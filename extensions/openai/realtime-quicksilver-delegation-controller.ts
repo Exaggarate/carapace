@@ -1,8 +1,8 @@
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
 import type {
   RealtimeVoiceAgentConsultRunner,
   RealtimeVoiceGatewayControl,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import {
   buildRealtimeVoiceAgentControlSpeechMessage,
   canonicalizeBase64,
@@ -11,7 +11,7 @@ import {
   rawDataToString,
   toErrorObject,
   truncateUtf16Safe,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice-provider";
 import type { RawData } from "ws";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {

@@ -1,16 +1,16 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 /** Handles /allowlist commands across config and pairing-store targets. */
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveExplicitConfigWriteTarget } from "../../channels/plugins/config-writes.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
 import { normalizeChatChannelId } from "../../channels/registry.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   addChannelAllowFromStoreEntry,
   readChannelAllowFromStore,
@@ -61,7 +61,7 @@ const ACTIONS = new Set(["list", "add", "remove"]);
 const SCOPES = new Set<AllowlistScope>(["dm", "group", "all"]);
 
 function resolveAllowlistAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: ChannelId;
   parsedAccount?: string;
   ctxAccountId?: string;
@@ -172,7 +172,7 @@ function parseAllowlistCommand(raw: string): AllowlistCommand | null {
 }
 
 function normalizeAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: ChannelId;
   accountId?: string | null;
   values: Array<string | number>;
@@ -226,7 +226,7 @@ async function updatePairingStoreAllowlist(params: {
 }
 
 async function resolveAllowlistNames(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: ChannelId;
   accountId?: string | null;
   scope: "dm" | "group";
@@ -247,7 +247,7 @@ async function resolveAllowlistNames(params: {
 }
 
 async function readAllowlistConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: ChannelId;
   accountId?: string | null;
 }) {
@@ -381,7 +381,7 @@ export const handleAllowlistCommand: CommandHandler = async (params, allowTextCo
     }
     if (supportsStore && storeReadFailed) {
       lines.push(
-        "Paired allowFrom (store): unavailable (read failed). Retry this command; if it still fails, run openclaw doctor.",
+        "Paired allowFrom (store): unavailable (read failed). Retry this command; if it still fails, run carapace doctor.",
       );
     } else if (supportsStore && storeAllowFrom.length > 0) {
       lines.push(`Paired allowFrom (store): ${formatEntryList(normalizeValues(storeAllowFrom))}`);

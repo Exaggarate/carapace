@@ -1,7 +1,7 @@
-import { finiteSecondsToTimerSafeMilliseconds } from "@openclaw/normalization-core/number-coercion";
+import { finiteSecondsToTimerSafeMilliseconds } from "@carapace/normalization-core/number-coercion";
 import { resolveThreadBindingSpawnPolicy } from "../../../channels/thread-bindings-policy.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { SubagentSpawnPreparation } from "../../../context-engine/types.js";
 import { summarizeSpawnError } from "../../spawn-pipeline.js";
 import { getSubagentSpawnDeps } from "./subagent-spawn-deps.js";
@@ -28,7 +28,7 @@ type PreparedSpawnContext =
 
 export async function prepareSubagentSessionContext(params: {
   assertActive?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   contextMode: SpawnSubagentContextMode;
   requesterAgentId: string;
   targetAgentId: string;
@@ -73,14 +73,14 @@ export async function prepareSubagentSessionContext(params: {
     }
     if (forkedResult.status === "failed" || forkedResult.status === "missing-entry") {
       throw new Error(
-        'context="fork" requested but OpenClaw could not fork the requester transcript.',
+        'context="fork" requested but Carapace could not fork the requester transcript.',
       );
     }
     if (forkedResult.status === "skipped") {
       const forkFallbackNote =
         forkedResult.decision?.status === "skip" ? forkedResult.decision.message : undefined;
       if (!forkFallbackNote) {
-        throw new Error('context="fork" requested but OpenClaw could not prepare forked context.');
+        throw new Error('context="fork" requested but Carapace could not prepare forked context.');
       }
       return {
         status: "ok",
@@ -104,7 +104,7 @@ export async function prepareSubagentSessionContext(params: {
 
 export async function prepareContextEngineSubagentSpawn(params: {
   assertActive?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   context: PreparedSpawnContext & { status: "ok" };
   requesterInternalKey: string;
   childSessionKey: string;
@@ -156,7 +156,7 @@ export async function rollbackPreparedContextEngine(
 export function resolveSubagentContextMode(params: {
   requestedContext?: SpawnSubagentContextMode;
   threadRequested: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requester: {
     channel?: string;
     accountId?: string;

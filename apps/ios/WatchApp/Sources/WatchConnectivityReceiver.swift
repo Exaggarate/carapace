@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import OSLog
 import WatchConnectivity
 
@@ -178,7 +178,7 @@ final class WatchConnectivityReceiver: NSObject, @unchecked Sendable {
 
     func sendAppCommand(_ message: WatchAppCommandMessage) async -> WatchReplySendResult {
         guard message.command != .sendChat else {
-            return Self.unavailableResult(OpenClawWatchChatDeliveryError(
+            return Self.unavailableResult(CarapaceWatchChatDeliveryError(
                 code: "upgrade_required", message: "Save Watch chat through its delivery journal before sending."))
         }
         let session: WCSession
@@ -214,7 +214,7 @@ final class WatchConnectivityReceiver: NSObject, @unchecked Sendable {
                         try await self.sendChatCommand(command, session: session)
                     }
                 } catch {
-                    Logger(subsystem: "ai.openclaw.watch", category: "chat-delivery")
+                    Logger(subsystem: "ai.carapace.watch", category: "chat-delivery")
                         .notice("Saved Watch message replay could not complete")
                     return
                 }
@@ -223,10 +223,10 @@ final class WatchConnectivityReceiver: NSObject, @unchecked Sendable {
     }
 
     @MainActor
-    private func sendChatCommand(_ command: OpenClawWatchChatDeliveryCommand, session: WCSession) async throws {
+    private func sendChatCommand(_ command: CarapaceWatchChatDeliveryCommand, session: WCSession) async throws {
         try Task.checkCancellation()
         guard try await self.store.chatDeliveryJournal.isPending(command, nowMs: Self.nowMs()) else { return }
-        let payload = try OpenClawWatchChatDeliveryCodec.encode(command)
+        let payload = try CarapaceWatchChatDeliveryCodec.encode(command)
         if session.isReachable {
             do {
                 try await sendReachableWatchMessage(payload, with: session)
@@ -239,23 +239,23 @@ final class WatchConnectivityReceiver: NSObject, @unchecked Sendable {
         guard try await self.store.chatDeliveryJournal.isPending(command, nowMs: Self.nowMs()) else { return }
         try Task.checkCancellation()
         guard !session.outstandingUserInfoTransfers.contains(where: {
-            (try? OpenClawWatchChatDeliveryCodec.decodeCommandStructure($0.userInfo)) == command
+            (try? CarapaceWatchChatDeliveryCodec.decodeCommandStructure($0.userInfo)) == command
         }) else { return }
         _ = session.transferUserInfo(payload)
     }
 
     private func cancelExpiredChatTransfers(nowMs: Int64) {
         for transfer in self.session?.outstandingUserInfoTransfers ?? [] {
-            guard let command = try? OpenClawWatchChatDeliveryCodec.decodeCommandStructure(transfer.userInfo),
+            guard let command = try? CarapaceWatchChatDeliveryCodec.decodeCommandStructure(transfer.userInfo),
                   command.expiresAtMs <= nowMs
             else { continue }
             transfer.cancel()
         }
     }
 
-    private func cancelClearedChatTransfers(context: OpenClawWatchChatDeliveryContext) {
+    private func cancelClearedChatTransfers(context: CarapaceWatchChatDeliveryContext) {
         for transfer in self.session?.outstandingUserInfoTransfers ?? [] {
-            guard let command = try? OpenClawWatchChatDeliveryCodec.decodeCommandStructure(transfer.userInfo),
+            guard let command = try? CarapaceWatchChatDeliveryCodec.decodeCommandStructure(transfer.userInfo),
                   command.context.gatewayStableID.utf8.elementsEqual(context.gatewayStableID.utf8),
                   command.context.routeGeneration.utf8.elementsEqual(context.routeGeneration.utf8)
             else { continue }
@@ -428,7 +428,7 @@ final class WatchConnectivityReceiver: NSObject, @unchecked Sendable {
             risk: risk,
             actions: actions,
             chatDeliveryContext: (payload["chatDeliveryContext"] as? [String: Any])
-                .flatMap { try? OpenClawWatchChatDeliveryCodec.decodeContext($0) })
+                .flatMap { try? CarapaceWatchChatDeliveryCodec.decodeContext($0) })
     }
 
     private static func parseExecApprovalDecision(_ value: Any?) -> WatchExecApprovalDecision? {
@@ -728,9 +728,9 @@ extension WatchConnectivityReceiver: WCSessionDelegate {
         _ payload: [String: Any],
         acknowledgment: WatchMessageAcknowledgment?) -> Bool
     {
-        let receipt: OpenClawWatchChatDeliveryReceipt
+        let receipt: CarapaceWatchChatDeliveryReceipt
         do {
-            receipt = try OpenClawWatchChatDeliveryCodec.decodeReceipt(payload)
+            receipt = try CarapaceWatchChatDeliveryCodec.decodeReceipt(payload)
         } catch {
             acknowledgment?.reject(reason: "invalid_payload")
             return false
@@ -739,19 +739,19 @@ extension WatchConnectivityReceiver: WCSessionDelegate {
             do {
                 let receiptAck = try await self.store.recordChatDeliveryReceipt(receipt)
                 if case let .rejected(code, _) = receipt.state,
-                   code == OpenClawWatchChatDeliveryCodec.staleRouteCode
+                   code == CarapaceWatchChatDeliveryCodec.staleRouteCode
                 {
                     self.cancelClearedChatTransfers(context: receipt.context)
                 }
                 acknowledgment?.accept()
                 if let receiptAck {
-                    let payload = try OpenClawWatchChatDeliveryCodec.encode(receiptAck)
+                    let payload = try CarapaceWatchChatDeliveryCodec.encode(receiptAck)
                     let session = try await self.activatedSession()
                     _ = await self.sendPayload(payload, session: session)
                 }
             } catch {
                 acknowledgment?
-                    .reject(reason: (error as? OpenClawWatchChatDeliveryError)?.code ?? "storage_unavailable")
+                    .reject(reason: (error as? CarapaceWatchChatDeliveryError)?.code ?? "storage_unavailable")
             }
         }
         return true

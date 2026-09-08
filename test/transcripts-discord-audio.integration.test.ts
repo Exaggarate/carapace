@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import { PassThrough } from "node:stream";
 import { setImmediate } from "node:timers/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { transcribeAudioFile } from "openclaw/plugin-sdk/media-understanding-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { transcribeAudioFile } from "carapace/plugin-sdk/media-understanding-runtime";
 import { vi } from "vitest";
 import { loadDiscordVoiceTestHarness } from "../extensions/discord/test-api.js";
 import type { MediaUnderstandingModelConfig } from "../src/config/types.tools.js";

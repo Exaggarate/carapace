@@ -32,7 +32,7 @@ import {
 } from "../commands/onboard-helpers.js";
 import type { OnboardOptions } from "../commands/onboard-types.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   describeGatewayServiceRestart,
   formatGatewayServiceStartRepairIssues,
@@ -66,9 +66,9 @@ import type { GatewayWizardSettings, WizardFlow } from "./setup.types.js";
 type FinalizeOnboardingOptions = {
   flow: WizardFlow;
   opts: OnboardOptions;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   hadExistingConfig?: boolean;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   workspaceDir: string;
   settings: GatewayWizardSettings;
   prompter: WizardPrompter;
@@ -78,7 +78,7 @@ type FinalizeOnboardingOptions = {
 const HATCH_TUI_TIMEOUT_MS = 5 * 60 * 1000;
 
 function buildSessionGatewayAuthOverride(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   settings: GatewayWizardSettings;
   resolvedGatewayPassword: string;
 }): GatewayAuthConfig | undefined {
@@ -100,7 +100,7 @@ function buildSessionGatewayAuthOverride(params: {
 }
 
 async function startSessionGatewayForOnboarding(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   settings: GatewayWizardSettings;
   resolvedGatewayPassword: string;
   prompter: WizardPrompter;
@@ -129,7 +129,7 @@ async function startSessionGatewayForOnboarding(params: {
         t("wizard.finalize.sessionGatewayStartFailed"),
         formatErrorMessage(error),
         t("wizard.finalize.startGatewayNow", {
-          command: formatCliCommand("openclaw gateway run"),
+          command: formatCliCommand("carapace gateway run"),
         }),
       ].join("\n"),
       "Gateway",
@@ -191,8 +191,8 @@ function buildGatewayRecoveryProjection(params: {
     const service = params.serviceLabel ?? t("wizard.finalize.gatewayService");
     const detail = t("wizard.finalize.managedGatewayUnreachable", {
       service,
-      statusCommand: formatCliCommand("openclaw gateway status --deep"),
-      recoveryCommand: formatCliCommand("openclaw gateway restart"),
+      statusCommand: formatCliCommand("carapace gateway status --deep"),
+      recoveryCommand: formatCliCommand("carapace gateway restart"),
     });
     return { detail, summary: `${notDetected} ${detail.replaceAll("\n", " ")}` };
   }
@@ -201,8 +201,8 @@ function buildGatewayRecoveryProjection(params: {
     const detail = t("wizard.finalize.managedGatewaySetupFailed", {
       service,
       error: gateway.error,
-      statusCommand: formatCliCommand("openclaw gateway status --deep"),
-      recoveryCommand: formatCliCommand("openclaw gateway install --force"),
+      statusCommand: formatCliCommand("carapace gateway status --deep"),
+      recoveryCommand: formatCliCommand("carapace gateway install --force"),
     });
     return {
       detail,
@@ -214,7 +214,7 @@ function buildGatewayRecoveryProjection(params: {
     gateway.reason === "external"
       ? formatExternalSupervisorActionRequired("start the gateway")
       : t("wizard.finalize.startGatewayNow", {
-          command: formatCliCommand("openclaw gateway run"),
+          command: formatCliCommand("carapace gateway run"),
         });
   const summary = [notDetected, startGuidance].join(" ");
   if (gateway.reason === "external") {
@@ -226,10 +226,10 @@ function buildGatewayRecoveryProjection(params: {
       t("wizard.finalize.noBackgroundGatewayExpected"),
       startGuidance,
       t("wizard.finalize.rerunInstallDaemon", {
-        command: formatCliCommand("openclaw onboard --install-daemon"),
+        command: formatCliCommand("carapace onboard --install-daemon"),
       }),
       t("wizard.finalize.skipHealthNextTime", {
-        command: formatCliCommand("openclaw onboard --skip-health"),
+        command: formatCliCommand("carapace onboard --skip-health"),
       }),
     ].join("\n"),
     summary,
@@ -244,7 +244,7 @@ function buildGatewayRecoveryProjection(params: {
 export async function ensureGatewayServiceForOnboarding(params: {
   flow: WizardFlow;
   opts: Pick<OnboardOptions, "installDaemon" | "daemonRuntime">;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   settings: Pick<GatewayWizardSettings, "port">;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -586,7 +586,7 @@ export async function finalizeSetupWizard(
             });
       if (gatewayProbe.ok) {
         try {
-          const healthConfig: OpenClawConfig =
+          const healthConfig: CarapaceConfig =
             settings.authMode === "token" && settings.gatewayToken
               ? {
                   ...nextConfig,
@@ -620,8 +620,8 @@ export async function finalizeSetupWizard(
           await prompter.note(
             [
               t("common.docs"),
-              "https://docs.openclaw.ai/gateway/health",
-              "https://docs.openclaw.ai/gateway/troubleshooting",
+              "https://github.com/Exaggarate/carapace",
+              "https://github.com/Exaggarate/carapace",
             ].join("\n"),
             t("wizard.finalize.healthCheckHelp"),
           );
@@ -637,8 +637,8 @@ export async function finalizeSetupWizard(
         await prompter.note(
           [
             t("common.docs"),
-            "https://docs.openclaw.ai/gateway/health",
-            "https://docs.openclaw.ai/gateway/troubleshooting",
+            "https://github.com/Exaggarate/carapace",
+            "https://github.com/Exaggarate/carapace",
           ].join("\n"),
           t("wizard.finalize.healthCheckHelp"),
         );
@@ -711,7 +711,7 @@ export async function finalizeSetupWizard(
                 : {}),
             },
           },
-          env: { ...process.env, OPENCLAW_GATEWAY_PORT: String(settings.port) },
+          env: { ...process.env, CARAPACE_GATEWAY_PORT: String(settings.port) },
         });
         const document = await waitForControlUiDocument({
           url: target.documentUrl,
@@ -816,7 +816,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.noModelAuth", { provider: modelAuthStatus.provider }),
             t("wizard.finalize.noModelAuthNext", {
-              command: formatCliCommand("openclaw configure --section model"),
+              command: formatCliCommand("carapace configure --section model"),
             }),
           ].join("\n"),
           t("wizard.finalize.noModelAuthTitle"),
@@ -828,13 +828,13 @@ export async function finalizeSetupWizard(
           t("wizard.finalize.gatewayTokenShared"),
           t("wizard.finalize.gatewayTokenStored"),
           t("wizard.finalize.gatewayTokenView", {
-            command: formatCliCommand("openclaw gateway auth-token --show"),
+            command: formatCliCommand("carapace gateway auth-token --show"),
           }),
           t("wizard.finalize.gatewayTokenGenerate", {
-            command: formatCliCommand("openclaw doctor --generate-gateway-token"),
+            command: formatCliCommand("carapace doctor --generate-gateway-token"),
           }),
           t("wizard.finalize.dashboardOpenAnytime", {
-            command: formatCliCommand("openclaw dashboard --no-open"),
+            command: formatCliCommand("carapace dashboard --no-open"),
           }),
         ].filter(Boolean);
         await prompter.note(tokenNotes.join("\n"), "Token");
@@ -897,7 +897,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchProviderUnavailable", { provider: label }),
             t("wizard.finalize.webSearchUnavailableAction"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("carapace configure --section web")}`,
             "",
             t("wizard.finalize.webDocs"),
           ].join("\n"),
@@ -931,10 +931,10 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchNoKey", { provider: label }),
             t("wizard.finalize.webSearchNeedsKey"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("carapace configure --section web")}`,
             "",
             t("wizard.finalize.webSearchGetKey", {
-              url: entry?.signupUrl ?? "https://docs.openclaw.ai/tools/web",
+              url: entry?.signupUrl ?? "https://github.com/Exaggarate/carapace",
             }),
             t("wizard.finalize.webDocs"),
           ].join("\n"),
@@ -945,7 +945,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchDisabled", { provider: label }),
             t("wizard.finalize.webSearchReenable", {
-              command: formatCliCommand("openclaw configure --section web"),
+              command: formatCliCommand("carapace configure --section web"),
             }),
             "",
             t("wizard.finalize.webDocs"),
@@ -981,7 +981,7 @@ export async function finalizeSetupWizard(
         await prompter.note(
           [
             t("wizard.finalize.webSearchSkipped"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("carapace configure --section web")}`,
             "",
             t("wizard.finalize.webDocs"),
           ].join("\n"),
@@ -1012,7 +1012,7 @@ export async function finalizeSetupWizard(
           }).summary
         : gatewayHealthCheckFailed
           ? t("wizard.finalize.outroHealthCheckFailed", {
-              command: formatCliCommand("openclaw health"),
+              command: formatCliCommand("carapace health"),
             })
           : dashboardReady
             ? t("wizard.finalize.outroDashboardLink")
@@ -1020,7 +1020,7 @@ export async function finalizeSetupWizard(
               ? [
                   t("wizard.guided.complete"),
                   t("wizard.finalize.dashboardWhenReady", {
-                    command: formatCliCommand("openclaw dashboard"),
+                    command: formatCliCommand("carapace dashboard"),
                   }),
                 ].join(" ")
               : t("wizard.guided.complete"),

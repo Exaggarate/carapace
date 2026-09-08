@@ -132,7 +132,7 @@ suite.define(() => {
       const finalText = "Browser prompt stayed synchronized.";
       await gateway.setHistoryMessages([
         {
-          __openclaw: {
+          __carapace: {
             id: "browser-local-authoritative-user",
             idempotencyKey: `${runId}:user`,
             seq: 1,
@@ -142,7 +142,7 @@ suite.define(() => {
           timestamp: Date.now(),
         },
         {
-          __openclaw: { id: "browser-local-authoritative-assistant", seq: 2, runId },
+          __carapace: { id: "browser-local-authoritative-assistant", seq: 2, runId },
           content: [{ text: finalText, type: "text" }],
           role: "assistant",
           timestamp: Date.now(),
@@ -283,7 +283,7 @@ suite.define(() => {
       const gateway = await installMockGateway(page, { historyMessages: [] });
       const prompt = "Both clients independently sent the same prompt.";
       const persistedMessages = ["web", "tui"].map((client, index) => ({
-        __openclaw: {
+        __carapace: {
           id: `canonical-${client}-same-text`,
           idempotencyKey: `${client}-same-text-run:user`,
           seq: index + 1,
@@ -370,7 +370,7 @@ suite.define(() => {
         };
         const persistedUserMessage = {
           ...userMessage,
-          __openclaw: { id: "shared-session-user", idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: "shared-session-user", idempotencyKey: `${runId}:user`, seq: 1 },
         };
         const secondUserMessage = {
           content: [{ text: secondPrompt, type: "text" }],
@@ -379,7 +379,7 @@ suite.define(() => {
         };
         const persistedSecondUserMessage = {
           ...secondUserMessage,
-          __openclaw: { id: "shared-session-second-user", idempotencyKey: `${runId}:user`, seq: 2 },
+          __carapace: { id: "shared-session-second-user", idempotencyKey: `${runId}:user`, seq: 2 },
         };
         await page.goto(`${suite.server.baseUrl}chat`);
         await gateway.waitForRequest("chat.startup");
@@ -461,7 +461,7 @@ suite.define(() => {
           persistedUserMessage,
           persistedSecondUserMessage,
           {
-            __openclaw: { id: "shared-session-assistant", seq: 3, runId },
+            __carapace: { id: "shared-session-assistant", seq: 3, runId },
             content: [{ text: finalText, type: "text" }],
             role: "assistant",
             timestamp: Date.now(),
@@ -489,13 +489,13 @@ suite.define(() => {
         const prompt = "The persisted prompt arrived after the final.";
         const finalText = "The reply was already finished.";
         const userMessage = {
-          __openclaw: { id: "finalized-run-user", idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: "finalized-run-user", idempotencyKey: `${runId}:user`, seq: 1 },
           content: [{ text: prompt, type: "text" }],
           role: "user",
           timestamp: Date.now(),
         };
         const assistantMessage = {
-          __openclaw: { id: "finalized-run-assistant", seq: 2 },
+          __carapace: { id: "finalized-run-assistant", seq: 2 },
           content: [{ text: finalText, type: "text" }],
           role: "assistant",
           timestamp: Date.now(),
@@ -660,7 +660,7 @@ suite.define(() => {
       const finalText = "One authoritative final response.";
       const messageId = "assistant-authoritative-final";
       const authoritative = {
-        __openclaw: { id: messageId, seq: 2 },
+        __carapace: { id: messageId, seq: 2 },
         content: [{ text: finalText, type: "text" }],
         role: "assistant",
         timestamp: Date.now(),
@@ -679,7 +679,7 @@ suite.define(() => {
       await page.locator(".chat-bubble.streaming", { hasText: finalText }).waitFor();
       await gateway.setHistoryMessages([
         {
-          __openclaw: { id: `mock-user:${runId}`, idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: `mock-user:${runId}`, idempotencyKey: `${runId}:user`, seq: 1 },
           content: "reconcile the terminal event ordering",
           role: "user",
           timestamp: Date.now() - 1,
@@ -777,7 +777,7 @@ suite.define(() => {
 
   it("sends annotated /stop to the exact selected channel session and clears its working indicator", async () => {
     await withChatPage(async (page) => {
-      const channelSessionKey = "agent:main:openclaw-weixin:direct:wechat-user";
+      const channelSessionKey = "agent:main:carapace-weixin:direct:wechat-user";
       const gateway = await installMockGateway(page, {
         sessionKey: channelSessionKey,
         methodResponses: {
@@ -803,7 +803,7 @@ suite.define(() => {
 
       await page.evaluate(() => {
         window.dispatchEvent(
-          new CustomEvent("openclaw:browser-annotation", {
+          new CustomEvent("carapace:browser-annotation", {
             cancelable: true,
             detail: {
               modelContext: "Review the annotated page",

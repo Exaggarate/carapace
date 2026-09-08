@@ -23,11 +23,11 @@ import {
 import { onSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
 import * as personalPublicationLifecycle from "../../state/github-personal-publication-lifecycle.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { normalizeSessionDeliveryState } from "../../utils/delivery-context.shared.js";
 import {
   applySessionEntryLifecycleMutation,
@@ -58,16 +58,16 @@ describe("session deletion and native owner state", () => {
   let bindings: Map<string, string>;
 
   beforeEach(() => {
-    const tempDir = tempDirs.make("openclaw-session-deletion-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = tempDirs.make("carapace-session-deletion-");
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
     storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
     bindings = new Map();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
   });
 
@@ -187,7 +187,7 @@ describe("session deletion and native owner state", () => {
         agentId: "main",
         path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       };
-      const database = openOpenClawAgentDatabase(scope);
+      const database = openCarapaceAgentDatabase(scope);
       if (scenario === "no windows") {
         database.db.prepare("DELETE FROM session_windows WHERE session_key = ?").run(reclaimedKey);
       } else {
@@ -375,7 +375,7 @@ describe("session deletion and native owner state", () => {
   it("restores companion state when the session transaction fails after its binding removal", async () => {
     await seed();
     const target = resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" });
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: target.path });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: target.path });
     database.db.exec(
       "CREATE TEMP TRIGGER reject_session_delete BEFORE DELETE ON session_nodes BEGIN SELECT RAISE(ABORT, 'injected session delete failure'); END",
     );
@@ -399,8 +399,8 @@ describe("session deletion and native owner state", () => {
           skipMaintenance: true,
           beforeCommitInTransaction: () => {
             const target = resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" });
-            const database = openOpenClawAgentDatabase({ agentId: "main", path: target.path });
-            deferOpenClawAgentPostCommitPublication(database, () => {
+            const database = openCarapaceAgentDatabase({ agentId: "main", path: target.path });
+            deferCarapaceAgentPostCommitPublication(database, () => {
               throw new Error("injected publication failure");
             });
           },

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 
-export { sha256Hex, sha256HexPrefixCore } from "@openclaw/normalization-core/node-crypto";
+export { sha256Hex, sha256HexPrefixCore } from "@carapace/normalization-core/node-crypto";
 
 type DigestInput = string | Uint8Array;
 

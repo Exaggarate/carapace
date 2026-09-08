@@ -40,7 +40,7 @@ const assert = require('node:assert/strict');
 const tool = path.basename(process.argv[1]);
 const args = process.argv.slice(2);
 const env = process.env;
-const resources = ['HOME', 'CFFIXED_USER_HOME', 'TMPDIR', 'OPENCLAW_STATE_DIR', 'OPENCLAW_CONFIG_PATH'];
+const resources = ['HOME', 'CFFIXED_USER_HOME', 'TMPDIR', 'CARAPACE_STATE_DIR', 'CARAPACE_CONFIG_PATH'];
 const present = Object.fromEntries(resources.map(key => [key, !!env[key] && fs.existsSync(env[key])]));
 const cachePath = path.join(env.HOME, 'Library/Caches/org.swift.swiftpm/fixture-cache');
 const cache = fs.existsSync(cachePath) ? fs.readFileSync(cachePath, 'utf8') : null;
@@ -52,7 +52,7 @@ const keychain = settings.default && fs.existsSync(settings.default) ? JSON.pars
 fs.appendFileSync(${JSON.stringify(log)}, JSON.stringify({tool, args, env, present, cache, settings, keychain, pid: process.pid}) + '\\n');
 function awaitSignal(ownedKeychain) {
   process.on('SIGTERM', () => {
-    fs.appendFileSync(${JSON.stringify(log)}, JSON.stringify({tool: 'shutdown', resourcesPresent: fs.existsSync(env.HOME) && fs.existsSync(env.OPENCLAW_STATE_DIR), keychainPresent: !!ownedKeychain && fs.existsSync(ownedKeychain)}) + '\\n');
+    fs.appendFileSync(${JSON.stringify(log)}, JSON.stringify({tool: 'shutdown', resourcesPresent: fs.existsSync(env.HOME) && fs.existsSync(env.CARAPACE_STATE_DIR), keychainPresent: !!ownedKeychain && fs.existsSync(ownedKeychain)}) + '\\n');
     process.exit(0);
   });
   console.log('fake-child-ready');
@@ -94,11 +94,11 @@ if (tool === 'rg') console.log('apps/macos/Sources/Fixture.swift');
 if (tool === 'git' && args[0] === 'rev-parse' && args[1] === '--show-toplevel') console.log(${JSON.stringify(root)});
 if (tool === 'git' && args[0] === 'diff' && args.includes('--name-only')) console.log('apps/macos/Sources/Fixture.swift');
 if (tool === 'swift' && args[0] === 'test') {
-  if (env.OPENCLAW_STATE_DIR !== ${JSON.stringify(path.join(root, "ambient-state"))}) {
-    fs.writeFileSync(path.join(env.OPENCLAW_STATE_DIR, 'child-owned'), 'fixture');
+  if (env.CARAPACE_STATE_DIR !== ${JSON.stringify(path.join(root, "ambient-state"))}) {
+    fs.writeFileSync(path.join(env.CARAPACE_STATE_DIR, 'child-owned'), 'fixture');
   }
   if (${JSON.stringify(waitForSignal)} === 'swift') awaitSignal(settings.default);
-  else process.exit(env.OPENCLAW_PROFILE === 'default' ? ${defaultExitCode} : ${namedExitCode});
+  else process.exit(env.CARAPACE_PROFILE === 'default' ? ${defaultExitCode} : ${namedExitCode});
 }
 `;
   for (const tool of ["security", "swift", "pnpm", "node", "git", "uname", "sysctl", "rg"]) {
@@ -121,10 +121,10 @@ if (tool === 'swift' && args[0] === 'test') {
     GITHUB_OUTPUT: path.join(root, "outputs"),
     HISTORICAL_TARGET: "false",
     SWIFT_TEST_EXECUTION: "serial",
-    OPENCLAW_PROFILE: "ambient-fixture",
-    OPENCLAW_STATE_DIR: path.join(root, "ambient-state"),
-    OPENCLAW_CONFIG_PATH: path.join(root, "ambient-config.json"),
-    OPENCLAW_GATEWAY_TOKEN: "synthetic-not-a-credential",
+    CARAPACE_PROFILE: "ambient-fixture",
+    CARAPACE_STATE_DIR: path.join(root, "ambient-state"),
+    CARAPACE_CONFIG_PATH: path.join(root, "ambient-config.json"),
+    CARAPACE_GATEWAY_TOKEN: "synthetic-not-a-credential",
     DEVELOPER_DIR: "/synthetic/Xcode.app/Contents/Developer",
     DYLD_FRAMEWORK_PATH: "/synthetic/frameworks",
     DYLD_LIBRARY_PATH: "/synthetic/libraries",
@@ -207,12 +207,12 @@ describe.skipIf(process.platform === "win32")("native test launch ownership", ()
           "AppStateIsolationTests",
         ]);
         if (index === 0) {
-          expect(test.env.OPENCLAW_PROFILE).toBe("default");
+          expect(test.env.CARAPACE_PROFILE).toBe("default");
         } else {
-          expect(test.env.OPENCLAW_PROFILE).toMatch(/^test-[a-z0-9-]+$/);
+          expect(test.env.CARAPACE_PROFILE).toMatch(/^test-[a-z0-9-]+$/);
         }
-        expect(test.env.OPENCLAW_PROFILE).not.toBe(f.env.OPENCLAW_PROFILE);
-        expect(test.env.OPENCLAW_GATEWAY_TOKEN).toBeUndefined();
+        expect(test.env.CARAPACE_PROFILE).not.toBe(f.env.CARAPACE_PROFILE);
+        expect(test.env.CARAPACE_GATEWAY_TOKEN).toBeUndefined();
         for (const key of [
           "DEVELOPER_DIR",
           "DYLD_FRAMEWORK_PATH",
@@ -238,9 +238,9 @@ describe.skipIf(process.platform === "win32")("native test launch ownership", ()
         const ownedRoot = path.dirname(test.env.HOME);
         roots.add(ownedRoot);
         expect(ownedRoot).not.toBe(f.root);
-        for (const key of ["HOME", "TMPDIR", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]) {
+        for (const key of ["HOME", "TMPDIR", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]) {
           expect(test.env[key].startsWith(`${ownedRoot}/`)).toBe(true);
-          expect(test.present[key]).toBe(key !== "OPENCLAW_CONFIG_PATH");
+          expect(test.present[key]).toBe(key !== "CARAPACE_CONFIG_PATH");
         }
         expect(fs.existsSync(ownedRoot)).toBe(false);
       }
@@ -272,7 +272,7 @@ describe.skipIf(process.platform === "win32")("native test launch ownership", ()
     }
     const calls = f.calls().filter((call) => call.tool === "swift");
     expect(calls).toHaveLength(2);
-    expect(calls[0].env.OPENCLAW_PROFILE).not.toBe(calls[1].env.OPENCLAW_PROFILE);
+    expect(calls[0].env.CARAPACE_PROFILE).not.toBe(calls[1].env.CARAPACE_PROFILE);
     expect(calls[0].env.HOME).not.toBe(calls[1].env.HOME);
   });
 

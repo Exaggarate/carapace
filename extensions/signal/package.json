@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/signal",
+  "name": "@carapace/signal",
   "version": "2026.9.2",
-  "description": "OpenClaw Signal channel plugin",
+  "description": "Carapace Signal channel plugin",
   "type": "module",
   "dependencies": {
     "ws": "8.21.3",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -89,8 +89,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/signal",
-      "npmSpec": "@openclaw/signal",
+      "clawhubSpec": "clawhub:@carapace/signal",
+      "npmSpec": "@carapace/signal",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -99,7 +99,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {
@@ -109,6 +109,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   }
 }

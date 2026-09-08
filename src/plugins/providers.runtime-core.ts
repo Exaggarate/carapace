@@ -1,6 +1,6 @@
 // Runtime boundary for resolving provider plugins from metadata and config.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   resolveBundledCompatActivationInputs,
   withActivatedPluginIds,
@@ -52,11 +52,11 @@ import {
 import type { ProviderPlugin } from "./types.js";
 
 export function createProviderRegistryResolver(dependencies: {
-  loadOpenClawPlugins: (options: PluginLoadOptions) => PluginRegistry;
+  loadCarapacePlugins: (options: PluginLoadOptions) => PluginRegistry;
   resolveRuntimePluginRegistry: (options?: PluginLoadOptions) => PluginRegistry | undefined;
   isPluginRegistryLoadInFlight: (options?: PluginLoadOptions) => boolean;
 }) {
-  const { loadOpenClawPlugins, resolveRuntimePluginRegistry, isPluginRegistryLoadInFlight } =
+  const { loadCarapacePlugins, resolveRuntimePluginRegistry, isPluginRegistryLoadInFlight } =
     dependencies;
   type ProviderResolutionInputs = Parameters<typeof resolvePluginProviderRegistryCore>[0] & {
     env: NodeJS.ProcessEnv;
@@ -550,7 +550,7 @@ export function createProviderRegistryResolver(dependencies: {
     }
     const registry =
       params.mode === "setup" || params.registryScope === "exact"
-        ? loadOpenClawPlugins(loadOptions)
+        ? loadCarapacePlugins(loadOptions)
         : resolveRuntimePluginRegistry(loadOptions);
     if (!registry) {
       return undefined;

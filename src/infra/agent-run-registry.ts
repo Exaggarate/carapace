@@ -20,7 +20,7 @@ import { clearAgentRunUsage, resetAgentRunUsageForTest } from "./agent-run-usage
 export type { AgentRunDelegatedAuthority } from "./agent-run-authority.types.js";
 export type { ProjectedAgentRunIndex } from "./agent-run-registry.types.js";
 
-const AGENT_RUN_REGISTRY_STATE_KEY = Symbol.for("openclaw.agentRunRegistry.state");
+const AGENT_RUN_REGISTRY_STATE_KEY = Symbol.for("carapace.agentRunRegistry.state");
 
 function getAgentRunRegistryState(): AgentRunRegistryState {
   return resolveGlobalSingleton<AgentRunRegistryState>(AGENT_RUN_REGISTRY_STATE_KEY, () => ({

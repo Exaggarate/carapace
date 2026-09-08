@@ -18,9 +18,9 @@ import { clearAgentRunContext, registerAgentRunContext } from "../../infra/agent
 import { isPathInside } from "../../infra/path-guards.js";
 import * as sessionLifecycle from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  listOpenClawAgentDatabasesForTest,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  listCarapaceAgentDatabasesForTest,
+} from "../../state/carapace-agent-db.js";
 import { handleChatAbortRequestWithLifecycle } from "./chat-abort-handler.js";
 import { useChatAbortRegistryFixture } from "./chat.abort-registry.test-support.js";
 import {
@@ -307,7 +307,7 @@ it.each(["child", "ancestor"])(
         expectsCompletionMessage: false,
       });
     }
-    const database = listOpenClawAgentDatabasesForTest().find(
+    const database = listCarapaceAgentDatabasesForTest().find(
       (item) => item.agentId === "broken" && isPathInside(fixture.stateDir, item.path),
     )!;
     expect(database).toBeDefined();
@@ -319,7 +319,7 @@ it.each(["child", "ancestor"])(
       }
       try {
         expect(loadSubagentRegistryFromSqlite().get("bad")?.killIntent).toBeDefined();
-        expect(closeOpenClawAgentDatabaseByPath(database.path)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(database.path)).toBe(true);
         original = readFileSync(database.path);
         writeFileSync(database.path, "not a SQLite database");
       } catch (error) {

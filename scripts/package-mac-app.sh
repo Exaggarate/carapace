@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build and bundle OpenClaw with its matching private worker runtime.
-# Outputs to dist/OpenClaw.app
+# Build and bundle Carapace with its matching private worker runtime.
+# Outputs to dist/Carapace.app
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/scripts/lib/plistbuddy.sh"
 source "$ROOT_DIR/scripts/lib/swift-toolchain.sh"
 source "$ROOT_DIR/scripts/lib/build-metadata.sh"
 source "$ROOT_DIR/scripts/lib/mac-app-bundle.sh"
-DEFAULT_APP_ROOT="$ROOT_DIR/dist/OpenClaw.app"
-APP_ROOT="${OPENCLAW_PACKAGE_APP_ROOT:-$DEFAULT_APP_ROOT}"
+DEFAULT_APP_ROOT="$ROOT_DIR/dist/Carapace.app"
+APP_ROOT="${CARAPACE_PACKAGE_APP_ROOT:-$DEFAULT_APP_ROOT}"
 case "$APP_ROOT" in
   "$ROOT_DIR/dist/"*) ;;
   *)
-    echo "ERROR: OPENCLAW_PACKAGE_APP_ROOT must stay under $ROOT_DIR/dist" >&2
+    echo "ERROR: CARAPACE_PACKAGE_APP_ROOT must stay under $ROOT_DIR/dist" >&2
     exit 1
     ;;
 esac
@@ -23,44 +23,44 @@ APP_STAGE_DIR=""
 SWIFT_BUILD_PID=""
 SWIFT_BUILD_RESULTS=""
 BUILD_ROOT="$ROOT_DIR/apps/macos/.build"
-PRODUCT="OpenClaw"
-MLX_TTS_HELPER_PRODUCT="openclaw-mlx-tts"
+PRODUCT="Carapace"
+MLX_TTS_HELPER_PRODUCT="carapace-mlx-tts"
 MLX_TTS_HELPER_ROOT="$ROOT_DIR/apps/macos-mlx-tts"
 MLX_TTS_HELPER_BUILD_ROOT="$MLX_TTS_HELPER_ROOT/.build"
-BUNDLE_ID="${BUNDLE_ID:-ai.openclaw.mac.debug}"
+BUNDLE_ID="${BUNDLE_ID:-ai.carapace.mac.debug}"
 PKG_VERSION="$(cd "$ROOT_DIR" && node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")"
 BUILD_CONFIG="${BUILD_CONFIG:-debug}"
-SIGNING_VARIANT="${OPENCLAW_MAC_SIGNING_VARIANT:-standard}"
+SIGNING_VARIANT="${CARAPACE_MAC_SIGNING_VARIANT:-standard}"
 case "$SIGNING_VARIANT" in
   standard | elevation-host) ;;
   *)
-    echo "ERROR: Unknown OPENCLAW_MAC_SIGNING_VARIANT value: $SIGNING_VARIANT (use standard|elevation-host)" >&2
+    echo "ERROR: Unknown CARAPACE_MAC_SIGNING_VARIANT value: $SIGNING_VARIANT (use standard|elevation-host)" >&2
     exit 1
     ;;
 esac
-# OPENCLAW_SKIP_MLX_TTS=1 packages the app without the local MLX voice helper.
+# CARAPACE_SKIP_MLX_TTS=1 packages the app without the local MLX voice helper.
 # The helper pulls in the full mlx-swift Metal shader stack, which some beta
 # Xcode toolchains cannot compile (flaky `metal` diagnostics), needlessly
 # blocking unrelated dev/proof builds. Release builds must always ship the
 # helper (notarization verifies it), so refuse the skip there instead of
 # producing a silently incomplete release bundle.
-SKIP_MLX_TTS="${OPENCLAW_SKIP_MLX_TTS:-0}"
+SKIP_MLX_TTS="${CARAPACE_SKIP_MLX_TTS:-0}"
 if [[ "$SKIP_MLX_TTS" == "1" && "$BUILD_CONFIG" == "release" ]]; then
-  echo "ERROR: OPENCLAW_SKIP_MLX_TTS is not allowed for release builds; the MLX voice helper must ship in release." >&2
+  echo "ERROR: CARAPACE_SKIP_MLX_TTS is not allowed for release builds; the MLX voice helper must ship in release." >&2
   exit 1
 fi
-BUILD_TS="$(openclaw_resolve_build_timestamp)"
+BUILD_TS="$(carapace_resolve_build_timestamp)"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
-  OPENCLAW_REQUIRE_BUILD_METADATA=1
+  CARAPACE_REQUIRE_BUILD_METADATA=1
 fi
-BUILD_GIT_COMMIT="$(openclaw_resolve_git_commit "$ROOT_DIR")"
+BUILD_GIT_COMMIT="$(carapace_resolve_git_commit "$ROOT_DIR")"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
   bash "$ROOT_DIR/scripts/apple-release-source-check.sh" \
     --root "$ROOT_DIR" \
     --expected-commit "$BUILD_GIT_COMMIT"
 fi
-export OPENCLAW_BUILD_TIMESTAMP="$BUILD_TS"
-if openclaw_is_full_git_commit "$BUILD_GIT_COMMIT"; then
+export CARAPACE_BUILD_TIMESTAMP="$BUILD_TS"
+if carapace_is_full_git_commit "$BUILD_GIT_COMMIT"; then
   export GIT_COMMIT="$BUILD_GIT_COMMIT"
 else
   unset GIT_COMMIT
@@ -82,7 +82,7 @@ fi
 IFS=' ' read -r -a BUILD_ARCHS <<< "$BUILD_ARCHS_VALUE"
 PRIMARY_ARCH="${BUILD_ARCHS[0]}"
 SPARKLE_PUBLIC_ED_KEY="${SPARKLE_PUBLIC_ED_KEY:-AGCY8w5vHirVfGGDGc8Szc5iuOqupZSh9pMj/Qs67XI=}"
-SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://raw.githubusercontent.com/openclaw/openclaw/main/appcast.xml}"
+SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://raw.githubusercontent.com/Exaggarate/carapace/main/appcast.xml}"
 AUTO_CHECKS=true
 if [[ "$BUNDLE_ID" == *.debug ]]; then
   SPARKLE_FEED_URL=""
@@ -122,9 +122,9 @@ if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is N
 print(revision, end="")
 PY
   )"
-  local expected="${OPENCLAW_EXPECTED_PEEKABOO_SOURCE_COMMIT:-}"
+  local expected="${CARAPACE_EXPECTED_PEEKABOO_SOURCE_COMMIT:-}"
   if [[ -n "$expected" && ! "$expected" =~ ^[0-9a-f]{40}$ ]]; then
-    echo "ERROR: OPENCLAW_EXPECTED_PEEKABOO_SOURCE_COMMIT must be a full lowercase 40-character SHA" >&2
+    echo "ERROR: CARAPACE_EXPECTED_PEEKABOO_SOURCE_COMMIT must be a full lowercase 40-character SHA" >&2
     return 1
   fi
   if [[ -n "$expected" && "$revision" != "$expected" ]]; then
@@ -298,8 +298,8 @@ node "$ROOT_DIR/scripts/prepare-apple-mermaid.mjs"
 # pnpm build owns the Control UI and content-checked build stamps as well.
 # Private Swift and worker staging must stay outside the published dist tree.
 mkdir -p "$(dirname "$APP_DESTINATION")" "$ROOT_DIR/.artifacts"
-APP_STAGE_DIR="$(mktemp -d "$ROOT_DIR/.artifacts/.openclaw-package.XXXXXX")"
-APP_ROOT="$APP_STAGE_DIR/OpenClaw.app"
+APP_STAGE_DIR="$(mktemp -d "$ROOT_DIR/.artifacts/.carapace-package.XXXXXX")"
+APP_ROOT="$APP_STAGE_DIR/Carapace.app"
 
 echo "🔨 Building $PRODUCT ($BUILD_CONFIG) [${BUILD_ARCHS[*]}]"
 SWIFT_BUILD_RESULTS="$APP_STAGE_DIR/swift-builds"
@@ -323,30 +323,30 @@ mkdir -p "$APP_ROOT/Contents/Resources"
 mkdir -p "$APP_ROOT/Contents/Frameworks"
 
 echo "📄 Copying Info.plist template"
-INFO_PLIST_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/Info.plist"
+INFO_PLIST_SRC="$ROOT_DIR/apps/macos/Sources/Carapace/Resources/Info.plist"
 if [ ! -f "$INFO_PLIST_SRC" ]; then
   echo "ERROR: Info.plist template missing at $INFO_PLIST_SRC" >&2
   exit 1
 fi
 cp "$INFO_PLIST_SRC" "$APP_ROOT/Contents/Info.plist"
-PORT_GUARDIAN_STORAGE_VERSION="$(plist_print_required "$APP_ROOT/Contents/Info.plist" OpenClawPortGuardianStorageVersion)"
+PORT_GUARDIAN_STORAGE_VERSION="$(plist_print_required "$APP_ROOT/Contents/Info.plist" CarapacePortGuardianStorageVersion)"
 if [[ ! "$PORT_GUARDIAN_STORAGE_VERSION" =~ ^[1-9][0-9]*$ ]]; then
-  echo "ERROR: OpenClawPortGuardianStorageVersion must be a positive integer." >&2
+  echo "ERROR: CarapacePortGuardianStorageVersion must be a positive integer." >&2
   exit 1
 fi
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleIdentifier "$BUNDLE_ID"
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleShortVersionString "$APP_VERSION"
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleVersion "$APP_BUILD"
-plist_set_string_required "$APP_ROOT/Contents/Info.plist" OpenClawBuildTimestamp "$BUILD_TS"
-plist_set_string_required "$APP_ROOT/Contents/Info.plist" OpenClawGitCommit "$BUILD_GIT_COMMIT"
+plist_set_string_required "$APP_ROOT/Contents/Info.plist" CarapaceBuildTimestamp "$BUILD_TS"
+plist_set_string_required "$APP_ROOT/Contents/Info.plist" CarapaceGitCommit "$BUILD_GIT_COMMIT"
 WORKER_BUILD_ID="$(node -e 'console.log(require(process.argv[1]).buildId)' "$ROOT_DIR/dist/build-info.json")"
-plist_set_or_add_string "$APP_ROOT/Contents/Info.plist" OpenClawWorkerBuildID "$WORKER_BUILD_ID"
+plist_set_or_add_string "$APP_ROOT/Contents/Info.plist" CarapaceWorkerBuildID "$WORKER_BUILD_ID"
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" PeekabooSourceCommit "$PEEKABOO_SOURCE_COMMIT"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
-  EMBEDDED_GIT_COMMIT="$(plist_print_required "$APP_ROOT/Contents/Info.plist" OpenClawGitCommit)"
+  EMBEDDED_GIT_COMMIT="$(plist_print_required "$APP_ROOT/Contents/Info.plist" CarapaceGitCommit)"
   BRIDGE_SOURCE_COMMIT="$(plist_print_required "$APP_ROOT/Contents/Info.plist" PeekabooSourceCommit)"
   if [[ "$EMBEDDED_GIT_COMMIT" != "$BUILD_GIT_COMMIT" ]]; then
-    echo "ERROR: Release app OpenClaw source mismatch: OpenClawGitCommit='$EMBEDDED_GIT_COMMIT', expected='$BUILD_GIT_COMMIT'." >&2
+    echo "ERROR: Release app Carapace source mismatch: CarapaceGitCommit='$EMBEDDED_GIT_COMMIT', expected='$BUILD_GIT_COMMIT'." >&2
     exit 1
   fi
   if [[ "$BRIDGE_SOURCE_COMMIT" != "$PEEKABOO_SOURCE_COMMIT" ]]; then
@@ -359,32 +359,32 @@ plist_set_or_add_string "$APP_ROOT/Contents/Info.plist" SUPublicEDKey "$SPARKLE_
 plist_set_or_add_bool "$APP_ROOT/Contents/Info.plist" SUEnableAutomaticChecks "$AUTO_CHECKS"
 
 echo "🚚 Copying binary"
-cp "$BIN_PRIMARY" "$APP_ROOT/Contents/MacOS/OpenClaw"
+cp "$BIN_PRIMARY" "$APP_ROOT/Contents/MacOS/Carapace"
 if [[ "${#BUILD_ARCHS[@]}" -gt 1 ]]; then
   BIN_INPUTS=()
   for arch in "${BUILD_ARCHS[@]}"; do
     BIN_INPUTS+=("$(bin_for_arch "$arch")")
   done
-  /usr/bin/lipo -create "${BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/OpenClaw"
+  /usr/bin/lipo -create "${BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/Carapace"
 fi
-chmod +x "$APP_ROOT/Contents/MacOS/OpenClaw"
+chmod +x "$APP_ROOT/Contents/MacOS/Carapace"
 # SwiftPM outputs ad-hoc signed binaries; strip the signature before install_name_tool to avoid warnings.
-/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/OpenClaw" 2>/dev/null || true
+/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/Carapace" 2>/dev/null || true
 
 echo "🚚 Copying macOS control CLI"
-cp "$(mac_cli_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/openclaw-mac"
+cp "$(mac_cli_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/carapace-mac"
 if [[ "${#BUILD_ARCHS[@]}" -gt 1 ]]; then
   MAC_CLI_BIN_INPUTS=()
   for arch in "${BUILD_ARCHS[@]}"; do
     MAC_CLI_BIN_INPUTS+=("$(mac_cli_bin_for_arch "$arch")")
   done
-  /usr/bin/lipo -create "${MAC_CLI_BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/openclaw-mac"
+  /usr/bin/lipo -create "${MAC_CLI_BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/carapace-mac"
 fi
-chmod +x "$APP_ROOT/Contents/MacOS/openclaw-mac"
-/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/openclaw-mac" 2>/dev/null || true
+chmod +x "$APP_ROOT/Contents/MacOS/carapace-mac"
+/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/carapace-mac" 2>/dev/null || true
 
 if [[ "$SKIP_MLX_TTS" == "1" ]]; then
-  echo "🔇 Skipping MLX TTS helper copy (OPENCLAW_SKIP_MLX_TTS=1) — bundle omits Contents/MacOS/$MLX_TTS_HELPER_PRODUCT"
+  echo "🔇 Skipping MLX TTS helper copy (CARAPACE_SKIP_MLX_TTS=1) — bundle omits Contents/MacOS/$MLX_TTS_HELPER_PRODUCT"
 else
   echo "🚚 Copying MLX TTS helper"
   cp "$(helper_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/$MLX_TTS_HELPER_PRODUCT"
@@ -437,15 +437,15 @@ xcrun actool "$ROOT_DIR/apps/macos/Icon.icon" \
   --development-region en --target-device mac \
   --minimum-deployment-target "$(plist_print_required "$APP_ROOT/Contents/Info.plist" LSMinimumSystemVersion)" \
   --platform macosx
-mv "$APP_ROOT/Contents/Resources/Icon.icns" "$APP_ROOT/Contents/Resources/OpenClaw.icns"
-cp -R "$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/AppIcons" "$APP_ROOT/Contents/Resources/AppIcons"
+mv "$APP_ROOT/Contents/Resources/Icon.icns" "$APP_ROOT/Contents/Resources/Carapace.icns"
+cp -R "$ROOT_DIR/apps/macos/Sources/Carapace/Resources/AppIcons" "$APP_ROOT/Contents/Resources/AppIcons"
 
 echo "📦 Copying device model resources"
 rm -rf "$APP_ROOT/Contents/Resources/DeviceModels"
-cp -R "$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/DeviceModels" "$APP_ROOT/Contents/Resources/DeviceModels"
+cp -R "$ROOT_DIR/apps/macos/Sources/Carapace/Resources/DeviceModels" "$APP_ROOT/Contents/Resources/DeviceModels"
 
 echo "📦 Copying provider icon resources"
-PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/ProviderIcons"
+PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/Carapace/Resources/ProviderIcons"
 if [ ! -d "$PROVIDER_ICONS_SRC" ]; then
   echo "ERROR: Provider icon resources missing at $PROVIDER_ICONS_SRC" >&2
   exit 1
@@ -510,9 +510,9 @@ done
 REQUIRED_SWIFTPM_RESOURCE_BUNDLES=(
   "GRDB_GRDB.bundle"
   "KeyboardShortcuts_KeyboardShortcuts.bundle"
-  "OpenClaw_OpenClaw.bundle"
-  "OpenClawKit_OpenClawKit.bundle"
-  "OpenClawKit_OpenClawChatUI.bundle"
+  "Carapace_Carapace.bundle"
+  "CarapaceKit_CarapaceKit.bundle"
+  "CarapaceKit_CarapaceChatUI.bundle"
   "SwiftMath_SwiftMath.bundle"
 )
 for resource_bundle in "${REQUIRED_SWIFTPM_RESOURCE_BUNDLES[@]}"; do
@@ -528,7 +528,7 @@ fi
 
 running_packaged_app_pids() {
   command -v pgrep >/dev/null 2>&1 || return 0
-  local app_binary="$APP_DESTINATION/Contents/MacOS/OpenClaw"
+  local app_binary="$APP_DESTINATION/Contents/MacOS/Carapace"
   local pid
   pgrep -x "$PRODUCT" 2>/dev/null | while IFS= read -r pid; do
     [[ "$pid" =~ ^[0-9]+$ ]] || continue
@@ -555,7 +555,7 @@ stop_packaged_app_if_running() {
     return 0
   fi
 
-  echo "⏹  Stopping packaged OpenClaw bundle (${pids[*]})"
+  echo "⏹  Stopping packaged Carapace bundle (${pids[*]})"
   kill "${pids[@]}" 2>/dev/null || true
   for _ in $(seq 1 40); do
     local alive=0
@@ -578,7 +578,7 @@ stop_packaged_app_if_running() {
     [[ "$alive" == "0" ]] && return 0
     sleep 0.1
   done
-  echo "ERROR: Packaged OpenClaw bundle did not exit: ${pids[*]}" >&2
+  echo "ERROR: Packaged Carapace bundle did not exit: ${pids[*]}" >&2
   return 1
 }
 

@@ -1,7 +1,7 @@
 import { createServer, type ServerResponse } from "node:http";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createQaBusState,
@@ -311,7 +311,7 @@ async function startProofProvider() {
   };
 }
 
-function withTimeoutConfig(config: OpenClawConfig): OpenClawConfig {
+function withTimeoutConfig(config: CarapaceConfig): CarapaceConfig {
   const provider = config.models?.providers?.["mock-openai"];
   if (!provider) {
     throw new Error("mock-openai provider missing from QA config");
@@ -444,7 +444,7 @@ describe("Gateway timeout recovery subagent delivery", () => {
     console.log(
       JSON.stringify({
         phase: "gateway-timeout-recovery-subagent",
-        stateDir: gateway.runtimeEnv.OPENCLAW_STATE_DIR,
+        stateDir: gateway.runtimeEnv.CARAPACE_STATE_DIR,
         childRunId: task?.runId,
         outboundCompletionCount: matching.length,
         childReleasedAt: provider.proof.childReleasedAt,

@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { prepareGithubIssue } from "../infra/github-issue.js";
 import { VERSION } from "../version.js";
 import {
@@ -36,7 +36,7 @@ export function writeSessionSqliteMigrationFailureReports(
     generatedAt: new Date().toISOString(),
     manifestPath: sanitizeFailureReportText(shortenFailureReportPath(manifestPath)),
     reason: params.reason,
-    recoveryCommand: "openclaw doctor --session-sqlite recover --github-issue",
+    recoveryCommand: "carapace doctor --session-sqlite recover --github-issue",
     restoreStatus: manifest?.restore?.status ?? "not_attempted",
     runId: manifest?.runId ?? path.basename(manifestPath, ".json"),
     targets: targets.map((target) => ({
@@ -96,7 +96,7 @@ export function createSessionSqliteMigrationFailureIssue(
       generatedAt: new Date().toISOString(),
       manifestPath: sanitizeFailureReportText(shortenFailureReportPath(manifestPath)),
       reason: "session SQLite migration failed",
-      recoveryCommand: "openclaw doctor --session-sqlite recover --github-issue",
+      recoveryCommand: "carapace doctor --session-sqlite recover --github-issue",
       restoreStatus: manifest.restore?.status ?? "not_attempted",
       runId: manifest.runId,
       targets: targets.map((target) => ({
@@ -114,7 +114,7 @@ export function createSessionSqliteMigrationFailureIssue(
       version: VERSION,
     });
   const body = [
-    "OpenClaw doctor generated this sanitized report from a local session SQLite migration recovery.",
+    "Carapace doctor generated this sanitized report from a local session SQLite migration recovery.",
     "",
     reportBody,
   ].join("\n");
@@ -227,7 +227,7 @@ function renderFailureMarkdown(payload: {
     "",
     `- Run: ${payload.runId}`,
     `- Generated: ${payload.generatedAt}`,
-    `- OpenClaw version: ${payload.version}`,
+    `- Carapace version: ${payload.version}`,
     `- Reason: ${sanitizeFailureReportText(payload.reason)}`,
     `- Restore status: ${payload.restoreStatus}`,
     `- Recovery command: \`${payload.recoveryCommand}\``,

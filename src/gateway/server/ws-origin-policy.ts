@@ -1,5 +1,5 @@
 import type { ConnectParams } from "../../../packages/gateway-protocol/src/schema/frames.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   isBrowserCopilotClient,
   isBrowserOperatorUiClient,
@@ -34,7 +34,7 @@ export function resolveGatewayWsBrowserOrigin(
   };
 }
 
-export function checkGatewayWsBrowserOrigin(origin: GatewayWsBrowserOrigin, cfg: OpenClawConfig) {
+export function checkGatewayWsBrowserOrigin(origin: GatewayWsBrowserOrigin, cfg: CarapaceConfig) {
   return checkBrowserOrigin({
     ...origin,
     allowedOrigins: cfg.gateway?.controlUi?.allowedOrigins,
@@ -50,7 +50,7 @@ export function disconnectDisallowedGatewayBrowserOriginClients(
       socket: Pick<GatewayWsClient["socket"], "close">;
     }
   >,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): void {
   for (const client of clients) {
     if (client.browserOrigin && !checkGatewayWsBrowserOrigin(client.browserOrigin, cfg).ok) {

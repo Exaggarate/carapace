@@ -5,7 +5,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import net from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { createWindowsCmdShimFixture, withServer, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { createWindowsCmdShimFixture, withServer, withTempDir } from "carapace/plugin-sdk/test-env";
 import { expect, test } from "vitest";
 import { createQaGatewayChild, writeJson } from "../../../../extensions/qa-lab/api.js";
 import {
@@ -13,9 +13,9 @@ import {
   getChannelIngressKysely,
 } from "../../../../src/channels/message/ingress-queue.js";
 import type { ModelDefinitionConfig } from "../../../../src/config/types.models.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { executeSqliteQuerySync } from "../../../../src/infra/kysely-sync.js";
-import { openExistingOpenClawStateDatabaseReadOnly } from "../../../../src/state/openclaw-state-db.js";
+import { openExistingCarapaceStateDatabaseReadOnly } from "../../../../src/state/carapace-state-db.js";
 import { withTestTimeout } from "../../../helpers/promise.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 
@@ -116,7 +116,7 @@ function configuredModel(id: string): ModelDefinitionConfig {
   };
 }
 
-function pickerConfig(apiRoot: string, modelId: string): OpenClawConfig {
+function pickerConfig(apiRoot: string, modelId: string): CarapaceConfig {
   const modelRef = `${REPLACEMENT_PROVIDER}/${modelId}`;
   return {
     gateway: { mode: "local", bind: "loopback", auth: { mode: "token", token: "picker-token" } },
@@ -165,8 +165,8 @@ function pickerConfig(apiRoot: string, modelId: string): OpenClawConfig {
 }
 
 async function readTelegramIngressStatuses(stateDir: string, eventIds: string[]) {
-  const database = await openExistingOpenClawStateDatabaseReadOnly({
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+  const database = await openExistingCarapaceStateDatabaseReadOnly({
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   if (!database) {
     return [];
@@ -262,9 +262,9 @@ const [{ startGatewayServer }, preparedRuntime] = await Promise.all([
   import(${JSON.stringify(runtimeUrl)}),
 ]);
 const replacementConfig = JSON.parse(
-  await fs.readFile(process.env.OPENCLAW_QA_REPLACEMENT_CONFIG_PATH, "utf8"),
+  await fs.readFile(process.env.CARAPACE_QA_REPLACEMENT_CONFIG_PATH, "utf8"),
 );
-const server = await startGatewayServer(Number(process.env.OPENCLAW_GATEWAY_PORT), {
+const server = await startGatewayServer(Number(process.env.CARAPACE_GATEWAY_PORT), {
   auth: { mode: "token", token: "picker-token" },
   bind: "loopback",
   controlUiEnabled: false,
@@ -310,17 +310,17 @@ process.on("message", async (message) => {
     env: {
       ...process.env,
       HOME: params.fixtureRoot,
-      OPENCLAW_HOME: params.fixtureRoot,
-      OPENCLAW_CONFIG_PATH: params.configPath,
-      OPENCLAW_STATE_DIR: path.join(params.fixtureRoot, "state"),
-      OPENCLAW_QA_REPLACEMENT_CONFIG_PATH: params.replacementConfigPath,
-      OPENCLAW_GATEWAY_PORT: String(port),
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_CHANNELS: undefined,
-      OPENCLAW_SKIP_PROVIDERS: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_HOME: params.fixtureRoot,
+      CARAPACE_CONFIG_PATH: params.configPath,
+      CARAPACE_STATE_DIR: path.join(params.fixtureRoot, "state"),
+      CARAPACE_QA_REPLACEMENT_CONFIG_PATH: params.replacementConfigPath,
+      CARAPACE_GATEWAY_PORT: String(port),
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_CHANNELS: undefined,
+      CARAPACE_SKIP_PROVIDERS: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
       TELEGRAM_BOT_TOKEN: undefined,
     },
     stdio: ["ignore", "pipe", "pipe", "ipc"],
@@ -553,7 +553,7 @@ test("initializes unrestricted Telegram model browsing and reuses its prepared c
       void handleRequest(req, res);
     },
     async (apiRoot) =>
-      await withTempDir("openclaw-telegram-model-picker-", async () => {
+      await withTempDir("carapace-telegram-model-picker-", async () => {
         const gatewayOwner = createQaGatewayChild();
         try {
           const repoRoot = path.resolve(import.meta.dirname, "../../../..");
@@ -587,10 +587,10 @@ test("initializes unrestricted Telegram model browsing and reuses its prepared c
             primaryModel: `ollama/${PREPARED_MODEL}`,
             alternateModel: `ollama/${PREPARED_MODEL}`,
             runtimeEnvPatch: {
-              OPENCLAW_SKIP_STARTUP_MODEL_PREWARM: undefined,
-              OPENCLAW_SKIP_CHANNELS: undefined,
-              OPENCLAW_SKIP_PROVIDERS: undefined,
-              OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+              CARAPACE_SKIP_STARTUP_MODEL_PREWARM: undefined,
+              CARAPACE_SKIP_CHANNELS: undefined,
+              CARAPACE_SKIP_PROVIDERS: undefined,
+              CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
               TELEGRAM_BOT_TOKEN: undefined,
             },
             mutateConfig: (cfg) => ({
@@ -760,7 +760,7 @@ test("lists native CLI-bound models through Telegram polling and provider callba
     succeed(res);
   };
 
-  await withTempDir("openclaw-telegram-native-model-picker-", async (fixtureRoot) => {
+  await withTempDir("carapace-telegram-native-model-picker-", async (fixtureRoot) => {
     const cliPath = path.join(fixtureRoot, process.platform === "win32" ? "claude.cjs" : "claude");
     const authCallsPath = path.join(fixtureRoot, "native-auth-calls.jsonl");
     if (process.platform === "win32") {
@@ -818,8 +818,8 @@ process.stdout.write(JSON.stringify({ loggedIn: true, authMethod: "claude.ai" })
               CLAUDE_CODE_OAUTH_TOKEN: undefined,
               CLAUDE_CONFIG_DIR: path.join(fixtureRoot, "claude-state"),
               TELEGRAM_BOT_TOKEN: undefined,
-              OPENCLAW_SKIP_STARTUP_MODEL_PREWARM: undefined,
-              OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+              CARAPACE_SKIP_STARTUP_MODEL_PREWARM: undefined,
+              CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
             },
             mutateConfig: (cfg) => ({
               ...cfg,
@@ -972,11 +972,11 @@ test("recovers a replaced model catalog and drains the following Telegram callba
       void handleRequest(req, res);
     },
     async (apiRoot) =>
-      await withTempDir("openclaw-telegram-model-picker-replacement-", async (fixtureRoot) => {
+      await withTempDir("carapace-telegram-model-picker-replacement-", async (fixtureRoot) => {
         const repoRoot = path.resolve(import.meta.dirname, "../../../..");
         const stateDir = path.join(fixtureRoot, "state");
-        const configPath = path.join(fixtureRoot, "openclaw.json");
-        const replacementConfigPath = path.join(fixtureRoot, "replacement-openclaw.json");
+        const configPath = path.join(fixtureRoot, "carapace.json");
+        const replacementConfigPath = path.join(fixtureRoot, "replacement-carapace.json");
         const initialConfig = pickerConfig(apiRoot, PREPARED_MODEL);
         const replacementConfig = pickerConfig(apiRoot, REPLACEMENT_MODEL);
         await fs.mkdir(stateDir, { recursive: true });

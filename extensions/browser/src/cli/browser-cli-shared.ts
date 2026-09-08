@@ -5,7 +5,7 @@ import {
   addTimerTimeoutGraceMs,
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   BROWSER_REQUEST_GATEWAY_METHOD,
   BROWSER_REQUEST_GATEWAY_SCOPES,

@@ -1,5 +1,5 @@
 import { getEventListeners } from "node:events";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createControlUiSessionPullRequestSubscriptions } from "./control-ui-session-pr-subscriptions.js";
 import { loadControlUiSessionPullRequests } from "./control-ui-session-prs.js";
@@ -67,8 +67,8 @@ describe("watched session PR retention", () => {
           cacheSignal,
           fetchImpl,
           resolveGitContext: async () => ({
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             branch: params.sessionKey,
           }),
         }),
@@ -88,7 +88,7 @@ describe("watched session PR retention", () => {
         ),
       ).toBe(true);
       for (const snapshot of snapshots.values()) {
-        expect(snapshot.repository).toEqual({ owner: "openclaw", repo: "openclaw" });
+        expect(snapshot.repository).toEqual({ owner: "carapace", repo: "carapace" });
       }
       vi.setSystemTime(Date.now() + 61_000);
       await subscriptions.replace("watcher", keys, new Set(keys));
@@ -125,7 +125,7 @@ describe("watched session PR retention", () => {
         return root.slice("/watched/".length);
       }
       if (args[0] === "remote") {
-        return "https://github.com/openclaw/openclaw.git";
+        return "https://github.com/Exaggarate/carapace.git";
       }
       if (args[0] === "symbolic-ref") {
         return "origin/main";
@@ -203,7 +203,7 @@ describe("watched session PR retention", () => {
         match: "/pulls?head=",
         response: () => githubJson(fetchFailure ? {} : [], fetchFailure ? 503 : 200),
       },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
     const load = () =>
       loadControlUiSessionPullRequests(
@@ -221,7 +221,7 @@ describe("watched session PR retention", () => {
             args[0] === "rev-parse"
               ? branch
               : args[0] === "remote"
-                ? "https://github.com/openclaw/openclaw.git"
+                ? "https://github.com/Exaggarate/carapace.git"
                 : "origin/main",
           resolveBranchLanding: async () => ({
             pushedSha: null,
@@ -247,7 +247,7 @@ describe("watched session PR retention", () => {
       fetchFailure = true;
       await expect(load()).resolves.toEqual({
         pullRequests: [],
-        repository: { owner: "openclaw", repo: "openclaw" },
+        repository: { owner: "carapace", repo: "carapace" },
         rateLimited: false,
         status: "unavailable",
       });

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   EMPTY_PLUGIN_SCHEMA,
   makePluginLoaderTempDir,
@@ -8,7 +8,7 @@ import {
   writePlugin,
 } from "../plugins/loader.test-fixtures.js";
 
-export function createVoiceProviderFixture(policy: OpenClawConfig["plugins"] = {}) {
+export function createVoiceProviderFixture(policy: CarapaceConfig["plugins"] = {}) {
   const root = fs.realpathSync(makePluginLoaderTempDir());
   const workspace = path.join(root, "workspace");
   mkdirSafe(workspace);
@@ -31,7 +31,7 @@ export function createVoiceProviderFixture(policy: OpenClawConfig["plugins"] = {
       } };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "carapace.plugin.json"),
       JSON.stringify({
         id,
         configSchema: EMPTY_PLUGIN_SCHEMA,
@@ -40,10 +40,10 @@ export function createVoiceProviderFixture(policy: OpenClawConfig["plugins"] = {
     );
     fs.writeFileSync(
       path.join(plugin.dir, "package.json"),
-      JSON.stringify({ openclaw: { extensions: ["./index.cjs"] } }),
+      JSON.stringify({ carapace: { extensions: ["./index.cjs"] } }),
     );
   }
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { defaults: { workspace } },
     plugins: {
       allow: ["active-voice", "configured-voice"],
@@ -58,10 +58,10 @@ export function createVoiceProviderFixture(policy: OpenClawConfig["plugins"] = {
   return {
     cfg,
     env: {
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "extensions"),
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "extensions"),
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
     },
   };
 }

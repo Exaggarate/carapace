@@ -26,7 +26,7 @@ function transcript(text: string, seq: number) {
         role: "assistant",
         content: [{ type: "text", text }],
         timestamp: CLOCK_START - 60_000 + seq,
-        __openclaw: { id: `msg-${seq}`, seq },
+        __carapace: { id: `msg-${seq}`, seq },
       },
     ],
   };
@@ -85,7 +85,7 @@ suite.define(() => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Peer message arrived." }],
-          __openclaw: { id: "peer-message", seq: 5 },
+          __carapace: { id: "peer-message", seq: 5 },
         },
         messageId: "peer-message",
         messageSeq: 5,

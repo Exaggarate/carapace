@@ -6,14 +6,14 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
-import { ensureConfigRevisionKeySchema } from "../state/openclaw-state-db-schema-additive.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { ensureConfigRevisionKeySchema } from "../state/carapace-state-db-schema-additive.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 
-type ConfigRevisionKeyDatabase = Pick<OpenClawStateKyselyDatabase, "config_revision_keys">;
+type ConfigRevisionKeyDatabase = Pick<CarapaceStateKyselyDatabase, "config_revision_keys">;
 type ConfigRevisionKeyRow = Pick<
   Selectable<ConfigRevisionKeyDatabase["config_revision_keys"]>,
   "hmac_key"
@@ -26,8 +26,8 @@ export type GatewayConfigRevisionProjector = {
 
 const CONFIG_REVISION_SINGLETON_ID = 1;
 const CONFIG_REVISION_KEY_BYTES = 32;
-const CONFIG_REVISION_RAW_DOMAIN = "openclaw.gateway.config-revision.raw.v1";
-const CONFIG_REVISION_RESOLVED_DOMAIN = "openclaw.gateway.config-revision.resolved.v1";
+const CONFIG_REVISION_RAW_DOMAIN = "carapace.gateway.config-revision.raw.v1";
+const CONFIG_REVISION_RESOLVED_DOMAIN = "carapace.gateway.config-revision.resolved.v1";
 
 function registerConfigRevisionKeyForRedaction(key: Uint8Array): void {
   const bytes = Buffer.from(key);
@@ -106,10 +106,10 @@ function createGatewayConfigRevisionProjector(key: Uint8Array): GatewayConfigRev
 
 /** Loads the durable installation key once for the Gateway request lifecycle. */
 export function loadGatewayConfigRevisionProjector(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): GatewayConfigRevisionProjector {
   const candidateKey = randomBytes(CONFIG_REVISION_KEY_BYTES);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       ensureConfigRevisionKeySchema(db);
       return createGatewayConfigRevisionProjector(loadOrCreateConfigRevisionKey(db, candidateKey));

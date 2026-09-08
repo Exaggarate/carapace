@@ -6,10 +6,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import {
@@ -235,7 +235,7 @@ describe("before_tool_call hook integration", () => {
       throw new Error("invalid projected arguments");
     });
     const validationControl = {
-      [Symbol.for("openclaw.internalToolExecutionValidation")]: true,
+      [Symbol.for("carapace.internalToolExecutionValidation")]: true,
       toolCallId: "call-private-validation",
       validate,
     };
@@ -891,7 +891,7 @@ describe("before_tool_call hook deduplication (#15502)", () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it("passes agent context to outer code-mode exec hooks through OpenClaw custom tools", async () => {
+  it("passes agent context to outer code-mode exec hooks through Carapace custom tools", async () => {
     beforeToolCallHook = installBeforeToolCallHook({
       runBeforeToolCallImpl: async () => ({
         block: true,
@@ -1467,7 +1467,7 @@ describe("before_tool_call hook deduplication (#15502)", () => {
       setActivePluginRegistry(registry);
       initializeGlobalHookRunner(registry);
       try {
-        const codeModeConfig: OpenClawConfig = { tools: { codeMode: true } };
+        const codeModeConfig: CarapaceConfig = { tools: { codeMode: true } };
         const catalogRef = createToolSearchCatalogRef();
         registerHeadlessToolSearchCatalog({ catalogRef, tools: [] });
         const execTool = createCodeModeTools({
@@ -2375,7 +2375,7 @@ describe("before_tool_call adapter and client tool integration", () => {
 
   it("lets trusted policies read session extensions for client tools when config is provided", async () => {
     resetGlobalHookRunner();
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-client-tool-policy-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-client-tool-policy-"));
     const storePath = path.join(stateDir, "sessions.json");
     const config = { session: { store: storePath } };
     const seen: unknown[] = [];

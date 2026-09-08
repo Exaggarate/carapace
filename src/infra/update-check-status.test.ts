@@ -30,8 +30,8 @@ async function runGit(cwd: string, ...args: string[]): Promise<string> {
 async function initGitRepo(root: string): Promise<void> {
   await fs.mkdir(root, { recursive: true });
   await runGit(root, "init", "--initial-branch=main");
-  await runGit(root, "config", "user.name", "OpenClaw Test");
-  await runGit(root, "config", "user.email", "test@openclaw.invalid");
+  await runGit(root, "config", "user.name", "Carapace Test");
+  await runGit(root, "config", "user.email", "test@carapace.invalid");
 }
 
 async function commitGit(root: string, message: string): Promise<void> {
@@ -50,7 +50,7 @@ describe("checkUpdateStatus", () => {
   ] as const)(
     "joins $scope Git discovery before reporting cancellation",
     async ({ scope, commands }) => {
-      await withTestDir({ prefix: "openclaw-update-check-cancel-" }, async (root) => {
+      await withTestDir({ prefix: "carapace-update-check-cancel-" }, async (root) => {
         await initGitRepo(root);
         await commitGit(root, "initial");
         const started = createDeferred();
@@ -125,7 +125,7 @@ describe("checkUpdateStatus", () => {
   );
 
   it("starts full-status worktree inspection before Git identity resolves", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-local-overlap-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-local-overlap-" }, async (root) => {
       await initGitRepo(root);
       await commitGit(root, "initial");
       const identityStarted = createDeferred();
@@ -151,7 +151,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reads a tagged install identity without inspecting freshness or dependencies", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-identity-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-identity-" }, async (root) => {
       await initGitRepo(root);
       await commitGit(root, "initial");
       await runGit(root, "tag", "v2000.1.1-beta.1");
@@ -173,7 +173,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("keeps an unreadable Git identity unknown in full status", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-unborn-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-unborn-" }, async (root) => {
       await initGitRepo(root);
       const identity = await resolveUpdateInstallIdentity({ root });
       expect(identity).toEqual({
@@ -195,7 +195,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("checks the registry while Git freshness is still pending", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-overlap-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-overlap-" }, async (base) => {
       const remoteRoot = path.join(base, "remote");
       const localRoot = path.join(base, "local");
       await initGitRepo(remoteRoot);
@@ -245,7 +245,7 @@ describe("checkUpdateStatus", () => {
     { name: "shared default", timeoutMs: undefined, expectedTimeoutMs: 120_000 },
     { name: "explicit override", timeoutMs: 4321, expectedTimeoutMs: 4321 },
   ])("uses the $name for Git fetches", async ({ timeoutMs, expectedTimeoutMs }) => {
-    await withTestDir({ prefix: "openclaw-update-check-fetch-timeout-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-fetch-timeout-" }, async (base) => {
       const remoteRoot = path.join(base, "remote");
       const localRoot = path.join(base, "local");
       await initGitRepo(remoteRoot);
@@ -268,7 +268,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("fetches a retained main upstream whose remote nickname contains a slash", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-slash-remote-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-slash-remote-" }, async (base) => {
       const sourceRoot = path.join(base, "source");
       const localRoot = path.join(base, "local");
       await initGitRepo(sourceRoot);
@@ -305,7 +305,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("prefers a retained main branch's configured non-origin upstream", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-configured-upstream-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-configured-upstream-" }, async (base) => {
       const sourceRoot = path.join(base, "source");
       const localRoot = path.join(base, "local");
       await initGitRepo(sourceRoot);
@@ -342,13 +342,13 @@ describe("checkUpdateStatus", () => {
   });
 
   it("resolves manager-style detached dev tracking before matching update receipts", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-receipt-fallback-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-receipt-fallback-" }, async (base) => {
       const sourceRoot = path.join(base, "source");
       const localRoot = path.join(base, "local");
       await initGitRepo(sourceRoot);
       await fs.writeFile(
         path.join(sourceRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: PNPM_PACKAGE_MANAGER }),
+        JSON.stringify({ name: "carapace", packageManager: PNPM_PACKAGE_MANAGER }),
       );
       await runGit(sourceRoot, "add", "package.json");
       await commitGit(sourceRoot, "base");
@@ -433,7 +433,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("does not treat stale remote refs as current when fetch fails", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-fetch-failure-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-fetch-failure-" }, async (base) => {
       const remoteRoot = path.join(base, "remote");
       const localRoot = path.join(base, "local");
       await initGitRepo(remoteRoot);
@@ -462,7 +462,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("does not report divergence for unrelated histories", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-unrelated-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-unrelated-" }, async (base) => {
       const localRoot = path.join(base, "local");
       const remoteRoot = path.join(base, "remote");
       await initGitRepo(localRoot);
@@ -498,7 +498,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reports divergence only when shallow history retains a merge base", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-shallow-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-shallow-" }, async (base) => {
       const sourceRoot = path.join(base, "source");
       await initGitRepo(sourceRoot);
       await commitGit(sourceRoot, "common base");
@@ -597,7 +597,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("detects package installs for non-git roots", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
         JSON.stringify({ packageManager: "npm@10.0.0" }),
@@ -622,7 +622,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("resolves a status registry channel after detecting the install kind", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-registry-channel-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-registry-channel-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
         JSON.stringify({ packageManager: "npm@10.0.0" }),
@@ -663,10 +663,10 @@ describe("checkUpdateStatus", () => {
       expectedLockfile: "bun.lock",
     },
   ])("reports dependency status for Bun's $name", async ({ lockfiles, expectedLockfile }) => {
-    await withTestDir({ prefix: "openclaw-update-check-bun-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-bun-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "bun@1.2.0" }),
+        JSON.stringify({ name: "carapace", packageManager: "bun@1.2.0" }),
         "utf8",
       );
       for (const lockfile of lockfiles) {
@@ -698,18 +698,18 @@ describe("checkUpdateStatus", () => {
     { manager: "npm", expectedLockfile: "package-lock.json" },
     { manager: "bun", expectedLockfile: "bun.lockb" },
   ])(
-    "detects lockless OpenClaw $manager installs despite packed pnpm metadata",
+    "detects lockless Carapace $manager installs despite packed pnpm metadata",
     async ({ manager, expectedLockfile }) => {
-      await withTestDir({ prefix: `openclaw-update-check-lockless-${manager}-` }, async (base) => {
+      await withTestDir({ prefix: `carapace-update-check-lockless-${manager}-` }, async (base) => {
         const bunInstall = path.join(base, "custom-bun-home");
         const root =
           manager === "bun"
-            ? path.join(bunInstall, "install", "global", "node_modules", "openclaw")
-            : path.join(base, "prefix", "node_modules", "openclaw");
+            ? path.join(bunInstall, "install", "global", "node_modules", "carapace")
+            : path.join(base, "prefix", "node_modules", "carapace");
         await fs.mkdir(root, { recursive: true });
         await fs.writeFile(
           path.join(root, "package.json"),
-          JSON.stringify({ name: "openclaw", packageManager: PNPM_PACKAGE_MANAGER }),
+          JSON.stringify({ name: "carapace", packageManager: PNPM_PACKAGE_MANAGER }),
           "utf8",
         );
 
@@ -734,11 +734,11 @@ describe("checkUpdateStatus", () => {
     },
   );
 
-  it("detects a metadata-free lockless OpenClaw npm install", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-lockless-npm-" }, async (base) => {
-      const root = path.join(base, "prefix", "node_modules", "openclaw");
+  it("detects a metadata-free lockless Carapace npm install", async () => {
+    await withTestDir({ prefix: "carapace-update-check-lockless-npm-" }, async (base) => {
+      const root = path.join(base, "prefix", "node_modules", "carapace");
       await fs.mkdir(root, { recursive: true });
-      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
 
       const status = await checkUpdateStatus({
         root,
@@ -759,10 +759,10 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reports a missing dependency marker and accepts an older valid marker", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-deps-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-update-check-deps-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: PNPM_PACKAGE_MANAGER }),
+        JSON.stringify({ name: "carapace", packageManager: PNPM_PACKAGE_MANAGER }),
         "utf8",
       );
       const lockfilePath = path.join(root, "pnpm-lock.yaml");
@@ -802,13 +802,13 @@ describe("checkUpdateStatus", () => {
   });
 
   it("treats symlinked git installs as git roots", async () => {
-    await withTestDir({ prefix: "openclaw-update-check-git-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-check-git-" }, async (base) => {
       const repoRoot = path.join(base, "repo");
-      const linkedRoot = path.join(base, "linked-openclaw");
+      const linkedRoot = path.join(base, "linked-carapace");
       await fs.mkdir(repoRoot, { recursive: true });
       await fs.writeFile(
         path.join(repoRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: PNPM_PACKAGE_MANAGER }),
+        JSON.stringify({ name: "carapace", packageManager: PNPM_PACKAGE_MANAGER }),
         "utf8",
       );
       await runCommandWithTimeout(["git", "init"], {

@@ -3,10 +3,10 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { join } from "node:path";
 import { setImmediate } from "node:timers/promises";
-import { createChannelMessageReplyPipeline } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { createChannelMessageReplyPipeline } from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -52,7 +52,7 @@ const {
       dmScope: "main",
       sessionKey: "agent:main:main",
     })),
-    resolveEffectiveMessagesConfig: vi.fn((_cfg: OpenClawConfig, _agentId: string) => ({
+    resolveEffectiveMessagesConfig: vi.fn((_cfg: CarapaceConfig, _agentId: string) => ({
       responsePrefix: undefined as string | undefined,
     })),
     shouldComputeCommandAuthorized: vi.fn(() => false),
@@ -63,7 +63,7 @@ const {
     startSubscription: vi.fn().mockResolvedValue(undefined),
   },
   realUrbitFixture: {
-    config: undefined as OpenClawConfig | undefined,
+    config: undefined as CarapaceConfig | undefined,
     enabled: false,
     url: "https://urbit.example.com",
     client: null as {
@@ -75,21 +75,21 @@ const {
 
 const runningServers: Server[] = [];
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-runtime", () => ({
   resolveHumanDelayConfig: vi.fn(() => undefined),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>()),
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>()),
   createChannelInboundEnvelopeBuilder: createChannelInboundEnvelopeBuilderMock,
   formatInboundMediaUnavailableText: formatInboundMediaUnavailableTextMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("carapace/plugin-sdk/runtime-env", () => ({
   sleepWithAbort: sleepWithAbortMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", () => ({
+vi.mock("carapace/plugin-sdk/media-runtime", () => ({
   MAX_IMAGE_BYTES: 6 * 1024 * 1024,
   readRemoteMediaBuffer: vi.fn(),
   saveRemoteMedia: saveRemoteMediaMock,
@@ -476,8 +476,8 @@ describe("monitorTlonProvider reply prefixes", () => {
     },
   ])("delivers $name through the shared dispatcher", async (row, { signal }) => {
     const { name, root, account, expected } = row;
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-      "openclaw/plugin-sdk/channel-inbound",
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/channel-inbound")>(
+      "carapace/plugin-sdk/channel-inbound",
     );
     // A timed-out import must not install fixtures into a later test.
     signal.throwIfAborted();
@@ -714,7 +714,7 @@ describe("monitorTlonProvider inbound media truth", () => {
         }
         return {
           id: `photo-${index}.png`,
-          path: `/tmp/openclaw/media/inbound/photo-${index}.png`,
+          path: `/tmp/carapace/media/inbound/photo-${index}.png`,
           size: 10,
           contentType: "image/png",
         };
@@ -729,7 +729,7 @@ describe("monitorTlonProvider inbound media truth", () => {
       const expectedMedia = Array.from({ length: Math.min(imageCount, 8) }, (_, index) => index)
         .filter((index) => !failedIndexes.includes(index))
         .map((index) => ({
-          path: `/tmp/openclaw/media/inbound/photo-${index}.png`,
+          path: `/tmp/carapace/media/inbound/photo-${index}.png`,
           contentType: "image/png",
         }));
       const expectedMediaPrompt = [

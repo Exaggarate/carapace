@@ -3,7 +3,7 @@ import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
   type SecretInput,
-} from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/secret-input";
 
 export const NOSTR_PRIVATE_KEY_ENV_VAR = "NOSTR_PRIVATE_KEY";
 // Nostr private keys are secp256k1 scalars. NIP-19 checksums alone do not

@@ -2,7 +2,7 @@ import path from "node:path";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { disposeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { disposeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { toToolDefinitions } from "../agent-tool-definition-adapter.js";
 import type { AgentTool } from "../runtime/index.js";
 import { attachInternalToolExecutionPreparer } from "../runtime/internal-hooks.js";
@@ -52,7 +52,7 @@ describe("session tool outcomes", () => {
         toolName: outcome.name,
         isError: outcome.isError,
       }));
-      const agentDir = tempDirs.make("openclaw-sdk-tool-outcome-");
+      const agentDir = tempDirs.make("carapace-sdk-tool-outcome-");
       const { session } = await createAgentSession({
         agentDir,
         model: testModel,
@@ -145,7 +145,7 @@ describe("session tool outcomes", () => {
         ).toMatchObject(expected);
       } finally {
         session.dispose();
-        disposeOpenClawAgentDatabaseByPath(path.join(agentDir, "openclaw-agent.sqlite"));
+        disposeCarapaceAgentDatabaseByPath(path.join(agentDir, "carapace-agent.sqlite"));
       }
     },
   );

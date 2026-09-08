@@ -124,7 +124,7 @@ async function createSharedAppPage(): Promise<Page> {
       historyMessages: [
         {
           // Keep context geometry independent of the lazily loaded media fixtures.
-          __openclaw: { runId: "context-fixture-run" },
+          __carapace: { runId: "context-fixture-run" },
           content: [{ text: SHARED_APP_CONTEXT_TEXT, type: "text" }],
           model: "openai/gpt-5.5",
           role: "assistant",
@@ -248,12 +248,12 @@ async function getBoundingBox(page: Page, selector: string) {
 /**
  * Corner radii are expressed as their base step times the live corner scale,
  * so these expectations stay true on engines that draw continuous curvature
- * (`--openclaw-corner-radius-scale: 1.25`) and on engines that do not.
+ * (`--carapace-corner-radius-scale: 1.25`) and on engines that do not.
  */
 async function readCornerScale(page: Page): Promise<number> {
   return await page.evaluate(() =>
     Number.parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--openclaw-corner-radius-scale"),
+      getComputedStyle(document.documentElement).getPropertyValue("--carapace-corner-radius-scale"),
     ),
   );
 }
@@ -649,7 +649,7 @@ function chatHtml(opts: ChatFixtureOptions = {}, mobileNavLayout = false) {
               </div>
               ${
                 opts.sessionRailBody !== undefined
-                  ? `<openclaw-chat-session-rail>
+                  ? `<carapace-chat-session-rail>
                     <section class="chat-session-rail chat-session-rail--expanded" role="region" aria-label="Side chat">
                       <header class="chat-session-rail__header">
                         <div class="chat-session-rail__header-copy">
@@ -680,7 +680,7 @@ function chatHtml(opts: ChatFixtureOptions = {}, mobileNavLayout = false) {
                         </div>
                       </footer>
                     </section>
-                  </openclaw-chat-session-rail>`
+                  </carapace-chat-session-rail>`
                   : ""
               }
               ${
@@ -1306,11 +1306,11 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                   >A deliberately long split-pane session title</span
                 ></span
               >
-              <openclaw-session-owner-chip>
+              <carapace-session-owner-chip>
                 <span class="session-owner-chip session-owner-chip--header">O</span>
-              </openclaw-session-owner-chip>
+              </carapace-session-owner-chip>
               <button class="chat-pane__workspace-chip" type="button">
-                ${iconSvg()}<span>openclaw-workspace</span>
+                ${iconSvg()}<span>carapace-workspace</span>
               </button>
               <wa-dropdown class="chat-pane__sharing-menu">
                 <button class="btn btn--ghost btn--icon chat-icon-btn chat-pane__sharing-trigger" type="button">S</button>
@@ -1337,7 +1337,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
       );
 
       const selectors = [
-        "openclaw-session-owner-chip",
+        "carapace-session-owner-chip",
         ".chat-side-panel-toggle",
         ".chat-pane__sharing-menu",
         ".chat-pane__branches-menu",
@@ -1436,7 +1436,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                 <div class="chat-pane__project-row">
                   <wa-dropdown class="chat-pane__workspace-menu">
                     <button class="chat-pane__workspace-chip" type="button">
-                      ${iconSvg()}<span>openclaw</span>
+                      ${iconSvg()}<span>carapace</span>
                     </button>
                   </wa-dropdown>
                 </div>
@@ -1936,7 +1936,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
             scrollWidth: node.scrollWidth,
           }));
         expect(labelWidths.scrollWidth).toBeLessThanOrEqual(labelWidths.clientWidth);
-        const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         if (artifactDir) {
           await mkdir(artifactDir, { recursive: true });
           await page.screenshot({
@@ -2052,9 +2052,9 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                   </div>
               </div>
             </main>
-            <openclaw-toast-host data-toast-placement="shell">
+            <carapace-toast-host data-toast-placement="shell">
               <div class="app-toast">Connection notice</div>
-            </openclaw-toast-host>
+            </carapace-toast-host>
           </div>
         </body></html>`);
         // The card entrance animation moves every measured descendant together.
@@ -2233,7 +2233,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
               noticePoint,
             ),
         ).toBe(true);
-        const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         if (artifactDir) {
           await mkdir(artifactDir, { recursive: true });
           await page.screenshot({
@@ -2929,7 +2929,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
       try {
         await page.setViewportSize({ width: 1366, height: 900 });
         const group = page.locator(".chat-group").filter({ hasText: SHARED_APP_CONTEXT_TEXT });
-        const tooltip = group.locator("openclaw-tooltip.msg-meta");
+        const tooltip = group.locator("carapace-tooltip.msg-meta");
         const context = tooltip.locator(".msg-meta__details");
         const summary = tooltip.locator(".msg-meta__summary");
         const messageText = group.locator(".chat-text").first();
@@ -2968,7 +2968,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
           .poll(() =>
             context.evaluate((node) => {
               const row = node.closest<HTMLElement>(".chat-virtual-row")!;
-              const tooltipNode = node.closest("openclaw-tooltip")!;
+              const tooltipNode = node.closest("carapace-tooltip")!;
               const popup = tooltipNode.shadowRoot
                 ?.querySelector("wa-tooltip")
                 ?.shadowRoot?.querySelector("wa-popup")
@@ -3058,7 +3058,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
     expect(await page.getByText(/MEDIA:/u).count()).toBe(0);
     for (const [fileName, type, , playback] of SHARED_APP_PLAYBACK_MEDIA) {
       const player = page
-        .locator(type === "audio" ? "openclaw-chat-audio-player" : "openclaw-chat-video-player")
+        .locator(type === "audio" ? "carapace-chat-audio-player" : "carapace-chat-video-player")
         .filter({ hasText: fileName });
       await player.waitFor({ state: "attached", timeout: 10_000 });
       expect(await player.evaluate((element) => (element as { playback?: unknown }).playback)).toBe(
@@ -3521,7 +3521,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                 <div class="chat-group-messages">
                   <div class="chat-bubble">
                     <div class="chat-text">
-                      <p><code>openclaw_message_send_channel_webchat_target_example_com_thread_very_long_identifier_without_spaces_1234567890abcdefghijklmnopqrstuvwxyz</code></p>
+                      <p><code>carapace_message_send_channel_webchat_target_example_com_thread_very_long_identifier_without_spaces_1234567890abcdefghijklmnopqrstuvwxyz</code></p>
                     </div>
                   </div>
                 </div>
@@ -4824,7 +4824,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
           .isDisabled(),
       ).toBe(true);
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await mkdir(artifactDir, { recursive: true });
         for (const { mode, runtime, variant } of reachableCells) {
@@ -5110,7 +5110,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
       expect((await summary.boundingBox())?.y).toBeCloseTo(expandedBefore.y, 1);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await mkdir(artifactDir, { recursive: true });
         await body.evaluate((node) => {
@@ -5438,7 +5438,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
       await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2, { steps: 8 });
       await page.mouse.up();
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await mkdir(artifactDir, { recursive: true });
         await page.screenshot({

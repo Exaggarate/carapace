@@ -1,6 +1,6 @@
 // Allowlist policy repair tests cover doctor repair of unsafe or stale allowlist policy.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { SignalAccountConfig } from "../../../config/types.signal.js";
 import { maybeRepairAllowlistPolicyAllowFrom } from "./allowlist-policy-repair.js";
 
@@ -66,7 +66,7 @@ describe("doctor allowlist-policy repair", () => {
         async (_channel: string, _env: NodeJS.ProcessEnv, accountId: string) =>
           accountId === "work" ? ["account-sender"] : [],
       );
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           signal: {
             dmPolicy: "allowlist",

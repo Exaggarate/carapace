@@ -1,5 +1,5 @@
 // Browser tests cover pw tools core.snapshot plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getPageForTargetId = vi.fn();

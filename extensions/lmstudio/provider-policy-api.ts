@@ -1,4 +1,4 @@
-import type { ProviderNormalizeConfigContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { ProviderNormalizeConfigContext } from "carapace/plugin-sdk/plugin-entry";
 import { normalizeLmstudioTransportReasoningCompat } from "./src/model-reasoning.js";
 
 /** LM Studio serves operator-hosted inference, including networked model hosts. */

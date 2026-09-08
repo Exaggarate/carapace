@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { tryResolveDefaultAgentId } from "../agents/agent-scope.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-agent-owner.js";
@@ -17,7 +17,7 @@ import {
   type SessionStoreTarget as ResolvedSessionStoreTarget,
 } from "../config/sessions/targets.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveStoredSessionOwnerAgentId } from "../gateway/session-store-key.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
 import { formatErrorMessage } from "../infra/errors.js";
@@ -30,7 +30,7 @@ import {
   parseAgentSessionKey,
 } from "../routing/session-key.js";
 import { migrateLegacySessionCreator } from "../state/creator-namespace-migration.js";
-import { closeOpenClawAgentDatabaseByPath } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../state/carapace-agent-db.js";
 import {
   readMigrationArtifactIdentity,
   sameMigrationArtifact,
@@ -259,7 +259,7 @@ function commonPathAncestor(leftPath: string, rightPath: string): string {
 }
 
 // Direct store migrations are scoped by path; broader agent discovery needs runtime config.
-function resolveDoctorSessionSqliteConfig(options: DoctorSessionSqliteOptions): OpenClawConfig {
+function resolveDoctorSessionSqliteConfig(options: DoctorSessionSqliteOptions): CarapaceConfig {
   if (options.cfg) {
     return options.cfg;
   }
@@ -272,7 +272,7 @@ function resolveDoctorSessionSqliteConfig(options: DoctorSessionSqliteOptions): 
 function resolveDoctorSessionSqliteTargets(params: {
   allAgents?: boolean;
   agent?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   mode: DoctorSessionSqliteMode;
   store?: string;
@@ -331,7 +331,7 @@ function filterLegacySessionStoreTargets(
 async function inspectOrMigrateTarget(params: {
   activeRun?: ActiveSessionSqliteMigrationRun;
   archiveTargets?: LegacyArchiveTarget[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   mode: Exclude<DoctorSessionSqliteMode, "restore" | "recover">;
   target: SessionStoreTarget;
@@ -429,7 +429,7 @@ async function inspectOrMigrateTarget(params: {
 }
 
 function gatherLegacyArchiveCoverage(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   targets: readonly SessionStoreTarget[],
 ) {
@@ -626,7 +626,7 @@ function readLegacySessionRecords(
 }
 
 function isLegacySessionRecordOwnedByTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   target: SessionStoreTarget,
   sessionKey: string,
 ): boolean {
@@ -1435,7 +1435,7 @@ async function compactSqliteDatabase(
 ): Promise<void> {
   try {
     if (options.operation === "import-finalize") {
-      closeOpenClawAgentDatabaseByPath(resolveTargetSqlitePath(target));
+      closeCarapaceAgentDatabaseByPath(resolveTargetSqlitePath(target));
     }
     report.compact = await compactDoctorSessionSqliteTarget(target, options);
   } catch (err) {

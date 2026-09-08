@@ -5,22 +5,22 @@ import {
   listAgentIds,
   resolveAgentDir,
   resolveSessionAgentIdsStrict,
-} from "openclaw/plugin-sdk/agent-scope-runtime";
+} from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   canonicalPathFromExistingAncestor,
   isPathInside,
-} from "openclaw/plugin-sdk/file-access-runtime";
-import { withFileLock, type FileLockOptions } from "openclaw/plugin-sdk/file-lock";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/file-access-runtime";
+import { withFileLock, type FileLockOptions } from "carapace/plugin-sdk/file-lock";
+import type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import {
   archiveLegacyStateSource,
   legacyStateFileExists,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { pathExists } from "openclaw/plugin-sdk/security-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-paths";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { pathExists } from "carapace/plugin-sdk/security-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-paths";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
   CODEX_APP_SERVER_BINDING_NAMESPACE,
@@ -710,7 +710,7 @@ async function recordSessionOwner(
   owner: LegacyBindingOwner,
   env: NodeJS.ProcessEnv,
 ): Promise<string | undefined> {
-  const { patchSessionEntry } = await import("openclaw/plugin-sdk/session-store-runtime");
+  const { patchSessionEntry } = await import("carapace/plugin-sdk/session-store-runtime");
   const currentIndex = await readLegacySessionIndex(owner.storePath);
   if ("failure" in currentIndex) {
     return "its legacy session owner could not be revalidated";

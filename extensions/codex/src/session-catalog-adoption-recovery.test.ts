@@ -24,7 +24,7 @@ import {
 describe("Codex supervision actions", () => {
   it("recovers the same pending session after a restart before binding commit", async () => {
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-interrupted-before-binding";
+    const sessionId = "carapace-interrupted-before-binding";
     const crashedRuntime = createRuntime();
     crashedRuntime.entries.push({
       sessionKey,
@@ -83,7 +83,7 @@ describe("Codex supervision actions", () => {
 
   it("recovers the same pending session after a restart following binding commit", async () => {
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-interrupted-after-binding";
+    const sessionId = "carapace-interrupted-after-binding";
     const crashedRuntime = createRuntime();
     crashedRuntime.entries.push({
       sessionKey,
@@ -150,7 +150,7 @@ describe("Codex supervision actions", () => {
     "pending cleanup artifacts",
   ] as const)("rejects recovery against %s in a same-thread binding", async (invalidState) => {
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-interrupted-invalid-binding";
+    const sessionId = "carapace-interrupted-invalid-binding";
     const crashedRuntime = createRuntime();
     crashedRuntime.entries.push({
       sessionKey,
@@ -256,7 +256,7 @@ describe("Codex supervision actions", () => {
     const { runtime, entries, createSessionEntry, patchSessionEntry } = createRuntime();
     const { api } = createGatewayApi(runtime);
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-session-archived";
+    const sessionId = "carapace-session-archived";
     entries.push({
       sessionKey,
       entry: {
@@ -324,7 +324,7 @@ describe("Codex supervision actions", () => {
       ),
     });
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-session-existing";
+    const sessionId = "carapace-session-existing";
     entries.push({
       sessionKey,
       entry: adoptedEntry({ sourceThreadId: "thread-1", sessionId }),
@@ -365,7 +365,7 @@ describe("Codex supervision actions", () => {
       const bindingStore = createCodexTestBindingStore();
       if (mapped) {
         const sessionKey = supervisionSessionKey("thread-1");
-        const sessionId = "openclaw-session-existing";
+        const sessionId = "carapace-session-existing";
         entries.push({
           sessionKey,
           entry: adoptedEntry({ sourceThreadId: "thread-1", sessionId }),
@@ -405,7 +405,7 @@ describe("Codex supervision actions", () => {
     const { runtime, entries, createSessionEntry, patchSessionEntry } = createRuntime();
     const { api } = createGatewayApi(runtime);
     const sessionKey = supervisionSessionKey("thread-1");
-    const sessionId = "openclaw-session-stale";
+    const sessionId = "carapace-session-stale";
     entries.push({
       sessionKey,
       entry: {
@@ -426,7 +426,7 @@ describe("Codex supervision actions", () => {
         if (!entry) {
           throw new Error("missing mapped session");
         }
-        entry.sessionId = "openclaw-session-replacement";
+        entry.sessionId = "carapace-session-replacement";
         return idleThread({ id: "thread-1-branch" });
       }),
     });

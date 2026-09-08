@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
 import { TaskStatus } from "@lit/task";
-import type { SkillsLibraryListResult } from "@openclaw/gateway-protocol";
+import type { SkillsLibraryListResult } from "@carapace/gateway-protocol";
 import { nothing } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
@@ -222,7 +222,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
       loadedAtMs: Date.now(),
       error: null,
     } satisfies UsageRouteData;
-    const page = createPage("openclaw-usage-page", context) as TestPage & {
+    const page = createPage("carapace-usage-page", context) as TestPage & {
       routeData: UsageRouteData;
       usageResult: UsageRouteData["result"];
     };
@@ -246,7 +246,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const client = { request } as unknown as GatewayBrowserClient;
     const context = contextWithClient(client, { connected: true });
     const staleResult = { sessions: [{ key: "stale" }] } as unknown as UsageRouteData["result"];
-    const page = createPage("openclaw-usage-page", context) as TestPage & {
+    const page = createPage("carapace-usage-page", context) as TestPage & {
       routeData: UsageRouteData;
       usageResult: UsageRouteData["result"];
     };
@@ -281,7 +281,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const client = { request } as unknown as GatewayBrowserClient;
     const context = contextWithClient(client, { connected: true });
     const result = { sessions: [{ key: "cached" }] } as unknown as UsageRouteData["result"];
-    const page = createPage("openclaw-usage-page", context) as TestPage & {
+    const page = createPage("carapace-usage-page", context) as TestPage & {
       routeData: UsageRouteData;
       gateway: TestGatewayController;
     };
@@ -329,7 +329,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     });
     const client = { request } as unknown as GatewayBrowserClient;
     const context = contextWithClient(client, { connected: true });
-    const page = createPage("openclaw-usage-page", context) as TestPage & {
+    const page = createPage("carapace-usage-page", context) as TestPage & {
       routeData: UsageRouteData;
       usageResult: UsageRouteData["result"];
       gateway: TestGatewayController;
@@ -387,7 +387,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const client = { request } as unknown as GatewayBrowserClient;
     const harness = contextWithMutableGateway(client);
     const result = { sessions: [] } as unknown as UsageRouteData["result"];
-    const page = createPage("openclaw-usage-page", harness.context) as TestPage & {
+    const page = createPage("carapace-usage-page", harness.context) as TestPage & {
       routeData: UsageRouteData;
       readonly usageLoading: boolean;
       refreshPolicy: UsageRefreshPolicy;
@@ -472,7 +472,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const client = { request } as unknown as GatewayBrowserClient;
     const agentsList = { defaultId: "main", agents: [{ id: "main" }] };
     const page = createPage(
-      "openclaw-model-providers-page",
+      "carapace-model-providers-page",
       contextWithClient(client, { connected: true, agentsList, selectedAgentId: "main" }),
     ) as TestPage & {
       data: ModelProvidersData | null;
@@ -518,7 +518,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
       selectedAgentId: "main",
     });
     const staleData = { authStatus: { ts: 1, providers: [] } } as unknown as ModelProvidersData;
-    const page = createPage("openclaw-model-providers-page", context) as TestPage & {
+    const page = createPage("carapace-model-providers-page", context) as TestPage & {
       routeData: ModelProvidersRouteData;
       data: ModelProvidersData | null;
     };
@@ -550,7 +550,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
       report,
       error: null,
     } as unknown as SkillsRouteData;
-    const page = createPage("openclaw-skills-page", context) as TestPage & {
+    const page = createPage("carapace-skills-page", context) as TestPage & {
       routeData: SkillsRouteData;
       skillsReport: SkillsRouteData["report"];
     };
@@ -577,7 +577,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
         return emptySkillLibrary;
       }
       if (method === "skills.securityVerdicts") {
-        return { schema: "openclaw.skills.security-verdicts.v1", items: [verdict] };
+        return { schema: "carapace.skills.security-verdicts.v1", items: [verdict] };
       }
       throw new Error(`Unexpected request: ${method}`);
     });
@@ -600,7 +600,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
         }),
       ],
     } as SkillsRouteData["report"];
-    const page = createPage("openclaw-skills-page", context) as TestPage & {
+    const page = createPage("carapace-skills-page", context) as TestPage & {
       routeData: SkillsRouteData;
       skillsReport: SkillsRouteData["report"];
       clawhubVerdicts: Record<string, unknown>;
@@ -664,7 +664,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
         }),
       ],
     } as SkillsRouteData["report"];
-    const page = createPage("openclaw-skills-page", harness.context) as TestPage & {
+    const page = createPage("carapace-skills-page", harness.context) as TestPage & {
       routeData: SkillsRouteData;
       clawhubVerdicts: Record<string, unknown>;
       clawhubVerdictsLoading: boolean;
@@ -684,7 +684,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     await waitForFast(() => expect(page.clawhubVerdictsLoading).toBe(true));
     harness.emitConnected(false);
     pending.resolve({
-      schema: "openclaw.skills.security-verdicts.v1",
+      schema: "carapace.skills.security-verdicts.v1",
       items: [
         {
           registry: "https://clawhub.ai",
@@ -725,7 +725,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
       agents: [{ id: "main" }, { id: "research" }],
     };
     const context = contextWithClient(client, { connected: true, agentsList });
-    const page = createPage("openclaw-skills-page", context) as TestPage & {
+    const page = createPage("carapace-skills-page", context) as TestPage & {
       routeData: SkillsRouteData;
     };
 
@@ -763,7 +763,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const agentsList = { defaultId: "main", agents: [{ id: "main" }] };
     const context = contextWithClient(client, { connected: true, agentsList });
     const staleReport = { skills: [{ skillKey: "stale" }] } as unknown as SkillsRouteData["report"];
-    const page = createPage("openclaw-skills-page", context) as TestPage & {
+    const page = createPage("carapace-skills-page", context) as TestPage & {
       routeData: SkillsRouteData;
       skillsReport: SkillsRouteData["report"];
     };
@@ -786,7 +786,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears sessions loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-sessions-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-sessions-page", contextWithClient(client)) as TestPage & {
       result: unknown;
       selectedKeys: Set<string>;
       checkpointItemsByKey: Record<string, unknown>;
@@ -806,7 +806,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears usage loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-usage-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-usage-page", contextWithClient(client)) as TestPage & {
       usageResult: unknown;
       providerUsageSummary: unknown;
       usageSelectedSessions: string[];
@@ -826,7 +826,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears skills loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-skills-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-skills-page", contextWithClient(client)) as TestPage & {
       skillsReport: unknown;
       skillCardContents: Record<string, string>;
     };
@@ -847,7 +847,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const request = vi.fn(async () => emptySkillLibrary);
     const client = { request } as unknown as GatewayBrowserClient;
     const context = contextWithClient(client, { connected: true, ensureList });
-    const page = createPage("openclaw-skills-page", context) as TestPage & {
+    const page = createPage("carapace-skills-page", context) as TestPage & {
       loadAgents: () => Promise<void>;
     };
     document.body.append(page);
@@ -875,7 +875,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears logs loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-logs-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-logs-page", contextWithClient(client)) as TestPage & {
       logsEntries: unknown[];
       logsFile: string | null;
       logsCursor: number | null;
@@ -895,7 +895,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears diagnostics data and errors loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-debug-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-debug-page", contextWithClient(client)) as TestPage & {
       debugStatus: unknown;
       debugHealth: unknown;
       debugModels: unknown[];
@@ -924,7 +924,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
     const request = vi.fn(() => pending.promise);
     const client = { request } as unknown as GatewayBrowserClient;
     const context = contextWithClient(client, { connected: true });
-    const page = createPage("openclaw-debug-page", context) as TestPage & {
+    const page = createPage("carapace-debug-page", context) as TestPage & {
       debugStatus: unknown;
       diagnosticsTask: { run: () => Promise<void>; status: TaskStatus };
     };
@@ -945,7 +945,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears cron data loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-cron-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-cron-page", contextWithClient(client)) as TestPage & {
       cron: {
         client: GatewayBrowserClient | null;
         connected: boolean;
@@ -969,7 +969,7 @@ describe("gateway source replacement across reconnect with a reused client", () 
 
   it("clears tasks loaded by the previous provider", async () => {
     const client = {} as GatewayBrowserClient;
-    const page = createPage("openclaw-tasks-page", contextWithClient(client)) as TestPage & {
+    const page = createPage("carapace-tasks-page", contextWithClient(client)) as TestPage & {
       tasks: unknown[];
       error: string | null;
       cancellingTaskIds: Set<string>;

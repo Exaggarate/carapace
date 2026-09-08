@@ -117,7 +117,7 @@ describe("resolveDiagnosticProcessEnv", () => {
         {
           ...native,
           PSModulePath: "C:\\ExtraModules",
-          OPENCLAW_GATEWAY_TOKEN: "synthetic",
+          CARAPACE_GATEWAY_TOKEN: "synthetic",
           https_proxy: "http://proxy.invalid",
         },
         "win32",

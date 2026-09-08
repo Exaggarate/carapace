@@ -2,7 +2,7 @@
 import {
   adaptMessagePresentationForChannel,
   renderMessagePresentationFallbackText,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildDiscordComponentMessage } from "./components.builders.js";
 import type { DiscordComponentMessageSpec } from "./components.types.js";
@@ -16,9 +16,9 @@ import {
 import { createDiscordSendReceipt } from "./send.receipt.js";
 
 const outboundWarnSpy = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -947,7 +947,7 @@ describe("discordOutbound", () => {
           text: "delivered",
           channelData: {
             discord: {
-              __openclawInboundEventDelivery: {
+              __carapaceInboundEventDelivery: {
                 sessionKey: "agent:main:discord:channel:c1",
                 inboundEventKind: "room_event",
               },

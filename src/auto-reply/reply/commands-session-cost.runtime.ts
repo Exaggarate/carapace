@@ -2,13 +2,13 @@ import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import { resolveSessionStorePathForScope } from "../../config/sessions/session-store-path.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadCostUsageSummary, loadSessionCostSummary } from "../../infra/session-cost-usage.js";
 import { DEFAULT_AGENT_ID, isUnscopedSessionKeySentinel } from "../../routing/session-key.js";
 import { formatTokenCount, formatUsd } from "../../utils/usage-format.js";
 
 export async function formatSessionUsageCostSummary(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   sessionEntry?: SessionEntry;

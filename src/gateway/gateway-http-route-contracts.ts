@@ -7,12 +7,12 @@ const GATEWAY_PROBE_ROUTES = new Map<string, "live" | "ready" | "startup">([
   ["/startupz", "startup"],
 ]);
 
-export const MCP_APP_STANDALONE_PATH = "/__openclaw__/mcp-app";
+export const MCP_APP_STANDALONE_PATH = "/__carapace__/mcp-app";
 export const MCP_APP_STANDALONE_VIEW_PATH = `${MCP_APP_STANDALONE_PATH}/view`;
-const WORKER_GATEWAY_PATH = "/__openclaw__/worker";
-const NODE_WORKER_BUNDLE_TRANSFER_NAMESPACE = "/__openclaw__/worker-bundle";
-const NODE_WORKSPACE_TRANSFER_NAMESPACE = "/__openclaw__/worker-transfer";
-export const WORKER_BOOTSTRAP_ARTIFACT_TRANSFER_PATH = "/__openclaw__/worker-bootstrap";
+const WORKER_GATEWAY_PATH = "/__carapace__/worker";
+const NODE_WORKER_BUNDLE_TRANSFER_NAMESPACE = "/__carapace__/worker-bundle";
+const NODE_WORKSPACE_TRANSFER_NAMESPACE = "/__carapace__/worker-transfer";
+export const WORKER_BOOTSTRAP_ARTIFACT_TRANSFER_PATH = "/__carapace__/worker-bootstrap";
 
 export function classifyGatewayProbePath(
   pathname: string,

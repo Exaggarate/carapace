@@ -1,6 +1,6 @@
 import Foundation
 import HealthKit
-import OpenClawKit
+import CarapaceKit
 
 enum HealthAuthorization {
     static let enabledKey = "health.summary.enabled"
@@ -56,7 +56,7 @@ enum HealthAuthorization {
         }
         guard !Task.isCancelled, isCurrent() else { throw CancellationError() }
         // HealthKit intentionally does not reveal read denial. This flag records only
-        // the user's explicit OpenClaw sharing choice, never inferred authorization.
+        // the user's explicit Carapace sharing choice, never inferred authorization.
         UserDefaults.standard.set(true, forKey: self.enabledKey)
     }
 
@@ -66,7 +66,7 @@ enum HealthAuthorization {
 }
 
 protocol HealthSummaryServicing: Sendable {
-    func summary(params: OpenClawHealthSummaryParams) async throws -> OpenClawHealthSummaryPayload
+    func summary(params: CarapaceHealthSummaryParams) async throws -> CarapaceHealthSummaryPayload
 }
 
 actor HealthSummaryService: HealthSummaryServicing {
@@ -76,11 +76,11 @@ actor HealthSummaryService: HealthSummaryServicing {
         self.healthStore = healthStore
     }
 
-    func summary(params: OpenClawHealthSummaryParams) async throws -> OpenClawHealthSummaryPayload {
+    func summary(params: CarapaceHealthSummaryParams) async throws -> CarapaceHealthSummaryPayload {
         guard HealthAuthorization.isEnabled else {
             throw NSError(domain: "Health", code: 2, userInfo: [
                 NSLocalizedDescriptionKey:
-                    "HEALTH_ACCESS_DISABLED: enable Apple Health Summaries in OpenClaw Settings",
+                    "HEALTH_ACCESS_DISABLED: enable Apple Health Summaries in Carapace Settings",
             ])
         }
 
@@ -92,7 +92,7 @@ actor HealthSummaryService: HealthSummaryServicing {
         let workouts = try await self.workouts(in: range)
         let formatter = ISO8601DateFormatter()
 
-        return OpenClawHealthSummaryPayload(
+        return CarapaceHealthSummaryPayload(
             period: params.period,
             startISO: formatter.string(from: range.start),
             endISO: formatter.string(from: range.end),

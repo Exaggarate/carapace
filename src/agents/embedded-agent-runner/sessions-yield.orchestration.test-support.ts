@@ -1,7 +1,7 @@
 /** Full-entry coverage for sessions_yield terminal projection. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
   mockedGlobalHookRunner,
@@ -11,7 +11,7 @@ import {
 } from "./run.overflow-compaction.harness.js";
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 
 describe("sessions_yield orchestration", () => {
@@ -21,8 +21,8 @@ describe("sessions_yield orchestration", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "sessions-yield.orchestration" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "sessions-yield.orchestration" });
     mockedGlobalHookRunner.hasHooks.mockImplementation(() => false);
   });
 

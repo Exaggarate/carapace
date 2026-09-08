@@ -1,6 +1,6 @@
 // Tests lifecycle/work admission ordering across canonical keys and backing ids.
 import { setImmediate as waitForImmediate } from "node:timers/promises";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { runExclusiveSessionStoreWrite } from "../config/sessions/store-writer.js";
@@ -70,7 +70,7 @@ it("waits for a competing session admission outside the caller context", async (
 it("observes only the named session admission owner while it is starting", async () => {
   const scope = "store-named-owner";
   const identities = ["agent:main:named-owner", "session-named-owner"];
-  const owner = Symbol.for("openclaw.test.namedSessionWorkAdmissionOwner");
+  const owner = Symbol.for("carapace.test.namedSessionWorkAdmissionOwner");
   const unrelated = await beginSessionWorkAdmission({ scope, identities, assertAllowed: () => {} });
   const started = createDeferred();
   const allowed = createDeferred();

@@ -1,5 +1,5 @@
 // Lazy plugin-registry loader for CLI commands that need plugin command/capability metadata.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loggingState } from "../logging/state.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import type { CliPluginRegistryScope } from "./command-catalog.js";
@@ -26,8 +26,8 @@ async function readPersistedSandboxBackendIds(): Promise<string[]> {
 export async function ensureCliPluginRegistryLoaded(params: {
   scope: CliPluginRegistryScope;
   routeLogsToStderr?: boolean;
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
 }) {
   const persistedSandboxBackendIds =
     params.scope === "sandbox-management"

@@ -1,5 +1,5 @@
 // Channel policy for delaying and merging text before agent dispatch.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isControlCommandMessage } from "../auto-reply/command-detection.js";
 import type { CommandNormalizeOptions } from "../auto-reply/commands-registry.js";
 import {
@@ -7,12 +7,12 @@ import {
   resolveInboundDebounceMs,
   type InboundDebounceCreateParams,
 } from "../auto-reply/inbound-debounce.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 
 /** Returns true when an inbound text event is safe to debounce before dispatch. */
 export function shouldDebounceTextInbound(params: {
   text: string | null | undefined;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   hasMedia?: boolean;
   commandOptions?: CommandNormalizeOptions;
   allowDebounce?: boolean;
@@ -37,7 +37,7 @@ export function shouldDebounceTextInbound(params: {
 /** Snapshot timing by default; resolveDebounceMs opts into per-entry timing. */
 export function createChannelInboundDebouncer<T>(
   params: Omit<InboundDebounceCreateParams<T>, "debounceMs"> & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     channel: string;
     debounceMsOverride?: number;
   },

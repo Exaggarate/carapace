@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   createQaGatewayChild,
   type QaGatewayChild,
@@ -21,7 +21,7 @@ function omitMemoryCoreEntry<T extends Record<string, unknown> | undefined>(entr
   return rest as T;
 }
 
-function prepareLiveTransportGatewayConfig(cfg: OpenClawConfig): OpenClawConfig {
+function prepareLiveTransportGatewayConfig(cfg: CarapaceConfig): CarapaceConfig {
   return {
     ...cfg,
     plugins: cfg.plugins
@@ -56,7 +56,7 @@ type QaLiveGatewayParams = {
     requiredPluginIds: readonly string[];
     createGatewayConfig: (params: {
       baseUrl: string;
-    }) => Pick<OpenClawConfig, "channels" | "messages">;
+    }) => Pick<CarapaceConfig, "channels" | "messages">;
   };
   transportBaseUrl: string;
   controlUiAllowedOrigins?: string[];
@@ -69,7 +69,7 @@ type QaLiveGatewayParams = {
   claudeCliAuthMode?: QaCliBackendAuthMode;
   controlUiEnabled?: boolean;
   mockAuthAgentIds?: readonly string[];
-  mutateConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  mutateConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
 };
 
 type QaLiveGateway = {

@@ -1,11 +1,11 @@
 import { expect, it } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { formatCliProcessFailure, runCliProcessChild } from "./cli-process-child.test-helpers.js";
 
 async function runImportBoundaryChild(forbidden: RegExp, workload: string) {
-  return withOpenClawTestState(
+  return withCarapaceTestState(
     {
-      prefix: "openclaw-mcp-import-boundary-",
+      prefix: "carapace-mcp-import-boundary-",
       scenario: "minimal",
       applyEnv: false,
     },

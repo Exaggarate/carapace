@@ -4,8 +4,8 @@ import net from "node:net";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isLocalDirectRequest,
   isLoopbackHost,
@@ -36,7 +36,7 @@ function headerValue(value: string | string[] | undefined): string | undefined {
 /** Gather the canonical Gateway browser-origin policy inputs for one HTTP request. */
 export function resolveBrowserOriginPolicy(params: {
   req: IncomingMessage;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): BrowserOriginPolicy {
   return {
     requestHost: headerValue(params.req.headers.host),
@@ -145,7 +145,7 @@ export function checkBrowserOrigin(params: {
 /** Return the request Origin only when the Gateway's canonical browser policy accepts it. */
 export function resolveAcceptedBrowserOrigin(params: {
   req: IncomingMessage;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): string | undefined {
   const policy = resolveBrowserOriginPolicy(params);
   const origin = policy.origin?.trim();

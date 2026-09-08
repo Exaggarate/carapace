@@ -137,13 +137,13 @@ describe("browser action input batch command", () => {
     const program = createActionInputProgram();
 
     await program.parseAsync(
-      ["browser", "batch", "--actions-file", "/tmp/openclaw/batch-actions.json"],
+      ["browser", "batch", "--actions-file", "/tmp/carapace/batch-actions.json"],
       { from: "user" },
     );
 
     expect(mocks.readActionsPayload).toHaveBeenCalledWith({
       actions: undefined,
-      actionsFile: "/tmp/openclaw/batch-actions.json",
+      actionsFile: "/tmp/carapace/batch-actions.json",
     });
     expect(getLastActionBody()).toMatchObject({ kind: "batch", actions: SAMPLE_ACTIONS });
   });

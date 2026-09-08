@@ -1,5 +1,5 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
 import {
   msteamsConfigAdapter,
   msteamsMeta,

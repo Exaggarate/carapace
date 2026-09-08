@@ -22,7 +22,7 @@ const coreText = (origin: string) =>
   `export interface Marker { origin: "${origin}" }\ndeclare global { const declarationOrigin: "${origin}"; }\n`;
 
 function nestedFixture(groups: readonly string[] = TSDOWN_PLUGIN_SDK_DTS_CONFIG_GROUPS) {
-  const ancestor = fs.realpathSync.native(createTempDir("openclaw-declaration-resolution-"));
+  const ancestor = fs.realpathSync.native(createTempDir("carapace-declaration-resolution-"));
   const root = path.join(ancestor, ".claude/worktrees/validation");
   const fixture = createFixture(groups, root);
   const ancestorPackage = path.join(ancestor, "node_modules/@types/synthetic-core");
@@ -72,7 +72,7 @@ function nestedFixture(groups: readonly string[] = TSDOWN_PLUGIN_SDK_DTS_CONFIG_
   const entry = Object.values(fixture.declarations).flat()[0]!;
   fs.appendFileSync(
     path.join(root, entry),
-    '\nexport { inferredOrigin } from "@openclaw/llm-core";\n',
+    '\nexport { inferredOrigin } from "@carapace/llm-core";\n',
   );
   return { ...fixture, ancestorInput, localInput: `${local}/index.d.ts` };
 }
@@ -256,7 +256,7 @@ const ts = createRequire(resolveDeclarationInputCaptureModule())("typescript");
 const root = process.cwd();
 const canonicalRoot = fs.realpathSync.native(root);
 const original = { ...ts.sys };
-process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD = ${JSON.stringify(dts ? "1" : "0")};
+process.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD = ${JSON.stringify(dts ? "1" : "0")};
 const { default: configs } = await import("./tsdown.config.ts");
 const { default: ai } = await import("./tsdown.ai.config.ts");
 const owner = ${JSON.stringify(owner)};
@@ -482,14 +482,14 @@ for (const config of configs) {
     }
     const cached = treeHashes(path.join(root, ".artifacts/build-all-cache"));
     write(".artifacts/replace-input", "ancestor");
-    const ancestorChanged = run(root, { OPENCLAW_BUILD_CACHE: "0" });
+    const ancestorChanged = run(root, { CARAPACE_BUILD_CACHE: "0" });
     expect(ancestorChanged.status, ancestorChanged.stdout + ancestorChanged.stderr).toBe(0);
     expect(treeHashes(path.join(root, "dist"))).toEqual(published);
     const restored = run(root);
     expect(restored.status, restored.stdout + restored.stderr).toBe(0);
     expect(restored.stdout + restored.stderr).not.toContain("[tsdown-build] invocation");
     write(".artifacts/replace-input", "local");
-    const localChanged = run(root, { OPENCLAW_BUILD_CACHE: "0" });
+    const localChanged = run(root, { CARAPACE_BUILD_CACHE: "0" });
     expect(localChanged.status, localChanged.stdout + localChanged.stderr).toBeGreaterThan(0);
     expect(localChanged.stdout + localChanged.stderr).toContain("changed during compilation");
     expect(treeHashes(path.join(root, "dist"))).toEqual(published);

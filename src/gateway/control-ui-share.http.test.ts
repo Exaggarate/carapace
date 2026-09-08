@@ -8,7 +8,7 @@ import { handleControlUiHttpRequest } from "./control-ui.js";
 describe("public Control UI previews", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
   it.each(["", "/control"])("serves a private-data-free preview under %s", async (basePath) => {
-    const root = tempDirs.make("openclaw-social-preview-");
+    const root = tempDirs.make("carapace-social-preview-");
     const cardBytes = fs.readFileSync(path.resolve("ui/public/apple-touch-icon.png"));
     fs.writeFileSync(path.join(root, "social-card.png"), cardBytes);
     const server = createServer((req, res) => {
@@ -37,10 +37,10 @@ describe("public Control UI previews", () => {
       expect(response.status).toBe(200);
       expect(response.headers.get("content-type")).toContain("text/html");
       const html = await response.text();
-      expect(html).toContain('<meta property="og:title" content="OpenClaw dashboard">');
+      expect(html).toContain('<meta property="og:title" content="Carapace dashboard">');
       expect(html).toContain(`content="https://gateway.example.test${basePath}/share/card.png"`);
       expect(html).toContain(`href="${basePath}/dashboard/example/private-name"`);
-      expect(html).not.toMatch(/secret-value|private-draft|<script|openclaw-app/);
+      expect(html).not.toMatch(/secret-value|private-draft|<script|carapace-app/);
       expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
       expect(response.headers.get("referrer-policy")).toBe("no-referrer");
       const head = await fetch(`${origin}${route}`, { method: "HEAD" });

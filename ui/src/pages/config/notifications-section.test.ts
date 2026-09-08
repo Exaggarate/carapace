@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { describe, expect, it, vi } from "vitest";
 import { renderNotificationsSection } from "./notifications-section.ts";

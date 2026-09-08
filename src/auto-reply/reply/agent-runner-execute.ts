@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { prepareGitCoauthorAttribution } from "../../agents/git-coauthor-attribution.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { withBeforeAgentReplyObserver } from "../../plugins/before-agent-reply.js";
 import { getGatewayContextResolver } from "../../plugins/runtime/gateway-request-scope.js";
@@ -68,7 +68,7 @@ type ExecutePreparedReplyAgentRunInput = Pick<
     typeof createReplyRestartRecoveryClaimController
   >["beginBeforeAgentReply"];
   blockReplyPipeline: BlockReplyPipeline | null;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   checkpointBeforeAgentReply: ReturnType<
     typeof createReplyRestartRecoveryClaimController
   >["checkpointBeforeAgentReply"];
@@ -454,7 +454,7 @@ export function createReplyAgentRestartRecoveryController(
     "followupRun" | "opts" | "runtimePolicySessionKey" | "sessionCtx" | "sessionKey" | "storePath"
   > & {
     activeSessionStore: Record<string, SessionEntry> | undefined;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     getActiveSessionEntry: () => SessionEntry | undefined;
     replyOperation: ReplyOperation;
     restartRecoverySourceTurnId: string | undefined;

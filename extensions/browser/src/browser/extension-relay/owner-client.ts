@@ -1,4 +1,4 @@
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import type { ConnectOverCDPTransport } from "playwright-core";
 import type { WebSocket } from "ws";
 import { z } from "zod";

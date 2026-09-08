@@ -1,5 +1,5 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString as normalizeTrimmedString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString as normalizeTrimmedString } from "@carapace/normalization-core/string-coerce";
 import type {
   DoctorMemoryDreamActionPayload,
   DoctorMemoryDreamDiaryPayload,

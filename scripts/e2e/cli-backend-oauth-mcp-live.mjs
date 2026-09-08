@@ -199,9 +199,9 @@ function redactDiagnostic(value) {
     .slice(-4_000);
 }
 
-function runOpenClaw(args, env) {
+function runCarapace(args, env) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["openclaw.mjs", ...args], {
+    const child = spawn(process.execPath, ["carapace.mjs", ...args], {
       cwd: process.cwd(),
       env,
       stdio: ["ignore", "pipe", "pipe"],
@@ -220,7 +220,7 @@ function runOpenClaw(args, env) {
       }
       reject(
         new Error(
-          `openclaw ${args[0]} exited code=${code} signal=${signal ?? "none"}: ${redactDiagnostic(`${stdout}\n${stderr}`)}`,
+          `carapace ${args[0]} exited code=${code} signal=${signal ?? "none"}: ${redactDiagnostic(`${stdout}\n${stderr}`)}`,
         ),
       );
     });
@@ -229,7 +229,7 @@ function runOpenClaw(args, env) {
 
 function runMcpLogin(env, issuer) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["openclaw.mjs", "mcp", "login", "proof"], {
+    const child = spawn(process.execPath, ["carapace.mjs", "mcp", "login", "proof"], {
       cwd: process.cwd(),
       env,
       stdio: ["ignore", "pipe", "pipe"],
@@ -265,7 +265,7 @@ function runMcpLogin(env, issuer) {
         resolve();
         return;
       }
-      reject(new Error(`openclaw mcp login exited code=${code} signal=${signal ?? "none"}`));
+      reject(new Error(`carapace mcp login exited code=${code} signal=${signal ?? "none"}`));
     });
   });
 }
@@ -277,7 +277,7 @@ function authorizationClass(value) {
   if (value === `Bearer ${freshAccess}`) {
     return "fresh";
   }
-  if (value?.includes("OPENCLAW_MCP_AUTH")) {
+  if (value?.includes("CARAPACE_MCP_AUTH")) {
     return "placeholder";
   }
   return value ? "other" : "absent";
@@ -285,10 +285,10 @@ function authorizationClass(value) {
 
 const fixture = await startOAuthMcpServer();
 const callbackPort = await getFreePort();
-const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-cli-oauth-mcp-"));
+const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-cli-oauth-mcp-"));
 const workspaceDir = path.join(stateDir, "workspace");
-const configPath = path.join(stateDir, "openclaw.json");
-const model = process.env.OPENCLAW_LIVE_CLI_BACKEND_MODEL ?? "claude-cli/claude-sonnet-5";
+const configPath = path.join(stateDir, "carapace.json");
+const model = process.env.CARAPACE_LIVE_CLI_BACKEND_MODEL ?? "claude-cli/claude-sonnet-5";
 await fs.mkdir(workspaceDir, { recursive: true });
 await fs.writeFile(
   configPath,
@@ -311,18 +311,18 @@ await fs.writeFile(
 const env = {
   ...process.env,
   BROWSER: "true",
-  OPENCLAW_CONFIG_PATH: configPath,
-  OPENCLAW_STATE_DIR: stateDir,
-  OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-  OPENCLAW_SKIP_CANVAS_HOST: "1",
-  OPENCLAW_SKIP_CHANNELS: "1",
-  OPENCLAW_SKIP_CRON: "1",
-  OPENCLAW_SKIP_GMAIL_WATCHER: "1",
+  CARAPACE_CONFIG_PATH: configPath,
+  CARAPACE_STATE_DIR: stateDir,
+  CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+  CARAPACE_SKIP_CANVAS_HOST: "1",
+  CARAPACE_SKIP_CHANNELS: "1",
+  CARAPACE_SKIP_CRON: "1",
+  CARAPACE_SKIP_GMAIL_WATCHER: "1",
 };
 
 try {
   await runMcpLogin(env, fixture.issuer);
-  const agent = await runOpenClaw(
+  const agent = await runCarapace(
     [
       "agent",
       "--local",
@@ -363,7 +363,7 @@ try {
   }
   console.log(
     `CLI_BACKEND_OAUTH_MCP_PROOF ${JSON.stringify({
-      entrypoint: "openclaw agent --local",
+      entrypoint: "carapace agent --local",
       runtime: model,
       authorizationSequence,
       methods,

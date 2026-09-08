@@ -1,13 +1,13 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 import UserNotifications
 
 extension SettingsProTab {
     func detailStatusCard(
         icon: String,
-        title: OpenClawTextValue,
-        detail: OpenClawTextValue,
-        value: OpenClawTextValue,
+        title: CarapaceTextValue,
+        detail: CarapaceTextValue,
+        value: CarapaceTextValue,
         color: Color,
         actionTitle: LocalizedStringKey? = nil,
         actionSystemImage: String = "arrow.right",
@@ -18,25 +18,25 @@ extension SettingsProTab {
                 SettingsIcon(systemName: icon, color: color)
                 VStack(alignment: .leading, spacing: 2) {
                     title.text
-                        .font(OpenClawType.headline)
+                        .font(CarapaceType.headline)
                     detail.text
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
                 value.text
-                    .font(OpenClawType.subheadMedium)
+                    .font(CarapaceType.subheadMedium)
                     .foregroundStyle(color)
             }
             if let action, let actionTitle {
                 Button(action: action) {
                     Label(actionTitle, systemImage: actionSystemImage)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(OpenClawBrand.accent)
+                .tint(CarapaceBrand.accent)
             }
         }
     }
@@ -60,7 +60,7 @@ extension SettingsProTab {
                 title: "Discovery",
                 detail: .verbatim(self.gatewayController.discoveryStatusText),
                 value: .verbatim(self.gatewayController.gateways.count.formatted()),
-                color: self.gatewayController.gateways.isEmpty ? .secondary : OpenClawBrand.accent)
+                color: self.gatewayController.gateways.isEmpty ? .secondary : CarapaceBrand.accent)
             self.diagnosticCheckRow(
                 icon: "waveform",
                 title: "Talk Config",
@@ -80,7 +80,7 @@ extension SettingsProTab {
                 value: .verbatim(self.appModel.screenRecordActive
                     ? String(localized: "live")
                     : String(localized: "idle")),
-                color: self.appModel.screenRecordActive ? OpenClawBrand.ok : .secondary)
+                color: self.appModel.screenRecordActive ? CarapaceBrand.ok : .secondary)
             self.diagnosticCheckRow(
                 icon: "mic",
                 title: "Voice Wake",
@@ -88,30 +88,30 @@ extension SettingsProTab {
                 value: .verbatim(self.voiceWakeEnabled
                     ? String(localized: "on")
                     : String(localized: "off")),
-                color: self.voiceWakeEnabled ? OpenClawBrand.ok : .secondary)
+                color: self.voiceWakeEnabled ? CarapaceBrand.ok : .secondary)
         }
     }
 
     func diagnosticCheckRow(
         icon: String,
-        title: OpenClawTextValue,
-        detail: OpenClawTextValue,
-        value: OpenClawTextValue,
+        title: CarapaceTextValue,
+        detail: CarapaceTextValue,
+        value: CarapaceTextValue,
         color: Color) -> some View
     {
         HStack(spacing: 12) {
             SettingsIcon(systemName: icon, color: color)
             VStack(alignment: .leading, spacing: 2) {
                 title.text
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                 detail.text
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             value.text
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
                 .foregroundStyle(.secondary)
         }
     }
@@ -725,9 +725,9 @@ extension SettingsProTab {
         do {
             let result = try await self.appModel.sendDirectWatchSetup()
             self.watchDirectSetupStatusText = result.deliveredImmediately
-                ? String(localized: "Setup sent. Open OpenClaw on the watch to connect.")
+                ? String(localized: "Setup sent. Open Carapace on the watch to connect.")
                 : String(
-                    localized: "Setup queued for the watch. Open OpenClaw before the code expires.")
+                    localized: "Setup queued for the watch. Open Carapace before the code expires.")
         } catch {
             self.watchDirectSetupStatusText = error.localizedDescription
         }
@@ -821,7 +821,7 @@ extension SettingsProTab {
         let lower = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if lower.contains("pairing required") {
             return String(
-                localized: "Pairing required. Run /pair approve in your OpenClaw chat, then connect again.")
+                localized: "Pairing required. Run /pair approve in your Carapace chat, then connect again.")
         }
         if lower.contains("device nonce required") || lower.contains("device nonce mismatch") {
             return String(localized: "Secure handshake failed. Check Tailscale, then connect again.")
@@ -909,8 +909,8 @@ extension SettingsProTab {
     }
 
     var gatewayStatusColor: Color {
-        if self.appModel.isAppleReviewDemoModeEnabled { return OpenClawBrand.accent }
-        return self.gatewayConnected ? OpenClawBrand.ok : .secondary
+        if self.appModel.isAppleReviewDemoModeEnabled { return CarapaceBrand.accent }
+        return self.gatewayConnected ? CarapaceBrand.ok : .secondary
     }
 
     var gatewayDiagnosticConnected: Bool {
@@ -927,7 +927,7 @@ extension SettingsProTab {
         }
         if self.notificationsNeedAttention {
             return String(
-                localized: "Foreground approvals still appear while OpenClaw is connected.")
+                localized: "Foreground approvals still appear while Carapace is connected.")
         }
         return self.gatewayConnected
             ? String(localized: "Gateway requests will appear here.")
@@ -948,7 +948,7 @@ extension SettingsProTab {
 
     var gatewayTalkConfigColor: Color {
         if self.appModel.isAppleReviewDemoModeEnabled { return .secondary }
-        return self.appModel.talkMode.gatewayTalkConfigLoaded ? OpenClawBrand.ok : .secondary
+        return self.appModel.talkMode.gatewayTalkConfigLoaded ? CarapaceBrand.ok : .secondary
     }
 
     var gatewayAddress: String {
@@ -956,7 +956,7 @@ extension SettingsProTab {
     }
 
     var gatewayServer: String {
-        self.appModel.gatewayServerName ?? "OpenClaw Gateway"
+        self.appModel.gatewayServerName ?? "Carapace Gateway"
     }
 
     var pendingApproval: NodeAppModel.ExecApprovalPrompt? {
@@ -982,8 +982,8 @@ extension SettingsProTab {
 
     var approvalItems: [SettingsApprovalItem] {
         guard let pendingApproval else { return [] }
-        let pendingTitle = pendingApproval.commandPreview.map(OpenClawTextValue.verbatim)
-            ?? OpenClawTextValue.localized("Review gateway action")
+        let pendingTitle = pendingApproval.commandPreview.map(CarapaceTextValue.verbatim)
+            ?? CarapaceTextValue.localized("Review gateway action")
         let agentDetail = String(
             format: String(localized: "Agent: %@"),
             self.appModel.activeAgentName)
@@ -996,7 +996,7 @@ extension SettingsProTab {
                 priority: self.appModel.pendingExecApprovalPromptResolving
                     ? .localized("Resolving")
                     : .localized("High"),
-                color: OpenClawBrand.danger),
+                color: CarapaceBrand.danger),
             SettingsApprovalItem(
                 id: "pending-context",
                 icon: "doc.text.fill",
@@ -1007,7 +1007,7 @@ extension SettingsProTab {
                 priority: pendingApproval.allowsAllowAlways
                     ? .localized("Medium")
                     : .localized("Review"),
-                color: OpenClawBrand.warn),
+                color: CarapaceBrand.warn),
         ]
     }
 
@@ -1027,7 +1027,7 @@ extension SettingsProTab {
 
     var diagnosticsRunColor: Color {
         guard let diagnosticsIssueCount else { return .secondary }
-        return diagnosticsIssueCount == 0 ? OpenClawBrand.ok : OpenClawBrand.warn
+        return diagnosticsIssueCount == 0 ? CarapaceBrand.ok : CarapaceBrand.warn
     }
 
     var notificationStatusText: String {
@@ -1043,7 +1043,7 @@ extension SettingsProTab {
     }
 
     var notificationDisclosureAccepted: Bool {
-        !PushBuildConfig.current.usesOpenClawHostedRelay
+        !PushBuildConfig.current.usesCarapaceHostedRelay
             || PushEnrollmentConsent.disclosureAccepted
     }
 

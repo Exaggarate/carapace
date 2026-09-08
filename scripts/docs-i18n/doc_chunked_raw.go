@@ -91,7 +91,7 @@ func translateDocBodyChunked(ctx context.Context, translator docsTranslator, rel
 			maskedListMarkers,
 			extractMarkdownListMarkerPrefixes(translatedBody),
 		)
-		if os.Getenv("OPENCLAW_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
+		if os.Getenv("CARAPACE_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
 			log.Printf("docs-i18n: rejected translated body %s %q", relPath, translatedBody)
 		}
 		return "", fmt.Errorf("%s: final document validation: %w", relPath, err)
@@ -156,7 +156,7 @@ func translateDocBlockGroup(ctx context.Context, translator docsTranslator, chun
 	if err == nil {
 		err = validatePlaceholders(translated, placeholdersInText(normalizedSource, protectedPlaceholders))
 	}
-	if err != nil && os.Getenv("OPENCLAW_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
+	if err != nil && os.Getenv("CARAPACE_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
 		// Capture the rejected translator boundary before normalization or leaf fallback loses it.
 		log.Printf("docs-i18n: rejected raw chunk %s input=%q output=%q err=%v", chunkID, normalizedSource, translated, err)
 	}
@@ -179,7 +179,7 @@ func translateDocBlockGroup(ctx context.Context, translator docsTranslator, chun
 	if len(blocks) <= 1 {
 		if fallback, fallbackErr := translateDocLeafBlock(ctx, translator, chunkID, source, protectedPlaceholders, listPlaceholders, srcLang, tgtLang); fallbackErr == nil {
 			return fallback, nil
-		} else if os.Getenv("OPENCLAW_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
+		} else if os.Getenv("CARAPACE_DOCS_I18N_LOG_REJECTED_BODY") == "1" {
 			log.Printf("docs-i18n: chunk leaf-fallback failed %s err=%v", chunkID, fallbackErr)
 		}
 		if plan, ok := planSingletonDocChunkRetry(source, docsI18nDocChunkMaxBytes(), docsI18nDocChunkPromptBudget()); ok {
@@ -626,9 +626,9 @@ var contextualProductDestinations = map[string]contextualProductDestinationRule{
 	"Runway":      {hosts: []string{"runwayml.com"}, routes: []string{"/providers/runway", "/plugins/reference/runway"}},
 	"Synthetic":   {hosts: []string{"synthetic.new"}, routes: []string{"/providers/synthetic"}},
 	"Upstash Box": {hosts: []string{"upstash.com"}, routes: []string{"/install/upstash", "/docs/box"}},
-	"Lobster":     {routes: []string{"/tools/lobster", "/openclaw/lobster"}},
-	"Mantis":      {routes: []string{"/concepts/mantis", "/openclaw/mantis"}},
-	"Tokenjuice":  {routes: []string{"/tools/tokenjuice", "/openclaw/tokenjuice"}},
+	"Lobster":     {routes: []string{"/tools/lobster", "/carapace/lobster"}},
+	"Mantis":      {routes: []string{"/concepts/mantis", "/carapace/mantis"}},
+	"Tokenjuice":  {routes: []string{"/tools/tokenjuice", "/carapace/tokenjuice"}},
 }
 
 func destinationMentionsProductName(destination, name string) bool {
@@ -1081,7 +1081,7 @@ func lastNonEmptyLineIndex(lines []string) int {
 }
 
 func docsI18nDocChunkMaxBytes() int {
-	value := strings.TrimSpace(os.Getenv("OPENCLAW_DOCS_I18N_DOC_CHUNK_MAX_BYTES"))
+	value := strings.TrimSpace(os.Getenv("CARAPACE_DOCS_I18N_DOC_CHUNK_MAX_BYTES"))
 	if value == "" {
 		return defaultDocChunkMaxBytes
 	}
@@ -1093,7 +1093,7 @@ func docsI18nDocChunkMaxBytes() int {
 }
 
 func docsI18nDocChunkPromptBudget() int {
-	value := strings.TrimSpace(os.Getenv("OPENCLAW_DOCS_I18N_DOC_CHUNK_PROMPT_BUDGET"))
+	value := strings.TrimSpace(os.Getenv("CARAPACE_DOCS_I18N_DOC_CHUNK_PROMPT_BUDGET"))
 	if value == "" {
 		return defaultDocChunkPromptBudget
 	}

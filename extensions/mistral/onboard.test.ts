@@ -2,7 +2,7 @@
 import {
   expectProviderOnboardMergedLegacyConfig,
   expectProviderOnboardPrimaryAndFallbacks,
-} from "openclaw/plugin-sdk/provider-test-contracts";
+} from "carapace/plugin-sdk/provider-test-contracts";
 import { describe, expect, it } from "vitest";
 import { buildMistralModelDefinition, MISTRAL_DEFAULT_MODEL_REF } from "./model-definitions.js";
 import { applyMistralConfig, applyMistralProviderConfig } from "./onboard.js";

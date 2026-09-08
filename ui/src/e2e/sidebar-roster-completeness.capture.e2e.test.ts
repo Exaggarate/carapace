@@ -109,7 +109,7 @@ suite.define(() => {
     try {
       await installMockGateway(page, rosterMock());
       await page.goto(`${suite.server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.waitFor({ state: "visible", timeout: 10_000 });
       await sidebar
         .getByText(STALE_CATEGORY, { exact: false })
@@ -120,7 +120,7 @@ suite.define(() => {
       await captureUiProof(
         suite,
         page,
-        `roster-completeness-${process.env.OPENCLAW_ROSTER_PROOF ?? "after"}.png`,
+        `roster-completeness-${process.env.CARAPACE_ROSTER_PROOF ?? "after"}.png`,
       );
       // The section header renders from the group catalog either way; the proof
       // is that its rows arrived, which a truncated roster cannot deliver.

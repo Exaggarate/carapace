@@ -1,5 +1,5 @@
-import { decodeTextPrefix } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { decodeTextPrefix } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { formatErrorMessage } from "./errors.js";
 import { readResponseTextPrefix } from "./http-body.js";

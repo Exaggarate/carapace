@@ -5,7 +5,7 @@ import type {
   GatewayBindMode,
   GatewayTailscaleConfig,
 } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   formatUnsafeGatewayTailscaleNoAuthMessage,
   isUnsafeGatewayTailscaleNoAuth,
@@ -16,7 +16,7 @@ import {
   resolveGatewayAuth,
 } from "./auth.js";
 import { normalizeControlUiBasePath } from "./control-ui-shared.js";
-import { warnLegacyOpenClawEnvVars } from "./env-deprecation.js";
+import { warnLegacyCarapaceEnvVars } from "./env-deprecation.js";
 import { commitHooksConfigReload, resolveHooksConfig } from "./hooks.js";
 import {
   defaultGatewayBindMode,
@@ -44,7 +44,7 @@ export function assertGatewayRuntimeSecurityConfig(
     GatewayRuntimeConfig,
     "bindHost" | "controlUiEnabled" | "resolvedAuth" | "tailscaleMode"
   > & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     port: number;
   },
 ): void {
@@ -62,7 +62,7 @@ export function assertGatewayRuntimeSecurityConfig(
   assertGatewayAuthConfigured(resolvedAuth, cfg.gateway?.auth);
   if (tailscaleMode === "funnel" && authMode !== "password") {
     throw new Error(
-      "tailscale funnel requires gateway auth mode=password (set gateway.auth.password or OPENCLAW_GATEWAY_PASSWORD)",
+      "tailscale funnel requires gateway auth mode=password (set gateway.auth.password or CARAPACE_GATEWAY_PASSWORD)",
     );
   }
   if (isUnsafeGatewayTailscaleNoAuth({ authMode, tailscaleMode })) {
@@ -73,7 +73,7 @@ export function assertGatewayRuntimeSecurityConfig(
   }
   if (!isLoopbackHost(bindHost) && !hasSharedSecret && authMode !== "trusted-proxy") {
     throw new Error(
-      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token/password, or set OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD; legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored)`,
+      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token/password, or set CARAPACE_GATEWAY_TOKEN/CARAPACE_GATEWAY_PASSWORD; legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored)`,
     );
   }
   if (
@@ -97,7 +97,7 @@ export function assertGatewayRuntimeSecurityConfig(
 
 /** Resolves bind, auth, HTTP, Tailscale, and hook settings for one gateway start. */
 export async function resolveGatewayRuntimeConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   port: number;
   bind?: GatewayBindMode;
   host?: string;
@@ -105,7 +105,7 @@ export async function resolveGatewayRuntimeConfig(params: {
   auth?: GatewayAuthConfig;
   tailscale?: GatewayTailscaleConfig;
 }): Promise<GatewayRuntimeConfig> {
-  warnLegacyOpenClawEnvVars();
+  warnLegacyCarapaceEnvVars();
 
   // Tailscale serve/funnel hard-requires loopback.  When bind is not
   // explicitly set, we must resolve Tailscale mode *before* choosing the

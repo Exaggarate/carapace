@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 /// iOS Settings-style icon: white glyph on a solid rounded-square, sized for a List row.
@@ -42,7 +42,7 @@ extension SettingsProTab {
                 route: .about)
         } header: {
             Text("Device")
-                .font(OpenClawType.captionSemiBold)
+                .font(CarapaceType.captionSemiBold)
                 .foregroundStyle(.secondary)
         }
     }
@@ -56,7 +56,7 @@ extension SettingsProTab {
         NavigationLink(value: route) {
             Label {
                 Text(title)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             } icon: {
                 SettingsIcon(systemName: icon, color: iconColor)
             }
@@ -80,7 +80,7 @@ extension SettingsProTab {
                 self.licensesDestination
             }
         }
-        .font(OpenClawType.body)
+        .font(CarapaceType.body)
         .navigationTitle(title(for: route))
         .navigationBarTitleDisplayMode(.inline)
         .task(id: route) {
@@ -90,7 +90,7 @@ extension SettingsProTab {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text(title(for: route))
-                    .font(OpenClawType.headline)
+                    .font(CarapaceType.headline)
                     .foregroundStyle(.primary)
             }
             if route == .gateway {
@@ -99,14 +99,14 @@ extension SettingsProTab {
                         self.openGatewayQRScanner()
                     } label: {
                         Image(systemName: "qrcode.viewfinder")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                     .disabled(self.connectingGateway != nil)
                     .accessibilityLabel("Scan QR")
                 }
             }
             if let headerSidebarAction {
-                OpenClawSidebarToolbarItem(
+                CarapaceSidebarToolbarItem(
                     action: headerSidebarAction,
                     placement: .topBarLeading)
             }
@@ -124,14 +124,14 @@ extension SettingsProTab {
                     Task { await self.reconnectGateway() }
                 } label: {
                     Label("Reconnect", systemImage: "arrow.triangle.2.circlepath")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
                 .disabled(self.isReconnectingGateway || self.appModel.isAppleReviewDemoModeEnabled)
                 Button {
                     Task { await self.runDiagnostics() }
                 } label: {
                     Label("Diagnose", systemImage: "cross.case")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
                 .disabled(self.isRefreshingGateway)
             } footer: {
@@ -167,10 +167,10 @@ extension SettingsProTab {
                 Section("Upgrade access") {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("This phone has limited Gateway access.")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                         Text(
-                            "Use a secure wss:// or Tailscale Serve Gateway, then scan a full-access setup code from the Control UI or openclaw qr and reconnect to enable settings and upgrades.") // swiftlint:disable:this line_length
-                            .font(OpenClawType.caption) // Keep the native localization key contiguous.
+                            "Use a secure wss:// or Tailscale Serve Gateway, then scan a full-access setup code from the Control UI or carapace qr and reconnect to enable settings and upgrades.") // swiftlint:disable:this line_length
+                            .font(CarapaceType.caption) // Keep the native localization key contiguous.
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -178,7 +178,7 @@ extension SettingsProTab {
                         self.openGatewayQRScanner()
                     } label: {
                         Label("Scan Full-Access Code", systemImage: "qrcode.viewfinder")
-                            .font(OpenClawType.body)
+                            .font(CarapaceType.body)
                     }
                 }
             }
@@ -188,7 +188,7 @@ extension SettingsProTab {
             self.manualGatewayCard
             self.gatewayAdvancedCard
         }
-        .font(OpenClawType.body)
+        .font(CarapaceType.body)
     }
 
     private var gatewayStatusCard: some View {
@@ -227,8 +227,8 @@ extension SettingsProTab {
                     : (self.pendingApprovalCount == 0
                         ? .verbatim(String(localized: "clear"))
                         : .verbatim(self.approvalWaitingText)),
-                color: self.notificationsNeedAttention ? OpenClawBrand.warn :
-                    (self.pendingApprovalCount == 0 ? OpenClawBrand.ok : OpenClawBrand.warn))
+                color: self.notificationsNeedAttention ? CarapaceBrand.warn :
+                    (self.pendingApprovalCount == 0 ? CarapaceBrand.ok : CarapaceBrand.warn))
 
             if self.notificationsNeedAttention {
                 self.approvalNotificationsWarningCard
@@ -248,21 +248,21 @@ extension SettingsProTab {
                     ? String(
                         localized: "Relay remains available; direct mode adds an independent Gateway node.")
                     : String(
-                        localized: "Install the OpenClaw watch app before enabling direct mode.")),
+                        localized: "Install the Carapace watch app before enabling direct mode.")),
                 value: .verbatim(
                     watchStatus.reachable
                         ? String(localized: "Reachable")
                         : (watchStatus.appInstalled
                             ? String(localized: "Installed")
                             : String(localized: "Unavailable"))),
-                color: watchStatus.appInstalled ? OpenClawBrand.ok : OpenClawBrand.warn)
+                color: watchStatus.appInstalled ? CarapaceBrand.ok : CarapaceBrand.warn)
 
             Section {
                 NavigationLink {
                     WatchMessageJournalView()
                 } label: {
                     Label("Message Delivery", systemImage: "bubble.left.and.text.bubble.right")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
             }
 
@@ -272,7 +272,7 @@ extension SettingsProTab {
                 } label: {
                     Label {
                         Text("Connect Apple Watch")
-                            .font(OpenClawType.body)
+                            .font(CarapaceType.body)
                     } icon: {
                         Image(systemName: "applewatch")
                     }
@@ -285,7 +285,7 @@ extension SettingsProTab {
 
                 if let statusText = self.watchDirectSetupStatusText {
                     Text(statusText)
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -297,7 +297,7 @@ extension SettingsProTab {
                     The microphone starts only when you tap Start on the watch. \
                     A reachable secure Gateway URL is required away from the iPhone.
                     """)
-                    .font(OpenClawType.footnote)
+                    .font(CarapaceType.footnote)
             }
 
             Section("Direct node features") {
@@ -311,9 +311,9 @@ extension SettingsProTab {
         Section {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Notifications are off")
-                    .font(OpenClawType.subheadSemiBold)
-                Text("Enable Notifications to receive approval alerts while OpenClaw is not open.")
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.subheadSemiBold)
+                Text("Enable Notifications to receive approval alerts while Carapace is not open.")
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -321,7 +321,7 @@ extension SettingsProTab {
                 self.openNotificationsRouteFromApprovals()
             } label: {
                 Label("Open Notifications", systemImage: "bell.badge")
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
             }
         }
     }
@@ -336,11 +336,11 @@ extension SettingsProTab {
                     } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.prompt.commandPreview ?? item.prompt.commandText)
-                                .font(OpenClawType.body)
+                                .font(CarapaceType.body)
                                 .foregroundStyle(.primary)
                                 .lineLimit(2)
                             Text(item.prompt.gatewayStableID)
-                                .font(OpenClawType.caption)
+                                .font(CarapaceType.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
@@ -360,27 +360,27 @@ extension SettingsProTab {
                 if let warningText = pendingApproval.warningText {
                     Label {
                         Text(warningText)
-                            .font(OpenClawType.caption)
+                            .font(CarapaceType.caption)
                     } icon: {
                         Image(systemName: "exclamationmark.triangle.fill")
                     }
-                    .foregroundStyle(OpenClawBrand.warn)
+                    .foregroundStyle(CarapaceBrand.warn)
                     .fixedSize(horizontal: false, vertical: true)
                 }
                 if let errorText = self.appModel.pendingExecApprovalPromptErrorText {
                     Text(errorText)
-                        .font(OpenClawType.caption)
-                        .foregroundStyle(OpenClawBrand.danger)
+                        .font(CarapaceType.caption)
+                        .foregroundStyle(CarapaceBrand.danger)
                 }
                 if let resolvedText = self.appModel.pendingExecApprovalPromptResolvedText {
                     Text(resolvedText)
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(self.approvalOutcomeColor)
                     Button {
                         self.appModel.dismissPendingExecApprovalPrompt()
                     } label: {
                         Label("Dismiss", systemImage: "xmark")
-                            .font(OpenClawType.body)
+                            .font(CarapaceType.body)
                     }
                 } else {
                     if pendingApproval.allowsAllowOnce {
@@ -388,7 +388,7 @@ extension SettingsProTab {
                             Task { await self.appModel.resolvePendingExecApprovalPrompt(decision: "allow-once") }
                         } label: {
                             Label("Allow Once", systemImage: "checkmark")
-                                .font(OpenClawType.body)
+                                .font(CarapaceType.body)
                         }
                         .disabled(self.appModel.pendingExecApprovalPromptResolving)
                     }
@@ -397,7 +397,7 @@ extension SettingsProTab {
                             Task { await self.appModel.resolvePendingExecApprovalPrompt(decision: "allow-always") }
                         } label: {
                             Label("Allow Always", systemImage: "checkmark.shield")
-                                .font(OpenClawType.body)
+                                .font(CarapaceType.body)
                         }
                         .disabled(self.appModel.pendingExecApprovalPromptResolving)
                     }
@@ -406,7 +406,7 @@ extension SettingsProTab {
                             Task { await self.appModel.resolvePendingExecApprovalPrompt(decision: "deny") }
                         } label: {
                             Label("Deny", systemImage: "xmark")
-                                .font(OpenClawType.body)
+                                .font(CarapaceType.body)
                         }
                         .disabled(self.appModel.pendingExecApprovalPromptResolving)
                     }
@@ -417,7 +417,7 @@ extension SettingsProTab {
                             self.appModel.dismissPendingExecApprovalPrompt()
                         } label: {
                             Label("Dismiss", systemImage: "xmark")
-                                .font(OpenClawType.body)
+                                .font(CarapaceType.body)
                         }
                     }
                 }
@@ -427,14 +427,14 @@ extension SettingsProTab {
                 Label {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("No approvals waiting")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                         Text(self.approvalEmptyDetail)
-                            .font(OpenClawType.caption)
+                            .font(CarapaceType.caption)
                             .foregroundStyle(.secondary)
                     }
                 } icon: {
                     Image(systemName: "checkmark.shield.fill")
-                        .foregroundStyle(OpenClawBrand.ok)
+                        .foregroundStyle(CarapaceBrand.ok)
                 }
             }
         }
@@ -443,11 +443,11 @@ extension SettingsProTab {
     private var approvalOutcomeColor: Color {
         switch self.appModel.pendingExecApprovalPromptOutcome?.tone {
         case .success:
-            OpenClawBrand.ok
+            CarapaceBrand.ok
         case .danger:
-            OpenClawBrand.danger
+            CarapaceBrand.danger
         case .warning:
-            OpenClawBrand.warn
+            CarapaceBrand.warn
         case .neutral, nil:
             .secondary
         }
@@ -460,14 +460,14 @@ extension SettingsProTab {
                 title: "Health Check",
                 detail: "Run app, permission, and gateway-adjacent checks without editing setup.",
                 value: .verbatim(self.diagnosticsHealthValue),
-                color: self.gatewayDiagnosticConnected ? OpenClawBrand.ok : OpenClawBrand.warn)
+                color: self.gatewayDiagnosticConnected ? CarapaceBrand.ok : CarapaceBrand.warn)
 
             Section {
                 Button {
                     Task { await self.runDiagnostics() }
                 } label: {
                     Label("Run Diagnostics", systemImage: "cross.case")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
                 .disabled(self.isRefreshingGateway)
             }
@@ -481,7 +481,7 @@ extension SettingsProTab {
                     value: .verbatim(DeviceInfoHelper.platformStringForDisplay()))
                 SettingsDetailRow(
                     "App",
-                    value: .verbatim(DeviceInfoHelper.openClawVersionString()))
+                    value: .verbatim(DeviceInfoHelper.carapaceVersionString()))
                 SettingsDetailRow("Model", value: .verbatim(DeviceInfoHelper.modelIdentifier()))
             }
 
@@ -493,7 +493,7 @@ extension SettingsProTab {
     var gatewayActionStatusView: some View {
         if let gatewayActionStatusText {
             Text(verbatim: gatewayActionStatusText)
-                .font(OpenClawType.footnote)
+                .font(CarapaceType.footnote)
                 .foregroundStyle(.secondary)
         }
     }
@@ -505,7 +505,7 @@ extension SettingsProTab {
                 "No Licenses Bundled",
                 systemImage: "doc.text",
                 description: Text("License files are not available in this build."))
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
         } else {
             Section {
                 ForEach(documents) { document in
@@ -514,15 +514,15 @@ extension SettingsProTab {
                     } label: {
                         Label {
                             Text(document.title)
-                                .font(OpenClawType.subhead)
+                                .font(CarapaceType.subhead)
                         } icon: {
                             SettingsIcon(systemName: "doc.text", color: .gray)
                         }
                     }
                 }
             } footer: {
-                Text("OpenClaw appreciates its partners in the open-source community.")
-                    .font(OpenClawType.footnote)
+                Text("Carapace appreciates its partners in the open-source community.")
+                    .font(CarapaceType.footnote)
             }
             .accessibilityIdentifier("settings-licenses-list")
         }
@@ -540,7 +540,7 @@ extension SettingsProTab {
         Button(action: action) {
             HStack {
                 Label(title, systemImage: icon)
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                 Spacer()
                 if isBusy {
                     ProgressView().controlSize(.small)
@@ -558,13 +558,13 @@ extension SettingsProTab {
         Group {
             Section {
                 VStack(spacing: 12) {
-                    OpenClawProMark(size: 96, shadowRadius: 18, interactive: true)
+                    CarapaceProMark(size: 96, shadowRadius: 18, interactive: true)
                         .accessibilityHidden(true)
                     VStack(spacing: 2) {
-                        Text("OpenClaw")
-                            .font(OpenClawType.title2SemiBold)
+                        Text("Carapace")
+                            .font(CarapaceType.title2SemiBold)
                         Text("Personal AI on your devices")
-                            .font(OpenClawType.footnote)
+                            .font(CarapaceType.footnote)
                             .foregroundStyle(.secondary)
                         SettingsBuildMetadataStrip(metadata: DeviceInfoHelper.buildMetadata())
                             .padding(.top, 8)
@@ -590,31 +590,31 @@ extension SettingsProTab {
                     title: "Website",
                     icon: "globe",
                     color: .blue,
-                    url: URL(string: "https://openclaw.ai")!)
+                    url: URL(string: "https://github.com/Exaggarate/carapace")!)
                 self.aboutLinkRow(
                     title: "Docs",
                     icon: "book.fill",
                     color: .orange,
-                    url: URL(string: "https://docs.openclaw.ai")!)
+                    url: URL(string: "https://github.com/Exaggarate/carapace")!)
                 self.aboutLinkRow(
                     title: "GitHub",
                     icon: "chevron.left.slash.chevron.right",
                     color: .gray,
-                    url: URL(string: "https://github.com/openclaw/openclaw")!)
+                    url: URL(string: "https://github.com/Exaggarate/carapace")!)
                 self.aboutLinkRow(
                     title: "Discord",
                     icon: "bubble.left.and.bubble.right.fill",
                     color: .indigo,
                     url: URL(string: "https://discord.gg/clawd")!)
             } footer: {
-                Text("© 2026 OpenClaw Foundation — MIT License.")
-                    .font(OpenClawType.footnote)
+                Text("© 2026 Carapace Foundation — MIT License.")
+                    .font(CarapaceType.footnote)
             }
         }
     }
 
     /// About link row with explicit branded label; shorthand `Link("Title", ...)`
-    /// would bypass the typography audit and OpenClawType styling.
+    /// would bypass the typography audit and CarapaceType styling.
     func aboutLinkRow(
         title: LocalizedStringKey,
         icon: String,
@@ -625,7 +625,7 @@ extension SettingsProTab {
             HStack {
                 Label {
                     Text(title)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .foregroundStyle(.primary)
                 } icon: {
                     SettingsIcon(systemName: icon, color: color)
@@ -643,7 +643,7 @@ extension SettingsProTab {
     var agentSelectionCard: some View {
         Section {
             Picker("Default Agent", selection: self.$selectedAgentPickerId) {
-                Text("Default").font(OpenClawType.body).tag("")
+                Text("Default").font(CarapaceType.body).tag("")
                 let defaultId = (self.appModel.gatewayDefaultAgentId ?? "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 ForEach(
@@ -651,13 +651,13 @@ extension SettingsProTab {
                     id: \.id)
                 { agent in
                     let name = (agent.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    Text(name.isEmpty ? agent.id : name).font(OpenClawType.body).tag(agent.id)
+                    Text(name.isEmpty ? agent.id : name).font(CarapaceType.body).tag(agent.id)
                 }
             }
-            .font(OpenClawType.body)
+            .font(CarapaceType.body)
         } footer: {
             Text("Used for new Chat and Talk sessions.")
-                .font(OpenClawType.footnote)
+                .font(CarapaceType.footnote)
         }
     }
 
@@ -668,21 +668,21 @@ extension SettingsProTab {
             self.gatewayActionButton(
                 title: "Scan QR",
                 icon: "qrcode.viewfinder",
-                color: OpenClawBrand.accent,
+                color: CarapaceBrand.accent,
                 isBusy: false,
                 isDisabled: self.connectingGateway != nil)
             {
                 self.openGatewayQRScanner()
             }
             TextField("Paste setup code", text: self.$setupCode)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .disabled(self.connectingGateway != nil)
             self.gatewayActionButton(
                 title: "Connect",
                 icon: "bolt.horizontal.circle",
-                color: OpenClawBrand.accent,
+                color: CarapaceBrand.accent,
                 isBusy: self.setupAttemptID != nil,
                 isDisabled: !self.canApplyGatewaySetup || self.connectingGateway != nil)
             {
@@ -690,7 +690,7 @@ extension SettingsProTab {
             }
             if self.gatewayController.gateways.isEmpty {
                 Text("No gateways found yet. Use manual setup if Bonjour is blocked.")
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(self.gatewayController.gateways) { gateway in
@@ -699,13 +699,13 @@ extension SettingsProTab {
             }
         } header: {
             Text("Add Gateway")
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
         } footer: {
             if let warning = self.tailnetWarningText {
-                Text(warning).font(OpenClawType.footnote).foregroundStyle(OpenClawBrand.warn)
+                Text(warning).font(CarapaceType.footnote).foregroundStyle(CarapaceBrand.warn)
             } else if let status = self.setupStatusLine {
                 Text(status)
-                    .font(OpenClawType.footnote)
+                    .font(CarapaceType.footnote)
             }
         }
     }
@@ -714,7 +714,7 @@ extension SettingsProTab {
         Section {
             if self.gatewayRegistry.entries.isEmpty {
                 Text("Pair a gateway to make it available here.")
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(self.gatewayRegistry.entries) { entry in
@@ -723,10 +723,10 @@ extension SettingsProTab {
             }
         } header: {
             Text("Paired Gateways")
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
         } footer: {
             Text("Keep multiple gateways connected and switch which one is in focus.")
-                .font(OpenClawType.footnote)
+                .font(CarapaceType.footnote)
         }
     }
 
@@ -744,10 +744,10 @@ extension SettingsProTab {
             } label: {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(entry.name)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .foregroundStyle(.primary)
                     Text(self.gatewayEndpointSummary(entry))
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
@@ -760,8 +760,8 @@ extension SettingsProTab {
                     .controlSize(.small)
             } else if isActive {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(OpenClawType.subheadSemiBold)
-                    .foregroundStyle(OpenClawBrand.accent)
+                    .font(CarapaceType.subheadSemiBold)
+                    .foregroundStyle(CarapaceBrand.accent)
                     .accessibilityLabel("Focused Gateway")
             } else {
                 Button {
@@ -773,8 +773,8 @@ extension SettingsProTab {
                     }
                 } label: {
                     Image(systemName: keepsConnected ? "bolt.horizontal.circle.fill" : "bolt.horizontal.circle")
-                        .font(OpenClawType.subheadSemiBold)
-                        .foregroundStyle(keepsConnected ? OpenClawBrand.accent : .secondary)
+                        .font(CarapaceType.subheadSemiBold)
+                        .foregroundStyle(keepsConnected ? CarapaceBrand.accent : .secondary)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(keepsConnected ? "Disconnect Gateway" : "Keep Gateway Connected")
@@ -787,7 +787,7 @@ extension SettingsProTab {
             } label: {
                 Label {
                     Text("Forget")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(CarapaceType.captionSemiBold)
                 } icon: {
                     Image(systemName: "trash")
                 }
@@ -799,7 +799,7 @@ extension SettingsProTab {
             } label: {
                 Label {
                     Text("Forget Gateway")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 } icon: {
                     Image(systemName: "trash")
                 }
@@ -813,9 +813,9 @@ extension SettingsProTab {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: gateway.name)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                     Text(verbatim: self.gatewayDetailLines(gateway).joined(separator: " • "))
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
@@ -828,22 +828,22 @@ extension SettingsProTab {
                             ProgressView().controlSize(.small)
                         } else {
                             Text(availability.actionTitle)
-                                .font(OpenClawType.captionSemiBold)
+                                .font(CarapaceType.captionSemiBold)
                         }
                     }
-                    .font(OpenClawType.captionSemiBold)
+                    .font(CarapaceType.captionSemiBold)
                     .buttonStyle(.bordered)
                     .disabled(self.connectingGateway != nil)
                 } else {
                     Text(availability.actionTitle)
-                        .font(OpenClawType.captionSemiBold)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(CarapaceType.captionSemiBold)
+                        .foregroundStyle(CarapaceBrand.warn)
                 }
             }
 
             if let guidanceText = availability.guidanceText {
                 Text(guidanceText)
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -854,34 +854,34 @@ extension SettingsProTab {
         Section("Manual Gateway") {
             self.settingsToggle("Use Manual Gateway", isOn: self.manualGatewayEnabledBinding)
             TextField("Host", text: self.manualHostBinding)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
             TextField("Port", text: self.manualPortBinding)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
                 .keyboardType(.numberPad)
             Picker(selection: self.manualGatewayTLSBinding) {
                 Text("Unencrypted")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(CarapaceType.captionSemiBold)
                     .tag(false)
                 Text("Secure (TLS)")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(CarapaceType.captionSemiBold)
                     .tag(true)
             } label: {
                 Text("Connection security")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(CarapaceType.captionSemiBold)
             }
             .pickerStyle(.segmented)
             .disabled(self.manualGatewayTransport.requiresTLS)
             if let helperText = self.manualGatewayTransport.helperText {
                 Text(helperText)
-                    .font(OpenClawType.footnote)
+                    .font(CarapaceType.footnote)
                     .foregroundStyle(.secondary)
             }
             self.gatewayActionButton(
                 title: "Connect Manual",
                 icon: "network",
-                color: OpenClawBrand.accent,
+                color: CarapaceBrand.accent,
                 isBusy: self.connectingGateway == .manual,
                 isDisabled: self.manualGatewayHost.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     || !self.manualPortIsValid)
@@ -918,14 +918,14 @@ extension SettingsProTab {
                     GatewayCustomHeadersSettingsView(gatewayStableID: headersStableID)
                 } label: {
                     Text("Custom Headers")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
             }
             Button(role: .destructive) {
                 self.showResetOnboardingAlert = true
             } label: {
                 Label("Reset Onboarding", systemImage: "arrow.counterclockwise")
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
             }
         }
     }
@@ -936,20 +936,20 @@ extension SettingsProTab {
     {
         ZStack(alignment: .leading) {
             SecureField("", text: text)
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .accessibilityLabel(Text(placeholder))
             if text.wrappedValue.isEmpty {
                 Text(placeholder)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 8)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
         }
-        .font(OpenClawType.subhead)
+        .font(CarapaceType.subhead)
     }
 
     var diagnosticsAdvancedCard: some View {
@@ -970,7 +970,7 @@ extension SettingsProTab {
     var deviceIdentityCard: some View {
         Section("Device") {
             TextField("Device Name", text: self.$displayName)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
             SettingsDetailRow("Instance ID", value: .verbatim(self.instanceId))
         }
     }
@@ -986,9 +986,9 @@ extension SettingsProTab {
         } label: {
             HStack {
                 Text(title)
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                 Spacer(minLength: 8)
-                OpenClawToggleIndicator(isOn: isOn.wrappedValue)
+                CarapaceToggleIndicator(isOn: isOn.wrappedValue)
             }
             .contentShape(Rectangle())
         }

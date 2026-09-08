@@ -1,9 +1,9 @@
-import { oversizedJsonResponse } from "openclaw/plugin-sdk/test-fixtures";
+import { oversizedJsonResponse } from "carapace/plugin-sdk/test-fixtures";
 // Qwen tests cover media understanding provider plugin behavior.
 import {
   createRequestCaptureJsonFetch,
   installPinnedHostnameTestHooks,
-} from "openclaw/plugin-sdk/test-media-understanding";
+} from "carapace/plugin-sdk/test-media-understanding";
 import { describe, expect, it } from "vitest";
 import { buildQwenMediaUnderstandingProvider } from "./media-understanding-provider.js";
 

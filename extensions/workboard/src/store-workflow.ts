@@ -7,10 +7,10 @@ import type {
   WorkboardMetadata,
   WorkboardNotification,
   WorkboardRunAttempt,
-} from "@openclaw/workboard-contract";
-import { isFutureDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "@carapace/workboard-contract";
+import { isFutureDateTimestampMs } from "carapace/plugin-sdk/number-runtime";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   assertCanMutateClaimedCard,
   cardBoardId,

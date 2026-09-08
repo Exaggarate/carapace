@@ -1,28 +1,28 @@
 // Openrouter provider module implements model/runtime integration.
-import { normalizeOpenRouterModelPricing } from "openclaw/plugin-sdk/model-catalog-pricing";
+import { normalizeOpenRouterModelPricing } from "carapace/plugin-sdk/model-catalog-pricing";
 import {
   buildLiveModelProviderConfig,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   normalizeBaseUrl,
   resolveProviderHttpRequestConfig,
   sanitizeConfiguredModelProviderRequest,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asOptionalRecord,
   asPositiveSafeInteger,
   filterStringEntries,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { OPENROUTER_BASE_URL } from "./provider-defaults.js";
 
 export { OPENROUTER_BASE_URL } from "./provider-defaults.js";

@@ -1,8 +1,8 @@
 // Builds plugin API objects from config, registries, and runtime helpers.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { attachPluginApiFacades, type OpenClawPluginApiWithoutFacades } from "./api-facades.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { attachPluginApiFacades, type CarapacePluginApiWithoutFacades } from "./api-facades.js";
 import type { PluginRuntime } from "./runtime/types.js";
-import type { OpenClawPluginApi, PluginLogger } from "./types.js";
+import type { CarapacePluginApi, PluginLogger } from "./types.js";
 
 type BuildPluginApiParams = {
   id: string;
@@ -11,13 +11,13 @@ type BuildPluginApiParams = {
   description?: string;
   source: string;
   rootDir?: string;
-  registrationMode: OpenClawPluginApi["registrationMode"];
-  config: OpenClawConfig;
+  registrationMode: CarapacePluginApi["registrationMode"];
+  config: CarapaceConfig;
   pluginConfig?: Record<string, unknown>;
   runtime: PluginRuntime;
   logger: PluginLogger;
   resolvePath: (input: string) => string;
-  handlers?: Partial<Pick<OpenClawPluginApi, keyof typeof noops>>;
+  handlers?: Partial<Pick<CarapacePluginApi, keyof typeof noops>>;
 };
 
 const noops = {
@@ -97,7 +97,7 @@ const noops = {
   registerMemoryPromptPreparation: () => {},
   registerMemoryCorpusSupplement: () => {},
   on: () => {},
-} satisfies Partial<OpenClawPluginApi>;
+} satisfies Partial<CarapacePluginApi>;
 
 export function createUnavailableRuntime(
   registrationMode: "cli-metadata" | "setup-only",
@@ -121,11 +121,11 @@ export function createUnavailableRuntime(
   });
 }
 
-export function buildPluginApi(params: BuildPluginApiParams): OpenClawPluginApi {
+export function buildPluginApi(params: BuildPluginApiParams): CarapacePluginApi {
   const handlers = params.handlers ?? {};
   // Keep explicit lookups for inherited/nullish handlers; capture CLI once for both entrypoints.
   const registerCli = handlers.registerCli ?? noops.registerCli;
-  const api: OpenClawPluginApiWithoutFacades = {
+  const api: CarapacePluginApiWithoutFacades = {
     id: params.id,
     name: params.name,
     version: params.version,

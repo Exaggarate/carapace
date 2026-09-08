@@ -6,7 +6,7 @@ import {
   resolveSqliteScope,
   toDatabaseOptions,
 } from "../../config/sessions/session-accessor.sqlite-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import type { PluginDoctorRepairAuthority } from "../../infra/state-migrations.types.js";
 import type {
@@ -14,11 +14,11 @@ import type {
   PluginDoctorStateMigrationContext,
 } from "../../plugins/doctor-contract-module.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  openExistingOpenClawStateDatabaseReadOnly,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openExistingCarapaceStateDatabaseReadOnly,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   acpSessionRowMatchesEntry,
   buildAcpDatabaseSessionKey,
@@ -29,12 +29,12 @@ import {
 import { resolveSessionStorePathForAcp } from "./session-meta-store.js";
 import { rowToAcpSessionMeta } from "./session-meta.js";
 
-type DoctorAcpScope = { config: OpenClawConfig; env: NodeJS.ProcessEnv; pluginId: string };
+type DoctorAcpScope = { config: CarapaceConfig; env: NodeJS.ProcessEnv; pluginId: string };
 
 // Canonical metadata plus a current binding proves free harness namespaces. Configured
 // binding keys still belong to the roster, even when their metadata survives retirement.
 function isRetiredClaimOwner(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: { agentId: string; sessionKey: string },
 ): boolean {
   const parsed = parseAgentSessionKey(target.sessionKey);
@@ -72,7 +72,7 @@ export async function inspectAcpSessionClaimsForDoctor(
   const claims: PluginDoctorAcpSessionClaim[] = [];
   const incomplete: string[] = [];
   try {
-    const database = await openExistingOpenClawStateDatabaseReadOnly({ env: scope.env });
+    const database = await openExistingCarapaceStateDatabaseReadOnly({ env: scope.env });
     if (!database) {
       return { claims, incomplete };
     }
@@ -135,8 +135,8 @@ export function updateAcpSessionIdentityForDoctor(
   const options = toDatabaseOptions(resolved);
   // Open the read handle before the commit section; the maintenance owner excludes
   // writers while the transaction rereads the exact entry binding and ACP row.
-  const updated = withOpenClawAgentDatabaseReadOnly((agentDatabase) => {
-    runOpenClawStateWriteTransaction(
+  const updated = withCarapaceAgentDatabaseReadOnly((agentDatabase) => {
+    runCarapaceStateWriteTransaction(
       (database) => {
         authority.assertOwnedInTransaction(database.db);
         const row = selectAcpSessionRow(database.db, key);

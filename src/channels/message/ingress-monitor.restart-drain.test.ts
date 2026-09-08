@@ -11,7 +11,7 @@ import {
   markGatewayRestartDraining,
   resetGatewayWorkAdmission,
 } from "../../process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   createChannelIngressMonitor,
   type ChannelIngressMonitorLifecycle,
@@ -32,13 +32,13 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
   resetGatewayWorkAdmission();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function withQueue(
   run: (queue: ChannelIngressQueue<StoredEvent>) => Promise<void>,
 ): Promise<void> {
-  const stateDir = tempDirs.make("openclaw-ingress-restart-lifecycle-");
+  const stateDir = tempDirs.make("carapace-ingress-restart-lifecycle-");
   await run(createChannelIngressQueue({ channelId: "test", accountId: "a", stateDir }));
 }
 
@@ -142,7 +142,7 @@ function runRestartDrainFixture(stateDir: string): Promise<RestartDrainProof> {
 }
 
 it("reaches ingress idle after the Gateway commits restart drain", async () => {
-  const stateDir = tempDirs.make("openclaw-ingress-gateway-restart-");
+  const stateDir = tempDirs.make("carapace-ingress-gateway-restart-");
   const proof = await runRestartDrainFixture(stateDir);
   expect(proof).toMatchObject({
     restart: "emitted",

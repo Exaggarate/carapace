@@ -1,33 +1,33 @@
 import fs from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resetLogger } from "../logging/logger.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { startGatewayServerCore as startGatewayServer } from "./server-start.js";
 import { connectGatewayClient, disconnectGatewayClient } from "./test-helpers.e2e.js";
 
 describe("config security policy before persistence", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
   let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
   let client: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "gateway-config-security-policy",
       env: {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
         // Minimal boot skips the managed writer subscription that owns pre-commit validation.
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
     });
   });
@@ -54,7 +54,7 @@ describe("config security policy before persistence", () => {
     async ({ method, disableUi }) => {
       const token = "config-security-policy-test-token";
       await state.writeText("control-ui/index.html", "<!doctype html><title>Control UI</title>");
-      const initialConfig: OpenClawConfig = {
+      const initialConfig: CarapaceConfig = {
         agents: { defaults: { workspace: state.workspaceDir } },
         logging: { level: "silent", consoleLevel: "silent" },
         gateway: {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Boots the OpenClaw CLI entry point under Node.
-// CLI process entrypoint for OpenClaw command execution.
+// Boots the Carapace CLI entry point under Node.
+// CLI process entrypoint for Carapace command execution.
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { format } from "node:util";
@@ -21,23 +21,23 @@ import {
 } from "./cli/startup-trace.js";
 import { normalizeWindowsArgv } from "./cli/windows-argv.js";
 import {
-  enableOpenClawCompileCache,
+  enableCarapaceCompileCache,
   resolveEntryInstallRoot,
-  respawnWithoutOpenClawCompileCacheIfNeeded,
+  respawnWithoutCarapaceCompileCacheIfNeeded,
 } from "./entry.compile-cache.js";
 import { installDistEsmResolveFastPath } from "./entry.esm-resolve-fast-path.js";
 import { buildCliRespawnPlan, runCliRespawnPlan } from "./entry.respawn.js";
 import { tryHandleRootVersionFastPath } from "./entry.version-fast-path.js";
 import { normalizeEnv } from "./infra/env.js";
 import { isMainModule } from "./infra/is-main.js";
-import { ensureOpenClawExecMarkerOnProcess } from "./infra/openclaw-exec-env.js";
+import { ensureCarapaceExecMarkerOnProcess } from "./infra/carapace-exec-env.js";
 import { installProcessWarningFilter } from "./infra/warning-filter.js";
 import { defaultRuntime } from "./runtime.js";
 
 const ENTRY_WRAPPER_PAIRS = [
-  { wrapperBasename: "openclaw.mjs", entryBasename: "entry.js" },
-  { wrapperBasename: "openclaw.mjs", entryBasename: "entry.mjs" },
-  { wrapperBasename: "openclaw.js", entryBasename: "entry.js" },
+  { wrapperBasename: "carapace.mjs", entryBasename: "entry.js" },
+  { wrapperBasename: "carapace.mjs", entryBasename: "entry.mjs" },
+  { wrapperBasename: "carapace.js", entryBasename: "entry.js" },
 ] as const;
 
 const loadRootHelpLiveConfigModule = async () => await import("./cli/root-help-live-config.js");
@@ -56,7 +56,7 @@ async function writeCapturedCliArgumentError(message: string): Promise<void> {
   if (isJsonOutputModeActive(process.argv)) {
     defaultRuntime.writeJson(formatCliJsonFailure(message));
   }
-  console.error(`[openclaw] ${message}`);
+  console.error(`[carapace] ${message}`);
 }
 
 async function prepareCliDiagnosticBlockWriter(): Promise<
@@ -120,8 +120,8 @@ if (
   const entryFile = fileURLToPath(import.meta.url);
   const installRoot = resolveEntryInstallRoot(entryFile);
   installDistEsmResolveFastPath(import.meta.url);
-  process.title = "openclaw";
-  ensureOpenClawExecMarkerOnProcess();
+  process.title = "carapace";
+  ensureCarapaceExecMarkerOnProcess();
   installProcessWarningFilter();
   normalizeEnv();
   process.argv = normalizeWindowsArgv(process.argv);
@@ -139,7 +139,7 @@ if (
   assertSupportedRuntime();
   gatewayEntryStartupTrace.mark("bootstrap");
 
-  const waitingForCompileCacheRespawn = await respawnWithoutOpenClawCompileCacheIfNeeded({
+  const waitingForCompileCacheRespawn = await respawnWithoutCarapaceCompileCacheIfNeeded({
     currentFile: entryFile,
     installRoot,
     prepareWriteError: async () => {
@@ -150,12 +150,12 @@ if (
     },
   });
   if (!waitingForCompileCacheRespawn) {
-    enableOpenClawCompileCache({
+    enableCarapaceCompileCache({
       installRoot,
     });
 
     if (shouldForceReadOnlyAuthStore(process.argv)) {
-      process.env.OPENCLAW_AUTH_STORE_READONLY = "1";
+      process.env.CARAPACE_AUTH_STORE_READONLY = "1";
     }
 
     if (process.argv.includes("--no-color")) {
@@ -224,7 +224,7 @@ export async function tryHandleRootHelpFastPath(
 ): Promise<boolean> {
   const env = deps.env ?? process.env;
   if (
-    env.OPENCLAW_DISABLE_CLI_STARTUP_HELP_FAST_PATH === "1" ||
+    env.CARAPACE_DISABLE_CLI_STARTUP_HELP_FAST_PATH === "1" ||
     resolveCliContainerTarget(argv, env)
   ) {
     return false;
@@ -237,7 +237,7 @@ export async function tryHandleRootHelpFastPath(
     (async (error: unknown) => {
       const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
       const writeError = await prepareCliDiagnosticBlockWriter();
-      await writeError(`[openclaw] Failed to display help: ${detail}\n`);
+      await writeError(`[carapace] Failed to display help: ${detail}\n`);
       process.exit(1);
     });
   try {

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ChannelConfigSchema } from "./types.config.js";
 
 type ManifestChannelAccount = {
@@ -25,11 +25,11 @@ export type ManifestChannelPlugin = {
   };
   configSchema?: ChannelConfigSchema;
   config: {
-    listAccountIds: (cfg: OpenClawConfig) => string[];
-    defaultAccountId: (cfg: OpenClawConfig) => string;
-    resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) => ManifestChannelAccount;
-    isEnabled: (account: ManifestChannelAccount, cfg: OpenClawConfig) => boolean;
-    isConfigured: (account: ManifestChannelAccount, cfg: OpenClawConfig) => boolean;
-    hasConfiguredState: (params: { cfg: OpenClawConfig; env?: NodeJS.ProcessEnv }) => boolean;
+    listAccountIds: (cfg: CarapaceConfig) => string[];
+    defaultAccountId: (cfg: CarapaceConfig) => string;
+    resolveAccount: (cfg: CarapaceConfig, accountId?: string | null) => ManifestChannelAccount;
+    isEnabled: (account: ManifestChannelAccount, cfg: CarapaceConfig) => boolean;
+    isConfigured: (account: ManifestChannelAccount, cfg: CarapaceConfig) => boolean;
+    hasConfiguredState: (params: { cfg: CarapaceConfig; env?: NodeJS.ProcessEnv }) => boolean;
   };
 };

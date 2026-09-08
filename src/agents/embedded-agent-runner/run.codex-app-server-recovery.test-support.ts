@@ -1,9 +1,9 @@
 // Full-entry coverage for replay-safe Codex app-server recovery retries.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createModelFallbackConfig } from "../test-helpers/model-fallback-config-fixture.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
@@ -18,7 +18,7 @@ import {
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 import type { EmbeddedRunAttemptParams, EmbeddedRunAttemptResult } from "./run/types.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 
 const CODEX_MISSING_TERMINAL_MESSAGE =
@@ -103,8 +103,8 @@ describe("runEmbeddedAgent Codex app-server recovery", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.codex-app-server-recovery" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.codex-app-server-recovery" });
     mockedClassifyFailoverReason.mockReturnValue(null);
   });
 

@@ -76,11 +76,11 @@ describe("createApplicationConfigCapability", () => {
   it("stays fail closed before bootstrap and accepts the Gateway favicon setting", async () => {
     const fetchMock = vi.fn<typeof fetch>(async () => bootstrapResponse("test", true));
     vi.stubGlobal("fetch", fetchMock);
-    const config = createApplicationConfigCapability({ resourceBasePath: "/openclaw" });
+    const config = createApplicationConfigCapability({ resourceBasePath: "/carapace" });
 
     expect(config.current.automaticallyFetchFavicons).toBe(false);
     await expect(config.refresh()).resolves.toMatchObject({ automaticallyFetchFavicons: true });
-    expect(fetchMock.mock.calls[0]?.[0]).toBe("/openclaw/control-ui-config.json");
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("/carapace/control-ui-config.json");
     expect(config.current.automaticallyFetchFavicons).toBe(true);
   });
 

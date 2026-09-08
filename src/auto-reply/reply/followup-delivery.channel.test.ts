@@ -1,7 +1,7 @@
 // Proves follow-up batch ownership through the real channel route and durable-send boundary.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -81,7 +81,7 @@ function createTurn(params: {
       },
     },
     operation: {} as AdmittedFollowupTurn["operation"],
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     session: {
       kind: "session",
       key: "main",

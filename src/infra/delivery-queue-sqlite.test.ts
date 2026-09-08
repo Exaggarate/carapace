@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../test/helpers/sqlite-statement-execution-counter.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
   claimDeliveryQueueEntryPlatformSend,
   promoteDeliveryQueueEntryPlatformSend,
@@ -24,7 +24,7 @@ import {
   updateDeliveryQueueEntry,
   upsertDeliveryQueueEntry,
 } from "./delivery-queue-sqlite.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 describe("delivery-queue-sqlite corrupt JSON resilience", () => {
   let stateDir: string;
@@ -37,7 +37,7 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
   } as const;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-dq-case-"));
+    tmpDir = fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-dq-case-"));
     stateDir = path.join(tmpDir, "state");
     fs.mkdirSync(stateDir, { recursive: true });
   });
@@ -47,8 +47,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
   });
 
   function insertCorruptRow(id: string, json: string) {
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     db.prepare(
       `INSERT INTO delivery_queue_entries
@@ -143,8 +143,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
       };
       upsertDeliveryQueueEntry({ queueName: status, entry, status, stateDir });
     }
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const reads = trackSqliteStatementExecutions(db, ["owners"], (sql) =>
       sql.startsWith("select ") && sql.includes('from "delivery_queue_entries"') ? "owners" : null,
@@ -256,8 +256,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
         stateDir,
       });
 
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const readMetadata = () =>
         db
@@ -283,8 +283,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
         stateDir,
       });
 
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       expect(
         db
@@ -326,8 +326,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
         }),
       ).toBe("created");
 
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       expect(
         db
@@ -418,8 +418,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
       );
       pruneExpiredDeliveryQueueTombstones(stateDir);
       expect(getDeliveryQueueEntryStatus(QUEUE, "rt-expired-completed", stateDir)).toBeUndefined();
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const row = db
         .prepare(
@@ -1013,8 +1013,8 @@ describe("delivery-queue-sqlite corrupt JSON resilience", () => {
         stateDir,
       });
       completeDeliveryQueueEntry(QUEUE, "rt-permanent", stateDir);
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       db.prepare(
         `UPDATE delivery_queue_entries

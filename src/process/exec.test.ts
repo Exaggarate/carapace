@@ -22,7 +22,7 @@ import {
   shouldSpawnWithShell,
 } from "./exec.js";
 
-const OPENCLAW_CLI_ENV_VALUE = "1";
+const CARAPACE_CLI_ENV_VALUE = "1";
 
 describe("runCommandWithTimeout", () => {
   it("never enables shell execution (Windows cmd.exe injection hardening)", () => {
@@ -75,21 +75,21 @@ describe("runCommandWithTimeout", () => {
     const resolved = resolveCommandEnv({
       argv: ["node", "script.js"],
       baseEnv: {
-        OPENCLAW_BASE_ENV: "base",
-        OPENCLAW_CHILD_ENV_REMOVE: "base",
-        OPENCLAW_TO_REMOVE: undefined,
+        CARAPACE_BASE_ENV: "base",
+        CARAPACE_CHILD_ENV_REMOVE: "base",
+        CARAPACE_TO_REMOVE: undefined,
       },
       env: {
-        OPENCLAW_CHILD_ENV_REMOVE: undefined,
-        OPENCLAW_TEST_ENV: "ok",
+        CARAPACE_CHILD_ENV_REMOVE: undefined,
+        CARAPACE_TEST_ENV: "ok",
       },
     });
 
-    expect(resolved.OPENCLAW_BASE_ENV).toBe("base");
-    expect(resolved.OPENCLAW_CHILD_ENV_REMOVE).toBeUndefined();
-    expect(resolved.OPENCLAW_TEST_ENV).toBe("ok");
-    expect(resolved.OPENCLAW_TO_REMOVE).toBeUndefined();
-    expect(resolved.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(resolved.CARAPACE_BASE_ENV).toBe("base");
+    expect(resolved.CARAPACE_CHILD_ENV_REMOVE).toBeUndefined();
+    expect(resolved.CARAPACE_TEST_ENV).toBe("ok");
+    expect(resolved.CARAPACE_TO_REMOVE).toBeUndefined();
+    expect(resolved.CARAPACE_CLI).toBe(CARAPACE_CLI_ENV_VALUE);
   });
 
   it("collapses case-insensitive duplicate env keys on Windows", () => {
@@ -98,18 +98,18 @@ describe("runCommandWithTimeout", () => {
       platform: "win32",
       baseEnv: {
         Path: "C:\\base\\bin",
-        OPENCLAW_BASE_ENV: "base",
+        CARAPACE_BASE_ENV: "base",
       },
       env: {
         PATH: "C:\\override\\bin",
-        OPENCLAW_TEST_ENV: "ok",
+        CARAPACE_TEST_ENV: "ok",
       },
     });
 
     expect(resolved.Path).toBeUndefined();
     expect(resolved.PATH).toBe("C:\\override\\bin");
-    expect(resolved.OPENCLAW_BASE_ENV).toBe("base");
-    expect(resolved.OPENCLAW_TEST_ENV).toBe("ok");
+    expect(resolved.CARAPACE_BASE_ENV).toBe("base");
+    expect(resolved.CARAPACE_TEST_ENV).toBe("ok");
   });
 
   it("removes case-insensitive inherited env keys on Windows", () => {
@@ -141,7 +141,7 @@ describe("runCommandWithTimeout", () => {
   });
 
   it("does not restore parent variables excluded from the child environment", async () => {
-    const key = "OPENCLAW_EXECA_PARENT_ONLY_TEST";
+    const key = "CARAPACE_EXECA_PARENT_ONLY_TEST";
     const previous = process.env[key];
     process.env[key] = "parent-value";
     try {
@@ -252,7 +252,7 @@ describe("runCommandWithTimeout", () => {
   it.runIf(process.platform === "win32")(
     "rejects unresolved commands before Execa can fall through to ambient ComSpec",
     async () => {
-      const command = `openclaw-missing-${process.pid}\r\ncalc.exe`;
+      const command = `carapace-missing-${process.pid}\r\ncalc.exe`;
       const previousComspec = process.env.comspec;
       process.env.comspec = process.execPath;
       try {
@@ -519,7 +519,7 @@ describe("runCommandWithTimeout", () => {
   it("keeps argv values out of transport errors", async () => {
     const privateArg = "private-command-argument";
     const error = await runCommandWithTimeout(
-      [`openclaw-missing-${process.pid}-${Date.now()}`, "--token", privateArg],
+      [`carapace-missing-${process.pid}-${Date.now()}`, "--token", privateArg],
       { timeoutMs: 3_000 },
     ).catch((caught: unknown) => caught);
 
@@ -599,7 +599,7 @@ describe("runCommandBuffered", () => {
     "drains descendants on failure or the post-success timeout (exit $exitCode, escaped=$escaped)",
     { timeout: 5_000 },
     async ({ exitCode, escaped, timeoutMs }) =>
-      withTempDir("openclaw-exec-descendant-", async (dir) => {
+      withTempDir("carapace-exec-descendant-", async (dir) => {
         const pidPath = path.join(dir, "descendant.pid");
         const termPath = path.join(dir, "sigterm");
         // Acknowledge only after the handler and keepalive exist. Stay quiet so
@@ -767,7 +767,7 @@ describe("runCommandBuffered", () => {
   it("keeps argv values out of buffered transport errors", async () => {
     const privateArg = "private-buffered-argument";
     const result = await runCommandBuffered(
-      [`openclaw-missing-${process.pid}-${Date.now()}`, privateArg],
+      [`carapace-missing-${process.pid}-${Date.now()}`, privateArg],
       { timeoutMs: 3_000 },
     );
 
@@ -796,10 +796,10 @@ describe("runExec", () => {
       process.execPath,
       [
         "-e",
-        "process.stdin.pipe(process.stdout); process.stderr.write(process.env.OPENCLAW_RUN_EXEC_TEST ?? 'missing')",
+        "process.stdin.pipe(process.stdout); process.stderr.write(process.env.CARAPACE_RUN_EXEC_TEST ?? 'missing')",
       ],
       {
-        baseEnv: { OPENCLAW_RUN_EXEC_TEST: "base" },
+        baseEnv: { CARAPACE_RUN_EXEC_TEST: "base" },
         input: Buffer.from("input"),
         timeoutMs: 3_000,
       },

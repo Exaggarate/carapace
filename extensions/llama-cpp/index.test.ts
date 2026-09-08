@@ -1,24 +1,24 @@
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { createLocalEmbeddingProvider } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { expectDefined } from "@carapace/normalization-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { createLocalEmbeddingProvider } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import {
   createPluginRegistryFixture,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-test-contracts";
 import {
   clearEmbeddingProviders,
   createEmptyPluginRegistry,
   getActivePluginRegistry,
   getRegisteredEmbeddingProvider,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import type {
   ModelProviderConfig,
   ProviderPlugin,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -37,8 +37,8 @@ vi.mock("./src/hardware.js", async (importOriginal) => ({
   detectLlamaCppHardware: mocks.detectHardware,
 }));
 
-vi.mock("openclaw/plugin-sdk/embedding-providers", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/embedding-providers")>()),
+vi.mock("carapace/plugin-sdk/embedding-providers", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/embedding-providers")>()),
   getEmbeddingProvider: () => ({ create: mocks.genericCreate }),
 }));
 
@@ -65,7 +65,7 @@ import {
 } from "./src/defaults.js";
 import { llamaCppEmbeddingProviderAdapter } from "./src/embedding-provider.js";
 
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("carapace.localEmbeddingRuntimeFacts");
 let previousPluginRegistry: ReturnType<typeof getActivePluginRegistry>;
 
 beforeEach(() => {

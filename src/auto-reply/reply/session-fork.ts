@@ -8,7 +8,7 @@ import {
   type ForkSessionFromParentTranscriptResult,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   assertModelSelectionUnlocked,
   MODEL_SELECTION_LOCKED_PARENT_FORK_MESSAGE,
@@ -21,7 +21,7 @@ type ParentForkDecision = SessionParentForkDecision;
 type ParentForkDecisionParams = {
   parentEntry: SessionEntry;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
 };
 
@@ -31,7 +31,7 @@ type ForkSessionFromParentParams = {
   parentEntry: SessionEntry;
   agentId: string;
   commitGuard?: () => void;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey: string;
   storePath?: string;
   forkFrom?: "last-completed";
@@ -85,7 +85,7 @@ type ForkSessionEntryFromParentParams = Omit<ForkSessionFromParentParams, "paren
 
 function resolveParentForkStorePath(params: {
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   storePath?: string;
 }): string {
   return (

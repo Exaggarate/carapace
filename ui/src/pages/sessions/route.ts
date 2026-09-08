@@ -82,6 +82,6 @@ export const page = definePage({
     import("./sessions-page.ts").then(() => ({
       header: true,
       render: (data: SessionsRouteData | undefined) =>
-        html`<openclaw-sessions-page .routeData=${data}></openclaw-sessions-page>`,
+        html`<carapace-sessions-page .routeData=${data}></carapace-sessions-page>`,
     })),
 });

@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { DEFAULT_PROVIDER } from "../../agents/defaults.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
 import {
@@ -6,12 +6,12 @@ import {
   RUNTIME_MODEL_VISIBILITY_NORMALIZATION,
 } from "../../agents/model-visibility-policy.js";
 import { resolveModelCatalogIdentityKey } from "../../agents/openai-model-routes.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 
 /** Configured dynamic-catalog providers that omit explicit model inventory. */
 export function listConfiguredRuntimeDiscoveryProviderIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   metadataSnapshot?: Pick<PluginMetadataSnapshot, "plugins">,
 ): Set<string> {
   const ids = new Set<string>();
@@ -79,7 +79,7 @@ export function resolveProviderConfigInventoryEntries(params: {
 }
 
 export function includeConfiguredStaticCatalogEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   snapshot: ModelCatalogSnapshot;
   defaultModel?: string;

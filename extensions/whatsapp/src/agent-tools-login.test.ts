@@ -1,9 +1,9 @@
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginToolContext,
-} from "openclaw/plugin-sdk/core";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+  CarapacePluginApi,
+  CarapacePluginToolContext,
+} from "carapace/plugin-sdk/core";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 // Whatsapp tests cover agent tools login plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { startWebLoginWithQr, waitForWebLogin } from "../login-qr-api.js";
@@ -17,8 +17,8 @@ vi.mock("../login-qr-api.js", () => ({
 const startWebLoginWithQrMock = vi.mocked(startWebLoginWithQr);
 const waitForWebLoginMock = vi.mocked(waitForWebLogin);
 
-function resolveRegisteredLoginTool(context: OpenClawPluginToolContext): AnyAgentTool | null {
-  const registerTool = vi.fn<OpenClawPluginApi["registerTool"]>();
+function resolveRegisteredLoginTool(context: CarapacePluginToolContext): AnyAgentTool | null {
+  const registerTool = vi.fn<CarapacePluginApi["registerTool"]>();
   const api = createTestPluginApi({ registerTool });
   registerWhatsAppLoginTool(api);
   const factory = registerTool.mock.calls[0]?.[0];
@@ -33,7 +33,7 @@ function resolveRegisteredLoginTool(context: OpenClawPluginToolContext): AnyAgen
   return tool ?? null;
 }
 
-function createOwnerLoginTool(context: OpenClawPluginToolContext = { senderIsOwner: true }) {
+function createOwnerLoginTool(context: CarapacePluginToolContext = { senderIsOwner: true }) {
   const tool = resolveRegisteredLoginTool(context);
   if (!tool) {
     throw new Error("expected WhatsApp login tool for owner sender");

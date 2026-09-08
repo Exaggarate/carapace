@@ -31,7 +31,7 @@ describe("Workboard dispatcher compensation", () => {
       } as const,
     },
   ])("compensates a materialized workspace after a concurrent $edit edit", async (testCase) => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-dispatch-rollback-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-dispatch-rollback-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const dispatchStores = createWorkboardSqliteStores({ dbPath });
     const hostStores = createWorkboardSqliteStores({ dbPath });
@@ -49,7 +49,7 @@ describe("Workboard dispatcher compensation", () => {
         create: vi.fn().mockResolvedValue({
           id: "managed-id",
           path: "/state/worktrees/fingerprint/wb-card",
-          branch: `openclaw/wb-${card.id}`,
+          branch: `carapace/wb-${card.id}`,
         }),
         release: vi.fn(),
         removeIfLossless: vi.fn().mockResolvedValue(true),

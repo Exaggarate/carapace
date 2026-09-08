@@ -4,7 +4,7 @@ import { access, cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "no
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { BUNDLED_PLUGIN_ROOT_DIR } from "openclaw/plugin-sdk/test-fixtures";
+import { BUNDLED_PLUGIN_ROOT_DIR } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 
 const repoRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
@@ -24,7 +24,7 @@ function collapseDockerContinuations(dockerfile: string): string {
 
 function resolveOptionalAptPackages(dockerfile: string, env: NodeJS.ProcessEnv): string {
   const assignment = collapseDockerContinuations(dockerfile).match(
-    /\bpackages="(\$\{OPENCLAW_IMAGE_APT_PACKAGES:-\$OPENCLAW_DOCKER_APT_PACKAGES\})";/u,
+    /\bpackages="(\$\{CARAPACE_IMAGE_APT_PACKAGES:-\$CARAPACE_DOCKER_APT_PACKAGES\})";/u,
   )?.[1];
   if (!assignment) {
     throw new Error("Dockerfile optional apt package assignment is missing");
@@ -51,12 +51,12 @@ describe("Dockerfile", () => {
     const docs = await readFile(dockerInstallDocsPath, "utf8");
     const composeSetup = await readFile(composeSetupScriptPath, "utf8");
     const gatewayHealthCommand =
-      'node dist/index.js gateway health --token "$OPENCLAW_GATEWAY_TOKEN"';
+      'node dist/index.js gateway health --token "$CARAPACE_GATEWAY_TOKEN"';
 
-    expect(docs).toContain(`docker compose exec openclaw-gateway sh -lc '${gatewayHealthCommand}'`);
-    expect(docs).not.toContain('node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"');
+    expect(docs).toContain(`docker compose exec carapace-gateway sh -lc '${gatewayHealthCommand}'`);
+    expect(docs).not.toContain('node dist/index.js health --token "$CARAPACE_GATEWAY_TOKEN"');
     expect(composeSetup).toContain(
-      `"\${COMPOSE[@]}" exec -T openclaw-gateway sh -lc '${gatewayHealthCommand}'`,
+      `"\${COMPOSE[@]}" exec -T carapace-gateway sh -lc '${gatewayHealthCommand}'`,
     );
     expect(composeSetup.match(/gateway health --token "\$TOKEN" --json/g)).toHaveLength(2);
     expect(composeSetup).toContain('assert_gateway_health_json "gateway service"');
@@ -79,29 +79,29 @@ describe("Dockerfile", () => {
   it("uses full bookworm for build stages and slim bookworm for runtime", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     expect(dockerfile).toContain(
-      'ARG OPENCLAW_NODE_BOOKWORM_IMAGE="docker.io/library/node:24-bookworm@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584"',
+      'ARG CARAPACE_NODE_BOOKWORM_IMAGE="docker.io/library/node:24-bookworm@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584"',
     );
     expect(dockerfile).toContain(
-      'ARG OPENCLAW_NODE_BOOKWORM_SLIM_IMAGE="docker.io/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03"',
+      'ARG CARAPACE_NODE_BOOKWORM_SLIM_IMAGE="docker.io/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03"',
     );
     expect(dockerfile).toContain(
-      'ARG OPENCLAW_BUN_IMAGE="docker.io/oven/bun:1.4.0@sha256:5ff609364c049b54eb0ff560ec96319729a972078ef2c755d758f0c6ef89c2d6"',
+      'ARG CARAPACE_BUN_IMAGE="docker.io/oven/bun:1.4.0@sha256:5ff609364c049b54eb0ff560ec96319729a972078ef2c755d758f0c6ef89c2d6"',
     );
-    expect(dockerfile).toContain("FROM ${OPENCLAW_NODE_BOOKWORM_IMAGE} AS workspace-deps");
-    expect(dockerfile).toContain("FROM ${OPENCLAW_NODE_BOOKWORM_IMAGE} AS dependency-inputs");
+    expect(dockerfile).toContain("FROM ${CARAPACE_NODE_BOOKWORM_IMAGE} AS workspace-deps");
+    expect(dockerfile).toContain("FROM ${CARAPACE_NODE_BOOKWORM_IMAGE} AS dependency-inputs");
     expect(dockerfile).toContain("FROM dependency-inputs AS build");
-    expect(dockerfile).toContain("FROM ${OPENCLAW_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime");
+    expect(dockerfile).toContain("FROM ${CARAPACE_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime");
     expect(dockerfile).toContain("FROM base-runtime");
     expect(dockerfile).toContain("current multi-arch manifest list entries");
     expect(dockerfile).not.toContain("current amd64 entry");
-    expect(dockerfile).not.toContain("OPENCLAW_VARIANT");
+    expect(dockerfile).not.toContain("CARAPACE_VARIANT");
   });
 
   it("installs CA certificates in the slim runtime stage", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     const collapsed = collapseDockerContinuations(dockerfile);
     const runtimeIndex = collapsed.indexOf(
-      "FROM ${OPENCLAW_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime",
+      "FROM ${CARAPACE_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime",
     );
     const caInstallIndex = collapsed.indexOf(
       "ca-certificates curl git hostname libgomp1 lsof openssh-client openssl procps python3",
@@ -117,7 +117,7 @@ describe("Dockerfile", () => {
   it("installs Python, tini, and the llama-server OpenMP runtime in the slim stage", async () => {
     const dockerfile = collapseDockerContinuations(await readFile(dockerfilePath, "utf8"));
     const runtimeIndex = dockerfile.indexOf(
-      "FROM ${OPENCLAW_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime",
+      "FROM ${CARAPACE_NODE_BOOKWORM_SLIM_IMAGE} AS base-runtime",
     );
     const pythonInstallIndex = dockerfile.indexOf(
       "ca-certificates curl git hostname libgomp1 lsof openssh-client openssl procps python3",
@@ -135,14 +135,14 @@ describe("Dockerfile", () => {
   it.runIf(process.platform !== "win32").each([
     {
       name: "preferred packages",
-      env: { OPENCLAW_IMAGE_APT_PACKAGES: "python3 wget" },
+      env: { CARAPACE_IMAGE_APT_PACKAGES: "python3 wget" },
       expected: "python3 wget",
     },
     {
       name: "legacy packages when the preferred argument is empty",
       env: {
-        OPENCLAW_IMAGE_APT_PACKAGES: "",
-        OPENCLAW_DOCKER_APT_PACKAGES: "git curl jq",
+        CARAPACE_IMAGE_APT_PACKAGES: "",
+        CARAPACE_DOCKER_APT_PACKAGES: "git curl jq",
       },
       expected: "git curl jq",
     },
@@ -154,8 +154,8 @@ describe("Dockerfile", () => {
     {
       name: "preferred packages when both arguments are present",
       env: {
-        OPENCLAW_IMAGE_APT_PACKAGES: "python3",
-        OPENCLAW_DOCKER_APT_PACKAGES: "git",
+        CARAPACE_IMAGE_APT_PACKAGES: "python3",
+        CARAPACE_DOCKER_APT_PACKAGES: "git",
       },
       expected: "python3",
     },
@@ -167,7 +167,7 @@ describe("Dockerfile", () => {
   it("installs optional browser dependencies after pnpm install", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     const installIndex = dockerfile.indexOf("pnpm install --frozen-lockfile");
-    const browserArgIndex = dockerfile.indexOf("ARG OPENCLAW_INSTALL_BROWSER");
+    const browserArgIndex = dockerfile.indexOf("ARG CARAPACE_INSTALL_BROWSER");
 
     expect(installIndex).toBeGreaterThan(-1);
     expect(browserArgIndex).toBeGreaterThan(-1);
@@ -199,7 +199,7 @@ describe("Dockerfile", () => {
       readFile(join(repoRoot, "scripts/docker/verify-native-addons.sh"), "utf8"),
     ]);
     expect(dockerfile.match(/^RUN sh scripts\/docker\/verify-native-addons.sh$/gm)).toHaveLength(2);
-    expect(nativeCheck).toContain("grep -qx 'matrix' /tmp/openclaw-selected-plugin-dirs");
+    expect(nativeCheck).toContain("grep -qx 'matrix' /tmp/carapace-selected-plugin-dirs");
     expect(nativeCheck).toContain('find /app/node_modules -name "matrix-sdk-crypto*.node"');
     expect(nativeCheck).toContain(
       "node /app/node_modules/@matrix-org/matrix-sdk-crypto-nodejs/download-lib.js",
@@ -213,21 +213,21 @@ describe("Dockerfile", () => {
   it("uses portable copies for workspace dependency inputs", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     const workspaceDepsStart = dockerfile.indexOf(
-      "FROM ${OPENCLAW_NODE_BOOKWORM_IMAGE} AS workspace-deps",
+      "FROM ${CARAPACE_NODE_BOOKWORM_IMAGE} AS workspace-deps",
     );
-    const workspaceDepsEnd = dockerfile.indexOf("FROM ${OPENCLAW_BUN_IMAGE} AS bun-binary");
+    const workspaceDepsEnd = dockerfile.indexOf("FROM ${CARAPACE_BUN_IMAGE} AS bun-binary");
 
     expect(workspaceDepsStart).toBeGreaterThan(-1);
     expect(workspaceDepsEnd).toBeGreaterThan(workspaceDepsStart);
 
     const workspaceDeps = dockerfile.slice(workspaceDepsStart, workspaceDepsEnd);
     const extractionIndex = workspaceDeps.indexOf(
-      'RUN mkdir -p /out/packages "/out/${OPENCLAW_BUNDLED_PLUGIN_DIR}"',
+      'RUN mkdir -p /out/packages "/out/${CARAPACE_BUNDLED_PLUGIN_DIR}"',
     );
     const inputCopies = [
       "COPY scripts/lib/docker-plugin-selection.mjs /tmp/docker-plugin-selection.mjs",
       "COPY packages /tmp/packages",
-      "COPY ${OPENCLAW_BUNDLED_PLUGIN_DIR} /tmp/${OPENCLAW_BUNDLED_PLUGIN_DIR}",
+      "COPY ${CARAPACE_BUNDLED_PLUGIN_DIR} /tmp/${CARAPACE_BUNDLED_PLUGIN_DIR}",
     ];
 
     expect(extractionIndex).toBeGreaterThan(-1);
@@ -254,7 +254,7 @@ describe("Dockerfile", () => {
       "COPY --from=workspace-deps /out/packages/ ./packages/",
     );
     const extensionManifestIndex = dockerfile.indexOf(
-      "COPY --from=workspace-deps /out/${OPENCLAW_BUNDLED_PLUGIN_DIR}/ ./${OPENCLAW_BUNDLED_PLUGIN_DIR}/",
+      "COPY --from=workspace-deps /out/${CARAPACE_BUNDLED_PLUGIN_DIR}/ ./${CARAPACE_BUNDLED_PLUGIN_DIR}/",
     );
 
     expect(postinstallIndex).toBeGreaterThan(-1);
@@ -265,12 +265,12 @@ describe("Dockerfile", () => {
     expect(extensionManifestIndex).toBeGreaterThan(-1);
     expect(dockerfile).toContain("for manifest in /tmp/packages/*/package.json");
     expect(dockerfile).toContain(
-      'node /tmp/docker-plugin-selection.mjs "/tmp/${OPENCLAW_BUNDLED_PLUGIN_DIR}" "$OPENCLAW_EXTENSIONS"',
+      'node /tmp/docker-plugin-selection.mjs "/tmp/${CARAPACE_BUNDLED_PLUGIN_DIR}" "$CARAPACE_EXTENSIONS"',
     );
-    expect(dockerfile).toContain("done < /tmp/openclaw-workspace-plugin-dirs");
+    expect(dockerfile).toContain("done < /tmp/carapace-workspace-plugin-dirs");
     expect(dockerfile).toContain(`if [ -f "$ext_dir/package.json" ]; then`);
     expect(dockerfile).toContain(
-      "COPY --from=workspace-deps /out/openclaw-selected-plugin-dirs /tmp/openclaw-selected-plugin-dirs",
+      "COPY --from=workspace-deps /out/carapace-selected-plugin-dirs /tmp/carapace-selected-plugin-dirs",
     );
     expect(postinstallIndex).toBeLessThan(installIndex);
     expect(prepareIndex).toBeLessThan(installIndex);
@@ -283,18 +283,18 @@ describe("Dockerfile", () => {
   it("keeps validated plugin selection outside the build-context copy destination", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     const selectionCopyIndex = dockerfile.indexOf(
-      "COPY --from=workspace-deps /out/openclaw-selected-plugin-dirs /tmp/openclaw-selected-plugin-dirs",
+      "COPY --from=workspace-deps /out/carapace-selected-plugin-dirs /tmp/carapace-selected-plugin-dirs",
     );
     const buildContextCopyIndex = dockerfile.indexOf("COPY . .");
 
     expect(selectionCopyIndex).toBeGreaterThan(-1);
     expect(buildContextCopyIndex).toBeGreaterThan(selectionCopyIndex);
-    expect(dockerfile).not.toContain("/app/.openclaw-selected-plugin-dirs");
-    expect(dockerfile).not.toContain("./.openclaw-selected-plugin-dirs");
+    expect(dockerfile).not.toContain("/app/.carapace-selected-plugin-dirs");
+    expect(dockerfile).not.toContain("./.carapace-selected-plugin-dirs");
     expect(dockerfile).toContain(
-      'selected_plugin_dirs="$(cat /tmp/openclaw-selected-plugin-dirs)"',
+      'selected_plugin_dirs="$(cat /tmp/carapace-selected-plugin-dirs)"',
     );
-    expect(dockerfile).toContain('OPENCLAW_EXTENSIONS="$(cat /tmp/openclaw-selected-plugin-dirs)"');
+    expect(dockerfile).toContain('CARAPACE_EXTENSIONS="$(cat /tmp/carapace-selected-plugin-dirs)"');
   });
 
   it.each(["Dockerfile", "scripts/docker/cleanup-smoke/Dockerfile"])(
@@ -305,7 +305,7 @@ describe("Dockerfile", () => {
       );
       const installIndex = dockerfile.indexOf("pnpm install --frozen-lockfile");
       expect(installIndex).toBeGreaterThan(-1);
-      const fixture = await mkdtemp(join(tmpdir(), "openclaw-docker-lifecycle-"));
+      const fixture = await mkdtemp(join(tmpdir(), "carapace-docker-lifecycle-"));
       try {
         // Stage the actual local COPY inputs, not a separately maintained import list.
         // Workspace manifests do not contribute executable root lifecycle modules.
@@ -372,10 +372,10 @@ describe("Dockerfile", () => {
     const collapsed = collapseDockerContinuations(dockerfile);
     const qaLabExtensionCheckIndex = collapsed.indexOf("grep -qx 'qa-lab'");
     const privateQaExportIndex = collapsed.indexOf(
-      "export OPENCLAW_BUILD_PRIVATE_QA=1 OPENCLAW_ENABLE_PRIVATE_QA_CLI=1",
+      "export CARAPACE_BUILD_PRIVATE_QA=1 CARAPACE_ENABLE_PRIVATE_QA_CLI=1",
     );
     const buildDockerIndex = collapsed.indexOf(
-      'OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS="$selected_plugin_dirs" OPENCLAW_RUN_NODE_SKIP_DTS_BUILD="$OPENCLAW_DOCKER_BUILD_SKIP_DTS" OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB="$OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB" NODE_OPTIONS="$OPENCLAW_DOCKER_BUILD_NODE_OPTIONS" pnpm_config_verify_deps_before_run=false pnpm build:docker',
+      'CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS="$selected_plugin_dirs" CARAPACE_RUN_NODE_SKIP_DTS_BUILD="$CARAPACE_DOCKER_BUILD_SKIP_DTS" CARAPACE_TSDOWN_MAX_OLD_SPACE_MB="$CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB" NODE_OPTIONS="$CARAPACE_DOCKER_BUILD_NODE_OPTIONS" pnpm_config_verify_deps_before_run=false pnpm build:docker',
     );
     const qaLabBuildIndex = collapsed.indexOf(
       "pnpm_config_verify_deps_before_run=false pnpm qa:lab:build",
@@ -388,7 +388,7 @@ describe("Dockerfile", () => {
     expect(qaLabExtensionCheckIndex).toBeGreaterThan(-1);
     expect(buildDockerIndex).toBeGreaterThan(-1);
     expect(collapsed).not.toContain(
-      'OPENCLAW_DOCKER_BUILD_EXTENSIONS="$OPENCLAW_EXTENSIONS" OPENCLAW_RUN_NODE_SKIP_DTS_BUILD=',
+      'CARAPACE_DOCKER_BUILD_EXTENSIONS="$CARAPACE_EXTENSIONS" CARAPACE_RUN_NODE_SKIP_DTS_BUILD=',
     );
     expect(qaLabBuildIndex).toBeGreaterThan(-1);
     expect(qaLabDistCopyIndex).toBeGreaterThan(-1);
@@ -409,7 +409,7 @@ describe("Dockerfile", () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     const installIndex = dockerfile.indexOf("pnpm install --frozen-lockfile");
     const commitArgIndex = dockerfile.indexOf('ARG GIT_COMMIT=""');
-    const timestampArgIndex = dockerfile.indexOf('ARG OPENCLAW_BUILD_TIMESTAMP=""');
+    const timestampArgIndex = dockerfile.indexOf('ARG CARAPACE_BUILD_TIMESTAMP=""');
     const provenanceEnvIndex = dockerfile.indexOf("ENV GIT_COMMIT=${GIT_COMMIT}");
     const backendBuildIndex = dockerfile.indexOf("pnpm build:docker");
     const uiBuildIndex = dockerfile.indexOf("pnpm ui:build");
@@ -417,8 +417,8 @@ describe("Dockerfile", () => {
     expect(commitArgIndex).toBeGreaterThan(installIndex);
     expect(timestampArgIndex).toBeGreaterThan(commitArgIndex);
     expect(provenanceEnvIndex).toBeGreaterThan(timestampArgIndex);
-    expect(dockerfile).toContain("OPENCLAW_BUILD_TIMESTAMP=${OPENCLAW_BUILD_TIMESTAMP}");
-    expect(dockerfile).toContain('OPENCLAW_BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"');
+    expect(dockerfile).toContain("CARAPACE_BUILD_TIMESTAMP=${CARAPACE_BUILD_TIMESTAMP}");
+    expect(dockerfile).toContain('CARAPACE_BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"');
     expect(backendBuildIndex).toBeGreaterThan(provenanceEnvIndex);
     expect(uiBuildIndex).toBeGreaterThan(backendBuildIndex);
   });
@@ -432,7 +432,7 @@ describe("Dockerfile", () => {
     expect(docs).toContain('BUILD_GIT_COMMIT="$(git rev-parse HEAD)"');
     expect(docs).toContain('BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"');
     expect(docs).toContain('--build-arg "GIT_COMMIT=${BUILD_GIT_COMMIT}"');
-    expect(docs).toContain('--build-arg "OPENCLAW_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}"');
+    expect(docs).toContain('--build-arg "CARAPACE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}"');
     expect(docs).toContain("The Docker context excludes `.git`.");
     expect(selectedPluginStart).toBeGreaterThan(-1);
     expect(selectedPluginEnd).toBeGreaterThan(selectedPluginStart);
@@ -440,7 +440,7 @@ describe("Dockerfile", () => {
     expect(selectedPluginDocs).toContain('BUILD_TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"');
     expect(selectedPluginDocs).toContain('--build-arg "GIT_COMMIT=${SOURCE_SHA}"');
     expect(selectedPluginDocs).toContain(
-      '--build-arg "OPENCLAW_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}"',
+      '--build-arg "CARAPACE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}"',
     );
   });
 
@@ -457,7 +457,7 @@ describe("Dockerfile", () => {
       expect(production?.parent).toBe("dependency-inputs");
       expect(stages.get("build")?.parent).toBe(production?.parent);
       const inputs = stages.get("dependency-inputs");
-      expect(inputs?.parent).toBe("${OPENCLAW_NODE_BOOKWORM_IMAGE}");
+      expect(inputs?.parent).toBe("${CARAPACE_NODE_BOOKWORM_IMAGE}");
       expect(inputs?.body).not.toMatch(/pnpm install|COPY \. \./);
       expect(production?.body).toContain("pnpm install --frozen-lockfile --prod");
       expect(production?.body).not.toMatch(/--ignore-scripts|COPY .*node_modules/);
@@ -479,7 +479,7 @@ describe("Dockerfile", () => {
         runtime.indexOf(buildCopy?.[0] ?? ""),
       );
 
-      const fixture = await mkdtemp(join(tmpdir(), "openclaw-docker-deps-"));
+      const fixture = await mkdtemp(join(tmpdir(), "carapace-docker-deps-"));
       try {
         const app = join(fixture, "app");
         const build = join(fixture, "build");
@@ -492,7 +492,7 @@ describe("Dockerfile", () => {
         const builtFiles = [
           "packages/ai/dist/index.mjs",
           "dist/index.js",
-          "dist/extensions/node_modules/openclaw/package.json",
+          "dist/extensions/node_modules/carapace/package.json",
           `${bundledPluginDir}/selected/index.js`,
         ];
         const prodFiles = [
@@ -515,10 +515,10 @@ describe("Dockerfile", () => {
         await writeFile(join(build, "package.json"), JSON.stringify({ version: "2026.8.1-1" }));
         execFileSync("/bin/sh", ["-eu", "-c", cleanCommand], {
           cwd: build,
-          env: { ...process.env, OPENCLAW_BUNDLED_PLUGIN_DIR: bundledPluginDir },
+          env: { ...process.env, CARAPACE_BUNDLED_PLUGIN_DIR: bundledPluginDir },
         });
-        await mkdir(join(app, "node_modules/@openclaw"), { recursive: true });
-        await symlink("../../packages/ai", join(app, "node_modules/@openclaw/ai"));
+        await mkdir(join(app, "node_modules/@carapace"), { recursive: true });
+        await symlink("../../packages/ai", join(app, "node_modules/@carapace/ai"));
         await cp(build, app, { recursive: true, verbatimSymlinks: true });
         for (const file of oldFiles) {
           await expect(access(join(app, file))).rejects.toThrow();
@@ -526,7 +526,7 @@ describe("Dockerfile", () => {
         for (const file of [...builtFiles, ...prodFiles]) {
           expect(await readFile(join(app, file), "utf8")).toBe(file);
         }
-        expect(await readFile(join(app, "node_modules/@openclaw/ai/dist/index.mjs"), "utf8")).toBe(
+        expect(await readFile(join(app, "node_modules/@carapace/ai/dist/index.mjs"), "utf8")).toBe(
           "packages/ai/dist/index.mjs",
         );
         expect(JSON.parse(await readFile(join(app, "package.json"), "utf8"))).toEqual({
@@ -588,18 +588,18 @@ describe("Dockerfile", () => {
   it("keeps the release version consistent through build and runtime assembly", async () => {
     const dockerfile = collapseDockerContinuations(await readFile(dockerfilePath, "utf8"));
 
-    const stampIndex = dockerfile.indexOf('pnpm pkg set "version=$OPENCLAW_DOCKER_BUILD_VERSION"');
+    const stampIndex = dockerfile.indexOf('pnpm pkg set "version=$CARAPACE_DOCKER_BUILD_VERSION"');
     const buildIndex = dockerfile.indexOf("pnpm build:docker");
     expect(stampIndex).toBeGreaterThan(dockerfile.indexOf("COPY . ."));
     expect(stampIndex).toBeLessThan(buildIndex);
     expect(dockerfile).toContain(
-      'test "$(node -p "require(\\"/app/package.json\\").version")" = "$OPENCLAW_DOCKER_BUILD_VERSION"',
+      'test "$(node -p "require(\\"/app/package.json\\").version")" = "$CARAPACE_DOCKER_BUILD_VERSION"',
     );
     expect(dockerfile).toContain(
-      'test "$(node -p "require(\\"/app/dist/build-info.json\\").version")" = "$OPENCLAW_DOCKER_BUILD_VERSION"',
+      'test "$(node -p "require(\\"/app/dist/build-info.json\\").version")" = "$CARAPACE_DOCKER_BUILD_VERSION"',
     );
     expect(dockerfile).toContain(
-      'test "$(node /app/openclaw.mjs --version | cut -d \' \' -f 2)" = "$OPENCLAW_DOCKER_BUILD_VERSION"',
+      'test "$(node /app/carapace.mjs --version | cut -d \' \' -f 2)" = "$CARAPACE_DOCKER_BUILD_VERSION"',
     );
   });
 
@@ -611,26 +611,26 @@ describe("Dockerfile", () => {
     expect(workflow).not.toContain("Build and smoke test final Docker runtime image");
     expect(workflow).not.toContain("test -f /app/src/agents/templates/HEARTBEAT.md");
     expect(workflow).not.toContain('grep -F "Missing workspace template:"');
-    expect(workflow).not.toContain('test -f "${temp_root}/home/.openclaw/workspace/HEARTBEAT.md"');
+    expect(workflow).not.toContain('test -f "${temp_root}/home/.carapace/workspace/HEARTBEAT.md"');
     expect(workflow).not.toContain("scripts/docker/runtime-workspace-template-smoke.sh");
   });
 
   it("does not override bundled plugin discovery in runtime images", async () => {
     const dockerfile = collapseDockerContinuations(await readFile(dockerfilePath, "utf8"));
-    expect(dockerfile).toContain(`ARG OPENCLAW_BUNDLED_PLUGIN_DIR=${BUNDLED_PLUGIN_ROOT_DIR}`);
-    expect(dockerfile).not.toMatch(/^\s*ENV\b[^\n]*\bOPENCLAW_BUNDLED_PLUGINS_DIR\b/m);
+    expect(dockerfile).toContain(`ARG CARAPACE_BUNDLED_PLUGIN_DIR=${BUNDLED_PLUGIN_ROOT_DIR}`);
+    expect(dockerfile).not.toMatch(/^\s*ENV\b[^\n]*\bCARAPACE_BUNDLED_PLUGINS_DIR\b/m);
   });
 
   it("normalizes plugin and agent paths permissions in image layers", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     expect(dockerfile).toContain(
-      "RUN for dir in /app/${OPENCLAW_BUNDLED_PLUGIN_DIR} /app/.agent /app/.agents; do \\",
+      "RUN for dir in /app/${CARAPACE_BUNDLED_PLUGIN_DIR} /app/.agent /app/.agents; do \\",
     );
     expect(dockerfile).toContain('find "$dir" -type d -exec chmod 755 {} +');
     expect(dockerfile).toContain('find "$dir" -type f -exec chmod 644 {} +');
   });
 
-  it("Docker GPG fingerprint awk uses correct quoting for OPENCLAW_SANDBOX=1 build", async () => {
+  it("Docker GPG fingerprint awk uses correct quoting for CARAPACE_SANDBOX=1 build", async () => {
     const dockerfile = await readFile(dockerfilePath, "utf8");
     expect(dockerfile).toContain('== "fpr" {');
     expect(dockerfile).not.toContain('\\"fpr\\"');
@@ -681,7 +681,7 @@ describe("Dockerfile", () => {
 
     expect(runtimeStageIndex).toBeGreaterThan(-1);
     // Regression: /home/node/.config parent must be created with node ownership
-    // before the leaf .config/openclaw dir (issue #85968).
+    // before the leaf .config/carapace dir (issue #85968).
     expect(parentConfigDirIndex).toBeGreaterThan(-1);
     expect(stateDirIndex).toBeGreaterThan(-1);
     expect(userIndex).toBeGreaterThan(-1);
@@ -689,21 +689,21 @@ describe("Dockerfile", () => {
     expect(parentConfigDirIndex).toBeLessThan(stateDirIndex);
     expect(stateDirIndex).toBeGreaterThan(runtimeStageIndex);
     expect(stateDirIndex).toBeLessThan(userIndex);
-    expect(dockerfile).not.toContain("mkdir -p /home/node/.openclaw");
-    expect(dockerfile).toContain("/home/node/.openclaw/workspace");
-    expect(dockerfile).toContain("/home/node/.config/openclaw");
+    expect(dockerfile).not.toContain("mkdir -p /home/node/.carapace");
+    expect(dockerfile).toContain("/home/node/.carapace/workspace");
+    expect(dockerfile).toContain("/home/node/.config/carapace");
     expect(dockerfile).toContain(
-      "stat -c '%U:%G %a' /home/node/.openclaw | grep -qx 'node:node 700'",
+      "stat -c '%U:%G %a' /home/node/.carapace | grep -qx 'node:node 700'",
     );
     expect(dockerfile).toContain(
-      "stat -c '%U:%G %a' /home/node/.openclaw/workspace | grep -qx 'node:node 700'",
+      "stat -c '%U:%G %a' /home/node/.carapace/workspace | grep -qx 'node:node 700'",
     );
     // Regression: assert parent /home/node/.config is also node-owned (issue #85968).
     expect(dockerfile).toContain(
       "stat -c '%U:%G %a' /home/node/.config | grep -qx 'node:node 755'",
     );
     expect(dockerfile).toContain(
-      "stat -c '%U:%G %a' /home/node/.config/openclaw | grep -qx 'node:node 700'",
+      "stat -c '%U:%G %a' /home/node/.config/carapace | grep -qx 'node:node 700'",
     );
   });
 });

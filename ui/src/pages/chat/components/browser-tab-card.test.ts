@@ -83,7 +83,7 @@ async function card(
     ),
     host,
   );
-  const element = host.querySelector("openclaw-browser-tab-card")!;
+  const element = host.querySelector("carapace-browser-tab-card")!;
   element.context = context;
   await element.updateComplete;
   return element;
@@ -184,7 +184,7 @@ describe("browser tab card", () => {
         }),
         host,
       );
-      const elements = [...host.querySelectorAll("openclaw-browser-tab-card")];
+      const elements = [...host.querySelectorAll("carapace-browser-tab-card")];
       for (const element of elements) {
         element.context = gateway.context;
         await element.updateComplete;
@@ -235,7 +235,7 @@ describe("browser tab card", () => {
       }),
       host,
     );
-    const elements = [...host.querySelectorAll("openclaw-browser-tab-card")];
+    const elements = [...host.querySelectorAll("carapace-browser-tab-card")];
     for (const element of elements) {
       element.context = gateway.context;
       await element.updateComplete;

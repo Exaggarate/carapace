@@ -5,9 +5,9 @@ import {
   formatLocationText,
   type ChannelInboundMediaInput,
   type NormalizedLocation,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { isRecord, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { isRecord, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveComparableIdentity, type WhatsAppReplyContext } from "../identity.js";
 import { jidToE164 } from "../text-runtime.js";
 import { parseVcard } from "../vcard.js";

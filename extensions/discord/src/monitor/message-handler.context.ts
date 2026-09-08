@@ -7,21 +7,21 @@ import {
   resolveEnvelopeFormatOptions,
   toHistoryMediaEntries,
   toInboundMediaFactsWithMetadata,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/conversation-runtime";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { formatAudioTranscriptForAgent } from "openclaw/plugin-sdk/media-understanding-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveChannelContextVisibilityMode } from "carapace/plugin-sdk/context-visibility-runtime";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "carapace/plugin-sdk/conversation-runtime";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
+import { formatAudioTranscriptForAgent } from "carapace/plugin-sdk/media-understanding-runtime";
 import {
   buildHistoryContextFromEntries,
   buildInboundHistoryFromEntries,
   createChannelHistoryWindow,
-} from "openclaw/plugin-sdk/reply-history";
-import { buildAgentSessionKey, resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
-import { danger, logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { evaluateSupplementalContextVisibility } from "openclaw/plugin-sdk/security-runtime";
-import { readSessionUpdatedAt, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/reply-history";
+import { buildAgentSessionKey, resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
+import { danger, logVerbose, shouldLogVerbose } from "carapace/plugin-sdk/runtime-env";
+import { evaluateSupplementalContextVisibility } from "carapace/plugin-sdk/security-runtime";
+import { readSessionUpdatedAt, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveDiscordConversationIdentity } from "../conversation-identity.js";
 import { ChannelType } from "../internal/discord.js";
 import { normalizeDiscordAllowList, normalizeDiscordSlug } from "./allow-list.js";

@@ -1,11 +1,11 @@
 import fs from "node:fs";
 /** Doctor warnings for heartbeat.session values that resolve to missing delivery sessions. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { canonicalizeMainSessionAlias } from "../config/sessions/main-session.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHeartbeatAgents, resolveHeartbeatIntervalMs } from "../infra/heartbeat-config.js";
 import { resolveHeartbeatDeliveryTarget } from "../infra/outbound/targets.js";
 import { loadLegacySessionStore } from "../infra/state-migrations.legacy-session-store.js";
@@ -24,7 +24,7 @@ import { isSubagentSessionKey } from "../sessions/session-key-utils.js";
  * Warning only — repair would mean rewriting the config, which is the
  * operator's intent to express.
  */
-export function describeHeartbeatSessionTargetIssues(cfg: OpenClawConfig): string[] {
+export function describeHeartbeatSessionTargetIssues(cfg: CarapaceConfig): string[] {
   const warnings: string[] = [];
   const sessionScope = cfg.session?.scope ?? "per-sender";
   for (const { agentId, heartbeat: heartbeatConfig } of resolveHeartbeatAgents(cfg)) {

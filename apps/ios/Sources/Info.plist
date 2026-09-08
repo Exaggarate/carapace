@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>OpenClaw</string>
+	<string>Carapace</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIconName</key>
@@ -23,20 +23,20 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(OPENCLAW_MARKETING_VERSION)</string>
+	<string>$(CARAPACE_MARKETING_VERSION)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>ai.openclawfoundation.app</string>
+			<string>ai.carapacefoundation.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>$(OPENCLAW_URL_SCHEME)</string>
+				<string>$(CARAPACE_URL_SCHEME)</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>$(OPENCLAW_BUILD_VERSION)</string>
+	<string>$(CARAPACE_BUILD_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>
@@ -48,52 +48,52 @@
 	</dict>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_openclaw-gw._tcp</string>
+		<string>_carapace-gw._tcp</string>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>OpenClaw uses your calendars to show events and scheduling context when you enable calendar access.</string>
+	<string>Carapace uses your calendars to show events and scheduling context when you enable calendar access.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>OpenClaw uses your calendars to show events and scheduling context when you enable calendar access.</string>
+	<string>Carapace uses your calendars to show events and scheduling context when you enable calendar access.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-	<string>OpenClaw uses your calendars to add events when you enable calendar access.</string>
+	<string>Carapace uses your calendars to add events when you enable calendar access.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>OpenClaw uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.</string>
+	<string>Carapace uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.</string>
 	<key>NSContactsUsageDescription</key>
-	<string>OpenClaw uses your contacts so you can search and reference people while using the assistant.</string>
+	<string>Carapace uses your contacts so you can search and reference people while using the assistant.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>OpenClaw reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.</string>
+	<string>Carapace reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>OpenClaw does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.</string>
+	<string>Carapace does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>OpenClaw discovers and connects to your OpenClaw gateway on the local network.</string>
+	<string>Carapace discovers and connects to your Carapace gateway on the local network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>OpenClaw can share your location in the background when you enable Always.</string>
+	<string>Carapace can share your location in the background when you enable Always.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>OpenClaw uses your location when you allow location sharing.</string>
+	<string>Carapace uses your location when you allow location sharing.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>OpenClaw uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.</string>
+	<string>Carapace uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>OpenClaw may use motion data to support device-aware interactions and automations.</string>
+	<string>Carapace may use motion data to support device-aware interactions and automations.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>OpenClaw lets your assistant read photos you allow and lets you choose photos to share.</string>
+	<string>Carapace lets your assistant read photos you allow and lets you choose photos to share.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>OpenClaw uses your reminders to list, add, and complete tasks when you enable reminders access.</string>
+	<string>Carapace uses your reminders to list, add, and complete tasks when you enable reminders access.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>OpenClaw uses on-device speech recognition for talk mode and voice wake.</string>
+	<string>Carapace uses on-device speech recognition for talk mode and voice wake.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
-	<key>OpenClawAppGroupIdentifier</key>
-	<string>$(OPENCLAW_ACTIVE_APP_GROUP_ID)</string>
-	<key>OpenClawBuildTimestamp</key>
-	<string>$(OPENCLAW_BUILD_TIMESTAMP)</string>
-	<key>OpenClawCanonicalVersion</key>
-	<string>$(OPENCLAW_IOS_VERSION)</string>
-	<key>OpenClawGitCommit</key>
-	<string>$(OPENCLAW_GIT_COMMIT)</string>
-	<key>OpenClawPushMode</key>
-	<string>$(OPENCLAW_PUSH_MODE)</string>
-	<key>OpenClawPushRelayBaseURL</key>
-	<string>$(OPENCLAW_PUSH_RELAY_BASE_URL)</string>
+	<key>CarapaceAppGroupIdentifier</key>
+	<string>$(CARAPACE_ACTIVE_APP_GROUP_ID)</string>
+	<key>CarapaceBuildTimestamp</key>
+	<string>$(CARAPACE_BUILD_TIMESTAMP)</string>
+	<key>CarapaceCanonicalVersion</key>
+	<string>$(CARAPACE_IOS_VERSION)</string>
+	<key>CarapaceGitCommit</key>
+	<string>$(CARAPACE_GIT_COMMIT)</string>
+	<key>CarapacePushMode</key>
+	<string>$(CARAPACE_PUSH_MODE)</string>
+	<key>CarapacePushRelayBaseURL</key>
+	<string>$(CARAPACE_PUSH_RELAY_BASE_URL)</string>
 	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
 	<true/>
 	<key>UIAppFonts</key>

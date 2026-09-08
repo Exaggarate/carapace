@@ -1,13 +1,13 @@
-import type { LlmRuntime } from "@openclaw/ai";
-import { defaultLlmRuntime, getApiProvider } from "@openclaw/ai/internal/runtime";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import * as providerTransportStream from "@openclaw/ai/transports";
+import type { LlmRuntime } from "@carapace/ai";
+import { defaultLlmRuntime, getApiProvider } from "@carapace/ai/internal/runtime";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import * as providerTransportStream from "@carapace/ai/transports";
 // Stream resolution tests cover how embedded runs choose provider, boundary,
 // native Codex, or custom stream functions and pass auth/cache/signal options.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { OpenClawPluginDefinition } from "openclaw/plugin-sdk/plugin-entry";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { CarapacePluginDefinition } from "carapace/plugin-sdk/plugin-entry";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { bindStreamLlmRuntime } from "../../llm/model-runtime-binding.js";
 import { streamSimple } from "../../llm/stream.js";
@@ -43,7 +43,7 @@ vi.mock("../../llm/stream.js", async (importOriginal) => {
 // real transport stream; per-test overrideBoundaryAwareStreamFnOnce() injects
 // a probe stream when a regression test needs to inspect the wrapped
 // transport's options.
-vi.mock("@openclaw/ai/transports", async (importOriginal) => {
+vi.mock("@carapace/ai/transports", async (importOriginal) => {
   const actual = await importOriginal<typeof providerTransportStream>();
   return {
     ...actual,
@@ -138,7 +138,7 @@ describe("prepared embedded stream strategy", () => {
     ).toBe("boundary-aware:openai-responses");
   });
 
-  it("describes default Codex fallback as OpenClaw native", () => {
+  it("describes default Codex fallback as Carapace native", () => {
     expect(
       resolveEmbeddedAgentStream({
         sessionId: "session-1",
@@ -149,7 +149,7 @@ describe("prepared embedded stream strategy", () => {
           id: "codex-mini-latest",
         } as never,
       }).strategy,
-    ).toBe("openclaw-native-codex-responses");
+    ).toBe("carapace-native-codex-responses");
   });
 
   it("keeps custom session streams labeled as custom", () => {
@@ -202,7 +202,7 @@ describe("resolveEmbeddedAgentStream", () => {
     "preserves the stable system cache boundary through the registered %s transport",
     async (providerId) => {
       const { default: plugin } = await loadBundledPluginPublicSurface<{
-        default: OpenClawPluginDefinition;
+        default: CarapacePluginDefinition;
       }>({
         pluginId: providerId,
         artifactBasename: "index.ts",
@@ -268,7 +268,7 @@ describe("resolveEmbeddedAgentStream", () => {
               { type: "text", text: "Dynamic suffix" },
             ],
       );
-      expect(JSON.stringify(request)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+      expect(JSON.stringify(request)).not.toContain("CARAPACE_CACHE_BOUNDARY");
     },
   );
 
@@ -386,8 +386,8 @@ describe("resolveEmbeddedAgentStream", () => {
     expect(innerStreamFn).toHaveBeenCalledTimes(1);
   });
 
-  it("routes Codex responses fallbacks through OpenClaw native transport", async () => {
-    // Codex OAuth models use the OpenClaw native transport, with prompt-cache
+  it("routes Codex responses fallbacks through Carapace native transport", async () => {
+    // Codex OAuth models use the Carapace native transport, with prompt-cache
     // markers stripped before the harness sees system prompt text.
     const nativeStreamFn = vi.fn(async (_model, context, options) => ({ context, options }));
     useNativeStreamFn(nativeStreamFn as never);
@@ -649,7 +649,7 @@ describe("resolveEmbeddedAgentStream", () => {
     expect(innerStreamFn).toHaveBeenCalledTimes(2);
   });
 
-  it("routes OpenClaw native OpenAI-compatible provider streams through boundary-aware transports", async () => {
+  it("routes Carapace native OpenAI-compatible provider streams through boundary-aware transports", async () => {
     const nativeStreamFn = getApiProvider("openai-completions")?.streamSimple;
     if (!nativeStreamFn) {
       throw new Error("expected native OpenAI-compatible stream function");
@@ -943,7 +943,7 @@ describe("resolveEmbeddedAgentStream", () => {
     },
   );
 
-  it("injects the resolved run api key into the OpenClaw native Codex Responses fallback", async () => {
+  it("injects the resolved run api key into the Carapace native Codex Responses fallback", async () => {
     const nativeStreamFn = vi.fn(async (_model, _context, options) => options);
     useNativeStreamFn(nativeStreamFn as never);
     const { streamFn } = resolveEmbeddedAgentStream({
@@ -965,7 +965,7 @@ describe("resolveEmbeddedAgentStream", () => {
     expect(nativeStreamFn).toHaveBeenCalledTimes(1);
   });
 
-  it("falls back to authStorage when no resolved api key is available for OpenClaw native fallback", async () => {
+  it("falls back to authStorage when no resolved api key is available for Carapace native fallback", async () => {
     const nativeStreamFn = vi.fn(async (_model, _context, options) => options);
     const authStorage = {
       getApiKey: vi.fn(async () => "stored-bearer-token"),
@@ -990,7 +990,7 @@ describe("resolveEmbeddedAgentStream", () => {
     expect(authStorage.getApiKey).toHaveBeenCalledWith("openai");
   });
 
-  it("forwards the run abort signal into the OpenClaw native fallback when callers omit one", async () => {
+  it("forwards the run abort signal into the Carapace native fallback when callers omit one", async () => {
     const nativeStreamFn = vi.fn(async (_model, _context, options) => options);
     const runSignal = new AbortController().signal;
     useNativeStreamFn(nativeStreamFn as never);
@@ -1015,7 +1015,7 @@ describe("resolveEmbeddedAgentStream", () => {
   });
 
   it.each(["run", "caller"] as const)(
-    "cancels the authenticated OpenClaw native fallback when the %s signal aborts",
+    "cancels the authenticated Carapace native fallback when the %s signal aborts",
     async (signalOwner) => {
       const nativeStreamFn = vi.fn(async (_model, _context, options) => options);
       const runController = new AbortController();
@@ -1045,7 +1045,7 @@ describe("resolveEmbeddedAgentStream", () => {
     },
   );
 
-  it("forwards the run signal on the sync OpenClaw native fallback path without auth credentials", async () => {
+  it("forwards the run signal on the sync Carapace native fallback path without auth credentials", async () => {
     const nativeStreamFn = vi.fn(async (_model, _context, options) => options);
     const runSignal = new AbortController().signal;
     useNativeStreamFn(nativeStreamFn as never);
@@ -1067,7 +1067,7 @@ describe("resolveEmbeddedAgentStream", () => {
     expect(result.signal).toBe(runSignal);
   });
 
-  it("strips cache boundary markers on the OpenClaw native fallback path", async () => {
+  it("strips cache boundary markers on the Carapace native fallback path", async () => {
     const nativeStreamFn = vi.fn(async (_model, context, _options) => context);
     useNativeStreamFn(nativeStreamFn as never);
     const { streamFn } = resolveEmbeddedAgentStream({

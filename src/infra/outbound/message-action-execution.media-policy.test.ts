@@ -1,10 +1,10 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import {
@@ -95,7 +95,7 @@ describe("runMessageAction plugin dispatch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "policydest",
@@ -163,7 +163,7 @@ describe("runMessageAction plugin dispatch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "policydest",
@@ -249,7 +249,7 @@ describe("runMessageAction plugin dispatch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "policydest",
@@ -326,7 +326,7 @@ describe("runMessageAction plugin dispatch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "policychat",

@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { RequestClient } from "../internal/rest.js";
 import { sendPollDiscord, sendStickerDiscord } from "../send.outbound.js";
@@ -12,7 +12,7 @@ const messageId = "223456789012345678";
 const guildId = "323456789012345678";
 const token = "synthetic-message-body-token";
 const attachment = { id: "423456789012345678", filename: "example.txt", size: 4 };
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: { discord: { token, groupPolicy: "open" } },
 };
 const original = { ...runtime };

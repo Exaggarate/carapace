@@ -1,14 +1,14 @@
 // Memory Core helper module supports test helpers behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterAll, beforeAll } from "vitest";
 import { consolidateMemory } from "./dreaming-consolidation.js";
 import {
@@ -188,7 +188,7 @@ export function createMemoryCoreTestHarness() {
   beforeAll(async () => {
     await configureMemoryCoreDreamingStateForTests();
     fixtureRoot = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "memory-core-test-fixtures-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "memory-core-test-fixtures-"),
     );
   });
 
@@ -198,7 +198,7 @@ export function createMemoryCoreTestHarness() {
     }
     // The agent close releases its leases through shared state and reopens it, so the
     // shared handle is released second; otherwise Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     await fs.rm(fixtureRoot, { recursive: true, force: true });
     resetMemoryCoreDreamingStateForTests();

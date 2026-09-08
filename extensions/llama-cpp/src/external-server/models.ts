@@ -1,13 +1,13 @@
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   SELF_HOSTED_DEFAULT_CONTEXT_WINDOW,
   SELF_HOSTED_DEFAULT_COST,
   SELF_HOSTED_DEFAULT_MAX_TOKENS,
-} from "openclaw/plugin-sdk/provider-setup";
-import { asBoolean, asPositiveSafeInteger } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-setup";
+import { asBoolean, asPositiveSafeInteger } from "carapace/plugin-sdk/string-coerce-runtime";
 import { LLAMA_SERVER_DEFAULT_ORIGIN } from "./defaults.js";
 import { normalizeLlamaServerProviderConfig } from "./endpoint.js";
 
@@ -109,7 +109,7 @@ function buildCompat(
   };
 }
 
-/** Maps one llama-server model row plus optional runtime properties into OpenClaw config. */
+/** Maps one llama-server model row plus optional runtime properties into Carapace config. */
 export function mapLlamaServerModel(
   row: LlamaServerModelWire,
   props?: LlamaServerPropsWire,

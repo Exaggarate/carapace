@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { InternalSessionEntry as SessionEntry } from "../../config/sessions.js";
 import {
   loadSessionEntry,
@@ -7,7 +7,7 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { buildRestartRecoveryExpectedState } from "../../config/sessions/session-transcript-turn-state.js";
 import { appendAssistantMessageToSessionTranscript } from "../../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayRecoveryRuntime } from "../../gateway/server-instance-runtime.types.js";
 import type { DeliveryContext } from "../../utils/delivery-context.shared.js";
 import type { MainSessionRecoveryObservation } from "./main-session-recovery-state.js";
@@ -113,7 +113,7 @@ async function claimMainRestartRecoveryTombstone(
 
 export async function tombstoneMainRestartRecoveryWithNotice(params: {
   agentId: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   entry: SessionEntry;
   gatewayRuntime: GatewayRecoveryRuntime;
   observation: MainSessionRecoveryObservation;

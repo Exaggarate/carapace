@@ -5,7 +5,7 @@
 import {
   preserveCompactionReplayWindow,
   resolveCompactionReplayEligibility,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
 import { captureOwnedTranscriptWriteAssertion } from "../../config/sessions/transcript-write-context.js";
 import type { ContextEngineSessionTarget } from "../../context-engine/types.js";
@@ -246,7 +246,7 @@ export async function executePreparedCompactionSession(runtime: PreparedCompacti
         },
       });
       // The session runtime treats `tools` as a name allowlist during session creation. Pass the
-      // exact OpenClaw-managed registrations so custom tools survive startup.
+      // exact Carapace-managed registrations so custom tools survive startup.
       const sessionToolAllowlist = toSessionToolAllowlist(collectRegisteredToolNames(customTools));
 
       const providerStreamFn = resolveCompactionProviderStream({

@@ -149,7 +149,7 @@ describe("export name collision guard", () => {
         export const runThing = bind((runtime) => runtime.runThing);
       `,
       `
-        import { createLazyRuntimeMethod } from "openclaw/plugin-sdk/lazy-runtime";
+        import { createLazyRuntimeMethod } from "carapace/plugin-sdk/lazy-runtime";
         export const runThing = createLazyRuntimeMethod(loadRuntime, (runtime) => runtime.runThing);
       `,
     ];
@@ -239,7 +239,7 @@ describe("export name collision guard", () => {
   });
 
   it("discovers JavaScript source collisions", async () => {
-    await withTempDir("openclaw-export-collisions-", async (repoRoot) => {
+    await withTempDir("carapace-export-collisions-", async (repoRoot) => {
       const sourceRoot = path.join(repoRoot, "src");
       await fs.mkdir(sourceRoot);
       await Promise.all([
@@ -268,7 +268,7 @@ describe("export name collision guard", () => {
   });
 
   it("marks repository collisions exposed through a package-backed Plugin SDK module", async () => {
-    await withTempDir("openclaw-export-collisions-sdk-", async (repoRoot) => {
+    await withTempDir("carapace-export-collisions-sdk-", async (repoRoot) => {
       await Promise.all([
         fs.mkdir(path.join(repoRoot, "src/plugin-sdk"), { recursive: true }),
         fs.mkdir(path.join(repoRoot, "packages"), { recursive: true }),

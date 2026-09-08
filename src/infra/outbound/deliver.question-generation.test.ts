@@ -2,7 +2,7 @@
 import {
   createQuestionReactionTargetStore,
   questionGatewayRuntime,
-} from "openclaw/plugin-sdk/question-gateway-runtime";
+} from "carapace/plugin-sdk/question-gateway-runtime";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Question } from "../../../packages/gateway-protocol/src/index.js";
 import type { ChannelOutboundAdapter } from "../../channels/plugins/types.public.js";
@@ -127,7 +127,7 @@ describe("generic outbound question generation", () => {
   });
 
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", fixtures.tmpDir());
+    vi.stubEnv("CARAPACE_STATE_DIR", fixtures.tmpDir());
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
   });
 

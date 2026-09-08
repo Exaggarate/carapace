@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 // Covers dependency-health projection for bundled-origin plugins in registry snapshots.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 import { buildPluginRegistrySnapshotReport } from "./status.js";
@@ -23,7 +23,7 @@ function snapshotBundledPluginWithMissingDependency(params: {
   pluginId: string;
   bundledDist?: false;
 }) {
-  const tempRoot = makeTrackedTempDir("openclaw-plugin-status-deps", tempDirs);
+  const tempRoot = makeTrackedTempDir("carapace-plugin-status-deps", tempDirs);
   const bundledRoot = path.join(tempRoot, "bundled");
   const pluginRoot = path.join(bundledRoot, params.pluginId);
   fs.mkdirSync(pluginRoot, { recursive: true });
@@ -37,9 +37,9 @@ function snapshotBundledPluginWithMissingDependency(params: {
     // dependencies plugin-local, so the bundled origin alone must not hide them.
     const packageJsonPath = path.join(pluginRoot, "package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-      openclaw: Record<string, unknown>;
+      carapace: Record<string, unknown>;
     };
-    packageJson.openclaw.build = { bundledDist: false };
+    packageJson.carapace.build = { bundledDist: false };
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), "utf8");
   }
   const report = buildPluginRegistrySnapshotReport({

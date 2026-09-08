@@ -15,7 +15,7 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function fixture() {
-  const root = tempDirs.make("openclaw-quiescence-test-");
+  const root = tempDirs.make("carapace-quiescence-test-");
   const home = path.join(root, "home");
   let workspace = path.join(root, "workspace");
   const bin = path.join(root, "bin");
@@ -26,7 +26,7 @@ async function fixture() {
   await fs.mkdir(bin);
   await fs.writeFile(
     path.join(bin, "ps"),
-    '#!/bin/sh\ncase "$*" in\n  *"stat=,lstart= -p"*|*"lstart= -p"*) exec /bin/ps "$@" ;;\n  *) printf "%s %s %s S Tue Jul 15 08:00:00 2026\\n" "$$" "$PPID" "$(id -u)"; if [ -f "$OPENCLAW_TEST_PS_EXTRA" ]; then extra_pid=$(cat "$OPENCLAW_TEST_PS_EXTRA"); /bin/ps -o pid=,ppid=,uid=,stat=,lstart= -p "$extra_pid" || true; fi ;;\nesac\n',
+    '#!/bin/sh\ncase "$*" in\n  *"stat=,lstart= -p"*|*"lstart= -p"*) exec /bin/ps "$@" ;;\n  *) printf "%s %s %s S Tue Jul 15 08:00:00 2026\\n" "$$" "$PPID" "$(id -u)"; if [ -f "$CARAPACE_TEST_PS_EXTRA" ]; then extra_pid=$(cat "$CARAPACE_TEST_PS_EXTRA"); /bin/ps -o pid=,ppid=,uid=,stat=,lstart= -p "$extra_pid" || true; fi ;;\nesac\n',
   );
   await fs.chmod(path.join(bin, "ps"), 0o755);
   return {
@@ -37,7 +37,7 @@ async function fixture() {
     env: {
       ...process.env,
       HOME: home,
-      OPENCLAW_TEST_PS_EXTRA: extraProcessPath,
+      CARAPACE_TEST_PS_EXTRA: extraProcessPath,
       PATH: `${bin}:${process.env.PATH ?? ""}`,
     },
   };
@@ -74,7 +74,7 @@ async function quiesce(
 
 function leasePath(home: string, workspace: string, nonce: string) {
   const key = createHash("sha256").update(workspace).digest("hex");
-  return path.join(home, ".openclaw-worker", "quiescence", `${key}.${nonce}.json`);
+  return path.join(home, ".carapace-worker", "quiescence", `${key}.${nonce}.json`);
 }
 
 // Absolute /bin/ps so the fixture's stubbed PATH entry cannot answer for the real host.
@@ -303,7 +303,7 @@ describe("remote workspace quiescence scripts", () => {
 case "$*" in
   *"lstart= -p"*)
     for pid do :; done
-    printf "%s\n" "$pid" > "$OPENCLAW_TEST_WATCHDOG_PID"
+    printf "%s\n" "$pid" > "$CARAPACE_TEST_WATCHDOG_PID"
     trap '' TERM
     while true; do sleep 1; done
     ;;
@@ -317,7 +317,7 @@ esac
       [process.execPath, "-e", REMOTE_WORKSPACE_QUIESCE_JS, input.workspace, "10000", "dedicated"],
       {
         timeoutMs: 10_000,
-        baseEnv: { ...input.env, OPENCLAW_TEST_WATCHDOG_PID: watchdogPidPath },
+        baseEnv: { ...input.env, CARAPACE_TEST_WATCHDOG_PID: watchdogPidPath },
       },
     );
 
@@ -325,7 +325,7 @@ esac
     expect(result.code).not.toBe(0);
     const watchdogPid = Number((await fs.readFile(watchdogPidPath, "utf8")).trim());
     expect(Number.isSafeInteger(watchdogPid)).toBe(true);
-    const leaseDirectory = path.join(input.home, ".openclaw-worker", "quiescence");
+    const leaseDirectory = path.join(input.home, ".carapace-worker", "quiescence");
     await expect(fs.readdir(leaseDirectory)).resolves.toEqual([]);
     await vi.waitFor(() => {
       expect(() => process.kill(watchdogPid, 0)).toThrow();

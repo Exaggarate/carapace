@@ -5,10 +5,10 @@ import { requireActivePluginRegistry } from "./runtime.js";
 import type {
   AgentPromptGuidance,
   AgentPromptSurfaceKind,
-  OpenClawPluginCommandDefinition,
+  CarapacePluginCommandDefinition,
 } from "./types.js";
 
-export type RegisteredPluginCommand = OpenClawPluginCommandDefinition & {
+export type RegisteredPluginCommand = CarapacePluginCommandDefinition & {
   pluginId: string;
   pluginName?: string;
   pluginRoot?: string;

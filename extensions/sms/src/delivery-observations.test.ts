@@ -1,8 +1,8 @@
 import type {
   PluginStateEntry,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   createSmsDeliveryRecorder,

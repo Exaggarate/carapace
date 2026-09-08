@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { addSessionMember } from "../../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   abandonTaskSuggestionAcceptance,
   beginTaskSuggestionAcceptance,
@@ -29,7 +29,7 @@ import type { GatewayClient, RespondFn } from "./types.js";
 const mocks = vi.hoisted(() => ({ handleChatSend: vi.fn() }));
 const sessionReadState = vi.hoisted(() => ({ mode: "normal" as "normal" | "present" | "throw" }));
 type TaskOperatorRole = "none" | "view" | "suggest" | "restricted";
-const taskRoleConfig = (role: TaskOperatorRole): OpenClawConfig => ({
+const taskRoleConfig = (role: TaskOperatorRole): CarapaceConfig => ({
   gateway: {
     roles: {
       default: "guest",
@@ -118,14 +118,14 @@ beforeEach(async () => {
 afterEach(async () => {
   await dismissPendingTaskSuggestions();
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("task suggestion gateway methods", () => {
   it.each(["none", "view", "suggest", "restricted"] as const)(
     "enforces %s role ownership, session access, and agent-creation boundaries",
     async (roleName) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const { owner, profile, taskId, request } = await createTaskRoleScenario(
           roleName,
           roleName === "restricted",
@@ -597,7 +597,7 @@ describe("task suggestion gateway methods", () => {
   });
 
   it("sends an idle session acceptance as a new turn and replays its source key", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: SOURCE_SESSION_KEY },
         { sessionId: "source-session", updatedAt: 1 },
@@ -632,7 +632,7 @@ describe("task suggestion gateway methods", () => {
   });
 
   it("rejects a missing source session and restores the suggestion", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const taskId = await createSourceSuggestion();
       const deleteSession = vi.spyOn(sessionDeleteHandlers, "sessions.delete");
 
@@ -653,7 +653,7 @@ describe("task suggestion gateway methods", () => {
   });
 
   it("restores a session-mode suggestion after delivery failure without deleting its source", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: SOURCE_SESSION_KEY },
         { sessionId: "source-session", updatedAt: 1 },
@@ -794,7 +794,7 @@ describe("task suggestion gateway methods", () => {
                 worktreePreserved: {
                   id: "preserved-worktree",
                   path: "/preserved-worktree",
-                  branch: "openclaw/preserved-worktree",
+                  branch: "carapace/preserved-worktree",
                   reason: "cleanup-failed",
                 },
               }

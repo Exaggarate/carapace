@@ -6,10 +6,10 @@ import {
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   type ChannelIngressMonitorLifecycle,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import {
   inspectNostrIngressEvent,
   isNostrIngressRecord,

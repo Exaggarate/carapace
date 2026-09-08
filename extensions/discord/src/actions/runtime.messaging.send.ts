@@ -1,12 +1,12 @@
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
+import { readBooleanParam } from "carapace/plugin-sdk/boolean-param";
 import {
   assertMediaNotDataUrl,
   jsonResult,
   readPositiveIntegerParam,
   readStringArrayParam,
   readStringParam,
-} from "openclaw/plugin-sdk/channel-actions";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { isDiscordThreadChannelType } from "../channel-type.js";
 import { coerceDiscordComponentParam } from "../components.js";
 import {

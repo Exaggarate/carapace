@@ -131,14 +131,14 @@ async function request(params: {
 }
 
 async function createSerializedHost(options: StandaloneHostBrowserOptions = {}) {
-  const shell = await request({ url: "/__openclaw__/mcp-app" });
+  const shell = await request({ url: "/__carapace__/mcp-app" });
   const source = /<script>([\s\S]+)<\/script>/u.exec(String(shell.end.mock.calls[0]?.[0]))?.[1];
   if (!source) {
     throw new Error("standalone shell script missing");
   }
   const ticket = issueTicket({ sessionKey: "agent:main:main", view, nowMs, secret }).ticket;
   const loaded = await request({
-    url: "/__openclaw__/mcp-app/view",
+    url: "/__carapace__/mcp-app/view",
     authorization: `MCP-App ${ticket}`,
   });
   const payload: unknown = JSON.parse(String(loaded.end.mock.calls[0]?.[0]));

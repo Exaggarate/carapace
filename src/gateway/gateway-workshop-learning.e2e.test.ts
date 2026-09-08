@@ -11,11 +11,11 @@ import {
 import { createDeferred, withTestTimeout } from "../../test/helpers/promise.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { loadSessionEntry, loadTranscriptEventsSync } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
 import { readSkillReviewOutcomes } from "../skills/workshop/collection-review-state.js";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { disconnectGatewayClient, startGatewayWithClient } from "./test-helpers.e2e.js";
 import { buildMockOpenAiResponsesProvider } from "./test-openai-responses-model.js";
 
@@ -74,18 +74,18 @@ describe("Gateway automatic Workshop learning", () => {
     "maintains a complete skill package within Workshop while foreground work continues",
     { timeout: 150_000 },
     async () => {
-      const state = await createOpenClawTestState({
+      const state = await createCarapaceTestState({
         layout: "home",
-        prefix: "openclaw-gateway-workshop-learning-",
+        prefix: "carapace-gateway-workshop-learning-",
         env: {
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         },
       });
       let gateway: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
@@ -213,7 +213,7 @@ describe("Gateway automatic Workshop learning", () => {
               plugins: { slots: { memory: "none" } },
               tools: { profile: "coding" },
               skills: { workshop: { autonomous: { mode: "auto" } } },
-            } satisfies OpenClawConfig;
+            } satisfies CarapaceConfig;
             const workshop = resolveWorkshopSkillsDir(config, "main");
             const skillFile = path.join(workshop, "map-publication", "SKILL.md");
             const supportFile = path.join(

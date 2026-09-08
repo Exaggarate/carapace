@@ -1,6 +1,6 @@
 // WhatsApp monitor inbox behavior split by ownership.
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime-env";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { defaultRuntime } from "carapace/plugin-sdk/runtime-env";
 import { describe, expect, it, vi } from "vitest";
 import {
   controllerContexts,

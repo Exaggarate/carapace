@@ -1,16 +1,16 @@
 // Enrollment roots its identity, device token, bundles, and node-host workspaces
-// under OPENCLAW_STATE_DIR here; deleting it is the cross-session data boundary.
+// under CARAPACE_STATE_DIR here; deleting it is the cross-session data boundary.
 // Crabbox's separate checkpoint workdir never receives session files (--no-sync).
 // SSH session workspaces must also be scrubbed; sibling bundle installs and git-seeds
-// in .openclaw-worker are machine-level caches and intentionally survive.
+// in .carapace-worker are machine-level caches and intentionally survive.
 export const SCRUB_WORKER_STATE = `set -eu
-worker_root="$HOME/.openclaw/cloud-workers"
+worker_root="$HOME/.carapace/cloud-workers"
 node <<'CRABBOX_SCRUB_NODE_SCRIPT'
 const fs = require("node:fs");
 const path = require("node:path");
 const os = require("node:os");
-const root = path.join(os.homedir(), ".openclaw", "cloud-workers");
-const runtimeRoot = path.join(os.homedir(), ".openclaw-worker", "node-runtimes") + path.sep;
+const root = path.join(os.homedir(), ".carapace", "cloud-workers");
+const runtimeRoot = path.join(os.homedir(), ".carapace-worker", "node-runtimes") + path.sep;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 (async () => {
   if (!fs.existsSync(root)) return;
@@ -31,7 +31,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const runtime = fs.realpathSync(path.join(stateDir, "runtime"));
       const cwd = fs.realpathSync(path.join("/proc", pidText, "cwd"));
       const env = fs.readFileSync(path.join("/proc", pidText, "environ"), "utf8").split("\\0");
-      if (!runtime.startsWith(runtimeRoot) || cwd !== runtime || Number(fields[2]) !== pid || !env.includes("OPENCLAW_STATE_DIR=" + stateDir)) throw new Error("Cannot scrub a worker whose live node ownership does not match");
+      if (!runtime.startsWith(runtimeRoot) || cwd !== runtime || Number(fields[2]) !== pid || !env.includes("CARAPACE_STATE_DIR=" + stateDir)) throw new Error("Cannot scrub a worker whose live node ownership does not match");
       return true;
     };
     if (!owned()) continue;
@@ -44,7 +44,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 })().catch((error) => { console.error(error.message); process.exitCode = 1; });
 CRABBOX_SCRUB_NODE_SCRIPT
 rm -rf "$worker_root"
-rm -rf "$HOME/.openclaw-worker/workspaces"
+rm -rf "$HOME/.carapace-worker/workspaces"
 # Crabbox's forwarded-env cleanup only warns on failure; native images include its workdir.
 # Replace the shell for this final command so deleting its uploaded script cannot interrupt cleanup.
 exec rm -rf -- .crabbox/env .crabbox/scripts

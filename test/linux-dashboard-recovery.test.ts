@@ -59,7 +59,7 @@ test("missing CLI mode offers installation without retrying bootstrap", async ()
     window,
   });
 
-  assert.equal(elements.get("#title")?.textContent, "OpenClaw needs the CLI");
+  assert.equal(elements.get("#title")?.textContent, "Carapace needs the CLI");
   assert.equal(elements.get("#install-controls")?.classList.contains("hidden"), false);
   assert.equal(invoked.includes("bootstrap"), false);
 });

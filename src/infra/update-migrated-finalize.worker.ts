@@ -9,9 +9,9 @@ import { finishUpdate } from "../cli/update-cli/update-command-post-update.js";
 import { UpdateCommandFailure } from "../cli/update-cli/update-command-result.js";
 import { createWindowsTaskAutoStartGuard } from "../cli/update-cli/update-command-service-maintenance.js";
 import { createWindowsTaskAutoStartRecovery } from "../cli/update-cli/update-command-windows-task.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { closeOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { closeCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { createManagedUpdateRequesterAuthority } from "./update-requester-authority.js";
 import { adoptUpdateRun, getUpdateRun, recordUpdateRunStep } from "./update-run-ledger.js";
 
@@ -24,8 +24,8 @@ async function finalizeMigratedUpdate(): Promise<void> {
     }
     process.stdout.write(
       JSON.stringify({
-        state: OPENCLAW_STATE_SCHEMA_VERSION,
-        agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+        state: CARAPACE_STATE_SCHEMA_VERSION,
+        agent: CARAPACE_AGENT_SCHEMA_VERSION,
       }),
     );
     return;
@@ -124,4 +124,4 @@ void finalizeMigratedUpdate()
     process.stderr.write(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   })
-  .finally(() => closeOpenClawStateDatabase());
+  .finally(() => closeCarapaceStateDatabase());

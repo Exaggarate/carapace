@@ -1,5 +1,5 @@
-import { createInboundDebouncer } from "openclaw/plugin-sdk/channel-inbound-debounce";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { createInboundDebouncer } from "carapace/plugin-sdk/channel-inbound-debounce";
+import { fanInChannelIngressLifecycles } from "carapace/plugin-sdk/channel-ingress-runtime";
 import { getPrimaryIdentityId } from "../identity.js";
 import { requireWhatsAppInboundAdmission } from "./admission.js";
 import type { WhatsAppIngressLifecycle, WhatsAppReadReceiptTarget } from "./durable-receive.js";

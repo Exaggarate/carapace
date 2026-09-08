@@ -1,6 +1,6 @@
 // Store entry shape normalization rejects unsafe persisted metadata before runtime use.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeSessionColorValue,
   normalizeSessionIconValue,

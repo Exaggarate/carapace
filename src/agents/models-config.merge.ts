@@ -3,9 +3,9 @@
  * preserved secret fields. Setup and doctor flows use this boundary to update
  * model catalogs without discarding existing credentials.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asPositiveFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asPositiveFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { mergeModelCost } from "../config/model-cost.js";
 import { isNonSecretApiKeyMarker } from "./model-auth-markers.js";
 import { resolveCatalogOwnedModelCompat } from "./model-compat-catalog.js";

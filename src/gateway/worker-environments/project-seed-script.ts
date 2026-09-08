@@ -37,7 +37,7 @@ const ownedDirectory = (parent, target) => {
 };
 (async () => {
   const home = fs.realpathSync(os.homedir());
-  const workerRoot = path.join(home, ".openclaw-worker");
+  const workerRoot = path.join(home, ".carapace-worker");
   fs.mkdirSync(workerRoot, { recursive: true, mode: 0o700 });
   ownedDirectory(home, workerRoot);
   const root = path.join(workerRoot, "git-seeds");

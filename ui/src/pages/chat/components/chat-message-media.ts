@@ -1,6 +1,6 @@
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asNonArrayRecord, asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asNonArrayRecord, asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { GatewaySessionRow } from "../../../api/types.ts";
 import type { ImageLightboxItem } from "../../../components/image-lightbox.ts";
 import { t } from "../../../i18n/index.ts";
@@ -429,7 +429,7 @@ export function projectMessageMedia(
     });
     return true;
   };
-  const layout = asNonArrayRecord(asNonArrayRecord(record["__openclaw"]).mediaImageLayout);
+  const layout = asNonArrayRecord(asNonArrayRecord(record["__carapace"]).mediaImageLayout);
   const slots = Array.isArray(layout.slots) ? layout.slots.map(asNonArrayRecord) : [];
   const factIndexes = slots.length > 0 ? new Set(slots.map((slot) => slot.factIndex)) : undefined;
   // Reject ambiguous layouts before deduplication: fact positions, including
@@ -505,7 +505,7 @@ export function projectMessageMedia(
       }
       // Separate blocks are separate attachments, including identical uploads.
       images.push(...blockImages);
-    } else if (block.type === "openclaw_pairing_qr") {
+    } else if (block.type === "carapace_pairing_qr") {
       const expiresAt = asFiniteNumber(block.expiresAtMs);
       if (expiresAt !== undefined) {
         if (expiresAt <= nowMs) {

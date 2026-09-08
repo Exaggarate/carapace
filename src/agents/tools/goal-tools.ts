@@ -11,7 +11,7 @@ import {
   updateSessionGoalStatus,
 } from "../../config/sessions/goals.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 import { stringEnum } from "../schema/typebox.js";
 import {
@@ -26,7 +26,7 @@ type GoalToolOptions = {
   agentSessionKey?: string;
   runSessionKey?: string;
   sessionAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 type GoalSessionScope = {

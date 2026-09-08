@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { normalizeProgressCardInput, ProgressCardInputError } from "./progress-card-input.js";
 
 const PLAN_PROGRESS_TOOL_NAMES = new Set(["progress_card", "update_plan"]);

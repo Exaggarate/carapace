@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { isRecord } from "./lib/record-shared.mjs";
 import { validateForwardAncestry } from "./pr-lib/crabbox-gate-contract.mjs";
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const BROKER_WORKFLOW = ".github/workflows/frv-proof-broker.yml";
 const FIXTURE_WORKFLOW = ".github/workflows/frv-proof-fixture.yml";
 const FIXTURE_WORKFLOW_ID = "frv-proof-fixture.yml";

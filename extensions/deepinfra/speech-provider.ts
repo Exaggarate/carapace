@@ -2,8 +2,8 @@
 import {
   createOpenAiCompatibleSpeechProvider,
   type SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-provider";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/speech-provider";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEEPINFRA_BASE_URL,
   DEEPINFRA_TTS_FALLBACK_MODELS,

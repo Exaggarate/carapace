@@ -8,7 +8,7 @@ import { isDeepStrictEqual } from "node:util";
 import {
   AgentHarnessPreflightError,
   resolveDefaultAgentDir,
-} from "openclaw/plugin-sdk/agent-harness-registration";
+} from "carapace/plugin-sdk/agent-harness-registration";
 import {
   ensureAuthProfileStore,
   findPersistedAuthProfileCredential,
@@ -19,12 +19,12 @@ import {
   type AuthProfileCredential,
   type AuthProfileStore,
   type OAuthCredential,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
   hasUsableOAuthCredential,
   resolveOpenAICodexAuthIdentity,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveProviderIdForAuth } from "openclaw/plugin-sdk/provider-auth-aliases";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveProviderIdForAuth } from "carapace/plugin-sdk/provider-auth-aliases";
 import {
   CODEX_AUTH_JSON_FILENAME,
   CODEX_APP_SERVER_API_KEY_ENV_VARS,
@@ -178,13 +178,13 @@ function resolveUnimportedAgentCodexAuthMessage(params: {
   }
   const codexHome = resolveCodexAppServerHomeDir(params.agentDir);
   const authPath = path.join(codexHome, CODEX_AUTH_JSON_FILENAME);
-  // OpenClaw-owned starts force ephemeral Codex auth, so this file would otherwise be
+  // Carapace-owned starts force ephemeral Codex auth, so this file would otherwise be
   // ignored and the operator would receive only the downstream authentication error.
   if (!fsSync.existsSync(authPath)) {
     return undefined;
   }
   const targetAgentId = params.agentId?.trim() || "<agent-id>";
-  return `A Codex auth file exists at ${authPath}, but agent-scoped Codex runs use OpenClaw's auth store and do not read that file. Preview only that credential import with \`openclaw migrate plan codex --from <codex-home> --agent ${targetAgentId} --include-secrets --item auth:openai\`, then run \`openclaw migrate apply codex --from <codex-home> --agent ${targetAgentId} --include-secrets --item auth:openai --yes\`. If the plan finds no credentials, remove the stale auth file.`;
+  return `A Codex auth file exists at ${authPath}, but agent-scoped Codex runs use Carapace's auth store and do not read that file. Preview only that credential import with \`carapace migrate plan codex --from <codex-home> --agent ${targetAgentId} --include-secrets --item auth:openai\`, then run \`carapace migrate apply codex --from <codex-home> --agent ${targetAgentId} --include-secrets --item auth:openai --yes\`. If the plan finds no credentials, remove the stale auth file.`;
 }
 
 type CodexAppServerPreparedAuthProfileSnapshot = {
@@ -282,7 +282,7 @@ export async function resolveCodexAppServerPreparedAuthHandoff(params: {
 }) {
   // A user-home app-server owns the operator's native Codex account. Codex persists
   // api-key logins into CODEX_HOME/auth.json and swaps the live account for external
-  // token logins, so a prepared OpenClaw handoff here would rewrite the account that
+  // token logins, so a prepared Carapace handoff here would rewrite the account that
   // Codex CLI and Desktop share. Native homes are verified, never logged into.
   const usesNativeHome = params.homeScope === "user";
   if (params.requirePreparedAuth && usesNativeHome) {
@@ -687,7 +687,7 @@ export async function applyCodexAppServerAuthProfile(params: {
           });
   if (params.authRequirement === "subscription" && loginParams?.type !== "chatgptAuthTokens") {
     throw createCodexAppServerAuthError(
-      "Codex subscription auth profile could not produce login credentials. Sign in with `openclaw models auth login --provider openai`, select that profile, then retry.",
+      "Codex subscription auth profile could not produce login credentials. Sign in with `carapace models auth login --provider openai`, select that profile, then retry.",
     );
   }
   if (
@@ -735,14 +735,14 @@ async function assertNativeCodexAccountMatchesRoute(
   if (authRequirement === "subscription") {
     if (accountType !== "chatgpt") {
       throw createCodexAppServerAuthError(
-        'Codex subscription route requires ChatGPT auth in the native Codex home. Run `codex login` for that home, or use appServer.homeScope="agent" with an OpenClaw OAuth profile, then retry.',
+        'Codex subscription route requires ChatGPT auth in the native Codex home. Run `codex login` for that home, or use appServer.homeScope="agent" with an Carapace OAuth profile, then retry.',
       );
     }
     return;
   }
   if (accountType === "chatgpt") {
     throw createCodexAppServerAuthError(
-      'Codex Platform route requires an API-key account, but the native Codex home is signed in with a ChatGPT subscription. Sign that home in with `codex login --with-api-key`, or set appServer.homeScope="agent" so OpenClaw can inject its own key.',
+      'Codex Platform route requires an API-key account, but the native Codex home is signed in with a ChatGPT subscription. Sign that home in with `codex login --with-api-key`, or set appServer.homeScope="agent" so Carapace can inject its own key.',
     );
   }
 }
@@ -772,12 +772,12 @@ async function resolveCodexAppServerAuthProfileLoginParams(params: {
   const profile = profileId ? store.profiles[profileId] : undefined;
   if (profileId && !profile) {
     throw new CodexAppServerAuthProfileUnavailableError(
-      `Codex app-server auth profile "${profileId}" was not found. Select an existing OpenAI profile or sign in again with OpenClaw, then retry.`,
+      `Codex app-server auth profile "${profileId}" was not found. Select an existing OpenAI profile or sign in again with Carapace, then retry.`,
     );
   }
   if (profileId && profile && !isCodexAppServerAuthProfileCredential(profile)) {
     throw new CodexAppServerAuthProfileUnavailableError(
-      `Codex app-server auth profile "${profileId}" must use the canonical OpenAI auth provider; run "openclaw doctor --fix" to migrate legacy provider IDs.`,
+      `Codex app-server auth profile "${profileId}" must use the canonical OpenAI auth provider; run "carapace doctor --fix" to migrate legacy provider IDs.`,
     );
   }
   return await resolveCodexAppServerAuthProfileLoginParamsInternal({
@@ -820,7 +820,7 @@ export async function refreshCodexAppServerAuthTokens(params: {
   });
   if (!loginParams || loginParams.type !== "chatgptAuthTokens") {
     throw new Error(
-      "Codex app-server ChatGPT token refresh requires an OAuth auth profile. Sign in with `openclaw models auth login --provider openai`, select that profile, then retry.",
+      "Codex app-server ChatGPT token refresh requires an OAuth auth profile. Sign in with `carapace models auth login --provider openai`, select that profile, then retry.",
     );
   }
   if (previousAccountId && loginParams.chatgptAccountId !== previousAccountId) {
@@ -859,12 +859,12 @@ async function resolveCodexAppServerAuthProfileLoginParamsInternal(params: {
   const credential = store.profiles[profileId];
   if (!credential) {
     throw new CodexAppServerAuthProfileUnavailableError(
-      `Codex app-server auth profile "${profileId}" was not found. Select an existing OpenAI profile or sign in again with OpenClaw, then retry.`,
+      `Codex app-server auth profile "${profileId}" was not found. Select an existing OpenAI profile or sign in again with Carapace, then retry.`,
     );
   }
   if (!isCodexAppServerAuthProfileCredential(credential)) {
     throw new CodexAppServerAuthProfileUnavailableError(
-      `Codex app-server auth profile "${profileId}" must use the canonical OpenAI auth provider; run "openclaw doctor --fix" to migrate legacy provider IDs.`,
+      `Codex app-server auth profile "${profileId}" must use the canonical OpenAI auth provider; run "carapace doctor --fix" to migrate legacy provider IDs.`,
     );
   }
   const loginParams = await resolveLoginParamsForCredential(profileId, credential, {
@@ -1019,7 +1019,7 @@ async function resolveOAuthCredentialForCodexAppServer(
     });
     if (!refreshedRuntimeCredential?.access?.trim()) {
       throw new Error(
-        `Codex app-server auth profile "${profileId}" could not refresh. Sign in again with OpenClaw, then retry.`,
+        `Codex app-server auth profile "${profileId}" could not refresh. Sign in again with Carapace, then retry.`,
       );
     }
     store.profiles[profileId] = refreshedRuntimeCredential;
@@ -1116,7 +1116,7 @@ async function resolveScopedOAuthCredential(params: {
     const refreshed = await refreshOAuthCredentialForRuntime({ credential });
     if (!refreshed?.access?.trim()) {
       throw new Error(
-        `Codex app-server auth profile "${params.profileId}" could not refresh. Sign in again with OpenClaw, then retry.`,
+        `Codex app-server auth profile "${params.profileId}" could not refresh. Sign in again with Carapace, then retry.`,
       );
     }
     if (!isDeepStrictEqual(params.store.profiles[params.profileId], credential)) {

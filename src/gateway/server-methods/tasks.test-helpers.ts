@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { TaskRecord } from "../../tasks/task-registry.types.js";
 import { tasksHandlers } from "./tasks.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
@@ -21,7 +21,7 @@ export function identifiedClient(
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes,
     },

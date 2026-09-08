@@ -1,7 +1,7 @@
 // Slack plugin module implements sent thread cache behavior.
-import { createPersistentDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
-import { createPluginStateErrorReporter } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { createPersistentDedupeCache } from "carapace/plugin-sdk/dedupe-runtime";
+import { resolveGlobalSingleton } from "carapace/plugin-sdk/global-singleton";
+import { createPluginStateErrorReporter } from "carapace/plugin-sdk/plugin-state-runtime";
 import { getOptionalSlackRuntime } from "./runtime.js";
 
 /**
@@ -23,8 +23,8 @@ type SlackThreadParticipationRecord = {
  * Keep Slack thread participation shared across bundled chunks so thread
  * auto-reply gating does not diverge between prepare/dispatch call paths.
  */
-const SLACK_THREAD_PARTICIPATION_KEY = Symbol.for("openclaw.slackThreadParticipation");
-const SLACK_THREAD_FAILURE_NOTICES_KEY = Symbol.for("openclaw.slackThreadFailureNotices");
+const SLACK_THREAD_PARTICIPATION_KEY = Symbol.for("carapace.slackThreadParticipation");
+const SLACK_THREAD_FAILURE_NOTICES_KEY = Symbol.for("carapace.slackThreadFailureNotices");
 const threadParticipation = createPersistentDedupeCache<SlackThreadParticipationRecord>({
   globalKey: SLACK_THREAD_PARTICIPATION_KEY,
   // Participation remains valid until bounded oldest-entry eviction removes it.

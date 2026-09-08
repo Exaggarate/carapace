@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { DatabaseSync } from "node:sqlite";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { Selectable } from "kysely";
 import {
   isAgentEventLifecycleGenerationCurrent,
@@ -13,13 +13,13 @@ import {
 import { stageSqliteTransactionState } from "../../infra/sqlite-post-commit.js";
 import type { PersistedUserTurnMessage } from "../../sessions/user-turn-transcript.types.js";
 import { resolveGlobalSingleton } from "../../shared/global-singleton.js";
-import type { SessionPendingInputs } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { SessionPendingInputs } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
   ensureSessionPendingInputsSchema,
   hasSessionPendingInputsSchema,
-} from "../../state/openclaw-agent-pending-inputs-schema.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+} from "../../state/carapace-agent-pending-inputs-schema.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { getSessionKysely, type ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
 
 export type SessionPendingInputState = "queued" | "interrupted" | "cancelled";
@@ -36,7 +36,7 @@ export type SessionPendingInputPage = {
   nextBefore?: number;
 };
 export type SessionPendingInputRow = Selectable<SessionPendingInputs>;
-type PendingInputDatabase = Pick<OpenClawAgentDatabase, "db" | "path">;
+type PendingInputDatabase = Pick<CarapaceAgentDatabase, "db" | "path">;
 
 export type SessionPendingInputOwner = {
   inputId: string;
@@ -47,7 +47,7 @@ export type SessionPendingInputOwner = {
   idempotencyKey: string;
   lifecycleGeneration: string;
   messageJson: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   assertCurrent: () => void;
   finish: (disposition: Exclude<SessionPendingInputState, "queued">) => void;
   restartRecovered?: true;
@@ -55,7 +55,7 @@ export type SessionPendingInputOwner = {
   sources?: readonly SessionPendingInputOwner[];
 };
 
-const owners = resolveGlobalSingleton(Symbol.for("openclaw.sessionPendingInputOwners"), () => ({
+const owners = resolveGlobalSingleton(Symbol.for("carapace.sessionPendingInputOwners"), () => ({
   live: new Map<string, SessionPendingInputOwner>(),
   current: new AsyncLocalStorage<SessionPendingInputOwner>(),
   relocation: new AsyncLocalStorage<{
@@ -66,7 +66,7 @@ const owners = resolveGlobalSingleton(Symbol.for("openclaw.sessionPendingInputOw
 }));
 
 const recoveredDedupeOwners = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPendingInputDedupeRecoveries"),
+  Symbol.for("carapace.sessionPendingInputDedupeRecoveries"),
   () => new WeakSet<SessionPendingInputOwner>(),
 );
 

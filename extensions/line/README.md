@@ -1,11 +1,11 @@
-# OpenClaw LINE
+# Carapace LINE
 
-Official OpenClaw channel plugin for LINE Bot API chats.
+Official Carapace channel plugin for LINE Bot API chats.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/line
+carapace plugins install @carapace/line
 ```
 
-Configure LINE channel credentials in OpenClaw, then connect the bot to the chats where agents should receive and send messages.
+Configure LINE channel credentials in Carapace, then connect the bot to the chats where agents should receive and send messages.

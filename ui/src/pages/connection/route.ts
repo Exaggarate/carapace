@@ -7,6 +7,6 @@ export const page = definePage({
   component: () =>
     import("./connection-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-connection-page></openclaw-connection-page>`,
+      render: () => html`<carapace-connection-page></carapace-connection-page>`,
     })),
 });

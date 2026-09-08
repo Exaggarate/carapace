@@ -18,8 +18,8 @@ import {
   runCodexModelPromptFixtureSync,
 } from "../../scripts/sync-codex-model-prompt-fixture.js";
 import { getPluginModuleLoaderStats } from "../../src/plugins/plugin-module-loader-cache.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../src/state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../../src/state/openclaw-state-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../src/state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../../src/state/carapace-state-db.paths.js";
 import {
   restoreStateDirEnv,
   setStateDirEnv,
@@ -54,15 +54,15 @@ const stateDirEnv = snapshotStateDirEnv();
 
 describe("happy path prompt snapshots", () => {
   beforeAll(async () => {
-    poisonedStateRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-prompt-snapshot-poison-"));
-    const databasePath = resolveOpenClawStateSqlitePath({
+    poisonedStateRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-prompt-snapshot-poison-"));
+    const databasePath = resolveCarapaceStateSqlitePath({
       ...process.env,
-      OPENCLAW_STATE_DIR: poisonedStateRoot,
+      CARAPACE_STATE_DIR: poisonedStateRoot,
     });
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const database = new DatabaseSync(databasePath);
     try {
-      database.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1}`);
+      database.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1}`);
     } finally {
       database.close();
     }
@@ -84,7 +84,7 @@ describe("happy path prompt snapshots", () => {
     const scenarios = [
       { name: "telegram-direct", replacements: [] },
       { name: "discord-group", replacements: ["sessions_spawn"] },
-      { name: "heartbeat-turn", replacements: ["openclaw_direct"] },
+      { name: "heartbeat-turn", replacements: ["carapace_direct"] },
     ];
 
     for (const { name, replacements } of scenarios) {
@@ -180,7 +180,7 @@ describe("happy path prompt snapshots", () => {
   });
 
   it("deletes stale generated snapshot artifacts", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-prompt-snapshot-stale-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-prompt-snapshot-stale-"));
     try {
       const snapshotDir = path.join(root, CODEX_RUNTIME_HAPPY_PATH_PROMPT_SNAPSHOT_DIR);
       fs.mkdirSync(snapshotDir, { recursive: true });
@@ -220,7 +220,7 @@ describe("happy path prompt snapshots", () => {
     );
     expect(telegram).toContain("### User: Codex Config Instructions");
     expect(telegram).toContain("### User: Turn Input Text");
-    expect(telegram).toContain("OpenClaw runtime context for this turn:");
+    expect(telegram).toContain("Carapace runtime context for this turn:");
     expect(telegram).toContain("<SOUL.md contents will be here>");
     expect(telegram).toContain("<IDENTITY.md contents will be here>");
     expect(telegram).toContain("<USER.md contents will be here>");
@@ -245,23 +245,23 @@ describe("happy path prompt snapshots", () => {
       additionalContext: Record<string, { kind: "application" | "untrusted"; value: string }>;
     };
     expect(Object.keys(turn.additionalContext)).toEqual(
-      expect.arrayContaining(["openclaw_current_sender", "openclaw_temporal_context"]),
+      expect.arrayContaining(["carapace_current_sender", "carapace_temporal_context"]),
     );
     let previous = telegram.indexOf("### Developer: Codex Collaboration Mode Instructions");
     const userInput = telegram.indexOf("### User: Turn Input Text");
     const contextTexts: string[] = [];
     // Canonical ASCII keys in Codex's BTreeMap order, independent of the renderer's sorter.
     const keyOrder = [
-      "openclaw_current_sender",
-      "openclaw_source_delivery",
-      "openclaw_temporal_context",
+      "carapace_current_sender",
+      "carapace_source_delivery",
+      "carapace_temporal_context",
     ].filter((key) => Object.hasOwn(turn.additionalContext, key));
     expect(keyOrder).toHaveLength(Object.keys(turn.additionalContext).length);
     for (const key of keyOrder) {
       const entry = turn.additionalContext[key]!;
       const role = entry.kind === "application" ? "Developer" : "User";
       const tag = entry.kind === "application" ? key : `external_${key}`;
-      const index = telegram.indexOf(`### ${role}: OpenClaw Additional Context (${key})`);
+      const index = telegram.indexOf(`### ${role}: Carapace Additional Context (${key})`);
       expect(index).toBeGreaterThan(previous);
       expect(index).toBeLessThan(userInput);
       const text = `<${tag}>${entry.value}</${tag}>`;
@@ -287,7 +287,7 @@ describe("happy path prompt snapshots", () => {
       materializeCodexPromptSnapshot("heartbeat-turn"),
     ]);
     const heartbeatPhrase = "Heartbeat = useful proactive progress";
-    const agentSoulHeading = "## OpenClaw Agent Soul";
+    const agentSoulHeading = "## Carapace Agent Soul";
 
     expect(direct).toContain('"collaborationMode": {');
     expect(direct).toContain('"developer_instructions": "# Collaboration Mode: Default');
@@ -297,15 +297,15 @@ describe("happy path prompt snapshots", () => {
     expect(group).toContain(agentSoulHeading);
     expect(direct).not.toContain(heartbeatPhrase);
     expect(group).not.toContain(heartbeatPhrase);
-    expect(direct).not.toContain("This is an OpenClaw heartbeat turn.");
-    expect(group).not.toContain("This is an OpenClaw heartbeat turn.");
+    expect(direct).not.toContain("This is an Carapace heartbeat turn.");
+    expect(group).not.toContain("This is an Carapace heartbeat turn.");
 
     expect(heartbeat).toContain('"collaborationMode": {');
     expect(heartbeat).toContain('"developer_instructions": "# Collaboration Mode: Default');
     expect(heartbeat).toContain(agentSoulHeading);
-    const openClawRuntimeInstructions = renderedPromptSection(
+    const carapaceRuntimeInstructions = renderedPromptSection(
       heartbeat,
-      "### Developer: OpenClaw Runtime Instructions",
+      "### Developer: Carapace Runtime Instructions",
       "### Developer: Codex Collaboration Mode Instructions",
     );
     const collaborationModeInstructions = renderedPromptSection(
@@ -314,10 +314,10 @@ describe("happy path prompt snapshots", () => {
       "### User: Turn Input Text",
     );
 
-    expect(openClawRuntimeInstructions).not.toContain(heartbeatPhrase);
+    expect(carapaceRuntimeInstructions).not.toContain(heartbeatPhrase);
     expect(collaborationModeInstructions).not.toContain(heartbeatPhrase);
     expect(collaborationModeInstructions).not.toContain("HEARTBEAT.md");
-    expect(heartbeat).not.toContain("This is an OpenClaw heartbeat turn.");
+    expect(heartbeat).not.toContain("This is an Carapace heartbeat turn.");
     expect(heartbeat).not.toContain("simulatedHeartbeatWorkspaceFile");
   });
 
@@ -367,7 +367,7 @@ describe("happy path prompt snapshots", () => {
   });
 
   it("finds the first available default Codex model catalog source", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-catalog-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-catalog-"));
     try {
       const cachePath = path.join(root, ".codex", "models_cache.json");
       fs.mkdirSync(path.dirname(cachePath), { recursive: true });
@@ -386,7 +386,7 @@ describe("happy path prompt snapshots", () => {
   });
 
   it("skips Codex model prompt fixture sync when no default catalog exists", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-catalog-missing-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-catalog-missing-"));
     const chunks: string[] = [];
     try {
       const result = await runCodexModelPromptFixtureSync([], {
@@ -407,7 +407,7 @@ describe("happy path prompt snapshots", () => {
   });
 
   it("writes Codex model prompt fixtures from an explicit catalog", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-catalog-write-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-catalog-write-"));
     try {
       const catalogPath = path.join(root, "models_cache.json");
       const outputDir = path.join(root, "out");

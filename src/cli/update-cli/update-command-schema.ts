@@ -2,8 +2,8 @@ import type { UpdateChannel } from "../../infra/update-channels.js";
 import type { DevUpdateTarget } from "../../infra/update-dev-target.js";
 import { canResolveRegistryVersionForPackageTarget } from "../../infra/update-global.js";
 import { recordUpdateRunPhase } from "../../infra/update-run-ledger.js";
-import type { OpenClawDatabaseSchemaPreflight } from "../../state/openclaw-database-preflight.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
+import type { CarapaceDatabaseSchemaPreflight } from "../../state/carapace-database-preflight.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
 import {
   checkTargetDatabaseSchemasForContexts,
   formatSchemaRefusalLines,
@@ -28,13 +28,13 @@ export async function preflightUpdateCommandSchemas(params: {
   managedServiceRootRedirect: ManagedServiceRootRedirect | null;
   channel: UpdateChannel;
   devTarget?: DevUpdateTarget;
-  packageTargetSchemaVersions?: OpenClawSchemaVersions;
+  packageTargetSchemaVersions?: CarapaceSchemaVersions;
   packageTargetVersion?: string;
   packageInstallSpec?: string | null;
   opts: Pick<UpdateCommandOptions, "dryRun" | "json" | "run">;
   refuseUpdate: (reason: string, message?: string) => Promise<void>;
 }): Promise<
-  { packageSchemaPreflight: OpenClawDatabaseSchemaPreflight; preflightNotes: string[] } | undefined
+  { packageSchemaPreflight: CarapaceDatabaseSchemaPreflight; preflightNotes: string[] } | undefined
 > {
   const {
     root,
@@ -52,7 +52,7 @@ export async function preflightUpdateCommandSchemas(params: {
   } = params;
   const run = opts.run!;
   recordUpdateRunPhase(run.runId, "validating", undefined, { env: run.env });
-  let packageSchemaPreflight: OpenClawDatabaseSchemaPreflight = {
+  let packageSchemaPreflight: CarapaceDatabaseSchemaPreflight = {
     incompatible: [],
     indeterminate: [],
   };

@@ -2,16 +2,16 @@
 import type {
   ChannelAccountSnapshot,
   ChannelRuntimeSurface,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type { TelegramBotInfo } from "./bot-info.js";
 
 export type MonitorTelegramOpts = {
   token?: string;
   accountId?: string;
   ownerAgentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime?: RuntimeEnv;
   channelRuntime?: ChannelRuntimeSurface;
   abortSignal?: AbortSignal;

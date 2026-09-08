@@ -21,7 +21,7 @@ function mountDetailPanel(content: SidebarContent): {
   container.className = "side-panel__panel";
   container.style.cssText = "display:flex;width:480px;height:320px;";
 
-  const panel = document.createElement("openclaw-chat-detail-panel") as DetailPanel;
+  const panel = document.createElement("carapace-chat-detail-panel") as DetailPanel;
   panel.className = "chat-sidebar";
   panel.content = content;
   container.append(panel);

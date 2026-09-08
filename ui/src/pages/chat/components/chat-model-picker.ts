@@ -220,12 +220,12 @@ export function renderChatModelPicker(params: ChatModelPickerParams) {
         ${
           modelToolsUnavailable
             ? html`
-                <openclaw-tooltip .content=${t("chat.modelControls.chatOnlyHelp")}>
+                <carapace-tooltip .content=${t("chat.modelControls.chatOnlyHelp")}>
                   <span class="chat-controls__model-capability-badge" aria-hidden="true">
                     ${icons.alertTriangle}
                     <span>${t("chat.modelControls.chatOnly")}</span>
                   </span>
-                </openclaw-tooltip>
+                </carapace-tooltip>
               `
             : nothing
         }

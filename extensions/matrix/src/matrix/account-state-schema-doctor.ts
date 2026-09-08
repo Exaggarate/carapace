@@ -2,12 +2,12 @@
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawStateDatabaseSchemaMigration } from "openclaw/plugin-sdk/doctor-repair-runtime";
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import type { CarapaceStateDatabaseSchemaMigration } from "carapace/plugin-sdk/doctor-repair-runtime";
+import type { PluginDoctorStateMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { resolveMatrixStateLayoutChildDepth } from "../storage-paths.js";
 import { resolveMatrixSqliteStateEnv } from "./sqlite-state.js";
 
-const STATE_DATABASE_FILENAME = "openclaw.sqlite";
+const STATE_DATABASE_FILENAME = "carapace.sqlite";
 
 async function collectMatrixAccountStateRoots(stateDir: string): Promise<string[]> {
   const matrixRoot = path.join(stateDir, "matrix");
@@ -56,7 +56,7 @@ async function collectMatrixAccountStateRoots(stateDir: string): Promise<string[
 
 function describeMatrixAccountStateMigration(
   storageRootDir: string,
-  migration: OpenClawStateDatabaseSchemaMigration,
+  migration: CarapaceStateDatabaseSchemaMigration,
 ): string {
   return `Matrix account SQLite schema migration (${migration.kind}): ${storageRootDir}`;
 }
@@ -68,11 +68,11 @@ export const matrixAccountStateSchemaMigration: PluginDoctorStateMigration = {
     const preview: string[] = [];
     for (const storageRootDir of await collectMatrixAccountStateRoots(params.stateDir)) {
       // Empty-state startup scans must not load the schema repair runtime.
-      const { detectOpenClawStateDatabaseSchemaMigrations } =
-        await import("openclaw/plugin-sdk/doctor-repair-runtime");
+      const { detectCarapaceStateDatabaseSchemaMigrations } =
+        await import("carapace/plugin-sdk/doctor-repair-runtime");
       const env = resolveMatrixSqliteStateEnv({ env: params.env, stateDir: storageRootDir });
       preview.push(
-        ...detectOpenClawStateDatabaseSchemaMigrations({ env }).map((migration) =>
+        ...detectCarapaceStateDatabaseSchemaMigrations({ env }).map((migration) =>
           describeMatrixAccountStateMigration(storageRootDir, migration),
         ),
       );
@@ -83,13 +83,13 @@ export const matrixAccountStateSchemaMigration: PluginDoctorStateMigration = {
     const changes: string[] = [];
     const warnings: string[] = [];
     for (const storageRootDir of await collectMatrixAccountStateRoots(params.stateDir)) {
-      const { detectOpenClawStateDatabaseSchemaMigrations, repairOpenClawStateDatabaseSchema } =
-        await import("openclaw/plugin-sdk/doctor-repair-runtime");
+      const { detectCarapaceStateDatabaseSchemaMigrations, repairCarapaceStateDatabaseSchema } =
+        await import("carapace/plugin-sdk/doctor-repair-runtime");
       const env = resolveMatrixSqliteStateEnv({ env: params.env, stateDir: storageRootDir });
-      if (detectOpenClawStateDatabaseSchemaMigrations({ env }).length === 0) {
+      if (detectCarapaceStateDatabaseSchemaMigrations({ env }).length === 0) {
         continue;
       }
-      const repaired = repairOpenClawStateDatabaseSchema({ env });
+      const repaired = repairCarapaceStateDatabaseSchema({ env });
       changes.push(
         ...repaired.changes.map((change) => `Matrix account SQLite ${storageRootDir}: ${change}`),
       );

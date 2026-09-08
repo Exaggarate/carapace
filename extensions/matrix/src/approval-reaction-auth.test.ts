@@ -1,5 +1,5 @@
 // Matrix tests cover approval reaction auth behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { isMatrixApprovalReactionAuthorizedSender } from "./approval-reaction-auth.js";
 
@@ -17,7 +17,7 @@ describe("isMatrixApprovalReactionAuthorizedSender", () => {
             execApprovals: { enabled: true, approvers: ["@\u212A:example.org"] },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       expect(
         isMatrixApprovalReactionAuthorizedSender({

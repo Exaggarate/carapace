@@ -1,19 +1,19 @@
-import type { Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { Model } from "carapace/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   createRuntimeEnv,
   createTestWizardPrompter,
   registerSingleProviderPlugin,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
   type ModelDefinitionConfig,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/provider-onboard";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import { applyBasetenConfig } from "./api.js";
@@ -126,7 +126,7 @@ describe("Baseten provider registration", () => {
       if (!method?.runNonInteractive) {
         throw new Error("expected Baseten noninteractive auth method");
       }
-      const config: OpenClawConfig = { models: { mode } };
+      const config: CarapaceConfig = { models: { mode } };
       const interactive = await method.run({
         config,
         env: {},
@@ -186,7 +186,7 @@ describe("Baseten provider registration", () => {
         authoredDefault,
         { ...authoredDefault, id: "operator-only", name: "Authored selection" },
       ];
-      const input: OpenClawConfig = {
+      const input: CarapaceConfig = {
         models: {
           mode,
           providers: {
@@ -201,7 +201,7 @@ describe("Baseten provider registration", () => {
         },
       };
       const original = structuredClone(input);
-      const authenticate = (config: OpenClawConfig) =>
+      const authenticate = (config: CarapaceConfig) =>
         run({
           authChoice: "baseten-api-key",
           opts: {},

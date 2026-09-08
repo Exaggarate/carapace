@@ -1,8 +1,8 @@
 import {
   estimateStringCharsWithMinimumRawWeight as estimateToolResultTextChars,
   type StringCharBudgetOptions,
-} from "@openclaw/normalization-core/cjk-chars";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/cjk-chars";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 
 export { estimateToolResultTextChars };
 

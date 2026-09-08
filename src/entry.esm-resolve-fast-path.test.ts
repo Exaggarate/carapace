@@ -12,7 +12,7 @@ type ResolveHook = (
   nextResolve: (specifier: string) => { url: string },
 ) => { url: string; format?: string | null; shortCircuit?: boolean };
 
-const DIST_ROOT = "file:///opt/openclaw/dist/";
+const DIST_ROOT = "file:///opt/carapace/dist/";
 const DIST_ENTRY_PATH = path.resolve("dist/entry.js");
 const DIST_INDEX_PATH = path.resolve("dist/index.js");
 
@@ -73,9 +73,9 @@ describe("installDistEsmResolveFastPath resolve hook", () => {
 
   it("defers bare, absolute, and non-.js specifiers", () => {
     for (const specifier of [
-      "openclaw/plugin-sdk/plugin-entry",
+      "carapace/plugin-sdk/plugin-entry",
       "node:path",
-      "/opt/openclaw/dist/chunk.js",
+      "/opt/carapace/dist/chunk.js",
       "./chunk.mjs",
       "./chunk.cjs",
       "./manifest.json",
@@ -105,7 +105,7 @@ describe("installDistEsmResolveFastPath gating", () => {
       registered += 1;
       return { deregister: () => {} };
     };
-    const root = "file:///opt/openclaw-idempotent/dist/";
+    const root = "file:///opt/carapace-idempotent/dist/";
     const deps = {
       registerHooks,
       execArgv: ["--trace-warnings"],
@@ -123,11 +123,11 @@ describe("installDistEsmResolveFastPath gating", () => {
       return { deregister: () => {} };
     };
     expect(
-      installDistEsmResolveFastPath("file:///opt/openclaw/src/entry.ts", { registerHooks }),
+      installDistEsmResolveFastPath("file:///opt/carapace/src/entry.ts", { registerHooks }),
     ).toBe(false);
     expect(registered).toBe(0);
     expect(
-      installDistEsmResolveFastPath("file:///opt/openclaw-two/dist/entry.js", {
+      installDistEsmResolveFastPath("file:///opt/carapace-two/dist/entry.js", {
         registerHooks: undefined,
         execArgv: [],
         nodeOptions: undefined,
@@ -146,7 +146,7 @@ describe("installDistEsmResolveFastPath gating", () => {
   ])("declines when execArgv contains %s", (_name, execArgv) => {
     let registered = 0;
     const installed = installDistEsmResolveFastPath(
-      `file:///opt/openclaw-preload-${execArgv[0]}/dist/entry.js`,
+      `file:///opt/carapace-preload-${execArgv[0]}/dist/entry.js`,
       {
         registerHooks: () => {
           registered += 1;
@@ -169,7 +169,7 @@ describe("installDistEsmResolveFastPath gating", () => {
   ])("declines for parsed NODE_OPTIONS %j", (nodeOptions) => {
     let registered = 0;
     const installed = installDistEsmResolveFastPath(
-      `file:///opt/openclaw-node-options-${registered}-${nodeOptions.length}/dist/entry.js`,
+      `file:///opt/carapace-node-options-${registered}-${nodeOptions.length}/dist/entry.js`,
       {
         registerHooks: () => {
           registered += 1;
@@ -190,7 +190,7 @@ describe("installDistEsmResolveFastPath gating", () => {
       let registered = 0;
       expect(
         installDistEsmResolveFastPath(
-          `file:///opt/openclaw-malformed-${nodeOptions.length}/dist/entry.js`,
+          `file:///opt/carapace-malformed-${nodeOptions.length}/dist/entry.js`,
           {
             registerHooks: () => {
               registered += 1;
@@ -241,7 +241,7 @@ describe.skipIf(!fs.existsSync(DIST_ENTRY_PATH) || !fs.existsSync(DIST_INDEX_PAT
     ])(
       "preserves $name resolver hooks",
       ({ entryPath, nodeOption, nodeOptions, argv, targetPrefix, registerSource }) => {
-        const root = tempDirs.make("openclaw-dist-resolver-hook-");
+        const root = tempDirs.make("carapace-dist-resolver-hook-");
         const hookPath = path.join(root, "resolver-hook.mjs");
         const markerPath = path.join(root, "resolver-hook.log");
         fs.writeFileSync(
@@ -250,7 +250,7 @@ describe.skipIf(!fs.existsSync(DIST_ENTRY_PATH) || !fs.existsSync(DIST_INDEX_PAT
 import { registerHooks } from "node:module";
 function recordTarget(specifier, context, nextResolve) {
   if (specifier.startsWith(${JSON.stringify(targetPrefix)}) && (specifier.endsWith(".js") || specifier.endsWith(".mjs"))) {
-    appendFileSync(process.env.OPENCLAW_TEST_RESOLVER_HOOK_MARKER, specifier + "\\n");
+    appendFileSync(process.env.CARAPACE_TEST_RESOLVER_HOOK_MARKER, specifier + "\\n");
   }
   return nextResolve(specifier, context);
 }
@@ -270,8 +270,8 @@ ${registerSource}
             NODE_DISABLE_COMPILE_CACHE: "1",
             NODE_ENV: undefined,
             NODE_OPTIONS: nodeOptions ? `--im"port" "${hookUrl}"` : undefined,
-            OPENCLAW_NO_RESPAWN: "1",
-            OPENCLAW_TEST_RESOLVER_HOOK_MARKER: markerPath,
+            CARAPACE_NO_RESPAWN: "1",
+            CARAPACE_TEST_RESOLVER_HOOK_MARKER: markerPath,
             VITEST: undefined,
           },
         });

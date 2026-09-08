@@ -128,12 +128,12 @@ suite.define(() => {
         await expect
           .poll(() =>
             surface
-              .locator("openclaw-chat-pane")
+              .locator("carapace-chat-pane")
               .evaluate((element) => (element as HTMLElement & { sessionKey: string }).sessionKey),
           )
           .toBe(viewport.routeKey);
         await gateway.waitForRequest("board.get", { match: { sessionKey: viewport.routeKey } });
-        await surface.locator("openclaw-session-progress-widget").waitFor();
+        await surface.locator("carapace-session-progress-widget").waitFor();
         await page.screenshot({
           animations: "disabled",
           fullPage: true,
@@ -142,7 +142,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             surface
-              .locator("openclaw-board-view")
+              .locator("carapace-board-view")
               .evaluate((element) => (element as HTMLElement & { session: unknown }).session),
           )
           .toEqual({ sessionKey: viewport.routeKey, agentId: "main" });

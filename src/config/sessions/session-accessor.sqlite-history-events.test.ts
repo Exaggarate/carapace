@@ -3,11 +3,11 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import { runSqliteImmediateTransactionSync } from "../../infra/sqlite-transaction.js";
 import { createNestedToolActivity } from "../../sessions/nested-tool-activity.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   appendTranscriptEvent,
   persistSessionTranscriptTurn,
@@ -33,7 +33,7 @@ function historyEventId(entry: { event: unknown } | undefined): unknown {
 }
 
 function enforceSqliteVariableLimit(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   limit = REGRESSION_SQLITE_VARIABLE_LIMIT,
 ): void {
   const prepare = database.db.prepare.bind(database.db);
@@ -47,7 +47,7 @@ function enforceSqliteVariableLimit(
 }
 
 function insertSyntheticHistory(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   count: number,
   boundaries = false,
@@ -116,7 +116,7 @@ describe("SQLite transcript history events", () => {
   beforeEach(() => {
     scope = {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: tempDirs.make("openclaw-history-events-") },
+      env: { ...process.env, CARAPACE_STATE_DIR: tempDirs.make("carapace-history-events-") },
       sessionId: "history-events-test",
       sessionKey: "agent:main:history-events-test",
     };
@@ -124,8 +124,8 @@ describe("SQLite transcript history events", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("preserves physical dispatch cuts across history pages and deltas", async () => {
@@ -235,7 +235,7 @@ describe("SQLite transcript history events", () => {
       ],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     database.db
       .prepare(
         `UPDATE transcript_events
@@ -265,7 +265,7 @@ describe("SQLite transcript history events", () => {
       messages: [{ eventId: "seed", parentId: null, message: { role: "user", content: "seed" } }],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     const boundaryEvents = [
       {
         seq: 2,
@@ -333,7 +333,7 @@ describe("SQLite transcript history events", () => {
         messages: [{ eventId: "seed", parentId: null, message: { role: "user", content: "seed" } }],
         touchSessionEntry: false,
       });
-      const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+      const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
       const bindingCount = Math.max(REGRESSION_SQLITE_VARIABLE_LIMIT, maxMessages);
       insertSyntheticHistory(database, scope.sessionId, bindingCount);
       enforceSqliteVariableLimit(database);
@@ -386,7 +386,7 @@ describe("SQLite transcript history events", () => {
       ],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     enforceSqliteVariableLimit(database, 999);
 
     const page = readRecentSessionTranscriptHistoryEvents(scope, {
@@ -411,7 +411,7 @@ describe("SQLite transcript history events", () => {
       messages: [{ eventId: "seed", parentId: null, message: { role: "user", content: "seed" } }],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, env: scope.env });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, env: scope.env });
     const bindingCount = REGRESSION_SQLITE_VARIABLE_LIMIT;
     insertSyntheticHistory(database, scope.sessionId, bindingCount, true);
     enforceSqliteVariableLimit(database);

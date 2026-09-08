@@ -1,5 +1,5 @@
 import { consume } from "@lit/context";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -15,7 +15,7 @@ import {
   GatewayPageController,
   type GatewayPageChange,
 } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { isUsageCacheIncomplete } from "./cache-status.ts";
 import type { ProviderUsageSummary } from "./data-types.ts";
@@ -45,7 +45,7 @@ import { renderUsage } from "./view.ts";
 
 export type { UsageRouteData } from "./types.ts";
 
-class UsagePage extends OpenClawLightDomElement {
+class UsagePage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -653,6 +653,6 @@ class UsagePage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-usage-page")) {
-  customElements.define("openclaw-usage-page", UsagePage);
+if (!customElements.get("carapace-usage-page")) {
+  customElements.define("carapace-usage-page", UsagePage);
 }

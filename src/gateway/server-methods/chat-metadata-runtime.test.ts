@@ -9,7 +9,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createChatMetadataHarness,
   createChatMetadataOwner,
@@ -592,8 +592,8 @@ describe("gateway chat metadata runtime", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
-    const runtimeConfig: OpenClawConfig = {
+    } satisfies CarapaceConfig;
+    const runtimeConfig: CarapaceConfig = {
       ...sourceConfig,
       models: {
         providers: {

@@ -1,7 +1,7 @@
 ---
-summary: "Use NVIDIA's OpenAI-compatible API in OpenClaw"
+summary: "Use NVIDIA's OpenAI-compatible API in Carapace"
 read_when:
-  - You want to use open models in OpenClaw for free
+  - You want to use open models in Carapace for free
   - You need NVIDIA_API_KEY setup
   - You want to use Nemotron 3 Ultra through NVIDIA
 title: "NVIDIA"
@@ -9,7 +9,7 @@ title: "NVIDIA"
 
 NVIDIA serves open models for free through an OpenAI-compatible API at
 `https://integrate.api.nvidia.com/v1`, authenticated with an API key from
-[build.nvidia.com](https://build.nvidia.com/settings/api-keys). OpenClaw
+[build.nvidia.com](https://build.nvidia.com/settings/api-keys). Carapace
 defaults the NVIDIA provider to Nemotron 3 Ultra, NVIDIA's 550B total / 55B
 active reasoning model for long-context agentic work.
 
@@ -22,12 +22,12 @@ active reasoning model for long-context agentic work.
   <Step title="Export the key and run onboarding">
     ```bash
     export NVIDIA_API_KEY="nvapi-..."
-    openclaw onboard --auth-choice nvidia-api-key
+    carapace onboard --auth-choice nvidia-api-key
     ```
   </Step>
   <Step title="Set an NVIDIA model">
     ```bash
-    openclaw models set nvidia/nvidia/nemotron-3-ultra-550b-a55b
+    carapace models set nvidia/nvidia/nemotron-3-ultra-550b-a55b
     ```
   </Step>
 </Steps>
@@ -35,7 +35,7 @@ active reasoning model for long-context agentic work.
 For non-interactive setup, pass the key directly:
 
 ```bash
-openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
+carapace onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
 ```
 
 <Warning>
@@ -76,7 +76,7 @@ bundled chat models follow. A fresh inventory can restore a previously hidden
 model that NVIDIA has republished.
 
 The inventory also contains embeddings and other non-chat endpoints, without
-capability metadata. OpenClaw therefore offers only exact models with bundled
+capability metadata. Carapace therefore offers only exact models with bundled
 chat metadata or valid featured-model metadata; it does not guess capabilities
 from model names. Unknown IDs can still be configured explicitly; listing alone
 does not prove chat compatibility. This is not a complete automatic catalog of
@@ -97,7 +97,7 @@ bundled row records its 1M context and a 16,384-token output budget matching
 NVIDIA's hosted example. Select it with:
 
 ```bash
-openclaw models set nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
+carapace models set nvidia/nvidia/nemotron-3.5-lightning-30b-a3b
 ```
 
 Lightning is selectable when the live inventory lists it even if it is absent
@@ -105,7 +105,7 @@ from the featured feed. Nemotron 3 Ultra remains the default.
 
 ## Nemotron 3 Ultra
 
-Nemotron 3 Ultra is the default NVIDIA model in OpenClaw. NVIDIA's build page for
+Nemotron 3 Ultra is the default NVIDIA model in Carapace. NVIDIA's build page for
 [`nvidia/nemotron-3-ultra-550b-a55b`](https://build.nvidia.com/nvidia/nemotron-3-ultra-550b-a55b)
 lists it as an available free endpoint with a 1M-token context specification.
 
@@ -152,7 +152,7 @@ longer work. Migrate existing Qwen configurations to an active model.
   </Accordion>
 
   <Accordion title="Catalog and pricing">
-    OpenClaw uses NVIDIA's inference inventory for availability and its featured
+    Carapace uses NVIDIA's inference inventory for availability and its featured
     feed for ranking. Exact bundled metadata preserves reasoning and image
     capabilities omitted by the featured feed. Deprecated exact-reference
     compatibility rows stay hidden from the offline fallback; fresh inventory
@@ -161,14 +161,14 @@ longer work. Migrate existing Qwen configurations to an active model.
   </Accordion>
 
   <Accordion title="OpenAI-compatible endpoint">
-    OpenClaw talks to NVIDIA with the `openai-completions` adapter against the
+    Carapace talks to NVIDIA with the `openai-completions` adapter against the
     standard `/v1` chat completions route. Any OpenAI-compatible tooling should
     work out of the box with the NVIDIA base URL.
   </Accordion>
 
   <Accordion title="Nemotron 3 Ultra reasoning params">
     NVIDIA's Ultra sample request uses `chat_template_kwargs.enable_thinking`
-    and `reasoning_budget` for reasoning output. OpenClaw's bundled Ultra row
+    and `reasoning_budget` for reasoning output. Carapace's bundled Ultra row
     disables template thinking by default for normal chat use. If you need to
     opt into NVIDIA reasoning output or force other NVIDIA-specific request
     fields, set per-model params and keep provider-specific overrides scoped to

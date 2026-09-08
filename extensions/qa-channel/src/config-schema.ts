@@ -3,7 +3,7 @@ import {
   buildChannelConfigSchema,
   buildGroupEntrySchema,
   buildMultiAccountChannelSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
+} from "carapace/plugin-sdk/channel-config-schema";
 import { z } from "zod";
 
 const QaChannelActionConfigSchema = z

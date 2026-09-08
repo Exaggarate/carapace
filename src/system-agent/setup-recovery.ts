@@ -1,7 +1,7 @@
 // Machine-local onboarding recovery owns receipt identity and completion validation.
 import { resolveSystemAgentOnboardingTarget } from "../commands/onboard-agent-target.js";
 import { readConfigFileSnapshot, withConfigMutationExclusive } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   completeLocalOnboarding,
   readLocalOnboardingStateForConfig,
@@ -15,7 +15,7 @@ export type LocalSetupRecovery = {
   workspace: string;
   applyOptions?: {
     resume: true;
-    assertCommitPreconditions: (sourceConfig: OpenClawConfig) => void;
+    assertCommitPreconditions: (sourceConfig: CarapaceConfig) => void;
   };
   complete: (
     appliedConfigPath: string,
@@ -75,7 +75,7 @@ export async function loadLocalSetupRecovery(
       "Another onboarding run owns a different workspace. Retry onboarding with its approved workspace.",
     );
   }
-  const assertOwner = (sourceConfig: OpenClawConfig) => {
+  const assertOwner = (sourceConfig: CarapaceConfig) => {
     if (
       pending &&
       readLocalOnboardingStateForConfig(snapshot.path, sourceConfig)?.runId !== pending.runId

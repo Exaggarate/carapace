@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveAgentConfig } from "../../agent-scope-config.js";
 
 type ResolvedSwarmConfig = {
@@ -34,7 +34,7 @@ function readBoundedPositiveInteger(value: unknown, fallback: number, max: numbe
 }
 
 /** Resolve global and per-agent Swarm configuration into bounded runtime values. */
-export function resolveSwarmConfig(config?: OpenClawConfig, agentId?: string): ResolvedSwarmConfig {
+export function resolveSwarmConfig(config?: CarapaceConfig, agentId?: string): ResolvedSwarmConfig {
   const globalRaw = normalizeRawConfig(config?.tools?.swarm) ?? {};
   const agentRaw =
     config && agentId

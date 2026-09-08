@@ -5,7 +5,7 @@ import { normalizeMessage } from "./message-normalizer.ts";
 
 // Inbound context blocks are stamped with the provenance marker; strippers key
 // on the marker, so display fixtures must carry it to be recognized.
-const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"openclaw-control-ui","id":"openclaw-control-ui"}\n\`\`\``;
+const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"carapace-control-ui","id":"carapace-control-ui"}\n\`\`\``;
 
 describe("message-normalizer sender labels", () => {
   it("normalizes message with string content", () => {
@@ -57,7 +57,7 @@ describe("message-normalizer sender labels", () => {
     const emailSender = normalizeMessage({
       role: "user",
       content: "Prompt from Alice",
-      __openclaw: { senderId: "alice@example.com" },
+      __carapace: { senderId: "alice@example.com" },
     });
     expect(emailSender.senderLabel).toBe("alice");
     expect(emailSender.sender).toEqual({ id: "alice@example.com" });
@@ -65,7 +65,7 @@ describe("message-normalizer sender labels", () => {
       normalizeMessage({
         role: "user",
         content: "Prompt from a profile",
-        __openclaw: { senderId: "profile_123", senderName: "Alice Example" },
+        __carapace: { senderId: "profile_123", senderName: "Alice Example" },
       }).senderLabel,
     ).toBe("Alice Example");
   });
@@ -81,7 +81,7 @@ describe("sender label opaque-id stripping", () => {
       normalizeMessage({
         role: "user",
         content: "hello",
-        __openclaw: {
+        __carapace: {
           senderIdentity,
           senderId: "profile",
           senderName: "Display",
@@ -102,7 +102,7 @@ describe("sender label opaque-id stripping", () => {
       normalizeMessage({
         role: "user",
         content: "hello",
-        __openclaw: { ...metadata, senderIdentity: identity },
+        __carapace: { ...metadata, senderIdentity: identity },
       }).sender,
     ).toEqual({
       id: "shared-id",
@@ -111,7 +111,7 @@ describe("sender label opaque-id stripping", () => {
       identity,
     });
     expect(
-      normalizeMessage({ role: "user", content: "hello", __openclaw: metadata }).sender,
+      normalizeMessage({ role: "user", content: "hello", __carapace: metadata }).sender,
     ).toEqual({ id: "shared-id", name: "Person" });
   });
 
@@ -151,7 +151,7 @@ describe("sender label opaque-id stripping", () => {
       role: "user",
       content: "hi",
       senderLabel: "steipete (c3e32452-0467-47e5-aafa-233cd5dae29f)",
-      __openclaw: { senderId: "meta-profile", senderName: "Meta Name" },
+      __carapace: { senderId: "meta-profile", senderName: "Meta Name" },
     });
     expect(normalized.sender).toEqual({ id: "meta-profile", name: "Meta Name" });
     expect(normalized.senderLabel).toBe("steipete");

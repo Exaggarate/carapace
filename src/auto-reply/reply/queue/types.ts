@@ -1,4 +1,4 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@carapace/normalization-core/string-coerce";
 // Shared queue type contracts for admission, drain, and fallback handling.
 import type { QueueMode } from "../../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import type { AutoFallbackPrimaryProbe } from "../../../agents/agent-scope.js";
@@ -17,7 +17,7 @@ import type { InboundEventKind } from "../../../channels/inbound-event/kind.js";
 import type { ChannelAdmissionEvidence } from "../../../channels/message-access/admission-evidence.js";
 import type { SessionEntry, SessionToolOverrides } from "../../../config/sessions.js";
 import type { ReplyToMode } from "../../../config/types.base.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { GroupToolPolicyConfig } from "../../../config/types.tools.js";
 import type { MediaFact } from "../../../media/media-facts.js";
 import type { PromptImageOrderEntry } from "../../../media/prompt-image-order.js";
@@ -55,7 +55,7 @@ export type QueueSettings = {
 };
 
 export type ResolveQueueSettingsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string;
   sessionEntry?: SessionEntry;
   inlineMode?: QueueMode;
@@ -210,7 +210,7 @@ export type FollowupRun = {
     cwd?: string;
     permissionMode?: SessionEntry["permissionMode"];
     sessionRoot?: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     toolOverrides?: SessionToolOverrides;
     skillsSnapshot?: SkillSnapshot;
     provider: string;

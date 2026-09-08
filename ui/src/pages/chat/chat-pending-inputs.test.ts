@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { expectDefined } from "@openclaw/normalization-core";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   ChatInputReceipts,
@@ -57,7 +57,7 @@ const input: ChatPendingInputsPage["items"][number] = {
     role: "user",
     content: "Keep my accepted input",
     timestamp: 100,
-    __openclaw: { id: "pending:input-1" },
+    __carapace: { id: "pending:input-1" },
   },
 };
 const page: ChatPendingInputsPage = { items: [input], total: 2, nextBefore: 2 };
@@ -140,7 +140,7 @@ describe("server-owned pending input display", () => {
       const canonical = {
         role: "user",
         content: "Authoritative input",
-        __openclaw: { id: "canonical-input", seq: 1, idempotencyKey: `${runId}:user` },
+        __carapace: { id: "canonical-input", seq: 1, idempotencyKey: `${runId}:user` },
       };
       if (receipt === "canonical-first") {
         reduceChatSessionProjection(host, { type: "snapshotLoaded", messages: [canonical] });
@@ -263,7 +263,7 @@ describe("server-owned pending input display", () => {
       const aggregate = {
         role: "user",
         content: "Collected source inputs",
-        __openclaw: { id: "aggregate", seq: 1, idempotencyKey: "followup-collect:session:batch" },
+        __carapace: { id: "aggregate", seq: 1, idempotencyKey: "followup-collect:session:batch" },
       };
       const cache: ChatMessageCache = new Map();
       const host = makeChatHost({
@@ -340,7 +340,7 @@ describe("server-owned pending input display", () => {
       const canonical = {
         role: "user",
         content: "An earlier canonical input",
-        __openclaw: { id: "canonical-user", seq: 1, runId: "canonical-run" },
+        __carapace: { id: "canonical-user", seq: 1, runId: "canonical-run" },
       };
       const acceptedPage =
         custody === "consumed"
@@ -360,7 +360,7 @@ describe("server-owned pending input display", () => {
                     role: "user",
                     content: "Keep my accepted input",
                     timestamp: 90,
-                    __openclaw: {
+                    __carapace: {
                       id: `pending:${input.id}`,
                       senderName: "Authoritative Author",
                       media: [{ url: "media://inbound/initial.png", contentType: "image/png" }],
@@ -494,7 +494,7 @@ describe("server-owned pending input display", () => {
         message: {
           role: "user",
           content: "Keep my accepted input",
-          __openclaw: { media: [{ url: "media://inbound/another.png" }] },
+          __carapace: { media: [{ url: "media://inbound/another.png" }] },
         },
       }));
       applyChatPendingInputs(host, {
@@ -510,7 +510,7 @@ describe("server-owned pending input display", () => {
         const promoted = {
           role: "user",
           content: "authoritative projection",
-          __openclaw: {
+          __carapace: {
             id: input.id,
             seq: 4,
             idempotencyKey: `${input.runId}:user`,
@@ -573,12 +573,12 @@ describe("server-owned pending input display", () => {
       const initialUser = {
         role: "user",
         content: "First turn",
-        __openclaw: { id: "first", seq: 1 },
+        __carapace: { id: "first", seq: 1 },
       };
       const promoted = {
         role: "user",
         content: "Keep my accepted input",
-        __openclaw: { id: input.id, seq: 2 },
+        __carapace: { id: input.id, seq: 2 },
       };
       const toolMessage = { role: "assistant", runId: "active-run", toolCallId: "live-tool" };
       let historyReads = 0;
@@ -661,7 +661,7 @@ describe("server-owned pending input display", () => {
         installOutboxBrowserStorage();
       }
       const history = [
-        { role: "assistant", content: "Still working", __openclaw: { id: "reply-1", seq: 1 } },
+        { role: "assistant", content: "Still working", __carapace: { id: "reply-1", seq: 1 } },
       ];
       const imageBase64 =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jh0cAAAAASUVORK5CYII=";
@@ -721,7 +721,7 @@ describe("server-owned pending input display", () => {
           }
         : undefined;
       if (reference && payloadOwner) {
-        sessionStorage.setItem("openclaw.control.outboxTab.v1", reference.tabId);
+        sessionStorage.setItem("carapace.control.outboxTab.v1", reference.tabId);
         const stored = await outboxPayloadStore.readOutboxPayload(payloadOwner, reference);
         if (stored.status !== "ready") {
           throw new Error(`Expected stored custody bytes: ${stored.reason}`);
@@ -830,7 +830,7 @@ describe("server-owned pending input display", () => {
     const promoted = {
       role: "user",
       content: "Keep my accepted input",
-      __openclaw: { id: "input-1", seq: 2, idempotencyKey: "run-queued:user" },
+      __carapace: { id: "input-1", seq: 2, idempotencyKey: "run-queued:user" },
     };
     const items = buildChatItems({
       paneId: "promoted-pane",
@@ -886,7 +886,7 @@ describe("server-owned pending input display", () => {
       const canonical = {
         role,
         content: "Earlier result",
-        __openclaw: { id: "another-entry", runId: input.runId },
+        __carapace: { id: "another-entry", runId: input.runId },
       };
       const host = makeChatHost({
         sessionKey,

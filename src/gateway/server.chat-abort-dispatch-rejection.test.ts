@@ -2,7 +2,7 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
@@ -74,7 +74,7 @@ afterEach(() => {
 
 describe("gateway WebSocket chat abort ownership", () => {
   test("does not replace an acknowledged abort with a later dispatch rejection", async () => {
-    const sessionDirectory = temporaryDirectories.make("openclaw-chat-abort-dispatch-");
+    const sessionDirectory = temporaryDirectories.make("carapace-chat-abort-dispatch-");
     testState.sessionStorePath = path.join(sessionDirectory, "sessions.json");
     await writeSessionStore({
       entries: {
@@ -150,7 +150,7 @@ describe("gateway WebSocket chat abort ownership", () => {
   });
 
   test("does not let a late abort replace an established dispatch error", async () => {
-    const sessionDirectory = temporaryDirectories.make("openclaw-chat-error-late-abort-");
+    const sessionDirectory = temporaryDirectories.make("carapace-chat-error-late-abort-");
     testState.sessionStorePath = path.join(sessionDirectory, "sessions.json");
     await writeSessionStore({
       entries: {
@@ -218,7 +218,7 @@ describe("gateway WebSocket chat abort ownership", () => {
   });
 
   test("keeps a real signal-only lifecycle terminal as the only chat terminal", async () => {
-    const sessionDirectory = temporaryDirectories.make("openclaw-chat-lifecycle-interrupt-");
+    const sessionDirectory = temporaryDirectories.make("carapace-chat-lifecycle-interrupt-");
     const storePath = path.join(sessionDirectory, "sessions.json");
     testState.sessionStorePath = storePath;
     await writeSessionStore({
@@ -328,7 +328,7 @@ describe("gateway WebSocket chat abort ownership", () => {
   });
 
   test("returns pre-ACK attachment cancellation only after inbound cleanup", async () => {
-    const sessionDirectory = temporaryDirectories.make("openclaw-chat-attachment-abort-");
+    const sessionDirectory = temporaryDirectories.make("carapace-chat-attachment-abort-");
     const storePath = path.join(sessionDirectory, "sessions.json");
     testState.sessionStorePath = storePath;
     const previousAgentConfig = testState.agentConfig;
@@ -428,7 +428,7 @@ describe("gateway WebSocket chat abort ownership", () => {
   });
 
   test("waits for pass-through attachment cleanup after sessions.abort before replying to chat.send", async () => {
-    const sessionDirectory = temporaryDirectories.make("openclaw-chat-pass-through-abort-");
+    const sessionDirectory = temporaryDirectories.make("carapace-chat-pass-through-abort-");
     testState.sessionStorePath = path.join(sessionDirectory, "sessions.json");
     const previousAgentConfig = testState.agentConfig;
     const prepared = createDeferred();

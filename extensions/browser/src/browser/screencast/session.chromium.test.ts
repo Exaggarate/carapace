@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { Browser, Page } from "playwright-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { WebSocket } from "ws";
@@ -18,7 +18,7 @@ vi.mock("../pw-ai-module.js", () => ({
   }),
 }));
 
-describe.runIf(process.env.OPENCLAW_BROWSER_SCREENCAST_E2E === "1")(
+describe.runIf(process.env.CARAPACE_BROWSER_SCREENCAST_E2E === "1")(
   "browser screencast in Chromium",
   () => {
     let browser: Browser;

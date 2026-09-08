@@ -1,6 +1,6 @@
 // Provider runtime contract helpers define reusable runtime tests for provider plugins.
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
-import { expectDefined } from "@openclaw/normalization-core";
+import { normalizeModelCatalog } from "@carapace/model-catalog-core/model-catalog-normalize";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPluginMetadataSnapshot } from "../../config/plugin-auto-enable.test-helpers.js";
 import type { ProviderRuntimeModel } from "../plugin-entry.js";
@@ -232,7 +232,7 @@ export function describeAnthropicProviderRuntimeContract(
       });
 
       expect(hint).toContain("suggested profile: anthropic:oauth-user@example.com");
-      expect(hint).toContain("openclaw doctor --yes");
+      expect(hint).toContain("carapace doctor --yes");
     });
 
     it("owns usage snapshot fetching", async () => {
@@ -312,7 +312,7 @@ export function describeGithubCopilotProviderRuntimeContract(
                 hooks: [],
                 rootDir: "/fixtures/github-copilot",
                 source: "/fixtures/github-copilot/index.js",
-                manifestPath: "/fixtures/github-copilot/openclaw.plugin.json",
+                manifestPath: "/fixtures/github-copilot/carapace.plugin.json",
                 modelCatalog: normalizeModelCatalog(
                   {
                     providers: { "github-copilot": manifestCatalog },
@@ -386,9 +386,9 @@ export function describeGithubCopilotProviderRuntimeContract(
         ["minimal", "low"],
         ["xhigh", "xhigh"],
       ] as const)("sends static GPT-5.4 mini %s thinking as %s", async (level, effort) => {
-        const { createApiRegistry, createLlmRuntime } = await import("@openclaw/ai");
+        const { createApiRegistry, createLlmRuntime } = await import("@carapace/ai");
         const { streamOpenAIResponses, streamSimpleOpenAIResponses } =
-          await import("@openclaw/ai/internal/openai");
+          await import("@carapace/ai/internal/openai");
         const { config, model } = await resolveStaticModel("gpt-5.4-mini");
         const provider = requireProviderContractProvider("github-copilot");
         const profile = provider.resolveThinkingProfile?.({
@@ -719,7 +719,7 @@ export function describeOpenAIProviderRuntimeContract(
       });
     });
 
-    it("keeps OpenClaw cost metadata but applies Codex context metadata for gpt-5.5 models", () => {
+    it("keeps Carapace cost metadata but applies Codex context metadata for gpt-5.5 models", () => {
       const provider = requireProviderContractProvider("openai");
       const manifestModel = createManifestModel("gpt-5.5", {
         api: "openai-chatgpt-responses",

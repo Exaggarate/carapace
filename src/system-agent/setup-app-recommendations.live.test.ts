@@ -1,7 +1,7 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { describe, expect, it } from "vitest";
 import { resolveRunWorkspaceDir } from "../agents/workspace-run.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { resolveSystemAgentConfiguredRouteFromConfig } from "./inference-route.js";
@@ -11,16 +11,16 @@ import {
   type CompleteSetupInferenceResult,
 } from "./setup-inference.js";
 
-const LIVE = process.env.OPENCLAW_LIVE_TEST === "1" && Boolean(process.env.OPENAI_API_KEY?.trim());
+const LIVE = process.env.CARAPACE_LIVE_TEST === "1" && Boolean(process.env.OPENAI_API_KEY?.trim());
 const describeLive = LIVE ? describe : describe.skip;
-const modelId = process.env.OPENCLAW_LIVE_APP_RECOMMENDATIONS_MODEL ?? "gpt-5.6-luna";
+const modelId = process.env.CARAPACE_LIVE_APP_RECOMMENDATIONS_MODEL ?? "gpt-5.6-luna";
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   models: {
     providers: {
       openai: {
         api: "openai-responses",
-        agentRuntime: { id: "openclaw" },
+        agentRuntime: { id: "carapace" },
         apiKey: { source: "env", provider: "default", id: "OPENAI_API_KEY" },
         baseUrl: "https://api.openai.com/v1",
         models: [
@@ -28,7 +28,7 @@ const config: OpenClawConfig = {
             id: modelId,
             name: modelId,
             api: "openai-responses",
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             input: ["text"],
             reasoning: true,
             contextWindow: 1_047_576,
@@ -46,7 +46,7 @@ const config: OpenClawConfig = {
       model: { primary: `openai/${modelId}` },
       models: {
         [`openai/${modelId}`]: {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           params: { maxTokens: 60_000 },
         },
       },

@@ -1,15 +1,15 @@
 // Message-action param normalization hydrates media sources, sandbox paths,
 // base64 buffers, JSON params, and plugin-owned media aliases.
-import { canonicalizeBase64, estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { basenameFromAnyPath } from "@openclaw/media-core/file-name";
-import { extensionForMime } from "@openclaw/media-core/mime";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { canonicalizeBase64, estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { basenameFromAnyPath } from "@carapace/media-core/file-name";
+import { extensionForMime } from "@carapace/media-core/mime";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { assertMediaNotDataUrl, resolveSandboxedMediaSource } from "../../agents/sandbox-paths.js";
 import { readStringArrayParam, readToolStringParam } from "../../agents/tools/common.js";
 import { resolveChannelMessageToolMediaSourceParamKeys } from "../../channels/plugins/message-action-discovery.js";
 import type { ChannelId, ChannelMessageActionName } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { root } from "../../infra/fs-safe.js";
 import { basenameFromMediaSource } from "../../infra/local-file-access.js";
 import { createBoundedOutboundMediaReadFile } from "../../media/bounded-read-file.js";
@@ -170,7 +170,7 @@ function buildActionMediaSourceParamKeys(extraParamKeys?: readonly string[]): st
 
 /** Resolves plugin-declared media source param aliases for a message action. */
 export function resolveExtraActionMediaSourceParamKeys(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   action?: ChannelMessageActionName;
   args: Record<string, unknown>;
   channel?: string;
@@ -240,7 +240,7 @@ function readAttachmentFileHint(args: Record<string, unknown>): string | undefin
 }
 
 function resolveAttachmentMaxBytes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
 }): number | undefined {
@@ -285,7 +285,7 @@ function normalizeBase64Payload(params: { base64?: string; contentType?: string 
 }
 
 function resolveSendBufferMaxBytes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
 }): number {
@@ -317,7 +317,7 @@ function decodeBoundedBase64Attachment(params: { base64: string; maxBytes: numbe
 }
 
 async function hydrateSendBufferMediaParams(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;
@@ -486,7 +486,7 @@ function buildAttachmentMediaLoadOptions(params: {
 }
 
 async function hydrateAttachmentPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;
@@ -629,7 +629,7 @@ export async function normalizeSandboxMediaList(params: {
 }
 
 async function hydrateAttachmentActionPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;
@@ -676,7 +676,7 @@ async function hydrateAttachmentActionPayload(params: {
 
 /** Hydrates attachment-bearing message actions with base64 buffers and metadata. */
 export async function hydrateAttachmentParamsForAction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;

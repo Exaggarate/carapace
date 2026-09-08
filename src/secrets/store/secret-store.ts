@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import type { Selectable } from "kysely";
 import { ENV_SECRET_REF_ID_RE } from "../../config/types.secrets.js";
 import {
@@ -8,14 +8,14 @@ import {
 } from "../../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../../infra/sqlite-number.js";
 import { registerSecretValueForRedaction } from "../../logging/secret-redaction-registry.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import { ensureSecretStoreSchema } from "../../state/openclaw-state-db-schema-additive.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import { ensureSecretStoreSchema } from "../../state/carapace-state-db-schema-additive.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import { normalizeExactAllowedHost } from "../exact-hostname.js";
 import { sealSecretSentinel } from "../sentinel.js";
 import {
@@ -41,8 +41,8 @@ export {
   SecretStoreValidationError,
 } from "./secret-store-validation-error.js";
 
-type SecretStoreDatabase = Pick<OpenClawStateKyselyDatabase, "secret_store_entries">;
-type SecretStoreRow = Selectable<OpenClawStateKyselyDatabase["secret_store_entries"]>;
+type SecretStoreDatabase = Pick<CarapaceStateKyselyDatabase, "secret_store_entries">;
+type SecretStoreRow = Selectable<CarapaceStateKyselyDatabase["secret_store_entries"]>;
 type SecretStoreScope = { kind: "team" };
 type SecretStoreKind = "secret" | "env";
 
@@ -183,12 +183,12 @@ function toMetadata(row: SecretStoreRow): SecretStoreEntryMetadata {
 export function listSecretStoreEntries(params: {
   scope: SecretStoreScope;
   includeDeleted?: boolean;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): SecretStoreEntryMetadata[] {
   const { scopeKind, scopeId } = normalizeScope(params.scope);
   try {
     return (
-      withExistingOpenClawStateDatabaseReadOnly(({ db: sqlite }) => {
+      withExistingCarapaceStateDatabaseReadOnly(({ db: sqlite }) => {
         const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
         let query = db
           .selectFrom("secret_store_entries")
@@ -216,7 +216,7 @@ export function listSecretStoreEntries(params: {
 export function consumeGitHubSetupHandoff(params: {
   name: string;
   nowMs?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): string | undefined {
   if (classifyHiddenGitHubStoreName(params.name) !== "setup") {
     return undefined;
@@ -224,7 +224,7 @@ export function consumeGitHubSetupHandoff(params: {
   const now = params.nowMs ?? Date.now();
   try {
     let value: string | undefined;
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db: sqlite }) => {
         const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
         const row = executeSqliteQueryTakeFirstSync(
@@ -273,11 +273,11 @@ export function consumeGitHubSetupHandoff(params: {
 export function readSecretStoreExecEnvironment(params: {
   includeSecretSentinels: boolean;
   excludeNames?: readonly string[];
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): SecretStoreExecEnvironment {
   try {
     return (
-      withExistingOpenClawStateDatabaseReadOnly(({ db: sqlite }) => {
+      withExistingCarapaceStateDatabaseReadOnly(({ db: sqlite }) => {
         const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
         const rows = executeSqliteQuerySync(
           sqlite,
@@ -337,12 +337,12 @@ export function readSecretStoreExecEnvironment(params: {
 export function readSecretStoreValue(params: {
   scope: SecretStoreScope;
   name: string;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): Result<string, SecretStoreReadError> {
   try {
     assertSecretStoreEnvName(params.name);
     const { scopeKind, scopeId } = normalizeScope(params.scope);
-    const row = withExistingOpenClawStateDatabaseReadOnly(({ db: sqlite }) => {
+    const row = withExistingCarapaceStateDatabaseReadOnly(({ db: sqlite }) => {
       const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
       return executeSqliteQueryTakeFirstSync(
         sqlite,
@@ -390,7 +390,7 @@ export function writeSecretStoreEntry(params: {
   kind: SecretStoreKind;
   allowedHosts?: readonly string[];
   updatedBy: string | null;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): void {
   assertSecretStoreMutationName(params.name);
   assertSecretStoreValue(params.value, params.kind);
@@ -407,7 +407,7 @@ export function writeSecretStoreEntry(params: {
   const allowedHostsJson = allowedHosts?.length ? JSON.stringify(allowedHosts) : null;
   const { scopeKind, scopeId } = normalizeScope(params.scope);
   const now = Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       ensureSecretStoreSchema(sqlite);
       const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
@@ -453,13 +453,13 @@ export function updateSecretStoreAllowedHosts(params: {
   name: string;
   allowedHosts: readonly string[];
   updatedBy: string | null;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): void {
   assertSecretStoreEnvName(params.name);
   const allowedHosts = normalizeSecretAllowedHosts(params.allowedHosts);
   const { scopeKind, scopeId } = normalizeScope(params.scope);
   const now = Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       ensureSecretStoreSchema(sqlite);
       const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
@@ -493,14 +493,14 @@ export function updateSecretStoreAllowedHosts(params: {
 export function deleteSecretStoreEntry(params: {
   scope: SecretStoreScope;
   name: string;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): void {
   assertSecretStoreMutationName(params.name);
   const { scopeKind, scopeId } = normalizeScope(params.scope);
-  const state = openOpenClawStateDatabase(params.database);
+  const state = openCarapaceStateDatabase(params.database);
   const now = Date.now();
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db: sqlite }) => {
         const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
         const query =
@@ -531,15 +531,15 @@ export function deleteSecretStoreEntry(params: {
 
 export function purgeExpiredSecretStoreEntries(
   params: {
-    database?: OpenClawStateDatabaseOptions;
+    database?: CarapaceStateDatabaseOptions;
   } = {},
 ): number {
-  const state = openOpenClawStateDatabase(params.database);
+  const state = openCarapaceStateDatabase(params.database);
   const threshold = Date.now() - SECRET_STORE_RETENTION_MS;
   const handoffThreshold = Date.now() - GITHUB_SETUP_HANDOFF_MAX_AGE_MS;
   const deviceThreshold = Date.now() - GITHUB_DEVICE_STORE_MAX_AGE_MS;
   try {
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db: sqlite }) => {
         const db = getNodeSqliteKysely<SecretStoreDatabase>(sqlite);
         const deleted = executeSqliteQuerySync(

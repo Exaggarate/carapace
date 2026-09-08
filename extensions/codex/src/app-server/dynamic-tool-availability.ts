@@ -1,7 +1,7 @@
 import {
   finalizeAgentToolAvailability,
   type AnyAgentTool,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   projectCodexDynamicTools,
   type CodexDynamicToolSchemaQuarantine,

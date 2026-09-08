@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/twitch",
+  "name": "@carapace/twitch",
   "version": "2026.9.2",
-  "description": "OpenClaw Twitch channel plugin for chat and moderation workflows.",
+  "description": "Carapace Twitch channel plugin for chat and moderation workflows.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -14,9 +14,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -25,7 +25,7 @@
       "configPromotion": true
     },
     "install": {
-      "npmSpec": "@openclaw/twitch",
+      "npmSpec": "@carapace/twitch",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -33,14 +33,14 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "channel": {
       "id": "twitch",
       "configuredState": {
         "env": {
           "anyOf": [
-            "OPENCLAW_TWITCH_ACCESS_TOKEN"
+            "CARAPACE_TWITCH_ACCESS_TOKEN"
           ]
         }
       },

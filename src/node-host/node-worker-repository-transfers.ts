@@ -22,7 +22,7 @@ export async function readNodeRepositoryCheckpointBase(params: {
   const raw = await fs.readFile(
     path.join(
       params.manifestHome,
-      ".openclaw-worker",
+      ".carapace-worker",
       "manifests",
       `${params.baseManifestRef.slice("sha256:".length)}.json`,
     ),
@@ -90,7 +90,7 @@ export async function withNodeRepositoryPublication<T>(
     throw new Error("Publication transfer baseline is invalid");
   }
   const publication = await tempWorkspace({
-    rootDir: path.join(params.manifestHome, ".openclaw-worker", "publication"),
+    rootDir: path.join(params.manifestHome, ".carapace-worker", "publication"),
     prefix: "worker-publication-",
   });
   try {
@@ -107,7 +107,7 @@ export async function withNodeRepositoryPublication<T>(
       ],
       signal: params.signal,
     });
-    const manifests = path.join(params.manifestHome, ".openclaw-worker", "manifests");
+    const manifests = path.join(params.manifestHome, ".carapace-worker", "manifests");
     await fs.mkdir(manifests, { recursive: true, mode: 0o700 });
     await fs.writeFile(
       path.join(manifests, `${NODE_WORKSPACE_EMPTY_MANIFEST_REF.slice("sha256:".length)}.json`),

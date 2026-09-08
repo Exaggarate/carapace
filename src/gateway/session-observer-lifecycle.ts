@@ -1,4 +1,4 @@
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
 import { resolveSessionAgentId } from "../agents/agent-scope.js";
 import { createSessionActivityNoteState } from "../agents/session-activity-notes.js";
 import type { SessionObserverEvent } from "./session-observer-contract.js";

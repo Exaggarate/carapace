@@ -82,7 +82,7 @@ const boardSnapshots = dashboardRows.map((row) => ({
 }));
 suite.define(() => {
   it("opens a responsive gallery card in its owning chat with the dashboard expanded", async () => {
-    const proofDir = process.env.OPENCLAW_UI_E2E_RECORD === "1" ? suite.artifactDir : null;
+    const proofDir = process.env.CARAPACE_UI_E2E_RECORD === "1" ? suite.artifactDir : null;
     await suite.withPage(
       { colorScheme: "dark", viewport: { width: 1440, height: 900 } },
       async ({ page }) => {
@@ -134,7 +134,7 @@ suite.define(() => {
         await page.goto(suite.server.baseUrl);
         await page.getByRole("link", { name: "Dashboards", exact: true }).click();
         await page.waitForURL(`${suite.server.baseUrl}dashboards`);
-        const gallery = page.locator("openclaw-dashboards-page");
+        const gallery = page.locator("carapace-dashboards-page");
         const releaseCard = gallery.locator("[data-dashboard-session]", {
           hasText: "Release health",
         });

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveMemoryRemDreamingConfig } from "openclaw/plugin-sdk/memory-core-host-status";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolveMemoryRemDreamingConfig } from "carapace/plugin-sdk/memory-core-host-status";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { resolveMemoryPluginConfig, withMemoryCommand } from "./cli-runtime-common.js";
 import { defaultRuntime, shortenHomePath, theme } from "./cli.host.runtime.js";
 import type { MemoryRemBackfillOptions, MemoryRemHarnessOptions } from "./cli.types.js";
@@ -359,7 +359,7 @@ export async function runMemoryRemBackfill(
         return;
       }
       const scratchDir = await fs.mkdtemp(
-        path.join(resolvePreferredOpenClawTmpDir(), "openclaw-rem-backfill-"),
+        path.join(resolvePreferredCarapaceTmpDir(), "carapace-rem-backfill-"),
       );
       try {
         const sourceFiles = await listHistoricalDailyFiles(opts.path);
@@ -508,7 +508,7 @@ async function createHistoricalRemHarnessWorkspace(params: {
 }> {
   const sourceFiles = await listHistoricalDailyFiles(params.inputPath);
   const workspaceDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-rem-harness-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-rem-harness-"),
   );
   const memoryDir = path.join(workspaceDir, "memory");
   await fs.mkdir(memoryDir, { recursive: true });

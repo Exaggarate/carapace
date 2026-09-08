@@ -51,7 +51,7 @@ function createDevRun() {
 async function openUpdateConfirmation(page: Page): Promise<void> {
   await page.locator(".sidebar-issues-button").click();
   const updateIssue = page.locator(
-    'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+    'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
   );
   await updateIssue.locator("summary").click();
   await updateIssue.locator(".sidebar-update-card__action").click();
@@ -92,14 +92,14 @@ suite.define(() => {
 
           await openUpdateConfirmation(page);
           await page
-            .locator("openclaw-modal-dialog")
+            .locator("carapace-modal-dialog")
             .getByRole("button", { name: "Update and restart", exact: true })
             .waitFor();
           // The modal fades in; capture it settled so the proof is readable.
           await page.waitForTimeout(500);
           await page.screenshot({ path: path.join(artifactDir, "1-confirm-dialog.png") });
           await page
-            .locator("openclaw-modal-dialog")
+            .locator("carapace-modal-dialog")
             .getByRole("button", { name: "Update and restart", exact: true })
             .click();
 
@@ -126,9 +126,9 @@ suite.define(() => {
             status: run.status,
             updatedAtMs: run.updatedAtMs,
           });
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog
-            .getByText("⬆️ OpenClaw update in progress: restarting.", { exact: true })
+            .getByText("⬆️ Carapace update in progress: restarting.", { exact: true })
             .waitFor();
           await gateway.setOnline(false);
           await dialog.getByText("Gateway restarting…", { exact: true }).waitFor();
@@ -159,7 +159,7 @@ suite.define(() => {
             (await gateway.waitForRequest("update.runs.get", { after: reads })).params,
           ).toEqual({ runId: run.runId });
           await dialog
-            .getByText("✅ OpenClaw updated to 9f3c21a0 (from 11111111).", { exact: true })
+            .getByText("✅ Carapace updated to 9f3c21a0 (from 11111111).", { exact: true })
             .first()
             .waitFor();
           await page.screenshot({ path: path.join(artifactDir, "4-success-report.png") });
@@ -206,7 +206,7 @@ suite.define(() => {
 
           await openUpdateConfirmation(page);
           await page
-            .locator("openclaw-modal-dialog")
+            .locator("carapace-modal-dialog")
             .getByRole("button", { name: "Update and restart", exact: true })
             .click();
           await page.getByRole("button", { name: "Updating…", exact: true }).waitFor();
@@ -233,15 +233,15 @@ suite.define(() => {
           await gateway.setGatewayBootId("failed-dev-update-restarted");
           await gateway.setOnline(true);
 
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog
-            .getByText("⚠️ OpenClaw update failed: deps-install-failed.", { exact: true })
+            .getByText("⚠️ Carapace update failed: deps-install-failed.", { exact: true })
             .first()
             .waitFor();
           const failureText = await dialog.textContent();
           expect(failureText).toContain("Failed: install — ENOSPC: no space left on device, write");
           expect(failureText).toContain(
-            "Run openclaw triage to diagnose and repair the failed update.",
+            "Run carapace triage to diagnose and repair the failed update.",
           );
           expect(await gateway.getRequests("update.run")).toHaveLength(1);
           await page.waitForTimeout(300);

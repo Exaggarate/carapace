@@ -4,12 +4,12 @@ import {
   UPDATE_RUN_DRIVER_LIMIT,
   UPDATE_RUN_PHASES,
 } from "../../packages/gateway-protocol/src/update-run-vocabulary.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db-contract.js";
-import { withExistingOpenClawStateDatabaseArtifactPreservingReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db-contract.js";
+import { withExistingCarapaceStateDatabaseArtifactPreservingReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -40,13 +40,13 @@ type RunPatch = Partial<
   Pick<UpdateRunRecord, "origin" | "target" | "before" | "after" | "trigger">
 >;
 
-const schemaStart = OPENCLAW_STATE_SCHEMA_SQL.indexOf("CREATE TABLE IF NOT EXISTS update_runs (");
+const schemaStart = CARAPACE_STATE_SCHEMA_SQL.indexOf("CREATE TABLE IF NOT EXISTS update_runs (");
 const schemaEndMarker = "ON update_runs(status, created_at_ms DESC, run_id);";
-const schemaEnd = OPENCLAW_STATE_SCHEMA_SQL.indexOf(schemaEndMarker, schemaStart);
+const schemaEnd = CARAPACE_STATE_SCHEMA_SQL.indexOf(schemaEndMarker, schemaStart);
 if (schemaStart < 0 || schemaEnd < 0) {
   throw new Error("Update run schema markers are missing");
 }
-const schema = OPENCLAW_STATE_SCHEMA_SQL.slice(schemaStart, schemaEnd + schemaEndMarker.length);
+const schema = CARAPACE_STATE_SCHEMA_SQL.slice(schemaStart, schemaEnd + schemaEndMarker.length);
 const readyDatabases = new WeakSet<DatabaseSync>();
 
 function readRun(db: DatabaseSync, runId: string): UpdateRunRecord | undefined {
@@ -58,9 +58,9 @@ function readRun(db: DatabaseSync, runId: string): UpdateRunRecord | undefined {
   return row ? decodeRun(row) : undefined;
 }
 
-function writeRun<T>(operation: (db: DatabaseSync) => T, options: OpenClawStateDatabaseOptions): T {
+function writeRun<T>(operation: (db: DatabaseSync) => T, options: CarapaceStateDatabaseOptions): T {
   let committedDatabase: DatabaseSync | undefined;
-  const result = runOpenClawStateWriteTransaction(
+  const result = runCarapaceStateWriteTransaction(
     ({ db }) => {
       // Feature-local, idempotent DDL shares the write transaction; a failed write also rolls back first use.
       if (!readyDatabases.has(db)) {
@@ -314,7 +314,7 @@ export function reconcileAbandonedUpdateRuns(
     return [];
   }
   const candidates =
-    withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(({ db }) => {
       if (!tableExists(db, "update_runs")) {
         return [];
       }
@@ -568,9 +568,9 @@ export function recordUpdateRunRepairAttempt(
 
 export function getUpdateRun(
   runId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UpdateRunRecord | undefined {
-  return withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(
+  return withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(
     ({ db }) => (tableExists(db, "update_runs") ? readRun(db, runId) : undefined),
     options,
   );
@@ -578,10 +578,10 @@ export function getUpdateRun(
 
 export function listUpdateRuns(
   input: { limit?: number; active?: boolean } = {},
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UpdateRunRecord[] {
   return (
-    withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(({ db }) => {
       if (!tableExists(db, "update_runs")) {
         return [];
       }
@@ -601,7 +601,7 @@ export function listUpdateRuns(
 }
 
 export function findActiveUpdateRun(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UpdateRunRecord | undefined {
   return listUpdateRuns({ limit: 1, active: true }, options)[0];
 }

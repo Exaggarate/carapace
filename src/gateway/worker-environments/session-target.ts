@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { SessionTranscriptWriteScope } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSessionIdMatchSelection } from "../../sessions/session-id-resolution.js";
 import {
   loadCombinedSessionStoreForGatewayCore,
@@ -24,7 +24,7 @@ export type ResolvedWorkerSessionTarget = Omit<
 };
 
 export function resolveWorkerSessionTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessionId: string,
 ): ResolvedWorkerSessionTarget | undefined {
   const { store, targetsBySessionKey } = loadCombinedSessionStoreForGatewayCore(cfg);

@@ -1,6 +1,6 @@
 // Managed gateway service lifecycle before and after an update.
 import { confirm, isCancel } from "@clack/prompts";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { stylePromptMessage } from "../../../packages/terminal-core/src/prompt-style.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
@@ -131,7 +131,7 @@ export async function tryInstallShellCompletion(opts: {
       if (isCancel(shouldInstall) || !shouldInstall) {
         defaultRuntime.log(
           theme.muted(
-            `Skipped. Run \`${formatCliCommand("openclaw completion --install")}\` later to enable.`,
+            `Skipped. Run \`${formatCliCommand("carapace completion --install")}\` later to enable.`,
           ),
         );
         return;
@@ -146,7 +146,7 @@ export async function tryInstallShellCompletion(opts: {
     const message = formatErrorMessage(err);
     defaultRuntime.log(
       theme.warn(
-        `Shell completion refresh failed: ${message}. Update will continue. Resolve the reported error before retrying: ${formatCliCommand("openclaw completion --write-state --install")}`,
+        `Shell completion refresh failed: ${message}. Update will continue. Resolve the reported error before retrying: ${formatCliCommand("carapace completion --write-state --install")}`,
       ),
     );
   }
@@ -505,7 +505,7 @@ export async function maybeRestartService(params: {
     } catch (err) {
       defaultRuntime.error(
         `Gateway: restart failed: ${String(err)}. Code update remains installed; a service stopped for update may still be stopped. ` +
-          "Run `openclaw gateway status --deep` and ask its service owner to restart it manually.",
+          "Run `carapace gateway status --deep` and ask its service owner to restart it manually.",
       );
       if (err instanceof GatewayRestartHealthError && !updatedInstallRestartNeedsServiceRootProof) {
         return await failed("restart-health-failed");
@@ -521,13 +521,13 @@ export async function maybeRestartService(params: {
     if (activation.result.mode === "npm" || activation.result.mode === "pnpm") {
       defaultRuntime.log(
         theme.muted(
-          `Tip: Run \`${formatCliCommand("openclaw doctor")}\`, then \`${formatCliCommand("openclaw gateway restart")}\` to apply updates to a running gateway.`,
+          `Tip: Run \`${formatCliCommand("carapace doctor")}\`, then \`${formatCliCommand("carapace gateway restart")}\` to apply updates to a running gateway.`,
         ),
       );
     } else {
       defaultRuntime.log(
         theme.muted(
-          `Tip: Run \`${formatCliCommand("openclaw gateway restart")}\` to apply updates to a running gateway.`,
+          `Tip: Run \`${formatCliCommand("carapace gateway restart")}\` to apply updates to a running gateway.`,
         ),
       );
     }

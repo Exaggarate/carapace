@@ -11,7 +11,7 @@ prepare_diagnostics_capture() {
 }
 publish_diagnostics() {
   # This directory is host-owned and is never mounted into the candidate.
-  local log_root="${OPENCLAW_DOCKER_ALL_LOG_DIR:-$ROOT_DIR/.artifacts/docker-tests}"
+  local log_root="${CARAPACE_DOCKER_ALL_LOG_DIR:-$ROOT_DIR/.artifacts/docker-tests}"
   local diagnostic_dir
   local private_root
   private_root="$(cd "$ARTIFACT_DIR" && pwd)" || return

@@ -230,7 +230,7 @@ describe("handleChannelAvatarHttpRequest", () => {
     expect(mocks.loadEntry).not.toHaveBeenCalled();
   });
 
-  it.each(["/__openclaw__/channel-avatar/", "/__openclaw__/channel-avatar/a/b"])(
+  it.each(["/__carapace__/channel-avatar/", "/__carapace__/channel-avatar/a/b"])(
     "claims malformed route %s as a 404",
     async (pathname) => {
       const response = await fetch(`http://127.0.0.1:${port}${pathname}`);
@@ -242,7 +242,7 @@ describe("handleChannelAvatarHttpRequest", () => {
 
   it("rejects non-read methods and leaves unrelated paths unhandled", async () => {
     const rejected = await fetch(avatarRoute("agent:main:one"), { method: "POST" });
-    const unhandled = await fetch(`http://127.0.0.1:${port}/__openclaw__/workspace-icon/one`);
+    const unhandled = await fetch(`http://127.0.0.1:${port}/__carapace__/workspace-icon/one`);
 
     expect(rejected.status).toBe(405);
     expect(rejected.headers.get("allow")).toBe("GET, HEAD");

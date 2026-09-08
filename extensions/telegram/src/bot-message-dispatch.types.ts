@@ -4,15 +4,15 @@ import type {
   AgentPlanStep,
   ChannelProgressDraftLine,
   TextChunkMode,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ReplyToMode,
   TelegramAccountConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import type { SessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import type { SessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import type { TelegramMessageContext } from "./bot-message-context.js";
 import type { TelegramBotOptions } from "./bot.types.js";
@@ -28,7 +28,7 @@ import type {
 export type DispatchTelegramMessageParams = {
   context: TelegramMessageContext;
   bot: Bot;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   replyToMode: ReplyToMode;
   streamMode: TelegramStreamMode;

@@ -22,12 +22,12 @@ import {
   type NodeClaudeSkillInit,
 } from "../infra/node-claude-skill-protocol.js";
 import { removeTemporaryArtifacts } from "../infra/temp-artifact-cleanup.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { materializeSkillResources } from "../skills/runtime/resources.js";
 
 /** The local MCP endpoint is a transport proxy only; no library, profile, or admin access. */
-export async function prepareNodeClaudeSkillSession(io: OpenClawPluginNodeHostCommandIo) {
+export async function prepareNodeClaudeSkillSession(io: CarapacePluginNodeHostCommandIo) {
   const frames = io.frames;
   if (!frames) {
     throw new Error("Upgrade and restart this node host for Claude skill resource support.");
@@ -113,7 +113,7 @@ export async function prepareNodeClaudeSkillSession(io: OpenClawPluginNodeHostCo
     const argv: string[] = artifacts ? ["--add-dir", artifacts.directory] : [];
     const workshop = init.workshop;
     if (workshop) {
-      directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-skills-"));
+      directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-skills-"));
       assertCurrent();
       // An unguessable local route prevents unrelated browser traffic; the
       // Gateway's exact pending invocation remains the privileged effect owner.
@@ -130,7 +130,7 @@ export async function prepareNodeClaudeSkillSession(io: OpenClawPluginNodeHostCo
             return;
           }
           const mcp = new Server(
-            { name: "openclaw-node-skills", version: "1" },
+            { name: "carapace-node-skills", version: "1" },
             { capabilities: { tools: {} } },
           );
           const transport = new StreamableHTTPServerTransport({
@@ -210,7 +210,7 @@ export async function prepareNodeClaudeSkillSession(io: OpenClawPluginNodeHostCo
         configPath,
         JSON.stringify({
           mcpServers: {
-            openclaw: {
+            carapace: {
               type: "http",
               url: `http://127.0.0.1:${address.port}${route}`,
               alwaysLoad: true,
@@ -222,7 +222,7 @@ export async function prepareNodeClaudeSkillSession(io: OpenClawPluginNodeHostCo
       assertCurrent();
       // Only this host-controlled tool may skip Claude's prompt. Native tools
       // retain the node's existing execution and permission policy.
-      argv.push("--mcp-config", configPath, "--allowedTools", "mcp__openclaw__skill_workshop");
+      argv.push("--mcp-config", configPath, "--allowedTools", "mcp__carapace__skill_workshop");
     }
     return {
       argv,

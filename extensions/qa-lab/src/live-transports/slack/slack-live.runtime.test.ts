@@ -1,5 +1,5 @@
 // Qa Lab tests cover slack live plugin behavior.
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { readQaScenarioById } from "../../scenario-catalog.js";
 import { requireFlowScenario } from "../../scenario-catalog.test-utils.js";
@@ -37,7 +37,7 @@ import { loadSlackQaRuntime } from "./slack-plugin.runtime.js";
 // Keep real Slack operations in Vitest's graph instead of recompiling them through Jiti.
 // The separate facade tests own plugin loading; this suite owns delivery behavior.
 vi.mock("./slack-plugin.runtime.js", async () => {
-  const runtime = await import("@openclaw/slack/test-api.js");
+  const runtime = await import("@carapace/slack/test-api.js");
   return { loadSlackQaRuntime: () => runtime };
 });
 
@@ -139,10 +139,10 @@ describe("Slack live QA runtime helpers", () => {
   it("resolves env credential payloads", () => {
     expect(
       testing.resolveSlackQaRuntimeEnv({
-        OPENCLAW_QA_SLACK_CHANNEL_ID: "C123456789",
-        OPENCLAW_QA_SLACK_DRIVER_BOT_TOKEN: "xoxb-driver",
-        OPENCLAW_QA_SLACK_SUT_BOT_TOKEN: "xoxb-sut",
-        OPENCLAW_QA_SLACK_SUT_APP_TOKEN: "xapp-sut",
+        CARAPACE_QA_SLACK_CHANNEL_ID: "C123456789",
+        CARAPACE_QA_SLACK_DRIVER_BOT_TOKEN: "xoxb-driver",
+        CARAPACE_QA_SLACK_SUT_BOT_TOKEN: "xoxb-sut",
+        CARAPACE_QA_SLACK_SUT_APP_TOKEN: "xapp-sut",
       }),
     ).toEqual({
       channelId: "C123456789",
@@ -155,12 +155,12 @@ describe("Slack live QA runtime helpers", () => {
   it("rejects malformed Slack channel ids", () => {
     expect(() =>
       testing.resolveSlackQaRuntimeEnv({
-        OPENCLAW_QA_SLACK_CHANNEL_ID: "qa-channel",
-        OPENCLAW_QA_SLACK_DRIVER_BOT_TOKEN: "xoxb-driver",
-        OPENCLAW_QA_SLACK_SUT_BOT_TOKEN: "xoxb-sut",
-        OPENCLAW_QA_SLACK_SUT_APP_TOKEN: "xapp-sut",
+        CARAPACE_QA_SLACK_CHANNEL_ID: "qa-channel",
+        CARAPACE_QA_SLACK_DRIVER_BOT_TOKEN: "xoxb-driver",
+        CARAPACE_QA_SLACK_SUT_BOT_TOKEN: "xoxb-sut",
+        CARAPACE_QA_SLACK_SUT_APP_TOKEN: "xapp-sut",
       }),
-    ).toThrow("OPENCLAW_QA_SLACK channelId must be a Slack id like C123 or U123.");
+    ).toThrow("CARAPACE_QA_SLACK channelId must be a Slack id like C123 or U123.");
   });
 
   it("parses Convex credential payloads", () => {
@@ -1233,7 +1233,7 @@ describe("Slack live QA runtime helpers", () => {
 
   it("extracts typed Slack approval button values from blocks", () => {
     const actionValue =
-      'openclaw:approval:v1:{"approvalId":"plugin:abc","approvalKind":"plugin","decision":"allow-once"}';
+      'carapace:approval:v1:{"approvalId":"plugin:abc","approvalKind":"plugin","decision":"allow-once"}';
     expect(
       testing.collectSlackActionValues([
         {
@@ -1254,8 +1254,8 @@ describe("Slack live QA runtime helpers", () => {
     expect(
       testing.extractSlackNativeApprovalId({
         actionValues: [
-          'openclaw:approval:v1:{"approvalId":"plugin:abc123","approvalKind":"plugin","decision":"allow-once"}',
-          'openclaw:approval:v1:{"approvalId":"plugin:abc123","approvalKind":"plugin","decision":"deny"}',
+          'carapace:approval:v1:{"approvalId":"plugin:abc123","approvalKind":"plugin","decision":"allow-once"}',
+          'carapace:approval:v1:{"approvalId":"plugin:abc123","approvalKind":"plugin","decision":"deny"}',
         ],
         decision: "allow-once",
       }),
@@ -1264,7 +1264,7 @@ describe("Slack live QA runtime helpers", () => {
 
   it("resolves the Codex file approval target path", () => {
     expect(testing.resolveCodexFileApprovalTargetPath("MARKER")).toMatch(
-      /\.openclaw-qa-codex-file-approval-marker\.txt$/u,
+      /\.carapace-qa-codex-file-approval-marker\.txt$/u,
     );
   });
 
@@ -1926,7 +1926,7 @@ describe("Slack live QA runtime helpers", () => {
                 type: "button",
                 text: { type: "plain_text", text: "Allow Once" },
                 value:
-                  'openclaw:approval:v1:{"approvalId":"plugin:abc","approvalKind":"plugin","decision":"allow-once"}',
+                  'carapace:approval:v1:{"approvalId":"plugin:abc","approvalKind":"plugin","decision":"allow-once"}',
               },
             ],
           },

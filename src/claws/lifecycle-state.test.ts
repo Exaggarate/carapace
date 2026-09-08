@@ -3,24 +3,24 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { loadConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { cronJobReadView } from "../cron/job-read-view.js";
 import { normalizeCronJobCreate } from "../cron/normalize.js";
 import { upsertCronJobRow } from "../cron/store/row-codec.js";
 import type { CronStoredJob } from "../cron/types.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
 import {
-  listOpenClawRegisteredAgentDatabases,
-  registerOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db-registry.js";
+  listCarapaceRegisteredAgentDatabases,
+  registerCarapaceAgentDatabase,
+} from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { clawCronGatewayInput, markClawCronRefRemoved, readClawCronRefs } from "./cron.js";
 import { withClawAgentConfigRemoval } from "./lifecycle-config-removal.js";
 import { quiescentClawMonitorGateway } from "./lifecycle-remove.test-support.js";
@@ -32,13 +32,13 @@ import {
   readClawPackageRefs,
 } from "./provenance.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ prefix: "claw-remove-config-" });
+  state = await createCarapaceTestState({ prefix: "claw-remove-config-" });
   await state.writeConfig({});
 });
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await state.cleanup();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -64,7 +64,7 @@ function seedAttachedCronJob(
   env: NodeJS.ProcessEnv,
   job: Pick<CronStoredJob, "id" | "name" | "schedule">,
 ): void {
-  const database = openOpenClawStateDatabase({ env });
+  const database = openCarapaceStateDatabase({ env });
   upsertCronJobRow(
     database.db,
     "default",
@@ -171,7 +171,7 @@ describe("Claw status and remove", () => {
       detectedFormat: "claude" as const,
       mapped: ["skills"],
       unavailable: ["agents"],
-      adapterIdentity: "openclaw/previous",
+      adapterIdentity: "carapace/previous",
     };
     persistClawPackageRef(
       current.plan,
@@ -207,7 +207,7 @@ describe("Claw status and remove", () => {
         state: "drifted",
         mapped: ["agents", "skills"],
         unavailable: [],
-        adapterIdentity: "openclaw/v1",
+        adapterIdentity: "carapace/v1",
       },
     });
     expect(readClawPackageRefs({ env: current.env })[0]?.extension).toEqual(extension);
@@ -221,7 +221,7 @@ describe("Claw status and remove", () => {
       detectedFormat: "claude" as const,
       mapped: ["skills"],
       unavailable: ["agents"],
-      adapterIdentity: "openclaw/current",
+      adapterIdentity: "carapace/current",
     };
     persistClawPackageRef(
       current.plan,
@@ -319,11 +319,11 @@ describe("Claw status and remove", () => {
 
   it("previews all canonical agent config deletion effects", async () => {
     const current = await addFixture();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...current.getConfig(),
       bindings: [{ match: { channel: "telegram", accountId: "*" }, agentId: "worker" }],
       tools: { agentToAgent: { allow: ["worker"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const plan = await buildClawRemovePlan("worker", { env: current.env, config });
 
@@ -342,15 +342,15 @@ describe("Claw status and remove", () => {
 
   it("refuses changed bindings and retains the cleanup fence", async () => {
     const current = await addFixture();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...current.getConfig(),
       bindings: [{ match: { channel: "telegram", accountId: "first" }, agentId: "worker" }],
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const plan = await buildClawRemovePlan("worker", { env: current.env, config });
-    const changedConfig: OpenClawConfig = {
+    const changedConfig: CarapaceConfig = {
       ...config,
       bindings: [{ match: { channel: "telegram", accountId: "second" }, agentId: "worker" }],
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       applyClawRemovePlan(plan, {
@@ -447,13 +447,13 @@ describe("Claw status and remove", () => {
   it("removes the agent and unchanged files but only releases package refs", async () => {
     const current = await addFixture({ withFile: true });
     const databasePath = join(
-      current.env.OPENCLAW_STATE_DIR,
+      current.env.CARAPACE_STATE_DIR,
       "agents",
       "worker",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
-    registerOpenClawAgentDatabase({ agentId: "worker", path: databasePath, env: current.env });
+    registerCarapaceAgentDatabase({ agentId: "worker", path: databasePath, env: current.env });
     persistClawPackageRef(
       current.plan,
       {
@@ -485,7 +485,7 @@ describe("Claw status and remove", () => {
     });
     expect(loadConfig().agents?.entries?.worker).toBeUndefined();
     expect(
-      listOpenClawRegisteredAgentDatabases({ env: current.env }).map((entry) => entry.agentId),
+      listCarapaceRegisteredAgentDatabases({ env: current.env }).map((entry) => entry.agentId),
     ).not.toContain("worker");
     await expect(readFile(join(current.plan.agent.workspace, "SOUL.md"), "utf8")).rejects.toThrow();
     await expect(
@@ -985,7 +985,7 @@ describe("Claw status and remove", () => {
     });
     const { id: firstId, ...firstConfig } = first.plan.agent.config;
     const { id: secondId, ...secondConfig } = second.plan.agent.config;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { entries: { [firstId]: firstConfig, [secondId]: secondConfig } },
     };
     await state.writeConfig(config);

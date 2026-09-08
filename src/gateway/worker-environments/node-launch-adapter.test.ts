@@ -29,7 +29,7 @@ import {
 const DEVICE_ID = "device-session-host";
 const WORKER_RUNS = {
   bundleHash: "a".repeat(64),
-  openclawVersion: "2026.8.1",
+  carapaceVersion: "2026.8.1",
   protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
 };
 
@@ -72,7 +72,7 @@ function launchInput(): NodeWorkerLaunchInput {
         turnId: "turn-1",
         prompt: "Inspect the workspace.",
         suppressPromptTranscript: true,
-        workspaceDir: "/tmp/openclaw-worker/workspace",
+        workspaceDir: "/tmp/carapace-worker/workspace",
         modelRef: { provider: "provider-1", model: "model-1" },
         inferenceOptions: {},
         initialMessages: [],
@@ -452,7 +452,7 @@ describe("node worker launch adapter", () => {
       getTransport: () => transportWith(invoke, async () => [node]),
     });
 
-    await expect(adapter.launch(launchRequest())).rejects.toThrow("openclaw update");
+    await expect(adapter.launch(launchRequest())).rejects.toThrow("carapace update");
     expect(invoke).not.toHaveBeenCalled();
   });
 

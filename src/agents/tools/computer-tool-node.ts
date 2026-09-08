@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { imageMimeFromFormat } from "@openclaw/media-core/mime";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { imageMimeFromFormat } from "@carapace/media-core/mime";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { formatErrorMessage } from "../../infra/errors.js";
 import type {
   ComputerActParams,
@@ -44,7 +44,7 @@ type ComputerState =
   | ({ kind: "frame" } & ComputerFrame);
 
 const NOT_COMPUTER_CAPABLE_HINT =
-  "enable Computer Control in the OpenClaw app and approve the pairing update";
+  "enable Computer Control in the Carapace app and approve the pairing update";
 const DANGEROUS_DENY_HINT = "blocked by gateway.nodes.commands.deny";
 const PLATFORM_ALLOWLIST_HINT = "is not in the allowlist for platform";
 const BUTTON_NOT_HELD_HINT = "left button is not held by computer control";

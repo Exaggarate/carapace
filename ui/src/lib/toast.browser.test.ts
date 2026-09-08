@@ -11,7 +11,7 @@ async function useViewport(width: number, height = 800) {
 }
 
 async function showArchiveToast(options: Partial<ToastOptions> = {}) {
-  const host = document.createElement("openclaw-toast-host");
+  const host = document.createElement("carapace-toast-host");
   document.body.append(host);
   await host.updateComplete;
   showToast({

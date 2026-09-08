@@ -1,14 +1,14 @@
 // Codex plugin module implements conversation control behavior.
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-runtime";
 import {
   applyModelOverrideWithAuthProfileCompatibility,
   ModelSelectionLockedError,
-} from "openclaw/plugin-sdk/model-session-runtime";
+} from "carapace/plugin-sdk/model-session-runtime";
 import {
   getSessionEntry,
   patchSessionEntry,
   resolveStorePath,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import {
   isCodexAppServerNativeAuthProfile,
   normalizeCodexAppServerBindingModelProvider,
@@ -45,7 +45,7 @@ type CodexAppServerBindingLookup = Omit<CodexAppServerAuthProfileLookup, "authPr
 
 type PermissionsMode = "default" | "yolo";
 
-const CODEX_CONVERSATION_CONTROL_STATE = Symbol.for("openclaw.codex.conversationControl");
+const CODEX_CONVERSATION_CONTROL_STATE = Symbol.for("carapace.codex.conversationControl");
 
 function getActiveTurns(): Map<string, ActiveTurn> {
   const globalState = globalThis as typeof globalThis & {
@@ -400,7 +400,7 @@ export function formatPermissionsMode(
 
 function requirePreparedThreadBinding(binding: CodexAppServerThreadBinding | undefined) {
   if (!binding?.threadId) {
-    throw new Error("No Codex thread is attached to this OpenClaw session yet.");
+    throw new Error("No Codex thread is attached to this Carapace session yet.");
   }
   return binding;
 }

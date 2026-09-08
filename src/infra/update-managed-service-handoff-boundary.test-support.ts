@@ -7,9 +7,9 @@ import { waitForFile } from "../../test/helpers/process-wait.js";
 import { DEFAULT_VITEST_TEST_TIMEOUT_MS } from "../../test/vitest/vitest.timeouts.js";
 import { writeTriageUpdateFailure } from "../commands/triage-update.js";
 import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "./kysely-sync.js";
 import { writeRestartSentinel } from "./restart-sentinel.js";
 import type { ManagedServiceBoundaryOptions } from "./update-managed-service-handoff-boundary-contract.test-support.js";
@@ -38,7 +38,7 @@ import { prepareManagedServiceRuntimeFixture } from "./update-managed-service-ha
 import { managedServiceStateUpdateScript } from "./update-managed-service-handoff-state.test-support.js";
 import { createUpdateRun, getUpdateRun } from "./update-run-ledger.js";
 
-type GatewayRestartSentinelDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_sentinel">;
+type GatewayRestartSentinelDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_restart_sentinel">;
 
 export async function pathExists(filePath: string): Promise<boolean> {
   try {
@@ -50,7 +50,7 @@ export async function pathExists(filePath: string): Promise<boolean> {
 }
 
 function readRestartSentinelPayload(env: NodeJS.ProcessEnv, key = "current"): unknown {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   const row = executeSqliteQueryTakeFirstSync(
     db,
@@ -85,7 +85,7 @@ export function createManagedServiceManagerBoundary({
       await fs.mkdtemp(
         path.join(
           os.tmpdir(),
-          `openclaw-${kind}-manager-boundary-${options?.updaterOutput === "split-utf8" ? "安装-" : ""}`,
+          `carapace-${kind}-manager-boundary-${options?.updaterOutput === "split-utf8" ? "安装-" : ""}`,
         ),
       ),
     );
@@ -101,10 +101,10 @@ export function createManagedServiceManagerBoundary({
     const updaterPidPath = path.join(root, "updater-pid");
     const commandTimingsPath = path.join(root, "manager-command-timings.jsonl");
     const recoveryModulePath = path.join(root, "recovery-health.mjs");
-    const stateDatabasePath = resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: root });
+    const stateDatabasePath = resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: root });
     const consumeNotification = `const db = new (require("node:sqlite").DatabaseSync)(${JSON.stringify(stateDatabasePath)}); const cleared = db.prepare("DELETE FROM gateway_restart_sentinel WHERE sentinel_key = 'current'").run(); db.close(); if (cleared.changes !== 1) throw new Error("expected one published notification before recovery consumed it"); ${managedServiceStateUpdateScript(statePath, "state.consumedNotifications = Number(cleared.changes)")};`;
     if (options?.updaterNotification) {
-      openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+      openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     }
     await fs.writeFile(
       recoveryModulePath,
@@ -159,7 +159,7 @@ export function createManagedServiceManagerBoundary({
         parentPid,
         statePath,
         commandsPath,
-        configPath: path.join(root, "openclaw.json"),
+        configPath: path.join(root, "carapace.json"),
         options,
       }),
       {
@@ -169,8 +169,8 @@ export function createManagedServiceManagerBoundary({
     const env = {
       ...process.env,
       ...(kind === "launchd" ? LAUNCHD_GATEWAY_IDENTITY_ENV : {}),
-      OPENCLAW_STATE_DIR: root,
-      OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
+      CARAPACE_STATE_DIR: root,
+      CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
       PATH: `${root}${path.delimiter}${process.env.PATH ?? ""}`,
     };
     const run = options?.ledger
@@ -185,7 +185,7 @@ export function createManagedServiceManagerBoundary({
     const { sourceRuntimeImport, ledgerRuntimeImport } = await prepareManagedServiceRuntimeFixture({
       recoveryModulePath,
       statePath,
-      configPath: env.OPENCLAW_CONFIG_PATH,
+      configPath: env.CARAPACE_CONFIG_PATH,
       activationGatePath,
       activationReleasePath,
       ledger: Boolean(run),
@@ -422,7 +422,7 @@ export function createManagedServiceManagerBoundary({
         });
       });
       helperCompletion = completion;
-      await waitForHandoffResponse(runningHelper.stdout, "OPENCLAW_UPDATE_HANDOFF_READY");
+      await waitForHandoffResponse(runningHelper.stdout, "CARAPACE_UPDATE_HANDOFF_READY");
 
       const databasePath = String(generated.updateLeaseDatabasePath);
       const owner = String(generated.updateLeaseOwner);
@@ -489,7 +489,7 @@ export function createManagedServiceManagerBoundary({
           } else {
             if (options.revokeWhileValidating) {
               await fs.writeFile(
-                env.OPENCLAW_CONFIG_PATH,
+                env.CARAPACE_CONFIG_PATH,
                 JSON.stringify({ commands: { ownerAllowFrom: [] } }),
               );
             }
@@ -504,7 +504,7 @@ export function createManagedServiceManagerBoundary({
                   throw new Error(`Repair updater exited before inference: ${stderr}`);
                 }),
               ]);
-              await releaseManagedRepairInference(options.repair, root, env.OPENCLAW_CONFIG_PATH);
+              await releaseManagedRepairInference(options.repair, root, env.CARAPACE_CONFIG_PATH);
             }
             if (notice) {
               await notice;
@@ -668,7 +668,7 @@ export function createManagedServiceManagerBoundary({
           string,
           unknown
         >,
-        sentinel: readRestartSentinelPayload({ OPENCLAW_STATE_DIR: root }),
+        sentinel: readRestartSentinelPayload({ CARAPACE_STATE_DIR: root }),
         log: await fs.readFile(String(generated.logPath), "utf8"),
         savedFailure,
         sensitiveFilesRemoved: (

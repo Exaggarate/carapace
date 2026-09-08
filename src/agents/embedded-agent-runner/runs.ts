@@ -3,8 +3,8 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createMessageInjectionAuthority } from "../../auto-reply/reply/message-injection-authority.js";
 import type { ReplyMessageInjectionOptions } from "../../auto-reply/reply/reply-run-registry.contracts.js";
 import {
@@ -363,7 +363,7 @@ export function markEmbeddedRunRecoveringTimeout(params: {
   ) {
     return undefined;
   }
-  const recoveryToken = Symbol("openclaw.embeddedRunTimeoutRecovery");
+  const recoveryToken = Symbol("carapace.embeddedRunTimeoutRecovery");
   abandoned.reason = "recovering_timeout";
   abandoned.recoveryToken = recoveryToken;
   return { sessionId: abandoned.sessionId, recoveryToken };
@@ -846,7 +846,7 @@ function prepareEmbeddedAgentQueueMessage(
 }
 
 /**
- * Abort embedded OpenClaw runs.
+ * Abort embedded Carapace runs.
  *
  * - With a sessionId, aborts that single run.
  * - With no sessionId, supports targeted abort modes (for example, compacting runs only).
@@ -1719,7 +1719,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.embeddedRunsTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.embeddedRunsTestApi")] =
     testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

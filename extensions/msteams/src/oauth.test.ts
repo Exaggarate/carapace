@@ -19,7 +19,7 @@ const fetchWithSsrFGuardMock = vi.hoisted(() =>
   ),
 );
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 

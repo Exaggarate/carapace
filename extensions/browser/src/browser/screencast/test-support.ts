@@ -6,7 +6,7 @@ export function screencastParams(
   overrides: Partial<BrowserScreencastTokenParams> = {},
 ): BrowserScreencastTokenParams {
   return {
-    profileName: "openclaw",
+    profileName: "carapace",
     targetId: "target-1",
     cdpUrl: "http://127.0.0.1:9222",
     maxWidth: 1280,

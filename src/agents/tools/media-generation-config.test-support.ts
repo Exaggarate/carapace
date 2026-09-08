@@ -1,16 +1,16 @@
 // Test-only bridge that feeds legacy fixture values through the canonical mediaModels owner.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 type MediaCapability = "image" | "music" | "video";
 type LegacyMediaModelKey = "imageGenerationModel" | "musicGenerationModel" | "videoGenerationModel";
 
 export function canonicalizeMediaGenerationTestConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   capability: MediaCapability,
   legacyKey: LegacyMediaModelKey,
-): OpenClawConfig {
+): CarapaceConfig {
   const defaults = config.agents?.defaults as
-    | (NonNullable<OpenClawConfig["agents"]>["defaults"] & Record<string, unknown>)
+    | (NonNullable<CarapaceConfig["agents"]>["defaults"] & Record<string, unknown>)
     | undefined;
   const legacyValue = defaults?.[legacyKey];
   if (legacyValue === undefined || defaults?.mediaModels?.[capability] !== undefined) {

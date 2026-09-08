@@ -19,7 +19,7 @@ afterEach(async () => {
 
 function seedRunningProfileState(
   state: ReturnType<typeof makeState>,
-  profileName = "openclaw",
+  profileName = "carapace",
 ): void {
   (state.profiles as Map<string, unknown>).set(profileName, {
     profile: { name: profileName },
@@ -73,14 +73,14 @@ describe("browser server-context tab selection lookup state", () => {
         }
       }) as never,
     }));
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     state.resolved.ssrfPolicy = {};
     seedRunningProfileState(state);
-    const openclaw = createTestBrowserRouteContext({ getState: () => state }).forProfile(
-      "openclaw",
+    const carapace = createTestBrowserRouteContext({ getState: () => state }).forProfile(
+      "carapace",
     );
 
-    const selected = await openclaw.ensureTabAvailable();
+    const selected = await carapace.ensureTabAvailable();
 
     expect(selected).toEqual(
       expect.objectContaining({
@@ -120,16 +120,16 @@ describe("browser server-context tab selection lookup state", () => {
     });
 
     global.fetch = withBrowserFetchPreconnect(fetchMock);
-    const state = makeState("openclaw");
+    const state = makeState("carapace");
     const ctx = createTestBrowserRouteContext({ getState: () => state });
-    const openclaw = ctx.forProfile("openclaw");
+    const carapace = ctx.forProfile("carapace");
 
-    await openclaw.labelTab("DOCS_RAW", "docs");
-    await expect(openclaw.ensureTabAvailable("t1")).resolves.toEqual(
+    await carapace.labelTab("DOCS_RAW", "docs");
+    await expect(carapace.ensureTabAvailable("t1")).resolves.toEqual(
       expect.objectContaining({ targetId: "DOCS_RAW" }),
     );
-    await openclaw.focusTab("docs");
-    await openclaw.closeTab("t1");
+    await carapace.focusTab("docs");
+    await carapace.closeTab("t1");
 
     expect(fetchCallUrls(fetchMock).some((url) => url.includes("/json/activate/DOCS_RAW"))).toBe(
       true,

@@ -15,7 +15,7 @@ vi.mock("../agents/prepared-model-catalog.js", () => ({
 import {
   loadModelCatalog,
   resolveThinkingDefaultWithRuntimeCatalog,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 
 describe("agent-runtime model catalog compatibility", () => {
   beforeEach(() => {
@@ -78,7 +78,7 @@ describe("agent-runtime model catalog compatibility", () => {
     expectTypeOf<PluginMetadataSnapshot>().toMatchTypeOf<AcceptedMetadataSnapshot>();
     mocks.loadCatalog.mockResolvedValue([]);
     const config = {};
-    const env = { OPENCLAW_STATE_DIR: "/tmp/plugin-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/plugin-state" };
 
     await loadModelCatalog({
       agentDir: "/tmp/plugin-agent",

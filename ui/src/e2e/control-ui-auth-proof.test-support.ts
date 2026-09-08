@@ -38,7 +38,7 @@ export async function captureConfigReadbackFailure(page: Page): Promise<void> {
       Promise.all([
         page.evaluate(() => {
           const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-            "openclaw-app",
+            "carapace-app",
           );
           const phase = app?.runtime?.context.gateway.snapshot.phase;
           const phases = [
@@ -56,7 +56,7 @@ export async function captureConfigReadbackFailure(page: Page): Promise<void> {
             gatewayPhase: phases.includes(phase ?? "") ? phase : "unknown",
             mainInert: document.querySelector("main")?.inert ?? null,
             outletInert:
-              document.querySelector<HTMLElement>("openclaw-router-outlet")?.inert ?? null,
+              document.querySelector<HTMLElement>("carapace-router-outlet")?.inert ?? null,
             rawButtons: [
               ...document.querySelectorAll<HTMLButtonElement>(
                 ".settings-segmented--primary button",

@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupBackgroundHarnesses,
@@ -8,7 +8,7 @@ import {
   sendRuntimeMessage,
 } from "./background.test-harness.js";
 
-const RELAY_WATCHDOG_ALARM = "openclaw-relay-watchdog";
+const RELAY_WATCHDOG_ALARM = "carapace-relay-watchdog";
 
 describe("relay command authorization", () => {
   beforeEach(() => {
@@ -952,7 +952,7 @@ describe("relay command authorization", () => {
       expect(frames).toContainEqual({
         type: "error",
         seq: 31,
-        message: "tab 81 is paused for OpenClaw",
+        message: "tab 81 is paused for Carapace",
       });
     });
 
@@ -1004,13 +1004,13 @@ describe("relay command authorization", () => {
       expect(frames).toContainEqual({
         type: "error",
         seq: 32,
-        message: "tab 91 is paused for OpenClaw",
+        message: "tab 91 is paused for Carapace",
       });
     });
   });
 
   it.each(["all", "selected"] as const)(
-    "keeps agent-created tabs in the OpenClaw group in %s mode",
+    "keeps agent-created tabs in the Carapace group in %s mode",
     async (accessMode) => {
       const harness = await loadBackground({
         storedConfig: {

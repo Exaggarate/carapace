@@ -1,10 +1,10 @@
 // Slack provider module implements model/runtime integration.
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { channelBlockedPatch, channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { channelBlockedPatch, channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
 import {
   asOptionalRecord as asRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SlackChannelResolution } from "../resolve-channels.js";
 import type { SlackUserResolution } from "../resolve-users.js";
 import type { SlackIdentityHealth } from "./enterprise-install.js";
@@ -22,9 +22,9 @@ type SlackSocketModeLogger = SlackSdkLogger & {
 };
 type SlackSocketDisconnect = Awaited<ReturnType<typeof waitForSlackSocketDisconnect>>;
 
-const OPENCLAW_SLACK_CLIENT_PING_TIMEOUT_MS = 15_000;
-const OPENCLAW_SLACK_SOCKET_START_FAILED_EVENT = "unable_to_socket_mode_start";
-const OPENCLAW_SLACK_NATIVE_RECONNECT_OBSERVER_KEY = "__openclawNativeReconnectFailureObserver";
+const CARAPACE_SLACK_CLIENT_PING_TIMEOUT_MS = 15_000;
+const CARAPACE_SLACK_SOCKET_START_FAILED_EVENT = "unable_to_socket_mode_start";
+const CARAPACE_SLACK_NATIVE_RECONNECT_OBSERVER_KEY = "__carapaceNativeReconnectFailureObserver";
 const SLACK_SOCKET_PONG_TIMEOUT_WARNING_PREFIX = "A pong wasn't received from the server";
 const SLACK_SOCKET_PING_TIMEOUT_WARNING_PREFIX = "A ping wasn't received from the server";
 const SLACK_SOCKET_LOG_LEVEL_IGNORED_WARNING_RE =
@@ -69,7 +69,7 @@ function installSlackNativeReconnectFailureObserver(receiver: unknown) {
   if (!client || typeof client !== "object") {
     return;
   }
-  if (Reflect.get(client, OPENCLAW_SLACK_NATIVE_RECONNECT_OBSERVER_KEY)) {
+  if (Reflect.get(client, CARAPACE_SLACK_NATIVE_RECONNECT_OBSERVER_KEY)) {
     return;
   }
   const delayReconnectAttempt = Reflect.get(client, "delayReconnectAttempt");
@@ -78,7 +78,7 @@ function installSlackNativeReconnectFailureObserver(receiver: unknown) {
     return;
   }
 
-  Reflect.set(client, OPENCLAW_SLACK_NATIVE_RECONNECT_OBSERVER_KEY, true);
+  Reflect.set(client, CARAPACE_SLACK_NATIVE_RECONNECT_OBSERVER_KEY, true);
   Reflect.set(
     client,
     "delayReconnectAttempt",
@@ -93,7 +93,7 @@ function installSlackNativeReconnectFailureObserver(receiver: unknown) {
       const delayMs =
         (Number.isFinite(pingTimeoutMs) && pingTimeoutMs >= 0
           ? pingTimeoutMs
-          : OPENCLAW_SLACK_CLIENT_PING_TIMEOUT_MS) * nextFailureCount;
+          : CARAPACE_SLACK_CLIENT_PING_TIMEOUT_MS) * nextFailureCount;
       const logger = Reflect.get(this, "logger") as { debug?: (message: string) => void };
       logger?.debug?.(
         `Before trying to reconnect, this client will wait for ${delayMs} milliseconds`,
@@ -110,7 +110,7 @@ function installSlackNativeReconnectFailureObserver(receiver: unknown) {
           emit.call(this, "reconnecting");
           Promise.resolve(callback.call(this)).then(resolve, (error: unknown) => {
             if (callback === Reflect.get(this, "start")) {
-              emit.call(this, OPENCLAW_SLACK_SOCKET_START_FAILED_EVENT, error);
+              emit.call(this, CARAPACE_SLACK_SOCKET_START_FAILED_EVENT, error);
               resolve(undefined);
               return;
             }
@@ -303,7 +303,7 @@ function createSlackSocketModeLogger(
   };
 }
 
-function shouldSkipOpenClawSlackSelfEvent(args: SlackSelfFilterArgs): boolean {
+function shouldSkipCarapaceSlackSelfEvent(args: SlackSelfFilterArgs): boolean {
   const botId = args.context?.botId;
   const botUserId = args.context?.botUserId;
   const message = asRecord(args.message);
@@ -346,7 +346,7 @@ export function createSlackBoltApp(params: {
   const socketModeReceiverOptions: SlackSocketModeReceiverOptions = {
     appToken: params.appToken ?? "",
     autoReconnectEnabled: true,
-    clientPingTimeout: OPENCLAW_SLACK_CLIENT_PING_TIMEOUT_MS,
+    clientPingTimeout: CARAPACE_SLACK_CLIENT_PING_TIMEOUT_MS,
     logger: socketModeLogger,
     ...(params.dispatcher ? { dispatcher: params.dispatcher } : {}),
     installerOptions: {
@@ -379,7 +379,7 @@ export function createSlackBoltApp(params: {
     ignoreSelf: false,
     // Bolt eagerly starts an auth.test promise in the constructor when token
     // verification is enabled. Invalid tokens can reject before any listener
-    // consumes that promise, tripping OpenClaw's fatal unhandled-rejection path.
+    // consumes that promise, tripping Carapace's fatal unhandled-rejection path.
     tokenVerificationEnabled: false,
     ...(appReceiver ? { receiver: appReceiver } : {}),
   });
@@ -388,7 +388,7 @@ export function createSlackBoltApp(params: {
       ...args.context,
       apiAppId: normalizeOptionalString(asRecord(args.body)?.api_app_id),
     });
-    if (shouldSkipOpenClawSlackSelfEvent(args)) {
+    if (shouldSkipCarapaceSlackSelfEvent(args)) {
       return;
     }
     await args.next();

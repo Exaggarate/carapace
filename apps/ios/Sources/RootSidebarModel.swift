@@ -1,20 +1,20 @@
 import Foundation
 import Observation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 
 struct ChatSessionRosterSnapshot: Sendable {
     private static let maximumPageCount = 50
     private static let maximumSessionCount = 10000
 
-    let sessions: [OpenClawChatSessionEntry]
+    let sessions: [CarapaceChatSessionEntry]
     let isCached: Bool
     let totalCount: Int?
     let isComplete: Bool
 
     init(
-        sessions: [OpenClawChatSessionEntry],
+        sessions: [CarapaceChatSessionEntry],
         isCached: Bool,
         totalCount: Int? = nil,
         isComplete: Bool = true)
@@ -27,9 +27,9 @@ struct ChatSessionRosterSnapshot: Sendable {
 
     @MainActor
     static func collect(
-        fetchPage: @MainActor (Int) async throws -> OpenClawChatSessionsListResponse) async throws -> Self
+        fetchPage: @MainActor (Int) async throws -> CarapaceChatSessionsListResponse) async throws -> Self
     {
-        var sessions: [OpenClawChatSessionEntry] = []
+        var sessions: [CarapaceChatSessionEntry] = []
         var rowIndices: [String: Int] = [:]
         var totalCount: Int?
         var offset = 0
@@ -43,7 +43,7 @@ struct ChatSessionRosterSnapshot: Sendable {
                 return Self(sessions: sessions, isCached: false, totalCount: totalCount, isComplete: false)
             }
             pageCount += 1
-            let response: OpenClawChatSessionsListResponse
+            let response: CarapaceChatSessionsListResponse
             do {
                 response = try await fetchPage(offset)
             } catch is CancellationError {
@@ -123,14 +123,14 @@ extension NodeAppModel {
                 // Every page belongs to one physical authenticated Gateway route;
                 // reconnects and gateway switches must never splice two rosters.
                 snapshot = try await ChatSessionRosterSnapshot.collect { offset in
-                    let request = OpenClawChatGatewayRequests.sessionsList(
+                    let request = CarapaceChatGatewayRequests.sessionsList(
                         limit: limit,
                         search: nil,
                         archived: archived,
                         agentID: sourceAgentID,
                         offset: offset)
                     let data = try await self.operatorSession.request(request, ifCurrentRoute: route)
-                    return try JSONDecoder().decode(OpenClawChatSessionsListResponse.self, from: data)
+                    return try JSONDecoder().decode(CarapaceChatSessionsListResponse.self, from: data)
                 }
                 guard GatewayStableIdentifier.matches(self.chatTranscriptCacheGatewayID, sourceGatewayID),
                       self.chatDeliveryAgentId == sourceAgentID
@@ -184,7 +184,7 @@ final class RootSidebarModel {
         let generation: UInt64
     }
 
-    private(set) var sessions: [OpenClawChatSessionEntry] = []
+    private(set) var sessions: [CarapaceChatSessionEntry] = []
     private(set) var usage: CostUsageSummaryLite?
     private(set) var cronJobs: [CronJob] = []
     private(set) var isRefreshing = false
@@ -213,7 +213,7 @@ final class RootSidebarModel {
         currentSessionKey: String,
         mainSessionKey: String,
         activeAgentID: String?,
-        groups: [OpenClawChatSessionGroup]) -> [ChatSessionSidebarModel.Section]
+        groups: [CarapaceChatSessionGroup]) -> [ChatSessionSidebarModel.Section]
     {
         ChatSessionSidebarModel.sections(
             sessions: self.sessions,
@@ -316,7 +316,7 @@ final class RootSidebarModel {
             // The Gateway may apply a change before its reply times out. An old
             // confirmation must never suppress the next recovery declaration.
             self.sessionObserverDeclaration = nil
-            let request = OpenClawChatGatewayRequests.setSessionObserverVisibility(
+            let request = CarapaceChatGatewayRequests.setSessionObserverVisibility(
                 visible,
                 timeoutMs: 12000)
             do {
@@ -365,7 +365,7 @@ final class RootSidebarModel {
                 await appModel.operatorSession.subscribeServerEvents(bufferingNewest: 200)
             },
             subscribe: {
-                let request = OpenClawChatGatewayRequests.subscribeSessions(timeoutMs: 12000)
+                let request = CarapaceChatGatewayRequests.subscribeSessions(timeoutMs: 12000)
                 _ = try await appModel.operatorSession.request(
                     method: request.method,
                     params: request.params,
@@ -465,7 +465,7 @@ final class RootSidebarModel {
     }
 
     private func handleSessionEvent(_ frame: EventFrame, appModel: NodeAppModel) async -> Bool {
-        guard let event = OpenClawChatGatewayPayloadCodec.event(from: frame) else { return false }
+        guard let event = CarapaceChatGatewayPayloadCodec.event(from: frame) else { return false }
         switch event {
         case .sessionsChanged:
             await self.refreshSessions(appModel: appModel)
@@ -488,7 +488,7 @@ final class RootSidebarModel {
     }
 
     static func tokenUsageSummary(
-        for sessions: [OpenClawChatSessionEntry],
+        for sessions: [CarapaceChatSessionEntry],
         rosterIsComplete: Bool = true) -> TokenUsageSummary
     {
         let knownTotals = sessions.compactMap(\.totalTokens)

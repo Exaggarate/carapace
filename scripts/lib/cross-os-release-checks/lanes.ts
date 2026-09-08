@@ -75,7 +75,7 @@ import {
   runDashboardSmoke,
   runModelsSet,
   runOnboard,
-  runOpenClaw,
+  runCarapace,
   startGateway,
   waitForGateway,
 } from "./runtime.ts";
@@ -269,7 +269,7 @@ export async function runUpgradeLane(
     await runTimedLanePhase(lane, "update", async () => {
       try {
         updateResult = await withNpmDiagnostics(lane.homeDir, updateLogPath, updateEnv, () =>
-          runOpenClaw({
+          runCarapace({
             lane,
             env: updateEnv,
             args: updateArgs,
@@ -340,7 +340,7 @@ export async function runUpgradeLane(
       })
     ) {
       await runTimedLanePhase(lane, "update-status", async () => {
-        await runOpenClaw({
+        await runCarapace({
           lane,
           env: updateEnv,
           args: ["update", "status", "--json"],
@@ -774,7 +774,7 @@ export async function runDevUpdateSuite(
       args: ["update", "--channel", "dev", "--yes", "--json"],
       env: {
         ...buildRealUpdateEnv(env),
-        OPENCLAW_UPDATE_DEV_TARGET_REF: verificationRef,
+        CARAPACE_UPDATE_DEV_TARGET_REF: verificationRef,
       },
       cwd: lane.homeDir,
       logPath: join(params.logsDir, "dev-update.log"),
@@ -785,7 +785,7 @@ export async function runDevUpdateSuite(
     const updatedShell = await verifyFreshShellCommand({
       lane,
       env,
-      expectedNeedle: "OpenClaw",
+      expectedNeedle: "Carapace",
       logPath: join(params.logsDir, "dev-update-shell.log"),
     });
 
@@ -893,10 +893,10 @@ export async function runDevUpdateSuite(
 }
 
 function createLaneState(name: string): LaneState {
-  const rootDir = mkdtempSync(join(tmpdir(), `openclaw-${name}-`));
+  const rootDir = mkdtempSync(join(tmpdir(), `carapace-${name}-`));
   const prefixDir = join(rootDir, "prefix");
   const homeDir = join(rootDir, "home");
-  const stateDir = join(homeDir, ".openclaw");
+  const stateDir = join(homeDir, ".carapace");
   const appDataDir = process.platform === "win32" ? join(homeDir, "AppData", "Roaming") : stateDir;
   mkdirSync(prefixDir, { recursive: true });
   mkdirSync(homeDir, { recursive: true });
@@ -930,11 +930,11 @@ function buildLaneEnv(
     USERPROFILE: lane.homeDir,
     APPDATA: lane.appDataDir,
     LOCALAPPDATA: join(lane.homeDir, "AppData", "Local"),
-    OPENCLAW_HOME: lane.homeDir,
-    OPENCLAW_STATE_DIR: lane.stateDir,
-    OPENCLAW_CONFIG_PATH: join(lane.stateDir, "openclaw.json"),
-    OPENCLAW_DISABLE_BONJOUR: "1",
-    OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: "1",
+    CARAPACE_HOME: lane.homeDir,
+    CARAPACE_STATE_DIR: lane.stateDir,
+    CARAPACE_CONFIG_PATH: join(lane.stateDir, "carapace.json"),
+    CARAPACE_DISABLE_BONJOUR: "1",
+    CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: "1",
     NPM_CONFIG_PREFIX: lane.prefixDir,
     PATH: `${binDirForPrefix(lane.prefixDir)}${process.platform === "win32" ? ";" : ":"}${process.env.PATH ?? ""}`,
     [providerMeta.secretEnv]: providerSecretValue,
@@ -954,12 +954,12 @@ function buildInstallerEnv(
     USERPROFILE: lane.homeDir,
     APPDATA: lane.appDataDir,
     LOCALAPPDATA: localAppData,
-    OPENCLAW_HOME: lane.homeDir,
-    OPENCLAW_STATE_DIR: lane.stateDir,
-    OPENCLAW_CONFIG_PATH: join(lane.stateDir, "openclaw.json"),
-    OPENCLAW_DISABLE_BONJOUR: "1",
-    OPENCLAW_NO_ONBOARD: "1",
-    OPENCLAW_NO_PROMPT: "1",
+    CARAPACE_HOME: lane.homeDir,
+    CARAPACE_STATE_DIR: lane.stateDir,
+    CARAPACE_CONFIG_PATH: join(lane.stateDir, "carapace.json"),
+    CARAPACE_DISABLE_BONJOUR: "1",
+    CARAPACE_NO_ONBOARD: "1",
+    CARAPACE_NO_PROMPT: "1",
     CI: "1",
     NODE_OPTIONS: "--max-old-space-size=8192",
     [providerMeta.secretEnv]: providerSecretValue,
@@ -986,14 +986,14 @@ export function resolveManagedGatewayInstallerEnv(params: {
   };
   const isolatedIdentityKeys = new Set(
     [
-      "OPENCLAW_HOME",
-      "OPENCLAW_PROFILE",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_WINDOWS_TASK_NAME",
-      "OPENCLAW_TASK_SCRIPT_NAME",
-      "OPENCLAW_TASK_SCRIPT",
-      "OPENCLAW_SERVICE_KIND",
+      "CARAPACE_HOME",
+      "CARAPACE_PROFILE",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
+      "CARAPACE_WINDOWS_TASK_NAME",
+      "CARAPACE_TASK_SCRIPT_NAME",
+      "CARAPACE_TASK_SCRIPT",
+      "CARAPACE_SERVICE_KIND",
     ].map((key) => key.toUpperCase()),
   );
   // Windows environment keys are case-insensitive. Remove every casing variant
@@ -1034,12 +1034,12 @@ export function assertManagedGatewayInstallerHostAvailable(params: {
   pathExists?: (path: string) => boolean;
 }): void {
   const pathExists = params.pathExists ?? existsSync;
-  const occupiedStateDirs = [".openclaw", ".clawdbot"]
+  const occupiedStateDirs = [".carapace", ".clawdbot"]
     .map((name) => join(params.accountHome, name))
     .filter((path) => pathExists(path));
   if (params.serviceInstalled || occupiedStateDirs.length > 0) {
     throw new Error(
-      "Managed installer service checks require a pristine host account with no OpenClaw service or state.",
+      "Managed installer service checks require a pristine host account with no Carapace service or state.",
     );
   }
 }
@@ -1052,7 +1052,7 @@ type ManagedGatewayInstallerHostLease = {
 export function acquireManagedGatewayInstallerHostLease(
   accountHome: string,
 ): ManagedGatewayInstallerHostLease {
-  const lockDir = join(accountHome, ".openclaw-release-check.lock");
+  const lockDir = join(accountHome, ".carapace-release-check.lock");
   try {
     mkdirSync(lockDir);
   } catch (error) {
@@ -1138,7 +1138,7 @@ async function cleanupManagedGatewayInstallerHost(params: {
 
   if (serviceRemoved) {
     try {
-      rmSync(join(params.accountHome, ".openclaw"), { recursive: true, force: true });
+      rmSync(join(params.accountHome, ".carapace"), { recursive: true, force: true });
       rmSync(join(params.accountHome, ".clawdbot"), { recursive: true, force: true });
     } catch (error) {
       cleanupErrors.push(error instanceof Error ? error : new Error(formatError(error)));

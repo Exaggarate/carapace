@@ -1,5 +1,5 @@
 /** Resolves the effective reply route from current context and persisted session route. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeChatType, type ChatType } from "../../channels/chat-type.js";
 import { getLoadedChannelPluginForRead } from "../../channels/plugins/registry-loaded.js";
 import type { SessionEntry } from "../../config/sessions/types.js";

@@ -98,7 +98,7 @@ if [ "$DEPENDENCY_CACHE" = "true" ]; then
   # The exact archive includes importer links, and frozen offline
   # reconciliation validates them without reaching the registry. Later
   # build wrappers can use installed Node entrypoints directly.
-  echo "OPENCLAW_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"
+  echo "CARAPACE_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"
   # Install and frozen reconciliation own dependency writes. Keep later
   # shard commands read-only so they cannot launch concurrent implicit
   # installs after CI fans out.

@@ -18,10 +18,10 @@ import { NATIVE_I18N_LOCALES } from "../../scripts/native-i18n-locales.ts";
 const probe = vi.hoisted(() => ({
   source: "",
   paths: [
-    "apps/macos/Sources/OpenClaw/OnboardingAISetupView.swift",
+    "apps/macos/Sources/Carapace/OnboardingAISetupView.swift",
     "apps/ios/Sources/Gateway/ExecApprovalPromptDialog.swift",
-    "apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatComposer+Controls.swift",
-    "apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayDiscoveryStatusText.swift",
+    "apps/shared/CarapaceKit/Sources/CarapaceChatUI/ChatComposer+Controls.swift",
+    "apps/shared/CarapaceKit/Sources/CarapaceKit/GatewayDiscoveryStatusText.swift",
   ],
 }));
 
@@ -44,7 +44,7 @@ vi.mock("node:fs/promises", async (importOriginal) => {
 
 describe("Apple app i18n catalogs", () => {
   it("verification and compile-macos reject raw macOS interpolation and retain shared/iOS coverage", async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), "openclaw-apple-runtime-"));
+    const root = await mkdtemp(path.join(os.tmpdir(), "carapace-apple-runtime-"));
     const output = path.join(root, "output");
     const gates = [() => verifyAppleAppI18n(), () => compileMacosLocalizations(output)];
     try {
@@ -174,7 +174,7 @@ describe("Apple app i18n catalogs", () => {
         "Waiting",
       ]),
     );
-    expect(keys).not.toContain("OpenClaw");
+    expect(keys).not.toContain("Carapace");
     expect(keys.some((key) => key.includes("\\("))).toBe(false);
   });
 
@@ -187,7 +187,7 @@ describe("Apple app i18n catalogs", () => {
           {
             id: "native.apple.settings",
             source: "Settings",
-            sites: [{ kind: "ui-call", path: "apps/macos/Sources/OpenClaw/Settings.swift" }],
+            sites: [{ kind: "ui-call", path: "apps/macos/Sources/Carapace/Settings.swift" }],
             surface: "apple",
           },
         ],
@@ -200,7 +200,7 @@ describe("Apple app i18n catalogs", () => {
         `${JSON.stringify({ sourceLanguage: "en", strings: {}, version: "1.0" }, null, 2)}\n`,
         build,
       ),
-    ).toThrow("Apple catalog apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings is stale");
+    ).toThrow("Apple catalog apps/macos/Sources/Carapace/Resources/Localizable.xcstrings is stale");
   });
 
   it("serializes one complete localization key per line without losing nested metadata", () => {
@@ -248,8 +248,8 @@ describe("Apple app i18n catalogs", () => {
 
   it("keeps Connection window runtime values verbatim", async () => {
     const [gateways, connection] = await Promise.all([
-      readFile("apps/macos/Sources/OpenClaw/GatewaySettings.swift", "utf8"),
-      readFile("apps/macos/Sources/OpenClaw/ConnectionSettingsView.swift", "utf8"),
+      readFile("apps/macos/Sources/Carapace/GatewaySettings.swift", "utf8"),
+      readFile("apps/macos/Sources/Carapace/ConnectionSettingsView.swift", "utf8"),
     ]);
 
     expect(gateways).toContain("Text(verbatim: profile.name)");
@@ -274,7 +274,7 @@ describe("Apple app i18n catalogs", () => {
       id: `native.apple.concatenated.${index}`,
       source,
       surface: "apple",
-      sites: [{ kind, path: "apps/macos/Sources/OpenClaw/Example.swift" }],
+      sites: [{ kind, path: "apps/macos/Sources/Carapace/Example.swift" }],
     }));
     const inventory = {
       version: 2,
@@ -285,7 +285,7 @@ describe("Apple app i18n catalogs", () => {
           surface: "apple",
           sites: [
             { kind: "ui-call", path: "apps/ios/Sources/Example.swift" },
-            { kind: "ui-call", path: "apps/macos/Sources/OpenClaw/Example.swift" },
+            { kind: "ui-call", path: "apps/macos/Sources/Carapace/Example.swift" },
           ],
         },
         {
@@ -342,12 +342,12 @@ describe("Apple app i18n catalogs", () => {
 
   it.each([
     ["iOS", buildIosCatalog, "apps/ios/Sources/Example.swift"],
-    ["macOS", buildMacosCatalog, "apps/macos/Sources/OpenClaw/Example.swift"],
-    ["shared iOS", buildIosCatalog, "apps/shared/OpenClawKit/Sources/OpenClawChatUI/Example.swift"],
+    ["macOS", buildMacosCatalog, "apps/macos/Sources/Carapace/Example.swift"],
+    ["shared iOS", buildIosCatalog, "apps/shared/CarapaceKit/Sources/CarapaceChatUI/Example.swift"],
     [
       "shared macOS",
       buildMacosCatalog,
-      "apps/shared/OpenClawKit/Sources/OpenClawChatUI/Example.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceChatUI/Example.swift",
     ],
   ] as const)(
     "converts only constrained inflected counts into typed %s catalog keys",
@@ -392,7 +392,7 @@ describe("Apple app i18n catalogs", () => {
   );
 
   it("keeps custom component text on explicit localized or verbatim paths", async () => {
-    const design = await readFile("apps/ios/Sources/Design/OpenClawProComponents.swift", "utf8");
+    const design = await readFile("apps/ios/Sources/Design/CarapaceProComponents.swift", "utf8");
     const settingsActions = await readFile(
       "apps/ios/Sources/Design/SettingsProTabActions.swift",
       "utf8",
@@ -412,7 +412,7 @@ describe("Apple app i18n catalogs", () => {
     const watchDirect = await readFile("apps/ios/WatchApp/Sources/WatchDirectNode.swift", "utf8");
 
     expect(design).toContain(
-      "struct ProStatusRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
+      "struct ProStatusRow: View {\n    let icon: String\n    let title: CarapaceTextValue\n    let detail: CarapaceTextValue",
     );
     expect(design).not.toContain(
       "struct ProStatusRow: View {\n    let icon: String\n    let title: String",
@@ -425,15 +425,15 @@ describe("Apple app i18n catalogs", () => {
     expect(watch).toContain("accessory: .verbatim(self.store.talkSummaryText)");
     expect(watch).toContain("title: .verbatim(record.approval.commandPreview");
     expect(settings).toContain(
-      "let title: OpenClawTextValue\n    let detail: OpenClawTextValue\n    let priority: OpenClawTextValue",
+      "let title: CarapaceTextValue\n    let detail: CarapaceTextValue\n    let priority: CarapaceTextValue",
     );
     expect(settings).toContain(
-      "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: OpenClawTextValue",
+      "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: CarapaceTextValue",
     );
     expect(settings).toContain("self.value.text");
     expect(settings).not.toContain("Text(self.item.title)");
     expect(settingsActions).toContain(
-      "func diagnosticCheckRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
+      "func diagnosticCheckRow(\n        icon: String,\n        title: CarapaceTextValue,\n        detail: CarapaceTextValue,\n        value: CarapaceTextValue",
     );
     expect(settingsSections).toContain("func settingsToggle(\n        _ title: LocalizedStringKey");
     expect(settingsSections).toContain(
@@ -528,11 +528,11 @@ describe("Apple app i18n catalogs", () => {
       ),
     ).toBe("Utilisez l’appareil photo pour scanner les codes de configuration.");
     expect(
-      selectInfoPlistTranslation("OpenClaw Share", [], {
-        source: "OpenClaw Share",
-        value: "OpenClaw Partager",
+      selectInfoPlistTranslation("Carapace Share", [], {
+        source: "Carapace Share",
+        value: "Carapace Partager",
       }),
-    ).toBe("OpenClaw Partager");
+    ).toBe("Carapace Partager");
     expect(
       selectInfoPlistTranslation(
         "Use the camera to scan setup codes.",
@@ -568,7 +568,7 @@ describe("Apple app i18n catalogs", () => {
   });
 
   it("compiles macOS catalogs into app-bundle localization directories", async () => {
-    const outputDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-apple-i18n-"));
+    const outputDir = await mkdtemp(path.join(os.tmpdir(), "carapace-apple-i18n-"));
     try {
       await compileMacosLocalizations(outputDir);
       const english = await readFile(
@@ -596,7 +596,7 @@ describe("Apple app i18n catalogs", () => {
         "utf8",
       );
       expect(frenchInfoPlist).toContain(
-        '"NSUserNotificationUsageDescription" = "OpenClaw a besoin de l’autorisation d’envoyer des notifications pour afficher des alertes concernant les actions de l’agent.";',
+        '"NSUserNotificationUsageDescription" = "Carapace a besoin de l’autorisation d’envoyer des notifications pour afficher des alertes concernant les actions de l’agent.";',
       );
       expect(frenchInfoPlist).toContain('"NSScreenCaptureDescription" = ');
       expect(frenchInfoPlist).toContain('"NSLocationUsageDescription" = ');

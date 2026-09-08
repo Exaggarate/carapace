@@ -1,5 +1,5 @@
 /** Parses cron schedule timestamps from user-facing absolute time strings. */
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import { hasValidIsoCalendarComponents, normalizeUtcIso } from "../shared/iso-time.js";
 
 /** Parses absolute cron timestamps from epoch milliseconds or ISO-like strings normalized to UTC. */

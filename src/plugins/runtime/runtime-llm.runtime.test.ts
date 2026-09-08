@@ -1,10 +1,10 @@
 // Runtime LLM tests cover plugin provider hooks inside the model runtime adapter.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveContextEngineCapabilities } from "../../agents/embedded-agent-runner/context-engine-capabilities.js";
 import { runContextEngineMaintenance } from "../../agents/embedded-agent-runner/context-engine-maintenance.js";
 import { buildAfterTurnRuntimeContext } from "../../agents/embedded-agent-runner/run/attempt-prompt-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withPluginRuntimePluginIdScope } from "./gateway-request-scope.js";
 import { createRuntimeLlm } from "./runtime-llm.runtime.js";
 import type { RuntimeLogger } from "./types-core.js";
@@ -27,14 +27,14 @@ const cfg = {
       model: "openai/gpt-5.5",
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 function createPreparedModel(modelId = "gpt-5.5") {
   return {
     selection: {
       provider: "openai",
       modelId,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     },
     model: {
       provider: "openai",

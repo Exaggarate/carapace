@@ -5,37 +5,37 @@ import { isCurrentProcessLaunchdServiceLabel } from "./launchd-current-service.j
 describe("isCurrentProcessLaunchdServiceLabel", () => {
   it("matches launchd-provided service labels", () => {
     expect(
-      isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway", {
-        LAUNCH_JOB_LABEL: "ai.openclaw.gateway",
+      isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway", {
+        LAUNCH_JOB_LABEL: "ai.carapace.gateway",
       }),
     ).toBe(true);
   });
 
-  it("falls back to OpenClaw service markers when XPC_SERVICE_NAME is inherited", () => {
+  it("falls back to Carapace service markers when XPC_SERVICE_NAME is inherited", () => {
     expect(
-      isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway", {
+      isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway", {
         XPC_SERVICE_NAME: "0",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
       }),
     ).toBe(true);
   });
 
   it("does not treat the configured label alone as current service identity", () => {
-    // Detached update helper children inherit OPENCLAW_LAUNCHD_LABEL.
+    // Detached update helper children inherit CARAPACE_LAUNCHD_LABEL.
     expect(
-      isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway", {
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
+      isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway", {
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
       }),
     ).toBe(false);
   });
 
   it("does not treat unrelated inherited launchd labels as current services", () => {
     expect(
-      isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway", {
+      isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway", {
         XPC_SERVICE_NAME: "0",
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
       }),
     ).toBe(false);
   });

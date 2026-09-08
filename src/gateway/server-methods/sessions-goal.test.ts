@@ -5,9 +5,9 @@ import {
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry, SessionGoal } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { handleGatewayRequest } from "../server-methods.js";
 import { SessionMutationAuthorizationChangedError } from "../session-sharing.js";
 import { flushPendingSessionsChangedEvents } from "./session-change-event.js";
@@ -22,7 +22,7 @@ vi.mock("./chat-send-handler.js", () => ({ handleSessionGoalResumeChat: resumeCh
 
 const sessionKey = "agent:main:goal-controls";
 const sessionId = "goal-controls-session";
-const cfg: OpenClawConfig = { agents: { list: [{ id: "main", default: true }] } };
+const cfg: CarapaceConfig = { agents: { list: [{ id: "main", default: true }] } };
 
 function initialGoal(): SessionGoal {
   return {
@@ -59,7 +59,7 @@ function client(scopes = ["operator.write"], profileId?: string): GatewayClient 
       maxProtocol: 1,
       role: "operator",
       scopes,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
     },
     ...(profileId
       ? {
@@ -125,7 +125,7 @@ afterEach(() => {
 
 describe("typed Goal management RPCs", () => {
   it("edits literal objectives without chat rows and rejects a changed retry", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession();
       const objective = "clear the backlog\n/goal pause is part of the objective";
       const request = operation("edit", { objective });
@@ -160,7 +160,7 @@ describe("typed Goal management RPCs", () => {
   });
 
   it("replays a clear without deleting a replacement Goal", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession();
       const request = operation("clear");
       const first = await invoke(request, { method: "sessions.goal.clear" });
@@ -184,7 +184,7 @@ describe("typed Goal management RPCs", () => {
   it.each(["sessions.goal.update", "sessions.goal.clear"] as const)(
     "%s requires write scope and session participation before mutation or continuation",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const owner = ensureProfileForEmail("goal-owner@example.test");
         const viewer = ensureProfileForEmail("goal-viewer@example.test");
         await seedSession({
@@ -226,7 +226,7 @@ describe("typed Goal management RPCs", () => {
     { name: "Goal identity", patch: { goalId: "replaced-goal" } },
     { name: "agent owner", patch: { agentId: "other" } },
   ])("rejects stale $name without changing state", async ({ patch }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession();
       const result = await invoke(operation("pause", patch));
       expect(result).toHaveBeenCalledWith(
@@ -240,7 +240,7 @@ describe("typed Goal management RPCs", () => {
   });
 
   it("checks caller lifetime again inside the mutation transaction", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession();
       let checks = 0;
       const request = operation("complete");
@@ -272,7 +272,7 @@ describe("typed Goal management RPCs", () => {
   });
 
   it("rejects a plugin caller that does not own the session", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession({ pluginOwnerId: "owning-plugin" });
       const pluginClient: GatewayClient = {
         ...client(),
@@ -292,7 +292,7 @@ describe("typed Goal management RPCs", () => {
   });
 
   it("does not activate a Goal before continuation admission succeeds", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSession();
       resumeChat.mockImplementation(async (options: GatewayRequestHandlerOptions) => {
         options.respond(false, undefined, { code: "UNAVAILABLE", message: "session busy" });

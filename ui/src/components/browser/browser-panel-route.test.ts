@@ -21,7 +21,7 @@ import "./browser-panel.ts";
 
 const hostTab = { target: "host", profile: "managed", targetId: "t1" } as const;
 const nodeTab = { target: "node", node: "node-a", profile: "work", targetId: "t1" } as const;
-type Panel = HTMLElementTagNameMap["openclaw-browser-panel"];
+type Panel = HTMLElementTagNameMap["carapace-browser-panel"];
 
 beforeEach(() => {
   vi.stubGlobal("localStorage", createStorageMock());
@@ -88,7 +88,7 @@ function browserGateway() {
 }
 
 async function mountPanel(client: Panel["client"], presented = true) {
-  const panel = document.createElement("openclaw-browser-panel");
+  const panel = document.createElement("carapace-browser-panel");
   panel.embedded = true;
   panel.presented = presented;
   panel.available = true;

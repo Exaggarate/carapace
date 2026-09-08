@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshotScopeRunner } from "../plugins/current-plugin-metadata-snapshot.js";
 import type { SkillStatusEntry } from "../skills/discovery/status.js";
 import { buildWorkspaceSkillStatus } from "../skills/discovery/status.js";
@@ -55,10 +55,10 @@ function formatUnavailableSkillDoctorLines(
       .join(", ")}`,
   ];
   if (includeDisableHint) {
-    lines.push(`Disable unused skills: ${formatCliCommand("openclaw doctor --fix")}`);
+    lines.push(`Disable unused skills: ${formatCliCommand("carapace doctor --fix")}`);
   }
   lines.push(
-    `Inspect details: ${formatCliCommand("openclaw skills check --agent <id>")} or ${formatCliCommand("openclaw skills info <name> --agent <id>")}`,
+    `Inspect details: ${formatCliCommand("carapace skills check --agent <id>")} or ${formatCliCommand("carapace skills info <name> --agent <id>")}`,
   );
   return lines;
 }
@@ -84,10 +84,10 @@ function collectFleetUnavailableSkills(
 
 /** Checks every agent's skill readiness and disables only fleet-wide unavailable skills. */
 export async function maybeRepairSkillReadiness(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: DoctorPrompter;
   runWithPluginMetadataSnapshot?: PluginMetadataSnapshotScopeRunner;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const agentIds = listAgentIds(params.cfg);
   const scopes = agentIds.map((agentId) => ({
     agentId,

@@ -46,17 +46,17 @@ type TestRunnerInternals = {
   workerState: { evaluatedModules: unknown; moduleExecutionInfo: ModuleExecutionInfo };
 };
 
-const SHARED_TEST_SETUP = Symbol.for("openclaw.sharedTestSetup");
-const RETIRED_TEST_API_EXECUTIONS = Symbol.for("openclaw.retiredTestApiExecutions");
-const EMBEDDED_RUN_STATE = Symbol.for("openclaw.embeddedRunState");
-const REPLY_RUN_REGISTRY = Symbol.for("openclaw.replyRunRegistry");
-const DIAGNOSTIC_EVENTS_STATE = Symbol.for("openclaw.diagnosticEvents.state.v1");
+const SHARED_TEST_SETUP = Symbol.for("carapace.sharedTestSetup");
+const RETIRED_TEST_API_EXECUTIONS = Symbol.for("carapace.retiredTestApiExecutions");
+const EMBEDDED_RUN_STATE = Symbol.for("carapace.embeddedRunState");
+const REPLY_RUN_REGISTRY = Symbol.for("carapace.replyRunRegistry");
+const DIAGNOSTIC_EVENTS_STATE = Symbol.for("carapace.diagnosticEvents.state.v1");
 const DIAGNOSTIC_EVENT_LISTENER_PRESENCE = Symbol.for(
-  "openclaw.diagnosticEventListenerPresence.v1",
+  "carapace.diagnosticEventListenerPresence.v1",
 );
-const SESSION_SUSPENSION_TEST_API = Symbol.for("openclaw.sessionSuspensionTestApi");
+const SESSION_SUSPENSION_TEST_API = Symbol.for("carapace.sessionSuspensionTestApi");
 // Shared-worker scoped: the registry lives on the worker global, not in the module graph.
-const CUSTOM_ELEMENT_TRACKING = Symbol.for("openclaw.nonIsolatedCustomElementTracking");
+const CUSTOM_ELEMENT_TRACKING = Symbol.for("carapace.nonIsolatedCustomElementTracking");
 const nativeConsoleMethods = {
   log: console.log,
   info: console.info,
@@ -82,7 +82,7 @@ function getSharedTestHome(): string | undefined {
   const globalState = globalThis as typeof globalThis & {
     [SHARED_TEST_SETUP]?: { tempHome?: string };
   };
-  return globalState[SHARED_TEST_SETUP]?.tempHome ?? process.env.OPENCLAW_TEST_HOME;
+  return globalState[SHARED_TEST_SETUP]?.tempHome ?? process.env.CARAPACE_TEST_HOME;
 }
 
 function resetEvaluatedModules(modules: EvaluatedModules, executions: ModuleExecutionInfo) {
@@ -131,10 +131,10 @@ function restoreSharedTestHomeAfterEnvUnstub(testHomeRaw: string | undefined): v
 
   process.env.HOME = testHome;
   process.env.USERPROFILE = testHome;
-  process.env.OPENCLAW_TEST_HOME = testHome;
-  delete process.env.OPENCLAW_CONFIG_PATH;
-  delete process.env.OPENCLAW_STATE_DIR;
-  delete process.env.OPENCLAW_AGENT_DIR;
+  process.env.CARAPACE_TEST_HOME = testHome;
+  delete process.env.CARAPACE_CONFIG_PATH;
+  delete process.env.CARAPACE_STATE_DIR;
+  delete process.env.CARAPACE_AGENT_DIR;
   delete process.env.PI_CODING_AGENT_DIR;
   process.env.XDG_CONFIG_HOME = path.join(testHome, ".config");
   process.env.XDG_DATA_HOME = path.join(testHome, ".local", "share");
@@ -283,7 +283,7 @@ function runCleanupActions(actions: CleanupAction[]): unknown {
   return firstError;
 }
 
-function resetOpenClawGlobalRunState(): void {
+function resetCarapaceGlobalRunState(): void {
   const cleanupActions: CleanupAction[] = [];
   const globalStore = globalThis as Record<PropertyKey, unknown>;
   const embeddedRunState = globalStore[EMBEDDED_RUN_STATE] as EmbeddedRunStateForTest | undefined;
@@ -344,7 +344,7 @@ function resetOpenClawGlobalRunState(): void {
   replyRunState?.waitersByKey?.clear();
 }
 
-function resetOpenClawGlobalDiagnosticState(): void {
+function resetCarapaceGlobalDiagnosticState(): void {
   const globalStore = globalThis as Record<PropertyKey, unknown>;
   const state = globalStore[DIAGNOSTIC_EVENTS_STATE] as DiagnosticEventsStateForTest | undefined;
   // The dispatcher intentionally survives module reloads. Mirror isolate mode
@@ -367,13 +367,13 @@ function resetOpenClawGlobalDiagnosticState(): void {
   }
 }
 
-function resetOpenClawSessionSuspensionState(): void {
+function resetCarapaceSessionSuspensionState(): void {
   const globalStore = globalThis as Record<PropertyKey, unknown>;
   const api = globalStore[SESSION_SUSPENSION_TEST_API] as SessionSuspensionTestApi | undefined;
   api?.resetSessionSuspensionStateForTest?.();
 }
 
-const SERIALIZED_RESOLVE_MOCKS = Symbol.for("openclaw.serializedResolveMocks");
+const SERIALIZED_RESOLVE_MOCKS = Symbol.for("carapace.serializedResolveMocks");
 
 type SerializedResolveMocksState = {
   tail: Promise<void>;
@@ -459,7 +459,7 @@ export async function drainMockerResolveMocks(
   }
 }
 
-export default class OpenClawNonIsolatedRunner extends TestRunner {
+export default class CarapaceNonIsolatedRunner extends TestRunner {
   override onCollectStart(file: RunnerTestFile) {
     super.onCollectStart(file);
     if (!this.config.isolate) {
@@ -517,10 +517,10 @@ export default class OpenClawNonIsolatedRunner extends TestRunner {
     if (isGatewayWorkAdmissionClosed()) {
       markGatewayRestartDraining();
     }
-    resetOpenClawGlobalRunState();
+    resetCarapaceGlobalRunState();
     resetAgentEventsForTest();
-    resetOpenClawGlobalDiagnosticState();
-    resetOpenClawSessionSuspensionState();
+    resetCarapaceGlobalDiagnosticState();
+    resetCarapaceSessionSuspensionState();
     // Lifecycle-owned singletons survive module resets; close them before the next file
     // can observe a previous file's sessions, caches, or registered resources.
     await drainGlobalSingletonLifecycleState();

@@ -6,7 +6,7 @@ import type {
   TranscriptsExportResult,
   TranscriptsGetResult,
   TranscriptsListResult,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import { html, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { applicationContext, type ApplicationContext } from "../../app/context.ts";
@@ -14,7 +14,7 @@ import { hasOperatorReadAccess } from "../../app/operator-access.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import { isArchiveAccessDeniedError } from "../../lib/gateway-errors.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import {
   transcriptListParams,
   transcriptRouteSearch,
@@ -33,7 +33,7 @@ type ArchiveReadResults = {
 // Keep a bounded reading window even when a room has stayed subscribed for days.
 const READER_WINDOW_PAGES = 5;
 
-class MeetingsPage extends OpenClawLightDomElement {
+class MeetingsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
   @property({ attribute: false }) routeSearch = "";
@@ -429,11 +429,11 @@ class MeetingsPage extends OpenClawLightDomElement {
 export const meetingsPageComponent = {
   header: true,
   render: (search: unknown) =>
-    html`<openclaw-meetings-page
+    html`<carapace-meetings-page
       .routeSearch=${typeof search === "string" ? search : ""}
-    ></openclaw-meetings-page>`,
+    ></carapace-meetings-page>`,
 };
 
-if (!customElements.get("openclaw-meetings-page")) {
-  customElements.define("openclaw-meetings-page", MeetingsPage);
+if (!customElements.get("carapace-meetings-page")) {
+  customElements.define("carapace-meetings-page", MeetingsPage);
 }

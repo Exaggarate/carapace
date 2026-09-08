@@ -4,7 +4,7 @@ import { StreamableHTTPError } from "@modelcontextprotocol/sdk/client/streamable
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import { OpenClawStreamableHTTPClientTransport } from "../agents/mcp-http-transport.js";
+import { CarapaceStreamableHTTPClientTransport } from "../agents/mcp-http-transport.js";
 import { startNodeHostMcpManager } from "./mcp.js";
 
 function tool(name: string, inputSchema: Tool["inputSchema"] = { type: "object" }): Tool {
@@ -39,7 +39,7 @@ const stdioTransport = {
 };
 
 function httpTransport(sessionId?: string) {
-  const transport = new OpenClawStreamableHTTPClientTransport(
+  const transport = new CarapaceStreamableHTTPClientTransport(
     new URL("http://127.0.0.1:1/mcp"),
     sessionId ? { sessionId } : undefined,
   );

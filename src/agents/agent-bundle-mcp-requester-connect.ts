@@ -1,5 +1,5 @@
 import { Type } from "typebox";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { BundleMcpServerConfig } from "../plugins/bundle-mcp.js";
 import type {
   McpToolCatalog,
@@ -98,7 +98,7 @@ export async function createRequesterMcpConnect(params: {
   mcpServers: Record<string, BundleMcpServerConfig>;
   safeServerNamesByServer: ReadonlyMap<string, string>;
   requesterScope: SessionMcpRequesterScope;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   configFingerprint: string;
 }): Promise<RequesterMcpConnect | undefined> {
   const servers = new Map<string, RequesterOAuthServer>();

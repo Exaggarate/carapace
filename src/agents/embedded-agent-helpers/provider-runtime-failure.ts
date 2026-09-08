@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { classifyGatewayStorageFailure } from "../../infra/sqlite-error-diagnostics.js";
 import { extractLeadingHttpStatus } from "../../shared/assistant-error-format.js";
 import { extractHttpResponseBody } from "../../shared/http-error-response.js";
@@ -156,7 +156,7 @@ function isOAuthRefreshContentionMessage(raw: string): boolean {
   return (
     /\brefresh_contention\b/i.test(raw) ||
     (/\bfile lock timeout\b/i.test(raw) &&
-      /(?:\/|\\|^)(?:oauth-refresh|openclaw-oauth-refresh)[^/\n\\]*?(?:\.lock)?\b/i.test(raw))
+      /(?:\/|\\|^)(?:oauth-refresh|carapace-oauth-refresh)[^/\n\\]*?(?:\.lock)?\b/i.test(raw))
   );
 }
 function isOAuthCallbackTimeoutMessage(raw: string): boolean {

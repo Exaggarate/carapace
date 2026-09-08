@@ -25,7 +25,7 @@ const readers = [
 
 describe.each(readers)("Skill Workshop $name tree", ({ read, marker, depth }) => {
   it("rejects an unreadable directory instead of returning a partial tree", async () => {
-    const dir = await tempDirs.make("openclaw-proposal-tree-");
+    const dir = await tempDirs.make("carapace-proposal-tree-");
     const blocked = path.join(dir, "references");
     await fs.mkdir(blocked);
     await fs.writeFile(path.join(dir, marker), "# Proposal\n");
@@ -40,7 +40,7 @@ describe.each(readers)("Skill Workshop $name tree", ({ read, marker, depth }) =>
   });
 
   it("reads the deepest allowed file and rejects content one level deeper", async () => {
-    const dir = await tempDirs.make("openclaw-proposal-tree-");
+    const dir = await tempDirs.make("carapace-proposal-tree-");
     const leaf = path.join(
       dir,
       "references",
@@ -62,7 +62,7 @@ describe.each(readers)("Skill Workshop $name tree", ({ read, marker, depth }) =>
 
 describe("Skill Workshop target tree exclusions", () => {
   it("treats a missing create target as empty but propagates an unreadable root", async () => {
-    const dir = await tempDirs.make("openclaw-proposal-tree-");
+    const dir = await tempDirs.make("carapace-proposal-tree-");
     const emptyHash = await readSkillProposalTargetTreeSha256(dir);
     await expect(readSkillProposalTargetTreeSha256(path.join(dir, "missing"))).resolves.toBe(
       emptyHash,
@@ -76,10 +76,10 @@ describe("Skill Workshop target tree exclusions", () => {
   });
 
   it("excludes root metadata from traversal limits without excluding nested skill content", async () => {
-    const dir = await tempDirs.make("openclaw-proposal-tree-");
+    const dir = await tempDirs.make("carapace-proposal-tree-");
     await fs.writeFile(path.join(dir, "SKILL.md"), "# Proposal\n");
     const initialHash = await readSkillProposalTargetTreeSha256(dir);
-    const metadata = path.join(dir, ".openclaw");
+    const metadata = path.join(dir, ".carapace");
     await fs.mkdir(metadata);
     await Promise.all(
       Array.from({ length: 513 }, (_, index) => fs.mkdir(path.join(metadata, `entry-${index}`))),
@@ -88,7 +88,7 @@ describe("Skill Workshop target tree exclusions", () => {
     await expect(
       readSkillProposalTargetTreeSha256(dir, { includeRootMetadata: true }),
     ).rejects.toThrow("exceeds traversal limits");
-    const nested = path.join(dir, "references", ".openclaw");
+    const nested = path.join(dir, "references", ".carapace");
     await fs.mkdir(nested, { recursive: true });
     await fs.writeFile(path.join(nested, "content.md"), "Ordinary nested skill content.\n");
     await expect(readSkillProposalTargetTreeSha256(dir)).resolves.not.toBe(initialHash);

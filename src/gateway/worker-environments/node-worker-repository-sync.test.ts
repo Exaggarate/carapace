@@ -32,7 +32,7 @@ it("rejects repository sources on SSH before invoking any remote command", async
       source: {
         kind: "repository",
         url: "https://github.com/example/repository.git",
-        branch: "openclaw/session",
+        branch: "carapace/session",
       },
     }),
   ).rejects.toThrow("managed node");
@@ -61,7 +61,7 @@ it.each([
     const root = await fs.realpath(tempDirs.make("node-repository-roundtrip-"));
     const origin = path.join(root, "origin");
     const home = path.join(root, "node-home");
-    await fs.mkdir(path.join(origin, ".openclaw"), { recursive: true });
+    await fs.mkdir(path.join(origin, ".carapace"), { recursive: true });
     await fs.writeFile(path.join(origin, ".gitignore"), "*.ignored\n");
     await fs.writeFile(path.join(origin, ".worktreeinclude"), "retained.ignored\n");
     await fs.writeFile(path.join(origin, "retained-removal.ignored"), "keep recovered bytes\n");
@@ -71,7 +71,7 @@ it.each([
       await fs.writeFile(path.join(origin, ".gitattributes"), "*.dat filter=example\n");
     }
     await fs.writeFile(
-      path.join(origin, ".openclaw", "worktree-setup.sh"),
+      path.join(origin, ".carapace", "worktree-setup.sh"),
       "#!/bin/sh\nprintf 'prepared\\n' > setup.txt\n",
       { mode: 0o755 },
     );
@@ -165,7 +165,7 @@ it.each([
       kind: "repository" as const,
       url: pathToFileURL(origin).href,
       ref: "HEAD",
-      branch: "openclaw/session",
+      branch: "carapace/session",
       gitToken: "synthetic-repository-token",
       runSetupScript: true,
     };

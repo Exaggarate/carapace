@@ -26,6 +26,6 @@ describe("MentionPatternsPolicySchema", () => {
   });
 
   it("rejects a bare pattern array", () => {
-    expect(MentionPatternsPolicySchema.safeParse(["openclaw"]).success).toBe(false);
+    expect(MentionPatternsPolicySchema.safeParse(["carapace"]).success).toBe(false);
   });
 });

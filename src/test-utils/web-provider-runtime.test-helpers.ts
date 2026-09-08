@@ -1,5 +1,5 @@
 // Test helpers for mocked web provider runtime dependencies.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   PluginWebFetchProviderEntry,
   PluginWebSearchProviderEntry,
@@ -13,7 +13,7 @@ type CommonWebProviderTestParams = {
   requiresCredential?: boolean;
   authProviderId?: string;
   getCredentialValue?: (config?: Record<string, unknown>) => unknown;
-  getConfiguredCredentialValue?: (config?: OpenClawConfig) => unknown;
+  getConfiguredCredentialValue?: (config?: CarapaceConfig) => unknown;
   getConfiguredCredentialFallback?:
     | PluginWebSearchProviderEntry["getConfiguredCredentialFallback"]
     | PluginWebFetchProviderEntry["getConfiguredCredentialFallback"];

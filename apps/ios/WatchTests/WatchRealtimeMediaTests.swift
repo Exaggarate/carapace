@@ -2,11 +2,11 @@ import AVFAudio
 import Foundation
 import Network
 import Observation
-import OpenClawProtocol
+import CarapaceProtocol
 import Synchronization
 import Testing
 import XCTest
-@testable import OpenClawWatchApp
+@testable import CarapaceWatchApp
 
 @MainActor
 struct WatchRealtimeMediaTests {

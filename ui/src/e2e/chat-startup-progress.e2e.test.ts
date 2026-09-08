@@ -12,7 +12,7 @@ beforeEach(() => {
     proofDir = createControlUiE2eArtifactDir("duplicate-session-naming");
   }
 });
-const capture = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const capture = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 suite.define(() => {
   it("preserves tool and approval activity received before the send ACK", async () => {
@@ -138,7 +138,7 @@ suite.define(() => {
         message: {
           role: "user",
           content: [{ type: "text", text: "Workspace check requested." }],
-          __openclaw: { id: "synthetic-peer-message", seq: 3 },
+          __carapace: { id: "synthetic-peer-message", seq: 3 },
         },
         messageId: "synthetic-peer-message",
         messageSeq: 3,

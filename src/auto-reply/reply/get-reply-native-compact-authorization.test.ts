@@ -16,7 +16,7 @@ describe("native command authorization delivery", () => {
   it.each(["compact", "stop"])(
     "delivers /%s refusal through the real command router",
     async (name) => {
-      const workspaceDir = tempDirs.make("openclaw-native-command-refusal-");
+      const workspaceDir = tempDirs.make("carapace-native-command-refusal-");
       const storePath = path.join(workspaceDir, "sessions.json");
       const sessionKey = "agent:main:discord:slash:denied-sender";
       const body = `/${name}`;

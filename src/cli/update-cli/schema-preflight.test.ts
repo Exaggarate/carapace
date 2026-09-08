@@ -2,47 +2,47 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { requireNodeSqlite } from "../../infra/node-sqlite.js";
-import { unregisterOpenClawAgentDatabase } from "../../state/openclaw-agent-db-registry.js";
+import { unregisterCarapaceAgentDatabase } from "../../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { checkTargetDatabaseSchemasForContexts } from "./schema-preflight.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("target-release database schema preflight", () => {
   it.runIf(process.platform !== "win32")(
     "deduplicates caller and managed aliases of one physical database",
     async () => {
-      const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-update-union-state-"));
-      const aliasRoot = tempDirs.make("openclaw-update-union-alias-");
+      const stateDir = fs.realpathSync.native(tempDirs.make("carapace-update-union-state-"));
+      const aliasRoot = tempDirs.make("carapace-update-union-alias-");
       const stateAlias = path.join(aliasRoot, "state-link");
       fs.symlinkSync(stateDir, stateAlias, "dir");
-      const statePath = openOpenClawStateDatabase({
-        env: { OPENCLAW_STATE_DIR: stateDir },
+      const statePath = openCarapaceStateDatabase({
+        env: { CARAPACE_STATE_DIR: stateDir },
       }).path;
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const { DatabaseSync } = requireNodeSqlite();
       const state = new DatabaseSync(statePath);
       state.exec("PRAGMA user_version = 9;");
       state.close();
-      const config: OpenClawConfig = {};
+      const config: CarapaceConfig = {};
 
       const result = await checkTargetDatabaseSchemasForContexts({ state: 3, agent: 11 }, [
-        { config, env: { OPENCLAW_STATE_DIR: stateDir } },
-        { config, env: { OPENCLAW_STATE_DIR: stateAlias } },
+        { config, env: { CARAPACE_STATE_DIR: stateDir } },
+        { config, env: { CARAPACE_STATE_DIR: stateAlias } },
       ]);
 
       expect(result.incompatible).toEqual([
@@ -53,14 +53,14 @@ describe("target-release database schema preflight", () => {
   );
 
   it("refuses v2026.8.1 before mutating v2026.7.1-2 shared state when an agent store is unreadable", async () => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-update-7-to-8-state-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const config: OpenClawConfig = { agents: { list: [{ id: "main" }, { id: "worker" }] } };
-    const statePath = openOpenClawStateDatabase({ env }).path;
-    const agentPath = openOpenClawAgentDatabase({ agentId: "worker", env }).path;
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
-    unregisterOpenClawAgentDatabase({ agentId: "worker", env, path: agentPath });
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-update-7-to-8-state-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const config: CarapaceConfig = { agents: { list: [{ id: "main" }, { id: "worker" }] } };
+    const statePath = openCarapaceStateDatabase({ env }).path;
+    const agentPath = openCarapaceAgentDatabase({ agentId: "worker", env }).path;
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
+    unregisterCarapaceAgentDatabase({ agentId: "worker", env, path: agentPath });
     const { DatabaseSync } = requireNodeSqlite();
     const state = new DatabaseSync(statePath);
     state.exec("PRAGMA user_version = 1; UPDATE schema_meta SET schema_version = 1;");
@@ -88,23 +88,23 @@ describe("target-release database schema preflight", () => {
   });
 
   it("finds every multi-agent store before refusing a v2026.7.1-2 target", async () => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-update-preflight-state-"));
-    const customDir = fs.realpathSync.native(tempDirs.make("openclaw-update-preflight-custom-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const config: OpenClawConfig = {
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-update-preflight-state-"));
+    const customDir = fs.realpathSync.native(tempDirs.make("carapace-update-preflight-custom-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const config: CarapaceConfig = {
       agents: { list: [{ id: "main" }, { id: "configured" }] },
     };
-    openOpenClawStateDatabase({ env });
-    const configuredPath = openOpenClawAgentDatabase({ agentId: "configured", env }).path;
-    const unregisteredPath = openOpenClawAgentDatabase({ agentId: "retired", env }).path;
-    const registeredCustomPath = openOpenClawAgentDatabase({
+    openCarapaceStateDatabase({ env });
+    const configuredPath = openCarapaceAgentDatabase({ agentId: "configured", env }).path;
+    const unregisteredPath = openCarapaceAgentDatabase({ agentId: "retired", env }).path;
+    const registeredCustomPath = openCarapaceAgentDatabase({
       agentId: "registered-custom",
       env,
-      path: path.join(customDir, "registered", "openclaw-agent.sqlite"),
+      path: path.join(customDir, "registered", "carapace-agent.sqlite"),
     }).path;
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
-    unregisterOpenClawAgentDatabase({ agentId: "retired", env, path: unregisteredPath });
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
+    unregisterCarapaceAgentDatabase({ agentId: "retired", env, path: unregisteredPath });
 
     const before = [configuredPath, unregisteredPath, registeredCustomPath].map((pathname) => ({
       pathname,
@@ -136,26 +136,26 @@ describe("target-release database schema preflight", () => {
   });
 
   it("finds configured custom stores without registry rows", async () => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-update-custom-state-"));
-    const customDir = fs.realpathSync.native(tempDirs.make("openclaw-update-custom-root-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const config: OpenClawConfig = {
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-update-custom-state-"));
+    const customDir = fs.realpathSync.native(tempDirs.make("carapace-update-custom-root-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const config: CarapaceConfig = {
       agents: { list: [{ id: "main" }, { id: "ops" }] },
       session: { store: path.join(customDir, "{agentId}", "sessions.json") },
     };
-    openOpenClawStateDatabase({ env });
+    openCarapaceStateDatabase({ env });
     const customPaths = ["main", "ops"].map(
       (agentId) =>
-        openOpenClawAgentDatabase({
+        openCarapaceAgentDatabase({
           agentId,
           env,
-          path: path.join(customDir, agentId, "openclaw-agent.sqlite"),
+          path: path.join(customDir, agentId, "carapace-agent.sqlite"),
         }).path,
     );
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     for (const [index, pathname] of customPaths.entries()) {
-      unregisterOpenClawAgentDatabase({
+      unregisterCarapaceAgentDatabase({
         agentId: index === 0 ? "main" : "ops",
         env,
         path: pathname,

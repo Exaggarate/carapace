@@ -1,8 +1,8 @@
-import type { HealthCheck, HealthFinding } from "openclaw/plugin-sdk/health";
+import type { HealthCheck, HealthFinding } from "carapace/plugin-sdk/health";
 import {
   asOptionalRecord as readRecord,
   normalizeOptionalString as nonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import * as doctorRuntime from "./crabbox-worker-doctor-runtime.js";
 import { CRABBOX_WORKER_PROVIDER_ID, findCrabboxBinary } from "./crabbox-worker-profile.js";
 import {
@@ -15,7 +15,7 @@ export const CRABBOX_CLOUD_WORKER_PROFILE_CHECK_ID = "crabbox/cloud-worker-profi
 const CRABBOX_WARM_IMAGES_CHECK_ID = "crabbox/warm-images";
 
 type CrabboxDoctorRegistrationHost = {
-  readonly openclawRoot: string;
+  readonly carapaceRoot: string;
   readonly getHealthCheck: (id: string) => HealthCheck | undefined;
   readonly registerHealthCheck: (check: HealthCheck) => void;
 };
@@ -43,11 +43,11 @@ function finding(params: {
 function repairHint(profileId: string, explicitBinary?: string): string {
   const configPath = `cloudWorkers.profiles.${profileId}.settings.binary`;
   return explicitBinary
-    ? `Install Crabbox 0.41.1 or newer at ${explicitBinary}, or set ${configPath} to an executable absolute path, then rerun \`openclaw doctor --json\`.`
-    : `Install Crabbox 0.41.1 or newer on the Gateway user's PATH, or set ${configPath} to an executable absolute path, then rerun \`openclaw doctor --json\`.`;
+    ? `Install Crabbox 0.41.1 or newer at ${explicitBinary}, or set ${configPath} to an executable absolute path, then rerun \`carapace doctor --json\`.`
+    : `Install Crabbox 0.41.1 or newer on the Gateway user's PATH, or set ${configPath} to an executable absolute path, then rerun \`carapace doctor --json\`.`;
 }
 
-function createCrabboxCloudWorkerProfileCheck(openclawRoot: string): HealthCheck {
+function createCrabboxCloudWorkerProfileCheck(carapaceRoot: string): HealthCheck {
   return {
     id: CRABBOX_CLOUD_WORKER_PROFILE_CHECK_ID,
     kind: "plugin",
@@ -67,7 +67,7 @@ function createCrabboxCloudWorkerProfileCheck(openclawRoot: string): HealthCheck
         const explicitBinary = nonEmptyString(settings?.binary);
         const binary = findCrabboxBinary({
           ...(explicitBinary ? { explicit: explicitBinary } : {}),
-          openclawRoot,
+          carapaceRoot,
           pathEnv: ctx.env?.PATH ?? process.env.PATH,
         });
         if (!binary) {
@@ -105,7 +105,7 @@ function createCrabboxCloudWorkerProfileCheck(openclawRoot: string): HealthCheck
               binary,
               severity: "info",
               message: `has an executable Crabbox binary, but Doctor could not determine its version: ${result.reason}.`,
-              fixHint: `Run \`${binary} --version\` and confirm it reports Crabbox 0.41.1 or newer, then rerun \`openclaw doctor --json --severity-min info\`.`,
+              fixHint: `Run \`${binary} --version\` and confirm it reports Crabbox 0.41.1 or newer, then rerun \`carapace doctor --json --severity-min info\`.`,
             }),
           );
         }
@@ -120,7 +120,7 @@ export function registerCrabboxWorkerProviderDoctorChecks(
 ): void {
   // Lookup and registration must use the same host registry across artifact loaders.
   if (!host.getHealthCheck(CRABBOX_CLOUD_WORKER_PROFILE_CHECK_ID)) {
-    host.registerHealthCheck(createCrabboxCloudWorkerProfileCheck(host.openclawRoot));
+    host.registerHealthCheck(createCrabboxCloudWorkerProfileCheck(host.carapaceRoot));
   }
   if (!host.getHealthCheck(CRABBOX_WARM_IMAGES_CHECK_ID)) {
     host.registerHealthCheck({
@@ -147,7 +147,7 @@ export function registerCrabboxWorkerProviderDoctorChecks(
                 : `Warm-image capture ${image.capture.selector} is in progress.`,
               fixHint: paused
                 ? crabboxWarmImageRecoveryHint(image.capture.selector)
-                : "Allow the current capture to finish; inspect `openclaw crabbox warm-images --json` if it remains pending.",
+                : "Allow the current capture to finish; inspect `carapace crabbox warm-images --json` if it remains pending.",
             });
           }
           if (image.retirement) {
@@ -155,7 +155,7 @@ export function registerCrabboxWorkerProviderDoctorChecks(
               ...details,
               message: `Warm-image checkpoint ${image.retirement.checkpointId} is still awaiting deletion.`,
               fixHint:
-                "Cleanup retries during the next warm-image capture or worker teardown. Inspect `openclaw crabbox warm-images --json` and resolve provider deletion errors if it remains pending.",
+                "Cleanup retries during the next warm-image capture or worker teardown. Inspect `carapace crabbox warm-images --json` and resolve provider deletion errors if it remains pending.",
             });
           }
         }

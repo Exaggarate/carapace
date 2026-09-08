@@ -6,14 +6,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InProcessGatewayCaller } from "../agents/tools/in-process-gateway.js";
 import { createTestBoardStore } from "../boards/board-store.test-support.js";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { createBoardHandlers } from "../gateway/server-methods/board.js";
 import type { GatewayRequestContext, RespondFn } from "../gateway/server-methods/types.js";
 import type { WidgetPresenter } from "../plugins/plugin-registration.types.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { resolveCanvasDocumentsDir } from "./documents.js";
 import { registerTestWidgetContentKind as registerDiagramContentKind } from "./widget-tool.content-kinds.test-support.js";
 import { createShowWidgetTool } from "./widget-tool.js";
@@ -31,21 +31,21 @@ beforeEach(() => {
 
 afterEach(async () => {
   vi.useRealTimers();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetPluginRuntimeStateForTest();
   await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
 async function createStateDir(): Promise<string> {
-  const stateDir = await mkdtemp(path.join(tmpdir(), "openclaw-widget-tool-"));
+  const stateDir = await mkdtemp(path.join(tmpdir(), "carapace-widget-tool-"));
   tempDirs.push(stateDir);
   return stateDir;
 }
 
 function createLiveBoardTestContext(
   broadcast: ReturnType<typeof vi.fn> = vi.fn(),
-  cfg: OpenClawConfig = { agents: { entries: { main: {} } } },
+  cfg: CarapaceConfig = { agents: { entries: { main: {} } } },
 ): GatewayRequestContext {
   const context = {
     broadcast,
@@ -218,7 +218,7 @@ describe("show_widget", () => {
   it("keeps widget documents from duplicating host-owned metadata and controls", () => {
     const description = createShowWidgetTool().description;
 
-    expect(description).toContain("openclaw.host.controlUiBaseUrl");
+    expect(description).toContain("carapace.host.controlUiBaseUrl");
     expect(description).toContain("read it at click time");
     expect(description).toContain('target="_blank" and rel="noopener noreferrer"');
     expect(description).toContain("`title` is host metadata");
@@ -607,7 +607,7 @@ describe("show_widget", () => {
     });
 
     expect(viewId).toMatch(/^cv_[a-f0-9]{32}$/);
-    expect(url).toBe(`/__openclaw__/canvas/documents/${viewId}/index.html`);
+    expect(url).toBe(`/__carapace__/canvas/documents/${viewId}/index.html`);
     expect(JSON.parse(text)).toMatchObject({
       kind: "canvas",
       presentation: { target: "assistant_message", title: "<Status>", sandbox: "scripts" },
@@ -626,7 +626,7 @@ describe("show_widget", () => {
     expect(html).toContain("--accent:#ff5c5c");
     expect(html).toContain("--accent-fill:#d13c3c");
     expect(html).toContain('<body class="svg-widget"><script>');
-    expect(html).toContain("openclaw:widget-size");
+    expect(html).toContain("carapace:widget-size");
     const manifest = JSON.parse(
       await readFile(
         path.join(resolveCanvasDocumentDir(stateDir, viewId), "manifest.json"),
@@ -665,7 +665,7 @@ describe("show_widget", () => {
       const siblingBefore = store.getSnapshot(sibling);
       const boardBroadcastScope = { sessionKeys: [sessionKey], agentId };
       const eventSessionKey = sessionKey === "global" ? `agent:${agentId}:global` : sessionKey;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { main: {}, research: {} } },
         session: { scope: "global" },
       };
@@ -972,18 +972,18 @@ describe("show_widget", () => {
 
     expect(html).not.toContain('<body class="svg-widget">');
     expect(html.indexOf("window.sendPrompt")).toBeLessThan(html.indexOf("<section>"));
-    expect(html).toContain("openclaw:widget-theme");
-    expect(html.indexOf("openclaw:widget-theme")).toBeLessThan(html.indexOf("<section>"));
-    expect(html).toContain("openclaw:widget-snapshot-request");
-    expect(html.indexOf("openclaw:widget-theme")).toBeLessThan(
-      html.indexOf("openclaw:widget-snapshot-request"),
+    expect(html).toContain("carapace:widget-theme");
+    expect(html.indexOf("carapace:widget-theme")).toBeLessThan(html.indexOf("<section>"));
+    expect(html).toContain("carapace:widget-snapshot-request");
+    expect(html.indexOf("carapace:widget-theme")).toBeLessThan(
+      html.indexOf("carapace:widget-snapshot-request"),
     );
-    expect(html.indexOf("openclaw:widget-snapshot-request")).toBeLessThan(
+    expect(html.indexOf("carapace:widget-snapshot-request")).toBeLessThan(
       html.indexOf("<section>"),
     );
-    expect(html).toContain("openclaw:widget-prompt-offer");
-    expect(html).toContain("openclaw:widget-bridge-port-offer");
-    expect(html).toContain("openclaw:widget-bridge-request");
+    expect(html).toContain("carapace:widget-prompt-offer");
+    expect(html).toContain("carapace:widget-bridge-port-offer");
+    expect(html).toContain("carapace:widget-bridge-request");
     expect(html).toContain("prompt:freeze({send:sendPrompt})");
     expect(html).toContain('state:freeze({emit:payload=>request("state.emit"');
     expect(html).toContain('data:freeze({read:(bindingId,params)=>request("data.read"');
@@ -992,12 +992,12 @@ describe("show_widget", () => {
     expect(html).toContain("navigator.userActivation");
     expect(html).toContain("c.port1.postMessage.bind(c.port1)");
     expect(html).toContain("b.port1.postMessage.bind(b.port1)");
-    expect(html).toContain('bridgePost({type:"openclaw:widget-bridge-request"');
+    expect(html).toContain('bridgePost({type:"carapace:widget-bridge-request"');
     expect(html).not.toContain(
-      'post({type:"openclaw:widget-bridge-request",id,method,params,ticket},"*")',
+      'post({type:"carapace:widget-bridge-request",id,method,params,ticket},"*")',
     );
-    expect(html).toContain('promptPost({type:"openclaw:widget-prompt"');
-    expect(html).not.toContain('window.parent.postMessage({type:"openclaw:widget-prompt",');
+    expect(html).toContain('promptPost({type:"carapace:widget-prompt"');
+    expect(html).not.toContain('window.parent.postMessage({type:"carapace:widget-prompt",');
     expect(html).toContain("const post=(message,origin)=>parent.postMessage(message,origin)");
     expect(html).toContain('query.call(root,"script")');
     expect(html).toContain('queryDocument("canvas")');

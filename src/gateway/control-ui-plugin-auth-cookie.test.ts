@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { describe, expect, it } from "vitest";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   resolveControlUiPluginAuthCookieGrants,
   setControlUiPluginAuthCookie,
@@ -37,7 +37,7 @@ function authorizeCookie(cookie: string) {
 }
 
 async function withRoleConfig(run: () => Promise<void>) {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     await withTempConfig({
       cfg: {
         gateway: {

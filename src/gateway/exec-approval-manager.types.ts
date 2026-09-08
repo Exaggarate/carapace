@@ -1,6 +1,6 @@
 import type { ExecutionIdentityAdmissionToken } from "../audit/execution-identity-admission.js";
 import type { ExecApprovalDecision, ExecApprovalRequestPayload } from "../infra/exec-approvals.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import type { AgentRuntimeDelegatedAuthority } from "./agent-runtime-identity-token.js";
 import type {
   PlacementStandingGrantMintSpec,
@@ -67,7 +67,7 @@ export type ExecApprovalManagerOptions<TPayload> = {
   approvalKind?: OperatorApprovalKind;
   persistence: {
     runtimeEpoch: string;
-    databaseOptions?: OpenClawStateDatabaseOptions;
+    databaseOptions?: CarapaceStateDatabaseOptions;
   };
   resolveAllowedDecisions?: (request: TPayload) => readonly ExecApprovalDecision[];
   /** Gateway owns lineage lookup; absence seeds only the requesting session. */

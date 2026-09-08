@@ -1,4 +1,4 @@
-import { createApiRegistry } from "@openclaw/ai";
+import { createApiRegistry } from "@carapace/ai";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { Model } from "../llm/types.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
@@ -91,7 +91,7 @@ beforeEach(() => {
   mocks.acquireRuntimeLease.mockResolvedValue({
     snapshot: {
       testGeneration: "A",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       workspaceDir: "/tmp/runtime-workspace",
       config: {},
       authModes: {},
@@ -157,7 +157,7 @@ it("keeps route rematerialization and runtime auth on the acquired generation", 
     agentId: "main",
     provider: "openai",
     modelId: "gpt-5.5",
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     modelResolver,
   });
 
@@ -183,8 +183,8 @@ it("acquires direct completion runtime for the exact selected model", async () =
     agentId: "main",
     provider: "ollama",
     modelId: "qwen3:0.6b",
-    agentDir: "/tmp/openclaw-agent",
-    agentRuntimeId: "openclaw",
+    agentDir: "/tmp/carapace-agent",
+    agentRuntimeId: "carapace",
     modelResolver,
   });
 
@@ -194,7 +194,7 @@ it("acquires direct completion runtime for the exact selected model", async () =
         {
           provider: "ollama",
           modelId: "qwen3:0.6b",
-          runtime: "openclaw",
+          runtime: "carapace",
           agentId: "main",
         },
       ],

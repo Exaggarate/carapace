@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { coerceErrorMessage, stableStringify } from "@openclaw/normalization-core";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import { coerceErrorMessage, stableStringify } from "@carapace/normalization-core";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import {
   CLAW_CRON_REF_SCHEMA_VERSION,
   clawCronGatewayJobMatchesRef,
@@ -58,7 +58,7 @@ function targetRef(params: {
 export async function applyClawCronUpdate(
   updatePlan: ClawUpdatePlan,
   targetManifest: ClawManifest,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     cronGateway?: ClawCronGateway;
     nowMs?: number;
     readRefs?: typeof readClawCronRefs;

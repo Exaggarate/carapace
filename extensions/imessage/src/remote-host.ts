@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
-import { normalizeScpRemoteHost } from "openclaw/plugin-sdk/host-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { normalizeScpRemoteHost } from "carapace/plugin-sdk/host-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { expandIMessageUserPath } from "./cli-path.js";
 
 // CLI installation and wrapper contents are process-stable channel metadata.

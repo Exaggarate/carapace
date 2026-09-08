@@ -1,8 +1,8 @@
 // SecretRef-aware Gateway config string resolver.
 // Resolves configured secret inputs and fallback values without leaking values.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveConfigSecretRef } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import {
@@ -36,7 +36,7 @@ function buildUnresolvedReason(params: {
 }
 
 export async function resolveConfiguredSecretInputString(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -105,7 +105,7 @@ export async function resolveConfiguredSecretInputString(params: {
 }
 
 async function resolveConfiguredSecretRefOnlyInputString(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -135,7 +135,7 @@ async function resolveConfiguredSecretRefOnlyInputString(params: {
 }
 
 export async function resolveConfiguredSecretInputWithFallback(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -186,7 +186,7 @@ export async function resolveConfiguredSecretInputWithFallback(params: {
 }
 
 export async function resolveRequiredConfiguredSecretRefInputString(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;

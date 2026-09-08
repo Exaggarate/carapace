@@ -33,9 +33,9 @@ let originalAgentDir: string | undefined;
 let tempAgentDir: string | undefined;
 
 beforeEach(() => {
-  originalAgentDir = process.env.OPENCLAW_AGENT_DIR;
-  tempAgentDir = mkdtempSync(join(tmpdir(), "openclaw-tools-manager-"));
-  setTestEnvValue("OPENCLAW_AGENT_DIR", tempAgentDir);
+  originalAgentDir = process.env.CARAPACE_AGENT_DIR;
+  tempAgentDir = mkdtempSync(join(tmpdir(), "carapace-tools-manager-"));
+  setTestEnvValue("CARAPACE_AGENT_DIR", tempAgentDir);
   fetchWithSsrFGuardMock.mockReset();
   extractArchiveMock.mockReset();
   withFileLockMock
@@ -57,9 +57,9 @@ afterEach(() => {
   vi.resetModules();
   vi.unstubAllEnvs();
   if (originalAgentDir === undefined) {
-    deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+    deleteTestEnvValue("CARAPACE_AGENT_DIR");
   } else {
-    setTestEnvValue("OPENCLAW_AGENT_DIR", originalAgentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", originalAgentDir);
   }
   if (tempAgentDir) {
     rmSync(tempAgentDir, { recursive: true, force: true });
@@ -143,7 +143,7 @@ describe("ensureTool", () => {
   });
 
   it("treats trimmed on as the canonical offline opt-in", async () => {
-    vi.stubEnv("OPENCLAW_OFFLINE", " ON ");
+    vi.stubEnv("CARAPACE_OFFLINE", " ON ");
     const { ensureTool } = await import("./tools-manager.js");
 
     await expect(ensureTool("fd", true)).resolves.toBeUndefined();

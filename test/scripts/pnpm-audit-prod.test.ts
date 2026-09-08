@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
 import { describe, expect, it, vi } from "vitest";
 import {
   collectAllResolvedPackagesFromLockfile,
@@ -858,7 +858,7 @@ snapshots:
   ])(
     "preserves whole-graph audit failure outcomes: $name",
     async ({ response, exit, attempts = 1 }) => {
-      const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-audit-partial-"));
+      const tempDir = await mkdtemp(path.join(tmpdir(), "carapace-audit-partial-"));
       const packages = Array.from({ length: 401 }, (_, index) => `pkg-${index}`);
       await writeFile(
         path.join(tempDir, "pnpm-lock.yaml"),
@@ -876,7 +876,7 @@ snapshots:
       const stderr: string[] = [];
       const summaryPath = path.join(tempDir, "summary.md");
       let requests = 0;
-      vi.stubEnv("OPENCLAW_PNPM_AUDIT_BULK_TIMEOUT_MS", "10");
+      vi.stubEnv("CARAPACE_PNPM_AUDIT_BULK_TIMEOUT_MS", "10");
       vi.stubEnv("GITHUB_STEP_SUMMARY", summaryPath);
       try {
         const audit = runPnpmAuditProd({
@@ -925,7 +925,7 @@ snapshots:
   it.each([false, true])(
     "submits one complete graph and reports npm-only coverage (blocked %s)",
     async (blocked) => {
-      const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-audit-prod-"));
+      const tempDir = await mkdtemp(path.join(tmpdir(), "carapace-audit-prod-"));
       const packageNames = [
         "axios",
         ...Array.from({ length: 400 }, (_, index) => `fixture-${index}`),

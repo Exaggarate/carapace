@@ -8,30 +8,30 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import type { CronJob } from "../../cron/types.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { sessionMutationHandlers } from "./sessions-mutations.js";
 import type { GatewayClient, GatewayRequestContext } from "./types.js";
 
 const sqliteTransactionLabels = vi.hoisted(() => [] as string[]);
 
-vi.mock("../../state/openclaw-agent-db.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../state/openclaw-agent-db.js")>();
-  const runOpenClawAgentWriteTransaction: typeof actual.runOpenClawAgentWriteTransaction = (
+vi.mock("../../state/carapace-agent-db.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../state/carapace-agent-db.js")>();
+  const runCarapaceAgentWriteTransaction: typeof actual.runCarapaceAgentWriteTransaction = (
     operation,
     options,
     transactionOptions,
   ) => {
     sqliteTransactionLabels.push(transactionOptions?.operationLabel ?? "agent.write");
-    return actual.runOpenClawAgentWriteTransaction(operation, options, transactionOptions);
+    return actual.runCarapaceAgentWriteTransaction(operation, options, transactionOptions);
   };
-  return { ...actual, runOpenClawAgentWriteTransaction };
+  return { ...actual, runCarapaceAgentWriteTransaction };
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function humanClient(): GatewayClient {
@@ -46,7 +46,7 @@ function humanClient(): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read", "operator.write", "operator.admin"],
     },
@@ -70,7 +70,7 @@ function isWholeSessionStoreProjection(normalizedSql: string): boolean {
 test.each([{ pinned: true }, { label: "Renamed" }, { label: " Taken " }])(
   "sessions.patch %j avoids hydrating unrelated sessions",
   async (patch) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const targetKey = "agent:main:single-patch-target";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: targetKey },
@@ -87,7 +87,7 @@ test.each([{ pinned: true }, { label: "Renamed" }, { label: " Taken " }])(
         );
       }
 
-      const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       const statements = trackSqliteStatementExecutions(
         database.db,
         ["whole-store-projection"] as const,
@@ -134,7 +134,7 @@ test.each([{ pinned: true }, { label: "Renamed" }, { label: " Taken " }])(
 );
 
 test("sessions.patchMany archives 30 human sessions without transcript hydration", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const targets = Array.from({ length: 30 }, (_, index) => ({
       key: `agent:main:archive-perf-${index}`,
       expectedSessionId: `session-archive-perf-${index}`,
@@ -170,7 +170,7 @@ test("sessions.patchMany archives 30 human sessions without transcript hydration
       );
     }
 
-    const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
     const statements = trackSqliteStatementExecutions(
       database.db,
       ["whole-store-projection", "transcript-full-hydration"] as const,
@@ -339,7 +339,7 @@ test("sessions.patchMany archives 30 human sessions without transcript hydration
           message !== null &&
           typeof message === "object" &&
           "customType" in message &&
-          message.customType === "openclaw.system-note"
+          message.customType === "carapace.system-note"
         );
       });
       expect(auditNotes).toEqual([]);

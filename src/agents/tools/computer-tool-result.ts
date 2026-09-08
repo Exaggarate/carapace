@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { imageMimeFromFormat } from "@openclaw/media-core/mime";
+import { imageMimeFromFormat } from "@carapace/media-core/mime";
 import { readImageMetadataFromHeader } from "../../media/image-ops.js";
 import type { ComputerActResult } from "../../plugins/computer-use-contract.js";
 import { DEFAULT_IMAGE_MAX_DIMENSION_PX } from "../image-sanitization.js";

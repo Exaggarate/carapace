@@ -1,4 +1,4 @@
-import { err, ok } from "@openclaw/normalization-core/result";
+import { err, ok } from "@carapace/normalization-core/result";
 import {
   prepareHostedGatewayStop,
   type HostedGatewayStop,

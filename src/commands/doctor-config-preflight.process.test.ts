@@ -5,17 +5,17 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterAll, describe, expect, it } from "vitest";
-import { createOpenClawTestInstance } from "../../test/helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "../../test/helpers/carapace-test-instance.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { resolveGatewayLockDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadCronJobsStoreWithConfigJobsReadOnly, loadCronQuarantinedJobs } from "../cron/store.js";
 import { hasActiveStartupMigrationLease } from "../infra/startup-migration-checkpoint.js";
 import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
 import {
-  ensureOpenClawAgentDatabaseSchema,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-} from "../state/openclaw-agent-db.js";
+  ensureCarapaceAgentDatabaseSchema,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+} from "../state/carapace-agent-db.js";
 import {
   createBuiltRuntime,
   createSourceRuntime,
@@ -26,12 +26,12 @@ import {
 } from "./doctor-config-preflight.process.test-support.js";
 
 const STARTUP_REFUSAL =
-  "OpenClaw startup migrations did not complete cleanly; refusing to report the gateway ready.";
+  "Carapace startup migrations did not complete cleanly; refusing to report the gateway ready.";
 const STARTUP_RECOVERY =
-  'Run "openclaw doctor --fix" against the same state/config, then restart the gateway.';
+  'Run "carapace doctor --fix" against the same state/config, then restart the gateway.';
 const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 function seedPluginStateConflict(stateDir: string): void {
-  const sharedPath = path.join(stateDir, "state", "openclaw.sqlite");
+  const sharedPath = path.join(stateDir, "state", "carapace.sqlite");
   const sidecarPath = path.join(stateDir, "plugin-state", "state.sqlite");
   fs.mkdirSync(path.dirname(sharedPath), { recursive: true });
   fs.mkdirSync(path.dirname(sidecarPath), { recursive: true });
@@ -87,13 +87,13 @@ function seedPluginStateConflict(stateDir: string): void {
 }
 
 function seedOwnerlessSchemaOnlyAgentDatabase(stateDir: string): string {
-  const databasePath = path.join(stateDir, "agent", "openclaw-agent.sqlite");
+  const databasePath = path.join(stateDir, "agent", "carapace-agent.sqlite");
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const database = new DatabaseSync(databasePath);
   try {
-    ensureOpenClawAgentDatabaseSchema(database, {
-      agentId: "openclaw",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    ensureCarapaceAgentDatabaseSchema(database, {
+      agentId: "carapace",
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       path: databasePath,
       register: false,
     });
@@ -106,19 +106,19 @@ function seedOwnerlessSchemaOnlyAgentDatabase(stateDir: string): string {
 
 describe("doctor invalid config process exit", () => {
   it("repairs the v17 additive schema through doctor --fix", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-v17-additive-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-v17-additive-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     fs.mkdirSync(path.join(stateDir, "agents", "main", "sessions"), { recursive: true });
     fs.writeFileSync(configPath, "{}\n");
     const databasePath = seedV17AdditiveRepairDatabase(stateDir);
     const runtimeRoot = createBuiltRuntime(root);
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     const args = ["doctor", "--fix", "--non-interactive", "--yes", "--no-workspace-suggestions"];
@@ -131,7 +131,7 @@ describe("doctor invalid config process exit", () => {
     const repaired = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(repaired.prepare("PRAGMA user_version").get()?.user_version).toBe(
-        OPENCLAW_AGENT_SCHEMA_VERSION,
+        CARAPACE_AGENT_SCHEMA_VERSION,
       );
       expect(
         repaired
@@ -167,7 +167,7 @@ describe("doctor invalid config process exit", () => {
   });
 
   it("keeps Doctor UI checks inside the source runtime fixture", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-runtime-owner-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-runtime-owner-"));
     const runtimeRoot = createSourceRuntime(root);
     const uiIndexPath = path.join(runtimeRoot, "dist", "control-ui", "index.html");
     fs.writeFileSync(uiIndexPath, '<script src="./assets/missing-fixture.js"></script>\n');
@@ -177,7 +177,7 @@ describe("doctor invalid config process exit", () => {
         ...process.env,
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
       },
       [
         "--input-type=module",
@@ -195,9 +195,9 @@ describe("doctor invalid config process exit", () => {
   });
 
   it("migrates legacy exec approvals before repairing a partially valid config", async () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-legacy-approvals-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-legacy-approvals-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const approvalsPath = path.join(stateDir, "exec-approvals.json");
     const knowledgePath = path.join(root, "knowledge");
     const legacyIndexPath = path.join(root, "legacy-memory.sqlite");
@@ -205,14 +205,14 @@ describe("doctor invalid config process exit", () => {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
 
     fs.mkdirSync(stateDir, { recursive: true });
@@ -288,7 +288,7 @@ describe("doctor invalid config process exit", () => {
     expect(output).not.toContain("Building Control UI assets");
     expect(output).toContain("Merged agents.entries.jup.memorySearch");
 
-    const repairedConfig = JSON.parse(fs.readFileSync(configPath, "utf8")) as OpenClawConfig;
+    const repairedConfig = JSON.parse(fs.readFileSync(configPath, "utf8")) as CarapaceConfig;
     expect(repairedConfig.agents).not.toHaveProperty("list");
     expect(repairedConfig.agents?.entries?.jup).not.toHaveProperty("memorySearch");
     expect(repairedConfig.agents?.entries?.jup?.memory?.search).toEqual({
@@ -302,7 +302,7 @@ describe("doctor invalid config process exit", () => {
     });
 
     expect(fs.existsSync(approvalsPath)).toBe(false);
-    const database = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+    const database = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
       readOnly: true,
     });
     try {
@@ -319,27 +319,27 @@ describe("doctor invalid config process exit", () => {
   }, 45_000);
 
   it("exits after a complete best-effort report for an unparseable config", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-invalid-config-exit-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-invalid-config-exit-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
     delete env.NODE_OPTIONS;
-    delete env.OPENCLAW_GATEWAY_PASSWORD;
-    delete env.OPENCLAW_GATEWAY_TOKEN;
-    delete env.OPENCLAW_GATEWAY_URL;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_GATEWAY_PASSWORD;
+    delete env.CARAPACE_GATEWAY_TOKEN;
+    delete env.CARAPACE_GATEWAY_URL;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
     delete env.VITEST_POOL_ID;
     delete env.VITEST_WORKER_ID;
@@ -368,28 +368,28 @@ describe("doctor invalid config process exit", () => {
 // Synchronous CLI probes must not consume neighboring cases' timeout budgets.
 describe("gateway startup-migration refusal", () => {
   it("boots with migration warnings while preserving legacy state and quarantining invalid automation", async () => {
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "cron-upgrade-ready",
       startTimeoutMs: 30_000,
       stopTimeoutMs: 1_500,
       env: {
         NODE_ENV: undefined,
         NO_COLOR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_HOME: undefined,
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_TEST_FAST: "1",
         VITEST: undefined,
         // Preserve full startup; the shared fixture otherwise skips sidecar readiness.
-        OPENCLAW_GATEWAY_TOKEN: process.env.OPENCLAW_GATEWAY_TOKEN,
-        OPENCLAW_GATEWAY_PASSWORD: process.env.OPENCLAW_GATEWAY_PASSWORD,
-        OPENCLAW_SKIP_PROVIDERS: process.env.OPENCLAW_SKIP_PROVIDERS,
-        OPENCLAW_SKIP_GMAIL_WATCHER: process.env.OPENCLAW_SKIP_GMAIL_WATCHER,
-        OPENCLAW_SKIP_CRON: process.env.OPENCLAW_SKIP_CRON,
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER,
-        OPENCLAW_SKIP_CANVAS_HOST: process.env.OPENCLAW_SKIP_CANVAS_HOST,
-        OPENCLAW_TEST_MINIMAL_GATEWAY: process.env.OPENCLAW_TEST_MINIMAL_GATEWAY,
+        CARAPACE_GATEWAY_TOKEN: process.env.CARAPACE_GATEWAY_TOKEN,
+        CARAPACE_GATEWAY_PASSWORD: process.env.CARAPACE_GATEWAY_PASSWORD,
+        CARAPACE_SKIP_PROVIDERS: process.env.CARAPACE_SKIP_PROVIDERS,
+        CARAPACE_SKIP_GMAIL_WATCHER: process.env.CARAPACE_SKIP_GMAIL_WATCHER,
+        CARAPACE_SKIP_CRON: process.env.CARAPACE_SKIP_CRON,
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: process.env.CARAPACE_SKIP_BROWSER_CONTROL_SERVER,
+        CARAPACE_SKIP_CANVAS_HOST: process.env.CARAPACE_SKIP_CANVAS_HOST,
+        CARAPACE_TEST_MINIMAL_GATEWAY: process.env.CARAPACE_TEST_MINIMAL_GATEWAY,
       },
     });
     const { env, port, stateDir } = instance;
@@ -437,7 +437,7 @@ describe("gateway startup-migration refusal", () => {
         const status = await instance.cli(["gateway", "call", "status", "--json"]);
         expect(status.code, status.stdout + "\n" + status.stderr).toBe(0);
         expect(JSON.parse(status.stdout).startupMigrationWarning).toBe(
-          'Startup migrations need attention. Run "openclaw doctor --fix" against the same state/config, then restart the gateway.',
+          'Startup migrations need attention. Run "carapace doctor --fix" against the same state/config, then restart the gateway.',
         );
         expect(fs.existsSync(path.join(stateDir, "plugin-state", "state.sqlite"))).toBe(true);
       } finally {
@@ -464,10 +464,10 @@ describe("gateway startup-migration refusal", () => {
   }, 45_000);
 
   it("repairs the stable upgrade config and additive state schema despite advisory warnings", async () => {
-    const root = await fs.promises.realpath(tempDirs.make("openclaw-stable-upgrade-ready-"));
+    const root = await fs.promises.realpath(tempDirs.make("carapace-stable-upgrade-ready-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
-    const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const configPath = path.join(root, "carapace.json");
+    const databasePath = path.join(stateDir, "state", "carapace.sqlite");
     const stableConfig = {
       meta: {
         lastTouchedAt: "2026-08-01T00:00:00.000Z",
@@ -480,30 +480,30 @@ describe("gateway startup-migration refusal", () => {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
 
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, JSON.stringify(stableConfig));
     seedPluginStateConflict(stateDir);
     const preflightUrl = new URL("./doctor-config-preflight.ts", import.meta.url).href;
-    const stateDatabaseUrl = new URL("../state/openclaw-state-db.ts", import.meta.url).href;
+    const stateDatabaseUrl = new URL("../state/carapace-state-db.ts", import.meta.url).href;
     const script = `
       const fs = await import("node:fs");
       const path = await import("node:path");
       const { DatabaseSync } = await import("node:sqlite");
       const { runDoctorConfigPreflight } = await import(${JSON.stringify(preflightUrl)});
-      const { closeOpenClawStateDatabase, openOpenClawStateDatabase } =
+      const { closeCarapaceStateDatabase, openCarapaceStateDatabase } =
         await import(${JSON.stringify(stateDatabaseUrl)});
-      openOpenClawStateDatabase({ env: process.env });
-      closeOpenClawStateDatabase();
+      openCarapaceStateDatabase({ env: process.env });
+      closeCarapaceStateDatabase();
       const oldDatabase = new DatabaseSync(${JSON.stringify(databasePath)});
       oldDatabase.exec("ALTER TABLE task_runs DROP COLUMN tool_use_count");
       oldDatabase.close();
@@ -558,9 +558,9 @@ describe("gateway startup-migration refusal", () => {
   }, 75_000);
 
   it("migrates retired Codex idle settings at startup without losing connection config", async () => {
-    const root = await fs.promises.realpath(tempDirs.make("openclaw-codex-startup-config-"));
+    const root = await fs.promises.realpath(tempDirs.make("carapace-codex-startup-config-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const appServer = {
       transport: "websocket",
       command: path.join(root, "custom-codex"),
@@ -595,29 +595,29 @@ describe("gateway startup-migration refusal", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
       CODEX_HOME: path.join(root, ".codex"),
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_OAUTH_DIR: path.join(stateDir, "credentials"),
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_HOME: root,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_OAUTH_DIR: path.join(stateDir, "credentials"),
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_HOME: root,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     // Use the pretest-built bundled artifacts, not the parent worker's source-tree override.
     for (const key of [
       "NODE_ENV",
       "NODE_OPTIONS",
-      "OPENCLAW_AGENT_DIR",
-      "OPENCLAW_BUNDLED_PLUGINS_DIR",
-      "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-      "OPENCLAW_HOME",
-      "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
-      "OPENCLAW_UPDATE_IN_PROGRESS",
+      "CARAPACE_AGENT_DIR",
+      "CARAPACE_BUNDLED_PLUGINS_DIR",
+      "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+      "CARAPACE_HOME",
+      "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+      "CARAPACE_UPDATE_IN_PROGRESS",
       "VITEST",
       "VITEST_POOL_ID",
       "VITEST_WORKER_ID",
@@ -685,9 +685,9 @@ describe("gateway startup-migration refusal", () => {
   }, 75_000);
 
   it("reaches readiness while preserving a legacy agent database without an owner", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-ownerless-agent-ready-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-ownerless-agent-ready-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const config = {
       gateway: { mode: "local", auth: { mode: "none" } },
       agents: {
@@ -695,19 +695,19 @@ describe("gateway startup-migration refusal", () => {
         defaults: { systemAgent: { agentId: "main" } },
         entries: { main: {}, blocker: {}, digest: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
 
     fs.mkdirSync(stateDir, { recursive: true });
@@ -749,9 +749,9 @@ describe("gateway startup-migration refusal", () => {
   }, 75_000);
 
   it("reaches readiness with unresolved legacy agent files left for Doctor", async () => {
-    const root = await fs.promises.realpath(tempDirs.make("openclaw-unresolved-agent-ready-"));
+    const root = await fs.promises.realpath(tempDirs.make("carapace-unresolved-agent-ready-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const legacyPath = path.join(stateDir, "agent", "settings.json");
     const config = {
       gateway: { mode: "local", auth: { mode: "none" } },
@@ -759,19 +759,19 @@ describe("gateway startup-migration refusal", () => {
         ownership: "explicit",
         entries: { main: {}, blocker: {}, digest: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
 
     fs.mkdirSync(path.dirname(legacyPath), { recursive: true });
@@ -808,23 +808,23 @@ describe("gateway startup-migration refusal", () => {
       { cwd: path.resolve("."), stdio: "ignore" },
     );
     const temporaryRoot = await fs.promises.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-live-owner-refusal-"),
+      path.join(os.tmpdir(), "carapace-live-owner-refusal-"),
     );
     const root = await fs.promises.realpath(temporaryRoot);
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
 
     try {
@@ -844,7 +844,7 @@ describe("gateway startup-migration refusal", () => {
       // sidecar quarantine unless the live-owner refusal runs first.
       const sharedStateDbDir = path.join(stateDir, "state");
       fs.mkdirSync(sharedStateDbDir, { recursive: true });
-      const orphanWalPath = path.join(sharedStateDbDir, "openclaw.sqlite-wal");
+      const orphanWalPath = path.join(sharedStateDbDir, "carapace.sqlite-wal");
       fs.writeFileSync(orphanWalPath, Buffer.alloc(64, 1));
       // A live gateway owner: the spawned gateway-shaped child is alive with a
       // matching start time, which is exactly how a real concurrent gateway verifies.
@@ -879,7 +879,7 @@ describe("gateway startup-migration refusal", () => {
       expect(fs.existsSync(legacyArtifactPath), output).toBe(true);
       expect(fs.existsSync(path.join(stateDir, "agents", "main", "agent")), output).toBe(false);
       // No orphan-sidecar quarantine copy either: write admission never ran.
-      expect(fs.readdirSync(sharedStateDbDir), output).toEqual(["openclaw.sqlite-wal"]);
+      expect(fs.readdirSync(sharedStateDbDir), output).toEqual(["carapace.sqlite-wal"]);
       expect(result.status, output).toBe(78);
       expect(result.stderr, output).toContain("already owns this state directory");
       expect(hasActiveStartupMigrationLease({ env })).toBe(false);
@@ -890,32 +890,32 @@ describe("gateway startup-migration refusal", () => {
   }, 45_000);
 
   it("reloads tool ownership after updater-managed manifest repair", async () => {
-    const root = await fs.promises.realpath(tempDirs.make("openclaw-updater-manifest-repair-"));
+    const root = await fs.promises.realpath(tempDirs.make("carapace-updater-manifest-repair-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const pluginId = "updater-tool-owner";
     const pluginDir = path.join(root, "plugins", pluginId);
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     const config = {
       gateway: { mode: "local", auth: { mode: "none" } },
       plugins: {
         load: { paths: [pluginDir] },
         entries: { [pluginId]: { enabled: true } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TEST_FAST: "1",
-      OPENCLAW_UPDATE_IN_PROGRESS: "1",
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TEST_FAST: "1",
+      CARAPACE_UPDATE_IN_PROGRESS: "1",
       NO_COLOR: "1",
     };
     delete env.NODE_ENV;
-    delete env.OPENCLAW_HOME;
+    delete env.CARAPACE_HOME;
     delete env.VITEST;
     delete env.VITEST_POOL_ID;
     delete env.VITEST_WORKER_ID;
@@ -925,9 +925,9 @@ describe("gateway startup-migration refusal", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: `@openclaw/${pluginId}`,
+        name: `@carapace/${pluginId}`,
         version: "1.0.0",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
     );
     fs.writeFileSync(path.join(pluginDir, "index.js"), "export default {};\n");

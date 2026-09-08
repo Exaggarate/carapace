@@ -8,9 +8,9 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { loadPreparedModelCatalogOwnerSnapshot } from "./prepared-model-catalog.js";
 import { withPreparedModelRuntimePluginGenerationScope } from "./prepared-model-runtime-generation-scope.js";
 import {
@@ -25,11 +25,11 @@ import {
 import { PreparedReplyDispatchPublicationOwner } from "./prepared-reply-dispatch-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared model runtime reload auth adoption", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -83,7 +83,7 @@ describe("prepared model runtime reload auth adoption", () => {
         agentId: dispatch.agentId,
         agentDir: dispatch.agentDir,
         workspaceDir: dispatch.workspaceDir,
-        runtimePluginSelections: [{ provider: "custom", modelId: "model", runtime: "openclaw" }],
+        runtimePluginSelections: [{ provider: "custom", modelId: "model", runtime: "carapace" }],
       };
       const lease = await acquireAgentRunPreparedModelRuntime(runInput, {
         pluginGeneration: dispatch.pluginGeneration,
@@ -400,7 +400,7 @@ describe("prepared model runtime reload auth adoption", () => {
       }
     });
     let defaultBuildCount = 0;
-    mocks.ensureOpenClawModelsJson.mockImplementation(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementation(async (_config, agentDir) => {
       if (agentDir !== state.agentDir("default")) {
         return { agentDir: String(agentDir), wrote: false };
       }
@@ -466,10 +466,10 @@ describe("prepared model runtime reload auth adoption", () => {
         "config-published",
         "affected-dispatch-resolved",
       ]);
-      const buildCountAfterPublication = mocks.ensureOpenClawModelsJson.mock.calls.length;
+      const buildCountAfterPublication = mocks.ensureCarapaceModelsJson.mock.calls.length;
       await Promise.resolve();
       await Promise.resolve();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(buildCountAfterPublication);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(buildCountAfterPublication);
       const lease = await acquireAgentRunPreparedModelRuntime({
         agentId: "default",
         agentDir: state.agentDir("default"),
@@ -497,7 +497,7 @@ describe("prepared model runtime reload auth adoption", () => {
     const unregister = registerPreparedModelRuntimePublicationListener((event) => {
       events.push(event.phase);
     });
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async () => await authBuild.promise)
       .mockImplementationOnce(async () => await configBuild.promise);
 
@@ -508,7 +508,7 @@ describe("prepared model runtime reload auth adoption", () => {
         agentDir: state.agentDir("default"),
         affectsInheritedStores: false,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       authWaiter = loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" });
       void authWaiter.catch(() => undefined);
       reload = refreshPreparedModelRuntimeSnapshots(replacementConfig, {
@@ -516,7 +516,7 @@ describe("prepared model runtime reload auth adoption", () => {
       });
       void reload.catch(() => undefined);
       authBuild.resolve({ agentDir: state.agentDir("default"), wrote: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3));
       await expect(
         Promise.race([authWaiter.then(() => "settled"), Promise.resolve("pending")]),
       ).resolves.toBe("pending");
@@ -551,7 +551,7 @@ describe("prepared model runtime reload auth adoption", () => {
     const unregister = registerPreparedModelRuntimePublicationListener((event) => {
       events.push(event.phase);
     });
-    mocks.ensureOpenClawModelsJson.mockImplementation(async (config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementation(async (config, agentDir) => {
       if (config === initialConfig && agentDir === state.agentDir("worker")) {
         return await workerAuthBuild.promise;
       }
@@ -573,14 +573,14 @@ describe("prepared model runtime reload auth adoption", () => {
         agentDir: state.agentDir("worker"),
         affectsInheritedStores: false,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(4));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(4));
       firstWorkerRead = loadPublishedGatewayReplyDispatchRuntime({ agentId: "worker" });
       mocks.mutationListener?.({
         agentDir: state.agentDir("research"),
         affectsInheritedStores: false,
       });
       workerAuthBuild.resolve({ agentDir: state.agentDir("worker"), wrote: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(5));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(5));
       await expect(firstWorkerRead).resolves.toMatchObject({ config: initialConfig });
 
       reload = refreshPreparedModelRuntimeSnapshots(replacementConfig, {
@@ -623,7 +623,7 @@ describe("prepared model runtime reload auth adoption", () => {
     await refreshPreparedModelRuntimeSnapshots(initialConfig, { gatewayLifecycle: true });
     const authBuild = createDeferred<{ agentDir: string; wrote: false }>();
     const reloadError = new Error("replacement config failed");
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async () => await authBuild.promise)
       .mockRejectedValueOnce(reloadError);
 
@@ -634,7 +634,7 @@ describe("prepared model runtime reload auth adoption", () => {
         agentDir: state.agentDir("default"),
         affectsInheritedStores: false,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       authWaiter = loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" });
       void authWaiter.catch(() => undefined);
       reload = refreshPreparedModelRuntimeSnapshots(replacementConfig, {
@@ -667,19 +667,19 @@ describe("prepared model runtime reload auth adoption", () => {
     const firstBuild = createDeferred<{ agentDir: string; wrote: false }>();
     const secondBuild = createDeferred<{ agentDir: string; wrote: false }>();
     const firstError = new Error("superseded auth build failed");
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async () => await firstBuild.promise)
       .mockImplementationOnce(async () => await secondBuild.promise);
 
     let dispatch: ReturnType<typeof loadPublishedGatewayReplyDispatchRuntime> | undefined;
     try {
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       dispatch = loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" });
       void dispatch.catch(() => undefined);
       mocks.mutationListener?.({ agentDir, affectsInheritedStores: false });
       firstBuild.reject(firstError);
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3));
       await expect(
         Promise.race([dispatch.then(() => "settled"), Promise.resolve("pending")]),
       ).resolves.toBe("pending");
@@ -712,7 +712,7 @@ describe("prepared model runtime reload auth adoption", () => {
         worker: createDeferred<{ agentDir: string; wrote: false }>(),
       };
       const refreshError = new Error(`${failedAgentId} auth build failed`);
-      mocks.ensureOpenClawModelsJson.mockImplementation(async (_config, agentDir) => {
+      mocks.ensureCarapaceModelsJson.mockImplementation(async (_config, agentDir) => {
         const agentId =
           agentDir === agentDirs.worker
             ? "worker"
@@ -743,7 +743,7 @@ describe("prepared model runtime reload auth adoption", () => {
         void dispatches.research.catch(() => undefined);
         void dispatches.worker.catch(() => undefined);
         await vi.waitFor(() =>
-          expect(mocks.ensureOpenClawModelsJson.mock.calls.length).toBeGreaterThanOrEqual(4),
+          expect(mocks.ensureCarapaceModelsJson.mock.calls.length).toBeGreaterThanOrEqual(4),
         );
         if (failedAgentId === "worker") {
           builds.worker.reject(refreshError);
@@ -751,7 +751,7 @@ describe("prepared model runtime reload auth adoption", () => {
           builds.worker.resolve({ agentDir: agentDirs.worker, wrote: false });
         }
         await vi.waitFor(() =>
-          expect(mocks.ensureOpenClawModelsJson.mock.calls.length).toBeGreaterThanOrEqual(5),
+          expect(mocks.ensureCarapaceModelsJson.mock.calls.length).toBeGreaterThanOrEqual(5),
         );
         if (failedAgentId === "research") {
           builds.research.reject(refreshError);
@@ -794,7 +794,7 @@ describe("prepared model runtime reload auth adoption", () => {
       worker: createDeferred<{ agentDir: string; wrote: false }>(),
     };
     const refreshError = new Error("inherited research auth build failed");
-    mocks.ensureOpenClawModelsJson.mockImplementation(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementation(async (_config, agentDir) => {
       const entry = Object.entries(agentDirs).find(
         ([, configuredDir]) => configuredDir === agentDir,
       );
@@ -825,7 +825,7 @@ describe("prepared model runtime reload auth adoption", () => {
       builds.default.resolve({ agentDir: agentDirs.default, wrote: false });
       builds.worker.resolve({ agentDir: agentDirs.worker, wrote: false });
       await vi.waitFor(() =>
-        expect(mocks.ensureOpenClawModelsJson.mock.calls.length).toBeGreaterThanOrEqual(6),
+        expect(mocks.ensureCarapaceModelsJson.mock.calls.length).toBeGreaterThanOrEqual(6),
       );
 
       builds.research.reject(refreshError);
@@ -853,7 +853,7 @@ describe("prepared model runtime reload auth adoption", () => {
     const unregister = registerPreparedModelRuntimePublicationListener((event) => {
       events.push(event.phase);
     });
-    mocks.ensureOpenClawModelsJson.mockImplementation(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementation(async (_config, agentDir) => {
       if (agentDir === state.agentDir("worker")) {
         return await workerBuild.promise;
       }
@@ -870,7 +870,7 @@ describe("prepared model runtime reload auth adoption", () => {
         agentDir: state.agentDir("worker"),
         affectsInheritedStores: false,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(4));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(4));
       workerDispatch = loadPublishedGatewayReplyDispatchRuntime({ agentId: "worker" });
       void workerDispatch.catch(() => undefined);
       let workerSettled = false;
@@ -887,7 +887,7 @@ describe("prepared model runtime reload auth adoption", () => {
       researchDispatch = loadPublishedGatewayReplyDispatchRuntime({ agentId: "research" });
       void researchDispatch.catch(() => undefined);
       workerBuild.resolve({ agentDir: state.agentDir("worker"), wrote: false });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(5));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(5));
       await vi.waitFor(() => expect(workerSettled).toBe(true));
       await expect(
         Promise.race([researchDispatch.then(() => "settled"), Promise.resolve("pending")]),
@@ -960,7 +960,7 @@ describe("prepared model runtime reload auth adoption", () => {
     const authBuild = createDeferred<{ agentDir: string; wrote: false }>();
     const configBuild = createDeferred<{ agentDir: string; wrote: false }>();
     const obsoleteAuthError = new Error("obsolete auth build failed");
-    mocks.ensureOpenClawModelsJson
+    mocks.ensureCarapaceModelsJson
       .mockImplementationOnce(async () => await authBuild.promise)
       .mockImplementationOnce(async () => await configBuild.promise);
 
@@ -971,7 +971,7 @@ describe("prepared model runtime reload auth adoption", () => {
         agentDir: state.agentDir("default"),
         affectsInheritedStores: false,
       });
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2));
       authWaiter = loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" });
       void authWaiter.catch(() => undefined);
       reload = refreshPreparedModelRuntimeSnapshots(replacementConfig, {
@@ -979,7 +979,7 @@ describe("prepared model runtime reload auth adoption", () => {
       });
       void reload.catch(() => undefined);
       authBuild.reject(obsoleteAuthError);
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3));
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3));
       await expect(
         Promise.race([authWaiter.then(() => "settled"), Promise.resolve("pending")]),
       ).resolves.toBe("pending");

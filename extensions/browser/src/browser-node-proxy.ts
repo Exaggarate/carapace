@@ -3,9 +3,9 @@ import {
   addTimerTimeoutGraceMs,
   MAX_TIMER_TIMEOUT_MS,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   BROWSER_PROXY_COMMAND,
   BROWSER_PROXY_UPLOAD_COMMAND,

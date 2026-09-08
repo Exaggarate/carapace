@@ -13,7 +13,7 @@ import type { PluginDiscoveryResult } from "../plugins/discovery.types.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.types.js";
 import { isChannelConfigured } from "./channel-configured.js";
 import type { PluginAutoEnableCandidate } from "./plugin-auto-enable.types.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 function normalizeManifestChannelId(channelId: string): string {
   return normalizeChatChannelId(channelId) ?? channelId;
@@ -57,7 +57,7 @@ function collectPluginIdsForConfiguredChannel(
 }
 
 export function collectAutoEnableChannelIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   discovery?: PluginDiscoveryResult,
   ambientEnvTriggers: AmbientEnvTriggerPolicy = "allow",
@@ -88,7 +88,7 @@ export function collectAutoEnableChannelIds(
 }
 
 function isAutoEnableConfiguredChannelSignal(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   channelId: string;
   source: ChannelPresenceSignalSource;
@@ -112,7 +112,7 @@ function isAutoEnableConfiguredChannelSignal(params: {
 }
 
 export type ConfiguredPluginAutoEnableParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   registry: PluginManifestRegistry;
   configuredChannelIds?: readonly string[];

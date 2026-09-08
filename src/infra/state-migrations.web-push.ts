@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { root, type Root } from "@openclaw/fs-safe";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -189,7 +189,7 @@ function migrateIntoDatabase(params: {
 }): { importedSubscriptions: number; importedVapidKeys: boolean } {
   let importedSubscriptions = 0;
   let importedVapidKeys = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       ensureWebPushSubscriptionBindingColumns(db);
       const webPushDb = getNodeSqliteKysely<WebPushDatabase>(db);
@@ -285,7 +285,7 @@ function migrateIntoDatabase(params: {
         }
       }
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } },
   );
   return { importedSubscriptions, importedVapidKeys };
 }

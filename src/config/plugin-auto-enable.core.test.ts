@@ -18,7 +18,7 @@ import {
   makeRegistry,
   resetPluginAutoEnableTestState,
 } from "./plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import { validateConfigObject } from "./validation.js";
 
 vi.mock("../channels/plugins/package-state-probes.js", async (importOriginal) => {
@@ -50,7 +50,7 @@ vi.mock("../channels/plugins/package-state-probes.js", async (importOriginal) =>
 
 const setupRegistryMock = vi.hoisted(() => ({
   resolvePluginSetupAutoEnableReasons: vi.fn(
-    (params: { config?: OpenClawConfig; pluginIds?: readonly string[] }) => {
+    (params: { config?: CarapaceConfig; pluginIds?: readonly string[] }) => {
       const pluginIds = new Set(params.pluginIds ?? []);
       const browserEntry = params.config?.plugins?.entries?.browser;
       const hasBrowserEntry =
@@ -194,7 +194,7 @@ describe("applyPluginAutoEnable core", () => {
 
   it("reuses policy-compatible current manifest registry when runtime config differs", () => {
     const manifestRegistry = makeRegistry([{ id: "custom-chat", channels: ["custom-chat"] }]);
-    const snapshotConfig: OpenClawConfig = { plugins: { allow: ["existing"] } };
+    const snapshotConfig: CarapaceConfig = { plugins: { allow: ["existing"] } };
     setCurrentPluginMetadataSnapshot(
       createPluginMetadataSnapshot({
         config: snapshotConfig,
@@ -228,7 +228,7 @@ describe("applyPluginAutoEnable core", () => {
 
   it("does not reuse an unscoped current manifest registry when plugin load paths change", () => {
     const manifestRegistry = makeRegistry([{ id: "load-path-chat", channels: ["load-path-chat"] }]);
-    const snapshotConfig: OpenClawConfig = { plugins: { allow: ["existing"] } };
+    const snapshotConfig: CarapaceConfig = { plugins: { allow: ["existing"] } };
     setCurrentPluginMetadataSnapshot(
       createPluginMetadataSnapshot({
         config: snapshotConfig,
@@ -263,7 +263,7 @@ describe("applyPluginAutoEnable core", () => {
 
   it("does not reuse a load-path current manifest registry for a config with default load paths", () => {
     const manifestRegistry = makeRegistry([{ id: "load-path-chat", channels: ["load-path-chat"] }]);
-    const snapshotConfig: OpenClawConfig = {
+    const snapshotConfig: CarapaceConfig = {
       plugins: {
         allow: ["existing"],
         load: { paths: ["/tmp/custom-plugin-root"] },
@@ -504,7 +504,7 @@ describe("applyPluginAutoEnable core", () => {
     expect(result.changes).toStrictEqual([]);
     expect(
       readFileSync.mock.calls.some(
-        ([filePath]) => typeof filePath === "string" && filePath.endsWith("openclaw.plugin.json"),
+        ([filePath]) => typeof filePath === "string" && filePath.endsWith("carapace.plugin.json"),
       ),
     ).toBe(false);
   });
@@ -532,7 +532,7 @@ describe("applyPluginAutoEnable core", () => {
     expect(result.changes).toStrictEqual([]);
     expect(
       readFileSync.mock.calls.some(
-        ([filePath]) => typeof filePath === "string" && filePath.endsWith("openclaw.plugin.json"),
+        ([filePath]) => typeof filePath === "string" && filePath.endsWith("carapace.plugin.json"),
       ),
     ).toBe(false);
   });
@@ -666,7 +666,7 @@ describe("applyPluginAutoEnable core", () => {
         return Reflect.get(target, property, receiver);
       },
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: Object.fromEntries(
@@ -944,7 +944,7 @@ describe("applyPluginAutoEnable core", () => {
   it("ignores agent harness runtime env when auto-enabling plugins", () => {
     const result = applyPluginAutoEnable({
       config: {},
-      env: makeIsolatedEnv({ OPENCLAW_AGENT_RUNTIME: "codex" }),
+      env: makeIsolatedEnv({ CARAPACE_AGENT_RUNTIME: "codex" }),
       manifestRegistry: makeRegistry([
         {
           id: "codex",
@@ -970,7 +970,7 @@ describe("applyPluginAutoEnable core", () => {
           },
         },
         agents: {
-          list: [{ id: "openclaw" }],
+          list: [{ id: "carapace" }],
         },
       },
       env,
@@ -984,7 +984,7 @@ describe("applyPluginAutoEnable core", () => {
         },
       },
       agents: {
-        list: [{ id: "openclaw" }],
+        list: [{ id: "carapace" }],
       },
     });
     expect(result.changes).toStrictEqual([]);
@@ -1048,7 +1048,7 @@ describe("applyPluginAutoEnable core", () => {
   it("does not auto-enable WhatsApp from persisted auth state alone", () => {
     const persistedEnv = makeIsolatedEnv();
     const authDir = path.join(
-      persistedEnv.OPENCLAW_STATE_DIR ?? "",
+      persistedEnv.CARAPACE_STATE_DIR ?? "",
       "credentials",
       "whatsapp",
       "default",
@@ -1163,7 +1163,7 @@ describe("applyPluginAutoEnable core", () => {
   it("reuses same-turn auto-enable results for identical fanout inputs", async () => {
     setupRegistryMock.resolvePluginSetupAutoEnableReasons.mockClear();
     const manifestRegistry = makeRegistry([{ id: "browser", channels: [] }]);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           browser: {
@@ -1206,7 +1206,7 @@ describe("applyPluginAutoEnable core", () => {
 
   it("fingerprints identical metadata snapshots once per plugin metadata lifecycle", () => {
     const traversals = { candidates: 0, plugins: 0 };
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const envSnapshot = makeIsolatedEnv();
     const discovery: PluginDiscoveryResult = {
       candidates: new Proxy([], {
@@ -1252,7 +1252,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("does not reuse same-turn results for omitted metadata after current snapshot replacement", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       channels: { apn: { someKey: "value" } },
     };
     const firstRegistry = makeRegistry([{ id: "apn-one", channels: ["apn"] }]);
@@ -1276,7 +1276,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("does not reuse same-turn auto-enable results across registry or env inputs", () => {
-    const channelConfig: OpenClawConfig = {
+    const channelConfig: CarapaceConfig = {
       channels: { apn: { someKey: "value" } },
     };
     const discovery = emptyDiscovery;
@@ -1298,7 +1298,7 @@ describe("applyPluginAutoEnable core", () => {
     expect(secondRegistry.config.plugins?.entries?.["apn-two"]?.enabled).toBe(true);
     expect(secondRegistry).not.toBe(firstRegistry);
 
-    const envConfig: OpenClawConfig = {
+    const envConfig: CarapaceConfig = {
       plugins: {
         entries: {
           browser: {
@@ -1312,13 +1312,13 @@ describe("applyPluginAutoEnable core", () => {
     const firstEnv = applyPluginAutoEnable({
       config: envConfig,
       discovery,
-      env: makeIsolatedEnv({ OPENCLAW_TEST_CACHE_INPUT: "one" }),
+      env: makeIsolatedEnv({ CARAPACE_TEST_CACHE_INPUT: "one" }),
       manifestRegistry,
     });
     const secondEnv = applyPluginAutoEnable({
       config: envConfig,
       discovery,
-      env: makeIsolatedEnv({ OPENCLAW_TEST_CACHE_INPUT: "two" }),
+      env: makeIsolatedEnv({ CARAPACE_TEST_CACHE_INPUT: "two" }),
       manifestRegistry,
     });
 
@@ -1329,7 +1329,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("refreshes auto-enable results after config mutates at a lifecycle boundary", () => {
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const manifestRegistry = makeRegistry([{ id: "apn-channel", channels: ["apn"] }]);
 
     const first = applyPluginAutoEnable({
@@ -1353,7 +1353,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("refreshes auto-enable results after registry mutates at a lifecycle boundary", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       channels: { apn: { someKey: "value" } },
     };
     const registry = makeRegistry([{ id: "other-channel", channels: ["other"] }]);
@@ -1383,7 +1383,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("refreshes auto-enable results after discovery mutates at a lifecycle boundary", () => {
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const mutableDiscovery: PluginDiscoveryResult = { candidates: [], diagnostics: [] };
     const manifestRegistry = makeRegistry([
       { id: "cache-channel-plugin", channels: ["cache-channel"] },
@@ -1418,7 +1418,7 @@ describe("applyPluginAutoEnable core", () => {
   });
 
   it("refreshes auto-enable results after env mutates at a lifecycle boundary", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         entries: {
           browser: {
@@ -1437,7 +1437,7 @@ describe("applyPluginAutoEnable core", () => {
       env: mutableEnv,
       manifestRegistry,
     });
-    mutableEnv.OPENCLAW_TEST_CACHE_INPUT = "changed";
+    mutableEnv.CARAPACE_TEST_CACHE_INPUT = "changed";
     clearPluginMetadataLifecycleCaches();
     const second = applyPluginAutoEnable({
       config,
@@ -1497,7 +1497,7 @@ describe("applyPluginAutoEnable core", () => {
       env: {
         ...makeIsolatedEnv(),
         IRC_HOST: "irc.libera.chat",
-        IRC_NICK: "openclaw-bot",
+        IRC_NICK: "carapace-bot",
       },
     });
 

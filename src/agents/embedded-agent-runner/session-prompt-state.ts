@@ -1,6 +1,6 @@
 /** Transcript-backed prompt projection state cached by an embedded session lifecycle. */
 import { createHash } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import { resolveGlobalSingleton } from "../../shared/global-singleton.js";
 import type { AgentMessage } from "../runtime/index.js";
@@ -27,7 +27,7 @@ type EmbeddedSessionPromptState = {
 
 const MAX_SESSION_PROMPT_STATES = 64;
 const MAX_ACTIVE_PROJECT_KEYS = 4;
-const SESSION_PROMPT_STATES_KEY = Symbol.for("openclaw.embeddedSessionPromptStates");
+const SESSION_PROMPT_STATES_KEY = Symbol.for("carapace.embeddedSessionPromptStates");
 const sessionPromptStates = resolveGlobalSingleton(
   SESSION_PROMPT_STATES_KEY,
   () => new Map<string, EmbeddedSessionPromptState>(),
@@ -153,7 +153,7 @@ export function persistToolResultProjections(
   if (hash === state.lastWrittenSnapshotHash) {
     return;
   }
-  appendEntry("openclaw.cache-ttl", snapshot);
+  appendEntry("carapace.cache-ttl", snapshot);
   // A failed owned write must leave the snapshot eligible for persistence.
   state.lastWrittenSnapshotHash = hash;
 }

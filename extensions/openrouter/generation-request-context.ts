@@ -1,15 +1,15 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   resolveProviderHttpRequestConfig,
   sanitizeConfiguredModelProviderRequest,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import { OPENROUTER_BASE_URL } from "./provider-catalog.js";
 
 type OpenRouterAuthStore = Parameters<typeof resolveApiKeyForProvider>[0]["store"];
 
 export async function resolveOpenRouterGenerationRequestContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: OpenRouterAuthStore;
   capability: "audio" | "image" | "video";
@@ -32,8 +32,8 @@ export async function resolveOpenRouterGenerationRequestContext(params: {
     defaultHeaders: {
       Authorization: `Bearer ${auth.apiKey}`,
       ...(params.jsonContentType ? { "Content-Type": "application/json" } : {}),
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
     },
     request: sanitizeConfiguredModelProviderRequest(
       params.cfg.models?.providers?.openrouter?.request,

@@ -1,10 +1,10 @@
 // Provider stream shared helpers implement reusable stream wrappers and payload policies.
-import { resolveOpenAIReasoningEffortForModel } from "@openclaw/ai/internal/openai";
+import { resolveOpenAIReasoningEffortForModel } from "@carapace/ai/internal/openai";
 import {
   createEmptyTransportUsage,
   resolveOpenAIReasoningEffortMap,
-} from "@openclaw/ai/transports";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/ai/transports";
+import { asOptionalObjectRecord } from "@carapace/normalization-core/record-coerce";
 import {
   createPromotedPlainTextToolCallBlock,
   createPromotedPlainTextToolCallEvents,
@@ -32,14 +32,14 @@ export {
   isGoogleGemini3FlashModel,
   isGoogleGemini3ProModel,
   isGoogleGemini3ThinkingLevelModel,
-} from "@openclaw/ai/internal/google-model-family";
+} from "@carapace/ai/internal/google-model-family";
 export {
   applyAnthropicRefusal,
   isAnthropicOAuthApiKey,
   resolveAnthropicServerCompactionPlan,
-} from "@openclaw/ai/internal/anthropic";
-export { createDeferredEventBuffer } from "@openclaw/ai/internal/runtime";
-export { notifyLlmRequestActivity, onLlmRequestActivity } from "@openclaw/ai/internal/runtime";
+} from "@carapace/ai/internal/anthropic";
+export { createDeferredEventBuffer } from "@carapace/ai/internal/runtime";
+export { notifyLlmRequestActivity, onLlmRequestActivity } from "@carapace/ai/internal/runtime";
 
 type ProviderWrapStreamFnContext = import("../plugins/types.js").ProviderWrapStreamFnContext;
 
@@ -714,7 +714,7 @@ export function createGoogleThinkingStreamWrapper(
 export {
   applyAnthropicPayloadPolicyToParams,
   resolveAnthropicPayloadPolicy,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 export { applyAnthropicEphemeralCacheControlMarkers } from "../llm/providers/stream-wrappers/anthropic-cache-control-payload.js";
 export {
   createMoonshotThinkingWrapper,
@@ -724,5 +724,5 @@ export {
 export { streamWithPayloadPatch };
 export { createToolStreamWrapper } from "../llm/providers/stream-wrappers/zai.js";
 
-export { applyCompletionsAnthropicCacheControl } from "@openclaw/ai/transports";
-export { projectCopilotRequestFacts } from "@openclaw/ai/internal/shared";
+export { applyCompletionsAnthropicCacheControl } from "@carapace/ai/transports";
+export { projectCopilotRequestFacts } from "@carapace/ai/internal/shared";

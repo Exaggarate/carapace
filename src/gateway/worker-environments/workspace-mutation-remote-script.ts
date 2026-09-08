@@ -75,7 +75,7 @@ if (
 }
 const receiver = childProcess.spawn(
   "sh",
-  ["-c", 'IFS= read -r gate <&3 && [ "$gate" = open ] && exec rsync "$@"', "openclaw-rsync", ...receiverArgs],
+  ["-c", 'IFS= read -r gate <&3 && [ "$gate" = open ] && exec rsync "$@"', "carapace-rsync", ...receiverArgs],
   { detached: true, stdio: ["inherit", "inherit", "inherit", "pipe"] },
 );
 if (!Number.isSafeInteger(receiver.pid) || receiver.pid < 1) {

@@ -1,5 +1,5 @@
 // Question delivery keeps its requested generation across a shared reply queue.
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
+import { questionGatewayRuntime } from "carapace/plugin-sdk/question-gateway-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { Question } from "../../packages/gateway-protocol/src/index.js";
 import { deliverAgentHarnessQuestionPrompt } from "../agents/harness/user-input-bridge.js";

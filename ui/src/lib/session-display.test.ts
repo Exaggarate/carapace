@@ -45,7 +45,7 @@ describe("resolveSessionDisplayName", () => {
     expect(
       resolveSessionDisplayName("agent:main:telegram:direct:42", {
         label: "Alice",
-        displayName: "openclaw-tui",
+        displayName: "carapace-tui",
       }),
     ).toBe("Alice");
     expect(
@@ -172,7 +172,7 @@ describe("resolveSessionDisplayName", () => {
   it("names unnamed work sessions after their checkout", () => {
     expect(
       resolveSessionDisplayName("agent:main:dashboard:uuid", {
-        worktree: { branch: "openclaw/wt-3f2a", repoRoot: "/Users/dev/Projects/clawdbot" },
+        worktree: { branch: "carapace/wt-3f2a", repoRoot: "/Users/dev/Projects/clawdbot" },
       }),
     ).toBe("clawdbot ⎇ wt-3f2a");
   });
@@ -196,7 +196,7 @@ describe("resolveSessionDisplayName", () => {
     ).toBe("Release room");
     expect(
       resolveSessionDisplayName("agent:main:dashboard:uuid", {
-        worktree: { branch: "openclaw/wt-3f2a", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "carapace/wt-3f2a", repoRoot: "/repo/clawdbot" },
         derivedTitle: "Quarterly launch plan",
       }),
     ).toBe("clawdbot ⎇ wt-3f2a");
@@ -258,14 +258,14 @@ describe("resolveSessionWorkSubtitle", () => {
     expect(
       resolveSessionWorkSubtitle({
         repository: {
-          url: "https://github.com/openclaw/openclaw.git",
-          branch: "openclaw/cloud-task",
+          url: "https://github.com/Exaggarate/carapace.git",
+          branch: "carapace/cloud-task",
         },
       }),
-    ).toBe("openclaw ⎇ cloud-task");
+    ).toBe("carapace ⎇ cloud-task");
     expect(
       resolveSessionWorkSubtitle({
-        worktree: { branch: "openclaw/session-ui", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "carapace/session-ui", repoRoot: "/repo/clawdbot" },
       }),
     ).toBe("clawdbot ⎇ session-ui");
     expect(
@@ -284,7 +284,7 @@ describe("resolveSessionWorkSubtitle", () => {
     ).toBe("…0357");
     expect(
       resolveSessionWorkSubtitle({
-        worktree: { branch: "openclaw/wt-1", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "carapace/wt-1", repoRoot: "/repo/clawdbot" },
         execNode: "11c38726acc6fac280357576c87acc6fac280357",
       }),
     ).toBe("clawdbot ⎇ wt-1 · …0357");
@@ -295,12 +295,12 @@ describe("resolveSessionWorkContext", () => {
   it("projects only repository or authoritative workspace facts", () => {
     expect(
       resolveSessionWorkContext({
-        worktree: { branch: "openclaw/session-ui", repoRoot: "/repo/openclaw" },
+        worktree: { branch: "carapace/session-ui", repoRoot: "/repo/carapace" },
       }),
     ).toEqual({
       kind: "project",
-      name: "openclaw",
-      path: "/repo/openclaw",
+      name: "carapace",
+      path: "/repo/carapace",
       branch: "session-ui",
     });
     expect(
@@ -318,7 +318,7 @@ describe("resolveSessionWorkContext", () => {
         execNode: "remote-node",
         execCwd: "/remote/workspace",
         spawnedWorkspaceDir: "/local/workspace",
-        worktree: { branch: "openclaw/local-branch", repoRoot: "/gateway/repo" },
+        worktree: { branch: "carapace/local-branch", repoRoot: "/gateway/repo" },
       }),
     ).toEqual({ kind: "workspace", name: "workspace", path: "/remote/workspace" });
     expect(resolveSessionWorkContext({ execCwd: "/stale/local-routing-cwd" })).toBeUndefined();

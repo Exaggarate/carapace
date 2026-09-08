@@ -37,13 +37,13 @@ export function applyManagedServiceEnvRenderPolicy(params: {
 }): void {
   const launchAgent =
     params.platform === "darwin" &&
-    Boolean(params.serviceEnvironment.OPENCLAW_LAUNCHD_LABEL?.trim());
+    Boolean(params.serviceEnvironment.CARAPACE_LAUNCHD_LABEL?.trim());
   writeManagedServiceEnvKeysToEnvironment(params.plan.environment, params.managedServiceEnvKeys);
-  if (params.plan.environment.OPENCLAW_SERVICE_MANAGED_ENV_KEYS) {
-    params.plan.environmentValueSources.OPENCLAW_SERVICE_MANAGED_ENV_KEYS = "inline";
+  if (params.plan.environment.CARAPACE_SERVICE_MANAGED_ENV_KEYS) {
+    params.plan.environmentValueSources.CARAPACE_SERVICE_MANAGED_ENV_KEYS = "inline";
   }
   const managedKeys = readManagedServiceEnvKeysFromEnvironment({
-    OPENCLAW_SERVICE_MANAGED_ENV_KEYS: params.managedServiceEnvKeys,
+    CARAPACE_SERVICE_MANAGED_ENV_KEYS: params.managedServiceEnvKeys,
   });
   if (managedKeys.size === 0) {
     return;

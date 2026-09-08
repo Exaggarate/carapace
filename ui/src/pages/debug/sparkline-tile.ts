@@ -1,7 +1,7 @@
 import { html, nothing, svg } from "lit";
 import { property, state as litState } from "lit/decorators.js";
 import { formatDurationCompact } from "../../lib/format.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 
 export type SparklineSample = { value: number; at: number };
 
@@ -21,7 +21,7 @@ function nextGradientId(): string {
 }
 
 /** Stat tile with an embedded area sparkline and pointer scrubbing. */
-class DebugSparklineTile extends OpenClawLightDomElement {
+class DebugSparklineTile extends CarapaceLightDomElement {
   @property() label = "";
   @property() sub = "";
   @property({ attribute: false }) samples: readonly SparklineSample[] = [];
@@ -168,6 +168,6 @@ class DebugSparklineTile extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-debug-sparkline")) {
-  customElements.define("openclaw-debug-sparkline", DebugSparklineTile);
+if (!customElements.get("carapace-debug-sparkline")) {
+  customElements.define("carapace-debug-sparkline", DebugSparklineTile);
 }

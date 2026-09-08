@@ -4,8 +4,8 @@ import { DatabaseSync } from "node:sqlite";
 import { gzipSync } from "node:zlib";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createDebugProxyCaptureReader } from "./store-readonly.js";
 
 const cleanupDirs: string[] = [];
@@ -15,11 +15,11 @@ afterEach(() => {
 });
 
 function makeStateEnv(prefix: string): NodeJS.ProcessEnv {
-  return { OPENCLAW_STATE_DIR: makeTempDir(cleanupDirs, prefix) };
+  return { CARAPACE_STATE_DIR: makeTempDir(cleanupDirs, prefix) };
 }
 
 function createCaptureDatabase(env: NodeJS.ProcessEnv, schemaVersion: number): string {
-  const databasePath = resolveOpenClawStateSqlitePath(env);
+  const databasePath = resolveCarapaceStateSqlitePath(env);
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const db = new DatabaseSync(databasePath);
   try {
@@ -75,7 +75,7 @@ function createCaptureDatabase(env: NodeJS.ProcessEnv, schemaVersion: number): s
       CREATE INDEX capture_events_flow_idx ON capture_events(flow_id, ts);
       INSERT INTO workspace_attestations VALUES ('workspace-1', 100, 200);
       INSERT INTO capture_sessions VALUES (
-        'session-1', 1, NULL, 'qa', 'openclaw', 'candidate', NULL
+        'session-1', 1, NULL, 'qa', 'carapace', 'candidate', NULL
       );
     `);
     db.prepare(
@@ -100,7 +100,7 @@ function createCaptureDatabase(env: NodeJS.ProcessEnv, schemaVersion: number): s
       1,
       "session-1",
       3,
-      "openclaw",
+      "carapace",
       "candidate",
       "https",
       "outbound",
@@ -147,7 +147,7 @@ describe("createDebugProxyCaptureReader", () => {
   it.each([3, 4, 5, 6])(
     "reads schema %s without changing its version, schema, or workspace attestations",
     (schemaVersion) => {
-      const env = makeStateEnv(`openclaw-proxy-reader-v${schemaVersion}-`);
+      const env = makeStateEnv(`carapace-proxy-reader-v${schemaVersion}-`);
       const databasePath = createCaptureDatabase(env, schemaVersion);
       const before = inspectDatabase(databasePath);
       const reader = createDebugProxyCaptureReader({ env });
@@ -166,9 +166,9 @@ describe("createDebugProxyCaptureReader", () => {
   );
 
   it("returns empty results for a missing database without creating state artifacts", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-missing-");
+    const env = makeStateEnv("carapace-proxy-reader-missing-");
     const reader = createDebugProxyCaptureReader({ env });
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const databasePath = resolveCarapaceStateSqlitePath(env);
 
     expect(reader.getSessionEvents("missing")).toEqual([]);
     expect(reader.readBlob("missing")).toBeNull();
@@ -177,7 +177,7 @@ describe("createDebugProxyCaptureReader", () => {
   });
 
   it("observes a database created after the reader", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-late-db-");
+    const env = makeStateEnv("carapace-proxy-reader-late-db-");
     const reader = createDebugProxyCaptureReader({ env });
     expect(reader.getSessionEvents("session-1")).toEqual([]);
 
@@ -188,7 +188,7 @@ describe("createDebugProxyCaptureReader", () => {
   });
 
   it("observes later committed WAL writes on subsequent calls", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-wal-");
+    const env = makeStateEnv("carapace-proxy-reader-wal-");
     const databasePath = createCaptureDatabase(env, 3);
     const writer = new DatabaseSync(databasePath);
     const reader = createDebugProxyCaptureReader({ env });
@@ -202,7 +202,7 @@ describe("createDebugProxyCaptureReader", () => {
              id, session_id, ts, source_scope, source_process, protocol, direction, kind, flow_id
            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
-        .run(2, "session-1", 4, "openclaw", "candidate", "https", "inbound", "response", "flow-1");
+        .run(2, "session-1", 4, "carapace", "candidate", "https", "inbound", "response", "flow-1");
 
       expect(reader.getSessionEvents("session-1").map((event) => event.id)).toEqual([2, 1]);
     } finally {
@@ -211,7 +211,7 @@ describe("createDebugProxyCaptureReader", () => {
   });
 
   it("projects exact camelCase keys with timestamp, id, and limit ordering", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-ordering-");
+    const env = makeStateEnv("carapace-proxy-reader-ordering-");
     const databasePath = createCaptureDatabase(env, 3);
     const writer = new DatabaseSync(databasePath);
     try {
@@ -226,7 +226,7 @@ describe("createDebugProxyCaptureReader", () => {
         2,
         "session-1",
         5,
-        "openclaw",
+        "carapace",
         "candidate",
         "https",
         "outbound",
@@ -249,7 +249,7 @@ describe("createDebugProxyCaptureReader", () => {
         3,
         "session-1",
         5,
-        "openclaw",
+        "carapace",
         "candidate",
         "https",
         "inbound",
@@ -272,7 +272,7 @@ describe("createDebugProxyCaptureReader", () => {
         4,
         "session-1",
         6,
-        "openclaw",
+        "carapace",
         "candidate",
         "https",
         "inbound",
@@ -302,7 +302,7 @@ describe("createDebugProxyCaptureReader", () => {
       id: 3,
       sessionId: "session-1",
       ts: 5,
-      sourceScope: "openclaw",
+      sourceScope: "carapace",
       sourceProcess: "candidate",
       protocol: "https",
       direction: "inbound",
@@ -324,21 +324,21 @@ describe("createDebugProxyCaptureReader", () => {
   });
 
   it("propagates newer schema errors", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-newer-");
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const env = makeStateEnv("carapace-proxy-reader-newer-");
+    const databasePath = resolveCarapaceStateSqlitePath(env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const db = new DatabaseSync(databasePath);
-    db.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};`);
+    db.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};`);
     db.close();
 
     expect(() => createDebugProxyCaptureReader({ env }).getSessionEvents("session-1")).toThrow(
-      `uses newer schema version ${OPENCLAW_STATE_SCHEMA_VERSION + 1}`,
+      `uses newer schema version ${CARAPACE_STATE_SCHEMA_VERSION + 1}`,
     );
   });
 
   it("propagates database corruption", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-corrupt-");
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const env = makeStateEnv("carapace-proxy-reader-corrupt-");
+    const databasePath = resolveCarapaceStateSqlitePath(env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     fs.writeFileSync(databasePath, "not a sqlite database");
 
@@ -346,8 +346,8 @@ describe("createDebugProxyCaptureReader", () => {
   });
 
   it("propagates capture query failures", () => {
-    const env = makeStateEnv("openclaw-proxy-reader-sql-");
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const env = makeStateEnv("carapace-proxy-reader-sql-");
+    const databasePath = resolveCarapaceStateSqlitePath(env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const db = new DatabaseSync(databasePath);
     db.exec("PRAGMA user_version = 3;");

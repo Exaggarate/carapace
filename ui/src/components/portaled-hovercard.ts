@@ -232,7 +232,7 @@ function mountPortaledHovercard(params: {
 }): () => void {
   // A modal drawer makes body siblings inert. Keep its card inside the same
   // dialog, then use the existing menu top layer to escape clipping and stacking.
-  const owner = params.anchor.closest("openclaw-modal-dialog") ?? document.body;
+  const owner = params.anchor.closest("carapace-modal-dialog") ?? document.body;
   owner.append(params.card);
   promoteToPopoverTopLayer(params.card);
   params.trigger.setAttribute("aria-controls", params.card.id);

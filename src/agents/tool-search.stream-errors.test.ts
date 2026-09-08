@@ -23,7 +23,7 @@ function createMockSpawnChild() {
 }
 
 vi.mock("node:child_process", async () => {
-  const { mockNodeBuiltinModule } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeBuiltinModule } = await import("carapace/plugin-sdk/test-node-mocks");
   return mockNodeBuiltinModule(
     () => vi.importActual<typeof import("node:child_process")>("node:child_process"),
     { spawn: vi.fn() as unknown as typeof import("node:child_process").spawn },

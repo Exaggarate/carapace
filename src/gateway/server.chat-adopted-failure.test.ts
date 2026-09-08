@@ -1,5 +1,5 @@
 import path from "node:path";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterAll, afterEach, beforeAll, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { clearConfigCache } from "../config/config.js";
@@ -33,7 +33,7 @@ afterEach(() => {
 
 it("reports an adopted pre-model failure as one visible failure over the Gateway WebSocket", async () => {
   testState.sessionStorePath = path.join(
-    temporaryDirectories.make("openclaw-adopted-failure-"),
+    temporaryDirectories.make("carapace-adopted-failure-"),
     "sessions.json",
   );
   await writeSessionStore({

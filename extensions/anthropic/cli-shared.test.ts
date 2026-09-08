@@ -1,5 +1,5 @@
 // Anthropic tests cover cli shared plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import {
@@ -35,7 +35,7 @@ describe("Claude CLI adapter equivalence", () => {
     "--setting-sources",
     "user",
     "--allowedTools",
-    "mcp__openclaw__*",
+    "mcp__carapace__*",
     "--disallowedTools",
     CLAUDE_CLI_DISALLOWED_TOOLS,
   ];
@@ -59,7 +59,7 @@ describe("Claude CLI adapter equivalence", () => {
   it("privately acknowledges isolated completion preparation", () => {
     const backend = buildAnthropicCliBackend();
     const prepared = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-8",
       isolatedCompletionPrompt: "TASK: return JSON",
@@ -247,7 +247,7 @@ describe("resolveClaudeCliExecutionArgs", () => {
     expect(argv).not.toContain("--disable-slash-commands");
   });
 
-  it("isolates OpenClaw from Claude user customizations while preserving exact MCP", () => {
+  it("isolates Carapace from Claude user customizations while preserving exact MCP", () => {
     expect(
       resolveClaudeCliExecutionArgs({
         workspaceDir: "/tmp",
@@ -289,24 +289,24 @@ describe("resolveClaudeCliExecutionArgs", () => {
           "--ide",
           "--strict-mcp-config",
           "--mcp-config",
-          "/tmp/openclaw-openclaw-mcp.json",
+          "/tmp/carapace-carapace-mcp.json",
           "--resume",
           "native-session",
           "--tools",
           "Bash,Edit",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__carapace__*",
           "--disallowedTools",
           "ScheduleWakeup,mcp__other__*",
         ],
-        toolAvailability: { native: [], openClaw: ["openclaw"] },
+        toolAvailability: { native: [], carapace: ["carapace"] },
       }),
     ).toEqual([
       "-p",
       "--output-format",
       "stream-json",
       "--mcp-config",
-      "/tmp/openclaw-openclaw-mcp.json",
+      "/tmp/carapace-carapace-mcp.json",
       "--resume",
       "native-session",
       "--setting-sources",
@@ -319,7 +319,7 @@ describe("resolveClaudeCliExecutionArgs", () => {
       "--tools",
       "",
       "--allowedTools",
-      "mcp__openclaw__openclaw",
+      "mcp__carapace__carapace",
       "--disallowedTools",
       "ScheduleWakeup,mcp__other__*",
     ]);
@@ -362,11 +362,11 @@ describe("resolveClaudeCliExecutionArgs", () => {
           "--tools",
           "Bash,Edit",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__carapace__*",
           "--disallowedTools",
           "mcp__other__*",
         ],
-        toolAvailability: { native: [], openClaw: [] },
+        toolAvailability: { native: [], carapace: [] },
       }),
     ).toEqual([
       "-p",
@@ -484,7 +484,7 @@ describe("resolveClaudeCliExecutionArgs", () => {
           "-p",
           "--output-format",
           "stream-json",
-          "--allowedTools=mcp__openclaw__*",
+          "--allowedTools=mcp__carapace__*",
           "--allowedTools",
           "Read",
           "Grep",
@@ -562,7 +562,7 @@ describe("normalizeClaudeBackendConfig", () => {
     expect(normalized.input).toBe("stdin");
   });
 
-  it("derives Claude bypass from OpenClaw YOLO policy and disables it for safer policy", () => {
+  it("derives Claude bypass from Carapace YOLO policy and disables it for safer policy", () => {
     expect(normalizeClaudeArgs(["-p"], { backendId: "claude-cli" })).toContain("bypassPermissions");
     expect(
       normalizeClaudeArgs(["-p"], {
@@ -578,7 +578,7 @@ describe("normalizeClaudeBackendConfig", () => {
     ).not.toContain("bypassPermissions");
   });
 
-  it("derives Claude bypass from per-agent OpenClaw exec policy", () => {
+  it("derives Claude bypass from per-agent Carapace exec policy", () => {
     expect(
       normalizeClaudeArgs(["-p"], {
         backendId: "claude-cli",
@@ -666,7 +666,7 @@ describe("normalizeClaudeBackendConfig", () => {
 
   it("passes system prompt on every turn (issue #80374 — systemPromptWhen must be 'always')", () => {
     // Before fix this was hardcoded to "first", which silently dropped updated
-    // OpenClaw system prompt context on resumed / compacted claude-cli sessions.
+    // Carapace system prompt context on resumed / compacted claude-cli sessions.
     const backend = buildAnthropicCliBackend();
     expect(backend.config.systemPromptWhen).toBe("always");
   });
@@ -830,7 +830,7 @@ describe("normalizeClaudeBackendConfig", () => {
 
     expect(
       backend.prepareExecution?.({
-        workspaceDir: "/tmp/openclaw-claude-cli",
+        workspaceDir: "/tmp/carapace-claude-cli",
         provider: "claude-cli",
         modelId: "claude-opus-4-7",
         contextTokenBudget: 100_000,
@@ -847,7 +847,7 @@ describe("normalizeClaudeBackendConfig", () => {
     const backend = buildAnthropicCliBackend();
 
     const prepared = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-7",
       authProfileId: "anthropic:claude-cli",
@@ -880,7 +880,7 @@ describe("normalizeClaudeBackendConfig", () => {
     expect(prepared.secretInput.createData().toString("utf8")).toBe("selected-access-token");
 
     const sameToken = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-7",
       authCredential: {
@@ -892,7 +892,7 @@ describe("normalizeClaudeBackendConfig", () => {
       authCredential: { type: "token"; provider: string; token: string };
     }) as ClaudePreparedExecutionWithSecret;
     const rotatedToken = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-7",
       authCredential: {
@@ -919,7 +919,7 @@ describe("normalizeClaudeBackendConfig", () => {
 
     expect(() =>
       backend.prepareExecution?.({
-        workspaceDir: "/tmp/openclaw-claude-cli",
+        workspaceDir: "/tmp/carapace-claude-cli",
         provider: "claude-cli",
         modelId: "claude-opus-4-7",
         authProfileId: "anthropic:claude-cli",
@@ -946,7 +946,7 @@ describe("normalizeClaudeBackendConfig", () => {
     const backend = buildAnthropicCliBackend();
 
     const prepared = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-7",
       executionMode: "agent",
@@ -962,7 +962,7 @@ describe("normalizeClaudeBackendConfig", () => {
     const backend = buildAnthropicCliBackend();
 
     const prepared = backend.prepareExecution?.({
-      workspaceDir: "/tmp/openclaw-claude-cli",
+      workspaceDir: "/tmp/carapace-claude-cli",
       provider: "claude-cli",
       modelId: "claude-opus-4-7",
       authProfileId: "claude-cli:api",

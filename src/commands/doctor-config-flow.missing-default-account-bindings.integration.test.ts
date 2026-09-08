@@ -1,7 +1,7 @@
 // Doctor default-account integration tests cover binding warnings across realistic config shapes.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAccountListHelpers } from "../channels/plugins/account-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveAgentRoute } from "../routing/resolve-route.js";
 import {
   collectMissingDefaultAccountBindingWarnings,
@@ -33,7 +33,7 @@ describe("doctor missing default account binding warning", () => {
         },
       },
       bindings: [{ agentId: "ops", match: { channel: "telegram" } }],
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(warnings).toEqual([
       '- channels.telegram: accounts.default is missing and no valid account-scoped binding exists for configured accounts (alerts, work). Channel-only bindings (no accountId) match only default. Add bindings[].match.accountId for one of these accounts (or "*"), or add channels.telegram.accounts.default.',
@@ -50,7 +50,7 @@ describe("doctor missing default account binding warning", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(warnings).toEqual([
       "- channels.telegram: multiple accounts are configured but no explicit default is set. Set channels.telegram.defaultAccount or add channels.telegram.accounts.default to avoid fallback routing.",
@@ -68,7 +68,7 @@ describe("doctor missing default account binding warning", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(warnings).toEqual([
       '- channels.telegram: defaultAccount is set to "missing" but does not match configured accounts (alerts, work). Set channels.telegram.defaultAccount to one of these accounts, or add channels.telegram.accounts.default to avoid fallback routing.',
@@ -78,11 +78,11 @@ describe("doctor missing default account binding warning", () => {
 
 type OwnershipRepairCase = {
   name: string;
-  agents?: OpenClawConfig["agents"];
+  agents?: CarapaceConfig["agents"];
   envToken?: boolean;
-  discord: NonNullable<OpenClawConfig["channels"]>["discord"];
-  bindings: NonNullable<OpenClawConfig["bindings"]>;
-  added: NonNullable<OpenClawConfig["bindings"]>;
+  discord: NonNullable<CarapaceConfig["channels"]>["discord"];
+  bindings: NonNullable<CarapaceConfig["bindings"]>;
+  added: NonNullable<CarapaceConfig["bindings"]>;
 };
 
 describe("doctor channel account ownership repair", () => {
@@ -208,7 +208,7 @@ describe("doctor channel account ownership repair", () => {
       "DISCORD_BOT_TOKEN",
       "envToken" in testCase && testCase.envToken ? "synthetic-discord-token" : undefined,
     );
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: testCase.agents ?? { ownership: "explicit", entries: { ops: {}, research: {} } },
       channels: { discord },
       bindings,

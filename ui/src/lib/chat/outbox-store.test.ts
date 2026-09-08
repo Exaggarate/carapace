@@ -105,7 +105,7 @@ describe("stored outbox summaries", () => {
   it("normalizes an unchanged projection once and refreshes after an external write", () => {
     const unsubscribe = subscribeStoredChatOutboxChanges(() => undefined);
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({ version: 4, recovery: {}, gatewayOwner: gatewayUrl, sessions: {} }),
@@ -140,7 +140,7 @@ describe("stored outbox summaries", () => {
   it.each([1, 2])("refreshes a retained v%i projection after an external write", (version) => {
     const unsubscribe = subscribeStoredChatOutboxChanges(() => undefined);
     const gatewayUrl = "ws://gateway.test/control";
-    const legacyKey = `openclaw.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
+    const legacyKey = `carapace.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
     const stored = (ids: string[]) =>
       JSON.stringify({
         version,
@@ -213,7 +213,7 @@ describe("stored outbox summaries", () => {
     const gatewayUrls = ["ws://first.test/control", "ws://second.test/control"];
     for (const gatewayUrl of gatewayUrls) {
       sessionStorage.setItem(
-        `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
+        `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
         JSON.stringify({
           version: 4,
           recovery: {},
@@ -265,7 +265,7 @@ describe("stored outbox summaries", () => {
 
   it("keeps the exact captured scope when sessionStorage retirement fails", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -308,7 +308,7 @@ describe("stored outbox summaries", () => {
 
   it("retires a batch with one write and notification while preserving newer replacements", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -428,7 +428,7 @@ describe("stored outbox summaries", () => {
   ])("queries draft and attention snapshots for $name", ({ state, storedKey, present, absent }) => {
     const gatewayUrl = "ws://gateway.test/control";
     sessionStorage.setItem(
-      `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
+      `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
       JSON.stringify({
         version: 4,
         recovery: {},
@@ -477,17 +477,17 @@ describe("stored outbox summaries", () => {
     expect(addEventListener).toHaveBeenCalledWith("storage", expect.any(Function));
 
     window.dispatchEvent(
-      new StorageEvent("storage", { key: "openclaw.control.chatComposer.v4:gateway" }),
+      new StorageEvent("storage", { key: "carapace.control.chatComposer.v4:gateway" }),
     );
     expect(firstListener).toHaveBeenCalledTimes(1);
     expect(secondListener).toHaveBeenCalledTimes(1);
 
-    window.dispatchEvent(new StorageEvent("storage", { key: "openclaw.control.settings.v1" }));
+    window.dispatchEvent(new StorageEvent("storage", { key: "carapace.control.settings.v1" }));
     expect(firstListener).toHaveBeenCalledTimes(1);
     expect(secondListener).toHaveBeenCalledTimes(1);
 
     window.dispatchEvent(
-      new StorageEvent("storage", { key: "openclaw.control.chatComposer.v1:gateway" }),
+      new StorageEvent("storage", { key: "carapace.control.chatComposer.v1:gateway" }),
     );
     expect(firstListener).toHaveBeenCalledTimes(2);
     expect(secondListener).toHaveBeenCalledTimes(2);
@@ -501,7 +501,7 @@ describe("stored outbox summaries", () => {
 
   it("routes shipped bare-main rows to the known default agent", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const legacyKey = `openclaw.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
+    const legacyKey = `carapace.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       legacyKey,
       JSON.stringify({
@@ -529,7 +529,7 @@ describe("stored outbox summaries", () => {
 
   it("rejects a v2 store owned by another gateway", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -559,7 +559,7 @@ describe("stored outbox summaries", () => {
   it("deduplicates item ids within a scope, not across scopes", () => {
     const gatewayUrl = "ws://gateway.test/control";
     sessionStorage.setItem(
-      `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
+      `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
       JSON.stringify({
         version: 4,
         recovery: {},
@@ -591,7 +591,7 @@ describe("stored outbox summaries", () => {
       "waiting-reconnect",
     ] as const;
     sessionStorage.setItem(
-      `openclaw.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
+      `carapace.control.chatComposer.v4:${encodeURIComponent(gatewayUrl)}`,
       JSON.stringify({
         version: 4,
         recovery: {},
@@ -653,7 +653,7 @@ describe("stored outbox summaries", () => {
 
   it("derives badges and replay from the same migrated durable queue", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const legacyKey = `openclaw.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
+    const legacyKey = `carapace.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       legacyKey,
       JSON.stringify({

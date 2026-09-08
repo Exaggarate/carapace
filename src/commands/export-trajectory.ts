@@ -1,6 +1,6 @@
 /** CLI command for exporting a session transcript as a trajectory artifact. */
 import path from "node:path";
-import { readNonBlankString, readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readNonBlankString, readStringValue } from "@carapace/normalization-core/string-coerce";
 import { resolveConfiguredAgentId } from "../agents/agent-scope-config.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { ExpectedCliError } from "../cli/failure-output.js";
@@ -117,7 +117,7 @@ export async function exportTrajectoryCommand(
   const sessionKey = resolvedOpts.sessionKey?.trim();
   if (!sessionKey) {
     throwTrajectoryExportError(
-      `--session-key is required. Run ${formatCliCommand("openclaw sessions")} to choose a session.`,
+      `--session-key is required. Run ${formatCliCommand("carapace sessions")} to choose a session.`,
     );
   }
   const requestedAgent = resolvedOpts.agent?.trim();
@@ -157,7 +157,7 @@ export async function exportTrajectoryCommand(
   });
   if (!entry?.sessionId) {
     throwTrajectoryExportError(
-      `Session not found: ${sessionKey}. Run ${formatCliCommand("openclaw sessions")} to see available sessions.`,
+      `Session not found: ${sessionKey}. Run ${formatCliCommand("carapace sessions")} to see available sessions.`,
     );
   }
 

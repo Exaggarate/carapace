@@ -2,10 +2,10 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ArchiveLimitError } from "openclaw/plugin-sdk/archive";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
-import { root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+import { ArchiveLimitError } from "carapace/plugin-sdk/archive";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { runCommandBuffered } from "carapace/plugin-sdk/process-runtime";
+import { root as fsRoot } from "carapace/plugin-sdk/security-runtime";
 import { inspectDirFetchArchive } from "../shared/dir-fetch-archive.js";
 import {
   DIR_FETCH_DEFAULT_MAX_BYTES,

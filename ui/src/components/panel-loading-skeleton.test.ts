@@ -25,7 +25,7 @@ afterEach(() => {
 describe("panel loading skeleton", () => {
   it("keeps the shadow shimmer primitive declaration-identical to base.css", () => {
     const component = customElements.get(
-      "openclaw-panel-loading-skeleton",
+      "carapace-panel-loading-skeleton",
     ) as CustomElementConstructor & {
       styles: CSSResult | CSSResult[];
     };
@@ -72,7 +72,7 @@ describe("panel loading skeleton", () => {
     const mount = document.body.appendChild(document.createElement("div"));
     render(html`${renderPanelLoadingSkeleton(variant, `Loading ${variant}`)}`, mount);
 
-    const skeleton = mount.querySelector<HTMLElement>("openclaw-panel-loading-skeleton");
+    const skeleton = mount.querySelector<HTMLElement>("carapace-panel-loading-skeleton");
     expect(skeleton).toBeInstanceOf(HTMLElement);
     await (skeleton as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
     expect(skeleton?.dataset.panelSkeleton).toBe(variant);
@@ -85,7 +85,7 @@ describe("panel loading skeleton", () => {
     const mount = document.body.appendChild(document.createElement("div"));
     render(html`${renderPanelLoadingSkeleton("terminal", "Loading sessions", true)}`, mount);
 
-    const skeleton = mount.querySelector<HTMLElement>("openclaw-panel-loading-skeleton");
+    const skeleton = mount.querySelector<HTMLElement>("carapace-panel-loading-skeleton");
     await (skeleton as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
     expect(skeleton?.hasAttribute("compact")).toBe(true);
   });
@@ -94,7 +94,7 @@ describe("panel loading skeleton", () => {
     const mount = document.body.appendChild(document.createElement("div"));
     render(html`${renderPanelLoadingSkeleton("desktop", "Connecting", false, true)}`, mount);
 
-    const skeleton = mount.querySelector<HTMLElement>("openclaw-panel-loading-skeleton");
+    const skeleton = mount.querySelector<HTMLElement>("carapace-panel-loading-skeleton");
     await (skeleton as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
     expect(skeleton?.hasAttribute("overlay")).toBe(true);
   });

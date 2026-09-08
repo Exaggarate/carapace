@@ -1,7 +1,7 @@
 /**
  * Checks app availability and enforces restricted MCP surfaces before a turn.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,
   unsubscribeCodexThreadBestEffort,

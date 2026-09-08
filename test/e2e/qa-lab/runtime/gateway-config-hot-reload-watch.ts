@@ -12,7 +12,7 @@ import {
   type ConnectParams,
 } from "../../../../packages/gateway-protocol/src/index.js";
 import type { DevicePairSetupCodeResult } from "../../../../packages/gateway-protocol/src/schema/devices.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import {
   loadOrCreateDeviceIdentity,
   publicKeyRawBase64UrlFromPem,
@@ -52,14 +52,14 @@ export async function proveHotReloadWatchPolicy({
   await proveGroup(PREFIX, async () => {
     assert(gateway.baseUrl && gateway.wsUrl, "Live Gateway URLs are required");
     const baseUrl = `${gateway.baseUrl}/api/nodes/watch`;
-    const original = (await rpc<{ config: OpenClawConfig }>("config.get")).config.gateway?.nodes
+    const original = (await rpc<{ config: CarapaceConfig }>("config.get")).config.gateway?.nodes
       ?.commands;
     const allow = [...new Set([...(original?.allow ?? []), APPROVED_COMMAND, UNAPPROVED_COMMAND])];
     const deny = (original?.deny ?? []).filter(
       (command) => command !== APPROVED_COMMAND && command !== UNAPPROVED_COMMAND,
     );
     const identity = loadOrCreateDeviceIdentity({
-      path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+      path: path.join(temporaryRoot, "state/carapace.sqlite"),
       identityKey: "runtime-policy-watch",
     });
     let connection: WatchConnection | undefined;

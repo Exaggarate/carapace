@@ -29,7 +29,7 @@ export function makePluginMetadataIndex(pluginId = "demo"): InstalledPluginIndex
     plugins: [
       {
         pluginId,
-        manifestPath: `${rootDir}/openclaw.plugin.json`,
+        manifestPath: `${rootDir}/carapace.plugin.json`,
         manifestHash: `${pluginId}-manifest`,
         rootDir,
         origin: "global",
@@ -57,7 +57,7 @@ export function makePluginMetadataManifestRegistry(pluginId = "demo"): PluginMan
     commandAliases: [{ name: `${pluginId}-command` }],
     rootDir: `/plugins/${pluginId}`,
     source: `/plugins/${pluginId}/index.js`,
-    manifestPath: `/plugins/${pluginId}/openclaw.plugin.json`,
+    manifestPath: `/plugins/${pluginId}/carapace.plugin.json`,
     origin: "global",
   };
   return { plugins: [plugin], diagnostics: [] };

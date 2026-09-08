@@ -2,7 +2,7 @@
  * Shared helpers for bash exec/process tools.
  * Owns output slicing, environment coercion, and compact session labels.
  */
-import { parseStrictInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictInteger } from "@carapace/normalization-core/number-coercion";
 import { sliceUtf16Safe } from "../utils.js";
 import type {
   SandboxBackendExecSpec,

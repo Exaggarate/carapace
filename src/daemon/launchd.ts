@@ -20,9 +20,9 @@ export {
 export { resolveLaunchAgentPlistPath } from "./launchd-service-files.js";
 export { parkCurrentLaunchAgentForMaintenance, stopLaunchAgent } from "./launchd-stop.js";
 export {
-  disableCurrentOpenClawUpdateLaunchdJob,
-  disableOpenClawUpdateLaunchdJob,
-  findStaleOpenClawUpdateLaunchdJobs,
-  parseLaunchctlListOpenClawUpdateJobs,
-  type StaleOpenClawUpdateLaunchdJob,
+  disableCurrentCarapaceUpdateLaunchdJob,
+  disableCarapaceUpdateLaunchdJob,
+  findStaleCarapaceUpdateLaunchdJobs,
+  parseLaunchctlListCarapaceUpdateJobs,
+  type StaleCarapaceUpdateLaunchdJob,
 } from "./launchd-update-jobs.js";

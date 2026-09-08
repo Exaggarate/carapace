@@ -1,11 +1,11 @@
 // Line tests cover which channels the bundled /card registration is offered on.
-import type { OpenClawPluginCommandDefinition } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { CarapacePluginCommandDefinition } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { describe, expect, it } from "vitest";
 import lineEntry from "./index.js";
 
-function registeredCardCommand(): OpenClawPluginCommandDefinition {
-  const commands: OpenClawPluginCommandDefinition[] = [];
+function registeredCardCommand(): CarapacePluginCommandDefinition {
+  const commands: CarapacePluginCommandDefinition[] = [];
   lineEntry.register(
     createTestPluginApi({
       // Exercise the shipped registration without loading the full channel runtime.

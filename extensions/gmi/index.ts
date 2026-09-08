@@ -1,9 +1,9 @@
-// Gmi plugin entrypoint registers its OpenClaw integration.
-import { readConfiguredProviderCatalogEntries } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+// Gmi plugin entrypoint registers its Carapace integration.
+import { readConfiguredProviderCatalogEntries } from "carapace/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "carapace/plugin-sdk/provider-model-shared";
+import { buildProviderToolCompatFamilyHooks } from "carapace/plugin-sdk/provider-tools";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const PROVIDER_ID = "gmi";
 

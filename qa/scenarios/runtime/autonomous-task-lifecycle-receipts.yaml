@@ -6,7 +6,7 @@ scenario:
   coverage:
     primary:
       - gateway.identity-and-presence-apis
-      - automation.openclaw-tasks-flow
+      - automation.carapace-tasks-flow
   objective: Verify exact-bound cron, task, and flow owner lifecycle rows are explained without generic decision-fact copies.
   successCriteria:
     - A mapped hook transform suppression returns HTTP 204 before admission and creates no execution identity.

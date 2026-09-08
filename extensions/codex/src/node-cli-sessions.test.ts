@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import manifest from "../openclaw.plugin.json" with { type: "json" };
+import manifest from "../carapace.plugin.json" with { type: "json" };
 import {
   createCodexCliSessionNodeHostCommands,
   createCodexCliSessionNodeInvokePolicies,
@@ -15,13 +15,13 @@ import {
 const CODEX_CLI_SESSIONS_LIST_COMMAND = "codex.cli.sessions.list";
 
 type RunCommandBuffered =
-  (typeof import("openclaw/plugin-sdk/process-runtime"))["runCommandBuffered"];
+  (typeof import("carapace/plugin-sdk/process-runtime"))["runCommandBuffered"];
 const processRuntimeMocks = vi.hoisted(() => ({
   runCommandBuffered: vi.fn<RunCommandBuffered>(),
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>()),
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>()),
   runCommandBuffered: processRuntimeMocks.runCommandBuffered,
 }));
 
@@ -31,7 +31,7 @@ let previousCodexHome: string | undefined;
 describe("codex cli node sessions", () => {
   beforeEach(async () => {
     processRuntimeMocks.runCommandBuffered.mockReset();
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-cli-sessions-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-cli-sessions-"));
     previousCodexHome = process.env.CODEX_HOME;
     process.env.CODEX_HOME = tempDir;
   });
@@ -110,10 +110,10 @@ describe("codex cli node sessions", () => {
       };
     });
 
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(tempDir, "openclaw.json"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(tempDir, "carapace.json"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
     const { createPluginRegistry, createPluginRecord, createPluginRuntimeMock } =
-      await import("openclaw/plugin-sdk/plugin-test-runtime");
+      await import("carapace/plugin-sdk/plugin-test-runtime");
     const config = {
       plugins: {
         entries: { codex: { enabled: true, config: { sessionCatalog: { enabled: false } } } },

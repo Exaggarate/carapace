@@ -1,5 +1,5 @@
 /** Channel Stop initiates native and ACP cancellation independently of either drain. */
-import type { AcpRuntime } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntime } from "@carapace/acp-core/runtime/types";
 import { expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { getAcpSessionManager, testing as acpTesting } from "../../acp/control-plane/manager.js";

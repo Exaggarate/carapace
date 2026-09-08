@@ -68,15 +68,15 @@ suite.define(() => {
             config,
           },
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [
               {
                 name: "Release",
                 description: "Prepare a release",
                 source: "test",
-                filePath: "/tmp/openclaw-e2e/skills/release/SKILL.md",
-                baseDir: "/tmp/openclaw-e2e/skills/release",
+                filePath: "/tmp/carapace-e2e/skills/release/SKILL.md",
+                baseDir: "/tmp/carapace-e2e/skills/release",
                 skillKey: "release",
                 always: false,
                 disabled: false,

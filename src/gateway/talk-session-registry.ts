@@ -2,7 +2,7 @@
  * Process-local registry that lets Talk protocol methods resolve opaque
  * `sessionId` values to the concrete relay or managed-room backend.
  */
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import { createDeferredCore } from "../shared/deferred.js";
 import { resolveGlobalMap } from "../shared/global-singleton.js";
 import { formatError } from "./server-utils.js";
@@ -30,7 +30,7 @@ type UnifiedTalkSessionRecord =
     };
 
 const unifiedTalkSessions = resolveGlobalMap<string, UnifiedTalkSessionRecord>(
-  Symbol.for("openclaw.unifiedTalkSessions"),
+  Symbol.for("carapace.unifiedTalkSessions"),
   "close-and-restart",
 );
 type TalkConnectionCleanup = {
@@ -44,7 +44,7 @@ const talkConnectionCleanups = resolveGlobalMap<
   string,
   Map<TalkConnectionCleanupKind, TalkConnectionCleanup>
 >(
-  Symbol.for("openclaw.talkConnectionCleanups"),
+  Symbol.for("carapace.talkConnectionCleanups"),
   async (connections) => {
     const results = await Promise.allSettled(
       [...connections].flatMap(([connId, cleanups]) =>

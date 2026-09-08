@@ -1,12 +1,12 @@
 ---
-summary: "Step-by-step Fly.io deployment for OpenClaw with persistent storage and HTTPS"
+summary: "Step-by-step Fly.io deployment for Carapace with persistent storage and HTTPS"
 title: Fly.io
 read_when:
-  - Deploying OpenClaw on Fly.io
+  - Deploying Carapace on Fly.io
   - Setting up Fly volumes, secrets, and first-run config
 ---
 
-**Goal:** OpenClaw Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
+**Goal:** Carapace Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
 
 ## What you need
 
@@ -25,14 +25,14 @@ read_when:
 <Steps>
   <Step title="Create the Fly app">
     ```bash
-    git clone https://github.com/openclaw/openclaw.git
-    cd openclaw
+    git clone https://github.com/Exaggarate/carapace.git
+    cd carapace
 
     # pick your own name
-    fly apps create my-openclaw
+    fly apps create my-carapace
 
     # 1GB is usually enough
-    fly volumes create openclaw_data --size 1 --region iad
+    fly volumes create carapace_data --size 1 --region iad
     ```
 
     Choose a region close to you. Common options: `lhr` (London), `iad` (Virginia), `sjc` (San Jose).
@@ -43,7 +43,7 @@ read_when:
     Edit `fly.toml` to match your app name and requirements. The repo's tracked `fly.toml` is the public template shown below; `deploy/fly.private.toml` is the hardened, no-public-IP variant (see [Private deployment](#private-deployment-hardened)).
 
     ```toml
-    app = "my-openclaw"  # your app name
+    app = "my-carapace"  # your app name
     primary_region = "iad"
 
     [build]
@@ -51,8 +51,8 @@ read_when:
 
     [env]
       NODE_ENV = "production"
-      OPENCLAW_PREFER_PNPM = "1"
-      OPENCLAW_STATE_DIR = "/data"
+      CARAPACE_PREFER_PNPM = "1"
+      CARAPACE_STATE_DIR = "/data"
       NODE_OPTIONS = "--max-old-space-size=1536"
 
     [processes]
@@ -78,11 +78,11 @@ read_when:
       memory = "2048mb"
 
     [mounts]
-      source = "openclaw_data"
+      source = "carapace_data"
       destination = "/data"
     ```
 
-    The OpenClaw Docker image entrypoint is `tini`, running `node openclaw.mjs gateway` by default. Fly `[processes]` replaces the Docker `CMD` (here it runs `node dist/index.js gateway ...` directly, the same compiled entrypoint) without touching `ENTRYPOINT`, so the process still runs under `tini`.
+    The Carapace Docker image entrypoint is `tini`, running `node carapace.mjs gateway` by default. Fly `[processes]` replaces the Docker `CMD` (here it runs `node dist/index.js gateway ...` directly, the same compiled entrypoint) without touching `ENTRYPOINT`, so the process still runs under `tini`.
 
     **Key settings:**
 
@@ -90,17 +90,17 @@ read_when:
     | ------------------------------ | --------------------------------------------------------------------------- |
     | `--bind lan`                   | Binds to `0.0.0.0` so Fly's proxy can reach the gateway                     |
     | `--allow-unconfigured`         | Starts without a config file (you create one after)                        |
-    | `internal_port = 3000`         | Must match `--port 3000` (or `OPENCLAW_GATEWAY_PORT`) for Fly health checks |
+    | `internal_port = 3000`         | Must match `--port 3000` (or `CARAPACE_GATEWAY_PORT`) for Fly health checks |
     | `path = "/startupz"`          | Admits traffic after Gateway startup finishes, independent of channel health |
     | `memory = "2048mb"`            | 512MB is too small; 2GB recommended                                         |
-    | `OPENCLAW_STATE_DIR = "/data"` | Persists state on the volume                                                |
+    | `CARAPACE_STATE_DIR = "/data"` | Persists state on the volume                                                |
 
   </Step>
 
   <Step title="Set secrets">
     ```bash
     # required: gateway auth token for non-loopback binding
-    fly secrets set OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
+    fly secrets set CARAPACE_GATEWAY_TOKEN=$(openssl rand -hex 32)
 
     # model provider API keys
     fly secrets set ANTHROPIC_API_KEY=example-anthropic-key-not-real
@@ -113,9 +113,9 @@ read_when:
     fly secrets set DISCORD_BOT_TOKEN=example-discord-bot-token
     ```
 
-    Non-loopback binds (`--bind lan`) require a valid gateway auth path. This example uses `OPENCLAW_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback trusted-proxy deployment also satisfy the requirement. See [Secrets management](/gateway/secrets) for the SecretRef contract.
+    Non-loopback binds (`--bind lan`) require a valid gateway auth path. This example uses `CARAPACE_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback trusted-proxy deployment also satisfy the requirement. See [Secrets management](/gateway/secrets) for the SecretRef contract.
 
-    Treat these tokens like passwords. Prefer env vars/`fly secrets` over the config file for API keys and tokens so secrets stay out of `openclaw.json`.
+    Treat these tokens like passwords. Prefer env vars/`fly secrets` over the config file for API keys and tokens so secrets stay out of `carapace.json`.
 
   </Step>
 
@@ -144,7 +144,7 @@ read_when:
 
     ```bash
     mkdir -p /data
-    cat > /data/openclaw.json << 'EOF'
+    cat > /data/carapace.json << 'EOF'
     {
       "agents": {
         "defaults": {
@@ -189,7 +189,7 @@ read_when:
         "bind": "auto",
         "controlUi": {
           "allowedOrigins": [
-            "https://my-openclaw.fly.dev",
+            "https://my-carapace.fly.dev",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
           ]
@@ -200,9 +200,9 @@ read_when:
     EOF
     ```
 
-    With `OPENCLAW_STATE_DIR=/data`, the config path is `/data/openclaw.json`.
+    With `CARAPACE_STATE_DIR=/data`, the config path is `/data/carapace.json`.
 
-    Replace `https://my-openclaw.fly.dev` with your real Fly app origin. Gateway startup seeds local Control UI origins from the runtime `--bind` and `--port` values so first boot can proceed before config exists, but browser access through Fly still needs the exact HTTPS origin listed in `gateway.controlUi.allowedOrigins`.
+    Replace `https://my-carapace.fly.dev` with your real Fly app origin. Gateway startup seeds local Control UI origins from the runtime `--bind` and `--port` values so first boot can proceed before config exists, but browser access through Fly still needs the exact HTTPS origin listed in `gateway.controlUi.allowedOrigins`.
 
     The `channels.discord` block above enables Discord. Its token can come from either:
 
@@ -225,9 +225,9 @@ read_when:
     fly open
     ```
 
-    Or visit `https://my-openclaw.fly.dev/`.
+    Or visit `https://my-carapace.fly.dev/`.
 
-    Authenticate with the configured shared secret: the gateway token from `OPENCLAW_GATEWAY_TOKEN`, or your password if you switched to password auth.
+    Authenticate with the configured shared secret: the gateway token from `CARAPACE_GATEWAY_TOKEN`, or your password if you switched to password auth.
 
     ### Logs
 
@@ -257,7 +257,7 @@ The gateway is binding to `127.0.0.1` instead of `0.0.0.0`.
 
 Fly cannot reach the gateway on the configured port, or `/startupz` is still reporting startup work.
 
-**Fix:** ensure `internal_port` matches the gateway port (`--port 3000` or `OPENCLAW_GATEWAY_PORT=3000`), then inspect `fly logs` for the pending startup step.
+**Fix:** ensure `internal_port` matches the gateway port (`--port 3000` or `CARAPACE_GATEWAY_PORT=3000`), then inspect `fly logs` for the pending startup step.
 
 ### OOM / memory issues
 
@@ -282,8 +282,8 @@ fly machine update <machine-id> --vm-memory 2048 -y
 
 Gateway refuses to start with "already running" errors after a container restart.
 
-With `OPENCLAW_STATE_DIR=/data`, the lock tree lives under
-`/data/tmp/openclaw-<uid>` and persists with the volume. OpenClaw normally
+With `CARAPACE_STATE_DIR=/data`, the lock tree lives under
+`/data/tmp/carapace-<uid>` and persists with the volume. Carapace normally
 reclaims stale owners automatically. If startup continues to report an owner,
 first use `fly status` and `fly logs` to verify that no other machine or Gateway
 process is using the volume. Do not delete the lock tree while an owner may
@@ -292,12 +292,12 @@ and stale-recovery contract.
 
 ### Config not being read
 
-`--allow-unconfigured` only bypasses the startup guard. It does not create or repair `/data/openclaw.json`, so make sure your real config exists and includes `"gateway": { "mode": "local" }` for a normal local gateway start.
+`--allow-unconfigured` only bypasses the startup guard. It does not create or repair `/data/carapace.json`, so make sure your real config exists and includes `"gateway": { "mode": "local" }` for a normal local gateway start.
 
 Verify the config exists:
 
 ```bash
-fly ssh console --command "cat /data/openclaw.json"
+fly ssh console --command "cat /data/carapace.json"
 ```
 
 ### Writing config via SSH
@@ -306,24 +306,24 @@ fly ssh console --command "cat /data/openclaw.json"
 
 ```bash
 # echo + tee (pipe from local to remote)
-echo '{"your":"config"}' | fly ssh console -C "tee /data/openclaw.json"
+echo '{"your":"config"}' | fly ssh console -C "tee /data/carapace.json"
 
 # or sftp
 fly sftp shell
-> put /local/path/config.json /data/openclaw.json
+> put /local/path/config.json /data/carapace.json
 ```
 
 `fly sftp` may fail if the file already exists; delete first:
 
 ```bash
-fly ssh console --command "rm /data/openclaw.json"
+fly ssh console --command "rm /data/carapace.json"
 ```
 
 ### State not persisting
 
 If you lose auth profiles, channel/provider state, or sessions after a restart, the state dir is writing to the container filesystem instead of the volume.
 
-**Fix:** ensure `OPENCLAW_STATE_DIR=/data` is set in `fly.toml` and redeploy.
+**Fix:** ensure `CARAPACE_STATE_DIR=/data` is set in `fly.toml` and redeploy.
 
 ## Updating
 
@@ -334,7 +334,7 @@ fly status
 fly logs
 ```
 
-`git pull` + `fly deploy` is the supervised path here: it rebuilds the image from the Dockerfile, so the CLI/gateway version, the base OS image, and any Dockerfile changes all update together. `openclaw update` inside the running container is not the same operation, since the image ships as a Docker-built `dist/` tree with no `.git` checkout and no npm-managed global install for it to detect; see [Updating](/install/updating) for that flow on VM-style installs.
+`git pull` + `fly deploy` is the supervised path here: it rebuilds the image from the Dockerfile, so the CLI/gateway version, the base OS image, and any Dockerfile changes all update together. `carapace update` inside the running container is not the same operation, since the image ships as a Docker-built `dist/` tree with no `.git` checkout and no npm-managed global install for it to detect; see [Updating](/install/updating) for that flow on VM-style installs.
 
 ### Updating the machine command
 
@@ -373,17 +373,17 @@ Or convert an existing deployment:
 
 ```bash
 # list current IPs
-fly ips list -a my-openclaw
+fly ips list -a my-carapace
 
 # release public IPs
-fly ips release <public-ipv4> -a my-openclaw
-fly ips release <public-ipv6> -a my-openclaw
+fly ips release <public-ipv4> -a my-carapace
+fly ips release <public-ipv6> -a my-carapace
 
 # switch to the private config so future deploys do not re-allocate public IPs
 fly deploy -c deploy/fly.private.toml
 
 # allocate private-only IPv6
-fly ips allocate-v6 --private -a my-openclaw
+fly ips allocate-v6 --private -a my-carapace
 ```
 
 After this, `fly ips list` should show only a `private` type IP:
@@ -398,7 +398,7 @@ v6       fdaa:x:x:x:x::x      private          global
 **Option 1: local proxy (simplest)**
 
 ```bash
-fly proxy 3000:3000 -a my-openclaw
+fly proxy 3000:3000 -a my-carapace
 # open http://localhost:3000 in a browser
 ```
 
@@ -413,7 +413,7 @@ fly wireguard create
 **Option 3: SSH only**
 
 ```bash
-fly ssh console -a my-openclaw
+fly ssh console -a my-carapace
 ```
 
 ### Webhooks with private deployment
@@ -471,7 +471,7 @@ With the recommended config (`shared-cpu-2x`, 2GB RAM), expect roughly $10-15/mo
 
 - Set up messaging channels: [Channels](/channels)
 - Configure the Gateway: [Gateway configuration](/gateway/configuration)
-- Keep OpenClaw up to date: [Updating](/install/updating)
+- Keep Carapace up to date: [Updating](/install/updating)
 
 ## Related
 

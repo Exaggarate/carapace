@@ -59,11 +59,11 @@ export async function withRetentionFixture(
     ) => Promise<Awaited<ReturnType<typeof writeRetentionBuild>> & { target: string }>;
   }) => Promise<void>,
 ) {
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-retention-")));
+  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-retention-")));
   const state = path.join(root, "state");
   const cache = path.join(state, "cache", "control-ui-assets");
   try {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: state }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: state }, async () => {
       await fs.mkdir(cache, { recursive: true });
       await run({
         root,

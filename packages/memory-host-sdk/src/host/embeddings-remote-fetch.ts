@@ -1,6 +1,6 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { readEmbeddingVectors } from "./embedding-vectors.js";
-import type { SsrFPolicy } from "./openclaw-runtime-network.js";
+import type { SsrFPolicy } from "./carapace-runtime-network.js";
 import { postJson } from "./post-json.js";
 
 // Fetches and validates OpenAI-compatible embedding responses.

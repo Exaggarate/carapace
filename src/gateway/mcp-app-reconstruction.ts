@@ -1,6 +1,6 @@
 import { type CallToolResult, ContentBlockSchema } from "@modelcontextprotocol/sdk/types.js";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { BoardMcpAppDescriptor } from "../../packages/gateway-protocol/src/index.js";
 import {
   acquireSessionMcpRuntime,
@@ -13,13 +13,13 @@ import {
   getMcpAppViewLease,
   type McpAppViewLease,
 } from "../agents/mcp-ui-resource.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentIdFromSessionKey } from "../routing/session-key.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
 import { visitSessionMessagesAsync } from "./session-transcript-readers.js";
 import { loadGatewaySessionEntryReadOnly } from "./session-utils.js";
 
-const MCP_APP_RESTORE_IN_FLIGHT_KEY = Symbol.for("openclaw.mcpAppRestoreInFlight");
+const MCP_APP_RESTORE_IN_FLIGHT_KEY = Symbol.for("carapace.mcpAppRestoreInFlight");
 
 type McpAppDescriptor = {
   viewId: string;
@@ -246,7 +246,7 @@ function getRestoreInFlight(): Map<string, Promise<ReconstructionResult | undefi
 }
 
 async function reconstructMcpAppView(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   lookup: TranscriptLookup;
@@ -310,7 +310,7 @@ async function reconstructMcpAppView(params: {
 }
 
 async function restoreMcpAppViewOnce(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   viewId: string;
@@ -329,7 +329,7 @@ async function restoreMcpAppViewOnce(params: {
 }
 
 export async function mintMcpAppViewFromTranscript(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   descriptor: BoardMcpAppDescriptor;
@@ -351,7 +351,7 @@ export async function mintMcpAppViewFromTranscript(params: {
 }
 
 export async function restoreMcpAppView(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   viewId: string;

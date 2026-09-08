@@ -1,5 +1,5 @@
 /** Gateway config reads and owner-requested self-updates. */
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { Type } from "typebox";
 import { formatCommandOwnerHint } from "../../commands/doctor-command-owner.js";
 import { GatewayClientRequestError } from "../../gateway/client.js";
@@ -142,7 +142,7 @@ export function createGatewayTool(options?: {
           return jsonResult({
             ok: false,
             code: "owner_required",
-            message: `Only the OpenClaw owner can start an update from chat. ${hint}`,
+            message: `Only the Carapace owner can start an update from chat. ${hint}`,
           });
         }
         // Routing comes from the admitted caller, never model-authored destinations or credentials.

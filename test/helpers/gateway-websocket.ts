@@ -1,4 +1,4 @@
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { WebSocket } from "ws";
 import { runQaGatewayFixture } from "./qa-gateway-cleanup.js";
 

@@ -1,11 +1,11 @@
-import { ok } from "@openclaw/normalization-core/result";
+import { ok } from "@carapace/normalization-core/result";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../test/helpers/sqlite-statement-execution-counter.js";
 import {
-  isOpenClawStateDatabaseOpen,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  isCarapaceStateDatabaseOpen,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   closePluginStateDatabase,
   createPluginStateKeyedStore,
@@ -18,7 +18,7 @@ afterEach(() => resetPluginStateStoreForTests());
 
 describe("plugin state bulk reads", () => {
   it("bulk reads exact keys positionally with sync/async parity across reopen", async () => {
-    await withOpenClawTestState({ label: "plugin-state-bulk-0" }, async () => {
+    await withCarapaceTestState({ label: "plugin-state-bulk-0" }, async () => {
       const options = { namespace: "bulk", maxEntries: 20 };
       const sync = createPluginStateSyncKeyedStore<{ index: number }>("discord", options);
       const asyncStore = createPluginStateKeyedStore<{ index: number }>("discord", options);
@@ -57,16 +57,16 @@ describe("plugin state bulk reads", () => {
           duplicates[1]?.ok && duplicates[1].value,
         );
         if (connection > 0) {
-          expect(isOpenClawStateDatabaseOpen()).toBe(false);
+          expect(isCarapaceStateDatabaseOpen()).toBe(false);
         }
         closePluginStateDatabase();
       }
-      expect(isOpenClawStateDatabaseOpen()).toBe(false);
+      expect(isCarapaceStateDatabaseOpen()).toBe(false);
     });
   });
 
   it("bulk reads use fresh expiry and preserve corrupt JSON errors", async () => {
-    await withOpenClawTestState({ label: "plugin-state-bulk-1" }, async () => {
+    await withCarapaceTestState({ label: "plugin-state-bulk-1" }, async () => {
       const options = { namespace: "bulk-errors", maxEntries: 10 };
       const sync = createPluginStateSyncKeyedStore<number>("discord", options);
       const asyncStore = createPluginStateKeyedStore<number>("discord", options);
@@ -81,7 +81,7 @@ describe("plugin state bulk reads", () => {
           ok(undefined),
           ok(2),
         ]);
-        const { db } = openOpenClawStateDatabase();
+        const { db } = openCarapaceStateDatabase();
         db.prepare(
           "UPDATE plugin_state_entries SET value_json = ? WHERE namespace = ? AND entry_key = ?",
         ).run("invalid JSON", "bulk-errors", "long");
@@ -103,7 +103,7 @@ describe("plugin state bulk reads", () => {
   });
 
   it("bounds and validates every bulk key before reading, with one native query", async () => {
-    await withOpenClawTestState({ label: "plugin-state-bulk-2" }, async () => {
+    await withCarapaceTestState({ label: "plugin-state-bulk-2" }, async () => {
       const store = createPluginStateSyncKeyedStore<number>("discord", {
         namespace: "bulk-bounds",
         maxEntries: 10,
@@ -113,7 +113,7 @@ describe("plugin state bulk reads", () => {
         maxEntries: 10,
       });
       store.register("key", 1);
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       const reads = trackSqliteStatementExecutions(db, ["reads"], (sql) =>
         sql.startsWith("select ") && sql.includes('"plugin_state_entries"') ? "reads" : null,
       );

@@ -1,4 +1,4 @@
-import { preserveCompactionReplayWindow } from "@openclaw/ai/transports";
+import { preserveCompactionReplayWindow } from "@carapace/ai/transports";
 import { buildHierarchyReinforcementMessage } from "../../../auto-reply/handoff-summarizer.js";
 import { filterHeartbeatTranscriptArtifacts } from "../../../auto-reply/heartbeat-filter.js";
 import { resolveSessionStorePathCore } from "../../../config/sessions/paths.js";
@@ -6,7 +6,7 @@ import {
   listSessionEntriesReadOnly,
   updateSessionEntry,
 } from "../../../config/sessions/session-accessor.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
 import type { AssembleResult } from "../../../context-engine/types.js";
 import { resolveHeartbeatSummaryForAgent } from "../../../infra/heartbeat-summary.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../defaults.js";
@@ -213,7 +213,7 @@ export async function prepareEmbeddedAttemptHistory(
         sandboxed,
         modelId: attempt.modelId,
         maxOutputTokens: reserveTokens,
-        contextEngineHostSupport: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHostSupport: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
         providerId: attempt.provider,
         requestedModelId: attempt.requestedModelId,
         fallbackReason: attempt.fallbackReason,

@@ -28,9 +28,9 @@ import type {
 import { createCachedLazyValueGetter } from "./lazy-value.js";
 
 export type AnyAgentTool = import("../plugins/types.js").AnyAgentTool;
-export type OpenClawPluginApi = import("../plugins/types.js").OpenClawPluginApi;
-export type OpenClawPluginCommandDefinition =
-  import("../plugins/types.js").OpenClawPluginCommandDefinition;
+export type CarapacePluginApi = import("../plugins/types.js").CarapacePluginApi;
+export type CarapacePluginCommandDefinition =
+  import("../plugins/types.js").CarapacePluginCommandDefinition;
 export type PluginCommandContext = import("../plugins/types.js").PluginCommandContext;
 
 export type {
@@ -63,9 +63,9 @@ type DefineBundledChannelEntryOptions<TPlugin = ChannelPlugin> = {
   runtime?: BundledEntryModuleRef;
   accountInspect?: BundledEntryModuleRef;
   features?: BundledChannelEntryFeatures;
-  registerCliMetadata?: (api: OpenClawPluginApi) => void;
-  registerFull?: (api: OpenClawPluginApi) => void;
-  registerCapabilities?: (api: OpenClawPluginApi) => void;
+  registerCliMetadata?: (api: CarapacePluginApi) => void;
+  registerFull?: (api: CarapacePluginApi) => void;
+  registerCapabilities?: (api: CarapacePluginApi) => void;
 };
 
 type DefineBundledChannelSetupEntryOptions = {
@@ -79,14 +79,14 @@ type DefineBundledChannelSetupEntryOptions = {
    */
   legacyStateMigrations?: BundledEntryModuleRef;
   legacySessionSurface?: BundledEntryModuleRef;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: CarapacePluginApi) => void;
   features?: BundledChannelSetupEntryFeatures;
 };
 
 /** Feature flags exposed by bundled setup entries for optional migration/session surfaces. */
 export type BundledChannelSetupEntryFeatures = {
   /**
-   * @deprecated Declare doctorContract.stateMigrations in openclaw.plugin.json instead.
+   * @deprecated Declare doctorContract.stateMigrations in carapace.plugin.json instead.
    * Removal plan: remove the setup-entry adapter after the 2027.1 external-plugin migration window.
    */
   legacyStateMigrations?: boolean;
@@ -106,7 +106,7 @@ export type BundledChannelEntryContract<TPlugin = ChannelPlugin> = {
   description: string;
   configSchema: ChannelConfigSchema;
   features?: BundledChannelEntryFeatures;
-  register: (api: OpenClawPluginApi) => void;
+  register: (api: CarapacePluginApi) => void;
   loadChannelPlugin: (options?: BundledEntryModuleLoadOptions) => TPlugin;
   loadChannelOutbound?: (
     options?: BundledEntryModuleLoadOptions,
@@ -134,11 +134,11 @@ export type BundledChannelSetupEntryContract<TPlugin = ChannelPlugin> = {
     options?: BundledEntryModuleLoadOptions,
   ) => BundledChannelLegacySessionSurface;
   setChannelRuntime?: (runtime: BundledChannelRuntime) => void;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: CarapacePluginApi) => void;
   features?: BundledChannelSetupEntryFeatures;
 };
 
-const disableBundledEntrySourceFallbackEnv = "OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK";
+const disableBundledEntrySourceFallbackEnv = "CARAPACE_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK";
 
 function isBundledEntrySourceFallbackDisabled(value: string | undefined): boolean {
   // Presence-based disable is a shipped operator contract; canonical opt-in
@@ -387,7 +387,7 @@ function resolveBundledEntryModulePath(importMetaUrl: string, specifier: string)
 function getSourceModuleLoader(
   modulePath: string,
   options: BundledEntryModuleLoadOptions,
-  transformOpenClawDependencies = false,
+  transformCarapaceDependencies = false,
 ) {
   return getCachedPluginSourceModuleLoader({
     modulePath,
@@ -395,7 +395,7 @@ function getSourceModuleLoader(
     importerUrl: import.meta.url,
     preferBuiltDist: true,
     loaderFilename: import.meta.url,
-    transformOpenClawDependencies,
+    transformCarapaceDependencies,
     ...(options.createLoaderForTest ? { createLoader: options.createLoaderForTest } : {}),
   });
 }
@@ -560,7 +560,7 @@ export function defineBundledChannelEntry<TPlugin = ChannelPlugin>({
     ...(features || accountInspect
       ? { features: { ...features, ...(accountInspect ? { accountInspect: true } : {}) } }
       : {}),
-    register(api: OpenClawPluginApi) {
+    register(api: CarapacePluginApi) {
       if (api.registrationMode === "cli-metadata") {
         registerCliMetadata?.(api);
         return;

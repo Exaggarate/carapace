@@ -291,7 +291,7 @@ describe("Telegram QA transport adapter", () => {
       await adapter.sendInbound?.({
         conversation: { id: "logical-room", kind: "group" },
         senderId: "driver",
-        text: "@openclaw reply exactly: QA-MARKER",
+        text: "@carapace reply exactly: QA-MARKER",
       });
       expect(mocks.userbotSend).toHaveBeenCalledWith({
         text: "@sut_bot reply exactly: QA-MARKER",

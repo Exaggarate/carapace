@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import {
   cleanupPluginLoaderFixturesForTest,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   resetPluginLoaderTestStateForTest,
   useNoBundledPlugins,
   writePlugin,
@@ -19,7 +19,7 @@ function fixture(controlUi: unknown) {
     body: 'module.exports = { id: "native-ui", register() {} };',
   });
   fs.writeFileSync(
-    path.join(plugin.dir, "openclaw.plugin.json"),
+    path.join(plugin.dir, "carapace.plugin.json"),
     JSON.stringify({
       id: plugin.id,
       configSchema: { type: "object", additionalProperties: false },
@@ -36,7 +36,7 @@ describe("native Control UI manifest", () => {
       entry: "./dist/control-ui/index.js",
       styles: ["./dist/control-ui/theme.css", "dist/control-ui/theme.css"],
     });
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       workspaceDir: plugin.dir,
       config: { plugins: { load: { paths: [plugin.file] }, allow: [plugin.id] } },

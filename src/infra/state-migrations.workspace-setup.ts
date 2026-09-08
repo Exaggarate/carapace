@@ -16,7 +16,7 @@ import {
 import { listWorkspaceStateDirs } from "../agents/workspace-state-dirs.js";
 import { resolveWorkspaceStateIdentity } from "../agents/workspace-state-identity.js";
 import { resolveLegacyStateDirs } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "./errors.js";
 import { resolveUserPath } from "./home-dir.js";
 import { pathMayExistSync } from "./path-existence.js";
@@ -300,7 +300,7 @@ function addLegacyWorkspaceSources(params: {
 
 /** Detect retired workspace files only when an explicit Doctor flow opts in. */
 export function detectLegacyWorkspaceState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   stateDir: string;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
@@ -309,7 +309,7 @@ export function detectLegacyWorkspaceState(params: {
   if (params.doctorOnlyStateMigrations !== true) {
     return { sources: [], hasLegacy: false };
   }
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), CARAPACE_STATE_DIR: params.stateDir };
   const homedir = params.homedir ?? os.homedir;
   const byPath = new Map<string, LegacyWorkspaceStateSource>();
   const add = (source: LegacyWorkspaceStateSource) => {
@@ -362,7 +362,7 @@ function formatLegacyWorkspaceReadWarning(
 ): string {
   return formatDoctorStateRepairFailure(
     `Failed reading legacy workspace state at ${source.sourcePath}: ${formatErrorMessage(error)}`,
-    "Stop the Gateway. Restore this source or its .doctor-importing claim from a verified backup, or rename the unreadable source or claim with a .rejected-<timestamp> suffix to retain its bytes if its setup/attestation history can be discarded. Then rerun openclaw doctor --fix against the same state/config.",
+    "Stop the Gateway. Restore this source or its .doctor-importing claim from a verified backup, or rename the unreadable source or claim with a .rejected-<timestamp> suffix to retain its bytes if its setup/attestation history can be discarded. Then rerun carapace doctor --fix against the same state/config.",
   );
 }
 

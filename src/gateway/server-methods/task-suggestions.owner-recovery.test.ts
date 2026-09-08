@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { abandonTaskSuggestionAcceptance } from "../task-suggestion-registry.js";
 import { sessionCreateHandlers } from "./sessions-create.js";
 import { sessionDispatchHandlers } from "./sessions-dispatch.js";
@@ -29,20 +29,20 @@ beforeEach(async () => {
 afterEach(async () => {
   await dismissPendingTaskSuggestions();
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("task suggestion owner recovery", () => {
   it.each(["worktree", "local", "cloud", "session"] as const)(
     "keeps %s suggestions retryable when their owner is temporarily unavailable",
     async (mode) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey: SOURCE_SESSION_KEY },
           { sessionId: "source-session", updatedAt: 1 },
         );
         const taskId = await createSourceSuggestion();
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           agents: { entries: { other: {} } },
           cloudWorkers: { profiles: { primary: { provider: "test" } } },
         };

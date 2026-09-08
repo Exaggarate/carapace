@@ -1,12 +1,12 @@
-# OpenClaw Featherless AI Provider
+# Carapace Featherless AI Provider
 
-Official OpenClaw provider plugin for Featherless AI's OpenAI-compatible API.
+Official Carapace provider plugin for Featherless AI's OpenAI-compatible API.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/featherless-provider
-openclaw gateway restart
+carapace plugins install @carapace/featherless-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/featherless> for setup and configuration.
+See <../../docs/providers/featherless.md> for setup and configuration.

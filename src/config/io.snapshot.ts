@@ -1,7 +1,7 @@
 import { formatErrorMessage } from "../infra/errors.js";
 import { findStartupMaintenanceRequiredError } from "../infra/startup-maintenance-required.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
-import { withArtifactPreservingStateReads } from "../state/openclaw-state-db-readonly.js";
+import { withArtifactPreservingStateReads } from "../state/carapace-state-db-readonly.js";
 import {
   includeContributionOwnsAgentRoster,
   includeContributionOwnsBindings,
@@ -47,7 +47,7 @@ import {
 } from "./legacy.js";
 import { materializeRuntimeConfig } from "./materialize.js";
 import { ConfigMutationConflictError } from "./mutation-conflict.js";
-import type { ConfigFileSnapshot, LegacyConfigIssue, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, LegacyConfigIssue, CarapaceConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 type InternalReadOptions = {
@@ -55,8 +55,8 @@ type InternalReadOptions = {
   recoverSuspicious?: boolean;
   skipSuspiciousRecovery?: boolean;
   allowSuspiciousRecovery?: (
-    candidate: OpenClawConfig,
-    current: OpenClawConfig,
+    candidate: CarapaceConfig,
+    current: CarapaceConfig,
   ) => boolean | Promise<boolean>;
 };
 
@@ -110,7 +110,7 @@ export async function readConfigFileSnapshotInternal(
 
   let fallbackRaw: string | null = null;
   let fallbackParsed: unknown = {};
-  let fallbackSourceConfig: OpenClawConfig = {};
+  let fallbackSourceConfig: CarapaceConfig = {};
   let fallbackHash = hashConfigRaw(null);
   let fallbackEnvSnapshotForRestore: Record<string, string | undefined> | undefined;
   const includeFileHashesForWrite: Record<string, string> = {};
@@ -292,7 +292,7 @@ export async function readConfigFileSnapshotInternal(
       !containsConfigIncludeDirective(effectiveParsed)
     ) {
       const allowSuspiciousRecovery = options.allowSuspiciousRecovery;
-      let recoveryCandidate: OpenClawConfig | null = null;
+      let recoveryCandidate: CarapaceConfig | null = null;
       const recovery = await deps.measure("config.snapshot.read.recover-suspicious", () =>
         maybeRecoverSuspiciousConfigRead({
           deps,
@@ -560,7 +560,7 @@ export async function readBestEffortConfigSnapshotFromContext(
 
 export async function readSourceConfigBestEffortFromContext(
   context: ConfigIoContext,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const { deps, configPath } = context;
   maybeLoadDotEnvForConfig(deps.env);
   if (!deps.fs.existsSync(configPath)) {

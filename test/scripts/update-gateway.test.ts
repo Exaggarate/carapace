@@ -43,7 +43,7 @@ describe("source-server updater bootstrap", () => {
       ).map((branch) => ({ scenario, branch })),
     ),
   )("keeps checkout and restart boundaries for $scenario on $branch", ({ scenario, branch }) => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-server-bootstrap-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-server-bootstrap-"));
     const repo = join(root, "repo");
     const bin = join(root, "bin");
     const temp = join(root, "temp");
@@ -132,7 +132,7 @@ assert.deepEqual(JSON.parse(fs.readFileSync('package.json', 'utf8')), { private:
 assert.equal(fs.readFileSync('pnpm-workspace.yaml', 'utf8').trim(), 'packages: []');
 assert.deepEqual(fs.readdirSync('.').sort(), ['package.json', 'pnpm-workspace.yaml']);
 assert.equal(fs.readFileSync(process.env.TARGET + '/.git/HEAD', 'utf8'), 'b'.repeat(40));
-assert.equal(process.env.OPENCLAW_UPDATE_IN_PROGRESS, undefined);
+assert.equal(process.env.CARAPACE_UPDATE_IN_PROGRESS, undefined);
 NODE
         echo probe >> "$FIXTURE/steps"
         # A later remote-ref move must not change the probed commit's mutation target.
@@ -149,8 +149,8 @@ const fs = require('node:fs');
 const expected = process.env.SCENARIO === 'local-pin' ? 'pnpm@11.15.1' : process.env.TARGET_PIN;
 assert.equal(JSON.parse(fs.readFileSync('package.json', 'utf8')).packageManager, expected);
 const building = ['build', 'nested'].includes(process.argv[2]);
-assert.equal(process.env.OPENCLAW_UPDATE_IN_PROGRESS, building ? '1' : undefined, 'update runtime context must be scoped to the build and its children');
-assert.equal(process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD, process.env.SCENARIO === 'explicit-declarations' ? '0' : undefined, 'the caller owns the declaration override');
+assert.equal(process.env.CARAPACE_UPDATE_IN_PROGRESS, building ? '1' : undefined, 'update runtime context must be scoped to the build and its children');
+assert.equal(process.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD, process.env.SCENARIO === 'explicit-declarations' ? '0' : undefined, 'the caller owns the declaration override');
 NODE
       case "$1" in
         install) [[ "$2" == --frozen-lockfile ]]; echo install >> "$FIXTURE/steps"; [[ "$SCENARIO" != install-failure ]] || exit 42 ;;
@@ -190,9 +190,9 @@ NODE
           npm_config_workspace_dir: root,
           PNPM_CONFIG_LOCKFILE_DIR: root,
           pnpm_config_lockfile_dir: root,
-          OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: scenario === "explicit-declarations" ? "0" : undefined,
-          OPENCLAW_UPDATE_RESTART_CMD:
-            '[[ "$COREPACK_ENABLE_DOWNLOAD_PROMPT" == 1 && "$PATH" == "$FIXTURE/bin" && "$NPM_CONFIG_WORKSPACE_DIR" == "$FIXTURE" && "$npm_config_workspace_dir" == "$FIXTURE" && "$PNPM_CONFIG_LOCKFILE_DIR" == "$FIXTURE" && "$pnpm_config_lockfile_dir" == "$FIXTURE" && "${OPENCLAW_UPDATE_IN_PROGRESS+x}" != x ]] && echo restart >> "$FIXTURE/steps"',
+          CARAPACE_RUN_NODE_SKIP_DTS_BUILD: scenario === "explicit-declarations" ? "0" : undefined,
+          CARAPACE_UPDATE_RESTART_CMD:
+            '[[ "$COREPACK_ENABLE_DOWNLOAD_PROMPT" == 1 && "$PATH" == "$FIXTURE/bin" && "$NPM_CONFIG_WORKSPACE_DIR" == "$FIXTURE" && "$npm_config_workspace_dir" == "$FIXTURE" && "$PNPM_CONFIG_LOCKFILE_DIR" == "$FIXTURE" && "$pnpm_config_lockfile_dir" == "$FIXTURE" && "${CARAPACE_UPDATE_IN_PROGRESS+x}" != x ]] && echo restart >> "$FIXTURE/steps"',
         },
       });
       const preflightFailure = [

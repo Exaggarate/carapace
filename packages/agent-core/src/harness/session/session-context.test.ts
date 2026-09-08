@@ -1,4 +1,4 @@
-import type { AssistantMessage, ProviderReplayState } from "@openclaw/llm-core";
+import type { AssistantMessage, ProviderReplayState } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { findCutPoint } from "../compaction/compaction.js";
 import { convertToLlm } from "../messages.js";
@@ -144,7 +144,7 @@ describe("buildSessionContext", () => {
           id: "entry-1",
           parentId: "entry-0",
           timestamp,
-          customType: runtimeContextCarrier ? "openclaw.runtime-context" : "extension-context",
+          customType: runtimeContextCarrier ? "carapace.runtime-context" : "extension-context",
           content: "metadata ".repeat(100),
           display: false,
           details: { runtimeContextCarrier },
@@ -188,7 +188,7 @@ describe("buildSessionContext", () => {
   it("keeps display-only custom activity out of model input", () => {
     const activity = {
       role: "custom" as const,
-      customType: "openclaw.context-compaction",
+      customType: "carapace.context-compaction",
       content: `Context compacted ${"x".repeat(80_000)}`,
       display: true,
       excludeFromContext: true,
@@ -196,7 +196,7 @@ describe("buildSessionContext", () => {
     };
     const runtimeContext = {
       role: "custom" as const,
-      customType: "openclaw.runtime-context",
+      customType: "carapace.runtime-context",
       content: "Model-visible runtime context",
       display: false,
       details: { runtimeContextCarrier: true },
@@ -398,7 +398,7 @@ describe("buildSessionContext", () => {
         keptAssistant as AssistantMessage & {
           [key: symbol]: true | undefined;
         }
-      )[Symbol.for("openclaw.sessionHistoryPrelude")],
+      )[Symbol.for("carapace.sessionHistoryPrelude")],
     ).toBe(true);
   });
 

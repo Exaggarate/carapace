@@ -7,7 +7,7 @@ import {
   resolveDefaultAgentId,
   tryResolveLegacyCompatibilityAgentId,
 } from "../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RespondFn } from "./types.js";
 
 /**
@@ -16,7 +16,7 @@ import type { RespondFn } from "./types.js";
 export function resolveAgentIdOrRespondError(params: {
   rawAgentId: unknown;
   respond: RespondFn;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   normalize: (rawAgentId: unknown) => string | undefined;
 }) {
   const knownAgents = listAgentIds(params.cfg);

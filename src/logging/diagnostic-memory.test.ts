@@ -6,7 +6,7 @@ import {
   resetDiagnosticEventsForTest,
   type DiagnosticEventPayload,
 } from "../infra/diagnostic-events.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { emitDiagnosticMemorySample, resetDiagnosticMemoryForTest } from "./diagnostic-memory.js";
 import {
   readLatestDiagnosticStabilityBundleSync,
@@ -513,7 +513,7 @@ describe("diagnostic memory", () => {
   });
 
   it("does not write bundles when critical pressure is emitted", async () => {
-    const state = await createOpenClawTestState({ label: "memory-pressure" });
+    const state = await createCarapaceTestState({ label: "memory-pressure" });
     try {
       startDiagnosticStabilityRecorder();
       emitDiagnosticMemorySample({
@@ -615,7 +615,7 @@ describe("diagnostic memory", () => {
     expect(records.at(-1)?.message).toContain("rssBytes=2012905472");
     expect(records.at(-1)?.message).toContain("heapUsedBytes=1307038712");
     expect(records.at(-1)?.message).toContain(
-      "nextStep=run openclaw gateway status --deep and openclaw gateway diagnostics export; restart gateway if pressure persists",
+      "nextStep=run carapace gateway status --deep and carapace gateway diagnostics export; restart gateway if pressure persists",
     );
   });
 });

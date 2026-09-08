@@ -1,5 +1,5 @@
 import { iterateSqliteQuerySync, sqliteStringSet } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import {
   parseSessionEntryJson,
@@ -8,10 +8,10 @@ import {
 import { assertCanonicalSqliteSessionKeysCurrent } from "./session-canonical-key.js";
 import type { InternalSessionEntry as SessionEntry } from "./types.js";
 
-type OpenClawAgentDatabaseReader = Pick<OpenClawAgentDatabase, "agentId" | "db">;
+type CarapaceAgentDatabaseReader = Pick<CarapaceAgentDatabase, "agentId" | "db">;
 
 export function readSessionEntryStore(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   options: {
     allowCanonicalRepair?: boolean;
     includeArchived?: boolean;
@@ -46,7 +46,7 @@ export function readSessionEntryStore(
 }
 
 export function readSessionEntryCount(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   options: { includeArchived?: boolean } = {},
 ): number {
   const db = getSessionKysely(database.db);
@@ -64,7 +64,7 @@ export function readSessionEntryCount(
 }
 
 export function* iterateSessionEntryKeys(
-  database: OpenClawAgentDatabaseReader,
+  database: CarapaceAgentDatabaseReader,
 ): IterableIterator<string> {
   const db = getSessionKysely(database.db);
   for (const row of iterateSqliteQuerySync(

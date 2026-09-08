@@ -2,7 +2,7 @@
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
+import { runExec } from "carapace/plugin-sdk/process-runtime";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 
 type ObsidianCliProbe = {

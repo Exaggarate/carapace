@@ -14,11 +14,11 @@ or configuring a skill.
 ## Data source
 
 - `skills.status` (gateway) returns all skills plus eligibility and missing requirements, including allowlist blocks for bundled skills.
-- Requirements come from `metadata.openclaw.requires` in each `SKILL.md`.
+- Requirements come from `metadata.carapace.requires` in each `SKILL.md`.
 
 ## Install actions
 
-- `metadata.openclaw.install` defines install options (brew/node/go/uv/download).
+- `metadata.carapace.install` defines install options (brew/node/go/uv/download).
 - The Dashboard calls `skills.install` to run installers on the Gateway host.
 - To install for this Mac's local Gateway, connect to it first. Use **Connection… → Connection** to choose Local mode, or select its saved profile from **Gateways**.
 - Operator-owned `security.installPolicy` (`enabled`, `targets`, `exec`) runs before installer metadata. `block` results and policy failures stop the install. A `warn` result also stops the gateway-backed request: review it with the matching direct CLI when one exists, or change the policy to allow the reviewed request, then retry.

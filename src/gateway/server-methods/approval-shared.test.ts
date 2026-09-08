@@ -7,7 +7,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_IDS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ExecApprovalManager } from "../exec-approval-manager.js";
 import { createTestApprovalManager } from "../exec-approval-manager.test-support.js";
 import {
@@ -1287,7 +1287,7 @@ describe("handlePendingApprovalRequest", () => {
   });
 
   it("releases run-aborted waiters without changing timeout terminal state", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-wait-terminal-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-wait-terminal-"));
     const manager = new ExecApprovalManager({
       approvalKind: "exec",
       persistence: {
@@ -1400,7 +1400,7 @@ describe("handlePendingApprovalRequest", () => {
       }),
       undefined,
     );
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(tempDir, { force: true, recursive: true });
   });
 
@@ -1707,7 +1707,7 @@ describe("handlePendingApprovalRequest", () => {
   });
 
   it("sanitizes durable registration failures while retaining server diagnostics", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-register-failure-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-register-failure-"));
     const databasePath = path.join(tempDir, "state.sqlite");
     fs.mkdirSync(databasePath);
     const manager = new ExecApprovalManager({
@@ -1739,14 +1739,14 @@ describe("handlePendingApprovalRequest", () => {
       expect(JSON.stringify(respond.mock.calls)).not.toContain(databasePath);
       expect(logError).toHaveBeenCalledTimes(1);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempDir, { force: true, recursive: true });
     }
   });
 
   it("sanitizes a no-route storage failure while failing the waiter closed", async () => {
     hasApprovalTurnSourceRouteMock.mockReturnValueOnce(false);
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-route-failure-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-route-failure-"));
     const databasePath = path.join(tempDir, "state.sqlite");
     const manager = new ExecApprovalManager({
       approvalKind: "exec",
@@ -1758,7 +1758,7 @@ describe("handlePendingApprovalRequest", () => {
     const record = manager.create({ command: "echo safe" }, 60_000, "route-failure");
     const decisionPromise = manager.register(record, 60_000);
     const afterDecision = vi.fn();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(databasePath, { force: true });
     fs.mkdirSync(databasePath);
     const respond = vi.fn();
@@ -1799,13 +1799,13 @@ describe("handlePendingApprovalRequest", () => {
       await expect(decisionPromise).resolves.toBe("deny");
     } finally {
       await manager.drain();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempDir, { force: true, recursive: true });
     }
   });
 
   it("sanitizes durable resolve failures while failing the waiter closed", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-resolve-failure-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-resolve-failure-"));
     const databasePath = path.join(tempDir, "state.sqlite");
     const manager = new ExecApprovalManager({
       approvalKind: "exec",
@@ -1816,7 +1816,7 @@ describe("handlePendingApprovalRequest", () => {
     });
     const record = manager.create({ command: "echo safe" }, 60_000, "resolve-failure");
     const decisionPromise = manager.register(record, 60_000);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(databasePath, { force: true });
     fs.mkdirSync(databasePath);
     const respond = vi.fn();
@@ -1846,7 +1846,7 @@ describe("handlePendingApprovalRequest", () => {
       expect(logError).toHaveBeenCalledTimes(1);
       await expect(decisionPromise).resolves.toBe("deny");
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempDir, { force: true, recursive: true });
     }
   });

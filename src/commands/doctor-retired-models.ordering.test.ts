@@ -232,7 +232,7 @@ describe("doctor retirement repair ordering", () => {
     const rawRef = scenario === "changed default provider" ? "retired-without-successor" : "daily";
     const settings = {
       alias: "daily",
-      agentRuntime: { id: "openclaw" },
+      agentRuntime: { id: "carapace" },
       params: { temperature: 0.25, maxTokens: 128 },
     };
     cfg.agents!.entries!.main!.models = { [retiredRef]: settings };

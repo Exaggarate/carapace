@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs one named live-test shard with OPENCLAW_LIVE_TEST enabled.
+// Runs one named live-test shard with CARAPACE_LIVE_TEST enabled.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -19,43 +19,43 @@ const LIVE_TEST_SUFFIX = ".live.test.ts";
 const OPTIONAL_LIVE_SHARD_FILE_ENVS = new Map([
   [
     "extensions/codex/src/app-server/native-subagent-monitor.live.test.ts",
-    ["OPENCLAW_LIVE_CODEX_NATIVE_SUBAGENT"],
+    ["CARAPACE_LIVE_CODEX_NATIVE_SUBAGENT"],
   ],
   [
     "extensions/codex/src/native-thread-coexistence.live.test.ts",
-    ["OPENCLAW_LIVE_CODEX_THREAD_COEXISTENCE"],
+    ["CARAPACE_LIVE_CODEX_THREAD_COEXISTENCE"],
   ],
-  ["src/agents/agent-mcp-style.cache.live.test.ts", ["OPENCLAW_LIVE_CACHE_TEST"]],
-  ["src/agents/cli-runner/bundle-mcp.gemini.live.test.ts", ["OPENCLAW_LIVE_CLI_MCP_GEMINI"]],
-  ["src/agents/embedded-agent-runner.cache.live.test.ts", ["OPENCLAW_LIVE_CACHE_TEST"]],
-  ["src/agents/live-cache-regression.live.test.ts", ["OPENCLAW_LIVE_CACHE_TEST"]],
-  ["src/agents/provider-headers.live.test.ts", ["OPENCLAW_LIVE_CACHE_TEST"]],
+  ["src/agents/agent-mcp-style.cache.live.test.ts", ["CARAPACE_LIVE_CACHE_TEST"]],
+  ["src/agents/cli-runner/bundle-mcp.gemini.live.test.ts", ["CARAPACE_LIVE_CLI_MCP_GEMINI"]],
+  ["src/agents/embedded-agent-runner.cache.live.test.ts", ["CARAPACE_LIVE_CACHE_TEST"]],
+  ["src/agents/live-cache-regression.live.test.ts", ["CARAPACE_LIVE_CACHE_TEST"]],
+  ["src/agents/provider-headers.live.test.ts", ["CARAPACE_LIVE_CACHE_TEST"]],
   // Frozen release candidates before the announce-family move retain this path.
-  ["src/agents/subagent-announce.live.test.ts", ["OPENCLAW_LIVE_SUBAGENT_E2E"]],
+  ["src/agents/subagent-announce.live.test.ts", ["CARAPACE_LIVE_SUBAGENT_E2E"]],
   [
     "src/agents/sessions/agent-session.openai-compaction.live.test.ts",
-    ["OPENCLAW_LIVE_OPENAI_COMPACTION"],
+    ["CARAPACE_LIVE_OPENAI_COMPACTION"],
   ],
-  ["src/agents/subagents/announce/subagent-announce.live.test.ts", ["OPENCLAW_LIVE_SUBAGENT_E2E"]],
-  ["src/agents/tools/image-tool.ollama.live.test.ts", ["OPENCLAW_LIVE_OLLAMA_IMAGE"]],
-  ["src/agents/tools/image-tool.providers.live.test.ts", ["OPENCLAW_LIVE_IMAGE_TOOL_TEST"]],
+  ["src/agents/subagents/announce/subagent-announce.live.test.ts", ["CARAPACE_LIVE_SUBAGENT_E2E"]],
+  ["src/agents/tools/image-tool.ollama.live.test.ts", ["CARAPACE_LIVE_OLLAMA_IMAGE"]],
+  ["src/agents/tools/image-tool.providers.live.test.ts", ["CARAPACE_LIVE_IMAGE_TOOL_TEST"]],
   [
     "extensions/openai/realtime-quicksilver-gateway-bridge.live.test.ts",
-    ["OPENCLAW_LIVE_GPT_LIVE"],
+    ["CARAPACE_LIVE_GPT_LIVE"],
   ],
-  ["extensions/openai/realtime-quicksilver.live.test.ts", ["OPENCLAW_LIVE_GPT_LIVE"]],
-  ["src/skills/workshop/experience-review.live.test.ts", ["OPENCLAW_LIVE_SKILL_EXPERIENCE_REVIEW"]],
-  ["src/system-agent/rescue-channel.live.test.ts", ["OPENCLAW_LIVE_SYSTEM_AGENT_RESCUE_CHANNEL"]],
-  ["src/gateway/android-node.capabilities.live.test.ts", ["OPENCLAW_LIVE_ANDROID_NODE"]],
-  ["src/gateway/gateway-acp-bind.live.test.ts", ["OPENCLAW_LIVE_ACP_BIND"]],
-  ["src/gateway/gateway-acp-spawn-defaults.live.test.ts", ["OPENCLAW_LIVE_ACP_SPAWN_DEFAULTS"]],
-  ["src/gateway/gateway-cli-backend.live.test.ts", ["OPENCLAW_LIVE_CLI_BACKEND"]],
-  ["src/gateway/gateway-codex-bind.live.test.ts", ["OPENCLAW_LIVE_CODEX_BIND"]],
-  ["src/gateway/gateway-codex-harness.live.test.ts", ["OPENCLAW_LIVE_CODEX_HARNESS"]],
-  ["src/gateway/gateway-openai-long-context.live.test.ts", ["OPENCLAW_LIVE_OPENAI_LONG_CONTEXT"]],
-  ["src/gateway/gateway-trajectory-export.live.test.ts", ["OPENCLAW_LIVE_CODEX_HARNESS"]],
-  ["src/infra/push-apns-http2.live.test.ts", ["OPENCLAW_LIVE_APNS_REACHABILITY"]],
-  ["test/image-generation.infer-cli.live.test.ts", ["OPENCLAW_LIVE_INFER_CLI_TEST"]],
+  ["extensions/openai/realtime-quicksilver.live.test.ts", ["CARAPACE_LIVE_GPT_LIVE"]],
+  ["src/skills/workshop/experience-review.live.test.ts", ["CARAPACE_LIVE_SKILL_EXPERIENCE_REVIEW"]],
+  ["src/system-agent/rescue-channel.live.test.ts", ["CARAPACE_LIVE_SYSTEM_AGENT_RESCUE_CHANNEL"]],
+  ["src/gateway/android-node.capabilities.live.test.ts", ["CARAPACE_LIVE_ANDROID_NODE"]],
+  ["src/gateway/gateway-acp-bind.live.test.ts", ["CARAPACE_LIVE_ACP_BIND"]],
+  ["src/gateway/gateway-acp-spawn-defaults.live.test.ts", ["CARAPACE_LIVE_ACP_SPAWN_DEFAULTS"]],
+  ["src/gateway/gateway-cli-backend.live.test.ts", ["CARAPACE_LIVE_CLI_BACKEND"]],
+  ["src/gateway/gateway-codex-bind.live.test.ts", ["CARAPACE_LIVE_CODEX_BIND"]],
+  ["src/gateway/gateway-codex-harness.live.test.ts", ["CARAPACE_LIVE_CODEX_HARNESS"]],
+  ["src/gateway/gateway-openai-long-context.live.test.ts", ["CARAPACE_LIVE_OPENAI_LONG_CONTEXT"]],
+  ["src/gateway/gateway-trajectory-export.live.test.ts", ["CARAPACE_LIVE_CODEX_HARNESS"]],
+  ["src/infra/push-apns-http2.live.test.ts", ["CARAPACE_LIVE_APNS_REACHABILITY"]],
+  ["test/image-generation.infer-cli.live.test.ts", ["CARAPACE_LIVE_INFER_CLI_TEST"]],
 ]);
 const SKIPPED_ASSERTION_STATUSES = new Set(["disabled", "pending", "skipped", "todo"]);
 const QA_RUNTIME_LIVE_TEST = "extensions/qa-lab/src/matrix-channel-driver.lifecycle.live.test.ts";
@@ -420,11 +420,11 @@ export function resolveLiveShardPreparation(files: string[]): LiveShardPreparati
       ...(gatewayProfiles
         ? {
             runtimeEnv: {
-              OPENCLAW_DISABLE_BONJOUR: "1",
-              OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
-              OPENCLAW_LIVE_TEST_QUIET: "0",
-              OPENCLAW_LOG_LEVEL: "info",
-              OPENCLAW_PLUGIN_LIFECYCLE_TRACE: "1",
+              CARAPACE_DISABLE_BONJOUR: "1",
+              CARAPACE_GATEWAY_STARTUP_TRACE: "1",
+              CARAPACE_LIVE_TEST_QUIET: "0",
+              CARAPACE_LOG_LEVEL: "info",
+              CARAPACE_PLUGIN_LIFECYCLE_TRACE: "1",
             },
           }
         : {}),
@@ -432,7 +432,7 @@ export function resolveLiveShardPreparation(files: string[]): LiveShardPreparati
   }
   if (files.includes(QA_RUNTIME_LIVE_TEST)) {
     return {
-      env: { OPENCLAW_BUILD_PRIVATE_QA: "1" },
+      env: { CARAPACE_BUILD_PRIVATE_QA: "1" },
       profile: "qaRuntime",
       requiredArtifact: QA_RUNTIME_ARTIFACT,
     };
@@ -444,7 +444,7 @@ export function resolveLiveShardPreparation(files: string[]): LiveShardPreparati
  * Builds the Vitest JSON report path used to prove that a live shard ran tests.
  */
 export function buildLiveShardReportPath(shard: string, env = process.env) {
-  const reportDir = env.OPENCLAW_LIVE_SHARD_REPORT_DIR || ".artifacts/live-shards";
+  const reportDir = env.CARAPACE_LIVE_SHARD_REPORT_DIR || ".artifacts/live-shards";
   return path.join(reportDir, `${shard}.vitest.json`);
 }
 

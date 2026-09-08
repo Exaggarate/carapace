@@ -1,10 +1,10 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 // Workboard dispatch workspace helpers keep authority resolution outside the orchestration loop.
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   canonicalPathFromExistingAncestor,
   pathExists,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/security-runtime";
 import type { WorkboardStore } from "./store.js";
 import {
   assertCanonicalWorkboardRootAccess,

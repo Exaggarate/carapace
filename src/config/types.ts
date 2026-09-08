@@ -11,7 +11,7 @@ export type * from "./types.browser.js";
 export type * from "./types.cloud-workers.js";
 export type * from "./types.desktop.js";
 export type * from "./types.channels.js";
-export type * from "./types.openclaw.js";
+export type * from "./types.carapace.js";
 export type * from "./types.cron.js";
 export type * from "./types.discord.js";
 export type * from "./types.googlechat.js";

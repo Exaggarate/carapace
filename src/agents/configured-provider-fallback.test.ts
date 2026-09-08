@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolveConfiguredProviderFallback } from "./configured-provider-fallback.js";
 
-type ModelProviders = NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>;
+type ModelProviders = NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>;
 type ConfiguredModel = ModelProviders[string]["models"][number];
 
-function configuredProviders(providers: ModelProviders): Pick<OpenClawConfig, "models"> {
+function configuredProviders(providers: ModelProviders): Pick<CarapaceConfig, "models"> {
   return { models: { providers } };
 }
 

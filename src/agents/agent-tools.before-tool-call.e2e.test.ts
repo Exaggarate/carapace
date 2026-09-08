@@ -6,10 +6,10 @@ import fs from "node:fs/promises";
  */
 import os from "node:os";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { GatewayClientRequestError } from "../gateway/client.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import {
@@ -51,7 +51,7 @@ import {
   runBeforeToolCallHook,
   wrapToolWithBeforeToolCallHook,
 } from "./agent-tools.before-tool-call.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { createExecTool } from "./bash-tools.exec-run.js";
 import { createWriteTool } from "./sessions/index.js";
 import type { AnyAgentTool } from "./tools/common.js";
@@ -82,7 +82,7 @@ vi.mock("./tools/gateway.js", () => ({
 }));
 
 const mockGetGlobalHookRunner = vi.mocked(getGlobalHookRunner);
-const hookRunnerGlobalStateKey = Symbol.for("openclaw.plugins.hook-runner-global-state");
+const hookRunnerGlobalStateKey = Symbol.for("carapace.plugins.hook-runner-global-state");
 
 function setGlobalHookRunnerForTest(hookRunner: HookRunner | null): void {
   const hookRunnerGlobalState = globalThis as Record<
@@ -508,7 +508,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("blocks real exec failures whose process ids drift across a session alias merge", async () => {
-    const workspace = tempDirs.make("openclaw-exec-loop-merge-");
+    const workspace = tempDirs.make("carapace-exec-loop-merge-");
     const sessionId = "exec-loop-merge-session";
     const sessionKey = "agent:main:exec-loop-merge";
     const sessionIdAlias = "agent:main:exec-loop-merge-id";
@@ -678,7 +678,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("detects alternating-path churn from the production write result contract", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-write-churn-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-write-churn-"));
     const sessionId = "production-write-churn-session";
     const sessionKey = "main";
     const runId = "production-write-churn-run";
@@ -1536,7 +1536,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("emits skill usage diagnostics when a run reads a known skill instruction file", async () => {
-    const workspaceDir = path.join("/tmp", "openclaw-skill-usage");
+    const workspaceDir = path.join("/tmp", "carapace-skill-usage");
     const skillBaseDir = path.join(workspaceDir, ".agents", "skills", "demo-skill");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
@@ -1605,13 +1605,13 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("matches home-compacted skill instruction paths from prompts", async () => {
-    const skillBaseDir = path.join(os.homedir(), ".openclaw", "skills", "home-skill");
+    const skillBaseDir = path.join(os.homedir(), ".carapace", "skills", "home-skill");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
       agentId: "main",
       sessionKey: "session-key",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
       skillsSnapshot: {
         prompt: "",
         skills: [{ name: "home-skill" }],
@@ -1621,7 +1621,7 @@ describe("before_tool_call loop detection behavior", () => {
             description: "Home skill",
             filePath: skillFilePath,
             baseDir: skillBaseDir,
-            source: "openclaw-managed",
+            source: "carapace-managed",
           }),
         ],
       },
@@ -1631,7 +1631,7 @@ describe("before_tool_call loop detection behavior", () => {
     await withSkillUsageDiagnosticEvents(async (emitted, privateData, flush) => {
       await tool.execute(
         "tool-call-home-skill",
-        { path: "~/.openclaw/skills/home-skill/SKILL.md" },
+        { path: "~/.carapace/skills/home-skill/SKILL.md" },
         undefined,
         undefined,
       );
@@ -1665,7 +1665,7 @@ describe("before_tool_call loop detection behavior", () => {
             description: "Remote skill",
             filePath: locator,
             baseDir: "node://node-1/skills/remote-skill",
-            source: "openclaw-node",
+            source: "carapace-node",
           }),
         ],
       },
@@ -1687,7 +1687,7 @@ describe("before_tool_call loop detection behavior", () => {
 
   it("accounts sandbox skill reads against the original canonical file", async () => {
     const workspaceDir = "/workspace";
-    const readPath = "/workspace/.openclaw/sandbox-skills/skills/demo/SKILL.md";
+    const readPath = "/workspace/.carapace/sandbox-skills/skills/demo/SKILL.md";
     const skillFile = "/agent-workspace/skills/demo/SKILL.md";
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
@@ -1708,7 +1708,7 @@ describe("before_tool_call loop detection behavior", () => {
     await withSkillUsageDiagnosticEvents(async (emitted, privateData, flush) => {
       await tool.execute(
         "tool-call-sandbox-skill",
-        { path: ".openclaw/sandbox-skills/skills/demo/SKILL.md" },
+        { path: ".carapace/sandbox-skills/skills/demo/SKILL.md" },
         undefined,
         undefined,
       );
@@ -1727,7 +1727,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("does not count unused read params as skill usage", async () => {
-    const workspaceDir = path.join("/tmp", "openclaw-skill-unused-param");
+    const workspaceDir = path.join("/tmp", "carapace-skill-unused-param");
     const skillBaseDir = path.join(workspaceDir, ".agents", "skills", "demo-skill");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "readme" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
@@ -1770,7 +1770,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("emits skill usage diagnostics for command-dispatched skill tools", async () => {
-    const skillBaseDir = path.join("/tmp", "openclaw-skill-command", "skills", "matrix-profile");
+    const skillBaseDir = path.join("/tmp", "carapace-skill-command", "skills", "matrix-profile");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "sent" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "message", execute }), {
@@ -2314,7 +2314,7 @@ describe("before_tool_call requireApproval handling", () => {
   });
 
   it("passes host-derived apply_patch paths to before_tool_call hooks", async () => {
-    const cwd = path.join("/tmp", "openclaw-hooks");
+    const cwd = path.join("/tmp", "carapace-hooks");
     const patch = [
       "*** Begin Patch",
       "*** Add File: src/new.ts",
@@ -2632,7 +2632,7 @@ describe("before_tool_call requireApproval handling", () => {
   });
 
   it("recomputes host-derived paths after trusted policy param rewrites", async () => {
-    const cwd = path.join("/tmp", "openclaw-hooks");
+    const cwd = path.join("/tmp", "carapace-hooks");
     const originalPatch = [
       "*** Begin Patch",
       "*** Add File: src/old.ts",
@@ -2769,7 +2769,7 @@ describe("before_tool_call requireApproval handling", () => {
 
     const result = await runBeforeToolCallHook({
       toolName: "web_search",
-      params: { query: "OpenClaw" },
+      params: { query: "Carapace" },
       ctx: { agentId: "main", sessionKey: "main" },
     });
 
@@ -3334,7 +3334,7 @@ describe("before_tool_call requireApproval handling", () => {
       },
     });
 
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hook-route-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-hook-route-"));
     await fs.writeFile(path.join(tempDir, "note.txt"), "hello");
     mockCallGateway.mockResolvedValueOnce({ id: "transport-route-id", status: "accepted" });
     mockCallGateway.mockResolvedValueOnce({
@@ -3342,7 +3342,7 @@ describe("before_tool_call requireApproval handling", () => {
       decision: "allow-once",
     });
 
-    const tools = createOpenClawCodingTools({
+    const tools = createCarapaceCodingTools({
       workspaceDir: tempDir,
       messageProvider: "discord-voice",
       messageChannel: "discord",
@@ -3499,7 +3499,7 @@ describe("before_tool_call tool content private-data capture", () => {
     }
   }
 
-  function configWithToolContent(): OpenClawConfig {
+  function configWithToolContent(): CarapaceConfig {
     return {
       diagnostics: {
         enabled: true,

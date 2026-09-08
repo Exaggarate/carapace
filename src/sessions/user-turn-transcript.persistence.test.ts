@@ -4,9 +4,9 @@ import path from "node:path";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { castAgentMessage } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { castAgentMessage } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { runAgentHarnessBeforeMessageWriteHook } from "../agents/harness/hook-helpers.js";
@@ -70,7 +70,7 @@ describe("persistUserTurnTranscript", () => {
   }
 
   it("appends a structured user turn through the shared transcript writer", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-");
+    const dir = tempDirs.make("carapace-user-turn-append-");
     const target = createSqliteTranscriptTarget({ dir });
     const provenance = {
       kind: "inter_session" as const,
@@ -94,7 +94,7 @@ describe("persistUserTurnTranscript", () => {
       role: "user",
       content: "What is in this image?",
       timestamp: 123,
-      __openclaw: {
+      __carapace: {
         senderIsOwner: false,
         media: [{ path: "/tmp/image.png", contentType: "image/png" }],
       },
@@ -108,13 +108,13 @@ describe("persistUserTurnTranscript", () => {
   });
 
   it("round-trips a multi-attachment SQLite row byte-identically", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-media-");
+    const dir = tempDirs.make("carapace-user-turn-append-media-");
     const target = createSqliteTranscriptTarget({ dir });
     const expected = {
       role: "user",
       content: "Inspect both",
       timestamp: 456,
-      __openclaw: {
+      __carapace: {
         media: [
           { path: "/tmp/image.png", contentType: "image/png" },
           { url: "https://example.test/report.pdf", contentType: "application/pdf" },
@@ -142,8 +142,8 @@ describe("persistUserTurnTranscript", () => {
     expect(JSON.stringify(messages[0])).toBe(JSON.stringify(expected));
   });
 
-  it("persists sender metadata as __openclaw envelope", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-sender-");
+  it("persists sender metadata as __carapace envelope", async () => {
+    const dir = tempDirs.make("carapace-user-turn-append-sender-");
     const target = createSqliteTranscriptTarget({ dir });
     // Deliberately attach runtime-only profile fields to prove durable sender
     // attribution is a whitelist, not a copy of the inbound sender object.
@@ -163,7 +163,7 @@ describe("persistUserTurnTranscript", () => {
       role: "user",
       content: "hello from group",
       timestamp: 1_700_000_000_000,
-      __openclaw: {
+      __carapace: {
         senderId: "8489979671",
         senderName: "Ram Shenoy",
         senderUsername: "ram_s",
@@ -216,7 +216,7 @@ describe("persistUserTurnTranscript", () => {
             });
       await persistUserTurnTranscript({ ...target, input: { text: "hello", sender } });
       const [message] = await readTranscriptMessages(target);
-      expect(message?.["__openclaw"]).toMatchObject({
+      expect(message?.["__carapace"]).toMatchObject({
         senderId: "shared-id",
         senderName: "Same label",
         senderIdentity: identity,
@@ -236,7 +236,7 @@ describe("persistUserTurnTranscript", () => {
           role: "user",
           content: "hello",
           timestamp: 1,
-          __openclaw: {
+          __carapace: {
             senderId: "original",
             senderName: "Original",
             senderIsOwner: true,
@@ -246,7 +246,7 @@ describe("persistUserTurnTranscript", () => {
         target,
         beforeMessageWrite: ({ message }) => {
           const metadata =
-            mode === "in-place" ? message["__openclaw"]! : { ...message["__openclaw"] };
+            mode === "in-place" ? message["__carapace"]! : { ...message["__carapace"] };
           if (mode === "omit") {
             delete metadata.senderIdentity;
           }
@@ -261,13 +261,13 @@ describe("persistUserTurnTranscript", () => {
           }
           return {
             ...message,
-            __openclaw: { ...metadata, senderName: "Edited display", senderIsOwner: false },
+            __carapace: { ...metadata, senderName: "Edited display", senderIsOwner: false },
           };
         },
       });
       await recorder.persistApproved();
       const [message] = await readTranscriptMessages(target);
-      expect(message?.["__openclaw"]).toEqual({
+      expect(message?.["__carapace"]).toEqual({
         ...(mode === "raw-redact" ? {} : { senderId: "original" }),
         senderName: "Edited display",
         senderIsOwner: true,
@@ -276,8 +276,8 @@ describe("persistUserTurnTranscript", () => {
     },
   );
 
-  it("omits __openclaw when no sender metadata is provided", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-nosender-");
+  it("omits __carapace when no sender metadata is provided", async () => {
+    const dir = tempDirs.make("carapace-user-turn-append-nosender-");
     const target = createSqliteTranscriptTarget({ dir });
 
     const appended = await persistUserTurnTranscript({
@@ -289,11 +289,11 @@ describe("persistUserTurnTranscript", () => {
       updateMode: "none",
     });
 
-    expect(appended?.message).not.toHaveProperty("__openclaw");
+    expect(appended?.message).not.toHaveProperty("__carapace");
   });
 
   it("uses inline update mode by default", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-inline-");
+    const dir = tempDirs.make("carapace-user-turn-append-inline-");
     const target = createSqliteTranscriptTarget({ dir });
 
     const appended = await persistUserTurnTranscript({
@@ -351,7 +351,7 @@ describe("persistUserTurnTranscript", () => {
         }),
         message: expect.objectContaining({
           content: input.text,
-          __openclaw: { humanMentions: input.mentions },
+          __carapace: { humanMentions: input.mentions },
         }),
       },
     ]);
@@ -397,8 +397,8 @@ describe("persistUserTurnTranscript", () => {
       ...(kind === "excluded" ? { excludeFromContext: true as const } : {}),
       ...(kind === "internal" ? { provenance: { kind: "internal_system" as const } } : {}),
       ...(kind === "handoff" ? { provenance: { kind: "inter_session" as const } } : {}),
-      ...(kind === "placeholder" ? { __openclaw: { beforeAgentRunBlocked: true } } : {}),
-      ...(kind === "late-media" ? { __openclaw: { lateMedia: true } } : {}),
+      ...(kind === "placeholder" ? { __carapace: { beforeAgentRunBlocked: true } } : {}),
+      ...(kind === "late-media" ? { __carapace: { lateMedia: true } } : {}),
     };
     const recorder = createUserTurnTranscriptRecorder({
       message,
@@ -458,7 +458,7 @@ describe("persistUserTurnTranscript", () => {
       expect(
         commits.map((commit) => ({
           text: commit.message.content,
-          sender: commit.message["__openclaw"]?.senderId,
+          sender: commit.message["__carapace"]?.senderId,
           entryId: commit.anchor.entryId,
         })),
       ).toEqual(
@@ -506,12 +506,12 @@ describe("persistUserTurnTranscript", () => {
         target,
         beforeMessageWrite: ({ message }) => {
           if (mode === "mutate-spans") {
-            message["__openclaw"]!.humanMentions![0]!.profileId = "forged";
+            message["__carapace"]!.humanMentions![0]!.profileId = "forged";
           }
           return {
             ...message,
             content: mode === "replace-text" ? "[redacted]" : message.content,
-            __openclaw: { humanMentions: [{ profileId: "forged", start: 0, end: 6 }] },
+            __carapace: { humanMentions: [{ profileId: "forged", start: 0, end: 6 }] },
           };
         },
       });
@@ -522,13 +522,13 @@ describe("persistUserTurnTranscript", () => {
         mode === "replace-text" ? "[redacted]" : "Hello @Ada",
       );
       expect(
-        (message?.["__openclaw"] as { humanMentions?: unknown } | undefined)?.humanMentions,
+        (message?.["__carapace"] as { humanMentions?: unknown } | undefined)?.humanMentions,
       ).toEqual(mode === "replace-text" || mode === "forge" ? undefined : mentions);
     },
   );
 
   it("returns the existing user turn when the idempotency key was already persisted", async () => {
-    const dir = tempDirs.make("openclaw-user-turn-append-idempotent-");
+    const dir = tempDirs.make("carapace-user-turn-append-idempotent-");
     const target = createSqliteTranscriptTarget({ dir });
 
     const first = await persistUserTurnTranscript({
@@ -581,7 +581,7 @@ describe("persistUserTurnTranscript", () => {
           handler: (event) => {
             hookCalls += 1;
             const message = (event as { message: Record<string, unknown> }).message;
-            const meta = message["__openclaw"] as {
+            const meta = message["__carapace"] as {
               transport?: { conversationRef?: string; messageId?: string };
             };
             if (meta.transport) {
@@ -592,14 +592,14 @@ describe("persistUserTurnTranscript", () => {
               message: castAgentMessage({
                 role: "user",
                 content: "[redacted by hook]",
-                __openclaw: { hookOwned: true },
+                __carapace: { hookOwned: true },
               }),
             };
           },
         },
       ]),
     );
-    const dir = tempDirs.make("openclaw-user-turn-redacted-idempotent-");
+    const dir = tempDirs.make("carapace-user-turn-redacted-idempotent-");
     const target = createSqliteTranscriptTarget({ dir });
 
     await persistUserTurnTranscript({
@@ -647,7 +647,7 @@ describe("persistUserTurnTranscript", () => {
         content: "[redacted by hook]",
         idempotencyKey: "chat-run-1:user",
         provenance,
-        __openclaw: {
+        __carapace: {
           hookOwned: true,
           replyToId: "transcript-reply-1",
           replyToPreview: { text: "Original reply", senderLabel: "Molty" },
@@ -667,7 +667,7 @@ describe("persistUserTurnTranscript", () => {
   it.each([true, false])(
     "protects internal Goal metadata across write hooks (Goal: %s)",
     async (isGoal) => {
-      const target = createSqliteTranscriptTarget({ dir: tempDirs.make("openclaw-goal-hook-") });
+      const target = createSqliteTranscriptTarget({ dir: tempDirs.make("carapace-goal-hook-") });
       const intent = {
         kind: "session-goal-resume",
         version: 1,
@@ -683,7 +683,7 @@ describe("persistUserTurnTranscript", () => {
             ? {
                 display: false as const,
                 provenance: { kind: "internal_system" as const },
-                __openclaw: { intent },
+                __carapace: { intent },
               }
             : {}),
         },
@@ -695,12 +695,12 @@ describe("persistUserTurnTranscript", () => {
             timestamp: 123,
             display: true,
             provenance: { kind: "external_user" },
-            __openclaw: { intent: { kind: "forged" } },
+            __carapace: { intent: { kind: "forged" } },
           }),
       });
       await recorder.persistApproved();
       const [message] = await readTranscriptMessages(target);
-      expect((message?.["__openclaw"] as Record<string, unknown> | undefined)?.intent).toEqual(
+      expect((message?.["__carapace"] as Record<string, unknown> | undefined)?.intent).toEqual(
         isGoal ? intent : undefined,
       );
       if (isGoal) {
@@ -738,13 +738,13 @@ describe("persistUserTurnTranscript", () => {
             handler: (event) => {
               const message = (event as { message: Record<string, unknown> }).message;
               const metadata = {
-                ...(message["__openclaw"] as Record<string, unknown> | undefined),
+                ...(message["__carapace"] as Record<string, unknown> | undefined),
               };
               delete metadata.steerTargetRunId;
               return {
                 message: castAgentMessage({
                   ...message,
-                  __openclaw: {
+                  __carapace: {
                     ...metadata,
                     ...(hookTarget ? { steerTargetRunId: hookTarget } : {}),
                   },
@@ -754,7 +754,7 @@ describe("persistUserTurnTranscript", () => {
           },
         ]),
       );
-      const dir = tempDirs.make("openclaw-user-turn-steer-target-hook-");
+      const dir = tempDirs.make("carapace-user-turn-steer-target-hook-");
       const target = createSqliteTranscriptTarget({ dir });
 
       const recorder = createUserTurnTranscriptRecorder({
@@ -771,7 +771,7 @@ describe("persistUserTurnTranscript", () => {
       await recorder.persistApproved();
 
       const [message] = await readTranscriptMessages(target);
-      const metadata = message?.["__openclaw"] as Record<string, unknown> | undefined;
+      const metadata = message?.["__carapace"] as Record<string, unknown> | undefined;
       expect(metadata?.steerTargetRunId).toBe(expectedTarget);
     },
   );

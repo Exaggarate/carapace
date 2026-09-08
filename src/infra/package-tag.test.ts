@@ -3,19 +3,19 @@ import { describe, expect, it } from "vitest";
 import { normalizePackageTagInput } from "./package-tag.js";
 
 describe("normalizePackageTagInput", () => {
-  const packageNames = ["openclaw", "@openclaw/plugin"] as const;
+  const packageNames = ["carapace", "@carapace/plugin"] as const;
 
   it.each([
     { input: undefined, expected: null },
     { input: "   ", expected: null },
-    { input: "openclaw@beta", expected: "beta" },
-    { input: "@openclaw/plugin@2026.2.24", expected: "2026.2.24" },
-    { input: "openclaw@   ", expected: null },
-    { input: "openclaw", expected: null },
-    { input: " @openclaw/plugin ", expected: null },
+    { input: "carapace@beta", expected: "beta" },
+    { input: "@carapace/plugin@2026.2.24", expected: "2026.2.24" },
+    { input: "carapace@   ", expected: null },
+    { input: "carapace", expected: null },
+    { input: " @carapace/plugin ", expected: null },
     { input: " latest ", expected: "latest" },
     { input: "@other/plugin@beta", expected: "@other/plugin@beta" },
-    { input: "openclawer@beta", expected: "openclawer@beta" },
+    { input: "carapaceer@beta", expected: "carapaceer@beta" },
   ] satisfies ReadonlyArray<{ input: string | undefined; expected: string | null }>)(
     "normalizes %j",
     ({ input, expected }) => {

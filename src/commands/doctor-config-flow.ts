@@ -17,7 +17,7 @@ import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { configWriteTargetsIncludeBoundary } from "../config/mutate.js";
 import { CONFIG_PATH } from "../config/paths.js";
 import { inspectShippedPluginInstallConfigRecords } from "../config/plugin-install-config-migration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { callGateway } from "../gateway/call.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { withoutPluginInstallRecords } from "../plugins/installed-plugin-index-records.js";
@@ -52,7 +52,7 @@ import { normalizeCompatibilityConfigValues } from "./doctor/shared/legacy-confi
 import type { DoctorPluginMetadataSnapshotState } from "./doctor/shared/plugin-metadata-snapshot-scope.js";
 
 function collectInvalidHookTransformsDirWarnings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   configPath: string,
 ): string[] {
   const transformsDir = cfg.hooks?.transformsDir?.trim();
@@ -72,7 +72,7 @@ function collectInvalidHookTransformsDirWarnings(
   ];
 }
 
-function collectUnsupportedInternalHookEntryWarnings(cfg: OpenClawConfig): string[] {
+function collectUnsupportedInternalHookEntryWarnings(cfg: CarapaceConfig): string[] {
   const entries = cfg.hooks?.internal?.entries;
   if (!entries) {
     return [];
@@ -162,7 +162,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   const shouldRepair = params.options.repair === true || params.options.yes === true;
   let preflight = await withProgress(
     {
-      label: "Checking OpenClaw state…",
+      label: "Checking Carapace state…",
       enabled: params.options.nonInteractive !== true && params.options.json !== true,
       delayMs: 200,
     },
@@ -217,7 +217,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     pluginMetadataSnapshotState.current = undefined;
     pluginMetadataSnapshotScope.invalidate();
   };
-  const runWithCurrentPluginMetadata = <T>(config: OpenClawConfig, run: () => T): T => {
+  const runWithCurrentPluginMetadata = <T>(config: CarapaceConfig, run: () => T): T => {
     const soleAgentId = tryResolveSoleAgentId(config);
     return runWithPluginMetadataSnapshot(
       {
@@ -236,8 +236,8 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   const explicitSetPaths: string[][] = [];
   let shouldRepairCronCodexModelRefsAfterConfigWrite = false;
   let openAICodexAuthProfileIdMap: ReadonlyMap<string, string> | undefined;
-  let retiredModelRefConfig: Pick<OpenClawConfig, "agents" | "models"> | undefined;
-  const doctorFixCommand = formatCliCommand("openclaw doctor --fix");
+  let retiredModelRefConfig: Pick<CarapaceConfig, "agents" | "models"> | undefined;
+  const doctorFixCommand = formatCliCommand("carapace doctor --fix");
   const changesPanelSink = createDoctorChangesPanelSink(shouldRepair);
   const applyConfigMutation = (
     mutation: DoctorConfigMutationResult & { warnings?: string[] },
@@ -290,7 +290,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     // again after health repairs, when the retired owner marker is no longer available to recover it.
     const migrated = migratePersistedImplicitMainRoster(state.candidate, {
       materializeWorkspace: true,
-    }).config as OpenClawConfig;
+    }).config as CarapaceConfig;
     const migratedRoster = readAgentRosterProperty(migrated);
     const migratedEntries = migratedRoster?.kind === "entries" ? migratedRoster.value : undefined;
     const { list: _legacyList, ...candidateAgents } = migrated.agents ?? {};
@@ -301,7 +301,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
         agents: {
           ...candidateAgents,
           ...(stampsExplicitOwnership ? { ownership: "explicit" as const } : {}),
-          entries: migratedEntries as NonNullable<OpenClawConfig["agents"]>["entries"],
+          entries: migratedEntries as NonNullable<CarapaceConfig["agents"]>["entries"],
         },
       },
       changes: [

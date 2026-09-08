@@ -1,14 +1,14 @@
-// Ollama plugin entrypoint registers its OpenClaw integration.
-import { collectConfiguredModelRefValues } from "@openclaw/model-catalog-core/configured-model-refs";
-import { findNormalizedProviderKey } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
-import type { MemoryEmbeddingProviderAdapter } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
+// Ollama plugin entrypoint registers its Carapace integration.
+import { collectConfiguredModelRefValues } from "@carapace/model-catalog-core/configured-model-refs";
+import { findNormalizedProviderKey } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { MediaUnderstandingProvider } from "carapace/plugin-sdk/media-understanding";
+import type { MemoryEmbeddingProviderAdapter } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type CarapacePluginApi,
   type ProviderAppGuidedSetupContext,
   type ProviderAuthContext,
   type ProviderAuthMethodNonInteractiveContext,
@@ -18,21 +18,21 @@ import {
   type ProviderPlugin,
   type ProviderReplayPolicy,
   type ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   buildApiKeyCredential,
   coerceSecretRef,
   isNonSecretApiKeyMarker,
-} from "openclaw/plugin-sdk/provider-auth";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
+} from "carapace/plugin-sdk/provider-auth";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { buildOpenAICompatibleReplayPolicy } from "openclaw/plugin-sdk/provider-model-shared";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
-import { resolveConfiguredSecretInputString } from "openclaw/plugin-sdk/secret-input-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { buildOpenAICompatibleReplayPolicy } from "carapace/plugin-sdk/provider-model-shared";
+import { buildProviderToolCompatFamilyHooks } from "carapace/plugin-sdk/provider-tools";
+import { resolveConfiguredSecretInputString } from "carapace/plugin-sdk/secret-input-runtime";
 import {
   normalizeResolvedModel,
   resolveThinkingProfile as resolveOllamaThinkingProfile,
@@ -108,9 +108,9 @@ const ollamaMediaUnderstandingProvider: MediaUnderstandingProvider = {
   describeImages: undefined,
 };
 
-async function checkWsl2CrashLoopRiskLazily(api: OpenClawPluginApi): Promise<void> {
+async function checkWsl2CrashLoopRiskLazily(api: CarapacePluginApi): Promise<void> {
   try {
-    const { isWSL2Sync } = await import("openclaw/plugin-sdk/runtime-env");
+    const { isWSL2Sync } = await import("carapace/plugin-sdk/runtime-env");
     if (!isWSL2Sync()) {
       return;
     }
@@ -475,7 +475,7 @@ function readUsableOllamaShowApiKey(params: {
 }
 
 function collectConfiguredOllamaModelIds(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   entries?: ProviderAugmentModelCatalogContext["entries"];
 }): Array<{
@@ -616,7 +616,7 @@ async function resolveRequestedDynamicOllamaModel(params: {
 }
 
 async function augmentConfiguredOllamaCatalogModels(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   defaultBaseUrl: string;
   env: NodeJS.ProcessEnv;
   provider: string;
@@ -691,7 +691,7 @@ async function augmentConfiguredOllamaCatalogModels(params: {
 }
 
 // Local and cloud own distinct auth/catalog policy but share native transport and replay rules.
-const createOllamaSharedProviderHooks = (api: OpenClawPluginApi) =>
+const createOllamaSharedProviderHooks = (api: CarapacePluginApi) =>
   ({
     ...buildProviderToolCompatFamilyHooks("llamacpp-gbnf"),
     createStreamFn: ({ config, model, provider }) => {
@@ -739,7 +739,7 @@ export default definePluginEntry({
   id: "ollama",
   name: "Ollama Provider",
   description: "Bundled Ollama provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     const startupPluginConfig = (api.pluginConfig ?? {}) as OllamaPluginConfig;
     const providerHooks = createOllamaSharedProviderHooks(api);
     if (api.registrationMode === "full") {
@@ -754,7 +754,7 @@ export default definePluginEntry({
     }
     api.registerNodeInvokePolicy(createOllamaNodeInvokePolicy());
     api.registerTool(createLazyOllamaNodeInferenceTool(api));
-    const resolveCurrentPluginConfig = (config?: OpenClawConfig): OllamaPluginConfig => {
+    const resolveCurrentPluginConfig = (config?: CarapaceConfig): OllamaPluginConfig => {
       const runtimePluginConfig = resolvePluginConfigObject(config, "ollama");
       if (runtimePluginConfig) {
         return runtimePluginConfig as OllamaPluginConfig;
@@ -840,8 +840,8 @@ export default definePluginEntry({
         }),
       buildUnknownModelHint: () =>
         "Ollama Cloud requires an API key. " +
-        'Set OLLAMA_API_KEY or run "openclaw onboard --auth-choice ollama-cloud". ' +
-        "See: https://docs.openclaw.ai/providers/ollama",
+        'Set OLLAMA_API_KEY or run "carapace onboard --auth-choice ollama-cloud". ' +
+        "See: https://github.com/Exaggarate/carapace",
     });
     api.registerProvider({
       id: OLLAMA_PROVIDER_ID,
@@ -1075,8 +1075,8 @@ export default definePluginEntry({
       },
       buildUnknownModelHint: () =>
         "Ollama requires authentication to be registered as a provider. " +
-        'Set OLLAMA_API_KEY="ollama-local" (any value works) or run "openclaw configure". ' +
-        "See: https://docs.openclaw.ai/providers/ollama",
+        'Set OLLAMA_API_KEY="ollama-local" (any value works) or run "carapace configure". ' +
+        "See: https://github.com/Exaggarate/carapace",
     });
   },
 });

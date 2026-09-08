@@ -2,8 +2,8 @@ import { appendFileSync, mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
 
 const PLUGIN_ID = "qa-worker-generation";
 const PROVIDER_ID = PLUGIN_ID;

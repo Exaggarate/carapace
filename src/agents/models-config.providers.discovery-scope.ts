@@ -1,14 +1,14 @@
 /** Resolves the plugin-owned provider scope for configured and live catalog discovery. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import { resolveOwningPluginIdsForProviderRef } from "../plugins/providers.js";
 
 export type ProviderDiscoveryScope = ReadonlyMap<string, readonly string[]>;
 
 function resolveProviderDiscoveryScope(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   resolveOwners?: (provider: string) => readonly string[] | undefined;
@@ -31,13 +31,13 @@ function resolveProviderDiscoveryScope(params: {
     });
   }
   const live =
-    env.OPENCLAW_LIVE_TEST === "1" || env.OPENCLAW_LIVE_GATEWAY === "1" || env.LIVE === "1";
+    env.CARAPACE_LIVE_TEST === "1" || env.CARAPACE_LIVE_GATEWAY === "1" || env.LIVE === "1";
   if (!live) {
     return undefined;
   }
   const rawValues = [
-    env.OPENCLAW_LIVE_PROVIDERS?.trim(),
-    env.OPENCLAW_LIVE_GATEWAY_PROVIDERS?.trim(),
+    env.CARAPACE_LIVE_PROVIDERS?.trim(),
+    env.CARAPACE_LIVE_GATEWAY_PROVIDERS?.trim(),
   ].filter((value): value is string => Boolean(value && value !== "all"));
   if (rawValues.length === 0) {
     return undefined;
@@ -59,7 +59,7 @@ function resolveProviderDiscoveryScope(params: {
 
 function buildProviderDiscoveryScope(params: {
   providerIds: readonly string[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   resolveOwners?: (provider: string) => readonly string[] | undefined;
@@ -158,7 +158,7 @@ function appendNormalizedPluginMetadataOwners(
 }
 
 export function resolveImplicitProviderDiscoveryScope(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "owners">;

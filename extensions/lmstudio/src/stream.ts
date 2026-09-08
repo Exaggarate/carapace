@@ -1,18 +1,18 @@
 // Lmstudio plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/logging-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple } from "carapace/plugin-sdk/llm";
+import { createSubsystemLogger } from "carapace/plugin-sdk/logging-core";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   createOpenAICompatibleCompletionsThinkingOffWrapper,
   createPlainTextToolCallCompatWrapper,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { ssrfPolicyFromHttpBaseUrlAllowedHostname } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { ssrfPolicyFromHttpBaseUrlAllowedHostname } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asPositiveSafeInteger,
   asRecord,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { LMSTUDIO_PROVIDER_ID } from "./defaults.js";
 import { prepareLmstudioModelForInference, type LmstudioPreparedModel } from "./models.fetch.js";
 import { resolveLmstudioInferenceBase } from "./models.js";

@@ -1,10 +1,10 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import { FAILOVER_REASONS } from "../../packages/gateway-protocol/src/failover-reasons.js";
 import type { TaskRecord } from "../tasks/task-registry.types.js";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { seedTaskRegistryRowsForTests } from "../test-utils/task-registry-sqlite.js";
 import type { CronRunLogEntry } from "./run-log-types.js";
 import { CronService } from "./service.js";
@@ -119,8 +119,8 @@ describe("cron task run history", () => {
   );
 
   it("reads executions produced by the cron service from the ledger", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-service-history-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-task-service-history-" },
       async (state) => {
         resetTaskRegistryForTests();
         const storePath = state.path("cron", "jobs.json");
@@ -219,8 +219,8 @@ describe("cron task run history", () => {
   });
 
   it("round-trips outcomes and telemetry through task detail", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-history-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-task-history-" },
       async (state) => {
         const storePath = state.path("jobs.json");
         const storeKey = cronStoreKey(storePath);
@@ -339,8 +339,8 @@ describe("cron task run history", () => {
   });
 
   it("preserves paging and text-query filtering", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-history-page-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-task-history-page-" },
       async (state) => {
         const storeKey = cronStoreKey(state.path("jobs.json"));
         const entries: CronRunLogEntry[] = [
@@ -430,8 +430,8 @@ describe("cron task run history", () => {
   });
 
   it("keeps same-job histories and totals scoped to one cron store", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-history-store-scope-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-task-history-store-scope-" },
       async (state) => {
         const storeA = cronStoreKey(state.path("cron-a", "jobs.json"));
         const storeB = cronStoreKey(state.path("cron-b", "jobs.json"));

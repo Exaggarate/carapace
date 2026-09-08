@@ -170,14 +170,14 @@ describe("subagent registry restart recovery", () => {
     {
       label: "legacy scalar user text and visible assistant text",
       userContent: "latest user direction",
-      assistantContent: "I updated openclaw.json",
+      assistantContent: "I updated carapace.json",
       appendImage: false,
       configChanged: true,
     },
     {
       label: "input_text user direction before an image and hidden reasoning",
       userContent: [{ type: "input_text", text: "latest user direction" }],
-      assistantContent: [{ type: "reasoning", text: "I updated openclaw.json" }],
+      assistantContent: [{ type: "reasoning", text: "I updated carapace.json" }],
       appendImage: true,
       configChanged: false,
     },
@@ -192,7 +192,7 @@ describe("subagent registry restart recovery", () => {
       label: "a final answer instead of preceding signed commentary",
       userContent: "latest user direction",
       assistantContent: [
-        signedAssistantText("commentary", "I will run openclaw gateway restart"),
+        signedAssistantText("commentary", "I will run carapace gateway restart"),
         signedAssistantText("final_answer", "The requested work remains pending"),
       ],
       appendImage: false,
@@ -201,7 +201,7 @@ describe("subagent registry restart recovery", () => {
     {
       label: "visible output_text after an image-only user follow-up",
       userContent: [{ type: "input_text", text: "latest user direction" }],
-      assistantContent: [{ type: "output_text", text: "I updated openclaw.json" }],
+      assistantContent: [{ type: "output_text", text: "I updated carapace.json" }],
       appendImage: true,
       configChanged: true,
     },

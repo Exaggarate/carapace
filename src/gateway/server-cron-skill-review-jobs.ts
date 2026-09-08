@@ -1,6 +1,6 @@
 // Converges the system-owned skill collection review jobs at startup and reload.
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveSkillCollectionReviewMonitorSpecs,
   skillCollectionReviewMonitorAgentId,
@@ -13,7 +13,7 @@ type SkillReviewJobCron = Pick<GatewayCronServiceContract, "add" | "list" | "rem
 
 export async function reconcileSkillCollectionReviewJobs(params: {
   cron: SkillReviewJobCron;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   logger: { warn: (obj: unknown, msg?: string) => void };
   commitGuard?: () => void;
 }): Promise<{ ok: boolean }> {

@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { isIP } from "node:net";
 import { fileTypeFromBuffer } from "file-type";
 import pLimit from "p-limit";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { openRootFile, readFileDescriptorBounded } from "../infra/boundary-file-read.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { normalizeHostname } from "../infra/net/hostname.js";
@@ -283,7 +283,7 @@ export async function handlePluginIconHttpRequest(
   res: ServerResponse,
   opts: {
     auth: ResolvedGatewayAuth;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     basePath?: string;
     trustedProxies?: string[];
     allowRealIpFallback?: boolean;

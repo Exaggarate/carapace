@@ -1,4 +1,4 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { listAgentIds, resolveAgentConfig } from "../agents/agent-scope-config.js";
 // Summarizes extra security audit findings for user-facing output.
 import {
@@ -9,7 +9,7 @@ import { parseModelRef } from "../agents/model-selection-normalize.js";
 import { resolveSandboxConfigForAgent } from "../agents/sandbox/config.js";
 import type { SandboxToolPolicy } from "../agents/sandbox/types.js";
 import { isToolAllowedByPolicies } from "../agents/tool-policy-match.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentToolsConfig } from "../config/types.tools.js";
 import { resolveInternalHookSelection } from "../hooks/configured.js";
 import {
@@ -35,7 +35,7 @@ type SecurityAuditFinding = {
 
 const SMALL_MODEL_PARAM_B_MAX = 300;
 
-function summarizeGroupPolicy(cfg: OpenClawConfig): {
+function summarizeGroupPolicy(cfg: CarapaceConfig): {
   open: number;
   allowlist: number;
   other: number;
@@ -70,7 +70,7 @@ function extractAgentIdFromSource(source: string): string | null {
 }
 
 function resolveToolPolicies(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentTools?: AgentToolsConfig;
   sandboxMode?: "off" | "non-main" | "all";
   agentId?: string | null;
@@ -96,7 +96,7 @@ function resolveToolPolicies(params: {
   });
 }
 
-function hasWebSearchKey(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolean {
+function hasWebSearchKey(cfg: CarapaceConfig, env: NodeJS.ProcessEnv): boolean {
   return hasConfiguredWebSearchCredential({
     config: cfg,
     env,
@@ -104,7 +104,7 @@ function hasWebSearchKey(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolean {
   });
 }
 
-function isWebSearchEnabled(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolean {
+function isWebSearchEnabled(cfg: CarapaceConfig, env: NodeJS.ProcessEnv): boolean {
   const enabled = cfg.tools?.web?.search?.enabled;
   if (enabled === false) {
     return false;
@@ -115,7 +115,7 @@ function isWebSearchEnabled(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolea
   return hasWebSearchKey(cfg, env);
 }
 
-function isWebFetchEnabled(cfg: OpenClawConfig): boolean {
+function isWebFetchEnabled(cfg: CarapaceConfig): boolean {
   const enabled = cfg.tools?.web?.fetch?.enabled;
   if (enabled === false) {
     return false;
@@ -123,7 +123,7 @@ function isWebFetchEnabled(cfg: OpenClawConfig): boolean {
   return true;
 }
 
-function isBrowserEnabled(cfg: OpenClawConfig): boolean {
+function isBrowserEnabled(cfg: CarapaceConfig): boolean {
   if (cfg.browser?.enabled === false) {
     return false;
   }
@@ -138,7 +138,7 @@ function isBrowserEnabled(cfg: OpenClawConfig): boolean {
 }
 
 /** Produce a concise inventory of major security-relevant surfaces. */
-export function collectAttackSurfaceSummaryFindings(cfg: OpenClawConfig): SecurityAuditFinding[] {
+export function collectAttackSurfaceSummaryFindings(cfg: CarapaceConfig): SecurityAuditFinding[] {
   const group = summarizeGroupPolicy(cfg);
   const elevated = cfg.tools?.elevated?.enabled !== false;
   const webhooksEnabled = cfg.hooks?.enabled === true;
@@ -156,7 +156,7 @@ export function collectAttackSurfaceSummaryFindings(cfg: OpenClawConfig): Securi
     `\n` +
     `browser control: ${browserEnabled ? "enabled" : "disabled"}` +
     `\n` +
-    "trust model: personal assistant (one trusted operator boundary), not hostile multi-tenant on one shared gateway. For multiple users or organizations, run one isolated Gateway cell per tenant: https://docs.openclaw.ai/gateway/multi-tenant-hosting";
+    "trust model: personal assistant (one trusted operator boundary), not hostile multi-tenant on one shared gateway. For multiple users or organizations, run one isolated Gateway cell per tenant: https://github.com/Exaggarate/carapace";
 
   return [
     {
@@ -170,7 +170,7 @@ export function collectAttackSurfaceSummaryFindings(cfg: OpenClawConfig): Securi
 
 /** Surface default cross-agent session access, escalating when trust boundaries may differ. */
 export function collectCrossAgentSessionAccessFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): SecurityAuditFinding[] {
   const agentIds = listAgentIds(cfg);
   if (agentIds.length < 2 || resolveSessionToolsVisibility(cfg) !== "all") {
@@ -248,14 +248,14 @@ export function collectCrossAgentSessionAccessFindings(
         [...reachers, ...nonReachers, "Incognito sessions remain hidden."].join("\n") +
         trustDetail,
       remediation:
-        'Set tools.sessions.visibility to "agent", "tree", or "self"; restrict tools.agentToAgent.allow to the intended requester and target ids; or set tools.agentToAgent.enabled: false. See https://docs.openclaw.ai/gateway/config-tools#tools-agenttoagent and https://docs.openclaw.ai/gateway/security#scope-one-trust-boundary-per-gateway.',
+        'Set tools.sessions.visibility to "agent", "tree", or "self"; restrict tools.agentToAgent.allow to the intended requester and target ids; or set tools.agentToAgent.enabled: false. See https://github.com/Exaggarate/carapace#tools-agenttoagent and https://github.com/Exaggarate/carapace#scope-one-trust-boundary-per-gateway.',
     },
   ];
 }
 
 /** Flag small-parameter models when they retain web/browser tool exposure. */
 export function collectSmallModelRiskFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];

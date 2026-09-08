@@ -9,7 +9,7 @@ import {
   listSessionEntriesReadOnly,
 } from "../../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RestartRecoveryCandidate } from "../../gateway/chat-abort.js";
 import type { GatewayContextResolver } from "../../gateway/server-methods/types.js";
 import {
@@ -125,8 +125,8 @@ async function markRecoveryStore(params: {
 
 export async function markRestartAbortedMainSessions(params: {
   resolveGatewayContext: GatewayContextResolver;
-  cfg?: OpenClawConfig;
-  additionalCfgs?: Iterable<OpenClawConfig | undefined>;
+  cfg?: CarapaceConfig;
+  additionalCfgs?: Iterable<CarapaceConfig | undefined>;
   stateDir?: string;
   activeRuns: Iterable<RestartRecoveryCandidate>;
   isActiveRun?: (run: RestartRecoveryCandidate) => boolean;
@@ -290,7 +290,7 @@ export async function markRestartAbortedMainSessions(params: {
 }
 
 export async function markStartupOrphanedMainSessionsForRecovery(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   stateDir?: string;
   activeSessionIds?: Iterable<string>;
   activeSessionKeys?: Iterable<string>;

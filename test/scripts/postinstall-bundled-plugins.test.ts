@@ -36,8 +36,8 @@ describe("bundled plugin postinstall", () => {
 
     expect(
       isDirectPostinstallInvocation({
-        entryPath: "/var/folders/tmp/openclaw/scripts/postinstall-bundled-plugins.mjs",
-        modulePath: "/private/var/folders/tmp/openclaw/scripts/postinstall-bundled-plugins.mjs",
+        entryPath: "/var/folders/tmp/carapace/scripts/postinstall-bundled-plugins.mjs",
+        modulePath: "/private/var/folders/tmp/carapace/scripts/postinstall-bundled-plugins.mjs",
         realpathSync,
       }),
     ).toBe(true);
@@ -78,7 +78,7 @@ describe("bundled plugin postinstall", () => {
   ])(
     "preserves shared default and configured Node caches during $cacheMode packaged postinstall",
     async ({ disableCompileCache }) => {
-      const packageRoot = await createTempDirAsync("openclaw-packaged-compile-cache-");
+      const packageRoot = await createTempDirAsync("carapace-packaged-compile-cache-");
       const scriptRoot = path.join(packageRoot, "scripts");
       const temporaryRoot = path.join(packageRoot, "temporary");
       const configuredCacheRoot = path.join(packageRoot, "configured-node-cache");
@@ -94,7 +94,7 @@ describe("bundled plugin postinstall", () => {
       await fs.mkdir(path.join(packageRoot, "home"), { recursive: true });
       await fs.writeFile(
         path.join(packageRoot, "package.json"),
-        '{"name":"openclaw","type":"module","version":"2026.7.2"}\n',
+        '{"name":"carapace","type":"module","version":"2026.7.2"}\n',
       );
       await fs.copyFile(
         fileURLToPath(new URL("../../scripts/postinstall-bundled-plugins.mjs", import.meta.url)),
@@ -118,10 +118,10 @@ describe("bundled plugin postinstall", () => {
           env: {
             ...process.env,
             HOME: path.join(packageRoot, "home"),
-            OPENCLAW_CONFIG_PATH: undefined,
-            OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
-            OPENCLAW_HOME: path.join(packageRoot, "home"),
-            OPENCLAW_STATE_DIR: path.join(packageRoot, "state"),
+            CARAPACE_CONFIG_PATH: undefined,
+            CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
+            CARAPACE_HOME: path.join(packageRoot, "home"),
+            CARAPACE_STATE_DIR: path.join(packageRoot, "state"),
             STATE_DIRECTORY: undefined,
             NODE_COMPILE_CACHE: configuredCacheRoot,
             NODE_DISABLE_COMPILE_CACHE: disableCompileCache,
@@ -160,7 +160,7 @@ describe("bundled plugin postinstall", () => {
   it.each(["git checkout", "workspace snapshot"])(
     "preserves importer dependency resolution during %s postinstall",
     async (sourceKind) => {
-      const packageRoot = await createTempDirAsync("openclaw-source-resolution-");
+      const packageRoot = await createTempDirAsync("carapace-source-resolution-");
       const fixture = await createSourcePluginDependenciesFixture(packageRoot);
       const scriptPath = path.join(packageRoot, "scripts", "postinstall-bundled-plugins.mjs");
       await fs.mkdir(path.join(packageRoot, "scripts", "lib"), { recursive: true });
@@ -184,11 +184,11 @@ describe("bundled plugin postinstall", () => {
         env: {
           ...process.env,
           HOME: path.join(packageRoot, "home"),
-          OPENCLAW_HOME: path.join(packageRoot, "home"),
-          OPENCLAW_STATE_DIR: path.join(packageRoot, "state"),
-          OPENCLAW_CONFIG_PATH: undefined,
+          CARAPACE_HOME: path.join(packageRoot, "home"),
+          CARAPACE_STATE_DIR: path.join(packageRoot, "state"),
+          CARAPACE_CONFIG_PATH: undefined,
           STATE_DIRECTORY: undefined,
-          OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
+          CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
         },
       });
       expect(result.status, result.stderr).toBe(0);
@@ -197,9 +197,9 @@ describe("bundled plugin postinstall", () => {
   );
 
   it("does not prune user-state legacy runtime deps during source-checkout postinstall", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-source-checkout-state-skip-");
-    const home = await createTempDirAsync("openclaw-source-checkout-home-");
-    const legacyRuntimeRoot = path.join(home, ".openclaw", "plugin-runtime-deps");
+    const packageRoot = await createTempDirAsync("carapace-source-checkout-state-skip-");
+    const home = await createTempDirAsync("carapace-source-checkout-home-");
+    const legacyRuntimeRoot = path.join(home, ".carapace", "plugin-runtime-deps");
     await fs.mkdir(path.join(packageRoot, ".git"), { recursive: true });
     await fs.mkdir(path.join(packageRoot, "src"), { recursive: true });
     await fs.mkdir(path.join(packageRoot, "extensions"), { recursive: true });
@@ -216,14 +216,14 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("honors the disable env before packaged cleanup", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-postinstall-disabled-");
+    const packageRoot = await createTempDirAsync("carapace-postinstall-disabled-");
     const staleFile = path.join(packageRoot, "dist", "stale.js");
     await fs.mkdir(path.dirname(staleFile), { recursive: true });
     await fs.writeFile(path.join(packageRoot, "dist", "postinstall-inventory.json"), "[]\n");
     await fs.writeFile(staleFile, "export {};\n");
 
     runBundledPluginPostinstall({
-      env: { OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: "1" },
+      env: { CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: "1" },
       packageRoot,
     });
 
@@ -233,11 +233,11 @@ describe("bundled plugin postinstall", () => {
   it.each([undefined, "1"])(
     "completes packaged lifecycle without changing operator databases (disabled=%s)",
     async (disabled) => {
-      const fixtureRoot = await createTempDirAsync("openclaw-postinstall-state-");
-      const packageRoot = path.join(fixtureRoot, "node_modules", "openclaw");
+      const fixtureRoot = await createTempDirAsync("carapace-postinstall-state-");
+      const packageRoot = path.join(fixtureRoot, "node_modules", "carapace");
       const home = path.join(fixtureRoot, "home");
-      const stateDir = path.join(home, ".openclaw");
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const stateDir = path.join(home, ".carapace");
+      const databasePath = path.join(stateDir, "state", "carapace.sqlite");
       const scriptPath = path.join(packageRoot, "scripts", "postinstall-bundled-plugins.mjs");
       const markerPath = path.join(packageRoot, PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH);
       const migrationPath = path.join(
@@ -274,7 +274,7 @@ describe("bundled plugin postinstall", () => {
           "import { DatabaseSync } from 'node:sqlite';",
           "import { join } from 'node:path';",
           "export function migratePluginRegistryForInstall({ env }) {",
-          "  const db = new DatabaseSync(join(env.OPENCLAW_STATE_DIR, 'state', 'openclaw.sqlite'));",
+          "  const db = new DatabaseSync(join(env.CARAPACE_STATE_DIR, 'state', 'carapace.sqlite'));",
           "  try { db.exec('PRAGMA user_version = 9; DROP TABLE operator_state;'); }",
           "  finally { db.close(); }",
           "  return { migrated: true, current: { plugins: [] } };",
@@ -289,11 +289,11 @@ describe("bundled plugin postinstall", () => {
         env: {
           ...process.env,
           HOME: home,
-          OPENCLAW_HOME: home,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: undefined,
+          CARAPACE_HOME: home,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: undefined,
           STATE_DIRECTORY: undefined,
-          OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: disabled,
+          CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: disabled,
         },
       });
       expect(result.status, result.stderr).toBe(0);
@@ -303,7 +303,7 @@ describe("bundled plugin postinstall", () => {
   );
 
   it("prunes stale dist files from packaged installs", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-");
     const currentFile = path.join(packageRoot, "dist", "channel-BOa4MfoC.js");
     const staleFile = path.join(packageRoot, "dist", "channel-CJUAgRQR.js");
     await fs.mkdir(path.dirname(currentFile), { recursive: true });
@@ -323,7 +323,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("prunes from the authoritative inventory without reading dist JavaScript", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-no-js-read-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-no-js-read-");
     const currentFile = path.join(packageRoot, "dist", "current.js");
     const staleFile = path.join(packageRoot, "dist", "stale.js");
     const inventoryPath = path.join(packageRoot, "dist", "postinstall-inventory.json");
@@ -353,7 +353,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("omits unpacked plugin-sdk test helpers from the package dist inventory", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-inventory-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-inventory-");
     const runtimeFile = path.join(packageRoot, "dist", "plugin-sdk", "runtime.js");
     const testHelperFile = path.join(packageRoot, "dist", "plugin-sdk", "channel-test-helpers.js");
     const nestedTestHelperFile = path.join(
@@ -381,19 +381,19 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("preserves other installs' runtime dependencies and sibling symlinks during packaged postinstall", async () => {
-    const prefix = await createTempDirAsync("openclaw-packaged-prefix-");
-    const packageRoot = path.join(prefix, "lib", "node_modules", "openclaw");
+    const prefix = await createTempDirAsync("carapace-packaged-prefix-");
+    const packageRoot = path.join(prefix, "lib", "node_modules", "carapace");
     const nodeModulesRoot = path.dirname(packageRoot);
-    const home = await createTempDirAsync("openclaw-packaged-home-");
+    const home = await createTempDirAsync("carapace-packaged-home-");
     const stateOverride = path.join(home, "custom-state");
     const systemState = path.join(home, "system-state");
-    const defaultLegacyRoot = path.join(home, ".openclaw", "plugin-runtime-deps");
+    const defaultLegacyRoot = path.join(home, ".carapace", "plugin-runtime-deps");
     const oldBrandLegacyRoot = path.join(home, ".clawdbot", "plugin-runtime-deps");
     const overrideLegacyRoot = path.join(stateOverride, "plugin-runtime-deps");
     const systemLegacyRoot = path.join(systemState, "plugin-runtime-deps");
     const thirdPartyNodeModules = path.join(
       home,
-      ".openclaw",
+      ".carapace",
       "extensions",
       "lossless-claw",
       "node_modules",
@@ -401,7 +401,7 @@ describe("bundled plugin postinstall", () => {
     const currentFile = path.join(packageRoot, "dist", "entry.js");
     const legacySymlinkTarget = path.join(
       defaultLegacyRoot,
-      "openclaw-2026.4.29-slack",
+      "carapace-2026.4.29-slack",
       "node_modules",
       "@slack",
       "web-api",
@@ -430,7 +430,7 @@ describe("bundled plugin postinstall", () => {
     runBundledPluginPostinstall({
       env: {
         HOME: home,
-        OPENCLAW_STATE_DIR: stateOverride,
+        CARAPACE_STATE_DIR: stateOverride,
         STATE_DIRECTORY: systemState,
       },
       packageRoot,
@@ -448,14 +448,14 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("prunes stale private QA files without restoring compat sidecars", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-qa-compat-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-qa-compat-");
     const currentFile = path.join(packageRoot, "dist", "entry.js");
     const currentManifest = path.join(
       packageRoot,
       "dist",
       "extensions",
       "example",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
     );
     const stalePackage = path.join(packageRoot, "dist", "extensions", "qa-lab", "package.json");
     const staleManifest = path.join(
@@ -463,7 +463,7 @@ describe("bundled plugin postinstall", () => {
       "dist",
       "extensions",
       "qa-lab",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
     );
     await fs.mkdir(path.dirname(stalePackage), { recursive: true });
     await fs.mkdir(path.dirname(currentManifest), { recursive: true });
@@ -493,7 +493,7 @@ describe("bundled plugin postinstall", () => {
       path.join(packageRoot, "dist", "extensions", "qa-channel", "package.json"),
     );
     await expectPathMissing(
-      path.join(packageRoot, "dist", "extensions", "qa-channel", "openclaw.plugin.json"),
+      path.join(packageRoot, "dist", "extensions", "qa-channel", "carapace.plugin.json"),
     );
     await expectPathMissing(
       path.join(packageRoot, "dist", "extensions", "qa-lab", "runtime-api.js"),
@@ -501,7 +501,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("keeps packaged postinstall non-fatal when the dist inventory is missing", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-missing-inventory-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-missing-inventory-");
     const staleFile = path.join(packageRoot, "dist", "channel-CJUAgRQR.js");
     await fs.mkdir(path.dirname(staleFile), { recursive: true });
     await fs.writeFile(staleFile, "export {};\n");
@@ -521,7 +521,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("keeps packaged postinstall non-fatal when the dist inventory is invalid", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-invalid-inventory-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-invalid-inventory-");
     const currentFile = path.join(packageRoot, "dist", "channel-BOa4MfoC.js");
     const inventoryPath = path.join(packageRoot, "dist", "postinstall-inventory.json");
     await fs.mkdir(path.dirname(currentFile), { recursive: true });
@@ -629,7 +629,7 @@ describe("bundled plugin postinstall", () => {
     );
     // One budget spans all three prune walks, and npm upgrades scan old+new
     // content-hashed dist files (~24k entries as of 2026.6.x). A cap without
-    // several-x headroom fails `npm install -g openclaw` for upgrading users.
+    // several-x headroom fails `npm install -g carapace` for upgrading users.
     expect(MAX_INSTALLED_DIST_SCAN_ENTRIES).toBeGreaterThanOrEqual(100_000);
   });
 
@@ -711,7 +711,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("prunes sibling empty dist directories after closing parent scans", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-empty-dirs-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-empty-dirs-");
     const firstEmptyDir = path.join(packageRoot, "dist", "empty-a");
     const secondEmptyDir = path.join(packageRoot, "dist", "empty-b");
     await fs.mkdir(firstEmptyDir, { recursive: true });
@@ -730,7 +730,7 @@ describe("bundled plugin postinstall", () => {
   });
 
   it("prunes stale bundled plugin dependency debris from packaged dist", async () => {
-    const packageRoot = await createTempDirAsync("openclaw-packaged-install-dist-prune-");
+    const packageRoot = await createTempDirAsync("carapace-packaged-install-dist-prune-");
     const staleFile = path.join(packageRoot, "dist", "stale-runtime.js");
     const packageJson = path.join(packageRoot, "dist", "extensions", "slack", "package.json");
     const binDir = path.join(packageRoot, "dist", "extensions", "slack", "node_modules", ".bin");
@@ -748,7 +748,7 @@ describe("bundled plugin postinstall", () => {
       "dist",
       "extensions",
       "slack",
-      ".openclaw-install-stage",
+      ".carapace-install-stage",
       "node_modules",
       "typebox",
       "build",
@@ -760,7 +760,7 @@ describe("bundled plugin postinstall", () => {
       "dist",
       "extensions",
       "slack",
-      ".openclaw-install-stage-retry",
+      ".carapace-install-stage-retry",
       "node_modules",
       "typebox",
       "build",

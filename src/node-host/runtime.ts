@@ -1,7 +1,7 @@
 /** Transport-independent CLI node-host runtime shared by Gateway and app workers. */
 import fs from "node:fs";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { getRuntimeConfig } from "../config/config.js";
 import type { SkillBinTrustEntry } from "../infra/exec-approvals.js";
 import { resolveExecutableFromPathEnv } from "../infra/executable-path.js";
@@ -21,12 +21,12 @@ import {
 } from "../infra/node-commands.js";
 import { createNodeDuplexEndpoint } from "../infra/node-duplex-framing.js";
 import type { NodeWorkerCapacitySnapshot } from "../infra/node-runner-inventory.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureCarapaceCliOnPath } from "../infra/path-env.js";
 import { ensureTerminalUploadCleanup } from "../infra/terminal-file-upload.js";
 import { logDebug } from "../logger.js";
 import type { ComputerUseCapabilityDescriptor } from "../plugins/computer-use-contract.js";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
-import type { OpenClawPluginNodeHostCommandContext } from "../plugins/types.node-host.js";
+import type { CarapacePluginNodeHostCommandIo } from "../plugins/types.js";
+import type { CarapacePluginNodeHostCommandContext } from "../plugins/types.node-host.js";
 import { BoundedBuffer } from "../shared/bounded-buffer.js";
 import { NODE_DESKTOP_STREAM_COMMAND } from "../shared/node-desktop-stream.js";
 import type { NodeHostClient } from "./client.js";
@@ -230,7 +230,7 @@ class SkillBinsCache implements SkillBinsProvider {
 }
 
 function ensureNodePathEnv(): string {
-  ensureOpenClawCliOnPath({ pathEnv: process.env.PATH ?? "" });
+  ensureCarapaceCliOnPath({ pathEnv: process.env.PATH ?? "" });
   const current = process.env.PATH ?? "";
   if (current.trim()) {
     return current;
@@ -269,7 +269,7 @@ function sameManifest(left: NodeHostManifest, right: NodeHostManifest): boolean 
 }
 
 export async function prepareNodeHostRuntime(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   /** The embedded app worker never advertises native agent runs. */
   enableAgentRuns?: boolean;
@@ -481,7 +481,7 @@ export async function prepareNodeHostRuntime(params?: {
       let skillBins = new SkillBinsCache(client, pathEnv);
       const activeInvokes = new Map<string, ActiveNodeInvoke>();
       let pluginDisconnectCleanup: Promise<void> = Promise.resolve();
-      const pluginCommandContext: OpenClawPluginNodeHostCommandContext = {
+      const pluginCommandContext: CarapacePluginNodeHostCommandContext = {
         sendNodeEvent: async (event, payload) =>
           await client.request("node.event", buildNodeEventParams(event, payload)),
         ...(workerWorkspace
@@ -601,7 +601,7 @@ export async function prepareNodeHostRuntime(params?: {
             controller.signal.addEventListener("abort", () => framedIo.close(), { once: true });
           }
           let framedInputRegistered = false;
-          const pluginCommandIo: OpenClawPluginNodeHostCommandIo | undefined =
+          const pluginCommandIo: CarapacePluginNodeHostCommandIo | undefined =
             input && progress && framedIo
               ? {
                   signal: controller.signal,

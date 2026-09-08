@@ -36,7 +36,7 @@ const hoisted = vi.hoisted(
 setCliRunnerPrepareTestDeps({
   makeBootstrapWarn: () => () => {},
   resolveBootstrapContextForRun: hoisted.resolveBootstrapContextForRunMock,
-  resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+  resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
 });
 
 beforeEach(() => {

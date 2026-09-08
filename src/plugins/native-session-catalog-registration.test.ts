@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createConfigIO } from "../config/io.factory.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { validateConfigObjectWithPlugins } from "../config/validation.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 import { createPluginRegistry } from "./registry.js";
@@ -23,11 +23,11 @@ async function registerCatalog(
   options: { pluginId?: string; legacyDefaultEnabled?: boolean } = {},
 ) {
   const pluginId = options.pluginId ?? "fixture";
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-native-catalog-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-native-catalog-"));
   roots.push(root);
-  const configPath = path.join(root, "openclaw.json");
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-  let source: OpenClawConfig =
+  const configPath = path.join(root, "carapace.json");
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+  let source: CarapaceConfig =
     initial === undefined
       ? {}
       : {
@@ -40,7 +40,7 @@ async function registerCatalog(
   } else if (configExists === true) {
     await fs.writeFile(configPath, JSON.stringify(source));
   }
-  const env = { HOME: root, OPENCLAW_STATE_DIR: root, OPENCLAW_CONFIG_PATH: configPath };
+  const env = { HOME: root, CARAPACE_STATE_DIR: root, CARAPACE_CONFIG_PATH: configPath };
   const io = createConfigIO({
     env,
     homedir: () => root,
@@ -63,7 +63,7 @@ async function registerCatalog(
     enabledByDefault: true,
     rootDir: root,
     source: path.join(root, "index.js"),
-    manifestPath: path.join(root, "openclaw.plugin.json"),
+    manifestPath: path.join(root, "carapace.plugin.json"),
     setup: {
       nativeSessionCatalog: {
         label: "Fixture",
@@ -98,7 +98,7 @@ async function registerCatalog(
     ok: true,
     value: { sessionCatalog: { enabled: true, pageSize: 10 } },
   });
-  const validate = (input: OpenClawConfig) => {
+  const validate = (input: CarapaceConfig) => {
     const validated = validateConfigObjectWithPlugins(
       {
         ...input,

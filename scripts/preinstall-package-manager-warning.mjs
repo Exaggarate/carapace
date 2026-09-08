@@ -273,14 +273,14 @@ export function enforceSupportedNodeRuntime(
   }
 
   const requirement = engine
-    ? `this OpenClaw release requires Node ${engine}.`
-    : "could not read this OpenClaw release's Node requirement.";
+    ? `this Carapace release requires Node ${engine}.`
+    : "could not read this Carapace release's Node requirement.";
   reportError(
     [
-      `[openclaw] error: ${requirement}`,
-      `[openclaw] detected Node ${detectedRuntime?.version ?? "missing"} (exec: ${detectedRuntime?.execPath || "unknown"}).`,
-      "[openclaw] install Node: https://nodejs.org/en/download",
-      "[openclaw] upgrade Node, then retry the OpenClaw update.",
+      `[carapace] error: ${requirement}`,
+      `[carapace] detected Node ${detectedRuntime?.version ?? "missing"} (exec: ${detectedRuntime?.execPath || "unknown"}).`,
+      "[carapace] install Node: https://nodejs.org/en/download",
+      "[carapace] upgrade Node, then retry the Carapace update.",
     ].join("\n"),
   );
   return false;
@@ -307,7 +307,7 @@ export function removeLegacyPackageInstallGuard(
     return true;
   } catch (error) {
     reportError(
-      `[openclaw] error: could not remove the legacy package install guard: ${
+      `[carapace] error: could not remove the legacy package install guard: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -375,9 +375,9 @@ export function createPackageManagerWarningMessage(packageManager) {
   }
 
   return [
-    `[openclaw] warning: detected ${normalizedPackageManager} for install lifecycle.`,
-    "[openclaw] this repo works best with pnpm; npm-compatible installs are slower and much larger here.",
-    "[openclaw] prefer: corepack pnpm install",
+    `[carapace] warning: detected ${normalizedPackageManager} for install lifecycle.`,
+    "[carapace] this repo works best with pnpm; npm-compatible installs are slower and much larger here.",
+    "[carapace] prefer: corepack pnpm install",
   ].join("\n");
 }
 

@@ -1,5 +1,5 @@
 /** Tests CLI runner integration with context-engine lifecycle hooks. */
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ContextEngine } from "../context-engine/types.js";
 import { createUserTurnTranscriptRecorder } from "../sessions/user-turn-transcript.js";
@@ -84,9 +84,9 @@ function createMaintenanceResult() {
 // the exact target it was given rather than re-deriving one from a session file token.
 const CONTEXT_ENGINE_SESSION_TARGET = {
   agentId: "main",
-  sessionId: "openclaw-session-1",
+  sessionId: "carapace-session-1",
   sessionKey: "agent:main:main",
-  storePath: "/tmp/openclaw-cli-context-engine-test/openclaw-agent.sqlite",
+  storePath: "/tmp/carapace-cli-context-engine-test/carapace-agent.sqlite",
 } as const;
 
 function createAdmittedCliRecorder(entryId: string) {
@@ -121,12 +121,12 @@ function buildPreparedContext(contextEngine: ContextEngine): PreparedCliRunConte
   return {
     params: {
       admittedRunContext: createTestAdmittedRunContext("run-1"),
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
       sessionKey: "agent:main:main",
       agentId: "main",
       sessionFile: "session.jsonl",
       sessionTarget: CONTEXT_ENGINE_SESSION_TARGET,
-      workspaceDir: "/tmp/openclaw-cli-context-engine-test",
+      workspaceDir: "/tmp/carapace-cli-context-engine-test",
       prompt: "visible ask",
       transcriptPrompt: "transcript visible ask",
       provider: "claude-cli",
@@ -136,7 +136,7 @@ function buildPreparedContext(contextEngine: ContextEngine): PreparedCliRunConte
       runId: "run-1",
     },
     started: Date.now(),
-    workspaceDir: "/tmp/openclaw-cli-context-engine-test",
+    workspaceDir: "/tmp/carapace-cli-context-engine-test",
     backendResolved: {
       id: "claude-cli",
       config: backend,
@@ -330,13 +330,13 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
     expect(bootstrap).toHaveBeenCalledTimes(1);
     const bootstrapParams = bootstrap.mock.calls[0]?.[0];
     expect.soft(bootstrapParams).toMatchObject({
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
       sessionKey: "agent:main:main",
       sessionTarget: CONTEXT_ENGINE_SESSION_TARGET,
       sessionFile: "session.jsonl",
       runtimeSettings: {
         schemaVersion: 1,
-        runtime: { host: "openclaw", mode: "normal" },
+        runtime: { host: "carapace", mode: "normal" },
         model: {
           provider: "claude-cli",
           requested: null,
@@ -355,7 +355,7 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
     expect(afterTurn).toHaveBeenCalledTimes(1);
     const afterTurnParams = afterTurn.mock.calls[0]?.[0];
     expect.soft(afterTurnParams).toMatchObject({
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
       sessionKey: "agent:main:main",
       sessionTarget: CONTEXT_ENGINE_SESSION_TARGET,
       sessionFile: "session.jsonl",
@@ -382,7 +382,7 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
       sessionTarget: CONTEXT_ENGINE_SESSION_TARGET,
     });
     expect.soft(maintain.mock.calls[1]?.[0]).toMatchObject({
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
       sessionKey: "agent:main:main",
       sessionTarget: CONTEXT_ENGINE_SESSION_TARGET,
       sessionFile: "session.jsonl",
@@ -459,7 +459,7 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
     expect(onContextEngineTurnCandidate).toHaveBeenCalledWith(
       expect.objectContaining({
         boundary: { admission, terminal: admission },
-        sessionIdUsed: "openclaw-session-1",
+        sessionIdUsed: "carapace-session-1",
         sessionKey: "agent:main:main",
       }),
     );
@@ -564,7 +564,7 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
     expect(ingestBatch).toHaveBeenCalledTimes(1);
     const ingestBatchParams = ingestBatch.mock.calls[0]?.[0];
     expect(ingestBatchParams).toMatchObject({
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
       sessionKey: "agent:main:main",
     });
     expect(ingestBatchParams?.messages).toHaveLength(2);
@@ -697,7 +697,7 @@ describe("runPreparedCliAgent context engine lifecycle", () => {
       reason: "empty_response",
       provider: "claude-cli",
       model: "sonnet-4.6",
-      sessionId: "openclaw-session-1",
+      sessionId: "carapace-session-1",
     });
 
     expect(bootstrap).toHaveBeenCalledTimes(1);

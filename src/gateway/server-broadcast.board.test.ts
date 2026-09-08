@@ -14,9 +14,9 @@ import {
   deleteSessionEntryLifecycle,
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { onSessionLifecycleEvent } from "../sessions/session-lifecycle-events.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { boardStore } from "./board-store.js";
 import { progressCardStore } from "./progress-card-store.js";
 import { createGatewayBroadcaster } from "./server-broadcast.js";
@@ -209,8 +209,8 @@ describe("board and progress event session ownership", () => {
   ] as const)(
     "delivers $feature events only to the canonical draft owner in $scope mode",
     async ({ scope, feature }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
-        const cfg: OpenClawConfig = {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
+        const cfg: CarapaceConfig = {
           ...rolePolicyConfig(),
           agents: { list: [{ id: "main", default: true }, { id: "work" }] },
           session: { scope },
@@ -386,7 +386,7 @@ describe("board and progress event session ownership", () => {
 
 describe("collaboration event scope guards", () => {
   it("revalidates an authoritative session-generation creator replacement before socket I/O", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:draft-owner-filter";
       const ownerActor = {
         type: "human" as const,
@@ -422,7 +422,7 @@ describe("collaboration event scope guards", () => {
           updatedAt: 1,
         };
       }
-      const cfg: OpenClawConfig = {};
+      const cfg: CarapaceConfig = {};
       const filter = vi.fn(
         (
           client: GatewayWsClient,
@@ -612,7 +612,7 @@ describe("collaboration event scope guards", () => {
       subscribers,
       isVisible: () => true,
       getConfig: () =>
-        ({ agents: { list: [{ id: "main", default: true }, { id: "work" }] } }) as OpenClawConfig,
+        ({ agents: { list: [{ id: "main", default: true }, { id: "work" }] } }) as CarapaceConfig,
     });
     const { broadcastToConnIds } = createGatewayBroadcaster({
       clients: new GatewayClientRegistry([
@@ -657,7 +657,7 @@ describe("collaboration event scope guards", () => {
       sessionEventSubscribers,
       isVisible: () => true,
       getConfig: () =>
-        ({ agents: { list: [{ id: "main", default: true }, { id: "work" }] } }) as OpenClawConfig,
+        ({ agents: { list: [{ id: "main", default: true }, { id: "work" }] } }) as CarapaceConfig,
     });
     const { broadcastToConnIds } = createGatewayBroadcaster({
       clients: new GatewayClientRegistry([message.client, eventOnly.client, unrelated.client]),
@@ -808,8 +808,8 @@ describe("collaboration event scope guards", () => {
 });
 
 it("delivers committed collector updates to a parent-only cross-agent viewer", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
-    const cfg: OpenClawConfig = {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
+    const cfg: CarapaceConfig = {
       ...rolePolicyConfig(),
       agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
     };

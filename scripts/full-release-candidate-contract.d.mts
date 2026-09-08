@@ -14,7 +14,7 @@ export interface FullReleaseCandidateRequest {
   releaseProfile: string;
   releaseSoak: boolean;
   repository: string;
-  schema: "openclaw.full-release-candidate-request/v2";
+  schema: "carapace.full-release-candidate-request/v2";
   sharedImagePolicy: string;
   targetSha: string;
   toolingSha: string;
@@ -78,14 +78,14 @@ export interface FullReleaseCandidateManifest {
   publisher: FullReleaseCandidatePublisher;
   request: FullReleaseCandidateRequest;
   requestSha256: string;
-  schema: "openclaw.full-release-candidate/v2";
+  schema: "carapace.full-release-candidate/v2";
   sharedImage: FullReleaseCandidateSharedImage;
 }
 
 export interface FullReleaseCandidateBinding extends Omit<FullReleaseCandidateManifest, "schema"> {
   evidenceArtifact: FullReleaseCandidateArtifactIdentity;
   manifestSha256: string;
-  schema: "openclaw.full-release-candidate-binding/v2";
+  schema: "carapace.full-release-candidate-binding/v2";
 }
 
 export function buildFullReleaseCandidateRequest(

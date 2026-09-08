@@ -9,7 +9,7 @@ import { recordPluginCandidateInstallOwner } from "./candidate-install-owner.js"
 import type { PluginCandidate } from "./discovery.js";
 import { resolvePluginManifestInstallOwner } from "./manifest-install-owner.js";
 import { loadPluginManifestRegistryCore } from "./manifest-registry.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { CarapacePackageManifest } from "./manifest.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "./test-helpers/fs-fixtures.js";
 
@@ -29,12 +29,12 @@ function mkdirSafe(dir: string) {
 }
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-manifest-registry", tempDirs);
+  return makeTrackedTempDir("carapace-manifest-registry", tempDirs);
 }
 
-function makeOpenClawDevSourceRoot() {
+function makeCarapaceDevSourceRoot() {
   const root = makeTempDir();
-  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }), "utf-8");
+  fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }), "utf-8");
   fs.writeFileSync(path.join(root, "pnpm-workspace.yaml"), "packages: [extensions/*]\n");
   mkdirSafe(path.join(root, "src"));
   mkdirSafe(path.join(root, "extensions"));
@@ -42,7 +42,7 @@ function makeOpenClawDevSourceRoot() {
 }
 
 function writeManifest(dir: string, manifest: Record<string, unknown>) {
-  fs.writeFileSync(path.join(dir, "openclaw.plugin.json"), JSON.stringify(manifest), "utf-8");
+  fs.writeFileSync(path.join(dir, "carapace.plugin.json"), JSON.stringify(manifest), "utf-8");
 }
 
 function writeTextFile(rootDir: string, relativePath: string, value: string) {
@@ -73,11 +73,11 @@ function createPluginCandidate(params: {
   rootDir: string;
   sourceName?: string;
   origin: "bundled" | "global" | "workspace" | "config";
-  format?: "openclaw" | "bundle";
+  format?: "carapace" | "bundle";
   bundleFormat?: "agent" | "codex" | "claude" | "cursor";
   packageName?: string;
   packageVersion?: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   packageDir?: string;
   bundledManifest?: PluginCandidate["bundledManifest"];
   bundledManifestPath?: string;
@@ -108,10 +108,10 @@ function createMsteamsClawHubInstallRecord(
 ): PluginInstallRecord {
   const record: PluginInstallRecord = {
     source: "clawhub",
-    spec: "clawhub:@openclaw/msteams",
+    spec: "clawhub:@carapace/msteams",
     installPath,
     clawhubUrl: "https://clawhub.ai",
-    clawhubPackage: "@openclaw/msteams",
+    clawhubPackage: "@carapace/msteams",
     clawhubChannel: "official",
   };
   return { ...record, ...overrides };
@@ -128,7 +128,7 @@ function resolveMsteamsClawHubTrust(overrides: Partial<PluginInstallRecord> = {}
       createPluginCandidate({
         idHint: "msteams",
         rootDir: dir,
-        packageName: "@openclaw/msteams",
+        packageName: "@carapace/msteams",
         origin: "global",
         installOwner: "msteams",
       }),
@@ -144,11 +144,11 @@ function resolveDiffsNpmTrust(overrides: Partial<PluginInstallRecord> = {}) {
     installRecords: {
       diffs: {
         source: "npm",
-        spec: "@openclaw/diffs",
+        spec: "@carapace/diffs",
         installPath: dir,
-        resolvedName: "@openclaw/diffs",
+        resolvedName: "@carapace/diffs",
         resolvedVersion: "2026.7.16",
-        resolvedSpec: "@openclaw/diffs@2026.7.16",
+        resolvedSpec: "@carapace/diffs@2026.7.16",
         ...overrides,
       },
     },
@@ -156,7 +156,7 @@ function resolveDiffsNpmTrust(overrides: Partial<PluginInstallRecord> = {}) {
       createPluginCandidate({
         idHint: "diffs",
         rootDir: dir,
-        packageName: "@openclaw/diffs",
+        packageName: "@carapace/diffs",
         origin: "global",
         installOwner: "diffs",
       }),
@@ -173,8 +173,8 @@ function loadRegistry(candidates: PluginCandidate[]) {
 
 function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: undefined,
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: undefined,
     VITEST: "true",
     ...overrides,
   };
@@ -268,8 +268,8 @@ function prepareLinkedManifestFixture(params: { id: string; mode: "symlink" | "h
 } {
   const rootDir = makeTempDir();
   const outsideDir = makeTempDir();
-  const outsideManifest = path.join(outsideDir, "openclaw.plugin.json");
-  const linkedManifest = path.join(rootDir, "openclaw.plugin.json");
+  const outsideManifest = path.join(outsideDir, "carapace.plugin.json");
+  const linkedManifest = path.join(rootDir, "carapace.plugin.json");
   fs.writeFileSync(path.join(rootDir, "index.ts"), "export default function () {}", "utf-8");
   fs.writeFileSync(
     outsideManifest,
@@ -325,7 +325,7 @@ function loadRegistryForMinHostVersionCase(params: {
         origin: "global",
         packageManifest: {
           install: {
-            npmSpec: "@openclaw/synology-chat",
+            npmSpec: "@carapace/synology-chat",
             minHostVersion: params.minHostVersion,
           },
         },
@@ -352,7 +352,7 @@ function loadRegistryForPluginApiCase(params: {
         origin: params.origin ?? "global",
         packageManifest: {
           install: {
-            npmSpec: "@openclaw/synology-chat",
+            npmSpec: "@carapace/synology-chat",
             minHostVersion: ">=2026.4.25",
           },
           compat: {
@@ -489,19 +489,19 @@ describe("loadPluginManifestRegistry", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/cached-manifest",
-        openclaw: { extensions: ["./index.js"] },
+        name: "@carapace/cached-manifest",
+        carapace: { extensions: ["./index.js"] },
       }),
       "utf-8",
     );
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     writeManifest(pluginDir, {
       id: "cached-manifest",
       name: "Before",
       configSchema: { type: "object" },
     });
     const env = hermeticEnv({
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_STATE_DIR: stateDir,
     });
 
     const first = loadPluginManifestRegistryCore({ env });
@@ -738,7 +738,7 @@ describe("loadPluginManifestRegistry", () => {
   it("preserves the identity of every independently malformed plugin manifest", () => {
     const candidates = ["first-invalid", "second-invalid"].map((pluginId) => {
       const rootDir = makeTempDir();
-      fs.writeFileSync(path.join(rootDir, "openclaw.plugin.json"), '{"id":', "utf-8");
+      fs.writeFileSync(path.join(rootDir, "carapace.plugin.json"), '{"id":', "utf-8");
       return createPluginCandidate({ idHint: pluginId, rootDir, origin: "global" });
     });
 
@@ -755,7 +755,7 @@ describe("loadPluginManifestRegistry", () => {
     const candidates = ["first", "second"].map((parent) => {
       const rootDir = path.join(root, parent, "plugin");
       mkdirSafe(rootDir);
-      fs.writeFileSync(path.join(rootDir, "openclaw.plugin.json"), '{"id":', "utf-8");
+      fs.writeFileSync(path.join(rootDir, "carapace.plugin.json"), '{"id":', "utf-8");
       writeTextFile(rootDir, "index.js", "export default {};");
       return createPluginCandidate({
         idHint: "index",
@@ -772,7 +772,7 @@ describe("loadPluginManifestRegistry", () => {
         expect.objectContaining({
           level: "error",
           pluginId: "index",
-          source: path.join(candidate.rootDir, "openclaw.plugin.json"),
+          source: path.join(candidate.rootDir, "carapace.plugin.json"),
         }),
       ),
     );
@@ -912,7 +912,7 @@ describe("loadPluginManifestRegistry", () => {
   it.each(["extensions", "dist/extensions", "dist-runtime/extensions"])(
     "prefers dev %s plugins over installed globals with the same id",
     (tree) => {
-      const devSourceRoot = makeOpenClawDevSourceRoot();
+      const devSourceRoot = makeCarapaceDevSourceRoot();
       const bundledDir = path.join(devSourceRoot, tree, "codex");
       const globalDir = makeTempDir();
       const manifest = { id: "codex", configSchema: { type: "object" } };
@@ -921,7 +921,7 @@ describe("loadPluginManifestRegistry", () => {
       writeManifest(globalDir, manifest);
 
       const registry = loadPluginManifestRegistryCore({
-        env: hermeticEnv({ OPENCLAW_DEV_SOURCE_ROOT: devSourceRoot }),
+        env: hermeticEnv({ CARAPACE_DEV_SOURCE_ROOT: devSourceRoot }),
         installRecords: {
           codex: {
             source: "npm",
@@ -993,10 +993,10 @@ describe("loadPluginManifestRegistry", () => {
       installRecords: {
         diffs: {
           source: "npm",
-          spec: "@openclaw/diffs",
+          spec: "@carapace/diffs",
           installPath: dir,
-          resolvedName: "@openclaw/diffs",
-          resolvedSpec: "@openclaw/diffs@2026.7.16",
+          resolvedName: "@carapace/diffs",
+          resolvedSpec: "@carapace/diffs@2026.7.16",
         },
       },
       candidates: [
@@ -1004,7 +1004,7 @@ describe("loadPluginManifestRegistry", () => {
           ...createPluginCandidate({
             idHint: "diffs/two",
             rootDir: dir,
-            packageName: "@openclaw/diffs",
+            packageName: "@carapace/diffs",
             origin: "global",
             installOwner: "diffs",
           }),
@@ -1014,7 +1014,7 @@ describe("loadPluginManifestRegistry", () => {
           ...createPluginCandidate({
             idHint: "diffs/one",
             rootDir: dir,
-            packageName: "@openclaw/diffs",
+            packageName: "@carapace/diffs",
             origin: "global",
             installOwner: "diffs",
           }),
@@ -1075,7 +1075,7 @@ describe("loadPluginManifestRegistry", () => {
     { name: "complete records", overrides: {} },
     {
       name: "versioned ClawHub specs",
-      overrides: { spec: "clawhub:@openclaw/msteams@2026.6.11" },
+      overrides: { spec: "clawhub:@carapace/msteams@2026.6.11" },
     },
     {
       name: "legacy spec-only records",
@@ -1087,15 +1087,15 @@ describe("loadPluginManifestRegistry", () => {
     },
     {
       name: "matching npm resolved specs",
-      overrides: { resolvedSpec: "@openclaw/msteams@2026.6.11" },
+      overrides: { resolvedSpec: "@carapace/msteams@2026.6.11" },
     },
     {
       name: "matching ClawHub resolved specs",
-      overrides: { resolvedSpec: "clawhub:@openclaw/msteams@2026.6.11" },
+      overrides: { resolvedSpec: "clawhub:@carapace/msteams@2026.6.11" },
     },
     {
       name: "matching resolved package names",
-      overrides: { resolvedName: "@openclaw/msteams" },
+      overrides: { resolvedName: "@carapace/msteams" },
     },
   ] satisfies Array<{ name: string; overrides: Partial<PluginInstallRecord> }>)(
     "marks official npm-only ClawHub installs with $name as trusted",
@@ -1123,19 +1123,19 @@ describe("loadPluginManifestRegistry", () => {
     },
     {
       name: "conflicting ClawHub package",
-      overrides: { clawhubPackage: "@openclaw/line" },
+      overrides: { clawhubPackage: "@carapace/line" },
     },
     {
       name: "conflicting requested spec",
-      overrides: { spec: "clawhub:@openclaw/line" },
+      overrides: { spec: "clawhub:@carapace/line" },
     },
     {
       name: "conflicting npm resolved spec",
-      overrides: { resolvedSpec: "@openclaw/line@2026.6.11" },
+      overrides: { resolvedSpec: "@carapace/line@2026.6.11" },
     },
     {
       name: "conflicting ClawHub resolved spec",
-      overrides: { resolvedSpec: "clawhub:@openclaw/line@2026.6.11" },
+      overrides: { resolvedSpec: "clawhub:@carapace/line@2026.6.11" },
     },
     {
       name: "blank ClawHub package",
@@ -1143,11 +1143,11 @@ describe("loadPluginManifestRegistry", () => {
     },
     {
       name: "malformed ClawHub package",
-      overrides: { clawhubPackage: "@openclaw/msteams@2026.6.11" },
+      overrides: { clawhubPackage: "@carapace/msteams@2026.6.11" },
     },
     {
       name: "malformed requested spec",
-      overrides: { spec: "@openclaw/msteams" },
+      overrides: { spec: "@carapace/msteams" },
     },
     {
       name: "malformed resolved spec",
@@ -1155,11 +1155,11 @@ describe("loadPluginManifestRegistry", () => {
     },
     {
       name: "conflicting resolved package name",
-      overrides: { resolvedName: "@openclaw/line" },
+      overrides: { resolvedName: "@carapace/line" },
     },
     {
       name: "malformed resolved package name",
-      overrides: { resolvedName: "@openclaw/msteams@2026.6.11" },
+      overrides: { resolvedName: "@carapace/msteams@2026.6.11" },
     },
     {
       name: "missing package identities",
@@ -1174,7 +1174,7 @@ describe("loadPluginManifestRegistry", () => {
       overrides: {
         clawhubPackage: undefined,
         spec: undefined,
-        resolvedSpec: "@openclaw/msteams@2026.6.11",
+        resolvedSpec: "@carapace/msteams@2026.6.11",
       },
     },
   ] satisfies Array<{ name: string; overrides: Partial<PluginInstallRecord> }>)(
@@ -1199,7 +1199,7 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "msteams",
           rootDir: dir,
-          packageName: "@openclaw/msteams",
+          packageName: "@carapace/msteams",
           origin: "config",
         }),
       ],
@@ -1216,10 +1216,10 @@ describe("loadPluginManifestRegistry", () => {
       installRecords: {
         "diagnostics-otel": {
           source: "clawhub",
-          spec: "clawhub:@openclaw/diagnostics-otel",
+          spec: "clawhub:@carapace/diagnostics-otel",
           installPath: dir,
           clawhubUrl: "https://example.invalid",
-          clawhubPackage: "@openclaw/diagnostics-otel",
+          clawhubPackage: "@carapace/diagnostics-otel",
           clawhubChannel: "official",
         },
       },
@@ -1227,7 +1227,7 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "diagnostics-otel",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-otel",
+          packageName: "@carapace/diagnostics-otel",
           origin: "global",
           installOwner: "diagnostics-otel",
         }),
@@ -1245,7 +1245,7 @@ describe("loadPluginManifestRegistry", () => {
       installRecords: {
         "diagnostics-otel": {
           source: "clawhub",
-          spec: "clawhub:@openclaw/diagnostics-otel@2026.5.18",
+          spec: "clawhub:@carapace/diagnostics-otel@2026.5.18",
           installPath: dir,
         },
       },
@@ -1253,7 +1253,7 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "diagnostics-otel",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-otel",
+          packageName: "@carapace/diagnostics-otel",
           origin: "global",
           installOwner: "diagnostics-otel",
         }),
@@ -1271,18 +1271,18 @@ describe("loadPluginManifestRegistry", () => {
       installRecords: {
         "diagnostics-otel": {
           source: "npm",
-          spec: "@openclaw/diagnostics-otel",
+          spec: "@carapace/diagnostics-otel",
           installPath: dir,
-          resolvedName: "@openclaw/diagnostics-otel",
+          resolvedName: "@carapace/diagnostics-otel",
           resolvedVersion: "2026.5.18",
-          resolvedSpec: "@openclaw/diagnostics-otel@2026.5.18",
+          resolvedSpec: "@carapace/diagnostics-otel@2026.5.18",
         },
       },
       candidates: [
         createPluginCandidate({
           idHint: "diagnostics-otel",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-otel",
+          packageName: "@carapace/diagnostics-otel",
           origin: "config",
           installOwner: "diagnostics-otel",
         }),
@@ -1305,7 +1305,7 @@ describe("loadPluginManifestRegistry", () => {
         "diagnostics-prometheus": {
           source: "npm",
           installPath: dir,
-          resolvedName: "@openclaw/diagnostics-prometheus",
+          resolvedName: "@carapace/diagnostics-prometheus",
           resolvedVersion: "2026.5.3",
         },
       },
@@ -1313,14 +1313,14 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "diagnostics-prometheus",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-prometheus",
+          packageName: "@carapace/diagnostics-prometheus",
           origin: "global",
           installOwner: "diagnostics-prometheus",
         }),
         createPluginCandidate({
           idHint: "diagnostics-prometheus",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-prometheus",
+          packageName: "@carapace/diagnostics-prometheus",
           origin: "config",
           installOwner: "diagnostics-prometheus",
         }),
@@ -1344,7 +1344,7 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "diagnostics-prometheus",
           rootDir: dir,
-          packageName: "@openclaw/diagnostics-prometheus",
+          packageName: "@carapace/diagnostics-prometheus",
           origin: "global",
         }),
       ],
@@ -1363,7 +1363,7 @@ describe("loadPluginManifestRegistry", () => {
         createPluginCandidate({
           idHint: "msteams",
           rootDir: dir,
-          packageName: "@openclaw/msteams",
+          packageName: "@carapace/msteams",
           origin: "global",
         }),
       ],
@@ -1868,7 +1868,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "external-chat",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "without channelConfigs metadata",
     });
   });
@@ -1933,17 +1933,17 @@ describe("loadPluginManifestRegistry", () => {
   it("hydrates supplemental official external catalog contracts for lagging npm manifests", () => {
     const dir = makeTempDir();
     writeManifest(dir, {
-      id: "wecom-openclaw-plugin",
+      id: "wecom-carapace-plugin",
       channels: ["wecom"],
       configSchema: { type: "object" },
     });
 
     const registry = loadRegistry([
       createPluginCandidate({
-        idHint: "wecom-openclaw-plugin",
+        idHint: "wecom-carapace-plugin",
         rootDir: dir,
         origin: "global",
-        packageName: "@wecom/wecom-openclaw-plugin",
+        packageName: "@wecom/wecom-carapace-plugin",
       }),
     ]);
 
@@ -1972,7 +1972,7 @@ describe("loadPluginManifestRegistry", () => {
         idHint: "slack",
         rootDir: dir,
         origin: "global",
-        packageName: "@openclaw/slack",
+        packageName: "@carapace/slack",
       }),
     ]);
 
@@ -2004,7 +2004,7 @@ describe("loadPluginManifestRegistry", () => {
         idHint: "diffs",
         rootDir: dir,
         origin: "global",
-        packageName: "@openclaw/diffs",
+        packageName: "@carapace/diffs",
       }),
     ]);
 
@@ -2014,7 +2014,7 @@ describe("loadPluginManifestRegistry", () => {
   it("fills missing official external catalog descriptors for partial npm channel configs", () => {
     const dir = makeTempDir();
     writeManifest(dir, {
-      id: "wecom-openclaw-plugin",
+      id: "wecom-carapace-plugin",
       channels: ["wecom"],
       configSchema: { type: "object" },
       channelConfigs: {
@@ -2032,10 +2032,10 @@ describe("loadPluginManifestRegistry", () => {
 
     const registry = loadRegistry([
       createPluginCandidate({
-        idHint: "wecom-openclaw-plugin",
+        idHint: "wecom-carapace-plugin",
         rootDir: dir,
         origin: "global",
-        packageName: "@wecom/wecom-openclaw-plugin",
+        packageName: "@wecom/wecom-carapace-plugin",
       }),
     ]);
 
@@ -2059,7 +2059,7 @@ describe("loadPluginManifestRegistry", () => {
     const dir = makeTempDir();
     writeTextFile(
       dir,
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({
         id: "external-chat",
         channels: ["safe-chat"],
@@ -2182,7 +2182,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "outside-provider",
-      source: path.join(pluginDir, "openclaw.plugin.json"),
+      source: path.join(pluginDir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2209,7 +2209,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "absolute-provider",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2236,7 +2236,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "absolute-catalog",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2272,7 +2272,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "symlink-provider",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2308,7 +2308,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "fallback-symlink-provider",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2347,7 +2347,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "hardlink-provider",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2386,7 +2386,7 @@ describe("loadPluginManifestRegistry", () => {
     expectDiagnosticFields(registry, {
       level: "warn",
       pluginId: "fallback-hardlink-provider",
-      source: path.join(dir, "openclaw.plugin.json"),
+      source: path.join(dir, "carapace.plugin.json"),
       messageIncludes: "providerCatalogEntry must resolve inside the plugin root",
     });
   });
@@ -2674,7 +2674,7 @@ describe("loadPluginManifestRegistry", () => {
     writeManifest(dir, {
       id: "workflow-harness",
       contracts: {
-        agentToolResultMiddleware: ["openclaw", "codex"],
+        agentToolResultMiddleware: ["carapace", "codex"],
         trustedToolPolicies: ["workflow-budget"],
       },
       configSchema: { type: "object" },
@@ -2687,7 +2687,7 @@ describe("loadPluginManifestRegistry", () => {
     });
 
     expect(registry.plugins[0]?.contracts).toEqual({
-      agentToolResultMiddleware: ["openclaw", "codex"],
+      agentToolResultMiddleware: ["carapace", "codex"],
       trustedToolPolicies: ["workflow-budget"],
     });
   });
@@ -2820,7 +2820,7 @@ describe("loadPluginManifestRegistry", () => {
         idHint: "telegram",
         rootDir: dir,
         origin: "bundled",
-        bundledManifestPath: path.join(dir, "openclaw.plugin.json"),
+        bundledManifestPath: path.join(dir, "carapace.plugin.json"),
         bundledManifest: {
           id: "telegram",
           configSchema: { type: "object" },
@@ -2944,27 +2944,27 @@ describe("loadPluginManifestRegistry", () => {
     {
       name: "skips plugins whose minHostVersion is newer than the current host",
       minHostVersion: ">=2026.3.22",
-      env: { OPENCLAW_VERSION: "2026.3.21" } as NodeJS.ProcessEnv,
-      expectedMessage: "plugin requires OpenClaw >=2026.3.22, but this host is 2026.3.21",
+      env: { CARAPACE_VERSION: "2026.3.21" } as NodeJS.ProcessEnv,
+      expectedMessage: "plugin requires Carapace >=2026.3.22, but this host is 2026.3.21",
       expectWarn: true,
     },
     {
       name: "skips plugins whose beta minHostVersion is newer than the current host",
       minHostVersion: ">=2026.5.1-beta.1",
-      env: { OPENCLAW_VERSION: "2026.4.30" } as NodeJS.ProcessEnv,
-      expectedMessage: "plugin requires OpenClaw >=2026.5.1-beta.1, but this host is 2026.4.30",
+      env: { CARAPACE_VERSION: "2026.4.30" } as NodeJS.ProcessEnv,
+      expectedMessage: "plugin requires Carapace >=2026.5.1-beta.1, but this host is 2026.4.30",
       expectWarn: true,
     },
     {
       name: "rejects invalid minHostVersion metadata",
       minHostVersion: "2026.3.22",
-      expectedMessage: "plugin manifest invalid | openclaw.install.minHostVersion must use",
+      expectedMessage: "plugin manifest invalid | carapace.install.minHostVersion must use",
       expectWarn: false,
     },
     {
       name: "warns distinctly when host version cannot be determined",
       minHostVersion: ">=2026.3.22",
-      env: { OPENCLAW_VERSION: "unknown" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "unknown" } as NodeJS.ProcessEnv,
       expectedMessage: "host version could not be determined",
       expectWarn: true,
     },
@@ -3005,7 +3005,7 @@ describe("loadPluginManifestRegistry", () => {
             origin: "global",
             packageManifest: {
               install: {
-                npmSpec: "@openclaw/codex",
+                npmSpec: "@carapace/codex",
                 minHostVersion: "2026.3.22",
               },
             },
@@ -3016,7 +3016,7 @@ describe("loadPluginManifestRegistry", () => {
     });
 
     expect(registry.plugins.map((plugin) => plugin.id)).toEqual(["codex"]);
-    expectNoRegistryDiagnosticContains(registry, "openclaw.install.minHostVersion must use");
+    expectNoRegistryDiagnosticContains(registry, "carapace.install.minHostVersion must use");
   });
 
   it("does not runtime-gate bundled source plugins by install minHostVersion", () => {
@@ -3033,17 +3033,17 @@ describe("loadPluginManifestRegistry", () => {
           origin: "bundled",
           packageManifest: {
             install: {
-              npmSpec: "@openclaw/codex",
+              npmSpec: "@carapace/codex",
               minHostVersion: ">=2026.5.1-beta.1",
             },
           },
         }),
       ],
-      env: { OPENCLAW_VERSION: "2026.4.30" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "2026.4.30" } as NodeJS.ProcessEnv,
     });
 
     expect(registry.plugins.map((plugin) => plugin.id)).toContain("codex");
-    expectNoRegistryDiagnosticContains(registry, "requires OpenClaw");
+    expectNoRegistryDiagnosticContains(registry, "requires Carapace");
   });
 
   it("skips installed plugins whose package plugin API range is newer than the current host", () => {
@@ -3053,13 +3053,13 @@ describe("loadPluginManifestRegistry", () => {
     const registry = loadRegistryForPluginApiCase({
       rootDir: dir,
       pluginApi: ">=2026.5.27",
-      env: { OPENCLAW_VERSION: "2026.5.10-beta.1" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "2026.5.10-beta.1" } as NodeJS.ProcessEnv,
     });
 
     expect(registry.plugins).toStrictEqual([]);
     expectRegistryDiagnosticContains(
       registry,
-      'plugin requires plugin API >=2026.5.27, but this host is 2026.5.10-beta.1; skipping load (check "openclaw --version", OPENCLAW_COMPATIBILITY_HOST_VERSION, or run "openclaw doctor")',
+      'plugin requires plugin API >=2026.5.27, but this host is 2026.5.10-beta.1; skipping load (check "carapace --version", CARAPACE_COMPATIBILITY_HOST_VERSION, or run "carapace doctor")',
     );
     expect(registry.diagnostics.map((diag) => diag.level)).toContain("warn");
   });
@@ -3071,13 +3071,13 @@ describe("loadPluginManifestRegistry", () => {
     const registry = loadRegistryForPluginApiCase({
       rootDir: dir,
       pluginApi: 20260527,
-      env: { OPENCLAW_VERSION: "2026.5.27" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "2026.5.27" } as NodeJS.ProcessEnv,
     });
 
     expect(registry.plugins).toStrictEqual([]);
     expectRegistryDiagnosticContains(
       registry,
-      "plugin manifest invalid | package.json openclaw.compat.pluginApi must be a string",
+      "plugin manifest invalid | package.json carapace.compat.pluginApi must be a string",
     );
     expect(registry.diagnostics.map((diag) => diag.level)).toContain("error");
   });
@@ -3089,7 +3089,7 @@ describe("loadPluginManifestRegistry", () => {
     const registry = loadRegistryForPluginApiCase({
       rootDir: dir,
       pluginApi: ">=2026.5.27",
-      env: { OPENCLAW_VERSION: "2026.5.27-beta.1" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "2026.5.27-beta.1" } as NodeJS.ProcessEnv,
     });
 
     expect(registry.plugins.map((plugin) => plugin.id)).toEqual(["synology-chat"]);
@@ -3105,7 +3105,7 @@ describe("loadPluginManifestRegistry", () => {
       pluginApi: ">=2026.5.27",
       origin: "bundled",
       idHint: "codex",
-      env: { OPENCLAW_VERSION: "2026.5.10-beta.1" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_VERSION: "2026.5.10-beta.1" } as NodeJS.ProcessEnv,
     });
 
     expect(registry.plugins.map((plugin) => plugin.id)).toContain("codex");
@@ -3196,23 +3196,23 @@ describe("loadPluginManifestRegistry", () => {
   it("suppresses duplicate warning when global candidates come from the same package artifact", () => {
     const firstDir = makeTempDir();
     const secondDir = makeTempDir();
-    const manifest = { id: "opik-openclaw", configSchema: { type: "object" } };
+    const manifest = { id: "opik-carapace", configSchema: { type: "object" } };
     writeManifest(firstDir, manifest);
     writeManifest(secondDir, manifest);
 
     const candidates: PluginCandidate[] = [
       createPluginCandidate({
-        idHint: "opik-openclaw",
+        idHint: "opik-carapace",
         rootDir: firstDir,
         origin: "global",
-        packageName: "@opik/opik-openclaw",
+        packageName: "@opik/opik-carapace",
         packageVersion: "0.2.14",
       }),
       createPluginCandidate({
-        idHint: "opik-openclaw",
+        idHint: "opik-carapace",
         rootDir: secondDir,
         origin: "global",
-        packageName: "@opik/opik-openclaw",
+        packageName: "@opik/opik-carapace",
         packageVersion: "0.2.14",
       }),
     ];
@@ -3407,7 +3407,7 @@ describe("loadPluginManifestRegistry", () => {
       return;
     }
     const registry = loadPluginManifestRegistryCore({
-      env: hermeticEnv({ OPENCLAW_NIX_MODE: "1" }),
+      env: hermeticEnv({ CARAPACE_NIX_MODE: "1" }),
       candidates: [
         createPluginCandidate({
           idHint: "unsafe-config-hardlink",
@@ -3466,16 +3466,16 @@ describe("loadPluginManifestRegistry", () => {
       config,
       env: hermeticEnv({
         HOME: homeA,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: path.join(homeA, ".state"),
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: path.join(homeA, ".state"),
       }),
     });
     const second = loadPluginManifestRegistryCore({
       config,
       env: hermeticEnv({
         HOME: homeB,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: path.join(homeB, ".state"),
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: path.join(homeB, ".state"),
       }),
     });
 
@@ -3500,7 +3500,7 @@ describe("loadPluginManifestRegistry", () => {
         origin: "global",
         packageManifest: {
           install: {
-            npmSpec: "@openclaw/synology-chat",
+            npmSpec: "@carapace/synology-chat",
             minHostVersion: ">=2026.3.22",
           },
         },
@@ -3510,13 +3510,13 @@ describe("loadPluginManifestRegistry", () => {
     const olderHost = loadPluginManifestRegistryCore({
       candidates,
       env: hermeticEnv({
-        OPENCLAW_VERSION: "2026.3.21",
+        CARAPACE_VERSION: "2026.3.21",
       }),
     });
     const newerHost = loadPluginManifestRegistryCore({
       candidates,
       env: hermeticEnv({
-        OPENCLAW_VERSION: "2026.3.22",
+        CARAPACE_VERSION: "2026.3.22",
       }),
     });
 

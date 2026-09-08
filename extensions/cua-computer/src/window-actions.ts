@@ -1,7 +1,7 @@
 import {
   COMPUTER_USE_V2_ACTION_NAMES,
   type ComputerActParams,
-} from "openclaw/plugin-sdk/computer-use";
+} from "carapace/plugin-sdk/computer-use";
 import {
   elementArgs,
   requireWindowTarget,

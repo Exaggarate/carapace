@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { PluginCandidate } from "./discovery.js";
 import {
   refreshPersistedInstalledPluginIndex,
@@ -26,19 +26,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   clearPluginMetadataLifecycleCaches();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeTempDir(): string {
-  return makeTrackedTempDir("openclaw-plugin-registry-inspection", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-registry-inspection", tempDirs);
 }
 
 function hermeticEnv(): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
   };
 }
@@ -47,7 +47,7 @@ function createCandidate(rootDir: string): PluginCandidate {
   const source = path.join(rootDir, "index.ts");
   fs.writeFileSync(source, "export default { register() {} };\n", "utf8");
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({ id: "demo", name: "Demo", configSchema: { type: "object" } }),
     "utf8",
   );
@@ -135,7 +135,7 @@ describe("plugin registry inspection", () => {
     expect(policy.refreshReasons).toEqual(["policy-changed"]);
 
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "demo",
         name: "Demo",
@@ -207,18 +207,18 @@ describe("plugin registry inspection", () => {
       JSON.stringify({
         name: "demo",
         version: "1.0.0",
-        openclaw: {
+        carapace: {
           extensions: ["./index.ts"],
-          build: { openclawVersion: "2026.4.25" },
+          build: { carapaceVersion: "2026.4.25" },
         },
       }),
       "utf8",
     );
-    const env = { ...hermeticEnv(), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...hermeticEnv(), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = { plugins: { load: { paths: [pluginDir] } } };
     const refreshed = await refreshPluginRegistry({ reason: "manual", stateDir, config, env });
     expect(expectDefined(refreshed.plugins[0], "refreshed plugin").packageBuild).toEqual({
-      openclawVersion: "2026.4.25",
+      carapaceVersion: "2026.4.25",
     });
 
     const persisted = expectDefined(
@@ -251,8 +251,8 @@ describe("plugin registry inspection", () => {
     createPackagedCandidate(sourceDir);
     const env = {
       ...hermeticEnv(),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const config = { plugins: { entries: { demo: { enabled: true } } } };
     await refreshPluginRegistry({
@@ -295,10 +295,10 @@ describe("plugin registry inspection", () => {
   it("uses the configured system-agent workspace for the freshness verdict", async () => {
     const stateDir = makeTempDir();
     const workspaceDir = makeTempDir();
-    const pluginDir = path.join(workspaceDir, ".openclaw", "extensions", "demo");
+    const pluginDir = path.join(workspaceDir, ".carapace", "extensions", "demo");
     fs.mkdirSync(pluginDir, { recursive: true });
     createCandidate(pluginDir);
-    const env = { ...hermeticEnv(), OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+    const env = { ...hermeticEnv(), CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     const config = {
       agents: {
         ownership: "explicit" as const,
@@ -341,7 +341,7 @@ describe("plugin registry inspection", () => {
     const copiedStateDir = path.join(makeTempDir(), "copied-state");
     const externalDir = makeTempDir();
     createPackagedCandidate(externalDir);
-    const packageName = "openclaw-copied-managed";
+    const packageName = "carapace-copied-managed";
     const sourceManagedPath = writeManagedNpmPlugin({
       stateDir: sourceStateDir,
       packageName,
@@ -354,7 +354,7 @@ describe("plugin registry inspection", () => {
       reason: "manual",
       stateDir: sourceStateDir,
       config,
-      env: { ...hermeticEnv(), OPENCLAW_STATE_DIR: sourceStateDir },
+      env: { ...hermeticEnv(), CARAPACE_STATE_DIR: sourceStateDir },
       installRecords: {
         "copied-managed": {
           source: "npm",
@@ -371,7 +371,7 @@ describe("plugin registry inspection", () => {
         },
       },
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     clearPluginMetadataLifecycleCaches();
     fs.cpSync(sourceStateDir, copiedStateDir, { recursive: true });
 
@@ -381,7 +381,7 @@ describe("plugin registry inspection", () => {
         reason: "manual",
         stateDir: copiedStateDir,
         config,
-        env: { ...hermeticEnv(), OPENCLAW_STATE_DIR: copiedStateDir },
+        env: { ...hermeticEnv(), CARAPACE_STATE_DIR: copiedStateDir },
       }),
     ).rejects.toThrow("cannot verify npm install ownership outside the selected state directory");
     const persisted = expectDefined(
@@ -399,7 +399,7 @@ describe("plugin registry inspection", () => {
   it("does not rewrite an external managed npm project", async () => {
     const stateDir = makeTempDir();
     const externalStateDir = makeTempDir();
-    const packageName = "openclaw-external-managed";
+    const packageName = "carapace-external-managed";
     const externalInstallPath = writeManagedNpmPlugin({
       stateDir: externalStateDir,
       packageName,
@@ -415,7 +415,7 @@ describe("plugin registry inspection", () => {
     await refreshPluginRegistry({
       reason: "manual",
       stateDir,
-      env: { ...hermeticEnv(), OPENCLAW_STATE_DIR: stateDir },
+      env: { ...hermeticEnv(), CARAPACE_STATE_DIR: stateDir },
       installRecords: {
         "external-managed": {
           source: "npm",
@@ -431,7 +431,7 @@ describe("plugin registry inspection", () => {
       refreshPluginRegistry({
         reason: "manual",
         stateDir,
-        env: { ...hermeticEnv(), OPENCLAW_STATE_DIR: stateDir },
+        env: { ...hermeticEnv(), CARAPACE_STATE_DIR: stateDir },
       }),
     ).rejects.toThrow("cannot verify npm install ownership outside the selected state directory");
     const persisted = expectDefined(

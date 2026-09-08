@@ -28,7 +28,7 @@ const repositoryToolEntries = [
   "security/opengrep/check-rule-metadata.mjs!",
   "security/opengrep/compile-rules.mjs!",
   "skills/meme-maker/scripts/meme.mjs!",
-  "scripts/check-openclaw-package-tarball.mts!",
+  "scripts/check-carapace-package-tarball.mts!",
 ] as const;
 
 const config = {

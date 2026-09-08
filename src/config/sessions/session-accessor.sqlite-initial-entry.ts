@@ -1,8 +1,8 @@
 /** Lazy session identity creation, including the original admission's first writer claim. */
 import {
-  deferOpenClawAgentPostCommitPublication,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import type {
   SessionAccessScope,
   SessionTranscriptWriteScope,
@@ -38,7 +38,7 @@ export function ensureSessionEntrySync(
   const resolved = resolveSqliteScope(fencedScope);
   assertCanonicalSessionKeyWrite(resolved.sessionKey, resolved.agentId);
   let owned = false;
-  const publishCommitted = runOpenClawAgentWriteTransaction((database) => {
+  const publishCommitted = runCarapaceAgentWriteTransaction((database) => {
     assertOwnedTranscriptWriteCommit({ ...fencedScope, sessionId: entry.sessionId });
     const identityKeys = collectSessionEntryLookupKeys(database, resolved.sessionKey);
     const previous = readSessionIdentitySnapshot(database, identityKeys);
@@ -79,7 +79,7 @@ export function ensureSessionEntrySync(
       };
       // Savepoint success is not COMMIT. The existing transaction owner discards this on rollback.
       if (
-        !deferOpenClawAgentPostCommitPublication(database, () => {
+        !deferCarapaceAgentPostCommitPublication(database, () => {
           try {
             initialWriter.recordCommitted(fence);
           } finally {

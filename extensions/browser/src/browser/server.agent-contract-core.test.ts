@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ACT_ERROR_CODES } from "./routes/agent.act.errors.js";
 import { isActKind } from "./routes/agent.act.shared.js";
@@ -177,7 +177,7 @@ describe("browser control server", () => {
     "returns ACT_EXISTING_SESSION_UNSUPPORTED for unsupported existing-session actions",
     async () => {
       setBrowserControlServerProfiles({
-        openclaw: {
+        carapace: {
           color: "#FF4500",
           driver: "existing-session",
         },
@@ -413,7 +413,7 @@ describe("browser control server", () => {
           {
             url: "https://example.com/report.pdf",
             suggestedFilename: "report.pdf",
-            path: "/tmp/openclaw/downloads/report.pdf",
+            path: "/tmp/carapace/downloads/report.pdf",
           },
         ],
       });
@@ -431,7 +431,7 @@ describe("browser control server", () => {
         {
           url: "https://example.com/report.pdf",
           suggestedFilename: "report.pdf",
-          path: "/tmp/openclaw/downloads/report.pdf",
+          path: "/tmp/carapace/downloads/report.pdf",
         },
       ]);
     },
@@ -544,7 +544,7 @@ describe("browser control server", () => {
     const runtime = expectDefined(await startBrowserControlServerFromConfig(), "browser runtime");
     const previousRelays = runtime.extensionRelays;
     runtime.extensionRelays = new Map([
-      ["openclaw", { bridge: { captureOperationTarget: () => () => undefined } }],
+      ["carapace", { bridge: { captureOperationTarget: () => () => undefined } }],
     ]) as unknown as NonNullable<typeof runtime.extensionRelays>;
     requirePwMock("navigateViaPlaywright").mockImplementationOnce(async () => ({
       url: "https://example.com/after",
@@ -568,7 +568,7 @@ describe("browser control server", () => {
     const runtime = expectDefined(await startBrowserControlServerFromConfig(), "browser runtime");
     const previousRelays = runtime.extensionRelays;
     runtime.extensionRelays = new Map([
-      ["openclaw", { bridge: { captureOperationTarget: () => () => "replacement-target" } }],
+      ["carapace", { bridge: { captureOperationTarget: () => () => "replacement-target" } }],
     ]) as unknown as NonNullable<typeof runtime.extensionRelays>;
     requirePwMock("navigateViaPlaywright").mockImplementationOnce(async (options) => {
       const targetId = await (
@@ -598,7 +598,7 @@ describe("browser control server", () => {
     "forwards timer-safe navigation timeout $requestedTimeoutMs to the Chrome MCP backend",
     async ({ requestedTimeoutMs, expectedTimeoutMs }) => {
       setBrowserControlServerProfiles({
-        openclaw: { color: "#FF4500", driver: "existing-session" },
+        carapace: { color: "#FF4500", driver: "existing-session" },
       });
       const base = await startServerAndBase();
 
@@ -612,7 +612,7 @@ describe("browser control server", () => {
       const chromeMcp = await vi.importMock<typeof import("./chrome-mcp.js")>("./chrome-mcp.js");
       expect(chromeMcp.navigateChromeMcpPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          profileName: "openclaw",
+          profileName: "carapace",
           targetId: "7",
           url: "https://example.com/slow",
           timeoutMs: expectedTimeoutMs,
@@ -877,7 +877,7 @@ describe("profile CRUD endpoints", () => {
     const createDuplicate = await realFetch(`${base}/profiles/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "openclaw" }),
+      body: JSON.stringify({ name: "carapace" }),
     });
     expect(createDuplicate.status).toBe(409);
     const createDuplicateBody = (await createDuplicate.json()) as { error: string };
@@ -925,7 +925,7 @@ describe("profile CRUD endpoints", () => {
     expect(createClawdBody.userDataDir).toBeNull();
 
     const explicitUserDataDir = await fs.promises.realpath(
-      await fs.promises.mkdtemp(path.join(os.tmpdir(), "openclaw-brave-profile-")),
+      await fs.promises.mkdtemp(path.join(os.tmpdir(), "carapace-brave-profile-")),
     );
     tempDirsToCleanup.add(explicitUserDataDir);
     const createExistingSession = await realFetch(`${base}/profiles/create`, {
@@ -977,7 +977,7 @@ describe("profile CRUD endpoints", () => {
     const deleteMissingBody = (await deleteMissing.json()) as { error: string };
     expect(deleteMissingBody.error).toContain("not found");
 
-    const deleteDefault = await realFetch(`${base}/profiles/openclaw`, {
+    const deleteDefault = await realFetch(`${base}/profiles/carapace`, {
       method: "DELETE",
     });
     expect(deleteDefault.status).toBe(400);

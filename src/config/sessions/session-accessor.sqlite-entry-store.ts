@@ -1,11 +1,11 @@
 import { isDeepStrictEqual } from "node:util";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
 import { getChildLogger } from "../../logging/logger.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type { ConversationRouteContext } from "./conversation-route-context.js";
 import {
   linkSessionConversation,
@@ -73,7 +73,7 @@ export {
 
 /** Exact reads already own nested values; retain them through identity publication. */
 export function readSessionIdentitySnapshot(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKeys: Iterable<string>,
 ): Map<string, SessionEntry> {
   const snapshot = new Map<string, SessionEntry>();
@@ -89,7 +89,7 @@ export function readSessionIdentitySnapshot(
 // Runtime patches own only the exact canonical row. Folded lookup candidates
 // can be distinct case-sensitive rooms and must not join its mutation snapshot.
 export function readSessionEntrySelectionSnapshot(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   exact: boolean,
 ): SqliteLifecycleTargetSnapshot {
@@ -100,7 +100,7 @@ export function readSessionEntrySelectionSnapshot(
 }
 
 export function resolveLifecyclePrimaryEntry(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   options: { allowCanonicalMove?: boolean } = {},
 ): SqliteLifecycleTargetSnapshot[number] | undefined {
@@ -124,7 +124,7 @@ export function resolveLifecyclePrimaryEntry(
 }
 
 export function readLifecycleTargetSnapshot(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   options: { allowCanonicalMove?: boolean } = {},
 ): SqliteLifecycleTargetSnapshot {
@@ -146,7 +146,7 @@ export function normalizeLifecycleTarget(target: { canonicalKey: string; storeKe
 }
 
 export function deleteSessionEntryRows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   options: {
     deleteOwnedWindows?: boolean;
@@ -235,7 +235,7 @@ export function deleteSessionEntryRows(
 
 /** Remove the logical entry while retaining its node-owned transcript windows. */
 function clearSqliteSessionEntryPreservingWindows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   params: { sessionId: string; sessionKey: string; updatedAt: number },
 ): void {
   const db = getSessionKysely(database.db);
@@ -291,7 +291,7 @@ function clearSqliteSessionEntryPreservingWindows(
 }
 
 export function deleteLifecycleTargetRows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
 ): void {
   for (const sessionKey of uniqueStrings([target.canonicalKey, ...target.storeKeys])) {
@@ -303,7 +303,7 @@ export function deleteLifecycleTargetRows(
 }
 
 function sqliteLifecycleTargetMatchesExpectedEntry(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   expectedEntry: SessionEntry | undefined,
 ): boolean {
@@ -315,7 +315,7 @@ function sqliteLifecycleTargetMatchesExpectedEntry(
 }
 
 export function assertLifecycleTargetUnchanged(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   expectedEntry: SessionEntry | undefined,
   operation: "deleted" | "reset",
@@ -327,7 +327,7 @@ export function assertLifecycleTargetUnchanged(
 }
 
 export function deleteLegacySessionEntryRows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   legacyKeys: string[],
   sessionKey: string,
   options: { rehomeMembers?: boolean; validatedEntries?: ReadonlyMap<string, SessionEntry> } = {},
@@ -360,7 +360,7 @@ export function deleteLegacySessionEntryRows(
 
 /** Move retained generations to the canonical node before removing key aliases. */
 export function rehomeSessionWindows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   canonicalKey: string,
   previousKeys: Iterable<string>,
 ): void {
@@ -381,7 +381,7 @@ export function rehomeSessionWindows(
 }
 
 export function writeSessionEntry(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   entry: SessionEntry,
   options: {

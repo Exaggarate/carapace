@@ -1,15 +1,15 @@
 // Telegram plugin module implements bot message behavior.
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { DEFAULT_GROUP_HISTORY_LIMIT } from "openclaw/plugin-sdk/reply-history";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
+import { DEFAULT_GROUP_HISTORY_LIMIT } from "carapace/plugin-sdk/reply-history";
 import {
   createSubsystemLogger,
   danger,
   logVerbose,
   shouldLogVerbose,
   sleepWithAbort,
-} from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import type { TelegramMessageProcessorTurnContext } from "./bot-handlers.types.js";
 import {
@@ -69,7 +69,7 @@ type TelegramMessageProcessorDeps = Omit<
 > & {
   runtime: RuntimeEnv;
   telegramDeps: TelegramBotDeps;
-  buildContext?: typeof import("openclaw/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
+  buildContext?: typeof import("carapace/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
   opts: Pick<
     TelegramBotOptions,
     | "token"
@@ -84,7 +84,7 @@ type TelegramMessageProcessorDeps = Omit<
 export function resolveTelegramMessageTurnSettings(params: {
   accountId: string;
   senderId?: string | number;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   telegramCfg: TelegramAccountConfig;
   opts: Pick<TelegramBotOptions, "allowFrom" | "groupAllowFrom" | "replyToMode">;
 }) {
@@ -193,7 +193,7 @@ export const createTelegramMessageProcessor = (deps: TelegramMessageProcessorDep
         ? options.receivedAtMs
         : undefined;
     const ingressDebugEnabled =
-      shouldLogVerbose() || process.env.OPENCLAW_DEBUG_TELEGRAM_INGRESS === "1";
+      shouldLogVerbose() || process.env.CARAPACE_DEBUG_TELEGRAM_INGRESS === "1";
     const ingressContextStartMs = ingressReceivedAtMs ? Date.now() : undefined;
     const recordCurrentUpdateProcessingResult = (result: TelegramMessageProcessingResult) => {
       if (options?.spooledReplay === true) {

@@ -1,7 +1,7 @@
 import type {
   QaBusConversationKind,
   QaBusStateSnapshot,
-} from "openclaw/plugin-sdk/qa-channel-protocol";
+} from "carapace/plugin-sdk/qa-channel-protocol";
 import type {
   QaLabExecutionKind,
   QaLabResolvedRunPlan,

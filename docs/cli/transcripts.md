@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw transcripts` (list, show, and export stored transcripts)"
+summary: "CLI reference for `carapace transcripts` (list, show, and export stored transcripts)"
 read_when:
   - You want to read stored transcript summaries from the terminal
   - You need the path to a transcripts markdown summary
@@ -9,27 +9,27 @@ read_when:
 title: "Transcripts CLI"
 ---
 
-# `openclaw transcripts`
+# `carapace transcripts`
 
 Inspector and export command for durable meeting transcripts. Google Meet,
 Microsoft Teams, and Zoom browser participants capture notes automatically;
 the `transcripts` agent tool also supports provider capture and manual import.
 
 Canonical transcript state lives in the shared SQLite database at
-`$OPENCLAW_STATE_DIR/state/openclaw.sqlite`. `show` and `path` explicitly
+`$CARAPACE_STATE_DIR/state/carapace.sqlite`. `show` and `path` explicitly
 materialize user-facing artifacts under the state directory:
 
 ```text
-$OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
+$CARAPACE_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
   metadata.json
   transcript.jsonl
   summary.json
   summary.md
 ```
 
-These files are exports, not a second runtime store. OpenClaw does not read them
+These files are exports, not a second runtime store. Carapace does not read them
 back during capture, summarization, or listing. Default state directory is
-`~/.openclaw`; override with `OPENCLAW_STATE_DIR`. The date directory comes
+`~/.carapace`; override with `CARAPACE_STATE_DIR`. The date directory comes
 from the session start time; the session directory is a filesystem-safe slug
 derived from the session id.
 
@@ -58,8 +58,8 @@ generate a missing summary.
 **Download JSONL** exports the reader's public utterance projection, excluding
 provider-private metadata and local filesystem paths. Local CLI exports retain
 their existing raw format. Browser exports larger than 4 MiB fail visibly
-without a partial file; use `openclaw transcripts path <session> --transcript`
-or `openclaw transcripts path <session> --dir` on the Gateway host for larger
+without a partial file; use `carapace transcripts path <session> --transcript`
+or `carapace transcripts path <session> --dir` on the Gateway host for larger
 exports.
 
 Archive reads require `operator.read` or its write/admin implication and
@@ -70,17 +70,17 @@ requires `operator.admin`.
 ## Commands
 
 ```bash
-openclaw transcripts list
-openclaw transcripts show <session>
-openclaw transcripts show YYYY-MM-DD/<session>
-openclaw transcripts path <session>
-openclaw transcripts path YYYY-MM-DD/<session>
-openclaw transcripts path <session> --dir
-openclaw transcripts path <session> --metadata
-openclaw transcripts path <session> --transcript
-openclaw transcripts list --json
-openclaw transcripts show <session> --json
-openclaw transcripts path <session> --json
+carapace transcripts list
+carapace transcripts show <session>
+carapace transcripts show YYYY-MM-DD/<session>
+carapace transcripts path <session>
+carapace transcripts path YYYY-MM-DD/<session>
+carapace transcripts path <session> --dir
+carapace transcripts path <session> --metadata
+carapace transcripts path <session> --transcript
+carapace transcripts list --json
+carapace transcripts show <session> --json
+carapace transcripts path <session> --json
 ```
 
 | Command                       | Description                                          |
@@ -99,7 +99,7 @@ Otherwise, `show` and `path` accept `YYYY-MM-DD/<raw-session-id>`, keeping the
 entire suffix literal, including punctuation and slashes. For example:
 
 ```bash
-openclaw transcripts show '2026-05-22/notes: room/one'
+carapace transcripts show '2026-05-22/notes: room/one'
 ```
 
 If neither qualified form finds a capture, the complete input is matched as a
@@ -109,12 +109,12 @@ selector; no raw ID is sanitized to choose a capture. Default session IDs
 include a timestamp and random suffix; give a session a fixed ID only when
 that ID is unique within the day.
 
-If the filesystem-safe export name exceeds 255 bytes, OpenClaw shortens it
+If the filesystem-safe export name exceeds 255 bytes, Carapace shortens it
 to a prefix plus a deterministic SHA-256 hash of the complete original session
 ID. Only the derived export name and its selector change; the raw session ID,
 provider stop handle, and stored notes stay intact. Names that already fit
 remain unchanged. Use the selector printed by `list` for the shortened name.
-For existing sessions with oversized stored names, run `openclaw doctor --fix`
+For existing sessions with oversized stored names, run `carapace doctor --fix`
 to repair their derived selectors without changing stored notes.
 
 ## Output
@@ -123,7 +123,7 @@ to repair their derived selectors without changing stored notes.
 summary path.
 
 ```text
-2026-05-22/standup  2026-05-22T09:00:00.000Z  Weekly standup  /Users/user/.openclaw/transcripts/2026-05-22/standup/summary.md
+2026-05-22/standup  2026-05-22T09:00:00.000Z  Weekly standup  /Users/user/.carapace/transcripts/2026-05-22/standup/summary.md
 ```
 
 The selector is the safest value to pass back to `show` or `path`.
@@ -154,7 +154,7 @@ accepts integers from 1 to 50. The text is bounded; structured results are in
 
 `show` returns the stored notes Markdown and session details. Its text is capped
 at 12,000 characters; a truncation marker points to
-`openclaw transcripts show <selector>` for the full notes. A capture without a
+`carapace transcripts show <selector>` for the full notes. A capture without a
 summary reports that notes are not available yet, including whether it is active.
 Reading notes does not regenerate the summary or export artifacts.
 
@@ -182,7 +182,7 @@ raw ID.
 Legacy `sessionId` input considers qualified and raw/slug meanings together. If
 they identify different captures, the tool reports ambiguity without listing
 candidate details. This stays ambiguous after a capture ends. Use a selector
-returned by start, import, or authorized list/status, or inspect `openclaw transcripts
+returned by start, import, or authorized list/status, or inspect `carapace transcripts
 list` locally and pass the desired value in the `selector` field. Both sides of
 a raw-ID/selector collision remain addressable by their own canonical selector.
 
@@ -255,7 +255,7 @@ heading. JSONL contains the public
 utterance projection: sequence, utterance ID, full text, speaker identity, source
 timestamps, and finality when available. It excludes private provider metadata
 and filesystem paths; the local CLI export retains its raw utterance format.
-Use `openclaw transcripts path <session> --transcript` on the Gateway host for
+Use `carapace transcripts path <session> --transcript` on the Gateway host for
 larger exports.
 
 Status reports registered subscriptions, not confirmed recording. `armed`,
@@ -286,7 +286,7 @@ Sessions group by date, then by session id. Ten meetings on one day become
 ten sibling folders:
 
 ```text
-~/.openclaw/transcripts/2026-05-22/
+~/.carapace/transcripts/2026-05-22/
   transcript-2026-05-22T09-00-00-000Z-a1b2c3d4/
   transcript-2026-05-22T10-30-00-000Z-b2c3d4e5/
   standup/
@@ -299,7 +299,7 @@ when it will not repeat on the same date.
 
 Meeting notes use the owning agent's utility model first, then its primary model
 when needed. If no model is available, a request times out, or the model returns
-invalid output, OpenClaw saves deterministic heuristic notes instead. Model
+invalid output, Carapace saves deterministic heuristic notes instead. Model
 generation enhances the notes; it does not gate saving them. Notes include an
 overview, participants, decisions, action items, risks, and finally the transcript,
 so bounded readers see the notes before long transcripts.
@@ -313,7 +313,7 @@ and end when the middle must be omitted. Stored utterances remain intact. Use
 from the stored transcript, including after changing model configuration.
 
 The tool's `status` action lists active capture subscriptions, not historical
-notes. When a provider ends or replaces a subscription, OpenClaw records
+notes. When a provider ends or replaces a subscription, Carapace records
 `stoppedAt` and stores its summary; the transcript remains available to `list`,
 `show`, and the tool's `summarize` action. A temporary transport disconnect does
 not end a subscription. Stopping historical notes does not stop a newer capture
@@ -344,7 +344,7 @@ Summaries are saved in SQLite before optional artifact export. If export fails,
 the saved summary remains available even when `summary.md` is missing. Configured
 auto-start captures log warnings during shutdown for failed exports or provider
 stop errors. Correct the export destination problem, then run
-`openclaw transcripts path <session>` or `openclaw transcripts show <session>`
+`carapace transcripts path <session>` or `carapace transcripts show <session>`
 to retry the export; an intended path in a warning is not proof of an exported file.
 
 Historical sessions without complete account-owner metadata remain on a local
@@ -355,17 +355,17 @@ providers, partial owner metadata, and accountless historical sources also stay
 on this local recovery path.
 
 ```bash
-openclaw agent --agent <owning-agent-or-main> --local --message \
+carapace agent --agent <owning-agent-or-main> --local --message \
   "Use transcripts summarize for session <session>."
 ```
 
 ## Upgrading the legacy file store
 
-OpenClaw releases that predate the SQLite store wrote canonical runtime state
-directly beneath `$OPENCLAW_STATE_DIR/transcripts/`. Run:
+Carapace releases that predate the SQLite store wrote canonical runtime state
+directly beneath `$CARAPACE_STATE_DIR/transcripts/`. Run:
 
 ```bash
-openclaw doctor --fix
+carapace doctor --fix
 ```
 
 Doctor imports the complete legacy tree into SQLite, verifies row counts and
@@ -424,8 +424,8 @@ Configure auto-start sources with `transcripts.autoStart`. Each entry is
 enabled by being present; omit an entry to disable that source. `discord-voice`
 is the bundled auto-start-capable source and requires `guildId` and
 `channelId`. When exactly one configured Discord account has credentials and
-voice enabled, OpenClaw selects it automatically. When multiple accounts are
-voice-capable, OpenClaw selects a capable `channels.discord.defaultAccount`.
+voice enabled, Carapace selects it automatically. When multiple accounts are
+voice-capable, Carapace selects a capable `channels.discord.defaultAccount`.
 Otherwise, set `accountId` to the corresponding key under
 `channels.discord.accounts`; an omitted account is rejected as ambiguous:
 
@@ -451,10 +451,10 @@ until stopped. Set it to `true` to wait for humans, then capture one meeting per
 occupancy episode. It also starts when humans are already present at startup;
 bots never count. After the last human leaves, a fixed 30-second grace period
 allows short reconnects without splitting the meeting. A human returning during
-that grace cancels the stop. Otherwise, OpenClaw stops capture and generates notes.
+that grace cancels the stop. Otherwise, Carapace stops capture and generates notes.
 
 Occupancy episodes use generated IDs; an entry's `sessionId` is ignored. To
-continue a meeting across a Gateway restart, OpenClaw reopens the most recent
+continue a meeting across a Gateway restart, Carapace reopens the most recent
 session for the same provider, account, guild, and channel when it stopped within
 the last 10 minutes and its stored ID origin is `generated`. The session keeps its original ID, title, and start time, and new
 utterances append to it. A later return within that window also reuses the meeting;

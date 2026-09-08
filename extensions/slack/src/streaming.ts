@@ -14,8 +14,8 @@
 import type { AnyChunk, MessageMetadata } from "@slack/types";
 import type { WebClient, WebClientOptions } from "@slack/web-api";
 import type { ChatStreamer } from "@slack/web-api/dist/chat-stream.js";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { getSlackListenerWriteClient } from "./client.js";
 import type { SlackSendIdentity } from "./send.js";
 

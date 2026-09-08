@@ -6,7 +6,7 @@ import {
   GATEWAY_CLIENT_NAMES,
 } from "../../../packages/gateway-protocol/src/client-info.js";
 import { getReplyPayloadMetadata } from "../../auto-reply/reply-payload.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { OutboundDeliveryError } from "./deliver-types.js";
@@ -41,7 +41,7 @@ const slackConfig = {
       enabled: true,
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function registerSlackTextPlugin(
   accountIds: string[] = ["default"],
@@ -125,7 +125,7 @@ describe("runMessageAction core send routing", () => {
       const result = await runMessageAction({
         cfg: {
           channels: { testchat: { enabled: true } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "testchat",
@@ -172,7 +172,7 @@ describe("runMessageAction core send routing", () => {
       runMessageAction({
         cfg: {
           channels: { testchat: { enabled: true } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "send",
         params: {
           channel: "testchat",
@@ -217,7 +217,7 @@ describe("runMessageAction core send routing", () => {
           enabled: true,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await runMessageAction({
       cfg,
@@ -301,7 +301,7 @@ describe("runMessageAction core send routing", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "testchat",
@@ -377,7 +377,7 @@ describe("runMessageAction core send routing", () => {
       );
 
       await runMessageAction({
-        cfg: { channels: { testchat: { enabled: true } } } as OpenClawConfig,
+        cfg: { channels: { testchat: { enabled: true } } } as CarapaceConfig,
         action: "send",
         params: {
           channel: "testchat",
@@ -446,7 +446,7 @@ describe("runMessageAction core send routing", () => {
     );
 
     const result = await runMessageAction({
-      cfg: { channels: { testchat: { enabled: true } } } as OpenClawConfig,
+      cfg: { channels: { testchat: { enabled: true } } } as CarapaceConfig,
       action: "send",
       params: {
         channel: "testchat",
@@ -510,7 +510,7 @@ describe("runMessageAction core send routing", () => {
               ],
             }
           : {}),
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       agentId: "main",
       defaultAccountId: testCase.defaultAccountId,
@@ -536,7 +536,7 @@ describe("runMessageAction core send routing", () => {
     await runMessageAction({
       cfg: {
         channels: { slack: { enabled: true, responsePrefix: "[Nexus]" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "slack",
@@ -556,7 +556,7 @@ describe("runMessageAction core send routing", () => {
     await runMessageAction({
       cfg: {
         channels: { slack: { enabled: true, responsePrefix: "[Nexus]" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "slack",
@@ -607,7 +607,7 @@ describe("runMessageAction core send routing", () => {
     await runMessageAction({
       cfg: {
         channels: { slack: { enabled: true, responsePrefix: "[Nexus]" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "slack",
@@ -628,7 +628,7 @@ describe("runMessageAction core send routing", () => {
       cfg: {
         channels: { slack: { enabled: true, responsePrefix: "[{identity.name}]" } },
         agents: { list: [{ id: "main", identity: { name: "Nexus" } }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "slack",
@@ -649,7 +649,7 @@ describe("runMessageAction core send routing", () => {
     await runMessageAction({
       cfg: {
         channels: { slack: { enabled: true, responsePrefix: "[{provider}/{model}]" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "slack",
@@ -672,7 +672,7 @@ describe("runMessageAction core send routing", () => {
       chatId: "c1",
     });
     ttsMocks.maybeApplyTtsToPayload.mockResolvedValueOnce({
-      mediaUrl: "file:///tmp/openclaw-voice.ogg",
+      mediaUrl: "file:///tmp/carapace-voice.ogg",
       audioAsVoice: true,
       spokenText: "hello there",
     });
@@ -704,7 +704,7 @@ describe("runMessageAction core send routing", () => {
         tts: {
           auto: "off",
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "testchat",
@@ -745,7 +745,7 @@ describe("runMessageAction core send routing", () => {
     expect(sendMedia).toHaveBeenCalledOnce();
     const mediaInput = firstMockArg(sendMedia, "send media");
     expect(mediaInput.text).toBe("");
-    expect(mediaInput.mediaUrl).toBe("file:///tmp/openclaw-voice.ogg");
+    expect(mediaInput.mediaUrl).toBe("file:///tmp/carapace-voice.ogg");
   });
 
   it("forwards inbound audio context to message-tool TTS", async () => {
@@ -780,7 +780,7 @@ describe("runMessageAction core send routing", () => {
         tts: {
           auto: "inbound",
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       action: "send",
       params: {
         channel: "testchat",

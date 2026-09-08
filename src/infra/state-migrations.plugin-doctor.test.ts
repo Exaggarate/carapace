@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { listPluginDoctorStateMigrationEntries } from "../plugins/doctor-contract-registry.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { runPostSessionPluginDoctorStateRepairs } from "./state-migrations.plugin-doctor.js";
 
@@ -39,8 +39,8 @@ const tempDirs = createTrackedTempDirs();
 afterEach(async () => {
   controls.entries = [];
   controls.failSettlement = false;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 
@@ -48,12 +48,12 @@ describe("plugin Doctor migration settlement", () => {
   it.each(["none", "later-action", "lease-settlement"] as const)(
     "preserves completed mutations and replay truth when failure is %s",
     async (failure) => {
-      const root = await tempDirs.make("openclaw-plugin-doctor-settlement-");
+      const root = await tempDirs.make("carapace-plugin-doctor-settlement-");
       const env = {
         ...process.env,
         HOME: root,
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-        OPENCLAW_STATE_DIR: root,
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+        CARAPACE_STATE_DIR: root,
       };
       const markers = [path.join(root, "first"), path.join(root, "second")] as const;
       controls.failSettlement = failure === "lease-settlement";

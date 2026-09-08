@@ -3,12 +3,12 @@ import {
   type ChannelIngressDecision,
   type ChannelIngressEventInput,
   resolveStableChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import type { MattermostChannel } from "./client.js";
 import { mattermostIngressIdentity, normalizeMattermostAllowEntry } from "./ingress-identity.js";
-import type { ChatType, OpenClawConfig } from "./runtime-api.js";
+import type { ChatType, CarapaceConfig } from "./runtime-api.js";
 import { isDangerousNameMatchingEnabled, resolveAllowlistMatchSimple } from "./runtime-api.js";
 
 export function normalizeMattermostAllowList(entries: Array<string | number>): string[] {
@@ -107,7 +107,7 @@ type MattermostCommandDenyReason = Extract<
 
 export async function resolveMattermostMonitorInboundAccess(params: {
   account: ResolvedMattermostAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   senderId: string;
   senderName: string;
   channelId: string;
@@ -208,7 +208,7 @@ function resolveMattermostCommandDenyReason(params: {
 
 export async function authorizeMattermostCommandInvocation(params: {
   account: ResolvedMattermostAccount;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   senderId: string;
   senderName: string;
   channelId: string;

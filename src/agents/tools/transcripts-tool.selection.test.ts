@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createTranscriptsAutoStartService } from "../../transcripts/auto-start.js";
 import { activeSessions } from "../../transcripts/capture.js";
 import type {
@@ -22,7 +22,7 @@ afterEach(() => {
   activeSessions.clear();
   vi.restoreAllMocks();
   vi.useRealTimers();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -66,7 +66,7 @@ function harness() {
   const tool = createTranscriptsTool(ctx);
   const execute = (params: Record<string, unknown>) => tool.execute("selection", params);
   const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   const start = async (id: string, date: string) => {
     vi.setSystemTime(new Date(`${date}T10:00:00.000Z`));
@@ -208,7 +208,7 @@ describe("transcript tool selection", () => {
     const shown = [...text.matchAll(/^(?:pending|active): (.+)$/gm)].map((match) => match[1]);
     expect(shown).toEqual([selectors[0], ...selectors.slice(1).toSorted().slice(0, 2)]);
     expect(text).toContain(`pending: ${selectors[0]}`);
-    expect(text).toContain("1 more; ask a local operator to run openclaw transcripts list.");
+    expect(text).toContain("1 more; ask a local operator to run carapace transcripts list.");
     expect(text).toContain("\nSelectors:\n");
     expect(text.slice(text.indexOf("Selectors:")).length).toBeLessThanOrEqual(1024);
     expect(text).not.toContain("x".repeat(900));

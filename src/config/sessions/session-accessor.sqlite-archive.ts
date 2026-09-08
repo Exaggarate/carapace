@@ -2,13 +2,13 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { Worker } from "node:worker_threads";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import { syncDirectoryBestEffortSync } from "../../infra/directory-durability.js";
 import { runtimeProcessEntrypoints } from "../../infra/runtime-process-entrypoints.js";
 import { resolveRuntimeWorkerUrl } from "../../infra/runtime-worker-url.js";
 import { KeyedAsyncQueue } from "../../plugin-sdk/keyed-async-queue.js";
 import { createDeferredCore, type Deferred } from "../../shared/deferred.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
   encodeSessionArchiveContent,
   readSessionArchiveContentSync,
@@ -342,7 +342,7 @@ function spawnSqliteTranscriptArchiveWorkerOperation<Result>(params: {
         const withWriteAdmission = params.withWriteAdmission;
         if (!withWriteAdmission || admission || message.admissionId !== admissionId + 1) {
           workerError ??= new Error(
-            "SQLite reclamation Worker requested invalid write admission; cleanup is uncertain, restart OpenClaw before deleting the owning agent",
+            "SQLite reclamation Worker requested invalid write admission; cleanup is uncertain, restart Carapace before deleting the owning agent",
           );
           void worker.terminate();
           return;
@@ -384,7 +384,7 @@ function spawnSqliteTranscriptArchiveWorkerOperation<Result>(params: {
             } catch (dispatchError) {
               workerError = new AggregateError(
                 [workerError, dispatchError],
-                "SQLite reclamation admission failed and Worker cleanup is uncertain; restart OpenClaw before deleting the owning agent",
+                "SQLite reclamation admission failed and Worker cleanup is uncertain; restart Carapace before deleting the owning agent",
                 { cause: workerError },
               );
               await worker.terminate();
@@ -396,7 +396,7 @@ function spawnSqliteTranscriptArchiveWorkerOperation<Result>(params: {
       } else if (message.type === "admission-release") {
         if (!admission || message.admissionId !== admission.id) {
           workerError ??= new Error(
-            "SQLite reclamation Worker released invalid write admission; cleanup is uncertain, restart OpenClaw before deleting the owning agent",
+            "SQLite reclamation Worker released invalid write admission; cleanup is uncertain, restart Carapace before deleting the owning agent",
           );
           void worker.terminate();
           return;
@@ -473,7 +473,7 @@ export function runSqliteTranscriptArchivePublishWorker(
 }
 
 function validateEmptyTranscriptArchivePlan(plan: TranscriptArchiveWorkerPlan): void {
-  const opened = withOpenClawAgentDatabaseReadOnly(
+  const opened = withCarapaceAgentDatabaseReadOnly(
     (database) => readSessionStateDeleteSnapshot(database.db, plan.sessionId),
     { agentId: plan.agentId, path: plan.databasePath },
   );

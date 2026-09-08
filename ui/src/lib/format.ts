@@ -2,10 +2,10 @@ import {
   bucketRelativeTimeMs,
   formatCompactTokenCount as formatTokenUnits,
   type RelativeTimeUnit,
-} from "@openclaw/normalization-core";
+} from "@carapace/normalization-core";
 // Control UI module implements format behavior.
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   resolveCompactDurationParts,
   resolveSingleUnitDurationParts,
@@ -14,7 +14,7 @@ import {
 import { i18n, t } from "../i18n/index.ts";
 import { formatUiError } from "./format-error.ts";
 
-export { formatByteSize } from "@openclaw/normalization-core";
+export { formatByteSize } from "@carapace/normalization-core";
 
 export function formatCountdown(deadlineMs: number, nowMs: number, padMinutes = false): string {
   const totalSeconds = Math.max(0, Math.ceil((deadlineMs - nowMs) / 1_000));

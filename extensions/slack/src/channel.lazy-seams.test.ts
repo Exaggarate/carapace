@@ -11,7 +11,7 @@
 //   - and accidental loss of the perf intent (re-introducing eager imports
 //     without updating the seam).
 
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { slackPlugin } from "./channel.js";
 import { setSlackRuntime } from "./runtime.js";
@@ -30,7 +30,7 @@ vi.mock("./scopes.js", () => ({
   fetchSlackScopes: fetchSlackScopesMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/target-resolver-runtime", async (orig) => {
+vi.mock("carapace/plugin-sdk/target-resolver-runtime", async (orig) => {
   // Preserve any sibling exports so importers that touch unrelated helpers
   // do not break; only override the function the channel actually calls.
   const original = (await orig()) as Record<string, unknown>;
@@ -40,7 +40,7 @@ vi.mock("openclaw/plugin-sdk/target-resolver-runtime", async (orig) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/extension-shared", async (orig) => {
+vi.mock("carapace/plugin-sdk/extension-shared", async (orig) => {
   const original = (await orig()) as Record<string, unknown>;
   return {
     ...original,
@@ -60,7 +60,7 @@ beforeEach(() => {
 
 function makeMinimalSlackConfig(
   opts: { botToken?: string; userToken?: string } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const slack: Record<string, unknown> = {};
   if (opts.botToken !== undefined) {
     slack.botToken = opts.botToken;
@@ -68,7 +68,7 @@ function makeMinimalSlackConfig(
   if (opts.userToken !== undefined) {
     slack.userToken = opts.userToken;
   }
-  return { channels: { slack } } as OpenClawConfig;
+  return { channels: { slack } } as CarapaceConfig;
 }
 
 type MockWithCalls = {

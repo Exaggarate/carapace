@@ -4,7 +4,7 @@ import {
   installChannelOutboundPayloadContractSuite,
   primeChannelOutboundSendMock,
   type OutboundPayloadHarnessParams,
-} from "openclaw/plugin-sdk/channel-contract-testing";
+} from "carapace/plugin-sdk/channel-contract-testing";
 import { describe, expect, it, vi } from "vitest";
 import { DiscordError, RateLimitError, RequestClient } from "./internal/discord.js";
 import { discordOutbound } from "./outbound-adapter.js";

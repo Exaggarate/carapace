@@ -1,5 +1,5 @@
 import type { CliDeps } from "../cli/deps.types.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { HeartbeatRunner } from "../infra/heartbeat-runner.js";
 import type { GatewayRestartEmitter } from "../infra/restart.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
@@ -47,8 +47,8 @@ export type GatewayGmailRestartAbortController = {
 export type GatewayHotReloadPublication = {
   publish: (commit: () => Promise<void>, isCommitted: () => boolean) => Promise<void>;
   isCurrent: () => boolean;
-  sourceConfig: OpenClawConfig;
-  prepareRestartRuntimeConfig?: () => Promise<OpenClawConfig>;
+  sourceConfig: CarapaceConfig;
+  prepareRestartRuntimeConfig?: () => Promise<CarapaceConfig>;
   runtimeEnv?: NodeJS.ProcessEnv;
 };
 
@@ -61,14 +61,14 @@ export type GatewayRestartTransactionResult = {
 
 export type GatewayRestartRequestOptions = {
   retainDebtAcrossConfigChanges?: boolean;
-  prepareRuntimeConfig?: () => Promise<OpenClawConfig>;
-  debtConfig?: OpenClawConfig;
+  prepareRuntimeConfig?: () => Promise<CarapaceConfig>;
+  debtConfig?: CarapaceConfig;
 };
 
 export type AcceptedRestartTarget = {
-  runtimeConfig: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
-  prepareRuntimeConfig: () => Promise<OpenClawConfig>;
+  runtimeConfig: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
+  prepareRuntimeConfig: () => Promise<CarapaceConfig>;
 };
 
 export type AcceptedRestartTargetOwnership = {
@@ -148,10 +148,10 @@ export type GatewayReloadHandlerParams = {
   pruneInactiveChannelAccountState: (activeChannelIds: ReadonlySet<ChannelKind>) => void;
   getChannelAutostartSuppression?: GatewayChannelManager["getAutostartSuppression"];
   stopPostReadySidecars?: () => Promise<void> | void;
-  reloadPluginServices?: (config: OpenClawConfig, serviceIds: ReadonlySet<string>) => Promise<void>;
+  reloadPluginServices?: (config: CarapaceConfig, serviceIds: ReadonlySet<string>) => Promise<void>;
   reloadPlugins: (params: {
-    nextConfig: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
+    nextConfig: CarapaceConfig;
+    sourceConfig: CarapaceConfig;
     beforeReplace: (channels: ReadonlySet<ChannelKind>) => Promise<void>;
     commitRuntime: (onCommit?: () => void) => Promise<void>;
     onReplacementTeardownFailure: (error: unknown) => void;
@@ -185,8 +185,8 @@ export type ManagedGatewayConfigReloaderParams = Omit<
 > & {
   configRevisionProjector: import("./config-revision-token.js").GatewayConfigRevisionProjector;
   minimalTestGateway: boolean;
-  initialConfig: OpenClawConfig;
-  initialCompareConfig?: OpenClawConfig;
+  initialConfig: CarapaceConfig;
+  initialCompareConfig?: CarapaceConfig;
   initialSnapshotRawHash: string | null;
   initialAuthoredConfig: unknown;
   initialIncludedPaths?: readonly string[];
@@ -204,26 +204,26 @@ export type ManagedGatewayConfigReloaderParams = Omit<
   activateRuntimeSecrets: ActivateRuntimeSecrets;
   /** Applies one immutable effective config/compare snapshot before reload planning. */
   prepareConfigCandidate?: (params: {
-    runtimeConfig: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
+    sourceConfig: CarapaceConfig;
   }) => {
-    runtimeConfig: OpenClawConfig;
-    compareConfig: OpenClawConfig;
-    reapplyRuntimeOverlays?: (config: OpenClawConfig) => OpenClawConfig;
-    reapplyCompareOverlays?: (config: OpenClawConfig) => OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
+    compareConfig: CarapaceConfig;
+    reapplyRuntimeOverlays?: (config: CarapaceConfig) => CarapaceConfig;
+    reapplyCompareOverlays?: (config: CarapaceConfig) => CarapaceConfig;
   };
   /** Reapplies fixed process-lifetime overlays before secrets preparation. */
-  applyRuntimeConfigOverrides?: (config: OpenClawConfig) => OpenClawConfig;
-  resolveSharedGatewaySessionGenerationForConfig: (config: OpenClawConfig) => string | undefined;
+  applyRuntimeConfigOverrides?: (config: CarapaceConfig) => CarapaceConfig;
+  resolveSharedGatewaySessionGenerationForConfig: (config: CarapaceConfig) => string | undefined;
   sharedGatewaySessionGenerationState: SharedGatewaySessionGenerationState;
   clients: Iterable<SharedGatewayAuthClient>;
-  prepareTerminalConfig: (plan: GatewayReloadPlan, nextConfig: OpenClawConfig) => void;
+  prepareTerminalConfig: (plan: GatewayReloadPlan, nextConfig: CarapaceConfig) => void;
   reconcileRuntimePolicy: (
-    nextConfig: OpenClawConfig,
+    nextConfig: CarapaceConfig,
     phase: "committed" | "restart",
   ) => Promise<void> | void;
-  assertRuntimeSecurityConfig?: (config: OpenClawConfig, env?: NodeJS.ProcessEnv) => void;
-  commitRuntimePolicy: (nextConfig: OpenClawConfig) => void;
+  assertRuntimeSecurityConfig?: (config: CarapaceConfig, env?: NodeJS.ProcessEnv) => void;
+  commitRuntimePolicy: (nextConfig: CarapaceConfig) => void;
   acceptTerminalConfig: (options: { retireRejectedRestart: boolean }) => void;
 };
 

@@ -1,13 +1,13 @@
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   createNativeApprovalControlRegistry,
   type ExecApprovalDecision,
-} from "openclaw/plugin-sdk/approval-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
 import {
   isRecord,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type MSTeamsApprovalCardBinding = {
   token: string;
@@ -37,7 +37,7 @@ export function readMSTeamsApprovalActionToken(value: unknown): string | null {
     isRecord(action.data)
       ? action.data
       : value;
-  if (submitted.openclawAction !== "approval") {
+  if (submitted.carapaceAction !== "approval") {
     return null;
   }
   return normalizeOptionalString(submitted.token) ?? null;

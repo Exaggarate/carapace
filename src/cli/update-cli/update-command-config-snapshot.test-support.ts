@@ -13,15 +13,15 @@ export async function runUpdateSnapshotIsolationProof(
   const repo = fileURLToPath(new URL("../../../", import.meta.url));
   const homeA = path.join(root, "A");
   const homeB = path.join(root, "B");
-  const configA = path.join(homeA, ".openclaw", "openclaw.json");
-  const defaultB = path.join(homeB, ".openclaw", "openclaw.json");
+  const configA = path.join(homeA, ".carapace", "carapace.json");
+  const defaultB = path.join(homeB, ".carapace", "carapace.json");
   const configB =
     selection === "explicit"
       ? path.join(homeB, "custom.json")
       : selection === "state"
-        ? path.join(homeB, "selected-state", "openclaw.json")
+        ? path.join(homeB, "selected-state", "carapace.json")
         : selection === "profile"
-          ? path.join(homeB, ".openclaw-snapshot-proof", "openclaw.json")
+          ? path.join(homeB, ".carapace-snapshot-proof", "carapace.json")
           : defaultB;
   const sourceA = '{ "canary": "synthetic-A" }\n';
   const sourceB = '{ "canary": "synthetic-B" }\n';
@@ -41,9 +41,9 @@ export async function runUpdateSnapshotIsolationProof(
     Object.assign(process.env, {
       HOME: home,
       USERPROFILE: home,
-      OPENCLAW_HOME: home,
-      OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-      OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json"),
+      CARAPACE_HOME: home,
+      CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+      CARAPACE_CONFIG_PATH: path.join(home, ".carapace", "carapace.json"),
     });
   };
   selectHome(homeA);
@@ -133,17 +133,17 @@ export async function runUpdateSnapshotIsolationProof(
   const { createUpdateConfigSnapshot } = await import("./update-command-config-snapshot.js");
   selectHome(homeB);
   if (selection === "home") {
-    delete process.env.OPENCLAW_STATE_DIR;
-    delete process.env.OPENCLAW_CONFIG_PATH;
+    delete process.env.CARAPACE_STATE_DIR;
+    delete process.env.CARAPACE_CONFIG_PATH;
   } else if (selection === "state") {
-    process.env.OPENCLAW_STATE_DIR = path.dirname(configB);
-    delete process.env.OPENCLAW_CONFIG_PATH;
+    process.env.CARAPACE_STATE_DIR = path.dirname(configB);
+    delete process.env.CARAPACE_CONFIG_PATH;
   } else if (selection === "explicit") {
-    process.env.OPENCLAW_CONFIG_PATH = configB;
+    process.env.CARAPACE_CONFIG_PATH = configB;
   } else {
     const { applyCliProfileEnv } = await import("../profile.js");
     applyCliProfileEnv({ profile: "snapshot-proof" });
-    assert.equal(process.env.OPENCLAW_CONFIG_PATH, configB);
+    assert.equal(process.env.CARAPACE_CONFIG_PATH, configB);
   }
   await createUpdateConfigSnapshot();
   console.log(JSON.stringify({ selection, importedConfig: CONFIG_PATH, configB, writes, blocked }));

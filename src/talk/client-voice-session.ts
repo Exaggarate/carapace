@@ -8,13 +8,13 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { buildSessionCreationStamp } from "../config/sessions/session-entry-provenance.js";
 import { mergeSessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   onTrustedInternalDiagnosticEvent,
   onTrustedToolExecutionEvent,
   type TrustedToolExecutionEvent,
 } from "../infra/diagnostic-events.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import { runCarapaceAgentWriteTransaction } from "../state/carapace-agent-db.js";
 import {
   deactivateClientVoiceConfirmationSession,
   noteClientVoiceConfirmationUtterance,
@@ -108,7 +108,7 @@ function recordClientVoiceToolEffect(event: TrustedToolExecutionEvent): void {
   if (!binding) {
     return;
   }
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const record = readRecordInTransaction(database, binding.voiceSessionId);
       if (!record) {
@@ -178,7 +178,7 @@ export function createOrResumeClientVoiceSession(params: {
   const voiceSessionId = params.voiceSessionId?.trim() || randomUUID();
   const provider = params.provider?.trim() || undefined;
   const now = params.now ?? Date.now();
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const existing = readRecordInTransaction(database, voiceSessionId);
       if (existing) {
@@ -280,10 +280,10 @@ export function registerClientVoiceConsultRun(params: {
   sessionKey: string;
   voiceSessionId: string;
   runId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): void {
   let recordClosed = false;
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const record = readRecordInTransaction(database, params.voiceSessionId);
       if (!record) {
@@ -458,7 +458,7 @@ function appendVoiceTranscript(params: {
   role: "user" | "assistant";
   text: string;
   timestamp?: number;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<void> {
   // Normalize before admission so the queued task retains only bounded text.
   const normalized = { ...params, text: normalizeVoiceTranscriptText(params.text) };
@@ -498,7 +498,7 @@ function appendVoiceTranscript(params: {
       const timestamp = normalized.timestamp ?? observedAt;
       // Reserve before the fallible append. A crash can leave a conservative
       // retry requirement, but can never let close skip an accepted entry.
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => {
           const current = readRecordInTransaction(database, normalized.voiceSessionId);
           if (!current) {
@@ -534,7 +534,7 @@ function appendVoiceTranscript(params: {
           { message: appended.message, messageId: appended.messageId },
         );
       }
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => {
           const current = readRecordInTransaction(database, normalized.voiceSessionId);
           if (!current) {
@@ -590,7 +590,7 @@ export function appendRelayVoiceTranscript(
   return appendVoiceTranscript({ ...params, origin: "relay" });
 }
 
-const mutationDigestDeliveryOwner = new ClientVoiceMutationDigestOwner<OpenClawConfig>({
+const mutationDigestDeliveryOwner = new ClientVoiceMutationDigestOwner<CarapaceConfig>({
   attempt: async ({ agentId, voiceSessionId, context: config, signal }) => {
     const record = readRecord(agentId, voiceSessionId);
     if (!record) {
@@ -609,7 +609,7 @@ async function closeClientVoiceSessionInternal(params: {
   agentId: string;
   sessionKey: string;
   voiceSessionId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   transcriptFailurePolicy: "require-success" | "retain-and-close";
   now?: number;
 }): Promise<void> {
@@ -619,7 +619,7 @@ async function closeClientVoiceSessionInternal(params: {
   }
   assertOwnership(existing, params);
   const now = params.now ?? Date.now();
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const current = readRecordInTransaction(database, params.voiceSessionId);
       if (!current) {
@@ -669,7 +669,7 @@ export async function closeClientVoiceSession(params: {
   agentId: string;
   sessionKey: string;
   voiceSessionId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   now?: number;
 }): Promise<void> {
   await closeVoiceSessionOperationOwner({
@@ -686,7 +686,7 @@ export async function closeRelayVoiceSessionRecord(params: {
   agentId: string;
   sessionKey: string;
   voiceSessionId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   now?: number;
 }): Promise<void> {
   await closeVoiceSessionOperationOwner({
@@ -698,7 +698,7 @@ export async function closeRelayVoiceSessionRecord(params: {
 /** Close abandoned open calls idle for the fixed six-hour recovery window. */
 export async function closeStaleClientVoiceSessions(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   excludeVoiceSessionId?: string;
   now?: number;
   warn?: (message: string) => void;
@@ -752,6 +752,6 @@ const clientVoiceSessionTesting = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.clientVoiceSessionTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.clientVoiceSessionTestApi")] =
     clientVoiceSessionTesting;
 }

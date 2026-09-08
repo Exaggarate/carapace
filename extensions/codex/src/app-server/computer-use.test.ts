@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 // Codex tests cover computer use plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerRuntimeOptions, resolveCodexComputerUseConfig } from "./config.js";
 import { acquireCodexNativeConfigFence } from "./native-config-fence.js";
@@ -177,7 +177,7 @@ describe("Codex Computer Use setup", () => {
       new Error("captured start options"),
     );
     const config = { agents: { list: [{ id: "worker" }] } };
-    const agentDir = "/tmp/openclaw-worker-agent";
+    const agentDir = "/tmp/carapace-worker-agent";
 
     await expect(installCodexComputerUse({ pluginConfig: {}, config, agentDir })).rejects.toThrow(
       "captured start options",
@@ -195,7 +195,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("holds the Codex-home fence until an install request settles", async () => {
-    const agentDir = "/tmp/openclaw-computer-use-fence-agent";
+    const agentDir = "/tmp/carapace-computer-use-fence-agent";
     let rejectInstallRequest: (error: Error) => void = () => undefined;
     const request = vi.fn(
       async () =>
@@ -237,7 +237,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("releases the install mutation fence before the guarded readiness thread", async () => {
-    const agentDir = "/tmp/openclaw-computer-use-guarded-install-agent";
+    const agentDir = "/tmp/carapace-computer-use-guarded-install-agent";
     const pluginConfig = {
       computerUse: { marketplaceName: "desktop-tools", liveTestTimeoutMs: 150 },
     };
@@ -309,7 +309,7 @@ describe("Codex Computer Use setup", () => {
     async (mode) => {
       const harness = createClientHarness();
       sharedClientMocks.getLeasedSharedCodexAppServerClient.mockResolvedValueOnce(harness.client);
-      const agentDir = `/tmp/openclaw-computer-use-${mode}-agent`;
+      const agentDir = `/tmp/carapace-computer-use-${mode}-agent`;
       const abortController = new AbortController();
       const install = installCodexComputerUse({
         pluginConfig: {},
@@ -363,7 +363,7 @@ describe("Codex Computer Use setup", () => {
     async (stream) => {
       const harness = createClientHarness();
       sharedClientMocks.getLeasedSharedCodexAppServerClient.mockResolvedValueOnce(harness.client);
-      const agentDir = `/tmp/openclaw-computer-use-${stream}-failure-agent`;
+      const agentDir = `/tmp/carapace-computer-use-${stream}-failure-agent`;
       const install = installCodexComputerUse({ pluginConfig: {}, agentDir, timeoutMs: 1_000 });
       await vi.waitFor(() => {
         const methods = harness.writes.map(
@@ -444,7 +444,7 @@ describe("Codex Computer Use setup", () => {
       "thread/start",
       {
         input: [],
-        developerInstructions: "OpenClaw Computer Use readiness probe",
+        developerInstructions: "Carapace Computer Use readiness probe",
         ephemeral: true,
       },
       { timeoutMs: 60_000 },
@@ -993,7 +993,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("auto-registers the current ChatGPT.app bundled marketplace before legacy Codex.app", async () => {
-    const root = tempDirs.make("openclaw-codex-bundled-marketplace-");
+    const root = tempDirs.make("carapace-codex-bundled-marketplace-");
     const chatGptMarketplacePath = path.join(
       root,
       "Applications",
@@ -1039,7 +1039,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("auto-registers the legacy Codex.app bundled marketplace when ChatGPT.app is absent", async () => {
-    const root = tempDirs.make("openclaw-codex-bundled-marketplace-");
+    const root = tempDirs.make("carapace-codex-bundled-marketplace-");
     const chatGptMarketplacePath = path.join(
       root,
       "Applications",
@@ -1084,7 +1084,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("keeps explicit bundled marketplace test overrides authoritative during auto-install", async () => {
-    const bundledMarketplacePath = tempDirs.make("openclaw-codex-bundled-marketplace-");
+    const bundledMarketplacePath = tempDirs.make("carapace-codex-bundled-marketplace-");
     const request = createBundledMarketplaceComputerUseRequest(bundledMarketplacePath);
 
     const status = await ensureCodexComputerUse({
@@ -1118,7 +1118,7 @@ describe("Codex Computer Use setup", () => {
     "/Applications/Codex.app/Contents/Resources/plugins/openai-bundled",
   ])("migrates the legacy bundled marketplace source through Codex", async (legacySource) => {
     const { agentDir, client, managedMarketplacePath } = createManagedMarketplaceHarness(
-      tempDirs.make("openclaw-codex-managed-marketplace-"),
+      tempDirs.make("carapace-codex-managed-marketplace-"),
     );
     const request = createBundledMarketplaceComputerUseRequest(managedMarketplacePath, {
       configuredSource: legacySource,
@@ -1160,7 +1160,7 @@ describe("Codex Computer Use setup", () => {
 
   it("preserves a custom source that uses the reserved bundled marketplace name", async () => {
     const { agentDir, client, managedMarketplacePath } = createManagedMarketplaceHarness(
-      tempDirs.make("openclaw-codex-managed-marketplace-"),
+      tempDirs.make("carapace-codex-managed-marketplace-"),
     );
     const request = createBundledMarketplaceComputerUseRequest(managedMarketplacePath, {
       configuredSource: "/opt/company/openai-bundled",
@@ -1179,7 +1179,7 @@ describe("Codex Computer Use setup", () => {
 
   it("preserves a legacy source owned by a non-user config layer", async () => {
     const { agentDir, client, managedMarketplacePath } = createManagedMarketplaceHarness(
-      tempDirs.make("openclaw-codex-managed-marketplace-"),
+      tempDirs.make("carapace-codex-managed-marketplace-"),
     );
     const request = createBundledMarketplaceComputerUseRequest(managedMarketplacePath, {
       configuredSource: "/Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled",
@@ -1199,7 +1199,7 @@ describe("Codex Computer Use setup", () => {
 
   it("preserves a legacy source owned by a selected user profile", async () => {
     const { agentDir, client, managedMarketplacePath } = createManagedMarketplaceHarness(
-      tempDirs.make("openclaw-codex-managed-marketplace-"),
+      tempDirs.make("carapace-codex-managed-marketplace-"),
     );
     const request = createBundledMarketplaceComputerUseRequest(managedMarketplacePath, {
       configuredSource: "/Applications/ChatGPT.app/Contents/Resources/plugins/openai-bundled",
@@ -1253,7 +1253,7 @@ describe("Codex Computer Use setup", () => {
   ])(
     "provisions the managed service for a $label explicit desktop install",
     async ({ commandSource, selector, provisionsWrapper }) => {
-      const root = tempDirs.make("openclaw-codex-explicit-install-");
+      const root = tempDirs.make("carapace-codex-explicit-install-");
       const agentDir = path.join(root, "agent");
       const codexHome = path.join(agentDir, "codex-home");
       const managedMarketplacePath = path.join(
@@ -1353,7 +1353,7 @@ describe("Codex Computer Use setup", () => {
   );
 
   it("rejects explicit managed provisioning from a desktop client without a generation", async () => {
-    const root = tempDirs.make("openclaw-codex-explicit-install-unbound-");
+    const root = tempDirs.make("carapace-codex-explicit-install-unbound-");
     const agentDir = path.join(root, "agent");
     const codexHome = path.join(agentDir, "codex-home");
     fs.mkdirSync(codexHome, { recursive: true });
@@ -1384,7 +1384,7 @@ describe("Codex Computer Use setup", () => {
   });
 
   it("rejects explicit provisioning from a stale desktop client", async () => {
-    const root = tempDirs.make("openclaw-codex-explicit-install-stale-");
+    const root = tempDirs.make("carapace-codex-explicit-install-stale-");
     const agentDir = path.join(root, "agent");
     const codexHome = path.join(agentDir, "codex-home");
     fs.mkdirSync(codexHome, { recursive: true });

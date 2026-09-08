@@ -212,7 +212,7 @@ describe("settleEmbeddedAttemptStream liveness", () => {
       expect(input.sessionManager.getEntries()).toContainEqual(
         expect.objectContaining({
           type: "custom",
-          customType: "openclaw.cache-ttl",
+          customType: "carapace.cache-ttl",
           data: expect.objectContaining({
             prunedToolResults: [{ key, mode: "soft" }],
           }),
@@ -228,7 +228,7 @@ describe("attempt projection persistence through settlement", () => {
   registerAgentSessionLoopTestLifecycle();
 
   it("keeps one snapshot across unchanged dispatch, TTL settlement, and reopen", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-projection-settle-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-projection-settle-"));
     const scope = {
       agentId: "main",
       sessionId: "projection-settle",
@@ -282,7 +282,7 @@ describe("attempt projection persistence through settlement", () => {
           manager
             .getBranch()
             .filter(
-              (entry) => entry.type === "custom" && entry.customType === "openclaw.cache-ttl",
+              (entry) => entry.type === "custom" && entry.customType === "carapace.cache-ttl",
             );
         const snapshotMarkers = () =>
           markers().filter(
@@ -547,7 +547,7 @@ describe("prepareEmbeddedAttemptTransport", () => {
   });
 
   it("materializes native video from the prepared session agent workspace", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-transport-video-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-transport-video-"));
     const videoPath = path.join(workspaceDir, "history.mp4");
     await fs.writeFile(videoPath, MP4);
     let providerOptions: ProviderStreamOptions | undefined;

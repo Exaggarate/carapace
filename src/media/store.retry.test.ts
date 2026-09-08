@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { FsSafeError } from "../infra/fs-safe.js";
@@ -41,8 +41,8 @@ describe("media store filesystem faults", () => {
       shouldRetry: true,
     },
   ])("surfaces or retries $name according to its exact cause", async ({ error, shouldRetry }) => {
-    const stateDir = tempDirs.make("openclaw-media-retry-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-media-retry-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const segment = `retry-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const injectedError = error();
     let writeAttempts = 0;
@@ -81,8 +81,8 @@ describe("media store filesystem faults", () => {
   });
 
   it("recovers a missing staging directory before consuming a stream", async () => {
-    const stateDir = tempDirs.make("openclaw-media-stream-retry-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-media-stream-retry-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const subdir = "stream-before-open";
     const input = Buffer.from("media stream survives directory recovery");
     let consumptionStarted = false;
@@ -121,8 +121,8 @@ describe("media store filesystem faults", () => {
   });
 
   it("rejects publication failure without replaying a consumed stream", async () => {
-    const stateDir = tempDirs.make("openclaw-media-stream-publication-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-media-stream-publication-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const subdir = "stream-final-rename";
     const input = Buffer.from("media stream must not become an empty success");
     const stream = (async function* () {
@@ -157,8 +157,8 @@ describe("media store filesystem faults", () => {
   });
 
   it("fully persists a stream chunk after a positive short write", async () => {
-    const stateDir = tempDirs.make("openclaw-media-short-write-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-media-short-write-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const input = Buffer.from("positive short write");
     const originalOpen = fs.open.bind(fs);
     let shortWriteObserved = false;

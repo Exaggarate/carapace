@@ -26,14 +26,14 @@ vi.mock("ws", () => ({
   default: mocks.FakeWebSocket,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuardMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", async () => {
+vi.mock("carapace/plugin-sdk/provider-auth", async () => {
   const { resolveOpenAICodexAuthIdentity } = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/provider-oauth-runtime")
-  >("openclaw/plugin-sdk/provider-oauth-runtime");
+    typeof import("carapace/plugin-sdk/provider-oauth-runtime")
+  >("carapace/plugin-sdk/provider-oauth-runtime");
   return {
     isProviderAuthProfileConfigured: mocks.isProviderAuthProfileConfiguredMock,
     resolveProviderAuthProfileApiKey: mocks.resolveProviderAuthProfileApiKeyMock,
@@ -264,8 +264,8 @@ describe("OpenAI realtime voice browser authentication", () => {
     expect(FakeWebSocket.instances).toHaveLength(0);
   });
 
-  it("returns browser-safe OpenClaw attribution headers for native WebRTC offers", async () => {
-    vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+  it("returns browser-safe Carapace attribution headers for native WebRTC offers", async () => {
+    vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
     mockRealtimeClientSecretResponse({ expiresAt: 1_765_000_000 });
     const provider = buildOpenAIRealtimeVoiceProvider();
     if (!provider.createBrowserSession) {
@@ -290,9 +290,9 @@ describe("OpenAI realtime voice browser authentication", () => {
     expectRecordFields(requireFetchHeaders(), "fetch headers", {
       Authorization: "Bearer test-api-key-test",
       "Content-Type": "application/json",
-      originator: "openclaw",
+      originator: "carapace",
       version: "2026.3.22",
-      "User-Agent": "openclaw/2026.3.22",
+      "User-Agent": "carapace/2026.3.22",
     });
     const body = requireFetchJsonBody();
     const bodySession = requireRecord(body.session, "fetch session");
@@ -355,7 +355,7 @@ describe("OpenAI realtime voice browser authentication", () => {
   );
 
   it("resolves keychain OPENAI_API_KEY refs before creating browser sessions", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "keychain:openclaw:OPENAI_REALTIME_BROWSER_TEST");
+    vi.stubEnv("OPENAI_API_KEY", "keychain:carapace:OPENAI_REALTIME_BROWSER_TEST");
     execFileSyncMock.mockReturnValueOnce("test-api-key-browser-env\n");
     mockRealtimeClientSecretResponse();
     const provider = buildOpenAIRealtimeVoiceProvider();
@@ -376,7 +376,7 @@ describe("OpenAI realtime voice browser authentication", () => {
     expect(securityArgs).toEqual([
       "find-generic-password",
       "-s",
-      "openclaw",
+      "carapace",
       "-a",
       "OPENAI_REALTIME_BROWSER_TEST",
       "-w",
@@ -391,7 +391,7 @@ describe("OpenAI realtime voice browser authentication", () => {
   });
 
   it("resolves and caches keychain OPENAI_API_KEY refs before creating bridges", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "keychain:openclaw:OPENAI_REALTIME_BRIDGE_TEST");
+    vi.stubEnv("OPENAI_API_KEY", "keychain:carapace:OPENAI_REALTIME_BRIDGE_TEST");
     execFileSyncMock.mockReturnValue("test-api-key-bridge-env\n");
     const provider = buildOpenAIRealtimeVoiceProvider();
 
@@ -467,7 +467,7 @@ describe("OpenAI realtime voice browser authentication", () => {
         providerConfig: {},
         model: "gpt-realtime-2.1",
         agentId: "main",
-        workspaceDir: "/tmp/openclaw-agent-workspace",
+        workspaceDir: "/tmp/carapace-agent-workspace",
         initialItems: [],
       } as never),
     ).rejects.toThrow("OpenAI Realtime voice requires an OpenAI Platform API key");
@@ -478,7 +478,7 @@ describe("OpenAI realtime voice browser authentication", () => {
   });
 
   it("reports an unresolved Platform credential without trying another auth route", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "keychain:openclaw:OPENAI_REALTIME_MISSING_TEST");
+    vi.stubEnv("OPENAI_API_KEY", "keychain:carapace:OPENAI_REALTIME_MISSING_TEST");
     execFileSyncMock.mockImplementationOnce(() => {
       throw new Error("keychain unavailable");
     });
@@ -493,14 +493,14 @@ describe("OpenAI realtime voice browser authentication", () => {
 
   it("checks bridge readiness in the selected agent directory", () => {
     isProviderAuthProfileConfiguredMock.mockImplementation(
-      ({ agentDir }: { agentDir?: string }) => agentDir === "/tmp/openclaw-molty-agent",
+      ({ agentDir }: { agentDir?: string }) => agentDir === "/tmp/carapace-molty-agent",
     );
     const provider = buildOpenAIRealtimeVoiceProvider();
     const cfg = {
       agents: {
         list: [
-          { id: "helper", agentDir: "/tmp/openclaw-helper-agent" },
-          { id: "molty", agentDir: "/tmp/openclaw-molty-agent" },
+          { id: "helper", agentDir: "/tmp/carapace-helper-agent" },
+          { id: "molty", agentDir: "/tmp/carapace-molty-agent" },
         ],
       },
     } as never;
@@ -509,7 +509,7 @@ describe("OpenAI realtime voice browser authentication", () => {
     expect(isProviderAuthProfileConfiguredMock).toHaveBeenCalledWith({
       provider: "openai",
       cfg,
-      agentDir: "/tmp/openclaw-molty-agent",
+      agentDir: "/tmp/carapace-molty-agent",
       profileTypes: ["api_key"],
       includeExternalCliAuth: false,
     });
@@ -518,14 +518,14 @@ describe("OpenAI realtime voice browser authentication", () => {
   it("resolves bridge Platform auth from the selected agent directory", async () => {
     resolveProviderAuthProfileApiKeyMock.mockImplementation(
       async ({ agentDir }: { agentDir?: string }) =>
-        agentDir === "/tmp/openclaw-molty-agent" ? "test-api-key-molty" : undefined,
+        agentDir === "/tmp/carapace-molty-agent" ? "test-api-key-molty" : undefined,
     );
     const provider = buildOpenAIRealtimeVoiceProvider();
     const cfg = {
       agents: {
         list: [
-          { id: "helper", agentDir: "/tmp/openclaw-helper-agent" },
-          { id: "molty", agentDir: "/tmp/openclaw-molty-agent" },
+          { id: "helper", agentDir: "/tmp/carapace-helper-agent" },
+          { id: "molty", agentDir: "/tmp/carapace-molty-agent" },
         ],
       },
     } as never;
@@ -544,7 +544,7 @@ describe("OpenAI realtime voice browser authentication", () => {
     expect(resolveProviderAuthProfileApiKeyMock).toHaveBeenCalledWith({
       provider: "openai",
       cfg,
-      agentDir: "/tmp/openclaw-molty-agent",
+      agentDir: "/tmp/carapace-molty-agent",
       profileTypes: ["api_key"],
       includeExternalCliAuth: false,
     });
@@ -604,7 +604,7 @@ describe("OpenAI realtime voice browser authentication", () => {
   });
 
   it("fails closed when keychain refs cannot be resolved", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "keychain:openclaw:OPENAI_REALTIME_MISSING_TEST");
+    vi.stubEnv("OPENAI_API_KEY", "keychain:carapace:OPENAI_REALTIME_MISSING_TEST");
     resolveProviderAuthProfileApiKeyMock.mockResolvedValueOnce(undefined);
     execFileSyncMock.mockImplementationOnce(() => {
       throw new Error("keychain unavailable");

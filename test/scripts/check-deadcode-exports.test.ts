@@ -125,7 +125,7 @@ describe("check-deadcode-exports", () => {
         "apps/android/scripts/build-release-artifacts.ts!",
         "security/opengrep/check-rule-metadata.mjs!",
         "skills/meme-maker/scripts/meme.mjs!",
-        "scripts/check-openclaw-package-tarball.mts!",
+        "scripts/check-carapace-package-tarball.mts!",
         "scripts/check-live-cache.ts!",
         "scripts/lib/vitest-resource-reporter.mts!",
         "scripts/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}!",
@@ -201,7 +201,7 @@ describe("check-deadcode-exports", () => {
   });
 
   it("models the spawned system-agent MCP stdio entry", () => {
-    expect(knipConfig.workspaces["."].entry).toContain("src/mcp/openclaw-tools-serve.ts!");
+    expect(knipConfig.workspaces["."].entry).toContain("src/mcp/carapace-tools-serve.ts!");
   });
 
   it("scans every nested bundled-plugin source file without broad entry masking", () => {

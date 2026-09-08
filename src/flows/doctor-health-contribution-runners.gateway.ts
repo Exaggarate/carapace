@@ -39,7 +39,7 @@ export async function runGatewayServicesHealth(ctx: DoctorHealthFlowContext): Pr
   const {
     noteMacLaunchAgentOverrides,
     noteMacLaunchctlGatewayEnvOverrides,
-    noteMacStaleOpenClawUpdateLaunchdJobs,
+    noteMacStaleCarapaceUpdateLaunchdJobs,
   } = await import("../commands/doctor-platform-notes.js");
   await maybeScanExtraGatewayServices(ctx.options, ctx.runtime, ctx.prompter);
   await maybeResolveDuelingSystemdGatewayScopes(ctx.runtime, ctx.prompter);
@@ -59,7 +59,7 @@ export async function runGatewayServicesHealth(ctx: DoctorHealthFlowContext): Pr
     },
   );
   await noteMacLaunchAgentOverrides();
-  await noteMacStaleOpenClawUpdateLaunchdJobs();
+  await noteMacStaleCarapaceUpdateLaunchdJobs();
   await noteMacLaunchctlGatewayEnvOverrides(ctx.cfg);
 }
 

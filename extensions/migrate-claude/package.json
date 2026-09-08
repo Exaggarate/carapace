@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/migrate-claude",
+  "name": "@carapace/migrate-claude",
   "version": "2026.9.2",
   "private": true,
-  "description": "Claude to OpenClaw migration provider",
+  "description": "Claude to Carapace migration provider",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

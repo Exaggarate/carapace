@@ -1,17 +1,17 @@
 // Memory Wiki tests cover doctor migration of legacy source sync state.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
   OpenBlobStoreOptions,
   OpenKeyedStoreOptions,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginBlobStoreForTests,
   createPluginStateKeyedStoreForTests,
   resetPluginBlobStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import { rollbackChatGptImportRun } from "./src/chatgpt-import.js";
@@ -42,11 +42,11 @@ function requireStateMigration(id: string) {
 const tempDirs = createMemoryWikiTestHarness();
 
 function resolveLegacyImportRunRecordPath(vaultRoot: string, runId: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs", `${runId}.json`);
+  return path.join(vaultRoot, ".carapace-wiki", "import-runs", `${runId}.json`);
 }
 
 function migrationParams(params: { stateDir: string; vaultRoot: string; agentIds?: string[] }) {
-  const env = { ...process.env, HOME: params.stateDir, OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...process.env, HOME: params.stateDir, CARAPACE_STATE_DIR: params.stateDir };
   return {
     config: {
       ...(params.agentIds ? { agents: { list: params.agentIds.map((id) => ({ id })) } } : {}),
@@ -88,7 +88,7 @@ describe("memory-wiki doctor source sync migration", () => {
   it("deletes rebuildable compiled cache files without importing them", async () => {
     const stateDir = await tempDirs.createTempDir("memory-wiki-doctor-");
     const vaultRoot = path.join(stateDir, "vault");
-    const cacheDir = path.join(vaultRoot, ".openclaw-wiki", "cache");
+    const cacheDir = path.join(vaultRoot, ".carapace-wiki", "cache");
     const legacyPaths = [
       path.join(cacheDir, "agent-digest.json"),
       path.join(cacheDir, "claims.jsonl"),
@@ -120,8 +120,8 @@ describe("memory-wiki doctor source sync migration", () => {
     const stateDir = await tempDirs.createTempDir("memory-wiki-doctor-state-");
     const homeDir = await tempDirs.createTempDir("memory-wiki-doctor-home-");
     const stateVault = path.join(stateDir, "wiki", "main");
-    const homeVault = path.join(homeDir, ".openclaw", "wiki", "main");
-    const cacheRelativePath = path.join(".openclaw-wiki", "cache", "agent-digest.json");
+    const homeVault = path.join(homeDir, ".carapace", "wiki", "main");
+    const cacheRelativePath = path.join(".carapace-wiki", "cache", "agent-digest.json");
     const stateCache = path.join(stateVault, cacheRelativePath);
     const homeCache = path.join(homeVault, cacheRelativePath);
     for (const cachePath of [stateCache, homeCache]) {
@@ -131,7 +131,7 @@ describe("memory-wiki doctor source sync migration", () => {
     const params = {
       ...migrationParams({ stateDir, vaultRoot: stateVault }),
       config: { plugins: { entries: { "memory-wiki": { config: {} } } } },
-      env: { ...process.env, HOME: homeDir, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, HOME: homeDir, CARAPACE_STATE_DIR: stateDir },
     };
     const migration = requireStateMigration("memory-wiki-compiled-cache-file-cleanup");
 
@@ -164,10 +164,10 @@ describe("memory-wiki doctor source sync migration", () => {
     const vaultRoot = path.join(stateDir, "vault");
     const externalCacheDir = path.join(stateDir, "external-cache");
     const externalCachePath = path.join(externalCacheDir, "agent-digest.json");
-    await fs.mkdir(path.join(vaultRoot, ".openclaw-wiki"), { recursive: true });
+    await fs.mkdir(path.join(vaultRoot, ".carapace-wiki"), { recursive: true });
     await fs.mkdir(externalCacheDir, { recursive: true });
     await fs.writeFile(externalCachePath, "private\n", "utf8");
-    await fs.symlink(externalCacheDir, path.join(vaultRoot, ".openclaw-wiki", "cache"));
+    await fs.symlink(externalCacheDir, path.join(vaultRoot, ".carapace-wiki", "cache"));
     const params = migrationParams({ stateDir, vaultRoot });
     const migration = requireStateMigration("memory-wiki-compiled-cache-file-cleanup");
 
@@ -185,7 +185,7 @@ describe("memory-wiki doctor source sync migration", () => {
     const vaultRoot = path.join(stateDir, "wiki", "main");
     const legacyPath = resolveMemoryWikiSourceSyncStatePath(vaultRoot);
     const homeLegacyPath = resolveMemoryWikiSourceSyncStatePath(
-      path.join(homeDir, ".openclaw", "wiki", "main"),
+      path.join(homeDir, ".carapace", "wiki", "main"),
     );
     await fs.mkdir(path.dirname(legacyPath), { recursive: true });
     await fs.mkdir(path.dirname(homeLegacyPath), { recursive: true });
@@ -210,7 +210,7 @@ describe("memory-wiki doctor source sync migration", () => {
     const params = {
       ...migrationParams({ stateDir, vaultRoot }),
       config: { plugins: { entries: { "memory-wiki": { config: {} } } } },
-      env: { ...process.env, HOME: homeDir, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, HOME: homeDir, CARAPACE_STATE_DIR: stateDir },
     };
     const migration = requireStateMigration("memory-wiki-source-sync-json-to-plugin-state");
 
@@ -251,7 +251,7 @@ describe("memory-wiki doctor source sync migration", () => {
     const legacyPath = resolveLegacyImportRunRecordPath(vaultRoot, "chatgpt-alpha");
     const snapshotPath = path.join(
       vaultRoot,
-      ".openclaw-wiki",
+      ".carapace-wiki",
       "import-runs",
       "chatgpt-alpha",
       "snapshots",
@@ -327,7 +327,7 @@ describe("memory-wiki doctor source sync migration", () => {
     await expect(fs.readFile(snapshotPath, "utf8")).resolves.toBe("previous page\n");
 
     configureMemoryWikiImportRunStateStore(store);
-    const blobStoreEnv = { ...process.env, HOME: stateDir, OPENCLAW_STATE_DIR: stateDir };
+    const blobStoreEnv = { ...process.env, HOME: stateDir, CARAPACE_STATE_DIR: stateDir };
     configureMemoryWikiCompiledCacheStore(
       createMemoryWikiCompiledCacheStore(<T>(options: OpenBlobStoreOptions) =>
         createPluginBlobStoreForTests<T>("memory-wiki", options, blobStoreEnv),

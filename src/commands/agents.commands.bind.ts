@@ -1,5 +1,5 @@
 // Implements agent route binding list/add/remove subcommands.
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { listAgentEntries, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { ExpectedCliError } from "../cli/failure-output.js";
@@ -60,13 +60,13 @@ function resolveTargetAgentId(params: {
     params.agentInput === undefined ? null : normalizeAgentIdStrict(params.agentInput);
   if (normalized && !normalized.ok) {
     failAgentBinding(
-      `Agent "${params.agentInput}" not found. Run ${formatCliCommand("openclaw agents list")} to see configured agents.`,
+      `Agent "${params.agentInput}" not found. Run ${formatCliCommand("carapace agents list")} to see configured agents.`,
     );
   }
   const agentId = normalized?.value ?? resolveDefaultAgentId(params.cfg);
   if (!hasAgent(params.cfg, agentId)) {
     failAgentBinding(
-      `Agent "${agentId}" not found. Run ${formatCliCommand("openclaw agents list")} to see configured agents.`,
+      `Agent "${agentId}" not found. Run ${formatCliCommand("carapace agents list")} to see configured agents.`,
     );
   }
   return agentId;

@@ -5,7 +5,7 @@ description: "Clawtributor PRs here, last week or another window: discover conve
 
 # Clawdtributor
 
-Rank OpenClaw PRs/issues shared in the requested conversation. Use authorized
+Rank Carapace PRs/issues shared in the requested conversation. Use authorized
 capabilities; no archive executable or companion skill is required.
 
 ## Source and time window

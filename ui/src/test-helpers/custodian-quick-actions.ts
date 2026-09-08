@@ -1,4 +1,4 @@
-import type { SystemAgentChatQuestion } from "@openclaw/gateway-protocol";
+import type { SystemAgentChatQuestion } from "@carapace/gateway-protocol";
 
 export const QUICK_ACTIONS_QUESTION: SystemAgentChatQuestion = {
   id: "system-agent-quick-actions",

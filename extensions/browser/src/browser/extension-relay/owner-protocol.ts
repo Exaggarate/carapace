@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RELAY_OWNER_PATH = "/_openclaw/relay/owner";
+export const RELAY_OWNER_PATH = "/_carapace/relay/owner";
 export const RELAY_OWNER_LIMIT = 64;
 export const RELAY_OPERATION_TTL_MS = 5 * 60_000;
 

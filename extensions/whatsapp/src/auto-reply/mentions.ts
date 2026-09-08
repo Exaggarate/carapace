@@ -2,8 +2,8 @@
 import {
   buildMentionRegexes,
   normalizeMentionText,
-} from "openclaw/plugin-sdk/channel-mention-gating";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-mention-gating";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   getComparableIdentityValues,
   getMentionIdentities,
@@ -27,7 +27,7 @@ type MentionTargets = {
 };
 
 export function buildMentionConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId?: string,
   options?: Parameters<typeof buildMentionRegexes>[2],
 ): MentionConfig {

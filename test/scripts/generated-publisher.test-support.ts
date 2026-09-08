@@ -27,7 +27,7 @@ function writeExecutable(filePath: string, lines: string[]): void {
 }
 function copyGeneratedPublisherFixture(root: string, workspaceName: string) {
   if (!generatedPublisherTemplate) {
-    const templateRoot = publisherTemplateDirs.make("openclaw-generated-pr-template-");
+    const templateRoot = publisherTemplateDirs.make("carapace-generated-pr-template-");
     const origin = path.join(templateRoot, "origin.git");
     const worktree = path.join(templateRoot, "worktree");
     const generatedDir = path.join(worktree, "generated");
@@ -182,13 +182,13 @@ export function prepareGeneratedPublisherFixture(
     "      else",
     '        head="$("${FAKE_REAL_GIT:-git}" --git-dir="$FAKE_ORIGIN" rev-parse refs/heads/automation/locale)"',
     "      fi",
-    '      printf "https://github.com/openclaw/openclaw/pull/1\\t%s\\n" "$head"',
+    '      printf "https://github.com/Exaggarate/carapace/pull/1\\t%s\\n" "$head"',
     "    fi",
     "    ;;",
     "  pr:create)",
     '    if [[ "$FAKE_RECONCILIATION" == "" ]]; then : > "$FAKE_PR_STATE"; fi',
     '    if [[ "$FAKE_RECONCILIATION" == "merged" ]]; then "$FAKE_REAL_GIT" --git-dir="$FAKE_ORIGIN" update-ref refs/heads/main "$("$FAKE_REAL_GIT" --git-dir="$FAKE_ORIGIN" rev-parse refs/heads/automation/locale)"; fi',
-    '    printf "%s\\n" "https://github.com/openclaw/openclaw/pull/1"',
+    '    printf "%s\\n" "https://github.com/Exaggarate/carapace/pull/1"',
     "    ;;",
     "  pr:edit) exit 0 ;;",
     "  pr:view)",
@@ -249,8 +249,8 @@ export function prepareGeneratedPublisherFixture(
       OVERLAP_POLICY: options.overlapPolicy ?? "defer",
       CONTENTS_TOKEN: "contents-token",
       GH_TOKEN: "test-token",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
-      GITHUB_REPOSITORY_OWNER: "openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
+      GITHUB_REPOSITORY_OWNER: "carapace",
       GITHUB_STEP_SUMMARY: summary,
       HEAD_BRANCH: "automation/locale",
       PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
@@ -302,7 +302,7 @@ export function runGeneratedPublisherScenario(
   baseChangePath: "a" | "b" | null,
   options: GeneratedPublisherOptions = {},
 ) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-generated-pr-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-generated-pr-"));
   try {
     const fixture = prepareGeneratedPublisherFixture(root, baseChangePath, options);
     const action = parse(readFileSync(PUBLISH_GENERATED_PR_ACTION, "utf8"));

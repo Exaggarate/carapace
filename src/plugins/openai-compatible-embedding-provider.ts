@@ -1,7 +1,7 @@
 // Builds OpenAI-compatible embedding provider entries for plugins.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { readEmbeddingVectors } from "../../packages/memory-host-sdk/src/host/embedding-vectors.js";
 import { withRemoteHttpResponse } from "../../packages/memory-host-sdk/src/host/remote-http.js";
 import { readProviderJsonArrayFieldResponse } from "../agents/provider-http-errors.js";

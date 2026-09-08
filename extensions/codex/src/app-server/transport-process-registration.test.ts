@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { terminateCodexAppServerOrphan } from "./transport-process-containment.js";
 import {
@@ -43,7 +43,7 @@ const commandFingerprint = createHash("sha256").update(command).digest("hex");
 
 async function openStore() {
   const { createPluginStateSyncKeyedStore } =
-    await import("openclaw/plugin-sdk/plugin-state-store-runtime");
+    await import("carapace/plugin-sdk/plugin-state-store-runtime");
   return createPluginStateSyncKeyedStore<{
     parent: typeof parent;
     child: typeof child & { commandFingerprint?: string };
@@ -60,7 +60,7 @@ describe("Codex process registration", () => {
 
   beforeEach(async () => {
     root = await fs.mkdtemp(path.join(os.tmpdir(), "codex-process-registration-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", root);
+    vi.stubEnv("CARAPACE_STATE_DIR", root);
     vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
     store = await openStore();
     vi.mocked(readCodexAppServerProcessSnapshot).mockResolvedValue([

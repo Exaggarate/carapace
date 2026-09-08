@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { bundledPluginFile } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledPluginFile } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 
@@ -128,11 +128,11 @@ describe("detectChangedScope", () => {
   it("routes only native i18n-owned paths to the native inventory job", () => {
     for (const changedPath of [
       "apps/.i18n/native-source.json",
-      "apps/android/app/src/main/java/ai/openclaw/app/MainActivity.kt",
-      "apps/android/wear/src/main/java/ai/openclaw/wear/WearScreens.kt",
+      "apps/android/app/src/main/java/ai/carapace/app/MainActivity.kt",
+      "apps/android/wear/src/main/java/ai/carapace/wear/WearScreens.kt",
       "apps/ios/Sources/RootTabs.swift",
-      "apps/macos/Sources/OpenClaw/Settings.swift",
-      "apps/shared/OpenClawKit/Sources/OpenClawKit/Client.swift",
+      "apps/macos/Sources/Carapace/Settings.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceKit/Client.swift",
       "scripts/native-app-i18n.ts",
       "scripts/android-app-i18n.ts",
       "scripts/apple-app-i18n.ts",
@@ -195,7 +195,7 @@ describe("detectChangedScope", () => {
       runUiTests: false,
     });
     expect(
-      detectChangedScope(["apps/macos-mlx-tts/Sources/OpenClawMLXTTSHelper/main.swift"]),
+      detectChangedScope(["apps/macos-mlx-tts/Sources/CarapaceMLXTTSHelper/main.swift"]),
     ).toEqual({
       runNode: false,
       runMacos: true,
@@ -220,7 +220,7 @@ describe("detectChangedScope", () => {
       runControlUiI18n: false,
       runUiTests: false,
     });
-    expect(detectChangedScope(["apps/shared/OpenClawKit/Sources/Foo.swift"])).toEqual({
+    expect(detectChangedScope(["apps/shared/CarapaceKit/Sources/Foo.swift"])).toEqual({
       runNode: false,
       runMacos: true,
       runMacosNode: true,
@@ -312,7 +312,7 @@ describe("detectChangedScope", () => {
 
   it("runs the iOS build but not macOS for generated protocol model-only changes", () => {
     expect(
-      detectChangedScope(["apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift"]),
+      detectChangedScope(["apps/shared/CarapaceKit/Sources/CarapaceProtocol/GatewayModels.swift"]),
     ).toEqual({
       runNode: false,
       runMacos: false,
@@ -458,12 +458,12 @@ describe("detectChangedScope", () => {
     ["scripts/npm-runner.mts", true, false],
     ["scripts/lib/format-generated-module.mts", true, false],
     ["test/scripts/format-generated-module.test.ts", true, false],
-    [".github/workflows/openclaw-cross-os-release-checks-reusable.yml", true, false],
+    [".github/workflows/carapace-cross-os-release-checks-reusable.yml", true, false],
     [".github/workflows/windows-testbox-probe.yml", true, false],
-    ["scripts/github/run-openclaw-cross-os-release-checks.sh", true, false],
-    ["scripts/openclaw-cross-os-release-checks.ts", true, false],
+    ["scripts/github/run-carapace-cross-os-release-checks.sh", true, false],
+    ["scripts/carapace-cross-os-release-checks.ts", true, false],
     ["scripts/lib/cross-os-release-checks/runtime.ts", true, false],
-    ["test/scripts/openclaw-cross-os-release-workflow.test.ts", true, false],
+    ["test/scripts/carapace-cross-os-release-workflow.test.ts", true, false],
     ["scripts/install.ps1", true, true],
   ])(
     "runs Windows only for Windows-relevant changes (%s)",
@@ -689,7 +689,7 @@ describe("detectChangedScope", () => {
   it("treats base and head as literal git args", () => {
     const markerPath = path.join(
       os.tmpdir(),
-      `openclaw-ci-changed-scope-${Date.now()}-${Math.random().toString(16).slice(2)}.tmp`,
+      `carapace-ci-changed-scope-${Date.now()}-${Math.random().toString(16).slice(2)}.tmp`,
     );
     markerPaths.push(markerPath);
 
@@ -710,7 +710,7 @@ describe("detectChangedScope", () => {
   });
 
   it("uses the merge commit first parent instead of a stale PR payload base", () => {
-    const { repoDir, staleBase } = createSyntheticMergeRepo("openclaw-ci-scope-merge-");
+    const { repoDir, staleBase } = createSyntheticMergeRepo("carapace-ci-scope-merge-");
 
     expect(
       execFileSync("git", ["diff", "--name-only", staleBase, "HEAD"], {
@@ -726,7 +726,7 @@ describe("detectChangedScope", () => {
   });
 
   it("reports both sides of a rename so deleted paths force safe planning", () => {
-    const repoDir = tempDirs.make("openclaw-ci-scope-rename-");
+    const repoDir = tempDirs.make("carapace-ci-scope-rename-");
     git(repoDir, ["init", "-b", "main"]);
     git(repoDir, ["config", "user.email", "ci@example.invalid"]);
     git(repoDir, ["config", "user.name", "CI"]);
@@ -745,7 +745,7 @@ describe("detectChangedScope", () => {
     if (process.platform === "win32") {
       return;
     }
-    const repoDir = tempDirs.make("openclaw-ci-scope-raw-paths-");
+    const repoDir = tempDirs.make("carapace-ci-scope-raw-paths-");
     git(repoDir, ["init", "-b", "main"]);
     git(repoDir, ["config", "user.email", "ci@example.invalid"]);
     git(repoDir, ["config", "user.name", "CI"]);
@@ -764,7 +764,7 @@ describe("detectChangedScope", () => {
   });
 
   it("drops oversized changed-path payloads before workflow environment interpolation", () => {
-    const outputPath = path.join(os.tmpdir(), `openclaw-ci-scope-output-${Date.now()}.txt`);
+    const outputPath = path.join(os.tmpdir(), `carapace-ci-scope-output-${Date.now()}.txt`);
     markerPaths.push(outputPath);
     const changedPaths = Array.from(
       { length: 1_000 },
@@ -795,7 +795,7 @@ describe("detectChangedScope", () => {
   ])(
     "runs zero-install scope detection for %s",
     (_label, changedPath, manifest, failSafe, cliArgs) => {
-      const repoDir = fs.realpathSync(tempDirs.make("openclaw-ci-scope-empty-"));
+      const repoDir = fs.realpathSync(tempDirs.make("carapace-ci-scope-empty-"));
       const outputPath = path.join(repoDir, "github-output.txt");
       const scriptPath = path.join(repoDir, "scripts/ci-changed-scope.mjs");
 

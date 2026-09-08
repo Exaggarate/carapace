@@ -33,13 +33,13 @@ describe("release upgrade baseline resolver", () => {
         "2026.7.1-beta.2",
         "2026.7.1-2",
       ]),
-    ).toBe(`openclaw@${expected}`);
+    ).toBe(`carapace@${expected}`);
   });
 
   it("rejects the candidate itself as an upgrade baseline", () => {
     expect(() =>
       resolveReleaseUpgradeBaseline("2026.7.1", ["2026.7.1-beta.2", "2026.7.1", "2026.8.1"]),
-    ).toThrow("no published stable OpenClaw baseline predates candidate");
+    ).toThrow("no published stable Carapace baseline predates candidate");
   });
 
   it.each([
@@ -48,7 +48,7 @@ describe("release upgrade baseline resolver", () => {
     ["2026.7.1", []],
   ])("rejects missing stable baselines for %s", (candidate, versions) => {
     expect(() => resolveReleaseUpgradeBaseline(candidate, versions)).toThrow(
-      "no published stable OpenClaw baseline",
+      "no published stable Carapace baseline",
     );
   });
 
@@ -62,7 +62,7 @@ describe("release upgrade baseline resolver", () => {
 
   it("allows a local candidate absent from npm metadata to use an older stable release", () => {
     expect(resolveReleaseUpgradeBaseline("2026.8.1-beta.2", ["2026.7.1", "2026.8.1-beta.1"])).toBe(
-      "openclaw@2026.7.1",
+      "carapace@2026.7.1",
     );
   });
 
@@ -87,7 +87,7 @@ describe("release upgrade baseline resolver", () => {
           targetContextRef: "extended-stable/2026.6.33",
         },
       ),
-    ).toBe("openclaw@2026.6.34-1");
+    ).toBe("carapace@2026.6.34-1");
   });
 
   it("selects a stable predecessor for the first frozen .33 candidate", () => {
@@ -99,7 +99,7 @@ describe("release upgrade baseline resolver", () => {
           targetContextRef: "extended-stable/2026.7.33",
         },
       ),
-    ).toBe("openclaw@2026.7.1-2");
+    ).toBe("carapace@2026.7.1-2");
   });
 
   it("honors an explicit published predecessor from the frozen extended-stable line", () => {
@@ -108,7 +108,7 @@ describe("release upgrade baseline resolver", () => {
         previousVersion: "2026.6.33",
         targetContextRef: "extended-stable/2026.6.33",
       }),
-    ).toBe("openclaw@2026.6.33");
+    ).toBe("carapace@2026.6.33");
   });
 
   it.each(["2026.6.35", "2026.7.1", "2026.6.31"])(

@@ -8,17 +8,17 @@ import {
   PreparedModelRuntimeOwnerNotPublishedError,
 } from "../agents/prepared-model-runtime.js";
 import { resetPreparedModelRuntimeSnapshotsForTest } from "../agents/prepared-model-runtime.test-support.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   clearPluginLoaderCache,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   writePlugin,
 } from "../plugins/loader.test-fixtures.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { checkTouchedTextModelRefs } from "./config-model-validation.js";
 
 const primary = "pin-alpha/exact-supported";
@@ -32,17 +32,17 @@ async function clearRuntimeState() {
 
 async function withProviderFixtures(
   run: (fixture: {
-    config: OpenClawConfig;
-    state: OpenClawTestState;
+    config: CarapaceConfig;
+    state: CarapaceTestState;
     imported: (provider: string) => boolean;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
       label: "config-model-runtime",
       env: {
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
       },
     },
     async (state) => {
@@ -84,7 +84,7 @@ module.exports = {
 };`,
         });
         fs.writeFileSync(
-          path.join(plugin.dir, "openclaw.plugin.json"),
+          path.join(plugin.dir, "carapace.plugin.json"),
           JSON.stringify({
             id,
             configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -94,7 +94,7 @@ module.exports = {
         );
         return plugin;
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           defaults: { workspace: state.workspaceDir, model: { primary } },
           entries: { main: { default: true } },
@@ -247,7 +247,7 @@ describe("config model validation with provider runtime", () => {
     "rejects a %s provider even when an ambient registry has its hook",
     async (policy) => {
       await withProviderFixtures(async ({ config, state, imported }) => {
-        const ambient = loadOpenClawPlugins({
+        const ambient = loadCarapacePlugins({
           config,
           workspaceDir: state.workspaceDir,
           onlyPluginIds: ["pin-alpha"],

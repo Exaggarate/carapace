@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { markClawMcpServerIndependentlyOwned } from "../state/claw-mcp-adoption.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { buildClawAddPlan } from "./lifecycle.js";
 import {
   deleteClawMcpServerRef,
@@ -14,10 +14,10 @@ import { parseClawManifest } from "./schema.js";
 import type { ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 async function fixture(agentId = "worker", root?: string) {
-  const packageRoot = root ?? tempDirs.make("openclaw-claw-mcp-");
+  const packageRoot = root ?? tempDirs.make("carapace-claw-mcp-");
   const parsed = parseClawManifest({
     schemaVersion: 1,
     agent: { id: agentId },
@@ -42,7 +42,7 @@ async function fixture(agentId = "worker", root?: string) {
     name: `@acme/${agentId}`,
     version: "1.0.0",
     packageRoot,
-    manifestPath: join(packageRoot, "openclaw.claw.json"),
+    manifestPath: join(packageRoot, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -52,7 +52,7 @@ async function fixture(agentId = "worker", root?: string) {
     source,
     context: { workspace: join(packageRoot, "workspace") },
   });
-  return { root: packageRoot, plan, env: { OPENCLAW_STATE_DIR: join(packageRoot, "state") } };
+  return { root: packageRoot, plan, env: { CARAPACE_STATE_DIR: join(packageRoot, "state") } };
 }
 
 function listedMcpServers(mcpServers: Record<string, Record<string, unknown>> = {}) {
@@ -95,7 +95,7 @@ describe("installClawMcpServers", () => {
     });
     expect(refs).toMatchObject([
       {
-        schemaVersion: "openclaw.clawMcpServerRef.v1",
+        schemaVersion: "carapace.clawMcpServerRef.v1",
         agentId: "worker",
         name: "docs",
         configDigest: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),
@@ -105,7 +105,7 @@ describe("installClawMcpServers", () => {
         status: "complete",
       },
       {
-        schemaVersion: "openclaw.clawMcpServerRef.v1",
+        schemaVersion: "carapace.clawMcpServerRef.v1",
         agentId: "worker",
         name: "linear",
         configDigest: expect.stringMatching(/^sha256:[a-f0-9]{64}$/),

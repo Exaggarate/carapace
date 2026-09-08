@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveThreadBindingSpawnPolicy } from "openclaw/plugin-sdk/conversation-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveThreadBindingSpawnPolicy } from "carapace/plugin-sdk/conversation-runtime";
 import { resolveDiscordRuntimeBindingConversationId } from "./conversation-identity.js";
 import { resolveDiscordConversationBindingRoute } from "./monitor/conversation-binding-route.js";
 import { resolveDiscordConversationRoute } from "./monitor/route-resolution.js";
 
 export function inspectDiscordConversationRouteOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   conversation: {
     kind: "direct" | "group" | "channel";

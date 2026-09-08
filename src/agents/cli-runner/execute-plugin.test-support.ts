@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   CliBackendExecute,
   CliBackendExecuteContext,
@@ -21,7 +21,7 @@ export const SUCCESS_RESULT = {
 
 export async function createExecution(
   options: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     sessionEntry?: RunCliAgentParams["sessionEntry"];
     nativeTools?: string[];
     abortSignal?: AbortSignal;
@@ -47,7 +47,7 @@ export async function createExecution(
     timeoutMs: options.timeoutMs ?? 5_000,
     sessionEntry: options.sessionEntry,
     ...(options.nativeTools
-      ? { cliToolAvailability: { native: options.nativeTools, openClaw: [] } }
+      ? { cliToolAvailability: { native: options.nativeTools, carapace: [] } }
       : {}),
     systemPrompt: "  Follow host policy.  ",
     backend: {
@@ -90,7 +90,7 @@ export function runPlugin(
     execute,
     executionCommand: "/bin/sh",
     executionArgs: ["-p", "--permission-mode", "bypassPermissions"],
-    env: { PATH: "/bin:/usr/bin", OPENCLAW_TEST_MARKER: "host-owned" },
+    env: { PATH: "/bin:/usr/bin", CARAPACE_TEST_MARKER: "host-owned" },
     prompt: context.params.prompt,
     promptContext: context.promptContext,
     useResume: options.useResume ?? Boolean(options.requiredGeneration),

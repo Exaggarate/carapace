@@ -1,4 +1,4 @@
-import { findSourceImportBackedges } from "openclaw/plugin-sdk/test-fixtures";
+import { findSourceImportBackedges } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 
 describe("Codex prepared-runtime registration import boundary", () => {
@@ -23,7 +23,7 @@ describe("Codex prepared-runtime registration import boundary", () => {
         "src/agents/provider-request-config.ts",
         "src/plugins/manifest-registry-installed.ts",
         "src/sessions/session-upstream-links.ts",
-        "src/state/openclaw-state-db.ts",
+        "src/state/carapace-state-db.ts",
         "src/infra/net/undici-runtime.ts",
         "src/plugin-sdk/text-chunking.ts",
         "extensions/codex/src/app-server/protocol-validators.ts",

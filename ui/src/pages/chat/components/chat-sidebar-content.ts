@@ -71,7 +71,7 @@ function renderSidebarAttachment(
     </div>`;
   }
   if (content.attachmentKind === "video" || mimeType.startsWith("video/")) {
-    return html`<openclaw-chat-video-player
+    return html`<carapace-chat-video-player
       .src=${src}
       .sourceIdentity=${content.sourceIdentity ?? content.src ?? src}
       .label=${content.title}
@@ -81,10 +81,10 @@ function renderSidebarAttachment(
       .sizeBytes=${source?.sizeBytes ?? content.sizeBytes}
       .mediaWidth=${source?.width ?? content.width}
       .mediaHeight=${source?.height ?? content.height}
-    ></openclaw-chat-video-player>`;
+    ></carapace-chat-video-player>`;
   }
   if (content.attachmentKind === "audio" || mimeType.startsWith("audio/")) {
-    return html`<openclaw-chat-audio-player
+    return html`<carapace-chat-audio-player
       .src=${src}
       .sourceIdentity=${content.sourceIdentity ?? content.src ?? src}
       .label=${content.title}
@@ -94,7 +94,7 @@ function renderSidebarAttachment(
       .sizeBytes=${source?.sizeBytes ?? content.sizeBytes}
       .serverDurationMs=${source?.durationMs ?? content.durationMs}
       .voiceNote=${content.voiceNote === true}
-    ></openclaw-chat-audio-player>`;
+    ></carapace-chat-audio-player>`;
   }
   const inferTypeFromExtension = !mimeType || mimeType === "application/octet-stream";
   const blockedExternalSvg =
@@ -111,13 +111,13 @@ function renderSidebarAttachment(
     return html`<img class="sidebar-attachment-preview__image" src=${src} alt=${content.title} />`;
   }
   if (isTextAttachment(mimeType, content.title) && !isCrossOriginHttpSource(src)) {
-    return html`<openclaw-chat-text-attachment
+    return html`<carapace-chat-text-attachment
       .src=${src}
       .sourceIdentity=${content.sourceIdentity ?? src}
       .label=${content.title}
       .mimeType=${content.mimeType ?? ""}
       .sizeBytes=${source?.sizeBytes ?? content.sizeBytes}
-    ></openclaw-chat-text-attachment>`;
+    ></carapace-chat-text-attachment>`;
   }
   return renderCompactAttachmentCard({
     kind: content.attachmentKind ?? "document",
@@ -236,7 +236,7 @@ function renderMarkdownSidebar(props: MarkdownSidebarProps) {
           : html`<div class="sidebar-header">
               <div class="sidebar-title">${title}</div>
               <div class="sidebar-header__actions">
-                <openclaw-tooltip .content=${t("chat.detailPanel.close")}>
+                <carapace-tooltip .content=${t("chat.detailPanel.close")}>
                   <button
                     @click=${props.onClose}
                     class="btn"
@@ -245,7 +245,7 @@ function renderMarkdownSidebar(props: MarkdownSidebarProps) {
                   >
                     ${icons.x}
                   </button>
-                </openclaw-tooltip>
+                </carapace-tooltip>
               </div>
             </div> `
       }
@@ -277,13 +277,13 @@ function renderMarkdownSidebar(props: MarkdownSidebarProps) {
               ? content.kind === "file"
                 ? renderSidebarFile(content, props.onViewRawText, props.fileView)
                 : content.kind === "session-diff"
-                  ? html`<openclaw-session-diff
+                  ? html`<carapace-session-diff
                       .loader=${content.load}
                       .loadFileText=${content.loadFileText ?? null}
                       .execNode=${props.fileView?.execNode ?? null}
                       .openFile=${content.openFile ?? null}
                       .revealFile=${props.fileView?.onReveal ?? null}
-                    ></openclaw-session-diff>`
+                    ></carapace-session-diff>`
                   : content.kind === "canvas"
                     ? html`
                         <div class="chat-tool-card__preview" data-kind="canvas">

@@ -2,13 +2,13 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { isMessagingToolDuplicate } from "../../agents/embedded-agent-helpers.js";
 import type { MessagingToolSend } from "../../agents/embedded-agent-messaging.types.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import { getLoadedChannelPluginForRead } from "../../channels/plugins/registry-loaded.js";
 import { normalizeAnyChannelId } from "../../channels/registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasReplyPayloadContent } from "../../interactive/payload.js";
 import { normalizeMediaReferenceForComparison } from "../../media/media-reference-comparison.js";
 import {
@@ -25,7 +25,7 @@ import {
 import type { ReplyPayload } from "../types.js";
 
 type MessagingToolDedupeRouteParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   messageProvider?: string;
   messagingToolSentTargets?: MessagingToolSend[];
   originatingTo?: string;
@@ -193,7 +193,7 @@ function targetsMatchForDedupe(params: {
 
 function resolveOriginThreadIdForPayload(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   accountId?: string;
   originatingThreadId?: string | number;
   replyToId?: string;

@@ -18,12 +18,12 @@ Each agent has its own:
 
 - **Workspace**: files, `AGENTS.md`/`SOUL.md`/`USER.md`, local notes, persona rules.
 - **State directory** (`agentDir`): auth profiles, model registry, per-agent config.
-- **Session store**: chat history and routing state in `<agentDir>/openclaw-agent.sqlite`.
+- **Session store**: chat history and routing state in `<agentDir>/carapace-agent.sqlite`.
 
-Auth profiles are per-agent, read from `<agentDir>/openclaw-agent.sqlite`. With the default layout, that resolves to:
+Auth profiles are per-agent, read from `<agentDir>/carapace-agent.sqlite`. With the default layout, that resolves to:
 
 ```text
-~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite
+~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite
 ```
 
 <Note>
@@ -31,10 +31,10 @@ Auth profiles are per-agent, read from `<agentDir>/openclaw-agent.sqlite`. With 
 </Note>
 
 <Warning>
-Never reuse `agentDir` across agents — it causes auth/session state collisions. When a secondary agent's local OAuth credential is expired or its refresh fails, OpenClaw reads through to the default/main agent's credential for the same profile id and adopts whichever token is freshest, without copying the refresh token into the secondary agent's store. If you want a fully independent OAuth account, sign in from that agent. If you copy credentials manually, copy only portable static `api_key` or `token` profiles — OAuth refresh material is not portable by default (`copyToAgents` can opt a profile in explicitly).
+Never reuse `agentDir` across agents — it causes auth/session state collisions. When a secondary agent's local OAuth credential is expired or its refresh fails, Carapace reads through to the default/main agent's credential for the same profile id and adopts whichever token is freshest, without copying the refresh token into the secondary agent's store. If you want a fully independent OAuth account, sign in from that agent. If you copy credentials manually, copy only portable static `api_key` or `token` profiles — OAuth refresh material is not portable by default (`copyToAgents` can opt a profile in explicitly).
 </Warning>
 
-Skills load from each agent workspace plus shared roots such as `~/.openclaw/skills`, then filter by the effective agent skill allowlist. Use `agents.defaults.skills` for a shared baseline and `agents.entries.*.skills` for a per-agent replacement (explicit entries replace the default, they do not merge). See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills) and [Skills: agent allowlists](/tools/skills#agent-allowlists).
+Skills load from each agent workspace plus shared roots such as `~/.carapace/skills`, then filter by the effective agent skill allowlist. Use `agents.defaults.skills` for a shared baseline and `agents.entries.*.skills` for a per-agent replacement (explicit entries replace the default, they do not merge). See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills) and [Skills: agent allowlists](/tools/skills#agent-allowlists).
 
 Plugin-owned storage follows that plugin's configuration; adding a second agent
 does not automatically split every global plugin store. For example, configure
@@ -49,29 +49,29 @@ when personas must not share compiled wiki knowledge.
 
 | What                             | Default                                                                                | Override                                                                                    |
 | -------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Config                           | `~/.openclaw/openclaw.json`                                                            | `OPENCLAW_CONFIG_PATH`                                                                      |
-| State dir                        | `~/.openclaw`                                                                          | `OPENCLAW_STATE_DIR`                                                                        |
-| Default agent's workspace        | `<stateDir>/workspace` (`~/.openclaw-<profile>/workspace` for a named profile)         | `agents.entries.*.workspace`, then `agents.defaults.workspace`, or `OPENCLAW_WORKSPACE_DIR` |
+| Config                           | `~/.carapace/carapace.json`                                                            | `CARAPACE_CONFIG_PATH`                                                                      |
+| State dir                        | `~/.carapace`                                                                          | `CARAPACE_STATE_DIR`                                                                        |
+| Default agent's workspace        | `<stateDir>/workspace` (`~/.carapace-<profile>/workspace` for a named profile)         | `agents.entries.*.workspace`, then `agents.defaults.workspace`, or `CARAPACE_WORKSPACE_DIR` |
 | Other agents' workspace          | `<stateDir>/workspace-<agentId>` (or `<agents.defaults.workspace>/<agentId>` when set) | `agents.entries.*.workspace`                                                                |
-| Agent dir                        | `~/.openclaw/agents/<agentId>/agent`                                                   | `agents.entries.*.agentDir`                                                                 |
-| Sessions and transcripts         | `<agentDir>/openclaw-agent.sqlite`                                                     | `agents.entries.*.agentDir`                                                                 |
-| Legacy/archive session artifacts | `~/.openclaw/agents/<agentId>/sessions`                                                | —                                                                                           |
+| Agent dir                        | `~/.carapace/agents/<agentId>/agent`                                                   | `agents.entries.*.agentDir`                                                                 |
+| Sessions and transcripts         | `<agentDir>/carapace-agent.sqlite`                                                     | `agents.entries.*.agentDir`                                                                 |
+| Legacy/archive session artifacts | `~/.carapace/agents/<agentId>/sessions`                                                | —                                                                                           |
 
 ### Single-agent mode (default)
 
-If you configure nothing, OpenClaw runs one agent:
+If you configure nothing, Carapace runs one agent:
 
 - `agentId` defaults to `main`.
 - The main session key is `agent:main:main`.
-- Workspace defaults to `<stateDir>/workspace` (`~/.openclaw/workspace` for the default install and `~/.openclaw-<profile>/workspace` for a named profile).
-- State defaults to `~/.openclaw/agents/main/agent`.
+- Workspace defaults to `<stateDir>/workspace` (`~/.carapace/workspace` for the default install and `~/.carapace-<profile>/workspace` for a named profile).
+- State defaults to `~/.carapace/agents/main/agent`.
 
 ## Agent helper
 
 Add a new isolated agent:
 
 ```bash
-openclaw agents add work
+carapace agents add work
 ```
 
 Flags: `--workspace <dir>`, `--model <id>`, `--agent-dir <dir>`, `--bind <channel[:accountId]>` (repeatable), `--non-interactive` (requires `--workspace`).
@@ -79,7 +79,7 @@ Flags: `--workspace <dir>`, `--model <id>`, `--agent-dir <dir>`, `--bind <channe
 Add `bindings` to route inbound messages (the wizard offers to do this for you), then verify:
 
 ```bash
-openclaw agents list --bindings
+carapace agents list --bindings
 ```
 
 In the Control UI, **Settings → Agents** updates model choices when the Gateway
@@ -90,16 +90,16 @@ edits keep their normal automatic save behavior.
 
 ### Agent provenance
 
-OpenClaw records how each configured agent was created: `operator` for CLI,
+Carapace records how each configured agent was created: `operator` for CLI,
 onboarding, and Gateway requests; `agent` when the system agent requested it;
 and `claw` when a Claw install added it. Agent-created entries also retain the
-requesting agent id. A configured agent can ask OpenClaw to create another
-agent through its `openclaw` tool. The system agent files the typed operation,
+requesting agent id. A configured agent can ask Carapace to create another
+agent through its `carapace` tool. The system agent files the typed operation,
 shows the requesting agent id to the operator, and creates the agent only after
 operator approval. Inspect the current creation hierarchy with:
 
 ```bash
-openclaw agents list --tree
+carapace agents list --tree
 ```
 
 Deleted creators remain historical provenance. If the creator is no longer in
@@ -110,11 +110,11 @@ the configured roster, its children appear at the root of the tree.
 <Steps>
   <Step title="Create each agent workspace">
     ```bash
-    openclaw agents add coding
-    openclaw agents add social
+    carapace agents add coding
+    carapace agents add social
     ```
 
-    Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USER.md`, plus a dedicated `agentDir` and session store. By default, those agent files live under `~/.openclaw/agents/<agentId>`.
+    Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USER.md`, plus a dedicated `agentDir` and session store. By default, those agent files live under `~/.carapace/agents/<agentId>`.
 
   </Step>
   <Step title="Create channel accounts">
@@ -125,7 +125,7 @@ the configured roster, its children appear at the root of the tree.
     - WhatsApp: link each phone number per account.
 
     ```bash
-    openclaw channels login --channel whatsapp --account work
+    carapace channels login --channel whatsapp --account work
     ```
 
     See channel guides: [Discord](/channels/discord), [Telegram](/channels/telegram), [WhatsApp](/channels/whatsapp).
@@ -136,9 +136,9 @@ the configured roster, its children appear at the root of the tree.
   </Step>
   <Step title="Restart and verify">
     ```bash
-    openclaw gateway restart
-    openclaw agents list --bindings
-    openclaw channels status --probe
+    carapace gateway restart
+    carapace agents list --bindings
+    carapace channels status --probe
     ```
   </Step>
 </Steps>
@@ -168,7 +168,7 @@ compiled knowledge separate from a marketing agent's, set
         config: {
           vault: {
             scope: "agent",
-            path: "~/.openclaw/wiki",
+            path: "~/.carapace/wiki",
           },
         },
       },
@@ -177,9 +177,9 @@ compiled knowledge separate from a marketing agent's, set
 }
 ```
 
-The configured path is the parent directory. OpenClaw appends the normalized
-agent id, producing paths such as `~/.openclaw/wiki/support` and
-`~/.openclaw/wiki/marketing`. Agent-scoped CLI and Gateway operations require
+The configured path is the parent directory. Carapace appends the normalized
+agent id, producing paths such as `~/.carapace/wiki/support` and
+`~/.carapace/wiki/marketing`. Agent-scoped CLI and Gateway operations require
 an explicit agent when multiple agents are configured. See
 [Memory Wiki per-agent vaults](/plugins/memory-wiki#per-agent-vaults) for bridge
 filtering, migration, and trust-boundary details.
@@ -205,8 +205,8 @@ Direct chats collapse to the agent's main session key by default, so true isolat
 {
   agents: {
     entries: {
-      alex: { default: true, workspace: "~/.openclaw/workspace-alex" },
-      mia: { workspace: "~/.openclaw/workspace-mia" },
+      alex: { default: true, workspace: "~/.carapace/workspace-alex" },
+      mia: { workspace: "~/.carapace/workspace-mia" },
     },
   },
   bindings: [
@@ -238,7 +238,7 @@ Bindings are deterministic and most-specific wins. See [Channel routing](/channe
 - If a binding sets multiple match fields (for example `peer` + `guildId`), all specified fields must match (`AND` semantics).
 - A binding that omits `accountId` matches only the default account, not every account. Use `accountId: "*"` for a channel-wide fallback, or `accountId: "<name>"` for one account. Adding the same binding again with an explicit account id upgrades the existing channel-only binding instead of duplicating it.
 
-For existing multi-agent configs, `openclaw doctor --fix` materializes legacy ambient default routing into channel-wide bindings plus explicit heartbeat, Custodian, and Talk targets. Single-agent configs are unchanged.
+For existing multi-agent configs, `carapace doctor --fix` materializes legacy ambient default routing into channel-wide bindings plus explicit heartbeat, Custodian, and Talk targets. Single-agent configs are unchanged.
 
 For a multi-agent roster defined directly in the main config file without a
 legacy `default: true` marker, Doctor adds `agents.ownership: "explicit"` for
@@ -260,7 +260,7 @@ from your backups; Doctor does not merge directories.
 
 Channels that support multiple accounts (e.g. WhatsApp) use `accountId` to identify each login. Each `accountId` routes to its own agent, so one server can host multiple phone numbers without mixing sessions.
 
-Set `channels.<channel>.defaultAccount` to choose the account used when `accountId` is omitted. When unset, OpenClaw falls back to `default` if present, otherwise the first configured account id (sorted).
+Set `channels.<channel>.defaultAccount` to choose the account used when `accountId` is omitted. When unset, Carapace falls back to `default` if present, otherwise the first configured account id (sorted).
 
 Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `mattermost`, `matrix`, `nextcloud-talk`, `nostr`, `signal`, `slack`, `telegram`, `whatsapp`, `zalo`, `zalouser`.
 
@@ -281,8 +281,8 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
     {
       agents: {
         entries: {
-          main: { default: true, workspace: "~/.openclaw/workspace-main" },
-          coding: { workspace: "~/.openclaw/workspace-coding" },
+          main: { default: true, workspace: "~/.carapace/workspace-main" },
+          coding: { workspace: "~/.carapace/workspace-coding" },
         },
       },
       bindings: [
@@ -328,8 +328,8 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
     {
       agents: {
         entries: {
-          main: { default: true, workspace: "~/.openclaw/workspace-main" },
-          alerts: { workspace: "~/.openclaw/workspace-alerts" },
+          main: { default: true, workspace: "~/.carapace/workspace-main" },
+          alerts: { workspace: "~/.carapace/workspace-alerts" },
         },
       },
       bindings: [
@@ -367,11 +367,11 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
     Link each account before starting the gateway:
 
     ```bash
-    openclaw channels login --channel whatsapp --account personal
-    openclaw channels login --channel whatsapp --account biz
+    carapace channels login --channel whatsapp --account personal
+    carapace channels login --channel whatsapp --account biz
     ```
 
-    `~/.openclaw/openclaw.json` (JSON5):
+    `~/.carapace/carapace.json` (JSON5):
 
     ```js
     {
@@ -380,13 +380,13 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
           home: {
             default: true,
             name: "Home",
-            workspace: "~/.openclaw/workspace-home",
-            agentDir: "~/.openclaw/agents/home/agent",
+            workspace: "~/.carapace/workspace-home",
+            agentDir: "~/.carapace/agents/home/agent",
           },
           work: {
             name: "Work",
-            workspace: "~/.openclaw/workspace-work",
-            agentDir: "~/.openclaw/agents/work/agent",
+            workspace: "~/.carapace/workspace-work",
+            agentDir: "~/.carapace/agents/work/agent",
           },
         },
       },
@@ -419,12 +419,12 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
         whatsapp: {
           accounts: {
             personal: {
-              // Optional override. Default: ~/.openclaw/credentials/whatsapp/personal
-              // authDir: "~/.openclaw/credentials/whatsapp/personal",
+              // Optional override. Default: ~/.carapace/credentials/whatsapp/personal
+              // authDir: "~/.carapace/credentials/whatsapp/personal",
             },
             biz: {
-              // Optional override. Default: ~/.openclaw/credentials/whatsapp/biz
-              // authDir: "~/.openclaw/credentials/whatsapp/biz",
+              // Optional override. Default: ~/.carapace/credentials/whatsapp/biz
+              // authDir: "~/.carapace/credentials/whatsapp/biz",
             },
           },
         },
@@ -448,12 +448,12 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
           chat: {
             default: true,
             name: "Everyday",
-            workspace: "~/.openclaw/workspace-chat",
+            workspace: "~/.carapace/workspace-chat",
             model: "anthropic/claude-sonnet-4-6",
           },
           opus: {
             name: "Deep Work",
-            workspace: "~/.openclaw/workspace-opus",
+            workspace: "~/.carapace/workspace-opus",
             model: "anthropic/claude-opus-4-6",
           },
         },
@@ -478,12 +478,12 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
           chat: {
             default: true,
             name: "Everyday",
-            workspace: "~/.openclaw/workspace-chat",
+            workspace: "~/.carapace/workspace-chat",
             model: "anthropic/claude-sonnet-4-6",
           },
           opus: {
             name: "Deep Work",
-            workspace: "~/.openclaw/workspace-opus",
+            workspace: "~/.carapace/workspace-opus",
             model: "anthropic/claude-opus-4-6",
           },
         },
@@ -511,7 +511,7 @@ Channels supporting multiple accounts: `discord`, `feishu`, `googlechat`, `imess
           family: {
             default: true,
             name: "Family",
-            workspace: "~/.openclaw/workspace-family",
+            workspace: "~/.carapace/workspace-family",
             identity: { name: "Family Bot" },
             groupChat: {
               mentionPatterns: ["@family", "@familybot", "@Family Bot"],
@@ -562,14 +562,14 @@ Each agent can have its own sandbox and tool restrictions:
     entries: {
       personal: {
         default: true,
-        workspace: "~/.openclaw/workspace-personal",
+        workspace: "~/.carapace/workspace-personal",
         sandbox: {
           mode: "off",  // No sandbox for personal agent
         },
         // No tool restrictions - all tools available
       },
       family: {
-        workspace: "~/.openclaw/workspace-family",
+        workspace: "~/.carapace/workspace-family",
         sandbox: {
           mode: "all",     // Always sandboxed
           scope: "agent",  // One container per agent

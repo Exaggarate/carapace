@@ -13,7 +13,7 @@ const EXIT_TIMEOUT_MS = 4_000;
 const tempDirs: string[] = [];
 
 async function createCodexFixture(exitMs?: number, exitCode = 0) {
-  const dir = await mkdtemp(path.join(tmpdir(), "openclaw-tui-auth-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "carapace-tui-auth-"));
   tempDirs.push(dir);
   const scriptPath = path.join(dir, "codex-fixture.cjs");
   await writeFile(

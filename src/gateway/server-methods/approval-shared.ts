@@ -1,12 +1,12 @@
 // Approval shared helpers normalize pending exec/plugin approval lookups,
 // decision payloads, turn-source routing, and gateway error responses.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import type {
   ApprovalChannelReviewer,
   ValidationError,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasApprovalTurnSourceRoute } from "../../infra/approval-turn-source.js";
 import type { ChannelApprovalKind } from "../../infra/approval-types.js";
 import type {
@@ -215,7 +215,7 @@ export function broadcastApprovalResolvedEvent<TPayload>(params: {
 }): void {
   const eventName =
     params.approvalKind === "system-agent"
-      ? "openclaw.approval.resolved"
+      ? "carapace.approval.resolved"
       : `${params.approvalKind}.approval.resolved`;
   const recipientConnIds = resolveApprovalRequestRecipientConnIds({
     approvalKind: params.approvalKind,
@@ -235,7 +235,7 @@ export async function handleApprovalWaitDecision<TPayload>(params: {
   manager: ExecApprovalManager<TPayload>;
   inputId: unknown;
   client?: GatewayClient | null;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   respond: RespondFn;
   resolveTerminalReason?: WaitReasonResolver<TPayload>;
 }): Promise<void> {

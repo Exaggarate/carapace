@@ -3,7 +3,7 @@ import type { IncomingMessage } from "node:http";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { GatewayAuthConfig, GatewayTrustedProxyConfig } from "../config/types.gateway.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
 import {
@@ -29,8 +29,8 @@ import {
 import { checkBrowserOrigin } from "./origin-check.js";
 import { withSerializedRateLimitAttempt } from "./rate-limit-attempt-serialization.js";
 export { resolveGatewayAuth, type ResolvedGatewayAuth } from "./auth-resolve.js";
-const LEGACY_OPENCLAW_ENV_NOTE =
-  " Legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored; use OPENCLAW_* names.";
+const LEGACY_CARAPACE_ENV_NOTE =
+  " Legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored; use CARAPACE_* names.";
 
 /** Normalized outcome for gateway shared-secret, Tailscale, device, and proxy auth. */
 export type GatewayAuthResult = {
@@ -161,7 +161,7 @@ export function assertGatewayAuthConfigured(
 ): void {
   if (auth.mode === "token" && isInvalidGatewaySecret(auth.token)) {
     throw new Error(
-      "Gateway token must not be blank or the literal string undefined/null. Run `openclaw doctor --fix --generate-gateway-token` for an inline token, or rotate its external secret source.",
+      "Gateway token must not be blank or the literal string undefined/null. Run `carapace doctor --fix --generate-gateway-token` for an inline token, or rotate its external secret source.",
     );
   }
   if (auth.mode === "token" && !auth.token) {
@@ -169,7 +169,7 @@ export function assertGatewayAuthConfigured(
       return;
     }
     throw new Error(
-      `gateway auth mode is token, but no token was configured (set gateway.auth.token or OPENCLAW_GATEWAY_TOKEN).${LEGACY_OPENCLAW_ENV_NOTE}`,
+      `gateway auth mode is token, but no token was configured (set gateway.auth.token or CARAPACE_GATEWAY_TOKEN).${LEGACY_CARAPACE_ENV_NOTE}`,
     );
   }
   if (auth.mode === "password" && !auth.password) {
@@ -178,11 +178,11 @@ export function assertGatewayAuthConfigured(
       typeof rawAuthConfig.password !== "string" // pragma: allowlist secret
     ) {
       throw new Error(
-        "gateway auth mode is password, but gateway.auth.password contains a provider reference object instead of a resolved string — bootstrap secrets (gateway.auth.password) must be plaintext strings or set via the OPENCLAW_GATEWAY_PASSWORD environment variable because the secrets provider system has not initialised yet at gateway startup", // pragma: allowlist secret
+        "gateway auth mode is password, but gateway.auth.password contains a provider reference object instead of a resolved string — bootstrap secrets (gateway.auth.password) must be plaintext strings or set via the CARAPACE_GATEWAY_PASSWORD environment variable because the secrets provider system has not initialised yet at gateway startup", // pragma: allowlist secret
       );
     }
     throw new Error(
-      `gateway auth mode is password, but no password was configured.${LEGACY_OPENCLAW_ENV_NOTE}`,
+      `gateway auth mode is password, but no password was configured.${LEGACY_CARAPACE_ENV_NOTE}`,
     );
   }
   if (auth.mode === "trusted-proxy") {
@@ -198,7 +198,7 @@ export function assertGatewayAuthConfigured(
     }
     if (auth.token) {
       throw new Error(
-        "gateway auth mode is trusted-proxy, but a shared token is also configured; remove gateway.auth.token / OPENCLAW_GATEWAY_TOKEN because trusted-proxy and token auth are mutually exclusive",
+        "gateway auth mode is trusted-proxy, but a shared token is also configured; remove gateway.auth.token / CARAPACE_GATEWAY_TOKEN because trusted-proxy and token auth are mutually exclusive",
       );
     }
   }

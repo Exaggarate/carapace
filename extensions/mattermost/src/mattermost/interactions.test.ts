@@ -1,6 +1,6 @@
 // Mattermost tests cover interactions plugin behavior.
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import type { PluginRuntime } from "../../runtime-api.js";
 import { setMattermostRuntime } from "../runtime.js";
@@ -38,7 +38,7 @@ type ButtonPropsInput = {
 };
 
 function buildButtonAttachmentsForTest(params: ButtonPropsInput): ButtonAttachments {
-  const signedChannelId = params.buttons[0]?.context?.["__openclaw_channel_id"];
+  const signedChannelId = params.buttons[0]?.context?.["__carapace_channel_id"];
   const props = buildButtonProps({
     ...params,
     channelId: typeof signedChannelId === "string" ? signedChannelId : "test-channel",
@@ -271,12 +271,12 @@ describe("resolveInteractionCallbackUrl", () => {
       channels: {
         mattermost: {
           interactions: {
-            callbackBaseUrl: "https://gateway.example.com/openclaw",
+            callbackBaseUrl: "https://gateway.example.com/carapace",
           },
         },
       },
     });
-    expect(url).toBe("https://gateway.example.com/openclaw/mattermost/interactions/default");
+    expect(url).toBe("https://gateway.example.com/carapace/mattermost/interactions/default");
   });
 
   it("trims trailing slashes from callbackBaseUrl", () => {
@@ -606,7 +606,7 @@ describe("createMattermostInteractionHandler", () => {
   }
 
   function createActionContext(actionId = "approve", channelId = "chan-1") {
-    const context = { action_id: actionId, __openclaw_channel_id: channelId };
+    const context = { action_id: actionId, __carapace_channel_id: channelId };
     return { context, token: generateInteractionToken(context, "acct") };
   }
 

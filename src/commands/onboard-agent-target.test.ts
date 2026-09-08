@@ -112,10 +112,10 @@ describe("onboarding agent target", () => {
   });
 
   it("resolves a pending first agent without nesting the selected workspace", async () => {
-    const stateDir = tempDirs.make("openclaw-pending-onboard-target-");
+    const stateDir = tempDirs.make("carapace-pending-onboard-target-");
     const workspaceDir = path.join(stateDir, "requested-workspace");
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       for (const entries of [undefined, { main: {} }, { main: { default: true } }] as const) {
         const config = {
           agents: { defaults: { workspace: workspaceDir }, ...(entries ? { entries } : {}) },
@@ -352,12 +352,12 @@ describe("onboarding agent target", () => {
   });
 
   it("provisions the configured default agent workspace and sessions", async () => {
-    const stateDir = tempDirs.make("openclaw-onboard-target-");
+    const stateDir = tempDirs.make("carapace-onboard-target-");
     const globalWorkspace = path.join(stateDir, "global-workspace");
     const opsWorkspace = path.join(stateDir, "ops-workspace");
     const runtime = { log: vi.fn() } as unknown as RuntimeEnv;
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const config = {
         agents: {
           defaults: { workspace: globalWorkspace },

@@ -1,7 +1,7 @@
 // Matrix setup module handles plugin onboarding behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OutputRuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import type { ChannelSetupWizardAdapter } from "openclaw/plugin-sdk/setup";
+import { expectDefined } from "@carapace/normalization-core";
+import type { OutputRuntimeEnv } from "carapace/plugin-sdk/runtime";
+import type { ChannelSetupWizardAdapter } from "carapace/plugin-sdk/setup";
 import { afterEach, vi } from "vitest";
 import type { RuntimeEnv, WizardPrompter } from "../runtime-api.js";
 import type { CoreConfig } from "./types.js";
@@ -280,7 +280,7 @@ export function createMatrixUpdateKeepCredentialsPrompter(params?: {
     },
     text: {
       "Matrix homeserver URL": params?.homeserver ?? "https://matrix.example.org",
-      "Matrix device name (optional)": params?.deviceName ?? "OpenClaw Gateway",
+      "Matrix device name (optional)": params?.deviceName ?? "Carapace Gateway",
       ...(params?.roomsAllowlist
         ? { "Matrix rooms allowlist (comma-separated)": params.roomsAllowlist }
         : {}),

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
   completeDeliveryQueueEntry,
   countFailedDeliveryQueueEntries,
@@ -15,7 +15,7 @@ import {
   upsertDeliveryQueueEntry,
 } from "./delivery-queue-sqlite.js";
 import type { DeliveryQueueCompletionRetention } from "./delivery-queue-sqlite.types.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 describe("delivery queue pending terminal transition", () => {
   let rootDir: string;
@@ -39,7 +39,7 @@ describe("delivery queue pending terminal transition", () => {
     });
 
   beforeEach(() => {
-    rootDir = fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-dq-terminal-"));
+    rootDir = fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-dq-terminal-"));
     stateDir = path.join(rootDir, "state");
     fs.mkdirSync(stateDir, { recursive: true });
   });
@@ -77,8 +77,8 @@ describe("delivery queue pending terminal transition", () => {
         status: "terminalized",
         retained: true,
       });
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const row = db
         .prepare(
@@ -170,8 +170,8 @@ describe("delivery queue pending terminal transition", () => {
   });
 
   it("groups backfilled bounded count limits by producer prefix during exact lookup", () => {
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const insert = db.prepare(
       `INSERT INTO delivery_queue_entries (
@@ -216,8 +216,8 @@ describe("delivery queue pending terminal transition", () => {
 
   it("keeps health reads immutable and expires tombstones during maintenance", () => {
     const retention = { idPrefix: "health:", maxAgeMs: 1_000, maxEntries: 1 } as const;
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const insertFailed = db.prepare(
       `INSERT INTO delivery_queue_entries (
@@ -329,8 +329,8 @@ describe("delivery queue pending terminal transition", () => {
     } finally {
       vi.useRealTimers();
     }
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     db.prepare(
       "UPDATE delivery_queue_entries SET failed_at = NULL WHERE queue_name = 'session'",
@@ -454,8 +454,8 @@ describe("delivery queue pending terminal transition", () => {
         expect(getDeliveryQueueEntryStatus(ownerQueue, entry.id, stateDir)).toBe(
           retained ? "failed" : undefined,
         );
-        const { db } = openOpenClawStateDatabase({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        const { db } = openCarapaceStateDatabase({
+          env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         });
         const row = db
           .prepare(

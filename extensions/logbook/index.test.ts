@@ -1,22 +1,22 @@
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginNodeInvokePolicy,
+} from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 
-type PolicyContext = Parameters<OpenClawPluginNodeInvokePolicy["handle"]>[0];
+type PolicyContext = Parameters<CarapacePluginNodeInvokePolicy["handle"]>[0];
 
-function registerLogbookPolicies(): OpenClawPluginNodeInvokePolicy[] {
-  const policies: OpenClawPluginNodeInvokePolicy[] = [];
+function registerLogbookPolicies(): CarapacePluginNodeInvokePolicy[] {
+  const policies: CarapacePluginNodeInvokePolicy[] = [];
   plugin.register({
     pluginConfig: {},
     lifecycle: { registerRuntimeLifecycle() {} },
     session: { controls: { registerControlUiDescriptor: () => {} } },
-    registerNodeInvokePolicy: (policy: OpenClawPluginNodeInvokePolicy) => policies.push(policy),
+    registerNodeInvokePolicy: (policy: CarapacePluginNodeInvokePolicy) => policies.push(policy),
     registerService: () => {},
     registerGatewayMethod: () => {},
-  } as unknown as OpenClawPluginApi);
+  } as unknown as CarapacePluginApi);
   return policies;
 }
 
@@ -32,7 +32,7 @@ describe("logbook gateway methods", () => {
       registerGatewayMethod: (method: string, _handler: unknown, options: unknown) => {
         registrations.push({ method, options });
       },
-    } as unknown as OpenClawPluginApi);
+    } as unknown as CarapacePluginApi);
 
     expect(registrations.find((entry) => entry.method === "logbook.status")?.options).toEqual({
       scope: "operator.read",

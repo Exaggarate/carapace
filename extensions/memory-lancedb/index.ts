@@ -1,19 +1,19 @@
 import {
   resolveAgentConfig,
   resolveDefaultAgentId as resolveConfiguredDefaultAgentId,
-} from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { enqueueKeyedTask } from "openclaw/plugin-sdk/keyed-async-queue";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { readFiniteNumberParam, readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import { resolveLivePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { isIncognitoSessionKey, normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import { textResult } from "openclaw/plugin-sdk/tool-results";
+} from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { enqueueKeyedTask } from "carapace/plugin-sdk/keyed-async-queue";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { readFiniteNumberParam, readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
+import { resolveLivePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import { isIncognitoSessionKey, normalizeAgentId } from "carapace/plugin-sdk/routing";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import { textResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
-import { definePluginEntry, type OpenClawPluginApi } from "./api.js";
+import { definePluginEntry, type CarapacePluginApi } from "./api.js";
 import { createAutoRecallHook } from "./auto-recall.js";
 import {
   MEMORY_CATEGORIES,
@@ -46,7 +46,7 @@ import {
 import { startMemoryRecall } from "./recall-service.js";
 
 const loadMemoryHostCoreModule = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/memory-host-core"),
+  () => import("carapace/plugin-sdk/memory-host-core"),
 );
 
 const DEFAULT_TOOL_RECALL_TIMEOUT_MS = 15_000;
@@ -99,7 +99,7 @@ export default definePluginEntry({
   kind: "memory" as const,
   configSchema: memoryConfigSchema,
 
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     let cfg: MemoryConfig;
     try {
       cfg = memoryConfigSchema.parse(api.pluginConfig);
@@ -124,8 +124,8 @@ export default definePluginEntry({
     const autoCaptureTasks = new Map<string, Promise<void>>();
     let captureStopped = false;
     const memoryRecallCooldowns = new Map<string, { until: number; error: string }>();
-    const resolveRuntimeConfig = (): OpenClawConfig =>
-      (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+    const resolveRuntimeConfig = (): CarapaceConfig =>
+      (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
     const resolveEnabledAgentId = (
       rawAgentId: string | undefined,
       runtimeConfig = resolveRuntimeConfig(),
@@ -141,7 +141,7 @@ export default definePluginEntry({
     };
     const assertRetainedToolEnabled = (
       agentId: string,
-      getRuntimeConfig: (() => OpenClawConfig | undefined) | undefined,
+      getRuntimeConfig: (() => CarapaceConfig | undefined) | undefined,
     ): void => {
       if (!getRuntimeConfig) {
         return;
@@ -162,7 +162,7 @@ export default definePluginEntry({
     const resolveCurrentHookConfig = () => {
       const runtimePluginConfig = resolveLivePluginConfigObject(
         api.runtime.config?.current
-          ? () => api.runtime.config.current() as OpenClawConfig
+          ? () => api.runtime.config.current() as CarapaceConfig
           : undefined,
         "memory-lancedb",
         api.pluginConfig as Record<string, unknown>,

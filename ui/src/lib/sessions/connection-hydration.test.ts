@@ -2,7 +2,7 @@ import {
   DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS,
   GatewayProtocolClient,
   type GatewayProtocolSocketHandlers,
-} from "@openclaw/gateway-client/browser";
+} from "@carapace/gateway-client/browser";
 import { describe, expect, it, vi } from "vitest";
 // @vitest-environment node
 import { SIDEBAR_SESSION_ROSTER_LIMIT } from "../../../../src/shared/session-list-limits.ts";

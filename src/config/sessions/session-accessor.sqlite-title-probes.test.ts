@@ -3,10 +3,10 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, expect, test, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import {
   readSessionTranscriptTitleProbeBatch,
@@ -25,9 +25,9 @@ test.each([
 ] as const)(
   "reads title edges after $boundaryType from $source without inspecting indexed payloads",
   async ({ boundaryType, source }) => {
-    const env = captureEnv(["OPENCLAW_STATE_DIR"]);
-    const tempDir = tempDirs.make("openclaw-title-probe-work-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const env = captureEnv(["CARAPACE_STATE_DIR"]);
+    const tempDir = tempDirs.make("carapace-title-probe-work-");
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
     const scope = {
       agentId: "main",
       sessionId: "bounded-title-probe",
@@ -79,9 +79,9 @@ test.each([
       } else {
         await replaceTranscriptEvents(scope, events);
       }
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: scope.agentId,
-        path: path.join(tempDir, "openclaw-agent.sqlite"),
+        path: path.join(tempDir, "carapace-agent.sqlite"),
       });
       let boundaryInspections = 0;
       database.db.function("json_extract", { deterministic: true }, (value, jsonPath) => {
@@ -114,8 +114,8 @@ test.each([
       }
     } finally {
       vi.restoreAllMocks();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       nativeJson.close();
       env.restore();
     }

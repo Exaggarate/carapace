@@ -1,6 +1,6 @@
 // Covers compaction token splitting and history pruning helpers.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { AssistantMessage, ToolResultMessage } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import type { AssistantMessage, ToolResultMessage } from "carapace/plugin-sdk/llm";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { makeAgentAssistantMessage } from "./test-helpers/agent-message-fixtures.js";
 import "./test-helpers/agent-session-token-mock.js";
@@ -620,7 +620,7 @@ describe("pruneHistoryForContextShare", () => {
       makeAssistantToolCall(2, "call_first"),
       {
         ...makeToolResult(3, "call_first", "synthetic result"),
-        details: { openclawSyntheticMissingToolResult: true },
+        details: { carapaceSyntheticMissingToolResult: true },
         isError: true,
       },
       makeAssistantToolCall(4, "call_second"),

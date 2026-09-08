@@ -1,5 +1,5 @@
 // Setup gateway config helpers build gateway config from onboarding answers.
-import { validateDottedDecimalIPv4Input } from "@openclaw/net-policy/ipv4";
+import { validateDottedDecimalIPv4Input } from "@carapace/net-policy/ipv4";
 import { formatPortRangeHint } from "../cli/error-format.js";
 import { parsePort } from "../cli/shared/parse-port.js";
 import {
@@ -8,7 +8,7 @@ import {
   validateGatewayPasswordInput,
 } from "../commands/onboard-helpers.js";
 import type { SecretInputMode } from "../commands/onboard-types.js";
-import type { GatewayBindMode, GatewayTailscaleMode, OpenClawConfig } from "../config/config.js";
+import type { GatewayBindMode, GatewayTailscaleMode, CarapaceConfig } from "../config/config.js";
 import { ensureControlUiAllowedOriginsForNonLoopbackBind } from "../config/gateway-control-ui-origins.js";
 import {
   normalizeSecretInputString,
@@ -35,8 +35,8 @@ import type {
 
 type ConfigureGatewayOptions = {
   flow: WizardFlow;
-  baseConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
+  nextConfig: CarapaceConfig;
   localPort: number;
   quickstartGateway: QuickstartGatewayDefaults;
   secretInputMode?: SecretInputMode;
@@ -45,7 +45,7 @@ type ConfigureGatewayOptions = {
 };
 
 type ConfigureGatewayResult = {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   settings: GatewayWizardSettings;
 };
 
@@ -205,7 +205,7 @@ export async function configureGatewayForSetup(
               refHint: t("wizard.gateway.refHint"),
             },
           });
-    const ambientToken = normalizeGatewayTokenInput(process.env.OPENCLAW_GATEWAY_TOKEN);
+    const ambientToken = normalizeGatewayTokenInput(process.env.CARAPACE_GATEWAY_TOKEN);
     if (tokenMode === "ref") {
       if (quickstartTokenRef) {
         gatewayTokenInput = quickstartTokenRef;
@@ -231,10 +231,10 @@ export async function configureGatewayForSetup(
           provider: "gateway-auth-token",
           config: nextConfig,
           prompter,
-          preferredEnvVar: "OPENCLAW_GATEWAY_TOKEN",
+          preferredEnvVar: "CARAPACE_GATEWAY_TOKEN",
           copy: {
             sourceMessage: t("wizard.gateway.authTokenStoredMessage"),
-            envVarPlaceholder: "OPENCLAW_GATEWAY_TOKEN",
+            envVarPlaceholder: "CARAPACE_GATEWAY_TOKEN",
           },
         });
         gatewayTokenInput = resolved.ref;
@@ -274,10 +274,10 @@ export async function configureGatewayForSetup(
           provider: "gateway-auth-password",
           config: nextConfig,
           prompter,
-          preferredEnvVar: "OPENCLAW_GATEWAY_PASSWORD",
+          preferredEnvVar: "CARAPACE_GATEWAY_PASSWORD",
           copy: {
             sourceMessage: t("wizard.gateway.authPasswordStoredMessage"),
-            envVarPlaceholder: "OPENCLAW_GATEWAY_PASSWORD",
+            envVarPlaceholder: "CARAPACE_GATEWAY_PASSWORD",
           },
         });
         password = resolved.ref;

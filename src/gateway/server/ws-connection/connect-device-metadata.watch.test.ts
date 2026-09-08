@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { resolvePinnedClientMetadata } from "./connect-device-metadata.js";
 
 describe("Watch resolvePinnedClientMetadata", () => {
-  it("allows openclaw-watchos platform version refresh without metadata-upgrade approval", () => {
+  it("allows carapace-watchos platform version refresh without metadata-upgrade approval", () => {
     expect(
       resolvePinnedClientMetadata({
-        clientId: "openclaw-watchos",
+        clientId: "carapace-watchos",
         clientMode: "node",
         claimedPlatform: "watchOS 27.0",
         claimedDeviceFamily: "Apple Watch",
@@ -23,8 +23,8 @@ describe("Watch resolvePinnedClientMetadata", () => {
 
   it.each([
     ["node-host", "watchOS 27.0", "watchOS 26.5.1"],
-    ["openclaw-watchos", "watchOS anything", "watchOS previous"],
-    ["openclaw-watchos", "watchOS", "watchOS 26.5.1"],
+    ["carapace-watchos", "watchOS anything", "watchOS previous"],
+    ["carapace-watchos", "watchOS", "watchOS 26.5.1"],
   ])(
     "keeps non-version or non-native Watch platform changes approval-bound for %s",
     (clientId, claimed, paired) => {

@@ -4,22 +4,22 @@ import {
   resolveInlineImageJsonResponseMaxBytes,
   type GeneratedImageAsset,
   type ImageGenerationProvider,
-} from "openclaw/plugin-sdk/image-generation";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/image-generation";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   assertOkOrThrowHttpError,
   postJsonRequest,
   readProviderJsonResponse,
   sanitizeConfiguredModelProviderRequest,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeGoogleModelId, resolveGoogleGenerativeAiHttpRequestConfig } from "./api.js";
 import { toStandardGoogleProviderBase64 } from "./base64.js";
 

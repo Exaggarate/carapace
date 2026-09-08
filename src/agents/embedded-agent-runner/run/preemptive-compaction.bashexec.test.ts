@@ -1,4 +1,4 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it } from "vitest";
 import { convertToLlm } from "../../../../packages/agent-core/src/harness/messages.js";
 import {
@@ -92,7 +92,7 @@ describe("preemptive precheck counts bashExecution and summary turns", () => {
   it("counts undisplayed custom context when it remains model-visible", () => {
     const runtimeContext = {
       role: "custom",
-      customType: "openclaw-runtime-context",
+      customType: "carapace-runtime-context",
       content: BIG_OUTPUT,
       display: false,
       timestamp: 1,

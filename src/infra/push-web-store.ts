@@ -4,14 +4,14 @@ import type { Insertable, Selectable } from "kysely";
 import type { WebPushDevicePreferences } from "../../packages/gateway-protocol/src/schema/push.js";
 import { updateConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { ensureColumn } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { ensureColumn } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "../state/openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "../state/carapace-state-feature-schema.js";
 import { sha256HexPrefixCore } from "./crypto-digest.js";
 import {
   executeSqliteQuerySync,
@@ -21,7 +21,7 @@ import {
 import { normalizeWebPushDevicePreferences } from "./push-web-preferences.js";
 
 export const WEB_PUSH_VAPID_STATE_KEY = "webPush.vapidKeys";
-export const DEFAULT_WEB_PUSH_VAPID_SUBJECT = "https://openclaw.ai";
+export const DEFAULT_WEB_PUSH_VAPID_SUBJECT = "https://github.com/Exaggarate/carapace";
 const WEB_PUSH_MAX_ENDPOINT_LENGTH = 2048;
 const WEB_PUSH_MAX_KEY_LENGTH = 512;
 const WEB_PUSH_APPROVAL_RECOVERY_MAX_APPROVALS = 1_024;
@@ -55,7 +55,7 @@ export function createWebPushVapidKeyPair(
 }
 
 export type WebPushDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   | "config_machine_state"
   | "operator_approvals"
   | "web_push_approval_deliveries"
@@ -65,15 +65,15 @@ type WebPushSubscriptionRow = Selectable<WebPushDatabase["web_push_subscriptions
 type WebPushSubscriptionInsert = Insertable<WebPushDatabase["web_push_subscriptions"]>;
 
 const ensuredWebPushBindingDatabases = new WeakSet<DatabaseSync>();
-const ensureWebPushApprovalDeliveryStateSchema = createOpenClawStateSchemaEnsurer({
+const ensureWebPushApprovalDeliveryStateSchema = createCarapaceStateSchemaEnsurer({
   table: "web_push_approval_deliveries",
   endMarker: "  ON web_push_approval_deliveries(subscription_id, approval_id);\n",
   operationLabel: "web-push.approval-delivery.schema.ensure",
 });
 
-function webPushStateDatabaseOptions(stateDir?: string): OpenClawStateDatabaseOptions {
+function webPushStateDatabaseOptions(stateDir?: string): CarapaceStateDatabaseOptions {
   return stateDir
-    ? { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } }
+    ? { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } }
     : { env: process.env };
 }
 
@@ -86,11 +86,11 @@ export function ensureWebPushSubscriptionBindingColumns(db: DatabaseSync): void 
 
 function ensureWebPushSubscriptionBindingSchema(stateDir?: string): void {
   const options = webPushStateDatabaseOptions(stateDir);
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   if (ensuredWebPushBindingDatabases.has(database.db)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => ensureWebPushSubscriptionBindingColumns(db),
     options,
     { operationLabel: "web-push.subscription-binding.schema.ensure" },
@@ -182,7 +182,7 @@ export function findBoundWebPushSubscriptionByEndpoint(params: {
   stateDir?: string;
 }): BoundWebPushSubscription | null {
   ensureWebPushSubscriptionBindingSchema(params.stateDir);
-  const database = openOpenClawStateDatabase(webPushStateDatabaseOptions(params.stateDir));
+  const database = openCarapaceStateDatabase(webPushStateDatabaseOptions(params.stateDir));
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
     getNodeSqliteKysely<WebPushDatabase>(database.db)
@@ -203,7 +203,7 @@ export function setWebPushSubscriptionPreferences(params: {
 }): boolean {
   ensureWebPushSubscriptionBindingSchema(params.stateDir);
   const options = webPushStateDatabaseOptions(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const result = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WebPushDatabase>(db)
@@ -241,7 +241,7 @@ export function webPushSubscriptionsEqual(
 
 export function listWebPushSubscriptions(stateDir?: string): WebPushSubscription[] {
   ensureWebPushSubscriptionBindingSchema(stateDir);
-  const database = openOpenClawStateDatabase(webPushStateDatabaseOptions(stateDir));
+  const database = openCarapaceStateDatabase(webPushStateDatabaseOptions(stateDir));
   const stateDb = getNodeSqliteKysely<WebPushDatabase>(database.db);
   return executeSqliteQuerySync(
     database.db,
@@ -256,7 +256,7 @@ export function listWebPushSubscriptions(stateDir?: string): WebPushSubscription
 /** Lists only subscriptions reconciled by an authenticated browser device. */
 export function listBoundWebPushSubscriptions(stateDir?: string): BoundWebPushSubscription[] {
   ensureWebPushSubscriptionBindingSchema(stateDir);
-  const database = openOpenClawStateDatabase(webPushStateDatabaseOptions(stateDir));
+  const database = openCarapaceStateDatabase(webPushStateDatabaseOptions(stateDir));
   const rows = executeSqliteQuerySync(
     database.db,
     getNodeSqliteKysely<WebPushDatabase>(database.db)
@@ -291,7 +291,7 @@ export function prepareWebPushApprovalDeliveries(params: {
   }
   ensureWebPushApprovalDeliverySchema(params.stateDir);
   const options = webPushStateDatabaseOptions(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<WebPushDatabase>(db);
     const approval = executeSqliteQueryTakeFirstSync(
       db,
@@ -334,7 +334,7 @@ export function listWebPushApprovalDeliveryTargets(params: {
   stateDir?: string;
 }): BoundWebPushSubscription[] {
   ensureWebPushApprovalDeliverySchema(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<WebPushDatabase>(db);
     const rows = executeSqliteQuerySync(
       db,
@@ -393,7 +393,7 @@ export function deleteWebPushApprovalDeliveryTargets(params: {
     return;
   }
   ensureWebPushApprovalDeliverySchema(params.stateDir);
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WebPushDatabase>(db)
@@ -415,7 +415,7 @@ export function listTerminalWebPushApprovalDeliveryIds(params: {
   throughApprovalId: string | null;
 } {
   ensureWebPushApprovalDeliverySchema(params.stateDir);
-  const database = openOpenClawStateDatabase(webPushStateDatabaseOptions(params.stateDir));
+  const database = openCarapaceStateDatabase(webPushStateDatabaseOptions(params.stateDir));
   const stateDb = getNodeSqliteKysely<WebPushDatabase>(database.db);
   const terminalApprovalQuery = () =>
     stateDb
@@ -479,7 +479,7 @@ export function upsertWebPushSubscription(params: {
   stateDir?: string;
 }): WebPushSubscription {
   ensureWebPushSubscriptionBindingSchema(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<WebPushDatabase>(db);
     const existingRow = executeSqliteQueryTakeFirstSync(
       db,
@@ -551,7 +551,7 @@ export function deleteBoundWebPushSubscription(params: {
   stateDir?: string;
 }): boolean {
   ensureWebPushSubscriptionBindingSchema(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const result = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WebPushDatabase>(db)
@@ -577,7 +577,7 @@ export function deleteWebPushSubscriptionIfCurrent(params: {
 }): boolean {
   const subscription = params.subscription;
   ensureWebPushSubscriptionBindingSchema(params.stateDir);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const result = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<WebPushDatabase>(db)

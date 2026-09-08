@@ -6,7 +6,7 @@ import {
   asPositiveSafeInteger,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import type { ConnectParams } from "../../packages/gateway-protocol/src/schema/frames.js";
 import { PROTOCOL_VERSION } from "../../packages/gateway-protocol/src/version.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
@@ -16,7 +16,7 @@ import {
 } from "./server/ws-policy-close.js";
 
 /** Path marker used to scope plugin-hosted node URLs with one-time capabilities. */
-export const PLUGIN_NODE_CAPABILITY_PATH_PREFIX = "/__openclaw__/cap";
+export const PLUGIN_NODE_CAPABILITY_PATH_PREFIX = "/__carapace__/cap";
 const PLUGIN_NODE_CAPABILITY_QUERY_PARAM = "oc_cap";
 /** Default lifetime for plugin-node capability tokens. */
 export const DEFAULT_PLUGIN_NODE_CAPABILITY_TTL_MS = 10 * 60_000;

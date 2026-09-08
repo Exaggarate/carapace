@@ -3,7 +3,7 @@
  *
  * Stores failure metadata used by transcripts, retry behavior, and mutation recovery logic.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 
 export type ProcessTerminalDiagnostic = {
   kind: "process";

@@ -187,7 +187,7 @@ async function confirmPersistedSteerTargetRunId(params: {
       return undefined;
     }
     const currentTarget = normalizePersistedSteerTargetRunId(
-      message["__openclaw"]?.steerTargetRunId,
+      message["__carapace"]?.steerTargetRunId,
     );
     return currentTarget === params.targetRunId
       ? undefined
@@ -237,13 +237,13 @@ export function createUserTurnTranscriptRecorder(
     if (!candidate || replacementText === undefined) {
       return candidate;
     }
-    const metadata = { ...candidate["__openclaw"] };
+    const metadata = { ...candidate["__carapace"] };
     if (candidate.content !== replacementText) {
       delete metadata.humanMentions;
     }
     const next = { ...candidate, content: replacementText };
-    delete next["__openclaw"];
-    return Object.keys(metadata).length > 0 ? { ...next, __openclaw: metadata } : next;
+    delete next["__carapace"];
+    return Object.keys(metadata).length > 0 ? { ...next, __carapace: metadata } : next;
   };
 
   const applyMessageOverrides = (candidate: PersistedUserTurnMessage | undefined) => {
@@ -331,7 +331,7 @@ export function createUserTurnTranscriptRecorder(
 
   const notifyOriginalInputCommitted = (commit: UserTurnOriginalInputCommit) => {
     const sourceMessage = commit.message;
-    const metadata = sourceMessage["__openclaw"];
+    const metadata = sourceMessage["__carapace"];
     if (
       originalInputCommitted ||
       blocked ||
@@ -690,7 +690,7 @@ export function createUserTurnTranscriptRecorder(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.userTurnTranscriptTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.userTurnTranscriptTestApi")] = {
     persistUserTurnTranscript,
   };
 }

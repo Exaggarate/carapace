@@ -5,7 +5,7 @@
 +# Telegram Direct Codex Heartbeat Tool Turn
 @@ -7,2 +7,2 @@
 -- Default happy path: OpenAI model through the Codex harness/runtime, Telegram direct conversation, and message-tool-only visible replies.
--- A quiet turn is represented by not calling `message(action=send)`; the normal final assistant text is private to OpenClaw/Codex.
+-- A quiet turn is represented by not calling `message(action=send)`; the normal final assistant text is private to Carapace/Codex.
 +- Heartbeat happy path: Codex receives the structured `heartbeat_respond` dynamic tool in the searchable catalog instead of the initial tool context.
 +- The heartbeat tool still carries the notify/no-notify decision, outcome, summary, and optional notification text instead of relying only on final-text parsing.
 @@ -30,2 +30,2 @@
@@ -19,7 +19,7 @@
 -  "threadId": "thread-telegram-direct-codex-message-tool"
 +  "threadId": "thread-telegram-heartbeat-codex-tool"
 @@ -146,4 +146,0 @@
--    "openclaw_current_sender": {
+-    "carapace_current_sender": {
 -      "kind": "untrusted",
 -      "value": "{\"sender\":{\"id\":\"1000001\",\"name\":\"Pash\",\"username\":\"pash\"}}"
 -    },
@@ -55,10 +55,10 @@
 +    "chars": 1205,
 +    "roughTokens": 302
 @@ -521,6 +517,0 @@
--### User: OpenClaw Additional Context (openclaw_current_sender)
+-### User: Carapace Additional Context (carapace_current_sender)
 -
 -```text
--<external_openclaw_current_sender>{"sender":{"id":"1000001","name":"Pash","username":"pash"}}</external_openclaw_current_sender>
+-<external_carapace_current_sender>{"sender":{"id":"1000001","name":"Pash","username":"pash"}}</external_carapace_current_sender>
 -```
 -
 @@ -566,1 +557,1 @@

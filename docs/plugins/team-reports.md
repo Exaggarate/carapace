@@ -14,7 +14,7 @@ Reports include activity counts, per-person history, source warnings, and
 optional model-written summaries.
 
 Team Reports is an official external package: it is not part of the core
-`openclaw` npm package and is installed on demand from ClawHub or npm. Source
+`carapace` npm package and is installed on demand from ClawHub or npm. Source
 checkouts of the repository load it directly from `extensions/team-reports`.
 It stays disabled until you enable it. Report pages use Gateway
 authentication. They are not public just because their default path is `/reports`.
@@ -41,10 +41,10 @@ Install the package unless you run the Gateway from a source checkout, which
 already contains it:
 
 ```bash
-openclaw plugins install @openclaw/team-reports
+carapace plugins install @carapace/team-reports
 ```
 
-Then add the following to your OpenClaw configuration, replacing the example
+Then add the following to your Carapace configuration, replacing the example
 organization, team, and login with your own:
 
 ```json5
@@ -79,9 +79,9 @@ use `plugins.allow`, include `team-reports` in that list.
 Restart the Gateway after changing plugin configuration, then check startup:
 
 ```bash
-openclaw gateway restart
-openclaw team-reports status --json
-openclaw dashboard
+carapace gateway restart
+carapace team-reports status --json
+carapace dashboard
 ```
 
 On startup, yesterday triggers a catch-up run after 60 seconds unless a
@@ -93,7 +93,7 @@ Status shows the run, stored periods, next scheduled times, and source warnings.
 To request a report immediately, use:
 
 ```bash
-openclaw team-reports generate --intraday
+carapace team-reports generate --intraday
 ```
 
 Generation returns a run ID before collection and summarization finish. Check
@@ -345,12 +345,12 @@ The CLI talks to the running Gateway and supports `--json` plus the standard
 generation needs `operator.admin`.
 
 ```bash
-openclaw team-reports status --json
-openclaw team-reports list --json
-openclaw team-reports show day 2026-08-20
-openclaw team-reports show week 2026-W34 --markdown
-openclaw team-reports generate --date 2026-08-20
-openclaw team-reports generate --intraday
+carapace team-reports status --json
+carapace team-reports list --json
+carapace team-reports show day 2026-08-20
+carapace team-reports show week 2026-W34 --markdown
+carapace team-reports generate --date 2026-08-20
+carapace team-reports generate --intraday
 ```
 
 With no date or `--intraday`, generation selects yesterday. `--intraday`
@@ -387,7 +387,7 @@ allowed by `plugins.allow` if present, and the Control UI session has
 `operator.read`. Restart the Gateway after config changes. For an unavailable
 frame, check HTTPS or trusted loopback access and third-party-cookie policy.
 
-**There are no reports yet.** Run `openclaw team-reports status --json`. Startup
+**There are no reports yet.** Run `carapace team-reports status --json`. Startup
 catch-up waits 60 seconds, and collection or model calls may still be running.
 Use `generate --intraday` for today's partial report. `/latest/` requires at
 least one closed daily report.

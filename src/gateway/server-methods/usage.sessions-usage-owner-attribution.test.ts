@@ -1,8 +1,8 @@
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SessionsUsageResult } from "../../shared/usage-types.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { cleanupSessionStateForTest } from "../../test-utils/session-state-cleanup.js";
@@ -53,10 +53,10 @@ const sharedDiscovery: DiscoveredFixture[] = [
   { agentId: "main", sessionId: "shared" },
   { agentId: "opus", sessionId: "shared" },
 ];
-const defaultConfig: OpenClawConfig = {
+const defaultConfig: CarapaceConfig = {
   agents: { list: [{ id: "main", default: true }, { id: "opus" }] },
 };
-const explicitConfig: OpenClawConfig = {
+const explicitConfig: CarapaceConfig = {
   agents: { ownership: "explicit", list: [{ id: "main" }, { id: "opus" }] },
 };
 
@@ -64,11 +64,11 @@ async function queryUsage(options: {
   rows: StoredFixture[];
   discovered?: DiscoveredFixture[];
   newestAgent?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   params?: Record<string, unknown>;
 }): Promise<SessionsUsageResult> {
   return await withTempDir("usage-owner-", async (stateDir) =>
-    withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const fixtureStore = {
         durableTargets: [],
         storePath: "(multiple)",
@@ -80,7 +80,7 @@ async function queryUsage(options: {
               agentId,
               storeTarget: {
                 agentId,
-                storePath: path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite"),
+                storePath: path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite"),
               },
             },
           ]),

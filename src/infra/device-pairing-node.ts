@@ -2,7 +2,7 @@
 // Device pairing owns connection auth and storage; this module owns the node
 // surface projected from those canonical paired-device records.
 import { randomUUID } from "node:crypto";
-import { normalizeArrayBackedTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeArrayBackedTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import type { NodeHostStats } from "../shared/node-host-stats.js";
 import { resolveMissingRequestedScope } from "../shared/operator-scope-compat.js";
 import { updatePairedNodeGenerationSurface } from "./device-pairing-node-facts.js";

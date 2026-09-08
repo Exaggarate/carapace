@@ -3,26 +3,26 @@
 import { randomInt, randomUUID } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Worker, type WorkerOptions } from "node:worker_threads";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { computeBackoffSchedule } from "../../../packages/retry/src/index.js";
 import { isGatewayExternallySupervised } from "../../infra/gateway-supervision.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { runtimeProcessEntrypoints } from "../../infra/runtime-process-entrypoints.js";
 import { resolveRuntimeWorkerUrl } from "../../infra/runtime-worker-url.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  borrowOpenClawAgentDatabase,
-  getOpenClawAgentDatabaseIfOpen,
-  isIncognitoOpenClawAgentDatabase,
-  isIncognitoOpenClawAgentSqlitePath,
-  withOpenClawAgentDatabaseAsync,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  borrowCarapaceAgentDatabase,
+  getCarapaceAgentDatabaseIfOpen,
+  isIncognitoCarapaceAgentDatabase,
+  isIncognitoCarapaceAgentSqlitePath,
+  withCarapaceAgentDatabaseAsync,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { sleep } from "../../utils/sleep.js";
 import { resolveStateDir } from "../paths.js";
 import type { SessionTranscriptReadScope } from "./session-accessor.sqlite-contract.js";
@@ -73,13 +73,13 @@ export type SessionTranscriptReconcileResult = {
   reconciledSessions: number;
 };
 
-type SessionTranscriptReconcileParams = OpenClawAgentDatabaseOptions & {
+type SessionTranscriptReconcileParams = CarapaceAgentDatabaseOptions & {
   createWorker?: (filename: string | URL, options: WorkerOptions) => Worker;
   preferredSessionId?: string;
 };
 
 type PreparedReconcileParams = SessionTranscriptReconcileParams & { env: NodeJS.ProcessEnv };
-type ReconcileDatabaseOptions = OpenClawAgentDatabaseOptions & {
+type ReconcileDatabaseOptions = CarapaceAgentDatabaseOptions & {
   env: NodeJS.ProcessEnv;
   path: string;
 };
@@ -94,13 +94,13 @@ type ActivePreparedProjection = {
   plan: PreparedSessionTranscriptProjectionMetadata;
 };
 
-function reconcileKey(params: OpenClawAgentDatabaseOptions): string {
-  return resolveOpenClawAgentSqlitePath(params);
+function reconcileKey(params: CarapaceAgentDatabaseOptions): string {
+  return resolveCarapaceAgentSqlitePath(params);
 }
 
-function captureMemorySource(params: OpenClawAgentDatabaseOptions) {
-  const database = getOpenClawAgentDatabaseIfOpen(params);
-  return database && isIncognitoOpenClawAgentDatabase(database)
+function captureMemorySource(params: CarapaceAgentDatabaseOptions) {
+  const database = getCarapaceAgentDatabaseIfOpen(params);
+  return database && isIncognitoCarapaceAgentDatabase(database)
     ? createMemoryTranscriptProjectionSource(database, { ...params, path: database.path })
     : undefined;
 }
@@ -149,7 +149,7 @@ function observeWorkerLeaseRelease(worker: Worker) {
 async function runProjectionWrite<T>(
   databaseOptions: ReconcileDatabaseOptions,
   operationLabel: string,
-  operation: (database: OpenClawAgentDatabase) => T,
+  operation: (database: CarapaceAgentDatabase) => T,
   memorySource?: MemoryTranscriptProjectionSource,
 ): Promise<T> {
   return await runExclusiveSqliteSessionWrite(databaseOptions, async () => {
@@ -157,11 +157,11 @@ async function runProjectionWrite<T>(
       // Disposal revokes a memory source. Check inside the queue before the opener
       // can materialize a successor database for a late worker result.
       memorySource?.assertCurrentOwner();
-      return runOpenClawAgentWriteTransaction(operation, databaseOptions, { operationLabel });
+      return runCarapaceAgentWriteTransaction(operation, databaseOptions, { operationLabel });
     };
-    return !isIncognitoOpenClawAgentSqlitePath(databaseOptions.path, databaseOptions) &&
-      !getOpenClawAgentDatabaseIfOpen(databaseOptions)
-      ? withOpenClawAgentDatabaseAsync(databaseOptions, write)
+    return !isIncognitoCarapaceAgentSqlitePath(databaseOptions.path, databaseOptions) &&
+      !getCarapaceAgentDatabaseIfOpen(databaseOptions)
+      ? withCarapaceAgentDatabaseAsync(databaseOptions, write)
       : write();
   });
 }
@@ -279,7 +279,7 @@ export async function reconcileSessionTranscriptIndexes(
 async function reconcilePreparedTranscriptIndexes(
   params: PreparedReconcileParams,
 ): Promise<SessionTranscriptReconcileResult> {
-  const databasePath = resolveOpenClawAgentSqlitePath(params);
+  const databasePath = resolveCarapaceAgentSqlitePath(params);
   const databaseOptions: ReconcileDatabaseOptions = {
     agentId: params.agentId,
     env: params.env,
@@ -299,7 +299,7 @@ async function reconcilePreparedTranscriptIndexes(
         const sessionIds = listSessionsNeedingTranscriptIndexReconcile(database.db);
         if (sessionIds.length > 0) {
           // Retain this verified handle across worker awaits; explicit disposal still revokes it.
-          releaseDatabase = borrowOpenClawAgentDatabase(databaseOptions).release;
+          releaseDatabase = borrowCarapaceAgentDatabase(databaseOptions).release;
           if (memorySource) {
             const preferred = params.preferredSessionId;
             memorySessionIds =
@@ -508,7 +508,7 @@ async function reconcilePreparedTranscriptIndexes(
       }
     } catch (error) {
       const failure = new Error(
-        `Transcript lease cleanup incomplete; restart OpenClaw before deleting this agent: ${toStringifiedError(error).message}`,
+        `Transcript lease cleanup incomplete; restart Carapace before deleting this agent: ${toStringifiedError(error).message}`,
         { cause: error },
       );
       throw outcome.ok
@@ -605,14 +605,14 @@ export function startSessionTranscriptIndexReconcile(
 }
 
 export function isSessionTranscriptIndexReconcileRunning(
-  params: OpenClawAgentDatabaseOptions,
+  params: CarapaceAgentDatabaseOptions,
 ): boolean {
   return runningReconciles.has(reconcileKey(params));
 }
 
 /** Test and maintenance wait hook for an already-scheduled reconcile. */
 export async function waitForSessionTranscriptIndexReconcile(
-  params: OpenClawAgentDatabaseOptions,
+  params: CarapaceAgentDatabaseOptions,
 ): Promise<void> {
   await runningReconciles.get(reconcileKey(params))?.promise;
 }
@@ -643,7 +643,7 @@ export async function waitForSessionTranscriptProjection(
   while (isSessionTranscriptIndexReconcileRunning(databaseOptions)) {
     // Poll committed metadata without superseding a pending writable admission
     // or recreating an incognito owner disposed across an earlier polling await.
-    const pending = withOpenClawAgentDatabaseReadOnly(
+    const pending = withCarapaceAgentDatabaseReadOnly(
       ({ db }) => sessionTranscriptIndexNeedsReconcile(db, resolved.sessionId),
       databaseOptions,
       { throwOnMissingTable: true },

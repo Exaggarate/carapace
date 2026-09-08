@@ -5,7 +5,7 @@ import path from "node:path";
 import { isVolatileBackupPath } from "../infra/backup-volatile-filter.js";
 import { hasErrnoCode } from "../infra/errno.js";
 import type { ResolvedPluginBackupResource } from "../plugins/manifest-backup-resources.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { isPathWithin } from "./cleanup-utils.js";
 
 export type BackupAgentRoot = Readonly<{
@@ -122,7 +122,7 @@ export async function createBackupResourceInventory(params: {
   );
   const protectedPathSet = new Set<string>([
     ...configPaths,
-    resolveOpenClawStateSqlitePath({ ...process.env, OPENCLAW_STATE_DIR: stateDir }),
+    resolveCarapaceStateSqlitePath({ ...process.env, CARAPACE_STATE_DIR: stateDir }),
   ]);
   const regenerableRoots: BackupRegenerableRoot[] = [];
   const exclude = (kind: BackupRegenerableKind, sourcePath: string): void => {
@@ -240,7 +240,7 @@ export async function createBackupResourceInventory(params: {
         (segments[2] === "agent" &&
           (segments.length === 3 ||
             (segments.length === 4 &&
-              /^openclaw-agent\.sqlite(?:-wal|-shm|-journal)?$/u.test(segments[3] ?? "")))))
+              /^carapace-agent\.sqlite(?:-wal|-shm|-journal)?$/u.test(segments[3] ?? "")))))
     ) {
       return false;
     }

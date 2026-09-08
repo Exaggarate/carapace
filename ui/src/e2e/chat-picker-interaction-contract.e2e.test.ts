@@ -32,7 +32,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, session.key));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const picker = pane.locator(".chat-controls__permission-picker");
       await pane.locator('[data-chat-permission-select="true"]').click();
       await pane.locator('[data-chat-permission-option="default"]').waitFor({ state: "visible" });

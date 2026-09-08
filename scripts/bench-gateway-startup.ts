@@ -1,4 +1,4 @@
-// Bench Gateway Startup script supports OpenClaw repository automation.
+// Bench Gateway Startup script supports Carapace repository automation.
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -168,13 +168,13 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "skipChannels",
     name: "gateway, skip channels",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     config: BASE_CONFIG,
   },
   {
     id: "preparedRuntimeCatalogStall",
     name: "gateway, prepared runtime with CPU-stalling live catalog",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     providerCatalogStallMs: 2_000,
     config: {
       ...BASE_CONFIG,
@@ -183,7 +183,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
           model: { primary: `${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}` },
           models: {
             [`${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}`]: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
           },
         },
@@ -195,7 +195,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
     name: "gateway, prepared runtime scale with one agent",
     agentTopology: "single",
     completionTracePhase: "sidecars.ready",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     providerStaticCatalogModelCount: 64,
     providerStaticCatalogStallMs: 100,
     config: {
@@ -205,7 +205,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
           model: { primary: `${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}` },
           models: {
             [`${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}`]: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
           },
         },
@@ -217,7 +217,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
     name: "gateway, prepared runtime scale with 11 shared-workspace agents and one distinct",
     agentTopology: "shared-eleven-plus-distinct-one",
     completionTracePhase: "sidecars.ready",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     providerStaticCatalogModelCount: 64,
     providerStaticCatalogStallMs: 100,
     config: {
@@ -227,7 +227,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
           model: { primary: `${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}` },
           models: {
             [`${STALLED_CATALOG_PROVIDER_ID}/${STALLED_CATALOG_MODEL_ID}`]: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
           },
         },
@@ -237,7 +237,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "oneInternalHook",
     name: "gateway, one configured internal hook",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     config: {
       ...BASE_CONFIG,
       hooks: {
@@ -252,7 +252,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "allInternalHooks",
     name: "gateway, all internal hooks",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     config: {
       ...BASE_CONFIG,
       hooks: {
@@ -265,7 +265,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "fiftyPlugins",
     name: "gateway, 50 manifest plugins",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     pluginActivationOnStartup: true,
     pluginCount: 50,
     config: BASE_CONFIG,
@@ -273,7 +273,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "fiftyStartupLazyPlugins",
     name: "gateway, 50 startup-lazy manifest plugins",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     pluginActivationOnStartup: false,
     pluginCount: 50,
     config: BASE_CONFIG,
@@ -282,7 +282,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
     id: "largePluginModelConfig",
     name: `gateway, ${LARGE_PLUGIN_MODEL_AGENT_COUNT} agents with ${LARGE_PLUGIN_MODEL_COUNT} plugin-owned model refs each`,
     completionTracePhase: "config.snapshot.auto-enable",
-    env: { OPENCLAW_SKIP_CHANNELS: "1" },
+    env: { CARAPACE_SKIP_CHANNELS: "1" },
     runByDefault: false,
     config: {
       ...BASE_CONFIG,
@@ -321,7 +321,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
   {
     id: "incidentPackagedPlugins",
     name: "gateway, packaged plugin inventory",
-    env: { OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1" },
+    env: { CARAPACE_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1" },
     incidentFixture: "packaged-plugins",
     runByDefault: false,
     config: BASE_CONFIG,
@@ -330,7 +330,7 @@ const GATEWAY_CASES: readonly GatewayBenchCase[] = [
     id: "incidentCombined",
     name: "gateway, incident-scale combined load",
     agentTopology: "incident-scale",
-    env: { OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1" },
+    env: { CARAPACE_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1" },
     incidentFixture: "combined",
     runByDefault: false,
     config: BASE_CONFIG,
@@ -377,7 +377,7 @@ function parseOptions(argv: string[] = process.argv.slice(2)): CliOptions {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw Gateway startup benchmark
+  console.log(`Carapace Gateway startup benchmark
 
 Usage:
   pnpm test:startup:gateway -- [options]
@@ -641,7 +641,7 @@ function fixtureIncludesPackagedPlugins(kind: IncidentFixtureOptions["kind"]): b
 
 function listIncidentPackagedPluginArtifacts(env = process.env): string[] {
   return listBundledPluginPackArtifacts({
-    env: { ...env, OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: undefined },
+    env: { ...env, CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: undefined },
   });
 }
 
@@ -722,15 +722,15 @@ async function writeIncidentFixture(root: string, options: IncidentFixtureOption
   if (!fixtureIncludesDatabase(options.kind)) {
     return;
   }
-  const env = { OPENCLAW_STATE_DIR: path.join(root, "state") };
+  const env = { CARAPACE_STATE_DIR: path.join(root, "state") };
   const [{ DatabaseSync }, agentDatabase, stateDatabase] = await Promise.all([
     import("node:sqlite"),
-    import("../src/state/openclaw-agent-db.js"),
-    import("../src/state/openclaw-state-db.js"),
+    import("../src/state/carapace-agent-db.js"),
+    import("../src/state/carapace-state-db.js"),
   ]);
-  const state = stateDatabase.openOpenClawStateDatabase({ env });
+  const state = stateDatabase.openCarapaceStateDatabase({ env });
   const agents = Array.from({ length: INCIDENT_WORKSPACE_COUNT }, (_, index) =>
-    agentDatabase.openOpenClawAgentDatabase({
+    agentDatabase.openCarapaceAgentDatabase({
       agentId: `incident-agent-${String(index + 1).padStart(2, "0")}`,
       env,
     }),
@@ -741,8 +741,8 @@ async function writeIncidentFixture(root: string, options: IncidentFixtureOption
     state.db.exec("PRAGMA wal_checkpoint(TRUNCATE);");
     agents.forEach((agent) => agent.db.exec("PRAGMA wal_checkpoint(TRUNCATE);"));
   } finally {
-    agentDatabase.closeOpenClawAgentDatabasesForTest();
-    stateDatabase.closeOpenClawStateDatabaseForTest();
+    agentDatabase.closeCarapaceAgentDatabasesForTest();
+    stateDatabase.closeCarapaceStateDatabaseForTest();
   }
   const stateHandle = new DatabaseSync(statePath);
   try {
@@ -771,7 +771,7 @@ async function writeIncidentFixture(root: string, options: IncidentFixtureOption
 }
 
 async function withGatewayBenchRoot<T>(run: (root: string) => Promise<T>): Promise<T> {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-gateway-bench-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-gateway-bench-"));
   try {
     return await run(root);
   } finally {
@@ -850,7 +850,7 @@ async function runGatewaySample(options: {
               "--cpu-prof-dir",
               options.cpuProfDir,
               "--cpu-prof-name",
-              `openclaw-gateway-${options.benchCase.id}-${options.sampleIndex}-${Date.now()}.cpuprofile`,
+              `carapace-gateway-${options.benchCase.id}-${options.sampleIndex}-${Date.now()}.cpuprofile`,
             ]
           : []),
         ...(options.heapProfDir ? ["--heap-prof", "--heap-prof-dir", options.heapProfDir] : []),

@@ -6,7 +6,7 @@ import {
   type AssistantMessage,
   type Context,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { setPluginToolMeta } from "../plugins/tool-metadata.js";

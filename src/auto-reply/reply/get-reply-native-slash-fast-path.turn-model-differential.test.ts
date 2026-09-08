@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import * as preparedModelCatalog from "../../agents/prepared-model-catalog.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -61,7 +61,7 @@ async function seedFixture(
 function createConfig(
   storePath: string,
   modelByChannel: TurnModelDifferentialFixture["modelByChannel"],
-): OpenClawConfig {
+): CarapaceConfig {
   return markCompleteReplyConfig({
     session: { store: storePath },
     agents: {
@@ -71,7 +71,7 @@ function createConfig(
       },
     },
     channels: modelByChannel ? { modelByChannel } : undefined,
-  } as OpenClawConfig);
+  } as CarapaceConfig);
 }
 
 async function observeStatusSelection(
@@ -139,7 +139,7 @@ async function observeStatusSelection(
 
 describe("turn model selection status-path differential", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     resetPluginRuntimeStateForTest();
     setActivePluginRegistry(createSessionConversationTestRegistry());
     vi.spyOn(preparedModelCatalog, "loadPreparedModelCatalog").mockResolvedValue([]);

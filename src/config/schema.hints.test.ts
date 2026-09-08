@@ -1,14 +1,14 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 // Verifies schema hint metadata and sensitive path handling.
-import { SENSITIVE_URL_HINT_TAG } from "@openclaw/net-policy/redact-sensitive-url";
+import { SENSITIVE_URL_HINT_TAG } from "@carapace/net-policy/redact-sensitive-url";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { buildSecretInputSchema } from "../plugin-sdk/secret-input-schema.js";
 import { buildBaseHints, mapSensitivePaths, testApi } from "./schema.hints.js";
 import { isSensitiveConfigPath } from "./sensitive-paths.js";
-import { OpenClawSchema } from "./zod-schema.js";
-import { OpenClawSchemaShape } from "./zod-schema.root-shape.js";
+import { CarapaceSchema } from "./zod-schema.js";
+import { CarapaceSchemaShape } from "./zod-schema.root-shape.js";
 import { sensitive } from "./zod-schema.sensitive.js";
 
 const { SECTION_DOCS_URLS } = testApi;
@@ -32,7 +32,7 @@ describe("section docs URLs", () => {
       ...Object.keys(SECTION_DOCS_URLS),
       ...SECTIONS_WITHOUT_DOCS,
     ]);
-    const undecidedSections = Object.keys(OpenClawSchemaShape).filter(
+    const undecidedSections = Object.keys(CarapaceSchemaShape).filter(
       (section) => !sectionsWithDocsDecisions.has(section),
     );
 
@@ -41,7 +41,7 @@ describe("section docs URLs", () => {
 
   it("maps every URL to an existing task-oriented docs page", () => {
     const hints = buildBaseHints();
-    const docsOrigin = "https://docs.openclaw.ai";
+    const docsOrigin = "https://github.com/Exaggarate/carapace";
 
     for (const [path, docsUrl] of Object.entries(SECTION_DOCS_URLS)) {
       const docsPath = docsUrl.slice(docsOrigin.length).replace(/^\//u, "");
@@ -230,12 +230,12 @@ describe("mapSensitivePaths", () => {
   });
 
   it("main schema yields correct hints (samples)", () => {
-    const schema = OpenClawSchema.toJSONSchema({
+    const schema = CarapaceSchema.toJSONSchema({
       target: "draft-07",
       unrepresentable: "any",
     });
-    schema.title = "OpenClawConfig";
-    const hints = mapSensitivePaths(OpenClawSchema, "", {});
+    schema.title = "CarapaceConfig";
+    const hints = mapSensitivePaths(CarapaceSchema, "", {});
 
     expect(hints["memory.search.remote.apiKey"]?.sensitive).toBe(true);
     expect(hints["agents.entries.*.memory.search.remote.apiKey"]?.sensitive).toBe(true);
@@ -264,7 +264,7 @@ describe("mapSensitivePaths", () => {
     expect(hints["nested.verificationToken"]?.sensitive).toBe(true);
   });
   it("tags base-config URL fields that may embed secrets", () => {
-    const hints = mapSensitivePaths(OpenClawSchema, "", {});
+    const hints = mapSensitivePaths(CarapaceSchema, "", {});
     for (const path of [
       "mcp.servers.*.url",
       "models.providers.*.baseUrl",

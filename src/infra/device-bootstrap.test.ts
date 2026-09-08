@@ -12,12 +12,12 @@ import {
   NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
   VOICE_NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
 } from "../shared/device-bootstrap-profile.js";
-import { tableHasColumn } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableHasColumn } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   clearDeviceBootstrapTokens,
@@ -42,7 +42,7 @@ import {
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "./kysely-sync.js";
 
 const tempDirs = createTrackedTempDirs();
-const createTempDir = () => tempDirs.make("openclaw-device-bootstrap-test-");
+const createTempDir = () => tempDirs.make("carapace-device-bootstrap-test-");
 
 async function verifyBootstrapToken(
   baseDir: string,
@@ -65,8 +65,8 @@ async function issueCloudWorkerSetupToken(baseDir: string) {
     baseDir,
     profile: CLOUD_WORKER_PAIRING_SETUP_BOOTSTRAP_PROFILE,
   });
-  const { db } = openOpenClawStateDatabase({
-    env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+  const { db } = openCarapaceStateDatabase({
+    env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
   });
   db.prepare(
     `INSERT INTO worker_environments (
@@ -82,7 +82,7 @@ afterEach(async () => {
   vi.useRealTimers();
   resetLogger();
   setLoggerOverride(null);
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 
@@ -157,8 +157,8 @@ describe("device bootstrap tokens", () => {
     if (first.status !== "pending") {
       throw new Error("expected pending setup credential");
     }
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
     });
     database.db
       .prepare(
@@ -178,26 +178,26 @@ describe("device bootstrap tokens", () => {
 
   it("adds setup correlation storage only on first setup issuance", async () => {
     const baseDir = await createTempDir();
-    const databaseOptions = { env: { ...process.env, OPENCLAW_STATE_DIR: baseDir } };
-    const initial = openOpenClawStateDatabase(databaseOptions);
+    const databaseOptions = { env: { ...process.env, CARAPACE_STATE_DIR: baseDir } };
+    const initial = openCarapaceStateDatabase(databaseOptions);
     initial.db.exec("ALTER TABLE device_bootstrap_tokens DROP COLUMN setup_id;");
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     await issueDeviceBootstrapToken({ baseDir });
-    const afterGenericIssue = openOpenClawStateDatabase(databaseOptions);
+    const afterGenericIssue = openCarapaceStateDatabase(databaseOptions);
     expect(tableHasColumn(afterGenericIssue.db, "device_bootstrap_tokens", "setup_id")).toBe(false);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const setup = await issueDevicePairSetupBootstrapToken({
       baseDir,
       profile: NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
     });
-    const afterSetupIssue = openOpenClawStateDatabase(databaseOptions);
+    const afterSetupIssue = openCarapaceStateDatabase(databaseOptions);
     expect(tableHasColumn(afterSetupIssue.db, "device_bootstrap_tokens", "setup_id")).toBe(true);
     expect(loadDeviceBootstrapTokenRecords(baseDir)[setup.token]?.setupId).toBe(setup.setupId);
   });
 
-  // `openclaw qr --voice-node` issues through the same setup boundary. Correlation
+  // `carapace qr --voice-node` issues through the same setup boundary. Correlation
   // must never gate issuance on a profile allowlist or that command stops working.
   it.each([
     ["voice node", VOICE_NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE],
@@ -312,8 +312,8 @@ describe("device bootstrap tokens", () => {
       };
       await verifyBootstrapToken(baseDir, issued.token);
       await consumeDeviceBootstrapTokenWithSetupCompletion(completion);
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
       });
       db.prepare("UPDATE worker_environments SET state = ? WHERE node_setup_id = ?").run(
         state,
@@ -346,8 +346,8 @@ describe("device bootstrap tokens", () => {
       const baseDir = await createTempDir();
       const issued = await issueCloudWorkerSetupToken(baseDir);
       await verifyBootstrapToken(baseDir, issued.token);
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
       });
       db.prepare("UPDATE worker_environments SET state = ? WHERE node_setup_id = ?").run(
         state,
@@ -378,8 +378,8 @@ describe("device bootstrap tokens", () => {
       };
       await verifyBootstrapToken(baseDir, issued.token);
       await consumeDeviceBootstrapTokenWithSetupCompletion(completion);
-      const { db } = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+      const { db } = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
       });
       db.prepare("UPDATE worker_environments SET state = ? WHERE node_setup_id = ?").run(
         state,
@@ -406,8 +406,8 @@ describe("device bootstrap tokens", () => {
     };
     await verifyBootstrapToken(baseDir, issued.token);
     await consumeDeviceBootstrapTokenWithSetupCompletion(completion);
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
     });
     db.prepare(
       "UPDATE worker_environments SET destroy_requested_at_ms = ? WHERE node_setup_id = ?",
@@ -487,8 +487,8 @@ describe("device bootstrap tokens", () => {
       profile: NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
     });
     await verifyBootstrapToken(baseDir, issued.token);
-    const { db } = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+    const { db } = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
     });
     db.exec("DROP TABLE IF EXISTS device_pair_setup_completions");
 
@@ -530,12 +530,12 @@ describe("device bootstrap tokens", () => {
       const found = await readDevicePairSetupCompletion({ baseDir, setupId: issued.setupId });
       expect(found === null).toBe(!expectFound);
       if (!expectFound) {
-        const { db } = openOpenClawStateDatabase({
-          env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+        const { db } = openCarapaceStateDatabase({
+          env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
         });
         const row = executeSqliteQueryTakeFirstSync(
           db,
-          getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db)
+          getNodeSqliteKysely<CarapaceStateKyselyDatabase>(db)
             .selectFrom("device_pair_setup_completions")
             .select("setup_id")
             .where("setup_id", "=", issued.setupId),

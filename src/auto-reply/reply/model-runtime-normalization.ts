@@ -8,7 +8,7 @@ import {
 } from "../../agents/model-selection.js";
 import { RUNTIME_MODEL_VISIBILITY_NORMALIZATION } from "../../agents/model-visibility-policy.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getCurrentPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata-snapshot.js";
 import {
   isManifestPluginAvailableForControlPlane,
@@ -19,7 +19,7 @@ import { resolveModelRuntimeDirective } from "./directive-handling.model-runtime
 export type RuntimeModelNormalization = NonNullable<Parameters<typeof normalizeModelRef>[2]>;
 
 /** Carries the Gateway-owned metadata snapshot through one model-selection run. */
-export function resolveRuntimeNormalization(cfg: OpenClawConfig): RuntimeModelNormalization {
+export function resolveRuntimeNormalization(cfg: CarapaceConfig): RuntimeModelNormalization {
   return {
     ...RUNTIME_MODEL_VISIBILITY_NORMALIZATION,
     manifestPlugins: getCurrentPluginMetadataSnapshot({
@@ -49,7 +49,7 @@ export function findSelectedCatalogEntry(params: {
 
 /** Provider identity comes from authored routes or prepared/plugin metadata, not model inventory. */
 export function isKnownModelSelectionProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   catalog: readonly ModelCatalogEntry[];
 }): boolean {
@@ -78,7 +78,7 @@ type ModelSelectionPreparation =
 
 /** Prepare runtime and capabilities for the selected route before any session mutation. */
 export async function prepareModelSelectionRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   provider: string;
   model: string;

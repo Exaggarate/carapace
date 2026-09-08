@@ -40,9 +40,9 @@ import {
 import { resolveReleaseContextIdentity } from "./lib/release-context.mjs";
 
 const sortReleaseJsonValueKeys = /** @type {<T>(value: T) => T} */ (sortJsonValueKeys); // Validated release JSON preserves its structural type.
-const DEFAULT_REPO = process.env.OPENCLAW_RELEASE_REPO || "openclaw/openclaw";
-const RELEASE_EVIDENCE_SCHEMA = "openclaw.release-validation-evidence/v3";
-const PHASED_RELEASE_EVIDENCE_SCHEMA = "openclaw.release-validation-evidence/v4";
+const DEFAULT_REPO = process.env.CARAPACE_RELEASE_REPO || "carapace/carapace";
+const RELEASE_EVIDENCE_SCHEMA = "carapace.release-validation-evidence/v3";
+const PHASED_RELEASE_EVIDENCE_SCHEMA = "carapace.release-validation-evidence/v4";
 const SHA_PINNED_BRANCH_PATTERN = /^release-ci\/[a-f0-9]{12}-[1-9][0-9]*$/u;
 const TRUSTED_RELEASE_PUBLISH_TAG_PATTERN =
   /^refs\/tags\/release-publish\/([a-f0-9]{12})-[1-9][0-9]*$/u;
@@ -73,11 +73,11 @@ const LEGACY_CHILD_DISPATCHES = [
   },
   {
     manifestKey: "releaseChecks",
-    name: "OpenClaw Release Checks",
+    name: "Carapace Release Checks",
     parentJobName: "Run release/live/Docker/QA validation",
     suffix: "-release-checks",
     trustedRef: "parent",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     manifestKey: "pluginPrerelease",
@@ -97,11 +97,11 @@ const LEGACY_CHILD_DISPATCHES = [
   },
   {
     manifestKey: "productPerformance",
-    name: "OpenClaw Performance",
+    name: "Carapace Performance",
     parentJobName: "Run product performance evidence",
     suffix: "",
     trustedRef: "parent",
-    workflow: "openclaw-performance.yml",
+    workflow: "carapace-performance.yml",
   },
 ];
 
@@ -125,19 +125,19 @@ const PHASED_CHILD_DISPATCHES = [
   },
   {
     manifestKey: "releaseChecksIndependent",
-    name: "OpenClaw Release Checks",
+    name: "Carapace Release Checks",
     parentJobName: "Run release checks independent validation",
     suffix: "-release-checks-independent",
     trustedRef: "parent",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   {
     manifestKey: "releaseChecksCandidate",
-    name: "OpenClaw Release Checks",
+    name: "Carapace Release Checks",
     parentJobName: "Run release checks candidate validation",
     suffix: "-release-checks-candidate",
     trustedRef: "parent",
-    workflow: "openclaw-release-checks.yml",
+    workflow: "carapace-release-checks.yml",
   },
   LEGACY_CHILD_DISPATCHES.find((child) => child.manifestKey === "npmTelegram"),
   LEGACY_CHILD_DISPATCHES.find((child) => child.manifestKey === "productPerformance"),
@@ -296,7 +296,7 @@ function downloadArtifactZip(artifactId, destination, sizeInBytes, repository = 
 
 function tryDownloadExecutionPlan(runId, repository = DEFAULT_REPO) {
   const artifactName = `full-release-execution-plan-${runId}`;
-  const downloadDir = mkdtempSync(join(tmpdir(), "openclaw-release-execution-plan-"));
+  const downloadDir = mkdtempSync(join(tmpdir(), "carapace-release-execution-plan-"));
   try {
     try {
       runReleaseCiGh(
@@ -1634,7 +1634,7 @@ function downloadParentManifestEvidence(runId, runAttempt, repository, manifestP
       runId,
     },
   );
-  const downloadDir = mkdtempSync(join(tmpdir(), "openclaw-release-ci-summary-"));
+  const downloadDir = mkdtempSync(join(tmpdir(), "carapace-release-ci-summary-"));
   try {
     const archivePath = join(downloadDir, "manifest.zip");
     downloadArtifactZip(String(artifact.id), archivePath, artifact.size_in_bytes, targetRepository);
@@ -2674,7 +2674,7 @@ export function tryReadReleaseDecisionArtifact(
   runReleaseCiGhImpl = runReleaseCiGh,
 ) {
   const artifactName = `full-release-decision-${runId}-${parent.attempt}`;
-  const downloadDir = mkdtempSync(join(tmpdir(), "openclaw-release-decision-watch-"));
+  const downloadDir = mkdtempSync(join(tmpdir(), "carapace-release-decision-watch-"));
   try {
     try {
       runReleaseCiGhImpl(

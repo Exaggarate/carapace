@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import * as subagentKill from "../agents/subagents/registry/subagent-control-kill.js";
 import { subagentRuns } from "../agents/subagents/registry/subagent-registry-memory.js";
@@ -725,7 +725,7 @@ describe("queued collector session projection", () => {
             expect.objectContaining({
               message: expect.objectContaining({
                 content: [{ type: "text", text: "Additional run partial" }],
-                openclawAbort: expect.objectContaining({ runId: extraRunId, aborted: true }),
+                carapaceAbort: expect.objectContaining({ runId: extraRunId, aborted: true }),
               }),
             }),
           );

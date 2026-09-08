@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { SessionEntry } from "../config/sessions.js";
 import {
   listSessionEntriesCore as listAccessorSessionEntries,

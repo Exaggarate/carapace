@@ -32,14 +32,14 @@ function envWith(overrides: Record<string, string | undefined>): NodeJS.ProcessE
 
 describe("default state directory", () => {
   it("matches filesystem aliases of the default state directory", async () => {
-    await withTestDir({ prefix: "openclaw-default-state-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-default-state-" }, async (root) => {
       const home = path.join(root, "home");
-      const defaultStateDir = path.join(home, ".openclaw");
+      const defaultStateDir = path.join(home, ".carapace");
       const stateAlias = path.join(home, "state-alias");
       await fs.mkdir(defaultStateDir, { recursive: true });
       await fs.symlink(defaultStateDir, stateAlias, "dir");
 
-      expect(isDefaultStateDir({ HOME: home, OPENCLAW_STATE_DIR: stateAlias }, () => home)).toBe(
+      expect(isDefaultStateDir({ HOME: home, CARAPACE_STATE_DIR: stateAlias }, () => home)).toBe(
         true,
       );
     });
@@ -49,22 +49,22 @@ describe("default state directory", () => {
 describe("default install identity", () => {
   it("accepts default paths and equivalent explicit overrides", () => {
     const home = "/home/test";
-    const stateDir = path.join(home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(home, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
 
     expect(isDefaultInstallIdentity({ HOME: home }, () => home)).toBe(true);
     expect(allowsProcessHomeSessionScan({ HOME: home }, () => home)).toBe(true);
     expect(
       isDefaultInstallIdentity(
-        { HOME: home, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+        { HOME: home, CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath },
         () => home,
       ),
     ).toBe(true);
   });
 
   it("preserves implicit legacy config discovery for the default profile", async () => {
-    await withTestDir({ prefix: "openclaw-default-install-legacy-config-" }, async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+    await withTestDir({ prefix: "carapace-default-install-legacy-config-" }, async (home) => {
+      const stateDir = path.join(home, ".carapace");
       const legacyStateDir = path.join(home, ".clawdbot");
       const legacyConfigPath = path.join(legacyStateDir, "clawdbot.json");
       await fs.mkdir(stateDir, { recursive: true });
@@ -81,11 +81,11 @@ describe("default install identity", () => {
     const home = "/home/test";
 
     expect(
-      isDefaultInstallIdentity({ HOME: home, OPENCLAW_STATE_DIR: "/tmp/copied-state" }, () => home),
+      isDefaultInstallIdentity({ HOME: home, CARAPACE_STATE_DIR: "/tmp/copied-state" }, () => home),
     ).toBe(false);
     expect(
       isDefaultInstallIdentity(
-        { HOME: home, OPENCLAW_CONFIG_PATH: "/tmp/copied-openclaw.json" },
+        { HOME: home, CARAPACE_CONFIG_PATH: "/tmp/copied-carapace.json" },
         () => home,
       ),
     ).toBe(false);
@@ -93,15 +93,15 @@ describe("default install identity", () => {
 
   it("rejects process home overrides that relocate the implicit install", () => {
     const accountHome = "/home/test";
-    const stateDir = path.join(accountHome, ".openclaw");
+    const stateDir = path.join(accountHome, ".carapace");
 
     expect(isDefaultInstallIdentity({ HOME: "/tmp/copied-home" }, () => accountHome)).toBe(false);
     expect(
       isDefaultInstallIdentity(
         {
           HOME: "/tmp/copied-home",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
         },
         () => accountHome,
       ),
@@ -110,26 +110,26 @@ describe("default install identity", () => {
       isDefaultInstallIdentity(
         {
           USERPROFILE: "/tmp/copied-home",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
         },
         () => accountHome,
       ),
     ).toBe(false);
   });
 
-  it("rejects installs relocated through OPENCLAW_HOME", () => {
+  it("rejects installs relocated through CARAPACE_HOME", () => {
     const accountHome = "/home/test";
-    const installHome = "/srv/openclaw";
-    const stateDir = path.join(installHome, ".openclaw");
+    const installHome = "/srv/carapace";
+    const stateDir = path.join(installHome, ".carapace");
 
-    expect(isDefaultInstallIdentity({ OPENCLAW_HOME: installHome }, () => accountHome)).toBe(false);
+    expect(isDefaultInstallIdentity({ CARAPACE_HOME: installHome }, () => accountHome)).toBe(false);
     expect(
       isDefaultInstallIdentity(
         {
-          OPENCLAW_HOME: installHome,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_HOME: installHome,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
         },
         () => accountHome,
       ),
@@ -137,10 +137,10 @@ describe("default install identity", () => {
     expect(
       isDefaultInstallIdentity(
         {
-          OPENCLAW_HOME: installHome,
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: path.join(installHome, ".openclaw-work"),
-          OPENCLAW_CONFIG_PATH: path.join(installHome, ".openclaw-work", "openclaw.json"),
+          CARAPACE_HOME: installHome,
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: path.join(installHome, ".carapace-work"),
+          CARAPACE_CONFIG_PATH: path.join(installHome, ".carapace-work", "carapace.json"),
         },
         () => accountHome,
       ),
@@ -148,19 +148,19 @@ describe("default install identity", () => {
   });
 
   it("accepts the canonical paths a named profile projects", async () => {
-    await withTestDir({ prefix: "openclaw-profile-install-" }, async (home) => {
-      const defaultStateDir = path.join(home, ".openclaw");
-      const profileStateDir = path.join(home, ".openclaw-work");
+    await withTestDir({ prefix: "carapace-profile-install-" }, async (home) => {
+      const defaultStateDir = path.join(home, ".carapace");
+      const profileStateDir = path.join(home, ".carapace-work");
       await fs.mkdir(defaultStateDir, { recursive: true });
-      await fs.writeFile(path.join(defaultStateDir, "openclaw.json"), "{}");
+      await fs.writeFile(path.join(defaultStateDir, "carapace.json"), "{}");
 
       expect(
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: profileStateDir,
-            OPENCLAW_CONFIG_PATH: path.join(profileStateDir, "openclaw.json"),
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: profileStateDir,
+            CARAPACE_CONFIG_PATH: path.join(profileStateDir, "carapace.json"),
           },
           () => home,
         ),
@@ -169,9 +169,9 @@ describe("default install identity", () => {
         allowsProcessHomeSessionScan(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: profileStateDir,
-            OPENCLAW_CONFIG_PATH: path.join(profileStateDir, "openclaw.json"),
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: profileStateDir,
+            CARAPACE_CONFIG_PATH: path.join(profileStateDir, "carapace.json"),
           },
           () => home,
         ),
@@ -180,21 +180,21 @@ describe("default install identity", () => {
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: profileStateDir,
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: profileStateDir,
           },
           () => home,
         ),
       ).toBe(false);
 
       await fs.mkdir(profileStateDir, { recursive: true });
-      await fs.writeFile(path.join(profileStateDir, "openclaw.json"), "{}");
+      await fs.writeFile(path.join(profileStateDir, "carapace.json"), "{}");
       expect(
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: profileStateDir,
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: profileStateDir,
           },
           () => home,
         ),
@@ -203,8 +203,8 @@ describe("default install identity", () => {
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "work",
-            OPENCLAW_STATE_DIR: path.join(home, ".openclaw-other"),
+            CARAPACE_PROFILE: "work",
+            CARAPACE_STATE_DIR: path.join(home, ".carapace-other"),
           },
           () => home,
         ),
@@ -213,8 +213,8 @@ describe("default install identity", () => {
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: "default",
-            OPENCLAW_STATE_DIR: defaultStateDir,
+            CARAPACE_PROFILE: "default",
+            CARAPACE_STATE_DIR: defaultStateDir,
           },
           () => home,
         ),
@@ -225,29 +225,29 @@ describe("default install identity", () => {
   it.each([
     {
       platform: "darwin" as const,
-      envKey: "OPENCLAW_LAUNCHD_LABEL",
-      value: "ai.openclaw.gateway",
+      envKey: "CARAPACE_LAUNCHD_LABEL",
+      value: "ai.carapace.gateway",
     },
     {
       platform: "linux" as const,
-      envKey: "OPENCLAW_SYSTEMD_UNIT",
-      value: "openclaw-gateway.service",
+      envKey: "CARAPACE_SYSTEMD_UNIT",
+      value: "carapace-gateway.service",
     },
     {
       platform: "win32" as const,
-      envKey: "OPENCLAW_WINDOWS_TASK_NAME",
-      value: "OpenClaw Gateway",
+      envKey: "CARAPACE_WINDOWS_TASK_NAME",
+      value: "Carapace Gateway",
     },
   ])("rejects a named profile overriding $envKey on $platform", ({ platform, envKey, value }) => {
     const home = "/home/test";
-    const stateDir = path.join(home, ".openclaw-work");
+    const stateDir = path.join(home, ".carapace-work");
     expect(
       isDefaultInstallIdentity(
         {
           HOME: home,
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
           [envKey]: value,
         },
         () => home,
@@ -260,15 +260,15 @@ describe("default install identity", () => {
     "rejects invalid profile %j even when its derived paths match",
     (profile) => {
       const home = "/home/test";
-      const profileStateDir = path.join(home, `.openclaw-${profile}`);
+      const profileStateDir = path.join(home, `.carapace-${profile}`);
 
       expect(
         isDefaultInstallIdentity(
           {
             HOME: home,
-            OPENCLAW_PROFILE: profile,
-            OPENCLAW_STATE_DIR: profileStateDir,
-            OPENCLAW_CONFIG_PATH: path.join(profileStateDir, "openclaw.json"),
+            CARAPACE_PROFILE: profile,
+            CARAPACE_STATE_DIR: profileStateDir,
+            CARAPACE_CONFIG_PATH: path.join(profileStateDir, "carapace.json"),
           },
           () => home,
         ),
@@ -279,11 +279,11 @@ describe("default install identity", () => {
   it.each(["gateway", "node"])(
     "rejects macOS profile %j because its LaunchAgent label is reserved",
     (profile) => {
-      expect(resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: profile }, "darwin")).toBe(
+      expect(resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: profile }, "darwin")).toBe(
         profile,
       );
       expect(
-        resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: profile }, "linux"),
+        resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: profile }, "linux"),
       ).toBeNull();
     },
   );
@@ -291,29 +291,29 @@ describe("default install identity", () => {
   it.each(["Main", "MAIN", "Work"])(
     "rejects mixed-case native service profile %j on case-insensitive platforms",
     (profile) => {
-      expect(resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: profile }, "darwin")).toBe(
+      expect(resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: profile }, "darwin")).toBe(
         profile,
       );
-      expect(resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: profile }, "win32")).toBe(
+      expect(resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: profile }, "win32")).toBe(
         profile,
       );
       expect(
-        resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: profile }, "linux"),
+        resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: profile }, "linux"),
       ).toBeNull();
     },
   );
 
   it("keeps lowercase native service profiles byte-compatible", () => {
-    expect(resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: "main" }, "darwin")).toBeNull();
-    expect(resolveNativeServiceProfileConflict({ OPENCLAW_PROFILE: "main" }, "win32")).toBeNull();
+    expect(resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: "main" }, "darwin")).toBeNull();
+    expect(resolveNativeServiceProfileConflict({ CARAPACE_PROFILE: "main" }, "win32")).toBeNull();
   });
 });
 
 describe("oauth paths", () => {
-  it("prefers OPENCLAW_OAUTH_DIR over OPENCLAW_STATE_DIR", () => {
+  it("prefers CARAPACE_OAUTH_DIR over CARAPACE_STATE_DIR", () => {
     const env = {
-      OPENCLAW_OAUTH_DIR: "/custom/oauth",
-      OPENCLAW_STATE_DIR: "/custom/state",
+      CARAPACE_OAUTH_DIR: "/custom/oauth",
+      CARAPACE_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveOAuthDir(env, "/custom/state")).toBe(path.resolve("/custom/oauth"));
@@ -322,9 +322,9 @@ describe("oauth paths", () => {
     );
   });
 
-  it("derives oauth path from OPENCLAW_STATE_DIR when unset", () => {
+  it("derives oauth path from CARAPACE_STATE_DIR when unset", () => {
     const env = {
-      OPENCLAW_STATE_DIR: "/custom/state",
+      CARAPACE_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveOAuthDir(env, "/custom/state")).toBe(path.join("/custom/state", "credentials"));
@@ -339,11 +339,11 @@ describe("gateway port resolution", () => {
     expect(
       resolveGatewayPort(
         { gateway: { port: 19002 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "19001", OPENCLAW_PROFILE: "work" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "19001", CARAPACE_PROFILE: "work" }),
       ),
     ).toBe(19001);
     expect(
-      resolveGatewayPort({ gateway: { port: 19002 } }, envWith({ OPENCLAW_PROFILE: "work" })),
+      resolveGatewayPort({ gateway: { port: 19002 } }, envWith({ CARAPACE_PROFILE: "work" })),
     ).toBe(19002);
   });
 
@@ -352,7 +352,7 @@ describe("gateway port resolution", () => {
     { profile: "p1402", expected: 55636 },
     { profile: "p2380", expected: 55636 },
   ])("derives the byte-exact profile port for $profile", ({ profile, expected }) => {
-    const port = resolveGatewayPort({}, envWith({ OPENCLAW_PROFILE: profile }));
+    const port = resolveGatewayPort({}, envWith({ CARAPACE_PROFILE: profile }));
     expect(port).toBe(expected);
     expect(port).toBeGreaterThanOrEqual(20000);
     expect(port).toBeLessThan(60000);
@@ -361,7 +361,7 @@ describe("gateway port resolution", () => {
   it.each([undefined, "default", "Default", "../escape"])(
     "keeps the default port for profile %j",
     (profile) => {
-      expect(resolveGatewayPort({}, envWith({ OPENCLAW_PROFILE: profile }))).toBe(
+      expect(resolveGatewayPort({}, envWith({ CARAPACE_PROFILE: profile }))).toBe(
         DEFAULT_GATEWAY_PORT,
       );
     },
@@ -371,7 +371,7 @@ describe("gateway port resolution", () => {
     expect(
       resolveGatewayPort(
         { gateway: { port: 19002 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "127.0.0.1:18789" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "127.0.0.1:18789" }),
       ),
     ).toBe(18789);
   });
@@ -380,7 +380,7 @@ describe("gateway port resolution", () => {
     expect(
       resolveGatewayPort(
         { gateway: { port: 19002 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "[::1]:28789" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "[::1]:28789" }),
       ),
     ).toBe(28789);
   });
@@ -398,85 +398,85 @@ describe("gateway port resolution", () => {
     expect(
       resolveGatewayPort(
         { gateway: { port: 19003 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "127.0.0.1:not-a-port" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "127.0.0.1:not-a-port" }),
       ),
     ).toBe(19003);
   });
 
   it("falls back to config when env ports exceed TCP bounds", () => {
     expect(
-      resolveGatewayPort({ gateway: { port: 19003 } }, envWith({ OPENCLAW_GATEWAY_PORT: "65536" })),
+      resolveGatewayPort({ gateway: { port: 19003 } }, envWith({ CARAPACE_GATEWAY_PORT: "65536" })),
     ).toBe(19003);
     expect(
       resolveGatewayPort(
         { gateway: { port: 19004 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "127.0.0.1:65536" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "127.0.0.1:65536" }),
       ),
     ).toBe(19004);
     expect(
       resolveGatewayPort(
         { gateway: { port: 19005 } },
-        envWith({ OPENCLAW_GATEWAY_PORT: "[::1]:65536" }),
+        envWith({ CARAPACE_GATEWAY_PORT: "[::1]:65536" }),
       ),
     ).toBe(19005);
   });
 
   it("falls back when malformed IPv6 inputs do not provide an explicit port", () => {
     expect(
-      resolveGatewayPort({ gateway: { port: 19003 } }, envWith({ OPENCLAW_GATEWAY_PORT: "::1" })),
+      resolveGatewayPort({ gateway: { port: 19003 } }, envWith({ CARAPACE_GATEWAY_PORT: "::1" })),
     ).toBe(19003);
-    expect(resolveGatewayPort({}, envWith({ OPENCLAW_GATEWAY_PORT: "2001:db8::1" }))).toBe(
+    expect(resolveGatewayPort({}, envWith({ CARAPACE_GATEWAY_PORT: "2001:db8::1" }))).toBe(
       DEFAULT_GATEWAY_PORT,
     );
   });
 
   it("falls back to the default port when env is invalid and config is unset", () => {
-    expect(resolveGatewayPort({}, envWith({ OPENCLAW_GATEWAY_PORT: "127.0.0.1:not-a-port" }))).toBe(
+    expect(resolveGatewayPort({}, envWith({ CARAPACE_GATEWAY_PORT: "127.0.0.1:not-a-port" }))).toBe(
       DEFAULT_GATEWAY_PORT,
     );
   });
 });
 
 describe("state + config path candidates", () => {
-  function expectOpenClawHomeDefaults(env: NodeJS.ProcessEnv): void {
-    const configuredHome = env.OPENCLAW_HOME;
+  function expectCarapaceHomeDefaults(env: NodeJS.ProcessEnv): void {
+    const configuredHome = env.CARAPACE_HOME;
     if (!configuredHome) {
-      throw new Error("OPENCLAW_HOME must be set for this assertion helper");
+      throw new Error("CARAPACE_HOME must be set for this assertion helper");
     }
     const resolvedHome = path.resolve(configuredHome);
-    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".openclaw"));
+    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".carapace"));
 
     const candidates = resolveDefaultConfigCandidates(env);
-    expect(candidates[0]).toBe(path.join(resolvedHome, ".openclaw", "openclaw.json"));
+    expect(candidates[0]).toBe(path.join(resolvedHome, ".carapace", "carapace.json"));
   }
 
-  it("uses OPENCLAW_STATE_DIR when set", () => {
+  it("uses CARAPACE_STATE_DIR when set", () => {
     const env = {
-      OPENCLAW_STATE_DIR: "/new/state",
+      CARAPACE_STATE_DIR: "/new/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveStateDir(env, () => "/home/test")).toBe(path.resolve("/new/state"));
   });
 
-  it("normalizes relative OPENCLAW_STATE_DIR overrides to absolute paths", () => {
+  it("normalizes relative CARAPACE_STATE_DIR overrides to absolute paths", () => {
     const env = {
-      OPENCLAW_STATE_DIR: ".",
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      CARAPACE_STATE_DIR: ".",
+      CARAPACE_HOME: "/srv/carapace-home",
     } as NodeJS.ProcessEnv;
 
     normalizeStateDirEnv(env);
 
-    expect(env.OPENCLAW_STATE_DIR).toBe(path.resolve("."));
+    expect(env.CARAPACE_STATE_DIR).toBe(path.resolve("."));
   });
 
   it("pins a relative state-dir override before later resolution", () => {
     const env = {
-      OPENCLAW_STATE_DIR: "relative-state",
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      CARAPACE_STATE_DIR: "relative-state",
+      CARAPACE_HOME: "/srv/carapace-home",
     } as NodeJS.ProcessEnv;
 
     normalizeStateDirEnv(env);
-    const normalized = env.OPENCLAW_STATE_DIR;
+    const normalized = env.CARAPACE_STATE_DIR;
 
     expect(normalized).toBe(path.resolve("relative-state"));
     expect(resolveStateDir(env, () => "/srv/other-home")).toBe(normalized);
@@ -486,14 +486,14 @@ describe("state + config path candidates", () => {
     const originalConfigPath = CONFIG_PATH;
     const originalNixMode = isNixMode;
     const originalStateDir = STATE_DIR;
-    const selectedStateDir = path.resolve("/tmp/openclaw-selected-runtime-state");
+    const selectedStateDir = path.resolve("/tmp/carapace-selected-runtime-state");
     const selectedConfigPath = path.join(selectedStateDir, "selected.json");
     try {
       const pinned = pinRuntimePaths({
-        OPENCLAW_CONFIG_PATH: selectedConfigPath,
-        OPENCLAW_NIX_MODE: "1",
-        OPENCLAW_STATE_DIR: selectedStateDir,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: selectedConfigPath,
+        CARAPACE_NIX_MODE: "1",
+        CARAPACE_STATE_DIR: selectedStateDir,
+        CARAPACE_TEST_FAST: "1",
       });
 
       expect(pinned).toEqual({
@@ -505,27 +505,27 @@ describe("state + config path candidates", () => {
       expect(STATE_DIR).toBe(selectedStateDir);
     } finally {
       pinRuntimePaths({
-        OPENCLAW_CONFIG_PATH: originalConfigPath,
-        OPENCLAW_NIX_MODE: originalNixMode ? "1" : undefined,
-        OPENCLAW_STATE_DIR: originalStateDir,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: originalConfigPath,
+        CARAPACE_NIX_MODE: originalNixMode ? "1" : undefined,
+        CARAPACE_STATE_DIR: originalStateDir,
+        CARAPACE_TEST_FAST: "1",
       });
     }
   });
 
-  it("uses OPENCLAW_HOME for default state/config locations", () => {
+  it("uses CARAPACE_HOME for default state/config locations", () => {
     const env = {
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      CARAPACE_HOME: "/srv/carapace-home",
     } as NodeJS.ProcessEnv;
-    expectOpenClawHomeDefaults(env);
+    expectCarapaceHomeDefaults(env);
   });
 
-  it("prefers OPENCLAW_HOME over HOME for default state/config locations", () => {
+  it("prefers CARAPACE_HOME over HOME for default state/config locations", () => {
     const env = {
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      CARAPACE_HOME: "/srv/carapace-home",
       HOME: "/home/other",
     } as NodeJS.ProcessEnv;
-    expectOpenClawHomeDefaults(env);
+    expectCarapaceHomeDefaults(env);
   });
 
   it("orders default config candidates in a stable order", () => {
@@ -533,25 +533,25 @@ describe("state + config path candidates", () => {
     const resolvedHome = path.resolve(home);
     const candidates = resolveDefaultConfigCandidates({} as NodeJS.ProcessEnv, () => home);
     const expected = [
-      path.join(resolvedHome, ".openclaw", "openclaw.json"),
-      path.join(resolvedHome, ".openclaw", "clawdbot.json"),
-      path.join(resolvedHome, ".clawdbot", "openclaw.json"),
+      path.join(resolvedHome, ".carapace", "carapace.json"),
+      path.join(resolvedHome, ".carapace", "clawdbot.json"),
+      path.join(resolvedHome, ".clawdbot", "carapace.json"),
       path.join(resolvedHome, ".clawdbot", "clawdbot.json"),
     ];
     expect(candidates).toEqual(expected);
   });
 
-  it("prefers ~/.openclaw when it exists and legacy dir is missing", async () => {
-    await withTestDir({ prefix: "openclaw-state-" }, async (root) => {
-      const newDir = path.join(root, ".openclaw");
+  it("prefers ~/.carapace when it exists and legacy dir is missing", async () => {
+    await withTestDir({ prefix: "carapace-state-" }, async (root) => {
+      const newDir = path.join(root, ".carapace");
       await fs.mkdir(newDir, { recursive: true });
       const resolved = resolveStateDir({} as NodeJS.ProcessEnv, () => root);
       expect(resolved).toBe(newDir);
     });
   });
 
-  it("falls back to existing legacy state dir when ~/.openclaw is missing", async () => {
-    await withTestDir({ prefix: "openclaw-state-legacy-" }, async (root) => {
+  it("falls back to existing legacy state dir when ~/.carapace is missing", async () => {
+    await withTestDir({ prefix: "carapace-state-legacy-" }, async (root) => {
       const legacyDir = path.join(root, ".clawdbot");
       await fs.mkdir(legacyDir, { recursive: true });
       const resolved = resolveStateDir({} as NodeJS.ProcessEnv, () => root);
@@ -560,10 +560,10 @@ describe("state + config path candidates", () => {
   });
 
   it("CONFIG_PATH prefers existing config when present", async () => {
-    await withTestDir({ prefix: "openclaw-config-" }, async (root) => {
-      const legacyDir = path.join(root, ".openclaw");
+    await withTestDir({ prefix: "carapace-config-" }, async (root) => {
+      const legacyDir = path.join(root, ".carapace");
       await fs.mkdir(legacyDir, { recursive: true });
-      const legacyPath = path.join(legacyDir, "openclaw.json");
+      const legacyPath = path.join(legacyDir, "carapace.json");
       await fs.writeFile(legacyPath, "{}", "utf-8");
 
       const resolved = resolveConfigPathCandidate({} as NodeJS.ProcessEnv, () => root);
@@ -580,7 +580,7 @@ describe("state + config path candidates", () => {
     const configPath = path.join(home, "selected.json");
     const exists = vi.spyOn(fsSync, "existsSync").mockReturnValue(false);
     try {
-      expect(resolve({ HOME: home, OPENCLAW_CONFIG_PATH: configPath })).toBe(configPath);
+      expect(resolve({ HOME: home, CARAPACE_CONFIG_PATH: configPath })).toBe(configPath);
       expect(exists).not.toHaveBeenCalled();
     } finally {
       exists.mockRestore();
@@ -588,16 +588,16 @@ describe("state + config path candidates", () => {
   });
 
   it("respects state dir overrides when config is missing", async () => {
-    await withTestDir({ prefix: "openclaw-config-override-" }, async (root) => {
-      const legacyDir = path.join(root, ".openclaw");
+    await withTestDir({ prefix: "carapace-config-override-" }, async (root) => {
+      const legacyDir = path.join(root, ".carapace");
       await fs.mkdir(legacyDir, { recursive: true });
-      const legacyConfig = path.join(legacyDir, "openclaw.json");
+      const legacyConfig = path.join(legacyDir, "carapace.json");
       await fs.writeFile(legacyConfig, "{}", "utf-8");
 
       const overrideDir = path.join(root, "override");
-      const env = { OPENCLAW_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
+      const env = { CARAPACE_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
       const resolved = resolveConfigPath(env, overrideDir, () => root);
-      expect(resolved).toBe(path.join(overrideDir, "openclaw.json"));
+      expect(resolved).toBe(path.join(overrideDir, "carapace.json"));
     });
   });
 });
@@ -605,32 +605,32 @@ describe("state + config path candidates", () => {
 describe("resolveIncludeRoots", () => {
   const HOME = path.parse(process.cwd()).root + "fakehome";
 
-  it("returns an empty list when OPENCLAW_INCLUDE_ROOTS is unset or blank", () => {
+  it("returns an empty list when CARAPACE_INCLUDE_ROOTS is unset or blank", () => {
     expect(resolveIncludeRoots(envWith({}), () => HOME)).toStrictEqual([]);
-    expect(resolveIncludeRoots(envWith({ OPENCLAW_INCLUDE_ROOTS: "" }), () => HOME)).toStrictEqual(
+    expect(resolveIncludeRoots(envWith({ CARAPACE_INCLUDE_ROOTS: "" }), () => HOME)).toStrictEqual(
       [],
     );
     expect(
-      resolveIncludeRoots(envWith({ OPENCLAW_INCLUDE_ROOTS: "   " }), () => HOME),
+      resolveIncludeRoots(envWith({ CARAPACE_INCLUDE_ROOTS: "   " }), () => HOME),
     ).toStrictEqual([]);
   });
 
   it("splits on the platform path delimiter and resolves each entry to an absolute path", () => {
     const a = path.resolve(path.parse(process.cwd()).root, "shared", "a");
     const b = path.resolve(path.parse(process.cwd()).root, "shared", "b");
-    const env = envWith({ OPENCLAW_INCLUDE_ROOTS: [a, b].join(path.delimiter) });
+    const env = envWith({ CARAPACE_INCLUDE_ROOTS: [a, b].join(path.delimiter) });
     expect(resolveIncludeRoots(env, () => HOME)).toEqual([a, b]);
   });
 
   it("expands a leading tilde in each entry using the resolved home dir", () => {
-    const env = envWith({ OPENCLAW_INCLUDE_ROOTS: "~/share/openclaw" });
-    expect(resolveIncludeRoots(env, () => HOME)).toEqual([path.join(HOME, "share", "openclaw")]);
+    const env = envWith({ CARAPACE_INCLUDE_ROOTS: "~/share/carapace" });
+    expect(resolveIncludeRoots(env, () => HOME)).toEqual([path.join(HOME, "share", "carapace")]);
   });
 
   it("drops empty entries and preserves de-duplicated order for repeated roots", () => {
     const a = path.resolve(path.parse(process.cwd()).root, "shared", "a");
     const env = envWith({
-      OPENCLAW_INCLUDE_ROOTS: ["", a, "  ", a].join(path.delimiter),
+      CARAPACE_INCLUDE_ROOTS: ["", a, "  ", a].join(path.delimiter),
     });
     expect(resolveIncludeRoots(env, () => HOME)).toEqual([a]);
   });

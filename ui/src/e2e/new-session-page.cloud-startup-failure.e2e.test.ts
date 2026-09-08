@@ -281,7 +281,7 @@ suite.define(() => {
                 {
                   role: "user",
                   content: [{ type: "text", text: message }],
-                  __openclaw: { idempotencyKey: `${messageId}:user` },
+                  __carapace: { idempotencyKey: `${messageId}:user` },
                 },
               ]
             : [],
@@ -300,7 +300,7 @@ suite.define(() => {
         const composer = page.locator(".agent-chat__composer-combobox textarea");
         await expect.poll(() => composer.isDisabled()).toBe(false);
         const owner = await page.evaluate(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: { context: ApplicationContext };
           };
           const { gateway: appGateway } = app.runtime.context;

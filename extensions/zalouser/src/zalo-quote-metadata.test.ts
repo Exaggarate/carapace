@@ -2,13 +2,13 @@
 import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { API, Message } from "./zca-client.js";
 
@@ -58,7 +58,7 @@ async function withStoredSession<T>(params: {
   api: API;
   run: () => Promise<T>;
 }): Promise<T> {
-  const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-message-"));
+  const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-message-"));
   saveStoredZaloCredentials(
     params.profile,
     {
@@ -67,11 +67,11 @@ async function withStoredSession<T>(params: {
       userAgent: "test-agent",
       createdAt: new Date().toISOString(),
     },
-    { OPENCLAW_STATE_DIR: stateDir },
+    { CARAPACE_STATE_DIR: stateDir },
   );
   createZaloMock.mockResolvedValueOnce({ login: vi.fn(async () => params.api) });
   try {
-    return await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, params.run);
+    return await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, params.run);
   } finally {
     // Listener and send paths leave the shared state database open under the temporary
     // state dir, so it must be released before removal or Windows keeps the files locked

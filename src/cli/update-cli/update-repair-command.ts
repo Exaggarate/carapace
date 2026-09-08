@@ -16,8 +16,8 @@ import {
 } from "../../infra/update-run-ledger.js";
 import type { UpdateRunRecord } from "../../infra/update-run-record.js";
 import { defaultRuntime } from "../../runtime.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../../state/openclaw-state-ownership.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../../state/carapace-state-ownership.js";
 import {
   confirmGatewayReachable,
   resolveGatewayRestartProbeContext,
@@ -84,8 +84,8 @@ export async function updateRepairCommand(opts: UpdateFinalizeOptions): Promise<
   const env = resolveServiceRefreshEnv(process.env, tryResolveInvocationCwd());
   const options = { env };
   assertConfigWriteAllowedInCurrentMode({ env });
-  await assertOpenClawStateWriteAllowedAtPath({
-    databasePath: resolveOpenClawStateSqlitePath(env),
+  await assertCarapaceStateWriteAllowedAtPath({
+    databasePath: resolveCarapaceStateSqlitePath(env),
     env,
     recoverOrphanedSidecars: false,
   });

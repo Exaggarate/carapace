@@ -26,18 +26,18 @@ let fetchImage: ReturnType<typeof vi.fn>;
 
 async function renderLightbox() {
   render(
-    html`<openclaw-image-lightbox
+    html`<carapace-image-lightbox
       src="data:image/png;base64,cG5n"
       .imageTitle=${"Generated lobster"}
-    ></openclaw-image-lightbox>`,
+    ></carapace-image-lightbox>`,
     container,
   );
-  const modal = container.querySelector("openclaw-image-lightbox");
+  const modal = container.querySelector("carapace-image-lightbox");
   if (!modal) {
     throw new Error("missing image lightbox");
   }
   await modal.updateComplete;
-  const dialogAdapter = modal.shadowRoot?.querySelector("openclaw-modal-dialog");
+  const dialogAdapter = modal.shadowRoot?.querySelector("carapace-modal-dialog");
   if (!dialogAdapter) {
     throw new Error("missing modal dialog adapter");
   }
@@ -45,7 +45,7 @@ async function renderLightbox() {
   return { modal, dialogAdapter };
 }
 
-describe("openclaw-image-lightbox", () => {
+describe("carapace-image-lightbox", () => {
   beforeEach(() => {
     restoreDialogPolyfill = installDialogPolyfill();
     createObjectUrl = vi.fn(() => "blob:lightbox-original");
@@ -94,15 +94,15 @@ describe("openclaw-image-lightbox", () => {
 
   it("renders video in the shared overlay without image zoom controls", async () => {
     render(
-      html`<openclaw-image-lightbox
+      html`<carapace-image-lightbox
         mediaKind="video"
         src="https://example.com/demo.mp4?playback=1"
         originalSrc="https://example.com/demo.mp4"
         .imageTitle=${"Demo clip"}
-      ></openclaw-image-lightbox>`,
+      ></carapace-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("carapace-image-lightbox");
     if (!modal) {
       throw new Error("missing media lightbox");
     }
@@ -138,13 +138,13 @@ describe("openclaw-image-lightbox", () => {
       blob: async () => new Blob(["png"], { type: "image/png;charset=utf-8" }),
     });
     render(
-      html`<openclaw-image-lightbox
+      html`<carapace-image-lightbox
         src="data:image/png;charset=utf-8;base64,cG5n"
         .imageTitle=${"Generated lobster"}
-      ></openclaw-image-lightbox>`,
+      ></carapace-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("carapace-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }
@@ -171,13 +171,13 @@ describe("openclaw-image-lightbox", () => {
 
   it("omits the original action for active data image formats", async () => {
     render(
-      html`<openclaw-image-lightbox
+      html`<carapace-image-lightbox
         src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'></svg>"
         .imageTitle=${"Untrusted SVG"}
-      ></openclaw-image-lightbox>`,
+      ></carapace-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("carapace-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }
@@ -193,13 +193,13 @@ describe("openclaw-image-lightbox", () => {
       blob: async () => new Blob(["svg"], { type: "image/svg+xml" }),
     });
     render(
-      html`<openclaw-image-lightbox
+      html`<carapace-image-lightbox
         src="blob:untrusted-svg"
         .imageTitle=${"Untrusted SVG"}
-      ></openclaw-image-lightbox>`,
+      ></carapace-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("carapace-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }
@@ -212,13 +212,13 @@ describe("openclaw-image-lightbox", () => {
 
   it("keeps the original action for inert blob image formats", async () => {
     render(
-      html`<openclaw-image-lightbox
+      html`<carapace-image-lightbox
         src="blob:safe-png"
         .imageTitle=${"Safe PNG"}
-      ></openclaw-image-lightbox>`,
+      ></carapace-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("carapace-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }

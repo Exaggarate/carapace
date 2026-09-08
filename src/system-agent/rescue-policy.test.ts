@@ -1,9 +1,9 @@
-// OpenClaw rescue policy tests cover eligibility and safety decisions.
+// Carapace rescue policy tests cover eligibility and safety decisions.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSystemAgentRescuePolicy } from "./rescue-policy.js";
 
-function decide(cfg: OpenClawConfig, overrides = {}) {
+function decide(cfg: CarapaceConfig, overrides = {}) {
   return resolveSystemAgentRescuePolicy({
     cfg,
     senderIsOwner: true,

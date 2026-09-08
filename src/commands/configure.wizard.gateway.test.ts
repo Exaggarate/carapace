@@ -1,7 +1,7 @@
 // Configure wizard Gateway tests cover run-mode probes, auth routing, and cancellation.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { ExitError, type RuntimeEnv } from "../runtime.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { withMockedPlatform } from "../test-utils/vitest-spies.js";
@@ -52,15 +52,15 @@ describe("runConfigureWizard", () => {
     setupBaseWizardState();
     queueWizardPrompts({ select: ["local", "configure"], confirm: [] });
     const events: string[] = [];
-    mocks.promptAuthConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.promptAuthConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("model");
       return cfg;
     });
-    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("gateway");
       return { config: cfg, port: 18789 };
     });
-    mocks.setupChannels.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.setupChannels.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("channels");
       return cfg;
     });
@@ -84,15 +84,15 @@ describe("runConfigureWizard", () => {
       confirm: [],
     });
     const events: string[] = [];
-    mocks.promptAuthConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.promptAuthConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("model");
       return cfg;
     });
-    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("gateway");
       return { config: cfg, port: 18789 };
     });
-    mocks.setupChannels.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.setupChannels.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("channels");
       return cfg;
     });
@@ -112,7 +112,7 @@ describe("runConfigureWizard", () => {
     setupBaseWizardState();
     queueWizardPrompts({ select: ["local"], confirm: [] });
     const events: string[] = [];
-    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => {
+    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => {
       events.push("gateway");
       return { config: cfg, port: 18991 };
     });
@@ -226,7 +226,7 @@ describe("runConfigureWizard", () => {
 
   it("keeps remote password health when the configured token ref is unresolved", async () => {
     const remotePassword = "remote-password"; // pragma: allowlist secret
-    const remoteConfig: OpenClawConfig = {
+    const remoteConfig: CarapaceConfig = {
       gateway: {
         mode: "remote",
         remote: {
@@ -282,7 +282,7 @@ describe("runConfigureWizard", () => {
   });
 
   it("skips remote health when a configured SecretRef is unresolved", async () => {
-    const unresolvedConfig: OpenClawConfig = {
+    const unresolvedConfig: CarapaceConfig = {
       gateway: {
         mode: "remote",
         remote: {
@@ -295,7 +295,7 @@ describe("runConfigureWizard", () => {
     setupBaseWizardState(unresolvedConfig);
     queueWizardPrompts({ select: ["remote"], confirm: [] });
     mocks.promptRemoteGatewayConfig.mockResolvedValueOnce(unresolvedConfig);
-    await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "ambient-password" }, async () => {
+    await withEnvAsync({ CARAPACE_GATEWAY_PASSWORD: "ambient-password" }, async () => {
       await runConfigureWizard({ command: "configure", sections: ["health"] }, createRuntime());
     });
 
@@ -330,7 +330,7 @@ describe("runConfigureWizard", () => {
   });
 
   it("persists edge auth returned by the shared remote Gateway prompt", async () => {
-    const remoteConfig: OpenClawConfig = {
+    const remoteConfig: CarapaceConfig = {
       gateway: {
         mode: "remote",
         remote: {
@@ -364,7 +364,7 @@ describe("runConfigureWizard", () => {
           },
         },
       });
-      await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "env-password" }, async () => {
+      await withEnvAsync({ CARAPACE_GATEWAY_PASSWORD: "env-password" }, async () => {
         await runConfigureWizard({ command: "configure", sections: ["gateway"] }, createRuntime());
       });
 
@@ -399,13 +399,13 @@ describe("runConfigureWizard", () => {
         auth: { token: "configured-token", password: "configured-password" },
       },
     });
-    process.env.OPENCLAW_GATEWAY_TOKEN = "";
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "";
+    process.env.CARAPACE_GATEWAY_TOKEN = "";
+    process.env.CARAPACE_GATEWAY_PASSWORD = "";
     try {
       await runConfigureWizard({ command: "configure", sections: ["gateway"] }, createRuntime());
     } finally {
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
-      delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+      delete process.env.CARAPACE_GATEWAY_TOKEN;
+      delete process.env.CARAPACE_GATEWAY_PASSWORD;
     }
 
     const probeRequests = mocks.probeGatewayReachable.mock.calls.map(([request]) =>
@@ -430,7 +430,7 @@ describe("runConfigureWizard", () => {
     maybeInstallDaemon.mockResolvedValueOnce("succeeded");
 
     await withEnvAsync(
-      { OPENCLAW_GATEWAY_TOKEN: "ambient-token", WIZARD_GATEWAY_TOKEN: "configured-token" },
+      { CARAPACE_GATEWAY_TOKEN: "ambient-token", WIZARD_GATEWAY_TOKEN: "configured-token" },
       () =>
         runConfigureWizard(
           { command: "configure", sections: ["gateway", "daemon", "health"] },
@@ -469,7 +469,7 @@ describe("runConfigureWizard", () => {
     });
     queueWizardPrompts({ select: ["local"], confirm: [] });
 
-    await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "ambient-password" }, () =>
+    await withEnvAsync({ CARAPACE_GATEWAY_PASSWORD: "ambient-password" }, () =>
       runConfigureWizard(
         { command: "configure", sections: ["gateway", "health"] },
         createRuntime(),
@@ -499,7 +499,7 @@ describe("runConfigureWizard", () => {
       gateway: { mode: "local", auth: { mode: "password", password: "previous-password" } },
     });
     queueWizardPrompts({ select: ["local"], confirm: [] });
-    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: OpenClawConfig) => ({
+    mocks.promptGatewayConfig.mockImplementationOnce(async (cfg: CarapaceConfig) => ({
       config: {
         ...cfg,
         gateway: {
@@ -513,7 +513,7 @@ describe("runConfigureWizard", () => {
       port: 18789,
     }));
 
-    await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "ambient-password" }, () =>
+    await withEnvAsync({ CARAPACE_GATEWAY_PASSWORD: "ambient-password" }, () =>
       runConfigureWizard({ command: "configure", sections: ["gateway"] }, createRuntime()),
     );
 
@@ -668,7 +668,7 @@ describe("runConfigureWizard", () => {
       [
         "Remote Gateway:",
         "wss://gateway.example.test",
-        "Docs: https://docs.openclaw.ai/gateway/remote",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Gateway",
     );

@@ -1,10 +1,10 @@
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 /**
  * Regression coverage for model catalog browsing.
  * Verifies filtered catalog output and pending load behavior.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildProviderConfigModelCatalogForBrowse,
   loadPreparedModelCatalogSnapshotForBrowse,
@@ -22,7 +22,7 @@ const fullCatalog: ModelCatalogSnapshot = {
   routeVariants: [{ id: "gpt-full", name: "GPT Full", provider: "openai" }],
 };
 
-function config(params: { providerWildcard?: boolean } = {}): OpenClawConfig {
+function config(params: { providerWildcard?: boolean } = {}): CarapaceConfig {
   return {
     agents: params.providerWildcard
       ? {
@@ -33,7 +33,7 @@ function config(params: { providerWildcard?: boolean } = {}): OpenClawConfig {
           },
         }
       : undefined,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("loadPreparedModelCatalogSnapshotForBrowse", () => {
@@ -180,7 +180,7 @@ describe("loadPreparedModelCatalogSnapshotForBrowse", () => {
         defaults: { modelPolicy: { allow: ["openai/gpt-5.6"] } },
         list: [{ id: "research", modelPolicy: { allow: ["litellm/*"] } }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       loadPreparedModelCatalogSnapshotForBrowse({
@@ -206,7 +206,7 @@ describe("loadPreparedModelCatalogSnapshotForBrowse", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(loadPreparedModelCatalogSnapshotForBrowse({ cfg, loadCatalog })).resolves.toBe(
       readOnlyCatalog,
@@ -234,7 +234,7 @@ describe("loadPreparedModelCatalogSnapshotForBrowse", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(buildProviderConfigModelCatalogForBrowse({ cfg })).toMatchObject([
       { provider: "openai", id: "one", name: "One" },

@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
 import {
   createAgentHarnessHostCapabilitiesForTest,
   createMockPluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
-import type { PluginHookToolContext } from "openclaw/plugin-sdk/types";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
+import type { PluginHookToolContext } from "carapace/plugin-sdk/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerRuntimeOptions } from "./config.js";
 import type { CodexModelListResponse } from "./protocol.js";
@@ -22,8 +22,8 @@ import {
 import { createIsolatedCodexAppServerClient } from "./shared-client.js";
 
 const LIVE =
-  process.env.OPENCLAW_LIVE_TEST === "1" &&
-  process.env.OPENCLAW_LIVE_CODEX_APPROVAL_REQUESTER === "1";
+  process.env.CARAPACE_LIVE_TEST === "1" &&
+  process.env.CARAPACE_LIVE_CODEX_APPROVAL_REQUESTER === "1";
 const describeLive = LIVE ? describe : describe.skip;
 
 afterEach(() => {
@@ -33,12 +33,12 @@ afterEach(() => {
 
 describeLive("Codex app-server approval requester real-binary bridge", () => {
   it("runs owner-gated apply_patch under default yolo without approval requests", async () => {
-    await withTempDir("openclaw-codex-approval-requester-", async (root) => {
+    await withTempDir("carapace-codex-approval-requester-", async (root) => {
       const workspace = path.join(root, "workspace");
       const agentDir = path.join(root, "agent");
       const target = path.join(workspace, "memory", "real-binary-owner.md");
       await fs.mkdir(path.dirname(target), { recursive: true });
-      vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
+      vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
 
       const runtime = resolveCodexAppServerRuntimeOptions({
         pluginConfig: { appServer: { homeScope: "user" } },

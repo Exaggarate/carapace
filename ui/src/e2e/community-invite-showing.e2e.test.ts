@@ -24,8 +24,8 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const STORAGE_KEY = "openclaw:control-ui:community-invite";
-const captureVideo = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const STORAGE_KEY = "carapace:control-ui:community-invite";
+const captureVideo = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 async function traceInviteMounts(page: Page) {
   await page.addInitScript(() => {
@@ -57,7 +57,7 @@ async function traceInviteMounts(page: Page) {
 
 async function waitForInvitePolicy(page: Page, enabled: boolean) {
   await page.waitForFunction((expected) => {
-    const app = document.querySelector("openclaw-app") as
+    const app = document.querySelector("carapace-app") as
       | (HTMLElement & {
           runtime?: {
             context: {
@@ -97,12 +97,12 @@ suite.define(() => {
     const page = await context.newPage();
     await page.addInitScript(() => {
       const observer = new MutationObserver(() => {
-        const app = document.querySelector("openclaw-app") as
+        const app = document.querySelector("carapace-app") as
           | (HTMLElement & {
               runtime?: { context: { config: { current: { communityInvite: boolean } } } };
             })
           | null;
-        const sidebar = document.querySelector("openclaw-app-sidebar") as
+        const sidebar = document.querySelector("carapace-app-sidebar") as
           | (HTMLElement & { updateComplete: Promise<unknown> })
           | null;
         const row = sidebar?.querySelector(".sidebar-recent-session__link");
@@ -270,7 +270,7 @@ suite.define(() => {
               await showMore.click();
             }
             await expect.poll(() => page.locator(".sidebar-recent-session").count()).toBe(13);
-            const sidebar = page.locator("openclaw-app-sidebar");
+            const sidebar = page.locator("carapace-app-sidebar");
             const row = page.locator(
               '.sidebar-recent-session[data-session-key="agent:main:session-10"]',
             );
@@ -334,7 +334,7 @@ suite.define(() => {
                 await menu.click();
               }
               await page.getByRole("menuitem", { name: "Move to group" }).waitFor();
-              await page.locator("openclaw-session-menu wa-dropdown-item:focus").waitFor();
+              await page.locator("carapace-session-menu wa-dropdown-item:focus").waitFor();
               // A background render must not admit new geometry while a popover owns focus.
               await gateway.emitGatewayEvent("presence", { presence: [] });
               await settleSidebarIdleWork(page);
@@ -426,7 +426,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}chat/main`);
       await page.locator(".sidebar-shell__footer").waitFor();
       const card = page.locator(".community-invite-card");
-      await page.waitForFunction(() => Boolean(customElements.get("openclaw-lobster-pet")));
+      await page.waitForFunction(() => Boolean(customElements.get("carapace-lobster-pet")));
       await settleSidebarIdleWork(page);
       expect(await card.count()).toBe(0);
       expect(await mountedInvites()).toBe(0);
@@ -441,7 +441,7 @@ suite.define(() => {
       expect(await mountedInvites()).toBe(0);
       expect(imageRequests).toEqual([]);
       expect(await page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBeNull();
-      const pet = page.locator("openclaw-lobster-pet");
+      const pet = page.locator("carapace-lobster-pet");
       const footer = page.locator(".sidebar-shell__footer");
       const petBox = await pet.boundingBox();
       const footerBox = await footer.boundingBox();
@@ -522,7 +522,7 @@ suite.define(() => {
       });
 
       await page.reload();
-      await page.locator("openclaw-app-sidebar").waitFor();
+      await page.locator("carapace-app-sidebar").waitFor();
       expect(await card.count()).toBe(0);
 
       const otherGatewayPage = await context.newPage();
@@ -532,12 +532,12 @@ suite.define(() => {
         gatewayUrl: "ws://127.0.0.1:29991/another-gateway",
       }).toString();
       await otherGatewayPage.goto(otherGatewayUrl.href);
-      const confirmation = otherGatewayPage.locator("openclaw-gateway-url-confirmation");
+      const confirmation = otherGatewayPage.locator("carapace-gateway-url-confirmation");
       await confirmation.waitFor({ state: "visible" });
       await confirmation
         .getByRole("button", { name: "Switch to 127.0.0.1:29991", exact: true })
         .click();
-      await otherGatewayPage.locator("openclaw-app-sidebar").waitFor();
+      await otherGatewayPage.locator("carapace-app-sidebar").waitFor();
       expect(await otherGatewayPage.locator(".community-invite-card").count()).toBe(0);
     } finally {
       await context.close();

@@ -1,5 +1,5 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { CHECK_IDS } from "./check-ids.js";
 import { ocPathSegment } from "./utils.js";
 

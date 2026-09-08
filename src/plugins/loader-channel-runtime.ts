@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { describeRootFileOpenFailure, openRootFileSync } from "../infra/boundary-file-read.js";
 import type { NormalizedPluginsConfig } from "./config-state.js";
 import {
@@ -17,7 +17,7 @@ import type { PluginManifestRecord } from "./manifest-registry.js";
 import { withProfile } from "./plugin-load-profile.js";
 import { resolvePluginRuntimeExecutionArtifact } from "./plugin-runtime-artifact-selection.js";
 import type { createPluginRegistry, PluginRecord } from "./registry.js";
-import type { OpenClawPluginModule, PluginLogger } from "./types.js";
+import type { CarapacePluginModule, PluginLogger } from "./types.js";
 
 type PluginRegistryBuilder = ReturnType<typeof createPluginRegistry>;
 
@@ -26,7 +26,7 @@ type PluginRegistryBuilder = ReturnType<typeof createPluginRegistry>;
  * Returns true when the candidate is complete (loaded, disabled, or failed).
  */
 export function loadSetupRuntimeChannelCandidate(params: {
-  mod: OpenClawPluginModule | null;
+  mod: CarapacePluginModule | null;
   manifestRecord: PluginManifestRecord;
   record: PluginRecord;
   registrationPlan: PluginRegistrationPlan;
@@ -35,7 +35,7 @@ export function loadSetupRuntimeChannelCandidate(params: {
   rejectHardlinks: boolean;
   loadPluginModule: PluginModuleLoader;
   registryBuilder: PluginRegistryBuilder;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: NormalizedPluginsConfig["entries"][string] | undefined;
   seenIds: Map<string, PluginRecord["origin"]>;
   logger: PluginLogger;
@@ -114,12 +114,12 @@ export function loadSetupRuntimeChannelCandidate(params: {
     }
     const safeRuntimeSource = runtimeOpened.path;
     fs.closeSync(runtimeOpened.fd);
-    let runtimeMod: OpenClawPluginModule | null;
+    let runtimeMod: CarapacePluginModule | null;
     try {
       runtimeMod = withProfile(
         { pluginId: record.id, source: safeRuntimeSource },
         "load-setup-runtime-entry",
-        () => params.loadPluginModule(safeRuntimeSource) as OpenClawPluginModule,
+        () => params.loadPluginModule(safeRuntimeSource) as CarapacePluginModule,
       );
     } catch (error) {
       recordSetupFailure(error, "load", "failed to load setup-runtime entry");

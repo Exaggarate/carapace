@@ -4,7 +4,7 @@
  * repeated env/profile/plugin discovery on hot paths.
  */
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { restorePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { withPluginRuntimeGenerationScope } from "../plugins/runtime/generation-scope.js";
@@ -58,13 +58,13 @@ import { resolveDefaultAgentWorkspaceDir } from "./workspace.js";
 
 const PROVIDER_AUTH_WARM_WORKER_TIMEOUT_MS = 120_000;
 
-const configFingerprintCache = new WeakMap<OpenClawConfig, string>();
+const configFingerprintCache = new WeakMap<CarapaceConfig, string>();
 /** Clears process-current warmed provider auth state. */
 export { clearCurrentProviderAuthState };
 
 function resolvePreparedStateForCaller(params: {
   states: ReadonlyMap<string, PreparedProviderAuthState> | null;
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   callerAgentId: string | undefined;
 }): PreparedProviderAuthState | null {
   if (!params.states) {
@@ -80,7 +80,7 @@ function resolvePreparedStateForCaller(params: {
   return params.states.get(resolveDefaultAgentId(params.cfg)) ?? null;
 }
 
-function resolveProviderAuthConfigFingerprint(cfg: OpenClawConfig | undefined): string | null {
+function resolveProviderAuthConfigFingerprint(cfg: CarapaceConfig | undefined): string | null {
   if (!cfg) {
     return null;
   }
@@ -97,7 +97,7 @@ function resolveProviderAuthConfigFingerprint(cfg: OpenClawConfig | undefined): 
 export async function hasAuthForModelProvider(params: {
   provider: string;
   modelApi?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   agentDir?: string;
   agentId?: string;
@@ -213,7 +213,7 @@ export type ProviderModelAuthChecker = ((
 
 /** Creates a cached provider-auth evaluator bound to one agent/runtime context. */
 export function createProviderAuthChecker(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   agentDir?: string;
   agentId?: string;
@@ -275,7 +275,7 @@ export function createProviderAuthChecker(params: {
       ref.baseUrl !== undefined ||
       ref.observedRoutes !== undefined;
     const cacheKey = hasRouteFacts
-      ? `${key}\0${hashRuntimeConfigValue(ref as unknown as OpenClawConfig)}`
+      ? `${key}\0${hashRuntimeConfigValue(ref as unknown as CarapaceConfig)}`
       : key;
     const cached = authCache.get(cacheKey);
     if (cached) {
@@ -345,7 +345,7 @@ function serializeProviderAuthStates(
 }
 
 function resolveProviderConfigApi(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   provider: string,
 ): string | undefined {
   const providers = cfg?.models?.providers ?? {};
@@ -361,7 +361,7 @@ function resolveProviderConfigApi(
 }
 
 function shouldOmitFalsePreparedAuthForProcessSyntheticProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   runtimeAuthLookup: RuntimeProviderAuthLookup;
 }): boolean {
@@ -378,7 +378,7 @@ function shouldOmitFalsePreparedAuthForProcessSyntheticProvider(params: {
 
 /** Builds a provider auth snapshot for every configured agent. */
 export async function buildCurrentProviderAuthStateSnapshot(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: {
     isCancelled?: () => boolean;
     readOnlyAuthStore?: boolean;
@@ -516,7 +516,7 @@ function createProviderAuthWarmPresenceStore(store: AuthProfileStore): AuthProfi
 }
 
 function collectProviderAuthWarmRuntimeAuthStores(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): ProviderAuthWarmRuntimeAuthStore[] {
   const entries: ProviderAuthWarmRuntimeAuthStore[] = [];
   const seen = new Set<string | undefined>();
@@ -542,7 +542,7 @@ function collectProviderAuthWarmRuntimeAuthStores(
   return entries;
 }
 
-function collectProviderAuthWarmRuntimeAuthLookups(cfg: OpenClawConfig): {
+function collectProviderAuthWarmRuntimeAuthLookups(cfg: CarapaceConfig): {
   entries: ProviderAuthWarmRuntimeAuthLookup[];
   omitFalseProviderAuth: boolean;
 } {
@@ -563,7 +563,7 @@ function collectProviderAuthWarmRuntimeAuthLookups(cfg: OpenClawConfig): {
 
 /** Warms process-current provider auth state in a worker thread. */
 export async function warmCurrentProviderAuthStateOffMainThread(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: {
     isCancelled?: () => boolean;
     timeoutMs?: number;

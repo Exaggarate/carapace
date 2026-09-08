@@ -2,8 +2,8 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { cancelBackgroundExecSession } from "../../agents/bash-process-control.js";
 import {
@@ -15,7 +15,7 @@ import { renderExecExitLabel } from "../../agents/bash-tools.exec-output.js";
 import { createExecTool } from "../../agents/bash-tools.js";
 import { resolveSandboxRuntimeStatus } from "../../agents/sandbox.js";
 import { isCommandFlagEnabled } from "../../config/commands.flags.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { clampInt } from "../../utils.js";
@@ -48,7 +48,7 @@ type ActiveBashJob =
 
 let activeJob: ActiveBashJob | null = null;
 
-function resolveForegroundMs(cfg: OpenClawConfig): number {
+function resolveForegroundMs(cfg: CarapaceConfig): number {
   const raw = cfg.commands?.bashForegroundMs;
   if (typeof raw !== "number" || Number.isNaN(raw)) {
     return DEFAULT_FOREGROUND_MS;
@@ -112,7 +112,7 @@ function parseBashRequest(raw: string): BashRequest | null {
 
 function resolveRawCommandBody(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   isGroup: boolean;
 }) {
@@ -169,7 +169,7 @@ function buildUsageReply(): ReplyPayload {
 /** Parses, authorizes, starts, polls, or stops chat-driven bash commands. */
 export async function handleBashChatCommand(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   isGroup: boolean;
@@ -183,7 +183,7 @@ export async function handleBashChatCommand(params: {
     return buildDisabledCommandReply({
       label: "bash",
       configKey: "bash",
-      docsUrl: "https://docs.openclaw.ai/tools/slash-commands#config",
+      docsUrl: "https://github.com/Exaggarate/carapace#config",
     });
   }
 

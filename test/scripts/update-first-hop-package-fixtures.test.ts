@@ -22,11 +22,11 @@ function writeJson(filePath: string, value: unknown) {
 }
 
 function makePackageFixture() {
-  const root = tempDirs.make("openclaw-first-hop-package-");
+  const root = tempDirs.make("carapace-first-hop-package-");
   writeJson(path.join(root, "package.json"), {
-    name: "openclaw",
+    name: "carapace",
     version: "2026.8.1",
-    dependencies: { "@openclaw/ai": "2026.8.1" },
+    dependencies: { "@carapace/ai": "2026.8.1" },
   });
   writeJson(path.join(root, "dist", "build-info.json"), {
     version: "2026.8.1",
@@ -71,7 +71,7 @@ describe("first-hop package fixtures", () => {
       fs.readFileSync(path.join(root, "dist", "build-info.json"), "utf8"),
     );
     expect(packageJson.version).toBe(FUTURE_FIXTURE_VERSION);
-    expect(packageJson.dependencies).toEqual({ "@openclaw/ai": "2026.8.1" });
+    expect(packageJson.dependencies).toEqual({ "@carapace/ai": "2026.8.1" });
     expect(buildInfo.version).toBe(FUTURE_FIXTURE_VERSION);
     expect(buildInfo.buildId).toBe("old-build");
     const inventory = JSON.parse(
@@ -84,11 +84,11 @@ describe("first-hop package fixtures", () => {
   });
 
   it("packs distinct self-update targets without changing the candidate artifact", () => {
-    const root = tempDirs.make("openclaw-same-schema-fixtures-");
+    const root = tempDirs.make("carapace-same-schema-fixtures-");
     fs.cpSync(makePackageFixture(), path.join(root, "package"), { recursive: true });
     const uiFiles = {
-      "index.html": `<html data-openclaw-control-ui-build-id="old-build-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`,
-      "assets/startup.js": 'globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO = { buildId: "old-build" };',
+      "index.html": `<html data-carapace-control-ui-build-id="old-build-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`,
+      "assets/startup.js": 'globalThis.CARAPACE_CONTROL_UI_BUILD_INFO = { buildId: "old-build" };',
       "sw.js": 'const EMBEDDED_CACHE_VERSION = "old-build";',
     };
     for (const [relative, contents] of Object.entries(uiFiles)) {
@@ -106,7 +106,7 @@ describe("first-hop package fixtures", () => {
         execFileSync("tar", ["-xOf", output, "package/package.json"], { encoding: "utf8" }),
       );
       expect(pkg.version).toBe(receipt.targetVersion);
-      expect(pkg.dependencies).toEqual({ "@openclaw/ai": "2026.8.1" });
+      expect(pkg.dependencies).toEqual({ "@carapace/ai": "2026.8.1" });
       expect(
         execFileSync("tar", ["-xOf", output, "package/dist/index.js"], { encoding: "utf8" }),
       ).toBe("export {};\n");
@@ -140,19 +140,19 @@ describe("first-hop package fixtures", () => {
   it.each([0, 1])(
     "packs the runtime plugin in future cohort %s without changing its payload",
     (sequence) => {
-      const root = tempDirs.make("openclaw-runtime-cohort-");
+      const root = tempDirs.make("carapace-runtime-cohort-");
       const manifest = {
-        name: "@openclaw/codex",
+        name: "@carapace/codex",
         version: "2026.9.3",
         dependencies: { "@openai/codex": "0.153.4" },
-        openclaw: {
+        carapace: {
           extensions: ["./dist/index.js"],
           compat: { pluginApi: ">=2026.9.3" },
-          build: { openclawVersion: "2026.9.3", bundledDist: true },
+          build: { carapaceVersion: "2026.9.3", bundledDist: true },
         },
       };
       writeJson(path.join(root, "package", "package.json"), manifest);
-      writeJson(path.join(root, "package", "openclaw.plugin.json"), {
+      writeJson(path.join(root, "package", "carapace.plugin.json"), {
         id: "codex",
         configSchema: { type: "object" },
       });
@@ -181,7 +181,7 @@ describe("first-hop package fixtures", () => {
       const targetVersion = `2026.9.99-first-hop.${sequence}`;
       expect(receipt).toMatchObject({
         method: "candidate-same-schema-runtime-fixture",
-        name: "@openclaw/codex",
+        name: "@carapace/codex",
         sourceVersion: "2026.9.3",
         targetVersion,
       });
@@ -190,12 +190,12 @@ describe("first-hop package fixtures", () => {
       expect(JSON.parse(readEntry(output, "package/package.json").toString())).toEqual({
         ...manifest,
         version: targetVersion,
-        openclaw: {
-          ...manifest.openclaw,
-          build: { ...manifest.openclaw.build, openclawVersion: targetVersion },
+        carapace: {
+          ...manifest.carapace,
+          build: { ...manifest.carapace.build, carapaceVersion: targetVersion },
         },
       });
-      for (const entry of ["package/dist/index.js", "package/openclaw.plugin.json"]) {
+      for (const entry of ["package/dist/index.js", "package/carapace.plugin.json"]) {
         expect(readEntry(output, entry)).toEqual(readEntry(source, entry));
       }
       expect(fs.readFileSync(source)).toEqual(before);
@@ -210,35 +210,35 @@ describe("first-hop package fixtures", () => {
   it.each([
     {
       name: "other package",
-      packageName: "@openclaw/other",
+      packageName: "@carapace/other",
       version: "2026.9.3",
       buildVersion: "2026.9.3",
       sequence: "0",
     },
     {
       name: "mismatched build",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       version: "2026.9.3",
       buildVersion: "2026.9.2",
       sequence: "0",
     },
     {
       name: "missing build",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       version: "2026.9.3",
       buildVersion: undefined,
       sequence: "0",
     },
     {
       name: "invalid version",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       version: "latest",
       buildVersion: "latest",
       sequence: "0",
     },
     {
       name: "invalid sequence",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       version: "2026.9.3",
       buildVersion: "2026.9.3",
       sequence: "10",
@@ -246,11 +246,11 @@ describe("first-hop package fixtures", () => {
   ])(
     "rejects runtime fixture $name before creating an output",
     ({ packageName, version, buildVersion, sequence }) => {
-      const root = tempDirs.make("openclaw-runtime-cohort-rejected-");
+      const root = tempDirs.make("carapace-runtime-cohort-rejected-");
       writeJson(path.join(root, "package", "package.json"), {
         name: packageName,
         version,
-        openclaw: { build: { openclawVersion: buildVersion } },
+        carapace: { build: { carapaceVersion: buildVersion } },
       });
       const source = path.join(root, "source.tgz");
       const output = path.join(root, "future.tgz");
@@ -276,7 +276,7 @@ describe("first-hop package fixtures", () => {
   it.skipIf(process.platform === "win32")(
     "carries the candidate registry into the first-hop Docker lane",
     () => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-first-hop-docker-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-first-hop-docker-"));
       const bin = path.join(root, "bin");
       const registry = path.join(root, "registry");
       const dockerArgs = path.join(root, "docker-args.json");
@@ -304,25 +304,25 @@ if (process.argv[2] === "run") fs.writeFileSync(process.env.DOCKER_ARGS_FILE, JS
           ...process.env,
           PATH: `${bin}:${process.env.PATH}`,
           DOCKER_ARGS_FILE: dockerArgs,
-          OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP: "1",
-          OPENCLAW_UPDATE_FIRST_HOP_E2E_SKIP_BUILD: "1",
-          OPENCLAW_UPDATE_FIRST_HOP_SOURCE_PACKAGE_TGZ: tarball,
-          OPENCLAW_UPDATE_FIRST_HOP_CANDIDATE_PACKAGE_TGZ: tarball,
-          OPENCLAW_UPDATE_FIRST_HOP_ARTIFACT_DIR: path.join(root, "artifacts"),
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
-          OPENCLAW_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: "2026.8.1",
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: "",
+          CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP: "1",
+          CARAPACE_UPDATE_FIRST_HOP_E2E_SKIP_BUILD: "1",
+          CARAPACE_UPDATE_FIRST_HOP_SOURCE_PACKAGE_TGZ: tarball,
+          CARAPACE_UPDATE_FIRST_HOP_CANDIDATE_PACKAGE_TGZ: tarball,
+          CARAPACE_UPDATE_FIRST_HOP_ARTIFACT_DIR: path.join(root, "artifacts"),
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
+          CARAPACE_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: "2026.8.1",
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: "",
         },
       });
       expect(result.status, result.stdout + result.stderr).toBe(0);
       const args: string[] = JSON.parse(fs.readFileSync(dockerArgs, "utf8"));
       expect(args[args.indexOf("--entrypoint") + 1]).toBe(
-        "/opt/openclaw-e2e/scripts/e2e/lib/prepublish-plugin-registry.sh",
+        "/opt/carapace-e2e/scripts/e2e/lib/prepublish-plugin-registry.sh",
       );
-      expect(args).toContain(`${registry}:/tmp/openclaw-prepublish-plugin-registry:ro`);
-      expect(args).toContain(`${tarball}:/tmp/openclaw-update-first-hop-candidate.tgz:ro`);
-      expect(args).toContain("OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION=2026.8.1");
+      expect(args).toContain(`${registry}:/tmp/carapace-prepublish-plugin-registry:ro`);
+      expect(args).toContain(`${tarball}:/tmp/carapace-update-first-hop-candidate.tgz:ro`);
+      expect(args).toContain("CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION=2026.8.1");
       expect(args).toContain("bash");
       expect(args).toContain("scripts/e2e/lib/upgrade-survivor/update-first-hop-compat.sh");
     },
@@ -332,7 +332,7 @@ if (process.argv[2] === "run") fs.writeFileSync(process.env.DOCKER_ARGS_FILE, JS
 const transitionHelper = path.resolve("scripts/e2e/lib/external-package-transition.mjs");
 
 function makeTransitionEvidenceFixture() {
-  const root = tempDirs.make("openclaw-external-transition-");
+  const root = tempDirs.make("carapace-external-transition-");
   const file = (name: string, value: unknown) => {
     const target = path.join(root, name);
     fs.writeFileSync(target, JSON.stringify(value));
@@ -341,7 +341,7 @@ function makeTransitionEvidenceFixture() {
   const run = (...args: string[]) =>
     spawnSync(process.execPath, [transitionHelper, ...args], {
       encoding: "utf8",
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
     });
   return { root, file, run };
 }
@@ -350,7 +350,7 @@ describe("external package transition evidence", () => {
   it("rejects a schema beyond the expected content version", () => {
     const { root, run } = makeTransitionEvidenceFixture();
     fs.mkdirSync(path.join(root, "state"));
-    const database = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"));
+    const database = new DatabaseSync(path.join(root, "state", "carapace.sqlite"));
     database.exec("PRAGMA user_version = 15");
     expect(run("schema", "15").status).toBe(0);
     database.exec("PRAGMA user_version = 16");
@@ -363,7 +363,7 @@ describe("external package transition evidence", () => {
   it("accepts applied content while schema publication is deferred", () => {
     const { root, run } = makeTransitionEvidenceFixture();
     fs.mkdirSync(path.join(root, "state"));
-    const database = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"));
+    const database = new DatabaseSync(path.join(root, "state", "carapace.sqlite"));
     database.exec(
       "PRAGMA user_version = 15; CREATE TABLE config_machine_state (state_key TEXT PRIMARY KEY, value_json TEXT)",
     );
@@ -379,7 +379,7 @@ describe("external package transition evidence", () => {
   it.each(["17", '"16"', "-1", "null"])("rejects unexpected content metadata %s", (value) => {
     const { root, run } = makeTransitionEvidenceFixture();
     fs.mkdirSync(path.join(root, "state"));
-    const database = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"));
+    const database = new DatabaseSync(path.join(root, "state", "carapace.sqlite"));
     database.exec(
       "PRAGMA user_version = 15; CREATE TABLE config_machine_state (state_key TEXT PRIMARY KEY, value_json TEXT)",
     );

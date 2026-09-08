@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it, vi } from "vitest";
 import {
   listSessionPendingInputs,
@@ -8,14 +8,14 @@ import {
 import { claimSessionPendingInputDedupeRecovery } from "../../config/sessions/session-accessor.pending-inputs.js";
 import { rotateAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { dispatchReplyFromConfig } from "./dispatch-from-config.js";
 import { claimInboundDedupe, resetInboundDedupe } from "./inbound-dedupe.js";
 import { createReplyDispatcher } from "./reply-dispatcher.js";
 import { buildTestCtx } from "./test-ctx.js";
 
 it("dispatches freshly reclaimed pending input despite its pre-restart inbound dedupe receipt", async () => {
-  await withOpenClawTestState({ label: "pending-input-in-process-restart" }, async (state) => {
+  await withCarapaceTestState({ label: "pending-input-in-process-restart" }, async (state) => {
     const cfg = {
       agents: {
         ownership: "explicit" as const,
@@ -118,7 +118,7 @@ it("dispatches freshly reclaimed pending input despite its pre-restart inbound d
 it.each(["initial", "inflight", "cache-miss", "consumed", "session", "input", "revoked"] as const)(
   "keeps completed inbound receipts bound to one exact recovered source (%s)",
   async (control) => {
-    await withOpenClawTestState({ label: "pending-input-dedupe-controls" }, async () => {
+    await withCarapaceTestState({ label: "pending-input-dedupe-controls" }, async () => {
       const target = {
         agentId: "main",
         sessionKey: "agent:main:dedupe",

@@ -5,10 +5,10 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { SUPPORTED_NODE_VERSIONS } from "../../node-version.mjs";
 import { note } from "../../packages/terminal-core/src/note.js";
-import { replaceConfigFile, type OpenClawConfig } from "../config/config.js";
+import { replaceConfigFile, type CarapaceConfig } from "../config/config.js";
 import { isDefaultInstallIdentity, resolveGatewayPort, resolveIsNixMode } from "../config/paths.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { formatGatewayHeapLimitReport, inspectGatewayHeapLimit } from "../daemon/gateway-heap.js";
@@ -18,7 +18,7 @@ import {
   type ExtraGatewayService,
 } from "../daemon/inspect.js";
 import { execLaunchctl, isLaunchctlNotLoaded } from "../daemon/launchd-exec.js";
-import { OPENCLAW_WRAPPER_ENV_KEY } from "../daemon/program-args.js";
+import { CARAPACE_WRAPPER_ENV_KEY } from "../daemon/program-args.js";
 import { renderSystemNodeWarning, resolveSystemNodeInfo } from "../daemon/runtime-paths.js";
 import { readWindowsStartupFallbackRuntimeForUpdate } from "../daemon/schtasks.js";
 import {
@@ -165,7 +165,7 @@ function findGatewayEntrypoint(programArguments?: string[]): string | null {
 }
 
 async function buildExpectedGatewayServicePlan(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   command: GatewayServiceCommandConfig;
   serviceInstallEnv: NodeJS.ProcessEnv;
   port: number;
@@ -220,11 +220,11 @@ function isOperatorOwnedEnvironmentIssue(
     case SERVICE_AUDIT_CODES.gatewayTokenEmbedded:
     case SERVICE_AUDIT_CODES.gatewayTokenMismatch:
     case SERVICE_AUDIT_CODES.gatewayTokenDrift:
-      return hasGatewayServiceEnvironmentOverride(command, ["OPENCLAW_GATEWAY_TOKEN"], {
+      return hasGatewayServiceEnvironmentOverride(command, ["CARAPACE_GATEWAY_TOKEN"], {
         environmentValueSources,
       });
     case SERVICE_AUDIT_CODES.gatewayPasswordEmbedded:
-      return hasGatewayServiceEnvironmentOverride(command, ["OPENCLAW_GATEWAY_PASSWORD"], {
+      return hasGatewayServiceEnvironmentOverride(command, ["CARAPACE_GATEWAY_PASSWORD"], {
         environmentValueSources,
       });
     case SERVICE_AUDIT_CODES.gatewayManagedEnvEmbedded:
@@ -256,7 +256,7 @@ function resolveSystemdScopeFromServicePath(sourcePath: string | undefined): Sys
 
 function resolveSystemdUnitNameFromServicePath(sourcePath: string | undefined): string {
   const base = sourcePath ? path.posix.basename(sourcePath.replaceAll("\\", "/")) : "";
-  return base.endsWith(".service") ? base : "openclaw-gateway.service";
+  return base.endsWith(".service") ? base : "carapace-gateway.service";
 }
 
 function shouldDeferUpdateModeSystemdServiceRepair(params: {
@@ -297,7 +297,7 @@ async function resolveSystemdServiceRewriteBlock(
     return undefined;
   }
   issues.splice(0, issues.length, ...issues.filter((issue) => !isExecStartRepairIssue(issue)));
-  return `Gateway service ${unitName} is running; skipped command/entrypoint rewrites and leaving supervisor metadata unchanged. Stop the service first or use \`openclaw gateway install --force\` when you want to replace the active launcher.`;
+  return `Gateway service ${unitName} is running; skipped command/entrypoint rewrites and leaving supervisor metadata unchanged. Stop the service first or use \`carapace gateway install --force\` when you want to replace the active launcher.`;
 }
 
 async function filterInactiveExtraGatewayServices(
@@ -341,7 +341,7 @@ export function extraGatewayServiceToHealthFinding(service: ExtraGatewayService)
     target: service.label,
     fixHint:
       service.legacy === true
-        ? "Run `openclaw doctor` interactively to review legacy gateway services and confirm supported cleanup."
+        ? "Run `carapace doctor` interactively to review legacy gateway services and confirm supported cleanup."
         : "Run a single gateway per machine unless this extra gateway is intentional.",
   };
 }
@@ -501,12 +501,12 @@ async function cleanupLegacyLinuxUserServices(
  * stay staged except for running Windows services, which must be activated to replace a fallback.
  */
 export async function maybeRepairGatewayServiceConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   mode: "local" | "remote",
   runtime: RuntimeEnv,
   prompter: DoctorPrompter,
   options: GatewayServiceConfigRepairOptions = {},
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   if (!isDefaultInstallIdentity(process.env)) {
     note(NON_DEFAULT_INSTALL_SERVICE_SKIP_REASON, "Gateway");
     return cfg;
@@ -553,22 +553,22 @@ export async function maybeRepairGatewayServiceConfig(
     ),
     "Gateway heap",
   );
-  const managedWrapperPath = managedDefinition.environment?.[OPENCLAW_WRAPPER_ENV_KEY]?.trim();
+  const managedWrapperPath = managedDefinition.environment?.[CARAPACE_WRAPPER_ENV_KEY]?.trim();
   const serviceInstallEnv =
-    managedWrapperPath && !Object.hasOwn(process.env, OPENCLAW_WRAPPER_ENV_KEY)
-      ? { ...process.env, [OPENCLAW_WRAPPER_ENV_KEY]: managedWrapperPath }
+    managedWrapperPath && !Object.hasOwn(process.env, CARAPACE_WRAPPER_ENV_KEY)
+      ? { ...process.env, [CARAPACE_WRAPPER_ENV_KEY]: managedWrapperPath }
       : process.env;
   const serviceWrapperPath = normalizeOptionalString(
-    command.environment?.[OPENCLAW_WRAPPER_ENV_KEY],
+    command.environment?.[CARAPACE_WRAPPER_ENV_KEY],
   );
   if (serviceWrapperPath) {
-    note(`Gateway service invokes ${OPENCLAW_WRAPPER_ENV_KEY}: ${serviceWrapperPath}`, "Gateway");
+    note(`Gateway service invokes ${CARAPACE_WRAPPER_ENV_KEY}: ${serviceWrapperPath}`, "Gateway");
   }
   const serviceLayout = await summarizeGatewayServiceLayout(command);
   const sourceCheckoutWarning = serviceLayout?.entrypointSourceCheckout
     ? [
         `Gateway service entrypoint resolves to a source checkout: ${serviceLayout.packageRootReal ?? serviceLayout.packageRoot ?? serviceLayout.entrypointReal ?? serviceLayout.entrypoint}.`,
-        "Run `openclaw gateway install --force` from the intended package install to replace the gateway service definition.",
+        "Run `carapace gateway install --force` from the intended package install to replace the gateway service definition.",
       ].join("\n")
     : null;
 
@@ -616,7 +616,7 @@ export async function maybeRepairGatewayServiceConfig(
     audit.issues.push({
       code: SERVICE_AUDIT_CODES.gatewayTokenMismatch,
       message:
-        "Gateway service OPENCLAW_GATEWAY_TOKEN should be unset when gateway.auth.token is SecretRef-managed",
+        "Gateway service CARAPACE_GATEWAY_TOKEN should be unset when gateway.auth.token is SecretRef-managed",
       detail: "service token is stale",
       level: "recommended",
     });
@@ -763,7 +763,7 @@ export async function maybeRepairGatewayServiceConfig(
     })
   ) {
     note(
-      "Update-mode doctor detected gateway service drift but left the live systemd unit unchanged. Review the service file and run `openclaw gateway install --force` when you want OpenClaw to rewrite its managed unit; operator-owned drop-ins remain unchanged.",
+      "Update-mode doctor detected gateway service drift but left the live systemd unit unchanged. Review the service file and run `carapace gateway install --force` when you want Carapace to rewrite its managed unit; operator-owned drop-ins remain unchanged.",
       "Gateway service config",
     );
     return cfg;
@@ -790,7 +790,7 @@ export async function maybeRepairGatewayServiceConfig(
   if (!repair) {
     if (!emittedSourceCheckoutWarning) {
       note(
-        "Run `openclaw gateway install --force` when you want to replace the gateway service definition.",
+        "Run `carapace gateway install --force` when you want to replace the gateway service definition.",
         "Gateway service config",
       );
     }
@@ -829,12 +829,12 @@ export async function maybeRepairGatewayServiceConfig(
     ...managedDefinition.environment,
   };
   const installedWindowsTaskName =
-    managedDefinition.environment?.OPENCLAW_WINDOWS_TASK_NAME?.trim();
+    managedDefinition.environment?.CARAPACE_WINDOWS_TASK_NAME?.trim();
   const serviceRepairEnv =
     updateRepairWillRewriteWindowsTask && installedWindowsTaskName
       ? {
           ...serviceInstallEnv,
-          OPENCLAW_WINDOWS_TASK_NAME: installedWindowsTaskName,
+          CARAPACE_WINDOWS_TASK_NAME: installedWindowsTaskName,
         }
       : serviceInstallEnv;
   const updateRepairCanActivateGateway =
@@ -883,7 +883,7 @@ export async function maybeRepairGatewayServiceConfig(
       );
       return cfg;
     }
-    const nextCfg: OpenClawConfig = {
+    const nextCfg: CarapaceConfig = {
       ...cfg,
       gateway: {
         ...cfg.gateway,
@@ -956,7 +956,7 @@ export async function maybeRepairGatewayServiceConfig(
       if (installedWindowsTaskName) {
         // Scheduled Task identity is caller-owned; a canonical rebuilt plan must
         // not redirect restart/cleanup to the default task after profile repair.
-        restartEnv.OPENCLAW_WINDOWS_TASK_NAME = installedWindowsTaskName;
+        restartEnv.CARAPACE_WINDOWS_TASK_NAME = installedWindowsTaskName;
       }
       await service.restart({
         env: restartEnv,
@@ -1080,7 +1080,7 @@ export async function maybeResolveDuelingSystemdGatewayScopes(
   const { user, system } = installation;
   note(
     [
-      "Both a user-scope and a system-scope OpenClaw gateway unit are installed:",
+      "Both a user-scope and a system-scope Carapace gateway unit are installed:",
       `- user:   ${user.unitPath}`,
       `- system: ${system.unitPath}`,
       "They bind the same port and will SIGTERM each other in a restart loop.",

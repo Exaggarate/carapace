@@ -7,12 +7,12 @@ title: "Doctor"
 sidebarTitle: "Doctor"
 ---
 
-`openclaw doctor` is the repair and migration tool for OpenClaw. It fixes stale config/state, checks health, and provides actionable repair steps.
+`carapace doctor` is the repair and migration tool for Carapace. It fixes stale config/state, checks health, and provides actionable repair steps.
 
 ## Quick start
 
 ```bash
-openclaw doctor
+carapace doctor
 ```
 
 ### Headless and automation modes
@@ -20,7 +20,7 @@ openclaw doctor
 <Tabs>
   <Tab title="--yes">
     ```bash
-    openclaw doctor --yes
+    carapace doctor --yes
     ```
 
     Accept default non-service repairs without prompting and enter maintenance while preserving the installed gateway service definition.
@@ -28,7 +28,7 @@ openclaw doctor
   </Tab>
   <Tab title="--fix">
     ```bash
-    openclaw doctor --fix
+    carapace doctor --fix
     ```
 
     Apply recommended non-service repairs without prompting (`--repair` is an alias) and enter maintenance while preserving the installed gateway service definition.
@@ -36,8 +36,8 @@ openclaw doctor
   </Tab>
   <Tab title="--lint">
     ```bash
-    openclaw doctor --lint
-    openclaw doctor --lint --json
+    carapace doctor --lint
+    carapace doctor --lint --json
     ```
 
     Run structured health checks for CI or preflight automation. Read-only: no
@@ -46,15 +46,15 @@ openclaw doctor
   </Tab>
   <Tab title="--fix --force">
     ```bash
-    openclaw doctor --fix --force
+    carapace doctor --fix --force
     ```
 
-    Apply aggressive config/state repairs too. Repair maintenance preserves the installed service definition; use `openclaw gateway install --force` from the intended installation to replace its launcher and managed environment.
+    Apply aggressive config/state repairs too. Repair maintenance preserves the installed service definition; use `carapace gateway install --force` from the intended installation to replace its launcher and managed environment.
 
   </Tab>
   <Tab title="--non-interactive">
     ```bash
-    openclaw doctor --non-interactive
+    carapace doctor --non-interactive
     ```
 
     Run without prompts, applying only safe migrations (config normalization +
@@ -69,7 +69,7 @@ openclaw doctor
   </Tab>
   <Tab title="--deep">
     ```bash
-    openclaw doctor --deep
+    carapace doctor --deep
     ```
 
     Scan system services for extra gateway installs (launchd/systemd/schtasks).
@@ -80,12 +80,12 @@ openclaw doctor
 To review changes before writing, open the config file first:
 
 ```bash
-cat ~/.openclaw/openclaw.json
+cat ~/.carapace/carapace.json
 ```
 
 ## Schema publication during a 2026.9.2 update
 
-When OpenClaw 2026.9.2 drives an update that needs a newer shared-state schema,
+When Carapace 2026.9.2 drives an update that needs a newer shared-state schema,
 Doctor applies the migration content and reports
 `schema content applied; version publication deferred until update run <id> finishes`.
 The old updater can finish its ledger access, while the new Gateway uses the
@@ -108,16 +108,16 @@ beyond the grace period.
 
 ## Read-only lint mode
 
-`openclaw doctor --lint` is the automation-friendly sibling of
-`openclaw doctor --fix`. They share the same Doctor rule registry, but they do
+`carapace doctor --lint` is the automation-friendly sibling of
+`carapace doctor --fix`. They share the same Doctor rule registry, but they do
 not select or act on rules in the same way:
 
 | Mode                     | Prompts   | Writes config/state                        | Output                 | Use it for                       |
 | ------------------------ | --------- | ------------------------------------------ | ---------------------- | -------------------------------- |
-| `openclaw doctor`        | yes       | yes, safe migrations and confirmed repairs | friendly health report | guided checks and repairs        |
-| `openclaw doctor --json` | no        | no                                         | JSON advisory report   | machine-readable operator checks |
-| `openclaw doctor --fix`  | sometimes | yes, with repair policy                    | friendly repair log    | applying approved repairs        |
-| `openclaw doctor --lint` | no        | no                                         | structured findings    | CI, preflight, and review gates  |
+| `carapace doctor`        | yes       | yes, safe migrations and confirmed repairs | friendly health report | guided checks and repairs        |
+| `carapace doctor --json` | no        | no                                         | JSON advisory report   | machine-readable operator checks |
+| `carapace doctor --fix`  | sometimes | yes, with repair policy                    | friendly repair log    | applying approved repairs        |
+| `carapace doctor --lint` | no        | no                                         | structured findings    | CI, preflight, and review gates  |
 
 Default `doctor --lint` runs the broad-safe automation profile: checks that are
 static, local, and useful in CI or preflight output. It skips opt-in checks that
@@ -142,11 +142,11 @@ finding (`info`, `warning`, or `error`); default selection is not a severity
 level.
 
 ```bash
-openclaw doctor --lint
-openclaw doctor --lint --severity-min warning
-openclaw doctor --lint --json
-openclaw doctor --lint --all
-openclaw doctor --lint --only core/doctor/gateway-config --json
+carapace doctor --lint
+carapace doctor --lint --severity-min warning
+carapace doctor --lint --json
+carapace doctor --lint --all
+carapace doctor --lint --only core/doctor/gateway-config --json
 ```
 
 JSON output fields:
@@ -163,7 +163,7 @@ Exit codes:
 | `1`  | one or more findings met the selected threshold          |
 | `2`  | command/runtime failure before findings could be emitted |
 
-These threshold-based exit codes belong to explicit `--lint` mode, with or without `--json`. Bare `openclaw doctor --json` preserves ordinary Doctor's advisory exit `0` after producing its payload; machine consumers should read `ok` and `findings`. Fatal errors before output remain nonzero.
+These threshold-based exit codes belong to explicit `--lint` mode, with or without `--json`. Bare `carapace doctor --json` preserves ordinary Doctor's advisory exit `0` after producing its payload; machine consumers should read `ok` and `findings`. Fatal errors before output remain nonzero.
 
 Flags:
 
@@ -180,7 +180,7 @@ Flags:
     - Optional pre-flight update for git installs (interactive only).
     - UI protocol freshness check (rebuilds Control UI when the protocol schema is newer).
     - Health check + restart prompt.
-    - Problem-only skill and plugin notes; healthy inventory stays in `openclaw skills check` and `openclaw plugins list`.
+    - Problem-only skill and plugin notes; healthy inventory stays in `carapace skills check` and `carapace plugins list`.
 
   </Accordion>
   <Accordion title="Config and migrations">
@@ -195,7 +195,7 @@ Flags:
     - Plugin/tool allowlist warnings when `plugins.allow` is restrictive but tool policy still asks for wildcard or plugin-owned tools.
     - Legacy on-disk state migration (sessions/agent dir/WhatsApp auth).
     - Legacy Tailscale provider login migration from user profile email aliases to provider identities.
-    - Merged shared owner profile detection and repair with `openclaw doctor --fix`; restores the owner identity while preserving personal emails, roles, and GitHub identities. Reconnect after repair.
+    - Merged shared owner profile detection and repair with `carapace doctor --fix`; restores the owner identity while preserving personal emails, roles, and GitHub identities. Reconnect after repair.
     - Retired QMD memory config and derived workspace cleanup; see [Migrating from QMD](/concepts/memory-builtin#migrating-from-qmd).
     - Legacy plugin manifest contract key migration (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders` → `contracts`).
     - Legacy cron store migration (`jobId`, `schedule.cron`, top-level delivery/payload fields, payload `provider`, `notify: true` webhook fallback jobs).
@@ -219,7 +219,7 @@ Flags:
     - Matrix channel legacy state migration (in `--fix` / `--repair` mode).
     - Gateway runtime checks (service installed but not running; cached launchd label).
     - Channel status warnings (probed from the running gateway).
-    - Channel-specific permission checks live under `openclaw channels capabilities`; for example, Discord voice channel permissions are audited with `openclaw channels capabilities --channel discord --target channel:<channel-id>`.
+    - Channel-specific permission checks live under `carapace channels capabilities`; for example, Discord voice channel permissions are audited with `carapace channels capabilities --channel discord --target channel:<channel-id>`.
     - WhatsApp responsiveness reports Gateway pressure and detected local TUI clients without attributing the pressure to those clients. Inspect [Gateway diagnostics](/gateway/diagnostics) before deciding whether to close clients; Doctor does not stop them.
     - Codex route repair for legacy `openai-codex/*` model refs in primary models, fallbacks, image/video generation models, heartbeat/subagent/compaction overrides, hooks, channel model overrides, and session route pins; `--fix` rewrites them to `openai/*`, migrates `openai-codex:*` auth profiles/order to `openai:*`, removes stale session/whole-agent runtime pins, and lets the repaired effective route determine whether Codex is compatible.
     - Supervisor config audit (launchd/systemd/schtasks) with optional repair.
@@ -248,7 +248,7 @@ Flags:
 
 ## Dreams UI backfill and reset
 
-The Control UI Dreams scene includes **Backfill**, **Reset**, and **Clear Grounded** actions for the grounded dreaming workflow. These use gateway doctor-style RPC methods but are **not** part of `openclaw doctor` CLI repair/migration.
+The Control UI Dreams scene includes **Backfill**, **Reset**, and **Clear Grounded** actions for the grounded dreaming workflow. These use gateway doctor-style RPC methods but are **not** part of `carapace doctor` CLI repair/migration.
 
 | Action         | What it does                                                                                                                                                      |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -259,7 +259,7 @@ The Control UI Dreams scene includes **Backfill**, **Reset**, and **Clear Ground
 None of these edit `MEMORY.md`, run full doctor migrations, or stage grounded candidates into the live short-term promotion store on their own. To feed grounded historical replay into the normal deep promotion lane, use the CLI flow instead:
 
 ```bash
-openclaw memory rem-backfill --path ./memory --stage-short-term
+carapace memory rem-backfill --path ./memory --stage-short-term
 ```
 
 That stages grounded durable candidates into the short-term dreaming store while `DREAMS.md` stays the review surface.
@@ -279,11 +279,11 @@ That stages grounded durable candidates into the short-term dreaming store while
 
   </Accordion>
   <Accordion title="2. Legacy config key migrations">
-    Gateway startup automatically applies deterministic, prompt-free legacy config migrations when an otherwise invalid single-file config can be fully migrated. It uses the same migration transforms as `openclaw doctor --fix`, validates the complete result including plugin config before writing, and reports the applied changes. The write runs under the startup migration lease and preserves the previous config in the five-slot `openclaw.json.bak` / `.bak.1` through `.bak.4` backup ring.
+    Gateway startup automatically applies deterministic, prompt-free legacy config migrations when an otherwise invalid single-file config can be fully migrated. It uses the same migration transforms as `carapace doctor --fix`, validates the complete result including plugin config before writing, and reports the applied changes. The write runs under the startup migration lease and preserves the previous config in the five-slot `carapace.json.bak` / `.bak.1` through `.bak.4` backup ring.
 
-    Startup does not migrate configs using `$include`, configs in Nix mode, or configs last written by a newer OpenClaw version. It also skips automatic config migration while an update is in progress and plugin validation is deferred; the post-update doctor run owns that repair. If any validation or legacy-key issue remains after migration, startup leaves the config unchanged, refuses to start, and prints the `openclaw doctor --fix` hint. An interactive terminal can still offer to run doctor and retry once for configs that need other repairs; headless services stop with the hint.
+    Startup does not migrate configs using `$include`, configs in Nix mode, or configs last written by a newer Carapace version. It also skips automatic config migration while an update is in progress and plugin validation is deferred; the post-update doctor run owns that repair. If any validation or legacy-key issue remains after migration, startup leaves the config unchanged, refuses to start, and prints the `carapace doctor --fix` hint. An interactive terminal can still offer to run doctor and retry once for configs that need other repairs; headless services stop with the hint.
 
-    Other commands that encounter legacy keys still ask you to run `openclaw doctor`. Doctor explains the issues, shows its migrations, and rewrites `~/.openclaw/openclaw.json` with the updated schema. Cron job store migrations are also handled by `openclaw doctor --fix`; automatic config-key migration does not import legacy session stores or repair services.
+    Other commands that encounter legacy keys still ask you to run `carapace doctor`. Doctor explains the issues, shows its migrations, and rewrites `~/.carapace/carapace.json` with the updated schema. Cron job store migrations are also handled by `carapace doctor --fix`; automatic config-key migration does not import legacy session stores or repair services.
 
     When a readable active config can be fully migrated, Doctor preserves it before considering last-known-good recovery. This includes legacy multi-agent rosters with a `default: true` owner: unrelated settings and the original agent ownership survive the migration.
 
@@ -370,7 +370,7 @@ That stages grounded durable candidates into the short-term dreaming store while
     | `plugins.entries.codex.config.codexDynamicToolsProfile`                                          | removed (Codex app-server always keeps Codex-native workspace tools native) |
     | `commands.modelsWrite`                                                                           | removed (`/models add` is deprecated)                                       |
     | `agents.defaults/list[].silentReplyRewrite`, `surfaces.*.silentReplyRewrite`                     | removed (exact `NO_REPLY` is no longer rewritten to visible fallback text)  |
-    | `agents.defaults/list[].systemPromptOverride`                                                    | removed (OpenClaw owns the generated system prompt)                        |
+    | `agents.defaults/list[].systemPromptOverride`                                                    | removed (Carapace owns the generated system prompt)                        |
     | `agents.defaults/list[].embeddedPi`                                                              | `embeddedAgent`                                                              |
     | `agents.defaults/list[].sandbox.perSession`                                                      | `sandbox.scope`                                                              |
     | `agents.defaults.llm`                                                                             | removed (use `models.providers.<id>.timeoutSeconds` for slow model/provider timeouts, kept below the agent/run timeout ceiling) |
@@ -386,8 +386,8 @@ That stages grounded durable candidates into the short-term dreaming store while
 
     <Note>
       The Voice Call plugin supplies the migration for its legacy config keys.
-      `openclaw doctor --fix` invokes it and persists the canonical shape in
-      `openclaw.json`; runtime config parsing accepts only current keys.
+      `carapace doctor --fix` invokes it and persists the canonical shape in
+      `carapace.json`; runtime config parsing accepts only current keys.
       Existing canonical settings win over legacy values, including streaming
       provider credentials, models, and timing. Doctor reports retained
       destinations instead of claiming those legacy values were moved.
@@ -421,22 +421,22 @@ That stages grounded durable candidates into the short-term dreaming store while
     readiness or cookie-import availability. It reports the importable cookie
     database count as unavailable, not zero. When a stable Chrome extension copy
     exists, Doctor reports its native-bootstrap status as not inspected;
-    `openclaw doctor --fix` skips native-host registration repair.
+    `carapace doctor --fix` skips native-host registration repair.
 
-    On the machine hosting Chrome, run `openclaw browser extension status --json`
+    On the machine hosting Chrome, run `carapace browser extension status --json`
     to inspect registration explicitly; this may request browser-profile access.
     If an upgrade leaves stale native-host targets, run
-    `openclaw browser extension install --no-store` to repair through the explicit
+    `carapace browser extension install --no-store` to repair through the explicit
     installer without requesting Store installation. The installer refuses to
     overwrite a foreign same-name manifest or launcher. Status distinguishes a
     requested installation, Chrome approval, and native-host registration health;
     it does not prove a live relay connection.
 
-    For initial setup, run `openclaw browser extension install`. On macOS, this
+    For initial setup, run `carapace browser extension install`. On macOS, this
     also requests the official Store installation in Google Chrome; reopen Chrome
-    and approve or enable OpenClaw when prompted. Other browsers and platforms
+    and approve or enable Carapace when prompted. Other browsers and platforms
     need a manual Store install. The unpacked stable path remains a development
-    fallback with `openclaw browser extension install --no-store`. Explicit cookie
+    fallback with `carapace browser extension install --no-store`. Explicit cookie
     import still requires its separate consent.
 
     Doctor also audits the host-local Chrome MCP path when you use `defaultProfile: "user"` or a configured `existing-session` profile:
@@ -475,31 +475,31 @@ That stages grounded durable candidates into the short-term dreaming store while
   <Accordion title="2g. Session route cleanup">
     Doctor also scans discovered agent session stores for stale auto-created route state after you move configured models or runtime away from a plugin-owned route such as Codex.
 
-    `openclaw doctor --fix` can clear auto-created stale state such as `modelOverrideSource: "auto"` model pins, runtime model metadata, pinned harness ids, CLI session bindings, and auto auth-profile overrides when their owning route is no longer configured. Explicit user or legacy session model choices are reported for manual review and left untouched; switch them with `/model ...`, `/new`, or reset the session when that route is no longer intended.
+    `carapace doctor --fix` can clear auto-created stale state such as `modelOverrideSource: "auto"` model pins, runtime model metadata, pinned harness ids, CLI session bindings, and auto auth-profile overrides when their owning route is no longer configured. Explicit user or legacy session model choices are reported for manual review and left untouched; switch them with `/model ...`, `/new`, or reset the session when that route is no longer intended.
 
   </Accordion>
   <Accordion title="3. Legacy state migrations (disk layout)">
     Doctor can migrate older on-disk layouts into the current structure:
 
-    - Session rows and transcripts: import legacy `sessions.json` and JSONL history from `~/.openclaw/sessions/` or per-agent `sessions/` directories into `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
-    - Agent dir: from `~/.openclaw/agent/` to `~/.openclaw/agents/<agentId>/agent/`
-    - WhatsApp auth state (Baileys): from legacy `~/.openclaw/credentials/*.json` (except `oauth.json`) to `~/.openclaw/credentials/whatsapp/<accountId>/...` (default account id: `default`)
-    - Signed device identity: from `~/.openclaw/identity/device.json` into the `primary` `device_identities` row in `state/openclaw.sqlite`; Gateway startup also performs this verified import for valid legacy identities, while Doctor retains repair authority for invalid canonical rows; the separate device-auth file is left untouched
+    - Session rows and transcripts: import legacy `sessions.json` and JSONL history from `~/.carapace/sessions/` or per-agent `sessions/` directories into `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`
+    - Agent dir: from `~/.carapace/agent/` to `~/.carapace/agents/<agentId>/agent/`
+    - WhatsApp auth state (Baileys): from legacy `~/.carapace/credentials/*.json` (except `oauth.json`) to `~/.carapace/credentials/whatsapp/<accountId>/...` (default account id: `default`)
+    - Signed device identity: from `~/.carapace/identity/device.json` into the `primary` `device_identities` row in `state/carapace.sqlite`; Gateway startup also performs this verified import for valid legacy identities, while Doctor retains repair authority for invalid canonical rows; the separate device-auth file is left untouched
 
-    Legacy session-file import and repair belong to explicit Doctor runs. Gateway and local CLI startup use SQLite; they do not import, restore, or rewrite session JSON/JSONL files. When startup finds a legacy session store, it refuses readiness and prints the Doctor command for the active profile instead of serving empty history. Stop the Gateway, back up its state, and run `openclaw doctor --fix` before restarting it to upgrade old session history. The [targeted migration sequence](/cli/doctor#session-sqlite-migration) provides inspection and validation evidence. Current SQLite maintenance does not require legacy files to remain on disk.
+    Legacy session-file import and repair belong to explicit Doctor runs. Gateway and local CLI startup use SQLite; they do not import, restore, or rewrite session JSON/JSONL files. When startup finds a legacy session store, it refuses readiness and prints the Doctor command for the active profile instead of serving empty history. Stop the Gateway, back up its state, and run `carapace doctor --fix` before restarting it to upgrade old session history. The [targeted migration sequence](/cli/doctor#session-sqlite-migration) provides inspection and validation evidence. Current SQLite maintenance does not require legacy files to remain on disk.
 
-    Doctor reports individual channel migration-plan failures while continuing plans for unrelated sources, including those from the same plugin. Plans sharing the failed source are deferred, and source cleanup waits for its last consumer to finish without reported failures or incomplete imports. Advisory startup migration warnings allow the Gateway to start degraded. Startup logs the warnings once with the exact repair command; `openclaw status` and `openclaw doctor` show the running Gateway's warning report. Run `openclaw doctor --fix` against the same state/config, then restart the Gateway. Warning-bearing work is not marked complete and is retried on a later startup. Migration errors that leave required state unsafe to read, including failed shared-schema repair, still refuse startup.
+    Doctor reports individual channel migration-plan failures while continuing plans for unrelated sources, including those from the same plugin. Plans sharing the failed source are deferred, and source cleanup waits for its last consumer to finish without reported failures or incomplete imports. Advisory startup migration warnings allow the Gateway to start degraded. Startup logs the warnings once with the exact repair command; `carapace status` and `carapace doctor` show the running Gateway's warning report. Run `carapace doctor --fix` against the same state/config, then restart the Gateway. Warning-bearing work is not marked complete and is retried on a later startup. Migration errors that leave required state unsafe to read, including failed shared-schema repair, still refuse startup.
 
-    Doctor emits warnings when migrations leave legacy folders behind as backups. WhatsApp auth is intentionally only migrated via `openclaw doctor`. Talk provider/provider-map normalization compares by structural equality, so key-order-only diffs no longer trigger repeat no-op `doctor --fix` changes.
+    Doctor emits warnings when migrations leave legacy folders behind as backups. WhatsApp auth is intentionally only migrated via `carapace doctor`. Talk provider/provider-map normalization compares by structural equality, so key-order-only diffs no longer trigger repeat no-op `doctor --fix` changes.
 
-    When an explicit roster no longer contains `main`, OpenClaw migrates durable `agent:main:*` SQLite rows only if the replacement owner is unambiguous: the sole roster member or the configured upgrade owner in `agents.defaults.sessionStore.agentId`. The explicit owner works for both per-agent and fixed session stores; fixed-store runtime ownership remains scoped to that physical store. Conflicting canonical or alias rows are preserved during startup and reported with a Doctor hint. `openclaw doctor --fix` first imports any legacy JSON session store, then keeps the winning canonical claim and renames each losing claim to `agent:<owner>:legacy-main-conflict-<n>` in its original database. Quarantine changes only the key; the entry and full transcript remain available for inspection or archival.
+    When an explicit roster no longer contains `main`, Carapace migrates durable `agent:main:*` SQLite rows only if the replacement owner is unambiguous: the sole roster member or the configured upgrade owner in `agents.defaults.sessionStore.agentId`. The explicit owner works for both per-agent and fixed session stores; fixed-store runtime ownership remains scoped to that physical store. Conflicting canonical or alias rows are preserved during startup and reported with a Doctor hint. `carapace doctor --fix` first imports any legacy JSON session store, then keeps the winning canonical claim and renames each losing claim to `agent:<owner>:legacy-main-conflict-<n>` in its original database. Quarantine changes only the key; the entry and full transcript remain available for inspection or archival.
 
   </Accordion>
   <Accordion title="3a. Legacy plugin manifest migrations">
     Doctor scans all installed plugin manifests for deprecated top-level capability keys (`speechProviders`, `realtimeTranscriptionProviders`, `realtimeVoiceProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, `videoGenerationProviders`, `webFetchProviders`, `webSearchProviders`). When found, it offers to move them into the `contracts` object and rewrite the manifest file in-place. This migration is idempotent; if `contracts` already has the same values, the legacy key is removed without duplicating data.
   </Accordion>
   <Accordion title="3b. Legacy cron store migrations">
-    Doctor also checks the legacy cron job store (`~/.openclaw/cron/jobs.json`) for old job shapes before importing canonical rows into SQLite.
+    Doctor also checks the legacy cron job store (`~/.carapace/cron/jobs.json`) for old job shapes before importing canonical rows into SQLite.
 
     Current cron cleanups include:
 
@@ -514,14 +514,14 @@ That stages grounded durable candidates into the short-term dreaming store while
 
     Gateway startup normalizes the runtime projection and ignores the top-level `notify` marker, but leaves persisted cron state for doctor repair. Doctor removes inert markers for jobs with no migration target (`delivery.mode` none/absent, an unusable legacy webhook target, or existing announce/chat delivery), leaving existing delivery untouched, so repeated `doctor --fix` runs no longer re-warn about the same job.
 
-    On Linux, doctor also warns when the user's crontab still invokes legacy `~/.openclaw/bin/ensure-whatsapp.sh`. That host-local script is not maintained by current OpenClaw and can write false `Gateway inactive` messages to `~/.openclaw/logs/whatsapp-health.log` when cron cannot reach the systemd user bus. Remove the stale crontab entry with `crontab -e`; use `openclaw channels status --probe`, `openclaw doctor`, and `openclaw gateway status` for current health checks.
+    On Linux, doctor also warns when the user's crontab still invokes legacy `~/.carapace/bin/ensure-whatsapp.sh`. That host-local script is not maintained by current Carapace and can write false `Gateway inactive` messages to `~/.carapace/logs/whatsapp-health.log` when cron cannot reach the systemd user bus. Remove the stale crontab entry with `crontab -e`; use `carapace channels status --probe`, `carapace doctor`, and `carapace gateway status` for current health checks.
 
   </Accordion>
   <Accordion title="3c. Session lock cleanup">
-    Doctor scans every agent session directory for legacy write-lock files left behind when a file-backed session exited abnormally. For each lock file found it reports: the path, PID, whether the PID is still alive, lock age, and whether it is considered stale (dead PID, malformed owner metadata, older than 30 minutes, or a live PID proven to belong to a non-OpenClaw process). In `--fix` / `--repair` mode it removes locks with dead, orphaned, recycled, malformed-old, or non-OpenClaw owners automatically. Old locks still owned by a live OpenClaw process are reported but left in place so doctor does not cut off an active transcript writer.
+    Doctor scans every agent session directory for legacy write-lock files left behind when a file-backed session exited abnormally. For each lock file found it reports: the path, PID, whether the PID is still alive, lock age, and whether it is considered stale (dead PID, malformed owner metadata, older than 30 minutes, or a live PID proven to belong to a non-Carapace process). In `--fix` / `--repair` mode it removes locks with dead, orphaned, recycled, malformed-old, or non-Carapace owners automatically. Old locks still owned by a live Carapace process are reported but left in place so doctor does not cut off an active transcript writer.
   </Accordion>
   <Accordion title="3d. Session transcript branch repair">
-    Doctor scans legacy agent session JSONL files for the duplicated branch shape created by the 2026.4.24 prompt transcript rewrite bug: an abandoned user turn with OpenClaw internal runtime context plus an active sibling containing the same visible user prompt. In `--fix` / `--repair` mode, doctor backs up each affected file next to the original and rewrites the transcript to the active branch before importing its history into SQLite.
+    Doctor scans legacy agent session JSONL files for the duplicated branch shape created by the 2026.4.24 prompt transcript rewrite bug: an abandoned user turn with Carapace internal runtime context plus an active sibling containing the same visible user prompt. In `--fix` / `--repair` mode, doctor backs up each affected file next to the original and rewrites the transcript to the active branch before importing its history into SQLite.
   </Accordion>
   <Accordion title="4. State integrity checks (session persistence, routing, and safety)">
     The state directory is the operational brainstem. If it vanishes, you lose sessions, credentials, logs, and config unless you have backups elsewhere.
@@ -536,19 +536,19 @@ That stages grounded durable candidates into the short-term dreaming store while
     - **Session directory permissions**: checks existing session and store directories for writability. Missing archive directories are healthy on fresh profiles and are created when needed.
     - **Legacy transcript mismatch**: warns when recent legacy session entries have missing transcript files. SQLite-owned sessions do not require archived JSONL files.
     - **Legacy main session "1-line JSONL"**: flags when an unimported main transcript has only one line (history was not accumulating).
-    - **Multiple state dirs**: warns when the active state directory differs from the effective home's default `~/.openclaw` directory and that default exists (history can split between installs). The effective home honors `OPENCLAW_HOME`, `HOME`, and `USERPROFILE`; Doctor does not enumerate other accounts' home directories.
+    - **Multiple state dirs**: warns when the active state directory differs from the effective home's default `~/.carapace` directory and that default exists (history can split between installs). The effective home honors `CARAPACE_HOME`, `HOME`, and `USERPROFILE`; Doctor does not enumerate other accounts' home directories.
     - **Remote mode reminder**: if `gateway.mode=remote`, doctor reminds you to run it on the remote host (the state lives there).
-    - **Config file permissions**: warns if `~/.openclaw/openclaw.json` is group/world readable and offers to tighten to `600`.
+    - **Config file permissions**: warns if `~/.carapace/carapace.json` is group/world readable and offers to tighten to `600`.
 
   </Accordion>
   <Accordion title="5. Model auth health (OAuth expiry)">
     Doctor inspects OAuth profiles in the auth store, warns when tokens are expiring/expired, and can refresh them when safe. If the Anthropic OAuth/token profile is stale, it suggests an Anthropic API key or the Anthropic setup-token path. Refresh prompts only appear when running interactively (TTY); `--non-interactive` skips refresh attempts.
 
-    When an OAuth refresh fails permanently (for example `refresh_token_reused`, `invalid_grant`, or a provider telling you to sign in again), doctor reports that re-auth is required and prints the exact `openclaw models auth login --provider ...` command to run.
+    When an OAuth refresh fails permanently (for example `refresh_token_reused`, `invalid_grant`, or a provider telling you to sign in again), doctor reports that re-auth is required and prints the exact `carapace models auth login --provider ...` command to run.
 
     Doctor also reports auth profiles that are temporarily unusable due to short cooldowns (rate limits/timeouts/auth failures) or longer disables (billing/credit failures).
 
-    Legacy Codex OAuth profiles with encrypted sidecar credentials are repaired only by doctor. Run `openclaw doctor --fix` from an interactive terminal on the original host so it can recover the legacy encryption key, including from macOS Keychain when needed, and import supported credentials into the SQLite auth store. If the legacy material cannot be recovered, sign in again with `openclaw models auth login --provider openai` on the Gateway host.
+    Legacy Codex OAuth profiles with encrypted sidecar credentials are repaired only by doctor. Run `carapace doctor --fix` from an interactive terminal on the original host so it can recover the legacy encryption key, including from macOS Keychain when needed, and import supported credentials into the SQLite auth store. If the legacy material cannot be recovered, sign in again with `carapace models auth login --provider openai` on the Gateway host.
 
   </Accordion>
   <Accordion title="6. Hooks model validation">
@@ -560,29 +560,29 @@ That stages grounded durable candidates into the short-term dreaming store while
   <Accordion title="7b. Plugin install cleanup">
     Doctor repairs legacy official ClawHub install records that predate recorded source authority. With `--fix`, it backfills the existing official host/channel fields only when the original spec and every recorded package identity agree with the official catalog. Local sources, partial or conflicting authority, and unverifiable identities require reinstalling. Ordinary legacy npm records with a consistent official spec already satisfy trust. See [Trusted plugin state refused](/tools/plugin#trusted-plugin-state-refused) for refusal reason codes and remedies.
 
-    When a local Gateway is unreachable, doctor compares the CLI state directory with the installed service's effective environment. It prints both paths when they differ, or reports that the service paths could not be verified. Unreadable or commandless service definitions and unavailable referenced environment files are unknown, not evidence that the paths match. Windows batch assignments with unresolved variable expansion or unsupported escaping also remain unverified; inspect their service environment with `openclaw gateway status --deep` before choosing a repair. Run inspection and repair with the Gateway's `OPENCLAW_STATE_DIR` and `OPENCLAW_CONFIG_PATH`; matching config and executable versions alone does not establish matching plugin installation state.
+    When a local Gateway is unreachable, doctor compares the CLI state directory with the installed service's effective environment. It prints both paths when they differ, or reports that the service paths could not be verified. Unreadable or commandless service definitions and unavailable referenced environment files are unknown, not evidence that the paths match. Windows batch assignments with unresolved variable expansion or unsupported escaping also remain unverified; inspect their service environment with `carapace gateway status --deep` before choosing a repair. Run inspection and repair with the Gateway's `CARAPACE_STATE_DIR` and `CARAPACE_CONFIG_PATH`; matching config and executable versions alone does not establish matching plugin installation state.
 
     If an unreadable native definition also blocks installation or self-update, follow [native service recovery](/cli/gateway#recover-an-unreadable-native-service-definition). Preserve service-only environment values before rebuilding the launcher; configuration and plugin state do not need to be deleted.
 
-    Doctor preserves shared plugin runtime caches and staging directories, including older versioned buckets. Another installation or profile can still depend on them; a directory name or marker does not establish that it is unused. `openclaw doctor --fix` / `openclaw doctor --repair` removes global plugin-runtime symlinks only when their targets no longer exist, not merely because they point into an older cache.
+    Doctor preserves shared plugin runtime caches and staging directories, including older versioned buckets. Another installation or profile can still depend on them; a directory name or marker does not establish that it is unused. `carapace doctor --fix` / `carapace doctor --repair` removes global plugin-runtime symlinks only when their targets no longer exist, not merely because they point into an older cache.
 
     The `core/doctor/legacy-plugin-dependencies` lint selector shipped in v2026.8.1 remains available as a deprecated, non-destructive informational check. It no longer scans cache roots or recommends deleting them. Use `--severity-min info` to display its deprecation notice.
 
-    Package-local cleanup remains with the package installer. Doctor still removes orphaned or recovered managed npm copies of bundled `@openclaw/*` plugins that can shadow the current bundled manifest. It also relinks the host `openclaw` package into managed npm plugins that declare `peerDependencies.openclaw`, so package-local runtime imports such as `openclaw/plugin-sdk/*` keep resolving after updates or npm repairs.
+    Package-local cleanup remains with the package installer. Doctor still removes orphaned or recovered managed npm copies of bundled `@carapace/*` plugins that can shadow the current bundled manifest. It also relinks the host `carapace` package into managed npm plugins that declare `peerDependencies.carapace`, so package-local runtime imports such as `carapace/plugin-sdk/*` keep resolving after updates or npm repairs.
 
-    Doctor can also reinstall missing downloadable plugins when config references them but the local plugin registry cannot find them (material `plugins.entries`, configured channel/provider/search settings, configured agent runtimes). During package updates, doctor avoids reinstalling plugin packages while the core package is being swapped; run `openclaw doctor --fix` again after the update if a configured plugin still needs recovery. Outside the container image startup exception below, gateway startup and config reload do not run package repair; plugin installs remain explicit doctor/install/update work.
+    Doctor can also reinstall missing downloadable plugins when config references them but the local plugin registry cannot find them (material `plugins.entries`, configured channel/provider/search settings, configured agent runtimes). During package updates, doctor avoids reinstalling plugin packages while the core package is being swapped; run `carapace doctor --fix` again after the update if a configured plugin still needs recovery. Outside the container image startup exception below, gateway startup and config reload do not run package repair; plugin installs remain explicit doctor/install/update work.
 
-    Doctor also refreshes stale official runtime plugins that are bound to the current OpenClaw release cohort. This repair uses the declared current target on the recorded registry and verifies that artifact independently of the old installation. An existing exact npm pin becomes the exact replacement version; ordinary missing-plugin repairs preserve the recorded target and integrity. Capability consent still applies.
+    Doctor also refreshes stale official runtime plugins that are bound to the current Carapace release cohort. This repair uses the declared current target on the recorded registry and verifies that artifact independently of the old installation. An existing exact npm pin becomes the exact replacement version; ordinary missing-plugin repairs preserve the recorded target and integrity. Capability consent still applies.
 
-    Containerized gateway startup has a narrow upgrade exception: when `openclaw gateway run` starts on a new OpenClaw version, it runs safe state migrations and the existing post-core plugin convergence before readiness, then records a per-version checkpoint. This startup pass can clean stale bundled-plugin records, repair local plugin links, reinstall configured plugin packages when the convergence path requires it, and check active plugin payloads. If startup cannot repair safely, run the same image once with `openclaw doctor --fix` against the same mounted state/config before restarting the container normally.
+    Containerized gateway startup has a narrow upgrade exception: when `carapace gateway run` starts on a new Carapace version, it runs safe state migrations and the existing post-core plugin convergence before readiness, then records a per-version checkpoint. This startup pass can clean stale bundled-plugin records, repair local plugin links, reinstall configured plugin packages when the convergence path requires it, and check active plugin payloads. If startup cannot repair safely, run the same image once with `carapace doctor --fix` against the same mounted state/config before restarting the container normally.
 
   </Accordion>
   <Accordion title="8. Gateway service migrations and cleanup hints">
-    Run `openclaw doctor` interactively to review legacy gateway services (launchd/systemd/schtasks) and confirm supported cleanup. Explicit repair maintenance skips this separate cleanup flow. Removal is reported separately from installation; use `openclaw gateway install` when the intended native service is missing. Doctor can also scan for extra gateway-like services and print cleanup hints. Profile-named OpenClaw gateway services are considered first-class and are not flagged as "extra."
+    Run `carapace doctor` interactively to review legacy gateway services (launchd/systemd/schtasks) and confirm supported cleanup. Explicit repair maintenance skips this separate cleanup flow. Removal is reported separately from installation; use `carapace gateway install` when the intended native service is missing. Doctor can also scan for extra gateway-like services and print cleanup hints. Profile-named Carapace gateway services are considered first-class and are not flagged as "extra."
 
     Linux user-service cleanup preserves the unit file if stopping or disabling the service fails. An interrupted status probe does not permit file-only removal; that fallback is reported only when `systemctl` is unavailable.
 
-    On Linux, if the user-level gateway service is missing but a system-level OpenClaw gateway service exists, doctor does not install a second user-level service automatically. Inspect with `openclaw gateway status --deep` or `openclaw doctor --deep`, then remove the duplicate or set `OPENCLAW_SERVICE_REPAIR_POLICY=external` when a system supervisor owns the gateway lifecycle.
+    On Linux, if the user-level gateway service is missing but a system-level Carapace gateway service exists, doctor does not install a second user-level service automatically. Inspect with `carapace gateway status --deep` or `carapace doctor --deep`, then remove the duplicate or set `CARAPACE_SERVICE_REPAIR_POLICY=external` when a system supervisor owns the gateway lifecycle.
 
   </Accordion>
   <Accordion title="8b. Startup Matrix migration">
@@ -597,20 +597,20 @@ That stages grounded durable candidates into the short-term dreaming store while
     - paired records missing an active token for an approved role
     - paired tokens whose scopes drift outside the approved pairing baseline
     - local cached device-token entries for the current machine that predate a gateway-side token rotation or carry stale scope metadata
-    - a retired `identity/device-auth.json` file that is still present and blocks inspection of locally cached tokens, including in remote Gateway mode; stop the Gateway and run `openclaw doctor --fix` to finish migration or cleanup
+    - a retired `identity/device-auth.json` file that is still present and blocks inspection of locally cached tokens, including in remote Gateway mode; stop the Gateway and run `carapace doctor --fix` to finish migration or cleanup
 
     Doctor does not auto-approve pair requests or auto-rotate device tokens. It prints the exact next steps:
 
-    - inspect pending requests with `openclaw devices list`
-    - approve the exact request with `openclaw devices approve <requestId>`
-    - rotate a fresh token with `openclaw devices rotate --device <deviceId> --role <role>`
-    - remove and re-approve a stale record with `openclaw devices remove <deviceId>`
+    - inspect pending requests with `carapace devices list`
+    - approve the exact request with `carapace devices approve <requestId>`
+    - rotate a fresh token with `carapace devices rotate --device <deviceId> --role <role>`
+    - remove and re-approve a stale record with `carapace devices remove <deviceId>`
 
     This distinguishes first-time pairing from pending role/scope upgrades and from stale token/device-identity drift, closing the common "already paired but still getting pairing required" hole.
 
   </Accordion>
   <Accordion title="9. Security warnings">
-    Doctor emits a Security note only when it finds a warning, such as a provider open to DMs without an allowlist or a dangerously configured policy. Use `openclaw security audit` for the full security inventory.
+    Doctor emits a Security note only when it finds a warning, such as a provider open to DMs without an allowlist or a dangerously configured policy. Use `carapace security audit` for the full security inventory.
 
     Missing multi-agent DM routing ownership is reported as a finding. It does
     not stop the remaining channel security checks or pending state migrations.
@@ -625,8 +625,8 @@ That stages grounded durable candidates into the short-term dreaming store while
   <Accordion title="11. Workspace status (skills, plugins, and TaskFlows)">
     Doctor prints problems and actions for the default agent, not healthy-state inventory:
 
-    - **Skills**: lists allowed but unusable skill names; use `openclaw skills check` for requirement details and full counts.
-    - **Plugins**: reports only errored plugin IDs; use `openclaw plugins list` for loaded, imported, disabled, and bundle-plugin inventory.
+    - **Skills**: lists allowed but unusable skill names; use `carapace skills check` for requirement details and full counts.
+    - **Plugins**: reports only errored plugin IDs; use `carapace plugins list` for loaded, imported, disabled, and bundle-plugin inventory.
     - **Plugin compatibility warnings**: flags plugins that have compatibility issues with the current runtime.
     - **Plugin diagnostics**: surfaces any load-time warnings or errors emitted by the plugin registry.
     - **TaskFlow recovery**: surfaces suspicious managed TaskFlows that need manual inspection or cancellation.
@@ -642,28 +642,28 @@ That stages grounded durable candidates into the short-term dreaming store while
   <Accordion title="11c. Shell completion">
     Doctor checks whether tab completion is installed for the current shell (zsh, bash, fish, or PowerShell):
 
-    - If the shell profile uses a slow dynamic completion pattern (`source <(openclaw completion ...)`), doctor upgrades it to the faster cached file variant.
+    - If the shell profile uses a slow dynamic completion pattern (`source <(carapace completion ...)`), doctor upgrades it to the faster cached file variant.
     - If completion is configured in the profile but the cache file is missing, doctor regenerates the cache automatically.
     - If no completion is configured at all, doctor prompts to install it (interactive mode only; skipped with `--non-interactive`).
 
-    Run `openclaw completion --write-state` to regenerate the cache manually.
+    Run `carapace completion --write-state` to regenerate the cache manually.
 
   </Accordion>
   <Accordion title="11d. Stale channel plugin cleanup">
-    When `openclaw doctor --fix` removes a missing channel plugin, it also removes the dangling channel-scoped config that referenced that plugin: `channels.<id>` entries, heartbeat targets that named the channel, and `agents.*.models["<channel>/*"]` overrides. This prevents Gateway boot loops where the channel runtime is gone but config still asks the gateway to bind to it.
+    When `carapace doctor --fix` removes a missing channel plugin, it also removes the dangling channel-scoped config that referenced that plugin: `channels.<id>` entries, heartbeat targets that named the channel, and `agents.*.models["<channel>/*"]` overrides. This prevents Gateway boot loops where the channel runtime is gone but config still asks the gateway to bind to it.
   </Accordion>
   <Accordion title="12. Gateway auth checks (local token)">
     Doctor checks local gateway token auth readiness.
 
     - If token mode needs a token and no token source exists, doctor offers to generate one.
     - If `gateway.auth.token` is SecretRef-managed but unavailable, doctor warns and does not overwrite it with plaintext.
-    - `openclaw doctor --generate-gateway-token` forces generation only when no token SecretRef is configured.
+    - `carapace doctor --generate-gateway-token` forces generation only when no token SecretRef is configured.
 
   </Accordion>
   <Accordion title="12b. Read-only SecretRef-aware repairs">
     Some repair flows need to inspect configured credentials without weakening runtime fail-fast behavior.
 
-    - `openclaw doctor --fix` uses the same read-only SecretRef summary model as status-family commands for targeted config repairs.
+    - `carapace doctor --fix` uses the same read-only SecretRef summary model as status-family commands for targeted config repairs.
     - Example: Telegram `allowFrom` / `groupAllowFrom` `@username` repair tries to use configured bot credentials when available.
     - If the Telegram bot token is configured via SecretRef but unavailable in the current command path, doctor reports that the credential is configured-but-unavailable and skips auto-resolution instead of crashing or misreporting the token as missing.
 
@@ -680,7 +680,7 @@ That stages grounded durable candidates into the short-term dreaming store while
 
     When a cached gateway probe result is available (gateway was healthy at the time of the check), doctor cross-references its result with the CLI-visible config and notes any discrepancy. Doctor does not start a fresh embedding ping on the default path; use the deep memory status command when you want a live provider check.
 
-    Use `openclaw memory status --deep` to verify embedding readiness at runtime.
+    Use `carapace memory status --deep` to verify embedding readiness at runtime.
 
     Embedding-provider readiness is a health check, not a state migration. Gateway startup does not initialize memory embedding providers during migration preflight, so auth-profile SecretRefs can activate afterward. If embeddings remain unavailable, memory sync preserves an existing semantic index rather than replacing it with FTS-only data. Migration warnings allow degraded startup; errors that leave required state unsafe to read still block Gateway readiness.
 
@@ -689,17 +689,17 @@ That stages grounded durable candidates into the short-term dreaming store while
     If the gateway is healthy, doctor runs a channel status probe and reports warnings with suggested fixes.
   </Accordion>
   <Accordion title="15. Supervisor config audit + repair">
-    Plain Doctor inspection checks the installed supervisor config (launchd/systemd/schtasks) for missing or outdated defaults (for example systemd network-online dependencies and restart delay) and can offer an interactive repair. Explicit repair maintenance preserves the installed service definition and skips this separate service-rewrite phase. Run `openclaw gateway install --force` from the intended installation to replace the launcher and managed environment.
+    Plain Doctor inspection checks the installed supervisor config (launchd/systemd/schtasks) for missing or outdated defaults (for example systemd network-online dependencies and restart delay) and can offer an interactive repair. Explicit repair maintenance preserves the installed service definition and skips this separate service-rewrite phase. Run `carapace gateway install --force` from the intended installation to replace the launcher and managed environment.
 
     Notes:
 
-    - `openclaw doctor` prompts before rewriting supervisor config. `openclaw doctor --force` alone remains guided: it allows aggressive repair choices but still requires interactive consent for an eligible service rewrite. It does not enter repair maintenance or bypass ownership and write-access checks.
-    - `openclaw doctor --yes` accepts default non-service repair prompts and enters maintenance while preserving the service definition.
-    - `openclaw doctor --fix` applies recommended repairs without prompts (`--repair` is an alias; `--yes` also enters repair maintenance). It stops the matching managed Gateway before plugin or mutable-state inspection, verifies repairs, and restarts the same service once, even when no changes are needed. It preserves the installed service definition, leaves services confirmed offline before maintenance offline, and refuses to stop an ancestor Gateway. Plain inspection does not enter maintenance, and custom state directories do not adopt native services.
+    - `carapace doctor` prompts before rewriting supervisor config. `carapace doctor --force` alone remains guided: it allows aggressive repair choices but still requires interactive consent for an eligible service rewrite. It does not enter repair maintenance or bypass ownership and write-access checks.
+    - `carapace doctor --yes` accepts default non-service repair prompts and enters maintenance while preserving the service definition.
+    - `carapace doctor --fix` applies recommended repairs without prompts (`--repair` is an alias; `--yes` also enters repair maintenance). It stops the matching managed Gateway before plugin or mutable-state inspection, verifies repairs, and restarts the same service once, even when no changes are needed. It preserves the installed service definition, leaves services confirmed offline before maintenance offline, and refuses to stop an ancestor Gateway. Plain inspection does not enter maintenance, and custom state directories do not adopt native services.
     - Explicit repair refuses unavailable service inspection and unmatched services that may still run. After their owner stops them and the native manager confirms they are offline, Doctor repairs its selected state without changing or starting those services. A disabled systemd unit can still be restarting; Doctor checks runtime state as well as installation state.
     - An updater's explicit Gateway activation policy leaves stop/restart ownership with the updater. Doctor still requires native proof that the service is offline; a live `update --no-restart` repair fails without stopping or restarting it. Stop the service through its owner before retrying the update. Older update parents without that policy retain ordinary Doctor maintenance.
-    - `openclaw doctor --fix --force` preserves the service definition too. Use `openclaw gateway install --force` to request a rewrite; operator-owned systemd drop-ins remain unchanged.
-    - `OPENCLAW_SERVICE_REPAIR_POLICY=external` keeps doctor read-only for gateway service lifecycle. It still reports service health and runs non-service repairs, but skips service install/start/restart/bootstrap, supervisor config rewrites, and legacy service cleanup because an external supervisor owns that lifecycle.
+    - `carapace doctor --fix --force` preserves the service definition too. Use `carapace gateway install --force` to request a rewrite; operator-owned systemd drop-ins remain unchanged.
+    - `CARAPACE_SERVICE_REPAIR_POLICY=external` keeps doctor read-only for gateway service lifecycle. It still reports service health and runs non-service repairs, but skips service install/start/restart/bootstrap, supervisor config rewrites, and legacy service cleanup because an external supervisor owns that lifecycle.
     - On macOS, a same-label system LaunchDaemon blocks user LaunchAgent install, start, restart, and bootstrap repair. Doctor reports the system owner and stops service recovery; `--force` does not bypass this ownership boundary. See [Existing system LaunchDaemons](/gateway#existing-system-launchdaemons).
     - On Linux, doctor does not rewrite command/entrypoint metadata while the matching systemd gateway unit is active. If a stopped unit's command or working directory is overridden by an operator-owned systemd drop-in, inspect it with `systemctl --user cat <unit>.service`, then update or remove the drop-in; rewriting the managed base cannot change the effective launcher. `Environment=` drop-ins remain supported. Doctor also ignores inactive non-legacy extra gateway-like units during the duplicate-service scan so companion service files do not create cleanup noise.
     - On Linux, doctor checks authority over the installed and planned service files before persisting a recovered gateway token. If that check blocks service repair, the repair leaves config and token unchanged and reports how to restore inspection access or involve the deployment owner; `--force` cannot bypass it. Unrelated Doctor config repairs are unaffected.
@@ -709,8 +709,8 @@ That stages grounded durable candidates into the short-term dreaming store while
     - If token auth requires a token and the configured token SecretRef is unresolved, doctor blocks the install/repair path with actionable guidance.
     - If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, doctor blocks install/repair until mode is set explicitly.
     - For Linux user-systemd units, doctor token drift checks include both `Environment=` and `EnvironmentFile=` sources when comparing service auth metadata.
-    - Doctor service repairs refuse to rewrite, stop, or restart a gateway service from an older OpenClaw binary when the config was last written by a newer version. See [Gateway troubleshooting](/gateway/troubleshooting#split-brain-installs-and-newer-config-guard).
-    - `openclaw gateway install --force` rewrites the managed base unit, but never removes operator-owned systemd drop-ins; it warns if a command or working-directory override remains effective.
+    - Doctor service repairs refuse to rewrite, stop, or restart a gateway service from an older Carapace binary when the config was last written by a newer version. See [Gateway troubleshooting](/gateway/troubleshooting#split-brain-installs-and-newer-config-guard).
+    - `carapace gateway install --force` rewrites the managed base unit, but never removes operator-owned systemd drop-ins; it warns if a command or working-directory override remains effective.
 
   </Accordion>
   <Accordion title="16. Gateway runtime + port diagnostics">

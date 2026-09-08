@@ -1,4 +1,4 @@
-// `openclaw update status`: combines install metadata, configured channel, and remote update checks.
+// `carapace update status`: combines install metadata, configured channel, and remote update checks.
 import { getTerminalTableWidth, renderTable } from "../../../packages/terminal-core/src/table.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
@@ -105,7 +105,7 @@ export async function updateStatusCommand(opts: UpdateStatusOptions): Promise<vo
     },
   ];
 
-  defaultRuntime.log(theme.heading("OpenClaw update status"));
+  defaultRuntime.log(theme.heading("Carapace update status"));
   defaultRuntime.log("");
   defaultRuntime.log(
     renderTable({
@@ -126,7 +126,7 @@ export async function updateStatusCommand(opts: UpdateStatusOptions): Promise<vo
     }
     if (abandonment) {
       defaultRuntime.log(
-        "Abandoned update detected; the Gateway will reconcile its recorded outcome. Run openclaw update repair to reconcile it now.",
+        "Abandoned update detected; the Gateway will reconcile its recorded outcome. Run carapace update repair to reconcile it now.",
       );
     }
     const report = renderUpdateRunReport(run);

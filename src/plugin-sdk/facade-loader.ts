@@ -32,7 +32,7 @@ const CURRENT_MODULE_PATH = fileURLToPath(import.meta.url);
 
 const loadedFacadePluginIds = new Set<string>();
 let facadeLoaderSourceTransformFactory: PluginModuleLoaderFactory | undefined;
-function getOpenClawPackageRoot() {
+function getCarapacePackageRoot() {
   return (
     resolveLoaderPackageRoot({
       modulePath: fileURLToPath(import.meta.url),
@@ -48,7 +48,7 @@ function resolveFacadeModuleLocation(params: {
 }): { modulePath: string; boundaryRoot: string } | null {
   const bundledPluginsDir = resolveBundledPluginsDir(params.env ?? process.env);
   const key = `facade:${createFacadeResolutionKey({ ...params, bundledPluginsDir })}`;
-  const artifacts = getPluginCacheRoot(getOpenClawPackageRoot()).artifacts;
+  const artifacts = getPluginCacheRoot(getCarapacePackageRoot()).artifacts;
   const cached = artifacts.get(key);
   if (cached !== undefined) {
     return cached;
@@ -56,7 +56,7 @@ function resolveFacadeModuleLocation(params: {
   const location = resolveBundledFacadeModuleLocation({
     ...params,
     currentModulePath: CURRENT_MODULE_PATH,
-    packageRoot: getOpenClawPackageRoot(),
+    packageRoot: getCarapacePackageRoot(),
     bundledPluginsDir,
   });
   artifacts.set(key, location);
@@ -200,8 +200,8 @@ function resolveFacadeBoundaryOpenParams(boundaryRoot: string): {
   if (checked) {
     return checked;
   }
-  if (isPathAtOrInside(boundaryRoot, getOpenClawPackageRoot())) {
-    return { boundaryLabel: "OpenClaw package root", rejectHardlinks: false };
+  if (isPathAtOrInside(boundaryRoot, getCarapacePackageRoot())) {
+    return { boundaryLabel: "Carapace package root", rejectHardlinks: false };
   }
   const bundledDir = resolveBundledPluginsDir();
   if (bundledDir && isPathAtOrInside(boundaryRoot, bundledDir)) {

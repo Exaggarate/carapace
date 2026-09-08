@@ -5,10 +5,10 @@ import {
   addActiveManagedProxyTlsOptions,
   resolveFetch,
   resolveEnvHttpProxyAgentOptions,
-} from "openclaw/plugin-sdk/fetch-runtime";
-import { isDebugProxyGlobalFetchPatchInstalled } from "openclaw/plugin-sdk/proxy-capture";
-import { parseRetryAfterHeaderSeconds, retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/fetch-runtime";
+import { isDebugProxyGlobalFetchPatchInstalled } from "carapace/plugin-sdk/proxy-capture";
+import { parseRetryAfterHeaderSeconds, retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import type { EnvHttpProxyAgent } from "undici";
 
 type SlackUndiciRuntime = Pick<typeof import("undici"), "EnvHttpProxyAgent" | "fetch">;

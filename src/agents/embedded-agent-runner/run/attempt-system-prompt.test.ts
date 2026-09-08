@@ -1,5 +1,5 @@
 // Coverage for assembling provider-transformed embedded attempt system prompts.
-import { prependSystemPromptAdditionAfterCacheBoundary } from "@openclaw/ai/internal/shared";
+import { prependSystemPromptAdditionAfterCacheBoundary } from "@carapace/ai/internal/shared";
 import { Type } from "typebox";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
@@ -43,7 +43,7 @@ afterEach(() => {
 
 const baseProviderTransform = {
   provider: "openai",
-  workspaceDir: "/tmp/openclaw",
+  workspaceDir: "/tmp/carapace",
   context: {
     provider: "openai",
     modelId: "gpt-5.5",
@@ -92,7 +92,7 @@ async function preparePermissionPrompt(
     sessionId: "permission-prompt",
     sessionKey: "agent:main:permission-prompt",
     ...session,
-    workspaceDir: "/tmp/openclaw",
+    workspaceDir: "/tmp/carapace",
     config: {},
     thinkLevel,
     sourceReplyDeliveryMode:
@@ -114,8 +114,8 @@ async function preparePermissionPrompt(
     requireExplicitMessageTarget,
     effectiveTools: tools,
     setup: createAttemptSetupFixture({
-      effectiveCwd: "/tmp/openclaw",
-      effectiveWorkspace: "/tmp/openclaw",
+      effectiveCwd: "/tmp/carapace",
+      effectiveWorkspace: "/tmp/carapace",
       getProviderRuntimeHandle: () => ({
         provider: attempt.provider,
         modelId: attempt.modelId,
@@ -188,7 +188,7 @@ describe("buildAttemptSystemPrompt", () => {
   ])(
     "reports the selected sandbox policy for a global attempt ($sandboxSessionKey)",
     async (testCase) => {
-      const workspaceDir = tempDirs.make("openclaw-global-system-prompt-");
+      const workspaceDir = tempDirs.make("carapace-global-system-prompt-");
       const config = {
         agents: {
           ownership: "explicit" as const,
@@ -322,7 +322,7 @@ describe("buildAttemptSystemPrompt", () => {
     expect(markStage).toHaveBeenCalledWith("system-prompt");
   });
 
-  it.each(["/tmp/openclaw", "/tmp/open\u202eclaw\n"])(
+  it.each(["/tmp/carapace", "/tmp/open\u202eclaw\n"])(
     "injects workspace identity context from %j",
     (workspaceDir) => {
       // Workspace identity files are part of the base system prompt and must
@@ -345,22 +345,22 @@ describe("buildAttemptSystemPrompt", () => {
           userTimezone: "UTC",
           userDate: "2026-01-05",
           contextFiles: [
-            { path: "/tmp/openclaw/SOUL.md", content: "SOUL_CONTEXT_MARKER" },
-            { path: "/tmp/openclaw/IDENTITY.md", content: "IDENTITY_CONTEXT_MARKER" },
-            { path: "/tmp/openclaw/USER.md", content: "USER_CONTEXT_MARKER" },
+            { path: "/tmp/carapace/SOUL.md", content: "SOUL_CONTEXT_MARKER" },
+            { path: "/tmp/carapace/IDENTITY.md", content: "IDENTITY_CONTEXT_MARKER" },
+            { path: "/tmp/carapace/USER.md", content: "USER_CONTEXT_MARKER" },
           ],
         },
         providerTransform: { ...baseProviderTransform, workspaceDir },
       });
 
-      expect(result.systemPrompt).toContain("\nWorking directory: /tmp/openclaw\n");
+      expect(result.systemPrompt).toContain("\nWorking directory: /tmp/carapace\n");
       expect(result.systemPrompt).not.toContain("\u202e");
       expect(result.systemPrompt).toContain("# Project Context");
-      expect(result.systemPrompt).toContain("## /tmp/openclaw/SOUL.md");
+      expect(result.systemPrompt).toContain("## /tmp/carapace/SOUL.md");
       expect(result.systemPrompt).toContain("SOUL_CONTEXT_MARKER");
-      expect(result.systemPrompt).toContain("## /tmp/openclaw/IDENTITY.md");
+      expect(result.systemPrompt).toContain("## /tmp/carapace/IDENTITY.md");
       expect(result.systemPrompt).toContain("IDENTITY_CONTEXT_MARKER");
-      expect(result.systemPrompt).toContain("## /tmp/openclaw/USER.md");
+      expect(result.systemPrompt).toContain("## /tmp/carapace/USER.md");
       expect(result.systemPrompt).toContain("USER_CONTEXT_MARKER");
     },
   );
@@ -370,7 +370,7 @@ describe("buildAttemptSystemPrompt", () => {
       isRawModelRun: false,
       transformProviderSystemPrompt,
       embeddedSystemPrompt: {
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         reasoningTagHint: false,
         runtimeInfo: {
           host: "test-host",
@@ -386,7 +386,7 @@ describe("buildAttemptSystemPrompt", () => {
         activeProjectKeys: ["github.com/acme/Alpha"],
         contextFiles: [
           {
-            path: "/tmp/openclaw/MEMORY.md",
+            path: "/tmp/carapace/MEMORY.md",
             content: [
               "# Durable memory",
               "- Alpha fact. <!-- project: github.com/acme/Alpha -->",
@@ -409,7 +409,7 @@ describe("buildAttemptSystemPrompt", () => {
       isRawModelRun: false,
       transformProviderSystemPrompt,
       embeddedSystemPrompt: {
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         reasoningTagHint: false,
         runtimeInfo: {
           host: "test-host",
@@ -426,19 +426,19 @@ describe("buildAttemptSystemPrompt", () => {
         bootstrapTruncationNotice: "Bootstrap context was truncated.",
         contextFiles: [
           {
-            path: "/tmp/openclaw/BOOTSTRAP.md",
+            path: "/tmp/carapace/BOOTSTRAP.md",
             content: "Reply with BOOTSTRAP_OK.",
           },
           {
-            path: "/tmp/openclaw/SOUL.md",
+            path: "/tmp/carapace/SOUL.md",
             content: "SOUL_CONTEXT_MARKER",
           },
           {
-            path: "/tmp/openclaw/IDENTITY.md",
+            path: "/tmp/carapace/IDENTITY.md",
             content: "IDENTITY_CONTEXT_MARKER",
           },
           {
-            path: "/tmp/openclaw/USER.md",
+            path: "/tmp/carapace/USER.md",
             content: "USER_CONTEXT_MARKER",
           },
         ],
@@ -452,13 +452,13 @@ describe("buildAttemptSystemPrompt", () => {
     expect(result.systemPrompt).toContain("## Bootstrap Context Notice");
     expect(result.systemPrompt).toContain("Bootstrap context was truncated.");
     expect(result.systemPrompt).toContain("# Project Context");
-    expect(result.systemPrompt).toContain("## /tmp/openclaw/SOUL.md");
+    expect(result.systemPrompt).toContain("## /tmp/carapace/SOUL.md");
     expect(result.systemPrompt).toContain("SOUL_CONTEXT_MARKER");
-    expect(result.systemPrompt).toContain("## /tmp/openclaw/IDENTITY.md");
+    expect(result.systemPrompt).toContain("## /tmp/carapace/IDENTITY.md");
     expect(result.systemPrompt).toContain("IDENTITY_CONTEXT_MARKER");
-    expect(result.systemPrompt).toContain("## /tmp/openclaw/USER.md");
+    expect(result.systemPrompt).toContain("## /tmp/carapace/USER.md");
     expect(result.systemPrompt).toContain("USER_CONTEXT_MARKER");
-    expect(result.systemPrompt).toContain("## /tmp/openclaw/BOOTSTRAP.md");
+    expect(result.systemPrompt).toContain("## /tmp/carapace/BOOTSTRAP.md");
     expect(result.systemPrompt).toContain("Reply with BOOTSTRAP_OK.");
   });
 
@@ -467,7 +467,7 @@ describe("buildAttemptSystemPrompt", () => {
       isRawModelRun: false,
       transformProviderSystemPrompt,
       embeddedSystemPrompt: {
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         reasoningTagHint: false,
         runtimeInfo: {
           host: "test-host",
@@ -501,7 +501,7 @@ describe("buildAttemptSystemPrompt", () => {
       isRawModelRun: true,
       transformProviderSystemPrompt,
       embeddedSystemPrompt: {
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         reasoningTagHint: false,
         runtimeInfo: {
           host: "test-host",
@@ -517,7 +517,7 @@ describe("buildAttemptSystemPrompt", () => {
         bootstrapMode: "full",
         contextFiles: [
           {
-            path: "/tmp/openclaw/BOOTSTRAP.md",
+            path: "/tmp/carapace/BOOTSTRAP.md",
             content: "Reply with BOOTSTRAP_OK.",
           },
         ],

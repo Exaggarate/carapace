@@ -1,6 +1,6 @@
 // Shared selection over prepared provider metadata. Keep runtime registration
 // out of manifest/default lookups and preserve the runner's lazy defaults load.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeMediaProviderId } from "../../packages/media-understanding-common/src/provider-id.js";
 import { providerSupportsCapability } from "../../packages/media-understanding-common/src/provider-supports.js";
 import type { MediaUnderstandingCapability, MediaUnderstandingProvider } from "./types.js";

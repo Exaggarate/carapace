@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildCodeModeMatrixAgentEnv,
@@ -135,7 +135,7 @@ describe("Code Mode model matrix options", () => {
   });
 
   it("reserves a fresh output path without symlink traversal", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-output-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-output-test-"));
     try {
       const existing = path.join(repoRoot, "existing");
       await fs.mkdir(existing);
@@ -143,7 +143,7 @@ describe("Code Mode model matrix options", () => {
         "must not already exist",
       );
 
-      const outside = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-outside-test-"));
+      const outside = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-outside-test-"));
       const linked = path.join(repoRoot, "linked");
       await fs.symlink(outside, linked, process.platform === "win32" ? "junction" : "dir");
       await expect(
@@ -156,7 +156,7 @@ describe("Code Mode model matrix options", () => {
   });
 
   it("allows only one concurrent run to reserve an output path", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-reserve-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-reserve-test-"));
     try {
       const outputDir = path.join(repoRoot, "nested", "results");
       const attempts = await Promise.allSettled([
@@ -183,7 +183,7 @@ describe("Code Mode model matrix provider setup", () => {
     expect(buildCodeModeMatrixAgentEnv("ollama/qwen3.5:9b", "/runtime", {})).toMatchObject({
       NODE_DISABLE_COMPILE_CACHE: "1",
       OLLAMA_API_KEY: "ollama-local",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join("/runtime", "dist", "extensions"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join("/runtime", "dist", "extensions"),
     });
     expect(
       buildCodeModeMatrixAgentEnv("ollama/qwen3.5:9b", "/runtime", {
@@ -430,7 +430,7 @@ describe("Code Mode model matrix extended fixtures", () => {
   ] as const)(
     "runs task fixtures through the process/evidence boundary: %s",
     async (thinking, failureCategory) => {
-      const repoRoot = tempDirs.make("openclaw-matrix-fixtures-");
+      const repoRoot = tempDirs.make("carapace-matrix-fixtures-");
       await fs.mkdir(path.join(repoRoot, "dist"));
       await fs.mkdir(path.join(repoRoot, "node_modules"));
       await fs.writeFile(path.join(repoRoot, "package.json"), JSON.stringify({ type: "module" }));
@@ -523,7 +523,7 @@ describe("Code Mode model matrix extended fixtures", () => {
   );
 
   it("plans extended tasks without building, executing, or fabricating passing evidence", async () => {
-    const repoRoot = tempDirs.make("openclaw-matrix-plan-");
+    const repoRoot = tempDirs.make("carapace-matrix-plan-");
     const options = parseCodeModeMatrixOptions(
       [
         "--model",
@@ -564,7 +564,7 @@ describe("Code Mode model matrix extended fixtures", () => {
 
 describe("Code Mode model matrix artifacts", () => {
   it("rejects output inside Git metadata", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-git-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-git-test-"));
     try {
       await fs.mkdir(path.join(repoRoot, ".git"));
       await expect(
@@ -600,7 +600,7 @@ describe("Code Mode model matrix artifacts", () => {
   });
 
   it("rejects case aliases of missing runtime artifacts", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-case-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-case-test-"));
     try {
       const canonicalRoot = await fs.realpath(repoRoot);
       const rootName = path.basename(canonicalRoot);
@@ -653,7 +653,7 @@ describe("Code Mode model matrix artifacts", () => {
   });
 
   it("rejects package artifact namespaces before reservation creates them", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-package-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-package-test-"));
     try {
       await fs.mkdir(path.join(repoRoot, "packages"));
       await expect(
@@ -693,7 +693,7 @@ describe("Code Mode model matrix artifacts", () => {
   it.each(["dist", path.join("packages", "agent-core", "dist")])(
     "rejects output inside build-created runtime artifacts: %s",
     async (artifactDir) => {
-      const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-build-test-"));
+      const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-build-test-"));
       let hashed = false;
       try {
         await expect(
@@ -740,7 +740,7 @@ describe("Code Mode model matrix artifacts", () => {
   );
 
   it("continues after cell crashes and reports first-pass versus eventual success", async () => {
-    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-code-mode-matrix-test-"));
+    const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-code-mode-matrix-test-"));
     try {
       let calls = 0;
       const result = await runCodeModeModelMatrix(

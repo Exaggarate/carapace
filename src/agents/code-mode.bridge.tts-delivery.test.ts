@@ -1,5 +1,5 @@
 /** Nested TTS crosses real catalog acceptance and subscribed source delivery. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";

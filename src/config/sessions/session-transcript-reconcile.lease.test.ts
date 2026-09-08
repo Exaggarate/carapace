@@ -2,15 +2,15 @@ import { pathToFileURL } from "node:url";
 import { MessageChannel, Worker, type MessagePort, type WorkerOptions } from "node:worker_threads";
 import { afterEach, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { releaseOpenClawAgentDatabaseLease } from "../../state/openclaw-agent-db-lease.js";
+import { releaseCarapaceAgentDatabaseLease } from "../../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { persistSessionTranscriptTurn } from "./session-accessor.js";
 import {
@@ -37,8 +37,8 @@ it.each([
 ] as const)(
   "reports %s failure and joins every native worker",
   async (fault) => {
-    const stateDir = tempDirs.make("openclaw-reconcile-lease-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-reconcile-lease-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const workers: Worker[] = [];
       const ports: MessagePort[] = [];
       const modes: SessionTranscriptReconcileWorkerInput["mode"][] = [];
@@ -50,9 +50,9 @@ it.each([
           touchSessionEntry: false,
         });
         await waitForSessionTranscriptIndexReconcile(options);
-        const database = openOpenClawAgentDatabase(options);
+        const database = openCarapaceAgentDatabase(options);
         database.db.prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1").run();
-        const state = openOpenClawStateDatabase();
+        const state = openCarapaceStateDatabase();
         const readLeases = () =>
           state.db.prepare("SELECT lease_id FROM agent_database_leases ORDER BY lease_id").all();
         const baseline = readLeases();
@@ -183,13 +183,13 @@ it.each([
           port.close();
         }
         if (triggerInstalled) {
-          openOpenClawStateDatabase().db.exec("DROP TRIGGER reject_test_lease_release");
+          openCarapaceStateDatabase().db.exec("DROP TRIGGER reject_test_lease_release");
         }
         if (leaseId) {
-          releaseOpenClawAgentDatabaseLease(leaseId);
+          releaseCarapaceAgentDatabaseLease(leaseId);
         }
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     });
   },

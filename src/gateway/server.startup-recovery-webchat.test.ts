@@ -10,12 +10,12 @@ import {
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   beginSessionWorkAdmission,
   getSessionWorkAdmissionOwnerRelease,
 } from "../sessions/session-lifecycle-admission.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { countPendingQueueItems } from "../utils/queue-helpers.js";
 import { getGatewayRecoveryRuntime } from "./server-recovery-runtime-context.js";
 import { disconnectGatewayClient, startGatewayWithClient } from "./test-helpers.e2e.js";
@@ -26,17 +26,17 @@ it(
   { timeout: 90_000 },
   async () => {
     const token = "startup-recovery-webchat-token";
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "startup-recovery-webchat",
       env: {
-        OPENCLAW_GATEWAY_TOKEN: token,
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_GATEWAY_TOKEN: token,
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
     });
     const sessionKey = "agent:main:main";
@@ -128,7 +128,7 @@ it(
         models: { mode: "replace", providers: { [provider.providerId]: provider.config } },
         gateway: { auth: { mode: "token", token } },
         plugins: { slots: { memory: "none" } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       gateway = await startGatewayWithClient({
         cfg,
         configPath: state.configPath,

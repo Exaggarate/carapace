@@ -3,8 +3,8 @@ import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-
 import {
   ensureRepositoryWorkspacePendingResultSchema,
   hasRepositoryWorkspacePendingResultSchema,
-} from "../../state/openclaw-state-db-schema-additive.js";
-import type { DB as StateDatabase } from "../../state/openclaw-state-db.generated.js";
+} from "../../state/carapace-state-db-schema-additive.js";
+import type { DB as StateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
   isCurrentPlacementTurnClaim,
   placementTurnOwner,
@@ -313,7 +313,7 @@ export function createPlacementWorkspaceResultOps(runtime: PlacementStoreRuntime
       stagedResultRef: string,
       repositoryWorkspaceId?: string,
     ): void {
-      if (!/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(stagedResultRef)) {
+      if (!/^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u.test(stagedResultRef)) {
         throw new Error("Worker workspace staged result reference is invalid");
       }
       if (repositoryWorkspaceId !== undefined && !/^[a-f0-9-]{36}$/u.test(repositoryWorkspaceId)) {

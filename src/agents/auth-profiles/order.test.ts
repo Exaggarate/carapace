@@ -7,7 +7,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
 import { isAmbientCredentialAllowedByProviderAuthPin } from "./ambient-auth.js";
 import { saveAuthProfileStore } from "./store-runtime.js";
@@ -94,7 +94,7 @@ describe("resolveAuthProfileOrder", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const store: AuthProfileStore = {
       version: 1,
       profiles: {
@@ -130,7 +130,7 @@ describe("resolveAuthProfileOrder", () => {
           "fixture-provider-plan": { baseUrl: "https://example.invalid", models: [] },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       isAmbientCredentialAllowedByProviderAuthPin({
@@ -157,7 +157,7 @@ describe("resolveAuthProfileOrder", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const store: AuthProfileStore = { version: 1, profiles: {} };
 
     expect(
@@ -517,7 +517,7 @@ describe("resolveAuthProfileOrder", () => {
           "fixture-provider": ["fixture-provider:primary", "fixture-provider:backup"],
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       resolveAuthProfileOrder({
@@ -567,7 +567,7 @@ describe("resolveAuthProfileOrder", () => {
           "fixture-provider": ["fixture-provider:primary", "fixture-provider:backup"],
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       resolveAuthProfileOrder({
@@ -598,7 +598,7 @@ describe("resolveAuthProfileOrder", () => {
           refresh: "",
           expires: 0,
           oauthRef: {
-            source: "openclaw-credentials",
+            source: "carapace-credentials",
             provider: "openai-codex",
             id: "00000000000000000000000000000000",
           },
@@ -849,7 +849,7 @@ describe("resolveAuthProfileOrder", () => {
   });
 
   it("marks profile success with one canonical last-good and usage update", async () => {
-    const agentDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-auth-profile-success-"));
+    const agentDir = await mkdtemp(path.join(os.tmpdir(), "carapace-auth-profile-success-"));
     try {
       const store: AuthProfileStore = {
         version: 1,

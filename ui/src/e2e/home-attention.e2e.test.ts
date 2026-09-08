@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { QuestionRecord } from "@openclaw/gateway-protocol";
+import type { QuestionRecord } from "@carapace/gateway-protocol";
 import { beforeEach, expect, it } from "vitest";
 import type { GatewaySessionRow, SessionsListResult } from "../api/types.ts";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
@@ -22,8 +22,8 @@ const suite = createControlUiE2eSuite({
 
 const mainSessionKey = "agent:main:main";
 const rosterMatch = { includeGlobal: true };
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const proofVariant = process.env.OPENCLAW_HOME_ATTENTION_PROOF_VARIANT || "candidate";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const proofVariant = process.env.CARAPACE_HOME_ATTENTION_PROOF_VARIANT || "candidate";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {

@@ -47,7 +47,7 @@ export function makeStateMigrationResult(changes: string[], migrated = true): St
   return { migrated, skipped: false, changes, warnings: [] };
 }
 
-const maybeRepairPluginOpenClawHostLinks = vi.hoisted(() =>
+const maybeRepairPluginCarapaceHostLinks = vi.hoisted(() =>
   vi.fn(
     async (_params: {
       env: NodeJS.ProcessEnv;
@@ -58,11 +58,11 @@ const maybeRepairPluginOpenClawHostLinks = vi.hoisted(() =>
 
 vi.mock("./doctor-plugin-host-links.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./doctor-plugin-host-links.js")>();
-  return { ...actual, maybeRepairPluginOpenClawHostLinks };
+  return { ...actual, maybeRepairPluginCarapaceHostLinks };
 });
 
-export function getMaybeRepairPluginOpenClawHostLinksMock() {
-  return maybeRepairPluginOpenClawHostLinks;
+export function getMaybeRepairPluginCarapaceHostLinksMock() {
+  return maybeRepairPluginCarapaceHostLinks;
 }
 
 type StartupConvergenceWarning = {

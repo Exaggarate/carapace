@@ -12,13 +12,13 @@ import {
   ProviderCommandsSchema,
   refineChannelDmPolicy,
   ToolPolicySchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
+} from "carapace/plugin-sdk/channel-config-schema";
 import {
   buildSecretInputSchema,
   hasConfiguredSecretInput,
   registerSensitiveConfigSchema,
-} from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import {
   normalizeTelegramCommandDescription,

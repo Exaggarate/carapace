@@ -167,7 +167,7 @@ function messageText(message: GatewayChatMessage): string {
     .trim();
 }
 
-describe.runIf(process.env.OPENCLAW_PROVIDER_TIMEOUT_RECOVERY_PROOF === "1")(
+describe.runIf(process.env.CARAPACE_PROVIDER_TIMEOUT_RECOVERY_PROOF === "1")(
   "Gateway provider-timeout recovery product proof",
   () => {
     it(
@@ -193,8 +193,8 @@ describe.runIf(process.env.OPENCLAW_PROVIDER_TIMEOUT_RECOVERY_PROOF === "1")(
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
           runtimeEnvPatch: {
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
           },
           mutateConfig: (config) => {
             const providerConfig = config.models?.providers?.["mock-openai"];
@@ -300,7 +300,7 @@ describe.runIf(process.env.OPENCLAW_PROVIDER_TIMEOUT_RECOVERY_PROOF === "1")(
         console.log(
           JSON.stringify({
             phase: "provider-timeout-recovery-proof-complete",
-            head: process.env.OPENCLAW_PROOF_HEAD_SHA ?? process.env.GITHUB_SHA ?? "local-checkout",
+            head: process.env.CARAPACE_PROOF_HEAD_SHA ?? process.env.GITHUB_SHA ?? "local-checkout",
             checkpointElapsedMs,
             globalRecoveryFloorMs: GLOBAL_RECOVERY_FLOOR_MS,
             providerAllowanceMs: PROVIDER_ALLOWANCE_MS,

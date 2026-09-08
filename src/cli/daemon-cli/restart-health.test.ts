@@ -30,7 +30,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 7001, ppid: 7000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 7001, ppid: 7000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -47,7 +47,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 7000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 7000, commandLine: "carapace-gateway" }],
       hints: [],
     });
     const service = makeGatewayService({ status: "running", pid: 7000 });
@@ -66,7 +66,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 9000, ppid: 8999, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 9000, ppid: 8999, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -137,7 +137,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 9100, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 9100, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -203,7 +203,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -228,7 +228,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -252,7 +252,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -281,7 +281,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -310,7 +310,7 @@ describe("restart health", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
     });
@@ -336,12 +336,12 @@ describe("restart health", () => {
     const service = makeGatewayService({ status: "running", pid: 8000 });
     const serviceEnv = {
       ...process.env,
-      OPENCLAW_STATE_DIR: "/tmp/openclaw-restart-service-state",
+      CARAPACE_STATE_DIR: "/tmp/carapace-restart-service-state",
     } as NodeJS.ProcessEnv;
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
       hints: [],
     });
 

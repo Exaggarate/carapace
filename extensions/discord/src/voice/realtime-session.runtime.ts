@@ -1,5 +1,5 @@
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { DiscordRealtimePlayer } from "./realtime-player.js";
 import type { DiscordRealtimeRecordingInput } from "./realtime-recording.js";
 import {

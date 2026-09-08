@@ -101,7 +101,7 @@ jobs:
             const baseSha = execFileSync('git', ['-C', 'source', 'rev-parse', `${policy.baseTag}^{commit}`], { encoding: 'utf8' }).trim();
             if (baseSha !== env.RELEASE_SHA) throw new Error('Docker correction source must match its base release tag.');
           }
-          const includeBrowser = /^ARG OPENCLAW_INSTALL_BROWSER/m.test(readFileSync('source/Dockerfile', 'utf8'));
+          const includeBrowser = /^ARG CARAPACE_INSTALL_BROWSER/m.test(readFileSync('source/Dockerfile', 'utf8'));
           appendFileSync(env.GITHUB_OUTPUT, `version=${policy.version}\ninclude_browser=${includeBrowser}\nbuilt_at=${new Date().toISOString()}\nartifact_name=${dockerReleaseArtifactName(env.RELEASE_SHA, env.GITHUB_RUN_ATTEMPT)}\n`);
           NODE
 
@@ -183,9 +183,9 @@ jobs:
           outputs: type=oci,dest=${{ runner.temp }}/docker-release/oci/default,tar=false,compression=gzip,compression-level=1
           build-args: |
             GIT_COMMIT=${{ inputs.release_sha }}
-            OPENCLAW_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}
-            OPENCLAW_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}
-            OPENCLAW_EXTENSIONS=diagnostics-otel,codex
+            CARAPACE_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}
+            CARAPACE_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}
+            CARAPACE_EXTENSIONS=diagnostics-otel,codex
           labels: |
             org.opencontainers.image.revision=${{ inputs.release_sha }}
             org.opencontainers.image.version=${{ needs.resolve.outputs.version }}
@@ -203,10 +203,10 @@ jobs:
           outputs: type=oci,dest=${{ runner.temp }}/docker-release/oci/browser,tar=false,compression=gzip,compression-level=1
           build-args: |
             GIT_COMMIT=${{ inputs.release_sha }}
-            OPENCLAW_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}
-            OPENCLAW_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}
-            OPENCLAW_EXTENSIONS=diagnostics-otel,codex
-            OPENCLAW_INSTALL_BROWSER=1
+            CARAPACE_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}
+            CARAPACE_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}
+            CARAPACE_EXTENSIONS=diagnostics-otel,codex
+            CARAPACE_INSTALL_BROWSER=1
           labels: |
             org.opencontainers.image.revision=${{ inputs.release_sha }}
             org.opencontainers.image.version=${{ needs.resolve.outputs.version }}

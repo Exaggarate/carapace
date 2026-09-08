@@ -1,12 +1,12 @@
 // Verifies channel guard behavior in plugin registry lookups.
 import { describe, expect, it } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createChatChannelPlugin } from "../plugin-sdk/channel-core.js";
 import { createPluginRegistry } from "./registry.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import { createPluginRecord } from "./status.test-fixtures.js";
-import type { OpenClawPluginChannelRegistration } from "./types.js";
+import type { CarapacePluginChannelRegistration } from "./types.js";
 
 function createTestRegistry() {
   return createPluginRegistry({
@@ -51,7 +51,7 @@ describe("plugin registry channel guard", () => {
 
       pluginRegistry.registry.plugins.push(record);
       pluginRegistry
-        .createApi(record, { config: {} as OpenClawConfig, registrationMode: "full" })
+        .createApi(record, { config: {} as CarapaceConfig, registrationMode: "full" })
         .registerChannel({ plugin });
 
       expect(pluginRegistry.registry.channelSetups).toHaveLength(0);
@@ -64,7 +64,7 @@ describe("plugin registry channel guard", () => {
 
   it("rejects channel registration from disabled workspace plugins", () => {
     const pluginRegistry = createTestRegistry();
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const record = createPluginRecord({
       id: "workspace-shadow",
       source: "/plugins/workspace-shadow/index.ts",
@@ -93,7 +93,7 @@ describe("plugin registry channel guard", () => {
 
   it("rejects disabled workspace registration before reading channel data", () => {
     const pluginRegistry = createTestRegistry();
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const record = createPluginRecord({
       id: "workspace-shadow",
       source: "/plugins/workspace-shadow/index.ts",
@@ -101,7 +101,7 @@ describe("plugin registry channel guard", () => {
       enabled: false,
     });
     let touchedPluginGetter = false;
-    const registration = {} as OpenClawPluginChannelRegistration;
+    const registration = {} as CarapacePluginChannelRegistration;
     Object.defineProperty(registration, "plugin", {
       enumerable: true,
       get() {
@@ -134,7 +134,7 @@ describe("plugin registry channel guard", () => {
 
   it("keeps channel registration available for trusted workspace plugins", () => {
     const pluginRegistry = createTestRegistry();
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const record = createPluginRecord({
       id: "trusted-workspace-shadow",
       source: "/plugins/trusted-workspace-shadow/index.ts",
@@ -176,7 +176,7 @@ describe("plugin registry channel guard", () => {
 
       pluginRegistry.registry.plugins.push(record);
       pluginRegistry
-        .createApi(record, { config: {} as OpenClawConfig, registrationMode: "full" })
+        .createApi(record, { config: {} as CarapaceConfig, registrationMode: "full" })
         .registerChannel({
           plugin: createChannelPlugin("telegram", `${origin} Telegram`),
         });

@@ -1,9 +1,9 @@
 // Nextcloud Talk plugin module implements gateway behavior.
-import { clearAccountFieldsFromConfigSection } from "openclaw/plugin-sdk/channel-config-helpers";
+import { clearAccountFieldsFromConfigSection } from "carapace/plugin-sdk/channel-config-helpers";
 import {
   createAccountStatusSink,
   runPassiveAccountLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { resolveNextcloudTalkAccount, type ResolvedNextcloudTalkAccount } from "./accounts.js";
 import type { ChannelPlugin } from "./channel-api.js";
 import { monitorNextcloudTalkProvider } from "./monitor-runtime.js";

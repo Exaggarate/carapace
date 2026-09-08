@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openDesktopFocus } from "../../components/desktop/desktop-focus-window.ts";
 import { formatTimeAgo } from "../../lib/format.ts";

@@ -843,7 +843,7 @@ describe("new-session composer attachment drops", () => {
       canSubmit: false,
       submitDisabledReason: "This action requires operator.write access.",
     });
-    const submitTooltip = composer.querySelector<HTMLElement>("openclaw-tooltip");
+    const submitTooltip = composer.querySelector<HTMLElement>("carapace-tooltip");
 
     expect((submitTooltip as HTMLElement & { content?: string })?.content).toBe(
       "This action requires operator.write access.",

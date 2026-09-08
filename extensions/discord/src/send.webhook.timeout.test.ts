@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DISCORD_REST_TIMEOUT_MS } from "./proxy-request-client.js";
 import { sendWebhookMessageDiscord } from "./send.webhook.js";
 
 const opts = {
-  cfg: { channels: { discord: { token: "Bot test-token" } } } as OpenClawConfig,
+  cfg: { channels: { discord: { token: "Bot test-token" } } } as CarapaceConfig,
   webhookId: "1",
   webhookToken: "token",
   wait: true as const,

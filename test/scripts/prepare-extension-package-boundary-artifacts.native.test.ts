@@ -25,7 +25,7 @@ function createPreparationFixture(mode: "package-boundary" | "all", signal: Abor
     signal.throwIfAborted();
     return writeNativeFixtureFile(root, file, text);
   };
-  write("package.json", '{"name":"openclaw","type":"module"}');
+  write("package.json", '{"name":"carapace","type":"module"}');
   write("pnpm-workspace.yaml", "packages: []\n");
   write(
     "tsconfig.json",

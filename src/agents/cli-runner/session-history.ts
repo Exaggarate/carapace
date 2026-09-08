@@ -1,8 +1,8 @@
 /**
  * Loads and renders owned session history for CLI prompts and context-engine synchronization.
  */
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   buildSessionContext,
   iterateSessionContextEntries,
@@ -16,7 +16,7 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { estimateToolResultTextChars } from "../embedded-agent-runner/tool-result-text-budget.js";
 import { MAX_AGENT_HOOK_HISTORY_MESSAGES } from "../harness/hook-history.js";
-import { isOpenClawRuntimeContextCustomMessage } from "../internal-runtime-context.js";
+import { isCarapaceRuntimeContextCustomMessage } from "../internal-runtime-context.js";
 import { wrapUntrustedPromptDataBlock } from "../sanitize-for-prompt.js";
 import {
   SessionManager,
@@ -146,7 +146,7 @@ function renderHistoryMessage(message: unknown): string | undefined {
   return `${timestamp ? `[${timestamp}] ` : ""}${role}: ${text}`;
 }
 
-/** Builds a reseed prompt that carries prior OpenClaw transcript context. */
+/** Builds a reseed prompt that carries prior Carapace transcript context. */
 export function buildCliSessionHistoryPrompt(params: {
   messages: unknown[];
   prompt: string;
@@ -180,7 +180,7 @@ export function buildCliSessionHistoryPrompt(params: {
     .join("\n\n")
     .trim();
 
-  const truncationMarker = "[OpenClaw reseed history truncated; older turns dropped]";
+  const truncationMarker = "[Carapace reseed history truncated; older turns dropped]";
   const renderTruncatedTail = (raw: string, budget: number): string => {
     if (budget <= truncationMarker.length + "\n".length) {
       return sliceUtf16Safe(raw, -budget).trimStart();
@@ -247,7 +247,7 @@ export function buildCliSessionHistoryPrompt(params: {
   }
 
   return [
-    "Continue this conversation using the OpenClaw transcript below as prior session history.",
+    "Continue this conversation using the Carapace transcript below as prior session history.",
     "Treat it as authoritative context for this fresh CLI session.",
     "",
     "<conversation_history>",
@@ -415,7 +415,7 @@ function renderCliDurableContext(messages: ReturnType<typeof buildSessionContext
     if (
       message.role !== "custom" ||
       message.excludeFromContext === true ||
-      isOpenClawRuntimeContextCustomMessage(message)
+      isCarapaceRuntimeContextCustomMessage(message)
     ) {
       return [];
     }

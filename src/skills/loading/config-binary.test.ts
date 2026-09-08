@@ -7,7 +7,7 @@ import type { SkillEntry } from "../types.js";
 import { shouldIncludeSkill } from "./config.js";
 
 it("includes a skill after its required binary is installed on unchanged PATH", () => {
-  withTempDirSync({ prefix: "openclaw-skill-binary-" }, (binDir) => {
+  withTempDirSync({ prefix: "carapace-skill-binary-" }, (binDir) => {
     const filePath = path.join(binDir, "SKILL.md");
     const entry: SkillEntry = {
       skill: {
@@ -15,7 +15,7 @@ it("includes a skill after its required binary is installed on unchanged PATH", 
         description: "Requires a binary",
         filePath,
         baseDir: binDir,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
         sourceInfo: { path: filePath, source: "test", scope: "temporary", origin: "top-level" },
         disableModelInvocation: false,
       },

@@ -21,16 +21,16 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
 import * as sessionTargetsReadAvailability from "../config/sessions/targets-read-availability.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { createWorkerPlacementSessionEvidenceResolver } from "./server-worker-placement-session-evidence.js";
 import type { WorkerSessionPlacementRecord } from "./worker-environments/placement-record.js";
@@ -45,8 +45,8 @@ const resolveTargetsReadOnlySpy = vi.spyOn(
 const readIdentityEvidenceBatchSpy = vi.spyOn(sessionAccessor, "readSessionIdentityEvidenceBatch");
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
   resolveTargetsReadOnlySpy.mockClear();
   readIdentityEvidenceBatchSpy.mockClear();
@@ -94,8 +94,8 @@ describe("worker placement session evidence", () => {
   ])(
     "does not duplicate exact-current payloads for $count placements",
     async ({ count, prompt }) => {
-      const stateDir = tempDirs.make("openclaw-placement-exact-first-");
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      const stateDir = tempDirs.make("carapace-placement-exact-first-");
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const placements = Array.from({ length: count }, (_, index) =>
           localPlacement(`exact-current-${index}`, `agent:main:exact-current-${index}`),
         );
@@ -113,7 +113,7 @@ describe("worker placement session evidence", () => {
         await expect(Promise.all(placements.map(warm))).resolves.toEqual(
           placements.map(() => "current"),
         );
-        const database = openOpenClawAgentDatabase({ agentId: "main" });
+        const database = openCarapaceAgentDatabase({ agentId: "main" });
         const statements = trackSqliteStatementExecutions(database.db, ["fallback"], (sql) => {
           const normalized = sql.toLowerCase().replaceAll(/\s+/g, " ");
           return normalized.includes('from "session_nodes"') &&
@@ -142,10 +142,10 @@ describe("worker placement session evidence", () => {
   );
 
   it("retires absent ownerless placements while retaining valid, unreadable, and claimed sessions", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-evidence-retirement-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-evidence-retirement-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const placements = createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase(),
+        database: openCarapaceStateDatabase(),
         now: () => 1_000,
       });
       const identities = ["current", "unreadable", "absent", "claimed"].map((kind) => ({
@@ -166,7 +166,7 @@ describe("worker placement session evidence", () => {
           updatedAt: 1,
         });
       }
-      const database = openOpenClawAgentDatabase({ agentId: "main" });
+      const database = openCarapaceAgentDatabase({ agentId: "main" });
       database.db
         .prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?")
         .run("{", identities[1]!.sessionKey);
@@ -197,8 +197,8 @@ describe("worker placement session evidence", () => {
   });
 
   it("keeps ordinary discovery failures independent from incognito evidence", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-read-failed-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-read-failed-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const ordinary = localPlacement("session-read-failed", "agent:main:read-failed");
       const currentIncognito = localPlacement(
         "session-incognito-current",
@@ -229,7 +229,7 @@ describe("worker placement session evidence", () => {
       expect(resolveTargetsReadOnlySpy).toHaveBeenCalledWith(expect.anything(), "main", {
         cache: expect.any(Map),
       });
-      const incognitoStorePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
+      const incognitoStorePath = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" });
       expect(readIdentityEvidenceBatchSpy).toHaveBeenCalledOnce();
       expect(readIdentityEvidenceBatchSpy).toHaveBeenCalledWith([
         {
@@ -249,10 +249,10 @@ describe("worker placement session evidence", () => {
   });
 
   it("canonicalizes legacy default-main placements before batching", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-canonical-main-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-canonical-main-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storeTemplate },
         agents: { list: [{ id: "ops", default: true }] },
       };
@@ -279,9 +279,9 @@ describe("worker placement session evidence", () => {
   });
 
   it("keeps a listed deleted-main placement current after default-agent migration", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-legacy-main-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
-      const cfg: OpenClawConfig = {
+    const stateDir = tempDirs.make("carapace-placement-session-legacy-main-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
+      const cfg: CarapaceConfig = {
         session: {
           store: path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json"),
         },
@@ -301,8 +301,8 @@ describe("worker placement session evidence", () => {
   });
 
   it("reports absence when the configured session database is genuinely missing", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-database-missing-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-database-missing-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await expect(
         resolvePlacementEvidence(localPlacement("session-missing", "agent:main:missing")),
       ).resolves.toBe("absent");
@@ -310,10 +310,10 @@ describe("worker placement session evidence", () => {
   });
 
   it("keeps a placement when the agent database registry is unreadable", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-registry-unreadable-");
-    fsSync.mkdirSync(path.join(stateDir, "state", "openclaw.sqlite"), { recursive: true });
+    const stateDir = tempDirs.make("carapace-placement-session-registry-unreadable-");
+    fsSync.mkdirSync(path.join(stateDir, "state", "carapace.sqlite"), { recursive: true });
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       await expect(
         resolvePlacementEvidence(
           localPlacement("session-unreadable", "agent:retired:unreadable", "retired"),
@@ -323,17 +323,17 @@ describe("worker placement session evidence", () => {
   });
 
   it("keeps a placement when its session database is migration-invalid", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-evidence-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-evidence-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const sessionId = "session-1";
       const sessionKey = "agent:main:main";
       await sessionAccessor.upsertSessionEntryCore(
         { agentId: "main", sessionKey },
         { sessionId, updatedAt: 1 },
       );
-      const database = openOpenClawAgentDatabase({ agentId: "main" });
+      const database = openCarapaceAgentDatabase({ agentId: "main" });
       database.db.exec("PRAGMA user_version = 999;");
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       await expect(resolvePlacementEvidence(localPlacement(sessionId, sessionKey))).resolves.toBe(
         "unknown",
@@ -342,8 +342,8 @@ describe("worker placement session evidence", () => {
   });
 
   it("warns instead of silently swallowing resolver pipeline failures", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-pipeline-failure-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-pipeline-failure-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       resolveTargetsReadOnlySpy.mockImplementationOnce(() => {
         throw new Error("evidence pipeline exploded");
       });
@@ -359,8 +359,8 @@ describe("worker placement session evidence", () => {
   });
 
   it("prepares targets once and reads only exact session rows for a placement batch", async () => {
-    const stateDir = tempDirs.make("openclaw-placement-session-evidence-batch-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-placement-session-evidence-batch-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const placements = Array.from({ length: 20 }, (_, index) => {
         const agentId = index % 2 === 0 ? "main" : "ops";
         const sessionId = `session-${index}`;
@@ -373,7 +373,7 @@ describe("worker placement session evidence", () => {
           { sessionId: placement.sessionId, updatedAt: 1 },
         );
       }
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       const listCoreSpy = vi.spyOn(sessionAccessor, "listSessionEntriesCore");
       const listReadOnlySpy = vi.spyOn(sessionAccessor, "listSessionEntriesReadOnly");

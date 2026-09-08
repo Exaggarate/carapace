@@ -113,7 +113,7 @@ async function preflight(candidate: string, image: string) {
     throw new Error("Invalid candidate/image selection");
   }
   const info = imageInfo.parse(JSON.parse(await podman(["image", "inspect", image])))[0];
-  if (!info || info.Config.Labels["org.openclaw.mantis.candidate-sha"] !== candidate) {
+  if (!info || info.Config.Labels["org.carapace.mantis.candidate-sha"] !== candidate) {
     throw new Error("Prepared runtime does not match exact candidate");
   }
   const versionName = `mantis-tg-version-${randomUUID()}`;
@@ -170,9 +170,9 @@ async function preflight(candidate: string, image: string) {
         "--security-opt",
         "no-new-privileges",
         "--env",
-        "OPENCLAW_STATE_DIR=/state",
+        "CARAPACE_STATE_DIR=/state",
         "--env",
-        "OPENCLAW_CONFIG_PATH=/candidate-config.json",
+        "CARAPACE_CONFIG_PATH=/candidate-config.json",
         info.Id,
         "node",
         "dist/entry.js",
@@ -618,8 +618,8 @@ async function run() {
         "--no-hydrate",
         "--",
         "env",
-        "OPENCLAW_STATE_DIR=/work/crabbox/state",
-        "OPENCLAW_CONFIG_PATH=/candidate-config.json",
+        "CARAPACE_STATE_DIR=/work/crabbox/state",
+        "CARAPACE_CONFIG_PATH=/candidate-config.json",
         "XDG_CACHE_HOME=/work/crabbox/cache",
         "node",
         "/candidate/dist/entry.js",

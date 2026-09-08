@@ -4,7 +4,7 @@ import { createDeferred } from "../../../../test/helpers/promise.js";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../../../config/config.js";
 import { loadSessionEntry } from "../../../config/sessions/session-accessor.js";
 import type { AgentRuntimeIdentity } from "../../../gateway/agent-runtime-identity-token.js";
@@ -25,9 +25,9 @@ import {
   setTaskRegistryControlRuntimeForTests,
 } from "../../../tasks/task-registry.test-support.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import {
   createOperationalRunInstanceRef,
   getAdmittedRunDelegatedAuthority,
@@ -63,9 +63,9 @@ vi.mock("../../embedded-agent.js", async (importOriginal) => ({
 
 const parentSessionKey = "agent:main:subagent:production-boundary-parent";
 const parentRunId = "production-boundary-parent";
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let stateDir = "";
-let runtimeConfig: OpenClawConfig;
+let runtimeConfig: CarapaceConfig;
 
 async function writeTestConfig() {
   const config = {
@@ -97,7 +97,7 @@ async function writeTestConfig() {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   await state.writeConfig(config);
   clearConfigCache();
   clearRuntimeConfigSnapshot();
@@ -105,7 +105,7 @@ async function writeTestConfig() {
 }
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "spawn-production-boundary" });
+  state = await createCarapaceTestState({ label: "spawn-production-boundary" });
   await resetPreparedModelRuntimeHarness(state);
   runEmbeddedAgent.mockReset();
   stateDir = state.stateDir;

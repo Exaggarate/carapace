@@ -1,17 +1,17 @@
 // Policy plugin sandbox posture evidence.
-import { splitSandboxBindSpec } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { splitSandboxBindSpec } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   asNonArrayRecord,
   isRecord,
   asBoolean as readBoolean,
   normalizeOptionalString as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { collectPolicyConfiguredAgents } from "./policy-state-helpers.js";
 import { readStringArray } from "./policy-state-tool-posture.js";
 import type { PolicySandboxPostureEvidence } from "./policy-state-types.js";
 
 // Mirrors the sandbox browser config default without importing core internals into the policy plugin.
-const DEFAULT_POLICY_SANDBOX_BROWSER_NETWORK = "openclaw-sandbox-browser";
+const DEFAULT_POLICY_SANDBOX_BROWSER_NETWORK = "carapace-sandbox-browser";
 
 export function scanPolicySandboxPosture(
   cfg: Record<string, unknown>,
@@ -25,8 +25,8 @@ export function scanPolicySandboxPosture(
     scope: "defaults",
     sandbox: defaultSandbox,
     inheritedSandbox: {},
-    sourceBase: "oc://openclaw.config/agents/defaults/sandbox",
-    inheritedSourceBase: "oc://openclaw.config/agents/defaults/sandbox",
+    sourceBase: "oc://carapace.config/agents/defaults/sandbox",
+    inheritedSourceBase: "oc://carapace.config/agents/defaults/sandbox",
   });
 
   collectPolicyConfiguredAgents(agents).forEach((configured) => {
@@ -43,7 +43,7 @@ export function scanPolicySandboxPosture(
       inheritedSandbox: defaultSandbox,
       sharedSandboxScope: sandboxScopeIsShared(sandbox, defaultSandbox),
       sourceBase: `${configured.sourceBase}/sandbox`,
-      inheritedSourceBase: "oc://openclaw.config/agents/defaults/sandbox",
+      inheritedSourceBase: "oc://carapace.config/agents/defaults/sandbox",
     });
   });
 

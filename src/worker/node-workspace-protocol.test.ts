@@ -14,7 +14,7 @@ const request = {
   environmentId: "environment-1",
   sessionId: "session-1",
   generation: 1,
-  argv: ["openclaw-internal-workspace-seed"],
+  argv: ["carapace-internal-workspace-seed"],
 };
 const key = "a".repeat(64);
 

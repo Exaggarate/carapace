@@ -18,7 +18,7 @@ import {
   resetTaskRegistryForTests,
 } from "../tasks/task-runtime.test-helpers.js";
 import { captureEnv } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { flowsCancelCommand, flowsListCommand, flowsShowCommand } from "./flows.js";
 
 vi.mock("../config/config.js", () => ({
@@ -68,10 +68,10 @@ function createRuntime(): TestRuntime {
 }
 
 async function withTaskFlowCommandStateDir(run: (root: string) => Promise<void>): Promise<void> {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
       layout: "state-only",
-      prefix: "openclaw-flows-command-",
+      prefix: "carapace-flows-command-",
     },
     async (state) => {
       resetTaskRegistryDeliveryRuntimeForTests();
@@ -92,7 +92,7 @@ describe("flows commands", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   });
 
   afterEach(() => {
@@ -442,7 +442,7 @@ describe("flows commands", () => {
           error: {
             type: "cli_error",
             message:
-              "TaskFlow not found: missing-flow. Run openclaw tasks flow list to see recent flow ids.",
+              "TaskFlow not found: missing-flow. Run carapace tasks flow list to see recent flow ids.",
           },
         },
         2,

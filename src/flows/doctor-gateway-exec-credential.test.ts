@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { hasActiveGatewayExecCredential } from "./doctor-gateway-exec-credential.js";
 
@@ -50,7 +50,7 @@ describe("hasActiveGatewayExecCredential", () => {
       expected: false,
     },
   ])("detects only effective exec edge credentials when $label", async (entry) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: entry.mode,
         remote: { url: "wss://gateway.example.test/rpc", edgeAuth: entry.edgeAuth },

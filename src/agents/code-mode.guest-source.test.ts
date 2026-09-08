@@ -1,6 +1,6 @@
 /** Tests Code Mode guest input and source-validation boundaries. */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodeModeConfig } from "./code-mode-runtime.js";
 import { prepareSource } from "./code-mode-source.js";

@@ -11,7 +11,7 @@ import { visibleWidth } from "../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { formatTextCell } from "../commands/text-format.js";
 import { resolveCanonicalMainSessionKey } from "../config/sessions/main-session-key.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   callGateway,
   GatewayStoredDeviceAuthUnavailableError,
@@ -26,7 +26,7 @@ import {
 } from "./session-ref.js";
 
 export type SessionTargetGateway = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   url?: string;
   token?: string;
   password?: string;
@@ -100,7 +100,7 @@ function formatAmbiguousCandidates(
 function sessionsListHint(gatewayUrl: string | undefined): string {
   return gatewayUrl
     ? `Choose a full session key from that gateway's Control UI (${controlUiBaseUrl(gatewayUrl)}).`
-    : "Run `openclaw sessions list` to choose a full session key.";
+    : "Run `carapace sessions list` to choose a full session key.";
 }
 
 function controlUiBaseUrl(gatewayUrl: string): string {

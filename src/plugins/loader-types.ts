@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { GatewayRequestHandler } from "../gateway/server-methods/types.js";
 import type { PluginCapabilityCatalogContext } from "./capability-catalog-context.types.js";
@@ -15,8 +15,8 @@ export type ChannelPluginLoadIntent = "full" | "setup";
 
 /** Inputs shared by runtime, snapshot, and CLI-metadata plugin loading. */
 export type PluginLoadOptions = {
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   autoEnabledReasons?: Readonly<Record<string, string[]>>;
   workspaceDir?: string;
   installRecords?: Record<string, PluginInstallRecord>;

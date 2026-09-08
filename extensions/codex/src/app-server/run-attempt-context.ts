@@ -8,9 +8,9 @@ import {
   isHostScopedAgentToolActive,
   resolveContextEngineOwnerPluginId,
   runHarnessContextEngineMaintenance,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
-  buildCodexOpenClawPromptContext,
+  buildCodexCarapacePromptContext,
   buildCodexWatchedSessionsContext,
   buildCodexWorkspaceBootstrapContext,
   getCodexWorkspaceMemoryToolNames,
@@ -169,7 +169,7 @@ export async function prepareCodexAttemptContext(
     sessionAgentId,
     memoryToolNames,
     ringZeroActive:
-      isHostScopedAgentToolActive("openclaw") &&
+      isHostScopedAgentToolActive("carapace") &&
       isSystemAgentOnlyCodexDynamicToolAllowlist(runtimeParams.toolsAllow),
     sandboxed: sandbox?.enabled === true,
   });
@@ -191,8 +191,8 @@ export async function prepareCodexAttemptContext(
     sessionKey: contextSessionKey,
     sandboxed: sandbox?.enabled === true,
   });
-  const buildOpenClawPromptContext = (includeWorkspaceReferences: boolean) =>
-    buildCodexOpenClawPromptContext({
+  const buildCarapacePromptContext = (includeWorkspaceReferences: boolean) =>
+    buildCodexCarapacePromptContext({
       params: runtimeParams,
       workspacePromptContext: includeWorkspaceReferences
         ? workspaceBootstrapContext.promptContext
@@ -238,7 +238,7 @@ export async function prepareCodexAttemptContext(
     workspaceBootstrapContext,
     agentWorkspaceDeveloperInstructions,
     baseDeveloperInstructions,
-    buildOpenClawPromptContext,
+    buildCarapacePromptContext,
     skillsCollaborationInstructions,
     promptState,
     codexContextProjectionMaxChars,

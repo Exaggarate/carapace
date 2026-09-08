@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Routing binding helpers resolve configured channel and agent route bindings.
 import { tryResolveLegacyCompatibilityAgentId } from "../agents/agent-scope.js";
 import { listRouteBindings } from "../config/bindings.js";
 import type { AgentRouteBinding } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   normalizeRouteBindingChannelId,
   resolveNormalizedRouteBindingMatch,
@@ -12,11 +12,11 @@ import { normalizeAgentId } from "./session-key.js";
 
 // Public binding helpers used by routing UI/diagnostics. They expose concrete
 // account ids derived from configured agent route bindings.
-export function listBindings(cfg: OpenClawConfig): AgentRouteBinding[] {
+export function listBindings(cfg: CarapaceConfig): AgentRouteBinding[] {
   return listRouteBindings(cfg);
 }
 
-export function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): string[] {
+export function listBoundAccountIds(cfg: CarapaceConfig, channelId: string): string[] {
   const normalizedChannel = normalizeRouteBindingChannelId(channelId);
   if (!normalizedChannel) {
     return [];
@@ -33,7 +33,7 @@ export function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): str
 }
 
 export function resolveDefaultAgentBoundAccountId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channelId: string,
 ): string | null {
   const normalizedChannel = normalizeRouteBindingChannelId(channelId);
@@ -59,7 +59,7 @@ export function resolveDefaultAgentBoundAccountId(
   return null;
 }
 
-export function buildChannelAccountBindings(cfg: OpenClawConfig) {
+export function buildChannelAccountBindings(cfg: CarapaceConfig) {
   const map = new Map<string, Map<string, string[]>>();
   for (const binding of listBindings(cfg)) {
     const resolved = resolveNormalizedRouteBindingMatch(binding);

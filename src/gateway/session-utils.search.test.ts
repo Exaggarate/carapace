@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { filterAndSortSessionEntries } from "./session-utils-list.js";
 
@@ -22,12 +22,12 @@ vi.mock("../agents/provider-model-normalization.runtime.js", () => ({
 const baseCfg = {
   session: { mainKey: "main" },
   agents: { list: [{ id: "main", default: true }] },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
-function createModelDefaultsConfig(primary: string): OpenClawConfig {
+function createModelDefaultsConfig(primary: string): CarapaceConfig {
   return {
     agents: { defaults: { model: { primary } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function makeStore(now = Date.now()): Record<string, SessionEntry> {
@@ -55,7 +55,7 @@ function makeStore(now = Date.now()): Record<string, SessionEntry> {
 
 function selectSessionKeys(params: {
   opts: Parameters<typeof filterAndSortSessionEntries>[0]["opts"];
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   store?: Record<string, SessionEntry>;
   now?: number;
 }): string[] {

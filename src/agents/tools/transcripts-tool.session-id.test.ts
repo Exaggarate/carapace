@@ -1,15 +1,15 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB } from "../../state/openclaw-state-db.generated.js";
+import type { DB } from "../../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { TranscriptSourceProvider } from "../../transcripts/provider-types.js";
 import { TranscriptsStore } from "../../transcripts/store.js";
 import { summarizeTranscripts } from "../../transcripts/summary.js";
@@ -28,8 +28,8 @@ const pendingStops = new Map<ReturnType<typeof createTranscriptsTool>, Set<strin
 const note = "Keep the captured notes.";
 
 function createHarness() {
-  const stateDir = tempDirs.make("openclaw-transcript-ids-");
-  const databaseOptions = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  const stateDir = tempDirs.make("carapace-transcript-ids-");
+  const databaseOptions = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
   const start = vi.fn<NonNullable<TranscriptSourceProvider["start"]>>(async (request) => {
     await request.onUtterance({ text: note, final: true });
     return { ok: true, session: request.session };
@@ -98,7 +98,7 @@ afterEach(async () => {
     pendingStops.clear();
     getTranscriptSourceProviderMock.mockReset();
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     tempDirs.cleanup();
   }
 });
@@ -178,7 +178,7 @@ describe("transcripts bounded export names", () => {
         expect(asOptionalRecord(stopped.details)?.summaryExportError).toBeUndefined();
         expect(stop.mock.calls[0]?.[0].sessionId === handle).toBe(true);
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const summarized = await tool.execute("summarize", {
         action: "summarize",
         sessionId: handle,
@@ -216,7 +216,7 @@ describe("transcripts bounded export names", () => {
     for (const sessionId of ids) {
       await capture(harness, "import", sessionId);
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const entries = await harness.store.listSessionEntries();
     expect(new Set(entries.map((entry) => entry.selector)).size).toBe(2);
     expect(entries.every((entry) => path.basename(entry.sessionDir).startsWith("notes-"))).toBe(
@@ -250,7 +250,7 @@ describe("transcripts bounded export names", () => {
     harness.active.delete(sessionId);
     expect(harness.stop.mock.calls[0]?.[0].sessionId === sessionId).toBe(true);
     expect(asOptionalRecord(result.details)?.summaryExportError).toBeUndefined();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     for (const entry of [older, current]) {
       expect((await harness.store.readSession(entry.selector))?.startedAt).toBe(
         entry.session.startedAt,
@@ -271,7 +271,7 @@ describe("transcripts bounded export names", () => {
     };
     const selector = `2026-07-01/${sessionId}`;
     await store.listSessionEntries();
-    const { db } = openOpenClawStateDatabase(databaseOptions);
+    const { db } = openCarapaceStateDatabase(databaseOptions);
     const queries =
       getNodeSqliteKysely<Pick<DB, "meeting_transcript_sessions" | "meeting_transcript_summaries">>(
         db,
@@ -308,10 +308,10 @@ describe("transcripts bounded export names", () => {
         .set({ markdown })
         .where("session_id", "=", sessionId),
     );
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     await store.writeSession({ ...session, stoppedAt: "2026-07-01T11:00:00.000Z" });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const entry = await store.readSessionEntry(sessionId);
     expect(entry?.session.sessionId === sessionId).toBe(true);
     expect(entry?.session.startedAt).toBe(session.startedAt);
@@ -325,7 +325,7 @@ describe("transcripts bounded export names", () => {
     const artifacts = await store.materializeSessionArtifacts(entry!.selector, "all");
     expect(await fs.readFile(artifacts.summaryPath, "utf8")).toBe(markdown);
     expect(JSON.parse(await fs.readFile(artifacts.summaryJsonPath, "utf8"))).toEqual(summary);
-    const reopened = openOpenClawStateDatabase(databaseOptions).db;
+    const reopened = openCarapaceStateDatabase(databaseOptions).db;
     const row = executeSqliteQuerySync(
       reopened,
       getNodeSqliteKysely<Pick<DB, "meeting_transcript_sessions">>(reopened)

@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { RuntimeEnv } from "../runtime.js";
 import type { BundledPluginSource } from "./bundled-sources.js";
 import type { ConfigSnapshotForInstallPersist } from "./install-config-mutation.js";
@@ -64,7 +64,7 @@ export async function installBundledPluginSource(params: {
     : prepareConfigForDisabledInstall(params.snapshot.config, params.bundledSource.pluginId);
   const configWarning = shouldEnable
     ? undefined
-    : `Installed bundled plugin "${params.bundledSource.pluginId}" without enabling it because it requires configuration first. Configure it, then run \`openclaw plugins enable ${params.bundledSource.pluginId}\`.`;
+    : `Installed bundled plugin "${params.bundledSource.pluginId}" without enabling it because it requires configuration first. Configure it, then run \`carapace plugins enable ${params.bundledSource.pluginId}\`.`;
   const warnings = [params.warning, configWarning].filter((warning): warning is string =>
     Boolean(warning),
   );

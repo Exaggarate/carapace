@@ -5,9 +5,9 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { getRegistryWorktree } from "./registry.js";
 import { ManagedWorktreeService } from "./service.js";
 import { useManagedWorktreeTestRepository } from "./service.test-support.js";
@@ -44,17 +44,17 @@ describe("ManagedWorktreeService canonical paths", () => {
 
   beforeEach(async () => {
     root = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "openclaw-worktree-canonical-paths-"),
+      path.join(await fs.realpath(os.tmpdir()), "carapace-worktree-canonical-paths-"),
     );
     repo = await initializeRepository(root);
     stateDir = path.join(root, "state");
     await fs.mkdir(stateDir, { recursive: true });
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     service = new ManagedWorktreeService({ env });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -92,10 +92,10 @@ describe("ManagedWorktreeService canonical paths", () => {
     await fs.writeFile(path.join(created.path, "README.md"), "normal tracked change\n");
     await fs.writeFile(path.join(created.path, "untracked.txt"), "normal untracked change\n");
     const staleHead = await git(repo, "rev-parse", "HEAD");
-    const snapshotRef = `refs/openclaw/snapshots/${created.id}`;
+    const snapshotRef = `refs/carapace/snapshots/${created.id}`;
     await git(repo, "branch", created.branch, staleHead);
     await git(repo, "update-ref", snapshotRef, staleHead);
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db.prepare("UPDATE worktrees SET repo_root = ?, repo_fingerprint = ? WHERE id = ?")
       .run(staleIdentity.repoRoot, staleIdentity.fingerprint, created.id);
 
@@ -147,10 +147,10 @@ describe("ManagedWorktreeService canonical paths", () => {
     await fs.writeFile(path.join(created.path, "README.md"), "do not snapshot or remove\n");
     const liveBranch = await git(liveRepo, "rev-parse", created.branch);
     const staleHead = await git(repo, "rev-parse", "HEAD");
-    const snapshotRef = `refs/openclaw/snapshots/${created.id}`;
+    const snapshotRef = `refs/carapace/snapshots/${created.id}`;
     await git(repo, "branch", created.branch, staleHead);
     await git(repo, "update-ref", snapshotRef, staleHead);
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db.prepare("UPDATE worktrees SET repo_root = ?, repo_fingerprint = ? WHERE id = ?")
       .run(staleIdentity.repoRoot, staleIdentity.fingerprint, created.id);
     const registered = getRegistryWorktree(env, created.id);
@@ -187,7 +187,7 @@ describe("ManagedWorktreeService canonical paths", () => {
       ownerId: "card-repository-rebind",
     });
     await service.acquire(created.id);
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db.prepare("UPDATE worktrees SET repo_root = ?, repo_fingerprint = ? WHERE id = ?")
       .run(staleIdentity.repoRoot, staleIdentity.fingerprint, created.id);
 
@@ -209,7 +209,7 @@ describe("ManagedWorktreeService canonical paths", () => {
       const linkedStateDir = path.join(root, "linked-state");
       await fs.symlink(realStateDir, linkedStateDir, "dir");
       const linkedStateService = new ManagedWorktreeService({
-        env: { ...process.env, OPENCLAW_STATE_DIR: linkedStateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: linkedStateDir },
       });
 
       const created = await linkedStateService.create({

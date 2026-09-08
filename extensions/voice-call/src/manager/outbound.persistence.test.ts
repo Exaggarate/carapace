@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { createEventManagerHarness } from "../manager.test-harness.js";
 import { PlivoProvider } from "../providers/plivo.js";

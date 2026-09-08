@@ -4,30 +4,30 @@ import fs from "node:fs/promises";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { createChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import {
   createInboundDebouncer,
   resolveInboundDebounceMs,
-} from "openclaw/plugin-sdk/channel-inbound-debounce";
+} from "carapace/plugin-sdk/channel-inbound-debounce";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import {
   createMessageReceiptFromOutboundResults,
   DEFAULT_INGRESS_RETRY_MAX_ATTEMPTS,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createTestInboundDebounceFlush } from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createTestInboundDebounceFlush } from "carapace/plugin-sdk/channel-test-helpers";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import type { MattermostPost } from "./client.js";
 import type { MattermostEventPayload } from "./monitor-websocket.js";
 import { monitorMattermostProvider } from "./monitor.js";
-import type { OpenClawConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
+import type { CarapaceConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
 
 class FakeWebSocket {
   public readonly sent: string[] = [];
@@ -126,13 +126,13 @@ const mockState = vi.hoisted(() => ({
   updateMattermostPost: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/plugin-runtime")>()),
+vi.mock("carapace/plugin-sdk/plugin-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/plugin-runtime")>()),
   getGlobalHookRunner: mockState.getGlobalHookRunner,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-outbound")>();
+vi.mock("carapace/plugin-sdk/channel-outbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-outbound")>();
   return {
     ...actual,
     createChannelProgressDraftCompositor: (
@@ -145,8 +145,8 @@ vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/reply-runtime")>();
+vi.mock("carapace/plugin-sdk/reply-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/reply-runtime")>();
   return {
     ...actual,
     createReplyDispatcherWithTyping: (...args: unknown[]) =>
@@ -253,7 +253,7 @@ vi.mock("./runtime-api.js", async () => {
       readStoreForDmPolicy: vi.fn(async () => []),
       upsertPairingRequest: vi.fn(async () => ({ code: "123456", created: true })),
     })),
-    createChannelMessageReplyPipeline: vi.fn((params: { cfg: OpenClawConfig }) => ({
+    createChannelMessageReplyPipeline: vi.fn((params: { cfg: CarapaceConfig }) => ({
       onModelSelected: vi.fn(),
       typingCallbacks: {},
       resolveResponsePrefix: () => params.cfg.channels?.mattermost?.responsePrefix,
@@ -273,7 +273,7 @@ vi.mock("./send.js", async () => {
 });
 
 function createRuntimeCore(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   routeOverride?: {
     accountId?: string;
     agentId?: string;
@@ -333,7 +333,7 @@ function createRuntimeCore(
   const recordInboundSession = vi.fn(async (_params: RecordInboundSessionInput) => {});
   const dispatchPlanForTest = vi.fn(
     async (turn: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       channel: string;
       route: { agentId: string; sessionKey: string };
       ctxPayload: { SessionKey?: string };
@@ -356,7 +356,7 @@ function createRuntimeCore(
     }) => {
       mockState.deliveryPlanObserver(turn.delivery.observeMessageSent);
       await recordInboundSession({
-        storePath: "/tmp/openclaw-test-sessions.json",
+        storePath: "/tmp/carapace-test-sessions.json",
         sessionKey: turn.ctxPayload.SessionKey ?? turn.route.sessionKey,
         ctx: turn.ctxPayload,
         groupResolution: turn.record?.groupResolution,
@@ -481,7 +481,7 @@ function createRuntimeCore(
         }),
       },
       session: {
-        resolveStorePath: () => "/tmp/openclaw-test-sessions.json",
+        resolveStorePath: () => "/tmp/carapace-test-sessions.json",
         recordInboundSession,
         updateLastRoute: vi.fn(async () => {}),
       },
@@ -501,7 +501,7 @@ function createRuntimeCore(
   };
 }
 
-const testConfig: OpenClawConfig = {
+const testConfig: CarapaceConfig = {
   channels: {
     mattermost: {
       enabled: true,
@@ -586,7 +586,7 @@ describe("mattermost inbound user posts", () => {
     });
     mockState.fetchMattermostMe.mockResolvedValue({
       id: "bot-user",
-      username: "openclaw",
+      username: "carapace",
       update_at: 1,
     });
     mockState.registerMattermostMonitorSlashCommands.mockResolvedValue(undefined);
@@ -670,7 +670,7 @@ describe("mattermost inbound user posts", () => {
     vi.useFakeTimers();
     const now = Date.UTC(2026, 0, 2);
     vi.setSystemTime(now);
-    const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mattermost-abandon-"));
+    const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mattermost-abandon-"));
     const stateDir = await fs.realpath(created);
     type Payload = { version: 1; receivedAt: number; rawEvent: string };
     const queue = createChannelIngressQueueForTests<Payload>({
@@ -800,7 +800,7 @@ describe("mattermost inbound user posts", () => {
     } finally {
       await Promise.allSettled(activeProviders.map(async (provider) => await provider.stop()));
       mockState.ingressQueue = undefined;
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
       vi.useRealTimers();
     }
@@ -981,7 +981,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: {
           envelopeTimezone: "user",
@@ -1066,7 +1066,7 @@ describe("mattermost inbound user posts", () => {
       const socket = new FakeWebSocket();
       const abortController = new AbortController();
       mockState.abortController = abortController;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         messages: { groupChat: { historyLimit: 2 } },
         channels: {
           ...(contextVisibility ? { defaults: { contextVisibility } } : {}),
@@ -1164,7 +1164,7 @@ describe("mattermost inbound user posts", () => {
           return;
         }
         if (request.url === "/api/v4/users/me") {
-          response.end(JSON.stringify({ id: "bot-user", username: "openclaw", update_at: 1 }));
+          response.end(JSON.stringify({ id: "bot-user", username: "carapace", update_at: 1 }));
           return;
         }
         if (request.url === "/api/v4/channels/chan-1") {
@@ -1194,7 +1194,7 @@ describe("mattermost inbound user posts", () => {
       mockState.abortController = abortController;
       const verboseDebug = vi.fn();
       const baseUrl = `http://127.0.0.1:${address.port}`;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         messages: { groupChat: { historyLimit: 2 } },
         channels: {
           ...(contextVisibility ? { defaults: { contextVisibility } } : {}),
@@ -1389,7 +1389,7 @@ describe("mattermost inbound user posts", () => {
           id: "post-bare-mention",
           channel_id: "chan-1",
           user_id: "user-1",
-          message: "@openclaw",
+          message: "@carapace",
           create_at: 1_714_000_000_001,
         }),
       },
@@ -1403,7 +1403,7 @@ describe("mattermost inbound user posts", () => {
 
     expect(mockState.dispatchInboundMessage).toHaveBeenCalledTimes(1);
     const ctx = mockState.dispatchInboundMessage.mock.calls.at(0)?.[0].ctx;
-    expect(ctx?.BodyForAgent).toBe("@openclaw");
+    expect(ctx?.BodyForAgent).toBe("@carapace");
     expect(ctx?.MessageSid).toBe("post-bare-mention");
     expect(ctx?.OriginatingChannel).toBe("mattermost");
     expect(ctx?.Provider).toBe("mattermost");
@@ -1411,14 +1411,14 @@ describe("mattermost inbound user posts", () => {
 
   it.each(
     [
-      { message: "@openclawdia hello", expectedBody: null },
-      { message: "@openclaw:remote.example hello", expectedBody: null },
-      { message: "hello.@openclaw", expectedBody: "hello." },
-      { message: "hello-@openclaw", expectedBody: "hello-" },
-      { message: "hello:@openclaw", expectedBody: "hello:" },
-      { message: "@openclaw.", expectedBody: "." },
-      { message: "@openclaw-", expectedBody: "-" },
-      { message: "@openclaw: hello", expectedBody: ": hello" },
+      { message: "@carapacedia hello", expectedBody: null },
+      { message: "@carapace:remote.example hello", expectedBody: null },
+      { message: "hello.@carapace", expectedBody: "hello." },
+      { message: "hello-@carapace", expectedBody: "hello-" },
+      { message: "hello:@carapace", expectedBody: "hello:" },
+      { message: "@carapace.", expectedBody: "." },
+      { message: "@carapace-", expectedBody: "-" },
+      { message: "@carapace: hello", expectedBody: ": hello" },
     ].map(({ message, expectedBody }, index) => ({
       message,
       expectedBody,
@@ -1431,7 +1431,7 @@ describe("mattermost inbound user posts", () => {
       const abortController = new AbortController();
       mockState.abortController = abortController;
       const runtime = testRuntime();
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -1506,7 +1506,7 @@ describe("mattermost inbound user posts", () => {
         stop: vi.fn(async () => {}),
       };
       mockState.createMattermostDraftStream.mockReturnValue(draftStream);
-      const progressConfig: OpenClawConfig = {
+      const progressConfig: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -1682,7 +1682,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const inlineCommandConfig: OpenClawConfig = {
+    const inlineCommandConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1757,7 +1757,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1836,7 +1836,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const mentionConfig: OpenClawConfig = {
+    const mentionConfig: CarapaceConfig = {
       messages: { inbound: { debounceMs: 60_000 } },
       channels: {
         mattermost: {
@@ -1873,7 +1873,7 @@ describe("mattermost inbound user posts", () => {
 
     await emitMattermostChannelPost(socket, {
       id: "post-mention-command",
-      message: "@openclaw /reset",
+      message: "@carapace /reset",
     });
     // Control commands bypass the 60s debounce window, so the turn dispatches right away.
     await vi.waitFor(() => {
@@ -1947,7 +1947,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const channelTypeConfig: OpenClawConfig = {
+    const channelTypeConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2005,7 +2005,7 @@ describe("mattermost inbound user posts", () => {
   it("does not debounce denied senders or system posts into an allowed turn", async () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       channels: {
         defaults: { contextVisibility: "allowlist" },
         mattermost: {
@@ -2074,7 +2074,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const mentionConfig: OpenClawConfig = {
+    const mentionConfig: CarapaceConfig = {
       messages: { inbound: { debounceMs: 60_000 } },
       channels: {
         mattermost: {
@@ -2166,7 +2166,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2223,7 +2223,7 @@ describe("mattermost inbound user posts", () => {
 
     expect(runtimeCore.channel.session.recordInboundSession).toHaveBeenCalledTimes(1);
     const [recordCall] = runtimeCore.channel.session.recordInboundSession.mock.calls.at(0) ?? [];
-    expect(recordCall?.storePath).toBe("/tmp/openclaw-test-sessions.json");
+    expect(recordCall?.storePath).toBe("/tmp/carapace-test-sessions.json");
     expect(recordCall?.sessionKey).toBe("mattermost:default:channel:chan-1");
     const updateLastRoute = recordCall?.updateLastRoute;
     expect(updateLastRoute?.sessionKey).toBe("mattermost:default:channel:chan-1");
@@ -2242,7 +2242,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: CarapaceConfig = {
       session: { dmScope: "per-channel-peer" },
       channels: {
         mattermost: {
@@ -2318,7 +2318,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("keeps core block streaming enabled when preview streaming is off", async () => {
-    const offConfig: OpenClawConfig = {
+    const offConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2439,7 +2439,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("preserves text-tool-text boundaries while grouping interleaved tool updates", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2666,7 +2666,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("finalizes only the current block when the terminal reply is cumulative", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2755,7 +2755,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("records participation when the confirmed preview already contains the final", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2829,7 +2829,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("records participation when confirmed-preview cleanup fails", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -2908,7 +2908,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("records participation when a later send step fails after a visible thread post", async () => {
-    const progressConfig: OpenClawConfig = {
+    const progressConfig: CarapaceConfig = {
       channels: {
         mattermost: {
           enabled: true,

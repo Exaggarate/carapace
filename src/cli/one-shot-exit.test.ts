@@ -487,8 +487,8 @@ describe("one-shot CLI exit", () => {
   ])("keeps the real proxy command exit truthful for $name", ({ args, exitCode, failure }) => {
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      OPENCLAW_STATE_DIR: "/dev/null",
-      OPENCLAW_CONFIG_PATH: "/dev/null",
+      CARAPACE_STATE_DIR: "/dev/null",
+      CARAPACE_CONFIG_PATH: "/dev/null",
       TSX_DISABLE_CACHE: "1",
       NODE_DISABLE_COMPILE_CACHE: "1",
     };
@@ -507,7 +507,7 @@ describe("one-shot CLI exit", () => {
       import { requestExitAfterOneShotOutput, runCliWithExitFinalization } from ${JSON.stringify(oneShotExitUrl)};
 
       setRuntimeConfigSnapshot({});
-      const argv = ["node", "openclaw", "proxy", "validate", ...${JSON.stringify(args)}];
+      const argv = ["node", "carapace", "proxy", "validate", ...${JSON.stringify(args)}];
       await runCliWithExitFinalization({
         run: async () => {
           const program = new Command().enablePositionalOptions().exitOverride();
@@ -547,7 +547,7 @@ describe("one-shot CLI exit", () => {
         }),
       );
     } else {
-      expect(result.stdout).toContain("Usage: openclaw proxy validate");
+      expect(result.stdout).toContain("Usage: carapace proxy validate");
     }
   });
 

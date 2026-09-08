@@ -1,11 +1,11 @@
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { isLoopbackHost } from "openclaw/plugin-sdk/gateway-runtime";
-import { createRuntimeConfigReader } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fanInChannelIngressLifecycles } from "carapace/plugin-sdk/channel-ingress-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/gateway-runtime";
+import { createRuntimeConfigReader } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   normalizeOptionalString,
   normalizeTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { getMattermostRuntime } from "../runtime.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import {
@@ -39,7 +39,7 @@ import {
   type MattermostWebSocketFactory,
 } from "./monitor-websocket.js";
 import { runWithReconnect } from "./reconnect.js";
-import type { ChannelAccountSnapshot, OpenClawConfig, RuntimeEnv } from "./runtime-api.js";
+import type { ChannelAccountSnapshot, CarapaceConfig, RuntimeEnv } from "./runtime-api.js";
 import {
   createChannelPairingController,
   resolveAllowlistProviderRuntimeGroupPolicy,
@@ -54,7 +54,7 @@ type MonitorMattermostOpts = {
   botToken?: string;
   baseUrl?: string;
   accountId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   statusSink?: (patch: Partial<ChannelAccountSnapshot>) => void;
@@ -83,7 +83,7 @@ export async function monitorMattermostProvider(opts: MonitorMattermostOpts = {}
         throw new Error(`exit ${code}`);
       },
     } satisfies RuntimeEnv);
-  const cfg = (opts.config ?? core.config.current()) as OpenClawConfig;
+  const cfg = (opts.config ?? core.config.current()) as CarapaceConfig;
   const readConfig = createRuntimeConfigReader(cfg);
   const resolveDebounceMs = () =>
     core.channel.debounce.resolveInboundDebounceMs({

@@ -15,7 +15,7 @@ import {
   type ExecApprovalsFile,
 } from "../infra/exec-approvals.js";
 import { sendMessage } from "../infra/outbound/message.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { buildSystemRunPreparePayload } from "../test-utils/system-run-prepare-payload.js";
 import { createExecTool as createExecToolImpl } from "./bash-tools.exec-run.js";
@@ -432,32 +432,32 @@ describe("exec approvals", () => {
   beforeAll(async () => {
     // Detached assertions exercise delivery, not cold loading of the recovery graph.
     await import("./bash-tools.exec-approval-followup.js");
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-exec-approvals-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-exec-approvals-"));
   });
 
   beforeEach(async () => {
     envSnapshot = captureEnv([
       "HOME",
       "USERPROFILE",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_BUNDLED_PLUGINS_DIR",
-      "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_BUNDLED_PLUGINS_DIR",
+      "CARAPACE_DISABLE_BUNDLED_PLUGINS",
     ]);
     const tempDir = path.join(tempRoot, `case-${++tempCaseIndex}`);
     await fs.mkdir(tempDir, { recursive: true });
     setTestEnvValue("HOME", tempDir);
     // Windows uses USERPROFILE for os.homedir()
     setTestEnvValue("USERPROFILE", tempDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempDir, ".openclaw"));
-    deleteTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempDir, ".carapace"));
+    deleteTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
     vi.mocked(callGatewayTool).mockReset();
     vi.mocked(sendMessage).mockClear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot?.restore();
     envSnapshot = undefined;
   });
@@ -526,7 +526,7 @@ describe("exec approvals", () => {
   });
 
   it("skips approval when node allowlist is satisfied", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-test-bin-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-test-bin-"));
     const binDir = path.join(tempDir, "bin");
     await fs.mkdir(binDir, { recursive: true });
     const exeName = process.platform === "win32" ? "tool.cmd" : "tool";
@@ -1348,7 +1348,7 @@ describe("exec approvals", () => {
     if (process.platform === "win32") {
       return;
     }
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-wrapper-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-wrapper-"));
     try {
       const binDir = path.join(tempDir, "bin");
       const wrapperPath = path.join(binDir, "gog-wrapper");
@@ -1428,9 +1428,9 @@ describe("exec approvals", () => {
     if (process.platform === "win32") {
       return;
     }
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-prelude-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-prelude-"));
     try {
-      const skillDir = path.join(tempDir, ".openclaw", "skills", "gog");
+      const skillDir = path.join(tempDir, ".carapace", "skills", "gog");
       const skillPath = path.join(skillDir, "SKILL.md");
       const binDir = path.join(tempDir, "bin");
       const wrapperPath = path.join(binDir, "gog-wrapper");

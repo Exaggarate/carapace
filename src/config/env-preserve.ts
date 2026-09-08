@@ -1,6 +1,6 @@
 // Normalizes preserved environment-variable config for subprocess launches.
 import { isDeepStrictEqual } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { isPlainObject } from "../infra/plain-object.js";
 import { isRecord } from "../utils.js";
 import { containsEnvVarReference, resolveConfigEnvVars } from "./env-substitution.js";

@@ -1,4 +1,4 @@
-import { resolveModelBoundThinkingReplayMode } from "@openclaw/ai/internal/anthropic";
+import { resolveModelBoundThinkingReplayMode } from "@carapace/ai/internal/anthropic";
 /**
  * Normalizes transcript messages before provider transport replay. It drops
  * unsafe failed turns, maps tool-call ids across model boundaries, and fills
@@ -10,29 +10,29 @@ import { repairToolUseResultPairing } from "./session-transcript-repair.js";
 
 const SYNTHETIC_TOOL_RESULT_APIS = new Set<string>([
   "anthropic-messages",
-  "openclaw-anthropic-messages-transport",
+  "carapace-anthropic-messages-transport",
   "bedrock-converse-stream",
   "google-generative-ai",
-  "openclaw-google-generative-ai-transport",
+  "carapace-google-generative-ai-transport",
   "openai-responses",
   "openai-chatgpt-responses",
   "azure-openai-responses",
-  "openclaw-openai-responses-transport",
-  "openclaw-openai-chatgpt-responses-transport",
-  "openclaw-azure-openai-responses-transport",
+  "carapace-openai-responses-transport",
+  "carapace-openai-chatgpt-responses-transport",
+  "carapace-azure-openai-responses-transport",
 ]);
 
 // "aborted" is the OpenAI Responses-family synthetic result convention,
 // inherited from upstream Codex history normalization. It applies to public,
-// Codex, Azure, and their OpenClaw transport aliases; Gemini/Anthropic use their
+// Codex, Azure, and their Carapace transport aliases; Gemini/Anthropic use their
 // own text. tool-replay-repair.live.test.ts exercises both paths against real models.
 const OPENAI_RESPONSES_ABORTED_OUTPUT_APIS = new Set<string>([
   "openai-responses",
   "openai-chatgpt-responses",
   "azure-openai-responses",
-  "openclaw-openai-responses-transport",
-  "openclaw-openai-chatgpt-responses-transport",
-  "openclaw-azure-openai-responses-transport",
+  "carapace-openai-responses-transport",
+  "carapace-openai-chatgpt-responses-transport",
+  "carapace-azure-openai-responses-transport",
 ]);
 
 function defaultAllowSyntheticToolResults(modelApi: Api): boolean {

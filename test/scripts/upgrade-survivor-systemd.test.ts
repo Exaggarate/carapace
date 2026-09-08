@@ -28,12 +28,12 @@ function fixture(customPaths = true, registry?: string, managerSetup = "") {
     PATH: `${home}/bin:${process.env.PATH}`,
     npm_config_prefix: home,
     NPM_CONFIG_REGISTRY: registry,
-    OPENCLAW_SKIP_CHANNELS: "1",
-    OPENCLAW_SKIP_PROVIDERS: "1",
-    OPENCLAW_DISABLE_BONJOUR: "1",
-    OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: customPaths ? paths.log : undefined,
-    OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: customPaths ? paths.pid : undefined,
-    OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: customPaths ? paths.daemonLog : undefined,
+    CARAPACE_SKIP_CHANNELS: "1",
+    CARAPACE_SKIP_PROVIDERS: "1",
+    CARAPACE_DISABLE_BONJOUR: "1",
+    CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: customPaths ? paths.log : undefined,
+    CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: customPaths ? paths.pid : undefined,
+    CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: customPaths ? paths.daemonLog : undefined,
   };
   const shell = (script: string, args: string[] = []) =>
     spawnSync(
@@ -53,7 +53,7 @@ function fixture(customPaths = true, registry?: string, managerSetup = "") {
       encoding: "utf8",
       timeout: 40_000,
     });
-  const unit = join(home, ".config/systemd/user/openclaw-gateway.service");
+  const unit = join(home, ".config/systemd/user/carapace-gateway.service");
   mkdirSync(join(home, ".config/systemd/user"), { recursive: true });
   return { home, env, shell, systemctl, unit, paths };
 }
@@ -71,7 +71,7 @@ describe.skipIf(process.platform === "win32")("survivor manager fixture", () => 
     writeFileSync(
       program,
       `import fs from "node:fs";
-fs.writeFileSync(${JSON.stringify(record)}, JSON.stringify({providers:process.env.OPENCLAW_SKIP_PROVIDERS ?? null, channels:process.env.OPENCLAW_SKIP_CHANNELS ?? null}));
+fs.writeFileSync(${JSON.stringify(record)}, JSON.stringify({providers:process.env.CARAPACE_SKIP_PROVIDERS ?? null, channels:process.env.CARAPACE_SKIP_CHANNELS ?? null}));
 process.on("SIGTERM", () => process.exit(0));
 setInterval(() => {}, 1000);
 `,
@@ -81,11 +81,11 @@ setInterval(() => {}, 1000);
       buildSystemdUnit({ programArguments: [process.execPath, program], workingDirectory: home }),
     );
     try {
-      expect(systemctl("start", "openclaw-gateway.service").status).toBe(0);
+      expect(systemctl("start", "carapace-gateway.service").status).toBe(0);
       await expect.poll(() => existsSync(record)).toBe(true);
       expect(JSON.parse(readFileSync(record, "utf8"))).toEqual({ providers: null, channels: null });
     } finally {
-      expect(systemctl("stop", "openclaw-gateway.service").status).toBe(0);
+      expect(systemctl("stop", "carapace-gateway.service").status).toBe(0);
     }
   });
 
@@ -97,12 +97,12 @@ setInterval(() => {}, 1000);
       status: "stopped",
       missingUnit: true,
     });
-    expect(systemctl("is-enabled", "openclaw-gateway.service").status).not.toBe(0);
+    expect(systemctl("is-enabled", "carapace-gateway.service").status).not.toBe(0);
     const environmentFile = join(home, "gateway.systemd.env");
     writeFileSync(environmentFile, 'FIXTURE_VALUE="from file"\n');
     const programArguments = [
       process.execPath,
-      join(home, "package root/openclaw.mjs"),
+      join(home, "package root/carapace.mjs"),
       "gateway",
       "--port",
       "18817",
@@ -113,8 +113,8 @@ setInterval(() => {}, 1000);
         programArguments,
         workingDirectory: home,
         environment: {
-          OPENCLAW_STATE_DIR: join(home, "state"),
-          OPENCLAW_GATEWAY_PORT: "18817",
+          CARAPACE_STATE_DIR: join(home, "state"),
+          CARAPACE_GATEWAY_PORT: "18817",
           FIXTURE_VALUE: "inline",
         },
         environmentFiles: [environmentFile],
@@ -125,13 +125,13 @@ setInterval(() => {}, 1000);
     expect(stoppedRuntime).toMatchObject({
       status: "stopped",
       state: "inactive",
-      systemd: { unit: "openclaw-gateway.service" },
+      systemd: { unit: "carapace-gateway.service" },
     });
     expect(stoppedRuntime.missingUnit).not.toBe(true);
     // Published 8.1 omits LoadState from its runtime query during baseline bootstrap.
     const legacyRuntime = systemctl(
       "show",
-      "openclaw-gateway.service",
+      "carapace-gateway.service",
       "--property",
       "Id,ActiveState,SubState,Result,NRestarts,StartLimitBurst,MainPID,ExecMainStatus,ExecMainCode,KillMode,TasksCurrent,MemoryCurrent",
     );
@@ -143,8 +143,8 @@ setInterval(() => {}, 1000);
       sourcePath: unit,
       definitionPaths: [unit],
       environment: {
-        OPENCLAW_STATE_DIR: join(home, "state"),
-        OPENCLAW_GATEWAY_PORT: "18817",
+        CARAPACE_STATE_DIR: join(home, "state"),
+        CARAPACE_GATEWAY_PORT: "18817",
         FIXTURE_VALUE: "from file",
       },
       environmentValueSources: { FIXTURE_VALUE: "inline-and-file" },
@@ -163,7 +163,7 @@ setInterval(() => {}, 1000);
     );
     expect(invalid.status).not.toBe(0);
     expect(invalid.stderr).not.toContain("not found");
-    expect(systemctl("show", "openclaw-gateway.service", "--property=Unsupported").status).not.toBe(
+    expect(systemctl("show", "carapace-gateway.service", "--property=Unsupported").status).not.toBe(
       0,
     );
 
@@ -199,9 +199,9 @@ setInterval(() => {}, 1000);
     const registry = "http://127.0.0.1:41731";
     const { home, env, shell, systemctl, unit, paths } = fixture(true, registry);
     env.NPM_CONFIG_REGISTRY = undefined;
-    env.OPENCLAW_SKIP_CHANNELS = undefined;
-    env.OPENCLAW_SKIP_PROVIDERS = undefined;
-    env.OPENCLAW_DISABLE_BONJOUR = undefined;
+    env.CARAPACE_SKIP_CHANNELS = undefined;
+    env.CARAPACE_SKIP_PROVIDERS = undefined;
+    env.CARAPACE_DISABLE_BONJOUR = undefined;
     const record = join(home, "starts.jsonl");
     const program = join(home, "gateway fixture.mjs");
     const environmentFile = join(home, "gateway.systemd.env");
@@ -210,7 +210,7 @@ setInterval(() => {}, 1000);
     writeFileSync(
       program,
       `import fs from "node:fs";
-fs.appendFileSync(${JSON.stringify(record)}, JSON.stringify({pid:process.pid, argv:process.argv.slice(2), cwd:process.cwd(), value:process.env.FIXTURE_VALUE, state:process.env.OPENCLAW_STATE_DIR, update:process.env.OPENCLAW_UPDATE_IN_PROGRESS, npmRegistry:process.env.NPM_CONFIG_REGISTRY, npmLowerRegistry:process.env.npm_config_registry, bunRegistry:process.env.BUN_CONFIG_REGISTRY, skipChannels:process.env.OPENCLAW_SKIP_CHANNELS, skipProviders:process.env.OPENCLAW_SKIP_PROVIDERS, disableBonjour:process.env.OPENCLAW_DISABLE_BONJOUR}) + "\\n");
+fs.appendFileSync(${JSON.stringify(record)}, JSON.stringify({pid:process.pid, argv:process.argv.slice(2), cwd:process.cwd(), value:process.env.FIXTURE_VALUE, state:process.env.CARAPACE_STATE_DIR, update:process.env.CARAPACE_UPDATE_IN_PROGRESS, npmRegistry:process.env.NPM_CONFIG_REGISTRY, npmLowerRegistry:process.env.npm_config_registry, bunRegistry:process.env.BUN_CONFIG_REGISTRY, skipChannels:process.env.CARAPACE_SKIP_CHANNELS, skipProviders:process.env.CARAPACE_SKIP_PROVIDERS, disableBonjour:process.env.CARAPACE_DISABLE_BONJOUR}) + "\\n");
 process.on("SIGTERM", () => process.exit(0));
 setInterval(() => {}, 1000);
 `,
@@ -228,7 +228,7 @@ setInterval(() => {}, 1000);
       buildSystemdUnit({
         programArguments,
         workingDirectory: home,
-        environment: { OPENCLAW_STATE_DIR: join(home, "state"), FIXTURE_VALUE: "inline" },
+        environment: { CARAPACE_STATE_DIR: join(home, "state"), FIXTURE_VALUE: "inline" },
         environmentFiles: [environmentFile],
       }),
     );
@@ -254,8 +254,8 @@ setInterval(() => {}, 1000);
       expect(records()).toHaveLength(count);
     };
     try {
-      expect(systemctl("enable", "openclaw-gateway.service").status).toBe(0);
-      expect(systemctl("is-enabled", "openclaw-gateway.service").status).toBe(0);
+      expect(systemctl("enable", "carapace-gateway.service").status).toBe(0);
+      expect(systemctl("is-enabled", "carapace-gateway.service").status).toBe(0);
       const restarted = spawnSync(
         "python3",
         [
@@ -271,18 +271,18 @@ status = pty.spawn(["bash", "-c", sys.argv[1], "fixture", sys.argv[2]], master_r
 code = os.waitstatus_to_exitcode(status)
 raise SystemExit(code if code >= 0 else 128 - code)
 `,
-          'set -e; systemctl --user restart openclaw-gateway.service; for _ in {1..200}; do [ -s "$1" ] && exit 0; sleep 0.01; done; exit 1',
+          'set -e; systemctl --user restart carapace-gateway.service; for _ in {1..200}; do [ -s "$1" ] && exit 0; sleep 0.01; done; exit 1',
           record,
         ],
         {
-          env: { ...env, OPENCLAW_UPDATE_IN_PROGRESS: "1" },
+          env: { ...env, CARAPACE_UPDATE_IN_PROGRESS: "1" },
           encoding: "utf8",
           timeout: 40_000,
         },
       );
       expect(restarted.status, restarted.stdout + restarted.stderr).toBe(0);
       await waitForStarts(1);
-      expect.soft(systemctl("is-active", "openclaw-gateway.service").status).toBe(0);
+      expect.soft(systemctl("is-active", "carapace-gateway.service").status).toBe(0);
       const inspected = await readSystemdServiceExecStart(env, { requireEffective: true });
       expect(records()[0]).toEqual({
         pid: expect.any(Number),
@@ -310,10 +310,10 @@ raise SystemExit(code if code >= 0 else 128 - code)
         ]);
       expect(assertion().status).not.toBe(0);
       env.NPM_CONFIG_REGISTRY = "http://127.0.0.1:41732";
-      env.OPENCLAW_SKIP_CHANNELS = "0";
-      env.OPENCLAW_SKIP_PROVIDERS = "0";
-      env.OPENCLAW_DISABLE_BONJOUR = "0";
-      expect(systemctl("restart", "openclaw-gateway.service").status).toBe(0);
+      env.CARAPACE_SKIP_CHANNELS = "0";
+      env.CARAPACE_SKIP_PROVIDERS = "0";
+      env.CARAPACE_DISABLE_BONJOUR = "0";
+      expect(systemctl("restart", "carapace-gateway.service").status).toBe(0);
       await waitForStarts(2);
       expect(records()[1]).toMatchObject({
         npmRegistry: registry,
@@ -328,7 +328,7 @@ raise SystemExit(code if code >= 0 else 128 - code)
       expect(records()[1]?.pid).not.toBe(records()[0]?.pid);
       expect(() => process.kill(records()[0]!.pid, 0)).toThrow();
     } finally {
-      const stopped = systemctl("stop", "openclaw-gateway.service");
+      const stopped = systemctl("stop", "carapace-gateway.service");
       expect(stopped.status, stopped.stderr).toBe(0);
       for (const { pid } of records()) {
         try {
@@ -356,16 +356,16 @@ raise SystemExit(code if code >= 0 else 128 - code)
       writeFileSync(`${paths.daemonLog}.exit.json`, JSON.stringify({ last: { code: 78 } }));
       const driftedEnv = {
         ...env,
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(home, "wrong.log"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(home, "wrong.pid"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: join(home, "wrong-daemon.log"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(home, "wrong.log"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(home, "wrong.pid"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: join(home, "wrong-daemon.log"),
       };
       const direct = spawnSync(
         join(home, "bin/systemctl"),
         [
           "--user",
           "show",
-          "openclaw-gateway.service",
+          "carapace-gateway.service",
           "--property=Id,LoadState,ActiveState,SubState,Result,NRestarts,StartLimitBurst,MainPID,ExecMainStatus,ExecMainCode,KillMode,TasksCurrent,MemoryCurrent",
         ],
         { env: driftedEnv, encoding: "utf8" },
@@ -378,8 +378,8 @@ raise SystemExit(code if code >= 0 else 128 - code)
         pid: process.pid,
         lastExitStatus: 78,
       });
-      expect(readFileSync(paths.log, "utf8")).toContain("--user show openclaw-gateway.service");
-      expect(existsSync(driftedEnv.OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG)).toBe(false);
+      expect(readFileSync(paths.log, "utf8")).toContain("--user show carapace-gateway.service");
+      expect(existsSync(driftedEnv.CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG)).toBe(false);
       // This is an observation-only PID fixture; never send stop to the test worker.
       rmSync(paths.pid);
     },

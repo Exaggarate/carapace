@@ -175,11 +175,11 @@ describe("Control UI Vite build", () => {
     }
     const serviceWorker = await fs.readFile(path.join(outDir, "sw.js"), "utf8");
     const embeddedBuildId = /const EMBEDDED_CACHE_VERSION = "([^"]+)"/u.exec(serviceWorker)?.[1];
-    const buildInfo = JSON.parse(config.define?.["globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO"]);
+    const buildInfo = JSON.parse(config.define?.["globalThis.CARAPACE_CONTROL_UI_BUILD_INFO"]);
     expect(embeddedBuildId).toBe(buildInfo.buildId);
 
     const html = await fs.readFile(path.join(outDir, "index.html"), "utf8");
-    const cacheId = /data-openclaw-control-ui-build-id="([^"]+)"/u.exec(html)?.[1];
+    const cacheId = /data-carapace-control-ui-build-id="([^"]+)"/u.exec(html)?.[1];
     expect(cacheId?.startsWith(`${buildInfo.buildId}-`)).toBe(true);
     expect(cacheId?.slice(buildInfo.buildId.length + 1)).toMatch(/^[a-f0-9]{64}$/u);
     const fonts = await fs.readdir(path.join(outDir, "fonts"));
@@ -220,13 +220,13 @@ describe("Control UI Vite build", () => {
       path.join(root, "index.html"),
       '<html><script type="module" src="./main.js"></script></html>',
     );
-    const buildInfo = JSON.parse(config.define?.["globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO"]);
+    const buildInfo = JSON.parse(config.define?.["globalThis.CARAPACE_CONTROL_UI_BUILD_INFO"]);
     const cacheIds: string[] = [];
     for (const title of ["First", "Second"]) {
       await fs.writeFile(path.join(publicDir, "favicon.svg"), `<svg><title>${title}</title></svg>`);
       await build(config);
       const html = await fs.readFile(path.join(outDir, "index.html"), "utf8");
-      const cacheId = /data-openclaw-control-ui-build-id="([^"]+)"/u.exec(html)?.[1];
+      const cacheId = /data-carapace-control-ui-build-id="([^"]+)"/u.exec(html)?.[1];
       expect(cacheId).toBeDefined();
       cacheIds.push(cacheId!);
       const worker = await fs.readFile(path.join(outDir, "sw.js"), "utf8");

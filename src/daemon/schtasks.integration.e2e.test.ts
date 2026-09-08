@@ -5,8 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import { describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { resolveGatewayWindowsTaskName } from "./constants.js";
 import { execSchtasks } from "./schtasks-exec.js";
@@ -401,8 +401,8 @@ async function cleanupNativeTask(params: {
   try {
     // Service guards observe config in this test process. Native child exit does
     // not close that parent-held database; release only this fixture before unlink.
-    const databasePath = resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: params.stateDir });
-    const cachedStateHandleClosed = closeOpenClawStateDatabaseByPath(databasePath);
+    const databasePath = resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: params.stateDir });
+    const cachedStateHandleClosed = closeCarapaceStateDatabaseByPath(databasePath);
     console.log(`[windows-schtasks-cleanup] ${JSON.stringify({ cachedStateHandleClosed })}`);
   } catch (error) {
     cleanupErrors.push(error);
@@ -439,7 +439,7 @@ async function createIntegrationRoot(
   id: string,
 ): Promise<string> {
   if (!configuredRoot) {
-    return fs.mkdtemp(path.join(os.tmpdir(), `openclaw-schtasks-int-${id}-`));
+    return fs.mkdtemp(path.join(os.tmpdir(), `carapace-schtasks-int-${id}-`));
   }
   const rootDir = path.resolve(configuredRoot);
   try {
@@ -490,7 +490,7 @@ describe("schtasks Windows integration principal assertion", () => {
   });
 
   it("refuses to reuse or delete an existing configured root", async () => {
-    const existingRoot = path.join(os.tmpdir(), `openclaw-schtasks-existing-${randomUUID()}`);
+    const existingRoot = path.join(os.tmpdir(), `carapace-schtasks-existing-${randomUUID()}`);
     await fs.mkdir(existingRoot);
     try {
       await expect(createIntegrationRoot(existingRoot, "existing")).rejects.toThrow(
@@ -504,8 +504,8 @@ describe("schtasks Windows integration principal assertion", () => {
 
   it("redacts task identities without rewriting placeholders", () => {
     expect(
-      sanitizeDiagnosticText("openclaw user on host-user", [
-        ["openclaw", "<product>"],
+      sanitizeDiagnosticText("carapace user on host-user", [
+        ["carapace", "<product>"],
         ["user", "<task-user>"],
       ]),
     ).toBe("<product> <task-user> on host-<task-user>");
@@ -516,7 +516,7 @@ describe("schtasks Windows integration principal assertion", () => {
     ).toBe("<Task><Author><task-user></Author><UserId><task-user></UserId></Task>");
     expect(
       sanitizeTaskXml("<Task><Author>private</Author><UserId>S-1-5-21</UserId></Task>", [
-        ["openclaw", "<product>"],
+        ["carapace", "<product>"],
       ]),
     ).toBe("<Task><Author><task-user></Author><UserId><task-user></UserId></Task>");
   });
@@ -532,7 +532,7 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
     const rootDir = await createIntegrationRoot(configuredRoot, id);
     const accountHome = os.userInfo().homedir;
     const profile = `schtasks-int-${id}`;
-    const stateDir = path.join(accountHome, `.openclaw-${profile}`);
+    const stateDir = path.join(accountHome, `.carapace-${profile}`);
     const activePidPath = path.join(rootDir, "active-pid.txt");
     const eventsPath = path.join(rootDir, "runs.txt");
     const probe = createGatewayTaskSupervisorProbe(rootDir);
@@ -551,15 +551,15 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
       APPDATA: path.join(rootDir, "appdata"),
       HOME: accountHome,
       USERPROFILE: accountHome,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_GATEWAY_PORT: String(gatewayPort),
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_PROFILE: profile,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_TASK_SCRIPT: undefined,
-      OPENCLAW_TASK_SCRIPT_NAME: undefined,
-      OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
-      OPENCLAW_WINDOWS_TASK_NAME: undefined,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_GATEWAY_PORT: String(gatewayPort),
+      CARAPACE_HOME: undefined,
+      CARAPACE_PROFILE: profile,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_TASK_SCRIPT: undefined,
+      CARAPACE_TASK_SCRIPT_NAME: undefined,
+      CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
+      CARAPACE_WINDOWS_TASK_NAME: undefined,
     };
     const scriptPath = resolveTaskScriptPath(env);
     const launcherPath = resolveTaskLauncherScriptPath(env, scriptPath);
@@ -581,10 +581,10 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
     });
     try {
       await fs.mkdir(stateDir);
-      await fs.writeFile(path.join(stateDir, "openclaw.json"), "{}\n");
+      await fs.writeFile(path.join(stateDir, "carapace.json"), "{}\n");
       pendingProof = await withEnvAsync(env, async () => {
         const startupFallbackProof = await proof.proveNativeStartupFallbackLaunch({ env, rootDir });
-        const defaultTaskBefore = await readTaskDefinitionSnapshot("OpenClaw Gateway");
+        const defaultTaskBefore = await readTaskDefinitionSnapshot("Carapace Gateway");
         const service = resolveGatewayService();
         const readRuntime = () => service.readRuntime(env);
 
@@ -598,16 +598,16 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
           programArguments,
           workingDirectory: rootDir,
           environment: {
-            OPENCLAW_PROFILE: profile,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: env.OPENCLAW_CONFIG_PATH,
-            OPENCLAW_GATEWAY_PORT: String(gatewayPort),
-            OPENCLAW_SERVICE_KIND: "gateway",
-            OPENCLAW_SERVICE_MARKER: "openclaw",
+            CARAPACE_PROFILE: profile,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: env.CARAPACE_CONFIG_PATH,
+            CARAPACE_GATEWAY_PORT: String(gatewayPort),
+            CARAPACE_SERVICE_KIND: "gateway",
+            CARAPACE_SERVICE_MARKER: "carapace",
             // Source aliases belong to the checkout, even when the task runs outside it.
             TSX_TSCONFIG_PATH: path.resolve("tsconfig.json"),
           },
-          description: `OpenClaw CI Scheduled Task integration ${id}`,
+          description: `Carapace CI Scheduled Task integration ${id}`,
         });
 
         const failedProcesses = await waitForGatewayTaskSupervisorProcesses({
@@ -636,8 +636,8 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
         }
         const command = await service.readCommand(env);
         expect(command?.programArguments).toEqual(programArguments);
-        expect(command?.environment?.OPENCLAW_GATEWAY_PORT).toBe(String(gatewayPort));
-        expect(command?.environment?.OPENCLAW_SERVICE_KIND).toBe("gateway");
+        expect(command?.environment?.CARAPACE_GATEWAY_PORT).toBe(String(gatewayPort));
+        expect(command?.environment?.CARAPACE_SERVICE_KIND).toBe("gateway");
         // An executed exit 23 need not trigger Scheduler retry. Request recovery only
         // after failure cleanup; IgnoreNew prevents overlap if Scheduler also retries.
         const recoveryMutations: string[] = [];
@@ -854,7 +854,7 @@ describe.runIf(nativeIntegrationEnabled)("schtasks Windows integration", () => {
         await expect(fs.access(scriptPath)).rejects.toThrow();
         await expect(fs.access(launcherPath)).rejects.toThrow();
         expect(await canBindLoopbackPort(gatewayPort)).toBe(true);
-        expect(await readTaskDefinitionSnapshot("OpenClaw Gateway")).toEqual(defaultTaskBefore);
+        expect(await readTaskDefinitionSnapshot("Carapace Gateway")).toEqual(defaultTaskBefore);
         const proofPath = process.env.CI_WINDOWS_SCHTASKS_PROOF_PATH?.trim();
         if (proofPath) {
           const proofHead = process.env.CI_WINDOWS_SCHTASKS_HEAD?.trim();

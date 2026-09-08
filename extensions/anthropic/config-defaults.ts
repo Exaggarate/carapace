@@ -1,13 +1,13 @@
-import { listAgentIds, resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { listAgentIds, resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
 /**
  * Anthropic config defaulting helpers. They seed default Anthropic/Claude CLI
  * model refs and cache-retention params based on configured auth mode.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/plugin-entry";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   normalizeAnthropicProviderId,
   parseAnthropicModelRef,
@@ -27,7 +27,7 @@ const ANTHROPIC_API_KEY_DEFAULT_ALLOWLIST_REFS = [
 ] as const;
 
 function resolveAnthropicDefaultAuthMode(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): "api_key" | "oauth" | null {
   if (usesRetiredClaudeCliProviderEntry(config)) {
@@ -86,7 +86,7 @@ function resolveAnthropicDefaultAuthMode(
   return null;
 }
 
-function usesRetiredClaudeCliProviderEntry(config: OpenClawConfig): boolean {
+function usesRetiredClaudeCliProviderEntry(config: CarapaceConfig): boolean {
   return Object.entries(config.models?.providers ?? {}).some(
     ([provider, entry]) =>
       normalizeAnthropicProviderId(provider) === "anthropic" &&
@@ -120,7 +120,7 @@ function isAnthropicCacheRetentionTarget(
   );
 }
 
-function usesClaudeCliModelSelection(config: OpenClawConfig): boolean {
+function usesClaudeCliModelSelection(config: CarapaceConfig): boolean {
   const primary = resolveModelPrimaryValue(
     config.agents?.defaults?.model as
       | string
@@ -144,7 +144,7 @@ function usesClaudeCliModelSelection(config: OpenClawConfig): boolean {
   });
 }
 
-function usesSelectedClaudeCliAuthProfile(config: OpenClawConfig): boolean {
+function usesSelectedClaudeCliAuthProfile(config: CarapaceConfig): boolean {
   if (usesRetiredClaudeCliProviderEntry(config)) {
     return true;
   }
@@ -198,7 +198,7 @@ function modelEntryWithClaudeCliRuntime(entry: unknown): Record<string, unknown>
   return base;
 }
 
-function collectClaudeCliRuntimeRefsFromConfig(config: OpenClawConfig): string[] {
+function collectClaudeCliRuntimeRefsFromConfig(config: CarapaceConfig): string[] {
   type ClaudeCliModelSelection = string | { primary?: string; fallbacks?: string[] } | undefined;
   const selections: Array<{
     model: ClaudeCliModelSelection;
@@ -256,11 +256,11 @@ export function normalizeAnthropicProviderConfigForProvider<
   return normalizeAnthropicProviderConfig(params.providerConfig);
 }
 
-/** Apply Anthropic and Claude CLI defaults to an OpenClaw config object. */
+/** Apply Anthropic and Claude CLI defaults to an Carapace config object. */
 export function applyAnthropicConfigDefaults(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const defaults = params.config.agents?.defaults;
   if (!defaults) {
     return params.config;

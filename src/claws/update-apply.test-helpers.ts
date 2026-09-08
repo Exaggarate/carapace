@@ -7,7 +7,7 @@ export const source: ClawSourceIdentity = {
   name: "@acme/worker",
   version: "2.0.0",
   packageRoot: "/tmp/target",
-  manifestPath: "/tmp/target/openclaw.claw.json",
+  manifestPath: "/tmp/target/carapace.claw.json",
   integrityKind: "artifact",
   integrity: "sha256:target",
   byteLength: 1,
@@ -21,7 +21,7 @@ export const manifest: ClawManifest = {
   cronJobs: [],
 };
 export const install: PersistedClawInstall = {
-  schemaVersion: "openclaw.clawInstallRecord.v1",
+  schemaVersion: "carapace.clawInstallRecord.v1",
   claw: { ...source, version: "1.0.0", integrity: "sha256:current" },
   manifestSchemaVersion: 1,
   planIntegrity: "sha256:current-add-plan",
@@ -34,7 +34,7 @@ export const install: PersistedClawInstall = {
   updatedAtMs: 1,
 };
 export const addPlan: ClawAddPlan = {
-  schemaVersion: "openclaw.clawAddPlan.v1",
+  schemaVersion: "carapace.clawAddPlan.v1",
   stability: "experimental",
   dryRun: true,
   mutationAllowed: false,
@@ -66,7 +66,7 @@ export const addPlan: ClawAddPlan = {
 
 export function plan(actions: ClawUpdatePlan["actions"]): ClawUpdatePlan {
   return {
-    schemaVersion: "openclaw.clawUpdatePlan.v1",
+    schemaVersion: "carapace.clawUpdatePlan.v1",
     stability: "experimental",
     dryRun: true,
     mutationAllowed: false,

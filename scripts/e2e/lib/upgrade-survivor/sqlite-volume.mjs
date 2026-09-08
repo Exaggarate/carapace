@@ -62,12 +62,12 @@ function readPositiveIntegerEnv(name, fallback) {
 
 export function getVolumeSpec() {
   return {
-    sessions: readPositiveIntegerEnv("OPENCLAW_UPGRADE_SURVIVOR_VOLUME_SESSIONS", 4800),
+    sessions: readPositiveIntegerEnv("CARAPACE_UPGRADE_SURVIVOR_VOLUME_SESSIONS", 4800),
     eventsPerSession: readPositiveIntegerEnv(
-      "OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION",
+      "CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION",
       5,
     ),
-    cronJobs: readPositiveIntegerEnv("OPENCLAW_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS", 2200),
+    cronJobs: readPositiveIntegerEnv("CARAPACE_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS", 2200),
   };
 }
 
@@ -115,7 +115,7 @@ export function getVolumeTranscriptEvent(index, sessionId, sequence) {
       version: 3,
       id: sessionId,
       timestamp: "2026-07-01T10:00:00.000Z",
-      cwd: "/tmp/openclaw-upgrade-survivor-workspace",
+      cwd: "/tmp/carapace-upgrade-survivor-workspace",
     };
   }
   const textSize = sequence % 3 === 1 ? 257 : sequence % 3 === 2 ? 1025 : 32;
@@ -350,7 +350,7 @@ export function assertUpgradeVolumeMigrated(stateDir, stage) {
     const expectedEvents =
       agentFixtures.filter((fixture) => !fixture.metadataOnly && !fixture.missingTranscript)
         .length * spec.eventsPerSession;
-    const databasePath = path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+    const databasePath = path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
     const counts = assertHealthySqlite(databasePath, (db) => {
       const sessionRows = db
         .prepare(
@@ -429,7 +429,7 @@ export function assertUpgradeVolumeMigrated(stateDir, stage) {
   }
   assert(migratedSessions === spec.sessions, `volume session count changed: ${migratedSessions}`);
 
-  const stateDatabasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const stateDatabasePath = path.join(stateDir, "state", "carapace.sqlite");
   assertHealthySqlite(stateDatabasePath, (db) => {
     const rows = db
       .prepare(

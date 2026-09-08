@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { hasErrnoCode } from "../infra/errors.js";
 import { createTempHomeEnv, type TempHomeEnv } from "../test-utils/temp-home.js";
@@ -243,13 +243,13 @@ describe("readRemoteMediaBuffer", () => {
 
   beforeAll(async () => {
     vi.resetModules();
-    tempHome = await createTempHomeEnv("openclaw-test-home-");
+    tempHome = await createTempHomeEnv("carapace-test-home-");
     const fetchModule = await import("./fetch.js");
     readRemoteMediaBuffer = fetchModule.readRemoteMediaBuffer;
     saveRemoteMedia = fetchModule.saveRemoteMedia;
     saveResponseMedia = fetchModule.saveResponseMedia;
     // Default cap mirrors the module-private DEFAULT_FETCH_MEDIA_MAX_BYTES.
-    defaultFetchMediaMaxBytes = (await import("@openclaw/media-core/constants")).MAX_DOCUMENT_BYTES;
+    defaultFetchMediaMaxBytes = (await import("@carapace/media-core/constants")).MAX_DOCUMENT_BYTES;
   });
 
   beforeEach(() => {
@@ -965,7 +965,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for streamed downloads", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\ncarapace,1\n");
     const fetchImpl = vi.fn(
       async () =>
         new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {
@@ -992,7 +992,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for provided response streams", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\ncarapace,1\n");
     const response = new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {
       status: 200,
       headers: {
@@ -1013,7 +1013,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for buffered downloads", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\ncarapace,1\n");
     const fetchImpl = vi.fn(
       async () =>
         new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {
@@ -1492,7 +1492,7 @@ describe("readRemoteMediaBuffer", () => {
   );
 
   it("rejects bodyless successful responses without saving an empty file", async () => {
-    const inboundDir = path.join(tempHome.home, ".openclaw", "media", "inbound");
+    const inboundDir = path.join(tempHome.home, ".carapace", "media", "inbound");
     const listInboundFiles = async () => {
       try {
         return (await fs.readdir(inboundDir)).toSorted();
@@ -1738,7 +1738,7 @@ describe("readRemoteMediaBuffer", () => {
         await expect(operation).resolves.toMatchObject({ code: "max_bytes" });
         expect(response.body?.locked).toBe(false);
         expect(body.wasCanceled()).toBe(false);
-        const dir = path.join(tempHome.home, ".openclaw", "media", subdir);
+        const dir = path.join(tempHome.home, ".carapace", "media", subdir);
         await expect(
           fs.readdir(dir).catch((error: unknown) => {
             if (hasErrnoCode(error, "ENOENT")) {

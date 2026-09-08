@@ -11,7 +11,7 @@ import {
   readMissingScopeError,
   type MissingScopeErrorDetails,
 } from "../../packages/gateway-protocol/src/gateway-error-details.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   loadDeviceAuthTokenReadOnly,
   loadOriginDeviceTokenReadOnly,
@@ -268,7 +268,7 @@ export async function probeGateway(opts: {
   /** Disable persisted device auth when the transport does not identify a stable Gateway origin. */
   suppressStoredDeviceAuth?: boolean;
   auth?: GatewayProbeAuth;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   timeoutMs: number;
   preauthHandshakeTimeoutMs?: number;
   includeDetails?: boolean;

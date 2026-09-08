@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { nip19 } from "nostr-tools";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import type { SecretInput, WizardPrompter } from "openclaw/plugin-sdk/setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import type { SecretInput, WizardPrompter } from "carapace/plugin-sdk/setup";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createBuzzSetupWizard } from "./setup-surface.js";
 
@@ -38,7 +38,7 @@ function createCredentialConfig(
     groupAllowFrom: [],
     groups: { [ROOM_A]: { requireMention: false, groupAllowFrom: [] } },
   };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     channels: {
       buzz:
         accountId === "default"
@@ -52,7 +52,7 @@ function createCredentialConfig(
 async function createStoredCredentials(source: "env" | "file"): Promise<{
   privateKey: SecretInput;
   authTag: SecretInput;
-  secrets?: OpenClawConfig["secrets"];
+  secrets?: CarapaceConfig["secrets"];
 }> {
   const privateKey = nip19.nsecEncode(GENERATED_KEY);
   if (source === "env") {
@@ -131,11 +131,11 @@ describe("Buzz guided setup", () => {
     const prompter = createPrompter();
     const runtime = createRuntime();
     const hooks: Array<{
-      run: (ctx: { cfg: OpenClawConfig; runtime: RuntimeEnv }) => void | Promise<void>;
+      run: (ctx: { cfg: CarapaceConfig; runtime: RuntimeEnv }) => void | Promise<void>;
     }> = [];
 
     const result = await wizard.configure({
-      cfg: { channels: { buzz: { authTag: AUTH_TAG } } } as OpenClawConfig,
+      cfg: { channels: { buzz: { authTag: AUTH_TAG } } } as CarapaceConfig,
       runtime,
       prompter,
       options: {
@@ -195,7 +195,7 @@ describe("Buzz guided setup", () => {
           groups: { [ROOM_A]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configure = (accountId: string) =>
       wizard.configure({
         cfg,
@@ -239,7 +239,7 @@ describe("Buzz guided setup", () => {
       .mockResolvedValueOnce("ada")
       .mockResolvedValueOnce("wss://ada.example.com");
     const result = await wizard.configure({
-      cfg: { channels: { buzz: root } } as OpenClawConfig,
+      cfg: { channels: { buzz: root } } as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       accountOverrides: {},
@@ -286,7 +286,7 @@ describe("Buzz guided setup", () => {
     vi.mocked(prompter.multiselect).mockResolvedValue([ROOM_A]);
 
     const result = await wizard.configure({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       options: { secretInputMode: "ref" },
@@ -324,7 +324,7 @@ describe("Buzz guided setup", () => {
             defaultTo: ROOM_A,
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       accountOverrides: {},
@@ -401,7 +401,7 @@ describe("Buzz guided setup", () => {
               privateKey: "11".repeat(32),
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         accountOverrides: {},
       }),
     ).resolves.toEqual({
@@ -429,7 +429,7 @@ describe("Buzz guided setup", () => {
     const result = await wizard.configure({
       cfg: {
         channels: { buzz: { relayUrl: "ws://127.attacker.example" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       accountOverrides: {},
@@ -469,7 +469,7 @@ describe("Buzz guided setup", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       accountOverrides: {},
@@ -626,7 +626,7 @@ describe("Buzz guided setup", () => {
             privateKey: "11".repeat(32),
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       options: { secretInputMode: "ref" },
@@ -658,7 +658,7 @@ describe("Buzz guided setup", () => {
     vi.mocked(prompter.multiselect).mockResolvedValue([ROOM_A]);
 
     const result = await wizard.configure({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: createRuntime(),
       prompter,
       accountOverrides: {},

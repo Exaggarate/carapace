@@ -8,7 +8,7 @@ import os from "node:os";
 import path from "node:path";
 import { URL } from "node:url";
 import { promisify } from "node:util";
-import { isPassThroughRemoteMediaSource } from "@openclaw/media-core/media-source-url";
+import { isPassThroughRemoteMediaSource } from "@carapace/media-core/media-source-url";
 import { isWindowsDrivePath } from "../infra/archive-path.js";
 import {
   assertNoWindowsNetworkPath,
@@ -17,7 +17,7 @@ import {
 } from "../infra/local-file-access.js";
 import { assertNoPathAliasEscape, type PathAliasPolicy } from "../infra/path-alias-guards.js";
 import { isNotFoundPathError, isPathInside } from "../infra/path-guards.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import { resolveConfigDir, shortenHomePath } from "../utils.js";
 
 const DATA_URL_RE = /^data:/i;
@@ -411,11 +411,11 @@ async function resolveAllowedTmpMediaPath(params: {
     return undefined;
   }
   const resolved = path.resolve(resolveSandboxInputPath(params.candidate, params.sandboxRoot));
-  const openClawTmpDir = path.resolve(resolvePreferredOpenClawTmpDir());
-  if (!isPathInside(openClawTmpDir, resolved)) {
+  const carapaceTmpDir = path.resolve(resolvePreferredCarapaceTmpDir());
+  if (!isPathInside(carapaceTmpDir, resolved)) {
     return undefined;
   }
-  await assertNoTmpAliasEscape({ filePath: resolved, tmpRoot: openClawTmpDir });
+  await assertNoTmpAliasEscape({ filePath: resolved, tmpRoot: carapaceTmpDir });
   return resolved;
 }
 

@@ -1,7 +1,7 @@
 import {
   parseStrictFiniteNumber,
   parseStrictPositiveInteger,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import type { Command } from "commander";
 import {
   resolveAgentOperationAgentId,
@@ -17,7 +17,7 @@ import {
   getRuntimeConfigSourceSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { defaultRuntime } from "../../runtime.js";
 import { getProviderEnvVars } from "../../secrets/provider-env-vars.js";
 import { runCommandWithRuntime } from "../cli-utils.js";
@@ -30,7 +30,7 @@ import { emitJsonOrText } from "./output.js";
 export function registerLocalProvidersCommand<T>(
   parent: Command,
   description: string,
-  collect: (cfg: OpenClawConfig, agentId: string) => T | Promise<T>,
+  collect: (cfg: CarapaceConfig, agentId: string) => T | Promise<T>,
   format: (value: T) => string,
 ): void {
   parent
@@ -88,7 +88,7 @@ export function resolveSelectedProviderFromModelRef(
 }
 
 export function resolveCapabilityProviderAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   rawAgentId: string | undefined,
   surface = "inference provider inspection",
 ): string {
@@ -112,7 +112,7 @@ export function resolveCapabilityAgentOption(
     : inheritOptionFromParent<string>(command, "agent");
 }
 function getAuthProfileIdsForProvider(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   providerId: string,
   agentId: string,
 ): string[] {
@@ -122,7 +122,7 @@ function getAuthProfileIdsForProvider(
 }
 
 export function providerHasGenericConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
   /** Omit only for aggregate/global callers that intentionally exclude agent auth stores. */
   agentId?: string;
@@ -221,8 +221,8 @@ export async function resolveLocalCapabilityRuntimeConfig(params: {
   allowedPaths?: Set<string>;
   forcedActivePaths?: Set<string>;
   optionalActivePaths?: Set<string>;
-  config?: OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  config?: CarapaceConfig;
+}): Promise<CarapaceConfig> {
   const cfg = params.config ?? getRuntimeConfig();
   const { effectiveConfig } = await resolveCommandConfigWithSecrets({
     config: cfg,
@@ -238,7 +238,7 @@ export async function resolveLocalCapabilityRuntimeConfig(params: {
   return effectiveConfig;
 }
 
-export function pinRuntimeConfigSnapshot(config: OpenClawConfig): void {
+export function pinRuntimeConfigSnapshot(config: CarapaceConfig): void {
   const sourceConfig = getRuntimeConfigSourceSnapshot();
   if (sourceConfig) {
     setRuntimeConfigSnapshot(config, sourceConfig);

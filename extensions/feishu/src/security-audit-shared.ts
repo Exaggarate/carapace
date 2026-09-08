@@ -1,12 +1,12 @@
 // Feishu plugin module implements security audit shared behavior.
-import { hasConfiguredSecretInput } from "openclaw/plugin-sdk/secret-input";
+import { hasConfiguredSecretInput } from "carapace/plugin-sdk/secret-input";
 import {
   asOptionalRecord as asRecord,
   hasNonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawConfig } from "../runtime-api.js";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "../runtime-api.js";
 
-function isFeishuDocToolEnabled(cfg: OpenClawConfig): boolean {
+function isFeishuDocToolEnabled(cfg: CarapaceConfig): boolean {
   const channels = asRecord(cfg.channels);
   const feishu = asRecord(channels?.feishu);
   if (!feishu || feishu.enabled === false) {
@@ -46,7 +46,7 @@ function isFeishuDocToolEnabled(cfg: OpenClawConfig): boolean {
   return false;
 }
 
-export function collectFeishuSecurityAuditFindings(params: { cfg: OpenClawConfig }) {
+export function collectFeishuSecurityAuditFindings(params: { cfg: CarapaceConfig }) {
   if (!isFeishuDocToolEnabled(params.cfg)) {
     return [];
   }

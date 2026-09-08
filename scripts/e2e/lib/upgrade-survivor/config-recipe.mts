@@ -179,17 +179,17 @@ const configuredPluginInstallSteps = [
 
 const scenarioConfigSteps = new Map<string, ConfigStep[]>([
   [
-    "acpx-openclaw-tools-bridge",
+    "acpx-carapace-tools-bridge",
     [
       {
         ...configSetJsonFile(
-          "plugins-acpx-openclaw-tools-bridge",
-          "acpx-openclaw-tools-bridge",
+          "plugins-acpx-carapace-tools-bridge",
+          "acpx-carapace-tools-bridge",
           "plugins",
-          "plugins-acpx-openclaw-tools-bridge.json",
+          "plugins-acpx-carapace-tools-bridge.json",
         ),
         // The candidate externalizes this runtime even when the baseline bundles it.
-        prepublishPluginPackages: ["@openclaw/acpx"],
+        prepublishPluginPackages: ["@carapace/acpx"],
       },
     ],
   ],
@@ -211,7 +211,7 @@ const scenarioConfigSteps = new Map<string, ConfigStep[]>([
       {
         id: "logging-file",
         intent: "logging",
-        argv: ["config", "set", "logging.file", "~/openclaw-upgrade-survivor/gateway.jsonl"],
+        argv: ["config", "set", "logging.file", "~/carapace-upgrade-survivor/gateway.jsonl"],
       },
     ],
   ],
@@ -254,7 +254,7 @@ const connectionOnlyScenarios = new Set(["mobile-pairing-reconnect", "watchos-di
 
 export function resolveUpgradeSurvivorConfigSteps(
   scenario = "base",
-  configuredUpdateChannel = process.env.OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL,
+  configuredUpdateChannel = process.env.CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL,
 ): ConfigStep[] {
   const validateStep = sharedRecipe.at(-1);
   const updateChannel =
@@ -300,7 +300,7 @@ export function resolveUpgradeSurvivorConfigSteps(
 }
 
 function selectedScenario() {
-  return process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO || "base";
+  return process.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIO || "base";
 }
 
 function adaptStepForBaseline(
@@ -309,11 +309,11 @@ function adaptStepForBaseline(
   summary: BaselineAdaptationSummary,
 ): ConfigStep | null {
   if (
-    step.intent === "acpx-openclaw-tools-bridge" &&
+    step.intent === "acpx-carapace-tools-bridge" &&
     isReleaseBefore(baselineVersion, "2026.4.22")
   ) {
-    if (!summary.skippedIntents.includes("acpx-openclaw-tools-bridge")) {
-      summary.skippedIntents.push("acpx-openclaw-tools-bridge");
+    if (!summary.skippedIntents.includes("acpx-carapace-tools-bridge")) {
+      summary.skippedIntents.push("acpx-carapace-tools-bridge");
     }
     return null;
   }
@@ -405,7 +405,7 @@ export function resolveUpgradeSurvivorConfigStepsForBaseline(
     .filter((step): step is ConfigStep => step !== null);
 }
 
-export function resolveUpgradeSurvivorOpenClawCommand(
+export function resolveUpgradeSurvivorCarapaceCommand(
   argv: string[],
   params: UpgradeSurvivorCommandParams = {},
 ) {
@@ -414,16 +414,16 @@ export function resolveUpgradeSurvivorOpenClawCommand(
     const comSpec = params.comSpec ?? resolveWindowsCmdExePath(params.env ?? process.env);
     return {
       command: comSpec,
-      args: ["/d", "/s", "/c", buildCmdExeCommandLine("openclaw.cmd", argv)],
-      commandLabel: ["openclaw", ...argv].join(" "),
+      args: ["/d", "/s", "/c", buildCmdExeCommandLine("carapace.cmd", argv)],
+      commandLabel: ["carapace", ...argv].join(" "),
       shell: false,
       windowsVerbatimArguments: true,
     };
   }
   return {
-    command: "openclaw",
+    command: "carapace",
     args: argv,
-    commandLabel: ["openclaw", ...argv].join(" "),
+    commandLabel: ["carapace", ...argv].join(" "),
     shell: false,
   };
 }
@@ -432,8 +432,8 @@ function errorCode(error: unknown) {
   return error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
 }
 
-export function runUpgradeSurvivorOpenClawStep(step: ConfigStep, params: ConfigCommandParams = {}) {
-  const invocation = resolveUpgradeSurvivorOpenClawCommand(step.argv);
+export function runUpgradeSurvivorCarapaceStep(step: ConfigStep, params: ConfigCommandParams = {}) {
+  const invocation = resolveUpgradeSurvivorCarapaceCommand(step.argv);
   const run: SpawnSyncCommand = params.spawnSyncCommand ?? spawnSync;
   const timeoutMs = params.timeoutMs ?? CONFIG_COMMAND_TIMEOUT_MS;
   const maxBuffer = params.maxBufferBytes ?? CONFIG_COMMAND_MAX_BUFFER_BYTES;
@@ -473,7 +473,7 @@ function applyRecipe() {
     scenario: string;
     acceptedIntents: string[];
     skippedIntents: string[];
-    steps: ReturnType<typeof runUpgradeSurvivorOpenClawStep>[];
+    steps: ReturnType<typeof runUpgradeSurvivorCarapaceStep>[];
   } = {
     source: "baseline-cli-command-recipe",
     recipe: "upgrade-survivor-v1",
@@ -489,7 +489,7 @@ function applyRecipe() {
     if (!adaptedStep) {
       continue;
     }
-    const outcome = runUpgradeSurvivorOpenClawStep(adaptedStep);
+    const outcome = runUpgradeSurvivorCarapaceStep(adaptedStep);
     summary.steps.push(outcome);
     if (outcome.ok && !summary.acceptedIntents.includes(adaptedStep.intent)) {
       summary.acceptedIntents.push(adaptedStep.intent);

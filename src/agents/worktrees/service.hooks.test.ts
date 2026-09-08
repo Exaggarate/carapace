@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { waitForPidFile } from "../../../test/helpers/process-wait.js";
 import { withTimeout } from "../../infra/fs-safe.js";
 import { SESSION_WORK_ADMISSION_DRAIN_TIMEOUT_MS } from "../../sessions/session-lifecycle-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ManagedWorktreeService } from "./service.js";
 import { useManagedWorktreeTestRepository } from "./service.test-support.js";
 
@@ -21,7 +21,7 @@ describe("ManagedWorktreeService repository code isolation", () => {
   let service: ManagedWorktreeService;
 
   beforeEach(async () => {
-    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worktree-hooks-")));
+    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worktree-hooks-")));
     repo = await initializeRepository(root);
     sentinel = path.join(repo, ".hook-ran");
     const hooks = path.join(repo, "git-hooks");
@@ -33,12 +33,12 @@ describe("ManagedWorktreeService repository code isolation", () => {
     }
     await execFileAsync("git", ["-C", repo, "config", "core.hooksPath", "git-hooks"]);
     service = new ManagedWorktreeService({
-      env: { ...process.env, OPENCLAW_STATE_DIR: path.join(root, "state") },
+      env: { ...process.env, CARAPACE_STATE_DIR: path.join(root, "state") },
     });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -98,7 +98,7 @@ describe("ManagedWorktreeService repository code isolation", () => {
   });
 
   it("still executes the explicitly enabled worktree setup script", async () => {
-    const setup = path.join(repo, ".openclaw");
+    const setup = path.join(repo, ".carapace");
     await fs.mkdir(setup);
     await fs.writeFile(
       path.join(setup, "worktree-setup.sh"),
@@ -122,13 +122,13 @@ describe("ManagedWorktreeService repository code isolation", () => {
   });
 
   it("stops setup and removes the unbound worktree when creation is aborted", async () => {
-    const setup = path.join(repo, ".openclaw");
+    const setup = path.join(repo, ".carapace");
     const pidFile = path.join(setup, "setup-pid");
     const release = path.join(setup, "release");
     await fs.mkdir(setup);
     await fs.writeFile(
       path.join(setup, "worktree-setup.sh"),
-      '#!/bin/sh\nprintf "%s" "$$" > "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/setup-pid"\nwhile [ ! -f "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/release" ]; do sleep 0.05; done\n',
+      '#!/bin/sh\nprintf "%s" "$$" > "$CARAPACE_SOURCE_TREE_PATH/.carapace/setup-pid"\nwhile [ ! -f "$CARAPACE_SOURCE_TREE_PATH/.carapace/release" ]; do sleep 0.05; done\n',
       { mode: 0o755 },
     );
     const controller = new AbortController();
@@ -161,7 +161,7 @@ describe("ManagedWorktreeService repository code isolation", () => {
         repo,
         "branch",
         "--list",
-        "openclaw/cancelled-setup",
+        "carapace/cancelled-setup",
       ]);
       expect(branches.stdout.trim()).toBe("");
     } finally {

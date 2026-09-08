@@ -1,7 +1,7 @@
 import path from "node:path";
-import * as agentHarnessRuntime from "openclaw/plugin-sdk/agent-harness-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { formatSqliteSessionFileMarker } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import * as agentHarnessRuntime from "carapace/plugin-sdk/agent-harness-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { formatSqliteSessionFileMarker } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { describe, expect, it, vi } from "vitest";
 import { dynamicToolBuildState } from "./dynamic-tool-build-state.js";
 import {
@@ -45,7 +45,7 @@ describe("runCodexAppServerAttempt agent-end context", () => {
       params.messageChannel = "discord";
       params.memberRoleIds = ["maintainer-role"];
       setCodexTestModelSupportsTools(params, true);
-      dynamicToolBuildState.openClawCodingToolsFactory = () => [
+      dynamicToolBuildState.carapaceCodingToolsFactory = () => [
         createRuntimeDynamicTool("skill_workshop"),
       ];
 

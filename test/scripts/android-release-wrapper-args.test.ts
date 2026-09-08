@@ -71,7 +71,7 @@ describe("Android release shell wrapper arguments", () => {
     expectedProvenance?: "locked" | "fallback";
     inheritedProvenance?: string;
   }) {
-    const binDir = tempDirs.make("openclaw-android-fastlane-test-");
+    const binDir = tempDirs.make("carapace-android-fastlane-test-");
     const tracePath = path.join(binDir, "trace.log");
     const bundle = path.join(binDir, "bundle");
     const fastlane = path.join(binDir, "fastlane");
@@ -83,13 +83,13 @@ describe("Android release shell wrapper arguments", () => {
       writeFileSync(
         bundle,
         "#!/usr/bin/env bash\n" +
-          '[[ "$BUNDLE_GEMFILE" == "$OPENCLAW_FASTLANE_EXPECTED_GEMFILE" ]] || exit 91\n' +
+          '[[ "$BUNDLE_GEMFILE" == "$CARAPACE_FASTLANE_EXPECTED_GEMFILE" ]] || exit 91\n' +
           '[[ "${1:-}" == "_2.6.9_" ]] || exit 92\n' +
-          '[[ "${2:-}" != "check" ]] || exit "$OPENCLAW_BUNDLE_CHECK_EXIT"\n' +
+          '[[ "${2:-}" != "check" ]] || exit "$CARAPACE_BUNDLE_CHECK_EXIT"\n' +
           '[[ "${2:-}" == "exec" && "${3:-}" == "fastlane" ]] || exit 93\n' +
-          '[[ -z "$OPENCLAW_EXPECTED_PROVENANCE" || "${_OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$OPENCLAW_EXPECTED_PROVENANCE" ]] || exit 95\n' +
-          'printf "bundle:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"\n' +
-          'exit "$OPENCLAW_BUNDLE_EXIT"\n',
+          '[[ -z "$CARAPACE_EXPECTED_PROVENANCE" || "${_CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$CARAPACE_EXPECTED_PROVENANCE" ]] || exit 95\n' +
+          'printf "bundle:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"\n' +
+          'exit "$CARAPACE_BUNDLE_EXIT"\n',
       );
       chmodSync(bundle, 0o755);
     }
@@ -98,12 +98,12 @@ describe("Android release shell wrapper arguments", () => {
         fastlane,
         "#!/usr/bin/env bash\n" +
           'if [[ "${1:-}" == "--version" ]]; then\n' +
-          '  [[ "$OPENCLAW_DIRECT_STATE" == "usable" ]]\n' +
+          '  [[ "$CARAPACE_DIRECT_STATE" == "usable" ]]\n' +
           "  exit\n" +
           "fi\n" +
-          '[[ -z "$OPENCLAW_EXPECTED_PROVENANCE" || "${_OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$OPENCLAW_EXPECTED_PROVENANCE" ]] || exit 95\n' +
-          'printf "direct:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"\n' +
-          'exit "$OPENCLAW_DIRECT_EXIT"\n',
+          '[[ -z "$CARAPACE_EXPECTED_PROVENANCE" || "${_CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$CARAPACE_EXPECTED_PROVENANCE" ]] || exit 95\n' +
+          'printf "direct:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"\n' +
+          'exit "$CARAPACE_DIRECT_EXIT"\n',
       );
       chmodSync(fastlane, 0o755);
     }
@@ -119,9 +119,9 @@ describe("Android release shell wrapper arguments", () => {
           "  exit 0\n" +
           "fi\n" +
           '[[ "${1:-}" == "exec" && "${2:-}" == "fastlane" ]] || exit 94\n' +
-          '[[ -z "$OPENCLAW_EXPECTED_PROVENANCE" || "${_OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$OPENCLAW_EXPECTED_PROVENANCE" ]] || exit 95\n' +
-          'printf "rbenv:%s\\n" "$*" >> "$OPENCLAW_FASTLANE_TEST_TRACE"\n' +
-          'exit "$OPENCLAW_RBENV_EXIT"\n',
+          '[[ -z "$CARAPACE_EXPECTED_PROVENANCE" || "${_CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE:-}" == "$CARAPACE_EXPECTED_PROVENANCE" ]] || exit 95\n' +
+          'printf "rbenv:%s\\n" "$*" >> "$CARAPACE_FASTLANE_TEST_TRACE"\n' +
+          'exit "$CARAPACE_RBENV_EXIT"\n',
       );
       chmodSync(rbenv, 0o755);
     }
@@ -147,17 +147,17 @@ describe("Android release shell wrapper arguments", () => {
         env: {
           ...process.env,
           BUNDLE_GEMFILE: options.bundleGemfile ?? "",
-          OPENCLAW_BUNDLE_CHECK_EXIT: bundleState === "usable" ? "0" : "1",
-          OPENCLAW_BUNDLE_EXIT: String(options.bundleExit ?? 0),
-          OPENCLAW_DIRECT_EXIT: String(options.directExit ?? 0),
-          OPENCLAW_DIRECT_STATE: directState,
-          OPENCLAW_EXPECTED_PROVENANCE: options.expectedProvenance ?? "",
-          OPENCLAW_FASTLANE_EXPECTED_GEMFILE: gemfilePath,
-          OPENCLAW_FASTLANE_TEST_TRACE: tracePath,
-          OPENCLAW_MOBILE_RELEASE_REF_MODE: options.releaseRefMode ?? "",
-          OPENCLAW_RBENV_EXIT: String(options.rbenvExit ?? 0),
+          CARAPACE_BUNDLE_CHECK_EXIT: bundleState === "usable" ? "0" : "1",
+          CARAPACE_BUNDLE_EXIT: String(options.bundleExit ?? 0),
+          CARAPACE_DIRECT_EXIT: String(options.directExit ?? 0),
+          CARAPACE_DIRECT_STATE: directState,
+          CARAPACE_EXPECTED_PROVENANCE: options.expectedProvenance ?? "",
+          CARAPACE_FASTLANE_EXPECTED_GEMFILE: gemfilePath,
+          CARAPACE_FASTLANE_TEST_TRACE: tracePath,
+          CARAPACE_MOBILE_RELEASE_REF_MODE: options.releaseRefMode ?? "",
+          CARAPACE_RBENV_EXIT: String(options.rbenvExit ?? 0),
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-          _OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE: options.inheritedProvenance ?? "",
+          _CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE: options.inheritedProvenance ?? "",
         },
         encoding: "utf8",
       },

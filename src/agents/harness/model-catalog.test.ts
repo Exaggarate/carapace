@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import type { ModelCatalogSnapshot } from "../model-catalog.types.js";
 import { augmentModelCatalogWithAgentHarness } from "./model-catalog.js";
@@ -15,7 +15,7 @@ const cfg = {
       },
     ],
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const snapshot: ModelCatalogSnapshot = {
   entries: [
@@ -220,7 +220,7 @@ describe("agent harness model catalog", () => {
   });
 
   it("prepares configured refs for the selected agent without including other agents", async () => {
-    const selectedConfig: OpenClawConfig = {
+    const selectedConfig: CarapaceConfig = {
       agents: {
         defaults: cfg.agents?.defaults,
         entries: {

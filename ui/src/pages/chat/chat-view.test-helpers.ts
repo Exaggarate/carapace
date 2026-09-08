@@ -46,7 +46,7 @@ export function appendChatBubble(
       message: {
         role: "user",
         content: options.text ?? "",
-        ...(options.entryId ? { __openclaw: { id: options.entryId } } : {}),
+        ...(options.entryId ? { __carapace: { id: options.entryId } } : {}),
       },
       messageId: options.messageId ?? "test-message",
       senderLabel: options.senderLabel ?? "User",

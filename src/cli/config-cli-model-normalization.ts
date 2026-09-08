@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { normalizeSubmittedConfigModelRefs } from "../config/model-input-normalization.js";
 import { normalizeAgentModelRefForConfig } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadPluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import type { PathSegment } from "./config-cli-path.js";
 
-export function normalizeConfigMutationModelRefs(cfg: OpenClawConfig): OpenClawConfig {
+export function normalizeConfigMutationModelRefs(cfg: CarapaceConfig): CarapaceConfig {
   const pluginMetadata = loadPluginMetadataSnapshot({ config: cfg, env: process.env });
   return normalizeSubmittedConfigModelRefs(cfg, pluginMetadata.owners.modelIdNormalizationPolicies);
 }

@@ -2,7 +2,7 @@
 import {
   isRecord,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type FeishuNativeCard = Record<string, unknown> & {
   body: { elements: Record<string, unknown>[] };

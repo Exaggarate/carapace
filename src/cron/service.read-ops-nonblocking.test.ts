@@ -13,17 +13,17 @@ import type { CronJob } from "./types.js";
 
 const sqliteTransactionLabels = vi.hoisted(() => [] as string[]);
 
-vi.mock("../state/openclaw-state-db.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../state/openclaw-state-db.js")>();
-  const runOpenClawStateWriteTransaction: typeof actual.runOpenClawStateWriteTransaction = (
+vi.mock("../state/carapace-state-db.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../state/carapace-state-db.js")>();
+  const runCarapaceStateWriteTransaction: typeof actual.runCarapaceStateWriteTransaction = (
     operation,
     options,
     transactionOptions,
   ) => {
     sqliteTransactionLabels.push(transactionOptions?.operationLabel ?? "state.write");
-    return actual.runOpenClawStateWriteTransaction(operation, options, transactionOptions);
+    return actual.runCarapaceStateWriteTransaction(operation, options, transactionOptions);
   };
-  return { ...actual, runOpenClawStateWriteTransaction };
+  return { ...actual, runCarapaceStateWriteTransaction };
 });
 
 const noopLogger = {
@@ -40,7 +40,7 @@ type IsolatedRunResult = {
 };
 
 async function makeStorePath() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-"));
   return {
     storePath: path.join(dir, "cron", "jobs.json"),
     cleanup: async () => {
@@ -92,7 +92,7 @@ function expectCronStatus(
 ) {
   expect(status.enabled).toBe(true);
   expect(status.storage).toBe("sqlite");
-  expect(status.sqlitePath).toContain("openclaw.sqlite");
+  expect(status.sqlitePath).toContain("carapace.sqlite");
   expect(status.storePath).toBe(status.sqlitePath);
   expect(status.jobs).toBe(params.jobs);
   if (status.nextWakeAtMs !== null) {

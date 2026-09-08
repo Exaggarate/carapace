@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { buildControlUiSessionPath } from "@openclaw/session-url-contract";
+import { normalizeOptionalString } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { buildControlUiSessionPath } from "@carapace/session-url-contract";
 import type { WebPushNotificationCategory } from "../../packages/gateway-protocol/src/schema/push.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createCronExecutionId } from "../cron/run-id.js";
 import {
   WEB_PUSH_USER_PREFERENCES_KEY,
@@ -19,7 +19,7 @@ import {
   type BoundWebPushSubscription,
 } from "../infra/push-web.js";
 import { createSubsystemLogger, type SubsystemLogger } from "../logging/subsystem.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyCarapaceAssistantMessage } from "../shared/transcript-only-carapace-assistant.js";
 import { getUserPreferences } from "../state/user-preferences.js";
 import { resolveUserProfileId } from "../state/user-profiles.js";
 import { resolveControlUiWebPushUrl } from "./control-ui-shared.js";
@@ -68,9 +68,9 @@ function resolveEventWebPushNotification(
     const questionId = normalizeOptionalString(value.id);
     return {
       category: "agent-question",
-      title: "OpenClaw needs an answer",
+      title: "Carapace needs an answer",
       body: "An agent has a question for you.",
-      tag: `openclaw-question-${id}`,
+      tag: `carapace-question-${id}`,
       ...(questionId ? { path: `ask/${encodeURIComponent(questionId)}` } : {}),
     };
   }
@@ -78,14 +78,14 @@ function resolveEventWebPushNotification(
     event === "chat" &&
     value.state === "final" &&
     value.yielded !== true &&
-    !isTranscriptOnlyOpenClawAssistantMessage(value.message)
+    !isTranscriptOnlyCarapaceAssistantMessage(value.message)
   ) {
     const runId = normalizeWebPushDisplayLabel(value.runId) ?? "finished";
     return {
       category: "agent-finished",
-      title: "OpenClaw agent finished",
+      title: "Carapace agent finished",
       body: "An agent completed its response.",
-      tag: `openclaw-agent-finished-${runId}`,
+      tag: `carapace-agent-finished-${runId}`,
     };
   }
   if (event === "task" && value.action === "upserted") {
@@ -97,10 +97,10 @@ function resolveEventWebPushNotification(
     const taskTitle = normalizeWebPushDisplayLabel(task.title);
     return {
       category: "background-task-failed",
-      title: "OpenClaw background task failed",
+      title: "Carapace background task failed",
       body: "A background task needs attention.",
       ...(taskTitle ? { identifiedBody: `${taskTitle} needs attention.` } : {}),
-      tag: `openclaw-task-failed-${taskId}`,
+      tag: `carapace-task-failed-${taskId}`,
     };
   }
   if (event === "cron" && value.action === "finished" && value.status === "error") {
@@ -124,10 +124,10 @@ function resolveEventWebPushNotification(
     }
     return {
       category: "scheduled-task-failed",
-      title: "OpenClaw scheduled task failed",
+      title: "Carapace scheduled task failed",
       body: "A scheduled task needs attention.",
       ...(jobName ? { identifiedBody: `${jobName} needs attention.` } : {}),
-      tag: `openclaw-cron-failed-${jobTag}`,
+      tag: `carapace-cron-failed-${jobTag}`,
       path: `automations${query.size ? `?${query}` : ""}`,
     };
   }
@@ -140,7 +140,7 @@ function preferenceFor(target: CurrentWebPushTarget, stateDir?: string) {
     ? getUserPreferences(
         profileId,
         [WEB_PUSH_USER_PREFERENCES_KEY],
-        stateDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } } : {},
+        stateDir ? { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } } : {},
       )[WEB_PUSH_USER_PREFERENCES_KEY]
     : undefined;
   return resolveEffectiveWebPushPreferences({
@@ -151,7 +151,7 @@ function preferenceFor(target: CurrentWebPushTarget, stateDir?: string) {
 
 /** Routes attention events to offline browsers without expanding live session visibility. */
 export function createEventWebPushDelivery(params: {
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   log?: Pick<SubsystemLogger, "warn">;
   stateDir?: string;
 }) {
@@ -303,10 +303,10 @@ export function createEventWebPushDelivery(params: {
       deliver(
         {
           category: "human-mentioned",
-          title: "OpenClaw mention",
+          title: "Carapace mention",
           body: "Someone mentioned you in a conversation.",
           identifiedBody: `${senderLabel} mentioned you${sessionTitle ? ` in ${sessionTitle}` : ""}.`,
-          tag: `openclaw-mention-${id}`,
+          tag: `carapace-mention-${id}`,
         },
         "human-mentioned",
         undefined,

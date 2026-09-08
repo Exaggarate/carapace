@@ -1,7 +1,7 @@
 // Onboard remote tests cover remote gateway prompts, Bonjour discovery, and remote config mutation.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/auth-wizard.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
 import { captureEnv } from "../test-utils/env.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
@@ -12,7 +12,7 @@ const resolveWideAreaDiscoveryDomain = vi.hoisted(() => vi.fn(() => undefined));
 const detectBinary = vi.hoisted(() => vi.fn<(name: string) => Promise<boolean>>());
 const INSECURE_WS_URL_MESSAGE =
   "Use wss:// for remote hosts, or ws://127.0.0.1/localhost via SSH tunnel. " +
-  "Break-glass: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 for trusted private networks.";
+  "Break-glass: CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1 for trusted private networks.";
 
 vi.mock("../infra/bonjour-discovery.js", async () => {
   const actual = await vi.importActual<typeof import("../infra/bonjour-discovery.js")>(
@@ -59,10 +59,10 @@ function createGatewayDiscoveryBeacon(): GatewayBonjourBeacon {
 }
 
 describe("promptRemoteGatewayConfig", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_ALLOW_INSECURE_PRIVATE_WS", "OPENCLAW_GATEWAY_TOKEN"]);
+  const envSnapshot = captureEnv(["CARAPACE_ALLOW_INSECURE_PRIVATE_WS", "CARAPACE_GATEWAY_TOKEN"]);
 
   async function runRemotePrompt(params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     text: WizardPrompter["text"];
     selectResponses: Partial<Record<string, string>>;
     confirm: boolean;
@@ -80,7 +80,7 @@ describe("promptRemoteGatewayConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     envSnapshot.restore();
-    delete process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS;
+    delete process.env.CARAPACE_ALLOW_INSECURE_PRIVATE_WS;
     detectBinary.mockResolvedValue(false);
     discoverGatewayBeacons.mockResolvedValue([]);
     resolveWideAreaDiscoveryDomain.mockReturnValue(undefined);
@@ -128,7 +128,7 @@ describe("promptRemoteGatewayConfig", () => {
       sshIdentity: "/tmp/test-identity",
       sshHostKeyPolicy: "strict" as const,
     };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: { mode: "remote", remote: { ...remote, url: seededUrl ?? remote.url } },
     };
     detectBinary.mockResolvedValue(true);
@@ -160,7 +160,7 @@ describe("promptRemoteGatewayConfig", () => {
     ["preserves", "wss://gateway.example/rpc", { "X-Edge-Auth": "test-secret" }],
     ["clears", "wss://other.example/rpc", undefined],
   ])("%s edge auth based on the remote Gateway scope", async (_label, nextUrl, expected) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: "remote",
         remote: {
@@ -310,7 +310,7 @@ describe("promptRemoteGatewayConfig", () => {
       text,
     });
 
-    const next = await promptRemoteGatewayConfig({} as OpenClawConfig, prompter);
+    const next = await promptRemoteGatewayConfig({} as CarapaceConfig, prompter);
 
     expect(next.gateway?.mode).toBe("remote");
     expect(next.gateway?.remote?.url).toBe(manualUrl);
@@ -414,7 +414,7 @@ describe("promptRemoteGatewayConfig", () => {
       text,
     });
 
-    const next = await promptRemoteGatewayConfig({} as OpenClawConfig, prompter);
+    const next = await promptRemoteGatewayConfig({} as CarapaceConfig, prompter);
 
     expect(next.gateway?.remote?.url).toBe("ws://127.0.0.1:18789");
     expect(vi.mocked(select).mock.calls.map(([params]) => params.message)).not.toContain(
@@ -447,13 +447,13 @@ describe("promptRemoteGatewayConfig", () => {
     expect(next.gateway?.remote?.token).toBeUndefined();
   });
 
-  it("allows ws:// hostname remote URLs when OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1", async () => {
-    process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS = "1";
+  it("allows ws:// hostname remote URLs when CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1", async () => {
+    process.env.CARAPACE_ALLOW_INSECURE_PRIVATE_WS = "1";
     const text: WizardPrompter["text"] = vi.fn(async (params) => {
       if (params.message === "Gateway WebSocket URL") {
-        expect(params.validate?.("ws://openclaw-gateway.ai:18789")).toBeUndefined();
+        expect(params.validate?.("ws://carapace-gateway.ai:18789")).toBeUndefined();
         expect(params.validate?.("ws://1.1.1.1:18789")).toBe(INSECURE_WS_URL_MESSAGE);
-        return "ws://openclaw-gateway.ai:18789";
+        return "ws://carapace-gateway.ai:18789";
       }
       return "";
     }) as WizardPrompter["text"];
@@ -465,7 +465,7 @@ describe("promptRemoteGatewayConfig", () => {
     });
 
     expect(next.gateway?.mode).toBe("remote");
-    expect(next.gateway?.remote?.url).toBe("ws://openclaw-gateway.ai:18789");
+    expect(next.gateway?.remote?.url).toBe("ws://carapace-gateway.ai:18789");
   });
 
   it("allows explicit no-auth confirmation even when reference storage is selected", async () => {
@@ -490,13 +490,13 @@ describe("promptRemoteGatewayConfig", () => {
   });
 
   it("supports storing remote auth as an external env secret ref", async () => {
-    process.env.OPENCLAW_GATEWAY_TOKEN = "remote-token-value";
+    process.env.CARAPACE_GATEWAY_TOKEN = "remote-token-value";
     const text: WizardPrompter["text"] = vi.fn(async (params) => {
       if (params.message === "Gateway WebSocket URL") {
         return "wss://remote.example.com:18789";
       }
       if (params.message === "Environment variable name") {
-        return "OPENCLAW_GATEWAY_TOKEN";
+        return "CARAPACE_GATEWAY_TOKEN";
       }
       return "";
     }) as WizardPrompter["text"];
@@ -511,7 +511,7 @@ describe("promptRemoteGatewayConfig", () => {
       return (params.options[0]?.value ?? "") as never;
     });
 
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const prompter = createPrompter({
       confirm: vi.fn(async () => false),
       select,
@@ -525,7 +525,7 @@ describe("promptRemoteGatewayConfig", () => {
     expect(next.gateway?.remote?.token).toEqual({
       source: "env",
       provider: "default",
-      id: "OPENCLAW_GATEWAY_TOKEN",
+      id: "CARAPACE_GATEWAY_TOKEN",
     });
   });
 

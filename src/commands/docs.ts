@@ -1,11 +1,11 @@
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatCliCommand } from "../cli/command-format.js";
-// Implements docs link/search output for `openclaw docs`.
+// Implements docs link/search output for `carapace docs`.
 import { readResponseWithLimit } from "../infra/http-body.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
 
-const SEARCH_API = "https://docs.openclaw.ai/api/search";
+const SEARCH_API = "https://github.com/Exaggarate/carapace";
 const SEARCH_TIMEOUT_MS = 30_000;
 const DOCS_SEARCH_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 
@@ -129,18 +129,18 @@ export async function docsSearchCommand(
     if (options.json) {
       writeRuntimeJson(runtime, {
         query: null,
-        url: "https://docs.openclaw.ai/",
+        url: "https://github.com/Exaggarate/carapace",
         results: [],
       });
       return;
     }
-    const docs = formatDocsLink("/", "docs.openclaw.ai");
+    const docs = formatDocsLink("/", "github.com/Exaggarate/carapace");
     if (isRich()) {
       runtime.log(`${theme.muted("Docs:")} ${docs}`);
-      runtime.log(`${theme.muted("Search:")} ${formatCliCommand('openclaw docs "your query"')}`);
+      runtime.log(`${theme.muted("Search:")} ${formatCliCommand('carapace docs "your query"')}`);
     } else {
-      runtime.log("Docs: https://docs.openclaw.ai/");
-      runtime.log(`Search: ${formatCliCommand('openclaw docs "your query"')}`);
+      runtime.log("Docs: https://github.com/Exaggarate/carapace");
+      runtime.log(`Search: ${formatCliCommand('carapace docs "your query"')}`);
     }
     return;
   }

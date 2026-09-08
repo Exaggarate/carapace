@@ -1,6 +1,6 @@
 import { setImmediate as nextTurn, setTimeout as delay } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, it, vi } from "vitest";
 import { WorkerTaskPool } from "../infra/worker-task-pool.js";
 import { resolveCodeModeConfig } from "./code-mode-runtime.js";

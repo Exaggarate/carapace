@@ -8,7 +8,7 @@ import {
 } from "../../agents/internal-runtime-context.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { extractTextFromChatContent } from "../../shared/chat-content.js";
 import type { TemplateContext } from "../templating.js";
 import type { FollowupRun, QueueSettings } from "./queue.js";
@@ -44,7 +44,7 @@ export function createTestQueueSettings(overrides: Partial<QueueSettings> = {}):
 }
 
 export function createTestFollowupRun(overrides: Partial<FollowupRun["run"]> = {}): FollowupRun {
-  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("openclaw-followup-run-");
+  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("carapace-followup-run-");
   return {
     prompt: "hello",
     summaryLine: "hello",
@@ -85,11 +85,11 @@ export function createTestQueuedFollowupRun(fixture: FollowupRunFixture): Follow
 }
 
 export function withTestModelContextTokens(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   followupRun: FollowupRun;
   defaultModel: string;
   contextTokens?: number;
-}): OpenClawConfig {
+}): CarapaceConfig {
   if (params.contextTokens === undefined) {
     return params.cfg;
   }
@@ -113,7 +113,7 @@ export function withTestModelContextTokens(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 export async function writeTestSessionStore(

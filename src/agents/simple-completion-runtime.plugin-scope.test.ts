@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getModelCompletionTransport } from "../llm/model-runtime-binding.js";
 import { loadAndActivateRootPluginRegistry } from "../plugins/loader.js";
 import { resetPluginLoaderTestStateForTest } from "../plugins/loader.test-fixtures.js";
@@ -29,7 +29,7 @@ import {
   prepareSimpleCompletionModelForAgent,
 } from "./simple-completion-runtime.js";
 
-const tempRoots = createSyncSuiteTempRootTracker("openclaw-simple-completion-plugin-scope");
+const tempRoots = createSyncSuiteTempRootTracker("carapace-simple-completion-plugin-scope");
 
 function createTransportOwnerFixture(
   rootDir: string,
@@ -56,7 +56,7 @@ function createTransportOwnerFixture(
   fs.writeFileSync(
     fixture.runtimeSource,
     `const fs = require("node:fs");
-const { getApiProvider } = require("openclaw/plugin-sdk/llm");
+const { getApiProvider } = require("carapace/plugin-sdk/llm");
 const owner = ${JSON.stringify(owner)};
 const reconcileFailureMarker = ${JSON.stringify(reconcileFailureMarker)};
 fs.writeFileSync(${JSON.stringify(fixture.runtimeMarker)}, "loaded", "utf8");
@@ -102,7 +102,7 @@ describe("simple completion prepared plugin scope", () => {
       name: "direct provider and model",
       expectedModelId: "selected-model",
       prepare: (params: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         modelResolver: typeof resolveModelAsync;
         provider: string;
         modelId: string;
@@ -119,7 +119,7 @@ describe("simple completion prepared plugin scope", () => {
       name: "agent-selected manifest utility model",
       expectedModelId: "utility-model",
       prepare: (params: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         modelResolver: typeof resolveModelAsync;
         provider: string;
         modelId: string;
@@ -185,7 +185,7 @@ module.exports = {
             [unrelated.pluginId]: { enabled: true },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       let preparedRuntime: PreparedModelRuntimeSnapshot | undefined;
       const modelResolver: typeof resolveModelAsync = vi.fn(
         async (provider, modelId, _agentDir, _cfg, options) => {
@@ -200,8 +200,8 @@ module.exports = {
       );
       const env = {
         ...createColdPluginHermeticEnv(tempRoot, { bundledPluginsDir: tempRoots.makeTempDir() }),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(tempRoot, "state"),
       };
 
       const result = await withEnvAsync(env, () =>
@@ -272,7 +272,7 @@ module.exports = {
         if (!address || typeof address === "string") {
           throw new Error("Completion owner fixture did not expose a TCP port");
         }
-        const configFor = (fixture: typeof selected): OpenClawConfig => ({
+        const configFor = (fixture: typeof selected): CarapaceConfig => ({
           agents: {
             defaults: { workspace: fixture.rootDir, model: `${fixture.providerId}/selected-model` },
           },
@@ -308,8 +308,8 @@ module.exports = {
         const cfg = configFor(selected);
         const env = {
           ...createColdPluginHermeticEnv(tempRoot, { bundledPluginsDir: tempRoots.makeTempDir() }),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: path.join(tempRoot, "state"),
         };
         await withEnvAsync(env, async () => {
           const input = {
@@ -447,7 +447,7 @@ module.exports = {
         throw new Error("Managed completion fixture did not expose a TCP port");
       }
       const origin = `http://127.0.0.1:${address.port}`;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { workspace: selected.rootDir, model: `${selected.providerId}/selected-model` },
         },
@@ -485,8 +485,8 @@ module.exports = {
       };
       const env = {
         ...createColdPluginHermeticEnv(tempRoot, { bundledPluginsDir: tempRoots.makeTempDir() }),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(tempRoot, "state"),
       };
       await withEnvAsync(env, async () => {
         const prepared = await prepareSimpleCompletionModel({
@@ -553,7 +553,7 @@ module.exports = {
 });
 
 function readHostMetadataReaders(): readonly unknown[] {
-  const readers = Reflect.get(globalThis, Symbol.for("openclaw.pluginMetadataSnapshotReaders")) as
+  const readers = Reflect.get(globalThis, Symbol.for("carapace.pluginMetadataSnapshotReaders")) as
     | Record<string, unknown>
     | undefined;
   return [readers?.getCurrentPluginMetadataSnapshot, readers?.resolvePluginMetadataSnapshot];

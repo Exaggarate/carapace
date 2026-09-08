@@ -3,7 +3,7 @@ import { realpathSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { resolveDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import type {
   BackupAgentRoot,
   BackupResourceInventory,
@@ -156,7 +156,7 @@ function formatBackupOutputFailure(
   }
 
   const outputParent = path.dirname(outputPath);
-  const retry = "run `openclaw backup create --output <archive>` again.";
+  const retry = "run `carapace backup create --output <archive>` again.";
   let detail: string;
   switch (filesystemError.code) {
     case "ENOENT":
@@ -461,8 +461,8 @@ export async function createBackupArchive(
   if (plan.included.length === 0) {
     throw new Error(
       onlyConfig
-        ? "No OpenClaw config file was found to back up."
-        : "No local OpenClaw state was found to back up.",
+        ? "No Carapace config file was found to back up."
+        : "No local Carapace state was found to back up.",
     );
   }
 
@@ -510,7 +510,7 @@ export async function createBackupArchive(
   await prepareBackupOutputParent(outputPath);
   const tempRoot = await chooseBackupTempRoot({ assets: result.assets, outputPath });
   await fs.mkdir(tempRoot, { recursive: true });
-  const tempDir = await fs.mkdtemp(path.join(tempRoot, "openclaw-backup-"));
+  const tempDir = await fs.mkdtemp(path.join(tempRoot, "carapace-backup-"));
   const manifestPath = path.join(tempDir, "manifest.json");
   let publication: BackupArchivePublication;
   try {

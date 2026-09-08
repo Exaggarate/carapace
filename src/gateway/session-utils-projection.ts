@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { expectDefined } from "@carapace/normalization-core";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { readAcpSessionMetaBatch } from "../acp/runtime/session-meta.js";
 import { readSessionRuntimeOwnership } from "../agents/harness/session-runtime-ownership.js";
 import { normalizeStoredOverrideModel } from "../agents/model-selection.js";
@@ -11,7 +11,7 @@ import { buildSubagentSessionListReadIndex } from "../agents/subagents/registry/
 import { resolveSessionStorePathCore, type SessionEntry } from "../config/sessions.js";
 import type { GatewayStoredSessionTargets } from "../config/sessions/combined-store-gateway.js";
 import { resolveConcreteSessionStorePath } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import type { SessionEntryPair } from "./session-list-order.js";
 import { resolveStoredSessionKeyForAgentStore } from "./session-store-key.js";
@@ -58,7 +58,7 @@ export function buildSingleRowStoreChildSessionsByKey(params: {
 }
 
 export function resolveSessionSelectedModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry?: SessionEntry;
   agentId: string;
   sessionKey?: string;
@@ -134,7 +134,7 @@ export function resolveChildSessionKeys(
 }
 
 export function resolveTranscriptUsageFallback(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   entry?: SessionEntry;
   storePath: string;
@@ -214,7 +214,7 @@ export function resolveTranscriptUsageFallback(params: {
 }
 
 export function populateSessionListAcpMetadata(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entries: readonly SessionEntryPair[];
   targetsBySessionKey: GatewayStoredSessionTargets;
   rowContext?: SessionListRowContext;

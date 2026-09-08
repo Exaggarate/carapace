@@ -97,7 +97,7 @@ export function createStandaloneMockIsolationPlugins(): Plugin[] {
   const script = `(() => { const __name = (target) => target; (${installStandaloneNetworkBoundary.toString()})(); })();`;
   return [
     {
-      name: "openclaw-control-ui-mock-isolation",
+      name: "carapace-control-ui-mock-isolation",
       enforce: "pre",
       configureServer(server) {
         // Install before *all* custom fixture handlers, not only Vite's HTML
@@ -133,13 +133,13 @@ export function createStandaloneMockIsolationPlugins(): Plugin[] {
       },
     },
     {
-      name: "openclaw-control-ui-mock-http-misses",
+      name: "carapace-control-ui-mock-http-misses",
       enforce: "post",
       configureServer(server) {
         // Registered after fixture handlers but before Vite's SPA fallback.
         server.middlewares.use((req, res, next) => {
           const pathname = new URL(req.url ?? "/", "http://mock.invalid").pathname;
-          if (!/^\/(?:api|avatar|__openclaw__|__fixtures)\//.test(pathname)) {
+          if (!/^\/(?:api|avatar|__carapace__|__fixtures)\//.test(pathname)) {
             next();
             return;
           }

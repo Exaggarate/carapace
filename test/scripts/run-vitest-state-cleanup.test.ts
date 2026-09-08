@@ -182,12 +182,12 @@ posixIt.each([
 
     // These namespaces belong to callers, not the child invocation. Keep an open
     // SQLite reader in a sibling PID namespace throughout the real Vitest run.
-    const siblingRoot = path.join(tmp, "openclaw-test-state", `${process.pid}-7`);
+    const siblingRoot = path.join(tmp, "carapace-test-state", `${process.pid}-7`);
     fs.mkdirSync(siblingRoot, { recursive: true });
     const sibling = new DatabaseSync(path.join(siblingRoot, "sentinel.sqlite"));
-    const explicitPath = path.join(home, "live-state", "state", "openclaw.sqlite");
+    const explicitPath = path.join(home, "live-state", "state", "carapace.sqlite");
     const receiptPath = path.join(root, "receipt.json");
-    const databaseModule = JSON.stringify(path.join(repoRoot, "src/state/openclaw-state-db.ts"));
+    const databaseModule = JSON.stringify(path.join(repoRoot, "src/state/carapace-state-db.ts"));
     const setupModule = path.join(repoRoot, hermetic ? "test/setup.env.ts" : "test/setup.ts");
     const configReceiptPath = path.join(root, "config-home.json");
     const testRoot = path.join(root, "src/tui");
@@ -204,7 +204,7 @@ import os, { homedir } from "node:os";
 import { syncBuiltinESMExports } from "node:module";
 import { createJiti } from "jiti";
 import { expect, vi } from "vitest";
-import { resolveOpenClawStateSqlitePath } from ${JSON.stringify(path.join(repoRoot, "src/state/openclaw-state-db.paths.ts"))};
+import { resolveCarapaceStateSqlitePath } from ${JSON.stringify(path.join(repoRoot, "src/state/carapace-state-db.paths.ts"))};
 import { withTempHomeCore } from ${JSON.stringify(path.join(repoRoot, "src/plugin-sdk/test-helpers/temp-home.ts"))};
 import { createTempHomeEnv } from ${JSON.stringify(path.join(repoRoot, "src/test-utils/temp-home.ts"))};
 const capturedDefault = os.homedir;
@@ -219,7 +219,7 @@ function assertContained(value) {
 export function assertHomeBoundary() {
   for (const value of [os.homedir(), homedir(), capturedDefault(), capturedNamed(), capturedHome]) assertContained(value);
   // The actual env:{} resolver must be contained before any database is opened.
-  const fallbackPath = resolveOpenClawStateSqlitePath({});
+  const fallbackPath = resolveCarapaceStateSqlitePath({});
   assertContained(fallbackPath);
   return fallbackPath;
 }
@@ -240,7 +240,7 @@ export async function allocateResources() {
   expect(fs.existsSync(credential)).toBe(${staged || realHome});
   if (${staged || realHome}) expect(fs.readFileSync(credential, "utf8")).toBe(${JSON.stringify(syntheticCredential)});
   ${realHome ? `expect(home).toBe(${JSON.stringify(home)});` : `assertContained(home); expect(home).not.toBe(path.join(namespace, "home"));`}
-  const cache = path.join(process.env.XDG_CACHE_HOME, "openclaw/jiti/fixture");
+  const cache = path.join(process.env.XDG_CACHE_HOME, "carapace/jiti/fixture");
   const jiti = createJiti(import.meta.url, { fsCache: cache, moduleCache: false, tryNative: false });
   expect((await jiti.import(${JSON.stringify(path.join(root, "tiny.ts"))})).answer).toBe(42);
   expect(fs.readdirSync(cache).length).toBeGreaterThan(0);
@@ -260,21 +260,21 @@ export async function allocateResources() {
       path.join(testRoot, fixtureTests[0][0]),
       `import fs from "node:fs";
 import { expect, it } from "vitest";
-import { openOpenClawStateDatabase, closeOpenClawStateDatabaseForTest } from ${databaseModule};
+import { openCarapaceStateDatabase, closeCarapaceStateDatabaseForTest } from ${databaseModule};
 import { allocateResources, assertHomeBoundary, restoreHomeMocks } from "../../resources.ts";
 const resources = await allocateResources();
 it(${JSON.stringify(fixtureTests[0][1])}, () => {
   restoreHomeMocks();
   const fallbackPath = assertHomeBoundary();
-  const first = openOpenClawStateDatabase();
+  const first = openCarapaceStateDatabase();
   expect(first.db.prepare("SELECT count(*) AS count FROM sqlite_schema").get().count).toBeGreaterThan(0);
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   expect(first.db.isOpen).toBe(false);
-  const reopened = openOpenClawStateDatabase();
-  const fallback = openOpenClawStateDatabase({ env: {} });
+  const reopened = openCarapaceStateDatabase();
+  const fallback = openCarapaceStateDatabase({ env: {} });
   expect(fallback.path).toBe(fallbackPath);
-  const explicit = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: ${JSON.stringify(path.dirname(path.dirname(explicitPath)))} } });
-  globalThis[Symbol.for("openclaw.stateLeakFixture")] = { reopened, fallback, explicit, resources, assertHomeBoundary, pid: process.pid };
+  const explicit = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: ${JSON.stringify(path.dirname(path.dirname(explicitPath)))} } });
+  globalThis[Symbol.for("carapace.stateLeakFixture")] = { reopened, fallback, explicit, resources, assertHomeBoundary, pid: process.pid };
   fs.writeFileSync(${JSON.stringify(receiptPath)}, JSON.stringify({ path: reopened.path }));
   ${failFirstFile ? `expect.fail(${JSON.stringify(counterfactualFailure)});` : ""}
 });
@@ -284,13 +284,13 @@ it(${JSON.stringify(fixtureTests[0][1])}, () => {
       path.join(testRoot, fixtureTests[1][0]),
       `import fs from "node:fs";
 import { expect, it, vi } from "vitest";
-const previous = globalThis[Symbol.for("openclaw.stateLeakFixture")];
+const previous = globalThis[Symbol.for("carapace.stateLeakFixture")];
 previous.assertHomeBoundary();
 vi.restoreAllMocks();
 vi.resetModules();
 const { allocateResources, assertHomeBoundary } = await import("../../resources.ts");
 assertHomeBoundary();
-const { openOpenClawStateDatabase } = await import(${databaseModule});
+const { openCarapaceStateDatabase } = await import(${databaseModule});
 const resources = await allocateResources();
 it(${JSON.stringify(fixtureTests[1][1])}, () => {
   expect(process.pid).toBe(previous.pid);
@@ -298,14 +298,14 @@ it(${JSON.stringify(fixtureTests[1][1])}, () => {
   expect(previous.explicit.db.isOpen).toBe(true);
   expect(previous.fallback.db.isOpen).toBe(true);
   expect(assertHomeBoundary()).toBe(previous.fallback.path);
-  const current = openOpenClawStateDatabase();
+  const current = openCarapaceStateDatabase();
   expect(current.path).toBe(previous.reopened.path);
   expect(current.db.prepare("SELECT count(*) AS count FROM sqlite_schema").get().count).toBeGreaterThan(0);
   expect(fs.existsSync(current.path)).toBe(true);
   expect(resources.home).toBe(previous.resources.home);
   expect(resources.roots).not.toEqual(previous.resources.roots);
   fs.writeFileSync(${JSON.stringify(receiptPath)}, JSON.stringify({ path: current.path, resetVerified: true, resources: [previous.resources, resources] }));
-  if (process.env.OPENCLAW_TUI_PTY_MIRROR_PATH) fs.appendFileSync(process.env.OPENCLAW_TUI_PTY_MIRROR_PATH, "namespace fixture frame\\n");
+  if (process.env.CARAPACE_TUI_PTY_MIRROR_PATH) fs.appendFileSync(process.env.CARAPACE_TUI_PTY_MIRROR_PATH, "namespace fixture frame\\n");
   ${failRun ? `expect.fail(${JSON.stringify(intentionalFailure)});` : ""}
 });
 `,
@@ -361,8 +361,8 @@ export default {
       XDG_DATA_HOME: path.join(home, "data"),
       XDG_STATE_HOME: path.join(home, "state"),
       LIVE: "0",
-      OPENCLAW_LIVE_TEST: "0",
-      OPENCLAW_LIVE_GATEWAY: "0",
+      CARAPACE_LIVE_TEST: "0",
+      CARAPACE_LIVE_GATEWAY: "0",
       CI: "1",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
       pnpm_config_verify_deps_before_run: "false",
@@ -376,9 +376,9 @@ export default {
       fs.writeFileSync(path.join(home, ".bashrc"), "export VITEST_UNREQUESTED_PROFILE=bashrc\n");
     }
     if (homePolicy !== "isolated") {
-      env.OPENCLAW_LIVE_TEST = profileOnly ? "0" : "1";
-      env.OPENCLAW_LIVE_USE_REAL_HOME = staged ? "0" : "1";
-      env.OPENCLAW_LIVE_TEST_QUIET = "1";
+      env.CARAPACE_LIVE_TEST = profileOnly ? "0" : "1";
+      env.CARAPACE_LIVE_USE_REAL_HOME = staged ? "0" : "1";
+      env.CARAPACE_LIVE_TEST_QUIET = "1";
     }
     const vitestArgs = ["--root", root, "--configLoader", "native"];
     const profileDir = path.join(root, "profiles");
@@ -676,9 +676,9 @@ it.each([
       TMP: tmp,
       TEMP: tmp,
       LIVE: "1",
-      OPENCLAW_LIVE_TEST: "1",
-      OPENCLAW_LIVE_GATEWAY: "1",
-      OPENCLAW_LIVE_USE_REAL_HOME: "yes",
+      CARAPACE_LIVE_TEST: "1",
+      CARAPACE_LIVE_GATEWAY: "1",
+      CARAPACE_LIVE_USE_REAL_HOME: "yes",
     };
     const selectionArgs = args.map((arg) =>
       arg === "custom.config.ts" ? path.join(root, arg) : arg,

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type { TriageFailureContext } from "../../commands/triage-prompt.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { runtimeProcessEntrypoints } from "../../infra/runtime-process-entrypoints.js";
 import {
@@ -16,8 +16,8 @@ import type { UpdateRunStep } from "../../infra/update-run-record.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { runUtf8CommandWithTimeout } from "../../process/exec.js";
 import { defaultRuntime } from "../../runtime.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { CLI_NAME } from "../cli-name.js";
 import { resolveNodeRunner } from "./shared.js";
 import type { FinishUpdateParams } from "./update-command-post-update.js";
@@ -34,9 +34,9 @@ export async function inspectActivatedUpdateState(
     FinishUpdateParams,
     "result" | "root" | "schemaVersions" | "packageUpdateNodeRunner"
   > & {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     env: NodeJS.ProcessEnv;
-    candidateSchemaVersions?: OpenClawSchemaVersions;
+    candidateSchemaVersions?: CarapaceSchemaVersions;
   },
 ): Promise<FinishUpdateParams["rollbackBlockedReason"]> {
   const { result, root, schemaVersions, candidateSchemaVersions, env, config } = params;
@@ -51,7 +51,7 @@ export async function inspectActivatedUpdateState(
       root: result.root ?? null,
       nodeRunner: params.packageUpdateNodeRunner,
     });
-    const shared = current.find((entry) => entry.path === resolveOpenClawStateSqlitePath(env));
+    const shared = current.find((entry) => entry.path === resolveCarapaceStateSqlitePath(env));
     const sharedVersion = shared ? resolveUpdateStateContentVersion(shared) : undefined;
     if (
       result.status === "ok" &&
@@ -72,7 +72,7 @@ export async function inspectActivatedUpdateState(
       });
     }
     return updateStateSchemaVersionsMatch(schemaVersions, current, {
-      sharedPath: resolveOpenClawStateSqlitePath(env),
+      sharedPath: resolveCarapaceStateSqlitePath(env),
       candidateSchemaVersions,
     })
       ? undefined
@@ -82,7 +82,7 @@ export async function inspectActivatedUpdateState(
     result.reason = "rollback-state-unverified";
     result.steps.push({
       name: "state schema verification",
-      command: "openclaw update",
+      command: "carapace update",
       cwd: result.root ?? root,
       durationMs: 0,
       exitCode: 1,
@@ -138,7 +138,7 @@ export async function continueMigratedUpdateInFreshProcess(
       }),
     );
   }
-  const scratchDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-migrated-"));
+  const scratchDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-migrated-"));
   try {
     const root = result.root;
     if (!root) {
@@ -185,7 +185,7 @@ export async function continueMigratedUpdateInFreshProcess(
               processEnv: params.ownedManagedUpdateEnv ?? run.env,
             }),
           ),
-          OPENCLAW_UPDATE_IN_PROGRESS: "1",
+          CARAPACE_UPDATE_IN_PROGRESS: "1",
           TMPDIR: scratchDir,
           TMP: scratchDir,
           TEMP: scratchDir,

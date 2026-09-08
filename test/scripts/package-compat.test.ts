@@ -30,7 +30,7 @@ const args = process.argv.slice(2);
 fs.appendFileSync(process.env.ARGV_LOG, JSON.stringify(args) + '\\n');
 const supported = (options.commands ?? ['install', 'enable', 'update']).includes(args[1]);
 if (args.includes('--help')) {
-  console.log('OpenClaw 2026.8.1\\nOptions:');
+  console.log('Carapace 2026.8.1\\nOptions:');
   console.log(supported ? '  --accept-capabilities  Accept capabilities' : '  --force  Confirm source');
   if (options.hang) setInterval(() => {}, 1000);
   else process.exit(options.helpStatus ?? 0);
@@ -42,7 +42,7 @@ if (args.includes('--help')) {
       if (args[1] === 'enable') fs.rmSync(marker, { force: true });
     }
     if (args[0] === 'demo-npm' && fs.existsSync(marker)) {
-      console.error('OpenClaw does not know the command "demo-npm".');
+      console.error('Carapace does not know the command "demo-npm".');
       process.exit(43);
     }
   }
@@ -74,13 +74,13 @@ function runShell(root: string, entry: string, script: string) {
     env: {
       ...process.env,
       HOME: root,
-      OPENCLAW_ENTRY: entry,
-      OPENCLAW_PLUGINS_TMP_DIR: root,
+      CARAPACE_ENTRY: entry,
+      CARAPACE_PLUGINS_TMP_DIR: root,
       KITCHEN_SINK_TMP_DIR: root,
       ARGV_LOG: path.join(root, "argv.jsonl"),
-      OPENCLAW_PLUGINS_E2E_CLAWHUB: "0",
-      OPENCLAW_PLUGINS_CLI_TIMEOUT: "5s",
-      OPENCLAW_TEST_STATE_SCRIPT_B64: Buffer.from(":").toString("base64"),
+      CARAPACE_PLUGINS_E2E_CLAWHUB: "0",
+      CARAPACE_PLUGINS_CLI_TIMEOUT: "5s",
+      CARAPACE_TEST_STATE_SCRIPT_B64: Buffer.from(":").toString("base64"),
     },
   });
   const log = path.join(root, "argv.jsonl");
@@ -94,8 +94,8 @@ function runShell(root: string, entry: string, script: string) {
 }
 
 const fixtureCommand = `
-source scripts/lib/openclaw-e2e-instance.sh
-openclaw_e2e_fixture_plugin_command openclaw_e2e_maybe_timeout 5s node "$OPENCLAW_ENTRY" --
+source scripts/lib/carapace-e2e-instance.sh
+carapace_e2e_fixture_plugin_command carapace_e2e_maybe_timeout 5s node "$CARAPACE_ENTRY" --
 `.trim();
 
 // Replace artifact construction and inventory assertions, not the CLI runner or scenario order.
@@ -113,7 +113,7 @@ source() {
     pack_fixture_plugin_with_invalid_extension_entry() { :; }
     start_npm_fixture_registry() { :; }
     record_fixture_plugin_trust() { :; }
-    openclaw_plugins_cleanup_fixture_servers() { :; }
+    carapace_plugins_cleanup_fixture_servers() { :; }
   else
     builtin source "$@"
   fi
@@ -156,7 +156,7 @@ describe("package fixture consent compatibility", () => {
   it.each([true, false])(
     "runs the plugin sweep with selective consent (supported=%s)",
     (supported) => {
-      const root = tempDirs.make("openclaw-consent-sweep-");
+      const root = tempDirs.make("carapace-consent-sweep-");
       const entry = writeCandidate(root, {
         commands: supported ? undefined : [],
         preserveUninstallIntent: true,
@@ -188,7 +188,7 @@ describe("package fixture consent compatibility", () => {
   it.each([true, false])(
     "runs kitchen-sink success and registry failure (supported=%s)",
     (supported) => {
-      const root = tempDirs.make("openclaw-consent-kitchen-");
+      const root = tempDirs.make("carapace-consent-kitchen-");
       const result = runShell(
         root,
         writeCandidate(root, { commands: supported ? undefined : [] }),
@@ -209,7 +209,7 @@ describe("package fixture consent compatibility", () => {
   );
 
   it("probes each command and preserves literal argv", () => {
-    const root = tempDirs.make("openclaw-consent-argv-");
+    const root = tempDirs.make("carapace-consent-argv-");
     const entry = writeCandidate(root, { commands: ["install", "update"] });
     const result = runShell(
       root,
@@ -232,12 +232,12 @@ ${fixtureCommand} plugins update fixture`,
   it.each([true, false])(
     "records candidate capability consent support (supported=%s)",
     (supported) => {
-      const root = tempDirs.make("openclaw-consent-support-");
+      const root = tempDirs.make("carapace-consent-support-");
       const result = runShell(
         root,
         writeCandidate(root, { commands: supported ? undefined : [] }),
         `${fixtureCommand} plugins install fixture
-printf 'support=%s\\n' "$OPENCLAW_E2E_LAST_FIXTURE_PLUGIN_CAPABILITY_CONSENT_SUPPORTED"`,
+printf 'support=%s\\n' "$CARAPACE_E2E_LAST_FIXTURE_PLUGIN_CAPABILITY_CONSENT_SUPPORTED"`,
       );
       expect(result.status, result.stderr).toBe(0);
       expect(result.stdout).toContain(`support=${supported ? "1" : "0"}`);
@@ -247,14 +247,14 @@ printf 'support=%s\\n' "$OPENCLAW_E2E_LAST_FIXTURE_PLUGIN_CAPABILITY_CONSENT_SUP
   it.each([true, false])(
     "consents to ClawHub install but not unchanged update (supported=%s)",
     (supported) => {
-      const root = tempDirs.make("openclaw-consent-clawhub-");
+      const root = tempDirs.make("carapace-consent-clawhub-");
       const result = runShell(
         root,
         writeCandidate(root, { commands: supported ? undefined : [] }),
         `
-export OPENCLAW_PLUGINS_SWEEP_SOURCE_ONLY=1
-export OPENCLAW_PLUGINS_E2E_CLAWHUB=1
-export OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB=1
+export CARAPACE_PLUGINS_SWEEP_SOURCE_ONLY=1
+export CARAPACE_PLUGINS_E2E_CLAWHUB=1
+export CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB=1
 source scripts/e2e/lib/plugins/sweep.sh
 node() {
   case "$1" in
@@ -291,15 +291,15 @@ run_plugins_clawhub_scenario
     ["kitchen-sink", "error"],
     ["kitchen-sink", "timeout"],
   ])("%s logger fails before mutation on help %s", (suite, failure) => {
-    const root = tempDirs.make("openclaw-consent-failure-");
+    const root = tempDirs.make("carapace-consent-failure-");
     const entry = writeCandidate(root, failure === "error" ? { helpStatus: 47 } : { hang: true });
     const result = runShell(
       root,
       entry,
       suite === "plugins"
         ? `
-export OPENCLAW_PLUGINS_SWEEP_SOURCE_ONLY=1
-export OPENCLAW_PLUGINS_CLI_TIMEOUT=1s
+export CARAPACE_PLUGINS_SWEEP_SOURCE_ONLY=1
+export CARAPACE_PLUGINS_CLI_TIMEOUT=1s
 source scripts/e2e/lib/plugins/sweep.sh
 run_plugins_fixture_logged failure plugins install fixture --force
 `
@@ -316,7 +316,7 @@ run_kitchen_sink_fixture_logged failure plugins install fixture --force
   });
 
   it("returns the mutation exit status", () => {
-    const root = tempDirs.make("openclaw-consent-exit-");
+    const root = tempDirs.make("carapace-consent-exit-");
     const result = runShell(
       root,
       writeCandidate(root, { exitCode: 49 }),
@@ -327,14 +327,14 @@ run_kitchen_sink_fixture_logged failure plugins install fixture --force
   });
 
   it("reprobes a replacement at the same executable path and version", () => {
-    const root = tempDirs.make("openclaw-consent-replacement-");
+    const root = tempDirs.make("carapace-consent-replacement-");
     const entry = writeCandidate(root, { commands: [] });
     writeCandidate(root, {}, "replacement.cjs");
     const result = runShell(
       root,
       entry,
       `${fixtureCommand} plugins install fixture
-cp "$HOME/replacement.cjs" "$OPENCLAW_ENTRY"
+cp "$HOME/replacement.cjs" "$CARAPACE_ENTRY"
 ${fixtureCommand} plugins install fixture`,
     );
     expect(result.status, result.stderr).toBe(0);

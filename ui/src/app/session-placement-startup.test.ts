@@ -450,11 +450,11 @@ describe("application session placement startup", () => {
         pendingRunId: "message-stable",
         message: {
           role: "user",
-          __openclaw: { idempotencyKey: "message-stable:user" },
+          __carapace: { idempotencyKey: "message-stable:user" },
         },
       });
       const handoff = chatSubmissions.readInitial(input.recovery.sessionKey, client)!;
-      expect(handoff.message["__openclaw"]).not.toHaveProperty("seq");
+      expect(handoff.message["__carapace"]).not.toHaveProperty("seq");
       const pane = makeChatHost({
         sessionKey: input.recovery.sessionKey,
         chatSubmissions,
@@ -698,7 +698,7 @@ describe("application session placement startup", () => {
       }
       if (method === "chat.history") {
         return Promise.resolve({
-          messages: [{ role: "user", __openclaw: { idempotencyKey: "message-stable:user" } }],
+          messages: [{ role: "user", __carapace: { idempotencyKey: "message-stable:user" } }],
         });
       }
       throw new Error(`unexpected method ${method}`);

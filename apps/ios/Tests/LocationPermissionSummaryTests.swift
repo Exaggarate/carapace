@@ -1,7 +1,7 @@
 import CoreLocation
 import Testing
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 @Suite(.serialized) struct LocationPermissionSummaryTests {
     @Test func `always desired when in use authorized needs attention`() {
@@ -162,7 +162,7 @@ import Testing
                 UserDefaults.standard.removeObject(forKey: defaultsKey)
             }
         }
-        UserDefaults.standard.set(OpenClawLocationMode.off.rawValue, forKey: defaultsKey)
+        UserDefaults.standard.set(CarapaceLocationMode.off.rawValue, forKey: defaultsKey)
         let locationService = MockLocationService(authorizationStatus: .authorizedAlways)
         let appModel = NodeAppModel(locationService: locationService)
         var isCurrent = true
@@ -177,15 +177,15 @@ import Testing
             isCurrent: { isCurrent })
 
         #expect(!granted)
-        #expect(UserDefaults.standard.string(forKey: defaultsKey) == OpenClawLocationMode.off.rawValue)
+        #expect(UserDefaults.standard.string(forKey: defaultsKey) == CarapaceLocationMode.off.rawValue)
         #expect(locationService.backgroundUpdatesEnabled == nil)
         #expect(locationService.startMonitoringCallCount == 0)
         #expect(locationService.stopMonitoringCallCount == 0)
     }
 
-    @MainActor @Test(arguments: [OpenClawLocationMode.whileUsing, .always], [true, false])
+    @MainActor @Test(arguments: [CarapaceLocationMode.whileUsing, .always], [true, false])
     func `location selection waits for settled authorization and reloads only grants`(
-        _ mode: OpenClawLocationMode,
+        _ mode: CarapaceLocationMode,
         authorizationGranted: Bool) async throws
     {
         let defaultsKey = "location.enabledMode"
@@ -197,9 +197,9 @@ import Testing
                 UserDefaults.standard.removeObject(forKey: defaultsKey)
             }
         }
-        UserDefaults.standard.set(OpenClawLocationMode.off.rawValue, forKey: defaultsKey)
+        UserDefaults.standard.set(CarapaceLocationMode.off.rawValue, forKey: defaultsKey)
         let locationService = MockLocationService(authorizationStatus: .notDetermined)
-        let requests = AsyncStream<OpenClawLocationMode>.makeStream()
+        let requests = AsyncStream<CarapaceLocationMode>.makeStream()
         let responses = AsyncStream<CLAuthorizationStatus>.makeStream()
         defer {
             requests.continuation.finish()
@@ -216,7 +216,7 @@ import Testing
         }
         var requestedModes = requests.stream.makeAsyncIterator()
         #expect(await requestedModes.next() == mode)
-        #expect(UserDefaults.standard.string(forKey: defaultsKey) == OpenClawLocationMode.off.rawValue)
+        #expect(UserDefaults.standard.string(forKey: defaultsKey) == CarapaceLocationMode.off.rawValue)
         #expect(locationService.startMonitoringCallCount == 0)
 
         let authorization: CLAuthorizationStatus = authorizationGranted
@@ -251,7 +251,7 @@ import Testing
                 UserDefaults.standard.removeObject(forKey: defaultsKey)
             }
         }
-        UserDefaults.standard.set(OpenClawLocationMode.always.rawValue, forKey: defaultsKey)
+        UserDefaults.standard.set(CarapaceLocationMode.always.rawValue, forKey: defaultsKey)
         let locationService = MockLocationService(authorizationStatus: .authorizedAlways)
         let appModel = NodeAppModel(locationService: locationService)
 
@@ -294,7 +294,7 @@ private final class MockLocationService: LocationServicing, @unchecked Sendable 
     var backgroundUpdatesEnabled: Bool?
     var startMonitoringCallCount = 0
     var stopMonitoringCallCount = 0
-    var ensureAuthorizationHandler: (@MainActor (OpenClawLocationMode) async -> CLAuthorizationStatus)?
+    var ensureAuthorizationHandler: (@MainActor (CarapaceLocationMode) async -> CLAuthorizationStatus)?
 
     init(
         authorizationStatus: CLAuthorizationStatus,
@@ -313,7 +313,7 @@ private final class MockLocationService: LocationServicing, @unchecked Sendable 
     }
 
     func ensureAuthorization(
-        mode: OpenClawLocationMode,
+        mode: CarapaceLocationMode,
         isCurrent _: @MainActor () -> Bool) async -> CLAuthorizationStatus
     {
         if let ensureAuthorizationHandler {
@@ -323,8 +323,8 @@ private final class MockLocationService: LocationServicing, @unchecked Sendable 
     }
 
     func currentLocation(
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
+        params: CarapaceLocationGetParams,
+        desiredAccuracy: CarapaceLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {

@@ -1,6 +1,6 @@
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig, SlackAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import type { OutboundDeliveryResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig, SlackAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { slackPlugin } from "./channel.js";
 import { registerSlackInstallationState } from "./installation-identity-state.js";
@@ -20,7 +20,7 @@ function createContext(
     userToken: "test-user-token",
   },
 ) {
-  const cfg: OpenClawConfig = { channels: { slack: { accounts: { work: account } } } };
+  const cfg: CarapaceConfig = { channels: { slack: { accounts: { work: account } } } };
   return { cfg, accountId: "work", to: "channel:C123", text: "hello", payload: { text: "hello" } };
 }
 

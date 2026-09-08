@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   resolveBundlePluginRoot,
   writeBundleTextFiles,
@@ -28,7 +28,7 @@ describe("prepareCliBundleMcpConfig", () => {
       enabled: false,
       mode: "claude-config-file",
       backend: { command: "claude", args: ["--print"] },
-      workspaceDir: "/tmp/openclaw-cli-web-search-disabled",
+      workspaceDir: "/tmp/carapace-cli-web-search-disabled",
       toolOverrides: { webSearch: false },
     });
 
@@ -38,7 +38,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("injects a strict empty --mcp-config overlay for bundle-MCP-enabled backends without servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-empty-",
+      "carapace-cli-bundle-mcp-empty-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -65,7 +65,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("serves only the exclusive config, ignoring user and plugin servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-exclusive-",
+      "carapace-cli-bundle-mcp-exclusive-",
     );
     const userConfig = path.join(workspaceDir, "user-mcp.json");
     await fs.writeFile(
@@ -84,7 +84,7 @@ describe("prepareCliBundleMcpConfig", () => {
       workspaceDir,
       config: { plugins: { enabled: false } },
       exclusiveConfig: {
-        mcpServers: { openclaw: { command: "node", args: ["openclaw.mjs"] } },
+        mcpServers: { carapace: { command: "node", args: ["carapace.mjs"] } },
       },
     });
 
@@ -93,8 +93,8 @@ describe("prepareCliBundleMcpConfig", () => {
     const raw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { args?: string[] }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["openclaw"]);
-    expect(raw.mcpServers?.openclaw?.args).toEqual(["openclaw.mjs"]);
+    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["carapace"]);
+    expect(raw.mcpServers?.carapace?.args).toEqual(["carapace.mjs"]);
     expect(prepared.mcpConfigHash).toMatch(/^[0-9a-f]{64}$/);
 
     await prepared.cleanup?.();
@@ -136,7 +136,7 @@ describe("prepareCliBundleMcpConfig", () => {
     });
     const agentDataDir = path.join(
       cliBundleMcpHarness.bundleProbeHomeDir,
-      ".openclaw",
+      ".carapace",
       "plugin-data",
       pluginId,
     );
@@ -192,7 +192,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("projects session MCP tool denials into Claude disallowed tools", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-deny-",
+      "carapace-cli-bundle-mcp-deny-",
     );
     const prepared = await prepareCliBundleMcpConfig({
       enabled: true,
@@ -215,7 +215,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("matches Claude's normalized MCP permission identifiers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-normalized-deny-",
+      "carapace-cli-bundle-mcp-normalized-deny-",
     );
     const prepared = await prepareCliBundleMcpConfig({
       enabled: true,
@@ -234,7 +234,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("projects durable policy into the first Claude process config and argv", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { allow: ["docs__*"], deny: ["docs__delete_docs"] },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
@@ -246,9 +246,9 @@ describe("prepareCliBundleMcpConfig", () => {
       workspaceDir: cliBundleMcpHarness.bundleProbeWorkspaceDir,
       config,
       additionalConfig: {
-        mcpServers: { openclaw: { url: "http://127.0.0.1:31783/mcp" } },
+        mcpServers: { carapace: { url: "http://127.0.0.1:31783/mcp" } },
       },
-      toolOverrides: { mcpToolsDeny: { openclaw: ["message"] } },
+      toolOverrides: { mcpToolsDeny: { carapace: ["message"] } },
       nativeMcpPolicy: cliNativeMcpPolicyContext(config, "claude-policy"),
     });
 
@@ -256,18 +256,18 @@ describe("prepareCliBundleMcpConfig", () => {
     expect(args).toContain("mcp__docs__delete_docs");
     expect(args).toContain("mcp__docs__task_docs");
     expect(args).toContain("mcp__docs__app_docs");
-    expect(args).toContain("mcp__openclaw__message");
+    expect(args).toContain("mcp__carapace__message");
     const raw = JSON.parse(
       await fs.readFile(requireMcpConfigPath(prepared.backend.args), "utf-8"),
     ) as { mcpServers?: Record<string, { toolFilter?: unknown }> };
-    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["docs", "openclaw"]);
+    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["docs", "carapace"]);
     expect(raw.mcpServers?.docs?.toolFilter).toBeUndefined();
     await prepared.cleanup?.();
   });
 
   it("hides non-model MCP tools from Claude without an explicit policy", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
     };
@@ -290,7 +290,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("projects configured MCP filters into Claude denials without a global tool policy", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: {
         servers: {
@@ -321,7 +321,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("projects an exact runtime cap into Claude before spawn", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
     };
@@ -347,7 +347,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("omits a fully excluded server while retaining an allowed sibling server", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { allow: ["docs__read_docs"] },
       mcp: {
@@ -375,7 +375,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("omits every configured MCP server removed by durable policy", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { allow: ["missing__tool"] },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
@@ -396,7 +396,7 @@ describe("prepareCliBundleMcpConfig", () => {
   });
 
   it("omits a server whose restrictive policy catalog cannot be established", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { deny: ["docs__delete_docs"] },
       mcp: {
@@ -423,9 +423,9 @@ describe("prepareCliBundleMcpConfig", () => {
       enabled: true,
       mode: "claude-config-file",
       backend: { command: "claude" },
-      workspaceDir: "/tmp/openclaw-cli-bundle-mcp-exclusive-disable",
-      exclusiveConfig: { mcpServers: { openclaw: { command: "node" } } },
-      toolOverrides: { mcpServers: { openclaw: false } },
+      workspaceDir: "/tmp/carapace-cli-bundle-mcp-exclusive-disable",
+      exclusiveConfig: { mcpServers: { carapace: { command: "node" } } },
+      toolOverrides: { mcpServers: { carapace: false } },
     });
 
     const generatedConfigPath = requireMcpConfigPath(prepared.backend.args);
@@ -438,7 +438,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("strips variadic Claude --mcp-config values and merges every listed config", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-variadic-",
+      "carapace-cli-bundle-mcp-variadic-",
     );
     const firstConfig = path.join(workspaceDir, "first-mcp.json");
     const secondConfig = path.join(workspaceDir, "second-mcp.json");
@@ -496,7 +496,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("merges and strips Claude --mcp-config equals form", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-equals-",
+      "carapace-cli-bundle-mcp-equals-",
     );
     const configPath = path.join(workspaceDir, "equals-mcp.json");
     await fs.writeFile(
@@ -532,7 +532,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("keeps dash-prefixed args after Claude --mcp-config because they terminate variadic values", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-dash-",
+      "carapace-cli-bundle-mcp-dash-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -559,9 +559,9 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("loads workspace bundle MCP plugins from the configured workspace root", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-workspace-root-",
+      "carapace-cli-bundle-mcp-workspace-root-",
     );
-    const pluginRoot = path.join(workspaceDir, ".openclaw", "extensions", "workspace-probe");
+    const pluginRoot = path.join(workspaceDir, ".carapace", "extensions", "workspace-probe");
     // Workspace-local plugins should be resolved relative to workspaceDir, not HOME.
     const serverPath = path.join(pluginRoot, "servers", "probe.mjs");
     await fs.mkdir(path.dirname(serverPath), { recursive: true });
@@ -617,12 +617,12 @@ describe("prepareCliBundleMcpConfig", () => {
   it("merges loopback overlay config with bundle MCP servers", async () => {
     const additionalConfig = {
       mcpServers: {
-        openclaw: {
+        carapace: {
           type: "http",
           url: "http://127.0.0.1:23119/mcp",
           headers: {
-            Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-            "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+            Authorization: "Bearer ${CARAPACE_MCP_TOKEN}",
+            "x-carapace-cli-capture-key": "${CARAPACE_MCP_CLI_CAPTURE_KEY}",
           },
         },
       },
@@ -630,15 +630,15 @@ describe("prepareCliBundleMcpConfig", () => {
     const prepared = await prepareBundleProbeCliConfig({
       additionalConfig,
       env: {
-        OPENCLAW_MCP_TOKEN: "lb-tk-123",
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        CARAPACE_MCP_TOKEN: "lb-tk-123",
+        CARAPACE_MCP_CLI_CAPTURE_KEY: "",
       },
     });
     const otherEnvPrepared = await prepareBundleProbeCliConfig({
       additionalConfig,
       env: {
-        OPENCLAW_MCP_TOKEN: "other-loopback-token",
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        CARAPACE_MCP_TOKEN: "other-loopback-token",
+        CARAPACE_MCP_CLI_CAPTURE_KEY: "",
       },
     });
 
@@ -646,10 +646,10 @@ describe("prepareCliBundleMcpConfig", () => {
     const raw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { url?: string; headers?: Record<string, string> }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {}).toSorted()).toEqual(["bundleProbe", "openclaw"]);
-    expect(raw.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:23119/mcp");
-    expect(raw.mcpServers?.openclaw?.headers?.Authorization).toBe("Bearer lb-tk-123");
-    expect(raw.mcpServers?.openclaw?.headers?.["x-openclaw-cli-capture-key"]).toBe("");
+    expect(Object.keys(raw.mcpServers ?? {}).toSorted()).toEqual(["bundleProbe", "carapace"]);
+    expect(raw.mcpServers?.carapace?.url).toBe("http://127.0.0.1:23119/mcp");
+    expect(raw.mcpServers?.carapace?.headers?.Authorization).toBe("Bearer lb-tk-123");
+    expect(raw.mcpServers?.carapace?.headers?.["x-carapace-cli-capture-key"]).toBe("");
     await prepareCliBundleMcpCaptureAttempt({
       mode: "claude-config-file",
       backend: prepared.backend,
@@ -659,8 +659,8 @@ describe("prepareCliBundleMcpConfig", () => {
     const attemptRaw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { url?: string; headers?: Record<string, string> }>;
     };
-    expect(attemptRaw.mcpServers?.openclaw?.headers?.Authorization).toBe("Bearer lb-tk-123");
-    expect(attemptRaw.mcpServers?.openclaw?.headers?.["x-openclaw-cli-capture-key"]).toBe(
+    expect(attemptRaw.mcpServers?.carapace?.headers?.Authorization).toBe("Bearer lb-tk-123");
+    expect(attemptRaw.mcpServers?.carapace?.headers?.["x-carapace-cli-capture-key"]).toBe(
       "attempt-123",
     );
     expect(prepared.mcpConfigHash).toBe(otherEnvPrepared.mcpConfigHash);
@@ -672,7 +672,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("preserves extra env values alongside generated MCP config", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-env-",
+      "carapace-cli-bundle-mcp-env-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -685,14 +685,14 @@ describe("prepareCliBundleMcpConfig", () => {
       workspaceDir,
       config: { plugins: { enabled: false } },
       env: {
-        OPENCLAW_MCP_TOKEN: "lb-tk-123",
-        OPENCLAW_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
+        CARAPACE_MCP_TOKEN: "lb-tk-123",
+        CARAPACE_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
       },
     });
 
     expect(prepared.env).toEqual({
-      OPENCLAW_MCP_TOKEN: "lb-tk-123",
-      OPENCLAW_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
+      CARAPACE_MCP_TOKEN: "lb-tk-123",
+      CARAPACE_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
     });
 
     await prepared.cleanup?.();
@@ -705,7 +705,7 @@ describe("prepareCliBundleMcpConfig", () => {
         command: "node",
         args: ["./fake-cli.mjs"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-disabled",
+      workspaceDir: "/tmp/carapace-bundle-mcp-disabled",
     });
 
     expect(prepared.backend.args).toEqual(["./fake-cli.mjs"]);

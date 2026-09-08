@@ -1,5 +1,5 @@
-import type { BoardSnapshot } from "@openclaw/gateway-protocol";
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
+import type { BoardSnapshot } from "@carapace/gateway-protocol";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
 
 export function emptyBoardSnapshot(sessionKey: string): BoardSnapshot {
   return { sessionKey, revision: 0, tabs: [], widgets: [] };

@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import { afterEach, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   ProviderModelRouteAuthRequirement,
   ProviderModelRouteCandidate,
   ProviderModelRouteResolution,
 } from "../../plugin-sdk/provider-model-types.js";
 import {
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  type CarapaceTestState,
+  withCarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { AuthProfileStore } from "./types.js";
 
 export const TEST_PRIMARY_PROFILE_ID = "openai:primary@example.test";
@@ -71,11 +71,11 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-export async function withAuthState<T>(run: (state: OpenClawTestState) => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
+export async function withAuthState<T>(run: (state: CarapaceTestState) => Promise<T>): Promise<T> {
+  return await withCarapaceTestState(
     {
       layout: "state-only",
-      prefix: "openclaw-auth-",
+      prefix: "carapace-auth-",
     },
     run,
   );
@@ -114,7 +114,7 @@ export function configureProviderRoutes(params: {
 }
 
 export async function prepareCooldownAuthState(
-  state: OpenClawTestState,
+  state: CarapaceTestState,
   options: {
     profileIds?: string[];
     usageStats?: AuthProfileStore["usageStats"];
@@ -144,7 +144,7 @@ export async function resolveSession(params: {
   agentDir: string;
   sessionEntry: SessionEntry;
   sessionStore: Record<string, SessionEntry>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider?: string;
   sessionKey?: string;
   storePath?: string;
@@ -152,7 +152,7 @@ export async function resolveSession(params: {
 }): Promise<string | undefined> {
   return (
     await resolveSessionAuthSelection({
-      cfg: params.cfg ?? ({} as OpenClawConfig),
+      cfg: params.cfg ?? ({} as CarapaceConfig),
       provider: params.provider ?? "openai",
       modelId: params.sessionEntry.model ?? "model-x",
       agentDir: params.agentDir,

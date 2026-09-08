@@ -1,4 +1,4 @@
-openclaw-board-view {
+carapace-board-view {
   display: block;
   min-width: 0;
   width: 100%;
@@ -155,7 +155,7 @@ openclaw-board-view {
   z-index: 7;
 }
 
-openclaw-board-widget-cell {
+carapace-board-widget-cell {
   display: contents;
 }
 

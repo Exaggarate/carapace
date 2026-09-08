@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { nothing, render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "../../i18n/index.ts";
@@ -21,7 +21,7 @@ async function expectReasonedBlockedAction(button: HTMLButtonElement | null) {
   expect(action.disabled).toBe(false);
   expect(action.getAttribute("aria-disabled")).toBe("true");
   const tooltip = expectDefined(
-    action.closest("openclaw-tooltip") as
+    action.closest("carapace-tooltip") as
       | (HTMLElement & { content?: string; updateComplete: Promise<unknown> })
       | null,
     "blocked-action tooltip",

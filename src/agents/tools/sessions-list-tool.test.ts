@@ -3,7 +3,7 @@
 import { Value } from "typebox/value";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildGatewaySessionRow } from "../../gateway/session-utils-row.js";
 import { describeSessionLinkRule } from "../tool-description-presets.js";
 import { compactToolOutputHint } from "../tool-schema-hints.js";
@@ -12,7 +12,7 @@ import { createSessionsListTool } from "./sessions-list-tool.js";
 const SESSION_LINK_BASE = "http://127.0.0.1:18789/control";
 const SESSION_LINK_RULE = describeSessionLinkRule(SESSION_LINK_BASE);
 
-const VALID_CONFIG: OpenClawConfig = {
+const VALID_CONFIG: CarapaceConfig = {
   agents: { entries: { main: { default: true } } },
   tools: { sessions: { visibility: "all" }, agentToAgent: { enabled: false } },
 };
@@ -680,7 +680,7 @@ describe("sessions-list-tool", () => {
         ],
       })
       .mockResolvedValueOnce({ messages: [] });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       session: { store: "/tmp/shared-sessions.sqlite", scope: "global" },
       agents: {
         ownership: "explicit",

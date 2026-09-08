@@ -1,5 +1,5 @@
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
+import { redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
 import { crabboxCommandError } from "./crabbox-worker-command-error.js";
 import { runCrabboxCommand, type CrabboxCommandRunner } from "./crabbox-worker-command.js";
 import { CRABBOX_NODE_ENROLLMENT_DIAGNOSTIC_TIMEOUT_MS } from "./crabbox-worker-timeouts.js";
@@ -21,7 +21,7 @@ export async function collectCrabboxNodeEnrollmentEvidence(params: {
       args: params.args,
       binary: params.binary,
       input: [
-        `state_dir="$HOME/.openclaw/cloud-workers/${params.id}"`,
+        `state_dir="$HOME/.carapace/cloud-workers/${params.id}"`,
         'printf "node-runtime="',
         'if [ -L "$state_dir/runtime" ]; then readlink "$state_dir/runtime"; else printf absent; fi',
         'printf " node-pid="',

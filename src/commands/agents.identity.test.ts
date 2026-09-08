@@ -48,7 +48,7 @@ type ConfigWritePayload = {
 };
 
 async function createIdentityWorkspace(subdir = "work") {
-  const root = await makeTempWorkspace("openclaw-identity-");
+  const root = await makeTempWorkspace("carapace-identity-");
   const workspace = path.join(root, subdir);
   await fs.mkdir(workspace, { recursive: true });
   return { root, workspace };
@@ -104,10 +104,10 @@ describe("agents set-identity command", () => {
   it("sets identity from workspace IDENTITY.md", async () => {
     const { root, workspace } = await createIdentityWorkspace();
     await writeIdentityFile(workspace, [
-      "- Name: OpenClaw",
+      "- Name: Carapace",
       "- Creature: helpful sloth",
       "- Emoji: :)",
-      "- Avatar: avatars/openclaw.png",
+      "- Avatar: avatars/carapace.png",
       "",
     ]);
 
@@ -126,10 +126,10 @@ describe("agents set-identity command", () => {
 
     expect(configMocks.writeConfigFile).toHaveBeenCalledTimes(1);
     expect(getWrittenMainIdentity()).toEqual({
-      name: "OpenClaw",
+      name: "Carapace",
       theme: "helpful sloth",
       emoji: ":)",
-      avatar: "avatars/openclaw.png",
+      avatar: "avatars/carapace.png",
     });
   });
 
@@ -190,10 +190,10 @@ describe("agents set-identity command", () => {
   it("overrides identity file values with explicit flags", async () => {
     const { workspace } = await createIdentityWorkspace();
     await writeIdentityFile(workspace, [
-      "- Name: OpenClaw",
+      "- Name: Carapace",
       "- Theme: space lobster",
       "- Emoji: :)",
-      "- Avatar: avatars/openclaw.png",
+      "- Avatar: avatars/carapace.png",
       "",
     ]);
 
@@ -348,12 +348,12 @@ describe("agents set-identity command", () => {
 
       await expectIdentityCommandFailure(
         { agent, name: "Ghost", json: true },
-        `Agent "${agent}" not found. Create it with \`openclaw agents add\`.`,
+        `Agent "${agent}" not found. Create it with \`carapace agents add\`.`,
       );
     },
   );
 
-  it.each(["main", "openclaw", "crestodian"])(
+  it.each(["main", "carapace", "crestodian"])(
     "does not create absent reserved agent %s",
     async (agentId) => {
       configMocks.readConfigFileSnapshot.mockResolvedValue(
@@ -362,7 +362,7 @@ describe("agents set-identity command", () => {
 
       await expectIdentityCommandFailure(
         { agent: agentId, name: "Hijack" },
-        `Agent "${agentId}" not found. Create it with \`openclaw agents add\`.`,
+        `Agent "${agentId}" not found. Create it with \`carapace agents add\`.`,
       );
     },
   );
@@ -375,7 +375,7 @@ describe("agents set-identity command", () => {
 
     await expectIdentityCommandFailure(
       { agent: "ghost", identityFile: path.join(workspace, "missing.md"), json: true },
-      'Agent "ghost" not found. Create it with `openclaw agents add`.',
+      'Agent "ghost" not found. Create it with `carapace agents add`.',
     );
   });
 
@@ -549,7 +549,7 @@ describe("agents set-identity command", () => {
     expect(logs).toContain(`Workspace locator: ${workspaceLocator}`);
     expect(logs).toContain(
       `Stored workspace unchanged. Relocate with ${formatCliCommand(
-        `openclaw config set agents.entries.worker.workspace ${quoteCliArg(workspaceLocator)}`,
+        `carapace config set agents.entries.worker.workspace ${quoteCliArg(workspaceLocator)}`,
       )}.`,
     );
     expect(logs.join("\n")).not.toContain("Identity source:");

@@ -47,7 +47,7 @@ function client(
 async function executableScript(source: string): Promise<string> {
   // realpath: macOS tmpdir is a /var -> /private/var symlink and the approval
   // plan canonicalizes argv[0]; raw mkdtemp paths pass on Linux but fail here.
-  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-")));
+  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-")));
   tempDirs.push(dir);
   const file = path.join(dir, "claude-test.cjs");
   await fs.writeFile(file, `#!${process.execPath}\n${source}\n`, { mode: 0o700 });
@@ -111,7 +111,7 @@ describe("Claude CLI node command", () => {
   });
 
   it("accepts bounded Claude resume/fork args and a separate system prompt", async () => {
-    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-cwd-"));
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-cwd-"));
     tempDirs.push(cwd);
     await expect(
       decodeClaudeCliNodeRunParams(
@@ -159,7 +159,7 @@ describe("Claude CLI node command", () => {
       decodeClaudeCliNodeRunParams(
         JSON.stringify({
           argv: ["-p"],
-          cwd: "/definitely/missing/openclaw-node-cwd",
+          cwd: "/definitely/missing/carapace-node-cwd",
           idleTimeoutMs: 1_000,
           timeoutMs: 2_000,
         }),
@@ -169,7 +169,7 @@ describe("Claude CLI node command", () => {
       decodeClaudeCliNodeRunParams(
         JSON.stringify({
           argv: ["-p"],
-          env: { [["OPENCLAW", "GATEWAY", "TOKEN"].join("_")]: "" },
+          env: { [["CARAPACE", "GATEWAY", "TOKEN"].join("_")]: "" },
           idleTimeoutMs: 1_000,
           timeoutMs: 2_000,
         }),
@@ -179,7 +179,7 @@ describe("Claude CLI node command", () => {
       decodeClaudeCliNodeRunParams(
         JSON.stringify({
           argv: ["-p"],
-          clearEnv: [["OPENCLAW", "GATEWAY", "TOKEN"].join("_")],
+          clearEnv: [["CARAPACE", "GATEWAY", "TOKEN"].join("_")],
           idleTimeoutMs: 1_000,
           timeoutMs: 2_000,
         }),
@@ -493,7 +493,7 @@ process.stdin.on("end", () => {
   it.runIf(process.platform !== "win32")(
     "retains the prompt for an authoritative descendant without delaying the root result",
     async () => {
-      const markerDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-prompt-"));
+      const markerDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-prompt-"));
       tempDirs.push(markerDir);
       const marker = path.join(markerDir, "descendant-read");
       const executable = await executableScript(`
@@ -506,7 +506,7 @@ const child = spawn(process.execPath, ["-e",
 ], { stdio: ["ignore", "ignore", "ignore", 3] });
 child.unref();
 process.stdout.write(JSON.stringify({ type: "result", result: prompt }) + "\\n");`);
-      await withEnvAsync({ OPENCLAW_SERVICE_MARKER: "openclaw" }, async () => {
+      await withEnvAsync({ CARAPACE_SERVICE_MARKER: "carapace" }, async () => {
         const calls: Array<{ method: string; params: unknown }> = [];
         const request = {
           argv: ["-p"],
@@ -726,7 +726,7 @@ process.stdout.write(Buffer.concat([
   });
 
   it("does not spawn Claude when cancellation wins during approval", async () => {
-    const markerDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-claude-marker-"));
+    const markerDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-claude-marker-"));
     tempDirs.push(markerDir);
     const marker = path.join(markerDir, "spawned");
     const executable = await executableScript(

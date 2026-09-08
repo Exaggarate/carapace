@@ -10,7 +10,7 @@ import {
 
 let artifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
   artifactDir = parent
     ? createControlUiE2eArtifactDir("chat-tool-turn-outcome", parent)
     : undefined;
@@ -53,7 +53,7 @@ async function captureFactrowProof(
   if (!artifactDir) {
     return;
   }
-  const state = process.env.OPENCLAW_FACTROW_PROOF_STATE?.trim() || "after";
+  const state = process.env.CARAPACE_FACTROW_PROOF_STATE?.trim() || "after";
   await page.locator(".chat-main").screenshot({
     path: path.join(artifactDir, `factrow-${state}-${theme}-context.png`),
   });
@@ -100,7 +100,7 @@ suite.define(() => {
                 name: "exec",
                 arguments: {
                   command: "pnpm test ui/src/pages/chat/components/chat-tool-cards.test.ts",
-                  workdir: "/workspace/openclaw",
+                  workdir: "/workspace/carapace",
                   timeout: 120000,
                 },
               },
@@ -115,7 +115,7 @@ suite.define(() => {
                 id: "layout-edit",
                 name: "edit",
                 arguments: {
-                  path: "/workspace/openclaw/ui/src/styles/chat/tool-cards.css",
+                  path: "/workspace/carapace/ui/src/styles/chat/tool-cards.css",
                   oldText: ".chat-tool-kv {\n  margin-top: 6px;\n}",
                   newText: ".chat-tool-kv {\n  padding: 10px 12px;\n}",
                 },

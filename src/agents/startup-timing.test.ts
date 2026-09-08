@@ -14,12 +14,12 @@ afterEach(async () => {
 
 describe("measureAgentStartup", () => {
   it("records the startup stage without changing the result", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-agent-startup-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-agent-startup-"));
     tempDirs.push(dir);
     const path = join(dir, "timeline.jsonl");
     const env = {
-      OPENCLAW_DIAGNOSTICS: "timeline",
-      OPENCLAW_DIAGNOSTICS_TIMELINE_PATH: path,
+      CARAPACE_DIAGNOSTICS: "timeline",
+      CARAPACE_DIAGNOSTICS_TIMELINE_PATH: path,
     } as NodeJS.ProcessEnv;
 
     await expect(measureAgentStartup("command-import", async () => "ready", { env })).resolves.toBe(

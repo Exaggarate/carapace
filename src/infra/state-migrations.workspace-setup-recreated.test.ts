@@ -4,7 +4,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { resolveWorkspaceStateIdentity } from "../agents/workspace-state-identity.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { useWorkspaceMigrationTestFixture } from "./state-migrations.workspace-setup.test-support.js";
 
 describe("recreated legacy workspace state migration", () => {
@@ -13,7 +13,7 @@ describe("recreated legacy workspace state migration", () => {
   it("cleans a covered setup marker recreated after completed migration", async () => {
     const context = setup();
     const identity = resolveWorkspaceStateIdentity(context.workspaceDir);
-    const setupPath = path.join(context.workspaceDir, "openclaw-workspace-state.json");
+    const setupPath = path.join(context.workspaceDir, "carapace-workspace-state.json");
     const seededAt = "2026-07-15T10:00:00.000Z";
     const completedAt = "2026-07-15T10:01:00.000Z";
     await fsp.writeFile(
@@ -30,7 +30,7 @@ describe("recreated legacy workspace state migration", () => {
 
     expect(result.warnings).toEqual([]);
     expect(fs.existsSync(setupPath)).toBe(false);
-    const db = openOpenClawStateDatabase({ env: context.env }).db;
+    const db = openCarapaceStateDatabase({ env: context.env }).db;
     expect(
       db
         .prepare(
@@ -71,14 +71,14 @@ describe("recreated legacy workspace state migration", () => {
     await fsp.mkdir(path.dirname(attestationPath), { recursive: true });
     await fsp.writeFile(
       attestationPath,
-      "openclaw-workspace-attestation:v1\n2026-07-15T11:00:00.000Z\n",
+      "carapace-workspace-attestation:v1\n2026-07-15T11:00:00.000Z\n",
       "utf8",
     );
     const originalMtime = new Date("2026-07-15T11:01:00.000Z");
     await fsp.utimes(attestationPath, originalMtime, originalMtime);
     expect((await migrate(context)).warnings).toEqual([]);
 
-    const recreated = "openclaw-workspace-attestation:v1\n2026-07-16T11:00:00.000Z\n";
+    const recreated = "carapace-workspace-attestation:v1\n2026-07-16T11:00:00.000Z\n";
     await fsp.mkdir(path.dirname(attestationPath), { recursive: true });
     await fsp.writeFile(attestationPath, recreated, "utf8");
     const recreatedMtime = new Date("2026-07-16T11:01:00.000Z");
@@ -93,7 +93,7 @@ describe("recreated legacy workspace state migration", () => {
     expect(result.warnings).toEqual([]);
     expect(fs.existsSync(attestationPath)).toBe(false);
     expect(fs.existsSync(claimPath)).toBe(false);
-    const db = openOpenClawStateDatabase({ env: context.env }).db;
+    const db = openCarapaceStateDatabase({ env: context.env }).db;
     expect(
       db
         .prepare("SELECT attested_at_ms FROM workspace_setup_state WHERE workspace_key = ?")
@@ -119,14 +119,14 @@ describe("recreated legacy workspace state migration", () => {
       "workspace-attestations",
       `${identity.workspaceKey}.attested`,
     );
-    const original = "openclaw-workspace-attestation:v1\n2026-07-15T11:00:00.000Z\n";
+    const original = "carapace-workspace-attestation:v1\n2026-07-15T11:00:00.000Z\n";
     await fsp.mkdir(path.dirname(attestationPath), { recursive: true });
     await fsp.writeFile(attestationPath, original, "utf8");
     const originalMtime = new Date("2026-07-15T11:01:00.000Z");
     await fsp.utimes(attestationPath, originalMtime, originalMtime);
     expect((await migrate(context)).warnings).toEqual([]);
 
-    const recreated = "openclaw-workspace-attestation:v1\n2026-07-16T11:00:00.000Z\n";
+    const recreated = "carapace-workspace-attestation:v1\n2026-07-16T11:00:00.000Z\n";
     const claimPath = `${attestationPath}.doctor-importing`;
     await fsp.mkdir(path.dirname(attestationPath), { recursive: true });
     await Promise.all([
@@ -141,7 +141,7 @@ describe("recreated legacy workspace state migration", () => {
     ]);
     expect(fs.existsSync(attestationPath)).toBe(true);
     expect(fs.existsSync(claimPath)).toBe(true);
-    const db = openOpenClawStateDatabase({ env: context.env }).db;
+    const db = openCarapaceStateDatabase({ env: context.env }).db;
     expect(
       db
         .prepare("SELECT attested_at_ms FROM workspace_setup_state WHERE workspace_key = ?")

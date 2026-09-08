@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Command } from "commander";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerVoiceCallLogs } from "../cli-call-log.js";
 import {
@@ -189,7 +189,7 @@ describe("voice-call call record store", () => {
         call.transcript,
       );
       await expect(getCallHistoryFromStore(storePath)).resolves.toEqual([call]);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: storePath };
+      const env = { ...process.env, CARAPACE_STATE_DIR: storePath };
       const chunks = createPluginStateSyncKeyedStoreForTests<{ index: number; dataBase64: string }>(
         "voice-call",
         {
@@ -208,7 +208,7 @@ describe("voice-call call record store", () => {
         makePersistedCall({ callId: "good-call", transcript: [] }),
       );
       persistCallRecord(storePath, good);
-      const { db } = openOpenClawStateDatabase({ env });
+      const { db } = openCarapaceStateDatabase({ env });
       db.prepare("UPDATE plugin_state_entries SET value_json = ? WHERE entry_key = ?").run(
         "invalid JSON",
         later.key,

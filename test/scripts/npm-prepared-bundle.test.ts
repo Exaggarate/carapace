@@ -23,7 +23,7 @@ import { validatePreflightManifest } from "../../scripts/release-candidate-check
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const repository = "openclaw/openclaw";
+const repository = "carapace/carapace";
 const sourceSha = "a".repeat(40);
 const toolingSha = "b".repeat(40);
 const workflowPath = ".github/workflows/full-release-validation.yml";
@@ -67,7 +67,7 @@ function packageSourceFixture(
   git("init", "--quiet");
   writeFileSync(
     join(sourceDir, "package.json"),
-    JSON.stringify({ name: "openclaw", version: packageVersion }),
+    JSON.stringify({ name: "carapace", version: packageVersion }),
   );
   git("add", "package.json");
   git("commit", "--quiet", "-m", "release package fixture");
@@ -83,7 +83,7 @@ function packageSourceFixture(
     copyFileSync(join(directory, "package.json"), join(staging, "package/package.json"));
     return execFileSync("tar", [
       "-czf",
-      join(destination, `openclaw-${packageVersion}.tgz`),
+      join(destination, `carapace-${packageVersion}.tgz`),
       "-C",
       staging,
       "package",
@@ -104,20 +104,20 @@ async function bundleFixture(callerWorkflowPath = workflowPath) {
   const tarball = Buffer.from("exact publishable root archive");
   const aiTarball = Buffer.from("exact publishable AI archive");
   const corePackage = {
-    packageName: "@openclaw/ai",
+    packageName: "@carapace/ai",
     packageVersion: "2026.8.1",
-    tarballName: "openclaw-ai-2026.8.1.tgz",
+    tarballName: "carapace-ai-2026.8.1.tgz",
     tarballSha256: hash(aiTarball),
   };
   const manifest = {
-    schema: "openclaw.npm-package-bundle/v1",
+    schema: "carapace.npm-package-bundle/v1",
     producer,
     releaseTag: "v2026.8.1",
     releaseSha: sourceSha,
     npmDistTag: "beta",
-    packageName: "openclaw",
+    packageName: "carapace",
     packageVersion: "2026.8.1",
-    tarballName: "openclaw-2026.8.1.tgz",
+    tarballName: "carapace-2026.8.1.tgz",
     tarballSha256: hash(tarball),
     corePackageTarballs: [corePackage],
     dependencyTarballs: [corePackage],
@@ -141,13 +141,13 @@ async function bundleFixture(callerWorkflowPath = workflowPath) {
     source: { sha: sourceSha },
     artifact: {
       id: "78",
-      name: "openclaw-npm-package-12-2",
+      name: "carapace-npm-package-12-2",
       digest: hash(archive),
       runId: "12",
       runAttempt: "2",
     },
     package: {
-      name: "openclaw",
+      name: "carapace",
       fileName: manifest.tarballName,
       sha256: hash(tarball),
       version: manifest.packageVersion,
@@ -267,7 +267,7 @@ async function qualificationFixture<
     });
     const artifact = {
       id,
-      name: `openclaw-npm-${kind}-proof-${producer.runId}-${producer.runAttempt}`,
+      name: `carapace-npm-${kind}-proof-${producer.runId}-${producer.runAttempt}`,
       digest: hash(archive),
       runId: producer.runId,
       runAttempt: producer.runAttempt,
@@ -375,7 +375,7 @@ describe("prepared npm bundle", () => {
   it.each(["failure", "cancelled"])(
     "reuses successful preparation and source jobs after parent %s",
     async (conclusion) => {
-      const fixture = await bundleFixture(".github/workflows/openclaw-npm-release.yml");
+      const fixture = await bundleFixture(".github/workflows/carapace-npm-release.yml");
       Object.assign(fixture.run, { status: "completed", conclusion });
       const downloaded = await downloadPreparedNpmBundle({
         ...fixture,
@@ -408,7 +408,7 @@ describe("prepared npm bundle", () => {
     ["completed", "cancelled"],
     ["in_progress", null],
   ])("requires a successful parent for publication (%s/%s)", async (status, conclusion) => {
-    const fixture = await bundleFixture(".github/workflows/openclaw-npm-release.yml");
+    const fixture = await bundleFixture(".github/workflows/carapace-npm-release.yml");
     Object.assign(fixture.run, { status, conclusion });
     fixture.job.name = "Qualify prepared npm package";
     const options = {
@@ -442,7 +442,7 @@ describe("prepared npm bundle", () => {
         directory: fixture.outputDir,
         artifact: {
           id: "78",
-          name: "openclaw-npm-package-12-2",
+          name: "carapace-npm-package-12-2",
           digest: "c".repeat(64),
           runId: "12",
           runAttempt: "2",
@@ -621,7 +621,7 @@ describe("prepared npm bundle", () => {
           qualified: true,
         }),
       ).toMatchObject({
-        schema: "openclaw.qualified-npm-preflight/v1",
+        schema: "carapace.qualified-npm-preflight/v1",
         source: { sha: sourceSha },
         preparedBundle: fixture.descriptor,
       });

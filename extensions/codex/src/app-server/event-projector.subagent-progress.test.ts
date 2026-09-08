@@ -1,4 +1,4 @@
-import { createChannelProgressDraftCompositor } from "openclaw/plugin-sdk/channel-outbound";
+import { createChannelProgressDraftCompositor } from "carapace/plugin-sdk/channel-outbound";
 import {
   createParams,
   createProjector,

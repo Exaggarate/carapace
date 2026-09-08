@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Restores retired cron migration inputs that canonical config migration intentionally strips. */
 export function withLegacyConfig(
-  config: OpenClawConfig,
-  legacyConfig: OpenClawConfig | undefined,
-): OpenClawConfig {
+  config: CarapaceConfig,
+  legacyConfig: CarapaceConfig | undefined,
+): CarapaceConfig {
   const legacyCron = legacyConfig?.cron as Record<string, unknown> | undefined;
   if (
     !legacyCron ||
@@ -19,11 +19,11 @@ export function withLegacyConfig(
       ...(Object.hasOwn(legacyCron, "store") ? { store: legacyCron.store } : {}),
       ...(Object.hasOwn(legacyCron, "webhook") ? { webhook: legacyCron.webhook } : {}),
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 /** Isolates the trusted partition selector from a partially valid legacy config. */
-export function retainStoreConfig(config: OpenClawConfig | undefined): OpenClawConfig | undefined {
+export function retainStoreConfig(config: CarapaceConfig | undefined): CarapaceConfig | undefined {
   const cron = config?.cron as { store?: unknown; webhook?: unknown } | undefined;
   if (typeof cron?.store !== "string" || !cron.store.trim()) {
     return undefined;
@@ -33,5 +33,5 @@ export function retainStoreConfig(config: OpenClawConfig | undefined): OpenClawC
       store: cron.store,
       ...(Object.hasOwn(cron, "webhook") ? { webhook: cron.webhook } : {}),
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }

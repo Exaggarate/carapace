@@ -64,12 +64,12 @@ describe("tryRouteCli", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    originalDisableRouteFirst = process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
-    originalHideBanner = process.env.OPENCLAW_HIDE_BANNER;
-    originalLogLevel = process.env.OPENCLAW_LOG_LEVEL;
-    delete process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
-    delete process.env.OPENCLAW_HIDE_BANNER;
-    delete process.env.OPENCLAW_LOG_LEVEL;
+    originalDisableRouteFirst = process.env.CARAPACE_DISABLE_ROUTE_FIRST;
+    originalHideBanner = process.env.CARAPACE_HIDE_BANNER;
+    originalLogLevel = process.env.CARAPACE_LOG_LEVEL;
+    delete process.env.CARAPACE_DISABLE_ROUTE_FIRST;
+    delete process.env.CARAPACE_HIDE_BANNER;
+    delete process.env.CARAPACE_LOG_LEVEL;
     originalForceStderr = loggingState.forceConsoleToStderr;
     loggingState.forceConsoleToStderr = false;
   });
@@ -79,19 +79,19 @@ describe("tryRouteCli", () => {
       loggingState.forceConsoleToStderr = originalForceStderr;
     }
     if (originalDisableRouteFirst === undefined) {
-      delete process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
+      delete process.env.CARAPACE_DISABLE_ROUTE_FIRST;
     } else {
-      process.env.OPENCLAW_DISABLE_ROUTE_FIRST = originalDisableRouteFirst;
+      process.env.CARAPACE_DISABLE_ROUTE_FIRST = originalDisableRouteFirst;
     }
     if (originalHideBanner === undefined) {
-      delete process.env.OPENCLAW_HIDE_BANNER;
+      delete process.env.CARAPACE_HIDE_BANNER;
     } else {
-      process.env.OPENCLAW_HIDE_BANNER = originalHideBanner;
+      process.env.CARAPACE_HIDE_BANNER = originalHideBanner;
     }
     if (originalLogLevel === undefined) {
-      delete process.env.OPENCLAW_LOG_LEVEL;
+      delete process.env.CARAPACE_LOG_LEVEL;
     } else {
-      process.env.OPENCLAW_LOG_LEVEL = originalLogLevel;
+      process.env.CARAPACE_LOG_LEVEL = originalLogLevel;
     }
   });
 
@@ -111,7 +111,7 @@ describe("tryRouteCli", () => {
     ["tasks", "list", "--json"],
     ["tasks", "audit", "--json"],
   ])("dispatches %j without startup config observation or plugin activation", async (...args) => {
-    await expect(tryRouteCli(["node", "openclaw", ...args])).resolves.toBe(true);
+    await expect(tryRouteCli(["node", "carapace", ...args])).resolves.toBe(true);
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe("tryRouteCli", () => {
     });
 
     await expect(
-      tryRouteCli(["node", "openclaw", "config", "get", "gateway.port"], {
+      tryRouteCli(["node", "carapace", "config", "get", "gateway.port"], {
         machineOutput: true,
       }),
     ).resolves.toBe(true);
@@ -136,7 +136,7 @@ describe("tryRouteCli", () => {
   });
 
   it("lets routed gateway health own its config read", async () => {
-    await expect(tryRouteCli(["node", "openclaw", "gateway", "health", "--json"])).resolves.toBe(
+    await expect(tryRouteCli(["node", "carapace", "gateway", "health", "--json"])).resolves.toBe(
       true,
     );
 
@@ -154,7 +154,7 @@ describe("tryRouteCli", () => {
       return true;
     });
     await expect(
-      tryRouteCli(["node", "openclaw", "config", "unset", "gateway.port"]),
+      tryRouteCli(["node", "carapace", "config", "unset", "gateway.port"]),
     ).resolves.toBe(true);
 
     expect(ensureConfigReadyMock.mock.calls[0]?.[0].commandPath).toEqual(["config", "unset"]);
@@ -165,7 +165,7 @@ describe("tryRouteCli", () => {
     const error = new Error("invalid synthetic config");
     ensureConfigReadyMock.mockRejectedValueOnce(error);
 
-    await expect(tryRouteCli(["node", "openclaw", "config", "unset", "gateway.port"])).rejects.toBe(
+    await expect(tryRouteCli(["node", "carapace", "config", "unset", "gateway.port"])).rejects.toBe(
       error,
     );
 
@@ -177,7 +177,7 @@ describe("tryRouteCli", () => {
     const error = new Error("synthetic command failure");
     runRouteMock.mockRejectedValueOnce(error);
 
-    await expect(tryRouteCli(["node", "openclaw", "status", "--json"])).rejects.toBe(error);
+    await expect(tryRouteCli(["node", "carapace", "status", "--json"])).rejects.toBe(error);
 
     expect(runRouteMock).toHaveBeenCalledOnce();
   });
@@ -189,7 +189,7 @@ describe("tryRouteCli", () => {
       return true;
     });
 
-    await tryRouteCli(["node", "openclaw", "agents", "--json"]);
+    await tryRouteCli(["node", "carapace", "agents", "--json"]);
 
     expect(runRouteMock).toHaveBeenCalledOnce();
     expect(captured[0]).toBe(true);
@@ -203,7 +203,7 @@ describe("tryRouteCli", () => {
       return true;
     });
 
-    await expect(tryRouteCli(["node", "openclaw", "models", "status", "--json"])).resolves.toBe(
+    await expect(tryRouteCli(["node", "carapace", "models", "status", "--json"])).resolves.toBe(
       true,
     );
 
@@ -218,7 +218,7 @@ describe("tryRouteCli", () => {
       return true;
     });
 
-    await tryRouteCli(["node", "openclaw", "agents"]);
+    await tryRouteCli(["node", "carapace", "agents"]);
 
     expect(runRouteMock).toHaveBeenCalledOnce();
     expect(captured[0]).toBe(false);
@@ -228,11 +228,11 @@ describe("tryRouteCli", () => {
   it("routes status when root options precede the command", async () => {
     const capturedLogLevels: Array<string | undefined> = [];
     runRouteMock.mockImplementationOnce(async () => {
-      capturedLogLevels.push(process.env.OPENCLAW_LOG_LEVEL);
+      capturedLogLevels.push(process.env.CARAPACE_LOG_LEVEL);
       return true;
     });
 
-    await expect(tryRouteCli(["node", "openclaw", "--log-level", "debug", "status"])).resolves.toBe(
+    await expect(tryRouteCli(["node", "carapace", "--log-level", "debug", "status"])).resolves.toBe(
       true,
     );
 
@@ -240,42 +240,42 @@ describe("tryRouteCli", () => {
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();
     expect(capturedLogLevels).toEqual(["debug"]);
-    expect(process.env.OPENCLAW_LOG_LEVEL).toBe("debug");
+    expect(process.env.CARAPACE_LOG_LEVEL).toBe("debug");
   });
 
   it("applies routed log level options after the command", async () => {
     const capturedLogLevels: Array<string | undefined> = [];
     runRouteMock.mockImplementationOnce(async () => {
-      capturedLogLevels.push(process.env.OPENCLAW_LOG_LEVEL);
+      capturedLogLevels.push(process.env.CARAPACE_LOG_LEVEL);
       return true;
     });
 
-    await expect(tryRouteCli(["node", "openclaw", "status", "--log-level=trace"])).resolves.toBe(
+    await expect(tryRouteCli(["node", "carapace", "status", "--log-level=trace"])).resolves.toBe(
       true,
     );
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(runRouteMock).toHaveBeenCalledTimes(1);
     expect(capturedLogLevels).toEqual(["trace"]);
-    expect(process.env.OPENCLAW_LOG_LEVEL).toBe("trace");
+    expect(process.env.CARAPACE_LOG_LEVEL).toBe("trace");
   });
 
   it("uses the last valid routed log level option", async () => {
     await expect(
-      tryRouteCli(["node", "openclaw", "--log-level", "debug", "status", "--log-level=trace"]),
+      tryRouteCli(["node", "carapace", "--log-level", "debug", "status", "--log-level=trace"]),
     ).resolves.toBe(true);
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(runRouteMock).toHaveBeenCalledTimes(1);
-    expect(process.env.OPENCLAW_LOG_LEVEL).toBe("trace");
+    expect(process.env.CARAPACE_LOG_LEVEL).toBe("trace");
   });
 
   it.each([
-    ["invalid value", ["node", "openclaw", "status", "--log-level", "verbose"]],
-    ["missing value", ["node", "openclaw", "status", "--log-level"]],
+    ["invalid value", ["node", "carapace", "status", "--log-level", "verbose"]],
+    ["missing value", ["node", "carapace", "status", "--log-level"]],
     [
       "later invalid value",
-      ["node", "openclaw", "--log-level", "debug", "status", "--log-level", "verbose"],
+      ["node", "carapace", "--log-level", "debug", "status", "--log-level", "verbose"],
     ],
   ])("falls back for %s routed log level options before bootstrap", async (_name, argv) => {
     await expect(tryRouteCli(argv)).resolves.toBe(false);
@@ -283,20 +283,20 @@ describe("tryRouteCli", () => {
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();
     expect(runRouteMock).not.toHaveBeenCalled();
-    expect(process.env.OPENCLAW_LOG_LEVEL).toBeUndefined();
+    expect(process.env.CARAPACE_LOG_LEVEL).toBeUndefined();
   });
 
-  it("respects OPENCLAW_HIDE_BANNER for routed commands", async () => {
-    process.env.OPENCLAW_HIDE_BANNER = "1";
+  it("respects CARAPACE_HIDE_BANNER for routed commands", async () => {
+    process.env.CARAPACE_HIDE_BANNER = "1";
 
-    await expect(tryRouteCli(["node", "openclaw", "status"])).resolves.toBe(true);
+    await expect(tryRouteCli(["node", "carapace", "status"])).resolves.toBe(true);
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
   });
 
   it("falls back before bootstrap when the route cannot parse the argv", async () => {
     await expect(
-      tryRouteCli(["node", "openclaw", "tasks", "list", "--json", "--unknown"]),
+      tryRouteCli(["node", "carapace", "tasks", "list", "--json", "--unknown"]),
     ).resolves.toBe(false);
 
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();

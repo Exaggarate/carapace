@@ -170,7 +170,7 @@ flow:
               ref: config.senderId
             senderName: QA Goal Operator
             text:
-              expr: "`@openclaw reply exactly: ${config.otherConversationMarker}`"
+              expr: "`@carapace reply exactly: ${config.otherConversationMarker}`"
         - waitForOutbound:
             conversation:
               id:
@@ -193,7 +193,7 @@ flow:
           value:
             expr: "(await readRawQaSessionStore(env))[sessionKey]"
         - assert:
-            expr: "typeof sessionBeforeCompaction?.sessionId === 'string' && sessionBeforeCompaction.agentHarnessId === 'openclaw'"
+            expr: "typeof sessionBeforeCompaction?.sessionId === 'string' && sessionBeforeCompaction.agentHarnessId === 'carapace'"
             message: expected an existing embedded session before manual compaction
         - call: readSessionTranscriptSummary
           args:
@@ -242,7 +242,7 @@ flow:
             - 100
           saveAs: compactedSession
         - assert:
-            expr: "compactedSession.sessionId === sessionBeforeCompaction.sessionId && compactedSession.lifecycleRevision === sessionBeforeCompaction.lifecycleRevision && compactedSession.agentHarnessId === 'openclaw' && Number.isFinite(compactedSession.totalTokens) && compactedSession.totalTokens >= 0 && compactedSession.totalTokensFresh === true"
+            expr: "compactedSession.sessionId === sessionBeforeCompaction.sessionId && compactedSession.lifecycleRevision === sessionBeforeCompaction.lifecycleRevision && compactedSession.agentHarnessId === 'carapace' && Number.isFinite(compactedSession.totalTokens) && compactedSession.totalTokens >= 0 && compactedSession.totalTokensFresh === true"
             message: manual compaction changed session identity or failed to publish fresh context
         - call: readSessionTranscriptSummary
           args:

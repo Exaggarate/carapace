@@ -1,5 +1,5 @@
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createQaBusState } from "./bus-state.js";
 import type { QaLabServerHandle } from "./lab-server.types.js";
@@ -44,10 +44,10 @@ const mocks = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness", () => ({
+vi.mock("carapace/plugin-sdk/agent-harness", () => ({
   disposeRegisteredAgentHarnesses: mocks.disposeRegisteredAgentHarnesses,
 }));
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuard,
 }));
 vi.mock("./gateway-child.js", () => ({
@@ -433,7 +433,7 @@ describe("isolated QA suite transport cleanup", () => {
   });
 
   it("preserves nested publication ownership through concurrent worker runtime preparation", async () => {
-    vi.stubEnv("OPENCLAW_QA_SUITE_PROGRESS", "1");
+    vi.stubEnv("CARAPACE_QA_SUITE_PROGRESS", "1");
     const stderrWrite = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     const lab = createCleanupTestLab();
     const selection = {

@@ -1,15 +1,15 @@
 // Applies Tool Search overlays on top of the selected runtime config.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isLocalModelLeanEnabled } from "./local-model-lean.js";
 import { resolveAgentRuntimeToolConfig } from "./tool-runtime-config.js";
 
 export function resolveAgentToolSearchRuntimeConfig(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   model?: { toolSearchMode?: "tools" | false };
   completionPrivateMessageOnly?: boolean;
-}): OpenClawConfig | undefined {
+}): CarapaceConfig | undefined {
   // Select before overlay cloning; cloning source config first loses snapshot identity and can
   // reintroduce unresolved SecretRefs into plugin tool factories.
   const runtimeConfig = resolveAgentRuntimeToolConfig(params.config);

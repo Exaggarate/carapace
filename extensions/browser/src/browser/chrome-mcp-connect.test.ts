@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NormalizedChromeMcpProfileOptions } from "./chrome-mcp-contracts.js";
 import { withChromeMcpLease } from "./chrome-mcp-routing.js";
@@ -16,7 +16,7 @@ vi.mock("../logging/subsystem.js", () => ({
 }));
 
 describe("Chrome MCP subprocess startup diagnostics", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let profileName: string;
   let homeDir: string;
   let options: NormalizedChromeMcpProfileOptions;
@@ -28,7 +28,7 @@ describe("Chrome MCP subprocess startup diagnostics", () => {
     warn.mockClear();
     ownsDescendant = false;
     expectsSubprocess = true;
-    state = await createOpenClawTestState({ prefix: "chrome-mcp-startup-" });
+    state = await createCarapaceTestState({ prefix: "chrome-mcp-startup-" });
     await state.writeConfig({ logging: { redactSensitive: "off" } });
     // Worker env overlays do not change native os.homedir(); the runner isolates both homes.
     homeDir = os.homedir();

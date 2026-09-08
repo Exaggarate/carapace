@@ -7,13 +7,13 @@ import type {
   RuntimeConfigSnapshotRefreshOptions,
   RuntimeConfigWriteNotification,
 } from "./runtime-snapshot.js";
-import type { ConfigFileSnapshot, ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, ConfigValidationIssue, CarapaceConfig } from "./types.js";
 
 export type ParseConfigJson5Result = { ok: true; parsed: unknown } | { ok: false; error: string };
 
 export type ConfigWriteResult = {
   persistedHash: string;
-  persistedConfig: OpenClawConfig;
+  persistedConfig: CarapaceConfig;
 };
 
 export type ConfigWriteInputBasis = { kind: ConfigMutationBase; config: unknown };
@@ -49,7 +49,7 @@ export type ConfigWriteOptions = {
   /** Caller-authored paths that stay persisted even when equal to defaults. */
   explicitSetPaths?: readonly (readonly string[])[];
   /** Source-shaped values paired with explicitSetPaths. */
-  explicitSetValueSource?: OpenClawConfig;
+  explicitSetValueSource?: CarapaceConfig;
   /** Persist roster format without treating every leaf as an explicit value edit. */
   persistCanonicalAgentRoster?: boolean;
   /** Agent ids that this write intentionally removes from the canonical roster. */
@@ -79,7 +79,7 @@ export type ConfigWriteOptions = {
   /** Preserve an older writer version during update handoff writes. */
   lastTouchedVersionOverride?: string;
   /** Optional runtime candidate preflight; the runtime writer composes its own preflight. */
-  preCommitRuntimePreflight?: (sourceConfig: OpenClawConfig) => Promise<unknown>;
+  preCommitRuntimePreflight?: (sourceConfig: CarapaceConfig) => Promise<unknown>;
   /** Revalidate authority at the final root-file publication; requires atomic rename. */
   beforeCommit?: () => void | Promise<void>;
   /** Snapshot-time hashes for include files that mutation writers may update. */
@@ -132,8 +132,8 @@ export type ConfigSnapshotReadOptions = {
   allowCurrentPluginMetadata?: boolean;
   recoverSuspicious?: boolean;
   allowSuspiciousRecovery?: (
-    candidate: OpenClawConfig,
-    current: OpenClawConfig,
+    candidate: CarapaceConfig,
+    current: CarapaceConfig,
   ) => boolean | Promise<boolean>;
   /** Controls whether snapshot validation resolves plugin metadata and defaults. */
   pluginValidation?: "full" | "skip" | "core-only";
@@ -160,15 +160,15 @@ export type PreparedConfigRecovery = ReadConfigFileSnapshotWithPluginMetadataRes
 };
 
 export type BestEffortConfigSnapshot = {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   configDiagnostics: { path: string; issues: ConfigValidationIssue[] } | null;
 };
 
 export type ConfigRecoveryCandidate = {
   raw: string;
   parsed: unknown;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 export type ConfigRecoveryCandidatePreparation =

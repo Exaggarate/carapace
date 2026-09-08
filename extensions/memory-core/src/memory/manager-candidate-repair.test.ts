@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { MemorySyncParams } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { MemorySyncParams } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { describe, expect, it, vi } from "vitest";
 import { createManagerIndexFixture } from "./manager-index.test-support.js";
 import type { MemoryIndexMeta } from "./manager-reindex-state.js";

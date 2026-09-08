@@ -1,4 +1,4 @@
-import { definePluginEntry, type OpenClawPluginApi } from "./api.js";
+import { definePluginEntry, type CarapacePluginApi } from "./api.js";
 import { VisitorPolicyClient } from "./src/cloudflare.js";
 import { visitorConfigSchema, visitorPluginSchema } from "./src/config.js";
 import { visitorErrorText } from "./src/errors.js";
@@ -6,7 +6,7 @@ import { visitorRuntimeStore, type VisitorRuntime } from "./src/runtime.js";
 import { createVisitorTools } from "./src/tools.js";
 import { VisitorAccessService, type VisitorGrant } from "./src/visitors.js";
 
-function registerVisitorPlugin(api: OpenClawPluginApi): void {
+function registerVisitorPlugin(api: CarapacePluginApi): void {
   if (api.registrationMode === "cli-metadata") {
     return;
   }

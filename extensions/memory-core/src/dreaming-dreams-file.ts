@@ -1,16 +1,16 @@
 // Memory Core helpers for safe managed DREAMS.md updates.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { replaceManagedMarkdownBlock } from "openclaw/plugin-sdk/memory-host-markdown";
-import { readRegularFile, replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { extractErrorCode } from "carapace/plugin-sdk/error-runtime";
+import { replaceManagedMarkdownBlock } from "carapace/plugin-sdk/memory-host-markdown";
+import { readRegularFile, replaceFileAtomic } from "carapace/plugin-sdk/security-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { withMemoryWorkspaceLock } from "./memory-workspace-lock.js";
 import { readStore } from "./short-term-promotion-store.js";
 
 export const DREAMS_FILENAMES = ["DREAMS.md", "dreams.md"] as const;
-const DEEP_START_MARKER = "<!-- openclaw:dreaming:deep:start -->";
-const DEEP_END_MARKER = "<!-- openclaw:dreaming:deep:end -->";
+const DEEP_START_MARKER = "<!-- carapace:dreaming:deep:start -->";
+const DEEP_END_MARKER = "<!-- carapace:dreaming:deep:end -->";
 
 async function resolveDreamsPath(workspaceDir: string): Promise<string> {
   for (const name of DREAMS_FILENAMES) {
@@ -131,9 +131,9 @@ export async function updateDeepDreamsFile(params: {
   });
 }
 
-const DIARY_START_MARKER = "<!-- openclaw:dreaming:diary:start -->";
-const DIARY_END_MARKER = "<!-- openclaw:dreaming:diary:end -->";
-const BACKFILL_ENTRY_MARKER = "openclaw:dreaming:backfill-entry";
+const DIARY_START_MARKER = "<!-- carapace:dreaming:diary:start -->";
+const DIARY_END_MARKER = "<!-- carapace:dreaming:diary:end -->";
+const BACKFILL_ENTRY_MARKER = "carapace:dreaming:backfill-entry";
 const RECENT_DIARY_CONTEXT_LIMIT = 3;
 const RECENT_DIARY_CONTEXT_MAX_CHARS = 360;
 

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { buildSystemAgentSessionInvalidatedErrorDetails } from "@openclaw/gateway-protocol";
+import { buildSystemAgentSessionInvalidatedErrorDetails } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../api/gateway.ts";
 import { CUSTODIAN_PANEL_TOGGLE_EVENT } from "../components/panel-toggle-contract.ts";
@@ -74,7 +74,7 @@ describe("update triage presentation", () => {
       );
       const { context } = createContext(request);
       const provider = createApplicationContextProvider(context);
-      const surface = document.createElement("openclaw-custodian-surface");
+      const surface = document.createElement("carapace-custodian-surface");
       surface.store = new CustodianSessionStore();
       provider.append(surface);
       document.body.append(provider);
@@ -101,7 +101,7 @@ describe("update triage presentation", () => {
       expect(questions[0]?.[1].message).toContain("2222222222222222222222222222222222222222");
       expect(custodianAlertStore.alert?.question).toContain("Do not retry the update");
       expect(surface.textContent).toContain("build-failed");
-      expect(surface.textContent).toContain("openclaw triage");
+      expect(surface.textContent).toContain("carapace triage");
       if (outcome === "session invalidation") {
         const recovery = request.mock.calls.at(-1)?.[1];
         expect(recovery?.sessionId).not.toBe(questions[0]?.[1].sessionId);
@@ -134,7 +134,7 @@ describe("update triage presentation", () => {
               question: {
                 id: "access",
                 header: "Access",
-                question: "How should OpenClaw work?",
+                question: "How should Carapace work?",
                 options: [{ label: "Full access" }, { label: "Ask first" }],
               },
             }
@@ -143,7 +143,7 @@ describe("update triage presentation", () => {
     );
     const { context } = createContext(request);
     const provider = createApplicationContextProvider(context);
-    const surface = document.createElement("openclaw-custodian-surface");
+    const surface = document.createElement("carapace-custodian-surface");
     surface.store = new CustodianSessionStore();
     provider.append(surface);
     document.body.append(provider);
@@ -182,7 +182,7 @@ describe("update triage presentation", () => {
         if (method === "update.status") {
           return { activeRun: run.status === "running" ? run : null, lastRun: run };
         }
-        return method === "openclaw.chat"
+        return method === "carapace.chat"
           ? {
               sessionId: params?.sessionId,
               reply: "Review the current access policy.",
@@ -191,7 +191,7 @@ describe("update triage presentation", () => {
                     question: {
                       id: "access",
                       header: "Access",
-                      question: "How should OpenClaw work?",
+                      question: "How should Carapace work?",
                       options: [{ label: "Full access" }, { label: "Ask first" }],
                     },
                   }
@@ -207,13 +207,13 @@ describe("update triage presentation", () => {
     );
     const overlays = createApplicationOverlays(context.gateway, { onUpdateFailure });
     const provider = createApplicationContextProvider(context);
-    const surface = document.createElement("openclaw-custodian-surface");
+    const surface = document.createElement("carapace-custodian-surface");
     surface.store = new CustodianSessionStore();
     provider.append(surface);
     document.body.append(provider);
     const diagnosticMessages = () =>
       request.mock.calls.flatMap(([method, params]) =>
-        method === "openclaw.chat" && params?.message ? [params.message] : [],
+        method === "carapace.chat" && params?.message ? [params.message] : [],
       );
     try {
       await vi.waitFor(() =>
@@ -301,14 +301,14 @@ describe("update triage presentation", () => {
         if (method === "update.status") {
           return { activeRun: run.status === "running" ? run : null, lastRun: run, schedule };
         }
-        return method === "openclaw.chat"
+        return method === "carapace.chat"
           ? { sessionId: params?.sessionId, reply: "Ready to inspect the update." }
           : {};
       },
     );
     const diagnosticMessages = () =>
       request.mock.calls.flatMap(([method, params]) =>
-        method === "openclaw.chat" && params?.message ? [params.message] : [],
+        method === "carapace.chat" && params?.message ? [params.message] : [],
       );
     const { context, emitGatewayEvent, setGatewaySnapshot } = createContext(request);
     const overlays = createApplicationOverlays(context.gateway, {
@@ -316,7 +316,7 @@ describe("update triage presentation", () => {
         presentUpdateFailureTriage(context, failure, admission),
     });
     const provider = createApplicationContextProvider(context);
-    const surface = document.createElement("openclaw-custodian-surface");
+    const surface = document.createElement("carapace-custodian-surface");
     surface.store = new CustodianSessionStore();
     provider.append(surface);
     document.body.append(provider);
@@ -360,7 +360,7 @@ describe("update triage presentation", () => {
       const request = vi.fn();
       const { context, setGatewaySnapshot } = createContext(
         request,
-        boundary === "missing capability" ? [] : ["openclaw.chat"],
+        boundary === "missing capability" ? [] : ["carapace.chat"],
       );
       if (boundary === "offline") {
         setGatewaySnapshot({ phase: "reconnecting" });
@@ -388,11 +388,11 @@ describe("update triage presentation", () => {
 
   it("keeps recorded facts visible without sending when no model is configured", async () => {
     const request = vi.fn();
-    const { context } = createContext(request, ["openclaw.chat"], {
+    const { context } = createContext(request, ["carapace.chat"], {
       agentsList: { defaultId: "main", mainKey: "main", scope: "global", agents: [{ id: "main" }] },
     });
     const provider = createApplicationContextProvider(context);
-    const surface = document.createElement("openclaw-custodian-surface");
+    const surface = document.createElement("carapace-custodian-surface");
     surface.store = new CustodianSessionStore();
     provider.append(surface);
     document.body.append(provider);
@@ -405,7 +405,7 @@ describe("update triage presentation", () => {
       "Before update: 1111111111111111111111111111111111111111",
     );
     expect(surface.textContent).toContain("Disk is full");
-    expect(surface.textContent).toContain("openclaw triage");
+    expect(surface.textContent).toContain("carapace triage");
     expect(admission.admit).not.toHaveBeenCalled();
     expect(request).not.toHaveBeenCalled();
   });
@@ -434,7 +434,7 @@ describe("update triage presentation", () => {
             },
           };
         }
-        return method === "openclaw.chat"
+        return method === "carapace.chat"
           ? { sessionId: params?.sessionId, reply: "Ready to inspect the installation." }
           : {};
       });
@@ -444,7 +444,7 @@ describe("update triage presentation", () => {
           presentUpdateFailureTriage(context, failure, admission),
       });
       const provider = createApplicationContextProvider(context);
-      const surface = document.createElement("openclaw-custodian-surface");
+      const surface = document.createElement("carapace-custodian-surface");
       surface.store = new CustodianSessionStore();
       provider.append(surface);
       document.body.append(provider);
@@ -481,7 +481,7 @@ describe("update triage presentation", () => {
 
         expect(
           request.mock.calls.filter(
-            ([method, params]) => method === "openclaw.chat" && params && "message" in params,
+            ([method, params]) => method === "carapace.chat" && params && "message" in params,
           ),
         ).toHaveLength(0);
         expect(custodianAlertStore.alert).toBeNull();
@@ -519,7 +519,7 @@ describe("update triage presentation", () => {
       });
       const { context } = createContext(request);
       const provider = createApplicationContextProvider(context);
-      const surface = document.createElement("openclaw-custodian-surface");
+      const surface = document.createElement("carapace-custodian-surface");
       surface.store = new CustodianSessionStore();
       provider.append(surface);
       document.body.append(provider);

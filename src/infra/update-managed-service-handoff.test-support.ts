@@ -100,7 +100,7 @@ export function signalMockManagedUpdateHandoffReady(params: {
     cleanups.add(cleanup);
     child.once("exit", cleanup);
   }
-  child.stdout.write("OPENCLAW_UPDATE_HANDOFF_READY\n");
+  child.stdout.write("CARAPACE_UPDATE_HANDOFF_READY\n");
 }
 
 export async function writeConcurrentManagedHandoffParams(

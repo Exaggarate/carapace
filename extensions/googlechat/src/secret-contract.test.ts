@@ -1,10 +1,10 @@
 // Googlechat tests cover secret contract plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   applyResolvedAssignments,
   createResolverContext,
   resolveSecretRefValues,
-} from "openclaw/plugin-sdk/secret-ref-runtime";
+} from "carapace/plugin-sdk/secret-ref-runtime";
 import { describe, expect, it } from "vitest";
 import { collectRuntimeConfigAssignments } from "./secret-contract.js";
 
@@ -26,8 +26,8 @@ describe("googlechat secret contract", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
-    const resolvedConfig: OpenClawConfig = structuredClone(sourceConfig);
+    } satisfies CarapaceConfig;
+    const resolvedConfig: CarapaceConfig = structuredClone(sourceConfig);
     const context = createResolverContext({
       sourceConfig,
       env: {

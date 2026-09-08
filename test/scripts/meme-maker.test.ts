@@ -20,9 +20,9 @@ const template = JSON.parse(
 };
 
 function renderFixture(format: "svg" | "png", isolated = false) {
-  const root = createTempDir("openclaw-meme-maker-");
+  const root = createTempDir("carapace-meme-maker-");
   const cache = path.join(root, "cache");
-  const imageDir = path.join(cache, "openclaw/meme-maker");
+  const imageDir = path.join(cache, "carapace/meme-maker");
   fs.mkdirSync(imageDir, { recursive: true });
   const image = createSolidPngBuffer(32, 24, { r: 24, g: 160, b: 96 });
   fs.writeFileSync(path.join(imageDir, `${template.id}-${template.imgflipId}.png`), image);
@@ -70,7 +70,7 @@ describe("meme-maker local rendering", () => {
     expect(fs.existsSync(out)).toBe(false);
   });
 
-  it.runIf(process.env.OPENCLAW_LIVE_TEST === "1")(
+  it.runIf(process.env.CARAPACE_LIVE_TEST === "1")(
     "renders a PNG at the template dimensions without Sharp",
     async () => {
       const { out, result } = renderFixture("png");

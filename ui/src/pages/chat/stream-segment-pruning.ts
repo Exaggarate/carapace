@@ -1,8 +1,8 @@
 import {
   readAssistantStreamSegmentIdentity,
   readSessionMessageIdentity,
-} from "@openclaw/gateway-client/browser";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/gateway-client/browser";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   accumulatedStreamText,
   advanceAccumulatedStreamText,

@@ -28,7 +28,7 @@ describe("resolveToCwd", () => {
   });
 
   it("keeps lexical backend paths independent of local literal @ names", async () => {
-    const tempCwd = tempDirs.make("openclaw-at-path-");
+    const tempCwd = tempDirs.make("carapace-at-path-");
     await fs.writeFile(path.join(tempCwd, "@literal.txt"), "literal", "utf8");
 
     expect(resolveLocalPathToCwd("@literal.txt", tempCwd)).toBe(path.join(tempCwd, "@literal.txt"));

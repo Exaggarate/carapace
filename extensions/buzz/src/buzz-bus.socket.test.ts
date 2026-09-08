@@ -5,13 +5,13 @@ import path from "node:path";
 import {
   createPluginRuntimeMock,
   createStartAccountContext,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { startBuzzBus, type BuzzBus } from "./buzz-bus.js";
 import { createBuzzRelayFixture } from "./buzz-relay.test-harness.js";
@@ -22,9 +22,9 @@ import { resolveBuzzAccount } from "./types.js";
 
 let stateDir: string;
 beforeEach(() => {
-  // openclaw-temp-dir: allow extension tests cannot import root test helpers.
-  stateDir = mkdtempSync(path.join(tmpdir(), "openclaw-buzz-socket-"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  // carapace-temp-dir: allow extension tests cannot import root test helpers.
+  stateDir = mkdtempSync(path.join(tmpdir(), "carapace-buzz-socket-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 });
 
 it("delivers live messages on the room-scoped roster subscription", async () => {
@@ -171,7 +171,7 @@ it("finishes an admitted room turn after its sender is removed", async () => {
         groups: { [fixture.roomId]: { requireMention: false } },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const account = resolveBuzzAccount({ cfg });
   vi.mocked(runtime.channel.inbound.dispatch).mockImplementation(async (params) => {
     dispatched.resolve();
@@ -321,7 +321,7 @@ it("recovers the Gateway account after silent presence without replaying pre-act
         groups: { [fixture.roomId]: { requireMention: false } },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const account = resolveBuzzAccount({ cfg });
   const abort = new AbortController();
   const states: string[] = [];

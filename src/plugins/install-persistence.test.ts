@@ -18,7 +18,7 @@ import {
   writePersistedInstalledPluginIndexInstallRecordsWithLeaseMock,
   applyPluginUninstallDirectoryRemovalMock,
 } from "../cli/plugins-cli-test-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { ConfigWriteOptions } from "../config/io.js";
 import { hasRetainedManagedNpmInstallMarker } from "./managed-npm-retention.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
@@ -41,8 +41,8 @@ function expectRuntimeLogIncludes(fragment: string) {
 
 const installWriteOptions = {
   assertConfigPathForWrite: () => {},
-  expectedConfigPath: "/tmp/openclaw.json",
-  ownedConfigPathForWrite: "/tmp/openclaw.json",
+  expectedConfigPath: "/tmp/carapace.json",
+  ownedConfigPathForWrite: "/tmp/carapace.json",
 };
 
 describe("persistPluginInstall", () => {
@@ -58,7 +58,7 @@ describe("persistPluginInstall", () => {
       const expired = new Error("approved operation owner expired");
       let ownerActive = phase === "at config publication";
       replaceConfigFileMock.mockImplementationOnce(async (...args: unknown[]) => {
-        const params = args[0] as { nextConfig: OpenClawConfig; writeOptions: ConfigWriteOptions };
+        const params = args[0] as { nextConfig: CarapaceConfig; writeOptions: ConfigWriteOptions };
         await Promise.resolve();
         ownerActive = false;
         await params.writeOptions.beforeCommit?.();
@@ -92,13 +92,13 @@ describe("persistPluginInstall", () => {
 
     expect(
       selectInstallMutationWriteOptions({
-        expectedConfigPath: "/tmp/openclaw.json",
-        ownedConfigPathForWrite: "/tmp/openclaw.json",
+        expectedConfigPath: "/tmp/carapace.json",
+        ownedConfigPathForWrite: "/tmp/carapace.json",
       }),
     ).toMatchObject({
       auditOrigin: "plugin-install",
-      expectedConfigPath: "/tmp/openclaw.json",
-      ownedConfigPathForWrite: "/tmp/openclaw.json",
+      expectedConfigPath: "/tmp/carapace.json",
+      ownedConfigPathForWrite: "/tmp/carapace.json",
     });
   });
 
@@ -108,7 +108,7 @@ describe("persistPluginInstall", () => {
       plugins: {
         allow: ["memory-core"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         allow: ["memory-core", "alpha"],
@@ -116,9 +116,9 @@ describe("persistPluginInstall", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockImplementation((...args: unknown[]) => {
-      const [cfg, pluginId] = args as [OpenClawConfig, string];
+      const [cfg, pluginId] = args as [CarapaceConfig, string];
       expect(pluginId).toBe("alpha");
       expect(cfg.plugins?.allow).toEqual(["memory-core", "alpha"]);
       return { config: enabledConfig, enabled: true };
@@ -130,8 +130,8 @@ describe("persistPluginInstall", () => {
         baseHash: "config-1",
         writeOptions: {
           assertConfigPathForWrite: installWriteOptions.assertConfigPathForWrite,
-          expectedConfigPath: "/tmp/openclaw.json",
-          ownedConfigPathForWrite: "/tmp/openclaw.json",
+          expectedConfigPath: "/tmp/carapace.json",
+          ownedConfigPathForWrite: "/tmp/carapace.json",
           includeFileHashesForWrite: { "/tmp/plugins.json5": "include-1" },
           includeFileTargetsForWrite: { "/tmp/plugins.json5": "/tmp/plugins.json5" },
         },
@@ -161,8 +161,8 @@ describe("persistPluginInstall", () => {
       baseHash: "config-1",
       writeOptions: {
         assertConfigPathForWrite: installWriteOptions.assertConfigPathForWrite,
-        expectedConfigPath: "/tmp/openclaw.json",
-        ownedConfigPathForWrite: "/tmp/openclaw.json",
+        expectedConfigPath: "/tmp/carapace.json",
+        ownedConfigPathForWrite: "/tmp/carapace.json",
         includeFileHashesForWrite: { "/tmp/plugins.json5": "include-1" },
         includeFileTargetsForWrite: { "/tmp/plugins.json5": "/tmp/plugins.json5" },
         afterWrite: { mode: "restart", reason: "plugin source changed" },
@@ -190,14 +190,14 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     clearPluginRegistryLoadCacheMock.mockImplementation(() => {
       throw new Error("cache unavailable");
@@ -228,25 +228,25 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           codex: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     setInstalledPluginIndexInstallRecords({
       codex: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/codex",
-        installPath: "/tmp/openclaw/extensions/codex",
+        spec: "clawhub:@carapace/codex",
+        installPath: "/tmp/carapace/extensions/codex",
       },
     });
     planPluginUninstallMock.mockReturnValueOnce({
       ok: true,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       pluginId: "codex",
       actions: {
         entry: false,
@@ -260,7 +260,7 @@ describe("persistPluginInstall", () => {
         directory: false,
       },
       directoryRemoval: {
-        target: "/tmp/openclaw/extensions/codex",
+        target: "/tmp/carapace/extensions/codex",
       },
     });
     applyPluginUninstallDirectoryRemovalMock.mockResolvedValueOnce({
@@ -277,8 +277,8 @@ describe("persistPluginInstall", () => {
       pluginId: "codex",
       install: {
         source: "npm",
-        spec: "@openclaw/codex",
-        installPath: "/tmp/openclaw/npm/node_modules/@openclaw/codex",
+        spec: "@carapace/codex",
+        installPath: "/tmp/carapace/npm/node_modules/@carapace/codex",
       },
     });
 
@@ -289,8 +289,8 @@ describe("persistPluginInstall", () => {
             installs: {
               codex: {
                 source: "clawhub",
-                spec: "clawhub:@openclaw/codex",
-                installPath: "/tmp/openclaw/extensions/codex",
+                spec: "clawhub:@carapace/codex",
+                installPath: "/tmp/carapace/extensions/codex",
               },
             },
           },
@@ -300,7 +300,7 @@ describe("persistPluginInstall", () => {
       }),
     );
     expect(applyPluginUninstallDirectoryRemovalMock).toHaveBeenCalledWith({
-      target: "/tmp/openclaw/extensions/codex",
+      target: "/tmp/carapace/extensions/codex",
     });
     const cleanupOrder =
       applyPluginUninstallDirectoryRemovalMock.mock.invocationCallOrder[0] ??
@@ -308,7 +308,7 @@ describe("persistPluginInstall", () => {
     const refreshOrder = refreshPluginRegistryMock.mock.invocationCallOrder[0] ?? 0;
     expect(cleanupOrder).toBeLessThan(refreshOrder);
     expect(pluginsCliRuntimeLogs.join("\n")).toContain(
-      "Removed previous plugin install directory: /tmp/openclaw/extensions/codex",
+      "Removed previous plugin install directory: /tmp/carapace/extensions/codex",
     );
   });
 
@@ -318,20 +318,20 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           codex: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     setInstalledPluginIndexInstallRecords({
       codex: {
         source: "npm",
-        spec: "@openclaw/codex",
-        installPath: "/tmp/openclaw/npm/node_modules/@openclaw/codex",
+        spec: "@carapace/codex",
+        installPath: "/tmp/carapace/npm/node_modules/@carapace/codex",
       },
     });
 
@@ -344,8 +344,8 @@ describe("persistPluginInstall", () => {
       pluginId: "codex",
       install: {
         source: "npm",
-        spec: "@openclaw/codex@latest",
-        installPath: "/tmp/openclaw/npm/node_modules/@openclaw/codex",
+        spec: "@carapace/codex@latest",
+        installPath: "/tmp/carapace/npm/node_modules/@carapace/codex",
       },
     });
 
@@ -359,21 +359,21 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           codex: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-persist-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-persist-"));
     const previousProjectRoot = path.join(tempRoot, "npm", "projects", "codex-v1");
     const previousInstallPath = path.join(
       previousProjectRoot,
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
     );
     const nextInstallPath = path.join(
@@ -382,20 +382,20 @@ describe("persistPluginInstall", () => {
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "codex",
     );
     fs.mkdirSync(previousInstallPath, { recursive: true });
     setInstalledPluginIndexInstallRecords({
       codex: {
         source: "npm",
-        spec: "@openclaw/codex@1.0.0",
+        spec: "@carapace/codex@1.0.0",
         installPath: previousInstallPath,
       },
     });
     planPluginUninstallMock.mockReturnValueOnce({
       ok: true,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       pluginId: "codex",
       actions: {
         entry: false,
@@ -413,7 +413,7 @@ describe("persistPluginInstall", () => {
         cleanup: {
           kind: "npm",
           npmRoot: previousProjectRoot,
-          packageName: "@openclaw/codex",
+          packageName: "@carapace/codex",
           rootKind: "isolated-project",
         },
       },
@@ -429,7 +429,7 @@ describe("persistPluginInstall", () => {
         pluginId: "codex",
         install: {
           source: "npm",
-          spec: "@openclaw/codex@2.0.0",
+          spec: "@carapace/codex@2.0.0",
           installPath: nextInstallPath,
         },
       });
@@ -441,7 +441,7 @@ describe("persistPluginInstall", () => {
               installs: {
                 codex: {
                   source: "npm",
-                  spec: "@openclaw/codex@1.0.0",
+                  spec: "@carapace/codex@1.0.0",
                   installPath: previousInstallPath,
                 },
               },
@@ -464,21 +464,21 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           discord: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [
         {
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw-upstream/extensions/discord/index.ts",
+          source: "/tmp/carapace-upstream/extensions/discord/index.ts",
           status: "error",
         },
       ],
@@ -494,8 +494,8 @@ describe("persistPluginInstall", () => {
       pluginId: "discord",
       install: {
         source: "npm",
-        spec: "@openclaw/discord",
-        installPath: "/tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+        spec: "@carapace/discord",
+        installPath: "/tmp/carapace/npm/node_modules/@carapace/discord/index.ts",
       },
     });
 
@@ -509,12 +509,12 @@ describe("persistPluginInstall", () => {
       'Warning: installed plugin "discord" is not the active source',
     );
     expect(pluginsCliRuntimeLogs.join("\n")).toContain(
-      "active config source: /tmp/openclaw-upstream/extensions/discord/index.ts",
+      "active config source: /tmp/carapace-upstream/extensions/discord/index.ts",
     );
     expect(pluginsCliRuntimeLogs.join("\n")).toContain(
-      "installed npm source: /tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+      "installed npm source: /tmp/carapace/npm/node_modules/@carapace/discord/index.ts",
     );
-    expect(pluginsCliRuntimeLogs.join("\n")).toContain("openclaw plugins doctor");
+    expect(pluginsCliRuntimeLogs.join("\n")).toContain("carapace plugins doctor");
   });
 
   it("does not warn when the config-selected source is inside the npm install path", async () => {
@@ -523,21 +523,21 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           discord: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [
         {
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw/npm/node_modules/@openclaw/discord/dist/index.js",
+          source: "/tmp/carapace/npm/node_modules/@carapace/discord/dist/index.js",
           status: "loaded",
         },
       ],
@@ -553,8 +553,8 @@ describe("persistPluginInstall", () => {
       pluginId: "discord",
       install: {
         source: "npm",
-        spec: "@openclaw/discord",
-        installPath: "/tmp/openclaw/npm/node_modules/@openclaw/discord",
+        spec: "@carapace/discord",
+        installPath: "/tmp/carapace/npm/node_modules/@carapace/discord",
       },
     });
 
@@ -567,14 +567,14 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     refreshPluginRegistryMock.mockRejectedValueOnce(new Error("registry unavailable"));
 
@@ -604,14 +604,14 @@ describe("persistPluginInstall", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
 
     const next = await persistPluginInstall({

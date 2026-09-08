@@ -1,5 +1,5 @@
 // Discord helper module supports secret config contract behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
 import {
   collectNestedChannelFieldAssignments,
   collectSimpleChannelFieldAssignments,
@@ -11,8 +11,8 @@ import {
   type ResolverContext,
   type SecretDefaults,
   type SecretTargetRegistryEntry,
-} from "openclaw/plugin-sdk/channel-secret-basic-runtime";
-import { collectNestedChannelTtsAssignments } from "openclaw/plugin-sdk/channel-secret-tts-runtime";
+} from "carapace/plugin-sdk/channel-secret-basic-runtime";
+import { collectNestedChannelTtsAssignments } from "carapace/plugin-sdk/channel-secret-tts-runtime";
 
 function createVoiceProviderSecretTarget(params: {
   providerPath: "realtime" | "tts" | "tts.personas.*";
@@ -23,7 +23,7 @@ function createVoiceProviderSecretTarget(params: {
   return {
     id: path,
     targetType: path,
-    configFile: "openclaw.json",
+    configFile: "carapace.json",
     pathPattern: path,
     secretShape: "secret_input",
     expectedResolvedValue: "string",
@@ -46,7 +46,7 @@ export const secretTargetRegistryEntries: SecretTargetRegistryEntry[] = [
   {
     id: "channels.discord.accounts.*.pluralkit.token",
     targetType: "channels.discord.accounts.*.pluralkit.token",
-    configFile: "openclaw.json",
+    configFile: "carapace.json",
     pathPattern: "channels.discord.accounts.*.pluralkit.token",
     secretShape: "secret_input",
     expectedResolvedValue: "string",
@@ -57,7 +57,7 @@ export const secretTargetRegistryEntries: SecretTargetRegistryEntry[] = [
   {
     id: "channels.discord.accounts.*.token",
     targetType: "channels.discord.accounts.*.token",
-    configFile: "openclaw.json",
+    configFile: "carapace.json",
     pathPattern: "channels.discord.accounts.*.token",
     secretShape: "secret_input",
     expectedResolvedValue: "string",
@@ -71,7 +71,7 @@ export const secretTargetRegistryEntries: SecretTargetRegistryEntry[] = [
   {
     id: "channels.discord.pluralkit.token",
     targetType: "channels.discord.pluralkit.token",
-    configFile: "openclaw.json",
+    configFile: "carapace.json",
     pathPattern: "channels.discord.pluralkit.token",
     secretShape: "secret_input",
     expectedResolvedValue: "string",
@@ -82,7 +82,7 @@ export const secretTargetRegistryEntries: SecretTargetRegistryEntry[] = [
   {
     id: "channels.discord.token",
     targetType: "channels.discord.token",
-    configFile: "openclaw.json",
+    configFile: "carapace.json",
     pathPattern: "channels.discord.token",
     secretShape: "secret_input",
     expectedResolvedValue: "string",

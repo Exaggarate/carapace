@@ -1,8 +1,8 @@
-// Implements `openclaw channels capabilities` account capability/probe reporting.
+// Implements `carapace channels capabilities` account capability/probe reporting.
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { resolveChannelDefaultAccountId } from "../../channels/plugins/helpers.js";
 import {
@@ -22,7 +22,7 @@ import { getChannelsCommandSecretTargetIds } from "../../cli/command-secret-targ
 import { formatUnknownChannelMessage } from "../../cli/error-format.js";
 import { ExpectedCliError } from "../../cli/failure-output.js";
 import { parseTimeoutMsWithFallback } from "../../cli/parse-timeout.js";
-import { getRuntimeConfig, type OpenClawConfig } from "../../config/config.js";
+import { getRuntimeConfig, type CarapaceConfig } from "../../config/config.js";
 import { danger } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { defaultRuntime, type RuntimeEnv, writeRuntimeJson } from "../../runtime.js";
@@ -180,7 +180,7 @@ function renderDisplayLine(line: ChannelCapabilitiesDisplayLine) {
 
 async function resolveChannelReports(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs: number;
   accountOverride?: string;
   target?: string;
@@ -263,7 +263,7 @@ async function resolveChannelReports(params: {
   return reports;
 }
 
-async function resolveCapabilitiesRuntimeConfig(config: OpenClawConfig, runtime: RuntimeEnv) {
+async function resolveCapabilitiesRuntimeConfig(config: CarapaceConfig, runtime: RuntimeEnv) {
   return (
     await resolveCommandConfigWithSecrets({
       config,
@@ -297,7 +297,7 @@ export async function channelsCapabilitiesCommand(
 
   if ((!rawChannel || rawChannel === "all") && (opts.account || rawTarget)) {
     const option = opts.account ? "--account" : "--target";
-    const message = `${option} requires a specific --channel. Run ${formatCliCommand("openclaw channels list")} to choose one.`;
+    const message = `${option} requires a specific --channel. Run ${formatCliCommand("carapace channels list")} to choose one.`;
     throw new ExpectedCliError({ message, humanOutput: danger(message), machineOutput: message });
   }
 
@@ -339,7 +339,7 @@ export async function channelsCapabilitiesCommand(
       runtime.log(
         theme.muted(
           `No configured channel capabilities found. Run ${formatCliCommand(
-            "openclaw channels list --all",
+            "carapace channels list --all",
           )} to see available channels.`,
         ),
       );

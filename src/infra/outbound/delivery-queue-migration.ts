@@ -1,7 +1,7 @@
 // One-time pre-D4 queue migration. Normal recovery reads only prepared rows.
 import { randomUUID } from "node:crypto";
 import { createRenderedMessageBatchPlan } from "../../channels/message/rendered-batch.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveOutboundMediaMaxBytes } from "../../media/configured-max-bytes.js";
 import { getOrCreatePromise } from "../../shared/lazy-promise.js";
 import {
@@ -76,7 +76,7 @@ function hasActiveLegacyPreparationLease(
   );
 }
 
-function buildLegacyPreparationParams(entry: LegacyQueuedDelivery, cfg: OpenClawConfig) {
+function buildLegacyPreparationParams(entry: LegacyQueuedDelivery, cfg: CarapaceConfig) {
   const reply = normalizeOutboundReplyFacts({
     reply: entry.reply,
     replyToId: entry.replyToId,
@@ -113,7 +113,7 @@ function buildLegacyPreparationParams(entry: LegacyQueuedDelivery, cfg: OpenClaw
 async function prepareLegacyEntryCheckpoint(params: {
   entry: LegacyQueuedDeliveryPreparation;
   ownerId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
 }): Promise<"checkpointed" | "skipped"> {
@@ -373,7 +373,7 @@ function reclaimLegacyPreparation(params: {
 
 async function finalizePreparedMigration(params: {
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
 }): Promise<"moved" | "skipped"> {
@@ -476,7 +476,7 @@ const activeLegacyMigrations = new Map<string, Promise<LegacyOutboundDeliveryMig
 
 /** Migrates every unchanged pre-D4 pending row before canonical recovery scans. */
 export async function migrateLegacyPendingOutboundDeliveries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
 }): Promise<LegacyOutboundDeliveryMigrationResult> {
@@ -490,7 +490,7 @@ export async function migrateLegacyPendingOutboundDeliveries(params: {
 }
 
 async function migrateLegacyPendingOutboundDeliveriesOwned(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
 }): Promise<LegacyOutboundDeliveryMigrationResult> {

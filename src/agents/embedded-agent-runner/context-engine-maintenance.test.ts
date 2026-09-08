@@ -1,7 +1,7 @@
 // Coverage for deferred context-engine maintenance and transcript rewrite hooks.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerLegacyContextEngine } from "../../context-engine/legacy.registration.js";
 import {
@@ -42,7 +42,7 @@ const resolveRuntimeTranscriptReadTargetMock = vi.fn(async (scope: Record<string
   agentId: scope.agentId ?? "main",
   sessionId: scope.sessionId,
   sessionKey: scope.sessionKey,
-  storePath: scope.storePath ?? "/tmp/default-openclaw.sqlite",
+  storePath: scope.storePath ?? "/tmp/default-carapace.sqlite",
 }));
 let createDeferredTurnMaintenanceAbortSignal: typeof import("./context-engine-maintenance.test-support.js").createDeferredTurnMaintenanceAbortSignal;
 let resetDeferredTurnMaintenanceStateForTest: typeof import("./context-engine-maintenance.test-support.js").resetDeferredTurnMaintenanceStateForTest;
@@ -212,7 +212,7 @@ describe("runContextEngineMaintenance", () => {
       agentId: "main",
       sessionId: "session-1",
       sessionKey: "agent:main:session-1",
-      storePath: "/tmp/state/openclaw.sqlite",
+      storePath: "/tmp/state/carapace.sqlite",
     };
     const maintain = vi.fn(async (_params?: unknown) => ({
       changed: false,
@@ -386,7 +386,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("retires a deferred worker's retained rewrite capability after disposal and settlement", async () => {
-    await withStateDirEnv("openclaw-retired-maintenance-rewrite-", async () => {
+    await withStateDirEnv("carapace-retired-maintenance-rewrite-", async () => {
       resetCommandQueueStateForTest();
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
@@ -459,7 +459,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("defers turn maintenance to a hidden background task when enabled", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -587,7 +587,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("coalesces repeated requests into one active run plus one follow-up run for the same session", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -653,7 +653,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("queues a follow-up maintenance run when a new turn finishes during an active deferred run", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-rerun-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-rerun-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -756,7 +756,7 @@ describe("runContextEngineMaintenance", () => {
   ])(
     "settles abort-waiting deferred maintenance during $name without rerun",
     async ({ trigger }) => {
-      await withStateDirEnv("openclaw-turn-maintenance-abort-waiting-", async () => {
+      await withStateDirEnv("carapace-turn-maintenance-abort-waiting-", async () => {
         resetCommandQueueStateForTest();
         resetTaskRegistryForTests({ persist: false });
         resetTaskFlowRegistryForTests({ persist: false });
@@ -935,7 +935,7 @@ describe("runContextEngineMaintenance", () => {
       trigger: () => markGatewayDraining(),
     },
   ])("does not start queued deferred maintenance after $name", async ({ trigger }) => {
-    await withStateDirEnv("openclaw-turn-maintenance-queued-abort-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-queued-abort-", async () => {
       resetCommandQueueStateForTest();
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
@@ -1017,7 +1017,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("disposes owned deferred engines only after their maintenance run finishes", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-dispose-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-dispose-", async () => {
       resetCommandQueueStateForTest();
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
@@ -1131,7 +1131,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("reports deferred maintenance schedule failure while gateway is draining", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-draining-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-draining-", async () => {
       resetCommandQueueStateForTest();
       resetTaskRegistryForTests({ persist: false });
       resetTaskFlowRegistryForTests({ persist: false });
@@ -1173,7 +1173,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("rejects coalesced deferred maintenance requests while gateway is draining", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-draining-coalesced-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-draining-coalesced-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1242,7 +1242,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("replaces legacy active maintenance tasks that are missing a runId", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1302,7 +1302,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("cancels the queued task when deferred scheduling is rejected", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       const scheduleError = new Error("gateway draining");
       const enqueueSpy = vi
@@ -1346,7 +1346,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("starts deferred maintenance while the foreground session lane stays busy", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1424,7 +1424,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("waits at the same-session read checkpoint before deferred maintenance rewrites", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1515,7 +1515,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("keeps fast deferred maintenance silent for the user", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1572,7 +1572,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("surfaces long-running deferred maintenance and completion via task updates", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       try {
         resetCommandQueueStateForTest();
@@ -1637,7 +1637,7 @@ describe("runContextEngineMaintenance", () => {
   });
 
   it("surfaces unrelated maintenance failures during shutdown", async () => {
-    await withStateDirEnv("openclaw-turn-maintenance-", async () => {
+    await withStateDirEnv("carapace-turn-maintenance-", async () => {
       vi.useFakeTimers();
       const keepProcessAlive = () => {};
       process.on("SIGTERM", keepProcessAlive);

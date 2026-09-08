@@ -1,7 +1,7 @@
 // Config gateway methods: validation, redaction, secrets, reload planning.
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
   ErrorCodes,
   errorShape,
@@ -36,7 +36,7 @@ import { redactConfigObject, restoreRedactedValues } from "../../config/redact-s
 import { loadGatewayRuntimeConfigSchema } from "../../config/runtime-schema.js";
 import { lookupConfigSchema, type ConfigSchemaResponse } from "../../config/schema.js";
 import { projectRuntimeChangesOntoSource } from "../../config/source-value-projection.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "../../config/types.openclaw.js";
+import type { ConfigValidationIssue, CarapaceConfig } from "../../config/types.carapace.js";
 import {
   validateConfigObjectRawWithPlugins,
   validateConfigObjectWithPlugins,
@@ -354,7 +354,7 @@ function collectDestructiveIdKeyedArrayEntryPatchPaths(params: {
 }
 
 function rejectDestructiveArrayPatchWithoutIntent(params: {
-  currentConfig: OpenClawConfig;
+  currentConfig: CarapaceConfig;
   mergedConfig: unknown;
   patch: unknown;
   replacePaths: Set<string>;
@@ -474,7 +474,7 @@ function parseValidateConfigFromRawOrRespond(
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>,
   respond: RespondFn,
   modelIdNormalizationPolicies?: Parameters<typeof normalizeSubmittedConfigModelRefs>[1],
-): { config: OpenClawConfig; writeConfig: OpenClawConfig; schema: ConfigSchemaResponse } | null {
+): { config: CarapaceConfig; writeConfig: CarapaceConfig; schema: ConfigSchemaResponse } | null {
   const rawValue = parseRawConfigOrRespond(params, requestName, respond);
   if (!rawValue) {
     return null;
@@ -516,7 +516,7 @@ function parseValidateConfigFromRawOrRespond(
   };
 }
 
-function listExplicitAgentRosterIds(config: OpenClawConfig): string[] {
+function listExplicitAgentRosterIds(config: CarapaceConfig): string[] {
   const roster = readAgentRosterProperty(config);
   if (roster?.kind === "entries" && isRecord(roster.value)) {
     return Object.keys(roster.value);
@@ -530,8 +530,8 @@ function listExplicitAgentRosterIds(config: OpenClawConfig): string[] {
 }
 
 function rejectDroppedAgentRosterEntries(params: {
-  currentConfig: OpenClawConfig;
-  submittedConfig: OpenClawConfig;
+  currentConfig: CarapaceConfig;
+  submittedConfig: CarapaceConfig;
   respond: RespondFn;
 }): boolean {
   const submittedIds = new Set(
@@ -549,7 +549,7 @@ function rejectDroppedAgentRosterEntries(params: {
     errorShape(
       ErrorCodes.INVALID_REQUEST,
       `config.set would remove existing agent entries: ${droppedIds.join(", ")}. ` +
-        "Use the agents.delete RPC or `openclaw agents delete <id>` for intentional deletion.",
+        "Use the agents.delete RPC or `carapace agents delete <id>` for intentional deletion.",
     ),
   );
   return true;
@@ -560,9 +560,9 @@ function validateSubmittedConfigOrRespond(params: {
   candidate: unknown;
   modelIdNormalizationPolicies: Parameters<typeof normalizeSubmittedConfigModelRefs>[1];
   respond: RespondFn;
-}): { validationCandidate: OpenClawConfig; config: OpenClawConfig } | null {
+}): { validationCandidate: CarapaceConfig; config: CarapaceConfig } | null {
   const validationCandidate = normalizeSubmittedConfigModelRefs(
-    params.candidate as OpenClawConfig,
+    params.candidate as CarapaceConfig,
     params.modelIdNormalizationPolicies,
   );
   const respondInvalid = (issues: ReadonlyArray<ConfigValidationIssue>) => {
@@ -584,7 +584,7 @@ function validateSubmittedConfigOrRespond(params: {
     respondInvalid(validated.issues);
     return null;
   }
-  return { validationCandidate: validationCandidate as OpenClawConfig, config: validated.config };
+  return { validationCandidate: validationCandidate as CarapaceConfig, config: validated.config };
 }
 
 function summarizeConfigValidationIssues(issues: ReadonlyArray<ConfigValidationIssue>): string {
@@ -602,7 +602,7 @@ function summarizeConfigValidationIssues(issues: ReadonlyArray<ConfigValidationI
 }
 
 async function ensureResolvableSecretRefsOrRespond(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   respond: RespondFn;
 }): Promise<PreparedSecretsRuntimeSnapshot | null> {
   try {
@@ -662,8 +662,8 @@ async function respondWithConfigRestartWrite(params: {
   mode: ConfigRestartWriteMode;
   writeResult: ConfigWriteCommitResult;
   changedPaths: string[];
-  previousConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  previousConfig: CarapaceConfig;
+  nextConfig: CarapaceConfig;
   actor: ReturnType<typeof resolveControlPlaneActor>;
   context: GatewayRequestContext;
   respond: RespondFn;
@@ -721,9 +721,9 @@ async function respondWithConfigRestartWrite(params: {
 }
 
 function shouldDisconnectSharedAuthClientsForConfigWrite(params: {
-  prevConfig: OpenClawConfig;
-  prevSourceConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  prevConfig: CarapaceConfig;
+  prevSourceConfig: CarapaceConfig;
+  nextConfig: CarapaceConfig;
   preparedSecretsSnapshot: PreparedSecretsRuntimeSnapshot;
 }): boolean {
   return (
@@ -738,7 +738,7 @@ function shouldDisconnectSharedAuthClientsForConfigWrite(params: {
 
 function respondConfigPatchNoop(params: {
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   uiHints: ConfigRedactionHints;
   actor: ReturnType<typeof resolveControlPlaneActor>;
   context: GatewayRequestContext | undefined;
@@ -984,7 +984,7 @@ export const configHandlers: GatewayRequestHandlers = {
         undefined,
         errorShape(
           ErrorCodes.INVALID_REQUEST,
-          `${summarizeConfigValidationIssues(snapshot.issues)}; fix (openclaw doctor) before patching`,
+          `${summarizeConfigValidationIssues(snapshot.issues)}; fix (carapace doctor) before patching`,
           { details: { issues: snapshot.issues } },
         ),
       );
@@ -1020,7 +1020,7 @@ export const configHandlers: GatewayRequestHandlers = {
       return;
     }
     const normalizedPatch = normalizeSubmittedConfigModelRefs(
-      parsedRes.parsed as OpenClawConfig,
+      parsedRes.parsed as CarapaceConfig,
       modelIdNormalizationPolicies,
     );
     if (hashlessPatch && !hasHashlessPatchLwwStructure(normalizedPatch)) {

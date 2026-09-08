@@ -1,17 +1,17 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { setCanonicalSqliteSessionMainKey } from "../../config/sessions/session-canonical-key.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import { deleteTaskRecordById } from "../../tasks/runtime-internal.js";
 import { reloadTaskRegistryFromStore } from "../../tasks/task-registry.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { seedTaskRegistryRowsForTests } from "../../test-utils/task-registry-sqlite.js";
 import { readGatewayAccessRevision } from "../gateway-access-revision.js";
 import { rolePolicyConfig } from "../session-sharing.test-utils.js";
@@ -23,9 +23,9 @@ import {
   runTaskHandler,
 } from "./tasks.test-helpers.js";
 
-let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ scenario: "minimal" });
+  state = await createCarapaceTestState({ scenario: "minimal" });
   resetTaskRegistryForTests({ persist: false });
 });
 afterEach(async () => {
@@ -48,7 +48,7 @@ describe("task page access snapshots", () => {
       if (mode === "main alias") {
         config.session = { mainKey: "cold-requester" };
         setCanonicalSqliteSessionMainKey(
-          openOpenClawAgentDatabase({ agentId: "main" }),
+          openCarapaceAgentDatabase({ agentId: "main" }),
           "cold-requester",
         );
       }
@@ -78,9 +78,9 @@ describe("task page access snapshots", () => {
       seedTaskRegistryRowsForTests(tasks);
       reloadTaskRegistryFromStore();
       if (!warm) {
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
-      const expectedHandles = listOpenClawAgentDatabasesForTest().length;
+      const expectedHandles = listCarapaceAgentDatabasesForTest().length;
       expect(expectedHandles > 0).toBe(warm);
       let materializedUnrelated = 0;
       const materialize = Object.fromEntries;
@@ -111,7 +111,7 @@ describe("task page access snapshots", () => {
         setImmediate(() =>
           resolve({
             parses: unrelatedParses,
-            handles: listOpenClawAgentDatabasesForTest().length,
+            handles: listCarapaceAgentDatabasesForTest().length,
           }),
         );
       });
@@ -131,7 +131,7 @@ describe("task page access snapshots", () => {
         if (!warm) {
           expect(slice.parses).toBeGreaterThan(0);
         }
-        expect(listOpenClawAgentDatabasesForTest()).toHaveLength(expectedHandles);
+        expect(listCarapaceAgentDatabasesForTest()).toHaveLength(expectedHandles);
         expect(materializedUnrelated).toBe(0);
         // Three synchronous slices plus fresh final authorization may each validate one cold store.
         expect(unrelatedParses).toBeLessThanOrEqual(unrelatedCount * 4);

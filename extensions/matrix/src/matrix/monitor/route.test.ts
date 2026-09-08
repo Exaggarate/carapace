@@ -6,7 +6,7 @@ import {
   registerSessionBindingAdapter,
   resolveAgentRoute,
   setActivePluginRegistry,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../../test-support/monitor-route-test-support.js";
 import { resolveMatrixInboundRoute } from "./route.js";
 
@@ -15,9 +15,9 @@ const baseCfg = {
   agents: {
     list: [{ id: "main" }, { id: "sender-agent" }, { id: "room-agent" }, { id: "acp-agent" }],
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
-type RouteBinding = NonNullable<OpenClawConfig["bindings"]>[number];
+type RouteBinding = NonNullable<CarapaceConfig["bindings"]>[number];
 type RoutePeer = NonNullable<RouteBinding["match"]["peer"]>;
 
 function matrixBinding(
@@ -44,13 +44,13 @@ function dmRoomPeer(id = "!dm:example.org"): RoutePeer {
   return { kind: "channel", id };
 }
 
-const threadCfg: OpenClawConfig = {
+const threadCfg: CarapaceConfig = {
   ...baseCfg,
   bindings: [matrixBinding("main")],
 };
 
 function resolveDmRoute(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: {
     dmSessionScope?: "per-user" | "per-room";
   } = {},
@@ -81,7 +81,7 @@ describe("resolveMatrixInboundRoute", () => {
         matrixBinding("room-agent", dmRoomPeer()),
         matrixBinding("sender-agent", senderPeer()),
       ],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 
@@ -95,7 +95,7 @@ describe("resolveMatrixInboundRoute", () => {
     const cfg = {
       ...baseCfg,
       bindings: [matrixBinding("acp-agent"), matrixBinding("room-agent", dmRoomPeer())],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 
@@ -109,7 +109,7 @@ describe("resolveMatrixInboundRoute", () => {
     const cfg = {
       ...baseCfg,
       bindings: [matrixBinding("sender-agent", senderPeer())],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg, {
       dmSessionScope: "per-room",
@@ -132,7 +132,7 @@ describe("resolveMatrixInboundRoute", () => {
           matrixBinding("room-agent", dmRoomPeer()),
           matrixBinding("acp-agent", dmRoomPeer(), "acp"),
         ],
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       const { route, configuredBinding } = resolveDmRoute(cfg, { dmSessionScope });
 
@@ -178,7 +178,7 @@ describe("resolveMatrixInboundRoute", () => {
           matrixBinding("sender-agent", senderPeer()),
           matrixBinding("room-agent", dmRoomPeer()),
         ],
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       const { route, configuredBinding, runtimeBindingId } = resolveDmRoute(cfg);
 
@@ -227,7 +227,7 @@ describe("resolveMatrixInboundRoute", () => {
     const cfg = {
       ...baseCfg,
       bindings: [matrixBinding("sender-agent", senderPeer())],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const { route, runtimeBindingId } = resolveDmRoute(cfg, { dmSessionScope: "per-room" });
 

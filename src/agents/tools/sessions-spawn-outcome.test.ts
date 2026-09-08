@@ -12,7 +12,7 @@ import {
   getRuntimeConfigSourceSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import { cleanupSessionStateForTest } from "../../test-utils/session-state-cleanup.js";
@@ -25,14 +25,14 @@ import { createSessionsSpawnTool } from "./sessions-spawn-tool.js";
 
 const report = "Seven blue boxes remain. Thursday delivery is confirmed.";
 const backendId = "spawn-effects-fixture";
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: { defaults: { subagents: { allowAgents: ["main"] } }, list: [{ id: "main" }] },
 };
 
-async function withSpawnConfig(cfg: OpenClawConfig, run: () => Promise<void>) {
+async function withSpawnConfig(cfg: CarapaceConfig, run: () => Promise<void>) {
   const previous = getRuntimeConfigSnapshot();
   const previousSource = getRuntimeConfigSourceSnapshot();
-  const env = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const env = captureEnv(["CARAPACE_STATE_DIR"]);
   registerAcpRuntimeBackend({
     id: backendId,
     runtime: {
@@ -49,7 +49,7 @@ async function withSpawnConfig(cfg: OpenClawConfig, run: () => Promise<void>) {
   try {
     await withTestDir({ prefix: "spawn-effects-" }, async (dir) => {
       const stateDir = await realpath(dir);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       setRuntimeConfigSnapshot(cfg);
       try {
         await run();

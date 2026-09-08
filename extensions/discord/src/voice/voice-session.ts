@@ -1,7 +1,7 @@
-import type { OpenClawConfig, DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { CarapaceConfig, DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import type { Client } from "../internal/discord.js";
 import type { VoicePlugin } from "../internal/voice.js";
 import { formatMention } from "../mentions.js";
@@ -76,11 +76,11 @@ function isRetryableVoiceJoinReadyError(error: unknown): boolean {
 }
 
 function resolveVoiceConnectionGroup(accountId: string): string {
-  return `openclaw:${accountId}`;
+  return `carapace:${accountId}`;
 }
 
 function resolveDiscordVoiceAgentRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   guildId: string;
   sessionChannelId: string;
@@ -133,7 +133,7 @@ export class DiscordVoiceSessions {
     private readonly params: {
       accountId: string;
       botUserId: () => string | undefined;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       client: Client;
       destroyed: () => boolean;
       getTranscripts: (entry: {

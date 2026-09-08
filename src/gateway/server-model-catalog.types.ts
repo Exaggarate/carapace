@@ -1,5 +1,5 @@
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../agents/model-catalog.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderThinkingRegistry } from "../plugins/provider-thinking.types.js";
 
 /** Catalog entries and policy come from the same completed prepared generation. */
@@ -13,5 +13,5 @@ export type GatewayModelCatalogSnapshot = ModelCatalogSnapshot & {
   agentDir: string;
   catalogComplete: boolean;
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };

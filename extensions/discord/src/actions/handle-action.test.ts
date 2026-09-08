@@ -1,5 +1,5 @@
 // Discord tests cover handle action plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   defaultActionOptions,

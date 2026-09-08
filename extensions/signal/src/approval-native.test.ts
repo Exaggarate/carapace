@@ -1,24 +1,24 @@
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 // Signal tests cover approval native plugin behavior.
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/approval-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   shouldSuppressLocalSignalExecApprovalPrompt,
   signalApprovalCapability,
 } from "./approval-native.js";
 
-type SignalConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["signal"]>;
+type SignalConfig = NonNullable<NonNullable<CarapaceConfig["channels"]>["signal"]>;
 
 function buildConfig(
   params: {
     signal?: Partial<SignalConfig>;
-    approvals?: OpenClawConfig["approvals"];
+    approvals?: CarapaceConfig["approvals"];
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     channels: {
       signal: {
@@ -27,7 +27,7 @@ function buildConfig(
       },
     },
     approvals: params.approvals,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function buildExecRequest(
@@ -72,7 +72,7 @@ function buildPluginRequest(
 }
 
 function nativeShouldHandle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   approvalKind: ChannelApprovalKind;
   request: ExecApprovalRequest | PluginApprovalRequest;
   accountId?: string | null;

@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import OSLog
 @preconcurrency import WatchConnectivity
 
@@ -20,7 +20,7 @@ func updateWatchSnapshotApplicationContext(_ payload: [String: Any], with sessio
 }
 
 final class WatchConnectivityTransport: NSObject, @unchecked Sendable {
-    private nonisolated static let logger = Logger(subsystem: "ai.openclawfoundation.app", category: "watch.messaging")
+    private nonisolated static let logger = Logger(subsystem: "ai.carapacefoundation.app", category: "watch.messaging")
 
     private let session: WCSession?
     private let activationGate = WatchSessionActivationGate()
@@ -223,7 +223,7 @@ final class WatchConnectivityTransport: NSObject, @unchecked Sendable {
     }
 
     private static func rejectInbound(_ error: any Error, acknowledgment: WatchMessageAcknowledgment?) {
-        let code = (error as? OpenClawWatchChatDeliveryError)?.code ?? "admission_unavailable"
+        let code = (error as? CarapaceWatchChatDeliveryError)?.code ?? "admission_unavailable"
         acknowledgment?.reject(reason: code)
         // Background userInfo has no reply channel; retain a local diagnostic without payload text.
         GatewayDiagnostics.log("watch messaging: inbound rejected code=\(code)")

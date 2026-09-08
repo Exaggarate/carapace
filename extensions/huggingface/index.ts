@@ -1,7 +1,7 @@
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import { applyHuggingfaceConfig, HUGGINGFACE_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildHuggingfaceProvider } from "./provider-catalog.js";
 
 const PROVIDER_ID = "huggingface";

@@ -14,9 +14,9 @@ describe("message CLI plugin cleanup", () => {
     { name: "failed text", fail: true, json: false, pending: false },
     { name: "stalled cleanup", fail: false, json: true, pending: true },
   ])("runs owned shutdown hooks after $name output", async ({ fail, json, pending }) => {
-    const root = tempDirs.make("openclaw-message-cleanup-");
+    const root = tempDirs.make("carapace-message-cleanup-");
     const pluginDir = path.join(root, "plugin");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const marker = path.join(root, "stopped.txt");
     const id = "message-cleanup-fixture";
     const meta = {
@@ -33,11 +33,11 @@ describe("message CLI plugin cleanup", () => {
         name: id,
         version: "1.0.0",
         type: "module",
-        openclaw: { extensions: ["./index.js"], setupEntry: "./index.js", channel: meta },
+        carapace: { extensions: ["./index.js"], setupEntry: "./index.js", channel: meta },
       }),
     );
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id,
         channels: [id],
@@ -102,10 +102,10 @@ export default { id: plugin.id, register(api) {
         HOME: root,
         USERPROFILE: root,
         NODE_DISABLE_COMPILE_CACHE: "1",
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         NO_COLOR: "1",
       },
     });

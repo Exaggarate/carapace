@@ -1,23 +1,23 @@
 // Root-owned integration may combine the public Slack plugin with the durable queue runtime.
 import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "carapace/plugin-sdk/channel-outbound";
 import {
   createEmptyPluginRegistry,
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   resetGlobalHookRunner,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { drainPendingDeliveries } from "openclaw/plugin-sdk/delivery-queue-runtime";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { drainPendingDeliveries } from "carapace/plugin-sdk/delivery-queue-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getDeliveryQueueEntryStatus } from "../src/infra/delivery-queue-sqlite.js";
 import { OUTBOUND_DELIVERY_QUEUE_NAME } from "../src/infra/outbound/delivery-queue-media-staging.js";
@@ -45,8 +45,8 @@ function readQueueTerminal(
   stateDir: string,
   intentId: string,
 ): { retryCount: number; status: string } | undefined {
-  const { db } = openOpenClawStateDatabase({
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+  const { db } = openCarapaceStateDatabase({
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   const row = db
     // sqlite-allow-raw: The proof reads one exact queue owner after terminalization.
@@ -106,8 +106,8 @@ async function startSlackPermanentRejectionLoopback(): Promise<SlackLoopback> {
 describe("Slack permanent rejections over real Web API transport", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetGlobalHookRunner();
     resetPluginRuntimeStateForTest();
     setActivePluginRegistry(createEmptyPluginRegistry());
@@ -120,12 +120,12 @@ describe("Slack permanent rejections over real Web API transport", () => {
       const { slackPlugin } = await import("../extensions/slack/api.js");
       const cfg = {
         channels: { slack: { botToken: "xoxb-loopback" } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       setActivePluginRegistry(
         createTestRegistry([{ pluginId: "slack", plugin: slackPlugin, source: "test" }]),
       );
 
-      await withStateDirEnv("openclaw-slack-permanent-loopback-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-slack-permanent-loopback-", async ({ stateDir }) => {
         try {
           const log = { info: vi.fn(), warn: vi.fn(), error: vi.fn() };
           for (const [index, code] of CLASSIFIED_CODES.entries()) {
@@ -187,8 +187,8 @@ describe("Slack permanent rejections over real Web API transport", () => {
             });
           }
 
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
           for (const code of CLASSIFIED_CODES) {
             expect(
               getDeliveryQueueEntryStatus(
@@ -223,8 +223,8 @@ describe("Slack permanent rejections over real Web API transport", () => {
             })}`,
           );
         } finally {
-          closeOpenClawAgentDatabasesForTest();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceAgentDatabasesForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       });
     } finally {

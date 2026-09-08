@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildCliMcpDelegationCapabilityBinding,
   buildCliMcpGrantContext,
@@ -20,14 +20,14 @@ function buildGrant(
     sourceReplyDeliveryMode: "message_tool_only",
     messageProvider: "telegram",
     currentChannelId: "telegram:chat123",
-    cliToolAvailability: { native: [], openClaw: ["message"] },
+    cliToolAvailability: { native: [], carapace: ["message"] },
     ...overrides,
     ...(delegationCapability ? buildCliMcpDelegationCapabilityBinding(delegationCapability) : {}),
   } as RunCliAgentParams;
 
   return buildCliMcpGrantContext({
     run,
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     requireExplicitMessageTarget: false,
     agentId: "main",
     modelProvider: "openai",
@@ -152,7 +152,7 @@ describe("buildCliMcpGrantContext source-reply authority", () => {
     },
     {
       label: "additional granted tools",
-      overrides: { cliToolAvailability: { native: [], openClaw: ["message", "read"] } },
+      overrides: { cliToolAvailability: { native: [], carapace: ["message", "read"] } },
     },
   ])("does not stamp source-only authority for $label", ({ overrides }) => {
     expect(buildGrant(overrides as Partial<RunCliAgentParams>).sourceReplyOnly).toBeUndefined();

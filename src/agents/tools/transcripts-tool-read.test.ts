@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { activeSessions } from "../../transcripts/capture.js";
 import type { TranscriptSourceProvider } from "../../transcripts/provider-types.js";
 import { TranscriptsStore, transcriptSessionSelector } from "../../transcripts/store.js";
@@ -57,14 +57,14 @@ function readThroughCatalog(params: Record<string, unknown>) {
 beforeEach(async () => {
   stateDir = tempDirs.make("transcripts-read-");
   store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   getProvider.mockReset();
   await store.writeSession(session);
 });
 afterEach(() => {
   activeSessions.clear();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("transcripts read actions", () => {
@@ -241,8 +241,8 @@ describe("transcripts read actions", () => {
         channelId: "discord",
         authorize: async () => {
           await store.appendUtteranceForSession(session, { text: "Written during authorization" });
-          const { db } = openOpenClawStateDatabase({
-            env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          const { db } = openCarapaceStateDatabase({
+            env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
           });
           // A pending SELECT would prevent the provider's committed write from checkpointing.
           db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
@@ -282,7 +282,7 @@ describe("transcripts read actions", () => {
     }
     expect(text.text.length).toBeLessThanOrEqual(12000);
     expect(text.text).toContain(
-      `[truncated; run openclaw transcripts show ${transcriptSessionSelector(session)} for the full notes]`,
+      `[truncated; run carapace transcripts show ${transcriptSessionSelector(session)} for the full notes]`,
     );
     await expect(
       readThroughCatalog({ action: "show", sessionId: "meeting" }),

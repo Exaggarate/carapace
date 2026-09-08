@@ -29,8 +29,8 @@ import { resolveLegacyOnboardAuthChoice } from "./auth-choice-legacy.js";
 
 function authChoiceManifestEnv(): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: "extensions",
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "0",
+    CARAPACE_BUNDLED_PLUGINS_DIR: "extensions",
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "0",
     VITEST: "1",
   } as NodeJS.ProcessEnv;
 }

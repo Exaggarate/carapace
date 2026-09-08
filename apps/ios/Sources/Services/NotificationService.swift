@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 /// Keeps notification failures Sendable across the system prompt and timeout tasks.
 struct NotificationCallError: Error {

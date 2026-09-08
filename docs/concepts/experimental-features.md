@@ -1,5 +1,5 @@
 ---
-summary: "What experimental flags mean in OpenClaw and which ones are currently documented"
+summary: "What experimental flags mean in Carapace and which ones are currently documented"
 title: "Experimental features"
 read_when:
   - You see an `.experimental` config key and want to know whether it is stable
@@ -22,9 +22,9 @@ Custom plugin UI flag below controls user-installed native browser code only.
 
 | Surface             | Key                                                                                           | Use it when                                                                                                                       | More                                                                                   |
 | ------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Local model runtime | `agents.defaults.experimental.localModelLean`, `agents.entries.*.experimental.localModelLean` | A smaller or stricter local backend chokes on OpenClaw's full default tool surface                                                | [Local Models](/gateway/local-models)                                                  |
-| Codex harness       | `plugins.entries.codex.config.appServer.experimental.sandboxExecServer`                       | You want native Codex app-server 0.143.0 or newer to target an OpenClaw sandbox-backed exec-server instead of disabling Code Mode | [Codex harness reference](/plugins/codex-harness-reference#sandboxed-native-execution) |
-| Code Mode           | `tools.codeMode.enabled`                                                                      | You want compact code-orchestrated access to a hidden OpenClaw tool catalog                                                       | [Code Mode](/tools/code-mode)                                                          |
+| Local model runtime | `agents.defaults.experimental.localModelLean`, `agents.entries.*.experimental.localModelLean` | A smaller or stricter local backend chokes on Carapace's full default tool surface                                                | [Local Models](/gateway/local-models)                                                  |
+| Codex harness       | `plugins.entries.codex.config.appServer.experimental.sandboxExecServer`                       | You want native Codex app-server 0.143.0 or newer to target an Carapace sandbox-backed exec-server instead of disabling Code Mode | [Codex harness reference](/plugins/codex-harness-reference#sandboxed-native-execution) |
+| Code Mode           | `tools.codeMode.enabled`                                                                      | You want compact code-orchestrated access to a hidden Carapace tool catalog                                                       | [Code Mode](/tools/code-mode)                                                          |
 | Cloud workers       | `cloudWorkers.desktop`                                                                        | You want to watch or control desktop-capable cloud worker environments from the Control UI                                        | [Cloud Worker Desktop](/gateway/cloud-workers#desktop-interactive)                     |
 | Custom plugin UI    | `gateway.controlUi.experimental.customPlugins`                                                | You want trusted user-installed plugins to add native Control UI views or replace built-in views                                  | [Feature plugins](/plugins/feature-plugins#enable-custom-plugin-ui)                    |
 | Swarm               | `tools.swarm.enabled`                                                                         | You want Code Mode scripts to orchestrate bounded groups of sub-agents in parallel                                                | [Swarm](/tools/swarm)                                                                  |
@@ -67,9 +67,9 @@ Lean mode is an explicit capability restriction. Local inference normally uses [
 
 `agents.defaults.experimental.localModelLean: true` removes optional tools before catalog construction: `browser`, `automations`, `message`, `image_generate`, `music_generate`, `video_generate`, `tts`, and `pdf`. These removed tools cannot be found through Tool Search. Explicitly allowed or delivery-required tools remain available, though Tool Search may catalog them instead of exposing them directly. Lean mode also defaults catalogs to structured Tool Search (`tool_search`, `tool_describe`, `tool_call`) when `tools.toolSearch` is not already set. Use `agents.entries.*.experimental.localModelLean` to scope this to one agent.
 
-Setup no longer writes this flag. For older installations, `openclaw doctor --fix` removes an onboarding-owned `true` when its ownership marker still matches the default model. Explicit settings and settings with stale ownership markers are preserved. Set a retained flag to `false` to restore optional capabilities; automatic Tool Search still applies to local routes.
+Setup no longer writes this flag. For older installations, `carapace doctor --fix` removes an onboarding-owned `true` when its ownership marker still matches the default model. Explicit settings and settings with stale ownership markers are preserved. Set a retained flag to `false` to restore optional capabilities; automatic Tool Search still applies to local routes.
 
-If you already tune Tool Search globally, OpenClaw leaves that config alone. Set `tools.toolSearch: false` to opt out of the lean-mode Tool Search default.
+If you already tune Tool Search globally, Carapace leaves that config alone. Set `tools.toolSearch: false` to opt out of the lean-mode Tool Search default.
 
 In structured `tools` mode, lean runs keep `exec` directly visible beside the Tool Search controls so coding-tuned local models can still choose their familiar shell path. This changes schema visibility only: normal tool policy, sandboxing, and exec approvals still apply. Explicit `code` and `directory` modes keep their normal compaction behavior.
 
@@ -87,7 +87,7 @@ The model still has `read`, `write`, `edit`, `exec`, `apply_patch`, image unders
 
 Enable lean mode once you have proved the model can talk to the Gateway but full agent turns misbehave:
 
-1. `openclaw infer model run --gateway --model <ref> --prompt "Reply with exactly: pong"` succeeds.
+1. `carapace infer model run --gateway --model <ref> --prompt "Reply with exactly: pong"` succeeds.
 2. A normal agent turn fails with malformed tool calls, oversized prompts, or the model ignoring its tools.
 3. Toggling `localModelLean: true` clears the failure.
 

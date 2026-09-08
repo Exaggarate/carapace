@@ -26,7 +26,7 @@ afterEach(async () => {
 async function createDescendantScope(
   options: { inheritLineage?: boolean; oneShot?: boolean; ignoreTerm?: boolean } = {},
 ) {
-  const cwd = tempDirs.make("openclaw-anchored-shell-");
+  const cwd = tempDirs.make("carapace-anchored-shell-");
   const descendantPath = path.join(cwd, "descendant.cjs");
   const descendantPidPath = path.join(cwd, "descendant.pid");
   const releasePath = path.join(cwd, "descendant.release");
@@ -167,7 +167,7 @@ describe("supervisor anchored shell real process ownership", () => {
   it.skipIf(process.platform !== "win32")(
     "keeps anchored Windows commands console-free",
     async () => {
-      const cwd = tempDirs.make("openclaw-anchored-shell-console-");
+      const cwd = tempDirs.make("carapace-anchored-shell-console-");
       const koffiPath = createRequire(import.meta.url).resolve("koffi");
       await writeFile(
         path.join(cwd, "console.cjs"),
@@ -239,16 +239,16 @@ describe("supervisor anchored shell real process ownership", () => {
   it.each(["inherited", "replacement", "empty"] as const)(
     "completes an otherwise idle host with %s command environment",
     async (environment) => {
-      const cwd = tempDirs.make("openclaw-anchored-shell-idle-");
+      const cwd = tempDirs.make("carapace-anchored-shell-idle-");
       const hostPath = path.join(cwd, "host.mts");
       const supervisorUrl = new URL("./supervisor.ts", import.meta.url).href;
       let command =
-        'printf "%s\\n" "${OPENCLAW_TEST_PARENT_ENV-absent}" "${OPENCLAW_TEST_CHILD_ENV-absent}"';
+        'printf "%s\\n" "${CARAPACE_TEST_PARENT_ENV-absent}" "${CARAPACE_TEST_CHILD_ENV-absent}"';
       if (process.platform === "win32") {
         const commandPath = path.join(cwd, "environment.cmd");
         await writeFile(
           commandPath,
-          "@echo off\r\nif defined OPENCLAW_TEST_PARENT_ENV (echo parent) else (echo absent)\r\nif defined OPENCLAW_TEST_CHILD_ENV (echo child) else (echo absent)\r\n",
+          "@echo off\r\nif defined CARAPACE_TEST_PARENT_ENV (echo parent) else (echo absent)\r\nif defined CARAPACE_TEST_CHILD_ENV (echo child) else (echo absent)\r\n",
         );
         command = `"${commandPath}"`;
       }
@@ -262,7 +262,7 @@ describe("supervisor anchored shell real process ownership", () => {
             mode: "anchored-shell",
             command: ${JSON.stringify(command)},
             ...(environment === "inherited" ? {} : {
-              env: environment === "empty" ? {} : { OPENCLAW_TEST_CHILD_ENV: "child" },
+              env: environment === "empty" ? {} : { CARAPACE_TEST_CHILD_ENV: "child" },
             }),
           });
           try {
@@ -279,8 +279,8 @@ describe("supervisor anchored shell real process ownership", () => {
       const host = spawnSync(process.execPath, ["--import", "tsx", hostPath], {
         env: {
           ...process.env,
-          OPENCLAW_TEST_PARENT_ENV: "parent",
-          OPENCLAW_TEST_CHILD_ENV: undefined,
+          CARAPACE_TEST_PARENT_ENV: "parent",
+          CARAPACE_TEST_CHILD_ENV: undefined,
         },
         encoding: "utf8",
         timeout: 10_000,

@@ -13,7 +13,7 @@ describe("Control UI HTTP loading", () => {
     {
       basePath: "",
       method: "POST",
-      path: "/__openclaw__/assistant-media/extra?meta=1&allow=1",
+      path: "/__carapace__/assistant-media/extra?meta=1&allow=1",
     },
   ])("keeps $method $path independent of the UI runtime", async ({ basePath, method, path }) => {
     let ready = false;

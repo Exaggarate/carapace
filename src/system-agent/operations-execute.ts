@@ -1,5 +1,5 @@
 // Public operation dispatcher. Parsing and mutation helpers live in focused modules.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { buildAgentMainSessionKey, normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { resolveUserPath, shortenHomePath } from "../utils.js";
@@ -33,7 +33,7 @@ import { executePluginInstall } from "./plugin-install.js";
 
 const loadOverviewModule = async () => await import("./overview.js");
 
-/** Execute a parsed OpenClaw operation after applying approval gates and audit logging. */
+/** Execute a parsed Carapace operation after applying approval gates and audit logging. */
 export async function executeSystemAgentOperation(
   operation: SystemAgentOperation,
   runtime: RuntimeEnv,
@@ -240,14 +240,14 @@ export async function executeSystemAgentOperation(
       return { applied: false };
     }
     case "channel-setup":
-      // Channel setup is a multi-step wizard; only interactive OpenClaw (TUI
+      // Channel setup is a multi-step wizard; only interactive Carapace (TUI
       // chat bridge or the gateway chat) can host it. One-shot mode points at
       // the guided paths.
       runtime.log(
         [
           `Connecting ${operation.channel} needs an interactive session.`,
-          "Run `openclaw setup` and say `connect " + operation.channel + "`,",
-          "or run `openclaw channels add` for the terminal wizard.",
+          "Run `carapace setup` and say `connect " + operation.channel + "`,",
+          "or run `carapace channels add` for the terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
@@ -255,8 +255,8 @@ export async function executeSystemAgentOperation(
       runtime.log(
         [
           "Skills setup needs an interactive session.",
-          "Run `openclaw setup` and say `configure skills`,",
-          "or run `openclaw configure --section skills` for the terminal wizard.",
+          "Run `carapace setup` and say `configure skills`,",
+          "or run `carapace configure --section skills` for the terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
@@ -264,8 +264,8 @@ export async function executeSystemAgentOperation(
       runtime.log(
         [
           "Web search setup needs an interactive session.",
-          "Run `openclaw setup` and say `configure search`,",
-          "or run `openclaw configure --section web` for the masked terminal wizard.",
+          "Run `carapace setup` and say `configure search`,",
+          "or run `carapace configure --section web` for the masked terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
@@ -273,8 +273,8 @@ export async function executeSystemAgentOperation(
       runtime.log(
         [
           "Gateway configuration needs an interactive session.",
-          "Run `openclaw setup` and say `configure gateway`,",
-          "or run `openclaw configure --section gateway` for the masked terminal wizard.",
+          "Run `carapace setup` and say `configure gateway`,",
+          "or run `carapace configure --section gateway` for the masked terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
@@ -283,36 +283,36 @@ export async function executeSystemAgentOperation(
         [
           "Memory import needs an interactive session.",
           "Open the Memory page in the Control UI,",
-          "or run `openclaw onboard` for the terminal wizard.",
+          "or run `carapace onboard` for the terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
     case "model-setup":
       runtime.log(
         [
-          "Changing model providers must happen outside the inference session that powers OpenClaw.",
-          "Stop the OpenClaw host through whatever started it. Run `openclaw onboard` on the machine running OpenClaw: it stages credentials, live-tests the candidate route, and saves only a passing setup. Then restart the host.",
+          "Changing model providers must happen outside the inference session that powers Carapace.",
+          "Stop the Carapace host through whatever started it. Run `carapace onboard` on the machine running Carapace: it stages credentials, live-tests the candidate route, and saves only a passing setup. Then restart the host.",
         ].join("\n"),
       );
       return { applied: false };
     case "model-accounts":
       runtime.log(
-        "Manage your personal accounts in Settings → Profile → Connected accounts, or run `openclaw models accounts list` / `openclaw models accounts login <provider>`. Check the Gateway, person, and Personal scope before signing in. Nothing has changed. Enter credentials only in the protected sign-in controls, never in chat.",
+        "Manage your personal accounts in Settings → Profile → Connected accounts, or run `carapace models accounts list` / `carapace models accounts login <provider>`. Check the Gateway, person, and Personal scope before signing in. Nothing has changed. Enter credentials only in the protected sign-in controls, never in chat.",
       );
       return { applied: false };
     case "open-setup": {
       const command =
         operation.target === "guided"
-          ? "openclaw onboard"
+          ? "carapace onboard"
           : operation.target === "classic"
-            ? "openclaw onboard --classic"
+            ? "carapace onboard --classic"
             : operation.target === "channels"
-              ? `openclaw channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`
+              ? `carapace channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`
               : operation.target === "search"
-                ? "openclaw configure --section web"
-                : "openclaw configure --section gateway";
+                ? "carapace configure --section web"
+                : "carapace configure --section gateway";
       runtime.log(
-        `This session cannot host an interactive wizard. Run \`${command}\` on the machine running OpenClaw.`,
+        `This session cannot host an interactive wizard. Run \`${command}\` on the machine running Carapace.`,
       );
       return { applied: false };
     }
@@ -358,8 +358,8 @@ export async function executeSystemAgentOperation(
     case "plugin-uninstall": {
       if (await isPluginBackingDefaultInferenceRoute(operation.pluginId)) {
         const message = [
-          `Uninstalling ${operation.pluginId} could remove the provider behind OpenClaw's own active inference route.`,
-          `Removing it has to happen with OpenClaw stopped: run \`openclaw plugins uninstall ${operation.pluginId}\` on the machine running it.`,
+          `Uninstalling ${operation.pluginId} could remove the provider behind Carapace's own active inference route.`,
+          `Removing it has to happen with Carapace stopped: run \`carapace plugins uninstall ${operation.pluginId}\` on the machine running it.`,
         ].join("\n");
         runtime.log(message);
         return { applied: false, message };
@@ -386,7 +386,7 @@ export async function executeSystemAgentOperation(
           // command's asynchronous preparation starts.
           if (await isPluginBackingDefaultInferenceRoute(operation.pluginId)) {
             throw new Error(
-              `Uninstall aborted: ${operation.pluginId} now backs the active inference route. Removing it has to happen with OpenClaw stopped: run \`openclaw plugins uninstall ${operation.pluginId}\` on the machine running it.`,
+              `Uninstall aborted: ${operation.pluginId} now backs the active inference route. Removing it has to happen with Carapace stopped: run \`carapace plugins uninstall ${operation.pluginId}\` on the machine running it.`,
             );
           }
           await ctx.commit(() =>
@@ -417,7 +417,7 @@ export async function executeSystemAgentOperation(
       }
       if (operation.model?.trim()) {
         throw new Error(
-          "OpenClaw cannot save an explicit per-agent model until that new route can be live-tested. Retry without `model`; the new agent inherits the verified default, then use `set_default_model` with agentId to live-test and save its own model.",
+          "Carapace cannot save an explicit per-agent model until that new route can be live-tested. Retry without `model`; the new agent inherits the verified default, then use `set_default_model` with agentId to live-test and save its own model.",
         );
       }
       return await applyPersistentOperation({
@@ -464,7 +464,7 @@ export async function executeSystemAgentOperation(
     }
     case "doctor-fix":
       runtime.log(
-        "Doctor repairs can change the inference route that powers this session, so they run with OpenClaw stopped: `openclaw doctor --fix` on the machine running it.",
+        "Doctor repairs can change the inference route that powers this session, so they run with Carapace stopped: `carapace doctor --fix` on the machine running it.",
       );
       return { applied: false };
     case "status": {
@@ -559,8 +559,8 @@ export async function executeSystemAgentOperation(
       if (result?.exitReason === "return-to-system-agent") {
         runtime.log(
           result.systemAgentMessage
-            ? `[openclaw] returned from agent with request: ${result.systemAgentMessage}`
-            : "[openclaw] returned from agent",
+            ? `[carapace] returned from agent with request: ${result.systemAgentMessage}`
+            : "[carapace] returned from agent",
         );
         return { applied: false, returnToShell: true, nextInput: result.systemAgentMessage };
       }

@@ -1,4 +1,4 @@
-import { asRecord, readStringField } from "@openclaw/normalization-core/record-coerce";
+import { asRecord, readStringField } from "@carapace/normalization-core/record-coerce";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayRequestContext } from "../../gateway/server-methods/types.js";
 import { withGatewayToolCallerIdentity } from "./gateway-caller-context.js";
@@ -96,7 +96,7 @@ describe("gateway update action", () => {
       ok: false,
       code: "owner_required",
       message:
-        "Only the OpenClaw owner can start an update from chat. Ask the operator to add `telegram:123456789` to `commands.ownerAllowFrom`.",
+        "Only the Carapace owner can start an update from chat. Ask the operator to add `telegram:123456789` to `commands.ownerAllowFrom`.",
     });
     expect(callGatewayToolMock).not.toHaveBeenCalled();
     expect(dispatchMock).not.toHaveBeenCalled();
@@ -113,7 +113,7 @@ describe("gateway update action", () => {
           reason: "managed-service-update-handoff",
           before: { version: "2026.9.1" },
         },
-        handoff: { status: "started", command: "openclaw update --timeout 1200", pid: 123 },
+        handoff: { status: "started", command: "carapace update --timeout 1200", pid: 123 },
         restart: { ok: true, delayMs: 2000, pid: 456 },
         sentinel: { payload: "private-runtime-state" },
         ackDelivered: true,
@@ -202,7 +202,7 @@ describe("gateway update action", () => {
   });
 
   it.each([1, 20])("bounds %i noisy failed steps and preserves handoff text", async (stepCount) => {
-    const command = `openclaw update --tag ${"v".repeat(520)}`;
+    const command = `carapace update --tag ${"v".repeat(520)}`;
     const message = `${"Recovery instructions. ".repeat(36)}Run ${command} in a terminal.`;
     dispatchMock.mockResolvedValue({
       ok: false,
@@ -241,7 +241,7 @@ describe("gateway update action", () => {
   });
 
   it("preserves long manual instructions without repeating them", async () => {
-    const command = `openclaw update --tag ${"v".repeat(1100)}`;
+    const command = `carapace update --tag ${"v".repeat(1100)}`;
     const message = "Recovery instructions. ".repeat(90);
     dispatchMock.mockResolvedValue({
       ok: false,

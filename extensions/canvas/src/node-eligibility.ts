@@ -1,8 +1,8 @@
-import type { NodeListNode } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { NodeListNode } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   type EligibleNodeMessages,
   resolveEligibleNodeFromList,
-} from "openclaw/plugin-sdk/node-selection-runtime";
+} from "carapace/plugin-sdk/node-selection-runtime";
 
 type CanvasNodeDescriptor = {
   commands?: string[];

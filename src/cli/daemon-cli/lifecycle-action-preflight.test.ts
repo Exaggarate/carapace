@@ -13,18 +13,18 @@ afterEach(() => {
 async function withIsolatedLifecycleState(
   run: (params: { agentDir: string; configPath: string }) => Promise<void>,
 ): Promise<void> {
-  await withTestDir({ prefix: "openclaw-lifecycle-action-preflight-" }, async (root) => {
+  await withTestDir({ prefix: "carapace-lifecycle-action-preflight-" }, async (root) => {
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const agentDir = path.join(stateDir, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
     await fs.writeFile(configPath, "{}\n");
     vi.stubEnv("HOME", root);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
     resetConfigRuntimeState();
     await run({ agentDir, configPath });
-    await expect(fs.access(path.join(stateDir, "state", "openclaw.sqlite"))).rejects.toMatchObject({
+    await expect(fs.access(path.join(stateDir, "state", "carapace.sqlite"))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
@@ -55,11 +55,11 @@ describe("getServiceActionPreflightFailure", () => {
         JSON.stringify({
           name: "migration-fixture",
           version: "2.0.0",
-          openclaw: { extensions: ["./index.js"] },
+          carapace: { extensions: ["./index.js"] },
         }),
       );
       await fs.writeFile(
-        path.join(pluginRoot, "openclaw.plugin.json"),
+        path.join(pluginRoot, "carapace.plugin.json"),
         JSON.stringify({
           id: "migration-fixture",
           configSchema: {
@@ -121,10 +121,10 @@ describe("getServiceActionPreflightFailure", () => {
         const failure = await getServiceActionPreflightFailure(action);
 
         expect(failure?.message).toContain(
-          'openclaw.json:3 — gateway.mode: Invalid input (allowed: "local", "remote"), got: "nope"',
+          'carapace.json:3 — gateway.mode: Invalid input (allowed: "local", "remote"), got: "nope"',
         );
         expect(failure?.message).toContain(
-          "Config was last written by OpenClaw 9999.1.1, but you are running",
+          "Config was last written by Carapace 9999.1.1, but you are running",
         );
       });
     },

@@ -1,7 +1,7 @@
 // Telegram tests cover group access.base access plugin behavior.
-import { resolveChannelGroupPolicy } from "openclaw/plugin-sdk/channel-policy";
-import { validateTestChannelConfig } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveChannelGroupPolicy } from "carapace/plugin-sdk/channel-policy";
+import { validateTestChannelConfig } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { mergeTelegramAccountConfig } from "./account-config.js";
 import { normalizeAllowFrom, type NormalizedAllowFrom } from "./bot-access.js";
@@ -80,7 +80,7 @@ describe("evaluateTelegramGroupBaseAccess", () => {
  */
 const baseCfg = {
   channels: { telegram: {} },
-} as unknown as OpenClawConfig;
+} as unknown as CarapaceConfig;
 
 const baseTelegramCfg: TelegramAccountConfig = {
   groupPolicy: "allowlist",

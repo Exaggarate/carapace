@@ -368,7 +368,7 @@ suite.define(() => {
       await page.keyboard.press("Escape");
       await page.setViewportSize({ width: 1280, height: 900 });
 
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await pollLocatorText(agentPicker.locator(".agent-select__menu-title")).toBe("Agents");
       await captureProjectUiProof(suite, page, "new-session-agent-menu-label.png", {
@@ -394,7 +394,7 @@ suite.define(() => {
       const checkoutSelect = page.locator("wa-popover.new-session-page__checkout-popover");
       const checkoutTrigger = page.locator("#new-session-checkout-trigger");
       await pollLocatorText(projectTrigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw",
+        "carapace",
       );
 
       // Browse from the workspace, descend one level, then adopt the folder.
@@ -453,7 +453,7 @@ suite.define(() => {
       await checkoutSelect.getByLabel("From").waitFor();
       await checkoutSelect.getByLabel("Name", { exact: true }).waitFor();
       await checkoutSelect
-        .getByText("Creates branch openclaw/<name> in a separate checkout.", { exact: true })
+        .getByText("Creates branch carapace/<name> in a separate checkout.", { exact: true })
         .waitFor();
       await page.keyboard.press("Escape");
       await expect.poll(() => checkoutTrigger.getAttribute("aria-expanded")).toBe("false");
@@ -527,15 +527,15 @@ suite.define(() => {
           projects: [
             {
               id: "workspace:main",
-              displayName: "openclaw",
+              displayName: "carapace",
               repoRoot: WORKSPACE,
               source: "workspace",
               agentId: "main",
             },
             {
-              id: "recorded-openclaw",
-              displayName: "Recorded OpenClaw",
-              repoRoot: "/recorded/openclaw",
+              id: "recorded-carapace",
+              displayName: "Recorded Carapace",
+              repoRoot: "/recorded/carapace",
               source: "registered",
             },
           ],
@@ -559,14 +559,14 @@ suite.define(() => {
       const trigger = page.locator("#new-session-project-trigger");
       const place = page.locator("wa-popover.new-session-page__project-popover");
       await trigger.click();
-      await place.getByRole("button", { name: "Recorded OpenClaw", exact: true }).click();
+      await place.getByRole("button", { name: "Recorded Carapace", exact: true }).click();
       await pollLocatorText(trigger.locator(".new-session-page__trigger-label")).toBe(
-        "Recorded OpenClaw",
+        "Recorded Carapace",
       );
-      expect(await trigger.getAttribute("data-project-id")).toBe("recorded-openclaw");
+      expect(await trigger.getAttribute("data-project-id")).toBe("recorded-carapace");
       await expect
         .poll(async () => (await gateway.getRequests("worktrees.branches")).at(-1)?.params)
-        .toEqual({ repoRoot: "/recorded/openclaw", includeRepositoryStatus: true });
+        .toEqual({ repoRoot: "/recorded/carapace", includeRepositoryStatus: true });
 
       await page.locator("#new-session-checkout-trigger").click();
       await page
@@ -586,7 +586,7 @@ suite.define(() => {
       expect(create.params).toMatchObject({
         agentId: "main",
         message: "inspect the project",
-        projectId: "recorded-openclaw",
+        projectId: "recorded-carapace",
         worktree: true,
         worktreeBaseRef: "main",
       });

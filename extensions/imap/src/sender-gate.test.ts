@@ -1,6 +1,6 @@
 import { authenticate } from "mailauth";
 import { simpleParser } from "mailparser";
-import type { IdentifierAuthentication } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import type { IdentifierAuthentication } from "carapace/plugin-sdk/channel-ingress-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resolveImapConfig } from "./config.js";
 import { createImapAuthResult } from "./imap-test-support.js";

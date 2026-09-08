@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { UsersMentionableResult } from "@openclaw/gateway-protocol";
+import type { UsersMentionableResult } from "@carapace/gateway-protocol";
 import { nothing, render } from "lit";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
@@ -155,12 +155,12 @@ describe("chat pane native history pagination", () => {
     const original = {
       role: "user",
       content: "Start working.",
-      __openclaw: { id: "original-refresh", idempotencyKey: "run-refresh:user", seq: 1 },
+      __carapace: { id: "original-refresh", idempotencyKey: "run-refresh:user", seq: 1 },
     };
     const steer = {
       role: "user",
       content: "Also check the result.",
-      __openclaw: {
+      __carapace: {
         id: "steer-refresh",
         idempotencyKey: "steer-refresh:user",
         steerTargetRunId: "run-refresh",
@@ -218,7 +218,7 @@ describe("chat pane native history pagination", () => {
           {
             role: "assistant",
             content: "Saved opening.",
-            __openclaw: { id: "saved-refresh", idempotencyKey: "run-refresh", seq: 2 },
+            __carapace: { id: "saved-refresh", idempotencyKey: "run-refresh", seq: 2 },
           },
           steer,
         ],
@@ -326,7 +326,7 @@ describe("chat pane native history pagination", () => {
       message: {
         role: "user",
         content: "Accepted input",
-        __openclaw: { idempotencyKey: `${runId}:user` },
+        __carapace: { idempotencyKey: `${runId}:user` },
       },
     });
     const loading = pane.loadOlderMessages();
@@ -799,11 +799,11 @@ describe("chat pane native history pagination", () => {
     const projected = [
       {
         ...nativeHistoryMessage(1, "Same routed send"),
-        openclawMessageToolMirror: { toolName: "message", toolCallId: "call-a" },
+        carapaceMessageToolMirror: { toolName: "message", toolCallId: "call-a" },
       },
       {
         ...nativeHistoryMessage(1, "Same routed send"),
-        openclawMessageToolMirror: { toolName: "message", toolCallId: "call-b" },
+        carapaceMessageToolMirror: { toolName: "message", toolCallId: "call-b" },
       },
     ];
 
@@ -823,7 +823,7 @@ describe("chat pane native history pagination", () => {
     const liveEventProjection = {
       role: "assistant",
       content: [{ type: "text", text: "One stored reply" }],
-      __openclaw: {
+      __carapace: {
         id: "assistant-message-42",
         idempotencyKey: "run-42",
         seq: 42,
@@ -832,7 +832,7 @@ describe("chat pane native history pagination", () => {
     const historyProjection = {
       role: "assistant",
       content: [{ type: "text", text: "One stored reply" }],
-      __openclaw: {
+      __carapace: {
         id: "assistant-message-42",
         idempotencyKey: "run-42",
         recordTimestampMs: 1_786_000_000_000,

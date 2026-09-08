@@ -10,9 +10,9 @@ import {
   HttpStatusCodeError,
   type TwitchApiCallFetchOptions,
 } from "@twurple/api-call";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import type {
   ChannelResolveKind,
   ChannelResolveResult,

@@ -2,7 +2,7 @@
 // target parsing, plus best-effort session route persistence.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import { createChannelTestPluginBase } from "../../test-utils/channel-plugins.js";
 import {
@@ -60,8 +60,8 @@ describe("resolveOutboundSessionRoute", () => {
     setMinimalOutboundSessionPluginRegistryForTests();
   });
 
-  const baseConfig = {} as OpenClawConfig;
-  const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as OpenClawConfig;
+  const baseConfig = {} as CarapaceConfig;
+  const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as CarapaceConfig;
   const identityLinksCfg = {
     session: {
       dmScope: "per-peer",
@@ -69,7 +69,7 @@ describe("resolveOutboundSessionRoute", () => {
         alice: ["guildchat:123"],
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const workspaceMpimCfg = {
     channels: {
       workspace: {
@@ -78,7 +78,7 @@ describe("resolveOutboundSessionRoute", () => {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it("uses a prepared runtime plugin for session-route resolution", async () => {
     const plugin = {
@@ -169,7 +169,7 @@ describe("resolveOutboundSessionRoute", () => {
             session: testCase.bindingSession,
           },
         ],
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: "bound-channel",
       plugin,
       agentId: "main",
@@ -182,7 +182,7 @@ describe("resolveOutboundSessionRoute", () => {
   });
 
   async function expectResolvedRoute(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     channel: string;
     target: string;
     replyToId?: string;
@@ -221,7 +221,7 @@ describe("resolveOutboundSessionRoute", () => {
   type RouteCase = Parameters<typeof expectResolvedRoute>[0];
   type NamedRouteCase = RouteCase & { name: string };
 
-  const perChannelPeerSessionCfg = { session: { dmScope: "per-channel-peer" } } as OpenClawConfig;
+  const perChannelPeerSessionCfg = { session: { dmScope: "per-channel-peer" } } as CarapaceConfig;
 
   it.each([
     {
@@ -238,7 +238,7 @@ describe("resolveOutboundSessionRoute", () => {
     },
     {
       name: "global groupScope main",
-      cfg: { session: { groupScope: "main" } } as OpenClawConfig,
+      cfg: { session: { groupScope: "main" } } as CarapaceConfig,
       channel: "mobilechat",
       target: "120363040000000000@g.us",
       expected: {
@@ -587,7 +587,7 @@ describe("resolveOutboundSessionRoute", () => {
     {
       name: "uses resolved direct-only channel user targets to avoid phantom group sessions",
       target: "wxid_abc123@im.wechat",
-      channel: "openclaw-weixin",
+      channel: "carapace-weixin",
       resolvedTarget: {
         to: "wxid_abc123@im.wechat",
         kind: "user" as const,
@@ -595,8 +595,8 @@ describe("resolveOutboundSessionRoute", () => {
         resolutionSource: "normalized" as const,
       },
       expected: {
-        sessionKey: "agent:main:openclaw-weixin:direct:wxid_abc123@im.wechat",
-        from: "openclaw-weixin:wxid_abc123@im.wechat",
+        sessionKey: "agent:main:carapace-weixin:direct:wxid_abc123@im.wechat",
+        from: "carapace-weixin:wxid_abc123@im.wechat",
         to: "user:wxid_abc123@im.wechat",
         chatType: "direct",
       },
@@ -641,7 +641,7 @@ describe("ensureOutboundSessionEntry", () => {
         session: {
           store: "/stores/{agentId}.json",
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: "workspace",
       route: {
         sessionKey: "agent:main:workspace:channel:c1",
@@ -668,7 +668,7 @@ describe("ensureOutboundSessionEntry", () => {
 
   it("persists the canonical direct peer separately from its adapter target", async () => {
     await ensureOutboundSessionEntry({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       channel: "reef",
       route: {
         sessionKey: "agent:main:main",
@@ -733,7 +733,7 @@ describe("ensureOutboundSessionEntry", () => {
 
     await expect(
       ensureOutboundSessionEntry({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "reef",
         route: {
           sessionKey: "agent:main:main",
@@ -752,7 +752,7 @@ describe("ensureOutboundSessionEntry", () => {
 
     await expect(
       bindOutboundSessionEntry({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "reef",
         route: {
           sessionKey: "agent:main:main",

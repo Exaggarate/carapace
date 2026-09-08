@@ -1,13 +1,13 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   ensureAuthProfileStore,
   replaceRuntimeAuthProfileStoreSnapshots,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { MemoryEmbeddingProvider } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/agent-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { MemoryEmbeddingProvider } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { CarapacePluginApi } from "./api.js";
 import type { MemoryConfig } from "./config.js";
 
 const providerMocks = vi.hoisted(() => ({
@@ -21,9 +21,9 @@ const providerMocks = vi.hoisted(() => ({
   >(),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/memory-core-host-engine-embeddings")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/memory-core-host-engine-embeddings")>();
   return {
     ...actual,
     getMemoryEmbeddingProvider: providerMocks.getMemoryEmbeddingProvider,
@@ -42,15 +42,15 @@ vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", async (importO
 
 import { createEmbeddings, type Embeddings } from "./embeddings.js";
 
-function createApi(): OpenClawPluginApi {
+function createApi(): CarapacePluginApi {
   const config = {};
   return {
     config,
     runtime: {
       config: { current: () => config },
-      agent: { resolveAgentDir: () => "/tmp/openclaw-agent" },
+      agent: { resolveAgentDir: () => "/tmp/carapace-agent" },
     },
-  } as unknown as OpenClawPluginApi;
+  } as unknown as CarapacePluginApi;
 }
 
 const embeddingConfig = {
@@ -112,7 +112,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => config },
         agent: { resolveAgentDir },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     await expect(embed(embeddings, "private", "private account memory")).resolves.toEqual([
@@ -153,7 +153,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => config },
         agent: { resolveAgentDir: (_config: unknown, agentId: string) => `/tmp/agent-${agentId}` },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     await Promise.all([
@@ -198,7 +198,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => config },
         agent: { resolveAgentDir: (_config: unknown, agentId: string) => `/tmp/agent-${agentId}` },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     await Promise.all([
@@ -232,7 +232,7 @@ describe("memory-lancedb provider lifecycle", () => {
 
   it("rotates actual private auth snapshots without replacing the runtime config", async () => {
     const config = {};
-    const agentDir = "/tmp/openclaw-lancedb-private-auth-rotation";
+    const agentDir = "/tmp/carapace-lancedb-private-auth-rotation";
     const profileId = "openai:private";
     const requests: Array<{ text: string; credential: string }> = [];
     const publishCredential = (credential: string | undefined) => {
@@ -280,7 +280,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => config },
         agent: { resolveAgentDir: () => agentDir },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     try {
@@ -311,8 +311,8 @@ describe("memory-lancedb provider lifecycle", () => {
   it("invalidates every inheriting agent when the actual main auth snapshot rotates", async () => {
     const config = {};
     const agentDirs = {
-      private: "/tmp/openclaw-lancedb-inherited-private",
-      secondary: "/tmp/openclaw-lancedb-inherited-secondary",
+      private: "/tmp/carapace-lancedb-inherited-private",
+      secondary: "/tmp/carapace-lancedb-inherited-secondary",
     };
     const profileId = "openai:inherited";
     const requests: Array<{ agentDir: string; credential: string; text: string }> = [];
@@ -365,7 +365,7 @@ describe("memory-lancedb provider lifecycle", () => {
             agentDirs[agentId as keyof typeof agentDirs],
         },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     try {
@@ -449,7 +449,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => currentConfig },
         agent: { resolveAgentDir: (_config: unknown, agentId: string) => `/tmp/agent-${agentId}` },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     await embed(embeddings, "private", "before revocation");
@@ -554,7 +554,7 @@ describe("memory-lancedb provider lifecycle", () => {
 
   it("drains an admitted embedding before retiring a rotated actual auth snapshot", async () => {
     const config = {};
-    const agentDir = "/tmp/openclaw-lancedb-inflight-auth-rotation";
+    const agentDir = "/tmp/carapace-lancedb-inflight-auth-rotation";
     const profileId = "openai:inflight";
     const publishCredential = (credential: string) => {
       replaceRuntimeAuthProfileStoreSnapshots([
@@ -605,7 +605,7 @@ describe("memory-lancedb provider lifecycle", () => {
         config: { current: () => config },
         agent: { resolveAgentDir: () => agentDir },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     const embeddings = createEmbeddings(api);
 
     try {

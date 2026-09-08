@@ -40,7 +40,7 @@ async function fixture() {
     createWorkerProjectPreparation({ project, namespace: "gateway", requireCurrent });
   const seed = path.join(
     home,
-    ".openclaw-worker",
+    ".carapace-worker",
     "git-seeds",
     "gateway",
     workerProjectSeedKey(project),
@@ -75,7 +75,7 @@ describe("project checkout preparation", () => {
     expect(retained).not.toContain(path.basename(stale));
   });
 
-  it.each([".openclaw-worker", ".openclaw-worker/git-seeds"])(
+  it.each([".carapace-worker", ".carapace-worker/git-seeds"])(
     "rejects a symlinked %s parent before writing outside the worker cache",
     async (relative) => {
       const f = await fixture();

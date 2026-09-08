@@ -1,17 +1,17 @@
-import type { TelegramNetworkConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { TelegramNetworkConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>()),
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>()),
   isWSL2Sync: vi.fn(() => false),
 }));
 
-let isWSL2Sync: typeof import("openclaw/plugin-sdk/runtime-env").isWSL2Sync;
+let isWSL2Sync: typeof import("carapace/plugin-sdk/runtime-env").isWSL2Sync;
 let resolveTelegramAutoSelectFamilyDecision: typeof import("./network-config.js").resolveTelegramAutoSelectFamilyDecision;
 let resolveTelegramDnsResultOrderDecision: typeof import("./network-config.js").resolveTelegramDnsResultOrderDecision;
 
 async function loadModule() {
-  const { isWSL2Sync: loadedIsWSL2Sync } = await import("openclaw/plugin-sdk/runtime-env");
+  const { isWSL2Sync: loadedIsWSL2Sync } = await import("carapace/plugin-sdk/runtime-env");
   isWSL2Sync = loadedIsWSL2Sync;
   ({ resolveTelegramAutoSelectFamilyDecision, resolveTelegramDnsResultOrderDecision } =
     await import("./network-config.js"));
@@ -23,7 +23,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/runtime-env");
+  vi.doUnmock("carapace/plugin-sdk/runtime-env");
   vi.resetModules();
 });
 
@@ -40,38 +40,38 @@ describe("resolveTelegramAutoSelectFamilyDecision", () => {
     {
       name: "prefers env enable over env disable",
       env: {
-        OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1",
-        OPENCLAW_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1",
+        CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1",
+        CARAPACE_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1",
       },
       expected: {
         value: true,
-        source: "env:OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
+        source: "env:CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
       },
     },
     {
       name: "uses env disable when set",
-      env: { OPENCLAW_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1" },
+      env: { CARAPACE_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1" },
       expected: {
         value: false,
-        source: "env:OPENCLAW_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY",
+        source: "env:CARAPACE_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY",
       },
     },
     {
       name: "prefers env enable over config",
-      env: { OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1" },
+      env: { CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1" },
       network: { autoSelectFamily: false },
       expected: {
         value: true,
-        source: "env:OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
+        source: "env:CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
       },
     },
     {
       name: "prefers env disable over config",
-      env: { OPENCLAW_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1" },
+      env: { CARAPACE_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY: "1" },
       network: { autoSelectFamily: true },
       expected: {
         value: false,
-        source: "env:OPENCLAW_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY",
+        source: "env:CARAPACE_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY",
       },
     },
     {
@@ -120,10 +120,10 @@ describe("resolveTelegramAutoSelectFamilyDecision", () => {
       },
       {
         name: "respects env override on WSL2",
-        env: { OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1" },
+        env: { CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY: "1" },
         expected: {
           value: true,
-          source: "env:OPENCLAW_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
+          source: "env:CARAPACE_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY",
         },
       },
       {
@@ -166,20 +166,20 @@ describe("resolveTelegramDnsResultOrderDecision", () => {
   it.each([
     {
       name: "uses env override when provided",
-      env: { OPENCLAW_TELEGRAM_DNS_RESULT_ORDER: "verbatim" },
+      env: { CARAPACE_TELEGRAM_DNS_RESULT_ORDER: "verbatim" },
       nodeMajor: 22,
       expected: {
         value: "verbatim",
-        source: "env:OPENCLAW_TELEGRAM_DNS_RESULT_ORDER",
+        source: "env:CARAPACE_TELEGRAM_DNS_RESULT_ORDER",
       },
     },
     {
       name: "normalizes trimmed env values",
-      env: { OPENCLAW_TELEGRAM_DNS_RESULT_ORDER: "  IPV4FIRST  " },
+      env: { CARAPACE_TELEGRAM_DNS_RESULT_ORDER: "  IPV4FIRST  " },
       nodeMajor: 20,
       expected: {
         value: "ipv4first",
-        source: "env:OPENCLAW_TELEGRAM_DNS_RESULT_ORDER",
+        source: "env:CARAPACE_TELEGRAM_DNS_RESULT_ORDER",
       },
     },
     {
@@ -196,14 +196,14 @@ describe("resolveTelegramDnsResultOrderDecision", () => {
     },
     {
       name: "ignores invalid env values and falls back to config",
-      env: { OPENCLAW_TELEGRAM_DNS_RESULT_ORDER: "bogus" },
+      env: { CARAPACE_TELEGRAM_DNS_RESULT_ORDER: "bogus" },
       network: { dnsResultOrder: "ipv4first" },
       nodeMajor: 20,
       expected: { value: "ipv4first", source: "config" },
     },
     {
       name: "ignores invalid env and config values before applying Node 22 default",
-      env: { OPENCLAW_TELEGRAM_DNS_RESULT_ORDER: "bogus" },
+      env: { CARAPACE_TELEGRAM_DNS_RESULT_ORDER: "bogus" },
       network: { dnsResultOrder: "invalid" } as unknown as TelegramNetworkConfig,
       defaultResultOrder: "ipv6first",
       nodeMajor: 22,

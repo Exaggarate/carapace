@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/memory-lancedb",
+  "name": "@carapace/memory-lancedb",
   "version": "2026.9.2",
-  "description": "OpenClaw LanceDB-backed long-term memory plugin with auto-recall, auto-capture, and vector search.",
+  "description": "Carapace LanceDB-backed long-term memory plugin with auto-recall, auto-capture, and vector search.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@lancedb/lancedb": "0.37.1",
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
   "optionalDependencies": {
     "@lancedb/lancedb-darwin-arm64": "0.37.1",
@@ -25,12 +25,12 @@
     "@lancedb/lancedb-win32-arm64-msvc": "0.37.1",
     "@lancedb/lancedb-win32-x64-msvc": "0.37.1"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/memory-lancedb",
+      "npmSpec": "@carapace/memory-lancedb",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.31"
     },
@@ -38,7 +38,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "bundleRuntimeDependencies": false,

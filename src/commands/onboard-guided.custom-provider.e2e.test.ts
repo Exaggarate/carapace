@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { captureFullEnv, setTestEnvValue } from "../test-utils/env.js";
 
 const cleanupTasks: Array<() => Promise<void>> = [];
@@ -29,12 +29,12 @@ async function runCustomSetup(scenario: Scenario) {
   const credential = `fixture-${scenario.protocol}-${scenario.outcome ?? "success"}-${scenario.secretRef ? "ref" : "literal"}`;
   const env = captureFullEnv();
   const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "guided-custom-")));
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   const workspace = path.join(root, "workspace");
   const requests: Array<{ stream: boolean; pathname: string; authorized: boolean }> = [];
   const serverErrors: unknown[] = [];
   const controller = new AbortController();
-  const initialConfig: OpenClawConfig = {
+  const initialConfig: CarapaceConfig = {
     gateway: { mode: "local" },
     plugins: { slots: { memory: "none" } },
     agents: {
@@ -54,8 +54,8 @@ async function runCustomSetup(scenario: Scenario) {
   const initialBytes = `${JSON.stringify(initialConfig)}\n`;
   await fs.mkdir(workspace);
   await fs.writeFile(configPath, initialBytes);
-  setTestEnvValue("OPENCLAW_STATE_DIR", root);
-  setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+  setTestEnvValue("CARAPACE_STATE_DIR", root);
+  setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
   setTestEnvValue("CUSTOM_SETUP_FIXTURE_KEY", credential);
 
   const server = createServer((request, response) => {
@@ -197,7 +197,7 @@ async function runCustomSetup(scenario: Scenario) {
     initialConfig,
     activationResults,
     textPrompts: vi.mocked(prompter.text).mock.calls,
-    config: JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig,
+    config: JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig,
     output: JSON.stringify([
       runtime.log.mock.calls,
       runtime.error.mock.calls,
@@ -281,7 +281,7 @@ describe("guided custom provider activation", () => {
     expect(setup.result).toBeNull();
     expect(setup.config).toEqual(setup.initialConfig);
     expect(setup.output).toContain(
-      "run openclaw onboard --auth-choice custom-api-key on the Gateway host",
+      "run carapace onboard --auth-choice custom-api-key on the Gateway host",
     );
   });
 });

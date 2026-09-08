@@ -4,9 +4,9 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { cronJobReadView } from "../cron/job-read-view.js";
 import { normalizeCronJobCreate } from "../cron/normalize.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { applyClawCronUpdate } from "./cron-update.js";
 import {
   CLAW_CRON_REF_SCHEMA_VERSION,
@@ -19,7 +19,7 @@ import { CLAW_OUTPUT_STABILITY, type ClawCronJob, type ClawManifest } from "./ty
 import { CLAW_UPDATE_PLAN_SCHEMA_VERSION, type ClawUpdatePlan } from "./update-plan.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(closeOpenClawStateDatabaseForTest);
+afterEach(closeCarapaceStateDatabaseForTest);
 
 const oldDaily: ClawCronJob = {
   id: "daily",
@@ -115,13 +115,13 @@ describe("applyClawCronUpdate", () => {
   it.each(["add", "change"] as const)(
     "preserves ownership before a failed readiness wait and permits %s retry",
     async (action) => {
-      const env = { OPENCLAW_STATE_DIR: join(tempDirs.make("openclaw-cron-readiness-"), "state") };
+      const env = { CARAPACE_STATE_DIR: join(tempDirs.make("carapace-cron-readiness-"), "state") };
       const previous = ref(oldDaily, "scheduler-daily");
       if (action === "change") {
         upsertClawCronRef(previous, { env });
       }
       readClawCronRefs("worker", { env });
-      const database = openOpenClawStateDatabase({ env });
+      const database = openCarapaceStateDatabase({ env });
       const rows = () =>
         JSON.stringify(
           database.db.prepare("SELECT * FROM claw_cron_refs ORDER BY agent_id, manifest_id").all(),
@@ -186,7 +186,7 @@ describe("applyClawCronUpdate", () => {
 
   it("compensates an earlier removal when later readiness fails without introducing a pending addition", async () => {
     const env = {
-      OPENCLAW_STATE_DIR: join(tempDirs.make("openclaw-cron-readiness-undo-"), "state"),
+      CARAPACE_STATE_DIR: join(tempDirs.make("carapace-cron-readiness-undo-"), "state"),
     };
     const previous = ref(legacy, "scheduler-legacy");
     upsertClawCronRef(previous, { env });

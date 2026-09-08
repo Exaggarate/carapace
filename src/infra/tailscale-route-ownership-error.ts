@@ -1,6 +1,6 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
-import { asNullableObjectRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
+import { asNullableObjectRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 
 const TAILSCALE_ROUTE_OWNERSHIP_CONFLICT_CODE = "TAILSCALE_ROUTE_OWNERSHIP_CONFLICT";
 
@@ -25,10 +25,10 @@ export class TailscaleRouteOwnershipConflictError extends Error {
       ? `https://${host}${mount ?? ""} -> ${normalizeOptionalString(readRecord(handler)?.Proxy) ?? "non-proxy handler"}`
       : `HTTPS port ${port}`;
     super(
-      `Tailscale HTTPS port ${port} is already owned by a route whose ownership OpenClaw cannot prove; it was not modified. ` +
+      `Tailscale HTTPS port ${port} is already owned by a route whose ownership Carapace cannot prove; it was not modified. ` +
         (session
           ? `Foreground session ${session} (${route.slice(0, 512)}). Inspect \`tailscale serve status --json\` and stop the confirmed owning process, then restart the Gateway. Tailscale status does not report the claimant PID; \`serve off\` does not release foreground claims. `
-          : "Inspect `tailscale serve status`. If the route belongs to the current Tailscale hostname and is stale from an older OpenClaw release, remove its background root handler with " +
+          : "Inspect `tailscale serve status`. If the route belongs to the current Tailscale hostname and is stale from an older Carapace release, remove its background root handler with " +
             `\`tailscale serve --yes --https=${port} --set-path=/ off\`, then restart the Gateway. ` +
             "Otherwise disable managed Tailscale ingress or reconfigure the route before restarting."),
     );

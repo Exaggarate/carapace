@@ -12,10 +12,10 @@ import {
 } from "./install-paths.js";
 import { loadPluginInstallRuntime, resolveEffectiveInstallMode } from "./install-shared.js";
 import { hasRetainedManagedNpmInstallMarker } from "./managed-npm-retention.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { CarapacePackageManifest } from "./manifest.js";
 import { listNpmPackageDirs } from "./npm-package-dirs.js";
 
-const MANAGED_NPM_PROJECT_QUARANTINE_DIR = "_openclaw-quarantined-npm-projects";
+const MANAGED_NPM_PROJECT_QUARANTINE_DIR = "_carapace-quarantined-npm-projects";
 const MANAGED_NPM_PROJECT_REBUILD_ARTIFACTS = [
   "node_modules",
   "package-lock.json",
@@ -33,7 +33,7 @@ export async function copyManagedNpmProjectInputs(params: {
     "package-lock.json",
     "npm-shrinkwrap.json",
     ".npmrc",
-    "_openclaw-pack-archives",
+    "_carapace-pack-archives",
   ]) {
     try {
       // Copy bytes, not links that could let npm mutate the original manifest through its stage.
@@ -143,7 +143,7 @@ export async function listManagedNpmRootPackageNames(npmRoot: string): Promise<S
   const packageDirs = await listNpmPackageDirs(npmRoot, {
     sortEntries: true,
     includeEntry: (entry, scoped) =>
-      (scoped || (entry.name !== ".bin" && entry.name !== "openclaw")) &&
+      (scoped || (entry.name !== ".bin" && entry.name !== "carapace")) &&
       // Scope reads must still report malformed directories, including regular files.
       ((!scoped && entry.name.startsWith("@")) || entry.isDirectory() || entry.isSymbolicLink()),
   });
@@ -330,7 +330,7 @@ export async function resolveManagedNpmInstallPlan(params: {
 }
 
 export function resolveRequiredPlatformPackageNames(
-  packageMetadata?: OpenClawPackageManifest,
+  packageMetadata?: CarapacePackageManifest,
 ): { ok: true; packageNames: string[] } | { ok: false; error: string } {
   const raw = packageMetadata?.install?.requiredPlatformPackages as unknown;
   if (raw === undefined) {
@@ -339,7 +339,7 @@ export function resolveRequiredPlatformPackageNames(
   if (!Array.isArray(raw)) {
     return {
       ok: false,
-      error: "package.json openclaw.install.requiredPlatformPackages must be an array",
+      error: "package.json carapace.install.requiredPlatformPackages must be an array",
     };
   }
   const packageNames = new Set<string>();
@@ -348,7 +348,7 @@ export function resolveRequiredPlatformPackageNames(
       return {
         ok: false,
         error:
-          "package.json openclaw.install.requiredPlatformPackages must contain only npm package names",
+          "package.json carapace.install.requiredPlatformPackages must contain only npm package names",
       };
     }
     const specError = validateRegistryNpmSpec(value);
@@ -356,7 +356,7 @@ export function resolveRequiredPlatformPackageNames(
     if (specError || !parsed || parsed.selectorKind !== "none") {
       return {
         ok: false,
-        error: `package.json openclaw.install.requiredPlatformPackages contains invalid package name: ${value}`,
+        error: `package.json carapace.install.requiredPlatformPackages contains invalid package name: ${value}`,
       };
     }
     packageNames.add(parsed.name);

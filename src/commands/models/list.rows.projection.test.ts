@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { describe, expect, it, vi } from "vitest";
 import type { ModelProviderConfig } from "../../config/types.models.js";
 import type { Model } from "../../llm/types.js";
@@ -50,7 +50,7 @@ describe("appendDiscoveredRows projection", () => {
     ];
     const context: RowBuilderContext = {
       cfg: { models: { providers } },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       authIndex: {
         evaluateModelAuth: () => ({ availability: true, routeResolution: null }),
       },

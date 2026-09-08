@@ -8,7 +8,7 @@ import type { PluginRegistry } from "../plugins/registry-types.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
 import type { GatewayContextResolver, GatewayRequestContext } from "./server-methods/types.js";
 
-export const BOARD_HTTP_PATH_PREFIX = "/__openclaw__/board/";
+export const BOARD_HTTP_PATH_PREFIX = "/__carapace__/board/";
 // Bounds residual bearer access after the originating client loses its view authority.
 // Each load rechecks grant state; content changes invalidate through revision and generation.
 export const BOARD_VIEW_TICKET_TTL_MS = 20 * 60_000;

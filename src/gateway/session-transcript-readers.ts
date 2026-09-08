@@ -1,5 +1,5 @@
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { SessionManager } from "../agents/sessions/session-manager.js";
 import {
   isSessionTranscriptProjectionUnavailableError,
@@ -41,7 +41,7 @@ import type { SessionPreviewItem } from "./session-utils.types.js";
 
 export type { ReadSessionMessagesAsyncOptions };
 export { capArrayByJsonBytes } from "./session-utils.fs.js";
-export { attachOpenClawTranscriptMeta } from "./session-transcript-message.js";
+export { attachCarapaceTranscriptMeta } from "./session-transcript-message.js";
 export { readSessionTranscriptVisibleMessageDeltaCore } from "../config/sessions/session-accessor.js";
 
 export type { SessionTranscriptReadScope };
@@ -299,7 +299,7 @@ export async function readSessionMessagesMatchingIdAsync(
         resetArchiveOnly: true,
       });
   return messages.filter(
-    (message) => asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.id === messageId,
+    (message) => asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.id === messageId,
   );
 }
 

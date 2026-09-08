@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_IDS } from "../../packages/gateway-protocol/src/client-info.js";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { NODE_WORKER_SUPERVISOR_LAUNCH_COMMAND } from "../infra/node-commands.js";
 import {
   mergeRemoteNodeSkillEntries,
@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 function createFixture(
-  initial: OpenClawConfig = {},
+  initial: CarapaceConfig = {},
   pairingOptions: Pick<
     NonNullable<ConstructorParameters<typeof NodeRegistry>[0]>,
     "resolveCurrentPairingState"
@@ -77,17 +77,17 @@ function createFixture(
     client,
     socket,
     getConfig: () => config,
-    publishConfig: (next: OpenClawConfig) => {
+    publishConfig: (next: CarapaceConfig) => {
       config = next;
     },
-    reload: (next: OpenClawConfig) => {
+    reload: (next: CarapaceConfig) => {
       config = next;
       registry.refreshRuntimePolicy(next);
     },
   };
 }
 
-function readCommandState(node: NodeSession, config: OpenClawConfig, command: string) {
+function readCommandState(node: NodeSession, config: CarapaceConfig, command: string) {
   return resolveRequiredNodeCommandAuthority({
     requiredCommands: [command],
     declaredCommands: node.declaredCommands,
@@ -148,7 +148,7 @@ describe("connected node runtime policy", () => {
     { name: "initially denied approved declaration", caps: [], initiallyDenied: true },
     { name: "Talk capability advertisement", caps: ["talk"], initiallyDenied: true },
   ])("restores approved Talk commands for a $name", ({ caps, initiallyDenied }) => {
-    const denied: OpenClawConfig = {
+    const denied: CarapaceConfig = {
       gateway: { nodes: { commands: { deny: TALK_PTT_COMMANDS } } },
     };
     const approvedCommands = ["talk.ptt.start", "talk.ptt.stop"];
@@ -194,7 +194,7 @@ describe("connected node runtime policy", () => {
       },
     });
     expect(invokeId).not.toBe("");
-    const candidate: OpenClawConfig = {
+    const candidate: CarapaceConfig = {
       gateway: {
         nodes: {
           commands: { deny: ["system.run"] },

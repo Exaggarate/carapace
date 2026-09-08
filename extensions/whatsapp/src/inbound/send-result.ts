@@ -1,20 +1,20 @@
 // Whatsapp plugin module implements send result behavior.
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { WAMessage, WAMessageKey } from "baileys";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
+import { recordChannelActivity } from "carapace/plugin-sdk/channel-activity-runtime";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createMessageReceiptFromOutboundResults,
   listMessageReceiptPlatformIds,
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { normalizeStringEntries, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type WhatsAppSendKind =
   | "contact"

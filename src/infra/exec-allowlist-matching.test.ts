@@ -33,13 +33,13 @@ describe("exec allowlist matching", () => {
     const relativeResolution = {
       kind: "executable" as const,
       rawExecutable: "./rg",
-      resolvedPath: "/tmp/openclaw-workspace/rg",
+      resolvedPath: "/tmp/carapace-workspace/rg",
       executableName: "rg",
     };
     const absoluteResolution = {
       kind: "executable" as const,
-      rawExecutable: "/tmp/openclaw-workspace/rg",
-      resolvedPath: "/tmp/openclaw-workspace/rg",
+      rawExecutable: "/tmp/carapace-workspace/rg",
+      resolvedPath: "/tmp/carapace-workspace/rg",
       executableName: "rg",
     };
 

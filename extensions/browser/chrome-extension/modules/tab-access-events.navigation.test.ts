@@ -87,7 +87,7 @@ async function createNavigationHarness(
     scheduleTabsSync() {},
     detachDebugger,
     pauseTab: async (tabId) => await policy.pause(tabId),
-    removeTabFromOpenClawGroup: async () => {},
+    removeTabFromCarapaceGroup: async () => {},
     runAccessMutation: async (task) => await task(),
   });
   return {
@@ -301,7 +301,7 @@ describe("Chrome navigation event access", () => {
         "https://destination.example/",
         "data:text/html,proof",
         "blob:https://destination.example/document",
-        "file:///tmp/openclaw-navigation-proof.html",
+        "file:///tmp/carapace-navigation-proof.html",
       ].map((url) => ({ mode, url })),
     ),
   )("preserves ordered navigation events in $mode mode for $url", async ({ mode, url }) => {
@@ -448,7 +448,7 @@ describe("Chrome navigation event access", () => {
       const harness = await createNavigationHarness("all", { fileAccessAllowed });
       const releaseLookup = harness.deferLookup();
       try {
-        harness.update({ url: "file:///tmp/openclaw-navigation-proof.html" });
+        harness.update({ url: "file:///tmp/carapace-navigation-proof.html" });
         harness.emitNavigation();
         expect(harness.send).toHaveBeenCalledTimes(fileAccessAllowed ? navigationEvents.length : 0);
       } finally {

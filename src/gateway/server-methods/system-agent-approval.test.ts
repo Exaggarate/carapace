@@ -2,14 +2,14 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createOperationalRunInstanceRef } from "../../agents/admitted-run-context.js";
 import { withGatewayToolCallerIdentity } from "../../agents/tools/gateway-caller-context.js";
 import { createSystemAgentTool } from "../../agents/tools/system-agent-tool.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   claimAgentRunDelegatedAuthority,
   releaseAgentRunDelegatedAuthority,
@@ -23,7 +23,7 @@ import {
 import { resetPluginStateStoreForTests } from "../../plugin-state/plugin-state-store.js";
 import { resetCommandQueueStateForTest } from "../../process/command-queue.test-support.js";
 import { AsyncWorkScope } from "../../shared/async-work-scope.js";
-import { closeOpenClawStateDatabaseByPath } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../../state/carapace-state-db.js";
 import { SystemAgentChatEngine } from "../../system-agent/chat-engine.js";
 import {
   createSystemAgentVerifiedInferenceTestFixture,
@@ -54,7 +54,7 @@ afterEach(() => {
 });
 
 describe("Full Access delegated chat", () => {
-  const verifiedConfig: OpenClawConfig = {
+  const verifiedConfig: CarapaceConfig = {
     agents: { defaults: { model: "openai/gpt-5.5@openai:verified" } },
     auth: { profiles: { "openai:verified": { provider: "openai", mode: "api_key" } } },
   };
@@ -72,7 +72,7 @@ describe("Full Access delegated chat", () => {
   afterEach(async () => {
     for (const { manager, databasePath } of approvalManagers.splice(0)) {
       await manager.drain();
-      closeOpenClawStateDatabaseByPath(databasePath);
+      closeCarapaceStateDatabaseByPath(databasePath);
     }
     vi.restoreAllMocks();
     vi.resetAllMocks();
@@ -87,10 +87,10 @@ describe("Full Access delegated chat", () => {
     source: "typed" | "model tool" = "typed",
     previousRun = "live",
   ) {
-    const stateDir = systemAgentTempDirs.make("openclaw-full-access-change-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
-    fs.writeFileSync(path.join(stateDir, "openclaw.json"), JSON.stringify(verifiedConfig));
+    const stateDir = systemAgentTempDirs.make("carapace-full-access-change-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
+    fs.writeFileSync(path.join(stateDir, "carapace.json"), JSON.stringify(verifiedConfig));
 
     const fixture = await pluginMetadataSnapshot!.run(() =>
       createSystemAgentVerifiedInferenceTestFixture(verifiedConfig),
@@ -110,7 +110,7 @@ describe("Full Access delegated chat", () => {
           ({
             exists: true,
             valid: true,
-            path: "/tmp/openclaw.json",
+            path: "/tmp/carapace.json",
             hash: "verified-config",
             config: verifiedConfig,
             runtimeConfig: verifiedConfig,
@@ -139,7 +139,7 @@ describe("Full Access delegated chat", () => {
       },
     });
     vi.spyOn(engine, "loadOverview").mockResolvedValue({
-      config: { path: "/tmp/openclaw.json", exists: true, valid: true, issues: [], hash: null },
+      config: { path: "/tmp/carapace.json", exists: true, valid: true, issues: [], hash: null },
       agents: [],
       defaultAgentId: "main",
       defaultModel: "openai/gpt-5.5",
@@ -151,8 +151,8 @@ describe("Full Access delegated chat", () => {
       },
       gateway: { url: "ws://127.0.0.1:18789", source: "test", reachable: true },
       references: {
-        docsUrl: "https://docs.openclaw.ai",
-        sourceUrl: "https://github.com/openclaw/openclaw",
+        docsUrl: "https://github.com/Exaggarate/carapace",
+        sourceUrl: "https://github.com/Exaggarate/carapace",
       },
     } as never);
     const delegatedSession: SystemAgentChatSession = {
@@ -180,7 +180,7 @@ describe("Full Access delegated chat", () => {
     const authority = claimAgentRunDelegatedAuthority(operationalRunInstance);
     const requested = createDeferred();
     const broadcast = vi.fn((event: string) => {
-      if (event === "openclaw.approval.requested") {
+      if (event === "carapace.approval.requested") {
         requested.resolve();
       }
     });
@@ -193,7 +193,7 @@ describe("Full Access delegated chat", () => {
     } as unknown as GatewayRequestContext;
     const callChat = async (params: Record<string, unknown>) => {
       const respond = vi.fn<(ok: boolean, payload?: unknown, error?: unknown) => void>();
-      const handler = expectDefined(systemAgentHandlers["openclaw.chat"], "chat handler");
+      const handler = expectDefined(systemAgentHandlers["carapace.chat"], "chat handler");
       await pluginMetadataSnapshot!.run(() =>
         handler({
           params,
@@ -372,7 +372,7 @@ describe("Full Access delegated chat", () => {
         }
         const expected =
           outcome === "allow"
-            ? "[openclaw] done: config.set"
+            ? "[carapace] done: config.set"
             : outcome === "deny"
               ? "Denied"
               : outcome === "expired"
@@ -391,7 +391,7 @@ describe("Full Access delegated chat", () => {
           expect(
             transcriptStoreMocks.appendTranscriptTurn.mock.calls.filter(([turn]) =>
               turn.text.includes(
-                outcome === "allow" ? "[openclaw] done: config.set" : "failed to complete",
+                outcome === "allow" ? "[carapace] done: config.set" : "failed to complete",
               ),
             ),
           ).toHaveLength(1);
@@ -456,7 +456,7 @@ describe("Full Access delegated chat", () => {
       expect(call.error).toBeUndefined();
       expect(call).toMatchObject({
         ok: true,
-        payload: { reply: expect.stringContaining("[openclaw] done: config.set") },
+        payload: { reply: expect.stringContaining("[carapace] done: config.set") },
       });
       expect(runConfigSet).toHaveBeenCalledOnce();
       expect(call.payload).not.toHaveProperty("needsApproval");
@@ -471,7 +471,7 @@ describe("Full Access delegated chat", () => {
       expect(transcriptStoreMocks.appendTranscriptTurn).toHaveBeenCalledWith(
         expect.objectContaining({
           role: "assistant",
-          text: expect.stringContaining("[openclaw] done: config.set"),
+          text: expect.stringContaining("[carapace] done: config.set"),
         }),
       );
 

@@ -3,7 +3,7 @@ import { fixtureCapabilityConsentArgs } from "../../e2e/lib/package-compat.mjs";
 import type { LaneBaseParams, LaneState } from "./config.ts";
 import { runInstalledCli } from "./installed.ts";
 import { runTimedLanePhase } from "./reporting.ts";
-import { runOpenClaw } from "./runtime.ts";
+import { runCarapace } from "./runtime.ts";
 
 export async function installLaneCompanions(
   params: Pick<LaneBaseParams, "companions" | "logsDir"> & {
@@ -26,7 +26,7 @@ export async function installLaneCompanions(
             logPath,
             timeoutMs,
           })
-        : runOpenClaw({
+        : runCarapace({
             lane: params.lane,
             args,
             env: params.env,

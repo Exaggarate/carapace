@@ -1,13 +1,13 @@
-# @openclaw/comfy-provider
+# @carapace/comfy-provider
 
 Official ComfyUI image, video, and music generation provider plugin for
-OpenClaw.
+Carapace.
 
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/comfy-provider
-openclaw gateway restart
+carapace plugins install @carapace/comfy-provider
+carapace gateway restart
 ```
 
 ## Configure
@@ -17,10 +17,10 @@ Local ComfyUI workflows do not require credentials. Comfy Cloud workflows use
 
 Full workflow, model, and provider configuration:
 
-- https://docs.openclaw.ai/providers/comfy
+- ../../docs/providers/comfy.md
 
 ## Package
 
 - Plugin id: `comfy`
-- Package: `@openclaw/comfy-provider`
-- Minimum OpenClaw host: `2026.7.2`
+- Package: `@carapace/comfy-provider`
+- Minimum Carapace host: `2026.7.2`

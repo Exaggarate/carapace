@@ -165,7 +165,7 @@ describeLaunchdIntegration("launchd integration", () => {
   const stdout = new PassThrough();
 
   it("real launchctl: node-host LaunchAgent stop/restart survives a co-located busy Gateway port (#124296)", async () => {
-    // Real-world proof for https://github.com/openclaw/openclaw/issues/124296:
+    // Real-world proof for https://github.com/Exaggarate/carapace/issues/124296:
     // this drives actual `launchctl` LaunchAgents (no mocked port-inspection
     // or launchctl calls) to reproduce the reported false-positive
     // "gateway port is still busy" failure and confirm the fix resolves it.
@@ -175,26 +175,26 @@ describeLaunchdIntegration("launchd integration", () => {
     // Real "gateway" LaunchAgent that genuinely binds the scratch port, so
     // the port really is busy for the whole test — no port mocking at all.
     const gatewayHomeDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), `openclaw-launchd-int-gw-${testId}-`),
+      path.join(os.tmpdir(), `carapace-launchd-int-gw-${testId}-`),
     );
     const gatewayEnv: GatewayServiceEnv = {
       HOME: gatewayHomeDir,
-      OPENCLAW_LAUNCHD_LABEL: `ai.openclaw.launchd-int-gw-${testId}`,
-      OPENCLAW_LOG_PREFIX: `gateway-launchd-int-gw-${testId}`,
-      OPENCLAW_GATEWAY_PORT: String(gatewayPort),
+      CARAPACE_LAUNCHD_LABEL: `ai.carapace.launchd-int-gw-${testId}`,
+      CARAPACE_LOG_PREFIX: `gateway-launchd-int-gw-${testId}`,
+      CARAPACE_GATEWAY_PORT: String(gatewayPort),
     };
 
     // Real "node-host" LaunchAgent, co-located on the same machine, tagged
     // with the node service kind. It never binds the gateway port itself.
     const nodeHomeDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), `openclaw-launchd-int-node-${testId}-`),
+      path.join(os.tmpdir(), `carapace-launchd-int-node-${testId}-`),
     );
     const nodeEnv: GatewayServiceEnv = {
       HOME: nodeHomeDir,
-      OPENCLAW_LAUNCHD_LABEL: `ai.openclaw.launchd-int-node-${testId}`,
-      OPENCLAW_LOG_PREFIX: `gateway-launchd-int-node-${testId}`,
-      OPENCLAW_SERVICE_KIND: "node",
-      OPENCLAW_GATEWAY_PORT: String(gatewayPort),
+      CARAPACE_LAUNCHD_LABEL: `ai.carapace.launchd-int-node-${testId}`,
+      CARAPACE_LOG_PREFIX: `gateway-launchd-int-node-${testId}`,
+      CARAPACE_SERVICE_KIND: "node",
+      CARAPACE_GATEWAY_PORT: String(gatewayPort),
     };
 
     try {
@@ -274,11 +274,11 @@ describeLaunchdIntegration("launchd integration", () => {
 
   beforeAll(async () => {
     const testId = randomUUID().slice(0, 8);
-    homeDir = await fs.mkdtemp(path.join(os.tmpdir(), `openclaw-launchd-int-${testId}-`));
+    homeDir = await fs.mkdtemp(path.join(os.tmpdir(), `carapace-launchd-int-${testId}-`));
     env = {
       HOME: homeDir,
-      OPENCLAW_LAUNCHD_LABEL: `ai.openclaw.launchd-int-${testId}`,
-      OPENCLAW_LOG_PREFIX: `gateway-launchd-int-${testId}`,
+      CARAPACE_LAUNCHD_LABEL: `ai.carapace.launchd-int-${testId}`,
+      CARAPACE_LOG_PREFIX: `gateway-launchd-int-${testId}`,
     };
   });
 
@@ -307,15 +307,15 @@ describeLaunchdIntegration("launchd integration", () => {
     const testId = randomUUID().slice(0, 8);
     const profile = `launchd-int-${testId}`;
     const accountHome = os.userInfo().homedir;
-    const stateDir = path.join(accountHome, `.openclaw-${profile}`);
+    const stateDir = path.join(accountHome, `.carapace-${profile}`);
     const profileEnv: GatewayServiceEnv = {
       HOME: accountHome,
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_PROFILE: profile,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_LAUNCHD_LABEL: undefined,
-      OPENCLAW_SUPERVISOR_MODE: undefined,
+      CARAPACE_HOME: undefined,
+      CARAPACE_PROFILE: profile,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_LAUNCHD_LABEL: undefined,
+      CARAPACE_SUPERVISOR_MODE: undefined,
     };
 
     await withEnvAsync(profileEnv, async () => {
@@ -350,15 +350,15 @@ describeLaunchdIntegration("launchd integration", () => {
     });
   }, 60_000);
 
-  it("refuses a relocated OPENCLAW_HOME before launchd mutation", async () => {
+  it("refuses a relocated CARAPACE_HOME before launchd mutation", async () => {
     const testId = randomUUID().slice(0, 8);
     const relocatedHome = await fs.mkdtemp(
-      path.join(os.tmpdir(), `openclaw-relocated-home-${testId}-`),
+      path.join(os.tmpdir(), `carapace-relocated-home-${testId}-`),
     );
     const relocatedEnv: GatewayServiceEnv = {
       HOME: os.userInfo().homedir,
-      OPENCLAW_HOME: relocatedHome,
-      OPENCLAW_PROFILE: `launchd-int-${testId}`,
+      CARAPACE_HOME: relocatedHome,
+      CARAPACE_PROFILE: `launchd-int-${testId}`,
     };
 
     try {

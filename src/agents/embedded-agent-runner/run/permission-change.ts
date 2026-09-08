@@ -12,7 +12,7 @@ type PermissionChangeAuthority = { authorized?: { mode: PermissionMode } };
 // Gateway dispatch and harness setup can load separate runtime chunks. Their
 // private authority registry must still recognize the exact same run owner.
 const permissionChangeAuthorities = resolveGlobalSingleton(
-  Symbol.for("openclaw.embeddedRunPermissionChangeAuthorities"),
+  Symbol.for("carapace.embeddedRunPermissionChangeAuthorities"),
   () => new WeakMap<object, PermissionChangeAuthority>(),
 );
 

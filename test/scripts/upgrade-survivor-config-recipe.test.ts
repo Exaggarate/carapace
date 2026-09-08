@@ -20,8 +20,8 @@ import {
   resolveScenarioConfigSteps,
   resolveUpgradeSurvivorConfigSteps,
   resolveUpgradeSurvivorConfigStepsForBaseline,
-  resolveUpgradeSurvivorOpenClawCommand,
-  runUpgradeSurvivorOpenClawStep,
+  resolveUpgradeSurvivorCarapaceCommand,
+  runUpgradeSurvivorCarapaceStep,
 } from "../../scripts/e2e/lib/upgrade-survivor/config-recipe.mts";
 import { AgentsSchema } from "../../src/config/zod-schema.agents.js";
 
@@ -32,20 +32,20 @@ const DOCKER_RUNNER_PATH = "scripts/e2e/upgrade-survivor-docker.sh";
 describe("upgrade survivor config recipe command resolution", () => {
   it("selects the prerelease update channel for the plugin registry", () => {
     const runner = readFileSync(RUN_PATH, "utf8");
-    expect(runner).toContain('OPENCLAW_UPGRADE_SURVIVOR_UPDATE_CHANNEL="beta"');
-    expect(runner).toContain("OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION");
+    expect(runner).toContain('CARAPACE_UPGRADE_SURVIVOR_UPDATE_CHANNEL="beta"');
+    expect(runner).toContain("CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION");
   });
 
   it.skipIf(process.platform === "win32")(
     "launches the published baseline with trusted sources and no host dependencies",
     () => {
-      const root = realpathSync(mkdtempSync(join(tmpdir(), "openclaw-upgrade-docker-boundary-")));
+      const root = realpathSync(mkdtempSync(join(tmpdir(), "carapace-upgrade-docker-boundary-")));
       const harnessRoot = realpathSync(process.cwd());
       try {
         const candidateRoot = join(root, "candidate");
         const binDir = join(root, "bin");
         const candidate = join(candidateRoot, "candidate.tgz");
-        const stateScript = "scripts/lib/openclaw-test-state.mts";
+        const stateScript = "scripts/lib/carapace-test-state.mts";
         mkdirSync(join(candidateRoot, dirname(stateScript)), { recursive: true });
         cpSync(stateScript, join(candidateRoot, stateScript));
         writeFileSync(candidate, "unused by the Docker boundary stub");
@@ -70,19 +70,19 @@ esac
             HOME: root,
             TMPDIR: root,
             PATH: [binDir, dirname(process.execPath), process.env.PATH ?? ""].join(delimiter),
-            OPENCLAW_SKIP_DOCKER_BUILD: "1",
-            OPENCLAW_DOCKER_E2E_REPO_ROOT: candidateRoot,
-            OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR: join(root, "artifacts"),
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
-            OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@2026.7.1-2",
-            OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE: candidate,
+            CARAPACE_SKIP_DOCKER_BUILD: "1",
+            CARAPACE_DOCKER_E2E_REPO_ROOT: candidateRoot,
+            CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR: join(root, "artifacts"),
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
+            CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@2026.7.1-2",
+            CARAPACE_UPGRADE_SURVIVOR_CANDIDATE: candidate,
           },
         });
         expect(result.status, result.stdout + result.stderr).toBe(0);
         const args = readFileSync(join(root, "docker-args"), "utf8").split("\0").slice(0, -1);
         const mounts = args.filter((_, index) => args[index - 1] === "-v");
         expect(mounts.filter((mount) => mount.includes("node_modules"))).toEqual([]);
-        expect(args.some((arg) => arg.startsWith("OPENCLAW_UPGRADE_SURVIVOR_TSX_IMPORT="))).toBe(
+        expect(args.some((arg) => arg.startsWith("CARAPACE_UPGRADE_SURVIVOR_TSX_IMPORT="))).toBe(
           false,
         );
         expect(mounts).toEqual(
@@ -90,22 +90,22 @@ esac
             `${harnessRoot}/scripts/e2e:/app/scripts/e2e:ro`,
             `${harnessRoot}/scripts/lib:/app/scripts/lib:ro`,
             `${harnessRoot}/scripts/windows-cmd-helpers.mjs:/app/scripts/windows-cmd-helpers.mjs:ro`,
-            `${harnessRoot}/${RUN_PATH}:/tmp/openclaw-upgrade-survivor-run.sh:ro`,
-            `${candidate}:/tmp/openclaw-current.tgz:ro`,
+            `${harnessRoot}/${RUN_PATH}:/tmp/carapace-upgrade-survivor-run.sh:ro`,
+            `${candidate}:/tmp/carapace-current.tgz:ro`,
           ]),
         );
         expect(mounts.filter((mount) => mount.startsWith(`${candidateRoot}/`))).toEqual([
-          `${candidate}:/tmp/openclaw-current.tgz:ro`,
+          `${candidate}:/tmp/carapace-current.tgz:ro`,
         ]);
         expect(args).toContain(
-          "OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC=/tmp/openclaw-current.tgz",
+          "CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC=/tmp/carapace-current.tgz",
         );
         expect(args.slice(-5)).toEqual([
           "timeout",
           "--kill-after=30s",
           "1200s",
           "bash",
-          "/tmp/openclaw-upgrade-survivor-run.sh",
+          "/tmp/carapace-upgrade-survivor-run.sh",
         ]);
       } finally {
         rmSync(root, { force: true, recursive: true });
@@ -122,9 +122,9 @@ esac
     expect(isReleaseBefore("2026.3.9007199254740993", "2026.4.0")).toBe(false);
   });
 
-  it("wraps Windows openclaw npm shims through cmd.exe", () => {
+  it("wraps Windows carapace npm shims through cmd.exe", () => {
     expect(
-      resolveUpgradeSurvivorOpenClawCommand(
+      resolveUpgradeSurvivorCarapaceCommand(
         ["config", "set", "models.providers.openai", '{"apiKey":"sk test"}', "--strict-json"],
         {
           comSpec: String.raw`C:\Windows\System32\cmd.exe`,
@@ -136,25 +136,25 @@ esac
         "/d",
         "/s",
         "/c",
-        'openclaw.cmd config set models.providers.openai "{""apiKey"":""sk test""}" --strict-json',
+        'carapace.cmd config set models.providers.openai "{""apiKey"":""sk test""}" --strict-json',
       ],
       command: String.raw`C:\Windows\System32\cmd.exe`,
       commandLabel:
-        'openclaw config set models.providers.openai {"apiKey":"sk test"} --strict-json',
+        'carapace config set models.providers.openai {"apiKey":"sk test"} --strict-json',
       shell: false,
       windowsVerbatimArguments: true,
     });
   });
 
-  it("keeps POSIX openclaw invocations direct", () => {
+  it("keeps POSIX carapace invocations direct", () => {
     expect(
-      resolveUpgradeSurvivorOpenClawCommand(["config", "validate"], {
+      resolveUpgradeSurvivorCarapaceCommand(["config", "validate"], {
         platform: "linux",
       }),
     ).toEqual({
       args: ["config", "validate"],
-      command: "openclaw",
-      commandLabel: "openclaw config validate",
+      command: "carapace",
+      commandLabel: "carapace config validate",
       shell: false,
     });
   });
@@ -317,11 +317,11 @@ esac
 
   it("bounds baseline config commands and reports spawn errors", () => {
     const calls: unknown[] = [];
-    const timeoutError = Object.assign(new Error("spawnSync openclaw ETIMEDOUT"), {
+    const timeoutError = Object.assign(new Error("spawnSync carapace ETIMEDOUT"), {
       code: "ETIMEDOUT",
     });
 
-    const outcome = runUpgradeSurvivorOpenClawStep(
+    const outcome = runUpgradeSurvivorCarapaceStep(
       {
         argv: ["config", "validate"],
         id: "validate",
@@ -344,7 +344,7 @@ esac
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({
       args: ["config", "validate"],
-      command: "openclaw",
+      command: "carapace",
       options: {
         killSignal: "SIGTERM",
         maxBuffer: CONFIG_COMMAND_MAX_BUFFER_BYTES,
@@ -352,9 +352,9 @@ esac
       },
     });
     expect(outcome).toMatchObject({
-      command: "openclaw config validate",
+      command: "carapace config validate",
       errorCode: "ETIMEDOUT",
-      errorMessage: "spawnSync openclaw ETIMEDOUT",
+      errorMessage: "spawnSync carapace ETIMEDOUT",
       ok: false,
       signal: "SIGTERM",
       status: null,
@@ -366,28 +366,28 @@ esac
   it.each(process.platform === "win32" ? ["recipe CLI"] : ["recipe CLI", "survivor shell"])(
     "skips unsupported ACPX bridge config through the %s",
     (entrypoint) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-upgrade-recipe-acpx-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-upgrade-recipe-acpx-"));
       try {
         const binDir = join(root, "bin");
-        const logPath = join(root, "openclaw-argv.jsonl");
+        const logPath = join(root, "carapace-argv.jsonl");
         const summaryPath = join(root, "summary.json");
         mkdirSync(binDir, { recursive: true });
-        const openclawLogPath = join(binDir, "openclaw-log.js");
-        const openclawPath = join(binDir, "openclaw");
-        const openclawCmdPath = join(binDir, "openclaw.cmd");
+        const carapaceLogPath = join(binDir, "carapace-log.js");
+        const carapacePath = join(binDir, "carapace");
+        const carapaceCmdPath = join(binDir, "carapace.cmd");
         writeFileSync(
-          openclawLogPath,
+          carapaceLogPath,
           `
 const fs = require("node:fs");
 fs.appendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + "\\n");
 process.exit(0);
 `,
         );
-        writeFileSync(openclawPath, `#!/usr/bin/env node\nrequire("./openclaw-log.js");\n`);
-        chmodSync(openclawPath, 0o755);
+        writeFileSync(carapacePath, `#!/usr/bin/env node\nrequire("./carapace-log.js");\n`);
+        chmodSync(carapacePath, 0o755);
         writeFileSync(
-          openclawCmdPath,
-          `@echo off\r\n"${process.execPath}" "%~dp0openclaw-log.js" %*\r\n`,
+          carapaceCmdPath,
+          `@echo off\r\n"${process.execPath}" "%~dp0carapace-log.js" %*\r\n`,
         );
 
         let command = process.execPath;
@@ -421,9 +421,9 @@ process.exit(0);
           cwd = root;
           args = [
             "-c",
-            `set -euo pipefail\nsource "$1"\n${launcher}\nSCENARIO="$OPENCLAW_UPGRADE_SURVIVOR_SCENARIO"\nCONFIG_COVERAGE_JSON="$2"\nbaseline_version=2026.4.21\napply_baseline_config_recipe`,
+            `set -euo pipefail\nsource "$1"\n${launcher}\nSCENARIO="$CARAPACE_UPGRADE_SURVIVOR_SCENARIO"\nCONFIG_COVERAGE_JSON="$2"\nbaseline_version=2026.4.21\napply_baseline_config_recipe`,
             "survivor-recipe",
-            join(process.cwd(), "scripts/lib/openclaw-e2e-instance.sh"),
+            join(process.cwd(), "scripts/lib/carapace-e2e-instance.sh"),
             summaryPath,
           ];
         }
@@ -431,7 +431,7 @@ process.exit(0);
           cwd,
           env: {
             ...process.env,
-            OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "acpx-openclaw-tools-bridge",
+            CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "acpx-carapace-tools-bridge",
             PATH: [binDir, join(process.cwd(), "node_modules/.bin"), process.env.PATH ?? ""].join(
               delimiter,
             ),
@@ -444,15 +444,15 @@ process.exit(0);
           .trim()
           .split("\n")
           .map((line) => JSON.parse(line));
-        expect(summary.skippedIntents).toContain("acpx-openclaw-tools-bridge");
-        expect(summary.acceptedIntents).not.toContain("acpx-openclaw-tools-bridge");
+        expect(summary.skippedIntents).toContain("acpx-carapace-tools-bridge");
+        expect(summary.acceptedIntents).not.toContain("acpx-carapace-tools-bridge");
         expect(summary.baselineVersion).toBe("2026.4.21");
         expect(loggedArgs.at(-1)).toEqual(["config", "validate"]);
         expect(loggedArgs).not.toContainEqual(
           expect.arrayContaining([
             "set",
             "plugins",
-            expect.stringContaining("openClawToolsMcpBridge"),
+            expect.stringContaining("carapaceToolsMcpBridge"),
           ]),
         );
       } finally {

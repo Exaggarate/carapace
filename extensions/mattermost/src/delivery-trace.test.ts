@@ -6,7 +6,7 @@
 // events are the raw REST calls (POST/PUT/DELETE /posts). The monitor's
 // per-activity glue (partial dedupe, boundary rotation) is replicated inline in
 // block-preview mode; the scripted steps stand in for the dispatcher callbacks.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with CARAPACE_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import {
   deliveryTraceScenarios,
   expectDeliveryTraceMatchesGolden,
@@ -14,20 +14,20 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenario,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
+} from "carapace/plugin-sdk/channel-contract-testing";
 import {
   createMessageReceiptFromOutboundResults,
   listMessageReceiptPlatformIds,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig, PluginRuntime } from "openclaw/plugin-sdk/core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig, PluginRuntime } from "carapace/plugin-sdk/core";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
 import {
   chunkMarkdownTextWithMode,
   resolveChunkMode,
   resolveTextChunkLimit,
-} from "openclaw/plugin-sdk/reply-chunking";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/reply-chunking";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { convertMarkdownTables } from "carapace/plugin-sdk/text-chunking";
 import { describe, it, vi } from "vitest";
 import { createMattermostPost, type MattermostClient } from "./mattermost/client.js";
 import {
@@ -47,7 +47,7 @@ const ACCOUNT_ID = "main";
 // Matches the monitor's draft stream wiring (throttleMs: 1200).
 const DRAFT_THROTTLE_MS = 1200;
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const tableMode = resolveMarkdownTableMode({ cfg, channel: "mattermost" });
 const chunkMode = resolveChunkMode(cfg, "mattermost", ACCOUNT_ID);
 const textLimit = resolveTextChunkLimit(cfg, "mattermost", ACCOUNT_ID, { fallbackLimit: 4000 });

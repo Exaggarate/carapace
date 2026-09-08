@@ -171,10 +171,10 @@ describe("executeZalouserTool", () => {
     const linkResult = await executeZalouserTool("tool-1", {
       action: "link",
       threadId: "t-2",
-      url: "https://openclaw.ai",
+      url: "https://github.com/Exaggarate/carapace",
       message: "read this",
     });
-    expect(mockSendLink).toHaveBeenCalledWith("t-2", "https://openclaw.ai", {
+    expect(mockSendLink).toHaveBeenCalledWith("t-2", "https://github.com/Exaggarate/carapace", {
       profile: undefined,
       caption: "read this",
       isGroup: undefined,

@@ -343,7 +343,7 @@ function makeRunModeCleanupEntry(
         agentId: "main",
         sessionId: transcriptSessionId,
         sessionKey: `agent:main:internal:${sessionKeySuffix}`,
-        storePath: "/tmp/openclaw-agent.sqlite",
+        storePath: "/tmp/carapace-agent.sqlite",
       },
       ...execution,
     },
@@ -529,7 +529,7 @@ async function runNoReplyMirrorScenario(params: {
     messages: [
       {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: text,
         timestamp: params.timestamp,
@@ -3800,7 +3800,7 @@ describe("subagent registry lifecycle hardening", () => {
           agentId: "main",
           sessionId: "child-session",
           sessionKey: "agent:main:subagent:child",
-          storePath: "/tmp/openclaw/agents/main/sessions/sessions.json",
+          storePath: "/tmp/carapace/agents/main/sessions/sessions.json",
         },
       },
     });
@@ -4396,7 +4396,7 @@ describe("subagent registry lifecycle hardening", () => {
               ? [
                   {
                     role: "assistant",
-                    provider: "openclaw",
+                    provider: "carapace",
                     model: "delivery-mirror",
                     timestamp: 12_300,
                     idempotencyKey: buildExpectedAnnounceIdempotencyKey(entry),

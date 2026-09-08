@@ -5,11 +5,11 @@ import { resolveControlUiAuthCandidates } from "../../ui/src/app/control-ui-auth
 import { setAvatarGatewayOrigin } from "../../ui/src/lib/identity-avatar-context.ts";
 import { resolveAvatarImageUrl } from "../../ui/src/lib/identity-avatar-loader.ts";
 import * as configIo from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { approveDevicePairing } from "../infra/device-pairing-approval.js";
 import { ensureDeviceToken, revokeDeviceToken } from "../infra/device-pairing-tokens.js";
 import { requestDevicePairing } from "../infra/device-pairing.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { ensureGatewayOwnerProfile, setAvatar } from "../state/user-profiles.js";
 import { createAuthRateLimiter, type AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
@@ -30,7 +30,7 @@ describe("personal avatar HTTP authentication", () => {
   let origin: string;
   let avatarPath: string;
   let auth: ResolvedGatewayAuth;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   let rateLimiter: AuthRateLimiter | undefined;
 
   beforeAll(async () => {
@@ -66,7 +66,7 @@ describe("personal avatar HTTP authentication", () => {
   });
 
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("personal-avatar-auth-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("personal-avatar-auth-"));
     cfg = {};
     auth = { mode: "token", token: "test-shared-secret", allowTailscale: false };
     vi.spyOn(configIo, "getRuntimeConfig").mockImplementation(() => cfg);
@@ -79,7 +79,7 @@ describe("personal avatar HTTP authentication", () => {
     setAvatarGatewayOrigin(null);
     rateLimiter?.dispose();
     rateLimiter = undefined;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
   });
@@ -91,7 +91,7 @@ describe("personal avatar HTTP authentication", () => {
       publicKey: "test-public-key",
       role,
       scopes,
-      clientId: "openclaw-control-ui",
+      clientId: "carapace-control-ui",
       clientMode: "webchat",
     });
     const approved = await approveDevicePairing(requested.request.requestId, {
@@ -212,7 +212,7 @@ describe("personal avatar HTTP authentication", () => {
           ? "invalid-test-token"
           : token;
     const response = await request(credential, {
-      headers: { "x-openclaw-scopes": "operator.admin" },
+      headers: { "x-carapace-scopes": "operator.admin" },
     });
     expect(response.status).toBe(401);
     expect(response.headers.get("content-type")).not.toBe("image/png");

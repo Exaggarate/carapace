@@ -1,6 +1,6 @@
 // Tests compact-command session authority across awaited lifecycle transitions.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   abortEmbeddedAgentRun,
   buildCompactParams,
@@ -28,7 +28,7 @@ describe("handleCompactCommand lifecycle authority", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -59,7 +59,7 @@ describe("handleCompactCommand lifecycle authority", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -91,7 +91,7 @@ describe("handleCompactCommand lifecycle authority", () => {
           ...buildCompactParams("/compact", {
             commands: { text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as OpenClawConfig),
+          } as CarapaceConfig),
           opts: { replyOperation },
           sessionEntry: {
             sessionId: "session-1",
@@ -116,7 +116,7 @@ describe("handleCompactCommand lifecycle authority", () => {
         ...buildCompactParams("/compact", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as OpenClawConfig),
+        } as CarapaceConfig),
         sessionEntry: {
           sessionId: "session-1",
           updatedAt: Date.now(),
@@ -245,7 +245,7 @@ describe("handleCompactCommand lifecycle authority", () => {
           ...buildCompactParams("/compact", {
             commands: { text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as OpenClawConfig),
+          } as CarapaceConfig),
           sessionEntry: initial,
         } as HandleCommandsParams,
         true,

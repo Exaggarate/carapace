@@ -10,7 +10,7 @@ import {
 } from "../config/sessions/conversation-delivery-store.js";
 import { registerConversationAddresses } from "../config/sessions/conversation-registry.js";
 import { buildConversationRef } from "../routing/conversation-ref.js";
-import { closeOpenClawAgentDatabaseByPath } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../state/carapace-agent-db.js";
 
 const address = {
   channel: "reef",
@@ -32,10 +32,10 @@ export const conversation = {
 
 export function createConversationDeliveryTestStore(agentId = "main") {
   const dirs = createTempDirTracker();
-  const agentDir = path.join(dirs.make("openclaw-gateway-conversation-"), "agents", agentId);
+  const agentDir = path.join(dirs.make("carapace-gateway-conversation-"), "agents", agentId);
   const scope = { agentId, storePath: path.join(agentDir, "sessions", "sessions.json") };
   onTestFinished(() => {
-    closeOpenClawAgentDatabaseByPath(path.join(agentDir, "agent", "openclaw-agent.sqlite"));
+    closeCarapaceAgentDatabaseByPath(path.join(agentDir, "agent", "carapace-agent.sqlite"));
     dirs.cleanup();
   });
   registerConversationAddresses(scope, [{ ...conversation, deliveryTarget: conversation.target }]);

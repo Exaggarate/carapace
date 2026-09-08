@@ -26,7 +26,7 @@ describe("AppSidebar catalog session visibility", () => {
             sessions: Array.from({ length: sessionCount }, (_, index) => ({
               threadId: `thread-${index + 1}`,
               name: `Session ${index + 1}`,
-              cwd: "/workspace/openclaw",
+              cwd: "/workspace/carapace",
               status: "stored" as const,
               archived: false,
               canContinue: true,
@@ -69,7 +69,7 @@ describe("AppSidebar catalog session visibility", () => {
     const sidebar = await mountCatalog("project");
 
     const project = sidebar.querySelector<HTMLElement>(
-      '[data-session-catalog-project="project:/workspace/openclaw"]',
+      '[data-session-catalog-project="project:/workspace/carapace"]',
     );
     const projectGroup = project?.closest<HTMLElement>(".sidebar-session-catalog-project");
     expect(projectGroup).not.toBeNull();

@@ -2,14 +2,14 @@
 import {
   normalizeConfiguredProviderCatalogModelId,
   type ManifestModelIdNormalizationProvider,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
 import { isRecord } from "../utils.js";
 import {
   normalizeAgentModelMapForConfig,
   normalizeAgentModelRefForConfig,
   normalizeAgentModelSelectionForConfig,
 } from "./model-input.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const MODEL_SELECTION_KEYS = ["model", "imageModel", "voiceModel", "pdfModel"] as const;
 const MEDIA_MODEL_KEYS = ["image", "video", "music"] as const;
@@ -175,17 +175,17 @@ function normalizeProviderCatalogs(
 
 /** Canonicalize model refs submitted through a config mutation API before persistence. */
 export function normalizeSubmittedConfigModelRefs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   modelIdNormalizationPolicies?: ReadonlyMap<string, ManifestModelIdNormalizationProvider>,
-): OpenClawConfig {
+): CarapaceConfig {
   let next = cfg;
   const agents = normalizeAgentScopes(cfg.agents);
   if (agents !== cfg.agents) {
-    next = { ...next, agents: agents as OpenClawConfig["agents"] };
+    next = { ...next, agents: agents as CarapaceConfig["agents"] };
   }
   const models = normalizeProviderCatalogs(cfg.models, modelIdNormalizationPolicies);
   if (models !== cfg.models) {
-    next = { ...next, models: models as OpenClawConfig["models"] };
+    next = { ...next, models: models as CarapaceConfig["models"] };
   }
   // tools.subagents owns only tool policy; model selection moved to
   // agents.defaults/entries.*.subagents.model and the schema rejects the old key.

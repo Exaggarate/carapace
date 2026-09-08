@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
-import { ensureWorkerEnvironmentNodeEnrollmentSchema } from "../state/openclaw-state-db-schema-additive.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { ensureWorkerEnvironmentNodeEnrollmentSchema } from "../state/carapace-state-db-schema-additive.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -13,7 +13,7 @@ export function bindCloudWorkerSetupCompletion(params: {
   completion: { setupId: string; deviceId: string; completedAtMs: number };
 }): void {
   ensureWorkerEnvironmentNodeEnrollmentSchema(params.db);
-  const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(params.db);
+  const kysely = getNodeSqliteKysely<CarapaceStateKyselyDatabase>(params.db);
   const environment = executeSqliteQueryTakeFirstSync(
     params.db,
     kysely

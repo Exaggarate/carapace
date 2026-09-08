@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { WORKER_BUNDLE_PREWARM_VERSION } from "../../packages/gateway-protocol/src/schema/worker-admission.js";
 
 export const NODE_RUNNER_INVENTORY_UPDATE_METHOD = "node.runnerInventory.update";
@@ -19,8 +19,8 @@ export const NODE_WORKER_CAPACITY_MAX = 1_024;
 export const NODE_RUNNER_UPDATE_REQUIRED_ISSUE = {
   code: "update-required",
   action: "update-and-reconnect",
-  updateCommand: "openclaw update",
-  headlessReconnectCommand: "openclaw node restart",
+  updateCommand: "carapace update",
+  headlessReconnectCommand: "carapace node restart",
 } as const;
 
 export type NodeRunnerInventoryIssue = typeof NODE_RUNNER_UPDATE_REQUIRED_ISSUE;

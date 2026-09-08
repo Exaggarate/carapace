@@ -3,12 +3,12 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { Message } from "grammy/types";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createChannelReplayGuard,
   type ChannelReplayClaimHandle,
-} from "openclaw/plugin-sdk/persistent-dedupe";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/persistent-dedupe";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   claimTelegramMessageDispatchReplay,
@@ -31,7 +31,7 @@ const TELEGRAM_MESSAGE_DISPATCH_DEDUPE_STATE_MAX_ENTRIES = 50_000;
 let previousStateDir: string | undefined;
 
 function createStateDir(): string {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-telegram-dispatch-dedupe-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-telegram-dispatch-dedupe-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -109,17 +109,17 @@ function createTestClaim(params: {
 }
 
 beforeEach(() => {
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = createStateDir();
+  previousStateDir = process.env.CARAPACE_STATE_DIR;
+  process.env.CARAPACE_STATE_DIR = createStateDir();
   resetPluginStateStoreForTests({ closeDatabase: false });
 });
 
 afterEach(() => {
   resetPluginStateStoreForTests();
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.CARAPACE_STATE_DIR = previousStateDir;
   }
   for (const dir of tempDirs.splice(0)) {
     rmSync(dir, { recursive: true, force: true });

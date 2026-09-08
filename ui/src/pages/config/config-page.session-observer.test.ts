@@ -21,7 +21,7 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  const pages = document.querySelectorAll<ConfigPage>("openclaw-config-page");
+  const pages = document.querySelectorAll<ConfigPage>("carapace-config-page");
   document.body.replaceChildren();
   await settleLitElements(pages);
   vi.restoreAllMocks();

@@ -1,20 +1,20 @@
-// SQLite state benchmark seeds OpenClaw DBs and reports hot-query proof lines.
+// SQLite state benchmark seeds Carapace DBs and reports hot-query proof lines.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { pathToFileURL } from "node:url";
 import { expectDefined } from "../packages/normalization-core/src/expect.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../src/state/openclaw-agent-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../src/state/carapace-agent-db-contract.js";
 import {
-  openOpenClawAgentDatabase,
-  closeOpenClawAgentDatabasesForTest,
-} from "../src/state/openclaw-agent-db.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../src/state/openclaw-state-db-contract.js";
+  openCarapaceAgentDatabase,
+  closeCarapaceAgentDatabasesForTest,
+} from "../src/state/carapace-agent-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../src/state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../src/state/carapace-state-db.js";
 import { parseStrictIntegerOption } from "./lib/dev-tooling-safety.ts";
 import {
   collectSqliteQueryPlanEvidence,
@@ -160,7 +160,7 @@ function applyScale(config: ProfileConfig): ProfileConfig {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw SQLite state benchmark
+  console.log(`Carapace SQLite state benchmark
 
 Usage:
   node --import tsx scripts/bench-sqlite-state.ts [options]
@@ -442,7 +442,7 @@ function seedAgentDatabase(db: DatabaseSync, count: number, agentIndex: number):
         JSON.stringify(
           isCatalog
             ? {
-                generatedBy: "openclaw-plugin-model-catalog-v1",
+                generatedBy: "carapace-plugin-model-catalog-v1",
                 models: [{ id: `model-${i}`, name: `Benchmark model ${i}` }],
                 pluginId: `plugin-${i}`,
               }
@@ -784,13 +784,13 @@ function main(): void {
   const { options } = cli;
   const config = applyScale(PROFILES[options.profile]);
   const stateDir =
-    options.stateDir ?? fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sqlite-perf-"));
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+    options.stateDir ?? fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sqlite-perf-"));
+  const env = { CARAPACE_STATE_DIR: stateDir };
   const started = nowMs();
   try {
-    const stateDatabase = openOpenClawStateDatabase({ env });
+    const stateDatabase = openCarapaceStateDatabase({ env });
     const agentDatabases = Array.from({ length: config.agentCount }, (_, index) =>
-      openOpenClawAgentDatabase({ agentId: `perf-agent-${index}`, env }),
+      openCarapaceAgentDatabase({ agentId: `perf-agent-${index}`, env }),
     );
 
     const seedStarted = nowMs();
@@ -832,9 +832,9 @@ function main(): void {
       profile: options.profile,
       queries,
       versions: {
-        agentSchema: OPENCLAW_AGENT_SCHEMA_VERSION,
+        agentSchema: CARAPACE_AGENT_SCHEMA_VERSION,
         sqlite: readSqliteVersion(stateDatabase.db),
-        stateSchema: OPENCLAW_STATE_SCHEMA_VERSION,
+        stateSchema: CARAPACE_STATE_SCHEMA_VERSION,
       },
       rows: {
         agentCacheEntries: perAgentEntries * config.agentCount,
@@ -866,8 +866,8 @@ function main(): void {
     }
     printProofLines(report);
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     if (!options.stateDir) {
       fs.rmSync(stateDir, { recursive: true, force: true });
     }

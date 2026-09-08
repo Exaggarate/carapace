@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type FilterEntry = { type?: string; exclude?: boolean };
 type Interest = { filter: FilterEntry[]; flatten: boolean; admitted: boolean };

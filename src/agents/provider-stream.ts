@@ -3,10 +3,10 @@
  * Resolves plugin-owned or transport-aware stream functions and registers the
  * model API once a concrete stream implementation exists.
  */
-import type { ApiRegistry } from "@openclaw/ai";
+import type { ApiRegistry } from "@carapace/ai";
 import "./ai-transport-runtime-host.js";
-import { createTransportAwareStreamFnForModel } from "@openclaw/ai/transports";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { createTransportAwareStreamFnForModel } from "@carapace/ai/transports";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getModelLlmRuntime } from "../llm/model-runtime-binding.js";
 import type { Api, Model } from "../llm/types.js";
 import {
@@ -27,7 +27,7 @@ import type { StreamFn } from "./runtime/index.js";
 /** Resolves and registers the stream function for a provider-backed model. */
 export function registerProviderStreamForModel<TApi extends Api>(params: {
   model: Model<TApi>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

@@ -1,10 +1,10 @@
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { ToolAuthorizationError } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { ToolAuthorizationError } from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
 import {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "carapace/plugin-sdk/runtime-group-policy";
 import type { CoreConfig } from "../types.js";
 import { resolveMatrixBaseConfig } from "./account-config.js";
 import { resolveMatrixAccount } from "./accounts.js";

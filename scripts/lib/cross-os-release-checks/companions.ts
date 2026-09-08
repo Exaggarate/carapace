@@ -38,7 +38,7 @@ export function resolveCrossOsPackageSet(params: {
     // Baseline and installer selectors still belong to the published registry.
     // The candidate root is installed by its explicit tarball path.
     packages: manifest.packages
-      .filter((entry: { name: string }) => entry.name !== "openclaw")
+      .filter((entry: { name: string }) => entry.name !== "carapace")
       .map((entry: { name: string; version: string; tarball: string }) => ({
         name: entry.name,
         version: entry.version,
@@ -67,10 +67,10 @@ export async function startCrossOsPackageRegistry(
     {
       env: {
         ...process.env,
-        OPENCLAW_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
-        OPENCLAW_NPM_REGISTRY_PORT: "0",
-        OPENCLAW_NPM_REGISTRY_MERGE_UPSTREAM: "1",
-        OPENCLAW_NPM_REGISTRY_UPSTREAM: "https://registry.npmjs.org",
+        CARAPACE_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
+        CARAPACE_NPM_REGISTRY_PORT: "0",
+        CARAPACE_NPM_REGISTRY_MERGE_UPSTREAM: "1",
+        CARAPACE_NPM_REGISTRY_UPSTREAM: "https://registry.npmjs.org",
       },
       stdio: ["ignore", log, log],
       detached: process.platform !== "win32",

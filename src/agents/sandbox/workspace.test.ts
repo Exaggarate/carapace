@@ -14,7 +14,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("ensureSandboxWorkspace", () => {
   it("seeds regular bootstrap files from the source workspace", async () => {
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     await fs.mkdir(seed, { recursive: true });
@@ -30,7 +30,7 @@ describe("ensureSandboxWorkspace", () => {
   it.runIf(process.platform !== "win32")("skips symlinked bootstrap seed files", async () => {
     // Bootstrap files can influence agent behavior; symlinks must not pull in
     // arbitrary host files from outside the source workspace.
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     const outside = path.join(root, "outside-secret.txt");
@@ -46,7 +46,7 @@ describe("ensureSandboxWorkspace", () => {
   });
 
   it.runIf(process.platform !== "win32")("skips hardlinked bootstrap seed files", async () => {
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     const outside = path.join(root, "outside-agents.txt");
@@ -71,7 +71,7 @@ describe("ensureSandboxWorkspace", () => {
 
   it("skips an oversized seed file but still seeds the others", async () => {
     // An unbounded read would copy the oversized file through; the bound skips it.
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     await fs.mkdir(seed, { recursive: true });
@@ -93,7 +93,7 @@ describe("ensureSandboxWorkspace", () => {
   });
 
   it("seeds a bootstrap file at the byte read limit", async () => {
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     await fs.mkdir(seed, { recursive: true });
@@ -108,7 +108,7 @@ describe("ensureSandboxWorkspace", () => {
   });
 
   it("does not publish a partial sandbox seed when the first write fails", async () => {
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     const agentsPath = path.join(sandbox, DEFAULT_AGENTS_FILENAME);
@@ -128,7 +128,7 @@ describe("ensureSandboxWorkspace", () => {
       const isFinalTarget = target === path.join(resolvedSandbox, DEFAULT_AGENTS_FILENAME);
       const isStagedTarget =
         path.dirname(parent) === resolvedSandbox &&
-        path.basename(parent).startsWith("openclaw-bootstrap-") &&
+        path.basename(parent).startsWith("carapace-bootstrap-") &&
         path.basename(target) === DEFAULT_AGENTS_FILENAME;
       if (injected && (isFinalTarget || isStagedTarget)) {
         injected = false;
@@ -154,7 +154,7 @@ describe("ensureSandboxWorkspace", () => {
   });
 
   it("reports when sandbox seed publication cannot use hard links", async () => {
-    const root = tempDirs.make("openclaw-sandbox-workspace-");
+    const root = tempDirs.make("carapace-sandbox-workspace-");
     const seed = path.join(root, "seed");
     const sandbox = path.join(root, "sandbox");
     const agentsPath = path.join(sandbox, DEFAULT_AGENTS_FILENAME);

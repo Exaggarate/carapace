@@ -1,4 +1,4 @@
-import type { Model, StreamOptions } from "@openclaw/llm-core";
+import type { Model, StreamOptions } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   copyProviderAcceptanceObserver,

@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { runIsolatedCompletion } from "../agents/isolated-completion.js";
 import { generateConversationLabel } from "../auto-reply/reply/conversation-label-generator.js";
 import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { maybeGenerateDashboardSessionTitle } from "./dashboard-session-title.js";
 import { deriveSessionTitle } from "./session-utils-core.js";
 
@@ -21,13 +21,13 @@ type TitleRequest = {
 async function withTitleProvider(
   raw: string,
   run: (fixture: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentDir: string;
     storePath: string;
     requests: TitleRequest[];
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "title-transport" }, async (state) => {
+  await withCarapaceTestState({ label: "title-transport" }, async (state) => {
     const requests: TitleRequest[] = [];
     await withServer(
       (request, response) => {
@@ -53,7 +53,7 @@ async function withTitleProvider(
         });
       },
       async (baseUrl) => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           plugins: { enabled: false },
           agents: {
             defaults: {

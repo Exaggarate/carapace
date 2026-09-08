@@ -1,9 +1,9 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveModelFallbackAvailability } from "../../agents/agent-scope.js";
 import type { EmbeddedAgentRunResult } from "../../agents/embedded-agent-runner/types.js";
 import { resolveModelAuthMode } from "../../agents/model-auth.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeVerboseLevel, type VerboseLevel } from "../thinking.js";
 import type { ReplyPayload } from "../types.js";
 import { buildInlinePluginStatusPayload } from "./agent-runner-core.js";
@@ -26,7 +26,7 @@ export async function buildReplyDiagnosticsPayload(params: {
     contextTokensUsed: number;
     promptTokens?: number;
   };
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   storePath?: string;
   userText?: string;
   resolvedVerboseLevel?: VerboseLevel;

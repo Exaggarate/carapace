@@ -31,22 +31,22 @@ describe.skipIf(process.platform !== "win32")("PowerShell profile encoding", () 
   ])(
     "preserves and reloads a $name profile during cached completion installation",
     async (encoding) => {
-      const homeDir = tempDirs.make("openclaw-powershell-profile-");
+      const homeDir = tempDirs.make("carapace-powershell-profile-");
       await withEnvAsync(
         {
           HOME: homeDir,
           USERPROFILE: homeDir,
-          OPENCLAW_HOME: undefined,
-          OPENCLAW_STATE_DIR: path.join(homeDir, "state"),
+          CARAPACE_HOME: undefined,
+          CARAPACE_STATE_DIR: path.join(homeDir, "state"),
           SHELL: "powershell.exe",
         },
         async () => {
           const profilePath = resolveCompletionProfilePath("powershell");
-          const cachePath = resolveCompletionCachePath("powershell", "openclaw");
+          const cachePath = resolveCompletionCachePath("powershell", "carapace");
           const greeting = encoding.bom ? "café €" : "plain ASCII control";
           const userLine = `$global:ProfileGreeting = '${greeting}'`;
           const dynamicLine =
-            "openclaw completion --shell powershell | Out-String | Invoke-Expression";
+            "carapace completion --shell powershell | Out-String | Invoke-Expression";
           await fs.mkdir(path.dirname(profilePath), { recursive: true });
           await fs.mkdir(path.dirname(cachePath), { recursive: true });
           await fs.writeFile(cachePath, "$global:CompletionCacheLoaded = $true\r\n", "utf8");
@@ -60,8 +60,8 @@ describe.skipIf(process.platform !== "win32")("PowerShell profile encoding", () 
           expect(fixture.error).toBeUndefined();
           expect(fixture.status, fixture.stderr).toBe(0);
 
-          const beforeSlow = await usesSlowDynamicCompletion("powershell", "openclaw");
-          await installCompletion("powershell", true, "openclaw");
+          const beforeSlow = await usesSlowDynamicCompletion("powershell", "carapace");
+          await installCompletion("powershell", true, "carapace");
           const bytes = await fs.readFile(profilePath);
           const content = new TextDecoder(encoding.decoder).decode(bytes);
           const prefix = bytes.subarray(0, 3).toString("hex");
@@ -85,14 +85,14 @@ describe.skipIf(process.platform !== "win32")("PowerShell profile encoding", () 
             { PROFILE_FIXTURE_PATH: profilePath },
           );
           const loadedState = loaded.status === 0 ? JSON.parse(loaded.stdout.trim()) : null;
-          await installCompletion("powershell", true, "openclaw");
+          await installCompletion("powershell", true, "carapace");
 
           expect({
             beforeSlow,
             bom: observedBom,
             dynamicRemoved: !content.includes(dynamicLine),
             userTextPreserved: content.includes(userLine),
-            installed: await isCompletionInstalled("powershell", "openclaw"),
+            installed: await isCompletionInstalled("powershell", "carapace"),
             profileExit: loaded.status,
             loadedState,
             stableOnReinstall: bytes.equals(await fs.readFile(profilePath)),

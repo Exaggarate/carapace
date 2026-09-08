@@ -88,7 +88,7 @@ function sanitizeErrorMessage(error: unknown, args: ParsedArgs | undefined): str
     }
   }
   return message
-    .replaceAll(/\/(?:private\/)?tmp\/openclaw-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
+    .replaceAll(/\/(?:private\/)?tmp\/carapace-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
     .replaceAll(/(^|[\s:(])\/[^ \t\n\r:,)\]}]+/gu, "$1<path>");
 }
 

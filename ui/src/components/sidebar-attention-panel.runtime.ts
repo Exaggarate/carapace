@@ -136,7 +136,7 @@ export function renderSidebarAttentionPanel(params: SidebarAttentionPanelParams)
       aria-label=${t("common.close")}
       @click=${() => params.onClose(true)}
     ></button>
-    <openclaw-menu-surface>
+    <carapace-menu-surface>
       <section
         id="sidebar-issues-panel"
         class="sidebar-issues-panel"
@@ -286,5 +286,5 @@ export function renderSidebarAttentionPanel(params: SidebarAttentionPanelParams)
             : nothing
         }
       </section>
-    </openclaw-menu-surface>`;
+    </carapace-menu-surface>`;
 }

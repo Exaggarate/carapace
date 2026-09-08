@@ -83,7 +83,7 @@ afterEach(async () => {
 describe("SessionDiffPanel", () => {
   it("keeps stopped cloud changes visible with restart guidance and no local checkout action", async () => {
     setNativeGatewayTestState("local");
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     panel.loader = async () => ({
       ...result("cloud/session"),
       unavailableReason: "workspace_stopped",
@@ -98,7 +98,7 @@ describe("SessionDiffPanel", () => {
     expect(panel.querySelector(".session-diff__toolbar-button")).toBeNull();
     panel.querySelector<HTMLButtonElement>(".session-diff__file-menu")?.click();
     await panel.updateComplete;
-    expect(panel.querySelector("openclaw-session-diff-menu")?.textContent).not.toContain(
+    expect(panel.querySelector("carapace-session-diff-menu")?.textContent).not.toContain(
       "Open in Editor",
     );
   });
@@ -106,22 +106,22 @@ describe("SessionDiffPanel", () => {
   it("renders a skeleton only while a real diff request is pending", async () => {
     setNativeGatewayTestState(null);
     const pending = deferred<SessionsDiffResult>();
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     document.body.append(panel);
 
     await panel.updateComplete;
-    expect(panel.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+    expect(panel.querySelector("carapace-panel-loading-skeleton")).toBeNull();
     expect(panel.querySelector(".session-diff")?.getAttribute("aria-busy")).toBe("false");
 
     panel.loader = vi.fn(() => pending.promise);
     await vi.waitFor(() => {
-      expect(panel.querySelector("openclaw-panel-loading-skeleton")?.variant).toBe("review");
+      expect(panel.querySelector("carapace-panel-loading-skeleton")?.variant).toBe("review");
       expect(panel.querySelector(".session-diff")?.getAttribute("aria-busy")).toBe("true");
     });
 
     pending.resolve(result("feature/pending"));
     await vi.waitFor(() => expect(panel.textContent).toContain("feature/pending"));
-    expect(panel.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+    expect(panel.querySelector("carapace-panel-loading-skeleton")).toBeNull();
     expect(panel.querySelector(".session-diff")?.getAttribute("aria-busy")).toBe("false");
   });
 
@@ -129,9 +129,9 @@ describe("SessionDiffPanel", () => {
     "highlights source in split=%s without changing its text",
     async (split) => {
       setNativeGatewayTestState(null);
-      localStorage.setItem("openclaw.control.sessionDiff.v1", JSON.stringify({ split }));
-      const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
-      localStorage.removeItem("openclaw.control.sessionDiff.v1");
+      localStorage.setItem("carapace.control.sessionDiff.v1", JSON.stringify({ split }));
+      const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
+      localStorage.removeItem("carapace.control.sessionDiff.v1");
       const patch = [
         "--- a/example.ts",
         "+++ b/example.ts",
@@ -178,9 +178,9 @@ describe("SessionDiffPanel", () => {
 
   it.each([false, true])("highlights both languages of a rename in split=%s", async (split) => {
     setNativeGatewayTestState(null);
-    localStorage.setItem("openclaw.control.sessionDiff.v1", JSON.stringify({ split }));
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
-    localStorage.removeItem("openclaw.control.sessionDiff.v1");
+    localStorage.setItem("carapace.control.sessionDiff.v1", JSON.stringify({ split }));
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
+    localStorage.removeItem("carapace.control.sessionDiff.v1");
     const before = '<section data-mode="before">Hello</section>';
     const after = 'const value = "after";';
     const data = fileResult(
@@ -226,7 +226,7 @@ describe("SessionDiffPanel", () => {
         value: { writeText },
       });
       setNativeGatewayTestState(null);
-      const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+      const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
       panel.loader = vi.fn(async () => ({ ...fileResult(SNAPSHOT_PATCH), root: "/workspace" }));
       document.body.append(panel);
 
@@ -236,7 +236,7 @@ describe("SessionDiffPanel", () => {
       panel.querySelector<HTMLButtonElement>(triggerSelector)?.click();
       await panel.updateComplete;
 
-      const menu = panel.querySelector("openclaw-session-diff-menu");
+      const menu = panel.querySelector("carapace-session-diff-menu");
       expect(menu).not.toBeNull();
       const label = surface === "file" ? "Copy Path" : "Checkout path";
       const button = menu?.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
@@ -249,7 +249,7 @@ describe("SessionDiffPanel", () => {
       const status = button?.parentElement?.querySelector<HTMLElement>('[role="status"]');
       expect(status?.textContent).toBe(feedback);
       expect(status?.hidden).toBe(false);
-      expect(panel.querySelector("openclaw-session-diff-menu")).toBe(menu);
+      expect(panel.querySelector("carapace-session-diff-menu")).toBe(menu);
     },
   );
 
@@ -265,7 +265,7 @@ describe("SessionDiffPanel", () => {
     },
   ] as const)("offers file editors only for native-local checkouts: $name", async (testCase) => {
     setNativeGatewayTestState(testCase.nativeGateway);
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     panel.execNode = "execNode" in testCase ? (testCase.execNode ?? null) : null;
     panel.loader = vi.fn(async () => ({ ...fileResult(SNAPSHOT_PATCH), root: "/workspace" }));
     document.body.append(panel);
@@ -274,28 +274,28 @@ describe("SessionDiffPanel", () => {
     panel.querySelector<HTMLButtonElement>(".session-diff__file-menu")?.click();
     await panel.updateComplete;
 
-    const menu = panel.querySelector("openclaw-session-diff-menu");
+    const menu = panel.querySelector("carapace-session-diff-menu");
     expect(menu?.textContent?.includes("Open in Editor")).toBe(testCase.offered);
     expect(menu?.textContent?.includes("Cursor")).toBe(testCase.offered);
   });
 
   it("closes an open editor menu when the native gateway switches to remote", async () => {
     setNativeGatewayTestState("local");
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     panel.loader = vi.fn(async () => ({ ...fileResult(SNAPSHOT_PATCH), root: "/workspace" }));
     document.body.append(panel);
 
     await vi.waitFor(() => expect(panel.querySelector(".session-diff__file-menu")).not.toBeNull());
     panel.querySelector<HTMLButtonElement>(".session-diff__file-menu")?.click();
     await panel.updateComplete;
-    expect(panel.querySelector("openclaw-session-diff-menu")?.textContent).toContain(
+    expect(panel.querySelector("carapace-session-diff-menu")?.textContent).toContain(
       "Open in Editor",
     );
 
     setNativeGatewayTestState("remote");
     await panel.updateComplete;
 
-    expect(panel.querySelector("openclaw-session-diff-menu")).toBeNull();
+    expect(panel.querySelector("carapace-session-diff-menu")).toBeNull();
   });
 
   it("commits only the latest loader result after a rapid loader change", async () => {
@@ -303,7 +303,7 @@ describe("SessionDiffPanel", () => {
     const second = deferred<SessionsDiffResult>();
     const firstLoader = vi.fn(() => first.promise);
     const secondLoader = vi.fn(() => second.promise);
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     panel.loader = firstLoader;
     document.body.append(panel);
 
@@ -329,7 +329,7 @@ describe("SessionDiffPanel", () => {
     const loadFileText = vi
       .fn<SessionDiffFileTextLoader>()
       .mockResolvedValue(["expanded current file line", "context", "snapshot line"].join("\n"));
-    const panel = document.createElement("openclaw-session-diff") as SessionDiffElement;
+    const panel = document.createElement("carapace-session-diff") as SessionDiffElement;
     panel.loader = loader;
     panel.loadFileText = loadFileText;
     document.body.append(panel);

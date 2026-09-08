@@ -8,8 +8,8 @@ import { planAutomaticConfigRepair } from "./doctor/shared/automatic-startup-con
 
 it("refuses a session-store change between core admission and the full config read", async () => {
   await withDoctorConfigPreflightHome(async (home) => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR ?? path.join(home, ".openclaw");
-    const configPath = process.env.OPENCLAW_CONFIG_PATH ?? path.join(stateDir, "openclaw.json");
+    const stateDir = process.env.CARAPACE_STATE_DIR ?? path.join(home, ".carapace");
+    const configPath = process.env.CARAPACE_CONFIG_PATH ?? path.join(stateDir, "carapace.json");
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     const config = { gateway: { mode: "local" }, plugins: { enabled: false } };
     fs.writeFileSync(configPath, JSON.stringify(config));

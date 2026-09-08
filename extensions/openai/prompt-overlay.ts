@@ -3,8 +3,8 @@ import {
   isGpt5ModelId,
   resolveGpt5PromptOverlayMode,
   resolveGpt5SystemPromptContribution,
-} from "openclaw/plugin-sdk/provider-model-metadata";
-import type { Gpt5PromptOverlayMode } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-metadata";
+import type { Gpt5PromptOverlayMode } from "carapace/plugin-sdk/provider-model-shared";
 
 const OPENAI_PROVIDER_IDS = new Set(["openai"]);
 

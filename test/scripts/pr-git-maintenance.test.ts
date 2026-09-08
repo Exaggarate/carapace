@@ -15,7 +15,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const runner = join(process.cwd(), "scripts/pr-lib/process-group-runner.mjs");
 const lockScript = join(process.cwd(), "scripts/pr-lib/operation-lock.sh");
-const lockRef = "refs/openclaw/pr-operation-locks/42";
+const lockRef = "refs/carapace/pr-operation-locks/42";
 const describePosix = process.platform === "win32" ? describe.skip : describe;
 
 function shellQuote(value: string) {
@@ -23,7 +23,7 @@ function shellQuote(value: string) {
 }
 
 function createMaintenanceFixture(command: string, exitCode: number) {
-  const root = realpathSync(tempDirs.make("openclaw-pr-git-maintenance-"));
+  const root = realpathSync(tempDirs.make("carapace-pr-git-maintenance-"));
   const home = join(root, "home");
   const repo = join(root, "repo");
   mkdirSync(home);
@@ -34,9 +34,9 @@ function createMaintenanceFixture(command: string, exitCode: number) {
     XDG_CONFIG_HOME: join(home, ".config"),
     GIT_CONFIG_GLOBAL: "/dev/null",
     GIT_CONFIG_NOSYSTEM: "1",
-    GIT_AUTHOR_NAME: "OpenClaw Test",
+    GIT_AUTHOR_NAME: "Carapace Test",
     GIT_AUTHOR_EMAIL: "test@example.invalid",
-    GIT_COMMITTER_NAME: "OpenClaw Test",
+    GIT_COMMITTER_NAME: "Carapace Test",
     GIT_COMMITTER_EMAIL: "test@example.invalid",
     GIT_TERMINAL_PROMPT: "0",
     GIT_CONFIG_COUNT: "1",

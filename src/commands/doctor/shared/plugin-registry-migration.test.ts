@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 // Plugin registry migration tests cover doctor repair of persisted plugin registry state.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { recordPluginCandidateInstallOwner } from "../../../plugins/candidate-install-owner.js";
 import type { PluginCandidate } from "../../../plugins/discovery.js";
 import { writePersistedInstalledPluginIndex } from "../../../plugins/installed-plugin-index-store-write.js";
@@ -16,8 +16,8 @@ import {
   cleanupTrackedTempDirs,
   makeTrackedTempDir,
 } from "../../../plugins/test-helpers/fs-fixtures.js";
-import * as stateDbReadOnly from "../../../state/openclaw-state-db-readonly.js";
-import { runOpenClawStateWriteTransaction } from "../../../state/openclaw-state-db.js";
+import * as stateDbReadOnly from "../../../state/carapace-state-db-readonly.js";
+import { runCarapaceStateWriteTransaction } from "../../../state/carapace-state-db.js";
 import { migratePluginRegistryForDoctor } from "./plugin-registry-migration.js";
 const tempDirs: string[] = [];
 
@@ -26,13 +26,13 @@ afterEach(() => {
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugin-registry-migration", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-registry-migration", tempDirs);
 }
 
 function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
     ...overrides,
   };
@@ -54,7 +54,7 @@ function createCandidate(
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id,
       name: id,
@@ -120,7 +120,7 @@ function requirePlugin(index: InstalledPluginIndex | null | undefined, pluginId:
 }
 
 function insertStalePersistedIndexRow(stateDir: string, installRecordsJson = "{}") {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const valueJson = JSON.stringify({
         revision: 123,
@@ -144,7 +144,7 @@ function insertStalePersistedIndexRow(stateDir: string, installRecordsJson = "{}
         `,
       ).run(valueJson);
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
   );
 }
 
@@ -157,7 +157,7 @@ describe("doctor plugin registry migration", () => {
       code: "ERR_SQLITE_ERROR",
       errcode: 5,
     });
-    const readSpy = vi.spyOn(stateDbReadOnly, "withExistingOpenClawStateDatabaseReadOnly");
+    const readSpy = vi.spyOn(stateDbReadOnly, "withExistingCarapaceStateDatabaseReadOnly");
     readSpy.mockImplementationOnce(() => {
       throw error;
     });
@@ -175,14 +175,14 @@ describe("doctor plugin registry migration", () => {
     expect.soft(readConfig).not.toHaveBeenCalled();
     expect(readSpy).toHaveBeenCalledOnce();
     readSpy.mockRestore();
-    const row = runOpenClawStateWriteTransaction(
+    const row = runCarapaceStateWriteTransaction(
       ({ db }) =>
         db
           .prepare(
             "SELECT value_json, updated_at_ms FROM config_machine_state WHERE state_key = 'plugins.installedIndex'",
           )
           .get(),
-      { env: { OPENCLAW_STATE_DIR: stateDir } },
+      { env: { CARAPACE_STATE_DIR: stateDir } },
     );
     expect(row).toMatchObject({ updated_at_ms: 123 });
     const restored = await migratePluginRegistryForDoctor({
@@ -255,7 +255,7 @@ describe("doctor plugin registry migration", () => {
       "delete only the config_machine_state row with state_key='plugins.installedIndex'",
     );
 
-    const row = runOpenClawStateWriteTransaction(
+    const row = runCarapaceStateWriteTransaction(
       ({ db }) =>
         db
           .prepare(
@@ -264,7 +264,7 @@ describe("doctor plugin registry migration", () => {
               WHERE state_key = 'plugins.installedIndex'`,
           )
           .get() as { value_json: string; updated_at_ms: number | bigint },
-      { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+      { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } },
     );
     expect(row.updated_at_ms).toBe(123);
     const persistedValue = JSON.parse(row.value_json) as {
@@ -280,7 +280,7 @@ describe("doctor plugin registry migration", () => {
     const stateDir = makeTempDir();
     const invalidConfig = JSON.parse(
       '{"plugins":{"installs":{"constructor":{"source":"bogus"}}}}',
-    ) as OpenClawConfig;
+    ) as CarapaceConfig;
 
     await expect(
       migratePluginRegistryForDoctor({
@@ -289,7 +289,7 @@ describe("doctor plugin registry migration", () => {
         env: hermeticEnv(),
       }),
     ).rejects.toThrow(
-      "Back up openclaw.json, correct or remove the invalid retired plugins.installs record",
+      "Back up carapace.json, correct or remove the invalid retired plugins.installs record",
     );
     expect(fs.existsSync(resolveInstalledPluginIndexStorePath({ stateDir }))).toBe(false);
   });

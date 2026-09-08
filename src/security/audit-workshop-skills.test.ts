@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { expect, it, vi } from "vitest";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { collectInstalledSkillsCodeSafetyFindings } from "./audit-extra.async.js";
 
 async function writeAuditSkill(root: string, unsafe: boolean, name = "shared-procedure") {
@@ -32,7 +32,7 @@ it.each(
     { label: "small prompt file cap", limits: { maxSkillFileBytes: 1 } },
   ].flatMap(({ label, limits }) => ["", "group"].map((group) => ({ label, limits, group }))),
 )("audits hidden and shadowed Workshop skills with $label ($group)", async ({ limits, group }) => {
-  await withOpenClawTestState({ label: "workshop-security-audit" }, async (state) => {
+  await withCarapaceTestState({ label: "workshop-security-audit" }, async (state) => {
     const cfg = {
       skills: { limits },
       agents: {
@@ -66,7 +66,7 @@ it.each(
 });
 
 it("reports an unreadable grouping directory without skipping readable siblings", async () => {
-  await withOpenClawTestState({ label: "workshop-audit-group-failure" }, async (state) => {
+  await withCarapaceTestState({ label: "workshop-audit-group-failure" }, async (state) => {
     const cfg = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
     const group = path.join(resolveWorkshopSkillsDir(cfg, "main"), "group");
     const unreadable = path.join(group, "unreadable");
@@ -104,7 +104,7 @@ it("reports an unreadable grouping directory without skipping readable siblings"
 });
 
 it.each(["contained", "escaping"] as const)("audits %s grouping symlinks", async (location) => {
-  await withOpenClawTestState({ label: "workshop-audit-group-link" }, async (state) => {
+  await withCarapaceTestState({ label: "workshop-audit-group-link" }, async (state) => {
     const cfg = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
     const workshopDir = resolveWorkshopSkillsDir(cfg, "main");
     const target = path.join(location === "contained" ? workshopDir : state.stateDir, ".storage");
@@ -137,7 +137,7 @@ it.each(["contained", "escaping"] as const)("audits %s grouping symlinks", async
 });
 
 it("reports a dangling grouping link without skipping a readable dangerous sibling", async () => {
-  await withOpenClawTestState({ label: "workshop-audit-dangling-link" }, async (state) => {
+  await withCarapaceTestState({ label: "workshop-audit-dangling-link" }, async (state) => {
     const cfg = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
     const workshopDir = resolveWorkshopSkillsDir(cfg, "main");
     const skillDir = await writeAuditSkill(workshopDir, true);
@@ -165,7 +165,7 @@ it("reports a dangling grouping link without skipping a readable dangerous sibli
 it.each([300, 301])(
   "reports incomplete audit or honors a larger traversal limit (%s)",
   async (limit) => {
-    await withOpenClawTestState({ label: "workshop-audit-inventory-limit" }, async (state) => {
+    await withCarapaceTestState({ label: "workshop-audit-inventory-limit" }, async (state) => {
       const cfg = {
         agents: { entries: { main: { workspace: state.workspaceDir } } },
         skills: { limits: { maxCandidatesPerRoot: limit, maxSkillsLoadedPerSource: 1 } },
@@ -206,7 +206,7 @@ it.each([300, 301])(
 it.each(["missing", "unreadable"] as const)(
   "reports an unreadable Workshop root but keeps a missing root quiet (%s)",
   async (rootState) => {
-    await withOpenClawTestState({ label: "workshop-audit-root-failure" }, async (state) => {
+    await withCarapaceTestState({ label: "workshop-audit-root-failure" }, async (state) => {
       const cfg = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
       const workshopDir = resolveWorkshopSkillsDir(cfg, "main");
       if (rootState === "unreadable") {
@@ -246,7 +246,7 @@ it.each(["missing", "unreadable"] as const)(
 it.runIf(process.platform !== "win32" && process.getuid?.() !== 0)(
   "reports an inaccessible Workshop ancestor instead of treating the root as missing",
   async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "workshop-audit-inaccessible-ancestor" },
       async (state) => {
         const cfg = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
@@ -274,7 +274,7 @@ it.runIf(process.platform !== "win32" && process.getuid?.() !== 0)(
 );
 
 it("audits child skills even when the Workshop container has a stray definition", async () => {
-  await withOpenClawTestState({ label: "workshop-audit-root-definition" }, async (state) => {
+  await withCarapaceTestState({ label: "workshop-audit-root-definition" }, async (state) => {
     const cfg = {
       agents: { entries: { main: { workspace: state.workspaceDir } } },
       skills: { limits: { maxCandidatesPerRoot: 0, maxSkillsLoadedPerSource: 0 } },

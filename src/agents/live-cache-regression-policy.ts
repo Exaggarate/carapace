@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   LIVE_CACHE_REGRESSION_BASELINE,
   type LiveCacheFloor,

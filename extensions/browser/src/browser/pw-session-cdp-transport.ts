@@ -1,6 +1,6 @@
 import type { lookup as dnsLookupCb } from "node:dns";
-import { asOptionalRecord, readStringField } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { asOptionalRecord, readStringField } from "carapace/plugin-sdk/string-coerce-runtime";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import type { Browser, ConnectOverCDPTransport } from "playwright-core";
 import WebSocket from "ws";
 import { formatErrorMessage } from "../infra/errors.js";

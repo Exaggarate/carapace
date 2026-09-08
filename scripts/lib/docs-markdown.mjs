@@ -6,10 +6,10 @@ import MarkdownIt from "markdown-it";
 import anchor from "markdown-it-anchor";
 import { parse } from "yaml";
 
-/** @public Consumed by openclaw/docs mdx-ish.mjs through the docs-sync support contract. */
-export const markerPrefix = "OPENCLAW_DOCS_MARKER";
-/** @public Consumed by openclaw/docs mdx-ish.mjs through the docs-sync support contract. */
-export const inlineMarkerPrefix = "OPENCLAW_DOCS_INLINE";
+/** @public Consumed by carapace/docs mdx-ish.mjs through the docs-sync support contract. */
+export const markerPrefix = "CARAPACE_DOCS_MARKER";
+/** @public Consumed by carapace/docs mdx-ish.mjs through the docs-sync support contract. */
+export const inlineMarkerPrefix = "CARAPACE_DOCS_INLINE";
 const knownBlocks = new Map([
   ["AccordionGroup", ["accordion-group", ""]],
   ["Tabs", ["tabs", ""]],
@@ -175,7 +175,7 @@ function cardGridClass(rawAttrs) {
   return `card-grid oc-card-cols-${cols}`;
 }
 
-/** @public Consumed by openclaw/docs mdx-ish.mjs through the docs-sync support contract. */
+/** @public Consumed by carapace/docs mdx-ish.mjs through the docs-sync support contract. */
 export function parseAttrs(raw) {
   /** @type {Record<string, string>} */
   const attrs = {};
@@ -205,7 +205,7 @@ function escapeAttr(value) {
 // normalize hrefs or replace reference metadata, only for diagnostic projections.
 const inlineLines = new WeakMap();
 
-/** @public Consumed by openclaw/docs mdx-ish.mjs through the docs-sync support contract. */
+/** @public Consumed by carapace/docs mdx-ish.mjs through the docs-sync support contract. */
 export function createDocsMarkdown(options = {}) {
   const md = new MarkdownIt({ html: true, linkify: false, typographer: false, ...options }).use(
     anchor,
@@ -228,7 +228,7 @@ const codeParser = new MarkdownIt({ html: false });
 // Literal regions are restored only after preprocessing, so examples cannot become components.
 function prepareDocument(input, { sourceFile, root, seen = new Set() }, firstLine) {
   const saved = [];
-  let prefix = "OPENCLAWVERBATIM";
+  let prefix = "CARAPACEVERBATIM";
   while (input.includes(prefix)) {
     prefix += "X";
   }
@@ -417,7 +417,7 @@ function readHtmlTargets(chunks) {
   return { ids, links };
 }
 
-/** @public Consumed by openclaw/docs assets.mjs through the docs-sync support contract. */
+/** @public Consumed by carapace/docs assets.mjs through the docs-sync support contract. */
 export function resolveDocsFragment(hash, ids) {
   const raw = hash.startsWith("#") ? hash.slice(1) : hash;
   if (ids.has(raw)) {
@@ -431,7 +431,7 @@ export function resolveDocsFragment(hash, ids) {
   }
 }
 
-/** @public Consumed by openclaw/docs mdx-ish.mjs through the docs-sync support contract. */
+/** @public Consumed by carapace/docs mdx-ish.mjs through the docs-sync support contract. */
 export function parseDocsDocument(markdown, md = createDocsMarkdown(), options = {}) {
   const env = options.mapLink ? { trackSourceLines: true } : {};
   const parsed = parseFrontmatter(markdown);
@@ -628,7 +628,7 @@ export function parseDocsDocument(markdown, md = createDocsMarkdown(), options =
 const openingDelimiter = /^---[ \t]*\r?\n/u;
 const closingDelimiter = /\r?\n---[ \t]*(?:\r?\n|$)/u;
 
-/** @public Consumed by openclaw/docs build.mjs and smoke.mjs through docs sync. */
+/** @public Consumed by carapace/docs build.mjs and smoke.mjs through docs sync. */
 export function parseFrontmatter(source) {
   const input = String(source).replace(/^\uFEFF/u, "");
   const opening = input.match(openingDelimiter);
@@ -658,7 +658,7 @@ function relativeDocsHref(href, { pageRoute } = {}) {
   if (!pageRoute || /^(?:[#/?]|[a-z][a-z0-9+.-]*:)/i.test(href)) {
     return href;
   }
-  const url = new URL(href, `https://docs.openclaw.ai${pageRoute}`);
+  const url = new URL(href, `https://github.com/Exaggarate/carapace${pageRoute}`);
   if (/\.[^/]+$/.test(url.pathname) && !/\.mdx?$/.test(url.pathname)) {
     return href;
   }
@@ -666,7 +666,7 @@ function relativeDocsHref(href, { pageRoute } = {}) {
   return `${target}${url.search}${url.hash}`;
 }
 
-/** @public Consumed by openclaw/docs mdx-ish.mjs through docs sync. */
+/** @public Consumed by carapace/docs mdx-ish.mjs through docs sync. */
 export function rewriteDocsRelativeLinks(html, options) {
   return html.replace(/<(?:a|span)\b[^>]*>/g, (tag) =>
     tag.replace(/\b(href|data-href)=(['"])(.*?)\2/g, (_, attr, quote, href) => {

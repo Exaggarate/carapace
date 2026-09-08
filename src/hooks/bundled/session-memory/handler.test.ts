@@ -2,9 +2,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { CarapaceConfig } from "../../../config/config.js";
 import {
   formatSqliteSessionFileMarker,
   parseSqliteSessionFileMarker,
@@ -28,7 +28,7 @@ function getRecentSessionContentFromEvents(
   return getRecentSessionProjectionFromEvents(events, messageCount)?.content ?? null;
 }
 
-// Avoid calling the embedded OpenClaw agent (global command lane); keep this unit test deterministic.
+// Avoid calling the embedded Carapace agent (global command lane); keep this unit test deterministic.
 vi.mock("../../llm-slug-generator.js", () => ({
   generateSlugViaLLM: vi.fn().mockResolvedValue("simple-math"),
 }));
@@ -145,7 +145,7 @@ async function createCaseWorkspace(prefix = "case"): Promise<string> {
 
 beforeAll(async () => {
   ({ default: handler, flushSessionMemoryWritesForTest } = await import("./handler.js"));
-  suiteWorkspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-memory-"));
+  suiteWorkspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-memory-"));
 });
 
 afterAll(async () => {
@@ -187,7 +187,7 @@ function sessionMemoryRecord(role: "user" | "assistant", text: string): string {
 async function runNewWithPreviousSessionEntry(params: {
   tempDir: string;
   previousSessionEntry: { sessionId: string; sessionFile?: string };
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   action?: "new" | "reset";
   agentId?: string;
   sessionKey?: string;
@@ -198,7 +198,7 @@ async function runNewWithPreviousSessionEntry(params: {
     params.cfg ??
     ({
       agents: { defaults: { workspace: params.tempDir } },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
   const legacySessionFile = params.previousSessionEntry.sessionFile;
   const marker = parseSqliteSessionFileMarker(legacySessionFile);
   const sessionKey = params.sessionKey ?? "agent:main:main";
@@ -244,7 +244,7 @@ async function runNewWithPreviousSessionEntry(params: {
   const cfg = {
     ...baseConfig,
     session: { ...baseConfig.session, store: storePath },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const event = createHookEvent("command", params.action ?? "new", sessionKey, {
     agentId,
     cfg,
@@ -272,7 +272,7 @@ async function runNewWithPreviousSessionEntry(params: {
 
 async function runNewWithPreviousSession(params: {
   sessionContent: string;
-  cfg?: (tempDir: string) => OpenClawConfig;
+  cfg?: (tempDir: string) => CarapaceConfig;
   action?: "new" | "reset";
 }): Promise<{ tempDir: string; files: string[]; memoryContent: string }> {
   const tempDir = await createCaseWorkspace("workspace");
@@ -289,7 +289,7 @@ async function runNewWithPreviousSession(params: {
     params.cfg?.(tempDir) ??
     ({
       agents: { defaults: { workspace: tempDir } },
-    } satisfies OpenClawConfig);
+    } satisfies CarapaceConfig);
 
   const { files, memoryContent } = await runNewWithPreviousSessionEntry({
     tempDir,
@@ -435,7 +435,7 @@ describe("session-memory hook", () => {
         message: {
           role: "user",
           content: "Retain this request",
-          __openclaw: { senderIsOwner: testCase.userOwner },
+          __carapace: { senderIsOwner: testCase.userOwner },
         },
       },
       {
@@ -443,7 +443,7 @@ describe("session-memory hook", () => {
         message: {
           role: "assistant",
           content: "Retained response",
-          ...(testCase.assistantTainted ? { __openclaw: { turnTainted: true } } : {}),
+          ...(testCase.assistantTainted ? { __carapace: { turnTainted: true } } : {}),
         },
       },
     ]
@@ -480,7 +480,7 @@ describe("session-memory hook", () => {
         message: {
           role: "user",
           content: "Do not persist without provenance",
-          __openclaw: { senderIsOwner: false },
+          __carapace: { senderIsOwner: false },
         },
       },
     ]
@@ -682,7 +682,7 @@ describe("session-memory hook", () => {
     await withEnvAsync(
       {
         NODE_ENV: "production",
-        OPENCLAW_TEST_FAST: undefined,
+        CARAPACE_TEST_FAST: undefined,
         VITEST: undefined,
       },
       async () => {
@@ -809,7 +809,7 @@ describe("session-memory hook", () => {
           defaults: { workspace: mainWorkspace },
           list: [{ id: "navi", workspace: naviWorkspace }],
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionKey: "agent:main:main",
       workspaceDirOverride: naviWorkspace,
       previousSessionEntry: {
@@ -1046,7 +1046,7 @@ describe("session-memory hook", () => {
           defaults: { workspace: defaultWorkspace },
           list: [{ id: "custom-agent", workspace: customAgentWorkspace }],
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionKey: "agent:main:main",
       workspaceDirOverride: customAgentWorkspace,
       previousSessionEntry: {
@@ -1068,7 +1068,7 @@ describe("session-memory hook", () => {
     loggerMocks.info.mockClear();
 
     await withEnvAsync(
-      { HOME: fakeHome, USERPROFILE: fakeHome, OPENCLAW_HOME: undefined },
+      { HOME: fakeHome, USERPROFILE: fakeHome, CARAPACE_HOME: undefined },
       async () => {
         const { files } = await runNewWithPreviousSessionEntry({
           tempDir: siblingWorkspace,

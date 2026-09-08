@@ -13,7 +13,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -32,7 +32,7 @@ const localPrepareOptions = [
     id: "llama-cpp",
     brandId: "llama-cpp",
     label: "llama.cpp",
-    hint: "Install a verified llama.cpp server and run a private GGUF model managed by OpenClaw",
+    hint: "Install a verified llama.cpp server and run a private GGUF model managed by Carapace",
     actionLabel: "Set up model",
   },
   {
@@ -67,16 +67,16 @@ suite.define(() => {
           credentials: true,
         };
         const gateway = await installMockGateway(page, {
-          featureMethods: ["chat.metadata", "chat.startup", "openclaw.setup.detect"],
+          featureMethods: ["chat.metadata", "chat.startup", "carapace.setup.detect"],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               sequence: [
                 "logged in · ChatGPT account · alex@example.com",
                 "logged in · API key (usage-billed)",
               ].map((detail) => ({
                 candidates: [{ ...candidate, detail }],
                 manualProviders: [],
-                workspace: "/tmp/openclaw-e2e",
+                workspace: "/tmp/carapace-e2e",
                 setupComplete: false,
               })),
             },
@@ -92,10 +92,10 @@ suite.define(() => {
             await takeControlUiViewportScreenshot(page, page.locator(".shell"), [row]),
           );
         }
-        const detectionCount = (await gateway.getRequests("openclaw.setup.detect")).length;
+        const detectionCount = (await gateway.getRequests("carapace.setup.detect")).length;
         await page.getByRole("button", { name: "Check again" }).click();
         await expect
-          .poll(async () => (await gateway.getRequests("openclaw.setup.detect")).length)
+          .poll(async () => (await gateway.getRequests("carapace.setup.detect")).length)
           .toBe(detectionCount + 1);
         await expect.poll(() => row.textContent()).toContain("API key (usage-billed)");
         expect(await row.textContent()).not.toContain("alex@example.com");
@@ -124,13 +124,13 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
             "wizard.next",
-            "openclaw.chat",
+            "carapace.chat",
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               candidates: [
                 {
                   kind: "openai-api-key",
@@ -143,10 +143,10 @@ suite.define(() => {
                 },
               ],
               manualProviders: [{ id: "openai", label: "OpenAI" }],
-              workspace: "/tmp/openclaw-e2e",
+              workspace: "/tmp/carapace-e2e",
               setupComplete: false,
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -156,9 +156,9 @@ suite.define(() => {
               status: "done",
               modelActivation: { modelRef: "openai/gpt-5" },
             },
-            "openclaw.chat": {
+            "carapace.chat": {
               sessionId: "e2e-custodian",
-              reply: "## Hi, I'm OpenClaw",
+              reply: "## Hi, I'm Carapace",
               action: "none",
               question: {
                 id: "onboarding-next-step",
@@ -178,12 +178,12 @@ suite.define(() => {
         const response = await page.goto(`${suite.server.baseUrl}settings/model-setup?firstRun=1`);
         expect(response?.status()).toBe(200);
 
-        const detect = await gateway.waitForRequest("openclaw.setup.detect");
+        const detect = await gateway.waitForRequest("carapace.setup.detect");
         expect(detect.params).toEqual({ agentId: "main" });
         await page.locator('[data-candidate-kind="openai-api-key"] button').waitFor();
-        expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+        expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
         await page.locator('[data-candidate-kind="openai-api-key"] button').click();
-        const activate = await gateway.waitForRequest("openclaw.setup.activate.start");
+        const activate = await gateway.waitForRequest("carapace.setup.activate.start");
         expect(activate.params).toEqual({
           sessionId: expect.any(String),
           kind: "openai-api-key",
@@ -206,7 +206,7 @@ suite.define(() => {
           });
         }
 
-        const chatRequest = await gateway.waitForRequest("openclaw.chat");
+        const chatRequest = await gateway.waitForRequest("carapace.chat");
         expect(chatRequest.params).toMatchObject({
           sessionId: expect.stringMatching(/^control-ui-onboarding-/u),
           welcomeVariant: "onboarding",
@@ -216,7 +216,7 @@ suite.define(() => {
         await expect
           .poll(() => page.locator(".shell").getAttribute("class"))
           .not.toContain("shell--onboarding");
-        const userTurns = (await gateway.getRequests("openclaw.chat")).filter((request) => {
+        const userTurns = (await gateway.getRequests("carapace.chat")).filter((request) => {
           const params = request.params;
           return typeof params === "object" && params !== null && "message" in params;
         });
@@ -254,15 +254,15 @@ suite.define(() => {
               featured: true,
             },
           ],
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         };
         const gateway = await installMockGateway(page, {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.auth.start",
+            "carapace.setup.detect",
+            "carapace.setup.auth.start",
             "wizard.next",
           ],
           methodResponses: {
@@ -274,8 +274,8 @@ suite.define(() => {
               valid: true,
               issues: [],
             },
-            "openclaw.setup.detect": initialDetection,
-            "openclaw.setup.auth.start": {
+            "carapace.setup.detect": initialDetection,
+            "carapace.setup.auth.start": {
               sessionId: "device-code-session",
               done: false,
               status: "running",
@@ -310,7 +310,7 @@ suite.define(() => {
         await gateway.deferNext("config.get");
         await page.getByRole("button", { name: "Pair" }).click();
 
-        const start = await gateway.waitForRequest("openclaw.setup.auth.start");
+        const start = await gateway.waitForRequest("carapace.setup.auth.start");
         expect(start.params).toMatchObject({ authChoice: "provider-device-code" });
         await expect
           .poll(async () => (await gateway.getRequests("config.get")).length)
@@ -329,7 +329,7 @@ suite.define(() => {
         await expect.poll(() => page.getByText("Working…").count()).toBe(0);
         await page.getByText("Expires in 14 minutes").waitFor();
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("alert")
           .filter({ hasText: "authoritative snapshot unavailable" })
           .waitFor();
@@ -351,7 +351,7 @@ suite.define(() => {
         await page.getByRole("button", { name: "Continue" }).waitFor();
         await page.getByRole("button", { name: "Cancel" }).waitFor();
 
-        const detectCountBeforeCompletion = (await gateway.getRequests("openclaw.setup.detect"))
+        const detectCountBeforeCompletion = (await gateway.getRequests("carapace.setup.detect"))
           .length;
         await page.getByRole("button", { name: "Continue" }).click();
         await expect.poll(async () => (await gateway.getRequests("wizard.next")).length).toBe(2);
@@ -362,7 +362,7 @@ suite.define(() => {
           answer: { stepId: "device-code" },
         });
         await page.getByRole("heading", { name: "Connection verified" }).waitFor();
-        expect(await gateway.getRequests("openclaw.setup.detect")).toHaveLength(
+        expect(await gateway.getRequests("carapace.setup.detect")).toHaveLength(
           detectCountBeforeCompletion,
         );
         await expect
@@ -394,26 +394,26 @@ suite.define(() => {
               website: "https://ollama.com/download",
             },
           ],
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         };
         const gateway = await installMockGateway(page, {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
+            "carapace.setup.prepare.start",
             "wizard.next",
           ],
           methodResponses: {
-            "openclaw.setup.detect": initialDetection,
-            "openclaw.setup.prepare.start": {
+            "carapace.setup.detect": initialDetection,
+            "carapace.setup.prepare.start": {
               sessionId: "ollama-prepare-session",
               done: false,
               status: "running",
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -460,7 +460,7 @@ suite.define(() => {
                       "Start or restart the Ollama server for this address.",
                       "If Ollama is not installed on that machine, download it at https://ollama.com/download",
                       "",
-                      "Continue when it is running. OpenClaw will retry this address.",
+                      "Continue when it is running. Carapace will retry this address.",
                     ].join("\n"),
                   },
                 },
@@ -505,7 +505,7 @@ suite.define(() => {
           .getByRole("button", { name: "Choose connection" })
           .click();
 
-        const start = await gateway.waitForRequest("openclaw.setup.prepare.start");
+        const start = await gateway.waitForRequest("carapace.setup.prepare.start");
         expect(start.params).toMatchObject({ authChoice: "ollama" });
 
         if (artifactDir) {
@@ -532,7 +532,7 @@ suite.define(() => {
         await page.getByRole("button", { name: "Submit" }).click();
         await page.getByText("Ollama could not be reached at http://127.0.0.1:11434.").waitFor();
         await page
-          .getByText("Continue when it is running. OpenClaw will retry this address.")
+          .getByText("Continue when it is running. Carapace will retry this address.")
           .waitFor();
 
         if (artifactDir) {
@@ -558,7 +558,7 @@ suite.define(() => {
           .poll(() => page.locator('.model-setup-success [data-provider-icon="ollama"]').count())
           .toBe(1);
 
-        const activate = await gateway.waitForRequest("openclaw.setup.activate.start");
+        const activate = await gateway.waitForRequest("carapace.setup.activate.start");
         expect(activate.params).toEqual({
           sessionId: expect.any(String),
           kind: "provider-auto:ollama",
@@ -574,7 +574,7 @@ suite.define(() => {
           });
         }
 
-        await gateway.setMethodResponse("openclaw.setup.detect", {
+        await gateway.setMethodResponse("carapace.setup.detect", {
           ...initialDetection,
           candidates: [],
           configuredModel: "ollama/qwen3:0.6b",
@@ -627,13 +627,13 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
+            "carapace.setup.prepare.start",
             "wizard.next",
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               candidates: [],
               unavailableCandidates: [],
               manualProviders: [
@@ -666,10 +666,10 @@ suite.define(() => {
                 },
               ],
               authOptions: [],
-              workspace: "/tmp/openclaw-e2e",
+              workspace: "/tmp/carapace-e2e",
               setupComplete: false,
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -698,7 +698,7 @@ suite.define(() => {
           page
             .locator("[data-manual-provider]")
             .evaluateAll((options) => options.some((option) => option === document.activeElement));
-        const providerHideMarker = "data-openclaw-test-after-hide";
+        const providerHideMarker = "data-carapace-test-after-hide";
         const armProviderHide = () =>
           providerPicker.evaluate((element, marker) => {
             element.removeAttribute(marker);
@@ -857,7 +857,7 @@ suite.define(() => {
             }),
         );
         await page.getByRole("button", { name: "Connect & verify" }).click();
-        const activate = await gateway.waitForRequest("openclaw.setup.activate.start");
+        const activate = await gateway.waitForRequest("carapace.setup.activate.start");
         expect(activate.params).toEqual({
           sessionId: expect.any(String),
           kind: "api-key",
@@ -893,11 +893,11 @@ suite.define(() => {
           .poll(() => page.locator(".model-setup-success").textContent())
           .not.toContain("Verified in");
 
-        const detectCountBeforeDismiss = (await gateway.getRequests("openclaw.setup.detect"))
+        const detectCountBeforeDismiss = (await gateway.getRequests("carapace.setup.detect"))
           .length;
         await page.getByRole("button", { name: "Stay in settings" }).click();
         await expect
-          .poll(async () => (await gateway.getRequests("openclaw.setup.detect")).length)
+          .poll(async () => (await gateway.getRequests("carapace.setup.detect")).length)
           .toBe(detectCountBeforeDismiss + 1);
         await providerTrigger.click();
         await expect.poll(manualProviderMenuReady).toBe(true);
@@ -925,11 +925,11 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.verify",
+            "carapace.setup.detect",
+            "carapace.setup.verify",
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               candidates: [
                 {
                   kind: "existing-model",
@@ -951,11 +951,11 @@ suite.define(() => {
                 },
               ],
               manualProviders: [],
-              workspace: "/tmp/openclaw-e2e",
+              workspace: "/tmp/carapace-e2e",
               configuredModel: "openai/gpt-5",
               setupComplete: true,
             },
-            "openclaw.setup.verify": {
+            "carapace.setup.verify": {
               ok: true,
               modelRef: "openai/gpt-5",
               latencyMs: 1234,
@@ -993,18 +993,18 @@ suite.define(() => {
           await page.setViewportSize({ height: 900, width: 1280 });
         }
         await page.getByRole("button", { name: "Check model" }).click();
-        const verify = await gateway.waitForRequest("openclaw.setup.verify");
+        const verify = await gateway.waitForRequest("carapace.setup.verify");
         expect(verify.params).toEqual({ agentId: "main" });
         await page.getByText("Ready · 1234 ms").waitFor();
-        const detectCountBeforeRefresh = (await gateway.getRequests("openclaw.setup.detect"))
+        const detectCountBeforeRefresh = (await gateway.getRequests("carapace.setup.detect"))
           .length;
-        const verifyCountBeforeRefresh = (await gateway.getRequests("openclaw.setup.verify"))
+        const verifyCountBeforeRefresh = (await gateway.getRequests("carapace.setup.verify"))
           .length;
         await page.getByRole("button", { name: "Check again" }).click();
         await expect
-          .poll(async () => (await gateway.getRequests("openclaw.setup.verify")).length)
+          .poll(async () => (await gateway.getRequests("carapace.setup.verify")).length)
           .toBe(verifyCountBeforeRefresh + 1);
-        expect((await gateway.getRequests("openclaw.setup.detect")).length).toBe(
+        expect((await gateway.getRequests("carapace.setup.detect")).length).toBe(
           detectCountBeforeRefresh,
         );
         await page.getByRole("button", { name: "Check again" }).waitFor();

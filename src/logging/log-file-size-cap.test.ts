@@ -12,7 +12,7 @@ import { createSuiteLogPathTracker } from "./log-test-helpers.js";
 import { testApi } from "./logger.test-support.js";
 
 const DEFAULT_MAX_FILE_BYTES = 100 * 1024 * 1024;
-const logPathTracker = createSuiteLogPathTracker("openclaw-log-cap-");
+const logPathTracker = createSuiteLogPathTracker("carapace-log-cap-");
 
 function rotatedLogPath(file: string, index: number): string {
   const ext = path.extname(file);
@@ -106,8 +106,8 @@ describe("log file size cap", () => {
   });
 
   it.each([
-    { name: "default rolling", prefix: "openclaw", rolls: true },
-    { name: "explicit profile-shaped", prefix: "openclaw-dev", rolls: false },
+    { name: "default rolling", prefix: "carapace", rolls: true },
+    { name: "explicit profile-shaped", prefix: "carapace-dev", rolls: false },
   ])(
     "keeps cached $name loggers on the expected files across date changes",
     async ({ prefix, rolls }) => {

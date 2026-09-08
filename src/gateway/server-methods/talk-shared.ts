@@ -1,14 +1,14 @@
 // Talk shared helpers build provider configs, launch options, tool schemas, and
 // room event broadcasts used by browser and gateway-owned Talk sessions.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveRealtimeBootstrapContextInstructions } from "../../agents/realtime-bootstrap-context.js";
 import type { TalkRealtimeConfig } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import type { RealtimeVoiceProviderPlugin } from "../../plugins/types.js";
 import {
   getRealtimeTranscriptionProvider,
@@ -62,7 +62,7 @@ export function normalizeTalkSessionBrain(params: { mode: TalkMode; brain?: stri
 }
 
 export async function resolveTalkRealtimeProviderInstructions(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   configuredInstructions?: string;
   sessionKey: string;
@@ -124,7 +124,7 @@ function normalizeRealtimeTransport(value: unknown): TalkRealtimeConfig["transpo
 }
 
 function getVoiceCallProviderConfig<TConfig extends Record<string, unknown>>(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   sectionName: "realtime" | "streaming",
 ): {
   provider?: string;
@@ -151,14 +151,14 @@ function getVoiceCallProviderConfig<TConfig extends Record<string, unknown>>(
   };
 }
 
-function getVoiceCallRealtimeConfig(config: OpenClawConfig): {
+function getVoiceCallRealtimeConfig(config: CarapaceConfig): {
   provider?: string;
   providers?: Record<string, RealtimeVoiceProviderConfig>;
 } {
   return getVoiceCallProviderConfig(config, "realtime");
 }
 
-function getVoiceCallStreamingConfig(config: OpenClawConfig): {
+function getVoiceCallStreamingConfig(config: CarapaceConfig): {
   provider?: string;
   providers?: Record<string, RealtimeTranscriptionProviderConfig>;
 } {
@@ -166,7 +166,7 @@ function getVoiceCallStreamingConfig(config: OpenClawConfig): {
 }
 
 export function listTalkTranscriptionProviders(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   configuredProviderIds: Iterable<string | undefined>,
 ) {
   const providers = listRealtimeTranscriptionProviders(config);
@@ -187,12 +187,12 @@ export function listTalkTranscriptionProviders(
 }
 
 type RealtimeProviderWithConfig<TConfig extends Record<string, unknown>> = VoiceModelProvider & {
-  resolveConfig?: (ctx: { cfg: OpenClawConfig; rawConfig: TConfig }) => TConfig;
-  isConfigured: (ctx: { cfg: OpenClawConfig; providerConfig: TConfig }) => boolean;
+  resolveConfig?: (ctx: { cfg: CarapaceConfig; rawConfig: TConfig }) => TConfig;
+  isConfigured: (ctx: { cfg: CarapaceConfig; providerConfig: TConfig }) => boolean;
 };
 
 function resolveConfiguredVoiceModelDefaultRef<TConfig extends Record<string, unknown>>(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   provider: string | undefined;
   providerConfigs: Record<string, TConfig>;
   providers: readonly RealtimeProviderWithConfig<TConfig>[];
@@ -234,7 +234,7 @@ function resolveConfiguredVoiceModelDefaultRef<TConfig extends Record<string, un
 }
 
 export function buildTalkRealtimeConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   requestedProvider?: string,
   requestedModel?: string,
 ) {
@@ -300,7 +300,7 @@ export function buildTalkRealtimeConfig(
 }
 
 export function buildTalkTranscriptionConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   requestedProvider?: string,
   requestedModel?: string,
 ) {
@@ -331,7 +331,7 @@ export function configuredOrFalse(callback: () => boolean): boolean {
 }
 
 export function resolveConfiguredRealtimeTranscriptionProvider(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configuredProviderId?: string;
   providerConfigs: Record<string, RealtimeTranscriptionProviderConfig>;
   requestedModel?: string;
@@ -373,12 +373,12 @@ export function resolveConfiguredRealtimeTranscriptionProvider(params: {
 }
 
 const DEFAULT_REALTIME_INSTRUCTIONS = [
-  "You are OpenClaw's realtime voice interface. Keep spoken replies concise.",
-  `If the user asks for code, repository state, files, current OpenClaw context, tool-backed actions, or deeper reasoning, call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and then summarize the result naturally.`,
-  `Do not claim you cannot use tools, perform actions, or reach OpenClaw unless ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} returns that failure.`,
-  `When ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} is in progress, speak one brief acknowledgement such as "Let me check that for you", then wait for the final OpenClaw result before answering with the actual result.`,
-  `If OpenClaw is already working through ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and the user asks in any language for progress, cancellation, a redirect/change, or a follow-up, call ${REALTIME_VOICE_AGENT_CONTROL_TOOL_NAME} with the semantic mode.`,
-  "For greetings and casual chatter while OpenClaw is working, answer naturally and do not redirect the active work.",
+  "You are Carapace's realtime voice interface. Keep spoken replies concise.",
+  `If the user asks for code, repository state, files, current Carapace context, tool-backed actions, or deeper reasoning, call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and then summarize the result naturally.`,
+  `Do not claim you cannot use tools, perform actions, or reach Carapace unless ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} returns that failure.`,
+  `When ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} is in progress, speak one brief acknowledgement such as "Let me check that for you", then wait for the final Carapace result before answering with the actual result.`,
+  `If Carapace is already working through ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and the user asks in any language for progress, cancellation, a redirect/change, or a follow-up, call ${REALTIME_VOICE_AGENT_CONTROL_TOOL_NAME} with the semantic mode.`,
+  "For greetings and casual chatter while Carapace is working, answer naturally and do not redirect the active work.",
 ].join(" ");
 
 export function buildRealtimeInstructions(configuredInstructions?: string): string {
@@ -454,7 +454,7 @@ function withRealtimeBrowserOverrides(
 export function resolveTalkRealtimeGatewayRelayLaunch(params: {
   provider: RealtimeVoiceProviderPlugin;
   providerConfig: RealtimeVoiceProviderConfig;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   launchOptions: RealtimeVoiceLaunchOptions;
   consultRouting?: string;
 }) {

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import { initializePublishedConfigRuntimeEnv } from "../config/config-env-vars.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { readPersistedInstalledPluginIndexSync } from "./installed-plugin-index-store.js";
 import {
   refreshPluginRegistryAfterConfigMutation,
@@ -18,11 +18,11 @@ describe("plugin registry refresh config ownership", () => {
   ] as const)(
     "discovers an env-referenced plugin from $envSource env after $reason",
     async ({ reason, envSource }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           label: "registry-refresh-env",
           layout: "split",
-          env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", PLUGIN_DIR: undefined },
+          env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", PLUGIN_DIR: undefined },
         },
         async (state) => {
           const pluginDir = state.path("plugin");
@@ -68,11 +68,11 @@ describe("plugin registry refresh config ownership", () => {
   it.each(["copied-owned", "caller-override"] as const)(
     "reads the owned config without stale Gateway env (%s)",
     async (envSource) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           label: "registry-refresh-owned",
           layout: "split",
-          env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", PLUGIN_DIR: undefined },
+          env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", PLUGIN_DIR: undefined },
         },
         async (state) => {
           const pluginDir = state.path("plugin");
@@ -98,7 +98,7 @@ describe("plugin registry refresh config ownership", () => {
           );
           const env = {
             ...process.env,
-            OPENCLAW_CONFIG_PATH: state.path("discovery-config.json"),
+            CARAPACE_CONFIG_PATH: state.path("discovery-config.json"),
             ...(envSource === "caller-override" ? { PLUGIN_DIR: callerPluginDir } : {}),
           };
           const warn = vi.fn();
@@ -118,8 +118,8 @@ describe("plugin registry refresh config ownership", () => {
             }),
           );
           expect(process.env.PLUGIN_DIR).toBe(priorEnv.PLUGIN_DIR);
-          expect(process.env.OPENCLAW_CONFIG_PATH).toBe(state.configPath);
-          expect(env.OPENCLAW_CONFIG_PATH).toBe(state.path("discovery-config.json"));
+          expect(process.env.CARAPACE_CONFIG_PATH).toBe(state.configPath);
+          expect(env.CARAPACE_CONFIG_PATH).toBe(state.path("discovery-config.json"));
           expect(env.PLUGIN_DIR).toBe(
             envSource === "caller-override" ? callerPluginDir : priorEnv.PLUGIN_DIR,
           );
@@ -129,13 +129,13 @@ describe("plugin registry refresh config ownership", () => {
   );
 
   it("resolves an external include using only the caller's allowed roots and path variables", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         label: "registry-refresh-caller-include",
         layout: "split",
         env: {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_INCLUDE_ROOTS: undefined,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_INCLUDE_ROOTS: undefined,
           PLUGIN_DIR: undefined,
         },
       },
@@ -153,7 +153,7 @@ describe("plugin registry refresh config ownership", () => {
         await state.writeConfig(config);
         const includePath = state.path("shared", "plugins.json");
         await fs.writeFile(includePath, JSON.stringify(plugins));
-        const env = { ...process.env, OPENCLAW_INCLUDE_ROOTS: includeRoot, PLUGIN_DIR: pluginDir };
+        const env = { ...process.env, CARAPACE_INCLUDE_ROOTS: includeRoot, PLUGIN_DIR: pluginDir };
         const warn = vi.fn();
         await refreshPluginRegistryAfterConfigMutation({
           configPath: state.configPath,
@@ -172,17 +172,17 @@ describe("plugin registry refresh config ownership", () => {
         );
         expect(JSON.parse(await fs.readFile(state.configPath, "utf8"))).toEqual(config);
         expect(JSON.parse(await fs.readFile(includePath, "utf8"))).toEqual(plugins);
-        expect(process.env.OPENCLAW_INCLUDE_ROOTS).toBeUndefined();
+        expect(process.env.CARAPACE_INCLUDE_ROOTS).toBeUndefined();
         expect(process.env.PLUGIN_DIR).toBeUndefined();
-        expect(env.OPENCLAW_INCLUDE_ROOTS).toBe(includeRoot);
+        expect(env.CARAPACE_INCLUDE_ROOTS).toBe(includeRoot);
         expect(env.PLUGIN_DIR).toBe(pluginDir);
       },
     );
   });
 
   it("keeps staged probe config and install receipts separate from the file, then restores disk policy", async () => {
-    await withOpenClawTestState(
-      { label: "registry-refresh-probe", env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" } },
+    await withCarapaceTestState(
+      { label: "registry-refresh-probe", env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" } },
       async (state) => {
         const pluginDir = state.path("staged-plugin");
         await fs.mkdir(pluginDir);

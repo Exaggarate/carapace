@@ -122,7 +122,7 @@ function toolResult(structuredContent: Record<string, unknown>, image = false) {
 
 function sessionState(scope: "window" | "desktop") {
   return toolResult({
-    session: "openclaw-test",
+    session: "carapace-test",
     capture_scope: scope,
     effective_scope: scope,
     desktop_unlocked: scope === "desktop",
@@ -188,7 +188,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
           fake.respond(request, sessionState("desktop"));
           break;
         case "end_session":
-          fake.respond(request, toolResult({ session: "openclaw-test", active: false }));
+          fake.respond(request, toolResult({ session: "carapace-test", active: false }));
           break;
         default:
           break;
@@ -235,7 +235,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
       params: {
         protocolVersion: "2025-06-18",
         capabilities: {},
-        clientInfo: { name: "openclaw-cua-computer", version: "1" },
+        clientInfo: { name: "carapace-cua-computer", version: "1" },
       },
     });
     const startCalls = endpoint.requests.filter(
@@ -244,7 +244,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
     expect(startCalls).toHaveLength(1);
     expect(startCalls[0]?.params?.arguments).not.toHaveProperty("capture_scope");
     const session = startCalls[0]?.params?.arguments?.session;
-    expect(session).toEqual(expect.stringMatching(/^openclaw-/));
+    expect(session).toEqual(expect.stringMatching(/^carapace-/));
     expect(
       endpoint.requests.find(
         (request) =>
@@ -318,7 +318,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
         fake.writeRaw(secondRequest, framed.subarray(0, split));
         setImmediate(() => fake.writeRaw(secondRequest, framed.subarray(split)));
       } else if (request.method === "tools/call" && request.params?.name === "end_session") {
-        fake.respond(request, toolResult({ session: "openclaw-test", active: false }));
+        fake.respond(request, toolResult({ session: "carapace-test", active: false }));
       }
     });
     const driver = createCuaMcpDriver(endpoint);
@@ -625,7 +625,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
       } else if (request.method === "tools/call" && request.params?.name === "list_windows") {
         held.push(request);
       } else if (request.method === "tools/call" && request.params?.name === "end_session") {
-        fake.respond(request, toolResult({ session: "openclaw-test", active: false }));
+        fake.respond(request, toolResult({ session: "carapace-test", active: false }));
       }
     });
     const driver = createCuaMcpDriver(endpoint);
@@ -635,7 +635,7 @@ describe.runIf(process.platform !== "win32")("CUA MCP proxy transport", () => {
     expect(driver.isAvailable()).toBe(true);
     await vi.waitFor(() => expect(held).toHaveLength(64));
     expect(held[0]?.params?.arguments).toMatchObject({
-      session: expect.stringMatching(/^openclaw-/),
+      session: expect.stringMatching(/^carapace-/),
     });
     for (const request of held) {
       endpoint.respond(request, toolResult({ windows: [] }));

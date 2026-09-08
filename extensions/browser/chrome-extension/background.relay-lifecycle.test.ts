@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupBackgroundHarnesses,
@@ -75,7 +75,7 @@ async function fixture() {
   const old = h.relaySockets[0]!;
   await h.authenticate(old);
   async function replacement() {
-    h.alarmListener({ name: "openclaw-relay-watchdog" });
+    h.alarmListener({ name: "carapace-relay-watchdog" });
     await vi.waitFor(() => expect(h.relaySockets).toHaveLength(2));
     const socket = h.relaySockets[1]!;
     await h.authenticate(socket);
@@ -361,14 +361,14 @@ describe("authenticated relay debugger lifetime", () => {
     });
     try {
       f.old.close();
-      f.h.alarmListener({ name: "openclaw-relay-watchdog" });
+      f.h.alarmListener({ name: "carapace-relay-watchdog" });
       await vi.waitFor(() => expect(f.h.relaySockets).toHaveLength(2));
       const expired = f.h.relaySockets[1]!;
       const clock = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 10_001);
-      f.h.alarmListener({ name: "openclaw-relay-opening-deadline" });
+      f.h.alarmListener({ name: "carapace-relay-opening-deadline" });
       clock.mockRestore();
       expect(expired.close).toHaveBeenCalledWith(4001, "relay authentication timed out");
-      f.h.alarmListener({ name: "openclaw-relay-watchdog" });
+      f.h.alarmListener({ name: "carapace-relay-watchdog" });
       await vi.waitFor(() => expect(f.h.relaySockets).toHaveLength(3));
       const next = f.h.relaySockets[2]!;
       await f.h.authenticate(next);

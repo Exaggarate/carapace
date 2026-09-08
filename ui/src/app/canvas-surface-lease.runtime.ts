@@ -1,6 +1,6 @@
 // Loaded after hello so capability renewal does not inflate the startup chunk.
-import { resolveSafeTimeoutDelayMs } from "@openclaw/gateway-client/browser";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { resolveSafeTimeoutDelayMs } from "@carapace/gateway-client/browser";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 const RENEWAL_LEAD_MS = 15_000;
 const MIN_RENEWAL_DELAY_MS = 1_000;

@@ -1,15 +1,15 @@
 {
-  "name": "@openclaw/memory-host-sdk",
+  "name": "@carapace/memory-host-sdk",
   "version": "0.0.0-private",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@openclaw/normalization-core": "workspace:*",
-    "@openclaw/retry": "workspace:*",
+    "@carapace/normalization-core": "workspace:*",
+    "@carapace/retry": "workspace:*",
     "p-map": "7.0.7"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "carapace": "workspace:*"
   },
   "exports": {
     "./runtime-core": "./src/runtime-core.ts",

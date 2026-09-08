@@ -1,5 +1,5 @@
 // Memory Core source filtering shared by the manager and subprocess request validation tests.
-import type { MemorySource } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySource } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 
 export function buildMemorySourceFilter(
   alias: string | undefined,

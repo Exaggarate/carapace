@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { createCodexTestBindingStore } from "./session-binding.test-helpers.js";
 

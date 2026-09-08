@@ -527,7 +527,7 @@ describe("persistent chat session snapshots", () => {
     try {
       await clearStoredChatSnapshots();
       const currentBroadcastValue = setItem.mock.calls.findLast(
-        ([key]) => key === "openclaw.control.chatSnapshots.invalidate.v1",
+        ([key]) => key === "carapace.control.chatSnapshots.invalidate.v1",
       )?.[1];
       if (currentBroadcastValue === undefined) {
         throw new Error("expected full-cache invalidation broadcast");
@@ -544,7 +544,7 @@ describe("persistent chat session snapshots", () => {
         await store.flush();
         window.dispatchEvent(
           new StorageEvent("storage", {
-            key: "openclaw.control.chatSnapshots.invalidate.v1",
+            key: "carapace.control.chatSnapshots.invalidate.v1",
             newValue: peerValue,
           }),
         );
@@ -580,7 +580,7 @@ describe("persistent chat session snapshots", () => {
     try {
       await deleteStoredChatSnapshot(deletedSessionKey);
       const broadcastValue = setItem.mock.calls.findLast(
-        ([key]) => key === "openclaw.control.chatSnapshots.invalidate.v1",
+        ([key]) => key === "carapace.control.chatSnapshots.invalidate.v1",
       )?.[1];
       expect(broadcastValue).toBeDefined();
 
@@ -588,7 +588,7 @@ describe("persistent chat session snapshots", () => {
       await store.flush();
       window.dispatchEvent(
         new StorageEvent("storage", {
-          key: "openclaw.control.chatSnapshots.invalidate.v1",
+          key: "carapace.control.chatSnapshots.invalidate.v1",
           newValue: broadcastValue,
         }),
       );

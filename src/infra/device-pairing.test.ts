@@ -1,11 +1,11 @@
 // Covers device pairing, token, and role lifecycle behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
 import {
   FULL_ACCESS_PAIRING_SETUP_BOOTSTRAP_PROFILE,
   PAIRING_SETUP_BOOTSTRAP_PROFILE,
 } from "../shared/device-bootstrap-profile.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { issueDeviceBootstrapToken, verifyDeviceBootstrapToken } from "./device-bootstrap.js";
 import { approveBootstrapDevicePairing, approveDevicePairing } from "./device-pairing-approval.js";
@@ -72,7 +72,7 @@ async function setupPairedBrowserOperatorDevice(baseDir: string) {
     {
       deviceId: "browser-device-1",
       publicKey: "public-key-browser-1",
-      clientId: "openclaw-control-ui",
+      clientId: "carapace-control-ui",
       clientMode: "webchat",
       role: "operator",
       scopes: ["operator.read"],
@@ -189,7 +189,7 @@ async function clearPairedOperatorApprovalBaseline(baseDir: string) {
   });
 }
 
-const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-device-pairing-" });
+const suiteRootTracker = createSuiteTempRootTracker({ prefix: "carapace-device-pairing-" });
 let suiteBaseDir = "";
 
 async function makeDevicePairingDir(): Promise<string> {
@@ -210,7 +210,7 @@ describe("device pairing tokens", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await suiteRootTracker.cleanup();
   });
 
@@ -2206,7 +2206,7 @@ describe("device pairing tokens", () => {
       nodeId: "device-1",
       transport: "direct",
       token: "ABCD1234ABCD1234ABCD1234ABCD1234",
-      topic: "ai.openclaw.ios",
+      topic: "ai.carapace.ios",
       environment: "sandbox",
       baseDir,
     });
@@ -2220,11 +2220,11 @@ describe("device pairing tokens", () => {
   });
 
   test.each([
-    { clientId: "openclaw-control-ui", platform: undefined, expected: true },
+    { clientId: "carapace-control-ui", platform: undefined, expected: true },
     { clientId: "webchat-ui", platform: undefined, expected: true },
-    { clientId: "openclaw-ios", platform: undefined, expected: true },
-    { clientId: "openclaw-android", platform: undefined, expected: true },
-    { clientId: "openclaw-macos", platform: undefined, expected: true },
+    { clientId: "carapace-ios", platform: undefined, expected: true },
+    { clientId: "carapace-android", platform: undefined, expected: true },
+    { clientId: "carapace-macos", platform: undefined, expected: true },
     { clientId: "cli", platform: "web", expected: true },
     { clientId: "cli", platform: "ios", expected: true },
     { clientId: "cli", platform: "android", expected: true },
@@ -2278,7 +2278,7 @@ describe("device pairing tokens", () => {
         nodeId: "node-1",
         transport: "direct",
         token: "ABCD1234ABCD1234ABCD1234ABCD1234",
-        topic: "ai.openclaw.ios",
+        topic: "ai.carapace.ios",
         environment: "sandbox",
         baseDir,
       });

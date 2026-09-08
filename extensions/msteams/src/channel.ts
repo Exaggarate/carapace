@@ -1,39 +1,39 @@
 // Msteams plugin module implements channel behavior.
-import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
+import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "carapace/plugin-sdk/approval-handler-adapter-runtime";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageToolDiscovery,
-} from "openclaw/plugin-sdk/channel-contract";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+} from "carapace/plugin-sdk/channel-contract";
+import { createChatChannelPlugin } from "carapace/plugin-sdk/channel-core";
 import {
   createAccountStatusSink,
   createChannelMessageAdapterFromOutbound,
   createRuntimeOutboundDelegates,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "carapace/plugin-sdk/channel-pairing";
 import {
   createAllowlistProviderGroupPolicyWarningCollector,
   createConditionalWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
-import { registerChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
+} from "carapace/plugin-sdk/channel-policy";
+import { registerChannelRuntimeContext } from "carapace/plugin-sdk/channel-runtime-context";
 import {
   createChannelDirectoryAdapter,
   createRuntimeDirectoryLiveAdapter,
-} from "openclaw/plugin-sdk/directory-runtime";
-import { normalizeMessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import { createComputedAccountStatusAdapter } from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/directory-runtime";
+import { normalizeMessagePresentation } from "carapace/plugin-sdk/interactive-runtime";
+import { createLazyRuntimeNamedExport } from "carapace/plugin-sdk/lazy-runtime";
+import { createComputedAccountStatusAdapter } from "carapace/plugin-sdk/status-helpers";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import { msteamsDirectoryContractPlugin } from "../directory-contract-api.js";
 import type {
   ChannelMessageActionName,
   ChannelOutboundAdapter,
   ChannelPlugin,
-  OpenClawConfig,
+  CarapaceConfig,
 } from "../runtime-api.js";
 import {
   buildProbeChannelStatusSummary,
@@ -91,7 +91,7 @@ const MSTEAMS_GROUP_MANAGEMENT_ACTIONS = new Set<ChannelMessageActionName>([
 ]);
 
 const collectMSTeamsSecurityWarnings = createAllowlistProviderGroupPolicyWarningCollector<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }>({
   providerConfigPresent: (cfg) => cfg.channels?.msteams !== undefined,
   resolveGroupPolicy: ({ cfg }) => cfg.channels?.msteams?.groupPolicy,

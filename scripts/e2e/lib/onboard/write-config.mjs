@@ -33,8 +33,8 @@ if (scenario === "guided-skip-ui") {
         ownership: "explicit",
         defaults: { systemAgent: { agentId: "main" } },
         entries: {
-          main: { workspace: "/tmp/openclaw-main-workspace" },
-          ops: { workspace: "/tmp/openclaw-ops-workspace" },
+          main: { workspace: "/tmp/carapace-main-workspace" },
+          ops: { workspace: "/tmp/carapace-ops-workspace" },
         },
       },
     },

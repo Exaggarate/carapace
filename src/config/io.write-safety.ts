@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
 import { replaceFileAtomic } from "../infra/replace-file.js";
 import { isRecord } from "../utils.js";
 import { stampConfigWriteMetadata } from "./io.meta.js";
@@ -8,7 +8,7 @@ import { hashConfigRaw, parseConfigJson5, resolveConfigSnapshotHash } from "./io
 import type { ConfigWriteOptions } from "./io.types.js";
 import { ConfigMutationConflictError } from "./mutation-conflict.js";
 import { resolveStateDir } from "./paths.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.js";
 
 export function assertBaseSnapshotStillCurrent(
   snapshot: ConfigFileSnapshot,
@@ -189,10 +189,10 @@ export function formatConfigArtifactTimestamp(ts: string): string {
 }
 
 export function stampConfigVersion(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   version?: string,
   previousConfig?: unknown,
-): OpenClawConfig {
+): CarapaceConfig {
   return stampConfigWriteMetadata(cfg, new Date().toISOString(), version, previousConfig);
 }
 
@@ -210,7 +210,7 @@ export function resolveConfigSizeBaselineBytes(params: {
     return rawBytes;
   }
   const canonical = JSON.stringify(
-    stampConfigVersion(parsed.parsed as OpenClawConfig, params.lastTouchedVersionOverride),
+    stampConfigVersion(parsed.parsed as CarapaceConfig, params.lastTouchedVersionOverride),
     null,
     2,
   )

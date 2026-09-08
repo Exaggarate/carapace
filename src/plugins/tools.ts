@@ -1,6 +1,6 @@
 /** Builds agent tools registered by plugins, preserving plugin scope around callbacks and descriptors. */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { compileGlobPatterns, matchesAnyGlobPattern } from "../agents/glob-pattern.js";
 import { normalizeToolPolicyName } from "../agents/tool-policy.js";
 import type { AnyAgentTool } from "../agents/tools/common.js";
@@ -38,7 +38,7 @@ import { resolvePluginRuntimeLoadContext } from "./runtime/load-context.resolve.
 import { findUndeclaredPluginToolNames } from "./tool-contracts.js";
 import { createPluginToolAllowlist, type PluginToolAllowlist } from "./tool-grant-allowlist.js";
 import { copyPluginToolMeta, setPluginToolMeta } from "./tool-metadata.js";
-import type { OpenClawPluginToolContext } from "./types.js";
+import type { CarapacePluginToolContext } from "./types.js";
 
 type PluginToolFactoryTimingResult = "array" | "error" | "null" | "single";
 
@@ -168,7 +168,7 @@ function wrapPluginToolFactoryResult(
 function resolvePluginToolFactory(
   entry: PluginToolRegistration,
   pluginRegistry: PluginRegistry | undefined,
-  ctx: OpenClawPluginToolContext,
+  ctx: CarapacePluginToolContext,
 ) {
   return runWithPluginToolScope(entry, pluginRegistry, () =>
     wrapPluginToolFactoryResult(entry, pluginRegistry, entry.factory(ctx)),
@@ -179,7 +179,7 @@ function blocksHostRestrictedConversationReadTool(params: {
   pluginId: string;
   toolNames: readonly string[];
   bundledOwner: boolean;
-  ctx: OpenClawPluginToolContext;
+  ctx: CarapacePluginToolContext;
 }): boolean {
   if (
     normalizeConversationReadInvocationOrigin(params.ctx.conversationReadOrigin) ===
@@ -196,7 +196,7 @@ function blocksHostRestrictedConversationReadTool(params: {
 function blocksHostRestrictedConversationReadRegistration(params: {
   entry: PluginToolRegistration;
   manifestPlugin: PluginManifestRecord | undefined;
-  ctx: OpenClawPluginToolContext;
+  ctx: CarapacePluginToolContext;
 }): boolean {
   return (
     registrationIncludesHostRestrictedConversationReadTool(params.entry) &&
@@ -348,7 +348,7 @@ function createPluginToolFactoryTiming(params: {
 function resolvePluginToolFactoryEntry(params: {
   entry: PluginToolRegistration;
   pluginRegistry: PluginRegistry | undefined;
-  ctx: OpenClawPluginToolContext;
+  ctx: CarapacePluginToolContext;
   declaredNames: string[];
   factoryTimingStartedAt: number;
   logError: (message: string) => void;
@@ -659,7 +659,7 @@ type PreparedPluginToolRuntime = {
 };
 
 function resolvePluginToolLoadState(params: {
-  context: OpenClawPluginToolContext;
+  context: CarapacePluginToolContext;
   toolAllowlist?: string[];
   toolDenylist?: string[];
   allowGatewaySubagentBinding?: boolean;
@@ -725,7 +725,7 @@ function resolvePluginToolLoadState(params: {
 }
 
 export function ensureStandalonePluginToolRegistryLoaded(params: {
-  context: OpenClawPluginToolContext;
+  context: CarapacePluginToolContext;
   toolAllowlist?: string[];
   toolDenylist?: string[];
   allowGatewaySubagentBinding?: boolean;
@@ -747,7 +747,7 @@ export function ensureStandalonePluginToolRegistryLoaded(params: {
 }
 
 export function resolvePluginTools(params: {
-  context: OpenClawPluginToolContext;
+  context: CarapacePluginToolContext;
   existingToolNames?: Set<string>;
   clientCaps?: string[];
   toolAllowlist?: string[];

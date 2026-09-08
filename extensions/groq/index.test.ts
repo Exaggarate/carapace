@@ -1,15 +1,15 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   createAssistantMessageEventStream,
   type SimpleStreamOptions,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 // Groq tests cover index plugin behavior.
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
 import { describe, expect, it } from "vitest";
 import { resolveGroqReasoningCompatPatch } from "./api.js";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 describe("groq provider compat", () => {
   it("recovers only matching implicit-budget rejections without changing normal tools", async () => {

@@ -11,7 +11,7 @@ import {
   resolveEmbeddingEndpointUrl,
   withRemoteHttpResponse,
   type EmbeddingBatchExecutionParams,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   assertOkOrThrowProviderError,
   createProviderOperationDeadline,
@@ -19,7 +19,7 @@ import {
   readProviderJsonObjectResponse,
   resolveProviderOperationTimeoutMs,
   waitProviderOperationPollInterval,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   sanitizeGeminiEmbedding,
   type GeminiEmbeddingClient,
@@ -156,7 +156,7 @@ function buildGeminiUploadBody(params: { jsonl: string; displayName: string }): 
   body: Blob;
   contentType: string;
 } {
-  const boundary = `openclaw-${hashText(params.displayName)}`;
+  const boundary = `carapace-${hashText(params.displayName)}`;
   const jsonPart = JSON.stringify({
     file: {
       displayName: params.displayName,

@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createTestBoardStore } from "../boards/board-store.test-support.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { handleBoardHttpRequest } from "./board-http.js";
 import {
   BOARD_VIEW_TICKET_TTL_MS,
@@ -15,7 +15,7 @@ import {
 } from "./board-view-ticket.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
 
-const stateDir = mkdtempSync(path.join(tmpdir(), "openclaw-board-http-"));
+const stateDir = mkdtempSync(path.join(tmpdir(), "carapace-board-http-"));
 const store = createTestBoardStore({ stateDir });
 const mainSession = { sessionKey: "agent:main:main", agentId: "main" };
 const nowMs = 1_800_000_000_000;
@@ -119,8 +119,8 @@ afterAll(async () => {
       resolve();
     });
   });
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   rmSync(stateDir, { recursive: true, force: true });
 });
 
@@ -153,7 +153,7 @@ function request(
   init: { method?: string; headers?: Record<string, string>; ticket?: string } = {},
 ) {
   const query = init.ticket ? `?bt=${encodeURIComponent(init.ticket)}` : "";
-  return fetch(`${baseUrl}/__openclaw__/board/agent%3Amain%3Amain/${name}/index.html${query}`, {
+  return fetch(`${baseUrl}/__carapace__/board/agent%3Amain%3Amain/${name}/index.html${query}`, {
     method: init.method,
     headers: init.headers,
   });
@@ -181,7 +181,7 @@ describe("board widget HTTP", () => {
       });
       const read = (owner: string) =>
         fetch(
-          `${baseUrl}/__openclaw__/board/agent%3A${owner}%3Aglobal/global-status/index.html?bt=${encodeURIComponent(ticket)}`,
+          `${baseUrl}/__carapace__/board/agent%3A${owner}%3Aglobal/global-status/index.html?bt=${encodeURIComponent(ticket)}`,
         );
       const response = await read(agentId);
       expect(response.status).toBe(200);
@@ -403,7 +403,7 @@ describe("board widget HTTP", () => {
       nowMs,
     }).ticket;
     const response = await fetch(
-      `${baseUrl}/__openclaw__/board/session%2Fwith%2Fslash/slash-key/index.html?bt=${encodeURIComponent(ticket)}`,
+      `${baseUrl}/__carapace__/board/session%2Fwith%2Fslash/slash-key/index.html?bt=${encodeURIComponent(ticket)}`,
     );
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toBe("slash");

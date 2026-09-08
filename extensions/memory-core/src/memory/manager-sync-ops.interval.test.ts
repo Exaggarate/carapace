@@ -1,11 +1,11 @@
 // Memory Core tests cover manager sync ops.interval plugin behavior.
 import type { DatabaseSync } from "node:sqlite";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { MemorySource } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import type { MemorySource } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryIndexDatabase } from "./manager-database-context.js";
 import { MemoryManagerSyncOps } from "./manager-sync-ops.js";
@@ -20,9 +20,9 @@ type MemoryIndexEntry = {
 };
 
 class IntervalSyncHarness extends MemoryManagerSyncOps {
-  protected readonly cfg = {} as OpenClawConfig;
+  protected readonly cfg = {} as CarapaceConfig;
   protected readonly agentId = "main";
-  protected readonly workspaceDir = "/tmp/openclaw-memory-interval-test";
+  protected readonly workspaceDir = "/tmp/carapace-memory-interval-test";
   protected readonly settings: ResolvedMemorySearchConfig;
   protected readonly batch = {
     enabled: false,

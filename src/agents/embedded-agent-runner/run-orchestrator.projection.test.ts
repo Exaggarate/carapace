@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Worker } from "node:worker_threads";
-import { getAiTransportHost } from "@openclaw/ai";
-import { streamOpenAIResponses } from "@openclaw/ai/internal/openai";
+import { getAiTransportHost } from "@carapace/ai";
+import { streamOpenAIResponses } from "@carapace/ai/internal/openai";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
@@ -14,10 +14,10 @@ import {
 import * as reconciliation from "../../config/sessions/session-transcript-reconcile.js";
 import type { SessionTranscriptReconcileWorkerMessage } from "../../config/sessions/session-transcript-reconcile.worker.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { SessionManager } from "../sessions/session-manager.js";
 import {
   buildEmbeddedRunnerAssistant,
@@ -40,7 +40,7 @@ let runEmbeddedAgent: ProductionRun;
 beforeAll(async () => {
   installEmbeddedRunnerBaseE2eMocks();
   installEmbeddedRunnerFastRunE2eMocks({ runEmbeddedAttempt: runAttempt });
-  vi.doMock("../models-config.js", () => ({ ensureOpenClawModelsJson: vi.fn() }));
+  vi.doMock("../models-config.js", () => ({ ensureCarapaceModelsJson: vi.fn() }));
   vi.doMock("./model.js", () => ({
     resolveModelAsync: async (provider: string, modelId: string) =>
       createResolvedEmbeddedRunnerModel(provider, modelId),
@@ -63,8 +63,8 @@ beforeAll(async () => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   tempRoots.cleanup();
@@ -73,7 +73,7 @@ afterEach(() => {
 
 function fenceProjection(target: SessionTranscriptRuntimeTarget) {
   const databaseOptions = { agentId: target.agentId };
-  const database = openOpenClawAgentDatabase(databaseOptions);
+  const database = openCarapaceAgentDatabase(databaseOptions);
   // Existing fault-injection pattern: the real owner must rebuild this projection.
   database.db
     .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
@@ -142,9 +142,9 @@ describe("embedded retry transcript ownership", () => {
   ] as const)(
     "%s metadata, caller manager=%s, projection=%s, abort=%s",
     async (sessionPersistence, suppliedManager, projection, abort) => {
-      const root = tempRoots.make("openclaw-retry-projection-");
+      const root = tempRoots.make("carapace-retry-projection-");
       const stateDir = path.join(root, "state");
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       const workspaceDir = path.join(root, "workspace");
       const agentDir = path.join(root, "staged", "agent");
       await fs.mkdir(workspaceDir, { recursive: true });

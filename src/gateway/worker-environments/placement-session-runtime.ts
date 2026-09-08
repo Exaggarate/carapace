@@ -1,7 +1,7 @@
 import { resolveSessionModelRef } from "../../agents/session-model-ref.js";
 import { resolveEffectiveAgentRuntime } from "../../agents/thinking-runtime.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayAgentRuntime } from "../../shared/session-types.js";
 import { resolveWorkerPlacementCapabilities } from "./placement-capabilities.js";
 import type { WorkerPlacementExecutionMode } from "./placement-record.js";
@@ -9,7 +9,7 @@ import type { WorkerPlacementExecutionMode } from "./placement-record.js";
 export { resolveWorkerPlacementCapabilities } from "./placement-capabilities.js";
 
 export function resolveWorkerPlacementSessionRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   agentId: string;
   sessionKey: string;

@@ -2,10 +2,10 @@ import type {
   WorkboardCard,
   WorkboardExecutionStatus,
   WorkboardStatus,
-} from "@openclaw/workboard-contract";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawPluginApi, OpenClawPluginService } from "../api.js";
+} from "@carapace/workboard-contract";
+import { resolveGlobalSingleton } from "carapace/plugin-sdk/global-singleton";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { CarapacePluginApi, CarapacePluginService } from "../api.js";
 import {
   cleanupWorkboardCardWorktree,
   isWorkboardWorktreeCleanupCandidate,
@@ -26,7 +26,7 @@ const WORKBOARD_WORKTREE_CLEANUP_SWEEP_LIMIT = 32;
 // Keep readiness across plugin-only reloads, while the singleton lifecycle
 // clears it before an in-process Gateway restart starts replacement services.
 const workboardLifecycleGatewayState = resolveGlobalSingleton(
-  Symbol.for("openclaw.workboard.lifecycleGatewayState"),
+  Symbol.for("carapace.workboard.lifecycleGatewayState"),
   () => ({ ready: false }),
   (state) => {
     state.ready = false;
@@ -77,7 +77,7 @@ type WorkboardLifecycleMatchHandler = (input: {
   sessionKey?: string;
 }) => Promise<void>;
 
-type WorkboardLifecycleService = OpenClawPluginService & {
+type WorkboardLifecycleService = CarapacePluginService & {
   stop: () => void;
   onGatewayStart: () => void;
   onGatewayStop: () => void;
@@ -392,7 +392,7 @@ function normalizeSession(value: unknown): WorkboardLifecycleSession | undefined
 }
 
 export async function readWorkboardLifecycleSessions(
-  gateway: Pick<OpenClawPluginApi["runtime"]["gateway"], "isAvailable" | "request">,
+  gateway: Pick<CarapacePluginApi["runtime"]["gateway"], "isAvailable" | "request">,
   options: WorkboardLifecycleSessionReadOptions = { includeUnknown: false },
 ): Promise<WorkboardLifecycleSessionSnapshot> {
   if (!(await gateway.isAvailable())) {

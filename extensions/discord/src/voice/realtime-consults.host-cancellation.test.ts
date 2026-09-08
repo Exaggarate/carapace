@@ -1,11 +1,11 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
 type AgentResult = { payloads: Array<{ text: string }> };
 
 const cancelledResult = {
   status: "cancelled",
-  message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+  message: "Carapace cancelled this consult before completion. Do not restart it.",
 };
 
 defineDiscordVoiceTests(
@@ -45,7 +45,7 @@ defineDiscordVoiceTests(
             {
               itemId: `item-${callId}`,
               callId,
-              name: "openclaw_agent_consult",
+              name: "carapace_agent_consult",
               args: { question: "shared question" },
             },
             source.session,

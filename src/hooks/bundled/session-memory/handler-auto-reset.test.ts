@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { CarapaceConfig } from "../../../config/config.js";
 import { replaceTranscriptEvents } from "../../../config/sessions/session-accessor.js";
 import { createInternalHookEvent } from "../../internal-hooks.js";
 import handler, { flushSessionMemoryWritesForTest } from "./handler.js";
@@ -14,7 +14,7 @@ describe("session-memory automatic reset", () => {
   let tempDir = "";
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-session-memory-auto-");
+    tempDir = tempDirs.make("carapace-session-memory-auto-");
   });
 
   afterEach(async () => {
@@ -30,7 +30,7 @@ describe("session-memory automatic reset", () => {
       const cfg = {
         agents: { defaults: { workspace: tempDir } },
         session: { store: storePath },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await replaceTranscriptEvents({ agentId: "main", sessionId, sessionKey, storePath }, [
         {
           type: "message",
@@ -39,7 +39,7 @@ describe("session-memory automatic reset", () => {
           message: {
             role: "user",
             content: `Remember the ${reason} rollover`,
-            __openclaw: { senderIsOwner: true },
+            __carapace: { senderIsOwner: true },
           },
         },
         {

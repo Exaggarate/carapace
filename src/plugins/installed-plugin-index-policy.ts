@@ -1,5 +1,5 @@
 // Applies policy checks to installed plugin index records.
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { readBundledDiscoveryModeMemoized } from "./bundled-discovery-state.js";
 import { listPluginCompatRecords } from "./compat/registry.js";
 import { normalizePluginsConfig } from "./config-state.js";
@@ -22,7 +22,7 @@ export function resolveCompatRegistryVersion(): string {
 
 /** Hashes config policy inputs that can change installed plugin activation. */
 export function resolveInstalledPluginIndexPolicyHash(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   // Callers scoped to an explicit env hash that env's state-root mode so
   // persisted indexes cannot leak activation decisions across roots.
   env?: NodeJS.ProcessEnv,

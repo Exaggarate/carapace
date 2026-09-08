@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/logbook",
+  "name": "@carapace/logbook",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw automatic work journal plugin",
+  "description": "Carapace automatic work journal plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

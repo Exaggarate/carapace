@@ -9,8 +9,8 @@ import {
 import {
   emitDiagnosticEvent,
   waitForDiagnosticEventsDrained,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { emitInternalDiagnosticEventForTest } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+import { emitInternalDiagnosticEventForTest } from "carapace/plugin-sdk/plugin-test-runtime";
 import { expect, test } from "vitest";
 import { installRealOtelSdkTestHarness } from "./service.real-sdk.test-support.js";
 import {
@@ -43,7 +43,7 @@ test.each([
             exportIntervalMillis: 60_000,
           }),
         ],
-        views: ["openclaw.gateway.event_loop.*", "openclaw.gc.duration_ms"].map(
+        views: ["carapace.gateway.event_loop.*", "carapace.gc.duration_ms"].map(
           (instrumentName) => ({
             instrumentName,
             attributesProcessors: [
@@ -101,8 +101,8 @@ test.each([
           )
             .filter(
               (metric) =>
-                metric.descriptor.name.startsWith("openclaw.gateway.event_loop.") ||
-                metric.descriptor.name === "openclaw.gc.duration_ms",
+                metric.descriptor.name.startsWith("carapace.gateway.event_loop.") ||
+                metric.descriptor.name === "carapace.gc.duration_ms",
             )
             .map(
               (metric) =>
@@ -135,15 +135,15 @@ test.each([
         await meterProvider.forceFlush();
         if (metricsEnabled) {
           expect(sampleMetrics()).toMatchObject({
-            "openclaw.gateway.event_loop.delay_max_ms": {
+            "carapace.gateway.event_loop.delay_max_ms": {
               unit: "ms",
               points: [{ attributes: {}, value: { count, sum } }],
             },
-            "openclaw.gateway.event_loop.observed_ms": {
+            "carapace.gateway.event_loop.observed_ms": {
               unit: "ms",
               points: [{ attributes: {}, value: totalMs }],
             },
-            "openclaw.gc.duration_ms": {
+            "carapace.gc.duration_ms": {
               unit: "ms",
               points: [{ attributes: {}, value: { count, sum } }],
             },

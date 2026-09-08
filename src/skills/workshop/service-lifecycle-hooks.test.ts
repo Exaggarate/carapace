@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { writeSkill } from "../test-support/e2e-test-helpers.js";
 
@@ -24,7 +24,7 @@ vi.mock("../../plugins/hook-runner-global.js", () => ({
   }),
 }));
 
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   applySkillProposal as applySkillProposalImpl,
   inspectSkillProposal as inspectSkillProposalImpl,
@@ -36,9 +36,9 @@ import {
 import { resolveWorkshopSkillsDir } from "./skills-root.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
-const workshopConfig: OpenClawConfig = {};
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+let testState: CarapaceTestState;
+const workshopConfig: CarapaceConfig = {};
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 const applySkillProposal = (
   input: OptionalWorkshopConfig<Parameters<typeof applySkillProposalImpl>[0]>,
 ) => applySkillProposalImpl({ config: workshopConfig, ...input });
@@ -60,9 +60,9 @@ const rejectSkillProposal = (
 ) => rejectSkillProposalImpl({ config: workshopConfig, ...input });
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-lifecycle-hooks-state-",
+    prefix: "carapace-skill-lifecycle-hooks-state-",
   });
   hookMocks.proposalChanged.mockReset();
   hookMocks.skillChanged.mockReset();
@@ -94,7 +94,7 @@ async function createOwnedSkill(workspaceDir: string, name: string): Promise<str
 
 describe("Skill Workshop lifecycle hooks", () => {
   it("emits a committed live-skill artifact after apply", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-hooks-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-hooks-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -145,7 +145,7 @@ describe("Skill Workshop lifecycle hooks", () => {
   });
 
   it("records and dispatches stale transitions detected during apply", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-stale-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-stale-");
     const skillDir = await createOwnedSkill(workspaceDir, "existing");
     const proposal = await proposeUpdateSkill({
       workspaceDir,
@@ -180,7 +180,7 @@ describe("Skill Workshop lifecycle hooks", () => {
   });
 
   it("marks a create proposal stale when its target appears before evaluation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-create-stale-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-create-stale-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -225,7 +225,7 @@ describe("Skill Workshop lifecycle hooks", () => {
   });
 
   it("releases the target lease before dispatching a reconciliation hook", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-reconcile-lock-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-reconcile-lock-");
     const first = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -274,7 +274,7 @@ describe("Skill Workshop lifecycle hooks", () => {
   });
 
   it("rejects apply when an untouched target asset changes after evaluation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-evaluation-race-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-evaluation-race-");
     const skillDir = await createOwnedSkill(workspaceDir, "existing");
     const untouchedAsset = path.join(skillDir, "references", "untouched.txt");
     await fs.mkdir(path.dirname(untouchedAsset), { recursive: true });
@@ -306,7 +306,7 @@ describe("Skill Workshop lifecycle hooks", () => {
   });
 
   it("records and dispatches scanner quarantine transitions", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-lifecycle-quarantine-");
+    const workspaceDir = await tempDirs.make("carapace-skill-lifecycle-quarantine-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",

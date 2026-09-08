@@ -1,6 +1,6 @@
 // Builds deterministic metadata scopes for startup planning.
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { addRequiredAgentHarnessPluginIds } from "./gateway-startup-plugin-activation.js";
 import {
   addConfiguredActivationPathPluginIds,
@@ -23,8 +23,8 @@ import { collectConfiguredWorkerProviderIds } from "./worker-provider-config.js"
 import { normalizeWorkerProviderIds } from "./worker-provider-id.js";
 
 export function resolveGatewayStartupMetadataPluginIds(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   index: InstalledPluginIndex;
   workerProviderIds?: readonly string[];
@@ -163,8 +163,8 @@ export function resolveGatewayStartupMetadataPluginIds(params: {
 }
 
 export function createGatewayStartupMetadataPluginIdScope(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workerProviderIds?: readonly string[];
   platform?: NodeJS.Platform;

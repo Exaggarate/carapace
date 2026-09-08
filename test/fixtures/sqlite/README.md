@@ -1,7 +1,7 @@
 # SQLite Release Fixtures
 
-`openclaw-state-v2026.7.1-2.sqlite.gz` is a deterministic fixture for the
-shared state database created by OpenClaw tag `v2026.7.1-2` at commit
+`carapace-state-v2026.7.1-2.sqlite.gz` is a deterministic fixture for the
+shared state database created by Carapace tag `v2026.7.1-2` at commit
 `0790d9f593ad30c940ed93b5872a8cf6d6f3cf8c`.
 
 The tagged runtime, whose package version is `2026.7.1`, created the database
@@ -14,7 +14,7 @@ are fixed, the WAL is checkpointed, and the database is vacuumed before
 deterministic Node `gzipSync(raw, { level: 9, mtime: 0 })` compression.
 
 The sorted `sqlite_schema` rows are byte-identical to a database initialized
-from `src/state/openclaw-state-schema.sql` at the commit above. Synthetic data
+from `src/state/carapace-state-schema.sql` at the commit above. Synthetic data
 and metadata normalization do not alter the released schema.
 
 Fixture contract:

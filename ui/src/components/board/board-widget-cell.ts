@@ -1,5 +1,5 @@
 import { consume } from "@lit/context";
-import type { BoardGetParams } from "@openclaw/gateway-protocol";
+import type { BoardGetParams } from "@carapace/gateway-protocol";
 import { html, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 import { html as staticHtml, unsafeStatic } from "lit/static-html.js";
@@ -27,7 +27,7 @@ import {
 } from "../../lib/board/widgets/index.ts";
 import { formatUiError } from "../../lib/format-error.ts";
 import { showToast } from "../../lib/toast.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderCustomPluginUiDisabled } from "../../plugins/control-ui-disabled.ts";
 import { renderPluginContribution } from "../../plugins/control-ui-view.ts";
@@ -69,7 +69,7 @@ export type BoardWidgetCellCallbacks = {
   refreshWidgetAppView: (name: string, revision: number) => Promise<BoardWidgetAppViewState>;
 };
 
-class OpenClawBoardWidgetCell extends OpenClawLightDomElement {
+class CarapaceBoardWidgetCell extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
@@ -114,7 +114,7 @@ class OpenClawBoardWidgetCell extends OpenClawLightDomElement {
     refreshFrame: () => this.callbacks?.frameLoadFailed,
     reportContentHeight: (name, height) => this.callbacks?.reportContentHeight(name, height),
     scrollBy: (deltaY) => {
-      this.closest("openclaw-board-view")?.scrollBy({ top: deltaY, behavior: "auto" });
+      this.closest("carapace-board-view")?.scrollBy({ top: deltaY, behavior: "auto" });
     },
     requestUpdate: () => this.requestUpdate(),
     resolveFrameUrl: () => this.widgetFrameUrl,
@@ -541,12 +541,12 @@ class OpenClawBoardWidgetCell extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-board-widget-cell")) {
-  customElements.define("openclaw-board-widget-cell", OpenClawBoardWidgetCell);
+if (!customElements.get("carapace-board-widget-cell")) {
+  customElements.define("carapace-board-widget-cell", CarapaceBoardWidgetCell);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-board-widget-cell": OpenClawBoardWidgetCell;
+    "carapace-board-widget-cell": CarapaceBoardWidgetCell;
   }
 }

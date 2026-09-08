@@ -1,8 +1,8 @@
 // Telegram tests cover fetch plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resolveFetch } from "openclaw/plugin-sdk/fetch-runtime";
-import { MAX_DATE_TIMESTAMP_MS } from "openclaw/plugin-sdk/number-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resolveFetch } from "carapace/plugin-sdk/fetch-runtime";
+import { MAX_DATE_TIMESTAMP_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { isSafeToRetrySendError, TelegramRequestNotStartedError } from "./network-errors.js";
 
@@ -15,7 +15,7 @@ const loggerWarn = vi.hoisted(() => vi.fn());
 
 const undiciFetch = vi.hoisted(() => vi.fn());
 const setGlobalDispatcher = vi.hoisted(() => vi.fn());
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__";
 type MockDispatcherInstance = {
   options?: Record<string, unknown> | string;
   destroy: ReturnType<typeof vi.fn>;
@@ -79,7 +79,7 @@ vi.mock("undici", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("carapace/plugin-sdk/runtime-env", () => ({
   createSubsystemLogger: () => ({
     info: loggerInfo,
     debug: loggerDebug,
@@ -131,8 +131,8 @@ beforeAll(async () => {
 beforeEach(() => {
   vi.unstubAllEnvs();
   for (const key of [
-    "OPENCLAW_DEBUG_PROXY_ENABLED",
-    "OPENCLAW_DEBUG_PROXY_URL",
+    "CARAPACE_DEBUG_PROXY_ENABLED",
+    "CARAPACE_DEBUG_PROXY_URL",
     "ALL_PROXY",
     "all_proxy",
     "HTTP_PROXY",
@@ -141,9 +141,9 @@ beforeEach(() => {
     "https_proxy",
     "NO_PROXY",
     "no_proxy",
-    "OPENCLAW_PROXY_URL",
-    "OPENCLAW_PROXY_ACTIVE",
-    "OPENCLAW_PROXY_CA_FILE",
+    "CARAPACE_PROXY_URL",
+    "CARAPACE_PROXY_ACTIVE",
+    "CARAPACE_PROXY_CA_FILE",
   ]) {
     vi.stubEnv(key, "");
   }
@@ -458,9 +458,9 @@ describe("resolveTelegramFetch", () => {
     expectTelegramKeepAliveOptions(dispatcher?.options?.connect);
   });
 
-  it("uses the OpenClaw debug proxy URL when no explicit proxy fetch is provided", async () => {
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_ENABLED", "1");
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_URL", "http://127.0.0.1:7777");
+  it("uses the Carapace debug proxy URL when no explicit proxy fetch is provided", async () => {
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_ENABLED", "1");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_URL", "http://127.0.0.1:7777");
     undiciFetch.mockResolvedValue({ ok: true } as Response);
 
     const resolved = resolveTelegramFetch(undefined);
@@ -475,8 +475,8 @@ describe("resolveTelegramFetch", () => {
     expect(proxyOptions.uri).toBe("http://127.0.0.1:7777");
   });
 
-  it("uses OPENCLAW_PROXY_URL as a Telegram explicit proxy when proxy env is absent", async () => {
-    vi.stubEnv("OPENCLAW_PROXY_URL", "http://127.0.0.1:7788");
+  it("uses CARAPACE_PROXY_URL as a Telegram explicit proxy when proxy env is absent", async () => {
+    vi.stubEnv("CARAPACE_PROXY_URL", "http://127.0.0.1:7788");
     undiciFetch.mockResolvedValue({ ok: true } as Response);
 
     const transport = resolveTelegramTransport(undefined, {
@@ -489,7 +489,7 @@ describe("resolveTelegramFetch", () => {
     await transport.fetch("https://api.telegram.org/botTOKEN/getMe");
 
     expect(ProxyAgentCtor).toHaveBeenCalledTimes(1);
-    const proxyOptions = constructorOptions(ProxyAgentCtor, "OpenClaw proxy") as {
+    const proxyOptions = constructorOptions(ProxyAgentCtor, "Carapace proxy") as {
       allowH2?: boolean;
       uri?: string;
       requestTls?: { autoSelectFamily?: boolean };
@@ -506,8 +506,8 @@ describe("resolveTelegramFetch", () => {
     expect(dispatcherPolicy?.proxyUrl).toBe("http://127.0.0.1:7788");
   });
 
-  it("preserves caller-provided custom fetch when OPENCLAW_PROXY_URL is present", async () => {
-    vi.stubEnv("OPENCLAW_PROXY_URL", "http://127.0.0.1:7788");
+  it("preserves caller-provided custom fetch when CARAPACE_PROXY_URL is present", async () => {
+    vi.stubEnv("CARAPACE_PROXY_URL", "http://127.0.0.1:7788");
     const proxyFetch = vi.fn(async () => ({ ok: true }) as Response) as unknown as typeof fetch;
 
     const transport = resolveTelegramTransport(proxyFetch, {
@@ -528,7 +528,7 @@ describe("resolveTelegramFetch", () => {
     expect(transport.dispatcherAttempts).toBeUndefined();
   });
 
-  it("keeps resolver-scoped transport policy for OpenClaw proxy fetches", async () => {
+  it("keeps resolver-scoped transport policy for Carapace proxy fetches", async () => {
     const { makeProxyFetch } = await import("./proxy.js");
     const proxyFetch = makeProxyFetch("http://127.0.0.1:7890");
     ProxyAgentCtor.mockClear();
@@ -624,7 +624,7 @@ describe("resolveTelegramFetch", () => {
   });
 
   it("skips sticky IPv4 fallback when the DNS result order env override is verbatim", async () => {
-    vi.stubEnv("OPENCLAW_TELEGRAM_DNS_RESULT_ORDER", "verbatim");
+    vi.stubEnv("CARAPACE_TELEGRAM_DNS_RESULT_ORDER", "verbatim");
     undiciFetch.mockResolvedValueOnce({ ok: true } as Response);
     const transport = resolveTelegramTransport();
 

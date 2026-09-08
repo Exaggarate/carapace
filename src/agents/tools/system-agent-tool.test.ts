@@ -1,4 +1,4 @@
-// OpenClaw ring-zero tool tests: approval gating, action mapping, verification.
+// Carapace ring-zero tool tests: approval gating, action mapping, verification.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { hashSystemAgentOperation } from "../../system-agent/operator-approval.js";
 import {
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   readConfigFileSnapshot: vi.fn(async () => ({
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "h",
     config: {},
     sourceConfig: {},
@@ -54,7 +54,7 @@ function toolText(result: unknown): string {
     .join("\n");
 }
 
-describe("openclaw tool", () => {
+describe("carapace tool", () => {
   it("stays directly callable instead of entering tool catalogs", () => {
     const tool = createSystemAgentTool({ surface: "cli" });
     expect(tool.catalogMode).toBe("direct-only");
@@ -147,7 +147,7 @@ describe("openclaw tool", () => {
     expect(text).toContain("needs-approval:");
     expect(text).toContain("requesting session's permission policy");
     expect(text).toContain("returns the final outcome");
-    expect(text).not.toContain("OpenClaw operator UI");
+    expect(text).not.toContain("Carapace operator UI");
     expect(text).not.toContain("ask the user to reply yes");
     expect(proposalRef.current).toBe(
       hashSystemAgentOperation({
@@ -597,9 +597,9 @@ describe("openclaw tool", () => {
     });
     expect(toolText(configureModel)).toContain("directive:");
     expect(toolText(configureModel)).toContain(
-      "active inference route cannot be changed inside OpenClaw",
+      "active inference route cannot be changed inside Carapace",
     );
-    expect(toolText(configureModel)).toContain("openclaw onboard");
+    expect(toolText(configureModel)).toContain("carapace onboard");
     expect(directiveRef.current).toEqual({ kind: "model-setup", workspace: "/tmp/work" });
 
     const open = await tool.execute("t7", { action: "open_agent", agentId: "work" });
@@ -622,8 +622,8 @@ describe("openclaw tool", () => {
       action: "open_setup",
       target: "guided",
     });
-    expect(toolText(guidedSetup)).toContain("cannot run inside OpenClaw");
-    expect(toolText(guidedSetup)).toContain("openclaw onboard");
+    expect(toolText(guidedSetup)).toContain("cannot run inside Carapace");
+    expect(toolText(guidedSetup)).toContain("carapace onboard");
     expect(directiveRef.current).toEqual({ kind: "open-setup", target: "guided" });
 
     const gatewaySetup = await tool.execute("t9", {
@@ -718,13 +718,13 @@ describe("openclaw tool", () => {
       resolveSystemAgentDirectiveTransition({
         args: { action: "configure_model_provider", workspace: "/tmp/work" },
         resultText:
-          "directive: the active inference route cannot be changed inside OpenClaw; run openclaw onboard.",
+          "directive: the active inference route cannot be changed inside Carapace; run carapace onboard.",
       }),
     ).toEqual({ kind: "model-setup", workspace: "/tmp/work" });
     expect(
       resolveSystemAgentDirectiveTransition({
         args: { action: "open_setup", target: "classic" },
-        resultText: "directive: classic setup cannot run inside OpenClaw; run openclaw onboard.",
+        resultText: "directive: classic setup cannot run inside Carapace; run carapace onboard.",
       }),
     ).toEqual({ kind: "open-setup", target: "classic" });
     expect(

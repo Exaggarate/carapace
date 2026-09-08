@@ -1,35 +1,35 @@
 import {
   execPolicy,
   type EmbeddedRunAttemptParamsV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   resolveExecApprovalsFromFile,
   type ExecApprovalsFile,
-} from "openclaw/plugin-sdk/exec-approvals-runtime";
+} from "carapace/plugin-sdk/exec-approvals-runtime";
 import type {
-  OpenClawExecApprovalFloorsForCodexAppServer,
-  OpenClawExecMode,
-  OpenClawExecPolicy,
-  OpenClawExecPolicyForCodexAppServer,
+  CarapaceExecApprovalFloorsForCodexAppServer,
+  CarapaceExecMode,
+  CarapaceExecPolicy,
+  CarapaceExecPolicyForCodexAppServer,
 } from "./config-contracts.js";
 import { readExecAsk, readExecSecurity, readRecord } from "./config-utils.js";
 
-function resolveOpenClawExecPolicyFromConfig(params: {
-  config?: OpenClawConfig;
+function resolveCarapaceExecPolicyFromConfig(params: {
+  config?: CarapaceConfig;
   agentId?: string;
-}): OpenClawExecPolicy {
+}): CarapaceExecPolicy {
   const globalExec = readRecord(params.config?.tools?.exec);
-  const globalPolicy = applyOpenClawExecPolicyLayer(createDefaultOpenClawExecPolicy(), globalExec);
+  const globalPolicy = applyCarapaceExecPolicyLayer(createDefaultCarapaceExecPolicy(), globalExec);
   const agentId = params.agentId?.trim();
   const agentExec = agentId
     ? readRecord(resolveAgentConfig(params.config ?? {}, agentId)?.tools?.exec)
     : undefined;
-  return applyOpenClawExecPolicyLayer(globalPolicy, agentExec);
+  return applyCarapaceExecPolicyLayer(globalPolicy, agentExec);
 }
 
-export function resolveOpenClawExecPolicyForCodexAppServer(params: {
+export function resolveCarapaceExecPolicyForCodexAppServer(params: {
   permissionMode?: EmbeddedRunAttemptParamsV2["permissionMode"];
   execOverrides?: {
     mode?: unknown;
@@ -37,43 +37,43 @@ export function resolveOpenClawExecPolicyForCodexAppServer(params: {
     ask?: unknown;
   };
   approvals?: ExecApprovalsFile;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
-}): OpenClawExecPolicyForCodexAppServer {
+}): CarapaceExecPolicyForCodexAppServer {
   if (params.permissionMode === "full") {
-    return { ...resolveOpenClawExecPolicyForMode("full"), touched: true };
+    return { ...resolveCarapaceExecPolicyForMode("full"), touched: true };
   }
-  const basePolicy = resolveOpenClawExecPolicyFromConfig({
+  const basePolicy = resolveCarapaceExecPolicyFromConfig({
     config: params.config,
     agentId: params.agentId,
   });
-  const overridePolicy = applyOpenClawExecPolicyLayer(basePolicy, params.execOverrides);
-  const approvalFloors = resolveOpenClawExecApprovalFloorsForCodexAppServer({
+  const overridePolicy = applyCarapaceExecPolicyLayer(basePolicy, params.execOverrides);
+  const approvalFloors = resolveCarapaceExecApprovalFloorsForCodexAppServer({
     approvals: params.approvals,
     agentId: params.agentId,
     policy: overridePolicy,
   });
-  return applyOpenClawExecApprovalFloors(overridePolicy, approvalFloors);
+  return applyCarapaceExecApprovalFloors(overridePolicy, approvalFloors);
 }
 
-function createDefaultOpenClawExecPolicy(): OpenClawExecPolicy {
+function createDefaultCarapaceExecPolicy(): CarapaceExecPolicy {
   return {
-    ...resolveOpenClawExecPolicyForMode("full"),
+    ...resolveCarapaceExecPolicyForMode("full"),
     touched: false,
   };
 }
 
-function applyOpenClawExecPolicyLayer(
-  base: OpenClawExecPolicy,
+function applyCarapaceExecPolicyLayer(
+  base: CarapaceExecPolicy,
   exec?: { mode?: unknown; security?: unknown; ask?: unknown },
-): OpenClawExecPolicy {
+): CarapaceExecPolicy {
   if (!exec) {
     return base;
   }
   const mode = readExecMode(exec.mode);
   if (mode !== undefined) {
     return {
-      ...resolveOpenClawExecPolicyForMode(mode),
+      ...resolveCarapaceExecPolicyForMode(mode),
       touched: true,
     };
   }
@@ -92,11 +92,11 @@ function applyOpenClawExecPolicyLayer(
   };
 }
 
-function resolveOpenClawExecApprovalFloorsForCodexAppServer(params: {
+function resolveCarapaceExecApprovalFloorsForCodexAppServer(params: {
   approvals?: ExecApprovalsFile;
   agentId?: string;
-  policy: OpenClawExecPolicy;
-}): OpenClawExecApprovalFloorsForCodexAppServer | undefined {
+  policy: CarapaceExecPolicy;
+}): CarapaceExecApprovalFloorsForCodexAppServer | undefined {
   if (!params.approvals) {
     return undefined;
   }
@@ -110,10 +110,10 @@ function resolveOpenClawExecApprovalFloorsForCodexAppServer(params: {
   }).agent;
 }
 
-function applyOpenClawExecApprovalFloors(
-  base: OpenClawExecPolicy,
-  approvalFloors?: OpenClawExecApprovalFloorsForCodexAppServer,
-): OpenClawExecPolicy {
+function applyCarapaceExecApprovalFloors(
+  base: CarapaceExecPolicy,
+  approvalFloors?: CarapaceExecApprovalFloorsForCodexAppServer,
+): CarapaceExecPolicy {
   if (!approvalFloors) {
     return base;
   }
@@ -132,9 +132,9 @@ function applyOpenClawExecApprovalFloors(
   };
 }
 
-function resolveOpenClawExecPolicyForMode(
-  mode: OpenClawExecMode,
-): Omit<OpenClawExecPolicy, "touched"> {
+function resolveCarapaceExecPolicyForMode(
+  mode: CarapaceExecMode,
+): Omit<CarapaceExecPolicy, "touched"> {
   const { security, ask } = execPolicy.resolveExecModePolicy({
     mode,
     security: "full",
@@ -143,7 +143,7 @@ function resolveOpenClawExecPolicyForMode(
   return { mode, security, ask };
 }
 
-function readExecMode(value: unknown): OpenClawExecMode | undefined {
+function readExecMode(value: unknown): CarapaceExecMode | undefined {
   return value === "deny" ||
     value === "allowlist" ||
     value === "ask" ||

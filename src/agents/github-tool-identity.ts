@@ -1,8 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import { parseDocument, stringify as stringifyYaml } from "yaml";
 import type {
   GitHubIdentityFacts,
@@ -10,7 +10,7 @@ import type {
 } from "../../packages/gateway-protocol/src/index.js";
 import { isManagedGitHubProfileId } from "../config/github-identity-profile-id.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isSecretRef, isValidEnvSecretRefId } from "../config/types.secrets.js";
 import type { GitHubToolIdentityConfig } from "../config/types.tools.js";
 import { hasErrnoCode } from "../infra/errno.js";
@@ -63,7 +63,7 @@ export function resolveManagedGitHubAgentKey(agentId: string): string {
 }
 
 export function resolveConfiguredGitHubToolIdentity(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   scope: "system" | "agent";
 }): GitHubToolIdentityConfig | undefined {
@@ -98,7 +98,7 @@ function resolveGitHubToolIdentity(params: GitHubIdentityPreparation) {
 }
 
 function resolveScopedGitHubToolIdentity(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   scope: "system" | "agent";
   env?: NodeJS.ProcessEnv;
@@ -491,7 +491,7 @@ export async function preparePersonalGitHubPublicationIdentity(params: {
 
 /** Confirms the current config still selects the prepared publication profile. */
 export function matchesPreparedGitHubPublicationIdentity(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   identity: PreparedGitHubPublicationIdentity;
 }): boolean {
@@ -503,8 +503,8 @@ export function matchesPreparedGitHubPublicationIdentity(params: {
 }
 
 type GitHubIdentityPreparation = {
-  config: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig?: CarapaceConfig;
   agentId: string;
   env?: NodeJS.ProcessEnv;
 };
@@ -571,7 +571,7 @@ export async function prepareGitHubPublicationIdentity(
 /** Read authority tracks current selection and token rotation, without exporting a child environment. */
 export async function prepareGitHubReadIdentity(
   params: GitHubIdentityPreparation & {
-    getCurrentConfig: () => OpenClawConfig;
+    getCurrentConfig: () => CarapaceConfig;
     assertActive: () => void;
     refresh: () => Promise<void>;
   },

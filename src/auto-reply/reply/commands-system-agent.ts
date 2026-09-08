@@ -1,4 +1,4 @@
-// Implements maintenance commands for OpenClaw-backed session cleanup.
+// Implements maintenance commands for Carapace-backed session cleanup.
 import { readChannelContextGatewayContextResolver } from "../../channels/message-access/admission-evidence.js";
 import { logVerbose } from "../../globals.js";
 import { getPluginRuntimeGatewayRequestScope } from "../../plugins/runtime/gateway-request-scope.js";
@@ -19,7 +19,7 @@ export const handleSystemAgentCommand: CommandHandler = async (params, allowText
   }
   if (!params.command.isAuthorizedSender) {
     logVerbose(
-      `Ignoring /openclaw from unauthorized sender: ${params.command.senderId || "<unknown>"}`,
+      `Ignoring /carapace from unauthorized sender: ${params.command.senderId || "<unknown>"}`,
     );
     return { shouldContinue: false };
   }
@@ -43,7 +43,7 @@ export const handleSystemAgentCommand: CommandHandler = async (params, allowText
                 }),
             },
           },
-        })) ?? "OpenClaw did not find a rescue request.",
+        })) ?? "Carapace did not find a rescue request.",
     },
   };
 };

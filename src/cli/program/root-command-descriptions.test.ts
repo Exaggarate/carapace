@@ -220,9 +220,9 @@ const JSON_NOT_APPLICABLE = {
 const JSON_OUTPUT_ROUTE_FIRST = new Set(["agents"]);
 
 async function registerAllBuiltInCommands(): Promise<Command> {
-  const program = new Command().name("openclaw");
+  const program = new Command().name("carapace");
   const ctx = createProgramContext();
-  const argv = ["node", "openclaw", "completion"];
+  const argv = ["node", "carapace", "completion"];
 
   for (const name of getCoreCliCommandNames()) {
     await registerCoreCliByName(program, ctx, name);
@@ -281,7 +281,7 @@ function collectRegisteredCommandPaths(...programs: Command[]): Set<string> {
 
 describe("root command descriptions", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_ENABLE_PRIVATE_QA_CLI", "");
+    vi.stubEnv("CARAPACE_ENABLE_PRIVATE_QA_CLI", "");
   });
 
   afterEach(() => {
@@ -323,14 +323,14 @@ describe("root command descriptions", () => {
   });
 
   it("keeps startup policy catalog paths registered or explicitly reserved", async () => {
-    vi.stubEnv("OPENCLAW_EXPERIMENTAL_CLAWS", "1");
+    vi.stubEnv("CARAPACE_EXPERIMENTAL_CLAWS", "1");
     const program = await registerAllBuiltInCommands();
 
     // Private QA is a lazy source-checkout command. Its root placeholder proves
     // registration without importing the private build omitted from normal dist.
-    vi.stubEnv("OPENCLAW_ENABLE_PRIVATE_QA_CLI", "1");
-    const lazyProgram = new Command().name("openclaw");
-    registerSubCliCommands(lazyProgram, ["node", "openclaw", "--help"]);
+    vi.stubEnv("CARAPACE_ENABLE_PRIVATE_QA_CLI", "1");
+    const lazyProgram = new Command().name("carapace");
+    registerSubCliCommands(lazyProgram, ["node", "carapace", "--help"]);
 
     const registeredPaths = collectRegisteredCommandPaths(program, lazyProgram);
     const catalogPaths = new Set(cliCommandCatalog.map((entry) => entry.commandPath.join(" ")));

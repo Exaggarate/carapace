@@ -31,8 +31,8 @@ describe("gateway stale install errors", () => {
     vi.unstubAllEnvs();
   });
 
-  it("turns a missing module from the OpenClaw install into restart guidance", async () => {
-    vi.stubEnv("OPENCLAW_PROFILE", "sd1");
+  it("turns a missing module from the Carapace install into restart guidance", async () => {
+    vi.stubEnv("CARAPACE_PROFILE", "sd1");
     const missingChunk = path.join(
       path.dirname(fileURLToPath(import.meta.url)),
       "missing-own-chunk.js",
@@ -45,19 +45,19 @@ describe("gateway stale install errors", () => {
       expect.objectContaining({
         code: "UNAVAILABLE",
         retryable: false,
-        message: expect.stringContaining("openclaw --profile sd1 gateway restart"),
+        message: expect.stringContaining("carapace --profile sd1 gateway restart"),
         details: {
           code: "STALE_INSTALL",
-          restartCommand: "openclaw --profile sd1 gateway restart",
+          restartCommand: "carapace --profile sd1 gateway restart",
         },
       }),
     );
   });
 
-  it("does not rewrite a missing module outside the OpenClaw install", async () => {
+  it("does not rewrite a missing module outside the Carapace install", async () => {
     const outsideInstall = path.join(
       path.parse(process.cwd()).root,
-      "outside-openclaw",
+      "outside-carapace",
       "missing.js",
     );
     const error = moduleNotFoundError(outsideInstall);

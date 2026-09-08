@@ -44,7 +44,7 @@ function runValidation(
     orList?: boolean;
   } = {},
 ) {
-  const fixtureRoot = tempDirs.make("openclaw-pr-review-validation-");
+  const fixtureRoot = tempDirs.make("carapace-pr-review-validation-");
   writeReviewArtifacts(fixtureRoot, review, options);
 
   return spawnSync(
@@ -96,7 +96,7 @@ function runReviewShellFunction(fixtureRoot: string, invocation: string) {
 }
 
 function runArtifactsInit(existing: { review?: unknown; markdown?: string } = {}) {
-  const fixtureRoot = tempDirs.make("openclaw-pr-review-artifacts-init-");
+  const fixtureRoot = tempDirs.make("carapace-pr-review-artifacts-init-");
   const localDir = join(fixtureRoot, ".local");
   mkdirSync(localDir);
   writeFileSync(join(localDir, "pr-meta.env"), `PR_NUMBER=${REVIEWED_PR}\n`);
@@ -118,7 +118,7 @@ function runArtifactsInit(existing: { review?: unknown; markdown?: string } = {}
 function runMergeVerification(
   checks: "api-error" | "invalid-json" | "invalid-row" | "no-required" | "pending" | "cancelled",
 ) {
-  const fixtureRoot = tempDirs.make("openclaw-pr-merge-verification-");
+  const fixtureRoot = tempDirs.make("carapace-pr-merge-verification-");
   const localDir = join(fixtureRoot, ".local");
   const head = "a".repeat(40);
   mkdirSync(localDir);
@@ -167,7 +167,7 @@ function runMergeVerification(
 
 describePosix("scripts/pr review artifact validation", () => {
   it("supplies direct review.sh consumers with the ripgrep command surface", () => {
-    const fixtureRoot = tempDirs.make("openclaw-pr-review-rg-surface-");
+    const fixtureRoot = tempDirs.make("carapace-pr-review-rg-surface-");
     const target = join(fixtureRoot, "target.txt");
     writeFileSync(target, `prefix ${REVIEWED_HEAD} suffix\nliteral [x.y]\n`);
 
@@ -307,7 +307,7 @@ describePosix("scripts/pr review artifact validation", () => {
   });
 
   it("rejects a review guard whose PR metadata describes another PR", () => {
-    const fixtureRoot = tempDirs.make("openclaw-pr-review-guard-");
+    const fixtureRoot = tempDirs.make("carapace-pr-review-guard-");
     const localDir = join(fixtureRoot, ".local");
     mkdirSync(localDir);
     writeFileSync(join(localDir, "review-mode.env"), "REVIEW_MODE=pr\n");

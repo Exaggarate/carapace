@@ -23,7 +23,7 @@ describe("Model Setup explicit discovery", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "test-device-key" }),
     );
     await i18n.setLocale("en");
@@ -37,10 +37,10 @@ describe("Model Setup explicit discovery", () => {
   it("detects an existing first-run route without testing it until a click", async () => {
     const { context, request } = createFirstRunContext();
     request.mockImplementation(async (method) => {
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return { ...detection, configuredModel: "openai/existing", setupComplete: true };
       }
-      if (method === "openclaw.setup.verify") {
+      if (method === "carapace.setup.verify") {
         return { ok: true, modelRef: "openai/existing", latencyMs: 12 };
       }
       throw new Error(`Unexpected setup request: ${method}`);
@@ -54,14 +54,14 @@ describe("Model Setup explicit discovery", () => {
       expect(page.querySelector(".model-setup__current button")).not.toBeNull(),
     );
     await page.updateComplete;
-    expect(request.mock.calls.map(([method]) => method)).toEqual(["openclaw.setup.detect"]);
+    expect(request.mock.calls.map(([method]) => method)).toEqual(["carapace.setup.detect"]);
     expect(context.navigate).not.toHaveBeenCalled();
-    expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+    expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
     page.querySelector<HTMLButtonElement>(".model-setup__current button")!.click();
     await waitForFast(() => expect(page.querySelector(".model-setup__verified")).not.toBeNull());
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.verify",
+      "carapace.setup.detect",
+      "carapace.setup.verify",
     ]);
   });
 
@@ -79,7 +79,7 @@ describe("Model Setup explicit discovery", () => {
       let sessionId: string | undefined;
       let starts = 0;
       request.mockImplementation(async (method, params) => {
-        if (method === "openclaw.setup.activate.start") {
+        if (method === "carapace.setup.activate.start") {
           starts += 1;
           sessionId = (params as { sessionId: string }).sessionId;
           session = new WizardSession(async (prompter, _signal, owner) => {
@@ -114,10 +114,10 @@ describe("Model Setup explicit discovery", () => {
           session!.cancel();
           return { status: session!.getStatus(), error: session!.getError() };
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return { ...detection, configuredModel: "openai/selected", setupComplete: true };
         }
-        if (method === "openclaw.setup.verify") {
+        if (method === "carapace.setup.verify") {
           return { ok: true, modelRef: "openai/selected", latencyMs: 12 };
         }
         throw new Error(`Unexpected setup request: ${method}`);
@@ -134,12 +134,12 @@ describe("Model Setup explicit discovery", () => {
         },
       });
       const cancel = () =>
-        page.querySelector("openclaw-modal-dialog")!.dispatchEvent(new CustomEvent("modal-cancel"));
+        page.querySelector("carapace-modal-dialog")!.dispatchEvent(new CustomEvent("modal-cancel"));
       try {
         await clickCandidate(page, "openai-api-key");
         await waitForFast(() => expect(page.textContent).toContain("Install provider?"));
         const confirm = [
-          ...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button"),
+          ...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button"),
         ].find((button) => button.textContent?.trim() === "Yes")!;
         confirm.click();
         await installed.promise;
@@ -147,8 +147,8 @@ describe("Model Setup explicit discovery", () => {
         await waitForFast(() =>
           expect(page.textContent).toContain("Setup is finishing the current step"),
         );
-        expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
-        expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).not.toBeNull();
+        expect(page.querySelector("carapace-modal-dialog")).not.toBeNull();
+        expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).not.toBeNull();
         expect(session!.getStatus()).toBe("running");
         expect(answers).toEqual([true]);
         expect(starts).toBe(1);
@@ -158,19 +158,19 @@ describe("Model Setup explicit discovery", () => {
           cancel();
           await terminal.promise;
           await waitForFast(() =>
-            expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull(),
+            expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull(),
           );
           expect(session!.getStatus()).toBe("cancelled");
           expect(answers).toEqual([true]);
         } else {
           const input = page.querySelector<HTMLInputElement>(
-            'openclaw-modal-dialog input[type="password"]',
+            'carapace-modal-dialog input[type="password"]',
           )!;
           input.value = "synthetic-key";
           input.dispatchEvent(new Event("input", { bubbles: true }));
           await page.updateComplete;
           page
-            .querySelector<HTMLFormElement>("openclaw-modal-dialog form")!
+            .querySelector<HTMLFormElement>("carapace-modal-dialog form")!
             .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
           await committed.promise;
           cancel();
@@ -211,7 +211,7 @@ describe("Model Setup explicit discovery", () => {
             ? new GatewayRequestError({ code: "FORBIDDEN", message: "Cancel permission denied" })
             : new Error("Cancellation transport failed");
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.activate.start") {
+        if (method === "carapace.setup.activate.start") {
           return { done: false, status: "running" };
         }
         if (method === "wizard.next") {
@@ -248,22 +248,22 @@ describe("Model Setup explicit discovery", () => {
       });
       await clickCandidate(page, "openai-api-key");
       await waitForFast(() => expect(page.textContent).toContain("Provider credential"));
-      const receiptKey = "openclaw.modelSetup.pendingActivation.v1";
+      const receiptKey = "carapace.modelSetup.pendingActivation.v1";
       const receipt = localStorage.getItem(receiptKey);
       expect(receipt).not.toBeNull();
       const cancel = () =>
-        page.querySelector("openclaw-modal-dialog")!.dispatchEvent(new CustomEvent("modal-cancel"));
+        page.querySelector("carapace-modal-dialog")!.dispatchEvent(new CustomEvent("modal-cancel"));
       cancel();
       if (failure === "missing wizard") {
         await waitForFast(() => expect(page.textContent).toContain("It may already have finished"));
         expect(cancels).toBe(1);
         expect(localStorage.getItem(receiptKey)).toBe(receipt);
         const close = [
-          ...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button"),
+          ...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button"),
         ].find((button) => button.textContent?.trim() === "Close");
         expect(close).toBeDefined();
         close!.click();
-        await waitForFast(() => expect(page.querySelector("openclaw-modal-dialog")).toBeNull());
+        await waitForFast(() => expect(page.querySelector("carapace-modal-dialog")).toBeNull());
         expect(page.querySelector(".model-setup__recovery")).not.toBeNull();
         expect(localStorage.getItem(receiptKey)).toBe(receipt);
       } else {
@@ -277,12 +277,12 @@ describe("Model Setup explicit discovery", () => {
         expect(localStorage.getItem(receiptKey)).toBe(receipt);
         expect(cancels).toBe(1);
         cancel();
-        await waitForFast(() => expect(page.querySelector("openclaw-modal-dialog")).toBeNull());
+        await waitForFast(() => expect(page.querySelector("carapace-modal-dialog")).toBeNull());
         expect(localStorage.getItem(receiptKey)).toBeNull();
         expect(cancels).toBe(2);
       }
       expect(
-        request.mock.calls.filter(([method]) => method === "openclaw.setup.activate.start"),
+        request.mock.calls.filter(([method]) => method === "carapace.setup.activate.start"),
       ).toHaveLength(1);
       expect(context.navigate).not.toHaveBeenCalled();
     },
@@ -316,7 +316,7 @@ describe("Model Setup explicit discovery", () => {
       expect(checkbox.checked).toBe(false);
       expect(page.querySelector("[data-selected]")).toBeNull();
       expect(request).not.toHaveBeenCalled();
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
       if (enabled) {
         checkbox.click();
         await page.updateComplete;
@@ -325,7 +325,7 @@ describe("Model Setup explicit discovery", () => {
       await clickCandidate(page, "codex-cli");
       await waitForFast(() => expect(request).toHaveBeenCalledOnce());
       expect(request.mock.calls[0]).toEqual([
-        "openclaw.setup.activate.start",
+        "carapace.setup.activate.start",
         expect.objectContaining({
           kind: "codex-cli",
           modelRef: "openai/available",
@@ -372,7 +372,7 @@ describe("Model Setup explicit discovery", () => {
       button.click();
       await waitForFast(() => expect(request).toHaveBeenCalledOnce());
       expect(request.mock.calls[0]).toEqual([
-        "openclaw.setup.auth.start",
+        "carapace.setup.auth.start",
         expect.objectContaining({
           authChoice: "manifest-auth",
           nativeSessionCatalogsEnabled: false,
@@ -436,7 +436,7 @@ describe("Model Setup explicit discovery", () => {
     publishGatewaySnapshot({ ...snapshot });
     await waitForFast(() =>
       expect(request).toHaveBeenCalledWith(
-        "openclaw.setup.detect",
+        "carapace.setup.detect",
         { agentId: "main" },
         expect.objectContaining({ timeoutMs: expect.any(Number), signal: expect.any(AbortSignal) }),
       ),
@@ -449,7 +449,7 @@ describe("Model Setup explicit discovery", () => {
     ).toBe(false);
     expect(page.querySelector<HTMLInputElement>(".model-setup__manual input")!.value).toBe("");
     expect(page.querySelector("[data-selected]")).toBeNull();
-    expect(request.mock.calls.map(([method]) => method)).toEqual(["openclaw.setup.detect"]);
+    expect(request.mock.calls.map(([method]) => method)).toEqual(["carapace.setup.detect"]);
   });
 
   it.each(["same client", "replacement client"])(
@@ -485,7 +485,7 @@ describe("Model Setup explicit discovery", () => {
       ).toBe(true);
       expect(request.mock.calls.map(([method]) => method)).toEqual([
         "config.get",
-        "openclaw.setup.detect",
+        "carapace.setup.detect",
       ]);
     },
   );

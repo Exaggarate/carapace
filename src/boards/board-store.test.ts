@@ -2,17 +2,17 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { BoardWidgetMaterializedPutParams } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { BoardValidationError } from "./board-layout.js";
 import { createBoardWidgetPutSnapshot, type BoardStore } from "./board-store.js";
 import { createTestBoardStore } from "./board-store.test-support.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
@@ -144,8 +144,8 @@ describe("board store", () => {
   );
 
   it("upgrades registered ownership from its exact legacy descriptor and preserves it", () => {
-    const stateDir = tempDirs.make("openclaw-board-legacy-registered-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-board-legacy-registered-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const sessionKey = "agent:main:legacy-registered";
     const store = createTestBoardStore({ stateDir });
     const content = {
@@ -155,7 +155,7 @@ describe("board store", () => {
       source: "diagram:first",
     };
     store.putWidget({ sessionKey, name: "status", content, declared: { tools: ["health"] } });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     database.db
       .prepare(
         "UPDATE board_widgets SET manifest = json_set(manifest, '$.registeredContentKind', 'other') WHERE session_key = ? AND name = 'status'",

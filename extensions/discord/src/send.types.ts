@@ -1,8 +1,8 @@
 // Discord type declarations define plugin contracts.
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OutboundMediaAccess, OutboundMediaReadFile } from "openclaw/plugin-sdk/media-runtime";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
+import type { MessageReceipt } from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { OutboundMediaAccess, OutboundMediaReadFile } from "carapace/plugin-sdk/media-runtime";
+import type { RetryConfig } from "carapace/plugin-sdk/retry-runtime";
 import type { RequestClient } from "./internal/discord.js";
 
 export class DiscordSendError extends Error {
@@ -36,7 +36,7 @@ export type DiscordSendResult = {
 };
 
 export type DiscordRuntimeAccountContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 };
 
@@ -51,7 +51,7 @@ export type DiscordOutboundMediaOpts = {
 };
 
 export type DiscordReactOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   token?: string;
   rest?: RequestClient;

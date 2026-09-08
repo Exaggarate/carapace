@@ -1,24 +1,24 @@
 // Memory Core plugin module owns embedding provider lifecycle.
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-runtime";
 import {
   formatErrorMessage,
   readErrorName,
   toErrorObject,
-} from "openclaw/plugin-sdk/error-runtime";
-import { listRegisteredMemoryEmbeddingProviderAdapters } from "openclaw/plugin-sdk/memory-core-host-embedding-registry";
+} from "carapace/plugin-sdk/error-runtime";
+import { listRegisteredMemoryEmbeddingProviderAdapters } from "carapace/plugin-sdk/memory-core-host-embedding-registry";
 import {
   createSubsystemLogger,
   resolveAgentDir,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import type {
   MemoryEmbeddingProbeResult,
   MemorySearchRuntimeDebug,
   MemorySyncParams,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
 import {
   createEmbeddingProvider,
   resolveEmbeddingProviderAdapterTransport,
@@ -78,7 +78,7 @@ export function resolveEffectiveMemorySearchSettings(
 }
 
 function resolveConfiguredMemoryEmbeddingProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
 }): string | undefined {
   const agentEntry = resolveAgentConfig(params.cfg, normalizeAgentId(params.agentId));
@@ -86,7 +86,7 @@ function resolveConfiguredMemoryEmbeddingProvider(params: {
 }
 
 export function resolveMemoryEmbeddingProviderRequirement(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   settings: ResolvedMemorySearchConfig;
 }): MemoryEmbeddingProviderRequirement {

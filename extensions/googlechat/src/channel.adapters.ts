@@ -1,27 +1,27 @@
 // Googlechat plugin module implements channel.adapters behavior.
-import { adaptScopedAccountAccessor } from "openclaw/plugin-sdk/channel-config-helpers";
+import { adaptScopedAccountAccessor } from "carapace/plugin-sdk/channel-config-helpers";
 import type {
   ChannelThreadingContext,
   ChannelThreadingToolContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import { identityEntryAuthenticationClassifier } from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import { identityEntryAuthenticationClassifier } from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   createAllowlistProviderOpenWarningCollector,
   createConditionalWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-policy";
 import {
   createChannelDirectoryAdapter,
   listResolvedDirectoryGroupEntriesFromMapKeys,
   listResolvedDirectoryUserEntriesFromAllowFrom,
-} from "openclaw/plugin-sdk/directory-runtime";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/directory-runtime";
+import { createLazyRuntimeNamedExport } from "carapace/plugin-sdk/lazy-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { shouldSuppressGoogleChatManualExecApprovalFollowupPayload } from "./approval-card-actions.js";
 import { formatGoogleChatAllowFromEntry } from "./channel-base.js";
 import {
@@ -32,7 +32,7 @@ import {
   PAIRING_APPROVED_MESSAGE,
   resolveGoogleChatAccount,
   resolveGoogleChatOutboundSpace,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "./channel.deps.runtime.js";
 import {
   formatGoogleChatTextChunks,
@@ -89,7 +89,7 @@ const collectGoogleChatOpenGroupFindings = createConditionalWarningCollector.fin
 });
 
 const collectGoogleChatSecurityWarnings = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedGoogleChatAccount;
 }) => [
   ...collectGoogleChatOpenGroupFindings(params),
@@ -134,7 +134,7 @@ export const googlechatSecurityAdapter = {
 
 export const googlechatThreadingAdapter = {
   scopedAccountReplyToMode: {
-    resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) =>
+    resolveAccount: (cfg: CarapaceConfig, accountId?: string | null) =>
       resolveGoogleChatAccount({ cfg, accountId }),
     resolveReplyToMode: (account: ResolvedGoogleChatAccount, _chatType?: string | null) =>
       account.config.replyToMode,
@@ -146,7 +146,7 @@ export const googlechatThreadingAdapter = {
     context,
     hasRepliedRef,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
     context: ChannelThreadingContext;
     hasRepliedRef?: { value: boolean };
@@ -175,7 +175,7 @@ export const googlechatPairingTextAdapter = {
     message,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     id: string;
     message: string;
     accountId?: string | null;
@@ -235,7 +235,7 @@ export const googlechatOutboundAdapter = {
       replyToId,
       threadId,
     }: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       to: string;
       text: string;
       accountId?: string | null;

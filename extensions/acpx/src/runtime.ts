@@ -1,6 +1,6 @@
 /**
- * OpenClaw ACPX runtime adapter. It wraps the upstream acpx runtime with
- * OpenClaw session metadata, lease tracking, model scoping, and cleanup policy.
+ * Carapace ACPX runtime adapter. It wraps the upstream acpx runtime with
+ * Carapace session metadata, lease tracking, model scoping, and cleanup policy.
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
@@ -24,13 +24,13 @@ import {
   type AcpRuntimeTurnResult,
   type SessionAgentOptions,
 } from "acpx/runtime";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { AcpRuntimeError, type AcpRuntime, type AcpRuntimeErrorCode } from "../runtime-api.js";
-import { CODEX_ACP_PACKAGE, OPENCLAW_CODEX_CONFIG_ARG } from "./codex-adapter.js";
+import { CODEX_ACP_PACKAGE, CARAPACE_CODEX_CONFIG_ARG } from "./codex-adapter.js";
 import { renderAgentCommand, splitCommandParts, type AcpxAgentCommand } from "./command-line.js";
 import {
   ACPX_PROBE_LEASE_SESSION_KEY,
@@ -42,9 +42,9 @@ import {
   type AcpxProcessLeaseStore,
 } from "./process-lease.js";
 import {
-  cleanupOpenClawOwnedAcpxPendingLease,
-  cleanupOpenClawOwnedAcpxProcessTree,
-  isOpenClawLeaseAwareAcpxProcessCommand,
+  cleanupCarapaceOwnedAcpxPendingLease,
+  cleanupCarapaceOwnedAcpxProcessTree,
+  isCarapaceLeaseAwareAcpxProcessCommand,
   type AcpxProcessCleanupDeps,
 } from "./process-reaper.js";
 import type { CompleteAcpRuntime, CompleteAcpRuntimeTurn } from "./runtime-proxy.js";
@@ -58,43 +58,43 @@ type AcpSessionStore = AcpRuntimeOptions["sessionStore"];
 type AcpSessionRecord = Parameters<AcpSessionStore["save"]>[0];
 type AcpLoadedSessionRecord = Awaited<ReturnType<AcpSessionStore["load"]>>;
 type BaseAcpxRuntimeTestOptions = ConstructorParameters<typeof BaseAcpxRuntime>[1];
-type OpenClawAcpxRuntimeOptions = AcpRuntimeOptions & {
-  openclawLegacyBareSessionKeys?: ReadonlySet<string>;
-  openclawWrapperRoot?: string;
-  openclawGatewayInstanceId?: string;
-  openclawProcessLeaseStore?: AcpxProcessLeaseStore;
+type CarapaceAcpxRuntimeOptions = AcpRuntimeOptions & {
+  carapaceLegacyBareSessionKeys?: ReadonlySet<string>;
+  carapaceWrapperRoot?: string;
+  carapaceGatewayInstanceId?: string;
+  carapaceProcessLeaseStore?: AcpxProcessLeaseStore;
   pluginToolsMcpBridgeEnabled?: boolean;
-  openclawToolsMcpBridgeEnabled?: boolean;
+  carapaceToolsMcpBridgeEnabled?: boolean;
 };
 type AcpxRuntimeTestOptions = Record<string, unknown> & {
-  openclawProcessCleanup?: AcpxProcessCleanupDeps;
+  carapaceProcessCleanup?: AcpxProcessCleanupDeps;
 };
-type OpenClawRuntimeTurnInput = Parameters<NonNullable<AcpRuntime["startTurn"]>>[0];
-type OpenClawRuntimeEnsureInput = Parameters<AcpRuntime["ensureSession"]>[0];
-type OpenClawRuntimeHandle = Awaited<ReturnType<AcpRuntime["ensureSession"]>>;
+type CarapaceRuntimeTurnInput = Parameters<NonNullable<AcpRuntime["startTurn"]>>[0];
+type CarapaceRuntimeEnsureInput = Parameters<AcpRuntime["ensureSession"]>[0];
+type CarapaceRuntimeHandle = Awaited<ReturnType<AcpRuntime["ensureSession"]>>;
 type AcpxDelegateEnsureInput = Parameters<BaseAcpxRuntime["ensureSession"]>[0];
 type AcpxMcpServer = NonNullable<AcpRuntimeOptions["mcpServers"]>[number];
 
-const ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME = "openclaw-plugin-tools";
-const ACPX_OPENCLAW_TOOLS_MCP_SERVER_NAME = "openclaw-tools";
-const OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY";
+const ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME = "carapace-plugin-tools";
+const ACPX_CARAPACE_TOOLS_MCP_SERVER_NAME = "carapace-tools";
+const CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY";
 type ResetAwareSessionStore = AcpSessionStore & {
   markFresh: (sessionKey: string) => void;
 };
 
-type OpenClawLeaseSessionMetadata = {
-  openclawLeaseId: string;
-  openclawGatewayInstanceId: string;
+type CarapaceLeaseSessionMetadata = {
+  carapaceLeaseId: string;
+  carapaceGatewayInstanceId: string;
 };
 
-function withOpenClawLeaseSessionMetadata<T extends object>(
+function withCarapaceLeaseSessionMetadata<T extends object>(
   record: T,
   lease: AcpxProcessLeaseIdentity,
-): T & OpenClawLeaseSessionMetadata {
+): T & CarapaceLeaseSessionMetadata {
   return {
     ...record,
-    openclawLeaseId: lease.leaseId,
-    openclawGatewayInstanceId: lease.gatewayInstanceId,
+    carapaceLeaseId: lease.leaseId,
+    carapaceGatewayInstanceId: lease.gatewayInstanceId,
   };
 }
 
@@ -201,21 +201,21 @@ function readRecordAgentPid(record: unknown): number | undefined {
   return numericPid && Number.isInteger(numericPid) && numericPid > 0 ? numericPid : undefined;
 }
 
-function readOpenClawLeaseIdFromRecord(record: unknown): string | undefined {
+function readCarapaceLeaseIdFromRecord(record: unknown): string | undefined {
   if (typeof record !== "object" || record === null) {
     return undefined;
   }
-  const { openclawLeaseId } = record as { openclawLeaseId?: unknown };
-  return typeof openclawLeaseId === "string" ? openclawLeaseId.trim() || undefined : undefined;
+  const { carapaceLeaseId } = record as { carapaceLeaseId?: unknown };
+  return typeof carapaceLeaseId === "string" ? carapaceLeaseId.trim() || undefined : undefined;
 }
 
-function readOpenClawGatewayInstanceIdFromRecord(record: unknown): string | undefined {
+function readCarapaceGatewayInstanceIdFromRecord(record: unknown): string | undefined {
   if (typeof record !== "object" || record === null) {
     return undefined;
   }
-  const { openclawGatewayInstanceId } = record as { openclawGatewayInstanceId?: unknown };
-  return typeof openclawGatewayInstanceId === "string"
-    ? openclawGatewayInstanceId.trim() || undefined
+  const { carapaceGatewayInstanceId } = record as { carapaceGatewayInstanceId?: unknown };
+  return typeof carapaceGatewayInstanceId === "string"
+    ? carapaceGatewayInstanceId.trim() || undefined
     : undefined;
 }
 
@@ -279,7 +279,7 @@ function createResetAwareSessionStore(
       if (!lease) {
         return record;
       }
-      return withOpenClawLeaseSessionMetadata(record, lease);
+      return withCarapaceLeaseSessionMetadata(record, lease);
     },
     async save(record: AcpSessionRecord): Promise<void> {
       let recordToSave = record;
@@ -295,7 +295,7 @@ function createResetAwareSessionStore(
         (!launch || sessionName === launch.sessionKey) &&
         leasedCommand &&
         leaseIdentity?.gatewayInstanceId === params.gatewayInstanceId &&
-        isOpenClawLeaseAwareAcpxProcessCommand({
+        isCarapaceLeaseAwareAcpxProcessCommand({
           command: leasedCommand,
           wrapperRoot: params.wrapperRoot,
         })
@@ -343,7 +343,7 @@ function createResetAwareSessionStore(
               state: "open",
             });
           }
-          recordToSave = withOpenClawLeaseSessionMetadata(
+          recordToSave = withCarapaceLeaseSessionMetadata(
             {
               ...lifecycleRecord,
               // ACPX reconnects from the persisted command, so lease identity must
@@ -369,14 +369,14 @@ function createResetAwareSessionStore(
   };
 }
 
-const OPENCLAW_BRIDGE_EXECUTABLE = "openclaw";
-const OPENCLAW_BRIDGE_SUBCOMMAND = "acp";
+const CARAPACE_BRIDGE_EXECUTABLE = "carapace";
+const CARAPACE_BRIDGE_SUBCOMMAND = "acp";
 const CODEX_ACP_AGENT_ID = "codex";
-const CODEX_ACP_OPENCLAW_PREFIX = "openai/";
-// Documented OpenClaw provider prefixes the Claude Agent SDK does not understand.
+const CODEX_ACP_CARAPACE_PREFIX = "openai/";
+// Documented Carapace provider prefixes the Claude Agent SDK does not understand.
 // Strip only these; a generic first-slash split would corrupt native Bedrock
 // inference-profile ids and ARNs the SDK accepts as-is.
-const CLAUDE_ACP_OPENCLAW_PREFIX = /^(?:anthropic|amazon-bedrock)\//i;
+const CLAUDE_ACP_CARAPACE_PREFIX = /^(?:anthropic|amazon-bedrock)\//i;
 const CODEX_ACP_THINKING_ALIASES = new Map<string, string | undefined>([
   ["off", undefined],
   ["minimal", "low"],
@@ -414,7 +414,7 @@ function readAgentFromSessionKey(sessionKey: string | undefined): string | undef
   return normalizeAgentName(match?.groups?.agent);
 }
 
-function readAgentFromHandle(handle: OpenClawRuntimeHandle): string | undefined {
+function readAgentFromHandle(handle: CarapaceRuntimeHandle): string | undefined {
   const decoded = decodeAcpxRuntimeHandleState(handle.runtimeSessionName);
   return normalizeAgentName(decoded?.agent) ?? readAgentFromSessionKey(handle.sessionKey);
 }
@@ -482,19 +482,19 @@ function isAcpCommand(
   return scriptName === params.executableName || scriptName === `${params.executableName}-wrapper`;
 }
 
-function isOpenClawBridgeCommand(command: AcpxAgentCommand | undefined): boolean {
+function isCarapaceBridgeCommand(command: AcpxAgentCommand | undefined): boolean {
   if (!command) {
     return false;
   }
   const parts = unwrapEnvCommand(splitCommandParts(command));
-  if (basename(parts[0] ?? "") === OPENCLAW_BRIDGE_EXECUTABLE) {
-    return parts[1] === OPENCLAW_BRIDGE_SUBCOMMAND;
+  if (basename(parts[0] ?? "") === CARAPACE_BRIDGE_EXECUTABLE) {
+    return parts[1] === CARAPACE_BRIDGE_SUBCOMMAND;
   }
   if (basename(parts[0] ?? "") !== "node") {
     return false;
   }
   const scriptName = basename(parts[1] ?? "");
-  return /^openclaw(?:\.[cm]?js)?$/i.test(scriptName) && parts[2] === OPENCLAW_BRIDGE_SUBCOMMAND;
+  return /^carapace(?:\.[cm]?js)?$/i.test(scriptName) && parts[2] === CARAPACE_BRIDGE_SUBCOMMAND;
 }
 
 function isCodexAcpCommand(command: AcpxAgentCommand | undefined): boolean {
@@ -571,8 +571,8 @@ function classifyCodexAcpModelRequest(
 
   let value = raw;
   let hadOpenAiQualifier = false;
-  if (value.toLowerCase().startsWith(CODEX_ACP_OPENCLAW_PREFIX)) {
-    value = value.slice(CODEX_ACP_OPENCLAW_PREFIX.length);
+  if (value.toLowerCase().startsWith(CODEX_ACP_CARAPACE_PREFIX)) {
+    value = value.slice(CODEX_ACP_CARAPACE_PREFIX.length);
     hadOpenAiQualifier = true;
   }
 
@@ -622,14 +622,14 @@ function normalizeClaudeAcpModelOverride(rawModel: string | undefined): string |
   if (!raw) {
     return undefined;
   }
-  const prefix = raw.match(CLAUDE_ACP_OPENCLAW_PREFIX);
+  const prefix = raw.match(CLAUDE_ACP_CARAPACE_PREFIX);
   if (!prefix) {
     return raw;
   }
   return raw.slice(prefix[0].length).trim() || undefined;
 }
 
-function withAcpxSessionOptions(input: OpenClawRuntimeEnsureInput): AcpxDelegateEnsureInput {
+function withAcpxSessionOptions(input: CarapaceRuntimeEnsureInput): AcpxDelegateEnsureInput {
   const existingOptions = (input as { sessionOptions?: SessionAgentOptions }).sessionOptions;
   const model = input.model?.trim() || existingOptions?.model;
   const sessionOptions = model ? { ...existingOptions, model } : existingOptions;
@@ -648,8 +648,8 @@ function isAcpModelCapabilityMissingError(error: unknown): boolean {
 // explicit selections and invalid model ids must remain visible failures.
 async function ensureDelegateSessionWithModelFallback(
   delegate: BaseAcpxRuntime,
-  input: OpenClawRuntimeEnsureInput,
-): Promise<OpenClawRuntimeHandle> {
+  input: CarapaceRuntimeEnsureInput,
+): Promise<CarapaceRuntimeHandle> {
   try {
     return await delegate.ensureSession(withAcpxSessionOptions(input));
   } catch (error) {
@@ -674,7 +674,7 @@ function appendCodexAcpConfigOverrides(
   if (Object.keys(config).length === 0) {
     return command;
   }
-  return [...splitCommandParts(command), OPENCLAW_CODEX_CONFIG_ARG, JSON.stringify(config)];
+  return [...splitCommandParts(command), CARAPACE_CODEX_CONFIG_ARG, JSON.stringify(config)];
 }
 
 function resolveAgentCommand(params: {
@@ -695,14 +695,14 @@ function shouldUseDistinctBridgeDelegate(options: AcpRuntimeOptions): boolean {
 
 function withManagedToolsMcpSessionEnv(params: {
   pluginToolsEnabled: boolean;
-  openclawToolsEnabled: boolean;
+  carapaceToolsEnabled: boolean;
   mcpServers: AcpRuntimeOptions["mcpServers"];
   sessionKey: string;
   agentId?: string;
 }): AcpRuntimeOptions["mcpServers"] {
   const sessionKey = params.sessionKey.trim();
   if (
-    (!params.pluginToolsEnabled && !params.openclawToolsEnabled) ||
+    (!params.pluginToolsEnabled && !params.carapaceToolsEnabled) ||
     !sessionKey ||
     !params.mcpServers?.length
   ) {
@@ -712,29 +712,29 @@ function withManagedToolsMcpSessionEnv(params: {
   const nextServers = params.mcpServers.map((server): AcpxMcpServer => {
     const isManagedPluginTools =
       params.pluginToolsEnabled && server.name === ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME;
-    const isManagedOpenClawTools =
-      params.openclawToolsEnabled && server.name === ACPX_OPENCLAW_TOOLS_MCP_SERVER_NAME;
-    if ((!isManagedPluginTools && !isManagedOpenClawTools) || !("command" in server)) {
+    const isManagedCarapaceTools =
+      params.carapaceToolsEnabled && server.name === ACPX_CARAPACE_TOOLS_MCP_SERVER_NAME;
+    if ((!isManagedPluginTools && !isManagedCarapaceTools) || !("command" in server)) {
       return server;
     }
     changed = true;
     const env = [
-      ...server.env.filter((entry) => entry.name !== OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV),
+      ...server.env.filter((entry) => entry.name !== CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV),
       {
-        name: OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV,
+        name: CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY_ENV,
         value: sessionKey,
       },
     ];
     return {
       ...server,
       env,
-      args: params.agentId ? [...server.args, "--openclaw-agent-id", params.agentId] : server.args,
+      args: params.agentId ? [...server.args, "--carapace-agent-id", params.agentId] : server.args,
     };
   });
   return changed ? nextServers : params.mcpServers;
 }
 
-/** OpenClaw-managed ACP runtime implementation backed by the upstream acpx runtime. */
+/** Carapace-managed ACP runtime implementation backed by the upstream acpx runtime. */
 export class AcpxRuntime implements CompleteAcpRuntime {
   readonly ownerAwareSessions = 1 as const;
   private readonly legacyBareSessionKeys: Set<string>;
@@ -753,7 +753,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   private readonly delegateOptions: AcpRuntimeOptions;
   private readonly delegateTestOptions: BaseAcpxRuntimeTestOptions;
   private readonly pluginToolsMcpBridgeEnabled: boolean;
-  private readonly openclawToolsMcpBridgeEnabled: boolean;
+  private readonly carapaceToolsMcpBridgeEnabled: boolean;
   private readonly managedToolsMcpBridgeEnabled: boolean;
   private readonly managedToolsSessionDelegates = new Map<string, BaseAcpxRuntime>();
   private readonly processCleanupDeps: AcpxProcessCleanupDeps | undefined;
@@ -767,17 +767,17 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   private readonly uncertainProcessLeaseIds = new Set<string>();
   private readonly cwd: string;
 
-  constructor(options: OpenClawAcpxRuntimeOptions, testOptions?: AcpxRuntimeTestOptions) {
-    this.legacyBareSessionKeys = new Set(options.openclawLegacyBareSessionKeys);
-    const { openclawProcessCleanup, ...delegateTestOptions } = testOptions ?? {};
-    this.processCleanupDeps = openclawProcessCleanup;
-    this.wrapperRoot = options.openclawWrapperRoot;
-    this.gatewayInstanceId = options.openclawGatewayInstanceId;
-    this.processLeaseStore = options.openclawProcessLeaseStore;
+  constructor(options: CarapaceAcpxRuntimeOptions, testOptions?: AcpxRuntimeTestOptions) {
+    this.legacyBareSessionKeys = new Set(options.carapaceLegacyBareSessionKeys);
+    const { carapaceProcessCleanup, ...delegateTestOptions } = testOptions ?? {};
+    this.processCleanupDeps = carapaceProcessCleanup;
+    this.wrapperRoot = options.carapaceWrapperRoot;
+    this.gatewayInstanceId = options.carapaceGatewayInstanceId;
+    this.processLeaseStore = options.carapaceProcessLeaseStore;
     this.pluginToolsMcpBridgeEnabled = options.pluginToolsMcpBridgeEnabled === true;
-    this.openclawToolsMcpBridgeEnabled = options.openclawToolsMcpBridgeEnabled === true;
+    this.carapaceToolsMcpBridgeEnabled = options.carapaceToolsMcpBridgeEnabled === true;
     this.managedToolsMcpBridgeEnabled =
-      this.pluginToolsMcpBridgeEnabled || this.openclawToolsMcpBridgeEnabled;
+      this.pluginToolsMcpBridgeEnabled || this.carapaceToolsMcpBridgeEnabled;
     this.cwd = options.cwd;
     this.sessionStore = createResetAwareSessionStore(options.sessionStore, {
       gatewayInstanceId: this.gatewayInstanceId,
@@ -819,7 +819,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
     });
     this.probeCommand = probeCommand;
     const useBridgeSafeProbe =
-      this.managedToolsMcpBridgeEnabled || isOpenClawBridgeCommand(probeCommand);
+      this.managedToolsMcpBridgeEnabled || isCarapaceBridgeCommand(probeCommand);
     this.probeDelegate = useBridgeSafeProbe ? this.bridgeSafeDelegate : this.delegate;
   }
 
@@ -828,7 +828,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
     sessionKey: string;
     agentId?: string;
   }): BaseAcpxRuntime {
-    if (isOpenClawBridgeCommand(params.command)) {
+    if (isCarapaceBridgeCommand(params.command)) {
       return this.bridgeSafeDelegate;
     }
     return this.resolveManagedToolsDelegateForSession(params);
@@ -854,7 +854,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
         ...this.delegateOptions,
         mcpServers: withManagedToolsMcpSessionEnv({
           pluginToolsEnabled: this.pluginToolsMcpBridgeEnabled,
-          openclawToolsEnabled: this.openclawToolsMcpBridgeEnabled,
+          carapaceToolsEnabled: this.carapaceToolsMcpBridgeEnabled,
           mcpServers: this.delegateOptions.mcpServers,
           sessionKey: target.sessionKey,
           agentId: target.agentId,
@@ -867,7 +867,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async loadOperationSnapshotForHandle(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
   ): Promise<AcpxHandleOperationSnapshot> {
     assertAcpxSessionOwnerLocator(
       { ...handle, persistedHandle: handle },
@@ -889,7 +889,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private resolveDelegateForOperationSnapshot(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     snapshot: AcpxHandleOperationSnapshot,
   ): BaseAcpxRuntime {
     // Lease-owning callers project only after validation so a rejected record
@@ -957,7 +957,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
       !this.wrapperRoot ||
       !this.gatewayInstanceId ||
       !this.processLeaseStore ||
-      !isOpenClawLeaseAwareAcpxProcessCommand({
+      !isCarapaceLeaseAwareAcpxProcessCommand({
         command: params.command,
         wrapperRoot: this.wrapperRoot,
       })
@@ -1060,7 +1060,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async prepareProcessLeaseForOperation(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     record: AcpLoadedSessionRecord,
   ): Promise<AcpxProcessLeaseIdentity | undefined> {
     if (!this.processLeaseStore || !this.gatewayInstanceId || !this.wrapperRoot) {
@@ -1073,7 +1073,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
     const identity = readAcpxProcessLeaseIdentity(command);
     if (
       !command ||
-      !isOpenClawLeaseAwareAcpxProcessCommand({
+      !isCarapaceLeaseAwareAcpxProcessCommand({
         command,
         wrapperRoot,
       })
@@ -1158,7 +1158,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async finalizeProcessLeaseForOperation(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     identity: AcpxProcessLeaseIdentity | undefined,
   ): Promise<void> {
     await this.finalizeProcessLeaseForSession(
@@ -1221,7 +1221,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
       if (lease.rootPid > 0) {
         return;
       }
-      await cleanupOpenClawOwnedAcpxPendingLease({
+      await cleanupCarapaceOwnedAcpxPendingLease({
         leaseId: lease.leaseId,
         gatewayInstanceId: lease.gatewayInstanceId,
         wrapperRoot: lease.wrapperRoot,
@@ -1248,7 +1248,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async runWithProcessLeaseForHandle<T>(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     record: AcpLoadedSessionRecord,
     run: () => Promise<T>,
   ): Promise<T> {
@@ -1261,7 +1261,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async finalizeProcessLeaseAfter<T>(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     identityPromise: Promise<AcpxProcessLeaseIdentity | undefined>,
     resultPromise: Promise<T>,
   ): Promise<T> {
@@ -1275,7 +1275,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   private async withCodexWrapperDiagnostics<T>(params: {
     command: AcpxAgentCommand | undefined;
     fallbackCode: AcpRuntimeErrorCode;
-    handle?: OpenClawRuntimeHandle;
+    handle?: CarapaceRuntimeHandle;
     run: () => Promise<T>;
   }): Promise<T> {
     try {
@@ -1300,22 +1300,22 @@ export class AcpxRuntime implements CompleteAcpRuntime {
   }
 
   private async readCodexTurnFailureStderr(params: {
-    handle: OpenClawRuntimeHandle;
+    handle: CarapaceRuntimeHandle;
   }): Promise<string> {
     const record = await this.sessionStore.load(
       params.handle.acpxRecordId ?? resolveAcpxSessionResource(params.handle),
     );
     return readCodexWrapperStderrTail({
       wrapperRoot: this.wrapperRoot,
-      leaseId: readOpenClawLeaseIdFromRecord(record),
+      leaseId: readCarapaceLeaseIdFromRecord(record),
     });
   }
 
   private async cleanupProcessTreeForRecord(
-    handle: OpenClawRuntimeHandle,
+    handle: CarapaceRuntimeHandle,
     record: AcpLoadedSessionRecord,
   ): Promise<void> {
-    const leaseId = readOpenClawLeaseIdFromRecord(record);
+    const leaseId = readCarapaceLeaseIdFromRecord(record);
     const rootPid = readRecordAgentPid(record);
     const sessionKeys = [resolveAcpxSessionResource(handle), readSessionRecordName(record)];
     const openLeases =
@@ -1338,7 +1338,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
         : undefined);
     if (lease && lease.gatewayInstanceId === this.gatewayInstanceId && lease.rootPid > 0) {
       await this.processLeaseStore?.markState(lease.leaseId, "closing");
-      const result = await cleanupOpenClawOwnedAcpxProcessTree({
+      const result = await cleanupCarapaceOwnedAcpxProcessTree({
         rootPid: lease.rootPid,
         rootCommand: record?.agentCommand,
         expectedLeaseId: lease.leaseId,
@@ -1367,8 +1367,8 @@ export class AcpxRuntime implements CompleteAcpRuntime {
     if (!rootPid || !rootCommand) {
       return;
     }
-    const expectedGatewayInstanceId = readOpenClawGatewayInstanceIdFromRecord(record);
-    await cleanupOpenClawOwnedAcpxProcessTree({
+    const expectedGatewayInstanceId = readCarapaceGatewayInstanceIdFromRecord(record);
+    await cleanupCarapaceOwnedAcpxProcessTree({
       rootPid,
       rootCommand: renderAgentCommand(rootCommand),
       ...(leaseId ? { expectedLeaseId: leaseId } : {}),
@@ -1404,7 +1404,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
 
   async ensureSession(
     input: Parameters<AcpRuntime["ensureSession"]>[0],
-  ): Promise<OpenClawRuntimeHandle> {
+  ): Promise<CarapaceRuntimeHandle> {
     const resource = assertAcpxSessionOwnerLocator(input, this.legacyBareSessionKeys);
     return await this.sessionEnsureQueue.enqueue(resource.trim() || resource, () =>
       this.ensureSessionUnlocked(input),
@@ -1413,7 +1413,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
 
   private async ensureSessionUnlocked(
     logicalInput: Parameters<AcpRuntime["ensureSession"]>[0],
-  ): Promise<OpenClawRuntimeHandle> {
+  ): Promise<CarapaceRuntimeHandle> {
     assertSupportedRuntimeSessionMode(logicalInput.mode);
     const command = resolveAgentCommand({
       agentName: logicalInput.agent,
@@ -1446,7 +1446,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
         ? classifiedCodexOverride
         : undefined;
     const requestedModel = input.model?.trim();
-    const appliedModel: OpenClawRuntimeHandle["appliedModel"] =
+    const appliedModel: CarapaceRuntimeHandle["appliedModel"] =
       isCodexAcp && requestedModel
         ? codexModelOverride?.model
           ? { kind: "applied", model: requestedModel }
@@ -1509,7 +1509,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
     }
   }
 
-  startTurn(input: OpenClawRuntimeTurnInput): CompleteAcpRuntimeTurn {
+  startTurn(input: CarapaceRuntimeTurnInput): CompleteAcpRuntimeTurn {
     const withTurnDiagnostics = <T>(command: AcpxAgentCommand | undefined, run: () => Promise<T>) =>
       this.withCodexWrapperDiagnostics({
         command,
@@ -1528,7 +1528,7 @@ export class AcpxRuntime implements CompleteAcpRuntime {
         command,
         turn: delegate.startTurn({
           ...toAcpxResourceInput(input),
-          // OpenClaw owns deadlines; acpx timeouts can report partial output as completed.
+          // Carapace owns deadlines; acpx timeouts can report partial output as completed.
           timeoutMs: 0,
         }),
       }));

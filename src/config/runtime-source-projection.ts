@@ -1,10 +1,10 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { getRuntimeConfigSnapshot, getRuntimeConfigSourceSnapshot } from "./runtime-snapshot.js";
 import { projectRuntimeChangesOntoSource } from "./source-value-projection.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 /** Projects a runtime-derived config back onto the active authored source snapshot. */
-export function projectConfigOntoRuntimeSourceSnapshot(config: OpenClawConfig): OpenClawConfig {
+export function projectConfigOntoRuntimeSourceSnapshot(config: CarapaceConfig): CarapaceConfig {
   const runtimeConfigSnapshot = getRuntimeConfigSnapshot();
   const runtimeConfigSourceSnapshot = getRuntimeConfigSourceSnapshot();
   if (!runtimeConfigSnapshot || !runtimeConfigSourceSnapshot) {
@@ -33,15 +33,15 @@ export function projectConfigOntoRuntimeSourceSnapshot(config: OpenClawConfig): 
     runtimeConfigSourceSnapshot,
     runtimeConfigSnapshot,
     config,
-  ) as OpenClawConfig;
+  ) as CarapaceConfig;
 }
 
 /** Projects partial legacy inputs without persisting deleted runtime-only parents. */
 export function projectLegacyRuntimeConfigWrite(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   runtimeSnapshot = getRuntimeConfigSnapshot(),
   sourceSnapshot = getRuntimeConfigSourceSnapshot(),
-): OpenClawConfig {
+): CarapaceConfig {
   if (!runtimeSnapshot || !sourceSnapshot) {
     return config;
   }
@@ -50,5 +50,5 @@ export function projectLegacyRuntimeConfigWrite(
     projectRuntimeChangesOntoSource(sourceSnapshot, runtimeSnapshot, config, {
       pruneUnauthoredDeletions: true,
     }),
-  ) ?? {}) as OpenClawConfig;
+  ) ?? {}) as CarapaceConfig;
 }

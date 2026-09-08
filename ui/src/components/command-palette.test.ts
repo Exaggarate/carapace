@@ -121,7 +121,7 @@ function createSessionResult(key: string, displayName: string): SessionsListResu
 
 async function mountPalette(context: ApplicationContext<RouteId>) {
   const provider = createApplicationContextProvider(context);
-  const palette = document.createElement("openclaw-command-palette") as CommandPalette;
+  const palette = document.createElement("carapace-command-palette") as CommandPalette;
   palette.onNavigate = vi.fn();
   palette.onSelectSession = vi.fn();
   provider.append(palette);
@@ -178,7 +178,7 @@ describe("CommandPalette lifecycle", () => {
 
   it("hides native browser overlays while the palette is open and releases on close or disconnect", async () => {
     vi.stubGlobal("webkit", {
-      messageHandlers: { openclawBrowser: { postMessage: vi.fn() } },
+      messageHandlers: { carapaceBrowser: { postMessage: vi.fn() } },
     });
     const { gateway } = createGateway(true);
     const { palette } = await mountPalette(
@@ -192,7 +192,7 @@ describe("CommandPalette lifecycle", () => {
     try {
       palette.openPalette();
       await palette.updateComplete;
-      await palette.querySelector("openclaw-modal-dialog")?.updateComplete;
+      await palette.querySelector("carapace-modal-dialog")?.updateComplete;
       expect(changes.mock.calls).toEqual([[false], [true]]);
 
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
@@ -200,7 +200,7 @@ describe("CommandPalette lifecycle", () => {
       expect(changes).toHaveBeenLastCalledWith(false);
       palette.openPalette();
       await palette.updateComplete;
-      await palette.querySelector("openclaw-modal-dialog")?.updateComplete;
+      await palette.querySelector("carapace-modal-dialog")?.updateComplete;
       expect(changes).toHaveBeenLastCalledWith(true);
       palette.remove();
       expect(changes).toHaveBeenLastCalledWith(false);
@@ -220,7 +220,7 @@ describe("CommandPalette lifecycle", () => {
 
     palette.remove();
     provider.append(palette);
-    const modal = palette.querySelector("openclaw-modal-dialog");
+    const modal = palette.querySelector("carapace-modal-dialog");
     const dialog = modal?.shadowRoot
       ?.querySelector("wa-dialog")
       ?.shadowRoot?.querySelector("dialog");
@@ -609,7 +609,7 @@ describe("CommandPalette lifecycle", () => {
       );
       const { palette } = await mountPalette({
         ...context,
-        basePath: "/openclaw",
+        basePath: "/carapace",
         agents: {
           ...context.agents,
           ensureList: async () => ({
@@ -633,7 +633,7 @@ describe("CommandPalette lifecycle", () => {
           ?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
       }
       expect(palette.onNavigate).toHaveBeenCalledWith("agents", {
-        pathname: "/openclaw/settings/agents/reviewer%2Eteam",
+        pathname: "/carapace/settings/agents/reviewer%2Eteam",
       });
       expect(palette.isOpen).toBe(false);
     },
@@ -1019,7 +1019,7 @@ describe("CommandPalette lifecycle", () => {
     { available: true, expectedCount: 1 },
     { available: false, expectedCount: 0 },
   ])(
-    "shows Ask OpenClaw only when availability is $available",
+    "shows Ask Carapace only when availability is $available",
     async ({ available, expectedCount }) => {
       const { gateway } = createGateway(true);
       const { palette } = await mountPalette(
@@ -1029,13 +1029,13 @@ describe("CommandPalette lifecycle", () => {
         ),
       );
       palette.custodianAvailable = available;
-      await enterQuery(palette, "openclaw");
+      await enterQuery(palette, "carapace");
 
-      expect(findPaletteOption(palette, "Ask OpenClaw", true) ? 1 : 0).toBe(expectedCount);
+      expect(findPaletteOption(palette, "Ask Carapace", true) ? 1 : 0).toBe(expectedCount);
     },
   );
 
-  it("opens Ask OpenClaw from its palette action", async () => {
+  it("opens Ask Carapace from its palette action", async () => {
     const { gateway } = createGateway(true);
     const { palette } = await mountPalette(
       createContext(
@@ -1044,13 +1044,13 @@ describe("CommandPalette lifecycle", () => {
       ),
     );
     palette.custodianAvailable = true;
-    await enterQuery(palette, "openclaw");
+    await enterQuery(palette, "carapace");
     const events: CustomEvent<CustodianPanelToggleDetail>[] = [];
     const listener = (event: Event) =>
       events.push(event as CustomEvent<CustodianPanelToggleDetail>);
     window.addEventListener(CUSTODIAN_PANEL_TOGGLE_EVENT, listener);
     try {
-      findPaletteOption(palette, "Ask OpenClaw", true)?.click();
+      findPaletteOption(palette, "Ask Carapace", true)?.click();
     } finally {
       window.removeEventListener(CUSTODIAN_PANEL_TOGGLE_EVENT, listener);
     }

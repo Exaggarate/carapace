@@ -1,8 +1,8 @@
-// Openai plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
+// Openai plugin entrypoint registers its Carapace integration.
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import { buildProviderToolCompatFamilyHooks } from "carapace/plugin-sdk/provider-tools";
 import { buildOpenAIImageGenerationProvider } from "./image-generation-provider.js";
 import { openaiMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import { openAiMemoryEmbeddingProviderAdapter } from "./memory-embedding-adapter.js";
@@ -64,7 +64,7 @@ export default definePluginEntry({
         api.registrationMode === "full"
           ? acquireOpenAIQuicksilverBrowserSessionBroker(
               {
-                getConfig: () => api.runtime.config.current() as OpenClawConfig,
+                getConfig: () => api.runtime.config.current() as CarapaceConfig,
                 logger: api.logger,
               },
               context,

@@ -1,7 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { clearRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { clearRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, expect, it } from "vitest";
 import {
   createBrowserControlContext,
@@ -47,7 +47,7 @@ it("borrows the compiled daemon in another process and leaves it serving an exte
       }
     },
     async (port, stateDir, config) => {
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.writeFile(configPath, JSON.stringify(config));
       child = spawn(
         process.execPath,
@@ -55,8 +55,8 @@ it("borrows the compiled daemon in another process and leaves it serving an exte
         {
           env: {
             HOME: stateDir,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
             PATH: process.env.PATH,
             TMPDIR: process.env.TMPDIR,
           },

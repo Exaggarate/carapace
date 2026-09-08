@@ -1,6 +1,6 @@
 // Control UI component renders the command palette.
 import { consume } from "@lit/context";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { ref } from "lit/directives/ref.js";
@@ -16,7 +16,7 @@ import {
 } from "../lib/sessions/session-key.ts";
 import { searchVisibleSessionTranscripts } from "../lib/sessions/transcript-search.ts";
 import { GatewayPageController } from "../lit/gateway-page-controller.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import {
   commandPaletteCategoryLabel,
@@ -190,10 +190,10 @@ function renderCommandPalette(props: CommandPaletteProps) {
   const paletteLabel = t("palette.placeholder");
 
   return html`
-    <openclaw-modal-dialog
+    <carapace-modal-dialog
       class="cmd-palette-overlay palette"
       label=${paletteLabel}
-      style="--openclaw-modal-width: min(640px, calc(100vw - 32px));"
+      style="--carapace-modal-width: min(640px, calc(100vw - 32px));"
       @modal-cancel=${() => closePalette(props)}
     >
       <div
@@ -289,11 +289,11 @@ function renderCommandPalette(props: CommandPaletteProps) {
           <span><kbd>esc</kbd> ${t("palette.footer.close")}</span>
         </div>
       </div>
-    </openclaw-modal-dialog>
+    </carapace-modal-dialog>
   `;
 }
 
-export class CommandPalette extends OpenClawLightDomContentsElement {
+export class CommandPalette extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) onNavigate?: ApplicationContext<RouteId>["navigate"];
   @property({ attribute: false }) onSelectSession?: (sessionKey: string) => void;
   @property({ attribute: false }) onSlashCommand?: (command: string) => void;
@@ -652,6 +652,6 @@ export class CommandPalette extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-command-palette")) {
-  customElements.define("openclaw-command-palette", CommandPalette);
+if (!customElements.get("carapace-command-palette")) {
+  customElements.define("carapace-command-palette", CommandPalette);
 }

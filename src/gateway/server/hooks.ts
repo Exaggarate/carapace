@@ -3,15 +3,15 @@ import { randomUUID } from "node:crypto";
 import {
   resolveDateTimestampMs,
   resolveTimestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { listAgentIds } from "../../agents/agent-scope.js";
 import { resolveChannelDefaultAccountId } from "../../channels/plugins/helpers.js";
 import type { CliDeps } from "../../cli/deps.types.js";
 import { getRuntimeConfig } from "../../config/io.js";
 import { canonicalizeMainSessionAlias, resolveAgentMainSessionKey } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   CronAgentAdmissionDisposition,
   RunCronAgentTurnResult,
@@ -67,7 +67,7 @@ type HookEventTarget = {
 };
 
 function resolveHookEventTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   resolvedAgentId: string;
   sessionKey?: string;
 }): HookEventTarget {
@@ -189,7 +189,7 @@ function createSessionKeyedHookDispatchQueue() {
 }
 
 function validateHookAgentDeliveryAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   value: HookAgentDispatchPayload;
 }): HookAgentDispatchPayload {
   // Mapped hooks can defer partial/last targets to cron and cannot select an account.
@@ -419,7 +419,7 @@ export function createGatewayHookDispatcher(params: {
         });
       }
     };
-    let dispatchCfg: OpenClawConfig;
+    let dispatchCfg: CarapaceConfig;
     try {
       dispatchCfg = getRuntimeConfig();
     } catch (err) {

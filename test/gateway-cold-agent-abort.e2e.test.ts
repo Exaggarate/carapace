@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { buildMockOpenAiResponsesProvider } from "../src/gateway/test-openai-responses-model.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 import { createDeferred } from "./helpers/promise.js";
 
 it(
@@ -48,7 +48,7 @@ it(
         response.destroy(error instanceof Error ? error : new Error(String(error)));
       });
     });
-    let instance: OpenClawTestInstance | undefined;
+    let instance: CarapaceTestInstance | undefined;
     let client: Awaited<ReturnType<typeof connectGatewayClient>> | undefined;
     let final: Promise<unknown> | undefined;
     try {
@@ -64,13 +64,13 @@ it(
         `http://127.0.0.1:${address.port}/v1`,
         modelId,
       );
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: { slots: { memory: "none" } },
         agents: {
           entries: { main: {} },
           defaults: {
             model: { primary: provider.modelRef, fallbacks: [] },
-            models: { [provider.modelRef]: { agentRuntime: { id: "openclaw" } } },
+            models: { [provider.modelRef]: { agentRuntime: { id: "carapace" } } },
             skills: [],
           },
         },
@@ -85,13 +85,13 @@ it(
           },
         },
       };
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "cold-agent-abort",
         config,
         env: {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       await instance.startGateway();

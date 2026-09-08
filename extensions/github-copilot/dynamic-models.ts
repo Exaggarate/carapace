@@ -1,16 +1,16 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   ProviderCatalogContext,
   ProviderCatalogResult,
   ProviderPrepareDynamicModelContext,
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   LiveModelCatalogHttpError,
   runLiveProviderCatalog,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { getCachedLiveCatalogValue } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { getCachedLiveCatalogValue } from "carapace/plugin-sdk/provider-catalog-shared";
 import { resolveFirstGithubToken } from "./auth.js";
 import { resolveGithubCopilotDomain } from "./domain.js";
 import {
@@ -24,7 +24,7 @@ import { buildCopilotRuntimeHeaders } from "./runtime-identity.js";
 
 type GithubCopilotCatalogContext = {
   agentDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   profileId?: string;
   authProfileMode?: ProviderPrepareDynamicModelContext["authProfileMode"];
@@ -43,7 +43,7 @@ function dynamicModelScope(
 }
 
 export function createGithubCopilotDynamicModelHooks(params: {
-  discoveryEnabled(config?: OpenClawConfig): boolean;
+  discoveryEnabled(config?: CarapaceConfig): boolean;
 }) {
   const preparedDynamicModels = new WeakMap<
     object,
@@ -161,7 +161,7 @@ export function createGithubCopilotDynamicModelHooks(params: {
     prepareDynamicModel,
     resolveDynamicModel,
     runCatalog,
-    preferRuntimeResolvedModel: ({ config }: { config?: OpenClawConfig }) =>
+    preferRuntimeResolvedModel: ({ config }: { config?: CarapaceConfig }) =>
       params.discoveryEnabled(config),
   };
 }

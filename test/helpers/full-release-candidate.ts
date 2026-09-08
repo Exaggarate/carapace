@@ -28,7 +28,7 @@ export function canonicalTestSha256(value: unknown): string {
 
 export function fullReleaseCandidateRequestInput(overrides: Record<string, unknown> = {}) {
   return {
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     targetSha: TARGET_SHA,
     toolingSha: TOOLING_SHA,
     releaseProfile: "stable",
@@ -66,12 +66,12 @@ export function fullReleaseCandidateManifestFixture(
     fullReleaseCandidateRequestInput(requestOverrides),
   );
   return {
-    schema: "openclaw.full-release-candidate/v2" as const,
+    schema: "carapace.full-release-candidate/v2" as const,
     request,
     requestSha256: canonicalTestSha256(request),
     producer: {
       repository: request.repository,
-      workflowPath: ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+      workflowPath: ".github/workflows/carapace-live-and-e2e-checks-reusable.yml",
       workflowSha: request.toolingSha,
       runId: "77",
       runAttempt: "1",
@@ -81,7 +81,7 @@ export function fullReleaseCandidateManifestFixture(
     },
     publisher: {
       repository: request.repository,
-      workflowPath: ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml",
+      workflowPath: ".github/workflows/carapace-live-and-e2e-checks-reusable.yml",
       workflowSha: request.toolingSha,
       runId: "77",
       runAttempt: "1",
@@ -91,11 +91,11 @@ export function fullReleaseCandidateManifestFixture(
     },
     preparation: {
       planSha256: "d".repeat(64),
-      requiredPrepublishPluginPackages: ["@openclaw/codex"],
+      requiredPrepublishPluginPackages: ["@carapace/codex"],
     },
     package: {
       artifact: fullReleaseCandidateArtifact("docker-e2e-package-77-1"),
-      fileName: "openclaw-current.tgz",
+      fileName: "carapace-current.tgz",
       sourceSha: request.targetSha,
       packageSha256: "e".repeat(64),
       version: "2026.8.28-beta.1",
@@ -126,7 +126,7 @@ export function fullReleaseCandidateBindingFixture(requestOverrides: Record<stri
   const manifest = fullReleaseCandidateManifestFixture(requestOverrides);
   const { schema: _schema, ...manifestFields } = manifest;
   return {
-    schema: "openclaw.full-release-candidate-binding/v2" as const,
+    schema: "carapace.full-release-candidate-binding/v2" as const,
     ...manifestFields,
     evidenceArtifact: fullReleaseCandidateArtifact(
       `full-release-candidate-v2-${manifest.requestSha256}`,

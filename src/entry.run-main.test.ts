@@ -6,11 +6,11 @@ describe("entry run-main boundary", () => {
   it("retains JSON console routing through process finalization", async () => {
     const runCli = vi.fn(async () => undefined);
 
-    await runMainOrRootHelp(["node", "openclaw", "status"], {
+    await runMainOrRootHelp(["node", "carapace", "status"], {
       loadRunCli: async () => ({ runCli }),
     });
 
-    expect(runCli).toHaveBeenCalledWith(["node", "openclaw", "status"], {
+    expect(runCli).toHaveBeenCalledWith(["node", "carapace", "status"], {
       additionalStartupTrace: expect.any(Object),
       retainConsoleRoutingUntilProcessExit: true,
     });
@@ -19,7 +19,7 @@ describe("entry run-main boundary", () => {
   it("keeps expected conditions at exit 1 without crash framing", async () => {
     const previousExitCode = process.exitCode;
     const message =
-      'The `openclaw workboard` command is provided by the "workboard" plugin, but that bundled plugin is disabled by default. Run `openclaw plugins enable workboard` to enable that CLI surface.';
+      'The `carapace workboard` command is provided by the "workboard" plugin, but that bundled plugin is disabled by default. Run `carapace plugins enable workboard` to enable that CLI surface.';
     const error = new ExpectedCliError({
       message,
       humanOutput: message,
@@ -29,7 +29,7 @@ describe("entry run-main boundary", () => {
     process.exitCode = undefined;
 
     try {
-      await runMainOrRootHelp(["node", "openclaw", "workboard", "list"], {
+      await runMainOrRootHelp(["node", "carapace", "workboard", "list"], {
         loadRunCli: async () => ({
           runCli: vi.fn(async () => {
             throw error;
@@ -39,8 +39,8 @@ describe("entry run-main boundary", () => {
 
       expect(process.exitCode).toBe(1);
       expect(errorSpy.mock.calls).toEqual([[message]]);
-      expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("OPENCLAW_DEBUG"));
-      expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("openclaw doctor"));
+      expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("CARAPACE_DEBUG"));
+      expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("carapace doctor"));
       expect(errorSpy).not.toHaveBeenCalledWith(expect.stringContaining("Could not start the CLI"));
     } finally {
       errorSpy.mockRestore();

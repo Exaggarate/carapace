@@ -4,23 +4,23 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildSessionEntry,
   statSessionEntrySync,
-} from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import type { MemorySyncParams } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import type { MemorySyncParams } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { deleteSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { deleteSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   publishSessionTranscriptUpdateByIdentity,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   SessionStartupCatchupHarness,
@@ -36,7 +36,7 @@ describe("session startup catch-up", () => {
   let stateDir = "";
 
   beforeEach(async () => {
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-startup-"));
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-startup-"));
     setStartupStateDir(stateDir);
     resetTranscriptUpdateListener();
   });
@@ -52,7 +52,7 @@ describe("session startup catch-up", () => {
       database.close();
     }
     startupHarnessDatabases.clear();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     // Closing the agent databases releases their leases through shared state, which
     // reopens it, so the shared handle has to be released after that and before the
     // removal or Windows fails the unlink with EBUSY.
@@ -82,7 +82,7 @@ describe("session startup catch-up", () => {
   }
 
   async function configureTestSessionStore(storePath: string): Promise<void> {
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await fs.mkdir(path.dirname(storePath), { recursive: true });
     await fs.writeFile(configPath, JSON.stringify({ session: { store: storePath } }), "utf-8");
     setStartupConfigPath(configPath);

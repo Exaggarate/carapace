@@ -74,7 +74,7 @@ describe("native plugin asset admission", () => {
                       pluginId: "review",
                       name: "Review",
                       revision: "one",
-                      entryUrl: `${resourceBasePath}/__openclaw__/plugins/control-ui/review/one/index.js`,
+                      entryUrl: `${resourceBasePath}/__carapace__/plugins/control-ui/review/one/index.js`,
                       styles: [],
                     },
                   ]
@@ -89,7 +89,7 @@ describe("native plugin asset admission", () => {
               {
                 pluginId: "review",
                 match: "prefix",
-                path: `${resourceBasePath}/__openclaw__/plugins/control-ui/review/`,
+                path: `${resourceBasePath}/__carapace__/plugins/control-ui/review/`,
               },
             ]
           : [],

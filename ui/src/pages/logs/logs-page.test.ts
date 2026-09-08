@@ -80,7 +80,7 @@ describe("LogsPage lifecycle", () => {
         (_method: string, _params: unknown, _options: { signal: AbortSignal }) => pending.promise,
       );
       const client = { request } as unknown as GatewayBrowserClient;
-      const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+      const page = document.createElement("carapace-logs-page") as TestLogsPage;
       const context = contextWithClient(client);
       page.context = context;
       document.body.append(page);
@@ -128,7 +128,7 @@ describe("LogsPage lifecycle", () => {
         },
       );
       const client = { request } as unknown as GatewayBrowserClient;
-      const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+      const page = document.createElement("carapace-logs-page") as TestLogsPage;
       let context = contextWithClient(client, true);
       page.context = context;
       document.body.append(page);
@@ -178,7 +178,7 @@ describe("LogsPage lifecycle", () => {
     vi.useFakeTimers();
     const request = vi.fn().mockRejectedValueOnce(new Error("logs unavailable"));
     const client = { request } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client, true);
     page.context = context;
     document.body.append(page);
@@ -199,7 +199,7 @@ describe("LogsPage lifecycle", () => {
   });
 
   it("does not schedule scroll work after disconnect", async () => {
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     page.context = {
       basePath: "",
       gateway: {
@@ -232,7 +232,7 @@ describe("LogsPage lifecycle", () => {
           }),
       ),
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     page.context = contextWithClient(client);
     document.body.append(page);
     await page.updateComplete;
@@ -253,7 +253,7 @@ describe("LogsPage lifecycle", () => {
     const client = {
       request: vi.fn(() => pending.promise),
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client);
     page.context = context;
     page.logsEntries = [{ raw: "seed" }];
@@ -277,7 +277,7 @@ describe("LogsPage lifecycle", () => {
     const client = {
       request: vi.fn(() => pending.promise),
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client);
     page.context = context;
     page.logsEntries = [{ raw: "seed" }];
@@ -299,7 +299,7 @@ describe("LogsPage lifecycle", () => {
     const client = {
       request: vi.fn(() => pending.promise),
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client);
     page.context = context;
     page.logsEntries = [{ raw: "seed" }];
@@ -328,7 +328,7 @@ describe("LogsPage lifecycle", () => {
     const client = {
       request,
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client, true);
     page.context = context;
     document.body.append(page);
@@ -360,7 +360,7 @@ describe("LogsPage lifecycle", () => {
         lines: ["B-one", "B-tail"],
       });
     const client = { request } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     page.context = contextWithClient(client, true);
     document.body.append(page);
     await vi.waitFor(() => expect(page.logsStatus.hasLoaded).toBe(true));
@@ -381,7 +381,7 @@ describe("LogsPage lifecycle", () => {
       .mockRejectedValueOnce(new Error("logs unavailable"))
       .mockResolvedValueOnce({ cursor: 2, lines: ["fresh"], reset: true });
     const client = { request } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client);
     page.context = context;
     document.body.append(page);
@@ -417,7 +417,7 @@ describe("LogsPage lifecycle", () => {
           }),
       ),
     } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-logs-page") as TestLogsPage;
+    const page = document.createElement("carapace-logs-page") as TestLogsPage;
     const context = contextWithClient(client);
     page.context = context;
     const requestFrame = vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);

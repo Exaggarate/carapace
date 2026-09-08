@@ -5,7 +5,7 @@ import {
   getSessionEntry,
   patchSessionEntry,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createCodexAppServerAgentHarness } from "./harness.js";
 import { clearCodexBindingAfterInvalidImagePayload } from "./src/app-server/run-attempt-state.js";

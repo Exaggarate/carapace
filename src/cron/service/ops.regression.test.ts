@@ -24,7 +24,7 @@ import {
   tryBeginGatewayRootWorkAdmission,
 } from "../../process/gateway-work-admission.js";
 import { CommandLane } from "../../process/lanes.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { mockCall } from "../../test-utils/mock-call-assertions.js";
 import { isCronJobActive } from "../active-jobs.js";
 import { loadCronStore, saveCronStore } from "../store.js";
@@ -61,7 +61,7 @@ function expectIsolatedRunJobId(
 }
 
 function latestRunReceipt(storePath: string, jobId: string) {
-  return openOpenClawStateDatabase()
+  return openCarapaceStateDatabase()
     .db.prepare(
       "SELECT status, error_text AS error FROM cron_run_receipts WHERE store_key = ? AND job_id = ? ORDER BY started_at_ms DESC, receipt_id DESC LIMIT 1",
     )

@@ -1,17 +1,17 @@
 // Real config IO; update packages, provider authentication, and host actions are stubbed.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createConfigIO,
   readConfigFileSnapshot,
   resetConfigRuntimeState,
 } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { POST_CORE_UPDATE_REQUESTED_CHANNEL_ENV } from "../../infra/update-post-core-context.js";
 import { defaultRuntime } from "../../runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 
 const controls = vi.hoisted(() => ({ root: "" }));
 
@@ -28,7 +28,7 @@ vi.mock("../../plugins/doctor-contract-registry.js", async (importOriginal) => (
   applyPluginDoctorCompatibilityMigrations: () => ({ next: null, changes: [] }),
 }));
 vi.mock("../../plugins/update-cohort.js", () => ({
-  convergePluginReleaseCohort: async ({ config }: { config: OpenClawConfig }) => {
+  convergePluginReleaseCohort: async ({ config }: { config: CarapaceConfig }) => {
     vi.stubEnv("UPDATE_PROVENANCE_TOKEN", "synthetic-after");
     return {
       config: { ...config, gateway: { ...config.gateway, port: 19001 } },
@@ -81,7 +81,7 @@ import { updatePluginsAfterCoreUpdate } from "./update-command-plugins.js";
 import { resumePostCoreUpdate } from "./update-command-resume.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
@@ -99,10 +99,10 @@ describe("update config provenance", () => {
     async ({ flow, requestedChannel }) => {
       await withTempHome(async (home) => {
         controls.root = home;
-        const stateDir = path.join(home, ".openclaw");
-        const configPath = path.join(stateDir, "openclaw.json");
-        vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-        vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+        const stateDir = path.join(home, ".carapace");
+        const configPath = path.join(stateDir, "carapace.json");
+        vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+        vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
         vi.stubEnv("UPDATE_PROVENANCE_TOKEN", "synthetic-before");
         await fs.mkdir(stateDir, { recursive: true });
         await fs.writeFile(
@@ -181,7 +181,7 @@ describe("update config provenance", () => {
             deferCompletionCache: true,
           });
         }
-        const saved = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+        const saved = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
         expect(saved.gateway?.auth?.token).toBe("${UPDATE_PROVENANCE_TOKEN}");
         if (flow !== "legacy") {
           expect(saved.gateway?.port).toBe(19001);

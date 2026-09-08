@@ -1,6 +1,6 @@
 import { hasPendingFollowupQueueWork } from "../../auto-reply/reply/queue/state.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { isSessionWorkAdmissionActive } from "../../sessions/session-lifecycle-admission.js";
 import type { WorkerPlacementDispatchService } from "./placement-dispatch.js";
@@ -14,7 +14,7 @@ export function createWorkerPlacementIdleSweep(options: {
   placements: WorkerSessionPlacementStore;
   environments: Pick<WorkerEnvironmentService, "get">;
   dispatch: Pick<WorkerPlacementDispatchService, "reclaim">;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   info: (message: string) => void;
   warn: (message: string) => void;
   isPlacementOperationInFlight?: (sessionId: string) => boolean;

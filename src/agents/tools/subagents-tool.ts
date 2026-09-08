@@ -5,7 +5,7 @@
  */
 import { Type } from "typebox";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { listTaskRecordsUnsorted } from "../../tasks/runtime-internal.js";
 import { cancelDetachedTaskRunById } from "../../tasks/task-executor.js";
 import type { TaskRecord, TaskStatus } from "../../tasks/task-registry.types.js";
@@ -54,7 +54,7 @@ type SubagentsToolOptions = {
    * alignment. Undefined and equal-to-agentSessionKey values are no-ops. */
   callerPolicySessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   listTasks?: typeof listTaskRecordsUnsorted;
   cancelTask?: typeof cancelDetachedTaskRunById;
 };
@@ -67,7 +67,7 @@ function taskOwnerMatches(
   task: TaskRecord,
   allowedOwnerKeys: ReadonlySet<string>,
   agentId: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   return (
     allowedOwnerKeys.has(task.ownerKey) &&
@@ -79,7 +79,7 @@ function listTreeTasks(
   tasks: TaskRecord[],
   rootSessionKeys: ReadonlySet<string>,
   rootAgentId: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): TaskRecord[] {
   const visibleSessions = new Set<string>();
   for (const key of rootSessionKeys) {

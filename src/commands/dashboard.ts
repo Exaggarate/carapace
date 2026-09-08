@@ -1,4 +1,4 @@
-// Implements `openclaw dashboard` URL resolution, readiness check, clipboard, and browser launch.
+// Implements `carapace dashboard` URL resolution, readiness check, clipboard, and browser launch.
 import { readConfigFileSnapshot } from "../config/config.js";
 import { copyToClipboard } from "../infra/clipboard.js";
 import { isRemoteEnvironment } from "../infra/remote-env.js";
@@ -30,7 +30,7 @@ async function resolveDashboardTarget() {
   const snapshot = await readConfigFileSnapshot();
   if (snapshot.exists && !snapshot.valid) {
     throw new Error(
-      `OpenClaw config is invalid: ${snapshot.path}. Run \`openclaw doctor --fix\` or \`openclaw config validate\`.`,
+      `Carapace config is invalid: ${snapshot.path}. Run \`carapace doctor --fix\` or \`carapace config validate\`.`,
     );
   }
   return await resolveControlUiHandoffTarget({
@@ -162,7 +162,7 @@ export async function dashboardCommand(
     runtime.error(
       "Dashboard loopback listener could not be verified as the configured Gateway; refusing to copy or open an authenticated URL.",
     );
-    runtime.log("Restart the Gateway, then run `openclaw gateway status --deep` for details.");
+    runtime.log("Restart the Gateway, then run `carapace gateway status --deep` for details.");
     return;
   }
   const document = await waitForControlUiDocument({
@@ -172,7 +172,7 @@ export async function dashboardCommand(
   });
   if (!document.ready) {
     runtime.error(document.reason);
-    runtime.log("Run `openclaw gateway status --deep` for details.");
+    runtime.log("Run `carapace gateway status --deep` for details.");
     runtime.exit(1);
     return;
   }
@@ -183,7 +183,7 @@ export async function dashboardCommand(
     runtime.error(
       `Could not create a one-time browser pairing link: ${error instanceof Error ? error.message : String(error)}`,
     );
-    runtime.log("Run `openclaw doctor`, then retry `openclaw dashboard`.");
+    runtime.log("Run `carapace doctor`, then retry `carapace dashboard`.");
     return;
   }
   const { port, basePath, links, includeTokenInUrl, tlsConfig } = target;
@@ -233,18 +233,18 @@ export async function dashboardCommand(
     options.noOpen === true && (fallbackToManualAuth || fallbackToJsonHandoff);
 
   if (opened) {
-    runtime.log("Opened in your browser. Keep that tab to control OpenClaw.");
+    runtime.log("Opened in your browser. Keep that tab to control Carapace.");
   } else if (hint && !suppressNoOpenHint) {
     runtime.log(hint);
   }
 
   if (fallbackToManualAuth) {
     runtime.log(
-      "Token auto-auth not delivered. Append your gateway token (from OPENCLAW_GATEWAY_TOKEN or gateway.auth.token) as a URL fragment with key `token` to authenticate.",
+      "Token auto-auth not delivered. Append your gateway token (from CARAPACE_GATEWAY_TOKEN or gateway.auth.token) as a URL fragment with key `token` to authenticate.",
     );
   } else if (fallbackToJsonHandoff) {
     runtime.log(
-      "One-time pairing URL not delivered. Run `openclaw dashboard --json` and open its `browserUrl` within ten minutes.",
+      "One-time pairing URL not delivered. Run `carapace dashboard --json` and open its `browserUrl` within ten minutes.",
     );
   }
 }

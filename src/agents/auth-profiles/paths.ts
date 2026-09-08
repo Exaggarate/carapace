@@ -13,7 +13,7 @@ export { resolveOAuthRefreshLockPath };
 export function resolveAuthStorePathForDisplay(agentDir?: string): string {
   const pathname =
     agentDir && inspectPersistedAuthProfileStoreRaw(agentDir).status !== "missing"
-      ? path.join(resolveUserPath(agentDir), "openclaw-agent.sqlite")
+      ? path.join(resolveUserPath(agentDir), "carapace-agent.sqlite")
       : resolveSharedAuthStorePath();
   return pathname.startsWith("~") ? pathname : resolveUserPath(pathname);
 }

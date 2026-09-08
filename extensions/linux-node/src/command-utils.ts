@@ -1,7 +1,7 @@
-import type { OpenClawPluginNodeHostCommandAvailabilityContext } from "openclaw/plugin-sdk/plugin-entry";
-import type { CommandOptions, SpawnResult } from "openclaw/plugin-sdk/process-runtime";
-import { asFiniteNumber, asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { CarapacePluginNodeHostCommandAvailabilityContext } from "carapace/plugin-sdk/plugin-entry";
+import type { CommandOptions, SpawnResult } from "carapace/plugin-sdk/process-runtime";
+import { asFiniteNumber, asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   resolveLinuxNodePluginConfigFromHost,
   type ResolvedLinuxNodePluginConfig,
@@ -44,7 +44,7 @@ export function assertToolResult(result: SpawnResult, code: string): void {
 }
 
 export function isCapabilityEnabledForHost(
-  context: OpenClawPluginNodeHostCommandAvailabilityContext,
+  context: CarapacePluginNodeHostCommandAvailabilityContext,
   capability: keyof ResolvedLinuxNodePluginConfig,
 ): boolean {
   return resolveLinuxNodePluginConfigFromHost(context.config)?.[capability].enabled === true;

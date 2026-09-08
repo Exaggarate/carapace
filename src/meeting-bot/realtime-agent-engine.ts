@@ -1,5 +1,5 @@
 // Shared STT plus agent-consult meeting engine.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
 import type { RealtimeTranscriptionProviderPlugin } from "../plugins/types.js";
@@ -31,7 +31,7 @@ import {
 
 export async function startMeetingAgentRealtimeEngine(params: {
   config: MeetingRealtimeEngineConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: CarapaceConfig;
   runtime: PluginRuntime;
   platform: MeetingRuntimePlatform;
   meetingSessionId: string;

@@ -66,8 +66,8 @@ export function buildInstalledProtocolInspectionScript() {
 import {
   validateConnectParams,
   validateRequestFrame,
-} from "@openclaw/gateway-protocol";
-import { ProtocolSchemas } from "@openclaw/gateway-protocol/schema";
+} from "@carapace/gateway-protocol";
+import { ProtocolSchemas } from "@carapace/gateway-protocol/schema";
 
 const requestValid = validateRequestFrame({
   type: "req",
@@ -263,7 +263,7 @@ async function runCommand(params: {
 async function withPreservedPackageOutputs<T>(repoRoot: string, run: () => Promise<T>): Promise<T> {
   const packageRoot = path.join(repoRoot, "packages", "gateway-protocol");
   const targets = [path.join(packageRoot, "dist"), path.join(packageRoot, "protocol.schema.json")];
-  const backupRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-protocol-pack-"));
+  const backupRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-protocol-pack-"));
   const backups: Array<{ backup: string; target: string }> = [];
   try {
     for (const [index, target] of targets.entries()) {
@@ -329,14 +329,14 @@ async function packAndInspectProtocol(params: {
   const packageJson = JSON.parse(
     await fs.readFile(path.join(unpackedRoot, "package.json"), "utf8"),
   ) as { name?: string; version?: string };
-  assert.equal(packageJson.name, "@openclaw/gateway-protocol");
+  assert.equal(packageJson.name, "@carapace/gateway-protocol");
   assert.ok(packageJson.version, "packed protocol package version is missing");
 
   const published = JSON.parse(
     await fs.readFile(path.join(unpackedRoot, "protocol.schema.json"), "utf8"),
   ) as ProtocolSchemaDocument;
   const consumerRoot = await fs.mkdtemp(
-    path.join(os.tmpdir(), "openclaw-gateway-protocol-consumer-"),
+    path.join(os.tmpdir(), "carapace-gateway-protocol-consumer-"),
   );
   const consumerInspectionPath = path.join(consumerRoot, "inspection.json");
   const inspection = await (async () => {
@@ -344,7 +344,7 @@ async function packAndInspectProtocol(params: {
       await fs.writeFile(
         path.join(consumerRoot, "package.json"),
         `${JSON.stringify({
-          name: "openclaw-gateway-protocol-artifact-consumer",
+          name: "carapace-gateway-protocol-artifact-consumer",
           private: true,
           type: "module",
         })}\n`,
@@ -396,8 +396,8 @@ async function packAndInspectProtocol(params: {
   return {
     consumer: {
       installed: true,
-      packageSpecifier: "@openclaw/gateway-protocol",
-      schemaSpecifier: "@openclaw/gateway-protocol/schema",
+      packageSpecifier: "@carapace/gateway-protocol",
+      schemaSpecifier: "@carapace/gateway-protocol/schema",
     },
     definitions: REQUIRED_PROTOCOL_DEFINITIONS.filter((definition) =>
       Object.hasOwn(published.definitions, definition),
@@ -427,7 +427,7 @@ async function compileAndRunSwiftProtocolModels(params: {
   await fs.rm(swiftArtifactDir, { force: true, recursive: true });
   await fs.mkdir(swiftArtifactDir, { recursive: true });
   const anyCodableSource = await fs.readFile(
-    path.join(params.repoRoot, "apps/shared/OpenClawKit/Sources/OpenClawProtocol/AnyCodable.swift"),
+    path.join(params.repoRoot, "apps/shared/CarapaceKit/Sources/CarapaceProtocol/AnyCodable.swift"),
     "utf8",
   );
   // Linux Foundation does not re-export the CoreFoundation type-ID helpers.
@@ -438,7 +438,7 @@ async function compileAndRunSwiftProtocolModels(params: {
       anyCodablePath,
       path.join(
         params.repoRoot,
-        "apps/shared/OpenClawKit/Sources/OpenClawProtocol/GatewayModels.swift",
+        "apps/shared/CarapaceKit/Sources/CarapaceProtocol/GatewayModels.swift",
       ),
       harnessPath,
       "-o",
@@ -472,7 +472,7 @@ async function runGatewayProtocolArtifactsProducer(
         "packages/gateway-protocol/src/schema/protocol-schemas.ts",
         "scripts/protocol-gen.ts",
         "scripts/protocol-gen-swift.ts",
-        "apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayProtocolGeneratedModelsTests.swift",
+        "apps/shared/CarapaceKit/Tests/CarapaceKitTests/GatewayProtocolGeneratedModelsTests.swift",
       ],
       docsRefs: ["docs/gateway/protocol.md", "docs/reference/test.md"],
       id: "gateway-protocol-artifacts",

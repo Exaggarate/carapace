@@ -1,5 +1,5 @@
-import { stripCompactionReplayCheckpointInPlace } from "@openclaw/ai/transports";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stripCompactionReplayCheckpointInPlace } from "@carapace/ai/transports";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { selectSessionTranscriptLeafControlledPath } from "../../config/sessions/transcript-tree.js";
 import { MIN_READABLE_SESSION_VERSION } from "../../config/sessions/version.js";
 import { logWarn } from "../../logger.js";

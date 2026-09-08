@@ -8,11 +8,11 @@ title: "Hooks CLI"
 doc-schema-version: 1
 ---
 
-# `openclaw hooks`
+# `carapace hooks`
 
 Inspect and configure [internal hooks](/automation/hooks): handlers for command,
-message, session, and Gateway events. Bare `openclaw hooks` runs the same report
-as `openclaw hooks list`. These commands do not manage HTTP
+message, session, and Gateway events. Bare `carapace hooks` runs the same report
+as `carapace hooks list`. These commands do not manage HTTP
 [Webhooks](/automation/cron-jobs#webhooks) or the typed `api.on(...)` hook catalog in
 [Plugin hooks](/plugins/hooks).
 
@@ -20,7 +20,7 @@ as `openclaw hooks list`. These commands do not manage HTTP
 
 Read-only reports (`hooks`, `list`, `info`, `check`) first call `hooks.status` on
 the selected Gateway. Configured remote Gateways and explicit
-`OPENCLAW_GATEWAY_URL` targets are authoritative: missing remote URLs,
+`CARAPACE_GATEWAY_URL` targets are authoritative: missing remote URLs,
 connection/authentication failures, and unsupported methods fail instead of
 showing client-local hooks. An implicitly selected local Gateway can fall back
 to local discovery when unavailable or when its hook-report method/agent
@@ -46,8 +46,8 @@ for the distinction between workspace inventory and Gateway loading.
 ## List hooks
 
 ```bash
-openclaw hooks [--agent <id>] [--json]
-openclaw hooks list [--agent <id>] [--eligible] [--json] [-v|--verbose]
+carapace hooks [--agent <id>] [--json]
+carapace hooks list [--agent <id>] [--eligible] [--json] [-v|--verbose]
 ```
 
 Discovery includes bundled hooks, active plugin hooks, managed hooks, extra
@@ -94,7 +94,7 @@ advisory: they do not by themselves make a hook unloadable.
 ## Get hook info
 
 ```bash
-openclaw hooks info <name> [--agent <id>] [--json]
+carapace hooks info <name> [--agent <id>] [--json]
 ```
 
 Accepts a hook name or its metadata `hookKey`. Exact hook names take precedence
@@ -112,7 +112,7 @@ a command to install dependencies automatically.
 ## Check eligibility
 
 ```bash
-openclaw hooks check [--agent <id>] [--json]
+carapace hooks check [--agent <id>] [--json]
 ```
 
 Prints totals for ready/not-ready hooks and lists blocking reasons. JSON has
@@ -126,7 +126,7 @@ exit code as an all-hooks-ready result. This still does not test actual loading.
 ## Enable a hook
 
 ```bash
-openclaw hooks enable <name> [--agent <id>]
+carapace hooks enable <name> [--agent <id>]
 ```
 
 Discovers the hook locally, then writes
@@ -151,7 +151,7 @@ not replay `gateway:startup`, so `boot-md` runs on the next Gateway start.
 ## Disable a hook
 
 ```bash
-openclaw hooks disable <name> [--agent <id>]
+carapace hooks disable <name> [--agent <id>]
 ```
 
 Writes `hooks.internal.entries.<hookKey>.enabled = false`. It does not remove the
@@ -161,28 +161,28 @@ In `hybrid` mode, subsequent events use the updated selection. An event already
 running finishes with its original handlers.
 
 Plugin-managed hooks cannot be toggled by these commands. Enable or disable the
-owning plugin through [`openclaw plugins`](/cli/plugins).
+owning plugin through [`carapace plugins`](/cli/plugins).
 
 ## Install and update hook packs
 
 Use the unified plugin installer for reviewed hook packs:
 
 ```bash
-openclaw plugins install npm:<package>
-openclaw plugins install npm:<package>@<version> --pin
-openclaw plugins install ./my-hook-pack
-openclaw plugins install ./my-hook-pack.tgz
+carapace plugins install npm:<package>
+carapace plugins install npm:<package>@<version> --pin
+carapace plugins install ./my-hook-pack
+carapace plugins install ./my-hook-pack.tgz
 
-openclaw plugins update <id> --dry-run
-openclaw plugins update <id>
+carapace plugins update <id> --dry-run
+carapace plugins update <id>
 ```
 
-A pack declares hook directories in `package.json` under `openclaw.hooks`.
+A pack declares hook directories in `package.json` under `carapace.hooks`.
 A local directory without `package.json` can contain a single `HOOK.md` and
 handler. Copied hook packs are installed into `<stateDir>/hooks/<id>`; their
 hooks are enabled in config and install provenance is recorded in shared SQLite
 state. That config can activate the hooks immediately in `hybrid` mode. Do not author
-`hooks.internal.installs` in `openclaw.json`.
+`hooks.internal.installs` in `carapace.json`.
 
 For the npm hook-pack path, specs are registry-only: package name with an
 optional exact version or dist-tag. Git/URL/file specs, npm aliases, and semver
@@ -190,14 +190,14 @@ ranges are not npm registry specs. Bare specs and `@latest` stay on the stable
 track; a prerelease resolution requires an explicit prerelease version or a
 non-latest tag such as `@beta` or `@rc`. Use `npm:` to select npm explicitly; the
 unified installer supports other plugin sources described in
-[`openclaw plugins`](/cli/plugins).
+[`carapace plugins`](/cli/plugins).
 
 Supported local archives are `.zip`, `.tgz`, `.tar.gz`, and `.tar`. Copied hook
 packs resolve runtime packages from `dependencies` and `optionalDependencies`,
 including packs with only optional dependencies. Packages listed only in
 `devDependencies` are omitted. npm pack and dependency installation use
 `--ignore-scripts`; this does not sandbox the installed handler.
-The download always creates an archive in OpenClaw's temporary workspace,
+The download always creates an archive in Carapace's temporary workspace,
 regardless of npm's `dry-run` or `pack-destination` settings.
 
 ### Install options and trust
@@ -218,7 +218,7 @@ either acknowledgement.
 <Warning>
 A linked hook runs directly from the supplied path; linking does not copy it
 or create a symlink. A single-hook root loads its own `HOOK.md` and handler.
-A pack loads only the hook directories listed in `openclaw.hooks`, including
+A pack loads only the hook directories listed in `carapace.hooks`, including
 nested paths such as `./hooks/my-hook`. Declared paths must stay inside the
 pack and point directly to hooks; discovery does not recurse into nested packs
 or collections, or scan unlisted children, even when all declared paths are rejected.
@@ -251,8 +251,8 @@ warnings. `--dry-run` reports the drift without prompting.
 These commands print a deprecation warning and forward to the unified owners:
 
 ```bash
-openclaw hooks install <path-or-spec> [-l|--link] [--pin] [--force] [--acknowledge-install-policy-warning]
-openclaw hooks update [id] [--all] [--dry-run] [--acknowledge-install-policy-warning]
+carapace hooks install <path-or-spec> [-l|--link] [--pin] [--force] [--acknowledge-install-policy-warning]
+carapace hooks update [id] [--all] [--dry-run] [--acknowledge-install-policy-warning]
 ```
 
 For update, provide `id` or `--all`. The aliases do not accept `--agent` and are
@@ -270,9 +270,9 @@ are in [Bundled hooks](/automation/hooks#bundled-hooks). This includes
 On the Gateway host, with the default state directory:
 
 ```bash
-tail -n 20 ~/.openclaw/logs/commands.log
-jq . ~/.openclaw/logs/commands.log
-jq 'select(.action == "new")' ~/.openclaw/logs/commands.log
+tail -n 20 ~/.carapace/logs/commands.log
+jq . ~/.carapace/logs/commands.log
+jq 'select(.action == "new")' ~/.carapace/logs/commands.log
 ```
 
 Use `<stateDir>/logs/commands.log` for a custom state directory. These records

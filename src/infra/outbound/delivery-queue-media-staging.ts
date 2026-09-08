@@ -1,6 +1,6 @@
 // Coordinates queue-media filesystem staging with durable SQLite ownership.
 import type { ReplyPayload } from "../../auto-reply/types.js";
-import type { OpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import type { CarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import {
   deleteDeliveryQueueEntry,
   expireStagingAndLoadDeliveryQueueEntries,
@@ -38,7 +38,7 @@ export function createDeliveryQueueMediaRetention(
   artifacts: readonly string[],
   entryKind: "outbound-media-stage" | "outbound-media-recovery-lease",
   stateDir?: string,
-  database?: OpenClawStateDatabase,
+  database?: CarapaceStateDatabase,
 ): string {
   const id = generateSecureUuid();
   const entry: MediaStageEntry = {

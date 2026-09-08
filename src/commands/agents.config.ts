@@ -1,9 +1,9 @@
-// Agent config mutation and summary builders used by `openclaw agents` commands.
+// Agent config mutation and summary builders used by `carapace agents` commands.
 import {
   normalizeOptionalString,
   resolvePrimaryStringValue,
-} from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   listAgentEntries,
   resolveAgentConfig,
@@ -18,7 +18,7 @@ import { pinLegacyInheritedAuthOwnerForRosterTransition } from "../agents/legacy
 import { pinSurvivorWorkspaceForRosterCollapse } from "../config/agent-workspace-roster-transition.js";
 import { listRouteBindings } from "../config/bindings.js";
 import type { IdentityConfig } from "../config/types.base.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId, normalizeAgentIdStrict } from "../routing/session-key.js";
 
 export type AgentSummary = {
@@ -41,7 +41,7 @@ export type AgentSummary = {
   isDefault: boolean;
 };
 
-type AgentEntry = NonNullable<NonNullable<OpenClawConfig["agents"]>["list"]>[number];
+type AgentEntry = NonNullable<NonNullable<CarapaceConfig["agents"]>["list"]>[number];
 
 export { listAgentEntries };
 
@@ -52,7 +52,7 @@ export function findAgentEntryIndex(list: AgentEntry[], agentId: string): number
 }
 
 /** Build config-derived summaries for text/JSON agent listing. */
-export function buildAgentSummaries(cfg: OpenClawConfig): AgentSummary[] {
+export function buildAgentSummaries(cfg: CarapaceConfig): AgentSummary[] {
   const defaultAgentId = tryResolveLegacyCompatibilityAgentId(cfg);
   const configuredAgents = listAgentEntries(cfg);
   const orderedIds =
@@ -103,7 +103,7 @@ export function buildAgentSummaries(cfg: OpenClawConfig): AgentSummary[] {
 }
 
 export function applyAgentConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     agentId: string;
     name?: string;
@@ -112,7 +112,7 @@ export function applyAgentConfig(
     model?: string | null;
     identity?: IdentityConfig;
   },
-): OpenClawConfig {
+): CarapaceConfig {
   const agentId = normalizeAgentId(params.agentId);
   const name = params.name?.trim();
   const list = listAgentEntries(cfg);
@@ -139,7 +139,7 @@ export function applyAgentConfig(
     nextList.push(nextEntry);
   }
   const { list: _legacyList, ownership: _ownership, ...agentsConfig } = cfg.agents ?? {};
-  const nextConfig: OpenClawConfig = {
+  const nextConfig: CarapaceConfig = {
     ...cfg,
     agents: {
       ...agentsConfig,
@@ -170,10 +170,10 @@ export function applyAgentConfig(
 
 /** Remove an agent and any config references that route or allow traffic to it. */
 export function pruneAgentConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   removedBindings: number;
   removedAllow: number;
   clearedOwnerRefs: string[];
@@ -295,7 +295,7 @@ export function pruneAgentConfig(
       }
     : cfg.tools;
 
-  const preliminaryConfig: OpenClawConfig = {
+  const preliminaryConfig: CarapaceConfig = {
     ...cfg,
     agents: nextAgentsConfig,
     bindings: filteredBindings.length > 0 ? filteredBindings : undefined,

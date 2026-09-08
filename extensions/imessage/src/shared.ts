@@ -1,15 +1,15 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
   formatTrimmedAllowFromEntries,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import { createRestrictSendersChannelSecurity } from "carapace/plugin-sdk/channel-policy";
 import {
   createChannelPluginBase,
   getChatChannelMeta,
   type ChannelPlugin,
-} from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/core";
 import {
   listIMessageAccountIds,
   resolveDefaultIMessageAccountId,

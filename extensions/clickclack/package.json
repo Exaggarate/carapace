@@ -1,7 +1,7 @@
 {
-  "name": "@openclaw/clickclack",
+  "name": "@carapace/clickclack",
   "version": "2026.9.2",
-  "description": "OpenClaw ClickClack channel plugin",
+  "description": "Carapace ClickClack channel plugin",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
@@ -13,18 +13,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -136,8 +136,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/clickclack",
-      "npmSpec": "@openclaw/clickclack",
+      "clawhubSpec": "clawhub:@carapace/clickclack",
+      "npmSpec": "@carapace/clickclack",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -146,7 +146,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {
@@ -156,6 +156,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   }
 }

@@ -2,11 +2,11 @@ import type { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createUpdateRun, finishUpdateRun } from "../infra/update-run-ledger.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { startUpdateRunWatcher, wakeUpdateRunWatcher } from "./update-run-watcher.js";
 
 vi.mock("./update-run-notice.runtime.js", () => ({ notifyUpdateRunPhase: vi.fn() }));
@@ -19,26 +19,26 @@ let watcher: ReturnType<typeof startUpdateRunWatcher> | undefined;
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(now);
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-watcher-publication-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-watcher-publication-"));
 });
 afterEach(async () => {
   await watcher?.stop();
   watcher = undefined;
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   vi.useRealTimers();
 });
 
 function createDeferredState() {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const run = createUpdateRun({ trigger: "cli", before: { version: "2026.9.2" } });
   // The runner tests cover the v15 rewrite; this fixture starts at its committed result.
   db.prepare(`INSERT INTO config_machine_state (state_key, value_json, updated_at_ms)
-    VALUES ('state.schema.contentVersion', ?, ?)`).run(String(OPENCLAW_STATE_SCHEMA_VERSION), now);
+    VALUES ('state.schema.contentVersion', ?, ?)`).run(String(CARAPACE_STATE_SCHEMA_VERSION), now);
   db.exec(`PRAGMA user_version = 15;
     UPDATE schema_meta SET schema_version = 15 WHERE meta_key = 'primary';`);
-  closeOpenClawStateDatabaseForTest();
-  return { db: openOpenClawStateDatabase().db, runId: run.runId };
+  closeCarapaceStateDatabaseForTest();
+  return { db: openCarapaceStateDatabase().db, runId: run.runId };
 }
 
 function expectVersion(db: DatabaseSync, version: number) {
@@ -65,7 +65,7 @@ describe("Gateway schema publication timer", () => {
     await vi.advanceTimersByTimeAsync(3 * 60_000 - 1);
     expectVersion(db, 15);
     await vi.advanceTimersByTimeAsync(1);
-    expectVersion(db, OPENCLAW_STATE_SCHEMA_VERSION);
+    expectVersion(db, CARAPACE_STATE_SCHEMA_VERSION);
     expect(log.warn).not.toHaveBeenCalled();
   });
 
@@ -77,7 +77,7 @@ describe("Gateway schema publication timer", () => {
     await vi.advanceTimersByTimeAsync(graceMs - 1);
     expectVersion(db, 15);
     await vi.advanceTimersByTimeAsync(1);
-    expectVersion(db, OPENCLAW_STATE_SCHEMA_VERSION);
+    expectVersion(db, CARAPACE_STATE_SCHEMA_VERSION);
     expect(log.warn).not.toHaveBeenCalled();
   });
 
@@ -95,7 +95,7 @@ describe("Gateway schema publication timer", () => {
     await vi.advanceTimersByTimeAsync(graceMs - 1);
     expectVersion(db, 15);
     await vi.advanceTimersByTimeAsync(1);
-    expectVersion(db, OPENCLAW_STATE_SCHEMA_VERSION);
+    expectVersion(db, CARAPACE_STATE_SCHEMA_VERSION);
     expect(log.warn).not.toHaveBeenCalled();
   });
 

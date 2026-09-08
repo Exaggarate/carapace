@@ -2,11 +2,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { AuthProfileFailureReason } from "./auth-profiles.js";
 import { ensureAuthProfileStore, saveAuthProfileStore } from "./auth-profiles/store-runtime.js";
 
-export function makeModelFallbackConfig(primaryProvider = "openai"): OpenClawConfig {
+export function makeModelFallbackConfig(primaryProvider = "openai"): CarapaceConfig {
   const apiKeyField = ["api", "Key"].join("");
   return {
     agents: {
@@ -54,7 +54,7 @@ export function makeModelFallbackConfig(primaryProvider = "openai"): OpenClawCon
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
 export async function withModelFallbackWorkspace<T>(
@@ -62,7 +62,7 @@ export async function withModelFallbackWorkspace<T>(
 ): Promise<T> {
   // Each e2e case gets isolated agent/workspace dirs because usage stats and
   // transcripts are part of the fallback behavior under test.
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-model-fallback-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-model-fallback-"));
   const agentDir = path.join(root, "agent");
   const workspaceDir = path.join(root, "workspace");
   await fs.mkdir(agentDir, { recursive: true });

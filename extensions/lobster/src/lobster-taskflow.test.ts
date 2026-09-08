@@ -1,5 +1,5 @@
 // Lobster tests cover lobster taskflow plugin behavior.
-import { createRuntimeTaskFlow } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createRuntimeTaskFlow } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { LobsterRunner } from "./lobster-runner.js";
 import { resumeManagedLobsterFlow, runManagedLobsterFlow } from "./lobster-taskflow.js";

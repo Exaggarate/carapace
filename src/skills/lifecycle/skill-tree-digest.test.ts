@@ -5,7 +5,7 @@ import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { digestClawHubSkillTree } from "./skill-tree-digest.js";
 
 it("preserves the installed tree fingerprint and root-only metadata exclusions", async () => {
-  await withTestDir({ prefix: "openclaw-skill-digest-" }, async (dir) => {
+  await withTestDir({ prefix: "carapace-skill-digest-" }, async (dir) => {
     await fs.mkdir(path.join(dir, "empty"));
     const files = {
       "SKILL.md": "# Synthetic skill\n",

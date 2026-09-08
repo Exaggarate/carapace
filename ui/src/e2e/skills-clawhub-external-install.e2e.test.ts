@@ -8,8 +8,8 @@ const suite = createControlUiE2eSuite({
 });
 
 const emptyStatus = {
-  workspaceDir: "/tmp/openclaw-e2e/workspace",
-  managedSkillsDir: "/tmp/openclaw-e2e/skills",
+  workspaceDir: "/tmp/carapace-e2e/workspace",
+  managedSkillsDir: "/tmp/carapace-e2e/skills",
   skills: [],
 };
 
@@ -20,8 +20,8 @@ const installedStatus = {
       name: "pdf",
       description: "PDF tools",
       source: "clawhub",
-      filePath: "/tmp/openclaw-e2e/skills/pdf/SKILL.md",
-      baseDir: "/tmp/openclaw-e2e/skills/pdf",
+      filePath: "/tmp/carapace-e2e/skills/pdf/SKILL.md",
+      baseDir: "/tmp/carapace-e2e/skills/pdf",
       skillKey: "pdf",
       always: false,
       disabled: false,

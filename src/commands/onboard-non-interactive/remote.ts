@@ -4,10 +4,10 @@
  * It writes gateway.remote config without local gateway setup, preserving the
  * same config commit path as local onboarding.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { logConfigUpdated } from "../../config/logging.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../../runtime.js";
 import { createGatewayEnvSecretRef } from "../../secrets/ref-contract.js";
 import { applySkipBootstrapConfig } from "../onboard-config.js";
@@ -19,7 +19,7 @@ import { commitNonInteractiveOnboardConfig } from "./config-write.js";
 export async function runNonInteractiveRemoteSetup(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   baseHash?: string;
 }) {
   const { opts, runtime, baseConfig, baseHash } = params;
@@ -30,7 +30,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     // Remote mode cannot infer a target gateway; fail before writing partial
     // remote config that would leave status/agent commands misconfigured.
     runtime.error(
-      `Missing --remote-url for remote mode. Example: ${formatCliCommand("openclaw onboard --non-interactive --mode remote --remote-url ws://127.0.0.1:3000")}.`,
+      `Missing --remote-url for remote mode. Example: ${formatCliCommand("carapace onboard --non-interactive --mode remote --remote-url ws://127.0.0.1:3000")}.`,
     );
     runtime.exit(1);
     return;
@@ -64,7 +64,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     delete preservedRemote.token;
   }
 
-  let nextConfig: OpenClawConfig = {
+  let nextConfig: CarapaceConfig = {
     ...baseConfig,
     gateway: {
       ...baseConfig.gateway,
@@ -76,7 +76,7 @@ export async function runNonInteractiveRemoteSetup(params: {
           ? {
               token:
                 opts.secretInputMode === "ref"
-                  ? createGatewayEnvSecretRef(baseConfig, "OPENCLAW_GATEWAY_TOKEN")
+                  ? createGatewayEnvSecretRef(baseConfig, "CARAPACE_GATEWAY_TOKEN")
                   : remoteToken,
             }
           : {}),
@@ -84,7 +84,7 @@ export async function runNonInteractiveRemoteSetup(params: {
           ? {
               password:
                 opts.secretInputMode === "ref"
-                  ? createGatewayEnvSecretRef(baseConfig, "OPENCLAW_GATEWAY_PASSWORD")
+                  ? createGatewayEnvSecretRef(baseConfig, "CARAPACE_GATEWAY_PASSWORD")
                   : remotePassword,
             }
           : {}),
@@ -118,7 +118,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     runtime.log(`Remote gateway: ${remoteUrl}`);
     runtime.log(`Auth: ${payload.auth}`);
     runtime.log(
-      `Tip: run \`${formatCliCommand("openclaw configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.openclaw.ai/tools/web`,
+      `Tip: run \`${formatCliCommand("carapace configure --section web")}\` to store your Brave API key for web_search. Docs: https://github.com/Exaggarate/carapace`,
     );
   }
 }

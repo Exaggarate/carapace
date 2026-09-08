@@ -12,7 +12,7 @@ import {
 import { enqueueSwarmRun, releaseSwarmRun } from "../../agents/subagents/swarm/swarm-scheduler.js";
 import { testing as swarmSchedulerTesting } from "../../agents/subagents/swarm/swarm-scheduler.test-support.js";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import { handleChatAbortRequestWithLifecycle } from "./chat-abort-handler.js";
 import * as transcriptInject from "./chat-transcript-inject.js";
@@ -67,7 +67,7 @@ describe("descendant cascade ownership", () => {
     "ordinary",
   ])("does not kill or inhibit excluded queued descendants: %s", async (kind) => {
     const sessionKey = kind.includes("worker") ? "global" : "agent:main:main";
-    const cfg: OpenClawConfig = sessionKey === "global" ? { session: { scope: "global" } } : {};
+    const cfg: CarapaceConfig = sessionKey === "global" ? { session: { scope: "global" } } : {};
     const childKey = "agent:main:subagent:cascade-ownership";
     const canCascade = ["owned", "orphan", "represented worker", "late descendant"].includes(kind);
     const hasOwnedActive = kind !== "orphan" && !kind.startsWith("all foreign");

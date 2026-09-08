@@ -30,7 +30,7 @@ impl GatewayOperationQueue {
     {
         let (sender, receiver) = mpsc::channel::<QueuedGatewayOperation>();
         thread::Builder::new()
-            .name("openclaw-gateway-operations".to_string())
+            .name("carapace-gateway-operations".to_string())
             .spawn(move || {
                 for request in receiver {
                     let result = sink(request.operation);

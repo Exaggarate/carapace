@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePluginMetadataSnapshot } from "./plugin-metadata-snapshot.js";
 import { resolveManifestProviderAuthChoices } from "./provider-auth-choices.js";
 import { resolveDiscoverableProviderOwnerPluginIds } from "./providers.js";
 
 /** Personal auth is opt-in; discovery never enables, installs, or imports host credentials. */
-export function listPersonalAccountAuthChoices(config: OpenClawConfig) {
+export function listPersonalAccountAuthChoices(config: CarapaceConfig) {
   const metadataSnapshot = resolvePluginMetadataSnapshot({ config });
   const choices = resolveManifestProviderAuthChoices({
     config,
@@ -24,7 +24,7 @@ export function listPersonalAccountAuthChoices(config: OpenClawConfig) {
 }
 
 export async function resolvePersonalAccountAuthMethod(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   providerId: string,
   methodId: string,
 ) {

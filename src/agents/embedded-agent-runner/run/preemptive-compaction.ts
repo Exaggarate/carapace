@@ -1,8 +1,8 @@
 /**
  * Estimates prompt pressure and decides pre-prompt compaction routing.
  */
-import { resolveCompactionReplayPressure } from "@openclaw/ai/transports";
-import type { Model } from "@openclaw/llm-core";
+import { resolveCompactionReplayPressure } from "@carapace/ai/transports";
+import type { Model } from "@carapace/llm-core";
 import type { SessionContextBudgetStatus } from "../../../config/sessions.js";
 import { resolveEffectiveCompactionReserveTokens } from "../../agent-compaction-constants.js";
 import { SAFETY_MARGIN } from "../../compaction-planning.js";

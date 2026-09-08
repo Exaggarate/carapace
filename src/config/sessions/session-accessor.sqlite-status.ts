@@ -4,8 +4,8 @@ import {
   getNodeSqliteKysely,
   sqliteStringSet,
 } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   SessionEntryStatus,
   SessionEntrySummary,
@@ -22,7 +22,7 @@ import {
 import { projectCanonicalSessionEntryShape } from "./store-entry-shape.js";
 import type { SessionEntry } from "./types.js";
 
-type SessionStatusDatabase = Pick<OpenClawAgentKyselyDatabase, "session_nodes">;
+type SessionStatusDatabase = Pick<CarapaceAgentKyselyDatabase, "session_nodes">;
 
 // Metadata readers do not own prompt snapshots. Strip those bytes before JS allocation;
 // Malformed/overdepth JSON reaches the parser unchanged. Requiring an identity keeps
@@ -36,7 +36,7 @@ export const sessionEntryMetadataJson =
   ELSE entry_json END`.as("entry_json");
 
 export function selectSessionEntryRows(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   projection: "full" | "list",
   fullEntryKeys: readonly string[] = [],
 ) {
@@ -102,7 +102,7 @@ export function parseSessionEntryJson(
 }
 
 export function readSessionEntriesByStatus(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   statuses: readonly SessionEntryStatus[],
   sessionKeys?: readonly string[],
 ): SessionEntrySummary[] {

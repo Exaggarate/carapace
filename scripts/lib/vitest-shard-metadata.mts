@@ -16,7 +16,7 @@ export type VitestShardTimingSpec = {
   watchMode?: boolean;
 };
 
-const SHARD_NAME_ENV_KEY = "OPENCLAW_VITEST_SHARD_NAME";
+const SHARD_NAME_ENV_KEY = "CARAPACE_VITEST_SHARD_NAME";
 
 function sanitizeTimingLabel(value: unknown): string {
   return String(value)
@@ -222,7 +222,7 @@ const STRIPE_FILE_SECONDS_HINTS = new Map<string, number>([
   ["test/scripts/ci-git-owner.test.ts", 187],
   // Blacksmith PR runs 33532741896/33545657559 recorded 127.288s/135.808s wrapper
   // spans; canonical push plans omit this tooling workload.
-  ["test/scripts/openclaw-performance-git-lifecycle.test.ts", 136],
+  ["test/scripts/carapace-performance-git-lifecycle.test.ts", 136],
   ["test/scripts/ci-linux-git.test.ts", 204],
   // Historical single-file wall from PR run 33576929814; this file has since grown.
   ["test/scripts/pr-merge-outcome.test.ts", 206],
@@ -236,7 +236,7 @@ const STRIPE_FILE_SECONDS_HINTS = new Map<string, number>([
   ["test/scripts/install-sh.test.ts", 6],
   ["test/scripts/kitchen-sink-rpc-walk.test.ts", 5],
   ["test/scripts/managed-child-process.test.ts", 42],
-  ["test/scripts/openclaw-live-updater.test.ts", 18],
+  ["test/scripts/carapace-live-updater.test.ts", 18],
   ["test/scripts/parallels-smoke-model.test.ts", 8],
   ["test/scripts/plugin-clawhub-release.test.ts", 5],
   ["test/scripts/plugin-gateway-gauntlet.test.ts", 5],

@@ -7,7 +7,7 @@ import * as providerAuth from "../../agents/model-provider-auth.js";
 import { PreparedModelCatalogConfigReplacedError } from "../../agents/prepared-model-catalog.errors.js";
 import { setPreparedModelRuntimeAuthStore } from "../../agents/prepared-model-runtime-auth.js";
 import { PreparedModelRuntimePublicationSupersededError } from "../../agents/prepared-model-runtime.errors.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 
 const catalogMocks = vi.hoisted(() => ({
@@ -49,11 +49,11 @@ const { buildPreparedModelsProviderData, resolveModelsCommandReply } =
 
 const staleCfg = {
   agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const replacementCfg = {
   agents: { defaults: { model: { primary: "openai/gpt-5.6-luna" } } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 beforeEach(() => {
   // Semantic projections must not exhaust their deadline through host CPU load.
@@ -99,7 +99,7 @@ describe("/models browse catalog recovery", () => {
         ],
       });
       catalogMocks.authModes = nativeAuth ? { "claude-cli": "api_key" } : {};
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             model: { primary: "anthropic/claude-opus-4-5" },
@@ -427,7 +427,7 @@ describe("/models browse catalog recovery", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const currentCfg = {
       agents: {
         defaults: { model: { primary: "openai/gpt-5.6-luna" } },
@@ -440,7 +440,7 @@ describe("/models browse catalog recovery", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     catalogMocks.loadSnapshot
       .mockRejectedValueOnce(new PreparedModelCatalogConfigReplacedError("/tmp/stale-agent"))
       .mockRejectedValueOnce(new PreparedModelRuntimePublicationSupersededError("superseded again"))
@@ -498,10 +498,10 @@ describe("/models browse catalog recovery", () => {
     vi.useFakeTimers();
     const intermediateCfg = {
       agents: { defaults: { model: { primary: "google/gemini-3.1-pro" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const currentCfg = {
       agents: { defaults: { model: { primary: "openai/gpt-5.6-luna" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const rejectAfter = (delayMs: number, error: Error) =>
       new Promise<never>((_resolve, reject) => {
         setTimeout(() => reject(error), delayMs);
@@ -572,7 +572,7 @@ describe("/models browse catalog recovery", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     catalogMocks.loadSnapshot.mockImplementationOnce(() => new Promise(() => {}));
 
     const ordinaryTimeoutPromise = buildPreparedModelsProviderData(fallbackCfg);

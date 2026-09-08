@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentTool } from "openclaw/plugin-sdk/agent-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@carapace/normalization-core";
+import type { AgentTool } from "carapace/plugin-sdk/agent-core";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withTestTimeout } from "../../../test/helpers/promise.js";
@@ -45,7 +45,7 @@ describe("AgentSession runtime and transcript projections", () => {
   ])(
     "settles the real $owner preparer with abortBeforeLaunch=$abortBeforeLaunch",
     async ({ owner, abortBeforeLaunch }) => {
-      const directory = tempDirs.make("openclaw-adapter-lifecycle-");
+      const directory = tempDirs.make("carapace-adapter-lifecycle-");
       const output = path.join(directory, "receipt.txt");
       const args = { value: "local receipt" };
       const partial = {
@@ -227,7 +227,7 @@ describe("AgentSession runtime and transcript projections", () => {
   );
 
   it("keeps grep-only truncation results free of unavailable read-tool instructions", async () => {
-    const cwd = await fs.realpath(tempDirs.make("openclaw-sdk-grep-guidance-"));
+    const cwd = await fs.realpath(tempDirs.make("carapace-sdk-grep-guidance-"));
     const line = `needle ${"x".repeat(600)} OMITTED_END`;
     await fs.writeFile(path.join(cwd, "long-line.txt"), `${line}\n`);
     const { session } = await createAgentSession({
@@ -265,7 +265,7 @@ describe("AgentSession runtime and transcript projections", () => {
   });
 
   it("preserves execution correlation IDs through redacted transcript persistence", async () => {
-    const dir = tempDirs.make("openclaw-correlation-projection-");
+    const dir = tempDirs.make("carapace-correlation-projection-");
     const scope = {
       agentId: "main",
       sessionId: "correlation-projection",
@@ -334,7 +334,7 @@ describe("AgentSession runtime and transcript projections", () => {
   it.each(["key", "apiKey", "account"])(
     "executes original %s arguments while preserving redacted storage and delivery facts",
     async (field) => {
-      const dir = tempDirs.make("openclaw-runtime-projection-");
+      const dir = tempDirs.make("carapace-runtime-projection-");
       const scope = {
         agentId: "main",
         sessionId: "runtime-projection",
@@ -442,7 +442,7 @@ describe("AgentSession runtime and transcript projections", () => {
           { type: "text", text: "Extension: Looking up both records." },
           ...values.map((value) => ({ type: "toolCall", arguments: { [field]: value } })),
         ],
-        openclawDelivery: { replyToCurrent: true },
+        carapaceDelivery: { replyToCurrent: true },
       });
       const reopened = SessionManager.open(scope, dir);
       const stored = reopened.getBranch().find((entry) => {
@@ -457,7 +457,7 @@ describe("AgentSession runtime and transcript projections", () => {
               arguments: { [field]: field === "account" ? value : "***" },
             })),
           ],
-          openclawDelivery: { replyToCurrent: true },
+          carapaceDelivery: { replyToCurrent: true },
         },
       });
     },

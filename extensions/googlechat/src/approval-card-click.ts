@@ -1,4 +1,4 @@
-import { resolveApprovalOverGateway } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import { resolveApprovalOverGateway } from "carapace/plugin-sdk/approval-gateway-runtime";
 import { updateGoogleChatMessage } from "./api.js";
 import { googleChatApprovalAuth } from "./approval-auth.js";
 import {

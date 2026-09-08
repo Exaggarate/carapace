@@ -3,7 +3,7 @@ import path from "node:path";
 import { root as fsRoot, sanitizeUntrustedFileName, type Root } from "../infra/fs-safe.js";
 import type { MediaFact } from "./media-facts.js";
 
-const STAGED_INPUT_DIRECTORY_PREFIX = "media/inbound/openclaw-staged-";
+const STAGED_INPUT_DIRECTORY_PREFIX = "media/inbound/carapace-staged-";
 export const STAGED_INPUT_GIT_PATHSPEC = `:(glob)${STAGED_INPUT_DIRECTORY_PREFIX}*/**`;
 const STAGED_INPUT_GITIGNORE =
   "# Raw task inputs remain private; copy outputs into the project to publish.\n*\n";
@@ -138,7 +138,7 @@ export async function ensureStagedInputDirectory(
   const ignorePath = `${directory}/.gitignore`;
   if (await root.exists(directory)) {
     if ((await root.readText(ignorePath, { maxBytes: 1024 })) !== STAGED_INPUT_GITIGNORE) {
-      throw new Error("Input staging directory is not owned by OpenClaw");
+      throw new Error("Input staging directory is not owned by Carapace");
     }
     return;
   }

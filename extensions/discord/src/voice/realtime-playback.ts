@@ -1,4 +1,4 @@
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
   realtimeVoiceAudioDurationMs,
@@ -8,9 +8,9 @@ import {
   type RealtimeVoiceBridgeSession,
   type RealtimeVoicePlaybackItem,
   type RealtimeVoiceSessionHarness,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { convertRealtimePcm24kMonoToDiscordPcm48kStereo } from "./audio.js";
 import { DiscordRealtimeOutput } from "./realtime-output.js";
 import type { DiscordRealtimePlayer } from "./realtime-player.js";

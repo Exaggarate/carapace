@@ -1,18 +1,18 @@
 // Openshell plugin module implements fs bridge behavior.
 import fsPromises from "node:fs/promises";
 import path from "node:path";
-import { isPathInside, root as fsRoot } from "openclaw/plugin-sdk/file-access-runtime";
+import { isPathInside, root as fsRoot } from "carapace/plugin-sdk/file-access-runtime";
 import type {
   DirectoryEntry,
   SandboxFsBridge,
   SandboxFsStat,
   SandboxResolvedPath,
-} from "openclaw/plugin-sdk/sandbox";
+} from "carapace/plugin-sdk/sandbox";
 import {
   createWritableRenameTargetResolver,
   resolveReadOnlyWorkspaceSkillMounts,
-} from "openclaw/plugin-sdk/sandbox";
-import { FsSafeError } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/sandbox";
+import { FsSafeError } from "carapace/plugin-sdk/security-runtime";
 import type { OpenShellFsBridgeContext, OpenShellMirrorBackend } from "./backend.types.js";
 import {
   isOpenShellRemotePathInside,

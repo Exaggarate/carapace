@@ -1,14 +1,14 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import type {
-  OpenClawAgentDatabase,
-  OpenClawAgentDatabaseOptions,
-} from "./openclaw-agent-db-contract.js";
-import { resolveOpenClawAgentSqlitePath } from "./openclaw-agent-db.paths.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  CarapaceAgentDatabase,
+  CarapaceAgentDatabaseOptions,
+} from "./carapace-agent-db-contract.js";
+import { resolveCarapaceAgentSqlitePath } from "./carapace-agent-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "./carapace-state-db.paths.js";
 
 type AgentDeletionCleanupRow = {
   agentId: string;
@@ -28,12 +28,12 @@ type AgentDeletionDatabaseCleanupScope = {
 };
 
 const databaseCleanup = resolveGlobalSingleton(
-  Symbol.for("openclaw.agentDeletionDatabaseCleanup"),
+  Symbol.for("carapace.agentDeletionDatabaseCleanup"),
   () => new AsyncLocalStorage<AgentDeletionDatabaseCleanupScope>(),
 );
 const cleanupHandles = resolveGlobalSingleton(
-  Symbol.for("openclaw.agentDeletionDatabaseCleanupHandles"),
-  () => new Map<OpenClawAgentDatabase, AgentDeletionDatabaseCleanupScope>(),
+  Symbol.for("carapace.agentDeletionDatabaseCleanupHandles"),
+  () => new Map<CarapaceAgentDatabase, AgentDeletionDatabaseCleanupScope>(),
 );
 
 /** The lifecycle owner supplies live closures, never a transferable operation id. */
@@ -144,17 +144,17 @@ export function createAgentDeletionDatabaseCleanup(owner: {
 }
 
 export function getAgentDeletionDatabaseCleanup(
-  params: OpenClawAgentDatabaseOptions & { statePath?: string },
+  params: CarapaceAgentDatabaseOptions & { statePath?: string },
 ): AgentDeletionDatabaseCleanupScope | undefined {
   const scope = databaseCleanup.getStore();
   if (
     !scope ||
     scope.agentId !== normalizeAgentId(params.agentId) ||
-    scope.path !== resolveOpenClawAgentSqlitePath(params)
+    scope.path !== resolveCarapaceAgentSqlitePath(params)
   ) {
     return undefined;
   }
-  const statePath = params.statePath ?? resolveOpenClawStateSqlitePath(params.env ?? process.env);
+  const statePath = params.statePath ?? resolveCarapaceStateSqlitePath(params.env ?? process.env);
   if (scope.statePath !== path.resolve(statePath)) {
     throw new Error("Agent deletion database cleanup belongs to another state database.");
   }
@@ -162,8 +162,8 @@ export function getAgentDeletionDatabaseCleanup(
 }
 
 export function assertAgentDeletionDatabaseCleanupAccess(
-  database: OpenClawAgentDatabase,
-  options: OpenClawAgentDatabaseOptions,
+  database: CarapaceAgentDatabase,
+  options: CarapaceAgentDatabaseOptions,
 ): void {
   const scope = getAgentDeletionDatabaseCleanup(options);
   const owner = cleanupHandles.get(database);
@@ -174,11 +174,11 @@ export function assertAgentDeletionDatabaseCleanupAccess(
 }
 
 export function assertAgentDeletionCleanupAliases(
-  options: OpenClawAgentDatabaseOptions,
+  options: CarapaceAgentDatabaseOptions,
   isSamePath: (left: string, right: string) => boolean,
 ): void {
   // Only cleanup-held files need this rare physical alias check on a cache miss.
-  const pathname = resolveOpenClawAgentSqlitePath(options);
+  const pathname = resolveCarapaceAgentSqlitePath(options);
   for (const owned of cleanupHandles.keys()) {
     if (isSamePath(owned.path, pathname)) {
       assertAgentDeletionDatabaseCleanupAccess(owned, options);
@@ -187,8 +187,8 @@ export function assertAgentDeletionCleanupAliases(
 }
 
 export function registerAgentDeletionDatabaseCleanup(
-  database: OpenClawAgentDatabase,
-  options: OpenClawAgentDatabaseOptions,
+  database: CarapaceAgentDatabase,
+  options: CarapaceAgentDatabaseOptions,
 ): AgentDeletionDatabaseCleanupScope | undefined {
   const scope = getAgentDeletionDatabaseCleanup(options);
   scope?.assertCurrent();
@@ -199,6 +199,6 @@ export function registerAgentDeletionDatabaseCleanup(
 }
 
 /** Release the tag only after the native owner has closed and released its lease. */
-export function releaseAgentDeletionDatabaseCleanup(database: OpenClawAgentDatabase): void {
+export function releaseAgentDeletionDatabaseCleanup(database: CarapaceAgentDatabase): void {
   cleanupHandles.delete(database);
 }

@@ -1,13 +1,13 @@
 // Tracks host hook state and scheduled turn identifiers.
 import { randomUUID } from "node:crypto";
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionEntry } from "../config/sessions.js";
 import {
   resolveSessionEntryAccessTarget,
   updateResolvedSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
   buildPluginAgentTurnPrepareContext,
@@ -72,7 +72,7 @@ function isExpired(entry: unknown, now: number) {
   return typeof entry.ttlMs === "number" && entry.ttlMs >= 0 && now - entry.createdAt > entry.ttlMs;
 }
 
-function isPluginPromptInjectionEnabled(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginPromptInjectionEnabled(cfg: CarapaceConfig, pluginId: string): boolean {
   const entry = cfg.plugins?.entries?.[pluginId];
   return entry?.hooks?.allowPromptInjection !== false;
 }
@@ -97,7 +97,7 @@ function toPluginNextTurnInjectionRecord(params: {
 }
 
 export async function enqueuePluginNextTurnInjection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
   pluginName?: string;
   injection: PluginNextTurnInjection;
@@ -248,7 +248,7 @@ async function drainPluginNextTurnInjections(
 }
 
 export async function drainPluginNextTurnInjectionContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
   now?: number;
@@ -261,7 +261,7 @@ export async function drainPluginNextTurnInjectionContext(params: {
 }
 
 export function getPluginSessionExtensionStateSync(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
   sessionKey?: string;
   agentId?: string;
@@ -283,7 +283,7 @@ export function getPluginSessionExtensionStateSync(params: {
 }
 
 export async function patchPluginSessionExtension(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   pluginId: string;

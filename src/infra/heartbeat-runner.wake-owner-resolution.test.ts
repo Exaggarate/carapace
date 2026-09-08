@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 
 describe("heartbeat wake owner resolution", () => {
   it("admits a scheduled tick for the configured system heartbeat owner", async () => {
-    await withOpenClawTestState({ label: "heartbeat-system-owner" }, async () => {
+    await withCarapaceTestState({ label: "heartbeat-system-owner" }, async () => {
       const cfg = {
         agents: {
           ownership: "explicit",
           entries: { ops: {}, main: {} },
           defaults: { systemAgent: { agentId: "ops" } },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const result = await runHeartbeatOnce({
         cfg,

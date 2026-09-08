@@ -1,5 +1,5 @@
-import type { CompactionSummaryPrompt, StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { createAssistantMessageEventStream, type Model } from "openclaw/plugin-sdk/llm";
+import type { CompactionSummaryPrompt, StreamFn } from "carapace/plugin-sdk/agent-core";
+import { createAssistantMessageEventStream, type Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { summarizeInStages } from "./compaction.js";
 import { makeAgentAssistantMessage } from "./test-helpers/agent-message-fixtures.js";

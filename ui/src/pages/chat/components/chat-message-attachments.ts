@@ -491,7 +491,7 @@ export function renderAssistantAttachments(
     if (imageAttachment) {
       const title = attachment.label.trim() || t("chat.imageLightbox.untitled");
       if (svgImage) {
-        return html`<openclaw-chat-svg-attachment
+        return html`<carapace-chat-svg-attachment
           .src=${attachmentUrl}
           .sourceIdentity=${attachment.url}
           .label=${title}
@@ -502,7 +502,7 @@ export function renderAssistantAttachments(
             openResolvedImage(onOpenImage, src, title, release, onRequestOpenImage?.())}
           .onExpand=${openAttachmentSidebar}
           .onMediaLoaded=${onAssistantAttachmentLoaded}
-        ></openclaw-chat-svg-attachment>`;
+        ></carapace-chat-svg-attachment>`;
       }
       return html`
         <button
@@ -525,7 +525,7 @@ export function renderAssistantAttachments(
       });
     }
     if (inlinePlayback && attachment.kind === "audio") {
-      return html`<openclaw-chat-audio-player
+      return html`<carapace-chat-audio-player
         .src=${safeAttachmentUrl}
         .sourceIdentity=${attachment.url}
         .label=${attachment.label}
@@ -537,10 +537,10 @@ export function renderAssistantAttachments(
         .voiceNote=${attachment.isVoiceNote === true}
         .onExpand=${openAttachmentSidebar}
         .onMediaLoaded=${onAssistantAttachmentLoaded}
-      ></openclaw-chat-audio-player>`;
+      ></carapace-chat-audio-player>`;
     }
     if (inlinePlayback && attachment.kind === "video") {
-      return html`<openclaw-chat-video-player
+      return html`<carapace-chat-video-player
         .src=${safeAttachmentUrl}
         .sourceIdentity=${attachment.url}
         .label=${attachment.label}
@@ -553,7 +553,7 @@ export function renderAssistantAttachments(
         .onExpand=${openVideoOverlay}
         .onFallbackExpand=${openAttachmentSidebar}
         .onMediaLoaded=${onAssistantAttachmentLoaded}
-      ></openclaw-chat-video-player>`;
+      ></carapace-chat-video-player>`;
     }
     return renderCompactAttachmentCard({
       kind: attachment.kind,

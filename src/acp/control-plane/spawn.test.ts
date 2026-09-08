@@ -1,4 +1,4 @@
-import type { AcpRuntime } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntime } from "@carapace/acp-core/runtime/types";
 import { afterEach, beforeAll, describe, expect, it, vi, type MockInstance } from "vitest";
 import { withGatewayToolCallerIdentity } from "../../agents/tools/gateway-caller-context.js";
 import { callInProcessGatewayTool } from "../../agents/tools/in-process-gateway.js";
@@ -7,7 +7,7 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import * as gatewayCall from "../../gateway/call.js";
 import { withLocalGatewayRequestScope } from "../../gateway/local-request-context.js";
 import { createGatewayMethodRegistry } from "../../gateway/methods/registry.js";
@@ -28,7 +28,7 @@ import {
 } from "../../plugins/runtime/gateway-request-scope.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { ensureGatewayOwnerProfile } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { registerAcpRuntimeBackend, unregisterAcpRuntimeBackend } from "../runtime/registry.js";
 import { AcpSessionManager, getAcpSessionManager, testing as managerTesting } from "./manager.js";
 import { disposeAcpSessionManagerInstance } from "./manager.lifecycle.js";
@@ -62,7 +62,7 @@ afterEach(() => vi.restoreAllMocks());
 
 async function withCleanupFixture(
   run: (fixture: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     manager: ReturnType<typeof getAcpSessionManager>;
     runtime: AcpRuntime;
     initialize: () => Promise<Initialized>;
@@ -75,8 +75,8 @@ async function withCleanupFixture(
     bind: ReturnType<typeof vi.fn<NonNullable<SessionBindingAdapter["bind"]>>>;
   }) => Promise<void>,
 ) {
-  return await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-    const cfg: OpenClawConfig = {
+  return await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+    const cfg: CarapaceConfig = {
       acp: { enabled: true, backend: backendId, allowedAgents: [agentId] },
       agents: {
         ownership: "explicit",

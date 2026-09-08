@@ -36,10 +36,10 @@ describe("web QR login Gateway dispatch", () => {
           },
         },
         {
-          pluginId: "openclaw-weixin",
+          pluginId: "carapace-weixin",
           source: "test",
           plugin: {
-            id: "openclaw-weixin",
+            id: "carapace-weixin",
             meta: { aliases: ["weixin", "wechat"] },
             gatewayMethods: ["web.login.start", "web.login.wait"],
             gateway: {
@@ -132,10 +132,10 @@ describe("web QR login Gateway dispatch", () => {
     ]);
     const scopedRegistry = createTestRegistry([
       {
-        pluginId: "openclaw-weixin",
+        pluginId: "carapace-weixin",
         source: "test",
         plugin: {
-          id: "openclaw-weixin",
+          id: "carapace-weixin",
           meta: { aliases: ["wechat"] },
           gatewayMethods: ["web.login.start"],
           gateway: { loginWithQrStart: scopedWeixinStart },

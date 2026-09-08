@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { NpmSpecResolution } from "../infra/install-source-utils.js";
 import type { UpdateChannel } from "../infra/update-channels.js";
 import { buildNpmResolutionInstallFields } from "./installs.js";
@@ -10,7 +10,7 @@ import {
 } from "./update-source.js";
 
 export async function reconcileUnchangedUpdate(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginId: string;
   record: UpdatablePluginInstallRecord;
   currentVersion: string;
@@ -20,7 +20,7 @@ export async function reconcileUnchangedUpdate(params: {
   timeoutMs?: number;
   hasSpecOverride: boolean;
   syncOfficialInstall: boolean;
-}): Promise<{ config: OpenClawConfig; changed: boolean; outcome: PluginUpdateOutcome }> {
+}): Promise<{ config: CarapaceConfig; changed: boolean; outcome: PluginUpdateOutcome }> {
   const newerExactPinnedDefaultLine = !params.hasSpecOverride
     ? await resolveNewerExactPinnedNpmDefaultLine({
         currentVersion: params.currentVersion,

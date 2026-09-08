@@ -12,11 +12,11 @@ import {
 import { acquireGatewayTestClient } from "../../test/helpers/gateway-client.js";
 import { writeOpenAiResponsesText } from "../../test/helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../test/helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../test/helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const PROVIDERS = ["route-proof-stable", "route-proof-dynamic"] as const;
 const PLUGIN_ID = "route-model-proof";
@@ -33,12 +33,12 @@ async function writeProviderProbe(pluginDir: string) {
       name: PLUGIN_ID,
       type: "commonjs",
       main: "index.js",
-      openclaw: { extensions: ["./index.js"] },
-      peerDependencies: { openclaw: ">=2026.1.1" },
+      carapace: { extensions: ["./index.js"] },
+      peerDependencies: { carapace: ">=2026.1.1" },
     }),
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: PLUGIN_ID,
       providers: PROVIDERS,
@@ -49,7 +49,7 @@ async function writeProviderProbe(pluginDir: string) {
   await fs.writeFile(
     path.join(pluginDir, "index.js"),
     `
-const counts = globalThis[Symbol.for("openclaw.test.routeModelCounts")] ??= {};
+const counts = globalThis[Symbol.for("carapace.test.routeModelCounts")] ??= {};
 function resolve(ctx, phase) {
   const key = ctx.provider + "/" + ctx.modelId;
   const count = counts[key] ??= { resolve: 0, prepare: 0 };
@@ -125,7 +125,7 @@ describe("Gateway route model reuse", () => {
           });
         })().catch((error: unknown) => response.writeHead(500).end(String(error)));
       });
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let client: Awaited<ReturnType<typeof acquireGatewayTestClient>> | undefined;
       await runQaGatewayFixture(
         async () => {
@@ -137,17 +137,17 @@ describe("Gateway route model reuse", () => {
           if (!address || typeof address === "string") {
             throw new Error("Synthetic provider has no port");
           }
-          instance = await createOpenClawTestInstance({
+          instance = await createCarapaceTestInstance({
             name: "route-model-reuse",
             cwd: repoRoot,
             stopTimeoutMs: 10_000,
             env: {
               VITEST: undefined,
               NODE_ENV: "production",
-              OPENCLAW_TEST_CONSOLE: "1",
-              OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-              OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-              OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+              CARAPACE_TEST_CONSOLE: "1",
+              CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+              CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+              CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
             },
           });
           const gateway = instance;
@@ -184,7 +184,7 @@ describe("Gateway route model reuse", () => {
                     modelIds.map((id) => [
                       `${provider}/${id}`,
                       {
-                        agentRuntime: { id: "openclaw" },
+                        agentRuntime: { id: "carapace" },
                         params: { transport: "sse", openaiWsWarmup: false },
                       },
                     ]),
@@ -222,7 +222,7 @@ describe("Gateway route model reuse", () => {
               slots: { memory: "none" },
             },
             tools: { profile: "minimal" },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           await gateway.state.writeConfig(cfg);
           await gateway.state.writeAuthProfiles(
             {

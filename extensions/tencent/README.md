@@ -1,13 +1,13 @@
-# Tencent Cloud OpenClaw provider
+# Tencent Cloud Carapace provider
 
-Official OpenClaw provider plugin for Tencent Cloud.
+Official Carapace provider plugin for Tencent Cloud.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/tencent-provider
+carapace plugins install @carapace/tencent-provider
 ```
 
 ## Docs
 
-See `docs/providers/tencent.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/tencent`.
+See `docs/providers/tencent.md` in the Carapace repository, or the published docs at `../../docs/providers/tencent.md`.

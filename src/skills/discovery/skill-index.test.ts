@@ -77,10 +77,10 @@ describe("skill index", () => {
   });
 
   it("records source, bundled state, skill key, and agent filter state", () => {
-    const bundled = createFixtureSkillEntry("bundle", { source: "openclaw-bundled" });
-    const custodian = createFixtureSkillEntry("custodian", { source: "openclaw-custodian" });
+    const bundled = createFixtureSkillEntry("bundle", { source: "carapace-bundled" });
+    const custodian = createFixtureSkillEntry("custodian", { source: "carapace-custodian" });
     const workspace = createFixtureSkillEntry("workspace", {
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
       skillKey: "workspace-key",
     });
 
@@ -89,17 +89,17 @@ describe("skill index", () => {
     });
 
     expect(indexEntries.find((entry) => entry.name === "bundle")).toMatchObject({
-      source: "openclaw-bundled",
+      source: "carapace-bundled",
       bundled: true,
       agentAllowed: false,
     });
     expect(indexEntries.find((entry) => entry.name === "custodian")).toMatchObject({
-      source: "openclaw-custodian",
+      source: "carapace-custodian",
       bundled: true,
       agentAllowed: false,
     });
     expect(indexEntries.find((entry) => entry.name === "workspace")).toMatchObject({
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
       bundled: false,
       skillKey: "workspace-key",
       agentAllowed: true,

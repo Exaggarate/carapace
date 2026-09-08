@@ -43,7 +43,7 @@ export async function writeOwnedTempFile<T>(
   return await withTempFile(
     {
       rootDir: targetRoot.rootReal,
-      prefix: "openclaw-output",
+      prefix: "carapace-output",
       fileName: path.basename(tempPath),
     },
     async (filePath) => {

@@ -1,9 +1,9 @@
 // Memory Core plugin module owns builtin search manager acquisition and cleanup.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { MemorySearchManager } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import type { MemorySearchManager } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 
 const managerRuntimeLoader = createLazyRuntimeModule(() => import("../../manager-runtime.js"));
@@ -11,7 +11,7 @@ const loadManagerRuntime = managerRuntimeLoader;
 
 type MemorySearchManagerPurpose = "default" | "status" | "cli";
 type MemorySearchManagerParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   purpose?: MemorySearchManagerPurpose;
   inspectSources?: boolean;
@@ -63,7 +63,7 @@ export async function closeAllMemorySearchManagers(): Promise<void> {
 }
 
 export async function closeMemorySearchManager(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
 }): Promise<void> {
   if (!managerRuntimeLoader.peek()) {

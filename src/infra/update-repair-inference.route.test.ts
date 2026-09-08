@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSystemAgentConfiguredRouteFromConfig } from "../system-agent/inference-route.js";
 import { selectUpdateRepairInference } from "./update-repair-inference.js";
 
@@ -34,7 +34,7 @@ vi.mock("../system-agent/setup-inference-persist.js", () => ({
   },
 }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: {
     defaults: { systemAgent: { agentId: "owner" } },
     entries: {
@@ -98,7 +98,7 @@ describe("update repair logical routes", () => {
         provider: "fixture",
         authProfileId: "owner-profile",
         agentDir: "/isolated/owner",
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "carapace",
       });
       expect(selected).toMatchObject({
         ok: true,

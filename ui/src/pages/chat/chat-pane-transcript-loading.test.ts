@@ -36,7 +36,7 @@ describe("chat pane transcript loading signal", () => {
     state.sessionKey = "agent:main:signal";
     const invalidate = vi.spyOn(state.renderLifecycle, "invalidate");
     const changed = vi.fn();
-    pane.addEventListener("openclaw-chat-transcript-loading-changed", changed);
+    pane.addEventListener("carapace-chat-transcript-loading-changed", changed);
 
     // Session-event reloads never re-render the page, so the load owner reports
     // the edge itself, without spending a frame on it.

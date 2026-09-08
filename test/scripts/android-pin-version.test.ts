@@ -15,7 +15,7 @@ describe("android-pin-version", () => {
     const rootDir = writeAndroidFixture({
       version: "2026.6.2",
       versionCode: 2026060201,
-      prefix: "openclaw-android-pin-",
+      prefix: "carapace-android-pin-",
     });
     const trackedPaths = [
       "apps/android/version.json",

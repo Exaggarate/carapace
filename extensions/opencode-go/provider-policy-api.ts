@@ -2,8 +2,8 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { resolveEffortThinkingProfile } from "openclaw/plugin-sdk/provider-thinking-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { resolveEffortThinkingProfile } from "carapace/plugin-sdk/provider-thinking-runtime";
 
 const KIMI_K2_THINKING_PROFILE = {
   levels: [{ id: "off" }],

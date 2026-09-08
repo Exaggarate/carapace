@@ -1,7 +1,7 @@
 /** Acyclic contracts for capabilities stored in the installed plugin registry. */
 import type { EmbeddingInput } from "../../packages/memory-host-sdk/src/engine-embeddings.js";
 import type { MemoryCitationsMode } from "../config/types.memory.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ContextEngine } from "../context-engine/types.js";
 import type {
   LegacyMemoryReadResult,
@@ -21,7 +21,7 @@ import type {
 } from "./embedding-provider-types.js";
 
 export type ContextEngineFactoryContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
 };
@@ -207,7 +207,7 @@ export type MemoryFlushPlan = {
 };
 
 export type MemoryFlushPlanResolver = (params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   nowMs?: number;
   contextWindowTokens?: number;
 }) => MemoryFlushPlan | null;
@@ -222,7 +222,7 @@ type MemoryRuntimeBackendConfig = { backend: "builtin" };
 
 export type MemoryPluginRuntime = {
   getMemorySearchManager(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
     purpose?: "default" | "status" | "cli";
     /** Request a read-only source freshness scan; runtimes may ignore unsupported diagnostics. */
@@ -237,24 +237,24 @@ export type MemoryPluginRuntime = {
     error?: string;
   }>;
   resolveMemoryBackendConfig(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
   }): MemoryRuntimeBackendConfig;
   /** Authorize raw hits before caller-visible use; absent runtimes must not expose session hits. */
   authorizeSearchHits?(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
     requesterSessionKey: string | undefined;
     sandboxed: boolean;
     hits: MemorySearchResult[];
   }): Promise<MemorySearchResult[]>;
   classifyWorkspaceMemoryPaths?(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId: string;
     workspaceDir: string;
     relativePaths: string[];
   }): Promise<Array<{ relativePath: string; originClass: MemoryOriginClass }>>;
-  closeMemorySearchManager?(params: { cfg: OpenClawConfig; agentId: string }): Promise<void>;
+  closeMemorySearchManager?(params: { cfg: CarapaceConfig; agentId: string }): Promise<void>;
   closeAllMemorySearchManagers?(): Promise<void>;
 };
 
@@ -270,7 +270,7 @@ export type MemoryPluginPublicArtifact = {
 };
 
 export type MemoryPluginPublicArtifactsProvider = {
-  listArtifacts(params: { cfg: OpenClawConfig }): Promise<MemoryPluginPublicArtifact[]>;
+  listArtifacts(params: { cfg: CarapaceConfig }): Promise<MemoryPluginPublicArtifact[]>;
 };
 
 export type MemoryPluginCapability = {

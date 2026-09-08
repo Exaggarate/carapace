@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import { buildModelAliasIndex } from "../../agents/model-selection-shared.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import { clearSessionStoreCacheForTest } from "../../config/sessions/store-writer-state.js";
@@ -28,7 +28,7 @@ const modelCatalog: ModelCatalogEntry[] = [
 ];
 
 function createResetFixture(entry: Partial<SessionEntry> = {}) {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
   const aliasIndex: ModelAliasIndex = { byAlias: new Map(), byKey: new Map() };
   const sessionEntry: SessionEntry = {
     sessionId: "s1",
@@ -72,7 +72,7 @@ async function applyResetFixture(params: {
 describe("applyResetModelOverride", () => {
   it.each(["initial", "persisted"])("honors the %s session model lock", async (owner) => {
     const fixture = createResetFixture({ modelSelectionLocked: owner === "initial" });
-    const storePath = path.join(tempDirs.make("openclaw-reset-model-lock-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("carapace-reset-model-lock-"), "sessions.json");
     const lockedEntry: SessionEntry = { ...fixture.sessionEntry, modelSelectionLocked: true };
     const sessionKey = "agent:main:dm:1";
     await replaceSessionEntry({ sessionKey, storePath }, lockedEntry);
@@ -338,7 +338,7 @@ describe("applyResetModelOverride", () => {
   });
 
   it("adopts a concurrent model winner instead of acknowledging the reset hint", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-model-race-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reset-model-race-"));
     const storePath = path.join(tempRoot, "sessions.json");
     const fixture = createResetFixture();
     const concurrentEntry: SessionEntry = {
@@ -386,7 +386,7 @@ describe("applyResetModelOverride", () => {
   });
 
   it("checks the persisted winner for an explicit same-value reset hint", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-model-race-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reset-model-race-"));
     const storePath = path.join(tempRoot, "sessions.json");
     const fixture = createResetFixture({
       providerOverride: "minimax",
@@ -431,7 +431,7 @@ describe("applyResetModelOverride", () => {
   });
 
   it("rejects a reset-model hint when the session rotates during persistence", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-model-rotation-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reset-model-rotation-"));
     const storePath = path.join(tempRoot, "sessions.json");
     const fixture = createResetFixture();
     const rotatedEntry: SessionEntry = {

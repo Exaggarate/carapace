@@ -24,8 +24,8 @@ describe("systemd logical lines", () => {
   it.each([
     {
       name: "standalone comment backslashes",
-      input: ["# note \\", "; note \\", "ExecStart=/usr/bin/openclaw gateway run"],
-      expected: ["# note \\", "; note \\", "ExecStart=/usr/bin/openclaw gateway run"],
+      input: ["# note \\", "; note \\", "ExecStart=/usr/bin/carapace gateway run"],
+      expected: ["# note \\", "; note \\", "ExecStart=/usr/bin/carapace gateway run"],
     },
     {
       name: "comments inside a continued quoted value",
@@ -34,13 +34,13 @@ describe("systemd logical lines", () => {
     },
     {
       name: "escaped trailing backslash pairs",
-      input: ["Environment=SETTING=one\\\\", "ExecStart=/usr/bin/openclaw gateway run"],
-      expected: ["Environment=SETTING=one\\\\", "ExecStart=/usr/bin/openclaw gateway run"],
+      input: ["Environment=SETTING=one\\\\", "ExecStart=/usr/bin/carapace gateway run"],
+      expected: ["Environment=SETTING=one\\\\", "ExecStart=/usr/bin/carapace gateway run"],
     },
     {
       name: "blank line ending a continuation",
-      input: ["Environment=SETTING=one\\", "", "ExecStart=/usr/bin/openclaw gateway run"],
-      expected: ["Environment=SETTING=one ", "ExecStart=/usr/bin/openclaw gateway run"],
+      input: ["Environment=SETTING=one\\", "", "ExecStart=/usr/bin/carapace gateway run"],
+      expected: ["Environment=SETTING=one ", "ExecStart=/usr/bin/carapace gateway run"],
     },
     {
       name: "continued value at EOF",
@@ -56,19 +56,19 @@ describe("systemd logical lines", () => {
 
 describe("systemd unit value round-trips", () => {
   it.each(ROUND_TRIP_VALUES)("round-trips %p through Environment=", (value) => {
-    const rendered = renderSystemdEnvAssignment("OPENCLAW_TOKEN", value);
-    expect(parseSystemdEnvAssignments(rendered)).toEqual([{ key: "OPENCLAW_TOKEN", value }]);
+    const rendered = renderSystemdEnvAssignment("CARAPACE_TOKEN", value);
+    expect(parseSystemdEnvAssignments(rendered)).toEqual([{ key: "CARAPACE_TOKEN", value }]);
   });
 
   it.each(ROUND_TRIP_VALUES)("round-trips %p through ExecStart=", (value) => {
     const unit = buildSystemdUnit({
-      description: "OpenClaw Gateway",
-      programArguments: ["/usr/bin/openclaw", "gateway", value],
+      description: "Carapace Gateway",
+      programArguments: ["/usr/bin/carapace", "gateway", value],
       environment: {},
     });
     const execStart = unit.split("\n").find((line) => line.startsWith("ExecStart="));
     expect(parseSystemdExecStart(execStart?.slice("ExecStart=".length) ?? "")).toEqual([
-      "/usr/bin/openclaw",
+      "/usr/bin/carapace",
       "gateway",
       value,
     ]);
@@ -99,18 +99,18 @@ describe("buildSystemdUnit", () => {
 
   it("quotes arguments with whitespace", () => {
     const unit = buildSystemdUnit({
-      description: "OpenClaw Gateway",
-      programArguments: ["/usr/bin/openclaw", "gateway", "--name", "My Bot"],
+      description: "Carapace Gateway",
+      programArguments: ["/usr/bin/carapace", "gateway", "--name", "My Bot"],
       environment: {},
     });
     const execStart = unit.split("\n").find((line) => line.startsWith("ExecStart="));
-    expect(execStart).toBe('ExecStart=/usr/bin/openclaw gateway --name "My Bot"');
+    expect(execStart).toBe('ExecStart=/usr/bin/carapace gateway --name "My Bot"');
   });
 
   it("drains through the main process while retaining final child-process cleanup", () => {
     const unit = buildSystemdUnit({
-      description: "OpenClaw Gateway",
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      description: "Carapace Gateway",
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environment: {},
     });
     expect(unit).toContain("KillMode=mixed");
@@ -126,8 +126,8 @@ describe("buildSystemdUnit", () => {
   it("rejects environment values with line breaks", () => {
     expect(() =>
       buildSystemdUnit({
-        description: "OpenClaw Gateway",
-        programArguments: ["/usr/bin/openclaw", "gateway", "start"],
+        description: "Carapace Gateway",
+        programArguments: ["/usr/bin/carapace", "gateway", "start"],
         environment: {
           INJECT: "ok\nExecStartPre=/bin/touch /tmp/oc15789_rce",
         },
@@ -137,17 +137,17 @@ describe("buildSystemdUnit", () => {
 
   it("renders EnvironmentFile entries before inline Environment values", () => {
     const unit = buildSystemdUnit({
-      description: "OpenClaw Gateway",
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-      environmentFiles: ["/home/test/.openclaw/.env"],
+      description: "Carapace Gateway",
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
+      environmentFiles: ["/home/test/.carapace/.env"],
       environment: {
-        OPENCLAW_GATEWAY_PORT: "18789",
+        CARAPACE_GATEWAY_PORT: "18789",
       },
     });
-    expect(unit).toContain("EnvironmentFile=-/home/test/.openclaw/.env");
-    expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
-    expect(unit.indexOf("EnvironmentFile=-/home/test/.openclaw/.env")).toBeLessThan(
-      unit.indexOf("Environment=OPENCLAW_GATEWAY_PORT=18789"),
+    expect(unit).toContain("EnvironmentFile=-/home/test/.carapace/.env");
+    expect(unit).toContain("Environment=CARAPACE_GATEWAY_PORT=18789");
+    expect(unit.indexOf("EnvironmentFile=-/home/test/.carapace/.env")).toBeLessThan(
+      unit.indexOf("Environment=CARAPACE_GATEWAY_PORT=18789"),
     );
   });
 });

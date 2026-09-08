@@ -73,7 +73,7 @@ flow:
             senderId: alice
             senderName: Alice
             text:
-              expr: "`@openclaw ${config.promptSnippet}. sessionKey=\"${config.targetSessionKey}\". Use sessions_send once with timeoutSeconds=0. The target must reply visibly with exact marker: \\`${config.expectedMarker}\\``"
+              expr: "`@carapace ${config.promptSnippet}. sessionKey=\"${config.targetSessionKey}\". Use sessions_send once with timeoutSeconds=0. The target must reply visibly with exact marker: \\`${config.expectedMarker}\\``"
         - call: waitForCondition
           saveAs: sourceRequest
           args:

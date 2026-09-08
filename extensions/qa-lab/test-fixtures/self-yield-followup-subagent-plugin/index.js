@@ -5,7 +5,7 @@ const RESTART_TRIGGER = "qa interrupted task restart";
 const RESTART_SESSION_PREFIX = "agent:qa:subagent:qa-restart-task-";
 const FOLLOW_UP_MESSAGE =
   "Subagent self yield qa remote job finished. Reply with only the exact marker.";
-const stateKey = Symbol.for("openclaw.qaSelfYieldFollowupState");
+const stateKey = Symbol.for("carapace.qaSelfYieldFollowupState");
 
 function getState() {
   if (globalThis[stateKey]) {

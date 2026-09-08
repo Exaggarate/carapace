@@ -1,8 +1,8 @@
 // Builds the gateway-visible combined session store across agent-specific stores.
 // Gateway callers need canonical per-agent keys even when stores are split by `{agentId}`.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { listAgentEntries } from "../../agents/agent-scope.js";
 import {
   resolveSessionStoreAgentId,
@@ -14,13 +14,13 @@ import {
   parseAgentSessionKey,
 } from "../../routing/session-key.js";
 import {
-  listOpenClawRegisteredAgentDatabases,
+  listCarapaceRegisteredAgentDatabases,
   listOpenIncognitoAgentDatabases,
-  readOpenClawAgentDatabaseRegistryToken,
+  readCarapaceAgentDatabaseRegistryToken,
   readOpenIncognitoAgentDatabaseGeneration,
-} from "../../state/openclaw-agent-db.js";
+} from "../../state/carapace-agent-db.js";
 import { resolveSessionStoreCompatibilityAgentId } from "../legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { canonicalizeMainSessionAlias } from "./main-session.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import {
@@ -90,7 +90,7 @@ type ResolvedGatewaySessionStoreTargets = {
 };
 
 type PreparedConfiguredSessionStoreTargets = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   includeIncognito: boolean;
   incognitoGeneration: number;
   registryToken: symbol;
@@ -130,7 +130,7 @@ function resolveCombinedDatabasePath(
 }
 
 function resolveSharedStoreRowOwner(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   selected: SessionStoreTarget,
   sharedStorePaths: ReadonlySet<string>,
 ): ResolvedGatewaySessionStoreTargets["sharedStoreRowOwner"] {
@@ -166,7 +166,7 @@ function loadGatewayStoreEntries(params: {
 }
 
 function mergeSessionEntryIntoCombined(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   combined: Record<string, SessionEntry>;
   targetsBySessionKey: Map<string, GatewayStoredSessionTarget>;
   entry: SessionEntry;
@@ -214,7 +214,7 @@ function mergeSessionEntryIntoCombined(params: {
 }
 
 function mergeOpenIncognitoStores(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   combined: Record<string, SessionEntry>;
   targetsBySessionKey: Map<string, GatewayStoredSessionTarget>;
   projection: GatewaySessionEntryProjection;
@@ -251,7 +251,7 @@ function mergeOpenIncognitoStores(params: {
 }
 
 function filterCombinedStoreToConfiguredAgents(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   configuredAgentIds: ReadonlySet<string>;
   store: Record<string, SessionEntry>;
   targetsBySessionKey: Map<string, GatewayStoredSessionTarget>;
@@ -281,10 +281,10 @@ function filterCombinedStoreToConfiguredAgents(params: {
 }
 
 function resolvePreparedConfiguredSessionStoreTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   includeIncognito: boolean,
 ): ResolvedGatewaySessionStoreTargets {
-  const registryToken = readOpenClawAgentDatabaseRegistryToken();
+  const registryToken = readCarapaceAgentDatabaseRegistryToken();
   const incognitoGeneration = readOpenIncognitoAgentDatabaseGeneration();
   const cached = preparedConfiguredSessionStoreTargets;
   if (
@@ -309,7 +309,7 @@ function resolvePreparedConfiguredSessionStoreTargets(
   let sharedStoreRowOwner: ResolvedGatewaySessionStoreTargets["sharedStoreRowOwner"];
   const candidates = dedupeSessionStoreTargetsBySqliteTarget(
     [
-      ...listOpenClawRegisteredAgentDatabases().map(({ agentId, path }) => ({
+      ...listCarapaceRegisteredAgentDatabases().map(({ agentId, path }) => ({
         agentId,
         storePath: path,
       })),
@@ -357,7 +357,7 @@ function resolvePreparedConfiguredSessionStoreTargets(
 }
 
 function resolveGatewaySessionStoreTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: GatewaySessionStoreOptions,
 ): ResolvedGatewaySessionStoreTargets {
   const storeConfig = cfg.session?.store;
@@ -433,7 +433,7 @@ function resolveGatewaySessionStoreTargets(
 
 /** Checks whether Gateway prewarm can project the selected stores within a bounded row budget. */
 export function canPrewarmCombinedSessionStoresForGateway(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: { agentIds: readonly string[]; maxRows: number },
 ): boolean {
   let totalRows = 0;
@@ -458,7 +458,7 @@ export function canPrewarmCombinedSessionStoresForGateway(
 
 /** Loads and canonicalizes session entries for gateway views across one or more agent stores. */
 export function loadCombinedSessionStoreForGatewayCore(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: GatewaySessionStoreOptions = {},
 ): {
   diagnostics?: readonly string[];

@@ -1,6 +1,6 @@
-// Resolves the configured default agent route shared by OpenClaw inference calls.
+// Resolves the configured default agent route shared by Carapace inference calls.
 import { isDeepStrictEqual } from "node:util";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   listAgentEntries,
   resolveAmbientOwnerAgentId,
@@ -12,15 +12,15 @@ import {
 } from "../agents/cli-execution-auth.js";
 import { copyConfigResolutionFacts } from "../config/resolution-facts.js";
 import { createRuntimeConfigReader } from "../config/runtime-snapshot.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { SYSTEM_AGENT_ID } from "./agent-id.js";
 
 export type SystemAgentConfiguredRoute = {
   /** Unprojected input, kept separate from prepared execution credentials. */
-  sourceConfig: OpenClawConfig;
-  runConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  runConfig: CarapaceConfig;
   modelLabel: string;
   provider: string;
   model: string;
@@ -61,16 +61,16 @@ export type DefaultInferenceRouteProjection = {
   defaults: unknown;
   agent?: unknown;
   executionAgent?: unknown;
-  env: OpenClawConfig["env"];
-  secrets: OpenClawConfig["secrets"];
-  plugins: OpenClawConfig["plugins"];
-  tools: OpenClawConfig["tools"];
+  env: CarapaceConfig["env"];
+  secrets: CarapaceConfig["secrets"];
+  plugins: CarapaceConfig["plugins"];
+  tools: CarapaceConfig["tools"];
 };
 
 function projectSystemAgentExecutionConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   routeAgentId: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const agents = listAgentEntries(config);
   const routeAgent = agents.find((agent) => normalizeAgentId(agent.id) === routeAgentId);
   const retainedAgents = agents.filter((agent) => normalizeAgentId(agent.id) !== SYSTEM_AGENT_ID);
@@ -95,7 +95,7 @@ function projectSystemAgentExecutionConfig(
 }
 
 export async function resolveSystemAgentConfiguredRouteFromConfig(
-  runConfig: OpenClawConfig,
+  runConfig: CarapaceConfig,
   requestedAgentId?: string,
   deps: SystemAgentRouteProjectionDeps = {},
   configSnapshot?: SystemAgentConfigSnapshot,
@@ -223,7 +223,7 @@ function projectRelevantModelMap(params: {
 
 /** Project every config input that can change the configured default-agent route. */
 export async function projectDefaultInferenceRoute(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   deps: SystemAgentRouteProjectionDeps = {},
 ): Promise<DefaultInferenceRouteProjection> {
   return await projectInferenceRoute(config, undefined, deps);
@@ -231,10 +231,10 @@ export async function projectDefaultInferenceRoute(
 
 /** Project every config input that can change one configured agent route. */
 export async function projectInferenceRoute(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   requestedAgentId?: string,
   deps: SystemAgentRouteProjectionDeps = {},
-  sourceConfig: OpenClawConfig = config,
+  sourceConfig: CarapaceConfig = config,
 ): Promise<DefaultInferenceRouteProjection> {
   const { resolveProviderIdForAuth } = await import("../agents/provider-auth-aliases.js");
   const routeAgentId = resolveAmbientOwnerAgentId(config, requestedAgentId);

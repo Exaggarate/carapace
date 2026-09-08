@@ -1,12 +1,12 @@
 import Foundation
 import Network
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 import Testing
 import UIKit
 import WebKit
 import XCTest
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct SettingsHubTests {
@@ -160,7 +160,7 @@ struct SettingsHubTests {
         await Task.yield()
         _ = try await fixture.webView.evaluateJavaScript("document.readyState")
         _ = try await fixture.webView.evaluateJavaScript(
-            "document.querySelector('main').classList.add('openclaw-native-embed')")
+            "document.querySelector('main').classList.add('carapace-native-embed')")
         compatibility.didReceiveStatusRequest()
 
         try await waitForDashboardCondition { !compatibility.needsGatewayUpgrade }
@@ -398,7 +398,7 @@ private final class DashboardDocumentFixture: NSObject, WKNavigationDelegate {
     func load(hasEmbedMarker: Bool) async throws -> WKNavigation {
         try await withCheckedThrowingContinuation { continuation in
             self.loaded = continuation
-            let marker = hasEmbedMarker ? "openclaw-native-embed" : "legacy-dashboard"
+            let marker = hasEmbedMarker ? "carapace-native-embed" : "legacy-dashboard"
             self.webView.loadHTMLString(
                 "<html><body><main class='\(marker)'>Settings</main></body></html>",
                 baseURL: self.url)

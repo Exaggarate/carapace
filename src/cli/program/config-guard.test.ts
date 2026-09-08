@@ -49,7 +49,7 @@ function makeSnapshot() {
     issues: [] as ConfigIssue[],
     warnings: [] as ConfigIssue[],
     legacyIssues: [] as ConfigIssue[],
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
   };
 }
 
@@ -117,31 +117,31 @@ describe("ensureConfigReady", () => {
     return snapshot;
   }
 
-  function useTempOpenClawHome(): string {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-guard-"));
+  function useTempCarapaceHome(): string {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-guard-"));
     tempRoots.push(root);
-    setTestEnvValue("OPENCLAW_HOME", root);
-    deleteTestEnvValue("OPENCLAW_NIX_MODE");
-    deleteTestEnvValue("OPENCLAW_PROFILE");
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
+    setTestEnvValue("CARAPACE_HOME", root);
+    deleteTestEnvValue("CARAPACE_NIX_MODE");
+    deleteTestEnvValue("CARAPACE_PROFILE");
+    deleteTestEnvValue("CARAPACE_STATE_DIR");
     return root;
   }
 
   function writeLegacyTaskSidecarMarker(root: string): void {
-    const markerPath = path.join(root, ".openclaw", "tasks", "runs.sqlite");
+    const markerPath = path.join(root, ".carapace", "tasks", "runs.sqlite");
     fs.mkdirSync(path.dirname(markerPath), { recursive: true });
     fs.writeFileSync(markerPath, "");
   }
 
   function writePendingTaskSidecarArchiveMarker(root: string): void {
-    const markerPath = path.join(root, ".openclaw", "tasks", "runs.sqlite");
+    const markerPath = path.join(root, ".carapace", "tasks", "runs.sqlite");
     fs.mkdirSync(path.dirname(markerPath), { recursive: true });
     fs.writeFileSync(`${markerPath}.migrated`, "");
     fs.writeFileSync(`${markerPath}-wal`, "");
   }
 
   function writeStateMarker(root: string, relativePath: string): void {
-    const markerPath = path.join(root, ".openclaw", relativePath);
+    const markerPath = path.join(root, ".carapace", relativePath);
     fs.mkdirSync(path.dirname(markerPath), { recursive: true });
     fs.writeFileSync(markerPath, "{}");
   }
@@ -152,17 +152,17 @@ describe("ensureConfigReady", () => {
     preflightMetadata = withPluginCache(preflightCache, createPluginMetadataSnapshotFixture);
     envSnapshot = captureEnv([
       "HOME",
-      "OPENCLAW_HOME",
-      "OPENCLAW_NIX_MODE",
-      "OPENCLAW_PROFILE",
-      "OPENCLAW_STATE_DIR",
+      "CARAPACE_HOME",
+      "CARAPACE_NIX_MODE",
+      "CARAPACE_PROFILE",
+      "CARAPACE_STATE_DIR",
     ]);
     vi.clearAllMocks();
     resetConfigGuardStateForTests();
     for (const root of tempRoots.splice(0)) {
       fs.rmSync(root, { recursive: true, force: true });
     }
-    useTempOpenClawHome();
+    useTempCarapaceHome();
     readConfigFileSnapshotMock.mockResolvedValue(makeSnapshot());
     loadAndMaybeMigrateDoctorConfigMock.mockImplementation(async () => ({
       snapshot: makeSnapshot(),
@@ -316,7 +316,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("runs doctor flow when lightweight startup detection finds legacy state", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeLegacyTaskSidecarMarker(root);
 
     await runEnsureConfigReady(["status"]);
@@ -331,7 +331,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("keeps remote gateway calls from migrating existing local legacy state", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeLegacyTaskSidecarMarker(root);
 
     await runEnsureConfigReady(["gateway", "call"]);
@@ -343,7 +343,7 @@ describe("ensureConfigReady", () => {
     ["gateway", "restart"],
     ["daemon", "restart"],
   ])("keeps %s control from migrating existing local legacy state", async (command, action) => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeLegacyTaskSidecarMarker(root);
 
     await runEnsureConfigReady([command, action]);
@@ -353,19 +353,19 @@ describe("ensureConfigReady", () => {
   });
 
   it("keeps logs from migrating existing local legacy state", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, "cron/runs/legacy-job.jsonl");
 
     await runEnsureConfigReady(["logs"]);
 
     expect(loadAndMaybeMigrateDoctorConfigMock).not.toHaveBeenCalled();
-    expect(fs.existsSync(path.join(root, ".openclaw", "cron/runs/legacy-job.jsonl"))).toBe(true);
+    expect(fs.existsSync(path.join(root, ".carapace", "cron/runs/legacy-job.jsonl"))).toBe(true);
   });
 
   it.each(["restart-sentinel.json", "restart-sentinel.json.doctor-importing"])(
     "runs doctor flow when lightweight startup detection finds %s",
     async (relativePath) => {
-      const root = useTempOpenClawHome();
+      const root = useTempCarapaceHome();
       writeStateMarker(root, relativePath);
 
       await runEnsureConfigReady(["status"]);
@@ -381,7 +381,7 @@ describe("ensureConfigReady", () => {
   );
 
   it("runs doctor flow when lightweight startup detection finds a pending SQLite archive", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writePendingTaskSidecarArchiveMarker(root);
 
     await runEnsureConfigReady(["status"]);
@@ -464,8 +464,8 @@ describe("ensureConfigReady", () => {
   });
 
   it("runs doctor flow for legacy sessions without task sidecars", async () => {
-    const root = useTempOpenClawHome();
-    fs.mkdirSync(path.join(root, ".openclaw", "sessions"), { recursive: true });
+    const root = useTempCarapaceHome();
+    fs.mkdirSync(path.join(root, ".carapace", "sessions"), { recursive: true });
 
     await runEnsureConfigReady(["status"]);
 
@@ -473,7 +473,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("runs doctor flow before agent commands when the legacy plugin install index exists", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, "plugins/installs.json");
 
     await runEnsureConfigReady(["agent"]);
@@ -488,7 +488,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("checkpoints migration discovery for established canonical agent state", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, "agents/main/sessions/sessions.json");
 
     await runEnsureConfigReady(["agent"]);
@@ -502,7 +502,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("preserves plugin listing migrations when the legacy plugin install index exists", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, "plugins/installs.json");
     const migratedSnapshot = {
       ...makeSnapshot(),
@@ -531,8 +531,8 @@ describe("ensureConfigReady", () => {
   });
 
   it("preserves plugin listing migrations when the shared state database exists", async () => {
-    const root = useTempOpenClawHome();
-    writeStateMarker(root, "state/openclaw.sqlite");
+    const root = useTempCarapaceHome();
+    writeStateMarker(root, "state/carapace.sqlite");
 
     await runEnsureConfigReady(["plugins", "list"]);
 
@@ -547,11 +547,11 @@ describe("ensureConfigReady", () => {
   ])(
     "ignores default-state $source while $commandPath uses custom state",
     async ({ commandPath, source }) => {
-      const root = useTempOpenClawHome();
+      const root = useTempCarapaceHome();
       const stateDir = path.join(root, "custom-state");
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       writeStateMarker(root, source);
-      const sourcePath = path.join(root, ".openclaw", source);
+      const sourcePath = path.join(root, ".carapace", source);
       const sourceRaw = fs.readFileSync(sourcePath, "utf8");
 
       await runEnsureConfigReady(commandPath);
@@ -564,9 +564,9 @@ describe("ensureConfigReady", () => {
   );
 
   it("keeps named profiles isolated from default-profile approval migrations", async () => {
-    const root = useTempOpenClawHome();
-    setTestEnvValue("OPENCLAW_PROFILE", "work");
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(root, ".openclaw-work"));
+    const root = useTempCarapaceHome();
+    setTestEnvValue("CARAPACE_PROFILE", "work");
+    setTestEnvValue("CARAPACE_STATE_DIR", path.join(root, ".carapace-work"));
     writeStateMarker(root, "exec-approvals.json");
     writeStateMarker(root, "plugin-binding-approvals.json");
 
@@ -588,7 +588,7 @@ describe("ensureConfigReady", () => {
     ["iMessage catchup cursor", "imessage/catchup/default__37a8eec1ce19.json"],
     ["WhatsApp root auth", "credentials/creds.json"],
   ])("runs doctor flow for bundled channel legacy state: %s", async (_label, relativePath) => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, relativePath);
 
     await runEnsureConfigReady(["status"]);
@@ -596,12 +596,12 @@ describe("ensureConfigReady", () => {
     expect(loadAndMaybeMigrateDoctorConfigMock).toHaveBeenCalledOnce();
   });
 
-  it("uses shared tilde expansion for OPENCLAW_HOME in the startup detector", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-guard-home-"));
+  it("uses shared tilde expansion for CARAPACE_HOME in the startup detector", async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-config-guard-home-"));
     tempRoots.push(root);
     setTestEnvValue("HOME", root);
-    setTestEnvValue("OPENCLAW_HOME", "~/svc");
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
+    setTestEnvValue("CARAPACE_HOME", "~/svc");
+    deleteTestEnvValue("CARAPACE_STATE_DIR");
     writeLegacyTaskSidecarMarker(path.join(root, "svc"));
 
     await runEnsureConfigReady(["status"]);
@@ -615,7 +615,7 @@ describe("ensureConfigReady", () => {
   ])(
     "runs doctor flow for $name with configured custom session stores",
     async ({ commandPath }) => {
-      const root = useTempOpenClawHome();
+      const root = useTempCarapaceHome();
       const customStore = path.join(root, "sessions", "sessions.json");
       const snapshot = {
         ...makeSnapshot(),
@@ -675,7 +675,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("forwards config snapshot phase measurement through doctor preflight", async () => {
-    const root = useTempOpenClawHome();
+    const root = useTempCarapaceHome();
     writeStateMarker(root, "plugins/installs.json");
     const measuredStages: string[] = [];
     const measure: ConfigSnapshotReadMeasure = async (stage, run) => {
@@ -736,14 +736,14 @@ describe("ensureConfigReady", () => {
     const runtime = await runEnsureConfigReady(["message"]);
 
     expect(plainErrorCalls(runtime)).toEqual([
-      "OpenClaw config is invalid",
-      "File: /tmp/openclaw.json",
+      "Carapace config is invalid",
+      "File: /tmp/carapace.json",
       "Problem:",
       "  - channels.quietchat: invalid",
       "",
-      `Inspect: ${formatCliCommand("openclaw config validate")}`,
+      `Inspect: ${formatCliCommand("carapace config validate")}`,
       "Audit, status, health, logs, tasks list/audit, and doctor commands still run with invalid config.",
-      `Run "${formatCliCommand("openclaw doctor --fix")}" to repair the config, then retry.`,
+      `Run "${formatCliCommand("carapace doctor --fix")}" to repair the config, then retry.`,
     ]);
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
@@ -776,9 +776,9 @@ describe("ensureConfigReady", () => {
     const runtime = await runEnsureConfigReady(["message"]);
     const output = plainErrorCalls(runtime).join("\n");
 
-    expect(output).toContain('  - openclaw.json:2 — meta: Unrecognized key: "migrations"');
+    expect(output).toContain('  - carapace.json:2 — meta: Unrecognized key: "migrations"');
     expect(output).toContain(
-      '  - openclaw.json:3 — gateway.port: Invalid input: expected number, got: "nope"',
+      '  - carapace.json:3 — gateway.port: Invalid input: expected number, got: "nope"',
     );
   });
 
@@ -792,14 +792,14 @@ describe("ensureConfigReady", () => {
 
       const runtime = await runEnsureConfigReady(["message"]);
       const output = plainErrorCalls(runtime).join("\n");
-      const hint = `Config was last written by OpenClaw ${touchedVersion}, but you are running ${VERSION} — upgrade or re-run setup.`;
+      const hint = `Config was last written by Carapace ${touchedVersion}, but you are running ${VERSION} — upgrade or re-run setup.`;
 
       expect(output.includes(hint)).toBe(expected);
     },
   );
 
   it("runs doctor and retries the config guard once after consent", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     const invalidSnapshot = setInvalidSnapshot();
     const validSnapshot = {
       ...makeSnapshot(),
@@ -820,7 +820,7 @@ describe("ensureConfigReady", () => {
     );
 
     expect(confirm).toHaveBeenCalledWith(
-      `Run "${formatCliCommand("openclaw doctor --fix")}" now?`,
+      `Run "${formatCliCommand("carapace doctor --fix")}" now?`,
       true,
     );
     expect(runDoctor).toHaveBeenCalledOnce();
@@ -860,28 +860,28 @@ describe("ensureConfigReady", () => {
     {
       name: "blocked JSON commands",
       commandPath: ["onboard"],
-      argv: ["node", "openclaw", "onboard", "--json"],
+      argv: ["node", "carapace", "onboard", "--json"],
       exitCode: 1,
       writesJson: true,
     },
     {
       name: "protocol-owned stdout",
       commandPath: ["mcp", "serve"],
-      argv: ["node", "openclaw", "mcp", "serve"],
+      argv: ["node", "carapace", "mcp", "serve"],
       exitCode: 1,
       writesJson: false,
     },
     {
       name: "allowed read-only JSON diagnostics",
       commandPath: ["status"],
-      argv: ["node", "openclaw", "status", "--json"],
+      argv: ["node", "carapace", "status", "--json"],
       exitCode: undefined,
       writesJson: false,
     },
     {
       name: "blocked JSON gateway startup",
       commandPath: ["gateway", "run"],
-      argv: ["node", "openclaw", "gateway", "run", "--json"],
+      argv: ["node", "carapace", "gateway", "run", "--json"],
       exitCode: 78,
       writesJson: true,
     },
@@ -908,7 +908,7 @@ describe("ensureConfigReady", () => {
           ok: false,
           error: {
             type: "cli_error",
-            message: "OpenClaw config is invalid: /tmp/openclaw.json",
+            message: "Carapace config is invalid: /tmp/carapace.json",
           },
           issues: [{ path: "channels.quietchat", message: "invalid" }],
         });
@@ -925,7 +925,7 @@ describe("ensureConfigReady", () => {
 
   it("keeps invalid Nix-managed config on the manual recovery path", async () => {
     setInvalidSnapshot();
-    setTestEnvValue("OPENCLAW_NIX_MODE", "1");
+    setTestEnvValue("CARAPACE_NIX_MODE", "1");
     const runtime = makeRuntime();
     const confirm = vi.fn(async () => true);
 
@@ -959,7 +959,7 @@ describe("ensureConfigReady", () => {
     const calls = plainErrorCalls(runtime);
 
     expect(calls).toContain(`Fix: ${pluginPackagingRecoveryHint}`);
-    expect(calls).not.toContain(`Fix: ${formatCliCommand("openclaw doctor --fix")}`);
+    expect(calls).not.toContain(`Fix: ${formatCliCommand("carapace doctor --fix")}`);
     expect(runtime.exit).toHaveBeenCalledWith(1);
 
     const gatewayRuntime = await runEnsureConfigReady(["gateway", "start"]);
@@ -1040,7 +1040,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("runs doctor migration flow only once per module instance", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     const runtimeA = makeRuntime();
     const runtimeB = makeRuntime();
 
@@ -1050,13 +1050,13 @@ describe("ensureConfigReady", () => {
   });
 
   it("still runs doctor flow when stdout suppression is enabled", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     await runEnsureConfigReady(["message"], true);
     expect(loadAndMaybeMigrateDoctorConfigMock).toHaveBeenCalledTimes(1);
   });
 
   it("prevents preflight note noise when suppression is enabled", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     loadAndMaybeMigrateDoctorConfigMock.mockImplementation(async () => {
       note("Doctor warnings", "Config warnings");
       return {
@@ -1071,7 +1071,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("allows preflight note noise when suppression is not enabled", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     loadAndMaybeMigrateDoctorConfigMock.mockImplementation(async () => {
       note("Doctor warnings", "Config warnings");
       return {
@@ -1086,7 +1086,7 @@ describe("ensureConfigReady", () => {
   });
 
   it("does not suppress unrelated concurrent stdout writes while suppressing preflight notes", async () => {
-    writeLegacyTaskSidecarMarker(useTempOpenClawHome());
+    writeLegacyTaskSidecarMarker(useTempCarapaceHome());
     let releasePreflight: (() => void) | undefined;
     let preflightStarted: (() => void) | undefined;
     const preflightStartedPromise = new Promise<void>((resolve) => {

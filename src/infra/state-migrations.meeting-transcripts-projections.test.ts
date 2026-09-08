@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   exportTranscriptLibrary,
   getTranscriptLibrary,
@@ -27,16 +27,16 @@ import {
 } from "./state-migrations.receipts.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 function createHarness() {
-  const stateDir = tempDirs.make("openclaw-transcript-projections-");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = tempDirs.make("carapace-transcript-projections-");
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const root = path.join(stateDir, "transcripts");
   const store = new TranscriptsStore(root, { env });
   const detect = () =>
     detectLegacyMeetingTranscripts({ stateDir, env, doctorOnlyStateMigrations: true });
-  const database = () => openOpenClawStateDatabase({ env }).db;
+  const database = () => openCarapaceStateDatabase({ env }).db;
   return {
     stateDir,
     env,
@@ -150,7 +150,7 @@ describe("meeting transcript Doctor oversized projections", () => {
       expect(harness.snapshot()).toEqual(before);
 
       const readListedCapture = async (expectedSelector: string) => {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         const reopened = new TranscriptsStore(harness.root, { env: harness.env });
         const listed = listTranscriptLibrary(reopened, {}).sessions.find(
           (entry) => entry.sessionId === sessionId,
@@ -190,7 +190,7 @@ describe("meeting transcript Doctor oversized projections", () => {
       const result = await harness.migrate();
       expect(result.warnings).toEqual([]);
       expect(result.changes).toEqual([expect.stringMatching(/1.*oversized/i)]);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const slug = safeTranscriptPathSegment(sessionId);
       const expected = structuredClone(before);
       Object.assign(
@@ -266,7 +266,7 @@ describe("meeting transcript Doctor oversized projections", () => {
     const result = await harness.migrate();
     expect(result.changes).toEqual([]);
     expect(result.warnings).toEqual([expect.stringMatching(/UNIQUE constraint failed.*selector/i)]);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(harness.snapshot()).toEqual(before);
     expect(harness.detect().hasLegacy).toBe(true);
     await expect(fs.stat(harness.root)).rejects.toMatchObject({ code: "ENOENT" });

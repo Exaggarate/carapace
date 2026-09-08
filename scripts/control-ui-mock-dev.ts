@@ -1,4 +1,4 @@
-// Control Ui Mock Dev script supports OpenClaw repository automation.
+// Control Ui Mock Dev script supports Carapace repository automation.
 import { createHash } from "node:crypto";
 import fs, { rmSync } from "node:fs";
 import { mkdir, mkdtemp } from "node:fs/promises";
@@ -242,7 +242,7 @@ function buildUpdateFixture(fixture: CliOptions["fixture"], nowMs: number): Upda
   const result: UpdateRunResult = {
     status: "error",
     mode: "git",
-    root: "/mock/openclaw",
+    root: "/mock/carapace",
     reason: "build-failed",
     before: { version: available.currentVersion, sha: currentSha },
     after: { version: available.latestVersion, sha: upstreamSha },
@@ -250,7 +250,7 @@ function buildUpdateFixture(fixture: CliOptions["fixture"], nowMs: number): Upda
       {
         name: "build",
         command: "pnpm build",
-        cwd: "/mock/openclaw",
+        cwd: "/mock/carapace",
         durationMs: 8_420,
         stdoutTail: "",
         stderrTail: "tsc: error TS2345",
@@ -281,7 +281,7 @@ const boardFixtureHtml = `<!doctype html>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <title>OpenClaw Board Fixture</title>
+    <title>Carapace Board Fixture</title>
     <script>
       // This standalone fixture bypasses app bootstrap, so mirror its root theme contract.
       const mediaQuery = matchMedia("(prefers-color-scheme: light)");
@@ -595,7 +595,7 @@ function buildSessionDiffMock() {
   ].join("\n");
   return {
     sessionKey: "main",
-    root: "/tmp/openclaw-mock-checkout",
+    root: "/tmp/carapace-mock-checkout",
     branch: "feature/session-diff-panel",
     baseRef: "main",
     files: [
@@ -845,12 +845,12 @@ function buildProfileUsageMocks(baseTime: number) {
       endDate: daily[daily.length - 1]?.date,
       sessions: [
         {
-          key: "agent:openclaw-mock:marathon",
+          key: "agent:carapace-mock:marathon",
           label: "Release night marathon",
           usage: { ...usageCostTotals(4_000_000_000), durationMs: (59 * 60 + 4) * 60 * 1000 },
         },
         {
-          key: "agent:openclaw-mock:daily",
+          key: "agent:carapace-mock:daily",
           label: "Daily driver",
           usage: { ...usageCostTotals(900_000_000), durationMs: 3 * 60 * 60 * 1000 },
         },
@@ -905,7 +905,7 @@ function buildProfileUsageMocks(baseTime: number) {
           },
         ],
         byAgent: [
-          { agentId: "openclaw-mock", totals: usageCostTotals(Math.round(lifetimeTokens * 0.8)) },
+          { agentId: "carapace-mock", totals: usageCostTotals(Math.round(lifetimeTokens * 0.8)) },
           { agentId: "alpha", totals: usageCostTotals(Math.round(lifetimeTokens * 0.2)) },
         ],
         byChannel: [
@@ -959,7 +959,7 @@ function buildConfigMocks(options: { swarmEnabled?: boolean; workboardEnabled?: 
   };
   const schema = {
     type: "object",
-    title: "OpenClaw config",
+    title: "Carapace config",
     properties: {
       logging: {
         type: "object",
@@ -1138,7 +1138,7 @@ function buildConfigMocks(options: { swarmEnabled?: boolean; workboardEnabled?: 
     },
   };
   const get = {
-    path: "~/.openclaw/openclaw.json",
+    path: "~/.carapace/carapace.json",
     exists: true,
     raw: `${JSON.stringify(config, null, 2)}\n`,
     hash: "mock-config-hash",
@@ -1160,7 +1160,7 @@ function buildConfigMocks(options: { swarmEnabled?: boolean; workboardEnabled?: 
           status: "ok",
           ts: 0,
           message: null,
-          doctorHint: "openclaw doctor --non-interactive",
+          doctorHint: "carapace doctor --non-interactive",
           stats: { mode: "config.apply", root: get.path, requiresRestart: false },
         },
       },
@@ -1454,7 +1454,7 @@ async function createChatPickerScenario(
       updatedAtMs: baseTime - 30_000,
     },
   ];
-  const workspaceListCases = ["main", "alpha", "openclaw-mock"].map((agentId) => ({
+  const workspaceListCases = ["main", "alpha", "carapace-mock"].map((agentId) => ({
     match: { agentId },
     response: {
       agentId,
@@ -1476,7 +1476,7 @@ async function createChatPickerScenario(
       "# Context notes\n\nThe right rail should feel like workspace context, not a modal pasted beside the chat.\n\n## Current focus\n\n- Markdown previews need readable dark-mode chrome.\n- Empty or unavailable content should show a quiet state instead of an empty card.\n- File previews should load from the same mock scenario as the file list.\n",
     ],
   ]);
-  const workspaceFileCases = ["main", "alpha", "openclaw-mock"].flatMap((agentId) =>
+  const workspaceFileCases = ["main", "alpha", "carapace-mock"].flatMap((agentId) =>
     workspaceFiles.map((file) => ({
       match: { agentId, name: file.name },
       response: {
@@ -1543,7 +1543,7 @@ async function createChatPickerScenario(
     ],
     [
       "package.json",
-      '{\n  "name": "openclaw",\n  "scripts": { "dev:ui:mock": "tsx scripts/control-ui-mock-dev.ts" }\n}\n',
+      '{\n  "name": "carapace",\n  "scripts": { "dev:ui:mock": "tsx scripts/control-ui-mock-dev.ts" }\n}\n',
     ],
     [
       "ui/vite.config.ts",
@@ -1634,12 +1634,12 @@ async function createChatPickerScenario(
   <path d="M232 114c-72-44-135-22-146 35 52 9 91-4 125-39" fill="none" stroke="#f06b5f" stroke-width="28" stroke-linecap="round"/>
   <path d="M408 114c72-44 135-22 146 35-52 9-91-4-125-39" fill="none" stroke="#f06b5f" stroke-width="28" stroke-linecap="round"/>
   <path d="M232 246c-45 28-91 35-142 23M408 246c45 28 91 35 142 23" fill="none" stroke="#e14b47" stroke-width="16" stroke-linecap="round"/>
-  <text x="320" y="326" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="24" fill="#f6f7f9">openclaw session artifact</text>
+  <text x="320" y="326" text-anchor="middle" font-family="ui-sans-serif, system-ui" font-size="24" fill="#f6f7f9">carapace session artifact</text>
 </svg>`;
   const lobsterArtifact = {
-    id: "artifact-openclaw-lobster",
+    id: "artifact-carapace-lobster",
     type: "image",
-    title: "openclaw-lobster-preview.svg",
+    title: "carapace-lobster-preview.svg",
     mimeType: "image/svg+xml",
     sizeBytes: Buffer.byteLength(lobsterSvg, "utf8"),
     source: "session-transcript",
@@ -1819,7 +1819,7 @@ async function createChatPickerScenario(
       hasActiveRun: true,
       status: "running",
       startedAt: baseTime - 3_500_000,
-      execCwd: "/workspace/openclaw",
+      execCwd: "/workspace/carapace",
       placement: {
         state: "active",
         generation: 3,
@@ -1832,7 +1832,7 @@ async function createChatPickerScenario(
         activeOwnerEpoch: 4,
         workerBundleHash: "b".repeat(64),
         workspaceBaseManifestRef: "sha256:cloud-refactor-base",
-        remoteWorkspaceDir: "/workspace/openclaw",
+        remoteWorkspaceDir: "/workspace/carapace",
         diskSpace: {
           status: "ok",
           availableBytes: 61 * 1024 ** 3,
@@ -1854,14 +1854,14 @@ async function createChatPickerScenario(
     ),
     sessionRow("agent:main:model-budget", "Model budget review", baseTime - 80_000, {
       category: "Research",
-      execCwd: "/Users/demo/Projects/openclaw",
+      execCwd: "/Users/demo/Projects/carapace",
       owner: { actor: { type: "human", id: "presence-riley", label: "Riley" } },
       status: "failed",
       lastRunError: "Model out of credits: openai/gpt-5.6",
     }),
-    sessionRow("agent:main:work-openclaw", "OpenClaw work checkout", baseTime - 85_000, {
+    sessionRow("agent:main:work-carapace", "Carapace work checkout", baseTime - 85_000, {
       createdActor: MOCK_ACTOR_PETER,
-      execCwd: "/Users/demo/Work/openclaw",
+      execCwd: "/Users/demo/Work/carapace",
       lastReadAt: baseTime - 120_000,
       owner: { actor: MOCK_ACTOR_PETER },
       participantCount: 4,
@@ -1892,7 +1892,7 @@ async function createChatPickerScenario(
       channel: "whatsapp",
       unread: true,
     }),
-    sessionRow("agent:main:discord:channel:openclaw-dev", "#openclaw-dev", baseTime - 300_000, {
+    sessionRow("agent:main:discord:channel:carapace-dev", "#carapace-dev", baseTime - 300_000, {
       kind: "group",
       channel: "discord",
     }),
@@ -1900,7 +1900,7 @@ async function createChatPickerScenario(
       worktree: {
         id: "wt-sidebar-zones",
         branch: "claude/sidebar-agent-zones",
-        repoRoot: "~/Projects/openclaw",
+        repoRoot: "~/Projects/carapace",
       },
     }),
     // Second repo plus a spawned worktree checkout so the sidebar's
@@ -1908,12 +1908,12 @@ async function createChatPickerScenario(
     sessionRow("agent:main:clawdbot-vite", "Vite upgrade spike", baseTime - 160_000, {
       worktree: {
         id: "wt-clawdbot-vite",
-        branch: "openclaw/vite-upgrade",
+        branch: "carapace/vite-upgrade",
         repoRoot: "~/Projects/clawdbot",
       },
     }),
     sessionRow("agent:main:project-grouping", "Sidebar project grouping", baseTime - 170_000, {
-      spawnedCwd: "~/Projects/openclaw/.claude/worktrees/groups-c7c338",
+      spawnedCwd: "~/Projects/carapace/.claude/worktrees/groups-c7c338",
     }),
     ...buildSessionRows({
       baseTime: baseTime - 400_000,
@@ -2097,9 +2097,9 @@ async function createChatPickerScenario(
       "chat.metadata",
       "chat.startup",
       "question.list",
-      "openclaw.changes.list",
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.changes.list",
+      "carapace.chat",
+      "carapace.chat.history",
       "progressCard.get",
       "sessions.delete",
       "sessions.diff",
@@ -2270,7 +2270,7 @@ async function createChatPickerScenario(
                   {
                     threadId: "codex-thread-1",
                     name: "Release checklist sweep",
-                    cwd: "/Users/demo/projects/openclaw",
+                    cwd: "/Users/demo/projects/carapace",
                     status: "idle",
                     updatedAt: baseTime - 10 * 60_000,
                     archived: false,
@@ -2280,7 +2280,7 @@ async function createChatPickerScenario(
                   {
                     threadId: "codex-thread-2",
                     name: "Sidebar context-menu proof",
-                    cwd: "/Users/demo/projects/openclaw",
+                    cwd: "/Users/demo/projects/carapace",
                     status: "idle",
                     updatedAt: baseTime - 45 * 60_000,
                     archived: false,
@@ -2389,7 +2389,7 @@ async function createChatPickerScenario(
         memoryFreeBytes: 34_359_738_368,
         diskTotalBytes: 1_000_000_000_000,
         diskAvailableBytes: 640_000_000_000,
-        diskPath: "/Users/demo/.openclaw",
+        diskPath: "/Users/demo/.carapace",
         defaultAgentUtilityModel: {
           status: "auto",
           model: "anthropic/claude-haiku-4-5",
@@ -2398,16 +2398,16 @@ async function createChatPickerScenario(
       "fs.listDir": {
         cases: [
           {
-            match: { path: "/Users/demo/Projects/openclaw" },
+            match: { path: "/Users/demo/Projects/carapace" },
             response: {
-              path: "/Users/demo/Projects/openclaw",
+              path: "/Users/demo/Projects/carapace",
               parent: "/Users/demo/Projects",
               home: "/Users/demo",
               entries: [
-                { name: "ui", path: "/Users/demo/Projects/openclaw/ui" },
-                { name: "src", path: "/Users/demo/Projects/openclaw/src" },
-                { name: "docs", path: "/Users/demo/Projects/openclaw/docs" },
-                { name: "packages", path: "/Users/demo/Projects/openclaw/packages" },
+                { name: "ui", path: "/Users/demo/Projects/carapace/ui" },
+                { name: "src", path: "/Users/demo/Projects/carapace/src" },
+                { name: "docs", path: "/Users/demo/Projects/carapace/docs" },
+                { name: "packages", path: "/Users/demo/Projects/carapace/packages" },
               ],
             },
           },
@@ -2418,7 +2418,7 @@ async function createChatPickerScenario(
               parent: "/Users/demo",
               home: "/Users/demo",
               entries: [
-                { name: "openclaw", path: "/Users/demo/Projects/openclaw" },
+                { name: "carapace", path: "/Users/demo/Projects/carapace" },
                 { name: "clawdbot", path: "/Users/demo/Projects/clawdbot" },
                 { name: "sweetistics", path: "/Users/demo/Projects/sweetistics" },
                 { name: "Peekaboo", path: "/Users/demo/Projects/Peekaboo" },
@@ -2443,9 +2443,9 @@ async function createChatPickerScenario(
       "worktrees.branches": {
         cases: [
           {
-            match: { repoRoot: "/Users/demo/Projects/openclaw" },
+            match: { repoRoot: "/Users/demo/Projects/carapace" },
             response: {
-              repoRoot: "/Users/demo/Projects/openclaw",
+              repoRoot: "/Users/demo/Projects/carapace",
               branches: [
                 { kind: "local", name: "main" },
                 { kind: "local", name: "steipete/place-picker" },
@@ -2495,8 +2495,8 @@ async function createChatPickerScenario(
       "config.set": configMocks.set,
       "config.apply": configMocks.apply,
       "config.schema": configMocks.schema,
-      "openclaw.chat.history": custodianHistory,
-      "openclaw.changes.list": custodianChanges,
+      "carapace.chat.history": custodianHistory,
+      "carapace.changes.list": custodianChanges,
       // The sidebar recovers pending questions through question.list after the
       // hello handshake, so this remains visible after a mock-page refresh.
       "question.list": {
@@ -2530,11 +2530,11 @@ async function createChatPickerScenario(
               {
                 id: "mock-production-export-approval",
                 request: {
-                  command: "openclaw export --target production",
+                  command: "carapace export --target production",
                   agentId: "main",
                   sessionKey: "agent:main:production-export",
                   host: "mock-workstation.invalid",
-                  cwd: "/Users/demo/Projects/openclaw",
+                  cwd: "/Users/demo/Projects/carapace",
                   security: "full",
                   ask: "on-miss",
                   allowedDecisions: ["allow-once", "allow-always", "deny"],
@@ -2560,7 +2560,7 @@ async function createChatPickerScenario(
             ]
           : [],
       "plugin.approval.list": [],
-      "openclaw.approval.list": [],
+      "carapace.approval.list": [],
       "exec.approval.resolve": { ok: true },
       "plugin.approval.resolve": { ok: true },
       "approval.resolve": { ok: true },
@@ -2574,9 +2574,9 @@ async function createChatPickerScenario(
             id: "wt-mock-1",
             name: "fix-session-icons",
             repoFingerprint: "a1b2c3d4e5f60718",
-            repoRoot: "/Users/demo/Projects/openclaw",
-            path: "/Users/demo/Projects/openclaw/.openclaw/worktrees/fix-session-icons",
-            branch: "openclaw/fix-session-icons",
+            repoRoot: "/Users/demo/Projects/carapace",
+            path: "/Users/demo/Projects/carapace/.carapace/worktrees/fix-session-icons",
+            branch: "carapace/fix-session-icons",
             baseRef: "origin/main",
             ownerKind: "session",
             createdAt: baseTime - 3 * 86_400_000,
@@ -2586,9 +2586,9 @@ async function createChatPickerScenario(
             id: "wt-mock-2",
             name: "dashboard-polish",
             repoFingerprint: "a1b2c3d4e5f60718",
-            repoRoot: "/Users/demo/Projects/openclaw",
-            path: "/Users/demo/Projects/openclaw/.openclaw/worktrees/dashboard-polish",
-            branch: "openclaw/dashboard-polish",
+            repoRoot: "/Users/demo/Projects/carapace",
+            path: "/Users/demo/Projects/carapace/.carapace/worktrees/dashboard-polish",
+            branch: "carapace/dashboard-polish",
             baseRef: "origin/main",
             ownerKind: "manual",
             createdAt: baseTime - 9 * 86_400_000,
@@ -2708,7 +2708,7 @@ async function createChatPickerScenario(
             deviceId: "11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
             displayName: "iPhone",
             platform: "iOS 26.4",
-            clientId: "openclaw-ios",
+            clientId: "carapace-ios",
             clientMode: "ui",
             roles: ["operator", "node"],
             scopes: ["operator.approvals", "operator.read", "operator.write"],
@@ -2871,14 +2871,14 @@ async function createChatPickerScenario(
           ts: baseTime - 30_000,
         },
         {
-          host: "openclaw-control-ui",
+          host: "carapace-control-ui",
           version: "2026.6.11",
           platform: "macos 26.5.2",
           mode: "webchat",
           reason: "connect",
           roles: ["operator"],
           instanceId: "mock-unpaired-webchat",
-          text: "Node: openclaw-control-ui · mode webchat",
+          text: "Node: carapace-control-ui · mode webchat",
           ts: baseTime - 10_000,
         },
       ],
@@ -3165,7 +3165,7 @@ async function createChatPickerScenario(
       taxChildRow,
     ],
     sessionKey: fixture === "workboard" ? workboardMocks.sessionKey : "agent:main:main",
-    workspace: "/Users/demo/Projects/openclaw",
+    workspace: "/Users/demo/Projects/carapace",
     workspaceGit: true,
   };
 }
@@ -3192,12 +3192,12 @@ async function createMockGatewayPlugin(
   );
   const attachmentThemeToggle =
     fixture === "attachments"
-      ? `    <style data-openclaw-control-ui-mock-theme-toggle>
+      ? `    <style data-carapace-control-ui-mock-theme-toggle>
       .control-ui-mock-theme-toggle { position: fixed; right: 16px; bottom: 16px; z-index: 1000; display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--card); box-shadow: var(--shadow-md); }
       .control-ui-mock-theme-toggle button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 999px; color: var(--muted); background: transparent; font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
       .control-ui-mock-theme-toggle button[aria-pressed="true"] { color: var(--text); background: var(--bg-hover); }
     </style>
-    <script data-openclaw-control-ui-mock-theme-toggle>
+    <script data-carapace-control-ui-mock-theme-toggle>
       addEventListener("DOMContentLoaded", () => {
         const control = document.createElement("div");
         control.className = "control-ui-mock-theme-toggle";
@@ -3230,8 +3230,8 @@ async function createMockGatewayPlugin(
   return {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const prefix = "/__openclaw__/plugin-icon/";
-        const pathname = new URL(req.url ?? "/", "http://openclaw.invalid").pathname;
+        const prefix = "/__carapace__/plugin-icon/";
+        const pathname = new URL(req.url ?? "/", "http://carapace.invalid").pathname;
         if (!pathname.startsWith(prefix)) {
           next();
           return;
@@ -3273,11 +3273,11 @@ async function createMockGatewayPlugin(
     // config-file plugins load first, so without "pre" its stub answers every
     // request and the scenario's bootstrap fields never reach the app.
     enforce: "pre",
-    name: "openclaw-control-ui-mock-gateway",
+    name: "carapace-control-ui-mock-gateway",
     transformIndexHtml(html) {
       return html.replace(
         "</head>",
-        `${attachmentThemeToggle}    <script data-openclaw-control-ui-mock-locale>\n      try { localStorage.setItem("openclaw.i18n.locale", "en"); } catch {}\n    </script>\n    <script data-openclaw-control-ui-mock-gateway>\n${sameOriginGatewayScript}\n${initScript}\n${statefulInitScript}\n    </script>\n  </head>`,
+        `${attachmentThemeToggle}    <script data-carapace-control-ui-mock-locale>\n      try { localStorage.setItem("carapace.i18n.locale", "en"); } catch {}\n    </script>\n    <script data-carapace-control-ui-mock-gateway>\n${sameOriginGatewayScript}\n${initScript}\n${statefulInitScript}\n    </script>\n  </head>`,
       );
     },
   };
@@ -3285,7 +3285,7 @@ async function createMockGatewayPlugin(
 
 function createBoardFixturePlugin(): Plugin {
   return {
-    name: "openclaw-control-ui-board-fixture",
+    name: "carapace-control-ui-board-fixture",
     configureServer(server) {
       server.middlewares.use(boardFixturePath, (_req, res, next) => {
         void server
@@ -3349,7 +3349,7 @@ try {
     clearScreen: false,
     configFile: path.join(uiRoot, "vite.config.ts"),
     define: {
-      "globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO": JSON.stringify({
+      "globalThis.CARAPACE_CONTROL_UI_BUILD_INFO": JSON.stringify({
         version: "2026.7.10",
         commit: "0123456789abcdef0123456789abcdef01234567",
         commitAt: "2026-07-10T11:22:33.000Z",

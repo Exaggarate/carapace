@@ -46,48 +46,48 @@ describe("agent cleanup timeout", () => {
     },
     {
       name: "trajectory environment override",
-      step: "openclaw-trajectory-flush",
-      env: { OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000" },
+      step: "carapace-trajectory-flush",
+      env: { CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000" },
       expectedTimeoutMs: 25_000,
     },
     {
       name: "general environment override",
       step: "bundle-mcp-retire",
-      env: { OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS: "1500" },
+      env: { CARAPACE_AGENT_CLEANUP_TIMEOUT_MS: "1500" },
       expectedTimeoutMs: 1_500,
     },
     {
       name: "explicit budget before environment overrides",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       timeoutMs: 2_000,
       env: {
-        OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000",
-        OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS: "15000",
+        CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000",
+        CARAPACE_AGENT_CLEANUP_TIMEOUT_MS: "15000",
       },
       expectedTimeoutMs: 2_000,
     },
     {
       name: "explicit zero clamped to one millisecond",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       timeoutMs: 0,
-      env: { OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000" },
+      env: { CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS: "25000" },
       expectedTimeoutMs: 1,
     },
     {
       name: "invalid environment numbers ignored",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       env: {
-        OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS: "0",
-        OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS: "not-a-number",
+        CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS: "0",
+        CARAPACE_AGENT_CLEANUP_TIMEOUT_MS: "not-a-number",
       },
       expectedTimeoutMs: AGENT_CLEANUP_STEP_TIMEOUT_MS,
     },
     {
       name: "invalid environment formats ignored",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       env: {
-        OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS: "1e3",
-        OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS: "0x10",
+        CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS: "1e3",
+        CARAPACE_AGENT_CLEANUP_TIMEOUT_MS: "0x10",
       },
       expectedTimeoutMs: AGENT_CLEANUP_STEP_TIMEOUT_MS,
     },
@@ -118,7 +118,7 @@ describe("agent cleanup timeout", () => {
     const result = runAgentCleanupStep({
       runId: "run-trajectory",
       sessionId: "session-trajectory",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       cleanup,
       log,
       timeoutMs: 5,
@@ -129,7 +129,7 @@ describe("agent cleanup timeout", () => {
     await expect(result).resolves.toBeUndefined();
 
     expect(log.warn).toHaveBeenCalledWith(
-      "agent cleanup timed out: runId=run-trajectory sessionId=session-trajectory step=openclaw-trajectory-flush timeoutMs=5 details=pendingWrites=2 queuedBytes=128 activeOperation=file-append",
+      "agent cleanup timed out: runId=run-trajectory sessionId=session-trajectory step=carapace-trajectory-flush timeoutMs=5 details=pendingWrites=2 queuedBytes=128 activeOperation=file-append",
     );
   });
 
@@ -176,7 +176,7 @@ describe("agent cleanup timeout", () => {
     const result = runAgentCleanupStep({
       runId: "run-trajectory",
       sessionId: "session-trajectory",
-      step: "openclaw-trajectory-flush",
+      step: "carapace-trajectory-flush",
       cleanup,
       log,
       timeoutMs: 5,
@@ -189,7 +189,7 @@ describe("agent cleanup timeout", () => {
     await expect(result).resolves.toBeUndefined();
 
     expect(log.warn).toHaveBeenCalledWith(
-      "agent cleanup timed out: runId=run-trajectory sessionId=session-trajectory step=openclaw-trajectory-flush timeoutMs=5 detailsError=details unavailable",
+      "agent cleanup timed out: runId=run-trajectory sessionId=session-trajectory step=carapace-trajectory-flush timeoutMs=5 detailsError=details unavailable",
     );
   });
 

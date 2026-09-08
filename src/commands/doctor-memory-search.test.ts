@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
 
 const note = vi.hoisted(() => vi.fn());
@@ -11,10 +11,10 @@ const listAgentIds = vi.hoisted(() =>
   ),
 );
 const resolveAgentDir = vi.hoisted(() =>
-  vi.fn<(_cfg: OpenClawConfig, agentId: string) => string>(() => "/tmp/agent-default"),
+  vi.fn<(_cfg: CarapaceConfig, agentId: string) => string>(() => "/tmp/agent-default"),
 );
 const resolveAgentWorkspaceDir = vi.hoisted(() =>
-  vi.fn<(_cfg: OpenClawConfig, agentId: string) => string>(() => "/tmp/agent-default/workspace"),
+  vi.fn<(_cfg: CarapaceConfig, agentId: string) => string>(() => "/tmp/agent-default/workspace"),
 );
 const resolveMemorySearchConfig = vi.hoisted(() => vi.fn());
 const resolveApiKeyForProviderCore = vi.hoisted(() => vi.fn());
@@ -73,8 +73,8 @@ const getMissingLocalMemoryEmbeddingProviderMessage = vi.hoisted(() =>
     () =>
       "Unknown memory embedding provider: local.\n" +
       "Local GGUF embeddings are provided by the official llama.cpp provider plugin.\n" +
-      "Install it with: openclaw plugins install @openclaw/llama-cpp-provider\n" +
-      "Then restart OpenClaw and retry: openclaw memory status --deep",
+      "Install it with: carapace plugins install @carapace/llama-cpp-provider\n" +
+      "Then restart Carapace and retry: carapace memory status --deep",
   ),
 );
 
@@ -220,7 +220,7 @@ function expectFirstNoteExcludes(...values: string[]) {
 }
 
 describe("noteMemorySearchHealth", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
   const skippedGatewayOptions = {
     gatewayMemoryProbe: { checked: false, ready: false, skipped: true },
   } satisfies NonNullable<Parameters<typeof noteMemorySearchHealth>[1]>;
@@ -254,7 +254,7 @@ describe("noteMemorySearchHealth", () => {
     NonNullable<Parameters<typeof noteMemorySearchHealth>[1]>,
     {
       overrides?: Record<string, unknown>;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       contains?: string[];
       noNote?: boolean;
       noApiKeyLookup?: boolean;
@@ -274,7 +274,7 @@ describe("noteMemorySearchHealth", () => {
     provider: string,
     options?: Parameters<typeof noteMemorySearchHealth>[1],
     overrides?: Record<string, unknown>,
-    config: OpenClawConfig = cfg,
+    config: CarapaceConfig = cfg,
   ) {
     stubMemorySearchConfig(provider, overrides);
     await noteMemorySearchHealth(config, options);
@@ -282,7 +282,7 @@ describe("noteMemorySearchHealth", () => {
 
   async function runConfiguredMemorySearch(
     provider: string,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     options?: Parameters<typeof noteMemorySearchHealth>[1],
     overrides?: Record<string, unknown>,
   ) {
@@ -290,9 +290,9 @@ describe("noteMemorySearchHealth", () => {
   }
 
   function conversationRecallConfig(
-    plugins?: OpenClawConfig["plugins"],
+    plugins?: CarapaceConfig["plugins"],
     rememberAcrossConversations = true,
-  ): OpenClawConfig {
+  ): CarapaceConfig {
     return {
       agents: {
         list: [
@@ -303,11 +303,11 @@ describe("noteMemorySearchHealth", () => {
         ],
       },
       ...(plugins ? { plugins } : {}),
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   async function runConversationRecallHealth(
-    plugins?: OpenClawConfig["plugins"],
+    plugins?: CarapaceConfig["plugins"],
     rememberAcrossConversations = true,
     overrides: Record<string, unknown> = conversationRecall,
   ) {
@@ -319,7 +319,7 @@ describe("noteMemorySearchHealth", () => {
     );
   }
 
-  async function runAuthLintHealth(provider: "openai" | "bedrock", config: OpenClawConfig = cfg) {
+  async function runAuthLintHealth(provider: "openai" | "bedrock", config: CarapaceConfig = cfg) {
     await runConfiguredMemorySearch(
       provider,
       config,
@@ -382,8 +382,8 @@ describe("noteMemorySearchHealth", () => {
     expect(note).toHaveBeenCalledTimes(1);
     expectFirstNoteContains(
       "Unknown memory embedding provider: local",
-      "openclaw plugins install @openclaw/llama-cpp-provider",
-      "openclaw memory status --deep",
+      "carapace plugins install @carapace/llama-cpp-provider",
+      "carapace memory status --deep",
     );
     expect(getMissingLocalMemoryEmbeddingProviderMessage).toHaveBeenCalledOnce();
   });
@@ -402,9 +402,9 @@ describe("noteMemorySearchHealth", () => {
     expectFirstNoteContains(
       'Installed plugin "llama-cpp" does not provide current local-memory setup diagnostics',
       "legacy llama.cpp server is unavailable",
-      "openclaw plugins update llama-cpp",
+      "carapace plugins update llama-cpp",
     );
-    expectFirstNoteExcludes("openclaw plugins install @openclaw/llama-cpp-provider");
+    expectFirstNoteExcludes("carapace plugins install @carapace/llama-cpp-provider");
   });
 
   it.each([
@@ -416,7 +416,7 @@ describe("noteMemorySearchHealth", () => {
     [
       "plugin-disabled",
       'Installed plugin "llama-cpp" is disabled for this config',
-      "openclaw plugins enable llama-cpp --accept-capabilities",
+      "carapace plugins enable llama-cpp --accept-capabilities",
     ],
     [
       "not-in-allowlist",
@@ -430,8 +430,8 @@ describe("noteMemorySearchHealth", () => {
 
     expectFirstNoteContains(message, "local provider is blocked", fix);
     expectFirstNoteExcludes(
-      "openclaw plugins install @openclaw/llama-cpp-provider",
-      "openclaw plugins update llama-cpp",
+      "carapace plugins install @carapace/llama-cpp-provider",
+      "carapace plugins update llama-cpp",
     );
     expect(loadTrustedExternalProviderPolicyArtifacts).not.toHaveBeenCalled();
   });
@@ -448,7 +448,7 @@ describe("noteMemorySearchHealth", () => {
 
     expectFirstNoteContains(
       "Plugin loading is disabled for this config",
-      "openclaw config set plugins.enabled true --strict-json",
+      "carapace config set plugins.enabled true --strict-json",
     );
     expectFirstNoteExcludes("No active memory plugin is registered");
     expect(resolveActiveMemoryBackendConfig).not.toHaveBeenCalled();
@@ -486,7 +486,7 @@ describe("noteMemorySearchHealth", () => {
     );
     expect(loadTrustedExternalProviderPolicyArtifacts).toHaveBeenCalledWith([selectedOwner]);
     expectFirstNoteContains("Selected provider needs setup", "Configure the selected provider");
-    expectFirstNoteExcludes("openclaw plugins enable a-disabled");
+    expectFirstNoteExcludes("carapace plugins enable a-disabled");
   });
 
   it("uses installed provider setup guidance instead of reinstalling the plugin", async () => {
@@ -495,7 +495,7 @@ describe("noteMemorySearchHealth", () => {
       reason: "Local embeddings need the managed llama.cpp server config.",
       requirement: "managed-llama-cpp-setup",
       fixHint:
-        "Run `openclaw models --agent agent-default auth login --provider llama-cpp --method local` in an interactive terminal, then rerun this check.",
+        "Run `carapace models --agent agent-default auth login --provider llama-cpp --method local` in an interactive terminal, then rerun this check.",
     });
 
     await runMemorySearchHealth(
@@ -505,10 +505,10 @@ describe("noteMemorySearchHealth", () => {
 
     expectFirstNoteContains(
       "Local embeddings need the managed llama.cpp server config",
-      "openclaw models --agent agent-default auth login --provider llama-cpp --method local",
+      "carapace models --agent agent-default auth login --provider llama-cpp --method local",
       "Managed local embeddings are unavailable",
     );
-    expectFirstNoteExcludes("openclaw plugins install @openclaw/llama-cpp-provider");
+    expectFirstNoteExcludes("carapace plugins install @carapace/llama-cpp-provider");
   });
 
   it("supports silent structured collection through an injected note sink", async () => {
@@ -535,7 +535,7 @@ describe("noteMemorySearchHealth", () => {
       "managed llama-server unavailable",
       "Repair the llama.cpp server problem reported by the Gateway",
     );
-    expectFirstNoteExcludes("openclaw plugins install @openclaw/llama-cpp-provider");
+    expectFirstNoteExcludes("carapace plugins install @carapace/llama-cpp-provider");
   });
 
   it("does not warn when local provider with default model and gateway probe is ready", async () => {
@@ -630,7 +630,7 @@ describe("noteMemorySearchHealth", () => {
     );
     expectFirstNoteExcludes(
       "Gateway probe: GGUF load failed",
-      "openclaw plugins install @openclaw/llama-cpp-provider",
+      "carapace plugins install @carapace/llama-cpp-provider",
     );
   });
 
@@ -642,7 +642,7 @@ describe("noteMemorySearchHealth", () => {
           checked: false,
           ready: false,
           error:
-            "memory embedding readiness not checked; run `openclaw memory status --deep` to probe",
+            "memory embedding readiness not checked; run `carapace memory status --deep` to probe",
           skipped: true,
         },
       },
@@ -660,11 +660,11 @@ describe("noteMemorySearchHealth", () => {
           checked: false,
           ready: false,
           error:
-            "memory embedding readiness not checked; run `openclaw memory status --deep` to probe",
+            "memory embedding readiness not checked; run `carapace memory status --deep` to probe",
           skipped: true,
         },
       },
-      { local: { modelPath: "/definitely/missing/openclaw-memory-model.gguf" } },
+      { local: { modelPath: "/definitely/missing/carapace-memory-model.gguf" } },
     );
 
     expect(note).toHaveBeenCalledTimes(1);
@@ -714,7 +714,7 @@ describe("noteMemorySearchHealth", () => {
       "does not warn when an enabled alternate memory plugin owns the memory slot",
       {
         slots: { memory: "memory-lancedb" },
-        entries: { "memory-lancedb": { enabled: true, config: { dbPath: ".openclaw/memory" } } },
+        entries: { "memory-lancedb": { enabled: true, config: { dbPath: ".carapace/memory" } } },
       },
       true,
     ],
@@ -741,7 +741,7 @@ describe("noteMemorySearchHealth", () => {
     ],
   ])("%s", async (_name, plugins, isActive) => {
     resolveActiveMemoryBackendConfig.mockReturnValue(null);
-    const config = { session: { dmScope: "per-peer" }, plugins } as unknown as OpenClawConfig;
+    const config = { session: { dmScope: "per-peer" }, plugins } as unknown as CarapaceConfig;
     await runConfiguredMemorySearch("auto", config);
     expect(resolveApiKeyForProviderCore).not.toHaveBeenCalled();
     if (isActive) {
@@ -873,8 +873,8 @@ describe("noteMemorySearchHealth", () => {
       agents: {
         list: [{ id: "personal", memory: { search: { rememberAcrossConversations: true } } }],
       },
-    } as OpenClawConfig;
-    resolveMemorySearchConfig.mockImplementation((_cfg: OpenClawConfig, agentId: string) =>
+    } as CarapaceConfig;
+    resolveMemorySearchConfig.mockImplementation((_cfg: CarapaceConfig, agentId: string) =>
       agentId === "personal"
         ? undefined
         : { provider: "openai", local: {}, remote: {}, sources: ["memory"] },
@@ -915,7 +915,7 @@ describe("noteMemorySearchHealth", () => {
   ])("%s provider credentials", (provider, authProvider, secretId) => {
     it.each(["store", "absent", "marker"] as const)("checks a %s key", async (keyKind) => {
       hasAnyAuthProfileStoreSource.mockReturnValue(false);
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             [authProvider]: {
@@ -1021,7 +1021,7 @@ describe("noteMemorySearchHealth", () => {
         contains: [
           'provider is set to "openai-compatible"',
           "remote.baseUrl",
-          "openclaw config set",
+          "carapace config set",
         ],
         noApiKeyLookup: true,
       },
@@ -1035,7 +1035,7 @@ describe("noteMemorySearchHealth", () => {
         contains: [
           'provider is set to "openai-compatible"',
           "memory.search.model",
-          "openclaw config set",
+          "carapace config set",
         ],
         noApiKeyLookup: true,
       },
@@ -1050,7 +1050,7 @@ describe("noteMemorySearchHealth", () => {
           models: {
             providers: { localEmbeddings: { baseUrl: "http://127.0.0.1:1234/v1", models: [] } },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         noNote: true,
         noApiKeyLookup: true,
       },
@@ -1089,7 +1089,7 @@ describe("noteMemorySearchHealth", () => {
     const orderedCfg = {
       ...cfg,
       auth: { order: { openai: profileIds } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await runAuthLintHealth("openai", orderedCfg);
     expect(hasAuthProfileStoreSourceForProvider).toHaveBeenCalledWith(
       "openai",
@@ -1108,7 +1108,7 @@ describe("noteMemorySearchHealth", () => {
           "amazon-bedrock": { auth: "aws-sdk", models: [] },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await runAuthLintHealth("bedrock", bedrockCfg);
 
@@ -1134,7 +1134,7 @@ describe("noteMemorySearchHealth", () => {
         },
         order: { "amazon-bedrock": ["amazon-bedrock:default"] },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await runAuthLintHealth("bedrock", bedrockCfg);
 
@@ -1175,7 +1175,7 @@ describe("noteMemorySearchHealth", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     await runConfiguredMemorySearch(
       "openai",
       openaiCfg,
@@ -1194,7 +1194,7 @@ describe("noteMemorySearchHealth", () => {
   it("warns for key-optional provider (lmstudio) when gateway probe timed out", async () => {
     // A gateway timeout sets checked: false but skipped: false/absent. This is a
     // real diagnostic signal — embeddings may be unavailable — so we should warn.
-    // Regression guard: https://github.com/openclaw/openclaw/issues/74608
+    // Regression guard: https://github.com/Exaggarate/carapace/issues/74608
     await runMemorySearchHealth("lmstudio", {
       gatewayMemoryProbe: {
         checked: false,
@@ -1221,9 +1221,9 @@ describe("noteMemorySearchHealth", () => {
 
     expectFirstNoteContains(
       "Gateway memory probe for default agent is not ready",
-      "openclaw configure --section model",
+      "carapace configure --section model",
     );
-    expectFirstNoteExcludes("openclaw auth add --provider");
+    expectFirstNoteExcludes("carapace auth add --provider");
   });
 
   it("does not probe unrelated embedding providers for the resolved default", async () => {
@@ -1285,7 +1285,7 @@ describe("noteMemorySearchHealth", () => {
   it("does not warn for secondary key-optional providers when readiness was skipped", async () => {
     const multiAgentCfg = {
       agents: { list: [{ id: "agent-default" }, { id: "secondary" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     resolveAgentDir.mockImplementation((_cfg, agentId) => `/tmp/${agentId}`);
     resolveAgentWorkspaceDir.mockImplementation((_cfg, agentId) => `/tmp/${agentId}/workspace`);
     resolveMemorySearchConfig.mockReturnValue({ provider: "ollama", local: {}, remote: {} });
@@ -1300,7 +1300,7 @@ describe("noteMemorySearchHealth", () => {
 });
 
 describe("memory recall doctor integration", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
 
   beforeEach(() => {
     note.mockClear();
@@ -1447,7 +1447,7 @@ describe("memory recall doctor integration", () => {
     );
     repairDreamingArtifacts.mockResolvedValueOnce({
       changed: true,
-      archiveDir: "/tmp/agent-default/workspace/.openclaw-repair/dreaming/2026-04-11T21-35-00-000Z",
+      archiveDir: "/tmp/agent-default/workspace/.carapace-repair/dreaming/2026-04-11T21-35-00-000Z",
       archivedDreamsDiary: false,
       archivedSessionCorpus: true,
       archivedSessionIngestion: true,

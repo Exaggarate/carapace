@@ -14,7 +14,7 @@ import { t } from "../../i18n/index.ts";
 import { isGatewayMethodAdvertised } from "../../lib/gateway-methods.ts";
 import { resolveScrollBehavior } from "../../lib/scroll-behavior.ts";
 import { readSessionDefaults } from "../../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   captureModelSetupConnection,
@@ -51,7 +51,7 @@ export { resumeFirstRunActivation } from "./first-run-activation-receipt.ts";
 
 type Candidate = SystemAgentSetupDetectResult["candidates"][number];
 
-export class ModelSetupPage extends OpenClawLightDomElement {
+export class ModelSetupPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -127,7 +127,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       }
     },
     onStart: (method, intent) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return undefined;
       }
       const activation = this.firstRun.beginActivation(intent ?? { kind: "provider-auth" });
@@ -236,7 +236,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       revealModelSetupFeedback(this.renderRoot);
     }
     if (this.wizardState.phase !== "idle") {
-      this.querySelector("openclaw-modal-dialog")?.setReturnFocusTarget(this.wizardReturnFocus);
+      this.querySelector("carapace-modal-dialog")?.setReturnFocusTarget(this.wizardReturnFocus);
     }
     this.iconLoader.reconcile();
     this.firstRun.start();
@@ -330,7 +330,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       client &&
       snapshot.phase === "connected" &&
       hasOperatorAdminAccess(snapshot.hello?.auth ?? null) &&
-      isGatewayMethodAdvertised(snapshot, "openclaw.setup.detect") === true,
+      isGatewayMethodAdvertised(snapshot, "carapace.setup.detect") === true,
     );
   }
 
@@ -351,7 +351,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
     const snapshot = this.context.gateway.snapshot;
     return (
       this.canUseSetup(client) &&
-      isGatewayMethodAdvertised(snapshot, "openclaw.setup.verify") === true
+      isGatewayMethodAdvertised(snapshot, "carapace.setup.verify") === true
     );
   }
 
@@ -453,7 +453,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
     isCurrent,
   }: ModelSetupWizardCompletion): Promise<void> {
     const prepareOption =
-      startMethod === "openclaw.setup.prepare.start" ? this.pendingPrepareOption : null;
+      startMethod === "carapace.setup.prepare.start" ? this.pendingPrepareOption : null;
     const nativeSessionCatalogPreference = this.nativeSessionCatalogPreference();
     this.pendingPrepareOption = null;
     if (prepareOption && preparedModelRef) {
@@ -465,7 +465,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       );
       return;
     }
-    if (startMethod !== "openclaw.setup.prepare.start") {
+    if (startMethod !== "carapace.setup.prepare.start") {
       if (isCurrent?.() === false) {
         this.wizard.close();
         return;
@@ -473,7 +473,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       if (!modelActivation) {
         this.wizard.fail(
           t(
-            startMethod === "openclaw.setup.activate.start"
+            startMethod === "carapace.setup.activate.start"
               ? "modelSetup.errors.activationFailed"
               : "modelSetup.wizard.notComplete",
           ),
@@ -643,11 +643,11 @@ export class ModelSetupPage extends OpenClawLightDomElement {
     const canAdmin = hasOperatorAdminAccess(snapshot.hello?.auth ?? null);
     const gatewayTooOld =
       snapshot.phase === "connected" &&
-      isGatewayMethodAdvertised(snapshot, "openclaw.setup.detect") !== true;
+      isGatewayMethodAdvertised(snapshot, "carapace.setup.detect") !== true;
     const canVerify =
       canAdmin &&
       !gatewayTooOld &&
-      isGatewayMethodAdvertised(snapshot, "openclaw.setup.verify") === true;
+      isGatewayMethodAdvertised(snapshot, "carapace.setup.verify") === true;
     return renderModelSetup({
       page: this.firstRun.visiblePageState(this.verifyState.phase === "ok"),
       activation: this.activationState,
@@ -660,7 +660,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
       canPrepare:
         canAdmin &&
         !gatewayTooOld &&
-        isGatewayMethodAdvertised(snapshot, "openclaw.setup.prepare.start") === true,
+        isGatewayMethodAdvertised(snapshot, "carapace.setup.prepare.start") === true,
       modelConfigured: readSessionDefaults(snapshot)?.modelConfigured === true,
       gatewayTooOld,
       refreshWarning: this.setupRefreshWarning,
@@ -689,7 +689,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
         void this.runWizardMutation(() =>
           this.wizard.start(
             option.id,
-            "openclaw.setup.auth.start",
+            "carapace.setup.auth.start",
             this.nativeSessionCatalogPreference(),
           ),
         );
@@ -698,7 +698,7 @@ export class ModelSetupPage extends OpenClawLightDomElement {
         this.pendingPrepareOption = option;
         this.wizardMode = "prepare";
         void this.runWizardMutation(() =>
-          this.wizard.start(option.id, "openclaw.setup.prepare.start"),
+          this.wizard.start(option.id, "carapace.setup.prepare.start"),
         );
       },
       onManualProviderChange: (providerId) => this.selectManualProvider(providerId),
@@ -724,6 +724,6 @@ export class ModelSetupPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-model-setup-page")) {
-  customElements.define("openclaw-model-setup-page", ModelSetupPage);
+if (!customElements.get("carapace-model-setup-page")) {
+  customElements.define("carapace-model-setup-page", ModelSetupPage);
 }

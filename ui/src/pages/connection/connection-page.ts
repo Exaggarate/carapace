@@ -20,15 +20,15 @@ import {
   GatewayPageController,
   type GatewayPageChange,
 } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { isUnknownSystemInfoMethodError, supportsSystemInfo } from "./system-info.ts";
 import { renderConnection } from "./view.ts";
 
 const SYSTEM_INFO_POLL_INTERVAL_MS = 10_000;
-const CONNECTION_DOCS_URL = "https://docs.openclaw.ai/gateway/remote";
+const CONNECTION_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
-export class ConnectionPage extends OpenClawLightDomElement {
+export class ConnectionPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -247,6 +247,6 @@ export class ConnectionPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-connection-page")) {
-  customElements.define("openclaw-connection-page", ConnectionPage);
+if (!customElements.get("carapace-connection-page")) {
+  customElements.define("carapace-connection-page", ConnectionPage);
 }

@@ -3,7 +3,7 @@
  * Covers provider plugin profiles, external CLI scoped discovery, persistence
  * rules, and external CLI bootstrap policy.
  */
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProviderExternalAuthProfile } from "../../plugins/provider-external-auth.types.js";
 import { resolveAgentCredentialMapFromStore } from "../agent-auth-credentials.js";
@@ -304,7 +304,7 @@ describe("auth external oauth helpers", () => {
   });
 
   it("publishes a usable scoped CLI bootstrap into the runtime auth owner", () => {
-    const agentDir = "/tmp/openclaw-external-oauth-publication";
+    const agentDir = "/tmp/carapace-external-oauth-publication";
     readCodexCliCredentialsCachedMock.mockReturnValue(
       createCredential({ expires: createUsableOAuthExpiry() }),
     );
@@ -333,7 +333,7 @@ describe("auth external oauth helpers", () => {
   });
 
   it("does not replace an explicit unresolved API-key profile with CLI OAuth", () => {
-    const agentDir = "/tmp/openclaw-external-oauth-explicit-owner";
+    const agentDir = "/tmp/carapace-external-oauth-explicit-owner";
     const explicit = createStore({
       "openai:default": {
         type: "api_key",
@@ -366,7 +366,7 @@ describe("auth external oauth helpers", () => {
   });
 
   it("preserves resolved runtime refs when startup publishes scoped external auth", () => {
-    const agentDir = "/tmp/openclaw-external-oauth-prepared-owner";
+    const agentDir = "/tmp/carapace-external-oauth-prepared-owner";
     const resolved = createStore({
       "openai:configured": {
         type: "api_key",

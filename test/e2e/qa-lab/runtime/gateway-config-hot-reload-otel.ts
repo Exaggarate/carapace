@@ -13,7 +13,7 @@ import {
 import { startLocalOtlpReceiver } from "./otel-test-support.js";
 
 type Receiver = ReturnType<typeof startLocalOtlpReceiver>;
-const HEADER = "x-openclaw-qa-generation";
+const HEADER = "x-carapace-qa-generation";
 const FLUSH_MS = 1_000;
 
 export async function proveHotReloadOtel({
@@ -53,7 +53,7 @@ export async function proveHotReloadOtel({
         transportBaseUrl: "http://127.0.0.1:1",
         enabledPluginIds: ["diagnostics-otel", "diagnostics-prometheus"],
         controlUiEnabled: false,
-        runtimeEnvPatch: { OPENCLAW_OTEL_PRELOADED: "0", OTEL_SDK_DISABLED: "false" },
+        runtimeEnvPatch: { CARAPACE_OTEL_PRELOADED: "0", OTEL_SDK_DISABLED: "false" },
         mutateConfig: (config) => ({
           ...config,
           logging: { level: "debug", consoleLevel: "warn" },
@@ -111,7 +111,7 @@ export async function proveHotReloadOtel({
         assert.equal(response.status, 200);
         const text = await response.text();
         return Number(
-          text.match(/^openclaw_gateway_rpc_requests_total\{method="health"\} (\d+)$/m)?.[1] ?? 0,
+          text.match(/^carapace_gateway_rpc_requests_total\{method="health"\} (\d+)$/m)?.[1] ?? 0,
         );
       };
       const health = async (times = 1) => {
@@ -135,7 +135,7 @@ export async function proveHotReloadOtel({
         await waitForHotReloadFact(`OTLP ${generation} traces, metrics, and logs`, () =>
           receiver.capturedSpans.some(
             (span) =>
-              span.name === "openclaw.gateway.rpc.response" && span.serviceName === serviceName,
+              span.name === "carapace.gateway.rpc.response" && span.serviceName === serviceName,
           ) &&
           receiver.capturedMetrics.some(
             (metric) => metric.name === `${prefix}gateway.rpc.requests`,
@@ -177,7 +177,7 @@ export async function proveHotReloadOtel({
         await quiet([0, 0]);
         assert.equal(await readPrometheus(), 0);
         await patch({ diagnostics: { enabled: true } });
-        await signals(receiverA, "generation-a", "qa-otel-a", "openclaw.");
+        await signals(receiverA, "generation-a", "qa-otel-a", "carapace.");
         await health(8);
         const retainedCounter = await readPrometheus();
         assert(retainedCounter >= 9);

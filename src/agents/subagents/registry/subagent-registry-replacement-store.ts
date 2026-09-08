@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { runOpenClawStateWriteTransaction } from "../../../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../../../state/carapace-state-db.js";
 import { publishTaskRecordAfterAtomicStore } from "../../../tasks/runtime-internal.js";
 import type { PreparedCanonicalTaskActivation } from "../../../tasks/task-backing-authority-write.js";
 import { readTaskBackingInstance } from "../../../tasks/task-backing-authority.js";
@@ -77,7 +77,7 @@ export function commitSubagentTaskReplacement(params: {
   const currentFlowRow = flow ? bindTaskFlowRecord(flow.current) : undefined;
   const flowRow = flow ? bindTaskFlowRecord(flow.next) : undefined;
 
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       const storedSource = readSubagentRun(database, params.source.runId);
       const storedTask = readTaskRecord(database.db, params.task.current.taskId);

@@ -2,7 +2,7 @@
 summary: "Nodes: pairing, capabilities, permissions, and CLI helpers for camera/screen/device/notifications/system and the macOS widget panel"
 read_when:
   - Pairing iOS/watchOS/Android nodes to a gateway
-  - Enabling isolated OpenClaw session hosting on a paired node
+  - Enabling isolated Carapace session hosting on a paired node
   - Using node camera or screen capture for agent context
   - Presenting a hosted widget on a Mac
   - Adding new node commands or CLI helpers
@@ -13,9 +13,9 @@ doc-schema-version: 1
 A **node** is a companion device (macOS/iOS/watchOS/Android/headless) that connects to the Gateway with `role: "node"` and exposes a command surface (e.g. `camera.*`, `device.*`, `notifications.*`, `system.*`) via `node.invoke`. Most nodes use the Gateway WebSocket on the operator port. The optional direct Apple Watch node uses signed HTTPS polling on that same port because watchOS blocks generic low-level networking for ordinary apps. Protocol details: [Gateway protocol](/gateway/protocol).
 
 macOS can also run in **node mode**: the menu bar app connects to the Gateway's
-WS server as one node (so `openclaw nodes …` works against this Mac). The app
+WS server as one node (so `carapace nodes …` works against this Mac). The app
 adds native widget-panel, camera, screen, notification, and computer-control commands
-to the same node-host command surface used by `openclaw node run`. Do not start a
+to the same node-host command surface used by `carapace node run`. Do not start a
 second CLI node on that Mac; the app runs the matching CLI node-host runtime as
 an internal worker and remains the sole Gateway connection and node identity.
 
@@ -28,14 +28,14 @@ Troubleshooting runbook: [/nodes/troubleshooting](/nodes/troubleshooting)
 Nodes use **device pairing**. A node presents a signed device identity during connect; the Gateway creates a device pairing request for `role: node`. Approve via the devices CLI (or UI). The direct Apple Watch setup uses an admin-minted, short-lived node-only setup code to approve its fixed low-risk command surface; later capability expansion still requires normal approval.
 
 ```bash
-openclaw devices list
-openclaw devices approve <requestId>
-openclaw devices reject <requestId>
-openclaw nodes status
-openclaw nodes describe --node <idOrNameOrIp>
+carapace devices list
+carapace devices approve <requestId>
+carapace devices reject <requestId>
+carapace nodes status
+carapace nodes describe --node <idOrNameOrIp>
 ```
 
-Pending pairing requests expire 5 minutes after the device's last retry — a device that keeps reconnecting keeps its one pending request (and `requestId`) alive instead of minting a new prompt every few minutes; see [Node pairing](/gateway/pairing) for the full request/approve lifecycle. If a node retries with changed auth details (role/scopes/public key), the prior pending request is superseded and a new `requestId` is created — clients get a `device.pair.resolved` event for the superseded request, and you should re-run `openclaw devices list` before approving.
+Pending pairing requests expire 5 minutes after the device's last retry — a device that keeps reconnecting keeps its one pending request (and `requestId`) alive instead of minting a new prompt every few minutes; see [Node pairing](/gateway/pairing) for the full request/approve lifecycle. If a node retries with changed auth details (role/scopes/public key), the prior pending request is superseded and a new `requestId` is created — clients get a `device.pair.resolved` event for the superseded request, and you should re-run `carapace devices list` before approving.
 
 - `nodes status` marks a node as **paired** when its device pairing role includes `node`.
 - A connected native Mac can opt in to coalesced physical-input activity from
@@ -46,8 +46,8 @@ Pending pairing requests expire 5 minutes after the device's last retry — a de
   [Active computer presence](/nodes/presence) for setup, privacy, timing, and
   troubleshooting.
 - The device pairing record is the durable approved-role contract. Token rotation stays inside that contract; it cannot upgrade a paired node into a role that pairing approval never granted.
-- `node.pair.*` (CLI: `openclaw nodes pending/approve/reject/remove/rename`) manages the node's approved command/capability surface on its canonical paired-device record. Device pairing owns both transport authentication and the durable node surface; there is no separate node pairing store.
-- `openclaw nodes remove --node <id|name|ip>` revokes the device's `node` role in the paired-device store and disconnects that device's node-role sessions: a mixed-role device keeps its row and only loses the `node` role, while a node-only device row is deleted. `operator.pairing` may remove non-operator node rows on other devices; a device-token caller revoking its own node role on a mixed-role device additionally needs `operator.admin`.
+- `node.pair.*` (CLI: `carapace nodes pending/approve/reject/remove/rename`) manages the node's approved command/capability surface on its canonical paired-device record. Device pairing owns both transport authentication and the durable node surface; there is no separate node pairing store.
+- `carapace nodes remove --node <id|name|ip>` revokes the device's `node` role in the paired-device store and disconnects that device's node-role sessions: a mixed-role device keeps its row and only loses the `node` role, while a node-only device row is deleted. `operator.pairing` may remove non-operator node rows on other devices; a device-token caller revoking its own node role on a mixed-role device additionally needs `operator.admin`.
 - Approval scope follows the pending request's declared commands:
   - commandless request: `operator.pairing`
   - non-exec node commands: `operator.pairing` + `operator.write`
@@ -60,8 +60,8 @@ memory, and home-volume disk capacity every 60 seconds, starting on connection.
 The Gateway exposes the latest snapshot as `hostStats` in `node.list` and
 `node.describe`. When received, it saves the snapshot on the paired node
 record, so offline nodes keep showing last-known stats with the original
-`updatedAtMs`. Connected nodes use live session stats. `openclaw nodes status`
-and `openclaw nodes describe` show a compact stats summary with a last-known age
+`updatedAtMs`. Connected nodes use live session stats. `carapace nodes status`
+and `carapace nodes describe` show a compact stats summary with a last-known age
 for offline nodes. Windows omits load averages, and unavailable disk capacity is
 omitted. See
 [Node host stats](/gateway/protocol/presence#node-host-stats) for the wire contract.
@@ -92,51 +92,51 @@ Use a **node host** when your Gateway runs on one machine and you want commands 
 | ------------ | ---------------------------------------------------------------------------------------- |
 | Gateway host | Receives messages, runs the model, routes tool calls.                                    |
 | Node host    | Executes `system.run`/`system.which` on the node machine.                                |
-| Approvals    | Enforced on the node host via `~/.openclaw/state/openclaw.sqlite#exec_approvals_config`. |
+| Approvals    | Enforced on the node host via `~/.carapace/state/carapace.sqlite#exec_approvals_config`. |
 
 Approval note:
 
 - Approval-backed node runs bind exact request context. The exec path prepares a canonical `systemRunPlan` before approval; once granted, the gateway forwards that stored plan, not any later caller-edited command/cwd/session fields, and re-validates the working directory before running.
-- For direct shell/runtime file executions, OpenClaw also best-effort binds one concrete local file operand and denies the run if that file changes before execution.
-- If OpenClaw cannot identify exactly one concrete local file for an interpreter/runtime command, approval-backed execution is denied instead of pretending full runtime coverage. Use sandboxing, separate hosts, or an explicit trusted allowlist/full workflow for broader interpreter semantics.
+- For direct shell/runtime file executions, Carapace also best-effort binds one concrete local file operand and denies the run if that file changes before execution.
+- If Carapace cannot identify exactly one concrete local file for an interpreter/runtime command, approval-backed execution is denied instead of pretending full runtime coverage. Use sandboxing, separate hosts, or an explicit trusted allowlist/full workflow for broader interpreter semantics.
 
 ### Gateway deployments that cannot host nodes
 
-A Gateway can remain healthy for browser users while node hosting is unavailable. Run `openclaw doctor` on the Gateway before onboarding nodes, and check these preconditions:
+A Gateway can remain healthy for browser users while node hosting is unavailable. Run `carapace doctor` on the Gateway before onboarding nodes, and check these preconditions:
 
 - **Machine authentication:** Tailscale identity headers do not authenticate node-role connections. In `gateway.auth.mode: "trusted-proxy"`, a new node also cannot supply the proxy's user identity headers. To use a shared token, switch to token mode and configure `gateway.auth.token` with a SecretRef; trusted-proxy mode rejects mixed token configuration. A trusted-proxy Gateway can use `gateway.auth.password` only for clean loopback/direct callers. See [trusted-proxy mixed token configuration](/gateway/trusted-proxy-auth#mixed-token-configuration).
-- **Node onboarding URL:** With `gateway.bind: "loopback"`, configure Tailscale Serve, `gateway.remote.url`, or `plugins.entries.device-pair.config.publicUrl` before minting a join code. Otherwise `openclaw devices join-code` reports: `Gateway is only bound to loopback. Set gateway.bind=lan, enable tailscale serve, or configure plugins.entries.device-pair.config.publicUrl.`
-- **Node onboarding plugin:** Join codes and `openclaw connect` require the bundled `device-pair` plugin. If it is disabled or excluded by plugin policy, set `plugins.entries.device-pair.enabled: true`, make sure `device-pair` is allowed, and restart the Gateway.
-- **Device session runtime:** Paired-device runners support the embedded OpenClaw runtime and explicitly authorized Codex `remote-exec`; ACPX routes cannot dispatch to a paired device. Codex requires `codex.exec-server.stdio.v1` in `gateway.nodes.commands.allow` plus its normal pairing and invocation approvals. Runtime policy belongs on provider/model routes, not the ignored whole-agent runtime keys. Multi-agent rosters must also set `agents.ownership: "explicit"`. See [Codex paired-device placement](/plugins/codex-harness/placement#run-codex-on-a-paired-device) and [runtime policy](/gateway/config-agents/runtime-and-cli-backends#runtime-policy).
-- **Edge routing:** When a reverse proxy or access edge fronts the Gateway, the node must satisfy edge auth on the join request, its main Gateway WebSocket, and the worker WebSocket. Keep WebSocket upgrade enabled for `/__openclaw__/worker`. You can instead exempt `/j/*` and `/__openclaw__/worker` from edge identity auth because both routes enforce their own short-lived credentials. See [worker protocol](/gateway/protocol/handshake#worker-role-and-closed-protocol).
+- **Node onboarding URL:** With `gateway.bind: "loopback"`, configure Tailscale Serve, `gateway.remote.url`, or `plugins.entries.device-pair.config.publicUrl` before minting a join code. Otherwise `carapace devices join-code` reports: `Gateway is only bound to loopback. Set gateway.bind=lan, enable tailscale serve, or configure plugins.entries.device-pair.config.publicUrl.`
+- **Node onboarding plugin:** Join codes and `carapace connect` require the bundled `device-pair` plugin. If it is disabled or excluded by plugin policy, set `plugins.entries.device-pair.enabled: true`, make sure `device-pair` is allowed, and restart the Gateway.
+- **Device session runtime:** Paired-device runners support the embedded Carapace runtime and explicitly authorized Codex `remote-exec`; ACPX routes cannot dispatch to a paired device. Codex requires `codex.exec-server.stdio.v1` in `gateway.nodes.commands.allow` plus its normal pairing and invocation approvals. Runtime policy belongs on provider/model routes, not the ignored whole-agent runtime keys. Multi-agent rosters must also set `agents.ownership: "explicit"`. See [Codex paired-device placement](/plugins/codex-harness/placement#run-codex-on-a-paired-device) and [runtime policy](/gateway/config-agents/runtime-and-cli-backends#runtime-policy).
+- **Edge routing:** When a reverse proxy or access edge fronts the Gateway, the node must satisfy edge auth on the join request, its main Gateway WebSocket, and the worker WebSocket. Keep WebSocket upgrade enabled for `/__carapace__/worker`. You can instead exempt `/j/*` and `/__carapace__/worker` from edge identity auth because both routes enforce their own short-lived credentials. See [worker protocol](/gateway/protocol/handshake#worker-role-and-closed-protocol).
 
 For a Cloudflare Access-fronted Gateway:
 
 1. In Cloudflare Zero Trust, create an Access service token. Copy its Client ID and Client Secret when Cloudflare displays them.
-2. Add a **Service Auth** policy that accepts the token on the Access application protecting the Gateway. If `/j/*` and `/__openclaw__/worker` are separate Access applications, add the same policy to both.
+2. Add a **Service Auth** policy that accepts the token on the Access application protecting the Gateway. If `/j/*` and `/__carapace__/worker` are separate Access applications, add the same policy to both.
 3. On the node, provide the conventional environment fallback and connect:
 
    ```bash
    export CF_ACCESS_CLIENT_ID="<client-id>"
    export CF_ACCESS_CLIENT_SECRET="<client-secret>"
-   openclaw connect https://gateway.example/j/<code> --service
+   carapace connect https://gateway.example/j/<code> --service
    ```
 
-The canonical node connection keys are `gateway.cloudflareAccess.clientId` and `gateway.cloudflareAccess.clientSecret`; both accept SecretInput values. The environment fallback above persists those keys as env SecretRefs, not copied plaintext. For installed nodes, OpenClaw stores the environment values in the managed service environment file rather than inline in launchd, systemd, or Task Scheduler definitions. Resolved values are bound to the configured Gateway origin and are not followed across redirects. OpenClaw rejects the pair before resolution on plaintext `http://` or `ws://` routes; credential-free loopback and private-network plaintext behavior is unchanged.
+The canonical node connection keys are `gateway.cloudflareAccess.clientId` and `gateway.cloudflareAccess.clientSecret`; both accept SecretInput values. The environment fallback above persists those keys as env SecretRefs, not copied plaintext. For installed nodes, Carapace stores the environment values in the managed service environment file rather than inline in launchd, systemd, or Task Scheduler definitions. Resolved values are bound to the configured Gateway origin and are not followed across redirects. Carapace rejects the pair before resolution on plaintext `http://` or `ws://` routes; credential-free loopback and private-network plaintext behavior is unchanged.
 
 ### Start a node host (foreground)
 
 On the node machine:
 
 ```bash
-openclaw node run --host <gateway-host> --port 18789 --display-name "Build Node"
+carapace node run --host <gateway-host> --port 18789 --display-name "Build Node"
 ```
 
 For one-paste setup, create a **Node host** setup link from the Control UI
 Devices page, then run its copyable command on the node machine:
 
 ```bash
-openclaw node run --pair "oc-pair://<setup-code>"
+carapace node run --pair "oc-pair://<setup-code>"
 ```
 
 The link is single-use and expires after 10 minutes. It supplies the endpoint,
@@ -159,26 +159,26 @@ Example (node host -> gateway host):
 ssh -N -L 18790:127.0.0.1:18789 user@gateway-host
 
 # Terminal B: export the gateway token and connect through the tunnel
-export OPENCLAW_GATEWAY_TOKEN="<gateway-token>"
-openclaw node run --host 127.0.0.1 --port 18790 --display-name "Build Node"
+export CARAPACE_GATEWAY_TOKEN="<gateway-token>"
+carapace node run --host 127.0.0.1 --port 18790 --display-name "Build Node"
 ```
 
 Notes:
 
-- `openclaw node run` supports token or password auth.
-- Env vars are preferred: `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD`.
+- `carapace node run` supports token or password auth.
+- Env vars are preferred: `CARAPACE_GATEWAY_TOKEN` / `CARAPACE_GATEWAY_PASSWORD`.
 - Config fallback is `gateway.auth.token` / `gateway.auth.password`.
 - In local mode, node host intentionally ignores `gateway.remote.token` / `gateway.remote.password`.
 - In remote mode, `gateway.remote.token` / `gateway.remote.password` are eligible per remote precedence rules.
 - If active local `gateway.auth.*` SecretRefs are configured but unresolved, node-host auth fails closed.
-- Node-host auth resolution only honors `OPENCLAW_GATEWAY_*` env vars.
+- Node-host auth resolution only honors `CARAPACE_GATEWAY_*` env vars.
 
 ### Start a node host (service)
 
 ```bash
-openclaw node install --host <gateway-host> --port 18789 --display-name "Build Node"
-openclaw node start
-openclaw node restart
+carapace node install --host <gateway-host> --port 18789 --display-name "Build Node"
+carapace node start
+carapace node restart
 ```
 
 `node install` also accepts `--context-path`, `--tls`, `--tls-fingerprint`, `--node-id` (legacy client instance ID only), `--share-installed-apps` / `--no-share-installed-apps`, `--runtime <node|bun>` (default: `node`), and `--force` to reinstall. Bun requires version 1.4+ with WAL-reset-safe `node:sqlite` and is an explicit opt-in; Node remains recommended. `node status`, `node stop`, and `node uninstall` are also available.
@@ -188,21 +188,21 @@ openclaw node restart
 On the gateway host:
 
 ```bash
-openclaw devices list
-openclaw devices approve <requestId>
-openclaw nodes status
+carapace devices list
+carapace devices approve <requestId>
+carapace nodes status
 ```
 
-If the node retries with changed auth details, re-run `openclaw devices list` and approve the current `requestId`.
+If the node retries with changed auth details, re-run `carapace devices list` and approve the current `requestId`.
 
 Naming options:
 
-- `--display-name` on `openclaw node run` / `openclaw node install` (persists in the shared `nodeHost.config` SQLite machine-state value alongside the client instance ID and Gateway connection metadata).
-- `openclaw nodes rename --node <id|name|ip> --name "Build Node"` (gateway override).
+- `--display-name` on `carapace node run` / `carapace node install` (persists in the shared `nodeHost.config` SQLite machine-state value alongside the client instance ID and Gateway connection metadata).
+- `carapace nodes rename --node <id|name|ip> --name "Build Node"` (gateway override).
 
 ### Node-hosted MCP servers
 
-Configure MCP servers in `openclaw.json` on the node machine, not on the
+Configure MCP servers in `carapace.json` on the node machine, not on the
 Gateway:
 
 ```json5
@@ -237,10 +237,10 @@ plugin. OAuth MCP servers are not supported by this node-hosted v1 path.
 
 Current node hosts declare the built-in `mcp.tools.call.v1` command family during
 their initial pairing even when no MCP server is configured. A node paired on an
-older OpenClaw version may request a one-time command-surface upgrade after the
+older Carapace version may request a one-time command-surface upgrade after the
 node host is updated. Adding, removing, or filtering servers after that does not
 require re-pairing because the approved command family is unchanged. Restart
-`openclaw node run` or `openclaw node restart` to apply node MCP config changes;
+`carapace node run` or `carapace node restart` to apply node MCP config changes;
 the node host does not watch this config.
 
 Server-advertised tool-list changes apply live and replace the published node
@@ -256,11 +256,11 @@ including node-hosted MCP tools, with
 
 ### Node-hosted skills
 
-Install skills under the node machine's active OpenClaw skills directory,
-`~/.openclaw/skills` by default. `OPENCLAW_HOME`, `OPENCLAW_STATE_DIR`, and
-`OPENCLAW_CONFIG_PATH` move that active profile. `OPENCLAW_STATE_DIR` takes
+Install skills under the node machine's active Carapace skills directory,
+`~/.carapace/skills` by default. `CARAPACE_HOME`, `CARAPACE_STATE_DIR`, and
+`CARAPACE_CONFIG_PATH` move that active profile. `CARAPACE_STATE_DIR` takes
 precedence for skills; otherwise, `skills/` is beside the path printed by
-`openclaw config file`. The headless node host publishes valid `SKILL.md` files
+`carapace config file`. The headless node host publishes valid `SKILL.md` files
 after it connects, and the Gateway adds them to agent skill snapshots only while
 that node remains connected. Each skill directory name must match the `name`
 frontmatter field so the abstract node locator maps to one entry without adding
@@ -268,7 +268,7 @@ another protocol field.
 
 The initial node-role pairing approves skill publication. Adding, removing, or
 changing skills does not require another pairing or Gateway configuration
-change. Restart `openclaw node run` or `openclaw node restart` after changing
+change. Restart `carapace node run` or `carapace node restart` after changing
 node skill files; the node host does not watch the skills directory.
 
 Node-hosted skill entries identify their node and carry their execution
@@ -279,7 +279,7 @@ not node skill locators; runtimes without the normal read tool can instead run
 `cat SKILL.md` through `exec host=node node=<node-id>` with the advertised
 `node://.../skills/<name>` directory as `workdir`. Referenced files and binaries
 use the same exec target and workdir. The node host resolves that locator against
-its active OpenClaw state directory, so relative paths resolve on the node rather
+its active Carapace state directory, so relative paths resolve on the node rather
 than the Gateway machine. The publishing node must have approved `system.run`,
 and the agent's exec policy must allow `host=node`; otherwise the skill stays
 out of that agent's snapshot.
@@ -292,9 +292,9 @@ operators can ignore skills from every paired node with
 
 The headless node keeps three separate state records in shared SQLite:
 
-- `~/.openclaw/state/openclaw.sqlite` (`config_machine_state`, key `nodeHost.config`): the client instance ID, display name, and Gateway connection metadata.
-- `~/.openclaw/state/openclaw.sqlite` (`device_identities`, key `primary`): the signed device keypair and derived cryptographic device ID.
-- `~/.openclaw/state/openclaw.sqlite` (`device_auth_tokens`): paired device auth tokens keyed by cryptographic device ID and role.
+- `~/.carapace/state/carapace.sqlite` (`config_machine_state`, key `nodeHost.config`): the client instance ID, display name, and Gateway connection metadata.
+- `~/.carapace/state/carapace.sqlite` (`device_identities`, key `primary`): the signed device keypair and derived cryptographic device ID.
+- `~/.carapace/state/carapace.sqlite` (`device_auth_tokens`): paired device auth tokens keyed by cryptographic device ID and role.
 
 For a signed node, the Gateway uses the cryptographic device ID for pairing and
 node routing. The client instance ID is only connection metadata. Changing
@@ -304,7 +304,7 @@ supported revoke-and-re-pair flow and upgrade notes.
 
 Retired `identity/device.json` and `identity/device-auth.json` files are
 Doctor-owned migration inputs. Stop the node host and run
-`openclaw doctor --fix`; Doctor imports and verifies their rows in SQLite before
+`carapace doctor --fix`; Doctor imports and verifies their rows in SQLite before
 removing the old files.
 
 ### Allowlist the commands
@@ -312,21 +312,21 @@ removing the old files.
 Exec approvals are **per node host**. Add allowlist entries from the gateway:
 
 ```bash
-openclaw approvals allowlist add --node <id|name|ip> "/usr/bin/uname"
-openclaw approvals allowlist add --node <id|name|ip> "/usr/bin/sw_vers"
+carapace approvals allowlist add --node <id|name|ip> "/usr/bin/uname"
+carapace approvals allowlist add --node <id|name|ip> "/usr/bin/sw_vers"
 ```
 
 Approvals live on the node host in
-`~/.openclaw/state/openclaw.sqlite#exec_approvals_config`.
+`~/.carapace/state/carapace.sqlite#exec_approvals_config`.
 
 ### Point exec at the node
 
 Configure defaults (gateway config):
 
 ```bash
-openclaw config set tools.exec.host node
-openclaw config set tools.exec.mode allowlist
-openclaw config set tools.exec.node "<id-or-name>"
+carapace config set tools.exec.host node
+carapace config set tools.exec.mode allowlist
+carapace config set tools.exec.node "<id-or-name>"
 ```
 
 Or per session:
@@ -410,7 +410,7 @@ the node pairing upgrade when those commands first appear.
 A native node host with the Claude CLI available also advertises
 `anthropic.claude.terminal.resume.v1`. Eligible CLI and Desktop rows can open
 `claude --resume <session-id>` in the operator terminal on their owning host.
-This is a takeover of the native session; unlike OpenClaw adoption, it does not
+This is a takeover of the native session; unlike Carapace adoption, it does not
 fork the Claude session first.
 
 The catalog combines valid Claude CLI project-index records with a bounded
@@ -440,7 +440,7 @@ when people must not share access to files, credentials, or tools. See
 [Multi-user mode](/concepts/multi-user).
 
 A Gateway-local Claude CLI row can be adopted from the normal Chat composer:
-OpenClaw imports bounded visible history, resumes with `--fork-session` on the
+Carapace imports bounded visible history, resumes with `--fork-session` on the
 first turn, and leaves the source transcript untouched.
 
 A headless node host can opt into the same continuation flow:
@@ -460,7 +460,7 @@ is enabled and the `claude` executable resolves on that node. The Gateway cannot
 enable it remotely. The command also passes through the node's existing exec
 approval policy. When all three Claude commands are advertised and permitted by
 the Gateway's node command policy, a Claude CLI
-row on that node becomes continuable: OpenClaw imports bounded history, binds
+row on that node becomes continuable: Carapace imports bounded history, binds
 the adopted session to the node and its catalog-reported working directory, and
 runs each one-shot `claude -p` turn there. The first turn still uses
 `--fork-session`, preserving the source transcript.
@@ -471,9 +471,9 @@ Gateway transcript, and reject attachments and images. Claude Desktop rows and
 nodes that do not advertise the run command remain view-only. The macOS app
 node does not advertise this command yet, so its rows remain view-only.
 
-### Host OpenClaw sessions
+### Host Carapace sessions
 
-The macOS menu bar app and the headless node host can opt into full OpenClaw
+The macOS menu bar app and the headless node host can opt into full Carapace
 session hosting with the same node-local setting:
 
 ```json5
@@ -510,9 +510,9 @@ avoiding another download. Cloud-enrolled nodes keep their own execution-mode-sp
 installation and retention lifecycle.
 
 You can also enroll and enable a service host in one step with
-`openclaw connect --service --session-host`. In Control UI New Session, a
+`carapace connect --service --session-host`. In Control UI New Session, a
 write-scoped operator selects a Gateway project or folder and then either a
-specific paired device or **Auto**. OpenClaw creates a
+specific paired device or **Auto**. Carapace creates a
 session-owned managed worktree on the Gateway, dispatches it with the exact
 `deviceId` or `autoDevice: true`, and sends the first turn only after the chosen
 device placement becomes active. New Session does not bind `execNode` or browse
@@ -526,9 +526,9 @@ requires the exact durable receipt and current node authority.
 
 Node hosts must support the current private worker-supervisor dialect before
 they can host sessions. An older connected host remains visible but disabled in
-the session picker. Update OpenClaw on that device and reconnect it; for a
-headless node, run `openclaw update` followed by `openclaw node restart`. The
-Gateway does not fall back to the node's local OpenClaw package or an older
+the session picker. Update Carapace on that device and reconnect it; for a
+headless node, run `carapace update` followed by `carapace node restart`. The
+Gateway does not fall back to the node's local Carapace package or an older
 supervisor dialect.
 
 This setting enables supervised session turns on the paired device, including
@@ -539,7 +539,7 @@ for a durable slot; while all slots are occupied, the node remains available
 for status and cancellation but is not selected for a new session turn.
 
 The picker derives every device row from `environments.list`. Every selected
-runtime requires an available, connected paired session host. OpenClaw worker
+runtime requires an available, connected paired session host. Carapace worker
 turns additionally require valid exact worker slots with at least one free
 slot. Codex paired-device execution launches its exec-server directly, so it
 does not consume or require a worker slot; instead, its required command must
@@ -548,7 +548,7 @@ capabilities. A declared command is usable only when the approved pairing and
 Gateway command allowlist both authorize it. Connected non-hosts, ineligible
 or saturated hosts, update-required devices, and unavailable hosts remain
 visible but disabled with an actionable reason. Enable hosting with
-`openclaw connect --service --session-host` or the `nodeHost.workerRuns`
+`carapace connect --service --session-host` or the `nodeHost.workerRuns`
 setting, then restart the node host. Update-required hosts must be upgraded and
 restarted before selection.
 
@@ -558,7 +558,7 @@ arrives. Local remains selectable; cached worker slots never authorize a new
 remote session.
 
 Choose **Auto** to let the Gateway select an eligible paired,
-connected session host. For OpenClaw worker turns, it selects the host with the
+connected session host. For Carapace worker turns, it selects the host with the
 most available worker slots and breaks ties by device ID. Runtimes that do not
 consume worker slots choose the eligible host with the lowest device ID instead.
 If a selected host disconnects, reaches capacity, or otherwise becomes
@@ -606,7 +606,7 @@ for the Control UI behavior and storage sources.
 
 #### Isolate hosted worker sessions in containers
 
-By default, hosted OpenClaw worker sessions run directly on the paired node.
+By default, hosted Carapace worker sessions run directly on the paired node.
 Set `nodeHost.workerRuns.isolation` to `"container"` on that node to run each
 worker inside its own container instead:
 
@@ -617,7 +617,7 @@ worker inside its own container instead:
       enabled: true,
       isolation: "container",
       // Optional: use a digest-pinned, private-registry, or preloaded image.
-      // containerImage: "registry.example.com/openclaw/node:24.19.0-slim",
+      // containerImage: "registry.example.com/carapace/node:24.19.0-slim",
     },
   },
 }
@@ -631,7 +631,7 @@ back to an unisolated worker.
 Container isolation is supported on Linux and macOS node hosts; Windows is
 unsupported because native Windows paths cannot be mounted at their original
 paths inside the container. The node must have a working Docker-compatible
-container engine. OpenClaw tries the `docker` CLI first, including Docker-backed
+container engine. Carapace tries the `docker` CLI first, including Docker-backed
 OrbStack installations, and then `podman`. The selected engine and daemon are
 checked when the node host starts and again before each container is created.
 If the platform is unsupported, neither engine works, or the daemon changes,
@@ -648,14 +648,14 @@ inaccessible, or does not provide a suitable Node.js runtime, that session
 launch fails visibly; it never retries as a bare host process. Preload the
 image or configure registry access before hosting sessions on an offline or
 restricted node. Existing explicit image settings are preserved; replace older Node
-images with a supported release before upgrading OpenClaw. Worker startup requires
+images with a supported release before upgrading Carapace. Worker startup requires
 a supported runtime; older releases may fail before the runtime diagnostic can run.
 
 Each worker container receives only two host bind mounts: its verified worker
 bundle root is read-only, and its assigned session workspace is read-write.
 Both are mounted at their original absolute host paths so the sealed bundle
 and workspace descriptor remain valid; the session workspace is also the
-container working directory. OpenClaw passes only the existing frozen,
+container working directory. Carapace passes only the existing frozen,
 non-secret worker environment allowlist and adds no other host mounts.
 Container isolation protects the rest of the host filesystem and separates
 the worker process, but the worker can still modify its assigned workspace
@@ -667,7 +667,7 @@ to reach the Gateway worker WebSocket endpoint. A Gateway address such as
 container when used by the worker; configure a Gateway address reachable from
 the container network instead. If a Gateway requires a custom certificate
 authority, `NODE_EXTRA_CA_CERTS` must point to a certificate already inside
-the mounted bundle or session workspace; OpenClaw will not mount another host
+the mounted bundle or session workspace; Carapace will not mount another host
 path for it. Browser assignments that require access to host-only browser
 state are not supported in container-isolated sessions.
 
@@ -758,7 +758,7 @@ filenames are not truncated or repaired to make an archive pass.
 Low-level (raw RPC):
 
 ```bash
-openclaw nodes invoke --node <idOrNameOrIp> --command device.info --params '{}'
+carapace nodes invoke --node <idOrNameOrIp> --command device.info --params '{}'
 ```
 
 `nodes invoke` blocks `system.run` and `system.run.prepare`; those commands only run through the `exec` tool with `host=node` (see above). Higher-level helpers exist for the common "give the agent a MEDIA attachment" workflows (camera, screen, location, below).
@@ -813,9 +813,9 @@ Dangerous or privacy-heavy commands require a one-time persistent opt-in with `g
 
 Plugin-owned node commands can add a Gateway node-invoke policy. That policy runs after the allowlist check and before forwarding to the node, so raw `node.invoke`, CLI helpers, and dedicated agent tools share the same plugin permission boundary. Dangerous plugin node commands still require explicit `gateway.nodes.commands.allow` opt-in.
 
-After a node changes its declared command list, reconnect it, inspect `openclaw nodes pending`, and approve the widened surface with `openclaw nodes approve <requestId>` so the Gateway stores the updated command snapshot.
+After a node changes its declared command list, reconnect it, inspect `carapace nodes pending`, and approve the widened surface with `carapace nodes approve <requestId>` so the Gateway stores the updated command snapshot.
 
-## Config (`openclaw.json`)
+## Config (`carapace.json`)
 
 Node-related settings live under `gateway.nodes` and `tools.exec`:
 
@@ -827,7 +827,7 @@ Node-related settings live under `gateway.nodes` and `tools.exec`:
       // Disabled when unset. Only applies to first-time role:node requests
       // with no requested scopes; does not auto-approve upgrades. This
       // approves the device only: the node's command/capability surface still
-      // needs `openclaw nodes approve <requestId>` (see `openclaw nodes
+      // needs `carapace nodes approve <requestId>` (see `carapace nodes
       // pending`), because device pairing alone must not grant commands.
       // Silent same-host pairing behaves the same way. SSH-verified pairing
       // and node-profile setup codes approve the initial surface, since both
@@ -883,9 +883,9 @@ Per-agent exec node override:
 ## macOS widget panel
 
 ```bash
-openclaw nodes canvas present --node <idOrNameOrIp>
-openclaw nodes canvas hide --node <idOrNameOrIp>
-openclaw nodes canvas navigate "/__openclaw__/canvas/documents/<document-id>/index.html" --node <idOrNameOrIp>
+carapace nodes canvas present --node <idOrNameOrIp>
+carapace nodes canvas hide --node <idOrNameOrIp>
+carapace nodes canvas navigate "/__carapace__/canvas/documents/<document-id>/index.html" --node <idOrNameOrIp>
 ```
 
 Notes:
@@ -906,18 +906,18 @@ Notes:
 Photos (`jpg`):
 
 ```bash
-openclaw nodes camera list --node <idOrNameOrIp>
-openclaw nodes camera snap --node <idOrNameOrIp>            # default: one node-selected photo
-openclaw nodes camera snap --node <idOrNameOrIp> --facing front
-openclaw nodes camera snap --node <idOrNameOrIp> --facing both # front then back (2 saved paths)
-openclaw nodes camera snap --node <idOrNameOrIp> --device-id <id> --max-width 1200 --quality 0.9 --delay-ms 2000
+carapace nodes camera list --node <idOrNameOrIp>
+carapace nodes camera snap --node <idOrNameOrIp>            # default: one node-selected photo
+carapace nodes camera snap --node <idOrNameOrIp> --facing front
+carapace nodes camera snap --node <idOrNameOrIp> --facing both # front then back (2 saved paths)
+carapace nodes camera snap --node <idOrNameOrIp> --device-id <id> --max-width 1200 --quality 0.9 --delay-ms 2000
 ```
 
 Video clips (`mp4`):
 
 ```bash
-openclaw nodes camera clip --node <idOrNameOrIp> --duration 10s
-openclaw nodes camera clip --node <idOrNameOrIp> --duration 3000 --no-audio
+carapace nodes camera clip --node <idOrNameOrIp> --duration 10s
+carapace nodes camera clip --node <idOrNameOrIp> --duration 3000 --no-audio
 ```
 
 Notes:
@@ -931,8 +931,8 @@ Notes:
 Supported nodes expose `screen.record` (mp4). Example:
 
 ```bash
-openclaw nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10
-openclaw nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10 --no-audio
+carapace nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10
+carapace nodes screen record --node <idOrNameOrIp> --duration 10s --fps 10 --no-audio
 ```
 
 Notes:
@@ -949,8 +949,8 @@ Nodes expose `location.get` when Location is enabled in settings.
 CLI helper:
 
 ```bash
-openclaw nodes location get --node <idOrNameOrIp>
-openclaw nodes location get --node <idOrNameOrIp> --accuracy precise --max-age 15000 --location-timeout 10000
+carapace nodes location get --node <idOrNameOrIp>
+carapace nodes location get --node <idOrNameOrIp> --accuracy precise --max-age 15000 --location-timeout 10000
 ```
 
 Notes:
@@ -964,7 +964,7 @@ Notes:
 
 Android nodes can expose `sms.send` and `sms.search` when the user grants **SMS** permission and the device supports telephony. Both commands are dangerous-by-default: the gateway operator must also add them to `gateway.nodes.commands.allow` before they can be invoked (see [Command policy](#command-policy)).
 
-For read-only SMS search, opt in explicitly in `openclaw.json`:
+For read-only SMS search, opt in explicitly in `carapace.json`:
 
 ```json5
 {
@@ -981,7 +981,7 @@ Add `sms.send` separately only when the node should also be able to send message
 Low-level invoke:
 
 ```bash
-openclaw nodes invoke --node <idOrNameOrIp> --command sms.send --params '{"to":"+15555550123","message":"Hello from OpenClaw"}'
+carapace nodes invoke --node <idOrNameOrIp> --command sms.send --params '{"to":"+15555550123","message":"Hello from Carapace"}'
 ```
 
 Notes:
@@ -1010,10 +1010,10 @@ Available families:
 Example invokes:
 
 ```bash
-openclaw nodes invoke --node <idOrNameOrIp> --command device.status --params '{}'
-openclaw nodes invoke --node <idOrNameOrIp> --command device.apps --params '{"limit":10}'
-openclaw nodes invoke --node <idOrNameOrIp> --command notifications.list --params '{}'
-openclaw nodes invoke --node <idOrNameOrIp> --command photos.latest --params '{"limit":1}'
+carapace nodes invoke --node <idOrNameOrIp> --command device.status --params '{}'
+carapace nodes invoke --node <idOrNameOrIp> --command device.apps --params '{"limit":10}'
+carapace nodes invoke --node <idOrNameOrIp> --command notifications.list --params '{}'
+carapace nodes invoke --node <idOrNameOrIp> --command photos.latest --params '{"limit":1}'
 ```
 
 ## System commands (node host / mac node)
@@ -1023,8 +1023,8 @@ The macOS node and headless node host both expose `system.run.prepare`, `system.
 Examples:
 
 ```bash
-openclaw nodes notify --node <idOrNameOrIp> --title "Ping" --body "Gateway ready"
-openclaw nodes invoke --node <idOrNameOrIp> --command system.which --params '{"bins":["git"]}'
+carapace nodes notify --node <idOrNameOrIp> --title "Ping" --body "Gateway ready"
+carapace nodes invoke --node <idOrNameOrIp> --command system.which --params '{"bins":["git"]}'
 ```
 
 Notes:
@@ -1052,21 +1052,21 @@ A binding sets the default node for `exec host=node` and can be overridden per a
 Global default:
 
 ```bash
-openclaw config set tools.exec.node "node-id-or-name"
+carapace config set tools.exec.node "node-id-or-name"
 ```
 
 Per-agent override:
 
 ```bash
-openclaw config get agents.entries
-openclaw config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
+carapace config get agents.entries
+carapace config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
 ```
 
 Unset the binding to use the sole eligible node, or choose a target per call when multiple eligible nodes are connected:
 
 ```bash
-openclaw config unset tools.exec.node
-openclaw config unset 'agents.entries.main.tools.exec.node'
+carapace config unset tools.exec.node
+carapace config unset 'agents.entries.main.tools.exec.node'
 ```
 
 ## Permissions map
@@ -1075,12 +1075,12 @@ Nodes may include a `permissions` map in `node.list` / `node.describe`, keyed by
 
 ## Headless node host (cross-platform)
 
-OpenClaw can run a **headless node host** (no UI) that connects to the Gateway WebSocket and exposes `system.run` / `system.which`. This is useful on Linux/Windows or for running a minimal node alongside a server.
+Carapace can run a **headless node host** (no UI) that connects to the Gateway WebSocket and exposes `system.run` / `system.which`. This is useful on Linux/Windows or for running a minimal node alongside a server.
 
 Start it:
 
 ```bash
-openclaw node run --host <gateway-host> --port 18789
+carapace node run --host <gateway-host> --port 18789
 ```
 
 Notes:
@@ -1088,11 +1088,11 @@ Notes:
 - Pairing is still required (the Gateway will show a device pairing prompt).
 - Client instance metadata, signed device identity, and pairing auth use separate state records; see [Headless identity state](#headless-identity-state).
 - Exec approvals are enforced locally via
-  `~/.openclaw/state/openclaw.sqlite#exec_approvals_config` (see [Exec approvals](/tools/exec-approvals)).
-- On macOS, the headless node host executes `system.run` locally by default. Set `OPENCLAW_NODE_EXEC_HOST=app` to require the companion app exec host, with no local fallback. `OPENCLAW_NODE_EXEC_FALLBACK` does not change current routing.
+  `~/.carapace/state/carapace.sqlite#exec_approvals_config` (see [Exec approvals](/tools/exec-approvals)).
+- On macOS, the headless node host executes `system.run` locally by default. Set `CARAPACE_NODE_EXEC_HOST=app` to require the companion app exec host, with no local fallback. `CARAPACE_NODE_EXEC_FALLBACK` does not change current routing.
 - Add `--tls` / `--tls-fingerprint` when the Gateway WS uses TLS.
 
 ## Mac node mode
 
-- The macOS menubar app connects to the Gateway WS server as a node (so `openclaw nodes …` works against this Mac).
+- The macOS menubar app connects to the Gateway WS server as a node (so `carapace nodes …` works against this Mac).
 - In remote mode, the app opens an SSH tunnel for the Gateway port and connects to `localhost`.

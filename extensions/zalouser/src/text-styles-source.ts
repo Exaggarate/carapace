@@ -1,4 +1,4 @@
-import { markdownToIR } from "openclaw/plugin-sdk/text-chunking";
+import { markdownToIR } from "carapace/plugin-sdk/text-chunking";
 import { protectLiteral, protectLocalInlineSyntax } from "./text-styles-inline.js";
 import type { MarkdownIRWithBlockMetadata, TokenRegistry } from "./text-styles-shared.js";
 import {

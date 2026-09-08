@@ -22,7 +22,7 @@ function catalog(): McpToolCatalog {
       toolName: "delete_docs",
       inputSchema: Type.Object({}),
       fallbackDescription: "delete",
-      excludedFromOpenClawCatalog: true as const,
+      excludedFromCarapaceCatalog: true as const,
     },
     {
       serverName: "docs?",
@@ -62,7 +62,7 @@ function catalog(): McpToolCatalog {
 function runtime(value: McpToolCatalog): SessionMcpRuntime {
   return {
     sessionId: "session-1",
-    workspaceDir: "/tmp/openclaw-native-mcp-policy",
+    workspaceDir: "/tmp/carapace-native-mcp-policy",
     configFingerprint: "test",
     createdAt: 1,
     lastUsedAt: 1,
@@ -78,7 +78,7 @@ describe("prepareNativeMcpPolicy", () => {
   it("keeps default callable tools while denying hidden native inventory", async () => {
     const prepared = await prepareNativeMcpPolicy({
       runtime: runtime(catalog()),
-      workspaceDir: "/tmp/openclaw-native-mcp-policy",
+      workspaceDir: "/tmp/carapace-native-mcp-policy",
       capabilityProfile: resolveConversationCapabilityProfile({}),
       warn: () => {},
     });
@@ -98,7 +98,7 @@ describe("prepareNativeMcpPolicy", () => {
     const prepared = await prepareNativeMcpPolicy({
       runtime: runtime(catalog()),
       config,
-      workspaceDir: "/tmp/openclaw-native-mcp-policy",
+      workspaceDir: "/tmp/carapace-native-mcp-policy",
       capabilityProfile: resolveConversationCapabilityProfile({ config }),
       warn: () => {},
     });
@@ -118,7 +118,7 @@ describe("prepareNativeMcpPolicy", () => {
   it("treats an empty runtime allowlist as an exact deny-all cap", async () => {
     const prepared = await prepareNativeMcpPolicy({
       runtime: runtime(catalog()),
-      workspaceDir: "/tmp/openclaw-native-mcp-policy",
+      workspaceDir: "/tmp/carapace-native-mcp-policy",
       capabilityProfile: resolveConversationCapabilityProfile({}),
       runtimeToolsAllow: [],
       warn: () => {},
@@ -184,7 +184,7 @@ describe("prepareNativeMcpPolicy", () => {
     const prepared = await prepareNativeMcpPolicy({
       runtime: runtime(collisionCatalog),
       config,
-      workspaceDir: "/tmp/openclaw-native-mcp-policy",
+      workspaceDir: "/tmp/carapace-native-mcp-policy",
       capabilityProfile: resolveConversationCapabilityProfile({ config }),
       warn: () => {},
     });
@@ -214,7 +214,7 @@ describe("prepareNativeMcpPolicy", () => {
         toolName,
         inputSchema: Type.Object({}),
         fallbackDescription: "hidden policy inventory",
-        excludedFromOpenClawCatalog: true as const,
+        excludedFromCarapaceCatalog: true as const,
       }),
     );
     const collisionCatalog: McpToolCatalog = {
@@ -239,7 +239,7 @@ describe("prepareNativeMcpPolicy", () => {
     const prepared = await prepareNativeMcpPolicy({
       runtime: runtime(collisionCatalog),
       config,
-      workspaceDir: "/tmp/openclaw-native-mcp-policy",
+      workspaceDir: "/tmp/carapace-native-mcp-policy",
       capabilityProfile: resolveConversationCapabilityProfile({ config }),
       warn: () => {},
     });

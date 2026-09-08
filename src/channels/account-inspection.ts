@@ -3,8 +3,8 @@
  *
  * Combines plugin inspection hooks, read-only fallbacks, and configured credential status.
  */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   hasConfiguredUnavailableCredentialStatus,
   hasResolvedCredentialValue,
@@ -33,7 +33,7 @@ export type ChannelAccountInspectionResult = {
  */
 export async function inspectChannelAccount(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 }): Promise<unknown> {
   return (
@@ -51,8 +51,8 @@ export async function inspectChannelAccount(params: {
  */
 export async function resolveInspectedChannelAccount(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   accountId: string;
 }): Promise<ChannelAccountInspectionResult> {
   const unavailable = resolveUnavailableChannelAccountSnapshot(params.cfg, {

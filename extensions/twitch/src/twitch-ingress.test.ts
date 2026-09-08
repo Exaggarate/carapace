@@ -1,6 +1,6 @@
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/channel-ingress-test-runtime";
 // Twitch durable ingress tests cover raw admission, recovery, and tombstones.
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTwitchIngress } from "./twitch-ingress.js";
 import {
@@ -15,7 +15,7 @@ function runtime() {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

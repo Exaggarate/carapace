@@ -1,5 +1,5 @@
 // Shared meeting bot realtime engines own provider and audio-transport orchestration.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
@@ -103,7 +103,7 @@ const MEETING_REALTIME_OUTPUT_MAX_WRITE_MS = 500;
 const MEETING_REALTIME_OUTPUT_MAX_PENDING_FRAMES = 256;
 export async function startMeetingRealtimeEngine(params: {
   config: MeetingRealtimeEngineConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: CarapaceConfig;
   runtime: PluginRuntime;
   platform: MeetingRuntimePlatform;
   meetingSessionId: string;

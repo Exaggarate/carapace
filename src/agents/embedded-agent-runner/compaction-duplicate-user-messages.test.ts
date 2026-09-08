@@ -9,7 +9,7 @@ function userMessage(params: { timestamp: number; senderId?: string; content?: s
     role: "user" as const,
     content: params.content ?? LONG_PROMPT,
     timestamp: params.timestamp,
-    ...(params.senderId ? { __openclaw: { senderId: params.senderId } } : {}),
+    ...(params.senderId ? { __carapace: { senderId: params.senderId } } : {}),
   };
 }
 
@@ -111,11 +111,11 @@ describe("compaction duplicate user message pruning", () => {
   ])("preserves separately attached $name with the same caption", ({ kind, extension }) => {
     const first = {
       ...userMessage({ timestamp: 1_000 }),
-      __openclaw: { media: [{ kind, url: `media://inbound/first.${extension}` }] },
+      __carapace: { media: [{ kind, url: `media://inbound/first.${extension}` }] },
     };
     const second = {
       ...userMessage({ timestamp: 2_000 }),
-      __openclaw: { media: [{ kind, url: `media://inbound/second.${extension}` }] },
+      __carapace: { media: [{ kind, url: `media://inbound/second.${extension}` }] },
     };
 
     expect(dedupeDuplicateUserMessagesForCompaction([first, second])).toEqual([first, second]);
@@ -125,7 +125,7 @@ describe("compaction duplicate user message pruning", () => {
     const first = userMessage({ timestamp: 1_000 });
     const second = {
       ...userMessage({ timestamp: 2_000 }),
-      __openclaw: { media: [{ kind: "image", url: "media://inbound/diagram.png" }] },
+      __carapace: { media: [{ kind: "image", url: "media://inbound/diagram.png" }] },
     };
 
     expect(dedupeDuplicateUserMessagesForCompaction([first, second])).toEqual([first, second]);

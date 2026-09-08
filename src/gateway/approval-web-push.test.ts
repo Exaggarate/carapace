@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { BoundWebPushSubscription } from "../infra/push-web.js";
@@ -205,10 +205,10 @@ describe("approval Web Push delivery", () => {
     expect(preparedWebPushSendMock).toHaveBeenCalledWith({
       subscriptions: [allowed],
       payload: {
-        title: "OpenClaw approval requested",
-        body: "Open OpenClaw to review this request.",
+        title: "Carapace approval requested",
+        body: "Open Carapace to review this request.",
         renotify: false,
-        tag: "openclaw-approval-exec:approval.1",
+        tag: "carapace-approval-exec:approval.1",
         url: "approve/exec%3Aapproval.1#gatewayUrl=wss%3A%2F%2Fgateway.example.test%2Foperator",
       },
       deliveryOptions: {
@@ -254,8 +254,8 @@ describe("approval Web Push delivery", () => {
       expect(preparedWebPushSendMock).toHaveBeenCalledWith(
         expect.objectContaining({
           payload: expect.objectContaining({
-            title: "Phone\\u{202E} · OpenClaw approval requested",
-            body: `Open OpenClaw to review an approval for ${label}.`,
+            title: "Phone\\u{202E} · Carapace approval requested",
+            body: `Open Carapace to review an approval for ${label}.`,
           }),
         }),
       );
@@ -550,7 +550,7 @@ describe("approval Web Push delivery", () => {
     expect(preparedWebPushSendMock).toHaveBeenCalledTimes(2);
     expect(preparedWebPushSendMock.mock.calls[1]?.[0]).toMatchObject({
       subscriptions: [ambiguous],
-      payload: { title: "OpenClaw approval updated" },
+      payload: { title: "Carapace approval updated" },
     });
     expect(deleteWebPushApprovalDeliveryTargetsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -614,10 +614,10 @@ describe("approval Web Push delivery", () => {
       expect(preparedWebPushSendMock).toHaveBeenNthCalledWith(2, {
         subscriptions: [delivered],
         payload: {
-          title: "OpenClaw approval updated",
+          title: "Carapace approval updated",
           body: "This approval is no longer pending.",
           renotify: false,
-          tag: `openclaw-approval-${record.id}`,
+          tag: `carapace-approval-${record.id}`,
           url: `approve/${encodeURIComponent(record.id)}`,
         },
         deliveryOptions: {
@@ -703,8 +703,8 @@ describe("approval Web Push delivery", () => {
       expect.objectContaining({
         subscriptions: [delivered],
         payload: expect.objectContaining({
-          title: "OpenClaw approval updated",
-          tag: "openclaw-approval-" + record.id,
+          title: "Carapace approval updated",
+          tag: "carapace-approval-" + record.id,
         }),
       }),
     );

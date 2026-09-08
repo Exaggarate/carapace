@@ -1,9 +1,9 @@
-import { readSessionTranscriptRawDelta } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { readSessionTranscriptRawDelta } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   asOptionalRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { clampInt } from "./config.js";
 import {
   readExplicitMemoryEvidence,

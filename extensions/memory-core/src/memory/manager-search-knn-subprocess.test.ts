@@ -5,8 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
-import { loadSqliteVecExtension } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import { loadSqliteVecExtension } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runVectorKnnInSubprocess } from "./manager-search-knn-subprocess.js";
 import type { VectorKnnRequest } from "./manager-search-knn.js";
@@ -81,7 +81,7 @@ async function createFileBackedVectorDatabase(): Promise<{
   databasePath: string;
   cleanup: () => void;
 }> {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-knn-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-memory-knn-"));
   const databasePath = path.join(directory, "memory.sqlite");
   const db = openNodeSqliteDatabase(databasePath, { allowExtension: true });
   try {

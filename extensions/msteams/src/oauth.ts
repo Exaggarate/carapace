@@ -1,10 +1,10 @@
 // Msteams plugin module implements oauth behavior.
-import { generateHexPkceVerifierChallenge } from "openclaw/plugin-sdk/provider-auth";
+import { generateHexPkceVerifierChallenge } from "carapace/plugin-sdk/provider-auth";
 import {
   generateOAuthState,
   parseOAuthCallbackInput,
   waitForLocalOAuthCallback,
-} from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth-runtime";
 import { buildMSTeamsAuthUrl, shouldUseManualOAuthFlow } from "./oauth.flow.js";
 import {
   MSTEAMS_DEFAULT_DELEGATED_SCOPES,

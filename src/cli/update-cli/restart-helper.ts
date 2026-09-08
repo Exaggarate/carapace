@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { DEFAULT_GATEWAY_PORT } from "../../config/paths.js";
 import {
   resolveGatewaySystemdServiceName,
@@ -46,19 +46,19 @@ function powerShellSingleQuote(value: string): string {
 }
 
 function resolveSystemdUnit(env: NodeJS.ProcessEnv): string {
-  const override = normalizeOptionalString(env.OPENCLAW_SYSTEMD_UNIT);
+  const override = normalizeOptionalString(env.CARAPACE_SYSTEMD_UNIT);
   if (override) {
     return override.endsWith(".service") ? override : `${override}.service`;
   }
-  return `${resolveGatewaySystemdServiceName(env.OPENCLAW_PROFILE)}.service`;
+  return `${resolveGatewaySystemdServiceName(env.CARAPACE_PROFILE)}.service`;
 }
 
 function resolveWindowsTaskName(env: NodeJS.ProcessEnv): string {
-  const override = env.OPENCLAW_WINDOWS_TASK_NAME?.trim();
+  const override = env.CARAPACE_WINDOWS_TASK_NAME?.trim();
   if (override) {
     return override;
   }
-  return resolveGatewayWindowsTaskName(env.OPENCLAW_PROFILE);
+  return resolveGatewayWindowsTaskName(env.CARAPACE_PROFILE);
 }
 
 function resolveLinuxFilesystemBusUid(busAddress: string | undefined): string | undefined {
@@ -150,7 +150,7 @@ export async function prepareRestartScript(
       const escaped = shellEscape(unitName);
       const logSetup = renderPosixRestartLogSetup({ ...process.env, ...env });
       const userBusRepair = await renderLinuxUserBusRepair({ ...process.env, ...env });
-      filename = `openclaw-restart-${timestamp}.sh`;
+      filename = `carapace-restart-${timestamp}.sh`;
       scriptContent = `#!/bin/sh
 # Standalone restart script — survives parent process termination.
 # Wait briefly to ensure file locks are released after update.
@@ -158,26 +158,26 @@ sleep 1
 exec 3>&2
 ${logSetup}
 ${userBusRepair}
-printf '[%s] openclaw restart attempt source=update target=%s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&2
+printf '[%s] carapace restart attempt source=update target=%s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&2
 if systemctl --user is-active --quiet '${escaped}' || systemctl --user is-enabled --quiet '${escaped}'; then
   if systemctl --user restart '${escaped}'; then
     status=0
-    printf '[%s] openclaw restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
+    printf '[%s] carapace restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
   else
     status=$?
-    printf '[%s] openclaw restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
+    printf '[%s] carapace restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
   fi
 elif systemctl is-active --quiet '${escaped}' || systemctl is-enabled --quiet '${escaped}'; then
   status=78
-  printf '[%s] system-scoped openclaw gateway unit detected; update cannot restart it without sudo. Run: sudo systemctl restart %s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&2
-  printf '[%s] system-scoped openclaw gateway unit detected; update cannot restart it without sudo. Run: sudo systemctl restart %s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&3 2>/dev/null || true
+  printf '[%s] system-scoped carapace gateway unit detected; update cannot restart it without sudo. Run: sudo systemctl restart %s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&2
+  printf '[%s] system-scoped carapace gateway unit detected; update cannot restart it without sudo. Run: sudo systemctl restart %s\\n' "$(date -u +%FT%TZ)" '${escaped}' >&3 2>/dev/null || true
 else
   if systemctl --user restart '${escaped}'; then
     status=0
-    printf '[%s] openclaw restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
+    printf '[%s] carapace restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
   else
     status=$?
-    printf '[%s] openclaw restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
+    printf '[%s] carapace restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
   fi
 fi
 # Self-cleanup
@@ -199,7 +199,7 @@ exit "$status"
       const escapedPlistPath = shellEscape(plistPath);
       const logSetup = renderPosixRestartLogSetup({ ...process.env, ...env });
       const systemOwnershipProbe = renderSystemLaunchDaemonOwnershipShellProbe(label);
-      filename = `openclaw-restart-${timestamp}.sh`;
+      filename = `carapace-restart-${timestamp}.sh`;
       scriptContent = `#!/bin/sh
 # Standalone restart script — survives parent process termination.
 # Wait briefly to ensure file locks are released after update.
@@ -208,7 +208,7 @@ sleep 1
 # audit trail. Log setup is best-effort: restart must still run if the log path
 # is temporarily unavailable.
 ${logSetup}
-printf '[%s] openclaw restart attempt source=update target=%s\\n' "$(date -u +%FT%TZ)" '${shellEscapeRestartLogValue(label)}' >&2
+printf '[%s] carapace restart attempt source=update target=%s\\n' "$(date -u +%FT%TZ)" '${shellEscapeRestartLogValue(label)}' >&2
 ${systemOwnershipProbe}
 # Try kickstart first (works when the service is still registered).
 # If it fails (e.g. after bootout), clear any persisted disabled state,
@@ -217,9 +217,9 @@ ${systemOwnershipProbe}
 # The final status is captured
 # before self-cleanup so a genuine failure remains observable.
 status=0
-if [ -n "$openclaw_system_launchd_conflict" ]; then
+if [ -n "$carapace_system_launchd_conflict" ]; then
   status=78
-  printf '[%s] openclaw restart blocked source=update reason=%s\n' "$(date -u +%FT%TZ)" "$openclaw_system_launchd_detail" >&2
+  printf '[%s] carapace restart blocked source=update reason=%s\n' "$(date -u +%FT%TZ)" "$carapace_system_launchd_detail" >&2
 elif ! launchctl kickstart -k 'gui/${uid}/${escaped}'; then
   launchctl enable 'gui/${uid}/${escaped}'
   if launchctl bootstrap 'gui/${uid}' '${escapedPlistPath}'; then
@@ -230,11 +230,11 @@ elif ! launchctl kickstart -k 'gui/${uid}/${escaped}'; then
   fi
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] carapace restart done source=update\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] carapace restart failed source=update status=%s\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
-# Self-cleanup (log is retained under the OpenClaw state logs directory).
+# Self-cleanup (log is retained under the Carapace state logs directory).
 script_dir=$(dirname "$0")
 rm -f "$0"
 rmdir "$script_dir" 2>/dev/null || true
@@ -253,17 +253,17 @@ exit "$status"
       const gatewayScriptPath = resolveGatewayTaskScriptPath({ ...process.env, ...env });
       const quotedGatewayScriptPath = powerShellSingleQuote(gatewayScriptPath);
       const expectedGatewayArgv = windowsGatewayArgv.map(powerShellSingleQuote).join(", ");
-      filename = `openclaw-restart-${timestamp}.cmd`;
+      filename = `carapace-restart-${timestamp}.cmd`;
       windowsWrapper = `@echo off
 REM Standalone restart script - survives parent process termination.
 REM Read fixed commands from stdin so Group Policy file-signing restrictions
 REM do not prevent recovery. The companion contains ASCII-only script text.
 setlocal
-set "OPENCLAW_RESTART_SCRIPT_DIR=%~dp0."
+set "CARAPACE_RESTART_SCRIPT_DIR=%~dp0."
 powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command - < "%~dpn0.ps1" > "%~dpn0.out"
 set "status=%ERRORLEVEL%"
 REM PowerShell can exit zero for malformed or incomplete stdin without running it.
-findstr /x /c:"OPENCLAW_RESTART_COMPLETE" "%~dpn0.out" >nul 2>&1
+findstr /x /c:"CARAPACE_RESTART_COMPLETE" "%~dpn0.out" >nul 2>&1
 if errorlevel 1 set "status=1"
 REM This dedicated cmd process must exit instead of returning to a deleted batch file.
 (
@@ -271,7 +271,7 @@ del "%~dpn0.out" >nul 2>&1
 del "%~dpn0.ps1" >nul 2>&1
 del "%~f0.vbs" >nul 2>&1
 del "%~f0" >nul 2>&1
-rmdir "%OPENCLAW_RESTART_SCRIPT_DIR%" >nul 2>&1
+rmdir "%CARAPACE_RESTART_SCRIPT_DIR%" >nul 2>&1
 exit %status%
 )
 `;
@@ -284,7 +284,7 @@ $logPath = ${quotedLogPath}
 try {
   $logDir = Split-Path -Parent $logPath
   New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-  Add-Content -LiteralPath $logPath -Value "[$(Get-Date -Format o)] openclaw restart log initialized"
+  Add-Content -LiteralPath $logPath -Value "[$(Get-Date -Format o)] carapace restart log initialized"
 } catch {
   # Restart should still run if log setup is unavailable.
 }
@@ -297,7 +297,7 @@ function Write-RestartLog {
   }
 }
 
-function Join-OpenClawProcessArguments {
+function Join-CarapaceProcessArguments {
   param([string[]]$Arguments)
   ($Arguments | ForEach-Object {
     if ($_ -match "\\s") {
@@ -308,7 +308,7 @@ function Join-OpenClawProcessArguments {
   }) -join " "
 }
 
-function Invoke-OpenClawSchtasksWithTimeout {
+function Invoke-CarapaceSchtasksWithTimeout {
   param(
     [string[]]$Arguments,
     [int]$TimeoutSeconds
@@ -317,7 +317,7 @@ function Invoke-OpenClawSchtasksWithTimeout {
   try {
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = "schtasks.exe"
-    $startInfo.Arguments = Join-OpenClawProcessArguments -Arguments $Arguments
+    $startInfo.Arguments = Join-CarapaceProcessArguments -Arguments $Arguments
     $startInfo.UseShellExecute = $false
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
@@ -327,7 +327,7 @@ function Invoke-OpenClawSchtasksWithTimeout {
         $process.Kill()
       } catch {
       }
-      Write-RestartLog "openclaw restart schtasks timeout source=update args=$($Arguments -join ' ')"
+      Write-RestartLog "carapace restart schtasks timeout source=update args=$($Arguments -join ' ')"
       return 124
     }
     $stdout = $process.StandardOutput.ReadToEnd()
@@ -340,12 +340,12 @@ function Invoke-OpenClawSchtasksWithTimeout {
     }
     return $process.ExitCode
   } catch {
-    Write-RestartLog "openclaw restart schtasks failed source=update args=$($Arguments -join ' ') error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart schtasks failed source=update args=$($Arguments -join ' ') error=$($_.Exception.Message)"
     return 1
   }
 }
 
-function Get-OpenClawScheduledTaskState {
+function Get-CarapaceScheduledTaskState {
   param([string]$TaskName)
   try {
     $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
@@ -368,8 +368,8 @@ function Get-OpenClawScheduledTaskState {
   return "Unknown"
 }
 
-# OPENCLAW_RESTART_KILL_POLICY_BEGIN
-function Split-OpenClawWindowsCommandLine {
+# CARAPACE_RESTART_KILL_POLICY_BEGIN
+function Split-CarapaceWindowsCommandLine {
   param([string]$CommandLine)
   if (-not $CommandLine) { return @() }
   $arguments = [Collections.Generic.List[string]]::new()
@@ -420,7 +420,7 @@ function Split-OpenClawWindowsCommandLine {
   return $arguments.ToArray()
 }
 
-function Get-OpenClawListenerSnapshot {
+function Get-CarapaceListenerSnapshot {
   param([int]$Port)
 
   try {
@@ -434,7 +434,7 @@ function Get-OpenClawListenerSnapshot {
       return [pscustomobject]@{ Known = $true; Pids = $listenerPids }
     }
   } catch {
-    Write-RestartLog "openclaw restart Get-NetTCPConnection query failed source=update error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart Get-NetTCPConnection query failed source=update error=$($_.Exception.Message)"
   }
 
   try {
@@ -465,12 +465,12 @@ function Get-OpenClawListenerSnapshot {
       Pids = @($listenerPids | Sort-Object -Unique)
     }
   } catch {
-    Write-RestartLog "openclaw restart netstat query failed source=update error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart netstat query failed source=update error=$($_.Exception.Message)"
     return [pscustomobject]@{ Known = $false; Pids = @() }
   }
 }
 
-function Get-OpenClawProcessFacts {
+function Get-CarapaceProcessFacts {
   param([int]$ProcessId)
 
   try {
@@ -488,15 +488,15 @@ function Get-OpenClawProcessFacts {
     return [pscustomobject]@{
       ProcessId = [int]$process.ProcessId
       CreationTimeFileTime = [string]$creationTimeFileTime
-      Argv = @(Split-OpenClawWindowsCommandLine -CommandLine ([string]$process.CommandLine))
+      Argv = @(Split-CarapaceWindowsCommandLine -CommandLine ([string]$process.CommandLine))
     }
   } catch {
-    Write-RestartLog "openclaw restart process query failed source=update pid=$ProcessId error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart process query failed source=update pid=$ProcessId error=$($_.Exception.Message)"
     return $null
   }
 }
 
-function Test-OpenClawArgvEqual {
+function Test-CarapaceArgvEqual {
   param([string[]]$Actual, [string[]]$Expected)
   if ($Actual.Count -ne $Expected.Count) {
     return $false
@@ -522,17 +522,17 @@ function Test-OpenClawArgvEqual {
   return $true
 }
 
-function Test-OpenClawSameProcess {
+function Test-CarapaceSameProcess {
   param($Expected, $Actual)
   return (
     $null -ne $Actual -and
     $Actual.ProcessId -eq $Expected.ProcessId -and
     $Actual.CreationTimeFileTime -eq $Expected.CreationTimeFileTime -and
-    (Test-OpenClawArgvEqual -Actual $Actual.Argv -Expected $Expected.Argv)
+    (Test-CarapaceArgvEqual -Actual $Actual.Argv -Expected $Expected.Argv)
   )
 }
 
-function Get-OpenClawListenerKillDecision {
+function Get-CarapaceListenerKillDecision {
   param(
     [int]$CandidatePid,
     [string[]]$ExpectedArgv,
@@ -547,7 +547,7 @@ function Get-OpenClawListenerKillDecision {
   if ($null -eq $ObservedProcess -or $ObservedProcess.ProcessId -ne $CandidatePid) {
     return "process-unavailable"
   }
-  if (-not (Test-OpenClawArgvEqual -Actual $ObservedProcess.Argv -Expected $ExpectedArgv)) {
+  if (-not (Test-CarapaceArgvEqual -Actual $ObservedProcess.Argv -Expected $ExpectedArgv)) {
     return "command-mismatch"
   }
   if ($HeldProcessCreationTimeFileTime -ne $ObservedProcess.CreationTimeFileTime) {
@@ -559,33 +559,33 @@ function Get-OpenClawListenerKillDecision {
   if ($RecheckedListeners.Pids -notcontains $CandidatePid) {
     return "no-longer-listening"
   }
-  if (-not (Test-OpenClawSameProcess -Expected $ObservedProcess -Actual $RecheckedProcess)) {
+  if (-not (Test-CarapaceSameProcess -Expected $ObservedProcess -Actual $RecheckedProcess)) {
     return "process-replaced"
   }
   return "kill"
 }
 
-function Invoke-OpenClawVerifiedListenerKill {
+function Invoke-CarapaceVerifiedListenerKill {
   param(
     [int]$ProcessId,
     [int]$Port,
     [string[]]$ExpectedArgv,
-    [scriptblock]$ProcessQuery = { param([int]$QueryPid) Get-OpenClawProcessFacts -ProcessId $QueryPid },
-    [scriptblock]$ListenerQuery = { param([int]$QueryPort) Get-OpenClawListenerSnapshot -Port $QueryPort },
+    [scriptblock]$ProcessQuery = { param([int]$QueryPid) Get-CarapaceProcessFacts -ProcessId $QueryPid },
+    [scriptblock]$ListenerQuery = { param([int]$QueryPort) Get-CarapaceListenerSnapshot -Port $QueryPort },
     [scriptblock]$ProcessOpen = { param([int]$QueryPid) [Diagnostics.Process]::GetProcessById($QueryPid) }
   )
 
   $observedProcess = & $ProcessQuery $ProcessId
   if ($null -eq $observedProcess) {
-    Write-RestartLog "openclaw restart skipped listener source=update pid=$ProcessId decision=process-unavailable"
+    Write-RestartLog "carapace restart skipped listener source=update pid=$ProcessId decision=process-unavailable"
     return
   }
   if ($ExpectedArgv.Count -eq 0) {
-    Write-RestartLog "openclaw restart skipped listener source=update pid=$ProcessId decision=expected-command-unavailable"
+    Write-RestartLog "carapace restart skipped listener source=update pid=$ProcessId decision=expected-command-unavailable"
     return
   }
-  if (-not (Test-OpenClawArgvEqual -Actual $observedProcess.Argv -Expected $ExpectedArgv)) {
-    Write-RestartLog "openclaw restart skipped listener source=update pid=$ProcessId decision=command-mismatch"
+  if (-not (Test-CarapaceArgvEqual -Actual $observedProcess.Argv -Expected $ExpectedArgv)) {
+    Write-RestartLog "carapace restart skipped listener source=update pid=$ProcessId decision=command-mismatch"
     return
   }
 
@@ -593,7 +593,7 @@ function Invoke-OpenClawVerifiedListenerKill {
   try {
     $lease = & $ProcessOpen $ProcessId
     if ($null -eq $lease) {
-      Write-RestartLog "openclaw restart skipped listener source=update pid=$ProcessId decision=process-handle-unavailable"
+      Write-RestartLog "carapace restart skipped listener source=update pid=$ProcessId decision=process-handle-unavailable"
       return
     }
 
@@ -612,38 +612,38 @@ function Invoke-OpenClawVerifiedListenerKill {
       RecheckedListeners = $recheckedListeners
       RecheckedProcess = $recheckedProcess
     }
-    $decision = Get-OpenClawListenerKillDecision @decisionParams
+    $decision = Get-CarapaceListenerKillDecision @decisionParams
     if ($decision -ne "kill") {
-      Write-RestartLog "openclaw restart skipped listener source=update pid=$ProcessId decision=$decision"
+      Write-RestartLog "carapace restart skipped listener source=update pid=$ProcessId decision=$decision"
       return
     }
 
     $lease.Kill()
-    Write-RestartLog "openclaw restart killed stale listener source=update pid=$ProcessId"
+    Write-RestartLog "carapace restart killed stale listener source=update pid=$ProcessId"
   } catch {
-    Write-RestartLog "openclaw restart ownership verification failed source=update pid=$ProcessId error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart ownership verification failed source=update pid=$ProcessId error=$($_.Exception.Message)"
   } finally {
     if ($null -ne $lease) {
       $lease.Dispose()
     }
   }
 }
-# OPENCLAW_RESTART_KILL_POLICY_END
+# CARAPACE_RESTART_KILL_POLICY_END
 
-function Invoke-OpenClawStartupLauncher {
+function Invoke-CarapaceStartupLauncher {
   param([string]$LauncherPath)
   $launcherPath = $LauncherPath
   if (-not (Test-Path -LiteralPath $launcherPath)) {
-    Write-RestartLog "openclaw restart startup launcher missing source=update path=$launcherPath"
+    Write-RestartLog "carapace restart startup launcher missing source=update path=$launcherPath"
     return 1
   }
 
   try {
     Start-Process -FilePath $launcherPath -WindowStyle Hidden | Out-Null
-    Write-RestartLog "openclaw restart launched startup fallback source=update path=$launcherPath"
+    Write-RestartLog "carapace restart launched startup fallback source=update path=$launcherPath"
     return 0
   } catch {
-    Write-RestartLog "openclaw restart startup fallback failed source=update error=$($_.Exception.Message)"
+    Write-RestartLog "carapace restart startup fallback failed source=update error=$($_.Exception.Message)"
     return 1
   }
 }
@@ -652,23 +652,23 @@ $taskName = ${quotedTaskName}
 $port = ${port}
 $gatewayScriptPath = ${quotedGatewayScriptPath}
 $expectedGatewayArgv = @(${expectedGatewayArgv})
-Write-RestartLog "openclaw restart attempt source=update target=$taskName"
+Write-RestartLog "carapace restart attempt source=update target=$taskName"
 
-$taskState = Get-OpenClawScheduledTaskState -TaskName $taskName
+$taskState = Get-CarapaceScheduledTaskState -TaskName $taskName
 if ($taskState -eq "Running") {
-  $endStatus = Invoke-OpenClawSchtasksWithTimeout -Arguments @("/End", "/TN", $taskName) -TimeoutSeconds 10
+  $endStatus = Invoke-CarapaceSchtasksWithTimeout -Arguments @("/End", "/TN", $taskName) -TimeoutSeconds 10
   if ($endStatus -ne 0) {
-    Write-RestartLog "openclaw restart schtasks end did not complete cleanly source=update status=$endStatus"
+    Write-RestartLog "carapace restart schtasks end did not complete cleanly source=update status=$endStatus"
   }
 } else {
-  Write-RestartLog "openclaw restart skipped schtasks end source=update state=$taskState"
+  Write-RestartLog "carapace restart skipped schtasks end source=update state=$taskState"
 }
 
 for ($attempt = 1; $attempt -le 10; $attempt++) {
-  $listenerSnapshot = Get-OpenClawListenerSnapshot -Port $port
+  $listenerSnapshot = Get-CarapaceListenerSnapshot -Port $port
   if (-not $listenerSnapshot.Known) {
     if ($attempt -eq 10) {
-      Write-RestartLog "openclaw restart listener ownership unavailable source=update; refusing force-kill"
+      Write-RestartLog "carapace restart listener ownership unavailable source=update; refusing force-kill"
       break
     }
     Start-Sleep -Seconds 1
@@ -682,7 +682,7 @@ for ($attempt = 1; $attempt -le 10; $attempt++) {
 
   if ($attempt -eq 10) {
     foreach ($listenerPid in $listeners) {
-      Invoke-OpenClawVerifiedListenerKill -ProcessId $listenerPid -Port $port -ExpectedArgv $expectedGatewayArgv
+      Invoke-CarapaceVerifiedListenerKill -ProcessId $listenerPid -Port $port -ExpectedArgv $expectedGatewayArgv
     }
     break
   }
@@ -690,24 +690,24 @@ for ($attempt = 1; $attempt -le 10; $attempt++) {
   Start-Sleep -Seconds 1
 }
 
-$status = Invoke-OpenClawSchtasksWithTimeout -Arguments @("/Run", "/TN", $taskName) -TimeoutSeconds 30
+$status = Invoke-CarapaceSchtasksWithTimeout -Arguments @("/Run", "/TN", $taskName) -TimeoutSeconds 30
 if ($status -ne 0) {
-  $status = Invoke-OpenClawStartupLauncher -LauncherPath $gatewayScriptPath
+  $status = Invoke-CarapaceStartupLauncher -LauncherPath $gatewayScriptPath
 }
 if ($status -eq 0) {
-  Write-RestartLog "openclaw restart done source=update"
+  Write-RestartLog "carapace restart done source=update"
 } else {
-  Write-RestartLog "openclaw restart failed source=update status=$status"
+  Write-RestartLog "carapace restart failed source=update status=$status"
 }
 
-[Console]::Out.WriteLine("OPENCLAW_RESTART_COMPLETE")
+[Console]::Out.WriteLine("CARAPACE_RESTART_COMPLETE")
 exit $status
 `;
     } else {
       return null;
     }
 
-    const scriptDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-"));
+    const scriptDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-"));
     const scriptPath = path.join(scriptDir, filename);
     try {
       if (windowsWrapper) {

@@ -10,7 +10,7 @@ import {
 
 describe("worker tunnel manager hash memo", () => {
   it("persists the workspace hash memo across reconciliations for one placement", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-memo-persist-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worker-memo-persist-"));
     const localPath = path.join(root, "local");
     const remoteHome = path.join(root, "remote-home");
     await Promise.all([

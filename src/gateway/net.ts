@@ -9,8 +9,8 @@ import {
   isPrivateOrLoopbackIpAddress,
   isRfc8215LocalUseNat64Ipv6Address,
   normalizeIpAddress,
-} from "@openclaw/net-policy/ip";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/net-policy/ip";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { GatewayBindMode } from "../config/types.gateway.js";
 import { isContainerEnvironment } from "../infra/container-environment.js";
 import {

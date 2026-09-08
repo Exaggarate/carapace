@@ -226,12 +226,12 @@ export class LazyCustomElementRequestController {
 }
 
 export const COMMAND_PALETTE_ELEMENT = {
-  tagName: "openclaw-command-palette",
+  tagName: "carapace-command-palette",
   label: "command palette",
   loadModule: () => import("../components/command-palette.ts"),
 } satisfies OptionalCustomElement;
 
-const DEBUG_OVERLAY_TAG = "openclaw-debug-overlay";
+const DEBUG_OVERLAY_TAG = "carapace-debug-overlay";
 
 export const DEBUG_OVERLAY_ELEMENT = {
   tagName: DEBUG_OVERLAY_TAG,
@@ -239,7 +239,7 @@ export const DEBUG_OVERLAY_ELEMENT = {
   loadModule: () => import("../pages/debug/debug-overlay.ts"),
 } satisfies OptionalCustomElement;
 
-const KEYBOARD_SHORTCUTS_TAG = "openclaw-keyboard-shortcuts-dialog";
+const KEYBOARD_SHORTCUTS_TAG = "carapace-keyboard-shortcuts-dialog";
 
 export const KEYBOARD_SHORTCUTS_ELEMENT = {
   tagName: KEYBOARD_SHORTCUTS_TAG,
@@ -247,7 +247,7 @@ export const KEYBOARD_SHORTCUTS_ELEMENT = {
   loadModule: () => import("../components/keyboard-shortcuts-dialog.ts"),
 } satisfies OptionalCustomElement;
 
-const MACOS_TITLEBAR_TAG = "openclaw-macos-titlebar-controls";
+const MACOS_TITLEBAR_TAG = "carapace-macos-titlebar-controls";
 
 export const MACOS_TITLEBAR_ELEMENT = {
   tagName: MACOS_TITLEBAR_TAG,
@@ -256,37 +256,37 @@ export const MACOS_TITLEBAR_ELEMENT = {
 } satisfies OptionalCustomElement;
 
 export const SIDEBAR_ATTENTION_ELEMENT = {
-  tagName: "openclaw-sidebar-attention",
+  tagName: "carapace-sidebar-attention",
   label: t("attention.issues"),
   loadModule: () => import("../components/sidebar-attention.ts"),
 } satisfies OptionalCustomElement;
 
 export const TERMINAL_PANEL_ELEMENT = {
-  tagName: "openclaw-terminal-panel",
+  tagName: "carapace-terminal-panel",
   label: "terminal panel",
   loadModule: () => import("../components/terminal/terminal-panel-registration.ts"),
 } satisfies OptionalCustomElement;
 
 export const BROWSER_PANEL_ELEMENT = {
-  tagName: "openclaw-browser-panel",
+  tagName: "carapace-browser-panel",
   label: "browser panel",
   loadModule: () => import("../components/browser/browser-panel.ts"),
 } satisfies OptionalCustomElement;
 
 export const DESKTOP_PANEL_ELEMENT = {
-  tagName: "openclaw-desktop-panel",
+  tagName: "carapace-desktop-panel",
   label: "desktop panel",
   loadModule: () => import("../components/desktop/desktop-panel.ts"),
 } satisfies OptionalCustomElement;
 
 export const DASHBOARD_DOCUMENT_ELEMENT = {
-  tagName: "openclaw-board-document",
+  tagName: "carapace-board-document",
   label: "dashboard document",
   loadModule: () => import("../components/board/board-document.ts"),
 } satisfies OptionalCustomElement;
 
 export const ASSISTANT_PANEL_ELEMENT = {
-  tagName: "openclaw-assistant-panel",
+  tagName: "carapace-assistant-panel",
   get label() {
     return t("assistantPanel.title");
   },
@@ -296,12 +296,12 @@ export const ASSISTANT_PANEL_ELEMENT = {
 // Loaded only for approval document URLs: the approval page pulls the protocol
 // validators (typebox runtime) and must stay out of the normal startup graph.
 export const APPROVAL_PAGE_ELEMENT = {
-  tagName: "openclaw-approval-page",
+  tagName: "carapace-approval-page",
   label: "approval page",
   loadModule: () => import("../pages/approval/approval-page-registration.ts"),
 } satisfies OptionalCustomElement;
 
-const QUESTION_PAGE_TAG = "openclaw-question-page";
+const QUESTION_PAGE_TAG = "carapace-question-page";
 
 export const QUESTION_PAGE_ELEMENT = {
   tagName: QUESTION_PAGE_TAG,
@@ -311,7 +311,7 @@ export const QUESTION_PAGE_ELEMENT = {
 
 // The card is in the chat graph, but modal-only queue controls stay off the
 // startup path until an approval is actually pending.
-const EXEC_APPROVAL_TAG = "openclaw-exec-approval";
+const EXEC_APPROVAL_TAG = "carapace-exec-approval";
 
 export const EXEC_APPROVAL_ELEMENT = {
   tagName: EXEC_APPROVAL_TAG,
@@ -325,7 +325,7 @@ export function isOptionalElementDefined(element: OptionalCustomElement): boolea
 }
 
 export const LOGIN_GATE_ELEMENT = {
-  tagName: "openclaw-login-gate",
+  tagName: "carapace-login-gate",
   label: "login screen",
   loadModule: () => import("../components/login-gate.ts"),
 } satisfies OptionalCustomElement;

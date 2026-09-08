@@ -1,5 +1,5 @@
 // Fal API module exposes the plugin public contract.
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 
 const PROVIDER_ID = "fal";
 

@@ -1,6 +1,6 @@
-import { buildSecretInputSchema } from "openclaw/plugin-sdk/secret-input";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { detectWindowsSpawnCommandInlineArgs } from "openclaw/plugin-sdk/windows-spawn";
+import { buildSecretInputSchema } from "carapace/plugin-sdk/secret-input";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { detectWindowsSpawnCommandInlineArgs } from "carapace/plugin-sdk/windows-spawn";
 import { z } from "zod";
 import {
   CODEX_PLUGIN_MARKETPLACE_NAME_PATTERN,
@@ -24,7 +24,7 @@ export const DEFAULT_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS = 60_00
 export const DEFAULT_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS = 60_000;
 export const DEFAULT_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS = 60_000;
 export const DEFAULT_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES = 60;
-export const DEFAULT_CODEX_APP_SERVER_NETWORK_PROXY_PROFILE_PREFIX = "openclaw-network";
+export const DEFAULT_CODEX_APP_SERVER_NETWORK_PROXY_PROFILE_PREFIX = "carapace-network";
 
 const codexAppServerTransportSchema = z.enum(["stdio", "websocket", "unix"]);
 const codexAppServerHomeScopeSchema = z.enum(["agent", "user"]);
@@ -193,7 +193,7 @@ export function readCodexPluginConfig(value: unknown): CodexPluginConfig {
   const appServer = asNullableRecord(asNullableRecord(value)?.appServer);
   if (appServer?.approvalPolicy === "untrusted") {
     throw new Error(
-      'plugins.entries.codex.config.appServer.approvalPolicy="untrusted" is retired; run "openclaw doctor --fix" to migrate it to "on-request".',
+      'plugins.entries.codex.config.appServer.approvalPolicy="untrusted" is retired; run "carapace doctor --fix" to migrate it to "on-request".',
     );
   }
   const parsed = codexPluginConfigSchema.safeParse(value);
@@ -248,11 +248,11 @@ export function assertCodexAppServerCommandHasNoInlineArgs(params: {
   }
   const sourceLabel =
     params.source === "env"
-      ? "OPENCLAW_CODEX_APP_SERVER_BIN"
+      ? "CARAPACE_CODEX_APP_SERVER_BIN"
       : "plugins.entries.codex.config.appServer.command";
   const argsLabel =
     params.source === "env"
-      ? "OPENCLAW_CODEX_APP_SERVER_ARGS"
+      ? "CARAPACE_CODEX_APP_SERVER_ARGS"
       : "plugins.entries.codex.config.appServer.args";
   throw new Error(
     `${sourceLabel} must be only the Codex app-server executable path; "${inlineArgs.executable}" was configured with inline arguments "${inlineArgs.arguments}". Move those arguments to ${argsLabel}, or remove the override to use the managed Codex startup path.`,

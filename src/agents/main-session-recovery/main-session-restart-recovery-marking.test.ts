@@ -20,11 +20,11 @@ import {
   getSessionWorkAdmissionRelease,
   type SessionWorkAdmissionLease,
 } from "../../sessions/session-lifecycle-admission.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { markRestartAbortedMainSessions } from "./main-session-restart-recovery-marking.js";
 
 it("marks only the closing Gateway's exact active admissions", async () => {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-owner-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-owner-"));
   const storePath = path.join(stateDir, "sessions.json");
   const resolveGatewayContext = () => undefined;
   const otherGatewayContext = () => undefined;
@@ -62,7 +62,7 @@ it("marks only the closing Gateway's exact active admissions", async () => {
     ).toBeUndefined();
   } finally {
     admissions.forEach((admission) => admission.release());
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 });
@@ -70,7 +70,7 @@ it("marks only the closing Gateway's exact active admissions", async () => {
 it.each(["release", "completed", "rotation"] as const)(
   "does not commit a restart mark when %s invalidates its owner after planning",
   async (change) => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-commit-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-commit-"));
     const storePath = path.join(stateDir, "sessions.json");
     const sessionKey = "agent:main:closing";
     const sessionId = "closing";
@@ -133,14 +133,14 @@ it.each(["release", "completed", "rotation"] as const)(
     } finally {
       restoreSpy();
       admission?.release();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   },
 );
 
 it("does not adopt an ambient Gateway when moving an unbound reply owner", async () => {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-adoption-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-adoption-"));
   const storePath = path.join(stateDir, "sessions.json");
   const sessionKey = "agent:main:adopted";
   const sessionId = "adopted";
@@ -182,13 +182,13 @@ it("does not adopt an ambient Gateway when moving an unbound reply owner", async
     const released = getSessionWorkAdmissionRelease({ scope: storePath, identities: [sessionKey] });
     operation.complete();
     await released;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 });
 
 it("keeps another active session recoverable when one owner releases after batch planning", async () => {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-restart-batch-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-restart-batch-"));
   const storePath = path.join(stateDir, "sessions.json");
   const resolveGatewayContext = () => undefined;
   const admissions: SessionWorkAdmissionLease[] = [];
@@ -253,7 +253,7 @@ it("keeps another active session recoverable when one owner releases after batch
   } finally {
     restoreSpy();
     admissions.forEach((admission) => admission.release());
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 });

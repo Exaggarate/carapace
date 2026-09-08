@@ -1,5 +1,5 @@
 // TTS provider registry core stores provider factories and defaults.
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   buildCapabilityProviderIndex,
   normalizeCapabilityProviderId,
@@ -9,8 +9,8 @@ import type { SpeechProviderId } from "./provider-types.js";
 
 /** Resolver contract for configured speech provider discovery and lookup. */
 export type SpeechProviderRegistryResolver = {
-  getProvider: (providerId: string, cfg?: OpenClawConfig) => SpeechProviderPlugin | undefined;
-  listProviders: (cfg?: OpenClawConfig) => SpeechProviderPlugin[];
+  getProvider: (providerId: string, cfg?: CarapaceConfig) => SpeechProviderPlugin | undefined;
+  listProviders: (cfg?: CarapaceConfig) => SpeechProviderPlugin[];
 };
 
 /** Normalize user/provider IDs into the canonical speech provider ID shape. */
@@ -35,16 +35,16 @@ export function compareSpeechProviderOrder(
 
 /** Create a registry facade with canonical listing, alias lookup, and ID canonicalization. */
 export function createSpeechProviderRegistry(resolver: SpeechProviderRegistryResolver) {
-  const buildAliasIndex = (cfg?: OpenClawConfig) =>
+  const buildAliasIndex = (cfg?: CarapaceConfig) =>
     buildCapabilityProviderIndex(resolver.listProviders(cfg), "aliases");
 
-  const listProviders = (cfg?: OpenClawConfig): SpeechProviderPlugin[] => [
+  const listProviders = (cfg?: CarapaceConfig): SpeechProviderPlugin[] => [
     ...buildCapabilityProviderIndex(resolver.listProviders(cfg), "canonical").values(),
   ];
 
   const getProvider = (
     providerId: string | undefined,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
   ): SpeechProviderPlugin | undefined => {
     const normalized = normalizeSpeechProviderId(providerId);
     if (!normalized) {
@@ -55,7 +55,7 @@ export function createSpeechProviderRegistry(resolver: SpeechProviderRegistryRes
 
   const canonicalizeProviderId = (
     providerId: string | undefined,
-    cfg?: OpenClawConfig,
+    cfg?: CarapaceConfig,
   ): SpeechProviderId | undefined => {
     const normalized = normalizeSpeechProviderId(providerId);
     if (!normalized) {

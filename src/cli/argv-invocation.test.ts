@@ -6,8 +6,8 @@ import { getCommanderCommandPath } from "./program/commander-parse-facts.js";
 
 describe("argv-invocation", () => {
   it("resolves root help and empty command path", () => {
-    expect(resolveCliArgvInvocation(["node", "openclaw", "--help"])).toEqual({
-      argv: ["node", "openclaw", "--help"],
+    expect(resolveCliArgvInvocation(["node", "carapace", "--help"])).toEqual({
+      argv: ["node", "carapace", "--help"],
       commandPath: [],
       primary: null,
       hasHelpOrVersion: true,
@@ -17,9 +17,9 @@ describe("argv-invocation", () => {
 
   it("resolves command path and primary with root options", () => {
     expect(
-      resolveCliArgvInvocation(["node", "openclaw", "--profile", "work", "gateway", "status"]),
+      resolveCliArgvInvocation(["node", "carapace", "--profile", "work", "gateway", "status"]),
     ).toEqual({
-      argv: ["node", "openclaw", "--profile", "work", "gateway", "status"],
+      argv: ["node", "carapace", "--profile", "work", "gateway", "status"],
       commandPath: ["gateway", "status"],
       primary: "gateway",
       hasHelpOrVersion: false,
@@ -30,24 +30,24 @@ describe("argv-invocation", () => {
   it.each([
     {
       name: "version-pinned install",
-      argv: ["node", "openclaw", "skills", "install", "@owner/weather", "--version", "1.2.3"],
+      argv: ["node", "carapace", "skills", "install", "@owner/weather", "--version", "1.2.3"],
       commandPath: ["skills", "install"],
     },
     {
       name: "version-pinned verification",
-      argv: ["node", "openclaw", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
+      argv: ["node", "carapace", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
       commandPath: ["skills", "verify"],
     },
     {
       name: "equals-form version-pinned install",
-      argv: ["node", "openclaw", "skills", "install", "@owner/weather", "--version=1.2.3"],
+      argv: ["node", "carapace", "skills", "install", "@owner/weather", "--version=1.2.3"],
       commandPath: ["skills", "install"],
     },
     {
       name: "profiled version-pinned verification",
       argv: [
         "node",
-        "openclaw",
+        "carapace",
         "--profile",
         "work",
         "skills",
@@ -72,7 +72,7 @@ describe("argv-invocation", () => {
     expect(
       resolveCliArgvInvocation([
         "node",
-        "openclaw",
+        "carapace",
         "agent",
         "--model",
         "openai/gpt-5.6-sol",
@@ -84,7 +84,7 @@ describe("argv-invocation", () => {
 
   it("does not treat an exec-valued parent option as the subcommand", () => {
     expect(
-      resolveCliArgvInvocation(["node", "openclaw", "agent", "--message", "exec"]).commandPath,
+      resolveCliArgvInvocation(["node", "carapace", "agent", "--message", "exec"]).commandPath,
     ).toEqual(["agent"]);
   });
 
@@ -92,7 +92,7 @@ describe("argv-invocation", () => {
     expect(
       resolveCliArgvInvocation([
         "node",
-        "openclaw",
+        "carapace",
         "agent",
         "--no-color",
         "--model",
@@ -108,12 +108,12 @@ describe("argv-invocation", () => {
     ["inline agent value", ["models", "--agent=main", "--status-json"]],
     ["status alias before agent", ["models", "--status-json", "--agent", "main"]],
   ])("keeps models parent status options on the parent path: %s", (_name, args) => {
-    expect(resolveCliArgvInvocation(["node", "openclaw", ...args]).commandPath).toEqual(["models"]);
+    expect(resolveCliArgvInvocation(["node", "carapace", ...args]).commandPath).toEqual(["models"]);
   });
 
   it("still resolves a models child after parent options", () => {
     expect(
-      resolveCliArgvInvocation(["node", "openclaw", "models", "--agent", "main", "status"])
+      resolveCliArgvInvocation(["node", "carapace", "models", "--agent", "main", "status"])
         .commandPath,
     ).toEqual(["models", "status"]);
   });
@@ -129,7 +129,7 @@ describe("argv-invocation", () => {
     ["skills", ["--json", "--agent", "main", "verify"], ["skills", "verify"]],
     ["skills", ["--", "verify"], ["skills", "verify"]],
   ])("matches Commander for %s %j", async (rootName, args, expectedPath) => {
-    const program = new Command().name("openclaw").enablePositionalOptions();
+    const program = new Command().name("carapace").enablePositionalOptions();
     const root = program.command(rootName);
     if (rootName === "config") {
       root.option("--section <section>");
@@ -143,7 +143,7 @@ describe("argv-invocation", () => {
         parsedPath = getCommanderCommandPath(command);
       });
     }
-    const argv = ["node", "openclaw", rootName, ...args];
+    const argv = ["node", "carapace", rootName, ...args];
 
     await program.parseAsync(argv);
 
@@ -160,7 +160,7 @@ describe("argv-invocation", () => {
         ["--", child],
       ]) {
         expect(
-          resolveCliArgvInvocation(["node", "openclaw", "--profile", "work", "update", ...args])
+          resolveCliArgvInvocation(["node", "carapace", "--profile", "work", "update", ...args])
             .commandPath,
         ).toEqual(["update", child]);
       }
@@ -172,7 +172,7 @@ describe("argv-invocation", () => {
     (flag) => {
       for (const args of [[flag, "cleanup"], [`${flag}=cleanup`], [flag]]) {
         expect(
-          resolveCliArgvInvocation(["node", "openclaw", "update", ...args]).commandPath,
+          resolveCliArgvInvocation(["node", "carapace", "update", ...args]).commandPath,
         ).toEqual(["update"]);
       }
     },
@@ -183,7 +183,7 @@ describe("argv-invocation", () => {
     ["update", "--help", "cleanup"],
     ["help", "update", "cleanup"],
   ])("recognizes update help without promoting scoped version flags: %j", (...args) => {
-    expect(resolveCliArgvInvocation(["node", "openclaw", ...args]).hasHelpOrVersion).toBe(true);
+    expect(resolveCliArgvInvocation(["node", "carapace", ...args]).hasHelpOrVersion).toBe(true);
   });
 
   it.each([
@@ -191,6 +191,6 @@ describe("argv-invocation", () => {
     ["update", "cleanup", "--", "--help"],
     ["update", "--channel=--help", "cleanup"],
   ])("leaves scoped or literal help/version tokens to Commander: %j", (...args) => {
-    expect(resolveCliArgvInvocation(["node", "openclaw", ...args]).hasHelpOrVersion).toBe(false);
+    expect(resolveCliArgvInvocation(["node", "carapace", ...args]).hasHelpOrVersion).toBe(false);
   });
 });

@@ -12,7 +12,7 @@ import {
 } from "../../infra/outbound/delivery-queue.test-helpers.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { buildCaptionedFinalTextFallback } from "../../tts/captioned-final.js";
 import { dispatchInboundMessageWithRoutedChannelDispatcher } from "../dispatch.js";
@@ -25,11 +25,11 @@ describe("caption fallback recovery ownership", () => {
   const fixtures = installDeliveryQueueTmpDirHooks();
 
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", fixtures.tmpDir());
+    vi.stubEnv("CARAPACE_STATE_DIR", fixtures.tmpDir());
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     resetPluginRuntimeStateForTest();

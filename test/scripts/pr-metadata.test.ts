@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const tempDirs: string[] = [];
 
 function createFakeGh(): string {
-  const dir = mkdtempSync(join(tmpdir(), "openclaw-pr-metadata-"));
+  const dir = mkdtempSync(join(tmpdir(), "carapace-pr-metadata-"));
   const gh = join(dir, "gh");
   tempDirs.push(dir);
   writeFileSync(join(dir, "pr-view-count"), "0\n");
@@ -153,7 +153,7 @@ function readPrMetadata(
         FAKE_PR_VIEW_FAILURE_TARGET: options.prViewFailureTarget ?? "all",
         FAKE_REJECT_REVIEW_REQUESTS: options.rejectReviewRequests ? "1" : "0",
         FAKE_REST_FILE_COUNT: options.restFileCount ?? "101",
-        OPENCLAW_GH_BIN: "",
+        CARAPACE_GH_BIN: "",
         PATH: `${fakeGhDir}:${process.env.PATH}`,
       },
       encoding: "utf8",

@@ -1,5 +1,5 @@
 import { MessageFlags, Routes } from "discord-api-types/v10";
-import { loadWebMediaRaw } from "openclaw/plugin-sdk/web-media";
+import { loadWebMediaRaw } from "carapace/plugin-sdk/web-media";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RateLimitError } from "./internal/discord.js";
 import {
@@ -117,8 +117,8 @@ export function registerSendAssetsAndRetriesTests(deps: SendAssetsAndRetriesDeps
       await uploadStickerDiscord(
         {
           guildId: "g1",
-          name: "openclaw_wave",
-          description: "OpenClaw waving",
+          name: "carapace_wave",
+          description: "Carapace waving",
           tags: "👋",
           mediaUrl: "file:///tmp/wave.png",
         },
@@ -126,8 +126,8 @@ export function registerSendAssetsAndRetriesTests(deps: SendAssetsAndRetriesDeps
       );
       expect(requestPath(postMock as unknown as MockCallSource)).toBe(Routes.guildStickers("g1"));
       const stickerBody = requestBody(postMock as unknown as MockCallSource);
-      expect(stickerBody.name).toBe("openclaw_wave");
-      expect(stickerBody.description).toBe("OpenClaw waving");
+      expect(stickerBody.name).toBe("carapace_wave");
+      expect(stickerBody.description).toBe("Carapace waving");
       expect(stickerBody.tags).toBe("👋");
       const files = stickerBody.files as Array<{ name?: string; contentType?: string }>;
       expect(files).toHaveLength(1);

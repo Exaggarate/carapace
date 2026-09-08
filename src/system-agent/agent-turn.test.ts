@@ -6,7 +6,7 @@ import { listAgentEntries } from "../agents/agent-scope-config.js";
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
 import { fingerprintResolvedProviderAuth } from "../agents/execution-auth-binding.js";
 import { createSystemAgentTool } from "../agents/tools/system-agent-tool.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   cleanupSystemAgentSession,
   createSystemAgentSession,
@@ -57,7 +57,7 @@ vi.mock("../config/config.js", async (importOriginal) => ({
   readConfigFileSnapshot: vi.fn(async () => ({
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "hash",
     config: { agents: { defaults: { model: { primary: "openai/gpt-5.5" } } } },
     runtimeConfig: { agents: { defaults: { model: { primary: "openai/gpt-5.5" } } } },
@@ -92,18 +92,18 @@ const createSystemAgentVerifiedInferenceBinding: typeof createSystemAgentVerifie
     pluginMetadataSnapshot!.run(() => createSystemAgentVerifiedInferenceBindingImpl(...args));
 
 function useTempStateDir(): string {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-turn-"));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-turn-"));
   tempDirs.push(stateDir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 
   return stateDir;
 }
 
-function configSnapshot(config: OpenClawConfig) {
+function configSnapshot(config: CarapaceConfig) {
   return {
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "hash",
     config,
     runtimeConfig: config,
@@ -119,7 +119,7 @@ function requireValue<T>(value: T | undefined, message: string): T {
   return value;
 }
 
-async function createVerifiedSession(config: OpenClawConfig) {
+async function createVerifiedSession(config: CarapaceConfig) {
   const fixture = await createSystemAgentVerifiedInferenceTestFixture(config);
   return {
     ...fixture,
@@ -154,14 +154,14 @@ describe("runSystemAgentTurn", () => {
         defaults: {
           model: "openai/gpt-5.5",
           models: {
-            "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+            "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
           },
         },
       },
       auth: {
         profiles: { "openai:p2": { provider: "openai", mode: "api_key" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const configuredRoute = await resolveSystemAgentConfiguredRouteFromConfig(verifiedConfig);
     if (!configuredRoute) {
       throw new Error("missing test route");
@@ -192,14 +192,14 @@ describe("runSystemAgentTurn", () => {
       auth: {
         authProfileId: "openai:p2",
         authFingerprint,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         modelId: executionRoute.model,
         modelApi: "openai-responses",
       },
       deps: authDeps,
     });
     const session = createSystemAgentSession(binding);
-    let currentConfig: OpenClawConfig = verifiedConfig;
+    let currentConfig: CarapaceConfig = verifiedConfig;
     const runEmbeddedAgent = vi.fn(async () => ({
       meta: { finalAssistantVisibleText: "ready" },
     }));
@@ -243,7 +243,7 @@ describe("runSystemAgentTurn", () => {
     useTempStateDir();
     const config = {
       agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const overview = { defaultModel: "openai/gpt-5.5" } as never;
     const fixture = await createSystemAgentVerifiedInferenceTestFixture(config);
     const first = createSystemAgentSession(fixture.binding);
@@ -263,8 +263,8 @@ describe("runSystemAgentTurn", () => {
     const [firstCall, secondCall, resumedCall] = mocks.runEmbeddedAgent.mock.calls.map(
       ([params]) => params,
     );
-    expect(firstCall?.sessionKey).toBe(`agent:openclaw:${first.sessionId}`);
-    expect(secondCall?.sessionKey).toBe(`agent:openclaw:${second.sessionId}`);
+    expect(firstCall?.sessionKey).toBe(`agent:carapace:${first.sessionId}`);
+    expect(secondCall?.sessionKey).toBe(`agent:carapace:${second.sessionId}`);
     expect(resumedCall?.sessionKey).toBe(firstCall?.sessionKey);
     expect(resumedCall?.sessionManager).toBe(first.sessionManager);
 
@@ -284,7 +284,7 @@ describe("runSystemAgentTurn", () => {
     expect(first.sessionManager).toBeUndefined();
   });
 
-  it("uses the default agent CLI route while keeping OpenClaw session identity", async () => {
+  it("uses the default agent CLI route while keeping Carapace session identity", async () => {
     const stateDir = useTempStateDir();
     const agentDir = path.join(stateDir, "ops-agent");
     const config = {
@@ -301,7 +301,7 @@ describe("runSystemAgentTurn", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({
       payloads: [{ text: "ready" }],
     }));
@@ -334,28 +334,28 @@ describe("runSystemAgentTurn", () => {
       model: "claude-opus-4-8",
       agentDir,
       authProfileId: "claude-cli:ops",
-      agentId: "openclaw",
-      sessionKey: `agent:openclaw:${session.sessionId}`,
-      runtimePolicySessionKey: "agent:openclaw:main",
+      agentId: "carapace",
+      sessionKey: `agent:carapace:${session.sessionId}`,
+      runtimePolicySessionKey: "agent:carapace:main",
       sessionId: session.sessionId,
-      workspaceDir: path.join(stateDir, "openclaw", "workspace"),
+      workspaceDir: path.join(stateDir, "carapace", "workspace"),
       sessionFile: `in-memory:${session.sessionId}`,
-      messageChannel: "openclaw",
-      messageProvider: "openclaw",
+      messageChannel: "carapace",
+      messageProvider: "carapace",
     });
     expect(call.disableCliLiveSession).toBe(true);
     expect(call.cleanupCliLiveSessionOnRunEnd).toBe(true);
     expect(call.cliToolAvailability).toEqual({
       native: [],
-      openClaw: ["openclaw"],
+      carapace: ["carapace"],
     });
     expect(call.toolsAllow).toBeUndefined();
-    expect(requireValue(call.systemAgentTool, "missing CLI OpenClaw tool").proposalRef).toBe(
+    expect(requireValue(call.systemAgentTool, "missing CLI Carapace tool").proposalRef).toBe(
       session.proposalRef,
     );
   });
 
-  it("rejects an always-on CLI backend before launching OpenClaw", async () => {
+  it("rejects an always-on CLI backend before launching Carapace", async () => {
     useTempStateDir();
     cliBackendsTesting.setDepsForTest({
       resolveRuntimeCliBackends: () => [
@@ -374,7 +374,7 @@ describe("runSystemAgentTurn", () => {
           model: "google-gemini-cli/gemini-3.1-pro-preview",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runCliAgent = vi.fn();
     const runEmbeddedAgent = vi.fn();
     const { session, deps } = await createVerifiedSession(config);
@@ -404,7 +404,7 @@ describe("runSystemAgentTurn", () => {
     expect((failure as SystemAgentInferenceUnavailableError).failures).toEqual([
       expect.objectContaining({
         message: expect.stringContaining(
-          "CLI backend google-gemini-cli cannot enforce OpenClaw's exact tool availability",
+          "CLI backend google-gemini-cli cannot enforce Carapace's exact tool availability",
         ),
       }),
     ]);
@@ -422,7 +422,7 @@ describe("runSystemAgentTurn", () => {
             model: "claude-cli/claude-opus-4-8@claude-cli:ops",
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const binding = {
         sessionId: "native-claude-session",
         authProfileId: "claude-cli:ops",
@@ -511,7 +511,7 @@ describe("runSystemAgentTurn", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({
       payloads: [{ text: "ready" }],
     }));
@@ -559,14 +559,14 @@ describe("runSystemAgentTurn", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const binding = {
       sessionId: "native-claude-session",
       authProfileId: "claude-cli:ops",
       authEpoch: "auth-epoch",
       authEpochVersion: 1,
       cwdHash: "cwd-hash",
-      mcpResumeHash: "openclaw-mcp-resume",
+      mcpResumeHash: "carapace-mcp-resume",
     };
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({
       payloads: [{ text: "ready" }],
@@ -622,7 +622,7 @@ describe("runSystemAgentTurn", () => {
             model: `claude-cli/claude-opus-4-8@${profileId}`,
           },
         },
-      }) as OpenClawConfig;
+      }) as CarapaceConfig;
     const binding = { sessionId: "native-claude-session", authEpochVersion: 1 };
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({
       payloads: [{ text: "ready" }],
@@ -670,13 +670,13 @@ describe("runSystemAgentTurn", () => {
             {
               id: "ops",
               default: true,
-              // Keep the model owner's policy stable. OpenClaw executes with
+              // Keep the model owner's policy stable. Carapace executes with
               // its own identity and therefore follows the changing global policy.
               tools: { exec: { mode: "ask" } },
             },
           ],
         },
-      }) as OpenClawConfig;
+      }) as CarapaceConfig;
     const binding = {
       sessionId: "native-claude-session",
       authProfileId: "claude-cli:ops",
@@ -730,7 +730,7 @@ describe("runSystemAgentTurn", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const embeddedConfig = {
       agents: {
         list: [
@@ -743,7 +743,7 @@ describe("runSystemAgentTurn", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const binding = { sessionId: "native-claude-session", authEpochVersion: 1 };
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({
       payloads: [{ text: "cli" }],
@@ -795,7 +795,7 @@ describe("runSystemAgentTurn", () => {
           model: { primary: "anthropic/claude-global" },
           systemAgent: { agentId: "ops" },
           models: {
-            "openai/gpt-5.4": { agentRuntime: { id: "openclaw" } },
+            "openai/gpt-5.4": { agentRuntime: { id: "carapace" } },
           },
         },
         list: [
@@ -811,13 +811,13 @@ describe("runSystemAgentTurn", () => {
             },
           },
           {
-            id: "openclaw",
+            id: "carapace",
             params: { temperature: 1.7 },
             tools: { allow: ["exec"] },
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runCliAgent = vi.fn(async (_params: RunCliAgentParams) => ({ payloads: [] }));
     const runEmbeddedAgent = vi.fn(async (_params: RunEmbeddedAgentParams) => ({
       payloads: [{ text: "ready" }],
@@ -852,24 +852,24 @@ describe("runSystemAgentTurn", () => {
       authProfileId: "openai:ops",
       authProfileIdSource: "user",
       agentHarnessRuntimeOverride: "codex",
-      agentId: "openclaw",
-      sessionKey: `agent:openclaw:${session.sessionId}`,
-      sandboxSessionKey: "agent:openclaw:main",
+      agentId: "carapace",
+      sessionKey: `agent:carapace:${session.sessionId}`,
+      sandboxSessionKey: "agent:carapace:main",
       sessionId: session.sessionId,
-      workspaceDir: path.join(stateDir, "openclaw", "workspace"),
+      workspaceDir: path.join(stateDir, "carapace", "workspace"),
       sessionFile: `in-memory:${session.sessionId}`,
-      messageChannel: "openclaw",
-      messageProvider: "openclaw",
-      toolsAllow: ["openclaw"],
+      messageChannel: "carapace",
+      messageProvider: "carapace",
+      toolsAllow: ["carapace"],
       disableMessageTool: true,
     });
     expect(call.agentHarnessId).toBeUndefined();
-    expect(listAgentEntries(call.config ?? {}).find((agent) => agent.id === "openclaw")).toEqual({
-      id: "openclaw",
+    expect(listAgentEntries(call.config ?? {}).find((agent) => agent.id === "carapace")).toEqual({
+      id: "carapace",
       params: { temperature: 0.2 },
       tools: { allow: ["read"], deny: ["exec"] },
     });
-    expect(requireValue(call.systemAgentTool, "missing embedded OpenClaw tool").proposalRef).toBe(
+    expect(requireValue(call.systemAgentTool, "missing embedded Carapace tool").proposalRef).toBe(
       session.proposalRef,
     );
   });
@@ -878,7 +878,7 @@ describe("runSystemAgentTurn", () => {
     useTempStateDir();
     const config = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const { session, deps } = await createVerifiedSession(config);
     const runEmbeddedAgent = vi.fn(async (params: RunEmbeddedAgentParams) => {
       const options = params.systemAgentTool;
@@ -922,7 +922,7 @@ describe("runSystemAgentTurn", () => {
     );
     expect(reply?.text).toContain("requesting session's permission policy");
     expect(reply?.text).toContain("returns the final outcome");
-    expect(reply?.text).not.toContain("OpenClaw operator UI");
+    expect(reply?.text).not.toContain("Carapace operator UI");
     expect(reply?.text).not.toContain("ask the user to reply yes");
     // Staging still registers the exact proposal for host authorization.
     expect(session.proposalRef.current).toBeDefined();
@@ -936,7 +936,7 @@ describe("runSystemAgentTurn", () => {
       configSnapshot({ agents: { defaults: { model: "openai/gpt-5.5" } } }),
     );
     const unverifiedSession = {
-      sessionId: "openclaw-unverified",
+      sessionId: "carapace-unverified",
       proposalRef: {},
     } as unknown as SystemAgentSession;
 
@@ -965,7 +965,7 @@ describe("runSystemAgentTurn", () => {
     useTempStateDir();
     const config = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const { session, deps } = await createVerifiedSession(config);
     session.proposalRef.current = "partial-proposal";
     session.cliSession = {

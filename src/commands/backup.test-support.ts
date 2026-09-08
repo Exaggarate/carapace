@@ -50,13 +50,13 @@ export function createBackupTestRuntime(): RuntimeEnv {
 
 export async function resetBackupTempHome(tempHome: { home: string }) {
   await fs.rm(tempHome.home, { recursive: true, force: true });
-  await fs.mkdir(path.join(tempHome.home, ".openclaw"), { recursive: true });
-  deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
+  await fs.mkdir(path.join(tempHome.home, ".carapace"), { recursive: true });
+  deleteTestEnvValue("CARAPACE_CONFIG_PATH");
 }
 
 export async function mockStateOnlyBackupPlan(stateDir: string) {
   await fs.writeFile(
-    path.join(stateDir, "openclaw.json"),
+    path.join(stateDir, "carapace.json"),
     JSON.stringify({ agents: { ownership: "explicit", entries: {} } }),
     "utf8",
   );

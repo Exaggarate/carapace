@@ -35,8 +35,8 @@ describe("runRespawnChildWithSignalBridge", () => {
 
     runRespawnChildWithSignalBridge({
       command: "/usr/bin/node",
-      args: ["/repo/openclaw/dist/entry.js"],
-      env: { OPENCLAW_NODE_OPTIONS_READY: "1" },
+      args: ["/repo/carapace/dist/entry.js"],
+      env: { CARAPACE_NODE_OPTIONS_READY: "1" },
       detachForProcessTree: true,
       stdioIsTerminal: false,
       runtime: {
@@ -47,9 +47,9 @@ describe("runRespawnChildWithSignalBridge", () => {
       onError: vi.fn(),
     });
 
-    expect(spawnChild).toHaveBeenCalledWith("/usr/bin/node", ["/repo/openclaw/dist/entry.js"], {
+    expect(spawnChild).toHaveBeenCalledWith("/usr/bin/node", ["/repo/carapace/dist/entry.js"], {
       stdio: "inherit",
-      env: { OPENCLAW_NODE_OPTIONS_READY: "1" },
+      env: { CARAPACE_NODE_OPTIONS_READY: "1" },
       detached: process.platform !== "win32",
     });
   });
@@ -64,7 +64,7 @@ describe("runRespawnChildWithSignalBridge", () => {
 
     runRespawnChildWithSignalBridge({
       command: "/usr/bin/node",
-      args: ["/repo/openclaw/dist/entry.js"],
+      args: ["/repo/carapace/dist/entry.js"],
       env: {},
       runtime: {
         spawn: vi.fn(() => child) as unknown as typeof spawn,
@@ -94,7 +94,7 @@ describe("runRespawnChildWithSignalBridge", () => {
     try {
       runRespawnChildWithSignalBridge({
         command: "/usr/bin/node",
-        args: ["/repo/openclaw/dist/entry.js"],
+        args: ["/repo/carapace/dist/entry.js"],
         env: {},
         detachForProcessTree: true,
         stdioIsTerminal: false,
@@ -149,7 +149,7 @@ describe("runRespawnChildWithSignalBridge", () => {
     try {
       runRespawnChildWithSignalBridge({
         command: "/usr/bin/node",
-        args: ["/repo/openclaw/dist/entry.js"],
+        args: ["/repo/carapace/dist/entry.js"],
         env: {},
         detachForProcessTree: true,
         stdioIsTerminal: false,
@@ -187,7 +187,7 @@ describe("runRespawnChildWithSignalBridge", () => {
 
     runRespawnChildWithSignalBridge({
       command: "/usr/bin/node",
-      args: ["/repo/openclaw/dist/entry.js", "configure"],
+      args: ["/repo/carapace/dist/entry.js", "configure"],
       env: {},
       detachForProcessTree: true,
       stdioIsTerminal: true,
@@ -201,7 +201,7 @@ describe("runRespawnChildWithSignalBridge", () => {
 
     expect(spawnChild).toHaveBeenCalledWith(
       "/usr/bin/node",
-      ["/repo/openclaw/dist/entry.js", "configure"],
+      ["/repo/carapace/dist/entry.js", "configure"],
       {
         stdio: "inherit",
         env: {},
@@ -303,7 +303,7 @@ describe("runRespawnChildWithSignalBridge", () => {
     try {
       runRespawnChildWithSignalBridge({
         command: "/usr/bin/node",
-        args: ["/repo/openclaw/dist/entry.js"],
+        args: ["/repo/carapace/dist/entry.js"],
         env: {},
         runtime: {
           spawn: vi.fn(() => child) as unknown as typeof spawn,

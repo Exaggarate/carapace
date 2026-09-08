@@ -3,18 +3,18 @@ import os from "node:os";
 import path from "node:path";
 // Covers message-action media hydration, sandbox path normalization,
 // attachments, and channel/plugin media source aliases.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
   createTestRegistry,
 } from "../../test-utils/channel-plugins.js";
-import { resolvePreferredOpenClawTmpDir } from "../tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../tmp-carapace-dir.js";
 import {
   resetMessageActionMediaMocks,
   runMessageAction,
@@ -33,7 +33,7 @@ const workspaceConfig = {
       appToken: "xapp-test",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 async function withSandbox(test: (sandboxDir: string) => Promise<void>) {
   const sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), "msg-sandbox-"));
@@ -45,7 +45,7 @@ async function withSandbox(test: (sandboxDir: string) => Promise<void>) {
 }
 
 const runDrySend = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   actionParams: Record<string, unknown>;
   sandboxRoot?: string;
 }) =>
@@ -188,7 +188,7 @@ describe("runMessageAction media behavior", () => {
     it("rewrites plugin-owned sandbox media params and preserves mxc URLs", async () => {
       await withSandbox(async (sandboxDir) => {
         const result = await runMessageAction({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           action: "set-profile",
           params: {
             channel: "profile-demo",
@@ -214,7 +214,7 @@ describe("runMessageAction media behavior", () => {
         const result = await runMessageAction({
           cfg: {
             tools: { fs: { workspaceOnly: false } },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           action: "set-profile",
           params: {
             channel: "profile-demo",
@@ -235,7 +235,7 @@ describe("runMessageAction media behavior", () => {
       await withSandbox(async (sandboxDir) => {
         const avatarUrl = "data:text/plain;base64,SGVsbG8=";
         const result = await runMessageAction({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           action: "send",
           dryRun: true,
           params: {
@@ -417,8 +417,8 @@ describe("runMessageAction media behavior", () => {
       },
     );
 
-    it("allows media paths under preferred OpenClaw tmp root", async () => {
-      const tmpRoot = resolvePreferredOpenClawTmpDir();
+    it("allows media paths under preferred Carapace tmp root", async () => {
+      const tmpRoot = resolvePreferredCarapaceTmpDir();
       await fs.mkdir(tmpRoot, { recursive: true });
       const sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), "msg-sandbox-"));
       try {
@@ -441,7 +441,7 @@ describe("runMessageAction media behavior", () => {
           throw new Error("expected send result");
         }
         expect(result.sendResult?.mediaUrl).toBe(path.resolve(tmpFile));
-        const hostTmpOutsideOpenClaw = path.join(os.tmpdir(), "outside-openclaw", "test-media.png");
+        const hostTmpOutsideCarapace = path.join(os.tmpdir(), "outside-carapace", "test-media.png");
         await expect(
           runMessageAction({
             cfg: workspaceConfig,
@@ -449,7 +449,7 @@ describe("runMessageAction media behavior", () => {
             params: {
               channel: "workspace",
               target: "12345678",
-              media: hostTmpOutsideOpenClaw,
+              media: hostTmpOutsideCarapace,
               message: "",
             },
             sandboxRoot: sandboxDir,

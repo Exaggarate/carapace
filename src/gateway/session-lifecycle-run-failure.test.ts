@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import {
   loadTranscriptEvents,
@@ -6,7 +6,7 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import { CURRENT_SESSION_VERSION } from "../config/sessions/version.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { persistGatewaySessionLifecycleEvent } from "./session-lifecycle-state.js";
 
 const target = {
@@ -50,7 +50,7 @@ async function seed(assistantBranch?: "active" | "inactive" | "other-run") {
               content: [],
               stopReason: "error",
               errorMessage: "Provider failed",
-              __openclaw: { runId: assistantBranch === "other-run" ? "previous-run" : runId },
+              __carapace: { runId: assistantBranch === "other-run" ? "previous-run" : runId },
             },
           },
         ]
@@ -76,7 +76,7 @@ async function reports() {
 
 describe("durable pre-reply run failure", () => {
   it("records one displayed failure per run and retains it after the next run starts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed();
       await persistGatewaySessionLifecycleEvent({ ...target, event });
       expect(await reports()).toMatchObject([
@@ -105,7 +105,7 @@ describe("durable pre-reply run failure", () => {
   it.each(["active", "inactive", "other-run"] as const)(
     "checks assistant output on the %s branch for this run",
     async (branch) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await seed(branch);
         await persistGatewaySessionLifecycleEvent({ ...target, event });
         expect(await reports()).toHaveLength(branch === "active" ? 0 : 1);
@@ -120,7 +120,7 @@ describe("durable pre-reply run failure", () => {
     { phase: "aborted" },
     { phase: "completed" },
   ])("does not report $phase / $stopReason", async (data) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed();
       await persistGatewaySessionLifecycleEvent({ ...target, event: { ...event, data } });
       expect(await reports()).toEqual([]);
@@ -128,7 +128,7 @@ describe("durable pre-reply run failure", () => {
   });
 
   it("sanitizes and bounds the stored error", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed();
       const secret = [
         String.fromCharCode(115, 107),
@@ -157,7 +157,7 @@ describe("durable pre-reply run failure", () => {
   });
 
   it.each(["session", "run"])("does not report a stale %s error", async (stale) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed();
       await persistGatewaySessionLifecycleEvent({
         ...target,
@@ -173,7 +173,7 @@ describe("durable pre-reply run failure", () => {
   });
 
   it("does not report an error whose lifecycle write was refused", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seed();
       await expect(
         persistGatewaySessionLifecycleEvent({

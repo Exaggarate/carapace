@@ -1,5 +1,5 @@
 import path from "node:path";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
 import { expect, it, vi } from "vitest";
 import { projectContextEngineAssemblyForCodex } from "./context-engine-projection.js";
 import {
@@ -73,7 +73,7 @@ it.each(["started", "resumed"] as const)(
     const manager = SessionManager.open(target);
     const note = {
       role: "custom" as const,
-      customType: "openclaw.system-note",
+      customType: "carapace.system-note",
       content: "Imported durable result: inbox cleared",
       display: false,
       timestamp: Date.now(),
@@ -90,9 +90,9 @@ it.each(["started", "resumed"] as const)(
     const transientNote = {
       ...note,
       idempotencyKey: "transient",
-      customType: "openclaw.runtime-context",
+      customType: "carapace.runtime-context",
       content: "TRANSIENT_NOTE",
-      details: { source: "openclaw-runtime-context", runtimeContextCarrier: true },
+      details: { source: "carapace-runtime-context", runtimeContextCarrier: true },
     };
     manager.appendMessage(transientNote);
     if (action === "resumed") {

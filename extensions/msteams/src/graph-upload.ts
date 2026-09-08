@@ -8,8 +8,8 @@
  * - Getting chat members for per-user sharing
  */
 
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import type { MSTeamsAccessTokenProvider } from "./attachments/types.js";
 import { createMSTeamsHttpError } from "./http-error.js";
 import {
@@ -74,8 +74,8 @@ async function uploadToSharePoint(params: {
 }): Promise<DriveUploadResult> {
   const fetchFn = params.fetchFn ?? fetch;
 
-  // Use "OpenClawShared" folder to organize bot-uploaded files
-  const uploadPath = `/OpenClawShared/${encodeURIComponent(params.filename)}`;
+  // Use "CarapaceShared" folder to organize bot-uploaded files
+  const uploadPath = `/CarapaceShared/${encodeURIComponent(params.filename)}`;
   // Graph's default conflictBehavior=replace overwrites a same-named file in place. Bot assets
   // reuse names (image-1.png each generation) and Teams caches file cards by driveItem URL, so
   // replace clobbers history and shows stale images; "rename" mints a unique driveItem instead.

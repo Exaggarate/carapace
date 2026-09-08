@@ -1,12 +1,12 @@
 // Openai tests cover speech provider plugin behavior.
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAISpeechProvider } from "./speech-provider.js";
 
 const OPENAI_TTS_SNAPSHOT = "gpt-4o-mini-tts-2025-12-15";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: async ({
     url,
     init,

@@ -1,5 +1,5 @@
 // Telegram tests cover bot.fetch abort plugin behavior.
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { TelegramRequestNotStartedError } from "./network-errors.js";
 

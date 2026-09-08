@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionTranscriptRuntimeTarget } from "../../config/sessions/session-accessor.js";
 import type { ContextEngineRuntimeContext } from "../../context-engine/types.js";
@@ -109,7 +109,7 @@ describe("transcript-byte preflight authority", () => {
     {
       name: "wrong owner",
       runtimeContext: {},
-      overrides: { lockedHarnessRuntime: "openclaw" },
+      overrides: { lockedHarnessRuntime: "carapace" },
     },
     {
       name: "wrong target",

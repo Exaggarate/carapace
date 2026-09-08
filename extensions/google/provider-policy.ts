@@ -2,13 +2,13 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/core";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-types";
+} from "carapace/plugin-sdk/core";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-types";
 import {
   isGoogleGemini3ProModel,
   isGoogleGemini3ThinkingLevelModel,
-} from "openclaw/plugin-sdk/provider-thinking-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-thinking-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeAntigravityModelId, normalizeGoogleModelId } from "./model-id.js";
 import {
   isGoogleGenerativeAiApi,

@@ -1,6 +1,6 @@
 import path from "node:path";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { VerboseLevel } from "../auto-reply/thinking.js";
 import type { CliDeps } from "../cli/deps.types.js";
 import {

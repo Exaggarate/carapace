@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { threadId } from "node:worker_threads";
 import type { TestProject } from "vitest/node";
 
-const PROFILE_ERROR_CODE = "OPENCLAW_VITEST_PROFILE_FAILED";
+const PROFILE_ERROR_CODE = "CARAPACE_VITEST_PROFILE_FAILED";
 
 // Vitest serializes worker errors into plain objects, preserving named fields.
 export function isVitestProfileError(error: unknown) {
@@ -20,8 +20,8 @@ export function isVitestProfileError(error: unknown) {
 
 declare module "vitest" {
   interface ProvidedContext {
-    openclawVitestProfileDir: string;
-    openclawVitestProfileRunner: string | undefined;
+    carapaceVitestProfileDir: string;
+    carapaceVitestProfileRunner: string | undefined;
   }
 }
 
@@ -33,7 +33,7 @@ export default async function setupVitestProfiles(root: TestProject) {
   state.onUnhandledError = (error) =>
     isVitestProfileError(error) || onUnhandledError?.call(state, error);
   const { normalizePath } = await import("vite");
-  const outputDir = root.getProvidedContext().openclawVitestProfileDir;
+  const outputDir = root.getProvidedContext().carapaceVitestProfileDir;
   const runner = fileURLToPath(new URL("./vitest-profile-runner.mts", import.meta.url));
   const profiler = import.meta.url;
   const preload = `data:text/javascript,${encodeURIComponent(
@@ -56,7 +56,7 @@ export default async function setupVitestProfiles(root: TestProject) {
         allowedFiles.push(file);
       }
     }
-    project.provide("openclawVitestProfileRunner", project.config.runner);
+    project.provide("carapaceVitestProfileRunner", project.config.runner);
     project.config.runner = runner;
     project.config.execArgv = [...project.config.execArgv, `--import=${preload}`];
   }
@@ -112,7 +112,7 @@ export async function startVitestProfile(outputDir: string, heap: boolean) {
   }
 }
 
-const WORKER_PROFILE = Symbol.for("openclaw.vitestWorkerProfile");
+const WORKER_PROFILE = Symbol.for("carapace.vitestWorkerProfile");
 function workerProfileState() {
   return globalThis as typeof globalThis & {
     [WORKER_PROFILE]?: ReturnType<typeof startVitestProfile>;

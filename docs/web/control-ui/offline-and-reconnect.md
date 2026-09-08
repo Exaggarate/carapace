@@ -14,7 +14,7 @@ What survives a dropped connection, and how the Control UI recovers when it retu
 Warm reload applies only after token or device-token authentication. The browser
 must still hold the Gateway token that authenticated the previous connection, or
 the paired device token retained from that connection, and present that same
-credential again. After that connection, OpenClaw keeps a small agent roster, the
+credential again. After that connection, Carapace keeps a small agent roster, the
 session list without live run state, and custom groups in browser storage. Recent
 transcripts use the existing chat cache. On reload, the shell, sidebar, and cached
 conversation can appear while the Gateway is still connecting. Live state replaces
@@ -113,7 +113,7 @@ A literal `global` conversation keeps its captured agent; an agent's main conver
 separate unless the Gateway is configured with global session scope.
 
 Older browser state may have combined several destinations into one bucket. The Control UI uses
-metadata version 4 (`openclaw.control.chatComposer.v4:`), migrating version 1, 2, and 3 records
+metadata version 4 (`carapace.control.chatComposer.v4:`), migrating version 1, 2, and 3 records
 directly when their destination is still identifiable. It verifies the new metadata before
 removing an older source, retaining complete sources when storage or recovery capacity blocks
 migration. This metadata change does not change the IndexedDB schema or durable-draft keys. Ambiguous records appear under
@@ -133,7 +133,7 @@ If the destination changes, a newer draft appears, or storage fails, recovery ke
 available rather than overwriting newer input. Do not clear browser site data
 while you still have saved messages or attachment drafts to recover.
 
-First opens and reloads without usable warm state show a small animated OpenClaw mark while the Gateway resolves the initial
+First opens and reloads without usable warm state show a small animated Carapace mark while the Gateway resolves the initial
 connection, including when authentication comes from a trusted proxy or Tailscale instead of a
 browser-stored credential. The login gate appears only after the initial connection fails or the
 Gateway actively rejects authentication (bad token/password, missing trusted identity, revoked

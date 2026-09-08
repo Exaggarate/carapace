@@ -1,7 +1,7 @@
 // Signal plugin module implements identity behavior.
-import { resolveAllowlistMatchByCandidates } from "openclaw/plugin-sdk/allow-from";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+import { resolveAllowlistMatchByCandidates } from "carapace/plugin-sdk/allow-from";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "carapace/plugin-sdk/text-utility-runtime";
 import { looksLikeUuid } from "./uuid.js";
 
 type SignalSenderAliases = {

@@ -1,11 +1,11 @@
 // OpenAI-compatible speech provider sends speech synthesis requests to OpenAI-style APIs.
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString as trimToUndefined,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type { SpeechProviderPlugin } from "../plugins/types.js";
 import type {
   SpeechDirectiveTokenParseContext,

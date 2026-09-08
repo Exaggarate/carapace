@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 export const SKILL_COMMAND_MAX_LENGTH = 32;
 

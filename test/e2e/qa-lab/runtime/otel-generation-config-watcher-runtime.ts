@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { WebSocket, type RawData } from "ws";
 import {
   QA_EVIDENCE_FILENAME,
@@ -19,7 +19,7 @@ import {
   MIN_CLIENT_PROTOCOL_VERSION,
   PROTOCOL_VERSION,
 } from "../../../../packages/gateway-protocol/src/version.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { formatErrorMessage } from "../../../../src/infra/errors.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import {
@@ -343,10 +343,10 @@ function inspectGeneration(receiver: LocalReceiver, target: GenerationTarget): G
     ...new Set(
       receiver.capturedMetrics
         .map((metric) => metric.name)
-        .filter((name) => name.startsWith("openclaw.")),
+        .filter((name) => name.startsWith("carapace.")),
     ),
   ].toSorted();
-  const requiredSpanNames = ["openclaw.model.call", "openclaw.run"].filter((name) =>
+  const requiredSpanNames = ["carapace.model.call", "carapace.run"].filter((name) =>
     spanNames.includes(name),
   );
   const logCorrelationValid = logs.some(
@@ -399,7 +399,7 @@ async function waitForGeneration(
   });
 }
 
-function withOtelEndpoint(config: OpenClawConfig, endpoint: string): OpenClawConfig {
+function withOtelEndpoint(config: CarapaceConfig, endpoint: string): CarapaceConfig {
   return {
     ...config,
     gateway: {
@@ -435,7 +435,7 @@ function withOtelEndpoint(config: OpenClawConfig, endpoint: string): OpenClawCon
 }
 
 async function updateWatchedEndpoint(configPath: string, endpoint: string): Promise<void> {
-  const parsed = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+  const parsed = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
   const next = withOtelEndpoint(parsed, endpoint);
   // Endpoint changes hot-apply; keep this separate full-restart generation proof explicit.
   next.gateway = {
@@ -488,16 +488,16 @@ async function probeOtelGenerationConfigWatcher(
       enabledPluginIds: ["diagnostics-otel"],
       controlUiEnabled: false,
       runtimeEnvPatch: {
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_OTEL_PRELOADED: "0",
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_OTEL_PRELOADED: "0",
         OTEL_SDK_DISABLED: "false",
       },
       mutateConfig: (config) => withOtelEndpoint(config, receiverA!.baseUrl),
     });
 
-    const noRespawn = gateway.runtimeEnv.OPENCLAW_NO_RESPAWN === "1";
+    const noRespawn = gateway.runtimeEnv.CARAPACE_NO_RESPAWN === "1";
     const pidBefore = gateway.pid;
-    assertContract(noRespawn, "QA Gateway did not set OPENCLAW_NO_RESPAWN=1");
+    assertContract(noRespawn, "QA Gateway did not set CARAPACE_NO_RESPAWN=1");
     assertContract(typeof pidBefore === "number", "QA Gateway did not expose its PID");
 
     await runTracedTurn(gateway, GENERATION_A);
@@ -512,7 +512,7 @@ async function probeOtelGenerationConfigWatcher(
         gateway!
           .logs()
           .slice(restartLogOffset)
-          .includes("restart mode: in-process restart (OPENCLAW_NO_RESPAWN)")
+          .includes("restart mode: in-process restart (CARAPACE_NO_RESPAWN)")
           ? true
           : undefined,
     });

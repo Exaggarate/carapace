@@ -5,26 +5,26 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   upsertSessionEntryCore,
   type SessionTranscriptRuntimeTarget,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   clearInternalHooks,
   registerInternalHook,
   type AgentBootstrapHookContext,
 } from "../hooks/internal-hooks.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { makeTempWorkspace } from "../test-helpers/workspace.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolveBootstrapContextForDiagnostics } from "./bootstrap-files-diagnostics.js";
 import {
   FULL_BOOTSTRAP_COMPLETED_CUSTOM_TYPE,
@@ -51,7 +51,7 @@ vi.mock("../plugins/memory-runtime.js", () => ({
     memoryRuntimeMocks.classifyWorkspacePaths(...args),
 }));
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 function registerExtraBootstrapFileHook() {
   registerInternalHook("agent:bootstrap", (event) => {
@@ -183,7 +183,7 @@ function registerBootstrapFileHook(relativePath = "BOOTSTRAP.md") {
 }
 
 async function createHeartbeatAgentsWorkspace() {
-  const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+  const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
   await fs.writeFile(path.join(workspaceDir, "HEARTBEAT.md"), "check inbox", "utf8");
   await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "repo rules", "utf8");
   return workspaceDir;
@@ -197,9 +197,9 @@ async function writeCompletedWorkspaceState(workspaceDir: string): Promise<void>
 }
 
 async function writeLegacyCompletedWorkspaceState(workspaceDir: string): Promise<void> {
-  await fs.mkdir(path.join(workspaceDir, ".openclaw"), { recursive: true });
+  await fs.mkdir(path.join(workspaceDir, ".carapace"), { recursive: true });
   await fs.writeFile(
-    path.join(workspaceDir, ".openclaw", "workspace-state.json"),
+    path.join(workspaceDir, ".carapace", "workspace-state.json"),
     `${JSON.stringify({
       version: 1,
       bootstrapSeededAt: "2026-05-16T00:00:00.000Z",
@@ -224,14 +224,14 @@ describe("resolveBootstrapFilesForRun", () => {
     memoryRuntimeMocks.classifyWorkspacePaths
       .mockReset()
       .mockResolvedValue({ status: "unavailable" });
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-bootstrap-state-",
+      prefix: "carapace-bootstrap-state-",
     });
   });
 
   it("excludes lower-trust root memory before hooks while preserving trusted user context", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-memory-provenance-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-memory-provenance-");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_MEMORY_FILENAME), "tainted memory", "utf8");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_USER_FILENAME), "trusted user", "utf8");
     registerNamedBootstrapFileHook(DEFAULT_MEMORY_FILENAME);
@@ -254,7 +254,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("fails closed when the memory runtime omits a requested root classification", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-missing-provenance-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-missing-provenance-");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_MEMORY_FILENAME), "memory", "utf8");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_USER_FILENAME), "user", "utf8");
     memoryRuntimeMocks.classifyWorkspacePaths.mockResolvedValue({
@@ -273,7 +273,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("excludes root memory for a selected runtime without provenance support", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-unsupported-provenance-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-unsupported-provenance-");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_MEMORY_FILENAME), "memory", "utf8");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_USER_FILENAME), "user", "utf8");
     memoryRuntimeMocks.classifyWorkspacePaths.mockResolvedValue({ status: "unsupported" });
@@ -294,7 +294,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
   afterEach(async () => {
     clearInternalHooks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetLegacyWorkspaceStateCheckForTest();
     await testState?.cleanup();
     testState = undefined;
@@ -303,7 +303,7 @@ describe("resolveBootstrapFilesForRun", () => {
   it("applies bootstrap hook overrides", async () => {
     registerExtraBootstrapFileHook();
 
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     const files = await resolveBootstrapFilesForRun({ workspaceDir });
 
     const filePaths = files.map((file) => file.path);
@@ -313,7 +313,7 @@ describe("resolveBootstrapFilesForRun", () => {
   it("drops malformed hook files with missing/invalid paths", async () => {
     registerMalformedBootstrapFileHook();
 
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     const warnings: string[] = [];
     const files = await resolveBootstrapFilesForRun({
       workspaceDir,
@@ -333,7 +333,7 @@ describe("resolveBootstrapFilesForRun", () => {
   it("dedupes hook-injected bootstrap paths relative to the workspace", async () => {
     registerDuplicateBootstrapFileHook();
 
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     const agentsPath = path.join(workspaceDir, "AGENTS.md");
     await fs.writeFile(agentsPath, "workspace rules", "utf8");
 
@@ -350,7 +350,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("ignores stale workspace BOOTSTRAP.md once setup is completed", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await writeCompletedWorkspaceState(workspaceDir);
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
     await fs.writeFile(path.join(workspaceDir, "BOOTSTRAP.md"), "stale ritual", "utf8");
@@ -362,7 +362,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("treats USER.md as optional", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
 
     const files = await resolveBootstrapFilesForRun({ workspaceDir });
 
@@ -370,7 +370,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("refreshes USER.md on every turn for long-lived sessions", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     const userPath = path.join(workspaceDir, "USER.md");
     const sessionKey = `agent:main:webchat:direct:${randomUUID()}`;
     await fs.writeFile(userPath, "Prefer concise answers.", "utf8");
@@ -386,7 +386,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("keeps BOOTSTRAP.md until Doctor migrates legacy setup state", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await writeLegacyCompletedWorkspaceState(workspaceDir);
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
     await fs.writeFile(path.join(workspaceDir, "BOOTSTRAP.md"), "stale ritual", "utf8");
@@ -398,8 +398,8 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("keeps BOOTSTRAP.md when current setup state cannot be read", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
-    await fs.mkdir(path.join(workspaceDir, "openclaw-workspace-state.json"), {
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
+    await fs.mkdir(path.join(workspaceDir, "carapace-workspace-state.json"), {
       recursive: true,
     });
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
@@ -412,7 +412,7 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("does not let hooks re-add stale root BOOTSTRAP.md after setup is completed", async () => {
     registerBootstrapFileHook();
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await writeCompletedWorkspaceState(workspaceDir);
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
     await fs.writeFile(path.join(workspaceDir, "BOOTSTRAP.md"), "stale ritual", "utf8");
@@ -424,14 +424,14 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("ignores stale root BOOTSTRAP.md for home-relative workspace paths", async () => {
     registerBootstrapFileHook();
-    const parentDir = await makeTempWorkspace("openclaw-bootstrap-home-");
+    const parentDir = await makeTempWorkspace("carapace-bootstrap-home-");
     const workspaceDir = path.join(parentDir, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
     await writeCompletedWorkspaceState(workspaceDir);
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
     await fs.writeFile(path.join(workspaceDir, "BOOTSTRAP.md"), "stale ritual", "utf8");
 
-    const files = await withEnvAsync({ OPENCLAW_HOME: parentDir }, async () =>
+    const files = await withEnvAsync({ CARAPACE_HOME: parentDir }, async () =>
       resolveBootstrapFilesForRun({ workspaceDir: "~/workspace" }),
     );
 
@@ -441,7 +441,7 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("keeps hook-added nested BOOTSTRAP.md after setup is completed", async () => {
     registerBootstrapFileHook(path.join("packages", "core", "BOOTSTRAP.md"));
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await fs.mkdir(path.join(workspaceDir, "packages", "core"), { recursive: true });
     await writeCompletedWorkspaceState(workspaceDir);
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
@@ -461,7 +461,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("keeps MEMORY.md for direct sessions", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-direct-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-direct-");
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), "private memory", "utf8");
 
     const files = await resolveBootstrapFilesForRun({
@@ -475,7 +475,7 @@ describe("resolveBootstrapFilesForRun", () => {
   it.each(["group", "channel"] as const)(
     "drops MEMORY.md for an opaque session with authoritative %s chat type",
     async (chatType) => {
-      const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-shared-");
+      const workspaceDir = await makeTempWorkspace("carapace-bootstrap-shared-");
       await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), "private memory", "utf8");
 
       const files = await resolveBootstrapFilesForRun({
@@ -491,7 +491,7 @@ describe("resolveBootstrapFilesForRun", () => {
   it.each(["direct", "group", "channel"] as const)(
     "applies root-memory source privacy while keeping unrelated aliases for %s chats",
     async (chatType) => {
-      const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-shared-alias-");
+      const workspaceDir = await makeTempWorkspace("carapace-bootstrap-shared-alias-");
       const nestedDir = path.join(workspaceDir, "packages", "core");
       await fs.mkdir(nestedDir, { recursive: true });
       await fs.writeFile(
@@ -534,7 +534,7 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("does not let hooks re-add MEMORY.md to shared sessions", async () => {
     registerNamedBootstrapFileHook();
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-hook-shared-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-hook-shared-");
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), "private memory", "utf8");
 
     const files = await resolveBootstrapFilesForRun({
@@ -547,7 +547,7 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("does not let hooks relabel and re-add root MEMORY.md to shared sessions", async () => {
     registerNamedBootstrapFileHook("MEMORY.md", "SOUL.md");
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-hook-shared-alias-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-hook-shared-alias-");
     const rootMemoryPath = path.join(workspaceDir, "MEMORY.md");
     await fs.writeFile(rootMemoryPath, "private memory", "utf8");
 
@@ -561,7 +561,7 @@ describe("resolveBootstrapFilesForRun", () => {
 
   it("keeps hook-added nested MEMORY.md in shared sessions", async () => {
     registerNamedBootstrapFileHook(path.join("packages", "core", "MEMORY.md"));
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-hook-nested-memory-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-hook-nested-memory-");
 
     const files = await resolveBootstrapFilesForRun({
       workspaceDir,
@@ -574,7 +574,7 @@ describe("resolveBootstrapFilesForRun", () => {
   });
 
   it("keeps missing hook records without source identity when policy allows them", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-missing-hook-record-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-missing-hook-record-");
     await fs.writeFile(path.join(workspaceDir, DEFAULT_MEMORY_FILENAME), "private memory", "utf8");
     registerInternalHook("agent:bootstrap", (event) => {
       const context = event.context as AgentBootstrapHookContext;
@@ -617,7 +617,7 @@ describe("resolveBootstrapFilesForRun", () => {
   ] as const)(
     "rejects loader aliases to root memory relabeled under the $mode allowlist",
     async ({ sessionKey, relabeledName, expectedNames }) => {
-      const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-restricted-");
+      const workspaceDir = await makeTempWorkspace("carapace-bootstrap-restricted-");
       const rootMemoryPath = path.join(workspaceDir, DEFAULT_MEMORY_FILENAME);
       const aliasDir = await createDirectoryAlias({
         workspaceDir,
@@ -661,7 +661,7 @@ describe("resolveBootstrapContextForRun", () => {
   it("returns context files for hook-adjusted bootstrap files", async () => {
     registerExtraBootstrapFileHook();
 
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     const result = await resolveBootstrapContextForRun({ workspaceDir });
     const extra = result.contextFiles.find(
       (file) => file.path === path.join(workspaceDir, "EXTRA.md"),
@@ -671,7 +671,7 @@ describe("resolveBootstrapContextForRun", () => {
   });
 
   it("keeps BOOTSTRAP.md available in shared injected context for non-attempt consumers", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await fs.writeFile(path.join(workspaceDir, "BOOTSTRAP.md"), "ritual", "utf8");
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "rules", "utf8");
 
@@ -685,7 +685,7 @@ describe("resolveBootstrapContextForRun", () => {
   });
 
   it("keeps bootstrap context empty in lightweight heartbeat mode", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await fs.writeFile(path.join(workspaceDir, "SOUL.md"), "persona", "utf8");
 
     const files = await resolveBootstrapFilesForRun({
@@ -699,7 +699,7 @@ describe("resolveBootstrapContextForRun", () => {
   });
 
   it("keeps bootstrap context empty in lightweight cron mode", async () => {
-    const workspaceDir = await makeTempWorkspace("openclaw-bootstrap-");
+    const workspaceDir = await makeTempWorkspace("carapace-bootstrap-");
     await fs.writeFile(path.join(workspaceDir, "HEARTBEAT.md"), "check inbox", "utf8");
 
     const files = await resolveBootstrapFilesForRun({
@@ -733,7 +733,7 @@ describe("resolveBootstrapContextForDiagnostics", () => {
   beforeEach(() => clearInternalHooks());
   afterEach(() => clearInternalHooks());
 
-  function createExtraFilesConfig(hooksEnabled?: boolean): OpenClawConfig {
+  function createExtraFilesConfig(hooksEnabled?: boolean): CarapaceConfig {
     return {
       hooks: {
         internal: {
@@ -750,7 +750,7 @@ describe("resolveBootstrapContextForDiagnostics", () => {
     workspaceDir: string;
     extraPath: string;
   }> {
-    const workspaceDir = await fs.realpath(await makeTempWorkspace("openclaw-bootstrap-diag-"));
+    const workspaceDir = await fs.realpath(await makeTempWorkspace("carapace-bootstrap-diag-"));
     const extraPath = path.join(workspaceDir, "packages", "core", "AGENTS.md");
     await fs.mkdir(path.dirname(extraPath), { recursive: true });
     await fs.writeFile(extraPath, "extra agents", "utf8");
@@ -807,7 +807,7 @@ describe("resolveBootstrapContextForDiagnostics", () => {
     "matches fresh-start selection for a managed hook with $label",
     async ({ handler, projects }) => {
       const { workspaceDir, extraPath } = await makeWorkspaceWithExtraAgentsFile();
-      const managedHooksDir = await makeTempWorkspace("openclaw-managed-hooks-");
+      const managedHooksDir = await makeTempWorkspace("carapace-managed-hooks-");
       const replacementDir = path.join(managedHooksDir, "bootstrap-extra-files");
       await fs.mkdir(replacementDir, { recursive: true });
       await fs.writeFile(
@@ -816,7 +816,7 @@ describe("resolveBootstrapContextForDiagnostics", () => {
           "---",
           "name: bootstrap-extra-files",
           "description: managed replacement",
-          'metadata: { "openclaw": { "events": ["agent:bootstrap"] } }',
+          'metadata: { "carapace": { "events": ["agent:bootstrap"] } }',
           "---",
           "",
         ].join("\n"),
@@ -841,7 +841,7 @@ describe("hasCompletedBootstrapTurn", () => {
   let sessionManager: SessionManager;
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(await fs.realpath("/tmp"), "openclaw-bootstrap-turn-"));
+    tmpDir = await fs.mkdtemp(path.join(await fs.realpath("/tmp"), "carapace-bootstrap-turn-"));
     sessionTarget = {
       agentId: "main",
       sessionId: randomUUID(),
@@ -856,7 +856,7 @@ describe("hasCompletedBootstrapTurn", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
@@ -871,7 +871,7 @@ describe("hasCompletedBootstrapTurn", () => {
 
   it("returns false when no full bootstrap marker has been recorded", async () => {
     sessionManager.appendMessage({ role: "user", content: "hello", timestamp: 1 });
-    sessionManager.appendCustomEntry("openclaw:unrelated", { timestamp: 2 });
+    sessionManager.appendCustomEntry("carapace:unrelated", { timestamp: 2 });
 
     expect(await hasCompletedBootstrapTurn(sessionTarget)).toBe(false);
   });

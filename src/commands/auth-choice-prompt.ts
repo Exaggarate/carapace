@@ -1,8 +1,8 @@
 // Interactive grouped auth-choice prompt used by onboarding and agent setup.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { expectDefined } from "@openclaw/normalization-core";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { expectDefined } from "@carapace/normalization-core";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { WizardPrompter, WizardSelectOption } from "../wizard/prompts.js";
 import {
   buildAuthChoiceGroups,
@@ -25,7 +25,7 @@ type PromptAuthChoiceGroupedParams = {
   assistantVisibleOnly?: boolean;
   allowedChoices?: ReadonlySet<string>;
   additionalGroups?: readonly AuthChoiceGroup[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   allowKeepCurrentProvider?: boolean;
@@ -36,11 +36,11 @@ export function isKeepCurrentAuthChoice(value: unknown): value is KeepCurrentAut
   return value === KEEP_CURRENT_AUTH_CHOICE;
 }
 
-function resolveConfiguredModelRef(config?: OpenClawConfig): string | undefined {
+function resolveConfiguredModelRef(config?: CarapaceConfig): string | undefined {
   return resolveAgentModelPrimaryValue(config?.agents?.defaults?.model);
 }
 
-function resolveConfiguredProvider(config?: OpenClawConfig): string | undefined {
+function resolveConfiguredProvider(config?: CarapaceConfig): string | undefined {
   const modelRef = resolveConfiguredModelRef(config);
   const slashIndex = modelRef?.indexOf("/") ?? -1;
   if (!modelRef || slashIndex <= 0) {

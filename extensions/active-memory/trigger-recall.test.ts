@@ -1,4 +1,4 @@
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildTriggerRecallContext,
@@ -15,7 +15,7 @@ const hoisted = vi.hoisted(() => ({
   listTriggerCandidates: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-host-search", () => ({
+vi.mock("carapace/plugin-sdk/memory-host-search", () => ({
   getActiveMemorySearchManager: (...args: unknown[]) => hoisted.getManager(...args),
 }));
 
@@ -100,7 +100,7 @@ describe("active-memory trigger recall", () => {
   });
 
   it("gates tagged entries to the active project while leaving global entries unchanged", () => {
-    const activeKey = "github.com/OpenClaw/OpenClaw";
+    const activeKey = "github.com/Carapace/Carapace";
     const sameProject = result({ projectKey: activeKey, startLine: 1 });
     const foreignProject = result({ projectKey: "github.com/example/other", startLine: 2 });
     const global = result({ startLine: 3 });
@@ -219,20 +219,20 @@ describe("active-memory trigger recall", () => {
 
   it("requires every project on a mixed chunk to be active before trigger injection", () => {
     const mixed = result({
-      projectKey: "github.com/openclaw/openclaw; github.com/example/other",
+      projectKey: "github.com/Exaggarate/carapace; github.com/example/other",
     });
     expect(
       selectStrongTriggerMatches(
         "when booking a flight",
         [mixed],
-        ["github.com/openclaw/openclaw"],
+        ["github.com/Exaggarate/carapace"],
       ),
     ).toEqual([]);
     expect(
       selectStrongTriggerMatches(
         "when booking a flight",
         [mixed],
-        ["github.com/openclaw/openclaw", "github.com/example/other"],
+        ["github.com/Exaggarate/carapace", "github.com/example/other"],
       ),
     ).toHaveLength(1);
   });
@@ -245,14 +245,14 @@ describe("active-memory trigger recall", () => {
       agentId: "main",
       query: "flight booking",
       message: "Help when booking a flight",
-      activeProjectKeys: ["github.com/openclaw/openclaw"],
+      activeProjectKeys: ["github.com/Exaggarate/carapace"],
     });
     expect(hoisted.search).toHaveBeenCalledWith(
       "flight booking",
       expect.objectContaining({ lexicalOnly: true }),
     );
     expect(hoisted.listTriggerCandidates).toHaveBeenCalledWith({
-      activeProjectKeys: ["github.com/openclaw/openclaw"],
+      activeProjectKeys: ["github.com/Exaggarate/carapace"],
     });
   });
 

@@ -1,15 +1,15 @@
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   toPackageRefExtensionSqlParams,
   type PersistedClawPackageRef,
@@ -39,13 +39,13 @@ export function digestClawPackageRef(ref: PersistedClawPackageRef): string {
 export function replaceClawPackageRefExpected(
   expected: PersistedClawPackageRef | undefined,
   replacement: PersistedClawPackageRef | undefined,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
   const identity = expected ?? replacement;
   if (!identity) {
     throw new Error("Package reference replacement requires an identity.");
   }
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const kysely = getNodeSqliteKysely<Pick<DB, "claw_package_refs">>(db);
     if (expected) {
       const extension = toPackageRefExtensionSqlParams(expected.extension);

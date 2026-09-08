@@ -17,8 +17,8 @@ vi.mock("../../tts/tts-settings.js", () => ({
 
 function fixedEmbeddedPromptInputs(): Parameters<typeof buildEmbeddedSystemPrompt>[0] {
   return {
-    workspaceDir: "/tmp/openclaw-prompt-agent",
-    runtimeCwd: "/tmp/openclaw-prompt-project",
+    workspaceDir: "/tmp/carapace-prompt-agent",
+    runtimeCwd: "/tmp/carapace-prompt-project",
     reasoningTagHint: true,
     runtimeInfo: {
       host: "fixture-host",
@@ -68,7 +68,7 @@ describe("buildEmbeddedSystemPrompt", () => {
 
   it("forwards provider prompt contributions into the embedded prompt", () => {
     const prompt = buildEmbeddedSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       runtimeCwd: "/tmp/task-repo",
       reasoningTagHint: false,
       runtimeInfo: {
@@ -90,12 +90,12 @@ describe("buildEmbeddedSystemPrompt", () => {
 
     expect(prompt).toContain("## Embedded Stable\n\nStable provider guidance.");
     expect(prompt).toContain("Working directory: /tmp/task-repo (tools and deliverables).");
-    expect(prompt).toContain("Agent workspace: /tmp/openclaw");
+    expect(prompt).toContain("Agent workspace: /tmp/carapace");
   });
 
   it("keeps post-compaction curated context scoped to the prepared project", () => {
     const prompt = buildEmbeddedSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         host: "local",
@@ -112,7 +112,7 @@ describe("buildEmbeddedSystemPrompt", () => {
       activeProjectKeys: ["github.com/acme/Alpha"],
       contextFiles: [
         {
-          path: "/tmp/openclaw/MEMORY.md",
+          path: "/tmp/carapace/MEMORY.md",
           content: [
             "- Alpha compaction fact. <!-- project: github.com/acme/Alpha -->",
             "- Beta compaction fact. <!-- project: github.com/acme/Beta -->",
@@ -139,7 +139,7 @@ describe("buildEmbeddedSystemPrompt", () => {
         },
       },
       agentId: "main",
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         agentId: "main",
@@ -170,7 +170,7 @@ describe("buildEmbeddedSystemPrompt", () => {
         },
       },
       agentId: "main",
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         agentId: "main",
@@ -203,7 +203,7 @@ describe("buildEmbeddedSystemPrompt", () => {
         },
       },
       agentId: "main",
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       proactiveSubagentOrchestration: true,
       runtimeInfo: {
@@ -235,7 +235,7 @@ describe("buildEmbeddedSystemPrompt", () => {
           },
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         host: "local",
@@ -252,7 +252,7 @@ describe("buildEmbeddedSystemPrompt", () => {
     });
 
     expect(prompt).toContain("tools.fs.workspaceOnly ON");
-    expect(prompt).toContain("`.openclaw/tmp/`");
+    expect(prompt).toContain("`.carapace/tmp/`");
     expect(prompt).toContain("never exec-write `/tmp`");
   });
 
@@ -265,7 +265,7 @@ describe("buildEmbeddedSystemPrompt", () => {
           },
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         host: "local",
@@ -287,7 +287,7 @@ describe("buildEmbeddedSystemPrompt", () => {
 
   it("forwards the subagent prompt surface to embedded prompt rendering", () => {
     const prompt = buildEmbeddedSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       promptSurface: "subagent",
       runtimeInfo: {
@@ -307,7 +307,7 @@ describe("buildEmbeddedSystemPrompt", () => {
     });
 
     expect(prompt).toContain("- sessions_spawn");
-    expect(prompt).not.toContain("OpenClaw lists the standard tools above");
+    expect(prompt).not.toContain("Carapace lists the standard tools above");
     expect(prompt).not.toContain("For long waits, avoid rapid poll loops");
     expect(prompt).not.toContain("Larger work: use `sessions_spawn`");
     expect(prompt).not.toContain("Do not poll `subagents list` / `sessions_list` in a loop");
@@ -321,7 +321,7 @@ describe("buildEmbeddedSystemPrompt", () => {
     registerTestMemoryPromptBuilder(() => ["## Memory Recall", "Use memory carefully.", ""]);
 
     const prompt = buildEmbeddedSystemPrompt({
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         host: "local",
@@ -343,7 +343,7 @@ describe("buildEmbeddedSystemPrompt", () => {
 
   it("includes background process guidance whenever process is callable", () => {
     const params = {
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       reasoningTagHint: false,
       runtimeInfo: {
         host: "local",
@@ -428,14 +428,14 @@ describe("buildEmbeddedSystemPrompt", () => {
     "preserves the fixed embedded prompt in %s mode",
     (promptMode) => {
       const prompt = buildEmbeddedSystemPrompt({ ...fixedEmbeddedPromptInputs(), promptMode });
-      expect(prompt).toContain("You are a personal assistant running inside OpenClaw.");
+      expect(prompt).toContain("You are a personal assistant running inside Carapace.");
       if (promptMode === "none") {
         expect(prompt).not.toContain("Fixture");
         expect(prompt).not.toContain("## Tooling");
       } else {
         expect(prompt).toContain("Fixture stable provider guidance.");
         expect(prompt).toContain("Fixture project guidance.");
-        expect(prompt).toContain("Working directory: /tmp/openclaw-prompt-project");
+        expect(prompt).toContain("Working directory: /tmp/carapace-prompt-project");
       }
       expect(prompt.includes("- direct-alias: fixture/direct")).toBe(promptMode === "full");
     },

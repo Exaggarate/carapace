@@ -20,7 +20,7 @@ describe("unrestricted host tool writes", () => {
   });
 
   async function createFile(content: string) {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-host-write-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-host-write-"));
     const filePath = path.join(tempDir, "important.txt");
     await fs.writeFile(filePath, content);
     return filePath;

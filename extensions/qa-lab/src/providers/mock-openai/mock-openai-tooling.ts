@@ -1,6 +1,6 @@
 // QA Lab mock provider tool planning and memory fixtures.
 import { createHash } from "node:crypto";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { QA_LAB_WEB_SEARCH_DENIED_INPUT_QUERY } from "../../qa-web-search-provider.js";
 import type { MockToolCallItem, StreamEvent } from "./mock-openai-contracts.js";
 import { MockResponseStream } from "./mock-openai-stream.js";
@@ -232,7 +232,7 @@ export function buildQaToolSearchArgs(
     };
   }
   if (targetTool === "web_search") {
-    return { query: "OpenClaw runtime parity fixed query", count: 1 };
+    return { query: "Carapace runtime parity fixed query", count: 1 };
   }
   if (targetTool === "web_fetch") {
     return { url: "https://example.com/", maxChars: 500 };
@@ -246,9 +246,9 @@ export function buildQaToolSearchArgs(
   if (targetTool === "message") {
     return { action: "send", message: "runtime parity message fixture" };
   }
-  if (targetTool === "openclaw") {
+  if (targetTool === "carapace") {
     return {
-      message: /\bopenclaw_fixture=logging-level-info\b/u.test(prompt)
+      message: /\bcarapace_fixture=logging-level-info\b/u.test(prompt)
         ? 'config set logging.level "info"'
         : "Reply exactly QA-SYSTEM-AGENT-DELEGATE-INFERENCE-OK. Do not call tools.",
     };

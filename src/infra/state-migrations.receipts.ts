@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -13,7 +13,7 @@ import {
 } from "./kysely-sync.js";
 
 type MigrationReceiptDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "migration_runs" | "migration_sources"
 >;
 
@@ -87,7 +87,7 @@ export function readLegacyMigrationReceipt(
   sourceKey: string,
   env: NodeJS.ProcessEnv,
 ): LegacyMigrationReceipt | null {
-  return readLegacyMigrationReceiptFromDatabase(openOpenClawStateDatabase({ env }).db, sourceKey);
+  return readLegacyMigrationReceiptFromDatabase(openCarapaceStateDatabase({ env }).db, sourceKey);
 }
 
 export function recordLegacyMigrationRun(database: DatabaseSync, run: LegacyMigrationRun): void {
@@ -180,7 +180,7 @@ export function markLegacyMigrationSourceRemoved(
   env: NodeJS.ProcessEnv,
   operationLabel?: string,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,

@@ -1,7 +1,7 @@
 import type { ApiKeyCredential, AuthProfileCredential } from "../agents/auth-profiles/types.js";
 import type { PromptMode } from "../agents/system-prompt.types.js";
 import type { ModelProviderConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import type { SecretInputMode } from "./provider-auth-types.js";
@@ -34,7 +34,7 @@ export type ProviderAuthResult = {
    * `models.providers.<id>` entries, default aliases, or agent model helpers.
    * The caller still persists auth-profile bindings separately.
    */
-  configPatch?: Partial<OpenClawConfig>;
+  configPatch?: Partial<CarapaceConfig>;
   defaultModel?: string;
   notes?: string[];
   /**
@@ -47,7 +47,7 @@ export type ProviderAuthResult = {
 
 /** Interactive auth context passed to provider login/setup methods. */
 export type ProviderAuthContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   agentDir?: string;
   workspaceDir?: string;
@@ -115,8 +115,8 @@ export type ProviderNonInteractiveApiKeyCredentialParams = {
 
 export type ProviderAuthMethodNonInteractiveContext = {
   authChoice: string;
-  config: OpenClawConfig;
-  baseConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  baseConfig: CarapaceConfig;
   opts: ProviderAuthOptionBag;
   runtime: RuntimeEnv;
   agentDir?: string;
@@ -136,7 +136,7 @@ type ProviderAuthMethodNonInteractiveValidationContext = Omit<
 
 /** Read-only context for app-guided discovery of already available inference. */
 export type ProviderAppGuidedSetupContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   signal?: AbortSignal;
@@ -174,7 +174,7 @@ export type ProviderAuthMethod = {
    * Optional wizard/onboarding metadata for this specific auth method.
    *
    * Use this when one provider exposes multiple setup entries (for example API
-   * key + OAuth, or region-specific login flows). OpenClaw uses this to expose
+   * key + OAuth, or region-specific login flows). Carapace uses this to expose
    * method-specific auth choices while keeping the provider id stable.
    */
   wizard?: ProviderPluginWizardSetup;
@@ -186,7 +186,7 @@ export type ProviderAuthMethod = {
   run: (ctx: ProviderAuthContext) => Promise<ProviderAuthResult>;
   runNonInteractive?: (
     ctx: ProviderAuthMethodNonInteractiveContext,
-  ) => Promise<OpenClawConfig | null>;
+  ) => Promise<CarapaceConfig | null>;
   /** Side-effect-free prerequisite validation used before destructive reset handling. */
   validateNonInteractive?: (
     ctx: ProviderAuthMethodNonInteractiveValidationContext,
@@ -254,7 +254,7 @@ export type ProviderOAuthProfileIdRepair = {
   /**
    * Legacy OAuth profile id to migrate away from.
    *
-   * When omitted, OpenClaw falls back to `<provider>:default`.
+   * When omitted, Carapace falls back to `<provider>:default`.
    */
   legacyProfileId?: string;
   /**
@@ -266,7 +266,7 @@ export type ProviderOAuthProfileIdRepair = {
 };
 
 export type ProviderModelSelectedContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   model: string;
   prompter: WizardPrompter;
   agentDir?: string;
@@ -274,14 +274,14 @@ export type ProviderModelSelectedContext = {
 };
 
 export type ProviderDeferSyntheticProfileAuthContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   providerConfig?: ModelProviderConfig;
   resolvedApiKey?: string;
 };
 
 export type ProviderSystemPromptContributionContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;

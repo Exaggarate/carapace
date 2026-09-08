@@ -211,7 +211,7 @@ describe("normalizePluginsConfig", () => {
   });
 
   it("normalizes unknown plugin ids without consulting discovery", async () => {
-    const discoverPlugins = vi.spyOn(discovery, "discoverOpenClawPlugins");
+    const discoverPlugins = vi.spyOn(discovery, "discoverCarapacePlugins");
     discoverPlugins.mockClear();
 
     const result = normalizePluginsConfig({
@@ -245,12 +245,12 @@ describe("normalizePluginsConfig", () => {
   });
 
   it("does not consult discovery or manifests for alias lookup", async () => {
-    const discoverPlugins = vi.spyOn(discovery, "discoverOpenClawPlugins").mockReturnValue({
+    const discoverPlugins = vi.spyOn(discovery, "discoverCarapacePlugins").mockReturnValue({
       candidates: [
         {
           idHint: "anthropic",
-          source: "/tmp/openclaw-bundled-anthropic/index.js",
-          rootDir: "/tmp/openclaw-bundled-anthropic",
+          source: "/tmp/carapace-bundled-anthropic/index.js",
+          rootDir: "/tmp/carapace-bundled-anthropic",
           origin: "bundled",
           bundledManifest: {
             id: "anthropic",
@@ -260,8 +260,8 @@ describe("normalizePluginsConfig", () => {
         },
         {
           idHint: "external-anthropic",
-          source: "/tmp/openclaw-global-anthropic/index.js",
-          rootDir: "/tmp/openclaw-global-anthropic",
+          source: "/tmp/carapace-global-anthropic/index.js",
+          rootDir: "/tmp/carapace-global-anthropic",
           origin: "global",
         },
       ],
@@ -269,7 +269,7 @@ describe("normalizePluginsConfig", () => {
     });
     const loadManifest = vi.spyOn(manifest, "loadPluginManifest").mockReturnValue({
       ok: true,
-      manifestPath: "/tmp/openclaw-global-anthropic/openclaw.plugin.json",
+      manifestPath: "/tmp/carapace-global-anthropic/carapace.plugin.json",
       manifest: {
         id: "external-anthropic",
         configSchema: {},
@@ -550,12 +550,12 @@ describe("resolveEffectivePluginActivationState", () => {
     },
     {
       name: "resolves an explicit channel disable through manifest-owned channel ids",
-      // QQ Bot style: plugin id `openclaw-demo` owns `channels.demo`, which the built-in
+      // QQ Bot style: plugin id `carapace-demo` owns `channels.demo`, which the built-in
       // catalog cannot map from the plugin id alone.
-      params: { id: "openclaw-demo", origin: "bundled", channelIds: ["demo"] },
+      params: { id: "carapace-demo", origin: "bundled", channelIds: ["demo"] },
       rawConfig: {
         channels: { demo: { enabled: false } },
-        plugins: { entries: { "openclaw-demo": { enabled: true } } },
+        plugins: { entries: { "carapace-demo": { enabled: true } } },
       },
       expected: {
         enabled: false,

@@ -20,8 +20,8 @@ const PROXY_KEYS = [
   "http_proxy",
   "NO_PROXY",
   "no_proxy",
-  "OPENCLAW_PROXY_ACTIVE",
-  "OPENCLAW_PROXY_CA_FILE",
+  "CARAPACE_PROXY_ACTIVE",
+  "CARAPACE_PROXY_CA_FILE",
 ] as const;
 const TEST_ENV_KEYS = [...SLACK_API_URL_KEYS, ...PROXY_KEYS] as const;
 const originalEnv = { ...process.env };

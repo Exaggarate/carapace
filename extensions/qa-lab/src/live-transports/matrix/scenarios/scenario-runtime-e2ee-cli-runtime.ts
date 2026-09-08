@@ -2,8 +2,8 @@
 import { randomUUID } from "node:crypto";
 import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { runMatrixQaOpenClawCli, startMatrixQaOpenClawCli } from "./scenario-runtime-cli.js";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
+import { runMatrixQaCarapaceCli, startMatrixQaCarapaceCli } from "./scenario-runtime-cli.js";
 import {
   assertMatrixQaPrivatePathMode,
   buildMatrixQaEmptyMatrixCliConfig,
@@ -62,7 +62,7 @@ export async function createMatrixQaCliE2eeSetupRuntime(params: {
 }) {
   const outputDir = requireMatrixQaE2eeOutputDir(params.context);
   const rootDir = await mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-matrix-e2ee-setup-qa-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-matrix-e2ee-setup-qa-"),
   );
   try {
     const artifactDir = path.join(
@@ -90,19 +90,19 @@ export async function createMatrixQaCliE2eeSetupRuntime(params: {
       ...requireMatrixQaCliRuntimeEnv(params.context),
       FORCE_COLOR: "0",
       NO_COLOR: "1",
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_NO_AUTO_UPDATE: "1",
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_NO_AUTO_UPDATE: "1",
+      CARAPACE_STATE_DIR: stateDir,
     };
     const run = async (args: string[], timeoutMs = params.context.timeoutMs, stdin?: string) =>
-      await runMatrixQaOpenClawCli({
+      await runMatrixQaCarapaceCli({
         args,
         env,
         stdin,
         timeoutMs,
       });
     const start = (args: string[], timeoutMs = params.context.timeoutMs) =>
-      startMatrixQaOpenClawCli({
+      startMatrixQaCarapaceCli({
         args,
         env,
         timeoutMs,
@@ -150,10 +150,10 @@ export async function createMatrixQaCliGatewayRuntime(params: {
     ...requireMatrixQaCliRuntimeEnv(params.context),
     FORCE_COLOR: "0",
     NO_COLOR: "1",
-    OPENCLAW_NO_AUTO_UPDATE: "1",
+    CARAPACE_NO_AUTO_UPDATE: "1",
   };
   const run = async (args: string[], timeoutMs = params.context.timeoutMs) =>
-    await runMatrixQaOpenClawCli({
+    await runMatrixQaCarapaceCli({
       args,
       env,
       timeoutMs,

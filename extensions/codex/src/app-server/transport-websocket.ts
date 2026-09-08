@@ -74,7 +74,7 @@ export function createWebSocketTransport(
       return;
     }
 
-    const payload = Buffer.from(`openclaw-codex-${++heartbeatSequence}`);
+    const payload = Buffer.from(`carapace-codex-${++heartbeatSequence}`);
     expectedPong = payload;
     pongTimeout = setTimeout(() => {
       pongTimeout = undefined;

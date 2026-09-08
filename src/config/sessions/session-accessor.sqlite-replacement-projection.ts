@@ -1,6 +1,6 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { isInternalSessionEffectsKey } from "./internal-session-key.js";
 import type {
   SessionEntryReplacementSnapshot,
@@ -9,7 +9,7 @@ import type {
 } from "./session-accessor.sqlite-contract.js";
 import {
   runPreparedSqliteSessionWrite,
-  runSqliteSessionDeletionTransaction as runOpenClawAgentWriteTransaction,
+  runSqliteSessionDeletionTransaction as runCarapaceAgentWriteTransaction,
 } from "./session-accessor.sqlite-deletion.js";
 import { sqliteSessionEntriesEqual } from "./session-accessor.sqlite-entry-equality.js";
 import {
@@ -75,7 +75,7 @@ async function applySqliteSessionEntryReplacementProjection<T, TReplacement>(
     storePath: params.storePath,
   });
   const preparedWrite = await runPreparedSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const selectedKeys = params.sessionKeys ? new Set(params.sessionKeys) : undefined;
     const selectedStatuses = params.statuses ? new Set(params.statuses) : undefined;
     const readLabelOwnerKeys = (db = database.db) =>
@@ -191,7 +191,7 @@ async function applySqliteSessionEntryReplacementProjection<T, TReplacement>(
     return {
       deletedEntries: deletedOwners,
       commit: () => {
-        const publish = runOpenClawAgentWriteTransaction(
+        const publish = runCarapaceAgentWriteTransaction(
           (transactionDb) => {
             // Planning can await providers or hooks. Recheck uniqueness under the
             // write transaction so an external label claim cannot race this snapshot.

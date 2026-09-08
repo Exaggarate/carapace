@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { applyEmbeddedAttemptToolsAllow } from "../../agents/embedded-agent-runner/run/attempt-tool-construction-plan.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   countPluginStateLiveEntries,
   resetPluginStateStoreForTests,
@@ -21,7 +21,7 @@ vi.mock("../../cron/isolated-agent.js", () => ({ runCronIsolatedAgentTurn }));
 
 let stateDir: string;
 
-function createJoinParams(conversationId: string, cfg: OpenClawConfig = {}) {
+function createJoinParams(conversationId: string, cfg: CarapaceConfig = {}) {
   return {
     cfg,
     channel: "slack",
@@ -35,8 +35,8 @@ function createJoinParams(conversationId: string, cfg: OpenClawConfig = {}) {
 
 beforeAll(async () => {
   resetPluginStateStoreForTests();
-  stateDir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-join-intro-")));
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  stateDir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-join-intro-")));
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 });
 
 afterAll(async () => {

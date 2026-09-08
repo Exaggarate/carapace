@@ -5,11 +5,11 @@ import { createDeferred } from "../../../test/helpers/promise.js";
 import { onTrustedMessageAuditEventForTest } from "../../audit/message-audit-events.test-support.js";
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { claimDeliveryQueueEntryPlatformSend } from "../delivery-queue-sqlite-claim.js";
 import { PlatformMessageNotDispatchedError } from "./deliver-types.js";
 import { failDurableDelivery, type DurableDeliveryCompletion } from "./delivery-completion.js";
@@ -41,7 +41,7 @@ describe("exhausted delivery producer recovery", () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   async function enqueue(
@@ -76,8 +76,8 @@ describe("exhausted delivery producer recovery", () => {
   }
 
   function queueStatus(id: string) {
-    return openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir() },
+    return openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: tmpDir() },
     })
       .db.prepare("SELECT status FROM delivery_queue_entries WHERE queue_name = ? AND id = ?")
       .get(OUTBOUND_DELIVERY_QUEUE_NAME, id)?.status;
@@ -109,7 +109,7 @@ describe("exhausted delivery producer recovery", () => {
       await enqueue("later-control");
       await queueStorage.reserveDeliveryAttempt("later-control", 1, tmpDir());
       now += 60_000;
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const log = await recover(mode);
 
@@ -216,8 +216,8 @@ describe("exhausted delivery producer recovery", () => {
         sessionAccessor.loadSessionEntry(completion)?.pendingFinalDelivery?.deliveries,
       ).toEqual([{ id, state: "queued" }]);
       fault.mockRestore();
-      closeOpenClawStateDatabaseForTest();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       await recover(mode);
       expect(queueStatus(id)).toBe("failed");
@@ -275,8 +275,8 @@ describe("exhausted delivery producer recovery", () => {
         },
       });
       vi.restoreAllMocks();
-      closeOpenClawStateDatabaseForTest();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
       await recoverPendingDeliveries(options);
       expect(deliver).toHaveBeenCalledTimes(1);
       expect(audits).toEqual(["suppressed", "failed"]);
@@ -378,13 +378,13 @@ describe("exhausted delivery producer recovery", () => {
       .spyOn(sessionAccessor, "patchSessionEntryCore")
       .mockRejectedValueOnce(new Error("synthetic owner fault"));
     await recover("startup");
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: tmpDir() },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: tmpDir() },
     });
     database.db
       .prepare("UPDATE schema_meta SET app_version = ? WHERE meta_key = 'primary'")
       .run("synthetic-older-version");
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(readQueuedEntry(tmpDir(), id)).toMatchObject({
       recoveryState: "settlement_pending",
       deliveryCompletion: completion,

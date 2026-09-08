@@ -3,7 +3,7 @@
  */
 import { v0_8 } from "@a2ui/lit";
 import { ContextProvider } from "@lit/context";
-import { themeContext } from "@openclaw/a2ui-theme-context";
+import { themeContext } from "@carapace/a2ui-theme-context";
 import { html, css, LitElement, unsafeCSS } from "lit";
 import "@a2ui/lit/ui";
 import { repeat } from "lit/directives/repeat.js";
@@ -119,7 +119,7 @@ const createSecureActionId = () => {
   return null;
 };
 
-const openclawTheme = {
+const carapaceTheme = {
   components: {
     AudioPlayer: emptyClasses(),
     Button: emptyClasses(),
@@ -233,7 +233,7 @@ const openclawTheme = {
   },
 };
 
-class OpenClawA2UIHost extends LitElement {
+class CarapaceA2UIHost extends LitElement {
   static properties = {
     surfaces: { state: true },
     pendingAction: { state: true },
@@ -243,7 +243,7 @@ class OpenClawA2UIHost extends LitElement {
   #processor = v0_8.Data.createSignalA2uiMessageProcessor();
   themeProvider = new ContextProvider(this, {
     context: themeContext,
-    initialValue: openclawTheme,
+    initialValue: carapaceTheme,
   });
 
   surfaces = [];
@@ -257,8 +257,8 @@ class OpenClawA2UIHost extends LitElement {
       height: 100%;
       position: relative;
       box-sizing: border-box;
-      padding: var(--openclaw-a2ui-inset-top, 0px) var(--openclaw-a2ui-inset-right, 0px)
-        var(--openclaw-a2ui-inset-bottom, 0px) var(--openclaw-a2ui-inset-left, 0px);
+      padding: var(--carapace-a2ui-inset-top, 0px) var(--carapace-a2ui-inset-right, 0px)
+        var(--carapace-a2ui-inset-bottom, 0px) var(--carapace-a2ui-inset-left, 0px);
     }
 
     #surfaces {
@@ -267,14 +267,14 @@ class OpenClawA2UIHost extends LitElement {
       gap: 12px;
       height: 100%;
       overflow: auto;
-      padding-bottom: var(--openclaw-a2ui-scroll-pad-bottom, 0px);
+      padding-bottom: var(--carapace-a2ui-scroll-pad-bottom, 0px);
     }
 
     .status {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: var(--openclaw-a2ui-status-top, 12px);
+      top: var(--carapace-a2ui-status-top, 12px);
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -300,7 +300,7 @@ class OpenClawA2UIHost extends LitElement {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      bottom: var(--openclaw-a2ui-toast-bottom, 12px);
+      bottom: var(--carapace-a2ui-toast-bottom, 12px);
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -331,7 +331,7 @@ class OpenClawA2UIHost extends LitElement {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: var(--openclaw-a2ui-empty-top, var(--openclaw-a2ui-status-top, 12px));
+      top: var(--carapace-a2ui-empty-top, var(--carapace-a2ui-status-top, 12px));
       text-align: center;
       opacity: 0.8;
       padding: 10px 12px;
@@ -369,14 +369,14 @@ class OpenClawA2UIHost extends LitElement {
       reset: () => this.reset(),
       getSurfaces: () => Array.from(this.#processor.getSurfaces().keys()),
     };
-    globalThis.openclawA2UI = api;
+    globalThis.carapaceA2UI = api;
     this.addEventListener("a2uiaction", (evt) => this.#handleA2UIAction(evt));
     this.#statusListener = (evt) => this.#handleActionStatus(evt);
-    for (const eventName of ["openclaw:a2ui-action-status"]) {
+    for (const eventName of ["carapace:a2ui-action-status"]) {
       globalThis.addEventListener(eventName, this.#statusListener);
     }
     this.#syncSurfaces();
-    const bootMessages = globalThis.openclawA2UIBoot?.messages;
+    const bootMessages = globalThis.carapaceA2UIBoot?.messages;
     if (Array.isArray(bootMessages)) {
       this.applyMessages(bootMessages);
     }
@@ -385,7 +385,7 @@ class OpenClawA2UIHost extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     if (this.#statusListener) {
-      for (const eventName of ["openclaw:a2ui-action-status"]) {
+      for (const eventName of ["carapace:a2ui-action-status"]) {
         globalThis.removeEventListener(eventName, this.#statusListener);
       }
       this.#statusListener = null;
@@ -500,12 +500,12 @@ class OpenClawA2UIHost extends LitElement {
       ...(Object.keys(context).length ? { context } : {}),
     };
 
-    globalThis["__openclawLastA2UIAction"] = userAction;
+    globalThis["__carapaceLastA2UIAction"] = userAction;
 
-    const boardApi = globalThis.openclaw;
+    const boardApi = globalThis.carapace;
     if (boardApi?.state?.emit) {
       const request =
-        globalThis.openclawA2UIBoot?.actionTier === "prompt" && boardApi.prompt?.send
+        globalThis.carapaceA2UIBoot?.actionTier === "prompt" && boardApi.prompt?.send
           ? boardApi.prompt.send(
               Object.keys(context).length
                 ? `A2UI action ${name}: ${JSON.stringify(context)}`
@@ -603,6 +603,6 @@ class OpenClawA2UIHost extends LitElement {
   }
 }
 
-if (!customElements.get("openclaw-a2ui-host")) {
-  customElements.define("openclaw-a2ui-host", OpenClawA2UIHost);
+if (!customElements.get("carapace-a2ui-host")) {
+  customElements.define("carapace-a2ui-host", CarapaceA2UIHost);
 }

@@ -1,12 +1,12 @@
 // Synology Chat tests cover core plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import {
   createPluginSetupWizardConfigure,
   createTestWizardPrompter,
   runSetupWizardConfigure,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { WizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { WizardPrompter } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { listAccountIds, resolveAccount } from "./accounts.js";
 import { SynologyChatChannelConfigSchema } from "./config-schema.js";
@@ -26,7 +26,7 @@ const synologyChatSetupPlugin = {
   config: {
     listAccountIds,
     defaultAccountId: () => "default",
-    resolveAllowFrom: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId?: string }) =>
+    resolveAllowFrom: ({ cfg, accountId }: { cfg: CarapaceConfig; accountId?: string }) =>
       resolveAccount(cfg, accountId).allowedUserIds,
   },
 };
@@ -86,7 +86,7 @@ beforeEach(() => {
   vi.stubEnv("SYNOLOGY_NAS_HOST", undefined);
   vi.stubEnv("SYNOLOGY_ALLOWED_USER_IDS", undefined);
   vi.stubEnv("SYNOLOGY_RATE_LIMIT", undefined);
-  vi.stubEnv("OPENCLAW_BOT_NAME", undefined);
+  vi.stubEnv("CARAPACE_BOT_NAME", undefined);
 });
 
 describe("synology-chat core", () => {
@@ -157,7 +157,7 @@ describe("synology-chat core", () => {
 
     const result = await runSetupWizardConfigure({
       configure: synologyChatConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       prompter,
       options: {},
     });
@@ -211,7 +211,7 @@ describe("synology-chat core", () => {
             incomingUrl: existingIncomingUrl,
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -234,7 +234,7 @@ describe("synology-chat core", () => {
 
     const result = await runSetupWizardConfigure({
       configure: synologyChatConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       prompter,
       options: {},
       forceAllowFrom: true,
@@ -307,7 +307,7 @@ describe("synology-chat account resolution", () => {
     expect(account.dangerouslyAllowInheritedWebhookPath).toBe(false);
     expect(account.dmPolicy).toBe("allowlist");
     expect(account.rateLimitPerMinute).toBe(30);
-    expect(account.botName).toBe("OpenClaw");
+    expect(account.botName).toBe("Carapace");
   });
 
   it("uses env var fallbacks", () => {
@@ -315,7 +315,7 @@ describe("synology-chat account resolution", () => {
     vi.stubEnv("SYNOLOGY_CHAT_TOKEN", padded);
     vi.stubEnv("SYNOLOGY_CHAT_INCOMING_URL", " https://nas/incoming ");
     vi.stubEnv("SYNOLOGY_NAS_HOST", " 192.0.2.1 ");
-    vi.stubEnv("OPENCLAW_BOT_NAME", " TestBot ");
+    vi.stubEnv("CARAPACE_BOT_NAME", " TestBot ");
 
     const cfg = { channels: { "synology-chat": {} } };
     const account = resolveAccount(cfg);
@@ -331,7 +331,7 @@ describe("synology-chat account resolution", () => {
     vi.stubEnv("SYNOLOGY_CHAT_INCOMING_URL", whitespace);
     vi.stubEnv("SYNOLOGY_NAS_HOST", whitespace);
     vi.stubEnv("SYNOLOGY_ALLOWED_USER_IDS", whitespace);
-    vi.stubEnv("OPENCLAW_BOT_NAME", whitespace);
+    vi.stubEnv("CARAPACE_BOT_NAME", whitespace);
 
     const account = resolveAccount({ channels: { "synology-chat": {} } });
 
@@ -340,7 +340,7 @@ describe("synology-chat account resolution", () => {
     expect(account.webhookUrl).toBe("");
     expect(account.nasHost).toBe("localhost");
     expect(account.allowedUserIds).toEqual([]);
-    expect(account.botName).toBe("OpenClaw");
+    expect(account.botName).toBe("Carapace");
   });
 
   it("lets config and account overrides win over env/base config", () => {

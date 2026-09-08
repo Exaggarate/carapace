@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { create as createArchive } from "tar";
 import { root } from "../infra/fs-safe.js";
 import { readPluginControlUiAssets } from "../plugins/control-ui-assets.js";
@@ -30,8 +30,8 @@ async function packFeaturePlugin(opts: PluginsPackOptions) {
   }
   const source = await root(rootDir, { symlinks: "reject", hardlinks: "reject" });
   const packageManifest = await source.readJson("package.json");
-  if (!isRecord(packageManifest) || !isRecord(packageManifest.openclaw)) {
-    throw new Error("Plugin package metadata is missing. Run openclaw plugins build.");
+  if (!isRecord(packageManifest) || !isRecord(packageManifest.carapace)) {
+    throw new Error("Plugin package metadata is missing. Run carapace plugins build.");
   }
   const extensions = resolvePackageExtensionEntries(packageManifest);
   if (extensions.status !== "ok" || extensions.entries.length !== 1) {
@@ -74,7 +74,7 @@ async function packFeaturePlugin(opts: PluginsPackOptions) {
   if (!/\.(?:tgz|tar\.gz)$/u.test(outputPath)) {
     throw new Error("Plugin artifact output must end in .tgz or .tar.gz.");
   }
-  const staging = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-pack-"));
+  const staging = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-pack-"));
   try {
     await fs.mkdir(path.join(staging, "package"));
     const destination = await root(path.join(staging, "package"), {
@@ -87,8 +87,8 @@ async function packFeaturePlugin(opts: PluginsPackOptions) {
       controlUi: _source,
       runtimeExtensions: _runtime,
       runtimeSetupEntry: _runtimeSetup,
-      ...openclaw
-    } = packageManifest.openclaw;
+      ...carapace
+    } = packageManifest.carapace;
     // Only runtime package metadata travels with the archive. Build-time dependencies
     // and scripts cannot trigger additional executable downloads after approval.
     const packedPackage = {
@@ -100,19 +100,19 @@ async function packFeaturePlugin(opts: PluginsPackOptions) {
         : {}),
       ...(typeof packageManifest.license === "string" ? { license: packageManifest.license } : {}),
       ...(isRecord(packageManifest.peerDependencies) &&
-      typeof packageManifest.peerDependencies.openclaw === "string"
-        ? { peerDependencies: { openclaw: packageManifest.peerDependencies.openclaw } }
+      typeof packageManifest.peerDependencies.carapace === "string"
+        ? { peerDependencies: { carapace: packageManifest.peerDependencies.carapace } }
         : {}),
-      openclaw: {
-        ...openclaw,
+      carapace: {
+        ...carapace,
         extensions: ["./dist/index.js"],
         ...(setupEntry ? { setupEntry: "./dist/setup.js" } : {}),
       },
     };
     await destination.create("package.json", `${JSON.stringify(packedPackage, null, 2)}\n`);
     await destination.create(
-      "openclaw.plugin.json",
-      await source.readBytes("openclaw.plugin.json"),
+      "carapace.plugin.json",
+      await source.readBytes("carapace.plugin.json"),
     );
     // One build keeps modules shared by setup and runtime in the same artifact graph.
     const files = await buildPluginBundle({
@@ -122,7 +122,7 @@ async function packFeaturePlugin(opts: PluginsPackOptions) {
       splitting: true,
       platform: "node",
       target: "node22",
-      external: ["openclaw", "openclaw/*"],
+      external: ["carapace", "carapace/*"],
     });
     for (const file of files) {
       const relativePath = path.relative(rootDir, file.path);

@@ -3,10 +3,10 @@
  *
  * Builds safe status snapshots and resolves enabled/configured account state.
  */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildRuntimeAccountStatusSnapshot } from "../plugin-sdk/status-helpers.js";
 import { isRecord } from "../utils.js";
 import { asBoolean } from "../utils/boolean.js";
@@ -70,7 +70,7 @@ export function buildChannelAccountSnapshotFromInspection(params: {
 export function buildChannelAccountSummary(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   enabled: boolean;
   configured: boolean;
@@ -90,7 +90,7 @@ export function buildChannelAccountSummary(params: {
  */
 export function formatChannelAllowFrom(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   allowFrom: Array<string | number>;
 }): string[] {
@@ -110,7 +110,7 @@ export function formatChannelAllowFrom(params: {
 export function resolveChannelAccountEnabled(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): boolean {
   if (params.plugin.config.isEnabled) {
     return params.plugin.config.isEnabled(params.account, params.cfg);
@@ -125,7 +125,7 @@ export function resolveChannelAccountEnabled(params: {
 export async function resolveChannelAccountConfigured(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   readAccountConfiguredField?: boolean;
 }): Promise<boolean> {
   if (params.plugin.config.isConfigured) {

@@ -1,8 +1,8 @@
 import { css, html, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 
-class OpenClawPanelEmptyState extends OpenClawLitElement {
+class CarapacePanelEmptyState extends CarapaceLitElement {
   @property() heading = "";
   @property() description = "";
 
@@ -78,8 +78,8 @@ class OpenClawPanelEmptyState extends OpenClawLitElement {
   `;
 }
 
-if (!customElements.get("openclaw-panel-empty-state")) {
-  customElements.define("openclaw-panel-empty-state", OpenClawPanelEmptyState);
+if (!customElements.get("carapace-panel-empty-state")) {
+  customElements.define("carapace-panel-empty-state", CarapacePanelEmptyState);
 }
 
 export function renderPanelEmptyState(params: {
@@ -88,7 +88,7 @@ export function renderPanelEmptyState(params: {
   description: string;
   action?: TemplateResult | typeof nothing;
 }) {
-  return html`<openclaw-panel-empty-state
+  return html`<carapace-panel-empty-state
     .heading=${params.heading}
     .description=${params.description}
   >
@@ -97,11 +97,11 @@ export function renderPanelEmptyState(params: {
         ? html`<span slot="action">${params.action}</span>`
         : nothing
     }
-  </openclaw-panel-empty-state>`;
+  </carapace-panel-empty-state>`;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-panel-empty-state": OpenClawPanelEmptyState;
+    "carapace-panel-empty-state": CarapacePanelEmptyState;
   }
 }

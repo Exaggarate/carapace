@@ -1,6 +1,6 @@
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @Suite(.serialized) struct GatewayConnectionIssueTests {
     @Test func `detects token missing`() {

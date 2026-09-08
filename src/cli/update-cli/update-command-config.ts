@@ -1,6 +1,6 @@
 // Config snapshots and pre/post-update config restoration.
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
   createConfigIO,
@@ -14,7 +14,7 @@ import type { ConfigWriteOptions } from "../../config/io.js";
 import { asResolvedSourceConfig, asRuntimeConfig } from "../../config/materialize.js";
 import { resolveIncludeRoots } from "../../config/paths.js";
 import { parsePluginInstallRecordMap } from "../../config/plugin-install-record-map.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { shouldWarnOnTouchedVersion } from "../../config/version.js";
 import { normalizeUpdateChannel, type UpdateChannel } from "../../infra/update-channels.js";
@@ -138,7 +138,7 @@ function restoreDroppedPreUpdateChannels(
   const authoredChannels = resolveRestoredAuthoredChannels({
     currentChannels: snapshot.sourceConfig.channels,
     currentAuthoredChannels: isRecord(snapshot.parsed)
-      ? (snapshot.parsed as OpenClawConfig).channels
+      ? (snapshot.parsed as CarapaceConfig).channels
       : snapshot.sourceConfig.channels,
     preUpdateAuthoredChannels: preUpdateConfig.authoredConfig.channels,
     restoredChannelIds,
@@ -146,7 +146,7 @@ function restoreDroppedPreUpdateChannels(
   const nextConfig = {
     ...snapshot.sourceConfig,
     channels: restoredChannels,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   return {
     snapshot: {
       ...createUpdatedConfigSnapshot(snapshot, nextConfig),
@@ -303,7 +303,7 @@ export async function preparePostCorePluginConfig(params: {
 
 function createUpdatedConfigSnapshot(
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>,
-  next: OpenClawConfig,
+  next: CarapaceConfig,
 ): Awaited<ReturnType<typeof readConfigFileSnapshot>> {
   if (!snapshot.valid) {
     return snapshot;
@@ -373,11 +373,11 @@ function normalizePreUpdateConfigRestoreInput(
   const authoredConfig = parsed.authoredConfig;
   if (isRecord(sourceConfig) && isRecord(authoredConfig)) {
     return {
-      sourceConfig: sourceConfig as OpenClawConfig,
-      authoredConfig: authoredConfig as OpenClawConfig,
+      sourceConfig: sourceConfig as CarapaceConfig,
+      authoredConfig: authoredConfig as CarapaceConfig,
     };
   }
-  const authored = parsed as OpenClawConfig;
+  const authored = parsed as CarapaceConfig;
   return {
     sourceConfig: options?.configPath
       ? resolvePreUpdateSourceConfigFromAuthored(authored, options.configPath)
@@ -387,9 +387,9 @@ function normalizePreUpdateConfigRestoreInput(
 }
 
 function resolvePreUpdateSourceConfigFromAuthored(
-  authoredConfig: OpenClawConfig,
+  authoredConfig: CarapaceConfig,
   configPath: string,
-): OpenClawConfig {
+): CarapaceConfig {
   try {
     const withIncludes = resolveConfigIncludes(authoredConfig, configPath, undefined, {
       allowedRoots: resolveIncludeRoots(process.env),
@@ -397,7 +397,7 @@ function resolvePreUpdateSourceConfigFromAuthored(
     const resolved = resolveConfigEnvVars(withIncludes, process.env, {
       onMissing: () => undefined,
     });
-    return isRecord(resolved) ? (resolved as OpenClawConfig) : authoredConfig;
+    return isRecord(resolved) ? (resolved as CarapaceConfig) : authoredConfig;
   } catch {
     return authoredConfig;
   }

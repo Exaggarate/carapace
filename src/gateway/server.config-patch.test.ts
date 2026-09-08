@@ -18,7 +18,7 @@ import {
 } from "../secrets/runtime.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { deleteTestEnvValue, withEnvAsync } from "../test-utils/env.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { GatewayClient, GatewayClientRequestError } from "./client.js";
 import { invalidateConfigGetResponseCache } from "./config-get-response.js";
@@ -27,7 +27,7 @@ import { startGatewayServerCore } from "./server-start.js";
 const CONFIG_SECRETREF_RPC_TIMEOUT_MS = 20_000;
 const GATEWAY_TOKEN = "config-rpc-synthetic-token";
 
-let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
 let server: Awaited<ReturnType<typeof startGatewayServerCore>> | undefined;
 let client: GatewayClient | undefined;
 let rateLimitEpochMs = Date.now();
@@ -72,20 +72,20 @@ function requireConfigObject(value: unknown, label: string): Record<string, unkn
 }
 
 async function startConfigRpcGateway() {
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "config-rpc",
     env: {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve(import.meta.dirname, "../../dist/extensions"),
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve(import.meta.dirname, "../../dist/extensions"),
     },
   });
   setLoggerOverride({ level: "silent", consoleLevel: "silent" });
@@ -401,7 +401,7 @@ describe("gateway config methods", () => {
   });
 
   it("rejects config.set when SecretRef resolution fails", async () => {
-    const missingEnvVar = `OPENCLAW_MISSING_SECRETREF_${Date.now()}`;
+    const missingEnvVar = `CARAPACE_MISSING_SECRETREF_${Date.now()}`;
     deleteTestEnvValue(missingEnvVar);
     const current = await getCurrentConfigObject();
     const nextConfig = configWithGatewayTokenSecretRef(current.config, missingEnvVar);
@@ -581,7 +581,7 @@ describe("gateway config methods", () => {
           expect(res.error?.code).toBe("INVALID_REQUEST");
           expect(res.error?.message ?? "").toContain("worker");
           expect(res.error?.message ?? "").toContain("agents.delete RPC");
-          expect(res.error?.message ?? "").toContain("openclaw agents delete");
+          expect(res.error?.message ?? "").toContain("carapace agents delete");
         }
       } finally {
         await restoreConfigFileForTest(original);
@@ -681,7 +681,7 @@ describe("gateway config methods", () => {
         models: {
           providers: {
             openai: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
           },
         },
@@ -727,7 +727,7 @@ describe("gateway config methods", () => {
         models: {
           providers: {
             openai: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
             },
           },
         },
@@ -764,7 +764,7 @@ describe("gateway config methods", () => {
         models: {
           providers: {
             openai: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               models: [],
             },
           },
@@ -800,8 +800,8 @@ describe("gateway config methods", () => {
     async (authoredCompat) => {
       await withEnvAsync(
         {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve(import.meta.dirname, "../../dist/extensions"),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve(import.meta.dirname, "../../dist/extensions"),
         },
         async () => {
           const configIo = await import("../config/io.js");
@@ -882,13 +882,13 @@ describe("gateway config methods", () => {
         };
       }>(requireClient(), "config.get", {});
       expect(after.ok).toBe(true);
-      expect(after.payload?.config?.browser?.cdpUrl).toBe("__OPENCLAW_REDACTED__");
+      expect(after.payload?.config?.browser?.cdpUrl).toBe("__CARAPACE_REDACTED__");
       expect(after.payload?.config?.browser?.profiles?.remote?.cdpUrl).toBe(
-        "__OPENCLAW_REDACTED__",
+        "__CARAPACE_REDACTED__",
       );
       expect(after.payload?.config?.browser?.profiles?.local?.cdpUrl).toBe("ws://127.0.0.1:9222");
       if (typeof after.payload?.raw === "string") {
-        expect(after.payload.raw).toContain("__OPENCLAW_REDACTED__");
+        expect(after.payload.raw).toContain("__CARAPACE_REDACTED__");
         expect(after.payload.raw).not.toContain("supersecret123");
         expect(after.payload.raw).not.toContain("user:pass@");
         expect(after.payload.raw).not.toContain("profile-secret");
@@ -991,7 +991,7 @@ describe("gateway config methods", () => {
   });
 
   it("does not reject config.set for unresolved auth-profile refs outside submitted config", async () => {
-    const missingEnvVar = `OPENCLAW_MISSING_AUTH_PROFILE_REF_${Date.now()}`;
+    const missingEnvVar = `CARAPACE_MISSING_AUTH_PROFILE_REF_${Date.now()}`;
     await writeUnresolvedAuthProfileTokenRef(missingEnvVar);
 
     const current = await getCurrentConfigObject();
@@ -1091,7 +1091,7 @@ describe("gateway config methods", () => {
 
   it("acknowledges sandbox config only after the runtime snapshot applies it", async () => {
     const original = await getCurrentConfigObject();
-    const image = `openclaw-settlement-${rateLimitEpochMs}:test`;
+    const image = `carapace-settlement-${rateLimitEpochMs}:test`;
 
     try {
       const res = await rpcReq<{ ok?: boolean }>(requireClient(), "config.patch", {
@@ -1492,7 +1492,7 @@ describe("gateway config methods", () => {
   });
 
   it("rejects config.patch when merged SecretRefs cannot resolve", async () => {
-    const missingEnvVar = `OPENCLAW_MISSING_SECRETREF_PATCH_${Date.now()}`;
+    const missingEnvVar = `CARAPACE_MISSING_SECRETREF_PATCH_${Date.now()}`;
     deleteTestEnvValue(missingEnvVar);
     const beforeHash = await getConfigHash();
     const res = await rpcReq<{ ok?: boolean; error?: { message?: string } }>(
@@ -1526,7 +1526,7 @@ describe("gateway config.apply", () => {
   installConfigWriteGatewayHooks();
 
   it("rejects config.apply when SecretRef resolution fails", async () => {
-    const missingEnvVar = `OPENCLAW_MISSING_SECRETREF_APPLY_${Date.now()}`;
+    const missingEnvVar = `CARAPACE_MISSING_SECRETREF_APPLY_${Date.now()}`;
     deleteTestEnvValue(missingEnvVar);
     const current = await getCurrentConfigObject();
     const nextConfig = configWithGatewayTokenSecretRef(current.config, missingEnvVar);
@@ -1548,7 +1548,7 @@ describe("gateway config.apply", () => {
   });
 
   it("does not reject config.apply for unresolved auth-profile refs outside submitted config", async () => {
-    const missingEnvVar = `OPENCLAW_MISSING_AUTH_PROFILE_REF_APPLY_${Date.now()}`;
+    const missingEnvVar = `CARAPACE_MISSING_AUTH_PROFILE_REF_APPLY_${Date.now()}`;
     await writeUnresolvedAuthProfileTokenRef(missingEnvVar);
 
     const current = await getCurrentConfigObject();

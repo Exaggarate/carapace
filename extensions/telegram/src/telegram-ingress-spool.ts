@@ -1,9 +1,9 @@
 // Telegram plugin module implements durable ingress enqueue + update_id mapping.
 import os from "node:os";
 import path from "node:path";
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
-import { computeBackoff, type BackoffPolicy } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
+import { computeBackoff, type BackoffPolicy } from "carapace/plugin-sdk/runtime-env";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import { getTelegramRuntime } from "./runtime.js";
 import { normalizeTelegramStateAccountId } from "./state-account-id.js";
 import type { TelegramSpooledUpdatePayload } from "./telegram-ingress-spool.payload.js";

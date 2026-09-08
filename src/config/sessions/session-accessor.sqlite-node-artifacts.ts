@@ -1,11 +1,11 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { ensureOpenClawAgentProgressCardSchemaInTransaction } from "../../state/openclaw-agent-progress-card-schema.js";
-import { ensureSessionParticipantsSchema } from "../../state/openclaw-agent-session-participants-schema.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { ensureCarapaceAgentProgressCardSchemaInTransaction } from "../../state/carapace-agent-progress-card-schema.js";
+import { ensureSessionParticipantsSchema } from "../../state/carapace-agent-session-participants-schema.js";
 import {
   copySessionPendingInputsForRepair,
   deleteSessionPendingInputs,
@@ -15,7 +15,7 @@ import { mergeParticipantAggregate } from "./session-participant-identity.js";
 import { normalizeStoreSessionKey } from "./store-entry.js";
 
 export function clearSessionCollaborationForKey(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   options: { clearSuggestions?: boolean } = {},
 ): void {
@@ -37,8 +37,8 @@ export function clearSessionCollaborationForKey(
 
 /** Copy logical-session artifacts into their canonical node within one agent store or across two. */
 export function copySessionNodeArtifactsForRepair(
-  source: OpenClawAgentDatabase,
-  destination: OpenClawAgentDatabase,
+  source: CarapaceAgentDatabase,
+  destination: CarapaceAgentDatabase,
   sourceKeys: readonly string[],
   canonicalKey: string,
   options: { includeMembers?: boolean; includeParticipants?: boolean } = {},
@@ -68,7 +68,7 @@ export function copySessionNodeArtifactsForRepair(
     ).rows;
     // Keep destination storage dormant unless an owned row actually needs transfer.
     if (progressCards.length > 0 && !destinationTables.has("session_progress_cards")) {
-      ensureOpenClawAgentProgressCardSchemaInTransaction(destination.db);
+      ensureCarapaceAgentProgressCardSchemaInTransaction(destination.db);
       destinationTables = readSessionNodeArtifactTables(destination);
     }
     for (const progressCard of progressCards) {
@@ -278,7 +278,7 @@ export function copySessionNodeArtifactsForRepair(
 
 /** Membership is authorization state; canonical repair replaces it from the selected winner. */
 export function deleteSessionMembersForRepair(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
 ): void {
   if (!readSessionNodeArtifactTables(database).has("session_members")) {
@@ -292,7 +292,7 @@ export function deleteSessionMembersForRepair(
 }
 
 export function deleteSessionDeliveryArtifacts(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   additionalKeys: readonly string[] = [],
 ): void {
@@ -322,7 +322,7 @@ export function deleteSessionDeliveryArtifacts(
 }
 
 export function deleteSessionNodeArtifacts(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
 ): void {
   deleteSessionPendingInputs(database, sessionKey);
@@ -351,7 +351,7 @@ export function deleteSessionNodeArtifacts(
   clearSessionCollaborationForKey(database, sessionKey);
 }
 
-function readSessionNodeArtifactTables(database: OpenClawAgentDatabase): Set<string> {
+function readSessionNodeArtifactTables(database: CarapaceAgentDatabase): Set<string> {
   const db = getSessionKysely(database.db);
   return new Set(
     executeSqliteQuerySync(

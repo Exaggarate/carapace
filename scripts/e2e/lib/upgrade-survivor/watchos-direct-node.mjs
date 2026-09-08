@@ -5,7 +5,7 @@ import fs from "node:fs";
 import { parseArgs } from "node:util";
 
 const WATCH_CLIENT = Object.freeze({
-  id: "openclaw-watchos",
+  id: "carapace-watchos",
   displayName: "Upgrade Survivor Watch",
   version: "2026.8.10",
   platform: "watchOS 11.5.0",

@@ -2,13 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../../src/state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+} from "../../src/state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../../src/state/carapace-state-db.js";
 import { captureFullEnv, withEnvAsync } from "../../src/test-utils/env.js";
 import { setupAuthTestEnv } from "./auth-wizard.js";
 
@@ -23,9 +23,9 @@ describe("setupAuthTestEnv", () => {
     try {
       expect(fixture.agentDir).toBe(path.join(fixture.stateDir, agentSubdir ?? "agent"));
       expect((await fs.stat(fixture.agentDir)).isDirectory()).toBe(true);
-      expect(process.env.OPENCLAW_AGENT_DIR).toBe(fixture.agentDir);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(fixture.stateDir);
-      expect(process.env.OPENCLAW_CONFIG_PATH).toBe(path.join(fixture.stateDir, "openclaw.json"));
+      expect(process.env.CARAPACE_AGENT_DIR).toBe(fixture.agentDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(fixture.stateDir);
+      expect(process.env.CARAPACE_CONFIG_PATH).toBe(path.join(fixture.stateDir, "carapace.json"));
       expect(process.env.HOME).toBe(previousEnv.HOME);
       await fixture.cleanup();
       expect(process.env).toEqual(previousEnv);
@@ -46,7 +46,7 @@ describe("setupAuthTestEnv", () => {
     async (prior) => {
       await withEnvAsync(
         {
-          OPENCLAW_AGENT_DIR:
+          CARAPACE_AGENT_DIR:
             prior === "set" ? path.join(process.env.HOME!, "prior-agent") : undefined,
         },
         async () => {
@@ -54,21 +54,21 @@ describe("setupAuthTestEnv", () => {
           const snapshot = captureFullEnv();
           const failure = new Error("agent mkdir failed");
           let root: string | undefined;
-          let shared: ReturnType<typeof openOpenClawStateDatabase> | undefined;
-          let agent: ReturnType<typeof openOpenClawAgentDatabase> | undefined;
+          let shared: ReturnType<typeof openCarapaceStateDatabase> | undefined;
+          let agent: ReturnType<typeof openCarapaceAgentDatabase> | undefined;
           const mkdir = fs.mkdir;
           const mkdirSpy = vi.spyOn(fs, "mkdir").mockImplementation(async (...args) => {
             if (
               typeof args[0] === "string" &&
-              args[0] === process.env.OPENCLAW_AGENT_DIR &&
+              args[0] === process.env.CARAPACE_AGENT_DIR &&
               path.basename(args[0]) === "faulting-agent"
             ) {
               const stateDir = path.dirname(args[0]);
               root = path.dirname(stateDir);
               expect((await fs.stat(stateDir)).isDirectory()).toBe(true);
-              const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-              shared = openOpenClawStateDatabase({ env });
-              agent = openOpenClawAgentDatabase({ agentId: "main", env });
+              const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+              shared = openCarapaceStateDatabase({ env });
+              agent = openCarapaceAgentDatabase({ agentId: "main", env });
               throw failure;
             }
             return mkdir(...args);
@@ -86,10 +86,10 @@ describe("setupAuthTestEnv", () => {
             mkdirSpy.mockRestore();
             try {
               if (agent) {
-                closeOpenClawAgentDatabaseByPath(agent.path);
+                closeCarapaceAgentDatabaseByPath(agent.path);
               }
               if (shared) {
-                closeOpenClawStateDatabaseByPath(shared.path);
+                closeCarapaceStateDatabaseByPath(shared.path);
               }
             } finally {
               snapshot.restore();

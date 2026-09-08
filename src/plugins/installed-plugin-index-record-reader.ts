@@ -1,7 +1,7 @@
 /** Reads installed-index records back into manifest registry records. */
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   copyPluginInstallRecordMap,
   createPluginInstallRecordMap,
@@ -68,16 +68,16 @@ function readStringRecord(value: unknown): Record<string, string> {
 }
 
 function hasPackagePluginMetadata(manifest: Record<string, unknown>): boolean {
-  const openclaw = manifest.openclaw;
-  if (!isRecord(openclaw)) {
+  const carapace = manifest.carapace;
+  if (!isRecord(carapace)) {
     return false;
   }
-  const extensions = openclaw.extensions;
+  const extensions = carapace.extensions;
   return Array.isArray(extensions) && extensions.some((entry) => typeof entry === "string");
 }
 
 function readManifestPluginId(packageDir: string): string | undefined {
-  const manifest = readJsonObjectFileSync(path.join(packageDir, "openclaw.plugin.json"));
+  const manifest = readJsonObjectFileSync(path.join(packageDir, "carapace.plugin.json"));
   const id = typeof manifest?.id === "string" ? manifest.id.trim() : "";
   return id || undefined;
 }
@@ -115,7 +115,7 @@ function readManagedNpmInstallTimestampMs(params: {
   projectRoot: string;
   sharedLegacyRoot: boolean;
 }): number {
-  // Isolated flat/generation roots have an OpenClaw-owned project manifest that
+  // Isolated flat/generation roots have an Carapace-owned project manifest that
   // is rewritten during install. The legacy root is shared, so only its
   // package-local directory mtime can represent this plugin's install.
   const timestampPaths = params.sharedLegacyRoot
@@ -238,10 +238,10 @@ function emitManagedNpmRecoveryFallbackWarning(params: {
   candidates: readonly RecoveredManagedNpmInstallCandidate[];
 }): void {
   process.emitWarning(
-    `Managed npm recovery found ${params.candidates.length} installs for plugin "${params.pluginId}" without an authoritative active path; selected the most recently installed candidate. Run \`openclaw doctor --fix\` to persist and retire stale generations.`,
+    `Managed npm recovery found ${params.candidates.length} installs for plugin "${params.pluginId}" without an authoritative active path; selected the most recently installed candidate. Run \`carapace doctor --fix\` to persist and retire stale generations.`,
     {
-      code: "OPENCLAW_PLUGIN_INSTALL_RECOVERY_FALLBACK",
-      type: "OpenClawPluginRecoveryWarning",
+      code: "CARAPACE_PLUGIN_INSTALL_RECOVERY_FALLBACK",
+      type: "CarapacePluginRecoveryWarning",
       detail: JSON.stringify({
         pluginId: params.pluginId,
         selectedInstallPath: params.selected.installRecord.installPath,
@@ -475,7 +475,7 @@ function requireLoadablePluginInstallRecordState(
   const state = inspectPersistedInstalledPluginIndexInstallRecordsSync(options);
   if (state.status === "invalid") {
     throw new Error(
-      "Persisted plugin install records are invalid. Run openclaw doctor to inspect and repair plugin installation state.",
+      "Persisted plugin install records are invalid. Run carapace doctor to inspect and repair plugin installation state.",
     );
   }
   return state.status === "valid" ? state.records : null;

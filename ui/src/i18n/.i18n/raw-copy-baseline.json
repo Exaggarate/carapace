@@ -125,14 +125,14 @@
       "kind": "html-attribute",
       "name": "aria-label",
       "path": "ui/src/components/app-topbar.ts",
-      "text": "OpenClaw"
+      "text": "Carapace"
     },
     {
       "count": 1,
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/components/app-topbar.ts",
-      "text": "OpenClaw"
+      "text": "Carapace"
     },
     {
       "count": 1,
@@ -216,7 +216,7 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/components/login-gate.ts",
-      "text": "OpenClaw"
+      "text": "Carapace"
     },
     {
       "count": 1,
@@ -342,35 +342,35 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/config/mcp.ts",
-      "text": "openclaw mcp doctor --probe"
+      "text": "carapace mcp doctor --probe"
     },
     {
       "count": 1,
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/config/mcp.ts",
-      "text": "openclaw mcp login &lt;name&gt;"
+      "text": "carapace mcp login &lt;name&gt;"
     },
     {
       "count": 1,
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/config/mcp.ts",
-      "text": "openclaw mcp reload"
+      "text": "carapace mcp reload"
     },
     {
       "count": 1,
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/config/mcp.ts",
-      "text": "openclaw mcp status --verbose"
+      "text": "carapace mcp status --verbose"
     },
     {
       "count": 1,
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/config/updates.ts",
-      "text": "openclaw triage"
+      "text": "carapace triage"
     },
     {
       "count": 1,
@@ -419,7 +419,7 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/debug/view.ts",
-      "text": "openclaw security audit --deep"
+      "text": "carapace security audit --deep"
     },
     {
       "count": 1,
@@ -440,7 +440,7 @@
       "kind": "html-text",
       "name": "text",
       "path": "ui/src/pages/profile/profile-hero.ts",
-      "text": "OpenClaw"
+      "text": "Carapace"
     },
     {
       "count": 1,

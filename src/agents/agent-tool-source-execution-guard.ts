@@ -5,7 +5,7 @@ import type { AnyAgentTool } from "./agent-tools.types.js";
 import { getGatewayToolCallerIdentity } from "./tools/gateway-caller-context.js";
 
 const executionBudgetContext = resolveGlobalSingleton(
-  Symbol.for("openclaw.agentToolExecutionBudgetContext"),
+  Symbol.for("carapace.agentToolExecutionBudgetContext"),
   () => new AsyncLocalStorage<{ admit: () => void; assertCurrent: () => void }>(),
 );
 

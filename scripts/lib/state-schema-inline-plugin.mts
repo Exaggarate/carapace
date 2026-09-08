@@ -1,18 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export const STATE_SCHEMA_INLINE_PLUGIN_NAME = "openclaw:inline-state-schemas";
+export const STATE_SCHEMA_INLINE_PLUGIN_NAME = "carapace:inline-state-schemas";
 
 const STATE_SCHEMA_MODULES = [
   {
-    modulePath: "src/state/openclaw-state-schema.ts",
-    schemaPath: "src/state/openclaw-state-schema.sql",
-    exportName: "OPENCLAW_STATE_SCHEMA_SQL",
+    modulePath: "src/state/carapace-state-schema.ts",
+    schemaPath: "src/state/carapace-state-schema.sql",
+    exportName: "CARAPACE_STATE_SCHEMA_SQL",
   },
   {
-    modulePath: "src/state/openclaw-agent-schema.ts",
-    schemaPath: "src/state/openclaw-agent-schema.sql",
-    exportName: "OPENCLAW_AGENT_SCHEMA_SQL",
+    modulePath: "src/state/carapace-agent-schema.ts",
+    schemaPath: "src/state/carapace-agent-schema.sql",
+    exportName: "CARAPACE_AGENT_SCHEMA_SQL",
   },
 ] as const;
 

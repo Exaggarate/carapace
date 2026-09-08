@@ -3,11 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { resolvePluginArtifactDeclaredSurface } from "./capability-artifact.js";
 import { resolvePluginCapabilityConsent } from "./capability-consent.js";
 import { computeDeclaredSurfaceHash } from "./capability-summary.js";
@@ -19,7 +19,7 @@ import { resolveInstalledPluginIndexPolicyHash } from "./installed-plugin-index.
 import { withPluginLifecycleLease } from "./plugin-lifecycle-lease.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function runChild(scriptPath: string, args: string[]) {
@@ -92,7 +92,7 @@ describe("plugin install record commit rollback", () => {
   ])(
     "preserves consent at config commit (pending: $pendingRecords, legacy: $legacy)",
     async ({ pendingRecords, legacy }) => {
-      await withOpenClawTestState({ label: "plugin-consent-commit" }, async (state) => {
+      await withCarapaceTestState({ label: "plugin-consent-commit" }, async (state) => {
         const pluginId = "consent-commit";
         const installPath = state.statePath("extensions", pluginId);
         await fs.promises.mkdir(installPath, { recursive: true });
@@ -100,11 +100,11 @@ describe("plugin install record commit rollback", () => {
           path.join(installPath, "package.json"),
           JSON.stringify({
             name: "@example/consent-commit",
-            openclaw: { extensions: ["./index.cjs"] },
+            carapace: { extensions: ["./index.cjs"] },
           }),
         );
         await fs.promises.writeFile(path.join(installPath, "index.cjs"), "module.exports = {};");
-        const manifestPath = path.join(installPath, "openclaw.plugin.json");
+        const manifestPath = path.join(installPath, "carapace.plugin.json");
         const manifest = {
           id: pluginId,
           configSchema: { type: "object" },
@@ -198,7 +198,7 @@ describe("plugin install record commit rollback", () => {
   );
 
   it("serializes two failing direct config commits and restores the original index", async () => {
-    await withOpenClawTestState({ label: "plugin-record-failing-commits" }, async (state) => {
+    await withCarapaceTestState({ label: "plugin-record-failing-commits" }, async (state) => {
       const commitModuleUrl = pathToFileURL(
         path.resolve("src/plugins/install-record-commit.ts"),
       ).href;
@@ -209,7 +209,7 @@ describe("plugin install record commit rollback", () => {
           import { setTimeout as delay } from "node:timers/promises";
           import { commitConfigWriteWithPendingPluginInstalls } from ${JSON.stringify(commitModuleUrl)};
           const [stateDir, pluginId, enteredPath, releasePath] = process.argv.slice(2);
-          process.env.OPENCLAW_STATE_DIR = stateDir;
+          process.env.CARAPACE_STATE_DIR = stateDir;
           process.send?.("ready");
           process.disconnect?.();
           try {

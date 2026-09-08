@@ -2,18 +2,18 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { buildLegacyMigrationPreview } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import { buildLegacyMigrationPreview } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { describe, expect, it, vi } from "vitest";
 import { stateMigrations } from "../doctor-contract-api.js";
 import { detectWhatsAppLegacyStateMigrations } from "./state-migrations.js";
 
-vi.mock("openclaw/plugin-sdk/security-runtime", () => {
+vi.mock("carapace/plugin-sdk/security-runtime", () => {
   throw new Error("Doctor migration detection must not load the broad security runtime");
 });
 
 describe("WhatsApp legacy state migrations", () => {
   it("plans migration for every Baileys auth category while preserving other shared-root files", async () => {
-    const oauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-wa-legacy-migration-"));
+    const oauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-wa-legacy-migration-"));
     const authFiles = [
       "creds.json",
       "creds.json.bak",

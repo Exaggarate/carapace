@@ -187,7 +187,7 @@ function retain_${name}_heap_workload() {
 }
 it("retains the selected execution context", async () => {
   // Keep a real named allocation alive through the sampler's final GC and stop.
-  process[Symbol.for("openclaw.test.heap-workload.${name}")] = retain_${name}_heap_workload();
+  process[Symbol.for("carapace.test.heap-workload.${name}")] = retain_${name}_heap_workload();
   vi.resetModules();
   expect(inject("customSetupCount")).toBe(1);
   expect(isMainThread).toBe(${pool === "forks"});

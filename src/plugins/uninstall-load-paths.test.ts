@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   prepareConfigForDisabledPluginSet,
   recordPluginPackageUninstallPlan,
@@ -15,7 +15,7 @@ describe("plugin uninstall load-path lifecycle", () => {
   it.each(["package", "entry"])(
     "removes the owned %s alias before deletion and preserves later config edits",
     async (aliasTarget) => {
-      const root = await fs.realpath(tempDirs.make("openclaw-uninstall-alias-"));
+      const root = await fs.realpath(tempDirs.make("carapace-uninstall-alias-"));
       const sourcePath = path.join(root, "source");
       const extensionsDir = path.join(root, "extensions");
       const installPath = path.join(extensionsDir, "demo");
@@ -34,14 +34,14 @@ describe("plugin uninstall load-path lifecycle", () => {
         aliasPath,
         aliasTarget === "package" ? "dir" : "file",
       );
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           entries: { demo: { enabled: true, config: { retainedUntilRemoval: true } } },
           installs: { demo: { source: "path", sourcePath, installPath } },
           load: { paths: [aliasPath, unrelatedPath] },
         },
       };
-      const planFor = (currentConfig: OpenClawConfig) =>
+      const planFor = (currentConfig: CarapaceConfig) =>
         planPluginUninstall(
           recordPluginPackageUninstallPlan(
             { config: currentConfig, pluginId: "demo", channelIds: [], extensionsDir },
@@ -69,7 +69,7 @@ describe("plugin uninstall load-path lifecycle", () => {
         },
       );
       await expect(fs.realpath(aliasPath)).rejects.toMatchObject({ code: "ENOENT" });
-      const concurrentConfig: OpenClawConfig = {
+      const concurrentConfig: CarapaceConfig = {
         ...disabled,
         logging: { level: "debug" },
         plugins: {

@@ -10,7 +10,7 @@ import {
   scheduleStaleChunkReload,
 } from "./stale-chunk-reload.ts";
 
-const GUARD_KEY = "openclaw.controlUi.staleChunkReloadBuildId";
+const GUARD_KEY = "carapace.controlUi.staleChunkReloadBuildId";
 const PROBE_TIMEOUT_MS = 3_000;
 
 type Deferred<T> = {

@@ -22,7 +22,7 @@ function canvasPreview(viewId: string) {
     render: "url",
     viewId,
     title: `Preview ${viewId}`,
-    url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+    url: `/__carapace__/canvas/documents/${viewId}/index.html`,
     preferredHeight: 120,
     sandbox: "scripts",
   };
@@ -39,7 +39,7 @@ function canvasToolResult(viewId: string, toolCallId: string, timestamp: number)
       view: {
         backend: "canvas",
         id: viewId,
-        url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+        url: `/__carapace__/canvas/documents/${viewId}/index.html`,
       },
       presentation: {
         target: "assistant_message",
@@ -58,7 +58,7 @@ function canvasBlock(viewId: string) {
 suite.define(() => {
   const canvasView = useCanvasSandboxFixture();
   it("renders each persisted Canvas view once after reload", async () => {
-    const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-canvas-history-stability", artifactRoot)
       : undefined;
@@ -158,7 +158,7 @@ suite.define(() => {
   });
 
   it("keeps multiple live replies after their delayed prompt before history catches up", async () => {
-    const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-live-final-order", artifactRoot)
       : undefined;
@@ -217,7 +217,7 @@ suite.define(() => {
           message: {
             role,
             content: [{ type: "text", text }],
-            __openclaw: { id, seq, idempotencyKey },
+            __carapace: { id, seq, idempotencyKey },
             timestamp: Date.now(),
           },
           messageId: id,
@@ -267,19 +267,19 @@ suite.define(() => {
     const currentFinal = "The control layer failed before the retry.";
     const durableMessages = [
       {
-        __openclaw: { id: "previous-user", seq: 369 },
+        __carapace: { id: "previous-user", seq: 369 },
         content: [{ text: previousPrompt, type: "text" }],
         role: "user",
         timestamp: Date.now(),
       },
       {
-        __openclaw: { id: "current-user", seq: 371 },
+        __carapace: { id: "current-user", seq: 371 },
         content: [{ text: currentPrompt, type: "text" }],
         role: "user",
         timestamp: Date.now(),
       },
       {
-        __openclaw: { id: "current-final", runId: currentRunId, seq: 372 },
+        __carapace: { id: "current-final", runId: currentRunId, seq: 372 },
         content: [{ text: currentFinal, type: "text" }],
         role: "assistant",
         timestamp: Date.now(),
@@ -381,7 +381,7 @@ suite.define(() => {
         )
         .toBe(true);
 
-      const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-live-final-order", artifactRoot)
         : undefined;

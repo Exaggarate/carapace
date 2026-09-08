@@ -1,5 +1,5 @@
-// OpenClaw Gateway client facade.
-// Injects OpenClaw host dependencies into the shared gateway-client package.
+// Carapace Gateway client facade.
+// Injects Carapace host dependencies into the shared gateway-client package.
 import { GatewayClient as BaseGatewayClient } from "../../packages/gateway-client/src/index.js";
 import type {
   GatewayClientConnectionMetadata,
@@ -54,7 +54,7 @@ export type GatewayClientOptions = BaseGatewayClientOptions & {
   preparedDeviceAuth?: DeviceAuthEntry;
 };
 
-function createOpenClawGatewayClientHostDeps(
+function createCarapaceGatewayClientHostDeps(
   overrides?: GatewayClientHostDeps,
   deviceAuthScope?: string,
   suppressOriginDeviceAuth = false,
@@ -110,7 +110,7 @@ function createOpenClawGatewayClientHostDeps(
     ? { ...deviceAuthDeps, loadDeviceAuthToken: () => preparedDeviceAuth }
     : deviceAuthDeps;
   return {
-    // This wrapper is the only place the package reaches into OpenClaw runtime
+    // This wrapper is the only place the package reaches into Carapace runtime
     // state. Keep device identity, token storage, proxy, and redaction here.
     loadOrCreateDeviceIdentity,
     signDevicePayload,
@@ -152,7 +152,7 @@ export class GatewayClient {
       deviceFamily:
         baseOptions.deviceFamily ??
         (baseOptions.platform === undefined ? runtimeIdentity.deviceFamily : undefined),
-      hostDeps: createOpenClawGatewayClientHostDeps(
+      hostDeps: createCarapaceGatewayClientHostDeps(
         baseOptions.hostDeps,
         deviceAuthScope,
         suppressOriginDeviceAuth,

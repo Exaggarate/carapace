@@ -5,7 +5,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../src/config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { diffGatewayReloadPaths } from "../src/gateway/config-diff.js";
 import {
   buildGatewayReloadPlan,
@@ -24,7 +24,7 @@ import {
   getActiveGatewayRootWorkCount,
   tryBeginGatewayRootWorkAdmission,
 } from "../src/process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../src/state/carapace-state-db.js";
 import { loadBundledPluginFacade } from "../src/test-utils/bundled-plugin-public-surface.js";
 import { createTestRegistry } from "../src/test-utils/channel-plugins.js";
 import { createTempDirTracker } from "./helpers/temp-dir.js";
@@ -35,16 +35,16 @@ let registrySnapshot: ReturnType<typeof captureActivePluginRegistrySnapshot>;
 beforeEach(() => {
   registrySnapshot = captureActivePluginRegistrySnapshot();
   const stateDir = tempDirs.make("discord-live-policy-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
-  vi.stubEnv("OPENCLAW_SKIP_CHANNELS", undefined);
-  vi.stubEnv("OPENCLAW_SKIP_PROVIDERS", undefined);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
+  vi.stubEnv("CARAPACE_SKIP_CHANNELS", undefined);
+  vi.stubEnv("CARAPACE_SKIP_PROVIDERS", undefined);
 });
 
 afterEach(() => {
   clearRuntimeConfigSnapshot();
   restoreActivePluginRegistrySnapshot(registrySnapshot);
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   tempDirs.cleanup();
 });
@@ -67,7 +67,7 @@ describe("Discord admission through Gateway policy publication", () => {
       pluginId: "discord",
       artifactBasename: "api.js",
     });
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { discord: { token: "synthetic-token", groupPolicy: "allowlist", guilds: {} } },
       messages: { inbound: { debounceMs: 0 } },
     };
@@ -214,7 +214,7 @@ describe("Discord admission through Gateway policy publication", () => {
     });
     let pendingReload: Promise<unknown> | undefined;
     let committed = cfg;
-    const apply = async (next: OpenClawConfig) => {
+    const apply = async (next: CarapaceConfig) => {
       const paths = diffGatewayReloadPaths(committed, next, listConfigReloadRefinementPrefixes());
       const plan = buildGatewayReloadPlan(paths, {
         previousConfig: committed,

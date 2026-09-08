@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SessionManager } from "../agents/sessions/session-manager.js";
 import {
@@ -14,9 +14,9 @@ import {
 } from "../config/sessions/session-accessor.js";
 import type { AssistantMessage } from "../llm/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   readUsageCostRollups,
   refreshCostUsageCacheForAgent,
@@ -90,7 +90,7 @@ function serialize(manager: SessionManager): string {
 }
 
 async function writeArchive(params: {
-  state: OpenClawTestState;
+  state: CarapaceTestState;
   manager: SessionManager;
   encoding: Encoding;
   reason?: "reset" | "deleted";
@@ -126,10 +126,10 @@ async function cachedTotal(agentId: string) {
 }
 
 describe("usage archive identity", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "usage-archive-identity" });
+    state = await createCarapaceTestState({ label: "usage-archive-identity" });
     await state.writeConfig(config);
   });
 

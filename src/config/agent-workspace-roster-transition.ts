@@ -4,13 +4,13 @@ import {
   toAgentEntriesRecord,
 } from "../agents/agent-scope-config.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 export function pinSurvivorWorkspaceForRosterCollapse(
-  sourceConfig: OpenClawConfig,
-  targetConfig: OpenClawConfig,
+  sourceConfig: CarapaceConfig,
+  targetConfig: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
-): { config: OpenClawConfig; insertedPaths: string[][] } {
+): { config: CarapaceConfig; insertedPaths: string[][] } {
   const sourceEntries = listAgentEntries(sourceConfig);
   const targetEntries = listAgentEntries(targetConfig);
   if (sourceEntries.length <= 1 || targetEntries.length !== 1) {

@@ -2,8 +2,8 @@ import nativeFs from "node:fs";
 import fs from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
 import {
   configureMemoryCoreDreamingStateForTests,
@@ -21,7 +21,7 @@ describe.skipIf(process.platform !== "linux")("memory watch capacity", () => {
   ])(
     "keeps later searches fresh after $failurePoint watch $code without per-file watches",
     async ({ failurePoint, code }) => {
-      const state = await createOpenClawTestState({ label: "memory-watch-capacity" });
+      const state = await createCarapaceTestState({ label: "memory-watch-capacity" });
       const memoryDir = path.join(state.workspaceDir, "memory");
       const nestedDir = path.join(memoryDir, "nested");
       const failurePath =
@@ -52,7 +52,7 @@ describe.skipIf(process.platform !== "linux")("memory watch capacity", () => {
         await configureMemoryCoreDreamingStateForTests(state.env);
         await fs.mkdir(nestedDir, { recursive: true });
         await fs.writeFile(path.join(memoryDir, "baseline.md"), "Amber lantern baseline.");
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           plugins: { enabled: false },
           agents: { defaults: { workspace: state.workspaceDir }, entries: { main: {} } },
           memory: {

@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { createWorkboardLifecycleService } from "./lifecycle-sync.js";
 import type { PersistedWorkboardCard, WorkboardKeyedStore } from "./persistence-types.js";

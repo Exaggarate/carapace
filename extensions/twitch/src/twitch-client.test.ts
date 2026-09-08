@@ -9,9 +9,9 @@
  * - Error handling and edge cases
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveTwitchToken } from "./token.js";
 import { TwitchClientManager } from "./twitch-client.js";
@@ -503,7 +503,7 @@ describe("TwitchClientManager", () => {
         cfg: { channels: { twitch: { ...testAccount, accessToken: "" } } },
         accountId: undefined,
         expected:
-          "Missing Twitch token for account default (set channels.twitch.accessToken or OPENCLAW_TWITCH_ACCESS_TOKEN for default)",
+          "Missing Twitch token for account default (set channels.twitch.accessToken or CARAPACE_TWITCH_ACCESS_TOKEN for default)",
       },
       {
         name: "multi-account default",
@@ -514,7 +514,7 @@ describe("TwitchClientManager", () => {
         },
         accountId: "default",
         expected:
-          "Missing Twitch token for account default (set channels.twitch.accounts.default.accessToken or OPENCLAW_TWITCH_ACCESS_TOKEN for default)",
+          "Missing Twitch token for account default (set channels.twitch.accounts.default.accessToken or CARAPACE_TWITCH_ACCESS_TOKEN for default)",
       },
       {
         name: "named account",
@@ -525,11 +525,11 @@ describe("TwitchClientManager", () => {
         },
         accountId: "stream-team",
         expected:
-          "Missing Twitch token for account stream-team (set channels.twitch.accounts.stream-team.accessToken or OPENCLAW_TWITCH_ACCESS_TOKEN for default)",
+          "Missing Twitch token for account stream-team (set channels.twitch.accounts.stream-team.accessToken or CARAPACE_TWITCH_ACCESS_TOKEN for default)",
       },
     ] satisfies Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       accountId: string | undefined;
       expected: string;
     }>)(

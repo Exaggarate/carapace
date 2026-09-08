@@ -1,8 +1,8 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
-import { jsonResult, readStringParam } from "openclaw/plugin-sdk/core";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
-import { asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { AgentToolResult } from "openclaw/plugin-sdk/tool-results";
+import type { WorkboardCard } from "@carapace/workboard-contract";
+import { jsonResult, readStringParam } from "carapace/plugin-sdk/core";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
+import { asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { AgentToolResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
 import { redactClaimToken } from "./card-redaction.js";
 import type { WorkboardStore } from "./store.js";

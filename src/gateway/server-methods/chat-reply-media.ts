@@ -1,6 +1,6 @@
 // Webchat reply media path normalizer for display-safe outbound payloads.
-import { isPassThroughRemoteMediaSource } from "@openclaw/media-core/media-source-url";
-import { isAudioFileName } from "@openclaw/media-core/mime";
+import { isPassThroughRemoteMediaSource } from "@carapace/media-core/media-source-url";
+import { isAudioFileName } from "@carapace/media-core/mime";
 import { resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
 import {
   copyReplyPayloadMetadata,
@@ -10,7 +10,7 @@ import {
   type ReplyPayload,
 } from "../../auto-reply/reply-payload.js";
 import { createReplyMediaPathNormalizer } from "../../auto-reply/reply/reply-media-paths.runtime.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSendableOutboundReplyParts } from "../../plugin-sdk/reply-payload.js";
 
 function isDataUrlMedia(mediaUrl: string): boolean {
@@ -33,7 +33,7 @@ function shouldPreserveDisplayMediaUrl(payload: ReplyPayload, mediaUrl: string):
 
 /** Normalize reply media paths for webchat display without leaking sensitive media. */
 export async function normalizeWebchatReplyMediaPathsForDisplay(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   workspaceDir?: string;

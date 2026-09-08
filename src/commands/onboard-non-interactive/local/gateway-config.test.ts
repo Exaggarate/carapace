@@ -1,6 +1,6 @@
 // Non-interactive gateway config tests cover port, bind, auth token, and SecretRef preservation behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { withEnv } from "../../../test-utils/env.js";
 import type { OnboardOptions } from "../../onboard-types.js";
 import { applyNonInteractiveGatewayConfig } from "./gateway-config.js";
@@ -32,30 +32,30 @@ const baseOpts = {} as OnboardOptions;
 const SAMPLE_SECRET_REF = {
   source: "env" as const,
   provider: "default",
-  id: "OPENCLAW_GATEWAY_TOKEN_REF",
+  id: "CARAPACE_GATEWAY_TOKEN_REF",
 };
 
-function createTokenConfig(token: unknown): OpenClawConfig {
+function createTokenConfig(token: unknown): CarapaceConfig {
   return {
     gateway: { auth: { mode: "token", token } },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 function applyGatewayConfig({
-  nextConfig = {} as OpenClawConfig,
+  nextConfig = {} as CarapaceConfig,
   opts = baseOpts,
   runtime = createRuntime(),
   env = {},
 }: {
-  nextConfig?: OpenClawConfig;
+  nextConfig?: CarapaceConfig;
   opts?: OnboardOptions;
   runtime?: ReturnType<typeof createRuntime>;
   env?: Record<string, string | undefined>;
 } = {}) {
   return withEnv(
     {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
       [SAMPLE_SECRET_REF.id]: undefined,
       ...env,
     },
@@ -86,14 +86,14 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
     expect(randomToken).not.toHaveBeenCalled();
   });
 
-  it("prefers existing plaintext token over ambient OPENCLAW_GATEWAY_TOKEN on re-onboard", () => {
-    // A stale shell/launchd OPENCLAW_GATEWAY_TOKEN must not rotate a
+  it("prefers existing plaintext token over ambient CARAPACE_GATEWAY_TOKEN on re-onboard", () => {
+    // A stale shell/launchd CARAPACE_GATEWAY_TOKEN must not rotate a
     // persisted token — that would break already-paired clients.
     const nextConfig = createTokenConfig("existing-user-token");
 
     const result = applyGatewayConfig({
       nextConfig,
-      env: { OPENCLAW_GATEWAY_TOKEN: "stale-env-token" },
+      env: { CARAPACE_GATEWAY_TOKEN: "stale-env-token" },
     });
 
     expect(result?.nextConfig.gateway?.auth?.token).toBe("existing-user-token");
@@ -150,7 +150,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
         gatewayPassword: "gateway-password-from-env",
         secretInputMode: "ref",
       },
-      env: { OPENCLAW_GATEWAY_PASSWORD: "gateway-password-from-env" },
+      env: { CARAPACE_GATEWAY_PASSWORD: "gateway-password-from-env" },
     });
 
     expect(result?.nextConfig.gateway?.auth).toMatchObject({
@@ -158,7 +158,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
       password: {
         source: "env",
         provider: "gatewayenv",
-        id: "OPENCLAW_GATEWAY_PASSWORD",
+        id: "CARAPACE_GATEWAY_PASSWORD",
       },
     });
   });
@@ -213,8 +213,8 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
     });
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN to fill an empty config on first-run", () => {
-    const result = applyGatewayConfig({ env: { OPENCLAW_GATEWAY_TOKEN: "env-token" } });
+  it("uses CARAPACE_GATEWAY_TOKEN to fill an empty config on first-run", () => {
+    const result = applyGatewayConfig({ env: { CARAPACE_GATEWAY_TOKEN: "env-token" } });
 
     expect(result?.nextConfig.gateway?.auth?.token).toBe("env-token");
     expect(randomToken).not.toHaveBeenCalled();
@@ -257,13 +257,13 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
     expect(randomToken).not.toHaveBeenCalled();
   });
 
-  it("preserves an existing SecretRef even when ambient OPENCLAW_GATEWAY_TOKEN is set", () => {
+  it("preserves an existing SecretRef even when ambient CARAPACE_GATEWAY_TOKEN is set", () => {
     // A stale ambient env must not declassify a configured SecretRef.
     const nextConfig = createTokenConfig(SAMPLE_SECRET_REF);
 
     const result = applyGatewayConfig({
       nextConfig,
-      env: { OPENCLAW_GATEWAY_TOKEN: "stale-env-token" },
+      env: { CARAPACE_GATEWAY_TOKEN: "stale-env-token" },
     });
 
     expect(result?.nextConfig.gateway?.auth?.token).toEqual(SAMPLE_SECRET_REF);
@@ -295,7 +295,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
   });
 
   it("overrides an existing SecretRef when --gateway-token-ref-env is provided", () => {
-    const newRefId = "OPENCLAW_GATEWAY_TOKEN_NEW_REF";
+    const newRefId = "CARAPACE_GATEWAY_TOKEN_NEW_REF";
     const nextConfig = createTokenConfig(SAMPLE_SECRET_REF);
 
     const result = applyGatewayConfig({
@@ -314,7 +314,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
   });
 
   it("selects token auth when --gateway-token-ref-env overrides password auth", () => {
-    const newRefId = "OPENCLAW_GATEWAY_TOKEN_NEW_REF";
+    const newRefId = "CARAPACE_GATEWAY_TOKEN_NEW_REF";
     const result = applyGatewayConfig({
       nextConfig: { gateway: { auth: { mode: "password", password: "test-password" } } },
       opts: { gatewayTokenRefEnv: newRefId } as OnboardOptions,
@@ -332,7 +332,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
   it("fails when --gateway-token-ref-env points to a missing env var", () => {
     const runtime = createRuntime();
     const message =
-      'Environment variable "MISSING_GATEWAY_TOKEN_ENV" is missing or empty. Export it first, then rerun openclaw onboard --non-interactive.';
+      'Environment variable "MISSING_GATEWAY_TOKEN_ENV" is missing or empty. Export it first, then rerun carapace onboard --non-interactive.';
 
     const result = applyGatewayConfig({
       opts: { gatewayTokenRefEnv: "MISSING_GATEWAY_TOKEN_ENV", json: true } as OnboardOptions,
@@ -364,7 +364,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
   it("preserves environment-backed password auth without persisting the password", () => {
     const result = applyGatewayConfig({
       nextConfig: { gateway: { auth: { mode: "password" } } },
-      env: { OPENCLAW_GATEWAY_PASSWORD: "environment-password" },
+      env: { CARAPACE_GATEWAY_PASSWORD: "environment-password" },
     });
 
     expect(result?.nextConfig.gateway?.auth).toEqual({ mode: "password" });
@@ -389,7 +389,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
     const runtime = createRuntime();
 
     const result = applyGatewayConfig({
-      nextConfig: { gateway: { customBindHost: "not-an-ip" } } as OpenClawConfig,
+      nextConfig: { gateway: { customBindHost: "not-an-ip" } } as CarapaceConfig,
       opts: { gatewayBind: "custom" } as OnboardOptions,
       runtime,
     });
@@ -403,7 +403,7 @@ describe("applyNonInteractiveGatewayConfig auth resolution", () => {
     const runtime = createRuntime();
 
     const result = applyGatewayConfig({
-      nextConfig: { gateway: { customBindHost: "192.168.1.100" } } as OpenClawConfig,
+      nextConfig: { gateway: { customBindHost: "192.168.1.100" } } as CarapaceConfig,
       opts: { gatewayBind: "custom" } as OnboardOptions,
       runtime,
     });

@@ -1,8 +1,8 @@
 // Elevenlabs tests cover tts plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { MAX_AUDIO_BYTES } from "openclaw/plugin-sdk/media-runtime";
-import { synthesizeElevenLabsLiveSpeech } from "openclaw/plugin-sdk/provider-test-contracts";
-import { resolveRequestUrl } from "openclaw/plugin-sdk/request-url";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { MAX_AUDIO_BYTES } from "carapace/plugin-sdk/media-runtime";
+import { synthesizeElevenLabsLiveSpeech } from "carapace/plugin-sdk/provider-test-contracts";
+import { resolveRequestUrl } from "carapace/plugin-sdk/request-url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createStreamingErrorResponse } from "../test-support/streaming-error-response.js";
 import { elevenLabsTTS, elevenLabsTTSStream } from "./tts.js";
@@ -339,7 +339,7 @@ describe("elevenlabs live audio helper error-path body release", () => {
 
     await expect(
       synthesizeElevenLabsLiveSpeech({
-        text: "OpenClaw leak check.",
+        text: "Carapace leak check.",
         apiKey: "x",
         outputFormat: "mp3_44100_128",
         timeoutMs: 1_000,

@@ -1,5 +1,5 @@
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import type { ChatInputReceipts } from "../../../../packages/gateway-protocol/src/schema/logs-chat.js";
 
 /** Exact custody is independent of display pagination, but stays physical-session scoped. */
@@ -49,7 +49,7 @@ export function findChatSubmissionMessage(
 
 export function nativeHistoryMessageIdentity(message: unknown): string | null {
   const record = asNullableRecord(message);
-  const metadata = asNullableRecord(record?.["__openclaw"]);
+  const metadata = asNullableRecord(record?.["__carapace"]);
   const seq = metadata?.seq;
   const id = metadata?.id ?? record?.messageId;
   const sourceIdentity =
@@ -62,7 +62,7 @@ export function nativeHistoryMessageIdentity(message: unknown): string | null {
     return null;
   }
   const { recordTimestampMs: _recordTimestampMs, ...projectionMetadata } = metadata ?? {};
-  const projection = metadata ? { ...record, __openclaw: projectionMetadata } : record;
+  const projection = metadata ? { ...record, __carapace: projectionMetadata } : record;
   try {
     // History alone adds recordTimestampMs; delivery metadata is not projection identity.
     // Keep every other projection byte so siblings from one transcript row stay distinct.

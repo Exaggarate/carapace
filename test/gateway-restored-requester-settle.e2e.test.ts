@@ -8,16 +8,16 @@ import {
   saveSubagentRegistryToSqlite,
 } from "../src/agents/subagents/registry/subagent-registry.store.sqlite.js";
 import type { SubagentRunRecord } from "../src/agents/subagents/registry/subagent-registry.types.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import type { SessionsListResult } from "../src/gateway/session-utils.types.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import type { Deferred } from "../src/shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../src/state/carapace-state-db.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 import { createDeferred } from "./helpers/promise.js";
 
 const TEST_TIMEOUT_MS = 180_000;
@@ -38,7 +38,7 @@ type HeldModelServer = {
   url: string;
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const modelServers: HeldModelServer[] = [];
 
 afterEach(async () => {
@@ -60,10 +60,10 @@ describe("Gateway restored requester settlement", () => {
       const cfg = createTestConfig(modelServer.url);
       cfg.agents!.defaults!.timeoutSeconds = 12;
       cfg.agents!.defaults!.subagents = { announceTimeoutMs };
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: `gateway-restored-deadline-${outcome.replaceAll(" ", "-")}`,
         config: cfg,
-        env: { OPENCLAW_SKIP_PROVIDERS: undefined, OPENCLAW_TEST_MINIMAL_GATEWAY: undefined },
+        env: { CARAPACE_SKIP_PROVIDERS: undefined, CARAPACE_TEST_MINIMAL_GATEWAY: undefined },
       });
       instances.push(instance);
       await seedRestoredRequesters(instance, 1);
@@ -148,7 +148,7 @@ describe("Gateway restored requester settlement", () => {
           expect(retained?.requesterSettleWake).toBeUndefined();
         }
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );
@@ -159,12 +159,12 @@ describe("Gateway restored requester settlement", () => {
     async () => {
       const modelServer = await startHeldModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "gateway-restored-requester-settle",
         config: createTestConfig(modelServer.url),
         env: {
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
@@ -198,7 +198,7 @@ describe("Gateway restored requester settlement", () => {
   );
 });
 
-async function seedRestoredRequesters(instance: OpenClawTestInstance, count: number) {
+async function seedRestoredRequesters(instance: CarapaceTestInstance, count: number) {
   instance.state.applyEnv();
   try {
     const endedAt = Date.now();
@@ -249,11 +249,11 @@ async function seedRestoredRequesters(instance: OpenClawTestInstance, count: num
   } finally {
     // Keep this one state lease through the Gateway run and retained-result reads;
     // instance.cleanup owns restoration after every process has stopped.
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): CarapaceConfig {
   return {
     plugins: { enabled: false },
     agents: {
@@ -261,7 +261,7 @@ function createTestConfig(baseUrl: string): OpenClawConfig {
         heartbeat: { every: "0m" },
         maxConcurrent: 8,
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
         skipBootstrap: true,
         skills: [],
       },

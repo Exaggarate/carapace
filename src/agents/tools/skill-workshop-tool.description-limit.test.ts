@@ -1,20 +1,20 @@
-import { validateToolArguments } from "openclaw/plugin-sdk/llm";
+import { validateToolArguments } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool } from "./skill-workshop-tool.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-description-state-",
+    prefix: "carapace-skill-workshop-description-state-",
   });
 });
 
@@ -25,9 +25,9 @@ afterEach(async () => {
 
 describe("skill_workshop description validation", () => {
   it("lets the proposal service explain overlong descriptions", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-description-limit-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-description-limit-");
     const tool = createSkillWorkshopTool({
-      config: {} satisfies OpenClawConfig,
+      config: {} satisfies CarapaceConfig,
       workspaceDir,
       agentId: "main",
       env: testState.env,

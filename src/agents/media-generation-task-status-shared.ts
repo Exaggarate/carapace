@@ -1,16 +1,16 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 /**
  * Shared media generation task status and duplicate-guard helpers.
  *
  * Image/video task modules use this to track recent starts, find active
  * background tasks, and build consistent user/prompt status messages.
  */
-import { resolveNonNegativeIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveNonNegativeIntegerOption } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { getRuntimeConfig } from "../config/config.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { listFreshTasksForOwnerKey } from "../tasks/runtime-internal.js";
@@ -318,7 +318,7 @@ function resetRecentMediaGenerationDuplicateGuardsForTests() {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.mediaGenerationDuplicateGuardTestApi")
+    Symbol.for("carapace.mediaGenerationDuplicateGuardTestApi")
   ] = { resetRecentMediaGenerationDuplicateGuardsForTests };
 }
 

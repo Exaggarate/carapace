@@ -2,7 +2,7 @@ import { writeConfigMachineState } from "../state/config-machine-state-write.js"
 // Maintains config metadata fields written alongside user config.
 import { VERSION } from "../version.js";
 import { materializeModelPolicyAllowlist } from "./model-policy-allowlist-migration.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 /** Metadata keys automatically stamped on config writes. */
 export const AUTO_MANAGED_CONFIG_META_PATHS = [
@@ -11,11 +11,11 @@ export const AUTO_MANAGED_CONFIG_META_PATHS = [
 ] as const;
 
 export function stampConfigWriteMetadata(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   _now: string = new Date().toISOString(),
   version: string = VERSION,
   previousConfig?: unknown,
-): OpenClawConfig {
+): CarapaceConfig {
   const migrationStamped =
     previousConfig === undefined
       ? cfg

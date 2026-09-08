@@ -1,5 +1,5 @@
 // Shared attachment controls for chat and new-session composers.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { icons } from "../../../components/icons.ts";
@@ -207,7 +207,7 @@ function renderCompactAttachmentFile(attachment: ChatAttachment) {
         ? icons.music
         : icons.fileText;
   return html`
-    <openclaw-tooltip .content=${attachment.fileName ?? t("chat.attachments.attachedFile")}>
+    <carapace-tooltip .content=${attachment.fileName ?? t("chat.attachments.attachedFile")}>
       <div class="chat-attachment-file">
         <span class="chat-attachment-file__icon" data-family=${resolved.family}>${glyph}</span>
         <span class="chat-attachment-file__body">
@@ -217,7 +217,7 @@ function renderCompactAttachmentFile(attachment: ChatAttachment) {
           <span class="chat-attachment-file__type">${resolved.extensionLabel}</span>
         </span>
       </div>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 
@@ -658,7 +658,7 @@ function renderBrowserAnnotationAttachment(
           <span>${regionLabel}</span>
         </span>
       </div>
-      <openclaw-tooltip .content=${removeLabel}>
+      <carapace-tooltip .content=${removeLabel}>
         <button
           class="chat-attachment-remove chat-browser-annotation-card__remove"
           type="button"
@@ -668,7 +668,7 @@ function renderBrowserAnnotationAttachment(
         >
           ${icons.x}
         </button>
-      </openclaw-tooltip>
+      </carapace-tooltip>
     </div>
   `;
 }
@@ -732,7 +732,7 @@ export function renderAttachmentPreview(props: ChatAttachmentControlsProps) {
                         `
                       : renderCompactAttachmentFile(att)
                 }
-                <openclaw-tooltip .content=${t("chat.composer.removeAttachment")}>
+                <carapace-tooltip .content=${t("chat.composer.removeAttachment")}>
                   <button
                     class="chat-attachment-remove"
                     type="button"
@@ -746,7 +746,7 @@ export function renderAttachmentPreview(props: ChatAttachmentControlsProps) {
                   >
                     ${icons.x}
                   </button>
-                </openclaw-tooltip>
+                </carapace-tooltip>
               </div>
             `,
       )}

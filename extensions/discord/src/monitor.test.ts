@@ -1,9 +1,9 @@
 // Discord tests cover monitor plugin behavior.
 import { GatewayDispatchEvents } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
-import { createRequireRecord, typedCases } from "openclaw/plugin-sdk/test-fixtures";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { danger } from "carapace/plugin-sdk/runtime-env";
+import { createRequireRecord, typedCases } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, type Guild } from "./internal/discord.js";
 import { mapGatewayDispatchData } from "./internal/gateway-dispatch.js";
@@ -32,9 +32,9 @@ type DiscordReactionClient = Parameters<
 
 const readAllowFromStoreMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("carapace/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/conversation-runtime")>(
+    "carapace/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -178,7 +178,7 @@ describe("DiscordMessageListener", () => {
       warn: vi.fn(),
       error: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("carapace/plugin-sdk/logging-core").createSubsystemLogger
     >;
     const handler = vi.fn(async () => {
       throw new Error("boom");
@@ -202,7 +202,7 @@ describe("DiscordMessageListener", () => {
       warn: vi.fn(),
       error: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("carapace/plugin-sdk/logging-core").createSubsystemLogger
     >;
     const listener = new DiscordMessageListener(handler, logger);
 
@@ -222,24 +222,24 @@ describe("DiscordMessageListener", () => {
 
 describe("discord allowlist helpers", () => {
   it("normalizes slugs", () => {
-    expect(normalizeDiscordSlug("Friends of OpenClaw")).toBe("friends-of-openclaw");
+    expect(normalizeDiscordSlug("Friends of Carapace")).toBe("friends-of-carapace");
     expect(normalizeDiscordSlug("#General")).toBe("general");
     expect(normalizeDiscordSlug("Dev__Chat")).toBe("dev-chat");
   });
 
   it("matches ids by default and names only when enabled", () => {
     const allow = expectNormalizedAllowList(
-      ["123", "steipete", "Friends of OpenClaw"],
+      ["123", "steipete", "Friends of Carapace"],
       ["discord:", "user:", "guild:", "channel:"],
     );
     expect(allowListMatches(allow, { id: "123" }, { allowNameMatching: false })).toBe(true);
     expect(allowListMatches(allow, { name: "steipete" }, { allowNameMatching: false })).toBe(false);
     expect(
-      allowListMatches(allow, { name: "friends-of-openclaw" }, { allowNameMatching: false }),
+      allowListMatches(allow, { name: "friends-of-carapace" }, { allowNameMatching: false }),
     ).toBe(false);
     expect(allowListMatches(allow, { name: "steipete" }, { allowNameMatching: true })).toBe(true);
     expect(
-      allowListMatches(allow, { name: "friends-of-openclaw" }, { allowNameMatching: true }),
+      allowListMatches(allow, { name: "friends-of-carapace" }, { allowNameMatching: true }),
     ).toBe(true);
     expect(allowListMatches(allow, { name: "other" }, { allowNameMatching: false })).toBe(false);
   });
@@ -274,38 +274,38 @@ describe("discord allowlist helpers", () => {
 describe("discord guild/channel resolution", () => {
   it("resolves guild entry by id", () => {
     const guildEntries = makeEntries({
-      "123": { slug: "friends-of-openclaw" },
+      "123": { slug: "friends-of-carapace" },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Carapace"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-carapace");
   });
 
   it("resolves guild entry by raw guild id when guild object is missing", () => {
     const guildEntries = makeEntries({
-      "123": { slug: "friends-of-openclaw" },
+      "123": { slug: "friends-of-carapace" },
     });
     const resolved = resolveDiscordGuildEntry({
       guildId: "123",
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-carapace");
   });
 
   it("resolves guild entry by slug key", () => {
     const guildEntries = makeEntries({
-      "friends-of-openclaw": { slug: "friends-of-openclaw" },
+      "friends-of-carapace": { slug: "friends-of-carapace" },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Carapace"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-carapace");
   });
 
   it("falls back to wildcard guild entry", () => {
@@ -313,7 +313,7 @@ describe("discord guild/channel resolution", () => {
       "*": { requireMention: false },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Carapace"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
@@ -660,15 +660,15 @@ describe("discord group DM gating", () => {
   it("matches group DM allowlist", () => {
     expect(
       resolveGroupDmAllow({
-        channels: ["openclaw-dm"],
+        channels: ["carapace-dm"],
         channelId: "1",
-        channelName: "OpenClaw DM",
-        channelSlug: "openclaw-dm",
+        channelName: "Carapace DM",
+        channelSlug: "carapace-dm",
       }),
     ).toBe(true);
     expect(
       resolveGroupDmAllow({
-        channels: ["openclaw-dm"],
+        channels: ["carapace-dm"],
         channelId: "1",
         channelName: "Other",
         channelSlug: "other",
@@ -912,13 +912,13 @@ const { enqueueSystemEventSpy, resolveAgentRouteMock } = vi.hoisted(() => ({
   })),
 }));
 
-const channelRuntimeModule = await import("openclaw/plugin-sdk/system-event-runtime");
+const channelRuntimeModule = await import("carapace/plugin-sdk/system-event-runtime");
 vi.spyOn(channelRuntimeModule, "enqueueRoutedSystemEvent").mockImplementation(
   (text, route, options) =>
     enqueueSystemEventSpy(text, { ...options, sessionKey: route.sessionKey }) as boolean,
 );
 
-const routingModule = await import("openclaw/plugin-sdk/routing");
+const routingModule = await import("carapace/plugin-sdk/routing");
 vi.spyOn(routingModule, "resolveAgentRoute").mockImplementation(resolveAgentRouteMock);
 
 const {
@@ -1026,9 +1026,9 @@ function makeReactionListenerParams(overrides?: {
   guildEntries?: Record<string, DiscordGuildEntryResolved>;
 }) {
   return {
-    cfg: {} as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+    cfg: {} as import("carapace/plugin-sdk/config-contracts").CarapaceConfig,
     accountId: "acc-1",
-    runtime: {} as import("openclaw/plugin-sdk/runtime-env").RuntimeEnv,
+    runtime: {} as import("carapace/plugin-sdk/runtime-env").RuntimeEnv,
     botUserId: overrides?.botUserId ?? "bot-1",
     dmEnabled: overrides?.dmEnabled ?? true,
     groupDmEnabled: overrides?.groupDmEnabled ?? true,
@@ -1044,7 +1044,7 @@ function makeReactionListenerParams(overrides?: {
       error: vi.fn(),
       debug: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("carapace/plugin-sdk/logging-core").createSubsystemLogger
     >,
   };
 }
@@ -1197,7 +1197,7 @@ describe("discord DM reaction handling", () => {
 
   it("applies DM allowlist edits and revokes reactions awaiting channel metadata", async () => {
     const params = makeReactionListenerParams({ dmPolicy: "allowlist", allowFrom: [] });
-    let cfg: OpenClawConfig = {
+    let cfg: CarapaceConfig = {
       channels: { discord: { dmPolicy: "allowlist", allowFrom: [] } },
     };
     const listener = new DiscordReactionListener({

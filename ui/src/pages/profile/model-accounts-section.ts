@@ -354,7 +354,7 @@ export function renderModelAccountsSection(
                 ${t("profilePage.modelAccounts.connectionSettings")}
               </button>
               ${renderLearnMoreLink(
-                "https://docs.openclaw.ai/concepts/multi-user#per-person-model-accounts",
+                "https://github.com/Exaggarate/carapace#per-person-model-accounts",
               )}
             `,
           })

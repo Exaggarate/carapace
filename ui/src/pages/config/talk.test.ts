@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { TalkCatalogResult } from "@openclaw/gateway-protocol";
+import type { TalkCatalogResult } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -162,7 +162,7 @@ function createTalkMutationHarness(options: TalkMutationHarnessOptions = {}) {
     },
     runtimeConfig,
   } as unknown as ApplicationContext;
-  const page = document.createElement("openclaw-talk-settings") as TalkPageElement;
+  const page = document.createElement("carapace-talk-settings") as TalkPageElement;
   page.context = context;
   page.configObject = configForm;
   document.body.append(page);
@@ -287,10 +287,10 @@ describe("Talk device and voice wake settings", () => {
 
   it("keeps device controls out of browsers while saving Gateway trigger words after a debounce", async () => {
     const voiceWakeRequest = vi.fn(async (method: string) => ({
-      triggers: method === "voicewake.get" ? ["openclaw"] : ["hello computer"],
+      triggers: method === "voicewake.get" ? ["carapace"] : ["hello computer"],
     }));
     const { page } = createTalkMutationHarness({ voiceWakeRequest });
-    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
     expect(page.textContent).not.toContain("This Mac");
     vi.useFakeTimers();
     const input = page.querySelector("textarea")!;
@@ -311,10 +311,10 @@ describe("Talk device and voice wake settings", () => {
       if (method === "voicewake.set") {
         throw new Error("Permission denied");
       }
-      return { triggers: ["openclaw"] };
+      return { triggers: ["carapace"] };
     });
     const { page } = createTalkMutationHarness({ voiceWakeRequest });
-    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
     vi.useFakeTimers();
     const input = page.querySelector("textarea")!;
     input.value = "hello";
@@ -334,13 +334,13 @@ describe("Talk device and voice wake settings", () => {
     let writes = 0;
     const voiceWakeRequest = vi.fn(async (method: string) => {
       if (method === "voicewake.get") {
-        return { triggers: ["openclaw"] };
+        return { triggers: ["carapace"] };
       }
       writes += 1;
       return writes === 1 ? first.promise : second.promise;
     });
     const { page } = createTalkMutationHarness({ voiceWakeRequest });
-    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
     vi.useFakeTimers();
     const input = page.querySelector("textarea")!;
     input.focus();
@@ -370,9 +370,9 @@ describe("Talk device and voice wake settings", () => {
   });
 
   it("saves the last trigger edit when navigating away inside the debounce window", async () => {
-    const voiceWakeRequest = vi.fn(async () => ({ triggers: ["openclaw"] }));
+    const voiceWakeRequest = vi.fn(async () => ({ triggers: ["carapace"] }));
     const { page } = createTalkMutationHarness({ voiceWakeRequest });
-    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
     vi.useFakeTimers();
     const input = page.querySelector("textarea")!;
     input.value = "computer";
@@ -390,13 +390,13 @@ describe("Talk device and voice wake settings", () => {
       let writes = 0;
       const voiceWakeRequest = vi.fn(async (method: string) => {
         if (method === "voicewake.get") {
-          return { triggers: ["openclaw"] };
+          return { triggers: ["carapace"] };
         }
         writes += 1;
         return writes === 1 ? first.promise : { triggers: [latest] };
       });
       const { page } = createTalkMutationHarness({ voiceWakeRequest });
-      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
       vi.useFakeTimers();
       const input = page.querySelector("textarea")!;
       for (const text of ["first phrase", "intermediate phrase"]) {
@@ -422,7 +422,7 @@ describe("Talk device and voice wake settings", () => {
       let writes = 0;
       const voiceWakeRequest = vi.fn(async (method: string) => {
         if (method === "voicewake.get") {
-          return { triggers: ["openclaw"] };
+          return { triggers: ["carapace"] };
         }
         writes += 1;
         return timing === "in-flight" && writes === 1
@@ -430,7 +430,7 @@ describe("Talk device and voice wake settings", () => {
           : { triggers: ["hello computer"] };
       });
       const { page, setGatewayConnection } = createTalkMutationHarness({ voiceWakeRequest });
-      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
       vi.useFakeTimers();
       const input = page.querySelector("textarea")!;
       input.value = "hello computer";
@@ -462,10 +462,10 @@ describe("Talk device and voice wake settings", () => {
   );
 
   it("does not carry an unsaved trigger draft into another Gateway", async () => {
-    let gatewayWords = ["openclaw"];
+    let gatewayWords = ["carapace"];
     const voiceWakeRequest = vi.fn(async () => ({ triggers: gatewayWords }));
     const { page, setGatewayConnection } = createTalkMutationHarness({ voiceWakeRequest });
-    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+    await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
     vi.useFakeTimers();
     const input = page.querySelector("textarea")!;
     input.value = "old gateway words";
@@ -485,12 +485,12 @@ describe("Talk device and voice wake settings", () => {
   it.each([false, true])(
     "restores an offline trigger draft after reopening Talk only for its Gateway (switch: %s)",
     async (switchGateway) => {
-      let gatewayWords = ["openclaw"];
+      let gatewayWords = ["carapace"];
       const voiceWakeRequest = vi.fn(async (method: string) => ({
         triggers: method === "voicewake.get" ? gatewayWords : ["retained phrase"],
       }));
       const { page, setGatewayConnection } = createTalkMutationHarness({ voiceWakeRequest });
-      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("openclaw"));
+      await vi.waitFor(() => expect(page.querySelector("textarea")?.value).toBe("carapace"));
       vi.useFakeTimers();
       const input = page.querySelector("textarea")!;
       input.value = "initial phrase";
@@ -503,7 +503,7 @@ describe("Talk device and voice wake settings", () => {
       page.remove();
       gatewayWords = ["other gateway phrase"];
       setGatewayConnection(true, switchGateway ? "wss://other-gateway.example.test" : undefined);
-      const reopened = document.createElement("openclaw-talk-settings") as TalkPageElement;
+      const reopened = document.createElement("carapace-talk-settings") as TalkPageElement;
       reopened.context = page.context;
       reopened.configObject = page.configObject;
       document.body.append(reopened);

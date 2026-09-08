@@ -1,8 +1,8 @@
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import { createCuaComputerNodeInvokePolicy } from "./node-invoke-policy.js";
 
-const resourceHandle = "openclaw:computer-resource:v1:123e4567-e89b-42d3-a456-426614174000";
+const resourceHandle = "carapace:computer-resource:v1:123e4567-e89b-42d3-a456-426614174000";
 
 describe("cua-computer node invoke policy", () => {
   const classifyRisk = (params: unknown) => {
@@ -92,7 +92,7 @@ describe("cua-computer node invoke policy", () => {
 
     const invokeNode = vi.fn(async () => ({ ok: true as const }));
     await expect(
-      policy.handle({ invokeNode } as unknown as OpenClawPluginNodeInvokePolicyContext),
+      policy.handle({ invokeNode } as unknown as CarapacePluginNodeInvokePolicyContext),
     ).resolves.toMatchObject({ ok: false, code: "COMPUTER_RISK_UNCLASSIFIED" });
     expect(invokeNode).not.toHaveBeenCalled();
   });

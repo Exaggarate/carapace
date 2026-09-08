@@ -1,4 +1,4 @@
-// Parallels Vm script supports OpenClaw repository automation.
+// Parallels Vm script supports Carapace repository automation.
 import { die, run, say, warn } from "./host-command.ts";
 
 const PRLCTL_STATUS_TIMEOUT_MS = 30_000;

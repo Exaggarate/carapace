@@ -8,10 +8,10 @@ import {
 } from "../agents/embedded-agent-runner/run/session-bootstrap.js";
 import { resolveAgentRunSessionTarget } from "../agents/run-session-target.js";
 import { readConfigFileSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { projectInferenceRoute, sameDefaultInferenceRoute } from "./inference-route.js";
 import type { ActivateSetupInferenceDeps } from "./setup-inference-core.js";
 import { applyManualAuthConfig } from "./setup-inference-persist.js";
@@ -22,20 +22,20 @@ import { createSystemAgentModelSelectionUpdater } from "./setup-model-selection.
 const tempRoots = createTempDirTracker();
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   tempRoots.cleanup();
 });
 
 describe("setup completion session ownership", () => {
-  it.each([undefined, "openclaw"] as const)(
+  it.each([undefined, "carapace"] as const)(
     "keeps a named owner's completion out of durable sessions (runtime: %s)",
     async (harness) => {
-      const root = tempRoots.make("openclaw-setup-completion-");
+      const root = tempRoots.make("carapace-setup-completion-");
       const stateDir = path.join(root, "state");
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-      const config: OpenClawConfig = {
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+      const config: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: { research: {} },
@@ -77,7 +77,7 @@ describe("setup completion session ownership", () => {
         deps: { runEmbeddedAgent },
       });
       await expect(
-        fs.access(path.join(stateDir, "agents", "research", "agent", "openclaw-agent.sqlite")),
+        fs.access(path.join(stateDir, "agents", "research", "agent", "carapace-agent.sqlite")),
       ).rejects.toThrow();
       expect(result).toMatchObject({
         ok: true,
@@ -91,16 +91,16 @@ describe("setup completion session ownership", () => {
 });
 
 function createFreshProviderPlan() {
-  const root = tempRoots.make("openclaw-manual-auth-conflict-");
-  vi.stubEnv("OPENCLAW_HOME", root);
-  vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
-  vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-  const sourceConfig: OpenClawConfig = { gateway: { mode: "local" } };
-  const runtimeConfig: OpenClawConfig = {
+  const root = tempRoots.make("carapace-manual-auth-conflict-");
+  vi.stubEnv("CARAPACE_HOME", root);
+  vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
+  vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+  const sourceConfig: CarapaceConfig = { gateway: { mode: "local" } };
+  const runtimeConfig: CarapaceConfig = {
     ...sourceConfig,
     gateway: { ...sourceConfig.gateway, port: 18789 },
   };
-  const preparedConfig: OpenClawConfig = {
+  const preparedConfig: CarapaceConfig = {
     ...runtimeConfig,
     plugins: { entries: { "fixture-provider": { enabled: true } } },
     models: {
@@ -154,7 +154,7 @@ describe("prepared provider config commit", () => {
     (kind) => {
       const fixture = createFreshProviderPlan();
       const base = kind === "runtime" ? fixture.runtimeConfig : fixture.sourceConfig;
-      const concurrentConfigs: OpenClawConfig[] = [
+      const concurrentConfigs: CarapaceConfig[] = [
         {
           ...base,
           models: {
@@ -181,7 +181,7 @@ describe("prepared provider config commit", () => {
 
   it("validates current plugin policy before checking conflicts", () => {
     const fixture = createFreshProviderPlan();
-    const config: OpenClawConfig = { ...fixture.sourceConfig, plugins: { enabled: false } };
+    const config: CarapaceConfig = { ...fixture.sourceConfig, plugins: { enabled: false } };
     expect(() => applyManualAuthConfig(config, fixture.manualAuth, config)).toThrow(
       "Provider plugin fixture-provider is plugins disabled.",
     );
@@ -190,7 +190,7 @@ describe("prepared provider config commit", () => {
 
   it("preserves an unrelated operator edit while applying the prepared provider", () => {
     const fixture = createFreshProviderPlan();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...fixture.sourceConfig,
       gateway: { mode: "local", port: 19000 },
     };
@@ -211,15 +211,15 @@ describe("provider installation changes runtime defaults without editing source"
   ])(
     "accepts $name materialized plugin config while rejecting authored changes",
     async ({ properties, defaults }) => {
-      const root = tempRoots.make("openclaw-installed-provider-defaults-");
+      const root = tempRoots.make("carapace-installed-provider-defaults-");
       const stateDir = path.join(root, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       vi.stubEnv("HOME", root);
-      vi.stubEnv("OPENCLAW_HOME", root);
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-      vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-      const source: OpenClawConfig = { gateway: { mode: "local" }, plugins: { entries: {} } };
+      vi.stubEnv("CARAPACE_HOME", root);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+      vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+      const source: CarapaceConfig = { gateway: { mode: "local" }, plugins: { entries: {} } };
       await fs.mkdir(stateDir, { recursive: true });
       const sourceBytes = JSON.stringify(source) + "\n";
       await fs.writeFile(configPath, sourceBytes);
@@ -244,11 +244,11 @@ describe("provider installation changes runtime defaults without editing source"
         JSON.stringify({
           name: "@fixture/provider",
           version: "1.0.0",
-          openclaw: { extensions: ["./index.cjs"] },
+          carapace: { extensions: ["./index.cjs"] },
         }),
       );
       await fs.writeFile(
-        path.join(pluginRoot, "openclaw.plugin.json"),
+        path.join(pluginRoot, "carapace.plugin.json"),
         JSON.stringify({
           id: "fixture-provider",
           providers: ["fixture-provider"],
@@ -270,13 +270,13 @@ describe("provider installation changes runtime defaults without editing source"
         expect(after.runtimeConfig.plugins?.entries?.["fixture-provider"]).toEqual({
           config: defaults,
         });
-        const projectPair = (runtime: OpenClawConfig, sourceConfig: OpenClawConfig) => {
+        const projectPair = (runtime: CarapaceConfig, sourceConfig: CarapaceConfig) => {
           return projectInferenceRoute(runtime, "main", {}, sourceConfig);
         };
         const baselineProjection = await projectPair(before.runtimeConfig, before.sourceConfig);
         const rereadProjection = await projectPair(after.runtimeConfig, after.sourceConfig);
         expect(sameDefaultInferenceRoute(baselineProjection, rereadProjection)).toBe(true);
-        const preparedConfig: OpenClawConfig = {
+        const preparedConfig: CarapaceConfig = {
           ...before.runtimeConfig,
           plugins: {
             ...before.runtimeConfig.plugins,
@@ -333,7 +333,7 @@ describe("provider installation changes runtime defaults without editing source"
 
         const selectModel = await createSystemAgentModelSelectionUpdater({
           model: "fixture-provider/fixture-model",
-          agentRuntimeId: "openclaw",
+          agentRuntimeId: "carapace",
         });
         const verifiedRuntime = selectModel(plan.config);
         const candidateSource = selectModel(sourceResult);
@@ -344,9 +344,9 @@ describe("provider installation changes runtime defaults without editing source"
         expect(stagedProjection.route).toMatchObject({
           modelLabel: "fixture-provider/fixture-model",
           runner: "embedded",
-          agentHarnessRuntimeOverride: "openclaw",
+          agentHarnessRuntimeOverride: "carapace",
         });
-        const changedPluginPolicies: Array<OpenClawConfig["plugins"]> = [
+        const changedPluginPolicies: Array<CarapaceConfig["plugins"]> = [
           { ...candidateSource.plugins, enabled: false },
           { ...candidateSource.plugins, allow: ["fixture-provider"] },
           { ...candidateSource.plugins, deny: ["fixture-provider"] },
@@ -365,14 +365,14 @@ describe("provider installation changes runtime defaults without editing source"
         }
         const changeModel = await createSystemAgentModelSelectionUpdater({
           model: "fixture-provider/different-model",
-          agentRuntimeId: "openclaw",
+          agentRuntimeId: "carapace",
         });
         const changedExecution = await projectPair(changeModel(stagedRuntime), candidateSource);
         expect(sameDefaultInferenceRoute(stagedProjection, changedExecution)).toBe(false);
 
         // Genuine edits to the touched source remain conflicts for both execution
         // and persistence projections, even though runtime defaults are ignored.
-        const changedSources: OpenClawConfig[] = [
+        const changedSources: CarapaceConfig[] = [
           {
             ...after.sourceConfig,
             plugins: { entries: { "fixture-provider": { enabled: false } } },

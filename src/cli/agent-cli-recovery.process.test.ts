@@ -9,19 +9,19 @@ import {
 } from "../config/sessions/session-accessor.js";
 import type { InternalSessionEntry } from "../config/sessions/types.js";
 import { resolveRuntimeWorkerArgv, resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { cliRecoveryEntrypoints } from "./cli-entrypoint.test-support.js";
 import { runCliProcessChild } from "./cli-process-child.test-helpers.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("CLI fork recovery process", () => {
   it("keeps a concurrent durable rebind when a stale fork reports its successor", async () => {
-    const root = tempDirs.make("openclaw-cli-fork-recovery-");
+    const root = tempDirs.make("carapace-cli-fork-recovery-");
     const stateDir = path.join(root, "state");
     const tmpDir = path.join(root, "tmp");
     const workspaceDir = path.join(root, "workspace");
@@ -46,7 +46,7 @@ describe("CLI fork recovery process", () => {
       backendScript,
       rebindScript,
     });
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     await fs.writeFile(
       configPath,
       JSON.stringify({
@@ -67,7 +67,7 @@ describe("CLI fork recovery process", () => {
     );
 
     const entry: InternalSessionEntry = {
-      sessionId: "openclaw-process-session",
+      sessionId: "carapace-process-session",
       lifecycleRevision: "process-lifecycle",
       activeWriterRunId: "process-writer",
       updatedAt: 1,
@@ -79,7 +79,7 @@ describe("CLI fork recovery process", () => {
       resumeCheckpointId: checkpointId,
     });
     await replaceSessionEntry({ sessionKey, storePath }, entry);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const result = await runCliProcessChild({
       nodeArgs: [
@@ -102,11 +102,11 @@ describe("CLI fork recovery process", () => {
         NODE_DISABLE_COMPILE_CACHE: "1",
         NODE_ENV: undefined,
         NODE_OPTIONS: undefined,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_HOME: root,
-        OPENCLAW_NO_RESPAWN: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_HOME: root,
+        CARAPACE_NO_RESPAWN: "1",
+        CARAPACE_STATE_DIR: stateDir,
         PR135168_BACKEND_SCRIPT: backendScript,
         PR135168_NEWER_CLI_SESSION_ID: newerCliSessionId,
         PR135168_REBIND_SCRIPT: rebindScript,
@@ -122,7 +122,7 @@ describe("CLI fork recovery process", () => {
     expect(result.stderr).toContain(
       "CLI turn failed and its fork successor could not be persisted",
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(
       loadSessionEntryReadOnly({ sessionKey, storePath })?.cliSessionBindings?.["proof-cli"]
         ?.sessionId,
@@ -152,11 +152,11 @@ async function writeProofPlugin(params: {
         name: "cli-fork-process-proof",
         private: true,
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
     ),
     fs.writeFile(
-      path.join(params.pluginDir, "openclaw.plugin.json"),
+      path.join(params.pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "cli-fork-process-proof",
         name: "CLI fork process proof",

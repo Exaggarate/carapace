@@ -1,4 +1,4 @@
-import type { AssistantMessage, Context, Model } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { convertResponsesMessages as convertProviderResponsesMessages } from "../providers/openai-responses-shared.js";
 import { createZeroUsage } from "../usage.test-support.js";
@@ -60,7 +60,7 @@ describe("OpenAI Responses reasoning replay", () => {
           type: "thinking" as const,
           thinking: "",
           thinkingSignature: JSON.stringify(item),
-          openclawReasoningReplay: buildOpenAIResponsesReasoningReplayMetadata(
+          carapaceReasoningReplay: buildOpenAIResponsesReasoningReplayMetadata(
             model,
             replayIdentity,
           ),
@@ -100,7 +100,7 @@ describe("OpenAI Responses reasoning replay", () => {
           type: "thinking" as const,
           thinking: "",
           thinkingSignature: JSON.stringify(item),
-          ...(replayMetadata === undefined ? {} : { openclawReasoningReplay: replayMetadata }),
+          ...(replayMetadata === undefined ? {} : { carapaceReasoningReplay: replayMetadata }),
         };
         const input = convert({ messages: [createAssistant([block])] });
         const preservesUnattributed = name === "provider-owned" && replayMetadata === undefined;

@@ -6,11 +6,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SKILL_LIBRARY_MAX_FILE_BYTES } from "../../../packages/gateway-protocol/src/schema/skill-library.js";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail, linkEmail, setDisplayName } from "../../state/user-profiles.js";
 import { withEnv, withEnvAsync } from "../../test-utils/env.js";
 import { materializeSkillResources, prepareSkillResourceDelivery } from "../runtime/resources.js";
@@ -31,7 +31,7 @@ import type { SkillLibraryAuthority } from "./store.js";
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanup();
   }),
 );
@@ -40,8 +40,8 @@ const content =
 function fixture() {
   const stateDir = tempDirs.make("skill-library-");
   const options = {
-    path: path.join(stateDir, "state", "openclaw.sqlite"),
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    path: path.join(stateDir, "state", "carapace.sqlite"),
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   };
   const alice = ensureProfileForEmail("alice@example.test", options);
   const actor = (profileId?: string, admin = false): SkillLibraryAuthority => ({
@@ -100,7 +100,7 @@ describe("profile-owned skill publication and selection", () => {
     expect(snapshot.prompt).toContain(`<name>${pins[0]!.name}</name>`);
     const copied = {
       ...entries[0]!,
-      skill: { ...entries[0]!.skill, source: "openclaw-workspace" },
+      skill: { ...entries[0]!.skill, source: "carapace-workspace" },
     };
     expect(() => buildSkillSnapshot(stateDir, { entries: [copied, ...entries] })).toThrow(
       "ambiguous",
@@ -124,7 +124,7 @@ describe("profile-owned skill publication and selection", () => {
       options,
     );
     const { listSkillCommandsForWorkspace } = await import("../discovery/chat-commands.js");
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+    withEnv({ CARAPACE_STATE_DIR: stateDir }, () => {
       const cfg = { agents: { defaults: { skills: [] } } };
       const discover = (
         overrides: Partial<Parameters<typeof listSkillCommandsForWorkspace>[0]> = {},
@@ -163,7 +163,7 @@ describe("profile-owned skill publication and selection", () => {
     expect(listSkillLibrary(actor(undefined, true), {}, options).defaultTarget).toBe("workspace");
     expect(listSkillLibrary(alice, {}, options).defaultTarget).toBe("personal");
     expect(seedSkillLibrarySelection(alice, options)).toEqual([]);
-    expect(tableExists(openOpenClawStateDatabase(options).db, "skill_library_entries")).toBe(false);
+    expect(tableExists(openCarapaceStateDatabase(options).db, "skill_library_entries")).toBe(false);
     linkEmail("alice-alias@example.test", alice.profileId!, options);
     expect(listSkillLibrary(admin, {}, options).multipleProfiles).toBe(false);
     ensureProfileForEmail("bob@example.test", options);
@@ -184,7 +184,7 @@ describe("profile-owned skill publication and selection", () => {
       const read = await readSkillLibrary(anonymousAdmin, skillId, undefined, options);
       expect(read.content).toBe(content);
       expect(read.entry.canEdit).toBe(false);
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       // Presentation needs metadata; the artifact read above still needs its full manifest.
       db.setAuthorizer((action, table, column) => {
         return action === constants.SQLITE_READ &&
@@ -360,7 +360,7 @@ describe("profile-owned skill publication and selection", () => {
       librarySelections: selections,
       version: 1,
     };
-    const delivery = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const delivery = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       prepareSkillResourceDelivery(snapshot, () => {}),
     );
     expect(delivery).toBeDefined();
@@ -404,7 +404,7 @@ describe("profile-owned skill publication and selection", () => {
   });
   it("delivers the pinned hidden revision on explicit selection after the library default changes", async () => {
     const { alice, options, stateDir } = fixture();
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const hiddenContent = content.replace(
         "---\n# Guide",
         "disable-model-invocation: true\n---\n# Guide",
@@ -455,14 +455,14 @@ describe("library admission and imports", () => {
         slug: "prerequisite",
         expectedRevision: null,
         content:
-          '---\nname: prerequisite\ndescription: Requires explicitly configured inputs\nmetadata: {"openclaw":{"skillKey":"someone-elses-key","requires":{"env":["OPENCLAW_SKILL_LIBRARY_FIXTURE_REQUIRED"],"config":["channels.fixture.enabled"]}}}\n---\n# Prerequisite\n',
+          '---\nname: prerequisite\ndescription: Requires explicitly configured inputs\nmetadata: {"carapace":{"skillKey":"someone-elses-key","requires":{"env":["CARAPACE_SKILL_LIBRARY_FIXTURE_REQUIRED"],"config":["channels.fixture.enabled"]}}}\n---\n# Prerequisite\n',
       },
       options,
     );
     const selected = loadSkillLibrarySelection(seedSkillLibrarySelection(alice, options), options);
     expect(selected[0]?.metadata?.skillKey).toBe(saved.entry.name);
     expect(selected[0]?.metadata?.requires).toMatchObject({
-      env: ["OPENCLAW_SKILL_LIBRARY_FIXTURE_REQUIRED"],
+      env: ["CARAPACE_SKILL_LIBRARY_FIXTURE_REQUIRED"],
       config: ["channels.fixture.enabled"],
     });
     const { buildSkillSnapshot } = await import("../loading/workspace-skill-prompt.js");
@@ -472,7 +472,7 @@ describe("library admission and imports", () => {
         skills: {
           entries: {
             "someone-elses-key": {
-              env: { OPENCLAW_SKILL_LIBRARY_FIXTURE_REQUIRED: "fixture-value" },
+              env: { CARAPACE_SKILL_LIBRARY_FIXTURE_REQUIRED: "fixture-value" },
             },
           },
         },
@@ -541,7 +541,7 @@ describe("library admission and imports", () => {
         uploadSkillLibrary(bob, { action: "commit", uploadId: begun.uploadId }, options),
       ).rejects.toMatchObject({ code: "NOT_FOUND" });
       const archiveReads = trackSqliteStatementExecutions(
-        openOpenClawStateDatabase(options).db,
+        openCarapaceStateDatabase(options).db,
         ["archive"],
         (sql) =>
           sql.startsWith("select ") &&

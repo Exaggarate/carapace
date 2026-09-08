@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import type { PortListener } from "./ports-types.js";
 
 type WindowsNetstatListener = PortListener & { pid: number; address: string };

@@ -1,5 +1,5 @@
 // Control UI route classifier for base-path and root-mounted SPA serving.
-import { isControlUiFocusPath } from "@openclaw/session-url-contract";
+import { isControlUiFocusPath } from "@carapace/session-url-contract";
 import { acceptsControlUiHtmlResponse, isReadHttpMethod } from "./control-ui-http-utils.js";
 import {
   classifyGatewayProbePath,

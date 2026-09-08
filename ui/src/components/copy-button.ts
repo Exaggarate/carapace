@@ -86,7 +86,7 @@ export function renderCopyButton(
 ): TemplateResult {
   // Chat footers own their ghost chrome; .btn backgrounds would box the icon.
   return html`
-    <openclaw-tooltip .content=${idleLabel}>
+    <carapace-tooltip .content=${idleLabel}>
       <button
         class=${bare ? "chat-copy-btn" : "btn btn--xs chat-copy-btn"}
         type="button"
@@ -99,7 +99,7 @@ export function renderCopyButton(
         </span>
       </button>
       <span data-copy-feedback role="status" hidden></span>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 

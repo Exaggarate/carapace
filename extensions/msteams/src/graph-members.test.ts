@@ -1,6 +1,6 @@
 // Msteams tests cover graph members plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import { getMemberInfoMSTeams } from "./graph-members.js";
 import { createGraphPageGuard } from "./graph-pagination.test-support.js";
 
@@ -48,7 +48,7 @@ describe("getMemberInfoMSTeams", () => {
       });
 
     const result = await getMemberInfoMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: "graph-team-1/channel-1",
       userId: "user-123",
     });
@@ -90,7 +90,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "graph-team-1/channel-1",
         userId: "user-123",
         currentRequesterId: "user-123",
@@ -111,7 +111,7 @@ describe("getMemberInfoMSTeams", () => {
       .mockResolvedValueOnce({ value: [{ userId: "user-456", displayName: "Bob" }] });
 
     const result = await getMemberInfoMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: "team-1/channel-1",
       userId: "user-456",
     });
@@ -143,7 +143,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-1",
         userId: "alice@contoso.com",
       }),
@@ -179,7 +179,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-1",
         userId: "teams:Alice@Contoso.com ",
       }),
@@ -197,7 +197,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-1",
         userId: "missing",
       }),
@@ -210,7 +210,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-1",
         userId: "nonexistent-user",
       }),
@@ -224,7 +224,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-1",
         userId: "user-789",
       }),
@@ -237,7 +237,7 @@ describe("getMemberInfoMSTeams", () => {
 
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "team-1/channel-private",
         userId: "user-123",
       }),
@@ -248,7 +248,7 @@ describe("getMemberInfoMSTeams", () => {
   it("returns the trusted requester identity in the current chat without Graph reads", async () => {
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "user:user-123",
         userId: "teams:user-123",
         currentRequesterId: "user-123",
@@ -271,7 +271,7 @@ describe("getMemberInfoMSTeams", () => {
   it("rejects unrelated profiles in chats before fetching a user", async () => {
     await expect(
       getMemberInfoMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: "conversation:19:chat@thread.v2",
         userId: "user-456",
         currentRequesterId: "user-123",

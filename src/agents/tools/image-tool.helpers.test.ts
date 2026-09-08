@@ -1,4 +1,4 @@
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
+import { MAX_IMAGE_BYTES } from "@carapace/media-core/constants";
 import { describe, expect, it } from "vitest";
 import { decodeDataUrl } from "./image-tool.helpers.js";
 

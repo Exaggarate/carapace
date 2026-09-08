@@ -78,7 +78,7 @@ on:
       - "src/agents/*completion*.ts"
       - "src/agents/*transport*.ts"
       - "src/agents/model-*.ts"
-      - "src/agents/openclaw-tools*.ts"
+      - "src/agents/carapace-tools*.ts"
       - "src/agents/provider-*.ts"
       - "src/agents/session*.ts"
       - "src/agents/tool-call*.ts"
@@ -210,7 +210,7 @@ jobs:
             changed_files="$(gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --jq '.[].filename')"
             while IFS= read -r file; do
               case "${file}" in
-                .github/codeql/codeql-network-runtime-boundary-critical-quality.yml|.github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql|.github/codeql/openclaw-boundary/queries/managed-proxy-runtime-mutation.ql|.github/codeql/openclaw-boundary/tests/network-runtime/*)
+                .github/codeql/codeql-network-runtime-boundary-critical-quality.yml|.github/codeql/carapace-boundary/queries/raw-socket-callsite-classification.ql|.github/codeql/carapace-boundary/queries/managed-proxy-runtime-mutation.ql|.github/codeql/carapace-boundary/tests/network-runtime/*)
                   network_runtime=true
                   ;;
                 .github/codeql/*|.github/workflows/codeql-critical-quality.yml)
@@ -235,7 +235,7 @@ jobs:
                   agent=true
                   core_auth_secrets=true
                   ;;
-                src/acp/control-plane/*|src/agents/cli-runner/*|src/agents/command/*|src/agents/embedded-agent-runner/*|src/agents/sessions/*|src/agents/tools/*|src/agents/*completion*.ts|src/agents/*transport*.ts|src/agents/model-*.ts|src/agents/openclaw-tools*.ts|src/agents/provider-*.ts|src/agents/session*.ts|src/agents/tool-call*.ts|src/auto-reply/reply/agent-runner*.ts|src/auto-reply/reply/commands*.ts|src/auto-reply/reply/directive-handling*.ts|src/auto-reply/reply/dispatch-*.ts|src/auto-reply/reply/get-reply-run*.ts|src/auto-reply/reply/provider-dispatcher*.ts|src/auto-reply/reply/queue*.ts|src/auto-reply/reply/reply-run-registry*.ts|src/auto-reply/reply/session*.ts)
+                src/acp/control-plane/*|src/agents/cli-runner/*|src/agents/command/*|src/agents/embedded-agent-runner/*|src/agents/sessions/*|src/agents/tools/*|src/agents/*completion*.ts|src/agents/*transport*.ts|src/agents/model-*.ts|src/agents/carapace-tools*.ts|src/agents/provider-*.ts|src/agents/session*.ts|src/agents/tool-call*.ts|src/auto-reply/reply/agent-runner*.ts|src/auto-reply/reply/commands*.ts|src/auto-reply/reply/directive-handling*.ts|src/auto-reply/reply/dispatch-*.ts|src/auto-reply/reply/get-reply-run*.ts|src/auto-reply/reply/provider-dispatcher*.ts|src/auto-reply/reply/queue*.ts|src/auto-reply/reply/reply-run-registry*.ts|src/auto-reply/reply/session*.ts)
                   agent=true
                   ;;
                 src/auto-reply/reply/post-compaction-context.ts|src/auto-reply/reply/queue/*|src/auto-reply/reply/startup-context.ts|src/commands/doctor-session-*.ts|src/commands/session-store-targets.ts|src/commands/sessions*.ts|src/infra/diagnostic-*.ts|src/infra/diagnostics-timeline.ts|src/infra/session-delivery-queue*.ts|src/logging/diagnostic*.ts)
@@ -449,7 +449,7 @@ jobs:
           added_lines="$(mktemp)"
           trap 'rm -f "$file_metadata" "$changed_files" "$monitored_sources" "$added_lines"' EXIT
           codex_transport="extensions/codex/src/app-server/transport-websocket.ts"
-          network_codeql_contract_pattern='^\.github/codeql/(codeql-network-runtime-boundary-critical-quality\.yml|openclaw-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\.ql)$'
+          network_codeql_contract_pattern='^\.github/codeql/(codeql-network-runtime-boundary-critical-quality\.yml|carapace-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\.ql)$'
 
           gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" > "$file_metadata"
           jq -r '.[].filename' "$file_metadata" > "$changed_files"
@@ -473,10 +473,10 @@ jobs:
           # The Codex transport also has an exact owner/function allowlist in the query.
           # Sensitive added lines select the same gate; failing here would skip it.
           if grep -Eq "$network_codeql_contract_pattern" "$changed_files" || \
-             grep -Eq '^\.github/codeql/openclaw-boundary/tests/network-runtime/' "$changed_files" || \
+             grep -Eq '^\.github/codeql/carapace-boundary/tests/network-runtime/' "$changed_files" || \
              grep -Fxq "$codex_transport" "$changed_files" || \
              [ "$missing_patch" = true ] || \
-             grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|OPENCLAW_PROXY_' "$added_lines" || \
+             grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|CARAPACE_PROXY_' "$added_lines" || \
              grep -En '(from|require\().*["'\''](node:)?(net|tls|http2)["'\'']|\b(net|tls|http2)\.(connect|createConnection)\b|new Socket\(' "$added_lines"; then
             echo "Network runtime boundary-sensitive added lines, unavailable source patches or contract edits require full CodeQL review." >&2
             echo "full_codeql=true" >> "$GITHUB_OUTPUT"
@@ -498,7 +498,7 @@ jobs:
           CODEQL_PATH: ${{ steps.init-network-codeql.outputs.codeql-path }}
         run: |
           set -euo pipefail
-          "$CODEQL_PATH" test run --show-extractor-output .github/codeql/openclaw-boundary/tests/network-runtime
+          "$CODEQL_PATH" test run --show-extractor-output .github/codeql/carapace-boundary/tests/network-runtime
 
       - name: Analyze
         id: analyze

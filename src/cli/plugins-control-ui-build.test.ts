@@ -20,7 +20,7 @@ afterEach(async () => {
 });
 
 async function fixture() {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-build-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ui-build-"));
   directories.push(directory);
   await fs.writeFile(
     path.join(directory, "package.json"),
@@ -71,7 +71,7 @@ describe("native plugin browser builds", () => {
     expect(next.entry).not.toBe(first.entry);
     expect(await fs.readFile(path.join(project.rootDir, first.entry), "utf8")).toBe(original);
     expect(
-      JSON.parse(await fs.readFile(path.join(project.rootDir, "openclaw.plugin.json"), "utf8"))
+      JSON.parse(await fs.readFile(path.join(project.rootDir, "carapace.plugin.json"), "utf8"))
         .controlUi,
     ).toEqual(first);
   });
@@ -99,7 +99,7 @@ describe("native plugin browser builds", () => {
     const project = await fixture();
     await fs.writeFile(
       path.join(project.rootDir, project.source),
-      'export { asDateTimestampMs, truncateUtf16Safe } from "openclaw/plugin-sdk/string-coerce-runtime";',
+      'export { asDateTimestampMs, truncateUtf16Safe } from "carapace/plugin-sdk/string-coerce-runtime";',
     );
     const artifact = await buildPluginControlUi(project);
     const built = await import(pathToFileURL(path.join(project.rootDir, artifact.entry)).href);
@@ -111,7 +111,7 @@ describe("native plugin browser builds", () => {
 
   it("bundles SDK source instead of stale dist under NODE_ENV=production", async () => {
     const project = await fixture();
-    const sdkRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-build-sdk-"));
+    const sdkRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ui-build-sdk-"));
     directories.push(sdkRoot);
     await Promise.all(
       ["src/plugin-sdk", "dist/plugin-sdk", "extensions"].map((dir) =>
@@ -121,9 +121,9 @@ describe("native plugin browser builds", () => {
     await fs.writeFile(
       path.join(sdkRoot, "package.json"),
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         type: "module",
-        bin: { openclaw: "openclaw.mjs" },
+        bin: { carapace: "carapace.mjs" },
         exports: { "./plugin-sdk/control-ui": { default: "./dist/plugin-sdk/control-ui.js" } },
       }),
     );
@@ -137,10 +137,10 @@ describe("native plugin browser builds", () => {
     );
     await fs.writeFile(
       path.join(project.rootDir, project.source),
-      'export { origin } from "openclaw/plugin-sdk/control-ui";',
+      'export { origin } from "carapace/plugin-sdk/control-ui";',
     );
     const build = (nodeEnv: string | undefined) =>
-      withEnvAsync({ NODE_ENV: nodeEnv, OPENCLAW_DEV_SOURCE_ROOT: sdkRoot }, () =>
+      withEnvAsync({ NODE_ENV: nodeEnv, CARAPACE_DEV_SOURCE_ROOT: sdkRoot }, () =>
         buildPluginControlUi(project),
       );
 
@@ -163,7 +163,7 @@ describe("native plugin browser builds", () => {
       const project = await fixture();
       const first = await buildPluginControlUi(project);
       await writePluginBuildManifest(project.rootDir, { id: "fixture", controlUi: first });
-      const manifestPath = path.join(project.rootDir, "openclaw.plugin.json");
+      const manifestPath = path.join(project.rootDir, "carapace.plugin.json");
       const manifest = await fs.readFile(manifestPath, "utf8");
       const runOriginal = await createPluginImportFixture(
         path.join(project.rootDir, "runtime"),
@@ -186,13 +186,13 @@ describe("native plugin browser builds", () => {
     const project = await fixture();
     const first = await buildPluginControlUi(project);
     await writePluginBuildManifest(project.rootDir, { id: "fixture", controlUi: first });
-    const manifest = await fs.readFile(path.join(project.rootDir, "openclaw.plugin.json"), "utf8");
+    const manifest = await fs.readFile(path.join(project.rootDir, "carapace.plugin.json"), "utf8");
     await fs.writeFile(
       path.join(project.rootDir, project.source),
       'import fs from "node:fs"; export default fs;',
     );
     await expect(buildPluginControlUi(project)).rejects.toThrow();
-    expect(await fs.readFile(path.join(project.rootDir, "openclaw.plugin.json"), "utf8")).toBe(
+    expect(await fs.readFile(path.join(project.rootDir, "carapace.plugin.json"), "utf8")).toBe(
       manifest,
     );
     expect(await fs.readFile(path.join(project.rootDir, first.entry), "utf8")).toContain("first");

@@ -8,23 +8,23 @@ import type {
   SessionBindingRecord,
 } from "../infra/outbound/session-binding-service.js";
 import { drainGlobalSingletonLifecycleState } from "../shared/global-singleton.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import * as openClawStateDb from "../state/openclaw-state-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import * as carapaceStateDb from "../state/carapace-state-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { seedPluginConversationBindingApprovalForTest } from "./conversation-binding.test-fixtures.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
 import type { PluginRegistry } from "./registry.js";
 import { cleanupTrackedTempDirs, makeTrackedTempDir } from "./test-helpers/fs-fixtures.js";
 
 const tempDirs: string[] = [];
-const tempRoot = makeTrackedTempDir("openclaw-plugin-binding", tempDirs);
-const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+const tempRoot = makeTrackedTempDir("carapace-plugin-binding", tempDirs);
+const previousStateDir = process.env.CARAPACE_STATE_DIR;
 
-type PluginBindingApprovalsDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_binding_approvals">;
+type PluginBindingApprovalsDatabase = Pick<CarapaceStateKyselyDatabase, "plugin_binding_approvals">;
 
 const sessionBindingState = vi.hoisted(() => {
   const records = new Map<string, SessionBindingRecord>();
@@ -164,11 +164,11 @@ function createAdapter(channel: string, accountId: string): SessionBindingAdapte
 }
 
 afterAll(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   if (previousStateDir == null) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.CARAPACE_STATE_DIR = previousStateDir;
   }
   cleanupTrackedTempDirs(tempDirs);
 });
@@ -420,7 +420,7 @@ async function expectResolutionDoesNotWait(params: {
 }
 
 function clearPluginBindingApprovalRows(): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const approvalsDb = getNodeSqliteKysely<PluginBindingApprovalsDatabase>(db);
     executeSqliteQuerySync(db, approvalsDb.deleteFrom("plugin_binding_approvals"));
   });
@@ -432,7 +432,7 @@ function readPluginBindingApprovalRows(): Array<{
   plugin_id: string;
   plugin_root: string;
 }> {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const approvalsDb = getNodeSqliteKysely<PluginBindingApprovalsDatabase>(db);
   return executeSqliteQuerySync(
     db,
@@ -459,7 +459,7 @@ function insertPluginBindingApprovalRow(params: {
 describe("plugin conversation binding approvals", () => {
   beforeEach(async () => {
     await drainGlobalSingletonLifecycleState();
-    process.env.OPENCLAW_STATE_DIR = tempRoot;
+    process.env.CARAPACE_STATE_DIR = tempRoot;
     clearPluginBindingApprovalRows();
     sessionBindingState.reset();
     setActivePluginRegistry(createEmptyPluginRegistry());
@@ -697,7 +697,7 @@ describe("plugin conversation binding approvals", () => {
     );
 
     const writeSpy = vi
-      .spyOn(openClawStateDb, "runOpenClawStateWriteTransaction")
+      .spyOn(carapaceStateDb, "runCarapaceStateWriteTransaction")
       .mockImplementationOnce(() => {
         throw new Error("SQLITE_BUSY: database is locked");
       });
@@ -930,8 +930,8 @@ describe("plugin conversation binding approvals", () => {
     const data = {
       kind: "codex-app-server-session",
       version: 1,
-      sessionFile: "/tmp/openclaw/session.jsonl",
-      workspaceDir: "/workspace/openclaw",
+      sessionFile: "/tmp/carapace/session.jsonl",
+      workspaceDir: "/workspace/carapace",
     };
     const binding = await requestResolvedBinding(
       createCodexBindRequest({
@@ -1232,7 +1232,7 @@ describe("plugin conversation binding approvals", () => {
       name: "migrates a legacy codex thread binding session key through the new approval flow",
       existingRecord: {
         bindingId: "binding-legacy-codex-thread",
-        targetSessionKey: "openclaw-app-server:thread:019ce411-6322-7db2-a821-1a61c530e7d9",
+        targetSessionKey: "carapace-app-server:thread:019ce411-6322-7db2-a821-1a61c530e7d9",
         targetKind: "session" as const,
         conversation: {
           channel: "telegram",
@@ -1249,10 +1249,10 @@ describe("plugin conversation binding approvals", () => {
         accountId: "default",
         conversationId: "8460800771",
         summary: "Bind this conversation to Codex thread 019ce411-6322-7db2-a821-1a61c530e7d9.",
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
       }),
       expectedBinding: {
-        pluginId: "openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
         pluginRoot: "/plugins/codex-a",
         conversationId: "8460800771",
       },

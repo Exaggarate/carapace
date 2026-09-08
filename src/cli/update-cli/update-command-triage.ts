@@ -61,7 +61,7 @@ export async function withUpdateFailureTriage(
           };
       const automatic =
         mode !== "interactive" && reportedFailure ? error.automaticTriage : undefined;
-      if (automatic || target.env.OPENCLAW_UPDATE_RUN_HANDOFF === "1") {
+      if (automatic || target.env.CARAPACE_UPDATE_RUN_HANDOFF === "1") {
         let updateResultPath: string | undefined;
         try {
           const meta = await readControlPlaneUpdateSentinelMeta(target.env);

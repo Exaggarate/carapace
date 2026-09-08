@@ -11,9 +11,9 @@ const originalArgv = process.argv;
 let tempDirs: string[] = [];
 
 function writeConfig(source: string): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-logging-config-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-logging-config-"));
   tempDirs.push(dir);
-  const configPath = path.join(dir, "openclaw.json");
+  const configPath = path.join(dir, "carapace.json");
   fs.writeFileSync(configPath, source);
   return configPath;
 }
@@ -37,10 +37,10 @@ describe("readLoggingConfig", () => {
   });
 
   it("reads logging style without a mutating config load for config schema", () => {
-    process.argv = ["node", "openclaw", "config", "schema"];
+    process.argv = ["node", "carapace", "config", "schema"];
     const configPath = writeConfig(`{ logging: { consoleStyle: "json" } }`);
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () => {
+    withEnv({ CARAPACE_CONFIG_PATH: configPath }, () => {
       expect(readLoggingConfig()).toStrictEqual({ consoleStyle: "json" });
     });
   });
@@ -49,15 +49,15 @@ describe("readLoggingConfig", () => {
     const configPath = writeConfig(`{
       logging: {
         level: "debug",
-        file: "/tmp/openclaw-custom.log",
+        file: "/tmp/carapace-custom.log",
         maxFileBytes: 1234,
       },
     }`);
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () => {
+    withEnv({ CARAPACE_CONFIG_PATH: configPath }, () => {
       expect(readLoggingConfig()).toStrictEqual({
         level: "debug",
-        file: "/tmp/openclaw-custom.log",
+        file: "/tmp/carapace-custom.log",
         maxFileBytes: 1234,
       });
     });
@@ -65,13 +65,13 @@ describe("readLoggingConfig", () => {
 
   it("supports JSON5 comments and trailing commas", () => {
     const configPath = writeConfig(`{
-      // users commonly keep comments in openclaw.json
+      // users commonly keep comments in carapace.json
       logging: {
         consoleLevel: "warn",
       },
     }`);
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () => {
+    withEnv({ CARAPACE_CONFIG_PATH: configPath }, () => {
       expect(readLoggingConfig()).toStrictEqual({
         consoleLevel: "warn",
       });
@@ -82,13 +82,13 @@ describe("readLoggingConfig", () => {
     const configPath = writeConfig(`{ logging: { $include: "./logging.json5" } }`);
     fs.writeFileSync(
       path.join(path.dirname(configPath), "logging.json5"),
-      `{ consoleStyle: "\${OPENCLAW_TEST_CONSOLE_STYLE}", file: "\${MISSING_LOG_FILE}" }`,
+      `{ consoleStyle: "\${CARAPACE_TEST_CONSOLE_STYLE}", file: "\${MISSING_LOG_FILE}" }`,
     );
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_CONSOLE_STYLE: "json",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_CONSOLE_STYLE: "json",
         MISSING_LOG_FILE: undefined,
       },
       () => {
@@ -106,7 +106,7 @@ describe("readLoggingConfig", () => {
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
         MISSING_DEMO_KEY: undefined,
         MISSING_LOG_FILE: undefined,
       },
@@ -128,7 +128,7 @@ describe("readLoggingConfig", () => {
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
         MISSING_LOG_FILE: undefined,
       },
       () => {
@@ -141,15 +141,15 @@ describe("readLoggingConfig", () => {
     const configPath = writeConfig(`{
       logging: {
         consoleStyle: "json",
-        file: "\${OPENCLAW_TEST_LOG_FILE}",
+        file: "\${CARAPACE_TEST_LOG_FILE}",
         level: "debug",
       },
     }`);
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_LOG_FILE: undefined,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_LOG_FILE: undefined,
       },
       () => {
         expect(readLoggingConfig()).toStrictEqual({ consoleStyle: "json" });
@@ -158,13 +158,13 @@ describe("readLoggingConfig", () => {
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_LOG_FILE: "/tmp/openclaw-env-backed.log",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_LOG_FILE: "/tmp/carapace-env-backed.log",
       },
       () => {
         expect(readLoggingConfig()).toStrictEqual({
           consoleStyle: "json",
-          file: "/tmp/openclaw-env-backed.log",
+          file: "/tmp/carapace-env-backed.log",
           level: "debug",
         });
       },
@@ -182,7 +182,7 @@ describe("readLoggingConfig", () => {
 
     withEnv(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
         MISSING_LOG_FILE: undefined,
       },
       () => {
@@ -196,31 +196,31 @@ describe("readLoggingConfig", () => {
 
   it("returns undefined for missing or malformed config files", () => {
     withEnv(
-      { OPENCLAW_CONFIG_PATH: path.join(os.tmpdir(), "openclaw-missing-config.json") },
+      { CARAPACE_CONFIG_PATH: path.join(os.tmpdir(), "carapace-missing-config.json") },
       () => {
         expect(readLoggingConfig()).toBeUndefined();
       },
     );
 
     const configPath = writeConfig(`{ logging: `);
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () => {
+    withEnv({ CARAPACE_CONFIG_PATH: configPath }, () => {
       expect(readLoggingConfig()).toBeUndefined();
     });
   });
 
   it("caches a missing config until the path selector changes", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-logging-config-missing-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-logging-config-missing-"));
     tempDirs.push(dir);
     const firstPath = path.join(dir, "missing-first.json");
     const secondPath = path.join(dir, "missing-second.json");
     const existsSync = vi.spyOn(fs, "existsSync");
 
     try {
-      withEnv({ OPENCLAW_CONFIG_PATH: firstPath }, () => {
+      withEnv({ CARAPACE_CONFIG_PATH: firstPath }, () => {
         expect(readLoggingConfig()).toBeUndefined();
         expect(readLoggingConfig()).toBeUndefined();
       });
-      withEnv({ OPENCLAW_CONFIG_PATH: secondPath }, () => {
+      withEnv({ CARAPACE_CONFIG_PATH: secondPath }, () => {
         expect(readLoggingConfig()).toBeUndefined();
       });
 

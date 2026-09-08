@@ -1,7 +1,7 @@
 /** Tests Code Mode MCP namespace. */
 
 import { GetPromptResultSchema, type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { materializeBundleMcpToolsForRun } from "./agent-bundle-mcp-materialize.js";
 import type { McpToolCatalog, SessionMcpRuntime } from "./agent-bundle-mcp-types.js";
@@ -81,8 +81,8 @@ describe("Code Mode MCP namespace", () => {
         const rootFile = await API.read("mcp/index.d.ts");
         const serverFile = await API.read("mcp/github.d.ts");
         const created = await MCP.github.createIssue({
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "carapace",
+          repo: "carapace",
           title: "Ship it",
           labels: ["red", "blue"],
         });
@@ -115,8 +115,8 @@ describe("Code Mode MCP namespace", () => {
         serverName: "github",
         toolName: "create_issue",
         input: {
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "carapace",
+          repo: "carapace",
           title: "Ship it",
           body: "",
           labels: ["red", "blue"],

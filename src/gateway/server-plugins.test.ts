@@ -3,8 +3,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { createTerminalTool } from "../agents/tools/terminal-tool.js";
 import {
@@ -27,7 +27,7 @@ import { createInternalAgentTurnFacade } from "./agent-turn/internal-facade.js";
 import type { GatewayRequestContext, GatewayRequestOptions } from "./server-methods/types.js";
 import { createSyntheticPluginRuntimeClient } from "./server-plugin-runtime-client.js";
 
-const loadOpenClawPlugins = vi.hoisted(() => vi.fn());
+const loadCarapacePlugins = vi.hoisted(() => vi.fn());
 const loadPluginLookUpTable = vi.hoisted(() =>
   vi.fn(() => ({
     startup: {
@@ -59,8 +59,8 @@ const dispatchReplyFromConfig = vi.hoisted(() =>
 );
 
 vi.mock("../plugins/loader.js", () => ({
-  loadAndActivateRootPluginRegistry: loadOpenClawPlugins,
-  loadOpenClawPlugins,
+  loadAndActivateRootPluginRegistry: loadCarapacePlugins,
+  loadCarapacePlugins,
 }));
 
 vi.mock("../plugins/runtime/load-context.js", async (importOriginal) => {
@@ -321,7 +321,7 @@ function readRecordField(record: Record<string, unknown>, key: string, label: st
 
 function getLastPluginLoadOptions(): Record<string, unknown> {
   return requireRecord(
-    getLastMockFirstArg(loadOpenClawPlugins, "plugin load"),
+    getLastMockFirstArg(loadCarapacePlugins, "plugin load"),
     "plugin load options",
   );
 }
@@ -362,7 +362,7 @@ function getLastPluginLoadLogger(): {
   error: (message: string) => void;
   debug?: (message: string) => void;
 } {
-  const call = getLastMockFirstArg(loadOpenClawPlugins, "plugin load") as
+  const call = getLastMockFirstArg(loadCarapacePlugins, "plugin load") as
     | {
         logger?: {
           info: (message: string) => void;
@@ -434,7 +434,7 @@ async function createSubagentRuntime(
   _serverPlugins: ServerPluginsModule,
   cfg: Record<string, unknown> = {},
 ): Promise<PluginRuntime["subagent"]> {
-  loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+  loadCarapacePlugins.mockReturnValue(createRegistry([]));
   loadGatewayStartupPluginsForTest({
     cfg,
   });
@@ -442,7 +442,7 @@ async function createSubagentRuntime(
 }
 
 async function createRequestScopedSubagentRuntime(): Promise<PluginRuntime["subagent"]> {
-  loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+  loadCarapacePlugins.mockReturnValue(createRegistry([]));
   loadGatewayStartupPluginsForTest({ resolveGatewayContext: undefined });
   return createRuntimeFromLastGatewayLoad().subagent;
 }
@@ -517,7 +517,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  loadOpenClawPlugins.mockReset();
+  loadCarapacePlugins.mockReset();
   loadPluginLookUpTable.mockReset().mockReturnValue({
     startup: {
       pluginIds: ["discord", "telegram"],
@@ -571,7 +571,7 @@ describe("loadGatewayPlugins", () => {
         message: "failed to load plugin: boom",
       },
     ];
-    loadOpenClawPlugins.mockReturnValue(createRegistry(diagnostics));
+    loadCarapacePlugins.mockReturnValue(createRegistry(diagnostics));
     const log = loadGatewayStartupPluginsForTest();
 
     expect(log.error).toHaveBeenCalledWith(
@@ -589,7 +589,7 @@ describe("loadGatewayPlugins", () => {
         message: 'typed hook "before_prompt_build" blocked by policy',
       },
     ];
-    loadOpenClawPlugins.mockReturnValue(createRegistry(diagnostics));
+    loadCarapacePlugins.mockReturnValue(createRegistry(diagnostics));
     const log = loadGatewayStartupPluginsForTest();
 
     expect(log.warn).toHaveBeenCalledWith(
@@ -612,7 +612,7 @@ describe("loadGatewayPlugins", () => {
       message: "configured plugin payload verification failed (missing-package-json): missing",
     };
     const registry = createRegistry([diagnostic, distinctDiagnostic]);
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     setActiveDegradedPlugins([
       {
         pluginId: "broken-payload",
@@ -635,7 +635,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("loads only gateway startup plugin ids", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayPluginsForTest();
 
     expect(applyPluginAutoEnable).toHaveBeenCalledWith({
@@ -660,7 +660,7 @@ describe("loadGatewayPlugins", () => {
       terminalSessions,
     } as unknown as GatewayRequestContext;
     serverPluginsModule.setFallbackGatewayContext(context);
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     dispatchReplyFromConfig.mockImplementationOnce(async () => {
       const result = await createTerminalTool({
         agentId: "main",
@@ -702,8 +702,8 @@ describe("loadGatewayPlugins", () => {
     const { captureGatewaySessionWorkAdmissions } =
       await import("../sessions/session-lifecycle-admission.js");
     const { replaceSessionEntry } = await import("../config/sessions/session-accessor.js");
-    const { closeOpenClawAgentDatabasesForTest } = await import("../state/openclaw-agent-db.js");
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-restart-owner-"));
+    const { closeCarapaceAgentDatabasesForTest } = await import("../state/carapace-agent-db.js");
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-restart-owner-"));
     const storePath = path.join(stateDir, "sessions.json");
     const context = createTestContext("same-context-distinct-owners");
     const closingResolver = vi.fn(() => context);
@@ -720,7 +720,7 @@ describe("loadGatewayPlugins", () => {
           { storePath, sessionKey },
           { sessionId: name, updatedAt: Date.now() },
         );
-        loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+        loadCarapacePlugins.mockReturnValue(createRegistry([]));
         runtimes.push(
           serverPluginsModule.loadGatewayPlugins({
             cfg: {},
@@ -783,23 +783,23 @@ describe("loadGatewayPlugins", () => {
       operations.forEach((operation) => operation.complete());
       runtimes.forEach((runtime) => runtime.retireGatewayRuntimeBindings());
       await Promise.resolve();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });
 
   test("injects the process HOME-isolation fact into registry construction", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     const home = os.userInfo().homedir;
-    const defaultStateDir = path.join(home, ".openclaw");
+    const defaultStateDir = path.join(home, ".carapace");
     withEnv(
       {
         HOME: home,
         USERPROFILE: home,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_STATE_DIR: defaultStateDir,
-        OPENCLAW_CONFIG_PATH: path.join(defaultStateDir, "openclaw.json"),
+        CARAPACE_HOME: undefined,
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_STATE_DIR: defaultStateDir,
+        CARAPACE_CONFIG_PATH: path.join(defaultStateDir, "carapace.json"),
       },
       () => loadGatewayPluginsForTest(),
     );
@@ -809,10 +809,10 @@ describe("loadGatewayPlugins", () => {
       {
         HOME: home,
         USERPROFILE: home,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_PROFILE: "dev",
-        OPENCLAW_STATE_DIR: path.join(home, ".openclaw-dev"),
-        OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw-dev", "openclaw.json"),
+        CARAPACE_HOME: undefined,
+        CARAPACE_PROFILE: "dev",
+        CARAPACE_STATE_DIR: path.join(home, ".carapace-dev"),
+        CARAPACE_CONFIG_PATH: path.join(home, ".carapace-dev", "carapace.json"),
       },
       () => loadGatewayPluginsForTest(),
     );
@@ -821,7 +821,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("routes plugin registration logs through the plugin logger", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     const log = loadGatewayPluginsForTest();
 
     const logger = getLastPluginLoadLogger();
@@ -835,7 +835,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("can suppress provisional plugin info logs while preserving warnings", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayPluginsForTest({
       suppressPluginInfoLogs: true,
     });
@@ -849,7 +849,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("reuses the provided startup plugin scope without recomputing it", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayPluginsForTest({
       pluginIds: ["browser"],
@@ -860,12 +860,12 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("reuses a provided lookup table for startup scope and auto-enable manifests", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     const manifestRegistry = { plugins: [], diagnostics: [] };
     const installRecords = {
       telegram: {
         source: "npm" as const,
-        spec: "@openclaw/telegram@1.0.0",
+        spec: "@carapace/telegram@1.0.0",
         installPath: "/tmp/plugins/telegram",
       },
     };
@@ -902,7 +902,7 @@ describe("loadGatewayPlugins", () => {
         slack: ["slack configured"],
       },
     });
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayStartupPluginsForTest({
       cfg: resolvedConfig,
@@ -929,7 +929,7 @@ describe("loadGatewayPlugins", () => {
       changes: [],
       autoEnabledReasons: { "qa-lab": ["static-ssh worker provider selected"] },
     });
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayStartupPluginsForTest({
       pluginIds: ["qa-lab"],
@@ -946,7 +946,7 @@ describe("loadGatewayPlugins", () => {
               hooks: [],
               rootDir: "/tmp/qa-lab",
               source: "/tmp/qa-lab/index.js",
-              manifestPath: "/tmp/qa-lab/openclaw.plugin.json",
+              manifestPath: "/tmp/qa-lab/carapace.plugin.json",
               contracts: { workerProviders: ["static-ssh"] },
             },
           ],
@@ -1021,7 +1021,7 @@ describe("loadGatewayPlugins", () => {
         telegram: ["telegram configured"],
       },
     });
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayStartupPluginsForTest({
       cfg: runtimeConfig,
@@ -1071,7 +1071,7 @@ describe("loadGatewayPlugins", () => {
       baseMethods: ["sessions.get"],
     });
 
-    expect(loadOpenClawPlugins).not.toHaveBeenCalled();
+    expect(loadCarapacePlugins).not.toHaveBeenCalled();
     expect(result.pluginRegistry.plugins).toStrictEqual([]);
     expect(result.gatewayMethods).toEqual(["sessions.get"]);
   });
@@ -1121,7 +1121,7 @@ describe("loadGatewayPlugins", () => {
         slack: ["slack configured"],
       },
     });
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayPluginsForTest();
 
@@ -1148,7 +1148,7 @@ describe("loadGatewayPlugins", () => {
         slack: ["slack configured"],
       },
     });
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
 
     loadGatewayPluginsForTest({
       cfg: resolvedConfig,
@@ -1414,7 +1414,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("filters connected plugin nodes locally without sending unsupported node.list params", async () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext(createTestContext("nodes-list-filter"));
     handleGatewayRequest.mockImplementationOnce(async (opts: HandleGatewayRequestOptions) => {
@@ -1436,7 +1436,7 @@ describe("loadGatewayPlugins", () => {
 
   test("projects effective node-command policy into the plugin node runtime", async () => {
     const command = "agent.cli.claude.run.v1";
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext({
       getRuntimeConfig: () => ({ gateway: { nodes: { commands: { deny: [command] } } } }),
@@ -1463,7 +1463,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("lets trusted official plugin runtime request admin scope for browser proxy", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext(createTestContext("nodes-invoke-browser-proxy"));
 
@@ -1493,7 +1493,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("honors trusted plugin node scopes inside a narrower Gateway request", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "opencode" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "opencode" }));
     loadGatewayStartupPluginsForTest({ resolveGatewayContext: undefined });
     const scope = {
       context: createTestContext("nodes-invoke-read-caller"),
@@ -1521,7 +1521,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("dispatches gateway methods with the trusted plugin identity", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext(createTestContext("plugin-gateway-request"));
     const runtime = createRuntimeFromLastGatewayLoad();
@@ -1541,7 +1541,7 @@ describe("loadGatewayPlugins", () => {
     { pluginId: "missing-plugin", reason: /Plugin "missing-plugin" is neither\./ },
     { pluginId: undefined, reason: /This call carries no plugin identity\./ },
   ])("explains the Gateway refusal for plugin identity $pluginId", async ({ pluginId, reason }) => {
-    loadOpenClawPlugins.mockReturnValue(
+    loadCarapacePlugins.mockReturnValue(
       addLoadedPlugin(createRegistry([]), { id: "community-plugin", origin: "global" }),
     );
     loadGatewayStartupPluginsForTest();
@@ -1558,13 +1558,13 @@ describe("loadGatewayPlugins", () => {
     await expect(request).rejects.toThrow(reason);
     await expect(request).rejects.toThrow("bundled or trusted official plugins");
     await expect(request).rejects.toThrow(
-      "https://docs.openclaw.ai/plugins/sdk-runtime#api-runtime-gateway",
+      "https://github.com/Exaggarate/carapace#api-runtime-gateway",
     );
     expect(handleGatewayRequest).not.toHaveBeenCalled();
   });
 
   test("lets trusted official plugins request explicit Gateway scopes", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext(createTestContext("plugin-gateway-admin"));
     const runtime = createRuntimeFromLastGatewayLoad();
@@ -1584,7 +1584,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("reports whether trusted in-process Gateway dispatch is available", async () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayStartupPluginsForTest();
     const runtime = createRuntimeFromLastGatewayLoad();
 
@@ -1594,7 +1594,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("does not inherit admin scope for trusted plugin gateway requests", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
     loadGatewayStartupPluginsForTest({ resolveGatewayContext: undefined });
     const scope = {
       context: createTestContext("plugin-gateway-request-admin-caller"),
@@ -1620,7 +1620,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("preserves structured errors from trusted plugin gateway requests", async () => {
-    loadOpenClawPlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
+    loadCarapacePlugins.mockReturnValue(addLoadedPlugin(createRegistry([]), { id: "google-meet" }));
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext(createTestContext("plugin-gateway-error"));
     handleGatewayRequest.mockImplementationOnce(async (opts: HandleGatewayRequestOptions) => {
@@ -1645,7 +1645,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("rejects gateway dispatch from arbitrary plugins", async () => {
-    loadOpenClawPlugins.mockReturnValue(
+    loadCarapacePlugins.mockReturnValue(
       addLoadedPlugin(createRegistry([]), { id: "third-party", origin: "global" }),
     );
     loadGatewayStartupPluginsForTest();
@@ -1667,7 +1667,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("does not let arbitrary plugin nodes runtime mint admin scope for browser proxy", async () => {
-    loadOpenClawPlugins.mockReturnValue(
+    loadCarapacePlugins.mockReturnValue(
       addLoadedPlugin(createRegistry([]), { id: "third-party", origin: "global" }),
     );
     loadGatewayStartupPluginsForTest();
@@ -1708,7 +1708,7 @@ describe("loadGatewayPlugins", () => {
       command: { command: "image.bridge", handle },
       source: "test",
     });
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext({
       nodeRegistry: { sendInvokeInput: vi.fn() },
@@ -1749,7 +1749,7 @@ describe("loadGatewayPlugins", () => {
         source: "test",
       })),
     );
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     loadGatewayStartupPluginsForTest();
     serverPluginsModule.setFallbackGatewayContext({
       nodeRegistry: { sendInvokeInput: vi.fn() },
@@ -1774,7 +1774,7 @@ describe("loadGatewayPlugins", () => {
     async (scopeLabel) => {
       const scopes = scopeLabel === "no scopes" ? [] : ["operator.read"];
       const registry = createDuplexPluginRegistry();
-      loadOpenClawPlugins.mockReturnValue(registry);
+      loadCarapacePlugins.mockReturnValue(registry);
       loadGatewayStartupPluginsForTest();
       const context = {
         nodeRegistry: { sendInvokeInput: vi.fn() },
@@ -1819,7 +1819,7 @@ describe("loadGatewayPlugins", () => {
       const scopes = callerScope === "no scopes" ? [] : [callerScope];
       const callerAbort = new AbortController();
       const registry = createDuplexPluginRegistry();
-      loadOpenClawPlugins.mockReturnValue(registry);
+      loadCarapacePlugins.mockReturnValue(registry);
       loadGatewayStartupPluginsForTest();
       const context = {
         nodeRegistry: { sendInvokeInput: vi.fn() },
@@ -1857,7 +1857,7 @@ describe("loadGatewayPlugins", () => {
 
   test("waits for framed readiness and carries binary messages through canonical invoke transport", async () => {
     const registry = createDuplexPluginRegistry();
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     loadGatewayStartupPluginsForTest();
     const sendInvokeInput = vi.fn();
     const context = {
@@ -1931,7 +1931,7 @@ describe("loadGatewayPlugins", () => {
     "waits for terminal asynchronous message delivery and handles %s",
     async (terminalAction) => {
       const registry = createDuplexPluginRegistry();
-      loadOpenClawPlugins.mockReturnValue(registry);
+      loadCarapacePlugins.mockReturnValue(registry);
       loadGatewayStartupPluginsForTest();
       serverPluginsModule.setFallbackGatewayContext({
         nodeRegistry: { sendInvokeInput: vi.fn() },
@@ -1997,7 +1997,7 @@ describe("loadGatewayPlugins", () => {
 
   test("cancels a retained duplex invocation when its delegated caller authority closes", async () => {
     const registry = createDuplexPluginRegistry();
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     loadGatewayStartupPluginsForTest();
     const sendInvokeInput = vi.fn();
     const validateAgentRuntimeApprovalAuthority = vi.fn(() => true);
@@ -2062,7 +2062,7 @@ describe("loadGatewayPlugins", () => {
 
   test("cancels an open node duplex invocation before retiring its plugin runtime", async () => {
     const registry = createDuplexPluginRegistry("plugin.duplex.v1");
-    loadOpenClawPlugins.mockReturnValue(registry);
+    loadCarapacePlugins.mockReturnValue(registry);
     const context = {
       nodeRegistry: { sendInvokeInput: vi.fn() },
     } as unknown as GatewayRequestContext;
@@ -2512,7 +2512,7 @@ describe("loadGatewayPlugins", () => {
         }),
       ),
     ).rejects.toThrow(
-      'plugin "voice-call" is not trusted for fallback provider/model override requests. See https://docs.openclaw.ai/plugins/sdk-runtime#api-runtime-subagent and search for: plugins.entries.<id>.subagent.allowModelOverride',
+      'plugin "voice-call" is not trusted for fallback provider/model override requests. See https://github.com/Exaggarate/carapace#api-runtime-subagent and search for: plugins.entries.<id>.subagent.allowModelOverride',
     );
   });
 
@@ -2755,7 +2755,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("can select setup-runtime channel plugins for setup flows", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     loadGatewayPluginsForTest({
       channelPluginLoadIntent: "setup",
     });
@@ -2764,7 +2764,7 @@ describe("loadGatewayPlugins", () => {
   });
 
   test("primes configured bindings during gateway startup", () => {
-    loadOpenClawPlugins.mockReturnValue(createRegistry([]));
+    loadCarapacePlugins.mockReturnValue(createRegistry([]));
     const cfg = {};
     const autoEnabledConfig = { channels: { slack: { enabled: true } }, autoEnabled: true };
     applyPluginAutoEnable.mockReturnValue({

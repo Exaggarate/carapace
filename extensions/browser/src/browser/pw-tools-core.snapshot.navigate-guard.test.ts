@@ -118,7 +118,7 @@ describe("pw-tools-core.snapshot navigate guard", () => {
     const download = {
       url: "https://example.com/export.csv",
       suggestedFilename: "export.csv",
-      path: "/tmp/openclaw/downloads/export.csv",
+      path: "/tmp/carapace/downloads/export.csv",
     };
     const downloadCapture = {
       armed: true,
@@ -156,7 +156,7 @@ describe("pw-tools-core.snapshot navigate guard", () => {
     const download = {
       url: "http://127.0.0.1:3333/download",
       suggestedFilename: "proof.txt",
-      path: "/tmp/openclaw/downloads/proof.txt",
+      path: "/tmp/carapace/downloads/proof.txt",
     };
     const downloadCapture = {
       armed: true,
@@ -212,7 +212,7 @@ describe("pw-tools-core.snapshot navigate guard", () => {
     const download = {
       url: "http://127.0.0.1:18080/export.csv",
       suggestedFilename: "export.csv",
-      path: "/tmp/openclaw/downloads/export.csv",
+      path: "/tmp/carapace/downloads/export.csv",
     };
     const downloadCapture = {
       armed: true,

@@ -7,7 +7,7 @@ import { setTestEnvValue } from "../test-utils/env.js";
 import { provisionGatewayTokenStoreRef } from "./auth-token-store-ref.js";
 
 const STORE_SCOPE = { kind: "team" } as const;
-const STORE_NAME = "OPENCLAW_GATEWAY_TOKEN";
+const STORE_NAME = "CARAPACE_GATEWAY_TOKEN";
 
 function readStored(): string | undefined {
   const result = readSecretStoreValue({ scope: STORE_SCOPE, name: STORE_NAME });
@@ -19,7 +19,7 @@ describe("provisionGatewayTokenStoreRef", () => {
 
   beforeEach(() => {
     stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "gateway-token-store-")));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   });
 
   afterEach(() => {

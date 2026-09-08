@@ -17,7 +17,7 @@ it("preserves the package-derived Git fixture identity through build and lifecyc
   mkdirSync(join(root, "dist"));
   writeFileSync(
     join(root, "package.json"),
-    JSON.stringify({ name: "openclaw", version: "2026.8.1", engines: { node: ">=22.22.3" } }),
+    JSON.stringify({ name: "carapace", version: "2026.8.1", engines: { node: ">=22.22.3" } }),
   );
   writeFileSync(join(root, "dist/entry.js"), runtimeEntry);
   writeFileSync(
@@ -75,11 +75,11 @@ it("preserves the package-derived Git fixture identity through build and lifecyc
             env: {
               ...process.env,
               HOME: home,
-              OPENCLAW_HOME: home,
-              OPENCLAW_STATE_DIR: join(home, "state"),
-              OPENCLAW_CONFIG_PATH: join(home, "config.json"),
+              CARAPACE_HOME: home,
+              CARAPACE_STATE_DIR: join(home, "state"),
+              CARAPACE_CONFIG_PATH: join(home, "config.json"),
               STATE_DIRECTORY: undefined,
-              OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
+              CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL: undefined,
             },
           });
         },
@@ -116,7 +116,7 @@ it("rejects retained runtime staging at the channel update success boundary", ()
     root,
     "packages",
     "nested",
-    "node_modules.openclaw-update-00000000-0000-4000-8000-000000000000.tmp",
+    "node_modules.carapace-update-00000000-0000-4000-8000-000000000000.tmp",
   );
   mkdirSync(staging, { recursive: true });
   writeFileSync(join(staging, "previous"), "recoverable original");

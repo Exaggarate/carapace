@@ -1,11 +1,11 @@
 // Session disk-budget enforcement prunes orphaned artifacts before deleting store entries.
 import fs from "node:fs";
 import path from "node:path";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveRealpathOrAbsolute as canonicalizePathForComparison } from "../../infra/boundary-path.js";
 import {
   resolveTrajectoryFilePath,

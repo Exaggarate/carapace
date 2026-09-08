@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { TextDecoder } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   classifySessionFileEntry,
   migrateSessionFileEntryToCurrentVersion,
@@ -21,10 +21,10 @@ import {
 } from "../config/sessions/session-accessor.sqlite-scope.js";
 import type { SessionStoreTarget as ResolvedSessionStoreTarget } from "../config/sessions/targets.js";
 import { resolveAllAgentSessionStoreCandidateTargetsSync } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
-import { tableExists, tableHasColumn } from "../state/openclaw-state-db-schema-helpers.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
+import { tableExists, tableHasColumn } from "../state/carapace-state-db-schema-helpers.js";
 
 type SessionStoreTarget = ResolvedSessionStoreTarget & { sqlitePath?: string };
 
@@ -234,7 +234,7 @@ function assertTranscriptFileUnchanged(
     current.size !== expected.size
   ) {
     throw new Error(
-      "Legacy transcript changed during import; stop active session writers and rerun `openclaw doctor --fix`.",
+      "Legacy transcript changed during import; stop active session writers and rerun `carapace doctor --fix`.",
     );
   }
 }
@@ -513,7 +513,7 @@ export function resolveTargetSqlitePath(
   target: SessionStoreTarget,
   env?: NodeJS.ProcessEnv,
 ): string {
-  return resolveOpenClawAgentSqlitePath(resolveTargetSqliteOptions(target, env));
+  return resolveCarapaceAgentSqlitePath(resolveTargetSqliteOptions(target, env));
 }
 
 /**
@@ -537,7 +537,7 @@ export function projectExistingAgentDatabaseTargets(
 }
 
 export function listExistingAgentDatabaseTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): ExistingAgentDatabaseTarget[] {
   return projectExistingAgentDatabaseTargets(

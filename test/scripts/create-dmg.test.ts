@@ -17,9 +17,9 @@ const tempDirs: string[] = [];
 const scriptPath = "scripts/create-dmg.sh";
 
 function makeApp(plistEntries: string[]): string {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-"));
   tempDirs.push(dir);
-  const app = path.join(dir, "OpenClaw.app");
+  const app = path.join(dir, "Carapace.app");
   const contents = path.join(app, "Contents");
   mkdirSync(contents, { recursive: true });
   writeFileSync(
@@ -42,14 +42,14 @@ function makeApp(plistEntries: string[]): string {
 function makeValidApp(): string {
   return makeApp([
     "<key>CFBundleName</key>",
-    "<string>OpenClaw</string>",
+    "<string>Carapace</string>",
     "<key>CFBundleShortVersionString</key>",
     "<string>2026.6.16</string>",
   ]);
 }
 
 function makeFakeDmgTools() {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-tools-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-tools-"));
   tempDirs.push(dir);
   const bin = path.join(dir, "bin");
   const hdiutilLog = path.join(dir, "hdiutil.log");
@@ -164,7 +164,7 @@ function expectPrivateDmgMount(log: string): string {
     throw new Error("Expected a DMG attach command with image and mount paths");
   }
   // TMPDIR may itself live under /Volumes; ownership comes from the per-run root.
-  expect(path.relative(tmpdir(), runRoot)).toMatch(/^openclaw-dmg\.[^/]+$/);
+  expect(path.relative(tmpdir(), runRoot)).toMatch(/^carapace-dmg\.[^/]+$/);
   expect(mountPoint).toBe(path.join(runRoot, "mount"));
   const detachTargets = Array.from(
     log.matchAll(/^detach (.+?)(?: -(?:quiet|force))?$/gm),
@@ -202,19 +202,19 @@ describe("create-dmg plist validation", () => {
   it("keeps temporary DMG artifacts scoped to one run", () => {
     const script = readFileSync(scriptPath, "utf8");
 
-    expect(script).toContain('DMG_TEMP="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-dmg.XXXXXX")"');
+    expect(script).toContain('DMG_TEMP="$(mktemp -d "${TMPDIR:-/tmp}/carapace-dmg.XXXXXX")"');
     expect(script).toContain('DMG_SOURCE="$DMG_TEMP/source"');
     expect(script).toContain('MOUNT_POINT="$DMG_TEMP/mount"');
     expect(script).toContain('DMG_RW_PATH="$DMG_TEMP/image-rw.dmg"');
     expect(script).toContain('DMG_OUTPUT_TEMP=""');
     expect(script).toContain('DMG_FINAL_PATH=""');
     expect(script).toContain(
-      'DMG_OUTPUT_TEMP="$(mktemp -d "$(dirname "$OUT_PATH")/.openclaw-dmg.XXXXXX")"',
+      'DMG_OUTPUT_TEMP="$(mktemp -d "$(dirname "$OUT_PATH")/.carapace-dmg.XXXXXX")"',
     );
     expect(script).toContain('DMG_FINAL_PATH="$DMG_OUTPUT_TEMP/final.dmg"');
     expect(script).toContain('DMG_LIMITS_PATH="$DMG_TEMP/resize-limits.txt"');
     expect(script).toContain('hdiutil resize -limits "$DMG_RW_PATH" >"$DMG_LIMITS_PATH"');
-    expect(script).not.toContain("/tmp/openclaw-dmg-limits.txt");
+    expect(script).not.toContain("/tmp/carapace-dmg-limits.txt");
     expect(script).not.toContain('"/Volumes/$DMG_VOLUME_NAME"');
     expect(script).not.toContain('tell application "Finder" to close every window');
   });
@@ -253,7 +253,7 @@ describe("create-dmg plist validation", () => {
   it.runIf(process.platform === "darwin")(
     "fails before hdiutil when required plist keys are missing",
     () => {
-      const app = makeApp(["<key>CFBundleName</key>", "<string>OpenClaw</string>"]);
+      const app = makeApp(["<key>CFBundleName</key>", "<string>Carapace</string>"]);
       const result = runScript([app, path.join(path.dirname(app), "out.dmg")]);
 
       expect(result.status).toBe(1);
@@ -266,10 +266,10 @@ describe("create-dmg plist validation", () => {
 describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries", () => {
   it("uses private intermediate paths without deleting caller-owned siblings", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
-    const sibling = path.join(outputDir, "OpenClaw-rw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
+    const sibling = path.join(outputDir, "Carapace-rw.dmg");
     writeFileSync(output, "previous output", "utf8");
     writeFileSync(sibling, "caller owned", "utf8");
     const tools = makeFakeDmgTools();
@@ -288,16 +288,16 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
     expect(create).toContain("-srcfolder ");
     expect(create).not.toMatch(/\s-(?:size|megabytes|sectors)\s/);
     expect(log).toContain("final.dmg");
-    expect(log).toContain(`${outputDir}${path.sep}.openclaw-dmg.`);
+    expect(log).toContain(`${outputDir}${path.sep}.carapace-dmg.`);
     expect(log).not.toContain(sibling);
   });
 
   it("creates a caller-provided output directory before finalizing the DMG", () => {
     const app = makeValidApp();
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(root);
     const outputDir = path.join(root, "nested", "artifacts");
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], tools.env);
@@ -306,14 +306,14 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
     expect(existsSync(outputDir)).toBe(true);
     expect(readFileSync(output, "utf8")).toBe("converted");
     const log = readFileSync(tools.hdiutilLog, "utf8");
-    expect(log).toContain(`${outputDir}${path.sep}.openclaw-dmg.`);
+    expect(log).toContain(`${outputDir}${path.sep}.carapace-dmg.`);
   });
 
   it("preserves an existing output when image creation fails", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     writeFileSync(output, "previous output", "utf8");
     const tools = makeFakeDmgTools();
 
@@ -326,9 +326,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("fails before image creation when Finder layout values are malformed", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], {
@@ -344,9 +344,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("fails before image creation when Finder layout values span multiple lines", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], {
@@ -362,9 +362,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("preserves an existing output when verification fails", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     writeFileSync(output, "previous output", "utf8");
     const tools = makeFakeDmgTools();
 
@@ -379,9 +379,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("fails before resize and conversion when its private mount cannot detach", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], {
@@ -403,9 +403,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("retries a delayed DMG detach before finalizing the artifact", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], {
@@ -425,9 +425,9 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
 
   it("styles the private mount without closing unrelated Finder windows", () => {
     const app = makeValidApp();
-    const outputDir = mkdtempSync(path.join(tmpdir(), "openclaw-create-dmg-output-"));
+    const outputDir = mkdtempSync(path.join(tmpdir(), "carapace-create-dmg-output-"));
     tempDirs.push(outputDir);
-    const output = path.join(outputDir, "OpenClaw.dmg");
+    const output = path.join(outputDir, "Carapace.dmg");
     const tools = makeFakeDmgTools();
 
     const result = runScript([app, output], { ...tools.env, SKIP_DMG_STYLE: "0" });
@@ -437,7 +437,7 @@ describe.runIf(process.platform === "darwin")("create-dmg ownership boundaries",
     expect(applescript).toContain('set dmgRoot to POSIX file "');
     expect(applescript).toContain('/mount" as alias');
     expect(applescript).toContain("set dmgDisk to disk of dmgRoot");
-    expect(applescript).not.toContain('tell disk "OpenClaw"');
+    expect(applescript).not.toContain('tell disk "Carapace"');
     expect(applescript).not.toContain("close every window");
   });
 });

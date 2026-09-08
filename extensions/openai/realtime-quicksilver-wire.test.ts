@@ -112,7 +112,7 @@ describe("GPT-Live session history", () => {
 
 describe("Realtime call creation", () => {
   it("uses the ChatGPT JSON call route for OAuth and preserves the Platform multipart route", async () => {
-    vi.stubEnv("OPENCLAW_VERSION", "2026.7.2-test");
+    vi.stubEnv("CARAPACE_VERSION", "2026.7.2-test");
     const requests: Array<{ url: string; init?: RequestInit }> = [];
     const fetchImpl = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
       const resolvedUrl = typeof url === "string" ? url : url instanceof URL ? url.href : url.url;
@@ -149,9 +149,9 @@ describe("Realtime call creation", () => {
     expect(requests[0]?.init?.headers).toEqual({
       Authorization: "Bearer oauth-token",
       "OpenAI-Alpha": "quicksilver=v2",
-      "User-Agent": "openclaw/2026.7.2-test",
+      "User-Agent": "carapace/2026.7.2-test",
       "chatgpt-account-id": "acct-1",
-      originator: "openclaw",
+      originator: "carapace",
       "session-id": "oauth-session",
       "thread-id": "oauth-thread",
       version: "2026.7.2-test",
@@ -205,7 +205,7 @@ describe("Realtime call creation", () => {
   it.each(["gpt-realtime-2.1", "gpt-realtime-2.1-mini", "gpt-realtime-2"])(
     "uses multipart session initialization without a sideband for %s OAuth",
     async (model) => {
-      vi.stubEnv("OPENCLAW_VERSION", "2026.7.2-test");
+      vi.stubEnv("CARAPACE_VERSION", "2026.7.2-test");
       let capturedUrl: string | undefined;
       let capturedInit: RequestInit | undefined;
       const fetchImpl = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
@@ -217,7 +217,7 @@ describe("Realtime call creation", () => {
         type: "realtime",
         model,
         instructions: "Use tools.",
-        tools: [{ type: "function", name: "openclaw_agent_consult", parameters: {} }],
+        tools: [{ type: "function", name: "carapace_agent_consult", parameters: {} }],
         tool_choice: "auto",
       };
 
@@ -242,9 +242,9 @@ describe("Realtime call creation", () => {
       const headers = capturedInit?.headers as Record<string, string> | undefined;
       expect(headers).toMatchObject({
         Authorization: "Bearer oauth-token",
-        "User-Agent": "openclaw/2026.7.2-test",
+        "User-Agent": "carapace/2026.7.2-test",
         "chatgpt-account-id": "acct-1",
-        originator: "openclaw",
+        originator: "carapace",
         "session-id": "ga-oauth-session",
         "thread-id": "ga-oauth-thread",
         version: "2026.7.2-test",

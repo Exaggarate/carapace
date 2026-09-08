@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { appendProgressCardSystemPrompt } from "../../progress-card-system-prompt.js";
 import { resolveEffectiveToolInventory } from "../../tools-effective-inventory.js";
 
@@ -13,7 +13,7 @@ vi.mock("../../../infra/device-pairing.js", () => ({
 
 describe("subagent progress-card availability", () => {
   let tempDir: string;
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   const parent = "agent:main:dashboard:parent";
   const children = [
     "agent:main:subagent:orchestrator",
@@ -23,7 +23,7 @@ describe("subagent progress-card availability", () => {
   ];
 
   beforeAll(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-child-progress-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-child-progress-"));
     const store = path.join(tempDir, "sessions.json");
     config = {
       session: { store },

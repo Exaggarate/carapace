@@ -15,12 +15,12 @@ const WORKFLOW_CASES = [
   {
     name: "macOS",
     path: ".github/workflows/macos-periphery.yml",
-    scopedPath: "apps/macos/Sources/OpenClaw/Test.swift",
+    scopedPath: "apps/macos/Sources/Carapace/Test.swift",
   },
   {
-    name: "shared OpenClawKit",
-    path: ".github/workflows/shared-openclawkit-periphery.yml",
-    scopedPath: "apps/shared/OpenClawKit/Sources/OpenClawKit/Test.swift",
+    name: "shared CarapaceKit",
+    path: ".github/workflows/shared-carapacekit-periphery.yml",
+    scopedPath: "apps/shared/CarapaceKit/Sources/CarapaceKit/Test.swift",
   },
 ] as const;
 
@@ -184,10 +184,10 @@ describe("Periphery scope workflows", () => {
   );
 
   it("ignores scoped files added only by base-branch drift", async () => {
-    const repoRoot = makeTempRepoRoot(tempDirs, "openclaw-periphery-scope-");
+    const repoRoot = makeTempRepoRoot(tempDirs, "carapace-periphery-scope-");
     git(repoRoot, ["init", "--initial-branch=main"]);
-    git(repoRoot, ["config", "user.name", "OpenClaw Test"]);
-    git(repoRoot, ["config", "user.email", "openclaw-test@example.com"]);
+    git(repoRoot, ["config", "user.name", "Carapace Test"]);
+    git(repoRoot, ["config", "user.email", "carapace-test@example.com"]);
 
     writeFixture(repoRoot, "docs/base.md", "base\n");
     git(repoRoot, ["add", "."]);
@@ -202,7 +202,7 @@ describe("Periphery scope workflows", () => {
     git(repoRoot, ["switch", "main"]);
     writeFixture(
       repoRoot,
-      "apps/shared/OpenClawKit/Sources/OpenClawKit/Main.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceKit/Main.swift",
       "struct Main {}\n",
     );
     git(repoRoot, ["add", "."]);
@@ -211,13 +211,13 @@ describe("Periphery scope workflows", () => {
 
     const oldDiff = spawnSync(
       "git",
-      ["diff", "--quiet", eventBase, "HEAD", "--", "apps/shared/OpenClawKit/"],
+      ["diff", "--quiet", eventBase, "HEAD", "--", "apps/shared/CarapaceKit/"],
       { cwd: repoRoot },
     );
     expect(oldDiff.status).toBe(1);
 
     const outputs = new Map<string, string>();
-    const { execute } = scopeWorkflows.get(".github/workflows/shared-openclawkit-periphery.yml")!;
+    const { execute } = scopeWorkflows.get(".github/workflows/shared-carapacekit-periphery.yml")!;
     await execute(
       { eventName: "pull_request", payload: { pull_request: { draft: false, number: 123 } } },
       { setOutput: (name: string, value: string) => outputs.set(name, value) },

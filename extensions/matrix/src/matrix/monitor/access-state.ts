@@ -4,7 +4,7 @@ import {
   defineStableChannelIngressIdentity,
   type ChannelIngressContextBinding,
   type ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import { normalizeMatrixAllowList, resolveMatrixAllowListMatch } from "./allowlist.js";
 
 type MatrixMonitorAccessState = {

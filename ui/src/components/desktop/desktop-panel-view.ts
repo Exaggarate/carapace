@@ -1,4 +1,4 @@
-import type { EnvironmentSummary, WorkerDesktopAppId } from "@openclaw/gateway-protocol";
+import type { EnvironmentSummary, WorkerDesktopAppId } from "@carapace/gateway-protocol";
 import { html, nothing, type TemplateResult } from "lit";
 import { t } from "../../i18n/index.ts";
 import { registerDesktopEnglish } from "../../i18n/locales/en-desktop.ts";

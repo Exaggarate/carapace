@@ -1,4 +1,4 @@
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 import type { GoogleMeetCliCommandContext } from "./cli-command-context.js";
 import {
   callGoogleMeetGateway,

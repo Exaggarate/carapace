@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { AgentHarness, AgentHarnessRegistrationOptions } from "../agents/harness/types.js";
 import { getCoreEmbeddingProvider } from "./core-embedding-providers.js";
 import type { EmbeddingProviderAdapter } from "./embedding-providers.js";
@@ -71,10 +71,10 @@ export function createProviderRegistrars(state: PluginRegistryState) {
       reportRegistrationError(record, "agent harness registration missing id");
       return;
     }
-    if (id === "openclaw") {
+    if (id === "carapace") {
       reportRegistrationError(
         record,
-        'agent harness id "openclaw" is reserved for the built-in runtime',
+        'agent harness id "carapace" is reserved for the built-in runtime',
       );
       return;
     }
@@ -133,7 +133,7 @@ export function createProviderRegistrars(state: PluginRegistryState) {
     registry.cliBackends.push({
       pluginId: record.id,
       pluginName: record.name,
-      builtWithOpenClawVersion: record.builtWithOpenClawVersion,
+      builtWithCarapaceVersion: record.builtWithCarapaceVersion,
       backend: { ...backend, id },
       source: record.source,
       rootDir: record.rootDir,

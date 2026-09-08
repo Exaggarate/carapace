@@ -1,6 +1,6 @@
 // File Transfer plugin module lists one canonically bound directory.
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { runCommandBuffered } from "carapace/plugin-sdk/process-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { createCanonicalDirListCommand } from "./dir-list-worker-command.js";
 
 const CANONICAL_PATH_CHANGED_EXIT_CODE = 78;

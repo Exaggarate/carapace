@@ -164,7 +164,7 @@ export const whatsappQaGroupAllowlistBlockScenario: WhatsAppQaScenarioImplementa
     return {
       configMode: "allowlist",
       expectReply: false,
-      input: `openclawqa blocked group should not reply with ${quietToken}`,
+      input: `carapaceqa blocked group should not reply with ${quietToken}`,
       matchText: quietToken,
       target: "group",
     };

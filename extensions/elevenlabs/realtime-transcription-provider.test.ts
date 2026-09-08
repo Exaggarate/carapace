@@ -1,9 +1,9 @@
 // Elevenlabs tests cover realtime transcription provider plugin behavior.
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createRealtimeTranscriptionWebSocketSession } from "openclaw/plugin-sdk/realtime-transcription-session";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createRealtimeTranscriptionWebSocketSession } from "carapace/plugin-sdk/realtime-transcription-session";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
@@ -85,7 +85,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("normalizes nested provider config", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider(realtimeHost);
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -118,7 +118,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("drops malformed numeric realtime config values", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider(realtimeHost);
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -144,7 +144,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("keeps realtime VAD numeric config inside provider ranges", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider(realtimeHost);
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -450,7 +450,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
     vi.stubEnv("XI_API_KEY", "   ");
     const provider = buildElevenLabsRealtimeTranscriptionProvider(realtimeHost);
 
-    expect(provider.isConfigured({ cfg: {} as OpenClawConfig, providerConfig: {} })).toBe(false);
+    expect(provider.isConfigured({ cfg: {} as CarapaceConfig, providerConfig: {} })).toBe(false);
     expect(() => provider.createSession({ providerConfig: {} })).toThrow(
       "ElevenLabs API key missing",
     );

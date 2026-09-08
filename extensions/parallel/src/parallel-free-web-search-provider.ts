@@ -1,5 +1,5 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { WebSearchProviderPlugin } from "openclaw/plugin-sdk/provider-web-search-contract";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { WebSearchProviderPlugin } from "carapace/plugin-sdk/provider-web-search-contract";
 import {
   createParallelFreeWebSearchProviderBase,
   PARALLEL_FREE_SESSION_ID_MAX_LENGTH,

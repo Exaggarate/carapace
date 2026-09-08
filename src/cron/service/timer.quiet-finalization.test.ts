@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import * as taskExecutor from "../../tasks/task-executor.js";
 import { findTaskByRunId, listTaskRecordsUnsorted } from "../../tasks/task-registry.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
@@ -60,12 +60,12 @@ describe("cron quiet task finalization", () => {
       };
       await writeCronStoreSnapshot({ storePath, jobs: [job] });
       const finalizedAfterPersist: boolean[] = [];
-      const database = openOpenClawStateDatabase().db;
+      const database = openCarapaceStateDatabase().db;
       const finalize = taskExecutor.finalizeTaskRunByRunIdCore;
       const finalizeSpy = vi
         .spyOn(taskExecutor, "finalizeTaskRunByRunIdCore")
         .mockImplementation((params) => {
-          const persistedJob = openOpenClawStateDatabase()
+          const persistedJob = openCarapaceStateDatabase()
             .db.prepare(
               "SELECT json_extract(state_json, '$.runningAtMs') AS runningAtMs, json_extract(state_json, '$.nextRunAtMs') AS nextRunAtMs FROM cron_jobs WHERE store_key = ? AND job_id = ?",
             )

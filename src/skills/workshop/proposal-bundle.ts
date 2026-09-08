@@ -13,7 +13,7 @@ const MAX_EVALUATION_FILES = 256;
 const MAX_EVALUATION_FILE_BYTES = 1024 * 1024;
 const MAX_EVALUATION_BUNDLE_BYTES = 8 * 1024 * 1024;
 const MAX_EVALUATION_PATH_DEPTH = 16;
-const EXCLUDED_ROOT_DIRS = new Set([".clawhub", ".clawdhub", ".openclaw"]);
+const EXCLUDED_ROOT_DIRS = new Set([".clawhub", ".clawdhub", ".carapace"]);
 
 export async function buildSkillProposalEvaluationBundles(params: {
   proposal: SkillProposalReadResult;

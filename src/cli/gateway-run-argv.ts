@@ -1,4 +1,4 @@
-// Fast-path argv parser for `openclaw gateway ...` without full Commander registration.
+// Fast-path argv parser for `carapace gateway ...` without full Commander registration.
 import { WINDOWS_TASK_SUPERVISOR_FLAG } from "../daemon/windows-task-supervisor-contract.js";
 import {
   consumeRootCommandOptionToken,

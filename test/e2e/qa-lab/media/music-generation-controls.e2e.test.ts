@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createOpenClawTools } from "../../../../src/agents/openclaw-tools.js";
+import { createCarapaceTools } from "../../../../src/agents/carapace-tools.js";
 import type { PreparedModelRuntimeSnapshot } from "../../../../src/agents/prepared-model-runtime.js";
 import { createPluginMetadataSnapshot } from "../../../../src/config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import type {
   MusicGenerationProvider,
   MusicGenerationRequest,
@@ -99,7 +99,7 @@ function createMusicFixture() {
       };
     },
   };
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     plugins: {
       allow: [PLUGIN_ID],
       entries: { [PLUGIN_ID]: { enabled: true } },
@@ -135,7 +135,7 @@ function createMusicFixture() {
     origin: "bundled",
     rootDir: `/fake/${PLUGIN_ID}`,
     source: `/fake/${PLUGIN_ID}/index.js`,
-    manifestPath: `/fake/${PLUGIN_ID}/openclaw.plugin.json`,
+    manifestPath: `/fake/${PLUGIN_ID}/carapace.plugin.json`,
     contracts: {
       musicGenerationProviders: [primary.id, fallback.id],
     },
@@ -160,7 +160,7 @@ function createMusicFixture() {
     metadataSnapshot: pluginMetadataSnapshot,
     mediaCapabilityProviders,
   } as unknown as PreparedModelRuntimeSnapshot;
-  const musicTools = createOpenClawTools({
+  const musicTools = createCarapaceTools({
     config,
     preparedModelRuntime,
     disableMessageTool: true,
@@ -223,11 +223,11 @@ describe("music generation controls QA product proof", () => {
       { config: fixture.config },
     );
 
-    const stateDir = tempDirs.make("openclaw-qa-music-controls-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    const stateDir = tempDirs.make("carapace-qa-music-controls-");
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const vocalResult = (await fixture.tool.execute("music-vocal-fallback", {
         prompt: "bright QA chorus",
-        lyrics: "OpenClaw keeps the signal clear",
+        lyrics: "Carapace keeps the signal clear",
         instrumental: false,
         durationSeconds: 45,
         format: "wav",
@@ -238,7 +238,7 @@ describe("music generation controls QA product proof", () => {
         "qa-fallback/beat-v2",
       ]);
       expect(fixture.calls[0]?.request).toMatchObject({
-        lyrics: "OpenClaw keeps the signal clear",
+        lyrics: "Carapace keeps the signal clear",
         instrumental: false,
         durationSeconds: 45,
         format: "wav",
@@ -266,7 +266,7 @@ describe("music generation controls QA product proof", () => {
           },
         ],
         ignoredOverrides: [
-          { key: "lyrics", value: "OpenClaw keeps the signal clear" },
+          { key: "lyrics", value: "Carapace keeps the signal clear" },
           { key: "format", value: "wav" },
         ],
         normalization: {
@@ -279,7 +279,7 @@ describe("music generation controls QA product proof", () => {
       expect(vocalDetails).not.toHaveProperty("requestedLyrics");
       expect(vocalDetails).not.toHaveProperty("format");
       expect(textOf(vocalResult)).toContain(
-        "Warning: Ignored unsupported overrides for qa-fallback/beat-v2: lyrics=OpenClaw keeps the signal clear, format=wav.",
+        "Warning: Ignored unsupported overrides for qa-fallback/beat-v2: lyrics=Carapace keeps the signal clear, format=wav.",
       );
       expect(textOf(vocalResult)).toContain("Duration normalized: requested 45s; used 30s.");
 

@@ -30,8 +30,8 @@ function readJsonFile(filePath: string, fsImpl: typeof fs) {
 }
 
 function readPackageSection(pkg: Record<string, unknown>, section: "assetScripts" | "build") {
-  const openclaw = isRecord(pkg.openclaw) ? pkg.openclaw : {};
-  const value = openclaw[section];
+  const carapace = isRecord(pkg.carapace) ? pkg.carapace : {};
+  const value = carapace[section];
   return isRecord(value) ? value : {};
 }
 

@@ -1,15 +1,15 @@
 // Doctor warnings and repairs for legacy OpenAI Codex model/provider routing.
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asMutableRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeFastMode,
   normalizeOptionalLowercaseString as normalizeString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   isAgentRuntimeModelParam,
   resolveModelExtraParamSources,
 } from "../../../agents/model-extra-params.js";
 import { resolveModelRuntimePolicy } from "../../../agents/model-runtime-policy.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { detectWindowsSpawnCommandInlineArgs } from "../../../plugin-sdk/windows-spawn.js";
 import { listMutableCodexRouteAgentEntries } from "./codex-route-agent-entries.js";
 import {
@@ -53,7 +53,7 @@ import { rewriteKnownModelRefs } from "./legacy-config-migrations.runtime.models
 import { migrateLegacyRuntimeModelRef } from "./legacy-runtime-model-providers.js";
 
 export function resolveKnownModelRefMigrationTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   ref: string,
 ): string | undefined {
   const blockedModelIdentities = new Set(
@@ -77,7 +77,7 @@ function formatUnsupportedCompactionWarning(params: {
   fixHint: string;
 }): string {
   return [
-    "- Codex runtime uses native server-side compaction and ignores OpenClaw compaction summarizer overrides.",
+    "- Codex runtime uses native server-side compaction and ignores Carapace compaction summarizer overrides.",
     ...params.hits.map(
       (hit) => `- ${hit.path}: ${hit.value} is ignored while this agent uses Codex runtime.`,
     ),
@@ -108,7 +108,7 @@ function formatLegacyLosslessCompactionWarning(params: {
     "- Legacy Lossless compaction config should use the Lossless context-engine slot for Codex.",
     ...configLines,
     params.canAutoFix
-      ? "- Run `openclaw doctor --fix`: it migrates legacy Lossless compaction config to the Lossless context-engine slot."
+      ? "- Run `carapace doctor --fix`: it migrates legacy Lossless compaction config to the Lossless context-engine slot."
       : "- Move the Lossless config manually; doctor will not overwrite an existing non-Lossless context-engine slot or collapse conflicting per-agent summary models.",
   ].join("\n");
 }
@@ -118,8 +118,8 @@ function formatDisabledCodexPluginWarning(params: {
   repairBlocked: boolean;
 }): string {
   const fixHint = params.repairBlocked
-    ? "- Enable plugins.entries.codex and plugin loading, and remove `codex` from plugins.deny; or set the affected OpenAI models to an OpenClaw runtime policy."
-    : "- Run `openclaw doctor --fix`: it enables plugins.entries.codex, or set the affected OpenAI models to an OpenClaw runtime policy.";
+    ? "- Enable plugins.entries.codex and plugin loading, and remove `codex` from plugins.deny; or set the affected OpenAI models to an Carapace runtime policy."
+    : "- Run `carapace doctor --fix`: it enables plugins.entries.codex, or set the affected OpenAI models to an Carapace runtime policy.";
   return [
     "- Codex runtime is selected, but the Codex plugin is disabled.",
     ...params.hits.map(
@@ -130,7 +130,7 @@ function formatDisabledCodexPluginWarning(params: {
   ].join("\n");
 }
 
-function collectCodexAppServerCommandWarnings(cfg: OpenClawConfig): string[] {
+function collectCodexAppServerCommandWarnings(cfg: CarapaceConfig): string[] {
   const plugins = asMutableRecord(cfg.plugins);
   const entries = asMutableRecord(plugins?.entries);
   const codex = asMutableRecord(entries?.codex);
@@ -152,9 +152,9 @@ function collectCodexAppServerCommandWarnings(cfg: OpenClawConfig): string[] {
         ]
       : []),
     [
-      "- Custom Codex app-server command bypasses OpenClaw's managed exact-version binary.",
+      "- Custom Codex app-server command bypasses Carapace's managed exact-version binary.",
       "- plugins.entries.codex.config.appServer.command: Doctor did not execute, inspect, or rewrite this command.",
-      "- Remove the override to use managed Codex startup, or verify the custom binary matches the Codex version bundled with this OpenClaw release.",
+      "- Remove the override to use managed Codex startup, or verify the custom binary matches the Codex version bundled with this Carapace release.",
     ].join("\n"),
   ];
 }
@@ -173,7 +173,7 @@ function ownValues(record: Record<string, unknown>, keys: readonly string[]): un
   return keys.filter((key) => Object.hasOwn(record, key)).map((key) => record[key]);
 }
 
-function modelUsesCodexForEveryAgent(cfg: OpenClawConfig, modelRef: string): boolean {
+function modelUsesCodexForEveryAgent(cfg: CarapaceConfig, modelRef: string): boolean {
   const parsed = parseCodexRouteModelRef(modelRef);
   if (!parsed || parsed.modelId === "*") {
     return false;
@@ -192,7 +192,7 @@ function modelUsesCodexForEveryAgent(cfg: OpenClawConfig, modelRef: string): boo
 }
 
 function collectCodexModelParamHits(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): CodexModelParamHit[] {
   const hits: CodexModelParamHit[] = [];
@@ -264,8 +264,8 @@ function collectCodexModelParamHits(
 
 function formatCodexModelParamWarning(hits: readonly CodexModelParamHit[]): string {
   const fixHint = hits.some((hit) => hit.removable)
-    ? '- Run `openclaw doctor --fix` to remove only redundant priority service-tier params; remove any remaining params or set the affected route\'s agentRuntime.id to "openclaw".'
-    : '- Remove these params or set the affected route\'s agentRuntime.id to "openclaw"; Doctor cannot migrate them without changing behavior.';
+    ? '- Run `carapace doctor --fix` to remove only redundant priority service-tier params; remove any remaining params or set the affected route\'s agentRuntime.id to "carapace".'
+    : '- Remove these params or set the affected route\'s agentRuntime.id to "carapace"; Doctor cannot migrate them without changing behavior.';
   return [
     "- Explicit native Codex model routes cannot reproduce authored request transport parameters.",
     ...hits.map(
@@ -280,7 +280,7 @@ function formatCodexModelParamWarning(hits: readonly CodexModelParamHit[]): stri
   ].join("\n");
 }
 
-function repairRedundantCodexServiceTiers(cfg: OpenClawConfig, env?: NodeJS.ProcessEnv) {
+function repairRedundantCodexServiceTiers(cfg: CarapaceConfig, env?: NodeJS.ProcessEnv) {
   const removable = collectCodexModelParamHits(cfg, env).filter((hit) => hit.removable);
   if (removable.length === 0) {
     return { config: cfg, changes: [] };
@@ -302,7 +302,7 @@ function repairRedundantCodexServiceTiers(cfg: OpenClawConfig, env?: NodeJS.Proc
 
 /** Collect non-executing Codex runtime compatibility diagnostics for Doctor and lint. */
 export function collectCodexRuntimeCompatibilityWarnings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): string[] {
   const warnings = collectCodexAppServerCommandWarnings(cfg);
@@ -313,7 +313,7 @@ export function collectCodexRuntimeCompatibilityWarnings(
   return warnings;
 }
 
-function collectCodexComputerUseWarnings(cfg: OpenClawConfig): string[] {
+function collectCodexComputerUseWarnings(cfg: CarapaceConfig): string[] {
   const plugins = asMutableRecord(cfg.plugins);
   const entries = asMutableRecord(plugins?.entries);
   const codex = asMutableRecord(entries?.codex);
@@ -358,7 +358,7 @@ function collectCodexComputerUseWarnings(cfg: OpenClawConfig): string[] {
 
 /** Collect doctor warnings for legacy Codex model refs, runtime pins, and compaction overrides. */
 export function collectCodexRouteWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   blockedProviderPlan?: BlockedLegacyOpenAICodexProviderPlan;
 }): string[] {
@@ -414,7 +414,7 @@ export function collectCodexRouteWarnings(params: {
               hit.runtime ? `; current runtime is "${hit.runtime}"` : ""
             }.`,
         ),
-        "- Run `openclaw doctor --fix`: it rewrites configured model refs and stale sessions to `openai/*`, moves Codex intent to provider/model runtime policy, and clears old whole-agent runtime pins.",
+        "- Run `carapace doctor --fix`: it rewrites configured model refs and stale sessions to `openai/*`, moves Codex intent to provider/model runtime policy, and clears old whole-agent runtime pins.",
       ].join("\n"),
     );
   }
@@ -466,7 +466,7 @@ export function collectCodexRouteWarnings(params: {
       formatUnsupportedCompactionWarning({
         hits: fixableHits,
         fixHint:
-          "- Run `openclaw doctor --fix`: it removes unsupported Codex compaction overrides.",
+          "- Run `carapace doctor --fix`: it removes unsupported Codex compaction overrides.",
       }),
     );
   }
@@ -475,12 +475,12 @@ export function collectCodexRouteWarnings(params: {
 
 /** Rewrite legacy Codex config routes to OpenAI refs and explicit runtime policy when allowed. */
 export function maybeRepairCodexRoutes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   shouldRepair: boolean;
   codexRuntimeReady?: boolean;
   blockedProviderPlan?: BlockedLegacyOpenAICodexProviderPlan;
-}): { cfg: OpenClawConfig; warnings: string[]; changes: string[] } {
+}): { cfg: CarapaceConfig; warnings: string[]; changes: string[] } {
   const env = params.env ?? process.env;
   const blockedProviderPlan =
     params.blockedProviderPlan ?? collectBlockedLegacyOpenAICodexProviderPlan(params.cfg);

@@ -1,7 +1,7 @@
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import { finiteSecondsToTimerSafeMilliseconds } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import { finiteSecondsToTimerSafeMilliseconds } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { Api, Model } from "../../llm/types.js";
 import type { ProviderToolSearchPolicyContext } from "../../plugin-sdk/provider-model-types.js";
 import { getCurrentPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata-snapshot.js";
@@ -127,7 +127,7 @@ function canonicalizeLegacyResolvedModel(params: { provider: string; model: Mode
 
 function applyResolvedTransportFallback(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   runtimeHooks: ProviderRuntimeHooks;
   model: Model;
@@ -164,7 +164,7 @@ function applyResolvedTransportFallback(params: {
 export function normalizeResolvedModel(params: {
   provider: string;
   model: Model;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   runtimeHooks?: ProviderRuntimeHooks;
@@ -288,7 +288,7 @@ export function resolveProviderTransport(params: {
   modelId?: string;
   api?: Api | null;
   baseUrl?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   runtimeHooks?: ProviderRuntimeHooks;
 }): { api?: Api; baseUrl?: string } {

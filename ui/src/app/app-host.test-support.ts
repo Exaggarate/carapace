@@ -10,9 +10,9 @@ export function resetAppHostTestGlobals(): void {
   vi.useRealTimers();
   Reflect.deleteProperty(window, "webkit");
   document.documentElement.classList.remove(
-    "openclaw-native-macos",
-    "openclaw-native-nav",
-    "openclaw-native-web-chrome",
+    "carapace-native-macos",
+    "carapace-native-nav",
+    "carapace-native-web-chrome",
   );
   vi.unstubAllGlobals();
 }
@@ -30,7 +30,7 @@ export function createLazyElementSpec(
   options: { firstError?: Error } = {},
 ): TestOptionalCustomElement {
   lazyElementSequence += 1;
-  const tagName = `openclaw-app-host-lazy-${lazyElementSequence}`;
+  const tagName = `carapace-app-host-lazy-${lazyElementSequence}`;
   let attempt = 0;
   return {
     tagName,

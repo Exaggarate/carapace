@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { PluginToolMatcher } from "./hook-types.js";
 
 export type PluginToolMatcherScope = {
@@ -48,7 +48,7 @@ export function normalizePluginToolMatcher(matcher: unknown): PluginToolMatcher 
       NON_CANONICAL_TOOL_MATCHER_NAMES.has(canonicalToolName) ||
       NON_CANONICAL_TOOL_MATCHER_NAMES.has(toolName.trim())
     ) {
-      throw new TypeError("tool hook matcher entries must use canonical OpenClaw tool ids");
+      throw new TypeError("tool hook matcher entries must use canonical Carapace tool ids");
     }
     normalized.add(canonicalToolName);
   }

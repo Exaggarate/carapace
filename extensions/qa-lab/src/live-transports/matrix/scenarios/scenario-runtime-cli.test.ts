@@ -2,20 +2,20 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { describe, expect, it, vi } from "vitest";
 import {
   killMatrixQaCliChild,
-  resolveMatrixQaOpenClawCliEntryPath,
+  resolveMatrixQaCarapaceCliEntryPath,
 } from "./scenario-runtime-cli-process.js";
 import {
   formatMatrixQaCliCommand,
   redactMatrixQaCliOutput,
-  runMatrixQaOpenClawCli,
-  startMatrixQaOpenClawCli,
+  runMatrixQaCarapaceCli,
+  startMatrixQaCarapaceCli,
 } from "./scenario-runtime-cli.js";
 
-const testing = { killMatrixQaCliChild, resolveMatrixQaOpenClawCliEntryPath };
+const testing = { killMatrixQaCliChild, resolveMatrixQaCarapaceCliEntryPath };
 
 function isProcessRunning(pid: number): boolean {
   try {
@@ -63,13 +63,13 @@ describe("Matrix QA CLI runtime", () => {
         "--recovery-key",
         "abcdef1234567890ghij",
       ]),
-    ).toBe("openclaw matrix verify backup restore --recovery-key [REDACTED]");
+    ).toBe("carapace matrix verify backup restore --recovery-key [REDACTED]");
     expect(formatMatrixQaCliCommand(["matrix", "account", "add", "--access-token=token-123"])).toBe(
-      "openclaw matrix account add --access-token=[REDACTED]",
+      "carapace matrix account add --access-token=[REDACTED]",
     );
     expect(
       formatMatrixQaCliCommand(["matrix", "verify", "device", "abcdef1234567890ghij", "--json"]),
-    ).toBe("openclaw matrix verify device [REDACTED] --json");
+    ).toBe("carapace matrix verify device [REDACTED] --json");
   });
 
   it("redacts Matrix token output before diagnostics and artifacts", () => {
@@ -110,12 +110,12 @@ describe("Matrix QA CLI runtime", () => {
     }
   });
 
-  it("prefers the ESM OpenClaw CLI entrypoint when present", async () => {
-    const root = await mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-entry-"));
+  it("prefers the ESM Carapace CLI entrypoint when present", async () => {
+    const root = await mkdtemp(path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-entry-"));
     try {
       await mkdir(path.join(root, "dist"));
       await writeFile(path.join(root, "dist", "index.mjs"), "");
-      expect(testing.resolveMatrixQaOpenClawCliEntryPath(root)).toBe(
+      expect(testing.resolveMatrixQaCarapaceCliEntryPath(root)).toBe(
         path.join(root, "dist", "index.mjs"),
       );
     } finally {
@@ -125,7 +125,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("can preserve expected non-zero CLI output for negative scenarios", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-nonzero-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-nonzero-"),
     );
     try {
       await mkdir(path.join(root, "dist"));
@@ -136,7 +136,7 @@ describe("Matrix QA CLI runtime", () => {
           "process.exit(7);",
         ].join("\n"),
       );
-      const result = await runMatrixQaOpenClawCli({
+      const result = await runMatrixQaCarapaceCli({
         allowNonZero: true,
         args: ["matrix", "verify", "backup", "restore", "--json"],
         cwd: root,
@@ -151,7 +151,7 @@ describe("Matrix QA CLI runtime", () => {
   });
 
   it("can pass stdin to CLI commands", async () => {
-    const root = await mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-stdin-"));
+    const root = await mkdtemp(path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-stdin-"));
     try {
       await mkdir(path.join(root, "dist"));
       await writeFile(
@@ -165,7 +165,7 @@ describe("Matrix QA CLI runtime", () => {
           "});",
         ].join("\n"),
       );
-      const result = await runMatrixQaOpenClawCli({
+      const result = await runMatrixQaCarapaceCli({
         args: ["matrix", "verify", "backup", "restore", "--recovery-key-stdin", "--json"],
         cwd: root,
         env: process.env,
@@ -180,7 +180,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("can close stdin after interactive CLI prompts", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-interactive-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-interactive-"),
     );
     try {
       await mkdir(path.join(root, "dist"));
@@ -195,7 +195,7 @@ describe("Matrix QA CLI runtime", () => {
           "});",
         ].join("\n"),
       );
-      const session = startMatrixQaOpenClawCli({
+      const session = startMatrixQaCarapaceCli({
         args: ["matrix", "verify", "self"],
         cwd: root,
         env: process.env,
@@ -219,7 +219,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("includes timed-out CLI output in diagnostics", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-timeout-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-timeout-"),
     );
     try {
       await mkdir(path.join(root, "dist"));
@@ -233,7 +233,7 @@ describe("Matrix QA CLI runtime", () => {
       );
 
       await expect(
-        runMatrixQaOpenClawCli({
+        runMatrixQaCarapaceCli({
           args: ["matrix", "verify", "self"],
           cwd: root,
           env: process.env,
@@ -249,7 +249,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("kills CLI commands that ignore graceful timeout termination", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-timeout-kill-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-timeout-kill-"),
     );
     const pidPath = path.join(root, "cli.pid");
     let childPid: number | undefined;
@@ -267,7 +267,7 @@ describe("Matrix QA CLI runtime", () => {
       );
 
       await expect(
-        runMatrixQaOpenClawCli({
+        runMatrixQaCarapaceCli({
           args: ["matrix", "verify", "self"],
           cwd: root,
           env: process.env,
@@ -287,7 +287,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("preserves timeout diagnostics when wait attaches after timeout", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-late-wait-timeout-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-late-wait-timeout-"),
     );
     const pidPath = path.join(root, "cli.pid");
     let childPid: number | undefined;
@@ -304,7 +304,7 @@ describe("Matrix QA CLI runtime", () => {
         ].join("\n"),
       );
 
-      const session = startMatrixQaOpenClawCli({
+      const session = startMatrixQaCarapaceCli({
         args: ["matrix", "verify", "self"],
         cwd: root,
         env: process.env,
@@ -327,7 +327,7 @@ describe("Matrix QA CLI runtime", () => {
 
   it("settles and kills descendants that keep timed-out CLI stdio open", async () => {
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-timeout-tree-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-timeout-tree-"),
     );
     const childPidPath = path.join(root, "child.pid");
     const grandchildPidPath = path.join(root, "grandchild.pid");
@@ -350,7 +350,7 @@ describe("Matrix QA CLI runtime", () => {
       );
 
       await expect(
-        runMatrixQaOpenClawCli({
+        runMatrixQaCarapaceCli({
           args: ["matrix", "verify", "self"],
           cwd: root,
           env: process.env,
@@ -379,7 +379,7 @@ describe("Matrix QA CLI runtime", () => {
       return;
     }
     const root = await mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "matrix-qa-cli-session-kill-ignored-stdio-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "matrix-qa-cli-session-kill-ignored-stdio-"),
     );
     const childPidPath = path.join(root, "child.pid");
     const grandchildPidPath = path.join(root, "grandchild.pid");
@@ -401,7 +401,7 @@ describe("Matrix QA CLI runtime", () => {
         ].join("\n"),
       );
 
-      const session = startMatrixQaOpenClawCli({
+      const session = startMatrixQaCarapaceCli({
         args: ["matrix", "verify", "self"],
         cwd: root,
         env: process.env,

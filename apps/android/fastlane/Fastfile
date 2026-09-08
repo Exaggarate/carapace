@@ -7,15 +7,15 @@ require "supply"
 default_platform(:android)
 
 ANDROID_FASTLANE_ROOT = File.expand_path(__dir__, Dir.pwd)
-DEFAULT_PLAY_PACKAGE_NAME = "ai.openclaw.app"
+DEFAULT_PLAY_PACKAGE_NAME = "ai.carapace.app"
 DEFAULT_PLAY_TRACK = "internal"
 DEFAULT_PLAY_RELEASE_STATUS = "completed"
-ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV = "_OPENCLAW_ANDROID_FASTLANE_EXECUTION_PROVENANCE"
+ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV = "_CARAPACE_ANDROID_FASTLANE_EXECUTION_PROVENANCE"
 ANDROID_RELEASE_SIGNING_GRADLE_PROPERTIES = [
-  "OPENCLAW_ANDROID_STORE_FILE",
-  "OPENCLAW_ANDROID_STORE_PASSWORD",
-  "OPENCLAW_ANDROID_KEY_ALIAS",
-  "OPENCLAW_ANDROID_KEY_PASSWORD"
+  "CARAPACE_ANDROID_STORE_FILE",
+  "CARAPACE_ANDROID_STORE_PASSWORD",
+  "CARAPACE_ANDROID_KEY_ALIAS",
+  "CARAPACE_ANDROID_KEY_PASSWORD"
 ].freeze
 
 def load_env_file(path)
@@ -81,19 +81,19 @@ def play_validate_only?
 end
 
 def mobile_release_intent_context!(gateway_version:)
-  mode = ENV.fetch("OPENCLAW_MOBILE_RELEASE_REF_MODE", "").strip
+  mode = ENV.fetch("CARAPACE_MOBILE_RELEASE_REF_MODE", "").strip
   return nil if mode.empty?
 
-  UI.user_error!("OPENCLAW_MOBILE_RELEASE_REF_MODE must be empty or intent.") unless mode == "intent"
-  intent_path = ENV.fetch("OPENCLAW_MOBILE_RELEASE_INTENT_PATH", "").strip
-  receipt_digest = ENV.fetch("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST", "").strip
-  target_ref = ENV.fetch("OPENCLAW_MOBILE_RELEASE_TARGET_REF", "").strip
-  UI.user_error!("OPENCLAW_MOBILE_RELEASE_INTENT_PATH is required in intent mode.") if intent_path.empty?
+  UI.user_error!("CARAPACE_MOBILE_RELEASE_REF_MODE must be empty or intent.") unless mode == "intent"
+  intent_path = ENV.fetch("CARAPACE_MOBILE_RELEASE_INTENT_PATH", "").strip
+  receipt_digest = ENV.fetch("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST", "").strip
+  target_ref = ENV.fetch("CARAPACE_MOBILE_RELEASE_TARGET_REF", "").strip
+  UI.user_error!("CARAPACE_MOBILE_RELEASE_INTENT_PATH is required in intent mode.") if intent_path.empty?
   unless receipt_digest.match?(/\Asha256:[0-9a-f]{64}\z/)
-    UI.user_error!("OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.")
+    UI.user_error!("CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST must be a canonical SHA-256 digest.")
   end
   unless target_ref == "release/#{gateway_version}-mobile"
-    UI.user_error!("OPENCLAW_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.")
+    UI.user_error!("CARAPACE_MOBILE_RELEASE_TARGET_REF must exactly match the mobile gateway version.")
   end
   {
     intent_path: intent_path,
@@ -103,7 +103,7 @@ def mobile_release_intent_context!(gateway_version:)
 end
 
 def validate_android_fastlane_execution_provenance!
-  mode = ENV.fetch("OPENCLAW_MOBILE_RELEASE_REF_MODE", "").strip
+  mode = ENV.fetch("CARAPACE_MOBILE_RELEASE_REF_MODE", "").strip
   return unless mode == "intent"
   return if ENV.fetch(ANDROID_FASTLANE_EXECUTION_PROVENANCE_ENV, "").strip == "locked"
 
@@ -394,11 +394,11 @@ def validate_android_screenshots!
 end
 
 def release_artifact_path(version)
-  File.join(android_root, "build", "release-artifacts", "openclaw-#{version}-play-release.aab")
+  File.join(android_root, "build", "release-artifacts", "carapace-#{version}-play-release.aab")
 end
 
 def wear_release_artifact_path(version)
-  File.join(android_root, "build", "release-artifacts", "openclaw-#{version}-wear-release.aab")
+  File.join(android_root, "build", "release-artifacts", "carapace-#{version}-wear-release.aab")
 end
 
 def play_release_artifact_paths(version)
@@ -555,8 +555,8 @@ def validate_android_release_signing!
       "./gradlew",
       ":app:validateSigningPlayRelease",
       ":wear:validateSigningRelease",
-      "-PopenclawBuildCommit=#{build_commit}",
-      "-PopenclawBuildTimestamp=#{build_timestamp}"
+      "-PcarapaceBuildCommit=#{build_commit}",
+      "-PcarapaceBuildTimestamp=#{build_timestamp}"
     ]))
   end
 end

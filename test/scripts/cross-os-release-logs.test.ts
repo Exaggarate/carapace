@@ -11,7 +11,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.ts";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function writeLog(contents: string) {
-  const logPath = path.join(tempDirs.make("openclaw-cross-os-release-logs-"), "release.log");
+  const logPath = path.join(tempDirs.make("carapace-cross-os-release-logs-"), "release.log");
   fs.writeFileSync(logPath, contents, "utf8");
   return logPath;
 }

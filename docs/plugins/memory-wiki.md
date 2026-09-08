@@ -20,8 +20,8 @@ knowledge into a maintained wiki layer.
 Enable the plugin before using its CLI, tools, or runtime integration:
 
 ```bash
-openclaw plugins enable memory-wiki
-openclaw gateway restart
+carapace plugins enable memory-wiki
+carapace gateway restart
 ```
 
 | Layer                | Owns                                                                              |
@@ -40,7 +40,7 @@ A common local-first setup uses builtin memory for recall and `memory-wiki` in
 [Configuration](#configuration).
 
 If bridge mode reports zero exported artifacts, the active memory plugin is
-not currently exposing public bridge inputs. Run `openclaw wiki doctor` first,
+not currently exposing public bridge inputs. Run `carapace wiki doctor` first,
 then confirm the active memory plugin supports public artifacts.
 
 ## Vault modes
@@ -69,7 +69,7 @@ Bridge mode can index, per `bridge.*` config toggle:
 - memory event logs (`followMemoryEvents`)
 
 When bridge mode is active and `bridge.readMemoryArtifacts` is enabled,
-`openclaw wiki status`, `openclaw wiki doctor`, and `openclaw wiki bridge
+`carapace wiki status`, `carapace wiki doctor`, and `carapace wiki bridge
 import` route through the running Gateway so they see the same active memory
 plugin context as agent/runtime memory. If bridge is disabled or artifact
 reads are off, those commands keep local/offline behavior.
@@ -89,7 +89,7 @@ reads are off, those commands keep local/offline behavior.
   reports/
   _attachments/
   _views/
-  .openclaw-wiki/
+  .carapace-wiki/
 ```
 
 Managed content stays inside generated blocks; human note blocks are
@@ -104,13 +104,13 @@ preserved across regeneration.
 ## Open Knowledge Format imports
 
 ```bash
-openclaw wiki okf import ./bundles/ga4
+carapace wiki okf import ./bundles/ga4
 ```
 
 Import an unpacked Open Knowledge Format bundle into wiki concept pages. Good
 fit when a data catalog, documentation crawler, or enrichment agent already
 produces OKF: keep OKF as the portable exchange artifact, let `memory-wiki`
-turn it into OpenClaw-native concept pages and compiled digests.
+turn it into Carapace-native concept pages and compiled digests.
 
 - non-reserved `.md` files are concept documents
 - each imported concept requires a non-empty `type` frontmatter field; missing `type` produces a `missing-type` warning and the file is skipped
@@ -204,7 +204,7 @@ claims:
 ## Compile pipeline
 
 Compile reads wiki pages, normalizes summaries, and persists a machine-facing
-snapshot in OpenClaw's shared SQLite plugin state. Runtime code uses the
+snapshot in Carapace's shared SQLite plugin state. Runtime code uses the
 lifecycle-owned owner snapshot to load SQLite during async prompt preparation;
 synchronous prompt assembly never scrapes Markdown or reads cache files.
 Compiled output also powers first-pass wiki indexing for search/get, claim-id
@@ -320,7 +320,7 @@ Dashboard requests never scan raw vault pages or wait for a full vault compile.
 During automatic recovery, the UI reports that the dashboards are rebuilding;
 reload the tab shortly. When
 `ingest.autoCompile` is `false`, a source change or older cache reports that a
-compile is required instead. Run `openclaw wiki compile`, then reload the tab.
+compile is required instead. Run `carapace wiki compile`, then reload the tab.
 
 ## Prompt and context behavior
 
@@ -345,13 +345,13 @@ Put config under `plugins.entries.memory-wiki.config`:
           vaultMode: "isolated",
           vault: {
             scope: "global",
-            path: "~/.openclaw/wiki/main",
+            path: "~/.carapace/wiki/main",
             renderMode: "obsidian",
           },
           obsidian: {
             enabled: true,
             useOfficialCli: true,
-            vaultName: "OpenClaw Wiki",
+            vaultName: "Carapace Wiki",
             openAfterWrites: false,
           },
           bridge: {
@@ -409,7 +409,7 @@ Key toggles:
 | `render.createBacklinks`                   | default `true`                                 | generate deterministic related blocks                                         |
 | `render.createDashboards`                  | default `true`                                 | generate dashboard pages                                                      |
 
-The state directory is `~/.openclaw` by default. When `OPENCLAW_STATE_DIR` is
+The state directory is `~/.carapace` by default. When `CARAPACE_STATE_DIR` is
 set, default wiki vaults use that directory instead. Explicit `vault.path`
 values keep their configured location, and `~/` still expands against the home
 directory.
@@ -417,7 +417,7 @@ directory.
 ### Per-agent vaults
 
 Set `vault.scope` to `agent` to give every configured agent a separate wiki.
-In this scope, `vault.path` is a parent directory and OpenClaw appends the
+In this scope, `vault.path` is a parent directory and Carapace appends the
 normalized agent id:
 
 ```json5
@@ -436,7 +436,7 @@ normalized agent id:
           vaultMode: "bridge",
           vault: {
             scope: "agent",
-            path: "~/.openclaw/wiki",
+            path: "~/.carapace/wiki",
           },
           bridge: {
             enabled: true,
@@ -449,10 +449,10 @@ normalized agent id:
 }
 ```
 
-This resolves to `~/.openclaw/wiki/support` and
-`~/.openclaw/wiki/marketing`. If `vault.path` is omitted in agent scope, the
+This resolves to `~/.carapace/wiki/support` and
+`~/.carapace/wiki/marketing`. If `vault.path` is omitted in agent scope, the
 parent defaults to `<state-dir>/wiki`, where the state directory is
-`~/.openclaw` or the value of `OPENCLAW_STATE_DIR`. The default `main` agent
+`~/.carapace` or the value of `CARAPACE_STATE_DIR`. The default `main` agent
 therefore uses `<state-dir>/wiki/main`.
 
 Agent tools, compiled prompt digests, and the wiki supplement exposed through
@@ -523,17 +523,17 @@ intentionally enable compiled digest prompts.
 ## CLI
 
 ```bash
-openclaw wiki status
-openclaw wiki doctor
-openclaw wiki init
-openclaw wiki ingest ./notes/alpha.md
-openclaw wiki compile
-openclaw wiki lint
-openclaw wiki search "alpha"
-openclaw wiki get entity.alpha
-openclaw wiki apply synthesis "Alpha Summary" --body "..." --source-id source.alpha
-openclaw wiki bridge import
-openclaw wiki obsidian status
+carapace wiki status
+carapace wiki doctor
+carapace wiki init
+carapace wiki ingest ./notes/alpha.md
+carapace wiki compile
+carapace wiki lint
+carapace wiki search "alpha"
+carapace wiki get entity.alpha
+carapace wiki apply synthesis "Alpha Summary" --body "..." --source-id source.alpha
+carapace wiki bridge import
+carapace wiki obsidian status
 ```
 
 See [CLI: wiki](/cli/wiki) for the full command reference, including

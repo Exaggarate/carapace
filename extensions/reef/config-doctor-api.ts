@@ -1,7 +1,7 @@
-import type { ChannelDoctorLegacyConfigRule } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { defineStrayPluginEntryConfigMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ChannelDoctorLegacyConfigRule } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { defineStrayPluginEntryConfigMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { ReefChannelConfigSchema } from "./src/config-schema.js";
 
 function hasRetiredReefPolicyConfig(value: unknown): boolean {
@@ -21,14 +21,14 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "reef"],
     message:
-      'channels.reef dmPolicy/allowFrom are legacy; run "openclaw doctor --fix" to remove them. Peer trust is SQLite-backed.',
+      'channels.reef dmPolicy/allowFrom are legacy; run "carapace doctor --fix" to remove them. Peer trust is SQLite-backed.',
     match: hasRetiredReefPolicyConfig,
   },
   reefStrayEntryConfigMigration.legacyConfigRule,
 ];
 
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: CarapaceConfig }): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   const reef = cfg.channels?.reef;

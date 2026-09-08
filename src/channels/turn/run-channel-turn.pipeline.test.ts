@@ -8,7 +8,7 @@ import type { DispatchReplyWithBufferedBlockDispatcher } from "../../auto-reply/
 import { createReplyDispatcher } from "../../auto-reply/reply/reply-dispatcher.js";
 import { getReplySystemEventContext } from "../../auto-reply/reply/system-event-session-key.js";
 import type { FinalizedMsgContext } from "../../auto-reply/templating.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   emitTrustedDiagnosticEvent,
   onInternalDiagnosticEvent,
@@ -116,7 +116,7 @@ vi.mock("../../config/sessions/transcript.js", () => ({
   readRecentUserAssistantTextForSession,
 }));
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let storePath: string;
 const visibleFinalReceipt = {
@@ -242,7 +242,7 @@ function loggedEvents(log: ReturnType<typeof vi.fn>): TurnLogEvent[] {
 
 describe("channel turn pipeline", () => {
   beforeEach(() => {
-    storePath = path.join(tempDirs.make("openclaw-channel-turn-pipeline-"), "sessions.json");
+    storePath = path.join(tempDirs.make("carapace-channel-turn-pipeline-"), "sessions.json");
     vi.clearAllMocks();
     recordInboundSessionCore.mockResolvedValue(undefined);
     dispatchReplyWithBufferedBlockDispatcherCore.mockImplementation(createDispatch());

@@ -5,7 +5,7 @@ import { expectDefined } from "../packages/normalization-core/src/expect.js";
 import { parseReleaseVersion } from "./lib/release-version.mjs";
 import { planMobileRelease } from "./mobile-release-version.ts";
 
-const MACOS_INFO_PLIST = "apps/macos/Sources/OpenClaw/Resources/Info.plist";
+const MACOS_INFO_PLIST = "apps/macos/Sources/Carapace/Resources/Info.plist";
 
 type ReleaseVersionMode = "check" | "write";
 

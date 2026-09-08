@@ -1,8 +1,8 @@
-import { normalizeAgentId } from "@openclaw/normalization-core/agent-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeAgentId } from "@carapace/normalization-core/agent-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
-const SYSTEM_EVENT_OWNERSHIP_KEY = Symbol.for("openclaw.systemEvents.ownership");
+const SYSTEM_EVENT_OWNERSHIP_KEY = Symbol.for("carapace.systemEvents.ownership");
 
 // The queue is process-global, so duplicated runtime chunks must share its
 // object-identity metadata or another agent can consume an owner-marked event.

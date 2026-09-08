@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AcpRuntimeEvent } from "@openclaw/acp-core/runtime/types";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AcpRuntimeEvent } from "@carapace/acp-core/runtime/types";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import type { WebSocket } from "ws";
 import { createDeferred } from "../../test/helpers/promise.js";
@@ -149,7 +149,7 @@ describe("Gateway ACP completion ownership", () => {
     { name: "replaced transcript target", rebound: true },
   ];
   test.each(cases)("completes $name once with truthful transcript ownership", async (scenario) => {
-    const storePath = path.join(tempDirs.make("openclaw-acp-completion-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("carapace-acp-completion-"), "sessions.json");
     testState.sessionStorePath = storePath;
     const mediaFile = path.join(path.dirname(storePath), "photo.png");
     if (scenario.media) {
@@ -218,7 +218,7 @@ describe("Gateway ACP completion ownership", () => {
                       },
                       view: {
                         id: activeRunId,
-                        url: `/__openclaw__/canvas/documents/${activeRunId}/index.html`,
+                        url: `/__carapace__/canvas/documents/${activeRunId}/index.html`,
                       },
                     }),
                   },
@@ -438,7 +438,7 @@ describe("Gateway ACP completion ownership", () => {
                   title: "Status",
                   sandbox: "scripts",
                   viewId: runId,
-                  url: `/__openclaw__/canvas/documents/${runId}/index.html`,
+                  url: `/__carapace__/canvas/documents/${runId}/index.html`,
                 },
                 rawText: null,
               },

@@ -3,8 +3,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { HEARTBEAT_PROMPT } from "../auto-reply/heartbeat.js";
 import { replaceTranscriptEvents } from "../config/sessions/session-accessor.js";
@@ -16,9 +16,9 @@ import {
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { emitSessionTranscriptUpdate } from "../sessions/transcript-events.js";
 import { persistUserTurnTranscript } from "../sessions/user-turn-transcript.test-support.js";
-import { OPENCLAW_TRANSCRIPT_ARTIFACT_API } from "../shared/transcript-only-openclaw-assistant.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import { CARAPACE_TRANSCRIPT_ARTIFACT_API } from "../shared/transcript-only-carapace-assistant.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
+import { runCarapaceAgentWriteTransaction } from "../state/carapace-agent-db.js";
 import { ensureProfileForEmail, setAvatar, setDisplayName } from "../state/user-profiles.js";
 import { resolveCurrentUserProfileDisplay } from "./current-user-profile-display.js";
 import { SSE_CONTENT_TYPE } from "./http-common.js";
@@ -36,18 +36,18 @@ import {
 } from "./test-helpers.server.js";
 
 const AUTH_HEADER = { Authorization: "Bearer test-gateway-token-1234567890" };
-const READ_SCOPE_HEADER = { "x-openclaw-scopes": "operator.read" };
+const READ_SCOPE_HEADER = { "x-carapace-scopes": "operator.read" };
 const cleanupDirs: string[] = [];
 const requireRecord = createRequireRecord("object", "expected-label");
 
 const AGENT_ID = "main";
 type SessionHistoryTestDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "session_nodes" | "session_windows"
 >;
 
 async function createSessionStoreFile(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-history-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-history-"));
   cleanupDirs.push(dir);
   const storePath = path.join(dir, "sessions.json");
   testState.sessionStorePath = storePath;
@@ -110,7 +110,7 @@ function seedRawSessionRows(params: {
   if (!databasePath) {
     throw new Error("expected SQLite session store path");
   }
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<SessionHistoryTestDatabase>(database.db);
       for (const row of params.rows) {
@@ -195,10 +195,10 @@ function makeDeliveryMirrorAssistantMessage(
   return {
     ...makeTranscriptAssistantMessage({
       ...params,
-      provider: "openclaw",
+      provider: "carapace",
       model: "delivery-mirror",
     }),
-    api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
+    api: CARAPACE_TRANSCRIPT_ARTIFACT_API,
   };
 }
 
@@ -273,7 +273,7 @@ async function withGatewayHarness<T>(
 
 type SessionHistoryMessage = {
   content?: Array<{ text?: string }>;
-  __openclaw?: { id?: string; seq?: number; turnBoundary?: boolean };
+  __carapace?: { id?: string; seq?: number; turnBoundary?: boolean };
 };
 
 type SessionHistoryBody = {
@@ -286,7 +286,7 @@ type SessionHistoryBody = {
 
 function sessionHistoryRowIdentity(message: unknown): string {
   const record = requireRecord(message, "session history row");
-  const metadata = requireRecord(record["__openclaw"], "session history row metadata");
+  const metadata = requireRecord(record["__carapace"], "session history row metadata");
   const firstContent = Array.isArray(record.content)
     ? requireRecord(record.content[0], "session history row content")
     : undefined;
@@ -294,7 +294,7 @@ function sessionHistoryRowIdentity(message: unknown): string {
     (typeof firstContent?.text === "string" ? firstContent.text : undefined) ??
     (typeof firstContent?.id === "string" ? firstContent.id : undefined) ??
     (typeof record.toolCallId === "string" ? record.toolCallId : "");
-  const kind = record.openclawMessageToolMirror ? "mirror" : String(record.role);
+  const kind = record.carapaceMessageToolMirror ? "mirror" : String(record.role);
   return `${String(metadata.seq)}:${kind}:${label}`;
 }
 
@@ -310,11 +310,11 @@ async function readSessionHistoryBody(
 
 function attributedHistoryMessageProjection(value: unknown) {
   const message = requireRecord(value, "attributed history message");
-  const metadata = requireRecord(message["__openclaw"], "attributed history metadata");
+  const metadata = requireRecord(message["__carapace"], "attributed history metadata");
   return {
     role: message.role,
     content: message.content,
-    __openclaw: {
+    __carapace: {
       id: metadata.id,
       seq: metadata.seq,
       senderId: metadata.senderId,
@@ -381,7 +381,7 @@ type SessionHistorySseStream = {
   streamState: { buffer: string };
 };
 
-function expectOpenClawMetadata(
+function expectCarapaceMetadata(
   metadata: { id?: string; seq?: number } | undefined,
   expected: { id?: string; seq: number },
 ) {
@@ -455,9 +455,9 @@ async function expectMessageEventMatch(
   ).toBe(params.text);
   expect((event.data as { messageSeq?: number }).messageSeq).toBe(params.seq);
   if (params.id !== undefined) {
-    expectOpenClawMetadata(
-      (event.data as { message?: { __openclaw?: { id?: string; seq?: number } } }).message?.[
-        "__openclaw"
+    expectCarapaceMetadata(
+      (event.data as { message?: { __carapace?: { id?: string; seq?: number } } }).message?.[
+        "__carapace"
       ],
       {
         id: params.id,
@@ -699,7 +699,7 @@ describe("session history HTTP endpoints", () => {
       expect(body.sessionKey).toBe("agent:main:main");
       expect(body.messages).toHaveLength(1);
       expect(body.messages?.[0]?.content?.[0]?.text).toBe("hello from history");
-      expectOpenClawMetadata(body.messages?.[0]?.["__openclaw"], {
+      expectCarapaceMetadata(body.messages?.[0]?.["__carapace"], {
         seq: 1,
       });
     });
@@ -756,7 +756,7 @@ describe("session history HTTP endpoints", () => {
         const oldExpected = {
           role: "user",
           content: "first attributed history turn",
-          __openclaw: {
+          __carapace: {
             id: first.messageId,
             seq: 1,
             senderId: profile.id,
@@ -788,7 +788,7 @@ describe("session history HTTP endpoints", () => {
         const newSecondExpected = {
           role: "user",
           content: "second attributed history turn",
-          __openclaw: {
+          __carapace: {
             id: second.messageId,
             seq: 2,
             senderId: profile.id,
@@ -799,8 +799,8 @@ describe("session history HTTP endpoints", () => {
         };
         const newFirstExpected = {
           ...oldExpected,
-          __openclaw: {
-            ...oldExpected["__openclaw"],
+          __carapace: {
+            ...oldExpected["__carapace"],
             senderProfileAvatarUrl: newAvatarUrl,
           },
         };
@@ -863,7 +863,7 @@ describe("session history HTTP endpoints", () => {
       ]);
       expect(body.hasMore).toBe(true);
       expect(body.nextCursor).toBe("2");
-      expectOpenClawMetadata(body.messages?.[0]?.["__openclaw"], {
+      expectCarapaceMetadata(body.messages?.[0]?.["__carapace"], {
         seq: 2,
       });
 
@@ -1045,7 +1045,7 @@ describe("session history HTTP endpoints", () => {
       expectErrorResponse(await res.json(), {
         type: "migration_required",
         message:
-          "duplicate rows resolve to canonical session key agent:main:work; stop the Gateway and run openclaw doctor --fix",
+          "duplicate rows resolve to canonical session key agent:main:work; stop the Gateway and run carapace doctor --fix",
       });
     });
   });
@@ -1074,7 +1074,7 @@ describe("session history HTTP endpoints", () => {
         "second message",
         "third message",
       ]);
-      expect(firstBody.messages?.map((message) => message["__openclaw"]?.seq)).toEqual([2, 3]);
+      expect(firstBody.messages?.map((message) => message["__carapace"]?.seq)).toEqual([2, 3]);
       expect(firstBody.hasMore).toBe(true);
       expect(firstBody.nextCursor).toBe("2");
 
@@ -1084,9 +1084,9 @@ describe("session history HTTP endpoints", () => {
       if (!databasePath) {
         throw new Error("expected session database path");
       }
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => {
-          const db = getNodeSqliteKysely<Pick<OpenClawAgentKyselyDatabase, "transcript_events">>(
+          const db = getNodeSqliteKysely<Pick<CarapaceAgentKyselyDatabase, "transcript_events">>(
             database.db,
           );
           executeSqliteQuerySync(
@@ -1109,7 +1109,7 @@ describe("session history HTTP endpoints", () => {
       expect(secondBody.items?.map((message) => message.content?.[0]?.text)).toEqual([
         "first message",
       ]);
-      expect(secondBody.messages?.map((message) => message["__openclaw"]?.seq)).toEqual([1]);
+      expect(secondBody.messages?.map((message) => message["__carapace"]?.seq)).toEqual([1]);
       expect(secondBody.hasMore).toBe(false);
       expect(secondBody.nextCursor).toBeUndefined();
     });
@@ -1257,7 +1257,7 @@ describe("session history HTTP endpoints", () => {
       storePath,
     });
     const assistantMessage = (text: string, model: string) =>
-      makeTranscriptAssistantMessage({ text, provider: "openclaw", model });
+      makeTranscriptAssistantMessage({ text, provider: "carapace", model });
     await replaceTranscriptEvents({ agentId: AGENT_ID, sessionId, sessionKey, storePath }, [
       { type: "session", version: 1, id: sessionId },
       { message: assistantMessage("First reply.", "acp-runtime") },
@@ -1283,7 +1283,7 @@ describe("session history HTTP endpoints", () => {
     await withGatewayHarness(async (harness) => {
       const history = await readSessionHistoryBody(harness.port, sessionKey);
       expect(history.messages?.map(sessionHistoryRowIdentity)).toEqual(expectedRows);
-      expect(history.messages?.map((message) => message["__openclaw"]?.turnBoundary)).toEqual([
+      expect(history.messages?.map((message) => message["__carapace"]?.turnBoundary)).toEqual([
         undefined,
         undefined,
         undefined,
@@ -1335,7 +1335,7 @@ describe("session history HTTP endpoints", () => {
         ]);
         expect(firstPage.hasMore).toBe(heartbeatBoundary);
         expect(firstPage.nextCursor).toBe(heartbeatBoundary ? "2" : undefined);
-        expect(firstPage.messages?.[0]?.["__openclaw"]?.turnBoundary === true).toBe(
+        expect(firstPage.messages?.[0]?.["__carapace"]?.turnBoundary === true).toBe(
           heartbeatBoundary,
         );
 
@@ -1351,7 +1351,7 @@ describe("session history HTTP endpoints", () => {
           ]);
           expect(history.hasMore).toBe(heartbeatBoundary);
           expect(history.nextCursor).toBe(heartbeatBoundary ? "2" : undefined);
-          expect(history.messages?.[0]?.["__openclaw"]?.turnBoundary === true).toBe(
+          expect(history.messages?.[0]?.["__carapace"]?.turnBoundary === true).toBe(
             heartbeatBoundary,
           );
         } finally {
@@ -1480,11 +1480,11 @@ describe("session history HTTP endpoints", () => {
       const nextData = nextEvent.data as {
         messages?: Array<{
           content?: Array<{ text?: string }>;
-          __openclaw?: { id?: string; seq?: number };
+          __carapace?: { id?: string; seq?: number };
         }>;
       };
       expect(nextData.messages?.[0]?.content?.[0]?.text).toBe("third message");
-      expectOpenClawMetadata(nextData.messages?.[0]?.["__openclaw"], {
+      expectCarapaceMetadata(nextData.messages?.[0]?.["__carapace"], {
         id: thirdMessageId,
         seq: 3,
       });
@@ -1509,10 +1509,10 @@ describe("session history HTTP endpoints", () => {
       const refreshEvent = await readSseEvent(stream.reader, stream.streamState);
       expect(refreshEvent.event).toBe("history");
       const refreshData = refreshEvent.data as {
-        messages?: Array<{ content?: Array<{ text?: string }>; __openclaw?: { seq?: number } }>;
+        messages?: Array<{ content?: Array<{ text?: string }>; __carapace?: { seq?: number } }>;
       };
       expect(refreshData.messages?.[0]?.content?.[0]?.text).toBe("second message");
-      expect(refreshData.messages?.[0]?.["__openclaw"]?.seq).toBe(2);
+      expect(refreshData.messages?.[0]?.["__carapace"]?.seq).toBe(2);
 
       await stream.reader.cancel();
     });
@@ -1574,22 +1574,22 @@ describe("session history HTTP endpoints", () => {
           sessionKey?: string;
           messages?: Array<{
             content?: Array<{ text?: string }>;
-            openclawStreamFallback?: { itemId?: string; replacementText?: string; source?: string };
-            __openclaw?: { id?: string; seq?: number };
+            carapaceStreamFallback?: { itemId?: string; replacementText?: string; source?: string };
+            __carapace?: { id?: string; seq?: number };
           }>;
         };
         expect(body.sessionKey).toBe("agent:main:main");
         expect(body.messages).toHaveLength(2);
         expect(body.messages?.[0]).toMatchObject({
           content: [{ type: "text", text: "internal reasoning" }],
-          openclawStreamFallback: {
+          carapaceStreamFallback: {
             itemId: "item_commentary",
             replacementText: "internal reasoning",
             source: "segment",
           },
         });
         expect(body.messages?.[1]?.content?.map((block) => block.text)).toEqual(["Done."]);
-        expectOpenClawMetadata(body.messages?.[1]?.["__openclaw"], {
+        expectCarapaceMetadata(body.messages?.[1]?.["__carapace"], {
           id: visibleMessageId,
           seq: 2,
         });
@@ -1723,7 +1723,7 @@ describe("session history HTTP endpoints", () => {
               text: "live history message",
               storePath,
             });
-            const lastSequence = initialMessages.at(-1)?.["__openclaw"]?.seq;
+            const lastSequence = initialMessages.at(-1)?.["__carapace"]?.seq;
             expect(lastSequence).toEqual(expect.any(Number));
             await expectMessageEventMatch(stream, {
               text: "live history message",

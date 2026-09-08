@@ -1,6 +1,6 @@
 // Capability metadata for the configured shared media model entries.
 import { normalizeMediaProviderId } from "../../packages/media-understanding-common/src/provider-id.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolvePluginCapabilityProvider } from "../plugins/capability-provider-runtime.js";
 import { resolveImageCapableConfigProviderIds } from "./config-provider-models.js";
 import { resolveConfiguredMediaEntryCapabilities } from "./entry-capabilities.js";
@@ -8,7 +8,7 @@ import type { MediaUnderstandingCapabilityRegistry } from "./types.js";
 
 /** Resolves capability metadata for configured shared media model providers. */
 export function buildMediaUnderstandingCapabilityRegistry(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): MediaUnderstandingCapabilityRegistry {
   const registry: MediaUnderstandingCapabilityRegistry = new Map();
   const providerIds = new Set<string>();

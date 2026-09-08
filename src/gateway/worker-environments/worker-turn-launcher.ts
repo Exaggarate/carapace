@@ -4,7 +4,7 @@ import type {
   LocalTurnPlacementClaim,
   SessionPlacementAdmissionProvider,
 } from "../../agents/session-placement-admission.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { emitAgentRunStatusEvent } from "../../infra/agent-run-status-events.js";
 import { StaleWorkerBuildError } from "./admission.js";
 import { matchesWorkerPlacementTarget } from "./placement-reclaim-contract.js";
@@ -59,7 +59,7 @@ export function createWorkerSessionTurnPlacementProvider(options: WorkerTurnLaun
   const provider: SessionPlacementAdmissionProvider & {
     resolveSandbox(params: {
       agentId: string;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       sessionId: string;
       sessionKey?: string;
       workspaceDir: string;

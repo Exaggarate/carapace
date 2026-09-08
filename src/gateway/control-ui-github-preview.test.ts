@@ -45,8 +45,8 @@ function previewPayload(overrides: Record<string, unknown> = {}): Record<string,
     state: "closed",
     title: "fix(agents): derive conversation scope from trusted group facts",
     updated_at: "2026-07-04T09:53:55Z",
-    base: { repo: { url: "https://api.github.com/repos/openclaw/openclaw" } },
-    repository_url: "https://api.github.com/repos/openclaw/openclaw",
+    base: { repo: { url: "https://api.github.com/repos/carapace/carapace" } },
+    repository_url: "https://api.github.com/repos/carapace/carapace",
     user: {
       avatar_url: "https://avatars.githubusercontent.com/u/58493?v=4",
       login: "steipete",
@@ -65,7 +65,7 @@ function managedIdentity(cacheScope: string, assertSelected: () => void = vi.fn(
 }
 
 describe("parseControlUiGitHubPreviewTarget", () => {
-  const target = { kind: "issue", number: 1, owner: "openclaw", repo: "openclaw" };
+  const target = { kind: "issue", number: 1, owner: "carapace", repo: "carapace" };
 
   it("accepts bounded GitHub issue and pull request targets", () => {
     expect(parseControlUiGitHubPreviewTarget({ ...target, kind: "pull" })).toEqual({
@@ -73,7 +73,7 @@ describe("parseControlUiGitHubPreviewTarget", () => {
       kind: "pull",
     });
     for (const repo of [
-      "openclaw",
+      "carapace",
       ".github",
       ".whitesource",
       ".emacs.d",
@@ -89,7 +89,7 @@ describe("parseControlUiGitHubPreviewTarget", () => {
 
   it.each([
     { field: "kind", value: "comment" },
-    { field: "owner", value: "openclaw/evil" },
+    { field: "owner", value: "carapace/evil" },
     { field: "repo", value: "." },
     { field: "repo", value: ".." },
     { field: "repo", value: "repo.git" },
@@ -120,7 +120,7 @@ describe("loadControlUiGitHubPreview", () => {
   });
 
   it("keeps selected identity caches separate and revalidates cached delivery", async () => {
-    const target = { kind: "issue" as const, number: 88122, owner: "openclaw", repo: "openclaw" };
+    const target = { kind: "issue" as const, number: 88122, owner: "carapace", repo: "carapace" };
     const firstIdentity = managedIdentity("first-preview-identity");
     const secondIdentity = managedIdentity("second-preview-identity");
     const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (input, init) =>
@@ -176,7 +176,7 @@ describe("loadControlUiGitHubPreview", () => {
           if (redirect) {
             return new Response(null, {
               status: 301,
-              headers: { Location: url.replace("/openclaw/openclaw", "/openclaw/renamed") },
+              headers: { Location: url.replace("/carapace/carapace", "/carapace/renamed") },
             });
           }
         }
@@ -190,7 +190,7 @@ describe("loadControlUiGitHubPreview", () => {
       });
       await expect(
         loadControlUiGitHubPreview(
-          { kind: "pull", number: 88123, owner: "openclaw", repo: "openclaw" },
+          { kind: "pull", number: 88123, owner: "carapace", repo: "carapace" },
           identity,
           fetchMock,
         ),
@@ -220,7 +220,7 @@ describe("loadControlUiGitHubPreview", () => {
           : { private: false },
       );
     });
-    const target = { kind: "issue" as const, number: 88125, owner: "openclaw", repo: "openclaw" };
+    const target = { kind: "issue" as const, number: 88125, owner: "carapace", repo: "carapace" };
     const first = loadControlUiGitHubPreview(target, identity, fetchMock);
     const rejected = expect(first).rejects.toMatchObject({ reason: "changed" });
     await started.promise;
@@ -244,7 +244,7 @@ describe("loadControlUiGitHubPreview", () => {
 
       await expect(
         loadControlUiGitHubPreview(
-          { kind: "issue", number: 88124, owner: "openclaw", repo: "openclaw" },
+          { kind: "issue", number: 88124, owner: "carapace", repo: "carapace" },
           identity,
           fetchMock,
         ),
@@ -266,7 +266,7 @@ describe("loadControlUiGitHubPreview", () => {
       }
       return githubJson(previewPayload());
     });
-    const target = { kind: "pull" as const, number: 99816, owner: "openclaw", repo: "openclaw" };
+    const target = { kind: "pull" as const, number: 99816, owner: "carapace", repo: "carapace" };
 
     const first = await loadControlUiGitHubPreview(target, undefined, fetchMock);
     const second = await loadControlUiGitHubPreview(target, undefined, fetchMock);
@@ -280,14 +280,14 @@ describe("loadControlUiGitHubPreview", () => {
       login: "steipete",
       mergedAt: "2026-07-04T09:53:52Z",
       number: 99816,
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "carapace",
+      repo: "carapace",
     });
     expect(second).toEqual(first);
     // Item, avatar, and the single commits page that carries co-author trailers.
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "https://api.github.com/repos/openclaw/openclaw/pulls/99816",
+      "https://api.github.com/repos/carapace/carapace/pulls/99816",
     );
     const avatarUrl = fetchMock.mock.calls
       .map(([input]) => requestUrl(input))
@@ -340,7 +340,7 @@ describe("loadControlUiGitHubPreview", () => {
     });
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "pull", number: 88101, owner: "openclaw", repo: "openclaw" },
+      { kind: "pull", number: 88101, owner: "carapace", repo: "carapace" },
       undefined,
       fetchMock,
     );
@@ -354,8 +354,8 @@ describe("loadControlUiGitHubPreview", () => {
     // The account id in the trailer is the avatar, so no per-person API lookup.
     const urls = fetchMock.mock.calls.map(([input]) => requestUrl(input));
     expect(urls.filter((url) => url.startsWith("https://api.github.com/"))).toEqual([
-      "https://api.github.com/repos/openclaw/openclaw/pulls/88101",
-      "https://api.github.com/repos/openclaw/openclaw/pulls/88101/commits?per_page=100",
+      "https://api.github.com/repos/carapace/carapace/pulls/88101",
+      "https://api.github.com/repos/carapace/carapace/pulls/88101/commits?per_page=100",
     ]);
     expect(urls.filter((url) => url.startsWith("https://avatars.githubusercontent.com/"))).toEqual([
       "https://avatars.githubusercontent.com/u/58493?s=64",
@@ -381,7 +381,7 @@ describe("loadControlUiGitHubPreview", () => {
     });
 
     const pull = await loadControlUiGitHubPreview(
-      { kind: "pull", number: 88102, owner: "openclaw", repo: "openclaw" },
+      { kind: "pull", number: 88102, owner: "carapace", repo: "carapace" },
       undefined,
       fetchMock,
     );
@@ -392,7 +392,7 @@ describe("loadControlUiGitHubPreview", () => {
 
     fetchMock.mockClear();
     await loadControlUiGitHubPreview(
-      { kind: "issue", number: 88103, owner: "openclaw", repo: "openclaw" },
+      { kind: "issue", number: 88103, owner: "carapace", repo: "carapace" },
       undefined,
       fetchMock,
     );
@@ -421,7 +421,7 @@ describe("loadControlUiGitHubPreview", () => {
     const target = {
       kind: "issue" as const,
       number: 70013,
-      owner: "openclaw",
+      owner: "carapace",
       repo: "credential-scope",
     };
     vi.stubEnv("GH_TOKEN", "preview-token-a");
@@ -449,7 +449,7 @@ describe("loadControlUiGitHubPreview", () => {
     const target = {
       kind: "issue" as const,
       number: 70014,
-      owner: "openclaw",
+      owner: "carapace",
       repo: "configured-degraded",
     };
 
@@ -499,7 +499,7 @@ describe("loadControlUiGitHubPreview", () => {
     );
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "issue", number, owner: "openclaw", repo },
+      { kind: "issue", number, owner: "carapace", repo },
       undefined,
       fetchMock,
     );
@@ -518,7 +518,7 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(avatarResponse);
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "issue", number: 70009, owner: "openclaw", repo: "bad-avatar" },
+      { kind: "issue", number: 70009, owner: "carapace", repo: "bad-avatar" },
       undefined,
       fetchMock,
     );
@@ -535,22 +535,22 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(
         githubJson(
           previewPayload({
-            repository_url: "https://api.github.com/repos/openclaw/public",
+            repository_url: "https://api.github.com/repos/carapace/public",
             user: { login: "octocat" },
           }),
         ),
       )
       .mockResolvedValueOnce(githubJson({ private: false }));
-    const target = { kind: "issue" as const, number: 70003, owner: "openclaw", repo: "public" };
+    const target = { kind: "issue" as const, number: 70003, owner: "carapace", repo: "public" };
 
     await loadControlUiGitHubPreview(target, undefined, fetchMock);
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.github.com/repos/openclaw/public");
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://api.github.com/repos/carapace/public");
     expect(fetchMock.mock.calls[1]?.[0]).toBe(
-      "https://api.github.com/repos/openclaw/public/issues/70003",
+      "https://api.github.com/repos/carapace/public/issues/70003",
     );
-    expect(fetchMock.mock.calls[2]?.[0]).toBe("https://api.github.com/repos/openclaw/public");
+    expect(fetchMock.mock.calls[2]?.[0]).toBe("https://api.github.com/repos/carapace/public");
     for (const call of fetchMock.mock.calls) {
       expect(call[1]?.headers).toHaveProperty("Authorization", "Bearer github-test-token");
     }
@@ -571,7 +571,7 @@ describe("loadControlUiGitHubPreview", () => {
     });
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "pull", number: 70012, owner: "openclaw", repo: "openclaw" },
+      { kind: "pull", number: 70012, owner: "carapace", repo: "carapace" },
       undefined,
       fetchMock,
     );
@@ -593,14 +593,14 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(
         new Response(null, {
           status: 301,
-          headers: { Location: "/repos/openclaw/renamed/issues/70007" },
+          headers: { Location: "/repos/carapace/renamed/issues/70007" },
         }),
       )
       .mockResolvedValueOnce(githubJson({ private: false }))
       .mockResolvedValueOnce(
         githubJson(
           previewPayload({
-            repository_url: "https://api.github.com/repos/openclaw/renamed",
+            repository_url: "https://api.github.com/repos/carapace/renamed",
             user: { login: "octocat" },
           }),
         ),
@@ -608,7 +608,7 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(githubJson({ private: false }));
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "issue", number: 70007, owner: "openclaw", repo: "old-name" },
+      { kind: "issue", number: 70007, owner: "carapace", repo: "old-name" },
       undefined,
       fetchMock,
     );
@@ -616,10 +616,10 @@ describe("loadControlUiGitHubPreview", () => {
     expect(preview.login).toBe("octocat");
     expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(requestUrl(fetchMock.mock.calls[3]?.[0])).toBe(
-      "https://api.github.com/repos/openclaw/renamed/issues/70007",
+      "https://api.github.com/repos/carapace/renamed/issues/70007",
     );
     expect(requestUrl(fetchMock.mock.calls[4]?.[0])).toBe(
-      "https://api.github.com/repos/openclaw/renamed",
+      "https://api.github.com/repos/carapace/renamed",
     );
     for (const call of fetchMock.mock.calls) {
       expect(new URL(requestUrl(call[0])).origin).toBe("https://api.github.com");
@@ -633,7 +633,7 @@ describe("loadControlUiGitHubPreview", () => {
     vi.stubEnv("GH_TOKEN", "github-test-token");
     const redirectResponse = new Response("discard me", {
       status: 301,
-      headers: { Location: "https://example.com/repos/openclaw/private" },
+      headers: { Location: "https://example.com/repos/carapace/private" },
     });
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -642,7 +642,7 @@ describe("loadControlUiGitHubPreview", () => {
 
     await expect(
       loadControlUiGitHubPreview(
-        { kind: "pull", number: 70008, owner: "openclaw", repo: "unsafe-redirect" },
+        { kind: "pull", number: 70008, owner: "carapace", repo: "unsafe-redirect" },
         undefined,
         fetchMock,
       ),
@@ -657,11 +657,11 @@ describe("loadControlUiGitHubPreview", () => {
     const visibilityChecks: string[] = [];
     const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (input) => {
       const url = requestUrl(input);
-      if (url.endsWith("/repos/openclaw/openclaw")) {
+      if (url.endsWith("/repos/carapace/carapace")) {
         visibilityChecks.push(url);
         return githubJson({ private: false });
       }
-      if (url.endsWith("/repos/openclaw/secret")) {
+      if (url.endsWith("/repos/carapace/secret")) {
         visibilityChecks.push(url);
         // The token can read it; the Control UI viewer must not.
         return githubJson({ private: true });
@@ -670,7 +670,7 @@ describe("loadControlUiGitHubPreview", () => {
         return new Response("moved", {
           status: 301,
           headers: {
-            Location: "https://api.github.com/repos/openclaw/secret/pulls/88201/commits",
+            Location: "https://api.github.com/repos/carapace/secret/pulls/88201/commits",
           },
         });
       }
@@ -683,7 +683,7 @@ describe("loadControlUiGitHubPreview", () => {
     });
 
     const preview = await loadControlUiGitHubPreview(
-      { kind: "pull", number: 88201, owner: "openclaw", repo: "openclaw" },
+      { kind: "pull", number: 88201, owner: "carapace", repo: "carapace" },
       undefined,
       fetchMock,
     );
@@ -692,10 +692,10 @@ describe("loadControlUiGitHubPreview", () => {
     expect(preview.login).toBe("steipete");
     expect(preview.coAuthors).toBeUndefined();
     // The redirect target was visibility-checked, and its commits were never fetched.
-    expect(visibilityChecks).toContain("https://api.github.com/repos/openclaw/secret");
+    expect(visibilityChecks).toContain("https://api.github.com/repos/carapace/secret");
     expect(
       fetchMock.mock.calls.filter(([input]) =>
-        requestUrl(input).startsWith("https://api.github.com/repos/openclaw/secret/pulls"),
+        requestUrl(input).startsWith("https://api.github.com/repos/carapace/secret/pulls"),
       ),
     ).toHaveLength(0);
   });
@@ -713,7 +713,7 @@ describe("loadControlUiGitHubPreview", () => {
     ] as const) {
       await expect(
         loadControlUiGitHubPreview(
-          { kind: "issue", number, owner: "openclaw", repo },
+          { kind: "issue", number, owner: "carapace", repo },
           undefined,
           fetchMock,
         ),
@@ -722,8 +722,8 @@ describe("loadControlUiGitHubPreview", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock.mock.calls.map((call) => requestUrl(call[0]))).toEqual([
-      "https://api.github.com/repos/openclaw/private",
-      "https://api.github.com/repos/openclaw/missing",
+      "https://api.github.com/repos/carapace/private",
+      "https://api.github.com/repos/carapace/missing",
     ]);
   });
 
@@ -735,14 +735,14 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(
         new Response(null, {
           status: 301,
-          headers: { Location: "/repos/openclaw/private/issues/70004" },
+          headers: { Location: "/repos/carapace/private/issues/70004" },
         }),
       )
       .mockResolvedValueOnce(githubJson({ private: true }));
 
     await expect(
       loadControlUiGitHubPreview(
-        { kind: "issue", number: 70004, owner: "openclaw", repo: "public-source" },
+        { kind: "issue", number: 70004, owner: "carapace", repo: "public-source" },
         undefined,
         fetchMock,
       ),
@@ -766,7 +766,7 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(
         githubJson(
           previewPayload({
-            repository_url: "https://api.github.com/repos/openclaw/visibility-change",
+            repository_url: "https://api.github.com/repos/carapace/visibility-change",
             user: { login: "octocat" },
           }),
         ),
@@ -775,13 +775,13 @@ describe("loadControlUiGitHubPreview", () => {
       .mockResolvedValueOnce(githubJson({ private: true }));
 
     await loadControlUiGitHubPreview(
-      { kind: "issue", number: 70005, owner: "openclaw", repo: "visibility-change" },
+      { kind: "issue", number: 70005, owner: "carapace", repo: "visibility-change" },
       undefined,
       fetchMock,
     );
     await expect(
       loadControlUiGitHubPreview(
-        { kind: "issue", number: 70006, owner: "openclaw", repo: "visibility-change" },
+        { kind: "issue", number: 70006, owner: "carapace", repo: "visibility-change" },
         undefined,
         fetchMock,
       ),
@@ -795,7 +795,7 @@ describe("loadControlUiGitHubPreview", () => {
 
     await expect(
       loadControlUiGitHubPreview(
-        { kind: "issue", number: 70002, owner: "openclaw", repo: "missing-preview" },
+        { kind: "issue", number: 70002, owner: "carapace", repo: "missing-preview" },
         undefined,
         fetchMock,
       ),

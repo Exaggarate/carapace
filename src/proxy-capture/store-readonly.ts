@@ -1,5 +1,5 @@
 import { gunzipSync } from "node:zlib";
-import { normalizeNullableString as normalizeObservedValue } from "@openclaw/normalization-core/string-coerce";
+import { normalizeNullableString as normalizeObservedValue } from "@carapace/normalization-core/string-coerce";
 import type { Compilable, InferResult } from "kysely";
 import {
   compileSqliteQueryBindings,
@@ -7,8 +7,8 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import type {
   CaptureObservedDimension,
   CaptureQueryPreset,
@@ -17,7 +17,7 @@ import type {
 } from "./types.js";
 
 type DebugProxyCaptureDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "capture_sessions" | "capture_events" | "capture_blobs"
 >;
 type NodeSqliteDatabase = Parameters<typeof getNodeSqliteKysely>[0];
@@ -314,7 +314,7 @@ export function createDebugProxyCaptureReader(params: {
   return {
     getSessionEvents(sessionId, limit) {
       return (
-        withExistingOpenClawStateDatabaseReadOnly(
+        withExistingCarapaceStateDatabaseReadOnly(
           ({ db }) => readDebugProxyCaptureSessionEvents(db, sessionId, limit),
           { env: params.env },
         ) ?? []
@@ -322,7 +322,7 @@ export function createDebugProxyCaptureReader(params: {
     },
     readBlob(blobId) {
       return (
-        withExistingOpenClawStateDatabaseReadOnly(
+        withExistingCarapaceStateDatabaseReadOnly(
           ({ db }) => readDebugProxyCaptureBlob(db, blobId),
           { env: params.env },
         ) ?? null

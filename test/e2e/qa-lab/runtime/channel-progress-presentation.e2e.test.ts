@@ -7,10 +7,10 @@ import { connect, type Socket } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { startOpenClawCrablineAdapter } from "@openclaw/crabline";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { startCarapaceCrablineAdapter } from "@openclaw/crabline";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createQaGatewayChild,
@@ -41,7 +41,7 @@ type WireWrite = {
   rejected?: string;
   identityOmitted?: true;
 };
-type CrablineAdapter = Awaited<ReturnType<typeof startOpenClawCrablineAdapter>>;
+type CrablineAdapter = Awaited<ReturnType<typeof startCarapaceCrablineAdapter>>;
 
 function parseBody(text: string): Record<string, unknown> {
   try {
@@ -358,8 +358,8 @@ function readCurrentProviderUserText(body: Record<string, unknown>): string {
         text.trim() &&
         (isCompletionUserText(text) ||
           !(
-            text.includes("<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>") &&
-            text.trimEnd().endsWith("<<<END_OPENCLAW_INTERNAL_CONTEXT>>>")
+            text.includes("<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>") &&
+            text.trimEnd().endsWith("<<<END_CARAPACE_INTERNAL_CONTEXT>>>")
           )),
     ) ?? "";
   return currentText;
@@ -410,12 +410,12 @@ function sendCompletionResponse(response: ServerResponse, marker: string, sequen
 }
 
 function progressConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   channel: "discord" | "slack",
   native: boolean,
   toolProgress: boolean,
   compact = false,
-): OpenClawConfig {
+): CarapaceConfig {
   const streaming = {
     mode: "progress" as const,
     progress: {
@@ -510,7 +510,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
     const pluginDir = path.join(directory, pluginId);
     await fs.mkdir(pluginDir);
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: pluginId,
         activation: { onStartup: true },
@@ -528,7 +528,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
     };`,
     );
     const writes: WireWrite[] = [];
-    const adapter = await startOpenClawCrablineAdapter({
+    const adapter = await startCarapaceCrablineAdapter({
       channel: "slack",
       recorderPath: path.join(directory, "provider.jsonl"),
     });
@@ -673,7 +673,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
       repoRoot: process.cwd(),
       command: {
         executablePath: process.execPath,
-        argsPrefix: [path.join(process.cwd(), "openclaw.mjs")],
+        argsPrefix: [path.join(process.cwd(), "carapace.mjs")],
         cwd: process.cwd(),
         usePackagedPlugins: true,
       },
@@ -685,7 +685,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
       transportBaseUrl: api.baseUrl,
       transport: {
         requiredPluginIds: adapter.requiredPluginIds,
-        createGatewayConfig: () => adapter.createGatewayConfig() as OpenClawConfig,
+        createGatewayConfig: () => adapter.createGatewayConfig() as CarapaceConfig,
       },
       runtimeEnvPatch: {
         ...adapter.createProviderReadinessEnv({}),
@@ -938,7 +938,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
     cleanups.push(() => fs.rm(directory, { recursive: true, force: true }));
     const marker = "QA-SUBAGENT-TERMINAL-VISIBLE-OK";
     const writes: WireWrite[] = [];
-    const adapter = await startOpenClawCrablineAdapter({
+    const adapter = await startCarapaceCrablineAdapter({
       channel: "discord",
       recorderPath: path.join(directory, "provider.jsonl"),
     });
@@ -1066,7 +1066,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
       repoRoot: process.cwd(),
       command: {
         executablePath: process.execPath,
-        argsPrefix: [path.join(process.cwd(), "openclaw.mjs")],
+        argsPrefix: [path.join(process.cwd(), "carapace.mjs")],
         cwd: process.cwd(),
         usePackagedPlugins: true,
       },
@@ -1078,7 +1078,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
       transportBaseUrl: api.baseUrl,
       transport: {
         requiredPluginIds: adapter.requiredPluginIds,
-        createGatewayConfig: () => adapter.createGatewayConfig() as OpenClawConfig,
+        createGatewayConfig: () => adapter.createGatewayConfig() as CarapaceConfig,
       },
       runtimeEnvPatch: {
         ...adapter.createProviderReadinessEnv({}),
@@ -1173,17 +1173,17 @@ describe("channel progress presentation through an isolated Gateway", () => {
     expect(injected.ok, await injected.text()).toBe(true);
     const { loadUnfinishedDeliveries } =
       await import("../../../../src/infra/outbound/delivery-queue-storage.js");
-    const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+    const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("isolated Gateway state directory missing");
     }
-    const { openOpenClawStateDatabase, closeOpenClawStateDatabaseByPath } =
-      await import("../../../../src/state/openclaw-state-db.js");
+    const { openCarapaceStateDatabase, closeCarapaceStateDatabaseByPath } =
+      await import("../../../../src/state/carapace-state-db.js");
     const { readSubagentRun } =
       await import("../../../../src/agents/subagents/registry/subagent-registry.store.sqlite.js");
-    const database = openOpenClawStateDatabase({ env: gateway.runtimeEnv });
+    const database = openCarapaceStateDatabase({ env: gateway.runtimeEnv });
     cleanups.push(async () => {
-      closeOpenClawStateDatabaseByPath(database.path);
+      closeCarapaceStateDatabaseByPath(database.path);
     });
     await waitForFact(async () => {
       const listing = asRecord(await gateway.call("tasks.list", { agentId: "qa", limit: 100 }));
@@ -1324,7 +1324,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
       );
       cleanups.push(() => fs.rm(directory, { recursive: true, force: true }));
       const writes: WireWrite[] = [];
-      const adapter = await startOpenClawCrablineAdapter({
+      const adapter = await startCarapaceCrablineAdapter({
         channel,
         recorderPath: path.join(directory, "provider.jsonl"),
       });
@@ -1363,7 +1363,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
         // beneath already-running test workers when the source tree is dirty.
         command: {
           executablePath: process.execPath,
-          argsPrefix: [path.join(process.cwd(), "openclaw.mjs")],
+          argsPrefix: [path.join(process.cwd(), "carapace.mjs")],
           cwd: process.cwd(),
           usePackagedPlugins: true,
         },
@@ -1375,7 +1375,7 @@ describe("channel progress presentation through an isolated Gateway", () => {
         transportBaseUrl: api.baseUrl,
         transport: {
           requiredPluginIds: adapter.requiredPluginIds,
-          createGatewayConfig: () => adapter.createGatewayConfig() as OpenClawConfig,
+          createGatewayConfig: () => adapter.createGatewayConfig() as CarapaceConfig,
         },
         runtimeEnvPatch: environment,
         mutateConfig: (config) => {

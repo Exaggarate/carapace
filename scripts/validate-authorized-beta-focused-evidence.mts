@@ -77,7 +77,7 @@ export type AuthorizedBetaFocusedProducerIdentity = {
 };
 
 export type AuthorizedBetaFocusedEvidence = {
-  schema: "openclaw.authorized-beta-focused-evidence.v1";
+  schema: "carapace.authorized-beta-focused-evidence.v1";
   mode: "authorized-beta-focused-v1";
   policySha256: string;
   releaseTag: string;
@@ -118,7 +118,7 @@ export type AuthorizedBetaFocusedEvidence = {
 
 const SCRIPT_ROOT = dirname(fileURLToPath(import.meta.url));
 const POLICY_PATH = resolve(SCRIPT_ROOT, "authorized-beta-focused-policy.json");
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const PRODUCER_WORKFLOW = ".github/workflows/authorized-beta-focused-validation.yml";
 const SHA_PATTERN = /^[a-f0-9]{40}$/u;
 const POSITIVE_INTEGER_PATTERN = /^[1-9][0-9]*$/u;
@@ -526,7 +526,7 @@ function assertHistoricalAndFocusedEvidence(policy: AuthorizedBetaFocusedPolicy)
   requireJob({
     jobId: historical.ciAggregateJobId,
     runId: historical.ciRunId,
-    name: "openclaw/ci-gate",
+    name: "carapace/ci-gate",
     conclusion: "failure",
     headSha: policy.historicalToolingSha,
   });
@@ -556,8 +556,8 @@ function assertHistoricalAndFocusedEvidence(policy: AuthorizedBetaFocusedPolicy)
   requireRun({
     runId: historical.releaseChecksRunId,
     attempt: 1,
-    name: `OpenClaw Release Checks full-release-validation-${historical.runId}-${historical.runAttempt}-release-checks`,
-    path: ".github/workflows/openclaw-release-checks.yml",
+    name: `Carapace Release Checks full-release-validation-${historical.runId}-${historical.runAttempt}-release-checks`,
+    path: ".github/workflows/carapace-release-checks.yml",
     headBranch: historical.workflowRef,
     headSha: policy.historicalToolingSha,
   });
@@ -571,8 +571,8 @@ function assertHistoricalAndFocusedEvidence(policy: AuthorizedBetaFocusedPolicy)
   requireRun({
     runId: historical.performanceRunId,
     attempt: 1,
-    name: `OpenClaw Performance full-release-validation-${historical.runId}-${historical.runAttempt}`,
-    path: ".github/workflows/openclaw-performance.yml",
+    name: `Carapace Performance full-release-validation-${historical.runId}-${historical.runAttempt}`,
+    path: ".github/workflows/carapace-performance.yml",
     headBranch: historical.workflowRef,
     headSha: policy.historicalToolingSha,
     conclusion: "failure",
@@ -580,7 +580,7 @@ function assertHistoricalAndFocusedEvidence(policy: AuthorizedBetaFocusedPolicy)
   requireJob({
     jobId: historical.performanceFailedJobId,
     runId: historical.performanceRunId,
-    name: "OpenClaw source performance probes",
+    name: "Carapace source performance probes",
     conclusion: "failure",
     headSha: policy.historicalToolingSha,
   });
@@ -793,7 +793,7 @@ export function validateAuthorizedBetaFocusedArtifactShape(
   expectedInventory: AuthorizedBetaFocusedEvidence["inventory"],
 ) {
   if (
-    evidence.schema !== "openclaw.authorized-beta-focused-evidence.v1" ||
+    evidence.schema !== "carapace.authorized-beta-focused-evidence.v1" ||
     evidence.mode !== policy.mode ||
     evidence.policySha256 !== digestAuthorizedBetaFocusedPolicy(policy) ||
     evidence.releaseTag !== policy.releaseTag ||
@@ -847,7 +847,7 @@ async function main() {
   if (command === "create") {
     const inventory = await collectInventory(policy, candidateRoot, true);
     const evidence: AuthorizedBetaFocusedEvidence = {
-      schema: "openclaw.authorized-beta-focused-evidence.v1",
+      schema: "carapace.authorized-beta-focused-evidence.v1",
       mode: "authorized-beta-focused-v1",
       policySha256: digestAuthorizedBetaFocusedPolicy(policy),
       releaseTag: policy.releaseTag,

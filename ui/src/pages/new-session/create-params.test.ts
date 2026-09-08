@@ -37,7 +37,7 @@ describe("buildDraftSessionCreateParams", () => {
       buildDraftSessionCreateParams({
         agentId: "main",
         message: "",
-        repository: { url: "https://github.com/openclaw/openclaw.git", ref: "release" },
+        repository: { url: "https://github.com/Exaggarate/carapace.git", ref: "release" },
         projectId: "old-clone",
         worktree: true,
         baseRef: "ignored-local-ref",
@@ -48,7 +48,7 @@ describe("buildDraftSessionCreateParams", () => {
     ).toEqual({
       agentId: "main",
       message: "",
-      repository: { url: "https://github.com/openclaw/openclaw.git", ref: "release" },
+      repository: { url: "https://github.com/Exaggarate/carapace.git", ref: "release" },
     });
   });
   it("keeps plain chats minimal", () => {
@@ -240,15 +240,15 @@ describe("buildDraftSessionCreateParams", () => {
       buildDraftSessionCreateParams({
         agentId: "main",
         message: "work in the recorded repo",
-        projectId: "openclaw",
+        projectId: "carapace",
         worktree: true,
-        cwd: "/recorded/openclaw",
+        cwd: "/recorded/carapace",
         workspace: "/workspace",
       }),
     ).toEqual({
       agentId: "main",
       message: "work in the recorded repo",
-      projectId: "openclaw",
+      projectId: "carapace",
       worktree: true,
     });
   });

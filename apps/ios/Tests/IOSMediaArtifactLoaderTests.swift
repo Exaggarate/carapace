@@ -1,9 +1,9 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @Suite("iOS managed media artifact loader")
 struct IOSMediaArtifactLoaderTests {

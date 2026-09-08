@@ -2,10 +2,10 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+} from "@carapace/normalization-core/string-coerce";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import type { ChatType } from "../../channels/chat-type.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { TtsAutoMode } from "../../config/types.tts.js";
 import { logVerbose } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -131,7 +131,7 @@ export type AcpDispatchDeliveryCoordinator = ReturnType<
 >;
 
 export function createAcpDispatchDeliveryCoordinator(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   ctx: FinalizedMsgContext;
   dispatcher: ReplyDispatcher;

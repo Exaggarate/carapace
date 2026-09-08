@@ -15,14 +15,14 @@ import {
   isUpdateActionable,
 } from "../app/update-schedule-projection.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { PollController } from "../lit/poll-controller.ts";
 import "../styles/sidebar-update-card.css";
 import { icons } from "./icons.ts";
 import { isUpdateRunAttentionVisible } from "./sidebar-attention-update.ts";
 import "./tooltip.ts";
 
-class SidebarUpdateCard extends OpenClawLightDomContentsElement {
+class SidebarUpdateCard extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) compact = false;
   @property({ attribute: false }) updateAvailable: UpdateAvailable | null = null;
   @property({ attribute: false }) updateSchedule: UpdateScheduleState | null = null;
@@ -464,9 +464,9 @@ class SidebarUpdateCard extends OpenClawLightDomContentsElement {
                 ${
                   this.canUpdate
                     ? updateAction
-                    : html`<openclaw-tooltip open-on-click .content=${t("updates.adminRequired")}>
+                    : html`<carapace-tooltip open-on-click .content=${t("updates.adminRequired")}>
                         ${updateAction}
-                      </openclaw-tooltip>`
+                      </carapace-tooltip>`
                 }
                 ${
                   showHold && campaign
@@ -505,6 +505,6 @@ class SidebarUpdateCard extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-sidebar-update-card")) {
-  customElements.define("openclaw-sidebar-update-card", SidebarUpdateCard);
+if (!customElements.get("carapace-sidebar-update-card")) {
+  customElements.define("carapace-sidebar-update-card", SidebarUpdateCard);
 }

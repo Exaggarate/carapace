@@ -8,9 +8,9 @@ import type {
   AgentMessage,
   AgentHarnessAttemptParamsV2 as AgentHarnessAttemptParams,
   AgentHarnessV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { createCopilotAgentHarness } from "../harness.js";
 import { createCopilotTestHostCapabilities } from "./host-capability.test-support.js";
@@ -61,12 +61,12 @@ type LiveAttemptFacts =
       resolvedApiKey: string;
     };
 
-vi.mock("openclaw/plugin-sdk/agent-harness", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness")>();
+vi.mock("carapace/plugin-sdk/agent-harness", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-harness")>();
 
   return {
     ...actual,
-    createOpenClawCodingTools: vi.fn(() => [
+    createCarapaceCodingTools: vi.fn(() => [
       {
         name: liveToolState.toolName,
         label: liveToolState.toolName,
@@ -102,7 +102,7 @@ vi.mock("openclaw/plugin-sdk/agent-harness", async (importOriginal) => {
       {
         name: liveToolState.spawnToolName,
         label: liveToolState.spawnToolName,
-        description: "Spawn an OpenClaw session for delegated work.",
+        description: "Spawn an Carapace session for delegated work.",
         parameters: {
           type: "object",
           additionalProperties: false,
@@ -144,7 +144,7 @@ vi.mock("openclaw/plugin-sdk/agent-harness", async (importOriginal) => {
   };
 });
 
-const LIVE = isLiveTestEnabled(["OPENCLAW_COPILOT_AGENT_LIVE_TEST"]);
+const LIVE = isLiveTestEnabled(["CARAPACE_COPILOT_AGENT_LIVE_TEST"]);
 const AUTH_MODE = resolveLiveAuthMode();
 const describeLive = LIVE && AUTH_MODE ? describe : describe.skip;
 let liveAttemptFacts: LiveAttemptFacts;
@@ -155,7 +155,7 @@ function readNonEmptyEnv(name: string): string | undefined {
 }
 
 function resolveLiveAuthMode(): LiveAuthMode | undefined {
-  const explicitCopilotToken = readNonEmptyEnv("OPENCLAW_COPILOT_AGENT_LIVE_TOKEN");
+  const explicitCopilotToken = readNonEmptyEnv("CARAPACE_COPILOT_AGENT_LIVE_TOKEN");
   if (explicitCopilotToken) {
     return { kind: "github-copilot", gitHubToken: explicitCopilotToken };
   }
@@ -164,7 +164,7 @@ function resolveLiveAuthMode(): LiveAuthMode | undefined {
     return {
       apiKey,
       kind: "openai-byok",
-      modelId: readNonEmptyEnv("OPENCLAW_COPILOT_AGENT_LIVE_MODEL") ?? OPENAI_DEFAULT_MODEL,
+      modelId: readNonEmptyEnv("CARAPACE_COPILOT_AGENT_LIVE_MODEL") ?? OPENAI_DEFAULT_MODEL,
     };
   }
   const fallbackCopilotToken = readNonEmptyEnv("GITHUB_TOKEN") ?? readNonEmptyEnv("GH_TOKEN");
@@ -332,7 +332,7 @@ async function createAttemptParams(params: {
   const now = Date.now();
   const sessionId = `copilot-live-smoke-session-${now}`;
   const sessionKey = "agent:copilot-live-smoke:main";
-  const storePath = join(params.copilotHome, "openclaw-agent.sqlite");
+  const storePath = join(params.copilotHome, "carapace-agent.sqlite");
   const userMessage = { content: params.prompt, role: "user", timestamp: now } as const;
   await upsertSessionEntry({
     agentId: "copilot-live-smoke",
@@ -391,7 +391,7 @@ describeLive("copilot agent runtime live smoke", () => {
     if (!AUTH_MODE) {
       throw new Error("Copilot live smoke requires a Copilot token or OPENAI_API_KEY");
     }
-    const modelHome = await createTempDir("openclaw-copilot-live-model-");
+    const modelHome = await createTempDir("carapace-copilot-live-model-");
     try {
       liveAttemptFacts = await resolveLiveAttemptFacts(AUTH_MODE, modelHome);
     } finally {
@@ -406,7 +406,7 @@ describeLive("copilot agent runtime live smoke", () => {
     const streamedTexts: string[] = [];
     const finalEventTypes: string[] = [];
     const prompt = `Use the ${liveToolState.toolName} tool exactly once with text '${liveToolState.expectedText}', then reply with one short sentence.`;
-    const copilotHome = await createTempDir("openclaw-copilot-live-");
+    const copilotHome = await createTempDir("carapace-copilot-live-");
     const facts = liveAttemptFacts;
     const modelId = facts.model.id;
     const harness = createCopilotAgentHarness({ pool: createLivePool() });
@@ -513,10 +513,10 @@ describeLive("copilot agent runtime live smoke", () => {
     }
   }, 180_000);
 
-  it("delegates user-followed deliverable work through a visible OpenClaw session", async () => {
+  it("delegates user-followed deliverable work through a visible Carapace session", async () => {
     liveToolState.spawnCalls.length = 0;
     const streamedTexts: string[] = [];
-    const copilotHome = await createTempDir("openclaw-copilot-live-delegation-");
+    const copilotHome = await createTempDir("carapace-copilot-live-delegation-");
     const facts = liveAttemptFacts;
     const modelId = facts.model.id;
     const harness = createCopilotAgentHarness({ pool: createLivePool() });

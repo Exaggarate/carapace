@@ -31,8 +31,8 @@ export function mountChatPaneHeader(
     catalog: false,
     editing: false,
     renameValue: "Session title",
-    workspaceRoot: "/repo/openclaw",
-    workspaceLabel: "openclaw",
+    workspaceRoot: "/repo/carapace",
+    workspaceLabel: "carapace",
     workspaceIcon: null,
     parentSession: null,
     branch: "feature/header",
@@ -70,7 +70,7 @@ export function mockWorkspaceIconFetch() {
   vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
     // Other header elements fetch assets asynchronously. They must not consume
     // workspace retry responses or count as authenticated icon requests.
-    if (typeof input === "string" && input.startsWith("/__openclaw__/workspace-icon/")) {
+    if (typeof input === "string" && input.startsWith("/__carapace__/workspace-icon/")) {
       return workspaceFetch(input, init);
     }
     return Promise.resolve(new Response(null, { status: 404 }));

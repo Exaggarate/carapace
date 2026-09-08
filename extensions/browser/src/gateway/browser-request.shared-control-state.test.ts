@@ -1,13 +1,13 @@
 // Browser tests cover browser request.shared control state plugin behavior.
 import { createServer } from "node:http";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 
 const mocks = vi.hoisted(() => ({
-  runtimeConfig: {} as OpenClawConfig,
-  runtimeSourceConfig: null as OpenClawConfig | null,
+  runtimeConfig: {} as CarapaceConfig,
+  runtimeSourceConfig: null as CarapaceConfig | null,
   ensureBrowserControlAuth: vi.fn(async () => ({ auth: {} })),
   resolveBrowserControlAuth: vi.fn(() => ({})),
   shouldAutoGenerateBrowserAuth: vi.fn(() => false),
@@ -46,11 +46,11 @@ vi.mock("../browser/chrome.js", () => ({
   formatChromeCdpDiagnostic: vi.fn(() => "not reachable"),
   isChromeCdpReady: mocks.isChromeCdpReady,
   isChromeReachable: mocks.isChromeReachable,
-  launchOpenClawChrome: vi.fn(async () => {
+  launchCarapaceChrome: vi.fn(async () => {
     throw new Error("launch should not be needed for status");
   }),
-  resolveOpenClawUserDataDir: vi.fn(() => "/tmp/openclaw-browser"),
-  stopOpenClawChrome: vi.fn(async () => {}),
+  resolveCarapaceUserDataDir: vi.fn(() => "/tmp/carapace-browser"),
+  stopCarapaceChrome: vi.fn(async () => {}),
 }));
 
 const { startBrowserControlServerFromConfig, stopBrowserControlServer } =
@@ -66,19 +66,19 @@ function browserConfig(params: {
   executablePath?: string;
   headless?: boolean;
   noSandbox?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     gateway: {
       port: params.gatewayPort,
     },
     browser: {
       enabled: true,
-      defaultProfile: "openclaw",
+      defaultProfile: "carapace",
       ...(params.executablePath ? { executablePath: params.executablePath } : {}),
       ...(typeof params.headless === "boolean" ? { headless: params.headless } : {}),
       ...(typeof params.noSandbox === "boolean" ? { noSandbox: params.noSandbox } : {}),
       profiles: {
-        openclaw: {
+        carapace: {
           cdpPort: params.gatewayPort + 11,
           color: "#FF4500",
         },
@@ -96,7 +96,7 @@ async function browserRequestStatus(): Promise<unknown> {
     params: {
       method: "GET",
       path: "/",
-      query: { profile: "openclaw" },
+      query: { profile: "carapace" },
     },
     respond: respond as never,
     context: {
@@ -199,7 +199,7 @@ describe("browser.request local control state", () => {
       mocks.runtimeConfig = { ...cfg, browser: { ...cfg.browser, enabled } };
       mocks.runtimeSourceConfig = mocks.runtimeConfig;
     };
-    const request = JSON.stringify({ method: "GET", path: "/", profile: "openclaw" });
+    const request = JSON.stringify({ method: "GET", path: "/", profile: "carapace" });
     setEnabled(false);
     await expect(runBrowserProxyCommand(request)).rejects.toThrow("browser control disabled");
     setEnabled(true);
@@ -209,13 +209,13 @@ describe("browser.request local control state", () => {
 
     setEnabled(true);
     const first = JSON.parse(await runBrowserProxyCommand(request));
-    expect(first.result).toMatchObject({ enabled: true, profile: "openclaw" });
+    expect(first.result).toMatchObject({ enabled: true, profile: "carapace" });
     const previous = getBrowserControlState();
     expect(previous).not.toBeNull();
     setEnabled(false);
     expect(JSON.parse(await runBrowserProxyCommand(request)).result).toMatchObject({
       enabled: true,
-      profile: "openclaw",
+      profile: "carapace",
     });
     expect(getBrowserControlState()).toBe(previous);
 
@@ -224,7 +224,7 @@ describe("browser.request local control state", () => {
 
     setEnabled(true);
     const restarted = JSON.parse(await runBrowserProxyCommand(request));
-    expect(restarted.result).toMatchObject({ enabled: true, profile: "openclaw" });
+    expect(restarted.result).toMatchObject({ enabled: true, profile: "carapace" });
     expect(getBrowserControlState()).not.toBe(previous);
     expect(getBrowserControlState()).not.toBeNull();
 

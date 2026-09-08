@@ -1,17 +1,17 @@
 // Toggles plugin enablement config for channels and agents.
 import { normalizeChatChannelId } from "../channels/ids.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginEntryConfig } from "../config/types.plugins.js";
 import { mergeDeep } from "../infra/deep-merge.js";
 import { normalizePluginId, normalizePluginTargetConfig } from "./config-state.js";
 
 /** Returns config with a plugin enabled/disabled and optional built-in channel state synced. */
 export function setPluginEnabledInConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
   enabled: boolean,
   options: { updateChannelConfig?: boolean } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   const resolvedId = normalizePluginId(builtInChannelId ?? pluginId);
   const normalizedConfig = normalizePluginTargetConfig(config, resolvedId);
@@ -33,7 +33,7 @@ export function setPluginEnabledInConfig(
     existingEntry = mergeDeep(existingEntry, entry) as PluginEntryConfig;
   }
 
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...normalizedConfig,
     plugins: {
       ...normalizedConfig.plugins,

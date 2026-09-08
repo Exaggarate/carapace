@@ -16,7 +16,7 @@ import {
 } from "../../../../src/config/config.js";
 import { resetConfigOverrides } from "../../../../src/config/runtime-overrides.js";
 import { clearSessionStoreCacheForTest } from "../../../../src/config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import {
   disconnectGatewayClient,
   startGatewayWithClient,
@@ -32,21 +32,21 @@ import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 
 const ISOLATED_GATEWAY_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_URL",
-  "OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN",
-  "OPENCLAW_TEST_RUNTIME_OVERRIDE_TOKEN",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_GATEWAY_URL",
+  "CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN",
+  "CARAPACE_TEST_RUNTIME_OVERRIDE_TOKEN",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 let sequence = 0;
@@ -102,11 +102,11 @@ describe("Gateway task and automation RPCs", () => {
     { timeout: 90_000 },
     async (cancelSurface) => {
       const envSnapshot = captureEnv([...ISOLATED_GATEWAY_ENV_KEYS]);
-      const tempHome = tempDirs.make("openclaw-gateway-automation-");
-      const stateDir = path.join(tempHome, ".openclaw");
+      const tempHome = tempDirs.make("carapace-gateway-automation-");
+      const stateDir = path.join(tempHome, ".carapace");
       const workspaceDir = path.join(tempHome, "workspace");
       const bundledPluginsDir = path.join(tempHome, "empty-bundled-plugins");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await Promise.all([
         fs.mkdir(workspaceDir, { recursive: true }),
         fs.mkdir(bundledPluginsDir, { recursive: true }),
@@ -120,22 +120,22 @@ describe("Gateway task and automation RPCs", () => {
       const token = nextId("gateway-automation-token");
       for (const [key, value] of Object.entries({
         HOME: tempHome,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_GATEWAY_TOKEN: token,
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "0",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_GATEWAY_TOKEN: token,
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "0",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       })) {
         setTestEnvValue(key, value);
       }
-      deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-      deleteTestEnvValue("OPENCLAW_GATEWAY_URL");
-      deleteTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY");
+      deleteTestEnvValue("CARAPACE_CONFIG_PATH");
+      deleteTestEnvValue("CARAPACE_GATEWAY_URL");
+      deleteTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY");
 
       const taskPrompt = nextId("create-tracked-task");
       const wakeText = nextId("wake-heartbeat");
@@ -213,7 +213,7 @@ describe("Gateway task and automation RPCs", () => {
           },
           gateway: { auth: { mode: "token", token } },
           plugins: { slots: { memory: "none" } },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
 
         gateway = await startGatewayWithClient({
           cfg: config,

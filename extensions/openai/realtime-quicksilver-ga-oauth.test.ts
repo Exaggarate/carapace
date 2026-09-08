@@ -79,7 +79,7 @@ describe("GA OAuth offer broker", () => {
           input: { transcription: { model: "gpt-4o-mini-transcribe" } },
           output: { voice: "cedar" },
         },
-        tools: [{ type: "function", name: "openclaw_agent_consult", parameters: {} }],
+        tools: [{ type: "function", name: "carapace_agent_consult", parameters: {} }],
         tool_choice: "auto",
       };
       const reservation = await realtime.broker.createBrowserSession(

@@ -1,6 +1,6 @@
 // Telegram tests cover forum reaction topic recovery before authorization and routing.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getChildLogger } from "openclaw/plugin-sdk/runtime-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { getChildLogger } from "carapace/plugin-sdk/runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultTelegramBotDeps } from "./bot-deps.js";
 import { createTelegramEventBindings } from "./bot-handlers.event-bindings.js";
@@ -28,7 +28,7 @@ const resolveCachedMessageThreadSpec = vi.fn<
 
 function buildTelegramConfig(overrides?: {
   topics?: Record<string, { enabled?: boolean; agentId?: string }>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -44,14 +44,14 @@ function buildTelegramConfig(overrides?: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 /**
  * Registers the real reaction handler against the real authorization runtime so
  * the test proves topic-scoped config lookup, not just the handler's own branch.
  */
-function registerHandler(cfg: OpenClawConfig): ReactionHandler {
+function registerHandler(cfg: CarapaceConfig): ReactionHandler {
   const handlers = new Map<string, ReactionHandler>();
   const params: RegisterTelegramHandlerParams = {
     accountId: "default",
@@ -74,7 +74,7 @@ function registerHandler(cfg: OpenClawConfig): ReactionHandler {
     resolveTelegramGroupConfig: (
       chatId: string | number,
       messageThreadId: number | undefined,
-      config: OpenClawConfig,
+      config: CarapaceConfig,
     ) => {
       const groups = (
         config.channels?.telegram as

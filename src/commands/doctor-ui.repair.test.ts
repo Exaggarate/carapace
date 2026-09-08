@@ -16,9 +16,9 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../../packages/terminal-core/src/note.js", () => ({ note: mocks.note }));
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: vi.fn(async () => mocks.root),
-  resolveOpenClawPackageRootSync: vi.fn(() => mocks.root),
+vi.mock("../infra/carapace-root.js", () => ({
+  resolveCarapacePackageRoot: vi.fn(async () => mocks.root),
+  resolveCarapacePackageRootSync: vi.fn(() => mocks.root),
 }));
 vi.mock("../process/exec.js", () => ({ runCommandWithTimeout: mocks.runCommandWithTimeout }));
 vi.mock("../version.js", async (importOriginal) => ({
@@ -45,7 +45,7 @@ describe("Control UI doctor repair owner", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mocks.root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-ui-repair-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-ui-repair-")),
     );
     await fs.mkdir(path.join(mocks.root, "ui"), { recursive: true });
     await fs.writeFile(path.join(mocks.root, "ui", "package.json"), "{}");
@@ -131,7 +131,7 @@ describe("Control UI doctor repair owner", () => {
         expect(mocks.note).not.toHaveBeenCalled();
       } else {
         expect(mocks.note).toHaveBeenCalledWith(
-          expect.stringContaining("Reinstall OpenClaw to restore bundled Control UI assets."),
+          expect.stringContaining("Reinstall Carapace to restore bundled Control UI assets."),
           expect.any(String),
         );
       }

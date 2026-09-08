@@ -1,8 +1,8 @@
 // Irc plugin module implements gateway behavior.
-import { runPassiveAccountLifecycle } from "openclaw/plugin-sdk/channel-outbound";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/status-helpers";
+import { runPassiveAccountLifecycle } from "carapace/plugin-sdk/channel-outbound";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/status-helpers";
 import type { ResolvedIrcAccount } from "./accounts.js";
 import { createAccountStatusSink } from "./channel-api.js";
 import type { CoreConfig } from "./types.js";

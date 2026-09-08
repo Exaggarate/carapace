@@ -2,7 +2,7 @@
 import { writeFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import path from "node:path";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import type { Route } from "playwright";
 import { expect, it } from "vitest";
 import { buildSandboxHostPath } from "../../../src/agents/sandbox-host.js";
@@ -33,9 +33,9 @@ const suite = createControlUiE2eSuite({
 });
 const sessionKey = "agent:main:widget-sandbox-proof";
 const documentId = "widget-sandbox-proof";
-const documentPath = `/__openclaw__/canvas/documents/${documentId}/index.html`;
+const documentPath = `/__carapace__/canvas/documents/${documentId}/index.html`;
 const widgetName = `canvas-${documentId}`;
-const boardPath = `/__openclaw__/board/${encodeURIComponent(sessionKey)}/${widgetName}/index.html`;
+const boardPath = `/__carapace__/board/${encodeURIComponent(sessionKey)}/${widgetName}/index.html`;
 const sourceAuthorization = "Bearer synthetic-widget-source-credential";
 
 function widgetDocument(): string {
@@ -60,12 +60,12 @@ function widgetDocument(): string {
     <output id="result" aria-label="Widget result">Ready</output>
     <div id="extra" class="details" hidden>Additional community details</div>
     <script>
-      document.querySelector('#refresh').onclick=()=>window.openclaw.prompt.send('Refresh the synthetic dashboard');
+      document.querySelector('#refresh').onclick=()=>window.carapace.prompt.send('Refresh the synthetic dashboard');
       document.querySelector('#details').onclick=()=>{const extra=document.querySelector('#extra');extra.hidden=!extra.hidden;};
-      document.querySelector('#data').onclick=async()=>{try{await window.openclaw.data.read('private-dashboard');
+      document.querySelector('#data').onclick=async()=>{try{await window.carapace.data.read('private-dashboard');
         document.querySelector('#result').textContent='Unexpected data access';}
         catch{document.querySelector('#result').textContent='Dashboard data is unavailable in chat';}};
-      document.querySelector('#record').onclick=async()=>{await window.openclaw.state.emit({clicked:true});
+      document.querySelector('#record').onclick=async()=>{await window.carapace.state.emit({clicked:true});
         document.querySelector('#result').textContent='State recorded';};
     </script>`,
   );

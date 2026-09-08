@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
   loadRunOverflowCompactionHarness,
@@ -9,7 +9,7 @@ import {
   createOverflowRunParams,
 } from "./run.overflow-compaction.harness.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared plugin harness credentials", () => {
   let runEmbeddedAgent: Awaited<
@@ -33,8 +33,8 @@ describe("prepared plugin harness credentials", () => {
     );
   });
   beforeEach(async () => {
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.prepared-harness-credentials" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.prepared-harness-credentials" });
     registerPreparedAgentHarness({
       id: "test-byok",
       label: "Test BYOK",

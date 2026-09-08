@@ -1,6 +1,6 @@
 // Verifies generated base config schema snapshots and sensitive redaction.
-import { SENSITIVE_URL_HINT_TAG } from "@openclaw/net-policy/redact-sensitive-url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SENSITIVE_URL_HINT_TAG } from "@carapace/net-policy/redact-sensitive-url";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { computeBaseConfigSchemaResponse } from "./schema-base.js";
 

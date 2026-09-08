@@ -33,9 +33,9 @@ import {
 } from "../../lib/sessions/route-navigation.ts";
 import { createManagedWorktree } from "../../lib/worktrees/create-worktree.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 
-const WORKTREES_DOCS_URL = "https://docs.openclaw.ai/concepts/managed-worktrees";
+const WORKTREES_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type WorktreesListResult = { worktrees: WorktreeRecord[] };
 type WorktreeBranchesResult = {
@@ -44,7 +44,7 @@ type WorktreeBranchesResult = {
   headBranch?: string;
 };
 
-class WorktreesPage extends OpenClawLightDomElement {
+class WorktreesPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -477,6 +477,6 @@ class WorktreesPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-worktrees-page")) {
-  customElements.define("openclaw-worktrees-page", WorktreesPage);
+if (!customElements.get("carapace-worktrees-page")) {
+  customElements.define("carapace-worktrees-page", WorktreesPage);
 }

@@ -163,10 +163,10 @@ function handleBudgetedGatewayWebSocketUpgrade(params: {
   try {
     wss.handleUpgrade(req, socket, head, (ws) => {
       const ingressSocket = ws as GatewayIngressWebSocket;
-      ingressSocket["__openclawPreauthBudgetKey"] = preauthBudgetKey;
+      ingressSocket["__carapacePreauthBudgetKey"] = preauthBudgetKey;
       params.prepareSocket?.(ingressSocket);
       wss.emit("connection", ws, req);
-      if (ingressSocket["__openclawPreauthBudgetClaimed"]) {
+      if (ingressSocket["__carapacePreauthBudgetClaimed"]) {
         budgetTransferred = true;
         socket.off("close", releaseUpgradeBudget);
       }

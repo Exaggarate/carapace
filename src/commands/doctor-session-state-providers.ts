@@ -1,7 +1,7 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /** Doctor repair for stale plugin-owned routing state persisted in session entries. */
-import { normalizeOptionalString as normalizeString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntriesLower } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString as normalizeString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntriesLower } from "@carapace/normalization-core/string-normalization";
 import { note } from "../../packages/terminal-core/src/note.js";
 import {
   resolveAgentModelFallbacksOverride,
@@ -17,7 +17,7 @@ import {
 import { resolveAgentModelFallbackValues } from "../config/model-input.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { applySessionEntryReplacements } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { updateLegacySessionStore } from "../infra/state-migrations.legacy-session-store.js";
 import { listPluginDoctorSessionRouteStateOwners } from "../plugins/doctor-contract-registry.js";
 import type { DoctorSessionRouteStateOwner } from "../plugins/doctor-session-route-state-owner-types.js";
@@ -56,7 +56,7 @@ function repairExample(repair: DoctorSessionRouteStateRepair): string {
 }
 
 function resolveSessionAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessionKey: string,
   storeAgentId?: string,
 ): string | undefined {
@@ -66,7 +66,7 @@ function resolveSessionAgentId(
 /** Resolves the currently configured provider/model/runtime route for a session key. */
 function resolveConfiguredDoctorSessionStateRoute(params: {
   agentId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   env?: NodeJS.ProcessEnv;
 }): DoctorSessionRouteState | undefined {
@@ -107,7 +107,7 @@ function resolveConfiguredDoctorSessionStateRoute(params: {
 }
 
 function resolvePluginDoctorSessionRouteStateOwners(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): DoctorSessionRouteStateOwner[] {
   return listPluginDoctorSessionRouteStateOwners({ config: params.cfg, env: params.env });
@@ -341,7 +341,7 @@ function scanEntryForOwner(params: {
 /** Streams session entries into compact plugin-owned route-state findings. */
 export function createPluginSessionStateDoctorScanner(params: {
   agentId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }) {
   const repairs: DoctorSessionRouteStateRepair[] = [];

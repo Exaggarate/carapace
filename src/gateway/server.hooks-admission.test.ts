@@ -109,9 +109,9 @@ async function postOversizedChunkedHook(port: number): Promise<{
 }
 
 async function writeHookTransformModule(moduleName: string, source: string): Promise<void> {
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("expected OPENCLAW_CONFIG_PATH");
+    throw new Error("expected CARAPACE_CONFIG_PATH");
   }
   const transformsDir = path.join(path.dirname(configPath), "hooks", "transforms");
   await fs.mkdir(transformsDir, { recursive: true });

@@ -8,9 +8,9 @@ import crypto from "node:crypto";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { ensureGatewayStartupAuth } from "../gateway/startup-auth.js";
 import { persistBrowserControlCredential } from "./config-mutations.js";
@@ -23,7 +23,7 @@ export type BrowserControlAuth = {
 
 /** Resolve browser-control auth material from config and environment. */
 export function resolveBrowserControlAuth(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): BrowserControlAuth {
   const auth = resolveGatewayAuth({
@@ -61,7 +61,7 @@ export function shouldAutoGenerateBrowserAuth(env: NodeJS.ProcessEnv): boolean {
 }
 
 function hasExplicitNonStringGatewayCredentialForMode(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   mode: "none" | "trusted-proxy";
 }): boolean {
   const { cfg, mode } = params;
@@ -99,7 +99,7 @@ async function generateAndPersistBrowserControlCredential(params: {
 
 /** Ensure browser-control auth exists, generating and persisting it when allowed. */
 export async function ensureBrowserControlAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<{
   auth: BrowserControlAuth;

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { createDefaultDeps } from "../../cli/deps.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { CronJob } from "../../cron/types.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -35,7 +35,7 @@ const channelJoinIntroDedupes = new Map<string, ReturnType<typeof createClaimabl
 class ChannelJoinIntroRetryableError extends Error {}
 
 type ChannelJoinIntroParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId?: string;
   conversationId: string;

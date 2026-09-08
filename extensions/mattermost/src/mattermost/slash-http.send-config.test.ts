@@ -1,8 +1,8 @@
 // Mattermost tests cover slash http.send config plugin behavior.
 import { ServerResponse, type IncomingMessage } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { createMockIncomingRequest } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { createMockIncomingRequest } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 
@@ -249,7 +249,7 @@ describe("slash-http cfg threading", () => {
           botToken: "exec:secret-ref",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
       cfg,
@@ -295,7 +295,7 @@ describe("slash-http cfg threading", () => {
       text: "replacement provider picker",
     },
   ] as const)("sends recovered data for $commandText initial render", async (testCase) => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const buttons = [{ text: "OpenAI", value: "openai" }];
     mockState.resolveCommandText.mockReturnValueOnce(testCase.commandText);
     mockState.resolveMattermostModelPickerEntry.mockReturnValueOnce(testCase.entry);
@@ -379,7 +379,7 @@ describe("slash-http cfg threading", () => {
     });
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [
         {
@@ -429,7 +429,7 @@ describe("slash-http cfg threading", () => {
 
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [
         {
@@ -464,7 +464,7 @@ describe("slash-http cfg threading", () => {
     });
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [
         {
@@ -509,7 +509,7 @@ describe("slash-http cfg threading", () => {
 
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [
         {

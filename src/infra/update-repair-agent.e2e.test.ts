@@ -7,9 +7,9 @@ import {
   writeOpenAiResponsesSse,
   writeOpenAiResponsesText,
 } from "../../test/helpers/openai-responses-sse.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { prepareUnattendedUpdateRepair } from "./update-repair-agent.js";
 import { createUpdateRun, getUpdateRun, recordUpdateRunPhase } from "./update-run-ledger.js";
 
@@ -39,7 +39,7 @@ function writeRepairToolCall(response: ServerResponse, name: "exec" | "write"): 
         ? { path: "../outside-repair.txt", content: "must not escape" }
         : {
             command:
-              "node -e \"require('node:fs').writeFileSync('repair-proof.txt', [process.env.OPENCLAW_STATE_DIR, process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION, process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR, process.env.OPENCLAW_SERVICE_REPAIR_POLICY].join(' '))\"",
+              "node -e \"require('node:fs').writeFileSync('repair-proof.txt', [process.env.CARAPACE_STATE_DIR, process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION, process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR, process.env.CARAPACE_SERVICE_REPAIR_POLICY].join(' '))\"",
           },
     ),
     status: "completed",
@@ -73,7 +73,7 @@ describe("update repair with a local model provider", () => {
   it.each(["validating", "verifying"] as const)(
     "runs host exec on the pinned target during %s",
     async (phase) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { prefix: "update-repair-boundary-", layout: "home" },
         async (state) => {
           const requests: ModelRequest[] = [];
@@ -118,13 +118,13 @@ describe("update repair with a local model provider", () => {
             },
             async (baseUrl) => {
               const modelRef = "repair-test/repair-model";
-              const config: OpenClawConfig = {
+              const config: CarapaceConfig = {
                 plugins: { slots: { memory: "none" } },
                 tools: { exec: { mode: "ask", safeBins: ["cat"] }, fs: { workspaceOnly: false } },
                 agents: {
                   defaults: {
                     model: { primary: modelRef },
-                    models: { [modelRef]: { agentRuntime: { id: "openclaw" } } },
+                    models: { [modelRef]: { agentRuntime: { id: "carapace" } } },
                     systemAgent: { agentId: "operator" },
                     skipBootstrap: true,
                     skills: [],

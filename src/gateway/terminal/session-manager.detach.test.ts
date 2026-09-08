@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { composeTerminalIntroBanner } from "./intro-banner.js";
 import { TerminalSessionManager } from "./session-manager.js";

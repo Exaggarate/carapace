@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   getGoogleChatAccessToken: vi.fn().mockResolvedValue("token"),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuard,
 }));
 
@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+  vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
   vi.doUnmock("./auth.js");
   vi.resetModules();
 });

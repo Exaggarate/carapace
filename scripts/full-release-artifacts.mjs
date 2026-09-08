@@ -22,7 +22,7 @@ import {
 import { runReleaseToolingGh } from "./release-tooling-identity.mjs";
 
 const WORKFLOW = ".github/workflows/full-release-artifacts.yml";
-const SCHEMA = "openclaw.full-release-artifact-receipt/v1";
+const SCHEMA = "carapace.full-release-artifact-receipt/v1";
 const MAX_ARCHIVE_BYTES = 1024 * 1024;
 const MAX_RECEIPT_BYTES = 256 * 1024;
 const WAIT_MINUTES = 350;
@@ -274,7 +274,7 @@ async function waitForArtifact(request, env) {
   const raw = env.ARTIFACT_OUTPUT === "raw";
   requireValue(!raw || request.stage === "npm", "Only npm exposes early raw artifacts.");
   const name = raw
-    ? `openclaw-npm-package-descriptor-${runId}-${runAttempt}`
+    ? `carapace-npm-package-descriptor-${runId}-${runAttempt}`
     : `full-release-artifact-receipt-${runId}-${runAttempt}`;
   const deadline = Date.now() + WAIT_MINUTES * 60_000;
   let receipt;

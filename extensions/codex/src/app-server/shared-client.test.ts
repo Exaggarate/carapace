@@ -1,9 +1,9 @@
 // Codex tests cover shared client plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { SemVer } from "semver";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer, type RawData } from "ws";
@@ -66,7 +66,7 @@ const mocks = vi.hoisted(() => ({
   resolveManagedCodexNativeCommand: vi.fn((command: string) => `${command}.native`),
   isManagedCodexDesktopCommand: vi.fn((command: string) => command.startsWith("/Applications/")),
   embeddedAgentLog: { debug: vi.fn(), warn: vi.fn() },
-  resolveDefaultAgentDir: vi.fn(() => "/tmp/openclaw-agent"),
+  resolveDefaultAgentDir: vi.fn(() => "/tmp/carapace-agent"),
   desktopGeneration: undefined as { epoch: number; fingerprint: string } | undefined,
   desktopGenerationCurrent: true,
   waitForCodexDesktopGeneration: vi.fn(),
@@ -109,8 +109,8 @@ vi.mock("./desktop-generation.js", () => ({
   waitForCodexDesktopGeneration: mocks.waitForCodexDesktopGeneration,
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-registration")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-registration")>()),
   resolveDefaultAgentDir: mocks.resolveDefaultAgentDir,
 }));
 
@@ -252,7 +252,7 @@ function configureManagedDesktopFallback(): CodexAppServerStartOptions {
     ...startOptions,
     command: "/Applications/Codex.app/Contents/Resources/codex",
     commandSource: "resolved-managed",
-    managedFallbackCommandPaths: ["/cache/openclaw/codex"],
+    managedFallbackCommandPaths: ["/cache/carapace/codex"],
   }));
   return {
     transport: "stdio",
@@ -347,7 +347,7 @@ describe("shared Codex app-server client", () => {
     // Model discovery uses the shared-client path, which owns child teardown
     // when initialize discovers an unsupported app-server.
     const listPromise = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(harness, "openclaw/0.117.9 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.117.9 (macOS; test)");
 
     await expect(listPromise).rejects.toThrow(
       `Codex app-server ${MIN_SUPPORTED_CODEX_APP_SERVER_VERSION} or newer is required`,
@@ -437,7 +437,7 @@ describe("shared Codex app-server client", () => {
         timeoutMs: 1_000,
       };
       const firstAcquire = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(first, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(first, "carapace/0.149.0 (Linux; test)");
       await expect(firstAcquire).resolves.toBe(first.client);
       releaseLeasedSharedCodexAppServerClient(first.client);
       await expect(getLeasedSharedCodexAppServerClient(options)).resolves.toBe(first.client);
@@ -453,7 +453,7 @@ describe("shared Codex app-server client", () => {
         secretFreeCacheKey: "replacement-account",
       });
       const nextAcquire = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(replacement, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(replacement, "carapace/0.149.0 (Linux; test)");
       expect(startSpy).toHaveBeenCalledTimes(2);
       await expect(nextAcquire).resolves.toBe(replacement.client);
       releaseLeasedSharedCodexAppServerClient(replacement.client);
@@ -516,7 +516,7 @@ describe("shared Codex app-server client", () => {
     await expect(first).rejects.toThrow("codex app-server initialize aborted");
     expect(harness.stdinDestroyed).toBe(false);
 
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     await expect(second).resolves.toBe(harness.client);
     expect(releaseLeasedSharedCodexAppServerClient(harness.client)).toBe(true);
   });
@@ -525,7 +525,7 @@ describe("shared Codex app-server client", () => {
     const harness = createClientHarness();
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
     const acquire = getLeasedSharedCodexAppServerClient({ timeoutMs: 1_000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     const client = await acquire;
 
     const retained = retainSharedCodexAppServerClientByInstanceId(client.getInstanceId());
@@ -554,7 +554,7 @@ describe("shared Codex app-server client", () => {
     // A plugin update inside a container restarts the gateway in-process, so the
     // new plugin build starts with the previous build's globalThis. This is the
     // slot name and record shape every build before the keyed slot wrote.
-    const legacySlot = Symbol.for("openclaw.codexAppServerClientState");
+    const legacySlot = Symbol.for("carapace.codexAppServerClientState");
     const legacyState = create();
     const globalState = globalThis as Record<symbol, unknown>;
     globalState[legacySlot] = legacyState;
@@ -611,7 +611,7 @@ describe("shared Codex app-server client", () => {
           ...(scenario.transport === "unix" ? { url: "unix:///tmp/synthetic-codex.sock" } : {}),
         },
       });
-      await sendInitializeResult(harness, "openclaw/0.151.0 (Linux; test)");
+      await sendInitializeResult(harness, "carapace/0.151.0 (Linux; test)");
       const client = await acquire;
       if (!scenario.allowed) {
         const writes = harness.writes.length;
@@ -640,7 +640,7 @@ describe("shared Codex app-server client", () => {
       CodexAdoptedThreadActiveError,
     );
     const acquire = getLeasedSharedCodexAppServerClient({ timeoutMs: 1_000 });
-    await sendInitializeResult(harness, "openclaw/0.151.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.151.0 (Linux; test)");
     const client = await acquire;
     const assertCurrent = captureCodexAppServerClientLifetime(client, "native-process");
     const retained = retainSharedCodexAppServerClientByInstanceId(client.getInstanceId());
@@ -675,7 +675,7 @@ describe("shared Codex app-server client", () => {
           ...(transport === "unix" ? { url: "unix:///tmp/synthetic-codex.sock" } : {}),
         },
       });
-      await sendInitializeResult(harness, "openclaw/0.151.0 (Linux; test)");
+      await sendInitializeResult(harness, "carapace/0.151.0 (Linux; test)");
       const client = await acquire;
       try {
         const assertCurrent = captureCodexAppServerClientLifetime(client, "connection");
@@ -709,7 +709,7 @@ describe("shared Codex app-server client", () => {
         } satisfies CodexAppServerStartOptions,
       };
       const acquire = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
       const client = await acquire;
       const assertCurrent = captureCodexAppServerClientLifetime(client, "native-process");
       if (operation === "acquire") {
@@ -729,7 +729,7 @@ describe("shared Codex app-server client", () => {
     const harness = createClientHarness();
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
     const acquire = getLeasedSharedCodexAppServerClient({ timeoutMs: 1_000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     const client = await acquire;
     const assertCurrent = captureCodexAppServerClientLifetime(client, "native-process");
     let observedPendingAcquire = false;
@@ -752,7 +752,7 @@ describe("shared Codex app-server client", () => {
     const harness = createClientHarness();
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
     const acquire = getLeasedSharedCodexAppServerClient({ timeoutMs: 1_000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     const client = await acquire;
     const assertExclusive = captureCodexAppServerClientLifetime(client, "native-process");
     retireSharedCodexAppServerClientIfCurrent(client);
@@ -774,7 +774,7 @@ describe("shared Codex app-server client", () => {
       const start = vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
       const options = { timeoutMs: 1_000 };
       const firstLease = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
       const client = await firstLease;
       await expect(getLeasedSharedCodexAppServerClient(options)).resolves.toBe(client);
       const ownedLease = { client };
@@ -802,7 +802,7 @@ describe("shared Codex app-server client", () => {
         await expect(retry).rejects.toThrow("replacement acquisition failed");
         expect(ownedLease.client).toBeUndefined();
       } else {
-        await sendInitializeResult(replacement, "openclaw/0.149.0 (Linux; test)");
+        await sendInitializeResult(replacement, "carapace/0.149.0 (Linux; test)");
         await expect(retry).resolves.toBe(replacement.client);
         expect(ownedLease.client).toBe(replacement.client);
       }
@@ -826,13 +826,13 @@ describe("shared Codex app-server client", () => {
     const startOptions = configureManagedDesktopFallback();
 
     const acquire = getSharedCodexAppServerClient({ startOptions, timeoutMs: 1_000 });
-    await sendInitializeResult(pluginLocal, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(pluginLocal, "carapace/0.149.0 (macOS; test)");
     const client = await acquire;
 
     expect(client).toBe(pluginLocal.client);
     expect(startSpy).toHaveBeenCalledTimes(1);
     expect(startSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ command: "/cache/openclaw/codex" }),
+      expect.objectContaining({ command: "/cache/carapace/codex" }),
       expect.any(Function),
     );
     expect(mocks.reconcileCodexComputerUseStartArtifacts).toHaveBeenCalledTimes(2);
@@ -845,7 +845,7 @@ describe("shared Codex app-server client", () => {
     );
     expect(mocks.reconcileCodexComputerUseStartArtifacts.mock.calls[1]?.[0]).toEqual(
       expect.objectContaining({
-        startOptions: expect.objectContaining({ command: "/cache/openclaw/codex" }),
+        startOptions: expect.objectContaining({ command: "/cache/carapace/codex" }),
       }),
     );
   });
@@ -881,8 +881,8 @@ describe("shared Codex app-server client", () => {
     const startOptions = configureManagedDesktopFallback();
 
     const firstAcquire = getSharedCodexAppServerClient({ startOptions, timeoutMs: 1_000 });
-    await sendInitializeResult(desktop, "openclaw/0.148.0 (macOS; test)");
-    await sendInitializeResult(pluginLocal, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(desktop, "carapace/0.148.0 (macOS; test)");
+    await sendInitializeResult(pluginLocal, "carapace/0.149.0 (macOS; test)");
     const firstClient = await firstAcquire;
 
     const secondClient = await getSharedCodexAppServerClient({ startOptions, timeoutMs: 1_000 });
@@ -902,10 +902,10 @@ describe("shared Codex app-server client", () => {
     expect(startSpy.mock.calls[0]?.[0]).toMatchObject({
       command: "/Applications/Codex.app/Contents/Resources/codex",
       commandSource: "resolved-managed",
-      managedFallbackCommandPaths: ["/cache/openclaw/codex"],
+      managedFallbackCommandPaths: ["/cache/carapace/codex"],
     });
     expect(startSpy.mock.calls[1]?.[0]).toMatchObject({
-      command: "/cache/openclaw/codex",
+      command: "/cache/carapace/codex",
       commandSource: "resolved-managed",
     });
     expect(startSpy.mock.calls[1]?.[0]).not.toHaveProperty("managedFallbackCommandPaths");
@@ -928,7 +928,7 @@ describe("shared Codex app-server client", () => {
     const startOptions = configureManagedDesktopFallback();
 
     const acquire = getSharedCodexAppServerClient({ startOptions, timeoutMs: 1_000 });
-    await sendInitializeResult(desktop, `openclaw/${desktopVersion} (macOS; test)`);
+    await sendInitializeResult(desktop, `carapace/${desktopVersion} (macOS; test)`);
     const client = await acquire;
 
     expect(client).toBe(desktop.client);
@@ -936,11 +936,11 @@ describe("shared Codex app-server client", () => {
     expect(startSpy.mock.calls[0]?.[0]).toMatchObject({
       command: "/Applications/Codex.app/Contents/Resources/codex",
       commandSource: "resolved-managed",
-      managedFallbackCommandPaths: ["/cache/openclaw/codex"],
+      managedFallbackCommandPaths: ["/cache/carapace/codex"],
     });
     expect(desktop.process.stdin.destroyed).toBe(false);
     expect(mocks.embeddedAgentLog.warn).toHaveBeenCalledExactlyOnceWith(
-      "codex app-server is newer than OpenClaw's managed runtime; continuing with normal startup validation",
+      "codex app-server is newer than Carapace's managed runtime; continuing with normal startup validation",
       {
         detectedVersion: desktopVersion,
         validatedVersion: CODEX_APP_SERVER_VERSION,
@@ -967,10 +967,10 @@ describe("shared Codex app-server client", () => {
     };
 
     const firstAcquire = getSharedCodexAppServerClient(options);
-    await sendInitializeResult(desktop, "openclaw/0.148.0 (macOS; test)");
+    await sendInitializeResult(desktop, "carapace/0.148.0 (macOS; test)");
     await vi.waitFor(() => expect(fallback.writes.length).toBeGreaterThanOrEqual(1));
     const secondAcquire = getSharedCodexAppServerClient(options);
-    await sendInitializeResult(fallback, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(fallback, "carapace/0.149.0 (macOS; test)");
 
     const [firstClient, secondClient] = await Promise.all([firstAcquire, secondAcquire]);
     expect(secondClient).toBe(firstClient);
@@ -980,11 +980,11 @@ describe("shared Codex app-server client", () => {
   });
 
   it("keeps capture clients separate from ordinary shared clients", async () => {
-    await withTempDir("openclaw-codex-capture-client-", async (root) => {
+    await withTempDir("carapace-codex-capture-client-", async (root) => {
       const command = path.join(root, "codex");
       await fs.writeFile(command, "native-v1");
-      const normal = createInitializingClientHarness("openclaw/0.149.0 (Linux; test)");
-      const captured = createInitializingClientHarness("openclaw/0.149.0 (Linux; test)");
+      const normal = createInitializingClientHarness("carapace/0.149.0 (Linux; test)");
+      const captured = createInitializingClientHarness("carapace/0.149.0 (Linux; test)");
       const startSpy = vi
         .spyOn(CodexAppServerClient, "start")
         .mockResolvedValueOnce(normal.client)
@@ -1021,7 +1021,7 @@ describe("shared Codex app-server client", () => {
   });
 
   it("binds the managed fallback candidate that actually initialized", async () => {
-    await withTempDir("openclaw-codex-capture-fallback-", async (root) => {
+    await withTempDir("carapace-codex-capture-fallback-", async (root) => {
       const desktopCommand = path.join(root, "desktop-codex");
       const fallbackCommand = path.join(root, "package-codex");
       await Promise.all([
@@ -1030,8 +1030,8 @@ describe("shared Codex app-server client", () => {
         fs.writeFile(fallbackCommand, "package-launcher"),
         fs.writeFile(`${fallbackCommand}.native`, "package-native"),
       ]);
-      const desktop = createInitializingClientHarness("openclaw/0.124.9 (macOS; test)");
-      const fallback = createInitializingClientHarness("openclaw/0.149.0 (macOS; test)");
+      const desktop = createInitializingClientHarness("carapace/0.124.9 (macOS; test)");
+      const fallback = createInitializingClientHarness("carapace/0.149.0 (macOS; test)");
       vi.spyOn(CodexAppServerClient, "start")
         .mockResolvedValueOnce(desktop.client)
         .mockResolvedValueOnce(fallback.client);
@@ -1095,13 +1095,13 @@ describe("shared Codex app-server client", () => {
   });
 
   it("detects persisted Computer Use enabled after managed client startup", async () => {
-    await withTempDir("openclaw-codex-managed-selection-", async (root) => {
+    await withTempDir("carapace-codex-managed-selection-", async (root) => {
       const harness = createClientHarness();
       vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
       mocks.resolveManagedCodexAppServerStartOptions.mockImplementationOnce(
         async (startOptions) => ({
           ...startOptions,
-          command: "/cache/openclaw/codex",
+          command: "/cache/carapace/codex",
           commandSource: "resolved-managed",
         }),
       );
@@ -1120,17 +1120,17 @@ describe("shared Codex app-server client", () => {
         startOptions,
         agentDir,
       });
-      await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
       const client = await clientPromise;
 
       expect(readCodexAppServerClientProcessIdentity(client)).toEqual({
         clientId: expect.any(String),
-        command: "/cache/openclaw/codex",
+        command: "/cache/carapace/codex",
         argsFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/),
         commandSource: "resolved-managed",
-        nativeCommand: "/cache/openclaw/codex.native",
+        nativeCommand: "/cache/carapace/codex.native",
         serverVersion: "0.149.0",
-        userAgent: "openclaw/0.149.0 (macOS; test)",
+        userAgent: "carapace/0.149.0 (macOS; test)",
       });
 
       expect(() =>
@@ -1206,7 +1206,7 @@ describe("shared Codex app-server client", () => {
       };
 
       const clientPromise = createIsolatedCodexAppServerClient({ startOptions });
-      await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
       const client = await clientPromise;
 
       mocks.desktopGeneration = { epoch: 2, fingerprint: "desktop-y" };
@@ -1220,13 +1220,13 @@ describe("shared Codex app-server client", () => {
   it.each(["abort", "timeout"] as const)(
     "holds the native config fence through process exit after a post-write %s",
     async (mode) => {
-      await withTempDir("openclaw-codex-guarded-request-cancel-", async (root) => {
+      await withTempDir("carapace-codex-guarded-request-cancel-", async (root) => {
         const harness = createClientHarness();
         vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
         mocks.resolveManagedCodexAppServerStartOptions.mockImplementationOnce(
           async (startOptions) => ({
             ...startOptions,
-            command: "/cache/openclaw/codex",
+            command: "/cache/carapace/codex",
             commandSource: "resolved-managed",
           }),
         );
@@ -1242,7 +1242,7 @@ describe("shared Codex app-server client", () => {
         };
 
         const clientPromise = createIsolatedCodexAppServerClient({ startOptions, agentDir });
-        await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+        await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
         const client = await clientPromise;
         const fenceKey = resolveCodexNativeConfigFenceKey({ client });
         expect(fenceKey).toBeTypeOf("string");
@@ -1311,7 +1311,7 @@ describe("shared Codex app-server client", () => {
 
     vi.useRealTimers();
     const secondList = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
 
     await expect(secondList).resolves.toEqual({ models: [] });
@@ -1344,7 +1344,7 @@ describe("shared Codex app-server client", () => {
     await expect(shortAcquire).rejects.toThrow("codex app-server initialize timed out");
     expect(harness.process.stdin.destroyed).toBe(false);
 
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(longAcquire).resolves.toBe(harness.client);
     expect(startSpy).toHaveBeenCalledTimes(1);
@@ -1357,7 +1357,7 @@ describe("shared Codex app-server client", () => {
     const releaseAuth = deferNextAuthProfileApplication();
 
     const acquire = getSharedCodexAppServerClient({ timeoutMs: 100 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(acquire).rejects.toThrow("codex app-server authentication timed out");
     expect(harness.process.stdin.destroyed).toBe(true);
@@ -1371,7 +1371,7 @@ describe("shared Codex app-server client", () => {
 
     const shortAcquire = getSharedCodexAppServerClient({ timeoutMs: 100 });
     const longAcquire = getSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(shortAcquire).rejects.toThrow("codex app-server authentication timed out");
     expect(harness.process.stdin.destroyed).toBe(false);
@@ -1400,7 +1400,7 @@ describe("shared Codex app-server client", () => {
     abandonController.abort();
     expect(harness.process.stdin.destroyed).toBe(false);
 
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await abandonedRejection;
     await expect(activeAcquire).resolves.toBe(harness.client);
@@ -1456,7 +1456,7 @@ describe("shared Codex app-server client", () => {
     const rejection = expect(clientPromise).rejects.toThrow(
       "codex app-server initialize timed out",
     );
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await rejection;
     expect(harness.process.stdin.destroyed).toBe(true);
@@ -1472,7 +1472,7 @@ describe("shared Codex app-server client", () => {
     const clientPromise = createIsolatedCodexAppServerClient({ timeoutMs: 100 });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThanOrEqual(1));
     now = 101;
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).rejects.toThrow("codex app-server initialize timed out");
     expect(mocks.applyCodexAppServerAuthProfile).not.toHaveBeenCalled();
@@ -1497,7 +1497,7 @@ describe("shared Codex app-server client", () => {
     try {
       await harness.waitForWrite(0);
       current = false;
-      await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
       await rejection;
       expect(mocks.applyCodexAppServerAuthProfile).not.toHaveBeenCalled();
@@ -1515,7 +1515,7 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       authProfileId: "openai:work",
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(harness);
 
     await expect(listPromise).resolves.toEqual({ models: [] });
@@ -1542,11 +1542,11 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       authProfileStore,
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     expect(mocks.resolveCodexAppServerAuthProfileStore).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       authProfileId: undefined,
       authProfileStore,
       config: undefined,
@@ -1569,7 +1569,7 @@ describe("shared Codex app-server client", () => {
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThan(priorWriteCount));
 
     expect(mocks.refreshCodexAppServerAuthTokens).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       authProfileId: "openai:scoped",
       authProfileStore: preparedAuthProfileStore,
       previousAccountId: "scoped-account",
@@ -1596,7 +1596,7 @@ describe("shared Codex app-server client", () => {
         .mockResolvedValueOnce(replacement.client);
       const options = { timeoutMs: 1_000, authProfileId: "openai:work" };
       const acquired = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(first, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(first, "carapace/0.149.0 (Linux; test)");
       await acquired;
       if (failure === "failure") {
         mocks.refreshCodexAppServerAuthTokens.mockRejectedValueOnce(new Error("refresh failed"));
@@ -1625,7 +1625,7 @@ describe("shared Codex app-server client", () => {
       });
       expect(first.stdinDestroyed).toBe(false);
       const nextAcquire = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(replacement, "openclaw/0.149.0 (Linux; test)");
+      await sendInitializeResult(replacement, "carapace/0.149.0 (Linux; test)");
       expect(startSpy).toHaveBeenCalledTimes(2);
       await expect(nextAcquire).resolves.toBe(replacement.client);
       expect(releaseLeasedSharedCodexAppServerClient(first.client)).toBe(true);
@@ -1659,7 +1659,7 @@ describe("shared Codex app-server client", () => {
         store: authProfileStore,
       },
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     expect(mocks.resolveCodexAppServerAuthProfileStore).not.toHaveBeenCalled();
@@ -1697,7 +1697,7 @@ describe("shared Codex app-server client", () => {
     });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThan(priorWriteCount));
     expect(mocks.refreshCodexAppServerAuthTokens).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       authProfileId: "openai:scoped",
       authProfileStore,
       previousAccountId: "scoped-account",
@@ -1769,7 +1769,7 @@ describe("shared Codex app-server client", () => {
             }
           : { authProfileId: "openai:scoped", authProfileStore: firstStore }),
       });
-      await sendInitializeResult(firstHarness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(firstHarness, "carapace/0.149.0 (macOS; test)");
       await expect(firstPromise).resolves.toBe(firstHarness.client);
 
       const secondPromise = getSharedCodexAppServerClient({
@@ -1784,7 +1784,7 @@ describe("shared Codex app-server client", () => {
             }
           : { authProfileId: "openai:scoped", authProfileStore: secondStore }),
       });
-      await sendInitializeResult(secondHarness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(secondHarness, "carapace/0.149.0 (macOS; test)");
       expect(startSpy).toHaveBeenCalledTimes(2);
       await expect(secondPromise).resolves.toBe(secondHarness.client);
 
@@ -1822,7 +1822,7 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       preparedAuth: { kind: "api-key", apiKey: "platform-key" },
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     expect(mocks.resolveCodexAppServerAuthProfileStore).not.toHaveBeenCalled();
@@ -1864,14 +1864,14 @@ describe("shared Codex app-server client", () => {
             };
       const options = {
         timeoutMs: 1000,
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         preparedAuth,
         authRequirement,
         authBindingFingerprint:
           authRequirement === "subscription" ? "profile-credential-fingerprint" : undefined,
       };
       const producer = getSharedCodexAppServerClient(options);
-      await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
       await expect(producer).resolves.toBe(harness.client);
       const response = { thread: { id: "thread-resume" } };
       const request = vi.spyOn(harness.client, "request").mockResolvedValue(response as never);
@@ -1927,14 +1927,14 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       preparedAuth: { kind: "api-key", apiKey: "first-platform-key" },
     });
-    await sendInitializeResult(firstHarness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(firstHarness, "carapace/0.149.0 (macOS; test)");
     await expect(firstPromise).resolves.toBe(firstHarness.client);
 
     const secondPromise = getSharedCodexAppServerClient({
       timeoutMs: 1000,
       preparedAuth: { kind: "api-key", apiKey: "second-platform-key" },
     });
-    await sendInitializeResult(secondHarness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(secondHarness, "carapace/0.149.0 (macOS; test)");
     expect(startSpy).toHaveBeenCalledTimes(2);
     await expect(secondPromise).resolves.toBe(secondHarness.client);
 
@@ -1961,9 +1961,9 @@ describe("shared Codex app-server client", () => {
     const clientPromise = createIsolatedCodexAppServerClient({
       timeoutMs: 1000,
       authProfileId: "openai:persisted",
-      agentDir: "/tmp/openclaw-persisted-agent",
+      agentDir: "/tmp/carapace-persisted-agent",
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     mocks.refreshCodexAppServerAuthTokens.mockResolvedValueOnce({
@@ -1980,7 +1980,7 @@ describe("shared Codex app-server client", () => {
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThan(priorWriteCount));
 
     expect(mocks.refreshCodexAppServerAuthTokens).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw-persisted-agent",
+      agentDir: "/tmp/carapace-persisted-agent",
       authProfileId: "openai:persisted",
       previousAccountId: "persisted-account",
       config: undefined,
@@ -2003,21 +2003,21 @@ describe("shared Codex app-server client", () => {
     const clientPromise = getSharedCodexAppServerClient({
       timeoutMs: 1000,
       authProfileId: null,
-      agentDir: "/tmp/openclaw-target-agent",
+      agentDir: "/tmp/carapace-target-agent",
       agentId: "research",
       config,
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     expect(mocks.resolveCodexAppServerAuthProfileIdForAgent).not.toHaveBeenCalled();
     const bridgeCall = bridgeStartOptionsCall();
-    expect(bridgeCall.agentDir).toBe("/tmp/openclaw-target-agent");
+    expect(bridgeCall.agentDir).toBe("/tmp/carapace-target-agent");
     expect(bridgeCall.agentId).toBe("research");
     expect(bridgeCall.authProfileId).toBeNull();
     expect(bridgeCall.config).toBe(config);
     const applyCall = applyAuthProfileCall();
-    expect(applyCall.agentDir).toBe("/tmp/openclaw-target-agent");
+    expect(applyCall.agentDir).toBe("/tmp/carapace-target-agent");
     expect(applyCall.authProfileId).toBeNull();
     expect(applyCall.config).toBe(config);
   });
@@ -2037,7 +2037,7 @@ describe("shared Codex app-server client", () => {
         headers: {},
       },
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     await expect(clientPromise).resolves.toBe(harness.client);
     expect(mocks.resolveCodexAppServerAuthProfileIdForAgent).not.toHaveBeenCalled();
@@ -2055,14 +2055,14 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       config,
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(harness);
 
     await expect(listPromise).resolves.toEqual({ models: [] });
     const resolveCall = resolveAuthProfileCall();
     expect(resolveCall).toStrictEqual({
       authProfileId: undefined,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       config,
     });
     const bridgeCall = bridgeStartOptionsCall();
@@ -2080,17 +2080,17 @@ describe("shared Codex app-server client", () => {
     const listPromise = listCodexAppServerModels({
       timeoutMs: 1000,
       authProfileId: "openai:work",
-      agentDir: "/tmp/openclaw-agent-nova",
+      agentDir: "/tmp/carapace-agent-nova",
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(harness);
 
     await expect(listPromise).resolves.toEqual({ models: [] });
     const bridgeCall = bridgeStartOptionsCall();
-    expect(bridgeCall?.agentDir).toBe("/tmp/openclaw-agent-nova");
+    expect(bridgeCall?.agentDir).toBe("/tmp/carapace-agent-nova");
     expect(bridgeCall?.authProfileId).toBe("openai:work");
     const applyCall = applyAuthProfileCall();
-    expect(applyCall?.agentDir).toBe("/tmp/openclaw-agent-nova");
+    expect(applyCall?.agentDir).toBe("/tmp/carapace-agent-nova");
     expect(applyCall?.authProfileId).toBe("openai:work");
   });
 
@@ -2104,17 +2104,17 @@ describe("shared Codex app-server client", () => {
 
     const firstList = listCodexAppServerModels({
       timeoutMs: 1000,
-      agentDir: "/tmp/openclaw-agent-one",
+      agentDir: "/tmp/carapace-agent-one",
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
     const secondList = listCodexAppServerModels({
       timeoutMs: 1000,
-      agentDir: "/tmp/openclaw-agent-two",
+      agentDir: "/tmp/carapace-agent-two",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2128,12 +2128,12 @@ describe("shared Codex app-server client", () => {
     const startSpy = vi.spyOn(CodexAppServerClient, "start").mockResolvedValue(harness.client);
     mocks.resolveManagedCodexAppServerStartOptions.mockImplementationOnce(async (startOptions) => ({
       ...startOptions,
-      command: "/cache/openclaw/codex",
+      command: "/cache/carapace/codex",
       commandSource: "resolved-managed",
     }));
 
     const listPromise = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(harness);
 
     await expect(listPromise).resolves.toEqual({ models: [] });
@@ -2141,15 +2141,15 @@ describe("shared Codex app-server client", () => {
     expect(managedCall?.command).toBe("codex");
     expect(managedCall?.commandSource).toBe("managed");
     const bridgeCall = bridgeStartOptionsCall();
-    expect(bridgeCall?.startOptions.command).toBe("/cache/openclaw/codex");
+    expect(bridgeCall?.startOptions.command).toBe("/cache/carapace/codex");
     expect(bridgeCall?.startOptions.commandSource).toBe("resolved-managed");
     const startCall = clientStartCall(startSpy);
-    expect(startCall?.command).toBe("/cache/openclaw/codex");
+    expect(startCall?.command).toBe("/cache/carapace/codex");
     expect(startCall?.commandSource).toBe("resolved-managed");
   });
 
   it("rechecks persisted native Computer Use before managed binary resolution", async () => {
-    await withTempDir("openclaw-codex-shared-native-", async (agentDir) => {
+    await withTempDir("carapace-codex-shared-native-", async (agentDir) => {
       const codexHome = path.join(agentDir, "codex-home");
       await fs.mkdir(codexHome);
       await fs.writeFile(
@@ -2172,7 +2172,7 @@ describe("shared Codex app-server client", () => {
           headers: {},
         },
       });
-      await sendInitializeResult(harness, `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)`);
+      await sendInitializeResult(harness, `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)`);
 
       await expect(clientPromise).resolves.toBe(harness.client);
       expect(managedStartOptionsCall().managedCommandOrder).toBe("desktop-first");
@@ -2198,7 +2198,7 @@ describe("shared Codex app-server client", () => {
         headers: {},
       },
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
@@ -2213,7 +2213,7 @@ describe("shared Codex app-server client", () => {
         headers: {},
       },
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2236,7 +2236,7 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       authRequirement: "api-key",
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
@@ -2244,7 +2244,7 @@ describe("shared Codex app-server client", () => {
       timeoutMs: 1000,
       authRequirement: "api-key",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2266,7 +2266,7 @@ describe("shared Codex app-server client", () => {
       authProfileId: "openai:work",
       authRequirement: "api-key",
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
@@ -2275,7 +2275,7 @@ describe("shared Codex app-server client", () => {
       authProfileId: "openai:work",
       authRequirement: "subscription",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2330,7 +2330,7 @@ describe("shared Codex app-server client", () => {
     });
     await vi.waitFor(() => expect(second.writes.length).toBeGreaterThanOrEqual(1));
 
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2348,7 +2348,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
 
     const firstList = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
@@ -2356,7 +2356,7 @@ describe("shared Codex app-server client", () => {
     expect(first.process.stdin.destroyed).toBe(true);
 
     const secondList = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2374,7 +2374,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
 
     const firstList = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
@@ -2393,7 +2393,7 @@ describe("shared Codex app-server client", () => {
     await expect(activeRequest).rejects.toThrow("codex app-server client is closed");
 
     const secondList = listCodexAppServerModels({ timeoutMs: 1000 });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -2413,7 +2413,7 @@ describe("shared Codex app-server client", () => {
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(harness.client);
 
     const clientPromise = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     const client = await clientPromise;
     const deliverCompletion = vi.fn(async () => ({ delivered: true, path: "direct" as const }));
     const taskRuntime = {
@@ -2509,7 +2509,7 @@ describe("shared Codex app-server client", () => {
 
     const firstLease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
     const secondLease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(firstLease).resolves.toBe(first.client);
     await expect(secondLease).resolves.toBe(first.client);
 
@@ -2543,7 +2543,7 @@ describe("shared Codex app-server client", () => {
 
     const completedRunLease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
     const siblingRunLease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(completedRunLease).resolves.toBe(first.client);
     await expect(siblingRunLease).resolves.toBe(first.client);
 
@@ -2592,7 +2592,7 @@ describe("shared Codex app-server client", () => {
     await expect(pendingLease).rejects.toThrow("codex app-server client is closed");
 
     const freshLease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await expect(freshLease).resolves.toBe(second.client);
     expect(second.process.stdin.destroyed).toBe(false);
   });
@@ -2602,7 +2602,7 @@ describe("shared Codex app-server client", () => {
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(first.client);
 
     const lease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(lease).resolves.toBe(first.client);
 
     // Routine cleanup detaches gracefully; a later terminal-idle kill must
@@ -2628,7 +2628,7 @@ describe("shared Codex app-server client", () => {
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(first.client);
 
     const lease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(lease).resolves.toBe(first.client);
     const current = captureSharedCodexAppServerCatalogLifetime(first.client);
     expect(current()).toBe(true);
@@ -2658,7 +2658,7 @@ describe("shared Codex app-server client", () => {
       const transport = createClientHarness();
       vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(transport.client);
       const lease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-      await sendInitializeResult(transport, "openclaw/0.149.0 (test)");
+      await sendInitializeResult(transport, "carapace/0.149.0 (test)");
       const client = await lease;
       const current = captureSharedCodexAppServerCatalogLifetime(client);
       expect(current()).toBe(true);
@@ -2693,10 +2693,10 @@ describe("shared Codex app-server client", () => {
       args: ["app-server"],
       headers: {},
     };
-    const options = { config, startOptions, agentDir: "/tmp/openclaw-agent" };
+    const options = { config, startOptions, agentDir: "/tmp/carapace-agent" };
 
     const firstAcquire = getLeasedSharedCodexAppServerClient(options);
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     const first = await firstAcquire;
     const dirty = createDeferred<typeof generation>();
     mocks.desktopGenerationCurrent = false;
@@ -2761,7 +2761,7 @@ describe("shared Codex app-server client", () => {
     const abort = new AbortController();
     const acquire = getLeasedSharedCodexAppServerClient({
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       startOptions: {
         transport: "stdio",
         homeScope: "agent",
@@ -2797,7 +2797,7 @@ describe("shared Codex app-server client", () => {
     await expect(
       getLeasedSharedCodexAppServerClient({
         config: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         startOptions: {
           transport: "stdio",
           homeScope: "agent",
@@ -2841,13 +2841,13 @@ describe("shared Codex app-server client", () => {
     const options = {
       config,
       startOptions,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
     };
 
     const firstAcquire = getLeasedSharedCodexAppServerClient(options);
     const siblingAcquire = getLeasedSharedCodexAppServerClient(options);
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     const clientX = await firstAcquire;
     await expect(siblingAcquire).resolves.toBe(clientX);
     const pending = clientX.request("test/pending", {});
@@ -2880,7 +2880,7 @@ describe("shared Codex app-server client", () => {
     expect(startSpy).toHaveBeenCalledTimes(1);
     first.emitExit();
 
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await replacementAcquire;
     expect(clientY).toBe(second.client);
     expect(clientY).not.toBe(clientX);
@@ -2907,7 +2907,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
     const options = {
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
       startOptions: {
         transport: "stdio" as const,
@@ -2934,11 +2934,11 @@ describe("shared Codex app-server client", () => {
     expect(mocks.reconcileCodexComputerUseStartArtifacts).toHaveBeenCalledTimes(1);
     expect(startSpy).toHaveBeenCalledTimes(1);
 
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(firstAcquire).rejects.toMatchObject({
       code: "CODEX_APP_SERVER_START_SELECTION_CHANGED",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await replacementAcquire;
 
     expect(startSpy).toHaveBeenCalledTimes(2);
@@ -2963,7 +2963,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
     const options = {
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
       startOptions: {
         transport: "stdio" as const,
@@ -2977,7 +2977,7 @@ describe("shared Codex app-server client", () => {
     };
 
     const clientXPromise = createIsolatedCodexAppServerClient(options);
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     const clientX = await clientXPromise;
 
     mocks.desktopGeneration = generationY;
@@ -2998,7 +2998,7 @@ describe("shared Codex app-server client", () => {
     expect(mocks.reconcileCodexComputerUseStartArtifacts).toHaveBeenCalledTimes(1);
     expect(startSpy).toHaveBeenCalledTimes(1);
     first.emitExit();
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await clientYPromise;
 
     expect(mocks.reconcileCodexComputerUseStartArtifacts).toHaveBeenCalledTimes(2);
@@ -3022,7 +3022,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
     const options = {
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: { computerUse: { enabled: true, autoInstall: false } },
       startOptions: {
         transport: "stdio" as const,
@@ -3036,11 +3036,11 @@ describe("shared Codex app-server client", () => {
     };
 
     const clientXPromise = createIsolatedCodexAppServerClient(options);
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     const clientX = await clientXPromise;
     mocks.desktopGeneration = generationY;
     const clientYPromise = createIsolatedCodexAppServerClient(options);
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await clientYPromise;
 
     await expect(
@@ -3068,7 +3068,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(second.client);
     const options = {
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
       startOptions: {
         transport: "stdio" as const,
@@ -3094,11 +3094,11 @@ describe("shared Codex app-server client", () => {
     expect(mocks.reconcileCodexComputerUseStartArtifacts).toHaveBeenCalledTimes(1);
     expect(startSpy).toHaveBeenCalledTimes(1);
 
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await expect(clientXPromise).rejects.toMatchObject({
       code: "CODEX_APP_SERVER_START_SELECTION_CHANGED",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await clientYPromise;
 
     expect(startSpy).toHaveBeenCalledTimes(2);
@@ -3138,18 +3138,18 @@ describe("shared Codex app-server client", () => {
 
     const firstAcquire = getLeasedSharedCodexAppServerClient({
       ...common,
-      agentDir: "/tmp/openclaw-agent-a",
+      agentDir: "/tmp/carapace-agent-a",
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     const clientX = await firstAcquire;
 
     mocks.desktopGeneration = generationY;
     retireSharedCodexAppServerClientsBeforeDesktopGeneration(generationY);
     const secondAcquire = getLeasedSharedCodexAppServerClient({
       ...common,
-      agentDir: "/tmp/openclaw-agent-b",
+      agentDir: "/tmp/carapace-agent-b",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     const clientY = await secondAcquire;
 
     expect(startSpy).toHaveBeenCalledTimes(2);
@@ -3165,7 +3165,7 @@ describe("shared Codex app-server client", () => {
     mocks.desktopGeneration = generationX;
     mocks.resolveManagedCodexAppServerStartOptions.mockImplementation(async (startOptions) => ({
       ...startOptions,
-      command: "/cache/openclaw/codex",
+      command: "/cache/carapace/codex",
       commandSource: "resolved-managed" as const,
       managedFallbackCommandPaths: ["/Applications/Codex.app/Contents/Resources/codex"],
     }));
@@ -3178,7 +3178,7 @@ describe("shared Codex app-server client", () => {
     const options = {
       config: {},
       pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       startOptions: {
         transport: "stdio" as const,
         homeScope: "agent" as const,
@@ -3191,7 +3191,7 @@ describe("shared Codex app-server client", () => {
     };
 
     const firstAcquire = getLeasedSharedCodexAppServerClient(options);
-    await sendInitializeResult(packageX, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(packageX, "carapace/0.149.0 (macOS; test)");
     const clientX = await firstAcquire;
 
     mocks.desktopGeneration = generationY;
@@ -3204,7 +3204,7 @@ describe("shared Codex app-server client", () => {
     expect(packageX.process.stdin.destroyed).toBe(false);
     expect(releaseLeasedSharedCodexAppServerClient(clientX)).toBe(true);
     expect(packageX.process.stdin.destroyed).toBe(true);
-    await sendInitializeResult(packageY, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(packageY, "carapace/0.149.0 (macOS; test)");
     const clientY = await replacementAcquire;
 
     expect(clientY).not.toBe(clientX);
@@ -3230,7 +3230,7 @@ describe("shared Codex app-server client", () => {
       const options = {
         config: {},
         pluginConfig: { computerUse: { enabled: true, autoInstall: true } },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         startOptions: {
           transport: "stdio" as const,
           homeScope: "agent" as const,
@@ -3242,7 +3242,7 @@ describe("shared Codex app-server client", () => {
       };
 
       const firstAcquire = getLeasedSharedCodexAppServerClient(options);
-      await sendInitializeResult(packageX, "openclaw/0.149.0 (macOS; test)");
+      await sendInitializeResult(packageX, "carapace/0.149.0 (macOS; test)");
       const clientX = await firstAcquire;
       expect(readCodexAppServerClientDesktopGeneration(clientX)).toBeUndefined();
 
@@ -3271,7 +3271,7 @@ describe("shared Codex app-server client", () => {
     const clientPromise = getLeasedSharedCodexAppServerClient({
       config: {},
       pluginConfig: { computerUse: { enabled: false } },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       startOptions: {
         transport: "stdio",
         homeScope: "agent",
@@ -3281,7 +3281,7 @@ describe("shared Codex app-server client", () => {
         headers: {},
       },
     });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
     const client = await clientPromise;
 
     expect(readCodexAppServerClientDesktopGeneration(client)).toEqual(generation);
@@ -3294,7 +3294,7 @@ describe("shared Codex app-server client", () => {
     mocks.desktopGeneration = generationX;
     mocks.resolveManagedCodexAppServerStartOptions.mockImplementation(async (startOptions) => ({
       ...startOptions,
-      command: "/cache/openclaw/codex",
+      command: "/cache/carapace/codex",
       commandSource: "resolved-managed" as const,
       managedFallbackCommandPaths: ["/Applications/Codex.app/Contents/Resources/codex"],
     }));
@@ -3309,7 +3309,7 @@ describe("shared Codex app-server client", () => {
       .mockResolvedValueOnce(desktopY.client);
     const options = {
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       startOptions: {
         transport: "stdio" as const,
         homeScope: "agent" as const,
@@ -3322,15 +3322,15 @@ describe("shared Codex app-server client", () => {
     };
 
     const firstAcquire = getLeasedSharedCodexAppServerClient(options);
-    await sendInitializeResult(packageX, "openclaw/0.124.9 (macOS; test)");
-    await sendInitializeResult(desktopX, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(packageX, "carapace/0.124.9 (macOS; test)");
+    await sendInitializeResult(desktopX, "carapace/0.149.0 (macOS; test)");
     const clientX = await firstAcquire;
 
     mocks.desktopGeneration = generationY;
     retireSharedCodexAppServerClientsBeforeDesktopGeneration(generationY);
     const replacementAcquire = getLeasedSharedCodexAppServerClient(options);
-    await sendInitializeResult(packageY, "openclaw/0.124.9 (macOS; test)");
-    await sendInitializeResult(desktopY, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(packageY, "carapace/0.124.9 (macOS; test)");
+    await sendInitializeResult(desktopY, "carapace/0.149.0 (macOS; test)");
     const clientY = await replacementAcquire;
 
     expect(clientX).toBe(desktopX.client);
@@ -3340,9 +3340,9 @@ describe("shared Codex app-server client", () => {
         ([params]) => params?.startOptions.command,
       ),
     ).toEqual([
-      "/cache/openclaw/codex",
+      "/cache/carapace/codex",
       "/Applications/Codex.app/Contents/Resources/codex",
-      "/cache/openclaw/codex",
+      "/cache/carapace/codex",
       "/Applications/Codex.app/Contents/Resources/codex",
     ]);
     expect(desktopX.process.stdin.destroyed).toBe(false);
@@ -3363,7 +3363,7 @@ describe("shared Codex app-server client", () => {
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(harness.client);
     const acquire = getLeasedSharedCodexAppServerClient({
       config: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       startOptions: {
         transport: "stdio",
         homeScope: "agent",
@@ -3377,7 +3377,7 @@ describe("shared Codex app-server client", () => {
     await vi.waitFor(() => expect(harness.writes).toHaveLength(1));
 
     mocks.desktopGeneration = { epoch: 2, fingerprint: "desktop-y" };
-    await sendInitializeResult(harness, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (macOS; test)");
 
     const error = await acquire.catch((caught: unknown) => caught);
     expect(isCodexAppServerStartSelectionChangedError(error)).toBe(true);
@@ -3425,7 +3425,7 @@ describe("shared Codex app-server client", () => {
       const load = harness.loadModelCatalog!({
         config: {},
         agentId: "main",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         workspaceDir: "/tmp/workspace",
       }).catch((error: unknown) => error);
       let disposal: Promise<void> | undefined;
@@ -3561,7 +3561,7 @@ describe("shared Codex app-server client", () => {
     vi.spyOn(CodexAppServerClient, "start").mockResolvedValueOnce(harness.client);
 
     const lease = getLeasedSharedCodexAppServerClient({ timeoutMs: 1000 });
-    await sendInitializeResult(harness, "openclaw/0.149.0 (Linux; test)");
+    await sendInitializeResult(harness, "carapace/0.149.0 (Linux; test)");
     const client = await lease;
     const releaseRetain = retainSharedCodexAppServerClientIfCurrent(client);
     expect(releaseRetain).toBeTypeOf("function");
@@ -3592,17 +3592,17 @@ describe("shared Codex app-server client", () => {
 
     const firstList = listCodexAppServerModels({
       timeoutMs: 1000,
-      agentDir: "/tmp/openclaw-agent-one",
+      agentDir: "/tmp/carapace-agent-one",
     });
-    await sendInitializeResult(first, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(first, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(first);
     await expect(firstList).resolves.toEqual({ models: [] });
 
     const secondList = listCodexAppServerModels({
       timeoutMs: 1000,
-      agentDir: "/tmp/openclaw-agent-two",
+      agentDir: "/tmp/carapace-agent-two",
     });
-    await sendInitializeResult(second, "openclaw/0.149.0 (macOS; test)");
+    await sendInitializeResult(second, "carapace/0.149.0 (macOS; test)");
     await sendEmptyModelList(second);
     await expect(secondList).resolves.toEqual({ models: [] });
 
@@ -3628,7 +3628,7 @@ describe("shared Codex app-server client", () => {
         const message = JSON.parse(rawDataToText(data)) as { id?: number; method?: string };
         if (message.method === "initialize") {
           socket.send(
-            JSON.stringify({ id: message.id, result: { userAgent: "openclaw/0.149.0" } }),
+            JSON.stringify({ id: message.id, result: { userAgent: "carapace/0.149.0" } }),
           );
           return;
         }

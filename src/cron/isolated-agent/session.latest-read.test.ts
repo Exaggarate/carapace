@@ -8,20 +8,20 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, expect, it } from "vitest";
 import { loadSessionEntry, replaceSessionEntry } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { loadCronSessionEntryLatest } from "./session.js";
 
 const SESSION_KEY = "agent:main:cron:job-1";
 const tempDirs: string[] = [];
 
 function createStorePath(): string {
-  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cron-latest-")));
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cron-latest-")));
   tempDirs.push(dir);
   return path.join(dir, "sessions.json");
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }

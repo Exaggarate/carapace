@@ -117,7 +117,7 @@ export async function registerCapabilityCli(
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/infer", "docs.openclaw.ai/cli/infer")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/infer", "github.com/Exaggarate/carapace")}\n`,
     );
 
   registerCapabilityListAndInspect(capability);

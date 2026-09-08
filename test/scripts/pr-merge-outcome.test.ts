@@ -21,8 +21,8 @@ const temps = useAutoCleanupTempDirTracker(afterEach);
 const templateDirs = useAutoCleanupTempDirTracker(afterAll);
 let fixtureTemplate: ReturnType<typeof createFixtureTemplate> | undefined;
 const scripts = join(process.cwd(), "scripts");
-const outcomeRef = "refs/openclaw/pr-merge-outcomes/123";
-const lockRef = "refs/openclaw/pr-operation-locks/123";
+const outcomeRef = "refs/carapace/pr-merge-outcomes/123";
+const lockRef = "refs/carapace/pr-operation-locks/123";
 const describePosix = process.platform === "win32" ? describe.skip : describe;
 const unknownProjection = { mergeable: "UNKNOWN", mergeStateStatus: "UNKNOWN" };
 const gitEnv = {
@@ -412,7 +412,7 @@ verify_crabbox_admin_merge_bypass() {
 # Fault the Git boundary, not the outcome owner: crash after intent CAS, or
 # reject later receipt writes. All successful object/ref operations are real.
 git() {
-  if [ "$1" = update-ref ] && [ "\${3-}" = refs/openclaw/pr-merge-outcomes/123 ]; then
+  if [ "$1" = update-ref ] && [ "\${3-}" = refs/carapace/pr-merge-outcomes/123 ]; then
     local crash
     crash=$(command jq -r .crash "$FIXTURE_STATE")
     if [ "$crash" = receipt ] && command git show-ref --verify --quiet "$3"; then return 1; fi
@@ -450,8 +450,8 @@ fi
     FIXTURE_REMOTE: remote,
     FIXTURE_SCRIPTS: scripts,
     FIXTURE_GH: gh,
-    OPENCLAW_PR_MERGE_METHOD: "squash",
-    OPENCLAW_PR_STRICT_DRIFT: "",
+    CARAPACE_PR_MERGE_METHOD: "squash",
+    CARAPACE_PR_STRICT_DRIFT: "",
     GIT_TRACE2_EVENT: join(root, "git.trace.jsonl"),
   };
   const run = (
@@ -475,7 +475,7 @@ fi
         bodyPath,
         completionOid,
       ],
-      { cwd, env: { ...env, OPENCLAW_PR_MERGE_METHOD: method }, encoding: "utf8", timeout: 20_000 },
+      { cwd, env: { ...env, CARAPACE_PR_MERGE_METHOD: method }, encoding: "utf8", timeout: 20_000 },
     );
     return { ...result, output: result.stdout + result.stderr };
   };
@@ -682,7 +682,7 @@ describePosix("native merge outcome with real Git and supervised lock recovery",
     const oid = f.git(["rev-parse", outcomeRef]);
     f.save({
       ...f.state(),
-      comments: [{ body: `<!-- openclaw-merge:${f.record().attempt} -->`, html_url: "fixture" }],
+      comments: [{ body: `<!-- carapace-merge:${f.record().attempt} -->`, html_url: "fixture" }],
     });
     const result = f.complete(oid);
     expect(result.status, result.output).toBe(1);
@@ -737,7 +737,7 @@ describePosix("native merge outcome with real Git and supervised lock recovery",
   it("refuses ambiguous completion markers without posting or advancing the receipt", () => {
     const f = reconciledMergeAfterCleanup();
     const oid = f.git(["rev-parse", outcomeRef]);
-    const body = `<!-- openclaw-merge:${f.record().attempt} -->`;
+    const body = `<!-- carapace-merge:${f.record().attempt} -->`;
     f.save({
       ...f.state(),
       comments: [1, 2].map((id) => ({ body, html_url: `${f.state().pr.url}#issuecomment-${id}` })),
@@ -2653,8 +2653,8 @@ describePosix("merge_outcome_repo_identity", () => {
   it("accepts the numeric repository id gh actually returns", () => {
     const run = identity({
       id: 1103012935,
-      nameWithOwner: "openclaw/openclaw",
-      url: "https://github.com/openclaw/openclaw",
+      nameWithOwner: "carapace/carapace",
+      url: "https://github.com/Exaggarate/carapace",
     });
     expect(run.status, run.stderr).toBe(0);
     expect(JSON.parse(run.stdout).id).toBe(1103012935);
@@ -2663,8 +2663,8 @@ describePosix("merge_outcome_repo_identity", () => {
   it("accepts a GraphQL node string repository id", () => {
     const run = identity({
       id: "R_kgDOQb6kRw",
-      nameWithOwner: "openclaw/openclaw",
-      url: "https://github.com/openclaw/openclaw",
+      nameWithOwner: "carapace/carapace",
+      url: "https://github.com/Exaggarate/carapace",
     });
     expect(run.status, run.stderr).toBe(0);
   });
@@ -2675,8 +2675,8 @@ describePosix("merge_outcome_repo_identity", () => {
     ["an object id", { id: { node: "x" } }],
   ])("still rejects %s", (_label, overrides) => {
     const run = identity({
-      nameWithOwner: "openclaw/openclaw",
-      url: "https://github.com/openclaw/openclaw",
+      nameWithOwner: "carapace/carapace",
+      url: "https://github.com/Exaggarate/carapace",
       ...overrides,
     });
     expect(run.status).not.toBe(0);
@@ -2686,8 +2686,8 @@ describePosix("merge_outcome_repo_identity", () => {
   it("still rejects a url that does not belong to the named repository", () => {
     const run = identity({
       id: 1103012935,
-      nameWithOwner: "openclaw/openclaw",
-      url: "https://github.com/attacker/openclaw",
+      nameWithOwner: "carapace/carapace",
+      url: "https://github.com/attacker/carapace",
     });
     expect(run.status).not.toBe(0);
     expect(run.stdout).toBe("");

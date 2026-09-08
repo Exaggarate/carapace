@@ -22,25 +22,25 @@ const surfaces = [
     kind: "missing-unit",
     name: "missing service unit",
     fact: "Service unit not found",
-    command: "openclaw gateway install",
+    command: "carapace gateway install",
   },
   {
     kind: "config-mismatch",
     name: "CLI/service config-path mismatch",
     fact: "CLI and service are using different config paths",
-    command: "openclaw gateway install --force",
+    command: "carapace gateway install --force",
   },
   {
     kind: "cached-label",
     name: "cached LaunchAgent label with missing plist",
     fact: "LaunchAgent label cached but plist missing",
-    command: "openclaw gateway install",
+    command: "carapace gateway install",
   },
   {
     kind: "config-audit",
     name: "embedded-token service audit",
-    fact: "embeds OPENCLAW_GATEWAY_TOKEN",
-    command: "openclaw gateway install --force",
+    fact: "embeds CARAPACE_GATEWAY_TOKEN",
+    command: "carapace gateway install --force",
   },
 ] as const;
 type StatusSurface = (typeof surfaces)[number]["kind"];
@@ -49,13 +49,13 @@ type InvocationEnvironment = (accountHome: string) => NodeJS.ProcessEnv;
 const deniedInvocations = [
   {
     name: "Nix-managed installation",
-    environment: () => ({ OPENCLAW_NIX_MODE: "1" }),
+    environment: () => ({ CARAPACE_NIX_MODE: "1" }),
     reason: /Nix mode detected/,
     recovery: /service install is disabled/,
   },
   {
     name: "global external supervision",
-    environment: () => ({ OPENCLAW_SUPERVISOR_MODE: " EXTERNAL " }),
+    environment: () => ({ CARAPACE_SUPERVISOR_MODE: " EXTERNAL " }),
     reason: /managed by an external supervisor/,
     recovery: /Use that supervisor to/,
   },
@@ -76,7 +76,7 @@ async function withStatusFixture(
   overrides: InvocationEnvironment,
   run: (accountHome: string, print: StatusPrinter) => Promise<void>,
 ): Promise<void> {
-  await withTestDir({ prefix: "openclaw-status-install-hints-" }, async (accountHome) => {
+  await withTestDir({ prefix: "carapace-status-install-hints-" }, async (accountHome) => {
     // The OS account stays fixed when the invocation changes HOME; following HOME
     // here would make a relocated installation falsely look canonical.
     vi.spyOn(os, "homedir").mockReturnValue(accountHome);
@@ -87,26 +87,26 @@ async function withStatusFixture(
       homedir: accountHome,
       shell: "/bin/sh",
     }));
-    const stateDir = path.join(accountHome, ".openclaw");
+    const stateDir = path.join(accountHome, ".carapace");
     await withEnvAsync(
       {
         HOME: accountHome,
         USERPROFILE: accountHome,
         HOMEDRIVE: undefined,
         HOMEPATH: undefined,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_NIX_MODE: undefined,
-        OPENCLAW_SUPERVISOR_MODE: undefined,
-        OPENCLAW_SERVICE_REPAIR_POLICY: undefined,
-        OPENCLAW_LAUNCHD_LABEL: undefined,
-        OPENCLAW_SYSTEMD_UNIT: undefined,
-        OPENCLAW_WINDOWS_TASK_NAME: undefined,
-        OPENCLAW_CONTAINER: undefined,
-        OPENCLAW_CONTAINER_HINT: undefined,
-        OPENCLAW_LOG_PREFIX: undefined,
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_NIX_MODE: undefined,
+        CARAPACE_SUPERVISOR_MODE: undefined,
+        CARAPACE_SERVICE_REPAIR_POLICY: undefined,
+        CARAPACE_LAUNCHD_LABEL: undefined,
+        CARAPACE_SYSTEMD_UNIT: undefined,
+        CARAPACE_WINDOWS_TASK_NAME: undefined,
+        CARAPACE_CONTAINER: undefined,
+        CARAPACE_CONTAINER_HINT: undefined,
+        CARAPACE_LOG_PREFIX: undefined,
         ...overrides(accountHome),
       },
       async () => {
@@ -138,10 +138,10 @@ async function createStatus(surface: StatusSurface, accountHome: string): Promis
     status.service.runtime = { status: "stopped", missingUnit: true };
   } else if (surface === "config-mismatch") {
     const serviceStateDir = path.join(accountHome, "service-state");
-    const serviceConfigPath = path.join(serviceStateDir, "openclaw.json");
+    const serviceConfigPath = path.join(serviceStateDir, "carapace.json");
     status.config = {
       cli: {
-        path: path.join(accountHome, ".openclaw", "openclaw.json"),
+        path: path.join(accountHome, ".carapace", "carapace.json"),
         exists: true,
         valid: true,
       },
@@ -149,11 +149,11 @@ async function createStatus(surface: StatusSurface, accountHome: string): Promis
       mismatch: true,
     };
     status.service.command = {
-      programArguments: ["openclaw", "gateway"],
+      programArguments: ["carapace", "gateway"],
       environment: {
         HOME: accountHome,
-        OPENCLAW_STATE_DIR: serviceStateDir,
-        OPENCLAW_CONFIG_PATH: serviceConfigPath,
+        CARAPACE_STATE_DIR: serviceStateDir,
+        CARAPACE_CONFIG_PATH: serviceConfigPath,
       },
     };
   } else if (surface === "cached-label") {
@@ -161,8 +161,8 @@ async function createStatus(surface: StatusSurface, accountHome: string): Promis
   } else {
     const { auditGatewayServiceConfig } = await import("../../daemon/service-audit.js");
     const command = {
-      programArguments: ["openclaw", "gateway"],
-      environment: { OPENCLAW_GATEWAY_TOKEN: SYNTHETIC_TOKEN },
+      programArguments: ["carapace", "gateway"],
+      environment: { CARAPACE_GATEWAY_TOKEN: SYNTHETIC_TOKEN },
     };
     status.service.command = command;
     // The embedded-token finding is platform-independent. Windows avoids native
@@ -242,7 +242,7 @@ describe("eligible status recovery", () => {
           expectProblemAndLogs(output, fact);
           expect(output).toContain(command);
           if (kind === "cached-label") {
-            expect(output).toContain("launchctl bootout gui/$UID/ai.openclaw.gateway");
+            expect(output).toContain("launchctl bootout gui/$UID/ai.carapace.gateway");
           }
         },
       );
@@ -252,14 +252,14 @@ describe("eligible status recovery", () => {
   it("keeps a canonical named profile's matching native identity and install command", async () => {
     await withStatusFixture(
       (accountHome) => ({
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_STATE_DIR: path.join(accountHome, ".openclaw-work"),
-        OPENCLAW_CONFIG_PATH: path.join(accountHome, ".openclaw-work", "openclaw.json"),
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.work",
+        CARAPACE_PROFILE: "work",
+        CARAPACE_STATE_DIR: path.join(accountHome, ".carapace-work"),
+        CARAPACE_CONFIG_PATH: path.join(accountHome, ".carapace-work", "carapace.json"),
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.work",
       }),
       async (accountHome, print) => {
         print(await createStatus("missing-unit", accountHome), { json: false });
-        expect(humanOutput()).toContain("openclaw --profile work gateway install");
+        expect(humanOutput()).toContain("carapace --profile work gateway install");
         expect(humanOutput()).not.toContain("service management skipped");
       },
     );
@@ -267,11 +267,11 @@ describe("eligible status recovery", () => {
 
   it("does not treat Doctor-only external policy as denied explicit service installation", async () => {
     await withStatusFixture(
-      () => ({ OPENCLAW_SERVICE_REPAIR_POLICY: "external" }),
+      () => ({ CARAPACE_SERVICE_REPAIR_POLICY: "external" }),
       async (accountHome, print) => {
         print(await createStatus("config-audit", accountHome), { json: false });
         const output = humanOutput();
-        expect(output).toContain("openclaw gateway install --force");
+        expect(output).toContain("carapace gateway install --force");
         expect(output).not.toContain("managed by an external supervisor");
       },
     );
@@ -286,8 +286,8 @@ describe("eligible status recovery", () => {
         print(status, { json: false });
 
         const output = humanOutput();
-        expect(output).toContain("launchctl bootout gui/$UID/ai.openclaw.gateway");
-        expect(output).toContain("openclaw gateway install");
+        expect(output).toContain("launchctl bootout gui/$UID/ai.carapace.gateway");
+        expect(output).toContain("carapace gateway install");
       },
     );
   });
@@ -295,7 +295,7 @@ describe("eligible status recovery", () => {
 
 it("reports the Nix gate before global external supervision", async () => {
   await withStatusFixture(
-    () => ({ OPENCLAW_NIX_MODE: "1", OPENCLAW_SUPERVISOR_MODE: "external" }),
+    () => ({ CARAPACE_NIX_MODE: "1", CARAPACE_SUPERVISOR_MODE: "external" }),
     async (accountHome, print) => {
       print(await createStatus("missing-unit", accountHome), { json: false });
       const output = humanOutput();
@@ -308,7 +308,7 @@ it("reports the Nix gate before global external supervision", async () => {
 
 it("preserves the JSON audit projection after human recovery rendering", async () => {
   await withStatusFixture(
-    () => ({ OPENCLAW_NIX_MODE: "1" }),
+    () => ({ CARAPACE_NIX_MODE: "1" }),
     async (accountHome, print) => {
       const status = await createStatus("config-audit", accountHome);
       const original = structuredClone(status);
@@ -323,7 +323,7 @@ it("preserves the JSON audit projection after human recovery rendering", async (
         ...original,
         service: {
           ...original.service,
-          command: { programArguments: ["openclaw", "gateway"], environment: undefined },
+          command: { programArguments: ["carapace", "gateway"], environment: undefined },
         },
       });
       expect(defaultRuntime.log).not.toHaveBeenCalled();
@@ -334,7 +334,7 @@ it("preserves the JSON audit projection after human recovery rendering", async (
 
 it("keeps stopped-runtime diagnostics without manufacturing an install refusal", async () => {
   await withStatusFixture(
-    () => ({ OPENCLAW_NIX_MODE: "1" }),
+    () => ({ CARAPACE_NIX_MODE: "1" }),
     async (accountHome, print) => {
       const status = await createStatus("cached-label", accountHome);
       status.service.runtime = { status: "stopped" };

@@ -173,7 +173,7 @@ describe("node desktop stream command", () => {
     ).rejects.toThrow("ticket and attachPath required");
   });
 
-  it.each(["", "/openclaw-gw", "/openclaw-gw/"])(
+  it.each(["", "/carapace-gw", "/carapace-gw/"])(
     "authenticates public and worker attaches through Gateway context %j and tears down on cancellation",
     async (contextPath) => {
       const rfbPeers = new Set<net.Socket>();

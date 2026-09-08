@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { SessionManager } from "../../agents/sessions/session-manager.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import {
   loadSessionEntry,
   loadTranscriptEventsSync,
@@ -14,7 +14,7 @@ import { withOwnedSessionTranscriptWrites } from "./transcript-write-context.js"
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 function isExpectedCompaction(entryId: string, appendedText: string): boolean {
@@ -33,7 +33,7 @@ function isExpectedCompaction(entryId: string, appendedText: string): boolean {
 
 describe("persistCompactionBoundaryWithSessionEntrySync", () => {
   it("publishes the boundary, count, and byte latch in one commit", async () => {
-    const dir = tempDirs.make("openclaw-compaction-boundary-");
+    const dir = tempDirs.make("carapace-compaction-boundary-");
     const scope = {
       agentId: "main",
       sessionId: "session",
@@ -86,7 +86,7 @@ describe("persistCompactionBoundaryWithSessionEntrySync", () => {
   });
 
   it("rolls back the boundary and accounting when validation fails", async () => {
-    const dir = tempDirs.make("openclaw-compaction-boundary-rollback-");
+    const dir = tempDirs.make("carapace-compaction-boundary-rollback-");
     const scope = {
       agentId: "main",
       sessionId: "session",
@@ -132,7 +132,7 @@ describe("persistCompactionBoundaryWithSessionEntrySync", () => {
   });
 
   it("rolls back when the admitted writer closes during validation", async () => {
-    const dir = tempDirs.make("openclaw-compaction-boundary-owner-");
+    const dir = tempDirs.make("carapace-compaction-boundary-owner-");
     const scope = {
       agentId: "main",
       sessionId: "session",

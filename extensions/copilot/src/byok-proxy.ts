@@ -1,14 +1,14 @@
-// Copilot BYOK transport proxy keeps OpenClaw in charge of outbound network policy.
+// Copilot BYOK transport proxy keeps Carapace in charge of outbound network policy.
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import type { ResolvedCopilotProvider } from "./provider-bridge.js";
 
 const LOOPBACK_HOST = "127.0.0.1";
-const PROXY_CREDENTIAL_HEADER_PREFIX = "x-openclaw-copilot-byok-";
+const PROXY_CREDENTIAL_HEADER_PREFIX = "x-carapace-copilot-byok-";
 
 type CopilotByokProxyHandle = {
   close: () => Promise<void>;

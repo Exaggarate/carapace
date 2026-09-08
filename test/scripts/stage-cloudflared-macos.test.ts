@@ -13,7 +13,7 @@ describe.runIf(process.platform === "darwin")("bundled browser sign-in helper", 
   it.each(["arm64", "x86_64", "wrong-architecture", "wrong-checksum"])(
     "verifies cached and downloaded payloads before staging: %s",
     async (scenario) => {
-      const root = tempDirs.make("openclaw-cloudflared-stage-");
+      const root = tempDirs.make("carapace-cloudflared-stage-");
       const scripts = path.join(root, "scripts");
       const cache = path.join(root, "apps/macos/.build/cloudflared/2026.8.3");
       const fixture = path.join(root, "fixture");

@@ -1,17 +1,17 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { parseClawManifest } from "./schema.js";
 import { buildClawUpdatePlan } from "./update-plan.js";
 import { createUpdatePlanFixture, targetSource } from "./update-plan.test-helpers.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 describe("buildClawUpdatePlan readiness", () => {
   it("projects and integrity-binds plugin setup prerequisites", async () => {
-    const current = await createUpdatePlanFixture(tempDirs.make("openclaw-claw-readiness-"));
+    const current = await createUpdatePlanFixture(tempDirs.make("carapace-claw-readiness-"));
     const requirement = (envVars: string[]) => ({
       kind: "plugin-setup" as const,
       plugin: "obsolete",
@@ -68,7 +68,7 @@ describe("buildClawUpdatePlan readiness", () => {
   });
 
   it("preserves prerequisites from an accepted owned plugin upgrade conflict", async () => {
-    const current = await createUpdatePlanFixture(tempDirs.make("openclaw-claw-upgrade-ready-"));
+    const current = await createUpdatePlanFixture(tempDirs.make("carapace-claw-upgrade-ready-"));
     const parsed = parseClawManifest({
       ...current.manifest,
       packages: current.manifest.packages.map((pkg) =>
@@ -130,8 +130,8 @@ describe("buildClawUpdatePlan readiness", () => {
     });
   });
 
-  it("accepts an owned plugin upgrade declared through the OpenClaw profile", async () => {
-    const current = await createUpdatePlanFixture(tempDirs.make("openclaw-claw-profile-upgrade-"));
+  it("accepts an owned plugin upgrade declared through the Carapace profile", async () => {
+    const current = await createUpdatePlanFixture(tempDirs.make("carapace-claw-profile-upgrade-"));
     const parsed = parseClawManifest({
       ...current.manifest,
       packages: current.manifest.packages.filter((pkg) => pkg.kind !== "plugin"),
@@ -143,7 +143,7 @@ describe("buildClawUpdatePlan readiness", () => {
     const plan = await buildClawUpdatePlan({
       agentId: "worker",
       targetManifest: parsed.manifest,
-      targetOpenClawProfile: {
+      targetCarapaceProfile: {
         schemaVersion: 1,
         agent: {},
         extensions: [
@@ -180,7 +180,7 @@ describe("buildClawUpdatePlan readiness", () => {
         detectedFormat: "claude",
         mapped: ["skills"],
         unavailable: ["agents"],
-        adapterIdentity: "openclaw/test",
+        adapterIdentity: "carapace/test",
         message: "The Claw owns the installed previous version.",
       }),
     });
@@ -191,7 +191,7 @@ describe("buildClawUpdatePlan readiness", () => {
     expect(plan.blockers).not.toContainEqual(
       expect.objectContaining({
         code: "plugin_version_conflict",
-        path: "$.profiles.openclaw.extensions[0]",
+        path: "$.profiles.carapace.extensions[0]",
       }),
     );
     expect(

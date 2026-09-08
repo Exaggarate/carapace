@@ -54,7 +54,7 @@ export function renderChatDetailSlot(params: {
   };
   return (
     documents[content.kind] ??
-    html`<openclaw-chat-detail-panel
+    html`<carapace-chat-detail-panel
       class="chat-sidebar"
       .content=${content}
       .execNode=${selectedChatSessionRow(host)?.execNode ?? null}
@@ -87,6 +87,6 @@ export function renderChatDetailSlot(params: {
       .embedded=${true}
       @chat-detail-panel-close=${() =>
         host.handleCloseSidebar(content.kind === "attachment" ? "workspace" : "detail")}
-    ></openclaw-chat-detail-panel>`
+    ></carapace-chat-detail-panel>`
   );
 }

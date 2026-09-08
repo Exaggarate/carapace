@@ -58,7 +58,7 @@ describe.skipIf(typeof HTMLElement.prototype.checkVisibility !== "function")(
         )!;
         await page.elementLocator(trigger).hover();
         const tooltip = () =>
-          [...document.querySelectorAll("openclaw-tooltip")]
+          [...document.querySelectorAll("carapace-tooltip")]
             .map((element) => element.shadowRoot?.querySelector<WaTooltip>("wa-tooltip"))
             .find((element) => element?.open);
         await expect

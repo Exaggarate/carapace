@@ -1,4 +1,4 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
 import { readTranscriptRawDelta } from "./session-accessor.sqlite-delta.js";
 import { resolveSessionKeyBySessionId as resolveTranscriptSessionKeyBySessionId } from "./session-accessor.sqlite-entry.js";
 import { publishTranscriptUpdate } from "./session-accessor.sqlite-events.js";

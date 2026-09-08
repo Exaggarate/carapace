@@ -5,12 +5,12 @@
 // session. The browser runtime is dynamically imported on first open so it
 // never weighs down the initial Control UI bundle.
 import { initialState, Task, TaskStatus } from "@lit/task";
-import { buildControlUiFocusPath } from "@openclaw/session-url-contract";
+import { buildControlUiFocusPath } from "@carapace/session-url-contract";
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { t } from "../../i18n/index.ts";
 import { openExternalUrlSafe } from "../../lib/open-external-url.ts";
-import { OpenClawLitElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../../lit/carapace-element.ts";
 import { scrollbarShadowStyles } from "../../lit/scrollbar-styles.ts";
 import { DockLayoutController, dockPanelStyles } from "../dock-layout-controller.ts";
 import { terminalPanelLayout, type DockPanelPlacement } from "../dock-panel-layout.ts";
@@ -45,8 +45,8 @@ type TerminalDock = Exclude<DockPanelPlacement, "left">;
 
 const CATALOG_TERMINAL_READY_TIMEOUT_MS = 30_000;
 
-/** `<openclaw-terminal-panel>` — the dockable Control UI shell surface. */
-export class OpenClawTerminalPanel extends OpenClawLitElement {
+/** `<carapace-terminal-panel>` — the dockable Control UI shell surface. */
+export class CarapaceTerminalPanel extends CarapaceLitElement {
   /** Gateway client used for terminal.* RPCs; null until connected. */
   @property({ attribute: false }) client: TerminalGatewayClient | null = null;
   /** Agent whose workspace and sandbox policy own newly opened sessions. */
@@ -483,6 +483,6 @@ export class OpenClawTerminalPanel extends OpenClawLitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-terminal-panel": OpenClawTerminalPanel;
+    "carapace-terminal-panel": CarapaceTerminalPanel;
   }
 }

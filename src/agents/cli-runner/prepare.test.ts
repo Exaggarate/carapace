@@ -4,8 +4,8 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
@@ -25,7 +25,7 @@ import {
   replaceSessionEntrySync,
   patchSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { registerContextEngineForOwner } from "../../context-engine/registry.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { resolveMcpLoopbackScopedTools as resolveLoopbackTools } from "../../gateway/mcp-http.runtime.js";
@@ -52,8 +52,8 @@ import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-trans
 import type { SkillLibraryAuthoringCapability } from "../../skills/library/authoring.js";
 import { buildSkillSnapshot } from "../../skills/loading/workspace-skill-prompt.js";
 import type { SkillSnapshot } from "../../skills/types.js";
-import { closeOpenClawStateDatabaseByPath } from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseByPath } from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { connectUserModelAccount } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
@@ -208,7 +208,7 @@ const mockBuildActiveMusicGenerationTaskPromptContextForSession = vi.mocked(
 
 let defaultTestCliBackend = buildDefaultTestCliBackend();
 
-function createCliBackendConfig(params: TestCliBackendParams = {}): OpenClawConfig {
+function createCliBackendConfig(params: TestCliBackendParams = {}): CarapaceConfig {
   defaultTestCliBackend = buildDefaultTestCliBackend(params);
   return {};
 }
@@ -216,7 +216,7 @@ function createCliBackendConfig(params: TestCliBackendParams = {}): OpenClawConf
 const SHARED_CHAT_MESSAGE_TOOL_ETIQUETTE =
   "- Group/channel: stale/joke/light ack/low-value chatter => reaction or silence. Needed reply => `message(action=send)`; final text private.";
 
-function createBundledMessageToolConfig(): OpenClawConfig {
+function createBundledMessageToolConfig(): CarapaceConfig {
   setCliRunnerPrepareTestDeps({
     getActiveMcpLoopbackRuntime: vi.fn(() => ({
       port: 31783,
@@ -425,7 +425,7 @@ describe("prepareCliRunContext", () => {
 
   it("preserves outer fallback route provenance through CLI admission", async () => {
     const runId = "run-cli-model-fallback-receipt";
-    const cfg = { logging: { audit: { executionIdentity: true } } } satisfies OpenClawConfig;
+    const cfg = { logging: { audit: { executionIdentity: true } } } satisfies CarapaceConfig;
     const preparedRunAdmission = createModelRoutingTestAdmission({
       cfg,
       runId,
@@ -573,7 +573,7 @@ describe("prepareCliRunContext", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
     });
 
     expect(context.backendResolved.modelProvider).toBe("fixture-anthropic");
@@ -653,7 +653,7 @@ describe("prepareCliRunContext", () => {
       revokeMcpLoopbackClientGrant: vi.fn(() => true),
       resolveMcpLoopbackPolicyTools: vi.fn(() => ({ agentId: "main", tools: [] })),
       resolveMcpLoopbackScopedTools: vi.fn(() => ({ agentId: "main", tools: [] })),
-      resolveOpenClawReferencePaths: vi.fn(async () => ({ docsPath: null, sourcePath: null })),
+      resolveCarapaceReferencePaths: vi.fn(async () => ({ docsPath: null, sourcePath: null })),
       prepareClaudeCliSkillsPlugin: vi.fn(async () => ({
         args: [],
         cleanup: vi.fn(async () => undefined),
@@ -854,7 +854,7 @@ describe("prepareCliRunContext", () => {
           { id: "arthur", workspace: arthurWorkspace },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const context = await fixture.prepare({
       sessionKey: "agent:arthur:main",
       workspaceDir: arthurWorkspace,
@@ -873,7 +873,7 @@ describe("prepareCliRunContext", () => {
   it("honors an explicit auth agent directory independently of session identity", async () => {
     const { dir } = fixture.session;
     const modelOwnerAgentDir = path.join(dir, "ops-agent");
-    const systemAgentDir = path.join(dir, "openclaw-agent");
+    const systemAgentDir = path.join(dir, "carapace-agent");
     const prepareExecution = vi.fn(async () => undefined);
     fs.mkdirSync(modelOwnerAgentDir, { recursive: true });
     setRawCliBackendForPrepareTest({
@@ -891,15 +891,15 @@ describe("prepareCliRunContext", () => {
     });
 
     const context = await fixture.prepare({
-      sessionKey: "agent:openclaw:main",
-      agentId: "openclaw",
+      sessionKey: "agent:carapace:main",
+      agentId: "carapace",
       agentDir: modelOwnerAgentDir,
       authProfileId: "test-cli:ops",
       config: {
         agents: {
           list: [
             { id: "ops", default: true, agentDir: modelOwnerAgentDir },
-            { id: "openclaw", agentDir: systemAgentDir },
+            { id: "carapace", agentDir: systemAgentDir },
           ],
         },
       },
@@ -1057,7 +1057,7 @@ describe("prepareCliRunContext", () => {
     const agentDir = path.join(dir, "agents", "main", "agent");
     const authProfileId = "google-gemini-cli:legacy";
     const backendError = new CliBackendAuthProfilePreparationError(
-      "Gemini CLI OAuth profile is incomplete and cannot be repaired by OpenClaw.",
+      "Gemini CLI OAuth profile is incomplete and cannot be repaired by Carapace.",
     );
     fs.mkdirSync(agentDir, { recursive: true });
     saveAuthProfileStore(
@@ -1170,7 +1170,7 @@ describe("prepareCliRunContext", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(resolveApiKeyForProfile).not.toHaveBeenCalled();
@@ -1240,7 +1240,7 @@ describe("prepareCliRunContext", () => {
     async (accountState) => {
       const { dir } = fixture.session;
       const agentDir = path.join(dir, "agents", "main", "agent");
-      const databasePath = resolveOpenClawStateSqlitePath();
+      const databasePath = resolveCarapaceStateSqlitePath();
       try {
         const owner = ensureProfileForEmail("cli-owner@example.test");
         const credential = {
@@ -1281,7 +1281,7 @@ describe("prepareCliRunContext", () => {
           connected.authProfileId,
         );
       } finally {
-        closeOpenClawStateDatabaseByPath(databasePath);
+        closeCarapaceStateDatabaseByPath(databasePath);
       }
     },
   );
@@ -1289,7 +1289,7 @@ describe("prepareCliRunContext", () => {
   it("persists and forwards a refreshed managed Anthropic OAuth profile", async () => {
     const { dir } = fixture.session;
     const agentDir = path.join(dir, "agents", "main", "agent");
-    const authProfileId = "anthropic:openclaw-managed";
+    const authProfileId = "anthropic:carapace-managed";
     const prepareExecution = vi.fn(async () => undefined);
     const refreshedCredential = {
       type: "oauth" as const,
@@ -1445,7 +1445,7 @@ describe("prepareCliRunContext", () => {
   it("does not revive a selected managed credential when auth resolution returns null", async () => {
     const { dir } = fixture.session;
     const agentDir = path.join(dir, "agents", "main", "agent");
-    const authProfileId = "anthropic:openclaw-managed";
+    const authProfileId = "anthropic:carapace-managed";
     const prepareExecution = vi.fn(async () => undefined);
     fs.mkdirSync(agentDir, { recursive: true });
     saveAuthProfileStore(
@@ -1486,7 +1486,7 @@ describe("prepareCliRunContext", () => {
       provider: "anthropic",
       agentDir,
     });
-    await expect(preparation).rejects.toThrow("openclaw models auth login --provider anthropic");
+    await expect(preparation).rejects.toThrow("carapace models auth login --provider anthropic");
     expect(prepareExecution).not.toHaveBeenCalled();
   });
 
@@ -1552,7 +1552,7 @@ describe("prepareCliRunContext", () => {
   it("surfaces managed profile refresh failures before backend preparation", async () => {
     const { dir } = fixture.session;
     const agentDir = path.join(dir, "agents", "main", "agent");
-    const authProfileId = "anthropic:openclaw-managed";
+    const authProfileId = "anthropic:carapace-managed";
     const prepareExecution = vi.fn(async () => undefined);
     fs.mkdirSync(agentDir, { recursive: true });
     saveAuthProfileStore(
@@ -1773,8 +1773,8 @@ describe("prepareCliRunContext", () => {
         mcp?: { allowed?: string[] };
         mcpServers?: Record<string, { url?: string }>;
       };
-      expect(generatedSettings.mcp?.allowed).toEqual(["openclaw"]);
-      expect(generatedSettings.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:31783/mcp");
+      expect(generatedSettings.mcp?.allowed).toEqual(["carapace"]);
+      expect(generatedSettings.mcpServers?.carapace?.url).toBe("http://127.0.0.1:31783/mcp");
       expect(context.preparedBackend.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe(
         profileSystemSettingsPath,
       );
@@ -1925,7 +1925,7 @@ describe("prepareCliRunContext", () => {
         args: ["--plugin-dir", skillsPluginDir],
         cleanup: skillsCleanup,
       })),
-      resolveOpenClawReferencePaths: vi.fn(async () => {
+      resolveCarapaceReferencePaths: vi.fn(async () => {
         throw new Error("reference path lookup failed");
       }),
     });
@@ -1942,7 +1942,7 @@ describe("prepareCliRunContext", () => {
       expect(revokeMcpLoopbackClientGrant).toHaveBeenCalledExactlyOnceWith("loopback-token");
       expect(fs.existsSync(skillsPluginDir)).toBe(false);
       expect(
-        fs.readdirSync(tempRoot).filter((entry) => entry.startsWith("openclaw-cli-mcp-")),
+        fs.readdirSync(tempRoot).filter((entry) => entry.startsWith("carapace-cli-mcp-")),
       ).toEqual([]);
     } finally {
       tempEnvSnapshot.restore();
@@ -2005,7 +2005,7 @@ describe("prepareCliRunContext", () => {
           },
         ],
       })),
-      resolveOpenClawReferencePaths: vi.fn(async () => ({ docsPath: "docs", sourcePath: "src" })),
+      resolveCarapaceReferencePaths: vi.fn(async () => ({ docsPath: "docs", sourcePath: "src" })),
     });
 
     const context = await fixture.prepare({
@@ -2028,7 +2028,7 @@ describe("prepareCliRunContext", () => {
     );
     expect(context.systemPrompt).toBe("BTW system prompt");
     expect(context.params.prompt).toBe("side question prompt");
-    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(context.carapaceHistoryPrompt).toBeUndefined();
     expect(context.contextEngine).toBeUndefined();
     expect(context.contextEngineTurnPrompt).toBeUndefined();
     expect(context.hadSessionFile).toBe(false);
@@ -2063,7 +2063,7 @@ describe("prepareCliRunContext", () => {
     const bootstrapPath = path.join(dir, "BOOTSTRAP.md");
     const config = {
       agents: { defaults: { workspace: dir } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     setRawCliBackendForPrepareTest({
       id: "test-cli",
       pluginId: "test",
@@ -2386,16 +2386,16 @@ describe("prepareCliRunContext", () => {
         trigger: "user",
         transcriptPrompt: "latest ask",
         currentInboundContext: {
-          text: "Sender: ⟦openclaw:ctx⟧\nsender_id=U123",
+          text: "Sender: ⟦carapace:ctx⟧\nsender_id=U123",
           promptJoiner: " ",
         },
         runId: "run-test-context",
       });
 
       const logicalPrompt =
-        "Sender: ⟦openclaw:ctx⟧\nsender_id=U123 trusted hook context\n\nlatest ask\n\ntrusted hook tail";
+        "Sender: ⟦carapace:ctx⟧\nsender_id=U123 trusted hook context\n\nlatest ask\n\ntrusted hook tail";
       expect(context.params.prompt).toBe(
-        pluginExecution ? "Sender: ⟦openclaw:ctx⟧\nsender_id=U123 latest ask" : logicalPrompt,
+        pluginExecution ? "Sender: ⟦carapace:ctx⟧\nsender_id=U123 latest ask" : logicalPrompt,
       );
       expect(context.promptContext).toEqual(
         pluginExecution
@@ -2427,12 +2427,12 @@ describe("prepareCliRunContext", () => {
         },
       });
       // Room resumes carry compact event text into the CLI prompt but keep the
-      // richer room context in OpenClaw history for reseed and audits.
+      // richer room context in Carapace history for reseed and audits.
       const context = await prepare({
         sessionKey: "agent:main:test",
         agentId: "main",
         trigger: "user",
-        prompt: "[OpenClaw room event]",
+        prompt: "[Carapace room event]",
         currentInboundEventKind: "room_event",
         currentInboundContext: {
           text: "Room context:\nAlice: lunch?\n\nCurrent event:\nBob: yes",
@@ -2447,9 +2447,9 @@ describe("prepareCliRunContext", () => {
       });
 
       expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-      expect(context.params.prompt).toBe("Current event:\nBob: yes\n\n[OpenClaw room event]");
-      expect(context.openClawHistoryPrompt).toContain("Room context:\nAlice: lunch?");
-      expect(context.openClawHistoryPrompt).toContain("Current event:\nBob: yes");
+      expect(context.params.prompt).toBe("Current event:\nBob: yes\n\n[Carapace room event]");
+      expect(context.carapaceHistoryPrompt).toContain("Room context:\nAlice: lunch?");
+      expect(context.carapaceHistoryPrompt).toContain("Current event:\nBob: yes");
     });
   });
 
@@ -2615,7 +2615,7 @@ describe("prepareCliRunContext", () => {
     const context = await fixture.prepare({});
 
     expect(context.params.prompt).toBe("latest ask");
-    expect(context.systemPrompt).toContain("You are a personal assistant running inside OpenClaw.");
+    expect(context.systemPrompt).toContain("You are a personal assistant running inside Carapace.");
     expect(context.systemPrompt).toContain("Current model identity: test-cli/test-model.");
     expect(context.systemPrompt).not.toContain("hook exploded");
     expect(hookRunner.runBeforePromptBuild).toHaveBeenCalledOnce();
@@ -2635,7 +2635,7 @@ describe("prepareCliRunContext", () => {
     });
     registerTestContextEngine(engineId, factory);
     setCliRunnerPrepareTestDeps({
-      resolveOpenClawReferencePaths: vi.fn(async () => {
+      resolveCarapaceReferencePaths: vi.fn(async () => {
         throw new Error("reference path lookup failed");
       }),
     });
@@ -2709,7 +2709,7 @@ describe("prepareCliRunContext", () => {
           hostRequirements: {
             "agent-run": {
               requiredCapabilities: ["assemble-before-prompt"],
-              unsupportedMessage: "Use the native Codex or OpenClaw embedded runtime.",
+              unsupportedMessage: "Use the native Codex or Carapace embedded runtime.",
             },
           },
         },
@@ -2740,7 +2740,7 @@ describe("prepareCliRunContext", () => {
         list: [{ id: "main", default: true, agentDir: runtimeAgentDir }],
       },
       plugins: { slots: { contextEngine: engineId } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const factory = vi.fn((_ctx: unknown): ContextEngine => {
       return {
         info: { id: engineId, name: "CLI runtime config engine" },
@@ -2890,7 +2890,7 @@ describe("prepareCliRunContext", () => {
 
   it("uses cwd for CLI system prompt workspace guidance", async () => {
     const { dir } = fixture.session;
-    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-task-"));
+    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-cli-task-"));
     try {
       const context = await fixture.prepare({
         cwd: taskDir,
@@ -3017,7 +3017,7 @@ describe("prepareCliRunContext", () => {
     const context = await fixture.prepare({
       sessionKey: "agent:main:test",
       currentInboundContext: {
-        text: "Conversation info: ⟦openclaw:ctx⟧\nchannel=telegram",
+        text: "Conversation info: ⟦carapace:ctx⟧\nchannel=telegram",
       },
       extraSystemPrompt: "new stable prompt",
       extraSystemPromptStatic: "new stable prompt",
@@ -3033,9 +3033,9 @@ describe("prepareCliRunContext", () => {
       sessionId: "cli-session",
       drift: { reasons: ["system-prompt"] },
     });
-    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(context.carapaceHistoryPrompt).toBeUndefined();
     expect(context.params.prompt).toContain(
-      "OpenClaw resumed this CLI session after prompt content changed.",
+      "Carapace resumed this CLI session after prompt content changed.",
     );
     expect(context.params.prompt).toContain("changed=system-prompt");
     expect(context.params.prompt).toContain("latest ask");
@@ -3059,7 +3059,7 @@ describe("prepareCliRunContext", () => {
       invalidatedReason: "system-prompt",
     });
     expect(context.params.prompt).not.toContain(
-      "OpenClaw resumed this CLI session after prompt content changed.",
+      "Carapace resumed this CLI session after prompt content changed.",
     );
   });
 
@@ -3385,8 +3385,8 @@ describe("prepareCliRunContext", () => {
         sessionId: "cli-session",
         drift: { reasons: ["system-prompt"] },
       });
-      expect(context.openClawHistoryPrompt).toContain("prior no-compaction ask");
-      expect(context.openClawHistoryPrompt).toContain("latest ask");
+      expect(context.carapaceHistoryPrompt).toContain("prior no-compaction ask");
+      expect(context.carapaceHistoryPrompt).toContain("latest ask");
     });
   });
 
@@ -3415,8 +3415,8 @@ describe("prepareCliRunContext", () => {
       });
 
       expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-      expect(context.openClawHistoryPrompt).toContain("prior resumable ask");
-      expect(context.openClawHistoryPrompt).toContain("latest ask");
+      expect(context.carapaceHistoryPrompt).toContain("prior resumable ask");
+      expect(context.carapaceHistoryPrompt).toContain("latest ask");
     });
   });
 
@@ -3486,11 +3486,11 @@ describe("prepareCliRunContext", () => {
         `${wrappedPluginSystemContext("hook prepend system")}\n\nhook system${SYSTEM_PROMPT_CACHE_BOUNDARY}\nCurrent model identity: test-cli/test-model. If asked what model you are, answer with this value for the current run.`,
       );
       const carrier = [
-        "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
         "## Media Generation Tasks",
         "image task running",
         "active video task",
-        "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       ].join("\n");
       expect(second.params.prompt).toBe(
         pluginExecution ? "latest ask" : `latest ask\n\n${carrier}`,
@@ -3870,8 +3870,8 @@ describe("prepareCliRunContext", () => {
       });
 
       expect(context.preparedBackend.env).toMatchObject({
-        OPENCLAW_MCP_TOKEN: "loopback-token",
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        CARAPACE_MCP_TOKEN: "loopback-token",
+        CARAPACE_MCP_CLI_CAPTURE_KEY: "",
       });
       expect(mintMcpLoopbackClientGrant).toHaveBeenCalledWith({
         context: {
@@ -4040,7 +4040,7 @@ describe("prepareCliRunContext", () => {
 
     expect(context.mcpDeliveryCapture).toBe(true);
     expect(context.preparedBackend.env).toMatchObject({
-      OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+      CARAPACE_MCP_CLI_CAPTURE_KEY: "",
     });
   });
 
@@ -4102,7 +4102,7 @@ describe("prepareCliRunContext", () => {
           capabilities,
           selected === undefined
             ? {}
-            : { cliToolAvailability: { native: selected, openClaw: ["message"] } },
+            : { cliToolAvailability: { native: selected, carapace: ["message"] } },
         );
       capture.activate("native-capture");
       observe(observed);
@@ -4145,7 +4145,7 @@ describe("prepareCliRunContext", () => {
     await fixture.prepare({
       provider: "claude-cli",
       sessionEntry: { execHost: "node", execNode: "node-a" } as never,
-      cliToolAvailability: { native: ["Read", "Bash"], openClaw: ["message"] },
+      cliToolAvailability: { native: ["Read", "Bash"], carapace: ["message"] },
     });
 
     expect(projectNativeToolAuthority).not.toHaveBeenCalled();
@@ -4224,7 +4224,7 @@ describe("prepareCliRunContext", () => {
       toolsAllow: ["read", "web_search"],
     });
     await expect(run).rejects.toThrow(
-      `CLI backend "test-cli" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. OpenClaw did not start the run.`,
+      `CLI backend "test-cli" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. Carapace did not start the run.`,
     );
 
     expect(getActiveMcpLoopbackRuntime).not.toHaveBeenCalled();
@@ -4289,7 +4289,7 @@ describe("prepareCliRunContext", () => {
 
     expect(context.params.cliToolAvailability).toEqual({
       native: [],
-      openClaw: ["write", "apply_patch"],
+      carapace: ["write", "apply_patch"],
     });
     expect(resolveMcpLoopbackPolicyTools).toHaveBeenCalledWith(
       expect.objectContaining({ context: expect.objectContaining({ toolsAllow: ["write"] }) }),
@@ -4304,7 +4304,7 @@ describe("prepareCliRunContext", () => {
     "request-cancelled",
     "retained-after-exit",
   ] as const)("binds prepared %s native questions to the actual CLI creator", async (mode) => {
-    const config = { tools: { exec: { security: "full", ask: "off" } } } satisfies OpenClawConfig;
+    const config = { tools: { exec: { security: "full", ask: "off" } } } satisfies CarapaceConfig;
     const runId = `native-question-${mode}`;
     const admission = prepareSystemAgentRunAdmission(
       config,
@@ -4380,7 +4380,7 @@ describe("prepareCliRunContext", () => {
       senderIsOwner: false,
       clientCaps: ["creator-client"],
       approvalReviewerDeviceId: "creator-reviewer",
-      cliToolAvailability: { native: ["AskUserQuestion"], openClaw: [] },
+      cliToolAvailability: { native: ["AskUserQuestion"], carapace: [] },
     };
     const sourceRoute = { provider: original.modelProvider, model: original.model };
     const caller = {
@@ -4582,7 +4582,7 @@ describe("prepareCliRunContext", () => {
       disableTools: true,
     });
 
-    expect(context.params.cliToolAvailability).toEqual({ native: [], openClaw: [] });
+    expect(context.params.cliToolAvailability).toEqual({ native: [], carapace: [] });
     expect(getActiveMcpLoopbackRuntime).not.toHaveBeenCalled();
   });
 
@@ -4612,7 +4612,7 @@ describe("prepareCliRunContext", () => {
       toolsAllow: ["write"],
     });
 
-    expect(context.params.cliToolAvailability).toEqual({ native: [], openClaw: [] });
+    expect(context.params.cliToolAvailability).toEqual({ native: [], carapace: [] });
   });
 
   it.each([false, true])(
@@ -4653,7 +4653,7 @@ describe("prepareCliRunContext", () => {
         "did not enforce exact per-run tool availability during execution preparation",
       );
       expect(prepareExecution).toHaveBeenCalledWith(
-        expect.objectContaining({ toolAvailability: { native: [], openClaw: [] } }),
+        expect.objectContaining({ toolAvailability: { native: [], carapace: [] } }),
       );
       expect(cleanup).toHaveBeenCalledOnce();
       expect(cleanupScope.outcome).toBe(fails ? "uncertain" : "closed");
@@ -4704,9 +4704,9 @@ describe("prepareCliRunContext", () => {
 
     const context = await fixture.prepare({
       provider: "settings-cli",
-      cliToolAvailability: { native: [], openClaw: [] },
+      cliToolAvailability: { native: [], carapace: [] },
     });
-    expect(context.params.cliToolAvailability).toEqual({ native: [], openClaw: [] });
+    expect(context.params.cliToolAvailability).toEqual({ native: [], carapace: [] });
     await context.preparedBackend.cleanup?.();
   });
 
@@ -4737,7 +4737,7 @@ describe("prepareCliRunContext", () => {
       executionMode: "side-question",
       isolatedCompletion: true,
       extraSystemPrompt: "Return only valid JSON.",
-      cliToolAvailability: { native: [], openClaw: [] },
+      cliToolAvailability: { native: [], carapace: [] },
     });
 
     expect(prepareExecution).toHaveBeenCalledWith(
@@ -4777,12 +4777,12 @@ describe("prepareCliRunContext", () => {
         provider: "external-cli",
         executionMode: "side-question",
         isolatedCompletion: true,
-        cliToolAvailability: { native: [], openClaw: [] },
+        cliToolAvailability: { native: [], carapace: [] },
       }),
     ).rejects.toMatchObject({
       code: "unsupported",
       message:
-        'CLI backend "external-cli" does not support isolated completion; OpenClaw did not start the run.',
+        'CLI backend "external-cli" does not support isolated completion; Carapace did not start the run.',
     });
     expect(cleanup).toHaveBeenCalledOnce();
   });
@@ -4830,18 +4830,18 @@ describe("prepareCliRunContext", () => {
       const context = await fixture.prepare({
         provider: "claude-cli",
         sessionEntry: { execHost: "node", execNode: "node-a" } as never,
-        cliToolAvailability: { native: ["Read"], openClaw: ["message", "skill_workshop"] },
+        cliToolAvailability: { native: ["Read"], carapace: ["message", "skill_workshop"] },
         ...(workshopEnabled ? { skillLibraryAuthoring } : {}),
       });
 
       expect(prepareExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          toolAvailability: { native: ["Read"], openClaw: ["skill_workshop"] },
+          toolAvailability: { native: ["Read"], carapace: ["skill_workshop"] },
         }),
       );
       expect(context.params.cliToolAvailability).toEqual({
         native: ["Read"],
-        openClaw: ["skill_workshop"],
+        carapace: ["skill_workshop"],
       });
       if (workshopEnabled) {
         expect(resolveMcpLoopbackScopedTools).toHaveBeenCalledWith(
@@ -4885,7 +4885,7 @@ describe("prepareCliRunContext", () => {
 
     const context = await fixture.prepare({
       provider: "claude-cli",
-      cliToolAvailability: { native: ["Read"], openClaw: ["message"] },
+      cliToolAvailability: { native: ["Read"], carapace: ["message"] },
       finalizePromptForResolvedTools,
     });
 
@@ -4907,7 +4907,7 @@ describe("prepareCliRunContext", () => {
     },
     {
       name: "keeps existing CLI availability as the upper bound",
-      cliToolAvailability: { native: [], openClaw: ["read", "message"] },
+      cliToolAvailability: { native: [], carapace: ["read", "message"] },
       hookToolsAllow: ["read", "write"],
       projectedToolNames: ["read", "message", "write"],
     },
@@ -4967,11 +4967,11 @@ describe("prepareCliRunContext", () => {
       );
       expect(context.params.cliToolAvailability).toEqual({
         native: [],
-        openClaw: ["read"],
+        carapace: ["read"],
       });
       expect(prepareExecution).toHaveBeenCalledWith(
         expect.objectContaining({
-          toolAvailability: { native: [], openClaw: ["read"] },
+          toolAvailability: { native: [], carapace: ["read"] },
         }),
       );
       expect(mintMcpLoopbackClientGrant.mock.calls[0]?.[0]?.context.toolsAllow).toEqual(["read"]);
@@ -5067,7 +5067,7 @@ describe("prepareCliRunContext", () => {
       expect(context.params.toolsAllow).toBeUndefined();
       expect(context.params.cliToolAvailability).toEqual({
         native: [],
-        openClaw: ["write", "apply_patch"],
+        carapace: ["write", "apply_patch"],
       });
       expect(mintMcpLoopbackClientGrant.mock.calls[0]?.[0]?.context.toolsAllow).toEqual([
         "write",
@@ -5159,7 +5159,7 @@ describe("prepareCliRunContext", () => {
         },
         cliToolAvailability: {
           native: [],
-          openClaw: ["memory_search", "memory_get"],
+          carapace: ["memory_search", "memory_get"],
         },
       });
       cleanup = context.preparedBackend.cleanup;
@@ -5175,8 +5175,8 @@ describe("prepareCliRunContext", () => {
       const rawBundle = JSON.parse(fs.readFileSync(mcpConfigPath ?? "", "utf-8")) as {
         mcpServers?: Record<string, { timeout?: number }>;
       };
-      expect(Object.keys(rawBundle.mcpServers ?? {})).toEqual(["openclaw"]);
-      expect(rawBundle.mcpServers?.openclaw?.timeout).toBe(3_610_000);
+      expect(Object.keys(rawBundle.mcpServers ?? {})).toEqual(["carapace"]);
+      expect(rawBundle.mcpServers?.carapace?.timeout).toBe(3_610_000);
     } finally {
       await cleanup?.();
     }
@@ -5241,7 +5241,7 @@ describe("prepareCliRunContext", () => {
       const generatedConfig = JSON.parse(
         fs.readFileSync(generatedConfigPath, "utf-8"),
       ) as NonNullable<Parameters<typeof prepareCliBundleMcpConfig>[0]["additionalConfig"]>;
-      expect(generatedConfig.mcpServers.openclaw?.timeout).toBe(3_610_000);
+      expect(generatedConfig.mcpServers.carapace?.timeout).toBe(3_610_000);
 
       const merged = await prepareCliBundleMcpConfig({
         enabled: true,
@@ -5266,7 +5266,7 @@ describe("prepareCliRunContext", () => {
         };
 
       expect(readConfig().mcpServers).toMatchObject({
-        openclaw: { timeout: 3_610_000 },
+        carapace: { timeout: 3_610_000 },
         localUser: { timeout: 12_345 },
       });
 
@@ -5278,9 +5278,9 @@ describe("prepareCliRunContext", () => {
       });
 
       expect(readConfig().mcpServers).toMatchObject({
-        openclaw: {
+        carapace: {
           timeout: 3_610_000,
-          headers: { "x-openclaw-cli-capture-key": "attempt-timeout-proof" },
+          headers: { "x-carapace-cli-capture-key": "attempt-timeout-proof" },
         },
         localUser: { timeout: 12_345 },
       });
@@ -5290,19 +5290,19 @@ describe("prepareCliRunContext", () => {
     }
   });
 
-  it("serves only the openclaw MCP server for ring-zero runs", async () => {
+  it("serves only the carapace MCP server for ring-zero runs", async () => {
     const { dir, sessionFile, sessionTarget } = fixture.session;
     const getActiveMcpLoopbackRuntime = vi.fn(() => undefined);
     const resolveExecutionArgs = vi.fn(
       (context: {
         baseArgs: readonly string[];
-        toolAvailability?: { native: readonly string[]; openClaw: readonly string[] };
+        toolAvailability?: { native: readonly string[]; carapace: readonly string[] };
       }) => [
         ...context.baseArgs,
         "--tools",
         context.toolAvailability?.native.join(",") ?? "default",
         "--allowedTools",
-        context.toolAvailability?.openClaw.join(",") ?? "",
+        context.toolAvailability?.carapace.join(",") ?? "",
       ],
     );
     setCliRunnerPrepareTestDeps({ getActiveMcpLoopbackRuntime });
@@ -5326,7 +5326,7 @@ describe("prepareCliRunContext", () => {
     });
 
     const params: RunCliAgentParams & { systemAgentTool: SystemAgentToolOptions } = {
-      admittedRunContext: createTestAdmittedRunContext("run-test-openclaw-mcp"),
+      admittedRunContext: createTestAdmittedRunContext("run-test-carapace-mcp"),
       sessionId: "session-test",
       sessionFile,
       sessionTarget,
@@ -5335,12 +5335,12 @@ describe("prepareCliRunContext", () => {
       provider: "claude-cli",
       model: "test-model",
       timeoutMs: 1_000,
-      runId: "run-test-openclaw-mcp",
+      runId: "run-test-carapace-mcp",
       config: createCliBackendConfig(),
       systemAgentTool: { surface: "cli" },
       cliToolAvailability: {
         native: [],
-        openClaw: ["openclaw"],
+        carapace: ["carapace"],
       },
     };
     const context = await prepareCliRunContext(params);
@@ -5358,7 +5358,7 @@ describe("prepareCliRunContext", () => {
     expect(resolveExecutionArgs).not.toHaveBeenCalled();
     expect(context.params.cliToolAvailability).toEqual({
       native: [],
-      openClaw: ["openclaw"],
+      carapace: ["carapace"],
     });
     const mcpConfigPath = expectDefined(
       args[args.indexOf("--mcp-config") + 1],
@@ -5367,10 +5367,10 @@ describe("prepareCliRunContext", () => {
     const raw = JSON.parse(fs.readFileSync(mcpConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { env?: Record<string, string> }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["openclaw"]);
-    expect(raw.mcpServers?.openclaw?.env).toMatchObject({
-      OPENCLAW_TOOLS_MCP_TOOLS: "openclaw",
-      OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_SURFACE: "cli",
+    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["carapace"]);
+    expect(raw.mcpServers?.carapace?.env).toMatchObject({
+      CARAPACE_TOOLS_MCP_TOOLS: "carapace",
+      CARAPACE_TOOLS_MCP_SYSTEM_AGENT_SURFACE: "cli",
     });
 
     await context.preparedBackend.cleanup?.();
@@ -5653,8 +5653,8 @@ describe("prepareCliRunContext", () => {
         model: "opus",
         userTurnTranscriptRecorder: recorder,
       });
-      expect(context.openClawHistoryPrompt).toContain("User: prior task");
-      expect(context.openClawHistoryPrompt?.split("latest ask")).toHaveLength(2);
+      expect(context.carapaceHistoryPrompt).toContain("User: prior task");
+      expect(context.carapaceHistoryPrompt?.split("latest ask")).toHaveLength(2);
     });
   });
 
@@ -5718,28 +5718,28 @@ describe("prepareCliRunContext", () => {
         });
 
         // Candidate is invalidated (no native --resume) yet reseed still fires:
-        // prepare hands the prior OpenClaw conversation forward as history.
+        // prepare hands the prior Carapace conversation forward as history.
         expect(context.reusableCliSession).toEqual(
           hasBinding
             ? { mode: "invalidate", invalidatedReason: "missing-transcript" }
             : { mode: "none" },
         );
-        expect(context.openClawHistoryPrompt).toContain(
+        expect(context.carapaceHistoryPrompt).toContain(
           `[${recoveredAt}] User: prior claude-cli ask`,
         );
-        expect(context.openClawHistoryPrompt).toContain(
+        expect(context.carapaceHistoryPrompt).toContain(
           "Tool result (exec): Archive created at /tmp/example-backup.tar",
         );
-        expect(context.openClawHistoryPrompt).toContain(
+        expect(context.carapaceHistoryPrompt).toContain(
           "Tool result (exec) [error]: Upload failed: destination unavailable",
         );
-        expect(context.openClawHistoryPrompt).not.toContain(
+        expect(context.carapaceHistoryPrompt).not.toContain(
           "[1970-01-01T00:00:00.001Z] User: prior claude-cli ask",
         );
-        expect(context.openClawHistoryPrompt).toContain(
+        expect(context.carapaceHistoryPrompt).toContain(
           "Recovered history may be stale; verify current and time-sensitive facts before acting.",
         );
-        expect(context.openClawHistoryPrompt).toContain(
+        expect(context.carapaceHistoryPrompt).toContain(
           "<next_user_message>\nlatest ask\n</next_user_message>",
         );
       });
@@ -5820,7 +5820,7 @@ describe("prepareCliRunContext", () => {
     // The reseed prompt is gateway-built text, so node placement keeps the
     // backend's raw-transcript reseed semantics for fresh-retry paths.
     // A borrowed native handle cannot authorize unverified durable history.
-    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(context.carapaceHistoryPrompt).toBeUndefined();
     expect(context.claudeSkillsPluginArgs).toEqual([]);
     expect(context.systemPrompt).not.toContain("GATEWAY_ONLY_SKILL_PATH");
     expect(context.mcpDeliveryCapture).toBeUndefined();
@@ -5894,8 +5894,8 @@ describe("prepareCliRunContext", () => {
       });
       expect(context.params.agentId).toBe("main");
       expect(context.requiredClaudeLiveSessionGeneration).toBe("warm-live-generation");
-      expect(context.openClawHistoryPrompt).toContain("earlier warm context");
-      expect(context.openClawHistoryPrompt).toContain("warm follow-up");
+      expect(context.carapaceHistoryPrompt).toContain("earlier warm context");
+      expect(context.carapaceHistoryPrompt).toContain("warm follow-up");
     });
   });
 
@@ -5908,7 +5908,7 @@ describe("prepareCliRunContext", () => {
     });
 
     const context = await fixture.prepare({
-      sessionKey: "agent:openclaw:main",
+      sessionKey: "agent:carapace:main",
       prompt: "approve the proposal",
       provider: "claude-cli",
       model: "opus",
@@ -5996,7 +5996,7 @@ describe("prepareCliRunContext", () => {
     "renders sandbox-readable CLI skills for the prepared owner of %s",
     async (sessionKey) => {
       const { dir } = fixture.session;
-      const hostSkillDir = "/home/tzdai/.npm-global/lib/node_modules/openclaw/skills/gog";
+      const hostSkillDir = "/home/tzdai/.npm-global/lib/node_modules/carapace/skills/gog";
       const hostSkillPath = `${hostSkillDir}/SKILL.md`;
       const materializedWorkspace = path.join(dir, "state", "sandbox-skills");
       const materializedSkillDir = path.join(materializedWorkspace, "skills", "gog");
@@ -6021,7 +6021,7 @@ describe("prepareCliRunContext", () => {
         workspaceAccess: "rw",
       });
 
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { main: {}, worker: {} } },
       };
       const skillsSnapshot: SkillSnapshot = {
@@ -6041,10 +6041,10 @@ describe("prepareCliRunContext", () => {
             description: "Read Gmail safely.",
             filePath: hostSkillPath,
             baseDir: hostSkillDir,
-            source: "openclaw-bundled",
+            source: "carapace-bundled",
             sourceInfo: {
               path: hostSkillPath,
-              source: "openclaw-bundled",
+              source: "carapace-bundled",
               scope: "project",
               origin: "top-level",
               baseDir: hostSkillDir,
@@ -6069,7 +6069,7 @@ describe("prepareCliRunContext", () => {
         skillsSnapshot,
       });
       expect(context.systemPrompt).toContain(
-        "/workspace/.openclaw/sandbox-skills/skills/gog/SKILL.md",
+        "/workspace/.carapace/sandbox-skills/skills/gog/SKILL.md",
       );
       expect(context.systemPrompt).not.toContain(hostSkillPath);
       expect(context.systemPromptReport.skills.promptChars).toBeGreaterThan(0);
@@ -6140,7 +6140,7 @@ describe("prepareCliRunContext", () => {
     const skill = createWeatherSkillFixture(dir, testCase.materialized);
     setCliBackendForPrepareTest({ id: "claude-cli", pluginId: "anthropic" });
     if (testCase.pluginResult !== "default") {
-      const pluginDir = path.join(dir, "openclaw-skills");
+      const pluginDir = path.join(dir, "carapace-skills");
       setCliRunnerPrepareTestDeps({
         prepareClaudeCliSkillsPlugin: vi.fn(async () => ({
           args: testCase.pluginResult === "args" ? ["--plugin-dir", pluginDir] : [],
@@ -6168,7 +6168,7 @@ describe("prepareCliRunContext", () => {
       expect(context.systemPromptReport.skills.promptChars).toBe(0);
       expect(context.claudeSkillsPluginArgs).toEqual([
         "--plugin-dir",
-        path.join(dir, "openclaw-skills"),
+        path.join(dir, "carapace-skills"),
       ]);
       expect(context.preparedBackend.claimLiveSessionResources).toEqual(expect.any(Function));
     }
@@ -6209,7 +6209,7 @@ describe("prepareCliRunContext", () => {
     const manifest = JSON.parse(
       fs.readFileSync(path.join(pluginDir, ".claude-plugin", "plugin.json"), "utf8"),
     );
-    expect(manifest).toMatchObject({ name: "openclaw-skills", skills: "./skills" });
+    expect(manifest).toMatchObject({ name: "carapace-skills", skills: "./skills" });
     const skillPath = path.join(pluginDir, "skills", "weather", "SKILL.md");
     expect(fs.readFileSync(skillPath, "utf8")).toContain("Read forecast data before replying.");
 
@@ -6282,7 +6282,7 @@ describe("prepareCliRunContext", () => {
     try {
       expect.soft(runBeforePromptBuild.mock.calls[0]?.[0].messages).toEqual([]);
       expect.soft(context.hadSessionFile).toBe(false);
-      expect.soft(context.openClawHistoryPrompt).toBeUndefined();
+      expect.soft(context.carapaceHistoryPrompt).toBeUndefined();
       expect.soft(context.params.sessionManager).toBe(sessionManager);
       expect.soft(context.params.lifecycleGeneration).toBe("owned-lifecycle-generation");
       expect.soft(context.params.sessionTarget).toBeUndefined();
@@ -6325,7 +6325,7 @@ describe("prepareCliRunContext", () => {
       const { dir, sessionTarget: fixtureTarget } = fixture.session;
       const sessionTarget =
         scenario === "absent-target"
-          ? { ...fixtureTarget, storePath: path.join(dir, "absent", "openclaw-agent.sqlite") }
+          ? { ...fixtureTarget, storePath: path.join(dir, "absent", "carapace-agent.sqlite") }
           : fixtureTarget;
       const durable = SessionManager.open(fixtureTarget, dir);
       const retained = durable.appendMessage({
@@ -6568,7 +6568,7 @@ describe("prepareCliRunContext", () => {
             sessionManager,
             cliSessionBinding: { sessionId: "native-owned", cwdHash: hashCliSessionText(dir) },
           });
-          expect(context.openClawHistoryPrompt).toContain("OWNED_RETAINED");
+          expect(context.carapaceHistoryPrompt).toContain("OWNED_RETAINED");
           const { runPreparedCliAgent } = await import("../cli-runner.js");
           await withTestRunAdmission(context.params, (admittedRunContext) =>
             runPreparedCliAgent({
@@ -6642,13 +6642,13 @@ describe("prepareCliRunContext", () => {
         model: testCase.model,
       });
 
-      expect(context.openClawHistoryPrompt).toBeDefined();
-      expect(context.openClawHistoryPrompt).toContain("RESEED_RETAINED_PREFIX");
+      expect(context.carapaceHistoryPrompt).toBeDefined();
+      expect(context.carapaceHistoryPrompt).toContain("RESEED_RETAINED_PREFIX");
       if (testCase.expectsTruncation) {
-        expect(context.openClawHistoryPrompt).toContain("OpenClaw reseed history truncated");
+        expect(context.carapaceHistoryPrompt).toContain("Carapace reseed history truncated");
       } else {
-        expect(context.openClawHistoryPrompt).toContain(testCase.marker);
-        expect(context.openClawHistoryPrompt).not.toContain("OpenClaw reseed history truncated");
+        expect(context.carapaceHistoryPrompt).toContain(testCase.marker);
+        expect(context.carapaceHistoryPrompt).not.toContain("Carapace reseed history truncated");
       }
     });
   });
@@ -6703,10 +6703,10 @@ describe("prepareCliRunContext", () => {
       });
 
       expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-      expect(context.openClawHistoryPrompt).toBeDefined();
-      expect(context.openClawHistoryPrompt).toContain(recentMarker);
-      expect(context.openClawHistoryPrompt).toContain("EARLIEST_USER");
-      expect(context.openClawHistoryPrompt).not.toContain("OpenClaw reseed history truncated");
+      expect(context.carapaceHistoryPrompt).toBeDefined();
+      expect(context.carapaceHistoryPrompt).toContain(recentMarker);
+      expect(context.carapaceHistoryPrompt).toContain("EARLIEST_USER");
+      expect(context.carapaceHistoryPrompt).not.toContain("Carapace reseed history truncated");
     });
   });
 });

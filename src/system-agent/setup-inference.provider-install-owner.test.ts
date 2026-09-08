@@ -5,7 +5,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import { fingerprintResolvedProviderAuth } from "../agents/execution-auth-binding.js";
 import { readConfigFileSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { resolvePluginArtifactDeclaredSurface } from "../plugins/capability-artifact.js";
 import { computeDeclaredSurfaceHash } from "../plugins/capability-summary.js";
@@ -19,7 +19,7 @@ import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../plugins/runtime.js";
 import { withPluginRuntimeGenerationScope } from "../plugins/runtime/generation-scope.js";
 import { createNonExitingRuntime } from "../runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { activateSetupInference } from "./setup-inference-activate.js";
 import type { ActivateSetupInferenceDeps } from "./setup-inference-core.js";
 import { captureSystemAgentOwnerPluginArtifacts } from "./verified-inference.js";
@@ -42,13 +42,13 @@ afterEach(() => {
 it.each([false, true])(
   "binds a newly installed provider to its real artifact (replace during probe: %s)",
   async (replaceDuringProbe) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         label: "provider-install-owner",
-        env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" },
+        env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" },
       },
       async (state) => {
-        const source: OpenClawConfig = {
+        const source: CarapaceConfig = {
           gateway: { mode: "local" },
           agents: {
             defaults: { workspace: state.workspaceDir },
@@ -103,11 +103,11 @@ it.each([false, true])(
             JSON.stringify({
               name: "@fixture/provider",
               version: "1.0.0",
-              openclaw: { extensions: ["./index.cjs"] },
+              carapace: { extensions: ["./index.cjs"] },
             }),
           );
           await fs.writeFile(
-            path.join(pluginRoot, "openclaw.plugin.json"),
+            path.join(pluginRoot, "carapace.plugin.json"),
             JSON.stringify({
               id: "fixture-provider",
               providers: ["fixture-provider"],
@@ -115,7 +115,7 @@ it.each([false, true])(
             }),
           );
           await fs.writeFile(pluginEntry, pluginSource);
-          const config: OpenClawConfig = {
+          const config: CarapaceConfig = {
             ...params.config,
             plugins: {
               ...params.config.plugins,
@@ -161,7 +161,7 @@ it.each([false, true])(
             expect(onPreparationComplete).toHaveBeenCalledOnce();
             params.onSuccessfulAuthBinding?.({
               authFingerprint,
-              agentHarnessId: "openclaw",
+              agentHarnessId: "carapace",
               modelId: "fixture-model",
               modelApi: "openai-completions",
             });

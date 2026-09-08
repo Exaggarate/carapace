@@ -11,7 +11,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     subpath: "channel-streaming",
     status: "removed",
     owner: "channel",
-    replacement: "`openclaw/plugin-sdk/channel-outbound`",
+    replacement: "`carapace/plugin-sdk/channel-outbound`",
     releaseNote:
       "The deprecated `channel-streaming` Plugin SDK subpath was removed; plugins now import channel streaming helpers from `channel-outbound`.",
   },
@@ -22,14 +22,14 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     owner: "config",
     removeAfter: "2026-10-01",
     replacement:
-      "`api.pluginConfig`, `openclaw/plugin-sdk/config-mutation`, `openclaw/plugin-sdk/runtime-config-snapshot`, and `openclaw/plugin-sdk/config-contracts`; retain until supported external plugin migration is verified",
+      "`api.pluginConfig`, `carapace/plugin-sdk/config-mutation`, `carapace/plugin-sdk/runtime-config-snapshot`, and `carapace/plugin-sdk/config-contracts`; retain until supported external plugin migration is verified",
   },
   {
     code: "plugin-sdk-inbound-reply-dispatch-subpath",
     subpath: "inbound-reply-dispatch",
     owner: "channel",
     removalGate: "next-plugin-sdk-major",
-    replacement: "`openclaw/plugin-sdk/channel-inbound` and `openclaw/plugin-sdk/channel-outbound`",
+    replacement: "`carapace/plugin-sdk/channel-inbound` and `carapace/plugin-sdk/channel-outbound`",
   },
   {
     code: "plugin-sdk-channel-reply-pipeline-subpath",
@@ -38,7 +38,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     owner: "channel",
     removeAfter: "2026-10-01",
     replacement:
-      "`openclaw/plugin-sdk/channel-outbound`; retain until supported external plugin migration is verified",
+      "`carapace/plugin-sdk/channel-outbound`; retain until supported external plugin migration is verified",
   },
   {
     code: "plugin-sdk-infra-runtime-subpath",
@@ -47,7 +47,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     owner: "sdk",
     removeAfter: "2026-10-01",
     replacement:
-      "focused subpaths including `openclaw/plugin-sdk/delivery-queue-runtime`, `openclaw/plugin-sdk/diagnostic-runtime`, `openclaw/plugin-sdk/error-runtime`, `openclaw/plugin-sdk/exec-approvals-runtime`, `openclaw/plugin-sdk/fetch-runtime`, and `openclaw/plugin-sdk/ssrf-runtime`; retain until supported external plugin migration is verified and system-event snapshot inspection and consumption have a modern public replacement",
+      "focused subpaths including `carapace/plugin-sdk/delivery-queue-runtime`, `carapace/plugin-sdk/diagnostic-runtime`, `carapace/plugin-sdk/error-runtime`, `carapace/plugin-sdk/exec-approvals-runtime`, `carapace/plugin-sdk/fetch-runtime`, and `carapace/plugin-sdk/ssrf-runtime`; retain until supported external plugin migration is verified and system-event snapshot inspection and consumption have a modern public replacement",
   },
   {
     code: "plugin-sdk-text-runtime-subpath",
@@ -55,7 +55,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     status: "removed",
     owner: "sdk",
     replacement:
-      "`openclaw/plugin-sdk/logging-core`, `openclaw/plugin-sdk/text-chunking`, `openclaw/plugin-sdk/text-utility-runtime`, and `openclaw/plugin-sdk/string-coerce-runtime`",
+      "`carapace/plugin-sdk/logging-core`, `carapace/plugin-sdk/text-chunking`, `carapace/plugin-sdk/text-utility-runtime`, and `carapace/plugin-sdk/string-coerce-runtime`",
     releaseNote:
       "The deprecated `text-runtime` Plugin SDK facade was removed; plugins now import logging, chunking, text utility, and string coercion helpers from their focused subpaths.",
   },
@@ -65,7 +65,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     status: "removed",
     owner: "channel",
     replacement:
-      "`openclaw/plugin-sdk/channel-secret-basic-runtime` and `openclaw/plugin-sdk/channel-secret-tts-runtime`",
+      "`carapace/plugin-sdk/channel-secret-basic-runtime` and `carapace/plugin-sdk/channel-secret-tts-runtime`",
     releaseNote:
       "The deprecated `channel-secret-runtime` Plugin SDK subpath was removed; plugins now use the focused basic and TTS secret-runtime subpaths.",
   },
@@ -74,7 +74,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     subpath: "agent-config-primitives",
     status: "removed",
     owner: "config",
-    replacement: "`openclaw/plugin-sdk/channel-config-schema`",
+    replacement: "`carapace/plugin-sdk/channel-config-schema`",
     releaseNote:
       "The deprecated `agent-config-primitives` Plugin SDK subpath was removed; plugins now use maintained config-schema primitives.",
   },
@@ -83,7 +83,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     subpath: "matrix",
     status: "removed",
     owner: "channel",
-    replacement: "`openclaw/plugin-sdk/run-command`",
+    replacement: "`carapace/plugin-sdk/run-command`",
     releaseNote:
       "The deprecated `matrix` Plugin SDK facade was removed; command execution now uses the generic `run-command` subpath.",
   },
@@ -92,7 +92,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     subpath: "channel-logging",
     status: "removed",
     owner: "channel",
-    replacement: "`openclaw/plugin-sdk/channel-inbound` and `openclaw/plugin-sdk/channel-outbound`",
+    replacement: "`carapace/plugin-sdk/channel-inbound` and `carapace/plugin-sdk/channel-outbound`",
     releaseNote:
       "The deprecated `channel-logging` Plugin SDK subpath was removed; channel logging helpers now come from the inbound and outbound channel surfaces.",
   },
@@ -103,7 +103,7 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     owner: "channel",
     removeAfter: "2026-10-01",
     replacement:
-      "`openclaw/plugin-sdk/channel-outbound`; retain until supported external plugin migration is verified",
+      "`carapace/plugin-sdk/channel-outbound`; retain until supported external plugin migration is verified",
   },
   {
     code: "plugin-sdk-channel-message-subpath",
@@ -112,14 +112,14 @@ const PLUGIN_SDK_SUBPATH_SEEDS = [
     owner: "channel",
     removeAfter: "2026-10-01",
     replacement:
-      "`openclaw/plugin-sdk/channel-outbound` and `openclaw/plugin-sdk/channel-inbound`; retain until supported external plugin migration is verified",
+      "`carapace/plugin-sdk/channel-outbound` and `carapace/plugin-sdk/channel-inbound`; retain until supported external plugin migration is verified",
   },
   {
     code: "plugin-sdk-group-access-subpath",
     subpath: "group-access",
     status: "removed",
     owner: "channel",
-    replacement: "`openclaw/plugin-sdk/channel-ingress-runtime`",
+    replacement: "`carapace/plugin-sdk/channel-ingress-runtime`",
     releaseNote:
       "The deprecated `group-access` Plugin SDK subpath was removed; plugins now resolve message admission through `channel-ingress-runtime`.",
   },
@@ -144,7 +144,7 @@ function buildPluginSdkSubpathRecord(seed: (typeof PLUGIN_SDK_SUBPATH_SEEDS)[num
       introduced: "2026-07-06",
       replacement: seed.replacement,
       docsPath: "/plugins/sdk-migration",
-      surfaces: [`openclaw/plugin-sdk/${seed.subpath}`],
+      surfaces: [`carapace/plugin-sdk/${seed.subpath}`],
       diagnostics: ["plugin SDK compatibility registry and migration guide"],
       tests: ["src/plugins/compat/registry.test.ts"],
       releaseNote: seed.releaseNote,
@@ -162,7 +162,7 @@ function buildPluginSdkSubpathRecord(seed: (typeof PLUGIN_SDK_SUBPATH_SEEDS)[num
     removalGate: "removalGate" in seed ? seed.removalGate : undefined,
     replacement: seed.replacement,
     docsPath: "/plugins/sdk-migration",
-    surfaces: [`openclaw/plugin-sdk/${seed.subpath}`],
+    surfaces: [`carapace/plugin-sdk/${seed.subpath}`],
     diagnostics: [
       "repository deprecated API usage guard for core and bundled plugins; no external runtime import warning",
     ],
@@ -180,7 +180,7 @@ const BUNDLED_ONLY_PUBLIC_PLUGIN_SDK_SUBPATH_SEEDS = [
     status: "removal-pending",
     removeAfter: "2026-09-30",
     replacement:
-      "`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `openclaw/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate",
+      "`api.registerMediaUnderstandingProvider(...)` with provider-owned request helpers and types from `carapace/plugin-sdk/plugin-entry`; retain the public subpath through the 2026-09-30 window while official plugin consumers migrate",
     docsPath: "/plugins/architecture",
   },
   {
@@ -188,7 +188,7 @@ const BUNDLED_ONLY_PUBLIC_PLUGIN_SDK_SUBPATH_SEEDS = [
     status: "removal-pending",
     removeAfter: "2026-09-30",
     replacement:
-      "host-prepared memory prompts via `openclaw/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists",
+      "host-prepared memory prompts via `carapace/plugin-sdk/core` and memory capability registration through the injected plugin API; retain the facade through the 2026-09-30 window and until a focused public-artifact read seam exists",
     docsPath: "/plugins/architecture-internals#context-engine-plugins",
   },
   {
@@ -219,7 +219,7 @@ function buildPublicSdkSubpathRecord({
     deprecated: "2026-07-15",
     warningStarts: "2026-07-15",
     ...compat,
-    surfaces: [`openclaw/plugin-sdk/${subpath}`],
+    surfaces: [`carapace/plugin-sdk/${subpath}`],
     diagnostics: ["registry-backed public SDK demotion window; no external runtime import warning"],
     tests: ["src/plugins/compat/registry.test.ts"],
   } satisfies PluginCompatRecord;

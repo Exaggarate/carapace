@@ -79,7 +79,7 @@ describe("AppSidebar catalog terminal ownership", () => {
         }),
       );
       await sidebar.updateComplete;
-      const menu = sidebar.querySelector("openclaw-catalog-session-menu") as HTMLElement & {
+      const menu = sidebar.querySelector("carapace-catalog-session-menu") as HTMLElement & {
         onAction: (action: "viewer" | "terminal") => void;
         updateComplete: Promise<boolean>;
       };

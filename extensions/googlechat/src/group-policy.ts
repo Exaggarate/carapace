@@ -2,10 +2,10 @@ import {
   buildChannelGroupsScopeTree,
   resolveScopeRequireMention,
   type ScopeTree,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/channel-policy";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
 
-type GroupContext = { cfg: OpenClawConfig; accountId?: string | null; groupId?: string | null };
+type GroupContext = { cfg: CarapaceConfig; accountId?: string | null; groupId?: string | null };
 
 export function buildGoogleChatGroupPolicyScope(params: {
   tree: ScopeTree;

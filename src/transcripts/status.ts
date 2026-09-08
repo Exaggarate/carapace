@@ -2,7 +2,7 @@ import {
   TRANSCRIPTS_PAGE_MAX,
   type TranscriptsStatusResult,
 } from "../../packages/gateway-protocol/src/schema/transcripts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import { getActivePluginRegistry } from "../plugins/runtime.js";
 import { readTranscriptCaptureSnapshot } from "./capture.js";
@@ -18,7 +18,7 @@ type ProviderStatus = TranscriptsStatusResult["providers"][number];
 /** Reads lifecycle snapshots only; status must not discover/import providers or probe audio. */
 export async function readTranscriptLibraryStatus(
   store: TranscriptsStore,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<TranscriptsStatusResult> {
   const config = resolveTranscriptsConfig(cfg.transcripts);
   const metadata = getCurrentPluginMetadataSnapshot({

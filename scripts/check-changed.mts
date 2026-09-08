@@ -102,9 +102,9 @@ const RUNTIME_SIDECAR_BASELINE_PATH_RE =
 // must re-prove the src/plugins-owned declaration and closure-guard tests that the
 // extension lanes would otherwise never select.
 const DOCTOR_CONTRACT_OWNER_TEST_PATH_RE =
-  /^extensions\/[^/]+\/(?:openclaw\.plugin\.json$|(?!.*\.test\.).*\.(?:c|m)?[jt]s$)/u;
+  /^extensions\/[^/]+\/(?:carapace\.plugin\.json$|(?!.*\.test\.).*\.(?:c|m)?[jt]s$)/u;
 const SQLITE_SESSION_SCHEMA_BASELINE_PATH_RE =
-  /^(?:src\/state\/openclaw-agent-schema\.sql|scripts\/(?:generate-sqlite-session-schema-baseline\.ts|lib\/sqlite-session-schema-baseline\.ts)|test\/scripts\/sqlite-session-schema-baseline\.test\.ts|docs\/\.generated\/sqlite-session-transcript-schema-baseline\.sha256)$/u;
+  /^(?:src\/state\/carapace-agent-schema\.sql|scripts\/(?:generate-sqlite-session-schema-baseline\.ts|lib\/sqlite-session-schema-baseline\.ts)|test\/scripts\/sqlite-session-schema-baseline\.test\.ts|docs\/\.generated\/sqlite-session-transcript-schema-baseline\.sha256)$/u;
 const PLUGIN_SDK_SURFACE_PATH_RE =
   /^(?:package\.json$|src\/plugin-sdk\/|packages\/plugin-sdk\/|extensions\/(?:tsconfig\.package-boundary\.paths\.json|xai\/tsconfig\.json)$|scripts\/(?:plugin-sdk-surface-report\.mts|sync-plugin-sdk-exports\.mts|lib\/plugin-sdk-(?:declaration-budget\.mts|deprecated-barrel-subpaths\.json|deprecated-public-subpaths\.json|entries\.mts|entrypoints\.json|private-local-only-subpaths\.json)))/u;
 const DEPRECATION_HYGIENE_PATH_RE =
@@ -210,7 +210,7 @@ export function shouldDelegateChangedCheckToCrabbox(
   env: NodeJS.ProcessEnv = process.env,
   options: ChangedCheckDelegateOptions = {},
 ) {
-  if (isOpenEndedTruthyValue(env.OPENCLAW_CHECK_CHANGED_REMOTE_CHILD)) {
+  if (isOpenEndedTruthyValue(env.CARAPACE_CHECK_CHANGED_REMOTE_CHILD)) {
     return false;
   }
   if (isOpenEndedTruthyValue(env.CI) || isOpenEndedTruthyValue(env.GITHUB_ACTIONS)) {
@@ -226,7 +226,7 @@ export function shouldDelegateChangedCheckToCrabbox(
   if (result.paths.length === 0) {
     return false;
   }
-  if (isOpenEndedTruthyValue(env.OPENCLAW_TESTBOX)) {
+  if (isOpenEndedTruthyValue(env.CARAPACE_TESTBOX)) {
     return true;
   }
   // Release metadata plans diff the supplied commits after classification. A missing
@@ -275,8 +275,8 @@ export function buildChangedCheckCrabboxArgs(argv: string[] = [], options: { cwd
     "--timing-json",
     "--",
     "env",
-    "OPENCLAW_CHECK_CHANGED_REMOTE_CHILD=1",
-    "OPENCLAW_CHANGED_LANES_RAW_SYNC=1",
+    "CARAPACE_CHECK_CHANGED_REMOTE_CHILD=1",
+    "CARAPACE_CHANGED_LANES_RAW_SYNC=1",
     "CI=1",
     "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false",
     "corepack",
@@ -761,11 +761,11 @@ export function createChangedCheckPlan(
   add("package patch guard", ["deps:patches:check"]);
   if (
     hasDeadcodeScannedSource(result.paths) &&
-    !isOpenEndedTruthyValue(baseEnv.OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE)
+    !isOpenEndedTruthyValue(baseEnv.CARAPACE_CHECK_CHANGED_SKIP_DEADCODE)
   ) {
     broadAudits.add(
       addCommand(
-        "dead export scan (skip with OPENCLAW_CHECK_CHANGED_SKIP_DEADCODE=1)",
+        "dead export scan (skip with CARAPACE_CHECK_CHANGED_SKIP_DEADCODE=1)",
         "node",
         ["--import", "tsx", "scripts/check-deadcode-exports.mts"],
         baseEnv,
@@ -983,8 +983,8 @@ export function createChangedCheckPlan(
     addCommand("live Docker shell syntax", "bash", ["-n", ...LIVE_DOCKER_AUTH_SHELL_TARGETS]);
     addCommand("live Docker scheduler dry run", "node", ["scripts/test-docker-all.mjs"], {
       ...baseEnv,
-      OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-      OPENCLAW_DOCKER_ALL_LIVE_MODE: "only",
+      CARAPACE_DOCKER_ALL_DRY_RUN: "1",
+      CARAPACE_DOCKER_ALL_LIVE_MODE: "only",
     });
   }
 
@@ -1206,7 +1206,7 @@ function ensureCorepackPnpmShimDir() {
   if (corepackPnpmShimDir) {
     return corepackPnpmShimDir;
   }
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-corepack-pnpm-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-corepack-pnpm-"));
   const pnpmPath = path.join(dir, "pnpm");
   writeFileSync(pnpmPath, '#!/bin/sh\nexec corepack pnpm "$@"\n', "utf8");
   chmodSync(pnpmPath, 0o755);

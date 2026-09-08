@@ -1,5 +1,5 @@
 /**
- * Knip configuration for OpenClaw root and bundled plugin dependency hygiene.
+ * Knip configuration for Carapace root and bundled plugin dependency hygiene.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -32,7 +32,7 @@ const repositoryScriptEntries = [
   "scripts/check-live-cache.ts!",
   "scripts/check-package-dist-imports.mjs!",
   "scripts/check-plugin-sdk-exports.mts!",
-  // openclaw-performance.yml invokes the paired benchmark CLI by path.
+  // carapace-performance.yml invokes the paired benchmark CLI by path.
   "scripts/vitest-pair-benchmark.mts!",
   // Cloudflare deployment template: wrangler bundles the Worker from this entry.
   "scripts/cloudflare/src/index.ts!",
@@ -123,8 +123,8 @@ const repositoryScriptEntries = [
   "scripts/mantis/observe-request-web-ui.mts!",
   "scripts/mantis/telegram-proof-bridge.mjs!",
   "scripts/mcp-code-mode-gateway-e2e.ts!",
-  "scripts/openclaw-release-clawhub-plan.ts!",
-  "scripts/openclaw-release-clawhub-runtime-state.ts!",
+  "scripts/carapace-release-clawhub-plan.ts!",
+  "scripts/carapace-release-clawhub-runtime-state.ts!",
   // Plugin Prerelease builds immutable package artifacts, then scans them in a bounded child.
   "scripts/plugin-npm-security-prepare.mts!",
   "scripts/plugin-npm-security-scan-runner.mjs!",
@@ -151,7 +151,7 @@ const repositoryScriptEntries = [
   "scripts/run-stylelint.mts!",
   // Path-spawned test roots are development entries; `!` would audit dev tools as production.
   "scripts/run-vitest-child.mts",
-  "scripts/secrets/openclaw-bws-resolver.mjs!",
+  "scripts/secrets/carapace-bws-resolver.mjs!",
   "scripts/sync-labels.ts!",
   "scripts/test-built-bundled-channel-entry-smoke.mts!",
   // Native shell UI tests connect to this manually launched loopback Gateway fixture.
@@ -198,7 +198,7 @@ const rootEntries = [
   "config/knip.config.ts!",
   "config/knip.all-exports.config.ts!",
   "config/knip.scripts-exports.config.ts!",
-  "openclaw.mjs!",
+  "carapace.mjs!",
   "src/index.ts!",
   "src/entry.ts!",
   // Built as the official image's Docker HEALTHCHECK entrypoint.
@@ -216,7 +216,7 @@ const rootEntries = [
   "src/config/sessions/disk-budget.worker.ts!",
   "scripts/print-cli-backend-live-metadata.ts!",
   // Workflow/package-script entrypoints are not imported from production modules.
-  "scripts/openclaw-cross-os-release-checks.ts!",
+  "scripts/carapace-cross-os-release-checks.ts!",
   "scripts/release-plan-producer-core.mts!",
   "scripts/release-plan-producer.mts!",
   // Spawned by the agent concurrency benchmark; no static import edge exists.
@@ -244,7 +244,7 @@ const rootEntries = [
   "src/infra/warning-filter.ts!",
   "src/infra/command-explainer/index.ts!",
   // Runtime modules loaded by path or namespace; static export tracing cannot see their contract.
-  // Jiti virtualizes openclaw/plugin-sdk/agent-sessions through this cycle-safe barrel.
+  // Jiti virtualizes carapace/plugin-sdk/agent-sessions through this cycle-safe barrel.
   "src/agents/sessions/extension-sdk.ts!",
   // Plugin-SDK ACP facades expose the registry's runtime signatures.
   "src/acp/runtime/registry.ts!",
@@ -252,7 +252,7 @@ const rootEntries = [
   "src/plugins/source-display.ts!",
   "src/mcp/codex-supervision-tools-serve.ts!",
   // Spawned by generated system-agent MCP configs; this stdio entry is not statically imported.
-  "src/mcp/openclaw-tools-serve.ts!",
+  "src/mcp/carapace-tools-serve.ts!",
   // Spawned by ACPX and QA Lab from a generated plugin-tool MCP command line.
   "src/mcp/plugin-tools-serve.ts!",
   // Dedicated tsdown entry exercised against built plugin singletons.
@@ -335,7 +335,7 @@ const bundledPluginIgnoredRuntimeDependencies = [
   "json5",
   "lit",
   "linkedom",
-  "openclaw",
+  "carapace",
   "clawpdf",
 ] as const;
 
@@ -366,7 +366,7 @@ const rootToolingAndWorkspaceDependencies = [
   // scripts/ui.mts anchors these lookups at ui/package.json before invoking the UI workspace.
   "@vitest/browser-playwright",
   "dompurify",
-  // Root typecheck/test projects compile @openclaw/net-policy source directly.
+  // Root typecheck/test projects compile @carapace/net-policy source directly.
   // Keep its exact dependency available without externalizing it from packaged builds.
   "ipaddr.js",
   "jscpd",
@@ -506,11 +506,11 @@ const config = {
   workspaces: {
     ".": {
       ignoreDependencies: [
-        "@openclaw/*",
+        "@carapace/*",
         // Cloudflare template dependency: declared in scripts/cloudflare/package.json
         // (isolated deploy tooling), not in the root manifest.
         "@cloudflare/containers",
-        // Docker packaging stages @openclaw/ai without nested dependencies after
+        // Docker packaging stages @carapace/ai without nested dependencies after
         // verifying the root owns its exact runtime dependency versions.
         "@mistralai/mistralai",
         "openai",
@@ -529,7 +529,7 @@ const config = {
         ...rootBundledPluginRuntimeDependencies,
       ],
       // Platform tools, installed CLIs, and shell builtins used by scripts and boundary tests.
-      ignoreBinaries: ["mint", "ngrok", "open", "openclaw", "sleep", "xcrun"],
+      ignoreBinaries: ["mint", "ngrok", "open", "carapace", "sleep", "xcrun"],
       // The stylelint config lives under config/, not a root default path.
       stylelint: { config: ["config/stylelint.config.mjs"] },
       project: [

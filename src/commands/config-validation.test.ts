@@ -105,7 +105,7 @@ describe("requireValidConfig", () => {
     const runtime = createRuntime();
     expect(await requireValidConfigForWrite(runtime)).toBeNull();
     expect(runtime.exit).toHaveBeenCalledWith(1);
-    expect(runtime.error).toHaveBeenCalledWith("Fix: openclaw doctor --fix");
+    expect(runtime.error).toHaveBeenCalledWith("Fix: carapace doctor --fix");
   });
 
   it("returns config without emitting compatibility advice by default", async () => {
@@ -160,14 +160,14 @@ describe("requireValidConfig", () => {
       [
         "Plugin compatibility: 1 notice.",
         "- legacy-plugin is hook-only. This remains a supported compatibility path, but it has not migrated to explicit capability registration yet.",
-        "Review: openclaw doctor",
+        "Review: carapace doctor",
       ].join("\n"),
     );
   });
 
   it("blocks invalid config before emitting compatibility advice", async () => {
     readConfigFileSnapshot.mockResolvedValue({
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: true,
       valid: false,
       raw: "{}",
@@ -190,7 +190,7 @@ describe("requireValidConfig", () => {
 
   it("replaces doctor fix advice for plugin packaging compiled-output failures", async () => {
     readConfigFileSnapshot.mockResolvedValue({
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: true,
       valid: false,
       raw: "{}",
@@ -221,13 +221,13 @@ describe("requireValidConfig", () => {
     expect(runtime.error).toHaveBeenCalledWith(
       "Fix: This is a plugin packaging issue, not a local config problem.\nUpdate or reinstall the plugin after the publisher ships compiled JavaScript, or disable/uninstall the plugin until then.",
     );
-    expect(runtime.error).not.toHaveBeenCalledWith("Fix: openclaw doctor --fix");
+    expect(runtime.error).not.toHaveBeenCalledWith("Fix: carapace doctor --fix");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 
   it("keeps doctor fix advice for normal invalid config failures", async () => {
     readConfigFileSnapshot.mockResolvedValue({
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: true,
       valid: false,
       raw: "{}",
@@ -242,7 +242,7 @@ describe("requireValidConfig", () => {
     const config = await requireValidConfig(runtime);
 
     expect(config).toBeNull();
-    expect(runtime.error).toHaveBeenCalledWith("Fix: openclaw doctor --fix");
+    expect(runtime.error).toHaveBeenCalledWith("Fix: carapace doctor --fix");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 });

@@ -20,8 +20,8 @@ jobs:
   warm:
     # Shared CI cache publication is isolated from pull-request execution.
     # Trusted release/proof workflows may save only through the same authority contract.
-    if: github.repository == 'openclaw/openclaw'
-    runs-on: ${{ matrix.platform == 'macos' && 'macos-15' || (vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404') }}
+    if: github.repository == 'carapace/carapace'
+    runs-on: ${{ matrix.platform == 'macos' && 'macos-15' || (vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404') }}
     timeout-minutes: 60
     strategy:
       # Each platform publishes its own cache namespace independently.
@@ -65,7 +65,7 @@ jobs:
             packages/*/node_modules
             extensions/*/node_modules
             examples/*/node_modules
-            .cache/openclaw-pnpm-store
+            .cache/carapace-pnpm-store
           key: ${{ steps.setup-node-env.outputs.dependency-cache-key }}
 
       # Seal this owner before the full build creates sibling package dist trees.
@@ -148,9 +148,9 @@ jobs:
           appendFileSync(
             process.env.GITHUB_ENV,
             [
-              `OPENCLAW_NODE_TEST_GROUPS_JSON=${JSON.stringify(groups)}`,
-              "OPENCLAW_NODE_TEST_PLAN_CONCURRENCY=1",
-              "OPENCLAW_NODE_TEST_PLAN_CONTINUE_ON_FAILURE=1",
+              `CARAPACE_NODE_TEST_GROUPS_JSON=${JSON.stringify(groups)}`,
+              "CARAPACE_NODE_TEST_PLAN_CONCURRENCY=1",
+              "CARAPACE_NODE_TEST_PLAN_CONTINUE_ON_FAILURE=1",
             ].join("\n") + "\n",
           );
           EOF
@@ -165,11 +165,11 @@ jobs:
           # (run 31874567859), skipping every cache save for the day.
           NODE_OPTIONS: --max-old-space-size=8192
           # Only the publisher prunes restored entries before saving a new seed.
-          OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER: "1"
-          OPENCLAW_NODE_COMPILE_CACHE_WRITER: "1"
+          CARAPACE_VITEST_FS_MODULE_CACHE_WRITER: "1"
+          CARAPACE_NODE_COMPILE_CACHE_WRITER: "1"
           # Keep compiled imports and per-file cleanup in the normal runner;
           # ordinary CI owns test-body validation.
-          OPENCLAW_NODE_TEST_VITEST_ARGS_JSON: '["--testNamePattern=(?!)"]'
+          CARAPACE_NODE_TEST_VITEST_ARGS_JSON: '["--testNamePattern=(?!)"]'
         run: node --import tsx scripts/ci-run-node-test-shard.mts
 
       # Let pnpm prune its owned store and record the remaining size; this does
@@ -195,7 +195,7 @@ jobs:
         continue-on-error: true
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: /var/tmp/openclaw-vitest-fs-cache
+          path: /var/tmp/carapace-vitest-fs-cache
           key: ${{ steps.setup-node-env.outputs.vitest-cache-key }}
 
       - name: Save Node compile cache
@@ -203,7 +203,7 @@ jobs:
         continue-on-error: true
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: /var/tmp/openclaw-node-compile-cache
+          path: /var/tmp/carapace-node-compile-cache
           key: ${{ steps.setup-node-env.outputs.node-compile-cache-key }}
 
       - name: Assert cache warming succeeded

@@ -1,4 +1,4 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "carapace/plugin-sdk/meeting-runtime";
 import type { ZoomMeetingsConfig, ZoomMeetingsMode, ZoomMeetingsTransport } from "./config.js";
 import { zoomMeetingsInvalidRequest } from "./errors.js";
 import type {

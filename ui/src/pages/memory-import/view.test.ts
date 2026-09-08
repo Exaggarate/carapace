@@ -10,7 +10,7 @@ type MemoryImportProps = Parameters<typeof renderMemoryImport>[0];
 function createPlan(): NonNullable<MemoryImportProps["plan"]> {
   return {
     agentId: "research",
-    workspace: "/tmp/openclaw-research",
+    workspace: "/tmp/carapace-research",
     providers: [
       {
         providerId: "codex",
@@ -19,7 +19,7 @@ function createPlan(): NonNullable<MemoryImportProps["plan"]> {
         planFingerprint: "a".repeat(64),
         found: true,
         source: "/tmp/codex",
-        target: "/tmp/openclaw-research",
+        target: "/tmp/carapace-research",
         summary: {
           total: 2,
           planned: 2,
@@ -34,7 +34,7 @@ function createPlan(): NonNullable<MemoryImportProps["plan"]> {
             id: "memory:codex:MEMORY.md",
             status: "planned",
             source: "/tmp/codex/memories/MEMORY.md",
-            target: "/tmp/openclaw-research/memory/imports/codex/MEMORY.md",
+            target: "/tmp/carapace-research/memory/imports/codex/MEMORY.md",
             details: {
               collectionId: "codex",
               collectionLabel: "Codex",
@@ -45,7 +45,7 @@ function createPlan(): NonNullable<MemoryImportProps["plan"]> {
             id: "memory:codex:memory_summary.md",
             status: "planned",
             source: "/tmp/codex/memories/memory_summary.md",
-            target: "/tmp/openclaw-research/memory/imports/codex/memory_summary.md",
+            target: "/tmp/carapace-research/memory/imports/codex/memory_summary.md",
             details: {
               collectionId: "codex",
               collectionLabel: "Codex",
@@ -128,7 +128,7 @@ describe("renderMemoryImport", () => {
 
     expect(container.textContent).toContain("MEMORY.md");
     expect(container.textContent).toContain("memory_summary.md");
-    expect(container.textContent).toContain("/tmp/openclaw-research/memory/imports/");
+    expect(container.textContent).toContain("/tmp/carapace-research/memory/imports/");
     expect(container.textContent).toContain("Consolidated Codex memory files.");
     expect(container.textContent).not.toContain("Import Codex memory.");
     expect(container.textContent).not.toContain("private memory body");
@@ -138,7 +138,7 @@ describe("renderMemoryImport", () => {
     const container = document.createElement("div");
     render(renderMemoryImport(createProps()), container);
 
-    expect(container.querySelector('openclaw-agent-select[name="memory-import-agent"]')).toBeNull();
+    expect(container.querySelector('carapace-agent-select[name="memory-import-agent"]')).toBeNull();
     expect(container.textContent).not.toContain("Destination agent");
   });
 
@@ -165,7 +165,7 @@ describe("renderMemoryImport", () => {
         onSelect: (value: string) => void;
         updateComplete: Promise<boolean>;
       }
-    >('openclaw-agent-select[name="memory-import-agent"]');
+    >('carapace-agent-select[name="memory-import-agent"]');
     await picker?.updateComplete;
     expect(picker?.options.map((option) => option.value)).toEqual(["research", "writer"]);
     expect(picker?.querySelector(".agent-select__avatar--text")?.getAttribute("data-avatar")).toBe(
@@ -314,7 +314,7 @@ describe("renderMemoryImport", () => {
     buttons[0]?.click();
     expect(onConfirmImport).not.toHaveBeenCalled();
     container
-      .querySelector("openclaw-modal-dialog")
+      .querySelector("carapace-modal-dialog")
       ?.dispatchEvent(new CustomEvent("modal-cancel", { bubbles: true }));
     expect(onCancelImport).not.toHaveBeenCalled();
 
@@ -324,7 +324,7 @@ describe("renderMemoryImport", () => {
     expect(refresh?.disabled).toBe(true);
     expect(
       container.querySelector<HTMLElement & { disabled: boolean }>(
-        'openclaw-agent-select[name="memory-import-agent"]',
+        'carapace-agent-select[name="memory-import-agent"]',
       )?.disabled,
     ).toBe(true);
     expect(
@@ -373,7 +373,7 @@ describe("renderMemoryImport", () => {
                   target: "/tmp/workspace/memory/imports/codex/MEMORY.md",
                   reason: "replacement interrupted",
                   details: {
-                    recoveryPath: "/tmp/workspace/.openclaw-memory-import-staging/MEMORY.md",
+                    recoveryPath: "/tmp/workspace/.carapace-memory-import-staging/MEMORY.md",
                     recoveryRecordPath: "/tmp/migration-report/recovery-required.json",
                     backupPath: "/tmp/migration-report/item-backups/MEMORY.md",
                   },
@@ -404,7 +404,7 @@ describe("renderMemoryImport", () => {
     expect(result?.textContent).toContain("/tmp/migration-report");
     expect(result?.textContent).toContain("replacement interrupted");
     expect(result?.textContent).toContain(
-      "/tmp/workspace/.openclaw-memory-import-staging/MEMORY.md",
+      "/tmp/workspace/.carapace-memory-import-staging/MEMORY.md",
     );
     expect(result?.textContent).toContain("Recovery file");
     expect(result?.textContent).toContain("Recovery journal");

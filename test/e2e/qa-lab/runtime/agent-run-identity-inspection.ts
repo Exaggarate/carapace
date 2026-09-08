@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { WebSocket, type ClientOptions } from "ws";
 import {
   QA_EVIDENCE_FILENAME,
@@ -210,11 +210,11 @@ function assertProfilelessGatewayIdentityProjection(result: AuditRunInspectResul
 }
 
 function findLocalRunId(gateway: QaGatewayChild) {
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("QA Gateway did not expose its isolated state directory");
   }
-  const database = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+  const database = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {
@@ -241,11 +241,11 @@ function findLocalRunId(gateway: QaGatewayChild) {
 }
 
 function inspectExecutionIdentityStorage(gateway: QaGatewayChild) {
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("QA Gateway did not expose its isolated state directory");
   }
-  const database = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+  const database = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {
@@ -265,13 +265,13 @@ function inspectExecutionIdentityStorage(gateway: QaGatewayChild) {
 }
 
 function inspectPersistedSessionCreator(gateway: QaGatewayChild, sessionKey: string) {
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   const agentId = sessionKey.split(":")[1];
   if (!stateDir || !agentId) {
     throw new Error("QA Gateway did not expose the session creator database owner");
   }
   const database = new DatabaseSync(
-    path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite"),
+    path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite"),
     { readOnly: true },
   );
   try {
@@ -316,11 +316,11 @@ async function runLocalTurn(gateway: QaGatewayChild, message: string) {
 }
 
 function findRunExecutions(gateway: QaGatewayChild, runId: string) {
-  const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+  const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
   if (!stateDir) {
     throw new Error("QA Gateway did not expose its isolated state directory");
   }
-  const database = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+  const database = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {

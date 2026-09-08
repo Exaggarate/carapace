@@ -1,5 +1,5 @@
 import { getLoadedChannelPluginEntryById } from "../channels/plugins/registry-loaded.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { ChannelKind, GatewayReloadPlan } from "./config-reload-plan.js";
 import type { StartChannelOptions } from "./server-channel-runtime.types.js";
@@ -47,7 +47,7 @@ export async function rollbackStoppedGatewayChannels(
 export async function restartGatewayChannels(options: {
   params: GatewayReloadHandlerParams;
   plan: GatewayReloadPlan;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   channelsToRestart: Set<ChannelKind>;
   restartChannelAccounts: ReadonlyMap<ChannelKind, Set<string>>;
   activePluginChannelsAfterReload: ReadonlySet<ChannelKind> | null;

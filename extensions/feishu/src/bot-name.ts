@@ -1,5 +1,5 @@
 // Feishu plugin module implements bot sender name resolution.
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
 import { createFeishuClient } from "./client.js";
 import type { ResolvedFeishuAccount } from "./types.js";
 

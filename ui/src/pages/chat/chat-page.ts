@@ -14,7 +14,7 @@ import type { BoardFace } from "../../lib/board/settings.ts";
 import { readSessionDragData, sessionDragActive } from "../../lib/sessions/drag.ts";
 import { sessionNavigationTarget } from "../../lib/sessions/route-navigation.ts";
 import { areUiSessionKeysEquivalent } from "../../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { persistSessionBoardFace } from "./chat-board-face-persistence.ts";
 import { currentRouteLocation, stillOwnsCanonicalLocation } from "./chat-canonical-location.ts";
@@ -50,7 +50,7 @@ import {
   splitWeight,
 } from "./split-layout.ts";
 
-export class ChatPage extends OpenClawLightDomElement implements SessionSplitHost {
+export class ChatPage extends CarapaceLightDomElement implements SessionSplitHost {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
   @property({ attribute: false }) data!: SessionChatRouteData;
@@ -293,7 +293,7 @@ export class ChatPage extends OpenClawLightDomElement implements SessionSplitHos
       event.dataTransfer.dropEffect = "copy";
     }
     const target = event.target instanceof Element ? event.target : null;
-    const pane = target?.closest<ChatPaneElement>("openclaw-chat-pane");
+    const pane = target?.closest<ChatPaneElement>("carapace-chat-pane");
     if (!pane || !this.contains(pane)) {
       return;
     }
@@ -342,7 +342,7 @@ export class ChatPage extends OpenClawLightDomElement implements SessionSplitHos
     event.preventDefault();
     const sessionKey = readSessionDragData(event.dataTransfer);
     const target = event.target instanceof Element ? event.target : null;
-    const pane = target?.closest<ChatPaneElement>("openclaw-chat-pane");
+    const pane = target?.closest<ChatPaneElement>("carapace-chat-pane");
     const indicator =
       (pane && this.contains(pane)
         ? resolveDropIndicator(this, pane, event.clientX, event.clientY)
@@ -722,13 +722,13 @@ export class ChatPage extends OpenClawLightDomElement implements SessionSplitHos
       </div>
     `;
     return this.mcpAppUnmountGate.render(JSON.stringify([...nextPaneKeys]), renderValue, () =>
-      [...this.querySelectorAll<ChatPaneElement>("openclaw-chat-pane")].filter(
+      [...this.querySelectorAll<ChatPaneElement>("carapace-chat-pane")].filter(
         (pane) => !nextPaneKeys.has(pane.dataset.mcpAppOwnerKey ?? ""),
       ),
     );
   }
 }
 
-if (!customElements.get("openclaw-chat-page")) {
-  customElements.define("openclaw-chat-page", ChatPage);
+if (!customElements.get("carapace-chat-page")) {
+  customElements.define("carapace-chat-page", ChatPage);
 }

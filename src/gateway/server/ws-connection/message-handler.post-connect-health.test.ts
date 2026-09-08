@@ -24,7 +24,7 @@ import {
   setAvatar,
   syncGitHubIdentity,
 } from "../../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { mintAgentRuntimeIdentityToken } from "../../agent-runtime-identity-token.js";
 import type { AuthRateLimiter } from "../../auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "../../auth.js";
@@ -197,10 +197,10 @@ beforeEach(() => {
 afterEach(cleanupGatewayHarnesses);
 
 async function withGatewayTestState(
-  options: Parameters<typeof withOpenClawTestState>[0],
+  options: Parameters<typeof withCarapaceTestState>[0],
   run: () => Promise<void>,
 ) {
-  await withOpenClawTestState(options, async () => {
+  await withCarapaceTestState(options, async () => {
     try {
       await run();
     } finally {
@@ -291,7 +291,7 @@ function createConnectedTestClient(params: {
     ...(params.invalidatedReason ? { invalidatedReason: params.invalidatedReason } : {}),
     connect: {
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "dev",
         platform: "test",
         mode: "ui",
@@ -603,7 +603,7 @@ function connectTrustedProxyUser(
     minProtocol: PROTOCOL_VERSION,
     maxProtocol: PROTOCOL_VERSION,
     client: {
-      id: "openclaw-control-ui",
+      id: "carapace-control-ui",
       version: "dev",
       platform: "test",
       mode: "ui",
@@ -647,7 +647,7 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
   });
 
   it("keeps one editable owner profile across shared-secret and device-token reconnects", async () => {
-    await withOpenClawTestState({ label: "gateway-owner-reconnect" }, async () => {
+    await withCarapaceTestState({ label: "gateway-owner-reconnect" }, async () => {
       let profileId: string | undefined;
       for (const authMethod of ["token", "password", "device-token", "none"] as const) {
         resolveConnectAuthStateMock.mockResolvedValueOnce({
@@ -703,7 +703,7 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
   it.each(["token", "password", "device-token", "none"] as const)(
     "limits owner attribution to shared-secret %s access when roles are configured",
     async (authMethod) => {
-      await withOpenClawTestState({ label: "gateway-owner-role-gate" }, async () => {
+      await withCarapaceTestState({ label: "gateway-owner-role-gate" }, async () => {
         loadConfigMock.mockImplementationOnce(() => ({
           gateway: {
             auth: { mode: "none" },
@@ -805,7 +805,7 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
   it.each(["cli", "backend", "probe"])(
     "keeps ephemeral %s connections unidentified",
     async (mode) => {
-      await withOpenClawTestState({ label: "gateway-owner-ephemeral" }, async () => {
+      await withCarapaceTestState({ label: "gateway-owner-ephemeral" }, async () => {
         resolveConnectAuthStateMock.mockResolvedValueOnce({
           authResult: { ok: true, method: "token" },
           authOk: true,
@@ -1611,7 +1611,7 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
           },
         },
         trustedProxies: ["10.0.0.1"],
-        controlUi: { allowedOrigins: ["https://team.openclaw.ai"] },
+        controlUi: { allowedOrigins: ["https://github.com/Exaggarate/carapace"] },
       },
     }));
     const resolvedAuth: ResolvedGatewayAuth = {
@@ -1625,8 +1625,8 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
     const harness = attachGatewayHarness({
       connId: "conn-cloudflare-access",
       connectNonce: "nonce-cloudflare-access",
-      requestHost: "team.openclaw.ai",
-      requestOrigin: "https://team.openclaw.ai",
+      requestHost: "github.com/Exaggarate/carapace",
+      requestOrigin: "https://github.com/Exaggarate/carapace",
       remoteAddr: "10.0.0.1",
       resolvedAuth,
       headers: {
@@ -1645,7 +1645,7 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
       minProtocol: PROTOCOL_VERSION,
       maxProtocol: PROTOCOL_VERSION,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "dev",
         platform: "test",
         mode: "ui",
@@ -2235,13 +2235,13 @@ describe("attachGatewayWsMessageHandler post-connect health refresh", () => {
   });
 
   it.each([
-    ["openclaw-control-ui", "operator.admin", true],
-    ["openclaw-control-ui", "operator.read", false],
-    ["openclaw-tui", "operator.admin", false],
+    ["carapace-control-ui", "operator.admin", true],
+    ["carapace-control-ui", "operator.read", false],
+    ["carapace-tui", "operator.admin", false],
   ] as const)(
     "records authenticated remote management authority for %s with %s: %s",
     async (id, scope, allowed) => {
-      await withOpenClawTestState({ label: "gateway-control-ui-admin" }, async () => {
+      await withCarapaceTestState({ label: "gateway-control-ui-admin" }, async () => {
         const harness = connectTrustedProxyUser("control-ui-authority", { id }, [scope]);
         await waitForFast(() => expect(harness.client).not.toBeNull());
         expect(harness.client).toMatchObject({ connect: { scopes: [scope] } });

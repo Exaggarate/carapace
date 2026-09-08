@@ -13,18 +13,18 @@ export const CODE_MODE_CONTROLLER_SOURCE = String.raw`
   const maxQueuedOrdinary = ${MAX_CODE_MODE_PENDING_TOOL_CALLS};
   let queuedOrdinaryCount = 0;
   let admissionError;
-  const maxPending = globalThis.__openclawMaxPendingToolCalls;
-  delete globalThis.__openclawMaxPendingToolCalls;
-  const catalogBindings = Array.isArray(globalThis.__openclawCatalog) ? globalThis.__openclawCatalog : [];
-  const apiFiles = Array.isArray(globalThis.__openclawApiFiles) ? globalThis.__openclawApiFiles : [];
-  const namespaceDescriptors = Array.isArray(globalThis.__openclawNamespaces) ? globalThis.__openclawNamespaces : [];
-  const hostRequest = globalThis.__openclawHostRequest;
-  const hostCancelRequest = globalThis.__openclawHostCancelRequest;
-  delete globalThis.__openclawHostRequest;
-  delete globalThis.__openclawHostCancelRequest;
-  delete globalThis.__openclawCatalog;
-  delete globalThis.__openclawApiFiles;
-  delete globalThis.__openclawNamespaces;
+  const maxPending = globalThis.__carapaceMaxPendingToolCalls;
+  delete globalThis.__carapaceMaxPendingToolCalls;
+  const catalogBindings = Array.isArray(globalThis.__carapaceCatalog) ? globalThis.__carapaceCatalog : [];
+  const apiFiles = Array.isArray(globalThis.__carapaceApiFiles) ? globalThis.__carapaceApiFiles : [];
+  const namespaceDescriptors = Array.isArray(globalThis.__carapaceNamespaces) ? globalThis.__carapaceNamespaces : [];
+  const hostRequest = globalThis.__carapaceHostRequest;
+  const hostCancelRequest = globalThis.__carapaceHostCancelRequest;
+  delete globalThis.__carapaceHostRequest;
+  delete globalThis.__carapaceHostCancelRequest;
+  delete globalThis.__carapaceCatalog;
+  delete globalThis.__carapaceApiFiles;
+  delete globalThis.__carapaceNamespaces;
   const bridgeSequences = new Map();
   const timers = new Map();
   // Keep rejection ownership in the snapshot so a handler attached after wait
@@ -230,7 +230,7 @@ export const CODE_MODE_CONTROLLER_SOURCE = String.raw`
     read: (name) => request("skillsRead", [name]),
   });
 
-  if (globalThis.__openclawSwarmEnabled === true) {
+  if (globalThis.__carapaceSwarmEnabled === true) {
     Object.defineProperties(globalThis, {
       agents: {
         value: Object.freeze({ run: runAgent }),
@@ -397,18 +397,18 @@ export const CODE_MODE_CONTROLLER_SOURCE = String.raw`
     text: { value: (value) => output.push({ type: "text", text: asText(value) }), enumerable: true },
     json: { value: (value) => output.push({ type: "json", value: safe(value, true) }), enumerable: true },
     yield_control: { value: (reason) => request("yield", [reason]), enumerable: true },
-    __openclawSettleBridge: { value: settle },
-    __openclawDrainQueuedRequests: { value: drainQueuedRequests },
-    __openclawAdmissionError: { value: () => admissionError },
-    __openclawSerializeCatalogHandles: { value: serializeOutputValue },
-    __openclawTakeOutput: { value: () => output.splice(0) },
-    __openclawTrackRejection: {
+    __carapaceSettleBridge: { value: settle },
+    __carapaceDrainQueuedRequests: { value: drainQueuedRequests },
+    __carapaceAdmissionError: { value: () => admissionError },
+    __carapaceSerializeCatalogHandles: { value: serializeOutputValue },
+    __carapaceTakeOutput: { value: () => output.splice(0) },
+    __carapaceTrackRejection: {
       value: (promise, reason, handled) => {
         if (handled) unhandledRejections.delete(promise);
         else unhandledRejections.set(promise, reason);
       },
     },
-    __openclawUnhandledRejection: { value: () => unhandledRejections.keys().next().value },
+    __carapaceUnhandledRejection: { value: () => unhandledRejections.keys().next().value },
   });
 })();
 `;

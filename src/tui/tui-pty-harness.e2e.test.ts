@@ -59,16 +59,16 @@ describe("TUI PTY harness", { concurrent: false }, () => {
       startTuiFixture(),
       startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_MODEL: "gpt-5.6-sol@openai:setup-64cddea3-938c-431e-be3b-aa47090577c7",
-          OPENCLAW_TUI_PTY_THINKING_LEVEL: "high",
+          CARAPACE_TUI_PTY_MODEL: "gpt-5.6-sol@openai:setup-64cddea3-938c-431e-be3b-aa47090577c7",
+          CARAPACE_TUI_PTY_THINKING_LEVEL: "high",
         },
       }),
       startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_MODEL: "fixture-provider/fixture-model",
-          OPENCLAW_TUI_PTY_THINKING_LEVEL: "medium",
-          OPENCLAW_TUI_PTY_LAUNCH_THINKING: "high",
-          OPENCLAW_TUI_PTY_INITIAL_MESSAGE: "thinking override proof",
+          CARAPACE_TUI_PTY_MODEL: "fixture-provider/fixture-model",
+          CARAPACE_TUI_PTY_THINKING_LEVEL: "medium",
+          CARAPACE_TUI_PTY_LAUNCH_THINKING: "high",
+          CARAPACE_TUI_PTY_INITIAL_MESSAGE: "thinking override proof",
         },
       }),
       startTuiFixture({
@@ -126,8 +126,8 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     async () => {
       const modeFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_DELIVER: "1",
-          OPENCLAW_TUI_PTY_MODEL: "fixture-model",
+          CARAPACE_TUI_PTY_DELIVER: "1",
+          CARAPACE_TUI_PTY_MODEL: "fixture-model",
         },
       });
       try {
@@ -251,7 +251,7 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     "recovers session subscription after $failures startup failures",
     async ({ failures }) => {
       const subscriptionFixture = await startTuiFixture({
-        env: { OPENCLAW_TUI_PTY_SUBSCRIBE_FAILURES: String(failures) },
+        env: { CARAPACE_TUI_PTY_SUBSCRIBE_FAILURES: String(failures) },
       });
       try {
         await subscriptionFixture.run.waitForOutput("local ready | idle", STARTUP_TIMEOUT_MS);
@@ -276,8 +276,8 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     async () => {
       const subscriptionFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_SUBSCRIBE_FAILURES: "5",
-          OPENCLAW_TUI_PTY_SUBSCRIBE_RECONNECT: "1",
+          CARAPACE_TUI_PTY_SUBSCRIBE_FAILURES: "5",
+          CARAPACE_TUI_PTY_SUBSCRIBE_RECONNECT: "1",
         },
       });
       try {
@@ -355,7 +355,7 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     "renders each live assistant reply once without replaying stale history",
     async () => {
       const liveFixture = await startTuiFixture({
-        env: { OPENCLAW_TUI_PTY_COLS: "220", OPENCLAW_TUI_PTY_ROWS: "50" },
+        env: { CARAPACE_TUI_PTY_COLS: "220", CARAPACE_TUI_PTY_ROWS: "50" },
       });
       try {
         await liveFixture.run.waitForOutput("local ready", STARTUP_TIMEOUT_MS);
@@ -457,7 +457,7 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     "cancels a buffered submit before Ctrl+D shutdown",
     async () => {
       const bufferedFixture = await startTuiFixture({
-        env: { OPENCLAW_TUI_PTY_SUBMIT_BURST_WINDOW_MS: "500" },
+        env: { CARAPACE_TUI_PTY_SUBMIT_BURST_WINDOW_MS: "500" },
       });
       try {
         const message = "buffered shutdown proof";
@@ -528,8 +528,8 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     async (cols, rows) => {
       const compactFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_COLS: String(cols),
-          OPENCLAW_TUI_PTY_ROWS: String(rows),
+          CARAPACE_TUI_PTY_COLS: String(cols),
+          CARAPACE_TUI_PTY_ROWS: String(rows),
         },
       });
 
@@ -548,9 +548,9 @@ describe("TUI PTY harness", { concurrent: false }, () => {
     async () => {
       const compactPickerFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_COLS: "20",
-          OPENCLAW_TUI_PTY_ROWS: "18",
-          OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
+          CARAPACE_TUI_PTY_COLS: "20",
+          CARAPACE_TUI_PTY_ROWS: "18",
+          CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
         },
       });
 

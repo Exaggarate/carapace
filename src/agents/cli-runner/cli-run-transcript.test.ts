@@ -10,12 +10,12 @@ import {
   onInternalSessionTranscriptUpdate,
   type InternalSessionTranscriptUpdate,
 } from "../../sessions/transcript-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { isIntermediateAssistantTranscriptMessage } from "../embedded-agent-runner/message-visibility.js";
 import { persistCliAssistantTranscript } from "./cli-run-transcript.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 it.each([
   { kind: "completed", yielded: undefined, stopReason: "stop" },
@@ -25,12 +25,12 @@ it.each([
 ] as const)(
   "prepares the $kind CLI assistant before its first transcript publication",
   async ({ yielded, stopReason }) => {
-    const root = tempDirs.make("openclaw-cli-media-transcript-");
+    const root = tempDirs.make("carapace-cli-media-transcript-");
     const target = {
       agentId: "main",
       sessionId: "cli-media-session",
       sessionKey: "agent:main:cli-media",
-      storePath: path.join(root, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      storePath: path.join(root, "agents", "main", "agent", "carapace-agent.sqlite"),
     };
     await upsertSessionEntry({
       ...target,
@@ -69,7 +69,7 @@ it.each([
       expect(updates[0]?.message).toMatchObject({
         content: [{ type: "text", text: sourceText }],
         idempotencyKey: result.idempotencyKey,
-        openclawDelivery: { mediaUrls: ["./artifact.json"] },
+        carapaceDelivery: { mediaUrls: ["./artifact.json"] },
       });
       const messages = (await loadTranscriptEvents(target)).flatMap((event) =>
         typeof event === "object" && event !== null && "message" in event ? [event.message] : [],
@@ -81,14 +81,14 @@ it.each([
       expect(messages[0]).toMatchObject({ stopReason });
       if (yielded && stopReason === "stop") {
         expect(messages[0]).toMatchObject({
-          openclawStreamFallback: {
+          carapaceStreamFallback: {
             replacementText: sourceText,
             source: "segment",
             itemId: "cli-media-run",
           },
         });
       } else {
-        expect(messages[0]).not.toHaveProperty("openclawStreamFallback");
+        expect(messages[0]).not.toHaveProperty("carapaceStreamFallback");
       }
       expect(sanitizeChatHistoryMessages(messages)).toMatchObject([
         { content: [{ type: "text", text: "Artifacts ready" }] },

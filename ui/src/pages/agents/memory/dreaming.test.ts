@@ -868,10 +868,10 @@ describe("dreaming controller", () => {
       config: {
         plugins: {
           slots: {
-            memory: "memos-local-openclaw-plugin",
+            memory: "memos-local-carapace-plugin",
           },
           entries: {
-            "memos-local-openclaw-plugin": {
+            "memos-local-carapace-plugin": {
               config: {
                 dreaming: {
                   enabled: true,
@@ -896,7 +896,7 @@ describe("dreaming controller", () => {
     expect(getConfigPatchRawPayload(config)).toEqual({
       plugins: {
         entries: {
-          "memos-local-openclaw-plugin": {
+          "memos-local-carapace-plugin": {
             config: {
               dreaming: {
                 enabled: false,
@@ -1002,10 +1002,10 @@ describe("dreaming controller", () => {
       resolveConfiguredDreaming({
         plugins: {
           slots: {
-            memory: "memos-local-openclaw-plugin",
+            memory: "memos-local-carapace-plugin",
           },
           entries: {
-            "memos-local-openclaw-plugin": {
+            "memos-local-carapace-plugin": {
               config: {
                 dreaming: {
                   enabled: true,
@@ -1023,7 +1023,7 @@ describe("dreaming controller", () => {
         },
       }),
     ).toEqual({
-      pluginId: "memos-local-openclaw-plugin",
+      pluginId: "memos-local-carapace-plugin",
       enabled: true,
       overridden: true,
       engineOff: false,
@@ -1389,7 +1389,7 @@ describe("dreaming controller", () => {
         return {
           action: "repairDreamingArtifacts",
           changed: true,
-          archiveDir: "/tmp/openclaw/.openclaw-repair/dreaming/2026-04-11T22-10-00-000Z",
+          archiveDir: "/tmp/carapace/.carapace-repair/dreaming/2026-04-11T22-10-00-000Z",
           archivedSessionCorpus: true,
           archivedSessionIngestion: true,
         };
@@ -1411,10 +1411,10 @@ describe("dreaming controller", () => {
     expect(state.dreamDiaryContent).toBe("keep existing diary");
     expect(state.dreamDiaryActionMessage).toEqual({
       kind: "success",
-      text: "Dream cache repair complete: archived session corpus, archived ingestion state. Archive: /tmp/openclaw/.openclaw-repair/dreaming/2026-04-11T22-10-00-000Z",
+      text: "Dream cache repair complete: archived session corpus, archived ingestion state. Archive: /tmp/carapace/.carapace-repair/dreaming/2026-04-11T22-10-00-000Z",
     });
     expect(state.dreamDiaryActionArchivePath).toBe(
-      "/tmp/openclaw/.openclaw-repair/dreaming/2026-04-11T22-10-00-000Z",
+      "/tmp/carapace/.carapace-repair/dreaming/2026-04-11T22-10-00-000Z",
     );
     expect(state.dreamDiaryActionLoading).toBe(false);
   });
@@ -1457,7 +1457,7 @@ describe("dreaming controller", () => {
   it("copies the dreaming repair archive path", async () => {
     const { state } = createState();
     state.dreamDiaryActionArchivePath =
-      "/tmp/openclaw/.openclaw-repair/dreaming/2026-04-11T22-10-00-000Z";
+      "/tmp/carapace/.carapace-repair/dreaming/2026-04-11T22-10-00-000Z";
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("navigator", { clipboard: { writeText } } as unknown as Navigator);
 
@@ -1465,7 +1465,7 @@ describe("dreaming controller", () => {
 
     expect(ok).toBe(true);
     expect(writeText).toHaveBeenCalledWith(
-      "/tmp/openclaw/.openclaw-repair/dreaming/2026-04-11T22-10-00-000Z",
+      "/tmp/carapace/.carapace-repair/dreaming/2026-04-11T22-10-00-000Z",
     );
     expect(state.dreamDiaryActionMessage).toEqual({
       kind: "success",
@@ -1475,7 +1475,7 @@ describe("dreaming controller", () => {
 
   it("reports when the dreaming repair archive path cannot be copied", async () => {
     const { state } = createState();
-    state.dreamDiaryActionArchivePath = "/tmp/openclaw/archive";
+    state.dreamDiaryActionArchivePath = "/tmp/carapace/archive";
     vi.stubGlobal("navigator", {
       clipboard: { writeText: vi.fn().mockRejectedValue(new Error("denied")) },
     } as unknown as Navigator);

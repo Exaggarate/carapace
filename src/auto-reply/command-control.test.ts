@@ -1,6 +1,6 @@
 /** Tests command-control detection and authorization trigger heuristics. */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { clearPluginCommands, registerPluginCommand } from "../plugins/commands.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
@@ -91,7 +91,7 @@ describe("resolveCommandAuthorization", () => {
     registerAllowFromPlugins(createAllowFromPlugin("mobilechat", () => params.allowFrom));
     const cfg = {
       channels: { mobilechat: { allowFrom: params.allowFrom } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const ctx = {
       Provider: "mobilechat",
       Surface: "mobilechat",
@@ -172,7 +172,7 @@ describe("resolveCommandAuthorization", () => {
     const cfg = {
       commands: { ownerAllowFrom: ["whatsapp:+15551234567"] },
       channels: { whatsapp: channelConfig },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const resolveSender = (senderId: string) =>
       resolveCommandAuthorization({
         ctx: {
@@ -218,7 +218,7 @@ describe("resolveCommandAuthorization", () => {
     );
     const cfg = {
       channels: { discord: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const auth = resolveCommandAuthorization({
       ctx: {
@@ -260,7 +260,7 @@ describe("resolveCommandAuthorization", () => {
     );
     const cfg = {
       channels: { discord: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const auth = resolveCommandAuthorization({
       ctx: {
@@ -294,7 +294,7 @@ describe("resolveCommandAuthorization", () => {
     );
     const cfg = {
       channels: { discord: {} },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "discord",
@@ -318,7 +318,7 @@ describe("resolveCommandAuthorization", () => {
   it("suppresses inherited owner status when the context forbids it", () => {
     const cfg = {
       channels: { telegram: { allowFrom: ["owner-123"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const auth = resolveCommandAuthorization({
       ctx: {
@@ -338,13 +338,13 @@ describe("resolveCommandAuthorization", () => {
   it("does not infer a provider from channel allowlists for webchat command contexts", () => {
     const cfg = {
       channels: { whatsapp: { allowFrom: ["+15551234567"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const ctx = {
       Provider: "webchat",
       Surface: "webchat",
       OriginatingChannel: "webchat",
-      SenderId: "openclaw-control-ui",
+      SenderId: "carapace-control-ui",
     } as MsgContext;
 
     const auth = resolveCommandAuthorization({
@@ -404,7 +404,7 @@ describe("resolveCommandAuthorization", () => {
           : { From: "discord:123456789012345678" }),
         SenderId: "123456789012345678",
       } as MsgContext,
-      cfg: { commands: { ownerAllowFrom: [owner] } } as OpenClawConfig,
+      cfg: { commands: { ownerAllowFrom: [owner] } } as CarapaceConfig,
       commandAuthorized: true,
     });
 
@@ -426,7 +426,7 @@ describe("resolveCommandAuthorization", () => {
     const cfg = {
       commands: { allowFrom: { whatsapp: ["+15551234567"] } },
       channels: { whatsapp: { allowFrom: ["+15551234567"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const auth = resolveCommandAuthorization({
       ctx: {
@@ -450,7 +450,7 @@ describe("resolveCommandAuthorization", () => {
     );
     const cfg = {
       channels: { telegram: { allowFrom: ["123"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const auth = resolveCommandAuthorization({
       ctx: {
@@ -476,7 +476,7 @@ describe("resolveCommandAuthorization", () => {
         },
       },
       channels: { whatsapp: { allowFrom: ["+different"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     function makeWhatsAppContext(senderId: string): MsgContext {
       return {
@@ -533,7 +533,7 @@ describe("resolveCommandAuthorization", () => {
           },
         },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       // User in global list but not in whatsapp-specific list
       const globalUserCtx = {
@@ -572,7 +572,7 @@ describe("resolveCommandAuthorization", () => {
     it("falls back to channel allowFrom when commands.allowFrom not set", () => {
       const cfg = {
         channels: { whatsapp: { allowFrom: ["+15551234567"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const authorizedCtx = {
         Provider: "whatsapp",
@@ -598,7 +598,7 @@ describe("resolveCommandAuthorization", () => {
           },
         },
         channels: { whatsapp: { allowFrom: ["+specific"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const anyUserCtx = {
         Provider: "whatsapp",
@@ -625,7 +625,7 @@ describe("resolveCommandAuthorization", () => {
           },
         },
         channels: { telegram: { allowFrom: ["*"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const auth = resolveCommandAuthorization({
         ctx: {
@@ -653,7 +653,7 @@ describe("resolveCommandAuthorization", () => {
           },
         },
         channels: { discord: { allowFrom: ["*"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const auth = resolveCommandAuthorization({
         ctx: {
@@ -715,7 +715,7 @@ describe("resolveCommandAuthorization", () => {
             SenderId: senderId,
             SenderE164: senderE164,
           } as MsgContext,
-          cfg: { commands: { allowFrom } } as unknown as OpenClawConfig,
+          cfg: { commands: { allowFrom } } as unknown as CarapaceConfig,
           commandAuthorized: false,
         });
 
@@ -730,7 +730,7 @@ describe("resolveCommandAuthorization", () => {
             discord: ["user:123", "<@!456>", "pk:member-1"],
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const userAuth = resolveCommandAuthorization({
         ctx: makeDiscordContext("123"),
@@ -830,7 +830,7 @@ describe("resolveCommandAuthorization", () => {
           cfg: {
             commands: { allowFrom: { [allowKey]: ["123"] } },
             channels: { [channelId]: channelConfig },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           commandAuthorized,
         };
         const auth = resolveCommandAuthorization(params);
@@ -873,7 +873,7 @@ describe("resolveCommandAuthorization", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         commandAuthorized: true,
       });
 
@@ -895,7 +895,7 @@ describe("resolveCommandAuthorization", () => {
           channels: {
             discord: {},
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         commandAuthorized: true,
       });
 
@@ -919,7 +919,7 @@ describe("resolveCommandAuthorization", () => {
                 allowFrom: ["123"],
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           commandAuthorized: true,
         });
         expect(warn).toHaveBeenCalledTimes(1);
@@ -959,7 +959,7 @@ describe("resolveCommandAuthorization", () => {
         ...(provider === "telegram" ? { From: "telegram:12345" } : {}),
         GatewayClientScopes: [scope],
       } as MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       commandAuthorized: true,
     });
     expect(auth.senderIsOwner).toBe(expectedOwner);
@@ -1055,7 +1055,7 @@ describe("control command parsing", () => {
     });
 
     expect(shouldComputeCommandAuthorized("/ pair qr")).toBe(true);
-    expect(shouldComputeCommandAuthorized("@openclaw / pair qr")).toBe(true);
+    expect(shouldComputeCommandAuthorized("@carapace / pair qr")).toBe(true);
     expect(shouldComputeCommandAuthorized("hey / pair qr")).toBe(true);
 
     clearPluginCommands();
@@ -1065,12 +1065,12 @@ describe("control command parsing", () => {
   it("ignores telegram commands addressed to other bots", () => {
     expect(
       hasControlCommand("/help@otherbot", undefined, {
-        botUsername: "openclaw",
+        botUsername: "carapace",
       }),
     ).toBe(false);
     expect(
-      hasControlCommand("/help@openclaw", undefined, {
-        botUsername: "openclaw",
+      hasControlCommand("/help@carapace", undefined, {
+        botUsername: "carapace",
       }),
     ).toBe(true);
   });

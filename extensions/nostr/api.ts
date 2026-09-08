@@ -1,7 +1,7 @@
 // Nostr API module exposes the plugin public contract.
 export {
   getPluginRuntimeGatewayRequestScope,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type PluginRuntime,
 } from "./runtime-api.js";
 export { nostrPlugin } from "./src/channel.js";

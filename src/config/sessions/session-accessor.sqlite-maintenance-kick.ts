@@ -1,10 +1,10 @@
 import { getChildLogger } from "../../logging/logger.js";
 import {
-  getOpenClawAgentDatabaseIfOpen,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  getCarapaceAgentDatabaseIfOpen,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   applySessionEntryMaintenance,
   finalizeSessionEntryMaintenancePlansAfterWriterReleaseBestEffort,
@@ -26,7 +26,7 @@ type SessionEntryMaintenanceRequest = {
 };
 type SessionEntryMaintenanceOwner = SessionEntryMaintenanceRequest & {
   activeSessionKeys: Set<string>;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   generation: number;
 };
 
@@ -39,8 +39,8 @@ export function kickSessionEntryMaintenanceAfterWrite(
   if (params.skipMaintenance) {
     return;
   }
-  const databasePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(params.scope));
-  const database = getOpenClawAgentDatabaseIfOpen(toDatabaseOptions(params.scope));
+  const databasePath = resolveCarapaceAgentSqlitePath(toDatabaseOptions(params.scope));
+  const database = getCarapaceAgentDatabaseIfOpen(toDatabaseOptions(params.scope));
   if (!database) {
     return;
   }
@@ -77,7 +77,7 @@ async function runPendingMaintenance(
         if (!isCurrent()) {
           return undefined;
         }
-        return runOpenClawAgentWriteTransaction(
+        return runCarapaceAgentWriteTransaction(
           (database) =>
             applySessionEntryMaintenance(database, {
               activeSessionKeys,

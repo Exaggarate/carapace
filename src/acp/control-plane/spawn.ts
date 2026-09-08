@@ -7,14 +7,14 @@ import {
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import { loadSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { runExclusiveSessionLifecycleMutation } from "../../sessions/session-lifecycle-admission.js";
 import { isAcpOwnerRepairRequired } from "./manager.runtime-owner.js";
 
 /** Roll back only the provisional session owned by this failed spawn. */
 export async function cleanupFailedAcpSpawn(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   sessionEntry?: SessionEntry;

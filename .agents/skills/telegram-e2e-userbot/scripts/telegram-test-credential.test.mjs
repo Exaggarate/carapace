@@ -137,8 +137,8 @@ test("removes restored Convex state before releasing the lease", async () => {
   try {
     const credential = await acquireTelegramTestCredential({
       env: {
-        OPENCLAW_QA_CONVEX_SITE_URL: "https://broker.example.test",
-        OPENCLAW_QA_CONVEX_SECRET_CI: "ci-secret",
+        CARAPACE_QA_CONVEX_SITE_URL: "https://broker.example.test",
+        CARAPACE_QA_CONVEX_SECRET_CI: "ci-secret",
       },
     });
     stateRoot = credential.stateRoot;

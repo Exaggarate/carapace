@@ -481,7 +481,7 @@ export function createMockTypingSignaler(): TypingSignaler {
 }
 
 export function createFollowupRun(): FollowupRun {
-  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("openclaw-agent-execution-");
+  const rootDir = useAutoCleanupTempDirTracker(onTestFinished).make("carapace-agent-execution-");
   return {
     prompt: "hello",
     summaryLine: "hello",
@@ -614,7 +614,7 @@ export function expectBlockReplyCall(
  */
 export function makeTestSessionStorePath(): string {
   return path.join(
-    useAutoCleanupTempDirTracker(onTestFinished).make("openclaw-agent-execution-store-"),
+    useAutoCleanupTempDirTracker(onTestFinished).make("carapace-agent-execution-store-"),
     "sessions.json",
   );
 }

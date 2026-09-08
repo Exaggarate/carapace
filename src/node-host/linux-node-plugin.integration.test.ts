@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { reconcileNodePairingOnConnect } from "../gateway/node-connect-reconcile.js";
 import { resetPluginLoaderTestStateForTest } from "../plugins/loader.test-fixtures.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
@@ -71,11 +71,11 @@ describe("linux-node node-host integration", () => {
       return originalAccessSync(candidate, mode);
     });
     vi.stubEnv("PATH", `${fakeBinDir}${path.delimiter}${process.env.PATH ?? ""}`);
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledRoot);
-    vi.stubEnv("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
-    vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", undefined);
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", bundledRoot);
+    vi.stubEnv("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", undefined);
 
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: {
         nodes: {
           commands: { allow: ["camera.snap", "camera.clip"] },

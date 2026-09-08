@@ -1,6 +1,6 @@
-import { embeddedAgentLog, formatErrorMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { PluginHookInboundClaimEvent } from "openclaw/plugin-sdk/plugin-entry";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
+import { embeddedAgentLog, formatErrorMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { PluginHookInboundClaimEvent } from "carapace/plugin-sdk/plugin-entry";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
 import { resolveCodexAppServerForModelProvider } from "./app-server/app-server-policy.js";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,

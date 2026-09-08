@@ -1,8 +1,8 @@
 import {
   embeddedAgentLog,
   hasBeforeToolCallPolicy,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server-policy.js";
 import { startCodexAttemptThread } from "./attempt-startup.js";
 import { flattenCodexDynamicToolFunctions } from "./protocol.js";

@@ -6,7 +6,7 @@
  * active runs (projection, timeout ownership, terminal dedupe), but they must
  * remain abortable by authorized requesters after chat.send terminalizes.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createAgentRunRestartAbortError } from "../agents/run-termination.js";
 import { chatRunBelongsToAgent } from "./chat-run-owner.js";
 

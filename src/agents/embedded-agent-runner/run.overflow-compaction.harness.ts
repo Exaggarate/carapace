@@ -1,7 +1,7 @@
 /**
  * Test harness mocks for embedded-run overflow compaction coverage.
  */
-import { matchesContextOverflowMessage } from "@openclaw/ai/internal/runtime";
+import { matchesContextOverflowMessage } from "@carapace/ai/internal/runtime";
 import { type Mock, vi } from "vitest";
 import type { ThinkLevel } from "../../auto-reply/thinking.js";
 import type { ContextEngineSessionTarget } from "../../context-engine/types.js";
@@ -19,7 +19,7 @@ import type {
   PluginHookBeforePromptBuildResult,
 } from "../../plugins/types.js";
 import { resetCommandQueueStateForTest } from "../../process/command-queue.test-support.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { AuthProfileStore } from "../auth-profiles/types.js";
 import { extractObservedOverflowTokenCount } from "../embedded-agent-helpers/context-overflow-observation.js";
 import type { FailoverReason } from "../failover/signal.js";
@@ -442,10 +442,10 @@ const mockedMarkAuthProfileSuccess = vi.fn(async () => {});
 const mockedShouldPreferExplicitConfigApiKeyAuth = vi.fn(() => false);
 
 // No provider here means model resolution defaults to anthropic/test-model, which
-// the mocked codex harness does not claim: such runs select the built-in openclaw
+// the mocked codex harness does not claim: such runs select the built-in carapace
 // host harness and pay its one-time source-compile cost. Suites proving plugin
 // harness behavior must pin provider "openai" (see run.session-permissions.test.ts).
-export function createOverflowRunParams(state: Pick<OpenClawTestState, "workspaceDir">) {
+export function createOverflowRunParams(state: Pick<CarapaceTestState, "workspaceDir">) {
   return {
     agentId: "main",
     sessionId: "test-session",
@@ -961,7 +961,7 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
   }));
 
   vi.doMock("../models-config.js", () => ({
-    ensureOpenClawModelsJson: vi.fn(async () => {}),
+    ensureCarapaceModelsJson: vi.fn(async () => {}),
   }));
 
   vi.doMock("../prepared-model-runtime.js", () => ({
@@ -1076,7 +1076,7 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
 /** Move one-time runner compilation out of individual behavior timings. */
 export async function warmRunOverflowCompactionHarness(
   runEmbeddedAgent: TestRunEmbeddedAgent,
-  state: Pick<OpenClawTestState, "workspaceDir">,
+  state: Pick<CarapaceTestState, "workspaceDir">,
   params?: Partial<Parameters<typeof runEmbeddedAgent>[0]>,
 ): Promise<void> {
   resetRunOverflowCompactionHarnessMocks();

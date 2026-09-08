@@ -5,7 +5,7 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import { createSessionMaintenanceOwner } from "../../agents/session-maintenance/coordinator.js";
 import { SessionWorkStartChangedError } from "../../config/sessions/lifecycle.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import * as registry from "./reply-run-registry.js";
 import { testing } from "./reply-run-registry.test-support.js";
 import { admitReplyTurn } from "./reply-turn-admission.js";
@@ -17,7 +17,7 @@ const successorId = "compacted-session-id";
 
 afterEach(() => {
   testing.resetReplyRunRegistry();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   vi.restoreAllMocks();
 });
 

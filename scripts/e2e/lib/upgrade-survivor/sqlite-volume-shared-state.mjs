@@ -49,7 +49,7 @@ function writeJson(file, value) {
 }
 
 function withReadonlySharedDatabase(stateDir, operation) {
-  const db = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), { readOnly: true });
+  const db = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), { readOnly: true });
   try {
     return operation(db);
   } finally {
@@ -100,18 +100,18 @@ function recordBaselineSharedState(stateDir, snapshot) {
 
 async function seedBaselinePluginState(packageRoot) {
   assert(packageRoot, "seed-baseline-plugin-state requires the installed baseline package root");
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
-  assert(stateDir, "baseline plugin state requires OPENCLAW_STATE_DIR");
+  const stateDir = process.env.CARAPACE_STATE_DIR;
+  assert(stateDir, "baseline plugin state requires CARAPACE_STATE_DIR");
   const packageJsonPath = path.join(path.resolve(packageRoot), "package.json");
   const manifest = readJson(packageJsonPath);
   assert.equal(
     manifest.name,
-    "openclaw",
-    "baseline SDK must belong to the installed OpenClaw package",
+    "carapace",
+    "baseline SDK must belong to the installed Carapace package",
   );
   assert.equal(
     manifest.version,
-    process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION,
+    process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION,
     "baseline SDK package version differs from the installed CLI",
   );
   const storeExport = manifest.exports?.["./plugin-sdk/plugin-state-store-runtime"];
@@ -142,8 +142,8 @@ async function seedBaselinePluginState(packageRoot) {
   const sdkUrl = pathToFileURL(
     installedRequire.resolve(
       storeExport
-        ? "openclaw/plugin-sdk/plugin-state-store-runtime"
-        : "openclaw/plugin-sdk/runtime-doctor",
+        ? "carapace/plugin-sdk/plugin-state-store-runtime"
+        : "carapace/plugin-sdk/runtime-doctor",
     ),
   );
   const { createPluginStateSyncKeyedStore } = await import(sdkUrl.href);
@@ -232,8 +232,8 @@ function getVolumePairingRequests(createdAt) {
 }
 
 function seedUpgradeVolumePairing(stateDir) {
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
-  assert(configPath, "volume pairing fixture requires OPENCLAW_CONFIG_PATH");
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
+  assert(configPath, "volume pairing fixture requires CARAPACE_CONFIG_PATH");
   const config = readJson(configPath);
   const discord = config.channels?.discord;
   assert(discord, "volume pairing fixture requires configured Discord");
@@ -318,8 +318,8 @@ function assertUpgradeVolumePairing(stateDir, stage) {
 
 export function seedUpgradeVolumeSharedState(stateDir) {
   seedUpgradeVolumePairing(stateDir);
-  const workspace = process.env.OPENCLAW_TEST_WORKSPACE_DIR;
-  assert(workspace, "volume fixture requires OPENCLAW_TEST_WORKSPACE_DIR");
+  const workspace = process.env.CARAPACE_TEST_WORKSPACE_DIR;
+  assert(workspace, "volume fixture requires CARAPACE_TEST_WORKSPACE_DIR");
   for (const [filename, contents] of VOLUME_WORKSPACE_FILES) {
     write(path.join(workspace, filename), contents);
   }
@@ -328,8 +328,8 @@ export function seedUpgradeVolumeSharedState(stateDir) {
 export function assertUpgradeVolumeSharedState(stateDir, stage) {
   assertVolumePluginState(stateDir, stage);
   assertUpgradeVolumePairing(stateDir, stage);
-  const workspace = process.env.OPENCLAW_TEST_WORKSPACE_DIR;
-  assert(workspace, "volume fixture requires OPENCLAW_TEST_WORKSPACE_DIR");
+  const workspace = process.env.CARAPACE_TEST_WORKSPACE_DIR;
+  assert(workspace, "volume fixture requires CARAPACE_TEST_WORKSPACE_DIR");
   for (const [filename, contents] of VOLUME_WORKSPACE_FILES) {
     assert(
       fs.readFileSync(path.join(workspace, filename), "utf8") === contents,

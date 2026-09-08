@@ -8,14 +8,14 @@ import {
 import { deferSqlitePostCommitPublication } from "../infra/sqlite-post-commit.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
 import { formatDoctorStateRepairFailure } from "../infra/state-repair-message.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { resolveUserPath } from "../utils.js";
 import { retireWorkspaceFileCache } from "./workspace-file-cache.js";
 import {
@@ -94,7 +94,7 @@ type WorkspaceStateDeletionPlan = {
 };
 
 type WorkspaceStateDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   | "workspace_setup_state"
   | "workspace_path_aliases"
   | "workspace_generated_bootstrap_hashes"
@@ -103,7 +103,7 @@ type WorkspaceStateDatabase = Pick<
 >;
 
 type WorkspaceStateDatabaseHandle = Pick<
-  ReturnType<typeof openOpenClawStateDatabase>,
+  ReturnType<typeof openCarapaceStateDatabase>,
   "db" | "path"
 >;
 
@@ -254,7 +254,7 @@ function readSnapshotFromDatabase(params: {
     throw new Error(
       formatDoctorStateRepairFailure(
         `unsupported workspace setup version ${setupRow.version} in ${params.database.path} for ${identity.workspacePath}`,
-        "Use a compatible OpenClaw build that supports this workspace version; preserve the database unchanged.",
+        "Use a compatible Carapace build that supports this workspace version; preserve the database unchanged.",
       ),
     );
   }
@@ -315,10 +315,10 @@ function readSnapshotFromDatabase(params: {
 
 export function readWorkspaceStateSnapshot(
   workspaceDir: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): WorkspaceStateSnapshot {
   if (options.readOnly) {
-    const snapshot = withExistingOpenClawStateDatabaseReadOnly(
+    const snapshot = withExistingCarapaceStateDatabaseReadOnly(
       (database) =>
         runSqliteDeferredTransactionSync(database.db, () => {
           const resolution = resolveWorkspaceIdentityFromDatabase({ workspaceDir, database });
@@ -334,7 +334,7 @@ export function readWorkspaceStateSnapshot(
       }
     );
   }
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const initial = runSqliteDeferredTransactionSync(database.db, () => {
     const resolution = resolveWorkspaceIdentityFromDatabase({ workspaceDir, database });
     return {
@@ -350,7 +350,7 @@ export function readWorkspaceStateSnapshot(
   }
   // Register a newly observed configured spelling once state proves the target
   // identity. Later disappearance must still find the same safety evidence.
-  return runOpenClawStateWriteTransaction((writeDatabase) => {
+  return runCarapaceStateWriteTransaction((writeDatabase) => {
     const currentAliases = resolveWorkspaceStateAliases(workspaceDir);
     const currentCanonicalIdentity = currentAliases.at(-1)!;
     if (
@@ -385,7 +385,7 @@ export function mergeWorkspaceSetupState(
   workspaceDir: string,
   next: Partial<Omit<WorkspaceSetupState, "version">>,
   nowMs = Date.now(),
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): WorkspaceSetupState {
   assertCanonicalIntegerTimestamp(nowMs, "setup update");
   if (next.bootstrapSeededAt) {
@@ -394,7 +394,7 @@ export function mergeWorkspaceSetupState(
   if (next.setupCompletedAt) {
     assertCanonicalTimestamp(next.setupCompletedAt, "setup completed");
   }
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const resolution = resolveWorkspaceIdentityFromDatabase({ workspaceDir, database });
     const identity = resolution.identity;
     const snapshot = readSnapshotFromDatabase({ identity, database });
@@ -456,7 +456,7 @@ export function replaceWorkspaceAttestation(params: {
   const sortedHashes = [...params.generatedHashes.entries()].toSorted(([left], [right]) =>
     left.localeCompare(right),
   );
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     // Capture the comparison clock only after BEGIN IMMEDIATE acquires the
     // writer lock, so a newer committed row cannot look future-dated.
     const updatedAtMs = params.nowMs ?? Date.now();
@@ -626,7 +626,7 @@ export function clearExpiredWorkspaceStateForVanishedWorkspace(
   nowMs = Date.now(),
 ): boolean {
   assertCanonicalIntegerTimestamp(nowMs, "workspace expiry check");
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const resolution = resolveWorkspaceIdentityFromDatabase({ workspaceDir, database });
     const identity = resolution.identity;
     const snapshot = readSnapshotFromDatabase({ identity, database });
@@ -673,11 +673,11 @@ export function prepareWorkspaceStateDeletion(workspaceDir: string): WorkspaceSt
 export function deleteWorkspaceState(plan: WorkspaceStateDeletionPlan): void {
   // Delete-only cleanup must not recreate state after reset/uninstall removed
   // the canonical database successfully or partially.
-  if (!existsSync(resolveOpenClawStateSqlitePath())) {
+  if (!existsSync(resolveCarapaceStateSqlitePath())) {
     retireWorkspaceFileCache(plan.cacheRoot);
     return;
   }
-  runOpenClawStateWriteTransaction((database) => {
+  runCarapaceStateWriteTransaction((database) => {
     const { lexicalAlias, currentCanonicalIdentity } = plan;
     const kysely = getNodeSqliteKysely<WorkspaceStateDatabase>(database.db);
     const storedAlias = executeSqliteQueryTakeFirstSync(

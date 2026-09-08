@@ -1,9 +1,9 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { normalizeClawHubSha256Integrity } from "../infra/clawhub-integrity.js";
 import {
-  openExistingOpenClawStateDatabaseReadOnly,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openExistingCarapaceStateDatabaseReadOnly,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   readClawInstallRecordFromDatabase,
   readClawPackageRefs,
@@ -84,7 +84,7 @@ export function findResumableIntroducedPluginRequirement(params: {
 
 export async function readClawResumeStateReadOnly(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<
   | {
       record: PersistedClawInstall;
@@ -92,7 +92,7 @@ export async function readClawResumeStateReadOnly(
     }
   | undefined
 > {
-  const database = await openExistingOpenClawStateDatabaseReadOnly(options);
+  const database = await openExistingCarapaceStateDatabaseReadOnly(options);
   if (!database) {
     return undefined;
   }

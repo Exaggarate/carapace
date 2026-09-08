@@ -1,10 +1,10 @@
 // Discord plugin module implements outbound components behavior.
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-send-result";
 import {
   createLazyRuntimeModule,
   createLazyRuntimeNamedExport,
-} from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveAskUserQuestionOptionIndices } from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/lazy-runtime";
+import { resolveAskUserQuestionOptionIndices } from "carapace/plugin-sdk/reply-payload";
 import { readDiscordComponentSpec, type DiscordComponentMessageSpec } from "./components.js";
 
 type DiscordComponentSendFn = typeof import("./send.components.js").sendDiscordComponentMessage;

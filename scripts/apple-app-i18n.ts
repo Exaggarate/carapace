@@ -13,31 +13,31 @@ const INFLECTED_COUNT_SEGMENT_RE =
   /\^\[[^\]]*\\\([A-Za-z_][A-Za-z0-9_]*\)[^\]]*\]\(inflect: true\)/gu;
 const INFLECTED_COUNT_MARKER = "](inflect: true)";
 const IOS_CATALOG_PATH = "apps/ios/Resources/Localizable.xcstrings";
-const MACOS_CATALOG_PATH = "apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings";
-const MACOS_INFO_PLIST_PATH = "apps/macos/Sources/OpenClaw/Resources/Info.plist";
+const MACOS_CATALOG_PATH = "apps/macos/Sources/Carapace/Resources/Localizable.xcstrings";
+const MACOS_INFO_PLIST_PATH = "apps/macos/Sources/Carapace/Resources/Info.plist";
 const NATIVE_SOURCE_PATH = "apps/.i18n/native-source.json";
 const NATIVE_TRANSLATIONS_DIR = "apps/.i18n/native";
-const SHARED_CHAT_UI_SOURCE_PREFIX = "apps/shared/OpenClawKit/Sources/OpenClawChatUI/";
+const SHARED_CHAT_UI_SOURCE_PREFIX = "apps/shared/CarapaceKit/Sources/CarapaceChatUI/";
 const SHARED_GATEWAY_DISCOVERY_STATUS_SOURCE =
-  "apps/shared/OpenClawKit/Sources/OpenClawKit/GatewayDiscoveryStatusText.swift";
+  "apps/shared/CarapaceKit/Sources/CarapaceKit/GatewayDiscoveryStatusText.swift";
 const IOS_SOURCE_PREFIXES = [
   "apps/ios/",
   SHARED_CHAT_UI_SOURCE_PREFIX,
-  "apps/shared/OpenClawKit/Sources/OpenClawKit/",
+  "apps/shared/CarapaceKit/Sources/CarapaceKit/",
 ] as const;
 const IOS_CATALOG_EXCLUSIONS = new Set([
   // Product names and preview-only single-character fixtures are intentionally verbatim.
-  "OpenClaw",
+  "Carapace",
   "z",
 ]);
 const MACOS_SOURCE_PREFIXES = [
-  "apps/macos/Sources/OpenClaw/",
+  "apps/macos/Sources/Carapace/",
   SHARED_CHAT_UI_SOURCE_PREFIX,
   SHARED_GATEWAY_DISCOVERY_STATUS_SOURCE,
 ] as const;
 const MACOS_CATALOG_EXCLUSIONS = new Set([
   // Product names are intentionally verbatim.
-  "OpenClaw",
+  "Carapace",
 ]);
 const IOS_INFO_PLIST_TARGETS = [
   {
@@ -123,36 +123,36 @@ const APPLE_LOCALE_DIRECTORIES: Record<string, string> = {
   "zh-TW": "zh-Hant",
 };
 const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
-  "apps/macos/Sources/OpenClaw/DeviceSettingsPanels.swift": [
+  "apps/macos/Sources/Carapace/DeviceSettingsPanels.swift": [
     'String(localized: "Quick Chat shortcut")',
     'String(localized: "Microphone Test")',
     'Button("Done")',
   ],
-  "apps/macos/Sources/OpenClaw/DeviceMicrophonePanel.swift": [
+  "apps/macos/Sources/Carapace/DeviceMicrophonePanel.swift": [
     'String(localized: "Stopped")',
     'String(localized: "Timeout: no trigger heard")',
     "Text(verbatim: meterError)",
   ],
-  "apps/ios/Sources/Design/OpenClawProComponents.swift": [
-    "enum OpenClawTextValue: ExpressibleByStringLiteral",
-    "struct OpenClawNoticeBanner: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let message: OpenClawTextValue",
-    "struct OpenClawAdaptiveHeaderRow<Leading: View, Accessory: View>: View {\n    let title: OpenClawTextValue\n    let subtitle: OpenClawTextValue?",
-    "struct OpenClawStatusBadge: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let label: OpenClawTextValue",
-    "struct ProStatusRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
+  "apps/ios/Sources/Design/CarapaceProComponents.swift": [
+    "enum CarapaceTextValue: ExpressibleByStringLiteral",
+    "struct CarapaceNoticeBanner: View {\n    let icon: String\n    let title: CarapaceTextValue\n    let message: CarapaceTextValue",
+    "struct CarapaceAdaptiveHeaderRow<Leading: View, Accessory: View>: View {\n    let title: CarapaceTextValue\n    let subtitle: CarapaceTextValue?",
+    "struct CarapaceStatusBadge: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let label: CarapaceTextValue",
+    "struct ProStatusRow: View {\n    let icon: String\n    let title: CarapaceTextValue\n    let detail: CarapaceTextValue",
   ],
   "apps/ios/Sources/Design/SettingsProTabSupport.swift": [
-    "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: OpenClawTextValue",
-    "init(_ label: LocalizedStringKey, value: OpenClawTextValue)",
+    "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: CarapaceTextValue",
+    "init(_ label: LocalizedStringKey, value: CarapaceTextValue)",
     "self.value.text",
-    "struct SettingsApprovalItem: Identifiable {\n    let id: String\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue\n    let priority: OpenClawTextValue",
+    "struct SettingsApprovalItem: Identifiable {\n    let id: String\n    let icon: String\n    let title: CarapaceTextValue\n    let detail: CarapaceTextValue\n    let priority: CarapaceTextValue",
     "self.item.title.text",
     "self.item.detail.text",
     "self.item.priority.text",
   ],
   "apps/ios/Sources/Design/SettingsProTabActions.swift": [
-    "func detailStatusCard(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
-    "func diagnosticCheckRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
-    "pendingApproval.commandPreview.map(OpenClawTextValue.verbatim)",
+    "func detailStatusCard(\n        icon: String,\n        title: CarapaceTextValue,\n        detail: CarapaceTextValue,\n        value: CarapaceTextValue",
+    "func diagnosticCheckRow(\n        icon: String,\n        title: CarapaceTextValue,\n        detail: CarapaceTextValue,\n        value: CarapaceTextValue",
+    "pendingApproval.commandPreview.map(CarapaceTextValue.verbatim)",
     'format: String(localized: "Agent: %@")',
   ],
   "apps/ios/Sources/Design/SettingsProTabSections.swift": [
@@ -189,8 +189,8 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
     "Text(verbatim: self.item.title)",
     "Text(verbatim: self.item.trailing)",
     "Text(verbatim: self.item.detail)",
-    "struct CommandEmptyStateRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
-    "private func actionButton(\n        _ title: OpenClawTextValue",
+    "struct CommandEmptyStateRow: View {\n    let icon: String\n    let title: CarapaceTextValue\n    let detail: CarapaceTextValue",
+    "private func actionButton(\n        _ title: CarapaceTextValue",
     "self.actionButton(.verbatim(category)",
   ],
   "apps/ios/Sources/Gateway/GatewayQuickSetupSheet.swift": [
@@ -406,7 +406,7 @@ type InfoPlistTranslation = {
 function parseStringsFile(source: string): Map<string, InfoPlistTranslation> {
   const values = new Map<string, InfoPlistTranslation>();
   for (const match of source.matchAll(
-    /(?:^\/\* OpenClaw source: ("(?:\\.|[^"\\])*") \*\/\n)?^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");/gmu,
+    /(?:^\/\* Carapace source: ("(?:\\.|[^"\\])*") \*\/\n)?^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");/gmu,
   )) {
     values.set(JSON.parse(match[2] ?? '""') as string, {
       source: match[1] ? (JSON.parse(match[1]) as string) : undefined,
@@ -464,7 +464,7 @@ function renderInfoPlistStrings(
     const candidates = infoPlistTranslationCandidates(artifact, sourceId, source);
     const value = selectInfoPlistTranslation(source, candidates, existing.get(key));
     return [
-      `/* OpenClaw source: ${stringsLiteral(source)} */`,
+      `/* Carapace source: ${stringsLiteral(source)} */`,
       `${stringsLiteral(key)} = ${stringsLiteral(value)};`,
     ].join("\n");
   });

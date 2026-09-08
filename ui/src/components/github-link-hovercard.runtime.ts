@@ -1,8 +1,8 @@
 import { initialState, Task } from "@lit/task";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, nothing, ReactiveElement, render, type TemplateResult } from "lit";
 import type { ControlUiGitHubPreview } from "../../../src/gateway/control-ui-contract.js";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
@@ -537,7 +537,7 @@ export class GitHubLinkHovercardProvider extends ReactiveElement {
     }
     nextHovercardId += 1;
     const card = createPortaledHovercard(
-      `openclaw-github-hovercard-${nextHovercardId}`,
+      `carapace-github-hovercard-${nextHovercardId}`,
       "github-link-hovercard",
     );
     renderLoading(card);

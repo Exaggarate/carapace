@@ -1,4 +1,4 @@
-import type { Context, Model, StreamFn } from "@openclaw/llm-core";
+import type { Context, Model, StreamFn } from "@carapace/llm-core";
 import OpenAI from "openai";
 import { getEnvApiKey } from "../env-api-keys.js";
 import {
@@ -249,8 +249,8 @@ export function createOpenAICompletionsTransportStreamFn(): StreamFn {
           params = nextParams as typeof params;
         }
         if (
-          (options as { openclawCodeModeToolSurface?: unknown } | undefined)
-            ?.openclawCodeModeToolSurface === true
+          (options as { carapaceCodeModeToolSurface?: unknown } | undefined)
+            ?.carapaceCodeModeToolSurface === true
         ) {
           const visibleToolNames = resolveCodeModeResponsesVisibleToolNames(context);
           enforceCodeModeResponsesToolSurface(

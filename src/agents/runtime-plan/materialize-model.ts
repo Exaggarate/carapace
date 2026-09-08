@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { FailoverError } from "../failover/error.js";
 import { resolveBuiltInModelSuppressionFromManifest } from "../model-suppression.js";
@@ -43,7 +43,7 @@ function modelMatchesPreparedTarget(params: {
 }
 
 type PreparedRuntimeModelRequest = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   authProfileId?: string;
   authProfileMode?: ProviderModelRouteMaterializationAuthMode;
 };
@@ -53,7 +53,7 @@ export async function materializePreparedRuntimeModel<Model extends RuntimeRoute
   plan: AgentRuntimeAuthPlan;
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   metadataSnapshot?: PluginMetadataSnapshot;
   model?: Model;

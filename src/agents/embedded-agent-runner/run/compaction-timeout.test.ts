@@ -248,7 +248,7 @@ describe("compaction-timeout helpers", () => {
       name: "undisplayed model-visible custom tail",
       tail: castAgentMessage({
         role: "custom",
-        customType: "openclaw-runtime-context",
+        customType: "carapace-runtime-context",
         content: "runtime context",
         display: false,
         timestamp: 2,

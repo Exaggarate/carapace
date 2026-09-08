@@ -17,13 +17,13 @@ function releaseRun(overrides: Record<string, unknown> = {}) {
     run_attempt: 2,
     name: "Full Release Validation",
     path: ".github/workflows/full-release-validation.yml",
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     head_branch: pinnedBranch,
     head_sha: workflowSha,
     event: "workflow_dispatch",
     status: "completed",
     conclusion: "success",
-    html_url: "https://github.com/openclaw/openclaw/actions/runs/123",
+    html_url: "https://github.com/Exaggarate/carapace/actions/runs/123",
     ...overrides,
   };
 }
@@ -56,7 +56,7 @@ function exactTargetEvidenceReuse() {
 
 function strictEvidenceReuse(version = 3) {
   return {
-    schema: `openclaw.release-validation-evidence/v${version}`,
+    schema: `carapace.release-validation-evidence/v${version}`,
     valid: true,
     current: { runId: "123", targetSha },
     root: { runId: "122", targetSha },
@@ -80,7 +80,7 @@ function validate(
   const result = validateFullReleaseValidationEvidence({
     run: releaseRun(runOverrides),
     manifest: releaseManifest(manifestOverrides),
-    expectedRepository: "openclaw/openclaw",
+    expectedRepository: "carapace/carapace",
     expectedRunId: "123",
     expectedTargetSha: targetSha,
     expectedWorkflowBranch: "release/2026.7.1",
@@ -107,7 +107,7 @@ describe("full release validation evidence", () => {
           runReleaseSoak: "false",
           validationInputs: { coveragePolicy: "npm-beta-v1", targetVersion: "2026.8.28-beta.1" },
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedReleaseTag: "v2026.8.28-beta.1",
@@ -153,7 +153,7 @@ describe("full release validation evidence", () => {
             targetVersion: targetVersion ?? "2026.8.28-beta.1",
           },
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedReleaseTag: Object.hasOwn(drift, "expectedReleaseTag")
@@ -195,7 +195,7 @@ describe("full release validation evidence", () => {
               targetVersion,
             },
           }),
-          expectedRepository: "openclaw/openclaw",
+          expectedRepository: "carapace/carapace",
           expectedRunId: "123",
           expectedTargetSha: targetSha,
           expectedReleaseTag,
@@ -217,7 +217,7 @@ describe("full release validation evidence", () => {
       runAttempt: 2,
       workflowName: "Full Release Validation",
       workflowPath: ".github/workflows/full-release-validation.yml",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       headBranch: pinnedBranch,
       headSha: workflowSha,
     });
@@ -250,7 +250,7 @@ describe("full release validation evidence", () => {
     const result = validateFullReleaseValidationEvidence({
       run: releaseRun(),
       manifest: releaseManifest(),
-      expectedRepository: "openclaw/openclaw",
+      expectedRepository: "carapace/carapace",
       expectedRunId: "123",
       expectedTargetSha: targetSha,
       expectedTrustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
@@ -271,7 +271,7 @@ describe("full release validation evidence", () => {
       const result = validateFullReleaseValidationEvidence({
         run: releaseRun(),
         manifest: releaseManifest({ version, evidenceReuse: exactTargetEvidenceReuse() }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedTrustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
@@ -283,7 +283,7 @@ describe("full release validation evidence", () => {
       expect(result.source).toBe("sha-pinned-protected-tag-main-ancestor");
       expect(isTrustedMainAncestor).toHaveBeenCalledWith(workflowSha);
       expect(validateEvidenceReuseStrictly).toHaveBeenCalledWith({
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: "123",
         targetSha,
       });
@@ -296,7 +296,7 @@ describe("full release validation evidence", () => {
       validateFullReleaseValidationEvidence({
         run: releaseRun(),
         manifest: releaseManifest(),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedTrustedWorkflowFullRef: `refs/heads/${trustedWorkflowRef}`,
@@ -318,7 +318,7 @@ describe("full release validation evidence", () => {
           workflowRef: olderBranch,
           workflowSha: olderWorkflowSha,
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedTrustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
@@ -334,7 +334,7 @@ describe("full release validation evidence", () => {
           workflowFullRef: `refs/heads/${trustedWorkflowRef}`,
           workflowRef: trustedWorkflowRef,
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedTrustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
@@ -388,7 +388,7 @@ describe("full release validation evidence", () => {
   });
 
   it.each([
-    ["repository", { repository: { full_name: "attacker/openclaw" } }, {}, "repository"],
+    ["repository", { repository: { full_name: "attacker/carapace" } }, {}, "repository"],
     ["workflow path", { path: ".github/workflows/other.yml" }, {}, "workflowPath"],
     [
       "qualified workflow ref",
@@ -443,7 +443,7 @@ describe("full release validation evidence", () => {
     const result = validateFullReleaseValidationEvidence({
       run: releaseRun(),
       manifest: releaseManifest({ version, evidenceReuse: reuse }),
-      expectedRepository: "openclaw/openclaw",
+      expectedRepository: "carapace/carapace",
       expectedRunId: "123",
       expectedTargetSha: targetSha,
       expectedWorkflowBranch: "release/2026.7.1",
@@ -470,7 +470,7 @@ describe("full release validation evidence", () => {
       validateFullReleaseValidationEvidence({
         run: releaseRun(),
         manifest: releaseManifest({ evidenceReuse: exactTargetEvidenceReuse() }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedWorkflowBranch: "release/2026.7.1",
@@ -482,7 +482,7 @@ describe("full release validation evidence", () => {
       validateFullReleaseValidationEvidence({
         run: releaseRun(),
         manifest: releaseManifest({ evidenceReuse: exactTargetEvidenceReuse() }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedWorkflowBranch: "release/2026.7.1",
@@ -502,7 +502,7 @@ describe("full release validation evidence", () => {
         validateFullReleaseValidationEvidence({
           run: releaseRun(),
           manifest: releaseManifest({ version, evidenceReuse: exactTargetEvidenceReuse() }),
-          expectedRepository: "openclaw/openclaw",
+          expectedRepository: "carapace/carapace",
           expectedRunId: "123",
           expectedTargetSha: targetSha,
           isTrustedMainAncestor: () => true,
@@ -547,7 +547,7 @@ describe("full release validation evidence", () => {
         manifest: releaseManifest({
           evidenceReuse: { ...exactTargetEvidenceReuse(), selectedRunId: "" },
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedWorkflowBranch: pinnedBranch,
@@ -566,7 +566,7 @@ describe("full release validation evidence", () => {
           workflowRef: branch,
           workflowFullRef: `refs/heads/${branch}`,
         }),
-        expectedRepository: "openclaw/openclaw",
+        expectedRepository: "carapace/carapace",
         expectedRunId: "123",
         expectedTargetSha: targetSha,
         expectedWorkflowBranch: branch,

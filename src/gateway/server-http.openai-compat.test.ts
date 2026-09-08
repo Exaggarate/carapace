@@ -4,7 +4,7 @@ import http, { type Server, type ServerResponse } from "node:http";
 import { describe, expect, it, vi } from "vitest";
 import { agentCommandFromGatewayIngress } from "../commands/agent.js";
 import { setRuntimeConfigSnapshot } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { fetchWithRuntimeDispatcher } from "../infra/net/runtime-fetch.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
@@ -73,7 +73,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
           "/v1",
           "/v1/",
           "/v1/models",
-          "/v1/models/openclaw",
+          "/v1/models/carapace",
           "/v1/chat/completions",
           "/v1/responses",
           "/v1/embeddings",
@@ -101,21 +101,21 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
         },
         run: async (server) => {
           for (const enabled of [false, true, false]) {
-            const config: OpenClawConfig = {
+            const config: CarapaceConfig = {
               gateway: { http: { endpoints: { [endpoint]: { enabled } } } },
             };
             setRuntimeConfigSnapshot(config, config);
 
             for (const requestPath of [
               "/v1/models",
-              "/v1/models/openclaw",
+              "/v1/models/carapace",
               "/v1/embeddings",
               ...endpointCases.map((entry) => entry.path),
             ]) {
               const { res, getBody } = await sendRequest(server, {
                 path: requestPath,
                 method: "GET",
-                headers: { "x-openclaw-scopes": "operator.read" },
+                headers: { "x-carapace-scopes": "operator.read" },
               });
               const isModels = requestPath.startsWith("/v1/models");
               const isEnabled =
@@ -127,7 +127,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
                 expect(JSON.parse(getBody())).toMatchObject({
                   object: "list",
                   data: expect.arrayContaining([
-                    expect.objectContaining({ id: "openclaw/default" }),
+                    expect.objectContaining({ id: "carapace/default" }),
                   ]),
                 });
               }
@@ -155,7 +155,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
         },
         run: async (server) => {
           for (const configuredEnabled of [!enabled, enabled, !enabled]) {
-            const config: OpenClawConfig = {
+            const config: CarapaceConfig = {
               gateway: { http: { endpoints: { [endpoint]: { enabled: configuredEnabled } } } },
             };
             setRuntimeConfigSnapshot(config, config);
@@ -163,7 +163,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
               const { res } = await sendRequest(server, {
                 path: requestPath,
                 method: "GET",
-                headers: { "x-openclaw-scopes": "operator.read" },
+                headers: { "x-carapace-scopes": "operator.read" },
               });
               expect(res.statusCode, `${requestPath} with config=${configuredEnabled}`).toBe(
                 enabled ? (requestPath === "/v1/models" ? 200 : 405) : 404,
@@ -180,7 +180,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
     async ({ endpoint, path, override }) => {
       vi.mocked(agentCommandFromGatewayIngress).mockClear();
       const body = JSON.stringify({
-        model: "openclaw/main",
+        model: "carapace/main",
         ...(endpoint === "chatCompletions"
           ? {
               messages: [
@@ -224,7 +224,7 @@ describe("gateway OpenAI-compatible HTTP routes", () => {
               throw new Error("Expected an HTTP listener address");
             }
             for (const maxBytes of [1, 1024, 1]) {
-              const config: OpenClawConfig = {
+              const config: CarapaceConfig = {
                 agents: { entries: { main: {} } },
                 gateway: { http: { endpoints: { [endpoint]: { images: { maxBytes } } } } },
               };
@@ -283,7 +283,7 @@ async function close(server: Server): Promise<void> {
 function requestBody(input: { path: string; kind: "image" | "file" }, stream: boolean) {
   const urls = ["first", "second"].map((name) => `${SOURCE_ORIGIN}/${name}`);
   return {
-    model: "openclaw/main",
+    model: "carapace/main",
     stream,
     ...(input.path === "/v1/chat/completions"
       ? {
@@ -367,7 +367,7 @@ describe("HTTP media preparation cancellation", () => {
         resolvedAuth: AUTH_TOKEN,
         overrides: { openAiChatCompletionsEnabled: true, openResponsesEnabled: true },
         run: async (server) => {
-          const config: OpenClawConfig = {
+          const config: CarapaceConfig = {
             agents: { entries: { main: {} } },
             gateway: {
               http: {

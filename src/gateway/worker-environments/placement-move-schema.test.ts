@@ -3,29 +3,29 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { assertSqliteSchemaContains } from "../../infra/sqlite-schema-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
-import { getOpenClawStateRuntimeSchema } from "../../state/openclaw-state-schema-compatibility.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../../state/openclaw-state-schema.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
+import { getCarapaceStateRuntimeSchema } from "../../state/carapace-state-schema-compatibility.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../../state/carapace-state-schema.js";
 import { createWorkerSessionPlacementStore } from "./placement-store.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("worker placement move schema", () => {
   it("survives a same-version previous reader and candidate reopen", () => {
-    const stateDir = tempDirs.make("openclaw-placement-move-schema-");
-    const options = { env: { OPENCLAW_STATE_DIR: stateDir } };
-    const database = openOpenClawStateDatabase(options);
+    const stateDir = tempDirs.make("carapace-placement-move-schema-");
+    const options = { env: { CARAPACE_STATE_DIR: stateDir } };
+    const database = openCarapaceStateDatabase(options);
     const versionBefore = database.db.prepare("PRAGMA user_version").get();
     const metadataBefore = database.db
       .prepare("SELECT schema_version, updated_at FROM schema_meta WHERE meta_key = 'primary'")
       .get();
-    const previousSchema = OPENCLAW_STATE_SCHEMA_SQL.replace(
+    const previousSchema = CARAPACE_STATE_SCHEMA_SQL.replace(
       "  target_machine_class TEXT,\n",
       "",
     ).replace(
@@ -74,14 +74,14 @@ describe("worker placement move schema", () => {
       ]),
     );
     const databasePath = database.path;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const previousReader = new DatabaseSync(databasePath);
     expect(() =>
       assertSqliteSchemaContains(
         previousReader,
         "previous state schema",
-        getOpenClawStateRuntimeSchema({ includeVersionLazyAdditiveTables: false }),
+        getCarapaceStateRuntimeSchema({ includeVersionLazyAdditiveTables: false }),
       ),
     ).not.toThrow();
     expect(
@@ -93,7 +93,7 @@ describe("worker placement move schema", () => {
     ).toEqual({ state: "draining", transition_generation: 5 });
     previousReader.close();
 
-    const reopened = openOpenClawStateDatabase(options);
+    const reopened = openCarapaceStateDatabase(options);
     const reopenedStore = createWorkerSessionPlacementStore({ database: reopened });
     expect(reopenedStore.getPlacementMove("session-move")).toEqual(begun.intent);
     expect(reopened.db.prepare("PRAGMA user_version").get()).toEqual(versionBefore);

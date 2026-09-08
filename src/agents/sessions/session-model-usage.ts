@@ -1,4 +1,4 @@
-import type { Usage } from "@openclaw/ai";
+import type { Usage } from "@carapace/ai";
 import { createSessionManagerRuntimeRegistry } from "../agent-hooks/session-manager-runtime-registry.js";
 
 export type SessionModelUsageSink = (usage: Usage) => void;

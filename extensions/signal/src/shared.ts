@@ -1,13 +1,13 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channel-policy";
-import { createChannelPluginBase, getChatChannelMeta } from "openclaw/plugin-sdk/core";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { normalizeStringifiedEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import { createRestrictSendersChannelSecurity } from "carapace/plugin-sdk/channel-policy";
+import { createChannelPluginBase, getChatChannelMeta } from "carapace/plugin-sdk/core";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
+import { normalizeStringifiedEntries } from "carapace/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   listSignalAccountIds,
   resolveDefaultSignalAccountId,

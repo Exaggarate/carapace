@@ -1,5 +1,5 @@
 // Reset boundaries project a logical message window without rewriting raw cursor positions.
-import type { SessionTreeEntry } from "@openclaw/agent-core";
+import type { SessionTreeEntry } from "@carapace/agent-core";
 import { sql } from "kysely";
 import { selectResetKeptEntries } from "../../../packages/agent-core/src/harness/session/tool-result-pairing.js";
 import {

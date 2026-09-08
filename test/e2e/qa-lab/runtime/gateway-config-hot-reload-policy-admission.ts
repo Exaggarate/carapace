@@ -6,13 +6,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import type { QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { waitForHotReloadFact } from "./gateway-config-hot-reload-fixtures.js";
 
-type Snapshot = { hash: string; config: OpenClawConfig };
+type Snapshot = { hash: string; config: CarapaceConfig };
 type AdmissionCase = {
   family: string;
-  change: OpenClawConfig;
+  change: CarapaceConfig;
   restore: unknown;
   replacePaths: string[];
   readConsumer?: () => Promise<unknown>;
@@ -172,7 +172,7 @@ process.stdout.write(JSON.stringify({ protocolVersion: 1, decision, reason: 'Syn
                 },
               },
             },
-          } satisfies OpenClawConfig,
+          } satisfies CarapaceConfig,
           [
             "security.installPolicy.targets",
             "security.installPolicy.exec.args",
@@ -216,13 +216,13 @@ process.stdout.write(JSON.stringify({ protocolVersion: 1, decision, reason: 'Syn
   };
   const probeDiagnostics = async () => {
     for (const key of [
-      "OPENCLAW_DIAGNOSTICS",
-      "OPENCLAW_CACHE_TRACE",
-      "OPENCLAW_CACHE_TRACE_FILE",
+      "CARAPACE_DIAGNOSTICS",
+      "CARAPACE_CACHE_TRACE",
+      "CARAPACE_CACHE_TRACE_FILE",
     ]) {
       assert(!gateway.runtimeEnv[key], `${key} would override the config proof`);
     }
-    const stateDir = gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+    const stateDir = gateway.runtimeEnv.CARAPACE_STATE_DIR;
     assert(stateDir);
     const tracePath = path.join(stateDir, "logs", "cache-trace.jsonl");
     const traceRows = async () => {

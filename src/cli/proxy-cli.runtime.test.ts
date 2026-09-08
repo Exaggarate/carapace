@@ -49,30 +49,30 @@ import {
   closeDebugProxyCaptureStore,
   getDebugProxyCaptureStore,
 } from "../proxy-capture/store.sqlite.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import * as proxyCliRuntime from "./proxy-cli.runtime.js";
 
 describe("proxy cli runtime", () => {
   const envKeys = [
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_DEBUG_PROXY_CERT_DIR",
-    "OPENCLAW_DEBUG_PROXY_SESSION_ID",
-    "OPENCLAW_DEBUG_PROXY_ENABLED",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_DEBUG_PROXY_CERT_DIR",
+    "CARAPACE_DEBUG_PROXY_SESSION_ID",
+    "CARAPACE_DEBUG_PROXY_ENABLED",
     "FORCE_COLOR",
     "NO_COLOR",
   ] as const;
   const savedEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
   const tempDirs = new Set<string>();
-  const tempDir = makeTempDir(tempDirs, "openclaw-proxy-cli-runtime-");
+  const tempDir = makeTempDir(tempDirs, "carapace-proxy-cli-runtime-");
 
   beforeEach(() => {
     // Reuse the path so missing store/DB cleanup is observable as sessions leaking across cases.
     mkdirSync(tempDir, { recursive: true });
     tempDirs.add(tempDir);
-    process.env.OPENCLAW_STATE_DIR = tempDir;
-    process.env.OPENCLAW_DEBUG_PROXY_CERT_DIR = path.join(tempDir, "certs");
-    delete process.env.OPENCLAW_DEBUG_PROXY_ENABLED;
-    delete process.env.OPENCLAW_DEBUG_PROXY_SESSION_ID;
+    process.env.CARAPACE_STATE_DIR = tempDir;
+    process.env.CARAPACE_DEBUG_PROXY_CERT_DIR = path.join(tempDir, "certs");
+    delete process.env.CARAPACE_DEBUG_PROXY_ENABLED;
+    delete process.env.CARAPACE_DEBUG_PROXY_SESSION_ID;
     delete process.env.FORCE_COLOR;
     process.env.NO_COLOR = "1";
     getRuntimeConfigMock.mockReset();
@@ -108,7 +108,7 @@ describe("proxy cli runtime", () => {
 
   afterEach(() => {
     closeDebugProxyCaptureStore();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.restoreAllMocks();
     process.exitCode = undefined;
     for (const key of envKeys) {
@@ -232,7 +232,7 @@ describe("proxy cli runtime", () => {
         "Problems\n" +
         "  - proxy validation requires proxy.enabled to be true for configured proxy URLs\n\n" +
         "Next steps\n" +
-        "  Fix proxy.proxyUrl, OPENCLAW_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
+        "  Fix proxy.proxyUrl, CARAPACE_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
     );
   });
 
@@ -243,7 +243,7 @@ describe("proxy cli runtime", () => {
         enabled: false,
         source: "disabled",
         errors: [
-          "proxy validation requires proxy.enabled=true with proxy.proxyUrl or OPENCLAW_PROXY_URL, or --proxy-url",
+          "proxy validation requires proxy.enabled=true with proxy.proxyUrl or CARAPACE_PROXY_URL, or --proxy-url",
         ],
       },
       checks: [],
@@ -256,9 +256,9 @@ describe("proxy cli runtime", () => {
         "  Source: disabled\n" +
         "  URL:    not configured\n\n" +
         "Problems\n" +
-        "  - proxy validation requires proxy.enabled=true with proxy.proxyUrl or OPENCLAW_PROXY_URL, or --proxy-url\n\n" +
+        "  - proxy validation requires proxy.enabled=true with proxy.proxyUrl or CARAPACE_PROXY_URL, or --proxy-url\n\n" +
         "Next steps\n" +
-        "  Fix proxy.proxyUrl, OPENCLAW_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
+        "  Fix proxy.proxyUrl, CARAPACE_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
     );
     expect(process.exitCode).toBe(1);
   });
@@ -284,7 +284,7 @@ describe("proxy cli runtime", () => {
         "Problems\n" +
         "  - proxyUrl must use http://\n\n" +
         "Next steps\n" +
-        "  Fix proxy.proxyUrl, OPENCLAW_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
+        "  Fix proxy.proxyUrl, CARAPACE_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.\n",
     );
   });
 
@@ -421,7 +421,7 @@ describe("proxy cli runtime", () => {
       config: {
         enabled: true,
         source: "missing",
-        errors: ["proxy validation requires proxy.proxyUrl, --proxy-url, or OPENCLAW_PROXY_URL"],
+        errors: ["proxy validation requires proxy.proxyUrl, --proxy-url, or CARAPACE_PROXY_URL"],
       },
       checks: [],
     });
@@ -435,7 +435,7 @@ describe("proxy cli runtime", () => {
             enabled: true,
             source: "missing",
             errors: [
-              "proxy validation requires proxy.proxyUrl, --proxy-url, or OPENCLAW_PROXY_URL",
+              "proxy validation requires proxy.proxyUrl, --proxy-url, or CARAPACE_PROXY_URL",
             ],
           },
           checks: [],

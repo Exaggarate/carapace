@@ -1,5 +1,5 @@
 // Validates retired plugin install config before Doctor migrates its records.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   inspectPluginInstallRecordMap,
   type PluginInstallRecordMapState,

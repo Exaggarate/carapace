@@ -1,8 +1,8 @@
 // Verifies catalog hooks consume runtime headers without persisting plaintext.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 
 const discovery = vi.hoisted(() => ({ providers: new Array<ProviderPlugin>() }));
@@ -26,7 +26,7 @@ describe("models-config catalog runtime headers", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("passes resolved catalog headers while persisting their source markers", async () => {
-    const { planOpenClawModelsJson } = await import("./models-config.plan.js");
+    const { planCarapaceModelsJson } = await import("./models-config.plan.js");
     const sourceConfig = {
       models: {
         providers: {
@@ -57,8 +57,8 @@ describe("models-config catalog runtime headers", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
-    const runtimeConfig: OpenClawConfig = {
+    } satisfies CarapaceConfig;
+    const runtimeConfig: CarapaceConfig = {
       models: {
         providers: {
           "catalog-fixture": {
@@ -100,7 +100,7 @@ describe("models-config catalog runtime headers", () => {
         },
       },
     ];
-    const plan = await planOpenClawModelsJson({
+    const plan = await planCarapaceModelsJson({
       context: {
         cfg: sourceConfig,
         discoveryAuthConfig: runtimeConfig,
@@ -136,7 +136,7 @@ describe("models-config catalog runtime headers", () => {
   });
 
   it("keeps unresolved catalog headers fail-closed", async () => {
-    const { planOpenClawModelsJson } = await import("./models-config.plan.js");
+    const { planCarapaceModelsJson } = await import("./models-config.plan.js");
     const { normalizeResolvedSecretInputString } = await import("../config/types.secrets.js");
     const config = {
       models: {
@@ -150,7 +150,7 @@ describe("models-config catalog runtime headers", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     discovery.providers = [
       {
         id: "catalog-fixture",
@@ -172,7 +172,7 @@ describe("models-config catalog runtime headers", () => {
     ];
 
     await expect(
-      planOpenClawModelsJson({
+      planCarapaceModelsJson({
         context: {
           cfg: config,
           discoveryAuthConfig: structuredClone(config),

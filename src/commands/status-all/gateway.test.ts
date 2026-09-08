@@ -160,7 +160,7 @@ describe("summarizeLogTail", () => {
 
 describe("readFileTailLines", () => {
   it("returns complete recent lines from a bounded large-file tail", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-log-tail-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-log-tail-"));
     tempDirs.push(dir);
     const file = path.join(dir, "gateway.log");
     fs.writeFileSync(

@@ -5,7 +5,7 @@ import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import {
@@ -15,8 +15,8 @@ import {
   setActivePluginRegistry,
 } from "../plugins/runtime.js";
 import { createPluginRecord } from "../plugins/status.test-helpers.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { activeSessions } from "./capture.js";
 import { sanitizeTranscriptSourceLocator } from "./source-locator.js";
 import { readTranscriptLibraryStatus } from "./status.js";
@@ -25,14 +25,14 @@ import { TranscriptsStore, transcriptSessionSelector } from "./store.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   activeSessions.clear();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("transcript library capture health", () => {
   it("does not claim an exact configured URL identity from a sanitized capture locator", async () => {
     const stateDir = tempDirs.make("transcript-status-url-");
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const url = new URL("https://example.test/room?invitation=first#caption");
     url.username = "synthetic-user";
@@ -72,7 +72,7 @@ describe("transcript library capture health", () => {
   it("uses the successful capture's requested alias even when its provider is absent from the active registry", async () => {
     const stateDir = tempDirs.make("transcript-status-alias-");
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const source = { providerId: "caption-alias", channelId: "room" };
     const session = { sessionId: "alias-capture", startedAt: "2026-08-20T10:00:00.000Z", source };
@@ -95,7 +95,7 @@ describe("transcript library capture health", () => {
   it("reports a durable source timestamp without inventing persistence time or recording from unstopped rows", async () => {
     const stateDir = tempDirs.make("transcript-status-");
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const source = {
       providerId: "fixture-voice",
@@ -103,7 +103,7 @@ describe("transcript library capture health", () => {
       channelId: "room",
       accountId: "work",
     };
-    const cfg: OpenClawConfig = { transcripts: { autoStart: [source] } };
+    const cfg: CarapaceConfig = { transcripts: { autoStart: [source] } };
     const session = { sessionId: "persistent-room", startedAt: "2026-08-20T10:00:00.000Z", source };
     await store.writeSession(session);
     await store.appendUtteranceForSession(session, {
@@ -143,8 +143,8 @@ describe("transcript library capture health", () => {
   });
 
   it("reads declared, disabled and unavailable providers from prepared metadata without calling provider runtime", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const cfg: CarapaceConfig = {
         transcripts: { autoStart: [{ providerId: "absent" }, { providerId: "disabled-source" }] },
       };
       const manifests = makeRegistry([
@@ -236,9 +236,9 @@ describe("transcript library capture health", () => {
     async (immutable) => {
       const stateDir = tempDirs.make("transcript-status-bound-");
       const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         transcripts: {
           autoStart: Array.from({ length: 102 }, (_, index) => ({
             providerId: `missing-${index}`,

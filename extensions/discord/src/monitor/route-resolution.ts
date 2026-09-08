@@ -1,6 +1,6 @@
 // Discord plugin module implements route resolution behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { SessionBindingRecord } from "openclaw/plugin-sdk/conversation-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { SessionBindingRecord } from "carapace/plugin-sdk/conversation-runtime";
 import {
   deriveLastRoutePolicy,
   isAcpSessionKey,
@@ -10,7 +10,7 @@ import {
   type ResolvedAgentRoute,
   type RoutePeer,
   resolveAgentIdFromSessionKey,
-} from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/routing";
 
 export function buildDiscordRoutePeer(params: {
   isDirectMessage: boolean;
@@ -46,7 +46,7 @@ export function buildDiscordConversationRouteContext(params: {
 }
 
 export function resolveDiscordConversationRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   guildId?: string | null;
   memberRoleIds?: string[];
@@ -67,7 +67,7 @@ export function resolveDiscordConversationRoute(params: {
 }
 
 export function resolveDiscordBoundConversationRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   guildId?: string | null;
   memberRoleIds?: string[];

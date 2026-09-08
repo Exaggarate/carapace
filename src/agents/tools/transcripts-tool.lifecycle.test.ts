@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { activeSessions, startTranscripts } from "../../transcripts/capture.js";
 import type {
   TranscriptSourceProvider,
@@ -23,7 +23,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.useRealTimers();
   activeSessions.clear();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -65,7 +65,7 @@ function harness() {
       meetingUrl: "https://meeting.example/room?private=opaque#fragment",
     });
   const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
   const session = async () => {
     const value = await store.readSession("notes");

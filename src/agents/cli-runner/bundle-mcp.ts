@@ -5,14 +5,14 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { applyMergePatch } from "../../config/merge-patch.js";
 import type { SessionToolOverrides } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { tryReadJson } from "../../infra/json-files.js";
 import {
-  OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_APPROVAL_ARMED_ENV,
-  OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_PROPOSAL_ENV,
-  OPENCLAW_TOOLS_MCP_TOOLS_ENV,
-} from "../../mcp/openclaw-tools-serve-config.js";
+  CARAPACE_TOOLS_MCP_SYSTEM_AGENT_APPROVAL_ARMED_ENV,
+  CARAPACE_TOOLS_MCP_SYSTEM_AGENT_PROPOSAL_ENV,
+  CARAPACE_TOOLS_MCP_TOOLS_ENV,
+} from "../../mcp/carapace-tools-serve-config.js";
 import {
   extractMcpServerMap,
   type BundleMcpConfig,
@@ -78,19 +78,19 @@ function sortJsonValue(value: unknown): unknown {
   );
 }
 
-function normalizeOpenClawLoopbackUrl(value: string): string {
+function normalizeCarapaceLoopbackUrl(value: string): string {
   const match =
     /^(http:\/\/(?:127\.0\.0\.1|localhost|\[::1\])):\d+(\/mcp)$/.exec(value.trim()) ?? undefined;
   if (!match) {
     return value;
   }
-  return `${match[1]}:<openclaw-loopback>${match[2]}`;
+  return `${match[1]}:<carapace-loopback>${match[2]}`;
 }
 
 function canonicalizeSystemAgentTurnStateForResume(
   server: BundleMcpConfig["mcpServers"][string],
 ): BundleMcpConfig["mcpServers"][string] {
-  if (!isRecord(server.env) || server.env[OPENCLAW_TOOLS_MCP_TOOLS_ENV] !== "openclaw") {
+  if (!isRecord(server.env) || server.env[CARAPACE_TOOLS_MCP_TOOLS_ENV] !== "carapace") {
     return server;
   }
   // The host reissues approval authority through a fresh stdio server each turn.
@@ -99,26 +99,26 @@ function canonicalizeSystemAgentTurnStateForResume(
     ...server,
     env: {
       ...server.env,
-      [OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_APPROVAL_ARMED_ENV]: "<openclaw-turn-state>",
-      [OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_PROPOSAL_ENV]: "<openclaw-turn-state>",
+      [CARAPACE_TOOLS_MCP_SYSTEM_AGENT_APPROVAL_ARMED_ENV]: "<carapace-turn-state>",
+      [CARAPACE_TOOLS_MCP_SYSTEM_AGENT_PROPOSAL_ENV]: "<carapace-turn-state>",
     },
   };
 }
 
 function canonicalizeBundleMcpConfigForResume(config: BundleMcpConfig): BundleMcpConfig {
-  // The OpenClaw loopback MCP port changes across runs. Replace it before
+  // The Carapace loopback MCP port changes across runs. Replace it before
   // hashing so resume compatibility tracks config shape, not ephemeral ports.
   const canonicalServers = Object.fromEntries(
     Object.entries(config.mcpServers).map(([name, server]) => {
       const canonicalServer = canonicalizeSystemAgentTurnStateForResume(server);
-      if (name !== "openclaw" || typeof canonicalServer.url !== "string") {
+      if (name !== "carapace" || typeof canonicalServer.url !== "string") {
         return [name, sortJsonValue(canonicalServer)];
       }
       return [
         name,
         sortJsonValue({
           ...canonicalServer,
-          url: normalizeOpenClawLoopbackUrl(canonicalServer.url),
+          url: normalizeCarapaceLoopbackUrl(canonicalServer.url),
         }),
       ];
     }),
@@ -128,7 +128,7 @@ function canonicalizeBundleMcpConfigForResume(config: BundleMcpConfig): BundleMc
   };
 }
 
-const OPENCLAW_MCP_ENV_TEMPLATE_PATTERN = /\$\{(OPENCLAW_MCP_[A-Z0-9_]+)\}/g;
+const CARAPACE_MCP_ENV_TEMPLATE_PATTERN = /\$\{(CARAPACE_MCP_[A-Z0-9_]+)\}/g;
 
 function normalizeMcpToolDenials(
   value?: Record<string, string[]>,
@@ -202,24 +202,24 @@ function selectBundleMcpServers(
   };
 }
 
-function resolveOpenClawMcpEnvTemplates(value: unknown, env?: Record<string, string>): unknown {
+function resolveCarapaceMcpEnvTemplates(value: unknown, env?: Record<string, string>): unknown {
   if (!env) {
     return value;
   }
   if (typeof value === "string") {
-    return value.replace(OPENCLAW_MCP_ENV_TEMPLATE_PATTERN, (match, name: string) => {
+    return value.replace(CARAPACE_MCP_ENV_TEMPLATE_PATTERN, (match, name: string) => {
       const replacement = env[name];
       return Object.hasOwn(env, name) && replacement !== undefined ? replacement : match;
     });
   }
   if (Array.isArray(value)) {
-    return value.map((entry) => resolveOpenClawMcpEnvTemplates(entry, env));
+    return value.map((entry) => resolveCarapaceMcpEnvTemplates(entry, env));
   }
   if (!isRecord(value)) {
     return value;
   }
   return Object.fromEntries(
-    Object.entries(value).map(([key, entry]) => [key, resolveOpenClawMcpEnvTemplates(entry, env)]),
+    Object.entries(value).map(([key, entry]) => [key, resolveCarapaceMcpEnvTemplates(entry, env)]),
   );
 }
 
@@ -282,7 +282,7 @@ async function prepareModeSpecificBundleMcpConfig(params: {
     };
   }
 
-  const runtimeConfig = resolveOpenClawMcpEnvTemplates(
+  const runtimeConfig = resolveCarapaceMcpEnvTemplates(
     params.mergedConfig,
     params.env,
   ) as BundleMcpConfig;
@@ -295,7 +295,7 @@ async function prepareModeSpecificBundleMcpConfig(params: {
     ),
   };
   const temporary = await writeTemporaryBundleMcpJson(
-    "openclaw-cli-mcp-",
+    "carapace-cli-mcp-",
     claudeConfig,
     "mcp.json",
     false,
@@ -341,14 +341,14 @@ export async function prepareCliBundleMcpConfig(params: {
   mode?: CliBundleMcpMode;
   backend: CliBackendConfig;
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   toolOverrides?: SessionToolOverrides;
   agentDir?: string;
   additionalConfig?: BundleMcpConfig;
   /**
    * Serve exactly these servers, skipping user/plugin/additional merges.
-   * Ring-zero OpenClaw runs use this so the CLI harness sees only the
-   * openclaw MCP server instead of the normal openclaw tool surface.
+   * Ring-zero Carapace runs use this so the CLI harness sees only the
+   * carapace MCP server instead of the normal carapace tool surface.
    */
   exclusiveConfig?: BundleMcpConfig;
   env?: Record<string, string>;
@@ -459,7 +459,7 @@ export async function prepareCliBundleMcpConfig(params: {
     // Native policy discovery runs in-process and owns OAuth refresh. Restrict it
     // to projected survivors without passing external-runtime bearer placeholders.
     const nativePolicyConfig = selectBundleMcpServers(mergedConfig, policyConfig);
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...params.config,
       mcp: { ...params.config?.mcp, servers: nativePolicyConfig.mcpServers },
     };
@@ -559,7 +559,7 @@ export async function prepareCliBundleMcpCaptureAttempt(params: {
   return {
     env: {
       ...params.env,
-      OPENCLAW_MCP_CLI_CAPTURE_KEY: params.captureKey,
+      CARAPACE_MCP_CLI_CAPTURE_KEY: params.captureKey,
     },
   };
 }

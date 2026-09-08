@@ -3,15 +3,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage } from "node:http";
 import net from "node:net";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../src/test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../src/test-utils/carapace-test-state.js";
 import { getFreePort } from "../../../src/test-utils/ports.js";
 import type { ApplicationRuntime } from "../app/bootstrap.ts";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
@@ -27,7 +27,7 @@ import {
 } from "./control-ui-auth-proof.test-support.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 const viewport = { height: 900, width: 1280 };
 const trustedProxyUser = "qa-operator";
@@ -84,7 +84,7 @@ type RealTransportProxy = {
 type RealGateway = {
   httpUrl: string;
   port: number;
-  state: OpenClawTestState;
+  state: CarapaceTestState;
   url: string;
 };
 
@@ -92,7 +92,7 @@ let allowedUi: ControlUiE2eServer;
 let rejectedUi: ControlUiE2eServer;
 let gateway: RealGateway;
 let proxy: RealTransportProxy;
-let gatewayState: OpenClawTestState | undefined;
+let gatewayState: CarapaceTestState | undefined;
 // Register producers before awaiting startup so partial setup still owns their closes.
 const closeProducers: Array<() => Promise<void>> = [];
 
@@ -412,19 +412,19 @@ async function startRealGateway(allowedOrigin: string, signal: AbortSignal): Pro
   const port = await getFreePort();
   const httpUrl = `http://127.0.0.1:${port}/`;
   signal.throwIfAborted();
-  gatewayState = await createOpenClawTestState({
+  gatewayState = await createCarapaceTestState({
     label: "control-ui-auth-transports",
     layout: "home",
     env: {
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_TEST_MINIMAL_GATEWAY: "1",
       VITEST: "1",
     },
   });
@@ -526,7 +526,7 @@ async function createBrowserPage(
   expect(response?.status()).toBe(200);
   // Browser startup shares CI shard CPU. Bound navigation and the first
   // rendered interaction separately; transport assertions stay narrow.
-  const confirmation = page.locator("openclaw-gateway-url-confirmation");
+  const confirmation = page.locator("carapace-gateway-url-confirmation");
   await confirmation.waitFor({ timeout: controlUiSettleTimeoutMs });
   expect(await confirmation.textContent()).toContain(gatewayUrl);
   expect(proxy.evidence).toHaveLength(evidenceStartIndex);
@@ -599,7 +599,7 @@ async function waitForVisibleFailure(page: Page, expectedText: string): Promise<
   const raw = (await failure.locator(".login-gate__failure-raw").textContent()) ?? "";
   expect(raw.toLowerCase()).toContain(expectedText.toLowerCase());
   expect(await failure.locator(".login-gate__failure-steps").isVisible()).toBe(true);
-  expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+  expect(await page.locator("carapace-app-shell").count()).toBe(0);
   return raw;
 }
 
@@ -627,7 +627,7 @@ const suite = createControlUiE2eSuite({
     console.info("[real-config-id-proof] setup-start");
     artifactDir = createControlUiE2eArtifactDir(
       "control-ui-auth-transports",
-      process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim() ||
+      process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim() ||
         ".artifacts/control-ui-e2e/control-ui-auth-transports",
     );
     return startControlUiE2eServer();
@@ -685,7 +685,7 @@ suite.define(() => {
         const servedBundle = await verifyGatewayServedControlUiBundle(gateway.httpUrl);
         const connected = await createBrowserPage(gateway.httpUrl, proxy.trustedUrl);
         await connected.page
-          .locator("openclaw-app-shell")
+          .locator("carapace-app-shell")
           .waitFor({ timeout: controlUiSettleTimeoutMs });
         const servedAssetLoaded = await connected.page.evaluate(
           (assetPath) =>
@@ -741,7 +741,7 @@ suite.define(() => {
 
         await connected.page.reload({ waitUntil: "domcontentloaded" });
         await connected.page
-          .locator("openclaw-app-shell")
+          .locator("carapace-app-shell")
           .waitFor({ timeout: controlUiSettleTimeoutMs });
         expect((await connected.page.goto(rawSettingsUrl.toString()))?.status()).toBe(200);
         try {
@@ -816,7 +816,7 @@ suite.define(() => {
 
         const connected = await createBrowserPage(allowedUi.baseUrl, proxy.trustedUrl);
         await connected.page
-          .locator("openclaw-app-shell")
+          .locator("carapace-app-shell")
           .waitFor({ timeout: controlUiSettleTimeoutMs });
         const trustedEvidence = await waitForConnectionEvidence(
           (entry) =>
@@ -827,7 +827,7 @@ suite.define(() => {
         );
         expect(trustedEvidence.browserConnect).toMatchObject({
           authFields: [],
-          clientId: "openclaw-control-ui",
+          clientId: "carapace-control-ui",
           clientMode: "webchat",
           hasDevice: true,
         });
@@ -865,13 +865,13 @@ suite.define(() => {
         signal.throwIfAborted();
         const connected = await createBrowserPage(gateway.httpUrl, proxy.trustedUrl);
         await connected.page
-          .locator("openclaw-app-shell")
+          .locator("carapace-app-shell")
           .waitFor({ timeout: controlUiSettleTimeoutMs });
 
         const seededEvidenceStart = proxy.evidence.length;
         await connected.page.evaluate((gatewayUrl) => {
           const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-            "openclaw-app",
+            "carapace-app",
           );
           if (!app?.runtime) {
             throw new Error("Control UI runtime is unavailable");
@@ -894,7 +894,7 @@ suite.define(() => {
         const queryEvidenceStart = proxy.evidence.length;
         await connected.page.evaluate((gatewayUrl) => {
           const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-            "openclaw-app",
+            "carapace-app",
           );
           if (!app?.runtime) {
             throw new Error("Control UI runtime is unavailable");
@@ -913,7 +913,7 @@ suite.define(() => {
         const originEvidenceStart = proxy.evidence.length;
         await connected.page.evaluate((gatewayUrl) => {
           const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-            "openclaw-app",
+            "carapace-app",
           );
           if (!app?.runtime) {
             throw new Error("Control UI runtime is unavailable");
@@ -977,7 +977,7 @@ suite.define(() => {
 
         const allowed = await createBrowserPage(allowedUi.baseUrl, proxy.trustedUrl);
         await allowed.page
-          .locator("openclaw-app-shell")
+          .locator("carapace-app-shell")
           .waitFor({ timeout: controlUiSettleTimeoutMs });
         const allowedOrigin = new URL(allowedUi.baseUrl).origin;
         const allowedEvidence = await waitForConnectionEvidence(

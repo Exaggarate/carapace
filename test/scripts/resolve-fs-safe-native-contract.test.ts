@@ -8,10 +8,10 @@ const SCRIPT = resolve("scripts/resolve-fs-safe-native-contract.mjs");
 const tempDirectories = useAutoCleanupTempDirTracker(afterEach);
 
 function commitSource(version: string, defaults: string, remoteBranch?: string) {
-  const root = tempDirectories.make("openclaw-fs-safe-contract-");
+  const root = tempDirectories.make("carapace-fs-safe-contract-");
   execFileSync("git", ["init", "-q"], { cwd: root });
-  execFileSync("git", ["config", "user.email", "test@openclaw.local"], { cwd: root });
-  execFileSync("git", ["config", "user.name", "OpenClaw test"], { cwd: root });
+  execFileSync("git", ["config", "user.email", "test@carapace.local"], { cwd: root });
+  execFileSync("git", ["config", "user.name", "Carapace test"], { cwd: root });
   writeFileSync(
     join(root, "package.json"),
     `${JSON.stringify({ dependencies: { "@openclaw/fs-safe": version } })}\n`,
@@ -75,7 +75,7 @@ describe("resolve-fs-safe-native-contract", () => {
   });
 
   it("uses only sparse-materialized fs-safe ownership sources for an authorized legacy target", () => {
-    const root = tempDirectories.make("openclaw-fs-safe-sparse-contract-");
+    const root = tempDirectories.make("carapace-fs-safe-sparse-contract-");
     const ref = "a".repeat(40);
     const gitPath = join(root, "git");
     writeFileSync(

@@ -1,8 +1,8 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 // Workboard plugin module implements tools behavior.
-import { jsonResult, readStringParam } from "openclaw/plugin-sdk/core";
-import type { AnyAgentTool, OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+import { jsonResult, readStringParam } from "carapace/plugin-sdk/core";
+import type { AnyAgentTool, CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
 import { Type } from "typebox";
 import { redactClaimToken } from "./card-redaction.js";
 import type { WorkboardStore } from "./store.js";
@@ -14,7 +14,7 @@ import {
 } from "./tools-card-mutations.js";
 import { createWorkboardOrchestrationTools } from "./tools-orchestration.js";
 
-function contextOwner(ctx: OpenClawPluginToolContext | undefined): string {
+function contextOwner(ctx: CarapacePluginToolContext | undefined): string {
   const record = (ctx ?? {}) as Record<string, unknown>;
   return (
     (typeof record.agentId === "string" && record.agentId) ||
@@ -167,7 +167,7 @@ const CardIdSchema = strictObject({
 });
 
 export function createWorkboardTools(params: {
-  context?: OpenClawPluginToolContext;
+  context?: CarapacePluginToolContext;
   store: WorkboardStore;
 }): AnyAgentTool[] {
   const { store } = params;

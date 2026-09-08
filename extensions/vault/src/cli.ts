@@ -1,10 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
-import { createPluginSecretRefSetupCli } from "openclaw/plugin-sdk/secret-ref-runtime";
-import { pathExists } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { CarapaceConfig } from "carapace/plugin-sdk/plugin-entry";
+import { createPluginSecretRefSetupCli } from "carapace/plugin-sdk/secret-ref-runtime";
+import { pathExists } from "carapace/plugin-sdk/security-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { parseVaultSecretId } from "../vault-secret-id.js";
 
 const VAULT_PROVIDER_ALIAS = "vault";
@@ -30,14 +30,14 @@ const vaultSecretRefSetupCli: PluginSecretRefSetupCli = createPluginSecretRefSet
   },
   normalizeSecretId: normalizeVaultSecretId,
   defaultPlanPath: () =>
-    path.join(resolvePreferredOpenClawTmpDir(), `openclaw-vault-secrets-${process.pid}.json`),
+    path.join(resolvePreferredCarapaceTmpDir(), `carapace-vault-secrets-${process.pid}.json`),
 });
 
 type CommandLike = Parameters<typeof vaultSecretRefSetupCli.registerSetupCommand>[0];
 
 type RegisterVaultCommandsParams = {
   program: CommandLike;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };
 
 type StatusOptions = {
@@ -73,12 +73,12 @@ async function resolveResolverScriptPath(
   return candidates[0];
 }
 
-async function runStatus(config: OpenClawConfig, options: StatusOptions): Promise<void> {
+async function runStatus(config: CarapaceConfig, options: StatusOptions): Promise<void> {
   const { providerAlias, provider } = vaultSecretRefSetupCli.inspectProvider(
     config,
     options.providerAlias,
   );
-  const authMethod = normalizeOptionalString(process.env.OPENCLAW_VAULT_AUTH_METHOD) ?? "token";
+  const authMethod = normalizeOptionalString(process.env.CARAPACE_VAULT_AUTH_METHOD) ?? "token";
   const result = {
     providerAlias,
     provider,
@@ -86,13 +86,13 @@ async function runStatus(config: OpenClawConfig, options: StatusOptions): Promis
     vaultAddr: normalizeOptionalString(process.env.VAULT_ADDR),
     authMethod,
     authMount:
-      normalizeOptionalString(process.env.OPENCLAW_VAULT_AUTH_MOUNT) ??
+      normalizeOptionalString(process.env.CARAPACE_VAULT_AUTH_MOUNT) ??
       (authMethod === "kubernetes" ? "kubernetes" : "jwt"),
-    authRole: normalizeOptionalString(process.env.OPENCLAW_VAULT_AUTH_ROLE),
-    hasJwtFile: Boolean(normalizeOptionalString(process.env.OPENCLAW_VAULT_JWT_FILE)),
+    authRole: normalizeOptionalString(process.env.CARAPACE_VAULT_AUTH_ROLE),
+    hasJwtFile: Boolean(normalizeOptionalString(process.env.CARAPACE_VAULT_JWT_FILE)),
     hasVaultTokenFile: Boolean(normalizeOptionalString(process.env.VAULT_TOKEN_FILE)),
-    kvMount: normalizeOptionalString(process.env.OPENCLAW_VAULT_KV_MOUNT) ?? "secret",
-    kvVersion: normalizeOptionalString(process.env.OPENCLAW_VAULT_KV_VERSION) ?? "2",
+    kvMount: normalizeOptionalString(process.env.CARAPACE_VAULT_KV_MOUNT) ?? "secret",
+    kvVersion: normalizeOptionalString(process.env.CARAPACE_VAULT_KV_VERSION) ?? "2",
     hasVaultToken: Boolean(normalizeOptionalString(process.env.VAULT_TOKEN)),
   };
   if (options.json) {
@@ -118,7 +118,7 @@ async function runStatus(config: OpenClawConfig, options: StatusOptions): Promis
   writeLine(`VAULT_TOKEN_FILE: ${result.hasVaultTokenFile ? "set" : "not set"}`);
   writeLine(`Auth mount: ${result.authMount}`);
   writeLine(`Auth role: ${result.authRole ?? "not set"}`);
-  writeLine(`OPENCLAW_VAULT_JWT_FILE: ${result.hasJwtFile ? "set" : "not set"}`);
+  writeLine(`CARAPACE_VAULT_JWT_FILE: ${result.hasJwtFile ? "set" : "not set"}`);
   writeLine(`KV mount: ${result.kvMount}`);
   writeLine(`KV version: ${result.kvVersion}`);
 }

@@ -1,8 +1,8 @@
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type TelegramChannelStatus = {
   accountId?: string;
@@ -21,7 +21,7 @@ type TelegramGatewayClient = {
 const TELEGRAM_QA_DEFAULT_READY_TIMEOUT_MS = 45_000;
 
 export function buildTelegramQaConfig(
-  baseCfg: OpenClawConfig,
+  baseCfg: CarapaceConfig,
   params: {
     apiRoot: string;
     directMessageOnly?: boolean;
@@ -30,7 +30,7 @@ export function buildTelegramQaConfig(
     sutToken: string;
     testerUserId: string;
   },
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     ...baseCfg,
     agents: {
@@ -41,7 +41,7 @@ export function buildTelegramQaConfig(
           ...baseCfg.agents?.defaults?.models,
           "openai/gpt-5.6-luna": {
             ...baseCfg.agents?.defaults?.models?.["openai/gpt-5.6-luna"],
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
           },
         },
         skipBootstrap: true,
@@ -92,7 +92,7 @@ export function buildTelegramQaConfig(
 }
 
 function resolveTelegramQaReadyTimeoutMs(env: NodeJS.ProcessEnv = process.env) {
-  const raw = env.OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS;
+  const raw = env.CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS;
   return raw
     ? (parseStrictPositiveInteger(raw) ?? TELEGRAM_QA_DEFAULT_READY_TIMEOUT_MS)
     : TELEGRAM_QA_DEFAULT_READY_TIMEOUT_MS;

@@ -16,7 +16,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 let artifactDir: string;
 beforeEach(() => {
@@ -100,7 +100,7 @@ async function startBasePathProxy(upstreamBaseUrl: string): Promise<BasePathProx
         body = Buffer.from(
           body
             .toString("utf8")
-            .replace("<html", `<html data-openclaw-control-ui-base-path="${basePath}"`),
+            .replace("<html", `<html data-carapace-control-ui-base-path="${basePath}"`),
         );
       }
       response.end(body);
@@ -154,7 +154,7 @@ describeControlUiE2e("Control UI shell routing E2E", () => {
       const response = await page.goto(url.href, { waitUntil: "domcontentloaded" });
       expect(response?.status()).toBe(200);
 
-      const confirmation = page.locator("openclaw-gateway-url-confirmation");
+      const confirmation = page.locator("carapace-gateway-url-confirmation");
       await confirmation.waitFor();
       expect(await confirmation.getByText(explicitGatewayUrl, { exact: true }).count()).toBe(1);
       await confirmation
@@ -162,13 +162,13 @@ describeControlUiE2e("Control UI shell routing E2E", () => {
         .click();
 
       await gateway.waitForRequest("connect");
-      await page.locator("openclaw-app-shell").waitFor();
-      await page.locator("openclaw-chat-page").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
+      await page.locator("carapace-chat-page").waitFor();
 
       expect(new URL(page.url()).pathname).toBe(`${basePath}/chat/main`);
       expect(new URL(page.url()).hash).toBe("");
       expect((await gateway.getSocketUrls()).at(-1)).toBe(explicitGatewayUrl);
-      expect(await page.locator("html").getAttribute("data-openclaw-control-ui-base-path")).toBe(
+      expect(await page.locator("html").getAttribute("data-carapace-control-ui-base-path")).toBe(
         basePath,
       );
 

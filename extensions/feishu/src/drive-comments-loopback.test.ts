@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterAll, afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createCommentTypingReactionLifecycle } from "./comment-reaction.js";
 import { registerFeishuDriveTools } from "./drive.js";

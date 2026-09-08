@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ProviderPrepareDynamicModelContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ProviderPrepareDynamicModelContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   coerceSecretRef,
   ensureAuthProfileStore,
@@ -7,18 +7,18 @@ import {
   listProfilesForProvider,
   normalizeOptionalSecretInput,
   resolveAuthProfileOrder,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   resolveConfiguredSecretInputWithFallback,
   resolveRequiredConfiguredSecretRefInputString,
-} from "openclaw/plugin-sdk/secret-input-runtime";
+} from "carapace/plugin-sdk/secret-input-runtime";
 import { PUBLIC_GITHUB_COPILOT_DOMAIN } from "./domain.js";
 import { PROVIDER_ID } from "./models.js";
 import { formatGithubCopilotApiKey, parseGithubCopilotApiKey } from "./oauth.js";
 
 export async function resolveFirstGithubToken(params: {
   agentDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   profileId?: string;
   authProfileMode?: ProviderPrepareDynamicModelContext["authProfileMode"];

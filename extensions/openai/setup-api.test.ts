@@ -1,4 +1,4 @@
-import type { OAuthCredential } from "openclaw/plugin-sdk/provider-auth";
+import type { OAuthCredential } from "carapace/plugin-sdk/provider-auth";
 // Openai tests cover setup api plugin behavior.
 import { describe, expect, it } from "vitest";
 import { buildOpenAISetupProvider } from "./setup-api.js";

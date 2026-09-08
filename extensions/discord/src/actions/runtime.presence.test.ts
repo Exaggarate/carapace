@@ -1,6 +1,6 @@
-import type { ActionGate } from "openclaw/plugin-sdk/channel-actions";
+import type { ActionGate } from "carapace/plugin-sdk/channel-actions";
 // Discord tests cover runtime.presence plugin behavior.
-import type { DiscordActionConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordActionConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayPlugin } from "../internal/gateway.js";
 import { clearGateways, registerGateway } from "../monitor/gateway-registry.js";
@@ -17,7 +17,7 @@ const presenceEnabled: ActionGate<DiscordActionConfig> = (key) => key === "prese
 const presenceDisabled: ActionGate<DiscordActionConfig> = () => false;
 const defaultDiscordConfig = {
   channels: { discord: { token: "test-token", actions: { presence: true } } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 describe("handleDiscordPresenceAction", () => {
   async function setPresence(
@@ -182,7 +182,7 @@ describe("handleDiscordPresenceAction", () => {
             accounts: { ops: { token: "ops-token" } },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "ops",
     },
     {
@@ -195,7 +195,7 @@ describe("handleDiscordPresenceAction", () => {
             accounts: { ops: { token: "ops-token" } },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "ops",
       requestedAccountId: "ops",
     },

@@ -60,7 +60,7 @@ export function createSettledProviderFailureAttempt(
     replayMetadata: { hadPotentialSideEffects: true, replaySafe: false },
     currentAttemptReplayMetadata: { hadPotentialSideEffects: true, replaySafe: false },
     settledTurnFinalizationContext: {
-      source: "openclaw-transcript",
+      source: "carapace-transcript",
       messages: Object.freeze([...messages]),
     },
     ...overrides,
@@ -75,7 +75,7 @@ export function createSettledFinalizationTestInput(
     admittedRunContext,
     sessionId: "session-settled",
     runId: "run-settled",
-    workspaceDir: "/tmp/openclaw-test",
+    workspaceDir: "/tmp/carapace-test",
     prompt: "finish the task",
     timeoutMs: 60_000,
   };

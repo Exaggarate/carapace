@@ -44,13 +44,13 @@ import {
   sessionNavigationTarget,
 } from "../../lib/sessions/route-navigation.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { buildCronSuggestions, THINKING_SUGGESTIONS } from "./form-suggestions.ts";
 import { resolveCronRouteData } from "./route-model.ts";
 import { renderCron, type CronDetailTab, type CronListTab } from "./view.ts";
 
-class CronPage extends OpenClawLightDomElement {
+class CronPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -647,12 +647,12 @@ class CronPage extends OpenClawLightDomElement {
 
 export const cronPageComponent = {
   header: true,
-  render: (search: unknown) => html`<openclaw-cron-page
+  render: (search: unknown) => html`<carapace-cron-page
     .routeSearch=${typeof search === "string" ? search : ""}
-  ></openclaw-cron-page>`,
+  ></carapace-cron-page>`,
 };
 
 // Module re-evaluation can retain the shared registry (for example, in Vitest).
-if (!customElements.get("openclaw-cron-page")) {
-  customElements.define("openclaw-cron-page", CronPage);
+if (!customElements.get("carapace-cron-page")) {
+  customElements.define("carapace-cron-page", CronPage);
 }

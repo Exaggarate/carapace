@@ -1,7 +1,7 @@
 import type { ReplyPayload } from "../../auto-reply/reply-payload.js";
 import type { NormalizeReplySkipReason } from "../../auto-reply/reply/normalize-reply-skip-reason.js";
 import type { CliDeps } from "../../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { TtsAutoMode } from "../../config/types.tts.js";
 import type { SourceDeliveryOutcome } from "../../infra/outbound/source-delivery-plan.js";
 import type { CronDeliveryPlan } from "../delivery-plan.js";
@@ -12,8 +12,8 @@ import type { RunCronAgentTurnResult } from "./run.types.js";
 export type SuccessfulCronDeliveryTarget = Extract<DeliveryTargetResolution, { ok: true }>;
 
 export type DispatchCronDeliveryParams = {
-  cfg: OpenClawConfig;
-  cfgWithAgentDefaults: OpenClawConfig;
+  cfg: CarapaceConfig;
+  cfgWithAgentDefaults: CarapaceConfig;
   deps: CliDeps;
   job: CronJob;
   agentId: string;

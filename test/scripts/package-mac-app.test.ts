@@ -32,7 +32,7 @@ describe.skipIf(process.platform === "win32" || availableParallelism() < 2)(
       "joins architecture workers and preserves assembly safety: %s",
       { timeout: 15_000 },
       async (mode, { mac, onTestFinished }) => {
-        const root = mac.createTempDir("openclaw-swift-parallel-");
+        const root = mac.createTempDir("carapace-swift-parallel-");
         const stage = path.join(root, "stage");
         const scripts = path.join(root, "scripts/lib");
         mkdirSync(scripts, { recursive: true });
@@ -111,7 +111,7 @@ ROOT_DIR=${JSON.stringify(root)}
 APP_STAGE_DIR=${JSON.stringify(stage)}
 SWIFT_BUILD_RESULTS=""
 SWIFT_BUILD_PID=""
-PRODUCT=OpenClaw
+PRODUCT=Carapace
 BUILD_CONFIG=release
 PEEKABOO_LOCKED_SOURCE_COMMIT=${commit}
 SKIP_MLX_TTS=0
@@ -180,7 +180,7 @@ touch "$ROOT_DIR/assembled"
           const pid = Number(readFileSync(path.join(root, `pid-${arch}`), "utf8"));
           expect(() => process.kill(pid, 0)).toThrow();
           expect(
-            existsSync(path.join(root, "apps/macos/.build", `.openclaw-package-${arch}.lock`)),
+            existsSync(path.join(root, "apps/macos/.build", `.carapace-package-${arch}.lock`)),
           ).toBe(mode === "cleanup-failure");
         }
       },
@@ -192,10 +192,10 @@ describe("packaged worker freshness", () => {
   it.skipIf(process.platform === "win32")(
     "keeps private app staging out of package contents and removes it after use",
     async () => {
-      const root = tempDirs.make("openclaw-package-stage-");
+      const root = tempDirs.make("carapace-package-stage-");
       const dist = path.join(root, "dist");
-      const output = tempDirs.make("openclaw-package-stage-output-");
-      const previousApp = path.join(dist, "OpenClaw.app/Contents/MacOS/OpenClaw");
+      const output = tempDirs.make("carapace-package-stage-output-");
+      const previousApp = path.join(dist, "Carapace.app/Contents/MacOS/Carapace");
       const { files, packageManager, version } = JSON.parse(
         readFileSync("package.json", "utf8"),
       ) as {
@@ -208,7 +208,7 @@ describe("packaged worker freshness", () => {
       writeFileSync(path.join(dist, "entry.js"), "export {};\n");
       writeFileSync(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", version, packageManager, files }),
+        JSON.stringify({ name: "carapace", version, packageManager, files }),
       );
       const script = readFileSync(scriptPath, "utf8");
       const allocationStart = script.indexOf("# pnpm build owns the Control UI");
@@ -221,7 +221,7 @@ describe("packaged worker freshness", () => {
           "-c",
           `set -euo pipefail
 ROOT_DIR="$1"
-APP_DESTINATION="$ROOT_DIR/dist/OpenClaw.app"
+APP_DESTINATION="$ROOT_DIR/dist/Carapace.app"
 ${script.slice(allocationStart, allocationEnd)}
 printf '%s' "$APP_STAGE_DIR"
 `,
@@ -239,8 +239,8 @@ printf '%s' "$APP_STAGE_DIR"
       mkdirSync(path.join(swiftResults, "arm64"), { recursive: true });
       writeFileSync(path.join(swiftResults, "arm64/peekaboo-commit"), "private stage canary\n");
       writeFileSync(path.join(swiftResults, "cleanup-complete"), "verified\n");
-      mkdirSync(path.join(stage, "OpenClaw.app/Contents/MacOS"), { recursive: true });
-      writeFileSync(path.join(stage, "OpenClaw.app/Contents/MacOS/OpenClaw"), "candidate app\n");
+      mkdirSync(path.join(stage, "Carapace.app/Contents/MacOS"), { recursive: true });
+      writeFileSync(path.join(stage, "Carapace.app/Contents/MacOS/Carapace"), "candidate app\n");
       try {
         expect(statSync(stage).dev).toBe(statSync(dist).dev);
         expect(statSync(stage).mode & 0o777).toBe(0o700);
@@ -252,7 +252,7 @@ printf '%s' "$APP_STAGE_DIR"
         expect(packed.status, packed.stderr).toBe(0);
         const entries: string[] = [];
         await tar.t({
-          file: path.join(output, `openclaw-${version}.tgz`),
+          file: path.join(output, `carapace-${version}.tgz`),
           onentry: (entry) => {
             if (entry.type !== "Directory") {
               entries.push(entry.path);
@@ -288,15 +288,15 @@ ${cleanup}
   );
 
   it.each([
-    "dist/OpenClaw.app",
-    "dist/OpenClaw-proof.app",
-    "dist/.openclaw-package.fixture/OpenClaw.app",
+    "dist/Carapace.app",
+    "dist/Carapace-proof.app",
+    "dist/.carapace-package.fixture/Carapace.app",
   ])("bounds expanded package exclusions to the app root %s", (app) => {
     const manifest = JSON.parse(readFileSync("package.json", "utf8")) as { files: string[] };
     const exclusions = manifest.files
       .filter((entry) => entry.startsWith("!"))
       .map((entry) => entry.slice(1));
-    const entries = [app, `${app}/Contents`, `${app}/Contents/MacOS/OpenClaw`, "dist/entry.js"];
+    const entries = [app, `${app}/Contents`, `${app}/Contents/MacOS/Carapace`, "dist/entry.js"];
     // npm 12 expands files globs into individual ignore rules. Exclude the app
     // directory, which also excludes its contents, not every payload file separately.
     const matches = entries.filter((entry) =>
@@ -306,7 +306,7 @@ ${cleanup}
   });
 
   it("rebuilds dirty JavaScript even when the old SKIP_TSC shortcut is requested", () => {
-    const root = tempDirs.make("openclaw-package-worker-freshness-");
+    const root = tempDirs.make("carapace-package-worker-freshness-");
     const script = readFileSync(scriptPath, "utf8");
     const start = script.indexOf('if [[ "${SKIP_TSC:-0}"');
     const end = script.indexOf('node - "$ROOT_DIR/dist/build-info.json"', start);
@@ -328,7 +328,7 @@ ${cleanup}
 });
 
 function makePlist(): string {
-  const dir = tempDirs.make("openclaw-plistbuddy-");
+  const dir = tempDirs.make("carapace-plistbuddy-");
   const plist = path.join(dir, "Info.plist");
   writeFileSync(
     plist,
@@ -396,7 +396,7 @@ function runSwiftToolchainHarness(options: {
   xcodeVersion?: string;
   xcodebuildFailure?: string;
 }) {
-  const root = tempDirs.make("openclaw-package-swift-root-");
+  const root = tempDirs.make("carapace-package-swift-root-");
   const toolsDir = path.join(root, "tools");
   const commandLineToolsDir = path.join(root, "Library", "Developer", "CommandLineTools");
   const xcodeDeveloperDir = path.join(root, "Applications", "Xcode.app", "Contents", "Developer");
@@ -494,7 +494,7 @@ function getPeekabooSourceCommitHelperBlock(): string {
 }
 
 function runPeekabooSourceCommitHarness(packageResolved: string, expectedRevision?: string) {
-  const root = tempDirs.make("openclaw-package-peekaboo-source-");
+  const root = tempDirs.make("carapace-package-peekaboo-source-");
   const resolvedFile = path.join(root, "apps", "macos", "Package.resolved");
   mkdirSync(path.dirname(resolvedFile), { recursive: true });
   writeFileSync(resolvedFile, packageResolved, "utf8");
@@ -502,7 +502,7 @@ function runPeekabooSourceCommitHarness(packageResolved: string, expectedRevisio
   return runHelper(`
     set -euo pipefail
     ROOT_DIR=${JSON.stringify(root)}
-    ${expectedRevision ? `export OPENCLAW_EXPECTED_PEEKABOO_SOURCE_COMMIT=${JSON.stringify(expectedRevision)}` : "unset OPENCLAW_EXPECTED_PEEKABOO_SOURCE_COMMIT"}
+    ${expectedRevision ? `export CARAPACE_EXPECTED_PEEKABOO_SOURCE_COMMIT=${JSON.stringify(expectedRevision)}` : "unset CARAPACE_EXPECTED_PEEKABOO_SOURCE_COMMIT"}
     ${getPeekabooSourceCommitHelperBlock()}
     resolve_peekaboo_source_commit
   `);
@@ -511,7 +511,7 @@ function runPeekabooSourceCommitHarness(packageResolved: string, expectedRevisio
 function getSourceProvenanceStampBlock(): string {
   const script = readFileSync(scriptPath, "utf8");
   const start = script.indexOf(
-    'plist_set_string_required "$APP_ROOT/Contents/Info.plist" OpenClawBuildTimestamp',
+    'plist_set_string_required "$APP_ROOT/Contents/Info.plist" CarapaceBuildTimestamp',
   );
   const end = script.indexOf(
     'plist_set_or_add_string "$APP_ROOT/Contents/Info.plist" SUFeedURL',
@@ -525,23 +525,23 @@ function getSourceProvenanceStampBlock(): string {
 }
 
 function runSourceProvenanceStampHarness(corruptKey?: string) {
-  const openClawCommit = "a".repeat(40);
+  const carapaceCommit = "a".repeat(40);
   const peekabooCommit = "b".repeat(40);
   const corruptCommit = "c".repeat(40);
   const result = runHelper(`
     set -euo pipefail
-    stamped_openclaw=
+    stamped_carapace=
     stamped_peekaboo=
     plist_set_string_required() {
       case "$2" in
-        OpenClawGitCommit) stamped_openclaw="$3" ;;
+        CarapaceGitCommit) stamped_carapace="$3" ;;
         PeekabooSourceCommit) stamped_peekaboo="$3" ;;
       esac
     }
     plist_print_required() {
       local value
       case "$2" in
-        OpenClawGitCommit) value="$stamped_openclaw" ;;
+        CarapaceGitCommit) value="$stamped_carapace" ;;
         PeekabooSourceCommit) value="$stamped_peekaboo" ;;
         *) return 1 ;;
       esac
@@ -550,19 +550,19 @@ function runSourceProvenanceStampHarness(corruptKey?: string) {
       fi
       printf '%s' "$value"
     }
-    APP_ROOT=/tmp/OpenClaw.app
+    APP_ROOT=/tmp/Carapace.app
     ROOT_DIR=/unused
     node() { echo fixture-build-id; }
     plist_set_or_add_string() { :; }
     BUILD_TS=2026-08-13T00:00:00.000Z
-    BUILD_GIT_COMMIT=${JSON.stringify(openClawCommit)}
+    BUILD_GIT_COMMIT=${JSON.stringify(carapaceCommit)}
     PEEKABOO_SOURCE_COMMIT=${JSON.stringify(peekabooCommit)}
     BUILD_CONFIG=release
     ${getSourceProvenanceStampBlock()}
-    printf '%s\n%s\n' "$stamped_openclaw" "$stamped_peekaboo"
+    printf '%s\n%s\n' "$stamped_carapace" "$stamped_peekaboo"
   `);
 
-  return { result, openClawCommit, peekabooCommit };
+  return { result, carapaceCommit, peekabooCommit };
 }
 
 function getMLXTTSHelperBuildBlock(): string {
@@ -611,7 +611,7 @@ function runRealCompiledPeekabooHarness(
     | "untracked",
   expectedOverride?: string,
 ) {
-  const root = tempDirs.make(`openclaw-compiled-peekaboo-real-${mutation}-`);
+  const root = tempDirs.make(`carapace-compiled-peekaboo-real-${mutation}-`);
   const buildPath = path.join(root, "build");
   const checkout = path.join(buildPath, "checkouts", "Peekaboo");
   const sourcePath = path.join(checkout, "Core", "Sources", "Fixture.swift");
@@ -795,9 +795,9 @@ function getSwiftPMResourcePatchBlock(): string {
 
 const swiftPMResourceBundles = [
   "GRDB_GRDB.bundle",
-  "OpenClaw_OpenClaw.bundle",
-  "OpenClawKit_OpenClawKit.bundle",
-  "OpenClawKit_OpenClawChatUI.bundle",
+  "Carapace_Carapace.bundle",
+  "CarapaceKit_CarapaceKit.bundle",
+  "CarapaceKit_CarapaceChatUI.bundle",
   "KeyboardShortcuts_KeyboardShortcuts.bundle",
   "SwiftMath_SwiftMath.bundle",
 ] as const;
@@ -815,10 +815,10 @@ const mlxTTSResourceFiles = [
 function runSwiftPMResourceBundleHarness(
   options: { missingBundle?: string; missingMetallib?: boolean; skipMLXTTS?: boolean } = {},
 ) {
-  const root = tempDirs.make("openclaw-package-resources-root-");
+  const root = tempDirs.make("carapace-package-resources-root-");
   const buildRoot = path.join(root, "build");
   const helperBuildRoot = path.join(root, "helper build");
-  const appRoot = path.join(root, "OpenClaw.app");
+  const appRoot = path.join(root, "Carapace.app");
   const buildProducts = path.join(buildRoot, "arm64", "debug");
   const helperBuildProducts = path.join(helperBuildRoot, "arm64", "out", "Products", "Debug");
 
@@ -868,8 +868,8 @@ function runSwiftPMResourceBundleHarness(
 }
 
 function runSwiftPMResourcePatchHarness(failRestore = false) {
-  const root = tempDirs.make("openclaw-package-resource-patch-");
-  const workRoot = tempDirs.make("openclaw-resource-backups-");
+  const root = tempDirs.make("carapace-package-resource-patch-");
+  const workRoot = tempDirs.make("carapace-resource-backups-");
   const backupRoot = path.join(workRoot, "resource-backups");
   const buildPath = path.join(root, "build");
   const checkoutRoot = path.join(buildPath, "checkouts");
@@ -945,11 +945,11 @@ function runSwiftPMResourcePatchHarness(failRestore = false) {
 }
 
 function runStopPackagedAppHarness(killZeroStatus: 0 | 1) {
-  const root = tempDirs.make("openclaw-package-stop-root-");
-  const toolsDir = tempDirs.make("openclaw-package-stop-tools-");
+  const root = tempDirs.make("carapace-package-stop-root-");
+  const toolsDir = tempDirs.make("carapace-package-stop-tools-");
 
-  const appRoot = path.join(root, "dist", "OpenClaw.app");
-  const appBinary = path.join(appRoot, "Contents", "MacOS", "OpenClaw");
+  const appRoot = path.join(root, "dist", "Carapace.app");
+  const appBinary = path.join(appRoot, "Contents", "MacOS", "Carapace");
   const lsofPath = path.join(toolsDir, "lsof");
   const pgrepPath = path.join(toolsDir, "pgrep");
   const sleepPath = path.join(toolsDir, "sleep");
@@ -968,7 +968,7 @@ function runStopPackagedAppHarness(killZeroStatus: 0 | 1) {
   return runHelper(`
     set -euo pipefail
     APP_DESTINATION=${JSON.stringify(appRoot)}
-    PRODUCT=OpenClaw
+    PRODUCT=Carapace
     PATH=${JSON.stringify(`${toolsDir}:/usr/bin:/bin`)}
     kill() {
       if [[ "\${1:-}" == "-0" ]]; then
@@ -982,10 +982,10 @@ function runStopPackagedAppHarness(killZeroStatus: 0 | 1) {
 }
 
 function runSwiftCompatibilityHarness(buildConfig: "debug" | "release") {
-  const root = tempDirs.make("openclaw-package-swift-root-");
-  const toolsDir = tempDirs.make("openclaw-package-swift-tools-");
+  const root = tempDirs.make("carapace-package-swift-root-");
+  const toolsDir = tempDirs.make("carapace-package-swift-tools-");
   const developerDir = path.join(root, "Xcode.app", "Contents", "Developer");
-  const appRoot = path.join(root, "OpenClaw.app");
+  const appRoot = path.join(root, "Carapace.app");
   const xcodeSelectPath = path.join(toolsDir, "xcode-select");
 
   writeFileSync(
@@ -1006,8 +1006,8 @@ function runSwiftCompatibilityHarness(buildConfig: "debug" | "release") {
 }
 
 function runSwiftPackageResolutionHarness(mutateLockfile: boolean) {
-  const root = tempDirs.make("openclaw-swift-resolve-root-");
-  const toolsDir = tempDirs.make("openclaw-swift-resolve-tools-");
+  const root = tempDirs.make("carapace-swift-resolve-root-");
+  const toolsDir = tempDirs.make("carapace-swift-resolve-tools-");
   const resolvedFile = path.join(root, "apps", "macos", "Package.resolved");
   const swiftPath = path.join(toolsDir, "swift");
 
@@ -1041,49 +1041,49 @@ describe("package-mac-app plist stamping", () => {
       source scripts/lib/build-metadata.sh
       node() { echo "unexpected Node invocation" >&2; return 97; }
       GIT_COMMIT=${JSON.stringify(commit)}
-      OPENCLAW_BUILD_TIMESTAMP=2026-07-10T12:34:56.7Z
-      printf '%s\n%s\n' "$(openclaw_resolve_git_commit "$PWD")" "$(openclaw_resolve_build_timestamp)"
+      CARAPACE_BUILD_TIMESTAMP=2026-07-10T12:34:56.7Z
+      printf '%s\n%s\n' "$(carapace_resolve_git_commit "$PWD")" "$(carapace_resolve_build_timestamp)"
     `);
     const invalidCommit = runHelper(`
       source scripts/lib/build-metadata.sh
       GIT_COMMIT=abc123
-      openclaw_resolve_git_commit "$PWD"
+      carapace_resolve_git_commit "$PWD"
     `);
     const validAlias = runHelper(`
       source scripts/lib/build-metadata.sh
       unset GIT_COMMIT GITHUB_SHA
       GIT_SHA=${JSON.stringify(commit)}
-      openclaw_resolve_git_commit "$PWD"
+      carapace_resolve_git_commit "$PWD"
     `);
     const invalidTimestamp = runHelper(`
       source scripts/lib/build-metadata.sh
-      OPENCLAW_BUILD_TIMESTAMP=2026-99-99T12:34:56Z
-      openclaw_resolve_build_timestamp
+      CARAPACE_BUILD_TIMESTAMP=2026-99-99T12:34:56Z
+      carapace_resolve_build_timestamp
     `);
     const missingLocalCommit = runHelper(`
       source scripts/lib/build-metadata.sh
       unset GIT_COMMIT GIT_SHA GITHUB_SHA
       empty_root="$(mktemp -d)"
-      openclaw_resolve_git_commit "$empty_root"
+      carapace_resolve_git_commit "$empty_root"
     `);
     const missingReleaseCommit = runHelper(`
       source scripts/lib/build-metadata.sh
       unset GIT_COMMIT GIT_SHA GITHUB_SHA
       empty_root="$(mktemp -d)"
-      OPENCLAW_REQUIRE_BUILD_METADATA=1 openclaw_resolve_git_commit "$empty_root"
+      CARAPACE_REQUIRE_BUILD_METADATA=1 carapace_resolve_git_commit "$empty_root"
     `);
     const ambientGithubCommit = runHelper(`
       source scripts/lib/build-metadata.sh
       unset GIT_COMMIT GIT_SHA
       GITHUB_SHA=${JSON.stringify("a".repeat(40))}
-      openclaw_resolve_git_commit "$PWD"
+      carapace_resolve_git_commit "$PWD"
     `);
     const invalidGithubFallback = runHelper(`
       source scripts/lib/build-metadata.sh
       unset GIT_COMMIT GIT_SHA
       GITHUB_SHA=bad
       empty_root="$(mktemp -d)"
-      openclaw_resolve_git_commit "$empty_root"
+      carapace_resolve_git_commit "$empty_root"
     `);
     const checkedOutCommit = spawnSync("git", ["rev-parse", "HEAD"], {
       cwd: process.cwd(),
@@ -1100,7 +1100,7 @@ describe("package-mac-app plist stamping", () => {
     expect(validAlias.stdout).toBe(commit.toLowerCase());
     expect(invalidTimestamp.status).toBe(1);
     expect(invalidTimestamp.stderr).toContain(
-      "OPENCLAW_BUILD_TIMESTAMP must be an ISO-8601 UTC timestamp",
+      "CARAPACE_BUILD_TIMESTAMP must be an ISO-8601 UTC timestamp",
     );
     expect(missingLocalCommit.status).toBe(0);
     expect(missingLocalCommit.stdout).toBe("unknown");
@@ -1123,7 +1123,7 @@ describe("package-mac-app plist stamping", () => {
         2000-02-29T23:59:59.7Z \
         2024-02-29T12:34:56.78Z \
         2026-07-10T12:34:56.789Z; do
-        OPENCLAW_BUILD_TIMESTAMP="$value" openclaw_resolve_build_timestamp
+        CARAPACE_BUILD_TIMESTAMP="$value" carapace_resolve_build_timestamp
         printf '\n'
       done
       for value in \
@@ -1135,12 +1135,12 @@ describe("package-mac-app plist stamping", () => {
         2026-01-01T00:60:00Z \
         2026-01-01T00:00:60Z \
         2026-01-01T00:00:00+00:00; do
-        if OPENCLAW_BUILD_TIMESTAMP="$value" openclaw_resolve_build_timestamp >/dev/null 2>&1; then
+        if CARAPACE_BUILD_TIMESTAMP="$value" carapace_resolve_build_timestamp >/dev/null 2>&1; then
           exit 1
         fi
       done
-      unset OPENCLAW_BUILD_TIMESTAMP
-      generated="$(openclaw_resolve_build_timestamp)"
+      unset CARAPACE_BUILD_TIMESTAMP
+      generated="$(carapace_resolve_build_timestamp)"
       [[ "$generated" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.]000Z$ ]]
     `);
 
@@ -1161,9 +1161,9 @@ describe("package-mac-app plist stamping", () => {
     const script = readFileSync(scriptPath, "utf8");
 
     expect(script).toContain('source "$ROOT_DIR/scripts/lib/build-metadata.sh"');
-    expect(script).toContain('BUILD_GIT_COMMIT="$(openclaw_resolve_git_commit "$ROOT_DIR")"');
-    expect(script).toContain('BUILD_TS="$(openclaw_resolve_build_timestamp)"');
-    expect(script).toContain('export OPENCLAW_BUILD_TIMESTAMP="$BUILD_TS"');
+    expect(script).toContain('BUILD_GIT_COMMIT="$(carapace_resolve_git_commit "$ROOT_DIR")"');
+    expect(script).toContain('BUILD_TS="$(carapace_resolve_build_timestamp)"');
+    expect(script).toContain('export CARAPACE_BUILD_TIMESTAMP="$BUILD_TS"');
     expect(script).toContain('export GIT_COMMIT="$BUILD_GIT_COMMIT"');
     expect(script).not.toContain("git rev-parse --short HEAD");
   });
@@ -1173,7 +1173,7 @@ describe("package-mac-app plist stamping", () => {
     const sourceCheck = script.indexOf('bash "$ROOT_DIR/scripts/apple-release-source-check.sh"');
     const build = script.indexOf('node "$ROOT_DIR/scripts/build-mac-swift.mts"');
     const embeddedRead = script.indexOf(
-      'plist_print_required "$APP_ROOT/Contents/Info.plist" OpenClawGitCommit',
+      'plist_print_required "$APP_ROOT/Contents/Info.plist" CarapaceGitCommit',
     );
     const bridgeSourceRead = script.indexOf(
       'plist_print_required "$APP_ROOT/Contents/Info.plist" PeekabooSourceCommit',
@@ -1202,16 +1202,16 @@ describe("package-mac-app plist stamping", () => {
     );
   });
 
-  it("stamps and validates independent OpenClaw and Peekaboo source revisions", () => {
-    const { result, openClawCommit, peekabooCommit } = runSourceProvenanceStampHarness();
+  it("stamps and validates independent Carapace and Peekaboo source revisions", () => {
+    const { result, carapaceCommit, peekabooCommit } = runSourceProvenanceStampHarness();
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toBe(`${openClawCommit}\n${peekabooCommit}\n`);
+    expect(result.stdout).toBe(`${carapaceCommit}\n${peekabooCommit}\n`);
     expect(result.stderr).toBe("");
   });
 
   it.each([
-    { key: "OpenClawGitCommit", diagnostic: "Release app OpenClaw source mismatch" },
+    { key: "CarapaceGitCommit", diagnostic: "Release app Carapace source mismatch" },
     { key: "PeekabooSourceCommit", diagnostic: "Release app Peekaboo source mismatch" },
   ])("fails release validation independently for a wrong $key", ({ key, diagnostic }) => {
     const { result } = runSourceProvenanceStampHarness(key);
@@ -1306,7 +1306,7 @@ describe("package-mac-app plist stamping", () => {
   it.each(["primary", "secondary"])(
     "merges framework architectures when %s file output exceeds the pipe buffer",
     (verboseFramework) => {
-      const root = tempDirs.make("openclaw-package-framework-pipe-");
+      const root = tempDirs.make("carapace-package-framework-pipe-");
       const primary = path.join(root, "primary.framework");
       const secondary = path.join(root, "secondary.framework");
       const destination = path.join(root, "destination.framework");
@@ -1372,25 +1372,25 @@ describe("package-mac-app plist stamping", () => {
       ),
     );
 
-    expect(buildLoop).toContain('--product openclaw-mac --build-path "$BUILD_PATH" --arch "$arch"');
+    expect(buildLoop).toContain('--product carapace-mac --build-path "$BUILD_PATH" --arch "$arch"');
     expect(cliCopy).toContain(
-      'cp "$(mac_cli_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/openclaw-mac"',
+      'cp "$(mac_cli_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/carapace-mac"',
     );
     expect(cliCopy).toContain('/usr/bin/lipo -create "${MAC_CLI_BIN_INPUTS[@]}"');
-    expect(cliCopy).toContain('chmod +x "$APP_ROOT/Contents/MacOS/openclaw-mac"');
+    expect(cliCopy).toContain('chmod +x "$APP_ROOT/Contents/MacOS/carapace-mac"');
     expect(cliCopy).toContain(
-      '/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/openclaw-mac"',
+      '/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/carapace-mac"',
     );
   });
 
   it.runIf(process.platform === "darwin")(
     "merges framework Mach-O binaries when the checkout path contains glob metacharacters",
     () => {
-      const root = tempDirs.make("openclaw-package-framework-[fixture]-");
+      const root = tempDirs.make("carapace-package-framework-[fixture]-");
       const primary = path.join(root, "Primary.framework");
       const secondary = path.join(root, "Secondary.framework");
       const destination = path.join(root, "Destination.framework");
-      const relativeBinary = path.join("Versions", "A", "OpenClawFixture");
+      const relativeBinary = path.join("Versions", "A", "CarapaceFixture");
 
       for (const framework of [primary, secondary, destination]) {
         mkdirSync(path.dirname(path.join(framework, relativeBinary)), { recursive: true });
@@ -1437,13 +1437,13 @@ describe("package-mac-app plist stamping", () => {
   it.each(["arm64", "x86_64"])(
     "builds and locates the MLX helper with SwiftBuild on %s without a legacy output alias",
     (arch) => {
-      const tempRoot = tempDirs.make("openclaw-package-mlx-metal-");
+      const tempRoot = tempDirs.make("carapace-package-mlx-metal-");
       const metalPath = path.join(tempRoot, "metal");
       const invocationPath = path.join(tempRoot, "swift-args");
       const helperBuildRoot = path.join(tempRoot, "build");
       const helperBuildProducts = path.join(helperBuildRoot, arch, "out", "Products", "Release");
       mkdirSync(helperBuildProducts, { recursive: true });
-      writeFileSync(path.join(helperBuildProducts, "openclaw-mlx-tts"), arch);
+      writeFileSync(path.join(helperBuildProducts, "carapace-mlx-tts"), arch);
       writeFileSync(metalPath, "#!/bin/sh\nexit 1\n");
       chmodSync(metalPath, 0o755);
 
@@ -1468,7 +1468,7 @@ describe("package-mac-app plist stamping", () => {
       }
       MLX_TTS_HELPER_ROOT=${JSON.stringify(path.join(tempRoot, "helper"))}
       MLX_TTS_HELPER_BUILD_ROOT=${JSON.stringify(helperBuildRoot)}
-      MLX_TTS_HELPER_PRODUCT=openclaw-mlx-tts
+      MLX_TTS_HELPER_PRODUCT=carapace-mlx-tts
       BUILD_CONFIG=release
       SWIFT_BUILD_JOBS=2
       SWIFT_BUILD_RESULTS=${JSON.stringify(tempRoot)}
@@ -1491,7 +1491,7 @@ describe("package-mac-app plist stamping", () => {
         "-c",
         "release",
         "--product",
-        "openclaw-mlx-tts",
+        "carapace-mlx-tts",
         "--build-path",
         path.join(helperBuildRoot, arch),
         "--arch",
@@ -1507,40 +1507,40 @@ describe("package-mac-app plist stamping", () => {
     },
   );
 
-  it("skips the MLX TTS helper build and copy when OPENCLAW_SKIP_MLX_TTS=1", () => {
+  it("skips the MLX TTS helper build and copy when CARAPACE_SKIP_MLX_TTS=1", () => {
     const script = readFileSync(scriptPath, "utf8") + readFileSync(swiftScriptPath, "utf8");
 
     // Both the per-arch build and the bundle copy are gated on the same flag so
     // a skipped build never tries to copy a helper binary that was not built.
     expect(script).toContain(
-      'if [[ "$SKIP_MLX_TTS" == "1" ]]; then\n    echo "🔇 Skipping $MLX_TTS_HELPER_PRODUCT (OPENCLAW_SKIP_MLX_TTS=1)',
+      'if [[ "$SKIP_MLX_TTS" == "1" ]]; then\n    echo "🔇 Skipping $MLX_TTS_HELPER_PRODUCT (CARAPACE_SKIP_MLX_TTS=1)',
     );
     expect(script).toContain(
-      'if [[ "$SKIP_MLX_TTS" == "1" ]]; then\n  echo "🔇 Skipping MLX TTS helper copy (OPENCLAW_SKIP_MLX_TTS=1)',
+      'if [[ "$SKIP_MLX_TTS" == "1" ]]; then\n  echo "🔇 Skipping MLX TTS helper copy (CARAPACE_SKIP_MLX_TTS=1)',
     );
   });
 
-  it("refuses OPENCLAW_SKIP_MLX_TTS for release builds but allows it for dev builds", () => {
+  it("refuses CARAPACE_SKIP_MLX_TTS for release builds but allows it for dev builds", () => {
     const script = readFileSync(scriptPath, "utf8");
 
     // Run the real guard snippet from the script (not a copy) so the release
     // safety invariant stays coupled to source: release bundles must ship the
     // voice helper, which notarization later verifies.
-    const guardStart = script.indexOf('SKIP_MLX_TTS="${OPENCLAW_SKIP_MLX_TTS:-0}"');
+    const guardStart = script.indexOf('SKIP_MLX_TTS="${CARAPACE_SKIP_MLX_TTS:-0}"');
     const guardEnd = script.indexOf("BUILD_TS=", guardStart);
     expect(guardStart).toBeGreaterThanOrEqual(0);
     expect(guardEnd).toBeGreaterThan(guardStart);
     const guard = script.slice(guardStart, guardEnd);
 
     const released = runHelper(
-      `set -euo pipefail\nexport OPENCLAW_SKIP_MLX_TTS=1\nBUILD_CONFIG=release\n${guard}\necho reached-build`,
+      `set -euo pipefail\nexport CARAPACE_SKIP_MLX_TTS=1\nBUILD_CONFIG=release\n${guard}\necho reached-build`,
     );
     expect(released.status).toBe(1);
     expect(released.stderr).toContain("not allowed for release builds");
     expect(released.stdout).not.toContain("reached-build");
 
     const dev = runHelper(
-      `set -euo pipefail\nexport OPENCLAW_SKIP_MLX_TTS=1\nBUILD_CONFIG=debug\n${guard}\necho reached-build`,
+      `set -euo pipefail\nexport CARAPACE_SKIP_MLX_TTS=1\nBUILD_CONFIG=debug\n${guard}\necho reached-build`,
     );
     expect(dev.status, dev.stderr).toBe(0);
     expect(dev.stdout).toContain("reached-build");
@@ -1564,8 +1564,8 @@ describe("package-mac-app plist stamping", () => {
   ] as const) {
     it(name, () => {
       const helperBlock = getPackageManagerHelperBlock();
-      const tempRoot = tempDirs.make("openclaw-package-pnpm-root-");
-      const toolsDir = tempDirs.make("openclaw-package-pnpm-tools-");
+      const tempRoot = tempDirs.make("carapace-package-pnpm-root-");
+      const toolsDir = tempDirs.make("carapace-package-pnpm-tools-");
       const logPath = path.join(tempRoot, "corepack.log");
 
       symlinkSync("/bin/bash", path.join(toolsDir, "bash"));
@@ -1575,7 +1575,7 @@ describe("package-mac-app plist stamping", () => {
         [
           "#!/usr/bin/env bash",
           "set -euo pipefail",
-          'printf \'%s|%s\\n\' "$PWD" "$*" >> "$OPENCLAW_TEST_LOG"',
+          'printf \'%s|%s\\n\' "$PWD" "$*" >> "$CARAPACE_TEST_LOG"',
           'if [[ "${1:-}" == "pnpm" && "${2:-}" == "--version" ]]; then',
           "  echo '11.2.2'",
           "fi",
@@ -1588,8 +1588,8 @@ describe("package-mac-app plist stamping", () => {
       const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(tempRoot)}
-      OPENCLAW_TEST_LOG=${JSON.stringify(logPath)}
-      export OPENCLAW_TEST_LOG
+      CARAPACE_TEST_LOG=${JSON.stringify(logPath)}
+      export CARAPACE_TEST_LOG
       PATH=${JSON.stringify(toolsDir)}
       ${helperBlock}
       run_pnpm install --frozen-lockfile --config.node-linker=hoisted
@@ -1605,9 +1605,9 @@ describe("package-mac-app plist stamping", () => {
 
   it("prefers repo Corepack pnpm over a global pnpm shim", () => {
     const helperBlock = getPackageManagerHelperBlock();
-    const tempRoot = tempDirs.make("openclaw-package-pnpm-root-");
-    const outerRoot = tempDirs.make("openclaw-package-pnpm-outer-");
-    const toolsDir = tempDirs.make("openclaw-package-pnpm-tools-");
+    const tempRoot = tempDirs.make("carapace-package-pnpm-root-");
+    const outerRoot = tempDirs.make("carapace-package-pnpm-outer-");
+    const toolsDir = tempDirs.make("carapace-package-pnpm-tools-");
     const logPath = path.join(tempRoot, "pnpm.log");
     symlinkSync("/bin/bash", path.join(toolsDir, "bash"));
     symlinkSync("/usr/bin/grep", path.join(toolsDir, "grep"));
@@ -1625,7 +1625,7 @@ describe("package-mac-app plist stamping", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'printf "global|%s|%s\\n" "$PWD" "$*" >> "$OPENCLAW_TEST_LOG"',
+        'printf "global|%s|%s\\n" "$PWD" "$*" >> "$CARAPACE_TEST_LOG"',
         'if [[ "${1:-}" == "--version" ]]; then echo "11.8.0"; fi',
         "",
       ].join("\n"),
@@ -1636,7 +1636,7 @@ describe("package-mac-app plist stamping", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'printf "corepack|%s|%s\\n" "$PWD" "$*" >> "$OPENCLAW_TEST_LOG"',
+        'printf "corepack|%s|%s\\n" "$PWD" "$*" >> "$CARAPACE_TEST_LOG"',
         'if [[ "${1:-}" == "pnpm" && "${2:-}" == "--version" ]]; then',
         '  if grep -q "pnpm@11.2.2" package.json 2>/dev/null; then echo "11.2.2"; else echo "11.8.0"; fi',
         "fi",
@@ -1650,8 +1650,8 @@ describe("package-mac-app plist stamping", () => {
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(tempRoot)}
-      OPENCLAW_TEST_LOG=${JSON.stringify(logPath)}
-      export OPENCLAW_TEST_LOG
+      CARAPACE_TEST_LOG=${JSON.stringify(logPath)}
+      export CARAPACE_TEST_LOG
       PATH=${JSON.stringify(toolsDir)}
       cd ${JSON.stringify(outerRoot)}
       ${helperBlock}
@@ -1668,8 +1668,8 @@ describe("package-mac-app plist stamping", () => {
 
   it("fails with an actionable error when neither pnpm nor corepack pnpm is available", () => {
     const helperBlock = getPackageManagerHelperBlock();
-    const tempRoot = tempDirs.make("openclaw-package-pnpm-root-");
-    const toolsDir = tempDirs.make("openclaw-package-pnpm-tools-");
+    const tempRoot = tempDirs.make("carapace-package-pnpm-root-");
+    const toolsDir = tempDirs.make("carapace-package-pnpm-tools-");
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(tempRoot)}
@@ -1698,7 +1698,7 @@ describe("package-mac-app plist stamping", () => {
     });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("OpenClaw macOS app packaging requires Swift tools 6.3+");
+    expect(result.stderr).toContain("Carapace macOS app packaging requires Swift tools 6.3+");
     expect(result.stderr).toContain("Current Swift is 6.0");
   });
 
@@ -1737,7 +1737,7 @@ describe("package-mac-app plist stamping", () => {
     });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("OpenClaw macOS app packaging requires Xcode 26.4+");
+    expect(result.stderr).toContain("Carapace macOS app packaging requires Xcode 26.4+");
     expect(result.stderr).toContain("current Xcode is 26.3");
   });
 
@@ -1794,7 +1794,7 @@ describe("package-mac-app plist stamping", () => {
     expect(result.status).toBe(1);
     const diagnosticIndex = result.stderr.indexOf(diagnostic);
     const guidanceIndex = result.stderr.indexOf(
-      "ERROR: OpenClaw macOS app packaging requires a full Xcode developer directory",
+      "ERROR: Carapace macOS app packaging requires a full Xcode developer directory",
     );
     expect(diagnosticIndex).toBeGreaterThanOrEqual(0);
     expect(guidanceIndex).toBeGreaterThan(diagnosticIndex);
@@ -1802,8 +1802,8 @@ describe("package-mac-app plist stamping", () => {
 
   it("runs Sparkle build metadata derivation from the repository root", () => {
     const helperBlock = getSparkleBuildHelperBlock();
-    const tempRoot = tempDirs.make("openclaw-package-sparkle-root-");
-    const toolsDir = tempDirs.make("openclaw-package-sparkle-tools-");
+    const tempRoot = tempDirs.make("carapace-package-sparkle-root-");
+    const toolsDir = tempDirs.make("carapace-package-sparkle-tools-");
 
     const nodePath = path.join(toolsDir, "node");
     writeFileSync(
@@ -1811,7 +1811,7 @@ describe("package-mac-app plist stamping", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'if [[ "$PWD" != "$OPENCLAW_ROOT" ]]; then',
+        'if [[ "$PWD" != "$CARAPACE_ROOT" ]]; then',
         '  echo "node ran outside repo root: $PWD" >&2',
         "  exit 1",
         "fi",
@@ -1825,9 +1825,9 @@ describe("package-mac-app plist stamping", () => {
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(tempRoot)}
-      OPENCLAW_ROOT=${JSON.stringify(tempRoot)}
+      CARAPACE_ROOT=${JSON.stringify(tempRoot)}
       PATH=${JSON.stringify(`${toolsDir}:/usr/bin:/bin`)}
-      export OPENCLAW_ROOT PATH
+      export CARAPACE_ROOT PATH
       cd /tmp
       ${helperBlock}
       sparkle_canonical_build_from_version 2026.6.2
@@ -1838,15 +1838,15 @@ describe("package-mac-app plist stamping", () => {
     expect(result.stderr).toBe("");
   });
 
-  it("does not kill unrelated OpenClaw processes during packaging", () => {
+  it("does not kill unrelated Carapace processes during packaging", () => {
     const script = readFileSync(scriptPath, "utf8");
     const stopBlock = script.slice(
       script.indexOf("running_packaged_app_pids()"),
       script.indexOf('echo "🔏 Signing bundle'),
     );
 
-    expect(script).not.toContain("killall -q OpenClaw");
-    expect(stopBlock).toContain('local app_binary="$APP_DESTINATION/Contents/MacOS/OpenClaw"');
+    expect(script).not.toContain("killall -q Carapace");
+    expect(stopBlock).toContain('local app_binary="$APP_DESTINATION/Contents/MacOS/Carapace"');
     expect(stopBlock).toContain('pgrep -x "$PRODUCT"');
     expect(stopBlock).toContain('grep -Fx "$app_binary"');
     expect(stopBlock).toContain(
@@ -1861,16 +1861,16 @@ describe("package-mac-app plist stamping", () => {
       const start = script.indexOf('if [[ -n "${SIGN_IDENTITY:-}" ]]');
       expect(start).toBeGreaterThanOrEqual(0);
       const signingBlock = script.slice(start);
-      const tempRoot = tempDirs.make("openclaw-package-signing-identity-");
+      const tempRoot = tempDirs.make("carapace-package-signing-identity-");
       const scriptsDir = path.join(tempRoot, "scripts");
       const signerPath = path.join(scriptsDir, "codesign-mac-app.sh");
       const appStage = path.join(tempRoot, "stage");
-      const appRoot = path.join(appStage, "OpenClaw.app");
+      const appRoot = path.join(appStage, "Carapace.app");
       const callerHome = path.join(tempRoot, "caller-home");
       const callerTemp = path.join(tempRoot, "caller temp [*]");
       const eventsPath = path.join(tempRoot, "events");
       const observationsPath = path.join(tempRoot, "worker-scratch.jsonl");
-      const identity = "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)";
+      const identity = "Developer ID Application: Carapace Foundation (FWJYW4S8P8)";
       for (const directory of [scriptsDir, appRoot, callerHome, callerTemp]) {
         mkdirSync(directory, { recursive: true });
       }
@@ -1897,7 +1897,7 @@ import path from 'node:path';
 const scratch = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'worker-proof-')));
 try {
   fs.writeFileSync(path.join(scratch, 'created-by-worker'), 'scratch');
-  fs.appendFileSync(${JSON.stringify(observationsPath)}, JSON.stringify({ home: process.env.HOME, scratch, callerCanary: process.env.OPENCLAW_TEST_CALLER_CANARY ?? null }) + '\\n');
+  fs.appendFileSync(${JSON.stringify(observationsPath)}, JSON.stringify({ home: process.env.HOME, scratch, callerCanary: process.env.CARAPACE_TEST_CALLER_CANARY ?? null }) + '\\n');
   fs.appendFileSync(${JSON.stringify(eventsPath)}, 'worker:' + path.basename(process.argv[2]) + '\\n');
 } finally {
   fs.rmSync(scratch, { recursive: true, force: true });
@@ -1913,8 +1913,8 @@ try {
       set -euo pipefail
       ROOT_DIR="$1"
       APP_STAGE_DIR="$ROOT_DIR/stage"
-      APP_ROOT="$APP_STAGE_DIR/OpenClaw.app"
-      APP_DESTINATION="$ROOT_DIR/OpenClaw.app"
+      APP_ROOT="$APP_STAGE_DIR/Carapace.app"
+      APP_DESTINATION="$ROOT_DIR/Carapace.app"
       BUILD_ARCHS=(arm64 x86_64)
       source "$3"
       stop_packaged_app_if_running() { printf 'stop\\n' >> "$ROOT_DIR/events"; }
@@ -1937,7 +1937,7 @@ try {
           env: {
             HOME: callerHome,
             PATH: "/usr/bin:/bin",
-            OPENCLAW_TEST_CALLER_CANARY: "must-not-reach-worker",
+            CARAPACE_TEST_CALLER_CANARY: "must-not-reach-worker",
             ...(tempMode === "configured" ? { TMPDIR: callerTemp } : {}),
           },
         },
@@ -1956,7 +1956,7 @@ try {
         "stop",
         "published",
       ]);
-      expect(readFileSync(path.join(tempRoot, "OpenClaw.app/candidate"), "utf8")).toBe(
+      expect(readFileSync(path.join(tempRoot, "Carapace.app/candidate"), "utf8")).toBe(
         "verified replacement",
       );
       const observations = readFileSync(observationsPath, "utf8")
@@ -1979,7 +1979,7 @@ try {
     const result = runStopPackagedAppHarness(0);
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("ERROR: Packaged OpenClaw bundle did not exit: 123");
+    expect(result.stderr).toContain("ERROR: Packaged Carapace bundle did not exit: 123");
   });
 
   it("fails release packaging when the Swift compatibility library is missing", () => {
@@ -2133,7 +2133,7 @@ try {
   ])(
     "preserves Peekaboo snapshot diagnostics and cleanup: $operation / $mounts",
     ({ operation, exitCode, reason, mounts }) => {
-      const root = tempDirs.make("openclaw-peekaboo-snapshot-fixture-");
+      const root = tempDirs.make("carapace-peekaboo-snapshot-fixture-");
       const buildPath = path.join(root, "build with spaces");
       const checkout = path.join(buildPath, "checkouts", "Peekaboo");
       const scratch = path.join(root, "temporary snapshots");
@@ -2250,7 +2250,7 @@ ${mounts === "failed" ? "exit 1" : mounts === "mounted" ? `printf '/dev/disk9 on
         "-srcfolder",
         checkout,
         "-volname",
-        "OpenClawPeekabooSnapshot",
+        "CarapacePeekabooSnapshot",
         image,
       ]);
       if (operation !== "create") {
@@ -2346,18 +2346,18 @@ ${mounts === "failed" ? "exit 1" : mounts === "mounted" ? `printf '/dev/disk9 on
     expect(packageManifest).toContain('.copy("Resources/ProviderIcons")');
     expect(
       readFileSync(
-        "apps/macos/Sources/OpenClaw/Resources/ProviderIcons/ProviderIcon-claude.svg",
+        "apps/macos/Sources/Carapace/Resources/ProviderIcons/ProviderIcon-claude.svg",
         "utf8",
       ),
     ).toContain("<svg");
     expect(
       readFileSync(
-        "apps/macos/Sources/OpenClaw/Resources/ProviderIcons/ProviderIcon-codex.svg",
+        "apps/macos/Sources/Carapace/Resources/ProviderIcons/ProviderIcon-codex.svg",
         "utf8",
       ),
     ).toContain("<svg");
     expect(script).toContain(
-      'PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/ProviderIcons"',
+      'PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/Carapace/Resources/ProviderIcons"',
     );
     expect(script).toContain(
       'echo "ERROR: Provider icon resources missing at $PROVIDER_ICONS_SRC"',
@@ -2405,8 +2405,8 @@ ${mounts === "failed" ? "exit 1" : mounts === "mounted" ? `printf '/dev/disk9 on
   it("omits the CUA driver only from elevation-host packages", () => {
     const packageScript = readFileSync(scriptPath, "utf8");
     const variantBlock = packageScript.slice(
-      packageScript.indexOf('SIGNING_VARIANT="${OPENCLAW_MAC_SIGNING_VARIANT:-standard}"'),
-      packageScript.indexOf("# OPENCLAW_SKIP_MLX_TTS"),
+      packageScript.indexOf('SIGNING_VARIANT="${CARAPACE_MAC_SIGNING_VARIANT:-standard}"'),
+      packageScript.indexOf("# CARAPACE_SKIP_MLX_TTS"),
     );
     const cuaBlock = packageScript.slice(
       packageScript.indexOf('if [[ "$SIGNING_VARIANT" == "elevation-host" ]]'),
@@ -2414,7 +2414,7 @@ ${mounts === "failed" ? "exit 1" : mounts === "mounted" ? `printf '/dev/disk9 on
     );
 
     expect(variantBlock).toContain("standard | elevation-host");
-    expect(variantBlock).toContain("Unknown OPENCLAW_MAC_SIGNING_VARIANT value");
+    expect(variantBlock).toContain("Unknown CARAPACE_MAC_SIGNING_VARIANT value");
     expect(cuaBlock).toContain("Omitting embedded CUA driver from elevation-host package");
     expect(cuaBlock).toContain("else");
     expect(cuaBlock).toContain("Staging embedded CUA driver");
@@ -2441,14 +2441,14 @@ ${mounts === "failed" ? "exit 1" : mounts === "mounted" ? `printf '/dev/disk9 on
       const result = runHelper(`
         set -euo pipefail
         source scripts/lib/plistbuddy.sh
-        plist_set_string_required ${JSON.stringify(plist)} CFBundleIdentifier 'ai.openclaw.test'
+        plist_set_string_required ${JSON.stringify(plist)} CFBundleIdentifier 'ai.carapace.test'
         /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' ${JSON.stringify(plist)}
         broken="$(mktemp -d)"
         plist_set_string_required "$broken" CFBundleIdentifier broken
       `);
 
       expect(result.status).toBe(1);
-      expect(result.stdout).toContain("ai.openclaw.test");
+      expect(result.stdout).toContain("ai.carapace.test");
       expect(result.stderr).toContain("Error Reading File");
     },
   );

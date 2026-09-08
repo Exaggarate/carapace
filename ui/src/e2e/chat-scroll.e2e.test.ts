@@ -19,7 +19,7 @@ const suite = createChatFlowE2eSuite();
 
 suite.define(() => {
   it("keeps a bottom-anchored transcript pinned while the composer grows", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.streaming", artifactDirParent)
       : undefined;
@@ -94,7 +94,7 @@ suite.define(() => {
   });
 
   it("scrolls a delayed pending send past expanding progress before the ACK resolves", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-send-scroll", artifactDirParent)
       : undefined;

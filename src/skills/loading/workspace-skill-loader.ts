@@ -1,10 +1,10 @@
 // Workspace skill loading turns validated discovery candidates into source-aware skill entries.
 import path from "node:path";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { tryResolveAmbientOwnerAgentId } from "../../agents/agent-scope-config.js";
 import { canonicalizePath } from "../../agents/utils/paths.js";
 import { isDefaultStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { shouldRejectHardlinkedPluginFiles } from "../../plugins/hardlink-policy.js";
@@ -52,7 +52,7 @@ type WorkspaceSkillRoots = {
 };
 
 type WorkspaceSkillLoadOptions = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   managedSkillsDir?: string;
   bundledSkillsDir?: string;
   pluginSkillsDir?: string;
@@ -119,7 +119,7 @@ function warnSkillPrecedenceCollision(winner: Skill, loser: Skill, workspaceDir:
 
 function filterSkillEntries(
   entries: SkillEntry[],
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   skillFilter?: string[],
   skillOverrides?: Readonly<Record<string, boolean>>,
   eligibility?: SkillEligibilityContext,
@@ -175,7 +175,7 @@ function createSkillEntry(record: LoadedSkillRecord): SkillEntry {
 function loadSkillEntries(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
@@ -210,7 +210,7 @@ function loadSkillEntries(
     opts?.pluginSkillsDir,
     opts?.config ? fingerprintSkillSnapshotConfig(opts.config) : undefined,
     osHomeDir,
-    process.env.OPENCLAW_STATE_DIR,
+    process.env.CARAPACE_STATE_DIR,
     getSkillsSnapshotVersion(workspaceDir),
   ]);
   const cachedEntries = skillEntryCache.get(cacheKey);
@@ -243,41 +243,41 @@ function loadSkillEntries(
       : resolvePluginSkillRoots({ workspaceDir, config: opts?.config, pluginSkillsDir });
 
   const bundledSkills = bundledSkillsDir
-    ? loadSkills({ dir: bundledSkillsDir, source: "openclaw-bundled" })
+    ? loadSkills({ dir: bundledSkillsDir, source: "carapace-bundled" })
     : [];
   const custodianSkillsDir =
     bundledSkillsDir && custodianAgentId
       ? path.join(path.dirname(bundledSkillsDir), CUSTODIAN_SKILLS_DIR_NAME)
       : undefined;
   const custodianSkills = custodianSkillsDir
-    ? loadSkills({ dir: custodianSkillsDir, source: "openclaw-custodian" })
+    ? loadSkills({ dir: custodianSkillsDir, source: "carapace-custodian" })
     : [];
   const extraSkills = [
     ...extraDirs.flatMap((dir) =>
-      loadSkills({ dir: resolveUserPath(dir), source: "openclaw-extra" }),
+      loadSkills({ dir: resolveUserPath(dir), source: "carapace-extra" }),
     ),
     ...pluginSkillRoots.flatMap((root) =>
       loadSkills({
         dir: root.dir,
-        source: "openclaw-extra",
+        source: "carapace-extra",
         rejectHardlinks: root.rejectHardlinks,
       }),
     ),
     ...loadGeneratedPluginSkillRecords({
       pluginSkillsDir,
       pluginSkillRoots,
-      source: "openclaw-extra",
+      source: "carapace-extra",
       limits,
     }),
   ];
   const managedSkills = workspaceOnly
     ? []
-    : loadSkills({ dir: managedSkillsDir, source: "openclaw-managed" });
+    : loadSkills({ dir: managedSkillsDir, source: "carapace-managed" });
   const workshopSkills =
     !workspaceOnly && opts?.config && opts.agentId
       ? loadSkills({
           dir: resolveWorkshopSkillsDir(opts.config, opts.agentId),
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         })
       : [];
   const personalAgentsSkillsDir = osHomeDir
@@ -291,7 +291,7 @@ function loadSkillEntries(
   const projectAgentsSkills = workspaceOnly
     ? []
     : loadSkills({ dir: projectAgentsSkillsDir, source: "agents-skills-project" });
-  const workspaceSkills = loadSkills({ dir: workspaceSkillsDir, source: "openclaw-workspace" });
+  const workspaceSkills = loadSkills({ dir: workspaceSkillsDir, source: "carapace-workspace" });
 
   const merged = new Map<string, LoadedSkillRecord>();
   const mergeRecord = (record: LoadedSkillRecord) => {
@@ -339,7 +339,7 @@ function loadSkillEntries(
 }
 
 function resolveEffectiveWorkspaceSkillFilter(opts?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   agentSkillFilter?: "apply" | "ignore";
   skillFilter?: string[];
@@ -356,7 +356,7 @@ function resolveEffectiveWorkspaceSkillFilter(opts?: {
 export function resolveWorkspaceSkillPromptEntries(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
     entries?: SkillEntry[];
@@ -448,7 +448,7 @@ export function loadMergedWorkspaceSkills(
 export function loadVisibleSkills(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
     librarySelections?: SkillSnapshot["librarySelections"];
@@ -482,7 +482,7 @@ export function loadVisibleSkills(
 export function loadBundledSkillEntryByName(
   skillName: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     bundledSkillsDir?: string;
     skillFilter?: string[];
     agentId?: string;
@@ -501,14 +501,14 @@ export function loadBundledSkillEntryByName(
   const limits = resolveSkillDiscoveryLimits(opts?.config);
   const loaded = loadSingleSkillDirectory({
     skillDir: path.join(rootRealPath, normalizedName),
-    source: "openclaw-bundled",
+    source: "carapace-bundled",
     rootRealPath,
     maxBytes: limits.maxSkillFileBytes,
     rejectHardlinks: shouldRejectHardlinkedPluginFiles({
       origin: "bundled",
       rootDir: rootRealPath,
     }),
-    onDiagnostic: (diagnostic) => warnInvalidSkill("openclaw-bundled", diagnostic),
+    onDiagnostic: (diagnostic) => warnInvalidSkill("carapace-bundled", diagnostic),
   });
   if (!loaded || loaded.skill.name.trim().toLowerCase() !== normalizedName) {
     return undefined;
@@ -525,7 +525,7 @@ export function loadBundledSkillEntryByName(
 export function filterWorkspaceSkills(
   entries: SkillEntry[],
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     skillFilter?: string[];
     skillOverrides?: Record<string, boolean>;
     eligibility?: SkillEligibilityContext;

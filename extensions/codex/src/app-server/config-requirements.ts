@@ -3,7 +3,7 @@ import type {
   CodexAppServerApprovalsReviewer,
   CodexAppServerManagedApprovalPolicy,
   CodexAppServerSandboxMode,
-  OpenClawExecMode,
+  CarapaceExecMode,
 } from "./config-contracts.js";
 import { resolveApprovalPolicy, resolveApprovalsReviewer } from "./config-exec-policy.js";
 import { readNonEmptyString } from "./config-utils.js";
@@ -317,7 +317,7 @@ function normalizeRequirementsApprovalsReviewer(
 
 export function selectGuardianApprovalPolicy(
   allowedApprovalPolicies: Set<CodexAppServerManagedApprovalPolicy> | undefined,
-  execModeRequiringPromptingApprovals?: Extract<OpenClawExecMode, "auto" | "ask">,
+  execModeRequiringPromptingApprovals?: Extract<CarapaceExecMode, "auto" | "ask">,
 ): CodexAppServerManagedApprovalPolicy {
   if (allowedApprovalPolicies === undefined || allowedApprovalPolicies.has("on-request")) {
     return "on-request";
@@ -338,7 +338,7 @@ export function selectGuardianApprovalPolicy(
 
 export function selectGuardianApprovalsReviewer(
   allowedApprovalsReviewers: Set<CodexAppServerApprovalsReviewer> | undefined,
-  execModeRequiringAutoReviewer?: Extract<OpenClawExecMode, "auto">,
+  execModeRequiringAutoReviewer?: Extract<CarapaceExecMode, "auto">,
 ): CodexAppServerApprovalsReviewer {
   if (allowedApprovalsReviewers === undefined || allowedApprovalsReviewers.has("auto_review")) {
     return "auto_review";
@@ -359,7 +359,7 @@ export function selectGuardianApprovalsReviewer(
 
 export function selectUserApprovalsReviewer(
   allowedApprovalsReviewers: Set<CodexAppServerApprovalsReviewer> | undefined,
-  execModeRequiringUserReviewer?: OpenClawExecMode,
+  execModeRequiringUserReviewer?: CarapaceExecMode,
 ): CodexAppServerApprovalsReviewer {
   if (allowedApprovalsReviewers === undefined || allowedApprovalsReviewers.has("user")) {
     return "user";

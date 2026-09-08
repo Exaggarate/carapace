@@ -1,7 +1,7 @@
 .git
 .worktrees
 
-# Sensitive files – scripts/docker/setup.sh writes .env with OPENCLAW_GATEWAY_TOKEN
+# Sensitive files – scripts/docker/setup.sh writes .env with CARAPACE_GATEWAY_TOKEN
 # into the project root; keep it out of the build context.
 .env
 .env.*
@@ -14,8 +14,8 @@
 **/.local
 .pi
 **/.pi
-__openclaw_vitest__
-**/__openclaw_vitest__
+__carapace_vitest__
+**/__carapace_vitest__
 .tmp
 **/.tmp
 .DS_Store
@@ -48,7 +48,7 @@ tmp
 **/tmp
 dist-runtime
 **/dist-runtime
-openclaw-path-alias-*
+carapace-path-alias-*
 
 # build artifacts
 dist
@@ -64,14 +64,14 @@ vendor/
 # Needed for building the Canvas A2UI bundle during Docker image builds.
 # Keep the rest of apps/ and vendor/ excluded to avoid a large build context.
 !apps/shared/
-!apps/shared/OpenClawKit/
-!apps/shared/OpenClawKit/Sources/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/
-!apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/tool-display.json
-!apps/shared/OpenClawKit/Tools/
-!apps/shared/OpenClawKit/Tools/CanvasA2UI/
-!apps/shared/OpenClawKit/Tools/CanvasA2UI/**
+!apps/shared/CarapaceKit/
+!apps/shared/CarapaceKit/Sources/
+!apps/shared/CarapaceKit/Sources/CarapaceKit/
+!apps/shared/CarapaceKit/Sources/CarapaceKit/Resources/
+!apps/shared/CarapaceKit/Sources/CarapaceKit/Resources/tool-display.json
+!apps/shared/CarapaceKit/Tools/
+!apps/shared/CarapaceKit/Tools/CanvasA2UI/
+!apps/shared/CarapaceKit/Tools/CanvasA2UI/**
 !vendor/a2ui/
 !vendor/a2ui/renderers/
 !vendor/a2ui/renderers/lit/

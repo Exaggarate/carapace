@@ -45,37 +45,37 @@ npx convex deploy
 
 4. In Convex deployment environment variables, set:
 
-- `OPENCLAW_QA_CONVEX_SECRET_MAINTAINER`
-- `OPENCLAW_QA_CONVEX_SECRET_CI`
+- `CARAPACE_QA_CONVEX_SECRET_MAINTAINER`
+- `CARAPACE_QA_CONVEX_SECRET_CI`
 
 Client URL policy:
 
-- `OPENCLAW_QA_CONVEX_SITE_URL` must use `https://` in normal use.
-- Local development may use loopback `http://` only when `OPENCLAW_QA_ALLOW_INSECURE_HTTP=1`.
+- `CARAPACE_QA_CONVEX_SITE_URL` must use `https://` in normal use.
+- Local development may use loopback `http://` only when `CARAPACE_QA_ALLOW_INSECURE_HTTP=1`.
 
 ## Manage credentials from qa-lab CLI
 
 Maintainers can manage rows without using the Convex dashboard:
 
 ```bash
-pnpm openclaw qa credentials add \
+pnpm carapace qa credentials add \
   --kind buzz \
   --payload-file qa/buzz-credential.json
 
-pnpm openclaw qa credentials add \
+pnpm carapace qa credentials add \
   --kind discord \
   --payload-file qa/discord-credential.json
 
-pnpm openclaw qa credentials add \
+pnpm carapace qa credentials add \
   --kind telegram \
   --payload-file qa/telegram-credential.json
 
-pnpm openclaw qa credentials list --kind telegram
+pnpm carapace qa credentials list --kind telegram
 
-pnpm openclaw qa credentials remove --credential-id <credential-id>
+pnpm carapace qa credentials remove --credential-id <credential-id>
 ```
 
-Admin endpoints require `OPENCLAW_QA_CONVEX_SECRET_MAINTAINER`.
+Admin endpoints require `CARAPACE_QA_CONVEX_SECRET_MAINTAINER`.
 
 ## Local request examples
 

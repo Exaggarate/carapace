@@ -1,4 +1,4 @@
-name: openclaw-codeql-network-ssrf-boundary-critical-security
+name: carapace-codeql-network-ssrf-boundary-critical-security
 
 disable-default-queries: true
 

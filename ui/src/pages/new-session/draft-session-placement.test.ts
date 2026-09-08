@@ -73,7 +73,7 @@ describe("new-session placement target", () => {
   });
 
   it("restores repository and ref from a creating recovery without a Gateway folder", () => {
-    const repository = { url: "https://github.com/openclaw/openclaw.git", ref: "release/next" };
+    const repository = { url: "https://github.com/Exaggarate/carapace.git", ref: "release/next" };
     expect(
       projectDraftSessionPlacementRecovery({
         sessionKey: "agent:main:cloud",

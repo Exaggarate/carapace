@@ -81,12 +81,12 @@ describe("message-channel", () => {
   });
 
   it("classifies the browser copilot as a dedicated browser operator UI", () => {
-    const client = { id: "openclaw-browser-copilot", mode: "ui" };
+    const client = { id: "carapace-browser-copilot", mode: "ui" };
     expect(isBrowserCopilotClient(client)).toBe(true);
     expect(isBrowserOperatorUiClient(client)).toBe(true);
     expect(isOperatorUiClient(client)).toBe(true);
     expect(isBrowserCopilotClient({ id: "webchat", mode: "webchat" })).toBe(false);
-    expect(isBrowserCopilotClient({ id: "openclaw-browser-copilot", mode: "webchat" })).toBe(true);
+    expect(isBrowserCopilotClient({ id: "carapace-browser-copilot", mode: "webchat" })).toBe(true);
   });
 
   it("normalizes plugin aliases when registered", () => {
@@ -124,17 +124,17 @@ describe("message-channel", () => {
   });
 
   it("reads Matrix markdown capability from bundled channel catalog metadata", async () => {
-    const previousBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = path.resolve("extensions");
+    const previousBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = path.resolve("extensions");
     vi.resetModules();
     try {
       const module = await import("./message-channel.js");
       expect(module.isMarkdownCapableMessageChannel("matrix")).toBe(true);
     } finally {
       if (previousBundledPluginsDir === undefined) {
-        delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+        delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
       } else {
-        process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
+        process.env.CARAPACE_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
       }
       vi.resetModules();
     }

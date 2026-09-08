@@ -90,7 +90,7 @@ function createFixture(
 
 function manifest(status: SkillWorkshopProposal["status"] = "pending") {
   return {
-    schema: "openclaw.skill-workshop.proposals-manifest.v1",
+    schema: "carapace.skill-workshop.proposals-manifest.v1",
     installedSkills: [],
     updatedAt: ISO_NOW,
     proposals: [
@@ -198,7 +198,7 @@ describe("Skill Workshop proposal RPCs", () => {
           target: {
             skillName: "Inbox Cleaner",
             skillKey: installed.skillKey,
-            source: proposalId === "workshop" ? "openclaw-workshop" : "openclaw-workspace",
+            source: proposalId === "workshop" ? "carapace-workshop" : "carapace-workspace",
           },
         },
       };

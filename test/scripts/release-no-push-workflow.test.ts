@@ -20,17 +20,17 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const FULL_RELEASE = ".github/workflows/full-release-validation.yml";
 const FULL_RELEASE_ARTIFACTS = ".github/workflows/full-release-artifacts.yml";
-const RELEASE_CHECKS = ".github/workflows/openclaw-release-checks.yml";
+const RELEASE_CHECKS = ".github/workflows/carapace-release-checks.yml";
 const PACKAGE_ACCEPTANCE = ".github/workflows/package-acceptance.yml";
 const PLUGIN_PRERELEASE = ".github/workflows/plugin-prerelease.yml";
-const LIVE_E2E = ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+const LIVE_E2E = ".github/workflows/carapace-live-and-e2e-checks-reusable.yml";
 const INSTALL_SMOKE = ".github/workflows/install-smoke.yml";
-const SHARED_IMAGE_PUBLISHER = ".github/workflows/openclaw-shared-image-publish-reusable.yml";
-const SCHEDULED_LIVE = ".github/workflows/openclaw-scheduled-live-checks.yml";
+const SHARED_IMAGE_PUBLISHER = ".github/workflows/carapace-shared-image-publish-reusable.yml";
+const SCHEDULED_LIVE = ".github/workflows/carapace-scheduled-live-checks.yml";
 const DOCKER_RELEASE = ".github/workflows/docker-release.yml";
 const DOCKER_PREPARE = ".github/workflows/docker-release-prepare.yml";
 const UPDATE_MIGRATION = ".github/workflows/update-migration.yml";
-const PERFORMANCE = ".github/workflows/openclaw-performance.yml";
+const PERFORMANCE = ".github/workflows/carapace-performance.yml";
 const LIVE_BUILD = "scripts/test-live-build-docker.sh";
 const DOCKER_E2E_IMAGE_HELPER = "scripts/lib/docker-e2e-image.sh";
 const RELEASE_FILTER_VALIDATOR = resolve("scripts/github/validate-release-suite-filters.sh");
@@ -210,7 +210,7 @@ function executeReleaseGroupCapture(
   candidateArtifactJson = "",
   releaseProfile = "beta",
 ) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-release-groups-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-release-groups-"));
   const output = join(root, "github-output");
   writeFileSync(output, "");
   try {
@@ -289,7 +289,7 @@ function executeParentFilterValidation(
   liveSuiteFilter = "",
   crossOsSuiteFilter = "",
 ) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-parent-filter-normalization-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-parent-filter-normalization-"));
   const output = join(root, "github-output");
   writeFileSync(output, "");
   try {
@@ -316,11 +316,11 @@ function executeParentFilterValidation(
 
 describe("release validation no-push transport", () => {
   it.each([
-    ["openclaw/openclaw", "hybrid", false, "blacksmith-4vcpu-ubuntu-2404"],
-    ["openclaw/openclaw", "github", false, "ubuntu-24.04"],
-    ["openclaw/openclaw", "", false, "ubuntu-24.04"],
-    ["fork/openclaw", "hybrid", false, "ubuntu-24.04"],
-    ["openclaw/openclaw", "hybrid", true, "ubuntu-24.04"],
+    ["carapace/carapace", "hybrid", false, "blacksmith-4vcpu-ubuntu-2404"],
+    ["carapace/carapace", "github", false, "ubuntu-24.04"],
+    ["carapace/carapace", "", false, "ubuntu-24.04"],
+    ["fork/carapace", "hybrid", false, "ubuntu-24.04"],
+    ["carapace/carapace", "hybrid", true, "ubuntu-24.04"],
   ])(
     "routes serial candidate jobs for %s/%s (hosted=%s)",
     (repository, backend, hosted, runner) => {
@@ -342,7 +342,7 @@ describe("release validation no-push transport", () => {
           ? runInNewContext(expression.slice(3, -2), {
               github: { repository },
               inputs: { use_github_hosted_runners: hosted },
-              vars: { OPENCLAW_CI_RUNNER_BACKEND: backend },
+              vars: { CARAPACE_CI_RUNNER_BACKEND: backend },
             })
           : expression;
         expect(actual, `${workflowPath}:${name}`).toBe(runner);
@@ -389,7 +389,7 @@ describe("release validation no-push transport", () => {
   ])("validates package identity without repeating local pack checks: $name", (fixture) => {
     const validate = step(
       job(readWorkflow(LIVE_E2E), "prepare_docker_e2e_image"),
-      "Validate OpenClaw Docker E2E package",
+      "Validate Carapace Docker E2E package",
     );
     const root = tempDirs.make("release package identity-");
     const artifacts = join(root, ".artifacts/docker-e2e-package");
@@ -409,13 +409,13 @@ describe("release validation no-push transport", () => {
     }
     writeFileSync(
       join(root, "package/package.json"),
-      JSON.stringify({ name: "openclaw", version }),
+      JSON.stringify({ name: "carapace", version }),
     );
     writeFileSync(
       join(root, "package/dist/build-info.json"),
       JSON.stringify({ commit: fixture.wrongSource ? "b".repeat(40) : source }),
     );
-    const fileName = fixture.imported ? "provided package.tgz" : "openclaw-current.tgz";
+    const fileName = fixture.imported ? "provided package.tgz" : "carapace-current.tgz";
     const tarball = join(artifacts, fileName);
     const pack = spawnSync("tar", ["-czf", tarball, "-C", root, "package"], { encoding: "utf8" });
     expect(pack.status, pack.stderr).toBe(0);
@@ -424,7 +424,7 @@ describe("release validation no-push transport", () => {
       writeFileSync(
         join(artifacts, "package-candidate.json"),
         JSON.stringify({
-          name: "openclaw",
+          name: "carapace",
           packageSourceSha: source,
           sha256: "b".repeat(64),
           version,
@@ -435,11 +435,11 @@ describe("release validation no-push transport", () => {
     writeFileSync(calls, "");
     // Instrument only the validator/package-manager boundary; identity checks use real tar, jq and hashes.
     writeFileSync(
-      join(root, "scripts/check-openclaw-package-tarball.mjs"),
+      join(root, "scripts/check-carapace-package-tarball.mjs"),
       'throw new Error("local pack already validated this package");\n',
     );
     writeFileSync(
-      join(root, ".release-harness/scripts/check-openclaw-package-tarball.mjs"),
+      join(root, ".release-harness/scripts/check-carapace-package-tarball.mjs"),
       'import fs from "node:fs"; fs.appendFileSync(process.env.VALIDATOR_CALLS, JSON.stringify(process.argv.slice(2)) + "\\n"); process.exit(Number(process.env.CHECK_EXIT));\n',
     );
     writeFileSync(
@@ -478,11 +478,11 @@ describe("release validation no-push transport", () => {
       expect(result.stderr).toContain(fixture.error);
     }
     expect(readFileSync(calls, "utf8")).toBe(
-      fixture.calls ? `${JSON.stringify([join(artifacts, "openclaw-current.tgz")])}\n` : "",
+      fixture.calls ? `${JSON.stringify([join(artifacts, "carapace-current.tgz")])}\n` : "",
     );
     expect(readFileSync(output, "utf8")).toBe(
       fixture.status === 0
-        ? `sha256=${digest}\nversion=${version}\nfile_name=openclaw-current.tgz\nsource_sha=${source}\ntag=pkg-${digest.slice(0, 32)}\n`
+        ? `sha256=${digest}\nversion=${version}\nfile_name=carapace-current.tgz\nsource_sha=${source}\ntag=pkg-${digest.slice(0, 32)}\n`
         : "",
     );
   });
@@ -940,8 +940,8 @@ describe("release validation no-push transport", () => {
         candidate.run?.includes("test-live-build-docker.sh"),
       );
 
-      expect(runStep?.run, jobName).toContain("OPENCLAW_SKIP_DOCKER_BUILD=0");
-      expect(runStep?.run, jobName).not.toContain("OPENCLAW_DOCKER_BUILD_ON_MISSING=1");
+      expect(runStep?.run, jobName).toContain("CARAPACE_SKIP_DOCKER_BUILD=0");
+      expect(runStep?.run, jobName).not.toContain("CARAPACE_DOCKER_BUILD_ON_MISSING=1");
     }
   });
 
@@ -951,7 +951,7 @@ describe("release validation no-push transport", () => {
       readyName: "docker_e2e_image_ready",
       packStep: "Pack Docker E2E image artifact",
       artifactDirectory: "docker-e2e-shared-images",
-      image: "openclaw-docker-e2e-bare:test",
+      image: "carapace-docker-e2e-bare:test",
       consumers: ["validate_docker_e2e", "validate_docker_lanes", "validate_docker_openwebui"],
     },
     {
@@ -959,7 +959,7 @@ describe("release validation no-push transport", () => {
       readyName: "live_test_image_ready",
       packStep: "Pack live-test image artifact",
       artifactDirectory: "live-test-shared-image",
-      image: "openclaw-live-test:test",
+      image: "carapace-live-test:test",
       consumers: [
         "validate_live_models_docker",
         "validate_live_models_docker_targeted",
@@ -1000,7 +1000,7 @@ describe("release validation no-push transport", () => {
         GITHUB_RUN_ATTEMPT: "1",
         RUNNER_TEMP: root,
         BARE_IMAGE: fixture.image,
-        FUNCTIONAL_IMAGE: "openclaw-docker-e2e-functional:test",
+        FUNCTIONAL_IMAGE: "carapace-docker-e2e-functional:test",
         LIVE_IMAGE: fixture.image,
         NEEDS_BARE_IMAGE: "1",
         NEEDS_FUNCTIONAL_IMAGE: "1",
@@ -1057,7 +1057,7 @@ describe("release validation no-push transport", () => {
   });
 
   it("models conditional reusable jobs as permission requests before scheduling", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-permission-graph-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-permission-graph-"));
     const fixture = join(root, "callee.yml");
     try {
       writeFileSync(
@@ -1136,7 +1136,7 @@ describe("release validation no-push transport", () => {
       ["release_checks_independent", "Dispatch release checks independent phase"],
       ["release_checks_candidate", "Dispatch release checks candidate phase"],
       ["npm_telegram", "Dispatch npm Telegram E2E"],
-      ["performance", "Dispatch OpenClaw Performance"],
+      ["performance", "Dispatch Carapace Performance"],
     ] as const) {
       const dispatch = step(job(full, jobName), stepName);
       const dispatchRun = dispatch.run ?? "";
@@ -1173,7 +1173,7 @@ describe("release validation no-push transport", () => {
     expect(dispatch.run).toContain("reused green product evidence from chain-root run");
     expect(dispatch.run).toContain("--connect-timeout 10");
     expect(dispatch.run).toContain("--max-time 30");
-    expect(dispatch.run).toContain("https://api.github.com/repos/openclaw/releases/dispatches");
+    expect(dispatch.run).toContain("https://api.github.com/repos/carapace/releases/dispatches");
   });
 
   it("publishes an attempt-qualified canonical manifest plus a temporary legacy alias", () => {
@@ -1194,8 +1194,8 @@ describe("release validation no-push transport", () => {
     const pluginPrerelease = readWorkflow(PLUGIN_PRERELEASE);
 
     expect(fullText).toContain("dispatch_child plugin-prerelease.yml");
-    expect(fullText).toContain("dispatch_child openclaw-release-checks.yml");
-    expect(fullText).toContain("dispatch_child openclaw-performance.yml");
+    expect(fullText).toContain("dispatch_child carapace-release-checks.yml");
+    expect(fullText).toContain("dispatch_child carapace-performance.yml");
     expect(fullText).toContain('gh workflow run "$workflow" --ref "$CHILD_WORKFLOW_REF" "$@"');
 
     const preparePackage = job(release, "prepare_release_package");
@@ -1332,7 +1332,7 @@ describe("release validation no-push transport", () => {
       ({ jobName }) => jobName === "bind_full_release_candidate_evidence",
     );
     expect(binderCheckout?.candidate.with).toMatchObject({
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       ref: "main",
       "persist-credentials": false,
     });
@@ -1449,7 +1449,7 @@ describe("release validation no-push transport", () => {
     expect(dockerProducer.outputs?.package_file_name).toContain("file_name");
     expect(dockerProducer.outputs?.package_source_sha).toContain("source_sha");
 
-    const packageIdentity = step(dockerProducer, "Validate OpenClaw package artifact identity");
+    const packageIdentity = step(dockerProducer, "Validate Carapace package artifact identity");
     expect(packageIdentity.env).toMatchObject({
       ARTIFACT_DIGEST: "${{ inputs.package_artifact_digest }}",
       ARTIFACT_ID: "${{ inputs.package_artifact_id }}",
@@ -1464,11 +1464,11 @@ describe("release validation no-push transport", () => {
     expect(packageIdentity.run).toContain("artifact_digest=$ARTIFACT_DIGEST");
     for (const [name, condition] of [
       [
-        "Download current-run OpenClaw Docker E2E package",
+        "Download current-run Carapace Docker E2E package",
         "inputs.package_artifact_run_id == github.run_id",
       ],
       [
-        "Download previous-run OpenClaw Docker E2E package",
+        "Download previous-run Carapace Docker E2E package",
         "inputs.package_artifact_run_id != github.run_id",
       ],
     ] as const) {
@@ -1499,9 +1499,9 @@ describe("release validation no-push transport", () => {
     expect(functionalBuild.run).toContain("docker build");
     expect(functionalBuild.run).toContain("--target functional");
     expect(functionalBuild.run).toContain(
-      'docker_e2e_prepare_package_context "$GITHUB_WORKSPACE/.artifacts/docker-e2e-package/openclaw-current.tgz"',
+      'docker_e2e_prepare_package_context "$GITHUB_WORKSPACE/.artifacts/docker-e2e-package/carapace-current.tgz"',
     );
-    expect(functionalBuild.run).toContain('--build-context "openclaw_package=$package_context"');
+    expect(functionalBuild.run).toContain('--build-context "carapace_package=$package_context"');
     expect(functionalBuild.run).toContain("--file .release-harness/scripts/e2e/Dockerfile");
     expect(functionalBuild.run).toContain('--tag "$IMAGE_REF"');
     const packDockerArtifact = step(dockerProducer, "Pack Docker E2E image artifact");
@@ -1511,10 +1511,10 @@ describe("release validation no-push transport", () => {
       "docker-e2e-shared-images-${SHARED_IMAGE_ARTIFACT_NAMESPACE}-${TARGET_SHA:0:12}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}",
     );
     expect(packDockerArtifact.run).toContain(
-      'OPENCLAW_SHARED_IMAGE_PACKAGE_SHA256="$PACKAGE_SHA256"',
+      'CARAPACE_SHARED_IMAGE_PACKAGE_SHA256="$PACKAGE_SHA256"',
     );
     expect(packDockerArtifact.run).toContain("archive_sha256=");
-    const validatePackage = step(dockerProducer, "Validate OpenClaw Docker E2E package");
+    const validatePackage = step(dockerProducer, "Validate Carapace Docker E2E package");
     expect(step(dockerProducer, "Setup trusted release harness")).toMatchObject({
       uses: "./.release-harness/.github/actions/setup-release-harness",
       with: { "node-version": "${{ env.NODE_VERSION }}" },
@@ -1536,9 +1536,9 @@ describe("release validation no-push transport", () => {
     );
     expect(validatePackage.run).toContain("package/dist/build-info.json");
     expect(validatePackage.run).toContain('[[ "$package_source_sha" == "$SELECTED_SHA" ]]');
-    expect(validatePackage.run).toContain("scripts/check-openclaw-package-tarball.mjs");
+    expect(validatePackage.run).toContain("scripts/check-carapace-package-tarball.mjs");
     expect(validatePackage.run).toContain(
-      "cd .release-harness && pnpm exec node scripts/check-openclaw-package-tarball.mjs",
+      "cd .release-harness && pnpm exec node scripts/check-carapace-package-tarball.mjs",
     );
     expect(validatePackage.run).toContain('"$GITHUB_WORKSPACE/$target"');
     expect(validatePackage.run).not.toContain("pnpm --dir .release-harness");
@@ -1621,8 +1621,8 @@ describe("release validation no-push transport", () => {
     ]) {
       const consumer = job(workflow, name);
       expect(consumer.needs).toContain("prepare_docker_e2e_image");
-      expect(consumer.env?.OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE).toContain("no-push-artifact");
-      expect(step(consumer, "Download OpenClaw Docker E2E package").with).toMatchObject({
+      expect(consumer.env?.CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE).toContain("no-push-artifact");
+      expect(step(consumer, "Download Carapace Docker E2E package").with).toMatchObject({
         "artifact-ids": "${{ needs.prepare_docker_e2e_image.outputs.package_artifact_id }}",
         "github-token": "${{ github.token }}",
         "run-id": "${{ needs.prepare_docker_e2e_image.outputs.package_artifact_run_id }}",
@@ -1658,15 +1658,15 @@ describe("release validation no-push transport", () => {
       expect(loadArtifact.env?.PACKAGE_SHA256).toBe(
         "${{ needs.prepare_docker_e2e_image.outputs.package_sha256 }}",
       );
-      expect(loadArtifact.env?.OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT).toBe(
+      expect(loadArtifact.env?.CARAPACE_SHARED_IMAGE_RUN_ATTEMPT).toBe(
         "${{ needs.prepare_docker_e2e_image.outputs.image_artifact_run_attempt }}",
       );
-      expect(loadArtifact.env?.OPENCLAW_SHARED_IMAGE_RUN_ID).toBe(
+      expect(loadArtifact.env?.CARAPACE_SHARED_IMAGE_RUN_ID).toBe(
         "${{ needs.prepare_docker_e2e_image.outputs.image_artifact_run_id }}",
       );
       expect(loadArtifact.run).toContain("shared-image-artifact.sh");
-      expect(loadArtifact.run).toContain('OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256="$ARCHIVE_SHA256"');
-      expect(loadArtifact.run).toContain('OPENCLAW_SHARED_IMAGE_PACKAGE_SHA256="$PACKAGE_SHA256"');
+      expect(loadArtifact.run).toContain('CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256="$ARCHIVE_SHA256"');
+      expect(loadArtifact.run).toContain('CARAPACE_SHARED_IMAGE_PACKAGE_SHA256="$PACKAGE_SHA256"');
       expect(step(consumer, "Log in to GHCR for shared Docker E2E image").if).toContain(
         "shared_image_policy != 'no-push-artifact'",
       );
@@ -1685,7 +1685,7 @@ describe("release validation no-push transport", () => {
     ]) {
       const consumer = job(workflow, name);
       expect(consumer.needs).toContain("prepare_live_test_image");
-      expect(consumer.env?.OPENCLAW_LIVE_REQUIRE_LOCAL_IMAGE).toContain("no-push-artifact");
+      expect(consumer.env?.CARAPACE_LIVE_REQUIRE_LOCAL_IMAGE).toContain("no-push-artifact");
       const binding = step(consumer, "Validate live-test image artifact binding");
       expect(binding.if).toContain("shared_image_policy == 'no-push-artifact'");
       expect(binding.env).toMatchObject({
@@ -1714,21 +1714,21 @@ describe("release validation no-push transport", () => {
       expect(loadArtifact.env?.ARCHIVE_SHA256).toBe(
         "${{ needs.prepare_live_test_image.outputs.image_archive_sha256 }}",
       );
-      expect(loadArtifact.env?.OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT).toBe(
+      expect(loadArtifact.env?.CARAPACE_SHARED_IMAGE_RUN_ATTEMPT).toBe(
         "${{ needs.prepare_live_test_image.outputs.image_artifact_run_attempt }}",
       );
-      expect(loadArtifact.env?.OPENCLAW_SHARED_IMAGE_RUN_ID).toBe(
+      expect(loadArtifact.env?.CARAPACE_SHARED_IMAGE_RUN_ID).toBe(
         "${{ needs.prepare_live_test_image.outputs.image_artifact_run_id }}",
       );
       expect(loadArtifact.run).toContain("shared-image-artifact.sh");
-      expect(loadArtifact.run).toContain('OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256="$ARCHIVE_SHA256"');
+      expect(loadArtifact.run).toContain('CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256="$ARCHIVE_SHA256"');
       expect(step(consumer, "Log in to GHCR").if).toContain(
         "shared_image_policy != 'no-push-artifact'",
       );
     }
 
     const liveBuild = readFileSync(LIVE_BUILD, "utf8");
-    const requireLocalIndex = liveBuild.indexOf("OPENCLAW_LIVE_REQUIRE_LOCAL_IMAGE");
+    const requireLocalIndex = liveBuild.indexOf("CARAPACE_LIVE_REQUIRE_LOCAL_IMAGE");
     const pullIndex = liveBuild.indexOf("Live-test image not found locally; pulling");
     expect(requireLocalIndex).toBeGreaterThanOrEqual(0);
     expect(pullIndex).toBeGreaterThan(requireLocalIndex);
@@ -1754,7 +1754,7 @@ describe("release validation no-push transport", () => {
       .filter((name) => name.endsWith(".yml") || name.endsWith(".yaml"))
       .filter((name) =>
         readFileSync(join(".github/workflows", name), "utf8").includes(
-          "openclaw-shared-image-publish-reusable.yml",
+          "carapace-shared-image-publish-reusable.yml",
         ),
       );
     expect(publisherCallers).toEqual([]);
@@ -1834,7 +1834,7 @@ describe("release validation no-push transport", () => {
 
   it("routes Docker publication through release publish after immutable npm evidence", () => {
     const dockerRelease = readWorkflow(DOCKER_RELEASE);
-    const releasePublishPath = ".github/workflows/openclaw-release-publish.yml";
+    const releasePublishPath = ".github/workflows/carapace-release-publish.yml";
     const releasePublish = readWorkflow(releasePublishPath);
     const dockerCall = job(releasePublish, "publish_docker");
 
@@ -1860,7 +1860,7 @@ describe("release validation no-push transport", () => {
     // docker-image-refresh.yml is the sanctioned second caller: it rebuilds
     // already-published releases behind the same docker-release environment
     // approval; its own guard test covers those safety properties.
-    expect(callers).toEqual(["docker-image-refresh.yml", "openclaw-release-publish.yml"]);
+    expect(callers).toEqual(["docker-image-refresh.yml", "carapace-release-publish.yml"]);
 
     expect(dockerCall.needs).toEqual([
       "resolve_release_target",
@@ -1895,7 +1895,7 @@ describe("release validation no-push transport", () => {
     expect(
       step(
         job(releasePublish, "resolve_release_target"),
-        "Validate OpenClaw npm preflight manifest",
+        "Validate Carapace npm preflight manifest",
       ).run,
     ).toContain("Preflight manifest SHA mismatch");
     expect(
@@ -1923,7 +1923,7 @@ describe("release validation no-push transport", () => {
   });
 
   it("finalizes npm-only alpha releases while retaining required Docker gates for other trains", () => {
-    const workflow = readWorkflow(".github/workflows/openclaw-release-publish.yml");
+    const workflow = readWorkflow(".github/workflows/carapace-release-publish.yml");
     const cases = [
       {
         tag: "v2026.9.1-alpha.1",
@@ -1967,7 +1967,7 @@ describe("release validation no-push transport", () => {
         runInNewContext(job(workflow, name).if!.slice(3, -2), {
           always: () => true,
           contains: (value: string, search: string) => value.includes(search),
-          inputs: { tag: scenario.tag, publish_openclaw_npm: true, publish_docker_only: false },
+          inputs: { tag: scenario.tag, publish_carapace_npm: true, publish_docker_only: false },
           needs: {
             publish: { result: scenario.npm },
             publish_docker: { result: scenario.docker },
@@ -1980,7 +1980,7 @@ describe("release validation no-push transport", () => {
   });
 
   it("fails a missing required local live image before any registry pull", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-live-local-image-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-live-local-image-"));
     const bin = join(root, "bin");
     const calls = join(root, "docker.log");
     try {
@@ -2009,24 +2009,24 @@ exit 2
           ...process.env,
           DOCKER_COMMAND_TIMEOUT: "5s",
           FAKE_DOCKER_LOG: calls,
-          OPENCLAW_LIVE_IMAGE: "openclaw-live-test:required-local",
-          OPENCLAW_LIVE_REQUIRE_LOCAL_IMAGE: "1",
-          OPENCLAW_SKIP_DOCKER_BUILD: "1",
+          CARAPACE_LIVE_IMAGE: "carapace-live-test:required-local",
+          CARAPACE_LIVE_REQUIRE_LOCAL_IMAGE: "1",
+          CARAPACE_SKIP_DOCKER_BUILD: "1",
           PATH: `${bin}:${process.env.PATH ?? ""}`,
         },
       });
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        "Required local live-test image not found: openclaw-live-test:required-local",
+        "Required local live-test image not found: carapace-live-test:required-local",
       );
-      expect(readFileSync(calls, "utf8")).toBe("image inspect openclaw-live-test:required-local\n");
+      expect(readFileSync(calls, "utf8")).toBe("image inspect carapace-live-test:required-local\n");
     } finally {
       rmSync(root, { force: true, recursive: true });
     }
   });
 
   it("fails a missing required local Docker E2E image before pull or build fallback", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-docker-e2e-local-image-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-docker-e2e-local-image-"));
     const bin = join(root, "bin");
     const calls = join(root, "docker.log");
     try {
@@ -2054,7 +2054,7 @@ exit 2
         [
           "-c",
           `source "$1"
-docker_e2e_build_or_reuse "openclaw-e2e:required-local" "required local image test"`,
+docker_e2e_build_or_reuse "carapace-e2e:required-local" "required local image test"`,
           "bash",
           resolve(DOCKER_E2E_IMAGE_HELPER),
         ],
@@ -2063,18 +2063,18 @@ docker_e2e_build_or_reuse "openclaw-e2e:required-local" "required local image te
           env: {
             ...process.env,
             FAKE_DOCKER_LOG: calls,
-            OPENCLAW_DOCKER_BUILD_ON_MISSING: "1",
-            OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
-            OPENCLAW_SKIP_DOCKER_BUILD: "1",
+            CARAPACE_DOCKER_BUILD_ON_MISSING: "1",
+            CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
+            CARAPACE_SKIP_DOCKER_BUILD: "1",
             PATH: `${bin}:${process.env.PATH ?? ""}`,
           },
         },
       );
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        "Required local Docker E2E image not found: openclaw-e2e:required-local",
+        "Required local Docker E2E image not found: carapace-e2e:required-local",
       );
-      expect(readFileSync(calls, "utf8")).toBe("image inspect openclaw-e2e:required-local\n");
+      expect(readFileSync(calls, "utf8")).toBe("image inspect carapace-e2e:required-local\n");
     } finally {
       rmSync(root, { force: true, recursive: true });
     }

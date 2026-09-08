@@ -1,6 +1,6 @@
 // Chutes tests cover implicit provider plugin behavior.
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveOAuthApiKeyMarker } from "openclaw/plugin-sdk/provider-auth";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { resolveOAuthApiKeyMarker } from "carapace/plugin-sdk/provider-auth";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { CHUTES_BASE_URL } from "./models.js";

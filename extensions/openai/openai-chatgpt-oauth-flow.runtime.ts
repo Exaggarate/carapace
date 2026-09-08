@@ -5,8 +5,8 @@
  * It is only intended for CLI use, not browser environments.
  */
 
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveOpenAICodexAuthIdentity } from "openclaw/plugin-sdk/provider-auth";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolveOpenAICodexAuthIdentity } from "carapace/plugin-sdk/provider-auth";
 import {
   createOAuthLoginCancelledError,
   oauthErrorHtml,
@@ -16,7 +16,7 @@ import {
   withOAuthLoginAbort,
   type OAuthCredentials,
   type OAuthPrompt,
-} from "openclaw/plugin-sdk/provider-oauth-runtime";
+} from "carapace/plugin-sdk/provider-oauth-runtime";
 import {
   createOpenAIAuthorizationFlow,
   resolveOpenAICallbackHost,
@@ -216,7 +216,7 @@ function resolveOpenAICredentials(
  * @param options.onManualCodeInput - Optional promise that resolves with user-pasted code.
  *                                    Races with browser callback - whichever completes first wins.
  *                                    Useful for showing paste input immediately alongside browser flow.
- * @param options.originator - OAuth originator parameter (defaults to "openclaw")
+ * @param options.originator - OAuth originator parameter (defaults to "carapace")
  */
 export async function loginOpenAICodex(options: {
   onAuth: (info: { url: string; instructions?: string }) => Promise<void> | void;
@@ -230,7 +230,7 @@ export async function loginOpenAICodex(options: {
   options.assertCurrent?.();
   throwIfOAuthLoginAborted(options.signal);
   const { verifier, redirectUri, state, url } = await createOpenAIAuthorizationFlow(
-    options.originator ?? "openclaw",
+    options.originator ?? "carapace",
     REDIRECT_URI,
   );
   const server = await startLocalOAuthServer(state, options.assertCurrent);

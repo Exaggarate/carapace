@@ -1,7 +1,7 @@
 // Gateway probe auth resolver.
 // Adapts gateway credential precedence for local/remote reachability checks.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayProbeSurfaceAuth } from "./auth-surface-resolution.js";
 import { createGatewayCredentialPlan } from "./credential-planner.js";
 import { resolveGatewayCredentialsWithSecretInputs } from "./credentials-secret-inputs.js";
@@ -15,7 +15,7 @@ export { resolveGatewayProbeTarget } from "./probe-target.js";
 export type { GatewayProbeTargetResolution } from "./probe-target.js";
 
 type GatewayProbeCredentialParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
@@ -55,9 +55,9 @@ function buildGatewayProbeCredentialPolicy(params: GatewayProbeCredentialParams)
 }
 
 export function resolveGatewayProbeCredentialConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: "local" | "remote";
-}): OpenClawConfig {
+}): CarapaceConfig {
   const gateway = params.cfg.gateway;
   const credentials = params.mode === "local" ? gateway?.remote : gateway?.auth;
   if (!credentials || (credentials.token === undefined && credentials.password === undefined)) {
@@ -106,7 +106,7 @@ function resolveGatewayProbeWarning(error: unknown): string | undefined {
 
 /** Resolves synchronous probe auth, throwing when configured secrets cannot be read. */
 export function resolveGatewayProbeAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   urlOverride?: string;
@@ -197,7 +197,7 @@ export async function resolveGatewayProbeAuthSafeWithSecretInputs(
 
 /** Synchronous safe probe auth wrapper for config-only credential paths. */
 export function resolveGatewayProbeAuthSafe(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;

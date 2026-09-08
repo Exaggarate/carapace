@@ -105,7 +105,7 @@ suite.define(() => {
         const navigate = (routeId: string, search = "") =>
           page.evaluate(
             ({ targetRouteId, targetSearch }) => {
-              const app = document.querySelector("openclaw-app") as HTMLElement & {
+              const app = document.querySelector("carapace-app") as HTMLElement & {
                 runtime?: {
                   context: {
                     navigate: (routeId: string, options?: { search?: string }) => void;
@@ -113,7 +113,7 @@ suite.define(() => {
                 };
               };
               if (!app.runtime) {
-                throw new Error("OpenClaw application runtime is unavailable");
+                throw new Error("Carapace application runtime is unavailable");
               }
               app.runtime.context.navigate(targetRouteId, { search: targetSearch });
             },

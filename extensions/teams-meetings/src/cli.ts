@@ -1,7 +1,7 @@
 import type { Command } from "commander";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
-import { addTimerTimeoutGraceMs } from "openclaw/plugin-sdk/number-runtime";
+import { callGatewayFromCli } from "carapace/plugin-sdk/gateway-runtime";
+import { MeetingPlatformAdapter } from "carapace/plugin-sdk/meeting-runtime";
+import { addTimerTimeoutGraceMs } from "carapace/plugin-sdk/number-runtime";
 import { teamsMeetingsConfig, type TeamsMeetingsConfig } from "./config.js";
 
 export function registerTeamsMeetingsCli(params: {

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { listAgentEntries, tryResolveSoleAgentId } from "../agents/agent-scope-config.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace-default.js";
 import { isChannelConfigMetadataKey } from "../channels/config-metadata.js";
@@ -7,7 +7,7 @@ import { normalizeAgentId } from "../routing/session-key.js";
 import { isRecord } from "../utils.js";
 import { isPerAgentSessionStoreConfig } from "./sessions/session-store-config.js";
 import type { AgentRouteBinding } from "./types.agents.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 function isChannelWideBinding(binding: AgentRouteBinding, channelId: string): boolean {
   const match = binding.match;
@@ -25,7 +25,7 @@ function isChannelWideBinding(binding: AgentRouteBinding, channelId: string): bo
 }
 
 function listUnboundAmbientChannelIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   ambientChannelIds: readonly string[],
 ): string[] {
   if (cfg.bindings && !Array.isArray(cfg.bindings)) {
@@ -88,7 +88,7 @@ export function resolveLegacyFirstAgentWorkspacePin(
 }
 
 export function materializeLegacyDefaultAgentRoles(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   legacyDefaultAgentId: string,
   options: {
     ambientChannelIds?: readonly string[];

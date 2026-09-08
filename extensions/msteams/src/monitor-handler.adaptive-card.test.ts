@@ -1,6 +1,6 @@
 // Msteams tests cover monitor handler.adaptive card plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, RuntimeEnv } from "../runtime-api.js";
+import type { CarapaceConfig, RuntimeEnv } from "../runtime-api.js";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import { type MSTeamsActivityHandler, registerMSTeamsHandlers } from "./monitor-handler.js";
 import {
@@ -25,7 +25,7 @@ function createDeps(): MSTeamsMessageHandlerDeps {
   installMSTeamsTestRuntime();
 
   return {
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     runtime: { error: vi.fn() } as unknown as RuntimeEnv,
     appId: "test-app",
     app: {} as MSTeamsMessageHandlerDeps["app"],
@@ -292,7 +292,7 @@ describe("msteams adaptive card action invoke", () => {
     async ({ activity, token }) => {
       const deps = createDeps();
       const data = {
-        openclawAction: "approval",
+        carapaceAction: "approval",
         ...(token !== undefined ? { token } : {}),
       };
 

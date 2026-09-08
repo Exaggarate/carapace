@@ -7,7 +7,7 @@ import {
 } from "../agents/harness/registry.js";
 import { restoreRegisteredAgentHarnesses } from "../agents/harness/registry.test-support.js";
 import * as thinking from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const { readAcpSessionMeta, readAcpSessionMetaForEntry } = vi.hoisted(() => ({
   readAcpSessionMeta: vi.fn<typeof import("../acp/runtime/session-meta.js").readAcpSessionMeta>(),
@@ -48,12 +48,12 @@ describe("resolveGatewaySessionThinkingProjectionInternal", () => {
       supports: ({ modelProvider }) =>
         modelProvider?.api === api && modelProvider.baseUrl === baseUrl
           ? { supported: true }
-          : { supported: false, fallbackRuntime: "openclaw" },
+          : { supported: false, fallbackRuntime: "carapace" },
       runAttempt: async () => {
         throw new Error("projection must not execute");
       },
     });
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           thinkingDefault: "off",
@@ -110,13 +110,13 @@ describe("resolveGatewaySessionThinkingProjectionInternal", () => {
         label: "Codex",
         supports: (ctx) =>
           ctx.modelProvider?.requestTransportOverrides === "present"
-            ? { supported: false, fallbackRuntime: "openclaw" }
+            ? { supported: false, fallbackRuntime: "carapace" }
             : { supported: true },
         runAttempt: async () => {
           throw new Error("projection must not execute");
         },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { models: { "openai/gpt-5.6-sol": { agentRuntime: { id: "codex" } } } },
         },
@@ -153,18 +153,18 @@ describe("resolveGatewaySessionThinkingProjectionInternal", () => {
         entry: {
           sessionId: "runtime-projection",
           updatedAt: 1,
-          agentHarnessId: transportOverride ? "codex" : "openclaw",
+          agentHarnessId: transportOverride ? "codex" : "carapace",
         },
       });
       expect(projection.agentRuntime).toEqual({
-        id: transportOverride ? "openclaw" : "codex",
+        id: transportOverride ? "carapace" : "codex",
         source: "model",
       });
     },
   );
 
   it("reads bare-key ACP metadata under the resolved row owner", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { scope: "global", store: "/tmp/shared.sqlite" },
       agents: {
         ownership: "explicit",
@@ -185,10 +185,10 @@ describe("resolveGatewaySessionThinkingProjectionInternal", () => {
   });
 
   it("keeps a prepared row from adopting a replacement session's ACP runtime", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         entries: { ops: {} },
-        defaults: { models: { "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } } } },
+        defaults: { models: { "openai/gpt-5.6-sol": { agentRuntime: { id: "carapace" } } } },
       },
     };
     const entry = { sessionId: "original", lifecycleRevision: "original-revision", updatedAt: 1 };
@@ -211,7 +211,7 @@ describe("resolveGatewaySessionThinkingProjectionInternal", () => {
       entry,
     });
 
-    expect(projection.agentRuntime.id).toBe("openclaw");
+    expect(projection.agentRuntime.id).toBe("carapace");
     expect(readAcpSessionMeta).not.toHaveBeenCalled();
     expect(readAcpSessionMetaForEntry).toHaveBeenCalledWith({
       cfg,

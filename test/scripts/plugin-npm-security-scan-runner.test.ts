@@ -22,7 +22,7 @@ describe.skipIf(process.platform === "win32")("plugin npm security runner RSS sa
     ["fractional", "0.5", false],
     ["unsafe integer", "9007199254740992", false],
   ] as const)("handles a non-zombie %s RSS sample", (_label, rss, accepted) => {
-    const root = tempDirs.make("openclaw-plugin-npm-security-rss-sample-");
+    const root = tempDirs.make("carapace-plugin-npm-security-rss-sample-");
     const childPath = join(root, "child.mjs");
     const pidPath = join(root, "child.pid");
     const samplePath = join(root, "sample.txt");
@@ -94,8 +94,8 @@ process.kill(pid, "SIGUSR2");
         env: {
           ...process.env,
           NODE_ENV: "test",
-          OPENCLAW_PLUGIN_SECURITY_RUNNER_CHILD: childPath,
-          OPENCLAW_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: "5000",
+          CARAPACE_PLUGIN_SECURITY_RUNNER_CHILD: childPath,
+          CARAPACE_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: "5000",
           PATH: `${binDir}${delimiter}${process.env.PATH}`,
         },
         timeout: 10_000,
@@ -116,7 +116,7 @@ process.kill(pid, "SIGUSR2");
 
 describe("plugin npm security runner process limits", () => {
   it("writes sanitized exact-identity reports for timeout, heap, and RSS failures", () => {
-    const root = tempDirs.make("openclaw-plugin-npm-security-runner-");
+    const root = tempDirs.make("carapace-plugin-npm-security-runner-");
     const timeoutChild = join(root, "timeout.mjs");
     const oomChild = join(root, "oom.mjs");
     const rssChild = join(root, "rss.mjs");
@@ -158,10 +158,10 @@ describe("plugin npm security runner process limits", () => {
           env: {
             ...process.env,
             NODE_ENV: "test",
-            OPENCLAW_PLUGIN_SECURITY_RUNNER_CHILD: child,
-            OPENCLAW_PLUGIN_SECURITY_RUNNER_HEAP_MB: heapMb,
-            OPENCLAW_PLUGIN_SECURITY_RUNNER_RSS_MB: rssMb,
-            OPENCLAW_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: timeoutMs,
+            CARAPACE_PLUGIN_SECURITY_RUNNER_CHILD: child,
+            CARAPACE_PLUGIN_SECURITY_RUNNER_HEAP_MB: heapMb,
+            CARAPACE_PLUGIN_SECURITY_RUNNER_RSS_MB: rssMb,
+            CARAPACE_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: timeoutMs,
           },
           timeout: 15_000,
         },
@@ -187,7 +187,7 @@ describe("plugin npm security runner process limits", () => {
   ] as const)(
     "joins scanner descendants and records cancellation on %s",
     async (signal, exitCode) => {
-      const root = tempDirs.make("openclaw-plugin-npm-security-cancel-");
+      const root = tempDirs.make("carapace-plugin-npm-security-cancel-");
       const childPath = join(root, "child.mjs");
       const childPidPath = join(root, "child.pid");
       const descendantPidPath = join(root, "descendant.pid");
@@ -222,7 +222,7 @@ descendant.unref();
           env: {
             ...process.env,
             NODE_ENV: "test",
-            OPENCLAW_PLUGIN_SECURITY_RUNNER_CHILD: childPath,
+            CARAPACE_PLUGIN_SECURITY_RUNNER_CHILD: childPath,
           },
           stdio: "ignore",
         },
@@ -267,7 +267,7 @@ descendant.unref();
   );
 
   it("fails closed when RSS measurement is unavailable", () => {
-    const root = tempDirs.make("openclaw-plugin-npm-security-rss-measurement-");
+    const root = tempDirs.make("carapace-plugin-npm-security-rss-measurement-");
     const child = join(root, "child.mjs");
     const binDir = join(root, "bin");
     const reportPath = join(root, "report.json");
@@ -297,8 +297,8 @@ descendant.unref();
         env: {
           ...process.env,
           NODE_ENV: "test",
-          OPENCLAW_PLUGIN_SECURITY_RUNNER_CHILD: child,
-          OPENCLAW_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: "5000",
+          CARAPACE_PLUGIN_SECURITY_RUNNER_CHILD: child,
+          CARAPACE_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS: "5000",
           PATH: `${binDir}:${process.env.PATH}`,
         },
         timeout: 10_000,

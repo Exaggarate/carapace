@@ -1,8 +1,8 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as lancedb from "@lancedb/lancedb";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import { expectDefined } from "@carapace/normalization-core";
+import type { PluginDoctorStateMigrationContext } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { describe, expect, test } from "vitest";
 import {
   createMemoryLanceDbStateMigrations,
@@ -19,7 +19,7 @@ const unusedDoctorContext = {
 
 describe("memory-lancedb doctor migration", () => {
   const { getDbPath, getTmpDir } = installTmpDirHarness({
-    prefix: "openclaw-memory-doctor-",
+    prefix: "carapace-memory-doctor-",
   });
 
   test("assigns legacy shared rows to the configured default agent once", async () => {

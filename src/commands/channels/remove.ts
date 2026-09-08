@@ -1,5 +1,5 @@
 // Implements guided and non-interactive disable/delete for channel accounts.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   applyPreparedChannelAccountRemoval,
   type ChannelAccountMutationPlugin,
@@ -12,7 +12,7 @@ import {
   formatUnknownChannelMessage,
   formatUnsupportedChannelActionMessage,
 } from "../../cli/error-format.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { callGateway } from "../../gateway/call.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
@@ -32,7 +32,7 @@ export type ChannelsRemoveOptions = {
 };
 
 function listAccountIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: ChatChannel,
   pluginInput?: ChannelAccountMutationPlugin,
 ): string[] {
@@ -45,7 +45,7 @@ function listAccountIds(
 }
 
 async function stopGatewayRuntimeBeforeRemove(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChatChannel;
   accountId: string;
   shouldStopRuntime: boolean;
@@ -84,7 +84,7 @@ export async function channelsRemoveCommand(
   if (!writeSnapshot) {
     return;
   }
-  const cfg: OpenClawConfig = writeSnapshot.snapshot.sourceConfig;
+  const cfg: CarapaceConfig = writeSnapshot.snapshot.sourceConfig;
 
   const useWizard = shouldUseWizard(params);
   const prompter = useWizard ? createClackPrompter() : null;
@@ -134,7 +134,7 @@ export async function channelsRemoveCommand(
   } else {
     if (!rawChannel) {
       runtime.error(
-        `Missing channel. Use ${formatCliCommand("openclaw channels remove --channel <name>")} or run ${formatCliCommand("openclaw channels status")} to inspect configured channels.`,
+        `Missing channel. Use ${formatCliCommand("carapace channels remove --channel <name>")} or run ${formatCliCommand("carapace channels status")} to inspect configured channels.`,
       );
       runtime.exit(1);
       return;
@@ -177,7 +177,7 @@ export async function channelsRemoveCommand(
   if (!plugin) {
     if (resolvedPluginState?.catalogEntry) {
       runtime.error(
-        `Channel plugin "${resolvedPluginState.catalogEntry.id}" is not installed. Run ${formatCliCommand(`openclaw channels add --channel ${resolvedPluginState.catalogEntry.id}`)} first.`,
+        `Channel plugin "${resolvedPluginState.catalogEntry.id}" is not installed. Run ${formatCliCommand(`carapace channels add --channel ${resolvedPluginState.catalogEntry.id}`)} first.`,
       );
       runtime.exit(1);
       return;
@@ -209,8 +209,8 @@ export async function channelsRemoveCommand(
   if (!removal.ok) {
     runtime.error(
       removal.error.action === "delete"
-        ? `${formatUnsupportedChannelActionMessage({ channel, action: "delete" })} Use ${formatCliCommand("openclaw channels remove --channel " + channel)} to disable it without deleting config.`
-        : `${formatUnsupportedChannelActionMessage({ channel, action: "disable" })} Use ${formatCliCommand("openclaw channels remove --channel " + channel + " --delete")} only if you want to remove config.`,
+        ? `${formatUnsupportedChannelActionMessage({ channel, action: "delete" })} Use ${formatCliCommand("carapace channels remove --channel " + channel)} to disable it without deleting config.`
+        : `${formatUnsupportedChannelActionMessage({ channel, action: "disable" })} Use ${formatCliCommand("carapace channels remove --channel " + channel + " --delete")} only if you want to remove config.`,
     );
     runtime.exit(1);
     return;

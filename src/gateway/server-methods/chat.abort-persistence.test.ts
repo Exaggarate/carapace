@@ -4,7 +4,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
 import {
@@ -14,8 +14,8 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { onAgentEvent, resetAgentEventsForTest } from "../../infra/agent-events.js";
 import { onInternalSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createChatRunState } from "../server-chat-state.js";
 import { handleChatAbortRequest } from "./chat-abort-handler.js";
 import { captureAbortedPartial, persistAbortedPartials } from "./chat-transcript-persistence.js";
@@ -188,7 +188,7 @@ function expectPersistedAbortMessage(
   if (expected.stopReason) {
     expect(actual.stopReason).toBe(expected.stopReason);
   }
-  const abort = expectRecord(actual.openclawAbort, "persisted abort metadata");
+  const abort = expectRecord(actual.carapaceAbort, "persisted abort metadata");
   expect(abort.aborted).toBe(true);
   expect(abort.origin).toBe(expected.origin);
   expect(abort.runId).toBe(expected.runId);
@@ -282,8 +282,8 @@ async function createMissingEntryFixture(prefix: string) {
 afterEach(async () => {
   vi.restoreAllMocks();
   resetAgentEventsForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   transcriptFixtures.clear();
   const dirs = [...fixtureDirs];
   fixtureDirs.clear();
@@ -297,7 +297,7 @@ afterEach(async () => {
 describe("chat abort transcript persistence", () => {
   it("publishes one run-owned transcript row for an abandoned placement partial", async () => {
     const { transcriptPath, sessionId } = await createTranscriptFixture(
-      "openclaw-chat-placement-abandon-",
+      "carapace-chat-placement-abandon-",
     );
     const runId = "placement-abandon-run";
     const updates: unknown[] = [];
@@ -342,7 +342,7 @@ describe("chat abort transcript persistence", () => {
     { origin: "placement-abandon" as const, rejects: true },
     { origin: "rpc" as const, rejects: false },
   ])("keeps $origin append failure at its owning abort boundary", async ({ origin, rejects }) => {
-    const { sessionId } = await createTranscriptFixture("openclaw-chat-abort-append-failure-");
+    const { sessionId } = await createTranscriptFixture("carapace-chat-abort-append-failure-");
     sessionEntryState.storePath = "";
     const warn = vi.fn();
     const persistence = persistAbortedPartials({
@@ -368,7 +368,7 @@ describe("chat abort transcript persistence", () => {
   });
 
   it("rejects an abandoned partial after its exact transcript session is replaced", async () => {
-    const { sessionId } = await createTranscriptFixture("openclaw-chat-abort-rebound-session-");
+    const { sessionId } = await createTranscriptFixture("carapace-chat-abort-rebound-session-");
 
     await expect(
       persistAbortedPartials({
@@ -391,7 +391,7 @@ describe("chat abort transcript persistence", () => {
     "rejects placement partials when captured revision %s changes without SID rotation",
     async (lifecycleRevision) => {
       const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-        "openclaw-chat-placement-revision-",
+        "carapace-chat-placement-revision-",
       );
       await replaceSessionEntry(
         { agentId: "main", storePath, sessionKey: "main" },
@@ -430,7 +430,7 @@ describe("chat abort transcript persistence", () => {
   );
 
   it("persists run-scoped abort partial with rpc metadata and idempotency", async () => {
-    const { transcriptPath, sessionId } = await createTranscriptFixture("openclaw-chat-abort-run-");
+    const { transcriptPath, sessionId } = await createTranscriptFixture("carapace-chat-abort-run-");
     const runId = "idem-abort-run-1";
     const respond = vi.fn();
     const context = createChatAbortContext({
@@ -487,7 +487,7 @@ describe("chat abort transcript persistence", () => {
 
   it("does not duplicate a committed reply when a late abort re-persists the buffered text", async () => {
     const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-      "openclaw-chat-abort-committed-reply-",
+      "carapace-chat-abort-committed-reply-",
     );
     // The embedded agent loop persists its final assistant row without a
     // run-scoped idempotency key, so the store-level key dedupe cannot see
@@ -501,7 +501,7 @@ describe("chat abort transcript persistence", () => {
           content: [{ type: "text", text: "Completed reply" }],
           timestamp: Date.now(),
           stopReason: "stop",
-          __openclaw: { runId: "stalled-committed-run" },
+          __carapace: { runId: "stalled-committed-run" },
         },
         now: 1,
       },
@@ -539,12 +539,12 @@ describe("chat abort transcript persistence", () => {
     const committedRows = collectAssistantRowsWithText(lines, "Completed reply");
 
     expect(committedRows).toHaveLength(1);
-    expect(committedRows[0]?.openclawAbort).toBeUndefined();
+    expect(committedRows[0]?.carapaceAbort).toBeUndefined();
   });
 
   it("keeps an abort partial when the committed reply belongs to a different run", async () => {
     const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-      "openclaw-chat-abort-cross-run-",
+      "carapace-chat-abort-cross-run-",
     );
     // An earlier run committed the identical reply. Text equality alone would
     // drop this run's abort partial, so the skip must be run-scoped.
@@ -557,7 +557,7 @@ describe("chat abort transcript persistence", () => {
           content: [{ type: "text", text: "Completed reply" }],
           timestamp: Date.now(),
           stopReason: "stop",
-          __openclaw: { runId: "settled-other-run" },
+          __carapace: { runId: "settled-other-run" },
         },
         now: 1,
       },
@@ -590,7 +590,7 @@ describe("chat abort transcript persistence", () => {
 
   it("keeps an abort partial when the committed row predates run identity tagging", async () => {
     const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-      "openclaw-chat-abort-legacy-row-",
+      "carapace-chat-abort-legacy-row-",
     );
     const seeded = appendTranscriptMessageSync(
       { agentId: "main", sessionId, sessionKey: "main", storePath },
@@ -635,7 +635,7 @@ describe("chat abort transcript persistence", () => {
 
   it("treats a declined committed-reply skip as a decision, not a placement-abandon failure", async () => {
     const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-      "openclaw-chat-abort-skip-decision-",
+      "carapace-chat-abort-skip-decision-",
     );
     const seeded = appendTranscriptMessageSync(
       { agentId: "main", sessionId, sessionKey: "main", storePath },
@@ -646,7 +646,7 @@ describe("chat abort transcript persistence", () => {
           content: [{ type: "text", text: "Completed reply" }],
           timestamp: Date.now(),
           stopReason: "stop",
-          __openclaw: { runId: "stalled-placement-run" },
+          __carapace: { runId: "stalled-placement-run" },
         },
         now: 1,
       },
@@ -672,12 +672,12 @@ describe("chat abort transcript persistence", () => {
     const lines = await readTranscriptLines(transcriptPath);
     const committedRows = collectAssistantRowsWithText(lines, "Completed reply");
     expect(committedRows).toHaveLength(1);
-    expect(committedRows[0]?.openclawAbort).toBeUndefined();
+    expect(committedRows[0]?.carapaceAbort).toBeUndefined();
   });
 
   it("does not let non-assistant idempotency collisions suppress abort partial persistence", async () => {
     const { transcriptPath, sessionId, storePath } = await createTranscriptFixture(
-      "openclaw-chat-abort-idempotency-collision-",
+      "carapace-chat-abort-idempotency-collision-",
     );
     const runId = "idem-abort-collision";
     const idempotencyKey = `${runId}:assistant`;
@@ -724,7 +724,7 @@ describe("chat abort transcript persistence", () => {
 
   it("persists session-scoped abort partials with rpc metadata", async () => {
     const { transcriptPath, sessionId } = await createTranscriptFixture(
-      "openclaw-chat-abort-session-",
+      "carapace-chat-abort-session-",
     );
     const respond = vi.fn();
     const context = createChatAbortContext({
@@ -763,7 +763,7 @@ describe("chat abort transcript persistence", () => {
 
   it("does not persist partials from finalizing runs that reject a session abort", async () => {
     const { transcriptPath, sessionId } = await createTranscriptFixture(
-      "openclaw-chat-abort-finalizing-",
+      "carapace-chat-abort-finalizing-",
     );
     const respond = vi.fn();
     const finalizingRun = {
@@ -800,7 +800,7 @@ describe("chat abort transcript persistence", () => {
   });
 
   it("persists /stop partials with stop-command metadata", async () => {
-    const { transcriptPath, sessionId } = await createTranscriptFixture("openclaw-chat-stop-");
+    const { transcriptPath, sessionId } = await createTranscriptFixture("carapace-chat-stop-");
     const respond = vi.fn();
     const context = createChatAbortContext({
       chatAbortControllers: new Map([["run-stop-1", createActiveRun("main", { sessionId })]]),
@@ -855,7 +855,7 @@ describe("chat abort transcript persistence", () => {
       "main",
     ],
   ])("%s", async (_name, caseId, activeSessionKey, requestedSessionKey) => {
-    const { sessionId } = await createTranscriptFixture(`openclaw-chat-stop-${caseId}-`);
+    const { sessionId } = await createTranscriptFixture(`carapace-chat-stop-${caseId}-`);
     const respond = vi.fn();
     const runId = `run-stop-${caseId}`;
     const active = createActiveRun(activeSessionKey, { sessionId });
@@ -892,7 +892,7 @@ describe("chat abort transcript persistence", () => {
     ["scopes bare global stop commands to the default agent", "main", "default"],
   ])("%s", async (_name, selectedAgentId, fixtureId) => {
     const { sessionId, transcriptPath } = await createTranscriptFixture(
-      `openclaw-chat-stop-global-${fixtureId}-`,
+      `carapace-chat-stop-global-${fixtureId}-`,
       {
         agentId: selectedAgentId,
         sessionKey: "global",
@@ -1360,7 +1360,7 @@ describe("chat abort transcript persistence", () => {
   });
 
   it("does not match stop targets by client-supplied session id without a stored entry", async () => {
-    const { sessionId } = await createMissingEntryFixture("openclaw-chat-stop-client-session-");
+    const { sessionId } = await createMissingEntryFixture("carapace-chat-stop-client-session-");
     const respond = vi.fn();
     const active = createActiveRun("third-session", { sessionId });
     const context = createChatAbortContext({
@@ -1393,7 +1393,7 @@ describe("chat abort transcript persistence", () => {
 
   it("skips run-scoped transcript persistence when partial text is blank", async () => {
     const { transcriptPath, sessionId } = await createTranscriptFixture(
-      "openclaw-chat-abort-run-blank-",
+      "carapace-chat-abort-run-blank-",
     );
     const runId = "idem-abort-run-blank";
     const respond = vi.fn();
@@ -1422,7 +1422,7 @@ describe("chat abort transcript persistence", () => {
 
   it("skips run-scoped transcript persistence for hidden internal runs", async () => {
     const { transcriptPath, sessionId } = await createTranscriptFixture(
-      "openclaw-chat-abort-run-hidden-",
+      "carapace-chat-abort-run-hidden-",
     );
     const runId = "idem-abort-run-hidden";
     const respond = vi.fn();

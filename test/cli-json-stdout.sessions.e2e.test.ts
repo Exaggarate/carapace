@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -10,20 +10,20 @@ async function seedTrajectorySession(tempHome: string, sessionKey: string) {
     ...process.env,
     HOME: tempHome,
     USERPROFILE: tempHome,
-    OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+    CARAPACE_STATE_DIR: stateDir,
   };
-  delete env.OPENCLAW_HOME;
-  const [{ upsertSessionEntryCore }, { closeOpenClawAgentDatabaseByPath }] = await Promise.all([
+  delete env.CARAPACE_HOME;
+  const [{ upsertSessionEntryCore }, { closeCarapaceAgentDatabaseByPath }] = await Promise.all([
     import("../src/config/sessions/session-accessor.js"),
-    import("../src/state/openclaw-agent-db.js"),
+    import("../src/state/carapace-agent-db.js"),
   ]);
   await upsertSessionEntryCore(
     { agentId: "main", env, sessionKey },
     { sessionId: "trajectory-process-session", updatedAt: 1 },
   );
-  closeOpenClawAgentDatabaseByPath(
-    path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+  closeCarapaceAgentDatabaseByPath(
+    path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
   );
 }
 
@@ -103,13 +103,13 @@ describe("cli json stdout contract", () => {
       name: "bare list unknown agent",
       args: ["sessions", "--agent", "unknown-agent", "--json"],
       message:
-        'Unknown agent id "unknown-agent". Run openclaw agents list to see configured agents.',
+        'Unknown agent id "unknown-agent". Run carapace agents list to see configured agents.',
     },
     {
       name: "Commander list unknown agent through dual-TTY finalization",
       args: ["sessions", "--json", "--agent", "unknown-agent"],
       message:
-        'Unknown agent id "unknown-agent". Run openclaw agents list to see configured agents.',
+        'Unknown agent id "unknown-agent". Run carapace agents list to see configured agents.',
       commander: true,
       tty: true,
     },
@@ -134,7 +134,7 @@ describe("cli json stdout contract", () => {
       name: "list unknown agent in human mode",
       args: ["sessions", "--agent", "unknown-agent"],
       message:
-        'Unknown agent id "unknown-agent". Run openclaw agents list to see configured agents.',
+        'Unknown agent id "unknown-agent". Run carapace agents list to see configured agents.',
       human: true,
     },
     {
@@ -177,18 +177,18 @@ describe("cli json stdout contract", () => {
     {
       name: "trajectory export missing session key in human mode",
       args: ["sessions", "export-trajectory"],
-      message: "--session-key is required. Run openclaw sessions to choose a session.",
+      message: "--session-key is required. Run carapace sessions to choose a session.",
       human: true,
     },
     {
       name: "trajectory export missing session key with leaf JSON",
       args: ["sessions", "export-trajectory", "--json"],
-      message: "--session-key is required. Run openclaw sessions to choose a session.",
+      message: "--session-key is required. Run carapace sessions to choose a session.",
     },
     {
       name: "trajectory export missing session key with parent JSON through forced Commander",
       args: ["sessions", "--json", "export-trajectory"],
-      message: "--session-key is required. Run openclaw sessions to choose a session.",
+      message: "--session-key is required. Run carapace sessions to choose a session.",
       commander: true,
     },
     {
@@ -240,13 +240,13 @@ describe("cli json stdout contract", () => {
         "--json",
       ],
       message:
-        'Unknown agent id "unknown-agent". Run openclaw agents list to see configured agents.',
+        'Unknown agent id "unknown-agent". Run carapace agents list to see configured agents.',
     },
     {
       name: "trajectory export missing session through dual-TTY finalization",
       args: ["sessions", "export-trajectory", "--session-key", "agent:main:missing", "--json"],
       message:
-        "Session not found: agent:main:missing. Run openclaw sessions to see available sessions.",
+        "Session not found: agent:main:missing. Run carapace sessions to see available sessions.",
       tty: true,
     },
     {
@@ -371,10 +371,10 @@ describe("cli json stdout contract", () => {
         const message = testCase.message.replace("$MISSING_STORE", missingStore);
         const result = runBuiltCli(tempHome, args, {
           NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          OPENCLAW_GATEWAY_PORT: "29791",
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          CARAPACE_GATEWAY_PORT: "29791",
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { FORCE_COLOR: "1" } : {}),
         });
 
@@ -396,7 +396,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).toContain("\u001B[?25h");
         }
       },
-      { prefix: "openclaw-sessions-registration-json-failure-e2e-" },
+      { prefix: "carapace-sessions-registration-json-failure-e2e-" },
     );
   });
 
@@ -430,29 +430,29 @@ describe("cli json stdout contract", () => {
         }
 
         const result = runBuiltCli(tempHome, args, {
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          OPENCLAW_GATEWAY_PORT: "29791",
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          CARAPACE_GATEWAY_PORT: "29791",
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
         });
 
         expect(result.status, result.stderr).toBe(0);
         if (testCase.json) {
           expect(JSON.parse(result.stdout)).toMatchObject({
-            displayPath: `.openclaw/trajectory-exports/${output}`,
+            displayPath: `.carapace/trajectory-exports/${output}`,
             sessionId: "trajectory-process-session",
           });
         } else {
           expect(result.stdout).toContain("✅ Trajectory exported!");
-          expect(result.stdout).toContain(`.openclaw/trajectory-exports/${output}`);
+          expect(result.stdout).toContain(`.carapace/trajectory-exports/${output}`);
           expect(result.stdout).toContain("trajectory-process-session");
         }
         await expect(
           fs.access(
-            path.join(tempHome, ".openclaw", "trajectory-exports", output, "manifest.json"),
+            path.join(tempHome, ".carapace", "trajectory-exports", output, "manifest.json"),
           ),
         ).resolves.toBeUndefined();
       },
-      { prefix: "openclaw-trajectory-success-e2e-" },
+      { prefix: "carapace-trajectory-success-e2e-" },
     );
   });
 });

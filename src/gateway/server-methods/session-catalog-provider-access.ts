@@ -1,4 +1,4 @@
-import { isControlUiReservedRouteSegment } from "@openclaw/session-url-contract";
+import { isControlUiReservedRouteSegment } from "@carapace/session-url-contract";
 import {
   validateSessionCatalogShareRoute,
   type SessionCatalogShareRoute,

@@ -308,7 +308,7 @@ export function validateFullReleaseValidationEvidence({
       targetSha: expectedTargetSha,
     });
     if (
-      strictEvidence?.schema !== `openclaw.release-validation-evidence/v${manifest.version}` ||
+      strictEvidence?.schema !== `carapace.release-validation-evidence/v${manifest.version}` ||
       strictEvidence.valid !== true ||
       scalarString(strictEvidence.current?.runId) !== String(expectedRunId) ||
       strictEvidence.current?.targetSha !== expectedTargetSha ||

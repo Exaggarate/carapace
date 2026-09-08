@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
+import { expectDefined } from "@carapace/normalization-core";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
 // Directive tag helpers parse inline directive tags from user text.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { findCodeRegions, isInsideCode } from "../shared/text/code-regions.js";
 
 export type InlineDirectiveParseResult = {
@@ -23,7 +23,7 @@ type InlineDirectiveParseOptions = {
 // TRANSITIONAL(marker-retirement): inline reply/audio markers are the last text
 // adapter for automatic-mode replies. Delete this parser family when the
 // messages.visibleReplies default flips to "message_tool" (structured fields own
-// delivery intent; persisted transcripts already carry openclawDelivery facts).
+// delivery intent; persisted transcripts already carry carapaceDelivery facts).
 const AUDIO_TAG_RE = /\[\[\s*audio_as_voice\s*\]\]/gi;
 const REPLY_TAG_RE = /\[\[\s*(?:reply_to_current|reply_to\s*:\s*([^\]\n]+))\s*\]\]/gi;
 const INLINE_DIRECTIVE_TAG_WITH_PADDING_RE =

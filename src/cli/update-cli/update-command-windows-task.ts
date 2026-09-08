@@ -13,7 +13,7 @@ import type { UpdateCommandOptions } from "./shared.js";
 
 export class UpdateCommandAbort extends Error {
   constructor() {
-    super("openclaw-update-abort");
+    super("carapace-update-abort");
     this.name = "UpdateCommandAbort";
   }
 }

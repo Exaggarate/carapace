@@ -16,12 +16,12 @@ import {
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
 import { getFileLockProcessStartTime, isPidDefinitelyDead } from "../../shared/pid-alive.js";
-import type { DB as OpenClawStateDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../../state/openclaw-state-schema.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../../state/carapace-state-schema.js";
 import { resolveCronJobConfigRevision } from "../config-revision.js";
 import type { CronJob } from "../types.js";
 import { cronStoreKey } from "./key.js";
@@ -43,7 +43,7 @@ import { loadedCronStoreFromRows, loadCronRows } from "./row-codec.js";
  * I4: Finalization applies outcomes to the authoritative row, never an admitted snapshot.
  */
 
-type CronRunReceiptDatabase = Pick<OpenClawStateDatabase, "cron_run_receipts">;
+type CronRunReceiptDatabase = Pick<CarapaceStateDatabase, "cron_run_receipts">;
 type CronRunReceiptRow = Selectable<CronRunReceiptDatabase["cron_run_receipts"]>;
 
 export type CronRunReceiptStatus =
@@ -150,14 +150,14 @@ export class CronRunReceiptRevisionError extends Error {
 }
 
 function ensureCronRunReceiptSchema(database: DatabaseSync): void {
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(CRON_RUN_RECEIPT_SCHEMA_START);
-  const endMarker = OPENCLAW_STATE_SCHEMA_SQL.indexOf(CRON_RUN_RECEIPT_SCHEMA_END, start);
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(CRON_RUN_RECEIPT_SCHEMA_START);
+  const endMarker = CARAPACE_STATE_SCHEMA_SQL.indexOf(CRON_RUN_RECEIPT_SCHEMA_END, start);
   if (start < 0 || endMarker < start) {
-    throw new Error("OpenClaw cron run receipt schema marker is missing.");
+    throw new Error("Carapace cron run receipt schema marker is missing.");
   }
   // sqlite-allow-raw -- Canonical feature-local additive DDL only.
   database.exec(
-    OPENCLAW_STATE_SCHEMA_SQL.slice(start, endMarker + CRON_RUN_RECEIPT_SCHEMA_END.length),
+    CARAPACE_STATE_SCHEMA_SQL.slice(start, endMarker + CRON_RUN_RECEIPT_SCHEMA_END.length),
   );
 }
 
@@ -191,11 +191,11 @@ function activeRow(db: DatabaseSync, key: string, jobId?: string) {
 
 function withReceiptWrite<T>(
   operationLabel: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
   operation: (database: DatabaseSync) => T,
 ): T {
   let initializedDatabase: DatabaseSync | undefined;
-  const result = runOpenClawStateWriteTransaction(
+  const result = runCarapaceStateWriteTransaction(
     ({ db }) => {
       if (!initializedDatabases.has(db)) {
         ensureCronRunReceiptSchema(db);
@@ -216,7 +216,7 @@ function withReceiptWrite<T>(
 export function bindCronRunReceiptExecution(params: {
   admitted: AdmittedRunContext;
   handle: CronRunReceiptHandle;
-  options?: OpenClawStateDatabaseOptions;
+  options?: CarapaceStateDatabaseOptions;
 }): ExecutionOwnerBindingResult {
   const binding = executionOwnerBindingFromAdmission(params.admitted);
   if (!binding) {

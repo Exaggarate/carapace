@@ -130,7 +130,7 @@ describe("AppSidebar live narration", () => {
     expect(questionAttention?.getAttribute("aria-label")).toBe("Waiting for your answer");
     expect(
       (
-        questionAttention?.closest("openclaw-tooltip") as
+        questionAttention?.closest("carapace-tooltip") as
           | (HTMLElement & {
               content?: string;
             })

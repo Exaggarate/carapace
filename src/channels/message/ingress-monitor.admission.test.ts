@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createChannelIngressMonitor } from "./ingress-monitor.js";
 import { createChannelIngressQueue } from "./ingress-queue.js";
 
@@ -10,7 +10,7 @@ type StoredEvent = { version: 1; rawEvent: string };
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
@@ -19,7 +19,7 @@ describe("channel ingress monitor admission", () => {
     const queue = createChannelIngressQueue<StoredEvent>({
       channelId: "test",
       accountId: "a",
-      stateDir: tempDirs.make("openclaw-ingress-monitor-admission-"),
+      stateDir: tempDirs.make("carapace-ingress-monitor-admission-"),
     });
     const admissions: boolean[] = [];
     const monitor = createChannelIngressMonitor<RawEvent, string, StoredEvent>({

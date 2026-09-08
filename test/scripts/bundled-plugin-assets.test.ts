@@ -21,14 +21,14 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
-  const rootDir = tempDirs.make("openclaw-plugin-assets-");
+  const rootDir = tempDirs.make("carapace-plugin-assets-");
   fs.mkdirSync(path.join(rootDir, "extensions", "canvas"), { recursive: true });
   fs.writeFileSync(
     path.join(rootDir, "extensions", "canvas", "package.json"),
     JSON.stringify(
       {
-        name: "@openclaw/canvas-plugin",
-        openclaw: {
+        name: "@carapace/canvas-plugin",
+        carapace: {
           assetScripts: {
             build: "node --import tsx scripts/bundle-a2ui.mts",
             buildOutputs: ["assets/generated-runtime.js"],
@@ -41,7 +41,7 @@ async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
     ),
   );
   fs.writeFileSync(
-    path.join(rootDir, "extensions", "canvas", "openclaw.plugin.json"),
+    path.join(rootDir, "extensions", "canvas", "carapace.plugin.json"),
     JSON.stringify({ id: "canvas" }, null, 2),
   );
   await run(rootDir);
@@ -49,7 +49,7 @@ async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
 
 describe("bundled plugin assets", () => {
   it("creates a missing Discord SDK bundle without rewriting it when unchanged", async () => {
-    const rootDir = tempDirs.make("openclaw-discord-sdk-");
+    const rootDir = tempDirs.make("carapace-discord-sdk-");
     const outputPath = path.join(rootDir, "embedded-app-sdk.mjs");
     const build = vi.fn(async () => ({
       outputFiles: [{ text: "export const sdk = true;\n" }],
@@ -82,7 +82,7 @@ describe("bundled plugin assets", () => {
     expect(hooks).toMatchObject([
       {
         command: "node --import tsx ../../scripts/build-discord-activity-sdk.mts",
-        packageName: "@openclaw/discord",
+        packageName: "@carapace/discord",
         phase: "build",
         pluginId: "discord",
       },
@@ -124,9 +124,9 @@ describe("bundled plugin assets", () => {
     await withPluginAssetFixture(async (rootDir) => {
       const packagePath = path.join(rootDir, "extensions", "canvas", "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8")) as {
-        openclaw: { assetScripts: { buildOutputs?: string[] } };
+        carapace: { assetScripts: { buildOutputs?: string[] } };
       };
-      delete packageJson.openclaw.assetScripts.buildOutputs;
+      delete packageJson.carapace.assetScripts.buildOutputs;
       fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
 
       const classifier = createRunNodePathClassifier({ rootDir });
@@ -134,7 +134,7 @@ describe("bundled plugin assets", () => {
       const generatedPath = "extensions/canvas/assets/generated-runtime.js";
       expect(classifier.isRestartRelevantRunNodePath(generatedPath)).toBe(true);
 
-      packageJson.openclaw.assetScripts.buildOutputs = ["assets/generated-runtime.js"];
+      packageJson.carapace.assetScripts.buildOutputs = ["assets/generated-runtime.js"];
       fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
       classifier.refreshGeneratedPluginAssetPaths();
 
@@ -153,9 +153,9 @@ describe("bundled plugin assets", () => {
 
       expect(hooks).toEqual([
         {
-          aliases: ["@openclaw/canvas-plugin", "canvas", "canvas-plugin"],
+          aliases: ["@carapace/canvas-plugin", "canvas", "canvas-plugin"],
           command: "node --import tsx scripts/bundle-a2ui.mts",
-          packageName: "@openclaw/canvas-plugin",
+          packageName: "@carapace/canvas-plugin",
           phase: "build",
           pluginDir: path.join(rootDir, "extensions", "canvas"),
           pluginId: "canvas",
@@ -169,9 +169,9 @@ describe("bundled plugin assets", () => {
       const pluginDir = path.join(rootDir, "extensions", "canvas");
       const packagePath = path.join(pluginDir, "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8")) as {
-        openclaw: { assetScripts: { build: string } };
+        carapace: { assetScripts: { build: string } };
       };
-      packageJson.openclaw.assetScripts.build = "node scripts/launch-stall.mjs";
+      packageJson.carapace.assetScripts.build = "node scripts/launch-stall.mjs";
       fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
       fs.mkdirSync(path.join(pluginDir, "scripts"));
       const pidFile = path.join(pluginDir, "stall.pid");

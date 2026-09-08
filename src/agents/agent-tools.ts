@@ -1,6 +1,6 @@
 /**
- * Builds the effective OpenClaw agent tool surface.
- * Assembles core, shell, channel, OpenClaw, plugin, and Tool Search tools, then
+ * Builds the effective Carapace agent tool surface.
+ * Assembles core, shell, channel, Carapace, plugin, and Tool Search tools, then
  * applies sandbox, profile, provider, sender, group, and sub-agent policy.
  */
 import type {
@@ -13,12 +13,12 @@ import type { ThinkLevel } from "../auto-reply/thinking.shared.js";
 import type { ChatType } from "../channels/chat-type.js";
 import type { InboundEventKind } from "../channels/inbound-event/kind.js";
 import type { ModelCompatConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GroupToolPolicyConfig } from "../config/types.tools.js";
 import type { DiagnosticTraceContext } from "../infra/diagnostic-trace-context.js";
 import { resolveEventSessionRoutingPolicy } from "../infra/event-session-routing.js";
 import { applyExecPolicyLayer } from "../infra/exec-policy.js";
-import { mergeGatewayAgentCliPath } from "../infra/openclaw-cli-shim.js";
+import { mergeGatewayAgentCliPath } from "../infra/carapace-cli-shim.js";
 import { logWarn } from "../logger.js";
 import type {
   PluginHookChannelContext,
@@ -70,7 +70,7 @@ import {
   resolveConversationToolPolicies,
 } from "./conversation-tool-policy-pipeline.js";
 import { createCoreCodingTools } from "./core-coding-tools.js";
-import type { OpenClawCodingToolConstructionPlan } from "./core-tool-factory-descriptors.js";
+import type { CarapaceCodingToolConstructionPlan } from "./core-tool-factory-descriptors.js";
 import {
   bindActiveCronCreatorAuthorityResolver,
   bindCronManagementGrant,
@@ -86,8 +86,8 @@ import {
 } from "./local-model-lean.js";
 import { createMemoryWriteProvenanceObserver } from "./memory-write-provenance.js";
 import type { ModelAuthMode } from "./model-auth.js";
-import { resolveOpenClawPluginToolsForOptions } from "./openclaw-plugin-tools.js";
-import { createOpenClawTools, filterToolsByClientCaps } from "./openclaw-tools.js";
+import { resolveCarapacePluginToolsForOptions } from "./carapace-plugin-tools.js";
+import { createCarapaceTools, filterToolsByClientCaps } from "./carapace-tools.js";
 import type { PreparedModelRuntimeSnapshot } from "./prepared-model-runtime.js";
 import type { SandboxContext } from "./sandbox.js";
 import { resolveSandboxFileIdentity } from "./sandbox/file-mutation-identity.js";
@@ -138,7 +138,7 @@ const MEMORY_FLUSH_ALLOWED_TOOL_NAMES = new Set(["read", "write"]);
 function applyModelProviderToolPolicy(
   toolsInput: AnyAgentTool[],
   params?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     modelProvider?: string;
     modelApi?: string;
     modelId?: string;
@@ -181,7 +181,7 @@ function applyModelProviderToolPolicy(
 export { resolveToolLoopDetectionConfig } from "./tool-loop-detection-config.js";
 
 /** Public options for building one plugin-owned agent tool surface. */
-type OpenClawCodingToolsOptions = {
+type CarapaceCodingToolsOptions = {
   agentId?: string;
   /** Retained policy owner; execution identity remains agentId/runSessionKey. */
   policyAgentId?: string;
@@ -258,7 +258,7 @@ type OpenClawCodingToolsOptions = {
    * Defaults to workspaceDir when not set.
    */
   spawnWorkspaceDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Explicitly distinguishes live Gateway session policy from a pinned run override. */
   sessionConfigSource?: "runtime" | "pinned";
   abortSignal?: AbortSignal;
@@ -283,7 +283,7 @@ type OpenClawCodingToolsOptions = {
   modelContextWindowTokens?: number;
   /** Resolved runtime model compatibility hints. */
   modelCompat?: ModelCompatConfig;
-  /** If false, keep OpenClaw web_search even when a provider-native search tool is active. */
+  /** If false, keep Carapace web_search even when a provider-native search tool is active. */
   suppressManagedWebSearch?: boolean;
   webFetchHostnameAllowlistRef?: { value?: string[] };
   webSearchEnabled?: boolean;
@@ -380,8 +380,8 @@ type OpenClawCodingToolsOptions = {
   /** Already-admitted skill locations for mistaken tool-id recovery. */
   codeModeSkills?: ToolSearchToolContext["codeModeSkills"];
   /** Limits which tool families are materialized before the shared policy pipeline runs. */
-  toolConstructionPlan?: OpenClawCodingToolConstructionPlan;
-  /** Ring-zero OpenClaw tool; set only by the OpenClaw agent runner. */
+  toolConstructionPlan?: CarapaceCodingToolConstructionPlan;
+  /** Ring-zero Carapace tool; set only by the Carapace agent runner. */
   systemAgentTool?: import("./tools/system-agent-tool.js").SystemAgentToolOptions;
   /** Trusted sender identity bit for command/channel-action auth and owner-gated plugin tools. */
   senderIsOwner?: boolean;
@@ -414,7 +414,7 @@ type OpenClawCodingToolsOptions = {
   scheduledToolPolicy?: ScheduledToolPolicyContext;
 };
 
-function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions): AnyAgentTool[] {
+function createCarapaceCodingToolsInternal(options?: CarapaceCodingToolsOptions): AnyAgentTool[] {
   const sandbox = options?.sandbox?.enabled ? options.sandbox : undefined;
   const isMemoryFlushRun = options?.trigger === "memory";
   if (isMemoryFlushRun && !options?.memoryFlushWritePath) {
@@ -603,12 +603,12 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
     includeBaseCodingTools: includeCoreTools,
     includeShellTools: includeCoreTools,
     includeChannelTools: includeCoreTools,
-    includeOpenClawTools: includeCoreTools,
+    includeCarapaceTools: includeCoreTools,
     includePluginTools: true,
   };
   const includeBaseCodingTools = includeCoreTools && toolConstructionPlan.includeBaseCodingTools;
   const includeShellTools = includeCoreTools && toolConstructionPlan.includeShellTools;
-  const includeOpenClawTools = includeCoreTools && toolConstructionPlan.includeOpenClawTools;
+  const includeCarapaceTools = includeCoreTools && toolConstructionPlan.includeCarapaceTools;
   const includeChannelTools = toolConstructionPlan.includeChannelTools;
   const includePluginTools = toolConstructionPlan.includePluginTools;
   const workspaceOnly =
@@ -758,7 +758,7 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
     accountId: options?.agentAccountId,
     channel: resolveGatewayMessageChannel(options?.messageChannel ?? options?.messageProvider),
   });
-  // Plugin-only plans bypass createOpenClawTools, so the capability gate must
+  // Plugin-only plans bypass createCarapaceTools, so the capability gate must
   // apply here too or narrow allowlists leak gated tools onto capless surfaces.
   const toolCallerIdentity =
     options && executionAgentId && executionSessionKey?.trim()
@@ -776,9 +776,9 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
         }
       : undefined;
   const pluginToolsOnly = filterToolsByClientCaps(
-    includeOpenClawTools || !includePluginTools
+    includeCarapaceTools || !includePluginTools
       ? []
-      : resolveOpenClawPluginToolsForOptions({
+      : resolveCarapacePluginToolsForOptions({
           options: {
             agentSessionKey: options?.sessionKey,
             runSessionKey: options?.runSessionKey,
@@ -825,7 +825,7 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
         }),
     options?.clientCaps,
   );
-  const ringZeroTools = includeOpenClawTools ? getActiveAgentRingZeroTools() : [];
+  const ringZeroTools = includeCarapaceTools ? getActiveAgentRingZeroTools() : [];
   const toolSearchTools =
     toolSearchControlsEnabled && ringZeroTools.length === 0
       ? createToolSearchTools({
@@ -852,10 +852,10 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
     ...scheduledCoreTools,
     // Include channel-defined agent tools (login, etc.).
     ...(includeChannelTools ? listChannelAgentTools({ cfg: options?.config }) : []),
-    ...(includeOpenClawTools
+    ...(includeCarapaceTools
       ? mergeAgentRingZeroTools(
           ringZeroTools,
-          createOpenClawTools({
+          createCarapaceTools({
             ...(options?.systemAgentTool ? { systemAgentTool: options.systemAgentTool } : {}),
             sandboxBrowserBridgeUrl: sandbox?.browser?.bridgeUrl,
             allowHostBrowserControl: sandbox ? sandbox.browserAllowHostControl : true,
@@ -972,7 +972,7 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
       : pluginToolsOnly),
     ...toolSearchTools,
   ];
-  options?.recordToolPrepStage?.("openclaw-tools");
+  options?.recordToolPrepStage?.("carapace-tools");
   const swarmStructuredOutputTool =
     options?.swarmCollector && options.swarmOutputSchema
       ? tools.find((tool) => tool.name === "structured_output")
@@ -1130,7 +1130,7 @@ function createOpenClawCodingToolsInternal(options?: OpenClawCodingToolsOptions)
 }
 
 /** Build the runtime tool list exposed through the public agent harness SDK. */
-export function createOpenClawCodingTools(options?: OpenClawCodingToolsOptions): AnyAgentTool[] {
-  return createOpenClawCodingToolsInternal(options);
+export function createCarapaceCodingTools(options?: CarapaceCodingToolsOptions): AnyAgentTool[] {
+  return createCarapaceCodingToolsInternal(options);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

@@ -8,7 +8,7 @@ the platform differences listed below are retained.
 ## Swift decision table
 
 The canonical selector is `selectConnectAuth` in
-[`GatewayChannel.swift`](../shared/OpenClawKit/Sources/OpenClawKit/GatewayChannel.swift).
+[`GatewayChannel.swift`](../shared/CarapaceKit/Sources/CarapaceKit/GatewayChannel.swift).
 Explicit credentials are trimmed; empty values count as absent. Evaluate these
 rows in order:
 
@@ -65,12 +65,12 @@ The lifecycle owners are `completeSuccessfulGatewayAuthHandoff` in
 
 ## Android durable handoff
 
-[`GatewaySession.kt`](app/src/main/java/ai/openclaw/app/gateway/GatewaySession.kt)
+[`GatewaySession.kt`](app/src/main/java/ai/carapace/app/gateway/GatewaySession.kt)
 selects fresh bootstrap before a stored device token. The wire regression is
 `connect_prefersFreshBootstrapTokenOverStoredDeviceToken` in
-[`GatewaySessionInvokeTest.kt`](app/src/test/java/ai/openclaw/app/gateway/GatewaySessionInvokeTest.kt).
+[`GatewaySessionInvokeTest.kt`](app/src/test/java/ai/carapace/app/gateway/GatewaySessionInvokeTest.kt).
 
-[`DeviceAuthStore.kt`](app/src/main/java/ai/openclaw/app/gateway/DeviceAuthStore.kt)
+[`DeviceAuthStore.kt`](app/src/main/java/ai/carapace/app/gateway/DeviceAuthStore.kt)
 commits each role token and its metadata together and returns the actual durable
 write result. The session records the final write result for each role in this
 hello; receipt alone and preexisting tokens do not establish fresh handoff.
@@ -82,7 +82,7 @@ A stale hello keeps its socket, but its persistence is refused; mismatch clears
 and recovery recommits follow the same stored-token rule. The wire regression is
 `bootstrapHandoff_staleStoredOperatorHelloCannotOverwriteFreshOperatorToken`.
 
-[`SecurePrefs.kt`](app/src/main/java/ai/openclaw/app/SecurePrefs.kt) then commits
+[`SecurePrefs.kt`](app/src/main/java/ai/carapace/app/SecurePrefs.kt) then commits
 the existing credential bundle with only the consumed bootstrap removed. Token
 and password fields are preserved. A failed commit restores the previous
 in-memory values, because Android can publish a failed disk write in memory.
@@ -90,12 +90,12 @@ Missing roles or failed writes retain bootstrap in saved credentials and in the
 session intent; the current socket can remain connected, but a later rejected
 bootstrap requires setup repair.
 
-[`GatewayBootstrapHandoff.kt`](app/src/main/java/ai/openclaw/app/gateway/GatewayBootstrapHandoff.kt)
+[`GatewayBootstrapHandoff.kt`](app/src/main/java/ai/carapace/app/gateway/GatewayBootstrapHandoff.kt)
 owns retirement authority for one connection intent. Every new runtime intent
 invalidates that authority before socket cleanup. A preference revision also
 fences every setup save/reset, including replacement with identical token bytes.
 Successful retirement clears the session's reconnect bootstrap and the active
-[`NodeRuntime.kt`](app/src/main/java/ai/openclaw/app/NodeRuntime.kt) auth view.
+[`NodeRuntime.kt`](app/src/main/java/ai/carapace/app/NodeRuntime.kt) auth view.
 Reconnect and relaunch then select the stored role tokens. Revision and handoff
 state are in memory only; encrypted preference keys and serialized formats do
 not change.
@@ -114,7 +114,7 @@ so this recovery applies to that saved-credential rejection, not an inferred age
 Explicit setup input never receives this recovery permission, even if its bytes
 match a saved token. It follows bootstrap auth and surfaces rejection instead of
 falling back to old device access. The normal setup owner,
-[`MainViewModel.kt`](app/src/main/java/ai/openclaw/app/MainViewModel.kt), drains and
+[`MainViewModel.kt`](app/src/main/java/ai/carapace/app/MainViewModel.kt), drains and
 resets old role credentials before saving replacement setup input; this also
 preserves the distinction across process death during setup.
 

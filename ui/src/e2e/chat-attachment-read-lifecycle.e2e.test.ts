@@ -75,7 +75,7 @@ async function waitForCommittedAttachmentDraft(
   text: string,
 ): Promise<void> {
   const defaults = await page
-    .locator('openclaw-chat-pane[aria-hidden="false"]')
+    .locator('carapace-chat-pane[aria-hidden="false"]')
     .evaluate((element) => {
       const { state } = element as HTMLElement & { state: UiSessionDefaultsHost };
       return {
@@ -106,7 +106,7 @@ suite.define(() => {
         const held = gesture === "held Enter";
         const capture = held && attachment;
         const proofDir = path.resolve(
-          process.env.OPENCLAW_UI_E2E_DIAGNOSTIC_DIR?.trim() || ".artifacts/control-ui-e2e",
+          process.env.CARAPACE_UI_E2E_DIAGNOSTIC_DIR?.trim() || ".artifacts/control-ui-e2e",
           "held-enter",
         );
         if (capture) {
@@ -120,13 +120,13 @@ suite.define(() => {
         const ready = {
           content: [{ text: "Ready for the held Enter check.", type: "text" }],
           role: "assistant",
-          __openclaw: { id: "held-enter-ready", seq: 1 },
+          __carapace: { id: "held-enter-ready", seq: 1 },
         };
         const gateway = await installMockGateway(page, { historyMessages: [ready] });
         const pageErrors: string[] = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, "main"));
-        const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+        const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
         const composer = pane.locator(".agent-chat__composer-combobox textarea");
         await pane.getByText("Ready for the held Enter check.", { exact: true }).waitFor();
         await gateway.waitForRequest("chat.startup");
@@ -159,14 +159,14 @@ suite.define(() => {
         const terminalMessage = {
           content: [{ text: terminalText, type: "text" }],
           role: "assistant",
-          __openclaw: { id: "held-enter-terminal", seq: 3 },
+          __carapace: { id: "held-enter-terminal", seq: 3 },
         };
         const historyMessages = [
           ready,
           {
             content: [{ text: initialText, type: "text" }],
             role: "user",
-            __openclaw: {
+            __carapace: {
               id: "held-enter-initial-user",
               idempotencyKey: `${initialRunId}:user`,
               seq: 2,
@@ -294,7 +294,7 @@ suite.define(() => {
           await waitForCommittedState(
             page,
             () => {
-              const active = document.querySelector('openclaw-chat-pane[aria-hidden="false"]');
+              const active = document.querySelector('carapace-chat-pane[aria-hidden="false"]');
               const input = active?.querySelector(".agent-chat__composer-combobox textarea");
               return (
                 input instanceof HTMLTextAreaElement &&
@@ -392,7 +392,7 @@ suite.define(() => {
       await gateway.setOnline(true);
       await expect.poll(() => composer.inputValue()).toBe(text);
       await expect.poll(() => page.locator(".chat-attachment-thumb").count()).toBe(1);
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await mkdir(artifactDir, { recursive: true });
         await page.screenshot({ path: path.join(artifactDir, "offline-draft-restored.png") });
@@ -427,7 +427,7 @@ suite.define(() => {
       ],
       ts: Date.now(),
     };
-    const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     if (artifactDir) {
       await mkdir(artifactDir, { recursive: true });
     }
@@ -441,10 +441,10 @@ suite.define(() => {
     });
     const activeComposer = (page: Page) =>
       page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox textarea',
+        'carapace-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox textarea',
       );
     const activeAttachments = (page: Page) =>
-      page.locator('openclaw-chat-pane[aria-hidden="false"] .chat-attachment-thumb');
+      page.locator('carapace-chat-pane[aria-hidden="false"] .chat-attachment-thumb');
     try {
       const firstPage = await context.newPage();
       await installMockGateway(firstPage, {
@@ -460,7 +460,7 @@ suite.define(() => {
       await navigateToControlUiSession(firstPage, secondSession);
       await activeComposer(firstPage).fill("restart draft B with removable file");
       await firstPage
-        .locator('openclaw-chat-pane[aria-hidden="false"] .agent-chat__file-input')
+        .locator('carapace-chat-pane[aria-hidden="false"] .agent-chat__file-input')
         .setInputFiles({
           name: "remove-me.txt",
           mimeType: "text/plain",
@@ -498,7 +498,7 @@ suite.define(() => {
       await activeAttachments(restoredPage).first().waitFor();
       expect(await activeAttachments(restoredPage).count()).toBe(1);
       await restoredPage
-        .locator('openclaw-chat-pane[aria-hidden="false"] .chat-attachment-remove')
+        .locator('carapace-chat-pane[aria-hidden="false"] .chat-attachment-remove')
         .click();
       await expect.poll(() => activeAttachments(restoredPage).count()).toBe(0);
 
@@ -567,7 +567,7 @@ suite.define(() => {
       await expect.poll(() => page.locator(".chat-attachment-thumb").count()).toBe(2);
       await expect.poll(() => composer.inputValue()).toBe("Send both files");
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await mkdir(artifactDir, { recursive: true });
         await page.screenshot({ path: path.join(artifactDir, "attachment-frame-rejected.png") });
@@ -642,7 +642,7 @@ suite.define(() => {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, firstSession));
       const activeComposer = () =>
         page.locator(
-          'openclaw-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox textarea',
+          'carapace-chat-pane[aria-hidden="false"] .agent-chat__composer-combobox textarea',
         );
       await activeComposer().fill("Private session A attachment");
       await pastePng(activeComposer());
@@ -663,7 +663,7 @@ suite.define(() => {
         .toBe(0);
       await expect
         .poll(() =>
-          page.locator('openclaw-chat-pane[aria-hidden="false"] .chat-attachment-thumb').count(),
+          page.locator('carapace-chat-pane[aria-hidden="false"] .chat-attachment-thumb').count(),
         )
         .toBe(0);
 
@@ -686,7 +686,7 @@ suite.define(() => {
         proof.finish();
       });
       await page
-        .locator('openclaw-chat-pane[aria-hidden="false"]')
+        .locator('carapace-chat-pane[aria-hidden="false"]')
         .getByRole("img", { name: "pixel.png" })
         .waitFor();
     });

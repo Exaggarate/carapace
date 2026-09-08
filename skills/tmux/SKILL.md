@@ -3,7 +3,7 @@ name: tmux
 description: "Control tmux sessions/panes for interactive CLIs: list, capture output, send keys, paste text, monitor prompts."
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "🧵",
         "os": ["darwin", "linux"],

@@ -20,7 +20,7 @@ const HISTORY_SCAN_METHODS = [...PAGE_LOAD_METHODS, "skills.proposals.historySca
 
 function emptyWorkshopManifest() {
   return {
-    schema: "openclaw.skill-workshop.proposals-manifest.v1",
+    schema: "carapace.skill-workshop.proposals-manifest.v1",
     updatedAt: "2026-08-16T10:00:00.000Z",
     proposals: [],
     installedSkills: [],
@@ -28,7 +28,7 @@ function emptyWorkshopManifest() {
 }
 
 beforeEach(() => {
-  localStorage.setItem("openclaw:control-ui:skill-workshop-mode:v1", "suggestions");
+  localStorage.setItem("carapace:control-ui:skill-workshop-mode:v1", "suggestions");
 });
 
 function waitForSkillWorkshop(assertion: () => void) {
@@ -69,13 +69,13 @@ function createProposal(overrides: Partial<SkillWorkshopProposal>): SkillWorksho
 
 afterEach(() => {
   document.body.replaceChildren();
-  localStorage.removeItem("openclaw:control-ui:skill-workshop-current-chat-revisions:v1");
-  localStorage.removeItem("openclaw:control-ui:skill-workshop-mode:v1");
+  localStorage.removeItem("carapace:control-ui:skill-workshop-current-chat-revisions:v1");
+  localStorage.removeItem("carapace:control-ui:skill-workshop-mode:v1");
 });
 
 describe("SkillWorkshopPage lifecycle", () => {
   it("renders a completed skill read after a repeated same-agent notification", async () => {
-    localStorage.setItem("openclaw:control-ui:skill-workshop-mode:v1", "skills");
+    localStorage.setItem("carapace:control-ui:skill-workshop-mode:v1", "skills");
     const skill = {
       name: "release-review",
       skillKey: "release-review",
@@ -93,7 +93,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       return null;
     });
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(request, {
       agentSelectionSubscribe: (listener) => {
@@ -133,25 +133,25 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopRevisionKey = proposal.key;
     loadedState.skillWorkshopRevisionDraft = "Make it clearer";
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = createContext(vi.fn(async () => emptyWorkshopManifest()));
     document.body.append(page);
     await page.updateComplete;
 
-    const modal = page.querySelector("openclaw-modal-dialog");
+    const modal = page.querySelector("carapace-modal-dialog");
     expect(modal).not.toBeNull();
     expect(page.querySelector(".sw-revision-backdrop")).toBeNull();
     expect(page.querySelector(".sw-revision-dialog__input")).toBeInstanceOf(HTMLTextAreaElement);
 
     modal?.dispatchEvent(new CustomEvent("modal-cancel", { bubbles: true, composed: true }));
     await page.updateComplete;
-    expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+    expect(page.querySelector("carapace-modal-dialog")).toBeNull();
   });
 
   it("keeps complete suggested skills readable as sanitized Markdown", async () => {
-    localStorage.setItem("openclaw:control-ui:skill-workshop-mode:v1", "suggestions");
+    localStorage.setItem("carapace:control-ui:skill-workshop-mode:v1", "suggestions");
     const previewText = `${"a".repeat(118)}😀trailing`;
     const proposal = createProposal({
       key: "proposal-utf16-preview",
@@ -181,7 +181,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopProposals = [proposal];
     loadedState.skillWorkshopSelectedKey = proposal.key;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = createContext(vi.fn(async () => emptyWorkshopManifest()));
@@ -210,7 +210,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopAgentId = "research";
     loadedState.skillWorkshopLoaded = true;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = createContext(firstRequest);
@@ -237,7 +237,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       if (method === "skills.proposals.list") {
         activation += 1;
         return {
-          schema: "openclaw.skill-workshop.proposals-manifest.v1",
+          schema: "carapace.skill-workshop.proposals-manifest.v1",
           installedSkills: [],
           updatedAt: "2026-08-12T00:00:00.000Z",
           proposals: [
@@ -281,7 +281,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       }
       if (method === "skills.proposals.historyStatus") {
         return {
-          schema: "openclaw.skill-workshop.history-scan.v1",
+          schema: "carapace.skill-workshop.history-scan.v1",
           hasScanned: false,
           reviewedSessions: 0,
           ideasFound: 0,
@@ -314,7 +314,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     expect(second.skillWorkshopProposals[0]?.status).toBe("stale");
 
     const secondPage = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     secondPage.data = second;
     secondPage.context = context;
@@ -328,7 +328,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     const manifest = deferred<unknown>();
     const request = vi.fn(() => manifest.promise);
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(request, { methods: PAGE_LOAD_METHODS });
     document.body.append(page);
@@ -344,7 +344,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     expect(callsFor(request, "skills.proposals.list")).toHaveLength(1);
 
     manifest.resolve({
-      schema: "openclaw.skill-workshop.proposals-manifest.v1",
+      schema: "carapace.skill-workshop.proposals-manifest.v1",
       installedSkills: [],
       updatedAt: "2026-07-08T00:00:00.000Z",
       proposals: [],
@@ -358,7 +358,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       throw new Error("gateway offline");
     });
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(request, { methods: PAGE_LOAD_METHODS });
     document.body.append(page);
@@ -386,7 +386,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       },
     });
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = context;
     document.body.append(page);
@@ -403,7 +403,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     expect(page.state?.skillWorkshopLoaded).toBe(false);
 
     manifest.resolve({
-      schema: "openclaw.skill-workshop.proposals-manifest.v1",
+      schema: "carapace.skill-workshop.proposals-manifest.v1",
       installedSkills: [],
       updatedAt: "2026-07-08T00:00:00.000Z",
       proposals: [],
@@ -440,7 +440,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopProposals = [proposal];
     loadedState.skillWorkshopSelectedKey = proposal.key;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = oldContext;
@@ -479,7 +479,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     "admits a revision on its origin session despite legacy current-chat setting %s",
     async (enabled) => {
       localStorage.setItem(
-        "openclaw:control-ui:skill-workshop-current-chat-revisions:v1",
+        "carapace:control-ui:skill-workshop-current-chat-revisions:v1",
         String(enabled),
       );
       const sessions = {
@@ -520,7 +520,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       });
       loadedState.skillWorkshopProposals = [proposal];
       const page = document.createElement(
-        "openclaw-skill-workshop-page",
+        "carapace-skill-workshop-page",
       ) as SkillWorkshopPageTestElement;
       page.data = skillWorkshopRouteData(loadedState);
       page.context = context;
@@ -578,7 +578,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopProposals = [proposal];
     loadedState.skillWorkshopSelectedKey = proposal.key;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = context;
@@ -638,7 +638,7 @@ describe("SkillWorkshopPage lifecycle", () => {
     loadedState.skillWorkshopProposals = [proposal];
     loadedState.skillWorkshopSelectedKey = proposal.key;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = context;
@@ -656,7 +656,7 @@ describe("SkillWorkshopPage lifecycle", () => {
   it("does not refresh the previous agent after a history scan finishes", async () => {
     const scan = deferred<unknown>();
     const scanStatus = {
-      schema: "openclaw.skill-workshop.history-scan.v1",
+      schema: "carapace.skill-workshop.history-scan.v1",
       hasScanned: false,
       reviewedSessions: 0,
       ideasFound: 0,
@@ -672,14 +672,14 @@ describe("SkillWorkshopPage lifecycle", () => {
         return Promise.resolve(scanStatus);
       }
       return Promise.resolve({
-        schema: "openclaw.skill-workshop.proposals-manifest.v1",
+        schema: "carapace.skill-workshop.proposals-manifest.v1",
         installedSkills: [],
         updatedAt: "2026-07-13T00:00:00.000Z",
         proposals: [],
       });
     });
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(oldRequest, { methods: HISTORY_SCAN_METHODS });
     document.body.append(page);
@@ -712,7 +712,7 @@ describe("SkillWorkshopPage lifecycle", () => {
       method === "skills.proposals.historyStatus"
         ? scanStatus
         : {
-            schema: "openclaw.skill-workshop.proposals-manifest.v1",
+            schema: "carapace.skill-workshop.proposals-manifest.v1",
             installedSkills: [],
             updatedAt: "2026-07-13T00:00:00.000Z",
             proposals: [],
@@ -734,7 +734,7 @@ describe("SkillWorkshopPage lifecycle", () => {
   it("reloads history when an agent is reselected during a scan", async () => {
     const scan = deferred<unknown>();
     const scanStatus = {
-      schema: "openclaw.skill-workshop.history-scan.v1",
+      schema: "carapace.skill-workshop.history-scan.v1",
       hasScanned: false,
       reviewedSessions: 0,
       ideasFound: 0,
@@ -749,7 +749,7 @@ describe("SkillWorkshopPage lifecycle", () => {
             method === "skills.proposals.historyStatus"
               ? scanStatus
               : {
-                  schema: "openclaw.skill-workshop.proposals-manifest.v1",
+                  schema: "carapace.skill-workshop.proposals-manifest.v1",
                   installedSkills: [],
                   updatedAt: "2026-07-13T00:00:00.000Z",
                   proposals: [],
@@ -757,7 +757,7 @@ describe("SkillWorkshopPage lifecycle", () => {
           ),
     );
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(firstRequest, { methods: HISTORY_SCAN_METHODS });
     document.body.append(page);
@@ -803,7 +803,7 @@ describe("SkillWorkshopPage lifecycle", () => {
           : Promise.resolve({ ...scanStatus, hasScanned: true, reviewedSessions: 8 });
       }
       return Promise.resolve({
-        schema: "openclaw.skill-workshop.proposals-manifest.v1",
+        schema: "carapace.skill-workshop.proposals-manifest.v1",
         installedSkills: [],
         updatedAt: "2026-07-13T00:00:00.000Z",
         proposals: [],
@@ -827,7 +827,7 @@ describe("SkillWorkshopPage lifecycle", () => {
 
   it("refreshes proposals after a history scan fails", async () => {
     const scanStatus = {
-      schema: "openclaw.skill-workshop.history-scan.v1",
+      schema: "carapace.skill-workshop.history-scan.v1",
       hasScanned: false,
       reviewedSessions: 0,
       ideasFound: 0,
@@ -843,14 +843,14 @@ describe("SkillWorkshopPage lifecycle", () => {
         return Promise.resolve(scanStatus);
       }
       return Promise.resolve({
-        schema: "openclaw.skill-workshop.proposals-manifest.v1",
+        schema: "carapace.skill-workshop.proposals-manifest.v1",
         installedSkills: [],
         updatedAt: "2026-07-13T00:00:00.000Z",
         proposals: [],
       });
     });
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.context = createContext(request, { methods: HISTORY_SCAN_METHODS });
     document.body.append(page);
@@ -900,7 +900,7 @@ describe("SkillWorkshopPage self-learning toggle", () => {
     loadedState.skillWorkshopAgentId = "research";
     loadedState.skillWorkshopLoaded = true;
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(loadedState);
     page.context = createContext(

@@ -1,16 +1,16 @@
 import {
   formatMediaPlaceholderText,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { fanInChannelIngressLifecycles } from "carapace/plugin-sdk/channel-ingress-runtime";
+import { resolveChannelContextVisibilityMode } from "carapace/plugin-sdk/context-visibility-runtime";
 import {
   DEFAULT_GROUP_HISTORY_LIMIT,
   createChannelHistoryWindow,
   type HistoryEntry,
-} from "openclaw/plugin-sdk/reply-history";
-import { createRuntimeConfigReader } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/reply-history";
+import { createRuntimeConfigReader } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { formatUnknownError } from "../errors.js";
 import { normalizeMSTeamsConversationId, parseMSTeamsActivityTimestamp } from "../inbound.js";
 import type { MSTeamsMessageHandlerDeps } from "../monitor-handler.types.js";

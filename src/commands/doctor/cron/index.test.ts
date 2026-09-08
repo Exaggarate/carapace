@@ -3,10 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 // Doctor cron index tests cover cron doctor checks and repair entrypoints.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCodeModeScriptSyntax } from "../../../agents/code-mode-script-syntax.js";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { CarapaceConfig } from "../../../config/config.js";
 import {
   loadCronJobsStoreWithConfigJobs,
   loadCronQuarantinedJobs,
@@ -16,7 +16,7 @@ import {
 } from "../../../cron/store.js";
 import { cronStoreKey } from "../../../cron/store/key.js";
 import { readCronTaskRunHistoryPage } from "../../../cron/task-run-history.js";
-import { resolveOpenClawStateSqlitePath } from "../../../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../../../state/carapace-state-db.paths.js";
 import { withRestoredMocks } from "../../../test-utils/vitest-spies.js";
 import {
   collectLegacyCronStoreHealthFindings,
@@ -36,7 +36,7 @@ vi.mock("../../../../packages/terminal-core/src/note.js", () => ({
 let tempRoot: string | null = null;
 
 async function makeTempStorePath() {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-cron-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-cron-"));
   return path.join(tempRoot, "cron", "jobs.json");
 }
 
@@ -62,13 +62,13 @@ function makePrompter(confirmResult = true) {
 function createCronConfig(
   storePath: string,
   webhook = "https://example.invalid/cron-finished",
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     cron: {
       store: storePath,
       webhook,
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 function createLegacyCronJob(overrides: Record<string, unknown> = {}) {
@@ -243,7 +243,7 @@ describe("collectLegacyCronStoreHealthFindings", () => {
         expect.objectContaining({
           checkId: "core/doctor/legacy-cron-store",
           severity: "warning",
-          path: resolveOpenClawStateSqlitePath(),
+          path: resolveCarapaceStateSqlitePath(),
           requirement: "legacy-notify-fallback",
         }),
       ]),
@@ -275,7 +275,7 @@ describe("collectLegacyCronStoreHealthFindings", () => {
     expect(findings).toEqual([
       expect.objectContaining({
         checkId: "core/doctor/legacy-cron-store",
-        path: resolveOpenClawStateSqlitePath(),
+        path: resolveCarapaceStateSqlitePath(),
         requirement: "quarantined-cron-rows",
       }),
     ]);
@@ -284,14 +284,14 @@ describe("collectLegacyCronStoreHealthFindings", () => {
 
   it("attributes SQLite-only cron findings to the canonical state database", async () => {
     const storePath = await makeTempStorePath();
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.dirname(path.dirname(storePath)));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.dirname(path.dirname(storePath)));
     await writeCurrentCronStore(storePath, [createCurrentCronJob({ notify: true })]);
 
     const findings = await collectLegacyCronStoreHealthFindings({ cfg: {} });
 
     expect(findings).toEqual([
       expect.objectContaining({
-        path: resolveOpenClawStateSqlitePath(),
+        path: resolveCarapaceStateSqlitePath(),
         requirement: "legacy-notify-fallback",
       }),
     ]);
@@ -336,14 +336,14 @@ describe("collectLegacyCronStoreHealthFindings", () => {
     expect(finding).toEqual(
       expect.objectContaining({
         message: "2 tool-bearing automations require explicit scheduled authority reauthorization.",
-        fixHint: expect.stringContaining("openclaw automations list --all"),
+        fixHint: expect.stringContaining("carapace automations list --all"),
       }),
     );
   });
 
   it("reports a legacy quarantine sidecar without creating or modifying a SQLite database", async () => {
     const storePath = await makeTempStorePath();
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.dirname(path.dirname(storePath)));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.dirname(path.dirname(storePath)));
     const quarantinePath = resolveLegacyCronQuarantinePath(storePath);
     await fs.mkdir(path.dirname(quarantinePath), { recursive: true });
     const historicalBytes = JSON.stringify({
@@ -363,7 +363,7 @@ describe("collectLegacyCronStoreHealthFindings", () => {
       }),
     ]);
     await expect(fs.readFile(quarantinePath, "utf-8")).resolves.toBe(historicalBytes);
-    await expect(fs.stat(resolveOpenClawStateSqlitePath())).rejects.toMatchObject({
+    await expect(fs.stat(resolveCarapaceStateSqlitePath())).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
@@ -698,7 +698,7 @@ describe("maybeRepairLegacyCronStore", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await maybeRepairLegacyCronStore({
       cfg,
@@ -751,7 +751,7 @@ describe("maybeRepairLegacyCronStore", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       maybeRepairLegacyCronStore({ cfg, options: {}, prompter: makePrompter(true) }),
@@ -793,7 +793,7 @@ describe("maybeRepairLegacyCronStore", () => {
 
   it("recovers a valid quarantined schedule only after Doctor confirmation", async () => {
     const storePath = await makeTempStorePath();
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.dirname(path.dirname(storePath)));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.dirname(path.dirname(storePath)));
     await writeCurrentCronStore(storePath, []);
     saveCronQuarantinedJobs({
       storePath,
@@ -970,7 +970,7 @@ describe("maybeRepairLegacyCronStore", () => {
             model: { primary: "openai/gpt-5.5", fallbacks: [] },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       options: {},
       prompter,
     });
@@ -1048,7 +1048,7 @@ describe("maybeRepairLegacyCronStore", () => {
             model: { primary: "test:opus", fallbacks: [] },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       options: {},
       prompter: makePrompter(true),
     });
@@ -1082,8 +1082,8 @@ describe("maybeRepairLegacyCronStore", () => {
       expectNoteContaining("1 automation is still marked in-flight", "Cron");
       expectNoNoteContaining("shows it as `running`", "Cron");
       expectNoteContaining("marks such runs interrupted the next time it starts", "Cron");
-      expectNoteContaining("openclaw automations list --all", "Cron");
-      expectNoteContaining("openclaw automations show <id>", "Cron");
+      expectNoteContaining("carapace automations list --all", "Cron");
+      expectNoteContaining("carapace automations show <id>", "Cron");
 
       // Observer-only: no repair prompt and the running marker is left untouched.
       expect(prompter.confirm).not.toHaveBeenCalled();
@@ -1107,7 +1107,7 @@ describe("maybeRepairLegacyCronStore", () => {
       });
 
       expectNoteContaining("2 automations are still marked in-flight", "Cron");
-      expectNoteContaining("openclaw automations list --all", "Cron");
+      expectNoteContaining("carapace automations list --all", "Cron");
     });
 
     it("stays silent when no job is marked in-flight", async () => {
@@ -1145,7 +1145,7 @@ describe("maybeRepairLegacyCronStore", () => {
       expectNoteContaining("re-fires it on error backoff", "Cron");
       expectNoteContaining("resets on the next successful run", "Cron");
       expectNoteContaining("interrupted by a gateway restart", "Cron");
-      expectNoteContaining("openclaw automations show <id>", "Cron");
+      expectNoteContaining("carapace automations show <id>", "Cron");
 
       // Observer-only: no repair prompt and the failure counters stay untouched.
       expect(prompter.confirm).not.toHaveBeenCalled();
@@ -1250,10 +1250,10 @@ describe("maybeRepairLegacyCronStore", () => {
       expectNoteContaining("2 automations are auto-disabled", "Cron");
       expectNoteContaining("Run failure job (run-failure-job)", "Cron");
       expectNoteContaining("recorded reason `consecutive-failures` after 10", "Cron");
-      expectNoteContaining("openclaw automations enable run-failure-job", "Cron");
+      expectNoteContaining("carapace automations enable run-failure-job", "Cron");
       expectNoteContaining("Schedule error job (schedule-error-job)", "Cron");
       expectNoteContaining("recorded reason `schedule-errors` after 3", "Cron");
-      expectNoteContaining("openclaw automations enable schedule-error-job", "Cron");
+      expectNoteContaining("carapace automations enable schedule-error-job", "Cron");
       expectNoNoteContaining("disabled-one-shot", "Cron");
     });
   });
@@ -2024,7 +2024,7 @@ describe("maybeRepairLegacyCronStore", () => {
     expectNoteContaining("Shell prompt job 1", "Cron");
     expectNoteContaining("Shell prompt job 2", "Cron");
     expectNoteContaining("Shell prompt job 3", "Cron");
-    expectNoNoteContaining("openclaw doctor --fix", "Cron");
+    expectNoNoteContaining("carapace doctor --fix", "Cron");
     expectNoNoteContaining("jobs.json", "Cron");
     expect(prompter.confirm).not.toHaveBeenCalled();
 
@@ -2067,7 +2067,7 @@ describe("maybeRepairLegacyCronStore", () => {
         message: [
           "Command to run:",
           "- command: python3 scripts/check_mail.py",
-          "- workdir: /home/openclaw/.razor/clawd",
+          "- workdir: /home/carapace/.razor/clawd",
         ].join("\n"),
         toolsAllow: ["read", "message"],
       },
@@ -2091,7 +2091,7 @@ describe("maybeRepairLegacyCronStore", () => {
     expectNoteContaining("Recreate it as a command automation", "Cron");
     expectNoNoteContaining("informational only", "Cron");
     expectNoNoteContaining("keep running as-is", "Cron");
-    expectNoNoteContaining("openclaw doctor --fix", "Cron");
+    expectNoNoteContaining("carapace doctor --fix", "Cron");
     expect(prompter.confirm).not.toHaveBeenCalled();
 
     const job = requirePersistedJob(await readPersistedJobs(storePath), 0);
@@ -2376,7 +2376,7 @@ describe("maybeRepairLegacyCronStore", () => {
       }),
     ]);
 
-    const cfg = { cron: { store: storePath } } as unknown as OpenClawConfig;
+    const cfg = { cron: { store: storePath } } as unknown as CarapaceConfig;
     await maybeRepairLegacyCronStore({
       cfg,
       options: {},
@@ -2414,7 +2414,7 @@ describe("maybeRepairLegacyCronStore", () => {
       }),
     ]);
 
-    const cfg = { cron: { store: storePath } } as unknown as OpenClawConfig;
+    const cfg = { cron: { store: storePath } } as unknown as CarapaceConfig;
     await maybeRepairLegacyCronStore({
       cfg,
       options: {},
@@ -2554,7 +2554,7 @@ describe("maybeRepairLegacyCronStore", () => {
         wakeMode: "now",
         payload: {
           kind: "systemEvent",
-          text: "__openclaw_memory_core_short_term_promotion_dream__",
+          text: "__carapace_memory_core_short_term_promotion_dream__",
         },
         state: {},
       },
@@ -2571,7 +2571,7 @@ describe("maybeRepairLegacyCronStore", () => {
     expect(job.sessionTarget).toBe("isolated");
     const payload = requireRecord(job.payload, "cron payload");
     expect(payload.kind).toBe("agentTurn");
-    expect(payload.message).toBe("__openclaw_memory_core_short_term_promotion_dream__");
+    expect(payload.message).toBe("__carapace_memory_core_short_term_promotion_dream__");
     expect(payload.lightContext).toBe(true);
     const delivery = requireRecord(job.delivery, "cron delivery");
     expect(delivery.mode).toBe("none");
@@ -2591,7 +2591,7 @@ describe("maybeRepairLegacyCronStore", () => {
 
     await expect(
       maybeRepairLegacyCronStore({
-        cfg: { cron: { store: storePath } } as unknown as OpenClawConfig,
+        cfg: { cron: { store: storePath } } as unknown as CarapaceConfig,
         options: {},
         prompter,
       }),
@@ -2610,7 +2610,7 @@ describe("legacy WhatsApp crontab health check", () => {
       readCrontab: async () => ({
         stdout: [
           "# keep comments ignored",
-          "*/5 * * * * ~/.openclaw/bin/ensure-whatsapp.sh >> ~/.openclaw/logs/whatsapp-health.log 2>&1",
+          "*/5 * * * * ~/.carapace/bin/ensure-whatsapp.sh >> ~/.carapace/logs/whatsapp-health.log 2>&1",
           "0 9 * * * /usr/bin/true",
           "",
         ].join("\n"),
@@ -2628,7 +2628,7 @@ describe("legacy WhatsApp crontab health check", () => {
       readCrontab: async () => ({
         stdout: [
           "# keep comments ignored",
-          "*/5 * * * * ~/.openclaw/bin/ensure-whatsapp.sh >> ~/.openclaw/logs/whatsapp-health.log 2>&1",
+          "*/5 * * * * ~/.carapace/bin/ensure-whatsapp.sh >> ~/.carapace/logs/whatsapp-health.log 2>&1",
           "0 9 * * * /usr/bin/true",
           "",
         ].join("\n"),
@@ -2678,7 +2678,7 @@ describe("legacy WhatsApp crontab health check", () => {
       noteLegacyWhatsAppCrontabHealthCheck({
         platform: "linux",
         readCrontab: async () => ({
-          stdout: { lines: ["*/5 * * * * ~/.openclaw/bin/ensure-whatsapp.sh"] },
+          stdout: { lines: ["*/5 * * * * ~/.carapace/bin/ensure-whatsapp.sh"] },
         }),
       }),
     ).resolves.toBeUndefined();

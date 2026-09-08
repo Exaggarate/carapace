@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import type { SessionCreatedActor } from "../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { hashTextSha256 } from "./hash.js";
 import { resolveSandboxRuntimeStatus } from "./runtime-status.js";
 import {
@@ -15,9 +15,9 @@ describe("required sandbox creator namespaces", () => {
   it.each(["agent", "session", "shared"] as const)(
     "separates non-profile resources with configured %s scope",
     async (scope) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const id = "equal-creator-id";
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             defaults: {
               sandbox: {
@@ -91,7 +91,7 @@ describe("required sandbox creator namespaces", () => {
             scopes.add(layout.scopeKey);
             workspaces.add(layout.workspaceDir);
             containers.add(
-              buildSandboxContainerName("openclaw-sbx-", slugifySessionKey(layout.scopeKey)),
+              buildSandboxContainerName("carapace-sbx-", slugifySessionKey(layout.scopeKey)),
             );
           }
           const [first, second] = layouts;

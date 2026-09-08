@@ -37,7 +37,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "whatsapp",
         name: "WhatsApp",
-        description: "OpenClaw WhatsApp channel plugin for WhatsApp Web chats.",
+        description: "Carapace WhatsApp channel plugin for WhatsApp Web chats.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -46,7 +46,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "telegram",
         name: "Telegram",
-        description: "OpenClaw Telegram channel plugin.",
+        description: "Carapace Telegram channel plugin.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -65,7 +65,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "googlechat",
         name: "Google Chat",
-        description: "OpenClaw Google Chat channel plugin for spaces and direct messages.",
+        description: "Carapace Google Chat channel plugin for spaces and direct messages.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -74,7 +74,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "slack",
         name: "Slack",
-        description: "OpenClaw Slack channel plugin for channels, DMs, commands, and app events.",
+        description: "Carapace Slack channel plugin for channels, DMs, commands, and app events.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -83,7 +83,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "signal",
         name: "Signal",
-        description: "OpenClaw Signal channel plugin.",
+        description: "Carapace Signal channel plugin.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -92,7 +92,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "imessage",
         name: "iMessage",
-        description: "OpenClaw iMessage channel plugin using imsg on a signed-in Mac.",
+        description: "Carapace iMessage channel plugin using imsg on a signed-in Mac.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -101,7 +101,7 @@ export function buildPluginCatalogMock() {
       entry({
         id: "nostr",
         name: "Nostr",
-        description: "OpenClaw Nostr channel plugin for NIP-04 encrypted direct messages.",
+        description: "Carapace Nostr channel plugin for NIP-04 encrypted direct messages.",
         category: "channel",
         origin: "bundled",
         installed: true,
@@ -180,8 +180,8 @@ export function buildPluginInspectMock() {
       {
         source: {
           kind: "npm",
-          spec: "@openclaw/discord@1.4.0",
-          packageName: "@openclaw/discord",
+          spec: "@carapace/discord@1.4.0",
+          packageName: "@carapace/discord",
           integrity: "sha512-Zt8FjB1uT0mMyF5b0z0aH4dKq7wVn0m8rW3o5cQx1JYb1sB4kQ2u5w9c1p6nEo3q",
           integrityKind: "ssri",
         },
@@ -204,8 +204,8 @@ export function buildPluginInspectMock() {
       {
         source: {
           kind: "official-catalog",
-          spec: "clawhub:openclaw/browser@1.4.0",
-          packageName: "openclaw/browser",
+          spec: "clawhub:carapace/browser@1.4.0",
+          packageName: "carapace/browser",
           integrity: "2f7c1a9be03d5c44a8a14a4e9d0d5375f4f3f0f5f7f1b9f2c3d4e5f60718293a",
           integrityKind: "sha256",
         },
@@ -220,7 +220,7 @@ export function buildPluginInspectMock() {
     [
       "canvas",
       {
-        source: { kind: "official-catalog", packageName: "openclaw/canvas" },
+        source: { kind: "official-catalog", packageName: "carapace/canvas" },
         declared: { tools: ["canvas_render"] },
       },
     ],

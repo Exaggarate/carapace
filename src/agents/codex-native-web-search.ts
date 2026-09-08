@@ -2,7 +2,7 @@
  * Public Codex native web-search facade. It re-exports core activation helpers
  * and reports whether native search matters for the configured agent model.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   hasAvailableCodexAuth,
   isCodexNativeSearchEligibleModel,
@@ -23,7 +23,7 @@ export {
 
 /** True when Codex native web search should appear relevant for an agent. */
 export function isCodexNativeWebSearchRelevant(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
 }): boolean {

@@ -71,7 +71,7 @@ it("opens customization once and retains reload state across close and reopen", 
     navigate,
   } as unknown as ApplicationContext);
   // SAFETY: the imported contributions module registers this Lit element.
-  const manager = document.createElement("openclaw-plugin-manager") as LitElement;
+  const manager = document.createElement("carapace-plugin-manager") as LitElement;
   const button = (label: string) => {
     const found = [...manager.querySelectorAll("button")].find(
       (element) => element.textContent?.trim() === label,
@@ -83,14 +83,14 @@ it("opens customization once and retains reload state across close and reopen", 
   };
   let mostDialogs = 0;
   const observer = new MutationObserver(() => {
-    mostDialogs = Math.max(mostDialogs, manager.querySelectorAll("openclaw-modal-dialog").length);
+    mostDialogs = Math.max(mostDialogs, manager.querySelectorAll("carapace-modal-dialog").length);
   });
   observer.observe(manager, { childList: true, subtree: true });
   provider.append(manager);
   document.body.append(provider);
   try {
     await manager.updateComplete;
-    expect(manager.querySelector("openclaw-modal-dialog")).toBeNull();
+    expect(manager.querySelector("carapace-modal-dialog")).toBeNull();
     button(t("pluginUi.customize")).click();
     await vi.waitFor(() => expect(manager.querySelector("select")).not.toBeNull());
     expect(mostDialogs).toBe(1);
@@ -99,7 +99,7 @@ it("opens customization once and retains reload state across close and reopen", 
     expect(labs?.textContent?.trim()).toBe("Open Labs");
     labs?.click();
     expect(navigate).toHaveBeenCalledExactlyOnceWith("labs");
-    await vi.waitFor(() => expect(manager.querySelector("openclaw-modal-dialog")).toBeNull());
+    await vi.waitFor(() => expect(manager.querySelector("carapace-modal-dialog")).toBeNull());
     button(t("pluginUi.customize")).click();
     await vi.waitFor(() => expect(manager.querySelector("select")).not.toBeNull());
 
@@ -117,7 +117,7 @@ it("opens customization once and retains reload state across close and reopen", 
     button(t("pluginUi.reload")).click();
     expect(plugins.reload).toHaveBeenCalledOnce();
     button(t("common.close")).click();
-    await vi.waitFor(() => expect(manager.querySelector("openclaw-modal-dialog")).toBeNull());
+    await vi.waitFor(() => expect(manager.querySelector("carapace-modal-dialog")).toBeNull());
     button(t("pluginUi.customize")).click();
     await vi.waitFor(() => expect(button(t("pluginUi.reload")).disabled).toBe(true));
     pendingReload.reject(new Error("Synthetic reload failure"));
@@ -224,7 +224,7 @@ async function mountActions(
   } as Omit<ControlUiPluginOwner, "host">;
   const host = createControlUiPluginHost(() => context, plugins, owner);
   const provider = createApplicationContextProvider(context);
-  const element = document.createElement("openclaw-plugin-contributions") as ContributionsElement;
+  const element = document.createElement("carapace-plugin-contributions") as ContributionsElement;
   element.kind = options.placement ?? "header";
   element.sessionKey = session.key;
   element.agentId = options.agentId;

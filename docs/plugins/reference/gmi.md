@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw GMI Cloud provider plugin."
+summary: "Carapace GMI Cloud provider plugin."
 read_when:
   - You are installing, configuring, or auditing the gmi plugin
 title: "Gmi plugin reference"
@@ -7,15 +7,15 @@ title: "Gmi plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw GMI Cloud provider plugin.
+Carapace GMI Cloud provider plugin.
 
 ## Distribution
 
-- Package: `@openclaw/gmi-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/gmi-provider`
+- Package: `@carapace/gmi-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/gmi-provider`
 
 ## Surface
 

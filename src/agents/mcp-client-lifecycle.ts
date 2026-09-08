@@ -3,8 +3,8 @@ import { StreamableHTTPError } from "@modelcontextprotocol/sdk/client/streamable
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { settlesWithin } from "../shared/settle-within.js";
 import { isMcpRequestTimeoutError } from "./mcp-error.js";
-import { OpenClawStreamableHTTPClientTransport } from "./mcp-http-transport.js";
-import { OpenClawStdioClientTransport } from "./mcp-stdio-transport.js";
+import { CarapaceStreamableHTTPClientTransport } from "./mcp-http-transport.js";
+import { CarapaceStdioClientTransport } from "./mcp-stdio-transport.js";
 import { recordAgentCleanupFailure } from "./run-cleanup-timeout.js";
 
 type LifecycleSession = {
@@ -23,7 +23,7 @@ export function isStatefulMcpHttpSessionExpired(
 ): boolean {
   return (
     session.transportType === "streamable-http" &&
-    session.transport instanceof OpenClawStreamableHTTPClientTransport &&
+    session.transport instanceof CarapaceStreamableHTTPClientTransport &&
     session.transport.sessionId !== undefined &&
     error instanceof StreamableHTTPError &&
     error.code === 404
@@ -64,9 +64,9 @@ export async function connectMcpClient(params: {
           client: params.client,
           transport: params.transport,
           transportType:
-            params.transport instanceof OpenClawStdioClientTransport
+            params.transport instanceof CarapaceStdioClientTransport
               ? "stdio"
-              : params.transport instanceof OpenClawStreamableHTTPClientTransport
+              : params.transport instanceof CarapaceStreamableHTTPClientTransport
                 ? "streamable-http"
                 : "sse",
         },
@@ -117,7 +117,7 @@ export async function disposeMcpClient(
     // group, so force it dead before disposal can report completion.
     const { transport } = session;
     const closeTransport =
-      session.transportType === "stdio" && transport instanceof OpenClawStdioClientTransport
+      session.transportType === "stdio" && transport instanceof CarapaceStdioClientTransport
         ? () => transport.forceClose()
         : () => transport.close();
     const forced = await settlesWithin(

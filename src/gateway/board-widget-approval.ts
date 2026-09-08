@@ -2,12 +2,12 @@ import type { BoardWidgetMaterializedPutParams } from "../../packages/gateway-pr
 import { resolveAgentConfig } from "../agents/agent-scope.js";
 import { resolveExecDefaults } from "../agents/exec-defaults.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.entry.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadExecApprovalsReadOnly } from "../infra/exec-approvals.js";
 import { resolveExecAutoReviewDecision } from "../infra/exec-auto-review.js";
 
 export async function resolveBoardWidgetApproval(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
   name: string;

@@ -22,7 +22,7 @@ const validSystemInfo = {
   memoryFreeBytes: 17_179_869_184,
   diskTotalBytes: 994_662_584_320,
   diskAvailableBytes: 497_331_292_160,
-  diskPath: "/Users/operator/.openclaw",
+  diskPath: "/Users/operator/.carapace",
   disks: [
     { path: "/", totalBytes: 994_662_584_320, availableBytes: 497_331_292_160 },
     { path: "/data", totalBytes: 2_000_000_000_000, availableBytes: 1_000_000_000_000 },

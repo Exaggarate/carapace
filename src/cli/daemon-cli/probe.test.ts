@@ -301,7 +301,7 @@ describe("probeGatewayStatus", () => {
         json: true,
         requireRpc: true,
         localPortOverride,
-        configPath: "/tmp/openclaw-daemon/openclaw.json",
+        configPath: "/tmp/carapace-daemon/carapace.json",
       });
 
       expect(result).toEqual({
@@ -332,7 +332,7 @@ describe("probeGatewayStatus", () => {
         timeoutMs: 5_000,
         sharedStateMode: "read-only",
         skipImplicitAuth: true,
-        configPath: "/tmp/openclaw-daemon/openclaw.json",
+        configPath: "/tmp/carapace-daemon/carapace.json",
         serviceTargetUrl: "ws://127.0.0.1:19191",
         onHelloOk: expect.any(Function),
       });

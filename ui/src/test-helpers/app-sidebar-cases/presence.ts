@@ -218,7 +218,7 @@ describe("AppSidebar viewer presence", () => {
     await sidebar.updateComplete;
     expect(onlineToggle?.getAttribute("aria-expanded")).toBe("false");
     expect(sidebar.querySelectorAll(".sidebar-online__person")).toHaveLength(0);
-    expect(localStorage.getItem("openclaw:sidebar:sessions:collapsed-sections")).toBe(
+    expect(localStorage.getItem("carapace:sidebar:sessions:collapsed-sections")).toBe(
       JSON.stringify(["online"]),
     );
 
@@ -443,9 +443,9 @@ describe("AppSidebar viewer presence", () => {
       sidebar.querySelector<HTMLElement>(".sidebar-online__person")!.focus();
       await vi.dynamicImportSettled();
       await vi.waitFor(() =>
-        expect(document.querySelector("openclaw-elapsed-time")?.textContent).toBeTruthy(),
+        expect(document.querySelector("carapace-elapsed-time")?.textContent).toBeTruthy(),
       );
-      const elapsed = document.querySelector<LitElement>("openclaw-elapsed-time")!;
+      const elapsed = document.querySelector<LitElement>("carapace-elapsed-time")!;
       await elapsed.updateComplete;
       const elapsedBeforeDismissal = elapsed.textContent;
       if (reason === "disconnect") {
@@ -498,7 +498,7 @@ describe("AppSidebar viewer presence", () => {
 
   it("restores the collapsed online section", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "carapace:sidebar:sessions:collapsed-sections",
       JSON.stringify(["online"]),
     );
     const gatewayHarness = createGatewayHarness({
@@ -528,7 +528,7 @@ describe("AppSidebar viewer presence", () => {
     );
     expect(onlineToggle?.getAttribute("aria-expanded")).toBe("false");
     expect(sidebar.querySelector(".sidebar-online__person")).toBeNull();
-    const facepile = sidebar.querySelector<HTMLElement>(".sidebar-online openclaw-viewer-facepile");
+    const facepile = sidebar.querySelector<HTMLElement>(".sidebar-online carapace-viewer-facepile");
     await (facepile as { updateComplete?: Promise<unknown> } | null)?.updateComplete;
     expect(facepile?.querySelector(".viewer-facepile")?.getAttribute("data-viewer-count")).toBe(
       "4",
@@ -562,7 +562,7 @@ describe("AppSidebar viewer presence", () => {
 
     await vi.waitFor(() => {
       const avatar = sidebar.querySelector<HTMLImageElement>(
-        ".sidebar-identity-card openclaw-viewer-avatar img",
+        ".sidebar-identity-card carapace-viewer-avatar img",
       );
       expect(avatar?.getAttribute("src")).toBe("/api/users/00-self/avatar?v=7");
     });
@@ -635,7 +635,7 @@ describe("AppSidebar viewer presence", () => {
     await sidebar.updateComplete;
 
     const sessionFacepile = sidebar.querySelector<HTMLElement>(
-      '[data-session-key="agent:main:work"] openclaw-viewer-facepile',
+      '[data-session-key="agent:main:work"] carapace-viewer-facepile',
     );
     await (sessionFacepile as { updateComplete?: Promise<unknown> } | null)?.updateComplete;
     expect(
@@ -649,7 +649,7 @@ describe("AppSidebar viewer presence", () => {
     expect(sessionFacepile?.querySelector(".viewer-avatar--overflow")?.textContent).toContain("+3");
     expect(sessionFacepile?.querySelector('[data-viewer-id="alice"] img')).not.toBeNull();
     expect(
-      [...(sessionFacepile?.querySelectorAll("openclaw-tooltip") ?? [])].map(
+      [...(sessionFacepile?.querySelectorAll("carapace-tooltip") ?? [])].map(
         (tooltip) => (tooltip as HTMLElement & { content?: string }).content,
       ),
     ).toEqual(["Alice", "bob@example.test", "Carol", "Dave\nErin\nFrank"]);
@@ -660,11 +660,11 @@ describe("AppSidebar viewer presence", () => {
     );
     expect(identityCard?.querySelector('[data-viewer-id="00-self"]')).not.toBeNull();
 
-    const avatar = identityCard?.querySelector<HTMLImageElement>("openclaw-viewer-avatar img");
+    const avatar = identityCard?.querySelector<HTMLImageElement>("carapace-viewer-avatar img");
     expect(avatar?.getAttribute("src")).toBe("/api/users/00-self/avatar?v=1");
     const footer = sidebar.querySelector(".sidebar-footer-bar");
-    expect(footer?.querySelector("openclaw-viewer-facepile")).toBeNull();
-    expect(footer?.querySelector("openclaw-sidebar-build-chip")).toBeNull();
+    expect(footer?.querySelector("carapace-viewer-facepile")).toBeNull();
+    expect(footer?.querySelector("carapace-sidebar-build-chip")).toBeNull();
     expect(footer?.querySelector(".sidebar-brand__logo-slot")).toBeNull();
     gatewayHarness.gateway.updateSelfUser?.({
       name: "Augusta Ada",

@@ -9,13 +9,13 @@ import * as cliCoreApiModule from "./core-api.js";
 vi.mock("../control-service.js", () => {
   throw new Error("Browser extension CLI must not load browser control services");
 });
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", () => {
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", () => {
   throw new Error("Browser extension CLI must not load agent runtime");
 });
-vi.mock("openclaw/plugin-sdk/media-runtime", () => {
+vi.mock("carapace/plugin-sdk/media-runtime", () => {
   throw new Error("Browser extension CLI must not load media runtime");
 });
-vi.mock("openclaw/plugin-sdk/media-understanding-runtime", () => {
+vi.mock("carapace/plugin-sdk/media-understanding-runtime", () => {
   throw new Error("Browser extension CLI must not load media understanding runtime");
 });
 
@@ -52,9 +52,9 @@ function createExtensionStatus() {
   return {
     platform: "linux" as const,
     platformSupport: "automatic" as const,
-    installedCopy: { path: "/stable/openclaw-extension", present: true, owned: true },
-    bundledPath: "/bundled/openclaw-extension",
-    approvedPaths: ["/stable/openclaw-extension"],
+    installedCopy: { path: "/stable/carapace-extension", present: true, owned: true },
+    bundledPath: "/bundled/carapace-extension",
+    approvedPaths: ["/stable/carapace-extension"],
     discovered: [],
     storeDiscovered: [],
     storeInstallRequests: [],
@@ -90,14 +90,14 @@ describe("browser extension pairing Gateway URL", () => {
       async (params: Parameters<typeof installChromeExtensionBootstrap>[0]) => {
         params.onProgress?.("Pre-registered the native host for Chromium.");
         params.onProgress?.(
-          "Native bootstrap is ready. Add OpenClaw from the Chrome Web Store. For development, load unpacked from /stable/openclaw-extension.",
+          "Native bootstrap is ready. Add Carapace from the Chrome Web Store. For development, load unpacked from /stable/carapace-extension.",
         );
         return {
           platform: "linux",
           platformSupport: "automatic",
-          installedCopy: { path: "/stable/openclaw-extension", present: true, owned: true },
-          bundledPath: "/bundled/openclaw-extension",
-          approvedPaths: ["/stable/openclaw-extension"],
+          installedCopy: { path: "/stable/carapace-extension", present: true, owned: true },
+          bundledPath: "/bundled/carapace-extension",
+          approvedPaths: ["/stable/carapace-extension"],
           discovered: [
             {
               product: "chromium",
@@ -106,7 +106,7 @@ describe("browser extension pairing Gateway URL", () => {
               profile: "Default",
               securePreferencesPath: "/chrome/Default/Secure Preferences",
               extensionId: "abcdefghijklmnopabcdefghijklmnop",
-              extensionPath: "/stable/openclaw-extension",
+              extensionPath: "/stable/carapace-extension",
             },
           ],
           storeDiscovered: [],
@@ -154,7 +154,7 @@ describe("browser extension pairing Gateway URL", () => {
       storeInstallRequests: [
         {
           browser: "Google Chrome",
-          path: "/chrome/External Extensions/openclaw.json",
+          path: "/chrome/External Extensions/carapace.json",
           state: "requested",
         },
       ],
@@ -329,7 +329,7 @@ describe("browser extension pairing Gateway URL", () => {
       .mockImplementation(runtime.writeJson);
     const { registerBrowserCli } = await import("./browser-cli.js");
     const program = new Command();
-    registerBrowserCli(program, ["node", "openclaw", "browser", "extension", "cdp", "--json"]);
+    registerBrowserCli(program, ["node", "carapace", "browser", "extension", "cdp", "--json"]);
 
     await program.parseAsync(["browser", "extension", "cdp", "--json"], { from: "user" });
 
@@ -337,11 +337,11 @@ describe("browser extension pairing Gateway URL", () => {
       browserUrl: `http://127.0.0.1:${port}`,
       wsEndpoint: `ws://127.0.0.1:${port}/cdp`,
       auth: {
-        label: "openclaw.browser-relay.auth",
+        label: "carapace.browser-relay.auth",
         version: 2,
         keyId: relayKeyIdFromHex(relayMocks.relayKey),
-        challengeUrl: `http://127.0.0.1:${port}/_openclaw/relay/auth/v2/challenge`,
-        completeUrl: `http://127.0.0.1:${port}/_openclaw/relay/auth/v2/complete`,
+        challengeUrl: `http://127.0.0.1:${port}/_carapace/relay/auth/v2/challenge`,
+        completeUrl: `http://127.0.0.1:${port}/_carapace/relay/auth/v2/complete`,
         role: "cdp",
         transport: "connection",
         method: "SEQUENCE",

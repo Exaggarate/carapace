@@ -1,5 +1,5 @@
 // Codex plugin module implements command handlers behavior.
-import type { PluginCommandContext, PluginCommandResult } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCommandContext, PluginCommandResult } from "carapace/plugin-sdk/plugin-entry";
 import { defaultCodexAppInventoryCache } from "./app-server/app-inventory-cache.js";
 import { resolveCodexAppServerAuthAccountCacheKey } from "./app-server/auth-bridge.js";
 import { resolveCodexAppServerFallbackApiKeyCacheKey } from "./app-server/auth-cache-key.js";
@@ -115,7 +115,7 @@ export async function handleCodexSubcommand(
       return {
         text:
           "Codex sub-plugin management is not wired up (codexPluginsManagementIo dep is undefined). " +
-          "Edit ~/.openclaw/openclaw.json or use `openclaw config patch` until the runtime exposes the IO.",
+          "Edit ~/.carapace/carapace.json or use `carapace config patch` until the runtime exposes the IO.",
       };
     }
     let appServerScope: ReturnType<typeof resolveCommandAppServerScope> | undefined;

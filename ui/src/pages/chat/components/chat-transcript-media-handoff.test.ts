@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
 import { Buffer } from "node:buffer";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createChatSubmissions } from "../../../app/chat-submissions.ts";
@@ -109,7 +109,7 @@ async function createCanonicalImageTranscript(
   };
   ownedAttachments.push(...input.attachments);
   const local = expectDefined(buildLocalUserMessage(input), "submitted image message");
-  const cached = origin === "canonical" ? { ...local, __openclaw: canonical } : local;
+  const cached = origin === "canonical" ? { ...local, __carapace: canonical } : local;
   const owner = {
     sessionKey: "agent:main:main",
     client: {},
@@ -180,7 +180,7 @@ async function createCanonicalImageTranscript(
       {
         ...cached,
         content: [{ type: "text", text }, ...content],
-        __openclaw: { ...canonical, media: nextMedia, ...metadata },
+        __carapace: { ...canonical, media: nextMedia, ...metadata },
       },
     ];
     if (origin === "canonical") {

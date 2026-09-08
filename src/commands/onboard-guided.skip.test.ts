@@ -19,10 +19,10 @@ vi.mock("../plugins/provider-setup-availability.js", () => ({
 
 let root: string | undefined;
 afterEach(async () => {
-  const { closeOpenClawStateDatabaseForTest } = await import("../state/openclaw-state-db.js");
-  const { closeOpenClawAgentDatabasesForTest } = await import("../state/openclaw-agent-db.js");
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  const { closeCarapaceStateDatabaseForTest } = await import("../state/carapace-state-db.js");
+  const { closeCarapaceAgentDatabasesForTest } = await import("../state/carapace-agent-db.js");
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   if (root) {
     await fs.rm(root, { recursive: true, force: true });
@@ -33,11 +33,11 @@ afterEach(async () => {
 it.each(["fresh", "interrupted", "replaced"] as const)(
   "keeps skipped baseline setup owner-fenced and resumable: %s",
   async (scenario) => {
-    root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onboard-skip-"));
+    root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-onboard-skip-"));
     const workspace = path.join(root, "workspace");
-    const configPath = path.join(root, "openclaw.json");
-    vi.stubEnv("OPENCLAW_STATE_DIR", root);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+    const configPath = path.join(root, "carapace.json");
+    vi.stubEnv("CARAPACE_STATE_DIR", root);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
     vi.stubEnv("HOME", root);
     vi.stubEnv("USERPROFILE", root);
     const { runGuidedOnboarding } = await import("./onboard-guided.js");
@@ -122,7 +122,7 @@ it.each(["fresh", "interrupted", "replaced"] as const)(
     expect(activate).not.toHaveBeenCalled();
     expect(launchHatchTui).not.toHaveBeenCalled();
     expect(prompter.note).toHaveBeenCalledWith(
-      expect.stringContaining("openclaw onboard"),
+      expect.stringContaining("carapace onboard"),
       "Next steps",
     );
   },

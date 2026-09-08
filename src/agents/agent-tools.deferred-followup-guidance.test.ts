@@ -1,5 +1,5 @@
 /** Tests model-facing descriptions selected from the final authorized tool set. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { getPluginToolMeta, setPluginToolMeta } from "../plugins/tool-metadata.js";
 import { withMockedPlatform } from "../test-utils/vitest-spies.js";
@@ -36,7 +36,7 @@ function findToolDescription(
   };
 }
 
-describe("createOpenClawCodingTools availability guidance", () => {
+describe("createCarapaceCodingTools availability guidance", () => {
   it.each([
     { available: [], mode: "suggest", deferred: false },
     { available: ["sessions_yield"], mode: "suggest", deferred: false },
@@ -68,7 +68,7 @@ describe("createOpenClawCodingTools availability guidance", () => {
       ]);
       const toolNames = tools.map((tool) => tool.name);
       const prompt = buildAgentSystemPrompt({
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         subagentDelegationMode: mode,
         toolNames: deferred ? ["tool_search"] : toolNames,
         capabilityToolNames: deferred ? toolNames : [],

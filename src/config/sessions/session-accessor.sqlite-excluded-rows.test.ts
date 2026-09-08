@@ -3,11 +3,11 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   iterateSessionEntryKeys,
   readExactSessionEntryRow,
@@ -21,12 +21,12 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function openDatabase(encoding?: "UTF-8" | "UTF-16le" | "UTF-16be") {
-  const stateDir = tempDirs.make("openclaw-excluded-rows-");
+  const stateDir = tempDirs.make("carapace-excluded-rows-");
   const pathname = path.join(stateDir, "agent.sqlite");
   if (encoding) {
     const seed = new DatabaseSync(pathname);
@@ -38,14 +38,14 @@ function openDatabase(encoding?: "UTF-8" | "UTF-16le" | "UTF-16be") {
       seed.close();
     }
   }
-  return openOpenClawAgentDatabase({
+  return openCarapaceAgentDatabase({
     agentId: "main",
     path: pathname,
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
 }
 
-function insertEntry(database: OpenClawAgentDatabase, key: string, id: string, json?: string) {
+function insertEntry(database: CarapaceAgentDatabase, key: string, id: string, json?: string) {
   database.db
     .prepare(
       "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, ?)",
@@ -56,12 +56,12 @@ function insertEntry(database: OpenClawAgentDatabase, key: string, id: string, j
 const readers = [
   {
     name: "references",
-    read: (database: OpenClawAgentDatabase, excludedKeys: ReadonlySet<string>) =>
+    read: (database: CarapaceAgentDatabase, excludedKeys: ReadonlySet<string>) =>
       [...readReferencedSessionIds(database, excludedKeys)].toSorted(),
   },
   {
     name: "cap candidates",
-    read: (database: OpenClawAgentDatabase, excludedKeys: ReadonlySet<string>) =>
+    read: (database: CarapaceAgentDatabase, excludedKeys: ReadonlySet<string>) =>
       Object.values(readSessionMaintenanceCapCandidates({ database, excludedKeys })).map(
         (entry) => entry.sessionId,
       ),

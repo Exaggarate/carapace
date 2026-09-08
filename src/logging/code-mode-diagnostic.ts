@@ -11,7 +11,7 @@ type CodeModeDiagnosticFields = Record<
 >;
 
 export function isCodeModeDiagnosticEnabled(): boolean {
-  return isTruthyEnvValue(process.env.OPENCLAW_DEBUG_CODE_MODE);
+  return isTruthyEnvValue(process.env.CARAPACE_DEBUG_CODE_MODE);
 }
 
 export function logCodeModeDiagnostic(

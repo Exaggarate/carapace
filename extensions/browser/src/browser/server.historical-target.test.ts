@@ -9,7 +9,7 @@ import {
 } from "./server.control-server.test-harness.js";
 import { getBrowserTestFetch } from "./test-support/fetch.js";
 
-const { launchOpenClawChrome, stopOpenClawChrome } = await import("./chrome.js");
+const { launchCarapaceChrome, stopCarapaceChrome } = await import("./chrome.js");
 
 describe("browser control server historical targets", () => {
   installBrowserControlServerHooks();
@@ -29,11 +29,11 @@ describe("browser control server historical targets", () => {
 
   it("does not start a stopped browser for a historical screenshot", async () => {
     await startBrowserControlServerFromConfig();
-    vi.mocked(launchOpenClawChrome).mockClear();
+    vi.mocked(launchCarapaceChrome).mockClear();
 
     const response = await request("/screenshot", { targetId: "closed-historical-tab" });
 
-    expect(launchOpenClawChrome).not.toHaveBeenCalled();
+    expect(launchCarapaceChrome).not.toHaveBeenCalled();
     expect(response.status).toBe(409);
     expect(await response.json()).toMatchObject({ error: expect.stringContaining("not running") });
     expect(await (await request("/tabs")).json()).toMatchObject({ running: false, tabs: [] });
@@ -44,8 +44,8 @@ describe("browser control server historical targets", () => {
     async (empty) => {
       await startBrowserControlServerFromConfig();
       setBrowserControlServerReachable(true);
-      vi.mocked(launchOpenClawChrome).mockClear();
-      vi.mocked(stopOpenClawChrome).mockClear();
+      vi.mocked(launchCarapaceChrome).mockClear();
+      vi.mocked(stopCarapaceChrome).mockClear();
       const fetchCdp = globalThis.fetch;
       const tabRequests: string[] = [];
       vi.stubGlobal(
@@ -64,8 +64,8 @@ describe("browser control server historical targets", () => {
       expect(getCdpMocks().createTargetViaCdp).not.toHaveBeenCalled();
       expect(response.status).toBe(404);
       expect(await response.json()).toMatchObject({ error: expect.stringContaining("not found") });
-      expect(launchOpenClawChrome).not.toHaveBeenCalled();
-      expect(stopOpenClawChrome).not.toHaveBeenCalled();
+      expect(launchCarapaceChrome).not.toHaveBeenCalled();
+      expect(stopCarapaceChrome).not.toHaveBeenCalled();
       expect(tabRequests.some((url) => url.includes("/json/new"))).toBe(false);
       expect(await (await request("/tabs")).json()).toMatchObject({
         running: true,
@@ -92,7 +92,7 @@ describe("browser control server historical targets", () => {
     { path: "/snapshot?format=ai", body: undefined },
   ])("preserves intentional startup through $path", async ({ path, body }) => {
     await startBrowserControlServerFromConfig();
-    vi.mocked(launchOpenClawChrome).mockClear();
+    vi.mocked(launchCarapaceChrome).mockClear();
     getCdpMocks().createTargetViaCdp.mockResolvedValue({
       targetId: "abcd1234",
       finalUrl: "https://example.com",
@@ -101,6 +101,6 @@ describe("browser control server historical targets", () => {
     const response = await request(path, body);
 
     expect(response.status).toBe(200);
-    expect(launchOpenClawChrome).toHaveBeenCalledOnce();
+    expect(launchCarapaceChrome).toHaveBeenCalledOnce();
   });
 });

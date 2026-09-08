@@ -4,7 +4,7 @@
  * It validates daemon runtime options, resolves gateway auth inputs, and then
  * delegates the platform-specific service install.
  */
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveGatewayService } from "../../../daemon/service.js";
 import { isSystemdUserServiceAvailable } from "../../../daemon/systemd.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
@@ -17,7 +17,7 @@ import { ensureSystemdUserLingerNonInteractive } from "../../systemd-linger.js";
 
 /** Installs the managed gateway daemon when non-interactive setup requested it. */
 export async function installGatewayDaemonNonInteractive(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
   port: number;
@@ -42,7 +42,7 @@ export async function installGatewayDaemonNonInteractive(params: {
     // Container and CI sessions often lack a user systemd manager; onboarding
     // owns the failure outcome for an explicitly requested installation.
     runtime.log(
-      "Systemd user services are unavailable; skipping service install. Use a direct shell run (`openclaw gateway run`) or rerun without --install-daemon on this session.",
+      "Systemd user services are unavailable; skipping service install. Use a direct shell run (`carapace gateway run`) or rerun without --install-daemon on this session.",
     );
     return { installed: false, skippedReason: "systemd-user-unavailable" };
   }

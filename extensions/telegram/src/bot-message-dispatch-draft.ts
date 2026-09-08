@@ -1,7 +1,7 @@
-import { resolveChannelStreamingBlockEnabled } from "openclaw/plugin-sdk/channel-outbound";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import type { BlockReplyContext } from "openclaw/plugin-sdk/reply-runtime";
-import { createSubsystemLogger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { resolveChannelStreamingBlockEnabled } from "carapace/plugin-sdk/channel-outbound";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
+import type { BlockReplyContext } from "carapace/plugin-sdk/reply-runtime";
+import { createSubsystemLogger, logVerbose } from "carapace/plugin-sdk/runtime-env";
 import type {
   TelegramDispatchTurn as Turn,
   TelegramDispatchTurnConfig as TurnConfig,

@@ -1,7 +1,7 @@
 /**
  * Reports prompt pressure and owns explicit mid-turn recovery routing.
  */
-import { CompactionReplayRefreshRequiredError } from "@openclaw/ai/transports";
+import { CompactionReplayRefreshRequiredError } from "@carapace/ai/transports";
 import type { AssembleResult } from "../../../context-engine/types.js";
 import type { AgentRunAttemptFailureSource } from "../../agent-run-terminal-outcome.js";
 import { sanitizeCompactionReplayMessages } from "../../compaction-replay.js";
@@ -46,7 +46,7 @@ type PreflightRecoveryBudgetSnapshot = Pick<
 
 // Carries the measured prompt budget into the outer recovery loop. The synthetic
 // precheck error is only a routing signal, so compaction engines need these
-// fields to compact against the prompt OpenClaw actually rendered.
+// fields to compact against the prompt Carapace actually rendered.
 function buildPreflightRecoveryBudgetSnapshot(snapshot: PreflightRecoveryBudgetSnapshot) {
   return {
     estimatedPromptTokens: snapshot.estimatedPromptTokens,

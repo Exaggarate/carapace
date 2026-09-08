@@ -1,4 +1,4 @@
-import { flattenMarkdownToPlainText } from "@openclaw/normalization-core/markdown-plain-text";
+import { flattenMarkdownToPlainText } from "@carapace/normalization-core/markdown-plain-text";
 import { clampText } from "../lib/format.ts";
 
 const SIDEBAR_NARRATION_MAX_LENGTH = 120;

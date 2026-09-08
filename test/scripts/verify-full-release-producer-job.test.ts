@@ -34,7 +34,7 @@ printf '%s' "$MOCK_JOB_JSON"
     [
       SCRIPT,
       "--repository",
-      "openclaw/openclaw",
+      "carapace/carapace",
       "--job-id",
       "123",
       "--job-name",
@@ -64,7 +64,7 @@ describe.skipIf(process.platform === "win32")("full release producer job verific
     expect(result.status, result.stderr).toBe(0);
     expect(readFileSync(callsPath, "utf8").split("\0").slice(0, -1)).toEqual([
       "api",
-      "repos/openclaw/openclaw/actions/jobs/123",
+      "repos/carapace/carapace/actions/jobs/123",
     ]);
   });
 

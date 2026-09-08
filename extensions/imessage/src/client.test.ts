@@ -488,9 +488,9 @@ describe("IMessageRpcClient child stream error handling", () => {
   });
 
   it("expands cliPath locally while preserving remote dbPath and JSON data", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-imessage-rpc-boundary-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-imessage-rpc-boundary-"));
     tempDirs.push(root);
-    const wrapperDir = path.join(root, ".openclaw");
+    const wrapperDir = path.join(root, ".carapace");
     const wrapperPath = path.join(wrapperDir, "imsg remote");
     const reportPath = path.join(root, "rpc-report.jsonl");
     await fs.mkdir(wrapperDir, { recursive: true });
@@ -524,7 +524,7 @@ describe("IMessageRpcClient child stream error handling", () => {
       childProcess.spawn(command, args, options),
     );
     const client = new IMessageRpcClient({
-      cliPath: "~/.openclaw/imsg remote",
+      cliPath: "~/.carapace/imsg remote",
       dbPath: "~/Library/Messages/chat.db",
       remoteHost: "messages-mac",
     });
@@ -552,14 +552,14 @@ describe("IMessageRpcClient child stream error handling", () => {
   it("keeps local dbPath home expansion", async () => {
     vi.stubEnv("HOME", "/Users/gateway");
     const client = new IMessageRpcClient({
-      cliPath: "~/.openclaw/imsg-local",
+      cliPath: "~/.carapace/imsg-local",
       dbPath: "~/Library/Messages/chat.db",
     });
 
     await client.start();
 
     expect(spawnMock).toHaveBeenCalledWith(
-      "/Users/gateway/.openclaw/imsg-local",
+      "/Users/gateway/.carapace/imsg-local",
       ["rpc", "--json", "--db", "/Users/gateway/Library/Messages/chat.db"],
       { stdio: ["pipe", "pipe", "pipe"] },
     );

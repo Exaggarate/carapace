@@ -1,5 +1,5 @@
 // Doctor runtime checks inspect tool names, browser residue, and runtime state.
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { assignSafeServerNames, TOOL_NAME_SEPARATOR } from "../agents/agent-bundle-mcp-names.js";
 import { loadSessionMcpConfig } from "../agents/agent-bundle-mcp-runtime-config.js";
@@ -39,7 +39,7 @@ import {
   GATEWAY_HEALTH_RATE_LIMITED_MESSAGE,
   gatewayConnectErrorWasRateLimited,
 } from "../commands/gateway-health-auth-diagnostic.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   getSystemdCgroupHygieneSummary,
   type GatewayServiceRuntime,
@@ -75,7 +75,7 @@ function formatGatewayHealthDiagnostic(value: unknown): string {
   return scrubDoctorErrorMessage(sanitizeTerminalText(redactSensitiveUrlLikeString(raw)));
 }
 
-export function detectUnavailableSkills(cfg: OpenClawConfig, workspaceDir: string) {
+export function detectUnavailableSkills(cfg: CarapaceConfig, workspaceDir: string) {
   const report = buildWorkspaceSkillStatus(workspaceDir, {
     config: cfg,
     agentId: tryResolveSoleAgentId(cfg),
@@ -145,7 +145,7 @@ export async function collectGatewayHealthFindings(
       return [
         warning(
           "Authenticated Gateway health inspection was intentionally skipped because an active credential uses an exec SecretRef.",
-          "Rerun `openclaw doctor --lint --only core/doctor/gateway-health --allow-exec` to permit configured secret execution.",
+          "Rerun `carapace doctor --lint --only core/doctor/gateway-health --allow-exec` to permit configured secret execution.",
         ),
       ];
     }
@@ -172,7 +172,7 @@ export async function collectGatewayHealthFindings(
       return [
         warning(
           `Gateway health inspection could not be prepared: ${formatGatewayHealthDiagnostic(error)}`,
-          "Fix Gateway connection configuration, then rerun `openclaw doctor --lint --only core/doctor/gateway-health`.",
+          "Fix Gateway connection configuration, then rerun `carapace doctor --lint --only core/doctor/gateway-health`.",
         ),
       ];
     }
@@ -193,7 +193,7 @@ export async function collectGatewayHealthFindings(
             fixHint:
               mode === "remote"
                 ? "Verify the remote Gateway URL, network path, TLS settings, and credentials."
-                : "Inspect the service with `openclaw gateway status --deep`, or run `openclaw doctor` for guided checks.",
+                : "Inspect the service with `carapace gateway status --deep`, or run `carapace doctor` for guided checks.",
           };
     return [warning(diagnostic.message, diagnostic.fixHint)];
   }
@@ -219,7 +219,7 @@ export async function collectGatewayDaemonFindings(
       message: `Gateway service status could not be determined: ${state.loadState.detail}`,
       path: state.command?.sourcePath,
       target: service.label,
-      fixHint: "Run `openclaw gateway status --deep`, restore service-manager access, and retry.",
+      fixHint: "Run `carapace gateway status --deep`, restore service-manager access, and retry.",
     });
     return findings;
   }
@@ -230,7 +230,7 @@ export async function collectGatewayDaemonFindings(
       message: "Gateway service is not installed.",
       path: "gateway.mode",
       target: service.label,
-      fixHint: "Run `openclaw gateway install` to install the service.",
+      fixHint: "Run `carapace gateway install` to install the service.",
     });
     return findings;
   }
@@ -241,7 +241,7 @@ export async function collectGatewayDaemonFindings(
       message: "Gateway service is installed but not loaded.",
       path: state.command?.sourcePath,
       target: service.label,
-      fixHint: "Start the installed service with `openclaw gateway start`.",
+      fixHint: "Start the installed service with `carapace gateway start`.",
     });
   }
   const status = gatewayRuntimeStatus(state.runtime);
@@ -255,7 +255,7 @@ export async function collectGatewayDaemonFindings(
       path: state.command?.sourcePath,
       target: service.label,
       fixHint:
-        "Run `openclaw gateway status --deep` to inspect the service before choosing a recovery action.",
+        "Run `carapace gateway status --deep` to inspect the service before choosing a recovery action.",
     });
   }
   if (state.runtime?.missingGuiSession) {
@@ -661,7 +661,7 @@ function groupProviderCatalogsForDoctor(providers: readonly ProviderPlugin[]): {
 }
 
 export async function collectProviderCatalogProjectionFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   workspaceDir?: string,
 ): Promise<readonly HealthFinding[]> {
   const { runProviderStaticCatalog } = await import("../plugins/provider-discovery.js");
@@ -825,7 +825,7 @@ function collectToolSchemaFindings(params: {
 function collectNormalizedToolSchemaFindings(params: {
   agentId: string;
   tools: AnyAgentTool[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir: string;
   modelRef: { provider: string; model: string };
   model: ProviderRuntimeModel;
@@ -871,7 +871,7 @@ function collectNormalizedToolSchemaFindings(params: {
 
 function collectBundleMcpRuntimeToolSchemaFindings(params: {
   bundleRuntime: BundleMcpToolRuntime;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   workspaceDir: string;
   modelRef: { provider: string; model: string };
@@ -930,7 +930,7 @@ function agentRuntimeToolNormalizationFailureFinding(params: {
 }
 
 async function collectAgentRuntimeToolSchemaFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   workspaceDir: string;
   modelRef: { provider: string; model: string };
@@ -938,8 +938,8 @@ async function collectAgentRuntimeToolSchemaFindings(params: {
 }): Promise<readonly HealthFinding[]> {
   let tools: AnyAgentTool[];
   try {
-    const { createOpenClawCodingTools } = await import("../agents/agent-tools.js");
-    tools = createOpenClawCodingTools({
+    const { createCarapaceCodingTools } = await import("../agents/agent-tools.js");
+    tools = createCarapaceCodingTools({
       agentId: params.agentId,
       workspaceDir: params.workspaceDir,
       config: params.cfg,
@@ -1051,7 +1051,7 @@ function synthesizeBundleMcpAllowlistSentinelName(params: {
 }
 
 function collectBundleMcpDiagnosticSentinels(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   modelRef: { provider: string; model: string };
   diagnostic: McpToolCatalogDiagnostic;
@@ -1094,7 +1094,7 @@ function collectBundleMcpDiagnosticSentinels(params: {
 }
 
 function shouldReportBundleMcpRuntimeDiagnostic(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   modelRef: { provider: string; model: string };
   diagnostic: McpToolCatalogDiagnostic;
@@ -1116,7 +1116,7 @@ function shouldReportBundleMcpRuntimeDiagnostic(params: {
 
 function filterPolicyActiveBundleMcpDiagnostics(params: {
   diagnostics: readonly McpToolCatalogDiagnostic[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   modelRef: { provider: string; model: string };
 }): readonly McpToolCatalogDiagnostic[] {
@@ -1130,7 +1130,7 @@ function filterPolicyActiveBundleMcpDiagnostics(params: {
   );
 }
 
-function isAcpRuntimeAgent(cfg: OpenClawConfig, agentId: string): boolean {
+function isAcpRuntimeAgent(cfg: CarapaceConfig, agentId: string): boolean {
   const entry = listAgentEntries(cfg).find(
     (candidate) => normalizeAgentId(candidate.id) === agentId,
   );
@@ -1138,7 +1138,7 @@ function isAcpRuntimeAgent(cfg: OpenClawConfig, agentId: string): boolean {
 }
 
 export async function collectRuntimeToolSchemaFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options?: { runWithPluginMetadataSnapshot?: PluginMetadataSnapshotScopeRunner },
 ): Promise<readonly HealthFinding[]> {
   const findings: HealthFinding[] = [];

@@ -15,7 +15,7 @@ type ChannelInput = {
   owner: ChannelIngressHostOwner;
 };
 const inputs = resolveGlobalSingleton(
-  Symbol.for("openclaw.channelParticipantInputs"),
+  Symbol.for("carapace.channelParticipantInputs"),
   () => new WeakMap<ResolvedChannelMessageIngress, ChannelInput>(),
 );
 

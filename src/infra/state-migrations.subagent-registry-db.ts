@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   readLegacyMigrationReceiptFromDatabase,
   recordLegacyMigrationReceipt,
@@ -23,7 +23,7 @@ export function recordLegacySubagentRegistryDiscard(params: {
   const now = Date.now();
   const runId = `${sourceKey}:${params.sourceSha256.slice(0, 16)}`;
   let decision: SubagentRegistryMigrationDecision = "retired-source-discarded";
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const receipt = readLegacyMigrationReceiptFromDatabase(db, sourceKey);
       if (receipt) {

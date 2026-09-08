@@ -12,14 +12,14 @@ import {
 import { managedWorktrees } from "../agents/worktrees/service.js";
 import * as sessionEntries from "../config/sessions/session-accessor.js";
 import { loadSessionEntry, upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as cloneRuntime from "../projects/project-clone-runtime.js";
 import { ProjectCloneError } from "../projects/project-clone-runtime.js";
 import * as projectCloning from "../projects/project-clone.js";
 import { registerClonedProjectRegistry } from "../projects/project-registry.js";
 import * as secretsRuntime from "../secrets/runtime-state.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import * as githubOAuthLifecycle from "./github-oauth-lifecycle.js";
 import { captureGitHubPublicationWorkspaceSnapshot } from "./github-publication-git-transport.js";
 import { REMOTE_GITHUB_PUBLICATION_SNAPSHOT_JS } from "./github-repository-publication-snapshot.js";
@@ -38,7 +38,7 @@ describe("explicit repository move to Gateway", () => {
   it.each(["system", "agent", "revoked", "reset", "auth failure"] as const)(
     "keeps the current shared GitHub identity and move authority at clone admission: %s",
     async (scenario) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           label: "repository-materialize-identity",
           env: { GH_TOKEN: "synthetic-legacy-token", GITHUB_TOKEN: undefined },
@@ -46,11 +46,11 @@ describe("explicit repository move to Gateway", () => {
         async (state) => {
           const systemProfileId = "ghp_11111111111111111111111111111111";
           const agentProfileId = "ghp_22222222222222222222222222222222";
-          const cfg: OpenClawConfig = {
+          const cfg: CarapaceConfig = {
             agents: { entries: { main: { workspace: state.workspaceDir } } },
             gateway: { controlUi: { github: { token: "synthetic-preview-token" } } },
           };
-          const config: OpenClawConfig = {
+          const config: CarapaceConfig = {
             ...cfg,
             tools: { github: { profileId: systemProfileId } },
             agents: {
@@ -91,7 +91,7 @@ describe("explicit repository move to Gateway", () => {
           const repositories = getSessionRepositoryWorkspaceStore();
           const created = repositories.create({
             ...scope,
-            url: "https://github.com/openclaw/private-materialization-fixture.git",
+            url: "https://github.com/Exaggarate/carapace/private-materialization-fixture.git",
             runSetupScript: false,
             assertCurrent: () => {},
           });
@@ -176,7 +176,7 @@ describe("explicit repository move to Gateway", () => {
     "publication unavailable",
     "requested topic",
   ] as const)("retains only committed materialization: %s", async (outcome) => {
-    await withOpenClawTestState({ label: "repository-materialize" }, async (state) => {
+    await withCarapaceTestState({ label: "repository-materialize" }, async (state) => {
       const cfg = {
         agents: { entries: { main: { workspace: state.workspaceDir } } },
         tools: { github: { profileId: "ghp_11111111111111111111111111111111" } },
@@ -185,7 +185,7 @@ describe("explicit repository move to Gateway", () => {
       const source = state.path("source");
       await fsp.mkdir(source);
       await git(source, ["init", "-b", "main"]);
-      await git(source, ["config", "user.name", "OpenClaw Test"]);
+      await git(source, ["config", "user.name", "Carapace Test"]);
       await git(source, ["config", "user.email", "test@example.invalid"]);
       await fsp.writeFile(path.join(source, ".gitignore"), "*.ignored\n");
       await fsp.writeFile(path.join(source, ".worktreeinclude"), "retained.ignored\n");
@@ -194,7 +194,7 @@ describe("explicit repository move to Gateway", () => {
       await git(source, ["add", "."]);
       await git(source, ["commit", "-m", "base"]);
       const baseCommit = await git(source, ["rev-parse", "HEAD"]);
-      const url = "https://github.com/openclaw/materialization-fixture.git";
+      const url = "https://github.com/Exaggarate/carapace/materialization-fixture.git";
       await registerClonedProjectRegistry({ path: source, name: "Fixture", originUrl: url });
       const base = await readActualWorkspaceManifest({ root: source, baseCommit });
       const remote = state.path("remote");

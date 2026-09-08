@@ -3,7 +3,7 @@
    ============================================= */
 
 /* Main chat card - flex column layout, transparent background */
-openclaw-chat-page {
+carapace-chat-page {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -312,7 +312,7 @@ openclaw-chat-page {
    carry tone while the card keeps the composer's own surface and geometry. */
 :is(.chat-composer-neighbor-card, .session-suggestion, .chat-pr.chat-pr) {
   padding: 10px 12px;
-  border-radius: calc(16px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(16px * var(--carapace-corner-radius-scale));
   corner-shape: superellipse(1.5);
 }
 
@@ -1100,8 +1100,8 @@ openclaw-chat-page {
   font-weight: 650;
 }
 
-openclaw-chat-audio-player,
-openclaw-chat-video-player {
+carapace-chat-audio-player,
+carapace-chat-video-player {
   display: block;
   width: 100%;
 }
@@ -1402,7 +1402,7 @@ openclaw-chat-video-player {
 .chat-main__conversation
   > .agent-chat__composer-shell:not(:has(> .agent-chat__progress-float))::before,
 .chat-main__conversation
-  > openclaw-plugin-view[data-plugin-composer]
+  > carapace-plugin-view[data-plugin-composer]
   .agent-chat__composer-shell:not(:has(> .agent-chat__progress-float))::before {
   position: absolute;
   inset: calc(0px - var(--chat-transcript-fade-height, 20px)) 0 auto;
@@ -1905,7 +1905,7 @@ openclaw-chat-video-player {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-  border-radius: calc(16px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(16px * var(--carapace-corner-radius-scale));
   corner-shape: superellipse(1.5);
   background: var(--chat-composer-surface, var(--popover));
   outline: none;
@@ -2516,7 +2516,7 @@ button.chat-pr__diff {
    frame does not change shape when composition is unavailable. */
 .agent-chat__disabled-banner.agent-chat__disabled-banner--replacement.callout {
   border: 1px solid var(--chat-composer-hairline, var(--border));
-  border-radius: calc(20px * var(--openclaw-corner-radius-scale));
+  border-radius: calc(20px * var(--carapace-corner-radius-scale));
   corner-shape: superellipse(1.5);
   background: var(--chat-composer-surface, var(--popover));
   box-shadow: none;
@@ -2695,7 +2695,7 @@ button.chat-pr__diff {
   .chat-main__conversation
     > .agent-chat__composer-shell:not(:has(> .agent-chat__progress-float))::before,
   .chat-main__conversation
-    > openclaw-plugin-view[data-plugin-composer]
+    > carapace-plugin-view[data-plugin-composer]
     .agent-chat__composer-shell:not(:has(> .agent-chat__progress-float))::before {
     inset-inline: calc(var(--chat-thread-gutter) - var(--chat-mobile-edge-inset, 4px));
   }

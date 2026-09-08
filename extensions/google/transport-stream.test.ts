@@ -4,11 +4,11 @@ import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { expectDefined } from "@openclaw/normalization-core";
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import type { Model, ProviderContext } from "openclaw/plugin-sdk/llm";
-import { onLlmRequestActivity } from "openclaw/plugin-sdk/provider-stream-shared";
-import { withProviderAcceptanceObserver } from "openclaw/plugin-sdk/provider-transport-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
+import type { Model, ProviderContext } from "carapace/plugin-sdk/llm";
+import { onLlmRequestActivity } from "carapace/plugin-sdk/provider-stream-shared";
+import { withProviderAcceptanceObserver } from "carapace/plugin-sdk/provider-transport-runtime";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetGoogleVertexAdcState } from "./google-oauth.test-support.js";
 
@@ -31,7 +31,7 @@ const {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/provider-transport-runtime", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/provider-transport-runtime", async (importOriginal) => ({
   ...(await importOriginal()),
   buildGuardedModelFetch: buildGuardedModelFetchMock,
 }));
@@ -46,7 +46,7 @@ let createGoogleVertexTransportStreamFn: typeof import("./transport-stream.js").
 let resolveGoogleVertexAuthorizedUserHeaders: typeof import("./vertex-adc.js").resolveGoogleVertexAuthorizedUserHeaders;
 
 const MODEL_PROVIDER_REQUEST_TRANSPORT_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRequestTransport",
+  "carapace.modelProviderRequestTransport",
 );
 
 function attachModelProviderRequestTransport<TModel extends object>(
@@ -168,7 +168,7 @@ async function useGoogleAuthorizedUserCredentials(
   refreshToken: string,
   quotaProjectId?: string,
 ) {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), `openclaw-google-vertex-${label}-`));
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), `carapace-google-vertex-${label}-`));
   const credentialsPath = path.join(tempDir, "application_default_credentials.json");
   await writeFile(
     credentialsPath,
@@ -186,7 +186,7 @@ async function useGoogleAuthorizedUserCredentials(
 }
 
 async function useGoogleAuthLibraryCredentials(label: string, token?: string): Promise<void> {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), `openclaw-google-vertex-${label}-`));
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), `carapace-google-vertex-${label}-`));
   vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
   vi.stubEnv("CLOUDSDK_CONFIG", "");
   vi.stubEnv("HOME", path.join(tempDir, "home"));
@@ -478,7 +478,7 @@ describe("google transport stream", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/provider-transport-runtime");
+    vi.doUnmock("carapace/plugin-sdk/provider-transport-runtime");
     vi.doUnmock("google-auth-library");
     vi.resetModules();
   });
@@ -788,7 +788,7 @@ describe("google transport stream", () => {
       "x-goog-api-key": "gemini-api-key",
       "X-Provider": "google",
     });
-    expect(new Headers(init.headers).get("x-goog-api-client")).toMatch(/^openclaw\//u);
+    expect(new Headers(init.headers).get("x-goog-api-client")).toMatch(/^carapace\//u);
 
     const payload = parseRequestJsonBody(init);
     expect(payload.cachedContent).toBe("cachedContents/request-cache");
@@ -1291,7 +1291,7 @@ describe("google transport stream", () => {
   });
 
   it("rotates Gemini LLM API keys when a pre-stream request is rate limited", async () => {
-    vi.stubEnv("OPENCLAW_LIVE_GEMINI_KEY", "");
+    vi.stubEnv("CARAPACE_LIVE_GEMINI_KEY", "");
     vi.stubEnv("GEMINI_API_KEYS", "gemini-key-2");
     guardedFetchMock.mockResolvedValueOnce(buildRateLimitResponse()).mockResolvedValueOnce(
       buildSseResponse([
@@ -1363,7 +1363,7 @@ describe("google transport stream", () => {
         "http://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse",
     },
   ])("$name", async ({ model, options, expectedHeaders, expectedUrl, omitApiKeyHeader }) => {
-    vi.stubEnv("OPENCLAW_LIVE_GEMINI_KEY", "");
+    vi.stubEnv("CARAPACE_LIVE_GEMINI_KEY", "");
     vi.stubEnv("GEMINI_API_KEYS", "gemini-env-key");
     guardedFetchMock.mockResolvedValueOnce(buildRateLimitResponse());
 
@@ -1786,7 +1786,7 @@ describe("google transport stream", () => {
   it.each(["request headers", "response body"] as const)(
     "retries Gemini 3 requests with lean thinking when the first %s stalls",
     async (stalledPhase) => {
-      vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+      vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
       guardedFetchMock
         .mockImplementationOnce((_url: string, init?: RequestInit) =>
           stalledPhase === "response body"
@@ -1854,7 +1854,7 @@ describe("google transport stream", () => {
   );
 
   it("does not retry when provider acceptance observation fails", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     let cancelCalled = false;
     guardedFetchMock.mockResolvedValueOnce(
       buildOpenRawSseResponse({
@@ -1882,7 +1882,7 @@ describe("google transport stream", () => {
   });
 
   it("aborts a pending response callback without retrying", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "1000");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "1000");
     const controller = new AbortController();
     const cancel = vi.fn();
     guardedFetchMock.mockResolvedValueOnce(
@@ -1926,7 +1926,7 @@ describe("google transport stream", () => {
   });
 
   it("retries when a pending response callback reaches the Gemini first-response deadline", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     const controller = new AbortController();
     const cancel = vi.fn();
     guardedFetchMock
@@ -1972,7 +1972,7 @@ describe("google transport stream", () => {
   });
 
   it("keeps oversized-video shedding in the Gemini 3 retry payload", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     guardedFetchMock
       .mockResolvedValueOnce(
         new Response(new ReadableStream<Uint8Array>(), {
@@ -2018,7 +2018,7 @@ describe("google transport stream", () => {
   });
 
   it("does not retry a genuinely empty Gemini 3 response", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     guardedFetchMock.mockResolvedValueOnce(buildRawSseResponse(""));
 
     const result = await runGeminiStreamResult({
@@ -2034,7 +2034,7 @@ describe("google transport stream", () => {
   });
 
   it("does not retry when an external abort interrupts a stalled Gemini 3 response body", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "1000");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "1000");
     const controller = new AbortController();
     let resolveBodyRead!: () => void;
     const bodyRead = new Promise<void>((resolve) => {
@@ -2072,7 +2072,7 @@ describe("google transport stream", () => {
   });
 
   it("keeps streaming after the first Gemini 3 chunk arrives before the retry deadline", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     guardedFetchMock.mockResolvedValueOnce(
       buildDelayedSecondSseResponse({
         first: {
@@ -2142,7 +2142,7 @@ describe("google transport stream", () => {
   ])(
     "routes the %s Vertex multi-region through the production stream",
     async (location, origin) => {
-      const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-region-"));
+      const tempDir = await mkdtemp(path.join(os.tmpdir(), "carapace-google-vertex-region-"));
       vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
       vi.stubEnv("HOME", path.join(tempDir, "home"));
       vi.stubEnv("APPDATA", "");
@@ -2191,7 +2191,7 @@ describe("google transport stream", () => {
   });
 
   it("never refreshes stale home ADC when the selected Cloud SDK directory has no credentials", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-stale-home-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "carapace-google-vertex-stale-home-"));
     const homeCredentialsDir = path.join(tempDir, "home", ".config", "gcloud");
     await mkdir(homeCredentialsDir, { recursive: true });
     await writeFile(
@@ -2222,7 +2222,7 @@ describe("google transport stream", () => {
   });
 
   it("bounds Google Vertex ADC files before google-auth-library reads them", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-adc-file-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "carapace-google-vertex-adc-file-"));
     const credentialsPath = path.join(tempDir, "application_default_credentials.json");
     const credentials = {
       type: "service_account",
@@ -2364,7 +2364,7 @@ describe("google transport stream", () => {
         );
       } else if (credentialType === "service_account") {
         const tempDir = await mkdtemp(
-          path.join(os.tmpdir(), "openclaw-google-vertex-quota-service-"),
+          path.join(os.tmpdir(), "carapace-google-vertex-quota-service-"),
         );
         const credentialsPath = path.join(tempDir, "application_default_credentials.json");
         await writeFile(
@@ -2380,7 +2380,7 @@ describe("google transport stream", () => {
         googleAuthGetAccessTokenMock.mockResolvedValueOnce("fixture-vertex-token");
       } else {
         const tempDir = await mkdtemp(
-          path.join(os.tmpdir(), "openclaw-google-vertex-quota-metadata-"),
+          path.join(os.tmpdir(), "carapace-google-vertex-quota-metadata-"),
         );
         vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
         vi.stubEnv("HOME", path.join(tempDir, "home"));
@@ -2582,7 +2582,7 @@ describe("google transport stream", () => {
   });
 
   it("refreshes authorized_user ADC from the Windows APPDATA fallback for Google Vertex requests", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-appdata-adc-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "carapace-google-vertex-appdata-adc-"));
     const homeDir = path.join(tempDir, "home");
     const appDataDir = path.join(tempDir, "AppData", "Roaming");
     const fallbackDir = path.join(appDataDir, "gcloud");
@@ -2680,7 +2680,7 @@ describe("google transport stream", () => {
     {
       name: "treats the Google transport alias as the same route for signature replay",
       modelId: "gemini-3.1-pro-preview",
-      api: "openclaw-google-generative-ai-transport",
+      api: "carapace-google-generative-ai-transport",
       signature: "Y2FsbF9zaWdfYWxpYXNfMQ==",
       messages: [
         googleToolCallAssistantTurn({ thoughtSignature: "Y2FsbF9zaWdfYWxpYXNfMQ==" }),
@@ -2756,8 +2756,8 @@ describe("google transport stream", () => {
         id: "gemini-3.1-pro-preview",
         name: "Gemini 3.1 Pro Preview",
       }),
-      api: "openclaw-google-generative-ai-transport",
-    } as Model<"openclaw-google-generative-ai-transport">;
+      api: "carapace-google-generative-ai-transport",
+    } as Model<"carapace-google-generative-ai-transport">;
 
     const params = buildGoogleGenerativeAiParams(model, {
       messages: [

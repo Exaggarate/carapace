@@ -2,18 +2,18 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { resolveAgentDir, resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import { resolveAgentDir, resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { parseAgentSessionKey } from "carapace/plugin-sdk/routing";
 import {
   cleanupSessionLifecycleArtifacts,
   formatSqliteSessionFileMarker,
   parseSqliteSessionFileMarker,
   patchSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isMissingRegisteredMemoryToolsError,
   resolvePersistentTranscriptBaseDir,
@@ -113,8 +113,8 @@ async function cleanupActiveMemoryRecallSession(params: {
 }
 
 async function runRecallSubagent(params: {
-  api: OpenClawPluginApi;
-  runtimeConfig: OpenClawConfig;
+  api: CarapacePluginApi;
+  runtimeConfig: CarapaceConfig;
   config: ResolvedActiveRecallPluginConfig;
   agentId: string;
   parentSessionKey?: string;
@@ -312,7 +312,7 @@ async function runRecallSubagent(params: {
     const activeSessionFile = normalizeOptionalString(agentMeta?.sessionFile);
     const marker = parseSqliteSessionFileMarker(activeSessionFile);
     // The host validates successors against this binding. CLI results without
-    // sessionFile carry a native sessionId, not an OpenClaw transcript identity.
+    // sessionFile carry a native sessionId, not an Carapace transcript identity.
     const activeSessionId =
       marker?.sessionId ??
       (activeSessionFile === subagentSessionKey

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# our-fork sync: merge upstream main into the Exaggarate/openclaw fork and push.
+# our-fork sync: merge upstream main into the Exaggarate/carapace fork and push.
 # Prints exactly one verdict line for the automation relay to parse.
 set -uo pipefail
-cd /home/ubuntu/openclaw-fork || { echo "SYNC_FAIL cd-missing"; exit 0; }
-LOG=/tmp/openclaw-fork-sync.log
+cd /home/ubuntu/carapace-fork || { echo "SYNC_FAIL cd-missing"; exit 0; }
+LOG=/tmp/carapace-fork-sync.log
 : > "$LOG"
 git fetch upstream -q >>"$LOG" 2>&1
 BEHIND=$(git rev-list --count main..upstream/main 2>>"$LOG")

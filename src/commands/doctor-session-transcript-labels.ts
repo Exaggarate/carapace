@@ -9,13 +9,13 @@ import {
 } from "../config/sessions/session-accessor.sqlite-read.js";
 import { updateSqliteTranscriptEventJsonInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
 import { resolveAllAgentSessionStoreTargetsSync } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import {
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
 import { resolveTargetSqliteOptions } from "./doctor-session-sqlite-readers.js";
 import { ReadOnlySqliteTranscriptReader } from "./doctor-session-sqlite-transcript-readers.js";
 
@@ -26,7 +26,7 @@ const NOTE_TITLE = "Session transcript labels";
 const LEGACY_LEADING_TIMESTAMP_PREFIX_RE = /^\[[A-Za-z]{3} \d{4}-\d{2}-\d{2} \d{2}:\d{2}[^\]]*\] */;
 
 // Rewrites legacy inbound-context labels to the current canonical form: plain label + the provenance
-// marker suffix (`Sender: ⟦openclaw:ctx⟧`). Runtime strippers and the memory-lancedb recognizers key
+// marker suffix (`Sender: ⟦carapace:ctx⟧`). Runtime strippers and the memory-lancedb recognizers key
 // on that marker, never on label text, so every rule targeting an inbound-context header must append
 // it — a plain-label rewrite would leave behind blocks the strippers no longer see.
 //
@@ -188,7 +188,7 @@ function formatCount(count: number, singular: string): string {
 
 /** Reports or repairs legacy inbound-context labels in canonical SQLite transcripts. */
 export async function noteSessionTranscriptLabelHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   shouldRepair: boolean;
 }): Promise<void> {
@@ -201,7 +201,7 @@ export async function noteSessionTranscriptLabelHealth(params: {
   const seenPaths = new Set<string>();
   for (const target of resolveAllAgentSessionStoreTargetsSync(params.cfg, { env })) {
     const databaseOptions = resolveTargetSqliteOptions(target, env);
-    const sqlitePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+    const sqlitePath = resolveCarapaceAgentSqlitePath(databaseOptions);
     if (seenPaths.has(sqlitePath) || !fs.existsSync(sqlitePath)) {
       continue;
     }
@@ -258,7 +258,7 @@ export async function noteSessionTranscriptLabelHealth(params: {
             if (hasMalformedRow) {
               throw new Error(`transcript contains malformed event JSON for ${sessionId}`);
             }
-            runOpenClawAgentWriteTransaction(
+            runCarapaceAgentWriteTransaction(
               (writeDatabase) => {
                 // Use rows-only guard (tolerant of malformed JSON in sibling rows).
                 const currentRows = readTranscriptEventRows(writeDatabase, sessionId);
@@ -302,7 +302,7 @@ export async function noteSessionTranscriptLabelHealth(params: {
     note(
       [
         `- Found ${formatCount(foundSessions, "session")} with legacy inbound-context labels.`,
-        '- Run "openclaw doctor --fix" to rewrite them.',
+        '- Run "carapace doctor --fix" to rewrite them.',
       ].join("\n"),
       NOTE_TITLE,
     );

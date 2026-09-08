@@ -5,17 +5,17 @@ import {
   invokeNativeHookRelay,
   nativeHookRelayTesting,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   onInternalDiagnosticEvent,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
 import {
   createEmptyPluginRegistry,
   createMockPluginRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as approvalBridge from "./approval-bridge.js";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
@@ -80,7 +80,7 @@ describe("runCodexAppServerAttempt native hook relay", () => {
       runCodexAppServerAttempt(createLoopRelayParams(sessionFile, workspaceDir), {
         nativeHookRelay: { enabled: true, events: ["pre_tool_use"] },
       }),
-    ).rejects.toThrow(/managed-only hooks.*OpenClaw native hook relay/i);
+    ).rejects.toThrow(/managed-only hooks.*Carapace native hook relay/i);
     expect(harness.requests.some((request) => request.method === "thread/start")).toBe(false);
   });
 

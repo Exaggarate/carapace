@@ -5,12 +5,12 @@ import { DatabaseSync } from "node:sqlite";
 import {
   loadAuthProfileStoreWithoutExternalProfiles,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirHarness } from "../../temp-dir.test-helper.js";
 import { readQaAuthProfiles, writeQaAuthProfiles } from "./auth-store.js";
@@ -18,10 +18,10 @@ import { stageQaMockAuthProfiles } from "./mock-auth.js";
 
 const tempDirs = createTempDirHarness();
 
-async function createQaAuthState(prefix = "openclaw-qa-auth-store-") {
+async function createQaAuthState(prefix = "carapace-qa-auth-store-") {
   const stateDir = await tempDirs.makeTempDir(prefix);
   const agentId = "main";
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   return {
     agentDir: path.join(stateDir, "agents", agentId, "agent"),
     agentId,
@@ -31,27 +31,27 @@ async function createQaAuthState(prefix = "openclaw-qa-auth-store-") {
 
 describe("QA auth profile store", () => {
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     await tempDirs.cleanup();
   });
 
   it("keeps inherited host shared state unchanged while staging isolated profiles", async () => {
-    const hostStateDir = await tempDirs.makeTempDir("openclaw-qa-auth-host-state-");
-    const qaStateDir = await tempDirs.makeTempDir("openclaw-qa-auth-isolated-state-");
-    const hostDatabase = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: hostStateDir },
+    const hostStateDir = await tempDirs.makeTempDir("carapace-qa-auth-host-state-");
+    const qaStateDir = await tempDirs.makeTempDir("carapace-qa-auth-isolated-state-");
+    const hostDatabase = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: hostStateDir },
     });
     const hostDatabasePath = hostDatabase.path;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const legacyHostDatabase = new DatabaseSync(hostDatabasePath);
     legacyHostDatabase.exec(`
       PRAGMA user_version = 6;
       UPDATE schema_meta SET schema_version = 6 WHERE meta_key = 'primary';
     `);
     legacyHostDatabase.close();
-    vi.stubEnv("OPENCLAW_STATE_DIR", hostStateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", hostStateDir);
 
     await writeQaAuthProfiles({
       agentId: "main",
@@ -65,8 +65,8 @@ describe("QA auth profile store", () => {
       stateDir: qaStateDir,
     });
 
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     const preservedHostDatabase = new DatabaseSync(hostDatabasePath, { readOnly: true });
     expect(preservedHostDatabase.prepare("PRAGMA user_version").get()).toEqual({
       user_version: 6,
@@ -77,7 +77,7 @@ describe("QA auth profile store", () => {
         .get(),
     ).toEqual({ schema_version: 6 });
     preservedHostDatabase.close();
-    vi.stubEnv("OPENCLAW_STATE_DIR", qaStateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", qaStateDir);
     const qaAgentDir = path.join(qaStateDir, "agents", "main", "agent");
     expect(readQaAuthProfiles(qaAgentDir).profiles).toMatchObject({
       "qa-mock-openai": { provider: "openai" },
@@ -87,8 +87,8 @@ describe("QA auth profile store", () => {
   it.each(["future", "invalid"] as const)(
     "stages concurrent isolated profiles and config without reading %s outer state",
     async (outerKind) => {
-      const hostStateDir = await tempDirs.makeTempDir("openclaw-qa-auth-unreadable-host-");
-      const hostDatabasePath = path.join(hostStateDir, "state", "openclaw.sqlite");
+      const hostStateDir = await tempDirs.makeTempDir("carapace-qa-auth-unreadable-host-");
+      const hostDatabasePath = path.join(hostStateDir, "state", "carapace.sqlite");
       await fs.mkdir(path.dirname(hostDatabasePath), { recursive: true });
       if (outerKind === "future") {
         const database = new DatabaseSync(hostDatabasePath);
@@ -99,11 +99,11 @@ describe("QA auth profile store", () => {
       }
       const hostBefore = await fs.readFile(hostDatabasePath);
       const qaRoots = await Promise.all([
-        tempDirs.makeTempDir("openclaw-qa-auth-first-"),
-        tempDirs.makeTempDir("openclaw-qa-auth-second-"),
+        tempDirs.makeTempDir("carapace-qa-auth-first-"),
+        tempDirs.makeTempDir("carapace-qa-auth-second-"),
       ]);
-      vi.stubEnv("OPENCLAW_STATE_DIR", hostStateDir);
-      vi.stubEnv("OPENCLAW_AGENT_DIR", path.join(hostStateDir, "relocated-agent"));
+      vi.stubEnv("CARAPACE_STATE_DIR", hostStateDir);
+      vi.stubEnv("CARAPACE_AGENT_DIR", path.join(hostStateDir, "relocated-agent"));
 
       const configs = await Promise.all(
         qaRoots.map((stateDir, index) =>
@@ -132,8 +132,8 @@ describe("QA auth profile store", () => {
         });
       }
       expect(await fs.readFile(hostDatabasePath)).toEqual(hostBefore);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(hostStateDir);
-      expect(process.env.OPENCLAW_AGENT_DIR).toBe(path.join(hostStateDir, "relocated-agent"));
+      expect(process.env.CARAPACE_STATE_DIR).toBe(hostStateDir);
+      expect(process.env.CARAPACE_AGENT_DIR).toBe(path.join(hostStateDir, "relocated-agent"));
     },
   );
 
@@ -142,7 +142,7 @@ describe("QA auth profile store", () => {
     async (targetKind) => {
       const { agentDir, agentId, stateDir } = await createQaAuthState();
       await fs.mkdir(agentDir, { recursive: true });
-      const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+      const databasePath = path.join(agentDir, "carapace-agent.sqlite");
       if (targetKind === "future") {
         const database = new DatabaseSync(databasePath);
         database.exec("PRAGMA user_version = 999");
@@ -261,7 +261,7 @@ describe("QA auth profile store", () => {
 
   it("can replace an existing profile set for deterministic fixture seeding", async () => {
     const { agentDir, agentId, stateDir } = await createQaAuthState();
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     saveAuthProfileStore(
       {
         version: 1,

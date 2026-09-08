@@ -51,7 +51,7 @@ it("keeps Messages default and opens capture with a collapsed schema editor insi
       gateway: { ...gateway, connection: { gatewayUrl: "ws://transcripts.test" } },
       runtimeConfig,
       navigate: vi.fn(),
-      config: { current: { assistantIdentity: { name: "OpenClaw" } } },
+      config: { current: { assistantIdentity: { name: "Carapace" } } },
       overlays: { snapshot: { updateRunning: false, updateReconciliationPending: false } },
       webPush: { snapshot: {} },
     } as unknown as ApplicationContext;
@@ -59,14 +59,14 @@ it("keeps Messages default and opens capture with a collapsed schema editor insi
     (page as unknown as { context: ApplicationContext }).context = context;
     page.pageId = "communications";
     render(page.render(), container);
-    expect(container.querySelector("openclaw-meeting-capture-settings")).toBeNull();
+    expect(container.querySelector("carapace-meeting-capture-settings")).toBeNull();
     const captureTab = container.querySelector<HTMLElement>('wa-tab[panel="transcripts"]')!;
     expect(captureTab.textContent?.trim()).toBe("Meeting capture");
     const tabs = captureTab.closest("wa-tab-group") as HTMLElement & { active: string };
     expect(tabs.active).toBe("messages");
     captureTab.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     render(page.render(), container);
-    const capture = container.querySelector("openclaw-meeting-capture-settings") as HTMLElement & {
+    const capture = container.querySelector("carapace-meeting-capture-settings") as HTMLElement & {
       context: ApplicationContext;
       updateComplete: Promise<boolean>;
     };
@@ -104,7 +104,7 @@ it("keeps Messages default and opens capture with a collapsed schema editor insi
       .querySelector<HTMLElement>('wa-tab[panel="messages"]')!
       .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     render(page.render(), container);
-    expect(container.querySelector("openclaw-meeting-capture-settings")).toBeNull();
+    expect(container.querySelector("carapace-meeting-capture-settings")).toBeNull();
   } finally {
     container.remove();
     runtimeConfig.dispose();

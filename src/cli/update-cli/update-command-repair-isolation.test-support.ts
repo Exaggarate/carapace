@@ -6,9 +6,9 @@ import {
   writeOpenAiResponsesSse,
   writeOpenAiResponsesText,
 } from "../../../test/helpers/openai-responses-sse.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
-export function repairIsolationConfig(baseUrl: string, gatewayPort: number): OpenClawConfig {
+export function repairIsolationConfig(baseUrl: string, gatewayPort: number): CarapaceConfig {
   const modelRef = "repair-test/repair-model";
   return {
     gateway: {
@@ -22,7 +22,7 @@ export function repairIsolationConfig(baseUrl: string, gatewayPort: number): Ope
     agents: {
       defaults: {
         model: { primary: modelRef },
-        models: { [modelRef]: { agentRuntime: { id: "openclaw" } } },
+        models: { [modelRef]: { agentRuntime: { id: "carapace" } } },
         systemAgent: { agentId: "operator" },
         skipBootstrap: true,
         skills: [],
@@ -138,7 +138,7 @@ export function repairIsolationProvider() {
 export async function writeRepairCandidate(candidate: string, configChange: boolean) {
   await fs.mkdir(candidate, { recursive: true });
   await fs.symlink(path.join(process.cwd(), "dist"), path.join(candidate, "dist"), "dir");
-  for (const file of ["openclaw.mjs", "node-version.mjs", "package.json"]) {
+  for (const file of ["carapace.mjs", "node-version.mjs", "package.json"]) {
     await fs.copyFile(path.join(process.cwd(), file), path.join(candidate, file));
   }
   await fs.writeFile(
@@ -148,9 +148,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { DatabaseSync } from 'node:sqlite';
 const configChange = ${JSON.stringify(configChange)};
-const stateDir = process.env.OPENCLAW_STATE_DIR;
-const configPath = process.env.OPENCLAW_CONFIG_PATH;
-const database = new DatabaseSync(path.join(stateDir, 'state', 'openclaw.sqlite'));
+const stateDir = process.env.CARAPACE_STATE_DIR;
+const configPath = process.env.CARAPACE_CONFIG_PATH;
+const database = new DatabaseSync(path.join(stateDir, 'state', 'carapace.sqlite'));
 const before = database.prepare('SELECT value FROM isolation_evidence').get().value;
 if (configChange) {
   database.exec("UPDATE isolation_evidence SET value = 'repaired-copy'");
@@ -161,14 +161,14 @@ if (configChange) {
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   config.logging = { ...config.logging, level: 'debug' };
   fs.writeFileSync(configPath, JSON.stringify(config));
-  const outcome = spawnSync(process.execPath, ['./openclaw.mjs', 'doctor', '--fix', '--non-interactive'], {
+  const outcome = spawnSync(process.execPath, ['./carapace.mjs', 'doctor', '--fix', '--non-interactive'], {
     cwd: process.cwd(), env: process.env, encoding: 'utf8', timeout: 90_000,
   });
   doctor = { status: outcome.status, error: outcome.error?.message,
     output: outcome.status === 0 ? undefined : (outcome.stdout + outcome.stderr).slice(-4000) };
 }
 fs.writeFileSync('repair-proof.json', JSON.stringify({
-  stateDir, configPath, workspaceDir: process.env.OPENCLAW_WORKSPACE_DIR,
+  stateDir, configPath, workspaceDir: process.env.CARAPACE_WORKSPACE_DIR,
   cwd: process.cwd(), before, doctor,
 }));
 `,

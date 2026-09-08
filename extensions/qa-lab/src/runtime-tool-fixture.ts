@@ -2,13 +2,13 @@
 import { realpathSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { loadTranscriptEventsSync } from "openclaw/plugin-sdk/session-store-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { loadTranscriptEventsSync } from "carapace/plugin-sdk/session-store-runtime";
 import {
   asBoolean,
   isRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { QaSuiteInfraError, QaSuiteScenarioSkipError } from "./errors.js";
 import {
   qaMockRequestCursorUrl,
@@ -467,7 +467,7 @@ function extractTranscriptToolCalls(
           normalizeToolCallId(block.toolCallId) ??
           normalizeToolCallId(block.toolUseId),
         tool,
-        // OpenClaw mirrors provider arguments separately; a placeholder input
+        // Carapace mirrors provider arguments separately; a placeholder input
         // can be empty even though arguments contains the executed patch.
         args: block.arguments ?? block.input ?? block.args ?? block.payload ?? null,
       });
@@ -708,7 +708,7 @@ async function readSessionTranscriptBytes(
     agentId: "qa",
     env: {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
+      CARAPACE_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
     },
     sessionId,
     sessionKey,
@@ -832,9 +832,9 @@ function formatCodexNativeWorkspaceDetails(params: {
   failureRequest?: QaRuntimeToolFixtureRequest;
 }) {
   return [
-    `codex-native-workspace ${params.toolName}: OpenClaw dynamic exposure is intentionally omitted because Codex owns this workspace operation natively`,
+    `codex-native-workspace ${params.toolName}: Carapace dynamic exposure is intentionally omitted because Codex owns this workspace operation natively`,
     params.reason ? `reason: ${params.reason}` : undefined,
-    `available OpenClaw dynamic tools: ${[...params.tools].toSorted().join(", ")}`,
+    `available Carapace dynamic tools: ${[...params.tools].toSorted().join(", ")}`,
     params.happyRequest
       ? `${params.toolName} mock provider happy planned args (diagnostic only): ${formatPlannedToolArgs(params.happyRequest.plannedToolArgs)}`
       : undefined,
@@ -933,7 +933,7 @@ export async function runRuntimeToolFixture(
     config,
   });
   const forcedCodexNativeWorkspace =
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME === "codex" &&
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME === "codex" &&
     metadata.expectedLayer === "codex-native-workspace";
   // Effective tool discovery may advertise the native name. The forced
   // runtime and scenario owner, not inventory absence, decide who executes it.

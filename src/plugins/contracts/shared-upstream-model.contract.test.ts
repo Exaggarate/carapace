@@ -1,12 +1,12 @@
 // Shared upstream model contract tests keep capability flags aligned across bundled catalogs.
 import fs from "node:fs";
 import path from "node:path";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import { listGitTrackedFiles } from "../../test-utils/repo-files.js";
 
 const repoRoot = path.resolve(import.meta.dirname, "../../..");
-const MANIFEST_BASENAME = "openclaw.plugin.json";
+const MANIFEST_BASENAME = "carapace.plugin.json";
 const CODE_MODE_TIER_LITERAL = /codeMode:\s*"(?:preferred|capable)"/;
 // Minimax resolves cost per provider surface, so its rows cannot live in one
 // manifest catalog and remain invisible to the manifest scan below.

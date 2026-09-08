@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { MEMORY_INDEX_CHUNKS_TABLE } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { MEMORY_INDEX_CHUNKS_TABLE } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
 import {
   configureMemoryCoreDreamingStateForTests,
@@ -22,7 +22,7 @@ describe("memory watchers on the real filesystem", () => {
   it.each(["replacement", "removal"] as const)(
     "keeps search fresh after root %s and releases watchers on close",
     async (operation) => {
-      const state = await createOpenClawTestState({ label: "memory-watch-filesystem" });
+      const state = await createCarapaceTestState({ label: "memory-watch-filesystem" });
       const initialWatchers = activeFilesystemWatchers();
       const openWatchers = new Set<nativeFs.FSWatcher>();
       const turnContext = new AsyncLocalStorage<string>();
@@ -61,7 +61,7 @@ describe("memory watchers on the real filesystem", () => {
         // Preserve an indexed file while the watched root is absent.
         await fs.writeFile(path.join(state.workspaceDir, "MEMORY.md"), "Evergreen sentinel.");
         await fs.writeFile(path.join(memoryDir, "old.md"), "Amethyst sentinel.");
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           plugins: { enabled: false },
           agents: { defaults: { workspace: state.workspaceDir }, list: [{ id: "main" }] },
           memory: {

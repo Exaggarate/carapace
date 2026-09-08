@@ -150,7 +150,7 @@ describe("gateway method registry", () => {
     expect(registry.requiresAuthenticatedProfile("agent")).toBe(true);
     expect(registry.requiresAuthenticatedProfile("chat.history")).toBe(true);
     expect(registry.requiresAuthenticatedProfile("sessions.list")).toBe(true);
-    expect(registry.requiresAuthenticatedProfile("openclaw.chat")).toBe(true);
+    expect(registry.requiresAuthenticatedProfile("carapace.chat")).toBe(true);
     expect(registry.requiresAuthenticatedProfile("projects.list")).toBe(true);
     expect(registry.requiresAuthenticatedProfile("approval.get")).toBe(false);
     expect(registry.requiresAuthenticatedProfile("approval.history")).toBe(false);

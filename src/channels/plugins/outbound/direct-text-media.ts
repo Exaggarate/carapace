@@ -3,9 +3,9 @@
  *
  * Builds lightweight SDK-backed send adapters with chunking, sanitization, and media limits.
  */
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import { chunkText } from "../../../auto-reply/chunk.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { OutboundSendDeps } from "../../../infra/outbound/deliver.js";
 import { sanitizeForPlainText } from "../../../infra/outbound/sanitize-text.js";
 import type { OutboundMediaAccess } from "../../../media/load-options.js";
@@ -13,7 +13,7 @@ import { resolveChannelMediaMaxBytes } from "../media-limits.js";
 import type { ChannelOutboundAdapter } from "../types.adapters.js";
 
 type DirectSendOptions = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   replyToId?: string | null;
   mediaUrl?: string;
@@ -40,9 +40,9 @@ function readNumberField(record: Record<string, unknown> | undefined, key: strin
  * Resolves an account-scoped channel media byte limit.
  */
 function resolveScopedChannelMediaMaxBytes(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
-  resolveChannelLimitMb: (params: { cfg: OpenClawConfig; accountId: string }) => number | undefined;
+  resolveChannelLimitMb: (params: { cfg: CarapaceConfig; accountId: string }) => number | undefined;
 }): number | undefined {
   return resolveChannelMediaMaxBytes({
     cfg: params.cfg,
@@ -55,7 +55,7 @@ function resolveScopedChannelMediaMaxBytes(params: {
  * Builds a media byte-limit resolver for channels with `mediaMaxMb` config.
  */
 export function createScopedChannelMediaMaxBytesResolver(channel: string) {
-  return (params: { cfg: OpenClawConfig; accountId?: string | null }) =>
+  return (params: { cfg: CarapaceConfig; accountId?: string | null }) =>
     resolveScopedChannelMediaMaxBytes({
       cfg: params.cfg,
       accountId: params.accountId,
@@ -80,14 +80,14 @@ export function createDirectTextMediaOutbound<
   channel: string;
   resolveSender: (deps: OutboundSendDeps | undefined) => DirectSendFn<TOpts, TResult>;
   resolveMaxBytes: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
   }) => number | undefined;
   buildTextOptions: (params: DirectSendOptions) => TOpts;
   buildMediaOptions: (params: DirectSendOptions) => TOpts;
 }): ChannelOutboundAdapter {
   const sendDirect = async (sendParams: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     to: string;
     text: string;
     accountId?: string | null;
@@ -126,7 +126,7 @@ export function createDirectTextMediaOutbound<
     textChunkLimit: 4000,
     sanitizeText: ({ text }) => sanitizeForPlainText(text),
     sendPayload: async (ctx) => {
-      const { sendTextMediaPayload } = await import("openclaw/plugin-sdk/reply-payload");
+      const { sendTextMediaPayload } = await import("carapace/plugin-sdk/reply-payload");
       return await sendTextMediaPayload({ channel: params.channel, ctx, adapter: outbound });
     },
     sendText: async ({ cfg, to, text, accountId, deps, replyToId }) => {

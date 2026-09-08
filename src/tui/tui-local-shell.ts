@@ -1,7 +1,7 @@
 // Launches and manages the local shell process used by TUI local mode.
 import { randomUUID } from "node:crypto";
 import type { Component, OverlayHandle, SelectItem } from "@earendil-works/pi-tui";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { tryProcessCwd } from "../infra/safe-cwd.js";
 import { getProcessSupervisor, type ManagedRun } from "../process/supervisor/index.js";
 import { createSearchableSelectList } from "./components/selectors.js";
@@ -133,7 +133,7 @@ export function createLocalShellRunner(deps: LocalShellDeps) {
         command: cmd,
         scopeKey,
         cwd,
-        env: { ...env, OPENCLAW_SHELL: "tui-local" },
+        env: { ...env, CARAPACE_SHELL: "tui-local" },
         captureOutput: false,
         onStdout: (chunk) => {
           stdout = sliceUtf16Safe(stdout + chunk, -maxChars);

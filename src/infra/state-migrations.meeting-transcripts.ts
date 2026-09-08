@@ -4,9 +4,9 @@ import fsSync from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { ensureMeetingTranscriptsSchema } from "../transcripts/sqlite-schema.js";
 import {
   safeTranscriptPathSegment,
@@ -56,7 +56,7 @@ function rollbackImportedSnapshots(params: {
   env: NodeJS.ProcessEnv;
   stateDir: string;
 }): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: database }) => {
       const db = migrationDb(database);
       for (const snapshot of params.snapshots) {
@@ -77,7 +77,7 @@ function rollbackImportedSnapshots(params: {
         db.deleteFrom("migration_runs").where("id", "=", params.runId),
       );
     },
-    { env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir } },
+    { env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir } },
     { operationLabel: "meeting-transcripts.legacy-import.rollback" },
   );
 }
@@ -89,7 +89,7 @@ function finishPendingMigration(params: {
   env: NodeJS.ProcessEnv;
   stateDir: string;
 }): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: database }) => {
       const db = migrationDb(database);
       executeSqliteQuerySync(
@@ -117,7 +117,7 @@ function finishPendingMigration(params: {
           .where("id", "=", params.runId),
       );
     },
-    { env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir } },
+    { env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir } },
     { operationLabel: "meeting-transcripts.legacy-import.finish" },
   );
 }
@@ -168,8 +168,8 @@ function readPendingImportRuns(params: {
   stateDir: string;
   sourceRoot: string;
 }): PendingImportRun[] {
-  const database = openOpenClawStateDatabase({
-    env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir },
+  const database = openCarapaceStateDatabase({
+    env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir },
   });
   const db = migrationDb(database.db);
   const rows = executeSqliteQuerySync(
@@ -277,8 +277,8 @@ async function resumePendingImports(params: {
         if (!archived.hashesMatch) {
           throw new Error("archived source hashes do not match migration receipts");
         }
-        const database = openOpenClawStateDatabase({
-          env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir },
+        const database = openCarapaceStateDatabase({
+          env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir },
         });
         await verifyImportedMeetingTranscriptSnapshots({
           store: params.store,
@@ -318,7 +318,7 @@ async function resumePendingImports(params: {
         ...run.canonicalRelativeDirs,
         ...(await listCanonicalMeetingTranscriptExportDirs({
           rootDir: params.sourceRoot,
-          env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir },
+          env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir },
         })),
       ]),
     ];
@@ -340,8 +340,8 @@ async function resumePendingImports(params: {
       );
       continue;
     }
-    const database = openOpenClawStateDatabase({
-      env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...params.env, CARAPACE_STATE_DIR: params.stateDir },
     });
     await verifyImportedMeetingTranscriptSnapshots({
       store: params.store,
@@ -387,7 +387,7 @@ export async function migrateLegacyMeetingTranscripts(params: {
   try {
     lock = await acquireGatewayLock({
       allowInTests: true,
-      env: { ...env, OPENCLAW_STATE_DIR: params.stateDir },
+      env: { ...env, CARAPACE_STATE_DIR: params.stateDir },
       role: "sqlite-maintenance",
       timeoutMs: 5_000,
     });
@@ -417,11 +417,11 @@ export async function migrateLegacyMeetingTranscripts(params: {
     const stage = openLegacyMeetingTranscriptStage(stagePath);
     stageDatabase = stage;
     await validateMeetingTranscriptRoot(detected.sourceDir, { allowMissing: true });
-    const databaseOptions = { env: { ...env, OPENCLAW_STATE_DIR: params.stateDir } };
+    const databaseOptions = { env: { ...env, CARAPACE_STATE_DIR: params.stateDir } };
     ensureMeetingTranscriptsSchema(databaseOptions);
     // Repair only oversized ASCII projections before classifying exports. Keep
     // identity/content intact; a selector conflict rolls back the entire repair.
-    const repaired = runOpenClawStateWriteTransaction(
+    const repaired = runCarapaceStateWriteTransaction(
       ({ db: database }) => {
         const db = migrationDb(database);
         const rows = executeSqliteQuerySync(
@@ -475,7 +475,7 @@ export async function migrateLegacyMeetingTranscripts(params: {
     const sessionRelativeDirs = await listLegacyMeetingTranscriptSessionDirs(detected.sourceDir);
     const sessionRelativeDirSet = new Set(sessionRelativeDirs);
     const detectionState = readMeetingTranscriptMigrationDetectionState({
-      env: { ...env, OPENCLAW_STATE_DIR: params.stateDir },
+      env: { ...env, CARAPACE_STATE_DIR: params.stateDir },
     });
     const legacyRelativeDirs: string[] = [];
     const partialRelativeDirs: string[] = [];
@@ -517,7 +517,7 @@ export async function migrateLegacyMeetingTranscripts(params: {
       );
     }
     for (const snapshot of snapshots) {
-      const database = openOpenClawStateDatabase(databaseOptions);
+      const database = openCarapaceStateDatabase(databaseOptions);
       const existing = executeSqliteQueryTakeFirstSync(
         database.db,
         migrationDb(database.db)
@@ -576,7 +576,7 @@ export async function migrateLegacyMeetingTranscripts(params: {
     const archiveRoot = resolveArchiveRoot(detected.sourceDir, now);
     const canonicalRelativeDirs = await listCanonicalMeetingTranscriptExportDirs({
       rootDir: detected.sourceDir,
-      env: { ...env, OPENCLAW_STATE_DIR: params.stateDir },
+      env: { ...env, CARAPACE_STATE_DIR: params.stateDir },
     });
     insertMeetingTranscriptSnapshots({
       snapshots,
@@ -589,7 +589,7 @@ export async function migrateLegacyMeetingTranscripts(params: {
       stateDir: params.stateDir,
     });
     try {
-      const database = openOpenClawStateDatabase(databaseOptions);
+      const database = openCarapaceStateDatabase(databaseOptions);
       await verifyImportedMeetingTranscriptSnapshots({
         store,
         snapshots,

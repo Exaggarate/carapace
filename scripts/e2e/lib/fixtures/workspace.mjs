@@ -6,20 +6,20 @@ import { readTextFileTail } from "../text-file-utils.mjs";
 import { assert, readJson, requireArg, write } from "./common.mjs";
 
 const AGENTS_DELETE_OUTPUT_MAX_BYTES = readPositiveIntEnv(
-  "OPENCLAW_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES",
+  "CARAPACE_FIXTURE_AGENTS_DELETE_OUTPUT_MAX_BYTES",
   1024 * 1024,
 );
 const ERROR_DETAIL_TAIL_BYTES = 16 * 1024;
 
 function writeOpenWebUiWorkspace() {
   const workspace =
-    process.env.OPENCLAW_WORKSPACE_DIR || path.join(process.env.HOME, ".openclaw", "workspace");
+    process.env.CARAPACE_WORKSPACE_DIR || path.join(process.env.HOME, ".carapace", "workspace");
   write(
     path.join(workspace, "IDENTITY.md"),
-    "# Identity\n\n- Name: OpenClaw\n- Purpose: Open WebUI Docker compatibility smoke test assistant.\n",
+    "# Identity\n\n- Name: Carapace\n- Purpose: Open WebUI Docker compatibility smoke test assistant.\n",
   );
-  fs.rmSync(path.join(workspace, ".openclaw", "workspace-state.json"), { force: true });
-  fs.rmSync(path.join(workspace, "openclaw-workspace-state.json"), { force: true });
+  fs.rmSync(path.join(workspace, ".carapace", "workspace-state.json"), { force: true });
+  fs.rmSync(path.join(workspace, "carapace-workspace-state.json"), { force: true });
   fs.rmSync(path.join(workspace, "BOOTSTRAP.md"), { force: true });
 }
 

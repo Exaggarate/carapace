@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { beginSessionWorkAdmission } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { loadGatewayWorkerEnvironmentStartupState } from "./server-worker-environment-startup.js";
 import { loadSessionEntry } from "./session-utils.js";
 import { embeddedRunMock, writeSessionStore } from "./test-helpers.js";
@@ -31,7 +31,7 @@ import { resolveSessionWorkerPlacementMutationError } from "./worker-environment
 const { createSessionStoreDir, seedActiveMainSession } = setupGatewaySessionsHandlerTestHarness();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function placementRecord(

@@ -1,9 +1,9 @@
 import { isBundleCapabilitySupported } from "./bundle-capability-support.js";
 import type { PluginBundleFormat } from "./manifest-types.js";
 
-type PluginArtifactFormat = "openclaw" | PluginBundleFormat;
+type PluginArtifactFormat = "carapace" | PluginBundleFormat;
 
-export const PLUGIN_ARTIFACT_ADAPTER_IDENTITY = "openclaw/v1" as const;
+export const PLUGIN_ARTIFACT_ADAPTER_IDENTITY = "carapace/v1" as const;
 
 export type PluginInstallArtifactInspection = {
   format: PluginArtifactFormat;
@@ -12,7 +12,7 @@ export type PluginInstallArtifactInspection = {
 };
 
 export function inspectNativePluginArtifact(): PluginInstallArtifactInspection {
-  return { format: "openclaw", mapped: ["plugin"], unavailable: [] };
+  return { format: "carapace", mapped: ["plugin"], unavailable: [] };
 }
 
 export function inspectBundlePluginArtifact(params: {

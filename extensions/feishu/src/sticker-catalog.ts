@@ -1,4 +1,4 @@
-import { readStringParam } from "openclaw/plugin-sdk/param-readers";
+import { readStringParam } from "carapace/plugin-sdk/param-readers";
 import type { ClawdbotConfig } from "../runtime-api.js";
 import type { FeishuConfig, ResolvedFeishuAccount } from "./types.js";
 

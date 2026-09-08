@@ -1,19 +1,19 @@
 // Slack plugin module implements setup shared behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { patchChannelConfigForAccount } from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import { patchChannelConfigForAccount } from "carapace/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "carapace/plugin-sdk/setup-tools";
 import { isSlackSetupAccountConfigured } from "./account-configured.js";
 import type { ResolvedSlackAccount } from "./accounts.js";
-import type { OpenClawConfig } from "./channel-api.js";
+import type { CarapaceConfig } from "./channel-api.js";
 
 export const SLACK_CHANNEL = "slack" as const;
 
-export function buildSlackManifest(botName = "OpenClaw") {
-  const safeName = botName.trim() || "OpenClaw";
+export function buildSlackManifest(botName = "Carapace") {
+  const safeName = botName.trim() || "Carapace";
   const manifest = {
     display_information: {
       name: safeName,
-      description: `${safeName} connector for OpenClaw`,
+      description: `${safeName} connector for Carapace`,
     },
     features: {
       bot_user: {
@@ -26,7 +26,7 @@ export function buildSlackManifest(botName = "OpenClaw") {
         messages_tab_read_only_enabled: false,
       },
       agent_view: {
-        agent_description: `${safeName} connects Slack Agent View conversations to OpenClaw agents.`,
+        agent_description: `${safeName} connects Slack Agent View conversations to Carapace agents.`,
         suggested_prompts: [
           {
             title: "What can you do?",
@@ -44,8 +44,8 @@ export function buildSlackManifest(botName = "OpenClaw") {
       },
       slash_commands: [
         {
-          command: "/openclaw",
-          description: "Send a message to OpenClaw",
+          command: "/carapace",
+          description: "Send a message to Carapace",
           should_escape: false,
         },
       ],
@@ -120,10 +120,10 @@ export function buildSlackSetupLines(): string[] {
 }
 
 export function setSlackChannelAllowlist(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   channelKeys: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const channels = Object.fromEntries(channelKeys.map((key) => [key, { enabled: true }]));
   return patchChannelConfigForAccount({
     cfg,

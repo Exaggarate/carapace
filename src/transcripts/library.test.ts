@@ -13,9 +13,9 @@ import {
   executeSqliteQuerySync,
 } from "../infra/kysely-sync.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { spawnNodeEvalSync } from "../test-utils/node-process.js";
 import { activeSessions } from "./capture.js";
 import { exportTranscriptLibrary, getTranscriptLibrary, listTranscriptLibrary } from "./library.js";
@@ -29,16 +29,16 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   vi.restoreAllMocks();
   activeSessions.clear();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function fixture() {
   const stateDir = tempDirs.make("transcript-library-");
-  const options = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  const options = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
   return {
     stateDir,
     store: new TranscriptsStore(path.join(stateDir, "transcripts"), options),
-    database: () => openOpenClawStateDatabase(options).db,
+    database: () => openCarapaceStateDatabase(options).db,
   };
 }
 
@@ -180,7 +180,7 @@ describe("transcript library SQLite reads", () => {
         import assert from "node:assert/strict";
         import { TranscriptsStore, transcriptSessionSelector } from ${JSON.stringify(new URL("./store.ts", import.meta.url).href)};
         import { listTranscriptLibrary } from ${JSON.stringify(new URL("./library.ts", import.meta.url).href)};
-        import { closeOpenClawStateDatabaseForTest } from ${JSON.stringify(new URL("../state/openclaw-state-db.ts", import.meta.url).href)};
+        import { closeCarapaceStateDatabaseForTest } from ${JSON.stringify(new URL("../state/carapace-state-db.ts", import.meta.url).href)};
         const store = new TranscriptsStore(${JSON.stringify(path.join(stateDir, "transcripts"))});
         const local = ${JSON.stringify(local)};
         try {
@@ -202,7 +202,7 @@ describe("transcript library SQLite reads", () => {
           }).sessions.map(row => row.sessionId), ["local"]);
           assert.deepEqual(await store.readSession(transcriptSessionSelector(local)), local);
         } finally {
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
         }
       `,
         {
@@ -211,8 +211,8 @@ describe("transcript library SQLite reads", () => {
           env: {
             ...process.env,
             TZ: "America/Los_Angeles",
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
           },
         },
       );
@@ -277,7 +277,7 @@ describe("transcript library SQLite reads", () => {
     expect(db.prepare("SELECT type, name, sql FROM sqlite_schema ORDER BY name").all()).toEqual(
       schema,
     );
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(database() === db).toBe(false);
     expect(listTranscriptLibrary(store, {}).sessions).toHaveLength(1);
   });
@@ -763,7 +763,7 @@ describe("transcript library SQLite reads", () => {
     }
     await store.writeSummary(summarizeTranscripts({ session: target, utterances }), target);
     // Reopen a raw legacy-shaped URL row without Doctor or read-time normalization.
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const selector = listTranscriptLibrary(store, {}).sessions[0]!.selector;
     for (const query of [
       "PLANNING",

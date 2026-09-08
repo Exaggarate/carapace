@@ -92,7 +92,7 @@ describe("GatewayClient", () => {
     params: { faviconSvg?: string; indexHtml?: string },
     run: (tmp: string) => Promise<void>,
   ) {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ui-"));
     try {
       await fs.writeFile(path.join(tmp, "index.html"), params.indexHtml ?? "<html></html>\n");
       if (typeof params.faviconSvg === "string") {
@@ -592,7 +592,7 @@ describe("gateway broadcaster", () => {
     const { pairingSocket, nodeSocket, readSocket, writeSocket, adminSocket, broadcast } =
       makeScopedBroadcastContext();
 
-    broadcast("config.changed", { path: "/tmp/openclaw.json", hash: "hash-1", ts: 1 });
+    broadcast("config.changed", { path: "/tmp/carapace.json", hash: "hash-1", ts: 1 });
 
     expect(pairingSocket.send).not.toHaveBeenCalled();
     expect(nodeSocket.send).not.toHaveBeenCalled();

@@ -4,7 +4,7 @@
 // max-lines budget.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import { resetConfigRuntimeState, type OpenClawConfig } from "../config/config.js";
+import { resetConfigRuntimeState, type CarapaceConfig } from "../config/config.js";
 import { wake as wakeCronService } from "../cron/service/wake.js";
 import { setHeartbeatsEnabled, startHeartbeatRunner } from "./heartbeat-runner.js";
 import { requestHeartbeat } from "./heartbeat-wake.js";
@@ -116,7 +116,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
   }
 
   async function expectWakeDispatch(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     runSpy: MockRunOnce;
     wake: Parameters<typeof requestHeartbeat>[0];
     expectedCall: Record<string, unknown>;
@@ -150,7 +150,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
       const runner = startHeartbeatRunner({
         cfg: {
           agents: { defaults: { heartbeat: { every: "0m" } }, list: [{ id: "main" }] },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         runOnce: runSpy,
       });
       const enqueueSystemEvent = vi.fn();
@@ -206,7 +206,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
           defaults: { heartbeat: { every: testCase.heartbeatEvery } },
           list: [{ id: "main" }],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runSpy,
       wake: { ...testCase.wake, coalesceMs: 0 },
       expectedCall: testCase.wake,
@@ -237,7 +237,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     const runner = startHeartbeatRunner({
       cfg: {
         agents: { defaults: { heartbeat: { every: "0m" } }, list: [{ id: "main" }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runOnce: runSpy,
     });
 
@@ -261,7 +261,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     const runner = startHeartbeatRunner({
       cfg: {
         agents: { defaults: { heartbeat: { every: "0m" } }, list: [{ id: "main" }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runOnce: runSpy,
     });
 
@@ -284,7 +284,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     const runner = startHeartbeatRunner({
       cfg: {
         agents: { defaults: { heartbeat: { every: "0m" } }, list: [{ id: "main" }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runOnce: runSpy,
     });
 
@@ -321,7 +321,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     const runner = startHeartbeatRunner({
       cfg: {
         agents: { defaults: { heartbeat: { every: "0m" } }, list: [{ id: "main" }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runOnce: runSpy,
     });
 
@@ -344,7 +344,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
       useFakeHeartbeatTime();
       const runSpy = vi.fn().mockResolvedValue({ status: "ran", durationMs: 1 });
       const runner = startHeartbeatRunner({
-        cfg: { agents: { list: [{ id: "main" }] } } as OpenClawConfig,
+        cfg: { agents: { list: [{ id: "main" }] } } as CarapaceConfig,
         runOnce: runSpy,
       });
 
@@ -365,7 +365,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     "retains the shared flood limit through reload with cadence %s",
     async (every) => {
       useFakeHeartbeatTime();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { heartbeat: { every } }, list: [{ id: "main" }] },
       };
       const callTimes: number[] = [];
@@ -410,7 +410,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     "preserves an in-flight start across a reload with cadence %s",
     async (every) => {
       useFakeHeartbeatTime();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { heartbeat: { every } }, list: [{ id: "main" }] },
       };
       const release = createDeferred();
@@ -454,7 +454,7 @@ describe("startHeartbeatRunner targeted unscheduled wake dispatch", () => {
     "keeps event spacing through enrollment changes for %j without adding broadcast wakes",
     async (heartbeat) => {
       useFakeHeartbeatTime();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", heartbeat },

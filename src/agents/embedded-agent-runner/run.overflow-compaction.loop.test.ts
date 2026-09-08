@@ -43,7 +43,7 @@ vi.mock("./run/attempt-exec-approval-continuation.js", () => ({
 }));
 
 vi.mock("../harness/selection.js", () => ({
-  agentHarnessBuildsOpenClawTools: (id: string) => id === "codex" || id === "copilot",
+  agentHarnessBuildsCarapaceTools: (id: string) => id === "codex" || id === "copilot",
   runAgentHarnessAttempt: mocks.runAttempt,
   runAgentHarnessSettledTurnFinalization: vi.fn(),
 }));
@@ -74,7 +74,7 @@ function makeDispatchInput(
   sessionManager: object,
   replayState: EmbeddedRunReplayState,
 ): Parameters<typeof prepareAndDispatchEmbeddedRunAttempt>[0] {
-  const workspaceDir = tempDirs.make("openclaw-retry-dispatch-");
+  const workspaceDir = tempDirs.make("carapace-retry-dispatch-");
   const params = {
     admittedRunContext,
     sessionId: "session-1",
@@ -211,7 +211,7 @@ describe("embedded run retry dispatch", () => {
       input.runInput.runParams.sandboxSessionKey = sandboxSessionKey;
       input.runInput.workspaceResolution.agentId = "marketing";
       input.runInput.resolvedSessionKey = "global";
-      input.runInput.workspaceDir = tempDirs.make("openclaw-global-plugin-attempt-");
+      input.runInput.workspaceDir = tempDirs.make("carapace-global-plugin-attempt-");
 
       const { dispatchedAttempt: result } = await prepareAndDispatchEmbeddedRunAttempt(input);
 
@@ -232,7 +232,7 @@ describe("embedded run retry dispatch", () => {
     const afterTurnError = new Error("after-turn cleanup failed");
     const onContextAccountingEvent = vi.fn();
     const input = makeDispatchInput({}, createEmbeddedRunReplayState());
-    input.preparedRuntime.snapshot().agentHarness.id = "openclaw";
+    input.preparedRuntime.snapshot().agentHarness.id = "carapace";
     input.preparedRuntime.snapshot().pluginHarnessOwnsTransport = false;
     Object.assign(input.runInput.runParams, { onContextAccountingEvent });
     let subscription: ReturnType<typeof createSubscribedSessionHarness>["subscription"] | undefined;

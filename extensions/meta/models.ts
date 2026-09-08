@@ -1,8 +1,8 @@
 /**
  * Meta model catalog helpers derived from the plugin manifest.
  */
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildMetaProvider } from "./provider-catalog.js";
 
 const META_MANIFEST_CATALOG = manifest.modelCatalog.providers["meta"];

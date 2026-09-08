@@ -2,7 +2,7 @@ import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { createDownloadCaptureForPage } from "./pw-download-capture.js";
 
@@ -112,7 +112,7 @@ describe("Playwright download capture cancellation", () => {
   });
 
   it("cancels an in-progress download without publishing staged output", async () => {
-    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-download-cancel-"));
+    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-download-cancel-"));
     const outputPath = path.join(outputRoot, "cancelled.bin");
     const page = new EventEmitter();
     const state = { downloadWaiterDepth: 0 };
@@ -170,7 +170,7 @@ describe("Playwright download capture cancellation", () => {
   });
 
   it("cancels a timed-out in-progress download without publishing staged output", async () => {
-    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-download-timeout-"));
+    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-download-timeout-"));
     const outputPath = path.join(outputRoot, "timed-out.bin");
     vi.useFakeTimers();
     const page = new EventEmitter();
@@ -222,7 +222,7 @@ describe("Playwright download capture cancellation", () => {
   });
 
   it("finishes atomic publication when cancellation arrives after its commit boundary", async () => {
-    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-download-publish-"));
+    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-download-publish-"));
     const outputPath = path.join(outputRoot, "published.bin");
     const renameStarted = createDeferred<void>();
     const releaseRename = createDeferred<void>();
@@ -287,7 +287,7 @@ describe("Playwright download capture cancellation", () => {
   });
 
   it("finishes atomic publication after its download deadline retires", async () => {
-    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-download-deadline-"));
+    const outputRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-download-deadline-"));
     const outputPath = path.join(outputRoot, "published.bin");
     vi.useFakeTimers();
     const renameStarted = createDeferred<void>();

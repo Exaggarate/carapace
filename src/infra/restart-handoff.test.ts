@@ -6,12 +6,12 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -27,23 +27,23 @@ import type { GatewayRestartHandoff } from "./restart-handoff.js";
 
 const tempDirs: string[] = [];
 const handoffConsumerCleanups: Array<() => Promise<void>> = [];
-type GatewayRestartHandoffDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_handoff">;
+type GatewayRestartHandoffDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_restart_handoff">;
 
 function createHandoffEnv(): NodeJS.ProcessEnv {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-restart-handoff-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-restart-handoff-"));
   tempDirs.push(dir);
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: dir,
+    CARAPACE_STATE_DIR: dir,
   };
 }
 
 function legacyHandoffPath(env: NodeJS.ProcessEnv): string {
-  return path.join(env.OPENCLAW_STATE_DIR ?? "", "gateway-supervisor-restart-handoff.json");
+  return path.join(env.CARAPACE_STATE_DIR ?? "", "gateway-supervisor-restart-handoff.json");
 }
 
 function readHandoffRow(env: NodeJS.ProcessEnv) {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartHandoffDatabase>(db);
   return executeSqliteQueryTakeFirstSync(
     db,
@@ -86,7 +86,7 @@ function insertHandoffRow(
     restartTraceLastAt?: number | null;
   },
 ) {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartHandoffDatabase>(db);
   const now = Date.now();
   executeSqliteQuerySync(
@@ -167,7 +167,7 @@ function spawnHandoffConsumer(params: {
 describe("gateway restart handoff", () => {
   afterEach(async () => {
     await Promise.all(handoffConsumerCleanups.splice(0).map((cleanup) => cleanup()));
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { force: true, recursive: true });
     }
@@ -175,7 +175,7 @@ describe("gateway restart handoff", () => {
 
   it("does not create shared state when no restart handoff database exists", () => {
     const env = createHandoffEnv();
-    const databasePath = path.join(env.OPENCLAW_STATE_DIR ?? "", "state", "openclaw.sqlite");
+    const databasePath = path.join(env.CARAPACE_STATE_DIR ?? "", "state", "carapace.sqlite");
 
     expect(readGatewayRestartHandoffSync(env)).toBeNull();
     expect(fs.existsSync(databasePath)).toBe(false);
@@ -190,9 +190,9 @@ describe("gateway restart handoff", () => {
       supervisorMode: "external",
       createdAt: 1_000,
     });
-    closeOpenClawStateDatabaseForTest();
-    const databasePath = path.join(env.OPENCLAW_STATE_DIR ?? "", "state", "openclaw.sqlite");
-    const olderVersion = OPENCLAW_STATE_SCHEMA_VERSION - 1;
+    closeCarapaceStateDatabaseForTest();
+    const databasePath = path.join(env.CARAPACE_STATE_DIR ?? "", "state", "carapace.sqlite");
+    const olderVersion = CARAPACE_STATE_SCHEMA_VERSION - 1;
     const writable = new DatabaseSync(databasePath);
     writable.exec(`
       PRAGMA user_version = ${olderVersion};
@@ -311,7 +311,7 @@ describe("gateway restart handoff", () => {
       startedAt: 10_000,
       lastAt: 10_250,
     });
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openCarapaceStateDatabase({ env });
     expect(
       db
         .prepare(
@@ -557,7 +557,7 @@ describe("gateway restart handoff", () => {
       supervisorMode: "external",
       createdAt: 1_000,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const consumers = [0, 1].map(() =>
       spawnHandoffConsumer({ env, expectedPid: 12_345, now: 1_500, signal }),
     );
@@ -617,7 +617,7 @@ describe("gateway restart handoff", () => {
       createdAt: 1_000,
       ttlMs: 1_000,
     });
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openCarapaceStateDatabase({ env });
     const originalExec = db.exec.bind(db);
     let transactionBegan = false;
     const execSpy = vi.spyOn(db, "exec").mockImplementation((sql) => {

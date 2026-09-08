@@ -3,12 +3,12 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { setImmediate } from "node:timers/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { OpenClawPluginApi, OpenClawPluginService } from "openclaw/plugin-sdk/plugin-entry";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { CarapacePluginApi, CarapacePluginService } from "carapace/plugin-sdk/plugin-entry";
 import {
   createCapturedPluginRegistration,
   createPluginRuntimeMock,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "../index.js";
 import { resolveLogbookConfig } from "./config.js";
@@ -20,7 +20,7 @@ const snapshot = { payload: { base64: Buffer.from("synthetic image").toString("b
 
 function completion(
   text: string,
-): Awaited<ReturnType<OpenClawPluginApi["runtime"]["llm"]["complete"]>> {
+): Awaited<ReturnType<CarapacePluginApi["runtime"]["llm"]["complete"]>> {
   return {
     text,
     provider: "synthetic",
@@ -187,9 +187,9 @@ describe("Logbook service disposal", () => {
       const stateDir = realpathSync(mkdtempSync(path.join(tmpdir(), "logbook-runtime-drain-")));
       const captured = createCapturedPluginRegistration({ id: "logbook" });
       captured.api.pluginConfig = { captureEnabled: false };
-      const services: OpenClawPluginService[] = [];
+      const services: CarapacePluginService[] = [];
       captured.api.registerService = (service) => services.push(service);
-      const handlers = new Map<string, Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1]>();
+      const handlers = new Map<string, Parameters<CarapacePluginApi["registerGatewayMethod"]>[1]>();
       captured.api.registerGatewayMethod = (name, handler) => handlers.set(name, handler);
       const entered = createDeferred<void>();
       const release = createDeferred<void>();
@@ -255,7 +255,7 @@ describe("Logbook service disposal", () => {
     const stateDir = realpathSync(mkdtempSync(path.join(tmpdir(), "logbook-retired-start-")));
     const captured = createCapturedPluginRegistration({ id: "logbook" });
     captured.api.pluginConfig = { captureEnabled: false };
-    const services: OpenClawPluginService[] = [];
+    const services: CarapacePluginService[] = [];
     captured.api.registerService = (service) => services.push(service);
     plugin.register(captured.api);
     const context = { config: {}, stateDir, logger: quietLogger };

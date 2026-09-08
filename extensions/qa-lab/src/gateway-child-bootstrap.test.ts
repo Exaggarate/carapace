@@ -58,7 +58,7 @@ if (command === "descendant") {
     const child = spawn(process.execPath, [process.argv[1], record, phase, mode, "descendant"],
       { stdio: ["ignore", mode === "closed-pipes" ? "ignore" : "inherit", mode === "closed-pipes" ? "ignore" : "inherit", "ipc"] });
     await once(child, "message");
-    write("ready", { descendant: child.pid, tempRoot: process.env.OPENCLAW_QA_TEMP_ROOT,
+    write("ready", { descendant: child.pid, tempRoot: process.env.CARAPACE_QA_TEMP_ROOT,
       ...(mode === "failure" ? { submittedKey: input.trim() } : {}) });
     if (mode === "running") {
       fs.writeSync(2, "plugin registry still pending apiKey=synthetic-stderr-secret\n::error::stderr diagnostic\nstderr ready\n");
@@ -97,9 +97,9 @@ const dirs = createTempDirHarness();
 const cleanups: Array<() => Promise<void>> = [];
 const realKill = process.kill.bind(process);
 beforeEach(() => {
-  vi.stubEnv("OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
-  vi.stubEnv("OPENCLAW_LIVE_SETUP_TOKEN_VALUE", undefined);
-  vi.stubEnv("OPENCLAW_QA_KEEP_TEMP", undefined);
+  vi.stubEnv("CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
+  vi.stubEnv("CARAPACE_LIVE_SETUP_TOKEN_VALUE", undefined);
+  vi.stubEnv("CARAPACE_QA_KEEP_TEMP", undefined);
 });
 afterEach(async () => {
   vi.useRealTimers();
@@ -399,7 +399,7 @@ describe.skipIf(process.platform === "win32")("packaged QA bootstrap lifetime", 
     const error = await bounded(starting);
     expect(error).toBeInstanceOf(AggregateError);
     const diagnostic = inspect(error, { depth: null });
-    expect(diagnostic).toContain("OpenClaw CLI exited 17");
+    expect(diagnostic).toContain("Carapace CLI exited 17");
     expect(diagnostic).toContain("process tree remained alive");
     expect(ready!.submittedKey).toMatch(/^sk-qa-mock-[a-f0-9]{32}$/u);
     expect(diagnostic).not.toContain(ready!.submittedKey);

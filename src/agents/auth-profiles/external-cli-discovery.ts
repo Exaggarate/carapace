@@ -3,8 +3,8 @@
  * Converts provider/config lookup contexts into scoped discovery options for
  * auth profile store loading.
  */
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   resolveExternalCliAuthScopeFromConfig,
   type ExternalCliAuthScope,
@@ -15,23 +15,23 @@ export type ExternalCliAuthDiscovery =
   | {
       mode: "none";
       allowKeychainPrompt?: false;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
     }
   | {
       mode: "existing";
       allowKeychainPrompt?: boolean;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
     }
   | {
       mode: "scoped";
       allowKeychainPrompt?: boolean;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       providerIds?: Iterable<string>;
       profileIds?: Iterable<string>;
     };
 
 type ProviderAuthDiscoveryParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   profileId?: string;
   preferredProfile?: string;
@@ -39,12 +39,12 @@ type ProviderAuthDiscoveryParams = {
 };
 
 type ConfigStatusDiscoveryParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   allowKeychainPrompt?: false;
 };
 
 type ProviderSetDiscoveryParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providers: Iterable<string>;
   allowKeychainPrompt?: false;
 };
@@ -54,7 +54,7 @@ function normalizeStringList(values: Iterable<string | undefined>): string[] {
 }
 
 /** Disables external CLI auth discovery. */
-function externalCliDiscoveryNone(params?: { config?: OpenClawConfig }): ExternalCliAuthDiscovery {
+function externalCliDiscoveryNone(params?: { config?: CarapaceConfig }): ExternalCliAuthDiscovery {
   return {
     mode: "none",
     allowKeychainPrompt: false,
@@ -64,7 +64,7 @@ function externalCliDiscoveryNone(params?: { config?: OpenClawConfig }): Externa
 
 /** Allows external CLI auth discovery for specific providers and/or profiles. */
 export function externalCliDiscoveryScoped(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   providerIds?: Iterable<string>;
   profileIds?: Iterable<string>;
   allowKeychainPrompt?: boolean;
@@ -121,7 +121,7 @@ export function externalCliDiscoveryForProviders(
 }
 
 function externalCliDiscoveryFromScope(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   scope: ExternalCliAuthScope | undefined;
   allowKeychainPrompt: false;
 }): ExternalCliAuthDiscovery {

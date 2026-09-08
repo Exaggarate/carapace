@@ -2,13 +2,13 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/openclaw-agent-db-additive-columns.js";
+import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/carapace-agent-db-additive-columns.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   assignSessionOwner,
   listSessionEntriesReadOnly,
@@ -26,16 +26,16 @@ import type { SessionEntry } from "./types.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function createScope() {
-  const stateDir = tempDirs.make("openclaw-cold-session-keys-");
+  const stateDir = tempDirs.make("carapace-cold-session-keys-");
   return {
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
-    storePath: path.join(stateDir, "agents/main/agent/openclaw-agent.sqlite"),
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
+    storePath: path.join(stateDir, "agents/main/agent/carapace-agent.sqlite"),
     sessionKey: "agent:main:cold-key",
   };
 }
@@ -44,11 +44,11 @@ describe("cold canonical session validation", () => {
   it("lists existing metadata without creating absent owner columns", () => {
     const scope = createScope();
     replaceSessionEntrySync(scope, { sessionId: "cold-key", updatedAt: 1, label: "existing" });
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     for (const { columnName } of FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS) {
       database.db.exec(`ALTER TABLE session_nodes DROP COLUMN ${columnName}`);
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(listSessionEntriesReadOnly({ ...scope, projection: "list" })[0]?.entry).toEqual({
       sessionId: "cold-key",
       updatedAt: 1,
@@ -80,14 +80,14 @@ describe("cold canonical session validation", () => {
   ])("keeps source-JSON fallback semantics in the cold metadata handoff (%#)", (entryJson) => {
     const scope = createScope();
     replaceSessionEntrySync(scope, { sessionId: "cold-key", updatedAt: 1 });
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     database.db
       .prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?")
       .run(entryJson, scope.sessionKey);
     database.db
       .prepare("UPDATE session_nodes SET entry_valid = 1 WHERE session_key = ?")
       .run(scope.sessionKey);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const rows = listSessionEntriesReadOnly({ ...scope, projection: "list" });
     expect(rows).toHaveLength(1);
     expect(rows[0]?.entry).toEqual({ sessionId: "cold-key", updatedAt: 1 });
@@ -96,15 +96,15 @@ describe("cold canonical session validation", () => {
   it("keeps timestamp-mismatched keys without strengthening Doctor validation", () => {
     const scope = createScope();
     replaceSessionEntrySync(scope, { sessionId: "cold-key", updatedAt: 1 });
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     database.db
       .prepare("UPDATE session_nodes SET updated_at = 2 WHERE session_key = ?")
       .run(scope.sessionKey);
     database.db
       .prepare("UPDATE session_nodes SET entry_valid = 1 WHERE session_key = ?")
       .run(scope.sessionKey);
-    closeOpenClawAgentDatabasesForTest();
-    const held = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    closeCarapaceAgentDatabasesForTest();
+    const held = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     expect(listSessionEntriesReadOnly({ ...scope, projection: "list" })).toEqual([]);
     const cached = readSessionEntryCache(held, { cache: true });
     expect(cached.keys).toEqual([scope.sessionKey]);
@@ -118,8 +118,8 @@ describe("cold canonical session validation", () => {
     const scope = createScope();
     const entry = { sessionId: "cold-key", updatedAt: 1, label: "before" };
     replaceSessionEntrySync(scope, entry);
-    closeOpenClawAgentDatabasesForTest();
-    openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    closeCarapaceAgentDatabasesForTest();
+    openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     const writer = new DatabaseSync(scope.storePath);
     const originalParse = JSON.parse;
     let committed = false;
@@ -160,17 +160,17 @@ describe("cold canonical session validation", () => {
       { ...scope, sessionKey: otherKey },
       { sessionId: "later", updatedAt: 1 },
     );
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     database.db
       .prepare("UPDATE session_nodes SET entry_json = '{' WHERE session_key = ?")
       .run(otherKey);
-    closeOpenClawAgentDatabasesForTest();
-    const held = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    closeCarapaceAgentDatabasesForTest();
+    const held = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     expect(() => listSessionEntriesReadOnly({ ...scope, projection: "list" })).toThrow(
-      "openclaw doctor --fix",
+      "carapace doctor --fix",
     );
     expect(() => listSessionEntriesReadOnly({ ...scope, projection: "list" })).toThrow(
-      "openclaw doctor --fix",
+      "carapace doctor --fix",
     );
     for (const [key, id] of [
       [scope.sessionKey, "cold-key"],
@@ -189,11 +189,11 @@ describe("cold canonical session validation", () => {
   it("rejects the retired main alias on a cold listing", () => {
     const scope = { ...createScope(), sessionKey: "agent:main:main" };
     replaceSessionEntrySync(scope, { sessionId: "main-alias", updatedAt: 1 });
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     setCanonicalSqliteSessionMainKey(database, "custom");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(() => listSessionEntriesReadOnly({ ...scope, projection: "list" })).toThrow(
-      "openclaw doctor --fix",
+      "carapace doctor --fix",
     );
   });
 
@@ -218,17 +218,17 @@ describe("cold canonical session validation", () => {
         promptedAt: 3,
       });
       const placeholderKey = "agent:main:retained";
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         ensureTranscriptSessionRoot(
           database,
           { ...scope, sessionKey: placeholderKey, sessionId: "retained" },
           4,
         );
       }, scope);
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       const database = retained
-        ? openOpenClawAgentDatabase({ ...scope, path: scope.storePath })
+        ? openCarapaceAgentDatabase({ ...scope, path: scope.storePath })
         : undefined;
       const parse = vi.spyOn(JSON, "parse");
       try {
@@ -272,8 +272,8 @@ describe("cold canonical session validation", () => {
       { ...scope, sessionKey: "agent:main:unrelated" },
       { sessionId: "unrelated", updatedAt: 2, skillsSnapshot: { prompt, skills: [] } },
     );
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const parse = vi.spyOn(JSON, "parse");
     try {
@@ -298,13 +298,13 @@ describe("cold canonical session validation", () => {
       parentSessionKey: "agent:main:parent",
       skillsSnapshot: { prompt: "synthetic saved prompt", skills: [] },
     });
-    const database = openOpenClawAgentDatabase({ ...scope, path: scope.storePath });
+    const database = openCarapaceAgentDatabase({ ...scope, path: scope.storePath });
     database.db
       .prepare("UPDATE session_nodes SET parent_session_key = ? WHERE session_key = ?")
       .run("agent:main:different", scope.sessionKey);
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
-    expect(() => loadSessionEntryReadOnly(scope)).toThrow("openclaw doctor --fix");
+    expect(() => loadSessionEntryReadOnly(scope)).toThrow("carapace doctor --fix");
   });
 });

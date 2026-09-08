@@ -1,8 +1,8 @@
 import {
   parseRetryAfterHttpDateMs,
   parseRetryAfterErrorSeconds,
-} from "@openclaw/ai/internal/retry-after";
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
+} from "@carapace/ai/internal/retry-after";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
 import milliseconds from "ms";
 import { isTransientNetworkError } from "../../infra/retryable-network-errors.js";
 import {

@@ -20,7 +20,7 @@ async function start(...args: Parameters<typeof createTriageBoundary>) {
   return boundary;
 }
 async function ready(boundary: Awaited<ReturnType<typeof start>>) {
-  expect(await boundary.response(), boundary.stderr()).toBe("OPENCLAW_UPDATE_HANDOFF_READY");
+  expect(await boundary.response(), boundary.stderr()).toBe("CARAPACE_UPDATE_HANDOFF_READY");
 }
 async function fixing(boundary: Awaited<ReturnType<typeof start>>) {
   // One readiness budget covers the fixer and its complete descendant placement.
@@ -60,7 +60,7 @@ describe("managed triage attachment cutover (synthetic native boundary)", () => 
     "retains the chat requester's authority at the repair effect boundary: %s",
     async (window) => {
       const boundary = await start("update", undefined, undefined, async (root, env) => {
-        const configPath = env.OPENCLAW_CONFIG_PATH!;
+        const configPath = env.CARAPACE_CONFIG_PATH!;
         await fs.writeFile(
           configPath,
           JSON.stringify({
@@ -81,7 +81,7 @@ export async function isManagedUpdateRequesterOwner(requester) {
 }
 `,
         );
-        await fs.writeFile(path.join(root, "package.json"), '{"type":"module","name":"openclaw"}');
+        await fs.writeFile(path.join(root, "package.json"), '{"type":"module","name":"carapace"}');
         const paramsPath = path.join(root, "handoff.json");
         const params = JSON.parse(await fs.readFile(paramsPath, "utf8"));
         params.requester = { channel: "synthetic", senderId: "owner" };
@@ -161,7 +161,7 @@ await admission.finish('closed');
             ? `const fsp=require('node:fs/promises'), read=fsp.readFile;
 fsp.readFile=async function(...args) {
   const result=await read.apply(this,args);
-  if(args[0]===process.env.OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META) {
+  if(args[0]===process.env.CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META) {
     event('admission-interrupted'); controller.abort(new Error('fixture cancellation'));
   }
   return result;
@@ -313,8 +313,8 @@ process.emit=function(kind,message,...args){
       expect(events.find((event) => event.kind === "descendant")).toMatchObject({
         handoff: null,
         sentinel: null,
-        stateDir: `${boundary.root}/.openclaw`,
-        workspace: `${boundary.root}/.openclaw/workspace`,
+        stateDir: `${boundary.root}/.carapace`,
+        workspace: `${boundary.root}/.carapace/workspace`,
         shell: "exec",
         compileCache: "1",
       });

@@ -27,9 +27,9 @@ import {
 } from "./recovery-cleanup-fixture.mjs";
 
 const run = promisify(execFile);
-const stateDir = process.env.OPENCLAW_STATE_DIR;
-const artifactRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
-const runtimeRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT;
+const stateDir = process.env.CARAPACE_STATE_DIR;
+const artifactRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
+const runtimeRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT;
 assert(stateDir && artifactRoot && runtimeRoot, "recovery proof requires isolated survivor roots");
 const evidencePath = path.join(artifactRoot, "recovery-evidence.json");
 const fixturePath = path.join(artifactRoot, "recovery-fixture.json");
@@ -45,7 +45,7 @@ const saveEvidence = (patch) =>
 async function command(
   name,
   argv,
-  { env = process.env, failure = false, measured = false, binary = "openclaw", json = true } = {},
+  { env = process.env, failure = false, measured = false, binary = "carapace", json = true } = {},
 ) {
   let code = 0;
   let stdout;
@@ -110,7 +110,7 @@ function roots() {
   return [
     process.env.HOME,
     stateDir,
-    process.env.OPENCLAW_CONFIG_PATH,
+    process.env.CARAPACE_CONFIG_PATH,
     process.env.TMPDIR,
     process.env.npm_config_cache,
   ];
@@ -119,7 +119,7 @@ function roots() {
 function preservedFiles(originals) {
   const files = [
     ...originals.map((item) => item.archive),
-    process.env.OPENCLAW_CONFIG_PATH,
+    process.env.CARAPACE_CONFIG_PATH,
     ...readRecoveryMoves(stateDir).map((move) => move.manifestPath),
   ];
   return Object.fromEntries(
@@ -299,9 +299,9 @@ async function live() {
   assert.equal(refused.totals?.removedBytes ?? 0, 0);
   assert.deepEqual(preservedFiles(originals), before, "live apply changed recovery/config files");
   const wrongEnv = { ...process.env };
-  delete wrongEnv.OPENCLAW_STATE_DIR;
-  delete wrongEnv.OPENCLAW_CONFIG_PATH;
-  delete wrongEnv.OPENCLAW_PROFILE;
+  delete wrongEnv.CARAPACE_STATE_DIR;
+  delete wrongEnv.CARAPACE_CONFIG_PATH;
+  delete wrongEnv.CARAPACE_PROFILE;
   const wrong = await command(
     "wrong-profile",
     ["--profile", "recovery-other", "update", "cleanup", "--yes", "--json"],
@@ -375,18 +375,18 @@ async function offline() {
 async function customRestore() {
   const primaryBefore = recoveryTreeSnapshot([stateDir]);
   const home = path.join(runtimeRoot, "recovery-restore-home");
-  const customState = path.join(home, ".openclaw");
+  const customState = path.join(home, ".carapace");
   const store = path.join(customState, "custom-sessions", "sessions.json");
   const transcript = path.join(path.dirname(store), "restore-original.jsonl");
-  const customConfig = path.join(customState, "openclaw.json");
+  const customConfig = path.join(customState, "carapace.json");
   const agentDir = path.join(customState, "custom-agents", "main");
   const env = {
     ...process.env,
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: customState,
-    OPENCLAW_CONFIG_PATH: customConfig,
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: customState,
+    CARAPACE_CONFIG_PATH: customConfig,
   };
   fs.mkdirSync(home, { recursive: true });
   await command(
@@ -515,10 +515,10 @@ async function customRestore() {
 async function packageEvidence() {
   const [baseline, candidate] = process.argv.slice(3);
   assert(baseline && candidate, "package evidence requires baseline and candidate");
-  const version = process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION;
+  const version = process.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION;
   assert(version, "package evidence requires the installed baseline version");
   // Resolve mutable tags once at installation; evidence must describe those same bytes.
-  const exactBaseline = `openclaw@${version}`;
+  const exactBaseline = `carapace@${version}`;
   const entries = resolveNpmJsonEntries(
     await command("baseline-package", ["view", exactBaseline, "version", "dist", "--json"], {
       binary: "npm",
@@ -540,7 +540,7 @@ async function packageEvidence() {
   assert.equal(packed.length, 1);
   const artifact = packed[0];
   assert(artifact && typeof artifact === "object");
-  assert.equal(artifact.name, "openclaw");
+  assert.equal(artifact.name, "carapace");
   assert.equal(artifact.version, version);
   assert.equal(artifact.integrity, metadata.dist.integrity);
   saveEvidence({

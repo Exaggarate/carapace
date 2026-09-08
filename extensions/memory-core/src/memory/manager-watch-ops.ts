@@ -1,19 +1,19 @@
 import fsSync from "node:fs";
 import path from "node:path";
 import chokidar from "chokidar";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { classifyMemoryMultimodalPath } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
+import { classifyMemoryMultimodalPath } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   createSubsystemLogger,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   isFileMissingError,
   matchesExtraMemoryPathEntry,
   normalizeExtraMemoryPathEntries,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   type LinuxMemoryDirectoryWatcher,
   MemoryManagerWatchResources,
@@ -36,8 +36,8 @@ const IGNORED_MEMORY_WATCH_DIR_NAMES = new Set([
   "__pycache__",
 ]);
 const log = createSubsystemLogger("memory");
-const TEST_MEMORY_WATCH_FACTORY_KEY = Symbol.for("openclaw.test.memoryWatchFactory");
-const TEST_MEMORY_NATIVE_WATCH_FACTORY_KEY = Symbol.for("openclaw.test.memoryNativeWatchFactory");
+const TEST_MEMORY_WATCH_FACTORY_KEY = Symbol.for("carapace.test.memoryWatchFactory");
+const TEST_MEMORY_NATIVE_WATCH_FACTORY_KEY = Symbol.for("carapace.test.memoryNativeWatchFactory");
 
 type NativeMemoryWatchResult = "attached" | "missing" | "failed";
 

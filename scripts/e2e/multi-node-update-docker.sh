@@ -2,8 +2,8 @@
 # Guards the multi-node-install update fix.
 #
 # Sets up two independent Node installations inside a Docker container, installs
-# OpenClaw under node-A, registers the gateway service pointing at node-A, then
-# switches PATH so node-B comes first and runs `openclaw update`. Verifies that:
+# Carapace under node-A, registers the gateway service pointing at node-A, then
+# switches PATH so node-B comes first and runs `carapace update`. Verifies that:
 #
 # 1. The update stays on node-A's package root and service runtime.
 # 2. The gateway restarts from the preserved entrypoint and becomes healthy.
@@ -12,18 +12,18 @@
 # Usage:
 #   ./scripts/e2e/multi-node-update-docker.sh
 #
-# Requires: Docker, a built openclaw-current.tgz (or will build one).
+# Requires: Docker, a built carapace-current.tgz (or will build one).
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-multi-node-update-e2e" OPENCLAW_MULTI_NODE_UPDATE_E2E_IMAGE)"
-SKIP_BUILD="${OPENCLAW_MULTI_NODE_UPDATE_E2E_SKIP_BUILD:-0}"
-DOCKER_RUN_TIMEOUT="${OPENCLAW_MULTI_NODE_DOCKER_TIMEOUT:-300s}"
-RUN_ID="${OPENCLAW_MULTI_NODE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
-ARTIFACT_DIR="${OPENCLAW_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update/$RUN_ID}"
+IMAGE_NAME="$(docker_e2e_resolve_image "carapace-multi-node-update-e2e" CARAPACE_MULTI_NODE_UPDATE_E2E_IMAGE)"
+SKIP_BUILD="${CARAPACE_MULTI_NODE_UPDATE_E2E_SKIP_BUILD:-0}"
+DOCKER_RUN_TIMEOUT="${CARAPACE_MULTI_NODE_DOCKER_TIMEOUT:-300s}"
+RUN_ID="${CARAPACE_MULTI_NODE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
+ARTIFACT_DIR="${CARAPACE_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update/$RUN_ID}"
 
 mkdir -p "$ARTIFACT_DIR"
 chmod -R a+rwX "$ARTIFACT_DIR" || true
@@ -34,7 +34,7 @@ trap cleanup EXIT
 
 # Build the bare e2e image and prepare the package tarball.
 docker_e2e_build_or_reuse "$IMAGE_NAME" multi-node-update "$ROOT_DIR/scripts/e2e/Dockerfile" "$ROOT_DIR" "bare" "$SKIP_BUILD"
-PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz multi-node-update "${OPENCLAW_CURRENT_PACKAGE_TGZ:-}")"
+PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz multi-node-update "${CARAPACE_CURRENT_PACKAGE_TGZ:-}")"
 docker_e2e_package_mount_args "$PACKAGE_TGZ"
 
 echo "=== Running multi-node-update Docker E2E ==="
@@ -43,11 +43,11 @@ CONTAINER_EXIT=0
 docker_e2e_run_with_harness \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
   -e CI=true \
-  -e OPENCLAW_NO_ONBOARD=1 \
-  -e OPENCLAW_NO_PROMPT=1 \
-  -e OPENCLAW_SKIP_PROVIDERS=1 \
-  -e OPENCLAW_SKIP_CHANNELS=1 \
-  -e OPENCLAW_DISABLE_BONJOUR=1 \
+  -e CARAPACE_NO_ONBOARD=1 \
+  -e CARAPACE_NO_PROMPT=1 \
+  -e CARAPACE_SKIP_PROVIDERS=1 \
+  -e CARAPACE_SKIP_CHANNELS=1 \
+  -e CARAPACE_DISABLE_BONJOUR=1 \
   -e OPENAI_API_KEY=sk-multi-node-test \
   -v "$ARTIFACT_DIR:/tmp/artifacts" \
   "${DOCKER_E2E_PACKAGE_ARGS[@]}" \
@@ -56,7 +56,7 @@ docker_e2e_run_with_harness \
   "$IMAGE_NAME" \
   timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" bash -lc '
 set -euo pipefail
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 
 ARTIFACTS=/tmp/artifacts
 exec > >(tee "$ARTIFACTS/run.log") 2>&1
@@ -97,9 +97,9 @@ NODE_B_VERSION="$("$NODE_B" --version)"
 echo "node-B: $NODE_B ($NODE_B_VERSION)"
 
 echo ""
-echo "── Step 2: Install OpenClaw under node-A ──"
+echo "── Step 2: Install Carapace under node-A ──"
 
-# Use node-A to install openclaw with npm prefix A.
+# Use node-A to install carapace with npm prefix A.
 export npm_config_prefix="$NPM_PREFIX_A"
 export NPM_CONFIG_PREFIX="$NPM_PREFIX_A"
 export npm_config_loglevel=error
@@ -107,16 +107,16 @@ export npm_config_fund=false
 export npm_config_audit=false
 export PATH="$NPM_PREFIX_A/bin:$NODE_A_DIR:$PATH"
 
-echo "Installing OpenClaw package under node-A prefix: $NPM_PREFIX_A"
-openclaw_e2e_install_package "$ARTIFACTS/install-a.log" "OpenClaw package under node-A prefix" "$NPM_PREFIX_A"
-echo "Installed. Checking openclaw location..."
+echo "Installing Carapace package under node-A prefix: $NPM_PREFIX_A"
+carapace_e2e_install_package "$ARTIFACTS/install-a.log" "Carapace package under node-A prefix" "$NPM_PREFIX_A"
+echo "Installed. Checking carapace location..."
 
-OPENCLAW_A="$(command -v openclaw)"
-echo "openclaw binary: $OPENCLAW_A"
-echo "openclaw version: $(openclaw --version 2>/dev/null || echo unknown)"
+CARAPACE_A="$(command -v carapace)"
+echo "carapace binary: $CARAPACE_A"
+echo "carapace version: $(carapace --version 2>/dev/null || echo unknown)"
 
 # Record the package root for node-A install.
-PACKAGE_ROOT_A="$NPM_PREFIX_A/lib/node_modules/openclaw"
+PACKAGE_ROOT_A="$NPM_PREFIX_A/lib/node_modules/carapace"
 echo "Package root A: $PACKAGE_ROOT_A"
 ls -la "$PACKAGE_ROOT_A/package.json" 2>/dev/null || echo "WARNING: package.json not found at A"
 
@@ -124,25 +124,25 @@ echo ""
 echo "── Step 3: Install the systemd service (gateway) using node-A ──"
 
 # Reuse the service fixture that models manager-loaded definitions and restarts.
-GATEWAY_UNIT_PATH="/root/.config/systemd/user/openclaw-gateway.service"
+GATEWAY_UNIT_PATH="/root/.config/systemd/user/carapace-gateway.service"
 GATEWAY_DAEMON_LOG="$ARTIFACTS/gateway-daemon.log"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$ARTIFACTS/systemctl-shim.log"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$GATEWAY_DAEMON_LOG"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$ARTIFACTS/gateway.pid"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$ARTIFACTS/systemctl-shim.log"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$GATEWAY_DAEMON_LOG"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$ARTIFACTS/gateway.pid"
 source scripts/e2e/lib/upgrade-survivor/update-restart-auth.sh
 install_update_restart_systemctl_shim
 
 # Now install the gateway service using node-A.
 echo "Installing gateway service..."
 mkdir -p "$(dirname "$GATEWAY_UNIT_PATH")"
-if ! openclaw gateway install --json >"$ARTIFACTS/gateway-install.json" 2>"$ARTIFACTS/gateway-install.err"; then
+if ! carapace gateway install --json >"$ARTIFACTS/gateway-install.json" 2>"$ARTIFACTS/gateway-install.err"; then
   echo "FAIL: gateway install failed before update"
   cat "$ARTIFACTS/gateway-install.json" 2>/dev/null || true
   cat "$ARTIFACTS/gateway-install.err" 2>/dev/null || true
   exit 1
 fi
 
-if ! openclaw gateway status --json \
+if ! carapace gateway status --json \
   >"$ARTIFACTS/gateway-status-before-update.json" \
   2>"$ARTIFACTS/gateway-status-before-update.err"; then
   echo "FAIL: gateway status failed before update"
@@ -187,7 +187,7 @@ echo "── Step 5: Switch PATH so node-B comes first ──"
 # Simulate the user scenario: their PATH changes (e.g. they installed
 # a second Node via nvm, brew, etc.) and the new node-B comes first.
 # Crucially, node-B has its own working npm with its own global prefix,
-# but openclaw is NOT installed there.
+# but carapace is NOT installed there.
 export PATH="$NPM_PREFIX_B/bin:$NODE_B_ROOT/bin:$NPM_PREFIX_A/bin:$NODE_A_DIR:$PATH"
 export npm_config_prefix="$NPM_PREFIX_B"
 export NPM_CONFIG_PREFIX="$NPM_PREFIX_B"
@@ -195,12 +195,12 @@ export NPM_CONFIG_PREFIX="$NPM_PREFIX_B"
 # Verify node-B npm works independently.
 echo "node-B npm prefix: $($NODE_B_ROOT/bin/node $NODE_B_ROOT/bin/npm prefix -g 2>/dev/null || echo unknown)"
 echo "which node: $(command -v node)"
-echo "which openclaw: $(command -v openclaw)"
+echo "which carapace: $(command -v carapace)"
 echo "process.execPath will be: $(node -e "console.log(process.execPath)")"
 
 echo ""
 for OUTPUT_MODE in json tty; do
-echo "── Step 6: Run openclaw update ($OUTPUT_MODE) ──"
+echo "── Step 6: Run carapace update ($OUTPUT_MODE) ──"
 
 UPDATE_FAILED=0
 GATEWAY_START_FAILED=0
@@ -210,8 +210,8 @@ GATEWAY_HEALTH_FAILED=0
 UPDATE_EXIT=0
 UPDATE_LOG="$ARTIFACTS/update.$OUTPUT_MODE.log"
 if [ "$OUTPUT_MODE" = json ]; then
-  openclaw update --yes --json \
-    --tag /tmp/openclaw-current.tgz \
+  carapace update --yes --json \
+    --tag /tmp/carapace-current.tgz \
     >"$ARTIFACTS/update.json" 2>"$UPDATE_LOG" || UPDATE_EXIT=$?
   node --input-type=module - "$ARTIFACTS/update.json" "$PACKAGE_ROOT_A" <<"NODE"
 import assert from "node:assert/strict";
@@ -221,7 +221,7 @@ assert.equal(result.status, "ok");
 assert.equal(result.root, process.argv[3]);
 NODE
 else
-  TTY_PROFILE_DIR="$(mktemp -d /tmp/openclaw-update-tty-profile.XXXXXX)"
+  TTY_PROFILE_DIR="$(mktemp -d /tmp/carapace-update-tty-profile.XXXXXX)"
   # Python is part of the bare image. Keep a real terminal open without sending
   # consent input; a stray prompt must time out and fail, never accept a default.
   SHELL=/bin/zsh ZDOTDIR="$TTY_PROFILE_DIR" python3 - >"$UPDATE_LOG" 2>&1 <<"PYTHON" || UPDATE_EXIT=$?
@@ -230,8 +230,8 @@ import pty
 
 wait_status = pty.spawn([
     "timeout", "--kill-after=10s", "120s", "bash", "-c",
-    "test -t 0 && test -t 1 && exec \"$@\"", "openclaw-tty",
-    "openclaw", "update", "--yes", "--tag", "/tmp/openclaw-current.tgz",
+    "test -t 0 && test -t 1 && exec \"$@\"", "carapace-tty",
+    "carapace", "update", "--yes", "--tag", "/tmp/carapace-current.tgz",
 ], stdin_read=lambda _: b"")
 exit_code = os.waitstatus_to_exitcode(wait_status)
 raise SystemExit(exit_code if exit_code >= 0 else 128 - exit_code)
@@ -250,13 +250,13 @@ echo ""
 echo "Update exit code: $UPDATE_EXIT"
 if [ "$UPDATE_EXIT" -ne 0 ]; then
   UPDATE_FAILED=1
-  openclaw_e2e_print_log "$UPDATE_LOG"
+  carapace_e2e_print_log "$UPDATE_LOG"
 fi
 
 # Keep inspecting after a non-zero update so the log shows whether the unit was
 # rewritten, but fail immediately if update never reached the service refresh.
 if [ "$UPDATE_EXIT" -ne 0 ] && ! grep -q "gateway" "$UPDATE_LOG" 2>/dev/null; then
-  echo "FAIL: openclaw update failed before reaching the package install step"
+  echo "FAIL: carapace update failed before reaching the package install step"
   exit 1
 fi
 
@@ -290,7 +290,7 @@ echo ""
 # Check 1: Did the baked node path change from A to B?
 if [ "$BAKED_NODE_AFTER" = "$NODE_B" ] && [ "$BAKED_NODE_BEFORE" != "$NODE_B" ]; then
   echo "BUG CONFIRMED: Gateway service now points at node-B ($NODE_B)"
-  echo "   but OpenClaw package is still under node-A prefix ($PACKAGE_ROOT_A)."
+  echo "   but Carapace package is still under node-A prefix ($PACKAGE_ROOT_A)."
   echo "   The gateway will use node-B to run an entrypoint that may reference"
   echo "   node-A dependencies or may not exist under node-B global prefix."
 elif [ "$BAKED_NODE_AFTER" = "$BAKED_NODE_BEFORE" ]; then
@@ -299,11 +299,11 @@ else
   echo "CHANGED: Node path changed from $BAKED_NODE_BEFORE to $BAKED_NODE_AFTER"
 fi
 
-# Check 2: Is the OpenClaw package installed under node-B npm prefix?
-if [ -f "$NPM_PREFIX_B/lib/node_modules/openclaw/package.json" ]; then
-  echo "WARNING: OpenClaw was ALSO installed under node-B prefix (split install)"
+# Check 2: Is the Carapace package installed under node-B npm prefix?
+if [ -f "$NPM_PREFIX_B/lib/node_modules/carapace/package.json" ]; then
+  echo "WARNING: Carapace was ALSO installed under node-B prefix (split install)"
 else
-  echo "OK: OpenClaw is NOT under node-B prefix (expected: only under node-A)"
+  echo "OK: Carapace is NOT under node-B prefix (expected: only under node-A)"
 fi
 
 # Check 3: Does the entrypoint in the unit file actually exist?
@@ -316,7 +316,7 @@ fi
 
 # Check 4: Were there any warnings about split install in the update output?
 if [ -f "$UPDATE_LOG" ]; then
-  if grep -qi "Shell OpenClaw root differs" "$UPDATE_LOG" 2>/dev/null; then
+  if grep -qi "Shell Carapace root differs" "$UPDATE_LOG" 2>/dev/null; then
     echo "OK: Update warned about split root"
   fi
   if grep -qi "Managed gateway service Node" "$UPDATE_LOG" 2>/dev/null; then
@@ -330,7 +330,7 @@ echo "── Step 9: Verify the gateway after $OUTPUT_MODE update ──"
 
 GATEWAY_START_FAILED=0
 if [ -f "$GATEWAY_UNIT_PATH" ]; then
-  if ! systemctl --user is-active --quiet openclaw-gateway.service; then
+  if ! systemctl --user is-active --quiet carapace-gateway.service; then
     echo "FAIL: update did not leave the managed gateway running"
     exit 1
   fi
@@ -366,7 +366,7 @@ NODE
     echo "BUG: Gateway healthz probe failed with the post-update unit"
     GATEWAY_START_FAILED=1
     GATEWAY_HEALTH_FAILED=1
-    openclaw_e2e_print_log "$GATEWAY_DAEMON_LOG"
+    carapace_e2e_print_log "$GATEWAY_DAEMON_LOG"
   fi
 fi
 
@@ -382,7 +382,7 @@ EXIT_CODE=0
 if [ "$BAKED_NODE_AFTER" = "$NODE_B" ] && [ "$BAKED_NODE_BEFORE" != "$NODE_B" ]; then
   EXIT_CODE=1
 fi
-if [ -f "$NPM_PREFIX_B/lib/node_modules/openclaw/package.json" ]; then
+if [ -f "$NPM_PREFIX_B/lib/node_modules/carapace/package.json" ]; then
   EXIT_CODE=1
 fi
 if [ "$ENTRYPOINT_FAILED" -ne 0 ]; then
@@ -401,7 +401,7 @@ if [ "$EXIT_CODE" -ne 0 ]; then
   exit "$EXIT_CODE"
 fi
 done
-systemctl --user stop openclaw-gateway.service
+systemctl --user stop carapace-gateway.service
 ' || CONTAINER_EXIT=$?
 
 echo ""

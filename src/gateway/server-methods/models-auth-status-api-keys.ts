@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import {
   listProviderEnvAuthLookupKeys,
@@ -15,7 +15,7 @@ import {
   resolveUsableCustomProviderApiKey,
 } from "../../agents/model-auth.js";
 import type { ProviderAuthAliasLookupParams } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { hasConfiguredSecretInput } from "../../config/types.secrets.js";
 import type { readPreparedCatalog } from "../server-model-catalog-auth.js";
 import type { ModelAuthStatusProvider } from "./models-auth-status.types.js";
@@ -32,7 +32,7 @@ function resolveEnvVarName(source: string): string | undefined {
 }
 
 export function resolveProviderApiKeys(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   store: AuthProfileStore,
   authAliasLookupParams: PreparedAuthMetadataLookupParams,
 ): Map<string, ModelAuthStatusProvider["apiKey"]> {

@@ -42,7 +42,7 @@ describe("configured agent scanning", () => {
           scope: "agent",
           agentId: "guest",
           value: "all",
-          source: "oc://openclaw.config/agents/entries/guest/sandbox/mode",
+          source: "oc://carapace.config/agents/entries/guest/sandbox/mode",
         }),
       ]),
     );
@@ -54,7 +54,7 @@ describe("configured agent scanning", () => {
         expect.objectContaining({
           scope: "agent",
           agentId: "guest",
-          source: "oc://openclaw.config/agents/entries/guest/tools/elevated/enabled",
+          source: "oc://carapace.config/agents/entries/guest/tools/elevated/enabled",
           value: false,
         }),
       ]),
@@ -64,7 +64,7 @@ describe("configured agent scanning", () => {
         expect.objectContaining({
           scope: "agent",
           agentId: "guest",
-          source: "oc://openclaw.config/agents/entries/guest/sandbox/workspaceAccess",
+          source: "oc://carapace.config/agents/entries/guest/sandbox/workspaceAccess",
           value: "none",
         }),
       ]),
@@ -73,7 +73,7 @@ describe("configured agent scanning", () => {
       ref: "openai/gpt-5.6-luna",
       provider: "openai",
       model: "gpt-5.6-luna",
-      source: 'oc://openclaw.config/agents/entries/guest/models/"openai/gpt-5.6-luna"',
+      source: 'oc://carapace.config/agents/entries/guest/models/"openai/gpt-5.6-luna"',
     });
   });
 
@@ -97,14 +97,14 @@ describe("configured agent scanning", () => {
           scope: "agent",
           agentId: "legacy",
           value: "all",
-          source: "oc://openclaw.config/agents/list/#0/sandbox/mode",
+          source: "oc://carapace.config/agents/list/#0/sandbox/mode",
         }),
       ]),
     );
     expect(evidence.modelRefs).toContainEqual(
       expect.objectContaining({
         ref: "openai/gpt-5.6-luna",
-        source: 'oc://openclaw.config/agents/list/#0/models/"openai/gpt-5.6-luna"',
+        source: 'oc://carapace.config/agents/list/#0/models/"openai/gpt-5.6-luna"',
       }),
     );
   });
@@ -153,7 +153,7 @@ describe("configured agent scanning", () => {
         expect.objectContaining({
           kind: "mode",
           agentId: "team/qa",
-          source: 'oc://openclaw.config/agents/entries/"team/qa"/sandbox/mode',
+          source: 'oc://carapace.config/agents/entries/"team/qa"/sandbox/mode',
         }),
       ]),
     );
@@ -215,14 +215,14 @@ describe("scanPolicyToolPosture", () => {
           id: "reviewer-exec-security",
           kind: "execSecurity",
           value: "allowlist",
-          source: "oc://openclaw.config/agents/entries/reviewer/tools/exec/mode",
+          source: "oc://carapace.config/agents/entries/reviewer/tools/exec/mode",
           explicit: true,
         }),
         expect.objectContaining({
           id: "reviewer-exec-ask",
           kind: "execAsk",
           value: "on-miss",
-          source: "oc://openclaw.config/agents/entries/reviewer/tools/exec/mode",
+          source: "oc://carapace.config/agents/entries/reviewer/tools/exec/mode",
           explicit: true,
         }),
       ]),
@@ -243,13 +243,13 @@ describe("scanPolicyToolPosture", () => {
           id: "reviewer-exec-security",
           kind: "execSecurity",
           value: "allowlist",
-          source: "oc://openclaw.config/tools/exec/mode",
+          source: "oc://carapace.config/tools/exec/mode",
         }),
         expect.objectContaining({
           id: "reviewer-exec-ask",
           kind: "execAsk",
           value: "always",
-          source: "oc://openclaw.config/agents/list/#0/tools/exec/ask",
+          source: "oc://carapace.config/agents/list/#0/tools/exec/ask",
         }),
       ]),
     );
@@ -277,7 +277,7 @@ describe("scanPolicyChannels", () => {
         enabled: true,
         id: "telegram",
         provider: "telegram",
-        source: "oc://openclaw.config/channels/telegram",
+        source: "oc://carapace.config/channels/telegram",
       },
     ]);
   });
@@ -445,7 +445,7 @@ describe("scanPolicyExecApprovals", () => {
     const evidence = scanPolicyExecApprovals(
       JSON.stringify({
         version: 1,
-        socket: { path: "/tmp/openclaw.sock", token: "secret-token" },
+        socket: { path: "/tmp/carapace.sock", token: "secret-token" },
         defaults: { security: "full", ask: "off", askFallback: "full", autoAllowSkills: true },
         agents: {
           sebby: {

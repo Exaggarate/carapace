@@ -2,17 +2,17 @@ import { createHmac, randomBytes } from "node:crypto";
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { detectMime, kindFromMime } from "@openclaw/media-core/mime";
+import { detectMime, kindFromMime } from "@carapace/media-core/mime";
 import {
   asDateTimestampMs,
   resolveTimestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import {
   type AgentAvatarResolution,
   resolvePublicAgentAvatarSource,
 } from "../agents/identity-avatar.js";
 import { resolveGatewayPublicOrigin } from "../config/gateway-public-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   matchRootFileOpenFailure,
   openRootFileSync,
@@ -125,7 +125,7 @@ const loadAvatarThumbnail = createLazyRuntimeModule(
 
 type ControlUiRequestOptions = {
   basePath?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   terminalEnabled?: boolean;
   agentId?: string;
   root?: ControlUiRootState;
@@ -150,7 +150,7 @@ export type ControlUiRootState =
   | { kind: "failed" }
   | { kind: "missing" };
 
-const CONTROL_UI_NAMESPACE_PREFIX = "/__openclaw__/";
+const CONTROL_UI_NAMESPACE_PREFIX = "/__carapace__/";
 /** Anchors bundled assets before deep-linked documents begin preloading. */
 function rewriteControlUiIndexHtmlAssetHrefs(
   html: string,
@@ -227,7 +227,7 @@ function respondControlUiAssetsUnavailable(
   const message = options?.preparing
     ? "Control UI assets are being prepared. Try again shortly."
     : options?.failed
-      ? "Control UI assets could not be prepared. Check the Gateway logs or run `openclaw doctor --fix`."
+      ? "Control UI assets could not be prepared. Check the Gateway logs or run `carapace doctor --fix`."
       : options?.configuredRootPath
         ? `Control UI assets not found at ${options.configuredRootPath}. Build them with \`pnpm ui:build\` (auto-installs UI deps), or update gateway.controlUi.root.`
         : CONTROL_UI_ASSETS_MISSING_MESSAGE;
@@ -526,7 +526,7 @@ export async function handleControlUiAssistantMediaRequest(
   res: ServerResponse,
   opts?: {
     basePath?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
     auth?: ResolvedGatewayAuth;
     trustedProxies?: string[];
@@ -717,7 +717,7 @@ export async function handleControlUiAvatarRequest(
   res: ServerResponse,
   opts: {
     basePath?: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     auth?: ResolvedGatewayAuth;
     trustedProxies?: string[];
     allowRealIpFallback?: boolean;
@@ -931,25 +931,25 @@ function isSafeRelativePath(relPath: string) {
 
 // Path served by the gateway under the default Control UI namespace when no
 // `gateway.controlUi.basePath` is configured. The SPA is mounted at
-// `/__openclaw__/`, so a browser that opens the default entry infers
-// `/__openclaw__` as its base path (see `inferBasePathFromPathname`) and fetches
-// `/__openclaw__/control-ui-config.json`. Accept that namespaced alias so the
+// `/__carapace__/`, so a browser that opens the default entry infers
+// `/__carapace__` as its base path (see `inferBasePathFromPathname`) and fetches
+// `/__carapace__/control-ui-config.json`. Accept that namespaced alias so the
 // default entry resolves its bootstrap config instead of 404ing.
 const CONTROL_UI_DEFAULT_NAMESPACE_BOOTSTRAP_CONFIG_PATH = `${CONTROL_UI_NAMESPACE_PREFIX.replace(
   /\/$/,
   "",
 )}${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}`;
 
-// Single-underscore `/__openclaw` prefix used by the pre-base-path-relative
+// Single-underscore `/__carapace` prefix used by the pre-base-path-relative
 // bootstrap endpoint. Before #66946 made the config path base-path-relative,
 // `CONTROL_UI_BOOTSTRAP_CONFIG_PATH` was hard-coded to
-// `/__openclaw/control-ui-config.json`, so current main and the v2026.6.1
+// `/__carapace/control-ui-config.json`, so current main and the v2026.6.1
 // release serve and document that exact path under an empty base path.
-const LEGACY_CONTROL_UI_NAMESPACE_PREFIX = "/__openclaw";
+const LEGACY_CONTROL_UI_NAMESPACE_PREFIX = "/__carapace";
 
 // The old documented no-base-path bootstrap endpoint
-// (`/__openclaw/control-ui-config.json`, single underscore). It is derived from
-// the legacy `/__openclaw` namespace joined with the canonical config constant
+// (`/__carapace/control-ui-config.json`, single underscore). It is derived from
+// the legacy `/__carapace` namespace joined with the canonical config constant
 // so it tracks any rename of the config filename. Kept as an empty-base-path
 // compatibility alias so older bundles and clients that fetch the previously
 // documented endpoint keep receiving config after upgrading instead of 404ing.
@@ -961,19 +961,19 @@ const LEGACY_BOOTSTRAP_CONFIG_PATH = `${LEGACY_CONTROL_UI_NAMESPACE_PREFIX}${CON
  * The canonical endpoint is the configured base path joined with the shared
  * bootstrap constant (or the bare constant when no base path is configured).
  * For every base path (configured or empty) we additionally accept the legacy
- * single-underscore suffix `${basePath}/__openclaw/control-ui-config.json` that
+ * single-underscore suffix `${basePath}/__carapace/control-ui-config.json` that
  * current main and v2026.6.1 serve and document, so older bundles and clients
  * that still request the pre-#66946 endpoint keep receiving config after an
  * upgrade instead of 404ing. When no base path is configured we further accept
- * the default-namespace alias `/__openclaw__/control-ui-config.json`, which is
- * what the default `/__openclaw__/` entry requests after inferring its base path
+ * the default-namespace alias `/__carapace__/control-ui-config.json`, which is
+ * what the default `/__carapace__/` entry requests after inferring its base path
  * from the URL. All compatibility endpoints are preserved; no path is removed.
  */
 function matchesControlUiBootstrapConfigPath(pathname: string, basePath: string): boolean {
   // Canonical and legacy suffixes apply under both an empty and a configured
   // base path. `LEGACY_BOOTSTRAP_CONFIG_PATH` already starts with the legacy
-  // `/__openclaw` namespace, so joining it with the base path yields
-  // `${basePath}/__openclaw/control-ui-config.json` (or the bare legacy path
+  // `/__carapace` namespace, so joining it with the base path yields
+  // `${basePath}/__carapace/control-ui-config.json` (or the bare legacy path
   // when no base path is configured).
   if (
     pathname === `${basePath}${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}` ||
@@ -981,7 +981,7 @@ function matchesControlUiBootstrapConfigPath(pathname: string, basePath: string)
   ) {
     return true;
   }
-  // The default `/__openclaw__/` namespace alias only applies when no base path
+  // The default `/__carapace__/` namespace alias only applies when no base path
   // is configured; with a configured base path the canonical endpoint already
   // lives under that base path and this inferred alias does not apply.
   return basePath === "" && pathname === CONTROL_UI_DEFAULT_NAMESPACE_BOOTSTRAP_CONFIG_PATH;

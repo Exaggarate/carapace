@@ -1,6 +1,6 @@
 // Error payload tests ensure embedded runs convert provider/tool failures into
 // concise user-facing replies without leaking raw provider bodies or secrets.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 // Classification fixtures here exercise message/status tables. Provider-attributed
 // structured signals otherwise cross the plugin-consult gate and cold-materialize

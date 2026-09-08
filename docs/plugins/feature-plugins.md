@@ -14,7 +14,7 @@ transcript, and tool results.
 
 All plugin APIs are [experimental](/plugins/sdk-overview#api-stability),
 including the backend and browser contracts on this page. Pin and test your
-OpenClaw host version.
+Carapace host version.
 
 Native UI runs trusted JavaScript in the Control UI origin. Install it only from
 authors you trust. Native modules share the signed-in operator's Gateway
@@ -53,8 +53,8 @@ setting. Disabling it prevents custom native UI from loading; it does not
 uninstall plugins or disable their backend operations, tools, or services.
 Ordinary plugin APIs, sandboxed dashboard widgets, and MCP Apps are unaffected.
 
-Native UI shipped with OpenClaw remains available for enabled bundled plugins,
-including Workboard. OpenClaw determines bundled status from the loaded
+Native UI shipped with Carapace remains available for enabled bundled plugins,
+including Workboard. Carapace determines bundled status from the loaded
 plugin's origin, not its name or a manifest claim. A separately installed copy
 uses the custom-plugin setting.
 
@@ -64,13 +64,13 @@ Enable the [Custom plugin UI lab](/plugins/feature-plugins#enable-custom-plugin-
 scaffold's browser views.
 
 ```bash
-openclaw plugins init draft-review --name "Draft Review" --type feature
+carapace plugins init draft-review --name "Draft Review" --type feature
 cd draft-review
 npm install
 npm run build
 npm run validate
-openclaw plugins install .
-openclaw gateway restart
+carapace plugins install .
+carapace gateway restart
 ```
 
 The scaffold includes a draft-analysis operation, an agent tool, a native page,
@@ -83,9 +83,9 @@ The project has three public SDK imports:
 
 | Import                                 | Purpose                                                                                          |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `openclaw/plugin-sdk/feature-contract` | Shared operation schemas, typed clients, and event subscriptions; browser safe.                  |
-| `openclaw/plugin-sdk/feature-plugin`   | Register backend implementations as session actions, optional agent tools, and command adapters. |
-| `openclaw/plugin-sdk/control-ui`       | Native browser activation, host capabilities, contribution types, and component mounts.          |
+| `carapace/plugin-sdk/feature-contract` | Shared operation schemas, typed clients, and event subscriptions; browser safe.                  |
+| `carapace/plugin-sdk/feature-plugin`   | Register backend implementations as session actions, optional agent tools, and command adapters. |
+| `carapace/plugin-sdk/control-ui`       | Native browser activation, host capabilities, contribution types, and component mounts.          |
 
 Browser code owns its DOM and bundles its framework dependencies. It does not
 import Control UI internals or return the host framework's templates.
@@ -224,17 +224,17 @@ ownership.
 
 ```json
 {
-  "openclaw": {
+  "carapace": {
     "extensions": ["./dist/index.js"],
     "controlUi": "./src/control-ui.ts"
   }
 }
 ```
 
-`openclaw plugins build` bundles that source and its browser dependencies with
+`carapace plugins build` bundles that source and its browser dependencies with
 the plugin's `esbuild` dev dependency. It writes immutable JavaScript and CSS
 under `dist/control-ui/<content-hash>/`, then publishes their paths in
-`openclaw.plugin.json.controlUi`. A failed build leaves the previous manifest
+`carapace.plugin.json.controlUi`. A failed build leaves the previous manifest
 and assets usable. `plugins validate` and `plugins build --check` detect stale
 source, assets, or generated metadata.
 
@@ -245,8 +245,8 @@ paths and supported glob imports work; unresolved dynamic imports, indirect
 `require` calls, and `require.resolve` are rejected. Each asset is limited to
 4 MiB, with an 8 MiB limit for the whole plugin browser build.
 
-Plugins with prebuilt browser bundles can omit `package.json.openclaw.controlUi`
-and declare the built entry and styles in `openclaw.plugin.json.controlUi`.
+Plugins with prebuilt browser bundles can omit `package.json.carapace.controlUi`
+and declare the built entry and styles in `carapace.plugin.json.controlUi`.
 Packing and serving include JavaScript and CSS dependencies under that entry's
 directory, including nested chunks and imported stylesheets, with the same byte
 limits. TypeScript sources, source maps, and hidden files are excluded. Keep all browser
@@ -294,12 +294,12 @@ tool catalog.
 After building and validating, produce an import archive:
 
 ```bash
-openclaw plugins pack --root . --out ./draft-review.tgz --json
+carapace plugins pack --root . --out ./draft-review.tgz --json
 ```
 
 The receipt contains the absolute archive path, SHA-256 digest, plugin id, and
 `plugin_activate_artifact` request. Packing bundles backend dependencies, keeps
-the host `openclaw` imports external, and includes the manifest and compiled UI.
+the host `carapace` imports external, and includes the manifest and compiled UI.
 The archive contains no install scripts or runtime package dependencies. It
 must have one backend entry; features that require separate runtime files need
 the normal reviewed package-install flow. Packing rejects backend references to
@@ -315,7 +315,7 @@ Provide an entry compiled without those loaders so packing can bundle its
 dependencies, or use the normal package-install flow.
 
 The system agent can propose activation with that path and digest. Before
-approval, OpenClaw verifies and retains the exact archive and inspects its
+approval, Carapace verifies and retains the exact archive and inspects its
 declared capabilities and native UI presence without executing the plugin.
 Approved application uses those retained bytes through the managed plugin
 installer. Changing the source file while approval is pending cannot change
@@ -324,7 +324,7 @@ what is installed. Existing install policy and capability checks still apply.
 Artifact approval does not enable the Custom plugin UI lab. The installed
 backend can run with that setting off; its native browser UI remains gated.
 
-Pending imports expire after one hour. OpenClaw keeps at most eight pending
+Pending imports expire after one hour. Carapace keeps at most eight pending
 archives of up to 32 MiB each and prunes expired or oldest imports when another
 proposal is prepared. An expired or evicted review requires a fresh proposal.
 Approved archives are retained separately as the install source, including when
@@ -333,12 +333,12 @@ an installer error leaves the final installation outcome uncertain.
 Artifact activation currently requires plugin configuration in the root config
 file without a root-level `$include`. For a `plugins` section containing only
 `$include: "plugins.json5"` (a single file under the config directory with no
-nested includes), use `openclaw plugins install <archive>` from a trusted shell.
+nested includes), use `carapace plugins install <archive>` from a trusted shell.
 The regular installer also rejects root-level, nested, and external include
 layouts; adjust those layouts before installation.
 
-Artifact activation also refuses to replace the plugin backing OpenClaw's active
-inference route. Stop OpenClaw and install that artifact from a trusted shell.
+Artifact activation also refuses to replace the plugin backing Carapace's active
+inference route. Stop Carapace and install that artifact from a trusted shell.
 
 After the Gateway restarts, inspect `plugins.controlUi.status` to see activation
 reports from currently connected Control UI clients. A report names the plugin

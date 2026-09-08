@@ -1,10 +1,10 @@
-// Summarizes channel token/account credential fields for `openclaw status --all`.
+// Summarizes channel token/account credential fields for `carapace status --all`.
 // The display path is intentionally secret-safe unless the caller explicitly requests disclosure.
 
-import { sha256HexPrefixCore } from "@openclaw/normalization-core/node-crypto";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sha256HexPrefixCore } from "@carapace/normalization-core/node-crypto";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { hasConfiguredUnavailableCredentialStatus } from "../../channels/account-snapshot-fields.js";
 import type { ChannelAccountSnapshot } from "../../channels/plugins/types.public.js";
 

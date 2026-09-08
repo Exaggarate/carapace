@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/channel-contract";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { runSignalSseLoop, type SignalStatusSink } from "./sse-reconnect.js";
 

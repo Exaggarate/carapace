@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveConversationCapabilityProfile } from "./conversation-capability-profile.js";
 import { createAdmittedHostCapabilityTestFixture } from "./harness/host-capability.test-support.js";
 import { resolveSandboxToolPolicyForAgent } from "./sandbox/tool-policy.js";
@@ -57,7 +57,7 @@ describe.each([false, true])(
       "applies $name policy to the real harness host tool surface",
       async ({ tools, allowed, sandboxed = true }) => {
         const workspaceDir = tempDirs.make("placement-computer-");
-        const config: OpenClawConfig = { plugins: { enabled: false }, tools };
+        const config: CarapaceConfig = { plugins: { enabled: false }, tools };
         const host = await createAdmittedHostCapabilityTestFixture({
           agentId: "main",
           runId: "run-computer",
@@ -85,7 +85,7 @@ describe.each([false, true])(
             includeBaseCodingTools: false,
             includeShellTools: false,
             includeChannelTools: false,
-            includeOpenClawTools: true,
+            includeCarapaceTools: true,
             includePluginTools: false,
           },
         };

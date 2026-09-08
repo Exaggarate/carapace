@@ -3,12 +3,12 @@ import type { DatabaseSync } from "node:sqlite";
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import { deferSqlitePostCommitPublication } from "../infra/sqlite-post-commit.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "./openclaw-state-db-readonly.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "./carapace-state-db-readonly.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import { emitUserProfilesChanged, publishUserProfileAliasChange } from "./user-profile-events.js";
 import { userProfilesDb } from "./user-profiles-internal.js";
 import { readGatewayOwnerProfileRows } from "./user-profiles-owner.js";
@@ -24,21 +24,21 @@ function ownerRepairRequired(db: DatabaseSync): boolean {
 }
 
 export function repairMergedGatewayOwnerProfile(
-  options: OpenClawStateDatabaseOptions & { shouldRepair: boolean },
+  options: CarapaceStateDatabaseOptions & { shouldRepair: boolean },
 ): { repaired: boolean; changes: string[]; warnings: string[] } {
   const unchanged = { repaired: false, changes: [], warnings: [] };
-  if (!withExistingOpenClawStateDatabaseReadOnly(({ db }) => ownerRepairRequired(db), options)) {
+  if (!withExistingCarapaceStateDatabaseReadOnly(({ db }) => ownerRepairRequired(db), options)) {
     return unchanged;
   }
   if (!options.shouldRepair) {
     return {
       ...unchanged,
       warnings: [
-        "The shared gateway owner profile requires repair. Run openclaw doctor --fix, then reconnect.",
+        "The shared gateway owner profile requires repair. Run carapace doctor --fix, then reconnect.",
       ],
     };
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       // Recheck under the writer lock; an earlier preview is not authority to mutate.
       if (!ownerRepairRequired(db)) {

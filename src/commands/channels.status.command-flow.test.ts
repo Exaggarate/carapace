@@ -11,7 +11,7 @@ const resolveDefaultAccountId = () => DEFAULT_ACCOUNT_ID;
 const mocks = vi.hoisted(() => ({
   callGateway: vi.fn(),
   resolveCommandConfigWithSecrets: vi.fn(),
-  readConfigFileSnapshot: vi.fn(async () => ({ path: "/tmp/openclaw.json" })),
+  readConfigFileSnapshot: vi.fn(async () => ({ path: "/tmp/carapace.json" })),
   requireValidConfig: vi.fn(),
   listChannelPlugins: vi.fn(),
   listConfiguredAnnounceChannelIdsForConfig: vi.fn((_params: unknown) => ["discord"]),
@@ -65,11 +65,11 @@ vi.mock("../plugins/official-external-plugin-repair-hints.js", () => ({
               pluginId: channelId,
               channelId,
               label: "Feishu",
-              installSpec: "@openclaw/feishu",
-              installCommand: "openclaw plugins install @openclaw/feishu",
-              doctorFixCommand: "openclaw doctor --fix",
+              installSpec: "@carapace/feishu",
+              installCommand: "carapace plugins install @carapace/feishu",
+              doctorFixCommand: "carapace doctor --fix",
               repairHint:
-                "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+                "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
             },
           ]
         : [],
@@ -347,13 +347,13 @@ describe("channelsStatusCommand SecretRef fallback flow", () => {
         [
           "gateway channels.status requires credentials before opening a websocket",
           "Fix: configure gateway.auth token/password, pair this device, or pass --token/--password.",
-          "Config: /tmp/openclaw.json",
+          "Config: /tmp/carapace.json",
         ].join("\n"),
       ),
       {
         name: "GatewayCredentialsRequiredError",
         method: "channels.status",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       },
     );
     mocks.callGateway.mockRejectedValue(error);
@@ -410,7 +410,7 @@ describe("channelsStatusCommand SecretRef fallback flow", () => {
     const joined = logs.join("\n");
     expect(joined).toContain("Missing official external plugins:");
     expect(joined).toContain(
-      "Feishu: Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu: Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
     );
   });
 
@@ -459,7 +459,7 @@ describe("channelsStatusCommand SecretRef fallback flow", () => {
           "gateway timeout after 3000ms",
           "Gateway target: wss://user:pass@gateway.example.com/socket?token=secret-token&keep=visible",
           "Gateway fallback: (wss://fallback-user:fallback-pass@[bad-host/socket?token=fallback-secret&keep=visible)",
-          "Source: env OPENCLAW_GATEWAY_URL",
+          "Source: env CARAPACE_GATEWAY_URL",
         ].join("\n"),
       ),
     );

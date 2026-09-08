@@ -2,26 +2,26 @@
 import {
   listNativeCommandSpecsForConfig,
   listSkillCommandsForAgents,
-} from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   mergeNativeCommandSpecs,
   type NativeCommandSpec,
-} from "openclaw/plugin-sdk/native-command-registry";
-import type { PluginCommandNativeCandidate } from "openclaw/plugin-sdk/plugin-command-runtime";
-import { danger, warn, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/native-command-registry";
+import type { PluginCommandNativeCandidate } from "carapace/plugin-sdk/plugin-command-runtime";
+import { danger, warn, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { DISCORD_VOICE_COMMAND_SPEC } from "../voice/command.js";
 
 export type DiscordProviderCommandSpec = NativeCommandSpec | PluginCommandNativeCandidate;
 
 const loadPluginCommandRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/plugin-command-runtime"),
+  () => import("carapace/plugin-sdk/plugin-command-runtime"),
 );
 
 export async function resolveDiscordProviderCommandSpecs(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   nativeEnabled: boolean;
   nativeSkillsEnabled: boolean;

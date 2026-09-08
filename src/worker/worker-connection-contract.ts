@@ -1,6 +1,6 @@
-import { toStructuredErrorObject } from "@openclaw/normalization-core/error-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { toStructuredErrorObject } from "@carapace/normalization-core/error-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { ClientOptions, WebSocket } from "ws";
 import type {
   WorkerConnectParams,

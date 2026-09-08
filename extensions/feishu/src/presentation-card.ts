@@ -1,5 +1,5 @@
 // Feishu plugin module implements presentation card behavior.
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-send-result";
 import {
   legacyInteractiveReplyToPresentation,
   normalizeLegacyInteractiveReply,
@@ -11,9 +11,9 @@ import {
   resolveLegacyInteractiveTextFallback,
   type MessagePresentationBlock,
   type MessagePresentationButton,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { markdownToIRWithMeta } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/interactive-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { markdownToIRWithMeta } from "carapace/plugin-sdk/text-chunking";
 import type { OutboundIdentity, ReplyPayload } from "../runtime-api.js";
 import { createFeishuCardInteractionEnvelope } from "./card-interaction.js";
 import { parseFeishuCommentTarget } from "./comment-target.js";
@@ -31,8 +31,8 @@ import {
 
 type NormalizedMessagePresentation = NonNullable<ReturnType<typeof normalizeMessagePresentation>>;
 type FeishuPresentationTextFormat = "plain" | "markdown";
-const RENDERED_FEISHU_CARD = Symbol("openclaw.renderedFeishuCard");
-const FEISHU_PRESENTATION_FALLBACK_MARKER = "__openclawPresentationFallback";
+const RENDERED_FEISHU_CARD = Symbol("carapace.renderedFeishuCard");
+const FEISHU_PRESENTATION_FALLBACK_MARKER = "__carapacePresentationFallback";
 
 export const FEISHU_PRESENTATION_CAPABILITIES = {
   supported: true,

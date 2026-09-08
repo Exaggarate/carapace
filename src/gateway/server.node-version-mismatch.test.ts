@@ -17,7 +17,7 @@ import {
 import { requestDevicePairing } from "../infra/device-pairing.js";
 import { configureNodeHost } from "../node-host/config.js";
 import type { NodeListNode } from "../shared/node-list-types.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { resolveRuntimeServiceVersion } from "../version.js";
 import { connectGatewayClient } from "./test-helpers.e2e.js";
@@ -144,7 +144,7 @@ describe("node host version mismatch guard", () => {
   );
 
   test("list and describe mark only the same-install device despite copied instance metadata", async () => {
-    const independent = await createOpenClawTestState({
+    const independent = await createCarapaceTestState({
       label: "node-independent",
       applyEnv: false,
     });
@@ -194,7 +194,7 @@ describe("node host version mismatch guard", () => {
   });
 
   test("independently paired stale node connects with the same-install instanceId", async () => {
-    const independent = await createOpenClawTestState({
+    const independent = await createCarapaceTestState({
       label: "node-independent-stale",
       applyEnv: false,
     });

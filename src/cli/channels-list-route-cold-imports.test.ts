@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resetPluginRuntimeStateForTest } from "../plugins/runtime.js";
 import {
   createColdPluginFixture,
@@ -11,7 +11,7 @@ import {
 } from "../plugins/test-helpers/cold-plugin-fixtures.js";
 
 const testState = vi.hoisted(() => ({
-  config: {} as OpenClawConfig,
+  config: {} as CarapaceConfig,
   json: [] as unknown[],
 }));
 
@@ -51,7 +51,7 @@ vi.mock("../runtime.js", () => ({
 
 import { tryRouteCli } from "./route.js";
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channels-list-route-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channels-list-route-"));
 
 afterAll(() => {
   fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -93,9 +93,9 @@ throw new Error("JSON inventory must not execute setup");`,
         },
       },
     });
-    vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    vi.stubEnv("OPENCLAW_HOME", path.join(tempRoot, "home"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempRoot, "state"));
+    vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    vi.stubEnv("CARAPACE_HOME", path.join(tempRoot, "home"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempRoot, "state"));
     testState.config = {
       channels: { "cold-channel": channel },
       plugins: {
@@ -105,7 +105,7 @@ throw new Error("JSON inventory must not execute setup");`,
     };
 
     for (const flags of [["--json"], ["--all", "--json"]]) {
-      await expect(tryRouteCli(["node", "openclaw", "channels", "list", ...flags])).resolves.toBe(
+      await expect(tryRouteCli(["node", "carapace", "channels", "list", ...flags])).resolves.toBe(
         true,
       );
     }

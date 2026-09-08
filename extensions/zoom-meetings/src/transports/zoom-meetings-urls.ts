@@ -1,4 +1,4 @@
-import type { MeetingBrowserCandidateTab } from "openclaw/plugin-sdk/meeting-runtime";
+import type { MeetingBrowserCandidateTab } from "carapace/plugin-sdk/meeting-runtime";
 
 type ZoomMeetingIdentity = {
   kind: "invitation" | "web-client";

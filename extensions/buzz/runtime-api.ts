@@ -1,2 +1,2 @@
-export type { ChannelGatewayContext } from "openclaw/plugin-sdk/channel-contract";
-export type { ChannelPlugin, PluginRuntime } from "openclaw/plugin-sdk/core";
+export type { ChannelGatewayContext } from "carapace/plugin-sdk/channel-contract";
+export type { ChannelPlugin, PluginRuntime } from "carapace/plugin-sdk/core";

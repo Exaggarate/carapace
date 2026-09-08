@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { ensureMemoryIndexSchema } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { ensureMemoryIndexSchema } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   inspectMemorySourceState,
@@ -101,8 +101,8 @@ describe("memory source inspection extra-path diagnostics", () => {
   it.skipIf(process.platform === "win32").each([true, false])(
     "reports skipped roots with canonical memory present: %s",
     async (canonicalMemory) => {
-      const workspaceDir = tempDirs.make("openclaw-memory-source-");
-      const vaultDir = tempDirs.make("openclaw-memory-vault-");
+      const workspaceDir = tempDirs.make("carapace-memory-source-");
+      const vaultDir = tempDirs.make("carapace-memory-vault-");
       await fs.mkdir(path.join(workspaceDir, "memory"));
       if (canonicalMemory) {
         await fs.writeFile(path.join(workspaceDir, "memory", "notes.md"), "# Canonical\n");
@@ -110,8 +110,8 @@ describe("memory source inspection extra-path diagnostics", () => {
       await fs.writeFile(path.join(vaultDir, "vault-note.md"), "# Vault\n");
       const linkedRoot = path.join(workspaceDir, "obsidian");
       await fs.symlink(vaultDir, linkedRoot, "dir");
-      await fs.mkdir(path.join(workspaceDir, ".openclaw-repair"));
-      await fs.symlink(vaultDir, path.join(workspaceDir, ".openclaw-repair", "root-memory"), "dir");
+      await fs.mkdir(path.join(workspaceDir, ".carapace-repair"));
+      await fs.symlink(vaultDir, path.join(workspaceDir, ".carapace-repair", "root-memory"), "dir");
 
       const inspection = await inspectMemorySourceState({
         db,
@@ -120,7 +120,7 @@ describe("memory source inspection extra-path diagnostics", () => {
           extraPaths: [
             { path: "obsidian" },
             { path: "./obsidian", pattern: "*.md" },
-            { path: ".openclaw-repair/root-memory" },
+            { path: ".carapace-repair/root-memory" },
             { path: "missing" },
           ],
           multimodal: { enabled: false, modalities: [], maxFileBytes: 0 },
@@ -140,9 +140,9 @@ describe("memory source inspection extra-path diagnostics", () => {
   it.skipIf(process.platform === "win32")(
     "keeps canonical extra roots eligible while skipping nested symlinks without a root warning",
     async () => {
-      const workspaceDir = tempDirs.make("openclaw-memory-source-");
-      const vaultDir = tempDirs.make("openclaw-memory-vault-");
-      const nestedTarget = tempDirs.make("openclaw-memory-nested-");
+      const workspaceDir = tempDirs.make("carapace-memory-source-");
+      const vaultDir = tempDirs.make("carapace-memory-vault-");
+      const nestedTarget = tempDirs.make("carapace-memory-nested-");
       await fs.mkdir(path.join(workspaceDir, "memory"));
       await fs.writeFile(path.join(workspaceDir, "memory", "notes.md"), "# Canonical\n");
       await fs.writeFile(path.join(vaultDir, "vault-note.md"), "# Vault\n");

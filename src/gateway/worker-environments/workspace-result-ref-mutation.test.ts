@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { requireGit } from "../../agents/worktrees/git.js";
 import { ManagedWorktreeService, SNAPSHOT_RETENTION_MS } from "../../agents/worktrees/service.js";
 import * as processExec from "../../process/exec.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   cleanupWorkerWorkspaceResultRef,
   deleteStagedWorkerWorkspaceResult,
@@ -24,16 +24,16 @@ const tempDirs = createTempDirTracker();
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
 async function repository() {
-  const root = await fs.realpath(tempDirs.make("openclaw-workspace-ref-"));
+  const root = await fs.realpath(tempDirs.make("carapace-workspace-ref-"));
   await requireGit(root, ["init", "--quiet", "-b", "main"]);
   await requireGit(root, [
     "-c",
-    "user.name=OpenClaw Test",
+    "user.name=Carapace Test",
     "-c",
     "user.email=test@localhost",
     "-c",
@@ -52,7 +52,7 @@ it("shares ref serialization and deferred retention between snapshots and result
   const other = await repository();
   let now = 1_700_000_000_000;
   const service = new ManagedWorktreeService({
-    env: { ...process.env, OPENCLAW_STATE_DIR: path.join(root, "state") },
+    env: { ...process.env, CARAPACE_STATE_DIR: path.join(root, "state") },
     now: () => now,
   });
   const worktree = await service.create({ repoRoot: root, name: "snapshot", baseRef: "HEAD" });
@@ -152,7 +152,7 @@ it("shares ref serialization and deferred retention between snapshots and result
   );
   await moveStagedWorkerWorkspaceResultToCleanup({ root: linked, stagedResultRef });
   await deleteWorkerWorkspaceResultCleanupRefs({ root: linked });
-  expect(await requireGit(root, ["for-each-ref", "--format=%(refname)", "refs/openclaw/"])).toBe(
+  expect(await requireGit(root, ["for-each-ref", "--format=%(refname)", "refs/carapace/"])).toBe(
     "",
   );
 });
@@ -162,7 +162,7 @@ it.each([false, true])(
   async (bare) => {
     let root = await repository();
     if (bare) {
-      const bareRoot = path.join(tempDirs.make("openclaw-workspace-bare-ref-"), "repo.git");
+      const bareRoot = path.join(tempDirs.make("carapace-workspace-bare-ref-"), "repo.git");
       await requireGit(root, ["clone", "--bare", "--no-hardlinks", "--", root, bareRoot]);
       root = await fs.realpath(bareRoot);
     }

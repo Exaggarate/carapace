@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../../../infra/clawhub-spec.js";
 import { parseRegistryNpmSpec } from "../../../infra/npm-registry-spec.js";
@@ -44,7 +44,7 @@ export function resolveRecordedInstallCandidate(params: {
   if (!record && params.candidate.trustedSourceLinkedOfficialInstall) {
     const packageName = parseRegistryNpmSpec(params.candidate.npmSpec ?? "")?.name;
     const officialReleasePackage =
-      packageName?.startsWith("@openclaw/") &&
+      packageName?.startsWith("@carapace/") &&
       listOfficialExternalPluginCatalogEntries().some(
         (entry) =>
           entry.source === "official" &&
@@ -55,7 +55,7 @@ export function resolveRecordedInstallCandidate(params: {
       );
     if (officialReleasePackage) {
       // Formerly bundled plugins have no recorded selector; restore the core's release cohort.
-      return { ...params.candidate, versionBoundToOpenClaw: true };
+      return { ...params.candidate, versionBoundToCarapace: true };
     }
   }
   const recordedSource =
@@ -148,7 +148,7 @@ type ConfiguredNpmPluginTarget = Parameters<typeof resolveNpmInstallSpecsForUpda
 
 /** Metadata-only inventory for the same npm targets used by post-core sync and repair. */
 export async function collectConfiguredNpmPluginTargets(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   targetVersion: string;
   channel: UpdateChannel;
@@ -229,7 +229,7 @@ export async function collectConfiguredNpmPluginTargets(params: {
           officialPackageName: selected.trustedSourceLinkedOfficialInstall
             ? parseRegistryNpmSpec(source.spec)?.name
             : undefined,
-          versionBoundToCore: selected.versionBoundToOpenClaw,
+          versionBoundToCore: selected.versionBoundToCarapace,
         });
       }
     } else if (record?.source === "npm") {
@@ -239,7 +239,7 @@ export async function collectConfiguredNpmPluginTargets(params: {
         syncOfficialPluginInstalls: true,
         updateChannel: params.channel,
         coreVersion: params.targetVersion,
-        versionBoundToCore: candidate?.versionBoundToOpenClaw,
+        versionBoundToCore: candidate?.versionBoundToCarapace,
       });
       if (target && parseRegistryNpmSpec(target.spec)) {
         targets.push({ pluginId, ...target });

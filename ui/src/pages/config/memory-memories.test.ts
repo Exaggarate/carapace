@@ -25,7 +25,7 @@ function deferred<T>() {
 }
 
 function createElement(request: Request, advertised = true) {
-  const element = document.createElement("openclaw-memory-memories") as MemoryMemoriesTestElement;
+  const element = document.createElement("carapace-memory-memories") as MemoryMemoriesTestElement;
   element.client = { request } as unknown as GatewayBrowserClient;
   element.connected = true;
   element.methodAdvertised = advertised;
@@ -305,7 +305,7 @@ describe("MemoryMemoriesElement", () => {
       const warning =
         "Memory index is stale: index scope changed (owner: configuration, code: scope). Search results may be incomplete.";
       const action =
-        "Run: openclaw memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.";
+        "Run: carapace memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.";
       const fresh = { ...result, snippet: "Freshly indexed Ada prefers careful reviews." };
       const request = vi
         .fn<Request>()

@@ -4,14 +4,14 @@ import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import type { Selectable, Updateable } from "kysely";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import { ensureSessionRepositoryWorkspaceSchema } from "./openclaw-state-db-schema-additive.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB, SessionRepositoryWorkspaces } from "./openclaw-state-db.generated.js";
+import { ensureSessionRepositoryWorkspaceSchema } from "./carapace-state-db-schema-additive.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB, SessionRepositoryWorkspaces } from "./carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "./carapace-state-db.js";
 
 export type SessionRepositoryWorkspaceRecord = {
   workspaceId: string;
@@ -40,7 +40,7 @@ const table = "session_repository_workspaces";
 const ensured = new WeakSet<DatabaseSync>();
 const query = (db: DatabaseSync) => getNodeSqliteKysely<Pick<DB, typeof table>>(db);
 const manifestPattern = /^sha256:[a-f0-9]{64}$/u;
-const resultRefPattern = /^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u;
+const resultRefPattern = /^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u;
 
 function bounded(value: string, field: string, limit: number): string {
   const result = value.trim();
@@ -70,13 +70,13 @@ function project(row: Selectable<SessionRepositoryWorkspaces>): SessionRepositor
 }
 
 export function createSessionRepositoryWorkspaceStore(
-  options: { database?: OpenClawStateDatabase; now?: () => number } = {},
+  options: { database?: CarapaceStateDatabase; now?: () => number } = {},
 ) {
-  const databasePath = (options.database ?? openOpenClawStateDatabase()).path;
+  const databasePath = (options.database ?? openCarapaceStateDatabase()).path;
   const now = options.now ?? Date.now;
-  const read = () => openOpenClawStateDatabase({ path: databasePath }).db;
+  const read = () => openCarapaceStateDatabase({ path: databasePath }).db;
   const write = <T>(operation: (db: DatabaseSync) => T) =>
-    runOpenClawStateWriteTransaction(({ db }) => operation(db), { path: databasePath });
+    runCarapaceStateWriteTransaction(({ db }) => operation(db), { path: databasePath });
   const ensure = () => {
     const db = read();
     if (!ensured.has(db)) {
@@ -198,7 +198,7 @@ export function createSessionRepositoryWorkspaceStore(
               run_setup_script: input.runSetupScript ? 1 : 0,
               base_commit: null,
               base_manifest_hash: null,
-              branch: branch ?? `openclaw/${workspaceId}`,
+              branch: branch ?? `carapace/${workspaceId}`,
               checkpoint_ref: null,
               manifest_hash: null,
               revision: 0,

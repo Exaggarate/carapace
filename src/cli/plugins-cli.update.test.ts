@@ -2,7 +2,7 @@
 import path from "node:path";
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { ClawHubTrustErrorCode } from "../infra/clawhub-install-trust.js";
 import { resolveRegistryUpdateChannel } from "../infra/update-channels.js";
 import type { PluginCapabilityConsentReview } from "../plugins/capability-summary.js";
@@ -36,7 +36,7 @@ import {
 } from "./plugins-cli-test-helpers.js";
 import { registerPluginsCli } from "./plugins-cli.js";
 
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_CARAPACE_NIX_MODE = process.env.CARAPACE_NIX_MODE;
 const ORIGINAL_STDIN_TTY = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
 const ORIGINAL_STDOUT_TTY = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
 
@@ -68,7 +68,7 @@ function createTrackedPluginConfig(params: {
   pluginId: string;
   spec: string;
   resolvedName?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     plugins: {
       installs: {
@@ -80,7 +80,7 @@ function createTrackedPluginConfig(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function createCapabilityConsentReview(): PluginCapabilityConsentReview {
@@ -142,18 +142,18 @@ function expectSingleCallParams(mockFn: ReturnType<typeof vi.fn>) {
 }
 
 function primeUpdateConfigSnapshot(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configPath?: string;
   hash?: string;
-  loadedConfig?: OpenClawConfig;
+  loadedConfig?: CarapaceConfig;
   parsed?: Record<string, unknown>;
-  runtimeConfig?: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  runtimeConfig?: CarapaceConfig;
+  sourceConfig?: CarapaceConfig;
   valid?: boolean;
   includeFileHashesForWrite?: Record<string, string>;
   includeFileTargetsForWrite?: Record<string, string>;
 }) {
-  const configPath = params.configPath ?? path.join(process.cwd(), "openclaw.json5");
+  const configPath = params.configPath ?? path.join(process.cwd(), "carapace.json5");
   const parsed = params.parsed ?? (params.config as Record<string, unknown>);
   const sourceConfig = params.sourceConfig ?? params.config;
   const runtimeConfig = params.runtimeConfig ?? params.config;
@@ -186,10 +186,10 @@ function primeUpdateConfigSnapshot(params: {
   return prepared;
 }
 
-function primeBlockedUpdateConfig(section: "hooks" | "plugins", config: OpenClawConfig): void {
+function primeBlockedUpdateConfig(section: "hooks" | "plugins", config: CarapaceConfig): void {
   const externalPath = path.join(
     path.parse(process.cwd()).root,
-    "external-openclaw",
+    "external-carapace",
     `${section}.json5`,
   );
   primeUpdateConfigSnapshot({
@@ -202,7 +202,7 @@ function primeBlockedUpdateConfig(section: "hooks" | "plugins", config: OpenClaw
 }
 
 function primePluginUpdate(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   outcomes: Awaited<ReturnType<typeof updateNpmInstalledPluginsMock>>["outcomes"] = [],
   changed = false,
   transactions?: PluginInstallTransaction[],
@@ -223,20 +223,20 @@ function primePluginUpdate(
   });
 }
 
-function primeBravePluginRecordUpdate(config: OpenClawConfig) {
+function primeBravePluginRecordUpdate(config: CarapaceConfig) {
   const previousRecords = {
     brave: {
       source: "npm",
-      spec: "@openclaw/brave-plugin@2026.6.11-beta.2",
+      spec: "@carapace/brave-plugin@2026.6.11-beta.2",
       installPath: "/tmp/brave-beta",
-      resolvedName: "@openclaw/brave-plugin",
+      resolvedName: "@carapace/brave-plugin",
       resolvedVersion: "2026.6.11-beta.2",
     },
   } as const;
   const nextRecords = {
     brave: {
       ...previousRecords.brave,
-      spec: "@openclaw/brave-plugin@2026.6.11",
+      spec: "@carapace/brave-plugin@2026.6.11",
       installPath: "/tmp/brave-stable",
       resolvedVersion: "2026.6.11",
     },
@@ -249,7 +249,7 @@ function primeBravePluginRecordUpdate(config: OpenClawConfig) {
         ...config.plugins,
         installs: nextRecords,
       },
-    } as OpenClawConfig,
+    } as CarapaceConfig,
     [{ pluginId: "brave", status: "updated", message: "Updated brave." }],
     true,
   );
@@ -267,12 +267,12 @@ async function expectSkippedClawHubPluginUpdate(params: {
       installs: {
         demo: {
           source: "clawhub",
-          spec: params.spec ?? "clawhub:@openclaw/plugin-demo",
-          clawhubPackage: "@openclaw/plugin-demo",
+          spec: params.spec ?? "clawhub:@carapace/plugin-demo",
+          clawhubPackage: "@carapace/plugin-demo",
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   pluginCliConfigMock.mockReturnValue(config);
   setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
   primePluginUpdate(config, [
@@ -298,10 +298,10 @@ describe("plugins cli update", () => {
 
   afterEach(() => {
     restoreTty();
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    if (ORIGINAL_CARAPACE_NIX_MODE === undefined) {
+      delete process.env.CARAPACE_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.CARAPACE_NIX_MODE = ORIGINAL_CARAPACE_NIX_MODE;
     }
   });
 
@@ -323,17 +323,17 @@ describe("plugins cli update", () => {
   });
 
   it("refuses plugin updates in Nix mode before package-manager work", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.CARAPACE_NIX_MODE;
+    process.env.CARAPACE_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "update", "--all"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "CARAPACE_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.CARAPACE_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.CARAPACE_NIX_MODE = previous;
       }
     }
 
@@ -343,7 +343,7 @@ describe("plugins cli update", () => {
   });
 
   it("previews plugin updates in Nix mode without acquiring a lease or writing state", async () => {
-    process.env.OPENCLAW_NIX_MODE = "1";
+    process.env.CARAPACE_NIX_MODE = "1";
     const config = createTrackedPluginConfig({
       pluginId: "alpha",
       spec: "@acme/alpha@1.0.0",
@@ -383,7 +383,7 @@ describe("plugins cli update", () => {
     { id: "constructor", args: [] },
     { id: "@acme/missing-plugin@beta", args: [] },
   ])("rejects untracked update target $id $args", async ({ id, args }) => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     primeUpdateConfigSnapshot({ config });
     primePluginUpdate(config, [
       { pluginId: id, status: "skipped", message: `No install record for "${id}".` },
@@ -417,7 +417,7 @@ describe("plugins cli update", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeUpdateConfigSnapshot({ config });
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
 
@@ -437,7 +437,7 @@ describe("plugins cli update", () => {
     { label: "a stale child-keyed owner", args: ["pack/one"] },
     { label: "update all", args: ["--all"] },
   ])("rejects ambiguous package paths for $label", async ({ args }) => {
-    const sharedPath = "/tmp/openclaw-ambiguous-update-pack";
+    const sharedPath = "/tmp/carapace-ambiguous-update-pack";
     const installRecords = {
       "pack/one": {
         source: "npm" as const,
@@ -450,7 +450,7 @@ describe("plugins cli update", () => {
         installPath: sharedPath,
       },
     };
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     primeUpdateConfigSnapshot({ config });
     setInstalledPluginIndexInstallRecords(installRecords);
 
@@ -464,7 +464,7 @@ describe("plugins cli update", () => {
     ["demo-hooks", undefined],
     ["@acme/demo-hooks", "@acme/demo-hooks"],
   ])("updates tracked hook packs through plugins update (%s)", async (target, specOverride) => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const nextConfig = cfg;
 
     primeUpdateConfigSnapshot({ config: cfg });
@@ -562,18 +562,18 @@ describe("plugins cli update", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const snapshotConfig = {
       plugins: {
         entries: {
           alpha: { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const installRecords = {
       alpha: {
         source: "npm",
-        spec: "@openclaw/alpha@1.0.0",
+        spec: "@carapace/alpha@1.0.0",
         installPath: "/tmp/alpha",
       },
     } as const;
@@ -592,18 +592,18 @@ describe("plugins cli update", () => {
       "new-hooks": {
         source: "npm",
         spec: "@acme/new-hooks@1.0.0",
-        installPath: "/home/test/.openclaw/hooks/new-hooks",
+        installPath: "/home/test/.carapace/hooks/new-hooks",
       },
     });
     updateNpmInstalledPluginsMock.mockImplementation(
-      async (params: { config: OpenClawConfig }) => ({
+      async (params: { config: CarapaceConfig }) => ({
         config: params.config,
         changed: false,
         outcomes: [],
       }),
     );
     updateNpmInstalledHookPacksMock.mockImplementation(
-      async (params: { config: OpenClawConfig }) => ({
+      async (params: { config: CarapaceConfig }) => ({
         config: params.config,
         changed: false,
         outcomes: [],
@@ -634,11 +634,11 @@ describe("plugins cli update", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const persistedRecords = {
       alpha: {
         source: "npm",
-        spec: "@openclaw/alpha@1.0.0",
+        spec: "@carapace/alpha@1.0.0",
         installPath: "/tmp/alpha",
       },
     } as const;
@@ -663,7 +663,7 @@ describe("plugins cli update", () => {
         ...cfg.plugins,
         installs: persistedRecords,
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     await runPluginsCommand(["plugins", "update", "alpha"]);
 
@@ -680,7 +680,7 @@ describe("plugins cli update", () => {
   it("rejects invalid config snapshots before updater side effects", async () => {
     const cfg = createTrackedPluginConfig({
       pluginId: "alpha",
-      spec: "@openclaw/alpha@1.0.0",
+      spec: "@carapace/alpha@1.0.0",
     });
     primeUpdateConfigSnapshot({
       config: cfg,
@@ -699,37 +699,37 @@ describe("plugins cli update", () => {
   });
 
   it("allows index-only legacy id migration when an included plugins section has no references", async () => {
-    const cfg = { plugins: {} } as OpenClawConfig;
+    const cfg = { plugins: {} } as CarapaceConfig;
     const pluginRecords = createTrackedPluginConfig({
       pluginId: "voice-call",
-      spec: "@openclaw/voice-call@1.0.0",
+      spec: "@carapace/voice-call@1.0.0",
     }).plugins?.installs;
     const nextConfig = {
       ...cfg,
       plugins: {
         ...cfg.plugins,
         installs: {
-          "@openclaw/voice-call": {
+          "@carapace/voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call@1.1.0",
+            spec: "@carapace/voice-call@1.1.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(pluginRecords ?? {});
     primePluginUpdate(
       nextConfig,
       [
         {
-          pluginId: "@openclaw/voice-call",
+          pluginId: "@carapace/voice-call",
           status: "updated",
-          message: "Updated @openclaw/voice-call.",
+          message: "Updated @carapace/voice-call.",
         },
       ],
       true,
       undefined,
-      { "voice-call": "@openclaw/voice-call" },
+      { "voice-call": "@carapace/voice-call" },
     );
 
     await runPluginsCommand(["plugins", "update", "--all"]);
@@ -747,7 +747,7 @@ describe("plugins cli update", () => {
       plugins: {
         load: { paths: ["/tmp/demo/index.js"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const pluginRecords = {
       [pluginId]: {
         source: "git",
@@ -761,7 +761,7 @@ describe("plugins cli update", () => {
         ...cfg.plugins,
         installs: pluginRecords,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(pluginRecords);
     primePluginUpdate(
@@ -799,7 +799,7 @@ describe("plugins cli update", () => {
           brave: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const sourceCfg = structuredClone(cfg);
     delete sourceCfg.gateway;
     primeUpdateConfigSnapshot({
@@ -826,25 +826,25 @@ describe("plugins cli update", () => {
   });
 
   it("commits a moved managed npm load path with its replacement record", async () => {
-    const previousInstallPath = "/tmp/openclaw/npm/projects/brave-v1/node_modules/brave";
-    const nextInstallPath = "/tmp/openclaw/npm/projects/brave-v2/node_modules/brave";
+    const previousInstallPath = "/tmp/carapace/npm/projects/brave-v1/node_modules/brave";
+    const nextInstallPath = "/tmp/carapace/npm/projects/brave-v2/node_modules/brave";
     const customPath = "/tmp/custom-plugin";
     const cfg = {
       plugins: {
         load: { paths: [previousInstallPath, customPath] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const previousRecords = {
       brave: {
         source: "npm" as const,
-        spec: "@openclaw/brave-plugin@1.0.0",
+        spec: "@carapace/brave-plugin@1.0.0",
         installPath: previousInstallPath,
       },
     };
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2.0.0",
+        spec: "@carapace/brave-plugin@2.0.0",
         installPath: nextInstallPath,
       },
     };
@@ -853,7 +853,7 @@ describe("plugins cli update", () => {
         load: { paths: [nextInstallPath, customPath] },
         installs: nextRecords,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeUpdateConfigSnapshot({ config: cfg });
     setInstalledPluginIndexInstallRecords(previousRecords);
     primePluginUpdate(
@@ -903,14 +903,14 @@ describe("plugins cli update", () => {
           brave: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const changedCfg = {
       ...cfg,
       gateway: {
         ...cfg.gateway,
         port: 18890,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const initialSnapshot = primeUpdateConfigSnapshot({ config: cfg });
     const changedSnapshot = {
       ...initialSnapshot,
@@ -944,7 +944,7 @@ describe("plugins cli update", () => {
         recordInstalledPluginIndexInstallOwner(
           {
             pluginId: "brave",
-            manifestPath: "/tmp/brave-beta/openclaw.plugin.json",
+            manifestPath: "/tmp/brave-beta/carapace.plugin.json",
             manifestHash: "brave-v1",
             source: "/tmp/brave-beta/index.js",
             rootDir: "/tmp/brave-beta",
@@ -984,7 +984,7 @@ describe("plugins cli update", () => {
   it("rolls back persisted install records when included config changes during a records-only update", async () => {
     const includePath = "/tmp/plugins.json5";
     const includeTarget = "/tmp/plugins.json5";
-    const cfg = { plugins: {} } as OpenClawConfig;
+    const cfg = { plugins: {} } as CarapaceConfig;
     const initialSnapshot = primeUpdateConfigSnapshot({
       config: cfg,
       parsed: {
@@ -1011,7 +1011,7 @@ describe("plugins cli update", () => {
     readConfigFileSnapshotForWriteMock
       .mockResolvedValueOnce(initialSnapshot)
       .mockResolvedValueOnce(changedSnapshot);
-    const pluginId = "@openclaw/brave-plugin";
+    const pluginId = "@carapace/brave-plugin";
     const previousRecords = {
       [pluginId]: {
         source: "npm" as const,
@@ -1068,7 +1068,7 @@ describe("plugins cli update", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const initialSnapshot = primeUpdateConfigSnapshot({ config: cfg });
     const invalidSnapshot = {
       ...initialSnapshot,
@@ -1118,12 +1118,12 @@ describe("plugins cli update", () => {
           "voice-call": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       "voice-call": {
         source: "npm",
-        spec: "@openclaw/voice-call",
+        spec: "@carapace/voice-call",
         installPath: "/tmp/voice-call",
       },
     });
@@ -1147,14 +1147,14 @@ describe("plugins cli update", () => {
           "fish-audio": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       "fish-audio": {
         source: "npm",
-        spec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
-        resolvedName: "@openclaw/fish-audio-speech",
-        resolvedSpec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+        spec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
+        resolvedName: "@carapace/fish-audio-speech",
+        resolvedSpec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
         installPath: "/tmp/fish-audio",
       },
     });
@@ -1172,12 +1172,12 @@ describe("plugins cli update", () => {
   });
 
   it("blocks managed npm load-path reconciliation before updater side effects", async () => {
-    const installPath = "/tmp/openclaw/npm/projects/demo-v1/node_modules/demo";
+    const installPath = "/tmp/carapace/npm/projects/demo-v1/node_modules/demo";
     const cfg = {
       plugins: {
         load: { paths: [installPath] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       demo: {
@@ -1200,8 +1200,8 @@ describe("plugins cli update", () => {
       label: "ClawHub",
       record: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/voice-call",
-        clawhubPackage: "@openclaw/voice-call",
+        spec: "clawhub:@carapace/voice-call",
+        clawhubPackage: "@carapace/voice-call",
         installPath: "/tmp/voice-call",
       },
     },
@@ -1209,7 +1209,7 @@ describe("plugins cli update", () => {
       label: "git",
       record: {
         source: "git",
-        spec: "https://github.com/openclaw/voice-call.git",
+        spec: "https://github.com/Exaggarate/carapace/voice-call.git",
         installPath: "/tmp/voice-call",
       },
     },
@@ -1231,7 +1231,7 @@ describe("plugins cli update", () => {
             "voice-call": { enabled: true },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       primeBlockedUpdateConfig("plugins", cfg);
       setInstalledPluginIndexInstallRecords({
         "voice-call": record,
@@ -1252,14 +1252,14 @@ describe("plugins cli update", () => {
   it("blocks possible legacy id migration when an included plugins section is unresolved", async () => {
     const externalPath = path.join(
       path.parse(process.cwd()).root,
-      "external-openclaw",
+      "external-carapace",
       "plugins.json5",
     );
-    const cfg = { plugins: {} } as OpenClawConfig;
+    const cfg = { plugins: {} } as CarapaceConfig;
     primeUpdateConfigSnapshot({
       config: cfg,
       parsed: { plugins: { $include: externalPath } },
-      sourceConfig: { plugins: { $include: externalPath } } as unknown as OpenClawConfig,
+      sourceConfig: { plugins: { $include: externalPath } } as unknown as CarapaceConfig,
       includeFileTargetsForWrite: {
         [externalPath]: externalPath,
       },
@@ -1267,7 +1267,7 @@ describe("plugins cli update", () => {
     setInstalledPluginIndexInstallRecords({
       "voice-call": {
         source: "npm",
-        spec: "@openclaw/voice-call",
+        spec: "@carapace/voice-call",
         installPath: "/tmp/voice-call",
       },
     });
@@ -1289,12 +1289,12 @@ describe("plugins cli update", () => {
         installs: {
           legacy: {
             source: "npm",
-            spec: "@openclaw/legacy@1.0.0",
+            spec: "@carapace/legacy@1.0.0",
             installPath: "/tmp/legacy",
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setHookInstallRecords({
       "demo-hooks": {
@@ -1327,7 +1327,7 @@ describe("plugins cli update", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     primePluginUpdate(cfg, [
@@ -1359,7 +1359,7 @@ describe("plugins cli update", () => {
           demo: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       demo: {
@@ -1389,7 +1389,7 @@ describe("plugins cli update", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     await expect(runPluginsCommand(["plugins", "update"])).rejects.toThrow("__exit__:1");
 
@@ -1402,7 +1402,7 @@ describe("plugins cli update", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     await runPluginsCommand(["plugins", "update", "--all"]);
 
@@ -1413,8 +1413,8 @@ describe("plugins cli update", () => {
 
   it("passes dangerous force unsafe install to plugin updates", async () => {
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server@beta",
+      pluginId: "carapace-codex-app-server",
+      spec: "carapace-codex-app-server@beta",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1423,13 +1423,13 @@ describe("plugins cli update", () => {
     await runPluginsCommand([
       "plugins",
       "update",
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       "--dangerously-force-unsafe-install",
     ]);
 
     const updateParams = expectSingleCallParams(updateNpmInstalledPluginsMock);
     expect(updateParams.config).toEqual(config);
-    expect(updateParams.pluginIds).toEqual(["openclaw-codex-app-server"]);
+    expect(updateParams.pluginIds).toEqual(["carapace-codex-app-server"]);
     expect(updateParams.dangerouslyForceUnsafeInstall).toBe(true);
     expect(
       pluginsCliRuntimeLogs.filter((message) =>
@@ -1444,12 +1444,12 @@ describe("plugins cli update", () => {
     {
       updateChannel: "beta" as const,
       registryLine: "beta",
-      spec: "@openclaw/codex@2026.6.8-beta.1",
+      spec: "@carapace/codex@2026.6.8-beta.1",
     },
     {
       updateChannel: "stable" as const,
       registryLine: "latest",
-      spec: "@openclaw/codex@2026.5.28",
+      spec: "@carapace/codex@2026.5.28",
     },
   ])(
     "passes the $updateChannel channel to probe $registryLine for targeted exact pins",
@@ -1457,7 +1457,7 @@ describe("plugins cli update", () => {
       const config = createTrackedPluginConfig({
         pluginId: "codex",
         spec,
-        resolvedName: "@openclaw/codex",
+        resolvedName: "@carapace/codex",
       });
       config.update = { channel: updateChannel };
       pluginCliConfigMock.mockReturnValue(config);
@@ -1479,8 +1479,8 @@ describe("plugins cli update", () => {
   it("passes the inferred core channel to a targeted update without enabling catalog sync", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex",
-      resolvedName: "@openclaw/codex",
+      spec: "@carapace/codex",
+      resolvedName: "@carapace/codex",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1499,8 +1499,8 @@ describe("plugins cli update", () => {
   it("syncs official catalog specs with beta channel context for update --all", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex@2026.6.8-beta.1",
-      resolvedName: "@openclaw/codex",
+      spec: "@carapace/codex@2026.6.8-beta.1",
+      resolvedName: "@carapace/codex",
     });
     config.update = { channel: "beta" };
     pluginCliConfigMock.mockReturnValue(config);
@@ -1519,8 +1519,8 @@ describe("plugins cli update", () => {
   it("infers the official catalog channel from the installed core for update --all", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex",
-      resolvedName: "@openclaw/codex",
+      spec: "@carapace/codex",
+      resolvedName: "@carapace/codex",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1537,8 +1537,8 @@ describe("plugins cli update", () => {
   it("passes extended-stable channel and installed core version to update --all", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex",
-      resolvedName: "@openclaw/codex",
+      spec: "@carapace/codex",
+      resolvedName: "@carapace/codex",
     });
     config.update = { channel: "extended-stable" };
     pluginCliConfigMock.mockReturnValue(config);
@@ -1611,14 +1611,14 @@ describe("plugins cli update", () => {
   it("does not pass an interactive ClawHub risk prompt to dry-run plugin updates", async () => {
     setTty(true);
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "clawhub:openclaw-codex-app-server",
+      pluginId: "carapace-codex-app-server",
+      spec: "clawhub:carapace-codex-app-server",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
     primePluginUpdate(config);
 
-    await runPluginsCommand(["plugins", "update", "openclaw-codex-app-server", "--dry-run"]);
+    await runPluginsCommand(["plugins", "update", "carapace-codex-app-server", "--dry-run"]);
 
     const updateParams = expectSingleCallParams(updateNpmInstalledPluginsMock);
     expect(updateParams.dryRun).toBe(true);
@@ -1629,14 +1629,14 @@ describe("plugins cli update", () => {
   it("passes an install-policy warning prompt to interactive plugin updates", async () => {
     setTty(true);
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server",
+      pluginId: "carapace-codex-app-server",
+      spec: "carapace-codex-app-server",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
     updateNpmInstalledPluginsMock.mockResolvedValue({ config, changed: false, outcomes: [] });
 
-    await runPluginsCommand(["plugins", "update", "openclaw-codex-app-server"]);
+    await runPluginsCommand(["plugins", "update", "carapace-codex-app-server"]);
 
     const updateParams = expectSingleCallParams(updateNpmInstalledPluginsMock);
     expect(updateParams.onInstallPolicyWarning).toEqual(expect.any(Function));
@@ -1645,8 +1645,8 @@ describe("plugins cli update", () => {
   it("passes noninteractive install-policy acknowledgement to plugin updates", async () => {
     setTty(false);
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server",
+      pluginId: "carapace-codex-app-server",
+      spec: "carapace-codex-app-server",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1655,7 +1655,7 @@ describe("plugins cli update", () => {
     await runPluginsCommand([
       "plugins",
       "update",
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       "--acknowledge-install-policy-warning",
     ]);
 
@@ -1666,8 +1666,8 @@ describe("plugins cli update", () => {
   it("shares invocation-wide install-policy acknowledgement across bulk plugin and hook updates", async () => {
     setTty(false);
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server",
+      pluginId: "carapace-codex-app-server",
+      spec: "carapace-codex-app-server",
     });
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1699,7 +1699,7 @@ describe("plugins cli update", () => {
     expect(hookAcknowledgement).toBe(pluginAcknowledgement);
     await expect(
       pluginAcknowledgement({
-        targetName: "openclaw-codex-app-server",
+        targetName: "carapace-codex-app-server",
         targetType: "plugin",
         requestMode: "update",
       }),
@@ -1720,17 +1720,17 @@ describe("plugins cli update", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const previousRecords = {
       alpha: {
         source: "npm" as const,
-        spec: "@openclaw/alpha@1.0.0",
+        spec: "@carapace/alpha@1.0.0",
       },
     };
     const nextRecords = {
       alpha: {
         source: "npm" as const,
-        spec: "@openclaw/alpha@1.1.0",
+        spec: "@carapace/alpha@1.1.0",
       },
     };
     const runtimeConfig = {
@@ -1738,7 +1738,7 @@ describe("plugins cli update", () => {
       messages: {
         ackReactionScope: "group-mentions",
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const nextRuntimeConfig = {
       ...runtimeConfig,
       plugins: {
@@ -1746,7 +1746,7 @@ describe("plugins cli update", () => {
         installs: nextRecords,
       },
       messages: runtimeConfig.messages,
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     primeUpdateConfigSnapshot({
       config: cfg,
       runtimeConfig,
@@ -1812,29 +1812,29 @@ describe("plugins cli update", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.0.0",
+            spec: "@carapace/alpha@1.0.0",
           },
           beta: {
             source: "npm",
-            spec: "@openclaw/beta@1.0.0",
+            spec: "@carapace/beta@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const nextConfig = {
       plugins: {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.1.0",
+            spec: "@carapace/alpha@1.1.0",
           },
           beta: {
             source: "npm",
-            spec: "@openclaw/beta@1.0.0",
+            spec: "@carapace/beta@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     primePluginUpdate(
@@ -1846,8 +1846,8 @@ describe("plugins cli update", () => {
           status: "error",
           message: "Failed to update beta: registry timeout",
           channelFallback: {
-            requestedSpec: "@openclaw/beta@beta",
-            usedSpec: "@openclaw/beta@latest",
+            requestedSpec: "@carapace/beta@beta",
+            usedSpec: "@carapace/beta@latest",
             requestedLabel: "beta",
             usedLabel: "latest",
             reason: "failed",
@@ -1890,13 +1890,13 @@ describe("plugins cli update", () => {
     await expectSkippedClawHubPluginUpdate({
       code: "clawhub_security_unavailable",
       message:
-        'Skipped demo ClawHub update: ClawHub security data for "@openclaw/plugin-demo@1.1.0" is unavailable, so OpenClaw left the existing installed plugin unchanged. Try again later or choose a different version.',
+        'Skipped demo ClawHub update: ClawHub security data for "@carapace/plugin-demo@1.1.0" is unavailable, so Carapace left the existing installed plugin unchanged. Try again later or choose a different version.',
       expectedLog: "security data",
     });
   });
 
   it("exits non-zero when a hook pack update reports an error", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(cfg);
     setHookInstallRecords({
       "demo-hooks": {

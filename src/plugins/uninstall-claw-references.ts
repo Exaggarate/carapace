@@ -1,7 +1,7 @@
 import { readClawPackageRefs, type PersistedClawPackageRef } from "../claws/provenance.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 
 function clawPackageRefMatchesPluginInstall(
   ref: PersistedClawPackageRef,
@@ -19,7 +19,7 @@ function clawPackageRefMatchesPluginInstall(
 export function collectClawPluginUninstallWarnings(params: {
   pluginId: string;
   installRecord?: PluginInstallRecord;
-  env?: OpenClawStateDatabaseOptions["env"];
+  env?: CarapaceStateDatabaseOptions["env"];
 }): string[] {
   const installRecord = params.installRecord;
   if (!installRecord || installRecord.source !== "clawhub") {

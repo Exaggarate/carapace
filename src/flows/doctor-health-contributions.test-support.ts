@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import type { DoctorPrompter } from "../commands/doctor-prompter.js";
-import type { OpenClawConfig, OpenClawConfigInput } from "../config/config.js";
+import type { CarapaceConfig, CarapaceConfigInput } from "../config/config.js";
 import type {
   DoctorHealthContribution,
   DoctorHealthFlowContext,
@@ -22,8 +22,8 @@ type DoctorHealthFlowContextFixture = Partial<Omit<DoctorHealthFlowContext, "con
 
 type DoctorLintContext = Parameters<typeof runDoctorLintChecks>[0];
 
-export function createDoctorConfigFixture(input: OpenClawConfigInput): OpenClawConfig {
-  return input as OpenClawConfig;
+export function createDoctorConfigFixture(input: CarapaceConfigInput): CarapaceConfig {
+  return input as CarapaceConfig;
 }
 
 export function createDoctorLintContext(
@@ -64,14 +64,14 @@ export function createDoctorHealthFlowContext(
     cfg,
     cfgForPersistence: cfg,
     sourceConfigValid: true,
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
     ...contextOverrides,
   };
 }
 
 function getTestApi(): DoctorHealthContributionTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.doctorHealthContributionsTestApi")
+    Symbol.for("carapace.doctorHealthContributionsTestApi")
   ];
   if (!api) {
     throw new Error("doctor health contributions test API is unavailable");

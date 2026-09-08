@@ -151,7 +151,7 @@ function renderSessionSection(params: {
   </span>`;
   const ownerAvatar = personOwner
     ? html`<span class="sidebar-session-group-toggle__person"
-        ><openclaw-viewer-avatar
+        ><carapace-viewer-avatar
           .identity=${personOwner.identity}
           .user=${{
             id: personOwner.id,
@@ -162,7 +162,7 @@ function renderSessionSection(params: {
           .markAsViewer=${false}
           variant="session"
           aria-hidden="true"
-        ></openclaw-viewer-avatar>
+        ></carapace-viewer-avatar>
         ${
           presence
             ? html`<span
@@ -629,7 +629,7 @@ export function renderSessionList(params: {
                 data-sidebar-session-error
               >
                 <span class="callout__content">${host.sessionData.sessionMutationError}</span>
-                <openclaw-tooltip .content=${t("chat.actions.dismissError")}>
+                <carapace-tooltip .content=${t("chat.actions.dismissError")}>
                   <button
                     class="callout__dismiss"
                     type="button"
@@ -638,7 +638,7 @@ export function renderSessionList(params: {
                   >
                     ${icons.x}
                   </button>
-                </openclaw-tooltip>
+                </carapace-tooltip>
               </div>
             `
           : nothing

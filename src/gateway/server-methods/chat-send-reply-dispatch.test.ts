@@ -114,7 +114,7 @@ describe("createChatSendReplyDispatch", () => {
       const persisted = prepare();
       expect(persisted).toMatchObject({
         content: [{ type: "text", text: rawText }],
-        openclawDelivery: { mediaUrls: ["./artifact.json"] },
+        carapaceDelivery: { mediaUrls: ["./artifact.json"] },
       });
       expect(projectChatDisplayMessage(persisted)).toMatchObject({
         content: [
@@ -125,10 +125,10 @@ describe("createChatSendReplyDispatch", () => {
         ],
       });
       current = false;
-      expect(prepare()).not.toHaveProperty("openclawDelivery");
+      expect(prepare()).not.toHaveProperty("carapaceDelivery");
       current = true;
     });
-    expect(prepare()).not.toHaveProperty("openclawDelivery");
+    expect(prepare()).not.toHaveProperty("carapaceDelivery");
   });
 
   it("captures visible replies, promotes tool media, and marks blocked turns", async () => {

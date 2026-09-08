@@ -1,29 +1,29 @@
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { createApproverRestrictedNativeApprovalCapability } from "openclaw/plugin-sdk/approval-delivery-runtime";
-import { createLazyChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { createApproverRestrictedNativeApprovalCapability } from "carapace/plugin-sdk/approval-delivery-runtime";
+import { createLazyChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-adapter-runtime";
 import type {
   ChannelApprovalKind,
   ChannelApprovalNativeRuntimeAdapter,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   createChannelApproverDmTargetResolver,
   createChannelNativeOriginTargetResolver,
   createNativeApprovalChannelRouteGates,
   createNativeApprovalMessagingTargetResolvers,
   shouldSuppressLocalNativeExecApprovalPrompt,
-} from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-native-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
   SystemAgentApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
 import type {
   ChannelApprovalCapability,
   ChannelOutboundPayloadHint,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { getMSTeamsApprovalApprovers, msTeamsApprovalAuth } from "./approval-auth.js";
 import { msteamsConfigAdapter, resolveMSTeamsAccount } from "./channel-config.js";
 import { normalizeMSTeamsMessagingTarget } from "./resolve-allowlist.js";
@@ -34,7 +34,7 @@ type MSTeamsApprovalRequest =
   | SystemAgentApprovalRequest;
 
 function isMSTeamsApprovalTransportEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   if (params.accountId && normalizeAccountId(params.accountId) !== DEFAULT_ACCOUNT_ID) {
@@ -74,7 +74,7 @@ const msTeamsApprovalRouteGates = createNativeApprovalChannelRouteGates({
 });
 
 export function isMSTeamsNativeApprovalClientEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   return (
@@ -86,7 +86,7 @@ export function isMSTeamsNativeApprovalClientEnabled(params: {
 }
 
 export function shouldHandleMSTeamsNativeApprovalRequest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   approvalKind?: ChannelApprovalKind;
   request: MSTeamsApprovalRequest;
@@ -99,7 +99,7 @@ export function shouldHandleMSTeamsNativeApprovalRequest(params: {
 }
 
 export function shouldSuppressLocalMSTeamsExecApprovalPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   payload: ReplyPayload;
   hint?: ChannelOutboundPayloadHint;

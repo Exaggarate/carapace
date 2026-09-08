@@ -2,20 +2,20 @@
 import {
   createCapturedPluginRegistration,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/provider-catalog-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import deepinfraPlugin from "./index.js";
 
 const DEEPINFRA_MODELS_URL =
-  "https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta";
+  "https://api.deepinfra.com/v1/openai/models?sort_by=carapace&filter=with_meta";
 
 function buildDeepInfraCatalogContext(): ProviderCatalogContext {
   return {
     config: {},
     env: {},
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     resolveProviderApiKey: () => ({ apiKey: "profile-key" }),
     resolveProviderAuth: () => ({
       apiKey: "profile-key",
@@ -139,7 +139,7 @@ describe("deepinfra capability registration", () => {
     },
   );
 
-  it("registers all DeepInfra-backed OpenClaw provider surfaces", () => {
+  it("registers all DeepInfra-backed Carapace provider surfaces", () => {
     const captured = createCapturedPluginRegistration();
     deepinfraPlugin.register(captured.api);
 

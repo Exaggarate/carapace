@@ -13,9 +13,9 @@ import {
 import { tryBeginGatewayRootWorkAdmission } from "../../process/gateway-work-admission.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
 import { createWorkerSessionPlacementStore } from "./placement-store.js";
 import { bindWorkerTurnOwner } from "./placement-turn-claim-events.js";
@@ -176,9 +176,9 @@ async function createWorkerSessionToolTestFixture(
     scopedSessionAccess,
   } = mocks;
   const root = await fs.mkdtemp(
-    path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-tools-"),
+    path.join(await fs.realpath(os.tmpdir()), "carapace-worker-tools-"),
   );
-  const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+  const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
   const placements = createWorkerSessionPlacementStore({ database });
   activate(SOURCE);
   activate(TARGET);
@@ -413,7 +413,7 @@ async function createWorkerSessionToolTestFixture(
         releaseAgentRunDelegatedAuthority(authority);
       }
       rootAdmission.release();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(root, { recursive: true, force: true });
     },
   };

@@ -950,7 +950,7 @@ export async function downloadExactActionsArtifactArchive(params) {
   const headers = {
     accept: "application/vnd.github+json",
     authorization: `Bearer ${token}`,
-    "user-agent": "openclaw-actions-artifact",
+    "user-agent": "carapace-actions-artifact",
     "x-github-api-version": ACTIONS_ARTIFACT_API_VERSION,
   };
   const apiRoot = `https://api.github.com/repos/${repository}`;
@@ -1034,7 +1034,7 @@ export async function downloadActionsArtifactArchive(params) {
   const headers = {
     accept: "application/vnd.github+json",
     authorization: `Bearer ${token}`,
-    "user-agent": "openclaw-publication-artifact",
+    "user-agent": "carapace-publication-artifact",
     "x-github-api-version": ACTIONS_ARTIFACT_API_VERSION,
   };
   const apiRoot = `https://api.github.com/repos/${expected.repository}`;

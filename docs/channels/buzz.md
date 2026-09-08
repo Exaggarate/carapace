@@ -1,13 +1,13 @@
 ---
-summary: "Connect OpenClaw agents to Buzz rooms"
+summary: "Connect Carapace agents to Buzz rooms"
 read_when:
-  - You want people to reach an OpenClaw agent from Buzz
+  - You want people to reach an Carapace agent from Buzz
   - You are setting up a Buzz bot identity and room access
   - You are troubleshooting a Buzz connection
 title: "Buzz"
 ---
 
-Buzz is an official channel plugin that connects OpenClaw agents to team rooms
+Buzz is an official channel plugin that connects Carapace agents to team rooms
 in a hosted or self-hosted Buzz workspace.
 
 ## What it does
@@ -16,14 +16,14 @@ in a hosted or self-hosted Buzz workspace.
   Buzz rooms
 - Replies in the same room and thread
 - Shows typing while an accepted agent turn is running
-- Preserves Markdown in replies and sends text through OpenClaw's built-in
+- Preserves Markdown in replies and sends text through Carapace's built-in
   `message` tool
 - Sends native Buzz mentions to current room members from replies and proactive
   messages
 - Supports mention requirements and sender allowlists
 - Discovers rooms after the bot has been approved
 - Resolves current Buzz profile names, avatars, room names, and room membership
-  through OpenClaw's directory commands
+  through Carapace's directory commands
 - Reconnects and avoids processing the same message twice
 
 The current plugin supports group rooms, Markdown text, and inbound structured
@@ -34,13 +34,13 @@ automatic admin approval are not supported yet.
 
 Buzz uses Nostr keypairs for identity:
 
-- The **private key** lets OpenClaw authenticate and sign messages. It stays with
+- The **private key** lets Carapace authenticate and sign messages. It stays with
   the Gateway.
 - The **public key** identifies the bot. Buzz owners use it for relay approval,
-  room admins use it to grant the **Bot** role, and OpenClaw can use public keys
+  room admins use it to grant the **Bot** role, and Carapace can use public keys
   in sender allowlists.
 
-The relay URL points to one Buzz workspace. Each room has a UUID, and OpenClaw
+The relay URL points to one Buzz workspace. Each room has a UUID, and Carapace
 treats each configured UUID as a separate group conversation. One Gateway and
 bot identity can serve many rooms; you do not need a Gateway per agent or room.
 
@@ -53,7 +53,7 @@ You need:
 3. At least one room where the bot can be added with the **Bot** role.
 
 <Warning>
-Never give OpenClaw a human Buzz owner's private key. OpenClaw creates or uses a
+Never give Carapace a human Buzz owner's private key. Carapace creates or uses a
 dedicated bot identity and displays the public key that an admin needs for
 approval.
 </Warning>
@@ -61,7 +61,7 @@ approval.
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/buzz
+carapace plugins install @carapace/buzz
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -71,22 +71,22 @@ Restart the Gateway after installing or updating the plugin.
 Run:
 
 ```bash
-openclaw channels add --channel buzz
+carapace channels add --channel buzz
 ```
 
 The setup flow walks through the following steps:
 
 1. Choose an existing Buzz account or add a named account.
 2. Enter the Buzz relay URL if one is not already configured for that account.
-3. OpenClaw reuses that account's bot identity or generates one automatically.
+3. Carapace reuses that account's bot identity or generates one automatically.
 4. If the bot does not have room access yet, give the displayed public key to a
    Buzz room owner or admin.
-5. OpenClaw waits for Buzz to confirm the **Bot** role and continues
+5. Carapace waits for Buzz to confirm the **Bot** role and continues
    automatically. If the automatic wait expires, retry authenticated discovery
    or go back without changing the generated identity.
-6. If Buzz returns one room, OpenClaw selects it. If Buzz returns several,
+6. If Buzz returns one room, Carapace selects it. If Buzz returns several,
    select the rooms to use and the default outbound room.
-7. OpenClaw saves the configuration and silently verifies the authenticated
+7. Carapace saves the configuration and silently verifies the authenticated
    room when the Gateway is running.
 
 Fresh setup accepts normal messages from current members of the configured
@@ -110,7 +110,7 @@ Every target room must contain the bot identity with the **Bot** role. An
 existing human member or ordinary room member role is not sufficient.
 
 Buzz desktop cannot reliably assign the Bot role to an externally managed
-OpenClaw identity. Use the Buzz CLI as the existing human room owner or admin:
+Carapace identity. Use the Buzz CLI as the existing human room owner or admin:
 
 ```bash
 buzz channels add-member \
@@ -119,20 +119,20 @@ buzz channels add-member \
   --role bot
 ```
 
-Run that command as the existing human owner or admin. Never give OpenClaw that
+Run that command as the existing human owner or admin. Never give Carapace that
 human private key.
 
-After the Gateway connects, OpenClaw preserves an existing non-empty Buzz
+After the Gateway connects, Carapace preserves an existing non-empty Buzz
 profile display name. For a new profile it uses the configured Buzz channel
 account name, then the identity name of the single agent routed to the
-configured Buzz rooms, and finally `OpenClaw`. This replaces the shortened
+configured Buzz rooms, and finally `Carapace`. This replaces the shortened
 public key in Buzz after its profile cache refreshes.
 
-OpenClaw also registers the same public identity in Buzz's agent directory. It
+Carapace also registers the same public identity in Buzz's agent directory. It
 preserves an existing agent-directory profile and channel-add policy; for a new
 profile it allows authorized Buzz users to add the identity. This lets Buzz
 assign the **Bot** role when the identity is invited to additional rooms
-instead of treating it as a normal member. OpenClaw still receives messages
+instead of treating it as a normal member. Carapace still receives messages
 only from rooms explicitly selected in that account's `groups`: use
 `channels.buzz.groups` for the implicit root identity or
 `channels.buzz.accounts.<id>.groups` for a nested identity.
@@ -140,15 +140,15 @@ only from rooms explicitly selected in that account's `groups`: use
 Buzz displays `owner unavailable` when the bot profile has no valid NIP-OA
 owner attestation. This does not mean room access failed. Configure the selected
 identity's `authTag` at `channels.buzz.authTag` for the implicit root identity or
-`channels.buzz.accounts.<id>.authTag` for a nested identity. OpenClaw includes
+`channels.buzz.accounts.<id>.authTag` for a nested identity. Carapace includes
 that attestation in the published profile so Buzz can show the verified human
 owner.
 
-While the Gateway is connected, OpenClaw publishes and refreshes the bot's
+While the Gateway is connected, Carapace publishes and refreshes the bot's
 ephemeral Buzz presence every 30 seconds. Buzz removes the presence when the
 last authenticated Gateway connection for that bot identity closes, so
 multiple Gateway instances do not incorrectly mark one another offline.
-If the relay stops acknowledging presence, OpenClaw reconnects the affected
+If the relay stops acknowledging presence, Carapace reconnects the affected
 Buzz account instead of leaving an open but stalled connection marked ready.
 An explicit presence rejection remains a warning, not a reconnect trigger.
 
@@ -161,13 +161,13 @@ it does not add the identity to a room with the Bot role.
 buzz-admin add-member --pubkey <BOT_PUBLIC_KEY> --role member
 ```
 
-OpenClaw cannot grant room or relay access. It displays only the bot public key
+Carapace cannot grant room or relay access. It displays only the bot public key
 needed by the authorized human.
 
 ## Agent tools and messaging
 
 The Buzz plugin does not add a separate Buzz-only agent tool. It registers Buzz
-as a destination for OpenClaw's built-in `message` tool and normal reply
+as a destination for Carapace's built-in `message` tool and normal reply
 delivery.
 
 Agents can:
@@ -184,27 +184,27 @@ Agents can:
 Structured diffs include their repository, commit, file, branch, pull request,
 language, description, truncation status, and unified-diff content in the agent
 context when those fields are present. Diff content is not interpreted as an
-OpenClaw command or textual mention.
+Carapace command or textual mention.
 
 Typing uses Buzz's ephemeral kind `20002` on the active authenticated Gateway
 connection. Ordinary replies refresh it every three seconds; heartbeat-driven
-replies use OpenClaw's shared typing interval, which defaults to six seconds.
-OpenClaw stops refreshing when the turn completes, is cancelled, fails, or the
+replies use Carapace's shared typing interval, which defaults to six seconds.
+Carapace stops refreshing when the turn completes, is cancelled, fails, or the
 Gateway shuts down. Typing failures do not block the reply or reconnect the
 Gateway solely to send an ephemeral event.
 
 Humans and automations can test the same outbound path from the CLI:
 
 ```bash
-openclaw message send \
+carapace message send \
   --channel buzz \
   --target buzz:<ROOM_UUID> \
-  --message "Hello from OpenClaw"
+  --message "Hello from Carapace"
 ```
 
 ### Native mentions
 
-Write a unique current room member's profile name as `@Display Name`. OpenClaw
+Write a unique current room member's profile name as `@Display Name`. Carapace
 keeps the visible text unchanged and adds the native Buzz `p` tag, including on
 threaded replies. Names are resolved only against the target room's current
 relay-signed membership and bounded profile snapshot.
@@ -212,7 +212,7 @@ relay-signed membership and bounded profile snapshot.
 For an explicit identity, include its NIP-27 reference in the message:
 
 ```bash
-openclaw message send \
+carapace message send \
   --channel buzz \
   --target engineering \
   --message "Please review this, nostr:npub1..."
@@ -237,7 +237,7 @@ existing direct publish path.
 
 ### Directory and sender labels
 
-OpenClaw keeps a bounded snapshot of the configured rooms, their current
+Carapace keeps a bounded snapshot of the configured rooms, their current
 relay-signed member lists, room metadata, and kind `0` member profiles. Incoming
 agent context uses the current profile and room names when available, while the
 sender public key remains the stable authorization, routing, and session
@@ -246,10 +246,10 @@ identity.
 Inspect the same data from the CLI:
 
 ```bash
-openclaw directory self --channel buzz
-openclaw directory peers list --channel buzz --query "alice"
-openclaw directory groups list --channel buzz --query "engineering"
-openclaw directory groups members \
+carapace directory self --channel buzz
+carapace directory peers list --channel buzz --query "alice"
+carapace directory groups list --channel buzz --query "engineering"
+carapace directory groups members \
   --channel buzz \
   --group-id buzz:<ROOM_UUID>
 ```
@@ -258,37 +258,37 @@ When the Gateway is connected, directory reads reuse its authenticated Buzz
 connection and in-memory snapshot. A standalone directory command opens one
 bounded authenticated connection, loads the current snapshot, and closes it.
 Ordinary directory errors are logged without reconnecting. If a directory or
-profile subscription does not reach EOSE within 10 seconds, OpenClaw treats the
+profile subscription does not reach EOSE within 10 seconds, Carapace treats the
 Buzz relay session as stalled and recycles only that Buzz account connection;
 the Gateway keeps running.
 
 Archived rooms are omitted from directory results and live room subscriptions.
-If a configured room is archived or restored while OpenClaw is connected, the
+If a configured room is archived or restored while Carapace is connected, the
 plugin recycles only its Buzz connection so the subscription set matches the
 relay's current metadata. The Gateway keeps running.
 
-Each configured room uses one room-scoped relay subscription. OpenClaw reserves
+Each configured room uses one room-scoped relay subscription. Carapace reserves
 four of Buzz's 1,024 connection subscriptions for membership notifications and
 concurrent profile, membership, and metadata queries, so one account can
 configure up to 1,020 rooms. Near that limit, optional member profile
 subscriptions are reduced first; directory entries continue to work with stable
 public keys and deterministic fallback labels.
 
-Unique current room names can resolve as outbound targets through OpenClaw's
+Unique current room names can resolve as outbound targets through Carapace's
 shared directory lookup. The canonical `buzz:<ROOM_UUID>` target remains the
 safest choice for automation and for rooms with duplicate names.
 
 ### Route rooms to different agents
 
-Standard OpenClaw bindings can send each Buzz room to a different agent,
+Standard Carapace bindings can send each Buzz room to a different agent,
 workspace, or model while one Gateway and Buzz bot serve all of them:
 
 ```json5
 {
   agents: {
     entries: {
-      support: { default: true, workspace: "~/.openclaw/workspace-support" },
-      engineering: { workspace: "~/.openclaw/workspace-engineering" },
+      support: { default: true, workspace: "~/.carapace/workspace-support" },
+      engineering: { workspace: "~/.carapace/workspace-engineering" },
     },
   },
   bindings: [
@@ -310,7 +310,7 @@ workspace, or model while one Gateway and Buzz bot serve all of them:
 }
 ```
 
-Without a room-specific binding, normal OpenClaw routing selects the default
+Without a room-specific binding, normal Carapace routing selects the default
 agent. See [Channel routing](/channels/channel-routing) for matching precedence.
 
 ## Access control
@@ -323,7 +323,7 @@ Buzz applies two independent controls:
   keys.
 
 Fresh guided setup allows normal messages from current members of the selected
-rooms. OpenClaw loads Buzz's relay-signed room roster before accepting messages,
+rooms. Carapace loads Buzz's relay-signed room roster before accepting messages,
 checks membership before queuing and again after asynchronous admission, and
 follows live relay-signed roster updates, including role changes. A removal
 invalidates queued messages immediately; cancelled admission is not committed as
@@ -353,7 +353,7 @@ for the room's trust level.
 ### Bot conversations
 
 Authorized room members with the relay-assigned **Bot** role can activate the
-agent under the same mention and sender rules. Within each Gateway, OpenClaw
+agent under the same mention and sender rules. Within each Gateway, Carapace
 limits repeated exchanges between each bot pair in the same relay and room:
 the default budget is 20 accepted messages in 60 seconds, followed by a
 60-second cooldown. Changing threads does not reset the budget. Restarting the
@@ -408,7 +408,7 @@ Guided setup is recommended. The equivalent configuration looks like:
 {
   channels: {
     buzz: {
-      name: "OpenClaw",
+      name: "Carapace",
       relayUrl: "wss://buzz.example.com",
       privateKey: "nsec1...",
       groupPolicy: "open",
@@ -476,7 +476,7 @@ an account-level `""` suppresses the inherited root prefix.
 ### Multiple bot identities
 
 One Gateway can run independent Buzz accounts, each with its own relay, bot key,
-authorization value, and selected rooms. Run `openclaw channels add --channel buzz`
+authorization value, and selected rooms. Run `carapace channels add --channel buzz`
 and choose a new account to configure it interactively. Adding a named account
 does not move or replace the existing root identity.
 
@@ -527,7 +527,7 @@ message work and pending profile synchronization before starting a replacement.
 ### Bot key storage
 
 The default guided path reuses the current bot identity or generates a private
-key and stores it in the selected account's `privateKey`, following OpenClaw's current
+key and stores it in the selected account's `privateKey`, following Carapace's current
 plaintext config convention.
 
 For an existing key, setup can use plaintext or an existing `env`, `file`, or
@@ -542,7 +542,7 @@ export BUZZ_PRIVATE_KEY="nsec1..."
 With `BUZZ_PRIVATE_KEY` set, non-interactive setup can also save an account name:
 
 ```bash
-openclaw channels add --channel buzz --name "Support bot" \
+carapace channels add --channel buzz --name "Support bot" \
   --relay-url wss://buzz.example.com --use-env
 ```
 
@@ -573,7 +573,7 @@ buzz-admin generate-key
 Run the authenticated channel probe:
 
 ```bash
-openclaw channels status --channel buzz --probe
+carapace channels status --channel buzz --probe
 ```
 
 A successful probe confirms that the bot can authenticate and that Buzz reports
@@ -582,14 +582,14 @@ the selected room with the **Bot** role.
 Then send a real message:
 
 ```bash
-openclaw message send \
+carapace message send \
   --channel buzz \
   --target buzz:<ROOM_UUID> \
-  --message "OpenClaw Buzz test"
+  --message "Carapace Buzz test"
 ```
 
 For a full round trip, have an allowed Buzz user mention the bot and confirm that
-OpenClaw replies in the room.
+Carapace replies in the room.
 
 ### QA Lab round trip
 
@@ -597,7 +597,7 @@ Source checkouts can exercise the production Buzz channel path with two
 dedicated test identities:
 
 ```bash
-pnpm openclaw qa buzz \
+pnpm carapace qa buzz \
   --credential-file /secure/path/buzz-qa-credentials.json \
   --provider-mode mock-openai
 ```
@@ -637,7 +637,7 @@ These follow-up areas are planned but are not part of the current plugin:
 - Direct messages
 - Media and file upload or download
 - Native emoji reactions
-- Creating or administering rooms from OpenClaw
+- Creating or administering rooms from Carapace
 - Automatic relay membership and room-role approval
 - Guided bot identity rotation
 
@@ -649,7 +649,7 @@ These follow-up areas are planned but are not part of the current plugin:
 | Authentication fails                         | Check the relay URL, bot private key, closed-relay membership, and any authorization value supplied by the operator. |
 | A message cannot be sent                     | Confirm the bot is a room member with the **Bot** role and that the UUID is configured.                              |
 | The bot receives messages but does not reply | Confirm the sender is still a room member, then check the optional sender allowlist and mention requirement.         |
-| Setup says the Gateway is not running        | Start it with `openclaw gateway`, then run `openclaw channels status --probe`.                                       |
+| Setup says the Gateway is not running        | Start it with `carapace gateway`, then run `carapace channels status --probe`.                                       |
 | Automatic room discovery expires             | Grant the Bot role, then choose Retry; the same identity remains active.                                             |
 
 ## Related

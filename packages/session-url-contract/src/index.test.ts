@@ -34,8 +34,8 @@ describe("buildControlUiCatalogSessionUrl", () => {
     {
       label: "nested base path and non-main agent",
       agentId: "research",
-      basePath: "/admin/openclaw/",
-      expected: "/admin/openclaw/chat/research?catalog=beam&host=gateway&thread=beam-1",
+      basePath: "/admin/carapace/",
+      expected: "/admin/carapace/chat/research?catalog=beam&host=gateway&thread=beam-1",
     },
   ])("builds a canonical URL for $label", ({ agentId, basePath, expected }) => {
     expect(
@@ -105,8 +105,8 @@ describe("buildControlUiCatalogSharePath", () => {
     },
     {
       label: "nested base path",
-      basePath: "/admin/openclaw/",
-      expected: "/admin/openclaw/beam/0123456789ab",
+      basePath: "/admin/carapace/",
+      expected: "/admin/carapace/beam/0123456789ab",
     },
   ])("builds a lowercase 12-character share id for $label", ({ basePath, expected }) => {
     expect(

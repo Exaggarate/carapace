@@ -1,21 +1,21 @@
 ---
-summary: "CLI reference for `openclaw config` (get/set/patch/unset/file/schema/validate)"
+summary: "CLI reference for `carapace config` (get/set/patch/unset/file/schema/validate)"
 read_when:
   - You want to read or edit config non-interactively
 title: "Config"
 sidebarTitle: "Config"
 ---
 
-Non-interactive helpers for `openclaw.json`: get/set/patch/unset a value by path, print the schema, validate, or print the active file path. Run `openclaw config` with no subcommand to open the same guided wizard as `openclaw configure`.
+Non-interactive helpers for `carapace.json`: get/set/patch/unset a value by path, print the schema, validate, or print the active file path. Run `carapace config` with no subcommand to open the same guided wizard as `carapace configure`.
 
 <Note>
-When `OPENCLAW_NIX_MODE=1`, OpenClaw treats `openclaw.json` as immutable. Read-only commands (`config get`, `config file`, `config schema`, `config validate`) still work; config writers refuse. Edit the Nix source for the install instead; for the first-party nix-openclaw distribution, use the [nix-openclaw Quick Start](https://github.com/openclaw/nix-openclaw#quick-start) and set values under `programs.openclaw.config` or `instances.<name>.config`.
+When `CARAPACE_NIX_MODE=1`, Carapace treats `carapace.json` as immutable. Read-only commands (`config get`, `config file`, `config schema`, `config validate`) still work; config writers refuse. Edit the Nix source for the install instead; for the first-party nix-carapace distribution, use the [nix-carapace Quick Start](https://github.com/Exaggarate/carapace/nix-carapace#quick-start) and set values under `programs.carapace.config` or `instances.<name>.config`.
 </Note>
 
 ## Root options
 
 <ParamField path="--section <section>" type="string">
-  Repeatable guided-setup section filter when you run `openclaw config` without a subcommand.
+  Repeatable guided-setup section filter when you run `carapace config` without a subcommand.
 </ParamField>
 
 Guided sections: `workspace`, `model`, `web`, `gateway`, `daemon`, `channels`, `plugins`, `skills`, `health`.
@@ -23,26 +23,26 @@ Guided sections: `workspace`, `model`, `web`, `gateway`, `daemon`, `channels`, `
 ## Examples
 
 ```bash
-openclaw config file
-openclaw config file --json
-openclaw config --section model
-openclaw config --section gateway --section daemon
-openclaw config schema
-openclaw config schema --json
-openclaw config get browser.executablePath
-openclaw config set browser.executablePath "/usr/bin/google-chrome"
-openclaw config set browser.profiles.work '{"cdpPort":18801,"executablePath":"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"}' --strict-json --merge
-openclaw config set agents.defaults.heartbeat.every "2h"
-openclaw config set logging.audit.executionIdentity true
-openclaw config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
-openclaw config set agents.defaults.models '{"openai/gpt-5.4":{}}' --strict-json --merge
-openclaw config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN
-openclaw config set secrets.providers.vaultfile --provider-source file --provider-path /etc/openclaw/secrets.json --provider-mode json
-openclaw config patch --file ./openclaw.patch.json5 --dry-run
-openclaw config unset plugins.entries.brave.config.webSearch.apiKey
-openclaw config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN --dry-run
-openclaw config validate
-openclaw config validate --json
+carapace config file
+carapace config file --json
+carapace config --section model
+carapace config --section gateway --section daemon
+carapace config schema
+carapace config schema --json
+carapace config get browser.executablePath
+carapace config set browser.executablePath "/usr/bin/google-chrome"
+carapace config set browser.profiles.work '{"cdpPort":18801,"executablePath":"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"}' --strict-json --merge
+carapace config set agents.defaults.heartbeat.every "2h"
+carapace config set logging.audit.executionIdentity true
+carapace config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
+carapace config set agents.defaults.models '{"openai/gpt-5.4":{}}' --strict-json --merge
+carapace config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN
+carapace config set secrets.providers.vaultfile --provider-source file --provider-path /etc/carapace/secrets.json --provider-mode json
+carapace config patch --file ./carapace.patch.json5 --dry-run
+carapace config unset plugins.entries.brave.config.webSearch.apiKey
+carapace config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN --dry-run
+carapace config validate
+carapace config validate --json
 ```
 
 ### Paths
@@ -50,10 +50,10 @@ openclaw config validate --json
 Dot or bracket notation. Quote bracket paths in shell examples so zsh does not glob-expand `[0]`:
 
 ```bash
-openclaw config get agents.defaults.workspace
-openclaw config get agents.entries.main
-openclaw config get agents.entries
-openclaw config set 'agents.entries.work.tools.exec.node' "node-id-or-name"
+carapace config get agents.defaults.workspace
+carapace config get agents.entries.main
+carapace config get agents.entries
+carapace config set 'agents.entries.work.tools.exec.node' "node-id-or-name"
 ```
 
 Prefer `agents.entries.<id>` paths for agent edits. The legacy `agents.list[0]`
@@ -78,23 +78,23 @@ the same batch.
 Reads a value from the redacted config snapshot (secrets never print). `--json` prints the same redacted value as JSON; otherwise strings/numbers/booleans print bare and objects/arrays print as formatted JSON.
 
 A schema-valid but unset path explains that the runtime default applies; an unknown path suggests
-`openclaw config schema`. With `--json`, both use the standard [CLI JSON failure envelope](/cli#json-failures)
+`carapace config schema`. With `--json`, both use the standard [CLI JSON failure envelope](/cli#json-failures)
 on stdout and exit with status 1. Without `--json`, diagnostics remain on stderr.
 
 ```bash
-openclaw config get browser.executablePath
-openclaw config get agents.defaults.model --json
+carapace config get browser.executablePath
+carapace config get agents.defaults.model --json
 ```
 
 ### `config file`
 
-Prints the active config file path, resolved from `OPENCLAW_CONFIG_PATH` or the default location. The path names a regular file, not a symlink; see [Write safety](#write-safety).
+Prints the active config file path, resolved from `CARAPACE_CONFIG_PATH` or the default location. The path names a regular file, not a symlink; see [Write safety](#write-safety).
 
 With `--json`, stdout contains an object with the resolved path under `path`.
 
 ### `config schema`
 
-Prints the generated JSON schema for `openclaw.json` to stdout.
+Prints the generated JSON schema for `carapace.json` to stdout.
 
 <AccordionGroup>
   <Accordion title="What it includes">
@@ -112,9 +112,9 @@ Prints the generated JSON schema for `openclaw.json` to stdout.
 </AccordionGroup>
 
 ```bash
-openclaw config schema
-openclaw config schema --json
-openclaw config schema > openclaw.schema.json
+carapace config schema
+carapace config schema --json
+carapace config schema > carapace.schema.json
 ```
 
 The schema is JSON in both modes. `--json` is accepted as the explicit
@@ -129,8 +129,8 @@ After schema validation, it checks every configured manual exec provider's comma
 Path validation does not execute providers or verify their output. Passing it does not guarantee successful secret resolution; exec dry runs require `--allow-exec` to test that separately.
 
 ```bash
-openclaw config validate
-openclaw config validate --json
+carapace config validate
+carapace config validate --json
 ```
 
 <Note>
@@ -141,12 +141,12 @@ after validation; startup checks them again before execution.
 </Note>
 
 <Note>
-If validation is already failing, start with `openclaw configure` or `openclaw doctor --fix`. `openclaw chat` does not bypass the invalid-config guard.
+If validation is already failing, start with `carapace configure` or `carapace doctor --fix`. `carapace chat` does not bypass the invalid-config guard.
 </Note>
 
 Provider and runtime `params` bags are intentionally typed as
 `Record<string, unknown>` because their owners define the supported keys and
-values. `openclaw config validate` can validate the container and overall
+values. `carapace config validate` can validate the container and overall
 config shape, but it cannot type-check provider-specific parameter names or
 values. Passing validation does not prove that a param is supported; consult
 the provider docs and verify behavior on the selected runtime and provider.
@@ -156,16 +156,16 @@ the provider docs and verify behavior on the selected runtime and provider.
 Values parse as JSON5 when possible; otherwise they are treated as raw strings. Use `--strict-json` to require standard JSON with no string fallback (JSON5-only syntax such as comments, trailing commas, or unquoted keys is then rejected). `--json` is a legacy alias for `--strict-json` on `config set`.
 
 ```bash
-openclaw config set agents.defaults.heartbeat.every "0m"
-openclaw config set gateway.port 19001 --strict-json
-openclaw config set channels.whatsapp.groups '{"*":{"requireMention":true}}' --strict-json
+carapace config set agents.defaults.heartbeat.every "0m"
+carapace config set gateway.port 19001 --strict-json
+carapace config set channels.whatsapp.groups '{"*":{"requireMention":true}}' --strict-json
 ```
 
 For structured values that are awkward to quote in your shell, put a config-shaped JSON5 object in a file and use [`config patch --file <path> --dry-run`](/cli/config#config-patch). The file contains config keys and their values, not a bare array.
 
 `config get <path> --json` prints the redacted value as JSON instead of terminal-formatted text.
 
-When a write changes `agents.defaults.model` or a per-agent `agents.entries.*.model`, OpenClaw resolves each changed primary or fallback through the configured catalogs and the selected provider's model resolver before writing. Provider-supported exact `provider/model` pins are accepted even when absent from the curated picker; validation does not replace the selected model. Unknown model references are rejected without changing the active config. Run `openclaw models list` to browse the picker, or check the provider's documentation for an exact model ID. Successful validation does not prove that your account can call the model.
+When a write changes `agents.defaults.model` or a per-agent `agents.entries.*.model`, Carapace resolves each changed primary or fallback through the configured catalogs and the selected provider's model resolver before writing. Provider-supported exact `provider/model` pins are accepted even when absent from the curated picker; validation does not replace the selected model. Unknown model references are rejected without changing the active config. Run `carapace models list` to browse the picker, or check the provider's documentation for an exact model ID. Successful validation does not prove that your account can call the model.
 
 <Note>
 Object assignment replaces the target path by default. Protected paths that commonly hold user-added entries refuse replacements that would remove existing entries unless you pass `--replace`: `agents.defaults.models`, `agents.entries`, `models.providers`, `models.providers.<id>`, `models.providers.<id>.models`, `plugins.entries`, and `auth.profiles`.
@@ -174,8 +174,8 @@ Object assignment replaces the target path by default. Protected paths that comm
 Use `--merge` when adding entries to those maps:
 
 ```bash
-openclaw config set agents.defaults.models '{"openai/gpt-5.4":{}}' --strict-json --merge
-openclaw config set models.providers.ollama.models '[{"id":"llama3.2","name":"Llama 3.2"}]' --strict-json --merge
+carapace config set agents.defaults.models '{"openai/gpt-5.4":{}}' --strict-json --merge
+carapace config set models.providers.ollama.models '[{"id":"llama3.2","name":"Llama 3.2"}]' --strict-json --merge
 ```
 
 Use `--replace` only when the provided value should intentionally become the complete target value.
@@ -186,8 +186,8 @@ Use a conditional expectation when automation must update one authored path only
 changed since the caller last observed it:
 
 ```bash
-openclaw config set gateway.port 19001 --strict-json --expect-current-json 18789
-openclaw config set gateway.port 19001 --strict-json --expect-current-absent
+carapace config set gateway.port 19001 --strict-json --expect-current-json 18789
+carapace config set gateway.port 19001 --strict-json --expect-current-absent
 ```
 
 `--expect-current-json <json>` uses strict JSON and compares the value by JSON type and structure.
@@ -200,7 +200,7 @@ operation, require a direct non-redirected config path, and cannot be combined w
 `--dry-run`. If input or roster resolution would write a different path than the caller requested,
 such as a sibling `*Ref` path, the command exits with status 1 instead of retargeting the
 expectation. A mismatch exits with status 1, writes nothing, and does not print either the expected
-or current value. OpenClaw's config snapshot guard still rejects a later race between the
+or current value. Carapace's config snapshot guard still rejects a later race between the
 expectation check and the final file replacement.
 
 ## `config set` modes
@@ -208,12 +208,12 @@ expectation check and the final file replacement.
 <Tabs>
   <Tab title="Value mode">
     ```bash
-    openclaw config set <path> <value>
+    carapace config set <path> <value>
     ```
   </Tab>
   <Tab title="SecretRef builder mode">
     ```bash
-    openclaw config set channels.discord.token \
+    carapace config set channels.discord.token \
       --ref-provider default \
       --ref-source env \
       --ref-id DISCORD_BOT_TOKEN
@@ -223,9 +223,9 @@ expectation check and the final file replacement.
     Targets `secrets.providers.<alias>` paths only:
 
     ```bash
-    openclaw config set secrets.providers.vault \
+    carapace config set secrets.providers.vault \
       --provider-source exec \
-      --provider-command /usr/local/bin/openclaw-vault \
+      --provider-command /usr/local/bin/carapace-vault \
       --provider-arg read \
       --provider-arg openai/api-key \
       --provider-timeout-ms 5000
@@ -234,7 +234,7 @@ expectation check and the final file replacement.
   </Tab>
   <Tab title="Batch mode">
     ```bash
-    openclaw config set --batch-json '[
+    carapace config set --batch-json '[
       {
         "path": "secrets.providers.default",
         "provider": { "source": "env" }
@@ -247,7 +247,7 @@ expectation check and the final file replacement.
     ```
 
     ```bash
-    openclaw config set --batch-file ./config-set.batch.json --dry-run
+    carapace config set --batch-file ./config-set.batch.json --dry-run
     ```
 
     Batch files are limited to 8 MiB.
@@ -266,12 +266,12 @@ Batch assignments apply in order, then validation checks the final config. A Sec
 JSON path/value mode also works for SecretRefs and providers directly:
 
 ```bash
-openclaw config set channels.discord.token \
+carapace config set channels.discord.token \
   '{"source":"env","provider":"default","id":"DISCORD_BOT_TOKEN"}' \
   --strict-json
 
-openclaw config set secrets.providers.vaultfile \
-  '{"source":"file","path":"/etc/openclaw/secrets.json","mode":"json"}' \
+carapace config set secrets.providers.vaultfile \
+  '{"source":"file","path":"/etc/carapace/secrets.json","mode":"json"}' \
   --strict-json
 ```
 
@@ -311,9 +311,9 @@ Provider builder targets must use `secrets.providers.<alias>` as the path.
 Hardened exec provider example:
 
 ```bash
-openclaw config set secrets.providers.vault \
+carapace config set secrets.providers.vault \
   --provider-source exec \
-  --provider-command /usr/local/bin/openclaw-vault \
+  --provider-command /usr/local/bin/carapace-vault \
   --provider-arg read \
   --provider-arg openai/api-key \
   --provider-json-only \
@@ -327,8 +327,8 @@ openclaw config set secrets.providers.vault \
 Paste or pipe a config-shaped JSON5 patch instead of running many path-based `config set` commands. Objects merge recursively; arrays and scalar values replace the target; `null` deletes the target path.
 
 ```bash
-openclaw config patch --file ./openclaw.patch.json5 --dry-run
-openclaw config patch --file ./openclaw.patch.json5
+carapace config patch --file ./carapace.patch.json5 --dry-run
+carapace config patch --file ./carapace.patch.json5
 ```
 
 Patch files are limited to 8 MiB. Piped `--stdin` patches are limited to 1 MiB.
@@ -336,8 +336,8 @@ Patch files are limited to 8 MiB. Piped `--stdin` patches are limited to 1 MiB.
 Pipe a patch over stdin for remote setup scripts:
 
 ```bash
-ssh user@gateway-host 'openclaw config patch --stdin --dry-run' < ./openclaw.patch.json5
-ssh user@gateway-host 'openclaw config patch --stdin' < ./openclaw.patch.json5
+ssh user@gateway-host 'carapace config patch --stdin --dry-run' < ./carapace.patch.json5
+ssh user@gateway-host 'carapace config patch --stdin' < ./carapace.patch.json5
 ```
 
 Example patch:
@@ -366,7 +366,7 @@ Example patch:
       model: { primary: "openai/gpt-5.6-sol" },
       models: {
         "openai/gpt-5.6-sol": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           params: { fastMode: true },
         },
       },
@@ -375,31 +375,31 @@ Example patch:
 }
 ```
 
-The runtime pin makes this an embedded OpenClaw recipe. A valid `fastMode`
-value is a portable typed runtime control and does not choose OpenClaw by
+The runtime pin makes this an embedded Carapace recipe. A valid `fastMode`
+value is a portable typed runtime control and does not choose Carapace by
 itself.
 
 Use `--replace-path <path>` when one object or array must become exactly the provided value instead of being recursively patched:
 
 ```bash
-openclaw config patch --file ./discord.patch.json5 --replace-path 'channels.discord.guilds["123"].channels'
+carapace config patch --file ./discord.patch.json5 --replace-path 'channels.discord.guilds["123"].channels'
 ```
 
 `--dry-run` runs schema and SecretRef resolvability checks without writing. Exec-backed SecretRefs are skipped by default during dry-run; add `--allow-exec` when you intentionally want dry-run to execute provider commands.
 
 ## Dry run
 
-`--dry-run` simulates a change without writing `openclaw.json`. Available on `config set`, `config patch`, and `config unset`. Which checks run depends on the input mode. Value mode (`config set <path> <value>` without `--strict-json`) skips the full schema pass and the ordinary SecretRef resolvability scan. Policy, provider, and model-reference checks can still run. When no checks apply, value mode reports `Dry run successful` even for a value the real write rejects. Use `--strict-json` (or `config patch --file --dry-run`) when you need schema validation.
+`--dry-run` simulates a change without writing `carapace.json`. Available on `config set`, `config patch`, and `config unset`. Which checks run depends on the input mode. Value mode (`config set <path> <value>` without `--strict-json`) skips the full schema pass and the ordinary SecretRef resolvability scan. Policy, provider, and model-reference checks can still run. When no checks apply, value mode reports `Dry run successful` even for a value the real write rejects. Use `--strict-json` (or `config patch --file --dry-run`) when you need schema validation.
 
 ```bash
-openclaw config set channels.discord.token \
+carapace config set channels.discord.token \
   --ref-provider default \
   --ref-source env \
   --ref-id DISCORD_BOT_TOKEN \
   --dry-run \
   --json
 
-openclaw config set channels.discord.token \
+carapace config set channels.discord.token \
   --ref-provider vault \
   --ref-source exec \
   --ref-id discord/token \
@@ -459,7 +459,7 @@ openclaw config set channels.discord.token \
     {
       "ok": true,
       "operations": 1,
-      "configPath": "/home/user/.openclaw/openclaw.json",
+      "configPath": "/home/user/.carapace/carapace.json",
       "inputModes": ["builder"],
       "checks": {
         "schema": false,
@@ -476,7 +476,7 @@ openclaw config set channels.discord.token \
     {
       "ok": false,
       "operations": 1,
-      "configPath": "/home/user/.openclaw/openclaw.json",
+      "configPath": "/home/user/.carapace/carapace.json",
       "inputModes": ["builder"],
       "checks": {
         "schema": false,
@@ -502,7 +502,7 @@ openclaw config set channels.discord.token \
     - `config schema validation failed`: your post-change config shape is invalid; fix the path/value or provider/ref object shape.
     - `Config policy validation failed: unsupported SecretRef usage`: move that credential back to plaintext/string input; keep SecretRefs on supported surfaces only.
     - `SecretRef assignment(s) could not be resolved`: the referenced provider/ref cannot currently resolve (missing env/store name, invalid file pointer, exec provider failure, or provider/source mismatch).
-    - `model reference validation failed`: a changed text-model primary or fallback is unknown; run `openclaw models list` and choose an available model.
+    - `model reference validation failed`: a changed text-model primary or fallback is unknown; run `carapace models list` and choose an available model.
     - `Dry run note: skipped <n> exec SecretRef resolvability check(s)`: rerun with `--allow-exec` if you need exec resolvability validation.
     - For batch mode, fix failing entries and rerun `--dry-run` before writing.
 
@@ -523,49 +523,49 @@ Effective changes to `plugins.entries` (or any subpath) require a restart, since
 
 ## Write safety
 
-`openclaw config set` and other OpenClaw-owned config writers validate the full post-change config before committing it to disk. If the new payload fails schema validation or looks like a destructive clobber, the active config is left alone and the rejected payload is saved beside it as `openclaw.json.rejected.*`.
+`carapace config set` and other Carapace-owned config writers validate the full post-change config before committing it to disk. If the new payload fails schema validation or looks like a destructive clobber, the active config is left alone and the rejected payload is saved beside it as `carapace.json.rejected.*`.
 
-OpenClaw-owned writes that change config reserialize JSON5 as standard JSON. When the source contains comments, the writer warns immediately before removing them; use a direct editor when preserving comments matters.
+Carapace-owned writes that change config reserialize JSON5 as standard JSON. When the source contains comments, the writer warns immediately before removing them; use a direct editor when preserving comments matters.
 
 <Warning>
-The active config path must be a regular file. Symlinked `openclaw.json` layouts are unsupported for writes; use `OPENCLAW_CONFIG_PATH` to point directly at the real file instead.
+The active config path must be a regular file. Symlinked `carapace.json` layouts are unsupported for writes; use `CARAPACE_CONFIG_PATH` to point directly at the real file instead.
 </Warning>
 
 Prefer CLI writes for small edits:
 
 ```bash
-openclaw config set gateway.reload.mode '"hybrid"' --strict-json --dry-run
-openclaw config set gateway.reload.mode '"hybrid"' --strict-json
-openclaw config validate
+carapace config set gateway.reload.mode '"hybrid"' --strict-json --dry-run
+carapace config set gateway.reload.mode '"hybrid"' --strict-json
+carapace config validate
 ```
 
 If a write is rejected, inspect the saved payload and fix the full config shape:
 
 ```bash
-CONFIG="$(openclaw config file)"
+CONFIG="$(carapace config file)"
 ls -lt "$CONFIG".rejected.* 2>/dev/null | head
-openclaw config validate
+carapace config validate
 ```
 
-Direct editor writes are still allowed, but the running Gateway treats them as untrusted until they validate. At startup, eligible single-file configs can receive deterministic legacy-key migrations if the complete result validates, with the previous config kept in the `.bak` ring. Other invalid direct edits fail startup; hot reload skips invalid edits without rewriting `openclaw.json`. Run `openclaw doctor --fix` to repair prefixed/clobbered config or restore the last-known-good copy. See [Gateway troubleshooting](/gateway/troubleshooting#gateway-rejected-invalid-config).
+Direct editor writes are still allowed, but the running Gateway treats them as untrusted until they validate. At startup, eligible single-file configs can receive deterministic legacy-key migrations if the complete result validates, with the previous config kept in the `.bak` ring. Other invalid direct edits fail startup; hot reload skips invalid edits without rewriting `carapace.json`. Run `carapace doctor --fix` to repair prefixed/clobbered config or restore the last-known-good copy. See [Gateway troubleshooting](/gateway/troubleshooting#gateway-rejected-invalid-config).
 
 Whole-file recovery is reserved for doctor repair. Plugin schema changes or `minHostVersion` skew stay loud instead of rolling back unrelated user settings such as models, providers, auth profiles, channels, gateway exposure, tools, memory, browser, or cron config.
 
 ## Repair loop
 
-After `openclaw config validate` passes, use the local TUI to have an embedded agent compare the active config against the docs while you validate each change from the same terminal:
+After `carapace config validate` passes, use the local TUI to have an embedded agent compare the active config against the docs while you validate each change from the same terminal:
 
 ```bash
-openclaw chat
+carapace chat
 ```
 
 Inside the TUI, a leading `!` runs a literal local shell command (after a one-time per-session confirmation prompt):
 
 ```text
-!openclaw config file
-!openclaw docs gateway auth token secretref
-!openclaw config validate
-!openclaw doctor
+!carapace config file
+!carapace docs gateway auth token secretref
+!carapace config validate
+!carapace doctor
 ```
 
 <Steps>
@@ -573,13 +573,13 @@ Inside the TUI, a leading `!` runs a literal local shell command (after a one-ti
     Ask the agent to compare your current config with the relevant docs page and suggest the smallest fix.
   </Step>
   <Step title="Apply targeted edits">
-    Apply targeted edits with `openclaw config set` or `openclaw configure`.
+    Apply targeted edits with `carapace config set` or `carapace configure`.
   </Step>
   <Step title="Re-validate">
-    Rerun `openclaw config validate` after each change.
+    Rerun `carapace config validate` after each change.
   </Step>
   <Step title="Doctor for runtime issues">
-    If validation passes but the runtime is still unhealthy, run `openclaw doctor` or `openclaw doctor --fix` for migration and repair help.
+    If validation passes but the runtime is still unhealthy, run `carapace doctor` or `carapace doctor --fix` for migration and repair help.
   </Step>
 </Steps>
 

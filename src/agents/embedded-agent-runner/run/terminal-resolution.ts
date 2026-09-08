@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { isCompactionReplayCheckpoint } from "@openclaw/ai/transports";
+import { isCompactionReplayCheckpoint } from "@carapace/ai/transports";
 import { getReplyPayloadMetadata } from "../../../auto-reply/reply-payload.js";
 import { SILENT_REPLY_TOKEN } from "../../../auto-reply/tokens.js";
 import { freezeDiagnosticTraceContext } from "../../../infra/diagnostic-trace-context.js";

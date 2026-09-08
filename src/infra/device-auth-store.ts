@@ -8,12 +8,12 @@ import {
   normalizeDeviceAuthRole,
   normalizeDeviceAuthScopes,
 } from "../shared/device-auth.js";
-import { withExistingOpenClawStateDatabaseArtifactPreservingReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseArtifactPreservingReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -21,7 +21,7 @@ import {
 } from "./kysely-sync.js";
 
 type DeviceAuthDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "device_auth_tokens" | "gateway_origin_device_tokens"
 >;
 type DeviceAuthRow = {
@@ -44,7 +44,7 @@ function assertNoLegacyDeviceAuth(env: NodeJS.ProcessEnv | undefined): void {
   }
   if (hasLegacy) {
     throw new Error(
-      "Legacy device auth requires migration; stop the Gateway and run `openclaw doctor --fix`.",
+      "Legacy device auth requires migration; stop the Gateway and run `carapace doctor --fix`.",
     );
   }
 }
@@ -122,7 +122,7 @@ export function loadDeviceAuthToken(params: {
   env?: NodeJS.ProcessEnv;
 }): DeviceAuthEntry | null {
   assertNoLegacyDeviceAuth(params.env);
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openCarapaceStateDatabase({ env: params.env });
   return readDeviceAuthTokenFromDatabase(db, params);
 }
 
@@ -134,7 +134,7 @@ export function loadDeviceAuthTokenReadOnly(params: {
 }): DeviceAuthEntry | null {
   assertNoLegacyDeviceAuth(params.env);
   return (
-    withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(
+    withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(
       ({ db }) => {
         return readDeviceAuthTokenFromDatabase(db, params);
       },
@@ -149,7 +149,7 @@ export function loadDeviceAuthTokens(params: {
   env?: NodeJS.ProcessEnv;
 }): DeviceAuthEntry[] {
   assertNoLegacyDeviceAuth(params.env);
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openCarapaceStateDatabase({ env: params.env });
   return executeSqliteQuerySync(
     db,
     getNodeSqliteKysely<DeviceAuthDatabase>(db)
@@ -175,7 +175,7 @@ export function storeDeviceAuthToken(params: {
   assertNoLegacyDeviceAuth(params.env);
   const entry = createDeviceAuthEntry(params);
   let stored = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<DeviceAuthDatabase>(db);
       // Fenced writes update only the row that supplied the request snapshot;
@@ -230,7 +230,7 @@ export function clearDeviceAuthToken(params: {
 }): boolean {
   assertNoLegacyDeviceAuth(params.env);
   let cleared = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const baseQuery = getNodeSqliteKysely<DeviceAuthDatabase>(db)
         .deleteFrom("device_auth_tokens")
@@ -255,7 +255,7 @@ export function loadOriginDeviceToken(params: {
   env?: NodeJS.ProcessEnv;
 }): DeviceAuthEntry | null {
   assertNoLegacyDeviceAuth(params.env);
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openCarapaceStateDatabase({ env: params.env });
   return readOriginDeviceTokenFromDatabase(db, params);
 }
 
@@ -268,7 +268,7 @@ export function loadOriginDeviceTokenReadOnly(params: {
 }): DeviceAuthEntry | null {
   assertNoLegacyDeviceAuth(params.env);
   return (
-    withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(
+    withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(
       ({ db }) => {
         return readOriginDeviceTokenFromDatabase(db, params);
       },
@@ -290,7 +290,7 @@ export function storeOriginDeviceToken(params: {
   assertNoLegacyDeviceAuth(params.env);
   const entry = createDeviceAuthEntry(params);
   let stored = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<DeviceAuthDatabase>(db);
       const result =
@@ -346,7 +346,7 @@ export function clearOriginDeviceToken(params: {
 }): boolean {
   assertNoLegacyDeviceAuth(params.env);
   let cleared = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const baseQuery = getNodeSqliteKysely<DeviceAuthDatabase>(db)
         .deleteFrom("gateway_origin_device_tokens")

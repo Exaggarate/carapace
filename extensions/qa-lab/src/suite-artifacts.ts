@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
+import type { CarapaceCrablineChannelDriverSelection } from "@openclaw/crabline";
+import { replaceFileAtomic } from "carapace/plugin-sdk/security-runtime";
 import { assertQaSuiteArtifactWritten } from "./artifact-assertion.js";
 import {
   resolveQaCrablineChannelDriverArtifactPaths,
@@ -155,7 +155,7 @@ export async function writeQaSuiteArtifacts(params: {
   concurrency: number;
   channel?: string | null;
   channelDriver?: QaTransportDriver | null;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
   isolatedWorkers?: boolean;
   scenarioIds?: readonly string[];
   runtimePair?: [RuntimeId, RuntimeId];
@@ -172,7 +172,7 @@ export async function writeQaSuiteArtifacts(params: {
     : undefined;
   const crablineProviderReadiness =
     crablineRuntime && crablineChannelDriverSelection
-      ? await crablineRuntime.runOpenClawCrablineProviderReadiness({
+      ? await crablineRuntime.runCarapaceCrablineProviderReadiness({
           outputDir: params.outputDir,
           selection: crablineChannelDriverSelection,
         })
@@ -189,7 +189,7 @@ export async function writeQaSuiteArtifacts(params: {
         }
       : undefined;
   const report = renderQaMarkdownReport({
-    title: "OpenClaw QA Scenario Suite",
+    title: "Carapace QA Scenario Suite",
     inProgress: params.status === "running",
     startedAt: params.startedAt,
     finishedAt: params.finishedAt,
@@ -203,7 +203,7 @@ export async function writeQaSuiteArtifacts(params: {
     notes: createQaSuiteReportNotes({
       ...params,
       channelDriverSelection: effectiveChannelDriverSelection,
-      createCrablineChannelReportNotes: crablineRuntime?.createOpenClawCrablineChannelReportNotes,
+      createCrablineChannelReportNotes: crablineRuntime?.createCarapaceCrablineChannelReportNotes,
     }),
   });
   const evidence =

@@ -72,7 +72,7 @@ describe("settings preference persistence", () => {
     const theme = createApplicationTheme(first, gateway);
     try {
       resetServerUiPrefsSync();
-      const key = `openclaw.control.settings.v1:${first.gatewayUrl}`;
+      const key = `carapace.control.settings.v1:${first.gatewayUrl}`;
       const next = {
         ...JSON.parse(localStorage.getItem(key) ?? "{}"),
         realtimeTalkInputDeviceId: "cross-tab-mic",
@@ -84,7 +84,7 @@ describe("settings preference persistence", () => {
       expect(credentialReads).not.toHaveBeenCalled();
       expect(theme.settings).not.toHaveProperty("token");
 
-      const selectionKey = `openclaw.control.currentGateway.v1:${first.gatewayUrl}`;
+      const selectionKey = `carapace.control.currentGateway.v1:${first.gatewayUrl}`;
       localStorage.setItem(selectionKey, second.gatewayUrl);
       events.dispatchEvent(Object.assign(new Event("storage"), { key: selectionKey }));
       expect.soft(loadSettings().gatewayUrl).toBe(first.gatewayUrl);
@@ -120,7 +120,7 @@ describe("settings preference persistence", () => {
       credentialReads.mockClear();
       patchSettings({ composerHoldToRecord: false });
       expect(credentialReads.mock.calls.map(([readKey]) => readKey)).toEqual([
-        `openclaw.control.token.v1:${first.gatewayUrl}`,
+        `carapace.control.token.v1:${first.gatewayUrl}`,
       ]);
       expect(theme.settings.composerHoldToRecord).toBe(false);
     } finally {
@@ -173,7 +173,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     saveSettings({ ...loadSettings(), chatSendShortcut: "modifier-enter" });
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}").chatSendShortcut).toBe(
       "modifier-enter",
@@ -200,7 +200,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().chatFollowUpMode).toBeUndefined();
     saveSettings({ ...loadSettings(), chatFollowUpMode: "queue" });
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}").chatFollowUpMode).toBe("queue");
@@ -229,7 +229,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().chatCollapseTaskProgress).toBe(false);
 
     saveSettings({ ...loadSettings(), chatCollapseTaskProgress: true });
@@ -256,7 +256,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().catalogOpenTarget).toBe("viewer");
     saveSettings({ ...loadSettings(), catalogOpenTarget: "terminal" });
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}").catalogOpenTarget).toBe("terminal");
@@ -297,7 +297,7 @@ describe("settings preference persistence", () => {
     });
     expect(loadSettings().pinnedAgentIds).toEqual(["main", "research"]);
 
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     const persisted = JSON.parse(localStorage.getItem(scopedKey) ?? "{}") as Record<
       string,
       unknown
@@ -315,7 +315,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().sidebarLiveActivity).toBe(true);
 
     saveSettings({ ...loadSettings(), sidebarLiveActivity: false });
@@ -331,7 +331,7 @@ describe("settings preference persistence", () => {
   it("defaults advanced settings off and persists only an explicit opt-in", () => {
     setTestLocation({ protocol: "https:", host: "gateway.example:8443", pathname: "/" });
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
 
     expect(loadSettings().showAdvancedSettings).toBe(false);
     saveSettings({ ...loadSettings(), showAdvancedSettings: true });
@@ -347,7 +347,7 @@ describe("settings preference persistence", () => {
   it("normalizes and persists browser-local chat message width", () => {
     setTestLocation({ protocol: "https:", host: "gateway.example:8443", pathname: "/" });
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
 
     expect(normalizeChatMessageMaxWidth("  min(1280px,   82%)  ")).toBe("min(1280px, 82%)");
     expect(normalizeChatMessageMaxWidth("960px; color: red")).toBeUndefined();
@@ -403,7 +403,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     saveSettings({ ...loadSettings(), realtimeTalkInputDeviceId: " usb-mic " });
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}").realtimeTalkInputDeviceId).toBe(
       "usb-mic",
@@ -424,7 +424,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     saveSettings({ ...loadSettings(), realtimeTalkVideoDeviceId: " back-camera " });
     expect(JSON.parse(localStorage.getItem(scopedKey) ?? "{}").realtimeTalkVideoDeviceId).toBe(
       "back-camera",
@@ -445,7 +445,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().composerHoldToRecord).toBe(true);
 
     saveSettings({ ...loadSettings(), composerHoldToRecord: false });
@@ -467,7 +467,7 @@ describe("settings preference persistence", () => {
     });
 
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     expect(loadSettings().talkCameraAutoEnable).toBeUndefined();
 
     saveSettings({ ...loadSettings(), talkCameraAutoEnable: true });
@@ -507,7 +507,7 @@ describe("settings preference persistence", () => {
       sidebarEntries: [],
     });
 
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     const persisted = JSON.parse(localStorage.getItem(scopedKey) ?? "{}") as Record<
       string,
       unknown
@@ -526,7 +526,7 @@ describe("settings preference persistence", () => {
 
     const gwUrl = expectedGatewayUrl("");
     localStorage.setItem(
-      `openclaw.control.settings.v1:${gwUrl}`,
+      `carapace.control.settings.v1:${gwUrl}`,
       JSON.stringify({
         gatewayUrl: gwUrl,
         textScale: 123,
@@ -541,7 +541,7 @@ describe("settings preference persistence", () => {
     (key) => {
       setTestLocation({ protocol: "https:", host: "gateway.example:8443", pathname: "/" });
       const defaults = loadSettings();
-      const scopedKey = `openclaw.control.settings.v1:${defaults.gatewayUrl}`;
+      const scopedKey = `carapace.control.settings.v1:${defaults.gatewayUrl}`;
       expect(defaults[key]).toBeUndefined();
 
       for (const face of ["geist", "lora", "system"] as const) {
@@ -572,7 +572,7 @@ describe("settings preference persistence", () => {
       pathname: "/",
     });
     const defaults = loadSettings();
-    const scopedKey = `openclaw.control.settings.v1:${defaults.gatewayUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${defaults.gatewayUrl}`;
     expect(defaults.textScale).toBeUndefined();
 
     saveSettings({ ...defaults, textScale: 125 });
@@ -592,7 +592,7 @@ describe("settings preference persistence", () => {
       pathname: "/",
     });
     const gatewayUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gatewayUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gatewayUrl}`;
     localStorage.setItem(scopedKey, JSON.stringify({ gatewayUrl, textScale: 100 }));
 
     expect(loadSettings().textScale).toBeUndefined();
@@ -639,7 +639,7 @@ describe("settings preference persistence", () => {
 
     const gwUrl = expectedGatewayUrl("");
     localStorage.setItem(
-      `openclaw.control.settings.v1:${gwUrl}`,
+      `carapace.control.settings.v1:${gwUrl}`,
       JSON.stringify({
         gatewayUrl: gwUrl,
         theme: "custom",
@@ -678,7 +678,7 @@ describe("settings preference persistence", () => {
       pathname: "/",
     });
     localStorage.setItem(
-      "openclaw.control.user.v1",
+      "carapace.control.user.v1",
       JSON.stringify({ name: "Buns", avatar: "🦞" }),
     );
 
@@ -686,7 +686,7 @@ describe("settings preference persistence", () => {
       name: "Buns",
       avatar: "🦞",
     });
-    expect(JSON.parse(localStorage.getItem("openclaw.control.user.v1") ?? "{}")).toEqual({
+    expect(JSON.parse(localStorage.getItem("carapace.control.user.v1") ?? "{}")).toEqual({
       name: "Buns",
       avatar: "🦞",
     });
@@ -694,7 +694,7 @@ describe("settings preference persistence", () => {
 
   it("normalizes invalid local user identity values on load", () => {
     localStorage.setItem(
-      "openclaw.control.user.v1",
+      "carapace.control.user.v1",
       JSON.stringify({
         name: "  ",
         avatar: "https://example.com/avatar.png",

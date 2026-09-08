@@ -76,7 +76,7 @@ afterEach(async () => {
 });
 
 function startFixture(initialFailure = false) {
-  const directory = tempDirs.make("openclaw-restart-liveness-");
+  const directory = tempDirs.make("carapace-restart-liveness-");
   const home = path.join(directory, "home");
   fs.mkdirSync(home);
   const faultPath = path.join(directory, "startup-fault");
@@ -91,9 +91,9 @@ function startFixture(initialFailure = false) {
         PATH: process.env.PATH,
         HOME: home,
         TMPDIR: directory,
-        OPENCLAW_STATE_DIR: path.join(directory, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(directory, "openclaw.json"),
-        OPENCLAW_NO_RESPAWN: "1",
+        CARAPACE_STATE_DIR: path.join(directory, "state"),
+        CARAPACE_CONFIG_PATH: path.join(directory, "carapace.json"),
+        CARAPACE_NO_RESPAWN: "1",
         NODE_DISABLE_COMPILE_CACHE: "1",
         TSX_DISABLE_CACHE: "1",
         ESBUILD_WORKER_THREADS: "0",

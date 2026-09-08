@@ -4,12 +4,12 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { findStartupMaintenanceRequiredError } from "../infra/startup-maintenance-required.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   readConfigHealthStateFromStore,
   writeConfigHealthStateToStore,
@@ -19,14 +19,14 @@ import { createConfigIO } from "./io.js";
 const tempDirs = createTempDirTracker();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
 function createHealthDeps(warn = vi.fn()) {
-  const home = tempDirs.make("openclaw-health-warning-");
+  const home = tempDirs.make("carapace-health-warning-");
   return {
-    env: { HOME: home, OPENCLAW_STATE_DIR: home },
+    env: { HOME: home, CARAPACE_STATE_DIR: home },
     homedir: () => home,
     logger: { warn, error: vi.fn() },
   };
@@ -39,7 +39,7 @@ const healthState = {
 describe("config health-state warnings", () => {
   it("reads an absent health store without creating shared state", () => {
     const deps = createHealthDeps();
-    const databasePath = resolveOpenClawStateSqlitePath(deps.env);
+    const databasePath = resolveCarapaceStateSqlitePath(deps.env);
 
     const state = readConfigHealthStateFromStore(deps);
     expect(fs.existsSync(databasePath)).toBe(false);
@@ -48,15 +48,15 @@ describe("config health-state warnings", () => {
 
   it("deduplicates write failures across fresh sync and async config reads", async () => {
     const deps = createHealthDeps();
-    const configPath = path.join(deps.env.HOME, "openclaw.json");
+    const configPath = path.join(deps.env.HOME, "carapace.json");
     fs.writeFileSync(configPath, JSON.stringify({ gateway: { mode: "local" } }));
-    openOpenClawStateDatabase(deps).db.exec("PRAGMA query_only = ON");
+    openCarapaceStateDatabase(deps).db.exec("PRAGMA query_only = ON");
 
     for (let i = 0; i < 3; i++) {
       const options = {
         ...deps,
         configPath,
-        env: { ...deps.env, OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" },
+        env: { ...deps.env, CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" },
       };
       expect(createConfigIO(options).loadConfig().gateway?.mode).toBe("local");
       expect((await createConfigIO(options).readConfigFileSnapshot()).valid).toBe(true);
@@ -69,16 +69,16 @@ describe("config health-state warnings", () => {
 
   it("propagates a newer database schema from health writes", () => {
     const deps = createHealthDeps();
-    const databasePath = resolveOpenClawStateSqlitePath(deps.env);
+    const databasePath = resolveCarapaceStateSqlitePath(deps.env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const db = new DatabaseSync(databasePath);
-    db.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1}`);
+    db.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1}`);
     db.close();
 
     for (let i = 0; i < 3; i++) {
       expect(readConfigHealthStateFromStore(deps)).toEqual({});
       expect(() => writeConfigHealthStateToStore(deps, healthState)).toThrow(
-        `uses newer schema version ${OPENCLAW_STATE_SCHEMA_VERSION + 1}`,
+        `uses newer schema version ${CARAPACE_STATE_SCHEMA_VERSION + 1}`,
       );
     }
     expect(deps.logger.warn).not.toHaveBeenCalled();
@@ -86,8 +86,8 @@ describe("config health-state warnings", () => {
 
   it("propagates audit migration required from health writes and config snapshots", async () => {
     const deps = createHealthDeps();
-    const { path: databasePath } = openOpenClawStateDatabase(deps);
-    closeOpenClawStateDatabaseForTest();
+    const { path: databasePath } = openCarapaceStateDatabase(deps);
+    closeCarapaceStateDatabaseForTest();
     const db = new DatabaseSync(databasePath);
     db.exec(`
       DROP TABLE audit_events;
@@ -122,7 +122,7 @@ describe("config health-state warnings", () => {
       kind: "audit-events-v2",
       pathname: databasePath,
     });
-    const configPath = path.join(deps.env.HOME, "openclaw.json");
+    const configPath = path.join(deps.env.HOME, "carapace.json");
     fs.writeFileSync(configPath, JSON.stringify({ gateway: { mode: "local" } }));
     await expect(createConfigIO({ ...deps, configPath }).readConfigFileSnapshot()).rejects.toThrow(
       "audit-events-v2",
@@ -132,7 +132,7 @@ describe("config health-state warnings", () => {
 
   it("reports changed failures and re-arms only after a successful health write", () => {
     const deps = createHealthDeps();
-    const { db } = openOpenClawStateDatabase(deps);
+    const { db } = openCarapaceStateDatabase(deps);
     db.exec("PRAGMA query_only = ON");
     writeConfigHealthStateToStore(deps, healthState);
     readConfigHealthStateFromStore(deps);
@@ -173,7 +173,7 @@ describe("config health-state warnings", () => {
     const warn = vi.fn();
     const stores = [createHealthDeps(warn), createHealthDeps(warn)] as const;
     for (const deps of stores) {
-      openOpenClawStateDatabase(deps).db.exec("PRAGMA query_only = ON");
+      openCarapaceStateDatabase(deps).db.exec("PRAGMA query_only = ON");
     }
     for (let i = 0; i < 2; i++) {
       for (const deps of stores) {
@@ -181,7 +181,7 @@ describe("config health-state warnings", () => {
       }
     }
     expect(warn).toHaveBeenCalledTimes(2);
-    openOpenClawStateDatabase(stores[1]).db.exec("PRAGMA query_only = OFF");
+    openCarapaceStateDatabase(stores[1]).db.exec("PRAGMA query_only = OFF");
     writeConfigHealthStateToStore(stores[1], healthState);
     writeConfigHealthStateToStore(stores[0], healthState);
     expect(warn).toHaveBeenCalledTimes(2);

@@ -2,15 +2,15 @@ import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayInstallEntrypoint } from "../daemon/gateway-entrypoint.js";
 import { redactSupportString } from "../logging/diagnostic-support-redaction.js";
 import { signalProcessTree } from "../process/kill-tree.js";
 import {
-  parseOpenClawSchemaVersions,
-  type OpenClawSchemaVersions,
-} from "../state/openclaw-schema-versions.js";
+  parseCarapaceSchemaVersions,
+  type CarapaceSchemaVersions,
+} from "../state/carapace-schema-versions.js";
 import { hasErrnoCode } from "./errors.js";
 import { readPackageVersion } from "./package-json.js";
 import { runtimeProcessEntrypoints } from "./runtime-process-entrypoints.js";
@@ -35,7 +35,7 @@ type CanaryResult = {
   durationMs: number;
   logTail: string[];
   steps: UpdateStepResult[];
-  candidateSchemaVersions?: OpenClawSchemaVersions;
+  candidateSchemaVersions?: CarapaceSchemaVersions;
 } & (
   | { status: "ok" }
   | {
@@ -98,7 +98,7 @@ async function terminateCanary(
 /** Rehearse the exact candidate against private SQLite snapshots while the serving generation stays up. */
 export async function validateUpdateCandidateCanary(params: {
   root: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   stateDir: string;
   timeoutMs?: number;
   signal?: AbortSignal;
@@ -126,7 +126,7 @@ export async function validateUpdateCandidateCanary(params: {
   const sourceEnv = params.env ?? process.env;
   const logTail: string[] = [];
   const steps: UpdateStepResult[] = [];
-  let candidateSchemaVersions: OpenClawSchemaVersions | undefined;
+  let candidateSchemaVersions: CarapaceSchemaVersions | undefined;
   let phase: CanaryPhase = "snapshot";
   let env: NodeJS.ProcessEnv = { ...sourceEnv };
   const capture = (chunk: Buffer | string) => {
@@ -305,7 +305,7 @@ export async function validateUpdateCandidateCanary(params: {
     ];
     for (const command of commands) {
       phase = command.phase;
-      env.OPENCLAW_UPDATE_IN_PROGRESS = phase === "doctor" ? "1" : "0";
+      env.CARAPACE_UPDATE_IN_PROGRESS = phase === "doctor" ? "1" : "0";
       remaining();
       const commandStart = Date.now();
       const running = launch(command.entry ?? entry, command.args);
@@ -347,7 +347,7 @@ export async function validateUpdateCandidateCanary(params: {
       if (code === 0 && phase === "runtime") {
         candidateSchemaVersions = running.outputExceeded()
           ? undefined
-          : parseOpenClawSchemaVersions(JSON.parse(running.stdout()));
+          : parseCarapaceSchemaVersions(JSON.parse(running.stdout()));
         if (!candidateSchemaVersions) {
           code = 1;
           capture("Candidate migration continuation did not report its schema contract");

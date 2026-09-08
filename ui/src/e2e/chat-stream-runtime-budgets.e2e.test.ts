@@ -91,7 +91,7 @@ type ScopedWindow = Window & {
   ocIdleProbe?: { longTasks: number; longTaskMs: number };
   ocBurstDone?: boolean;
   ocToolProjectionProbe?: ToolProjectionProbe;
-  openclawControlUiE2eGateway?: {
+  carapaceControlUiE2eGateway?: {
     emit: (event: string, payload?: unknown) => void;
   };
 };
@@ -121,9 +121,9 @@ function renderedChunkText(index: number): string {
 async function installRenderProbe(page: ChatFlowPage) {
   await page.evaluate(() => {
     const scope = window as ScopedWindow;
-    const chatPage = document.querySelector("openclaw-chat-page");
+    const chatPage = document.querySelector("carapace-chat-page");
     if (!chatPage) {
-      throw new Error("openclaw-chat-page is not mounted");
+      throw new Error("carapace-chat-page is not mounted");
     }
     scope.ocStreamPerf = {
       mutationBatches: 0,
@@ -165,7 +165,7 @@ async function installRenderProbe(page: ChatFlowPage) {
     ownerPrototype.requestUpdate = function patchedRequestUpdate(this: object, ...args: unknown[]) {
       const probe = scope.ocStreamPerf!;
       const tag = (this as HTMLElement).localName;
-      if (tag === "openclaw-chat-page" || tag === "openclaw-chat-pane") {
+      if (tag === "carapace-chat-page" || tag === "carapace-chat-pane") {
         probe.hostUpdates += 1;
         if (insideFrame) {
           probe.hostUpdatesInsideFrame += 1;
@@ -202,7 +202,7 @@ async function emitDeltaBurstInPage(
 ): Promise<void> {
   await page.evaluate(
     ({ runId: targetRunId, count: targetCount }) => {
-      const gateway = (window as ScopedWindow).openclawControlUiE2eGateway;
+      const gateway = (window as ScopedWindow).carapaceControlUiE2eGateway;
       if (!gateway) {
         throw new Error("mock gateway handle missing");
       }
@@ -279,7 +279,7 @@ async function probeDeferredToolProjection(page: ChatFlowPage, runId: string): P
   await page.evaluate(
     ({ runId: targetRunId, seqSeed }) => {
       const scope = window as ScopedWindow;
-      const gateway = scope.openclawControlUiE2eGateway;
+      const gateway = scope.carapaceControlUiE2eGateway;
       if (!gateway) {
         throw new Error("mock gateway handle missing");
       }
@@ -346,7 +346,7 @@ async function probeDeferredToolProjection(page: ChatFlowPage, runId: string): P
 async function completeFirstToolLifecycle(page: ChatFlowPage, runId: string): Promise<void> {
   await page.evaluate(
     ({ runId: targetRunId, seq }) => {
-      const gateway = (window as ScopedWindow).openclawControlUiE2eGateway;
+      const gateway = (window as ScopedWindow).carapaceControlUiE2eGateway;
       if (!gateway) {
         throw new Error("mock gateway handle missing");
       }
@@ -385,7 +385,7 @@ async function emitRemainingToolLifecycleFlood(
   await page.evaluate(
     ({ runId: targetRunId, pairCount: targetPairCount, phaseIntervalMs, seqSeed }) => {
       const scope = window as ScopedWindow;
-      const gateway = scope.openclawControlUiE2eGateway;
+      const gateway = scope.carapaceControlUiE2eGateway;
       if (!gateway) {
         throw new Error("mock gateway handle missing");
       }

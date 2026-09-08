@@ -1,7 +1,7 @@
 // Memory Core plugin module implements dreaming shared behavior.
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
-export { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+export { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 
 export function includesSystemEventToken(cleanedBody: string, eventText: string): boolean {
   const normalizedBody = normalizeOptionalString(cleanedBody);

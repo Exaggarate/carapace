@@ -1,11 +1,11 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { AcpTurnAttachment } from "../../../acp/control-plane/manager.types.js";
 import { resolveInboundConversationResolution } from "../../../channels/conversation-resolution.js";
 import {
   formatConversationTarget,
   deliveryContextFromConversation,
 } from "../../../channels/route-projection.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { SessionBindingRecord } from "../../../infra/outbound/session-binding-service.js";
 import { resolveSpawnChannelAccountId } from "../../spawn-plan.js";
 import type { AcpSpawnRequesterState } from "./acp-spawn-requester.js";
@@ -44,7 +44,7 @@ export type AcpSpawnBootstrapDeliveryPlan = {
 };
 
 export function resolveAcpSpawnBootstrapDeliveryPlan(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   spawnMode: "run" | "session";
   effectiveStreamToParent: boolean;
   requester: AcpSpawnRequesterState;

@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { WebSocket, WebSocketServer } from "ws";
 import type {
   QuestionRequestParams,
@@ -38,10 +38,10 @@ export async function withQuestionGateway(
 ) {
   await withEnvAsync(
     {
-      OPENCLAW_GATEWAY_URL: undefined,
-      OPENCLAW_GATEWAY_PORT: undefined,
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
+      CARAPACE_GATEWAY_URL: undefined,
+      CARAPACE_GATEWAY_PORT: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
     },
     async () => {
       const server = new WebSocketServer({ host: "127.0.0.1", port: 0 });

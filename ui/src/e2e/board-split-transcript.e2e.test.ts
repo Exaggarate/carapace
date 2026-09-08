@@ -22,12 +22,12 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const sessionKey = "agent:main:board-split-transcript";
 let proofDir: string;
 beforeEach(() => {
-  if (process.env.OPENCLAW_UI_E2E_RECORD === "1") {
+  if (process.env.CARAPACE_UI_E2E_RECORD === "1") {
     proofDir = createControlUiE2eArtifactDir("dashboard-side-chat-tabs");
   }
 });
@@ -289,7 +289,7 @@ describeControlUiE2e("Board split transcript restore", () => {
   }, 120_000);
 
   it("transitions between expanded and split dashboard panel states", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     const context = await browser.newContext({
       viewport: { width: 1400, height: 900 },
       ...(recordProof
@@ -361,7 +361,7 @@ describeControlUiE2e("Board split transcript restore", () => {
     await restoreChatAsMain(page);
     await expectSidePanelTabs(page, expectedTabLabels);
     expect(await sidePanel.locator('[data-panel-slot="dashboard"]').count()).toBe(1);
-    const dashboard = await page.locator("openclaw-board-view").elementHandle();
+    const dashboard = await page.locator("carapace-board-view").elementHandle();
     expect(dashboard).not.toBeNull();
     await recordStep("transition-02-split");
 
@@ -376,7 +376,7 @@ describeControlUiE2e("Board split transcript restore", () => {
     await expectSidePanelTabs(page, expectedTabLabels);
     expect(
       await page
-        .locator("openclaw-board-view")
+        .locator("carapace-board-view")
         .evaluate((element, previous) => element === previous, dashboard),
     ).toBe(true);
     await expect.poll(() => chat.isVisible()).toBe(true);
@@ -391,7 +391,7 @@ describeControlUiE2e("Board split transcript restore", () => {
   }, 120_000);
 
   it("activates Side chat from a split dashboard panel", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     const context = await browser.newContext({
       viewport: { width: 1400, height: 900 },
       ...(recordProof
@@ -453,7 +453,7 @@ describeControlUiE2e("Board split transcript restore", () => {
   }, 120_000);
 
   it("does not offer Discussion when the gateway has no discussion provider", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     const context = await browser.newContext({
       viewport: { width: 1400, height: 900 },
       ...(recordProof
@@ -514,7 +514,7 @@ describeControlUiE2e("Board split transcript restore", () => {
     const headerToggle = page.locator(".chat-side-panel-toggle").first();
     await sidePanel.locator('[data-region-header="side"]').waitFor();
     await expectSidePanelTabs(page, ["Dashboard"]);
-    const dashboard = await page.locator("openclaw-board-view").elementHandle();
+    const dashboard = await page.locator("carapace-board-view").elementHandle();
     expect(dashboard).not.toBeNull();
     await expect.poll(() => headerToggle.getAttribute("aria-expanded")).toBe("true");
     await expect.poll(() => headerToggle.getAttribute("aria-label")).toBe("Minimize side panel");
@@ -532,7 +532,7 @@ describeControlUiE2e("Board split transcript restore", () => {
     await expectSidePanelTabs(page, ["Dashboard"]);
     expect(
       await page
-        .locator("openclaw-board-view")
+        .locator("carapace-board-view")
         .evaluate((element, previous) => element === previous, dashboard),
     ).toBe(true);
     expect(await headerToggle.getAttribute("aria-expanded")).toBe("true");
@@ -549,7 +549,7 @@ describeControlUiE2e("Board split transcript restore", () => {
     await expectSidePanelTabs(page, ["Dashboard"]);
     expect(
       await page
-        .locator("openclaw-board-view")
+        .locator("carapace-board-view")
         .evaluate((element, previous) => element === previous, dashboard),
     ).toBe(true);
     expect(await gateway.getRequests("board.update")).toHaveLength(0);

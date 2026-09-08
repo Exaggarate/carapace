@@ -1,15 +1,15 @@
 // Discord plugin module implements channel actions behavior.
-import { createUnionActionGate } from "openclaw/plugin-sdk/channel-actions";
+import { createUnionActionGate } from "carapace/plugin-sdk/channel-actions";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
   ChannelMessageToolDiscovery,
   ChannelMessageToolSchemaContribution,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { DiscordActionConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { extractToolSend } from "openclaw/plugin-sdk/tool-send";
+} from "carapace/plugin-sdk/channel-contract";
+import type { DiscordActionConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { extractToolSend } from "carapace/plugin-sdk/tool-send";
 import { Type } from "typebox";
 import { inspectDiscordAccount } from "./account-inspect.js";
 import { createDiscordActionGate, listDiscordAccountIds } from "./accounts.js";
@@ -78,13 +78,13 @@ const loadDiscordChannelActionsRuntime = createLazyRuntimeModule(
   () => import("./channel-actions.runtime.js"),
 );
 
-function listDiscoverableDiscordAccounts(cfg: OpenClawConfig) {
+function listDiscoverableDiscordAccounts(cfg: CarapaceConfig) {
   return listDiscordAccountIds(cfg)
     .map((accountId) => inspectDiscordAccount({ cfg, accountId }))
     .filter((account) => account.enabled && account.configured);
 }
 
-function resolveDiscordActionDiscovery(cfg: OpenClawConfig) {
+function resolveDiscordActionDiscovery(cfg: CarapaceConfig) {
   const accounts = listDiscoverableDiscordAccounts(cfg);
   if (accounts.length === 0) {
     return null;
@@ -102,7 +102,7 @@ function resolveDiscordActionDiscovery(cfg: OpenClawConfig) {
 }
 
 function resolveScopedDiscordActionDiscovery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }) {
   if (!params.accountId) {

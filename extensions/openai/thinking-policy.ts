@@ -2,8 +2,8 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeLowercaseStringOrEmpty as normalizeModelId } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { normalizeLowercaseStringOrEmpty as normalizeModelId } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   OPENAI_GPT_53_CODEX_SPARK_MODEL_ID,
   OPENAI_GPT_54_MINI_MODEL_ID,
@@ -16,7 +16,7 @@ import {
   OPENAI_GPT_6_ASTRA_MODEL_ID,
   resolveOpenAICodexReasoningEfforts,
 } from "./model-route-contract.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 type OpenAIThinkingCompat = ProviderDefaultThinkingPolicyContext["compat"];
 type OpenAIThinkingApi = ProviderDefaultThinkingPolicyContext["api"];
@@ -104,7 +104,7 @@ function buildOpenAIThinkingProfile(params: {
     // Ultra is runtime orchestration; the Platform's scalar effort list stops at Max.
     // Preserve narrower account capabilities while exposing the supported runtime mode.
     const supportsUltra =
-      ["openclaw", "codex", "auto"].includes(agentRuntime) && efforts.includes("max");
+      ["carapace", "codex", "auto"].includes(agentRuntime) && efforts.includes("max");
     return {
       levels: buildCodexLevels(supportsUltra ? [...efforts, "ultra"] : efforts),
       ...(efforts.includes("low") ? { defaultLevel: "low" as const } : {}),
@@ -120,11 +120,11 @@ function buildOpenAIThinkingProfile(params: {
   const supportsMax =
     modelId.startsWith("gpt-5.6") && (agentRuntime !== "codex" || codexSupportsMax);
   const codexSupportsUltra = (resolvedCodexEfforts ?? knownCodexEfforts)?.includes("ultra");
-  // OpenClaw owns its logical Ultra orchestration. Native Codex capabilities
+  // Carapace owns its logical Ultra orchestration. Native Codex capabilities
   // come from native discovery or the selected ChatGPT route's catalog metadata.
   const supportsUltra =
     (modelId === OPENAI_GPT_56_MODEL_ID || isGpt56Variant) &&
-    (agentRuntime === "openclaw" ||
+    (agentRuntime === "carapace" ||
       agentRuntime === "auto" ||
       (agentRuntime === "codex" && codexSupportsUltra));
   const nativeCodexNeedsAccountEffortValidation =

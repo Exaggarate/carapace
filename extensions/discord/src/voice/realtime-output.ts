@@ -3,9 +3,9 @@ import {
   createRealtimeVoiceOutputActivityTracker,
   type RealtimeVoiceOutputActivityDelta,
   type RealtimeVoicePlaybackItem,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { createDiscordOpusEncodeStream } from "./audio.js";
 import type { DiscordRealtimePlayer, DiscordRealtimePlayerRequest } from "./realtime-player.js";
 import { loadDiscordVoiceSdk } from "./sdk-runtime.js";

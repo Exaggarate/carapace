@@ -1,8 +1,8 @@
 // Channel setup plugin install tests cover install decisions, registry reloads, scoped snapshots, and trust boundaries.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { createRequireRecord, bundledPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { createRequireRecord, bundledPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createColdPluginFixture } from "../../plugins/test-helpers/cold-plugin-fixtures.js";
@@ -77,23 +77,23 @@ vi.mock("../../plugins/bundled-sources.js", () => ({
 
 vi.mock("../../plugins/loader.js", () => {
   const load = vi.fn();
-  return { loadOpenClawPlugins: load, loadPluginRegistryHandle: load };
+  return { loadCarapacePlugins: load, loadPluginRegistryHandle: load };
 });
 
-const discoverOpenClawPlugins = vi.fn((_args?: unknown) => ({
+const discoverCarapacePlugins = vi.fn((_args?: unknown) => ({
   candidates: [] as PluginCandidate[],
   diagnostics: [],
 }));
 vi.mock("../../plugins/discovery.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../plugins/discovery.js")>()),
-  discoverOpenClawPlugins: (args: unknown) => discoverOpenClawPlugins(args),
+  discoverCarapacePlugins: (args: unknown) => discoverCarapacePlugins(args),
 }));
 
 import type { ChannelPluginCatalogEntry } from "../../channels/plugins/catalog.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { PluginCandidate } from "../../plugins/discovery.js";
 import { PLUGIN_INSTALL_ERROR_CODE } from "../../plugins/install-types.js";
-import { loadOpenClawPlugins } from "../../plugins/loader.js";
+import { loadCarapacePlugins } from "../../plugins/loader.js";
 import type { PluginManifestRecord } from "../../plugins/manifest-registry.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
@@ -105,11 +105,11 @@ import {
   loadChannelSetupPluginRegistrySnapshotForChannel,
 } from "./plugin-install.js";
 
-const bundledChatNpmSpec = "@openclaw/bundled-chat@1.2.3";
+const bundledChatNpmSpec = "@carapace/bundled-chat@1.2.3";
 const bundledChatIntegrity = "sha512-bundled-chat";
 const bundledChatForkNpmSpec = "@vendor/bundled-chat-fork@1.2.3";
 const bundledChatForkIntegrity = "sha512-vendor-bundled-chat-fork";
-const ORIGINAL_OPENCLAW_STATE_DIR = process.env.OPENCLAW_STATE_DIR;
+const ORIGINAL_CARAPACE_STATE_DIR = process.env.CARAPACE_STATE_DIR;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 const baseEntry: ChannelPluginCatalogEntry = {
@@ -186,15 +186,15 @@ function createManifestRecord(
     skills: [],
     hooks: [],
     origin: "bundled",
-    rootDir: `/tmp/openclaw-test/${id}`,
-    source: `/tmp/openclaw-test/${id}/index.ts`,
-    manifestPath: `/tmp/openclaw-test/${id}/openclaw.plugin.json`,
+    rootDir: `/tmp/carapace-test/${id}`,
+    source: `/tmp/carapace-test/${id}/index.ts`,
+    manifestPath: `/tmp/carapace-test/${id}/carapace.plugin.json`,
     ...rest,
   };
 }
 
 function expectSetupSnapshotDoesNotScopeToPlugin(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: ReturnType<typeof makeRuntime>;
   pluginId: string;
 }) {
@@ -202,11 +202,11 @@ function expectSetupSnapshotDoesNotScopeToPlugin(params: {
     cfg: params.cfg,
     runtime: params.runtime,
     channel: "external-chat",
-    workspaceDir: "/tmp/openclaw-workspace",
+    workspaceDir: "/tmp/carapace-workspace",
   });
 
-  expect(loadOpenClawPlugins).toHaveBeenCalledTimes(1);
-  expect(requireMockCallArg(vi.mocked(loadOpenClawPlugins), 0).onlyPluginIds).toStrictEqual([]);
+  expect(loadCarapacePlugins).toHaveBeenCalledTimes(1);
+  expect(requireMockCallArg(vi.mocked(loadCarapacePlugins), 0).onlyPluginIds).toStrictEqual([]);
 }
 
 beforeEach(() => {
@@ -219,7 +219,7 @@ beforeEach(() => {
     autoEnabledReasons: {},
   }));
   resolveBundledPluginSources.mockReturnValue(new Map());
-  discoverOpenClawPlugins.mockReturnValue({ candidates: [], diagnostics: [] });
+  discoverCarapacePlugins.mockReturnValue({ candidates: [], diagnostics: [] });
   getChannelPluginCatalogEntry.mockReturnValue(undefined);
   listChannelPluginCatalogEntries.mockReturnValue([]);
   loadPluginManifestRegistryCore.mockReturnValue({ plugins: [], diagnostics: [] });
@@ -228,15 +228,15 @@ beforeEach(() => {
 
 afterEach(() => {
   clearPluginMetadataLifecycleCaches();
-  if (ORIGINAL_OPENCLAW_STATE_DIR === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+  if (ORIGINAL_CARAPACE_STATE_DIR === undefined) {
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = ORIGINAL_OPENCLAW_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = ORIGINAL_CARAPACE_STATE_DIR;
   }
 });
 
 function createLocalPluginFixture(pluginId = "bundled-chat") {
-  const workspaceDir = tempDirs.make("openclaw-channel-plugin-");
+  const workspaceDir = tempDirs.make("carapace-channel-plugin-");
   const localPath = path.join(workspaceDir, bundledPluginRoot("bundled-chat"));
   fs.mkdirSync(path.join(workspaceDir, ".git"));
   fs.mkdirSync(localPath, { recursive: true });
@@ -251,7 +251,7 @@ async function runInitialValueForChannel(channel: "dev" | "beta") {
   const runtime = makeRuntime();
   const select = vi.fn((async <T extends string>() => "skip" as T) as WizardPrompter["select"]);
   const prompter = makePrompter({ select: select as unknown as WizardPrompter["select"] });
-  const cfg: OpenClawConfig = { update: { channel } };
+  const cfg: CarapaceConfig = { update: { channel } };
   const { workspaceDir } = createLocalPluginFixture();
 
   await ensureChannelSetupPluginInstalled({
@@ -306,10 +306,10 @@ function requireOptionByValue(options: unknown[], value: string) {
   return requireRecord(option, `select option ${value}`);
 }
 
-function expectLoadOpenClawPluginFields(expected: Record<string, unknown>, callIndex = 0) {
+function expectLoadCarapacePluginFields(expected: Record<string, unknown>, callIndex = 0) {
   expectRecordFields(
-    requireMockCallArg(vi.mocked(loadOpenClawPlugins), callIndex),
-    "loadOpenClawPlugins args",
+    requireMockCallArg(vi.mocked(loadCarapacePlugins), callIndex),
+    "loadCarapacePlugins args",
     expected,
   );
 }
@@ -321,7 +321,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       select: vi.fn(async () => "npm") as WizardPrompter["select"],
       confirm: vi.fn(async () => true),
     });
-    const cfg: OpenClawConfig = { plugins: { allow: ["bundled-chat"] } };
+    const cfg: CarapaceConfig = { plugins: { allow: ["bundled-chat"] } };
     installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
       pluginId: "bundled-chat",
@@ -356,8 +356,8 @@ describe("ensureChannelSetupPluginInstalled", () => {
       select: vi.fn(async () => "npm") as WizardPrompter["select"],
       confirm: vi.fn(async () => true),
     });
-    const profileStateDir = tempDirs.make("openclaw-ledger-channel-");
-    process.env.OPENCLAW_STATE_DIR = profileStateDir;
+    const profileStateDir = tempDirs.make("carapace-ledger-channel-");
+    process.env.CARAPACE_STATE_DIR = profileStateDir;
     installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
       pluginId: "bundled-chat",
@@ -384,7 +384,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       select: vi.fn(async () => "local") as WizardPrompter["select"],
       confirm: vi.fn(async () => true),
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const { workspaceDir, localPath, runtimeMarker } = createLocalPluginFixture();
 
     const result = await ensureChannelSetupPluginInstalled({
@@ -407,7 +407,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       select: vi.fn(async () => "local") as WizardPrompter["select"],
       confirm: vi.fn(async () => true),
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const { workspaceDir } = createLocalPluginFixture("@vendor/external-chat-plugin");
 
     const result = await ensureChannelSetupPluginInstalled({
@@ -443,23 +443,23 @@ describe("ensureChannelSetupPluginInstalled", () => {
     async ({ beta, latest, selected }) => {
       const runtime = makeRuntime();
       const { prompter, select } = makeSkipInstallPrompter(true);
-      const cfg: OpenClawConfig = { update: { channel: "beta" } };
+      const cfg: CarapaceConfig = { update: { channel: "beta" } };
       resolveNpmSpecMetadata.mockImplementation(async ({ spec }: { spec: string }) => {
-        const version = spec === "@openclaw/wecom@beta" ? beta : latest;
-        expect(["@openclaw/wecom@beta", "@openclaw/wecom@latest"]).toContain(spec);
-        const name = "@openclaw/wecom";
+        const version = spec === "@carapace/wecom@beta" ? beta : latest;
+        expect(["@carapace/wecom@beta", "@carapace/wecom@latest"]).toContain(spec);
+        const name = "@carapace/wecom";
         const metadata = { name, version, resolvedSpec: `${name}@${version}` };
         return { ok: true, metadata };
       });
       installPluginFromNpmSpec.mockResolvedValue({
         ok: true,
-        pluginId: "wecom-openclaw-plugin",
-        targetDir: "/tmp/wecom-openclaw-plugin",
+        pluginId: "wecom-carapace-plugin",
+        targetDir: "/tmp/wecom-carapace-plugin",
         version: selected,
         npmResolution: {
-          name: "@openclaw/wecom",
+          name: "@carapace/wecom",
           version: selected,
-          resolvedSpec: `@openclaw/wecom@${selected}`,
+          resolvedSpec: `@carapace/wecom@${selected}`,
         },
       });
 
@@ -467,7 +467,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
         cfg,
         entry: {
           id: "wecom",
-          pluginId: "wecom-openclaw-plugin",
+          pluginId: "wecom-carapace-plugin",
           meta: {
             id: "wecom",
             label: "WeCom",
@@ -476,7 +476,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
             blurb: "WeCom channel",
           },
           install: {
-            npmSpec: "@openclaw/wecom",
+            npmSpec: "@carapace/wecom",
           },
         },
         prompter,
@@ -486,17 +486,17 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
       expect(select).not.toHaveBeenCalled();
       expectRecordFields(requireMockCallArg(installPluginFromNpmSpec, 0), "npm install args", {
-        spec: `@openclaw/wecom@${selected}`,
-        expectedPluginId: "wecom-openclaw-plugin",
+        spec: `@carapace/wecom@${selected}`,
+        expectedPluginId: "wecom-carapace-plugin",
       });
-      expect(result.cfg.plugins?.installs?.["wecom-openclaw-plugin"]?.spec).toBe("@openclaw/wecom");
+      expect(result.cfg.plugins?.installs?.["wecom-carapace-plugin"]?.spec).toBe("@carapace/wecom");
     },
   );
 
   it("defaults to bundled local path on beta channel when available", async () => {
     const runtime = makeRuntime();
     const { prompter, select } = makeSkipInstallPrompter();
-    const cfg: OpenClawConfig = { update: { channel: "beta" } };
+    const cfg: CarapaceConfig = { update: { channel: "beta" } };
     const localPath = mockBundledChatSource();
 
     await ensureChannelSetupPluginInstalled({
@@ -521,7 +521,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("uses the bundled default install source without prompting in non-interactive mode", async () => {
     const runtime = makeRuntime();
     const { prompter, select } = makeSkipInstallPrompter();
-    const cfg: OpenClawConfig = { update: { channel: "beta" } };
+    const cfg: CarapaceConfig = { update: { channel: "beta" } };
     mockBundledChatSource();
 
     const result = await ensureChannelSetupPluginInstalled({
@@ -542,7 +542,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("does not default to bundled local path when an external catalog overrides the npm spec", async () => {
     const runtime = makeRuntime();
     const { prompter, select } = makeSkipInstallPrompter();
-    const cfg: OpenClawConfig = { update: { channel: "beta" } };
+    const cfg: CarapaceConfig = { update: { channel: "beta" } };
     mockBundledChatSource();
 
     await ensureChannelSetupPluginInstalled({
@@ -581,7 +581,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
   it("offers ClawHub as the first-class install source for channel catalog entries", async () => {
     const runtime = makeRuntime();
     const { prompter, select } = makeSkipInstallPrompter();
-    const cfg: OpenClawConfig = { update: { channel: "beta" } };
+    const cfg: CarapaceConfig = { update: { channel: "beta" } };
     resolveBundledPluginSources.mockReturnValue(new Map());
 
     await ensureChannelSetupPluginInstalled({
@@ -597,7 +597,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
           blurb: "Test",
         },
         install: {
-          clawhubSpec: "clawhub:openclaw/clawhub-chat@2026.5.2",
+          clawhubSpec: "clawhub:carapace/clawhub-chat@2026.5.2",
           defaultChoice: "clawhub",
         },
       },
@@ -611,7 +611,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     expect(options).toHaveLength(2);
     expectRecordFields(options[0], "clawhub option", {
       value: "clawhub",
-      label: "Download from ClawHub (clawhub:openclaw/clawhub-chat@2026.5.2)",
+      label: "Download from ClawHub (clawhub:carapace/clawhub-chat@2026.5.2)",
     });
     expectRecordFields(options[1], "skip option", {
       value: "skip",
@@ -622,7 +622,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     {
       scenario: "falls back to local path when the npm target is not published",
       code: PLUGIN_INSTALL_ERROR_CODE.NPM_PACKAGE_NOT_FOUND,
-      error: "Package not found on npm: @openclaw/bundled-chat@1.2.3",
+      error: "Package not found on npm: @carapace/bundled-chat@1.2.3",
       fallback: true,
     },
     {
@@ -652,7 +652,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       note,
       confirm,
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const { workspaceDir, localPath } = createLocalPluginFixture();
     installPluginFromNpmSpec.mockResolvedValue({
       ok: false,
@@ -686,11 +686,11 @@ describe("ensureChannelSetupPluginInstalled", () => {
     async (acceptCapabilities) => {
       const runtime = makeRuntime();
       const { prompter, select, confirm } = makeSkipInstallPrompter(acceptCapabilities);
-      const cfg: OpenClawConfig = {};
+      const cfg: CarapaceConfig = {};
       // npm-only entry (no local path)
       const npmOnlyEntry: ChannelPluginCatalogEntry = {
         id: "wecom",
-        pluginId: "wecom-openclaw-plugin",
+        pluginId: "wecom-carapace-plugin",
         meta: {
           id: "wecom",
           label: "WeCom",
@@ -699,13 +699,13 @@ describe("ensureChannelSetupPluginInstalled", () => {
           blurb: "WeCom channel",
         },
         install: {
-          npmSpec: "@openclaw/wecom@2026.4.23",
+          npmSpec: "@carapace/wecom@2026.4.23",
         },
       };
       installPluginFromNpmSpec.mockResolvedValue({
         ok: true,
-        pluginId: "wecom-openclaw-plugin",
-        targetDir: "/tmp/wecom-openclaw-plugin",
+        pluginId: "wecom-carapace-plugin",
+        targetDir: "/tmp/wecom-carapace-plugin",
       });
       resolveBundledPluginSources.mockReturnValue(new Map());
 
@@ -720,7 +720,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       expect(select).not.toHaveBeenCalled();
       expect(confirm).toHaveBeenCalledOnce();
       expect(result.installed).toBe(acceptCapabilities);
-      expect(result.pluginId).toBe("wecom-openclaw-plugin");
+      expect(result.pluginId).toBe("wecom-carapace-plugin");
       if (!acceptCapabilities) {
         expect(result.cfg).toBe(cfg);
         expect(runtime.error).toHaveBeenCalledWith(expect.stringMatching(/capabilit/i));
@@ -730,7 +730,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("loads setup snapshots from the auto-enabled config snapshot", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {},
       channels: { "external-chat": { enabled: true } } as never,
     };
@@ -741,7 +741,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
           "external-chat": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     applyPluginAutoEnable.mockReturnValue({
       config: autoEnabledConfig,
       changes: [],
@@ -752,14 +752,14 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
     expect(applyPluginAutoEnable).toHaveBeenCalledWith({
       config: cfg,
       env: process.env,
     });
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       config: autoEnabledConfig,
       activationSourceConfig: cfg,
       autoEnabledReasons: {},
@@ -768,34 +768,34 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("can load a channel-scoped snapshot without activating the global registry", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     getChannelPluginCatalogEntry.mockReturnValue({ pluginId: "@vendor/external-chat-plugin" });
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       config: cfg,
       activationSourceConfig: cfg,
       autoEnabledReasons: {},
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
       cache: false,
       onlyPluginIds: ["@vendor/external-chat-plugin"],
       includeSetupOnlyChannelPlugins: true,
       channelPluginLoadIntent: "setup",
     });
     expect(getChannelPluginCatalogEntry).toHaveBeenCalledWith("external-chat", {
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
   });
 
   it("falls back to the bundled plugin for untrusted workspace shadows", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     getChannelPluginCatalogEntry
       .mockReturnValueOnce({ pluginId: "evil-external-chat-shadow", origin: "workspace" })
       .mockReturnValueOnce({ pluginId: "@vendor/external-chat-plugin", origin: "bundled" });
@@ -804,17 +804,17 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       onlyPluginIds: ["@vendor/external-chat-plugin"],
     });
     expect(getChannelPluginCatalogEntry).toHaveBeenNthCalledWith(1, "external-chat", {
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
     expect(getChannelPluginCatalogEntry).toHaveBeenNthCalledWith(2, "external-chat", {
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
       env: undefined,
       excludePluginRefs: [{ pluginId: "evil-external-chat-shadow", origin: "workspace" }],
     });
@@ -822,7 +822,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("keeps trusted workspace overrides scoped during setup reloads", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         enabled: true,
         allow: ["trusted-external-chat-shadow"],
@@ -837,10 +837,10 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       onlyPluginIds: ["trusted-external-chat-shadow"],
     });
     expect(getChannelPluginCatalogEntry).toHaveBeenCalledTimes(1);
@@ -848,23 +848,23 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not widen setup snapshots when no trusted plugin mapping exists", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       onlyPluginIds: [],
     });
   });
 
   it("scopes snapshots by a unique discovered manifest match when catalog mapping is missing", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     loadPluginManifestRegistryCore.mockReturnValue({
       plugins: [
         createManifestRecord({
@@ -879,14 +879,14 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       config: cfg,
       activationSourceConfig: cfg,
       autoEnabledReasons: {},
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
       cache: false,
       onlyPluginIds: ["custom-external-chat-plugin"],
       includeSetupOnlyChannelPlugins: true,
@@ -896,14 +896,14 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("scopes snapshots by activation-declared channel ownership when direct channel lists are empty", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     let sawTrustedCandidate = false;
-    discoverOpenClawPlugins.mockReturnValue({
+    discoverCarapacePlugins.mockReturnValue({
       candidates: [
         {
           idHint: "custom-external-chat-plugin",
-          source: "/tmp/openclaw-test/custom-external-chat-plugin/index.ts",
-          rootDir: "/tmp/openclaw-test/custom-external-chat-plugin",
+          source: "/tmp/carapace-test/custom-external-chat-plugin/index.ts",
+          rootDir: "/tmp/carapace-test/custom-external-chat-plugin",
           origin: "bundled",
         },
       ],
@@ -913,7 +913,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       if (
         isRecord(args) &&
         args.config === cfg &&
-        args.workspaceDir === "/tmp/openclaw-workspace" &&
+        args.workspaceDir === "/tmp/carapace-workspace" &&
         Array.isArray(args.candidates)
       ) {
         sawTrustedCandidate ||= args.candidates.some((candidate) => {
@@ -938,10 +938,10 @@ describe("ensureChannelSetupPluginInstalled", () => {
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       onlyPluginIds: ["custom-external-chat-plugin"],
     });
     expect(sawTrustedCandidate).toBe(true);
@@ -949,14 +949,14 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("uses live manifest discovery for activation-declared setup scoping", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     mockActivationOnlyPlugin({ id: "custom-external-chat-plugin" });
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
       runtime,
       channel: "external-chat",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
     expect(loadPluginManifestRegistryCore).toHaveBeenCalled();
@@ -969,7 +969,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust unconfigured workspace activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     mockActivationOnlyPlugin({
       id: "evil-external-chat-shadow",
       origin: "workspace",
@@ -984,7 +984,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust allowlist-excluded bundled activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         allow: ["other-plugin"],
       },
@@ -1003,7 +1003,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust explicitly denied bundled activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         deny: ["custom-external-chat-plugin"],
       },
@@ -1022,7 +1022,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust explicitly disabled workspace activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         enabled: true,
         allow: ["evil-external-chat-shadow"],
@@ -1045,7 +1045,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust explicitly disabled bundled activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         entries: {
           "custom-external-chat-plugin": { enabled: false },
@@ -1066,7 +1066,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("does not trust unenabled global activation-only channel ownership during setup", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     mockActivationOnlyPlugin({
       id: "custom-external-chat-global",
       origin: "global",
@@ -1081,21 +1081,21 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("scopes snapshots by plugin id when channel and plugin ids differ", () => {
     const runtime = makeRuntime();
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
       runtime,
       channel: "external-chat",
       pluginId: "@vendor/external-chat-plugin",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
     });
 
-    expectLoadOpenClawPluginFields({
+    expectLoadCarapacePluginFields({
       config: cfg,
       activationSourceConfig: cfg,
       autoEnabledReasons: {},
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/carapace-workspace",
       cache: false,
       onlyPluginIds: ["@vendor/external-chat-plugin"],
       includeSetupOnlyChannelPlugins: true,

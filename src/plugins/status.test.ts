@@ -1,6 +1,6 @@
 // Covers plugin status reporting from config, discovery, and registry state.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 import {
@@ -16,7 +16,7 @@ import {
 } from "./status.test-fixtures.js";
 
 const loadConfigMock = vi.fn();
-const loadOpenClawPluginsMock = vi.fn();
+const loadCarapacePluginsMock = vi.fn();
 const resolveCompatibleRuntimePluginRegistryMock = vi.fn();
 const loadPluginMetadataRegistrySnapshotMock = vi.fn();
 const loadPluginManifestRegistryForPluginRegistryMock = vi.fn();
@@ -67,9 +67,9 @@ vi.mock("../config/plugin-auto-enable.js", () => ({
 }));
 
 vi.mock("./loader.js", () => ({
-  loadOpenClawPlugins: (...args: unknown[]) => loadOpenClawPluginsMock(...args),
+  loadCarapacePlugins: (...args: unknown[]) => loadCarapacePluginsMock(...args),
   loadPluginRegistryHandle: (options: Record<string, unknown> = {}) =>
-    loadOpenClawPluginsMock({ ...options, activate: false }),
+    loadCarapacePluginsMock({ ...options, activate: false }),
   resolveCompatibleRuntimePluginRegistry: (...args: unknown[]) =>
     resolveCompatibleRuntimePluginRegistryMock(...args),
 }));
@@ -138,7 +138,7 @@ function setPluginLoadResult(overrides: Partial<ReturnType<typeof createPluginLo
     plugins: [],
     ...overrides,
   });
-  loadOpenClawPluginsMock.mockReturnValue(result);
+  loadCarapacePluginsMock.mockReturnValue(result);
   loadPluginMetadataRegistrySnapshotMock.mockReturnValue(result);
 }
 
@@ -190,7 +190,7 @@ function expectPluginLoaderCall(params: {
   logger?: unknown;
   loadModules?: boolean;
 }) {
-  expectMockCalledWithFields(loadOpenClawPluginsMock, {
+  expectMockCalledWithFields(loadCarapacePluginsMock, {
     ...(params.config !== undefined ? { config: params.config } : {}),
     ...(params.activationSourceConfig !== undefined
       ? { activationSourceConfig: params.activationSourceConfig }
@@ -369,7 +369,7 @@ describe("plugin status reports", () => {
   beforeEach(() => {
     clearPluginMetadataLifecycleCaches();
     loadConfigMock.mockReset();
-    loadOpenClawPluginsMock.mockReset();
+    loadCarapacePluginsMock.mockReset();
     resolveCompatibleRuntimePluginRegistryMock.mockReset();
     loadPluginMetadataRegistrySnapshotMock.mockReset();
     loadPluginManifestRegistryForPluginRegistryMock.mockReset();
@@ -410,7 +410,7 @@ describe("plugin status reports", () => {
   });
 
   it("forwards an explicit env to plugin loading", () => {
-    const env = { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv;
 
     buildPluginSnapshotReport({
       config: {},
@@ -451,7 +451,7 @@ describe("plugin status reports", () => {
     buildPluginSnapshotReport({ config: {}, workspaceDir: "/workspace" });
 
     expect(mockInput(loadPluginMetadataRegistrySnapshotMock).loadModules).toBe(false);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("reuses a supplied metadata snapshot for scoped diagnostics", () => {
@@ -468,8 +468,8 @@ describe("plugin status reports", () => {
     });
 
     expect(loadPluginMetadataSnapshotMock).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).toHaveBeenCalledTimes(1);
-    expect(mockInput(loadOpenClawPluginsMock)).toMatchObject({
+    expect(loadCarapacePluginsMock).toHaveBeenCalledTimes(1);
+    expect(mockInput(loadCarapacePluginsMock)).toMatchObject({
       manifestRegistry: metadataSnapshot.manifestRegistry,
       installRecords: {},
       onlyPluginIds: ["demo"],
@@ -585,7 +585,7 @@ describe("plugin status reports", () => {
     const report = buildPluginDiagnosticsReport({
       config: {},
       env: {
-        OPENCLAW_VERSION: "2026.3.23-1",
+        CARAPACE_VERSION: "2026.3.23-1",
       } as NodeJS.ProcessEnv,
     });
 
@@ -793,7 +793,7 @@ describe("plugin status reports", () => {
         compatibility: [],
       });
       expect(buildAllPluginInspectReports({ config: {}, report })).toEqual([inspect]);
-      expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+      expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
     },
   );
 
@@ -805,7 +805,7 @@ describe("plugin status reports", () => {
       capabilityCount: 0,
       capabilities: [],
     });
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
     setSinglePluginLoadResult(
       createPluginRecord({ id: "bonjour", gatewayDiscoveryServiceIds: ["bonjour"] }),
     );
@@ -815,7 +815,7 @@ describe("plugin status reports", () => {
       capabilityCount: 1,
       capabilities: [{ kind: "gateway-discovery", ids: ["bonjour"] }],
     });
-    expect(mockInput(loadOpenClawPluginsMock).activate).toBe(false);
+    expect(mockInput(loadCarapacePluginsMock).activate).toBe(false);
   });
 
   it("treats a CLI-command-only plugin as a plain capability", () => {
@@ -903,7 +903,7 @@ describe("plugin status reports", () => {
       createCompatibilityNotice({ pluginId: runtimePlugin.id, code: "hook-only" }),
     ]);
     expect(loadPluginMetadataRegistrySnapshotMock).toHaveBeenCalledOnce();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not claim hook-only warnings from an unloaded metadata-only plugin", () => {
@@ -913,7 +913,7 @@ describe("plugin status reports", () => {
     resolveCompatibleRuntimePluginRegistryMock.mockReturnValue(undefined);
 
     expect(buildPluginCompatibilitySnapshotNotices({ config: {} })).toStrictEqual([]);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("warns external plugins when load diagnostics reference removed session file APIs", () => {

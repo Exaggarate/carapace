@@ -4,7 +4,7 @@ import {
   mapBatchEmbeddingsByIndex,
   sanitizeEmbeddingCacheHeaders,
   type MemoryEmbeddingProviderAdapter,
-} from "openclaw/plugin-sdk/embedding-provider-adapter";
+} from "carapace/plugin-sdk/embedding-provider-adapter";
 import { OPENAI_DEFAULT_EMBEDDING_MODEL } from "./default-models.js";
 
 function resolveEmbeddingCacheExcludedHeaders(providerId: string, baseUrl: string): string[] {
@@ -15,7 +15,7 @@ function resolveEmbeddingCacheExcludedHeaders(providerId: string, baseUrl: strin
   try {
     if (new URL(baseUrl).hostname.toLowerCase().replace(/\.+$/, "") === "api.openai.com") {
       // Native attribution changes on every upgrade; cache identity must describe embeddings,
-      // not the OpenClaw build that requested them.
+      // not the Carapace build that requested them.
       excludedHeaders.push("version", "user-agent");
     }
   } catch {

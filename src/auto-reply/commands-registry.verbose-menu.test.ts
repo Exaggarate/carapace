@@ -1,14 +1,14 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   loadSessionEntryReadOnly,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   buildCommandTextFromArgs,
   findCommandByNativeName,
@@ -19,12 +19,12 @@ import {
 import type { VerboseLevel } from "./thinking.js";
 
 describe("native verbose menu status", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   const session = { agentId: "target", sessionKey: "global" };
   const command = expectDefined(findCommandByNativeName("verbose"), "verbose command");
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "verbose-menu" });
+    state = await createCarapaceTestState({ label: "verbose-menu" });
   });
   afterEach(async () => {
     await state.cleanup();
@@ -43,7 +43,7 @@ describe("native verbose menu status", () => {
     { name: "stored off", agentLevel: "full", storedLevel: "off", expected: "off" },
     { name: "stored full", agentLevel: "on", storedLevel: "full", expected: "full" },
   ])("shows $name without changing or borrowing session state", async (testCase) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { target: { verboseDefault: testCase.agentLevel }, other: {} },

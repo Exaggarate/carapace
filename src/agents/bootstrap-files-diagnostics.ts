@@ -1,5 +1,5 @@
 // Hook discovery belongs only to diagnostics, not normal bootstrap preparation.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadDeclaredExtraBootstrapFiles } from "../hooks/bundled/bootstrap-extra-files/declared-files.js";
 import { isHookLoadable, resolveInternalHookSelection } from "../hooks/configured.js";
 import { loadWorkspaceHookEntries } from "../hooks/workspace.js";
@@ -7,7 +7,7 @@ import { tryResolveConfiguredAgentWorkspaceDir } from "./agent-scope-config.js";
 import { resolveBootstrapContextWithProjectedHookFiles } from "./bootstrap-files.js";
 import { resolveDefaultAgentWorkspaceDir } from "./workspace-default.js";
 
-function isBundledExtraFilesHookSelected(config: OpenClawConfig | undefined): boolean {
+function isBundledExtraFilesHookSelected(config: CarapaceConfig | undefined): boolean {
   if (!config) {
     return false;
   }
@@ -22,7 +22,7 @@ function isBundledExtraFilesHookSelected(config: OpenClawConfig | undefined): bo
     (entry) => entry.hook.name === "bootstrap-extra-files",
   );
   return (
-    selected?.hook.source === "openclaw-bundled" &&
+    selected?.hook.source === "carapace-bundled" &&
     isHookLoadable({ entry: selected, config, names: selection.names })
   );
 }

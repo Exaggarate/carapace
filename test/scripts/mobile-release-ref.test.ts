@@ -27,7 +27,7 @@ function git(cwd: string, args: string[]): string {
 }
 
 function createFixtureRepo(): { remote: string; root: string; sha: string } {
-  const root = tempRoots.make("openclaw-mobile-release-ref-");
+  const root = tempRoots.make("carapace-mobile-release-ref-");
   const remote = path.join(root, "remote.git");
   const checkout = path.join(root, "checkout");
 
@@ -51,7 +51,7 @@ function createFixtureRepo(): { remote: string; root: string; sha: string } {
 describe("mobile-release-ref", () => {
   it("renders platform release refs from store identities", () => {
     expect(mobileReleaseRefFor({ platform: "ios", version: "2026.6.10", build: "8" })).toBe(
-      "refs/openclaw/mobile-releases/ios/2026.6.10-8",
+      "refs/carapace/mobile-releases/ios/2026.6.10-8",
     );
     expect(
       mobileReleaseRefFor({
@@ -59,7 +59,7 @@ describe("mobile-release-ref", () => {
         version: "2026.6.10",
         versionCode: "2026061008",
       }),
-    ).toBe("refs/openclaw/mobile-releases/android/2026.6.10-2026061008");
+    ).toBe("refs/carapace/mobile-releases/android/2026.6.10-2026061008");
   });
 
   it("validates platform-specific numeric identities", () => {
@@ -129,13 +129,13 @@ describe("mobile-release-ref", () => {
 
     expect(preflightMobileReleaseRef(iosOptions).status).toBe("available");
     expect(recordMobileReleaseRef(iosOptions)).toMatchObject({
-      ref: "refs/openclaw/mobile-releases/ios/2026.6.10-8",
+      ref: "refs/carapace/mobile-releases/ios/2026.6.10-8",
       sha: fixture.sha,
       status: "created",
     });
     expect(recordMobileReleaseRef(iosOptions).status).toBe("already-recorded");
     expect(resolveMobileReleaseRef(iosOptions)).toMatchObject({
-      ref: "refs/openclaw/mobile-releases/ios/2026.6.10-8",
+      ref: "refs/carapace/mobile-releases/ios/2026.6.10-8",
       sha: fixture.sha,
     });
 
@@ -177,11 +177,11 @@ describe("mobile-release-ref", () => {
       process.cwd(),
     );
 
-    expect(stdout).toBe(`${fixture.sha}\trefs/openclaw/mobile-releases/ios/2026.6.10-8\n`);
+    expect(stdout).toBe(`${fixture.sha}\trefs/carapace/mobile-releases/ios/2026.6.10-8\n`);
   });
 
   it("runs the CLI entrypoint from a path containing spaces", () => {
-    const root = tempRoots.make("openclaw mobile release ref-");
+    const root = tempRoots.make("carapace mobile release ref-");
     const scriptDir = path.join(root, "script dir");
     const scriptPath = path.join(scriptDir, "mobile-release-ref.ts");
     mkdirSync(scriptDir, { recursive: true });

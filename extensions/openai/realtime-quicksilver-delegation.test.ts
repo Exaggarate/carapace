@@ -1,6 +1,6 @@
 import { setImmediate as nextEventLoopTurn } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { RealtimeVoiceGatewayControl } from "openclaw/plugin-sdk/realtime-voice";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { RealtimeVoiceGatewayControl } from "carapace/plugin-sdk/realtime-voice";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OpenAIQuicksilverDelegationController } from "./realtime-quicksilver-delegation-controller.js";
 import {

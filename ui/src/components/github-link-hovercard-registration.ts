@@ -11,7 +11,7 @@ import {
   type HovercardBootstrapTrigger,
 } from "./lazy-hovercard-registration.ts";
 
-const HOVERCARD_TAG = "openclaw-github-link-hovercard-provider";
+const HOVERCARD_TAG = "carapace-github-link-hovercard-provider";
 
 const bootstrap = new LazyHovercardBootstrap<GitHubLinkHovercardProvider>({
   tag: HOVERCARD_TAG,

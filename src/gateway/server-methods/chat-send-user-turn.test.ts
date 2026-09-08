@@ -28,7 +28,7 @@ import {
   type UserTurnInput,
 } from "../../sessions/user-turn-transcript.js";
 import { ensureGatewayOwnerProfile, ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import * as chatAttachments from "../chat-attachments.js";
 import { applyChatSendManagedMedia, prepareChatSendUserTurn } from "./chat-send-user-turn.js";
 
@@ -104,7 +104,7 @@ describe("prepareChatSendUserTurn", () => {
   it.each(["profile", "synthetic", "profileless", "profileless-ui", "system"] as const)(
     "records only accepted authenticated external input after retargeting: %s",
     async (kind) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const profile = ensureProfileForEmail("accepted@example.test", { env: state.env });
         const { controller } = createUserTurnInputController();
         const clientInfo = createClientInfo(
@@ -153,7 +153,7 @@ describe("prepareChatSendUserTurn", () => {
         const target = {
           agentId: "main",
           sessionKey: scope.sessionKey,
-          storePath: state.statePath("agents", "main", "agent", "openclaw-agent.sqlite"),
+          storePath: state.statePath("agents", "main", "agent", "carapace-agent.sqlite"),
         };
         prepareChannelParticipantObservation(prepared.ctx);
         recordAcceptedSessionParticipantInput({ ...prepared.ctx }, target);
@@ -198,7 +198,7 @@ describe("prepareChatSendUserTurn", () => {
   it.each([false, true])(
     "preserves sandbox policy for attributed chat (system actor: %s)",
     async (systemActor) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const profile = systemActor
           ? ensureGatewayOwnerProfile("Gateway Owner")
           : ensureProfileForEmail("chat-sandbox-creator@example.com");
@@ -676,7 +676,7 @@ describe("prepareChatSendUserTurn", () => {
     ]);
     const persisted = buildPersistedUserTurnMessage({ ...input, text: "play this" });
     expect(
-      ((persisted as unknown as Record<string, unknown>)["__openclaw"] as { media?: unknown })
+      ((persisted as unknown as Record<string, unknown>)["__carapace"] as { media?: unknown })
         .media,
     ).toEqual(input.media);
   });
@@ -752,7 +752,7 @@ describe("prepareChatSendUserTurn", () => {
     expect(first?.content).toBe(
       "read this\n[media reference removed - already processed by model]",
     );
-    expect((first?.["__openclaw"] as Record<string, unknown> | undefined)?.media).toBeUndefined();
+    expect((first?.["__carapace"] as Record<string, unknown> | undefined)?.media).toBeUndefined();
   });
 
   it("hydrates and prunes a staged image claim-check alias as structured ownership", async () => {
@@ -817,7 +817,7 @@ describe("prepareChatSendUserTurn", () => {
       const persisted = buildPersistedUserTurnMessage({ ...input, text });
       expect(
         (
-          (persisted as unknown as Record<string, unknown>)["__openclaw"] as {
+          (persisted as unknown as Record<string, unknown>)["__carapace"] as {
             media?: unknown;
           }
         ).media,
@@ -858,7 +858,7 @@ describe("prepareChatSendUserTurn", () => {
       expect(first?.content).toBe(
         `inspect\n[media reference removed - already processed by model]\n[media attached: ${unownedRef}]`,
       );
-      expect((first?.["__openclaw"] as Record<string, unknown> | undefined)?.media).toBeUndefined();
+      expect((first?.["__carapace"] as Record<string, unknown> | undefined)?.media).toBeUndefined();
     } finally {
       await fs.rm(imagePath, { force: true });
     }

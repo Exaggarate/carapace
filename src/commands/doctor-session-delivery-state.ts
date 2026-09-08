@@ -4,12 +4,12 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { stripRuntimeOnlySessionSkillsFields } from "../config/sessions/store-entry-shape.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeLegacySessionEntryDelivery } from "../infra/state-migrations.legacy-session-store.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  isCarapaceAgentDatabaseOpen,
+} from "../state/carapace-agent-db.js";
 import { runDoctorAgentDatabaseOperation } from "./doctor-agent-database-operation.js";
 import { listExistingAgentDatabaseTargets } from "./doctor-session-sqlite-readers.js";
 
@@ -22,7 +22,7 @@ export type SessionDeliveryStateRepairReport = {
 /** Scan or rewrite legacy delivery fields inside existing session row JSON. */
 export function repairCanonicalSessionDeliveryStates(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): SessionDeliveryStateRepairReport {
   return repairCanonicalSessionEntries({
@@ -35,7 +35,7 @@ export function repairCanonicalSessionDeliveryStates(params: {
 /** Removes runtime-only skill catalogs from previously persisted session rows. */
 export function repairCanonicalSessionResolvedSkills(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): SessionDeliveryStateRepairReport {
   return repairCanonicalSessionEntries({
@@ -47,7 +47,7 @@ export function repairCanonicalSessionResolvedSkills(params: {
 
 export function repairCanonicalSessionEntries(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   transform: (entry: SessionEntry, sessionKey: string, phase: "scan" | "repair") => SessionEntry;
   updateDeliveryProjection: boolean;
@@ -82,7 +82,7 @@ export function repairCanonicalSessionEntries(params: {
     if (!params.apply || operation.value === 0) {
       continue;
     }
-    const wasOpen = isOpenClawAgentDatabaseOpen(target.sqlitePath);
+    const wasOpen = isCarapaceAgentDatabaseOpen(target.sqlitePath);
     try {
       repaired += rewriteDoctorSessionEntries({
         scope: { agentId: target.agentId, env: params.env, storePath: target.storePath },
@@ -92,7 +92,7 @@ export function repairCanonicalSessionEntries(params: {
       });
     } finally {
       if (!wasOpen) {
-        closeOpenClawAgentDatabaseByPath(target.sqlitePath);
+        closeCarapaceAgentDatabaseByPath(target.sqlitePath);
       }
     }
   }

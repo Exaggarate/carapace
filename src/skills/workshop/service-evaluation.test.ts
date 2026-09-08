@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginHookSkillProposalEvaluateEvent } from "../../plugins/hook-types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 
 const hookMocks = vi.hoisted(() => ({
@@ -36,9 +36,9 @@ import {
 import { prepareSkillProposalSupportFiles } from "./store.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
-const workshopConfig: OpenClawConfig = {};
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+let testState: CarapaceTestState;
+const workshopConfig: CarapaceConfig = {};
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 
 const applySkillProposal = (
   input: OptionalWorkshopConfig<Parameters<typeof applySkillProposalImpl>[0]>,
@@ -64,9 +64,9 @@ const reviseSkillProposal = (
 ) => reviseSkillProposalImpl({ config: workshopConfig, ...input });
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-evaluation-state-",
+    prefix: "carapace-skill-evaluation-state-",
   });
 });
 
@@ -115,7 +115,7 @@ describe("Skill Workshop proposal evaluation", () => {
   it.each(["before", "during"])(
     "does not publish evaluation when a target directory becomes unreadable %s evaluation",
     async (phase) => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-incomplete-");
+      const workspaceDir = await tempDirs.make("carapace-skill-evaluation-incomplete-");
       const skillName = `incomplete-${phase}`;
       const skillDir = await createOwnedSkill(workspaceDir, skillName);
       const references = path.join(skillDir, "references");
@@ -169,7 +169,7 @@ describe("Skill Workshop proposal evaluation", () => {
   );
 
   it("persists attributed results and exposes durable lifecycle events", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -285,7 +285,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("overlays update candidates and discards results after a concurrent revision", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-update-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-update-");
     const skillDir = await createOwnedSkill(workspaceDir, "existing");
     await fs.mkdir(path.join(skillDir, "references"), { recursive: true });
     await fs.writeFile(
@@ -351,7 +351,7 @@ describe("Skill Workshop proposal evaluation", () => {
   ])(
     "preserves the target marker casing in evaluation bundles for $skillFileName",
     async ({ skillFileName, skillName }) => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-filename-");
+      const workspaceDir = await tempDirs.make("carapace-skill-evaluation-filename-");
       const skillDir = await createOwnedSkill(workspaceDir, skillName);
       const canonicalSkillFile = path.join(skillDir, "SKILL.md");
       await fs.writeFile(
@@ -391,7 +391,7 @@ describe("Skill Workshop proposal evaluation", () => {
   );
 
   it("uses filesystem path equivalence for create support-file collisions", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-create-collision-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-create-collision-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -431,7 +431,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects an oversized proposed SKILL.md after overlaying the candidate", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-candidate-file-limit-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-candidate-file-limit-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -452,7 +452,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects a candidate whose proposed files push it over the file-count limit", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-candidate-count-limit-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-candidate-count-limit-");
     const skillDir = await createOwnedSkill(workspaceDir, "candidate-count-limit");
     await fs.mkdir(path.join(skillDir, "references"), { recursive: true });
     await fs.writeFile(
@@ -483,7 +483,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects a candidate whose proposed files push it over the total-byte limit", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-candidate-byte-limit-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-candidate-byte-limit-");
     const skillDir = await createOwnedSkill(workspaceDir, "candidate-byte-limit");
     await fs.mkdir(path.join(skillDir, "assets"), { recursive: true });
     await fs.writeFile(
@@ -516,7 +516,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects a draft file that no longer matches its persisted revision", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-drift-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-drift-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -557,7 +557,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("discards evaluator results when the on-disk draft changes during evaluation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-concurrent-drift-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-concurrent-drift-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -597,7 +597,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("discards evaluator results when the live skill baseline changes during evaluation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-baseline-drift-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-baseline-drift-");
     const skillDir = await createOwnedSkill(workspaceDir, "baseline-drift");
     const skillFile = path.join(skillDir, "SKILL.md");
     await fs.writeFile(
@@ -636,7 +636,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("discards create evaluator results when the target appears during evaluation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-create-drift-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-create-drift-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -671,7 +671,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects stale guards after a support-file-only revision", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-support-revision-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-support-revision-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -708,7 +708,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects empty revisions without advancing lifecycle state", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-empty-revision-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-empty-revision-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -731,7 +731,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects evaluator overflow instead of dropping blocking decisions", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-overflow-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-overflow-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -762,7 +762,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("persists a blocking evaluation and refuses to apply the proposal", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-block-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-block-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -809,7 +809,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("omits optional evaluator strings that normalize to empty", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-empty-optionals-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-empty-optionals-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -863,7 +863,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("does not split surrogate pairs when bounding evaluator text", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-surrogate-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-surrogate-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -918,7 +918,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects evaluator results that exceed the aggregate persistence budget", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-size-budget-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-size-budget-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -956,7 +956,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("rejects oversized correlation ids before running evaluators", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-correlation-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-correlation-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       agentId: "main",
@@ -991,7 +991,7 @@ describe("Skill Workshop proposal evaluation", () => {
   });
 
   it("applies large existing skills without evaluator bundle limits when no evaluator exists", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-evaluation-no-hooks-");
+    const workspaceDir = await tempDirs.make("carapace-skill-evaluation-no-hooks-");
     const skillDir = await createOwnedSkill(workspaceDir, "large-existing", "Existing large skill");
     const largeAsset = path.join(skillDir, "assets", "large.bin");
     await fs.mkdir(path.dirname(largeAsset), { recursive: true });

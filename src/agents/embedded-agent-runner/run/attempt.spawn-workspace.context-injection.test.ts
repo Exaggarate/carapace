@@ -1,5 +1,5 @@
 // Coverage for bootstrap context injection and heartbeat filtering in attempts.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { filterHeartbeatTranscriptArtifacts } from "../../../auto-reply/heartbeat-filter.js";
 import { HEARTBEAT_PROMPT } from "../../../auto-reply/heartbeat.js";

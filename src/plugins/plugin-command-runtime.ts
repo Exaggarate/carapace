@@ -1,7 +1,7 @@
 /** Registry-bound plugin command selection and execution for native/channel surfaces. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { redactToolPayloadTextWithConfig } from "../logging/redact.js";
 import type { RegisteredPluginCommand } from "./command-registry-state.js";
 import { resolveManifestCommandAliasOwnerInRegistry } from "./manifest-command-aliases.js";
@@ -41,7 +41,7 @@ export type PluginCommandDispatchContext = Readonly<{
   sessionFile?: PluginCommandContext["sessionFile"];
   authProfileId?: string;
   commandBody: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   from?: PluginCommandContext["from"];
   to?: PluginCommandContext["to"];
   originatingTo?: string;
@@ -176,7 +176,7 @@ async function executeSelectedPluginCommand(
       240,
     );
     return {
-      text: `⚠️ Plugin "${selection.plugin.id}" failed to load: ${reason}. Run \`openclaw doctor\` and check the gateway logs.`,
+      text: `⚠️ Plugin "${selection.plugin.id}" failed to load: ${reason}. Run \`carapace doctor\` and check the gateway logs.`,
     };
   }
   const { executeRegisteredPluginCommand } = await import("./plugin-command-execution.js");

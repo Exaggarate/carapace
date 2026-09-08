@@ -95,7 +95,7 @@
       "model": "gpt-5.5",
       "responseId": "chatcmpl-parity",
       "responseModel": "gpt-5.5-response",
-      "openclawDelivery": {
+      "carapaceDelivery": {
         "textPhaseRequiresTerminal": true
       },
       "usage": {
@@ -208,7 +208,7 @@
       "model": "gpt-5.5",
       "responseId": "chatcmpl-parity",
       "responseModel": "gpt-5.5-response",
-      "openclawDelivery": {
+      "carapaceDelivery": {
         "textPhaseRequiresTerminal": true
       },
       "usage": {

@@ -1,7 +1,7 @@
 import fs, { type FileHandle } from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   createDirtyDirectoryWatch,
   type DirtyDirectoryWatch,

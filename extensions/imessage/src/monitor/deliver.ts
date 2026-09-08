@@ -3,14 +3,14 @@ import {
   createAcceptedChannelDeliveryResult,
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-inbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   deliverTextOrMediaReply,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/reply-payload";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { sendMessageIMessage } from "../send.js";
 import {
   chunkTextWithMode,
@@ -22,7 +22,7 @@ import type { SentMessageCache } from "./echo-cache.js";
 import { sanitizeOutboundText } from "./sanitize-outbound.js";
 
 export async function deliverIMessageReply(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   payload: ReplyPayload;
   target: string;
   accountId?: string;

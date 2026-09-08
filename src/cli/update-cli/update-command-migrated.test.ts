@@ -13,16 +13,16 @@ import {
   recordUpdateRunStep,
 } from "../../infra/update-run-ledger.js";
 import { defaultRuntime } from "../../runtime.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../../state/openclaw-agent-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../../state/carapace-agent-db-contract.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../state/openclaw-state-db-contract.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createUpdateProgress } from "./progress.js";
 import {
   continueMigratedUpdateInFreshProcess,
@@ -32,9 +32,9 @@ import { createUpdateRunProgress } from "./update-command-run.js";
 
 // Model the already-running updater's older schema contract. The candidate
 // worker is a real unmocked process with the checkout's current contract.
-vi.mock("../../state/openclaw-state-db-contract.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../state/openclaw-state-db-contract.js")>();
-  return { ...actual, OPENCLAW_STATE_SCHEMA_VERSION: actual.OPENCLAW_STATE_SCHEMA_VERSION - 1 };
+vi.mock("../../state/carapace-state-db-contract.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../state/carapace-state-db-contract.js")>();
+  return { ...actual, CARAPACE_STATE_SCHEMA_VERSION: actual.CARAPACE_STATE_SCHEMA_VERSION - 1 };
 });
 
 const dirs = useAutoCleanupTempDirTracker(afterEach);
@@ -46,8 +46,8 @@ afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it.each([
@@ -59,15 +59,15 @@ it.each([
   "classifies activation after first-use database creation (agent=$agentId, changed=$changed)",
   async ({ agentId, changed, blocked }) => {
     const stateDir = await fs.realpath(dirs.make("update-first-serving-turn-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const shared = openOpenClawStateDatabase({ env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const shared = openCarapaceStateDatabase({ env });
     const schemaVersions = await readUpdateStateSchemaVersions({ stateDir, config: {}, env });
-    const agentPath = path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+    const agentPath = path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
     expect(
       schemaVersions.find((entry) => entry.path === agentPath)?.userVersion ?? null,
     ).toBeNull();
 
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         appendTranscriptEventsInTransaction(
           database,
@@ -89,7 +89,7 @@ it.each([
                 provider: "openai",
                 model: "gpt-4.1-mini",
                 stopReason: "stop",
-                __openclaw: { runId: "run" },
+                __carapace: { runId: "run" },
               },
             },
           ],
@@ -97,12 +97,12 @@ it.each([
       },
       { agentId, env },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     if (changed !== "none") {
       const db = new DatabaseSync(changed === "shared" ? shared.path : agentPath);
       try {
         db.exec(
-          `PRAGMA user_version = ${changed === "shared" ? OPENCLAW_STATE_SCHEMA_VERSION + 1 : OPENCLAW_AGENT_SCHEMA_VERSION + 1}`,
+          `PRAGMA user_version = ${changed === "shared" ? CARAPACE_STATE_SCHEMA_VERSION + 1 : CARAPACE_AGENT_SCHEMA_VERSION + 1}`,
         );
       } finally {
         db.close();
@@ -121,8 +121,8 @@ it.each([
         root: process.cwd(),
         schemaVersions,
         candidateSchemaVersions: {
-          state: OPENCLAW_STATE_SCHEMA_VERSION + Number(changed === "shared"),
-          agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+          state: CARAPACE_STATE_SCHEMA_VERSION + Number(changed === "shared"),
+          agent: CARAPACE_AGENT_SCHEMA_VERSION,
         },
         config: {},
         env,
@@ -139,7 +139,7 @@ it("refuses state inspection when activation leaves no known runtime root", asyn
       root: process.cwd(),
       schemaVersions: [],
       config: {},
-      env: { OPENCLAW_STATE_DIR: dirs.make("unknown-update-runtime-") },
+      env: { CARAPACE_STATE_DIR: dirs.make("unknown-update-runtime-") },
     }),
   ).resolves.toBe("rollback-state-unverified");
   expect(result).toMatchObject({
@@ -156,9 +156,9 @@ it.each([
   "accepts applied shared content through activation (alreadyApplied=$beforeContent, published=$publish)",
   async ({ beforeContent, publish, blocked }) => {
     const stateDir = await fs.realpath(dirs.make("update-deferred-content-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const shared = openOpenClawStateDatabase({ env });
-    const contentVersion = OPENCLAW_STATE_SCHEMA_VERSION + 1;
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const shared = openCarapaceStateDatabase({ env });
+    const contentVersion = CARAPACE_STATE_SCHEMA_VERSION + 1;
     const markContentApplied = () =>
       shared.db
         .prepare(
@@ -185,14 +185,14 @@ it.each([
         result,
         root: process.cwd(),
         schemaVersions,
-        candidateSchemaVersions: { state: contentVersion, agent: OPENCLAW_AGENT_SCHEMA_VERSION },
+        candidateSchemaVersions: { state: contentVersion, agent: CARAPACE_AGENT_SCHEMA_VERSION },
         config: {},
         env,
       }),
     ).resolves.toBe(blocked);
     expect(result).toMatchObject({ status: "ok", steps: [] });
     expect(shared.db.prepare("PRAGMA user_version").get()?.user_version).toBe(
-      publish ? contentVersion : OPENCLAW_STATE_SCHEMA_VERSION,
+      publish ? contentVersion : CARAPACE_STATE_SCHEMA_VERSION,
     );
   },
 );
@@ -206,9 +206,9 @@ it.each([
     const stateDir = await fs.realpath(dirs.make("migrated-update-"));
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-      OPENCLAW_TEST_RUNTIME_LOG: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+      CARAPACE_TEST_RUNTIME_LOG: "1",
     };
     const root = process.cwd();
     const created = createUpdateRun({ trigger: "cli" }, { env });
@@ -224,16 +224,16 @@ it.each([
     progress.deferLedgerWrites();
     const migrationStep = { name: "core migrations", command: "doctor --fix", index: 0, total: 1 };
     progress.onStepStart?.(migrationStep);
-    const database = openOpenClawStateDatabase({ env });
+    const database = openCarapaceStateDatabase({ env });
     expect(database.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     const migrated = new DatabaseSync(database.path);
     try {
       migrated.exec(`
       BEGIN IMMEDIATE;
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};
-      UPDATE schema_meta SET schema_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1} WHERE meta_key = 'primary';
+      PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};
+      UPDATE schema_meta SET schema_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1} WHERE meta_key = 'primary';
       COMMIT;
     `);
     } finally {
@@ -271,7 +271,7 @@ it.each([
         root,
         installKindChanged: false,
         configSnapshot: {
-          path: path.join(stateDir, "openclaw.json"),
+          path: path.join(stateDir, "carapace.json"),
           exists: false,
           raw: null,
           parsed: {},

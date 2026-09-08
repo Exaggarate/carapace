@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { setTimeout as sleep } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createQaLiveLaneGateway } from "../../../../extensions/qa-lab/runtime-api.js";
@@ -569,7 +569,7 @@ describe("Gateway chat RPCs", () => {
               models: Object.fromEntries(
                 Object.entries(config.agents?.defaults?.models ?? {}).map(([ref, model]) => [
                   ref,
-                  { ...model, agentRuntime: { id: "openclaw" } },
+                  { ...model, agentRuntime: { id: "carapace" } },
                 ]),
               ),
             },
@@ -688,7 +688,7 @@ describe("Gateway chat RPCs", () => {
         ).toBe(false);
       }
       const database = new DatabaseSync(
-        path.join(gateway.tempRoot, "state", "state", "openclaw.sqlite"),
+        path.join(gateway.tempRoot, "state", "state", "carapace.sqlite"),
         { readOnly: true },
       );
       try {

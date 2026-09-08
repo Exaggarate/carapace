@@ -1,9 +1,9 @@
 /**
  * Resolves configured provider secrets from env, profiles, and SecretRefs.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveConfigSecretRef } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import { normalizeOptionalSecretInput } from "../utils/normalize-secret-input.js";
 import { listProfilesForProvider } from "./auth-profiles/profile-list.js";
@@ -24,12 +24,12 @@ import { resolveAwsSdkEnvVarName } from "./model-auth-runtime-shared.js";
  * lookups into provider apiKey/header values while preserving non-printable
  * markers for secrets managed outside plain environment variables.
  */
-type ModelsConfig = NonNullable<OpenClawConfig["models"]>;
-/** Provider config entry from the canonical OpenClaw models config. */
+type ModelsConfig = NonNullable<CarapaceConfig["models"]>;
+/** Provider config entry from the canonical Carapace models config. */
 export type ProviderConfig = NonNullable<ModelsConfig["providers"]>[string];
 
 /** Default secret reference sources applied when config omits an explicit source. */
-export type SecretDefaults = NonNullable<NonNullable<OpenClawConfig["secrets"]>["defaults"]>;
+export type SecretDefaults = NonNullable<NonNullable<CarapaceConfig["secrets"]>["defaults"]>;
 
 /** Resolved API key value plus provenance for discovery and secret-marker handling. */
 type ProfileApiKeyResolution = {
@@ -115,7 +115,7 @@ function resolveEnvAuthEvidenceApiKeyMarker(
 export function normalizeHeaderValues(params: {
   headers: ProviderConfig["headers"] | undefined;
   secretDefaults: SecretDefaults | undefined;
-  source?: { config: OpenClawConfig; providerKey: string };
+  source?: { config: CarapaceConfig; providerKey: string };
 }): { headers: ProviderConfig["headers"] | undefined; mutated: boolean } {
   const { headers } = params;
   if (!headers) {

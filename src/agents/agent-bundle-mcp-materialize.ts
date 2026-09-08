@@ -1,9 +1,9 @@
 /** Materializes configured MCP catalog entries into agent tools and runtime helpers. */
 import crypto from "node:crypto";
-import { normalizeToolParameterSchema } from "@openclaw/ai/internal/tool-schema";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeToolParameterSchema } from "@carapace/ai/internal/tool-schema";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { logWarn } from "../logger.js";
 import {
   getPluginToolMeta,
@@ -308,8 +308,8 @@ export function buildBundleMcpToolsFromCatalog(params: {
         safeServerName: tool.safeServerName,
         toolName: tool.toolName,
         operation: "tool",
-        ...(tool.excludedFromOpenClawCatalog || appOnly
-          ? { excludedFromOpenClawCatalog: true }
+        ...(tool.excludedFromCarapaceCatalog || appOnly
+          ? { excludedFromCarapaceCatalog: true }
           : {}),
         ...(tool.deniedBySession ? { deniedBySession: true } : {}),
         codexApproval: {
@@ -605,7 +605,7 @@ export async function materializeBundleMcpToolsForRun(params: {
 export async function createBundleMcpToolRuntime(params: {
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   excludeServerNames?: ReadonlySet<string>;
   reservedToolNames?: Iterable<string>;
   safeServerNamesByServer?: ReadonlyMap<string, string>;
@@ -613,7 +613,7 @@ export async function createBundleMcpToolRuntime(params: {
     sessionId: string;
     workspaceDir: string;
     agentDir?: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     excludeServerNames?: ReadonlySet<string>;
     safeServerNamesByServer?: ReadonlyMap<string, string>;
   }) => SessionMcpRuntime;

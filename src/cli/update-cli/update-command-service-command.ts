@@ -1,4 +1,4 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { runCommandWithTimeout } from "../../process/exec.js";

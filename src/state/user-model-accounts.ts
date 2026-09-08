@@ -11,14 +11,14 @@ import {
 } from "../infra/kysely-sync.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { SECRET_STORE_VALUE_MAX_BYTES } from "../secrets/store/secret-store-validation-error.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "./openclaw-state-db-readonly.js";
-import { ensureSecretStoreSchema } from "./openclaw-state-db-schema-additive.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB } from "./openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "./carapace-state-db-readonly.js";
+import { ensureSecretStoreSchema } from "./carapace-state-db-schema-additive.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB } from "./carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import { isUserModelAuthProfileId, parseUserModelAuthProfileId } from "./user-model-account-id.js";
 import { selectResolvedUserProfileById } from "./user-profiles-internal.js";
 
@@ -214,10 +214,10 @@ function credentialOwner(db: DatabaseSync, authProfileId: string): string | unde
 /** A locator identifies a record; only its current identity owner can newly select it. */
 export function isUserModelAuthProfileOwner(
   params: { profileId: string; authProfileId: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       const owner = resolveOwner(db, params.profileId);
       if (
         !owner ||
@@ -264,10 +264,10 @@ function accountSummary(
 /** Owner-only control-plane inventory; runtime selection never enumerates private accounts. */
 export function listUserModelAccounts(
   params: { profileId: string; cursor?: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): { accounts: UserModelAccount[]; nextCursor?: string } {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       const owner = requireOwner(db, params.profileId);
       if (!tableExists(db, "secret_store_entries")) {
         return { accounts: [] };
@@ -305,9 +305,9 @@ export function listUserModelAccounts(
 
 export function readUserModelAccountSummary(
   params: { profileId: string; authProfileId: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserModelAccount | undefined {
-  return withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+  return withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
     const owner = resolveOwner(db, params.profileId);
     if (!owner || credentialOwner(db, params.authProfileId) !== owner) {
       return undefined;
@@ -322,9 +322,9 @@ export function readUserModelAccountSummary(
 /** Only an explicitly selected credential is loaded; no personal account enumeration. */
 export function readUserModelAuthProfile(
   authProfileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserModelAuthProfile | undefined {
-  return withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+  return withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
     const owner = credentialOwner(db, authProfileId);
     return owner ? readProfile(db, owner, authProfileId) : undefined;
   }, options);
@@ -334,9 +334,9 @@ export function readUserModelAuthProfile(
 export function updateUserModelAuthProfile(
   authProfileId: string,
   update: (profile: UserModelAuthProfile) => boolean,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const owner = credentialOwner(db, authProfileId);
       const current = owner ? readProfile(db, owner, authProfileId) : undefined;
@@ -366,10 +366,10 @@ export function connectUserModelAccount(
     assertCurrent: () => void;
     matchesCredential?: (credential: AuthProfileCredential) => boolean;
   },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): { authProfileId: string; links: UserProfileAuthLink[] } {
   const credential = credentialSchema.parse(params.credential);
-  const candidate = withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+  const candidate = withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
     const record = readLinks(db, params.ownerProfileId);
     const id = record.links[credential.provider]?.authProfileId;
     const profile = id ? readProfile(db, params.ownerProfileId, id) : undefined;
@@ -382,7 +382,7 @@ export function connectUserModelAccount(
     params.matchesCredential?.(candidate.credential)
       ? candidate
       : undefined;
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const owner = requireOwner(db, params.ownerProfileId);
       if (owner !== params.ownerProfileId) {
@@ -408,10 +408,10 @@ export function connectUserModelAccount(
 
 export function listUserProfileAuthLinks(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileAuthLink[] {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       const owner = resolveOwner(db, profileId);
       return owner ? accountLinks(readLinks(db, owner)) : [];
     }, options) ?? []
@@ -420,7 +420,7 @@ export function listUserProfileAuthLinks(
 
 export function resolveUserProfileAuthLink(
   params: { profileId: string; providers: readonly string[] },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): string | undefined {
   const links = listUserProfileAuthLinks(params.profileId, options);
   for (const provider of params.providers) {
@@ -439,9 +439,9 @@ export function setUserProfileAuthLink(
     authProfileId: string;
     assertCurrent?: () => void;
   },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileAuthLink[] {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const owner = requireOwner(db, params.profileId);
       const record = readLinks(db, owner);
@@ -467,9 +467,9 @@ export function setUserProfileAuthLink(
 
 export function clearUserProfileAuthLink(
   params: { profileId: string; provider: string; assertCurrent?: () => void },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileAuthLink[] {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const owner = requireOwner(db, params.profileId);
       const record = readLinks(db, owner);

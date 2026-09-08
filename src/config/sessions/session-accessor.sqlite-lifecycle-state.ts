@@ -1,5 +1,5 @@
 import { toUSVString } from "node:util";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -9,11 +9,11 @@ import {
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 import {
-  isIncognitoOpenClawAgentDatabase,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  isIncognitoCarapaceAgentDatabase,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { persistSessionTranscriptArchive } from "./session-accessor.sqlite-archive-store.js";
 import type {
   MaterializedSessionStateDeletePlan,
@@ -114,7 +114,7 @@ function sessionKeyBelongsToAgent(sessionKey: string, agentId: string | undefine
 }
 
 function readSessionTranscriptUpdatedAt(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
 ): number | undefined {
   const db = getSessionKysely(database.db);
@@ -132,7 +132,7 @@ function readSessionTranscriptUpdatedAt(
 }
 
 function sqliteTranscriptStateIsReclaimable(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   sessionUpdatedAt?: number;
   sessionId: string;
   nowMs: number;
@@ -147,7 +147,7 @@ function sqliteTranscriptStateIsReclaimable(params: {
 }
 
 function sqliteTranscriptStateHasMarker(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   sessionId: string;
   transcriptContentMarker: string;
 }): boolean {
@@ -170,7 +170,7 @@ function sqliteTranscriptStateHasMarker(params: {
 
 /** Session ids protected by live node state. */
 export function readReferencedSessionIds(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   excludedSessionKeys: ReadonlySet<string> = new Set(),
   candidateSessionIds?: readonly string[],
   diskBudget?: { preserveRecentMs?: number | null },
@@ -218,7 +218,7 @@ export function readReferencedSessionIds(
 // Projects references after a lifecycle mutation so reset/delete can archive
 // before removing entry rows while still preserving shared session ids.
 export function readReferencedSessionIdsAfterTargetMutation(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   nextEntry?: SessionEntry,
 ): Set<string> {
@@ -237,7 +237,7 @@ export function readReferencedSessionIdsAfterTargetMutation(
 export function planSessionStateDeleteIfUnreferenced(params: {
   archiveTranscript?: boolean;
   archiveDirectory: string;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   reason?: "deleted" | "reset";
   referencedSessionIds: ReadonlySet<string>;
   sessionId: string;
@@ -249,7 +249,7 @@ export function planSessionStateDeleteIfUnreferenced(params: {
     agentId: params.database.agentId,
     archiveDirectory: params.archiveDirectory,
     archiveTranscript:
-      params.archiveTranscript !== false && !isIncognitoOpenClawAgentDatabase(params.database),
+      params.archiveTranscript !== false && !isIncognitoCarapaceAgentDatabase(params.database),
     databasePath: params.database.path,
     reason: params.reason ?? "deleted",
     sessionId: params.sessionId,
@@ -258,7 +258,7 @@ export function planSessionStateDeleteIfUnreferenced(params: {
 }
 
 export function deleteMaterializedSessionStatePlans(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   plans: readonly MaterializedSessionStateDeletePlan[],
   protectedSessionIds?: ReadonlySet<string>,
   excludedSessionKeys?: ReadonlySet<string>,
@@ -305,7 +305,7 @@ export function deleteMaterializedSessionStatePlans(
 export function planSessionStateAfterEntryRemoval(params: {
   archiveDirectory: string;
   archiveTranscript?: boolean;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   entry: SessionEntry;
   reason: "deleted" | "reset";
   referencedSessionIds?: ReadonlySet<string>;
@@ -327,7 +327,7 @@ export function planSessionStateAfterEntryRemoval(params: {
 
 /** Ids of every persisted generation owned by the given logical session keys. */
 export function readSessionGenerationIdsForKeys(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   keys: Iterable<string>,
   options: { exactStoredKeys?: boolean } = {},
 ): string[] {
@@ -345,7 +345,7 @@ export function readSessionGenerationIdsForKeys(
 // Projects removals and upserts before archive materialization so same-call
 // upserts can keep a transcript live without producing a spurious archive.
 export async function projectSessionEntryLifecycleMutation(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
   params: {
     allowCanonicalRepair?: boolean;
     archiveDirectory: string;
@@ -353,8 +353,8 @@ export async function projectSessionEntryLifecycleMutation(
     upserts: readonly SessionEntryLifecycleUpsert[];
   },
 ): Promise<ProjectedLifecycleMutation> {
-  // openclaw-agent-db.ts cache rule: keep handles within synchronous sections.
-  const removalDatabase = openOpenClawAgentDatabase(databaseOptions);
+  // carapace-agent-db.ts cache rule: keep handles within synchronous sections.
+  const removalDatabase = openCarapaceAgentDatabase(databaseOptions);
   const store = readSessionEntryStore(removalDatabase, {
     allowCanonicalRepair: params.allowCanonicalRepair === true,
     sessionKeys: [
@@ -453,8 +453,8 @@ export async function projectSessionEntryLifecycleMutation(
   if (projectedRemovals.length === 0) {
     return { deletePlans: [], removals: projectedRemovals, upsertedEntries };
   }
-  // openclaw-agent-db.ts cache rule: LRU eviction may close idle handles during buildEntry awaits.
-  const database = openOpenClawAgentDatabase(databaseOptions);
+  // carapace-agent-db.ts cache rule: LRU eviction may close idle handles during buildEntry awaits.
+  const database = openCarapaceAgentDatabase(databaseOptions);
   const referencedSessionIds = collectProjectedReferencedSessionIds({
     database,
     excludedSessionKeys: changedSessionKeys,
@@ -509,7 +509,7 @@ export async function projectSessionEntryLifecycleMutation(
 // Projected deletes must preserve raw session_nodes.current_session_id references for
 // remaining rows whose entry_json cannot be parsed into a SessionEntry.
 export function collectProjectedReferencedSessionIds(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   excludedSessionKeys: Iterable<string>;
   projectedStore: Record<string, SessionEntry>;
 }): Set<string> {
@@ -525,7 +525,7 @@ export function collectProjectedReferencedSessionIds(params: {
 
 export { collectSessionStateIdsForEntry };
 
-function deleteSqliteSessionStateRows(database: OpenClawAgentDatabase, sessionId: string): boolean {
+function deleteSqliteSessionStateRows(database: CarapaceAgentDatabase, sessionId: string): boolean {
   const db = getSessionKysely(database.db);
   // The window row cascades canonical transcript tables, but FTS is virtual;
   // clear its projection before dropping the owner row.
@@ -543,7 +543,7 @@ function planSqliteOrphanLifecycleTranscriptStateDeletes(params: {
   agentId?: string;
   archiveRemovedEntryTranscripts: boolean;
   archiveDirectory: string;
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   excludedSessionIds?: ReadonlySet<string>;
   pluginOwnerId?: string;
   referencedSessionIds: ReadonlySet<string>;
@@ -603,7 +603,7 @@ function planSqliteOrphanLifecycleTranscriptStateDeletes(params: {
 }
 
 export function planSessionLifecycleArtifactCleanup(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   params: {
     agentId?: string;
     archiveRemovedEntryTranscripts: boolean;
@@ -719,7 +719,7 @@ export function planSessionLifecycleArtifactCleanup(
 }
 
 export function deletePlannedLifecycleArtifactEntries(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   entries: readonly SessionEntryRemovalPlan[],
 ): number {
   assertPlannedLifecycleArtifactEntriesUnchanged(database, entries);
@@ -732,7 +732,7 @@ export function deletePlannedLifecycleArtifactEntries(
 }
 
 export function assertPlannedLifecycleArtifactEntriesUnchanged(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   entries: readonly SessionEntryRemovalPlan[],
 ): void {
   for (const planned of entries) {
@@ -745,7 +745,7 @@ export function assertPlannedLifecycleArtifactEntriesUnchanged(
 
 /** Partition only optimistic entry conflicts; database and parse failures stay fatal. */
 export function partitionUnchangedPlannedLifecycleArtifactEntries(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   entries: readonly SessionEntryRemovalPlan[],
 ): { changed: SessionEntryRemovalPlan[]; unchanged: SessionEntryRemovalPlan[] } {
   const changed: SessionEntryRemovalPlan[] = [];

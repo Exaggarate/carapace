@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadCronJobsStore, resolveCronJobsStorePathFromConfig } from "../cron/store.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { resolveHeartbeatPhaseMs } from "../infra/heartbeat-schedule.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   collectHeartbeatCadenceMigrationFindings,
   maybeMigrateHeartbeatCadenceToCron,
@@ -19,11 +19,11 @@ let originalStateDir: string | undefined;
 
 beforeEach(() => {
   originalHome = process.env.HOME;
-  originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  originalStateDir = process.env.CARAPACE_STATE_DIR;
 });
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   if (originalHome === undefined) {
     delete process.env.HOME;
@@ -31,25 +31,25 @@ afterEach(async () => {
     process.env.HOME = originalHome;
   }
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.CARAPACE_STATE_DIR = originalStateDir;
   }
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
 
 async function createFixture(every = "15m") {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-heartbeat-cadence-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-heartbeat-cadence-"));
   tempDirs.push(root);
   process.env.HOME = path.join(root, "home");
-  process.env.OPENCLAW_STATE_DIR = root;
+  process.env.CARAPACE_STATE_DIR = root;
   const env = process.env;
   const cfg = {
     agents: {
       defaults: { heartbeat: { every } },
       list: [{ id: "main" }],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const storePath = resolveCronJobsStorePathFromConfig(cfg, env);
   return { cfg, env, storePath };
 }
@@ -82,7 +82,7 @@ describe("heartbeat cadence cron migration", () => {
       env: fixture.env,
     });
     expect(preview).toEqual({ changes: [], warnings: [] });
-    await expect(fs.access(resolveOpenClawStateSqlitePath(fixture.env))).rejects.toMatchObject({
+    await expect(fs.access(resolveCarapaceStateSqlitePath(fixture.env))).rejects.toMatchObject({
       code: "ENOENT",
     });
     expect(await loadMainMonitor(fixture.storePath)).toBeUndefined();
@@ -107,7 +107,7 @@ describe("heartbeat cadence cron migration", () => {
     const updatedCfg = {
       ...fixture.cfg,
       agents: { ...fixture.cfg.agents, defaults: { heartbeat: { every: "45m" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const updated = await maybeMigrateHeartbeatCadenceToCron({
       cfg: updatedCfg,
       shouldRepair: true,
@@ -155,7 +155,7 @@ describe("heartbeat cadence cron migration", () => {
           { id: "beta", heartbeat: { every: "20m" } },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await maybeMigrateHeartbeatCadenceToCron({
       cfg: initialCfg,
       shouldRepair: true,
@@ -171,7 +171,7 @@ describe("heartbeat cadence cron migration", () => {
           { id: "gamma", heartbeat: { every: "30m" } },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await maybeMigrateHeartbeatCadenceToCron({
       cfg: updatedCfg,
       shouldRepair: true,
@@ -209,19 +209,19 @@ describe("heartbeat cadence cron migration", () => {
 
   it("uses the supplied environment for the writable scheduler seed", async () => {
     const ambientRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-heartbeat-cadence-ambient-"),
+      path.join(os.tmpdir(), "carapace-heartbeat-cadence-ambient-"),
     );
     const suppliedRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-heartbeat-cadence-supplied-"),
+      path.join(os.tmpdir(), "carapace-heartbeat-cadence-supplied-"),
     );
     tempDirs.push(ambientRoot, suppliedRoot);
     process.env.HOME = path.join(ambientRoot, "home");
-    process.env.OPENCLAW_STATE_DIR = ambientRoot;
+    process.env.CARAPACE_STATE_DIR = ambientRoot;
     const ambientEnv = { ...process.env };
     const suppliedEnv = {
       ...process.env,
       HOME: path.join(suppliedRoot, "home"),
-      OPENCLAW_STATE_DIR: suppliedRoot,
+      CARAPACE_STATE_DIR: suppliedRoot,
     };
     const ambientIdentity = loadOrCreateDeviceIdentity({ env: ambientEnv });
     const suppliedIdentity = loadOrCreateDeviceIdentity({ env: suppliedEnv });
@@ -247,7 +247,7 @@ describe("heartbeat cadence cron migration", () => {
         defaults: { heartbeat: { every: "15m" } },
         list: [{ id: agentId }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const storePath = resolveCronJobsStorePathFromConfig(cfg, suppliedEnv);
 
     const result = await maybeMigrateHeartbeatCadenceToCron({

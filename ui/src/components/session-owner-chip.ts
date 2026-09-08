@@ -7,7 +7,7 @@ import type { AuthenticatedUser } from "../app/user-profile.ts";
 import { t } from "../i18n/index.ts";
 import { takeGraphemes } from "../lib/graphemes.ts";
 import { resolveAvatar } from "../lib/identity-avatar.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import "./viewer-facepile.ts";
 
 export type SessionCreatedActor = ProtocolSessionCreatedActor;
@@ -36,14 +36,14 @@ export function renderSessionOwnerChip(
   participantCount?: number,
 ) {
   return owner?.id
-    ? html`<openclaw-session-owner-chip
+    ? html`<carapace-session-owner-chip
         .owner=${owner}
         size=${size}
         attribution=${attribution}
         .viewingNow=${viewingNow}
         .participants=${participants ?? []}
         .participantCount=${participantCount ?? participants?.length ?? 0}
-      ></openclaw-session-owner-chip>`
+      ></carapace-session-owner-chip>`
     : nothing;
 }
 
@@ -75,7 +75,7 @@ function ownerHue(id: string): number {
 export function renderSessionOwnerAvatar(
   owner: Pick<SessionOwnerOption, "id" | "label" | "avatarUrl" | "identity">,
 ) {
-  return html`<openclaw-viewer-avatar
+  return html`<carapace-viewer-avatar
     .identity=${owner.identity}
     .user=${{
       id: owner.id,
@@ -86,7 +86,7 @@ export function renderSessionOwnerAvatar(
     .markAsViewer=${false}
     variant="session"
     aria-hidden="true"
-  ></openclaw-viewer-avatar>`;
+  ></carapace-viewer-avatar>`;
 }
 
 /**
@@ -95,7 +95,7 @@ export function renderSessionOwnerAvatar(
  * identities (solo mode shows no attribution chrome). Human actors use the durable
  * profile projection carried by the session record; actors without it keep stable initials.
  */
-class SessionOwnerChip extends OpenClawLightDomElement {
+class SessionOwnerChip extends CarapaceLightDomElement {
   @property({ attribute: false }) owner: SessionCreatedActor | null = null;
   @property({ type: String }) size: "row" | "header" = "row";
   @property({ type: String }) attribution: "created" | "owned" | "archived" = "created";
@@ -168,12 +168,12 @@ class SessionOwnerChip extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-session-owner-chip")) {
-  customElements.define("openclaw-session-owner-chip", SessionOwnerChip);
+if (!customElements.get("carapace-session-owner-chip")) {
+  customElements.define("carapace-session-owner-chip", SessionOwnerChip);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-session-owner-chip": SessionOwnerChip;
+    "carapace-session-owner-chip": SessionOwnerChip;
   }
 }

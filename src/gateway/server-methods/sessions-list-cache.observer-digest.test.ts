@@ -4,8 +4,8 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { listSessionFixture } from "../session-list.test-support.js";
 import {
@@ -46,8 +46,8 @@ function observerState(
 }
 
 it("invalidates a cached sessions.list result after an observer-digest persist", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
-    const config: OpenClawConfig = {};
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
+    const config: CarapaceConfig = {};
     const context = createDirectChatContext({ getRuntimeConfig: () => config });
     const sessionKey = "agent:main:observer-fence";
     const request = { archived: "all" as const, limit: 100 };
@@ -115,8 +115,8 @@ it("invalidates a cached sessions.list result after an observer-digest persist",
 });
 
 it("invalidates the cache after terminal observer-digest synthesis", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
-    const config: OpenClawConfig = {};
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
+    const config: CarapaceConfig = {};
     const context = createDirectChatContext({ getRuntimeConfig: () => config });
     const sessionKey = "agent:main:observer-terminal-fence";
     const sessionId = "observer-terminal-fence";

@@ -12,18 +12,18 @@ function runBuiltCli(stateDir: string, homeDir: string, args: string[]) {
     ...process.env,
     HOME: homeDir,
     USERPROFILE: homeDir,
-    OPENAI_API_KEY: "sk-fake-openclaw-onboard-regression",
-    OPENCLAW_SKIP_CHANNELS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
+    OPENAI_API_KEY: "sk-fake-carapace-onboard-regression",
+    CARAPACE_SKIP_CHANNELS: "1",
+    CARAPACE_STATE_DIR: stateDir,
     NO_COLOR: "1",
   };
   for (const key of [
     "DISCORD_BOT_TOKEN",
     "NODE_ENV",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-    "OPENCLAW_HOME",
-    "OPENCLAW_PROFILE",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+    "CARAPACE_HOME",
+    "CARAPACE_PROFILE",
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
     "TWILIO_FROM_NUMBER",
@@ -33,7 +33,7 @@ function runBuiltCli(stateDir: string, homeDir: string, args: string[]) {
   ]) {
     delete env[key];
   }
-  return spawnSync(process.execPath, [path.resolve("openclaw.mjs"), ...args], {
+  return spawnSync(process.execPath, [path.resolve("carapace.mjs"), ...args], {
     cwd: path.resolve("."),
     encoding: "utf8",
     env,
@@ -44,7 +44,7 @@ function runBuiltCli(stateDir: string, homeDir: string, args: string[]) {
 
 describe("non-interactive onboarding plugin validation", () => {
   it("does not warn about bundled plugins enabled by the documented OpenAI setup", () => {
-    const rootDir = tempDirs.make("openclaw-onboard-plugin-warnings-", "/tmp");
+    const rootDir = tempDirs.make("carapace-onboard-plugin-warnings-", "/tmp");
     const homeDir = path.join(rootDir, "home");
     const stateDir = path.join(rootDir, "state");
     fs.mkdirSync(homeDir, { recursive: true });
@@ -72,7 +72,7 @@ describe("non-interactive onboarding plugin validation", () => {
     expect(onboard.stderr).not.toContain("plugin not found: openai");
     expect(onboard.stderr).not.toContain("plugin not installed: codex");
 
-    const config = JSON.parse(fs.readFileSync(path.join(stateDir, "openclaw.json"), "utf8")) as {
+    const config = JSON.parse(fs.readFileSync(path.join(stateDir, "carapace.json"), "utf8")) as {
       plugins?: { entries?: Record<string, { enabled?: boolean }> };
     };
     expect(config.plugins?.entries?.openai?.enabled).toBe(true);

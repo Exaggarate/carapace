@@ -6,7 +6,7 @@ import {
   toNormalizedUsage,
 } from "./embedded-agent-runner/usage-accumulator.js";
 import { runBestEffortCallback } from "./embedded-agent-subscribe.callback.js";
-import { isSubscribeTranscriptOnlyOpenClawAssistantMessage } from "./embedded-agent-subscribe.handlers.messages.stream.js";
+import { isSubscribeTranscriptOnlyCarapaceAssistantMessage } from "./embedded-agent-subscribe.handlers.messages.stream.js";
 import type { SubscribeEmbeddedAgentSessionParams } from "./embedded-agent-subscribe.types.js";
 import type { AgentSessionEvent } from "./sessions/index.js";
 import {
@@ -127,7 +127,7 @@ export function createEmbeddedModelState(
       const message = evt.message;
       if (
         message.role !== "assistant" ||
-        isSubscribeTranscriptOnlyOpenClawAssistantMessage(message)
+        isSubscribeTranscriptOnlyCarapaceAssistantMessage(message)
       ) {
         return;
       }

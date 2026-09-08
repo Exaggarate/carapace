@@ -17,7 +17,7 @@ const metaEntry: ProviderInstallCatalogEntry = {
   onboardingScopes: ["text-inference"],
   label: "Meta",
   origin: "bundled",
-  install: { npmSpec: "@openclaw/meta-provider", defaultChoice: "npm" },
+  install: { npmSpec: "@carapace/meta-provider", defaultChoice: "npm" },
 };
 
 describe("setup inference install options", () => {

@@ -1,14 +1,14 @@
 // Parses npm registry specs into package, version, and tag references.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   parse as parseSemver,
   prerelease as parseSemverPrerelease,
   type SemVer,
   valid as validSemver,
 } from "semver";
-import { compareOpenClawSemver, isOpenClawCorrectionSemver } from "./semver.js";
+import { compareCarapaceSemver, isCarapaceCorrectionSemver } from "./semver.js";
 
-const OPENCLAW_RELEASE_PREFIX_RE = /^\d{4}\./;
+const CARAPACE_RELEASE_PREFIX_RE = /^\d{4}\./;
 const DIST_TAG_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 /**
@@ -120,7 +120,7 @@ function parseRegistryNpmSpecInternal(
         selectorKind: "exact-version",
         selectorIsPrerelease:
           parseSemverPrerelease(exactVersion) !== null &&
-          !isOpenClawStableCorrectionVersion(selector),
+          !isCarapaceStableCorrectionVersion(selector),
       },
     };
   }
@@ -159,10 +159,10 @@ export function isExactSemverVersion(value: string): boolean {
   return validSemver(value.trim()) !== null;
 }
 
-/** Parses OpenClaw's monthly patch stable/alpha/beta/correction version format. */
-function parseOpenClawReleaseVersion(value: string): SemVer | null {
+/** Parses Carapace's monthly patch stable/alpha/beta/correction version format. */
+function parseCarapaceReleaseVersion(value: string): SemVer | null {
   const trimmed = value.trim();
-  const parsed = OPENCLAW_RELEASE_PREFIX_RE.test(trimmed) ? parseSemver(trimmed) : null;
+  const parsed = CARAPACE_RELEASE_PREFIX_RE.test(trimmed) ? parseSemver(trimmed) : null;
   if (!parsed || parsed.build.length > 0) {
     return null;
   }
@@ -172,7 +172,7 @@ function parseOpenClawReleaseVersion(value: string): SemVer | null {
 
   const [label, sequence] = parsed.prerelease;
   const isStable = parsed.prerelease.length === 0;
-  const isCorrection = isOpenClawCorrectionSemver(parsed) && typeof label === "number" && label > 0;
+  const isCorrection = isCarapaceCorrectionSemver(parsed) && typeof label === "number" && label > 0;
   const isAlpha =
     parsed.prerelease.length === 2 &&
     label === "alpha" &&
@@ -189,38 +189,38 @@ function parseOpenClawReleaseVersion(value: string): SemVer | null {
   return parsed;
 }
 
-/** Returns whether a version is an OpenClaw monthly patch stable correction release. */
-function isOpenClawStableCorrectionVersion(value: string): boolean {
-  const parsed = parseOpenClawReleaseVersion(value);
-  return parsed !== null && isOpenClawCorrectionSemver(parsed);
+/** Returns whether a version is an Carapace monthly patch stable correction release. */
+function isCarapaceStableCorrectionVersion(value: string): boolean {
+  const parsed = parseCarapaceReleaseVersion(value);
+  return parsed !== null && isCarapaceCorrectionSemver(parsed);
 }
 
 /** Resolves stable correction releases to their shared base release cohort. */
-export function resolveOpenClawReleaseCohortVersion(value: string): string {
+export function resolveCarapaceReleaseCohortVersion(value: string): string {
   const trimmed = value.trim();
-  const parsed = parseOpenClawReleaseVersion(trimmed);
-  return parsed && isOpenClawCorrectionSemver(parsed)
+  const parsed = parseCarapaceReleaseVersion(trimmed);
+  return parsed && isCarapaceCorrectionSemver(parsed)
     ? `${parsed.major}.${parsed.minor}.${parsed.patch}`
     : trimmed;
 }
 
-/** Compares OpenClaw monthly patch release versions across alpha, beta, stable, and corrections. */
-export function compareOpenClawReleaseVersions(left: string, right: string): number | null {
-  const parsedLeft = parseOpenClawReleaseVersion(left);
-  const parsedRight = parseOpenClawReleaseVersion(right);
-  return parsedLeft && parsedRight ? compareOpenClawSemver(parsedLeft, parsedRight) : null;
+/** Compares Carapace monthly patch release versions across alpha, beta, stable, and corrections. */
+export function compareCarapaceReleaseVersions(left: string, right: string): number | null {
+  const parsedLeft = parseCarapaceReleaseVersion(left);
+  const parsedRight = parseCarapaceReleaseVersion(right);
+  return parsedLeft && parsedRight ? compareCarapaceSemver(parsedLeft, parsedRight) : null;
 }
 
 /** Returns whether an exact semver value is a prerelease, excluding stable correction releases. */
 export function isPrereleaseSemverVersion(value: string): boolean {
   const trimmed = value.trim();
-  return parseSemverPrerelease(trimmed) !== null && !isOpenClawStableCorrectionVersion(trimmed);
+  return parseSemverPrerelease(trimmed) !== null && !isCarapaceStableCorrectionVersion(trimmed);
 }
 
 /**
  * Enforces explicit opt-in before an npm spec may resolve to a prerelease.
  * Bare specs and `latest` stay on stable releases unless the resolved version
- * is an OpenClaw stable correction.
+ * is an Carapace stable correction.
  */
 export function isPrereleaseResolutionAllowed(params: {
   spec: ParsedRegistryNpmSpec;

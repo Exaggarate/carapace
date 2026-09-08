@@ -3,7 +3,7 @@ import { state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { icons } from "../components/icons.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { formatUiExternalText } from "./format-error.ts";
 
 type ToastDismissReason = "action" | "dismiss" | "disconnected" | "replaced" | "timeout";
@@ -30,7 +30,7 @@ const DEFAULT_TOAST_DURATION_MS = 6_000;
 const TOAST_EXIT_FALLBACK_MS = 450;
 
 function activeModalToastLayer() {
-  return [...(document.openClawModalLayers ?? [])].findLast((candidate) => candidate.isConnected);
+  return [...(document.carapaceModalLayers ?? [])].findLast((candidate) => candidate.isConnected);
 }
 
 function restingToastLayer() {
@@ -44,7 +44,7 @@ function restingToastLayer() {
 // dropping it, so no caller's message disappears because it arrived too early.
 let queuedToast: ToastOptions | null = null;
 
-class OpenClawToastHost extends OpenClawLightDomContentsElement {
+class CarapaceToastHost extends CarapaceLightDomContentsElement {
   @state() private toast: ToastOptions | null = null;
   @state() private active = false;
   private readonly toastQueue: ToastOptions[] = [];
@@ -68,7 +68,7 @@ class OpenClawToastHost extends OpenClawLightDomContentsElement {
 
   override disconnectedCallback() {
     const target = activeModalToastLayer() ?? restingToastLayer();
-    if (!this.isConnected && this.parentElement?.localName === "openclaw-modal-dialog" && target) {
+    if (!this.isConnected && this.parentElement?.localName === "carapace-modal-dialog" && target) {
       target.append(this);
     } else {
       this.dismiss("disconnected");
@@ -226,7 +226,7 @@ export function showToast(options: ToastOptions): boolean {
   if (typeof document === "undefined") {
     return false;
   }
-  const host = document.querySelector<OpenClawToastHost>("openclaw-toast-host");
+  const host = document.querySelector<CarapaceToastHost>("carapace-toast-host");
   if (!host) {
     queuedToast = options;
     return false;
@@ -250,12 +250,12 @@ export function showToast(options: ToastOptions): boolean {
 }
 
 // Guarded so DOM-free (node) consumers of send-failure surfacing can load this module.
-if (typeof customElements !== "undefined" && !customElements.get("openclaw-toast-host")) {
-  customElements.define("openclaw-toast-host", OpenClawToastHost);
+if (typeof customElements !== "undefined" && !customElements.get("carapace-toast-host")) {
+  customElements.define("carapace-toast-host", CarapaceToastHost);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-toast-host": OpenClawToastHost;
+    "carapace-toast-host": CarapaceToastHost;
   }
 }

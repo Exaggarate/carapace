@@ -9,10 +9,10 @@ function parseVersion(version) {
     : undefined;
 }
 
-function compareOpenClawVersions(leftVersion, rightVersion) {
+function compareCarapaceVersions(leftVersion, rightVersion) {
   const comparison = compareReleaseVersions(leftVersion, rightVersion);
   if (comparison === null) {
-    throw new Error(`cannot compare OpenClaw versions: ${leftVersion} ${rightVersion}`);
+    throw new Error(`cannot compare Carapace versions: ${leftVersion} ${rightVersion}`);
   }
   return comparison;
 }
@@ -28,7 +28,7 @@ function isEarlierStableSameReleaseMonth(params) {
     baseline?.channel === "stable" &&
     baseline.year === candidate.year &&
     baseline.month === candidate.month &&
-    compareOpenClawVersions(baseline.version, candidate.version) < 0
+    compareCarapaceVersions(baseline.version, candidate.version) < 0
   );
 }
 
@@ -36,7 +36,7 @@ export function resolveReleaseUpgradeBaseline(candidateVersion, publishedVersion
   const targetContextRef = normalizeTargetContextRef(context.targetContextRef);
   const candidate = parseVersion(candidateVersion);
   if (!candidate) {
-    throw new Error(`invalid candidate OpenClaw version: ${String(candidateVersion ?? "").trim()}`);
+    throw new Error(`invalid candidate Carapace version: ${String(candidateVersion ?? "").trim()}`);
   }
   const allPublished = [
     ...new Set(
@@ -51,7 +51,7 @@ export function resolveReleaseUpgradeBaseline(candidateVersion, publishedVersion
 
   const published = allPublished
     .filter((version) => parseVersion(version)?.channel === "stable")
-    .toSorted((left, right) => compareOpenClawVersions(right, left));
+    .toSorted((left, right) => compareCarapaceVersions(right, left));
   const requestedBaseline = parseVersion(context.previousVersion);
   if (context.previousVersion !== undefined && !requestedBaseline) {
     throw new Error("previous_version must be a published stable predecessor");
@@ -60,19 +60,19 @@ export function resolveReleaseUpgradeBaseline(candidateVersion, publishedVersion
   if (!targetContextRef.startsWith("extended-stable/")) {
     const baseline =
       requestedBaseline?.version ??
-      published.find((version) => compareOpenClawVersions(version, candidate.version) < 0);
+      published.find((version) => compareCarapaceVersions(version, candidate.version) < 0);
     if (
       !baseline ||
       !published.includes(baseline) ||
-      compareOpenClawVersions(baseline, candidate.version) >= 0
+      compareCarapaceVersions(baseline, candidate.version) >= 0
     ) {
       throw new Error(
         requestedBaseline
           ? `previous_version ${requestedBaseline.version} is not a published stable predecessor of ${candidate.version}`
-          : `no published stable OpenClaw baseline predates candidate ${candidate.version}`,
+          : `no published stable Carapace baseline predates candidate ${candidate.version}`,
       );
     }
-    return `openclaw@${baseline}`;
+    return `carapace@${baseline}`;
   }
 
   // Frozen lines cannot upgrade from a newer release with a possibly incompatible SQLite schema.
@@ -111,7 +111,7 @@ export function resolveReleaseUpgradeBaseline(candidateVersion, publishedVersion
         : `no published stable baseline from the frozen release month predates candidate ${candidate.version} on ${targetContextRef}`,
     );
   }
-  return `openclaw@${baseline}`;
+  return `carapace@${baseline}`;
 }
 
 export function parseArgs(argv) {
@@ -146,7 +146,7 @@ function readPublishedVersions(args) {
   }
   const raw = execFileSync(
     "npm",
-    ["view", "openclaw", "versions", "--json", "--silent", "--prefer-online"],
+    ["view", "carapace", "versions", "--json", "--silent", "--prefer-online"],
     {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "inherit"],
@@ -154,7 +154,7 @@ function readPublishedVersions(args) {
   );
   const parsed = JSON.parse(raw);
   if (!Array.isArray(parsed)) {
-    throw new Error("npm returned a non-array openclaw versions payload");
+    throw new Error("npm returned a non-array carapace versions payload");
   }
   return parsed;
 }

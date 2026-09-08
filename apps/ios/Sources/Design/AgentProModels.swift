@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawProtocol
+import CarapaceProtocol
 
 enum AgentProValueReader {
     static func doubleValue(_ value: AnyCodable?) -> Double? {

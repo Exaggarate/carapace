@@ -1,12 +1,12 @@
 ---
-summary: "Use Qwen Cloud through its OpenClaw plugin"
+summary: "Use Qwen Cloud through its Carapace plugin"
 read_when:
-  - You want to use Qwen with OpenClaw
+  - You want to use Qwen with Carapace
   - You have an Alibaba Cloud Token Plan subscription
 title: "Qwen"
 ---
 
-Qwen Cloud is an official external OpenClaw provider plugin with canonical id `qwen`. It targets Qwen Cloud / Alibaba DashScope Standard and Coding Plan endpoints, exposes Token Plan as `qwen-token-plan`, keeps `modelstudio` as a compatibility alias, and independently owns Alibaba's documented `bailian-token-plan` custom-provider id.
+Qwen Cloud is an official external Carapace provider plugin with canonical id `qwen`. It targets Qwen Cloud / Alibaba DashScope Standard and Coding Plan endpoints, exposes Token Plan as `qwen-token-plan`, keeps `modelstudio` as a compatibility alias, and independently owns Alibaba's documented `bailian-token-plan` custom-provider id.
 
 | Property               | Value                                      |
 | ---------------------- | ------------------------------------------ |
@@ -29,8 +29,8 @@ The older Coding Plan does not include these models. `qwen3.7-max` and
 `qwen` ships as an official external plugin, not bundled with core. Install it and restart Gateway:
 
 ```bash
-openclaw plugins install @openclaw/qwen-provider
-openclaw gateway restart
+carapace plugins install @carapace/qwen-provider
+carapace gateway restart
 ```
 
 ## Getting started
@@ -49,13 +49,13 @@ Choose your plan type and follow the setup steps.
         For the **Global** endpoint:
 
         ```bash
-        openclaw onboard --auth-choice qwen-api-key
+        carapace onboard --auth-choice qwen-api-key
         ```
 
         For the **China** endpoint:
 
         ```bash
-        openclaw onboard --auth-choice qwen-api-key-cn
+        carapace onboard --auth-choice qwen-api-key-cn
         ```
       </Step>
       <Step title="Set a default model">
@@ -71,7 +71,7 @@ Choose your plan type and follow the setup steps.
       </Step>
       <Step title="Verify the model is available">
         ```bash
-        openclaw models list --provider qwen
+        carapace models list --provider qwen
         ```
       </Step>
     </Steps>
@@ -98,13 +98,13 @@ Choose your plan type and follow the setup steps.
         For the **Global** endpoint:
 
         ```bash
-        openclaw onboard --auth-choice qwen-standard-api-key
+        carapace onboard --auth-choice qwen-standard-api-key
         ```
 
         For the **China** endpoint:
 
         ```bash
-        openclaw onboard --auth-choice qwen-standard-api-key-cn
+        carapace onboard --auth-choice qwen-standard-api-key-cn
         ```
       </Step>
       <Step title="Set a default model">
@@ -120,7 +120,7 @@ Choose your plan type and follow the setup steps.
       </Step>
       <Step title="Verify the model is available">
         ```bash
-        openclaw models list --provider qwen
+        carapace models list --provider qwen
         ```
       </Step>
     </Steps>
@@ -147,25 +147,25 @@ Choose your plan type and follow the setup steps.
         For the **Global / International** endpoint in Singapore:
 
         ```bash
-        openclaw onboard --auth-choice qwen-token-plan
+        carapace onboard --auth-choice qwen-token-plan
         ```
 
         For the **China** endpoint in Beijing:
 
         ```bash
-        openclaw onboard --auth-choice qwen-token-plan-cn
+        carapace onboard --auth-choice qwen-token-plan-cn
         ```
       </Step>
       <Step title="Verify the provider">
         ```bash
-        openclaw models list --provider qwen-token-plan
-        openclaw agent --model qwen-token-plan/qwen3.7-plus --message "Reply with: token plan ready"
+        carapace models list --provider qwen-token-plan
+        carapace agent --model qwen-token-plan/qwen3.7-plus --message "Reply with: token plan ready"
         ```
       </Step>
     </Steps>
 
     <Note>
-    Alibaba's OpenClaw guide uses `bailian-token-plan` for a manual custom
+    Alibaba's Carapace guide uses `bailian-token-plan` for a manual custom
     provider. The plugin registers that id as a compatibility owner, but new
     configs should use `qwen-token-plan`. An exact custom
     `models.providers.bailian-token-plan` entry keeps ownership of its configured
@@ -173,7 +173,7 @@ Choose your plan type and follow the setup steps.
     </Note>
 
     <Warning>
-    Use Token Plan only for interactive OpenClaw sessions. Do not select it for
+    Use Token Plan only for interactive Carapace sessions. Do not select it for
     cron jobs, unattended scripts, or application backends. Alibaba states that
     non-interactive use can suspend the subscription or revoke its API key.
     </Warning>
@@ -217,7 +217,7 @@ Override with a custom `baseUrl` in config.
 Setup keeps connection settings and model aliases, including `modelstudio` aliases, without copying generated catalog rows into your config.
 Explicit `models.mode: "replace"` keeps catalog seeding enabled; custom model rows stay intact.
 
-OpenClaw discovers models from the configured endpoint's authenticated `/models`
+Carapace discovers models from the configured endpoint's authenticated `/models`
 API. The plugin keeps the following seed metadata for offline discovery and for
 endpoints that return only model IDs. Coding Plan configs omit models that are
 not included in that plan; a Standard model listing does not establish Token
@@ -271,7 +271,7 @@ included here because they use different APIs.
 `qwen3.8-max` and `qwen3.8-flash` support `off`, `low`, `medium`, and `xhigh`
 thinking, with `xhigh` as the default. `minimal` maps to `low`; `high` and `max`
 map to `xhigh`. This applies to Standard and Token Plan. Both models support
-131,072 output tokens. OpenClaw preserves returned reasoning in its separate
+131,072 output tokens. Carapace preserves returned reasoning in its separate
 `reasoning_content` replay field during tool use, rather than placing it in
 visible answer text.
 
@@ -281,14 +281,14 @@ mapped `reasoning_effort`: Qwen rejects requests containing both. See the
 
 `qwen3.7-max`, `qwen3.7-plus`, `qwen3.6-flash`, and `qwen3.6-plus` are
 reasoning-enabled in the built-in catalog. For reasoning models on the `qwen`
-family, the provider maps OpenClaw thinking levels to DashScope's top-level
+family, the provider maps Carapace thinking levels to DashScope's top-level
 `enable_thinking` request flag: disabled thinking sends `enable_thinking: false`,
 any other level sends `enable_thinking: true`. Custom models can opt into an
 alternate chat-template thinking payload by setting
 `compat.thinkingFormat: "qwen-chat-template"` on the model entry.
 
 Token Plan models are also marked reasoning-capable. `kimi-k2.7-code` and
-`MiniMax-M2.5` are thinking-only, so OpenClaw keeps thinking enabled even when
+`MiniMax-M2.5` are thinking-only, so Carapace keeps thinking enabled even when
 the session requests `/think off`. DeepSeek V4 maps `minimal` through `high` to
 the service's `high` effort and maps `xhigh` or `max` to `max`. GLM 5.2 accepts
 the full `minimal` through `max` range; GLM 5.1 and GLM 5 accept through
@@ -350,14 +350,14 @@ See [Video generation](/tools/video-generation) for shared tool parameters, prov
     - China: `dashscope.aliyuncs.com/compatible-mode/v1`
     - Global: `dashscope-intl.aliyuncs.com/compatible-mode/v1`
 
-    OpenClaw omits these models from Coding Plan catalogs. If a Coding Plan
+    Carapace omits these models from Coding Plan catalogs. If a Coding Plan
     endpoint returns an "unsupported model" error, switch to the matching
     Standard or Token Plan endpoint and its dedicated key.
 
   </Accordion>
 
   <Accordion title="Video generation region routing">
-    OpenClaw maps the configured Qwen region to the matching DashScope AIGC host
+    Carapace maps the configured Qwen region to the matching DashScope AIGC host
     before submitting a video job:
 
     - Global/Intl: `https://dashscope-intl.aliyuncs.com`
@@ -402,7 +402,7 @@ See [Video generation](/tools/video-generation) for shared tool parameters, prov
   <Accordion title="Environment and daemon setup">
     If the Gateway runs as a daemon (launchd/systemd), make sure `QWEN_API_KEY`
     or `QWEN_TOKEN_PLAN_API_KEY` is available to that process (for example, in
-    `~/.openclaw/.env` or via `env.shellEnv`).
+    `~/.carapace/.env` or via `env.shellEnv`).
   </Accordion>
 </AccordionGroup>
 

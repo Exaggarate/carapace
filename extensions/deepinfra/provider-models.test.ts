@@ -1,9 +1,9 @@
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 // Deepinfra tests cover provider models plugin behavior.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const isProviderApiKeyConfiguredMock = vi.hoisted(() => vi.fn<(p: unknown) => boolean>());
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth", () => ({
   isProviderApiKeyConfigured: isProviderApiKeyConfiguredMock,
 }));
 
@@ -16,7 +16,7 @@ import {
 } from "./provider-models.js";
 
 const DEEPINFRA_MODELS_URL =
-  "https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta";
+  "https://api.deepinfra.com/v1/openai/models?sort_by=carapace&filter=with_meta";
 
 beforeEach(() => {
   clearLiveCatalogCacheForTests();
@@ -164,12 +164,12 @@ describe("DeepInfra pre-auth discovery", () => {
     const mockFetch = mockProjectionFetch(() => jsonResponse({ data: [makeAgentModelEntry()] }));
     await withFetchPathTest(mockFetch, {}, async () => {
       expect(
-        (await discoverDeepInfraSurfaces({ env: {}, agentDir: "/tmp/openclaw-agent" })).live,
+        (await discoverDeepInfraSurfaces({ env: {}, agentDir: "/tmp/carapace-agent" })).live,
       ).toBe(true);
     });
     expect(isProviderApiKeyConfiguredMock).toHaveBeenCalledWith({
       provider: "deepinfra",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     });
   });
 });
@@ -188,7 +188,7 @@ describe("discoverDeepInfraModels", () => {
     expect(streamingUsageIncompatibleModelIds).toStrictEqual([]);
   });
 
-  it("fetches the openclaw-projection endpoint and parses chat-surface entries when an API key is configured", async () => {
+  it("fetches the carapace-projection endpoint and parses chat-surface entries when an API key is configured", async () => {
     const mockFetch = mockProjectionFetch(
       vi.fn().mockResolvedValue(jsonResponse({ data: [makeAgentModelEntry()] })),
     );

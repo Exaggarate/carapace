@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-store-runtime";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-store-runtime";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import {
   terminateCodexAppServerDescendants,
@@ -54,7 +54,7 @@ function addProcess(pid: number, ppid: number, state = "S", threads = 1) {
 }
 
 describe("Codex registration procfs boundary", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
   let store: ReturnType<
     typeof createPluginStateSyncKeyedStore<{
       parent: ReturnType<typeof identity>;
@@ -64,7 +64,7 @@ describe("Codex registration procfs boundary", () => {
   let kill: MockInstance<typeof process.kill>;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "codex-registration-procfs-" });
+    state = await createCarapaceTestState({ prefix: "codex-registration-procfs-" });
     store = createPluginStateSyncKeyedStore("codex", {
       namespace: "app-server-processes",
       maxEntries: 512,

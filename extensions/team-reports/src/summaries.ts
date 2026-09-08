@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { z } from "zod";
 import type {
   GithubCounts,
@@ -10,7 +10,7 @@ import type {
   SummaryDocument,
 } from "./types.js";
 
-type SummaryLlm = Pick<OpenClawPluginApi["runtime"]["llm"], "complete">;
+type SummaryLlm = Pick<CarapacePluginApi["runtime"]["llm"], "complete">;
 type CompletionParams = Parameters<SummaryLlm["complete"]>[0];
 type SummaryLogger = Pick<SourceRuntime["logger"], "warn">;
 

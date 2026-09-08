@@ -20,7 +20,7 @@ function createChildEnv(root: string): NodeJS.ProcessEnv {
   for (const dir of [home, state, temporary]) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  const configPath = path.join(state, "openclaw.json");
+  const configPath = path.join(state, "carapace.json");
   fs.writeFileSync(configPath, "{}\n");
   // A fresh process must not inherit operator credentials, test mocks, or Node preloads.
   return {
@@ -29,9 +29,9 @@ function createChildEnv(root: string): NodeJS.ProcessEnv {
     WINDIR: process.env.WINDIR,
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: state,
-    OPENCLAW_CONFIG_PATH: configPath,
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: state,
+    CARAPACE_CONFIG_PATH: configPath,
     TMPDIR: temporary,
     TMP: temporary,
     TEMP: temporary,
@@ -46,7 +46,7 @@ describe("MCP profile auth through real credential owners", () => {
   ])(
     "%s: %s",
     async (scenario) => {
-      const root = tempDirs.make("openclaw-mcp-auth-demand-");
+      const root = tempDirs.make("carapace-mcp-auth-demand-");
       // Child isolation also keeps neighboring suites' store/provider mocks out of this proof.
       const { stdout } = await execFileAsync(
         process.execPath,

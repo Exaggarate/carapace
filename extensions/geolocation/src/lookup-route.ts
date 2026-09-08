@@ -1,7 +1,7 @@
 /** HTTP surface: `GET /plugins/geolocation/lookup?ip=<address>`. */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import net from "node:net";
-import { isPrivateOrLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
+import { isPrivateOrLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
 import type { GeolocationSettings } from "./config.js";
 import type { GeolocationDatabase } from "./database-store.js";
 import { projectGeolocationRecord } from "./lookup.js";

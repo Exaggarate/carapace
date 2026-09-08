@@ -565,7 +565,7 @@ export function readSessionTranscriptHistoryEventLookup(
       !eventId.trim() ||
       hasUnindexedVisibleMessages(projection, range.messageStart, range.messageEnd)
     ) {
-      // Unindexed stored rows can retain message.__openclaw.id during projection.
+      // Unindexed stored rows can retain message.__carapace.id during projection.
       // Let the full reader select those candidates; the caller matches projected IDs.
       const events = readVisibleHistoryRange(projection, 0, history.total, history);
       return {

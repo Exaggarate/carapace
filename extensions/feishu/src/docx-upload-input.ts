@@ -5,7 +5,7 @@ import {
   canonicalizeBase64,
   estimateBase64DecodedBytes,
   extensionForMime,
-} from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/media-runtime";
 import { getFeishuRuntime } from "./runtime.js";
 
 type DocxUploadInput = {

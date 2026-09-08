@@ -75,7 +75,7 @@ suite.define(() => {
           ],
         });
         await page.route(
-          `${origin}/.well-known/openclaw/browser-bootstrap`,
+          `${origin}/.well-known/carapace/browser-bootstrap`,
           trackRoute(async (route) => {
             helperCalls += 1;
             expect(route.request().method()).toBe("GET");

@@ -13,11 +13,11 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function createRepo(files: Record<string, string> = {}) {
-  const root = tempDirs.make("openclaw-env-count-");
+  const root = tempDirs.make("carapace-env-count-");
   const git = (...args: string[]) =>
     execFileSync(
       "git",
-      ["-c", "user.name=OpenClaw", "-c", "user.email=test@openclaw.local", ...args],
+      ["-c", "user.name=Carapace", "-c", "user.email=test@carapace.local", ...args],
       { cwd: root, stdio: "ignore" },
     );
   const write = (file: string, source: string) => {
@@ -43,64 +43,64 @@ describe("check-env-var-count", () => {
   it("keeps an empty index separate from untracked worktree sources", () => {
     const { root, write } = createRepo();
     expect(collectEnvVarNames(root, { staged: true })).toEqual([]);
-    write("src/runtime.ts", "OPENCLAW_UNTRACKED");
+    write("src/runtime.ts", "CARAPACE_UNTRACKED");
     expect(collectEnvVarNames(root, { staged: true })).toEqual([]);
-    expect(collectEnvVarNames(root)).toEqual(["OPENCLAW_UNTRACKED"]);
+    expect(collectEnvVarNames(root)).toEqual(["CARAPACE_UNTRACKED"]);
   });
 
   it("collects distinct names from the whole selected snapshot without crossing file boundaries", () => {
     const { root, git, write } = createRepo({
       ".gitignore": "src/ignored.ts\n",
-      "src/partial.ts": "OPENCLAW_HEAD",
-      "src/modified.ts": "OPENCLAW_OLD",
-      "src/removed.ts": "OPENCLAW_REMOVED",
-      "src/gone.ts": "OPENCLAW_GONE",
+      "src/partial.ts": "CARAPACE_HEAD",
+      "src/modified.ts": "CARAPACE_OLD",
+      "src/removed.ts": "CARAPACE_REMOVED",
+      "src/gone.ts": "CARAPACE_GONE",
       "src/empty.ts": "",
-      "src/boundary-a.ts": "OPENCLAW_",
+      "src/boundary-a.ts": "CARAPACE_",
       "src/boundary-b.ts": "BOUNDARY_TRAP",
-      "src/unchanged.ts": "é 🦞 東京\nOPENCLAW_SHARED\0OPENCLAW_UNICODE",
-      "packages/api/index.mts": "OPENCLAW_SHARED OPENCLAW_SHARED",
-      "extensions/demo/index.cjs": "OPENCLAW_PLUGIN",
-      "src/runtime.test.ts": "OPENCLAW_EXCLUDED",
-      "src/__tests__/index.ts": "OPENCLAW_EXCLUDED",
-      "packages/api/test/index.ts": "OPENCLAW_EXCLUDED",
-      "extensions/demo/index.spec.ts": "OPENCLAW_EXCLUDED",
-      "extensions/qa-lab/index.ts": "OPENCLAW_EXCLUDED",
-      "extensions/test-support/index.ts": "OPENCLAW_EXCLUDED",
-      "src/runtime.json": "OPENCLAW_EXCLUDED",
-      "ui/src/runtime.ts": "OPENCLAW_EXCLUDED",
+      "src/unchanged.ts": "é 🦞 東京\nCARAPACE_SHARED\0CARAPACE_UNICODE",
+      "packages/api/index.mts": "CARAPACE_SHARED CARAPACE_SHARED",
+      "extensions/demo/index.cjs": "CARAPACE_PLUGIN",
+      "src/runtime.test.ts": "CARAPACE_EXCLUDED",
+      "src/__tests__/index.ts": "CARAPACE_EXCLUDED",
+      "packages/api/test/index.ts": "CARAPACE_EXCLUDED",
+      "extensions/demo/index.spec.ts": "CARAPACE_EXCLUDED",
+      "extensions/qa-lab/index.ts": "CARAPACE_EXCLUDED",
+      "extensions/test-support/index.ts": "CARAPACE_EXCLUDED",
+      "src/runtime.json": "CARAPACE_EXCLUDED",
+      "ui/src/runtime.ts": "CARAPACE_EXCLUDED",
     });
     git("add", ".");
     git("commit", "-m", "base");
-    write("src/partial.ts", "OPENCLAW_INDEX");
-    write("src/modified.ts", "OPENCLAW_MODIFIED");
-    write("src/added.ts", "OPENCLAW_ADDED");
+    write("src/partial.ts", "CARAPACE_INDEX");
+    write("src/modified.ts", "CARAPACE_MODIFIED");
+    write("src/added.ts", "CARAPACE_ADDED");
     git("add", ".");
-    write("src/partial.ts", "OPENCLAW_WORKTREE");
-    write("src/added.ts", "OPENCLAW_UNSTAGED_ADDITION");
+    write("src/partial.ts", "CARAPACE_WORKTREE");
+    write("src/added.ts", "CARAPACE_UNSTAGED_ADDITION");
     git("rm", "--cached", "src/removed.ts");
     fs.rmSync(path.join(root, "src/gone.ts"));
-    write("src/untracked.ts", "OPENCLAW_UNTRACKED");
-    write("src/ignored.ts", "OPENCLAW_IGNORED");
+    write("src/untracked.ts", "CARAPACE_UNTRACKED");
+    write("src/ignored.ts", "CARAPACE_IGNORED");
 
-    const shared = ["OPENCLAW_MODIFIED", "OPENCLAW_PLUGIN", "OPENCLAW_SHARED", "OPENCLAW_UNICODE"];
+    const shared = ["CARAPACE_MODIFIED", "CARAPACE_PLUGIN", "CARAPACE_SHARED", "CARAPACE_UNICODE"];
     expect(collectEnvVarNames(root, { staged: true })).toEqual(
-      [...shared, "OPENCLAW_ADDED", "OPENCLAW_GONE", "OPENCLAW_INDEX"].toSorted(),
+      [...shared, "CARAPACE_ADDED", "CARAPACE_GONE", "CARAPACE_INDEX"].toSorted(),
     );
     expect(collectEnvVarNames(root)).toEqual(
       [
         ...shared,
-        "OPENCLAW_REMOVED",
-        "OPENCLAW_UNSTAGED_ADDITION",
-        "OPENCLAW_UNTRACKED",
-        "OPENCLAW_WORKTREE",
+        "CARAPACE_REMOVED",
+        "CARAPACE_UNSTAGED_ADDITION",
+        "CARAPACE_UNTRACKED",
+        "CARAPACE_WORKTREE",
       ].toSorted(),
     );
   });
 
   it("uses a constant number of Git processes as the staged source set grows", () => {
     const counts = [8, 16].map((fileCount) => {
-      const names = Array.from({ length: fileCount }, (_, index) => `OPENCLAW_N${index}`);
+      const names = Array.from({ length: fileCount }, (_, index) => `CARAPACE_N${index}`);
       const { root, git } = createRepo(
         Object.fromEntries(names.map((name, index) => [`src/file-${index}.ts`, name])),
       );
@@ -123,17 +123,17 @@ describe("check-env-var-count", () => {
 
   it.skipIf(process.platform === "win32")("preserves valid unusual staged filenames", () => {
     const { root, git } = createRepo({
-      "src/space name.ts": "OPENCLAW_SPACE",
-      "packages/api/tab\tname.ts": "OPENCLAW_TAB",
-      "extensions/demo/newline\nname.ts": "OPENCLAW_NEWLINE",
-      "src/conflict blob 0\n\nx blob 0\n\nx blob 0\n\n.ts": "OPENCLAW_HEADER",
+      "src/space name.ts": "CARAPACE_SPACE",
+      "packages/api/tab\tname.ts": "CARAPACE_TAB",
+      "extensions/demo/newline\nname.ts": "CARAPACE_NEWLINE",
+      "src/conflict blob 0\n\nx blob 0\n\nx blob 0\n\n.ts": "CARAPACE_HEADER",
     });
     git("add", ".");
     expect(collectEnvVarNames(root, { staged: true })).toEqual([
-      "OPENCLAW_HEADER",
-      "OPENCLAW_NEWLINE",
-      "OPENCLAW_SPACE",
-      "OPENCLAW_TAB",
+      "CARAPACE_HEADER",
+      "CARAPACE_NEWLINE",
+      "CARAPACE_SPACE",
+      "CARAPACE_TAB",
     ]);
   });
 
@@ -141,10 +141,10 @@ describe("check-env-var-count", () => {
     "src/conflict.ts",
     ...(process.platform === "win32" ? [] : ["src/conflict blob 0\n\nx blob 0\n\nx blob 0\n\n.ts"]),
   ])("rejects an unresolved stage-zero source: %s", (file) => {
-    const { root } = createRepo({ [file]: "OPENCLAW_WORKTREE" });
+    const { root } = createRepo({ [file]: "CARAPACE_WORKTREE" });
     const oid = execFileSync("git", ["hash-object", "-w", "--stdin"], {
       cwd: root,
-      input: "OPENCLAW_CONFLICT",
+      input: "CARAPACE_CONFLICT",
       encoding: "utf8",
     }).trim();
     execFileSync("git", ["update-index", "-z", "--index-info"], {
@@ -163,7 +163,7 @@ describe("check-env-var-count", () => {
     // Shallow clones and grafted agent checkouts resolve the base but truncate its history.
     const { root, git, write } = createRepo({
       "config/env-var-count-budget.txt": "1\n",
-      "src/runtime.ts": "process.env.OPENCLAW_ONLY;\n",
+      "src/runtime.ts": "process.env.CARAPACE_ONLY;\n",
     });
     git("add", ".");
     git("commit", "-m", "detached base");
@@ -174,20 +174,20 @@ describe("check-env-var-count", () => {
     git("commit", "-m", "severed history");
     expect(() => main(["--base", "severed-base"], root)).not.toThrow();
 
-    write("src/runtime.ts", "process.env.OPENCLAW_ONE; process.env.OPENCLAW_TWO;\n");
+    write("src/runtime.ts", "process.env.CARAPACE_ONE; process.env.CARAPACE_TWO;\n");
     expect(() => main(["--base", "severed-base"], root)).toThrow(/exceeds budget/u);
   });
 
   it("compares against the fork budget when the base branch later shrinks", () => {
     const { root, git, write } = createRepo({
       "config/env-var-count-budget.txt": "2\n",
-      "src/runtime.ts": "process.env.OPENCLAW_ONE; process.env.OPENCLAW_TWO;\n",
+      "src/runtime.ts": "process.env.CARAPACE_ONE; process.env.CARAPACE_TWO;\n",
     });
     git("add", ".");
     git("commit", "-m", "base");
     git("branch", "release");
     write("config/env-var-count-budget.txt", "1\n");
-    write("src/runtime.ts", "process.env.OPENCLAW_ONE;\n");
+    write("src/runtime.ts", "process.env.CARAPACE_ONE;\n");
     git("add", ".");
     git("commit", "-m", "shrink main");
     git("branch", "moving-main");
@@ -217,7 +217,7 @@ describe("check-env-var-count", () => {
     ])("checks $name", ({ base, budget, count, error }) => {
       const { root, git, write } = createRepo({
         "config/env-var-count-budget.txt": `${base}\n`,
-        "src/runtime.ts": Array.from({ length: base }, (_, index) => `OPENCLAW_BASE_${index}`).join(
+        "src/runtime.ts": Array.from({ length: base }, (_, index) => `CARAPACE_BASE_${index}`).join(
           "\n",
         ),
       });
@@ -226,7 +226,7 @@ describe("check-env-var-count", () => {
       write("config/env-var-count-budget.txt", `${budget}\n`);
       write(
         "src/runtime.ts",
-        Array.from({ length: count }, (_, index) => `OPENCLAW_NEXT_${index}`).join("\n"),
+        Array.from({ length: count }, (_, index) => `CARAPACE_NEXT_${index}`).join("\n"),
       );
       if (staged) {
         git("add", ".");

@@ -1,11 +1,11 @@
 // Checks plugin minimum host version compatibility.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { valid as validSemver } from "semver";
-import { compareOpenClawVersions } from "../config/version.js";
+import { compareCarapaceVersions } from "../config/version.js";
 
 /** Validation message for plugin minHostVersion manifest fields. */
 const MIN_HOST_VERSION_FORMAT =
-  'openclaw.install.minHostVersion must use a semver floor in the form ">=x.y.z[-prerelease][+build]"';
+  'carapace.install.minHostVersion must use a semver floor in the form ">=x.y.z[-prerelease][+build]"';
 const SEMVER_LABEL_RE = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?`;
 const MIN_HOST_VERSION_RE = new RegExp(`^>=(${SEMVER_LABEL_RE})$`);
 const LEGACY_MIN_HOST_VERSION_RE = new RegExp(`^(${SEMVER_LABEL_RE})$`);
@@ -72,7 +72,7 @@ export function checkMinHostVersion(params: {
     return { ok: false, kind: "invalid", error: MIN_HOST_VERSION_FORMAT };
   }
   const currentVersion = normalizeOptionalString(params.currentVersion) || "unknown";
-  const comparison = compareOpenClawVersions(currentVersion, requirement.minimumLabel);
+  const comparison = compareCarapaceVersions(currentVersion, requirement.minimumLabel);
   if (comparison === null) {
     return {
       ok: false,

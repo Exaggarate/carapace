@@ -25,7 +25,7 @@ const dependency = {
 };
 
 function sourceFixture() {
-  const root = tempDirs.make("openclaw-npm-lock-report-");
+  const root = tempDirs.make("carapace-npm-lock-report-");
   mkdirSync(path.join(root, "extensions"));
   mkdirSync(path.join(root, "packages"));
   writeFileSync(path.join(root, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n");
@@ -41,32 +41,32 @@ function sourceFixture() {
 
 function fixture() {
   const { root, writePackage } = sourceFixture();
-  writePackage(".", { name: "openclaw", dependencies: { fixture: "1.0.0" } });
+  writePackage(".", { name: "carapace", dependencies: { fixture: "1.0.0" } });
   // Reverse creation order ensures discovery, not fixture order, owns sorting.
   writePackage("packages/zulu", {
-    name: "@openclaw/zulu",
+    name: "@carapace/zulu",
     optionalDependencies: { fixture: "1.0.0" },
-    openclaw: { release: { publishToNpm: true, bundleRuntimeDependencies: true } },
+    carapace: { release: { publishToNpm: true, bundleRuntimeDependencies: true } },
   });
   writePackage("extensions/beta", {
-    name: "@openclaw/beta",
+    name: "@carapace/beta",
     dependencies: { fixture: "1.0.0" },
-    openclaw: { release: { publishToNpm: true } },
+    carapace: { release: { publishToNpm: true } },
   });
   writePackage("extensions/acpx", {
-    name: "@openclaw/acpx",
+    name: "@carapace/acpx",
     dependencies: { fixture: "1.0.0" },
-    openclaw: { release: { publishToNpm: true, bundleRuntimeDependencies: false } },
+    carapace: { release: { publishToNpm: true, bundleRuntimeDependencies: false } },
   });
   writePackage("extensions/empty", {
-    name: "@openclaw/empty",
+    name: "@carapace/empty",
     devDependencies: { fixture: "1.0.0" },
-    openclaw: { release: { publishToNpm: true } },
+    carapace: { release: { publishToNpm: true } },
   });
   writePackage("extensions/private", {
-    name: "@openclaw/private",
+    name: "@carapace/private",
     dependencies: { fixture: "1.0.0" },
-    openclaw: { release: { publishToNpm: false } },
+    carapace: { release: { publishToNpm: false } },
   });
   return root;
 }
@@ -106,10 +106,10 @@ describe("npm package-lock release report", () => {
       lockfileVersion: 3,
       packagesWithOmittedWorkspaceDependencies: 0,
       packages: [
-        [".", "openclaw", false, 1, 0],
-        ["extensions/acpx", "@openclaw/acpx", false, 1, 0],
-        ["extensions/beta", "@openclaw/beta", true, 1, 0],
-        ["packages/zulu", "@openclaw/zulu", true, 0, 1],
+        [".", "carapace", false, 1, 0],
+        ["extensions/acpx", "@carapace/acpx", false, 1, 0],
+        ["extensions/beta", "@carapace/beta", true, 1, 0],
+        ["packages/zulu", "@carapace/zulu", true, 0, 1],
       ].map(
         ([
           packageDir,
@@ -150,13 +150,13 @@ describe("npm package-lock release report", () => {
   it("marks only the root and gateway client partial in the release-split fixture", async () => {
     const { root, writePackage } = sourceFixture();
     writePackage(".", {
-      name: "openclaw",
-      dependencies: { "@openclaw/ai": "workspace:*", fixture: "1.0.0" },
+      name: "carapace",
+      dependencies: { "@carapace/ai": "workspace:*", fixture: "1.0.0" },
     });
     writePackage("packages/gateway-client", {
-      name: "@openclaw/gateway-client",
-      dependencies: { "@openclaw/gateway-protocol": "workspace:*", fixture: "1.0.0" },
-      openclaw: { release: { publishToNpm: true } },
+      name: "@carapace/gateway-client",
+      dependencies: { "@carapace/gateway-protocol": "workspace:*", fixture: "1.0.0" },
+      carapace: { release: { publishToNpm: true } },
     });
     const locklessPlugins = [
       "acpx",
@@ -169,10 +169,10 @@ describe("npm package-lock release report", () => {
     ];
     for (const plugin of locklessPlugins) {
       writePackage(`extensions/${plugin}`, {
-        name: `@openclaw/${plugin}`,
+        name: `@carapace/${plugin}`,
         dependencies: { fixture: "1.0.0" },
-        devDependencies: { "@openclaw/plugin-sdk": "workspace:*" },
-        openclaw: { release: { publishToNpm: true, bundleRuntimeDependencies: false } },
+        devDependencies: { "@carapace/plugin-sdk": "workspace:*" },
+        carapace: { release: { publishToNpm: true, bundleRuntimeDependencies: false } },
       });
     }
     const report = await generateNpmPackageLocksReport({ rootDir: root });
@@ -186,10 +186,10 @@ describe("npm package-lock release report", () => {
           omittedWorkspaceDependencies: entry.omittedWorkspaceDependencies,
         })),
     ).toEqual([
-      { name: "openclaw", omittedWorkspaceDependencies: ["@openclaw/ai"] },
+      { name: "carapace", omittedWorkspaceDependencies: ["@carapace/ai"] },
       {
-        name: "@openclaw/gateway-client",
-        omittedWorkspaceDependencies: ["@openclaw/gateway-protocol"],
+        name: "@carapace/gateway-client",
+        omittedWorkspaceDependencies: ["@carapace/gateway-protocol"],
       },
     ]);
     expect(
@@ -201,7 +201,7 @@ describe("npm package-lock release report", () => {
         })),
     ).toEqual(
       locklessPlugins.map((plugin) => ({
-        name: `@openclaw/${plugin}`,
+        name: `@carapace/${plugin}`,
         omittedWorkspaceDependencies: [],
       })),
     );
@@ -210,7 +210,7 @@ describe("npm package-lock release report", () => {
   it("sorts and deduplicates runtime omissions without including dev or peer references", async () => {
     const { root, writePackage } = sourceFixture();
     writePackage(".", {
-      name: "openclaw",
+      name: "carapace",
       dependencies: { zeta: "workspace:*", alpha: "workspace:^", fixture: "1.0.0" },
       optionalDependencies: { middle: "workspace:~", alpha: "workspace:^" },
       devDependencies: { development: "workspace:*" },
@@ -223,16 +223,16 @@ describe("npm package-lock release report", () => {
 
   it("rejects an omission claim when the generated lock resolves that workspace package", async () => {
     const { root, writePackage } = sourceFixture();
-    writePackage(".", { name: "openclaw", dependencies: { "@openclaw/ai": "workspace:*" } });
+    writePackage(".", { name: "carapace", dependencies: { "@carapace/ai": "workspace:*" } });
     vi.mocked(generateNpmPackageLocks).mockImplementation(async ({ packageDirs }) =>
       packageDirs.map((dir) => {
         const lock = lockFor(dir);
-        Object.assign(lock.packages, { "node_modules/@openclaw/ai": dependency });
+        Object.assign(lock.packages, { "node_modules/@carapace/ai": dependency });
         return JSON.stringify(lock);
       }),
     );
     await expect(generateNpmPackageLocksReport({ rootDir: root })).rejects.toThrow(
-      ".: npm lock contains omitted workspace dependency @openclaw/ai",
+      ".: npm lock contains omitted workspace dependency @carapace/ai",
     );
   });
 

@@ -1,16 +1,16 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { appendTranscriptMessages } from "../../../src/config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../src/config/types.carapace.js";
 import { encodePngRgba } from "../../../src/media/png-encode.js";
 import { ensureGatewayOwnerProfile, setAvatar } from "../../../src/state/user-profiles.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { controlUiSessionPath } from "../test-helpers/control-ui-e2e.ts";
@@ -23,9 +23,9 @@ const transcriptLength = 900;
 const avifAvatar =
   "data:image/avif;base64,AAAAHGZ0eXBhdmlmAAAAAG1pZjFhdmlmbWlhZgAAANZtZXRhAAAAAAAAACFoZGxyAAAAAAAAAABwaWN0AAAAAAAAAAAAAAAAAAAAACJpbG9jAAAAAERAAAEAAQAAAAAA+gABAAAAAAAAACgAAAAjaWluZgAAAAAAAQAAABVpbmZlAgAAAAABAABhdjAxAAAAAA5waXRtAAAAAAABAAAAVmlwcnAAAAA4aXBjbwAAAAxhdjFDgUBsAAAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwwMDAAAABZpcG1hAAAAAAAAAAEAAQOBAgMAAAAwbWRhdBIACghYAAa0BDQbhDIaGUeHhiGJpppmgAAAkD+bDGFLK02PUUVOpCA=";
 const viewport = { width: 1440, height: 900 };
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-let instance: OpenClawTestInstance | undefined;
-let config: OpenClawConfig;
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+let instance: CarapaceTestInstance | undefined;
+let config: CarapaceConfig;
 let originalAvatarBytes = 0;
 
 type RpcMetric = {
@@ -98,7 +98,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI chat loading performance with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({ name: "chat-loading-performance" });
+    const owner = await createCarapaceTestInstance({ name: "chat-loading-performance" });
     instance = owner;
     try {
       const workspace = owner.state.path("workspace");
@@ -393,7 +393,7 @@ suite.define(() => {
         await page.goto(url.toString());
         await waitForControlUiGatewayReady(page);
         const selectedPane = page.locator(
-          "openclaw-chat-pane.chat-pane-cache__pane--active:not([inert])",
+          "carapace-chat-pane.chat-pane-cache__pane--active:not([inert])",
         );
         await expect
           .poll(() =>
@@ -410,7 +410,7 @@ suite.define(() => {
         await selectedPane.locator(".agent-chat__composer-combobox textarea").waitFor();
         await page.locator(".sidebar-footer-bar__home").click();
         await page
-          .locator("openclaw-assistant-panel .chat-thread")
+          .locator("carapace-assistant-panel .chat-thread")
           .getByText("Synthetic Home message 900.", { exact: false })
           .waitFor();
         if (captureUiProof) {
@@ -424,7 +424,7 @@ suite.define(() => {
         const selectedCommitted = waitForStartupCommit(selectedKey, selectedPane);
         const homeCommitted = waitForStartupCommit(
           homeKey,
-          page.locator("openclaw-assistant-panel openclaw-chat-pane"),
+          page.locator("carapace-assistant-panel carapace-chat-pane"),
         );
         await selectedPane
           .locator(".chat-thread", {
@@ -440,7 +440,7 @@ suite.define(() => {
             elements.map((element) => new URL((element as HTMLScriptElement).src).pathname),
           );
         await page
-          .locator("openclaw-assistant-panel .chat-thread")
+          .locator("carapace-assistant-panel .chat-thread")
           .getByText("Synthetic Home message 900.", { exact: false })
           .waitFor();
         const homeVisibleMs = Date.now() - startedAt;
@@ -559,7 +559,7 @@ suite.define(() => {
           const narrowHomeCommitted = homeOpen
             ? waitForStartupCommit(
                 homeKey,
-                page.locator("openclaw-assistant-panel openclaw-chat-pane"),
+                page.locator("carapace-assistant-panel carapace-chat-pane"),
                 requestStart,
               )
             : Promise.resolve(null);
@@ -573,7 +573,7 @@ suite.define(() => {
           const composerMs = Date.now() - startedAt;
           if (homeOpen) {
             await page
-              .locator("openclaw-assistant-panel .chat-thread")
+              .locator("carapace-assistant-panel .chat-thread")
               .getByText("Synthetic Home message 900.", { exact: false })
               .waitFor();
           }
@@ -600,7 +600,7 @@ suite.define(() => {
         };
         const narrowHomeOpen = await captureNarrowReload("04-narrow-home-restored", true);
         await page
-          .locator("openclaw-assistant-panel")
+          .locator("carapace-assistant-panel")
           .getByRole("button", { name: "Close assistant sidebar", exact: true })
           .click();
         const narrowHomeClosed = await captureNarrowReload("05-narrow-home-closed", false);

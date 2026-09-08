@@ -65,7 +65,7 @@ suite.define(() => {
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
         await page.getByRole("button", { name: "Actions for Mobile menu" }).click();
         const menu = page.getByRole("menu", { name: "Actions for Mobile menu" });
-        const menuHost = page.locator("openclaw-chat-header-session-menu");
+        const menuHost = page.locator("carapace-chat-header-session-menu");
         await menu.waitFor({ state: "visible" });
         const rootItems = menuHost.locator(":scope > wa-dropdown > wa-dropdown-item");
         await expect
@@ -143,7 +143,7 @@ suite.define(() => {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
       await page.locator(".chat-pane__draft-indicator").waitFor();
       await page.getByRole("button", { name: "Actions for Member draft" }).click();
-      const menuHost = page.locator("openclaw-chat-header-session-menu");
+      const menuHost = page.locator("carapace-chat-header-session-menu");
       await expect
         .poll(() => menuHost.locator('wa-dropdown-item[value="compact:open-sharing"]').count())
         .toBe(0);

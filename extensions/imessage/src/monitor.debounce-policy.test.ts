@@ -1,12 +1,12 @@
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import type { waitForTransportReady } from "openclaw/plugin-sdk/transport-ready-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import type { waitForTransportReady } from "carapace/plugin-sdk/transport-ready-runtime";
 import { expect, it, vi } from "vitest";
 import { IMessageRpcClient, createIMessageRpcClient } from "./client.js";
 import { monitorIMessageProvider } from "./monitor.js";
@@ -14,7 +14,7 @@ import { resolveIMessageInboundDecision } from "./monitor/inbound-processing.js"
 import { getIMessageRuntime } from "./runtime.js";
 import { installIMessageStateRuntimeForTest } from "./test-support/runtime.js";
 
-vi.mock("openclaw/plugin-sdk/transport-ready-runtime", () => ({
+vi.mock("carapace/plugin-sdk/transport-ready-runtime", () => ({
   waitForTransportReady: vi.fn<typeof waitForTransportReady>(async () => {}),
 }));
 vi.mock("./client.js", async (importOriginal) => ({
@@ -31,7 +31,7 @@ vi.mock("./monitor/inbound-processing.js", async (importOriginal) => ({
 
 it("changes iMessage batching delay without replacing the attached RPC client", async () => {
   installIMessageStateRuntimeForTest();
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     channels: {
       imessage: {
         dbPath: path.join(getIMessageRuntime().state.resolveStateDir(), "absent-chat.db"),
@@ -124,7 +124,7 @@ it("changes iMessage batching delay without replacing the attached RPC client", 
     abort.abort();
     await monitor;
     clearRuntimeConfigSnapshot();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.restoreAllMocks();
   }
 });

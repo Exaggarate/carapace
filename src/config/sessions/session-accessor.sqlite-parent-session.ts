@@ -4,10 +4,10 @@ import {
   MODEL_SELECTION_LOCKED_PARENT_FORK_MESSAGE,
 } from "../../sessions/model-overrides.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type {
   ForkSessionEntryFromParentTargetParams,
   ForkSessionEntryFromParentTargetResult,
@@ -65,7 +65,7 @@ export async function forkSessionTranscriptFromParent(
   if (!crossDatabase) {
     return await runExclusiveSqliteSessionWrite(resolved, async () => {
       let result: ForkSessionFromParentTranscriptResult = { status: "failed" };
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         params.commitGuard?.();
         result = forkSqliteParentTranscriptInTransaction(database, resolved, {
           enforceTokenLimit: params.enforceTokenLimit,
@@ -88,7 +88,7 @@ export async function forkSessionTranscriptFromParent(
   if (!params.parentEntry.sessionId) {
     return { status: "missing-parent" };
   }
-  const sourceDatabase = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const sourceDatabase = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const source = resolveParentForkSourceTranscript(
     loadTranscriptEventsFromDatabase(sourceDatabase, params.parentEntry.sessionId),
     params.forkFrom,
@@ -113,7 +113,7 @@ export async function forkSessionTranscriptFromParent(
       sessionKey: normalizeSqliteSessionKey(params.sessionKey),
     };
     const sessionFile = formatSqliteSessionReferenceForScope(targetScope);
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       params.commitGuard?.();
       writeSqliteForkedChildTranscriptInTransaction(database, targetScope, {
         parentSessionFile,
@@ -134,7 +134,7 @@ export async function forkSessionEntryFromParentTarget(
   return await runExclusiveSqliteSessionWrite<ForkSessionEntryFromParentTargetResult>(
     resolved,
     async () => {
-      const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+      const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
       const parent = resolveLifecyclePrimaryEntry(database, parentTarget);
       if (!parent?.entry.sessionId) {
         return { status: "missing-parent" };
@@ -196,7 +196,7 @@ export async function forkSessionEntryFromParentTarget(
       }
 
       let result: ForkSessionEntryFromParentTargetResult = { status: "failed" };
-      const publish = runOpenClawAgentWriteTransaction((writeDatabase) => {
+      const publish = runCarapaceAgentWriteTransaction((writeDatabase) => {
         // Parent authority can close while this fork waits behind another writer.
         params.commitGuard?.();
         const freshParent = resolveLifecyclePrimaryEntry(writeDatabase, parentTarget)?.entry;
@@ -291,7 +291,7 @@ function persistSqliteParentForkSkipPatch(params: {
     previous: params.entry,
     sessionKey: params.sessionKey,
   });
-  const publish = runOpenClawAgentWriteTransaction((database) => {
+  const publish = runCarapaceAgentWriteTransaction((database) => {
     params.commitGuard?.();
     const previousIdentity = readSessionIdentitySnapshot(database, [params.sessionKey]);
     writeSessionEntry(database, params.sessionKey, next, {
@@ -322,7 +322,7 @@ export async function resolveSessionParentForkDecision(params: {
     return planParentForkDecision(params.parentEntry);
   }
   const resolved = resolveSqliteStoreScope(params.storePath);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return planParentForkDecision(
     params.parentEntry,
     estimateTranscriptPromptTokens(loadTranscriptEventsFromDatabase(database, parentSessionId)),
@@ -330,7 +330,7 @@ export async function resolveSessionParentForkDecision(params: {
 }
 
 function forkSqliteParentTranscriptInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedSqliteScope,
   params: {
     enforceTokenLimit?: boolean;
@@ -403,7 +403,7 @@ function resolveParentForkLimitDecision(
 }
 
 function writeSqliteForkedChildTranscriptInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   targetScope: ResolvedTranscriptScope,
   params: {
     parentSessionFile: string;

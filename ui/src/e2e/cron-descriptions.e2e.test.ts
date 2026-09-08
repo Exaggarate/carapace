@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -28,7 +28,7 @@ function cronJob(id: string, name: string) {
   };
 }
 
-const captureDurationProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureDurationProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const requireDurationRecord = createRequireRecord("record", "expected-object-value");
 
 function durationResponses(jobs: unknown[]) {

@@ -5,9 +5,9 @@ import {
   type ChannelProgressDraftLine,
   isChannelProgressDraftWorkToolName,
   resolveChannelPreviewStreamMode,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { MarkdownTableMode, MSTeamsConfig, ReplyPayload } from "../runtime-api.js";
 import { formatMSTeamsMarkdown } from "./format.js";
 import { extractMessageId } from "./media-helpers.js";
@@ -53,7 +53,7 @@ function isStreamCancelledError(err: unknown): boolean {
 }
 
 /**
- * Bridges openclaw's reply pipeline callbacks to the SDK's `ctx.stream`.
+ * Bridges carapace's reply pipeline callbacks to the SDK's `ctx.stream`.
  * Streaming is enabled for personal (DM) conversations only; group/channel
  * messages fall through to block delivery.
  *
@@ -101,7 +101,7 @@ export function createTeamsReplyStreamController(params: {
   // Matches the pre-migration `TeamsHttpStream.hasContent → false` recovery.
   let streamFailed = false;
   let pendingFinalPayload: Maybe<ReplyPayload>;
-  // openclaw's reply pipeline calls onPartialReply with the cumulative text on
+  // carapace's reply pipeline calls onPartialReply with the cumulative text on
   // each chunk, but the SDK's HttpStream appends each emit() to its internal
   // text buffer (this.text += activity.text). Forwarding cumulative text into
   // an appending sink produces "chunk1 + chunk2 + chunk3..." duplication. We

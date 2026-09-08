@@ -5,9 +5,9 @@ import path from "node:path";
 import { getPublicKey } from "nostr-tools";
 import { decrypt } from "nostr-tools/nip04";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PluginRuntime } from "../runtime-api.js";
 import { startNostrBus, type NostrBusHandle } from "./nostr-bus.js";
@@ -49,7 +49,7 @@ async function startBus(urls: string[], onError?: Parameters<typeof startNostrBu
 
 describe("Nostr outbound relay failover", () => {
   beforeEach(async () => {
-    const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-nostr-outbound-"));
+    const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-nostr-outbound-"));
     stateDir = await fs.realpath(created);
     buses = [];
     relays = [];
@@ -78,7 +78,7 @@ describe("Nostr outbound relay failover", () => {
         expect(entry.errors).toEqual([]);
       }
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(stateDir, { recursive: true, force: true });
     }
   });

@@ -3,16 +3,16 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { expect, test } from "vitest";
-import { createOpenClawCodingTools } from "../../../../src/agents/agent-tools.js";
+import { createCarapaceCodingTools } from "../../../../src/agents/agent-tools.js";
 import { resolveAttemptWorkspaceSandbox } from "../../../../src/agents/workspace-sandbox.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { captureEnv, setTestEnvValue } from "../../../../src/test-utils/env.js";
 
 function createConfig(params: {
   image: string;
   prefix: string;
   workspaceRoot: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -43,18 +43,18 @@ function createConfig(params: {
 }
 
 test("host:auto executes inside the resolved Docker sandbox", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sandboxed-exec-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sandboxed-exec-"));
   const stateDir = path.join(root, "state");
   const workspaceDir = path.join(root, "workspace");
   const outsideDir = path.join(root, "host-only");
   const outsideScript = path.join(outsideDir, "must-not-run.sh");
   const outsideMarker = path.join(outsideDir, "executed.txt");
   const workspaceMarker = path.join(workspaceDir, "container-marker.txt");
-  const image = process.env.OPENCLAW_SANDBOX_TEST_IMAGE ?? "openclaw-sandbox:bookworm-slim";
-  const env = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const image = process.env.CARAPACE_SANDBOX_TEST_IMAGE ?? "carapace-sandbox:bookworm-slim";
+  const env = captureEnv(["CARAPACE_STATE_DIR"]);
   let runtimeId: string | undefined;
 
-  await fs.mkdir(path.join(workspaceDir, ".openclaw", "sandbox-skills", "skills"), {
+  await fs.mkdir(path.join(workspaceDir, ".carapace", "sandbox-skills", "skills"), {
     recursive: true,
   });
   await fs.mkdir(outsideDir, { recursive: true });
@@ -63,7 +63,7 @@ test("host:auto executes inside the resolved Docker sandbox", async () => {
     `#!/bin/sh\nprintf executed > ${JSON.stringify(outsideMarker)}\n`,
     { mode: 0o755 },
   );
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
 
   try {
     const sessionId = randomUUID();
@@ -86,7 +86,7 @@ test("host:auto executes inside the resolved Docker sandbox", async () => {
     }
     runtimeId = workspace.sandbox.runtimeId;
 
-    const exec = createOpenClawCodingTools({
+    const exec = createCarapaceCodingTools({
       agentId: workspace.sessionAgentId,
       config,
       cwd: workspace.effectiveCwd,

@@ -1,6 +1,6 @@
 // Openai tests cover openai chatgpt device code plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resolveOpenAICodexAccessTokenExpiry } from "openclaw/plugin-sdk/provider-auth";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resolveOpenAICodexAccessTokenExpiry } from "carapace/plugin-sdk/provider-auth";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loginOpenAICodexDeviceCode } from "./openai-chatgpt-device-code.js";
 
@@ -239,7 +239,7 @@ describe("loginOpenAICodexDeviceCode", () => {
 
   it("requests a device code, polls for authorization, and exchanges OAuth tokens", async () => {
     vi.useFakeTimers();
-    vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+    vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
     try {
       const fetchMock = vi
         .fn<typeof fetch>()
@@ -299,9 +299,9 @@ describe("loginOpenAICodexDeviceCode", () => {
       expect(userCodeRequest[1]?.signal).toBeInstanceOf(AbortSignal);
       expect(userCodeRequest[1]?.headers).toEqual({
         "Content-Type": "application/json",
-        originator: "openclaw",
+        originator: "carapace",
         version: "2026.3.22",
-        "User-Agent": "openclaw/2026.3.22",
+        "User-Agent": "carapace/2026.3.22",
       });
 
       const deviceTokenRequest = fetchCall(fetchMock, 1);
@@ -310,9 +310,9 @@ describe("loginOpenAICodexDeviceCode", () => {
       expect(deviceTokenRequest[1]?.signal).toBeInstanceOf(AbortSignal);
       expect(deviceTokenRequest[1]?.headers).toEqual({
         "Content-Type": "application/json",
-        originator: "openclaw",
+        originator: "carapace",
         version: "2026.3.22",
-        "User-Agent": "openclaw/2026.3.22",
+        "User-Agent": "carapace/2026.3.22",
       });
 
       const oauthTokenRequest = fetchCall(fetchMock, 3);
@@ -321,9 +321,9 @@ describe("loginOpenAICodexDeviceCode", () => {
       expect(oauthTokenRequest[1]?.signal).toBeInstanceOf(AbortSignal);
       expect(oauthTokenRequest[1]?.headers).toEqual({
         "Content-Type": "application/x-www-form-urlencoded",
-        originator: "openclaw",
+        originator: "carapace",
         version: "2026.3.22",
-        "User-Agent": "openclaw/2026.3.22",
+        "User-Agent": "carapace/2026.3.22",
       });
       expect(onVerification).toHaveBeenCalledWith({
         verificationUrl: "https://auth.openai.com/codex/device",

@@ -1,6 +1,6 @@
 // Slack plugin module implements thread ts behavior.
-import type { ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ReplyToMode } from "carapace/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const SLACK_THREAD_TS_PATTERN = /^\d+\.\d+$/;
 

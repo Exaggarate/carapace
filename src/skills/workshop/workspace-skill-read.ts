@@ -1,6 +1,6 @@
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSkillStatusEntry } from "../discovery/status.js";
 import {
   assertInsideSkillsRoot,
@@ -32,7 +32,7 @@ export type WritableWorkshopSkillSummary = {
 };
 
 export type WorkshopSkillReadOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
 };
@@ -51,10 +51,10 @@ export function listWritableWorkshopSkillSummaries(
   // per-source count, file-size, symlink, and hardlink limits instead of an unbounded read.
   const records = loadSkillRootRecords({
     dir: workshopSkillsDir(options),
-    source: "openclaw-workshop",
+    source: "carapace-workshop",
     config: options.config,
     onDiagnostic: (diagnostic) => {
-      warnInvalidSkill("openclaw-workshop", diagnostic);
+      warnInvalidSkill("carapace-workshop", diagnostic);
       // A failed read is not an empty collection. Keep intentional loader
       // exclusions, but never use an unreadable inventory for review or display.
       if (diagnostic.kind === "read") {

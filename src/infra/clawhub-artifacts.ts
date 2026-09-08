@@ -1,8 +1,8 @@
 // ClawHub package, skill, resolver URL, and GitHub archive downloads.
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   createClawHubError,
   readClawHubBytes,
@@ -159,7 +159,7 @@ export async function downloadClawHubPackageArchive(params: {
     const rawSpecVersion = response.headers.get("X-ClawHub-ClawPack-Spec-Version");
     const specVersion = parseStrictPositiveInteger(rawSpecVersion);
     return stageClawHubArchive({
-      prefix: "openclaw-clawhub-clawpack",
+      prefix: "carapace-clawhub-clawpack",
       fileName: npmTarballName,
       bytes,
       sha256Hex: sha256Digest,
@@ -197,7 +197,7 @@ export async function downloadClawHubPackageArchive(params: {
     resourceLabel: `package archive download for ${params.name}`,
   });
   return stageClawHubArchive({
-    prefix: "openclaw-clawhub-package",
+    prefix: "carapace-clawhub-package",
     fileName: `${params.name}.zip`,
     bytes,
   });
@@ -235,7 +235,7 @@ export async function downloadClawHubSkillArchive(params: {
     resourceLabel: `skill archive download for ${params.slug}`,
   });
   return stageClawHubArchive({
-    prefix: "openclaw-clawhub-skill",
+    prefix: "carapace-clawhub-skill",
     fileName: `${params.slug}.zip`,
     bytes,
   });
@@ -269,7 +269,7 @@ export async function downloadClawHubSkillArchiveUrl(params: {
     resourceLabel: `skill archive download at ${url.pathname}`,
   });
   return stageClawHubArchive({
-    prefix: "openclaw-clawhub-skill",
+    prefix: "carapace-clawhub-skill",
     fileName: "skill.zip",
     bytes,
   });
@@ -297,7 +297,7 @@ export async function downloadClawHubGitHubSkillArchive(params: {
     resourceLabel: `GitHub source archive for ${params.repo}@${params.commit}`,
   });
   return stageClawHubArchive({
-    prefix: "openclaw-clawhub-github-skill",
+    prefix: "carapace-clawhub-github-skill",
     fileName: `${params.commit}.zip`,
     bytes,
   });

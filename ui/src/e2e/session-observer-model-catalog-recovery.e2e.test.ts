@@ -14,7 +14,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 suite.define(() => {
   it.each([

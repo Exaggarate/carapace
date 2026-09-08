@@ -3,16 +3,16 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { webhook } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/account-resolution";
+import type { CarapaceConfig } from "carapace/plugin-sdk/account-resolution";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests as createChannelIngressQueue,
   listChannelIngressQueueAccountIdsForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import type {
   PluginDoctorChannelIngressQueueAccess,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 
@@ -69,17 +69,17 @@ function legacyEvent(webhookEventId: string): webhook.Event {
 }
 
 async function withStateDir<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-line-doctor-"));
+  const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-line-doctor-"));
   const stateDir = await fs.realpath(createdDir);
   try {
     return await fn(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
-function migrationParams(stateDir: string, config: OpenClawConfig) {
+function migrationParams(stateDir: string, config: CarapaceConfig) {
   return {
     config,
     env: process.env,
@@ -104,7 +104,7 @@ async function seedLegacyRow(stateDir: string, accountId: string, webhookEventId
 
 describe("LINE doctor state migration", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("detects nothing on a store without pre-drain rows", async () => {
@@ -143,7 +143,7 @@ describe("LINE doctor state migration", () => {
   it("detects and migrates pre-drain rows for a configured account", async () => {
     await withStateDir(async (stateDir) => {
       await seedLegacyRow(stateDir, "work", "legacy-doctor-1");
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         channels: { line: { accounts: { work: {} } } },
       };
 

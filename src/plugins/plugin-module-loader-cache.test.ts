@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { build } from "esbuild";
-import { createRequireRecord, importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord, importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { spawnNodeEvalSync } from "../test-utils/node-process.js";
 import {
@@ -122,7 +122,7 @@ function expectStats(value: unknown, fields: Record<string, unknown>) {
 
 describe("getCachedPluginModuleLoader", () => {
   it("shares native SDK state while keeping plugin source reloadable", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-sdk-graph-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-sdk-graph-"));
     try {
       const ownerPath = path.join(root, "loader.mjs");
       await build({
@@ -147,23 +147,23 @@ describe("getCachedPluginModuleLoader", () => {
           import { pathToFileURL } from "node:url";
           import { getCachedPluginModuleLoader, resetPluginCache } from ${JSON.stringify(pathToFileURL(ownerPath).href)};
           const root = ${JSON.stringify(root)};
-          for (const transformOpenClawDependencies of [false, true]) {
-            const sdk = path.join(root, "sdk-" + transformOpenClawDependencies + ".mts");
+          for (const transformCarapaceDependencies of [false, true]) {
+            const sdk = path.join(root, "sdk-" + transformCarapaceDependencies + ".mts");
             fs.writeFileSync(sdk, "export const state: object = {};\\n");
             const native = await import(pathToFileURL(sdk).href);
-            const rootDir = path.join(root, "plugin-" + transformOpenClawDependencies);
+            const rootDir = path.join(root, "plugin-" + transformCarapaceDependencies);
             fs.mkdirSync(rootDir);
             const modulePath = path.join(rootDir, "entry.ts");
             const dependency = path.join(rootDir, "dependency.ts");
-            fs.writeFileSync(modulePath, 'export { state } from "openclaw/plugin-sdk/fixture"; export { value } from "./dependency.ts";\\n');
+            fs.writeFileSync(modulePath, 'export { state } from "carapace/plugin-sdk/fixture"; export { value } from "./dependency.ts";\\n');
             fs.writeFileSync(dependency, "export const value: number = 1;\\n");
             const load = () => getCachedPluginModuleLoader({
               modulePath, rootDir, importerUrl: import.meta.url, tryNative: false,
-              transformOpenClawDependencies,
-              aliasMap: { "openclaw/plugin-sdk/fixture": sdk },
+              transformCarapaceDependencies,
+              aliasMap: { "carapace/plugin-sdk/fixture": sdk },
             })(modulePath);
             const first = load();
-            assert.equal(first.state === native.state, !transformOpenClawDependencies, "SDK loading mode must preserve its graph contract");
+            assert.equal(first.state === native.state, !transformCarapaceDependencies, "SDK loading mode must preserve its graph contract");
             fs.writeFileSync(dependency, "export const value: number = 2;\\n");
             assert.equal(load(), first);
             assert.equal(first.value, 1);
@@ -178,10 +178,10 @@ describe("getCachedPluginModuleLoader", () => {
             const modulePath = path.join(root, name + "-entry.ts");
             fs.mkdirSync(path.dirname(sdk), { recursive: true });
             fs.writeFileSync(sdk, source);
-            fs.writeFileSync(modulePath, 'export * from "openclaw/plugin-sdk/fixture";\\n');
+            fs.writeFileSync(modulePath, 'export * from "carapace/plugin-sdk/fixture";\\n');
             const loader = getCachedPluginModuleLoader({
               modulePath, rootDir: root, importerUrl: import.meta.url, tryNative: false,
-              aliasMap: { "openclaw/plugin-sdk/fixture": sdk },
+              aliasMap: { "carapace/plugin-sdk/fixture": sdk },
             });
             return () => loader(modulePath);
           };
@@ -198,7 +198,7 @@ describe("getCachedPluginModuleLoader", () => {
             SystemRoot: process.env.SystemRoot,
             HOME: root,
             USERPROFILE: root,
-            OPENCLAW_STATE_DIR: path.join(root, "state"),
+            CARAPACE_STATE_DIR: path.join(root, "state"),
             JITI_FS_CACHE: "0",
           },
         },
@@ -212,7 +212,7 @@ describe("getCachedPluginModuleLoader", () => {
           const modulePath = root + "/enum-entry.ts";
           const load = getCachedPluginModuleLoader({
             modulePath, rootDir: root, importerUrl: import.meta.url, tryNative: false,
-            aliasMap: { "openclaw/plugin-sdk/fixture": root + "/enum.mts" },
+            aliasMap: { "carapace/plugin-sdk/fixture": root + "/enum.mts" },
           });
           assert.equal(load(modulePath).ready, 0);
         `,
@@ -223,7 +223,7 @@ describe("getCachedPluginModuleLoader", () => {
             SystemRoot: process.env.SystemRoot,
             HOME: root,
             USERPROFILE: root,
-            OPENCLAW_STATE_DIR: path.join(root, "state"),
+            CARAPACE_STATE_DIR: path.join(root, "state"),
             NODE_OPTIONS: "--no-strip-types",
             JITI_FS_CACHE: "0",
           },
@@ -291,7 +291,7 @@ describe("getCachedPluginModuleLoader", () => {
       cache,
       modulePath: "/repo/dist/extensions/demo/api.ts",
       importerUrl: "file:///repo/src/plugins/public-surface-loader.ts",
-      argvEntry: "/repo/openclaw.mjs",
+      argvEntry: "/repo/carapace.mjs",
       preferBuiltDist: true,
       loaderFilename: "file:///repo/src/plugins/public-surface-loader.ts",
     });
@@ -299,7 +299,7 @@ describe("getCachedPluginModuleLoader", () => {
       cache,
       modulePath: "/repo/dist/extensions/demo/api.ts",
       importerUrl: "file:///repo/src/plugins/public-surface-loader.ts",
-      argvEntry: "/repo/openclaw.mjs",
+      argvEntry: "/repo/carapace.mjs",
       preferBuiltDist: true,
       loaderFilename: "file:///repo/src/plugins/bundled-channel-config-metadata.ts",
     });
@@ -330,7 +330,7 @@ describe("getCachedPluginModuleLoader", () => {
       cache,
       modulePath: "/repo/extensions/demo/index.ts",
       importerUrl: "file:///repo/src/plugins/setup-registry.ts",
-      argvEntry: "/repo/openclaw.mjs",
+      argvEntry: "/repo/carapace.mjs",
       loaderFilename: "file:///repo/src/plugins/source-loader.ts",
     } as const;
 
@@ -347,7 +347,7 @@ describe("getCachedPluginModuleLoader", () => {
     const nativeResolver = await import("./plugin-sdk-native-resolver.js");
     const installNativeResolver = vi.spyOn(
       nativeResolver,
-      "installOpenClawInternalCorePackageNativeResolver",
+      "installCarapaceInternalCorePackageNativeResolver",
     );
     const { getCachedPluginModuleLoader } = await loadCachedPluginModuleLoader(
       "native-resolver-cache-misses",
@@ -461,7 +461,7 @@ describe("getCachedPluginModuleLoader", () => {
       tryNative: false,
     });
     expect(options.fsCache).toEqual(expect.any(String));
-    expect(String(options.fsCache)).toContain(`${path.sep}openclaw${path.sep}jiti${path.sep}`);
+    expect(String(options.fsCache)).toContain(`${path.sep}carapace${path.sep}jiti${path.sep}`);
     expect(options.alias).toEqual({
       alpha: "/repo/alpha.js",
       zeta: "/repo/zeta.js",
@@ -672,7 +672,7 @@ describe("getCachedPluginModuleLoader", () => {
       importerUrl: "file:///repo/src/plugins/public-surface-loader.ts",
       loaderFilename: "file:///repo/src/plugins/public-surface-loader.ts",
       aliasMap: {
-        "openclaw/plugin-sdk/core": "/repo/dist/plugin-sdk/core.js",
+        "carapace/plugin-sdk/core": "/repo/dist/plugin-sdk/core.js",
       },
       createLoader: asPluginModuleLoaderFactory(createJiti),
     });
@@ -687,8 +687,8 @@ describe("getCachedPluginModuleLoader", () => {
     >;
     const target =
       typeof options.aliasMap === "function"
-        ? options.aliasMap("openclaw/plugin-sdk/core")
-        : options.aliasMap?.["openclaw/plugin-sdk/core"];
+        ? options.aliasMap("carapace/plugin-sdk/core")
+        : options.aliasMap?.["carapace/plugin-sdk/core"];
     expect(target).toBe("/repo/dist/plugin-sdk/core.js");
     expectStats(getPluginModuleLoaderStats(), {
       calls: 1,
@@ -738,9 +738,9 @@ describe("getCachedPluginModuleLoader", () => {
 
   it("propagates native plugin evaluation errors without running the plugin twice", async () => {
     vi.doUnmock("./native-module-require.js");
-    const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-native-evaluation-"));
+    const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-native-evaluation-"));
     const modulePath = path.join(fixtureDir, "plugin.cjs");
-    const markerName = `openclaw.pluginModuleLoaderCache.nativeEvaluation:${fixtureDir}`;
+    const markerName = `carapace.pluginModuleLoaderCache.nativeEvaluation:${fixtureDir}`;
     const sideEffectMarker = Symbol.for(markerName);
     const expectedError = "plugin exploded during native evaluation";
     const fromSourceTransformer = vi.fn();
@@ -864,7 +864,7 @@ describe("getCachedPluginModuleLoader", () => {
     ]);
   });
 
-  it("can transform OpenClaw dependencies on a forced source fallback", async () => {
+  it("can transform Carapace dependencies on a forced source fallback", async () => {
     const fromSourceTransformer = vi.fn(() => ({ fromSourceTransform: true }));
     const createJiti = vi.fn(() => fromSourceTransformer);
     const nativeStub = vi.fn(() => ({ ok: true, moduleExport: { fromNative: true } }));
@@ -881,7 +881,7 @@ describe("getCachedPluginModuleLoader", () => {
       modulePath: "/repo/dist/extensions/demo/api.js",
       importerUrl: "file:///repo/src/plugin-sdk/channel-entry-contract.ts",
       loaderFilename: "file:///repo/src/plugin-sdk/channel-entry-contract.ts",
-      transformOpenClawDependencies: true,
+      transformCarapaceDependencies: true,
       createLoader: asPluginModuleLoaderFactory(createJiti),
     });
 
@@ -909,24 +909,24 @@ describe("getCachedPluginModuleLoader", () => {
     const cache = new Map();
     const loader = getCachedPluginModuleLoader({
       cache,
-      modulePath: "C:\\Users\\alice\\openclaw\\dist\\extensions\\feishu\\api.js",
-      importerUrl: "file:///C:/Users/alice/openclaw/dist/src/plugins/public-surface-loader.js",
-      loaderFilename: "C:\\Users\\alice\\openclaw\\dist\\extensions\\feishu\\api.js",
+      modulePath: "C:\\Users\\alice\\carapace\\dist\\extensions\\feishu\\api.js",
+      importerUrl: "file:///C:/Users/alice/carapace/dist/src/plugins/public-surface-loader.js",
+      loaderFilename: "C:\\Users\\alice\\carapace\\dist\\extensions\\feishu\\api.js",
       tryNative: true,
       createLoader: asPluginModuleLoaderFactory(createJiti),
     });
 
-    loader("C:\\Users\\alice\\openclaw\\dist\\extensions\\feishu\\api.js");
+    loader("C:\\Users\\alice\\carapace\\dist\\extensions\\feishu\\api.js");
 
     const options = expectJitiOptions(
       createJiti,
       0,
-      "file:///C:/Users/alice/openclaw/dist/extensions/feishu/api.js",
+      "file:///C:/Users/alice/carapace/dist/extensions/feishu/api.js",
       { tryNative: false },
     );
     expect(options.nativeModules).toEqual([]);
     expect(fromSourceTransformer).toHaveBeenCalledWith(
-      "file:///C:/Users/alice/openclaw/dist/extensions/feishu/api.js",
+      "file:///C:/Users/alice/carapace/dist/extensions/feishu/api.js",
     );
   });
 
@@ -949,7 +949,7 @@ describe("getCachedPluginModuleLoader", () => {
       modulePath: "/repo/dist/extensions/demo/api.js",
       importerUrl: "file:///repo/src/plugins/bundled-capability-runtime.ts",
       loaderFilename: "file:///repo/src/plugins/bundled-capability-runtime.ts",
-      aliasMap: { "openclaw/plugin-sdk/core": "/repo/core.js" },
+      aliasMap: { "carapace/plugin-sdk/core": "/repo/core.js" },
       tryNative: false,
       createLoader: asPluginModuleLoaderFactory(createJiti),
     });
@@ -958,7 +958,7 @@ describe("getCachedPluginModuleLoader", () => {
     expect(result.fromSourceTransform).toBe(true);
     const options = requireRecord(callArg(createJiti, 0, 1, "jiti options"), "jiti options");
     expect(options.tryNative).toBe(false);
-    expect(options.nativeModules).toEqual(["openclaw"]);
+    expect(options.nativeModules).toEqual(["carapace"]);
     // With tryNative: false the wrapper must route every target through the source transformer
     // so its alias rewrites still apply; native require must not be consulted.
     expect(nativeStub).not.toHaveBeenCalled();
@@ -1029,21 +1029,21 @@ describe("getCachedPluginModuleLoader", () => {
     const cache = new Map();
     const loader = getCachedPluginModuleLoader({
       cache,
-      modulePath: "C:\\Users\\alice\\openclaw\\extensions\\feishu\\api.ts",
-      importerUrl: "file:///C:/Users/alice/openclaw/src/plugins/loader.ts",
-      loaderFilename: "C:\\Users\\alice\\openclaw\\extensions\\feishu\\api.ts",
+      modulePath: "C:\\Users\\alice\\carapace\\extensions\\feishu\\api.ts",
+      importerUrl: "file:///C:/Users/alice/carapace/src/plugins/loader.ts",
+      loaderFilename: "C:\\Users\\alice\\carapace\\extensions\\feishu\\api.ts",
       tryNative: false,
       createLoader: asPluginModuleLoaderFactory(createJiti),
     });
 
-    loader("C:\\Users\\alice\\openclaw\\extensions\\feishu\\api.ts");
+    loader("C:\\Users\\alice\\carapace\\extensions\\feishu\\api.ts");
 
     expect(nativeStub).not.toHaveBeenCalled();
-    expectJitiOptions(createJiti, 0, "file:///C:/Users/alice/openclaw/extensions/feishu/api.ts", {
+    expectJitiOptions(createJiti, 0, "file:///C:/Users/alice/carapace/extensions/feishu/api.ts", {
       tryNative: false,
     });
     expect(fromSourceTransformer).toHaveBeenCalledWith(
-      "file:///C:/Users/alice/openclaw/extensions/feishu/api.ts",
+      "file:///C:/Users/alice/carapace/extensions/feishu/api.ts",
     );
   });
 });

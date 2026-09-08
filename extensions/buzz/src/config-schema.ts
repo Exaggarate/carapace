@@ -2,8 +2,8 @@ import {
   buildChannelConfigSchema,
   GroupPolicySchema,
   MarkdownConfigSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { buildSecretInputSchema } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/channel-config-schema";
+import { buildSecretInputSchema } from "carapace/plugin-sdk/secret-input";
 import { z } from "zod";
 import { BUZZ_CHANNEL_ID_PATTERN } from "./target.js";
 

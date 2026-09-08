@@ -41,7 +41,7 @@ const historyMessages = [
     role: "user",
     content: "Run the autoreview skill on this branch.",
     timestamp: baseTime,
-    __openclaw: { id: "user-1", seq: 1 },
+    __carapace: { id: "user-1", seq: 1 },
   },
   {
     role: "user",
@@ -50,7 +50,7 @@ const historyMessages = [
       ? { provenance: { kind: "internal_system", sourceTool: "cli_harness_context" } }
       : {}),
     timestamp: baseTime + 1_000,
-    __openclaw: {
+    __carapace: {
       id: "skill-meta-1",
       importedFrom: "claude-cli",
       cliSessionId: "cli-session-1",
@@ -62,7 +62,7 @@ const historyMessages = [
     role: "assistant",
     content: "Autoreview finished: no findings.",
     timestamp: baseTime + 2_000,
-    __openclaw: { id: "assistant-1", seq: 3 },
+    __carapace: { id: "assistant-1", seq: 3 },
   },
 ];
 

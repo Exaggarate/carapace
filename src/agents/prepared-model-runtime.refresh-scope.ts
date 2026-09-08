@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   advancePreparedModelRuntimeOwnerConfig,
   listConfiguredOwnerInputs,
@@ -29,7 +29,7 @@ export function isPreparedModelRuntimeOwnerInRefreshScope(
 
 /** Builds configured inputs while preserving the startup-selected default workspace. */
 export function listConfiguredRefreshInputs(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: PreparedModelRuntimeRefreshOptions,
   owners: Map<string, PreparedModelRuntimeOwner>,
 ): PreparedModelRuntimeInput[] {
@@ -82,7 +82,7 @@ export function updateOwnersForScopedRefresh(
   agentIds: ReadonlySet<string> | undefined,
   staleError: Error,
   options: {
-    retainedConfig?: OpenClawConfig;
+    retainedConfig?: CarapaceConfig;
     retireStandalone?: boolean;
     clearPending?: boolean;
     resetPluginGeneration?: boolean;
@@ -114,7 +114,7 @@ export function updateOwnersForScopedRefresh(
 
 /** Keeps a requested scope only when every retained owner has identical prepared dependencies. */
 export function resolveSafeRefreshAgentIds(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: PreparedModelRuntimeRefreshOptions,
   owners: Map<string, PreparedModelRuntimeOwner>,
 ): ReadonlySet<string> | undefined {

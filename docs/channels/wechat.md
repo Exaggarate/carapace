@@ -1,14 +1,14 @@
 ---
-summary: "WeChat channel setup through the external openclaw-weixin plugin"
+summary: "WeChat channel setup through the external carapace-weixin plugin"
 read_when:
-  - You want to connect OpenClaw to WeChat or Weixin
-  - You are installing or troubleshooting the openclaw-weixin channel plugin
+  - You want to connect Carapace to WeChat or Weixin
+  - You are installing or troubleshooting the carapace-weixin channel plugin
   - You need to understand how external channel plugins run beside the Gateway
 title: "WeChat"
 ---
 
-OpenClaw connects to WeChat through Tencent's external
-`@tencent-weixin/openclaw-weixin` channel plugin.
+Carapace connects to WeChat through Tencent's external
+`@tencent-weixin/carapace-weixin` channel plugin.
 
 Status: external plugin, maintained by the Tencent Weixin team. Direct chats and
 media are supported. Group chats are not advertised by the plugin capability
@@ -18,29 +18,29 @@ metadata (it declares direct chats only).
 
 - **WeChat** is the user-facing name in these docs.
 - **Weixin** is the name used by Tencent's package and by the plugin id.
-- `openclaw-weixin` is the OpenClaw channel id (`weixin` and `wechat` work as aliases).
-- `@tencent-weixin/openclaw-weixin` is the npm package.
+- `carapace-weixin` is the Carapace channel id (`weixin` and `wechat` work as aliases).
+- `@tencent-weixin/carapace-weixin` is the npm package.
 
-Use `openclaw-weixin` in CLI commands and config paths.
+Use `carapace-weixin` in CLI commands and config paths.
 
 ## How it works
 
-The WeChat code does not live in the OpenClaw core repo. OpenClaw provides the
+The WeChat code does not live in the Carapace core repo. Carapace provides the
 generic channel plugin contract, and the external plugin provides the
 WeChat-specific runtime:
 
-1. `openclaw plugins install` installs `@tencent-weixin/openclaw-weixin`.
+1. `carapace plugins install` installs `@tencent-weixin/carapace-weixin`.
 2. The Gateway discovers the plugin manifest and loads the plugin entrypoint.
-3. The plugin registers channel id `openclaw-weixin`.
-4. `openclaw channels login --channel openclaw-weixin` starts QR login.
-5. The plugin stores account credentials under the OpenClaw state directory
-   (`~/.openclaw` by default).
+3. The plugin registers channel id `carapace-weixin`.
+4. `carapace channels login --channel carapace-weixin` starts QR login.
+5. The plugin stores account credentials under the Carapace state directory
+   (`~/.carapace` by default).
 6. When the Gateway starts, the plugin starts its Weixin monitor for each
    configured account.
 7. Inbound WeChat messages are normalized through the channel contract, routed to
-   the selected OpenClaw agent, and sent back through the plugin outbound path.
+   the selected Carapace agent, and sent back through the plugin outbound path.
 
-That separation matters: OpenClaw core stays channel-agnostic. WeChat login,
+That separation matters: Carapace core stays channel-agnostic. WeChat login,
 Tencent iLink API calls, media upload/download, context tokens, and account
 monitoring are owned by the external plugin.
 
@@ -49,20 +49,20 @@ monitoring are owned by the external plugin.
 Quick install:
 
 ```bash
-npx -y @tencent-weixin/openclaw-weixin-cli install
+npx -y @tencent-weixin/carapace-weixin-cli install
 ```
 
 Manual install:
 
 ```bash
-openclaw plugins install "@tencent-weixin/openclaw-weixin"
-openclaw config set plugins.entries.openclaw-weixin.enabled true
+carapace plugins install "@tencent-weixin/carapace-weixin"
+carapace config set plugins.entries.carapace-weixin.enabled true
 ```
 
 Restart the Gateway after install:
 
 ```bash
-openclaw gateway restart
+carapace gateway restart
 ```
 
 ## Login
@@ -70,7 +70,7 @@ openclaw gateway restart
 Run QR login on the same machine that runs the Gateway:
 
 ```bash
-openclaw channels login --channel openclaw-weixin
+carapace channels login --channel carapace-weixin
 ```
 
 Scan the QR code with WeChat on your phone and confirm the login. The plugin saves
@@ -80,56 +80,56 @@ To add another WeChat account, run the same login command again. For multiple
 accounts, isolate direct-message sessions by account, channel, and sender:
 
 ```bash
-openclaw config set session.dmScope per-account-channel-peer
+carapace config set session.dmScope per-account-channel-peer
 ```
 
 ## Access control
 
-Direct messages use the normal OpenClaw pairing and allowlist model for channel
+Direct messages use the normal Carapace pairing and allowlist model for channel
 plugins.
 
 Approve new senders:
 
 ```bash
-openclaw pairing list openclaw-weixin
-openclaw pairing approve openclaw-weixin <CODE>
+carapace pairing list carapace-weixin
+carapace pairing approve carapace-weixin <CODE>
 ```
 
 For the full access-control model, see [Pairing](/channels/pairing).
 
 ## Compatibility
 
-The plugin checks the host OpenClaw version at startup.
+The plugin checks the host Carapace version at startup.
 
-| Plugin line | OpenClaw version                                                | npm tag  |
+| Plugin line | Carapace version                                                | npm tag  |
 | ----------- | --------------------------------------------------------------- | -------- |
 | `2.x`       | `>=2026.5.12` (current 2.4.8; early 2.x accepted `>=2026.3.22`) | `latest` |
 | `1.x`       | `>=2026.1.0 <2026.3.22`                                         | `legacy` |
 
-If the plugin reports that your OpenClaw version is too old, either update
-OpenClaw or install the legacy plugin line:
+If the plugin reports that your Carapace version is too old, either update
+Carapace or install the legacy plugin line:
 
 ```bash
-openclaw plugins install @tencent-weixin/openclaw-weixin@legacy
+carapace plugins install @tencent-weixin/carapace-weixin@legacy
 ```
 
-Plugin 2.4.6 imports the retired `openclaw/plugin-sdk/channel-runtime` path and
-cannot load on OpenClaw 2026.8.1. If startup reports that this subpath is not
+Plugin 2.4.6 imports the retired `carapace/plugin-sdk/channel-runtime` path and
+cannot load on Carapace 2026.8.1. If startup reports that this subpath is not
 exported, update to plugin 2.4.8, which uses the available SDK path:
 
 ```bash
-openclaw plugins update @tencent-weixin/openclaw-weixin@2.4.8
-openclaw gateway restart
+carapace plugins update @tencent-weixin/carapace-weixin@2.4.8
+carapace gateway restart
 ```
 
 ## Sidecar process
 
 The WeChat plugin can run helper work beside the Gateway while it monitors the
-Tencent iLink API. In issue #68451, that helper path exposed a bug in OpenClaw's
+Tencent iLink API. In issue #68451, that helper path exposed a bug in Carapace's
 generic stale-Gateway cleanup: a child process could try to clean up the parent
 Gateway process, causing restart loops under process managers such as systemd.
 
-Current OpenClaw startup cleanup excludes the current process and its ancestors,
+Current Carapace startup cleanup excludes the current process and its ancestors,
 so a channel helper cannot kill the Gateway that launched it. This fix is
 generic; it is not a WeChat-specific path in core.
 
@@ -138,38 +138,38 @@ generic; it is not a WeChat-specific path in core.
 Check install and status:
 
 ```bash
-openclaw plugins list
-openclaw channels status --probe
-openclaw --version
+carapace plugins list
+carapace channels status --probe
+carapace --version
 ```
 
 If the channel shows as installed but does not connect, confirm that the plugin is
 enabled and restart:
 
 ```bash
-openclaw config set plugins.entries.openclaw-weixin.enabled true
-openclaw gateway restart
+carapace config set plugins.entries.carapace-weixin.enabled true
+carapace gateway restart
 ```
 
-If the Gateway restarts repeatedly after enabling WeChat, update both OpenClaw and
+If the Gateway restarts repeatedly after enabling WeChat, update both Carapace and
 the plugin:
 
 ```bash
-npm view @tencent-weixin/openclaw-weixin version
-openclaw plugins install "@tencent-weixin/openclaw-weixin" --force
-openclaw gateway restart
+npm view @tencent-weixin/carapace-weixin version
+carapace plugins install "@tencent-weixin/carapace-weixin" --force
+carapace gateway restart
 ```
 
 If startup reports that the installed plugin package `requires compiled runtime
 output for TypeScript entry`, the npm package was published without the compiled
-JavaScript runtime files OpenClaw needs. Update/reinstall after the plugin
+JavaScript runtime files Carapace needs. Update/reinstall after the plugin
 publisher ships a fixed package, or temporarily disable/uninstall the plugin.
 
 Temporary disable:
 
 ```bash
-openclaw config set plugins.entries.openclaw-weixin.enabled false
-openclaw gateway restart
+carapace config set plugins.entries.carapace-weixin.enabled false
+carapace gateway restart
 ```
 
 ## Related docs
@@ -179,4 +179,4 @@ openclaw gateway restart
 - Channel routing: [Channel Routing](/channels/channel-routing)
 - Plugin architecture: [Plugin Architecture](/plugins/architecture)
 - Channel plugin SDK: [Channel Plugin SDK](/plugins/sdk-channel-plugins)
-- External package: [@tencent-weixin/openclaw-weixin](https://www.npmjs.com/package/@tencent-weixin/openclaw-weixin)
+- External package: [@tencent-weixin/carapace-weixin](https://www.npmjs.com/package/@tencent-weixin/carapace-weixin)

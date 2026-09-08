@@ -1,5 +1,5 @@
 /**
- * Top-level `openclaw onboard` command entrypoint.
+ * Top-level `carapace onboard` command entrypoint.
  *
  * It validates global setup flags, performs optional reset handling, and then
  * routes to interactive or non-interactive onboarding.
@@ -8,7 +8,7 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { formatInvalidPortOption } from "../cli/error-format.js";
 import { readConfigFileSnapshot, resolveGatewayPort } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isValidEnvSecretRefId } from "../config/types.secrets.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { assertSupportedRuntime } from "../infra/runtime-guard.js";
@@ -60,7 +60,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
     return rejectOption(
       opts,
       runtime,
-      `Invalid --mode "${String(opts.mode)}". Use "local" or "remote", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Invalid --mode "${String(opts.mode)}". Use "local" or "remote", or run ${formatCliCommand("carapace onboard")} for interactive setup.`,
     );
   }
   const remoteOnlyFlags = [
@@ -108,9 +108,9 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
   }
   if (opts.nonInteractive && opts.secretInputMode === "ref") {
     const gatewayCredentials = [
-      ["--gateway-password", opts.gatewayPassword, "OPENCLAW_GATEWAY_PASSWORD"],
-      ["--remote-token", opts.remoteToken, "OPENCLAW_GATEWAY_TOKEN"],
-      ["--remote-password", opts.remotePassword, "OPENCLAW_GATEWAY_PASSWORD"],
+      ["--gateway-password", opts.gatewayPassword, "CARAPACE_GATEWAY_PASSWORD"],
+      ["--remote-token", opts.remoteToken, "CARAPACE_GATEWAY_TOKEN"],
+      ["--remote-password", opts.remotePassword, "CARAPACE_GATEWAY_PASSWORD"],
     ] as const;
     for (const [flag, value, envName] of gatewayCredentials) {
       if (value === undefined) {
@@ -177,7 +177,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
       return rejectOption(
         opts,
         runtime,
-        "Invalid --gateway-token-ref-env. Use an environment variable name like OPENCLAW_GATEWAY_TOKEN.",
+        "Invalid --gateway-token-ref-env. Use an environment variable name like CARAPACE_GATEWAY_TOKEN.",
       );
     }
     if (opts.gatewayToken !== undefined) {
@@ -191,7 +191,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
       return rejectOption(
         opts,
         runtime,
-        `Environment variable "${gatewayTokenRefEnv}" is missing or empty. Export it first, then rerun ${formatCliCommand("openclaw onboard")}.`,
+        `Environment variable "${gatewayTokenRefEnv}" is missing or empty. Export it first, then rerun ${formatCliCommand("carapace onboard")}.`,
       );
     }
   }
@@ -199,7 +199,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
     return rejectOption(
       opts,
       runtime,
-      `Missing --remote-url for remote mode. Example: ${formatCliCommand("openclaw onboard --non-interactive --accept-risk --mode remote --remote-url ws://127.0.0.1:3000")}.`,
+      `Missing --remote-url for remote mode. Example: ${formatCliCommand("carapace onboard --non-interactive --accept-risk --mode remote --remote-url ws://127.0.0.1:3000")}.`,
     );
   }
   if (opts.nonInteractive && opts.mode === "remote" && opts.remoteUrl?.trim()) {
@@ -216,7 +216,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
     return rejectOption(
       opts,
       runtime,
-      `--import-from is required for non-interactive migration import. Run ${formatCliCommand("openclaw migrate list")} to choose a provider.`,
+      `--import-from is required for non-interactive migration import. Run ${formatCliCommand("carapace migrate list")} to choose a provider.`,
     );
   }
   return true;
@@ -225,7 +225,7 @@ function validatePreflightOptions(opts: OnboardOptions, runtime: RuntimeEnv): bo
 async function validateResetAuthChoice(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   workspaceDir: string;
   resetScope: ResetScope;
 }): Promise<boolean> {
@@ -269,7 +269,7 @@ async function validateResetAuthChoice(params: {
     return rejectOption(
       params.opts,
       params.runtime,
-      `Auth choice "${authChoice}" was not matched to a provider setup flow. Run ${formatCliCommand("openclaw onboard")} to choose interactively.`,
+      `Auth choice "${authChoice}" was not matched to a provider setup flow. Run ${formatCliCommand("carapace onboard")} to choose interactively.`,
     );
   }
   const providerAuthChoices: Array<ProviderAuthChoiceMetadata & { providerAliases?: string[] }> = [
@@ -476,7 +476,7 @@ function validateResetMigrationImport(params: {
 function validateResetNonInteractiveGateway(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
 }): boolean {
   if (!params.opts.nonInteractive || (params.opts.mode ?? "local") === "remote") {
     return true;
@@ -499,7 +499,7 @@ function validateResetNonInteractiveGateway(params: {
  * them with Boolean(). False-valued explicit choices preserve undefined when
  * omitted, so daemon, Tailscale-reset, and custom-model input overrides are
  * special-cased. `--modern` never reaches this dispatch; the command layer
- * routes it through the inference-gated OpenClaw.
+ * routes it through the inference-gated Carapace.
  */
 const GUIDED_SAFE_ONBOARD_KEYS = new Set([
   "workspace",
@@ -591,7 +591,7 @@ export async function setupWizardCommand(
     rejectOption(
       normalizedOpts,
       runtime,
-      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("openclaw onboard")} for the interactive setup.`,
+      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("carapace onboard")} for the interactive setup.`,
     );
     return;
   }
@@ -600,7 +600,7 @@ export async function setupWizardCommand(
     rejectOption(
       normalizedOpts,
       runtime,
-      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("openclaw onboard --reset --reset-scope config")} for a config-only reset.`,
+      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("carapace onboard --reset --reset-scope config")} for a config-only reset.`,
     );
     return;
   }
@@ -608,7 +608,7 @@ export async function setupWizardCommand(
     rejectOption(
       normalizedOpts,
       runtime,
-      `--reset-scope requires --reset. Re-run with ${formatCliCommand(`openclaw onboard --reset --reset-scope ${normalizedOpts.resetScope}`)}.`,
+      `--reset-scope requires --reset. Re-run with ${formatCliCommand(`carapace onboard --reset --reset-scope ${normalizedOpts.resetScope}`)}.`,
     );
     return;
   }
@@ -621,8 +621,8 @@ export async function setupWizardCommand(
       runtime,
       [
         "Non-interactive setup requires explicit risk acknowledgement.",
-        "Read: https://docs.openclaw.ai/security",
-        `Re-run with: ${formatCliCommand("openclaw onboard --non-interactive --accept-risk ...")}`,
+        "Read: https://github.com/Exaggarate/carapace",
+        `Re-run with: ${formatCliCommand("carapace onboard --non-interactive --accept-risk ...")}`,
       ].join("\n"),
     );
     return;
@@ -638,10 +638,10 @@ export async function setupWizardCommand(
   if (process.platform === "win32") {
     runtime.log(
       [
-        "Windows detected - OpenClaw runs great on WSL2!",
+        "Windows detected - Carapace runs great on WSL2!",
         "Native Windows might be trickier.",
         "Quick setup: wsl --install (one command, one reboot)",
-        "Guide: https://docs.openclaw.ai/windows",
+        "Guide: https://github.com/Exaggarate/carapace",
       ].join("\n"),
     );
   }
@@ -659,7 +659,7 @@ export async function setupWizardCommand(
       const resetScope: ResetScope = normalizedOpts.resetScope ?? "config+creds+sessions";
       // Every reset scope removes the config file. Validate setup against the
       // empty config and requested/default workspace that dispatch will see.
-      const setupBaseConfig: OpenClawConfig = {};
+      const setupBaseConfig: CarapaceConfig = {};
       const setupWorkspaceDir = resolveUserPath(normalizedOpts.workspace ?? DEFAULT_WORKSPACE);
       const configuredWorkspace: unknown =
         normalizedOpts.workspace ?? baseConfig.agents?.defaults?.workspace;

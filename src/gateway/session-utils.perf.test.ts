@@ -2,7 +2,7 @@
 // session lists with repeated provider/model tuples.
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, test, expect, vi } from "vitest";
 import {
   readAcpSessionMetaBatch,
@@ -11,12 +11,12 @@ import {
 } from "../acp/runtime/session-meta.js";
 import * as modelCatalogLookup from "../agents/model-catalog-lookup.js";
 import * as thinking from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import * as usageFormat from "../utils/usage-format.js";
@@ -97,10 +97,10 @@ describe("session list resolver cache", () => {
   ])(
     "shares the event loop for $name",
     async ({ rowWorkMs, storeWorkMs, preparationWorkMs, keepRows, limit, shouldYield }) => {
-      await withStateDirEnv("openclaw-list-work-budget-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-list-work-budget-", async ({ stateDir }) => {
         resetPluginRuntimeStateForTest();
         setActivePluginRegistry(createEmptyPluginRegistry());
-        const cfg: OpenClawConfig = {};
+        const cfg: CarapaceConfig = {};
         resetConfigRuntimeState();
         setRuntimeConfigSnapshot(cfg);
         const store = Object.fromEntries(
@@ -160,14 +160,14 @@ describe("session list resolver cache", () => {
     { name: "recorded zero", recorded: 0, tiered: true, expected: 0 },
     { name: "unknown tiered total", recorded: undefined, tiered: true, expected: undefined },
   ])("bounds resolver work and preserves $name", ({ recorded, tiered, expected }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           model: { primary: "google-vertex/gemini-3-flash-preview" },
           thinkingDefault: "off",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const tuples: Array<{ modelProvider: string; model: string }> = [
       { modelProvider: "google-vertex", model: "gemini-3-flash-preview" },
       { modelProvider: "openai", model: "gpt-5" },
@@ -269,18 +269,18 @@ describe("session list resolver cache", () => {
   });
 
   test("batches ACP metadata reads once per list without changing row results", async () => {
-    await withStateDirEnv("openclaw-perf-acp-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-perf-acp-", async ({ stateDir }) => {
       resetPluginRuntimeStateForTest();
       setActivePluginRegistry(createEmptyPluginRegistry());
       const cfg = {
         agents: {
           defaults: {
             model: { primary: "openai/gpt-5" },
-            models: { "openai/gpt-5": { agentRuntime: { id: "openclaw" } } },
+            models: { "openai/gpt-5": { agentRuntime: { id: "carapace" } } },
             thinkingDefault: "off",
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       resetConfigRuntimeState();
       setRuntimeConfigSnapshot(cfg);
 
@@ -357,7 +357,7 @@ describe("session list resolver cache", () => {
         ]),
       );
 
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       const originalPrepare = database.db.prepare.bind(database.db);
       let acpSelects = 0;
       const prepareSpy = vi.spyOn(database.db, "prepare").mockImplementation((sql: string) => {
@@ -395,7 +395,7 @@ describe("session list resolver cache", () => {
         });
         expect(result.sessions).toHaveLength(3);
         expect(acpSelects).toBe(1);
-        for (const search of ["openclaw", "unmatched-runtime"]) {
+        for (const search of ["carapace", "unmatched-runtime"]) {
           acpSelects = 0;
           const rows = vi.spyOn(rowProjection, "buildGatewaySessionRow");
           try {
@@ -409,7 +409,7 @@ describe("session list resolver cache", () => {
               ),
               opts: { search, limit: 1 },
             });
-            expect(searched.totalCount).toBe(search === "openclaw" ? 55 : 0);
+            expect(searched.totalCount).toBe(search === "carapace" ? 55 : 0);
             expect(rows).toHaveBeenCalledTimes(searched.count);
             expect(acpSelects).toBe(1);
           } finally {
@@ -434,12 +434,12 @@ describe("session list resolver cache", () => {
       sharedTail: 99,
     },
   ])("batches $name transcript hydration without starving shared rows", async (scenario) => {
-    await withStateDirEnv("openclaw-perf-title-batch-", async () => {
+    await withStateDirEnv("carapace-perf-title-batch-", async () => {
       resetPluginRuntimeStateForTest();
       setActivePluginRegistry(createEmptyPluginRegistry());
       const cfg = {
         agents: { defaults: { model: { primary: "openai/gpt-5" }, thinkingDefault: "off" } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       resetConfigRuntimeState();
       setRuntimeConfigSnapshot(cfg);
       const storePath = "/tmp/sessions.json";

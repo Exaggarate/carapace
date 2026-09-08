@@ -1,7 +1,7 @@
 // Telegram tests cover delivery plugin behavior.
 import type { Bot } from "grammy";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTelegramPromptContextProjectionSequence } from "../prompt-context-projection.js";
 const { loadWebMedia } = vi.hoisted(() => ({
@@ -31,28 +31,28 @@ type DeliverWithParams = Omit<
   Partial<Pick<DeliverRepliesParams, "replyToMode" | "textLimit" | "mediaLoader">>;
 type RuntimeStub = Pick<RuntimeEnv, "error" | "log" | "exit">;
 
-vi.mock("openclaw/plugin-sdk/web-media", () => ({
+vi.mock("carapace/plugin-sdk/web-media", () => ({
   loadWebMedia: (...args: unknown[]) => loadWebMedia(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/media-runtime")>();
+vi.mock("carapace/plugin-sdk/media-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/media-runtime")>();
   return {
     ...actual,
     probeVideoDimensions,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/hook-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/hook-runtime")>();
+vi.mock("carapace/plugin-sdk/hook-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/hook-runtime")>();
   return {
     ...actual,
     triggerInternalHook,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/plugin-runtime")>();
+vi.mock("carapace/plugin-sdk/plugin-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/plugin-runtime")>();
   return {
     ...actual,
     getGlobalHookRunner: () => messageHookRunner,
@@ -66,7 +66,7 @@ vi.mock("../sent-message-cache.js", async (importOriginal) => {
 
 vi.resetModules();
 const { deliverReplies } = await import("./delivery.js");
-const { PlatformMessageNotDispatchedError } = await import("openclaw/plugin-sdk/error-runtime");
+const { PlatformMessageNotDispatchedError } = await import("carapace/plugin-sdk/error-runtime");
 
 vi.mock("grammy", () => ({
   API_CONSTANTS: {
@@ -2513,7 +2513,7 @@ describe("deliverReplies", () => {
           text: "plain fallback body",
           presentationTextMode: "fallback",
           presentation: {
-            title: "🦞 OpenClaw 2026.7.2",
+            title: "🦞 Carapace 2026.7.2",
             blocks: [
               {
                 type: "table",
@@ -2539,7 +2539,7 @@ describe("deliverReplies", () => {
     expect(tableBlock).toBeDefined();
     expect(tableBlock?.cells?.length).toBe(2);
     const flattened = JSON.stringify(richMessage.blocks);
-    expect(flattened).toContain("OpenClaw 2026.7.2");
+    expect(flattened).toContain("Carapace 2026.7.2");
     expect(flattened).not.toContain("plain fallback body");
   });
 

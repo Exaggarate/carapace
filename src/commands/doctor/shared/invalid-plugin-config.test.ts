@@ -1,6 +1,6 @@
 // Invalid plugin config tests cover doctor diagnostics for malformed plugin configuration.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 
 const validationMocks = vi.hoisted(() => ({
   validateConfigObjectWithPlugins: vi.fn(),
@@ -39,7 +39,7 @@ describe("doctor invalid plugin config repair", () => {
       validationMocks.findDoctorLegacyConfigIssues.mockReturnValue([
         { path: `plugins.entries.${migrationOwner}.config.root`, message: "Run doctor --fix" },
       ]);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         plugins: { entries: { pending: { enabled: true, config: { root: "/legacy/documents" } } } },
       };
       const result = maybeRepairInvalidPluginConfig(cfg);
@@ -79,7 +79,7 @@ describe("doctor invalid plugin config repair", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(result.changes).toEqual([
       "- plugins.entries: quarantined 1 invalid plugin config (community-feedback)",
@@ -117,7 +117,7 @@ describe("doctor invalid plugin config repair", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(result.config.plugins?.entries?.["pack/one"]).toEqual({
       enabled: false,
@@ -147,7 +147,7 @@ describe("doctor invalid plugin config repair", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(result.changes).toEqual([
       "- plugins.entries: quarantined 1 invalid plugin config (community-feedback)",
@@ -175,7 +175,7 @@ describe("doctor invalid plugin config repair", () => {
       gateway: {
         mode: "invalid",
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(maybeRepairInvalidPluginConfig(cfg)).toEqual({ config: cfg, changes: [] });
   });

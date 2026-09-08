@@ -63,13 +63,13 @@ describe("triageCommand", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    stateDir = tempDirs.make("openclaw-triage-test-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_SHELL", "");
-    vi.stubEnv("OPENCLAW_SUPERVISOR_MODE", "");
+    stateDir = tempDirs.make("carapace-triage-test-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_SHELL", "");
+    vi.stubEnv("CARAPACE_SUPERVISOR_MODE", "");
     vi.stubEnv("CODEX_THREAD_ID", "");
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", undefined);
-    vi.stubEnv("OPENCLAW_WORKSPACE_DIR", undefined);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", undefined);
+    vi.stubEnv("CARAPACE_WORKSPACE_DIR", undefined);
     mocks.collectDoctorFindings.mockResolvedValue([]);
     mocks.runUpdateRepairLoop.mockResolvedValue({
       status: "repaired",
@@ -91,7 +91,7 @@ describe("triageCommand", () => {
 
   it("runs one selected automatic route with the original failure prompt", async () => {
     await fs.writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       JSON.stringify({ agents: { defaults: { model: "openai/gpt-5.6-luna" } } }),
     );
     mocks.agentExecCommand.mockResolvedValue({ exitCode: 1 });
@@ -122,7 +122,7 @@ describe("triageCommand", () => {
 
   it("fences the selected embedded effect after source loss without watchdog cancellation", async () => {
     await fs.writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       JSON.stringify({ agents: { defaults: { model: "openai/gpt-5.6-luna" } } }),
     );
     const controller = new AbortController();
@@ -162,9 +162,9 @@ describe("triageCommand", () => {
   it.each(["nested", "codex-shell", "external", "cancelled"])(
     "does not auto-triage %s commands",
     async (kind) => {
-      vi.stubEnv("OPENCLAW_SHELL", kind === "nested" ? "exec" : "");
+      vi.stubEnv("CARAPACE_SHELL", kind === "nested" ? "exec" : "");
       vi.stubEnv("CODEX_THREAD_ID", kind === "codex-shell" ? "synthetic-thread" : "");
-      vi.stubEnv("OPENCLAW_SUPERVISOR_MODE", kind === "external" ? "external" : "");
+      vi.stubEnv("CARAPACE_SUPERVISOR_MODE", kind === "external" ? "external" : "");
       const signal = AbortSignal.abort();
       await triageAfterFailure(
         createTriageRuntime(),
@@ -187,7 +187,7 @@ describe("triageCommand", () => {
     async (configured) => {
       if (configured) {
         await fs.writeFile(
-          path.join(stateDir, "openclaw.json"),
+          path.join(stateDir, "carapace.json"),
           JSON.stringify({ agents: { defaults: { model: "openai/gpt-5.6-luna" } } }),
         );
         mocks.agentExecCommand.mockRejectedValue(new Error("Authentication required"));
@@ -213,7 +213,7 @@ describe("triageCommand", () => {
       expect(output).toContain(
         configured ? "Authentication required" : "No configured embedded agent",
       );
-      expect(output).toContain("openclaw triage --run");
+      expect(output).toContain("carapace triage --run");
       expect(output).toContain("codex exec --skip-git-repo-check - <");
       const promptFile = (await fs.readdir(path.join(stateDir, "logs/support"))).find((file) =>
         file.endsWith(".md"),
@@ -229,9 +229,9 @@ describe("triageCommand", () => {
 
   it("keeps unsupported managed recovery diagnostic-only", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
-    vi.stubEnv("OPENCLAW_LAUNCHD_LABEL", "ai.openclaw.gateway");
+    vi.stubEnv("CARAPACE_LAUNCHD_LABEL", "ai.carapace.gateway");
     await fs.writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       JSON.stringify({ agents: { defaults: { model: "openai/gpt-5.6-luna" } } }),
     );
     mocks.agentExecCommand.mockResolvedValue({ exitCode: 0 });
@@ -263,7 +263,7 @@ describe("triageCommand", () => {
       const targetPath = path.join(stateDir, "headless-target.json");
       await fs.writeFile(
         executablePath,
-        `#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(targetPath)}, JSON.stringify([process.env.OPENCLAW_STATE_DIR, process.env.OPENCLAW_CONFIG_PATH, process.env.OPENCLAW_WORKSPACE_DIR])); let input = ''; process.stdin.on('data', chunk => input += chunk); process.stdin.on('end', () => { console.log(JSON.stringify({ args: process.argv.slice(2), shell: process.env.OPENCLAW_SHELL, hasPrompt: input.includes('original symptom') })); console.error('Diagnostic detail '.repeat(200) + '\\n${exitCode ? "Authentication required" : "Repair completed"}'); process.exitCode = ${exitCode}; });\n`,
+        `#!/usr/bin/env node\nrequire('node:fs').writeFileSync(${JSON.stringify(targetPath)}, JSON.stringify([process.env.CARAPACE_STATE_DIR, process.env.CARAPACE_CONFIG_PATH, process.env.CARAPACE_WORKSPACE_DIR])); let input = ''; process.stdin.on('data', chunk => input += chunk); process.stdin.on('end', () => { console.log(JSON.stringify({ args: process.argv.slice(2), shell: process.env.CARAPACE_SHELL, hasPrompt: input.includes('original symptom') })); console.error('Diagnostic detail '.repeat(200) + '\\n${exitCode ? "Authentication required" : "Repair completed"}'); process.exitCode = ${exitCode}; });\n`,
         { mode: 0o700 },
       );
       const actual =
@@ -299,7 +299,7 @@ describe("triageCommand", () => {
       const output = [...runtime.error.mock.calls, ...runtime.log.mock.calls].flat().join("\n");
       expect(JSON.parse(await fs.readFile(targetPath, "utf8"))).toEqual([
         stateDir,
-        path.join(stateDir, "openclaw.json"),
+        path.join(stateDir, "carapace.json"),
         path.join(stateDir, "workspace"),
       ]);
       expect(output).toContain('"shell":"exec"');
@@ -364,7 +364,7 @@ describe("triageCommand", () => {
       await expect(result).rejects.toMatchObject({ code: 1 });
     }
     expect(() => process.kill(pid, 0)).toThrow();
-    expect(process.env.OPENCLAW_SHELL).toBe("");
+    expect(process.env.CARAPACE_SHELL).toBe("");
   });
 
   it("writes one stable JSON handoff without probing inference or starting an agent", async () => {
@@ -379,7 +379,7 @@ describe("triageCommand", () => {
     await triageCommand(runtime, { json: true, noExport: true });
 
     const promptPath = runtime.writeJson.mock.calls[0]?.[0]?.promptPath as string;
-    const targetEnv = `env OPENCLAW_STATE_DIR='${stateDir}' OPENCLAW_CONFIG_PATH='${path.join(stateDir, "openclaw.json")}' OPENCLAW_WORKSPACE_DIR='${path.join(stateDir, "workspace")}'`;
+    const targetEnv = `env CARAPACE_STATE_DIR='${stateDir}' CARAPACE_CONFIG_PATH='${path.join(stateDir, "carapace.json")}' CARAPACE_WORKSPACE_DIR='${path.join(stateDir, "workspace")}'`;
     expect(runtime.writeJson).toHaveBeenCalledOnce();
     expect(path.isAbsolute(promptPath)).toBe(true);
     expect(promptPath.startsWith(stateDir)).toBe(true);
@@ -396,14 +396,14 @@ describe("triageCommand", () => {
               expect.stringContaining("| & codex exec --skip-git-repo-check -"),
               expect.stringContaining("| & opencode run"),
               expect.stringContaining("| & pi --print"),
-              expect.stringContaining("& openclaw triage --run"),
+              expect.stringContaining("& carapace triage --run"),
             ]
           : [
               `${targetEnv} claude -p < '${promptPath}'`,
               `${targetEnv} codex exec --skip-git-repo-check - < '${promptPath}'`,
               `${targetEnv} opencode run < '${promptPath}'`,
               `${targetEnv} pi --print < '${promptPath}'`,
-              `${targetEnv} openclaw triage --run`,
+              `${targetEnv} carapace triage --run`,
             ],
     });
     expect(await fs.readFile(promptPath, "utf8")).toContain("[error] core/error: broken");
@@ -415,7 +415,7 @@ describe("triageCommand", () => {
     "pins state, config and %s workspace in executable, POSIX-quoted manual handoffs",
     async (workspaceSelector) => {
       const home = path.join(stateDir, "operator's $fixture");
-      const originalState = path.join(home, ".openclaw");
+      const originalState = path.join(home, ".carapace");
       const configPath = path.join(home, "custom config.json");
       const defaultWorkspaceDir =
         workspaceSelector === "custom"
@@ -424,21 +424,21 @@ describe("triageCommand", () => {
       const bin = path.join(home, "bin");
       await fs.mkdir(bin, { recursive: true });
       vi.stubEnv("HOME", home);
-      vi.stubEnv("OPENCLAW_HOME", home);
-      vi.stubEnv("OPENCLAW_STATE_DIR", undefined);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", undefined);
+      vi.stubEnv("CARAPACE_HOME", home);
+      vi.stubEnv("CARAPACE_STATE_DIR", undefined);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", undefined);
       // Doctor's dotenv phase can establish the original custom selectors.
       mocks.collectDoctorFindings.mockImplementation(async () => {
-        process.env.OPENCLAW_CONFIG_PATH = configPath;
+        process.env.CARAPACE_CONFIG_PATH = configPath;
         if (workspaceSelector === "custom") {
-          process.env.OPENCLAW_WORKSPACE_DIR = defaultWorkspaceDir;
+          process.env.CARAPACE_WORKSPACE_DIR = defaultWorkspaceDir;
         }
         return [];
       });
-      for (const command of ["claude", "codex", "opencode", "pi", "openclaw"]) {
+      for (const command of ["claude", "codex", "opencode", "pi", "carapace"]) {
         await fs.writeFile(
           path.join(bin, command),
-          `#!/bin/sh\nprintf "%s\\n" "$OPENCLAW_STATE_DIR" "$OPENCLAW_CONFIG_PATH" "$OPENCLAW_WORKSPACE_DIR"\n${command === "openclaw" ? "" : "cat\n"}`,
+          `#!/bin/sh\nprintf "%s\\n" "$CARAPACE_STATE_DIR" "$CARAPACE_CONFIG_PATH" "$CARAPACE_WORKSPACE_DIR"\n${command === "carapace" ? "" : "cat\n"}`,
           { mode: 0o700 },
         );
       }
@@ -459,7 +459,7 @@ describe("triageCommand", () => {
         );
       }
       expect(await fs.readFile(report.promptPath, "utf8")).not.toContain(home);
-      expect(process.env.OPENCLAW_STATE_DIR).toBeUndefined();
+      expect(process.env.CARAPACE_STATE_DIR).toBeUndefined();
     },
   );
 
@@ -494,7 +494,7 @@ describe("triageCommand", () => {
     mocks.callGatewayFromCliWithTransport.mockResolvedValue({ ok: true });
     mocks.writeDiagnosticSupportExport.mockRejectedValue(
       new Error(
-        `Gateway unreachable: Config: ${stateDir}/openclaw.json; Authorization: Bearer ${secret}`,
+        `Gateway unreachable: Config: ${stateDir}/carapace.json; Authorization: Bearer ${secret}`,
       ),
     );
     const runtime = createTriageRuntime();
@@ -508,11 +508,11 @@ describe("triageCommand", () => {
     };
     expect(report.bundlePath).toBeNull();
     expect(report.bundleError).toContain("Gateway unreachable");
-    expect(report.bundleError).toContain("Config: $OPENCLAW_STATE_DIR/openclaw.json");
+    expect(report.bundleError).toContain("Config: $CARAPACE_STATE_DIR/carapace.json");
     expect(report.bundleError).not.toContain(secret);
     const prompt = await fs.readFile(report.promptPath, "utf8");
     expect(prompt).toContain("Diagnostics export unavailable: Gateway unreachable");
-    expect(prompt).toContain("Config: $OPENCLAW_STATE_DIR/openclaw.json");
+    expect(prompt).toContain("Config: $CARAPACE_STATE_DIR/carapace.json");
     expect(prompt).not.toContain(stateDir);
   });
 
@@ -545,7 +545,7 @@ describe("triageCommand", () => {
           ? runtime.writeJson.mock.calls[0]?.[0]?.promptPath
           : String(runtime.log.mock.calls[0]?.[0]).replace("Debugging prompt: ", "");
       const prompt = await fs.readFile(promptPath, "utf8");
-      expect(prompt).toContain("Original update failed at $OPENCLAW_STATE_DIR");
+      expect(prompt).toContain("Original update failed at $CARAPACE_STATE_DIR");
       expect(prompt).toContain("Doctor checks unavailable:");
       expect(prompt).toContain("Diagnostics export unavailable:");
       expect(prompt).not.toContain(secret);
@@ -589,7 +589,7 @@ describe("triageCommand", () => {
       typeof import("../logging/diagnostic-support-export.js")
     >("../logging/diagnostic-support-export.js");
     const secret = "sk-test-triage-offline-secret-1234567890";
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await fs.writeFile(configPath, JSON.stringify({ gateway: { auth: { token: secret } } }));
     mocks.callGatewayFromCliWithTransport.mockRejectedValue(new Error(`Offline token=${secret}`));
     mocks.gatherDaemonStatus.mockRejectedValue(new Error("Status unavailable"));
@@ -597,7 +597,7 @@ describe("triageCommand", () => {
       writeDiagnosticSupportExport({
         ...options,
         stateDir,
-        env: { HOME: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+        env: { HOME: stateDir, CARAPACE_CONFIG_PATH: configPath },
         readLogTail: async () => ({
           file: path.join(stateDir, "gateway.log"),
           cursor: 0,
@@ -667,7 +667,7 @@ describe("triageCommand", () => {
     expect(report.suggestedCommands[0]).toContain(report.promptPath);
     expect(report.suggestedCommands[1]).toContain(report.promptPath);
     expect(await fs.readFile(report.promptPath, "utf8")).toContain(
-      "Sanitized ZIP: $OPENCLAW_STATE_DIR/diagnostics.zip",
+      "Sanitized ZIP: $CARAPACE_STATE_DIR/diagnostics.zip",
     );
     expect(mocks.gatherDaemonStatus).toHaveBeenCalledWith({
       rpc: { timeout: "3000", json: true },
@@ -687,7 +687,7 @@ describe("triageCommand", () => {
       const writeFile = fs.writeFile.bind(fs);
       vi.spyOn(fs, "writeFile").mockImplementation(async (...args) => {
         await writeFile(...args);
-        if (typeof args[0] === "string" && args[0].includes("openclaw-triage-prompt-")) {
+        if (typeof args[0] === "string" && args[0].includes("carapace-triage-prompt-")) {
           current = false;
         }
       });
@@ -749,7 +749,7 @@ describe("triageCommand", () => {
       vi.stubEnv("PATHEXT", ".EXE;.CMD;.BAT");
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       vi.spyOn(process, "execPath", "get").mockReturnValue(
-        nodeSource === "current" ? currentNode : path.join(binDir, "openclaw.exe"),
+        nodeSource === "current" ? currentNode : path.join(binDir, "carapace.exe"),
       );
       const runtime = createTriageRuntime();
 
@@ -766,8 +766,8 @@ describe("triageCommand", () => {
       expect(options?.stdio).toBe("inherit");
       expect(options?.shell).not.toBe(true);
       expect(options?.windowsHide).not.toBe(true);
-      expect(options?.env.OPENCLAW_STATE_DIR).toBe(stateDir);
-      expect(options?.env.OPENCLAW_CONFIG_PATH).toBe(path.join(stateDir, "openclaw.json"));
+      expect(options?.env.CARAPACE_STATE_DIR).toBe(stateDir);
+      expect(options?.env.CARAPACE_CONFIG_PATH).toBe(path.join(stateDir, "carapace.json"));
       expect(runtime.exit).not.toHaveBeenCalled();
     },
   );
@@ -779,7 +779,7 @@ describe("triageCommand", () => {
     "keeps unresolved Windows $agent wrappers as executable PowerShell manual handoffs",
     async ({ agent, executablePath }) => {
       const configPath = path.join(stateDir, "operator's $config`file.json");
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
       mocks.resolveExecutablePath.mockImplementation((binary: string) =>
         binary === agent ? executablePath : undefined,
@@ -801,7 +801,7 @@ describe("triageCommand", () => {
       expect(commands[1]).toContain("Get-Content -Raw -Encoding UTF8 -LiteralPath ");
       expect(commands[2]).toContain("| & opencode run");
       expect(commands[3]).toContain("| & pi --print");
-      expect(commands[4]).toContain("& openclaw triage --run");
+      expect(commands[4]).toContain("& carapace triage --run");
       expect(mocks.spawn).not.toHaveBeenCalled();
     },
   );
@@ -838,9 +838,9 @@ describe("triageCommand", () => {
         stdio: "inherit",
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-          OPENCLAW_WORKSPACE_DIR: path.join(stateDir, "workspace"),
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+          CARAPACE_WORKSPACE_DIR: path.join(stateDir, "workspace"),
         },
       },
     );

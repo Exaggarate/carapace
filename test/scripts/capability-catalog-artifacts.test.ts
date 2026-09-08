@@ -18,7 +18,7 @@ describe("capability catalog artifact ownership", () => {
   it.each(["esm", "cjs"] as const)(
     "carries nested declarations into %s build and emitted manifests",
     (runtimeFormat) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-catalog-artifacts-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-catalog-artifacts-"));
       roots.push(root);
       const plugin = path.join(root, "extensions", "catalog-fixture");
       fs.mkdirSync(path.join(plugin, "catalog"), { recursive: true });
@@ -28,20 +28,20 @@ describe("capability catalog artifact ownership", () => {
         capabilityCatalogEntry: "./catalog/voice.ts",
         providerCatalogEntry: "./catalog/models.ts",
       };
-      fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+      fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
       fs.writeFileSync(
         path.join(plugin, "package.json"),
         JSON.stringify({
-          name: "@openclaw/catalog-fixture",
+          name: "@carapace/catalog-fixture",
           version: "2026.9.1",
-          openclaw: {
+          carapace: {
             extensions: ["./index.ts"],
             release: { publishToNpm: true },
             build: { bundledDist: false, runtimeFormat },
           },
         }),
       );
-      fs.writeFileSync(path.join(plugin, "openclaw.plugin.json"), JSON.stringify(manifest));
+      fs.writeFileSync(path.join(plugin, "carapace.plugin.json"), JSON.stringify(manifest));
       for (const file of ["index.ts", "catalog/voice.ts", "catalog/models.ts"]) {
         fs.writeFileSync(path.join(plugin, file), "export default {};\n");
       }
@@ -64,7 +64,7 @@ describe("capability catalog artifact ownership", () => {
       copyBundledPluginMetadata({ cwd: root, env: {} });
       const emitted = JSON.parse(
         fs.readFileSync(
-          path.join(root, "dist", "extensions", "catalog-fixture", "openclaw.plugin.json"),
+          path.join(root, "dist", "extensions", "catalog-fixture", "carapace.plugin.json"),
           "utf8",
         ),
       );
@@ -73,7 +73,7 @@ describe("capability catalog artifact ownership", () => {
         providerCatalogEntry: `./catalog/models${extension}`,
       });
       expect(
-        JSON.parse(fs.readFileSync(path.join(plugin, "openclaw.plugin.json"), "utf8")),
+        JSON.parse(fs.readFileSync(path.join(plugin, "carapace.plugin.json"), "utf8")),
       ).toEqual(manifest);
     },
   );

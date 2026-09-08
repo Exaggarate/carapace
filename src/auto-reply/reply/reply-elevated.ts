@@ -1,9 +1,9 @@
 // Resolves whether a reply turn may use elevated command capabilities.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveAgentConfig } from "../../agents/agent-scope.js";
 import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
-import type { AgentElevatedAllowFromConfig, OpenClawConfig } from "../../config/config.js";
+import type { AgentElevatedAllowFromConfig, CarapaceConfig } from "../../config/config.js";
 import { shouldUseFromAsSenderFallback } from "../sender-identity.js";
 import type { MsgContext } from "../templating.js";
 import {
@@ -33,7 +33,7 @@ function resolveElevatedAllowList(
 
 /** Resolves the channel formatter used before matching allowFrom entries. */
 function resolveAllowFromFormatter(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   accountId?: string;
 }): AllowFromFormatter {
@@ -177,7 +177,7 @@ function isApprovedElevatedSender(params: {
 
 /** Resolves whether elevated tools are enabled and allowed for the inbound sender. */
 export function resolveElevatedPermissions(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   ctx: MsgContext;
   provider: string;

@@ -6,11 +6,11 @@ import { resolveStateDir } from "../config/paths.js";
 import { isSessionArchiveArtifactName } from "../config/sessions/artifacts.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
-  createOpenClawAgentDatabasePathMatcher,
-  isPersistentOpenClawAgentDatabasePath,
-  listOpenClawRegisteredAgentDatabases,
-  unregisterOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db-registry.js";
+  createCarapaceAgentDatabasePathMatcher,
+  isPersistentCarapaceAgentDatabasePath,
+  listCarapaceRegisteredAgentDatabases,
+  unregisterCarapaceAgentDatabase,
+} from "../state/carapace-agent-db-registry.js";
 import { hasErrnoCode } from "./errno.js";
 import { isPathInside } from "./path-guards.js";
 
@@ -33,7 +33,7 @@ function listDefaultAgentDatabaseTargets(
       const agentDir = path.dirname(sessionsDir);
       return {
         agentId: normalizeAgentId(path.basename(agentDir)),
-        path: path.join(agentDir, "agent", "openclaw-agent.sqlite"),
+        path: path.join(agentDir, "agent", "carapace-agent.sqlite"),
         source: "disk" as const,
       };
     });
@@ -89,14 +89,14 @@ export function discoverAgentDatabaseMigrationTargets(params: {
       );
     }
   }
-  const configuredPathMatcher = createOpenClawAgentDatabasePathMatcher();
+  const configuredPathMatcher = createCarapaceAgentDatabasePathMatcher();
   const targets: AgentDatabaseMigrationTarget[] = [];
   const seenRealPaths = new Set<string>();
   for (const candidate of candidates) {
     // Preserve the original locator: lexical normalization of `link/../file`
     // can select a different file than filesystem symlink traversal does.
     const pathname = candidate.path;
-    if (!isPersistentOpenClawAgentDatabasePath(pathname, params.env)) {
+    if (!isPersistentCarapaceAgentDatabasePath(pathname, params.env)) {
       discard(
         candidate,
         `Removed archived or transient agent database registry entry ${pathname}.`,
@@ -179,10 +179,10 @@ export function resolveAgentDatabaseMigrationTargets(params: {
   env: NodeJS.ProcessEnv;
   warnings: string[];
 }): { targets: AgentDatabaseMigrationTarget[]; recoverableWarningCount: number } {
-  let registeredAgentDatabases: ReturnType<typeof listOpenClawRegisteredAgentDatabases> = [];
+  let registeredAgentDatabases: ReturnType<typeof listCarapaceRegisteredAgentDatabases> = [];
   let registryReadFailed = false;
   try {
-    registeredAgentDatabases = listOpenClawRegisteredAgentDatabases({
+    registeredAgentDatabases = listCarapaceRegisteredAgentDatabases({
       env: params.env,
       includeIncompatibleSchemaVersions: true,
     });
@@ -194,7 +194,7 @@ export function resolveAgentDatabaseMigrationTargets(params: {
   }
   const discovery = discoverAgentDatabaseMigrationTargets({ ...params, registeredAgentDatabases });
   for (const removed of discovery.registryRemovals) {
-    unregisterOpenClawAgentDatabase({ ...removed, env: params.env });
+    unregisterCarapaceAgentDatabase({ ...removed, env: params.env });
     if (removed.change) {
       params.changes.push(removed.change);
     }

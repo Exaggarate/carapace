@@ -1,14 +1,14 @@
 ---
 name: command-logger
 description: "Log emitted command events to a centralized audit file"
-homepage: https://docs.openclaw.ai/automation/hooks#command-logger
+homepage: ../../../../docs/automation/hooks.md#command-logger
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "📝",
         "events": ["command"],
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Carapace" }],
       },
   }
 ---
@@ -19,10 +19,10 @@ Logs emitted command events to a centralized audit log file for debugging and mo
 
 ## What It Does
 
-Every time OpenClaw emits a command event:
+Every time Carapace emits a command event:
 
 1. **Captures event details** - Command action, timestamp, session key, sender ID, source
-2. **Appends to log file** - Writes a JSON line to `~/.openclaw/logs/commands.log`
+2. **Appends to log file** - Writes a JSON line to `~/.carapace/logs/commands.log`
 3. **Silent operation** - Runs in the background without user notifications
 
 ## Output Format
@@ -43,7 +43,7 @@ Log entries are written in JSONL (JSON Lines) format:
 
 ## Log File Location
 
-`~/.openclaw/logs/commands.log`
+`~/.carapace/logs/commands.log`
 
 ## Requirements
 
@@ -62,7 +62,7 @@ No configuration needed. The hook automatically:
 To disable this hook:
 
 ```bash
-openclaw hooks disable command-logger
+carapace hooks disable command-logger
 ```
 
 Or via config:
@@ -86,13 +86,13 @@ The hook does not automatically rotate logs. To manage log size, you can:
 1. **Manual rotation**:
 
    ```bash
-   mv ~/.openclaw/logs/commands.log ~/.openclaw/logs/commands.log.old
+   mv ~/.carapace/logs/commands.log ~/.carapace/logs/commands.log.old
    ```
 
 2. **Use logrotate** (Linux):
-   Create `/etc/logrotate.d/openclaw`:
+   Create `/etc/logrotate.d/carapace`:
    ```
-   /home/username/.openclaw/logs/commands.log {
+   /home/username/.carapace/logs/commands.log {
        weekly
        rotate 4
        compress
@@ -106,17 +106,17 @@ The hook does not automatically rotate logs. To manage log size, you can:
 View recent commands:
 
 ```bash
-tail -n 20 ~/.openclaw/logs/commands.log
+tail -n 20 ~/.carapace/logs/commands.log
 ```
 
 Pretty-print with jq:
 
 ```bash
-cat ~/.openclaw/logs/commands.log | jq .
+cat ~/.carapace/logs/commands.log | jq .
 ```
 
 Filter by action:
 
 ```bash
-grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .
+grep '"action":"new"' ~/.carapace/logs/commands.log | jq .
 ```

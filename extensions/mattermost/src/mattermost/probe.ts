@@ -1,13 +1,13 @@
 // Mattermost plugin module implements probe behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromPrivateNetworkOptIn,
   type LookupFn,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { runChannelProbe } from "carapace/plugin-sdk/text-utility-runtime";
 import { normalizeMattermostBaseUrl, readMattermostError, type MattermostUser } from "./client.js";
 import type { BaseProbeResult } from "./runtime-api.js";
 

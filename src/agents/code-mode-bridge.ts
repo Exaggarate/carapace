@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import { NODE_FS_LIST_DIR_COMMAND } from "../infra/node-commands.js";
 import { createLazyRuntimeNamedExport } from "../shared/lazy-runtime.js";
@@ -31,7 +31,7 @@ const loadSwarmHandlers = createLazyRuntimeNamedExport(
   "codeModeSwarmHandlers",
 );
 
-export const CODE_MODE_NODES_TOOL_ID = "openclaw:core:nodes";
+export const CODE_MODE_NODES_TOOL_ID = "carapace:core:nodes";
 
 type CodeModeNode = {
   id: string;
@@ -182,7 +182,7 @@ export function isCodeModeSwarmAvailable(
   return (
     resolveSwarmConfig(ctx.runtimeConfig ?? ctx.config, ctx.agentId).enabled &&
     (!ctx.toolExecutionAllow || isToolExecutionAllowed(ctx.toolExecutionAllow, "sessions_spawn")) &&
-    catalog?.some((entry) => entry.source === "openclaw" && entry.name === "sessions_spawn") ===
+    catalog?.some((entry) => entry.source === "carapace" && entry.name === "sessions_spawn") ===
       true &&
     ctx.catalogRef?.current?.entries.some(
       (entry) => entry.name === "sessions_spawn" && isCollectorSpawnTool(entry.tool),
@@ -278,7 +278,7 @@ export async function runBridgeRequest(params: {
         }
         let input = values[1] ?? {};
         if (
-          binding.source === "openclaw" &&
+          binding.source === "carapace" &&
           binding.name === "exec" &&
           binding.input?.includes("yieldMs") === true &&
           isRecord(input) &&

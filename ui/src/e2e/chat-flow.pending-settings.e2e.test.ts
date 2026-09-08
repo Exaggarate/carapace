@@ -131,7 +131,7 @@ suite.define(() => {
       await waitForRequests(gateway, "sessions.list", listsBefore + 2, rosterMatch);
       await gateway.deferNext("sessions.list", rosterMatch);
       await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime: {
             context: {
               sessions: {

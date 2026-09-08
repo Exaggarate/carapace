@@ -1,5 +1,5 @@
-import type { Result } from "@openclaw/normalization-core/result";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import type { Result } from "@carapace/normalization-core/result";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { appendAgentRunFailure } from "../../agents/agent-run-result.js";
 import type { EmbeddedAgentRunResult } from "../../agents/embedded-agent-runner/types.js";
 import { recordModelFallbackStop } from "../../agents/failover-error.js";

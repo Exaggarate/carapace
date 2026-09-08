@@ -1,5 +1,5 @@
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { stableStringify } from "@openclaw/normalization-core";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   listAgentEntries,
   listAgentIds,
@@ -198,13 +198,13 @@ export async function runClawsInspectCommand(
   }
 
   const extensionPlan = await planClawExtensions({
-    extensions: result.openClawProfile?.extensions ?? [],
+    extensions: result.carapaceProfile?.extensions ?? [],
     workspace: result.source.packageRoot,
     packagePreflight: preflightClawPackage,
   });
   const extensionCollisions = findClawExtensionPackageCollisions({
     packages: result.manifest.packages,
-    extensions: result.openClawProfile?.extensions ?? [],
+    extensions: result.carapaceProfile?.extensions ?? [],
   });
   const diagnostics = [
     ...result.diagnostics,
@@ -218,7 +218,7 @@ export async function runClawsInspectCommand(
     valid,
     source: result.source,
     manifest: result.manifest,
-    ...(result.openClawProfile ? { openClawProfile: result.openClawProfile } : {}),
+    ...(result.carapaceProfile ? { carapaceProfile: result.carapaceProfile } : {}),
     extensions: extensionPlan.extensions,
     diagnostics,
   };
@@ -298,17 +298,17 @@ export async function runClawsAddCommand(
     manifest: result.manifest,
     clawMarkdownBody: result.clawMarkdownBody,
     packageBootstrap: result.packageBootstrap,
-    openClawProfile: result.openClawProfile,
+    carapaceProfile: result.carapaceProfile,
     source: result.source,
     diagnostics: result.diagnostics,
     context: basePlanContext,
   });
-  let legacyResumePlan = result.legacyOpenClawProfile
+  let legacyResumePlan = result.legacyCarapaceProfile
     ? await buildClawAddPlan({
         manifest: result.manifest,
         clawMarkdownBody: result.clawMarkdownBody,
         packageBootstrap: result.packageBootstrap,
-        openClawProfile: result.legacyOpenClawProfile,
+        carapaceProfile: result.legacyCarapaceProfile,
         reconstructLegacyDynamicToolProfilePlan: true,
         source: result.source,
         diagnostics: result.diagnostics,
@@ -317,7 +317,7 @@ export async function runClawsAddCommand(
     : undefined;
   let resumableInstallRecord: PersistedClawInstall | undefined;
   const resumeState = await matchingResumeState(legacyResumePlan ?? plan, opts);
-  if (result.legacyOpenClawProfile && !resumeState) {
+  if (result.legacyCarapaceProfile && !resumeState) {
     plan = {
       ...plan,
       blockers: [
@@ -382,17 +382,17 @@ export async function runClawsAddCommand(
       manifest: result.manifest,
       clawMarkdownBody: result.clawMarkdownBody,
       packageBootstrap: result.packageBootstrap,
-      openClawProfile: result.openClawProfile,
+      carapaceProfile: result.carapaceProfile,
       source: result.source,
       diagnostics: result.diagnostics,
       context: resumePlanContext,
     });
-    if (result.legacyOpenClawProfile) {
+    if (result.legacyCarapaceProfile) {
       legacyResumePlan = await buildClawAddPlan({
         manifest: result.manifest,
         clawMarkdownBody: result.clawMarkdownBody,
         packageBootstrap: result.packageBootstrap,
-        openClawProfile: result.legacyOpenClawProfile,
+        carapaceProfile: result.legacyCarapaceProfile,
         reconstructLegacyDynamicToolProfilePlan: true,
         source: result.source,
         diagnostics: result.diagnostics,

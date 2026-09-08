@@ -4,12 +4,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   isCrablineServerChannel,
-  OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
-  resolveOpenClawCrablineChannelDriverSelection,
+  CARAPACE_CRABLINE_DEFAULT_CHANNEL,
+  resolveCarapaceCrablineChannelDriverSelection,
 } from "@openclaw/crabline";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { parseBooleanValue, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { parseBooleanValue, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildQaAgenticParityComparison,
   buildQaRuntimeParityReport,
@@ -126,7 +126,7 @@ import {
   type QaToolCoverageSuiteSummary,
 } from "./tool-coverage-report.js";
 
-const QA_CREDENTIAL_PAYLOAD_MAX_BYTES_ENV = "OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_BYTES";
+const QA_CREDENTIAL_PAYLOAD_MAX_BYTES_ENV = "CARAPACE_QA_CREDENTIAL_PAYLOAD_MAX_BYTES";
 const DEFAULT_QA_CREDENTIAL_PAYLOAD_MAX_BYTES = 64 * 1024 * 1024;
 const QA_HARNESS_ROOT_MAX_PARENT_HOPS = 8;
 
@@ -270,8 +270,8 @@ function normalizeQaOptionalModelRef(input: string | undefined) {
 }
 
 function normalizeQaRuntimeId(value: string): RuntimeId | undefined {
-  if (value === "openclaw" || value === "pi") {
-    return "openclaw";
+  if (value === "carapace" || value === "pi") {
+    return "carapace";
   }
   if (value === "codex") {
     return "codex";
@@ -285,11 +285,11 @@ function parseQaRuntimePair(value: string | undefined): [RuntimeId, RuntimeId] |
   }
   const runtimeNames = value.split(",");
   if (runtimeNames.length !== 2) {
-    throw new Error('--runtime-pair must use exactly two runtimes, e.g. "openclaw,codex".');
+    throw new Error('--runtime-pair must use exactly two runtimes, e.g. "carapace,codex".');
   }
   const [left, right] = runtimeNames.map((part) => normalizeQaRuntimeId(part.trim().toLowerCase()));
   if (!left || !right) {
-    throw new Error('--runtime-pair only supports "openclaw" and "codex".');
+    throw new Error('--runtime-pair only supports "carapace" and "codex".');
   }
   if (left === right) {
     throw new Error("--runtime-pair must compare two different runtimes.");
@@ -349,7 +349,7 @@ async function runQaParityPreflight(params: {
   primaryModel?: string;
   alternateModel?: string;
   allowFailures?: boolean;
-  sutOpenClawCommand?: QaGatewayChildCommand;
+  sutCarapaceCommand?: QaGatewayChildCommand;
 }) {
   const outputDir = path.join(
     params.repoRoot,
@@ -368,7 +368,7 @@ async function runQaParityPreflight(params: {
       alternateModel: params.alternateModel,
       scenarioIds: ["approval-turn-tool-followthrough"],
       concurrency: 1,
-      ...(params.sutOpenClawCommand ? { sutOpenClawCommand: params.sutOpenClawCommand } : {}),
+      ...(params.sutCarapaceCommand ? { sutCarapaceCommand: params.sutCarapaceCommand } : {}),
     }),
   );
   process.stdout.write(`QA parity preflight watch: ${result.watchUrl}\n`);
@@ -399,7 +399,7 @@ export async function resolveQaHarnessRepoRoot(moduleUrl = import.meta.url): Pro
         packageJson !== null &&
         typeof packageJson === "object" &&
         "name" in packageJson &&
-        packageJson.name === "openclaw"
+        packageJson.name === "carapace"
       ) {
         return candidateDir;
       }
@@ -419,7 +419,7 @@ export async function resolveQaHarnessRepoRoot(moduleUrl = import.meta.url): Pro
     candidateDir = parentDir;
   }
   throw new Error(
-    `Unable to resolve QA harness repository root from ${modulePath}: no ancestor package.json named "openclaw" within ${QA_HARNESS_ROOT_MAX_PARENT_HOPS} parent directories.`,
+    `Unable to resolve QA harness repository root from ${modulePath}: no ancestor package.json named "carapace" within ${QA_HARNESS_ROOT_MAX_PARENT_HOPS} parent directories.`,
   );
 }
 
@@ -726,7 +726,7 @@ export async function runQaProfileCommand(opts: QaProfileCommandOptions) {
     primaryModel,
     channelDriver: profileReport.channelDriver,
     defaultChannel:
-      profileReport.channelDriver === "crabline" ? OPENCLAW_CRABLINE_DEFAULT_CHANNEL : undefined,
+      profileReport.channelDriver === "crabline" ? CARAPACE_CRABLINE_DEFAULT_CHANNEL : undefined,
     supportsChannel:
       profileReport.channelDriver === "crabline" ? isCrablineServerChannel : undefined,
     resolveModuleFlowSupport:
@@ -880,15 +880,15 @@ function formatQaRunProfileFilterList(
 }
 
 async function withTemporaryQaProfileEnv<T>(profile: string, run: () => Promise<T>): Promise<T> {
-  const previousProfile = process.env.OPENCLAW_QA_PROFILE;
-  process.env.OPENCLAW_QA_PROFILE = profile;
+  const previousProfile = process.env.CARAPACE_QA_PROFILE;
+  process.env.CARAPACE_QA_PROFILE = profile;
   try {
     return await run();
   } finally {
     if (previousProfile === undefined) {
-      delete process.env.OPENCLAW_QA_PROFILE;
+      delete process.env.CARAPACE_QA_PROFILE;
     } else {
-      process.env.OPENCLAW_QA_PROFILE = previousProfile;
+      process.env.CARAPACE_QA_PROFILE = previousProfile;
     }
   }
 }
@@ -937,7 +937,7 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
     channel: opts.channel,
     channelDriver,
     claudeCliAuthMode,
-    defaultChannel: channelDriver === "crabline" ? OPENCLAW_CRABLINE_DEFAULT_CHANNEL : undefined,
+    defaultChannel: channelDriver === "crabline" ? CARAPACE_CRABLINE_DEFAULT_CHANNEL : undefined,
     primaryModel: primaryModel ?? defaultQaModelForMode(providerMode),
     providerMode,
     scenarioIds: explicitScenarioIds,
@@ -991,14 +991,14 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
   const channelDriverChannels =
     channelDriver === "crabline"
       ? resolveQaSuiteScenarioChannels({
-          defaultChannel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+          defaultChannel: CARAPACE_CRABLINE_DEFAULT_CHANNEL,
           explicitChannel: opts.channel,
           scenarios: channelDriverScenarios,
         })
       : [];
   if (runner === "multipass" && channelDriverChannels.length > 1) {
     resolveQaSuiteScenarioChannel({
-      defaultChannel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+      defaultChannel: CARAPACE_CRABLINE_DEFAULT_CHANNEL,
       explicitChannel: opts.channel,
       scenarios: channelDriverScenarios,
     });
@@ -1006,7 +1006,7 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
   const [singleChannelDriverChannel] = channelDriverChannels;
   const channelDriverSelection =
     channelDriver === "crabline" && channelDriverChannels.length === 1 && singleChannelDriverChannel
-      ? resolveOpenClawCrablineChannelDriverSelection({
+      ? resolveCarapaceCrablineChannelDriverSelection({
           channel: singleChannelDriverChannel,
         })
       : undefined;
@@ -1077,7 +1077,7 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
     }
     return result;
   }
-  const sutOpenClawCommand =
+  const sutCarapaceCommand =
     opts.repoRoot === undefined ? undefined : await resolveExternalQaCandidateCommand(repoRoot);
   if (opts.preflight === true) {
     await runQaParityPreflight({
@@ -1087,7 +1087,7 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
       primaryModel,
       alternateModel,
       allowFailures,
-      ...(sutOpenClawCommand ? { sutOpenClawCommand } : {}),
+      ...(sutCarapaceCommand ? { sutCarapaceCommand } : {}),
     });
     return undefined;
   }
@@ -1145,7 +1145,7 @@ export async function runQaSuiteCommand(opts: QaSuiteCommandOptions) {
         ? { concurrency: parseQaPositiveIntegerOption("--concurrency", opts.concurrency) }
         : {}),
     ...(runtimePair ? { runtimePair } : {}),
-    ...(sutOpenClawCommand ? { sutOpenClawCommand } : {}),
+    ...(sutCarapaceCommand ? { sutCarapaceCommand } : {}),
   });
   const result = runtimeResult.result;
   if (runtimeResult.executionKind === "flow") {
@@ -1392,9 +1392,9 @@ export async function runQaJsonlReplayCommand(opts: {
   providerMode?: QaProviderModeInput;
 }) {
   const repoRoot = path.resolve(opts.repoRoot ?? process.cwd());
-  const runtimePair = parseQaRuntimePair(opts.runtimePair) ?? ["openclaw", "codex"];
-  if (runtimePair[0] !== "openclaw" || runtimePair[1] !== "codex") {
-    throw new Error('--runtime-pair for jsonl-replay must be "openclaw,codex".');
+  const runtimePair = parseQaRuntimePair(opts.runtimePair) ?? ["carapace", "codex"];
+  if (runtimePair[0] !== "carapace" || runtimePair[1] !== "codex") {
+    throw new Error('--runtime-pair for jsonl-replay must be "carapace,codex".');
   }
   const providerMode = normalizeQaProviderMode(opts.providerMode ?? "mock-openai");
   if (providerMode !== "mock-openai") {
@@ -1695,7 +1695,7 @@ export async function runQaLabUiCommand(opts: {
     advertiseHost: opts.advertiseHost,
     advertisePort: Number.isFinite(opts.advertisePort) ? opts.advertisePort : undefined,
     controlUiUrl: opts.controlUiUrl,
-    controlUiProxyToken: process.env.OPENCLAW_QA_CONTROL_UI_PROXY_TOKEN,
+    controlUiProxyToken: process.env.CARAPACE_QA_CONTROL_UI_PROXY_TOKEN,
     controlUiProxyTarget: opts.controlUiProxyTarget,
     uiDistDir: opts.uiDistDir,
     autoKickoffTarget: opts.autoKickoffTarget,

@@ -6,7 +6,7 @@ import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { resetPluginStateStoreForTests } from "../plugin-state/plugin-state-store.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { writePersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   makePluginLoaderTempDir,
@@ -18,7 +18,7 @@ import {
 import { buildPluginInspectReport, buildPluginSnapshotReport } from "./status.js";
 
 const pluginId = "diagnostics-otel";
-const packageName = `@openclaw/${pluginId}`;
+const packageName = `@carapace/${pluginId}`;
 
 afterEach(() => {
   resetPluginStateStoreForTests();
@@ -80,10 +80,10 @@ describe("recorded plugin trust diagnostics", () => {
         packageJson: {
           name: packageName,
           version: "2026.8.2",
-          openclaw: { extensions: ["./index.cjs"] },
+          carapace: { extensions: ["./index.cjs"] },
         },
       });
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const install: PluginInstallRecord = {
           source: "npm",
           spec: `${packageName}@2026.8.2`,
@@ -106,21 +106,21 @@ describe("recorded plugin trust diagnostics", () => {
           config,
           report: snapshot,
         })!.plugin;
-        const registry = loadOpenClawPlugins({ config, cache: false });
+        const registry = loadCarapacePlugins({ config, cache: false });
         const loaded = registry.plugins.find((entry) => entry.id === plugin.id)!;
         expect(inspected.trustedOfficialInstall === true).toBe(trusted);
         expect(loaded.trustedOfficialInstall === true).toBe(trusted);
         expect(inspected.trust).toEqual(loaded.trust);
         expect(loaded.trust).toMatchObject({
           reason,
-          registryPath: path.join(stateDir, "state", "openclaw.sqlite"),
+          registryPath: path.join(stateDir, "state", "carapace.sqlite"),
           origin: "global",
         });
         expect(loaded.status).toBe(trusted ? "loaded" : "error");
         if (!trusted) {
           expect(loaded.error).toContain(`reason=${reason}`);
           expect(loaded.error).toContain(
-            `registryPath=${JSON.stringify(path.join(stateDir, "state", "openclaw.sqlite"))}`,
+            `registryPath=${JSON.stringify(path.join(stateDir, "state", "carapace.sqlite"))}`,
           );
           expect(loaded.error).toContain(
             `installSource=${JSON.stringify(missing ? null : install.source)}`,
@@ -135,7 +135,7 @@ describe("recorded plugin trust diagnostics", () => {
             stateDir,
             prompter: { shouldRepair: true },
           });
-          const repaired = loadOpenClawPlugins({ config, cache: false }).plugins.find(
+          const repaired = loadCarapacePlugins({ config, cache: false }).plugins.find(
             (entry) => entry.id === pluginId,
           )!;
           const inspectedAfter = buildPluginSnapshotReport({ config }).plugins.find(

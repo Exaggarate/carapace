@@ -3,12 +3,12 @@ import Contacts
 import CoreLocation
 import EventKit
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Photos
 import Speech
 import Testing
 import UserNotifications
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct IOSDeviceSettingsSnapshotTests {
@@ -158,15 +158,15 @@ private final class SnapshotLocationService: LocationServicing {
     }
 
     func ensureAuthorization(
-        mode _: OpenClawLocationMode,
+        mode _: CarapaceLocationMode,
         isCurrent _: @MainActor () -> Bool) async -> CLAuthorizationStatus
     {
         self.authorizationStatus()
     }
 
     func currentLocation(
-        params _: OpenClawLocationGetParams,
-        desiredAccuracy _: OpenClawLocationAccuracy,
+        params _: CarapaceLocationGetParams,
+        desiredAccuracy _: CarapaceLocationAccuracy,
         maxAgeMs _: Int?,
         timeoutMs _: Int?) async throws -> CLLocation
     {

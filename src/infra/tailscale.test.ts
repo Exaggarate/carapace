@@ -21,11 +21,11 @@ function useTailscaleSudoFixture(mode: "password" | "route-error" | "conflict") 
   const fixture = fileURLToPath(
     new URL("../../test/fixtures/tailscale-sudo-fixture.mjs", import.meta.url),
   );
-  const fakeBin = tempDirs.make("openclaw-tailscale-bin-");
+  const fakeBin = tempDirs.make("carapace-tailscale-bin-");
   symlinkSync(fixture, path.join(fakeBin, "sudo"));
   process.env.PATH = `${fakeBin}${path.delimiter}${process.env.PATH ?? ""}`;
-  process.env.OPENCLAW_TEST_TAILSCALE_BINARY = fixture;
-  process.env.OPENCLAW_TEST_TAILSCALE_SUDO_FIXTURE_MODE = mode;
+  process.env.CARAPACE_TEST_TAILSCALE_BINARY = fixture;
+  process.env.CARAPACE_TEST_TAILSCALE_SUDO_FIXTURE_MODE = mode;
 }
 
 function expectExecCall(
@@ -54,13 +54,13 @@ describe("tailscale helpers", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "OPENCLAW_TEST_TAILSCALE_BINARY",
-      "OPENCLAW_TEST_TAILSCALE_SUDO_FIXTURE_MODE",
+      "CARAPACE_TEST_TAILSCALE_BINARY",
+      "CARAPACE_TEST_TAILSCALE_SUDO_FIXTURE_MODE",
       "NODE_ENV",
       "PATH",
       "VITEST",
     ]);
-    process.env.OPENCLAW_TEST_TAILSCALE_BINARY = "tailscale";
+    process.env.CARAPACE_TEST_TAILSCALE_BINARY = "tailscale";
     process.env.VITEST ??= "true";
   });
 
@@ -242,7 +242,7 @@ describe("tailscale helpers", () => {
   it.runIf(process.platform !== "win32")(
     "holds a foreground route claim until cleanup stops its owner",
     async () => {
-      process.env.OPENCLAW_TEST_TAILSCALE_BINARY = fileURLToPath(
+      process.env.CARAPACE_TEST_TAILSCALE_BINARY = fileURLToPath(
         new URL("../../test/fixtures/tailscale-foreground-fixture.mjs", import.meta.url),
       );
 
@@ -283,7 +283,7 @@ describe("tailscale helpers", () => {
       useTailscaleSudoFixture("conflict");
 
       await expect(claimTailscaleRoute("serve", 18789, 18789, vi.fn())).rejects.toThrow(
-        "ownership OpenClaw cannot prove; it was not modified",
+        "ownership Carapace cannot prove; it was not modified",
       );
     },
   );
@@ -294,7 +294,7 @@ describe("tailscale helpers", () => {
       const fixture = fileURLToPath(
         new URL("../../test/fixtures/tailscale-foreground-fixture.mjs", import.meta.url),
       );
-      process.env.OPENCLAW_TEST_TAILSCALE_BINARY = fixture;
+      process.env.CARAPACE_TEST_TAILSCALE_BINARY = fixture;
 
       await expect(claimTailscaleRoute("funnel", 18790, 18790, vi.fn())).rejects.toThrow(
         "Funnel is not enabled on your tailnet.",

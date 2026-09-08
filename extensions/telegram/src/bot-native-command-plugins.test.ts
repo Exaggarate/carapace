@@ -2,11 +2,11 @@ import {
   createEmptyPluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 // Telegram tests cover bot native commands plugin behavior.
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { clearPluginCommands, registerPluginCommand } from "openclaw/plugin-sdk/plugin-runtime";
-import type { SessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { clearPluginCommands, registerPluginCommand } from "carapace/plugin-sdk/plugin-runtime";
+import type { SessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTelegramTopicCommandContext } from "./bot-native-commands.fixture-test-support.js";
 import {
@@ -29,9 +29,9 @@ const pluginSessionMocks = vi.hoisted(() => ({
   resolveStorePath: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return {
     ...actual,
@@ -42,7 +42,7 @@ vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
 type CommandBotHarness = ReturnType<typeof createCommandBot>;
 type PlugCommandHarnessParams = {
   botHarness?: CommandBotHarness;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   command?: Record<string, unknown>;
   acceptsArgs?: boolean;
   args?: string;
@@ -153,12 +153,12 @@ describe("registerTelegramNativeCommands", () => {
     clearPluginCommands();
     pluginCommandHandler.mockReset().mockResolvedValue({ text: "ok" });
     pluginSessionMocks.getSessionEntry.mockReset().mockReturnValue(undefined);
-    pluginSessionMocks.resolveStorePath.mockReset().mockReturnValue("/tmp/openclaw-sessions.json");
+    pluginSessionMocks.resolveStorePath.mockReset().mockReturnValue("/tmp/carapace-sessions.json");
   });
 
   it("passes agent-scoped media roots for plugin command replies with media", async () => {
     const mediaMaxBytes = 50 * 1024 * 1024;
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         list: [{ id: "main", default: true }, { id: "work" }],
       },
@@ -181,7 +181,7 @@ describe("registerTelegramNativeCommands", () => {
     const deliverParams = firstDeliverRepliesParams();
     expect(deliverParams.mediaMaxBytes).toBe(mediaMaxBytes);
     const mediaLocalRoots = deliverParams.mediaLocalRoots as Array<string> | undefined;
-    expect(mediaLocalRoots?.some((root) => /[\\/]\.openclaw[\\/]workspace-work$/.test(root))).toBe(
+    expect(mediaLocalRoots?.some((root) => /[\\/]\.carapace[\\/]workspace-work$/.test(root))).toBe(
       true,
     );
     expect(sendMessage).not.toHaveBeenCalledWith(123, "Command not found.");
@@ -634,7 +634,7 @@ describe("registerTelegramNativeCommands", () => {
       updatedAt: 1,
     });
     const { handler } = registerPlugCommand({
-      cfg: { commands: { allowFrom: { telegram: ["200"] } } } as OpenClawConfig,
+      cfg: { commands: { allowFrom: { telegram: ["200"] } } } as CarapaceConfig,
     });
 
     await handler(
@@ -663,7 +663,7 @@ describe("registerTelegramNativeCommands", () => {
       name: "keeps the canonical SQLite marker",
       entry: {
         sessionId: "sess-main",
-        sessionFile: "sqlite:main:sess-main:/tmp/openclaw-sessions.json",
+        sessionFile: "sqlite:main:sess-main:/tmp/carapace-sessions.json",
         updatedAt: 1,
       } satisfies SessionEntry,
     },
@@ -685,7 +685,7 @@ describe("registerTelegramNativeCommands", () => {
       expect.objectContaining({
         sessionKey: "agent:main:main",
         sessionId: "sess-main",
-        sessionFile: "sqlite:main:sess-main:/tmp/openclaw-sessions.json",
+        sessionFile: "sqlite:main:sess-main:/tmp/carapace-sessions.json",
       }),
     );
   });

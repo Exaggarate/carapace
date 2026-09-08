@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import os
 
 enum GatewayCredentialPersistenceError: Error, Equatable, LocalizedError {
@@ -20,7 +20,7 @@ enum GatewayCredentialPersistenceError: Error, Equatable, LocalizedError {
 }
 
 enum GatewaySettingsStore {
-    private static let productionGatewayService = "ai.openclawfoundation.app.gateway"
+    private static let productionGatewayService = "ai.carapacefoundation.app.gateway"
     private static var gatewayService: String {
         #if DEBUG
         // Hosted tests share the app's Keychain access group; keep fixtures away from installed-app state.
@@ -36,8 +36,8 @@ enum GatewaySettingsStore {
         self.gatewayService
     }
     #endif
-    private static let nodeService = "ai.openclawfoundation.app.node"
-    private static let talkService = "ai.openclawfoundation.app.talk"
+    private static let nodeService = "ai.carapacefoundation.app.node"
+    private static let talkService = "ai.carapacefoundation.app.talk"
 
     private static let instanceIdDefaultsKey = "node.instanceId"
     private static let preferredGatewayStableIDDefaultsKey = "gateway.preferredStableID"
@@ -55,7 +55,7 @@ enum GatewaySettingsStore {
     private static let lastDiscoveredGatewayStableIDAccount = "lastDiscoveredStableID"
     private static let gatewayRegistryAccount = "gateway-registry"
     private static let lastGatewayConnectionAccount = "lastConnection"
-    private static let gatewayCustomHeadersService = "ai.openclawfoundation.app.gateway.custom-headers"
+    private static let gatewayCustomHeadersService = "ai.carapacefoundation.app.gateway.custom-headers"
     private static let talkProviderApiKeyAccountPrefix = "provider.apiKey." // pragma: allowlist secret
 
     struct GatewayRegistryEntry: Codable, Equatable, Identifiable, Sendable {
@@ -1177,8 +1177,8 @@ enum GatewayDiagnostics {
         }
     }
 
-    private static let logger = Logger(subsystem: "ai.openclawfoundation.app", category: "GatewayDiag")
-    private static let queue = DispatchQueue(label: "ai.openclawfoundation.app.gateway.diagnostics")
+    private static let logger = Logger(subsystem: "ai.carapacefoundation.app", category: "GatewayDiag")
+    private static let queue = DispatchQueue(label: "ai.carapacefoundation.app.gateway.diagnostics")
     private static let maxLogBytes: Int64 = 512 * 1024
     private static let keepLogBytes: Int64 = 256 * 1024
     private static let logSizeCheckEveryWrites = 50
@@ -1210,7 +1210,7 @@ enum GatewayDiagnostics {
 
     private static var fileURL: URL? {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("openclaw-gateway.log")
+            .appendingPathComponent("carapace-gateway.log")
     }
 
     private static func truncateLogIfNeeded(url: URL) {

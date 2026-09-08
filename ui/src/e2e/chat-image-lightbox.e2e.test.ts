@@ -16,9 +16,9 @@ import { openChatSidePanelType } from "./chat-side-panel.test-support.ts";
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -61,7 +61,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
   });
 
   it("opens transcript and sidebar images in one accessible modal", async () => {
-    const banner = await readFile(path.join(process.cwd(), "docs/assets/openclaw-banner-dark.png"));
+    const banner = await readFile(path.join(process.cwd(), "docs/assets/carapace-banner-dark.png"));
     const bannerBase64 = banner.toString("base64");
     const dataUrl = `data:image/png;base64,${bannerBase64}`;
     const context = await newContext({
@@ -81,7 +81,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
             {
               type: "image",
               url: dataUrl,
-              alt: "OpenClaw banner",
+              alt: "Carapace banner",
             },
           ],
           timestamp: Date.now(),
@@ -95,7 +95,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
               id: "artifact-image-lightbox",
               mimeType: "image/png",
               sizeBytes: banner.byteLength,
-              title: "openclaw-banner.png",
+              title: "carapace-banner.png",
               type: "image",
             },
           ],
@@ -105,7 +105,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
             id: "artifact-image-lightbox",
             mimeType: "image/png",
             sizeBytes: banner.byteLength,
-            title: "openclaw-banner.png",
+            title: "carapace-banner.png",
             type: "image",
           },
           data: bannerBase64,
@@ -124,18 +124,18 @@ describeControlUiE2e("Control UI image lightbox", () => {
       await page.goto(`${server.baseUrl}chat`);
       await gateway.waitForRequest("chat.startup");
 
-      const transcriptTrigger = page.getByRole("button", { name: "Open image OpenClaw banner" });
+      const transcriptTrigger = page.getByRole("button", { name: "Open image Carapace banner" });
       await transcriptTrigger.waitFor({ state: "visible", timeout: 10_000 });
       await transcriptTrigger.click();
 
-      const dialog = page.getByRole("dialog", { name: "Image preview: OpenClaw banner" });
+      const dialog = page.getByRole("dialog", { name: "Image preview: Carapace banner" });
       await dialog.waitFor({ state: "visible" });
       const closeButton = page.getByRole("button", { name: "Close image preview" });
       const openOriginal = page.getByRole("link", { name: "Open in new tab" });
       await openOriginal.waitFor({ state: "visible" });
       await expect.poll(() => openOriginal.getAttribute("href")).toMatch(/^blob:/);
       const readControlContrast = () =>
-        page.locator("openclaw-image-lightbox").evaluate((lightbox) => {
+        page.locator("carapace-image-lightbox").evaluate((lightbox) => {
           const root = lightbox.shadowRoot!;
           return [".open-original", ".close", '[aria-label="Zoom in"]'].map((selector) => {
             const style = getComputedStyle(root.querySelector(selector)!);
@@ -178,7 +178,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
       }
       await page.evaluate(() => document.documentElement.setAttribute("data-theme-mode", "dark"));
       const focusIsInsideLightbox = () =>
-        page.locator("openclaw-image-lightbox").evaluate((lightbox) => {
+        page.locator("carapace-image-lightbox").evaluate((lightbox) => {
           let active: Element | null = document.activeElement;
           while (active instanceof HTMLElement && active.shadowRoot?.activeElement) {
             active = active.shadowRoot.activeElement;
@@ -196,7 +196,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
       await expect
         .poll(() => closeButton.evaluate((element) => element.matches(":focus")))
         .toBe(true);
-      const displayedImage = page.getByAltText("OpenClaw banner").last();
+      const displayedImage = page.getByAltText("Carapace banner").last();
       await expect
         .poll(() =>
           displayedImage.evaluate((image) =>
@@ -205,9 +205,9 @@ describeControlUiE2e("Control UI image lightbox", () => {
         )
         .toBeGreaterThan(0);
       await page
-        .locator("openclaw-image-lightbox wa-dialog dialog")
+        .locator("carapace-image-lightbox wa-dialog dialog")
         .evaluate(finishElementAnimations);
-      const desktopBox = await page.locator("openclaw-image-lightbox .lightbox").boundingBox();
+      const desktopBox = await page.locator("carapace-image-lightbox .lightbox").boundingBox();
       const viewport = page.viewportSize();
       expect(desktopBox?.x).toBe(0);
       expect(desktopBox?.y).toBe(0);
@@ -231,12 +231,12 @@ describeControlUiE2e("Control UI image lightbox", () => {
 
       await openChatSidePanelType(page, "Files");
       const artifactRow = page.locator(".chat-workspace-rail__file-open", {
-        hasText: "openclaw-banner.png",
+        hasText: "carapace-banner.png",
       });
       await artifactRow.waitFor({ state: "visible", timeout: 10_000 });
       await artifactRow.click();
       const sidebarTrigger = page.getByRole("button", {
-        name: "Open image openclaw-banner.png",
+        name: "Open image carapace-banner.png",
       });
       await sidebarTrigger.waitFor({ state: "visible", timeout: 10_000 });
 
@@ -249,7 +249,7 @@ describeControlUiE2e("Control UI image lightbox", () => {
 
       await sidebarTrigger.click();
       const sidebarDialog = page.getByRole("dialog", {
-        name: "Image preview: openclaw-banner.png",
+        name: "Image preview: carapace-banner.png",
       });
       await sidebarDialog.waitFor({ state: "visible" });
       if (captureUiProofEnabled) {
@@ -270,9 +270,9 @@ describeControlUiE2e("Control UI image lightbox", () => {
       await sidebarTrigger.click();
       await sidebarDialog.waitFor({ state: "visible" });
       await page
-        .locator("openclaw-image-lightbox wa-dialog dialog")
+        .locator("carapace-image-lightbox wa-dialog dialog")
         .evaluate(finishElementAnimations);
-      await page.locator("openclaw-image-lightbox").evaluate((lightbox) => {
+      await page.locator("carapace-image-lightbox").evaluate((lightbox) => {
         lightbox.style.setProperty("--safe-area-top", "18px");
         lightbox.style.setProperty("--safe-area-right", "12px");
         lightbox.style.setProperty("--safe-area-bottom", "22px");
@@ -285,16 +285,16 @@ describeControlUiE2e("Control UI image lightbox", () => {
       await expect
         .poll(() =>
           page
-            .locator("openclaw-image-lightbox .image")
+            .locator("carapace-image-lightbox .image")
             .evaluate((image) =>
               image instanceof HTMLImageElement && image.complete ? image.naturalHeight : 0,
             ),
         )
         .toBe(1200);
-      const mobileBox = await page.locator("openclaw-image-lightbox .lightbox").boundingBox();
-      const mobileImage = page.locator("openclaw-image-lightbox .image");
+      const mobileBox = await page.locator("carapace-image-lightbox .lightbox").boundingBox();
+      const mobileImage = page.locator("carapace-image-lightbox .image");
       const readMobileLayout = () =>
-        page.locator("openclaw-image-lightbox .stage").evaluate((stage) => {
+        page.locator("carapace-image-lightbox .stage").evaluate((stage) => {
           const root = stage.getRootNode();
           const image = stage.querySelector("img");
           const header = root instanceof ShadowRoot ? root.querySelector(".header") : null;

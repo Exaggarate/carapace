@@ -1,18 +1,18 @@
 // Telegram plugin module implements token behavior.
-import { resolveNormalizedAccountEntry } from "openclaw/plugin-sdk/account-core";
-import type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveNormalizedAccountEntry } from "carapace/plugin-sdk/account-core";
+import type { BaseTokenResolution } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/routing";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+} from "carapace/plugin-sdk/routing";
+import { tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file-runtime";
 import {
   normalizeSecretInputString,
   resolveSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import { canResolveEnvSecretRefInReadOnlyPath } from "openclaw/plugin-sdk/secret-ref-readonly";
+} from "carapace/plugin-sdk/secret-input";
+import { canResolveEnvSecretRefInReadOnlyPath } from "carapace/plugin-sdk/secret-ref-readonly";
 import { resolveDefaultTelegramAccountId } from "./account-selection.js";
 
 type CredentialUnavailableDiagnostic = Extract<
@@ -33,7 +33,7 @@ type RuntimeTokenValueResolution =
   | { status: "missing" };
 
 function resolveEnvSecretRefValue(params: {
-  cfg?: Pick<OpenClawConfig, "secrets">;
+  cfg?: Pick<CarapaceConfig, "secrets">;
   provider: string;
   id: string;
 }): string | undefined {
@@ -58,7 +58,7 @@ function resolveEnvSecretRefValue(params: {
 }
 
 function resolveRuntimeTokenValue(params: {
-  cfg?: Pick<OpenClawConfig, "secrets">;
+  cfg?: Pick<CarapaceConfig, "secrets">;
   value: unknown;
   path: string;
 }): RuntimeTokenValueResolution {
@@ -108,7 +108,7 @@ type ResolveTelegramTokenOpts = {
 };
 
 export function resolveTelegramToken(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   opts: ResolveTelegramTokenOpts = {},
 ): TelegramTokenResolution {
   const requestedAccountId = normalizeOptionalAccountId(opts.accountId);
@@ -138,7 +138,7 @@ export function resolveTelegramToken(
   //
   // Single-bot: no accounts section (or empty) → allow fallthrough so that
   // binding-created accountIds inherit the channel-level token.
-  // See: https://github.com/openclaw/openclaw/issues/53876
+  // See: https://github.com/Exaggarate/carapace/issues/53876
   if (accountId !== DEFAULT_ACCOUNT_ID && !accountCfg) {
     const accounts = telegramCfg?.accounts;
     const hasConfiguredAccounts =

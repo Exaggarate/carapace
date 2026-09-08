@@ -1,9 +1,9 @@
-import type { CreateSandboxBackendParams } from "openclaw/plugin-sdk/sandbox";
+import type { CreateSandboxBackendParams } from "carapace/plugin-sdk/sandbox";
 import {
   createSandboxBrowserConfig,
   createSandboxPruneConfig,
   createSandboxSshConfig,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 
 export function createOpenShellBackendSandboxConfig(): CreateSandboxBackendParams["cfg"] {
   return {
@@ -11,11 +11,11 @@ export function createOpenShellBackendSandboxConfig(): CreateSandboxBackendParam
     backend: "openshell",
     scope: "session",
     workspaceAccess: "rw",
-    workspaceRoot: "/tmp/openclaw-sandboxes",
+    workspaceRoot: "/tmp/carapace-sandboxes",
     dockerTmpfsSource: "configured",
     docker: {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "carapace-sandbox:bookworm-slim",
+      containerPrefix: "carapace-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -24,14 +24,14 @@ export function createOpenShellBackendSandboxConfig(): CreateSandboxBackendParam
       binds: [],
       env: {},
     },
-    ssh: createSandboxSshConfig("/tmp/openclaw-sandboxes"),
+    ssh: createSandboxSshConfig("/tmp/carapace-sandboxes"),
     browser: createSandboxBrowserConfig(),
     tools: { allow: ["*"], deny: [] },
     prune: createSandboxPruneConfig(),
   };
 }
 
-export function createOpenShellRuntimeEntryFixture(runtimeId: string, configLabel = "openclaw") {
+export function createOpenShellRuntimeEntryFixture(runtimeId: string, configLabel = "carapace") {
   return {
     containerName: runtimeId,
     backendId: "openshell",

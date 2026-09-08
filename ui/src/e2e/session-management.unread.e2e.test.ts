@@ -1,5 +1,5 @@
 import path from "node:path";
-import { GATEWAY_SERVER_CAPS } from "@openclaw/gateway-protocol";
+import { GATEWAY_SERVER_CAPS } from "@carapace/gateway-protocol";
 import { expect, it } from "vitest";
 import { createControlUiSessionRow as sessionRow } from "../test-helpers/control-ui-session-fixtures.ts";
 import { expectRequestCountStable } from "./chat-flow.test-support.ts";

@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelAccountSnapshot } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createAccountListHelpers } from "../plugin-sdk/account-helpers.js";
 import { createScopedChannelConfigAdapter } from "../plugin-sdk/channel-config-helpers.js";
 import type { OfficialExternalPluginRepairHint } from "../plugins/official-external-plugin-repair-hints.js";
@@ -70,7 +70,7 @@ function createAccountSelectionFixture(): ChannelPlugin<ChannelAccountSnapshot> 
     ["alpha", { accountId: "alpha", name: "Alpha", configured: false, enabled: true }],
     ["beta", { accountId: "beta", name: "Beta", configured: false, enabled: false }],
   ]);
-  const resolveAccount = (_cfg: OpenClawConfig, accountId?: string | null) => {
+  const resolveAccount = (_cfg: CarapaceConfig, accountId?: string | null) => {
     const account = accounts.get(accountId ?? "alpha");
     if (!account) {
       throw new Error("Unexpected fixture account");
@@ -100,7 +100,7 @@ function createAccountSelectionFixture(): ChannelPlugin<ChannelAccountSnapshot> 
 function createRawListedAccountFixture() {
   const helpers = createAccountListHelpers("imessage");
   const calls: Array<string | null | undefined> = [];
-  const resolveAccount = (cfg: OpenClawConfig, requestedId?: string | null) => {
+  const resolveAccount = (cfg: CarapaceConfig, requestedId?: string | null) => {
     calls.push(requestedId);
     const accountId = normalizeAccountId(requestedId);
     const account = resolveAccountEntry(cfg.channels?.imessage?.accounts, accountId);
@@ -164,7 +164,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    const map = await buildProviderStatusIndex({} as OpenClawConfig);
+    const map = await buildProviderStatusIndex({} as CarapaceConfig);
 
     expect(mocks.listReadOnlyChannelPluginsForConfig).toHaveBeenCalledWith(
       {},
@@ -197,7 +197,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    await expect(buildProviderStatusIndex({} as OpenClawConfig)).resolves.toEqual(
+    await expect(buildProviderStatusIndex({} as CarapaceConfig)).resolves.toEqual(
       new Map([
         [
           "quietchat:default",
@@ -212,14 +212,14 @@ describe("buildProviderStatusIndex", () => {
         ],
       ]),
     );
-    const statuses = await buildProviderStatusIndex({} as OpenClawConfig);
+    const statuses = await buildProviderStatusIndex({} as CarapaceConfig);
     expect(
       listProvidersForAgent({
         summaryIsDefault: true,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         bindings: [],
         providerStatus: statuses,
-        providerMetadata: buildProviderSummaryMetadataIndex({} as OpenClawConfig),
+        providerMetadata: buildProviderSummaryMetadataIndex({} as CarapaceConfig),
       }),
     ).toEqual(["QuietChat default: configured unavailable"]);
     expect(JSON.stringify([...statuses.values()])).not.toContain("PRIVATE_PROVIDER_TOKEN");
@@ -256,7 +256,7 @@ describe("buildProviderStatusIndex", () => {
           tokenFile: "/nonexistent/token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
     const statuses = await buildProviderStatusIndex(cfg);
@@ -300,7 +300,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
     expect(
-      (await buildProviderStatusIndex({} as OpenClawConfig)).get("slack:default"),
+      (await buildProviderStatusIndex({} as CarapaceConfig)).get("slack:default"),
     ).toMatchObject({ configured: true, state: "configured" });
   });
 
@@ -328,7 +328,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
     expect(
-      (await buildProviderStatusIndex({} as OpenClawConfig)).get("slack:default"),
+      (await buildProviderStatusIndex({} as CarapaceConfig)).get("slack:default"),
     ).toMatchObject({ configured: false, state: "not configured" });
   });
 
@@ -356,7 +356,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
     expect(
-      (await buildProviderStatusIndex({} as OpenClawConfig)).get("slack:default"),
+      (await buildProviderStatusIndex({} as CarapaceConfig)).get("slack:default"),
     ).toMatchObject({ configured: true, state: "configured unavailable" });
   });
 
@@ -376,7 +376,7 @@ describe("buildProviderStatusIndex", () => {
     } as never;
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
-    const status = (await buildProviderStatusIndex({} as OpenClawConfig)).get("quietchat:default");
+    const status = (await buildProviderStatusIndex({} as CarapaceConfig)).get("quietchat:default");
 
     expect(status?.state).toBe("not configured");
     expect(isLinked).not.toHaveBeenCalled();
@@ -396,7 +396,7 @@ describe("buildProviderStatusIndex", () => {
     } as never;
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
 
-    const status = (await buildProviderStatusIndex({} as OpenClawConfig)).get("legacychat:default");
+    const status = (await buildProviderStatusIndex({} as CarapaceConfig)).get("legacychat:default");
 
     expect(status?.state).toBe("enabled");
     expect(resolveAccountState).toHaveBeenCalledOnce();
@@ -418,7 +418,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    await expect(buildProviderStatusIndex({} as OpenClawConfig)).rejects.toThrow("plugin crash");
+    await expect(buildProviderStatusIndex({} as CarapaceConfig)).rejects.toThrow("plugin crash");
   });
 
   it("keeps configured missing external channels in provider metadata", () => {
@@ -429,11 +429,11 @@ describe("buildProviderStatusIndex", () => {
         channelId: "feishu",
         pluginId: "feishu",
         label: "Feishu",
-        installSpec: "@openclaw/feishu",
-        installCommand: "openclaw plugins install @openclaw/feishu",
-        doctorFixCommand: "openclaw doctor --fix",
+        installSpec: "@carapace/feishu",
+        installCommand: "carapace plugins install @carapace/feishu",
+        doctorFixCommand: "carapace doctor --fix",
         repairHint:
-          "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+          "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
       },
     ]);
 
@@ -448,7 +448,7 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
           },
         ],
       ]),
@@ -488,7 +488,7 @@ describe("buildProviderStatusIndex", () => {
     { selector: "absent", ids: ["absent"], route: "absent" },
   ])("renders canonical account selector $selector", async ({ selector, ids, route }) => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([createAccountSelectionFixture()]);
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const providerStatus = await buildProviderStatusIndex(cfg);
     const providerMetadata = new Map([
       [
@@ -517,7 +517,7 @@ describe("buildProviderStatusIndex", () => {
 
   it("keeps configured-scope inventory separate from mixed-owner route precedence", async () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([createAccountSelectionFixture()]);
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { fallback: {}, specific: {}, defaultscope: {}, idle: {} },
@@ -642,7 +642,7 @@ describe("buildProviderStatusIndex", () => {
       ["*", "alpha", "Alpha"],
     ].map((selectors) => ({ selectors })),
   )("joins raw listed Alpha through canonical selectors $selectors", async ({ selectors }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { imessage: { accounts: { Alpha: { name: "Work", enabled: true } } } },
     };
     const { plugin, calls } = createRawListedAccountFixture();
@@ -670,7 +670,7 @@ describe("buildProviderStatusIndex", () => {
   });
 
   it("canonicalizes raw listed ids for unavailable account status records", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { imessage: { accounts: { Alpha: { enabled: true } } } },
     };
     const { plugin, calls } = createRawListedAccountFixture();
@@ -698,7 +698,7 @@ describe("buildProviderStatusIndex", () => {
   });
 
   it("prefers the exact canonical record when listed account aliases collide", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         imessage: {
           accounts: {
@@ -734,7 +734,7 @@ describe("buildProviderStatusIndex", () => {
 
   it("keeps wildcard scope diagnostics distinct from the concrete default key", async () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([]);
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const bindings = ["*", "default"].map((accountId) => ({
       agentId: "proof",
       match: { channel: "imessage", accountId },
@@ -774,14 +774,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
     ]);
   });
 
@@ -801,14 +801,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
     ]);
   });
 
@@ -826,14 +826,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: carapace plugins install @carapace/feishu, or run: carapace doctor --fix.",
     ]);
   });
 

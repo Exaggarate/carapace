@@ -1,35 +1,35 @@
 /** Cross-platform daemon service names, labels, and profile-aware descriptions. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 // Default service labels (canonical + legacy compatibility)
-export const GATEWAY_LAUNCH_AGENT_LABEL = "ai.openclaw.gateway";
-const GATEWAY_SYSTEMD_SERVICE_NAME = "openclaw-gateway";
-const GATEWAY_WINDOWS_TASK_NAME = "OpenClaw Gateway";
-export const GATEWAY_SERVICE_MARKER = "openclaw";
+export const GATEWAY_LAUNCH_AGENT_LABEL = "ai.carapace.gateway";
+const GATEWAY_SYSTEMD_SERVICE_NAME = "carapace-gateway";
+const GATEWAY_WINDOWS_TASK_NAME = "Carapace Gateway";
+export const GATEWAY_SERVICE_MARKER = "carapace";
 export const GATEWAY_SERVICE_KIND = "gateway";
-export const GATEWAY_SERVICE_RUNTIME_PID_ENV = "OPENCLAW_GATEWAY_SERVICE_PID";
+export const GATEWAY_SERVICE_RUNTIME_PID_ENV = "CARAPACE_GATEWAY_SERVICE_PID";
 export const GATEWAY_SERVICE_SELECTOR_ENV_KEYS = [
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_PROFILE",
-  "OPENCLAW_GATEWAY_PORT",
-  "OPENCLAW_LAUNCHD_LABEL",
-  "OPENCLAW_SYSTEMD_UNIT",
-  "OPENCLAW_WINDOWS_TASK_NAME",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_PROFILE",
+  "CARAPACE_GATEWAY_PORT",
+  "CARAPACE_LAUNCHD_LABEL",
+  "CARAPACE_SYSTEMD_UNIT",
+  "CARAPACE_WINDOWS_TASK_NAME",
 ] as const;
 
 export function isGatewayServiceEnv(env: Record<string, string | undefined>): boolean {
-  if (env.OPENCLAW_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER) {
+  if (env.CARAPACE_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER) {
     return false;
   }
-  const serviceKind = env.OPENCLAW_SERVICE_KIND?.trim();
+  const serviceKind = env.CARAPACE_SERVICE_KIND?.trim();
   return !serviceKind || serviceKind === GATEWAY_SERVICE_KIND;
 }
 
-const NODE_LAUNCH_AGENT_LABEL = "ai.openclaw.node";
-const NODE_SYSTEMD_SERVICE_NAME = "openclaw-node";
-const NODE_WINDOWS_TASK_NAME = "OpenClaw Node";
-const NODE_SERVICE_MARKER = "openclaw";
+const NODE_LAUNCH_AGENT_LABEL = "ai.carapace.node";
+const NODE_SYSTEMD_SERVICE_NAME = "carapace-node";
+const NODE_WINDOWS_TASK_NAME = "Carapace Node";
+const NODE_SERVICE_MARKER = "carapace";
 export const NODE_SERVICE_KIND = "node";
 const NODE_WINDOWS_TASK_SCRIPT_NAME = "node.cmd";
 export const LEGACY_GATEWAY_SYSTEMD_SERVICE_NAMES: string[] = ["clawdbot-gateway"];
@@ -53,7 +53,7 @@ export function resolveGatewayLaunchAgentLabel(profile?: string): string {
   if (!normalized) {
     return GATEWAY_LAUNCH_AGENT_LABEL;
   }
-  return `ai.openclaw.${normalized}`;
+  return `ai.carapace.${normalized}`;
 }
 
 export function resolveGatewaySystemdServiceName(profile?: string): string {
@@ -61,7 +61,7 @@ export function resolveGatewaySystemdServiceName(profile?: string): string {
   if (!suffix) {
     return GATEWAY_SYSTEMD_SERVICE_NAME;
   }
-  return `openclaw-gateway${suffix}`;
+  return `carapace-gateway${suffix}`;
 }
 
 export function resolveGatewayWindowsTaskName(profile?: string): string {
@@ -69,11 +69,11 @@ export function resolveGatewayWindowsTaskName(profile?: string): string {
   if (!normalized) {
     return GATEWAY_WINDOWS_TASK_NAME;
   }
-  return `OpenClaw Gateway (${normalized})`;
+  return `Carapace Gateway (${normalized})`;
 }
 
 type GatewayNativeServiceIdentityConflict = {
-  envKey: "OPENCLAW_LAUNCHD_LABEL" | "OPENCLAW_SYSTEMD_UNIT" | "OPENCLAW_WINDOWS_TASK_NAME";
+  envKey: "CARAPACE_LAUNCHD_LABEL" | "CARAPACE_SYSTEMD_UNIT" | "CARAPACE_WINDOWS_TASK_NAME";
   expected: string;
 };
 
@@ -81,26 +81,26 @@ export function resolveGatewayNativeServiceIdentityConflict(
   env: Record<string, string | undefined>,
   platform: NodeJS.Platform = process.platform,
 ): GatewayNativeServiceIdentityConflict | null {
-  const profile = normalizeGatewayProfile(env.OPENCLAW_PROFILE);
+  const profile = normalizeGatewayProfile(env.CARAPACE_PROFILE);
   if (!profile) {
     return null;
   }
 
   if (platform === "darwin") {
-    const envKey = "OPENCLAW_LAUNCHD_LABEL";
+    const envKey = "CARAPACE_LAUNCHD_LABEL";
     const actual = env[envKey]?.trim();
     const expected = resolveGatewayLaunchAgentLabel(profile);
     return actual && actual !== expected ? { envKey, expected } : null;
   }
   if (platform === "linux") {
-    const envKey = "OPENCLAW_SYSTEMD_UNIT";
+    const envKey = "CARAPACE_SYSTEMD_UNIT";
     const actual = env[envKey]?.trim();
     const normalizedActual = actual?.endsWith(".service") ? actual : actual && `${actual}.service`;
     const expected = `${resolveGatewaySystemdServiceName(profile)}.service`;
     return normalizedActual && normalizedActual !== expected ? { envKey, expected } : null;
   }
   if (platform === "win32") {
-    const envKey = "OPENCLAW_WINDOWS_TASK_NAME";
+    const envKey = "CARAPACE_WINDOWS_TASK_NAME";
     const actual = env[envKey]?.trim();
     const expected = resolveGatewayWindowsTaskName(profile);
     return actual && actual !== expected ? { envKey, expected } : null;
@@ -111,16 +111,16 @@ export function resolveGatewayNativeServiceIdentityConflict(
 function formatGatewayServiceDescription(profile?: string): string {
   const normalized = normalizeGatewayProfile(profile);
   if (!normalized) {
-    return "OpenClaw Gateway";
+    return "Carapace Gateway";
   }
-  return `OpenClaw Gateway (profile: ${normalized})`;
+  return `Carapace Gateway (profile: ${normalized})`;
 }
 
 export function resolveGatewayServiceDescription(params: {
   env: Record<string, string | undefined>;
   description?: string;
 }): string {
-  return params.description ?? formatGatewayServiceDescription(params.env.OPENCLAW_PROFILE);
+  return params.description ?? formatGatewayServiceDescription(params.env.CARAPACE_PROFILE);
 }
 
 export function resolveNodeLaunchAgentLabel(): string {
@@ -137,13 +137,13 @@ export function resolveNodeWindowsTaskName(): string {
 
 export function resolveNodeServiceIdentityEnvironment(): Record<string, string> {
   return {
-    OPENCLAW_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
-    OPENCLAW_SYSTEMD_UNIT: resolveNodeSystemdServiceName(),
-    OPENCLAW_WINDOWS_TASK_NAME: resolveNodeWindowsTaskName(),
-    OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
-    OPENCLAW_TASK_SCRIPT_NAME: NODE_WINDOWS_TASK_SCRIPT_NAME,
-    OPENCLAW_LOG_PREFIX: "node",
-    OPENCLAW_SERVICE_MARKER: NODE_SERVICE_MARKER,
-    OPENCLAW_SERVICE_KIND: NODE_SERVICE_KIND,
+    CARAPACE_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
+    CARAPACE_SYSTEMD_UNIT: resolveNodeSystemdServiceName(),
+    CARAPACE_WINDOWS_TASK_NAME: resolveNodeWindowsTaskName(),
+    CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
+    CARAPACE_TASK_SCRIPT_NAME: NODE_WINDOWS_TASK_SCRIPT_NAME,
+    CARAPACE_LOG_PREFIX: "node",
+    CARAPACE_SERVICE_MARKER: NODE_SERVICE_MARKER,
+    CARAPACE_SERVICE_KIND: NODE_SERVICE_KIND,
   };
 }

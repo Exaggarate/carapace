@@ -12,7 +12,7 @@ import { isCoreCanvasHostEnabled } from "../canvas/config.js";
 import { isCanvasDocumentHttpPath } from "../canvas/constants.js";
 import { getRuntimeConfig } from "../config/io.js";
 import { getRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createDiagnosticTraceContext,
   runWithDiagnosticTraceContext,
@@ -181,7 +181,7 @@ export function createGatewayHttpServer(opts: {
   handleNodeWorkspaceTransferRequest?: NodeWorkspaceTransferHttpCallback;
   getReadiness?: ReadinessChecker;
   getStartup?: StartupChecker;
-  getRuntimeConfig?: () => OpenClawConfig;
+  getRuntimeConfig?: () => CarapaceConfig;
   getGatewayRequestContext?: () => GatewayRequestContext | undefined;
   isStartupPluginRuntimeReady?: () => boolean;
   isTerminalEnabled?: () => boolean;
@@ -509,7 +509,7 @@ export function createGatewayHttpServer(opts: {
           getResolvedAuth,
         }),
       );
-      addAdmittedStage(scopedRequestPath.startsWith("/__openclaw__/board/"), async () =>
+      addAdmittedStage(scopedRequestPath.startsWith("/__carapace__/board/"), async () =>
         (await getBoardHttpModule()).handleBoardHttpRequest(req, res, {
           resolveGatewayContext: opts.getGatewayRequestContext?.()?.resolveGatewayContext,
         }),

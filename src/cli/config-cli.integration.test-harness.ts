@@ -20,7 +20,7 @@ vi.mock("../plugins/plugin-metadata-snapshot.js", async (importOriginal) => {
     ) => {
       snapshot ??= actual.loadPluginMetadataSnapshot({
         ...params,
-        pluginIds: ["codex", "discord", "openclaw-mem0"],
+        pluginIds: ["codex", "discord", "carapace-mem0"],
         pluginIdScope: undefined,
       });
       return snapshot;
@@ -79,12 +79,12 @@ export function useConfigCliIntegrationHarness() {
     run: (params: { configPath: string; tempDir: string }) => Promise<void>,
   ): Promise<void> {
     const tempDir = tempDirs.make(prefix);
-    const configPath = path.join(tempDir, "openclaw.json");
-    const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH", "OPENCLAW_TEST_FAST"]);
+    const configPath = path.join(tempDir, "carapace.json");
+    const envSnapshot = captureEnv(["CARAPACE_CONFIG_PATH", "CARAPACE_TEST_FAST"]);
     try {
       fs.writeFileSync(configPath, raw, "utf8");
-      setTestEnvValue("OPENCLAW_TEST_FAST", "1");
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_TEST_FAST", "1");
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
       clearConfigCache();
       clearRuntimeConfigSnapshot();
       await run({ configPath, tempDir });

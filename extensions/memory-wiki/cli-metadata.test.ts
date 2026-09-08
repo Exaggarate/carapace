@@ -1,6 +1,6 @@
 // Memory Wiki tests cover cli metadata plugin behavior.
 import { Command } from "commander";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -69,7 +69,7 @@ describe("memory-wiki cli metadata entry", () => {
     await register({
       program,
       config: appConfig,
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       logger: api.logger,
     });
 

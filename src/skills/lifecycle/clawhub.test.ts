@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   ClawHubSkillSecurityVerdictItem,
@@ -204,7 +204,7 @@ function mockSkillSecurityVerdict(item: ClawHubSkillSecurityVerdictItem) {
         overview: item.overview ?? "No security analysis has been recorded yet.",
         securityAuditUrl:
           item.securityAuditUrl ??
-          `${item.skillUrl ?? `https://clawhub.ai/${item.publisherHandle ?? "openclaw"}/skills/${item.requestedSlug}`}/security-audit?version=${item.requestedVersion}`,
+          `${item.skillUrl ?? `https://clawhub.ai/${item.publisherHandle ?? "carapace"}/skills/${item.requestedSlug}`}/security-audit?version=${item.requestedVersion}`,
       },
     ],
   });
@@ -329,7 +329,7 @@ describe("skills-clawhub", () => {
   });
 
   beforeEach(async () => {
-    testWorkspaceDir = await tempDirs.make("openclaw-clawhub-workspace-");
+    testWorkspaceDir = await tempDirs.make("carapace-clawhub-workspace-");
     fetchClawHubSkillDetailMock.mockReset();
     fetchClawHubSkillInstallResolutionMock.mockReset();
     fetchClawHubSkillVerificationMock.mockReset();
@@ -403,7 +403,7 @@ describe("skills-clawhub", () => {
           displayName: "Agent Receipt",
           ...(item.ownerHandle ? { publisherHandle: item.ownerHandle } : {}),
           overview: "No security analysis has been recorded yet.",
-          securityAuditUrl: `https://clawhub.ai/${item.ownerHandle ?? "openclaw"}/skills/${item.slug}/security-audit?version=${item.version}`,
+          securityAuditUrl: `https://clawhub.ai/${item.ownerHandle ?? "carapace"}/skills/${item.slug}/security-audit?version=${item.version}`,
           security: {
             status: "clean",
             passed: true,
@@ -470,7 +470,7 @@ describe("skills-clawhub", () => {
     expectInstallPackageSourceDir("/tmp/extracted-skill");
     expect(installPolicyInput()).toMatchObject({
       origin: { registry: "https://clawhub.ai" },
-      source: { kind: "clawhub", authority: "openclaw", mutable: false, network: true },
+      source: { kind: "clawhub", authority: "carapace", mutable: false, network: true },
     });
     expectInstalledSkill(result, {
       slug: "agentreceipt",
@@ -493,7 +493,7 @@ describe("skills-clawhub", () => {
       path: "/api/v1/skills/missing-skill/install",
       body: "remote not-found detail",
       expected:
-        'Skill "missing-skill" not found on ClawHub. Run `openclaw skills search missing-skill` to find the right skill reference.',
+        'Skill "missing-skill" not found on ClawHub. Run `carapace skills search missing-skill` to find the right skill reference.',
     },
     {
       name: "maps missing versioned skills to the skills-info recovery message",
@@ -502,7 +502,7 @@ describe("skills-clawhub", () => {
       path: "/custom-clawhub/api/v1/skills/missing-skill",
       body: "remote versioned not-found detail",
       expected:
-        'Skill "missing-skill" not found on ClawHub. Run `openclaw skills search missing-skill` to find the right skill reference.',
+        'Skill "missing-skill" not found on ClawHub. Run `carapace skills search missing-skill` to find the right skill reference.',
     },
     {
       name: "keeps server failures distinct from missing skills",
@@ -534,7 +534,7 @@ describe("skills-clawhub", () => {
 
   it("installs skills-sh references via a ClawHub-approved pinned GitHub commit", async () => {
     const commit = "a".repeat(40);
-    const reference = "skills-sh:openclaw/skills/weather";
+    const reference = "skills-sh:carapace/skills/weather";
     const trustState = "not-scanned-by-clawhub";
     fetchClawHubSkillInstallResolutionMock.mockResolvedValueOnce({
       ok: true,
@@ -542,12 +542,12 @@ describe("skills-clawhub", () => {
       installKind: "github",
       trust: { state: trustState },
       github: {
-        repo: "openclaw/skills",
+        repo: "carapace/skills",
         path: "skills/weather",
         commit,
         trustState,
         contentHash: "sha256:approved",
-        sourceUrl: `https://github.com/openclaw/skills/tree/${commit}/skills/weather`,
+        sourceUrl: `https://github.com/Exaggarate/carapace/skills/tree/${commit}/skills/weather`,
       },
     });
     withExtractedArchiveRootMock.mockImplementationOnce(async (params) => {
@@ -567,7 +567,7 @@ describe("skills-clawhub", () => {
       requestedReference: reference,
     });
     expect(downloadClawHubGitHubSkillArchiveMock).toHaveBeenCalledWith({
-      repo: "openclaw/skills",
+      repo: "carapace/skills",
       commit,
     });
     expect(fetchClawHubSkillVerificationMock).toHaveBeenCalledWith({
@@ -581,7 +581,7 @@ describe("skills-clawhub", () => {
       origin: {
         slug: "weather",
         version: commit,
-        repo: "openclaw/skills",
+        repo: "carapace/skills",
         path: "skills/weather",
         commit,
       },
@@ -608,15 +608,15 @@ describe("skills-clawhub", () => {
       installKind: "github",
       trust: { state: "not-scanned-by-clawhub" },
       github: {
-        repo: "openclaw/skills",
+        repo: "carapace/skills",
         path: "skills/weather",
         commit: "main",
         contentHash: "sha256:approved",
-        sourceUrl: "https://github.com/openclaw/skills/tree/main/skills/weather",
+        sourceUrl: "https://github.com/Exaggarate/carapace/skills/tree/main/skills/weather",
       },
     });
 
-    const result = await installTestSkill(testWorkspaceDir, "skills-sh:openclaw/skills/weather");
+    const result = await installTestSkill(testWorkspaceDir, "skills-sh:carapace/skills/weather");
 
     expect(result.ok).toBe(false);
     expect(result.ok ? "" : result.error).toContain("expected a full 40-character commit SHA");
@@ -644,7 +644,7 @@ describe("skills-clawhub", () => {
   });
 
   it("rejects versions for skills-sh references before network access", async () => {
-    const result = await installTestSkill(testWorkspaceDir, "skills-sh:openclaw/skills/weather", {
+    const result = await installTestSkill(testWorkspaceDir, "skills-sh:carapace/skills/weather", {
       version: "1.2.3",
     });
 
@@ -668,7 +668,7 @@ describe("skills-clawhub", () => {
       },
     });
 
-    const result = await installTestSkill(testWorkspaceDir, "skills-sh:openclaw/skills/weather");
+    const result = await installTestSkill(testWorkspaceDir, "skills-sh:carapace/skills/weather");
 
     expect(result).toEqual({
       ok: false,
@@ -687,15 +687,15 @@ describe("skills-clawhub", () => {
         installKind: "github",
         ...(trust ? { trust } : {}),
         github: {
-          repo: "openclaw/skills",
+          repo: "carapace/skills",
           path: "skills/weather",
           commit: "a".repeat(40),
           contentHash: "sha256:approved",
-          sourceUrl: "https://github.com/openclaw/skills",
+          sourceUrl: "https://github.com/Exaggarate/carapace/skills",
         },
       });
 
-      const result = await installTestSkill(testWorkspaceDir, "skills-sh:openclaw/skills/weather");
+      const result = await installTestSkill(testWorkspaceDir, "skills-sh:carapace/skills/weather");
 
       expect(result).toEqual({
         ok: false,
@@ -1129,7 +1129,7 @@ describe("skills-clawhub", () => {
   });
 
   it("installs owner-qualified ClawHub skills without using owner as a local path", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-owner-skill-");
+    const workspaceDir = await tempDirs.make("carapace-owner-skill-");
     mockSkillVerification({
       schema: "clawhub.skill.verify.v1",
       ok: true,
@@ -1233,7 +1233,7 @@ describe("skills-clawhub", () => {
   });
 
   it("installs owner-qualified clean skills missing only cards", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-owner-card-missing-");
+    const workspaceDir = await tempDirs.make("carapace-owner-card-missing-");
     mockSkillVerification({
       schema: "clawhub.skill.verify.v1",
       ok: false,
@@ -1333,7 +1333,7 @@ describe("skills-clawhub", () => {
       throw new Error("expected ambiguous slug failure");
     }
     expect(result.error).toContain('Skill "weather" is ambiguous on ClawHub.');
-    expect(result.error).toContain("openclaw skills install @owner/weather");
+    expect(result.error).toContain("carapace skills install @owner/weather");
     expect(result.error).toContain("Multiple ClawHub publishers provide weather.");
   });
 
@@ -1353,7 +1353,7 @@ describe("skills-clawhub", () => {
     ["JSON null", "null"],
     ["invalid lock shape", '{"version":2,"skills":{}}'],
   ])("preserves a shared lock with %s instead of installing over it", async (_label, damaged) => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-damaged-lock-");
+    const workspaceDir = await tempDirs.make("carapace-skills-damaged-lock-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       skillMd: "---\nname: weather\n---\n",
     });
@@ -1383,7 +1383,7 @@ describe("skills-clawhub", () => {
   it.each([".clawhub", ".clawdhub"])(
     "rejects damaged %s tracking in update, untracking, status and verification",
     async (directory) => {
-      const workspaceDir = await tempDirs.make("openclaw-skills-damaged-tracking-");
+      const workspaceDir = await tempDirs.make("carapace-skills-damaged-tracking-");
       const lockPath = path.join(workspaceDir, directory, "lock.json");
       const damaged = '{"version":1,"skills":{"weather":';
       await fs.mkdir(path.dirname(lockPath));
@@ -1413,7 +1413,7 @@ describe("skills-clawhub", () => {
   );
 
   it("preserves tracking added while a skill is downloading", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-install-tracking-");
+    const workspaceDir = await tempDirs.make("carapace-skills-install-tracking-");
     await writeTrackedSkill(workspaceDir, "weather");
     const lockPath = path.join(workspaceDir, ".clawhub", "lock.json");
     const existing = await readJson<{ skills: Record<string, unknown> }>(lockPath);
@@ -1443,7 +1443,7 @@ describe("skills-clawhub", () => {
   it.for([".clawhub", ".clawdhub"])(
     "rejects symlinked %s tracking without changing the link or its target",
     async (directory, context) => {
-      const workspaceDir = await tempDirs.make("openclaw-skills-linked-tracking-");
+      const workspaceDir = await tempDirs.make("carapace-skills-linked-tracking-");
       const target = path.join(workspaceDir, "original.json");
       const content = JSON.stringify({ version: 1, skills: {} });
       const lockPath = path.join(workspaceDir, directory, "lock.json");
@@ -1469,7 +1469,7 @@ describe("skills-clawhub", () => {
   );
 
   it("reads the replacement tracking when an existing lock changes before open", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-replaced-tracking-");
+    const workspaceDir = await tempDirs.make("carapace-skills-replaced-tracking-");
     await writeTrackedSkill(workspaceDir, "weather");
     const lockPath = path.join(workspaceDir, ".clawhub", "lock.json");
     const replacement = path.join(workspaceDir, "replacement.json");
@@ -1495,7 +1495,7 @@ describe("skills-clawhub", () => {
   });
 
   it("persists install artifact and verification provenance in the ClawHub lockfile", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-lock-");
+    const workspaceDir = await tempDirs.make("carapace-skills-lock-");
     const warn = vi.fn();
     const skillContent = "---\nname: agentreceipt\ndescription: Receipt helper\n---\n";
     const skillSha256 = createHash("sha256").update(skillContent).digest("hex");
@@ -1564,10 +1564,10 @@ describe("skills-clawhub", () => {
   });
 
   it("persists the source URL from server-resolved verification provenance", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-source-");
-    const sourceUrl = "https://github.com/openclaw/skills/tree/main/agentreceipt";
+    const workspaceDir = await tempDirs.make("carapace-skills-source-");
+    const sourceUrl = "https://github.com/Exaggarate/carapace/skills/tree/main/agentreceipt";
     const verifiedSourceUrl =
-      "https://github.com/openclaw/skills/tree/0123456789abcdef0123456789abcdef01234567/agentreceipt";
+      "https://github.com/Exaggarate/carapace/skills/tree/0123456789abcdef0123456789abcdef01234567/agentreceipt";
     fetchClawHubSkillDetailMock.mockResolvedValueOnce({
       skill: {
         slug: "agentreceipt",
@@ -1591,7 +1591,7 @@ describe("skills-clawhub", () => {
         source: "server-resolved-github-import",
         kind: "github",
         url: sourceUrl,
-        repo: "openclaw/skills",
+        repo: "carapace/skills",
         ref: "main",
         commit: "0123456789abcdef0123456789abcdef01234567",
         path: "agentreceipt",
@@ -1622,7 +1622,7 @@ describe("skills-clawhub", () => {
             source: "server-resolved-github-import",
             kind: "github",
             url: sourceUrl,
-            repo: "openclaw/skills",
+            repo: "carapace/skills",
             ref: "main",
             commit: "0123456789abcdef0123456789abcdef01234567",
             path: "agentreceipt",
@@ -1642,7 +1642,7 @@ describe("skills-clawhub", () => {
   it("requires a full commit SHA before promoting verified source provenance", () => {
     const baseProvenance = {
       source: "server-resolved-github-import",
-      repo: "openclaw/skills",
+      repo: "carapace/skills",
       path: "agentreceipt",
     };
 
@@ -1652,7 +1652,7 @@ describe("skills-clawhub", () => {
         commit: "0123456789abcdef0123456789abcdef01234567",
       }),
     ).toBe(
-      "https://github.com/openclaw/skills/tree/0123456789abcdef0123456789abcdef01234567/agentreceipt",
+      "https://github.com/Exaggarate/carapace/skills/tree/0123456789abcdef0123456789abcdef01234567/agentreceipt",
     );
     expect(
       readVerifiedClawHubSkillSourceUrl({
@@ -1669,19 +1669,19 @@ describe("skills-clawhub", () => {
   });
 
   it("does not treat detail metadata as verified source provenance", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-source-");
+    const workspaceDir = await tempDirs.make("carapace-skills-source-");
     fetchClawHubSkillDetailMock.mockResolvedValueOnce({
       skill: {
         slug: "agentreceipt",
         displayName: "AgentReceipt",
         createdAt: 1,
         updatedAt: 2,
-        sourceUrl: "https://github.com/openclaw/skills/tree/latest/agentreceipt",
+        sourceUrl: "https://github.com/Exaggarate/carapace/skills/tree/latest/agentreceipt",
       },
       latestVersion: {
         version: "1.0.0",
         createdAt: 3,
-        sourceUrl: "https://github.com/openclaw/skills/tree/latest/agentreceipt",
+        sourceUrl: "https://github.com/Exaggarate/carapace/skills/tree/latest/agentreceipt",
       },
     });
     fetchClawHubSkillVerificationMock.mockRejectedValueOnce(new Error("verification down"));
@@ -1711,7 +1711,7 @@ describe("skills-clawhub", () => {
   });
 
   it("does not trust URLs from unavailable verification provenance", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-source-");
+    const workspaceDir = await tempDirs.make("carapace-skills-source-");
     fetchClawHubSkillVerificationMock.mockResolvedValueOnce({
       schema: "clawhub.skill.verify.v1",
       ok: true,
@@ -1721,7 +1721,7 @@ describe("skills-clawhub", () => {
       artifact: { sourceFingerprint: "source-fp" },
       provenance: {
         source: "unavailable",
-        url: "https://github.com/openclaw/skills/tree/unverified/agentreceipt",
+        url: "https://github.com/Exaggarate/carapace/skills/tree/unverified/agentreceipt",
       },
       security: { status: "clean" },
       signature: { status: "unsigned" },
@@ -1755,7 +1755,7 @@ describe("skills-clawhub", () => {
   });
 
   it("keeps installing when the ClawHub verification snapshot is unavailable", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skills-lock-");
+    const workspaceDir = await tempDirs.make("carapace-skills-lock-");
     const warn = vi.fn();
     fetchClawHubSkillVerificationMock.mockRejectedValueOnce(new Error("verification down"));
     installPackageDirMock.mockImplementationOnce(async (params: { targetDir: string }) => {
@@ -1931,10 +1931,10 @@ describe("skills-clawhub", () => {
   );
 
   it("updates skills.sh installs with the stored reference", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-owner-update-");
+    const workspaceDir = await tempDirs.make("carapace-owner-update-");
     const commit = "b".repeat(40);
     await writeTrackedSkill(workspaceDir, "weather", {
-      requestedReference: "skills-sh:openclaw/skills/weather",
+      requestedReference: "skills-sh:carapace/skills/weather",
       trustState: "not-scanned-by-clawhub",
       registry: "https://private.example.com/clawhub",
       installedVersion: "0.9.0",
@@ -1946,11 +1946,11 @@ describe("skills-clawhub", () => {
       installKind: "github",
       trust: { state: "not-scanned-by-clawhub" },
       github: {
-        repo: "openclaw/skills",
+        repo: "carapace/skills",
         path: "skills/weather",
         commit,
         contentHash: "sha256:approved",
-        sourceUrl: `https://github.com/openclaw/skills/tree/${commit}/skills/weather`,
+        sourceUrl: `https://github.com/Exaggarate/carapace/skills/tree/${commit}/skills/weather`,
       },
     });
     withExtractedArchiveRootMock.mockImplementationOnce(async (params) => {
@@ -1958,16 +1958,16 @@ describe("skills-clawhub", () => {
     });
     mockInstalledSkillFile("# Weather\n");
 
-    const results = await updateTestSkill(workspaceDir, "skills-sh:openclaw/skills/weather");
+    const results = await updateTestSkill(workspaceDir, "skills-sh:carapace/skills/weather");
 
     expect(fetchClawHubSkillInstallResolutionMock).toHaveBeenCalledWith({
       slug: "weather",
-      requestedReference: "skills-sh:openclaw/skills/weather",
+      requestedReference: "skills-sh:carapace/skills/weather",
       baseUrl: "https://private.example.com/clawhub",
     });
     expect(fetchClawHubSkillVerificationMock).toHaveBeenCalledWith({
       slug: "weather",
-      requestedReference: "skills-sh:openclaw/skills/weather",
+      requestedReference: "skills-sh:carapace/skills/weather",
       version: undefined,
       baseUrl: "https://private.example.com/clawhub",
     });
@@ -1986,13 +1986,13 @@ describe("skills-clawhub", () => {
       await fs.readFile(path.join(workspaceDir, ".clawhub", "lock.json"), "utf8"),
     ) as { skills: Record<string, Record<string, unknown>> };
     expect(lock.skills.weather).toMatchObject({
-      requestedReference: "skills-sh:openclaw/skills/weather",
+      requestedReference: "skills-sh:carapace/skills/weather",
       trustState: "not-scanned-by-clawhub",
     });
   });
 
   it("reports a tracked skill removed from ClawHub with the same recovery message", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-missing-update-");
+    const workspaceDir = await tempDirs.make("carapace-missing-update-");
     await writeTrackedSkill(workspaceDir, "missing-skill", {
       installedVersion: "0.9.0",
       skillMd: "# Missing skill\n",
@@ -2012,14 +2012,14 @@ describe("skills-clawhub", () => {
       {
         ok: false,
         error:
-          'Skill "missing-skill" not found on ClawHub. Run `openclaw skills search missing-skill` to find the right skill reference.',
+          'Skill "missing-skill" not found on ClawHub. Run `carapace skills search missing-skill` to find the right skill reference.',
       },
     ]);
     expect(results[0]?.ok ? "" : results[0]?.error).not.toContain(body);
   });
 
   it("updates official publisher ClawHub skills without fetching security verdicts", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-official-owner-update-");
+    const workspaceDir = await tempDirs.make("carapace-official-owner-update-");
     await writeTrackedSkill(workspaceDir, "tao-setup-nvidia-gpu-host", {
       ownerHandle: "nvidia",
       registry: "https://clawhub.ai",
@@ -2089,7 +2089,7 @@ describe("skills-clawhub", () => {
     {
       ownerHandle: undefined,
       skillRef: "agentreceipt",
-      workspaceName: ".openclaw",
+      workspaceName: ".carapace",
     },
     {
       ownerHandle: undefined,
@@ -2119,7 +2119,7 @@ describe("skills-clawhub", () => {
   ])(
     "explains that a malicious skill update will not be downloaded ($skillRef)",
     async ({ ownerHandle, skillRef, workspaceName }) => {
-      const tempRoot = await tempDirs.make("openclaw-skill-malicious-update-");
+      const tempRoot = await tempDirs.make("carapace-skill-malicious-update-");
       const workspaceDir = path.join(tempRoot, workspaceName);
       const warnings: string[] = [];
       const slug = ownerHandle ? skillRef.slice(skillRef.indexOf("/") + 1) : skillRef;
@@ -2166,7 +2166,7 @@ describe("skills-clawhub", () => {
   );
 
   it("updates owner-qualified ClawHub skills when the requested owner matches tracking", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-owner-update-request-");
+    const workspaceDir = await tempDirs.make("carapace-owner-update-request-");
     await writeTrackedSkill(workspaceDir, "weather", {
       ownerHandle: "demo-owner",
       installedVersion: "0.9.0",
@@ -2197,7 +2197,7 @@ describe("skills-clawhub", () => {
   });
 
   it("refuses to update a ClawHub skill with local changes unless forced", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-local-changes-update-");
+    const workspaceDir = await tempDirs.make("carapace-local-changes-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
       skillFile: {
@@ -2230,7 +2230,7 @@ describe("skills-clawhub", () => {
   });
 
   it("refuses to update a ClawHub skill whose SKILL.md is unreadable unless forced", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-unreadable-update-");
+    const workspaceDir = await tempDirs.make("carapace-unreadable-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
       skillFile: {
@@ -2260,7 +2260,7 @@ describe("skills-clawhub", () => {
   });
 
   it("refuses to replace a ClawHub skill edited while the update was downloading", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-concurrent-edit-update-");
+    const workspaceDir = await tempDirs.make("carapace-concurrent-edit-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
       skillMd: "# Weather\n",
@@ -2306,7 +2306,7 @@ describe("skills-clawhub", () => {
   });
 
   it("updates a ClawHub skill with local changes when forced", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-local-changes-forced-update-");
+    const workspaceDir = await tempDirs.make("carapace-local-changes-forced-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
       skillFile: {
@@ -2342,7 +2342,7 @@ describe("skills-clawhub", () => {
   });
 
   it("requires a one-time force for tracked skills without recorded digests, then verifies digests", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-predigest-update-");
+    const workspaceDir = await tempDirs.make("carapace-predigest-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
     });
@@ -2371,7 +2371,7 @@ describe("skills-clawhub", () => {
         ok: false,
         code: "force_required",
         error:
-          'Skill "weather" was installed before OpenClaw recorded file fingerprints, so local changes cannot be detected. Updating replaces the installed skill directory.',
+          'Skill "weather" was installed before Carapace recorded file fingerprints, so local changes cannot be detected. Updating replaces the installed skill directory.',
       },
     ]);
 
@@ -2393,7 +2393,7 @@ describe("skills-clawhub", () => {
   });
 
   it("updates an unmodified ClawHub skill without requiring force", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-clean-update-");
+    const workspaceDir = await tempDirs.make("carapace-clean-update-");
     const skillDir = await writeTrackedSkill(workspaceDir, "weather", {
       installedVersion: "0.9.0",
       skillFile: {
@@ -2427,7 +2427,7 @@ describe("skills-clawhub", () => {
   });
 
   it("rejects owner-qualified ClawHub updates when the requested owner does not match tracking", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-owner-update-mismatch-");
+    const workspaceDir = await tempDirs.make("carapace-owner-update-mismatch-");
     await writeTrackedSkill(workspaceDir, "weather", {
       ownerHandle: "other-owner",
       installedVersion: "0.9.0",
@@ -2446,7 +2446,7 @@ describe("skills-clawhub", () => {
 
   describe("legacy tracked slugs remain updatable", () => {
     async function createLegacyTrackedSkillFixture(slug: string) {
-      const workspaceDir = await tempDirs.make("openclaw-skills-clawhub-");
+      const workspaceDir = await tempDirs.make("carapace-skills-clawhub-");
       const skillDir = path.join(workspaceDir, "skills", slug);
       await fs.mkdir(path.join(skillDir, ".clawhub"), { recursive: true });
       await fs.mkdir(path.join(workspaceDir, ".clawhub"), { recursive: true });
@@ -2566,7 +2566,7 @@ describe("skills-clawhub", () => {
     });
 
     it("does not install configured skills during update all without ClawHub tracking", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-configured-update-");
+      const workspaceDir = await tempDirs.make("carapace-configured-update-");
       const results = await updateTestSkill(workspaceDir, undefined, {
         config: {
           agents: {
@@ -2583,7 +2583,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects untracked requested updates instead of installing by slug", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-untracked-update-");
+      const workspaceDir = await tempDirs.make("carapace-untracked-update-");
 
       const results = await updateTestSkill(workspaceDir, "calendar");
 
@@ -2617,7 +2617,7 @@ describe("skills-clawhub", () => {
     });
 
     it("still rejects an untracked Unicode slug passed to update", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skills-clawhub-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skills-clawhub-"));
 
       try {
         await expect(
@@ -2687,10 +2687,10 @@ describe("skills-clawhub", () => {
 
   describe("verification target resolution", () => {
     it("preserves installed skills.sh references for verification", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         const skillDir = await writeTrackedSkill(workspaceDir, "agentreceipt", {
-          requestedReference: "skills-sh:openclaw/skills/agentreceipt",
+          requestedReference: "skills-sh:carapace/skills/agentreceipt",
           trustState: "not-scanned-by-clawhub",
           registry: "https://private.example.com/clawhub/",
           installedVersion: "2.0.0",
@@ -2699,12 +2699,12 @@ describe("skills-clawhub", () => {
         await expect(
           resolveClawHubSkillVerificationTarget({
             workspaceDir,
-            slug: "skills-sh:openclaw/skills/agentreceipt",
+            slug: "skills-sh:carapace/skills/agentreceipt",
           }),
         ).resolves.toEqual({
           ok: true,
           slug: "agentreceipt",
-          requestedReference: "skills-sh:openclaw/skills/agentreceipt",
+          requestedReference: "skills-sh:carapace/skills/agentreceipt",
           trustState: "not-scanned-by-clawhub",
           baseUrl: "https://private.example.com/clawhub",
           version: undefined,
@@ -2723,7 +2723,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects a different installed skills.sh reference before verification", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+      const workspaceDir = await tempDirs.make("carapace-skill-verify-");
       await writeTrackedSkill(workspaceDir, "agentreceipt", {
         requestedReference: "skills-sh:owner-a/repo-a/agentreceipt",
         trustState: "not-scanned-by-clawhub",
@@ -2751,7 +2751,7 @@ describe("skills-clawhub", () => {
         await expect(
           resolveClawHubSkillVerificationTarget({
             workspaceDir: testWorkspaceDir,
-            slug: "skills-sh:openclaw/skills/agentreceipt",
+            slug: "skills-sh:carapace/skills/agentreceipt",
             version,
             tag,
           }),
@@ -2768,9 +2768,9 @@ describe("skills-clawhub", () => {
     ])(
       "rejects selectors when an installed skill is tracked from skills.sh",
       async ({ version, tag }) => {
-        const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+        const workspaceDir = await tempDirs.make("carapace-skill-verify-");
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
-          requestedReference: "skills-sh:openclaw/skills/agentreceipt",
+          requestedReference: "skills-sh:carapace/skills/agentreceipt",
           trustState: "not-scanned-by-clawhub",
           installedVersion: "a".repeat(40),
         });
@@ -2790,7 +2790,7 @@ describe("skills-clawhub", () => {
     );
 
     it("uses installed owner namespace when resolving owner-qualified verification targets", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "weather", {
           ownerHandle: "demo-owner",
@@ -2823,7 +2823,7 @@ describe("skills-clawhub", () => {
     });
 
     it("accepts owner-qualified installed verification targets", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+      const workspaceDir = await tempDirs.make("carapace-skill-verify-");
       try {
         await writeTrackedSkill(workspaceDir, "weather", {
           ownerHandle: "demo-owner",
@@ -2856,7 +2856,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects owner-qualified installed verification when the owner differs", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+      const workspaceDir = await tempDirs.make("carapace-skill-verify-");
       try {
         await writeTrackedSkill(workspaceDir, "weather", {
           ownerHandle: "demo-owner",
@@ -2879,7 +2879,7 @@ describe("skills-clawhub", () => {
     });
 
     it("keeps the installed registry when an explicit version overrides the installed version", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           registry: "https://private.example.com/clawhub",
@@ -2912,7 +2912,7 @@ describe("skills-clawhub", () => {
     });
 
     it("keeps the installed registry when an explicit tag is provided", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           registry: "https://private.example.com/clawhub",
@@ -2945,7 +2945,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects installed owner namespace metadata that does not match lock tracking", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "weather", {
           ownerHandle: "demo-owner",
@@ -2974,7 +2974,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects installed origin metadata without workspace lock tracking", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           writeLock: false,
@@ -2996,7 +2996,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects installed origin metadata for a different skill slug", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           originSlug: "trusted-skill",
@@ -3018,7 +3018,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects installed origin metadata that does not match lock tracking", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           installedVersion: "2.0.0",
@@ -3050,7 +3050,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects installed origin metadata when lock registry disagrees", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await writeTrackedSkill(workspaceDir, "agentreceipt", {
           registry: "https://origin.example.com/clawhub",
@@ -3083,7 +3083,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects lock-tracked installed skills without origin metadata", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await fs.mkdir(path.join(workspaceDir, ".clawhub"), { recursive: true });
         await fs.writeFile(
@@ -3121,7 +3121,7 @@ describe("skills-clawhub", () => {
     });
 
     it("rejects malformed workspace locks before registry fallback", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         await fs.mkdir(path.join(workspaceDir, ".clawhub"), { recursive: true });
         await fs.writeFile(path.join(workspaceDir, ".clawhub", "lock.json"), "{not json", "utf8");
@@ -3142,7 +3142,7 @@ describe("skills-clawhub", () => {
     });
 
     it("uses the configured registry and latest selector for uninstalled skills", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       resolveClawHubBaseUrlMock.mockReturnValueOnce("https://configured.example.com/clawhub");
       try {
         await expect(
@@ -3171,7 +3171,7 @@ describe("skills-clawhub", () => {
     });
 
     it("uses owner-qualified registry verification targets", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+      const workspaceDir = await tempDirs.make("carapace-skill-verify-");
       resolveClawHubBaseUrlMock.mockReturnValueOnce("https://configured.example.com/clawhub");
       try {
         await expect(
@@ -3201,7 +3201,7 @@ describe("skills-clawhub", () => {
     });
 
     it("keeps owner-qualified registry selectors for explicit versions and tags", async () => {
-      const workspaceDir = await tempDirs.make("openclaw-skill-verify-");
+      const workspaceDir = await tempDirs.make("carapace-skill-verify-");
       try {
         await expect(
           resolveClawHubSkillVerificationTarget({
@@ -3244,7 +3244,7 @@ describe("skills-clawhub", () => {
     });
 
     it("fails clearly when installed origin metadata is malformed", async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-verify-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-verify-"));
       try {
         const skillDir = path.join(workspaceDir, "skills", "agentreceipt");
         await fs.mkdir(path.join(skillDir, ".clawhub"), { recursive: true });
@@ -3359,7 +3359,7 @@ describe("ClawHub origin provenance readback", () => {
   }
 
   it("restores matching provenance and rejects one-sided origin edits", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-origin-prov-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-origin-prov-"));
     try {
       const artifact = {
         kind: "clawpack" as const,
@@ -3445,7 +3445,7 @@ describe("ClawHub origin provenance readback", () => {
   });
 
   it("drops malformed provenance fields while keeping the link valid", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-origin-prov-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-origin-prov-"));
     try {
       const skillDir = await writeOriginWithProvenance({
         workspaceDir,

@@ -4,7 +4,7 @@ import { stylePromptMessage } from "../../../packages/terminal-core/src/prompt-s
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { createConfigIO } from "../../config/config.js";
 import { formatConfigIssueLines } from "../../config/issue-format.js";
-import { disableCurrentOpenClawUpdateLaunchdJob } from "../../daemon/launchd.js";
+import { disableCurrentCarapaceUpdateLaunchdJob } from "../../daemon/launchd.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
   channelToNpmTag,
@@ -32,9 +32,9 @@ import { finishUpdateRun, recordUpdateRunPhase } from "../../infra/update-run-le
 import { loadInstalledPluginIndexInstallRecords } from "../../plugins/installed-plugin-index-records.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
 import { defaultRuntime } from "../../runtime.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../../state/openclaw-state-ownership.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../../state/carapace-state-ownership.js";
 import { VERSION } from "../../version.js";
 import { CLI_NAME } from "../cli-name.js";
 import { createUpdateProgress } from "./progress.js";
@@ -265,7 +265,7 @@ async function updateCommandInternal(
     await refuseUpdate(
       unsupportedMainTag ? "unsupported-package-target" : EXTENDED_STABLE_TAG_UNSUPPORTED_REASON,
       unsupportedMainTag
-        ? "`--tag main` cannot update a package install. Run `openclaw update --channel dev` to switch to the supported Git checkout and build flow."
+        ? "`--tag main` cannot update a package install. Run `carapace update --channel dev` to switch to the supported Git checkout and build flow."
         : undefined,
     );
     return;
@@ -280,7 +280,7 @@ async function updateCommandInternal(
   let packageInstallTarget: ResolvedGlobalInstallTarget | undefined;
   let installedPackageName = DEFAULT_PACKAGE_NAME;
   let packageAlreadyCurrent = false;
-  let packageTargetSchemaVersions: OpenClawSchemaVersions | undefined;
+  let packageTargetSchemaVersions: CarapaceSchemaVersions | undefined;
   let packageRuntimeTarget: { version: string; nodeEngine: string | null } | undefined;
   let managedServiceRootRedirect: ManagedServiceRootRedirect | null = null;
   // The service's Node can differ even when its package root matches the shell.
@@ -302,7 +302,7 @@ async function updateCommandInternal(
         );
         defaultRuntime.log(
           theme.warn(
-            `Shell OpenClaw root differs from the managed gateway service root: ${managedServiceRootRedirect.previousRoot}`,
+            `Shell Carapace root differs from the managed gateway service root: ${managedServiceRootRedirect.previousRoot}`,
           ),
         );
         defaultRuntime.log(
@@ -432,7 +432,7 @@ async function updateCommandInternal(
       if (targetMetadata.error || targetMetadata.version !== targetVersion) {
         await refuseUpdate(
           "target-metadata-preflight",
-          `Update refused: could not inspect exact package target openclaw@${targetVersion}: ${targetMetadata.error ?? `registry returned version ${targetMetadata.version ?? "unknown"}`}.`,
+          `Update refused: could not inspect exact package target carapace@${targetVersion}: ${targetMetadata.error ?? `registry returned version ${targetMetadata.version ?? "unknown"}`}.`,
         );
         return;
       }
@@ -598,7 +598,7 @@ async function updateCommandInternal(
     if (runtimeSelection.replacedNodeRunner && !opts.json) {
       defaultRuntime.log(
         theme.warn(
-          `Managed gateway service Node (${runtimeSelection.replacedNodeRunner}) cannot run openclaw@${runtimeSelection.targetVersion ?? tag}.`,
+          `Managed gateway service Node (${runtimeSelection.replacedNodeRunner}) cannot run carapace@${runtimeSelection.targetVersion ?? tag}.`,
         ),
       );
       defaultRuntime.log(
@@ -631,10 +631,10 @@ async function updateCommandInternal(
     // Cleanup, state-write admission and updater autostart belong after complete target admission.
     await withOwnedManagedUpdateEnv(env, async () => {
       await cleanupStaleManagedServiceUpdateHandoffs().catch(() => undefined);
-      await assertOpenClawStateWriteAllowedAtPath({
-        databasePath: resolveOpenClawStateSqlitePath(process.env),
+      await assertCarapaceStateWriteAllowedAtPath({
+        databasePath: resolveCarapaceStateSqlitePath(process.env),
       });
-      await disableCurrentOpenClawUpdateLaunchdJob().catch(() => undefined);
+      await disableCurrentCarapaceUpdateLaunchdJob().catch(() => undefined);
       preUpdatePluginInstallRecords = await loadInstalledPluginIndexInstallRecords();
     });
     mutableUpdatePrepared = true;

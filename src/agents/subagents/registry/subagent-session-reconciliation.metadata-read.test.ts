@@ -7,7 +7,7 @@ import {
   resolveSqliteScope,
   toDatabaseOptions,
 } from "../../../config/sessions/session-accessor.sqlite-scope.js";
-import { openOpenClawAgentDatabase } from "../../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../../state/carapace-agent-db.js";
 import { withEnvAsync } from "../../../test-utils/env.js";
 import { cleanupSessionStateForTest } from "../../../test-utils/session-state-cleanup.js";
 import {
@@ -19,7 +19,7 @@ import { resolveSubagentSessionCompletion } from "./subagent-session-reconciliat
 
 it("reads subagent lifecycle and policy metadata without decoding unrelated session payloads", async () => {
   const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "subagent-point-read-"));
-  await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
     try {
       const storePath = path.join(stateDir, "agents/main/sessions/sessions.json");
       const childSessionKey = "agent:main:subagent:target";
@@ -104,7 +104,7 @@ it("reads subagent lifecycle and policy metadata without decoding unrelated sess
         }),
       ).toBeNull();
 
-      const database = openOpenClawAgentDatabase(
+      const database = openCarapaceAgentDatabase(
         toDatabaseOptions(resolveSqliteScope({ storePath, sessionKey: childSessionKey })),
       );
       database.db

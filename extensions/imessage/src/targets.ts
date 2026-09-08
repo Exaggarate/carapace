@@ -1,5 +1,5 @@
 // Imessage plugin module implements targets behavior.
-import { normalizeE164 } from "openclaw/plugin-sdk/account-resolution";
+import { normalizeE164 } from "carapace/plugin-sdk/account-resolution";
 import {
   type ChatSenderAllowParams,
   createAllowedChatSenderMatcher,
@@ -7,8 +7,8 @@ import {
   parseChatTargetPrefixesOrThrow,
   resolveServicePrefixedChatTarget,
   resolveServicePrefixedOrChatAllowTarget,
-} from "openclaw/plugin-sdk/channel-targets";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-targets";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isIMessagePhoneLikeHandle,
   normalizeBareIMessageChatIdentifier,

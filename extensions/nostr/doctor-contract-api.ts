@@ -5,8 +5,8 @@ import path from "node:path";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { asFiniteNumber } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { asFiniteNumber } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeNostrStateAccountId } from "./src/state-account-id.js";
 
 type NostrBusState = {

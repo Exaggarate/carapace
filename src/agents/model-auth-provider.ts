@@ -2,7 +2,7 @@
  * Ordered credential resolution for one provider request.
  */
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
@@ -51,12 +51,12 @@ function assertAuthProfileNotRetired(params: {
     return;
   }
   throw new Error(
-    `Auth profile "${params.profileId}" is retired. Run ${formatCliCommand("openclaw doctor --fix")}.`,
+    `Auth profile "${params.profileId}" is retired. Run ${formatCliCommand("carapace doctor --fix")}.`,
   );
 }
 
 function shouldDeferSyntheticProfileAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   resolvedApiKey: string | undefined;
   modelApi?: string;
@@ -79,7 +79,7 @@ function shouldDeferSyntheticProfileAuth(params: {
 
 export function resolveScopedAuthProfileStore(params: {
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   profileId?: string;
   preferredProfile?: string;
@@ -92,7 +92,7 @@ export function resolveScopedAuthProfileStore(params: {
 
 function assertProviderAuthReady(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
 }): void {
   // Pending credential files own this agent's auth route until Doctor commits
@@ -106,7 +106,7 @@ function assertProviderAuthReady(params: {
 /** Resolves a stored provider-entry binding without general credential discovery. */
 export async function resolveProviderEntryApiKeyAuth(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   store: AuthProfileStore;
   agentDir?: string;
   modelApi?: string;
@@ -163,7 +163,7 @@ export async function resolveProviderEntryApiKeyAuth(params: {
 /** Resolves the credential that should be used for one provider request. */
 export async function resolveApiKeyForProviderCore(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   profileId?: string;
   preferredProfile?: string;
   store?: AuthProfileStore;
@@ -679,7 +679,7 @@ export async function resolveApiKeyForProviderCore(params: {
     [
       `No API key found for provider "${provider}".`,
       `Auth store: ${authStorePath}${agentDirContext}.`,
-      `Configure an API key (${formatCliCommand(`openclaw models auth paste-api-key --provider ${provider}`)}; add --agent <id> for a non-default agent) or copy only portable static auth profiles from the main agentDir.`,
+      `Configure an API key (${formatCliCommand(`carapace models auth paste-api-key --provider ${provider}`)}; add --agent <id> for a non-default agent) or copy only portable static auth profiles from the main agentDir.`,
     ].join(" "),
   );
 }

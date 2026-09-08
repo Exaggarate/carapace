@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   deliveryContextFromSession,
   normalizeSessionDeliveryState,
@@ -41,12 +41,12 @@ const sourceExpectedState = {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function trackFullTranscriptLoads(env: NodeJS.ProcessEnv): () => number {
-  const database = openOpenClawAgentDatabase({ agentId, env });
+  const database = openCarapaceAgentDatabase({ agentId, env });
   const { counts } = trackSqliteStatementExecutions(database.db, ["loads"], (sqlText) =>
     sqlText.includes('select "event_json" from "transcript_events"') &&
     sqlText.includes('order by "seq" asc')
@@ -80,8 +80,8 @@ async function createSiblingSession(params: {
 }
 
 async function createSession(options: { activeLeafTarget?: string } = {}) {
-  const stateDir = tempDirs.make("openclaw-message-cut-");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = tempDirs.make("carapace-message-cut-");
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const sessionId = "message-cut-source";
   const scope = { agentId, env, sessionId, sessionKey };
   const entry: InternalSessionEntry = {
@@ -141,7 +141,7 @@ async function createSession(options: { activeLeafTarget?: string } = {}) {
           { type: "text", text: "second prompt" },
           { type: "image", data: "aW1hZ2U=", mimeType: "image/png" },
         ],
-        __openclaw: {
+        __carapace: {
           media: [
             { path: "/state/media/inbound/stored-image.png", contentType: "image/png" },
             { path: "/state/media/inbound/notes.txt", contentType: "text/plain" },
@@ -420,8 +420,8 @@ describe("SQLite session message cuts", () => {
   });
 
   it("summarizes a large shared branch graph without repeated path walks", async () => {
-    const stateDir = tempDirs.make("openclaw-large-branches-");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-large-branches-");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sessionId = "large-branches-source";
     const scope = { agentId, env, sessionId, sessionKey };
     await upsertSessionEntryCore(scope, { sessionId, updatedAt: Date.now() });

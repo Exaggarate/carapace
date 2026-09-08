@@ -12,7 +12,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 const now = Date.now();
-const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
 const unavailableMessage =
   "Provider usage is unavailable; the last request failed. Refresh to retry.";
 
@@ -299,7 +299,7 @@ suite.define(() => {
         }
         await openaiCard.getByLabel("API key").fill("synthetic-main-provider-key");
 
-        const agentPicker = page.locator(".agent-scope-control openclaw-agent-select");
+        const agentPicker = page.locator(".agent-scope-control carapace-agent-select");
         await agentPicker.locator(".agent-select__trigger").click();
         await agentPicker.locator('wa-dropdown-item[aria-label="Writer"]').click();
         await expect.poll(async () => openaiCard.textContent()).toContain("Credentials for Writer");

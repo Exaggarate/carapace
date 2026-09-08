@@ -14,8 +14,8 @@ function installSkillLibraryMock(
   seed: ReturnType<typeof buildSkillLibraryMock>,
   models: ModelCatalogEntry[],
 ): void {
-  const gateway = (window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway })
-    .openclawControlUiE2eGateway;
+  const gateway = (window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway })
+    .carapaceControlUiE2eGateway;
   if (!gateway) {
     return;
   }

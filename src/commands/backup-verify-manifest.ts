@@ -1,5 +1,5 @@
 import path from "node:path";
-import { normalizeAgentId } from "@openclaw/normalization-core/agent-id";
+import { normalizeAgentId } from "@carapace/normalization-core/agent-id";
 import {
   isArchivePathWithin,
   normalizeArchivePath,

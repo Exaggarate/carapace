@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { resolveSessionStorePathCore, type SessionEntry } from "../../../config/sessions.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   resolveSubagentSessionCompletion,
   type SubagentSessionStoreCache,
 } from "./subagent-session-reconciliation.js";
 
-const configuredStorePath = "/virtual/openclaw-subagent-reconciliation-sessions.json";
+const configuredStorePath = "/virtual/carapace-subagent-reconciliation-sessions.json";
 const cfg = {
   session: { store: configuredStorePath },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 const storePath = resolveSessionStorePathCore(configuredStorePath, { agentId: "main" });
 
 const terminalSession: SessionEntry = {

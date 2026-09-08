@@ -6,15 +6,15 @@ import {
   sortPromptCacheToolsByName,
   splitSystemPromptCacheBoundary,
   stripSystemPromptCacheBoundary,
-} from "@openclaw/ai/internal/shared";
-import { mergeTransportHeaders, sanitizeTransportPayloadText } from "@openclaw/ai/transports";
-import { stableStringify } from "@openclaw/normalization-core";
+} from "@carapace/ai/internal/shared";
+import { mergeTransportHeaders, sanitizeTransportPayloadText } from "@carapace/ai/transports";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   parseDateStringTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { SessionTranscriptWriterClaimReboundError } from "../../config/sessions/transcript-write-context.js";
 import { parseGeminiAuth } from "../../infra/gemini-auth.js";
 import { normalizeGoogleApiBaseUrl } from "../../infra/google-api-base-url.js";
@@ -35,7 +35,7 @@ import { log } from "./logger.js";
 import { isGooglePromptCacheEligible, resolveCacheRetention } from "./prompt-cache-retention.js";
 import { prependRuntimeContextForModel } from "./run/runtime-context-prompt.js";
 
-const GOOGLE_PROMPT_CACHE_CUSTOM_TYPE = "openclaw.google-prompt-cache";
+const GOOGLE_PROMPT_CACHE_CUSTOM_TYPE = "carapace.google-prompt-cache";
 // CachedContent metadata responses are tiny (name + expireTime); cap the read so
 // a buggy/hostile Google endpoint cannot stream an unbounded body into memory.
 const GOOGLE_PROMPT_CACHE_RESPONSE_MAX_BYTES = 1024 * 1024;

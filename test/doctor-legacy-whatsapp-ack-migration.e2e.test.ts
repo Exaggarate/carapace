@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import { expect, it } from "vitest";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 
 it(
   "reports a legacy WhatsApp acknowledgement emoji kept by canonical config",
   { timeout: 180_000 },
   async () => {
-    const instance = await createOpenClawTestInstance({ name: "doctor-whatsapp-ack" });
+    const instance = await createCarapaceTestInstance({ name: "doctor-whatsapp-ack" });
     try {
       const initialConfig = JSON.parse(await fs.readFile(instance.configPath, "utf8"));
       await fs.writeFile(

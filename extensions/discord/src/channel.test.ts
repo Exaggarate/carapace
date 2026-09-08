@@ -2,14 +2,14 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { ChannelType } from "discord-api-types/v10";
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createStartAccountContext } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedDiscordAccount } from "./accounts.js";
 import { createDiscordLivePolicyReader } from "./monitor/live-policy.js";
@@ -37,9 +37,9 @@ function discordTestSendResult(messageId: string, channelId = "channel:thread-12
   };
 }
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -66,7 +66,7 @@ vi.mock("./audit.js", () => {
   };
 });
 
-function createCfg(): OpenClawConfig {
+function createCfg(): CarapaceConfig {
   return {
     channels: {
       discord: {
@@ -74,14 +74,14 @@ function createCfg(): OpenClawConfig {
         token: "discord-token",
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function resolveAccount(cfg: OpenClawConfig, accountId = "default"): ResolvedDiscordAccount {
+function resolveAccount(cfg: CarapaceConfig, accountId = "default"): ResolvedDiscordAccount {
   return discordPlugin.config.resolveAccount(cfg, accountId);
 }
 
-function startDiscordAccount(cfg: OpenClawConfig, accountId = "default") {
+function startDiscordAccount(cfg: CarapaceConfig, accountId = "default") {
   return discordPlugin.gateway!.startAccount!(
     createStartAccountContext({
       account: resolveAccount(cfg, accountId),
@@ -107,7 +107,7 @@ function prepareDiscordStartupMocks() {
 }
 
 async function expectDiscordStartupDelay(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   expectedMs: number,
 ) {
@@ -245,7 +245,7 @@ describe("discordPlugin policy status", () => {
   ])(
     "reports effective guild policy for $name without probing",
     async ({ channels, accountId, warning }) => {
-      const cfg = { channels } as OpenClawConfig;
+      const cfg = { channels } as CarapaceConfig;
       const account = resolveAccount(cfg, accountId);
       const snapshot = await discordPlugin.status!.buildAccountSnapshot!({
         account,
@@ -278,7 +278,7 @@ describe("discordPlugin outbound", () => {
 
     expect(
       buildToolContext({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         context: {
           To: "user:123456789",
           NativeChannelId: "987654321",
@@ -452,7 +452,7 @@ describe("discordPlugin outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveReplyToMode({ cfg, accountId: "work" })).toBe("first");
     expect(resolveReplyToMode({ cfg, accountId: "default" })).toBe("all");
@@ -698,7 +698,7 @@ describe("discordPlugin outbound", () => {
           token: { source: "env", provider: "default", id: "DISCORD_BOT_TOKEN" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await expect(startDiscordAccount(cfg)).rejects.toThrow(
       'Discord bot token configured for account "default" is unavailable',
@@ -866,7 +866,7 @@ describe("discordPlugin outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expectDiscordStartupDelay(cfg, "alpha", 0);
     await expectDiscordStartupDelay(cfg, "zeta", 10_000);
@@ -874,7 +874,7 @@ describe("discordPlugin outbound", () => {
 
   it("follows live policy published during a staggered account start", async () => {
     prepareDiscordStartupMocks();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           accounts: {
@@ -898,7 +898,7 @@ describe("discordPlugin outbound", () => {
     try {
       const pending = startDiscordAccount(cfg, "zeta");
       await vi.waitFor(() => expect(sleepWithAbortMock).toHaveBeenCalled());
-      const next: OpenClawConfig = {
+      const next: CarapaceConfig = {
         channels: {
           discord: {
             ...cfg.channels?.discord,
@@ -935,7 +935,7 @@ describe("discordPlugin outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expectDiscordStartupDelay(cfg, "main", 0);
     await expectDiscordStartupDelay(cfg, "billy", 10_000);
@@ -957,7 +957,7 @@ describe("discordPlugin outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expectDiscordStartupDelay(cfg, "billy", 0);
     await expectDiscordStartupDelay(cfg, "farber", 10_000);
@@ -975,7 +975,7 @@ describe("discordPlugin outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expectDiscordStartupDelay(cfg, "zeta", 0);
   });

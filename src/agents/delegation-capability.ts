@@ -14,7 +14,7 @@ export type DelegationCapability = "full" | "report_only";
 const NEW_DELEGATION_TOOL_NAMES = new Set([
   "codex_session_send",
   "llm-task",
-  "openclaw",
+  "carapace",
   "sessions_send",
   "sessions_spawn",
 ]);

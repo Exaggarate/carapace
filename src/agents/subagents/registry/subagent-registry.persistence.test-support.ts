@@ -89,7 +89,7 @@ export async function withSubagentRegistryPersistenceState<T>(
   params: PersistenceCleanup,
   run: () => Promise<T>,
 ): Promise<T> {
-  return await withEnvAsync({ OPENCLAW_STATE_DIR: params.stateDir }, async () => {
+  return await withEnvAsync({ CARAPACE_STATE_DIR: params.stateDir }, async () => {
     try {
       return await run();
     } finally {

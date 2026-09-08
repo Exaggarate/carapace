@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   buildRealtimeVoiceAgentErrorProviderResult,
   classifyRealtimeVoiceConsultToolCall,
@@ -16,9 +16,9 @@ import {
   type RealtimeVoiceSessionHarness,
   type RealtimeVoiceToolCallEvent,
   type RealtimeVoiceWakeNamePolicy,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { maybeControlDiscordVoiceAgentRun } from "./agent-control.js";
 import { formatVoiceLogPreview } from "./log-preview.js";
 import { formatVoiceIngressPrompt } from "./prompt.js";
@@ -33,11 +33,11 @@ const DISCORD_REALTIME_TALKBACK_DEBOUNCE_MS = 350;
 const DISCORD_REALTIME_FALLBACK_TEXT = "I hit an error while checking that. Please try again.";
 const DISCORD_REALTIME_FORCED_CONSULT_FALLBACK_DELAY_MS = 200;
 const DISCORD_REALTIME_FORCED_CONSULT_REASON =
-  "provider_final_transcript_without_openclaw_agent_consult";
+  "provider_final_transcript_without_carapace_agent_consult";
 
 const CANCELLED_CONSULT_RESULT = {
   status: "cancelled",
-  message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+  message: "Carapace cancelled this consult before completion. Do not restart it.",
 };
 
 type AgentProxyConsultResult =
@@ -585,7 +585,7 @@ export class DiscordRealtimeConsults {
     } else if (alreadyDelivered) {
       await this.submitTerminalRealtimeToolResult(callId, session, {
         status: "already_delivered",
-        message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+        message: "Carapace already delivered this answer to Discord voice. Do not repeat it.",
       });
     } else {
       await session.submitToolResult(callId, result);

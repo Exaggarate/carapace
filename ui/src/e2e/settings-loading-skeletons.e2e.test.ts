@@ -14,8 +14,8 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 
-const proofStage = process.env.OPENCLAW_UI_PROOF_STAGE ?? "after";
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const proofStage = process.env.CARAPACE_UI_PROOF_STAGE ?? "after";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const captureBeforeProof = captureUiProof && proofStage === "before";
 
 async function captureScreenshot(
@@ -94,7 +94,7 @@ suite.define(() => {
       await gateway.deferNext("models.authStatus");
       await gateway.deferNext("models.authStatus");
       await gateway.deferNext("models.authStatus");
-      const agentPicker = page.locator(".agent-scope-control openclaw-agent-select");
+      const agentPicker = page.locator(".agent-scope-control carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker.locator('wa-dropdown-item[aria-label="Reviewer"]').click();
       await expect
@@ -278,13 +278,13 @@ suite.define(() => {
   it("renders the Custodian history load as a skeleton", async () => {
     await withPage(async (page) => {
       const gateway = await installMockGateway(page, {
-        featureMethods: [...defaultControlUiFeatureMethods, "openclaw.changes.list"],
-        heldMethods: ["openclaw.changes.list"],
+        featureMethods: [...defaultControlUiFeatureMethods, "carapace.changes.list"],
+        heldMethods: ["carapace.changes.list"],
       });
       await page.goto(`${suite.server.baseUrl}custodian`);
       await waitForControlUiRoute(page, { pathname: "/custodian", routeId: "custodian" });
       await page.getByRole("button", { name: "History", exact: true }).click();
-      await gateway.waitForRequest("openclaw.changes.list");
+      await gateway.waitForRequest("carapace.changes.list");
       await captureLoadingState(page.locator(".custodian__history"), "custodian-history");
     });
   });
@@ -292,9 +292,9 @@ suite.define(() => {
   it("uses a compact spinner when Custodian refreshes existing history", async () => {
     await withPage(async (page) => {
       const gateway = await installMockGateway(page, {
-        featureMethods: [...defaultControlUiFeatureMethods, "openclaw.changes.list"],
+        featureMethods: [...defaultControlUiFeatureMethods, "carapace.changes.list"],
         methodResponses: {
-          "openclaw.changes.list": {
+          "carapace.changes.list": {
             entries: [
               {
                 at: Date.now() - 5_000,
@@ -311,14 +311,14 @@ suite.define(() => {
       await waitForControlUiRoute(page, { pathname: "/custodian", routeId: "custodian" });
       const historyToggle = page.getByRole("button", { name: "History", exact: true });
       await historyToggle.click();
-      await gateway.waitForRequest("openclaw.changes.list");
+      await gateway.waitForRequest("carapace.changes.list");
       await page.locator(".custodian__change-card").waitFor();
 
-      const requestCount = (await gateway.getRequests("openclaw.changes.list")).length;
-      await gateway.deferNext("openclaw.changes.list");
+      const requestCount = (await gateway.getRequests("carapace.changes.list")).length;
+      await gateway.deferNext("carapace.changes.list");
       await historyToggle.click();
       await historyToggle.click();
-      await gateway.waitForRequest("openclaw.changes.list", { after: requestCount });
+      await gateway.waitForRequest("carapace.changes.list", { after: requestCount });
 
       const history = page.locator(".custodian__history");
       const spinner = history.locator(".custodian__history-spinner");

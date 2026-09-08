@@ -1,5 +1,5 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { restoreLatestSkillCollectionBackup } from "../../skills/workshop/collection-restore.js";
 import { listSkillCollectionReviewOutcomes } from "../../skills/workshop/collection-review-state.js";
 import { ToolInputError } from "./common.js";
@@ -22,7 +22,7 @@ function summarizeSkillNames(names: string[]) {
 
 export async function executeSkillCollectionRestore(params: {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
 }) {
@@ -46,7 +46,7 @@ export async function executeSkillCollectionRestore(params: {
 export function executeSkillCollectionHistory(
   params: {
     workspaceDir: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     agentId?: string;
     env?: NodeJS.ProcessEnv;
   },

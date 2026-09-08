@@ -5,16 +5,16 @@ import {
   buildSkillWorkshopPromptSection,
   resolveMainSessionDelegationMode,
   SKILL_WORKSHOP_TOOL_NAME,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   normalizeUniqueStringEntries,
   readNonEmptyStringPreservingWhitespace as readNonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { isRawCopilotModelRun } from "./attempt-mode.js";
 import type { AttemptParamsLike } from "./attempt-types.js";
 
 const COPILOT_HARNESS_IDENTITY =
-  "You are a personal agent running inside OpenClaw. Your available OpenClaw capabilities are policy-filtered for this turn; use only the exact tools exposed to you.";
+  "You are a personal agent running inside Carapace. Your available Carapace capabilities are policy-filtered for this turn; use only the exact tools exposed to you.";
 
 export function buildCopilotPromptGuidance(params: {
   attempt: AttemptParamsLike;

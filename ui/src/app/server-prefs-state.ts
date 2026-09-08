@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import { UI_APPEARANCE_THEME_VALUES } from "../../../packages/gateway-protocol/src/schema/ui-appearance-preferences.ts";
 import { normalizeSidebarEntries } from "../app-navigation.ts";
 import { isSupportedLocale } from "../i18n/index.ts";

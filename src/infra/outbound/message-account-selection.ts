@@ -1,11 +1,11 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isChannelAccountExplicitlyDisabled } from "../../channels/account-config-enabled.js";
 import { resolveChannelAccountEnabled } from "../../channels/account-summary.js";
 import { resolveChannelDefaultAccountId } from "../../channels/plugins/helpers.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeOptionalAccountId } from "../../routing/account-id.js";
 import { assertSecretOwnerAvailable } from "../../secrets/runtime-degraded-state.js";
 import { isAccountEnabled } from "../../shared/account-enabled.js";
@@ -22,7 +22,7 @@ export type MessageBroadcastAccountPlan = {
 
 function resolveListedAccountId(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 }): string | undefined {
   const listedAccountId = params.plugin.config
@@ -45,7 +45,7 @@ function resolveListedAccountId(params: {
  * Host-derived defaults and binding accounts bypass this helper by design.
  */
 export function validateExplicitMessageAccountSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string | null;
   accountId?: unknown;
   plugin?: ChannelPlugin;
@@ -114,9 +114,9 @@ export function validateExplicitMessageAccountSelection(params: {
 
 /** Checks configured and enabled state after channel availability is resolved. */
 export function isPotentialConfiguredMessageChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   plugin: ChannelPlugin;
-}): params is { cfg: OpenClawConfig; plugin: ChannelPlugin & { id: ChannelId } } {
+}): params is { cfg: CarapaceConfig; plugin: ChannelPlugin & { id: ChannelId } } {
   const channelConfig = (params.cfg.channels as Record<string, unknown> | undefined)?.[
     params.plugin.id
   ];
@@ -146,7 +146,7 @@ export function isPotentialConfiguredMessageChannel(params: {
  * Host-derived binding/default accounts do not use this explicit-account plan.
  */
 export function resolveMessageBroadcastAccountPlan(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: unknown;
 }): MessageBroadcastAccountPlan | undefined {
   const accountId = validateExplicitMessageAccountSelection({

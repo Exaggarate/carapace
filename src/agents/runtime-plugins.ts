@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { adoptRuntimeContextEngineRegistrations } from "../context-engine/registry.js";
 import {
   listLoadedRuntimePluginIds,
@@ -28,7 +28,7 @@ import {
 } from "./harness/runtime-plugin-load-plan.js";
 
 type AgentRuntimePluginRegistryParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string | null;
   allowGatewaySubagentBinding?: boolean;
@@ -131,7 +131,7 @@ export function loadAgentRuntimePluginRegistryHandle(
 
 /** Binds a scoped plugin generation when a direct host has no Gateway owner. */
 export async function withAgentPluginRegistry<T>(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   selections?: readonly AgentHarnessPluginSelection[];
   workspaceDir: string;

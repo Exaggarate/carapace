@@ -1,5 +1,5 @@
 import type { WorkerAdmissionHandshake } from "../../../packages/gateway-protocol/src/schema/worker-admission.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import type { SecretRef } from "../../config/types.secrets.js";
 import type {
   WorkerNodeEnrollment,
@@ -28,7 +28,7 @@ export type WorkerEnvironmentAbandonment = {
 
 export type WorkerProviderLifecycleInputOptions = {
   store: WorkerEnvironmentStore;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   resolveProvider: (providerId: string) => WorkerProvider | undefined;
   prepareInstallation: (
     install: WorkerInstallationArtifact["install"],

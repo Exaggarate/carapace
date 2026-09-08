@@ -73,7 +73,7 @@ describe("plugin session writer claim projection", () => {
     "preserves server publication through %s lifecycle changes while rejecting forged grants",
     async (method) => {
       const sessionKey = "agent:main:plugin-publication";
-      const storePath = path.join(tempDirs.make("openclaw-sdk-publication-"), "sessions.json");
+      const storePath = path.join(tempDirs.make("carapace-sdk-publication-"), "sessions.json");
       const publicShare = { id: "a".repeat(48), sessionId: "session-1", createdAt: 1 };
       const updatedAt = Date.now();
       await replaceSessionEntry(
@@ -196,7 +196,7 @@ describe("plugin session writer claim projection", () => {
 
   it("preserves private generation fields when patches and upserts omit lifecycle revision", async () => {
     const sessionKey = "agent:main:patch-preserve-generation";
-    const storePath = path.join(tempDirs.make("openclaw-sdk-generation-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("carapace-sdk-generation-"), "sessions.json");
     await replaceSessionEntry({ sessionKey, storePath }, privateGenerationEntry());
 
     await patchSessionEntry({
@@ -238,7 +238,7 @@ describe("plugin session writer claim projection", () => {
 
   it("clears private generation fields when a patch rotates lifecycle revision", async () => {
     const sessionKey = "agent:main:patch-rotate-generation";
-    const storePath = path.join(tempDirs.make("openclaw-sdk-generation-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("carapace-sdk-generation-"), "sessions.json");
     await replaceSessionEntry({ sessionKey, storePath }, privateGenerationEntry());
 
     await patchSessionEntry({

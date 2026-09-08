@@ -4,7 +4,7 @@ import { normalizeChatType } from "../../channels/chat-type.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { loadSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { TypingMode } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayContextResolver } from "../../gateway/server-methods/types.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { defaultRuntime } from "../../runtime.js";
@@ -77,7 +77,7 @@ export type AdmittedFollowupTurn = {
   runId: string;
   queued: FollowupRun;
   operation: ReplyOperation;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   session: FollowupSessionOwner;
   sessionStore?: Record<string, SessionEntry>;
   currentInboundContext?: CurrentInboundPromptContext;

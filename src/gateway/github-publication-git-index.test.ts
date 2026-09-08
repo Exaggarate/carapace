@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { runCommandBuffered } from "../process/exec.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   assertGitHubPublicationRefCasCompleted,
   recoverGitHubPublicationBranchAndIndex,
@@ -19,13 +19,13 @@ import {
   githubPublicationUpdateRefArgs,
 } from "./github-publication-git-transport.js";
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let directoryIndex = 0;
 const REQUEST_ID = "11111111-1111-4111-8111-111111111111";
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
-    prefix: "openclaw-publication-index-",
+  testState = await createCarapaceTestState({
+    prefix: "carapace-publication-index-",
     env: { XDG_CONFIG_HOME: undefined },
   });
   directoryIndex = 0;
@@ -63,8 +63,8 @@ async function git(
 async function createFixture() {
   const cwd = await makeDirectory("git");
   await git(cwd, ["init", "--initial-branch=main"]);
-  await git(cwd, ["config", "user.name", "OpenClaw Test"]);
-  await git(cwd, ["config", "user.email", "openclaw@example.test"]);
+  await git(cwd, ["config", "user.name", "Carapace Test"]);
+  await git(cwd, ["config", "user.email", "carapace@example.test"]);
   await fs.writeFile(path.join(cwd, "artifact.txt"), "base\n");
   await git(cwd, ["add", "artifact.txt"]);
   await git(cwd, ["commit", "-m", "base"]);
@@ -75,7 +75,7 @@ async function createFixture() {
   const headCommit = await git(
     cwd,
     ["commit-tree", sourceIndexTree, "-p", previousHead],
-    `published\n\nOpenClaw-Publication: ${REQUEST_ID}\n`,
+    `published\n\nCarapace-Publication: ${REQUEST_ID}\n`,
   );
   return { cwd, previousHead, sourceIndexTree, workspaceTree: sourceIndexTree, headCommit };
 }
@@ -98,8 +98,8 @@ describe("GitHub publication index update", () => {
   it("accepts a linked worktree without a worktree config scope", async () => {
     const repository = await makeDirectory("worktree-config");
     await git(repository, ["init", "--initial-branch=main"]);
-    await git(repository, ["config", "user.name", "OpenClaw Test"]);
-    await git(repository, ["config", "user.email", "openclaw@example.test"]);
+    await git(repository, ["config", "user.name", "Carapace Test"]);
+    await git(repository, ["config", "user.email", "carapace@example.test"]);
     await fs.writeFile(path.join(repository, "artifact.txt"), "base\n");
     await git(repository, ["add", "artifact.txt"]);
     await git(repository, ["commit", "-m", "base"]);
@@ -128,14 +128,14 @@ describe("GitHub publication index update", () => {
     const remote = await makeDirectory("remote");
     const hooks = await makeDirectory("hooks");
     const marker = path.join(hooks, "invoked");
-    const hookEnv = { ...process.env, OPENCLAW_PUBLICATION_HOOK_MARKER: marker };
+    const hookEnv = { ...process.env, CARAPACE_PUBLICATION_HOOK_MARKER: marker };
     await git(remote, ["init", "--bare"]);
     await Promise.all(
       ["pre-push", "post-index-change", "reference-transaction"].map(
         async (hook) =>
           await fs.writeFile(
             path.join(hooks, hook),
-            '#!/bin/sh\nprintf invoked > "$OPENCLAW_PUBLICATION_HOOK_MARKER"\nexit 97\n',
+            '#!/bin/sh\nprintf invoked > "$CARAPACE_PUBLICATION_HOOK_MARKER"\nexit 97\n',
             { mode: 0o755 },
           ),
       ),

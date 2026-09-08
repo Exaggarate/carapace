@@ -1,5 +1,5 @@
 // Maintains interactive plugin registry entries discovered from manifests.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizePluginInteractiveNamespace,
   resolvePluginInteractiveMatch,

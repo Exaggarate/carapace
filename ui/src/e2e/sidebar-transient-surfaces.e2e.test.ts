@@ -14,7 +14,7 @@ import { createSidebarCustomizationSuite } from "./sidebar-customization.test-su
 const suite = createSidebarCustomizationSuite(
   "Control UI transient surface tokens mocked Gateway E2E",
 );
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 const themes = [
   { colorScheme: "light", resolvedTheme: "light", theme: "claw" },
@@ -74,7 +74,7 @@ suite.define(() => {
         const root = page.locator("html");
         await expect.poll(() => root.getAttribute("data-theme")).toBe(resolvedTheme);
 
-        const session = page.locator(`openclaw-app-sidebar [data-session-key="${sessionKey}"]`);
+        const session = page.locator(`carapace-app-sidebar [data-session-key="${sessionKey}"]`);
         await session.waitFor();
         await session.hover();
         await session.locator("[data-session-menu]").click();

@@ -8,7 +8,7 @@ import {
   ATTR_GEN_AI_TOOL_DEFINITIONS,
   GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
 } from "@opentelemetry/semantic-conventions/incubating";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   MAX_OTEL_CONTENT_ARRAY_ITEMS,
   MAX_OTEL_CONTENT_ATTRIBUTE_CHARS,
@@ -33,7 +33,7 @@ function textPart(content: string): Record<string, unknown> {
   return { type: "text", content };
 }
 
-// Shared text-part reading for gen_ai message normalization: OpenClaw emits
+// Shared text-part reading for gen_ai message normalization: Carapace emits
 // {type:"text", text}; some harness shapes carry {type:"text", content}.
 function textPartContent(part: Record<string, unknown>): string | undefined {
   if (part.type !== "text") {
@@ -180,7 +180,7 @@ function redactInternalReasoningFromMessage(value: unknown): unknown {
   }
   const redacted = { ...value };
   // Compatible provider replay payloads can attach reasoning beside `content`
-  // instead of using OpenClaw's normalized thinking blocks. Those fields are
+  // instead of using Carapace's normalized thinking blocks. Those fields are
   // transport-private too and must not survive compatibility serialization.
   for (const field of INTERNAL_REASONING_MESSAGE_FIELDS) {
     delete redacted[field];
@@ -339,7 +339,7 @@ export function assignOtelToolIdentityAttributes(
   evt: { toolCallId?: string },
 ): void {
   // Semconv execute_tool identity, span-only by design: metric attrs must stay
-  // low-cardinality, and unlike the dropped openclaw.toolCallId passthrough keys
+  // low-cardinality, and unlike the dropped carapace.toolCallId passthrough keys
   // (DROPPED_OTEL_ATTRIBUTE_KEYS) the semconv id is a deliberate per-span export.
   attributes["gen_ai.operation.name"] = GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL;
   const toolCallId = evt.toolCallId?.trim();
@@ -367,26 +367,26 @@ export function assignOtelModelContentAttributes(
   if (policy.inputMessages) {
     assignOtelContentAttribute(
       attributes,
-      "openclaw.content.input_messages",
+      "carapace.content.input_messages",
       redactedContent?.inputMessages,
     );
   }
   if (policy.toolDefinitions) {
     assignOtelContentAttribute(
       attributes,
-      "openclaw.content.tool_definitions",
+      "carapace.content.tool_definitions",
       content?.toolDefinitions,
     );
   }
   if (policy.outputMessages) {
     assignOtelContentAttribute(
       attributes,
-      "openclaw.content.output_messages",
+      "carapace.content.output_messages",
       redactedContent?.outputMessages,
     );
   }
   if (policy.systemPrompt) {
-    assignOtelContentAttribute(attributes, "openclaw.content.system_prompt", content?.systemPrompt);
+    assignOtelContentAttribute(attributes, "carapace.content.system_prompt", content?.systemPrompt);
   }
 }
 
@@ -396,19 +396,19 @@ export function assignOtelToolContentAttributes(
   policy: OtelContentCapturePolicy,
 ): void {
   // Mirror captured content onto the semconv keys next to the shipped
-  // openclaw.content.* names; normalize once so both copies stay byte-identical.
+  // carapace.content.* names; normalize once so both copies stay byte-identical.
   if (policy.toolInputs) {
     const toolInput = normalizeOtelContentValue(content?.toolInput);
     if (toolInput) {
       attributes[ATTR_GEN_AI_TOOL_CALL_ARGUMENTS] = toolInput;
-      attributes["openclaw.content.tool_input"] = toolInput;
+      attributes["carapace.content.tool_input"] = toolInput;
     }
   }
   if (policy.toolOutputs) {
     const toolOutput = normalizeOtelContentValue(content?.toolOutput);
     if (toolOutput) {
       attributes[ATTR_GEN_AI_TOOL_CALL_RESULT] = toolOutput;
-      attributes["openclaw.content.tool_output"] = toolOutput;
+      attributes["carapace.content.tool_output"] = toolOutput;
     }
   }
 }

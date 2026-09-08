@@ -4,7 +4,7 @@ import { hasErrnoCode } from "./errno.js";
 import { runtimeProcessEntrypoints } from "./runtime-process-entrypoints.js";
 import { resolveRuntimeWorkerArgv, resolveRuntimeWorkerUrl } from "./runtime-worker-url.js";
 
-export const SQLITE_READONLY_CHILD_ARG = "--openclaw-sqlite-readonly-child";
+export const SQLITE_READONLY_CHILD_ARG = "--carapace-sqlite-readonly-child";
 const SQLITE_READONLY_STDERR_TAIL_CHARS = 4_000;
 // A 300 MiB synthetic database took 1.13–3.15 s to snapshot and <1 s to
 // integrity-check. Leave storage headroom after admission has excluded writers.
@@ -12,7 +12,7 @@ export const SQLITE_INSPECTION_TIMEOUT_MS = 30_000;
 
 export function sqliteInspectionTimeoutError(operation: string, pathname: string): Error {
   return new Error(
-    `SQLite ${operation} timed out after 30 seconds for ${pathname}. Stop the Gateway service and other OpenClaw processes using this database, then retry; if already stopped, check storage performance.`,
+    `SQLite ${operation} timed out after 30 seconds for ${pathname}. Stop the Gateway service and other Carapace processes using this database, then retry; if already stopped, check storage performance.`,
   );
 }
 

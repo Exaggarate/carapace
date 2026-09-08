@@ -10,12 +10,12 @@ import {
   SessionDeliveryDeferredError,
   type QueuedSessionDelivery,
 } from "../../../infra/session-delivery-queue-storage.js";
-import { resolvePreferredOpenClawTmpDir } from "../../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../../infra/tmp-carapace-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../../state/carapace-state-db.js";
 import { ensureTaskRegistryReady, getTaskById } from "../../../tasks/runtime-internal.js";
 import { publishTaskRecordAfterAtomicStore } from "../../../tasks/task-registry.js";
 import type { TaskRecord } from "../../../tasks/task-registry.types.js";
@@ -54,17 +54,17 @@ vi.mock("../registry/subagent-registry.js", () => ({ resumeSubagentRun }));
 
 describe("atomic subagent completion admission store", () => {
   let tempDir: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-subagent-admission-", resolvePreferredOpenClawTmpDir());
-    database = openOpenClawStateDatabase({ path: path.join(tempDir, "state.sqlite") });
+    tempDir = tempDirs.make("carapace-subagent-admission-", resolvePreferredCarapaceTmpDir());
+    database = openCarapaceStateDatabase({ path: path.join(tempDir, "state.sqlite") });
   });
 
   afterEach(() => {
     subagentRuns.clear();
     resetTaskRegistryForTests({ persist: false });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
   });
 
@@ -109,20 +109,20 @@ describe("atomic subagent completion admission store", () => {
     clearRows();
     subagentRuns.clear();
     resetTaskRegistryForTests({ persist: false });
-    database = openOpenClawStateDatabase({ path: path.join(tempDir, "state.sqlite") });
+    database = openCarapaceStateDatabase({ path: path.join(tempDir, "state.sqlite") });
   }
 
   function useDefaultDatabase(): void {
-    closeOpenClawStateDatabaseForTest();
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
-    database = openOpenClawStateDatabase();
+    closeCarapaceStateDatabaseForTest();
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
+    database = openCarapaceStateDatabase();
   }
 
   function reopenOwners() {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     subagentRuns.clear();
     resetTaskRegistryForTests({ persist: false });
-    database = openOpenClawStateDatabase();
+    database = openCarapaceStateDatabase();
     for (const [runId, entry] of loadSubagentRegistryFromSqlite()) {
       subagentRuns.set(runId, entry);
     }
@@ -661,9 +661,9 @@ describe("atomic subagent completion admission store", () => {
   });
 
   it("recovers canonical completion guidance after restart and clears payload after redrive success", async () => {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tempDir }, async () => {
-      closeOpenClawStateDatabaseForTest();
-      database = openOpenClawStateDatabase();
+    await withEnvAsync({ CARAPACE_STATE_DIR: tempDir }, async () => {
+      closeCarapaceStateDatabaseForTest();
+      database = openCarapaceStateDatabase();
       const input = records();
       input.subagent.delivery = {
         status: "pending",
@@ -741,8 +741,8 @@ describe("atomic subagent completion admission store", () => {
       await releaseSessionDeliveryClaim(second.id);
       resetTaskRegistryForTests({ persist: false });
       subagentRuns.clear();
-      closeOpenClawStateDatabaseForTest();
-      database = openOpenClawStateDatabase();
+      closeCarapaceStateDatabaseForTest();
+      database = openCarapaceStateDatabase();
       for (const [runId, entry] of loadSubagentRegistryFromSqlite()) {
         subagentRuns.set(runId, entry);
       }
@@ -800,9 +800,9 @@ describe("atomic subagent completion admission store", () => {
   });
 
   it("reloads a blocked text completion from SQLite before canonical owner redrive", async () => {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tempDir }, async () => {
-      closeOpenClawStateDatabaseForTest();
-      database = openOpenClawStateDatabase();
+    await withEnvAsync({ CARAPACE_STATE_DIR: tempDir }, async () => {
+      closeCarapaceStateDatabaseForTest();
+      database = openCarapaceStateDatabase();
       const input = records();
       const now = Date.now();
       input.subagent.delivery = {
@@ -860,8 +860,8 @@ describe("atomic subagent completion admission store", () => {
 
       resetTaskRegistryForTests({ persist: false });
       subagentRuns.clear();
-      closeOpenClawStateDatabaseForTest();
-      database = openOpenClawStateDatabase();
+      closeCarapaceStateDatabaseForTest();
+      database = openCarapaceStateDatabase();
       for (const [runId, entry] of loadSubagentRegistryFromSqlite()) {
         subagentRuns.set(runId, entry);
       }

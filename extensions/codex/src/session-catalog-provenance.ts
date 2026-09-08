@@ -1,6 +1,6 @@
 import path from "node:path";
 import { createZstdDecompress } from "node:zlib";
-import { root as openSafeFilesystemRoot } from "openclaw/plugin-sdk/file-access-runtime";
+import { root as openSafeFilesystemRoot } from "carapace/plugin-sdk/file-access-runtime";
 import {
   isJsonObject,
   type CodexThread,
@@ -107,10 +107,10 @@ export async function readCodexSessionMeta(
 }
 
 /**
- * Codex 0.147 reports OpenClaw app-server rollouts as `vscode`, so the rollout's
+ * Codex 0.147 reports Carapace app-server rollouts as `vscode`, so the rollout's
  * immutable session metadata is the authoritative historical provenance.
  */
-export async function isOpenClawManagedCodexThread(
+export async function isCarapaceManagedCodexThread(
   thread: CodexThread,
   localSessionsRoot: string | undefined,
 ): Promise<boolean> {
@@ -124,7 +124,7 @@ export async function isOpenClawManagedCodexThread(
     return cached;
   }
   const metadata = await readCodexSessionMeta(localSessionsRoot, rolloutPath, thread.id);
-  const managed = metadata === undefined ? undefined : metadata?.originator === "openclaw";
+  const managed = metadata === undefined ? undefined : metadata?.originator === "carapace";
   // A missing or still-being-written rollout must not become a permanent false
   // negative. Newly created sessions are additionally covered by the durable
   // ownership store, while a completed metadata line can be cached safely.

@@ -7,18 +7,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateToolArguments } from "../../packages/llm-core/src/validation.js";
 import { execSchema } from "../../src/agents/bash-tools.schemas.js";
 import { writeJsonAtomic } from "../../src/infra/json-files.js";
 import { captureFullEnv } from "../../src/test-utils/env.js";
-import { createOpenClawTestState } from "../../src/test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../src/test-utils/carapace-test-state.js";
 import { getFreePort } from "../../src/test-utils/ports.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../helpers/carapace-test-instance.js";
 import { runSqliteSessionsTranscriptsFlipProof } from "../helpers/sqlite-sessions-transcripts-flip-proof.js";
 import { stopChildProcess } from "../helpers/stop-child-process.js";
 
@@ -26,14 +26,14 @@ vi.mock("node:child_process", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:child_process")>();
   return { ...actual, spawn: vi.fn(actual.spawn) };
 });
-vi.mock("../../src/test-utils/openclaw-test-state.js", async (importOriginal) => {
+vi.mock("../../src/test-utils/carapace-test-state.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../../src/test-utils/openclaw-test-state.js")>();
-  return { ...actual, createOpenClawTestState: vi.fn(actual.createOpenClawTestState) };
+    await importOriginal<typeof import("../../src/test-utils/carapace-test-state.js")>();
+  return { ...actual, createCarapaceTestState: vi.fn(actual.createCarapaceTestState) };
 });
-vi.mock("../helpers/openclaw-test-instance.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../helpers/openclaw-test-instance.js")>();
-  return { ...actual, createOpenClawTestInstance: vi.fn(actual.createOpenClawTestInstance) };
+vi.mock("../helpers/carapace-test-instance.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../helpers/carapace-test-instance.js")>();
+  return { ...actual, createCarapaceTestInstance: vi.fn(actual.createCarapaceTestInstance) };
 });
 vi.mock("../helpers/stop-child-process.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../helpers/stop-child-process.js")>();
@@ -56,10 +56,10 @@ const scrubbedEnvKeys = [
   "MOCK_RESPONSE_CONTROL",
   "MOCK_TLS_CERT",
   "MOCK_TLS_KEY",
-  "OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES",
-  "OPENCLAW_CONFIG_RELOAD_LOG_PATH",
-  "OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS",
-  "OPENCLAW_MOCK_OPENAI_PORT",
+  "CARAPACE_CONFIG_RELOAD_LOG_MAX_READ_BYTES",
+  "CARAPACE_CONFIG_RELOAD_LOG_PATH",
+  "CARAPACE_CONFIG_RELOAD_LOG_TIMEOUT_MS",
+  "CARAPACE_MOCK_OPENAI_PORT",
   "RAW_SCHEMA_ERROR",
   "SUCCESS_MARKER",
 ];
@@ -191,7 +191,7 @@ describe("mock OpenAI response markers", () => {
         mockOpenAiPath,
         { MOCK_DRAFTPROOF_FINAL_DELAY_MS: "80" },
         async (baseUrl) => {
-          const user = { role: "user", content: "return OPENCLAW_E2E_DRAFTPROOF" };
+          const user = { role: "user", content: "return CARAPACE_E2E_DRAFTPROOF" };
           const tool = {
             name: "exec",
             description: "Execute a shell command",
@@ -281,8 +281,8 @@ describe("mock OpenAI response markers", () => {
             name: call.name,
             arguments: args,
           });
-          taskExpect(args.command).toBe("sleep 3 && echo openclaw-draft-proof");
-          let toolOutput = "openclaw-draft-proof\n";
+          taskExpect(args.command).toBe("sleep 3 && echo carapace-draft-proof");
+          let toolOutput = "carapace-draft-proof\n";
           // The command is POSIX shell syntax; Windows still covers HTTP and native validation.
           if (process.platform !== "win32") {
             const startedAt = performance.now();
@@ -311,7 +311,7 @@ describe("mock OpenAI response markers", () => {
             const response = stream
               ? final.find((event) => event.type === "response.completed").response
               : final[0];
-            taskExpect(response.output[0].content[0].text).toBe("OPENCLAW_E2E_DRAFTPROOF");
+            taskExpect(response.output[0].content[0].text).toBe("CARAPACE_E2E_DRAFTPROOF");
           } else {
             taskExpect(
               final
@@ -321,7 +321,7 @@ describe("mock OpenAI response markers", () => {
                     : chunk.choices[0].message.content,
                 )
                 .join(""),
-            ).toBe("OPENCLAW_E2E_DRAFTPROOF");
+            ).toBe("CARAPACE_E2E_DRAFTPROOF");
             taskExpect(performance.now() - finalStartedAt).toBeGreaterThanOrEqual(60);
           }
         },
@@ -329,17 +329,17 @@ describe("mock OpenAI response markers", () => {
     },
   );
 
-  it("echoes dynamic OpenClaw E2E and update serving markers", async () => {
+  it("echoes dynamic Carapace E2E and update serving markers", async () => {
     await withMockServer(mockOpenAiPath, {}, async (baseUrl) => {
       const servingMarker = "update-verified-67a60fb5-203d-4d08-bfba-6f5a053af61b";
       const cases = [
-        ...["OPENCLAW_E2E_SEED_0_123", "OPENCLAW_E2E_ANDROID_OK"].map((marker) => ({
+        ...["CARAPACE_E2E_SEED_0_123", "CARAPACE_E2E_ANDROID_OK"].map((marker) => ({
           marker,
           prompt: `Reply exactly with ${marker}.`,
         })),
         {
           marker: servingMarker,
-          prompt: `This is an OpenClaw update serving check. Do not use tools. Reply with exactly: ${servingMarker}`,
+          prompt: `This is an Carapace update serving check. Do not use tools. Reply with exactly: ${servingMarker}`,
         },
       ];
       for (const { marker, prompt } of cases) {
@@ -393,7 +393,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("accepts response-control delays above 60 seconds", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-delay-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-delay-"));
     const control = join(root, "response.json");
     try {
       await writeFile(control, JSON.stringify({ chunkDelayMs: 60_001, text: "delayed response" }));
@@ -412,7 +412,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("reloads the lane-owned response control between turns", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-"));
     const control = join(root, "response.json");
     try {
       await writeFile(control, JSON.stringify({ chunkDelayMs: 0, text: "first response" }));
@@ -422,7 +422,7 @@ describe("mock OpenAI response markers", () => {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              input: "return OPENCLAW_E2E_EDIT_FAILURE_UNRESOLVED",
+              input: "return CARAPACE_E2E_EDIT_FAILURE_UNRESOLVED",
               stream: false,
             }),
           }).then((response) => response.json());
@@ -431,7 +431,7 @@ describe("mock OpenAI response markers", () => {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            messages: [{ content: "return OPENCLAW_E2E_DRAFTPROOF", role: "user" }],
+            messages: [{ content: "return CARAPACE_E2E_DRAFTPROOF", role: "user" }],
             stream: false,
           }),
         }).then((response) => response.json());
@@ -445,7 +445,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("streams lane-owned raw Responses API events", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-events-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-events-"));
     const control = join(root, "response.json");
     const events = [
       { delta: "< / internal", type: "response.reasoning_text.delta" },
@@ -472,7 +472,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("holds a lane response until the recorder reveals the outbound message", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-hold-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-hold-"));
     const control = join(root, "response.json");
     try {
       await writeFile(
@@ -508,7 +508,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("consumes scripted responses in order and logs the selected entries", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-script-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-script-"));
     const control = join(root, "response.json");
     const requestLog = join(root, "requests.ndjson");
     const script = {
@@ -589,7 +589,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("records bounded media facts without provider payload bytes", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-content-facts-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-content-facts-"));
     const requestLog = join(root, "requests.ndjson");
     const pdfBytes = "private-pdf-bytes";
     const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
@@ -694,7 +694,7 @@ describe("mock OpenAI response markers", () => {
   });
 
   it("supports scripted connection drops", async () => {
-    const root = await mkdtemp(join(tmpdir(), "openclaw-mock-response-drop-"));
+    const root = await mkdtemp(join(tmpdir(), "carapace-mock-response-drop-"));
     const control = join(root, "response.json");
     try {
       await writeFile(
@@ -833,7 +833,7 @@ describe("e2e mock and config helper numeric limits", () => {
         body: JSON.stringify({ input: "ephemeral listener" }),
       });
       expect(response.status).toBe(200);
-      expect(await response.text()).toContain("OPENCLAW_E2E_OK");
+      expect(await response.text()).toContain("CARAPACE_E2E_OK");
     });
   });
 
@@ -844,9 +844,9 @@ describe("e2e mock and config helper numeric limits", () => {
   });
 
   it("keeps zero invalid for other launcher port settings", () => {
-    const fallback = runScript(mockOpenAiPath, { OPENCLAW_MOCK_OPENAI_PORT: "0" });
+    const fallback = runScript(mockOpenAiPath, { CARAPACE_MOCK_OPENAI_PORT: "0" });
     expect(fallback.status).not.toBe(0);
-    expect(fallback.stderr).toContain("invalid OPENCLAW_MOCK_OPENAI_PORT: 0");
+    expect(fallback.stderr).toContain("invalid CARAPACE_MOCK_OPENAI_PORT: 0");
     const webSearch = runScript(webSearchMockPath, { MOCK_PORT: "0" });
     expect(webSearch.status).not.toBe(0);
     expect(webSearch.stderr).toContain("invalid MOCK_PORT: 0");
@@ -858,10 +858,10 @@ describe("e2e mock and config helper numeric limits", () => {
     expect(mockPort.stderr).toContain("invalid MOCK_PORT: 44080tcp");
 
     const fallbackPort = runScript(mockOpenAiPath, {
-      OPENCLAW_MOCK_OPENAI_PORT: "44080http",
+      CARAPACE_MOCK_OPENAI_PORT: "44080http",
     });
     expect(fallbackPort.status).not.toBe(0);
-    expect(fallbackPort.stderr).toContain("invalid OPENCLAW_MOCK_OPENAI_PORT: 44080http");
+    expect(fallbackPort.stderr).toContain("invalid CARAPACE_MOCK_OPENAI_PORT: 44080http");
   });
 
   it("rejects out-of-range mock OpenAI port env values", () => {
@@ -870,10 +870,10 @@ describe("e2e mock and config helper numeric limits", () => {
     expect(mockPort.stderr).toContain("invalid MOCK_PORT: 65536");
 
     const fallbackPort = runScript(mockOpenAiPath, {
-      OPENCLAW_MOCK_OPENAI_PORT: "65536",
+      CARAPACE_MOCK_OPENAI_PORT: "65536",
     });
     expect(fallbackPort.status).not.toBe(0);
-    expect(fallbackPort.stderr).toContain("invalid OPENCLAW_MOCK_OPENAI_PORT: 65536");
+    expect(fallbackPort.stderr).toContain("invalid CARAPACE_MOCK_OPENAI_PORT: 65536");
   });
 
   it("rejects loose OpenAI web-search mock port env values", () => {
@@ -901,24 +901,24 @@ describe("e2e mock and config helper numeric limits", () => {
 
   it("rejects loose config-reload log timeout env values", () => {
     const result = runScript(configReloadAssertPath, {
-      OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS: "30000ms",
+      CARAPACE_CONFIG_RELOAD_LOG_TIMEOUT_MS: "30000ms",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS: 30000ms");
+    expect(result.stderr).toContain("invalid CARAPACE_CONFIG_RELOAD_LOG_TIMEOUT_MS: 30000ms");
   });
 
   it("rejects loose config-reload log read caps", () => {
     const result = runScript(configReloadAssertPath, {
-      OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES: "256kb",
+      CARAPACE_CONFIG_RELOAD_LOG_MAX_READ_BYTES: "256kb",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES: 256kb");
+    expect(result.stderr).toContain("invalid CARAPACE_CONFIG_RELOAD_LOG_MAX_READ_BYTES: 256kb");
   });
 
   it("returns a clear error when mock OpenAI cannot append request logs", async () => {
-    const requestLogDirectory = await mkdtemp(join(tmpdir(), "openclaw-mock-request-log-"));
+    const requestLogDirectory = await mkdtemp(join(tmpdir(), "carapace-mock-request-log-"));
     try {
       await withMockServer(
         mockOpenAiPath,
@@ -927,7 +927,7 @@ describe("e2e mock and config helper numeric limits", () => {
           const response = await fetch(`${baseUrl}/v1/responses`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ input: "OPENCLAW_E2E_OK" }),
+            body: JSON.stringify({ input: "CARAPACE_E2E_OK" }),
           });
           const body = await response.json();
 
@@ -944,21 +944,21 @@ describe("e2e mock and config helper numeric limits", () => {
   });
 
   it("returns a clear error when web-search mock cannot append request logs", async () => {
-    const requestLogDirectory = await mkdtemp(join(tmpdir(), "openclaw-web-search-log-"));
+    const requestLogDirectory = await mkdtemp(join(tmpdir(), "carapace-web-search-log-"));
     try {
       await withMockServer(
         webSearchMockPath,
         {
           MOCK_REQUEST_LOG: requestLogDirectory,
           RAW_SCHEMA_ERROR: "400 schema rejected",
-          SUCCESS_MARKER: "OPENCLAW_SCHEMA_E2E_OK",
+          SUCCESS_MARKER: "CARAPACE_SCHEMA_E2E_OK",
         },
         async (baseUrl, output) => {
           const response = await fetch(`${baseUrl}/v1/responses`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              input: "OPENCLAW_SCHEMA_E2E_OK",
+              input: "CARAPACE_SCHEMA_E2E_OK",
               reasoning: { effort: "low" },
               tools: [{ type: "web_search" }],
             }),
@@ -1008,17 +1008,17 @@ describe("SQLite flip mock endpoint ownership", () => {
       process.env.ANTHROPIC_API_KEY = "ambient-provider-fixture";
       const previousEnv = { ...process.env };
       const actualState = await vi.importActual<
-        typeof import("../../src/test-utils/openclaw-test-state.js")
-      >("../../src/test-utils/openclaw-test-state.js");
+        typeof import("../../src/test-utils/carapace-test-state.js")
+      >("../../src/test-utils/carapace-test-state.js");
       const actualInstance = await vi.importActual<
-        typeof import("../helpers/openclaw-test-instance.js")
-      >("../helpers/openclaw-test-instance.js");
+        typeof import("../helpers/carapace-test-instance.js")
+      >("../helpers/carapace-test-instance.js");
       const actualStop = await vi.importActual<typeof import("../helpers/stop-child-process.js")>(
         "../helpers/stop-child-process.js",
       );
       const configFailure = new Error("fixture configuration write failed");
       const stopFailure = new Error("mock process closure could not be verified");
-      let instance: OpenClawTestInstance | undefined;
+      let instance: CarapaceTestInstance | undefined;
       let publishedPort: number | undefined;
       let competingBind: unknown;
       let requestLog = "";
@@ -1029,8 +1029,8 @@ describe("SQLite flip mock endpoint ownership", () => {
       const cli = vi.fn(async (): Promise<never> => {
         throw new Error("CLI ran before configuration completed");
       });
-      vi.mocked(createOpenClawTestState).mockImplementation(async (options) => {
-        const state = await actualState.createOpenClawTestState(options);
+      vi.mocked(createCarapaceTestState).mockImplementation(async (options) => {
+        const state = await actualState.createCarapaceTestState(options);
         const writeConfig = state.writeConfig;
         state.writeConfig = async (config) => {
           const record = asRecord(config);
@@ -1056,15 +1056,15 @@ describe("SQLite flip mock endpoint ownership", () => {
               body: JSON.stringify({ input: "mock startup proof" }),
             });
             expect(response.status).toBe(200);
-            expect(await response.text()).toContain("OPENCLAW_E2E_OK_12");
+            expect(await response.text()).toContain("CARAPACE_E2E_OK_12");
             requestLog = await readFile(state.statePath("mock-openai-requests.ndjson"), "utf8");
           }
           throw configFailure;
         };
         return state;
       });
-      vi.mocked(createOpenClawTestInstance).mockImplementation(async (options) => {
-        instance = await actualInstance.createOpenClawTestInstance(options);
+      vi.mocked(createCarapaceTestInstance).mockImplementation(async (options) => {
+        instance = await actualInstance.createCarapaceTestInstance(options);
         instance.cli = cli;
         instance.entrypoint = cli;
         return instance;
@@ -1095,11 +1095,11 @@ describe("SQLite flip mock endpoint ownership", () => {
           Object.keys(previousEnv).filter((key) => process.env[key] !== previousEnv[key]),
         ).toEqual([]);
         expect(instance).toBeDefined();
-        expect({ HOME: childEnv?.HOME, OPENCLAW_STATE_DIR: childEnv?.OPENCLAW_STATE_DIR }).toEqual({
+        expect({ HOME: childEnv?.HOME, CARAPACE_STATE_DIR: childEnv?.CARAPACE_STATE_DIR }).toEqual({
           HOME: instance!.homeDir,
-          OPENCLAW_STATE_DIR: instance!.stateDir,
+          CARAPACE_STATE_DIR: instance!.stateDir,
         });
-        expect(childEnv?.OPENAI_API_KEY === "sk-openclaw-e2e-mock").toBe(true);
+        expect(childEnv?.OPENAI_API_KEY === "sk-carapace-e2e-mock").toBe(true);
         expect(childEnv?.ANTHROPIC_API_KEY).toBeUndefined();
         if (unverifiedStop) {
           expect(result).toBeInstanceOf(AggregateError);
@@ -1119,8 +1119,8 @@ describe("SQLite flip mock endpoint ownership", () => {
           await actualStop.stopChildProcess(child, timeout);
         }
         await instance?.cleanup();
-        vi.mocked(createOpenClawTestState).mockReset();
-        vi.mocked(createOpenClawTestInstance).mockReset();
+        vi.mocked(createCarapaceTestState).mockReset();
+        vi.mocked(createCarapaceTestInstance).mockReset();
         vi.mocked(stopChildProcess).mockReset();
         vi.mocked(spawn).mockClear();
         envSnapshot.restore();

@@ -4,12 +4,12 @@ import { access, readFile, realpath } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import type { OpenClawPluginNodeHostCommandIo } from "openclaw/plugin-sdk/node-host";
+import type { CarapacePluginNodeHostCommandIo } from "carapace/plugin-sdk/node-host";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicyContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setManagedCodexPluginRoot } from "./app-server/managed-binary.js";
 import {
@@ -54,7 +54,7 @@ function createManagedWorkspaceInvocation(cwd: string) {
     sendNodeEvent: async () => undefined,
     acquireManagedWorkspace,
     prepareExecAuthorization: () => () => {},
-  } satisfies NonNullable<Parameters<OpenClawPluginNodeHostCommand["handle"]>[2]>;
+  } satisfies NonNullable<Parameters<CarapacePluginNodeHostCommand["handle"]>[2]>;
   return { placement, context, acquireManagedWorkspace, release };
 }
 
@@ -68,7 +68,7 @@ function createNodeFrames(testSignal?: AbortSignal) {
     signalReady = resolve;
   });
   const outbound: JsonRpcRecord[] = [];
-  const io: OpenClawPluginNodeHostCommandIo = {
+  const io: CarapacePluginNodeHostCommandIo = {
     signal,
     emitChunk: async () => undefined,
     onInput: () => undefined,
@@ -338,7 +338,7 @@ describe("Codex node exec-server", () => {
       risk: { level: "high", family: "codex.exec-server" },
       approvals: { request },
       invokeNode,
-    } satisfies OpenClawPluginNodeInvokePolicyContext;
+    } satisfies CarapacePluginNodeInvokePolicyContext;
 
     for (const { decision, result } of [
       {
@@ -491,7 +491,7 @@ describe("Codex node exec-server", () => {
     vi.stubEnv("NODE_OPTIONS", "--no-warnings");
 
     pendingNodeProof = withTempWorkspace(
-      { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "codex-node-exec-contract-" },
+      { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "codex-node-exec-contract-" },
       async ({ dir }) => {
         const cwd = await realpath(dir);
         const workspaceUri = pathToFileURL(cwd).href;
@@ -517,7 +517,7 @@ describe("Codex node exec-server", () => {
           await frames.send({
             id: 1,
             method: "initialize",
-            params: { clientName: "openclaw-node" },
+            params: { clientName: "carapace-node" },
           });
           expect(await readNodeResponse(frames, 1)).toMatchObject({
             sessionId: expect.any(String),

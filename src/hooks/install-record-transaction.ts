@@ -1,7 +1,7 @@
 import type { PackageDirInstallTransaction } from "../infra/install-package-dir.js";
 import type { PluginInstallTransaction } from "../plugins/install-transaction.js";
 import type { PluginLifecycleLeaseContext } from "../plugins/plugin-lifecycle-lease.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   recordHookInstall,
   restoreHookInstallIfCurrent,
@@ -20,7 +20,7 @@ export async function stageHookInstall(params: {
   const storeOptions = { path: lease.databasePath };
   let receipt: HookInstallWriteReceipt;
   try {
-    receipt = runOpenClawStateWriteTransaction((database) => {
+    receipt = runCarapaceStateWriteTransaction((database) => {
       lease.assertOwnedInTransaction(database.db);
       params.beforePersistentApply?.();
       return recordHookInstall(params.update, { database });
@@ -61,7 +61,7 @@ export async function stageHookInstall(params: {
         return;
       }
       settled = true;
-      const restored = runOpenClawStateWriteTransaction((database) => {
+      const restored = runCarapaceStateWriteTransaction((database) => {
         // Compensation uses retained lifecycle ownership, not the now-revoked install authority.
         lease.assertOwnedInTransaction(database.db);
         return restoreHookInstallIfCurrent(receipt, { database });

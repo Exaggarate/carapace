@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setActiveNodeContext } from "../infra/active-node-context.js";
 import { buildSystemPromptParams, resolveSystemPromptRepoRoot } from "./system-prompt-params.js";
 
@@ -14,7 +14,7 @@ async function makeRepoRoot(root: string): Promise<void> {
   await fs.mkdir(path.join(root, ".git"), { recursive: true });
 }
 
-function buildParams(params: { config?: OpenClawConfig; workspaceDir?: string; cwd?: string }) {
+function buildParams(params: { config?: CarapaceConfig; workspaceDir?: string; cwd?: string }) {
   const preparedRepoRoot = resolveSystemPromptRepoRoot(params);
   return buildSystemPromptParams({
     config: params.config,
@@ -72,7 +72,7 @@ describe("buildSystemPromptParams", () => {
   });
 
   it("detects repo root from workspaceDir", async () => {
-    const temp = tempDirs.make("openclaw-workspace-");
+    const temp = tempDirs.make("carapace-workspace-");
     const repoRoot = path.join(temp, "repo");
     const workspaceDir = path.join(repoRoot, "nested", "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
@@ -84,7 +84,7 @@ describe("buildSystemPromptParams", () => {
   });
 
   it("falls back to cwd when workspaceDir has no repo", async () => {
-    const temp = tempDirs.make("openclaw-cwd-");
+    const temp = tempDirs.make("carapace-cwd-");
     const repoRoot = path.join(temp, "repo");
     const workspaceDir = path.join(temp, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
@@ -96,14 +96,14 @@ describe("buildSystemPromptParams", () => {
   });
 
   it("uses configured repoRoot when valid", async () => {
-    const temp = tempDirs.make("openclaw-config-");
+    const temp = tempDirs.make("carapace-config-");
     const repoRoot = path.join(temp, "config-root");
     const workspaceDir = path.join(temp, "workspace");
     await fs.mkdir(repoRoot, { recursive: true });
     await fs.mkdir(workspaceDir, { recursive: true });
     await makeRepoRoot(workspaceDir);
 
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: {
           repoRoot,
@@ -119,13 +119,13 @@ describe("buildSystemPromptParams", () => {
   it("ignores invalid repoRoot config and auto-detects", async () => {
     // Invalid explicit roots must not poison runtime metadata; auto-detection
     // still finds the real repository root from the workspace path.
-    const temp = tempDirs.make("openclaw-invalid-");
+    const temp = tempDirs.make("carapace-invalid-");
     const repoRoot = path.join(temp, "repo");
     const workspaceDir = path.join(repoRoot, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
     await makeRepoRoot(repoRoot);
 
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         defaults: {
           repoRoot: path.join(temp, "missing"),
@@ -139,7 +139,7 @@ describe("buildSystemPromptParams", () => {
   });
 
   it("returns undefined when no repo is found", async () => {
-    const workspaceDir = tempDirs.make("openclaw-norepo-");
+    const workspaceDir = tempDirs.make("carapace-norepo-");
 
     const { runtimeInfo } = buildParams({ workspaceDir });
 
@@ -147,8 +147,8 @@ describe("buildSystemPromptParams", () => {
   });
 
   it("does not rediscover the repository after preparation", async () => {
-    const workspaceDir = tempDirs.make("openclaw-prepared-norepo-");
-    const repoRoot = tempDirs.make("openclaw-late-repo-");
+    const workspaceDir = tempDirs.make("carapace-prepared-norepo-");
+    const repoRoot = tempDirs.make("carapace-late-repo-");
     const preparedRepoRoot = resolveSystemPromptRepoRoot({ workspaceDir });
     await makeRepoRoot(repoRoot);
 

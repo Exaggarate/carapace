@@ -1,5 +1,5 @@
 /** Prepares queued follow-up payloads for source-channel delivery. */
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import {
   hasCommittedSourceReplyDeliveryEvidence,
   hasCompletedSourceReplyDeliveryEvidence,
@@ -465,7 +465,7 @@ async function sendFollowupPayloads(params: {
   ) {
     await dispatchPayload({
       text:
-        "Follow-up completed, but OpenClaw could not deliver it to the originating channel. " +
+        "Follow-up completed, but Carapace could not deliver it to the originating channel. " +
         "The reply content was not forwarded to this channel to avoid cross-channel misdelivery.",
       isError: true,
     });

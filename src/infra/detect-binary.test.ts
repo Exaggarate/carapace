@@ -30,15 +30,15 @@ describe("detectBinary", () => {
     vi.stubEnv("SystemRoot", "D:\\Windows");
     runCommandWithTimeoutMock.mockResolvedValue({
       code: 0,
-      stdout: "D:\\Tools\\openclaw.exe\n",
+      stdout: "D:\\Tools\\carapace.exe\n",
     });
 
     await withMockedWindowsPlatform(async () => {
-      await expect(detectBinary("openclaw")).resolves.toBe(true);
+      await expect(detectBinary("carapace")).resolves.toBe(true);
     });
 
     expect(runCommandWithTimeoutMock).toHaveBeenCalledWith(
-      [path.win32.join("D:\\Windows", "System32", "where.exe"), "openclaw"],
+      [path.win32.join("D:\\Windows", "System32", "where.exe"), "carapace"],
       { timeoutMs: 2000 },
     );
   });

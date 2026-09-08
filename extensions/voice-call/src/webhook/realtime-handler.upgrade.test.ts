@@ -2,15 +2,15 @@ import { once } from "node:events";
 import { IncomingMessage } from "node:http";
 import { Socket } from "node:net";
 import { Duplex } from "node:stream";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { VoiceCallConfigSchema } from "../config.js";
 import { CallManager } from "../manager.js";
 import { RealtimeCallHandler } from "./realtime-handler.js";
 
 // The published minimum host has no WebSocket SDK subpath at all.
-vi.mock("openclaw/plugin-sdk/websocket-runtime", () => {
-  throw new Error("websocket-runtime is not exported by OpenClaw 2026.9.2");
+vi.mock("carapace/plugin-sdk/websocket-runtime", () => {
+  throw new Error("websocket-runtime is not exported by Carapace 2026.9.2");
 });
 
 function createHandler() {

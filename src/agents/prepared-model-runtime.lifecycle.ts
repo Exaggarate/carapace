@@ -10,7 +10,7 @@ class ProcessModelRuntimeLifetimes {
 }
 
 const lifetimes = resolveGlobalSingleton(
-  Symbol.for("openclaw.preparedModelRuntimeLifetimes"),
+  Symbol.for("carapace.preparedModelRuntimeLifetimes"),
   () => new ProcessModelRuntimeLifetimes(),
   () => closePreparedModelRuntimeSnapshots(),
 );

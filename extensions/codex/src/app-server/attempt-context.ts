@@ -13,19 +13,19 @@ import {
   type ContextEngineProjection,
   type EmbeddedContextFile,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveBootstrapFilesForPreparation } from "openclaw/plugin-sdk/codex-mcp-projection";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveBootstrapFilesForPreparation } from "carapace/plugin-sdk/codex-mcp-projection";
 import {
   buildMemorySystemPromptAddition,
   prepareMemorySystemPromptAddition,
-} from "openclaw/plugin-sdk/core";
-import { MESSAGE_TOOL_DELIVERY_HINTS } from "openclaw/plugin-sdk/message-tool-delivery-hints";
+} from "carapace/plugin-sdk/core";
+import { MESSAGE_TOOL_DELIVERY_HINTS } from "carapace/plugin-sdk/message-tool-delivery-hints";
 import type {
   SessionTranscriptTargetParams,
   TranscriptTurnAdmission,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { readNonBlankString as readNonEmptyString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { readNonBlankString as readNonEmptyString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import { isMessageOnlyCodexSourceReply } from "./dynamic-tool-profile.js";
 import type { CodexDynamicToolFunctionSpec, CodexDynamicToolSpec, JsonValue } from "./protocol.js";
@@ -195,8 +195,8 @@ export async function prepareCodexWorkspaceDeveloperInstructions(params: {
   });
   return renderCodexWorkspaceDeveloperInstructions({
     files: selectCodexWorkspaceAgentProjectInstructionFiles(contextFiles, params.workspaceDir),
-    header: "## OpenClaw Agent Workspace Instructions",
-    preamble: "OpenClaw loaded this bounded snapshot from the configured agent workspace.",
+    header: "## Carapace Agent Workspace Instructions",
+    preamble: "Carapace loaded this bounded snapshot from the configured agent workspace.",
   });
 }
 
@@ -276,19 +276,19 @@ export async function buildCodexWorkspaceBootstrapContext(params: {
       excludeMemory: memoryToolsAvailable,
       memoryWorkspaceDir: params.effectiveWorkspace,
     });
-    const injectOpenClawContext = shouldInjectCodexOpenClawPromptContext(params.params);
-    const restrictedProjectDocNeedsOpenClawCarrier =
+    const injectCarapaceContext = shouldInjectCodexCarapacePromptContext(params.params);
+    const restrictedProjectDocNeedsCarapaceCarrier =
       params.params.pluginHarnessToolPolicyRestricted === true &&
       !params.params.disableTools &&
       !isMessageOnlyCodexSourceReply(params.params) &&
       params.params.bootstrapContextMode !== "lightweight";
     const threadDeveloperInstructionFiles =
-      injectOpenClawContext &&
+      injectCarapaceContext &&
       !params.ringZeroActive &&
-      (inheritsAgentWorkspace || restrictedProjectDocNeedsOpenClawCarrier)
+      (inheritsAgentWorkspace || restrictedProjectDocNeedsCarapaceCarrier)
         ? selectCodexWorkspaceAgentProjectInstructionFiles(contextFiles, params.resolvedWorkspace)
         : [];
-    const turnScopedDeveloperInstructionFiles = injectOpenClawContext
+    const turnScopedDeveloperInstructionFiles = injectCarapaceContext
       ? selectCodexWorkspaceTurnScopedDeveloperInstructionFiles(contextFiles)
       : [];
     return {
@@ -305,13 +305,13 @@ export async function buildCodexWorkspaceBootstrapContext(params: {
       promptContext: renderCodexWorkspaceBootstrapPromptContext(promptContextFiles),
       threadDeveloperInstructions: renderCodexWorkspaceDeveloperInstructions({
         files: threadDeveloperInstructionFiles,
-        header: "## OpenClaw Agent Workspace Instructions",
-        preamble: "OpenClaw loaded this bounded snapshot from the configured agent workspace.",
+        header: "## Carapace Agent Workspace Instructions",
+        preamble: "Carapace loaded this bounded snapshot from the configured agent workspace.",
       }),
       turnScopedDeveloperInstructions: renderCodexWorkspaceCollaborationDeveloperInstructions(
         turnScopedDeveloperInstructionFiles,
       ),
-      memoryCollaborationInstructions: shouldInjectCodexOpenClawPromptContext(params.params)
+      memoryCollaborationInstructions: shouldInjectCodexCarapacePromptContext(params.params)
         ? await renderCodexWorkspaceMemoryCollaborationInstructions({
             files: memoryReferenceFiles,
             toolNames: params.memoryToolNames,
@@ -582,19 +582,19 @@ function readPositiveNumber(value: unknown): number | undefined {
 }
 
 /**
- * Builds OpenClaw-provided workspace prompt context for the current Codex turn.
+ * Builds Carapace-provided workspace prompt context for the current Codex turn.
  */
-export function buildCodexOpenClawPromptContext(params: {
+export function buildCodexCarapacePromptContext(params: {
   params: EmbeddedRunAttemptParams;
   workspacePromptContext?: string;
   watchedSessionsContext?: string;
 }): string | undefined {
-  if (!shouldInjectCodexOpenClawPromptContext(params.params)) {
+  if (!shouldInjectCodexCarapacePromptContext(params.params)) {
     return undefined;
   }
   const sections = [
     params.workspacePromptContext?.trim()
-      ? ["## OpenClaw Workspace Context", "", params.workspacePromptContext.trim()].join("\n")
+      ? ["## Carapace Workspace Context", "", params.workspacePromptContext.trim()].join("\n")
       : undefined,
     params.watchedSessionsContext?.trim() || undefined,
   ].filter(isNonEmptyString);
@@ -602,8 +602,8 @@ export function buildCodexOpenClawPromptContext(params: {
     return undefined;
   }
   return [
-    "OpenClaw runtime context for this turn:",
-    "Treat this OpenClaw-provided context as supporting project/user reference for the current request.",
+    "Carapace runtime context for this turn:",
+    "Treat this Carapace-provided context as supporting project/user reference for the current request.",
     "",
     ...sections,
   ].join("\n");
@@ -613,7 +613,7 @@ export function buildCodexOpenClawPromptContext(params: {
  * Renders the watched-sessions block for the Codex per-turn runtime context.
  * Codex builds its own instruction layers, so the embedded prompt's Watched
  * Sessions section must be re-surfaced here or Codex-backed main sessions
- * keep refusing cross-session questions (openclaw#114797).
+ * keep refusing cross-session questions (carapace#114797).
  */
 export function buildCodexWatchedSessionsContext(params: {
   attempt: EmbeddedRunAttemptParams;
@@ -621,7 +621,7 @@ export function buildCodexWatchedSessionsContext(params: {
   sessionKey?: string;
   sandboxed?: boolean;
 }): string | undefined {
-  if (!shouldInjectCodexOpenClawPromptContext(params.attempt)) {
+  if (!shouldInjectCodexCarapacePromptContext(params.attempt)) {
     return undefined;
   }
   return buildWatchedSessionsHarnessContext({
@@ -634,7 +634,7 @@ export function buildCodexWatchedSessionsContext(params: {
   });
 }
 
-function shouldInjectCodexOpenClawPromptContext(params: EmbeddedRunAttemptParams): boolean {
+function shouldInjectCodexCarapacePromptContext(params: EmbeddedRunAttemptParams): boolean {
   // Lightweight cron runs are commonly exact commands. Keep the user input byte-for-byte
   // to avoid changing command intent while Codex keeps its native project-doc loader.
   return !(
@@ -642,24 +642,24 @@ function shouldInjectCodexOpenClawPromptContext(params: EmbeddedRunAttemptParams
   );
 }
 
-/** Renders loaded OpenClaw skill prompts as Codex collaboration instructions. */
+/** Renders loaded Carapace skill prompts as Codex collaboration instructions. */
 export function renderCodexSkillsCollaborationInstructions(params: {
   attempt: EmbeddedRunAttemptParams;
   skillsPrompt?: string;
 }): string | undefined {
-  if (!shouldInjectCodexOpenClawPromptContext(params.attempt)) {
+  if (!shouldInjectCodexCarapacePromptContext(params.attempt)) {
     return undefined;
   }
   return params.skillsPrompt?.trim()
-    ? ["## OpenClaw Skills", "", params.skillsPrompt.trim()].join("\n")
+    ? ["## Carapace Skills", "", params.skillsPrompt.trim()].join("\n")
     : undefined;
 }
 
 /**
- * Prepends OpenClaw context while preserving leading delivery metadata as
+ * Prepends Carapace context while preserving leading delivery metadata as
  * routing guidance instead of user request text.
  */
-export function prependCodexOpenClawPromptContext(
+export function prependCodexCarapacePromptContext(
   prompt: string,
   context: string | undefined,
   options: { preservePromptWithoutContext?: boolean } = {},
@@ -669,13 +669,13 @@ export function prependCodexOpenClawPromptContext(
     return prompt;
   }
   const promptSection = promptWithoutDeliveryHint.startsWith(
-    "OpenClaw assembled context for this turn:",
+    "Carapace assembled context for this turn:",
   )
     ? promptWithoutDeliveryHint
     : ["Current user request:", promptWithoutDeliveryHint].join("\n");
   const deliverySection = deliveryHint
     ? [
-        "OpenClaw delivery metadata:",
+        "Carapace delivery metadata:",
         "This delivery metadata is runtime routing guidance, not the user's request.",
         deliveryHint,
       ].join("\n")
@@ -754,7 +754,7 @@ function renderCodexWorkspaceBootstrapPromptContext(
     return undefined;
   }
   const lines = [
-    "OpenClaw loaded these user-editable workspace files for the current turn. Codex loads project-local AGENTS.md natively. When execution uses another folder, OpenClaw supplies the agent workspace AGENTS.md as thread-level developer instructions. SOUL.md, IDENTITY.md, and USER.md remain turn-scoped collaboration instructions. Those files are not repeated here.",
+    "Carapace loaded these user-editable workspace files for the current turn. Codex loads project-local AGENTS.md natively. When execution uses another folder, Carapace supplies the agent workspace AGENTS.md as thread-level developer instructions. SOUL.md, IDENTITY.md, and USER.md remain turn-scoped collaboration instructions. Those files are not repeated here.",
     "",
     "# Project Context",
     "",
@@ -832,9 +832,9 @@ function renderCodexWorkspaceCollaborationDeveloperInstructions(
 ): string | undefined {
   return renderCodexWorkspaceDeveloperInstructions({
     files,
-    header: "## OpenClaw Agent Soul",
+    header: "## Carapace Agent Soul",
     preamble:
-      "OpenClaw loaded these workspace instruction files from the active agent workspace. They are the canonical definitions of who you are, how you think and work, and the human you work alongside. Internalize and follow them accordingly.",
+      "Carapace loaded these workspace instruction files from the active agent workspace. They are the canonical definitions of who you are, how you think and work, and the human you work alongside. Internalize and follow them accordingly.",
     wrapperTag: "AGENT_SOUL",
   });
 }
@@ -895,9 +895,9 @@ function renderCodexWorkspaceMemoryReference(params: {
     ? params.toolNames
     : Array.from(CODEX_MEMORY_TOOL_NAMES);
   const lines = [
-    "## OpenClaw Workspace Memory",
+    "## Carapace Workspace Memory",
     "",
-    `MEMORY.md exists in the active agent workspace as a memory file, not an instruction file. OpenClaw does not paste its contents into native Codex turns; use ${toolNames.join(" or ")} when durable memory is relevant and the tools are available.`,
+    `MEMORY.md exists in the active agent workspace as a memory file, not an instruction file. Carapace does not paste its contents into native Codex turns; use ${toolNames.join(" or ")} when durable memory is relevant and the tools are available.`,
     "",
   ];
   for (const file of params.files) {

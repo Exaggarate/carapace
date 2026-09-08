@@ -2,7 +2,7 @@
  * Runtime validators for Codex app-server protocol payloads, including schema
  * normalization for generated JSON Schema before TypeBox compilation.
  */
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { Compile, type Validator as TypeBoxValidator } from "typebox/compile";
 import rawDynamicToolCallParamsSchema from "./protocol-generated/json/DynamicToolCallParams.json" with { type: "json" };
 import sharedDefinitionsSchema from "./protocol-generated/json/v2/CodexAppServerProtocolDefinitions.json" with { type: "json" };
@@ -340,7 +340,7 @@ export class CodexThreadDirectInputError extends Error {
   constructor(threadId: string) {
     super(
       `Codex thread ${threadId} is controlled by its parent and cannot accept direct input. ` +
-        "Continue its parent thread, or use /new for a separate OpenClaw session.",
+        "Continue its parent thread, or use /new for a separate Carapace session.",
     );
     this.name = "CodexThreadDirectInputError";
   }

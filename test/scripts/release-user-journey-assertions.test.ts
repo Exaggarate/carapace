@@ -126,7 +126,7 @@ async function startTcpFixtureServer(handler: (socket: Socket) => void): Promise
 
 describe("release user journey assertions", () => {
   it("rejects loose mock OpenAI port args", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
 
     try {
@@ -141,7 +141,7 @@ describe("release user journey assertions", () => {
   });
 
   it("scans large files when checking release user journey output text", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const outputPath = path.join(root, "output.log");
 
@@ -167,7 +167,7 @@ describe("release user journey assertions", () => {
   });
 
   it("bounds release user journey output assertion diagnostics", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const outputPath = path.join(root, "output.log");
 
@@ -190,9 +190,9 @@ describe("release user journey assertions", () => {
   });
 
   it("rejects oversized JSON artifacts before parsing release user journey config", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".carapace", "carapace.json");
 
     try {
       mkdirSync(path.dirname(configPath), { recursive: true });
@@ -215,7 +215,7 @@ describe("release user journey assertions", () => {
   });
 
   it("accepts a configured channel before Gateway startup", async () => {
-    const root = tempDirs.make("openclaw-release-user-assertions-");
+    const root = tempDirs.make("carapace-release-user-assertions-");
     const statusPath = path.join(root, "status.json");
 
     writeJson(statusPath, { configuredChannels: ["clickclack"] });
@@ -226,7 +226,7 @@ describe("release user journey assertions", () => {
   });
 
   it("rejects a configured channel that failed after Gateway restart", async () => {
-    const root = tempDirs.make("openclaw-release-user-assertions-");
+    const root = tempDirs.make("carapace-release-user-assertions-");
     const statusPath = path.join(root, "status.json");
 
     writeJson(statusPath, {
@@ -243,7 +243,7 @@ describe("release user journey assertions", () => {
   });
 
   it("accepts a running channel after Gateway restart", async () => {
-    const root = tempDirs.make("openclaw-release-user-assertions-");
+    const root = tempDirs.make("carapace-release-user-assertions-");
     const statusPath = path.join(root, "status.json");
 
     writeJson(statusPath, {
@@ -260,21 +260,21 @@ describe("release user journey assertions", () => {
   });
 
   it("fails when uninstall leaves the managed plugin directory behind", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const pluginId = "journey-plugin-a";
-    const installPath = path.join(home, ".openclaw", "extensions", pluginId);
+    const installPath = path.join(home, ".carapace", "extensions", pluginId);
     const installPathFile = path.join(root, "install-path.txt");
 
     try {
-      writeJson(path.join(home, ".openclaw", "openclaw.json"), {
+      writeJson(path.join(home, ".carapace", "carapace.json"), {
         plugins: {
           entries: { [pluginId]: { enabled: false } },
           allow: [],
           deny: [],
         },
       });
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {},
       });
       mkdirSync(installPath, { recursive: true });
@@ -290,24 +290,24 @@ describe("release user journey assertions", () => {
   });
 
   it("passes after uninstall clears config, records, and managed files", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const installPathFile = path.join(root, "install-path.txt");
 
     try {
-      writeJson(path.join(home, ".openclaw", "openclaw.json"), {
+      writeJson(path.join(home, ".carapace", "carapace.json"), {
         plugins: {
           entries: { "journey-plugin-a": { enabled: false } },
           allow: [],
           deny: [],
         },
       });
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {},
       });
       writeFileSync(
         installPathFile,
-        path.join(home, ".openclaw", "extensions", "journey-plugin-a"),
+        path.join(home, ".carapace", "extensions", "journey-plugin-a"),
         "utf8",
       );
 
@@ -324,18 +324,18 @@ describe("release user journey assertions", () => {
   });
 
   it("remembers the installed plugin path from the install record", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const pluginId = "journey-plugin-a";
     const sourcePath = path.join(root, "source", pluginId);
-    const installPath = path.join(home, ".openclaw", "extensions", pluginId);
+    const installPath = path.join(home, ".carapace", "extensions", pluginId);
     const installPathFile = path.join(root, "install-path.txt");
     const sourcePathFile = path.join(root, "source-path.txt");
 
     try {
       mkdirSync(sourcePath, { recursive: true });
       mkdirSync(installPath, { recursive: true });
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {
           [pluginId]: {
             source: "path",
@@ -361,7 +361,7 @@ describe("release user journey assertions", () => {
   });
 
   it("waits for a new ClickClack websocket generation across reconnect", async () => {
-    const root = tempDirs.make("openclaw-release-user-assertions-");
+    const root = tempDirs.make("carapace-release-user-assertions-");
     const statePath = path.join(root, "clickclack.json");
     const port = await reserveTcpPort();
     const token = "clickclack-test-token";
@@ -436,7 +436,7 @@ describe("release user journey assertions", () => {
       };
     };
 
-    const pluginDir = path.join(tempDirs.make("openclaw-release-clickclack-plugin-"), "plugin");
+    const pluginDir = path.join(tempDirs.make("carapace-release-clickclack-plugin-"), "plugin");
     const writer = spawnSync(process.execPath, [CLICKCLACK_PLUGIN_WRITER_SCRIPT, pluginDir], {
       encoding: "utf8",
     });
@@ -488,7 +488,7 @@ describe("release user journey assertions", () => {
   });
 
   it("cancels successful ClickClack inbound response bodies", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     let socketClosed = false;
     const server = await startTcpFixtureServer((socket) => {
@@ -500,7 +500,7 @@ describe("release user journey assertions", () => {
 
     try {
       await expect(
-        withEnvAsync({ HOME: home, OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000" }, () =>
+        withEnvAsync({ HOME: home, CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000" }, () =>
           runReleaseUserJourneyAssertion("post-clickclack-inbound", [
             `http://127.0.0.1:${server.port}`,
             "hello",
@@ -515,7 +515,7 @@ describe("release user journey assertions", () => {
   });
 
   it("bounds stalled ClickClack fixture HTTP probes", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const server = await startTcpFixtureServer((socket) =>
       socket.write("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n"),
@@ -524,7 +524,7 @@ describe("release user journey assertions", () => {
     try {
       const startedAt = Date.now();
       await expect(
-        withEnvAsync({ HOME: home, OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "100" }, () =>
+        withEnvAsync({ HOME: home, CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "100" }, () =>
           waitForClickClackSocket({
             baseUrl: `http://127.0.0.1:${server.port}`,
             pollIntervalMs: 20,
@@ -540,7 +540,7 @@ describe("release user journey assertions", () => {
   });
 
   it("rejects loose HTTP timeout env values instead of parsing prefixes", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const server = await startTcpFixtureServer((socket) =>
       socket.write("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n"),
@@ -548,14 +548,14 @@ describe("release user journey assertions", () => {
 
     try {
       await expect(
-        withEnvAsync({ HOME: home, OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "100ms" }, () =>
+        withEnvAsync({ HOME: home, CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "100ms" }, () =>
           runReleaseUserJourneyAssertion("wait-clickclack-socket", [
             `http://127.0.0.1:${server.port}`,
             "1",
           ]),
         ),
       ).rejects.toThrow(
-        'OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS must be a positive integer. Got: "100ms"',
+        'CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS must be a positive integer. Got: "100ms"',
       );
     } finally {
       await server.stop();
@@ -564,7 +564,7 @@ describe("release user journey assertions", () => {
   });
 
   it("rejects loose ClickClack wait timeout args instead of parsing prefixes", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const statePath = path.join(root, "state.json");
 
@@ -580,7 +580,7 @@ describe("release user journey assertions", () => {
         withEnvAsync({ HOME: home }, () =>
           runReleaseUserJourneyAssertion("wait-clickclack-reply", [
             statePath,
-            "OPENCLAW_E2E_OK",
+            "CARAPACE_E2E_OK",
             "30s",
           ]),
         ),
@@ -591,7 +591,7 @@ describe("release user journey assertions", () => {
   });
 
   it("bounds ClickClack fixture error response bodies", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const server = await startTcpFixtureServer((socket) => {
       const body = "x".repeat(128);
@@ -605,8 +605,8 @@ describe("release user journey assertions", () => {
         withEnvAsync(
           {
             HOME: home,
-            OPENCLAW_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES: "16",
-            OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000",
+            CARAPACE_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES: "16",
+            CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000",
           },
           () =>
             runReleaseUserJourneyAssertion("post-clickclack-inbound", [
@@ -622,7 +622,7 @@ describe("release user journey assertions", () => {
   });
 
   it("keeps the ClickClack HTTP timeout active while reading error bodies", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const server = await startTcpFixtureServer((socket) => {
       socket.write("HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\n\r\npartial");
@@ -633,7 +633,7 @@ describe("release user journey assertions", () => {
         withEnvAsync(
           {
             HOME: home,
-            OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "25",
+            CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "25",
           },
           () =>
             runReleaseUserJourneyAssertion("post-clickclack-inbound", [
@@ -649,7 +649,7 @@ describe("release user journey assertions", () => {
   });
 
   it("rejects loose body byte env values instead of parsing prefixes", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-release-user-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-release-user-assertions-"));
     const home = path.join(root, "home");
     const server = await startTcpFixtureServer((socket) => {
       const body = "x".repeat(128);
@@ -663,8 +663,8 @@ describe("release user journey assertions", () => {
         withEnvAsync(
           {
             HOME: home,
-            OPENCLAW_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES: "16bytes",
-            OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000",
+            CARAPACE_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES: "16bytes",
+            CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS: "1000",
           },
           () =>
             runReleaseUserJourneyAssertion("post-clickclack-inbound", [
@@ -673,7 +673,7 @@ describe("release user journey assertions", () => {
             ]),
         ),
       ).rejects.toThrow(
-        'OPENCLAW_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES must be a positive integer. Got: "16bytes"',
+        'CARAPACE_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES must be a positive integer. Got: "16bytes"',
       );
     } finally {
       await server.stop();

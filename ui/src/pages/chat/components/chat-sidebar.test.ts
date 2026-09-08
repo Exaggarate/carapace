@@ -87,7 +87,7 @@ describe("file sidebar editor locality", () => {
     },
   ] as const)("offers editors only for native-local files: $name", async (testCase) => {
     setNativeGatewayTestState(testCase.nativeGateway);
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       execNode: string | null;
       ensureFileEditor: () => Promise<void>;
@@ -115,7 +115,7 @@ describe("file sidebar editor locality", () => {
 
   it("removes editor controls when the native gateway switches to remote", async () => {
     setNativeGatewayTestState("local");
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       ensureFileEditor: () => Promise<void>;
       updateComplete: Promise<unknown>;
@@ -140,7 +140,7 @@ describe("file sidebar editor locality", () => {
   });
 
   it("overlays the file viewport while the editor module is pending", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       ensureFileEditor: () => Promise<void>;
       updateComplete: Promise<unknown>;
@@ -158,7 +158,7 @@ describe("file sidebar editor locality", () => {
 
     const viewport = panel.querySelector(".file-view");
     const skeleton = viewport?.querySelector(
-      'openclaw-panel-loading-skeleton[data-panel-skeleton="review"]',
+      'carapace-panel-loading-skeleton[data-panel-skeleton="review"]',
     );
     expect(panel.ensureFileEditor).toHaveBeenCalledOnce();
     expect(viewport?.querySelector(".file-view__mount")).not.toBeNull();
@@ -174,7 +174,7 @@ describe("markdown sidebar", () => {
     const source =
       ["Intro", "", "```ts", "const x = 1;", "```", "", "**literal after**"].join("\n") +
       (testCase.trailingNewline ? "\n" : "");
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       ensureFileEditor: () => Promise<void>;
       updateComplete: Promise<unknown>;
@@ -222,7 +222,7 @@ describe("markdown sidebar", () => {
   });
 
   it("opens workspace files from markdown preview clicks", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       onOpenWorkspaceFile?: (target: { path: string; line?: number | null }) => void;
       updateComplete?: Promise<unknown>;
@@ -253,7 +253,7 @@ describe("markdown sidebar", () => {
     // comes from the first strong character, not from the fence.
     ["raw Hebrew text as rtl", "```\nשורה ראשונה\n```", "rtl"],
   ] as const)("renders %s", async (_name, markdown, expected) => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       updateComplete?: Promise<unknown>;
     };
@@ -266,7 +266,7 @@ describe("markdown sidebar", () => {
   });
 
   it.each(["Enter", " "])("opens focused markdown preview file links with %j", async (key) => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       onOpenWorkspaceFile?: (target: { path: string; line?: number | null }) => void;
       updateComplete?: Promise<unknown>;
@@ -295,7 +295,7 @@ describe("markdown sidebar", () => {
   it.each(["click", "Ctrl+click", "Enter", " "])(
     "handles markdown preview session links with %j",
     async (action) => {
-      const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+      const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
         content: unknown;
         onOpenSessionLink?: (target: { sessionKey: string; agentId: string }) => void;
         updateComplete?: Promise<unknown>;
@@ -343,7 +343,7 @@ describe("markdown sidebar", () => {
   it.each(["click", "Enter"])(
     "SPA-routes markdown preview session hrefs with %s",
     async (action) => {
-      const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+      const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
         basePath?: string;
         content: unknown;
         onOpenSessionLink?: (target: unknown) => void;
@@ -375,7 +375,7 @@ describe("markdown sidebar", () => {
   );
 
   it("activates Markdown images only when a chat owner opts in", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       onOpenImage?: (item: { src: string; title: string }) => void;
       updateComplete?: Promise<unknown>;
@@ -393,7 +393,7 @@ describe("markdown sidebar", () => {
     });
     panel.remove();
 
-    const fallbackPanel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const fallbackPanel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       updateComplete?: Promise<unknown>;
     };
@@ -408,7 +408,7 @@ describe("markdown sidebar", () => {
   });
 
   it("opens image artifacts through the shared lightbox callback", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       onOpenImage?: (item: { src: string; title: string }) => void;
       updateComplete?: Promise<unknown>;
@@ -431,7 +431,7 @@ describe("markdown sidebar", () => {
     });
     panel.remove();
 
-    const fallbackPanel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const fallbackPanel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       updateComplete?: Promise<unknown>;
     };
@@ -458,7 +458,7 @@ describe("markdown sidebar", () => {
   it("preserves authenticated transcoded video playback in Files", async () => {
     const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       updateComplete?: Promise<unknown>;
     };
@@ -480,7 +480,7 @@ describe("markdown sidebar", () => {
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url instanceof Request ? url.url : url?.toString()).toContain("playback=1");
     expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer session-token");
-    const player = panel.querySelector("openclaw-chat-video-player");
+    const player = panel.querySelector("carapace-chat-video-player");
     expect(player?.mediaWidth).toBe(9);
     expect(player?.mediaHeight).toBe(16);
     expect(panel.querySelector(":scope > video")).toBeNull();
@@ -488,7 +488,7 @@ describe("markdown sidebar", () => {
   });
 
   it("plays normalized base64 audio from Files", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       updateComplete?: Promise<unknown>;
     };
@@ -502,7 +502,7 @@ describe("markdown sidebar", () => {
     document.body.append(panel);
     await panel.updateComplete;
 
-    const player = panel.querySelector("openclaw-chat-audio-player");
+    const player = panel.querySelector("carapace-chat-audio-player");
     expect(player?.src).toBe("data:audio/wav;base64,UklGRg==");
     panel.remove();
   });
@@ -510,14 +510,14 @@ describe("markdown sidebar", () => {
   it.each([
     ["external.html", "https://files.example/external.html", "text/html"],
     ["external.txt", "https://files.example/external.txt", "text/plain"],
-    ["bundle.zip", "/__openclaw__/media/bundle.zip", "application/zip"],
-    ["brief.pdf", "/__openclaw__/media/brief.pdf", "application/pdf"],
+    ["bundle.zip", "/__carapace__/media/bundle.zip", "application/zip"],
+    ["brief.pdf", "/__carapace__/media/brief.pdf", "application/pdf"],
   ] as const)(
     "renders document %s as a Files card without previewing it",
     async (title, src, mimeType) => {
       const fetchMock = vi.fn();
       vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
-      const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+      const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
         content: unknown;
         updateComplete?: Promise<unknown>;
       };
@@ -560,7 +560,7 @@ describe("markdown sidebar", () => {
   ])(
     "keeps external SVG attachments as Files cards with title $title and MIME $mimeType",
     async ({ title, mimeType, src }) => {
-      const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+      const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
         content: unknown;
         updateComplete?: Promise<unknown>;
       };
@@ -585,7 +585,7 @@ describe("markdown sidebar", () => {
   );
 
   it("keeps a canvas scripts ceiling under a trusted global sandbox", async () => {
-    const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+    const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
       content: unknown;
       embedSandboxMode: "trusted";
       canvasPluginSurfaceUrl: string;
@@ -625,7 +625,7 @@ describe("file sidebar clipboard feedback", () => {
   };
 
   async function mountFilePanel(): Promise<FilePanel> {
-    const panel = document.createElement("openclaw-chat-detail-panel") as FilePanel;
+    const panel = document.createElement("carapace-chat-detail-panel") as FilePanel;
     panel.content = {
       kind: "file",
       path: "src/example.ts",

@@ -4,7 +4,7 @@ import {
   type SessionCatalogSession,
 } from "../../../packages/gateway-protocol/src/index.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   SessionCatalogListProviderParams,
   SessionCatalogProvider,
@@ -32,7 +32,7 @@ type SessionCatalogVisibility = { cacheKey: string } & (
 
 export function resolveSessionCatalogVisibility(
   client: GatewayClient | null,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): SessionCatalogVisibility {
   const scopes = Array.isArray(client?.connect?.scopes) ? client.connect.scopes : [];
   const admin = authorizeOperatorScopesForRequiredScope(ADMIN_SCOPE, scopes).allowed;
@@ -99,7 +99,7 @@ export function filterSessionCatalogHost(
     ...host,
     sessions: host.sessions.filter((session) => {
       // No sessionKey means the provider cannot link this host-owned CLI row to an adopted
-      // OpenClaw session. Keep it private from non-admin callers on multi-identity Gateways.
+      // Carapace session. Keep it private from non-admin callers on multi-identity Gateways.
       return visibleCatalogSessionEntry({ ...params, session, visibility }) !== undefined;
     }),
   };
@@ -110,7 +110,7 @@ export async function isSessionCatalogThreadVisible(params: {
   allowProcessHomeFallback: boolean;
   audience?: SessionCatalogProvider["audience"];
   client: GatewayClient | null;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   fallbackAgentId: string;
   hostId: string;
   list: SessionCatalogProvider["list"];

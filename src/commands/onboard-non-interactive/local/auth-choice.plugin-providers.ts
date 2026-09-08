@@ -6,7 +6,7 @@
  */
 import type { ApiKeyCredential } from "../../../agents/auth-profiles/types.js";
 import { resolveAgentModelPrimaryValue } from "../../../config/model-input.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { enablePluginWithCapabilityConsent } from "../../../plugins/enable.js";
 import { resolvePreferredProviderForAuthChoice } from "../../../plugins/provider-auth-choice-preference.js";
 import { resolveManifestProviderAuthChoice } from "../../../plugins/provider-auth-choices.js";
@@ -47,11 +47,11 @@ const loadAuthChoicePluginProvidersRuntime = createLazyRuntimeSurface(
 
 /** Applies a plugin-defined auth choice, or returns undefined when it is not plugin-backed. */
 export async function applyNonInteractivePluginProviderChoice(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   authChoice: string;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   target: OnboardingAgentTarget;
   resolveApiKey: (input: ProviderResolveNonInteractiveApiKeyParams) => Promise<{
     key: string;
@@ -61,7 +61,7 @@ export async function applyNonInteractivePluginProviderChoice(params: {
   toApiKeyCredential: (
     input: ProviderNonInteractiveApiKeyCredentialParams,
   ) => ApiKeyCredential | null;
-}): Promise<OpenClawConfig | null | undefined> {
+}): Promise<CarapaceConfig | null | undefined> {
   const { agentDir, workspaceDir } = params.target;
   const reject = (message: string): null => {
     rejectOnboardingOption(params.opts, params.runtime, message);
@@ -248,7 +248,7 @@ export async function applyNonInteractivePluginProviderChoice(params: {
   const providerConfig = agentScopedModels
     ? prepareAgentModelDefaults(enableResult.config, params.target)
     : enableResult.config;
-  const projectProviderResult = (updated: OpenClawConfig) =>
+  const projectProviderResult = (updated: CarapaceConfig) =>
     agentScopedModels
       ? projectAgentModelDefaults(enableResult.config, params.target, updated)
       : updated;

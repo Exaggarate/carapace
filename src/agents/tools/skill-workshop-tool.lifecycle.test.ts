@@ -1,22 +1,22 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { listSkillProposalEvents } from "../../skills/workshop/service.js";
 import { resolveWorkshopSkillsDir } from "../../skills/workshop/skills-root.js";
 import { readSkillProposalRecord } from "../../skills/workshop/store.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool as createSkillWorkshopToolImpl } from "./skill-workshop-tool.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 const createSkillWorkshopTool = (
   options: Omit<Parameters<typeof createSkillWorkshopToolImpl>[0], "config" | "agentId"> & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
   },
 ) => createSkillWorkshopToolImpl({ config: {}, agentId: "main", ...options });
@@ -35,9 +35,9 @@ async function proposalDraftPath(proposalId: string): Promise<string> {
 }
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-lifecycle-state-",
+    prefix: "carapace-skill-workshop-lifecycle-state-",
   });
 });
 
@@ -48,7 +48,7 @@ afterEach(async () => {
 
 describe("skill_workshop terminal lifecycle", () => {
   it("disposes of proposals without reading damaged draft artifacts", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-damaged-drafts-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-damaged-drafts-");
     const tool = createSkillWorkshopTool({ workspaceDir, agentId: "main", env: testState.env });
     const draftDamageCases: Array<readonly [string, (draft: string) => Promise<void>]> = [
       ["altered", async (draft) => await fs.writeFile(draft, "# Altered\n", "utf8")],

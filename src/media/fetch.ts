@@ -1,9 +1,9 @@
 // Media fetch helpers download and validate remote media payloads.
-import { MAX_DOCUMENT_BYTES } from "@openclaw/media-core/constants";
-import { parseMediaContentLength } from "@openclaw/media-core/content-length";
-import { basenameFromAnyPath, extnameFromAnyPath } from "@openclaw/media-core/file-name";
-import { detectMime, extensionForMime } from "@openclaw/media-core/mime";
-import { expectDefined } from "@openclaw/normalization-core";
+import { MAX_DOCUMENT_BYTES } from "@carapace/media-core/constants";
+import { parseMediaContentLength } from "@carapace/media-core/content-length";
+import { basenameFromAnyPath, extnameFromAnyPath } from "@carapace/media-core/file-name";
+import { detectMime, extensionForMime } from "@carapace/media-core/mime";
+import { expectDefined } from "@carapace/normalization-core";
 import { isAbortError } from "../infra/abort-signal.js";
 import { sleepWithAbort } from "../infra/backoff.js";
 import { formatErrorMessage } from "../infra/errors.js";

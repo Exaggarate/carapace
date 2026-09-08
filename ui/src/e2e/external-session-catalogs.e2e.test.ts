@@ -104,19 +104,19 @@ suite.define(() => {
           await page.waitForFunction(
             (expectedSessionKey) =>
               [
-                ...document.querySelectorAll("openclaw-chat-pane.chat-pane-cache__pane--visible"),
+                ...document.querySelectorAll("carapace-chat-pane.chat-pane-cache__pane--visible"),
               ].some(
                 (pane) =>
                   (pane as HTMLElement & { sessionKey?: string }).sessionKey === expectedSessionKey,
               ),
             `agent:main:catalog:${catalogId}:gateway:shared`,
           );
-          const pane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+          const pane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
           const message = pane
             .locator(".chat-group.user")
             .filter({ hasText: "The imported author's question." });
           await message.waitFor();
-          const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+          const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
           const artifactDir = artifactRoot
             ? createControlUiE2eArtifactDir("external-session-catalogs", artifactRoot)
             : undefined;
@@ -232,13 +232,13 @@ suite.define(() => {
           },
         });
         const activePane = page.locator(
-          "openclaw-chat-pane.chat-pane-cache__pane--active:not([inert])",
+          "carapace-chat-pane.chat-pane-cache__pane--active:not([inert])",
         );
         const composer = () => activePane.locator(".agent-chat__composer-combobox > textarea");
         const navigate = async (agentId: string, catalog = true) => {
           await page.evaluate(
             ({ agentId: routeAgentId, search: routeSearch }) => {
-              const app = document.querySelector("openclaw-app") as HTMLElement & {
+              const app = document.querySelector("carapace-app") as HTMLElement & {
                 runtime: { context: ApplicationContext };
               };
               app.runtime.context.navigate("chat", {
@@ -258,7 +258,7 @@ suite.define(() => {
           await expect
             .poll(() =>
               page.evaluate(() => {
-                const app = document.querySelector("openclaw-app") as HTMLElement & {
+                const app = document.querySelector("carapace-app") as HTMLElement & {
                   runtime: { context: ApplicationContext };
                 };
                 return app.runtime.context.agentSelection.state.selectedId;
@@ -288,7 +288,7 @@ suite.define(() => {
         await page.goto(
           `${suite.server.baseUrl}chat/${entrance === "cold link" ? `other${search}` : "main"}`,
         );
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         if (entrance === "sidebar") {
           await sidebar.getByRole("button", { name: /Switch agent/ }).click();
           await sidebar
@@ -331,7 +331,7 @@ suite.define(() => {
         expect(await composer().inputValue()).toBe("other retained draft");
         expect(
           await page
-            .locator("openclaw-chat-pane")
+            .locator("carapace-chat-pane")
             .filter({ hasText: "main native transcript" })
             .count(),
         ).toBe(1);
@@ -346,7 +346,7 @@ suite.define(() => {
         await activePane.getByRole("button", { name: "Open split view" }).click();
         await navigate("main");
         const visiblePanes = page.locator(
-          "openclaw-chat-pane.chat-pane-cache__pane--visible:not([inert])",
+          "carapace-chat-pane.chat-pane-cache__pane--visible:not([inert])",
         );
         await expect.poll(() => visiblePanes.count()).toBe(2);
         await visiblePanes.getByText("other native transcript", { exact: true }).click();
@@ -358,7 +358,7 @@ suite.define(() => {
 
         // Ordinary Gateway publication and transport reconnect must retain each pane's owner.
         const instanceId = await page.evaluate(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: { context: ApplicationContext };
           };
           return app.runtime.context.gateway.snapshot.client?.instanceId;
@@ -455,10 +455,10 @@ suite.define(() => {
     });
     const page = await context.newPage();
     const fullId = "0123456789abcdef0123456789abcdef";
-    const prettyPath = "/openclaw/beam/pretty-beam-route-0123456789ab";
-    const queryPath = `/openclaw/chat/research?catalog=beam&host=gateway&thread=${fullId}`;
+    const prettyPath = "/carapace/beam/pretty-beam-route-0123456789ab";
+    const queryPath = `/carapace/chat/research?catalog=beam&host=gateway&thread=${fullId}`;
     const gateway = await installMockGateway(page, {
-      basePath: "/openclaw",
+      basePath: "/carapace",
       defaultAgentId: "research",
       featureMethods: [
         "chat.metadata",
@@ -520,7 +520,7 @@ suite.define(() => {
     const assertCatalogOwner = async (agentId = "research") => {
       await expect
         .poll(() =>
-          page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible").evaluateAll((panes) =>
+          page.locator("carapace-chat-pane.chat-pane-cache__pane--visible").evaluateAll((panes) =>
             panes.map((pane) => {
               const chat = pane as HTMLElement & {
                 sessionKey: string;
@@ -559,7 +559,7 @@ suite.define(() => {
         .waitFor();
       expect(
         await page
-          .locator("openclaw-chat-pane.chat-pane-cache__pane--visible textarea")
+          .locator("carapace-chat-pane.chat-pane-cache__pane--visible textarea")
           .isDisabled(),
       ).toBe(true);
       const resolution = (await gateway.getRequests("sessions.catalog.list")).find(
@@ -590,20 +590,20 @@ suite.define(() => {
 
       // Both previously shared IDs and stale names retain their transcript after a rename.
       for (const reference of ["0123456789ab", "old-title-0123456789ab"]) {
-        await page.goto(new URL(`/openclaw/beam/${reference}`, suite.server.baseUrl).href);
+        await page.goto(new URL(`/carapace/beam/${reference}`, suite.server.baseUrl).href);
         await transcript.waitFor();
         await assertCatalogOwner();
         await expect.poll(() => new URL(page.url()).pathname).toBe(prettyPath);
       }
 
-      await page.goto(new URL("/openclaw/chat/other", suite.server.baseUrl).href);
+      await page.goto(new URL("/carapace/chat/other", suite.server.baseUrl).href);
       const beamRow = page.locator("a", { hasText: "Pretty Beam route" }).first();
       await beamRow.waitFor();
       await beamRow.click();
       await page.getByText("The pretty route stayed put.", { exact: true }).waitFor();
       await assertCatalogOwner("other");
       expect(new URL(page.url()).pathname + new URL(page.url()).search).toBe(
-        `/openclaw/chat/other?catalog=beam&host=gateway&thread=${fullId}`,
+        `/carapace/chat/other?catalog=beam&host=gateway&thread=${fullId}`,
       );
       expect((await gateway.getRequests("sessions.catalog.read")).at(-1)?.params).toMatchObject({
         agentId: "other",
@@ -720,7 +720,7 @@ suite.define(() => {
     await expect.poll(() => page.getByText("OpenCode transcript loaded").count()).toBe(1);
     await page.getByText("Pi architecture notes", { exact: true }).click();
     const piPane = page
-      .locator("openclaw-chat-pane.chat-pane-cache__pane--visible")
+      .locator("carapace-chat-pane.chat-pane-cache__pane--visible")
       .filter({ hasText: "Pi transcript loaded" });
     await piPane.getByText("Pi transcript loaded").waitFor();
     expect(await piPane.locator(".agent-chat__composer-combobox > textarea").isDisabled()).toBe(
@@ -728,7 +728,7 @@ suite.define(() => {
     );
     expect(await gateway.getRequests("sessions.catalog.read")).toHaveLength(2);
 
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("external-session-catalogs", artifactRoot)
       : undefined;

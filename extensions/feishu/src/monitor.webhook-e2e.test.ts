@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import type { Server } from "node:http";
 import { createConnection } from "node:net";
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { normalizeCompatibilityConfig } from "./doctor-contract.js";
@@ -356,7 +356,7 @@ describe("Feishu webhook signed-request e2e", () => {
         const response = await postSignedPayload(url, payload);
 
         expect(response.status).toBe(200);
-        expect(response.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+        expect(response.headers.get("x-carapace-delivery-accepted")).toBeNull();
         await expect(response.json()).resolves.toEqual({ challenge: "challenge-token" });
       },
     );
@@ -385,7 +385,7 @@ describe("Feishu webhook signed-request e2e", () => {
         const response = await postSignedPayload(url, payload);
 
         expect(response.status).toBe(200);
-        expect(response.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+        expect(response.headers.get("x-carapace-delivery-accepted")).toBeNull();
         expect(await response.text()).toContain("no unknown.event event handle");
         expect(statusSink.mock.calls).toEqual([
           [{ lastEventAt: expect.any(Number), lastTransportActivityAt: expect.any(Number) }],
@@ -622,7 +622,7 @@ describe("Feishu webhook signed-request e2e", () => {
       };
       const needsMigration = configuredPath !== acceptedTarget;
       if (needsMigration) {
-        await expect(monitorWebhook(monitorParams)).rejects.toThrow("openclaw doctor --fix");
+        await expect(monitorWebhook(monitorParams)).rejects.toThrow("carapace doctor --fix");
         expect(httpServers.has(accountId)).toBe(false);
         expect(handler).not.toHaveBeenCalled();
         expect(statusSink).not.toHaveBeenCalled();
@@ -810,7 +810,7 @@ describe("Feishu webhook signed-request e2e", () => {
         const response = await postSignedPayload(url, payload);
 
         expect(response.status).toBe(200);
-        expect(response.headers.get("x-openclaw-delivery-accepted")).toBe("durable");
+        expect(response.headers.get("x-carapace-delivery-accepted")).toBe("durable");
       },
     );
   });
@@ -864,7 +864,7 @@ describe("Feishu webhook signed-request e2e", () => {
 
       const accepted = await acceptedRequest;
       expect(accepted.status).toBe(200);
-      expect(accepted.headers.get("x-openclaw-delivery-accepted")).toBe("durable");
+      expect(accepted.headers.get("x-carapace-delivery-accepted")).toBe("durable");
     } finally {
       releaseAdmission?.();
       abortController.abort();
@@ -902,7 +902,7 @@ describe("Feishu webhook signed-request e2e", () => {
         event: { message: { chat_id: "oc_durable_ack_failure" } },
       });
       expect(response.status).toBe(500);
-      expect(response.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+      expect(response.headers.get("x-carapace-delivery-accepted")).toBeNull();
       expect(invoke).toHaveBeenCalledTimes(1);
     } finally {
       abortController.abort();

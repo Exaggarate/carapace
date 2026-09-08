@@ -54,7 +54,7 @@ function readIndexRepairState(database: DatabaseSync): IndexRepairState {
   const entries = database
     .prepare(
       `SELECT id, identity, payload
-         FROM openclaw_reliability_index_records
+         FROM carapace_reliability_index_records
         ORDER BY id`,
     )
     .iterate() as Iterable<{ id?: unknown; identity?: unknown; payload?: unknown }>;
@@ -83,7 +83,7 @@ function prepareIndexRepairDatabase(
     database.exec(`
       PRAGMA synchronous = FULL;
       PRAGMA journal_mode = ${journalMode === "wal" ? "WAL" : "DELETE"};
-      CREATE TABLE openclaw_reliability_index_records (
+      CREATE TABLE carapace_reliability_index_records (
         id INTEGER PRIMARY KEY,
         identity TEXT NOT NULL,
         payload TEXT NOT NULL
@@ -91,7 +91,7 @@ function prepareIndexRepairDatabase(
       BEGIN IMMEDIATE;
     `);
     const insert = database.prepare(
-      `INSERT INTO openclaw_reliability_index_records (id, identity, payload)
+      `INSERT INTO carapace_reliability_index_records (id, identity, payload)
        VALUES (?, ?, ?)`,
     );
     try {
@@ -105,7 +105,7 @@ function prepareIndexRepairDatabase(
     }
     database.exec(
       `CREATE INDEX ${INDEX_REPAIR_INDEX_NAME}
-         ON openclaw_reliability_index_records(payload);`,
+         ON carapace_reliability_index_records(payload);`,
     );
     if (journalMode === "wal") {
       database.exec("PRAGMA wal_checkpoint(TRUNCATE);");
@@ -200,7 +200,7 @@ function recoverAndRepair(databasePath: string, expectedState: IndexRepairState)
     assertSameState(readIndexRepairState(database), expectedState);
     const probeIndexes = database
       .prepare(
-        "SELECT name FROM main.sqlite_schema WHERE type = 'index' AND name LIKE 'openclaw_probe_%'",
+        "SELECT name FROM main.sqlite_schema WHERE type = 'index' AND name LIKE 'carapace_probe_%'",
       )
       .all();
     if (probeIndexes.length > 0) {

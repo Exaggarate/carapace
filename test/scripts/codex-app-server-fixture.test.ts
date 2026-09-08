@@ -33,10 +33,10 @@ describe("fake Codex configuration preflight", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_QA_CODEX_APP_SERVER_VERSION: "0.153.0",
-        OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG: requestLog,
-        OPENCLAW_QA_CODEX_NATIVE_APPROVAL_LOG: requestLog,
-        OPENCLAW_CODEX_MEDIA_PATH_APP_SERVER_LOG: requestLog,
+        CARAPACE_QA_CODEX_APP_SERVER_VERSION: "0.153.0",
+        CARAPACE_QA_CODEX_AUTH_APP_SERVER_LOG: requestLog,
+        CARAPACE_QA_CODEX_NATIVE_APPROVAL_LOG: requestLog,
+        CARAPACE_CODEX_MEDIA_PATH_APP_SERVER_LOG: requestLog,
       },
       input:
         [

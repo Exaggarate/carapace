@@ -1,5 +1,5 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { ModelCompatConfig } from "openclaw/plugin-sdk/provider-model-types";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { ModelCompatConfig } from "carapace/plugin-sdk/provider-model-types";
 import { describe, expect, it } from "vitest";
 import {
   createStartedThreadHarness,

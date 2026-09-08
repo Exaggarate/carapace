@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
 // Voice Call tests cover runtime plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { VoiceCallConfig } from "./config.js";
 import { createVoiceCallBaseConfig } from "./test-fixtures.js";
@@ -218,7 +218,7 @@ function requireRealtimeConsultToolHandler(): RealtimeConsultToolHandler {
     mocks.realtimeHandlerRegisterToolHandler.mock.calls,
     "realtime tool handler registration",
   );
-  expect(registeredToolHandler[0]).toBe("openclaw_agent_consult");
+  expect(registeredToolHandler[0]).toBe("carapace_agent_consult");
   if (typeof registeredToolHandler[1] !== "function") {
     throw new Error("expected realtime tool handler callback");
   }
@@ -284,7 +284,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
     expect(mocks.startTunnel).not.toHaveBeenCalled();
   });
 
-  it.each<{ name: string; coreConfig: OpenClawConfig; agentId?: string }>([
+  it.each<{ name: string; coreConfig: CarapaceConfig; agentId?: string }>([
     { name: "sole named agent", coreConfig: { agents: { entries: { operator: {} } } } },
     {
       name: "explicit fleet owner",
@@ -361,7 +361,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     const runtime = await createVoiceCallRuntime({
       config: createBaseConfig(),
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: {} as never,
     });
 
@@ -388,14 +388,14 @@ describe("createVoiceCallRuntime lifecycle", () => {
   });
 
   it("passes fullConfig to the webhook server for streaming provider resolution", async () => {
-    const coreConfig = { tts: { provider: "openai" } } as OpenClawConfig;
+    const coreConfig = { tts: { provider: "openai" } } as CarapaceConfig;
     const fullConfig = {
       plugins: {
         entries: {
           openai: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await createVoiceCallRuntime({
       config: createBaseConfig(),
@@ -420,14 +420,14 @@ describe("createVoiceCallRuntime lifecycle", () => {
     };
     const fullConfig = {
       agents: { list: [{ id: "operator", default: true }, { id: "support" }] },
-    } as OpenClawConfig;
-    const resolveAgentIdentity = vi.fn((_cfg: OpenClawConfig, agentId: string) => ({
+    } as CarapaceConfig;
+    const resolveAgentIdentity = vi.fn((_cfg: CarapaceConfig, agentId: string) => ({
       name: agentId === "support" ? "Support Voice" : "Main Voice",
     }));
 
     const runtime = await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       fullConfig,
       agentRuntime: {
         resolveAgentIdentity,
@@ -472,7 +472,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
       from: "+15550001111",
       to: "+15550002222",
     });
-    expect(unknownRegistration.instructions).not.toContain("OpenClaw agent voice context:");
+    expect(unknownRegistration.instructions).not.toContain("Carapace agent voice context:");
   });
 
   it("selects realtime provider readiness from the routed call owner", async () => {
@@ -482,7 +482,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
     config.numbers["+15550009999"] = { agentId: "support" };
     const fullConfig = {
       agents: { list: [{ id: "main", default: true }, { id: "support" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mocks.resolveConfiguredRealtimeVoiceProvider.mockImplementation(
       ({ agentId }: { agentId?: string }) => {
         if (agentId !== "support") {
@@ -498,7 +498,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
     await expect(
       createVoiceCallRuntime({
         config,
-        coreConfig: {} as OpenClawConfig,
+        coreConfig: {} as CarapaceConfig,
         fullConfig,
         agentRuntime: {} as never,
       }),
@@ -534,7 +534,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
       await expect(
         createVoiceCallRuntime({
           config: createExternalProviderConfig({ provider }),
-          coreConfig: {} as OpenClawConfig,
+          coreConfig: {} as CarapaceConfig,
           agentRuntime: {} as never,
         }),
       ).rejects.toThrow(`${provider} requires a publicly reachable webhook URL`);
@@ -553,7 +553,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
           provider: "twilio",
           publicUrl,
         }),
-        coreConfig: {} as OpenClawConfig,
+        coreConfig: {} as CarapaceConfig,
         agentRuntime: {} as never,
       }),
     ).rejects.toThrow("twilio requires a publicly reachable webhook URL");
@@ -566,7 +566,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
         provider: "twilio",
         publicUrl: "https://voice.example.com/voice/webhook",
       }),
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: {} as never,
     });
 
@@ -588,7 +588,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
         provider: "twilio",
         publicUrl: "https://voice.example.com/voice/webhook",
       }),
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: {} as never,
       logger,
     });
@@ -647,7 +647,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -660,8 +660,8 @@ describe("createVoiceCallRuntime lifecycle", () => {
       throw new Error("expected realtime handler tools to be an array");
     }
     expect(tools.map((tool) => requireRecord(tool, "realtime tool").name)).toEqual([
-      "openclaw_end_call",
-      "openclaw_agent_consult",
+      "carapace_end_call",
+      "carapace_agent_consult",
       "custom_tool",
     ]);
     const handler = requireRealtimeConsultToolHandler();
@@ -674,8 +674,8 @@ describe("createVoiceCallRuntime lifecycle", () => {
     });
     expect(runEmbeddedAgent).toHaveBeenCalledOnce();
     const consultParams = requireRecord(
-      firstCallParam(runEmbeddedAgent.mock.calls as unknown[][], "embedded OpenClaw consult"),
-      "embedded OpenClaw consult params",
+      firstCallParam(runEmbeddedAgent.mock.calls as unknown[][], "embedded Carapace consult"),
+      "embedded Carapace consult params",
     );
     expect(consultParams.agentId).toBe("support");
     expect(consultParams.sessionKey).toBe("agent:support:voice:15550009999");
@@ -704,7 +704,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
     config.realtime.tools = [
       {
         type: "function",
-        name: "openclaw_end_call",
+        name: "carapace_end_call",
         description: "Configured replacement",
         parameters: { type: "object", properties: { callId: { type: "string" } } },
       },
@@ -718,7 +718,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: {} as never,
     });
 
@@ -731,7 +731,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
       throw new Error("expected realtime handler tools to be an array");
     }
     expect(tools.map((tool) => requireRecord(tool, "realtime tool").name)).toEqual([
-      "openclaw_end_call",
+      "carapace_end_call",
       "custom_tool",
     ]);
     const endCallTool = requireRecord(tools[0], "end-call tool");
@@ -770,7 +770,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -818,7 +818,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -830,9 +830,9 @@ describe("createVoiceCallRuntime lifecycle", () => {
     const consultParams = requireRecord(
       firstCallParam(
         runEmbeddedAgent.mock.calls as unknown[][],
-        "per-call embedded OpenClaw consult",
+        "per-call embedded Carapace consult",
       ),
-      "per-call embedded OpenClaw consult params",
+      "per-call embedded Carapace consult params",
     );
     expect(consultParams.sessionKey).toBe("agent:main:voice:call:call-1");
   });
@@ -869,7 +869,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -916,13 +916,13 @@ describe("createVoiceCallRuntime lifecycle", () => {
     mocks.resolveRealtimeFastContextConsult.mockResolvedValue({
       handled: true,
       result: {
-        text: "Fast OpenClaw memory or session context found.\nThe caller's basement lights are on.",
+        text: "Fast Carapace memory or session context found.\nThe caller's basement lights are on.",
       },
     });
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -988,7 +988,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
 
     await createVoiceCallRuntime({
       config,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: agentRuntime as never,
     });
 
@@ -1002,9 +1002,9 @@ describe("createVoiceCallRuntime lifecycle", () => {
     const consultParams = requireRecord(
       firstCallParam(
         runEmbeddedAgent.mock.calls as unknown[][],
-        "configured embedded OpenClaw consult",
+        "configured embedded Carapace consult",
       ),
-      "configured embedded OpenClaw consult params",
+      "configured embedded Carapace consult params",
     );
     expect(consultParams.thinkLevel).toBe("ultra");
     expect(consultParams.fastMode).toBe(true);

@@ -1,5 +1,5 @@
 // Codex tests cover attempt steering plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   CodexSteeringAcceptedUnconfirmedError,
@@ -257,7 +257,7 @@ describe("Codex app-server steering queue", () => {
     await vi.advanceTimersByTimeAsync(0);
 
     const requestParams = request.mock.calls[0]?.[1] as { clientUserMessageId?: string };
-    expect(requestParams.clientUserMessageId).toBe("openclaw:turn-1:steer:1");
+    expect(requestParams.clientUserMessageId).toBe("carapace:turn-1:steer:1");
     expect(onQueueAccepted).toHaveBeenCalledWith(true);
     expect(settled).toBe(false);
     expect(queue.confirmConsumed("unrelated-user-message")).toBe(false);
@@ -269,7 +269,7 @@ describe("Codex app-server steering queue", () => {
         threadId: "thread-1",
         expectedTurnId: "turn-1",
         input: [{ type: "text", text: "accepted", text_elements: [] }],
-        clientUserMessageId: "openclaw:turn-1:steer:1",
+        clientUserMessageId: "carapace:turn-1:steer:1",
       },
       steerRequestOptions,
     );
@@ -337,7 +337,7 @@ describe("Codex app-server steering queue", () => {
 
     const queued = queue.queue("consumed first", { debounceMs: 0, onQueueAccepted });
     await vi.advanceTimersByTimeAsync(0);
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(true);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(true);
     expect(onQueueAccepted).toHaveBeenCalledWith(true);
     await queued;
 
@@ -359,7 +359,7 @@ describe("Codex app-server steering queue", () => {
     });
     await vi.advanceTimersByTimeAsync(5);
 
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(true);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(true);
     await Promise.all([first, second]);
     expect(request).toHaveBeenCalledWith(
       "turn/steer",
@@ -372,7 +372,7 @@ describe("Codex app-server steering queue", () => {
           { type: "text", text: "second", text_elements: [] },
           { type: "image", url: `data:image/png;base64,${PNG_1X1}` },
         ],
-        clientUserMessageId: "openclaw:turn-1:steer:1",
+        clientUserMessageId: "carapace:turn-1:steer:1",
       },
       steerRequestOptions,
     );
@@ -438,7 +438,7 @@ describe("Codex app-server steering queue", () => {
 
     queue.cancel();
     await rejected;
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(false);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(false);
     await expect(queue.queue("too late", { debounceMs: 0 })).rejects.toThrow(
       "steering queue cancelled",
     );
@@ -456,7 +456,7 @@ describe("Codex app-server steering queue", () => {
 
     controller.abort();
     await rejected;
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(false);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(false);
     await expect(queue.queue("too late", { debounceMs: 0 })).rejects.toThrow(
       "steering queue aborted",
     );
@@ -503,7 +503,7 @@ describe("Codex app-server steering queue", () => {
       await finished.promise;
       expect(request).not.toHaveBeenCalled();
       expect(onQueueAccepted).toHaveBeenCalledExactlyOnceWith(false);
-      expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(false);
+      expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(false);
     } finally {
       queue.cancel();
       finished.resolve(prepared);
@@ -595,7 +595,7 @@ describe("Codex app-server steering queue", () => {
     expect(onLateAccepted).toHaveBeenCalledWith(false);
     expect(onDispatchedAccepted).not.toHaveBeenCalled();
 
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(true);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(true);
     await dispatched;
     expect(onDispatchedAccepted).toHaveBeenCalledWith(true);
 
@@ -630,7 +630,7 @@ describe("Codex app-server steering queue", () => {
 
     await rejected;
     expect(onQueueAccepted).toHaveBeenCalledWith(true);
-    expect(queue.confirmConsumed("openclaw:turn-1:steer:1")).toBe(false);
+    expect(queue.confirmConsumed("carapace:turn-1:steer:1")).toBe(false);
     acceptSteer?.();
     await vi.advanceTimersByTimeAsync(0);
   });

@@ -10,9 +10,9 @@ import { saveAuthProfileStore } from "../agents/auth-profiles/store-runtime.js";
 import { loadCliSessionHistoryMessages } from "../agents/cli-runner/session-history.js";
 import { computeCacheHitRate } from "../agents/live-cache-test-support.js";
 import { listSubagentRunsForRequester } from "../agents/subagents/registry/subagent-registry.test-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionTranscriptRuntimeTarget } from "../config/sessions/session-accessor.js";
-import { loadOpenClawPlugins } from "../plugins/loader.js";
+import { loadCarapacePlugins } from "../plugins/loader.js";
 import { extractTextFromChatContent } from "../shared/chat-content.js";
 import { sleep } from "../utils/sleep.js";
 import type { GatewayClient } from "./client.js";
@@ -77,13 +77,13 @@ export type RuntimeBackendEntry = ReturnType<
 
 export async function initializeCacheProbeGitWorkspace(workspaceDir: string): Promise<void> {
   await execFileAsync("git", ["init", "--quiet", workspaceDir]);
-  await execFileAsync("git", ["-C", workspaceDir, "config", "user.name", "OpenClaw Tests"]);
+  await execFileAsync("git", ["-C", workspaceDir, "config", "user.name", "Carapace Tests"]);
   await execFileAsync("git", [
     "-C",
     workspaceDir,
     "config",
     "user.email",
-    "openclaw-tests@localhost",
+    "carapace-tests@localhost",
   ]);
   await execFileAsync("git", ["-C", workspaceDir, "add", "--all"]);
   await execFileAsync("git", [
@@ -137,7 +137,7 @@ export async function createCliBackendProbePlugin(
   const resultToken = `MCP-SCHEMA-${randomBytes(6).toString("hex").toUpperCase()}`;
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: CLI_BACKEND_PROBE_PLUGIN_ID,
@@ -195,7 +195,7 @@ export async function createCliBackendProbePlugin(
 }
 
 export function prepareClaudeCacheProbeBackend(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   liveBackend: RuntimeBackendEntry;
   providerId: string;
 }): RuntimeBackendEntry {
@@ -223,7 +223,7 @@ export function prepareClaudeCacheProbeBackend(params: {
 
   // This Vitest gateway uses the minimal startup path, so load the owning bundled plugin
   // explicitly. The production Gateway loads the same runtime registration at startup.
-  const registry = loadOpenClawPlugins({
+  const registry = loadCarapacePlugins({
     cache: false,
     config: params.config,
     onlyPluginIds: ["anthropic"],
@@ -243,8 +243,8 @@ export function prepareClaudeCacheProbeBackend(params: {
     // exercising the owning plugin's real prepare/argv hooks.
     config: params.liveBackend.config,
     pluginId: registration.pluginId,
-    ...(registration.builtWithOpenClawVersion
-      ? { builtWithOpenClawVersion: registration.builtWithOpenClawVersion }
+    ...(registration.builtWithCarapaceVersion
+      ? { builtWithCarapaceVersion: registration.builtWithCarapaceVersion }
       : {}),
   };
 }
@@ -284,7 +284,7 @@ export async function verifyCliBackendAnnounceOrdering({
       deliver: false,
       timeout: 240,
       message: [
-        "Run this exact OpenClaw CLI-backed completion announcement scenario. Use tool calls, not prose.",
+        "Run this exact Carapace CLI-backed completion announcement scenario. Use tool calls, not prose.",
         `Call sessions_spawn exactly once with taskName=cli_announce_${announceNonce.toLowerCase()} and task=${JSON.stringify(`Reply exactly ${announceChildToken} and nothing else.`)}.`,
         `After sessions_spawn returns status=accepted, call ${CLI_ANNOUNCE_BARRIER_TOOL_NAME} exactly once with no arguments.`,
         `After that tool returns, reply exactly ${announceParentToken}.`,

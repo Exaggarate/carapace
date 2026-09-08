@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 struct GatewaySetupRequest {
@@ -62,7 +62,7 @@ struct SettingsProTab: View {
     let directRoute: SettingsRoute?
     let registersNavigationDestinations: Bool
     let acceptsGatewaySetupRequests: Bool
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: CarapaceSidebarHeaderAction?
     let onRouteChange: ((SettingsRoute?) -> Void)?
     let onApprovalNotificationsRoute: ((String?) -> Void)?
     let gatewaySetupRequest: GatewaySetupRequest?
@@ -72,7 +72,7 @@ struct SettingsProTab: View {
         directRoute: SettingsRoute? = nil,
         registersNavigationDestinations: Bool = true,
         acceptsGatewaySetupRequests: Bool = false,
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: CarapaceSidebarHeaderAction? = nil,
         onRouteChange: ((SettingsRoute?) -> Void)? = nil,
         onApprovalNotificationsRoute: ((String?) -> Void)? = nil,
         gatewaySetupRequest: GatewaySetupRequest? = nil,
@@ -120,11 +120,11 @@ struct SettingsProTab: View {
             self.offlineDeviceSection
         }
         .accessibilityIdentifier("SettingsHub.Fallback")
-        .font(OpenClawType.body)
+        .font(CarapaceType.body)
         .navigationTitle("Settings")
         .toolbar {
             if let headerSidebarAction {
-                OpenClawSidebarToolbarItem(
+                CarapaceSidebarToolbarItem(
                     action: headerSidebarAction,
                     placement: .topBarLeading)
             }
@@ -207,7 +207,7 @@ struct SettingsProTab: View {
                             .ignoresSafeArea()
                             .navigationTitle("Scan QR Code")
                             .navigationBarTitleDisplayMode(.inline)
-                            .font(OpenClawType.body)
+                            .font(CarapaceType.body)
                             .toolbar {
                                 ToolbarItem(placement: .topBarLeading) {
                                     Button {
@@ -215,9 +215,9 @@ struct SettingsProTab: View {
                                         self.showQRScanner = false
                                     } label: {
                                         Text("Cancel")
-                                            .font(OpenClawType.subheadSemiBold)
+                                            .font(CarapaceType.subheadSemiBold)
                                     }
-                                    .font(OpenClawType.subheadSemiBold)
+                                    .font(CarapaceType.subheadSemiBold)
                                 }
                             }
                     }
@@ -227,15 +227,15 @@ struct SettingsProTab: View {
                     Task { await self.resetOnboarding() }
                 } label: {
                     Text("Reset")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 Button(role: .cancel) {} label: {
                     Text("Cancel")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             } message: {
                 Text("This disconnects, clears saved gateway credentials, and reopens onboarding.")
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
             }
             .alert(
                 "QR Scanner Unavailable",
@@ -248,11 +248,11 @@ struct SettingsProTab: View {
                     })) {
                 Button(role: .cancel) {} label: {
                     Text("OK")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             } message: {
                 Text(self.scannerError ?? "")
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
             }
             .confirmationDialog(
                 String(
@@ -273,13 +273,13 @@ struct SettingsProTab: View {
                     Task { await self.forgetGateway(entry) }
                 } label: {
                     Text("Forget Gateway")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 Button(role: .cancel) {
                     self.pendingForgetGateway = nil
                 } label: {
                     Text("Cancel")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             } message: { _ in
                 // Keep the extraction key contiguous for the native localization inventory.
@@ -287,7 +287,7 @@ struct SettingsProTab: View {
                     String(
                         localized:
                         "This removes saved credentials, device access, TLS trust, and cached chats for this gateway."))
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
             }
     }
 

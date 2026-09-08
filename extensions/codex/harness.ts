@@ -5,10 +5,10 @@ import type {
   AgentHarnessV2,
   AgentHarnessNativeCompaction,
   ContextEngineHostCapability,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import { readCodexRuntimeModelId } from "./src/app-server/model-runtime.js";
 import { sessionBindingIdentity } from "./src/app-server/session-binding-record.js";
 import type { CodexAppServerBindingStore } from "./src/app-server/session-binding.js";
@@ -21,7 +21,7 @@ const DEFAULT_CODEX_HARNESS_PROVIDER_IDS = new Set(["codex", "openai"]);
 // Same versioned slot shared-client.ts writes; a bare name would let this harness call
 // another build's disposer after an in-process plugin update.
 const SHARED_CODEX_APP_SERVER_CLIENT_DISPOSER = codexBuildSymbol(
-  "openclaw.codexAppServerClientDisposer",
+  "carapace.codexAppServerClientDisposer",
 );
 // Audited against @openai/codex 0.150.1 (rust-v0.150.1). These exact denies
 // either have no Codex-native equivalent or are enforced by the harness. Keep
@@ -60,7 +60,7 @@ type CodexAppServerAgentHarnessOptions = {
   providerIds?: Iterable<string>;
   pluginConfig?: unknown;
   resolvePluginConfig?: () => unknown;
-  resolveConfig?: () => OpenClawConfig | undefined;
+  resolveConfig?: () => CarapaceConfig | undefined;
   runtime?: PluginRuntime;
   bindingStore: CodexAppServerBindingStore;
   sessionCatalogControlFactory?: CodexSessionCatalogControlFactory;
@@ -97,7 +97,7 @@ export function createCodexAppServerAgentHarness(
       >
     | undefined;
   let disposed = false;
-  const resolveAttemptPluginConfig = (config: OpenClawConfig | undefined) =>
+  const resolveAttemptPluginConfig = (config: CarapaceConfig | undefined) =>
     resolvePluginConfigObject(config, "codex") ??
     options.resolvePluginConfig?.() ??
     options.pluginConfig;
@@ -214,7 +214,7 @@ export function createCodexAppServerAgentHarness(
         return {
           supported: false,
           reason: "Codex cannot reproduce authored request transport overrides",
-          fallbackRuntime: "openclaw",
+          fallbackRuntime: "carapace",
         };
       }
       const preparedAuth = ctx.modelProvider?.preparedAuth;
@@ -287,7 +287,7 @@ export function createCodexAppServerAgentHarness(
     runIsolatedCompletionV2: async (params) => {
       if (params.authorization.owner === "host") {
         const { runHostPreparedIsolatedCompletion } =
-          await import("openclaw/plugin-sdk/simple-completion-runtime");
+          await import("carapace/plugin-sdk/simple-completion-runtime");
         return runHostPreparedIsolatedCompletion(params);
       }
       const { runCodexIsolatedCompletion } =
@@ -298,7 +298,7 @@ export function createCodexAppServerAgentHarness(
     },
     runIsolatedCompletion: async (params) => {
       const { runHostPreparedIsolatedCompletion } =
-        await import("openclaw/plugin-sdk/simple-completion-runtime");
+        await import("carapace/plugin-sdk/simple-completion-runtime");
       // Keep the deprecated V1 contract on its exact host-prepared transport.
       // V2 owns native Codex auth and zero-tool attestation above.
       return runHostPreparedIsolatedCompletion({

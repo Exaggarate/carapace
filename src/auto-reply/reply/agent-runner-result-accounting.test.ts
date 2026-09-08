@@ -248,7 +248,7 @@ describe("accountFollowupTurn", () => {
       ...session.current(),
       modelProvider: "anthropic",
       model: "claude",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       contextTokens: 272_000,
       contextTokensSource: "resolved",
     });

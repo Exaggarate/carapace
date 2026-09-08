@@ -1,13 +1,13 @@
 import { isDeepStrictEqual } from "node:util";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
-import { readByteStreamWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictInteger } from "carapace/plugin-sdk/number-runtime";
+import { readByteStreamWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
 import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { formatZonedTimestamp } from "openclaw/plugin-sdk/time-runtime";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { formatZonedTimestamp } from "carapace/plugin-sdk/time-runtime";
 import {
   hasExplicitMatrixAccountConfig,
   resolveMatrixAccountConfig,
@@ -170,7 +170,7 @@ function formatMatrixCliRecoveryKeyStdinCommand(command: string, accountId?: str
 
 export function formatMatrixCliCommandParts(parts: string[], accountId?: string): string {
   const normalizedAccountId = normalizeAccountId(accountId);
-  const command = ["openclaw", "matrix", ...parts];
+  const command = ["carapace", "matrix", ...parts];
   if (normalizedAccountId !== "default") {
     const optionTerminatorIndex = command.indexOf("--");
     if (optionTerminatorIndex >= 0) {
@@ -479,7 +479,7 @@ export function printMatrixVerificationSummary(summary: MatrixCliVerificationSum
   console.log(`Other user: ${sanitizeMatrixCliText(summary.otherUserId)}`);
   console.log(`Other device: ${sanitizeMatrixCliText(summary.otherDeviceId ?? "unknown")}`);
   console.log(`Self-verification: ${summary.isSelfVerification ? "yes" : "no"}`);
-  console.log(`Initiated by OpenClaw: ${summary.initiatedByMe ? "yes" : "no"}`);
+  console.log(`Initiated by Carapace: ${summary.initiatedByMe ? "yes" : "no"}`);
   console.log(`Phase: ${sanitizeMatrixCliText(summary.phaseName)}`);
   console.log(`Pending: ${summary.pending ? "yes" : "no"}`);
   console.log(`Completed: ${summary.completed ? "yes" : "no"}`);
@@ -569,7 +569,7 @@ function buildVerificationGuidance(
   }
   if (status.serverDeviceKnown === false) {
     nextSteps.add(
-      `This Matrix device is no longer listed on the homeserver. Create a new OpenClaw Matrix device with ${formatMatrixCliCommand("account add --homeserver <url> --user-id <@user:server> --password <password> --device-name OpenClaw-Gateway", accountId)}. If you use token auth, create a fresh Matrix access token in your Matrix client or admin UI, then run ${formatMatrixCliCommand("account add --homeserver <url> --access-token <token>", accountId)}.`,
+      `This Matrix device is no longer listed on the homeserver. Create a new Carapace Matrix device with ${formatMatrixCliCommand("account add --homeserver <url> --user-id <@user:server> --password <password> --device-name Carapace-Gateway", accountId)}. If you use token auth, create a fresh Matrix access token in your Matrix client or admin UI, then run ${formatMatrixCliCommand("account add --homeserver <url> --access-token <token>", accountId)}.`,
     );
   }
   for (const step of buildBackupGuidance(backup, accountId, {

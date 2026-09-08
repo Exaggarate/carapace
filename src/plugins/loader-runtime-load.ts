@@ -6,7 +6,7 @@ import { resolveAllowedModelRefCore } from "../agents/model-selection-resolve.js
 import { createPluginCapabilityCatalogContext } from "./capability-catalog-context.js";
 import { isPluginRegistryLoadInFlight } from "./loader-cache.js";
 import {
-  loadOpenClawPluginsCore,
+  loadCarapacePluginsCore,
   type InternalPluginLoadOverrides,
   type NativePluginLoadBindings,
 } from "./loader-runtime-core.js";
@@ -24,10 +24,10 @@ import type { PluginRuntime } from "./runtime/types.js";
 // Construction only binds callbacks. No profile reads, plugin loads, or network work occur here.
 // Hoisted entry functions let cold auth discovery re-enter this same binding without a module cycle.
 export const resolveRuntimePluginRegistry =
-  createPluginRuntimeRegistryResolver(loadOpenClawPlugins);
+  createPluginRuntimeRegistryResolver(loadCarapacePlugins);
 const providerRegistry = Object.freeze(
   createProviderRegistryResolver({
-    loadOpenClawPlugins,
+    loadCarapacePlugins,
     resolveRuntimePluginRegistry,
     isPluginRegistryLoadInFlight,
   }),
@@ -84,8 +84,8 @@ export const nativePluginBindings: Readonly<NativePluginBindings> = Object.freez
 export function resolvePluginCapabilityCatalogContext() {
   return loaderBindings.capabilityCatalogContext;
 }
-export function loadOpenClawPlugins(options: PluginLoadOptions = {}): PluginRegistry {
-  return loadOpenClawPluginsCore(options, loaderBindings);
+export function loadCarapacePlugins(options: PluginLoadOptions = {}): PluginRegistry {
+  return loadCarapacePluginsCore(options, loaderBindings);
 }
 
 /** Acquires a fresh discovery registry; release waits for its registration resources. */
@@ -94,7 +94,7 @@ export async function acquirePluginRegistryForInspection(
 ): Promise<{ registry: PluginRegistry; release: () => Promise<void> }> {
   const resources = new PluginRegistryInspectionResources();
   try {
-    const registry = loadOpenClawPluginsCore(
+    const registry = loadCarapacePluginsCore(
       { ...options, activate: false, cache: false },
       loaderBindings,
       undefined,
@@ -115,7 +115,7 @@ export async function acquirePluginRegistryForInspection(
   }
 }
 
-export function loadOpenClawPluginsWithInternalOverrides(
+export function loadCarapacePluginsWithInternalOverrides(
   options: PluginLoadOptions & { cache: false },
   overrides: Omit<InternalPluginLoadOverrides, "runtime"> & {
     runtime: Pick<PluginRuntime, "config"> &
@@ -141,7 +141,7 @@ export function loadOpenClawPluginsWithInternalOverrides(
   delete runtimeDescriptors.modelAuth;
   delete runtimeDescriptors.modelConfig;
   Object.defineProperties(runtime, runtimeDescriptors);
-  return loadOpenClawPluginsCore(options, loaderBindings, { ...overrides, runtime });
+  return loadCarapacePluginsCore(options, loaderBindings, { ...overrides, runtime });
 }
 
 export function resolveNativePluginModelAuth(): PluginRuntime["modelAuth"] {

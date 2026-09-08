@@ -2,13 +2,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { webhook } from "@line/bot-sdk";
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelIngressQueue } from "carapace/plugin-sdk/channel-outbound";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests as createChannelIngressQueue,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { expect, vi } from "vitest";
 
 export type SpoolPayload = {
@@ -66,7 +66,7 @@ export async function withQueue<T>(
   ) => Promise<T>,
 ): Promise<T> {
   const createdDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-line-spool-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-line-spool-"),
   );
   const stateDir = await fs.realpath(createdDir);
   const queue = createChannelIngressQueue<SpoolPayload>({
@@ -84,7 +84,7 @@ export async function withQueue<T>(
   try {
     return await fn(queue, legacySeed);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }

@@ -155,7 +155,7 @@ describe("waitForQaTransportOutboundSequence", () => {
     });
     const preview = state.addOutboundMessage({
       accountId: "default",
-      senderId: "openclaw",
+      senderId: "carapace",
       text: "preview",
       threadId: "42",
       to: "thread:qa-room/42",
@@ -323,7 +323,7 @@ describe("waitForQaTransportOutboundSequence", () => {
     const state = createQaBusState();
     const preview = state.addOutboundMessage({
       accountId: "default",
-      senderId: "openclaw",
+      senderId: "carapace",
       text: "preview",
       to: "dm:alice",
     });
@@ -355,14 +355,14 @@ describe("waitForQaTransportOutboundSequence", () => {
     const state = createQaBusState();
     state.addOutboundMessage({
       accountId: "default",
-      senderId: "openclaw",
+      senderId: "carapace",
       text: "stale preview",
       to: "dm:alice",
     });
     const sinceCursor = state.getSnapshot().cursor;
     const final = state.addOutboundMessage({
       accountId: "default",
-      senderId: "openclaw",
+      senderId: "carapace",
       text: "final marker",
       to: "dm:alice",
     });

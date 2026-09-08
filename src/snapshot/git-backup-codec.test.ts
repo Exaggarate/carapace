@@ -4,9 +4,9 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { dumpGitBackupDatabase, restoreGitBackupDirectory } from "./git-backup-codec.js";
 
 it("preserves NUL-bearing TEXT, storage classes, and source key order", async () => {
@@ -19,14 +19,14 @@ it("preserves NUL-bearing TEXT, storage classes, and source key order", async ()
   const byteQuery =
     'SELECT hex("key") AS key, typeof(value) AS type, hex(value) AS bytes FROM text_values ORDER BY "key"';
   try {
-    const source = openOpenClawStateDatabase({ path: sourcePath });
+    const source = openCarapaceStateDatabase({ path: sourcePath });
     source.db.exec('CREATE TABLE text_values ("key" TEXT PRIMARY KEY, value ANY) STRICT');
     const insert = source.db.prepare('INSERT INTO text_values ("key", value) VALUES (?, ?)');
     for (let index = keys.length - 1; index >= 0; index -= 1) {
       insert.run(keys[index]!, values[index]!);
     }
     const expectedBytes = source.db.prepare(byteQuery).all();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     await dumpGitBackupDatabase({
       snapshotPath: sourcePath,
@@ -60,7 +60,7 @@ it("preserves NUL-bearing TEXT, storage classes, and source key order", async ()
       database.close();
     }
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   }
 });

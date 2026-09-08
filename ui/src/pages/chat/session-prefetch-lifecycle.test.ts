@@ -74,7 +74,7 @@ describe("session prefetch pane and navigation ownership", () => {
         conversationPresented: boolean;
       };
       // A visible sibling Home conversation cannot opt the dashboard page into warming.
-      const home = Object.assign(document.createElement("openclaw-chat-pane"), {
+      const home = Object.assign(document.createElement("carapace-chat-pane"), {
         sessionKey: "agent:main:home",
         conversationPresented: true,
         transcriptLoading: false,
@@ -88,20 +88,20 @@ describe("session prefetch pane and navigation ownership", () => {
       target.dataset.sessionKey = intended;
       shell.append(target);
       home.transcriptLoading = true;
-      home.dispatchEvent(new Event("openclaw-chat-transcript-loading-changed", { bubbles: true }));
+      home.dispatchEvent(new Event("carapace-chat-transcript-loading-changed", { bubbles: true }));
       target.dispatchEvent(new Event(eventType, { bubbles: true }));
       await vi.advanceTimersByTimeAsync(300);
       await settlePromises();
       expect(request).not.toHaveBeenCalled();
 
       home.transcriptLoading = false;
-      home.dispatchEvent(new Event("openclaw-chat-transcript-loading-changed", { bubbles: true }));
+      home.dispatchEvent(new Event("carapace-chat-transcript-loading-changed", { bubbles: true }));
       await vi.advanceTimersByTimeAsync(300);
       await settlePromises();
       expect(request.mock.calls.map(sessionKeyFromCall)).toEqual([intended]);
 
       pane.conversationPresented = true;
-      pane.dispatchEvent(new Event("openclaw-chat-pane-lifecycle-changed", { bubbles: true }));
+      pane.dispatchEvent(new Event("carapace-chat-pane-lifecycle-changed", { bubbles: true }));
       await vi.advanceTimersByTimeAsync(300);
       await settlePromises();
       expect(request.mock.calls.map(sessionKeyFromCall)).toEqual([intended, recent]);
@@ -178,7 +178,7 @@ describe("session prefetch pane and navigation ownership", () => {
       rows: [row("agent:main:recent", NOW - 1)],
     });
     fixture.host.lastElementChild!.dispatchEvent(
-      new Event("openclaw-chat-pane-lifecycle-changed", { bubbles: true }),
+      new Event("carapace-chat-pane-lifecycle-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(300);
     await settlePromises();
@@ -186,14 +186,14 @@ describe("session prefetch pane and navigation ownership", () => {
   });
 
   it("excludes the Home pane beside the page without borrowing another app's panes", async () => {
-    const home = Object.assign(document.createElement("openclaw-chat-pane"), {
+    const home = Object.assign(document.createElement("carapace-chat-pane"), {
       sessionKey: "agent:main:main",
       transcriptLoading: false,
     });
     shell.append(home);
-    const otherShell = document.createElement("openclaw-app-shell");
+    const otherShell = document.createElement("carapace-app-shell");
     otherShell.append(
-      Object.assign(document.createElement("openclaw-chat-pane"), {
+      Object.assign(document.createElement("carapace-chat-pane"), {
         sessionKey: "agent:main:recent",
         transcriptLoading: true,
       }),
@@ -219,7 +219,7 @@ describe("session prefetch pane and navigation ownership", () => {
   it.each(["commit", "remove"])(
     "waits for the sibling Home transcript and resumes on %s",
     async (completion) => {
-      const home = Object.assign(document.createElement("openclaw-chat-pane"), {
+      const home = Object.assign(document.createElement("carapace-chat-pane"), {
         sessionKey: "agent:main:main",
         transcriptLoading: false,
       });
@@ -235,7 +235,7 @@ describe("session prefetch pane and navigation ownership", () => {
       });
       // Home hydrates in its own update, without re-rendering the chat page.
       home.transcriptLoading = true;
-      home.dispatchEvent(new Event("openclaw-chat-transcript-loading-changed", { bubbles: true }));
+      home.dispatchEvent(new Event("carapace-chat-transcript-loading-changed", { bubbles: true }));
       await vi.advanceTimersByTimeAsync(300);
       await settlePromises();
       expect(request).not.toHaveBeenCalled();
@@ -243,11 +243,11 @@ describe("session prefetch pane and navigation ownership", () => {
       if (completion === "commit") {
         home.transcriptLoading = false;
         home.dispatchEvent(
-          new Event("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+          new Event("carapace-chat-transcript-loading-changed", { bubbles: true }),
         );
       } else {
         home.remove();
-        shell.dispatchEvent(new Event("openclaw-chat-pane-lifecycle-changed"));
+        shell.dispatchEvent(new Event("carapace-chat-pane-lifecycle-changed"));
       }
       await vi.advanceTimersByTimeAsync(300);
       await settlePromises();

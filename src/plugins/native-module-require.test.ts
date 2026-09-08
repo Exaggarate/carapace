@@ -23,7 +23,7 @@ let nativeEsmGraphProbe: NativeEsmGraphProbe;
 
 describe("tryNativeRequireJavaScriptModule", () => {
   it("loads native CommonJS modules", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     fs.writeFileSync(modulePath, 'module.exports = { marker: "native" };\n', "utf8");
 
@@ -33,7 +33,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines modules that need source-transform fallback", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.mjs");
     fs.writeFileSync(
       modulePath,
@@ -47,7 +47,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines an in-flight ESM require race for source-transform fallback", () => {
-    const modulePath = path.join(tempDirs.make("openclaw-native-require-"), "plugin.cjs");
+    const modulePath = path.join(tempDirs.make("carapace-native-require-"), "plugin.cjs");
     fs.writeFileSync(modulePath, "module.exports = {};\n", "utf8");
     const error = Object.assign(new Error("ESM is still loading"), {
       code: "ERR_REQUIRE_ESM_RACE_CONDITION",
@@ -72,7 +72,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines missing target modules so callers can try source fallback", () => {
-    const modulePath = path.join(tempDirs.make("openclaw-native-require-"), "missing.cjs");
+    const modulePath = path.join(tempDirs.make("carapace-native-require-"), "missing.cjs");
 
     expect(tryNativeRequireJavaScriptModule(modulePath, { allowWindows: true })).toEqual({
       ok: false,
@@ -80,7 +80,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("propagates missing dependency errors from existing modules", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     fs.writeFileSync(modulePath, 'require("./missing-dependency.cjs");\n', "utf8");
 
@@ -90,9 +90,9 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines missing dependency errors when source-transform fallback is available", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
-    fs.writeFileSync(modulePath, 'require("openclaw/plugin-sdk/core");\n', "utf8");
+    fs.writeFileSync(modulePath, 'require("carapace/plugin-sdk/core");\n', "utf8");
 
     expect(
       tryNativeRequireJavaScriptModule(modulePath, {
@@ -103,7 +103,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   beforeAll(() => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const sdkPath = path.join(dir, "sdk.js");
     const modulePath = path.join(dir, "plugin.mjs");
     const probePath = path.join(dir, "probe.mjs");
@@ -117,7 +117,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
     );
     fs.writeFileSync(
       modulePath,
-      'import { defineChannelMessageAdapter } from "openclaw/plugin-sdk/channel-outbound";\nexport const marker = defineChannelMessageAdapter();\n',
+      'import { defineChannelMessageAdapter } from "carapace/plugin-sdk/channel-outbound";\nexport const marker = defineChannelMessageAdapter();\n',
       "utf8",
     );
     fs.writeFileSync(
@@ -126,7 +126,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
         `import { tryNativeRequireJavaScriptModule } from ${JSON.stringify(nativeRequireModuleUrl)};`,
         `const result = tryNativeRequireJavaScriptModule(${JSON.stringify(modulePath)}, {`,
         "  allowWindows: true,",
-        `  aliasMap: { "openclaw/plugin-sdk/channel-outbound": ${JSON.stringify(sdkPath)} },`,
+        `  aliasMap: { "carapace/plugin-sdk/channel-outbound": ${JSON.stringify(sdkPath)} },`,
         "});",
         "if (!result.ok) {",
         '  throw new Error("native require declined ESM graph");',
@@ -155,7 +155,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines missing dependency errors when the caller can use source transform fallback", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     fs.writeFileSync(modulePath, 'require("./helper.js");\n', "utf8");
     fs.writeFileSync(path.join(dir, "helper.ts"), "export const loaded = true;\n", "utf8");
@@ -169,7 +169,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("propagates real module evaluation errors instead of falling back", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     fs.writeFileSync(
       modulePath,
@@ -183,7 +183,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("declines real module evaluation errors when the caller can use source transform fallback", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     fs.writeFileSync(
       modulePath,
@@ -200,7 +200,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   });
 
   it("loads and evicts path and file-URL modules through plain Node", async () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const ownerPath = path.join(dir, "native-require.mjs");
     // tsx's CommonJS hook accepts file URLs and masks Node's native contract.
     await build({
@@ -249,7 +249,7 @@ console.log("native path + file URL load/cache reload; missing target/dependency
   });
 
   it("retains terminal ESM failures across eviction and alias changes until a new path loads", async () => {
-    const dir = tempDirs.make("openclaw-native-failed-generation-");
+    const dir = tempDirs.make("carapace-native-failed-generation-");
     const ownerPath = path.join(dir, "native-require.mjs");
     await build({
       entryPoints: [path.resolve("src/plugins/native-module-require.ts")],
@@ -332,7 +332,7 @@ console.log("terminal error retained; new generation recovered");
   });
 
   it("clears local dependencies loaded by a native JavaScript module", () => {
-    const dir = tempDirs.make("openclaw-native-require-");
+    const dir = tempDirs.make("carapace-native-require-");
     const modulePath = path.join(dir, "plugin.cjs");
     const helperPath = path.join(dir, "helper.cjs");
     fs.writeFileSync(modulePath, 'module.exports = require("./helper.cjs");\n', "utf8");
@@ -352,7 +352,7 @@ console.log("terminal error retained; new generation recovered");
   });
 
   it("releases retired native module graphs, including local cycles", () => {
-    const dir = tempDirs.make("openclaw-native-retirement-");
+    const dir = tempDirs.make("carapace-native-retirement-");
     const modulePath = path.join(dir, "plugin.cjs");
     const probePath = path.join(dir, "probe.mjs");
     fs.writeFileSync(modulePath, 'exports.helper = require("./helper.cjs");\n');

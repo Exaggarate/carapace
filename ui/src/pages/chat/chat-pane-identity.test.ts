@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import type { ProgressCard, ProgressCardChangedEvent } from "@openclaw/gateway-protocol";
+import type { ProgressCard, ProgressCardChangedEvent } from "@carapace/gateway-protocol";
 import { html, render } from "lit";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";

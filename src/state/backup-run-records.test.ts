@@ -8,12 +8,12 @@ import {
   readBackupFreshness,
 } from "../commands/backup-health.js";
 import { recordBackupRunOutcome } from "./backup-run-records.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "./openclaw-state-db-readonly.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "./carapace-state-db-readonly.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "./carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "./carapace-state-db.paths.js";
 
 const roots: string[] = [];
 const mocks = vi.hoisted(() => ({ note: vi.fn() }));
@@ -21,13 +21,13 @@ const mocks = vi.hoisted(() => ({ note: vi.fn() }));
 vi.mock("../../packages/terminal-core/src/note.js", () => ({ note: mocks.note }));
 
 async function testEnv(options?: { bootstrap?: boolean }): Promise<NodeJS.ProcessEnv> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-runs-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-backup-runs-test-"));
   roots.push(root);
-  const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(root, "state") };
+  const env = { ...process.env, CARAPACE_STATE_DIR: path.join(root, "state") };
   if (options?.bootstrap) {
     // Recording is non-creating by contract, so the fixture bootstraps the
     // state database the way a real gateway host already has.
-    runOpenClawStateWriteTransaction(() => undefined, { env });
+    runCarapaceStateWriteTransaction(() => undefined, { env });
   }
   return env;
 }
@@ -35,7 +35,7 @@ async function testEnv(options?: { bootstrap?: boolean }): Promise<NodeJS.Proces
 afterEach(async () => {
   vi.restoreAllMocks();
   mocks.note.mockReset();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await Promise.all(
     roots.splice(0).map(async (root) => await fs.rm(root, { recursive: true, force: true })),
   );
@@ -63,7 +63,7 @@ describe("backup run records", () => {
         createdAt: index,
       });
     }
-    const rows = withExistingOpenClawStateDatabaseReadOnly(
+    const rows = withExistingCarapaceStateDatabaseReadOnly(
       ({ db }) =>
         db
           .prepare(
@@ -104,10 +104,10 @@ describe("backup run records", () => {
 
   it("treats an older same-version database without backup_runs as no recorded backups", async () => {
     const env = await testEnv({ bootstrap: true });
-    withExistingOpenClawStateDatabaseReadOnly(() => undefined, { env });
-    closeOpenClawStateDatabaseForTest();
+    withExistingCarapaceStateDatabaseReadOnly(() => undefined, { env });
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = await import("node:sqlite");
-    const raw = new DatabaseSync(resolveOpenClawStateSqlitePath(env));
+    const raw = new DatabaseSync(resolveCarapaceStateSqlitePath(env));
     raw.exec("DROP TABLE backup_runs");
     raw.close();
     expect(readBackupFreshness(env)).toEqual({});
@@ -116,7 +116,7 @@ describe("backup run records", () => {
   it("keeps absent status reads read-only and formats none, failed, fresh, and stale states", async () => {
     const env = await testEnv();
     expect(readBackupFreshness(env)).toEqual({});
-    await expect(fs.access(resolveOpenClawStateSqlitePath(env))).rejects.toMatchObject({
+    await expect(fs.access(resolveCarapaceStateSqlitePath(env))).rejects.toMatchObject({
       code: "ENOENT",
     });
     const formatTimeAgo = (ageMs: number) => `${ageMs / 3_600_000}h ago`;
@@ -143,7 +143,7 @@ describe("backup run records", () => {
 
     // Recording is non-creating; bootstrap the state database before the
     // recording phase the way a real gateway host already has.
-    runOpenClawStateWriteTransaction(() => undefined, { env });
+    runCarapaceStateWriteTransaction(() => undefined, { env });
     vi.spyOn(Date, "now").mockReturnValue(1_000);
     recordBackupRunOutcome({
       env,

@@ -3,7 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { makeTempWorkspace } from "../test-helpers/workspace.js";
 import { setTestEnvValue, withEnv, withEnvAsync } from "../test-utils/env.js";
@@ -86,19 +86,19 @@ describe("logNonInteractiveOnboardingFailure", () => {
 
     const parsed = JSON.parse(readCapturedJson()) as { hints: string[] };
     expect(parsed.hints).toEqual([
-      "Fix: start `openclaw gateway run`, or run `openclaw gateway restart` for a managed gateway.",
+      "Fix: start `carapace gateway run`, or run `carapace gateway restart` for a managed gateway.",
     ]);
   });
 
   it.each([
     {
       name: "active profile",
-      env: { OPENCLAW_PROFILE: "work", OPENCLAW_CONTAINER_HINT: undefined },
+      env: { CARAPACE_PROFILE: "work", CARAPACE_CONTAINER_HINT: undefined },
       selector: "--profile work",
     },
     {
       name: "container precedence over the active profile",
-      env: { OPENCLAW_PROFILE: "work", OPENCLAW_CONTAINER_HINT: "preview" },
+      env: { CARAPACE_PROFILE: "work", CARAPACE_CONTAINER_HINT: "preview" },
       selector: "--container preview",
     },
   ])("keeps $name on every recovery command in human and JSON output", ({ env, selector }) => {
@@ -122,7 +122,7 @@ describe("logNonInteractiveOnboardingFailure", () => {
       {
         detail: "connect ECONNREFUSED",
         diagnostics: {
-          lastGatewayError: "Cannot find package '@openclaw/example' imported from /app/plugin.mjs",
+          lastGatewayError: "Cannot find package '@carapace/example' imported from /app/plugin.mjs",
         },
         commands: ["doctor --fix"],
       },
@@ -180,7 +180,7 @@ describe("logNonInteractiveOnboardingFailure", () => {
             ? (JSON.parse(emitted) as { hints: string[] }).hints[0]
             : emitted.split("\n").find((line) => line.startsWith("Fix:"));
           for (const command of commands) {
-            expect(hint).toContain(`\`openclaw ${selector} ${command}\``);
+            expect(hint).toContain(`\`carapace ${selector} ${command}\``);
           }
         }
       }
@@ -212,7 +212,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
   beforeAll(async () => {
     envSnapshot = prepareOnboardGatewayTestEnv();
 
-    tempHome = await makeTempWorkspace("openclaw-onboard-");
+    tempHome = await makeTempWorkspace("carapace-onboard-");
     setTestEnvValue("HOME", tempHome);
 
     await loadGatewayOnboardModules();
@@ -256,7 +256,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
             throw new Error(`exit:${code}`);
           },
         };
-        const message = "Config invalid. Run `openclaw doctor` to repair it, then re-run setup.";
+        const message = "Config invalid. Run `carapace doctor` to repair it, then re-run setup.";
 
         await expect(
           runNonInteractiveSetup(
@@ -305,7 +305,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
       const options = {
         nonInteractive: true,
         mode: "local" as const,
-        workspace: path.join(stateDir, "openclaw"),
+        workspace: path.join(stateDir, "carapace"),
         authChoice: "skip" as const,
         skipSkills: true,
         skipHealth: true,
@@ -363,9 +363,9 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
     });
   });
 
-  it("preserves existing config on onboard rerun (openclaw#84692)", async () => {
+  it("preserves existing config on onboard rerun (carapace#84692)", async () => {
     await withStateDir("state-preserve-agents-", async (stateDir) => {
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
       const warningRuntime = { ...runtime, error: vi.fn() };
       const passwordRef = { source: "env" as const, provider: "default", id: "GATEWAY_PASSWORD" };
       const seededAgents = {
@@ -404,7 +404,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
           auth: { mode: "password", password: passwordRef },
           tailscale: { mode: "serve" },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -435,7 +435,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
 
   it("migrates local onboard plugin install records in the setup write", async () => {
     await withStateDir("state-local-plugin-installs-", async (stateDir) => {
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
       testConfigStore.set(resolveTestConfigPath(), {
         plugins: {
           installs: {
@@ -445,7 +445,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
             },
           },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -473,10 +473,10 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
 
   it("does not auto-enable default hooks when skipHooks is set", async () => {
     await withStateDir("state-skip-hooks-", async (stateDir) => {
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
       testConfigStore.set(resolveTestConfigPath(), {
         gateway: { mode: "local", bind: "lan" },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -500,7 +500,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
 
   it("persists skipBootstrap and skips workspace bootstrap creation", async () => {
     await withStateDir("state-skip-bootstrap-", async (stateDir) => {
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
 
       await runNonInteractiveSetup(
         {
@@ -550,7 +550,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
             tlsFingerprint: "sha256:test-fingerprint",
           },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
       await runNonInteractiveSetup(
         {
           nonInteractive: true,
@@ -574,13 +574,13 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
     });
   }, 60_000);
 
-  it("preserves existing agents and bindings on remote onboard rerun (openclaw#84692)", async () => {
+  it("preserves existing agents and bindings on remote onboard rerun (carapace#84692)", async () => {
     await withStateDir("state-remote-preserve-agents-", async (_stateDir) => {
       const port = getPseudoPort(30_000);
       const passwordRef = {
         source: "env" as const,
         provider: "default",
-        id: "OPENCLAW_REMOTE_GATEWAY_PASSWORD",
+        id: "CARAPACE_REMOTE_GATEWAY_PASSWORD",
       };
       const tokenRef = { source: "env" as const, provider: "default", id: "REMOTE_TOKEN" };
       const seededAgents = {
@@ -616,7 +616,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
             tlsFingerprint: "sha256:test-fingerprint",
           },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -662,7 +662,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
           mode: "remote",
           remote: { url: `ws://127.0.0.1:${port}`, token },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -698,7 +698,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
       );
 
       expect(log.mock.calls.flat().join("\n")).toMatch(
-        /Setup complete; gateway was not installed or started because daemon installation was explicitly skipped\.[\s\S]*Gateway did not become reachable[\s\S]*Classification: not-listening[\s\S]*only waits for an already-running gateway unless you pass `--install-daemon` to `openclaw onboard`[\s\S]*openclaw onboard --install-daemon[\s\S]*openclaw onboard --skip-health/,
+        /Setup complete; gateway was not installed or started because daemon installation was explicitly skipped\.[\s\S]*Gateway did not become reachable[\s\S]*Classification: not-listening[\s\S]*only waits for an already-running gateway unless you pass `--install-daemon` to `carapace onboard`[\s\S]*carapace onboard --install-daemon[\s\S]*carapace onboard --skip-health/,
       );
     });
   }, 60_000);
@@ -716,7 +716,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
           runtime,
         ),
       ).rejects.toThrow(
-        /Gateway did not become reachable[\s\S]*Classification: not-listening[\s\S]*openclaw onboard --install-daemon[\s\S]*openclaw onboard --skip-health/,
+        /Gateway did not become reachable[\s\S]*Classification: not-listening[\s\S]*carapace onboard --install-daemon[\s\S]*carapace onboard --skip-health/,
       );
     });
   }, 60_000);
@@ -885,7 +885,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
       expect(parsed.installDaemon).toBe(true);
       expect(parsed.detail).toContain("1006 abnormal closure");
       expect(parsed.gateway?.wsUrl).toContain("ws://127.0.0.1:");
-      expect(parsed.hints).toContain("Run `openclaw gateway status --deep` for more detail.");
+      expect(parsed.hints).toContain("Run `carapace gateway status --deep` for more detail.");
       expect(parsed.diagnostics?.service?.label).toBe("LaunchAgent");
       expect(parsed.diagnostics?.service?.loaded).toBe(true);
       expect(parsed.diagnostics?.service?.loadState).toEqual({ status: "loaded" });
@@ -930,7 +930,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
       expect(parsed.phase).toBe("gateway-health");
       expect(parsed.message).toContain("health check failed");
       expect(parsed.detail).toContain("Gateway credentials rejected.");
-      expect(parsed.hints).toContain("Run `openclaw health` for full diagnostics.");
+      expect(parsed.hints).toContain("Run `carapace health` for full diagnostics.");
     });
   }, 60_000);
 
@@ -998,7 +998,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
 
       const { runtimeWithCapture, readCapturedJson } = createOnboardJsonCaptureRuntime();
       await withEnvAsync(
-        { OPENCLAW_PROFILE: "work", OPENCLAW_CONTAINER_HINT: undefined },
+        { CARAPACE_PROFILE: "work", CARAPACE_CONTAINER_HINT: undefined },
         async () => {
           await expectOnboardLocalJsonSetupFailure({
             runSetup: runNonInteractiveSetup,
@@ -1017,7 +1017,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
       expect(parsed.ok).toBe(false);
       expect(parsed.phase).toBe("gateway-health");
       expect(parsed.classification).toBe("service-stopped");
-      expect(parsed.hints).toContain("Fix: run `openclaw --profile work gateway restart`.");
+      expect(parsed.hints).toContain("Fix: run `carapace --profile work gateway restart`.");
     });
   }, 60_000);
 });

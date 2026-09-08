@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   buildOAuthRefreshFailureLoginCommand,
   classifyOAuthRefreshFailure,
@@ -37,7 +37,7 @@ import { isAgentHarnessPreflightError } from "../../agents/harness/errors.js";
 import { isProviderAuthError } from "../../agents/model-auth-runtime-shared.js";
 import { buildProviderAuthRecoveryHint } from "../../agents/provider-auth-recovery-hint.js";
 import { resolveSilentReplyPolicy } from "../../config/silent-reply.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { extractErrorHttpStatus } from "../../shared/assistant-error-format.js";
 import { buildCodexLoginRecovery } from "../codex-login-recovery.js";
@@ -172,7 +172,7 @@ export function resolveExternalRunFailureTextForConversation(params: {
   text: string;
   sessionCtx: ExternalFailureConversationContext;
   isGenericRunnerFailure: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   visibleReplyDelivered?: boolean;
 }): string {
   // Group silence must not strand an already-visible partial without its terminal failure.
@@ -204,10 +204,10 @@ function buildCodexAppServerFailureText(message: string): string | null {
     return "⚠️ This Codex session changed before your message could run. Please send it again.";
   }
   if (CODEX_APP_SERVER_CLIENT_CLOSED_BEFORE_REPLY_RE.test(normalizedMessage)) {
-    return "⚠️ Codex app-server connection closed before this turn finished. OpenClaw retried once when the stdio turn was still replay-safe; please try again if this keeps happening.";
+    return "⚠️ Codex app-server connection closed before this turn finished. Carapace retried once when the stdio turn was still replay-safe; please try again if this keeps happening.";
   }
   if (CODEX_APP_SERVER_TURN_COMPLETION_IDLE_TIMEOUT_RE.test(normalizedMessage)) {
-    return "⚠️ Codex app-server stopped before confirming turn completion. OpenClaw did not replay the turn automatically because it may still be active; try again, or use /new if the session stays stuck.";
+    return "⚠️ Codex app-server stopped before confirming turn completion. Carapace did not replay the turn automatically because it may still be active; try again, or use /new if the session stays stuck.";
   }
   return null;
 }
@@ -435,7 +435,7 @@ export function buildTerminalAgentRunFailureReplyPayload(params: {
   isHeartbeat?: boolean;
   visibleReplyDelivered: boolean;
   sessionCtx: ExternalFailureConversationContext;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): ReplyPayload {
   const text = params.isHeartbeat
     ? HEARTBEAT_EXTERNAL_RUN_FAILURE_TEXT
@@ -459,7 +459,7 @@ export function buildEmptyInteractiveReplyPayload(params: {
   hasCommittedDelivery: boolean;
   hasIntentionalTerminalCompletion: boolean;
   sessionCtx: ExternalFailureConversationContext;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): ReplyPayload | undefined {
   if (
     !params.isInteractive ||
@@ -488,7 +488,7 @@ export function buildKnownAgentRunFailureReplyPayload(params: {
   err: unknown;
   sessionCtx: TemplateContext;
   resolvedVerboseLevel: VerboseLevel | undefined;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): ReplyPayload | undefined {
   // Direct preflight diagnostics are not provider failures; preserve their
   // identity for the caller's generic settlement and disclosure policy.

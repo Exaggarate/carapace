@@ -20,7 +20,7 @@ const suite = createControlUiE2eSuite({
 });
 
 const sessionKey = "agent:main:side-panel-clearance";
-const proofDirParent = process.env.OPENCLAW_UI_RAIL_PROOF_DIR?.trim();
+const proofDirParent = process.env.CARAPACE_UI_RAIL_PROOF_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = proofDirParent
@@ -53,7 +53,7 @@ function scenario(
     featureMethods: [
       "device.scopes.requestUpgrade",
       "device.scopes.waitUpgrade",
-      ...(options.custodian ? ["openclaw.chat"] : []),
+      ...(options.custodian ? ["carapace.chat"] : []),
     ],
     historyMessages,
     methodResponses: {
@@ -74,24 +74,24 @@ function scenario(
             kind: "modified",
             missing: false,
             name: "chat-pane-render.ts",
-            path: "/workspace/openclaw/ui/src/pages/chat/chat-pane-render.ts",
+            path: "/workspace/carapace/ui/src/pages/chat/chat-pane-render.ts",
             size: 18_432,
           },
           {
             kind: "read",
             missing: false,
             name: "sidebar.css",
-            path: "/workspace/openclaw/ui/src/styles/chat/sidebar.css",
+            path: "/workspace/carapace/ui/src/styles/chat/sidebar.css",
             size: 24_820,
           },
         ],
-        root: "/workspace/openclaw",
+        root: "/workspace/carapace",
         sessionKey,
       },
     },
     ...(options.operatorScopes ? { operatorScopes: options.operatorScopes } : {}),
     sessionKey,
-    workspace: "/workspace/openclaw",
+    workspace: "/workspace/carapace",
     workspaceGit: true,
   };
 }

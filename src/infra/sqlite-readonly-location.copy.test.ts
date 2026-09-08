@@ -14,9 +14,9 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
 });
 
 function createFixture(bytes: Buffer) {
-  const sourceRoot = tempDirs.make("openclaw-readonly-copy-source-");
+  const sourceRoot = tempDirs.make("carapace-readonly-copy-source-");
   const sourcePath = path.join(sourceRoot, "source.sqlite");
-  const stagingRoot = tempDirs.make("openclaw-readonly-copy-staging-");
+  const stagingRoot = tempDirs.make("carapace-readonly-copy-staging-");
   fs.writeFileSync(sourcePath, bytes, { mode: 0o600 });
   return { sourcePath, sourceRoot, stagingRoot };
 }

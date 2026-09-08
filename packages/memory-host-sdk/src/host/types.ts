@@ -1,5 +1,5 @@
 // Public memory host contracts shared by runtime, builtin search, and package consumers.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 export type MemorySource = "memory" | "sessions";
 
 export type MemoryOriginClass = "owner" | "agent" | "untrusted" | "system";
@@ -67,7 +67,7 @@ export type MemorySyncProgressUpdate = {
 };
 
 export type MemorySessionSyncTarget = {
-  /** Owning OpenClaw agent. Omit only when the active manager scope already supplies it. */
+  /** Owning Carapace agent. Omit only when the active manager scope already supplies it. */
   agentId?: string;
   /** Storage-neutral transcript/session identity. */
   sessionId: string;
@@ -204,12 +204,12 @@ export type MemoryIndexIdentityState =
       status: "missing";
       reason: string;
       code: "metadata_missing";
-      owner: "openclaw";
+      owner: "carapace";
     }
   | ({ status: "mismatched"; reason: string } & (
       | {
           code: "provenance_version" | "chunking_version";
-          owner: "openclaw";
+          owner: "carapace";
         }
       | {
           code:
@@ -249,18 +249,18 @@ export function resolveMemoryIndexIdentityDiagnostic(
   if (
     identity.status === "missing" &&
     identity.code === "metadata_missing" &&
-    identity.owner === "openclaw"
+    identity.owner === "carapace"
   ) {
-    return { status: "missing", reason, code: "metadata_missing", owner: "openclaw" };
+    return { status: "missing", reason, code: "metadata_missing", owner: "carapace" };
   }
   if (identity.status !== "mismatched") {
     return undefined;
   }
   if (
-    identity.owner === "openclaw" &&
+    identity.owner === "carapace" &&
     (identity.code === "provenance_version" || identity.code === "chunking_version")
   ) {
-    return { status: "mismatched", reason, code: identity.code, owner: "openclaw" };
+    return { status: "mismatched", reason, code: identity.code, owner: "carapace" };
   }
   if (
     identity.owner === "configuration" &&
@@ -282,7 +282,7 @@ export function formatMemoryIndexRebuildGuidance(
   status: Partial<Pick<MemoryProviderStatus, "provider" | "requestedProvider">>,
   agentId?: string,
 ): string {
-  const command = `openclaw memory status --index${agentId?.trim() ? ` --agent ${agentId.trim()}` : ""}`;
+  const command = `carapace memory status --index${agentId?.trim() ? ` --agent ${agentId.trim()}` : ""}`;
   const configuredProvider = status.requestedProvider?.trim() || status.provider?.trim();
   const disclosure =
     configuredProvider === "none"

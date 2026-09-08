@@ -16,11 +16,11 @@ describe("cold facade runtime", () => {
     const pluginRoot = path.join(fixtureRoot, "fixture");
     fs.mkdirSync(pluginRoot);
     fs.writeFileSync(path.join(pluginRoot, "package.json"), '{"type":"module"}\n');
-    fs.writeFileSync(path.join(pluginRoot, "openclaw.plugin.json"), '{"id":"cold-facade-owner"}\n');
+    fs.writeFileSync(path.join(pluginRoot, "carapace.plugin.json"), '{"id":"cold-facade-owner"}\n');
     fs.writeFileSync(path.join(pluginRoot, "api.ts"), 'export const marker: string = "cold";\n');
 
     resetFacadeRuntimeStateForTest();
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", fixtureRoot);
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", fixtureRoot);
     try {
       const params = { dirName: "fixture", artifactBasename: "api.js" };
       const loaded = loadBundledPluginPublicSurfaceModuleSync<{ marker: string }>(params);

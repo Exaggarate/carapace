@@ -53,7 +53,7 @@ export function updatePersonalAuthProfileStore(params: {
       profile.usageStats = store.usageStats?.[params.profileId];
       return true;
     },
-    params.stateDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } } : undefined,
+    params.stateDir ? { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } } : undefined,
   );
   return store;
 }

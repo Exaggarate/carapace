@@ -1,11 +1,11 @@
 // Telegram tests cover conversation route.base session key plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   testing as conversationBindingTesting,
   registerSessionBindingAdapter,
   type SessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   resolveTelegramConversationBaseSessionKey,
@@ -13,7 +13,7 @@ import {
 } from "./conversation-route.js";
 
 describe("resolveTelegramConversationBaseSessionKey", () => {
-  const cfg: OpenClawConfig = {};
+  const cfg: CarapaceConfig = {};
 
   beforeEach(() => {
     conversationBindingTesting.resetSessionBindingAdaptersForTests();
@@ -172,7 +172,7 @@ describe("resolveTelegramConversationBaseSessionKey", () => {
       listBySession: () => [],
       resolveByConversation: () => ({
         bindingId: "binding-plugin-owned",
-        targetSessionKey: "plugin-binding:openclaw-codex-app-server:abc123",
+        targetSessionKey: "plugin-binding:carapace-codex-app-server:abc123",
         targetKind: "session",
         conversation: {
           channel: "telegram",
@@ -183,8 +183,8 @@ describe("resolveTelegramConversationBaseSessionKey", () => {
         boundAt: 1,
         metadata: {
           pluginBindingOwner: "plugin",
-          pluginId: "openclaw-codex-app-server",
-          pluginRoot: "/tmp/openclaw-codex-app-server",
+          pluginId: "carapace-codex-app-server",
+          pluginRoot: "/tmp/carapace-codex-app-server",
         },
       }),
       touch,
@@ -206,7 +206,7 @@ describe("resolveTelegramConversationBaseSessionKey", () => {
     expect(touch).toHaveBeenCalledWith("binding-plugin-owned", undefined);
     expect(result.bindingMode).toEqual({
       kind: "plugin-owned-runtime",
-      pluginId: "openclaw-codex-app-server",
+      pluginId: "carapace-codex-app-server",
     });
     expect(result.route.agentId).toBe("main");
     expect(result.route.sessionKey).toBe("agent:main:telegram:group:-1001234567890:topic:11");

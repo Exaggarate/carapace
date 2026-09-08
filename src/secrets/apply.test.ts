@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { registerResolvedAgentDir } from "../agents/agent-dir-registry.js";
@@ -27,13 +27,13 @@ import { getRuntimeAuthProfileStoreSnapshot } from "../agents/auth-profiles/stor
 import { testing as storeTesting } from "../agents/auth-profiles/store.test-support.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   buildTalkTestProviderConfig,
   TALK_TEST_PROVIDER_API_KEY_PATH,
@@ -90,7 +90,7 @@ function stripVolatileConfigMeta(input: string): Record<string, unknown> {
 }
 
 async function writeJsonFile(filePath: string, value: unknown): Promise<void> {
-  if (path.basename(filePath) === "openclaw-agent.sqlite") {
+  if (path.basename(filePath) === "carapace-agent.sqlite") {
     saveAuthProfileStore(value as AuthProfileStore, path.dirname(filePath), {
       filterExternalAuthProfiles: false,
       syncExternalCli: false,
@@ -115,12 +115,12 @@ function createOpenAiProviderConfig(apiKey: unknown = "sk-openai-plaintext") {
 }
 
 function buildFixturePaths(rootDir: string) {
-  const stateDir = path.join(rootDir, ".openclaw");
+  const stateDir = path.join(rootDir, ".carapace");
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   return {
     rootDir,
     stateDir,
-    configPath: path.join(stateDir, "openclaw.json"),
+    configPath: path.join(stateDir, "carapace.json"),
     agentDir,
     authStorePath: resolveAuthProfileDatabasePath(agentDir),
     authJsonPath: path.join(agentDir, "auth.json"),
@@ -130,15 +130,15 @@ function buildFixturePaths(rootDir: string) {
 
 async function createApplyFixture(): Promise<ApplyFixture> {
   const paths = buildFixturePaths(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-apply-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-secrets-apply-")),
   );
   await fs.mkdir(path.dirname(paths.configPath), { recursive: true });
   await fs.mkdir(paths.agentDir, { recursive: true });
   return {
     ...paths,
     env: {
-      OPENCLAW_STATE_DIR: paths.stateDir,
-      OPENCLAW_CONFIG_PATH: paths.configPath,
+      CARAPACE_STATE_DIR: paths.stateDir,
+      CARAPACE_CONFIG_PATH: paths.configPath,
       OPENAI_API_KEY: "sk-live-env", // pragma: allowlist secret
     },
   };
@@ -312,8 +312,8 @@ describe("secrets apply", () => {
     clearSecretsRuntimeSnapshot();
     storeTesting.resetRuntimeSnapshotPublisherForTest();
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     await fs.rm(fixture.rootDir, { recursive: true, force: true });
   });
@@ -417,7 +417,7 @@ describe("secrets apply", () => {
     const ambientStateDir = path.join(fixture.rootDir, "ambient-state");
     const ambientMainDir = path.join(ambientStateDir, "agents", "main", "agent");
     const ambientOpsDir = path.join(ambientStateDir, "agents", "ops", "agent");
-    vi.stubEnv("OPENCLAW_STATE_DIR", ambientStateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", ambientStateDir);
     saveAuthProfileStore(
       {
         version: 1,
@@ -450,7 +450,7 @@ describe("secrets apply", () => {
       agents: { entries: { ops: {} } },
       models: { providers: { openai: createOpenAiProviderConfig() } },
     });
-    const stateDatabase = openOpenClawStateDatabase({ env: fixture.env }).db;
+    const stateDatabase = openCarapaceStateDatabase({ env: fixture.env }).db;
     stateDatabase
       .prepare(
         `INSERT INTO config_machine_state (state_key, value_json, updated_at_ms)
@@ -695,9 +695,9 @@ describe("secrets apply", () => {
   it("preserves relocated shared inheritance when applying an agent SecretRef", async () => {
     const sharedDir = path.join(fixture.rootDir, "relocated-shared");
     const agentDir = path.join(fixture.rootDir, "ops-agent");
-    fixture.env.OPENCLAW_AGENT_DIR = sharedDir;
-    vi.stubEnv("OPENCLAW_STATE_DIR", fixture.stateDir);
-    vi.stubEnv("OPENCLAW_AGENT_DIR", sharedDir);
+    fixture.env.CARAPACE_AGENT_DIR = sharedDir;
+    vi.stubEnv("CARAPACE_STATE_DIR", fixture.stateDir);
+    vi.stubEnv("CARAPACE_AGENT_DIR", sharedDir);
     noteCommittedSharedAuthStoreOwnership({ location: "legacy-main" }, fixture.env);
     const shared: AuthProfileStore = {
       version: 1,
@@ -826,7 +826,7 @@ describe("secrets apply", () => {
     const result = await runSecretsApply({ plan, env: fixture.env, write: true });
 
     expect(result.changedFiles).toContain(coderStorePath);
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "coder",
       path: coderStorePath,
     });
@@ -851,7 +851,7 @@ describe("secrets apply", () => {
       version: 1 as const,
       order: { openai: ["openai:preexisting"] },
     };
-    const firstDatabase = openOpenClawAgentDatabase({
+    const firstDatabase = openCarapaceAgentDatabase({
       agentId: "first",
       path: firstStorePath,
     });
@@ -861,7 +861,7 @@ describe("secrets apply", () => {
     ]);
     const firstMutationRevision =
       getRuntimeAuthProfileStoreCredentialMutationToken(firstAgentDir).revision;
-    const secondDatabase = openOpenClawAgentDatabase({
+    const secondDatabase = openCarapaceAgentDatabase({
       agentId: "second",
       path: secondStorePath,
     });
@@ -942,7 +942,7 @@ describe("secrets apply", () => {
       };
       saveAuthProfileStore(initialStore, firstAgentDir, { syncExternalCli: false });
       replaceRuntimeAuthProfileStoreSnapshots([{ agentDir: firstAgentDir, store: initialStore }]);
-      const secondDatabase = openOpenClawAgentDatabase({
+      const secondDatabase = openCarapaceAgentDatabase({
         agentId: "second",
         path: secondStorePath,
       });
@@ -1770,14 +1770,14 @@ describe("secrets apply", () => {
   });
 
   it("scrubs .env in legacy .clawdbot state directory via automatic fallback", async () => {
-    // Do NOT set OPENCLAW_STATE_DIR — rely on resolveStateDir's automatic
+    // Do NOT set CARAPACE_STATE_DIR — rely on resolveStateDir's automatic
     // legacy-directory fallback. A controlled HOME that contains only
-    // .clawdbot (no .openclaw) exercises the scrub path so the old
-    // resolveConfigDir call (which always returns $HOME/.openclaw) would
+    // .clawdbot (no .carapace) exercises the scrub path so the old
+    // resolveConfigDir call (which always returns $HOME/.carapace) would
     // miss the .env inside .clawdbot.
-    const homeDir = tempDirs.make("openclaw-secrets-apply-legacy-");
+    const homeDir = tempDirs.make("carapace-secrets-apply-legacy-");
     const legacyStateDir = path.join(homeDir, ".clawdbot");
-    const configPath = path.join(legacyStateDir, "openclaw.json");
+    const configPath = path.join(legacyStateDir, "carapace.json");
     const agentDir = path.join(legacyStateDir, "agents", "main", "agent");
     const envPath = path.join(legacyStateDir, ".env");
     const authStorePath = resolveAuthProfileDatabasePath(agentDir);
@@ -1821,7 +1821,7 @@ describe("secrets apply", () => {
       expect(nextEnv).toContain("UNRELATED=value");
     } finally {
       clearSecretsRuntimeSnapshot();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(homeDir, { recursive: true, force: true });
     }
   });
@@ -1834,15 +1834,15 @@ describe("secrets apply", () => {
     // appearing or disappearing during the operation could direct .env
     // scrubbing at a different file.
     //
-    // Set up a HOME where both .openclaw and .clawdbot exist.
-    // resolveStateDir returns .openclaw when both exist because it checks
-    // .openclaw first. The apply must use that same root for .env.
-    const homeDir = tempDirs.make("openclaw-secrets-apply-root-");
-    const openclawDir = path.join(homeDir, ".openclaw");
+    // Set up a HOME where both .carapace and .clawdbot exist.
+    // resolveStateDir returns .carapace when both exist because it checks
+    // .carapace first. The apply must use that same root for .env.
+    const homeDir = tempDirs.make("carapace-secrets-apply-root-");
+    const carapaceDir = path.join(homeDir, ".carapace");
     const clawdbotDir = path.join(homeDir, ".clawdbot");
-    const configPath = path.join(openclawDir, "openclaw.json");
-    const agentDir = path.join(openclawDir, "agents", "main", "agent");
-    const openclawEnvPath = path.join(openclawDir, ".env");
+    const configPath = path.join(carapaceDir, "carapace.json");
+    const agentDir = path.join(carapaceDir, "agents", "main", "agent");
+    const carapaceEnvPath = path.join(carapaceDir, ".env");
     const clawdbotEnvPath = path.join(clawdbotDir, ".env");
     const authStorePath = resolveAuthProfileDatabasePath(agentDir);
 
@@ -1866,9 +1866,9 @@ describe("secrets apply", () => {
       version: 1,
       profiles: {},
     });
-    // .env in the canonical .openclaw dir — this is the one that should be scrubbed
+    // .env in the canonical .carapace dir — this is the one that should be scrubbed
     await fs.writeFile(
-      openclawEnvPath,
+      carapaceEnvPath,
       "OPENAI_API_KEY=sk-openai-plaintext\nUNRELATED=value\n", // pragma: allowlist secret
       "utf8",
     );
@@ -1889,10 +1889,10 @@ describe("secrets apply", () => {
       expect(applied.mode).toBe("write");
       expect(applied.changed).toBe(true);
 
-      // Canonical .openclaw/.env was scrubbed
-      const nextOpenclawEnv = await fs.readFile(openclawEnvPath, "utf8");
-      expect(nextOpenclawEnv).not.toContain("sk-openai-plaintext");
-      expect(nextOpenclawEnv).toContain("UNRELATED=value");
+      // Canonical .carapace/.env was scrubbed
+      const nextCarapaceEnv = await fs.readFile(carapaceEnvPath, "utf8");
+      expect(nextCarapaceEnv).not.toContain("sk-openai-plaintext");
+      expect(nextCarapaceEnv).toContain("UNRELATED=value");
 
       // Legacy .clawdbot/.env was NOT touched — same stateDir used throughout
       const nextClawdbotEnv = await fs.readFile(clawdbotEnvPath, "utf8");
@@ -1900,7 +1900,7 @@ describe("secrets apply", () => {
       expect(nextClawdbotEnv).toContain("UNRELATED=legacy");
     } finally {
       clearSecretsRuntimeSnapshot();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(homeDir, { recursive: true, force: true });
     }
   });
@@ -1940,12 +1940,12 @@ describe("secrets apply", () => {
 
   it("scrubs config and state .env files when the config path is external", async () => {
     const configDir = path.join(fixture.rootDir, "config");
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "carapace.json");
     const configEnvPath = path.join(configDir, ".env");
     await fs.mkdir(configDir, { recursive: true });
     await fs.copyFile(fixture.configPath, configPath);
     await fs.copyFile(fixture.envPath, configEnvPath);
-    fixture.env.OPENCLAW_CONFIG_PATH = configPath;
+    fixture.env.CARAPACE_CONFIG_PATH = configPath;
 
     const applied = await runSecretsApply({
       plan: createPlan({

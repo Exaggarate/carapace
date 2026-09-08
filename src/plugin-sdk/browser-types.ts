@@ -7,7 +7,7 @@ export type ResolvedBrowserProfileConfig = {
   userDataDir?: string;
   mcpCommand?: string;
   mcpArgs?: string[];
-  driver?: "openclaw" | "clawd" | "existing-session";
+  driver?: "carapace" | "clawd" | "existing-session";
   headless?: boolean;
   executablePath?: string;
   attachOnly?: boolean;
@@ -61,7 +61,7 @@ export type ResolvedBrowserProfile = {
   cdpIsLoopback: boolean;
   userDataDir?: string;
   color: string;
-  driver: "openclaw" | "existing-session";
+  driver: "carapace" | "existing-session";
   headless?: boolean;
   attachOnly: boolean;
 };

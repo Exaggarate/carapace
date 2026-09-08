@@ -1,5 +1,5 @@
 // Msteams plugin module implements graph group management behavior.
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import { findMSTeamsConversationMember } from "./graph-conversation-members.js";
 import { resolveConversationPath, resolveGraphConversationId } from "./graph-messages.js";
 import { deleteGraphRequest, escapeOData, mutateGraphJson, resolveGraphToken } from "./graph.js";
@@ -9,7 +9,7 @@ import { deleteGraphRequest, escapeOData, mutateGraphJson, resolveGraphToken } f
 // ---------------------------------------------------------------------------
 
 type AddParticipantMSTeamsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   userId: string;
   role?: string;
@@ -76,7 +76,7 @@ export async function addParticipantMSTeams(
 // ---------------------------------------------------------------------------
 
 type RemoveParticipantMSTeamsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   userId: string;
 };
@@ -116,7 +116,7 @@ export async function removeParticipantMSTeams(
 // ---------------------------------------------------------------------------
 
 type RenameGroupMSTeamsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   name: string;
 };

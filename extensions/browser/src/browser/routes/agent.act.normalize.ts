@@ -4,7 +4,7 @@
  * Converts loosely typed route bodies into the closed BrowserActRequest union
  * used by Playwright and Chrome MCP action executors.
  */
-import { filterStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { filterStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   ACT_MAX_BATCH_ACTIONS,
   ACT_MAX_BATCH_DEPTH,

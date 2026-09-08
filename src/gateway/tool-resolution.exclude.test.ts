@@ -7,9 +7,9 @@ import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-type CreateOpenClawToolsArg = {
+type CreateCarapaceToolsArg = {
   agentAccountId?: string;
   agentChannel?: string;
   clientCaps?: string[];
@@ -26,7 +26,7 @@ type CreateOpenClawToolsArg = {
   sourceReplyOnly?: boolean;
 };
 
-type CreateOpenClawCodingToolsArg = {
+type CreateCarapaceCodingToolsArg = {
   runtimeToolAllowlist?: string[];
   sessionKey?: string;
   runSessionKey?: string;
@@ -80,10 +80,10 @@ const hoisted = vi.hoisted(() => {
     makeTool,
     createLazyExecToolMock,
     getLoadedChannelPluginMock: vi.fn(),
-    createOpenClawCodingToolsMock: vi.fn(
-      (_args: CreateOpenClawCodingToolsArg): ReturnType<typeof makeTool>[] => [],
+    createCarapaceCodingToolsMock: vi.fn(
+      (_args: CreateCarapaceCodingToolsArg): ReturnType<typeof makeTool>[] => [],
     ),
-    createOpenClawToolsMock: vi.fn((_args: CreateOpenClawToolsArg) => [
+    createCarapaceToolsMock: vi.fn((_args: CreateCarapaceToolsArg) => [
       makeTool("read"),
       makeTool("sessions_spawn"),
       makeTool("automations"),
@@ -93,13 +93,13 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
-vi.mock("../agents/openclaw-tools.js", () => ({
-  createOpenClawTools: (args: CreateOpenClawToolsArg) => hoisted.createOpenClawToolsMock(args),
+vi.mock("../agents/carapace-tools.js", () => ({
+  createCarapaceTools: (args: CreateCarapaceToolsArg) => hoisted.createCarapaceToolsMock(args),
 }));
 
 vi.mock("../agents/agent-tools.js", () => ({
-  createOpenClawCodingTools: (args: CreateOpenClawCodingToolsArg) =>
-    hoisted.createOpenClawCodingToolsMock(args),
+  createCarapaceCodingTools: (args: CreateCarapaceCodingToolsArg) =>
+    hoisted.createCarapaceCodingToolsMock(args),
 }));
 
 vi.mock("../channels/plugins/index.js", () => ({
@@ -116,17 +116,17 @@ import { resolveGatewayScopedTools } from "./tool-resolution.js";
 
 describe("resolveGatewayScopedTools excludeToolNames", () => {
   beforeEach(() => {
-    hoisted.createOpenClawToolsMock.mockClear();
+    hoisted.createCarapaceToolsMock.mockClear();
     hoisted.createLazyExecToolMock.mockClear();
-    hoisted.createOpenClawCodingToolsMock.mockReset();
-    hoisted.createOpenClawCodingToolsMock.mockReturnValue([]);
+    hoisted.createCarapaceCodingToolsMock.mockReset();
+    hoisted.createCarapaceCodingToolsMock.mockReturnValue([]);
     hoisted.getLoadedChannelPluginMock.mockReset();
   });
 
-  function readCreateToolsArgs(index = 0): CreateOpenClawToolsArg {
-    const args = hoisted.createOpenClawToolsMock.mock.calls[index]?.[0];
+  function readCreateToolsArgs(index = 0): CreateCarapaceToolsArg {
+    const args = hoisted.createCarapaceToolsMock.mock.calls[index]?.[0];
     if (!args || typeof args !== "object") {
-      throw new Error("expected createOpenClawTools args");
+      throw new Error("expected createCarapaceTools args");
     }
     return args;
   }
@@ -135,7 +135,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     "passes client capabilities but restricts pinned authoring on the %s surface",
     (surface) => {
       resolveGatewayScopedTools({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         sessionKey: "agent:main:direct:test",
         surface,
         clientCaps: ["tool-events", "inline-widgets"],
@@ -151,7 +151,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("hands loopback ask_user the originating-channel prompt sender", () => {
     resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:telegram:direct:1",
       messageProvider: "telegram",
       currentChannelId: "1",
@@ -169,7 +169,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("does not invent a prompt sender without a deliverable channel", () => {
     resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:main",
       surface: "loopback",
     });
@@ -179,7 +179,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("passes immutable source-reply authority into message-tool construction", () => {
     resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:telegram:group:chat123",
       messageProvider: "telegram",
       currentChannelId: "telegram:chat123",
@@ -193,7 +193,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("does not restrict ordinary message-tool-only turns", () => {
     resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:telegram:group:chat123",
       messageProvider: "telegram",
       currentChannelId: "telegram:chat123",
@@ -206,7 +206,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("filters loopback dedup exclusions without inheriting policy denies", () => {
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       excludeToolNames: ["read", "apply_patch"],
@@ -224,10 +224,10 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("constructs exact coding tools for a server-minted mediated grant", () => {
-    hoisted.createOpenClawCodingToolsMock.mockReturnValueOnce([hoisted.makeTool("write")]);
+    hoisted.createCarapaceCodingToolsMock.mockReturnValueOnce([hoisted.makeTool("write")]);
 
     const result = resolveGatewayScopedTools({
-      cfg: { tools: { exec: { host: "node" } } } as OpenClawConfig,
+      cfg: { tools: { exec: { host: "node" } } } as CarapaceConfig,
       sessionKey: "agent:main:cron:run-1",
       runtimePolicySessionKey: "agent:main:qa-channel:group:ops",
       runId: "run-1",
@@ -246,7 +246,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     });
 
     expect(result.tools.map((tool) => tool.name)).toContain("write");
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenCalledWith(
+    expect(hoisted.createCarapaceCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         runtimeToolAllowlist: ["write"],
         sessionKey: "agent:main:qa-channel:group:ops",
@@ -278,7 +278,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     const resolveToolPolicy = vi.fn(() => ({ allow: ["read"] }));
     hoisted.getLoadedChannelPluginMock.mockReturnValue({
       config: {
-        listAccountIds: (cfg: OpenClawConfig) => Object.keys(cfg.channels?.discord?.accounts ?? {}),
+        listAccountIds: (cfg: CarapaceConfig) => Object.keys(cfg.channels?.discord?.accounts ?? {}),
       },
       groups: { resolveToolPolicy },
     });
@@ -298,7 +298,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:cron:run-1",
       runtimePolicySessionKey: "agent:main:cron:run-1",
       accountId: "delivery",
@@ -314,7 +314,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:cron:run-1",
       runtimePolicySessionKey: "agent:main:cron:run-1",
       accountId: "delivery",
@@ -333,13 +333,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("does not fall back when policy removes a mediated coding tool", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("write"),
       hoisted.makeTool("automations"),
     ]);
 
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:cron:run-1",
       surface: "loopback",
       mediatedToolNames: ["write"],
@@ -353,7 +353,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     const ownerResult = resolveGatewayScopedTools({
       cfg: {
         gateway: { tools: { allow: ["gateway"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -361,7 +361,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     const nonOwnerResult = resolveGatewayScopedTools({
       cfg: {
         gateway: { tools: { allow: ["gateway"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: false,
@@ -389,7 +389,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
       "nodes",
       "computer",
       "mobile_ui",
-      "openclaw",
+      "carapace",
     ]);
     expect(args.inheritedToolDenylist).toEqual([
       "automations",
@@ -404,7 +404,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
       "nodes",
       "computer",
       "mobile_ui",
-      "openclaw",
+      "carapace",
     ]);
   });
 
@@ -412,7 +412,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     resolveGatewayScopedTools({
       cfg: {
         gateway: { tools: { deny: ["exec"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       excludeToolNames: ["read", "apply_patch"],
@@ -437,7 +437,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
               { id: "worker", tools: { exec: { node: "worker-node" } } },
             ],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         sessionKey: "agent:main:direct:test",
         runtimePolicySessionKey: "agent:worker:direct:test",
         runtimePolicyAgentId: "worker",
@@ -451,13 +451,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   );
 
   it("adds a synchronous node-forced exec tool to allowed owner loopback scopes", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("exec"),
       hoisted.makeTool("nodes"),
     ]);
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -502,13 +502,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("omits all exec variants when host policy forbids node execution", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("exec"),
       hoisted.makeTool("nodes"),
     ]);
     const gatewayOnly = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -516,13 +516,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
       nodeExecAvailable: () => true,
       execSession: { execHost: "gateway" },
     });
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("exec"),
       hoisted.makeTool("nodes"),
     ]);
     const turnOverrideGateway = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -531,13 +531,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
       execSession: { execHost: "node" },
       execOverrides: { host: "gateway" },
     });
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("exec"),
       hoisted.makeTool("nodes"),
     ]);
     const sandboxAuto = resolveGatewayScopedTools({
-      cfg: { agents: { defaults: { sandbox: { mode: "all" } } } } as OpenClawConfig,
+      cfg: { agents: { defaults: { sandbox: { mode: "all" } } } } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -555,7 +555,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     const result = resolveGatewayScopedTools({
       cfg: {
         agents: { defaults: { sandbox: { mode: "non-main" } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:main",
       runtimePolicySessionKey: "agent:main:discord:default:direct:peer-42",
       agentId: "main",
@@ -577,7 +577,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
           { id: "worker", tools: { deny: ["exec"] } },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const defaultAgent = resolveGatewayScopedTools({
       cfg,
       sessionKey: "main",
@@ -602,13 +602,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("does not honor the internal node-exec flag on HTTP surfaces", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("exec"),
       hoisted.makeTool("nodes"),
     ]);
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "http",
       senderIsOwner: true,
@@ -622,7 +622,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("filters node exec through the existing gateway deny policy", () => {
     const result = resolveGatewayScopedTools({
-      cfg: { gateway: { tools: { deny: ["exec"] } } } as OpenClawConfig,
+      cfg: { gateway: { tools: { deny: ["exec"] } } } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -634,14 +634,14 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("applies the node-originated message provider policy before gateway policy", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("canvas"),
       hoisted.makeTool("web_search"),
       hoisted.makeTool("exec"),
     ]);
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:node:request:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -662,7 +662,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             "id:blocked-sender": { deny: ["exec"] },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:discord:channel:dev",
       surface: "loopback",
       senderIsOwner: false,
@@ -677,7 +677,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("uses persisted delegated policy instead of the sender wildcard", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-delegated-policy-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-delegated-policy-"));
     const storePath = path.join(tempDir, "sessions.json");
     const sessionKey = "agent:main:subagent:gateway-child";
     await replaceSessionEntry({ storePath, sessionKey }, {
@@ -700,7 +700,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
               "id:alice": {},
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         sessionKey,
         surface: "loopback",
         senderIsOwner: false,
@@ -732,7 +732,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     });
 
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:child",
       spawnedBy: "agent:main:discord:channel:bound",
       groupId: "bound",
@@ -769,7 +769,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             "*": {},
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:discord:channel:dev",
       surface: "loopback",
       senderIsOwner: false,
@@ -796,7 +796,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
               "*": { deny: ["exec"] },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         sessionKey: "agent:main:discord:channel:dev",
         surface: "loopback",
         senderIsOwner,
@@ -818,7 +818,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             "*": { deny: ["exec"] },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:main",
       surface: "loopback",
       senderIsOwner: true,
@@ -838,7 +838,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
           anthropic: { deny: ["exec"] },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const blocked = resolveGatewayScopedTools({
       cfg,
       sessionKey: "agent:main:direct:test",
@@ -878,7 +878,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const blocked = resolveGatewayScopedTools({
       cfg,
       sessionKey: "agent:main:direct:test",
@@ -918,7 +918,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:telegram:group:dev",
       surface: "loopback",
       senderIsOwner: false,
@@ -934,7 +934,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
 
   it("does not inherit node-only exec as a generic child or cron capability", () => {
     const result = resolveGatewayScopedTools({
-      cfg: { tools: { allow: ["exec", "sessions_spawn", "automations"] } } as OpenClawConfig,
+      cfg: { tools: { allow: ["exec", "sessions_spawn", "automations"] } } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -952,7 +952,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
       cfg: {
         agents: { defaults: { sandbox: { mode: "all" } } },
         tools: { sandbox: { tools: { deny: ["automations"] } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
     });
@@ -965,7 +965,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("passes final filtered tool surface to gateway cron jobs", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("automations"),
       hoisted.makeTool("exec"),
@@ -974,7 +974,7 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
     const result = resolveGatewayScopedTools({
       cfg: {
         tools: { allow: ["read", "automations"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
     });
@@ -987,14 +987,14 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("passes unrestricted gateway tool surfaces to cron jobs", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("read"),
       hoisted.makeTool("automations"),
       hoisted.makeTool("exec"),
     ]);
 
     const result = resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
@@ -1009,13 +1009,13 @@ describe("resolveGatewayScopedTools excludeToolNames", () => {
   });
 
   it("merges host-projected native authority into the cron creator cap", () => {
-    hoisted.createOpenClawToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceToolsMock.mockReturnValueOnce([
       hoisted.makeTool("automations"),
       hoisted.makeTool("message"),
     ]);
 
     resolveGatewayScopedTools({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,

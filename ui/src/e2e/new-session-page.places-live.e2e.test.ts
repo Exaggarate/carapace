@@ -88,7 +88,7 @@ suite.define(() => {
           name: "Claude Sonnet 4.6",
           provider: "anthropic",
           agentRuntime: {
-            id: "openclaw",
+            id: "carapace",
             cloudPlacementSupported: true,
             cloudPlacementExecutionMode: "worker-turn",
             source: "model",
@@ -176,7 +176,7 @@ suite.define(() => {
   });
 
   it.each([
-    { name: "OpenClaw", runtime: "openclaw" },
+    { name: "Carapace", runtime: "carapace" },
     { name: "Codex", runtime: "codex" },
   ] as const)(
     "keeps the same multimode Crabbox profile selectable for $name",

@@ -17,7 +17,7 @@ import {
 const fingerprint = new X509Certificate(TEST_TLS_CERT_PEM).fingerprint256;
 
 test("probes configured local TLS readiness with its exact certificate pin", async () => {
-  await withTestDir({ prefix: "openclaw-local-http-probe-" }, async (directory) => {
+  await withTestDir({ prefix: "carapace-local-http-probe-" }, async (directory) => {
     const certPath = path.join(directory, "gateway-cert.pem");
     const keyPath = path.join(directory, "gateway-key.pem");
     await Promise.all([

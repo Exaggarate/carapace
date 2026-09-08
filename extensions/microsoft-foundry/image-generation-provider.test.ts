@@ -1,5 +1,5 @@
 // Microsoft Foundry image provider tests cover MAI request construction.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildMicrosoftFoundryImageGenerationProvider } from "./image-generation-provider.js";
 import { PROVIDER_ID } from "./shared.js";
@@ -41,17 +41,17 @@ const {
   sanitizeConfiguredModelProviderRequestMock: vi.fn((request) => request),
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth", () => ({
   isProviderApiKeyConfigured: isProviderApiKeyConfiguredMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-http")>(
-    "openclaw/plugin-sdk/provider-http",
+vi.mock("carapace/plugin-sdk/provider-http", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/provider-http")>(
+    "carapace/plugin-sdk/provider-http",
   );
   return {
     assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,
@@ -77,7 +77,7 @@ function buildConfig(
     includeModel?: boolean;
     mediaMaxMb?: number;
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const baseUrl = params.baseUrl ?? "https://example.services.ai.azure.com/openai/v1";
   const modelId = params.modelId ?? "image-deployment";
   const modelName = params.modelName ?? "MAI-Image-2.5";

@@ -9,25 +9,25 @@ import {
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
 import {
   chunkMarkdownTextWithMode,
   resolveChunkMode,
   resolveTextChunkLimit,
-} from "openclaw/plugin-sdk/reply-chunking";
-import { resolveTextChunksWithFallback } from "openclaw/plugin-sdk/reply-payload";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/reply-chunking";
+import { resolveTextChunksWithFallback } from "carapace/plugin-sdk/reply-payload";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
 import {
   normalizeOptionalString,
   normalizeOptionalString as normalizeSlackApiString,
   normalizeTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe, truncateCodePoints } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe, truncateCodePoints } from "carapace/plugin-sdk/text-utility-runtime";
 import type { SlackTokenSource } from "./accounts.js";
 import { resolveSlackAccount, resolveSlackOperationToken } from "./accounts.js";
 import type { SlackAuthoredTextPlacement } from "./authored-text.js";
@@ -60,11 +60,11 @@ import { canonicalizeSlackApiTargetId, parseSlackTarget } from "./target-parsing
 import { normalizeSlackThreadTsCandidate, resolveSlackThreadTsValue } from "./thread-ts.js";
 import { truncateSlackText, truncateSlackTextByUtf8Bytes } from "./truncate.js";
 const SLACK_DM_CHANNEL_CACHE_MAX = 1024;
-const SLACK_DELIVERY_METADATA_EVENT = "openclaw_delivery";
-const SLACK_DELIVERY_METADATA_KEY = "openclaw_delivery_id";
-const SLACK_DELIVERY_METADATA_PART_INDEX_KEY = "openclaw_delivery_part_index";
-const SLACK_DELIVERY_METADATA_PART_COUNT_KEY = "openclaw_delivery_part_count";
-const SLACK_DELIVERY_METADATA_SIGNATURE_KEY = "openclaw_delivery_signature";
+const SLACK_DELIVERY_METADATA_EVENT = "carapace_delivery";
+const SLACK_DELIVERY_METADATA_KEY = "carapace_delivery_id";
+const SLACK_DELIVERY_METADATA_PART_INDEX_KEY = "carapace_delivery_part_index";
+const SLACK_DELIVERY_METADATA_PART_COUNT_KEY = "carapace_delivery_part_count";
+const SLACK_DELIVERY_METADATA_SIGNATURE_KEY = "carapace_delivery_signature";
 const SLACK_RECONCILE_LOOKBACK_MS = 30_000;
 const SLACK_RECONCILE_CLOCK_SKEW_MS = 5 * 60_000;
 const SLACK_RECONCILE_LIMIT = 100;
@@ -107,7 +107,7 @@ type SlackResolvedDelivery = Readonly<{
 const slackDefaultSendIdentities = new Map<string, SlackSendIdentity>();
 
 type SlackSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   token?: string;
   accountId?: string;
   mediaUrl?: string;
@@ -276,7 +276,7 @@ export type SlackSendResult = {
 };
 
 export async function updateMessageSlack(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   channelId: string;
   teamId?: string;
@@ -459,7 +459,7 @@ function resolveSlackDelivery(params: {
 }
 
 function resolveSlackTextChunkLimit(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   textLimit?: number;
 }): number {
@@ -472,7 +472,7 @@ function resolveSlackTextChunkLimit(params: {
 }
 
 function resolveSlackTextChunks(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   text: string;
   textLimit?: number;
@@ -634,7 +634,7 @@ function createSlackDeliveryMetadataId(queueId?: string): string | undefined {
     return undefined;
   }
   // Slack metadata is visible to workspace apps and members. Keep the durable
-  // store key inside OpenClaw while retaining a stable provider-side marker.
+  // store key inside Carapace while retaining a stable provider-side marker.
   return createHash("sha256").update(normalized).digest("base64url");
 }
 
@@ -1103,7 +1103,7 @@ export async function sendMessageSlack(
 async function sendMessageSlackQueued(params: {
   trimmedMessage: string;
   opts: SlackSendOpts;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ReturnType<typeof resolveSlackAccount>;
   blocks?: (Block | KnownBlock)[];
   delivery: SlackResolvedDelivery;
@@ -1118,7 +1118,7 @@ async function sendMessageSlackQueued(params: {
 async function sendMessageSlackQueuedInner(params: {
   trimmedMessage: string;
   opts: SlackSendOpts;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ReturnType<typeof resolveSlackAccount>;
   blocks?: (Block | KnownBlock)[];
   delivery: SlackResolvedDelivery;

@@ -1,10 +1,10 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /**
  * Subagent completion announcement coordinator.
  *
  * Captures child output, applies wait outcomes, routes announcements, and performs cleanup decisions.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   isSilentReplyText,
   SILENT_REPLY_TOKEN,

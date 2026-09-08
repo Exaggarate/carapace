@@ -5,12 +5,12 @@ import {
   createPluginStateKeyedStoreForTests,
   executeSqliteQuerySync,
   getNodeSqliteKysely,
-  openOpenClawStateDatabase,
-  type OpenClawStateKyselyDatabaseForTests,
+  openCarapaceStateDatabase,
+  type CarapaceStateKyselyDatabaseForTests,
   resetPluginStateStoreForTests,
   setMaxPluginStateEntriesPerPluginForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { PluginDoctorStateMigrationContext } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import {
@@ -47,8 +47,8 @@ describe("Teams custom migration retention", () => {
 
   beforeEach(async () => {
     resetPluginStateStoreForTests();
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-teams-retention-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-teams-retention-"));
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     context = {
       openPluginStateKeyedStore: (options) =>
         createPluginStateKeyedStoreForTests("msteams", { ...options, env }),
@@ -129,10 +129,10 @@ describe("Teams custom migration retention", () => {
         };
       });
       // Seed pre-existing rows together; migration below still owns real limit enforcement.
-      const { db } = openOpenClawStateDatabase({ env });
+      const { db } = openCarapaceStateDatabase({ env });
       executeSqliteQuerySync(
         db,
-        getNodeSqliteKysely<OpenClawStateKyselyDatabaseForTests>(db)
+        getNodeSqliteKysely<CarapaceStateKyselyDatabaseForTests>(db)
           .insertInto("plugin_state_entries")
           .values(rows),
       );

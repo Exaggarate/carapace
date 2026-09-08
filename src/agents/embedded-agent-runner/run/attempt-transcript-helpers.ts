@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionStorePathCore } from "../../../config/sessions/paths.js";
 import {
   hasSessionTranscriptMessage,
@@ -8,8 +8,8 @@ import {
 } from "../../../config/sessions/session-accessor.js";
 import { resolveQuotaSuspensionEntryMaintenance } from "../../../config/sessions/store-maintenance.js";
 import type { SessionEntry as ConfigSessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
+import { isTranscriptOnlyCarapaceAssistantMessage } from "../../../shared/transcript-only-carapace-assistant.js";
 import { sanitizeCompactionReplayMessages } from "../../compaction-replay.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
@@ -34,7 +34,7 @@ export function removeTrailingMidTurnPrecheckAssistantError(params: {
     entry.type === "custom" ||
     entry.type === "label" ||
     entry.type === "session_info" ||
-    (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message));
+    (entry.type === "message" && isTranscriptOnlyCarapaceAssistantMessage(entry.message));
   const persistedTail = params.sessionManager
     .getEntries()
     .findLast((entry) => !preserveTrailing(entry));
@@ -75,7 +75,7 @@ export function normalizeCompactionRecoveryTranscriptTail(params: {
         entry.type === "custom" ||
         entry.type === "label" ||
         entry.type === "session_info" ||
-        (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message)),
+        (entry.type === "message" && isTranscriptOnlyCarapaceAssistantMessage(entry.message)),
     },
   );
   params.activeSession.agent.state.messages =
@@ -127,7 +127,7 @@ export async function loadAttemptSessionEntryAfterQuotaMaintenance(params: {
 
 export async function resolveAttemptTrajectorySessionFile(params: {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionFile: string;
   sessionId: string;
   sessionKey?: string;
@@ -155,7 +155,7 @@ type ExistingAttemptTranscriptState = {
 
 export async function resolveExistingAttemptTranscriptState(params: {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionFile: string;
   sessionManager?: EmbeddedRunAttemptParams["sessionManager"];
   sessionId: string;

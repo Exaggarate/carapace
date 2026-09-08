@@ -1,15 +1,15 @@
 import { fileURLToPath } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawPluginService, WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapacePluginService, WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import * as processRuntime from "carapace/plugin-sdk/process-runtime";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { importFreshModule } from "../../plugin-sdk/test-helpers/import-fresh.js";
 import { resolvePluginModuleExport } from "../../plugins/loader-module-runtime.js";
 import * as support from "./service.test-support.js";
 
-const SETUP_ENV = "OPENCLAW_TEST_REPLAY_SETUP";
+const SETUP_ENV = "CARAPACE_TEST_REPLAY_SETUP";
 const CLASSLESS_PROFILE = {
   binary: "/mock/crabbox",
   provider: "machine0",
@@ -34,7 +34,7 @@ function commandResult(overrides: Partial<SpawnResult> = {}): SpawnResult {
 
 describe("Crabbox runtime preflight cleanup", () => {
   support.setupWorkerEnvironmentServiceSuite();
-  const pluginServices: OpenClawPluginService[] = [];
+  const pluginServices: CarapacePluginService[] = [];
   async function registerProvider(): Promise<WorkerProvider> {
     let registered: WorkerProvider | undefined;
     const { register } = resolvePluginModuleExport(
@@ -58,7 +58,7 @@ describe("Crabbox runtime preflight cleanup", () => {
     return expectDefined(registered, "registered Crabbox provider");
   }
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", support.testState.root);
+    vi.stubEnv("CARAPACE_STATE_DIR", support.testState.root);
     vi.stubEnv(SETUP_ENV, "fixture");
   });
   afterEach(async () => {

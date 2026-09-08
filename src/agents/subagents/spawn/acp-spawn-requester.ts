@@ -1,7 +1,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { readAcpSessionMeta } from "../../../acp/runtime/session-meta.js";
 import { resolveSessionStorePathCore } from "../../../config/sessions/paths.js";
 import {
@@ -10,7 +10,7 @@ import {
   resolveSessionTranscriptRuntimeTarget,
 } from "../../../config/sessions/session-accessor.js";
 import type { SessionAcpMeta, SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { getSessionBindingService } from "../../../infra/outbound/session-binding-service.js";
 import { createSubsystemLogger } from "../../../logging/subsystem.js";
@@ -47,7 +47,7 @@ export type AcpSpawnRequesterState = {
 };
 
 export function resolveRequesterInternalSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requesterSessionKey?: string;
 }): string {
   const { mainKey, alias } = resolveMainSessionAlias(params.cfg);
@@ -94,7 +94,7 @@ export async function persistAcpSpawnSessionFileBestEffort(params: {
 }
 
 export function resolveAcpSpawnRequesterState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   parentSessionKey?: string;
   requesterAgentId: string;
   targetAgentId: string;
@@ -194,7 +194,7 @@ function sessionEntryIsOwnedByRequester(params: {
 }
 
 export function validateAcpResumeSessionOwnership(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetAgentId: string;
   backendId?: string;
   requesterSessionKey?: string;

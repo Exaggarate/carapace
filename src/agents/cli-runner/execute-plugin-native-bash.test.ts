@@ -31,7 +31,7 @@ describe("native Bash execution policy", () => {
     "applies %s/%s to native Bash with configured PATH",
     async (security, ask, behavior) => {
       const dir = makeExecApprovalsTempDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+      vi.stubEnv("CARAPACE_STATE_DIR", dir);
       const binary = makeExecutable(dir, "gog");
       saveExecApprovals({ version: 1, agents: { main: { allowlist: [{ pattern: binary }] } } });
       const { context } = await createExecution({

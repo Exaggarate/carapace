@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT,
   type ModelCompatConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { upsertSessionEntry, patchSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { upsertSessionEntry, patchSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { codexCatalogHomeId } from "../session-catalog-home-id.js";
 import { resolveCodexAppServerHomeDir } from "./auth-start-options.js";
@@ -20,7 +20,7 @@ import { createCodexTestHostCapabilities } from "./host-capability.test-support.
 import { buildCodexAppServerConnectionFingerprint } from "./plugin-app-cache-key.js";
 import type { CodexPluginThreadConfig } from "./plugin-thread-config.js";
 import {
-  CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+  CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
   type CodexDynamicToolFunctionSpec,
   type JsonObject,
   isJsonObject,
@@ -135,9 +135,9 @@ describe("Codex managed shell environment", () => {
           GH_TOKEN: "",
           GITHUB_TOKEN: "",
           PREVIEW_SERVICE_TOKEN: "",
-          OPENCLAW_STATE_DIR: "/fixture/diagnosed",
-          OPENCLAW_CONFIG_PATH: "/fixture/custom.json",
-          OPENCLAW_WORKSPACE_DIR: "/fixture/default-workspace",
+          CARAPACE_STATE_DIR: "/fixture/diagnosed",
+          CARAPACE_CONFIG_PATH: "/fixture/custom.json",
+          CARAPACE_WORKSPACE_DIR: "/fixture/default-workspace",
         },
         disableLoginShell: true,
       };
@@ -167,9 +167,9 @@ describe("Codex managed shell environment", () => {
           GH_TOKEN: "",
           GITHUB_TOKEN: "",
           PREVIEW_SERVICE_TOKEN: "",
-          OPENCLAW_STATE_DIR: "/fixture/diagnosed",
-          OPENCLAW_CONFIG_PATH: "/fixture/custom.json",
-          OPENCLAW_WORKSPACE_DIR: "/fixture/default-workspace",
+          CARAPACE_STATE_DIR: "/fixture/diagnosed",
+          CARAPACE_CONFIG_PATH: "/fixture/custom.json",
+          CARAPACE_WORKSPACE_DIR: "/fixture/default-workspace",
         },
       });
       expect(request.config?.allow_login_shell).toBe(false);
@@ -182,9 +182,9 @@ describe("Codex managed shell environment", () => {
           "GITHUB_TOKEN",
           "GH_TOKEN",
           "PREVIEW_SERVICE_TOKEN",
-          "OPENCLAW_STATE_DIR",
-          "OPENCLAW_CONFIG_PATH",
-          "OPENCLAW_WORKSPACE_DIR",
+          "CARAPACE_STATE_DIR",
+          "CARAPACE_CONFIG_PATH",
+          "CARAPACE_WORKSPACE_DIR",
         ]),
       );
       expect(shellEnvironmentPolicy.experimental_use_profile).toBe(false);
@@ -441,7 +441,7 @@ describe("Codex ring-zero thread config", () => {
 
   it("applies the restriction to both thread start and resume", () => {
     const params = createAttemptParams({ provider: "openai" });
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["carapace"];
     params.pluginHarnessToolPolicyRestricted = true;
     const appServer = createAppServerOptions() as never;
     const developerInstructions = "Host-authored ring-zero instructions.";
@@ -1209,13 +1209,13 @@ describe("Codex app-server native code mode config", () => {
     );
   });
 
-  it("keeps Codex-native subagents primary while limiting OpenClaw spawn to OpenClaw delegation", () => {
+  it("keeps Codex-native subagents primary while limiting Carapace spawn to Carapace delegation", () => {
     const instructions = buildDeveloperInstructions(createAttemptParams({ provider: "openai" }), {
       dynamicTools: [
         {
           type: "function",
           name: "sessions_spawn",
-          description: "Start an OpenClaw session",
+          description: "Start an Carapace session",
           inputSchema: { type: "object" },
         },
       ],
@@ -1231,7 +1231,7 @@ describe("Codex app-server native code mode config", () => {
     );
     expect(instructions).toContain("call the matching entry through `tools`");
     expect(instructions).toContain(
-      "Use OpenClaw `sessions_spawn` only for OpenClaw or ACP delegation, never as a substitute for `spawn_agent` on internal legwork.",
+      "Use Carapace `sessions_spawn` only for Carapace or ACP delegation, never as a substitute for `spawn_agent` on internal legwork.",
     );
   });
 
@@ -1240,7 +1240,7 @@ describe("Codex app-server native code mode config", () => {
       Object.assign(createAttemptParams({ provider: "openai" }), {
         delegationCapability: "report_only" as const,
       }),
-      Object.assign(createAttemptParams({ provider: "openai" }), { toolsAllow: ["openclaw"] }),
+      Object.assign(createAttemptParams({ provider: "openai" }), { toolsAllow: ["carapace"] }),
       Object.assign(createAttemptParams({ provider: "openai" }), { modelId: "gpt-5.4-nano" }),
       Object.assign(createAttemptParams({ provider: "openai" }), { disableTools: true }),
     ];
@@ -1266,7 +1266,7 @@ describe("Codex app-server native code mode config", () => {
         dynamicTools: [
           {
             type: "namespace",
-            name: "openclaw_direct",
+            name: "carapace_direct",
             description: "",
             tools: [
               {
@@ -1292,7 +1292,7 @@ describe("Codex app-server native code mode config", () => {
         dynamicTools: [
           {
             type: "namespace",
-            name: "openclaw",
+            name: "carapace",
             description: "",
             tools: [
               {
@@ -1308,21 +1308,21 @@ describe("Codex app-server native code mode config", () => {
     );
 
     expect(withSessionsYield).toContain(
-      "end the current turn with `openclaw_direct.sessions_yield`",
+      "end the current turn with `carapace_direct.sessions_yield`",
     );
     expect(withSessionsYield).toContain(
       "Use native `wait_agent` only for an intentional same-turn wait",
     );
     expect(withSessionsYield).toContain("Never loop-poll for native child completion.");
-    expect(withoutSessionsYield).not.toContain("`openclaw_direct.sessions_yield`");
+    expect(withoutSessionsYield).not.toContain("`carapace_direct.sessions_yield`");
     expect(withoutSessionsYield).not.toContain("native `wait_agent`");
-    expect(withWrongNamespace).not.toContain("`openclaw_direct.sessions_yield`");
+    expect(withWrongNamespace).not.toContain("`carapace_direct.sessions_yield`");
     expect(withWrongNamespace).not.toContain("native `wait_agent`");
   });
 
   it.each([
-    { namespace: "openclaw_direct", exposesNativeYield: true },
-    { namespace: "openclaw", exposesNativeYield: false },
+    { namespace: "carapace_direct", exposesNativeYield: true },
+    { namespace: "carapace", exposesNativeYield: false },
   ])(
     "materializes the $namespace native-yield namespace exactly once",
     ({ namespace, exposesNativeYield }) => {
@@ -1350,7 +1350,7 @@ describe("Codex app-server native code mode config", () => {
       });
 
       expect(namespaceReads).toBe(1);
-      expect(instructions.includes("`openclaw_direct.sessions_yield`")).toBe(exposesNativeYield);
+      expect(instructions.includes("`carapace_direct.sessions_yield`")).toBe(exposesNativeYield);
       expect(instructions.includes("native `wait_agent`")).toBe(exposesNativeYield);
     },
   );
@@ -1366,7 +1366,7 @@ describe("Codex app-server native code mode config", () => {
         },
         {
           type: "namespace",
-          name: "openclaw",
+          name: "carapace",
           description: "",
           tools: [
             {
@@ -1389,7 +1389,7 @@ describe("Codex app-server native code mode config", () => {
     });
 
     expect(instructions).toContain(
-      "Deferred searchable OpenClaw dynamic tools available: image_generate, music_generate.",
+      "Deferred searchable Carapace dynamic tools available: image_generate, music_generate.",
     );
     expect(instructions).toContain("Use `tool_search` when directly callable");
     expect(instructions).toContain(
@@ -1437,7 +1437,7 @@ describe("Codex app-server native code mode config", () => {
       dynamicTools: [
         {
           type: "namespace",
-          name: "openclaw",
+          name: "carapace",
           description: "",
           get tools() {
             namespaceReads += 1;
@@ -1449,11 +1449,11 @@ describe("Codex app-server native code mode config", () => {
 
     expect(namespaceReads).toBe(1);
     expect(instructions).toContain(
-      "Deferred searchable OpenClaw dynamic tools available: alpha_tool, skill_workshop, zeta_tool.",
+      "Deferred searchable Carapace dynamic tools available: alpha_tool, skill_workshop, zeta_tool.",
     );
     expect(instructions).toContain("## Skill Workshop");
     expect(instructions).not.toContain("Visible source replies are not automatically delivered");
-    expect(instructions).not.toContain("`openclaw_direct.sessions_yield`");
+    expect(instructions).not.toContain("`carapace_direct.sessions_yield`");
   });
 
   it("uses the shared Skill Workshop guidance when skill_workshop is available", () => {
@@ -1461,7 +1461,7 @@ describe("Codex app-server native code mode config", () => {
       dynamicTools: [
         {
           type: "namespace",
-          name: "openclaw",
+          name: "carapace",
           description: "",
           tools: [
             {
@@ -1500,7 +1500,7 @@ describe("Codex app-server native code mode config", () => {
       ],
     });
 
-    expect(instructions).not.toContain("Deferred searchable OpenClaw dynamic tools available");
+    expect(instructions).not.toContain("Deferred searchable Carapace dynamic tools available");
   });
 
   it("keeps durable dynamic tool fingerprints scoped to loading mode", () => {
@@ -1523,7 +1523,7 @@ describe("Codex app-server native code mode config", () => {
     const searchableFingerprint = codexDynamicToolsFingerprint([
       {
         type: "namespace",
-        name: "openclaw",
+        name: "carapace",
         description: "",
         tools: [
           {
@@ -1570,7 +1570,7 @@ describe("Codex app-server native code mode config", () => {
     ).toBe(true);
   });
 
-  it("keeps OpenClaw skill catalogs out of developer instructions", () => {
+  it("keeps Carapace skill catalogs out of developer instructions", () => {
     const params = createAttemptParams({ provider: "openai" });
     params.skillsSnapshot = {
       prompt: "<available_skills><skill><name>demo</name></skill></available_skills>",
@@ -1798,11 +1798,11 @@ describe("Codex app-server native code mode config", () => {
     expect(request.personality).toBe("none");
   });
 
-  it("omits OpenClaw model selection when adopting a native Codex thread", () => {
+  it("omits Carapace model selection when adopting a native Codex thread", () => {
     const request = buildThreadResumeParams(createAttemptParams({ provider: "codex" }), {
       threadId: "thread-adopted",
-      model: "openclaw-model",
-      modelProvider: "openclaw-provider",
+      model: "carapace-model",
+      modelProvider: "carapace-provider",
       preserveNativeModel: true,
       appServer: createAppServerOptions() as never,
       developerInstructions: "test instructions",
@@ -1856,17 +1856,17 @@ describe("Codex app-server native code mode config", () => {
       expect(request).not.toHaveProperty("collaborationMode");
       expect(request).not.toHaveProperty("personality");
       expect(request.additionalContext).toEqual({
-        openclaw_source_delivery: {
+        carapace_source_delivery: {
           kind: "application",
           value: expect.stringContaining("reply normally in your final assistant message"),
         },
-        openclaw_temporal_context: {
+        carapace_temporal_context: {
           kind: "application",
           value: expect.stringContaining("## Temporal Context"),
         },
         ...(notice
           ? {
-              openclaw_permission_change: { kind: "application", value: notice },
+              carapace_permission_change: { kind: "application", value: notice },
             }
           : {}),
       });
@@ -1989,7 +1989,7 @@ describe("Codex app-server native code mode config", () => {
       const dynamicTools = [
         {
           type: "namespace" as const,
-          name: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+          name: CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
           description: "",
           tools: [],
         },
@@ -2032,7 +2032,7 @@ describe("Codex app-server native code mode config", () => {
             : {}),
           direct_only_tool_namespaces: [
             ...(configured ? ["vendor_direct"] : []),
-            CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+            CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
           ],
         });
         expect(request.config?.["code_mode.direct_only_tool_namespaces"]).toBeUndefined();
@@ -2429,7 +2429,7 @@ describe("Codex app-server turn input image sanitizing", () => {
 });
 
 describe("Codex app-server turn params", () => {
-  it("builds resume and turn params from the currently selected OpenClaw model", () => {
+  it("builds resume and turn params from the currently selected Carapace model", () => {
     const params = createAttemptParams({ provider: "codex" });
     params.modelId = "gpt-5.4-codex";
     params.thinkLevel = "medium";
@@ -2520,7 +2520,7 @@ describe("Codex app-server turn params", () => {
     }).settings.developer_instructions;
     expect(workspaceInstructions).toContain("Turn-only workspace instructions.");
     expect(workspaceInstructions).toContain("# Collaboration Mode: Default");
-    expect(workspaceInstructions).not.toContain("This is an OpenClaw heartbeat turn");
+    expect(workspaceInstructions).not.toContain("This is an Carapace heartbeat turn");
     expect(workspaceInstructions).not.toContain("### Heartbeats");
   });
 
@@ -2537,7 +2537,7 @@ describe("Codex app-server turn params", () => {
     expect(cronCollaborationMode.settings.model).toBe("gpt-5.4-codex");
     expect(cronCollaborationMode.settings.reasoning_effort).toBe("medium");
     expect(cronCollaborationMode.settings.developer_instructions).toContain(
-      "This is an OpenClaw cron automation turn",
+      "This is an Carapace cron automation turn",
     );
     expect(cronCollaborationMode.settings.developer_instructions).toContain(
       "If it asks you to run an exact command, run that command before doing any investigation",
@@ -2715,7 +2715,7 @@ describe("Codex app-server model provider selection", () => {
 
 describe("Codex plugin binding recovery", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-plugin-recovery-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-plugin-recovery-"));
     resetCodexTestBindingStore();
   });
 
@@ -3235,7 +3235,7 @@ describe("Codex plugin binding recovery", () => {
 
 describe("Codex thread-effective app attestation", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-plugin-attestation-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-plugin-attestation-"));
     resetCodexTestBindingStore();
   });
 
@@ -3600,7 +3600,7 @@ describe("Codex thread-effective app attestation", () => {
 
 describe("Codex app-server adopted thread lifecycle", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-thread-adoption-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-thread-adoption-"));
     resetCodexTestBindingStore();
   });
 
@@ -3738,7 +3738,7 @@ describe("Codex app-server adopted thread lifecycle", () => {
     },
   );
 
-  it("keeps OpenClaw from overriding App Server model selection across resumes", async () => {
+  it("keeps Carapace from overriding App Server model selection across resumes", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     const params = createThreadLifecycleParams(sessionFile, workspaceDir);
@@ -3890,7 +3890,7 @@ describe("Codex app-server adopted thread lifecycle", () => {
 
 describe("Codex app-server supervised branch lifecycle", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-supervision-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-supervision-"));
     resetCodexTestBindingStore();
   });
 
@@ -4314,7 +4314,7 @@ describe("Codex app-server supervised branch lifecycle", () => {
       `rollout-${finalThreadId}.jsonl`,
     );
     attempt.pluginHarnessToolPolicyRestricted = true;
-    attempt.toolsAllow = ["openclaw"];
+    attempt.toolsAllow = ["carapace"];
     const identity = await seedPendingSupervisionBinding({
       attempt,
       cwd: workspaceDir,
@@ -6128,7 +6128,7 @@ describe("Codex app-server supervised branch lifecycle", () => {
 
 describe("Codex app-server thread lifecycle timing", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-thread-lifecycle-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-thread-lifecycle-"));
     // Bindings are keyed by session identity, not tempDir, so sibling tests
     // would otherwise leak resumable threads into fresh-start expectations.
     resetCodexTestBindingStore();

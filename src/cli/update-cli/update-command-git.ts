@@ -34,8 +34,8 @@ import type {
 import { runGatewayUpdate, type UpdateRunResult } from "../../infra/update-runner.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
 import { defaultRuntime } from "../../runtime.js";
-import { OPENCLAW_DATABASE_SCHEMA_DOCS_URL } from "../../state/openclaw-database-preflight.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
+import { CARAPACE_DATABASE_SCHEMA_DOCS_URL } from "../../state/carapace-database-preflight.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
 import { splitShellArgs } from "../../utils/shell-argv.js";
 import { createUpdateProgress } from "./progress.js";
 import {
@@ -67,7 +67,7 @@ export async function retireStandaloneGitWrapper(params: {
   searchDirs?: readonly string[];
 }): Promise<{ error?: string }> {
   const platform = params.platform ?? process.platform;
-  const wrapperName = platform === "win32" ? "openclaw.cmd" : "openclaw";
+  const wrapperName = platform === "win32" ? "carapace.cmd" : "carapace";
   const searchDirs = params.searchDirs ?? (process.env.PATH ?? "").split(path.delimiter);
   const expectedEntry =
     platform === "win32"
@@ -138,7 +138,7 @@ export async function retireStandaloneGitWrapper(params: {
 }
 
 type BeforeGitMutation = (target: {
-  schemaVersions?: OpenClawSchemaVersions;
+  schemaVersions?: CarapaceSchemaVersions;
   metadataUnreadable?: string;
 }) => Promise<{
   allowGatewayServiceRepair?: boolean;
@@ -320,7 +320,7 @@ export async function inspectGitDryRunTargetSchemaVersions(params: {
   timeoutMs: number;
   channel: UpdateChannel;
   devTarget?: DevUpdateTarget;
-}): Promise<{ schemaVersions?: OpenClawSchemaVersions; metadataUnreadable?: string }> {
+}): Promise<{ schemaVersions?: CarapaceSchemaVersions; metadataUnreadable?: string }> {
   const runCommand: GlobalCommandRunner = (argv, options) =>
     runCommandWithTimeout(argv, {
       ...options,
@@ -404,7 +404,7 @@ export function createBeforeGitMutation(params: {
   shouldRestart: boolean;
   stopManagedService: (roots: readonly string[]) => Promise<void>;
   getPreManagedServiceStop: () => PreManagedServiceStop | undefined;
-  checkTargetSchemas: (versions: OpenClawSchemaVersions | undefined) => Promise<void>;
+  checkTargetSchemas: (versions: CarapaceSchemaVersions | undefined) => Promise<void>;
   prepareMutableUpdate: () => Promise<void>;
   switchToGit: boolean;
 }): BeforeGitMutation {
@@ -412,7 +412,7 @@ export function createBeforeGitMutation(params: {
     if (target?.metadataUnreadable) {
       throw new UpdatePreMutationError(
         "target-metadata-preflight",
-        `Update refused: could not inspect the target's schema support (${target.metadataUnreadable}). Retry, or see ${OPENCLAW_DATABASE_SCHEMA_DOCS_URL}.`,
+        `Update refused: could not inspect the target's schema support (${target.metadataUnreadable}). Retry, or see ${CARAPACE_DATABASE_SCHEMA_DOCS_URL}.`,
       );
     }
     await params.checkTargetSchemas(target.schemaVersions);

@@ -13,7 +13,7 @@ import {
   setInstalledPluginIndexInstallRecords,
   writePersistedInstalledPluginIndexInstallRecordsWithLeaseMock,
 } from "../cli/plugins-cli-test-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { recordPluginManifestInstallOwner } from "./manifest-install-owner.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
@@ -39,7 +39,7 @@ function createManifestRecord(
   overrides: Partial<PluginManifestRecord> = {},
   owner = id,
 ): PluginManifestRecord {
-  const rootDir = path.join(os.tmpdir(), "openclaw-plugin-fixtures", id);
+  const rootDir = path.join(os.tmpdir(), "carapace-plugin-fixtures", id);
   return recordPluginManifestInstallOwner(
     {
       id,
@@ -51,7 +51,7 @@ function createManifestRecord(
       origin: "config",
       rootDir,
       source: path.join(rootDir, "index.ts"),
-      manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+      manifestPath: path.join(rootDir, "carapace.plugin.json"),
       ...overrides,
     },
     owner,
@@ -60,8 +60,8 @@ function createManifestRecord(
 
 const installWriteOptions = {
   assertConfigPathForWrite: () => {},
-  expectedConfigPath: "/tmp/openclaw.json",
-  ownedConfigPathForWrite: "/tmp/openclaw.json",
+  expectedConfigPath: "/tmp/carapace.json",
+  ownedConfigPathForWrite: "/tmp/carapace.json",
 };
 
 describe("persistPluginInstall enablement", () => {
@@ -77,9 +77,9 @@ describe("persistPluginInstall enablement", () => {
         allow: ["memory-core"],
         deny: ["demo-plugin-npm", "other"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setInstalledPluginIndexInstallRecords({
-      "demo-package": { source: "npm", spec: "@openclaw/demo-package@0.0.1" },
+      "demo-package": { source: "npm", spec: "@carapace/demo-package@0.0.1" },
     });
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [createManifestRecord("demo-plugin-npm", {}, "demo-package")],
@@ -95,7 +95,7 @@ describe("persistPluginInstall enablement", () => {
       pluginId: "demo-package",
       install: {
         source: "npm",
-        spec: "@openclaw/demo-package@0.0.1",
+        spec: "@carapace/demo-package@0.0.1",
         installPath: "/tmp/demo-package",
       },
     });
@@ -113,7 +113,7 @@ describe("persistPluginInstall enablement", () => {
           "legacy-memory-a": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
@@ -121,7 +121,7 @@ describe("persistPluginInstall enablement", () => {
           "legacy-memory": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [createManifestRecord("legacy-memory")],
@@ -132,7 +132,7 @@ describe("persistPluginInstall enablement", () => {
       diagnostics: [],
     });
     applyExclusiveSlotSelectionMock.mockImplementation(((params: {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       selectedId: string;
       selectedKind?: string;
       registry?: { plugins: Array<{ id: string; kind?: string }> };
@@ -195,7 +195,7 @@ describe("persistPluginInstall enablement", () => {
           "legacy-memory-a": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
@@ -203,14 +203,14 @@ describe("persistPluginInstall enablement", () => {
           "memory-b": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [createManifestRecord("memory-b", { kind: "memory" })],
       diagnostics: [],
     });
     applyExclusiveSlotSelectionMock.mockImplementation(((params: {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       selectedId: string;
       selectedKind?: string;
       registry?: { plugins: Array<{ id: string; kind?: string }> };
@@ -265,14 +265,14 @@ describe("persistPluginInstall enablement", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           plain: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     enablePluginInConfigMock.mockReturnValue({ config: enabledConfig, enabled: true });
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [createManifestRecord("plain")],
@@ -326,13 +326,13 @@ describe("persistPluginInstall enablement", () => {
           "needs-config": { hooks: { timeoutMs: 5_000 } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [
         recordPluginManifestInstallOwner(
           {
             id: "needs-config",
-            manifestPath: "/tmp/needs-config/openclaw.plugin.json",
+            manifestPath: "/tmp/needs-config/carapace.plugin.json",
             configSchema: {
               type: "object",
               required: ["token"],
@@ -387,7 +387,7 @@ describe("persistPluginInstall enablement", () => {
     const { persistPluginInstall } = await import("./install-persistence.js");
     const baseConfig = {
       plugins: { allow: ["memory-core"], deny: ["broken-schema"], entries: {} },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [
         createManifestRecord("broken-schema", {
@@ -434,13 +434,13 @@ describe("persistPluginInstall enablement", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadPluginManifestRegistryMock.mockReturnValue({
       plugins: [
         recordPluginManifestInstallOwner(
           {
             id: "needs-config",
-            manifestPath: "/tmp/needs-config/openclaw.plugin.json",
+            manifestPath: "/tmp/needs-config/carapace.plugin.json",
             configSchema: {
               type: "object",
               required: ["token"],
@@ -485,7 +485,7 @@ describe("persistPluginInstall enablement", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const next = await persistPluginInstall({
       snapshot: {
@@ -527,7 +527,7 @@ describe("persistPluginInstall enablement", () => {
         allow: ["memory-core"],
         deny: ["memory-lancedb"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const next = await persistPluginInstall({
       snapshot: {

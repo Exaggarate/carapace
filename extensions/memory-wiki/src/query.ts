@@ -1,18 +1,18 @@
 import path from "node:path";
-import { filterMemorySearchHitsBySessionVisibility } from "@openclaw/memory-core/api.js";
-import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/memory-host-core";
-import { getActiveMemorySearchManager } from "openclaw/plugin-sdk/memory-host-search";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+import { filterMemorySearchHitsBySessionVisibility } from "@carapace/memory-core/api.js";
+import { resolveSessionAgentIdStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import { resolveDefaultAgentId } from "carapace/plugin-sdk/memory-host-core";
+import { getActiveMemorySearchManager } from "carapace/plugin-sdk/memory-host-search";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import { FsSafeError, root as fsRoot } from "carapace/plugin-sdk/security-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import type { OpenClawConfig } from "../api.js";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import type { CarapaceConfig } from "../api.js";
 import { walkMemoryWikiDirectory } from "./bounded-walk.js";
 import { assessClaimFreshness, isClaimContestedStatus } from "./claim-health.js";
 import {
@@ -34,9 +34,9 @@ const QUERY_DIRS = ["entities", "concepts", "sources", "syntheses", "reports"] a
 const QUERY_PAGE_READ_CONCURRENCY = 16;
 const WIKI_SNIPPET_MAX_CHARS = 700;
 const RELATED_BLOCK_PATTERN =
-  /<!-- openclaw:wiki:related:start -->[\s\S]*?<!-- openclaw:wiki:related:end -->/g;
+  /<!-- carapace:wiki:related:start -->[\s\S]*?<!-- carapace:wiki:related:end -->/g;
 const MARKDOWN_FRONTMATTER_PATTERN = /^\s*---\r?\n[\s\S]*?\r?\n---\r?\n?/;
-const STRUCTURAL_MARKER_LINE_PATTERN = /^\s*<!--\s*openclaw:(?:wiki|human):[^>]*-->\s*$/;
+const STRUCTURAL_MARKER_LINE_PATTERN = /^\s*<!--\s*carapace:(?:wiki|human):[^>]*-->\s*$/;
 const ROUTE_QUESTION_STOP_WORDS = new Set([
   "a",
   "about",
@@ -167,7 +167,7 @@ type QuerySearchOverrides = {
   searchCorpus?: WikiSearchCorpus;
 };
 
-type ConversationRecallContext = NonNullable<OpenClawPluginToolContext["conversationRecall"]>;
+type ConversationRecallContext = NonNullable<CarapacePluginToolContext["conversationRecall"]>;
 
 function sortWikiSearchResults(results: WikiSearchResult[]): WikiSearchResult[] {
   return results.toSorted((left, right) => {
@@ -843,7 +843,7 @@ function isBridgeCompiledPage(page: QueryableWikiPage): boolean {
 }
 
 function createWikiPageVisibilityFilter(params: {
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
@@ -876,7 +876,7 @@ function shouldUseSharedMemory(config: ResolvedMemoryWikiConfig): boolean {
 
 function assertSessionVisibilityAppConfig(params: {
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
@@ -905,13 +905,13 @@ function shouldSearchWiki(config: ResolvedMemoryWikiConfig): boolean {
 
 function shouldSearchSharedMemory(
   config: ResolvedMemoryWikiConfig,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
 ): boolean {
   return shouldUseSharedMemory(config) && appConfig !== undefined;
 }
 
 function resolveActiveMemoryAgentId(params: {
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
 }): string | null {
@@ -931,7 +931,7 @@ function resolveActiveMemoryAgentId(params: {
 }
 
 async function resolveActiveMemoryManager(params: {
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
 }) {
@@ -1150,7 +1150,7 @@ export function resolveQueryableWikiPageByLookup(
 
 export async function searchMemoryWiki(input: {
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
@@ -1238,7 +1238,7 @@ export async function searchMemoryWiki(input: {
 
 export async function getMemoryWikiPage(input: {
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;

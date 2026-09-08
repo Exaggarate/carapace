@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { isCompactionReplayCheckpoint } from "@openclaw/ai/transports";
+import { isCompactionReplayCheckpoint } from "@carapace/ai/transports";
 import { calculateContextTokens, estimateContextTokens } from "../runtime/index.js";
 import { AgentSessionModels } from "./agent-session-models.js";
 import type { SessionStats } from "./agent-session-types.js";

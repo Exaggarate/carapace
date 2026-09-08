@@ -1,12 +1,12 @@
-# OpenClaw Exa Plugin
+# Carapace Exa Plugin
 
-Official OpenClaw plugin for Exa.
+Official Carapace plugin for Exa.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/exa-plugin
-openclaw gateway restart
+carapace plugins install @carapace/exa-plugin
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/exa-search> for setup and configuration.
+See <../../docs/tools/exa-search.md> for setup and configuration.

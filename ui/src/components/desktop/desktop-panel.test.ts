@@ -12,7 +12,7 @@ import { waitForFast } from "../../test-helpers/wait-for.ts";
 import type { DesktopClient, DesktopConnectionHandle } from "./desktop-client.ts";
 import "./desktop-panel.ts";
 
-type DesktopPanelElement = HTMLElementTagNameMap["openclaw-desktop-panel"];
+type DesktopPanelElement = HTMLElementTagNameMap["carapace-desktop-panel"];
 
 const desktopEnvironment = {
   id: "worker-desktop-1",
@@ -30,7 +30,7 @@ const desktopEnvironment = {
 } as const;
 
 function createPanel() {
-  return document.createElement("openclaw-desktop-panel");
+  return document.createElement("carapace-desktop-panel");
 }
 
 function createConnectionHandle(overrides: Partial<DesktopConnectionHandle> = {}) {
@@ -223,7 +223,7 @@ describe("embedded desktop panel presentation", () => {
       await panel.updateComplete;
       if (presentation === "floating") {
         window.dispatchEvent(
-          new CustomEvent("openclaw:desktop-toggle", { detail: { open: true } }),
+          new CustomEvent("carapace:desktop-toggle", { detail: { open: true } }),
         );
       }
       if (picker) {
@@ -887,7 +887,7 @@ describe("embedded desktop panel presentation", () => {
 
   it("keeps a hidden embedded mount dormant even when the standalone dock was open", async () => {
     localStorage.setItem(
-      "openclaw.desktopPanel",
+      "carapace.desktopPanel",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
     const request = vi.fn(async () => ({ environments: [desktopEnvironment] }));
@@ -901,7 +901,7 @@ describe("embedded desktop panel presentation", () => {
     await settleTasks();
 
     panel.handleToggleRequest(
-      new CustomEvent("openclaw:desktop-toggle", {
+      new CustomEvent("carapace:desktop-toggle", {
         detail: { environmentId: desktopEnvironment.id },
       }),
     );

@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createGoogleChatIngressMonitor } from "./monitor-ingress.js";
 
@@ -73,7 +73,7 @@ function startIngress(queue: GoogleChatIngressQueue, dispatch: GoogleChatIngress
 }
 
 async function withQueue<T>(fn: (queue: GoogleChatIngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-googlechat-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-googlechat-ingress-"));
   const stateDir = await fs.realpath(created);
   const queue = createChannelIngressQueueForTests<GoogleChatIngressPayload>({
     channelId: "googlechat",
@@ -83,13 +83,13 @@ async function withQueue<T>(fn: (queue: GoogleChatIngressQueue) => Promise<T>): 
   try {
     return await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

@@ -1,4 +1,4 @@
-import { normalizeOptionalStringifiedId } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalStringifiedId } from "carapace/plugin-sdk/string-coerce-runtime";
 
 // Zalouser plugin module implements message sid behavior.
 function parseZalouserMessageSidFull(

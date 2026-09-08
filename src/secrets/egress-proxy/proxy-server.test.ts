@@ -77,7 +77,7 @@ async function closeServer(server: Server): Promise<void> {
 }
 
 function basicProxyAuth(password: string): string {
-  return `Basic ${Buffer.from(`openclaw:${password}`).toString("base64")}`;
+  return `Basic ${Buffer.from(`carapace:${password}`).toString("base64")}`;
 }
 
 function registeredPassword(env: Record<string, string>): string {
@@ -213,7 +213,7 @@ function tamperSentinel(sentinel: string): string {
 beforeEach(async () => {
   auditEvents = [];
   originRequests = [];
-  caDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-egress-proxy-test-"));
+  caDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-egress-proxy-test-"));
   tempDirs.push(caDir);
   proxy = await startSecretEgressProxyServer({
     caDir,
@@ -470,7 +470,7 @@ describe("secret egress proxy", () => {
 
       expect(result).toMatchObject({ status: 502 });
       expect(result.body).toContain(
-        "openclaw secrets store set SERVICE_API_KEY --allow-host localhost",
+        "carapace secrets store set SERVICE_API_KEY --allow-host localhost",
       );
       expect(originRequests).toEqual([]);
       expect(JSON.stringify(originRequests)).not.toContain(secret);
@@ -525,7 +525,7 @@ describe("secret egress proxy", () => {
   it("blind-tunnels bypassed hosts without substituting sentinels", async () => {
     const bypassEvents: SecretEgressProxyAuditEvent[] = [];
     const bypassProxy = await startSecretEgressProxyServer({
-      caDir: fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-egress-bypass-test-")),
+      caDir: fs.mkdtempSync(path.join(os.tmpdir(), "carapace-egress-bypass-test-")),
       bypassHosts: ["localhost"],
       onAudit: (event) => bypassEvents.push(event),
     });

@@ -1,11 +1,11 @@
 // Gateway boot lifecycle tests cover restart-loop breaker accounting.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   GATEWAY_CRASH_LOOP_BREAKER_REASON,
   GATEWAY_CRASH_LOOP_RECOVERED_REASON,
@@ -18,7 +18,7 @@ import {
 } from "./gateway-boot-lifecycle.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 
-type GatewayBootLifecycleTestDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_boot_lifecycle">;
+type GatewayBootLifecycleTestDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_boot_lifecycle">;
 type GatewayBootLifecycleOutcome = Parameters<typeof completeGatewayBootLifecycle>[1]["outcome"];
 
 const GATEWAY_BOOT_LOOP_UNCLEAN_THRESHOLD = 3;
@@ -28,15 +28,15 @@ const GATEWAY_BOOT_LIFECYCLE_RETENTION_MS = 24 * 60 * 60_000;
 const tempDirs = createTempDirTracker();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
   vi.unstubAllEnvs();
 });
 
 function createLifecycleDb() {
-  const stateDir = tempDirs.make("openclaw-gateway-boot-");
-  const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
-  const { db } = openOpenClawStateDatabase({ env });
+  const stateDir = tempDirs.make("carapace-gateway-boot-");
+  const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+  const { db } = openCarapaceStateDatabase({ env });
   const kysely = getNodeSqliteKysely<GatewayBootLifecycleTestDatabase>(db);
   return { env, db, kysely };
 }
@@ -364,18 +364,18 @@ describe("formatGatewayCrashLoopManualChannelStartHint", () => {
   });
 
   it.each([
-    { name: "default", profile: "", container: "", command: "openclaw" },
-    { name: "named profile", profile: "work", container: "", command: "openclaw --profile work" },
-    { name: "container", profile: "", container: "demo", command: "openclaw --container demo" },
+    { name: "default", profile: "", container: "", command: "carapace" },
+    { name: "named profile", profile: "work", container: "", command: "carapace --profile work" },
+    { name: "container", profile: "", container: "demo", command: "carapace --container demo" },
     {
       name: "container and profile",
       profile: "work",
       container: "demo",
-      command: "openclaw --container demo",
+      command: "carapace --container demo",
     },
   ])("targets the active gateway for $name", ({ profile, container, command }) => {
-    vi.stubEnv("OPENCLAW_PROFILE", profile);
-    vi.stubEnv("OPENCLAW_CONTAINER_HINT", container);
+    vi.stubEnv("CARAPACE_PROFILE", profile);
+    vi.stubEnv("CARAPACE_CONTAINER_HINT", container);
 
     expect(
       formatGatewayCrashLoopManualChannelStartHint({ channelId: "telegram", accountId: "work" }),

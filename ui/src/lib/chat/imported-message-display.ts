@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 
 // Match only the complete, no-warning frame emitted by the Gateway catalog copy.
 // Anchoring protects quoted/fenced examples and truncated or malformed history.
@@ -21,8 +21,8 @@ export function projectImportedMessageForDisplay(message: unknown): unknown {
   if (!record || (record.role !== "user" && record.role !== "assistant")) {
     return message;
   }
-  const metadata = asOptionalRecord(record["__openclaw"]);
-  // History reads project the persisted key into __openclaw; inline events can
+  const metadata = asOptionalRecord(record["__carapace"]);
+  // History reads project the persisted key into __carapace; inline events can
   // still carry it at the top level. Both originate at the catalog importer.
   const importKey = metadata?.idempotencyKey ?? record.idempotencyKey;
   if (typeof importKey !== "string" || !/^[^:\s]+-catalog:/u.test(importKey)) {

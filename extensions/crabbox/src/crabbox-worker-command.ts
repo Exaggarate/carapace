@@ -1,4 +1,4 @@
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
 import { crabboxCommandError } from "./crabbox-worker-command-error.js";
 import { CRABBOX_STOP_TIMEOUT_MS } from "./crabbox-worker-timeouts.js";
 

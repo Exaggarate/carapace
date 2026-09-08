@@ -42,8 +42,8 @@ describe("notarize-mac-artifact input validation", () => {
   });
 
   it("rejects extra artifact arguments before notarization", () => {
-    const tempRoot = tempDirs.make("openclaw-notary-extra-");
-    const artifact = path.join(tempRoot, "OpenClaw.zip");
+    const tempRoot = tempDirs.make("carapace-notary-extra-");
+    const artifact = path.join(tempRoot, "Carapace.zip");
     writeFileSync(artifact, "placeholder", "utf8");
 
     const result = spawnSync("bash", [scriptPath, artifact, "extra"], {
@@ -57,8 +57,8 @@ describe("notarize-mac-artifact input validation", () => {
   });
 
   it("fails before notarization when an explicit staple app path is missing", () => {
-    const tempRoot = tempDirs.make("openclaw-notary-staple-");
-    const artifact = path.join(tempRoot, "OpenClaw.zip");
+    const tempRoot = tempDirs.make("carapace-notary-staple-");
+    const artifact = path.join(tempRoot, "Carapace.zip");
     const missingApp = path.join(tempRoot, "Missing.app");
     writeFileSync(artifact, "placeholder", "utf8");
 
@@ -79,9 +79,9 @@ describe("notarize-mac-artifact input validation", () => {
   });
 
   it("records the accepted notarization id before stapling", () => {
-    const tempRoot = tempDirs.make("openclaw-notary-result-");
-    const artifact = path.join(tempRoot, "OpenClaw.zip");
-    const app = path.join(tempRoot, "OpenClaw.app");
+    const tempRoot = tempDirs.make("carapace-notary-result-");
+    const artifact = path.join(tempRoot, "Carapace.zip");
+    const app = path.join(tempRoot, "Carapace.app");
     const binDir = path.join(tempRoot, "bin");
     const resultPath = path.join(tempRoot, "notary-result.json");
     const accepted = {
@@ -131,8 +131,8 @@ describe("notarize-mac-artifact input validation", () => {
 const submissionId = "11111111-2222-4333-8444-555555555555";
 
 function notarizationFixture(extension = "zip") {
-  const root = tempDirs.make("openclaw-notary-resume-");
-  const artifact = path.join(root, `OpenClaw.${extension}`);
+  const root = tempDirs.make("carapace-notary-resume-");
+  const artifact = path.join(root, `Carapace.${extension}`);
   const submission = path.join(root, "submission.json");
   const result = path.join(root, "accepted.json");
   const calls = path.join(root, "calls.jsonl");
@@ -301,11 +301,11 @@ function recoveryFixture(archiveCase = "valid") {
       `
 import stat, sys, zipfile
 with zipfile.ZipFile(sys.argv[1], "w") as archive:
-    archive.writestr("OpenClaw.app/Contents/Info.plist", "signed bundle metadata")
+    archive.writestr("Carapace.app/Contents/Info.plist", "signed bundle metadata")
     if sys.argv[2] == "traversal":
-        archive.writestr("OpenClaw.app/../../outside", "escape")
+        archive.writestr("Carapace.app/../../outside", "escape")
     if sys.argv[2] in ("escaping-link", "valid"):
-        entry = zipfile.ZipInfo("OpenClaw.app/Contents/Frameworks/Current")
+        entry = zipfile.ZipInfo("Carapace.app/Contents/Frameworks/Current")
         entry.create_system = 3
         entry.external_attr = (stat.S_IFLNK | 0o777) << 16
         archive.writestr(entry, "../../../outside" if sys.argv[2] == "escaping-link" else "VersionA")

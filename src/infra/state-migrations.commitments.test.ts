@@ -5,9 +5,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   detectLegacyCommitments,
   migrateLegacyCommitments,
@@ -18,14 +18,14 @@ const CLAIM_SUFFIX = ".doctor-discarding";
 describe("retired commitments Doctor cleanup", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       cleanup();
     });
   });
 
   function useStateDir(): { env: NodeJS.ProcessEnv; stateDir: string } {
-    const stateDir = tempDirs.make("openclaw-commitments-cleanup-");
-    return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir }, stateDir };
+    const stateDir = tempDirs.make("carapace-commitments-cleanup-");
+    return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir }, stateDir };
   }
 
   async function writeLegacy(stateDir: string, value: unknown): Promise<string> {
@@ -40,7 +40,7 @@ describe("retired commitments Doctor cleanup", () => {
   }
 
   function readReceipt(env: NodeJS.ProcessEnv) {
-    return openOpenClawStateDatabase({ env })
+    return openCarapaceStateDatabase({ env })
       .db.prepare(
         `SELECT migration_kind, target_table, source_record_count, removed_source, report_json
          FROM migration_sources
@@ -116,7 +116,7 @@ describe("retired commitments Doctor cleanup", () => {
     expect(fs.existsSync(`${sourcePath}${CLAIM_SUFFIX}`)).toBe(false);
     expect(await fsp.readdir(path.dirname(sourcePath))).toEqual([]);
     expect(
-      openOpenClawStateDatabase({ env })
+      openCarapaceStateDatabase({ env })
         .db.prepare("SELECT name FROM sqlite_schema WHERE name = 'commitments'")
         .get(),
     ).toBeUndefined();

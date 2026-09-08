@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QaSuiteInfraError } from "./errors.js";
 import { runRuntimeToolFixture } from "./runtime-tool-fixture.js";
@@ -47,7 +47,7 @@ async function writeQaSessionTranscript(
   const sessionId = sessionKey.replace(/[^a-z0-9]+/giu, "-");
   const sessionEnv = {
     ...process.env,
-    OPENCLAW_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
+    CARAPACE_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
   };
   await upsertSessionEntry({
     agentId: "qa",
@@ -243,8 +243,8 @@ function runtimeToolFixtureConfig(
   return {
     toolName,
     toolCoverage: {
-      bucket: "openclaw-dynamic-integration",
-      expectedLayer: "openclaw-dynamic",
+      bucket: "carapace-dynamic-integration",
+      expectedLayer: "carapace-dynamic",
     },
     ...overrides,
   };
@@ -377,7 +377,7 @@ async function runMockRuntimeToolFixture(params: {
   const toolName = params.toolName ?? "read";
   const env = params.env ?? (await makeEnv({ mock: { baseUrl: MOCK_BASE_URL } }));
   if (params.forceCodex) {
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
   }
   return runRuntimeToolFixture(
     env,
@@ -397,8 +397,8 @@ async function runMockRuntimeToolFixture(params: {
 function asyncImageFixtureConfig(overrides: RuntimeToolFixtureConfig = {}) {
   return runtimeToolFixtureConfig("image_generate", {
     toolCoverage: {
-      bucket: "openclaw-dynamic-integration",
-      expectedLayer: "openclaw-dynamic",
+      bucket: "carapace-dynamic-integration",
+      expectedLayer: "carapace-dynamic",
       required: false,
       action: "optional runtime parity gate with async image completion coverage",
     },
@@ -441,7 +441,7 @@ async function runMockRuntimeToolFixtureWithOutputs(params: {
 afterEach(async () => {
   // The session store keeps the state database open under the temporary root, so
   // Windows fails the removal with EBUSY unless the cached handle is released first.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await Promise.all(
     tempRoots.splice(0).map((tempRoot) => fs.rm(tempRoot, { recursive: true, force: true })),
@@ -471,8 +471,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "carapace-dynamic-integration",
+          expectedLayer: "carapace-dynamic",
         },
       },
       {
@@ -643,14 +643,14 @@ describe("runtime tool fixture", () => {
     );
   });
 
-  it("skips Codex-native fixtures when only OpenClaw dynamic exposure evidence is absent", async () => {
+  it("skips Codex-native fixtures when only Carapace dynamic exposure evidence is absent", async () => {
     const env = await makeEnv({
       mock: { baseUrl: "http://127.0.0.1:9999" },
       gateway: {
         baseUrl: "http://127.0.0.1:1",
         tempRoot: "",
         workspaceDir: "",
-        runtimeEnv: { OPENCLAW_QA_FORCE_RUNTIME: "codex" },
+        runtimeEnv: { CARAPACE_QA_FORCE_RUNTIME: "codex" },
         call: vi.fn(),
       },
     });
@@ -710,7 +710,7 @@ describe("runtime tool fixture", () => {
     "patch rejected: writing outside of the project; rejected by user approval settings",
   ])("verifies native Codex patch success and workspace denial: %s", async (failureOutput) => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, failureOutput);
     const promptEvidence: Array<{
       requireSuccessfulTranscriptToolResult?: boolean;
@@ -744,7 +744,7 @@ describe("runtime tool fixture", () => {
 
   it("recognizes forced Codex native patches even when the effective inventory lists apply_patch", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(
       env,
       "patch rejected: writing outside of the project; rejected by user approval settings",
@@ -775,7 +775,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects a native patch whose recorded working directory changes its target", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, "apply_patch failed: path escapes sandbox root", {
       happyArguments: {
         input:
@@ -795,7 +795,7 @@ describe("runtime tool fixture", () => {
       encode: (input: string) => input,
     },
     {
-      label: "OpenClaw input envelope",
+      label: "Carapace input envelope",
       encode: (input: string) => ({ input }),
     },
     {
@@ -810,7 +810,7 @@ describe("runtime tool fixture", () => {
   ])("verifies linked $label without weakening workspace containment", async (testCase) => {
     const { encode } = testCase;
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, "patch rejected: writing outside of the project", {
       happyArguments: encode(
         "*** Begin Patch\n*** Add File: runtime-tool-fixture-patch.txt\n+runtime patch\n*** End Patch\n",
@@ -832,7 +832,7 @@ describe("runtime tool fixture", () => {
 
   it("recognizes native patch paths through a canonical workspace alias", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     const workspaceAlias = path.join(env.gateway.tempRoot, "workspace-alias");
     await fs.symlink(
       env.gateway.workspaceDir,
@@ -850,7 +850,7 @@ describe("runtime tool fixture", () => {
 
   it("does not accept assistant text as evidence of a native Codex workspace rejection", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, undefined, { omitFailureEvidence: true });
     await writeQaSessionTranscript(env, "agent:qa:runtime-tool:apply_patch:failure", [
       {
@@ -875,7 +875,7 @@ describe("runtime tool fixture", () => {
 
   it("verifies executed patch envelopes with canonical absolute target paths", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     const happyPath = path.join(env.gateway.workspaceDir, "runtime-tool-fixture-patch.txt");
     const deniedPath = path.resolve(
       env.gateway.workspaceDir,
@@ -898,7 +898,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native patch transcripts that claim success without creating the workspace file", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env);
 
     await expect(
@@ -910,7 +910,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native Codex patch failures that only report missing patch context", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(
       env,
       "apply_patch failed: failed to find expected lines in runtime-tool-fixture-denied.txt",
@@ -923,7 +923,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native Codex patch failures without a linked failure result", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, "apply_patch completed", {
       failureStructuredError: false,
     });
@@ -953,7 +953,7 @@ describe("runtime tool fixture", () => {
     },
   ])("rejects linked native Codex patch evidence for the wrong $label", async (testCase) => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(
       env,
       "apply_patch failed: path escapes sandbox root",
@@ -965,7 +965,7 @@ describe("runtime tool fixture", () => {
 
   it("validates the native patch call linked to its result instead of the first plan", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeQaSessionTranscript(env, "agent:qa:runtime-tool:apply_patch:happy", [
       {
         role: "assistant",
@@ -1015,7 +1015,7 @@ describe("runtime tool fixture", () => {
 
   it("fails closed when required native Codex patch execution has no linked transcript", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.CARAPACE_QA_FORCE_RUNTIME = "codex";
     await writeRuntimeToolTranscripts(
       env,
       "apply_patch",
@@ -1411,7 +1411,7 @@ describe("runtime tool fixture", () => {
     {
       name: "unavailable-provider",
       toolName: "web_search",
-      happyArgs: { query: "OpenClaw runtime parity fixed query" },
+      happyArgs: { query: "Carapace runtime parity fixed query" },
       happyOutput: "result",
       failureOutput: "web_search is disabled or no provider is available.",
     },
@@ -1436,7 +1436,7 @@ describe("runtime tool fixture", () => {
     {
       name: "unavailable-provider happy output",
       toolName: "web_search",
-      happyArgs: { query: "OpenClaw runtime parity fixed query" },
+      happyArgs: { query: "Carapace runtime parity fixed query" },
       happyOutput: "web_search is disabled or no provider is available.",
       failureOutput: "web_search is disabled or no provider is available.",
       expectedError: "expected mock happy-path successful tool output for web_search",
@@ -1502,7 +1502,7 @@ describe("runtime tool fixture", () => {
     );
   });
 
-  it("still fails required OpenClaw dynamic fixtures when the tool is absent", async () => {
+  it("still fails required Carapace dynamic fixtures when the tool is absent", async () => {
     const env = await makeEnv();
 
     await expect(

@@ -5,7 +5,7 @@ import { managedWorktrees } from "../agents/worktrees/service.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { isSessionLifecycleMutationActive } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import {
   directSessionReq,
   loadSeededTranscriptEvents,
@@ -73,7 +73,7 @@ test.each([false, true])(
     const entered = createDeferredCore();
     const release = createDeferredCore();
     const restoreEntered = createDeferredCore();
-    const allocation = withOpenClawStateLease(
+    const allocation = withCarapaceStateLease(
       {
         scope: "core:managed-worktrees:create",
         key: "capacity",

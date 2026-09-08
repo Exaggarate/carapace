@@ -3,10 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMattermostIngressMonitor } from "./monitor-ingress.js";
 
@@ -63,12 +63,12 @@ function createQueue(stateDir: string, accountId: string): MattermostIngressQueu
 }
 
 async function withStateDir<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mattermost-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mattermost-ingress-"));
   const stateDir = await fs.realpath(created);
   try {
     return await fn(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -78,7 +78,7 @@ async function withQueue<T>(fn: (queue: MattermostIngressQueue) => Promise<T>): 
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

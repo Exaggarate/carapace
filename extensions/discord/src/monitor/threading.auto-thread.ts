@@ -1,12 +1,12 @@
 // Discord plugin module implements threading.auto thread behavior.
-import type { OpenClawConfig, ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
-import { resolveChannelModelOverride } from "openclaw/plugin-sdk/model-session-runtime";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { CarapaceConfig, ReplyToMode } from "carapace/plugin-sdk/config-contracts";
+import { resolveChannelModelOverride } from "carapace/plugin-sdk/model-session-runtime";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import {
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   ChannelType,
   createThread,
@@ -81,7 +81,7 @@ export async function resolveDiscordAutoThreadReplyPlan(
     replyToMode: ReplyToMode;
     agentId: string;
     channel: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     parentSessionKey: string;
     groupScope?: "main" | "per-group";
     threadParentInheritanceEnabled?: boolean;
@@ -247,7 +247,7 @@ export async function maybeCreateDiscordAutoThread(
 }
 
 function resolveDiscordThreadTitleModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string;
   agentId: string;
   threadId: string;
@@ -286,7 +286,7 @@ async function maybeRenameDiscordAutoThread(params: {
   modelRef?: string;
   channelName?: string;
   channelDescription?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
 }): Promise<void> {
   try {

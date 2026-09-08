@@ -6,16 +6,16 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import { publishedSdkBridgeEntrypoints } from "./loader-sdk-bridge-artifacts.test-support.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import { resetPluginCache } from "./plugin-cache.js";
 import { getPluginModuleLoaderStats } from "./plugin-module-loader-cache.js";
 
 const tempDirs = createTempDirTracker();
 
 function writeJavaScriptPluginFixture(id: string) {
-  const pluginRoot = tempDirs.make("openclaw-plugin-loader-");
+  const pluginRoot = tempDirs.make("carapace-plugin-loader-");
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify(
       {
         id,
@@ -46,7 +46,7 @@ function writePackagedPluginFixture(id: string) {
       {
         name: id,
         type: "commonjs",
-        openclaw: {
+        carapace: {
           extensions: ["./index.cjs"],
         },
       },
@@ -59,16 +59,16 @@ function writePackagedPluginFixture(id: string) {
 }
 
 function writePreSplitSdkBridgeConsumerFixture() {
-  const pluginRoot = tempDirs.make("openclaw-plugin-loader-");
+  const pluginRoot = tempDirs.make("carapace-plugin-loader-");
   fs.mkdirSync(path.join(pluginRoot, "dist"));
   fs.writeFileSync(
     path.join(pluginRoot, "package.json"),
     JSON.stringify(
       {
-        name: "@openclaw/sdk-bridge-consumer",
+        name: "@carapace/sdk-bridge-consumer",
         version: "2026.7.2-beta.7",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./dist/index.js"],
           runtimeExtensions: ["./dist/index.js"],
         },
@@ -79,7 +79,7 @@ function writePreSplitSdkBridgeConsumerFixture() {
     "utf-8",
   );
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: "sdk-bridge-consumer",
@@ -103,14 +103,14 @@ function writePreSplitSdkBridgeConsumerFixture() {
   fs.writeFileSync(
     path.join(pluginRoot, "dist", "index.js"),
     [
-      'import { archiveLegacyStateSource, detectOpenClawStateDatabaseSchemaMigrations, repairOpenClawStateDatabaseSchema, detectPluginInstallPathIssue, formatPluginInstallPathIssue, removePluginFromConfig, createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/runtime-doctor";',
-      'import { shouldAckReactionForWhatsApp } from "openclaw/plugin-sdk/channel-feedback";',
-      'import { resolveChannelProgressDraftRender } from "openclaw/plugin-sdk/channel-outbound";',
+      'import { archiveLegacyStateSource, detectCarapaceStateDatabaseSchemaMigrations, repairCarapaceStateDatabaseSchema, detectPluginInstallPathIssue, formatPluginInstallPathIssue, removePluginFromConfig, createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/runtime-doctor";',
+      'import { shouldAckReactionForWhatsApp } from "carapace/plugin-sdk/channel-feedback";',
+      'import { resolveChannelProgressDraftRender } from "carapace/plugin-sdk/channel-outbound";',
       'export default { id: "sdk-bridge-consumer", register() {',
       "  const bridged = [",
       "    archiveLegacyStateSource,",
-      "    detectOpenClawStateDatabaseSchemaMigrations,",
-      "    repairOpenClawStateDatabaseSchema,",
+      "    detectCarapaceStateDatabaseSchemaMigrations,",
+      "    repairCarapaceStateDatabaseSchema,",
       "    detectPluginInstallPathIssue,",
       "    formatPluginInstallPathIssue,",
       "    removePluginFromConfig,",
@@ -135,10 +135,10 @@ afterEach(() => {
 describe("createPluginModuleLoader", () => {
   it("loads bundled JavaScript natively without source transformation", () => {
     const pluginRoot = writeJavaScriptPluginFixture("demo");
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", pluginRoot);
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", pluginRoot);
 
     const before = getPluginModuleLoaderStats();
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       installRecords: {},
       workspaceDir: pluginRoot,
@@ -166,10 +166,10 @@ describe("createPluginModuleLoader", () => {
 
   it("loads packaged JavaScript natively without source transformation", () => {
     const pluginRoot = writePackagedPluginFixture("npm-demo");
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", tempDirs.make("openclaw-plugin-loader-"));
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", tempDirs.make("carapace-plugin-loader-"));
 
     const before = getPluginModuleLoaderStats();
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       installRecords: {},
       onlyPluginIds: ["npm-demo"],
@@ -202,7 +202,7 @@ describe("createPluginModuleLoader", () => {
     const artifact = fileURLToPath(resolveRuntimeWorkerUrl(entrypoint));
     const hasCompiledSdk = path.extname(artifact) === ".js";
     if (hasCompiledSdk) {
-      const hostRoot = tempDirs.make("openclaw-sdk-bridge-host-");
+      const hostRoot = tempDirs.make("carapace-sdk-bridge-host-");
       fs.cpSync(path.dirname(path.dirname(artifact)), path.join(hostRoot, "dist"), {
         recursive: true,
       });
@@ -213,15 +213,15 @@ describe("createPluginModuleLoader", () => {
       fs.mkdirSync(path.join(hostRoot, "src"));
       fs.mkdirSync(path.join(hostRoot, "extensions"));
       fs.symlinkSync(path.resolve("node_modules"), path.join(hostRoot, "node_modules"), "junction");
-      vi.stubEnv("OPENCLAW_DEV_SOURCE_ROOT", hostRoot);
-      vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.join(hostRoot, "extensions"));
+      vi.stubEnv("CARAPACE_DEV_SOURCE_ROOT", hostRoot);
+      vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", path.join(hostRoot, "extensions"));
     } else {
       // Standalone and watch-mode Vitest deliberately retain source declarations.
-      vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", tempDirs.make("openclaw-plugin-loader-"));
+      vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", tempDirs.make("carapace-plugin-loader-"));
     }
     const before = getPluginModuleLoaderStats();
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       pluginSdkResolution: hasCompiledSdk ? "dist" : "auto",
       onlyPluginIds: ["sdk-bridge-consumer"],

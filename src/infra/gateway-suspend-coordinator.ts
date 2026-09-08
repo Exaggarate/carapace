@@ -1,6 +1,6 @@
 // Coordinates atomic host suspension preparation and terminal-policy-aware drain leases.
 import { randomUUID } from "node:crypto";
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
+import { err as resultError, ok, type Result } from "@carapace/normalization-core/result";
 import type {
   GatewaySuspendHandoffResult,
   GatewaySuspendPrepareParams,
@@ -88,7 +88,7 @@ type GatewaySuspendCoordinatorState = {
 };
 
 const COORDINATOR_STATE = resolveGlobalSingleton(
-  Symbol.for("openclaw.gatewaySuspendCoordinatorState"),
+  Symbol.for("carapace.gatewaySuspendCoordinatorState"),
   (): GatewaySuspendCoordinatorState => ({
     current: null,
     retiredForLifecycleReset: null,

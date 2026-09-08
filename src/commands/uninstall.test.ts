@@ -132,7 +132,7 @@ describe("uninstallCommand", () => {
         uninstallCommand(runtime, { all: true, yes: true, nonInteractive: true }),
       ).rejects.toMatchObject({ name: "ExitError", code: 1 });
       expect(removePath).toHaveBeenCalledWith(
-        "/Applications/OpenClaw.app",
+        "/Applications/Carapace.app",
         runtime,
         expect.any(Object),
       );
@@ -169,7 +169,7 @@ describe("uninstallCommand", () => {
 
     expect(
       cleanupCommandLogMessages(runtime).some((message) =>
-        message.includes("openclaw backup create"),
+        message.includes("carapace backup create"),
       ),
     ).toBe(true);
   });
@@ -184,7 +184,7 @@ describe("uninstallCommand", () => {
 
     expect(
       cleanupCommandLogMessages(runtime).some((message) =>
-        message.includes("openclaw backup create"),
+        message.includes("carapace backup create"),
       ),
     ).toBe(false);
   });
@@ -202,7 +202,7 @@ describe("uninstallCommand", () => {
       runtime,
       expect.objectContaining({
         dryRun: true,
-        preservePaths: ["/tmp/.openclaw/workspace"],
+        preservePaths: ["/tmp/.carapace/workspace"],
       }),
     );
   });
@@ -215,7 +215,7 @@ describe("uninstallCommand", () => {
       dryRun: true,
     });
 
-    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.openclaw/workspace"], runtime, {
+    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.carapace/workspace"], runtime, {
       dryRun: true,
       preserveWorkspace: true,
     });
@@ -248,7 +248,7 @@ describe("uninstallCommand", () => {
       dryRun: true,
     });
 
-    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.openclaw/workspace"], runtime, {
+    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.carapace/workspace"], runtime, {
       dryRun: true,
       removeStateRows: true,
     });
@@ -263,7 +263,7 @@ describe("uninstallCommand", () => {
       dryRun: true,
     });
 
-    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.openclaw/workspace"], runtime, {
+    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.carapace/workspace"], runtime, {
       dryRun: true,
       removeStateRows: false,
     });
@@ -281,7 +281,7 @@ describe("uninstallCommand", () => {
       }),
     ).rejects.toMatchObject({ name: "ExitError", code: 1 });
 
-    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.openclaw/workspace"], runtime, {
+    expect(removeWorkspaceDirs).toHaveBeenCalledWith(["/tmp/.carapace/workspace"], runtime, {
       dryRun: false,
       removeStateRows: true,
     });
@@ -313,7 +313,7 @@ describe("uninstallCommand", () => {
 
         expect(removeStateAndLinkedPaths).toHaveBeenCalledOnce();
         expect(removePath).toHaveBeenCalledWith(
-          "/Applications/OpenClaw.app",
+          "/Applications/Carapace.app",
           runtime,
           expect.any(Object),
         );
@@ -325,12 +325,12 @@ describe("uninstallCommand", () => {
   );
 
   it("fails when workspace cleanup returns failures", async () => {
-    removeWorkspaceDirs.mockResolvedValueOnce(["/tmp/.openclaw/workspace"]);
+    removeWorkspaceDirs.mockResolvedValueOnce(["/tmp/.carapace/workspace"]);
     await expect(
       uninstallCommand(runtime, { workspace: true, yes: true, nonInteractive: true }),
     ).rejects.toMatchObject({ name: "ExitError", code: 1 });
     expect(cleanupCommandErrorMessages(runtime)).toContain(
-      "Workspace cleanup incomplete: /tmp/.openclaw/workspace",
+      "Workspace cleanup incomplete: /tmp/.carapace/workspace",
     );
   });
 

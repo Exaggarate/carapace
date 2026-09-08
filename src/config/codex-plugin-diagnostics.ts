@@ -1,8 +1,8 @@
 // Builds diagnostics for Codex plugin config and provider wiring.
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   isDefaultAgentRuntimeId,
   normalizeOptionalAgentRuntimeId,
@@ -26,7 +26,7 @@ import {
 import { resolveOpenAIImplicitAgentRuntime } from "../agents/openai-routing.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveAgentModelFallbackValues } from "./model-input.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const CODEX_PLUGIN_ID = "codex";
 const OPENAI_PROVIDER_ID = "openai";
@@ -36,7 +36,7 @@ type ModelRoute = {
   modelId: string;
 };
 
-function codexPluginEntryEnabled(cfg: OpenClawConfig): boolean | undefined {
+function codexPluginEntryEnabled(cfg: CarapaceConfig): boolean | undefined {
   for (const [pluginId, entry] of Object.entries(cfg.plugins?.entries ?? {})) {
     if (normalizeLowercaseStringOrEmpty(pluginId) === CODEX_PLUGIN_ID) {
       return entry?.enabled;
@@ -46,7 +46,7 @@ function codexPluginEntryEnabled(cfg: OpenClawConfig): boolean | undefined {
 }
 
 function configuredRuntimeNeedsCodex(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   modelId?: string;
   runtimeId?: string;
@@ -70,7 +70,7 @@ function configuredRuntimeNeedsCodex(params: {
 
 /** Resolves effective runtime policy for one canonical provider/model route. */
 export function configuredModelRouteNeedsCodex(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   agentId?: string;
   route: ModelRoute;
@@ -92,7 +92,7 @@ export function configuredModelRouteNeedsCodex(params: {
   });
 }
 
-function resolveEffectiveSelectedModelRefs(params: { cfg: OpenClawConfig; agentId: string }): {
+function resolveEffectiveSelectedModelRefs(params: { cfg: CarapaceConfig; agentId: string }): {
   complete: boolean;
   values: ReadonlySet<string>;
 } {
@@ -125,8 +125,8 @@ function resolveEffectiveSelectedModelRefs(params: { cfg: OpenClawConfig; agentI
 }
 
 function configuredRefTargetsAgent(params: {
-  cfg: OpenClawConfig;
-  sourceConfigBeforeMigrations?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfigBeforeMigrations?: CarapaceConfig;
   path: string;
   agentId: string;
 }): boolean {
@@ -142,8 +142,8 @@ function configuredRefTargetsAgent(params: {
 }
 
 function configuredRefIsEffectiveForAgent(params: {
-  cfg: OpenClawConfig;
-  sourceConfigBeforeMigrations?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfigBeforeMigrations?: CarapaceConfig;
   path: string;
   value: string;
   agentId: string;
@@ -171,7 +171,7 @@ function configuredRefIsEffectiveForAgent(params: {
 }
 
 function configuredProviderPoliciesNeedCodex(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   agentIds: string[],
 ): boolean {
@@ -218,8 +218,8 @@ function configuredProviderPoliciesNeedCodex(
 }
 
 function configuredModelRefsNeedCodex(params: {
-  cfg: OpenClawConfig;
-  sourceConfigBeforeMigrations?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfigBeforeMigrations?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   agentIds: string[];
 }): { complete: boolean; needsCodex: boolean } {
@@ -273,7 +273,7 @@ function configuredModelRefsNeedCodex(params: {
 }
 
 function defaultOpenAiRouteNeedsCodex(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   agentIds: string[],
 ): boolean {
@@ -288,9 +288,9 @@ function defaultOpenAiRouteNeedsCodex(
 }
 
 function configNeedsCodexForOpenAi(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
-  sourceConfigBeforeMigrations?: OpenClawConfig,
+  sourceConfigBeforeMigrations?: CarapaceConfig,
 ): boolean {
   const agentIds = listAgentIds(cfg);
   const configuredRefs = configuredModelRefsNeedCodex({
@@ -310,9 +310,9 @@ function configNeedsCodexForOpenAi(
 
 /** Suppresses missing Codex diagnostics when no effective OpenAI route selects it. */
 export function shouldSuppressMissingCodexPluginDiagnostics(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
-  sourceConfigBeforeMigrations?: OpenClawConfig,
+  sourceConfigBeforeMigrations?: CarapaceConfig,
 ): boolean {
   const entryEnabled = codexPluginEntryEnabled(cfg);
   if (entryEnabled === true) {

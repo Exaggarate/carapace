@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { NodeWorkerLaunchStore } from "./node-worker-launch-store.js";
 import { requireNodeWorkerProcessIdentity } from "./node-worker-process-identity.js";
 import { createNodeWorkerSupervisor } from "./node-worker-supervisor.js";
@@ -14,18 +14,18 @@ const NOW_MS = 10 * DAY_MS;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function fixture() {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("node-worker-launch-store-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("node-worker-launch-store-") };
   const store = new NodeWorkerLaunchStore({ env });
   store.get("schema-probe");
-  return { database: openOpenClawStateDatabase({ env }).db, env, store };
+  return { database: openCarapaceStateDatabase({ env }).db, env, store };
 }
 
 function insertLaunch(params: {
-  database: ReturnType<typeof openOpenClawStateDatabase>["db"];
+  database: ReturnType<typeof openCarapaceStateDatabase>["db"];
   launchId: string;
   state: "pending" | "running" | "completed" | "failed" | "interrupted" | "cancelled";
   completedAtMs?: number;
@@ -63,7 +63,7 @@ function insertLaunch(params: {
 }
 
 function hasTerminalExpiryIndex(
-  database: ReturnType<typeof openOpenClawStateDatabase>["db"],
+  database: ReturnType<typeof openCarapaceStateDatabase>["db"],
 ): boolean {
   return Boolean(
     database
@@ -72,7 +72,7 @@ function hasTerminalExpiryIndex(
   );
 }
 
-function launchIds(database: ReturnType<typeof openOpenClawStateDatabase>["db"]): string[] {
+function launchIds(database: ReturnType<typeof openCarapaceStateDatabase>["db"]): string[] {
   return (
     database
       .prepare("SELECT launch_id FROM node_worker_launches ORDER BY launch_id")
@@ -88,11 +88,11 @@ describe("node worker launch store pruning", () => {
     expect(hasTerminalExpiryIndex(database)).toBe(true);
     database.exec("DROP INDEX idx_node_worker_launches_terminal_completed");
     expect(hasTerminalExpiryIndex(database)).toBe(false);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const reopenedStore = new NodeWorkerLaunchStore({ env });
     reopenedStore.get("schema-probe");
-    const reopened = openOpenClawStateDatabase({ env }).db;
+    const reopened = openCarapaceStateDatabase({ env }).db;
 
     expect(hasTerminalExpiryIndex(reopened)).toBe(true);
   });
@@ -174,7 +174,7 @@ describe("node worker launch store pruning", () => {
     const workerFixture = writeNodeWorkerFixture(tempDirs.make("node-worker-launch-restart-"));
     const store = new NodeWorkerLaunchStore({ env: workerFixture.env });
     store.get("schema-probe");
-    const database = openOpenClawStateDatabase({ env: workerFixture.env }).db;
+    const database = openCarapaceStateDatabase({ env: workerFixture.env }).db;
     insertLaunch({
       database,
       launchId: "expired-after-restart",
@@ -273,10 +273,10 @@ describe("node worker launch store container identity", () => {
     expect(hasContainerIdentityTable(database)).toBe(false);
     expect(Object.hasOwn(receipt, "container")).toBe(false);
     expect(store.get("bare-launch")).toEqual(receipt);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(new NodeWorkerLaunchStore({ env }).get("bare-launch")).toEqual(receipt);
-    expect(hasContainerIdentityTable(openOpenClawStateDatabase({ env }).db)).toBe(false);
+    expect(hasContainerIdentityTable(openCarapaceStateDatabase({ env }).db)).toBe(false);
   });
 
   it("lazily persists container identity across reopen without advancing the schema", () => {
@@ -302,7 +302,7 @@ describe("node worker launch store container identity", () => {
     expect(receipt.container).toEqual(container);
     expect(hasContainerIdentityTable(database)).toBe(true);
     expect(database.prepare("PRAGMA user_version").get()).toEqual(initialSchemaVersion);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(new NodeWorkerLaunchStore({ env }).get("container-launch")).toEqual(receipt);
   });

@@ -12,7 +12,7 @@ Manifest fields that describe the models a provider plugin exposes: which shorth
 
 ## modelSupport reference
 
-Use `modelSupport` when OpenClaw should infer your provider plugin from shorthand model ids like `gpt-5.6-sol` or `claude-sonnet-4.6` before plugin runtime loads.
+Use `modelSupport` when Carapace should infer your provider plugin from shorthand model ids like `gpt-5.6-sol` or `claude-sonnet-4.6` before plugin runtime loads.
 
 ```json
 {
@@ -23,7 +23,7 @@ Use `modelSupport` when OpenClaw should infer your provider plugin from shorthan
 }
 ```
 
-OpenClaw applies this precedence:
+Carapace applies this precedence:
 
 - explicit `provider/model` refs use the owning `providers` manifest metadata
 - `modelPatterns` beat `modelPrefixes`
@@ -41,7 +41,7 @@ Fields:
 
 ## modelCatalog reference
 
-Use `modelCatalog` when OpenClaw should know provider model metadata before loading plugin runtime. This is the manifest-owned source for fixed catalog rows, publication-time metadata sources, provider aliases, suppression rules, and discovery mode. Runtime refresh still belongs in provider runtime code, but the manifest tells core when runtime is required.
+Use `modelCatalog` when Carapace should know provider model metadata before loading plugin runtime. This is the manifest-owned source for fixed catalog rows, publication-time metadata sources, provider aliases, suppression rules, and discovery mode. Runtime refresh still belongs in provider runtime code, but the manifest tells core when runtime is required.
 
 ```json
 {
@@ -97,20 +97,20 @@ Top-level fields:
 
 | Field            | Type                                                     | What it means                                                                                               |
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `modelsDev`      | `Record<string, string>`                                 | Publication-time opt-in mapping from an owned OpenClaw provider id to a models.dev provider id.             |
+| `modelsDev`      | `Record<string, string>`                                 | Publication-time opt-in mapping from an owned Carapace provider id to a models.dev provider id.             |
 | `providers`      | `Record<string, object>`                                 | Catalog rows for provider ids owned by this plugin. Keys should also appear in top-level `providers`.       |
 | `aliases`        | `Record<string, object>`                                 | Provider aliases that should resolve to an owned provider for catalog or suppression planning.              |
 | `suppressions`   | `object[]`                                               | Model rows from another source that this plugin suppresses for a provider-specific reason.                  |
 | `discovery`      | `Record<string, "static" \| "refreshable" \| "runtime">` | Whether the provider catalog can be read from manifest metadata, refreshed into cache, or requires runtime. |
 | `runtimeAugment` | `boolean`                                                | Set to `true` only when the provider runtime must append catalog rows after manifest/config planning.       |
 
-`modelsDev` opts an owned provider into models.dev metadata hydration when the hosted catalog is published. Declare the upstream provider once per OpenClaw provider, not once per model. Omission means no models.dev hydration; there is no central provider fallback. Keys are normalized as OpenClaw provider ids and source ids are trimmed. Empty or non-string source ids and mappings for unowned providers are ignored; an alias alone does not grant ownership. A mapping does not create catalog provider rows or relax their validation.
+`modelsDev` opts an owned provider into models.dev metadata hydration when the hosted catalog is published. Declare the upstream provider once per Carapace provider, not once per model. Omission means no models.dev hydration; there is no central provider fallback. Keys are normalized as Carapace provider ids and source ids are trimmed. Empty or non-string source ids and mappings for unowned providers are ignored; an alias alone does not grant ownership. A mapping does not create catalog provider rows or relax their validation.
 
 Hydration adds eligible model ids and fills only undefined metadata. Explicit manifest values remain authoritative, including `false`; models.dev never supplies transport settings or prices. Prices still follow the provider-owned pricing policy. Opt in only when the provider defaults are appropriate for newly imported rows; providers that choose a transport per model should not opt in unless those defaults are safe. Hydration errors fail publication, leaving the last published artifact intact. The publisher hydrates opted-in metadata even without `--pricing`; that flag controls price enrichment only. A dry run performs the same metadata hydration without writing the artifact.
 
 This field is publication-time authoring metadata, not a Gateway discovery hook. It does not add runtime network calls or hot reload; the existing [hosted catalog update lifecycle](/concepts/models#hosted-catalog-updates) is unchanged.
 
-`aliases` participates in provider ownership lookup for model-catalog planning. Alias targets must be top-level providers owned by the same plugin. When a provider-filtered list uses an alias, OpenClaw can read the owning manifest and apply alias API/base URL overrides without loading provider runtime. Aliases do not expand unfiltered catalog listings; broad lists emit the owning canonical provider rows only.
+`aliases` participates in provider ownership lookup for model-catalog planning. Alias targets must be top-level providers owned by the same plugin. When a provider-filtered list uses an alias, Carapace can read the owning manifest and apply alias API/base URL overrides without loading provider runtime. Aliases do not expand unfiltered catalog listings; broad lists emit the owning canonical provider rows only.
 
 `suppressions` replaces the old provider runtime `suppressBuiltInModel` hook. Suppression entries are honored only when the provider is owned by the plugin or declared as a `modelCatalog.aliases` key that targets an owned provider. Runtime suppression hooks are no longer called during model resolution.
 
@@ -142,7 +142,7 @@ Model fields:
 | `maxTokens`            | `number`                                                       | Maximum output tokens when known.                                                    |
 | `thinkingLevelMap`     | `Record<string, string \| null>`                               | Optional per-thinking-level model-id or param overrides.                             |
 | `cost`                 | `object`                                                       | Optional USD per million token pricing, including optional `tieredPricing`.          |
-| `compat`               | `object`                                                       | Optional compatibility flags matching OpenClaw model config compatibility.           |
+| `compat`               | `object`                                                       | Optional compatibility flags matching Carapace model config compatibility.           |
 | `upstreamModel`        | `string`                                                       | Optional `provider/model` ref of the same upstream model in another bundled catalog. |
 | `mediaInput`           | `object`                                                       | Optional per-modality input config, currently image-only.                            |
 | `status`               | `"available"` \| `"preview"` \| `"deprecated"` \| `"disabled"` | Listing status. Suppress only when the row must not appear at all.                   |
@@ -163,11 +163,11 @@ Suppression fields:
 | `when.baseUrlHosts`        | `string[]` | Optional list of effective provider base URL hosts required before the suppression applies.                                                                |
 | `when.providerConfigApiIn` | `string[]` | Optional list of exact provider-config `api` values required before the suppression applies.                                                               |
 
-Declare retirement only from affirmative provider evidence, never from a failed or empty discovery request. Scope account-route retirements with `when.baseUrlHosts`; matching those rules requires a concrete selected endpoint and leaves sibling endpoints untouched. Unconditional retirement rules do not require credentials. Malformed or empty retirement scopes are ignored rather than becoming global rules. Runtime blocks that retired route, while `openclaw doctor --fix` owns persistent replacement or override removal. Ordinary suppression and a model row's `deprecated` listing status do not authorize retirement repair. Manifest changes take effect after Gateway restart or the owning metadata reload.
+Declare retirement only from affirmative provider evidence, never from a failed or empty discovery request. Scope account-route retirements with `when.baseUrlHosts`; matching those rules requires a concrete selected endpoint and leaves sibling endpoints untouched. Unconditional retirement rules do not require credentials. Malformed or empty retirement scopes are ignored rather than becoming global rules. Runtime blocks that retired route, while `carapace doctor --fix` owns persistent replacement or override removal. Ordinary suppression and a model row's `deprecated` listing status do not authorize retirement repair. Manifest changes take effect after Gateway restart or the owning metadata reload.
 
 `upstreamModel` marks a row that serves the same upstream model as a row in another bundled catalog under a different name, for example a subscription endpoint next to the vendor's API endpoint. It is authoring metadata: normalization drops it, and a contract test uses it to keep capability flags such as `compat.codeMode` from drifting between catalogs that ship the same model. Most rows need no marker, because matching ignores a leading vendor namespace and casing: `moonshotai/kimi-k3` and `zai-org/GLM-5.2` already match the first-party `kimi-k3` and `glm-5.2` rows. Reach for `upstreamModel` only when the vendor's own names genuinely differ. See [Code mode](/tools/code-mode#models-shipped-by-more-than-one-provider).
 
-Do not put runtime-only data in `modelCatalog`. Use `static` only when manifest rows are complete enough for provider-filtered list and picker surfaces to skip registry/runtime discovery. Use `refreshable` when manifest rows are useful listable seeds or supplements but a refresh/cache can add more rows later; refreshable rows are not authoritative by themselves. Use `runtime` when OpenClaw must load provider runtime to know the list.
+Do not put runtime-only data in `modelCatalog`. Use `static` only when manifest rows are complete enough for provider-filtered list and picker surfaces to skip registry/runtime discovery. Use `refreshable` when manifest rows are useful listable seeds or supplements but a refresh/cache can add more rows later; refreshable rows are not authoritative by themselves. Use `runtime` when Carapace must load provider runtime to know the list.
 
 Capabilities belong to the declared API and base URL, not only the provider/model id. When model listing enriches a cached row, it uses manifest capabilities only for a matching route; a custom endpoint must supply its own limits and capabilities.
 
@@ -242,7 +242,7 @@ Source fields:
 
 | Field                      | Type               | What it means                                                                                                        |
 | -------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `provider`                 | `string`           | External catalog provider id when it differs from the OpenClaw provider id, for example `z-ai` for a `zai` provider. |
+| `provider`                 | `string`           | External catalog provider id when it differs from the Carapace provider id, for example `z-ai` for a `zai` provider. |
 | `passthroughProviderModel` | `boolean`          | Treat slash-containing model ids as nested provider/model refs, useful for proxy providers such as OpenRouter.       |
 | `modelIdTransforms`        | `"version-dots"[]` | Extra external catalog model-id variants. `version-dots` tries dotted version ids like `claude-opus-4.6`.            |
 
@@ -289,10 +289,10 @@ stop publication, leaving the previous hosted catalog intact. Explicit operator
 rates remain unchanged. This authoring metadata adds no operator setting and does
 not change the Gateway's existing refresh and restart lifecycle.
 
-### OpenClaw Provider Index
+### Carapace Provider Index
 
-The compiled OpenClaw Provider Index is retired. Model metadata comes from plugin manifests, provider-owned discovery, and the hosted model catalog, with configured overrides applied by model resolution. See [Model listing](/cli/models#list) for catalog sources and refresh behavior.
+The compiled Carapace Provider Index is retired. Model metadata comes from plugin manifests, provider-owned discovery, and the hosted model catalog, with configured overrides applied by model resolution. See [Model listing](/cli/models#list) for catalog sources and refresh behavior.
 
-Provider setup uses installed manifest metadata and the official external plugin catalog. The external catalog supplies install hints and auth-choice labels for plugins that are not installed; installed plugin owners take precedence. Install hints remain in `package.json#openclaw.install`, not in a separate compiled provider index.
+Provider setup uses installed manifest metadata and the official external plugin catalog. The external catalog supplies install hints and auth-choice labels for plugins that are not installed; installed plugin owners take precedence. Install hints remain in `package.json#carapace.install`, not in a separate compiled provider index.
 
-`openclaw doctor --fix` migrates a small, closed set of legacy top-level manifest capability keys into `contracts.*`: `speechProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, and `tools`. None of these (or any other capability list) are read as top-level manifest fields anymore; normal manifest loading only recognizes them under `contracts`.
+`carapace doctor --fix` migrates a small, closed set of legacy top-level manifest capability keys into `contracts.*`: `speechProviders`, `mediaUnderstandingProviders`, `imageGenerationProviders`, and `tools`. None of these (or any other capability list) are read as top-level manifest fields anymore; normal manifest loading only recognizes them under `contracts`.

@@ -1,10 +1,10 @@
 import { Command } from "commander";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import { callGatewayFromCli } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerTeamReportsCli } from "./cli.js";
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", async (importOriginal) => {
-  const original = await importOriginal<typeof import("openclaw/plugin-sdk/gateway-runtime")>();
+vi.mock("carapace/plugin-sdk/gateway-runtime", async (importOriginal) => {
+  const original = await importOriginal<typeof import("carapace/plugin-sdk/gateway-runtime")>();
   return { ...original, callGatewayFromCli: vi.fn() };
 });
 

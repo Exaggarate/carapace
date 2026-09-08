@@ -43,9 +43,9 @@ describe("runtime context prompt submission", () => {
     expect(
       resolveRuntimeContextPromptParts({
         effectivePrompt: "Check the deployment.",
-        transcriptPrompt: "[OpenClaw heartbeat poll]",
+        transcriptPrompt: "[Carapace heartbeat poll]",
       }),
-    ).toEqual({ prompt: "[OpenClaw heartbeat poll]", modelPrompt: "Check the deployment." });
+    ).toEqual({ prompt: "[Carapace heartbeat poll]", modelPrompt: "Check the deployment." });
   });
 
   it("requires producer context for runtime-only system context", () => {
@@ -57,7 +57,7 @@ describe("runtime context prompt submission", () => {
       transcriptPrompt: "",
       fragments,
     });
-    expect(parts.prompt).toBe("Continue the OpenClaw runtime event.");
+    expect(parts.prompt).toBe("Continue the Carapace runtime event.");
     expect(parts.runtimeOnly).toBe(true);
     expect(
       resolveRuntimeContextPromptParts({ effectivePrompt: "ordinary input", transcriptPrompt: "" }),
@@ -97,9 +97,9 @@ describe("runtime context prompt submission", () => {
     const message = buildRuntimeContextCustomMessage(text, fragments)!;
     expect(message).toMatchObject({
       role: "custom",
-      customType: "openclaw.runtime-context",
+      customType: "carapace.runtime-context",
       display: false,
-      details: { source: "openclaw-runtime-context", runtimeContextCarrier: true, fragments },
+      details: { source: "carapace-runtime-context", runtimeContextCarrier: true, fragments },
     });
     expect(stripInternalMetadataForDisplay(message.content)).toBe("");
     expect(buildRuntimeContextCustomMessage(" ")).toBeUndefined();
@@ -109,7 +109,7 @@ describe("runtime context prompt submission", () => {
 describe("per-request runtime instructions", () => {
   it.each([false, true])("preserves carrier position and parts (array=%s)", (arrayContent) => {
     const body =
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nCurrent facts\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nCurrent facts\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
     const image = { type: "image" as const, data: "aGVsbG8=", mimeType: "image/png" };
     const carrier: UserMessage = {
       role: "user",
@@ -123,9 +123,9 @@ describe("per-request runtime instructions", () => {
       { role: "user", content: "Steering", timestamp: 3 },
     ];
     const nested =
-      "Date B\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nRuntime event\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+      "Date B\n<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nRuntime event\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
     const projected = prependRuntimeContextForModel(messages, nested);
-    const expected = `<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\n${nested}\n\nCurrent facts\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>`;
+    const expected = `<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\n${nested}\n\nCurrent facts\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>`;
     expect(projected).toEqual([
       messages[0],
       { ...carrier, content: arrayContent ? [{ type: "text", text: expected }, image] : expected },
@@ -146,7 +146,7 @@ describe("per-request runtime instructions", () => {
         timestamp: 1,
         runtimeContextCarrier: true,
         content:
-          "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\nDate A\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\nDate A\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       },
     ]);
     expect(messages).toHaveLength(1);

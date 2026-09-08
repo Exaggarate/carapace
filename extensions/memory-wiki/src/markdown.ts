@@ -7,15 +7,15 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeSingleOrTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
 import YAML from "yaml";
 import { extractWikiLinks } from "./markdown-links.js";
 
 export { WIKI_RELATED_END_MARKER, WIKI_RELATED_START_MARKER } from "./markdown-links.js";
 
 const WIKI_PAGE_KINDS = ["entity", "concept", "source", "synthesis", "report"] as const;
-export const WIKI_RAW_SOURCE_MARKER = "<!-- openclaw:wiki:raw-source -->";
+export const WIKI_RAW_SOURCE_MARKER = "<!-- carapace:wiki:raw-source -->";
 
 export type WikiPageKind = (typeof WIKI_PAGE_KINDS)[number];
 type GeneratedSourceBody = "bridge" | "unsafe-local" | "local-file" | "chatgpt-export";
@@ -133,8 +133,8 @@ const MAX_WIKI_SAFE_WRITE_FILENAME_COMPONENT_BYTES =
   Buffer.byteLength(".");
 const WIKI_SEGMENT_HASH_BYTES = 12;
 const WIKI_RESERVED_PAGE_STEMS = new Set(["index"]);
-const HUMAN_START_MARKER = "<!-- openclaw:human:start -->";
-const HUMAN_END_MARKER = "<!-- openclaw:human:end -->";
+const HUMAN_START_MARKER = "<!-- carapace:human:start -->";
+const HUMAN_END_MARKER = "<!-- carapace:human:end -->";
 
 function capWikiValueWithHash(raw: string, maxBytes: number, fallback: string): string {
   if (Buffer.byteLength(raw) <= maxBytes) {

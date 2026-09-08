@@ -3,8 +3,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   closeQaHttpServer,
@@ -87,7 +87,7 @@ function readRestartBacking(databasePath: string, taskId: string, childSessionKe
   }
 }
 
-function withFixturePlugin(config: OpenClawConfig): OpenClawConfig {
+function withFixturePlugin(config: CarapaceConfig): CarapaceConfig {
   return {
     ...config,
     plugins: {
@@ -156,7 +156,7 @@ describe("plugin subagent sessions_yield follow-up", () => {
       });
       const { state, transport, gateway } = await startFixtureGateway(
         {
-          forcedRuntime: "openclaw",
+          forcedRuntime: "carapace",
           useRepoCli: false,
           mutateConfig: (config) => ({
             ...withFixturePlugin(config),
@@ -214,7 +214,7 @@ describe("plugin subagent sessions_yield follow-up", () => {
         dmScope: gateway.cfg.session?.dmScope,
         identityLinks: gateway.cfg.session?.identityLinks,
       });
-      const databasePath = path.join(gateway.tempRoot, "state", "state", "openclaw.sqlite");
+      const databasePath = path.join(gateway.tempRoot, "state", "state", "carapace.sqlite");
       const observe = async (): Promise<RestartObservation> => {
         const response = await fetch(
           `${gateway.baseUrl}/qa/self-yield/restart?sessionKey=${encodeURIComponent(sessionKey)}`,

@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchPublishedRepositoryAdvisories } from "../../scripts/lib/upstream-repository-advisories.mts";
 import { createDeferred, withTestTimeout } from "../helpers/promise.js";

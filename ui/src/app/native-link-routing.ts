@@ -17,12 +17,12 @@ import { hasNativeBrowserBridge } from "./native-browser-host.ts";
 import { webKitHostWindow, type WebKitHostMessages } from "./native-webkit-bridge.ts";
 
 type NativeLinkTarget = "external";
-type NativeLinkPoster = (message: WebKitHostMessages["openclawLink"]) => void;
+type NativeLinkPoster = (message: WebKitHostMessages["carapaceLink"]) => void;
 
-const NATIVE_UPDATE_DECLINED_EVENT = "openclaw:native-update-declined";
+const NATIVE_UPDATE_DECLINED_EVENT = "carapace:native-update-declined";
 export const NATIVE_UPDATE_AVAILABILITY_CHANGED_EVENT =
-  "openclaw:native-update-availability-changed";
-const NATIVE_UPDATE_POSTED_EVENT = "openclaw:native-update-posted";
+  "carapace:native-update-availability-changed";
+const NATIVE_UPDATE_POSTED_EVENT = "carapace:native-update-posted";
 
 type NativeLinkRouting = {
   dispose(): void;
@@ -37,12 +37,12 @@ type NativeLinkRoutingOptions = {
 
 function getNativeLinkPoster(): NativeLinkPoster | undefined {
   // Native hosts install this handler before navigation; its absence preserves browser behavior.
-  const handler = webKitHostWindow()?.webkit?.messageHandlers?.openclawLink;
+  const handler = webKitHostWindow()?.webkit?.messageHandlers?.carapaceLink;
   return handler?.postMessage.bind(handler);
 }
 
 function getNativeUpdateHandler() {
-  return webKitHostWindow()?.webkit?.messageHandlers?.openclawUpdate;
+  return webKitHostWindow()?.webkit?.messageHandlers?.carapaceUpdate;
 }
 
 export function hasNativeUpdateBridge(): boolean {
@@ -81,7 +81,7 @@ function trustedExternalAppUrl(event: MouseEvent): { anchor: HTMLAnchorElement; 
 function menuContainer(event: Event): HTMLElement {
   const path = event.composedPath();
   const modalHost = path.find(
-    (target) => target instanceof HTMLElement && target.localName === "openclaw-modal-dialog",
+    (target) => target instanceof HTMLElement && target.localName === "carapace-modal-dialog",
   );
   if (modalHost instanceof HTMLElement) {
     // Keep the menu in the modal's light-DOM slot so global menu styles still apply.
@@ -195,7 +195,7 @@ export function startNativeLinkRouting(options: NativeLinkRoutingOptions = {}): 
     ) {
       return;
     }
-    const nextMenu = document.createElement("openclaw-native-link-menu") as NativeLinkMenu;
+    const nextMenu = document.createElement("carapace-native-link-menu") as NativeLinkMenu;
     nextMenu.x = x;
     nextMenu.y = y;
     nextMenu.trigger = anchor;
@@ -270,7 +270,7 @@ export function startNativeLinkRouting(options: NativeLinkRoutingOptions = {}): 
     ).catch((error: unknown) => {
       menuModule = undefined;
       if (!disposed) {
-        console.error("[openclaw] native link menu failed to load; right-click to retry", error);
+        console.error("[carapace] native link menu failed to load; right-click to retry", error);
       }
     });
   };

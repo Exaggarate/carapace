@@ -1,4 +1,4 @@
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { readSessionEntryCache } from "./session-accessor.sqlite-entry-cache.js";
 import { projectSessionEntriesForListing } from "./session-accessor.sqlite-entry.js";
 import { resolveSqliteScope, toDatabaseOptions } from "./session-accessor.sqlite-scope.js";
@@ -19,7 +19,7 @@ export function readSessionCreationSnapshot(
   normalizedKey: string;
   legacyKeys: string[];
 } {
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope)));
   // Listing validation rejects other structural aliases; these candidates retain
   // complete payloads in the same SELECT that captures sibling label metadata.
   const snapshot = readSessionEntryCache(database, {

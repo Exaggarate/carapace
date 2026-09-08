@@ -5,7 +5,7 @@ import {
   getRuntimeConfigSourceSnapshot,
 } from "../config/runtime-snapshot.js";
 import { projectConfigOntoRuntimeSourceSnapshot } from "../config/runtime-source-projection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   activateSecretsRuntimeSnapshot,
   activateSecretsRuntimeSnapshotWithSource,
@@ -26,7 +26,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function configPair(runtime: "openclaw" | "codex") {
+function configPair(runtime: "carapace" | "codex") {
   const source = {
     agents: { defaults: { models: { "openai/gpt-5.6-luna": { agentRuntime: { id: runtime } } } } },
     models: {
@@ -47,21 +47,21 @@ function configPair(runtime: "openclaw" | "codex") {
         },
       },
     },
-  } satisfies OpenClawConfig;
-  const config: OpenClawConfig = structuredClone(source);
+  } satisfies CarapaceConfig;
+  const config: CarapaceConfig = structuredClone(source);
   // The loader may seed catalog compatibility; this is not authored request policy.
   config.models!.providers!.openai!.models[0]!.compat = { supportsStore: false };
   return { source, config };
 }
 
-const prepare = (config: OpenClawConfig) =>
+const prepare = (config: CarapaceConfig) =>
   prepareSecretsRuntimeSnapshot({
     config,
     includeAuthStoreRefs: false,
     env: {},
   });
 
-function expectAuthoredSource(source: OpenClawConfig) {
+function expectAuthoredSource(source: CarapaceConfig) {
   const config = getRuntimeConfigSnapshot();
   expect(config).not.toBeNull();
   expect(getRuntimeConfigSourceSnapshot()).toEqual(source);
@@ -74,7 +74,7 @@ function expectAuthoredSource(source: OpenClawConfig) {
 }
 
 async function createReload(canonicalActivator: boolean, commit: () => Promise<void>) {
-  const initial = configPair("openclaw");
+  const initial = configPair("carapace");
   activateSecretsRuntimeSnapshotWithSource(await prepare(initial.config), initial.source);
   expectAuthoredSource(initial.source);
   const activator = createRuntimeSecretsActivator({

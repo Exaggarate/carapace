@@ -1,8 +1,8 @@
 // Command queue tests cover bounded command execution and queue ordering.
 import { AsyncLocalStorage } from "node:async_hooks";
 import { spawnSync } from "node:child_process";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { resetCommandQueueStateForTest } from "./command-queue.test-support.js";

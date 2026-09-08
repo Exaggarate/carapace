@@ -1,5 +1,5 @@
 /**
- * Standalone MCP server that exposes OpenClaw plugin-registered tools
+ * Standalone MCP server that exposes Carapace plugin-registered tools
  * (e.g. memory-lancedb's memory_recall, memory_store, memory_forget)
  * so ACP sessions running Claude Code can use them.
  *
@@ -23,7 +23,7 @@ import {
 } from "../agents/tool-policy.js";
 import type { AnyAgentTool } from "../agents/tools/common.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { logWarn } from "../logger.js";
 import { routeLogsToStderr } from "../logging/console.js";
@@ -33,7 +33,7 @@ import { resolveToolsMcpAgentId, resolveToolsMcpSessionContext } from "./agent-s
 import { connectToolsMcpServerToStdio, createToolsMcpServer } from "./tools-stdio-server.js";
 
 function resolvePluginToolPolicy(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   context: ReturnType<typeof resolveToolsMcpSessionContext>,
 ): {
   toolAllowlist?: string[];
@@ -77,7 +77,7 @@ function resolvePluginToolPolicy(
 }
 
 export function resolvePluginToolsForMcp(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentSessionKey?: string;
   agentId?: string;
 }): AnyAgentTool[] {
@@ -106,7 +106,7 @@ export function resolvePluginToolsForMcp(params: {
 
 export function createPluginToolsMcpServer(
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     tools?: AnyAgentTool[];
     agentSessionKey?: string;
     agentId?: string;
@@ -120,7 +120,7 @@ export function createPluginToolsMcpServer(
       agentSessionKey: params.agentSessionKey,
       agentId: params.agentId,
     });
-  return createToolsMcpServer({ name: "openclaw-plugin-tools", tools });
+  return createToolsMcpServer({ name: "carapace-plugin-tools", tools });
 }
 
 export async function servePluginToolsMcp(): Promise<void> {

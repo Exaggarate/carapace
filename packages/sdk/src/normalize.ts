@@ -1,10 +1,10 @@
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonEmptyStringPreservingWhitespace as readNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonEmptyStringPreservingWhitespace as readNonEmptyString } from "@carapace/normalization-core/string-coerce";
 import { resolveSdkLifecycleEventType } from "./run-terminal.js";
-import type { GatewayEvent, JsonObject, OpenClawEvent, OpenClawEventType } from "./types.js";
+import type { GatewayEvent, JsonObject, CarapaceEvent, CarapaceEventType } from "./types.js";
 
-function normalizeAgentEventType(payload: JsonObject): OpenClawEventType {
+function normalizeAgentEventType(payload: JsonObject): CarapaceEventType {
   const stream = readNonEmptyString(payload.stream);
   const data = asRecord(payload.data);
   const phase = readNonEmptyString(data.phase);
@@ -53,7 +53,7 @@ function normalizeAgentEventType(payload: JsonObject): OpenClawEventType {
   return "raw";
 }
 
-function normalizeNamedEventType(event: GatewayEvent): OpenClawEventType {
+function normalizeNamedEventType(event: GatewayEvent): CarapaceEventType {
   const payload = asRecord(event.payload);
   switch (event.event) {
     case "agent":
@@ -87,7 +87,7 @@ function normalizeNamedEventType(event: GatewayEvent): OpenClawEventType {
 }
 
 /** Normalize a raw Gateway event into the public SDK event shape. */
-export function normalizeGatewayEvent(event: GatewayEvent): OpenClawEvent {
+export function normalizeGatewayEvent(event: GatewayEvent): CarapaceEvent {
   const payload = asRecord(event.payload);
   const runId = readNonEmptyString(payload.runId);
   const sessionId = readNonEmptyString(payload.sessionId);

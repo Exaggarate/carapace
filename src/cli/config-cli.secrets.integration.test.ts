@@ -83,7 +83,7 @@ describe("config cli secrets integration", () => {
     async (agentPath) => {
       const raw = '{ secrets: { providers: { default: { source: "env" } } } }\n';
       await withConfigFileHarness(
-        "openclaw-config-cli-normalized-model-ref-",
+        "carapace-config-cli-normalized-model-ref-",
         raw,
         async ({ configPath }) => {
           const envSnapshot = captureEnv(["MISSING_TEST_SECRET"]);
@@ -120,7 +120,7 @@ describe("config cli secrets integration", () => {
 
   it("keeps model provider ids separate from SecretRef provider aliases", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-model-provider-alias-",
+      "carapace-config-cli-model-provider-alias-",
       "{}\n",
       async ({ configPath, tempDir }) => {
         const raw = JSON.stringify({
@@ -193,7 +193,7 @@ describe("config cli secrets integration", () => {
         secrets: {
           defaults: { env: "shared" },
           providers: {
-            shared: { source: "file", path: "/tmp/openclaw-unused-secrets.json", mode: "json" },
+            shared: { source: "file", path: "/tmp/carapace-unused-secrets.json", mode: "json" },
           },
         },
       },
@@ -201,7 +201,7 @@ describe("config cli secrets integration", () => {
       2,
     )}\n`;
     await withConfigFileHarness(
-      "openclaw-config-cli-source-mismatch-",
+      "carapace-config-cli-source-mismatch-",
       raw,
       async ({ configPath }) => {
         const output = createTestRuntime();
@@ -228,7 +228,7 @@ describe("config cli secrets integration", () => {
         secrets: {
           defaults: { env: "shared" },
           providers: {
-            shared: { source: "file", path: "/tmp/openclaw-unused-secrets.json", mode: "json" },
+            shared: { source: "file", path: "/tmp/carapace-unused-secrets.json", mode: "json" },
           },
         },
       },
@@ -236,7 +236,7 @@ describe("config cli secrets integration", () => {
       2,
     )}\n`;
     await withConfigFileHarness(
-      "openclaw-config-cli-patch-source-mismatch-",
+      "carapace-config-cli-patch-source-mismatch-",
       raw,
       async ({ configPath, tempDir }) => {
         const patchPath = path.join(tempDir, "patch.json5");
@@ -258,7 +258,7 @@ describe("config cli secrets integration", () => {
   it("rejects impossible provider/source refs during real config validate", async () => {
     const refId = "DISCORD_TEST_TOKEN";
     await withConfigFileHarness(
-      "openclaw-config-cli-validate-source-mismatch-",
+      "carapace-config-cli-validate-source-mismatch-",
       `${JSON.stringify(
         {
           channels: {
@@ -271,7 +271,7 @@ describe("config cli secrets integration", () => {
             providers: {
               shared: {
                 source: "file",
-                path: "/tmp/openclaw-unused-secrets.json",
+                path: "/tmp/carapace-unused-secrets.json",
                 mode: "json",
               },
             },
@@ -309,7 +309,7 @@ describe("config cli secrets integration", () => {
         },
         secrets: {
           providers: {
-            shared: { source: "file", path: "/tmp/openclaw-unused-secrets.json", mode: "json" },
+            shared: { source: "file", path: "/tmp/carapace-unused-secrets.json", mode: "json" },
           },
         },
       },
@@ -317,7 +317,7 @@ describe("config cli secrets integration", () => {
       2,
     )}\n`;
     await withConfigFileHarness(
-      "openclaw-config-cli-repair-source-mismatch-",
+      "carapace-config-cli-repair-source-mismatch-",
       raw,
       async ({ configPath }) => {
         const output = createTestRuntime();
@@ -369,7 +369,7 @@ describe("config cli secrets integration", () => {
         },
         secrets: {
           providers: {
-            shared: { source: "file", path: "/tmp/openclaw-unused-secrets.json", mode: "json" },
+            shared: { source: "file", path: "/tmp/carapace-unused-secrets.json", mode: "json" },
           },
         },
       },
@@ -377,7 +377,7 @@ describe("config cli secrets integration", () => {
       2,
     )}\n`;
     await withConfigFileHarness(
-      "openclaw-config-cli-noop-source-mismatch-",
+      "carapace-config-cli-noop-source-mismatch-",
       raw,
       async ({ configPath }) => {
         const output = createTestRuntime();
@@ -395,7 +395,7 @@ describe("config cli secrets integration", () => {
 
   it("supports batch-file dry-run and then writes real config changes", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-int-",
+      "carapace-config-cli-int-",
       "{ gateway: { port: 18789 } }\n",
       async ({ configPath, tempDir }) => {
         const envSnapshot = captureEnv(["DISCORD_BOT_TOKEN"]);
@@ -444,7 +444,7 @@ describe("config cli secrets integration", () => {
 
   it("keeps file unchanged when real-file dry-run fails and reports JSON error payload", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-int-fail-",
+      "carapace-config-cli-int-fail-",
       '{ gateway: { port: 18789 }, secrets: { providers: { default: { source: "env" } } } }\n',
       async ({ configPath }) => {
         const envSnapshot = captureEnv(["MISSING_TEST_SECRET"]);
@@ -487,7 +487,7 @@ describe("config cli secrets integration", () => {
   });
 
   it("skips exec provider execution during dry-run by default", async () => {
-    await withExecDryRunConfigHarness("openclaw-config-cli-int-exec-skip-", async (params) => {
+    await withExecDryRunConfigHarness("carapace-config-cli-int-exec-skip-", async (params) => {
       const before = fs.readFileSync(params.configPath, "utf8");
       await runConfigSet({
         cliOptions: {
@@ -517,7 +517,7 @@ describe("config cli secrets integration", () => {
     "validates only the final candidate after a %s overwrites an exec ref (dry run: %s)",
     async (replacement, dryRun) => {
       await withConfigFileHarness(
-        "openclaw-config-cli-batch-overwrite-",
+        "carapace-config-cli-batch-overwrite-",
         "{ gateway: { port: 18789 } }\n",
         async ({ configPath, tempDir }) => {
           const provider = { source: "exec", command: path.join(tempDir, "missing-helper") };
@@ -563,7 +563,7 @@ describe("config cli secrets integration", () => {
     "still rejects an unsafe exec ref assigned last in a batch (dry run: %s)",
     async (dryRun) => {
       await withConfigFileHarness(
-        "openclaw-config-cli-batch-final-ref-",
+        "carapace-config-cli-batch-final-ref-",
         "{ gateway: { port: 18789 } }\n",
         async ({ configPath, tempDir }) => {
           const raw = JSON.stringify({
@@ -602,7 +602,7 @@ describe("config cli secrets integration", () => {
 
   it("does not execute an overwritten exec ref during an --allow-exec batch dry-run", async () => {
     await withConfigFileHarness(
-      "openclaw-config-cli-batch-superseded-exec-",
+      "carapace-config-cli-batch-superseded-exec-",
       "{ gateway: { port: 18789 } }\n",
       async ({ configPath, tempDir }) => {
         const markerPath = path.join(tempDir, "marker.txt");
@@ -636,7 +636,7 @@ describe("config cli secrets integration", () => {
   });
 
   it("executes exec providers during dry-run when --allow-exec is set", async () => {
-    await withExecDryRunConfigHarness("openclaw-config-cli-int-exec-allow-", async (params) => {
+    await withExecDryRunConfigHarness("carapace-config-cli-int-exec-allow-", async (params) => {
       const before = fs.readFileSync(params.configPath, "utf8");
       await runConfigSet({
         cliOptions: {

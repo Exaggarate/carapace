@@ -1,9 +1,9 @@
 // Memory Core tests cover index plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi, OpenClawPluginCommandDefinition } from "openclaw/plugin-sdk/core";
-import type { MemoryPluginRuntime } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi, CarapacePluginCommandDefinition } from "carapace/plugin-sdk/core";
+import type { MemoryPluginRuntime } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildMemoryFlushPlan } from "./src/flush-plan.js";
 import { buildMemoryPromptSection } from "./src/memory-tool-contract.js";
@@ -44,9 +44,9 @@ const hostRuntime = {
       list: vi.fn(),
     })),
   },
-} as unknown as OpenClawPluginApi["runtime"];
+} as unknown as CarapacePluginApi["runtime"];
 
-function hostRuntimeWithConfig(current: () => OpenClawConfig) {
+function hostRuntimeWithConfig(current: () => CarapaceConfig) {
   return createPluginRuntimeMock({
     ...hostRuntime,
     config: { ...hostRuntime.config, current },
@@ -69,9 +69,9 @@ function registerMemoryCoreRuntime(): MemoryPluginRuntime {
   return runtime;
 }
 
-function captureMemoryModelContract(initialConfig: OpenClawConfig) {
+function captureMemoryModelContract(initialConfig: CarapaceConfig) {
   let promptBuilder:
-    | NonNullable<Parameters<OpenClawPluginApi["registerMemoryCapability"]>[0]["promptBuilder"]>
+    | NonNullable<Parameters<CarapacePluginApi["registerMemoryCapability"]>[0]["promptBuilder"]>
     | undefined;
   const factories = new Map<string, (ctx: unknown) => unknown>();
   plugin.register(
@@ -110,7 +110,7 @@ function captureMemoryModelContract(initialConfig: OpenClawConfig) {
 describe("buildPromptSection", () => {
   it("prepares explicitly owned memory tools without resolving unrelated legacy defaults", () => {
     let unrelatedDefaultReads = 0;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         list: [
           { id: "main" },
@@ -200,7 +200,7 @@ describe("buildPromptSection", () => {
         ],
       },
       memory: { search: { provider: "none", extraPaths: sourceCase.extraPaths } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const lazy = captureMemoryModelContract(config);
     const { createMemoryGetTool, createMemorySearchTool } = await import("./src/tools.js");
     const eagerSearch = createMemorySearchTool({ config, agentId: "main" });
@@ -246,7 +246,7 @@ describe("memory-core plugin runtime registration", () => {
 
   it("does not resolve prompt config when no memory tools are exposed", () => {
     let promptBuilder:
-      | NonNullable<Parameters<OpenClawPluginApi["registerMemoryCapability"]>[0]["promptBuilder"]>
+      | NonNullable<Parameters<CarapacePluginApi["registerMemoryCapability"]>[0]["promptBuilder"]>
       | undefined;
     const current = vi.fn(() => {
       throw new Error("runtime config must remain lazy");
@@ -265,7 +265,7 @@ describe("memory-core plugin runtime registration", () => {
   });
 
   it("registers the dreaming runtime slash command", () => {
-    let command: OpenClawPluginCommandDefinition | undefined;
+    let command: CarapacePluginCommandDefinition | undefined;
     plugin.register(
       createTestPluginApi({
         runtime: hostRuntime,
@@ -288,7 +288,7 @@ describe("memory-core plugin runtime registration", () => {
     plugin.register(
       createTestPluginApi({
         runtime: { ...hostRuntime, subagent: { run: subagentRun } } as never,
-        registerTool(_factory, options?: Parameters<OpenClawPluginApi["registerTool"]>[1]) {
+        registerTool(_factory, options?: Parameters<CarapacePluginApi["registerTool"]>[1]) {
           toolNames.push(...(options?.names ?? []));
         },
         on(hookName) {
@@ -326,7 +326,7 @@ describe("memory-core plugin runtime registration", () => {
   it("hides intent create, list, and cancel from non-owner turns", () => {
     const warn = vi.fn();
     let intentFactory:
-      | ((ctx: { config?: OpenClawConfig; senderIsOwner?: boolean }) => unknown)
+      | ((ctx: { config?: CarapaceConfig; senderIsOwner?: boolean }) => unknown)
       | undefined;
     plugin.register(
       createTestPluginApi({
@@ -381,7 +381,7 @@ describe("memory-core plugin runtime registration", () => {
 
   it("wires scoped memory search cleanup through the lazy runtime", async () => {
     const runtime = registerMemoryCoreRuntime();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await runtime.closeMemorySearchManager?.({ cfg, agentId: "main" });
 
@@ -390,7 +390,7 @@ describe("memory-core plugin runtime registration", () => {
 
   it("binds the host local-service hook to the registered memory runtime", async () => {
     const runtime = registerMemoryCoreRuntime();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await runtime.getMemorySearchManager({ cfg, agentId: "main" });
 
@@ -411,7 +411,7 @@ describe("memory-core plugin runtime registration", () => {
         llm: { configurable: true, enumerable: true, get: llmGetter },
         state: { configurable: true, enumerable: true, get: stateGetter },
       },
-    ) as OpenClawPluginApi["runtime"];
+    ) as CarapacePluginApi["runtime"];
     let runtime: MemoryPluginRuntime | undefined;
 
     plugin.register(
@@ -444,7 +444,7 @@ describe("memory-core plugin runtime registration", () => {
 
   it("forwards search-hit authorization through the registered memory runtime", async () => {
     const runtime = registerMemoryCoreRuntime();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const hits = [
       {
         source: "sessions" as const,
@@ -480,7 +480,7 @@ describe("memory-core plugin runtime registration", () => {
 
   it("binds the host SQLite state hook to tools and CLI runtime", async () => {
     const runtime = registerMemoryCoreRuntime();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await runtime.getMemorySearchManager({ cfg, agentId: "main" });
 
@@ -499,7 +499,7 @@ describe("buildMemoryFlushPlan", () => {
         timeFormat: "12",
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it("replaces YYYY-MM-DD using user timezone and appends current time", () => {
     const plan = buildMemoryFlushPlan({

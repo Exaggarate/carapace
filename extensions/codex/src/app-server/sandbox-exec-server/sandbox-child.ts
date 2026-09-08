@@ -1,8 +1,8 @@
 /** Owns one sandbox subprocess tree through close, reaping, and backend finalization. */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { killProcessTree } from "openclaw/plugin-sdk/process-runtime";
-import type { SandboxContext } from "openclaw/plugin-sdk/sandbox";
+import { killProcessTree } from "carapace/plugin-sdk/process-runtime";
+import type { SandboxContext } from "carapace/plugin-sdk/sandbox";
 
 const SANDBOX_CHILD_TERM_GRACE_MS = 1_000;
 // Covers the post-TERM tree kill plus Windows taskkill completion before failure is reported.
@@ -37,7 +37,7 @@ export async function spawnSandboxChild(params: {
     });
   if (!command) {
     await finalize("failed", null).catch(params.onFinalizeError);
-    throw new Error("OpenClaw sandbox exec spec did not provide a command.");
+    throw new Error("Carapace sandbox exec spec did not provide a command.");
   }
   let child: ChildProcessWithoutNullStreams;
   try {

@@ -1,7 +1,7 @@
 import path from "node:path";
-import { isPathStrictlyInside, root } from "openclaw/plugin-sdk/file-access-runtime";
-import { getMediaDir } from "openclaw/plugin-sdk/media-runtime";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
+import { isPathStrictlyInside, root } from "carapace/plugin-sdk/file-access-runtime";
+import { getMediaDir } from "carapace/plugin-sdk/media-runtime";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
 import type { CodexCommandExecParams, CodexCommandExecResponse } from "./command-exec-protocol.js";
 import {
   isCodexPassThroughMediaSource,

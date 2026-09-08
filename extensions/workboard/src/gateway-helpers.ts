@@ -1,8 +1,8 @@
-import { WORKBOARD_STATUSES, type WorkboardCard } from "@openclaw/workboard-contract";
+import { WORKBOARD_STATUSES, type WorkboardCard } from "@carapace/workboard-contract";
 // Workboard plugin module implements shared gateway request helpers.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import type { OpenClawPluginApi } from "../api.js";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import type { CarapacePluginApi } from "../api.js";
 import {
   dispatchAndStartWorkboardCards,
   type WorkboardDispatchStartOptions,
@@ -16,12 +16,12 @@ import {
 } from "./workspace-access.js";
 
 export type GatewayMethodContext = Parameters<
-  Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1]
+  Parameters<CarapacePluginApi["registerGatewayMethod"]>[1]
 >[0];
 type GatewayRespond = GatewayMethodContext["respond"];
 type WorkboardGatewayResultHandler = (context: GatewayMethodContext) => unknown;
 type WorkboardGatewayScope = NonNullable<
-  NonNullable<Parameters<OpenClawPluginApi["registerGatewayMethod"]>[2]>["scope"]
+  NonNullable<Parameters<CarapacePluginApi["registerGatewayMethod"]>[2]>["scope"]
 >;
 
 export function respondError(respond: GatewayRespond, error: unknown) {
@@ -32,7 +32,7 @@ export function respondError(respond: GatewayRespond, error: unknown) {
 }
 
 export function registerWorkboardResultMethods(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   methods: ReadonlyArray<
     readonly [method: string, scope: WorkboardGatewayScope, handler: WorkboardGatewayResultHandler]
   >,
@@ -114,7 +114,7 @@ export function resolveGatewayWorkboardWorkspaceAccess(params: {
 }
 
 function gatewayDispatchOptions(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   request: Pick<GatewayMethodContext, "client" | "context">;
   input: Pick<
     WorkboardDispatchStartOptions,
@@ -144,7 +144,7 @@ function gatewayDispatchOptions(params: {
 }
 
 export function createWorkboardDispatchHandler(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   store: WorkboardStore;
   redactCard: (card: WorkboardCard) => WorkboardCard;
 }) {

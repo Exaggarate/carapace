@@ -124,7 +124,7 @@ function gatewayScenario() {
       "skills.proposals.inspect": inspectResult(),
       "skills.proposals.list": {
         proposals: [proposal()],
-        schema: "openclaw.skill-workshop.proposals-manifest.v1",
+        schema: "carapace.skill-workshop.proposals-manifest.v1",
         installedSkills: [],
         updatedAt: ISO_NOW,
       },

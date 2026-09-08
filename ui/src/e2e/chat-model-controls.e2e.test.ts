@@ -7,7 +7,7 @@ const suite = createControlUiE2eSuite({ name: "Control UI model and effort contr
 
 suite.define(() => {
   it("shows and changes this chat's account without changing the default for new chats", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-model-accounts", artifactRoot)
       : undefined;
@@ -318,7 +318,7 @@ suite.define(() => {
           await expect
             .poll(() => model.evaluate((node) => node === document.activeElement))
             .toBe(true);
-          const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+          const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
           const artifactDir = artifactRoot
             ? createControlUiE2eArtifactDir("chat-model-controls", artifactRoot)
             : undefined;
@@ -368,7 +368,7 @@ suite.define(() => {
         // The pointer can remain over the changing effort label during slider input.
         // Establish whether the hover hint or the picker owns this Escape.
         await slider.hover();
-        const openTooltips = page.locator("openclaw-tooltip[open]");
+        const openTooltips = page.locator("carapace-tooltip[open]");
         await expect.poll(() => openTooltips.count()).toBe(0);
         expect(await slider.evaluate((node) => node === document.activeElement)).toBe(true);
         if (tooltipOpen) {
@@ -421,7 +421,7 @@ suite.define(() => {
               ),
             )
             .toBe(true);
-          const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+          const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
           const artifactDir = artifactRoot
             ? createControlUiE2eArtifactDir("chat-model-controls", artifactRoot)
             : undefined;
@@ -544,7 +544,7 @@ suite.define(() => {
         await expect
           .poll(() => effort.evaluate((node) => node === document.activeElement))
           .toBe(true);
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir("chat-model-controls", artifactRoot)
           : undefined;
@@ -562,7 +562,7 @@ suite.define(() => {
     "clears %s model search before Escape dismisses the picker",
     async (route) => {
       await suite.withPage({ viewport: { width: 1280, height: 900 } }, async ({ page }) => {
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir(`model-search-escape-${route}`, artifactRoot)
           : undefined;

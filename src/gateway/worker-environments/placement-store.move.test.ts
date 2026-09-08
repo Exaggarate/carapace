@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createWorkerPlacementMoveService } from "./placement-move-service.js";
 import type { WorkerSessionPlacementIdentity } from "./placement-record.js";
 import {
@@ -23,19 +23,19 @@ const SESSION: WorkerSessionPlacementIdentity = {
 
 describe("worker session placement moves", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let store: WorkerSessionPlacementStore;
   let nowMs: number;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-move-store-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-move-store-"));
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     nowMs = 1_000;
     store = createWorkerSessionPlacementStore({ database, now: () => nowMs });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -158,7 +158,7 @@ describe("worker session placement moves", () => {
     });
     expect(begun.intent.operationId).toMatch(/^move:v1:[A-Za-z0-9_-]{43}$/u);
     expect(database.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(store.getPlacementMove(SESSION.sessionId)).toEqual(begun.intent);
     expect(store.getPlacementMoves([SESSION.sessionId, "missing"])).toEqual(

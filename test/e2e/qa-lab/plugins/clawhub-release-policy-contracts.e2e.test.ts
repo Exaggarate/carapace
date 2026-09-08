@@ -8,8 +8,8 @@ import { writeJsonFile } from "../../../helpers/temp-repo.js";
 
 const CLAWHUB_CHECK = resolve("scripts/plugin-clawhub-release-check.ts");
 const NPM_CHECK = resolve("scripts/plugin-npm-release-check.ts");
-const REPOSITORY_URL = "https://github.com/openclaw/openclaw";
-const PACKAGE_NAME = "@openclaw/demo-plugin";
+const REPOSITORY_URL = "https://github.com/Exaggarate/carapace";
+const PACKAGE_NAME = "@carapace/demo-plugin";
 const INITIAL_VERSION = "2026.8.3";
 const tsxImport = import.meta.resolve("tsx");
 const tempDirs: string[] = [];
@@ -42,7 +42,7 @@ function packageManifest(options: FixtureOptions = {}) {
       type: "git",
       url: options.repositoryUrl ?? REPOSITORY_URL,
     },
-    openclaw: {
+    carapace: {
       extensions: ["./index.ts"],
       ...(options.includePluginApi === false
         ? {}
@@ -55,7 +55,7 @@ function packageManifest(options: FixtureOptions = {}) {
         ? {}
         : {
             build: {
-              openclawVersion: version,
+              carapaceVersion: version,
             },
           }),
       install: {
@@ -70,11 +70,11 @@ function packageManifest(options: FixtureOptions = {}) {
 }
 
 function createPluginRepo(options: FixtureOptions = {}) {
-  const repoDir = makeTempRepoRoot(tempDirs, "openclaw-clawhub-policy-");
+  const repoDir = makeTempRepoRoot(tempDirs, "carapace-clawhub-policy-");
   const packageDir = join(repoDir, "extensions", "demo-plugin");
   mkdirSync(packageDir, { recursive: true });
   writeJsonFile(join(repoDir, "package.json"), {
-    name: "openclaw-release-policy-fixture",
+    name: "carapace-release-policy-fixture",
     private: true,
   });
   writeFileSync(join(repoDir, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n", "utf8");
@@ -86,7 +86,7 @@ function createPluginRepo(options: FixtureOptions = {}) {
   git(repoDir, ["add", "."]);
   git(repoDir, [
     "-c",
-    "user.name=OpenClaw Test",
+    "user.name=Carapace Test",
     "-c",
     "user.email=test@example.invalid",
     "commit",
@@ -100,7 +100,7 @@ function commitFixture(repoDir: string, message: string) {
   git(repoDir, ["add", "."]);
   git(repoDir, [
     "-c",
-    "user.name=OpenClaw Test",
+    "user.name=Carapace Test",
     "-c",
     "user.email=test@example.invalid",
     "commit",
@@ -142,7 +142,7 @@ describe("ClawHub release policy contracts", () => {
 
   it("requires the canonical repository provenance for ClawHub and npm publishing", () => {
     const repoDir = createPluginRepo({
-      repositoryUrl: "https://example.invalid/not-openclaw",
+      repositoryUrl: "https://example.invalid/not-carapace",
     });
     const expected = `package.json repository.url must be "${REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing`;
 
@@ -165,10 +165,10 @@ describe("ClawHub release policy contracts", () => {
       expect(result.status).toBe(1);
       expect(result.stdout).toBe("");
       expect(result.stderr).toContain(
-        "openclaw.compat.pluginApi is required for external code plugin packages.",
+        "carapace.compat.pluginApi is required for external code plugin packages.",
       );
       expect(result.stderr).toContain(
-        "openclaw.build.openclawVersion is required for external code plugin packages.",
+        "carapace.build.carapaceVersion is required for external code plugin packages.",
       );
     }
   });
@@ -209,13 +209,13 @@ describe("ClawHub release policy contracts", () => {
     writeJsonFile(manifestPath, {
       ...manifest,
       version: nextVersion,
-      openclaw: {
-        ...manifest.openclaw,
+      carapace: {
+        ...manifest.carapace,
         compat: {
           pluginApi: `>=${nextVersion}`,
         },
         build: {
-          openclawVersion: nextVersion,
+          carapaceVersion: nextVersion,
         },
       },
     });

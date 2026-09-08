@@ -1,16 +1,16 @@
 // Memory Core plugin module owns memory and session source indexing.
-import { createSubsystemLogger } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { createSubsystemLogger } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildSessionEntry,
   sessionPathForSessionIdentity,
   type SessionTranscriptCorpusEntry,
-} from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
+} from "carapace/plugin-sdk/memory-core-host-engine-sessions";
 import {
   MEMORY_INDEX_FTS_TABLE,
   runWithConcurrency,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { runSqliteImmediateTransaction } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { runSqliteImmediateTransaction } from "carapace/plugin-sdk/sqlite-runtime";
 import { MemoryIndexRevisionConflictError } from "./manager-db.js";
 import { MemoryManagerSessionSyncOps } from "./manager-session-sync-ops.js";
 import {

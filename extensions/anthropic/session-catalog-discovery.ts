@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { parseDateFirstTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { parseDateFirstTimestampMs } from "carapace/plugin-sdk/number-runtime";
 import {
   isRecord,
   normalizeBoundedOptionalString as readBoundedString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   type DesktopOverlay,
   desktopPullRequestSummary,

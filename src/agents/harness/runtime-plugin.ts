@@ -1,5 +1,5 @@
 /** Resolves the selected native harness from a run-owned plugin registry. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ProviderRouteOverridePresence } from "../../plugin-sdk/provider-model-types.js";
 import {
   normalizePluginsConfig,
@@ -14,7 +14,7 @@ import {
 import { getPluginRuntimeLoadContext } from "../../plugins/runtime/load-context.js";
 import {
   isDefaultAgentRuntimeId,
-  OPENCLAW_AGENT_RUNTIME_ID,
+  CARAPACE_AGENT_RUNTIME_ID,
   normalizeOptionalAgentRuntimeId,
 } from "../agent-runtime-id.js";
 import { isCliRuntimeAliasForProvider } from "../model-runtime-aliases.js";
@@ -44,7 +44,7 @@ type AgentHarnessRuntimePayloadFailure = {
 function describeMissingHarnessRegistration(
   runtime: string,
   pluginRegistry: PluginRegistry | undefined,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
 ): string {
   const context = getPluginRuntimeLoadContext(pluginRegistry);
   const activationSourceConfig = context?.activationSourceConfig ?? config;
@@ -78,13 +78,13 @@ function describeMissingHarnessRegistration(
     .find((plugin) => plugin?.status === "error");
   if (failedOwner) {
     const phase = failedOwner.failurePhase ?? "load";
-    return `(reason=owner-plugin-degraded, ownerPluginId=${failedOwner.id}). Run "openclaw plugins inspect ${failedOwner.id} --runtime --json". Owner plugin "${failedOwner.id}" failed during ${phase}. Repair the reported plugin failure, restart the Gateway, then retry or select a model that does not require this runtime.`;
+    return `(reason=owner-plugin-degraded, ownerPluginId=${failedOwner.id}). Run "carapace plugins inspect ${failedOwner.id} --runtime --json". Owner plugin "${failedOwner.id}" failed during ${phase}. Repair the reported plugin failure, restart the Gateway, then retry or select a model that does not require this runtime.`;
   }
   const loadedOwner = ownerPluginIds
     .map((pluginId) => pluginRegistry?.plugins.find((plugin) => plugin.id === pluginId))
     .find((plugin) => plugin?.status === "loaded");
   if (loadedOwner) {
-    return `(reason=owner-plugin-degraded, ownerPluginId=${loadedOwner.id}). Run "openclaw plugins inspect ${loadedOwner.id} --runtime --json". Owner plugin "${loadedOwner.id}" loaded but did not register agent harness "${runtime}". Repair the reported plugin failure, restart the Gateway, then retry or select a model that does not require this runtime.`;
+    return `(reason=owner-plugin-degraded, ownerPluginId=${loadedOwner.id}). Run "carapace plugins inspect ${loadedOwner.id} --runtime --json". Owner plugin "${loadedOwner.id}" loaded but did not register agent harness "${runtime}". Repair the reported plugin failure, restart the Gateway, then retry or select a model that does not require this runtime.`;
   }
 
   const blockers: string[] = [];
@@ -118,7 +118,7 @@ function describeMissingHarnessRegistration(
   // Bound the rendered summary, not the owner set used to classify availability.
   const detail =
     blockers.length > 0 ? blockers.slice(0, 3).join("; ") : "The owner plugin did not register";
-  return `(${reason}${ownerField}=${ownerPluginIds.slice(0, 3).join(",")}). Run "openclaw doctor --fix". ${detail}. Repair the plugin or select a model that does not require this runtime, restart the Gateway, then retry.`;
+  return `(${reason}${ownerField}=${ownerPluginIds.slice(0, 3).join(",")}). Run "carapace doctor --fix". ${detail}. Repair the plugin or select a model that does not require this runtime, restart the Gateway, then retry.`;
 }
 
 /**
@@ -128,7 +128,7 @@ function describeMissingHarnessRegistration(
 export function resolveAgentHarnessRuntimeAvailability(params: {
   runtime: string;
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   payloadFailures: readonly AgentHarnessRuntimePayloadFailure[];
   payloadCheckedPluginIds: readonly string[];
@@ -183,7 +183,7 @@ export function resolveAgentHarnessRuntimeAvailability(params: {
 export async function ensureSelectedAgentHarnessPlugin(params: {
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   agentHarnessId?: string;
@@ -210,7 +210,7 @@ export async function ensureSelectedAgentHarnessPlugin(params: {
   if (
     (!explicitRuntime && policy.runtimeSource === "implicit") ||
     isDefaultAgentRuntimeId(runtime) ||
-    runtime === OPENCLAW_AGENT_RUNTIME_ID ||
+    runtime === CARAPACE_AGENT_RUNTIME_ID ||
     isCliRuntimeAliasForProvider({
       runtime,
       provider: params.provider,

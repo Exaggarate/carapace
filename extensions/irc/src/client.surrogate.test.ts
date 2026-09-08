@@ -93,7 +93,7 @@ async function connectReadyClient(messageChunkMaxChars: number) {
     tls: false,
     nick: "bot",
     username: "bot",
-    realname: "OpenClaw Bot",
+    realname: "Carapace Bot",
     connectTimeoutMs: 1000,
     messageChunkMaxChars,
   });

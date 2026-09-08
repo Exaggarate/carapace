@@ -13,7 +13,7 @@ type PreparedModelRuntimeGenerationScope = Readonly<{
 // Global singleton keeps one scope instance across lazy module boundaries so a
 // wrapped turn and the nested embedded runner always share the same store.
 const PREPARED_MODEL_RUNTIME_PLUGIN_GENERATION_SCOPE_KEY: unique symbol = Symbol.for(
-  "openclaw.preparedModelRuntimePluginGenerationScope",
+  "carapace.preparedModelRuntimePluginGenerationScope",
 );
 
 const preparedModelRuntimePluginGenerationScope = resolveGlobalSingleton<

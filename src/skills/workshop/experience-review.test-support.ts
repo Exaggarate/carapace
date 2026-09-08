@@ -269,7 +269,7 @@ export async function createExperienceReviewCandidate(
         providers: {
           openai: {
             api: "openai-responses",
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             apiKey: options.apiKey ?? { source: "env", provider: "default", id: "OPENAI_API_KEY" },
             baseUrl: options.baseUrl ?? "https://api.openai.com/v1",
             ...(options.baseUrl ? { request: { allowPrivateNetwork: true } } : {}),
@@ -278,7 +278,7 @@ export async function createExperienceReviewCandidate(
                 id: modelId,
                 name: modelId,
                 api: "openai-responses",
-                agentRuntime: { id: "openclaw" },
+                agentRuntime: { id: "carapace" },
                 input: ["text"],
                 reasoning: true,
                 contextWindow: 1_047_576,
@@ -295,7 +295,7 @@ export async function createExperienceReviewCandidate(
           model: { primary: `openai/${modelId}` },
           models: {
             [`openai/${modelId}`]: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: { maxTokens: 2_048 },
             },
           },

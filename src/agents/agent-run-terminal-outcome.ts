@@ -6,9 +6,9 @@ import {
   type AgentRunTerminalFactInput,
   type AgentRunTerminalFacts,
   type AgentRunTimeoutPhase,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
-import { asFiniteNumber as asFiniteTimestamp } from "@openclaw/normalization-core/number-coercion";
-import { readNonBlankString as asNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
+import { asFiniteNumber as asFiniteTimestamp } from "@carapace/normalization-core/number-coercion";
+import { readNonBlankString as asNonEmptyString } from "@carapace/normalization-core/string-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   formatAbandonedLivenessError,
@@ -397,7 +397,7 @@ export {
   classifyAgentRunTerminalOutcome,
   hasExecutionSettlement,
   isDefinitiveRunLifecycle,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
 export { mergeAgentRunTerminalOutcome } from "./agent-run-terminal-outcome-merge.js";
 
 /** Raw terminal input collected from run wait/liveness/timeout paths. */

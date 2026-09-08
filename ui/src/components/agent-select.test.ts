@@ -7,7 +7,7 @@ import { setAvatarGatewayOrigin } from "../lib/identity-avatar-context.ts";
 import { waitForFast } from "../test-helpers/wait-for.ts";
 import { AgentSelect, type AgentSelectOption } from "./agent-select.ts";
 
-const AGENT_SELECT_TEST_TAG = `test-openclaw-agent-select-${crypto.randomUUID()}`;
+const AGENT_SELECT_TEST_TAG = `test-carapace-agent-select-${crypto.randomUUID()}`;
 
 customElements.define(AGENT_SELECT_TEST_TAG, class extends AgentSelect {});
 

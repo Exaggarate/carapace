@@ -1,4 +1,4 @@
-import { validateJsonSchemaValue } from "openclaw/plugin-sdk/json-schema-runtime";
+import { validateJsonSchemaValue } from "carapace/plugin-sdk/json-schema-runtime";
 // Feishu tests cover config schema plugin behavior.
 import { describe, expect, it } from "vitest";
 import { FeishuChannelConfigSchema, FeishuConfigSchema } from "./config-schema.js";
@@ -130,7 +130,7 @@ describe("FeishuConfigSchema webhook validation", () => {
       const result = FeishuConfigSchema.safeParse(input);
       expectSchemaIssue(result, issuePath);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain("openclaw doctor --fix");
+        expect(result.error.issues[0]?.message).toContain("carapace doctor --fix");
       }
     }
   });

@@ -1,19 +1,19 @@
 // Builds provider catalog entries from plugin manifest metadata.
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
-import { buildModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import { normalizeModelCatalog } from "@carapace/model-catalog-core/model-catalog-normalize";
+import { buildModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import type {
   ModelCatalogCost,
   ModelCatalogMediaInputConfig,
   ModelCatalogModel,
   ModelCatalogTieredCost,
   NormalizedModelCatalogRow,
-} from "@openclaw/model-catalog-core/model-catalog-types";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeConfiguredProviderCatalogModelId } from "@openclaw/model-catalog-core/provider-model-id-normalization";
+} from "@carapace/model-catalog-core/model-catalog-types";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeConfiguredProviderCatalogModelId } from "@carapace/model-catalog-core/provider-model-id-normalization";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "../config/types.models.js";
 import { copyRecordEntries } from "../shared/safe-record.js";
 import type { ProviderCatalogContext, ProviderCatalogResult, ProviderPlugin } from "./types.js";

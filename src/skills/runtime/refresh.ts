@@ -2,10 +2,10 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import chokidar, { type FSWatcher } from "chokidar";
 import { isDefaultStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveRealpathOrAbsolute } from "../../infra/boundary-path.js";
 import { getFileWatchCapacityCode } from "../../infra/fs-watch-errors.js";
 import { isPathInside } from "../../infra/path-guards.js";
@@ -110,7 +110,7 @@ const DEFAULT_SKILLS_WATCH_IGNORED: RegExp[] = [
 
 function resolveWatchTargets(
   workspaceDir: string,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   agentId: string | undefined,
   executionSkillsDir: string | undefined,
   watcherKey: string,
@@ -118,17 +118,17 @@ function resolveWatchTargets(
 ): WatchTarget[] {
   const baseRoots: Array<{ path: string; source: string }> = [];
   if (workspaceDir.trim()) {
-    baseRoots.push({ path: path.join(workspaceDir, "skills"), source: "openclaw-workspace" });
+    baseRoots.push({ path: path.join(workspaceDir, "skills"), source: "carapace-workspace" });
     baseRoots.push({
       path: path.join(workspaceDir, ".agents", "skills"),
       source: "agents-skills-project",
     });
   }
   if (executionSkillsDir) {
-    baseRoots.push({ path: executionSkillsDir, source: "openclaw-workspace" });
+    baseRoots.push({ path: executionSkillsDir, source: "carapace-workspace" });
   }
   baseRoots.push(...resolveWorkshopWatchRoots(config, agentId));
-  baseRoots.push({ path: path.join(CONFIG_DIR, "skills"), source: "openclaw-managed" });
+  baseRoots.push({ path: path.join(CONFIG_DIR, "skills"), source: "carapace-managed" });
   if (isDefaultStateDir()) {
     baseRoots.push({
       path: path.join(os.homedir(), ".agents", "skills"),
@@ -171,10 +171,10 @@ function resolveWatchTargets(
     );
   }
   for (const resolved of extraDirs) {
-    addSkillSourceWatchTargets(targets, resolved, "openclaw-extra", allowedSymlinkTargetRealPaths);
+    addSkillSourceWatchTargets(targets, resolved, "carapace-extra", allowedSymlinkTargetRealPaths);
   }
   for (const dir of pluginSkillDirs) {
-    addSkillSourceWatchTargets(targets, dir, "openclaw-plugin", allowedSymlinkTargetRealPaths);
+    addSkillSourceWatchTargets(targets, dir, "carapace-plugin", allowedSymlinkTargetRealPaths);
   }
   const sortedTargets = Array.from(targets.values()).toSorted((a, b) =>
     a.path.localeCompare(b.path),
@@ -361,7 +361,7 @@ function isTrustedSymlinkSkillTarget(
   targetRealPath: string,
   allowedSymlinkTargetRealPaths: readonly string[],
 ): boolean {
-  if (source === "openclaw-managed" || source === "agents-skills-personal") {
+  if (source === "carapace-managed" || source === "agents-skills-personal") {
     return true;
   }
   return (
@@ -680,7 +680,7 @@ function evictIdleWorkspaceWatchStates(now: number): void {
 export function ensureSkillsWatcher(params: {
   workspaceDir: string;
   executionSkillsDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
 }) {
@@ -771,7 +771,7 @@ export async function closeSkillsWatchers(resetState = false): Promise<void> {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.skillsRefreshTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.skillsRefreshTestApi")] = {
     resetSkillsRefreshForTest: () => closeSkillsWatchers(true),
   };
 }

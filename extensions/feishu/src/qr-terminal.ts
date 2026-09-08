@@ -1,2 +1,2 @@
 // Feishu plugin module implements qr terminal behavior.
-export { renderQrTerminal } from "openclaw/plugin-sdk/media-runtime";
+export { renderQrTerminal } from "carapace/plugin-sdk/media-runtime";

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   resolveAgentConfig,
   resolveAgentDir,
@@ -32,7 +32,7 @@ import type { ThinkLevel } from "../auto-reply/thinking.js";
 import { toAgentModelListLike } from "../config/model-input.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { hasSessionAutoModelFallbackProvenance } from "../config/sessions/model-override-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   formatUsageWindowSummary,
   loadProviderUsageSummary,
@@ -79,7 +79,7 @@ const USAGE_OAUTH_ONLY_PROVIDERS = new Set([
 const CODEX_APP_SERVER_HOME_DIRNAME = "codex-home";
 
 function resolveStatusChannelFeatureLine(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   statusChannel: string;
   statusAccountId?: string;
   sessionEntry?: SessionEntry;
@@ -150,7 +150,7 @@ function shouldLoadUsageSummary(params: {
 
 function resolveCodexSyntheticUsageAuthProfileId(params: {
   profileId: string | undefined;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
 }): string | undefined {
   const normalizedProfileId = params.profileId?.trim();
@@ -196,7 +196,7 @@ function formatSessionTaskLine(sessionKey: string, agentId: string): string | un
 }
 
 async function resolveStatusHarnessId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   model: string;
   agentId: string;
@@ -228,7 +228,7 @@ async function resolveStatusHarnessId(params: {
           undefined,
       )
     ) {
-      return "openclaw";
+      return "carapace";
     }
     const { resolveEffectiveAgentRuntime } = await loadAgentThinkingRuntime();
     const id = resolveEffectiveAgentRuntime({

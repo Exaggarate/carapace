@@ -528,13 +528,13 @@ export const en: TranslationMap & {
     errorTitle: "Panel failed to load",
     genericSubtitle: "Something went wrong while loading this panel.",
     staleTitle: "A new version is available",
-    staleSubtitle: "OpenClaw was updated in the background. Reload to get the latest panel.",
+    staleSubtitle: "Carapace was updated in the background. Reload to get the latest panel.",
     reloading: "Reloading…",
     retry: "Retry",
     stylesFailed: "Styles failed to load, so the page may look broken.",
   },
   communityInvite: {
-    cardLabel: "Join the OpenClaw community on Discord",
+    cardLabel: "Join the Carapace community on Discord",
     artAlt: "A lobster beside the Discord mark on a lit seafloor pedestal",
     title: "Come build with us",
     body: "Ask anything, show what you're making, and find out what everyone else is building.",
@@ -615,9 +615,9 @@ export const en: TranslationMap & {
     },
     dialog: {
       disconnected:
-        "The Gateway disconnected during the update. This page reconnects on its own. If it stays disconnected, run `openclaw triage` on the Gateway host to open a local coding agent for diagnosis and repair.",
+        "The Gateway disconnected during the update. This page reconnects on its own. If it stays disconnected, run `carapace triage` on the Gateway host to open a local coding agent for diagnosis and repair.",
       restarting:
-        "The Gateway is restarting. This page disconnects and reconnects on its own. If it stays disconnected, run `openclaw triage` on the Gateway host to open a local coding agent for diagnosis and repair.",
+        "The Gateway is restarting. This page disconnects and reconnects on its own. If it stays disconnected, run `carapace triage` on the Gateway host to open a local coding agent for diagnosis and repair.",
     },
     channel: {},
     installKind: {},
@@ -627,23 +627,23 @@ export const en: TranslationMap & {
     error: "Update error: {error}",
     status: "Update {status}: {reason}. {guidance}",
     verificationFailedWithIdentity:
-      "Update finished, but the running install does not match the expected revision. Expected {expected}, running {actual}. Run `openclaw triage` on the Gateway host before retrying.",
+      "Update finished, but the running install does not match the expected revision. Expected {expected}, running {actual}. Run `carapace triage` on the Gateway host before retrying.",
     handoffTimeout:
-      "Update completion was not confirmed. Run `openclaw triage` on the Gateway host and inspect the result before retrying.",
+      "Update completion was not confirmed. Run `carapace triage` on the Gateway host and inspect the result before retrying.",
     outcomeUnknown:
-      "The update outcome is unknown. Run `openclaw triage` on the Gateway host and inspect the result before retrying.",
+      "The update outcome is unknown. Run `carapace triage` on the Gateway host and inspect the result before retrying.",
     triage: {
       hostHint:
-        "If Ask OpenClaw is unavailable, run `openclaw triage` on the Gateway host to open a local coding agent for diagnosis and repair. Diagnose the cause before retrying.",
+        "If Ask Carapace is unavailable, run `carapace triage` on the Gateway host to open a local coding agent for diagnosis and repair. Diagnose the cause before retrying.",
     },
     report: {},
     failureReasons: {
       dirty: "Commit or stash changes, then retry.",
       noUpstream: "Set an upstream branch, then retry.",
       notGitInstall:
-        "Not a git checkout. Run `openclaw update` from the CLI for a global reinstall.",
-      notOpenclawRoot:
-        "Run the update from an OpenClaw checkout or use the CLI global reinstall path.",
+        "Not a git checkout. Run `carapace update` from the CLI for a global reinstall.",
+      notCarapaceRoot:
+        "Run the update from an Carapace checkout or use the CLI global reinstall path.",
       depsInstallFailed: "Dependency install failed. Fix the install error and retry.",
       buildFailed: "Build failed. Fix the build error and retry.",
       buildDirty:
@@ -665,14 +665,14 @@ export const en: TranslationMap & {
       managedServiceHandoffAlreadyRunning:
         "Another managed update is already running. Wait for it to complete, then refresh update status.",
       managedServiceHandoffUnavailable:
-        "Stop the foreground Gateway, run `openclaw update`, then launch it again. For automatic updates, install a managed Gateway service.",
-      doctorFailed: "Doctor repair failed. Run `openclaw doctor --non-interactive` and retry.",
+        "Stop the foreground Gateway, run `carapace update`, then launch it again. For automatic updates, install a managed Gateway service.",
+      doctorFailed: "Doctor repair failed. Run `carapace doctor --non-interactive` and retry.",
       managedServiceHandoffFailed:
-        "The update helper stopped before finishing. Run `openclaw update` in the terminal to see why.",
+        "The update helper stopped before finishing. Run `carapace update` in the terminal to see why.",
       managedServiceHandoffSpawnFailed:
-        "The Gateway could not start the update helper. Run `openclaw update` in the terminal instead.",
+        "The Gateway could not start the update helper. Run `carapace update` in the terminal instead.",
       managedServiceHandoffParentTimeout:
-        "The Gateway stayed up too long for the update helper. Start the update again, or run `openclaw update`.",
+        "The Gateway stayed up too long for the update helper. Start the update again, or run `carapace update`.",
       default: "See the gateway logs for the exact failure and retry once the cause is fixed.",
     },
     failedAtStep: "The update failed at {step}: {cause}.",
@@ -712,7 +712,7 @@ export const en: TranslationMap & {
       failed: "Could not create a setup code.",
       statusFailed: "Could not verify whether pairing completed.",
       loadFailed: "Could not load the pairing dialog. Check your connection and try again.",
-      qrAlt: "OpenClaw mobile pairing QR code",
+      qrAlt: "Carapace mobile pairing QR code",
       qrUnavailable: "QR unavailable. Copy the setup code instead.",
       copySetupCode: "Copy setup code",
       nodeExpiresIn: "This setup link expires in {time}.",
@@ -721,7 +721,7 @@ export const en: TranslationMap & {
       showSetupCode: "Show setup code",
       pending: "Device requests waiting for review: {count}",
       review: "Review",
-      waiting: "Official OpenClaw mobile apps connect automatically after scanning.",
+      waiting: "Official Carapace mobile apps connect automatically after scanning.",
       pairedTitle: "Device paired",
       deliveryUncertainTitle: "Pairing delivery could not be confirmed",
       deliveryUncertainHint:
@@ -778,7 +778,7 @@ export const en: TranslationMap & {
       tokenAge: "Age",
       desktopOpenWindow: "Open this desktop in a new window",
       desktopEnableHint:
-        "Enable desktop.host.enabled: true in the node config and add desktop.stream to gateway.nodes.commands.allow, then restart both. The node reconnects with a pending reapproval for desktop.stream; approve it here or with openclaw nodes approve.",
+        "Enable desktop.host.enabled: true in the node config and add desktop.stream to gateway.nodes.commands.allow, then restart both. The node reconnects with a pending reapproval for desktop.stream; approve it here or with carapace nodes approve.",
       uptime: "up {time}",
       loadLabel: "load {load}",
       loadTitle: "Load averages (1 / 5 / 15 min): {averages} on {cores} cores",
@@ -919,7 +919,7 @@ export const en: TranslationMap & {
     ownerSession: "Session",
     ownerWorkboard: "Workboard",
     title: "Managed Worktrees",
-    subtitle: "Isolated repository checkouts owned by OpenClaw.",
+    subtitle: "Isolated repository checkouts owned by Carapace.",
     cleanNow: "Clean up now",
     name: "Name",
     namePlaceholder: "auto",
@@ -1015,7 +1015,7 @@ export const en: TranslationMap & {
     worktreeBaseRef: "From",
     worktreeName: "Name",
     worktreeNamePlaceholder: "Named from the session title",
-    worktreeBranchNote: "Creates branch openclaw/<name> in a separate checkout.",
+    worktreeBranchNote: "Creates branch carapace/<name> in a separate checkout.",
     worktreeNameInvalid: "Use lowercase letters, digits, and dashes.",
     incognito: "Incognito",
     incognitoDescription: "Keep this session only until the Gateway restarts",
@@ -1027,7 +1027,7 @@ export const en: TranslationMap & {
     start: "Start session",
     startInTerminal: "Start in terminal",
     nativeTerminalHint:
-      "Start the native CLI on the selected machine using its own account and configuration. This does not create an OpenClaw Chat.",
+      "Start the native CLI on the selected machine using its own account and configuration. This does not create an Carapace Chat.",
     chooseNativeHost: "Choose a native CLI host",
     nativeHostsUnavailable:
       "No native CLI is available. Install it on the Gateway or connect a machine with CLI access, then reconnect to the Gateway.",
@@ -1101,7 +1101,7 @@ export const en: TranslationMap & {
       "owner-mismatch": "owned elsewhere",
       busy: "live run or cleanup active",
       "foreign-lock": "foreign Git lock",
-      "snapshot-failed": "OpenClaw could not create a safety snapshot",
+      "snapshot-failed": "Carapace could not create a safety snapshot",
       "cleanup-failed": "cleanup failed",
     },
     draftCleanupFailed: "Session deleted; browser draft remains. Clear site data.",
@@ -1329,7 +1329,7 @@ export const en: TranslationMap & {
     moveSessionTitle: "Move session",
     moveSessionDescription: 'Choose where "{session}" should continue.',
     moveSessionNoReplayWarning:
-      "OpenClaw safely reconciles the current workspace before moving. Active work is never replayed.",
+      "Carapace safely reconciles the current workspace before moving. Active work is never replayed.",
     moveSessionActiveRunWarning:
       "The active turn will be interrupted. Partial output is not replayed; send the next turn again after the move.",
     moveSessionAction: "Move session",
@@ -1941,7 +1941,7 @@ export const en: TranslationMap & {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Carapace",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1950,7 +1950,7 @@ export const en: TranslationMap & {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Carapace cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -2199,7 +2199,7 @@ export const en: TranslationMap & {
     back: "Back",
     forward: "Forward",
     settings: "Settings",
-    askOpenClaw: "Ask OpenClaw",
+    askCarapace: "Ask Carapace",
     settingsGroupDevice: "This Mac",
     settingsGroupThisIPhone: "This iPhone",
     settingsGroupThisIPad: "This iPad",
@@ -2278,7 +2278,7 @@ export const en: TranslationMap & {
     profile: "Browser profile: {profile}",
     navigationBlocked:
       "The current browser navigation rules block this address. Select another tab or enter an allowed address.",
-    navigationCheckFailed: "OpenClaw couldn’t verify this tab’s address. Refresh to try again.",
+    navigationCheckFailed: "Carapace couldn’t verify this tab’s address. Refresh to try again.",
     title: "Browser",
     open: "Open",
     openPanel: "Open browser panel",
@@ -2377,7 +2377,7 @@ export const en: TranslationMap & {
     cloudWorkers: "Cloud workers",
     chat: "Chat",
     dashboards: "Dashboards",
-    custodian: "OpenClaw",
+    custodian: "Carapace",
     profile: "Profile",
     communications: "Communications",
     appearance: "Appearance",
@@ -2480,10 +2480,10 @@ export const en: TranslationMap & {
     missingAuth: "No provider credential is configured for this model. Set it up in Model Setup.",
     heading: "Connect a verified AI model",
     intro:
-      "OpenClaw discovers AI access on this Gateway. Choose a provider to begin; nothing is selected, tested, installed, or saved automatically.",
+      "Carapace discovers AI access on this Gateway. Choose a provider to begin; nothing is selected, tested, installed, or saved automatically.",
     required: {
       title: "No AI provider configured",
-      body: "We couldn't find a provider and model configured for this agent. Choose a supported connection; OpenClaw will test it before enabling chat.",
+      body: "We couldn't find a provider and model configured for this agent. Choose a supported connection; Carapace will test it before enabling chat.",
       action: "Connect an AI provider",
     },
     loading: "Checking this Gateway for available AI access…",
@@ -2509,7 +2509,7 @@ export const en: TranslationMap & {
     },
     access: {
       adminRequired: "Model setup requires operator.admin access.",
-      gatewayTooOld: "The Gateway is running an older OpenClaw version",
+      gatewayTooOld: "The Gateway is running an older Carapace version",
     },
     candidates: {
       title: "Found on this Gateway",
@@ -2523,7 +2523,7 @@ export const en: TranslationMap & {
     },
     nativeDiscovery: {
       title: "Discover existing conversations",
-      body: "Show native assistant conversations from this Gateway host in OpenClaw. This is discovery, not an import or copy.",
+      body: "Show native assistant conversations from this Gateway host in Carapace. This is discovery, not an import or copy.",
       enable: "Show existing native conversations",
       decline:
         "Leave unchecked to keep native session catalogs off when you connect your AI provider. Existing installations are not changed.",
@@ -2564,12 +2564,12 @@ export const en: TranslationMap & {
       accessValueFor: "{provider} API key or token",
       accessValuePlaceholder: "Paste an API key or token",
       connectAndVerify: "Connect & verify",
-      verifyHint: "OpenClaw verifies a real model reply before marking the connection ready.",
+      verifyHint: "Carapace verifies a real model reply before marking the connection ready.",
       required: "Choose a provider and enter an API key or token.",
     },
     success: {
       title: "Connection verified",
-      body: "OpenClaw received a real reply from {modelRef}. You can start chatting now.",
+      body: "Carapace received a real reply from {modelRef}. You can start chatting now.",
       activeModel: "Active model",
       latency: "Verified in {latencyMs} ms",
       openChat: "Start chatting",
@@ -2626,7 +2626,7 @@ export const en: TranslationMap & {
   onboarding: {
     memoryImport: {
       title: "Bring your assistant memory with you",
-      body: "OpenClaw found memory from other coding assistants. Import it into your agent workspace?",
+      body: "Carapace found memory from other coding assistants. Import it into your agent workspace?",
       plannedCount: "{count} ready to import",
       alreadyImported: "Already imported: {count}",
       sourceUnavailable: "Source path unavailable",
@@ -2641,7 +2641,7 @@ export const en: TranslationMap & {
       connectionChanged: "Skipped: the Gateway connection changed during the import",
       unknownError: "Request failed",
       doneTitle: "Memory import finished",
-      doneBody: "Migrated {migrated}, skipped {skipped}. You can continue setting up OpenClaw.",
+      doneBody: "Migrated {migrated}, skipped {skipped}. You can continue setting up Carapace.",
     },
   },
   assistantPanel: {
@@ -2662,30 +2662,30 @@ export const en: TranslationMap & {
     removeSelection: "Remove selected text",
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Carapace",
     subtitleCaretaker: "System setup and care.",
     exitSetup: "Exit setup",
     newAgent: "New agent",
     hatchDraft: "Wake up, my friend!",
-    placeholder: "Message OpenClaw…",
+    placeholder: "Message Carapace…",
     sensitivePlaceholder: "Enter sensitive value…",
     sensitiveReply: "Sensitive reply sent",
     cancel: "Cancel",
     send: "Send",
-    thinking: "OpenClaw is thinking",
+    thinking: "Carapace is thinking",
     earlier: "Earlier",
-    requestFailed: "OpenClaw could not reply. Try again.",
+    requestFailed: "Carapace could not reply. Try again.",
     connectionChanged: "The Gateway connection changed. Retry to continue this setup.",
     sessionRestarted:
-      "{error} OpenClaw started a fresh session; earlier messages remain for context.",
-    unsupportedGateway: "Update the Gateway to continue setup with OpenClaw.",
+      "{error} Carapace started a fresh session; earlier messages remain for context.",
+    unsupportedGateway: "Update the Gateway to continue setup with Carapace.",
     panel: {
-      title: "OpenClaw",
-      toggle: "Toggle Ask OpenClaw",
-      close: "Close Ask OpenClaw",
-      resize: "Resize Ask OpenClaw",
-      dockBottom: "Dock Ask OpenClaw at bottom",
-      dockRight: "Dock Ask OpenClaw at right",
+      title: "Carapace",
+      toggle: "Toggle Ask Carapace",
+      close: "Close Ask Carapace",
+      resize: "Resize Ask Carapace",
+      dockBottom: "Dock Ask Carapace at bottom",
+      dockRight: "Dock Ask Carapace at right",
     },
     history: {
       button: "History",
@@ -2693,7 +2693,7 @@ export const en: TranslationMap & {
       description: "What changed on this system, newest first.",
       loading: "Loading recent changes…",
       empty: "No recorded changes yet.",
-      requestFailed: "OpenClaw could not load change history.",
+      requestFailed: "Carapace could not load change history.",
       loadMore: "Load more",
       loadingMore: "Loading more…",
       changedPaths: "Changed paths ({count})",
@@ -2716,9 +2716,9 @@ export const en: TranslationMap & {
       channelDegraded: "{channel} is degraded — ask me what happened",
       channelFallback: "A channel",
       dismiss: "Dismiss this update",
-      channelSetupTitle: "Reach OpenClaw outside this app",
+      channelSetupTitle: "Reach Carapace outside this app",
       channelSetupBody:
-        "The web app already works. Add a channel only if you want to message OpenClaw from another service.",
+        "The web app already works. Add a channel only if you want to message Carapace from another service.",
       channelSetupAction: "Set up a channel",
       channelSetupDismiss: "Keep using the web app",
       channelStatusErrorTitle: "Channel status is unavailable",
@@ -2756,7 +2756,7 @@ export const en: TranslationMap & {
     working: "Working…",
   },
   mcpPage: {
-    intro: "Connect and manage MCP servers that provide tools to OpenClaw.",
+    intro: "Connect and manage MCP servers that provide tools to Carapace.",
     servers: "Servers",
     oauth: "OAuth",
     filtered: "Filtered",
@@ -2814,7 +2814,7 @@ export const en: TranslationMap & {
     },
   },
   memoryPage: {
-    intro: "Choose how OpenClaw stores, searches, and maintains agent memory.",
+    intro: "Choose how Carapace stores, searches, and maintains agent memory.",
     tablistLabel: "Memory sections",
     tabs: {
       overview: "Overview",
@@ -2908,7 +2908,7 @@ export const en: TranslationMap & {
       description:
         "Exactly one memory plugin owns the memory slot. Selecting an engine enables it and disables the others.",
       rowTitle: "Memory engine",
-      openClawMemory: "OpenClaw Memory",
+      carapaceMemory: "Carapace Memory",
       off: "Off",
       unavailable: "Unavailable",
       autoHint: "No engine is pinned in config, so the slot falls back to its default owner.",
@@ -3107,7 +3107,7 @@ export const en: TranslationMap & {
       notes: "Capture notes to Markdown, Obsidian, Notion, or Bear.",
     },
     noInstalledTitle: "No optional plugins installed",
-    noInstalledBody: "Discover a featured plugin or search ClawHub to extend OpenClaw.",
+    noInstalledBody: "Discover a featured plugin or search ClawHub to extend Carapace.",
     noInstalledMatchTitle: "No installed plugins match",
     noMatchBody: "Try a different search.",
     filterAll: "All",
@@ -3144,7 +3144,7 @@ export const en: TranslationMap & {
     capabilities: "Capabilities",
     offlineTitle: "Gateway offline",
     offlineBody: "Connect to browse installed and recommended plugins.",
-    optionalCapability: "Optional OpenClaw capability.",
+    optionalCapability: "Optional Carapace capability.",
     enabled: "Enabled",
     disabled: "Disabled",
     available: "Available",
@@ -3257,7 +3257,7 @@ export const en: TranslationMap & {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Carapace",
     tagline: "Your personal AI assistant, running on your own devices.",
     waveHello: "Wave hello to Clawd",
     linksLabel: "Community and resources",
@@ -3267,7 +3267,7 @@ export const en: TranslationMap & {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "Changelog",
-    license: "© 2026 OpenClaw Foundation — MIT License.",
+    license: "© 2026 Carapace Foundation — MIT License.",
     artifactTitle: "Control UI",
     artifactSubtitle: "Identity embedded when this browser artifact was built.",
     artifactDetails: "Control UI build details",
@@ -3286,7 +3286,7 @@ export const en: TranslationMap & {
       "Reported by the active Gateway connection; separate from this Control UI build.",
   },
   appsPage: {
-    heroTitle: "Take OpenClaw everywhere",
+    heroTitle: "Take Carapace everywhere",
     heroTagline:
       "Companion apps for your phone, watch, desktop, and browser — plus plugins to extend what your agent can do.",
     sectionMobile: "On your phone",
@@ -3312,11 +3312,11 @@ export const en: TranslationMap & {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "Chat, talk, approve actions, and share into OpenClaw from iOS.",
+        desc: "Chat, talk, approve actions, and share into Carapace from iOS.",
       },
       android: {
         title: "Android",
-        desc: "Your Android phone as a full OpenClaw device — chat, camera, and Canvas.",
+        desc: "Your Android phone as a full Carapace device — chat, camera, and Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -3324,7 +3324,7 @@ export const en: TranslationMap & {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "The Android companion extends OpenClaw to your watch.",
+        desc: "The Android companion extends Carapace to your watch.",
       },
       macos: {
         title: "macOS",
@@ -3332,7 +3332,7 @@ export const en: TranslationMap & {
       },
       windows: {
         title: "Windows",
-        desc: "The Windows companion connects your PC as an OpenClaw device.",
+        desc: "The Windows companion connects your PC as an Carapace device.",
       },
       linux: {
         title: "Linux",
@@ -3340,11 +3340,11 @@ export const en: TranslationMap & {
       },
       chrome: {
         title: "Chrome extension",
-        desc: "Let OpenClaw drive your existing Chrome — tabs, pages, and forms.",
+        desc: "Let Carapace drive your existing Chrome — tabs, pages, and forms.",
       },
       plugins: {
         title: "Plugins & ClawHub",
-        desc: "Extend OpenClaw with channels, tools, and skills from the community.",
+        desc: "Extend Carapace with channels, tools, and skills from the community.",
       },
     },
   },
@@ -3731,7 +3731,7 @@ export const en: TranslationMap & {
     selfLearning: {
       pitchTitle: "Turn on self-learning",
       pitchBody:
-        "OpenClaw reviews corrections and substantial completed runs, then applies scanner-approved skills and lists them here. Experience review spends extra background tokens.",
+        "Carapace reviews corrections and substantial completed runs, then applies scanner-approved skills and lists them here. Experience review spends extra background tokens.",
       enable: "Enable self-learning",
       enabling: "Enabling\u2026",
       updateError: "Could not update the self-learning setting.",
@@ -3912,7 +3912,7 @@ export const en: TranslationMap & {
     scopeUpgrade: {
       limited: "This browser has limited access.",
       guidance:
-        "This browser has limited access. Manage it with openclaw devices on the Gateway or from Devices on an admin browser.",
+        "This browser has limited access. Manage it with carapace devices on the Gateway or from Devices on an admin browser.",
       status: "Limited access",
       inboxState: "Administrator access required",
       showDetails: "Show limited access details",
@@ -3921,7 +3921,7 @@ export const en: TranslationMap & {
       requesting: "Requesting administrator access…",
       requestingAction: "Requesting…",
       pending:
-        "Approve this browser by running openclaw devices on the Gateway or from Devices on an admin browser. Retry reattaches to the request; Cancel stops waiting.",
+        "Approve this browser by running carapace devices on the Gateway or from Devices on an admin browser. Retry reattaches to the request; Cancel stops waiting.",
       retry: "Retry",
       cancel: "Cancel",
       rejected: "The administrator access request was rejected.",
@@ -4905,11 +4905,11 @@ export const en: TranslationMap & {
       remoteViewOnly: "This session is on a paired device and is view-only.",
       unsupportedViewOnly: "This external session source is view-only.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInCarapace: "Open in Carapace",
       openInTerminal: "Open in terminal",
       deleteSession: "Delete",
       deleteSessionConfirm:
-        "Delete this external session from OpenClaw? Make sure no other runner is using it. Beamed sessions are deleted permanently. Sessions kept by another tool, such as Codex, are archived there and may be restorable.",
+        "Delete this external session from Carapace? Make sure no other runner is using it. Beamed sessions are deleted permanently. Sessions kept by another tool, such as Codex, are archived there and may be restorable.",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
     taskSuggestions: {
@@ -4975,7 +4975,7 @@ export const en: TranslationMap & {
     followUpModeOverriding: "Overriding server default ({mode})",
     followUpModeReset: "Reset to server default",
     catalogOpenTarget: "Open external sessions in",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Carapace viewer",
     catalogOpenTargetTerminal: "Terminal",
     catalogOutputTruncated: "[Output truncated]",
     onboardingDisabled: "Disabled during setup",
@@ -5021,7 +5021,7 @@ export const en: TranslationMap & {
       titleOne: "1 cloud workspace conflict",
       titleMany: "{count} cloud workspace conflicts",
       description:
-        "OpenClaw kept your local versions and applied the other cloud changes. Inspect the staged result or take its version for a conflicted path.",
+        "Carapace kept your local versions and applied the other cloud changes. Inspect the staged result or take its version for a conflicted path.",
       summary: "Local versions kept; inspect or take the cloud version.",
       showCommands: "Show commands",
       morePaths: "+{count} more paths",
@@ -5034,7 +5034,7 @@ export const en: TranslationMap & {
       commandHelp:
         "Run these in Bash or zsh (Git Bash on Windows). If inspect says the path does not exist, the cloud deleted it; verify and remove the local path manually. If checkout reports a file/directory conflict, move or remove the blocking local path, then retry. If the staged ref is missing, the notice is stale; do not change the local path.",
       commandsUnavailable:
-        "This filename contains terminal control characters, so OpenClaw will not build a copyable shell command for it. Inspect the staged ref directly and enter the path manually with care.",
+        "This filename contains terminal control characters, so Carapace will not build a copyable shell command for it. Inspect the staged ref directly and enter the path manually with care.",
       dismiss: "Dismiss workspace conflict notice",
       eventSender: "Cloud workspace",
       eventTitleOne: "Cloud result applied with 1 conflict",
@@ -5743,7 +5743,7 @@ export const en: TranslationMap & {
       video: "Video",
     },
     voice: {
-      asking: "Asking OpenClaw...",
+      asking: "Asking Carapace...",
       preparing: "Preparing voice session...",
       connecting: "Connecting voice input...",
       listening: "Listening...",
@@ -6065,7 +6065,7 @@ export const en: TranslationMap & {
       filters: "Filters",
       shownOf: "{shown} of {total}",
       emptyTitle: "No automations yet",
-      emptyHint: "Describe what OpenClaw should do and when — it runs on schedule.",
+      emptyHint: "Describe what Carapace should do and when — it runs on schedule.",
       noMatching: "No automations match the current filters.",
       loadMore: "Load more",
       loading: "Loading...",
@@ -6133,7 +6133,7 @@ export const en: TranslationMap & {
     detail: {
       tabsLabel: "Automation details",
       newTitle: "New automation",
-      newSubtitle: "Describe what OpenClaw should do, then pick when it runs.",
+      newSubtitle: "Describe what Carapace should do, then pick when it runs.",
       back: "All automations",
       settingsTab: "Settings",
       historyTitle: "Run history",
@@ -6227,7 +6227,7 @@ export const en: TranslationMap & {
       descriptionPlaceholder: "Optional context for this task",
       agentPlaceholder: "main or ops",
       agentHelp: "Start typing to pick a known agent, or enter a custom one.",
-      promptPlaceholder: "Describe what OpenClaw should do...",
+      promptPlaceholder: "Describe what Carapace should do...",
       repeat: "Repeat",
       repeatInterval: "Interval",
       repeatOnce: "Once",

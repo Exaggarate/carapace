@@ -1,7 +1,7 @@
 // Tlon tests cover non-interactive setup validation and config writes.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createNonExitingRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createNonExitingRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it } from "vitest";
 import { tlonSetupAdapter } from "./setup-core.js";
 
@@ -15,7 +15,7 @@ urlWithCredentials.username = "test-user";
 urlWithCredentials.password = "test-password";
 
 function validate(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   input: Parameters<NonNullable<typeof tlonSetupAdapter.validateInput>>[0]["input"];
 }) {
   return tlonSetupAdapter.validateInput?.({
@@ -27,7 +27,7 @@ function validate(params: {
 
 async function prepare(
   input: Parameters<NonNullable<typeof tlonSetupAdapter.prepareAccountConfigInput>>[0]["input"],
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
 ) {
   return await tlonSetupAdapter.prepareAccountConfigInput!({
     cfg,
@@ -60,7 +60,7 @@ describe("Tlon setup adapter", () => {
       channels: {
         tlon: { ...validInput, url: existingUrl },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const codeOnlyInput = { code: "replacement-code" };
 
     expect(validate({ cfg, input: codeOnlyInput })).toBeNull();
@@ -82,7 +82,7 @@ describe("Tlon setup adapter", () => {
       validate({
         cfg: {
           channels: { tlon: { ...validInput, url: "ftp://urbit.example.com" } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         input: { code: "replacement-code" },
       }),
     ).toBe("Invalid URL: URL must use http:// or https://");

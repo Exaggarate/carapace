@@ -116,10 +116,10 @@ describe("disambiguate", () => {
 
   it("uses parent folders, then full paths, for recent basename collisions", () => {
     const items: Array<{ folder: string; label: string }> = [
-      { folder: "/a/openclaw", label: "openclaw" },
-      { folder: "/b/openclaw", label: "openclaw" },
-      { folder: "/one/shared/openclaw", label: "openclaw · Mac Studio" },
-      { folder: "/two/shared/openclaw", label: "openclaw · Mac Studio" },
+      { folder: "/a/carapace", label: "carapace" },
+      { folder: "/b/carapace", label: "carapace" },
+      { folder: "/one/shared/carapace", label: "carapace · Mac Studio" },
+      { folder: "/two/shared/carapace", label: "carapace · Mac Studio" },
     ];
     expect(
       disambiguate(items, (item) => item.label, [
@@ -127,6 +127,6 @@ describe("disambiguate", () => {
         (item) => item.folder,
         (item) => item.folder,
       ]),
-    ).toEqual(["a", "b", "/one/shared/openclaw", "/two/shared/openclaw"]);
+    ).toEqual(["a", "b", "/one/shared/carapace", "/two/shared/carapace"]);
   });
 });

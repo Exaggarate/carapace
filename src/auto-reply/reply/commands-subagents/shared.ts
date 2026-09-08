@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { buildSubagentRunReadIndex } from "../../../agents/subagents/registry/subagent-registry-read.js";
 import type { SubagentRunRecord } from "../../../agents/subagents/registry/subagent-registry.types.js";
 import { buildSubagentRunView } from "../../../agents/subagents/registry/subagent-run-view.js";

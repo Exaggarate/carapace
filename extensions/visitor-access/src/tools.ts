@@ -1,5 +1,5 @@
 import { Type } from "typebox";
-import type { AnyAgentTool, OpenClawPluginToolContext } from "../api.js";
+import type { AnyAgentTool, CarapacePluginToolContext } from "../api.js";
 import { visitorRuntimeStore } from "./runtime.js";
 import type { VisitorAccessService } from "./visitors.js";
 
@@ -16,14 +16,14 @@ const identityFields = {
   ),
 };
 
-export function createVisitorTools(context: OpenClawPluginToolContext): AnyAgentTool[] {
+export function createVisitorTools(context: CarapacePluginToolContext): AnyAgentTool[] {
   let runtime = visitorRuntimeStore.tryGetRuntime();
   const definitions = [
     {
       name: "visitor_invite",
       label: "Invite visitor",
       description:
-        "Grant or renew visitor access to team.openclaw.ai. Provide email or GitHub login; private GitHub emails require explicit email. Grants expire after the configured duration (14 days by default); forever must be explicit.",
+        "Grant or renew visitor access to github.com/Exaggarate/carapace. Provide email or GitHub login; private GitHub emails require explicit email. Grants expire after the configured duration (14 days by default); forever must be explicit.",
       parameters: Type.Object(
         {
           ...identityFields,

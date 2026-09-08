@@ -3,13 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DecisionReceiptV1 } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { readSqliteBusyTimeout } from "../infra/sqlite-busy-timeout.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  registerOpenClawStateDatabaseLifecycleListener,
-} from "../state/openclaw-state-db.js";
-import { claimOpenClawStateOwnership } from "../state/openclaw-state-ownership-operations.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  registerCarapaceStateDatabaseLifecycleListener,
+} from "../state/carapace-state-db.js";
+import { claimCarapaceStateOwnership } from "../state/carapace-state-ownership-operations.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { listAuditEvents, recordAuditEvent } from "./audit-event-store.js";
 import type { AuditEventInput } from "./audit-event-types.js";
@@ -170,25 +170,25 @@ function captureWork(envelope: ExecutionIdentityAdmissionEnvelope) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("audit event writer", () => {
   it("preserves external supervision for claimed state writes", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-external-");
+    const stateDir = tempDirs.make("carapace-audit-writer-external-");
     const supervisedDatabase = {
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_SUPERVISOR_MODE: "external",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_SUPERVISOR_MODE: "external",
       },
     };
-    claimOpenClawStateOwnership("gateway-test-supervisor", supervisedDatabase);
-    closeOpenClawStateDatabaseForTest();
+    claimCarapaceStateOwnership("gateway-test-supervisor", supervisedDatabase);
+    closeCarapaceStateDatabaseForTest();
     const write = async (runId: string, supervisorMode: string | undefined) => {
       const errors: string[] = [];
-      await withEnvAsync({ OPENCLAW_SUPERVISOR_MODE: supervisorMode }, async () => {
+      await withEnvAsync({ CARAPACE_SUPERVISOR_MODE: supervisorMode }, async () => {
         const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
         await writer.ready;
         expect(writer.record({ ...input(), sourceId: `${runId}:1:started`, runId })).toBe(true);
@@ -204,7 +204,7 @@ describe("audit event writer", () => {
         (event) => event.runId,
       ),
     ).toEqual(["supervised-run"]);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const unmarkedErrors = await write("unmarked-run", undefined);
     expect(unmarkedErrors.some((error) => error.includes("gateway-test-supervisor"))).toBe(true);
@@ -216,20 +216,20 @@ describe("audit event writer", () => {
   });
 
   it("keeps progress absent while disabled and routes enabled progress off audit_events", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const disabledWriter = createAuditEventWriter({ stateDir });
     const disabledRecorder = createAuditEventRecorder({
       messageMode: "off",
       writer: disabledWriter,
     });
     await disabledWriter.ready;
-    expect(tableExists(openOpenClawStateDatabase(database).db, "outbound_message_progress")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(database).db, "outbound_message_progress")).toBe(
       false,
     );
     disabledRecorder.recordMessage(messageEvent("message.outbound.queued"));
     await disabledWriter.stop();
-    expect(tableExists(openOpenClawStateDatabase(database).db, "outbound_message_progress")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(database).db, "outbound_message_progress")).toBe(
       false,
     );
 
@@ -244,7 +244,7 @@ describe("audit event writer", () => {
     await enabledWriter.ready;
     await enabledWriter.stop();
 
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     expect(
       (
         db.prepare("SELECT COUNT(*) AS count FROM outbound_message_progress").get() as {
@@ -265,9 +265,9 @@ describe("audit event writer", () => {
   });
 
   it("flushes accepted events through the canonical state connection", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
-    const owner = openOpenClawStateDatabase(database).db;
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
+    const owner = openCarapaceStateDatabase(database).db;
     const readDataVersion = () =>
       (owner.prepare("PRAGMA data_version").get() as { data_version: number }).data_version;
     const dataVersionBefore = readDataVersion();
@@ -283,14 +283,14 @@ describe("audit event writer", () => {
   });
 
   it("keeps fresh storage identity-free when recovery evidence is missing", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const errors: string[] = [];
     const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
 
     await writer.ready;
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
         .get("execution_identity_contexts"),
     ).toBeUndefined();
@@ -311,30 +311,30 @@ describe("audit event writer", () => {
     expect(JSON.stringify(errors)).not.toContain(token.runId);
     expect(listAuditEvents({ database, limit: 10 }).events).toHaveLength(1);
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
         .get("execution_identity_contexts"),
     ).toBeUndefined();
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
         .get("execution_decision_facts"),
     ).toBeUndefined();
   });
 
   it("keeps a cold owner open nonblocking under a held write lock", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     recordAuditEvent(input(), database);
-    const path = openOpenClawStateDatabase(database).path;
-    closeOpenClawStateDatabaseForTest();
+    const path = openCarapaceStateDatabase(database).path;
+    closeCarapaceStateDatabaseForTest();
     const contender = new DatabaseSync(path);
     contender.exec("PRAGMA busy_timeout = 0; BEGIN IMMEDIATE");
     const errors: string[] = [];
     const observedBusyTimeouts: number[] = [];
     let openedBusyTimeout: number | undefined;
     let restoreExec: (() => void) | undefined;
-    const clearDatabaseListener = registerOpenClawStateDatabaseLifecycleListener((event) => {
+    const clearDatabaseListener = registerCarapaceStateDatabaseLifecycleListener((event) => {
       if (event.kind !== "opened" || event.database.path !== path) {
         return;
       }
@@ -374,8 +374,8 @@ describe("audit event writer", () => {
   });
 
   it("persists a generic decision through the bounded queue", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const errors: string[] = [];
     const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
 
@@ -411,10 +411,10 @@ describe("audit event writer", () => {
   });
 
   it("keeps the shared queue nonblocking under a held write lock and flushes before stop", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     recordAuditEvent(input(), database);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const errors: string[] = [];
     const writer = createAuditEventWriter({
       stateDir,
@@ -422,7 +422,7 @@ describe("audit event writer", () => {
       onError: (error) => errors.push(error),
     });
     await writer.ready;
-    const { db, path } = openOpenClawStateDatabase(database);
+    const { db, path } = openCarapaceStateDatabase(database);
     expect(
       db
         .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
@@ -542,8 +542,8 @@ describe("audit event writer", () => {
   });
 
   it("reports sustained lock contention once while backing off retries", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const contentions: string[] = [];
     const errors: string[] = [];
     const writer = createAuditEventWriter({
@@ -552,7 +552,7 @@ describe("audit event writer", () => {
       onError: (error) => errors.push(error),
     });
     await writer.ready;
-    const { path } = openOpenClawStateDatabase(database);
+    const { path } = openCarapaceStateDatabase(database);
     const contender = new DatabaseSync(path);
     contender.exec("PRAGMA busy_timeout = 0; BEGIN IMMEDIATE");
     let fakeTimersActive = false;
@@ -600,8 +600,8 @@ describe("audit event writer", () => {
   });
 
   it("persists owned unknown and omits inherited evidence through the queue clone boundary", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const errors: string[] = [];
     const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
     const clearSink = configureExecutionIdentityAdmissionSink(writer.recordExecutionIdentity);
@@ -755,7 +755,7 @@ describe("audit event writer", () => {
       },
       coverage: { state: "unknown", missingEvidence: ["invoker.principal"] },
     });
-    const persisted = openOpenClawStateDatabase(database)
+    const persisted = openCarapaceStateDatabase(database)
       .db.prepare(
         "SELECT context_json FROM execution_identity_contexts WHERE execution_id IN (?, ?) ORDER BY execution_id",
       )
@@ -776,8 +776,8 @@ describe("audit event writer", () => {
   });
 
   it("prunes expired identity contexts before preserving exact-envelope conflicts", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     persistExecutionIdentityAdmissionEnvelope(
       captureExecutionIdentityAdmissionEnvelope(
         {
@@ -790,13 +790,13 @@ describe("audit event writer", () => {
       ),
       { ...database, now: 0 },
     );
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const errors: string[] = [];
     const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
     await writer.ready;
     expect(
-      openOpenClawStateDatabase(database)
+      openCarapaceStateDatabase(database)
         .db.prepare("SELECT COUNT(*) AS count FROM execution_identity_contexts")
         .get(),
     ).toEqual({ count: 0 });
@@ -878,7 +878,7 @@ describe("audit event writer", () => {
         },
       },
     });
-    const persisted = openOpenClawStateDatabase(database)
+    const persisted = openCarapaceStateDatabase(database)
       .db.prepare("SELECT context_json FROM execution_identity_contexts WHERE run_id = ?")
       .get("ordered-run") as { context_json: string };
     for (const raw of ["raw-conflict-source", "raw-conflict-principal"]) {
@@ -898,14 +898,14 @@ describe("audit event writer", () => {
       { runtimeInstanceId: "runtime-1" },
     );
 
-    const schemaStateDir = tempDirs.make("openclaw-audit-writer-");
-    const schemaDatabase = { env: { OPENCLAW_STATE_DIR: schemaStateDir } };
-    openOpenClawStateDatabase(schemaDatabase).db.exec(`
+    const schemaStateDir = tempDirs.make("carapace-audit-writer-");
+    const schemaDatabase = { env: { CARAPACE_STATE_DIR: schemaStateDir } };
+    openCarapaceStateDatabase(schemaDatabase).db.exec(`
       CREATE VIEW execution_identity_contexts AS
       SELECT 'context' AS context_id, 'run' AS run_id, 0 AS created_at,
              'unattributed' AS coverage_state, 2 AS context_bytes, '{}' AS context_json;
     `);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const schemaErrors: string[] = [];
     const schemaWriter = createAuditEventWriter({
       stateDir: schemaStateDir,
@@ -918,8 +918,8 @@ describe("audit event writer", () => {
     await schemaWriter.stop();
     expect(schemaErrors).toContain("audit execution identity persistence failed");
 
-    const insertStateDir = tempDirs.make("openclaw-audit-writer-");
-    const insertDatabase = { env: { OPENCLAW_STATE_DIR: insertStateDir } };
+    const insertStateDir = tempDirs.make("carapace-audit-writer-");
+    const insertDatabase = { env: { CARAPACE_STATE_DIR: insertStateDir } };
     persistExecutionIdentityAdmissionEnvelope(
       captureExecutionIdentityAdmissionEnvelope(
         {
@@ -932,7 +932,7 @@ describe("audit event writer", () => {
       ),
       insertDatabase,
     );
-    const insertDb = openOpenClawStateDatabase(insertDatabase).db;
+    const insertDb = openCarapaceStateDatabase(insertDatabase).db;
     insertDb.exec(`
       CREATE TRIGGER reject_identity_insert
       BEFORE INSERT ON execution_identity_contexts
@@ -959,8 +959,8 @@ describe("audit event writer", () => {
   });
 
   it("keeps malformed, serialization, and key failures nonblocking and redaction-safe", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-writer-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-writer-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const rawSecret = "raw-worker-message-secret";
     persistExecutionIdentityAdmissionEnvelope(
       captureExecutionIdentityAdmissionEnvelope(
@@ -974,8 +974,8 @@ describe("audit event writer", () => {
       ),
       database,
     );
-    openOpenClawStateDatabase(database).db.exec("DELETE FROM audit_identity_keys;");
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceStateDatabase(database).db.exec("DELETE FROM audit_identity_keys;");
+    closeCarapaceStateDatabaseForTest();
     const errors: string[] = [];
     const writer = createAuditEventWriter({
       stateDir,

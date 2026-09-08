@@ -242,7 +242,7 @@ export function renderAgents(props: AgentsProps) {
             agentOptions.length > 1
               ? html`
                   <div class="agents-control-select">
-                    <openclaw-agent-select
+                    <carapace-agent-select
                       .options=${agentOptions}
                       .value=${selectedId ?? ""}
                       .accessibleLabel=${t("usage.filters.agent")}
@@ -250,7 +250,7 @@ export function renderAgents(props: AgentsProps) {
                       .disabled=${props.loading}
                       .onSelect=${props.onSelectAgent}
                       .onCreateAgent=${props.access.canCreateAgent ? props.onCreateAgent : null}
-                    ></openclaw-agent-select>
+                    ></carapace-agent-select>
                   </div>
                 `
               : nothing
@@ -531,9 +531,9 @@ export function renderAgents(props: AgentsProps) {
                               onClick: () => props.onOpenMemoryImport?.(),
                             })}
                           </div>
-                          <openclaw-agent-memory-panel
+                          <carapace-agent-memory-panel
                             .agentId=${selectedAgent.id}
-                          ></openclaw-agent-memory-panel>
+                          ></carapace-agent-memory-panel>
                         `
                       : nothing
                   }

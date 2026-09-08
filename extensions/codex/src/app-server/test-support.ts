@@ -4,8 +4,8 @@
  */
 import { EventEmitter } from "node:events";
 import { PassThrough, Writable } from "node:stream";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { expect, vi } from "vitest";
 import { resolveCodexAppServerHomeDir } from "./auth-start-options.js";
 import { CodexAppServerClient } from "./client.js";
@@ -68,7 +68,7 @@ export function createCodexTestToolTerminalObserver(): NonNullable<
   };
 }
 
-export { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+export { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 
 /** Positional naked-client injection contract confined to tests. */
 export type CodexTestAppServerClientFactory = (

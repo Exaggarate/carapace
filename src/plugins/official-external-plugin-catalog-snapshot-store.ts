@@ -1,4 +1,4 @@
-/** Persists hosted official external plugin catalog snapshots in OpenClaw state. */
+/** Persists hosted official external plugin catalog snapshots in Carapace state. */
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import {
@@ -7,13 +7,13 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   HostedCatalogSignedFeedMonotonicityError,
   type HostedOfficialExternalPluginCatalogMetadata,
@@ -47,7 +47,7 @@ type HostedCatalogSnapshotRow = {
 };
 
 type HostedCatalogSnapshotDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "official_external_plugin_catalog_snapshots"
 >;
 
@@ -65,13 +65,13 @@ function resolveStoreEnv(
   }
   return {
     ...(options.env ?? process.env),
-    OPENCLAW_STATE_DIR: options.stateDir,
+    CARAPACE_STATE_DIR: options.stateDir,
   };
 }
 
 function resolveStateDatabaseOptions(
   options: HostedOfficialExternalPluginCatalogSnapshotStoreOptions,
-): OpenClawStateDatabaseOptions {
+): CarapaceStateDatabaseOptions {
   const env = resolveStoreEnv(options);
   return {
     ...(env ? { env } : {}),
@@ -85,7 +85,7 @@ function resolveStateDatabasePath(
   if (options.stateDatabasePath) {
     return options.stateDatabasePath;
   }
-  return resolveOpenClawStateSqlitePath(resolveStoreEnv(options) ?? process.env);
+  return resolveCarapaceStateSqlitePath(resolveStoreEnv(options) ?? process.env);
 }
 
 function rowToTrustState(
@@ -230,7 +230,7 @@ function rowToSnapshot(
   };
 }
 
-/** Creates a snapshot store backed by the shared `state/openclaw.sqlite` database. */
+/** Creates a snapshot store backed by the shared `state/carapace.sqlite` database. */
 export function createSqliteHostedOfficialExternalPluginCatalogSnapshotStore(
   options: HostedOfficialExternalPluginCatalogSnapshotStoreOptions = {},
 ): HostedOfficialExternalPluginCatalogSnapshotStore {
@@ -240,7 +240,7 @@ export function createSqliteHostedOfficialExternalPluginCatalogSnapshotStore(
       if (!existsSync(pathname)) {
         return null;
       }
-      const database = openOpenClawStateDatabase(resolveStateDatabaseOptions(options));
+      const database = openCarapaceStateDatabase(resolveStateDatabaseOptions(options));
       const stateDb = getNodeSqliteKysely<HostedCatalogSnapshotDatabase>(database.db);
       const row = executeSqliteQueryTakeFirstSync(
         database.db,
@@ -266,7 +266,7 @@ export function createSqliteHostedOfficialExternalPluginCatalogSnapshotStore(
     },
     async write(snapshot) {
       const now = Date.now();
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         const stateDb = getNodeSqliteKysely<HostedCatalogSnapshotDatabase>(database.db);
         const current = executeSqliteQueryTakeFirstSync(
           database.db,

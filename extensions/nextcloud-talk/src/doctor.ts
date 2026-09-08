@@ -1,10 +1,10 @@
 // Nextcloud Talk plugin module implements doctor behavior.
 import os from "node:os";
 import path from "node:path";
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
-import { fileExists } from "openclaw/plugin-sdk/file-access-runtime";
-import { migratePersistentDedupeLegacyJsonFile } from "openclaw/plugin-sdk/persistent-dedupe";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import type { ChannelDoctorAdapter } from "carapace/plugin-sdk/channel-contract";
+import { fileExists } from "carapace/plugin-sdk/file-access-runtime";
+import { migratePersistentDedupeLegacyJsonFile } from "carapace/plugin-sdk/persistent-dedupe";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import { listNextcloudTalkAccountIds, resolveNextcloudTalkAccount } from "./accounts.js";
 import { probeNextcloudTalkBotResponseFeature } from "./bot-preflight.js";
 import {

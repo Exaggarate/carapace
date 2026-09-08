@@ -52,7 +52,7 @@ afterEach(() => {
 
 describe("git-hooks/pre-commit (integration)", () => {
   it("does not treat staged filenames as git-add flags (e.g. --all)", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-pre-commit-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-pre-commit-");
     run(dir, "git", ["init", "-q", "--initial-branch=main"]);
 
     // Use the real hook script and lightweight helper stubs.
@@ -76,7 +76,7 @@ describe("git-hooks/pre-commit (integration)", () => {
   it.each(["configured", "unconfigured", "external"])(
     "formats staged files with %s private rules",
     (mode) => {
-      const dir = makeTempRepoRoot(tempDirs, "openclaw-pre-commit-normal-");
+      const dir = makeTempRepoRoot(tempDirs, "carapace-pre-commit-normal-");
       run(dir, "git", ["init", "-q", "--initial-branch=main"]);
       const fakeBinDir = installPreCommitFixture(dir);
       const logPath = installFormattingRecorder(dir);
@@ -84,7 +84,7 @@ describe("git-hooks/pre-commit (integration)", () => {
         run(dir, "git", ["config", "--local", "--unset", ruleSetting]);
         unlinkSync(path.join(dir, rulePath));
       } else if (mode === "external") {
-        const privateDir = makeTempRepoRoot(tempDirs, "openclaw-private-rules-");
+        const privateDir = makeTempRepoRoot(tempDirs, "carapace-private-rules-");
         const privatePath = path.join(privateDir, "private rules.txt");
         copyFileSync(path.join(dir, rulePath), privatePath);
         unlinkSync(path.join(dir, rulePath));
@@ -189,7 +189,7 @@ case "$*" in *--stdin-filepath=*) sed 's/FORMAT_ME/FORMATTED/' ;; esac
   });
 
   it("does not run the changed-scope check for non-doc staged changes", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-pre-commit-no-check-changed-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-pre-commit-no-check-changed-");
     run(dir, "git", ["init", "-q", "--initial-branch=main"]);
 
     const fakeBinDir = installPreCommitFixture(dir);
@@ -212,7 +212,7 @@ case "$*" in *--stdin-filepath=*) sed 's/FORMAT_ME/FORMATTED/' ;; esac
   });
 
   it("does not re-add staged paths that are ignored by the current .gitignore", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-pre-commit-ignored-staged-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-pre-commit-ignored-staged-");
     run(dir, "git", ["init", "-q", "--initial-branch=main"]);
 
     const fakeBinDir = installPreCommitFixture(dir);
@@ -236,7 +236,7 @@ case "$*" in *--stdin-filepath=*) sed 's/FORMAT_ME/FORMATTED/' ;; esac
   });
 
   it("does not invoke pnpm when FAST_COMMIT is set", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-pre-commit-fast-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-pre-commit-fast-");
     run(dir, "git", ["init", "-q", "--initial-branch=main"]);
 
     const fakeBinDir = installPreCommitFixture(dir);
@@ -528,7 +528,7 @@ describe("staged content guard", () => {
 
 describe("scripts/pre-commit/run-node-tool.sh", () => {
   it("runs the installed local tool without invoking pnpm", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-run-node-tool-local-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-run-node-tool-local-");
     installRunNodeToolFixture(dir);
     writeFileSync(path.join(dir, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n", "utf8");
 
@@ -551,7 +551,7 @@ describe("scripts/pre-commit/run-node-tool.sh", () => {
   });
 
   it("fails before pnpm can hydrate dependencies when node_modules is missing", () => {
-    const dir = makeTempRepoRoot(tempDirs, "openclaw-run-node-tool-missing-deps-");
+    const dir = makeTempRepoRoot(tempDirs, "carapace-run-node-tool-missing-deps-");
     installRunNodeToolFixture(dir);
     writeFileSync(path.join(dir, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n", "utf8");
 

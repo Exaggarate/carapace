@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import type { Duplex } from "node:stream";
 import { fileURLToPath } from "node:url";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { chromium, type BrowserContext } from "playwright-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { chromeMcpSessions } from "../src/browser/chrome-mcp-state.js";
@@ -34,7 +34,7 @@ declare const chrome: {
 };
 
 const runE2E =
-  process.env.OPENCLAW_BROWSER_EXTENSION_E2E === "1" &&
+  process.env.CARAPACE_BROWSER_EXTENSION_E2E === "1" &&
   (process.platform === "linux" || process.platform === "darwin");
 const cleanups: Array<() => Promise<void>> = [];
 const STORE_ORIGIN = "chrome-extension://kcdjddhmeafeomebliikmbpblkmkfoig/";
@@ -69,7 +69,7 @@ async function waitForExtensionId(context: BrowserContext, extensionPath: string
       setTimeout(resolve, 100);
     });
   } while (Date.now() < deadline);
-  throw new Error("Chromium did not report the loaded OpenClaw extension");
+  throw new Error("Chromium did not report the loaded Carapace extension");
 }
 
 async function loadUnpackedExtension(
@@ -97,13 +97,13 @@ async function exactOwnedManifestsExist(
         key?: unknown;
       };
       if (
-        manifest.name !== "ai.openclaw.browser_bootstrap" ||
+        manifest.name !== "ai.carapace.browser_bootstrap" ||
         typeof manifest.path !== "string" ||
         Object.hasOwn(manifest, "key") ||
         !Array.isArray(manifest.allowed_origins) ||
         JSON.stringify(manifest.allowed_origins) !== JSON.stringify(expectedOrigins) ||
         !(await fs.readFile(manifest.path, "utf8")).includes(
-          "# OpenClaw native messaging bootstrap v1",
+          "# Carapace native messaging bootstrap v1",
         )
       ) {
         return false;
@@ -160,12 +160,12 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
       diagnostic.flush();
     });
     const root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-extension-e2e-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-extension-e2e-")),
     );
     cleanups.push(async () => await fs.rm(root, { recursive: true, force: true }));
     const homeDir = path.join(root, "home");
     const stateDir = path.join(root, "custom-state");
-    const configPath = path.join(root, "custom-config", "openclaw.json");
+    const configPath = path.join(root, "custom-config", "carapace.json");
     const gatewayPort = await getFreePort();
     let relayPort = await getFreePort();
     while (relayPort === gatewayPort) {
@@ -195,9 +195,9 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
     );
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_GATEWAY_PORT: String(gatewayPort),
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_GATEWAY_PORT: String(gatewayPort),
       },
       async () => {
         const extensionSource = path.dirname(fileURLToPath(import.meta.url));
@@ -214,9 +214,9 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
           env: {
             HOME: homeDir,
             ...chromeRootEnv,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_GATEWAY_PORT: String(gatewayPort),
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_GATEWAY_PORT: String(gatewayPort),
           },
           ...launchFixture,
         };
@@ -225,7 +225,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
             diagnostic.mark("http.request", true);
             res.once("finish", () => diagnostic.mark("http.finish", res.statusCode));
             res.writeHead(200, { "content-type": "text/html" });
-            res.end("<title>OpenClaw selected tab</title><h1>OpenClaw created destination</h1>");
+            res.end("<title>Carapace selected tab</title><h1>Carapace created destination</h1>");
             return;
           }
           res.writeHead(426);
@@ -304,7 +304,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
         const relevantManifestPaths = chromeProductRoots(deps)
           .filter((productRoot) => productRoot.userDataDir === userDataDir)
           .map((productRoot) =>
-            path.join(productRoot.nativeManifestDir, "ai.openclaw.browser_bootstrap.json"),
+            path.join(productRoot.nativeManifestDir, "ai.carapace.browser_bootstrap.json"),
           );
         const installPromise = installChromeExtensionBootstrap({
           bundledDir: extensionSource,
@@ -368,7 +368,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
         const controlled = await context.newPage();
         await controlled.goto(
           `data:text/html,${encodeURIComponent(
-            '<title>OpenClaw E2E</title><style>body{margin:0}#spacer{height:2200px}#target{display:block;width:240px;height:96px;background:#1457d9;color:white;border:0;font:20px sans-serif}</style><div id="spacer"></div><button id="target">Offscreen target</button>',
+            '<title>Carapace E2E</title><style>body{margin:0}#spacer{height:2200px}#target{display:block;width:240px;height:96px;background:#1457d9;color:white;border:0;font:20px sans-serif}</style><div id="spacer"></div><button id="target">Offscreen target</button>',
           )}`,
         );
 
@@ -425,7 +425,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
         }
         const existingSessionProfile = "e2e-existing-session";
         const relayAuthorization = `Basic ${Buffer.from(
-          `openclaw-internal:${relay.internalToken}`,
+          `carapace-internal:${relay.internalToken}`,
         ).toString("base64")}`;
         const relayVersionResponse = await fetch(`http://127.0.0.1:${relay.port}/json/version`, {
           headers: { Authorization: relayAuthorization },
@@ -440,7 +440,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
           ...extensionProfile,
           driver: "existing-session",
           attachOnly: true,
-          cdpUrl: `http://openclaw-internal:${encodeURIComponent(relay.internalToken)}@127.0.0.1:${relay.port}`,
+          cdpUrl: `http://carapace-internal:${encodeURIComponent(relay.internalToken)}@127.0.0.1:${relay.port}`,
           mcpArgs: [
             "--wsEndpoint",
             relayVersion.webSocketDebuggerUrl,
@@ -518,7 +518,7 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
           expect(connectOverCdp).not.toHaveBeenCalled();
           const bindingSession = await relayPlaywrightContext.newCDPSession(relayPage);
           const observerSession = await relayPlaywrightContext.newCDPSession(relayPage);
-          const bindingName = "__openclawRelayBindingProof";
+          const bindingName = "__carapaceRelayBindingProof";
           diagnostic.identifyContextBinding(bindingName);
           const bindingPayloads: string[] = [];
           const observerPayloads: string[] = [];
@@ -536,13 +536,13 @@ describe.runIf(runE2E)("Chrome native bootstrap Chromium E2E", () => {
             await observerSession.send("Runtime.enable");
             await bindingSession.send("Runtime.addBinding", { name: bindingName });
             await bindingSession.send("Runtime.evaluate", {
-              expression: "globalThis.__openclawRelayBindingProof('before-enable')",
+              expression: "globalThis.__carapaceRelayBindingProof('before-enable')",
             });
             await expect.poll(() => bindingPayloads).toEqual(["before-enable"]);
             await bindingSession.send("Runtime.enable");
             await bindingSession.send("Runtime.disable");
             await bindingSession.send("Runtime.evaluate", {
-              expression: "globalThis.__openclawRelayBindingProof('after-disable')",
+              expression: "globalThis.__carapaceRelayBindingProof('after-disable')",
             });
             await expect.poll(() => bindingPayloads).toEqual(["before-enable", "after-disable"]);
             expect(observerPayloads).toEqual([]);

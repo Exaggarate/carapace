@@ -1,13 +1,13 @@
-// Venice plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Venice plugin entrypoint registers its Carapace integration.
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import {
   applyModelCompatPatch,
   type ModelCompatConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { VENICE_MODEL_DISCOVERY_OPTIONS } from "./models.js";
 import { applyVeniceConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildStaticVeniceProvider } from "./provider-catalog.js";
 import { createVeniceStreamWrapper } from "./stream.js";
 import { fetchVeniceUsage } from "./usage.js";

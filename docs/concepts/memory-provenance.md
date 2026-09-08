@@ -9,8 +9,8 @@ read_when:
   - You are reviewing memory provenance, deletion coverage, or retained data
 ---
 
-OpenClaw records source-session lineage for memories staged by automatic
-session ingestion and historical session backfill. `openclaw memory forget` uses that lineage to remove
+Carapace records source-session lineage for memories staged by automatic
+session ingestion and historical session backfill. `carapace memory forget` uses that lineage to remove
 tracked entries and related artifacts, and records the selected sessions as
 forgotten so later ingestion does not restore them.
 
@@ -36,8 +36,8 @@ sessions to find the full session key or ID. Session IDs are exact and
 case-sensitive; an abbreviation does not select a longer ID:
 
 ```bash
-openclaw sessions --agent <agent-id> --limit all --json
-openclaw memory forget --agent <agent-id> --session <id-or-key> --dry-run --json
+carapace sessions --agent <agent-id> --limit all --json
+carapace memory forget --agent <agent-id> --session <id-or-key> --dry-run --json
 ```
 
 Check `sessionResolutions` for the intended sessions, `entryKeys` and
@@ -48,7 +48,7 @@ neither is a complete inventory of data that will remain.
 When the selection is correct, repeat the same command without `--dry-run`:
 
 ```bash
-openclaw memory forget --agent <agent-id> --session <id-or-key> --json
+carapace memory forget --agent <agent-id> --session <id-or-key> --json
 ```
 
 There is no additional confirmation prompt or `--apply` flag. A preview is
@@ -162,7 +162,7 @@ Matching requires retained session metadata; missing fields do not match a
 rule. Both controls honor the configured `session.store`, including custom
 and shared stores, while keeping selection scoped to the chosen agent. Older
 retained records may have only a coarse `webhook` classification; without the
-original exact source, OpenClaw does not infer `email` or `webhook` for matching.
+original exact source, Carapace does not infer `email` or `webhook` for matching.
 Select those sessions explicitly by full ID.
 
 Automatic dreaming separately skips retained archives. To exclude an
@@ -219,7 +219,7 @@ history, and missing historical lineage is not reconstructed.
 Indexing checks again before publishing chunks or cached embeddings, so a
 result prepared before the purge cannot restore forgotten session data or a
 stale memory-file snapshot. An affected index run reports that its source
-changed; rerun `openclaw memory index --agent <agent-id>` to index current data.
+changed; rerun `carapace memory index --agent <agent-id>` to index current data.
 
 Repeating a purge does not lift that exclusion. It applies to those session
 IDs in that agent's store, not to future conversations with the same person
@@ -259,7 +259,7 @@ matching rules. It is not a certificate that no related information remains.
 For a participant, start with a preview in each relevant agent:
 
 ```bash
-openclaw memory forget --agent <agent-id> --participant <actor-id> --dry-run --json
+carapace memory forget --agent <agent-id> --participant <actor-id> --dry-run --json
 ```
 
 Verify the resolved session IDs before removing `--dry-run`. This removes
@@ -270,7 +270,7 @@ from an archive, add its explicit `--session <id-or-key>` selector.
 For a source, use its recorded hook identifier:
 
 ```bash
-openclaw memory forget --agent <agent-id> --hook-source gmail --dry-run --json
+carapace memory forget --agent <agent-id> --hook-source gmail --dry-run --json
 ```
 
 After applying the reviewed selection, inspect retained files and untracked

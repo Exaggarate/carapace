@@ -18,7 +18,7 @@ describe("embedded runner compatibility aliases", () => {
   it("normalizes shipped runtime aliases", () => {
     // These aliases appear in persisted/runtime-facing config and must resolve
     // before model/provider dispatch observes the runtime id.
-    expect(normalizeEmbeddedAgentRuntime("pi")).toBe("openclaw");
+    expect(normalizeEmbeddedAgentRuntime("pi")).toBe("carapace");
     expect(normalizeEmbeddedAgentRuntime("codex-app-server")).toBe("codex");
   });
 

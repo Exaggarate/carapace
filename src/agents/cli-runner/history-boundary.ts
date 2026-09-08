@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   isKnownCliHistoryBoundary,
   type CliHistoryBoundary,

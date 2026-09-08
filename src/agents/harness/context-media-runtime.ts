@@ -1,6 +1,6 @@
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
+import { MAX_IMAGE_BYTES } from "@carapace/media-core/constants";
 import { buildInboundMediaNoteProjection } from "../../auto-reply/media-note.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ImageContent } from "../../llm/types.js";
 import { prepareFileContextFromMedia } from "../../media-understanding/file-context.js";
 import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
@@ -23,7 +23,7 @@ import { sanitizeImageBlocks } from "../tool-images.js";
 export async function prepareHarnessContextMedia(params: {
   message: AgentMessage;
   maxChars: number;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   modelInput: string[];
   agentId?: string;

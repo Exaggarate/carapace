@@ -33,7 +33,7 @@ type BodyScenario = {
 };
 
 function prepareBody(scenario: BodyScenario) {
-  const root = tempDirs.make("openclaw-merge-attribution-");
+  const root = tempDirs.make("carapace-merge-attribution-");
   const sourceRepo = join(root, "source");
   const trailerMarker = join(root, "trailer-command-called");
   const body = join(root, "body");
@@ -200,7 +200,7 @@ file=$(prepare_squash_merge_body 123 "$snapshot")
             GIT_CONFIG_VALUE_0: "Unrequested-Metadata",
             GIT_CONFIG_KEY_1: "trailer.audit.command",
             GIT_CONFIG_VALUE_1:
-              'printf invoked > "$OPENCLAW_TEST_TRAILER_MARKER"; printf "unrequested value"',
+              'printf invoked > "$CARAPACE_TEST_TRAILER_MARKER"; printf "unrequested value"',
           }
         : {}),
       ...(scenario.trailerSeparators
@@ -210,7 +210,7 @@ file=$(prepare_squash_merge_body 123 "$snapshot")
             GIT_CONFIG_VALUE_0: scenario.trailerSeparators,
           }
         : {}),
-      OPENCLAW_TEST_TRAILER_MARKER: trailerMarker,
+      CARAPACE_TEST_TRAILER_MARKER: trailerMarker,
       BODY_MERGE_SCRIPT: mergeScript,
       BODY_HEAD: publishedHead,
       BODY_LOCAL_HEAD: localHead,

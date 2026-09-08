@@ -230,7 +230,7 @@ function createInspectionFixture(options?: {
 }) {
   useNoBundledPlugins();
   const id = `owned-inspection-${inspectionFixtureId++}`;
-  const key = `__openclaw_${id}`;
+  const key = `__carapace_${id}`;
   const connections: InspectionConnection[] = [];
   const resume = createDeferredCore();
   const finishDisposal = createDeferredCore();
@@ -476,7 +476,7 @@ describe("owned plugin inspections", () => {
     try {
       warnings = collectContextEngineHostCompatibilityWarnings({
         cfg: fixture.config,
-        doctorFixCommand: "openclaw doctor --fix",
+        doctorFixCommand: "carapace doctor --fix",
       });
       await vi.waitFor(() => expect(fixture.state.connections).toHaveLength(1));
       let completed = false;

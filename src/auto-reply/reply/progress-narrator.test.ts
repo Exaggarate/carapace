@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { PROGRESS_STATUS_PREAMBLE_FRESH_MS } from "../../channels/progress-draft-compositor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GetReplyOptions } from "../get-reply-options.types.js";
 import type { InternalGetReplyOptions } from "./get-reply.types.js";
 import type { ProgressNarrationInput } from "./progress-narrator-model.js";
@@ -48,10 +48,10 @@ vi.mock("./progress-narrator-model.js", async (importOriginal) => {
 
 import { attachProgressNarratorToReplyOptions } from "./progress-narrator.js";
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const narratorCfg = {
   agents: { defaults: { utilityModel: "openai/gpt-5.5-mini" } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 // The narrator runs generations on a detached promise; drain microtasks so
 // onUpdate assertions observe the settled state.
@@ -596,7 +596,7 @@ describe("progress narration through reply options", () => {
 describe("attachProgressNarratorToReplyOptions", () => {
   const utilityCfg = {
     agents: { defaults: { utilityModel: "openai/gpt-5.5-mini" } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it("returns options unchanged without a narration callback", () => {
     const opts: GetReplyOptions = { onToolStart: vi.fn() };
@@ -615,7 +615,7 @@ describe("attachProgressNarratorToReplyOptions", () => {
   it("returns options unchanged when utility routing is explicitly disabled", () => {
     const disabledCfg = {
       agents: { defaults: { utilityModel: "" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const opts: GetReplyOptions = { onNarrationUpdate: vi.fn(), onToolStart: vi.fn() };
     expect(attachProgressNarratorToReplyOptions({ cfg: disabledCfg, agentId: "main", opts })).toBe(
       opts,

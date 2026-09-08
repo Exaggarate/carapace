@@ -1,5 +1,5 @@
 /** Model descriptors and prompt metadata without runtime discovery or credential policy. */
-export { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+export { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 export { DEFAULT_CONTEXT_TOKENS } from "../agents/defaults.js";
 export {
   isGpt5ModelId,

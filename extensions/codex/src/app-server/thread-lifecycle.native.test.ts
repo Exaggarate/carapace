@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-store-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-store-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCodexNativeTestState } from "./native-app-server.test-support.js";
 import { isJsonObject } from "./protocol.js";
@@ -32,7 +32,7 @@ describe("native Codex cold thread recovery", () => {
       const tempDirs = useAutoCleanupTempDirTracker(context.onTestFinished);
       const root = await fs.realpath(tempDirs.make("codex-missing-thread-"));
       const native = await createCodexNativeTestState(root);
-      vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "state"));
+      vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "state"));
       vi.stubEnv("HOME", native.env.HOME);
       vi.stubEnv("CODEX_HOME", native.codexHome);
       let requests = 0;

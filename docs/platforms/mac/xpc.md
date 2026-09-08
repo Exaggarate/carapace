@@ -1,13 +1,13 @@
 ---
-summary: "macOS IPC architecture for OpenClaw app, gateway node transport, and PeekabooBridge"
+summary: "macOS IPC architecture for Carapace app, gateway node transport, and PeekabooBridge"
 read_when:
   - Editing IPC contracts or menu bar app IPC
 title: "macOS IPC"
 ---
 
-# OpenClaw macOS IPC architecture
+# Carapace macOS IPC architecture
 
-A local Unix socket connects the node host service to the macOS app for exec approvals and `system.run`. The bundled `openclaw-mac` CLI uses a separate local control socket to inspect and configure primary and saved Gateway connections. Agent actions still flow through the Gateway WebSocket and `node.invoke`. The node-backed `computer.act` path runs embedded Peekaboo automation in-process; standalone Peekaboo clients use PeekabooBridge.
+A local Unix socket connects the node host service to the macOS app for exec approvals and `system.run`. The bundled `carapace-mac` CLI uses a separate local control socket to inspect and configure primary and saved Gateway connections. Agent actions still flow through the Gateway WebSocket and `node.invoke`. The node-backed `computer.act` path runs embedded Peekaboo automation in-process; standalone Peekaboo clients use PeekabooBridge.
 
 ## Goals
 
@@ -43,7 +43,7 @@ Agent -> Gateway -> Node Service (WS)
 
 ### App control socket
 
-`openclaw-mac` sends one JSONL request and receives one JSONL response per
+`carapace-mac` sends one JSONL request and receives one JSONL response per
 Unix-domain connection. The running app starts and stops this listener with
 its exec-approvals lifecycle owner. The shared listener owns the socket path
 lease, guarded filesystem cleanup, connection framing, and shutdown drainage.
@@ -68,9 +68,9 @@ or stdin. Saved-Gateway requests use `name`, `url`, and `browser`, or
 `idOrName` for removal/reconnection. Matching tries an exact ID first, then a
 unique case-insensitive name. Ambiguity is an error with candidate names/IDs.
 
-The default profile uses `~/.openclaw/mac-control.sock` and
-`~/.openclaw/mac-control.token`. Named profiles use the corresponding
-`~/.openclaw-<name>/` directory. These paths follow
+The default profile uses `~/.carapace/mac-control.sock` and
+`~/.carapace/mac-control.token`. Named profiles use the corresponding
+`~/.carapace-<name>/` directory. These paths follow
 `AppProfile.stateDirectoryURL`, independently of config/state environment
 overrides. The app owns token creation. The token must be a regular,
 user-owned file with mode `0600`; missing or unsafe credentials reject
@@ -103,8 +103,8 @@ profile selection, safe credential input, and background app launch.
 ### PeekabooBridge (UI automation)
 
 - The built-in agent `computer` tool does **not** use this socket. A paired macOS node fulfills `computer.act` in the app process with embedded Peekaboo services.
-- UI automation uses a separate UNIX socket (`~/Library/Application Support/OpenClaw/<socket>`) and the PeekabooBridge JSON protocol.
-- Host preference order (client-side): Peekaboo.app -> Claude.app -> OpenClaw.app -> local execution.
+- UI automation uses a separate UNIX socket (`~/Library/Application Support/Carapace/<socket>`) and the PeekabooBridge JSON protocol.
+- Host preference order (client-side): Peekaboo.app -> Claude.app -> Carapace.app -> local execution.
 - Security: bridge hosts require the exact signed Peekaboo client bundle identifier and Peekaboo's canonical
   current/legacy release signer set; a DEBUG-only same-UID escape hatch is guarded by
   `PEEKABOO_ALLOW_UNSIGNED_SOCKET_CLIENTS=1` (Peekaboo convention).
@@ -122,7 +122,7 @@ profile selection, safe credential input, and background app launch.
 - All communication remains local-only; no network sockets are exposed.
 - TCC prompts originate only from the GUI app bundle; keep the signed bundle ID stable across rebuilds.
 - Exec approvals socket hardening: file mode `0600`, shared token stored in the
-  `exec_approvals_config` row of `state/openclaw.sqlite`, peer-UID check
+  `exec_approvals_config` row of `state/carapace.sqlite`, peer-UID check
   (`getpeereid`), HMAC-SHA256 challenge/response, and a short TTL on requests.
 
 ## Related

@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { resolveGatewayStartupMaintenanceReason } from "../cli/gateway-cli/startup-maintenance.js";
-import { OpenClawStateDatabaseSchemaMigrationRequiredError } from "../state/openclaw-state-db-schema-migration-required.js";
+import { CarapaceStateDatabaseSchemaMigrationRequiredError } from "../state/carapace-state-db-schema-migration-required.js";
 import { throwStartupMigrationRefusal } from "./doctor-startup-migration-refusal.js";
 
 describe("startup refusal handoff", () => {
   it("preserves maintenance classification after the preflight exit", () => {
-    const cause = new OpenClawStateDatabaseSchemaMigrationRequiredError(
+    const cause = new CarapaceStateDatabaseSchemaMigrationRequiredError(
       "audit-events-v2",
-      "/synthetic/state/openclaw.sqlite",
+      "/synthetic/state/carapace.sqlite",
     );
     const output = vi.spyOn(console, "error").mockImplementation(() => undefined);
     let refusal: unknown;

@@ -1,21 +1,21 @@
 // Formats port probe results for diagnostics and CLI output.
 import net from "node:net";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { formatCliCommand } from "../cli/command-format.js";
 import { parseTcpListenerEndpoint } from "./ports-netstat.js";
 import type { PortListener, PortListenerKind, PortUsage } from "./ports-types.js";
 
-/** Classifies a listener as OpenClaw Gateway, SSH tunnel, known non-gateway, or unknown. */
+/** Classifies a listener as Carapace Gateway, SSH tunnel, known non-gateway, or unknown. */
 export function classifyPortListener(listener: PortListener, _port: number): PortListenerKind {
   const command = normalizeLowercaseStringOrEmpty(listener.command ?? "");
   const commandLine = normalizeLowercaseStringOrEmpty(listener.commandLine ?? "");
   // The inspected command identifies the listener owner. Check it before argv,
-  // where a socat forward may name OpenClaw. Observed macOS output also uses `socat1`.
+  // where a socat forward may name Carapace. Observed macOS output also uses `socat1`.
   if (command === "socat" || command === "socat1" || command === "socat.exe") {
     return "non_gateway";
   }
   const raw = `${commandLine} ${command}`;
-  if (raw.includes("openclaw")) {
+  if (raw.includes("carapace")) {
     return "gateway";
   }
   const hasSshCommand = /(?:^|[/\\])ssh(?:\.exe)?$/.test(command);
@@ -169,7 +169,7 @@ export function buildPortHints(listeners: PortListener[], port: number): string[
   const expectedGatewayListeners = isExpectedGatewayListeners(listeners, port);
   if (kinds.has("gateway") && !expectedGatewayListeners) {
     hints.push(
-      `Gateway already running locally. Stop it (${formatCliCommand("openclaw gateway stop")}) or use a different port.`,
+      `Gateway already running locally. Stop it (${formatCliCommand("carapace gateway stop")}) or use a different port.`,
     );
   }
   if (kinds.has("ssh")) {

@@ -13,7 +13,7 @@ export function createUnitFastIsolatedVitestConfig(
   options: { argv?: string[] } = {},
 ) {
   const sharedTest = sharedVitestConfig.test ?? {};
-  const selectedPatterns = loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  const selectedPatterns = loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env);
   const isolatedTestFiles = getUnitFastIsolatedTestFiles(selectedPatterns);
   const includeFromEnv = intersectIncludePatterns(isolatedTestFiles, selectedPatterns);
   const cliInclude = narrowIncludePatternsForCli(isolatedTestFiles, options.argv);

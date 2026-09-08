@@ -1,10 +1,10 @@
 // Imessage tests cover doctor contract api plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract-api.js";
 
-function imessageConfig(entry: Record<string, unknown>): OpenClawConfig {
+function imessageConfig(entry: Record<string, unknown>): CarapaceConfig {
   return { channels: { imessage: entry } } as never;
 }
 

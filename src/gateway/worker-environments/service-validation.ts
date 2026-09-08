@@ -1,5 +1,5 @@
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Value } from "typebox/value";
 import { WorkerMachineOptionsSchema } from "../../../packages/gateway-protocol/src/schema/environments.js";
 import { normalizeCapabilityProviderId } from "../../plugins/provider-registry-shared.js";

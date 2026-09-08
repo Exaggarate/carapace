@@ -1,13 +1,13 @@
 // Control UI tests cover workboard behavior.
 import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
   WorkboardBoardSummary,
   WorkboardCard,
   WorkboardStatus,
-} from "@openclaw/workboard-contract";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "@carapace/workboard-contract";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import { WORKBOARD_CHANGED_EVENT } from "../../../../packages/workboard-contract/src/index.js";
@@ -26,10 +26,10 @@ import { workboardUi } from "../../test-helpers/control-ui-workboard-fixture.ts"
 const suite = createControlUiE2eSuite({
   name: "Control UI Workboard mocked Gateway E2E",
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed at ${executablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed at ${executablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const viewport = { height: 1000, width: 2400 };
 const baseTime = Date.parse("2026-06-01T18:00:00.000Z");
 const linkedSessionKey = "agent:main:workboard-proof";
@@ -179,7 +179,7 @@ function workboardConfigSnapshot() {
   return {
     config,
     hash: "workboard-e2e-config",
-    path: "/tmp/openclaw-e2e/openclaw.json",
+    path: "/tmp/carapace-e2e/carapace.json",
     raw: JSON.stringify(config, null, 2),
     resolved: config,
     sourceConfig: config,

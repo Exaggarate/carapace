@@ -1,15 +1,15 @@
 // OpenAI tests cover the native realtime voice bridge against the live API.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createRealtimeVoiceSessionHarness,
   type RealtimeVoiceResponseOutcome,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { describe, expect, it } from "vitest";
 import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY?.trim() ?? "";
-const LIVE_ENABLED = OPENAI_API_KEY.length > 0 && process.env.OPENCLAW_LIVE_TEST === "1";
+const LIVE_ENABLED = OPENAI_API_KEY.length > 0 && process.env.CARAPACE_LIVE_TEST === "1";
 const describeLive = LIVE_ENABLED ? describe : describe.skip;
 
 describeLive("OpenAI realtime voice lifecycle live", () => {

@@ -3,7 +3,7 @@ import { afterEach, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { loadSessionEntry, patchSessionEntryCore } from "../config/sessions/session-accessor.js";
 import type { InternalSessionEntry } from "../config/sessions/types.js";
-import { closeOpenClawAgentDatabaseByPath } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../state/carapace-agent-db.js";
 import {
   getSessionEntry,
   loadSessionStore,
@@ -15,7 +15,7 @@ import {
 const databases = new Set<string>();
 afterEach(() => {
   for (const database of databases) {
-    closeOpenClawAgentDatabaseByPath(database);
+    closeCarapaceAgentDatabaseByPath(database);
   }
   databases.clear();
 });
@@ -24,7 +24,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 it.each(["upsert", "whole-store", "patch"] as const)(
   "preserves private history provenance across a public %s without accepting injected ownership",
   async (operation) => {
-    const storePath = path.join(tempDirs.make("sdk-cli-history-"), "openclaw-agent.sqlite");
+    const storePath = path.join(tempDirs.make("sdk-cli-history-"), "carapace-agent.sqlite");
     databases.add(storePath);
     const sessionKey = "agent:main:history";
     const scope = { sessionKey, storePath };

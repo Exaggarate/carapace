@@ -26,7 +26,7 @@ function createTracking() {
 function startParsed(tracking: Tracking, toolCallId: string, args: Record<string, unknown>) {
   tracking.handleCliToolUseStart({
     toolCallId,
-    name: "mcp__openclaw__ask_user",
+    name: "mcp__carapace__ask_user",
     kind: "mcp_tool_use",
     args,
   });
@@ -75,7 +75,7 @@ describe("CLI loopback ask_user deadline tracking", () => {
 
     tracking.handleCliToolResult({
       toolCallId: "tool-1",
-      name: "mcp__openclaw__ask_user",
+      name: "mcp__carapace__ask_user",
       isError: false,
     });
     expect(tracking.getActiveLoopbackAskUserDeadline()).toBe(Date.now() + 70_000);
@@ -83,7 +83,7 @@ describe("CLI loopback ask_user deadline tracking", () => {
 
     tracking.handleCliToolResult({
       toolCallId: "tool-2",
-      name: "mcp__openclaw__ask_user",
+      name: "mcp__carapace__ask_user",
       isError: false,
     });
     expect(tracking.getActiveLoopbackAskUserDeadline()).toBeUndefined();
@@ -106,7 +106,7 @@ describe("CLI loopback ask_user deadline tracking", () => {
     expect(tracking.getActiveLoopbackAskUserDeadline()).toBeUndefined();
     tracking.handleCliToolResult({
       toolCallId: "invalid",
-      name: "mcp__openclaw__ask_user",
+      name: "mcp__carapace__ask_user",
       isError: true,
     });
 

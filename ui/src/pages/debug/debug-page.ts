@@ -15,7 +15,7 @@ import {
   loadGatewayDiagnostics,
 } from "../../lib/gateway-diagnostics.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import "../../styles/debug.css";
@@ -24,7 +24,7 @@ import { renderDebug } from "./view.ts";
 
 const DEBUG_POLL_INTERVAL_MS = 3000;
 
-class DebugPage extends OpenClawLightDomElement {
+class DebugPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -226,6 +226,6 @@ class DebugPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-debug-page")) {
-  customElements.define("openclaw-debug-page", DebugPage);
+if (!customElements.get("carapace-debug-page")) {
+  customElements.define("carapace-debug-page", DebugPage);
 }

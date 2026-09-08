@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { lobsterPetSeed } from "./lobster-pet-contract.ts";
 import { canonicalLobsterLook, createLobsterPetLook } from "./lobster-pet-look.ts";

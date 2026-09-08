@@ -209,7 +209,7 @@ describe("cloud worker settings state", () => {
       name: "changes provider",
       replacement: {
         provider: "static-ssh",
-        settings: { host: "worker.example.test", user: "openclaw" },
+        settings: { host: "worker.example.test", user: "carapace" },
       },
     },
     {

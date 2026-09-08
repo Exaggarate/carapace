@@ -3,10 +3,10 @@ import path from "node:path";
 import { afterEach, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { migrateLegacyMainSessionKeys } from "./legacy-main-session-migration.js";
 import { readExactSessionEntryRowForCanonicalRepair } from "./session-accessor.sqlite-canonical-repair.js";
 import { writeSessionEntry } from "./session-accessor.sqlite-entry-store.js";
@@ -14,11 +14,11 @@ import { writeSessionEntry } from "./session-accessor.sqlite-entry-store.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function databasePath(stateDir: string, agentId: string): string {
-  return path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+  return path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
 }
 
 function seedClaim(databaseAgentId: string, databasePathname: string, key: string): void {
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       writeSessionEntry(
         database,
@@ -32,22 +32,22 @@ function seedClaim(databaseAgentId: string, databasePathname: string, key: strin
 }
 
 function readClaim(databaseAgentId: string, databasePathname: string, key: string) {
-  return runOpenClawAgentWriteTransaction(
+  return runCarapaceAgentWriteTransaction(
     (database) => readExactSessionEntryRowForCanonicalRepair(database, key)?.entry,
     { agentId: databaseAgentId, path: databasePathname },
   );
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it("keys the startup shortcut to source layout and makes Doctor rescan", async () => {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-legacy-main-layout-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-legacy-main-layout-"));
   const stateDir = path.join(root, "state");
   fs.mkdirSync(stateDir, { recursive: true });
-  const env = { ...process.env, OPENCLAW_AGENT_DIR: undefined, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_AGENT_DIR: undefined, CARAPACE_STATE_DIR: stateDir };
   const cfg = { agents: { entries: { ops: {} } } };
   const mainPath = databasePath(stateDir, "main");
   const opsPath = databasePath(stateDir, "ops");
@@ -67,7 +67,7 @@ it("keys the startup shortcut to source layout and makes Doctor rescan", async (
 
   const restoredPath = path.join(root, "restored-main.sqlite");
   seedClaim("main", restoredPath, "agent:main:restored");
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   fs.renameSync(mainPath, `${mainPath}.before-restore`);
   fs.renameSync(restoredPath, mainPath);
   const restored = await migrateLegacyMainSessionKeys({ cfg, env, mode: "automatic" });

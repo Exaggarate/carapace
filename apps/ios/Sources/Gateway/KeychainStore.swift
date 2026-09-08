@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Security
 
 enum KeychainStore {

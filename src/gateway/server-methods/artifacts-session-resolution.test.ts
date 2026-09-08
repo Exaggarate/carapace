@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   ArtifactSessionResolutionError,
   resolveAuthorizedArtifactSession,
@@ -27,7 +27,7 @@ function identifiedClient(scopes: string[], profileId = "viewer@example.com"): G
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes,
     },
@@ -45,7 +45,7 @@ describe("artifact session authorization", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("denies direct and indirect incognito selectors while preserving admin access", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:dashboard:incognito-artifacts";
       const cfg = { agents: { list: [{ id: "main", default: true }] } };
       await upsertSessionEntryCore(
@@ -96,7 +96,7 @@ describe("artifact session authorization", () => {
   });
 
   it("hides foreign artifact sessions behind direct, run, and task selectors", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const viewerProfile = ensureProfileForEmail("viewer@example.com");
       const sessionKey = "agent:main:foreign-artifacts";
       await upsertSessionEntryCore(
@@ -114,7 +114,7 @@ describe("artifact session authorization", () => {
         ownerKey: sessionKey,
       });
       mocks.resolveRunSession.mockReturnValue(sessionKey);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
         gateway: {
           roles: {

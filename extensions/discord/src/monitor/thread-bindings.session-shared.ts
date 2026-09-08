@@ -1,5 +1,5 @@
 // Discord plugin module implements thread bindings.session shared behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
 import {
   BINDINGS_BY_THREAD_ID,
   ensureBindingsLoaded,

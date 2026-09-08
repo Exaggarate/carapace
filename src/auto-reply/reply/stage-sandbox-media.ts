@@ -2,19 +2,19 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isInboundPathAllowed } from "@openclaw/media-core/inbound-path-policy";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isInboundPathAllowed } from "@carapace/media-core/inbound-path-policy";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { assertSandboxPath } from "../../agents/sandbox-paths.js";
 import { ensureSandboxWorkspaceForSession } from "../../agents/sandbox.js";
 import { slugifySessionKey } from "../../agents/sandbox/shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { root as fsRoot, FsSafeError, readLocalFileSafely } from "../../infra/fs-safe.js";
 import { safeFileURLToPath } from "../../infra/local-file-access.js";
 import { retryAsync } from "../../infra/retry.js";
 import { normalizeScpRemoteHost, normalizeScpRemotePath } from "../../infra/scp-host.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import { resolveChannelRemoteInboundAttachmentRoots } from "../../media/channel-inbound-roots.js";
 import { normalizeMediaFacts } from "../../media/media-facts.js";
 import { resolveInboundMediaReference } from "../../media/media-reference.js";
@@ -43,7 +43,7 @@ const EMPTY_STAGE_RESULT: StageSandboxMediaResult = { staged: new Map() };
 export async function stageSandboxMedia(params: {
   ctx: MsgContext;
   sessionCtx: TemplateContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   workspaceDir: string;
@@ -71,8 +71,8 @@ export async function stageSandboxMedia(params: {
         workspaceDir,
       });
 
-  // For remote attachments without sandbox, use ~/.openclaw/media (not agent workspace for privacy).
-  // Managed local inbound refs are already in OpenClaw's media store; when no sandbox is
+  // For remote attachments without sandbox, use ~/.carapace/media (not agent workspace for privacy).
+  // Managed local inbound refs are already in Carapace's media store; when no sandbox is
   // active, copy them into the runner workspace so host-mode shell/doc readers get a path.
   const remoteMediaCacheDir = ctx.MediaRemoteHost
     ? path.join(CONFIG_DIR, "media", "remote-cache", slugifySessionKey(sessionKey))
@@ -281,7 +281,7 @@ async function stageRemoteFileIntoRoot(params: {
   if (!safeRemotePath) {
     throw new Error("invalid remote path for SCP");
   }
-  const tmpRoot = resolvePreferredOpenClawTmpDir();
+  const tmpRoot = resolvePreferredCarapaceTmpDir();
   await fs.mkdir(tmpRoot, { recursive: true });
   const tmpDir = await fs.mkdtemp(path.join(tmpRoot, "stage-sandbox-media-"));
   const tmpPath = path.join(tmpDir, "download");

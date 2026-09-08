@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
@@ -43,12 +43,12 @@ test.each([
     ];
     setActivePluginRegistry(registry);
     const selected = `${fixture.provider}/${fixture.model}`;
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         entries: { main: {} },
         defaults: {
           model: "unrelated/shared-model",
-          models: { [selected]: { agentRuntime: { id: "openclaw" } } },
+          models: { [selected]: { agentRuntime: { id: "carapace" } } },
         },
       },
     };
@@ -75,7 +75,7 @@ test.each([
         skipTranscriptUsageFallback: true,
       });
       expect(row).toMatchObject(expected);
-      expect(row.agentRuntime?.id).toBe("openclaw");
+      expect(row.agentRuntime?.id).toBe("carapace");
     }
     expect(
       projectSessionPatchResult({
@@ -85,7 +85,7 @@ test.each([
         targetAgentId: "main",
         storePath: stateDir,
       }).resolved,
-    ).toMatchObject({ ...expected, agentRuntime: { id: "openclaw" } });
+    ).toMatchObject({ ...expected, agentRuntime: { id: "carapace" } });
     const listed = await listSessionFixture({
       cfg,
       storePath: stateDir,
@@ -93,7 +93,7 @@ test.each([
       opts: { agentId: "main", search: `${fixture.expectedProvider}/shared-model` },
     });
     expect(listed.sessions).toMatchObject([{ key, ...expected }]);
-    const defaultConfig: OpenClawConfig = {
+    const defaultConfig: CarapaceConfig = {
       ...cfg,
       agents: { ...cfg.agents, defaults: { ...cfg.agents?.defaults, model: selected } },
     };

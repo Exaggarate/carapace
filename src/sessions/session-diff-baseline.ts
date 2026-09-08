@@ -19,7 +19,7 @@ import { resolveGlobalMap } from "../shared/global-singleton.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
 
 const captureInFlight = resolveGlobalMap<string, Promise<InternalSessionEntry>>(
-  Symbol.for("openclaw.sessionDiffBaselineCaptureInFlight"),
+  Symbol.for("carapace.sessionDiffBaselineCaptureInFlight"),
   async (captures) => {
     await Promise.allSettled(captures.values());
     captures.clear();

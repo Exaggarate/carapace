@@ -2,13 +2,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasConfiguredSecretInput } from "../config/types.secrets.js";
 import {
-  findStaleOpenClawUpdateLaunchdJobs,
+  findStaleCarapaceUpdateLaunchdJobs,
   isLaunchAgentEnabled,
   isLaunchAgentLoaded,
   launchAgentPlistExists,
@@ -27,7 +27,7 @@ function collectMacLaunchAgentOverrideWarning(): string | null {
   }
   const markerPath = path.join(
     process.env.HOME ?? os.homedir(),
-    ".openclaw",
+    ".carapace",
     "disable-launchagent",
   );
   if (!fs.existsSync(markerPath)) {
@@ -61,31 +61,31 @@ export async function noteMacDisabledGatewayLaunchAgent(env: NodeJS.ProcessEnv =
     return;
   }
   const label = resolveLaunchAgentLabel(env);
-  const labelEnv = env.OPENCLAW_LAUNCHD_LABEL?.trim() ? `OPENCLAW_LAUNCHD_LABEL=${label} ` : "";
+  const labelEnv = env.CARAPACE_LAUNCHD_LABEL?.trim() ? `CARAPACE_LAUNCHD_LABEL=${label} ` : "";
   note(
     [
       `Gateway LaunchAgent ${label} is installed but unloaded and disabled in launchd.`,
       "A terminated update helper can leave it disabled across logins. Doctor does not automatically re-enable it.",
-      `After verifying the installation is safe to run, use ${labelEnv}${formatCliCommand("openclaw gateway start", env)} to re-enable and start it. Keep the same state/config overrides.`,
-      `If an update was interrupted or installation safety is uncertain, run ${formatCliCommand("openclaw update", env)} or ${formatCliCommand("openclaw doctor", env)} and ${formatCliCommand("openclaw triage", env)} before starting it.`,
+      `After verifying the installation is safe to run, use ${labelEnv}${formatCliCommand("carapace gateway start", env)} to re-enable and start it. Keep the same state/config overrides.`,
+      `If an update was interrupted or installation safety is uncertain, run ${formatCliCommand("carapace update", env)} or ${formatCliCommand("carapace doctor", env)} and ${formatCliCommand("carapace triage", env)} before starting it.`,
     ].join("\n"),
     "Gateway (macOS)",
   );
 }
 
-/** Returns a warning for stale OpenClaw updater launchd jobs left after interrupted updates. */
-async function collectMacStaleOpenClawUpdateLaunchdJobsWarning(): Promise<string | null> {
+/** Returns a warning for stale Carapace updater launchd jobs left after interrupted updates. */
+async function collectMacStaleCarapaceUpdateLaunchdJobsWarning(): Promise<string | null> {
   if (process.platform !== "darwin") {
     return null;
   }
   const scanEnv = await resolveGatewayServiceEnvForPlatformNotes();
-  const jobs = await findStaleOpenClawUpdateLaunchdJobs(scanEnv).catch(() => []);
+  const jobs = await findStaleCarapaceUpdateLaunchdJobs(scanEnv).catch(() => []);
   if (jobs.length === 0) {
     return null;
   }
 
   return [
-    "- Stale OpenClaw updater launchd job(s) detected.",
+    "- Stale Carapace updater launchd job(s) detected.",
     ...jobs.map((job) => {
       const exitStatus =
         job.lastExitStatus !== undefined ? `, last exit ${job.lastExitStatus}` : "";
@@ -94,13 +94,13 @@ async function collectMacStaleOpenClawUpdateLaunchdJobsWarning(): Promise<string
     }),
     "- Fix after confirming no update is running:",
     "  launchctl remove <label>",
-    `  ${formatCliCommand("openclaw gateway restart")}`,
+    `  ${formatCliCommand("carapace gateway restart")}`,
   ].join("\n");
 }
 
 /** Emits stale updater launchd job notes using the gateway service environment when available. */
-export async function noteMacStaleOpenClawUpdateLaunchdJobs() {
-  const warning = await collectMacStaleOpenClawUpdateLaunchdJobsWarning();
+export async function noteMacStaleCarapaceUpdateLaunchdJobs() {
+  const warning = await collectMacStaleCarapaceUpdateLaunchdJobsWarning();
   if (warning) {
     note(warning, "Gateway (macOS)");
   }
@@ -118,7 +118,7 @@ async function launchctlGetenv(name: string): Promise<string | undefined> {
   }
 }
 
-function hasConfigGatewayCreds(cfg: OpenClawConfig): boolean {
+function hasConfigGatewayCreds(cfg: CarapaceConfig): boolean {
   const localPassword = cfg.gateway?.auth?.password;
   const remoteToken = cfg.gateway?.remote?.token;
   const remotePassword = cfg.gateway?.remote?.password;
@@ -132,7 +132,7 @@ function hasConfigGatewayCreds(cfg: OpenClawConfig): boolean {
 
 /** Returns a warning for host-wide launchctl gateway auth env overrides. */
 async function collectMacLaunchctlGatewayEnvOverrideWarning(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<string | null> {
   if (process.platform !== "darwin") {
     return null;
@@ -141,8 +141,8 @@ async function collectMacLaunchctlGatewayEnvOverrideWarning(
     return null;
   }
 
-  const envToken = await launchctlGetenv("OPENCLAW_GATEWAY_TOKEN");
-  const envPassword = await launchctlGetenv("OPENCLAW_GATEWAY_PASSWORD");
+  const envToken = await launchctlGetenv("CARAPACE_GATEWAY_TOKEN");
+  const envPassword = await launchctlGetenv("CARAPACE_GATEWAY_PASSWORD");
   if (!envToken && !envPassword) {
     return null;
   }
@@ -151,21 +151,21 @@ async function collectMacLaunchctlGatewayEnvOverrideWarning(
     "- Host-wide launchctl gateway auth overrides detected.",
     "- Current managed Gateway installs do not need these values unless config intentionally references the env var.",
     envToken
-      ? "- `OPENCLAW_GATEWAY_TOKEN` is set; explicit environment URL or node-host targets can use a different token than gateway.auth.token."
+      ? "- `CARAPACE_GATEWAY_TOKEN` is set; explicit environment URL or node-host targets can use a different token than gateway.auth.token."
       : undefined,
     envPassword
-      ? "- `OPENCLAW_GATEWAY_PASSWORD` is set; explicit environment URL or node-host targets can use a different password than gateway.auth.password."
+      ? "- `CARAPACE_GATEWAY_PASSWORD` is set; explicit environment URL or node-host targets can use a different password than gateway.auth.password."
       : undefined,
     "- Clear overrides and restart the app/gateway:",
-    envToken ? "  launchctl unsetenv OPENCLAW_GATEWAY_TOKEN" : undefined,
-    envPassword ? "  launchctl unsetenv OPENCLAW_GATEWAY_PASSWORD" : undefined,
+    envToken ? "  launchctl unsetenv CARAPACE_GATEWAY_TOKEN" : undefined,
+    envPassword ? "  launchctl unsetenv CARAPACE_GATEWAY_PASSWORD" : undefined,
   ]
     .filter((line): line is string => Boolean(line))
     .join("\n");
 }
 
 /** Emits macOS launchctl gateway auth override warnings. */
-export async function noteMacLaunchctlGatewayEnvOverrides(cfg: OpenClawConfig) {
+export async function noteMacLaunchctlGatewayEnvOverrides(cfg: CarapaceConfig) {
   const warning = await collectMacLaunchctlGatewayEnvOverrideWarning(cfg);
   if (warning) {
     note(warning, "Gateway (macOS)");
@@ -186,14 +186,14 @@ async function resolveGatewayServiceEnvForPlatformNotes(): Promise<NodeJS.Proces
 
 /** Collects all macOS gateway platform warnings without emitting notes. */
 export async function collectMacGatewayPlatformWarnings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<readonly string[]> {
   const warnings: string[] = [];
   const launchAgentWarning = collectMacLaunchAgentOverrideWarning();
   if (launchAgentWarning) {
     warnings.push(launchAgentWarning);
   }
-  const staleUpdateWarning = await collectMacStaleOpenClawUpdateLaunchdJobsWarning();
+  const staleUpdateWarning = await collectMacStaleCarapaceUpdateLaunchdJobsWarning();
   if (staleUpdateWarning) {
     warnings.push(staleUpdateWarning);
   }
@@ -232,7 +232,7 @@ export function noteStartupOptimizationHints(env: NodeJS.ProcessEnv = process.en
 
   const compileCache = normalizeOptionalString(env.NODE_COMPILE_CACHE) ?? "";
   const disableCompileCache = normalizeOptionalString(env.NODE_DISABLE_COMPILE_CACHE) ?? "";
-  const noRespawn = normalizeOptionalString(env.OPENCLAW_NO_RESPAWN) ?? "";
+  const noRespawn = normalizeOptionalString(env.CARAPACE_NO_RESPAWN) ?? "";
   const lines: string[] = [];
 
   if (!compileCache) {
@@ -251,7 +251,7 @@ export function noteStartupOptimizationHints(env: NodeJS.ProcessEnv = process.en
 
   if (noRespawn !== "1") {
     lines.push(
-      "- OPENCLAW_NO_RESPAWN is not set to 1; set it when you want routine gateway restarts to stay in-process instead of handing off to a managed supervisor.",
+      "- CARAPACE_NO_RESPAWN is not set to 1; set it when you want routine gateway restarts to stay in-process instead of handing off to a managed supervisor.",
     );
   }
 
@@ -261,9 +261,9 @@ export function noteStartupOptimizationHints(env: NodeJS.ProcessEnv = process.en
 
   const suggestions = [
     "- Suggested env for low-power hosts:",
-    "  export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache",
-    "  mkdir -p /var/tmp/openclaw-compile-cache",
-    "  export OPENCLAW_NO_RESPAWN=1",
+    "  export NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache",
+    "  mkdir -p /var/tmp/carapace-compile-cache",
+    "  export CARAPACE_NO_RESPAWN=1",
     disableCompileCache ? "  unset NODE_DISABLE_COMPILE_CACHE" : undefined,
   ].filter((line): line is string => Boolean(line));
 

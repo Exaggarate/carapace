@@ -4,7 +4,7 @@
  * Reports and updates session runtime state, model overrides, visibility, task status, and delivery context.
  */
 import { randomUUID } from "node:crypto";
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { Type } from "typebox";
 import type {
   ElevatedLevel,
@@ -17,7 +17,7 @@ import {
   resolveSessionStorePathCore,
   type SessionEntry,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { triggerSessionPatchHook } from "../../gateway/session-patch-hooks.js";
 import {
   isPluginMetadataSnapshotCompatible,
@@ -441,7 +441,7 @@ function formatSessionTaskLine(params: {
   relatedSessionKey: string;
   callerOwnerKey: string;
   callerAgentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): string | undefined {
   const snapshot = buildTaskStatusSnapshotForRelatedSessionKeyForOwner({
     relatedSessionKey: params.relatedSessionKey,
@@ -467,7 +467,7 @@ function formatSessionTaskLine(params: {
 }
 
 async function resolveModelOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   raw: string;
   sessionEntry?: SessionEntry;
   agentId: string;
@@ -575,7 +575,7 @@ export function createSessionStatusTool(opts?: {
    * "current"})` to resolve to the live run session instead of the stale sandbox key.
    */
   runSessionKey?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sandboxed?: boolean;
   activeModelProvider?: string;
   activeModelId?: string;

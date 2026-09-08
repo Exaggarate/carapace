@@ -2,19 +2,19 @@
  * Azure Speech provider descriptor. It reads config/env defaults, parses speech
  * directives, lists voices, and calls the Azure TTS runtime helper.
  */
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-core";
+import { resolveSpeechProviderApiKey } from "carapace/plugin-sdk/speech-provider";
 import {
   asFiniteNumber,
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   azureSpeechTTS,
   DEFAULT_AZURE_SPEECH_AUDIO_FORMAT,
@@ -274,7 +274,7 @@ export function buildAzureSpeechProvider(): SpeechProviderPlugin {
         overrides.outputFormat ??
         (req.target === "voice-note" ? config.voiceNoteOutputFormat : config.outputFormat);
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const audioBuffer = await azureSpeechTTS({
         text: req.text,
         apiKey,
@@ -303,7 +303,7 @@ export function buildAzureSpeechProvider(): SpeechProviderPlugin {
       }
       const sampleRate = 8_000;
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const audioBuffer = await azureSpeechTTS({
         text: req.text,
         apiKey,

@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
   ErrorCodes,
   errorShape,

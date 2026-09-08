@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it } from "vitest";
 import {
   defaultControlUiFeatureMethods,
@@ -21,7 +21,7 @@ suite.define(() => {
       await suite.withPage(
         { locale: "en-US", serviceWorkers: "block", viewport: { height: 900, width: 1280 } },
         async ({ page }) => {
-          await page.route("**/__openclaw__/assistant-media**", (route) =>
+          await page.route("**/__carapace__/assistant-media**", (route) =>
             route.fulfill({
               contentType: "image/png",
               body: Buffer.from(
@@ -140,7 +140,7 @@ suite.define(() => {
           await page.goto(`${suite.server.baseUrl}chat`);
           await page.getByText("History is ready.", { exact: true }).waitFor();
           await expectRequestCountStable(gateway, "browser.request", 0);
-          expect(await page.locator("openclaw-browser-tab-card").count()).toBe(0);
+          expect(await page.locator("carapace-browser-tab-card").count()).toBe(0);
           await expandHistoryTools();
           if (includeHistory) {
             for (const output of [
@@ -219,7 +219,7 @@ suite.define(() => {
           await expectToolOutput("live-0", "Live ordinary output 0");
           await expectToolOutput("live-1", "Live ordinary output 1");
           await expectRequestCountStable(gateway, "browser.request", 0);
-          expect(await page.locator("openclaw-browser-tab-card").count()).toBe(0);
+          expect(await page.locator("carapace-browser-tab-card").count()).toBe(0);
           await captureUiProof(
             suite,
             page,
@@ -241,7 +241,7 @@ suite.define(() => {
             },
           });
           await expectToolOutput("live-after-open", "Live output after opening Browser");
-          expect(await page.locator("openclaw-browser-tab-card").count()).toBe(0);
+          expect(await page.locator("carapace-browser-tab-card").count()).toBe(0);
           expect(await panel.locator('.bp-shot[alt="Configured default"]').isVisible()).toBe(true);
           const requests = await gateway.getRequests("browser.request");
           expect(
@@ -279,7 +279,7 @@ suite.define(() => {
               },
             },
           });
-          await page.locator("openclaw-browser-tab-card").waitFor();
+          await page.locator("carapace-browser-tab-card").waitFor();
           await expect.poll(() => panel.locator(".bp-profile").textContent()).toBe("managed");
           await expect
             .poll(async () =>
@@ -304,7 +304,7 @@ suite.define(() => {
       await suite.withPage(
         { locale: "en-US", serviceWorkers: "block", viewport: { height: 900, width: 1280 } },
         async ({ page }) => {
-          await page.route("**/__openclaw__/assistant-media**", (route) =>
+          await page.route("**/__carapace__/assistant-media**", (route) =>
             route.fulfill({
               contentType: "image/png",
               body: Buffer.from(
@@ -404,12 +404,12 @@ suite.define(() => {
           await page.goto(`${suite.server.baseUrl}chat`);
           await page.getByText("The pages are ready.", { exact: true }).waitFor();
           const hostCard = page
-            .locator("openclaw-browser-tab-card")
+            .locator("carapace-browser-tab-card")
             .filter({ hasText: "Managed tab" });
           // Card thumbnails legitimately capture both routes before the panel opens.
           await hostCard.locator(".shot img").waitFor();
           await page
-            .locator("openclaw-browser-tab-card")
+            .locator("carapace-browser-tab-card")
             .filter({ hasText: "Node tab" })
             .locator(".shot img")
             .waitFor();

@@ -1,10 +1,10 @@
 // Resolves or installs channel plugins needed by setup/onboarding flows.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import type { ChannelPluginCatalogEntry } from "../../channels/plugins/catalog.js";
 import { getLoadedChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import { createClackPrompter } from "../../wizard/clack-prompter.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
@@ -19,7 +19,7 @@ import {
 } from "./trusted-catalog.js";
 
 type ResolveInstallableChannelPluginResult = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId?: ChannelId;
   plugin?: ChannelPlugin;
   catalogEntry?: ChannelPluginCatalogEntry;
@@ -28,7 +28,7 @@ type ResolveInstallableChannelPluginResult = {
   supportsRequestedCapability?: boolean;
 };
 
-function resolveCatalogChannelEntry(raw: string, cfg: OpenClawConfig, workspaceDir?: string) {
+function resolveCatalogChannelEntry(raw: string, cfg: CarapaceConfig, workspaceDir?: string) {
   const trimmed = normalizeOptionalLowercaseString(raw);
   if (!trimmed) {
     return undefined;
@@ -46,7 +46,7 @@ function resolveCatalogChannelEntry(raw: string, cfg: OpenClawConfig, workspaceD
 
 /** Resolve an existing channel plugin, scoped setup plugin, or installable catalog entry. */
 export async function resolveInstallableChannelPlugin(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   rawChannel?: string | null;
   channelId?: ChannelId;

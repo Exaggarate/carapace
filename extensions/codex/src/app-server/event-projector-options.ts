@@ -1,6 +1,6 @@
-import type { runAgentHarnessBeforeCompactionHook } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AgentPlanStep } from "openclaw/plugin-sdk/channel-outbound";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { runAgentHarnessBeforeCompactionHook } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AgentPlanStep } from "carapace/plugin-sdk/channel-outbound";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import type { CodexThreadItem, JsonValue } from "./protocol.js";
 import type { CodexRemoteWorkspaceFileReader } from "./remote-workspace-media.js";
 import type { CodexTrajectoryRecorder } from "./trajectory.js";

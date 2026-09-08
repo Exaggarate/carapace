@@ -1,5 +1,5 @@
 import type { Component, OverlayHandle, SelectItem } from "@earendil-works/pi-tui";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { createDeferred as deferred } from "../../test/helpers/promise.js";

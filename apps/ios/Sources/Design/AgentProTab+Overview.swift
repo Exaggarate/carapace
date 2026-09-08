@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 import SwiftUI
 
 extension AgentProTab {
@@ -8,12 +8,12 @@ extension AgentProTab {
             Picker(selection: self.$agentRosterFilter) {
                 ForEach(AgentRosterFilter.allCases) { filter in
                     Label(filter.title, systemImage: filter.systemImage)
-                        .font(OpenClawType.subhead)
+                        .font(CarapaceType.subhead)
                         .tag(filter)
                 }
             } label: {
                 Text("Agent status")
-                    .font(OpenClawType.subhead)
+                    .font(CarapaceType.subhead)
             }
             if self.agentFiltersActive {
                 Divider()
@@ -22,12 +22,12 @@ extension AgentProTab {
                     self.agentSearchText = ""
                 } label: {
                     Label("Clear Filters", systemImage: "xmark.circle")
-                        .font(OpenClawType.subhead)
+                        .font(CarapaceType.subhead)
                 }
             }
         } label: {
             Label("Filter agents", systemImage: "line.3.horizontal.decrease")
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
                 .labelStyle(.iconOnly)
         }
         .accessibilityIdentifier("agent-status-filter-menu")
@@ -40,7 +40,7 @@ extension AgentProTab {
             Button(action: openSettings) {
                 Image(systemName: self.gatewayConnected ? "antenna.radiowaves.left.and.right" : "wifi.slash")
             }
-            .tint(self.gatewayConnected ? OpenClawBrand.ok : .secondary)
+            .tint(self.gatewayConnected ? CarapaceBrand.ok : .secondary)
             .accessibilityLabel(self.gatewayConnected
                 ? String(localized: "Gateway online")
                 : String(localized: "Gateway offline"))
@@ -58,9 +58,9 @@ extension AgentProTab {
             ProIconBadge(systemName: "person.2.slash", color: .secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(self.emptyAgentsTitle)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                 Text(self.emptyAgentsDetail)
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -79,12 +79,12 @@ extension AgentProTab {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(self.agentName(for: agent))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
 
                     Text(self.agentDetail(for: agent))
-                        .font(OpenClawType.footnote)
+                        .font(CarapaceType.footnote)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -94,8 +94,8 @@ extension AgentProTab {
 
                 if isActive {
                     Image(systemName: "checkmark")
-                        .font(OpenClawType.subheadSemiBold)
-                        .foregroundStyle(OpenClawBrand.accent)
+                        .font(CarapaceType.subheadSemiBold)
+                        .foregroundStyle(CarapaceBrand.accent)
                         .frame(width: 24, height: 44)
                         .accessibilityHidden(true)
                 }
@@ -113,7 +113,7 @@ extension AgentProTab {
     func agentAvatar(_ agent: AgentSummary, state: AgentRosterState) -> some View {
         ZStack(alignment: .bottomTrailing) {
             Text(self.agentBadge(for: agent))
-                .font(OpenClawType.avatar(size: self.agentBadge(for: agent).count > 2 ? 14 : 18))
+                .font(CarapaceType.avatar(size: self.agentBadge(for: agent).count > 2 ? 14 : 18))
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.62)
                 .lineLimit(1)

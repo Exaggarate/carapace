@@ -5,8 +5,8 @@ import { createSuiteTempRootTracker } from "../../../test-helpers/temp-dir.js";
 import { classifyOtelGrpcMigrationOwnership } from "./include-migration-ownership.js";
 
 describe("include migration ownership", () => {
-  const configDir = path.resolve("/tmp/openclaw-config");
-  const configPath = path.join(configDir, "openclaw.json");
+  const configDir = path.resolve("/tmp/carapace-config");
+  const configPath = path.join(configDir, "carapace.json");
   const diagnosticsPath = path.join(configDir, "diagnostics.json5");
   const classifyOtelOwnership = (
     includeProvenance: NonNullable<
@@ -133,7 +133,7 @@ describe("include migration ownership", () => {
   });
 
   describe("symlinked include targets", () => {
-    const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-include-ownership-" });
+    const suiteRootTracker = createSuiteTempRootTracker({ prefix: "carapace-include-ownership-" });
 
     beforeAll(async () => {
       await suiteRootTracker.setup();
@@ -145,7 +145,7 @@ describe("include migration ownership", () => {
 
     it("requires manual repair when a config-dir symlink targets an external file", async () => {
       const home = await suiteRootTracker.make("symlink-external");
-      const realConfigDir = path.join(home, ".openclaw");
+      const realConfigDir = path.join(home, ".carapace");
       const externalDir = path.join(home, "external");
       await fs.mkdir(realConfigDir, { recursive: true });
       await fs.mkdir(externalDir, { recursive: true });
@@ -157,7 +157,7 @@ describe("include migration ownership", () => {
       expect(
         classifyOtelGrpcMigrationOwnership({
           snapshot: {
-            path: path.join(realConfigDir, "openclaw.json"),
+            path: path.join(realConfigDir, "carapace.json"),
             includeProvenance: [
               {
                 path: ["diagnostics"],
@@ -176,7 +176,7 @@ describe("include migration ownership", () => {
 
     it("keeps a real file beneath the config directory eligible", async () => {
       const home = await suiteRootTracker.make("internal-file");
-      const realConfigDir = path.join(home, ".openclaw");
+      const realConfigDir = path.join(home, ".carapace");
       await fs.mkdir(realConfigDir, { recursive: true });
       const targetPath = path.join(realConfigDir, "diagnostics.json5");
       await fs.writeFile(targetPath, "{}\n", "utf-8");
@@ -184,7 +184,7 @@ describe("include migration ownership", () => {
       expect(
         classifyOtelGrpcMigrationOwnership({
           snapshot: {
-            path: path.join(realConfigDir, "openclaw.json"),
+            path: path.join(realConfigDir, "carapace.json"),
             includeProvenance: [
               {
                 path: ["diagnostics"],

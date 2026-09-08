@@ -4,8 +4,8 @@ import { mkdtemp, realpath, rm } from "node:fs/promises";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { saveRemoteMedia } from "openclaw/plugin-sdk/media-runtime";
+import { createChannelIngressQueueForTests } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { saveRemoteMedia } from "carapace/plugin-sdk/media-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SmsChannelRuntime } from "./inbound.js";
 import { createSmsIngressSpool } from "./ingress-spool.js";
@@ -39,7 +39,7 @@ type SmsIngressDeliver = NonNullable<Parameters<typeof createSmsIngressSpool>[0]
 type SmsIngressSpool = ReturnType<typeof createSmsIngressSpool>;
 
 async function createStateDir(): Promise<string> {
-  const created = await mkdtemp(path.join(os.tmpdir(), "openclaw-sms-ingress-"));
+  const created = await mkdtemp(path.join(os.tmpdir(), "carapace-sms-ingress-"));
   const resolved = await realpath(created);
   stateDirs.push(resolved);
   return resolved;
@@ -99,7 +99,7 @@ describe("createSmsIngressSpool", () => {
     let now = 1_700_000_000_000;
     const nowSpy = vi.spyOn(Date, "now").mockImplementation(() => now);
     disposers.push(() => nowSpy.mockRestore());
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     disposers.push(() => {
       vi.unstubAllEnvs();
     });
@@ -234,7 +234,7 @@ describe("createSmsIngressSpool", () => {
     };
     const firstResponse = await postSignedCallback(mediaCallback);
     expect(firstResponse.status).toBe(200);
-    expect(firstResponse.headers.get("x-openclaw-delivery-accepted")).toBe("durable");
+    expect(firstResponse.headers.get("x-carapace-delivery-accepted")).toBe("durable");
     await spool.waitForIdle();
     expect(mediaRequests).toBe(1);
     expect(await queue.listPending()).toEqual([

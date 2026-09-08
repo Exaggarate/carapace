@@ -10,7 +10,7 @@ import {
   startProductionControlUiE2eServer,
 } from "../test-helpers/control-ui-e2e.ts";
 
-const RECORDED_GATEWAY_REQUESTS_KEY = "openclaw.control-ui-e2e.phone-recovery-requests";
+const RECORDED_GATEWAY_REQUESTS_KEY = "carapace.control-ui-e2e.phone-recovery-requests";
 
 type ObservedAssetLink = {
   elementId: string | null;
@@ -149,19 +149,19 @@ export function phoneProofIdentity(): Pick<
   PhoneRecoveryObservation,
   "expectedRevisionSha" | "proofRevision"
 > {
-  const configuredRevision = process.env.OPENCLAW_PHONE_PROOF_REVISION?.trim();
+  const configuredRevision = process.env.CARAPACE_PHONE_PROOF_REVISION?.trim();
   if (configuredRevision !== undefined && !isPhoneProofRevision(configuredRevision)) {
-    throw new Error("OPENCLAW_PHONE_PROOF_REVISION must be base, head, or local");
+    throw new Error("CARAPACE_PHONE_PROOF_REVISION must be base, head, or local");
   }
   const proofRevision = configuredRevision ?? "local";
-  const expectedSha = process.env.OPENCLAW_PHONE_PROOF_EXPECTED_SHA?.trim() ?? "";
+  const expectedSha = process.env.CARAPACE_PHONE_PROOF_EXPECTED_SHA?.trim() ?? "";
   if (proofRevision !== "local" && !expectedSha) {
     throw new Error(
-      "OPENCLAW_PHONE_PROOF_EXPECTED_SHA is required for base and head proof revisions",
+      "CARAPACE_PHONE_PROOF_EXPECTED_SHA is required for base and head proof revisions",
     );
   }
   if (expectedSha && !/^[a-f0-9]{40}$/u.test(expectedSha)) {
-    throw new Error("OPENCLAW_PHONE_PROOF_EXPECTED_SHA must be a full lowercase commit SHA");
+    throw new Error("CARAPACE_PHONE_PROOF_EXPECTED_SHA must be a full lowercase commit SHA");
   }
   if (expectedSha) {
     const repoRoot = execFileSync("git", ["rev-parse", "--show-toplevel"], {
@@ -205,7 +205,7 @@ export function phoneProofIdentity(): Pick<
 }
 
 export async function startPhoneProofServer(buildId: string) {
-  const buildDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-login-gate-e2e-"));
+  const buildDir = await mkdtemp(path.join(os.tmpdir(), "carapace-login-gate-e2e-"));
   try {
     const server = await startProductionControlUiE2eServer(buildDir, buildId);
     return {
@@ -292,10 +292,10 @@ export async function observeInstalledArtifact(page: Page): Promise<InstalledArt
     };
     return {
       bodyDisplay: getComputedStyle(document.body).display,
-      buildId: document.documentElement.getAttribute("data-openclaw-control-ui-build-id"),
-      font: observeLink('link[id^="openclaw-typeface-"]'),
+      buildId: document.documentElement.getAttribute("data-carapace-control-ui-build-id"),
+      font: observeLink('link[id^="carapace-typeface-"]'),
       icon: observeLink('link[rel="icon"][type="image/svg+xml"]'),
-      theme: observeLink("#openclaw-theme-palette-absolutely"),
+      theme: observeLink("#carapace-theme-palette-absolutely"),
     };
   });
 }
@@ -310,7 +310,7 @@ export async function observeGatewayRequests(page: Page): Promise<ObservedGatewa
 export async function resetPhoneRecoveryRequestObserver(page: Page): Promise<void> {
   await page.evaluate((key) => {
     sessionStorage.setItem(key, "[]");
-    sessionStorage.setItem("openclaw.control-ui-e2e.build-rejection-loads", "0");
+    sessionStorage.setItem("carapace.control-ui-e2e.build-rejection-loads", "0");
   }, RECORDED_GATEWAY_REQUESTS_KEY);
 }
 
@@ -336,12 +336,12 @@ export async function installPhoneRecoveryRequestObserver(
 ): Promise<void> {
   await page.addInitScript(
     ({ gatewayUrl, requestLedgerKey }) => {
-      const key = "openclaw.control-ui-e2e.build-rejection-loads";
+      const key = "carapace.control-ui-e2e.build-rejection-loads";
       const count = Number.parseInt(sessionStorage.getItem(key) ?? "0", 10);
       const documentOrdinal = count + 1;
       sessionStorage.setItem(key, String(documentOrdinal));
       localStorage.setItem(
-        `openclaw.control.settings.v1:${gatewayUrl}`,
+        `carapace.control.settings.v1:${gatewayUrl}`,
         JSON.stringify({ gatewayUrl, theme: "absolutely", themeMode: "dark" }),
       );
       const instrumentedPrototypes = new WeakSet<object>();
@@ -426,8 +426,8 @@ export async function renderLoginGate(
 
 async function mountLoginGate(page: Page, lastError: string | null): Promise<void> {
   await page.evaluate(async (failureMessage) => {
-    await customElements.whenDefined("openclaw-login-gate");
-    const gate = document.createElement("openclaw-login-gate") as HTMLElement & {
+    await customElements.whenDefined("carapace-login-gate");
+    const gate = document.createElement("carapace-login-gate") as HTMLElement & {
       props: Record<string, unknown>;
       updateComplete: Promise<unknown>;
     };

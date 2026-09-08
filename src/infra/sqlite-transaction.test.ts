@@ -106,7 +106,7 @@ afterEach(() => {
 
 describe("runSqliteDeferredTransactionSync", () => {
   it("keeps multiple reads on one snapshot while another connection commits", () => {
-    const tempDir = tempDirs.make("openclaw-sqlite-read-snapshot-");
+    const tempDir = tempDirs.make("carapace-sqlite-read-snapshot-");
     const databasePath = path.join(tempDir, "snapshot.sqlite");
     const { DatabaseSync } = requireNodeSqlite();
     const reader = new DatabaseSync(databasePath);
@@ -164,7 +164,7 @@ describe("runSqliteImmediateTransactionSync", () => {
   });
 
   it("preserves SQLITE_FULL and prevents caught nested failures from committing later writes", async () => {
-    const tempDir = tempDirs.make("openclaw-sqlite-full-");
+    const tempDir = tempDirs.make("carapace-sqlite-full-");
     const databasePath = path.join(tempDir, "full.sqlite");
     const { DatabaseSync } = requireNodeSqlite();
     const db = new DatabaseSync(databasePath);
@@ -494,7 +494,7 @@ describe("runSqliteImmediateTransactionSync", () => {
 
   it("waits for a separate writer and exposes the synchronous event-loop cost", async () => {
     const holdMs = 200;
-    const tempDir = tempDirs.make("openclaw-sqlite-contention-");
+    const tempDir = tempDirs.make("carapace-sqlite-contention-");
     const databasePath = path.join(tempDir, "contention.sqlite");
     const { DatabaseSync } = requireNodeSqlite();
     const db = new DatabaseSync(databasePath);
@@ -529,7 +529,7 @@ describe("runSqliteImmediateTransactionSync", () => {
   });
 
   it("fails a real separate-writer wait after the single SQLite busy timeout", async () => {
-    const tempDir = tempDirs.make("openclaw-sqlite-timeout-");
+    const tempDir = tempDirs.make("carapace-sqlite-timeout-");
     const databasePath = path.join(tempDir, "contention.sqlite");
     const { DatabaseSync } = requireNodeSqlite();
     const db = new DatabaseSync(databasePath);
@@ -618,7 +618,7 @@ describe("runSqliteImmediateTransaction", () => {
   it.each([false, true])(
     "preserves a failed rollback during admission yield (deadline expired: %s)",
     async (expireDeadline) => {
-      const dir = tempDirs.make("openclaw-sqlite-admission-abort-");
+      const dir = tempDirs.make("carapace-sqlite-admission-abort-");
       const { DatabaseSync } = requireNodeSqlite();
       const db = new DatabaseSync(path.join(dir, "index.sqlite"));
       const writer = new DatabaseSync(path.join(dir, "index.sqlite"));
@@ -677,7 +677,7 @@ describe("runSqliteImmediateTransaction", () => {
   );
 
   it("repeats preparation and can decline a write while another writer remains active", async () => {
-    const dir = tempDirs.make("openclaw-sqlite-preparation-");
+    const dir = tempDirs.make("carapace-sqlite-preparation-");
     const { DatabaseSync } = requireNodeSqlite();
     const db = new DatabaseSync(path.join(dir, "index.sqlite"));
     const writer = new DatabaseSync(path.join(dir, "index.sqlite"));

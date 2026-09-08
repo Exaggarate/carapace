@@ -1,6 +1,6 @@
-import { asOptionalRecord, stableStringify } from "@openclaw/normalization-core";
-import { normalizeStringifiedOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalRecord, stableStringify } from "@carapace/normalization-core";
+import { normalizeStringifiedOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { parseRetryAfterErrorSeconds } from "../internal/retry-after.js";
 import { projectDiagnosticValue, redactDiagnosticText } from "./credential-redaction.js";
 

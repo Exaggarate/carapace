@@ -5,10 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE } from "../../../packages/gateway-protocol/src/schema/worker-admission.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
   type PlacementStore,
   REQUEST,
@@ -32,7 +32,7 @@ const { stageWorkerWorkspaceResult } = workerWorkspaceResultStaging;
 describe("staged worker placement result recovery", () => {
   support.setupWorkerEnvironmentServiceSuite();
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placementStore: PlacementStore;
 
   beforeEach(() => {
@@ -117,7 +117,7 @@ describe("staged worker placement result recovery", () => {
 
   it("applies a staged pending result without a tunnel and reclaims the worker", async () => {
     const workspacePath = path.join(root, "same-worker-staged-result");
-    const priorConflictRef = "refs/openclaw/worker-results/prior-conflict";
+    const priorConflictRef = "refs/carapace/worker-results/prior-conflict";
     const prepareAcceptedWorkspacePublication = vi.fn(async () => {
       throw new Error("publication snapshot rejected");
     });
@@ -492,8 +492,8 @@ describe("staged worker placement result recovery", () => {
         expect(originalHarness.environments.destroy).toHaveBeenCalledOnce();
       }
 
-      closeOpenClawStateDatabaseForTest();
-      database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+      closeCarapaceStateDatabaseForTest();
+      database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
       const restartedStore = createWorkerSessionPlacementStore({ database, now: () => 2_000 });
       expect(restartedStore.clearLocalTurnClaimsAfterRestart()).toBe(1);
       expect(restartedStore.get(active.sessionId)).toMatchObject({

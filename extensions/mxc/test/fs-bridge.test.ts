@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolvePreferredOpenClawTmpDir, tempWorkspace } from "openclaw/plugin-sdk/temp-path";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolvePreferredCarapaceTmpDir, tempWorkspace } from "carapace/plugin-sdk/temp-path";
 import { describe, expect, test } from "vitest";
 import { createMxcFsBridge } from "../src/fs-bridge.js";
 
@@ -28,8 +28,8 @@ function createDirectoryReader(params: {
 describe("MXC filesystem directory reads", () => {
   test("returns entry names and directory types relative to the mounted directory", async () => {
     await using workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-mxc-directory-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-mxc-directory-",
     });
     const workspaceDir = await fs.realpath(workspace.dir);
     await fs.mkdir(path.join(workspaceDir, "notes"));
@@ -52,8 +52,8 @@ describe("MXC filesystem directory reads", () => {
     { workspaceAccess: "rw", expectedName: "agent.txt" },
   ] as const)("uses the mounted workspace with access $workspaceAccess", async (scenario) => {
     await using workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-mxc-mounts-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-mxc-mounts-",
     });
     const root = await fs.realpath(workspace.dir);
     const workspaceDir = path.join(root, "sandbox");
@@ -85,13 +85,13 @@ describe("MXC filesystem directory reads", () => {
 
   test("lists the protected skill mount instead of its workspace shadow", async () => {
     await using workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-mxc-skills-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-mxc-skills-",
     });
     const root = await fs.realpath(workspace.dir);
     const workspaceDir = path.join(root, "sandbox");
     const skillsWorkspaceDir = path.join(root, "materialized");
-    const skillPath = path.join(".openclaw", "sandbox-skills", "skills");
+    const skillPath = path.join(".carapace", "sandbox-skills", "skills");
     await fs.mkdir(path.join(workspaceDir, skillPath, "shadow"), { recursive: true });
     await fs.mkdir(path.join(skillsWorkspaceDir, "skills", "demo"), { recursive: true });
     const readDirectory = createDirectoryReader({ workspaceDir, skillsWorkspaceDir });
@@ -103,8 +103,8 @@ describe("MXC filesystem directory reads", () => {
 
   test("rejects a directory symlink that escapes the mounted root", async () => {
     await using workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-mxc-symlink-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-mxc-symlink-",
     });
     const root = await fs.realpath(workspace.dir);
     const workspaceDir = path.join(root, "sandbox");

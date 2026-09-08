@@ -15,7 +15,7 @@ import {
   runWithSessionTranscriptReadFence,
   SessionTranscriptReadFenceError,
 } from "../config/sessions/session-transcript-read-fence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   onInternalSessionTranscriptUpdate,
   onSessionTranscriptUpdate,
@@ -87,7 +87,7 @@ async function withConfiguredStores(
 ) {
   await withTempHome(
     async (home) => {
-      const stateDir = path.join(fs.realpathSync(home), ".openclaw");
+      const stateDir = path.join(fs.realpathSync(home), ".carapace");
       const configured = { ...identity, storePath: path.join(stateDir, "custom", "sessions.json") };
       const competing = {
         ...identity,
@@ -96,7 +96,7 @@ async function withConfiguredStores(
       const config = { session: { store: configured.storePath }, plugins: { enabled: false } };
       const previous = getRuntimeConfigSnapshot();
       const previousSource = getRuntimeConfigSourceSnapshot();
-      fs.writeFileSync(process.env.OPENCLAW_CONFIG_PATH!, JSON.stringify(config));
+      fs.writeFileSync(process.env.CARAPACE_CONFIG_PATH!, JSON.stringify(config));
       setRuntimeConfigSnapshot(config);
       try {
         await seedTranscript(configured, configuredText);
@@ -111,7 +111,7 @@ async function withConfiguredStores(
             "agents",
             "main",
             "agent",
-            "openclaw-agent.sqlite",
+            "carapace-agent.sqlite",
           ),
         });
       } finally {
@@ -123,8 +123,8 @@ async function withConfiguredStores(
       }
     },
     {
-      prefix: "openclaw-sdk-configured-store-",
-      env: { OPENCLAW_CONFIG_PATH: (home) => path.join(home, ".openclaw", "openclaw.json") },
+      prefix: "carapace-sdk-configured-store-",
+      env: { CARAPACE_CONFIG_PATH: (home) => path.join(home, ".carapace", "carapace.json") },
     },
   );
 }
@@ -176,7 +176,7 @@ const writers: Array<{
   name: string;
   contents: unknown[];
   write: (
-    scope: SessionTranscriptReadParams & { config?: OpenClawConfig },
+    scope: SessionTranscriptReadParams & { config?: CarapaceConfig },
     priorContent: string,
   ) => Promise<void>;
 }> = [

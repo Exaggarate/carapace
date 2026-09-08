@@ -1,6 +1,6 @@
-import { registerComputerUseProvider } from "openclaw/plugin-sdk/computer-use";
-import type { OpenClawPluginNodeHostCommand } from "openclaw/plugin-sdk/plugin-entry";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+import { registerComputerUseProvider } from "carapace/plugin-sdk/computer-use";
+import type { CarapacePluginNodeHostCommand } from "carapace/plugin-sdk/plugin-entry";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import { readImageMetadataFromHeader } from "rastermill";
 import { describe, expect, it } from "vitest";
 import { createCuaComputerProvider } from "./commands.js";
@@ -96,7 +96,7 @@ describe("cua-computer desktop frames", () => {
         env: macOsEndpoint(),
         driver: input.session,
       });
-      const commands: OpenClawPluginNodeHostCommand[] = [];
+      const commands: CarapacePluginNodeHostCommand[] = [];
       registerComputerUseProvider(
         { registerNodeHostCommand: (command) => commands.push(command) },
         provider,

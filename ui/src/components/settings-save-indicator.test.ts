@@ -41,7 +41,7 @@ function button(label: string): HTMLButtonElement | undefined {
 beforeEach(async () => {
   await i18n.setLocale("en");
   indicator = document.createElement(
-    "openclaw-settings-save-indicator",
+    "carapace-settings-save-indicator",
   ) as SettingsSaveIndicatorElement;
   document.body.append(indicator);
 });

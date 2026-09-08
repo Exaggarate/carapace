@@ -3,7 +3,7 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { formatPluginPackagingRuntimeOutputRecoveryHint } from "../cli/config-recovery-hints.js";
 import {
   type ConfigFileSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
   readConfigFileSnapshot,
   readConfigFileSnapshotForWrite,
 } from "../config/config.js";
@@ -57,13 +57,13 @@ function validateConfigFileSnapshot(
       snapshot.issues.length > 0
         ? renderConfigValidationIssueLines(snapshot).join("\n")
         : "Unknown validation issue.";
-    runtime.error(`OpenClaw config is invalid: ${snapshot.path}\n${issues}`);
+    runtime.error(`Carapace config is invalid: ${snapshot.path}\n${issues}`);
     runtime.error(
       isPluginPackagingRuntimeOutputInvalidConfigSnapshot(snapshot)
         ? `Fix: ${formatPluginPackagingRuntimeOutputRecoveryHint()}`
-        : `Fix: ${formatCliCommand("openclaw doctor --fix")}`,
+        : `Fix: ${formatCliCommand("carapace doctor --fix")}`,
     );
-    runtime.error(`Inspect: ${formatCliCommand("openclaw config validate")}`);
+    runtime.error(`Inspect: ${formatCliCommand("carapace config validate")}`);
     runtime.exit(1);
     return null;
   }
@@ -79,17 +79,17 @@ function validateConfigFileSnapshot(
           .slice(0, 3)
           .map((notice) => `- ${formatPluginCompatibilityNotice(notice)}`),
         ...(compatibility.length > 3 ? [`- ... +${compatibility.length - 3} more`] : []),
-        `Review: ${formatCliCommand("openclaw doctor")}`,
+        `Review: ${formatCliCommand("carapace doctor")}`,
       ].join("\n"),
     );
   }
   return snapshot;
 }
 
-/** Read and return a valid OpenClaw config, or null after reporting validation errors. */
+/** Read and return a valid Carapace config, or null after reporting validation errors. */
 export async function requireValidConfig(
   runtime: RuntimeEnv,
   opts?: ConfigValidationOptions,
-): Promise<OpenClawConfig | null> {
+): Promise<CarapaceConfig | null> {
   return (await requireValidConfigFileSnapshot(runtime, opts))?.config ?? null;
 }

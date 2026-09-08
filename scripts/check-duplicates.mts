@@ -8,7 +8,7 @@ const jscpdBin = resolveRepoToolBinPath("jscpd", { cwd: repoRoot });
 
 const targets = [
   ".github/actions",
-  ".github/codeql/openclaw-boundary/tests",
+  ".github/codeql/carapace-boundary/tests",
   "src",
   "extensions",
   "examples",
@@ -23,7 +23,7 @@ const targets = [
   "skills",
   "config",
   "node-version.mjs",
-  "openclaw.mjs",
+  "carapace.mjs",
   "tsdown.ai.config.ts",
   "tsdown.config.ts",
   "vitest.config.ts",

@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { runOpenClawAgentWriteTransaction } from "../../state/openclaw-agent-db.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { runCarapaceAgentWriteTransaction } from "../../state/carapace-agent-db.js";
 import {
   normalizeLifecycleTarget,
   readSessionIdentitySnapshot,
@@ -75,7 +75,7 @@ export async function recoverSessionEntryFromRestartTombstone(params: {
   };
 
   const publish = await runExclusiveSqliteSessionWrite(resolved, async () => {
-    return runOpenClawAgentWriteTransaction((database) => {
+    return runCarapaceAgentWriteTransaction((database) => {
       const source = resolveLifecyclePrimaryEntry(database, sourceTarget)?.entry as
         | InternalSessionEntry
         | undefined;

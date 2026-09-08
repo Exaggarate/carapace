@@ -1,11 +1,11 @@
-// Host Command script supports OpenClaw repository automation.
+// Host Command script supports Carapace repository automation.
 import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   addTimerTimeoutGraceMs,
   clampTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { terminateManagedChild } from "../../lib/managed-child-process.mts";
 import { resolveNpmRunner } from "../../npm-runner.mts";
 import { resolvePnpmRunner } from "../../pnpm-runner.mts";
@@ -18,9 +18,9 @@ const HOST_COMMAND_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 const HOST_COMMAND_WRAPPER_EXTRA_BUFFER_BYTES = 1024 * 1024;
 const HOST_COMMAND_WRAPPER_BACKSTOP_MS = 5_000;
 const HOST_COMMAND_TIMEOUT_KILL_GRACE_MS = 100;
-const HOST_COMMAND_CHILD_PID_PREFIX = "__OPENCLAW_HOST_COMMAND_CHILD_PID__";
-const HOST_COMMAND_SPAWN_ERROR_PREFIX = "__OPENCLAW_HOST_COMMAND_SPAWN_ERROR__";
-const HOST_COMMAND_TIMEOUT_PREFIX = "__OPENCLAW_HOST_COMMAND_TIMEOUT__";
+const HOST_COMMAND_CHILD_PID_PREFIX = "__CARAPACE_HOST_COMMAND_CHILD_PID__";
+const HOST_COMMAND_SPAWN_ERROR_PREFIX = "__CARAPACE_HOST_COMMAND_SPAWN_ERROR__";
+const HOST_COMMAND_TIMEOUT_PREFIX = "__CARAPACE_HOST_COMMAND_TIMEOUT__";
 let progressStderrDepth = 0;
 
 type HostCommandInvocation = {

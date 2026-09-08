@@ -1,4 +1,4 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import type { SessionToolOverrides } from "../config/sessions.js";
 
 export function normalizeSessionToolOverrides(

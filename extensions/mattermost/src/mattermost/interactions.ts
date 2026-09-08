@@ -1,12 +1,12 @@
 // Mattermost plugin module implements interactions behavior.
 import { createHmac } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { resolveGatewayPort } from "openclaw/plugin-sdk/gateway-config-runtime";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+import { resolveGatewayPort } from "carapace/plugin-sdk/gateway-config-runtime";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { getMattermostRuntime } from "../runtime.js";
 import { isWildcardBindHost } from "./callback-host.js";
 import { updateMattermostPost, type MattermostClient, type MattermostPost } from "./client.js";
@@ -16,12 +16,12 @@ import {
   readRequestBodyWithLimit,
   resolveClientIp,
   sendHttpRequestRejection,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "./runtime-api.js";
 
 const INTERACTION_MAX_BODY_BYTES = 64 * 1024;
 const INTERACTION_BODY_TIMEOUT_MS = 10_000;
-const SIGNED_CHANNEL_ID_CONTEXT_KEY = "__openclaw_channel_id";
+const SIGNED_CHANNEL_ID_CONTEXT_KEY = "__carapace_channel_id";
 
 /**
  * Mattermost interactive message callback payload.
@@ -70,7 +70,7 @@ export function setInteractionCallbackUrl(accountId: string, url: string): void 
   callbackUrls.set(accountId, url);
 }
 
-type InteractionCallbackConfig = Pick<OpenClawConfig, "gateway" | "channels"> & {
+type InteractionCallbackConfig = Pick<CarapaceConfig, "gateway" | "channels"> & {
   interactions?: {
     callbackBaseUrl?: string;
   };
@@ -166,7 +166,7 @@ const interactionSecrets = new Map<string, string>();
 let defaultInteractionSecret: string | undefined;
 
 function deriveInteractionSecret(botToken: string): string {
-  return createHmac("sha256", "openclaw-mattermost-interactions").update(botToken).digest("hex");
+  return createHmac("sha256", "carapace-mattermost-interactions").update(botToken).digest("hex");
 }
 
 export function setInteractionSecret(accountIdOrBotToken: string, botToken?: string): void {

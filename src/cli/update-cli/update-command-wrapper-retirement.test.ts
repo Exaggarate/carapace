@@ -6,11 +6,11 @@ import { retireStandaloneGitWrapper } from "./update-command-git.js";
 
 describe("retireStandaloneGitWrapper", () => {
   it("removes only the installer wrapper for the previous checkout", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-wrapper-retire-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-wrapper-retire-"));
     const oldRoot = path.join(home, "old checkout");
-    const unrelatedWrapper = path.join(home, "earlier", "openclaw");
-    const wrapper = path.join(home, ".local", "bin", "openclaw");
-    const secondWrapper = path.join(home, "legacy", "bin", "openclaw");
+    const unrelatedWrapper = path.join(home, "earlier", "carapace");
+    const wrapper = path.join(home, ".local", "bin", "carapace");
+    const secondWrapper = path.join(home, "legacy", "bin", "carapace");
     const oldWrapperContents = `#!/usr/bin/env bash\nset -euo pipefail\nexec /usr/bin/node ${oldRoot.replaceAll(" ", "\\ ")}/dist/entry.js "$@"\n`;
     await Promise.all([
       fs.mkdir(path.dirname(unrelatedWrapper), { recursive: true }),
@@ -40,7 +40,7 @@ describe("retireStandaloneGitWrapper", () => {
 
       await fs.writeFile(
         wrapper,
-        "#!/usr/bin/env node\nimport '../lib/node_modules/openclaw/openclaw.mjs';\n",
+        "#!/usr/bin/env node\nimport '../lib/node_modules/carapace/carapace.mjs';\n",
         { mode: 0o755 },
       );
       await expect(
@@ -57,9 +57,9 @@ describe("retireStandaloneGitWrapper", () => {
   });
 
   it("removes only the exact PowerShell installer wrapper on Windows", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-wrapper-retire-win-"));
-    const oldRoot = "C:\\Users\\operator\\openclaw";
-    const wrapper = path.join(home, ".local", "bin", "openclaw.cmd");
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-wrapper-retire-win-"));
+    const oldRoot = "C:\\Users\\operator\\carapace";
+    const wrapper = path.join(home, ".local", "bin", "carapace.cmd");
     await fs.mkdir(path.dirname(wrapper), { recursive: true });
     await fs.writeFile(
       wrapper,

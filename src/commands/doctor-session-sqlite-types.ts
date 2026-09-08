@@ -1,5 +1,5 @@
 /** Shared type contracts for doctor-owned session SQLite migration reports. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 export type DoctorSessionSqliteIssue = {
   code: string;
@@ -86,7 +86,7 @@ export type DoctorSessionSqliteMode =
 export type DoctorSessionSqliteOptions = {
   allAgents?: boolean;
   agent?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   mode: DoctorSessionSqliteMode;
   store?: string;

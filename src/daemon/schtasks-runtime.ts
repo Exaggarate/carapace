@@ -128,7 +128,7 @@ export async function launchFallbackTaskScript(
     // inner Gateway. Direct fallback must restore that wrapper or it loses the
     // Job Object owner that terminates the whole Gateway process tree.
     const programArguments =
-      command.environment?.OPENCLAW_SERVICE_KIND === "gateway"
+      command.environment?.CARAPACE_SERVICE_KIND === "gateway"
         ? [...command.programArguments, WINDOWS_TASK_SUPERVISOR_FLAG]
         : command.programArguments;
     const { child } = await spawnWithFallback({
@@ -154,12 +154,12 @@ export async function launchFallbackTaskScript(
       "-NonInteractive",
       "-EncodedCommand",
       Buffer.from(
-        "$ErrorActionPreference='Stop'; [System.IO.File]::OpenRead($env:OPENCLAW_TASK_SCRIPT).Dispose()",
+        "$ErrorActionPreference='Stop'; [System.IO.File]::OpenRead($env:CARAPACE_TASK_SCRIPT).Dispose()",
         "utf16le",
       ).toString("base64"),
     ],
     {
-      env: { ...resolveServiceManagerEnv(), OPENCLAW_TASK_SCRIPT: scriptPath },
+      env: { ...resolveServiceManagerEnv(), CARAPACE_TASK_SCRIPT: scriptPath },
       stdio: "ignore",
       windowsHide: true,
     },
@@ -172,10 +172,10 @@ export async function launchFallbackTaskScript(
   }
   const { child } = await spawnWithFallback({
     // Node's verbatim /s shell contract preserves inner quotes; percent expansion is nonrecursive.
-    argv: [getWindowsCmdExePath(), "/d", "/s", "/v:off", "/c", '""%OPENCLAW_TASK_SCRIPT%""'],
+    argv: [getWindowsCmdExePath(), "/d", "/s", "/v:off", "/c", '""%CARAPACE_TASK_SCRIPT%""'],
     options: {
       detached: true,
-      env: { ...process.env, OPENCLAW_TASK_SCRIPT: scriptPath },
+      env: { ...process.env, CARAPACE_TASK_SCRIPT: scriptPath },
       stdio: "ignore",
       windowsHide: true,
       windowsVerbatimArguments: true,

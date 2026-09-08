@@ -1,16 +1,16 @@
 // Lmstudio tests cover index plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ProviderAuthMethod,
   ProviderPrepareDynamicModelContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { CUSTOM_LOCAL_AUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/plugin-entry";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { CUSTOM_LOCAL_AUTH_MARKER } from "carapace/plugin-sdk/provider-auth";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { LMSTUDIO_LOCAL_API_KEY_PLACEHOLDER } from "./src/defaults.js";
@@ -259,7 +259,7 @@ describe("lmstudio plugin", () => {
 
     await detectAvailability({
       config: {},
-      env: { OPENCLAW_DOCKER_SETUP: "1" },
+      env: { CARAPACE_DOCKER_SETUP: "1" },
     });
 
     expect(fetchLmstudioModelsMock).toHaveBeenCalledWith({
@@ -640,12 +640,12 @@ describe("lmstudio plugin", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       provider?.augmentModelCatalog?.({
         config,
-        agentDir: "/tmp/openclaw",
+        agentDir: "/tmp/carapace",
         env: {},
         entries: [],
       }),

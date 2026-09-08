@@ -115,7 +115,7 @@ export async function prepareNativePackageStage(params: {
   if (installTarget.manager === "bun" && process.platform === "win32") {
     throw new Error(
       "Bun Windows binary launchers cannot be relocated by the staged updater. " +
-        `Run \`bun add -g --trust ${params.installSpec}\` manually, then \`openclaw gateway restart\`; verify with \`openclaw update status\`.`,
+        `Run \`bun add -g --trust ${params.installSpec}\` manually, then \`carapace gateway restart\`; verify with \`carapace update status\`.`,
     );
   }
   const env =

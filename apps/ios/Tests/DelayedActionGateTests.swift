@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 private actor DelayDeliveryBarrier {
     private var deliveryCount = 0

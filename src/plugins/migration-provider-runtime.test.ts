@@ -1,6 +1,6 @@
 // Covers migration provider runtime hooks supplied by plugins.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 import type { PluginRegistry } from "./registry-types.js";
 import { createEmptyPluginRegistry } from "./registry.js";
@@ -23,7 +23,7 @@ type MockPluginIndex = {
 
 type MockPluginSnapshotLoadParams = {
   index?: MockPluginIndex;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -77,7 +77,7 @@ vi.mock("./plugin-registry-snapshot.js", () => ({
 }));
 
 vi.mock("./plugin-metadata-snapshot.js", () => ({
-  loadPluginMetadataSnapshot: (params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv }) => {
+  loadPluginMetadataSnapshot: (params: { config?: CarapaceConfig; env?: NodeJS.ProcessEnv }) => {
     const loaded = mocks.loadPluginRegistrySnapshotWithMetadata(params);
     const manifestRegistry = mocks.loadPluginManifestRegistry({
       index: loaded.snapshot,
@@ -172,7 +172,7 @@ describe("migration provider runtime", () => {
     }));
 
     ensureStandaloneMigrationProviderRegistryLoaded({
-      cfg: { plugins: { enabled: false } } as OpenClawConfig,
+      cfg: { plugins: { enabled: false } } as CarapaceConfig,
     });
 
     const standaloneParams = requireMockCallArg(
@@ -181,7 +181,7 @@ describe("migration provider runtime", () => {
     ) as {
       activate?: unknown;
       onlyPluginIds?: unknown;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
     };
     expect(standaloneParams.activate).toBe(false);
     expect(standaloneParams.onlyPluginIds).toEqual(["migrate-hermes"]);
@@ -218,7 +218,7 @@ describe("migration provider runtime", () => {
           "disabled-external-migration": { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const provider = createMigrationProvider("external-import");
     const active = createEmptyPluginRegistry();
     const loaded = createEmptyPluginRegistry();
@@ -286,7 +286,7 @@ describe("migration provider runtime", () => {
       "loadPluginManifestRegistry",
     ) as {
       index?: MockPluginIndex;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       env?: NodeJS.ProcessEnv;
       includeDisabled?: unknown;
     };
@@ -340,8 +340,8 @@ describe("migration provider runtime", () => {
     "does not reuse a standalone handle after %s changes",
     async (change) => {
       mocks.resolveRuntimePluginRegistry.mockReturnValue(undefined);
-      const cfgA = { plugins: { allow: ["migration-a"] } } as OpenClawConfig;
-      const cfgB = { plugins: { allow: ["migration-b"] } } as OpenClawConfig;
+      const cfgA = { plugins: { allow: ["migration-a"] } } as CarapaceConfig;
+      const cfgB = { plugins: { allow: ["migration-b"] } } as CarapaceConfig;
       const provider = createMigrationProvider("shared-import");
       const loadedA = createEmptyPluginRegistry();
       loadedA.migrationProviders.push({

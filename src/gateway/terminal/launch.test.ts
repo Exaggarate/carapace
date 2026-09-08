@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildTerminalEnv,
   createTerminalLaunchPolicy,
@@ -9,7 +9,7 @@ import {
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-const disabled: OpenClawConfig = { gateway: { terminal: { enabled: false } } };
+const disabled: CarapaceConfig = { gateway: { terminal: { enabled: false } } };
 
 describe("createTerminalLaunchPolicy", () => {
   it("is enabled by default and fails closed when disabled, sandboxed, or unknown-agent", () => {
@@ -62,7 +62,7 @@ describe("createTerminalLaunchPolicy", () => {
   it("applies restart-bound revocations without granting access early", () => {
     const enabled = {
       gateway: { port: 18789, terminal: { enabled: true } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const policy = createTerminalLaunchPolicy(enabled);
 
     policy.prepareConfig(
@@ -90,7 +90,7 @@ describe("createTerminalLaunchPolicy", () => {
 
   it("preserves sandbox revocations across later restart-bound updates", () => {
     const workspace = tempDirs.make("term-policy-agent-");
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { workspace }, list: [{ id: "ops" }] },
     };
@@ -115,7 +115,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("keeps restart and commit restrictions isolated across agents", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       agents: { ownership: "explicit", list: [{ id: "alpha" }, { id: "beta" }] },
     };
     const policy = createTerminalLaunchPolicy(baseConfig);
@@ -153,7 +153,7 @@ describe("createTerminalLaunchPolicy", () => {
   it.each(["sandboxed", "unknown-agent"] as const)(
     "retains a pending %s restriction when hot-enabling an initially disabled terminal",
     (kind) => {
-      const initial: OpenClawConfig = {
+      const initial: CarapaceConfig = {
         ...disabled,
         agents: { ownership: "explicit", entries: { ops: {}, other: {} } },
       };
@@ -223,7 +223,7 @@ describe("createTerminalLaunchPolicy", () => {
   it.each([false, true])(
     "publishes shell changes only at hot commit with pending restart=%s",
     (restartPending) => {
-      const initial: OpenClawConfig = {
+      const initial: CarapaceConfig = {
         gateway: { terminal: { enabled: true, shell: "/bin/old-shell" } },
       };
       const policy = createTerminalLaunchPolicy(initial);
@@ -236,7 +236,7 @@ describe("createTerminalLaunchPolicy", () => {
           },
         );
       }
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         gateway: { terminal: { enabled: true, shell: "/bin/new-shell" } },
       };
       policy.prepareConfig(nextConfig, { restartPending: false });
@@ -301,7 +301,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("retains failed hot-reload revocations until a later commit succeeds", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "off" } } },
     };
@@ -337,7 +337,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("releases a rejected restart restriction after an accepted revert", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       gateway: { terminal: { enabled: true } },
     };
     const policy = createTerminalLaunchPolicy(baseConfig);
@@ -359,7 +359,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("commits a newer hot candidate after a rejected restart is retired", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "all" } } },
     };
@@ -382,7 +382,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("retires failed hot candidates without clearing committed restart restrictions", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "off" } } },
     };
@@ -453,10 +453,10 @@ describe("createTerminalLaunchPolicy", () => {
     "commits hot enablement and keeps failed disable restrictions until commit with pending restart=%s",
     (restartPending) => {
       const policy = createTerminalLaunchPolicy(disabled);
-      const disabledConfig: OpenClawConfig = {
+      const disabledConfig: CarapaceConfig = {
         gateway: { ...(restartPending ? { port: 18790 } : {}), terminal: { enabled: false } },
       };
-      const enabledConfig: OpenClawConfig = {
+      const enabledConfig: CarapaceConfig = {
         gateway: { ...disabledConfig.gateway, terminal: { enabled: true, shell: "/bin/sh" } },
       };
       if (restartPending) {
@@ -499,7 +499,7 @@ describe("buildTerminalEnv", () => {
     expect(env.PATH).toBe("/usr/bin");
     expect(env.FOO).toBe("bar");
     expect(env.TERM).toBe("xterm-256color");
-    expect(env.OPENCLAW_TERMINAL).toBe("1");
+    expect(env.CARAPACE_TERMINAL).toBe("1");
   });
 
   it("preserves an existing TERM", () => {

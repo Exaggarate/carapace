@@ -9,9 +9,9 @@ import { NodeWorkerWorkspaceRuntime } from "../../node-host/node-worker-workspac
 import { runExclusiveSessionLifecycleMutation } from "../../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import {
   NODE_WORKSPACE_DRAIN_COMMAND,
@@ -195,7 +195,7 @@ beforeEach(async () => {
   git("add", ".");
   git("commit", "-qm", "base");
   store = createSessionRepositoryWorkspaceStore({
-    database: openOpenClawStateDatabase({ path: path.join(gatewayRoot, "state.sqlite") }),
+    database: openCarapaceStateDatabase({ path: path.join(gatewayRoot, "state.sqlite") }),
   });
   source = store.create({
     agentId: "main",
@@ -250,14 +250,14 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseByPath(path.join(gatewayRoot, "state.sqlite"));
+  closeCarapaceStateDatabaseByPath(path.join(gatewayRoot, "state.sqlite"));
   removeWorkspaceFixture(nodeRoot);
   removeWorkspaceFixture(gatewayRoot);
 });
 
 async function withCheckpointAcceptance(failCapture = false) {
   const placements = createWorkerSessionPlacementStore({
-    database: openOpenClawStateDatabase({ path: path.join(gatewayRoot, "state.sqlite") }),
+    database: openCarapaceStateDatabase({ path: path.join(gatewayRoot, "state.sqlite") }),
   });
   let placement = placements.startDispatch({
     sessionId: identity.sessionId,

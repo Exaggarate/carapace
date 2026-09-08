@@ -1,4 +1,4 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core";
+import { coerceErrorMessage } from "@carapace/normalization-core";
 
 type ClawRollbackStep =
   | (() => Promise<void>)

@@ -48,7 +48,7 @@ function hasExplicitlyAllowedClientTool(params: {
   return names.some((name) => matchers.some((matches) => matches(name)));
 }
 
-function collectOpenClawCapabilityToolNames(
+function collectCarapaceCapabilityToolNames(
   tools: CollectAllowedToolNamesParams["tools"],
 ): Set<string> {
   return collectAllowedToolNames({
@@ -81,7 +81,7 @@ export function buildToolSearchRunPlan(params: {
     tools: params.uncompactedTools,
     clientTools: params.clientTools,
   });
-  const capabilityToolNames = collectOpenClawCapabilityToolNames([
+  const capabilityToolNames = collectCarapaceCapabilityToolNames([
     ...(params.deferredToolsCallable ? params.uncompactedTools : params.visibleTools),
     ...(params.catalogCapabilityTools ?? []),
   ]);

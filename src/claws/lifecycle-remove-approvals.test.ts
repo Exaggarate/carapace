@@ -14,8 +14,8 @@ import {
   loadSessionEntryReadOnly,
 } from "../config/sessions/session-accessor.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.sqlite-entry.js";
-import { withTempHomeConfig, writeOpenClawConfig } from "../config/test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { withTempHomeConfig, writeCarapaceConfig } from "../config/test-helpers.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadExecApprovals, saveExecApprovals } from "../infra/exec-approvals.js";
 import { resolveRuntimeWorkerArgv, resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import { onSessionIdentityMutation } from "../sessions/session-lifecycle-events.js";
@@ -24,19 +24,19 @@ import {
   readAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
 import { readAgentProvenance } from "../state/agent-provenance.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import { registerCarapaceAgentDatabase } from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabases,
-  closeOpenClawAgentDatabaseByPath,
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabases,
+  closeCarapaceAgentDatabaseByPath,
+  listCarapaceRegisteredAgentDatabases,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { agentDatabaseHeldRuntimeEntrypoint } from "../state/openclaw-state-lease-runtime.test-support.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { agentDatabaseHeldRuntimeEntrypoint } from "../state/carapace-state-lease-runtime.test-support.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { applyClawAddPlan } from "./add.js";
 import {
@@ -52,19 +52,19 @@ import { parseClawManifest } from "./schema.js";
 import type { ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabases();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabases();
+  closeCarapaceStateDatabaseForTest();
   envSnapshot.restore();
 });
 
 const sourceMcpServer = { command: "fixture-mcp" };
 
 async function buildApprovalFixture(withMcp = false) {
-  const root = tempDirs.make("openclaw-claw-remove-approvals-");
+  const root = tempDirs.make("carapace-claw-remove-approvals-");
   const parsed = parseClawManifest({
     schemaVersion: 1,
     agent: { id: "worker", name: "Worker" },
@@ -78,7 +78,7 @@ async function buildApprovalFixture(withMcp = false) {
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -127,15 +127,15 @@ describe("Claw exec approvals removal", () => {
   it.each([false, true])("purges a retained session database (cold: %s)", async (cold) => {
     const addPlan = await buildApprovalFixture();
     await withTempHomeConfig({}, async ({ home }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", join(home, ".openclaw"));
-      let config: OpenClawConfig = {};
+      setTestEnvValue("CARAPACE_STATE_DIR", join(home, ".carapace"));
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         commitConfig: async (transform) => {
           config = transform(config);
         },
       });
-      const target = openOpenClawAgentDatabase({ agentId: "worker" });
+      const target = openCarapaceAgentDatabase({ agentId: "worker" });
       config = {
         ...config,
         agents: {
@@ -143,13 +143,13 @@ describe("Claw exec approvals removal", () => {
           entries: { ...config.agents?.entries, kept: { workspace: dirname(target.path) } },
         },
       };
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       const workerScope = { agentId: "worker", sessionKey: "agent:worker:main" };
       const keptScope = { agentId: "kept", sessionKey: "agent:kept:main" };
       replaceSessionEntrySync(workerScope, { sessionId: "worker-session", updatedAt: 1 });
       replaceSessionEntrySync(keptScope, { sessionId: "kept-session", updatedAt: 1 });
       if (cold) {
-        closeOpenClawAgentDatabaseByPath(target.path);
+        closeCarapaceAgentDatabaseByPath(target.path);
       }
       const plan = await buildClawRemovePlan("worker");
       const trashPath = vi.fn(async () => true);
@@ -171,15 +171,15 @@ describe("Claw exec approvals removal", () => {
   it("retains an archive publication failure and completes its real session cleanup on retry", async () => {
     const addPlan = await buildApprovalFixture();
     await withTempHomeConfig({}, async ({ home }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", join(home, ".openclaw"));
-      let config: OpenClawConfig = {};
+      setTestEnvValue("CARAPACE_STATE_DIR", join(home, ".carapace"));
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         commitConfig: async (transform) => {
           config = transform(config);
         },
       });
-      const target = openOpenClawAgentDatabase({ agentId: "worker" });
+      const target = openCarapaceAgentDatabase({ agentId: "worker" });
       config = {
         ...config,
         agents: {
@@ -187,7 +187,7 @@ describe("Claw exec approvals removal", () => {
           entries: { ...config.agents?.entries, kept: { workspace: dirname(target.path) } },
         },
       };
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       const scope = {
         agentId: "worker",
         sessionKey: "agent:worker:main",
@@ -225,7 +225,7 @@ describe("Claw exec approvals removal", () => {
       expect(readAgentDeletionJournal("worker")?.cleanupCompleted).toBe(false);
       expect(readAgentProvenance("worker")).toBeDefined();
       const readArchives = () =>
-        withOpenClawAgentDatabaseReadOnly(
+        withCarapaceAgentDatabaseReadOnly(
           (database) =>
             database.db.prepare("SELECT published_at FROM session_transcript_archives").all(),
           { agentId: "worker" },
@@ -253,8 +253,8 @@ describe("Claw exec approvals removal", () => {
   it("preserves config, approvals, and files until another process closes its database", async () => {
     const addPlan = await buildApprovalFixture(true);
     await withTempHomeConfig({}, async ({ home }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", join(home, ".openclaw"));
-      let config: OpenClawConfig = {};
+      setTestEnvValue("CARAPACE_STATE_DIR", join(home, ".carapace"));
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         commitConfig: async (transform) => {
@@ -272,7 +272,7 @@ describe("Claw exec approvals removal", () => {
         listMcpServers: async () => ({ ok: true, path: "fixture", config: {}, mcpServers: {} }),
       });
       config = { ...config, mcp: { servers: { docs: sourceMcpServer } } };
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       saveExecApprovals({ version: 1, agents: { worker: { security: "deny" } } });
       const configBefore = structuredClone(config);
       const approvalsBefore = loadExecApprovals();
@@ -307,7 +307,7 @@ describe("Claw exec approvals removal", () => {
           error: { message: expect.stringContaining("database is still open in another process") },
         });
         expect(
-          JSON.parse(await readFile(join(home, ".openclaw", "openclaw.json"), "utf8")),
+          JSON.parse(await readFile(join(home, ".carapace", "carapace.json"), "utf8")),
         ).toEqual(configBefore);
         expect(loadExecApprovals()).toEqual(approvalsBefore);
         expect(readAgentProvenance("worker")).toEqual(provenanceBefore);
@@ -315,13 +315,13 @@ describe("Claw exec approvals removal", () => {
         expect(unsetMcpServer).not.toHaveBeenCalled();
         expect(readClawMcpServerRefs("worker")).toHaveLength(1);
         expect(readAgentDeletionJournal("worker")).toMatchObject({ cleanupCompleted: false });
-        const agentDir = join(home, ".openclaw", "agents", "worker", "agent");
+        const agentDir = join(home, ".carapace", "agents", "worker", "agent");
         await withAgentDeletion("worker", async (begin) => {
           const deletion = begin({
             agentId: "worker",
             agentDir,
             workspaceDir: join(home, "workspace-worker"),
-            sessionsDir: join(home, ".openclaw", "agents", "worker", "sessions"),
+            sessionsDir: join(home, ".carapace", "agents", "worker", "sessions"),
           });
           const cleanup = vi.fn(async () => undefined);
           try {
@@ -329,7 +329,7 @@ describe("Claw exec approvals removal", () => {
               deletion.runDatabaseCleanup(
                 {
                   agentId: "worker",
-                  path: join(agentDir, "openclaw-agent.sqlite"),
+                  path: join(agentDir, "carapace-agent.sqlite"),
                 },
                 cleanup,
               ),
@@ -359,8 +359,8 @@ describe("Claw exec approvals removal", () => {
 
   it("refuses a cleanup capability while a foreign process holds a database beneath its paths", async () => {
     await withTempHomeConfig({}, async ({ home }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", join(home, ".openclaw"));
-      const agentDir = join(home, ".openclaw", "agents", "worker", "agent");
+      setTestEnvValue("CARAPACE_STATE_DIR", join(home, ".carapace"));
+      const agentDir = join(home, ".carapace", "agents", "worker", "agent");
       const target = { agentId: "kept", path: join(agentDir, "shared.sqlite") };
       const child = startHeldDatabase(target.agentId, target.path);
       try {
@@ -370,9 +370,9 @@ describe("Claw exec approvals removal", () => {
             agentId: "worker",
             agentDir,
             workspaceDir: join(home, "workspace-worker"),
-            sessionsDir: join(home, ".openclaw", "agents", "worker", "sessions"),
+            sessionsDir: join(home, ".carapace", "agents", "worker", "sessions"),
           });
-          const cleanup = vi.fn(async () => openOpenClawAgentDatabase(target));
+          const cleanup = vi.fn(async () => openCarapaceAgentDatabase(target));
           await expect(deletion.runDatabaseCleanup(target, cleanup)).rejects.toThrow(
             "agent worker deletion owns",
           );
@@ -396,20 +396,20 @@ describe("Claw exec approvals removal", () => {
     "closes configured and relocated databases in their state owner (failed close: $failClose, shared: $shared)",
     async ({ failClose, shared }) => {
       const root = tempDirs.make("claw-delete-lease-owner-");
-      const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+      const env = { CARAPACE_STATE_DIR: join(root, "state") };
       const agentDir = join(root, "custom-agent");
-      const foreign = openOpenClawAgentDatabase({ agentId: "kept", env });
-      const owned = openOpenClawAgentDatabase({
+      const foreign = openCarapaceAgentDatabase({ agentId: "kept", env });
+      const owned = openCarapaceAgentDatabase({
         agentId: "worker",
         env,
-        path: join(agentDir, "openclaw-agent.sqlite"),
+        path: join(agentDir, "carapace-agent.sqlite"),
       });
-      const relocated = openOpenClawAgentDatabase({
+      const relocated = openCarapaceAgentDatabase({
         agentId: "worker",
         env,
         path: join(root, "relocated.sqlite"),
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           defaults: { authInheritance: { agentId: "main" } },
           entries: {
@@ -419,9 +419,9 @@ describe("Claw exec approvals removal", () => {
         },
       };
       const originalConfig = structuredClone(config);
-      const configPath = join(root, "openclaw.json");
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      const configPath = join(root, "carapace.json");
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       await writeFile(configPath, JSON.stringify(config));
       const agent = listAgentEntries(config)[0]!;
       const remove = () =>
@@ -463,28 +463,28 @@ describe("Claw exec approvals removal", () => {
     async ({ kind, schemaVersion }) => {
       const addPlan = await buildApprovalFixture();
       await withTempHomeConfig({}, async ({ home }) => {
-        setTestEnvValue("OPENCLAW_STATE_DIR", join(home, ".openclaw"));
-        let config: OpenClawConfig = {};
-        const commitConfig = async (transform: (current: OpenClawConfig) => OpenClawConfig) => {
+        setTestEnvValue("CARAPACE_STATE_DIR", join(home, ".carapace"));
+        let config: CarapaceConfig = {};
+        const commitConfig = async (transform: (current: CarapaceConfig) => CarapaceConfig) => {
           config = transform(config);
         };
         await applyClawAddPlan(addPlan, {
           consentPlanIntegrity: addPlan.planIntegrity,
           commitConfig,
         });
-        await writeOpenClawConfig(home, config);
+        await writeCarapaceConfig(home, config);
         const sharedDir =
           kind === "workspace"
             ? addPlan.agent.workspace
             : join(
                 home,
-                ".openclaw",
+                ".carapace",
                 "agents",
                 "worker",
                 kind === "agentState" ? "agent" : "sessions",
               );
         const foreignPath = join(sharedDir, "kept.sqlite");
-        expect(listOpenClawRegisteredAgentDatabases()).toEqual([]);
+        expect(listCarapaceRegisteredAgentDatabases()).toEqual([]);
         const child = startHeldDatabase("kept", foreignPath);
         try {
           await child.ready;
@@ -493,7 +493,7 @@ describe("Claw exec approvals removal", () => {
           await child.dispose();
         }
         if (schemaVersion !== undefined) {
-          registerOpenClawAgentDatabase({ agentId: "kept", path: foreignPath, schemaVersion });
+          registerCarapaceAgentDatabase({ agentId: "kept", path: foreignPath, schemaVersion });
         }
         const before = await stat(foreignPath);
         const plan = await buildClawRemovePlan("worker", { config });
@@ -527,9 +527,9 @@ describe("Claw exec approvals removal", () => {
     const addPlan = await buildApprovalFixture();
 
     await withTempHomeConfig({}, async ({ home }) => {
-      const env = { OPENCLAW_STATE_DIR: join(home, ".openclaw") };
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
-      let config: OpenClawConfig = {};
+      const env = { CARAPACE_STATE_DIR: join(home, ".carapace") };
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         env,
@@ -537,7 +537,7 @@ describe("Claw exec approvals removal", () => {
           config = transform(config);
         },
       });
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       saveExecApprovals({
         version: 1,
         agents: {
@@ -582,9 +582,9 @@ describe("Claw exec approvals removal", () => {
     const addPlan = await buildApprovalFixture();
 
     await withTempHomeConfig({}, async ({ home }) => {
-      const env = { OPENCLAW_STATE_DIR: join(home, ".openclaw") };
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
-      let config: OpenClawConfig = {};
+      const env = { CARAPACE_STATE_DIR: join(home, ".carapace") };
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         env,
@@ -592,7 +592,7 @@ describe("Claw exec approvals removal", () => {
           config = transform(config);
         },
       });
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       const plan = await buildClawRemovePlan("worker");
       let creationDuringCleanup: Awaited<ReturnType<typeof createAgent>> | undefined;
 
@@ -621,9 +621,9 @@ describe("Claw exec approvals removal", () => {
     const addPlan = await buildApprovalFixture();
 
     await withTempHomeConfig({}, async ({ home }) => {
-      const env = { OPENCLAW_STATE_DIR: join(home, ".openclaw") };
-      setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
-      let config: OpenClawConfig = {};
+      const env = { CARAPACE_STATE_DIR: join(home, ".carapace") };
+      setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
+      let config: CarapaceConfig = {};
       await applyClawAddPlan(addPlan, {
         consentPlanIntegrity: addPlan.planIntegrity,
         env,
@@ -631,9 +631,9 @@ describe("Claw exec approvals removal", () => {
           config = transform(config);
         },
       });
-      await writeOpenClawConfig(home, config);
+      await writeCarapaceConfig(home, config);
       const plan = await buildClawRemovePlan("worker", { env, config });
-      const state = openOpenClawStateDatabase({ env });
+      const state = openCarapaceStateDatabase({ env });
       state.db.exec(`
         CREATE TRIGGER fail_claw_deletion_completion
         BEFORE UPDATE OF cleanup_completed ON agent_deletion_journal
@@ -670,17 +670,17 @@ describe("Claw exec approvals removal", () => {
 
   it("rechecks shared session ownership after resource cleanup changes config", async () => {
     const root = tempDirs.make("claw-remove-shared-topology-");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const env = { CARAPACE_STATE_DIR: join(root, "state") };
     const workspace = join(root, "workspace-worker");
     const sharedPath = join(root, "shared.sqlite");
-    const database = openOpenClawAgentDatabase({ agentId: "worker", path: sharedPath, env });
-    closeOpenClawAgentDatabaseByPath(database.path);
-    const initialConfig: OpenClawConfig = {
+    const database = openCarapaceAgentDatabase({ agentId: "worker", path: sharedPath, env });
+    closeCarapaceAgentDatabaseByPath(database.path);
+    const initialConfig: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { worker: { workspace }, kept: {} } },
     };
-    const configPath = join(root, "openclaw.json");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-    setTestEnvValue("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+    const configPath = join(root, "carapace.json");
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
     await writeFile(configPath, JSON.stringify(initialConfig));
 
     await expect(
@@ -704,7 +704,7 @@ describe("Claw exec approvals removal", () => {
         },
       ),
     ).rejects.toThrow('still used by agent "kept"');
-    const persistedConfig = JSON.parse(await readFile(configPath, "utf8")) as OpenClawConfig;
+    const persistedConfig = JSON.parse(await readFile(configPath, "utf8")) as CarapaceConfig;
     expect(listAgentEntries(persistedConfig).map((entry) => entry.id)).toEqual(["worker", "kept"]);
     expect(persistedConfig.session?.store).toBe(sharedPath);
     expect(readAgentDeletionJournal("worker", { env })).toBeUndefined();
@@ -715,13 +715,13 @@ describe("Claw exec approvals removal", () => {
     { label: "keeps a pre-existing journal", seedJournal: true },
     { label: "rolls back the journal it opened", seedJournal: false },
   ])("$label when the config commit rejects a changed agent", async ({ seedJournal }) => {
-    const root = tempDirs.make("openclaw-claw-remove-journal-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", join(root, "state"));
-    const config: OpenClawConfig = {
+    const root = tempDirs.make("carapace-claw-remove-journal-");
+    setTestEnvValue("CARAPACE_STATE_DIR", join(root, "state"));
+    const config: CarapaceConfig = {
       agents: { entries: { worker: { workspace: join(root, "workspace") } } },
     };
-    const configPath = join(root, "openclaw.json");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    const configPath = join(root, "carapace.json");
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
     await writeFile(configPath, JSON.stringify(config));
     if (seedJournal) {
       beginAgentDeletionJournal({

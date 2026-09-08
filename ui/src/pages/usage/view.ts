@@ -448,14 +448,14 @@ export function renderUsage(props: UsageProps) {
                     switch (event.detail.item.value) {
                       case "sessions-csv":
                         downloadTextFile(
-                          `openclaw-usage-sessions-${exportStamp}.csv`,
+                          `carapace-usage-sessions-${exportStamp}.csv`,
                           buildSessionsCsv(filteredSessions),
                           "text/csv;charset=utf-8",
                         );
                         break;
                       case "daily-csv":
                         downloadTextFile(
-                          `openclaw-usage-daily-${exportStamp}.csv`,
+                          `carapace-usage-daily-${exportStamp}.csv`,
                           buildDailyCsv(filteredDaily),
                           "text/csv;charset=utf-8",
                         );
@@ -662,7 +662,7 @@ export function renderUsage(props: UsageProps) {
                           return html`
                             <span class="usage-query-chip">
                               ${label}
-                              <openclaw-tooltip .content=${t("usage.filters.remove")}>
+                              <carapace-tooltip .content=${t("usage.filters.remove")}>
                                 <button
                                   aria-label=${t("usage.filters.remove")}
                                   @click=${() =>
@@ -672,7 +672,7 @@ export function renderUsage(props: UsageProps) {
                                 >
                                   ×
                                 </button>
-                              </openclaw-tooltip>
+                              </carapace-tooltip>
                             </span>
                           `;
                         })}

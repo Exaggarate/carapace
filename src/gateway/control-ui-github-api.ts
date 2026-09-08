@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import { getRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readResponseWithLimit } from "../infra/http-body.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { parseRetryAfterHeaderSeconds } from "../infra/retry-after.js";
@@ -118,7 +118,7 @@ export function formatControlUiGitHubPreviewError(error: unknown): {
 
 export function githubApiToken(
   env: NodeJS.ProcessEnv = process.env,
-  config: OpenClawConfig | null = getRuntimeConfigSnapshot(),
+  config: CarapaceConfig | null = getRuntimeConfigSnapshot(),
 ): string | undefined {
   const configured = config?.gateway?.controlUi?.github?.token;
   if (configured !== undefined) {
@@ -142,7 +142,7 @@ export function githubApiToken(
 /** Raw-config inspection for doctor; it never consults process-global runtime degradation state. */
 export function hasConfiguredGitHubApiCredential(
   env: NodeJS.ProcessEnv,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): boolean {
   return (
     config.gateway?.controlUi?.github?.token !== undefined ||
@@ -190,7 +190,7 @@ function activeGitHubCooldown(
 function githubApiHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "OpenClaw-Control-UI",
+    "User-Agent": "Carapace-Control-UI",
     "X-GitHub-Api-Version": GITHUB_API_VERSION,
   };
   if (token) {

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { resolveProviderIdForAuth } from "openclaw/plugin-sdk/agent-runtime";
+import type { resolveProviderIdForAuth } from "carapace/plugin-sdk/agent-runtime";
 import { parse as parseToml, type TomlTable } from "smol-toml";
 import {
   resolveCodexAppServerHomeDir,

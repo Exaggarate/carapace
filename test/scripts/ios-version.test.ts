@@ -20,10 +20,10 @@ describe("resolveIosVersion", () => {
     const script = fs.readFileSync("scripts/ios-write-version-xcconfig.sh", "utf8");
 
     expect(script).toContain('source "${ROOT_DIR}/scripts/lib/build-metadata.sh"');
-    expect(script).toContain("OPENCLAW_GIT_COMMIT = ${RESOLVED_GIT_COMMIT}");
-    expect(script).toContain("OPENCLAW_BUILD_TIMESTAMP = ${RESOLVED_BUILD_TIMESTAMP}");
-    expect(script).toContain('openclaw_resolve_git_commit "${ROOT_DIR}"');
-    expect(script).toContain("openclaw_resolve_build_timestamp");
+    expect(script).toContain("CARAPACE_GIT_COMMIT = ${RESOLVED_GIT_COMMIT}");
+    expect(script).toContain("CARAPACE_BUILD_TIMESTAMP = ${RESOLVED_BUILD_TIMESTAMP}");
+    expect(script).toContain('carapace_resolve_git_commit "${ROOT_DIR}"');
+    expect(script).toContain("carapace_resolve_build_timestamp");
   });
 
   it("rejects missing CLI option values before reading version files", () => {
@@ -55,7 +55,7 @@ describe("resolveIosVersion", () => {
   it("prints selected fields from the CLI", () => {
     const rootDir = writeIosFixture({
       packageVersion: "2026.4.6",
-      changelog: "# OpenClaw iOS Changelog\n\n## 2026.4.6\n\nStable notes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## 2026.4.6\n\nStable notes.\n",
     });
     const result = spawnSync(
       process.execPath,
@@ -82,7 +82,7 @@ describe("resolveIosVersion", () => {
   it("prints explicit gateway version fields from the CLI", () => {
     const rootDir = writeIosFixture({
       packageVersion: "2026.4.6",
-      changelog: "# OpenClaw iOS Changelog\n\n## 2026.4.7\n\nStable notes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## 2026.4.7\n\nStable notes.\n",
     });
     const result = spawnSync(
       process.execPath,
@@ -111,7 +111,7 @@ describe("resolveIosVersion", () => {
   it("prints an encoded App Store version for an explicit gateway revision", () => {
     const rootDir = writeIosFixture({
       packageVersion: "2026.7.2",
-      changelog: "# OpenClaw iOS Changelog\n\n## 2026.7.21\n\nRevision notes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## 2026.7.21\n\nRevision notes.\n",
     });
     const result = spawnSync(
       process.execPath,
@@ -139,7 +139,7 @@ describe("resolveIosVersion", () => {
   it("prints derived release notes from the CLI", () => {
     const rootDir = writeIosFixture({
       packageVersion: "2026.4.6",
-      changelog: "# OpenClaw iOS Changelog\n\n## 2026.4.7\n\nGenerated notes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## 2026.4.7\n\nGenerated notes.\n",
     });
     const result = spawnSync(
       process.execPath,
@@ -195,7 +195,7 @@ describe("resolveIosVersion", () => {
     const rootDir = writeIosFixture({
       mobileVersion: "2026.4.6",
       packageVersion: "2026.9.9",
-      changelog: "# OpenClaw iOS Changelog\n\n## 2026.4.6\n\nStable notes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## 2026.4.6\n\nStable notes.\n",
     });
 
     expect(resolveIosVersion(rootDir)).toEqual({
@@ -229,7 +229,7 @@ describe("resolveIosVersion", () => {
   it("rejects semver-only mobile gateway versions", () => {
     const rootDir = writeIosFixture({
       mobileVersion: "1.2.3",
-      changelog: "# OpenClaw iOS Changelog\n\n## Unreleased\n\nNotes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## Unreleased\n\nNotes.\n",
     });
 
     expect(() => resolveIosVersion(rootDir)).toThrow("Expected a stable release version");
@@ -238,7 +238,7 @@ describe("resolveIosVersion", () => {
   it("rejects prerelease suffixes in explicit gateway versions", () => {
     const rootDir = writeIosFixture({
       packageVersion: "2026.4.6",
-      changelog: "# OpenClaw iOS Changelog\n\n## Unreleased\n\nNotes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## Unreleased\n\nNotes.\n",
     });
 
     expect(() => resolveIosVersion(rootDir, { releaseVersion: "2026.4.6-beta.1" })).toThrow(
@@ -252,7 +252,7 @@ describe("gateway version ownership", () => {
     const rootDir = writeIosFixture({
       mobileVersion: "2026.4.7",
       packageVersion: "2026.9.9",
-      changelog: "# OpenClaw iOS Changelog\n\n## Unreleased\n\nNotes.\n",
+      changelog: "# Carapace iOS Changelog\n\n## Unreleased\n\nNotes.\n",
     });
 
     expect(resolveGatewayVersionForIosRelease(rootDir)).toEqual({
@@ -268,7 +268,7 @@ describe("release note extraction", () => {
       appStoreRevision: 1,
       releaseVersion: "2026.7.2",
     });
-    const changelog = `# OpenClaw iOS Changelog
+    const changelog = `# Carapace iOS Changelog
 
 ## Unreleased
 
@@ -289,7 +289,7 @@ Draft notes.
       appStoreRevision: 1,
       releaseVersion: "2026.7.2",
     });
-    const changelog = "# OpenClaw iOS Changelog\n\n## Unreleased\n\nDraft notes.\n";
+    const changelog = "# Carapace iOS Changelog\n\n## Unreleased\n\nDraft notes.\n";
 
     expect(() => renderIosReleaseNotes(version, changelog)).toThrow(
       "Unable to find iOS changelog notes for 2026.7.21",
@@ -298,7 +298,7 @@ Draft notes.
 
   it("extracts exact pinned version sections first", () => {
     const version = resolveIosVersion(".", { releaseVersion: "2026.4.6" });
-    const changelog = `# OpenClaw iOS Changelog
+    const changelog = `# Carapace iOS Changelog
 
 ## Unreleased
 
@@ -314,7 +314,7 @@ Draft notes.
 
   it("falls back to Unreleased when the release section does not exist yet", () => {
     const version = resolveIosVersion(".", { releaseVersion: "2026.4.6" });
-    const changelog = `# OpenClaw iOS Changelog
+    const changelog = `# Carapace iOS Changelog
 
 ## Unreleased
 
@@ -331,7 +331,7 @@ Draft notes.
   it("extracts markdown bodies without the version heading", () => {
     expect(
       extractChangelogSection(
-        `# OpenClaw iOS Changelog\n\n## 2026.4.6 - 2026-04-06\n\nLine one.\n\n## 2026.4.5\n`,
+        `# Carapace iOS Changelog\n\n## 2026.4.6 - 2026-04-06\n\nLine one.\n\n## 2026.4.5\n`,
         "2026.4.6",
       ),
     ).toBe("Line one.");

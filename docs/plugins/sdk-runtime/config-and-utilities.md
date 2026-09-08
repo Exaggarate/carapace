@@ -1,7 +1,7 @@
 ---
 summary: "Runtime config reads and writes, plus the shared process, error, and model-picker utilities"
 read_when:
-  - You are reading or writing OpenClaw config from plugin code
+  - You are reading or writing Carapace config from plugin code
   - You need a shared process, error, or timing utility instead of a host import
   - You are wiring model-picker persistence or bot-loop protection
 title: "Plugin runtime config and utilities"
@@ -29,7 +29,7 @@ The mutation helpers return `afterWrite` plus a typed `followUp` summary so call
 Use `current()`, a passed-in `cfg`, `mutateConfigFile(...)`, or
 `replaceConfigFile(...)` for runtime config access and writes.
 
-For direct SDK imports, prefer the focused config subpaths over the broad `openclaw/plugin-sdk/config-runtime` compatibility barrel: `config-contracts` for types, `runtime-config-snapshot` for current process snapshots, and `config-mutation` for writes. Read entry-scoped values from `api.pluginConfig`; use a supplied tool context only for its runtime-wide config snapshot, and keep plugin-specific merging at that boundary. Bundled plugin tests should mock these focused subpaths directly instead of mocking the broad compatibility barrel.
+For direct SDK imports, prefer the focused config subpaths over the broad `carapace/plugin-sdk/config-runtime` compatibility barrel: `config-contracts` for types, `runtime-config-snapshot` for current process snapshots, and `config-mutation` for writes. Read entry-scoped values from `api.pluginConfig`; use a supplied tool context only for its runtime-wide config snapshot, and keep plugin-specific merging at that boundary. Bundled plugin tests should mock these focused subpaths directly instead of mocking the broad compatibility barrel.
 
 When using the direct `config-mutation` import to replace a source snapshot, pass
 the edited config as `sourceConfig` to `replaceConfigFile`, retaining its `snapshot`,
@@ -40,12 +40,12 @@ preserve their file snapshot's references even when the active runtime uses a di
 The direct SDK `updateConfig` helper returns the config produced by its mutator.
 Its disk write restores environment references using the original read snapshot.
 
-Internal OpenClaw runtime code follows the same direction: load config once at the CLI, gateway, or process boundary, then pass that value through. Successful mutation writes refresh the process runtime snapshot and advance its internal revision; long-lived caches should key off the runtime-owned cache key instead of serializing config locally. Long-lived runtime modules have a zero-tolerance scanner for ambient `loadConfig()` calls; use a passed `cfg`, a request `context.getRuntimeConfig()`, or `getRuntimeConfig()` at an explicit process boundary.
+Internal Carapace runtime code follows the same direction: load config once at the CLI, gateway, or process boundary, then pass that value through. Successful mutation writes refresh the process runtime snapshot and advance its internal revision; long-lived caches should key off the runtime-owned cache key instead of serializing config locally. Long-lived runtime modules have a zero-tolerance scanner for ambient `loadConfig()` calls; use a passed `cfg`, a request `context.getRuntimeConfig()`, or `getRuntimeConfig()` at an explicit process boundary.
 
 Provider and channel execution paths must use the active runtime config snapshot, not a file snapshot returned for config readback or editing. File snapshots preserve source values such as SecretRef markers for UI and writes; provider callbacks need the resolved runtime view. When a helper may be called with either the active source snapshot or the active runtime snapshot, route through `selectApplicableRuntimeConfig()` before reading credentials.
 
 Retained channel monitors can bind `createRuntimeConfigReader(cfg)` from
-`openclaw/plugin-sdk/runtime-config-snapshot` once at startup. The reader follows
+`carapace/plugin-sdk/runtime-config-snapshot` once at startup. The reader follows
 runtime updates when the supplied config belongs to the active runtime, and
 preserves an explicitly scoped config otherwise, including when no runtime has
 been published yet. Read once per turn and carry that snapshot through admission
@@ -66,7 +66,7 @@ retain restart behavior under a broader no-op prefix.
 
 ## Reusable runtime utilities
 
-Import `execPolicy` from `openclaw/plugin-sdk/agent-harness-runtime` for the
+Import `execPolicy` from `carapace/plugin-sdk/agent-harness-runtime` for the
 host's exec mode algebra. `execPolicy.resolveExecModePolicy({ mode, security, ask })`
 returns the mode, security, ask, and auto-review settings. An explicit mode
 determines those settings; without one, the helper preserves the security/ask
@@ -81,7 +81,7 @@ exports from `infra-runtime`. The retired `resolveExecModeFromPolicy`,
 to `execPolicy.resolveExecModePolicy`, selecting the returned fields they need.
 
 Native command probes should use `runCommandWithTimeout` from
-`openclaw/plugin-sdk/process-runtime` with `timeoutMs`, the caller's `signal`, and
+`carapace/plugin-sdk/process-runtime` with `timeoutMs`, the caller's `signal`, and
 `killProcessTree: true`. Await its result so timeout or cancellation cleanup finishes
 before returning. For commands whose output is always UTF-8, such as JSON status
 probes, use `runUtf8CommandWithTimeout` from the same subpath.
@@ -100,7 +100,7 @@ still alive.
 
 Channel plugins that deliver agent replies directly can call
 `renderPresentationForDelivery(handler, payload)` from
-`openclaw/plugin-sdk/interactive-runtime` at delivery, after modifying hooks. Supply
+`carapace/plugin-sdk/interactive-runtime` at delivery, after modifying hooks. Supply
 the channel's `presentationCapabilities` and `renderPresentation` callback; the
 callback receives a payload with a normalized, adapted `presentation` and the
 normalized original presentation as its second argument. Use the original for
@@ -108,7 +108,7 @@ whole-card text fallbacks that must retain labels clipped by native limits. This
 shares core outbound rendering's fallback-text policy and removes the portable
 presentation fields after rendering. The callback may be synchronous or async.
 
-Use `attachErrorDiagnostic(error, text)` from `openclaw/plugin-sdk/error-runtime`
+Use `attachErrorDiagnostic(error, text)` from `carapace/plugin-sdk/error-runtime`
 to attach supplemental operator diagnostics to a thrown error without changing
 its identity, message, or failure classification. Mask opaque credentials first;
 the helper also redacts recognized secrets and retains at most 2,048 characters.
@@ -127,9 +127,9 @@ accepts owner authority only from the exact active, trusted plugin registered fo
 
 Model-picker integrations use two focused runtime subpaths. Import the typed
 `ModelPickerAction` and `ModelPickerCapabilityProfile` contracts from
-`openclaw/plugin-sdk/interactive-runtime`. Import
+`carapace/plugin-sdk/interactive-runtime`. Import
 `applySessionModelSelection(...)` and its result types from
-`openclaw/plugin-sdk/model-session-runtime`; this is the live-session mutation
+`carapace/plugin-sdk/model-session-runtime`; this is the live-session mutation
 seam, including its authoritative conflict check and post-commit effects. The
 lower-level `applyModelOverrideToSessionEntry(...)` helper is not a picker
 persistence API.
@@ -188,12 +188,12 @@ return {
 };
 ```
 
-Use `openclaw/plugin-sdk/pair-loop-guard-runtime` directly only for custom
+Use `carapace/plugin-sdk/pair-loop-guard-runtime` directly only for custom
 two-party event loops that do not go through the shared inbound reply runner.
 
 ### Stage timing diagnostics
 
-`openclaw/plugin-sdk/time-runtime` exports `createStageTimingTracker(now?)` and
+`carapace/plugin-sdk/time-runtime` exports `createStageTimingTracker(now?)` and
 `formatStageTimings(stages)`. The tracker records rounded, nonnegative
 `durationMs` and `elapsedMs` values. `mark(name)` measures since the previous
 mark; `measure(name, run)` and `measureSync(name, run)` record explicit spans,

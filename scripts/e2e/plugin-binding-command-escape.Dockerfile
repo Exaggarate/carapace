@@ -6,11 +6,11 @@ RUN apt-get update \
 
 RUN corepack enable
 
-WORKDIR /workspace/openclaw
+WORKDIR /workspace/carapace
 COPY . .
 
 # Source tests resolve workspace packages through aliases, outside the root
 # dependency graph. Install their isolated links along with the root tools.
-RUN OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL=1 pnpm install --frozen-lockfile --ignore-scripts
+RUN CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL=1 pnpm install --frozen-lockfile --ignore-scripts
 
 CMD ["bash"]

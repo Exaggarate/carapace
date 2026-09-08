@@ -1,11 +1,11 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { NormalizedPluginsConfig } from "../../plugins/config-state.js";
 import { passesManifestOwnerBasePolicy } from "../../plugins/manifest-owner-policy.js";
 
 export function shouldIncludeChannelSetupFeatureForConfig(params: {
   plugin: { id: string; channels?: readonly string[] };
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   normalizedConfig: NormalizedPluginsConfig;
 }): boolean {
   if (!params.config) {

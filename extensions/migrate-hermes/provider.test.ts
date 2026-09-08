@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createCapturedPluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveHomePath } from "./helpers.js";
 import pluginEntry from "./index.js";
@@ -27,8 +27,8 @@ function itemById(
 describe("Hermes migration provider", () => {
   beforeEach(async () => {
     testWorkspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-migrate-hermes-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-migrate-hermes-",
     });
   });
 
@@ -42,16 +42,16 @@ describe("Hermes migration provider", () => {
     expect(captured.migrationProviders.map((provider) => provider.id)).toEqual(["hermes"]);
   });
 
-  it("resolves tilde source paths against the OS home when OPENCLAW_HOME is set", () => {
-    const previous = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = path.join(path.sep, "tmp", "openclaw-home");
+  it("resolves tilde source paths against the OS home when CARAPACE_HOME is set", () => {
+    const previous = process.env.CARAPACE_HOME;
+    process.env.CARAPACE_HOME = path.join(path.sep, "tmp", "carapace-home");
     try {
       expect(resolveHomePath("~/.hermes")).toBe(path.join(os.homedir(), ".hermes"));
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_HOME;
+        delete process.env.CARAPACE_HOME;
       } else {
-        process.env.OPENCLAW_HOME = previous;
+        process.env.CARAPACE_HOME = previous;
       }
     }
   });

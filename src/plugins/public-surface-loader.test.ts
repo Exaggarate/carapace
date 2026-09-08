@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { MissingPublicSurfaceError } from "../plugin-sdk/facade-loader.js";
@@ -11,8 +11,8 @@ import { withMockedWindowsPlatform } from "../test-utils/vitest-spies.js";
 import { resetPluginCache } from "./plugin-cache.js";
 
 const tempDirs = createTempDirTracker();
-const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const originalTrustBundledPluginsDir = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+const originalBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+const originalTrustBundledPluginsDir = process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
 function captureThrownError(run: () => unknown): Error {
   try {
@@ -36,20 +36,20 @@ afterEach(() => {
   vi.doUnmock("./public-surface-runtime.js");
   vi.doUnmock("./sdk-alias.js");
   if (originalBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
   }
   if (originalTrustBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
   }
 });
 
 describe("bundled plugin public surface loader", () => {
   it("loads bundled artifacts from each caller's environment without changing process.env", async () => {
-    const tempRoot = tempDirs.make("openclaw-public-surface-env-");
+    const tempRoot = tempDirs.make("carapace-public-surface-env-");
     const createEnvironment = (marker: string) => {
       const bundledPluginsDir = path.join(tempRoot, marker);
       const pluginRoot = path.join(bundledPluginsDir, "demo");
@@ -61,8 +61,8 @@ describe("bundled plugin public surface loader", () => {
       );
       return {
         VITEST: "true",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       };
     };
     const firstEnvironment = createEnvironment("first");
@@ -92,7 +92,7 @@ describe("bundled plugin public surface loader", () => {
   it.each([false, true])(
     "separates disabled and enabled fallback caches with disabledFirst=%s",
     async (disabledFirst) => {
-      const tempRoot = tempDirs.make("openclaw-public-surface-env-cache-");
+      const tempRoot = tempDirs.make("carapace-public-surface-env-cache-");
       const pluginRoot = path.join(tempRoot, "extensions", "demo");
       fs.mkdirSync(pluginRoot, { recursive: true });
       fs.writeFileSync(path.join(pluginRoot, "package.json"), '{"type":"commonjs"}\n');
@@ -117,7 +117,7 @@ describe("bundled plugin public surface loader", () => {
         loader.loadBundledPluginPublicArtifactModuleFromCandidatesSync<{ marker: string }>({
           dirName: "demo",
           artifactCandidates: ["api.js"],
-          env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: disabled ? "1" : "0" },
+          env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: disabled ? "1" : "0" },
         });
 
       expect(load(disabledFirst)?.marker ?? null).toBe(disabledFirst ? null : "enabled");
@@ -129,7 +129,7 @@ describe("bundled plugin public surface loader", () => {
   it("keeps auto-resolved bundled roots on built public artifacts", async () => {
     // The non-isolated plugin shard may have already imported the native loader.
     vi.resetModules();
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist", "extensions");
     const modulePath = path.join(bundledPluginsDir, "demo", "provider-policy-api.js");
     fs.mkdirSync(path.dirname(modulePath), { recursive: true });
@@ -193,9 +193,9 @@ describe("bundled plugin public surface loader", () => {
       const publicSurfaceLoader = await importFreshModule<
         typeof import("./public-surface-loader.js")
       >(import.meta.url, "./public-surface-loader.js?scope=windows-dist-jiti");
-      const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+      const tempRoot = tempDirs.make("carapace-public-surface-loader-");
       const bundledPluginsDir = path.join(tempRoot, "dist");
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+      process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
 
       const modulePath = path.join(bundledPluginsDir, "demo", "provider-policy-api.js");
       fs.mkdirSync(path.dirname(modulePath), { recursive: true });
@@ -212,7 +212,7 @@ describe("bundled plugin public surface loader", () => {
   });
 
   it("loads import-only dependencies under tsx and shares source artifacts for one cache generation", () => {
-    const tempRoot = tempDirs.make("openclaw-public-surface-source-");
+    const tempRoot = tempDirs.make("carapace-public-surface-source-");
     const bundledPluginsDir = path.join(tempRoot, "extensions");
     const pluginRoot = path.join(bundledPluginsDir, "demo");
     const dependencyRoot = path.join(pluginRoot, "node_modules", "import-only-fixture");
@@ -266,9 +266,9 @@ describe("bundled plugin public surface loader", () => {
           TMP: tempRoot,
           TEMP: tempRoot,
           VITEST: "true",
-          OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_STATE_DIR: path.join(tempRoot, "state"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
           JITI_FS_CACHE: "0",
         },
       },
@@ -295,11 +295,11 @@ describe("bundled plugin public surface loader", () => {
     const publicSurfaceLoader = await importFreshModule<
       typeof import("./public-surface-loader.js")
     >(import.meta.url, "./public-surface-loader.js?scope=bundled-native-public-artifacts");
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     fs.mkdirSync(bundledPluginsDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const firstPath = path.join(bundledPluginsDir, "demo-a", "api.js");
     const secondPath = path.join(bundledPluginsDir, "demo-b", "api.js");
@@ -342,10 +342,10 @@ describe("bundled plugin public surface loader", () => {
     const publicSurfaceLoader = await importFreshModule<
       typeof import("./public-surface-loader.js")
     >(import.meta.url, "./public-surface-loader.js?scope=source-root-local-dist-public-artifacts");
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "extensions");
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const sourcePath = path.join(bundledPluginsDir, "demo", "api.ts");
     const distPath = path.join(bundledPluginsDir, "demo", "dist", "api.js");
@@ -376,13 +376,13 @@ describe("bundled plugin public surface loader", () => {
         `./public-surface-loader.js?scope=esm-artifact-relocation-${firstLocation}-${nextLocation}`,
       );
       const { clearPluginMetadataLifecycleCaches } = await import("./plugin-metadata-lifecycle.js");
-      const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+      const tempRoot = tempDirs.make("carapace-public-surface-loader-");
       const bundledPluginsDir = path.join(tempRoot, "extensions");
       const pluginDir = path.join(bundledPluginsDir, "demo");
       fs.mkdirSync(pluginDir, { recursive: true });
       fs.writeFileSync(path.join(pluginDir, "package.json"), '{"type":"module"}\n', "utf8");
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-      process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+      process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+      process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
       const artifactPath = (location: "root" | "dist") =>
         path.join(pluginDir, ...(location === "dist" ? ["dist"] : []), "api.js");
@@ -419,7 +419,7 @@ describe("bundled plugin public surface loader", () => {
       typeof import("./public-surface-loader.js")
     >(import.meta.url, "./public-surface-loader.js?scope=installed-artifact-replacement");
     const { clearPluginMetadataLifecycleCaches } = await import("./plugin-metadata-lifecycle.js");
-    const tempRoot = fs.realpathSync(tempDirs.make("openclaw-public-surface-replacement-"));
+    const tempRoot = fs.realpathSync(tempDirs.make("carapace-public-surface-replacement-"));
     const pluginRoot = path.join(tempRoot, "installed-plugin");
     const modulePath = path.join(pluginRoot, "api.js");
     const dependencyPath = path.join(pluginRoot, "dependency.js");
@@ -461,15 +461,15 @@ describe("bundled plugin public surface loader", () => {
       const publicSurfaceLoader = await importFreshModule<
         typeof import("./public-surface-loader.js")
       >(import.meta.url, "./public-surface-loader.js?scope=bundled-hardlink-public-artifacts");
-      const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+      const tempRoot = tempDirs.make("carapace-public-surface-loader-");
       const bundledPluginsDir = path.join(tempRoot, "dist");
       const sourcePath = path.join(tempRoot, "api-source.js");
       const modulePath = path.join(bundledPluginsDir, "demo", "api.js");
       fs.mkdirSync(path.dirname(modulePath), { recursive: true });
       fs.writeFileSync(sourcePath, 'export const marker = "demo";\n', "utf8");
       fs.linkSync(sourcePath, modulePath);
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-      process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+      process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+      process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
       expect(
         publicSurfaceLoader.loadBundledPluginPublicArtifactModuleSync<{ marker: string }>({
@@ -497,7 +497,7 @@ describe("bundled plugin public surface loader", () => {
         import.meta.url,
         `./public-surface-loader.js?scope=installed-hardlink-${artifact.replace(".js", "")}`,
       );
-      const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+      const tempRoot = tempDirs.make("carapace-public-surface-loader-");
       const pluginRoot = path.join(tempRoot, "installed-plugin");
       const outsidePath = path.join(tempRoot, "outside.js");
       const artifactPath = path.join(pluginRoot, artifact);
@@ -524,11 +524,11 @@ describe("bundled plugin public surface loader", () => {
       }),
     }));
 
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     fs.mkdirSync(bundledPluginsDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
     const publicSurfaceLoader = await importFreshModule<
       typeof import("./public-surface-loader.js")
     >(import.meta.url, "./public-surface-loader.js?scope=missing-location-retry");
@@ -567,7 +567,7 @@ describe("bundled plugin public surface loader", () => {
   it("shares installed artifact exports with SDK facades without warm filesystem probes", async () => {
     const { loadPluginPublicArtifactModuleSync } = await import("./public-surface-loader.js");
     const { loadFacadeModuleAtLocationSync } = await import("../plugin-sdk/facade-loader.js");
-    const pluginRoot = fs.realpathSync(tempDirs.make("openclaw-shared-plugin-artifact-"));
+    const pluginRoot = fs.realpathSync(tempDirs.make("carapace-shared-plugin-artifact-"));
     const modulePath = path.join(pluginRoot, "api.cjs");
     fs.writeFileSync(modulePath, 'module.exports = { marker: "shared-artifact" };\n');
     const loadArtifact = () =>
@@ -604,9 +604,9 @@ describe("bundled plugin public surface loader", () => {
     const publicSurfaceLoader = await importFreshModule<
       typeof import("./public-surface-loader.js")
     >(import.meta.url, "./public-surface-loader.js?scope=post-validation-identity");
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
 
     const modulePath = path.join(bundledPluginsDir, "demo", "api.js");
     fs.mkdirSync(path.dirname(modulePath), { recursive: true });
@@ -641,11 +641,11 @@ describe("bundled plugin public surface loader", () => {
       import.meta.url,
       "./public-surface-loader.js?scope=candidate-catcher-instanceof",
     );
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     fs.mkdirSync(bundledPluginsDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const result = fresh.loadBundledPluginPublicArtifactModuleFromCandidatesSync<{
       marker: string;
@@ -661,7 +661,7 @@ describe("bundled plugin public surface loader", () => {
       import.meta.url,
       "./public-surface-loader.js?scope=candidate-fallback-success",
     );
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     const pluginDir = path.join(bundledPluginsDir, "demo");
     fs.mkdirSync(pluginDir, { recursive: true });
@@ -670,8 +670,8 @@ describe("bundled plugin public surface loader", () => {
       'export const marker = "runtime-fallback";\n',
       "utf8",
     );
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const result = fresh.loadBundledPluginPublicArtifactModuleFromCandidatesSync<{
       marker: string;
@@ -688,7 +688,7 @@ describe("bundled plugin public surface loader", () => {
       import.meta.url,
       "./public-surface-loader.js?scope=candidate-catcher-generic-error",
     );
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     const pluginDir = path.join(bundledPluginsDir, "demo");
     fs.mkdirSync(pluginDir, { recursive: true });
@@ -697,8 +697,8 @@ describe("bundled plugin public surface loader", () => {
       'throw new Error("Unable to resolve bundled plugin public surface synthetic loader failure");\n',
       "utf8",
     );
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const error = captureThrownError(() =>
       fresh.loadBundledPluginPublicArtifactModuleFromCandidatesSync({
@@ -723,13 +723,13 @@ describe("bundled plugin public surface loader", () => {
       import.meta.url,
       "./public-surface-loader.js?scope=candidate-catcher-nested-missing-error",
     );
-    const tempRoot = tempDirs.make("openclaw-public-surface-loader-");
+    const tempRoot = tempDirs.make("carapace-public-surface-loader-");
     const bundledPluginsDir = path.join(tempRoot, "dist");
     const modulePath = path.join(bundledPluginsDir, "demo", "api.js");
     fs.mkdirSync(path.dirname(modulePath), { recursive: true });
     fs.writeFileSync(modulePath, 'export const marker = "demo";\n', "utf8");
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
 
     const error = captureThrownError(() =>
       fresh.loadBundledPluginPublicArtifactModuleFromCandidatesSync({

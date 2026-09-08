@@ -2,9 +2,9 @@
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-inbound";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageIMessageMock = vi.hoisted(() =>

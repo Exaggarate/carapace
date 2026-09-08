@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { BoardGetParams } from "@openclaw/gateway-protocol";
+import type { BoardGetParams } from "@carapace/gateway-protocol";
 import { html, LitElement } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {

@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import {
   resolveRuntimeWorkerArgv,
   resolveRuntimeWorkerUrl,
-} from "openclaw/plugin-sdk/process-runtime";
+} from "carapace/plugin-sdk/process-runtime";
 import { vectorKnnProcessEntrypoint } from "./manager-search-knn-entrypoint.js";
 import type { VectorKnnChildInput, VectorKnnChildResult } from "./manager-search-knn.child.js";
 import {

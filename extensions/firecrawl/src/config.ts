@@ -1,8 +1,8 @@
 // Firecrawl helper module supports config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePositiveTimeoutSeconds } from "openclaw/plugin-sdk/provider-web-fetch";
-import { normalizeSecretInput } from "openclaw/plugin-sdk/secret-input";
-import { resolveReadOnlyEnvSecretRef } from "openclaw/plugin-sdk/secret-ref-readonly";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePositiveTimeoutSeconds } from "carapace/plugin-sdk/provider-web-fetch";
+import { normalizeSecretInput } from "carapace/plugin-sdk/secret-input";
+import { resolveReadOnlyEnvSecretRef } from "carapace/plugin-sdk/secret-ref-readonly";
 
 export const DEFAULT_FIRECRAWL_BASE_URL = "https://api.firecrawl.dev";
 const DEFAULT_FIRECRAWL_SEARCH_TIMEOUT_SECONDS = 30;
@@ -43,7 +43,7 @@ type FirecrawlFetchConfig =
     }
   | undefined;
 
-function resolveFirecrawlSearchConfig(cfg?: OpenClawConfig): FirecrawlSearchConfig {
+function resolveFirecrawlSearchConfig(cfg?: CarapaceConfig): FirecrawlSearchConfig {
   const pluginConfig = cfg?.plugins?.entries?.firecrawl?.config as PluginEntryConfig;
   const pluginWebSearch = pluginConfig?.webSearch;
   if (pluginWebSearch && typeof pluginWebSearch === "object" && !Array.isArray(pluginWebSearch)) {
@@ -52,7 +52,7 @@ function resolveFirecrawlSearchConfig(cfg?: OpenClawConfig): FirecrawlSearchConf
   return undefined;
 }
 
-function resolveFirecrawlFetchConfig(cfg?: OpenClawConfig): FirecrawlFetchConfig {
+function resolveFirecrawlFetchConfig(cfg?: CarapaceConfig): FirecrawlFetchConfig {
   const pluginConfig = cfg?.plugins?.entries?.firecrawl?.config as PluginEntryConfig;
   const pluginWebFetch = pluginConfig?.webFetch;
   if (pluginWebFetch && typeof pluginWebFetch === "object" && !Array.isArray(pluginWebFetch)) {
@@ -61,7 +61,7 @@ function resolveFirecrawlFetchConfig(cfg?: OpenClawConfig): FirecrawlFetchConfig
   return undefined;
 }
 
-function resolveConfiguredSecret(value: unknown, path: string, cfg?: OpenClawConfig) {
+function resolveConfiguredSecret(value: unknown, path: string, cfg?: CarapaceConfig) {
   return resolveReadOnlyEnvSecretRef({
     value,
     path,
@@ -71,7 +71,7 @@ function resolveConfiguredSecret(value: unknown, path: string, cfg?: OpenClawCon
   });
 }
 
-export function resolveFirecrawlApiKey(cfg?: OpenClawConfig): string | undefined {
+export function resolveFirecrawlApiKey(cfg?: CarapaceConfig): string | undefined {
   const pluginConfig = cfg?.plugins?.entries?.firecrawl?.config as PluginEntryConfig;
   const search = resolveFirecrawlSearchConfig(cfg);
   const configuredCandidates: Array<{ value: unknown; path: string }> = [
@@ -100,7 +100,7 @@ export function resolveFirecrawlApiKey(cfg?: OpenClawConfig): string | undefined
   return normalizeSecretInput(process.env[FIRECRAWL_API_KEY_ENV_VAR]) || undefined;
 }
 
-export function resolveFirecrawlBaseUrl(cfg?: OpenClawConfig): string {
+export function resolveFirecrawlBaseUrl(cfg?: CarapaceConfig): string {
   const search = resolveFirecrawlSearchConfig(cfg);
   const fetch = resolveFirecrawlFetchConfig(cfg);
   const configured =
@@ -111,7 +111,7 @@ export function resolveFirecrawlBaseUrl(cfg?: OpenClawConfig): string {
   return configured || DEFAULT_FIRECRAWL_BASE_URL;
 }
 
-export function resolveFirecrawlOnlyMainContent(cfg?: OpenClawConfig, override?: boolean): boolean {
+export function resolveFirecrawlOnlyMainContent(cfg?: CarapaceConfig, override?: boolean): boolean {
   if (typeof override === "boolean") {
     return override;
   }
@@ -122,7 +122,7 @@ export function resolveFirecrawlOnlyMainContent(cfg?: OpenClawConfig, override?:
   return true;
 }
 
-export function resolveFirecrawlMaxAgeMs(cfg?: OpenClawConfig, override?: number): number {
+export function resolveFirecrawlMaxAgeMs(cfg?: CarapaceConfig, override?: number): number {
   if (typeof override === "number" && Number.isFinite(override) && override >= 0) {
     return Math.floor(override);
   }
@@ -138,7 +138,7 @@ export function resolveFirecrawlMaxAgeMs(cfg?: OpenClawConfig, override?: number
 }
 
 export function resolveFirecrawlScrapeTimeoutSeconds(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   override?: number,
 ): number {
   const fetch = resolveFirecrawlFetchConfig(cfg);

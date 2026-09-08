@@ -32,10 +32,10 @@ const FAMILY_SPECS = {
   },
 };
 const EXPECTED_FAMILIES = Object.keys(FAMILY_SPECS).toSorted();
-// Model only whole OpenClaw Fastlane invocations. Fastlane's internal launch
+// Model only whole Carapace Fastlane invocations. Fastlane's internal launch
 // retries remain workflow-log evidence.
 const ATTEMPT_MODEL = Object.freeze({
-  owner: "openclaw",
+  owner: "carapace",
   unit: "capture_ios_screenshots invocation",
   maxAttempts: 2,
   fastlaneInternalRetries: "workflow-log",
@@ -205,13 +205,13 @@ function collectScreenshots({ family, screenshotDirectory, familyDirectory, spec
 function readCaptureAttemptLedger(xcresultDirectory) {
   const ledgerPath = path.join(xcresultDirectory, CAPTURE_ATTEMPTS_FILENAME);
   if (!fs.existsSync(ledgerPath) || !fs.statSync(ledgerPath).isFile()) {
-    fail(`missing OpenClaw capture attempt ledger: ${ledgerPath}`);
+    fail(`missing Carapace capture attempt ledger: ${ledgerPath}`);
   }
   let ledger;
   try {
     ledger = JSON.parse(fs.readFileSync(ledgerPath, "utf8"));
   } catch (error) {
-    return fail(`invalid OpenClaw capture attempt ledger: ${String(error)}`);
+    return fail(`invalid Carapace capture attempt ledger: ${String(error)}`);
   }
   const expectedKeys = ["attempts", "schemaVersion"];
   const actualKeys =
@@ -219,10 +219,10 @@ function readCaptureAttemptLedger(xcresultDirectory) {
       ? Object.keys(ledger).toSorted((left, right) => left.localeCompare(right))
       : [];
   if (actualKeys.join("\n") !== expectedKeys.join("\n")) {
-    fail("OpenClaw capture attempt ledger has an unexpected shape");
+    fail("Carapace capture attempt ledger has an unexpected shape");
   }
   if (ledger.schemaVersion !== 1 || !Array.isArray(ledger.attempts)) {
-    fail("OpenClaw capture attempt ledger has an unsupported schema");
+    fail("Carapace capture attempt ledger has an unsupported schema");
   }
   return ledger.attempts;
 }
@@ -244,7 +244,7 @@ function collectCaptureAttempts({
   );
   if (unexpectedEntries.length > 0) {
     fail(
-      `OpenClaw capture evidence contains unexpected entries: ${unexpectedEntries.map((entry) => entry.name).join(", ")}`,
+      `Carapace capture evidence contains unexpected entries: ${unexpectedEntries.map((entry) => entry.name).join(", ")}`,
     );
   }
   const xcresultNames = directoryEntries
@@ -259,7 +259,7 @@ function collectCaptureAttempts({
     const attemptNumbers = attempts.map(({ attempt }) => attempt).join(",");
     if (attemptNumbers !== "1" && attemptNumbers !== "1,2") {
       fail(
-        `${deviceName} ${screenshotName} expected OpenClaw attempt 1 and optional retry 2; found ${attemptNumbers || "none"}`,
+        `${deviceName} ${screenshotName} expected Carapace attempt 1 and optional retry 2; found ${attemptNumbers || "none"}`,
       );
     }
     const summaries = attempts.map((entry, index) => {

@@ -3,8 +3,8 @@ import {
   describeOpenAiCompatibleVideo,
   type MediaUnderstandingProvider,
   type VideoDescriptionRequest,
-} from "openclaw/plugin-sdk/media-understanding";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/media-understanding";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { MOONSHOT_BASE_URL } from "./provider-catalog.js";
 
 // Media defaults are capability-specific and intentionally independent from chat onboarding.

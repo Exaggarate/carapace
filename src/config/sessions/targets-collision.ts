@@ -3,9 +3,9 @@ import path from "node:path";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import {
-  createOpenClawAgentDatabasePathMatcher,
-  listOpenClawRegisteredAgentDatabases,
-} from "../../state/openclaw-agent-db-registry.js";
+  createCarapaceAgentDatabasePathMatcher,
+  listCarapaceRegisteredAgentDatabases,
+} from "../../state/carapace-agent-db-registry.js";
 import {
   resolveSqliteTargetFromSessionStorePath,
   resolveUnsuffixedSqliteTargetFromSessionStorePath,
@@ -47,7 +47,7 @@ export function dedupeSessionStoreTargetsBySqliteTarget(
   // Ownership must not fall back while the authoritative registry is unreadable:
   // doing so can project the same physical DB under a different configured default.
   const registeredDatabases =
-    options.registeredDatabases ?? listOpenClawRegisteredAgentDatabases({ env: options.env });
+    options.registeredDatabases ?? listCarapaceRegisteredAgentDatabases({ env: options.env });
   const grouped = new Map<
     string,
     Array<{ target: SessionStoreTarget; databaseOwnerAgentId?: string; shared: boolean }>
@@ -62,7 +62,7 @@ export function dedupeSessionStoreTargetsBySqliteTarget(
   >();
   // Alias targets can change between calls. Reuse prepared identities only for this
   // synchronous dedupe invocation so collision ownership never relies on stale paths.
-  const isSameDatabasePath = createOpenClawAgentDatabasePathMatcher();
+  const isSameDatabasePath = createCarapaceAgentDatabasePathMatcher();
   const resolvePhysicalGroupKey = <T>(groups: ReadonlyMap<string, T>, pathname: string) =>
     [...groups.keys()].find((candidate) => isSameDatabasePath(candidate, pathname)) ??
     path.resolve(pathname);

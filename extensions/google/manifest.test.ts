@@ -1,7 +1,7 @@
 // Google tests cover manifest plugin behavior.
 import { readFileSync } from "node:fs";
-import { buildJsonPluginConfigSchema } from "openclaw/plugin-sdk/core";
-import type { JsonSchemaObject } from "openclaw/plugin-sdk/json-schema-runtime";
+import { buildJsonPluginConfigSchema } from "carapace/plugin-sdk/core";
+import type { JsonSchemaObject } from "carapace/plugin-sdk/json-schema-runtime";
 import { describe, expect, it } from "vitest";
 
 type GoogleManifest = {
@@ -103,7 +103,7 @@ const RETIRED_GEMINI_CHAT_MODELS = [
 const GOOGLE_CHAT_PROVIDERS = ["google", "google-gemini-cli", "google-vertex"] as const;
 
 function loadManifest(): GoogleManifest {
-  return JSON.parse(readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"));
+  return JSON.parse(readFileSync(new URL("./carapace.plugin.json", import.meta.url), "utf8"));
 }
 
 describe("google manifest model catalog", () => {

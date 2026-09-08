@@ -31,7 +31,7 @@ type ContainerExecFinalizeToken = () => Promise<void>;
 function resolveContainerExecEnv(env: Record<string, string>): Record<string, string> {
   const { PATH: requestedPath, ...containerEnv } = env;
   if (requestedPath) {
-    containerEnv.OPENCLAW_PREPEND_PATH = requestedPath;
+    containerEnv.CARAPACE_PREPEND_PATH = requestedPath;
   }
   return containerEnv;
 }
@@ -55,7 +55,7 @@ function buildContainerExecArgs(params: {
   // Apply the staged prepend only after login profile sourcing; direct PATH
   // injection can break the container engine's initial executable lookup.
   const pathExport = params.env.PATH
-    ? 'export PATH="${OPENCLAW_PREPEND_PATH}:$PATH"; unset OPENCLAW_PREPEND_PATH; '
+    ? 'export PATH="${CARAPACE_PREPEND_PATH}:$PATH"; unset CARAPACE_PREPEND_PATH; '
     : "";
   // Use absolute path for sh to avoid dependency on PATH resolution during exec.
   args.push(params.containerName, "/bin/sh", "-lc", `${pathExport}${params.command}`);
@@ -63,7 +63,7 @@ function buildContainerExecArgs(params: {
 }
 
 function resolveConfiguredDockerRuntimeImage(params: {
-  config: CreateSandboxBackendParams["cfg"] | import("../../config/config.js").OpenClawConfig;
+  config: CreateSandboxBackendParams["cfg"] | import("../../config/config.js").CarapaceConfig;
   agentId?: string;
   configLabelKind?: string;
 }): string {
@@ -203,7 +203,7 @@ async function runContainerSandboxShellCommand(
     "sh",
     "-c",
     params.script,
-    "openclaw-sandbox-fs",
+    "carapace-sandbox-fs",
   ];
   if (params.args?.length) {
     dockerArgs.push(...params.args);

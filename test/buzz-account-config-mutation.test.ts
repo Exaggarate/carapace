@@ -4,7 +4,7 @@ import {
   applyPreparedChannelAccountConfiguration,
   prepareChannelAccountConfiguration,
 } from "../src/channels/plugins/account-config-mutation.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 
 const rootKey = "11".repeat(32);
 const roomId = "7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c";
@@ -47,7 +47,7 @@ it.each([
   },
 ])("preserves $label through named Buzz account setup", async ({ section }) => {
   vi.stubEnv("BUZZ_PRIVATE_KEY", rootKey);
-  const cfg: OpenClawConfig = { channels: { buzz: structuredClone(section) } };
+  const cfg: CarapaceConfig = { channels: { buzz: structuredClone(section) } };
   const before = structuredClone(cfg);
   const originalAccount = resolveBuzzAccount({ cfg, accountId: "default" });
   const prepared = await prepareChannelAccountConfiguration({

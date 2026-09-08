@@ -6,7 +6,7 @@ import {
   setupCronRegressionFixtures,
 } from "../../../test/helpers/cron/service-regression-fixtures.js";
 import { formatErrorMessage } from "../../infra/errors.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { markCronJobActive } from "../active-jobs.js";
 import { loadCronStore, saveCronStore } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
@@ -395,7 +395,7 @@ describe("cron failure alert persistence", () => {
       nowMs: () => dueAt + 10,
       sendCronFailureAlert,
     });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TEMP TRIGGER reject_failure_alert_terminal_write
       BEFORE UPDATE ON cron_jobs
@@ -672,7 +672,7 @@ describe("cron failure alert outcome write-back", () => {
     });
 
     // The run itself is durable; from here on every write to this row fails.
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TEMP TRIGGER reject_outcome_write
       BEFORE UPDATE ON cron_jobs

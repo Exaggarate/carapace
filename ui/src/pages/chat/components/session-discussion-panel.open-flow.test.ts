@@ -13,7 +13,7 @@ import {
 afterEach(resetDiscussionPanelTestState);
 
 async function emptyStateText(panel: HTMLElement): Promise<string> {
-  const empty = panel.querySelector("openclaw-panel-empty-state");
+  const empty = panel.querySelector("carapace-panel-empty-state");
   expect(empty).not.toBeNull();
   await empty!.updateComplete;
   return empty!.shadowRoot?.textContent ?? "";
@@ -21,13 +21,13 @@ async function emptyStateText(panel: HTMLElement): Promise<string> {
 
 describe("session discussion panel", () => {
   it("does not render a skeleton without a loadable discussion", async () => {
-    const panel = document.createElement("openclaw-session-discussion") as HTMLElement & {
+    const panel = document.createElement("carapace-session-discussion") as HTMLElement & {
       updateComplete: Promise<unknown>;
     };
     document.body.append(panel);
     try {
       await panel.updateComplete;
-      expect(panel.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+      expect(panel.querySelector("carapace-panel-loading-skeleton")).toBeNull();
     } finally {
       panel.remove();
     }
@@ -46,7 +46,7 @@ describe("session discussion panel", () => {
       expect(openDiscussion).toHaveBeenCalledTimes(1);
       expect(
         panel
-          .querySelector('openclaw-panel-loading-skeleton[data-panel-skeleton="discussion"]')
+          .querySelector('carapace-panel-loading-skeleton[data-panel-skeleton="discussion"]')
           ?.getAttribute("aria-label"),
       ).toContain("Opening discussion");
     });
@@ -63,7 +63,7 @@ describe("session discussion panel", () => {
       expect(await emptyStateText(panel)).toContain("cannot be embedded");
     });
     expect(
-      panel.querySelector('openclaw-panel-loading-skeleton[data-panel-skeleton="discussion"]'),
+      panel.querySelector('carapace-panel-loading-skeleton[data-panel-skeleton="discussion"]'),
     ).toBeNull();
   });
 
@@ -174,7 +174,7 @@ describe("session discussion panel", () => {
     expect(openDiscussion).toHaveBeenCalledTimes(1);
     expect(panel.querySelector("iframe")).toBeNull();
     expect(
-      panel.querySelector('openclaw-panel-loading-skeleton[data-panel-skeleton="discussion"]'),
+      panel.querySelector('carapace-panel-loading-skeleton[data-panel-skeleton="discussion"]'),
     ).toBeNull();
   });
 

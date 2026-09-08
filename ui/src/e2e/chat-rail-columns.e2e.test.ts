@@ -22,14 +22,14 @@ const suite = createControlUiE2eSuite({
 });
 
 const sessionKey = "agent:main:rail-tabs";
-const proofDirParent = process.env.OPENCLAW_UI_RAIL_PROOF_DIR?.trim();
+const proofDirParent = process.env.CARAPACE_UI_RAIL_PROOF_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = proofDirParent
     ? createControlUiE2eArtifactDir("chat-rail-columns", proofDirParent)
     : undefined;
 });
-const videoDirParent = process.env.OPENCLAW_UI_RAIL_VIDEO_DIR?.trim();
+const videoDirParent = process.env.CARAPACE_UI_RAIL_VIDEO_DIR?.trim();
 let videoDir: string | undefined;
 beforeEach(() => {
   videoDir = videoDirParent
@@ -82,7 +82,7 @@ function scenario(): ControlUiMockGatewayScenario {
       },
       "sessions.diff": {
         sessionKey,
-        root: "/workspace/openclaw",
+        root: "/workspace/carapace",
         branch: "feature/tabbed-side-panel",
         baseRef: "main",
         files: [
@@ -128,18 +128,18 @@ function scenario(): ControlUiMockGatewayScenario {
             kind: "modified",
             missing: false,
             name: "chat-pane-render.ts",
-            path: "/workspace/openclaw/ui/src/pages/chat/chat-pane-render.ts",
+            path: "/workspace/carapace/ui/src/pages/chat/chat-pane-render.ts",
             size: 18_432,
           },
           {
             kind: "read",
             missing: false,
             name: "sidebar.css",
-            path: "/workspace/openclaw/ui/src/styles/chat/sidebar.css",
+            path: "/workspace/carapace/ui/src/styles/chat/sidebar.css",
             size: 24_820,
           },
         ],
-        root: "/workspace/openclaw",
+        root: "/workspace/carapace",
         sessionKey,
       },
       "tasks.list": {
@@ -165,14 +165,14 @@ function scenario(): ControlUiMockGatewayScenario {
       "terminal.open": {
         agentId: "main",
         confined: false,
-        cwd: "/workspace/openclaw",
+        cwd: "/workspace/carapace",
         sessionId: "rail-tabs-terminal",
         shell: "/bin/zsh",
       },
     },
     sessionKey,
     terminalEnabled: true,
-    workspace: "/workspace/openclaw",
+    workspace: "/workspace/carapace",
     workspaceGit: true,
   };
 }
@@ -214,7 +214,7 @@ async function seedDockReservationRegression(page: Page, dock: "bottom" | "right
         }),
       );
       localStorage.setItem(
-        "openclaw.browser.panel.v1",
+        "carapace.browser.panel.v1",
         JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
       );
     },
@@ -624,7 +624,7 @@ suite.define(() => {
           const tooltipTrigger = overflowingLabel.locator("..");
           const labelTooltip = tooltipTrigger.locator("..");
           expect(await labelTooltip.evaluate((element) => element.localName)).toBe(
-            "openclaw-tooltip",
+            "carapace-tooltip",
           );
           expect(
             await overflowingLabel.locator("xpath=ancestor::wa-tab").getAttribute("title"),
@@ -993,7 +993,7 @@ suite.define(() => {
         expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 1);
         expect(geometry.width).toBeGreaterThan(300);
 
-        const companion = sidePanel(page).locator("openclaw-chat-session-rail");
+        const companion = sidePanel(page).locator("carapace-chat-session-rail");
         const companionGeometry = await companion.locator(".chat-session-rail").evaluate((rail) => {
           const body = rail.closest(".side-panel__panel");
           const bodyRect = body?.getBoundingClientRect();

@@ -8,7 +8,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it.each([
-  ["openclaw-release-telegram-qa", "build_candidate"],
+  ["carapace-release-telegram-qa", "build_candidate"],
   ["qa-profile-evidence", "plan_qa_profile"],
   ["qa-profile-evidence", "run_qa_profile_shard"],
   ["qa-profile-evidence", "aggregate_qa_profile"],

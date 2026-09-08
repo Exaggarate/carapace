@@ -85,8 +85,8 @@ function readSidebarNativeGateway(): SidebarNativeGateway | null {
     return null;
   }
   const snapshot = (
-    window as Window & { __OPENCLAW_NATIVE_GATEWAYS__?: SidebarNativeGatewaysSnapshot }
-  )["__OPENCLAW_NATIVE_GATEWAYS__"];
+    window as Window & { __CARAPACE_NATIVE_GATEWAYS__?: SidebarNativeGatewaysSnapshot }
+  )["__CARAPACE_NATIVE_GATEWAYS__"];
   if (!snapshot || !Array.isArray(snapshot.gateways) || snapshot.gateways.length < 2) {
     return null;
   }
@@ -119,7 +119,7 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
   const collapseLabel = t("nav.collapse");
   return html`
     <div class="sidebar-brand">
-      <openclaw-sidebar-agent-card
+      <carapace-sidebar-agent-card
         .agentName=${cardName}
         .avatarUrl=${
           cardAgent ? resolveAgentAvatarUrl(cardAgent, cardIdentity) : cardIdentity?.avatar
@@ -143,9 +143,9 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
           const trigger = card.querySelector<HTMLElement>(".sidebar-agent-card__main") ?? card;
           host.sidebarMenus.toggleAgentMenu(trigger);
         }}
-      ></openclaw-sidebar-agent-card>
+      ></carapace-sidebar-agent-card>
       <div class="sidebar-brand__actions">
-        <openclaw-tooltip
+        <carapace-tooltip
           .content=${`${collapseLabel} (${formatKeyboardShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.toggleSidebar)})`}
         >
           <button
@@ -158,8 +158,8 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
           >
             ${icons.panelLeftClose}
           </button>
-        </openclaw-tooltip>
-        <openclaw-tooltip
+        </carapace-tooltip>
+        <carapace-tooltip
           .content=${`${t("chat.openCommandPalette")} (${formatKeyboardShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.commandPalette)})`}
         >
           <button
@@ -171,7 +171,7 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
           >
             ${icons.search}
           </button>
-        </openclaw-tooltip>
+        </carapace-tooltip>
         ${renderNewSessionLink({
           basePath: host.basePath,
           agentId: host.expandedAgentId(),
@@ -243,7 +243,7 @@ export function renderAppSidebarHomeRow(host: AppSidebarRenderHost) {
     >
       ${
         attentionLabel
-          ? html`<openclaw-tooltip .content=${attentionLabel}>${homeGlyph}</openclaw-tooltip>`
+          ? html`<carapace-tooltip .content=${attentionLabel}>${homeGlyph}</carapace-tooltip>`
           : homeGlyph
       }
       <span class="nav-item__text">${t("nav.home")}</span>
@@ -325,10 +325,10 @@ export function renderAppSidebarOnline(host: AppSidebarRenderHost) {
             ${
               collapsed
                 ? html`<span class="sidebar-online__facepile">
-                    <openclaw-viewer-facepile
+                    <carapace-viewer-facepile
                       .staticUsers=${users}
                       .maxVisible=${2}
-                    ></openclaw-viewer-facepile>
+                    ></carapace-viewer-facepile>
                   </span>`
                 : nothing
             }
@@ -363,12 +363,12 @@ export function renderAppSidebarOnline(host: AppSidebarRenderHost) {
                       name: presenceViewerLabel(user),
                     })}
                   >
-                    <openclaw-viewer-avatar
+                    <carapace-viewer-avatar
                       .user=${user}
                       .markAsViewer=${false}
                       variant="footer"
                       aria-hidden="true"
-                    ></openclaw-viewer-avatar>
+                    ></carapace-viewer-avatar>
                     <span class="sidebar-online__person-name">${presenceViewerLabel(user)}</span>
                     <span class="sidebar-online__person-action" aria-hidden="true"
                       >${icons.chevronRight}</span
@@ -425,7 +425,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
         @click=${(event: MouseEvent) =>
           host.sidebarMenus.toggleIdentityMenu(event.currentTarget as HTMLElement)}
       >
-        <openclaw-viewer-avatar .user=${avatarUser} variant="footer"></openclaw-viewer-avatar>
+        <carapace-viewer-avatar .user=${avatarUser} variant="footer"></carapace-viewer-avatar>
         <span class="sidebar-identity-card__text">
           <span class="sidebar-identity-card__name" title=${selfLabel}>${selfLabel}</span>
         </span>
@@ -445,7 +445,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
       <span class="sidebar-footer-actions">
         ${
           isHomePanelAvailable(host.sessionDataContext?.gateway)
-            ? html`<openclaw-tooltip
+            ? html`<carapace-tooltip
                 .content=${`${t("assistantPanel.toggle")} (${formatKeyboardShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.homePanel)})`}
                 ><button
                   type="button"
@@ -454,7 +454,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
                   @click=${() => window.dispatchEvent(new CustomEvent(HOME_PANEL_TOGGLE_EVENT))}
                 >
                   ${icons.home}
-                </button></openclaw-tooltip
+                </button></carapace-tooltip
               >`
             : nothing
         }
@@ -481,10 +481,10 @@ export function renderAppSidebarZoneEntry(
     entry.type === "route"
       ? host.sidebarMenus.renderRoute(entry.route)
       : entry.type === "plugin"
-        ? html`<openclaw-plugin-contributions
+        ? html`<carapace-plugin-contributions
             .kind=${"navigation"}
             .navigationKey=${entry.key}
-          ></openclaw-plugin-contributions>`
+          ></carapace-plugin-contributions>`
         : sessionRows.has(entry.key)
           ? host.renderPinnedSidebarSession(sessionRows.get(entry.key)!)
           : nothing;
@@ -542,9 +542,9 @@ export function renderAppSidebarPluginTabEntry(
 }
 
 function renderAppSidebarAttention(host: AppSidebarRenderHost) {
-  return html`<openclaw-sidebar-attention
+  return html`<carapace-sidebar-attention
     .activeRouteId=${host.activeRouteId}
     .onNavigate=${(routeId: NavigationRouteId) => host.onNavigate?.(routeId)}
     .watchUpdateProgress=${host.watchUpdateProgress}
-  ></openclaw-sidebar-attention>`;
+  ></carapace-sidebar-attention>`;
 }

@@ -1,4 +1,4 @@
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { clearStoredChatSnapshots } from "../pages/chat/session-snapshot-invalidation.runtime.ts";
 import { markPrewarmedChatSnapshotReady } from "../pages/chat/session-snapshot-prewarm.ts";
 import { clearBootRecords, persistBootRecord, resolveBootRecordAuth } from "./boot-record.ts";

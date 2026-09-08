@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import {
   resolveExpiresAtMsFromDurationMs,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asOptionalObjectRecord } from "@carapace/normalization-core/record-coerce";
 import { buildApprovalPresentation } from "../infra/approval-presentation.js";
 import type { ExecApprovalDecision, ExecApprovalRequestPayload } from "../infra/exec-approvals.js";
 import {

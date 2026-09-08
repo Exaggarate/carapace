@@ -1,5 +1,5 @@
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { runExec, spawnCommand } from "../../process/exec.js";
 
 const OPEN_PATH_TIMEOUT_MS = 5_000;

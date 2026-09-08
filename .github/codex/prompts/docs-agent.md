@@ -1,6 +1,6 @@
-# OpenClaw Docs Agent
+# Carapace Docs Agent
 
-You are maintaining OpenClaw documentation after a main-branch commit.
+You are maintaining Carapace documentation after a main-branch commit.
 
 Goal: inspect the code changes and existing documentation, then update existing docs only when they are stale, incomplete, or misleading.
 

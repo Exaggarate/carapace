@@ -74,7 +74,7 @@ function writeFixtureServerShims(binDir: string, pidPath: string): void {
     path.join(binDir, "node"),
     [
       "#!/bin/bash",
-      'printf "%s\\n" "$$" >"$OPENCLAW_TEST_FIXTURE_SERVER_PID"',
+      'printf "%s\\n" "$$" >"$CARAPACE_TEST_FIXTURE_SERVER_PID"',
       "trap 'exit 0' TERM",
       "while true; do /bin/sleep 1; done",
       "",
@@ -92,7 +92,7 @@ function writeStubbornFixtureServerShims(binDir: string, pidPath: string): void 
     path.join(binDir, "node"),
     [
       "#!/bin/bash",
-      'printf "%s\\n" "$$" >"$OPENCLAW_TEST_FIXTURE_SERVER_PID"',
+      'printf "%s\\n" "$$" >"$CARAPACE_TEST_FIXTURE_SERVER_PID"',
       "trap ':' TERM",
       "while true; do /bin/sleep 1; done",
       "",
@@ -201,26 +201,26 @@ describe("plugins Docker assertions", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1e3",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1e3",
       },
     });
     expect(timeoutResult.status).not.toBe(0);
     expect(timeoutResult.stderr).toContain(
-      "invalid OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: 1e3",
+      "invalid CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: 1e3",
     );
 
     const bodyLimitResult = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "clawhub-preflight"], {
       encoding: "utf8",
       env: {
         ...process.env,
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: "1000bytes",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: "1000bytes",
       },
     });
     expect(bodyLimitResult.status).not.toBe(0);
     expect(bodyLimitResult.stderr).toContain(
-      "invalid OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: 1000bytes",
+      "invalid CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: 1000bytes",
     );
   });
 
@@ -234,29 +234,29 @@ describe("plugins Docker assertions", () => {
     for (const scriptPath of scripts) {
       const script = readFileSync(scriptPath, "utf8");
       const scriptWithoutDefaultScratch = script.replace(
-        'mktemp -d "/tmp/openclaw-plugins.XXXXXX"',
+        'mktemp -d "/tmp/carapace-plugins.XXXXXX"',
         "",
       );
-      expect(script).toContain("OPENCLAW_PLUGINS_TMP_DIR");
+      expect(script).toContain("CARAPACE_PLUGINS_TMP_DIR");
       expect(scriptWithoutDefaultScratch).not.toMatch(
-        /\/tmp\/(?:plugins|marketplace|demo-plugin|is-number|openclaw-plugin|openclaw-clawhub)/,
+        /\/tmp\/(?:plugins|marketplace|demo-plugin|is-number|carapace-plugin|carapace-clawhub)/,
       );
     }
   });
 
   it("cleans the default plugin sweep scratch root", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-sweep-cleanup-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-sweep-cleanup-"));
     const marker = path.join(root, "scratch-path.txt");
     try {
       const result = runPluginsSweepShell(
         `
 set -euo pipefail
-export OPENCLAW_PLUGINS_SWEEP_SOURCE_ONLY=1
+export CARAPACE_PLUGINS_SWEEP_SOURCE_ONLY=1
 source scripts/e2e/lib/plugins/sweep.sh
-printf '%s\\n' "$OPENCLAW_PLUGINS_TMP_DIR" > "$MARKER"
-test -d "$OPENCLAW_PLUGINS_TMP_DIR"
-cleanup_openclaw_plugins_sweep
-test ! -e "$OPENCLAW_PLUGINS_TMP_DIR"
+printf '%s\\n' "$CARAPACE_PLUGINS_TMP_DIR" > "$MARKER"
+test -d "$CARAPACE_PLUGINS_TMP_DIR"
+cleanup_carapace_plugins_sweep
+test ! -e "$CARAPACE_PLUGINS_TMP_DIR"
 `,
         { MARKER: marker },
       );
@@ -265,7 +265,7 @@ test ! -e "$OPENCLAW_PLUGINS_TMP_DIR"
       expect(result.stderr).toBe("");
       expect(result.status).toBe(0);
       const scratchRoot = readFileSync(marker, "utf8").trim();
-      expect(scratchRoot).toContain("/tmp/openclaw-plugins.");
+      expect(scratchRoot).toContain("/tmp/carapace-plugins.");
       expect(existsSync(scratchRoot)).toBe(false);
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -273,18 +273,18 @@ test ! -e "$OPENCLAW_PLUGINS_TMP_DIR"
   });
 
   it("preserves caller-provided plugin sweep scratch roots", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-sweep-caller-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-sweep-caller-"));
     const scratchRoot = path.join(root, "scratch");
     try {
       const result = runPluginsSweepShell(
         `
 set -euo pipefail
-export OPENCLAW_PLUGINS_SWEEP_SOURCE_ONLY=1
-export OPENCLAW_PLUGINS_TMP_DIR="$SCRATCH_ROOT"
+export CARAPACE_PLUGINS_SWEEP_SOURCE_ONLY=1
+export CARAPACE_PLUGINS_TMP_DIR="$SCRATCH_ROOT"
 source scripts/e2e/lib/plugins/sweep.sh
-test -d "$OPENCLAW_PLUGINS_TMP_DIR"
-cleanup_openclaw_plugins_sweep
-test -d "$OPENCLAW_PLUGINS_TMP_DIR"
+test -d "$CARAPACE_PLUGINS_TMP_DIR"
+cleanup_carapace_plugins_sweep
+test -d "$CARAPACE_PLUGINS_TMP_DIR"
 `,
         { SCRATCH_ROOT: scratchRoot },
       );
@@ -307,7 +307,7 @@ test -d "$OPENCLAW_PLUGINS_TMP_DIR"
   )(
     "bounds $mode diagnostics with exit $status and lifecycle tracing $traceEnabled",
     (testCase) => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-sweep-diagnostics-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-sweep-diagnostics-"));
       const outputFile = path.join(root, "plugins-git-inspect.json");
       const capturedOutput = `DO_NOT_DUMP_CAPTURED_PLUGIN_OUTPUT\n${"x".repeat(32 * 1024)}\nCAPTURED_PLUGIN_OUTPUT_TAIL`;
       const fixtureApiKey = ["sk", "proj", "plugin", "fixture", "secret"].join("-");
@@ -318,8 +318,8 @@ test -d "$OPENCLAW_PLUGINS_TMP_DIR"
       const capturedError = `DO_NOT_DUMP_PLUGIN_STDERR_PREFIX\n${"y".repeat(32 * 1024)}\n${startOfLineApiKey}\nPLUGIN_STDERR_TAIL_MARKER task-runner risk-score disk-space Authorization: Bearer plugin-fixture-bearer OPENAI_API_KEY=${fixtureApiKey} [${punctuationApiKey}]\n${boundaryApiKey}`;
       const command =
         testCase.mode === "capture"
-          ? 'run_plugins_openclaw_capture "$OUTPUT_FILE" plugins inspect demo-plugin --runtime --json'
-          : 'run_plugins_openclaw_logged install-git plugins install "git:file:///tmp/fixture@revision" --force';
+          ? 'run_plugins_carapace_capture "$OUTPUT_FILE" plugins inspect demo-plugin --runtime --json'
+          : 'run_plugins_carapace_logged install-git plugins install "git:file:///tmp/fixture@revision" --force';
 
       try {
         const unredactedTail = Buffer.from(`${capturedError}\n`, "utf8")
@@ -331,16 +331,16 @@ test -d "$OPENCLAW_PLUGINS_TMP_DIR"
         const result = runPluginsSweepShell(
           `
 set -euo pipefail
-export OPENCLAW_PLUGINS_SWEEP_SOURCE_ONLY=1
-export OPENCLAW_PLUGINS_TMP_DIR="$SCRATCH_ROOT"
-export OPENCLAW_PLUGINS_CLI_TIMEOUT=1s
-export OPENCLAW_ENTRY=fixture-entry
+export CARAPACE_PLUGINS_SWEEP_SOURCE_ONLY=1
+export CARAPACE_PLUGINS_TMP_DIR="$SCRATCH_ROOT"
+export CARAPACE_PLUGINS_CLI_TIMEOUT=1s
+export CARAPACE_ENTRY=fixture-entry
 source scripts/e2e/lib/plugins/sweep.sh
 umask 000
-openclaw_e2e_maybe_timeout() {
+carapace_e2e_maybe_timeout() {
   local raw_stderr_file
   local raw_stderr_mode
-  for raw_stderr_file in "$SCRATCH_ROOT"/openclaw-plugin-stderr.*; do
+  for raw_stderr_file in "$SCRATCH_ROOT"/carapace-plugin-stderr.*; do
     [[ -f "$raw_stderr_file" ]] || return 86
     if raw_stderr_mode="$(stat -f '%Lp' "$raw_stderr_file" 2>/dev/null)"; then
       :
@@ -353,7 +353,7 @@ openclaw_e2e_maybe_timeout() {
   done
   printf '%s\\n' "$CAPTURED_OUTPUT"
   printf '%s\\n' "$CAPTURED_STDERR" >&2
-  if [[ "\${OPENCLAW_PLUGIN_LIFECYCLE_TRACE:-}" == "1" ]]; then
+  if [[ "\${CARAPACE_PLUGIN_LIFECYCLE_TRACE:-}" == "1" ]]; then
     printf '%s\\n' '[plugins:lifecycle] shim' >&2
   fi
   return "$CAPTURE_STATUS"
@@ -364,8 +364,8 @@ ${command}
             CAPTURED_OUTPUT: capturedOutput,
             CAPTURED_STDERR: capturedError,
             CAPTURE_STATUS: String(testCase.status),
-            OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "192",
-            OPENCLAW_PLUGIN_LIFECYCLE_TRACE: testCase.traceEnabled ? "1" : "0",
+            CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "192",
+            CARAPACE_PLUGIN_LIFECYCLE_TRACE: testCase.traceEnabled ? "1" : "0",
             OUTPUT_FILE: outputFile,
             SCRATCH_ROOT: root,
           },
@@ -388,7 +388,7 @@ ${command}
         expect(result.stderr).not.toContain(boundaryApiKey);
         expect(
           readdirSync(root).filter(
-            (name) => name.startsWith("openclaw-plugin-") || name.endsWith(".stderr.log"),
+            (name) => name.startsWith("carapace-plugin-") || name.endsWith(".stderr.log"),
           ),
         ).toEqual([]);
 
@@ -428,7 +428,7 @@ ${command}
   );
 
   it("scans plugin assertion logs without echoing whole files on failure", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-log-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-log-"));
     try {
       const passRoot = path.join(root, "pass");
       mkdirSync(passRoot, { recursive: true });
@@ -438,7 +438,7 @@ ${command}
         "utf8",
       );
       const pass = await runAssertionAsync(["plugin-dir-update-skipped"], {
-        OPENCLAW_PLUGINS_TMP_DIR: passRoot,
+        CARAPACE_PLUGINS_TMP_DIR: passRoot,
       });
       expect(pass.status).toBe(0);
 
@@ -450,7 +450,7 @@ ${command}
         "utf8",
       );
       const fail = await runAssertionAsync(["plugin-dir-update-skipped"], {
-        OPENCLAW_PLUGINS_TMP_DIR: failRoot,
+        CARAPACE_PLUGINS_TMP_DIR: failRoot,
       });
       expect(fail.status).toBe(1);
       expect(fail.stderr).toContain("Output tail:");
@@ -462,16 +462,16 @@ ${command}
       mkdirSync(invalidRoot, { recursive: true });
       mkdirSync(invalidHome, { recursive: true });
       writeFileSync(
-        path.join(invalidRoot, "plugins-invalid-openclaw-extensions.log"),
-        `openclaw.extensions[1]\n${"x".repeat(256 * 1024)}\nmissing validation tail`,
+        path.join(invalidRoot, "plugins-invalid-carapace-extensions.log"),
+        `carapace.extensions[1]\n${"x".repeat(256 * 1024)}\nmissing validation tail`,
         "utf8",
       );
-      writeJson(path.join(invalidRoot, "plugins-invalid-openclaw-extensions-list.json"), {
+      writeJson(path.join(invalidRoot, "plugins-invalid-carapace-extensions-list.json"), {
         plugins: [],
       });
-      const invalid = await runAssertionAsync(["invalid-openclaw-extensions"], {
+      const invalid = await runAssertionAsync(["invalid-carapace-extensions"], {
         HOME: invalidHome,
-        OPENCLAW_PLUGINS_TMP_DIR: invalidRoot,
+        CARAPACE_PLUGINS_TMP_DIR: invalidRoot,
       });
       expect(invalid.status).toBe(1);
       expect(invalid.stderr).toContain("malformed metadata install output");
@@ -483,7 +483,7 @@ ${command}
   });
 
   it("routes npm through both registry environment spellings after replacing a parent registry", () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-routing-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-routing-");
     writeFileSync(path.join(root, "fixture.tgz"), "fixture package archive");
     const result = runPluginsSweepShell(
       `
@@ -514,7 +514,7 @@ done
   });
 
   it("cleans npm fixture registry children when readiness times out", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-npm-fixture-cleanup-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-npm-fixture-cleanup-"));
     try {
       const binDir = path.join(root, "bin");
       const fixtureDir = path.join(root, "fixture");
@@ -542,7 +542,7 @@ done
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_TEST_FIXTURE_SERVER_PID: pidPath,
+            CARAPACE_TEST_FIXTURE_SERVER_PID: pidPath,
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
@@ -559,7 +559,7 @@ done
   });
 
   it("force-kills stubborn npm fixture registry children during cleanup", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-npm-fixture-kill-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-npm-fixture-kill-"));
     try {
       const binDir = path.join(root, "bin");
       const fixtureDir = path.join(root, "fixture");
@@ -586,9 +586,9 @@ done
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2",
-            OPENCLAW_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: "0.05",
-            OPENCLAW_TEST_FIXTURE_SERVER_PID: pidPath,
+            CARAPACE_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2",
+            CARAPACE_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: "0.05",
+            CARAPACE_TEST_FIXTURE_SERVER_PID: pidPath,
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
@@ -611,10 +611,10 @@ done
         [
           "set -euo pipefail",
           "source scripts/e2e/lib/plugins/fixtures.sh",
-          "openclaw_plugins_signal_fixture_process() { echo signal; }",
-          "openclaw_plugins_fixture_process_alive() { echo probe; return 1; }",
+          "carapace_plugins_signal_fixture_process() { echo signal; }",
+          "carapace_plugins_fixture_process_alive() { echo probe; return 1; }",
           "set +e",
-          "openclaw_plugins_stop_fixture_process 12345",
+          "carapace_plugins_stop_fixture_process 12345",
           'status="$?"',
           "set -e",
           'exit "$status"',
@@ -625,13 +625,13 @@ done
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2x",
+          CARAPACE_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2x",
         },
       },
     );
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_PLUGINS_FIXTURE_STOP_ATTEMPTS: 2x");
+    expect(result.stderr).toContain("invalid CARAPACE_PLUGINS_FIXTURE_STOP_ATTEMPTS: 2x");
     expect(result.stdout).not.toContain("signal");
     expect(result.stdout).not.toContain("probe");
   });
@@ -644,10 +644,10 @@ done
         [
           "set -euo pipefail",
           "source scripts/e2e/lib/plugins/fixtures.sh",
-          "openclaw_plugins_signal_fixture_process() { echo signal; }",
-          "openclaw_plugins_fixture_process_alive() { echo probe; return 1; }",
+          "carapace_plugins_signal_fixture_process() { echo signal; }",
+          "carapace_plugins_fixture_process_alive() { echo probe; return 1; }",
           "set +e",
-          "openclaw_plugins_stop_fixture_process 12345",
+          "carapace_plugins_stop_fixture_process 12345",
           'status="$?"',
           "set -e",
           'exit "$status"',
@@ -658,20 +658,20 @@ done
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2",
-          OPENCLAW_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: "soon",
+          CARAPACE_PLUGINS_FIXTURE_STOP_ATTEMPTS: "2",
+          CARAPACE_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: "soon",
         },
       },
     );
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: soon");
+    expect(result.stderr).toContain("invalid CARAPACE_PLUGINS_FIXTURE_STOP_INTERVAL_SECONDS: soon");
     expect(result.stdout).not.toContain("signal");
     expect(result.stdout).not.toContain("probe");
   });
 
   it("bounds npm fixture registry logs when readiness fails", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-npm-fixture-log-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-npm-fixture-log-"));
     try {
       const binDir = path.join(root, "bin");
       const fixtureDir = path.join(root, "fixture");
@@ -698,7 +698,7 @@ done
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "80",
+            CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "80",
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
@@ -720,7 +720,7 @@ done
     { initial: null, fault: "write", label: "failed write" },
     { initial: "12345", fault: "rename", label: "failed replacement" },
   ])("publishes complete npm fixture port bytes: $label", async ({ initial, fault }) => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-publication-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-publication-");
     const registryScript = "scripts/e2e/lib/plugins/npm-registry-server.mjs";
     // Docker and private observers copy this plain-Node closure without repository packages.
     for (const file of [registryScript, "scripts/lib/bounded-response.mjs"]) {
@@ -788,12 +788,12 @@ fs.renameSync = (source, destination) => {
         cwd: root,
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_PORT: "0",
-          OPENCLAW_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: "",
-          OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_URL: "",
-          OPENCLAW_NPM_REGISTRY_MERGE_UPSTREAM: "",
-          OPENCLAW_NPM_REGISTRY_DIST_TAGS: "",
+          CARAPACE_NPM_REGISTRY_PORT: "0",
+          CARAPACE_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
+          CARAPACE_NPM_REGISTRY_UPSTREAM: "",
+          CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_URL: "",
+          CARAPACE_NPM_REGISTRY_MERGE_UPSTREAM: "",
+          CARAPACE_NPM_REGISTRY_DIST_TAGS: "",
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -868,7 +868,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("keeps npm fixture registry alive after malformed package paths", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-request-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-request-");
     const portFile = path.join(root, "port");
     const tarballPath = path.join(root, "demo-plugin.tgz");
     writeFileSync(tarballPath, "fixture package archive", "utf8");
@@ -878,7 +878,7 @@ fs.renameSync = (source, destination) => {
       [
         "scripts/e2e/lib/plugins/npm-registry-server.mjs",
         portFile,
-        "@openclaw/demo-plugin-npm",
+        "@carapace/demo-plugin-npm",
         "1.0.0",
         tarballPath,
       ],
@@ -901,11 +901,11 @@ fs.renameSync = (source, destination) => {
       expect(malformed.body).toContain("not found");
       expect(child.exitCode, stderr.text()).toBeNull();
 
-      const valid = await requestFixtureRegistry(port, "/@openclaw%2Fdemo-plugin-npm");
+      const valid = await requestFixtureRegistry(port, "/@carapace%2Fdemo-plugin-npm");
 
       expect(valid.statusCode, stderr.text()).toBe(200);
       expect(JSON.parse(valid.body)).toMatchObject({
-        name: "@openclaw/demo-plugin-npm",
+        name: "@carapace/demo-plugin-npm",
         "dist-tags": { latest: "1.0.0" },
       });
     } finally {
@@ -919,26 +919,26 @@ fs.renameSync = (source, destination) => {
   });
 
   it("serves drive-qualified tarball dependencies using the request-visible registry origin", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-package-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-package-");
     const packageDir = path.join(root, "package");
     const portFile = path.join(root, "port");
     // On POSIX, a relative D:/ path reproduces GNU tar's Windows remote-archive parsing.
     const archiveDir = process.platform === "win32" ? root : "D:/packages";
-    const tarballPath = path.join(archiveDir, "openclaw.tgz");
+    const tarballPath = path.join(archiveDir, "carapace.tgz");
     mkdirSync(path.resolve(root, archiveDir), { recursive: true });
     mkdirSync(packageDir);
     writeJson(path.join(packageDir, "package.json"), {
-      name: "openclaw",
+      name: "carapace",
       version: "2026.7.1-beta.3",
       dependencies: {
-        "@openclaw/ai": "2026.7.1-beta.3",
+        "@carapace/ai": "2026.7.1-beta.3",
         zod: "4.3.6",
       },
       optionalDependencies: {
         "sqlite-vec": "0.1.7-alpha.2",
       },
     });
-    const packed = spawnSync("tar", ["-czf", "openclaw.tgz", "-C", root, "package"], {
+    const packed = spawnSync("tar", ["-czf", "carapace.tgz", "-C", root, "package"], {
       cwd: path.resolve(root, archiveDir),
       encoding: "utf8",
     });
@@ -949,7 +949,7 @@ fs.renameSync = (source, destination) => {
       [
         path.resolve("scripts/e2e/lib/plugins/npm-registry-server.mjs"),
         portFile,
-        "openclaw",
+        "carapace",
         "2026.7.1-beta.3",
         tarballPath,
       ],
@@ -957,7 +957,7 @@ fs.renameSync = (source, destination) => {
         cwd: root,
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_DIST_TAGS: "latest=0.0.0,beta=2026.7.1-beta.3",
+          CARAPACE_NPM_REGISTRY_DIST_TAGS: "latest=0.0.0,beta=2026.7.1-beta.3",
           // Fail locally if GNU tar mistakes the synthetic drive letter for a remote host.
           TAR_OPTIONS: "--rsh-command=false",
         },
@@ -967,7 +967,7 @@ fs.renameSync = (source, destination) => {
 
     try {
       const port = await waitForPortFile(portFile);
-      const response = await requestFixtureRegistry(port, "/openclaw", {
+      const response = await requestFixtureRegistry(port, "/carapace", {
         host: `192.0.2.2:${port}`,
       });
       const metadata = JSON.parse(response.body);
@@ -978,14 +978,14 @@ fs.renameSync = (source, destination) => {
         beta: "2026.7.1-beta.3",
       });
       expect(metadata.versions["2026.7.1-beta.3"].dependencies).toEqual({
-        "@openclaw/ai": "2026.7.1-beta.3",
+        "@carapace/ai": "2026.7.1-beta.3",
         zod: "4.3.6",
       });
       expect(metadata.versions["2026.7.1-beta.3"].optionalDependencies).toEqual({
         "sqlite-vec": "0.1.7-alpha.2",
       });
       expect(metadata.versions["2026.7.1-beta.3"].dist.tarball).toBe(
-        `http://192.0.2.2:${port}/openclaw/-/openclaw.tgz`,
+        `http://192.0.2.2:${port}/carapace/-/carapace.tgz`,
       );
     } finally {
       if (child.exitCode === null) {
@@ -1000,10 +1000,10 @@ fs.renameSync = (source, destination) => {
   it.each([false, true])(
     "projects upstream tarballs per request origin without changing external URLs (merged=%s)",
     async (merged) => {
-      const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-proxy-");
+      const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-proxy-");
       const portFile = path.join(root, "port");
       const tarballPath = path.join(root, "demo-plugin.tgz");
-      const packageName = merged ? "@openclaw/demo-plugin-npm" : "upstream-package";
+      const packageName = merged ? "@carapace/demo-plugin-npm" : "upstream-package";
       const externalTarball = "https://external.invalid/upstream-package.tgz";
       let upstreamRequests = 0;
       writeFileSync(tarballPath, "fixture package archive", "utf8");
@@ -1050,7 +1050,7 @@ fs.renameSync = (source, destination) => {
         [
           "scripts/e2e/lib/plugins/npm-registry-server.mjs",
           portFile,
-          "@openclaw/demo-plugin-npm",
+          "@carapace/demo-plugin-npm",
           "1.0.0",
           tarballPath,
         ],
@@ -1058,8 +1058,8 @@ fs.renameSync = (source, destination) => {
           cwd: process.cwd(),
           env: {
             ...process.env,
-            OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
-            OPENCLAW_NPM_REGISTRY_MERGE_UPSTREAM: merged ? "1" : "",
+            CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
+            CARAPACE_NPM_REGISTRY_MERGE_UPSTREAM: merged ? "1" : "",
           },
           stdio: ["ignore", "pipe", "pipe"],
         },
@@ -1103,7 +1103,7 @@ fs.renameSync = (source, destination) => {
   );
 
   it("streams proxied npm tarballs without buffering a content length", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-tarball-proxy-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-tarball-proxy-");
     const portFile = path.join(root, "port");
     const tarballPath = path.join(root, "demo-plugin.tgz");
     const upstreamBody = "x".repeat(1024 * 1024);
@@ -1127,7 +1127,7 @@ fs.renameSync = (source, destination) => {
       [
         "scripts/e2e/lib/plugins/npm-registry-server.mjs",
         portFile,
-        "@openclaw/demo-plugin-npm",
+        "@carapace/demo-plugin-npm",
         "1.0.0",
         tarballPath,
       ],
@@ -1135,7 +1135,7 @@ fs.renameSync = (source, destination) => {
         cwd: process.cwd(),
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
+          CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -1165,7 +1165,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("rejects oversized upstream bodies without stopping the fixture registry", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-proxy-limit-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-proxy-limit-");
     const portFile = path.join(root, "port");
     const tarballPath = path.join(root, "demo-plugin.tgz");
     writeFileSync(tarballPath, "fixture package archive", "utf8");
@@ -1190,7 +1190,7 @@ fs.renameSync = (source, destination) => {
       [
         "scripts/e2e/lib/plugins/npm-registry-server.mjs",
         portFile,
-        "@openclaw/demo-plugin-npm",
+        "@carapace/demo-plugin-npm",
         "1.0.0",
         tarballPath,
       ],
@@ -1198,7 +1198,7 @@ fs.renameSync = (source, destination) => {
         cwd: process.cwd(),
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
+          CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -1218,7 +1218,7 @@ fs.renameSync = (source, destination) => {
         "npm registry upstream response body exceeded 67108864 bytes",
       );
 
-      const local = await requestFixtureRegistry(port, "/@openclaw%2Fdemo-plugin-npm");
+      const local = await requestFixtureRegistry(port, "/@carapace%2Fdemo-plugin-npm");
 
       expect(local.statusCode, stderr.text()).toBe(200);
       expect(child.exitCode, stderr.text()).toBeNull();
@@ -1237,7 +1237,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("times out stalled upstream response bodies without stopping the fixture registry", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-proxy-timeout-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-proxy-timeout-");
     const portFile = path.join(root, "port");
     const preloadPath = path.join(root, "shorten-abort-timeout.mjs");
     const tarballPath = path.join(root, "demo-plugin.tgz");
@@ -1300,7 +1300,7 @@ fs.renameSync = (source, destination) => {
         pathToFileURL(preloadPath).href,
         "scripts/e2e/lib/plugins/npm-registry-server.mjs",
         portFile,
-        "@openclaw/demo-plugin-npm",
+        "@carapace/demo-plugin-npm",
         "1.0.0",
         tarballPath,
       ],
@@ -1308,7 +1308,7 @@ fs.renameSync = (source, destination) => {
         cwd: process.cwd(),
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
+          CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${upstreamAddress.port}`,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -1327,7 +1327,7 @@ fs.renameSync = (source, destination) => {
       expect(stalled.body).toContain("upstream registry request failed");
       expect(upstreamHits).toBe(1);
 
-      const local = await requestFixtureRegistry(port, "/@openclaw%2Fdemo-plugin-npm");
+      const local = await requestFixtureRegistry(port, "/@carapace%2Fdemo-plugin-npm");
 
       expect(local.statusCode, stderr.text()).toBe(200);
       expect(child.exitCode, stderr.text()).toBeNull();
@@ -1346,7 +1346,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("does not let absolute-form request targets escape the configured upstream", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugin-npm-fixture-proxy-origin-");
+    const root = autoCleanupTempDirs.make("carapace-plugin-npm-fixture-proxy-origin-");
     const portFile = path.join(root, "port");
     const tarballPath = path.join(root, "demo-plugin.tgz");
     let configuredUpstreamHits = 0;
@@ -1389,7 +1389,7 @@ fs.renameSync = (source, destination) => {
       [
         "scripts/e2e/lib/plugins/npm-registry-server.mjs",
         portFile,
-        "@openclaw/demo-plugin-npm",
+        "@carapace/demo-plugin-npm",
         "1.0.0",
         tarballPath,
       ],
@@ -1397,7 +1397,7 @@ fs.renameSync = (source, destination) => {
         cwd: process.cwd(),
         env: {
           ...process.env,
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${configuredAddress.port}`,
+          CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${configuredAddress.port}`,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -1441,7 +1441,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("rejects invalid plugin fixture log byte limits before npm fixture setup", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-npm-fixture-log-invalid-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-npm-fixture-log-invalid-"));
     try {
       const binDir = path.join(root, "bin");
       const fixtureDir = path.join(root, "fixture");
@@ -1472,14 +1472,14 @@ fs.renameSync = (source, destination) => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "64kb",
+            CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "64kb",
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
       );
 
       expect(result.status).toBe(2);
-      expect(result.stderr).toContain("invalid OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: 64kb");
+      expect(result.stderr).toContain("invalid CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: 64kb");
       expect(result.stderr).not.toContain("node should not run");
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -1487,7 +1487,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("cleans ClawHub fixture children when readiness times out", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-clawhub-fixture-cleanup-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-clawhub-fixture-cleanup-"));
     try {
       const binDir = path.join(root, "bin");
       const cleanupPath = path.join(root, "caller-cleanup");
@@ -1516,9 +1516,9 @@ fs.renameSync = (source, destination) => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB: "0",
-            OPENCLAW_PLUGINS_TMP_DIR: tmpDir,
-            OPENCLAW_TEST_FIXTURE_SERVER_PID: pidPath,
+            CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB: "0",
+            CARAPACE_PLUGINS_TMP_DIR: tmpDir,
+            CARAPACE_TEST_FIXTURE_SERVER_PID: pidPath,
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
@@ -1535,7 +1535,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("rejects invalid plugin fixture log byte limits before ClawHub fixture setup", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-clawhub-fixture-log-invalid-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-clawhub-fixture-log-invalid-"));
     try {
       const binDir = path.join(root, "bin");
       const tmpDir = path.join(root, "scratch");
@@ -1567,16 +1567,16 @@ fs.renameSync = (source, destination) => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "64kb",
-            OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB: "0",
-            OPENCLAW_PLUGINS_TMP_DIR: tmpDir,
+            CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "64kb",
+            CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB: "0",
+            CARAPACE_PLUGINS_TMP_DIR: tmpDir,
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
       );
 
       expect(result.status).toBe(2);
-      expect(result.stderr).toContain("invalid OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: 64kb");
+      expect(result.stderr).toContain("invalid CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: 64kb");
       expect(result.stderr).not.toContain("node should not run");
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -1584,7 +1584,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("bounds ClawHub fixture server logs when readiness fails", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-clawhub-fixture-log-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-clawhub-fixture-log-"));
     try {
       const binDir = path.join(root, "bin");
       const tmpDir = path.join(root, "scratch");
@@ -1612,9 +1612,9 @@ fs.renameSync = (source, destination) => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES: "80",
-            OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB: "0",
-            OPENCLAW_PLUGINS_TMP_DIR: tmpDir,
+            CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES: "80",
+            CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB: "0",
+            CARAPACE_PLUGINS_TMP_DIR: tmpDir,
             PATH: `${binDir}${path.delimiter}/usr/bin${path.delimiter}/bin`,
           },
         },
@@ -1630,7 +1630,7 @@ fs.renameSync = (source, destination) => {
   });
 
   it("uses the configured scratch root and resolves Windows home-relative install paths", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
     const installPath = path.join(home, "managed-plugin");
@@ -1643,7 +1643,7 @@ fs.renameSync = (source, destination) => {
       writeJson(path.join(scratchRoot, "plugins2-inspect.json"), {
         gatewayMethods: ["demo.tgz"],
       });
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {
           "demo-plugin-tgz": {
             source: "archive",
@@ -1657,8 +1657,8 @@ fs.renameSync = (source, destination) => {
         env: {
           ...process.env,
           HOME: home,
-          OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1e3",
-          OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
+          CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1e3",
+          CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
         },
       });
 
@@ -1669,13 +1669,13 @@ fs.renameSync = (source, destination) => {
   });
 
   it("compares local plugin source paths by canonical path", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
     const sourceParent = path.join(root, "source");
     const sourcePath = `${sourceParent}//plugin`;
     const normalizedSourcePath = path.join(sourceParent, "plugin");
-    const installPath = path.join(home, ".openclaw", "extensions", "demo-plugin-dir");
+    const installPath = path.join(home, ".carapace", "extensions", "demo-plugin-dir");
     mkdirSync(sourcePath, { recursive: true });
     mkdirSync(installPath, { recursive: true });
 
@@ -1686,7 +1686,7 @@ fs.renameSync = (source, destination) => {
       writeJson(path.join(scratchRoot, "plugins3-inspect.json"), {
         gatewayMethods: ["demo.dir"],
       });
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {
           "demo-plugin-dir": {
             source: "path",
@@ -1701,9 +1701,9 @@ fs.renameSync = (source, destination) => {
         env: {
           ...process.env,
           HOME: home,
-          OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json"),
-          OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
-          OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
+          CARAPACE_CONFIG_PATH: path.join(home, ".carapace", "carapace.json"),
+          CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
+          CARAPACE_STATE_DIR: path.join(home, ".carapace"),
         },
       });
 
@@ -1714,19 +1714,19 @@ fs.renameSync = (source, destination) => {
   });
 
   it("still requires archive managed install directories to be removed", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
-    const installPath = path.join(home, ".openclaw", "extensions", "demo-plugin-tgz");
+    const installPath = path.join(home, ".carapace", "extensions", "demo-plugin-tgz");
     mkdirSync(installPath, { recursive: true });
 
     try {
       writeJson(path.join(scratchRoot, "plugins2-uninstalled.json"), { plugins: [] });
       writeFileSync(path.join(scratchRoot, "plugins2-install-path.txt"), installPath, "utf8");
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {},
       });
-      writeJson(path.join(home, ".openclaw", "openclaw.json"), {
+      writeJson(path.join(home, ".carapace", "carapace.json"), {
         plugins: { entries: { "demo-plugin-tgz": { enabled: false } } },
       });
 
@@ -1735,7 +1735,7 @@ fs.renameSync = (source, destination) => {
         env: {
           ...process.env,
           HOME: home,
-          OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
+          CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
         },
       });
 
@@ -1747,10 +1747,10 @@ fs.renameSync = (source, destination) => {
   });
 
   it("requires the resolved legacy profile before allowing the pre-marker uninstall contract", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
-    const removedInstallPath = path.join(home, ".openclaw", "extensions", "demo-plugin-tgz");
+    const removedInstallPath = path.join(home, ".carapace", "extensions", "demo-plugin-tgz");
 
     try {
       writeJson(path.join(scratchRoot, "plugins2-uninstalled.json"), { plugins: [] });
@@ -1759,16 +1759,16 @@ fs.renameSync = (source, destination) => {
         removedInstallPath,
         "utf8",
       );
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {},
       });
 
       const baseEnv = {
         ...process.env,
         HOME: home,
-        OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json"),
-        OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
-        OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
+        CARAPACE_CONFIG_PATH: path.join(home, ".carapace", "carapace.json"),
+        CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
+        CARAPACE_STATE_DIR: path.join(home, ".carapace"),
       };
       const current = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "plugin-tgz-removed"], {
         encoding: "utf8",
@@ -1779,12 +1779,12 @@ fs.renameSync = (source, destination) => {
         [ASSERTIONS_SCRIPT, "plugin-tgz-removed"],
         {
           encoding: "utf8",
-          env: { ...baseEnv, OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1" },
+          env: { ...baseEnv, CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1" },
         },
       );
       const legacy = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "plugin-tgz-removed"], {
         encoding: "utf8",
-        env: { ...baseEnv, OPENCLAW_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE: "legacy" },
+        env: { ...baseEnv, CARAPACE_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE: "legacy" },
       });
 
       expect(current.status).not.toBe(0);
@@ -1798,11 +1798,11 @@ fs.renameSync = (source, destination) => {
   });
 
   it("keeps the legacy npm project cleanup assertion scoped to the resolved profile", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
-    const npmProjectRoot = path.join(home, ".openclaw", "npm", "projects", "demo-plugin-npm");
-    const installPath = path.join(npmProjectRoot, "node_modules", "@openclaw", "demo-plugin-npm");
+    const npmProjectRoot = path.join(home, ".carapace", "npm", "projects", "demo-plugin-npm");
+    const installPath = path.join(npmProjectRoot, "node_modules", "@carapace", "demo-plugin-npm");
     const dependencyPackagePath = path.join(
       npmProjectRoot,
       "node_modules",
@@ -1819,27 +1819,27 @@ fs.renameSync = (source, destination) => {
         dependencyPackagePath,
         "utf8",
       );
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), { installRecords: {} });
-      writeJson(path.join(home, ".openclaw", "openclaw.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), { installRecords: {} });
+      writeJson(path.join(home, ".carapace", "carapace.json"), {
         plugins: { entries: { "demo-plugin-npm": { enabled: false } } },
       });
 
       const baseEnv = {
         ...process.env,
         HOME: home,
-        OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json"),
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1000",
-        OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
-        OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
+        CARAPACE_CONFIG_PATH: path.join(home, ".carapace", "carapace.json"),
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1000",
+        CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
+        CARAPACE_STATE_DIR: path.join(home, ".carapace"),
       };
       const current = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "plugin-npm-removed"], {
         encoding: "utf8",
         env: baseEnv,
       });
-      writeJson(path.join(home, ".openclaw", "openclaw.json"), { plugins: { entries: {} } });
+      writeJson(path.join(home, ".carapace", "carapace.json"), { plugins: { entries: {} } });
       const legacy = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "plugin-npm-removed"], {
         encoding: "utf8",
-        env: { ...baseEnv, OPENCLAW_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE: "legacy" },
+        env: { ...baseEnv, CARAPACE_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE: "legacy" },
       });
 
       expect(current.status).not.toBe(0);
@@ -1851,10 +1851,10 @@ fs.renameSync = (source, destination) => {
   });
 
   it("rejects unreadable config during plugin uninstall proof", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugins-assertions-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugins-assertions-"));
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
-    const removedInstallPath = path.join(home, ".openclaw", "extensions", "demo-plugin-tgz");
+    const removedInstallPath = path.join(home, ".carapace", "extensions", "demo-plugin-tgz");
 
     try {
       writeJson(path.join(scratchRoot, "plugins2-uninstalled.json"), { plugins: [] });
@@ -1863,52 +1863,52 @@ fs.renameSync = (source, destination) => {
         removedInstallPath,
         "utf8",
       );
-      writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+      writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
         installRecords: {},
       });
-      writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{ malformed\n", "utf8");
+      writeFileSync(path.join(home, ".carapace", "carapace.json"), "{ malformed\n", "utf8");
 
       const result = spawnSync(process.execPath, [ASSERTIONS_SCRIPT, "plugin-tgz-removed"], {
         encoding: "utf8",
         env: {
           ...process.env,
           HOME: home,
-          OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
+          CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
         },
       });
 
       expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain("failed to read OpenClaw config");
+      expect(result.stderr).toContain("failed to read Carapace config");
     } finally {
       rmSync(root, { force: true, recursive: true });
     }
   });
 
   it("rejects ClawHub install paths that resolve outside the managed extensions root", () => {
-    const root = autoCleanupTempDirs.make("openclaw-plugins-clawhub-path-");
+    const root = autoCleanupTempDirs.make("carapace-plugins-clawhub-path-");
     const home = path.join(root, "home");
     const scratchRoot = path.join(root, "scratch");
-    const extensionsRoot = path.join(home, ".openclaw", "extensions");
+    const extensionsRoot = path.join(home, ".carapace", "extensions");
     const escapedInstallPath = `${extensionsRoot}${path.sep}..${path.sep}escaped-clawhub`;
     mkdirSync(extensionsRoot, { recursive: true });
     mkdirSync(escapedInstallPath, { recursive: true });
 
     writeJson(path.join(scratchRoot, "plugins-clawhub-installed.json"), {
-      plugins: [{ id: "openclaw-kitchen-sink-fixture", status: "loaded" }],
+      plugins: [{ id: "carapace-kitchen-sink-fixture", status: "loaded" }],
     });
     writeJson(path.join(scratchRoot, "plugins-clawhub-inspect.json"), {
-      plugin: { id: "openclaw-kitchen-sink-fixture" },
+      plugin: { id: "carapace-kitchen-sink-fixture" },
     });
-    writeJson(path.join(home, ".openclaw", "plugins", "installs.json"), {
+    writeJson(path.join(home, ".carapace", "plugins", "installs.json"), {
       installRecords: {
-        "openclaw-kitchen-sink-fixture": {
+        "carapace-kitchen-sink-fixture": {
           artifactFormat: "zip",
           artifactKind: "legacy-zip",
           clawhubFamily: "code-plugin",
-          clawhubPackage: "@openclaw/kitchen-sink",
+          clawhubPackage: "@carapace/kitchen-sink",
           installPath: escapedInstallPath,
           source: "clawhub",
-          spec: "clawhub:@openclaw/kitchen-sink",
+          spec: "clawhub:@carapace/kitchen-sink",
         },
       },
     });
@@ -1917,10 +1917,10 @@ fs.renameSync = (source, destination) => {
       encoding: "utf8",
       env: {
         ...process.env,
-        CLAWHUB_PLUGIN_ID: "openclaw-kitchen-sink-fixture",
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
+        CLAWHUB_PLUGIN_ID: "carapace-kitchen-sink-fixture",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
         HOME: home,
-        OPENCLAW_PLUGINS_TMP_DIR: scratchRoot,
+        CARAPACE_PLUGINS_TMP_DIR: scratchRoot,
       },
     });
 
@@ -1940,15 +1940,15 @@ fs.renameSync = (source, destination) => {
         throw new Error("expected TCP server address");
       }
       const result = await runAssertionAsync(["clawhub-preflight"], {
-        CLAWHUB_PLUGIN_ID: "openclaw-kitchen-sink-fixture",
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
-        OPENCLAW_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "25",
+        CLAWHUB_PLUGIN_ID: "carapace-kitchen-sink-fixture",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
+        CARAPACE_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "25",
       });
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        "ClawHub package preflight for @openclaw/kitchen-sink timed out after 25ms",
+        "ClawHub package preflight for @carapace/kitchen-sink timed out after 25ms",
       );
     } finally {
       await new Promise<void>((resolve) => {
@@ -1973,18 +1973,18 @@ fs.renameSync = (source, destination) => {
         throw new Error("expected TCP server address");
       }
       const result = await runAssertionAsync(["clawhub-preflight"], {
-        CLAWHUB_PLUGIN_ID: "openclaw-kitchen-sink-fixture",
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
+        CLAWHUB_PLUGIN_ID: "carapace-kitchen-sink-fixture",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
         NODE_OPTIONS: `--import=data:text/javascript,${encodeURIComponent(
-          "const response = await fetch(process.env.OPENCLAW_CLAWHUB_URL); globalThis.fetch = async () => response;",
+          "const response = await fetch(process.env.CARAPACE_CLAWHUB_URL); globalThis.fetch = async () => response;",
         )}`,
-        OPENCLAW_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "75",
+        CARAPACE_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "75",
       });
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        "ClawHub package preflight response for @openclaw/kitchen-sink timed out after 75ms",
+        "ClawHub package preflight response for @carapace/kitchen-sink timed out after 75ms",
       );
     } finally {
       await new Promise<void>((resolve) => {
@@ -2008,16 +2008,16 @@ fs.renameSync = (source, destination) => {
         throw new Error("expected TCP server address");
       }
       const result = await runAssertionAsync(["clawhub-preflight"], {
-        CLAWHUB_PLUGIN_ID: "openclaw-kitchen-sink-fixture",
-        CLAWHUB_PLUGIN_SPEC: "clawhub:@openclaw/kitchen-sink",
-        OPENCLAW_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: "16",
-        OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1000",
+        CLAWHUB_PLUGIN_ID: "carapace-kitchen-sink-fixture",
+        CLAWHUB_PLUGIN_SPEC: "clawhub:@carapace/kitchen-sink",
+        CARAPACE_CLAWHUB_URL: `http://127.0.0.1:${address.port}`,
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES: "16",
+        CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS: "1000",
       });
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain(
-        "ClawHub package preflight response for @openclaw/kitchen-sink response body exceeded 16 bytes",
+        "ClawHub package preflight response for @carapace/kitchen-sink response body exceeded 16 bytes",
       );
       expect(result.stderr).not.toContain("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     } finally {

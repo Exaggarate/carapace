@@ -74,11 +74,11 @@ export type {
 } from "../../packages/memory-host-sdk/src/engine-storage.js";
 
 export {
-  openOpenClawAgentDatabaseReadOnly,
-  type OpenClawAgentDatabaseReadOnlyOpenResult,
-  type OpenClawAgentReadOnlyDatabase,
-  type OpenClawAgentReadOnlyDatabaseHandle,
-} from "../state/openclaw-agent-db-readonly.js";
+  openCarapaceAgentDatabaseReadOnly,
+  type CarapaceAgentDatabaseReadOnlyOpenResult,
+  type CarapaceAgentReadOnlyDatabase,
+  type CarapaceAgentReadOnlyDatabaseHandle,
+} from "../state/carapace-agent-db-readonly.js";
 
 /** Health probe result for embedding provider availability checks. */
 export type MemoryEmbeddingProbeResult = {

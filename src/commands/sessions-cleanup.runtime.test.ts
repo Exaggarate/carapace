@@ -33,7 +33,7 @@ vi.mock("../plugins/runtime/gateway-request-scope.js", () => ({
   withPluginRuntimeRegistryScope: vi.fn((_registry: unknown, run: () => unknown) => run()),
 }));
 vi.mock("../agents/agent-scope-config.js", () => ({
-  resolveAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-test-workspace"),
+  resolveAgentWorkspaceDir: vi.fn(() => "/tmp/carapace-test-workspace"),
 }));
 
 const runtime: RuntimeEnv = {

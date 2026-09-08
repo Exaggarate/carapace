@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AgentSelectionRequiredError } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import {
   resolveSessionAgentId,
   resolveSessionAgentIdStrict,
@@ -15,7 +15,7 @@ describe("agent-scope-runtime compatibility", () => {
       defaults: { systemAgent: { agentId: "beta" } },
       entries: { main: {}, beta: {} },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 
   it("resolves the configured system agent for ownerless shipped calls", () => {
     expect(resolveSessionAgentIds({ config })).toEqual({

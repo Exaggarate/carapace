@@ -50,9 +50,9 @@ const it = mockGatewayTest.extend<{
         frames.find((frame) => frame.type === "res" && frame.id === id);
       const controls = (
         window as typeof window & {
-          openclawControlUiE2eGateway: Controls;
+          carapaceControlUiE2eGateway: Controls;
         }
-      ).openclawControlUiE2eGateway;
+      ).carapaceControlUiE2eGateway;
       return {
         send,
         response,

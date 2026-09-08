@@ -2,8 +2,8 @@ import {
   formatErrorMessage,
   type NormalizedUsage,
   type AgentHarnessAttemptParamsV2,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage, Usage } from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage, Usage } from "carapace/plugin-sdk/llm";
 import type { CodexProviderRefusal } from "./event-projector-values.js";
 import {
   resolveCodexLocalRuntimeAttribution,
@@ -31,7 +31,7 @@ export type AssistantMessageOptions = {
 };
 
 export type CodexAsyncAssistantMessage = AssistantMessage & {
-  openclawAsyncDelivery: { itemId: string };
+  carapaceAsyncDelivery: { itemId: string };
 };
 
 const ZERO_USAGE: Usage = {
@@ -123,12 +123,12 @@ export function createAssistantCommentaryMessage(
   timestamp: number,
 ): AssistantMessage {
   const message: AssistantMessage & {
-    openclawStreamFallback: { replacementText: string; source: "segment"; itemId: string };
+    carapaceStreamFallback: { replacementText: string; source: "segment"; itemId: string };
   } = {
     ...createNonterminalAssistantMessage(params, [{ type: "text", text }], timestamp),
     // Keep this unphased: gateway history hides commentary-phase assistant rows.
     // The keyed fallback persists Control UI narration without channel delivery.
-    openclawStreamFallback: {
+    carapaceStreamFallback: {
       replacementText: text,
       source: "segment",
       itemId,
@@ -145,7 +145,7 @@ export function createAssistantAsyncMessage(
 ): CodexAsyncAssistantMessage {
   return {
     ...createNonterminalAssistantMessage(params, [{ type: "text", text }], timestamp),
-    openclawAsyncDelivery: { itemId },
+    carapaceAsyncDelivery: { itemId },
   };
 }
 

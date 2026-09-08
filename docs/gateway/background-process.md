@@ -6,7 +6,7 @@ read_when:
 title: "Background exec and process tool"
 ---
 
-OpenClaw runs shell commands through the `exec` tool and keeps long-running tasks in memory. The `process` tool manages those background sessions.
+Carapace runs shell commands through the `exec` tool and keeps long-running tasks in memory. The `process` tool manages those background sessions.
 
 ## exec tool
 
@@ -34,7 +34,7 @@ Behavior:
 - Output stays in memory up to the per-session aggregate cap until the session is polled or cleared.
 - Finished sessions expire after their configured TTL, measured from completion. Each exec captures its agent's retention setting when admitted; using another agent's process tool does not change existing results' lifetimes. The registry also retains at most 50 finished sessions and 2,000,000 total retained output characters, evicting the oldest records first. The newest completed session retains its capped per-session aggregate even when that record alone exceeds the global limit.
 - If the `process` tool is disallowed, `exec` runs synchronously and ignores `yieldMs`/`background`.
-- Spawned exec commands receive `OPENCLAW_SHELL=exec` for context-aware shell/profile rules.
+- Spawned exec commands receive `CARAPACE_SHELL=exec` for context-aware shell/profile rules.
 - For long-running work that starts now: start it once and rely on automatic completion wake (when enabled) once the command emits output or fails.
 - If automatic completion wake is unavailable, or you need quiet-success confirmation for a command that exits cleanly with no output, poll with `process`.
 - Don't emulate reminders or delayed follow-ups with `sleep` loops or repeated polling — use cron for future work.
@@ -43,19 +43,19 @@ Behavior:
 
 | Variable                                 | Effect                                                                                                           |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `OPENCLAW_BASH_YIELD_MS`                 | Default yield before backgrounding (ms). Default 10000, clamped 10-120000.                                       |
-| `OPENCLAW_BASH_MAX_OUTPUT_CHARS`         | In-memory aggregate cap in characters. Default 200000, clamped 1000-200000.                                      |
-| `OPENCLAW_BASH_PENDING_MAX_OUTPUT_CHARS` | Pending stdout/stderr cap per stream. Default 30000, clamped 1000-200000 and limited by the aggregate cap.       |
-| `OPENCLAW_BASH_JOB_TTL_MS`               | TTL for finished sessions (ms), bounded to 1m-3h.                                                                |
-| `OPENCLAW_PROCESS_INPUT_WAIT_IDLE_MS`    | Idle-output threshold before writable background sessions are marked as likely waiting for input. Default 15000. |
+| `CARAPACE_BASH_YIELD_MS`                 | Default yield before backgrounding (ms). Default 10000, clamped 10-120000.                                       |
+| `CARAPACE_BASH_MAX_OUTPUT_CHARS`         | In-memory aggregate cap in characters. Default 200000, clamped 1000-200000.                                      |
+| `CARAPACE_BASH_PENDING_MAX_OUTPUT_CHARS` | Pending stdout/stderr cap per stream. Default 30000, clamped 1000-200000 and limited by the aggregate cap.       |
+| `CARAPACE_BASH_JOB_TTL_MS`               | TTL for finished sessions (ms), bounded to 1m-3h.                                                                |
+| `CARAPACE_PROCESS_INPUT_WAIT_IDLE_MS`    | Idle-output threshold before writable background sessions are marked as likely waiting for input. Default 15000. |
 
 ### Config (preferred over env overrides)
 
 | Key                                   | Default | Effect                                                                          |
 | ------------------------------------- | ------- | ------------------------------------------------------------------------------- |
-| `tools.exec.backgroundMs`             | 10000   | Same as `OPENCLAW_BASH_YIELD_MS`.                                               |
+| `tools.exec.backgroundMs`             | 10000   | Same as `CARAPACE_BASH_YIELD_MS`.                                               |
 | `tools.exec.timeoutSeconds`           | 1800    | Default per-call timeout.                                                       |
-| `tools.exec.cleanupMs`                | 1800000 | Same as `OPENCLAW_BASH_JOB_TTL_MS`.                                             |
+| `tools.exec.cleanupMs`                | 1800000 | Same as `CARAPACE_BASH_JOB_TTL_MS`.                                             |
 | `tools.exec.notifyOnExit`             | true    | Enqueue a system event + request heartbeat when a backgrounded exec exits.      |
 | `tools.exec.notifyOnExitEmptySuccess` | false   | Also enqueue completion events for successful backgrounded runs with no output. |
 
@@ -74,7 +74,7 @@ the environment, replacing its ownership, or stopping the node also stops its
 processes. Process handles do not survive a worker or node restart.
 
 If the node's pairing is revoked or its provider no longer recognizes the lease,
-the session placement fails. Physical cleanup can remain pending until OpenClaw
+the session placement fails. Physical cleanup can remain pending until Carapace
 confirms that the exact worker has stopped; an unconfirmed stop does not release
 its ownership record.
 
@@ -138,7 +138,7 @@ Notes:
 - Use `log` before recovering an interactive CLI, so the current transcript, stdin state, and input-wait hint are visible together.
 - Use `write`/`send-keys`/`submit`/`paste`/`kill` when you need input or intervention.
 - `process list` includes a derived `name` (command verb + target) for quick scans.
-- `process list`, `poll`, and `log` report `waitingForInput` only when the session still has writable stdin and has been idle longer than the input-wait threshold (default 15000 ms, `OPENCLAW_PROCESS_INPUT_WAIT_IDLE_MS`).
+- `process list`, `poll`, and `log` report `waitingForInput` only when the session still has writable stdin and has been idle longer than the input-wait threshold (default 15000 ms, `CARAPACE_PROCESS_INPUT_WAIT_IDLE_MS`).
 - `process log` uses line-based `offset`/`limit`. When both are omitted, it returns the last 200 lines with a paging hint. When `offset` is set and `limit` isn't, it returns from `offset` to the end (not capped to 200).
 - `process poll` and `process log` distinguish output discarded at the aggregate retention cap from output merely omitted by the pending buffer or retained tail. Discarded output cannot be recovered; paged logs can inspect only the retained portion.
 - `poll`'s `timeout` waits up to that many milliseconds before returning; values above 30000 are clamped to 30000.

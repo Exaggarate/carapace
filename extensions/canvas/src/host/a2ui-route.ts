@@ -1,5 +1,5 @@
-import { detectMime } from "openclaw/plugin-sdk/media-mime";
-import { lowercasePreservingWhitespace } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { detectMime } from "carapace/plugin-sdk/media-mime";
+import { lowercasePreservingWhitespace } from "carapace/plugin-sdk/string-coerce-runtime";
 import { A2UI_PATH, isA2uiPath } from "./a2ui-shared.js";
 import { resolveFileWithinRoot } from "./file-resolver.js";
 

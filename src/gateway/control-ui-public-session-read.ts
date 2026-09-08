@@ -4,7 +4,7 @@ import { resolveSessionPublicShare } from "../config/sessions/session-public-sha
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
 import { resolveSessionStorePathForScope } from "../config/sessions/session-store-path.js";
 import type { InternalSessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isIncognitoSessionKey, parseAgentSessionKey } from "../routing/session-key.js";
 import type { PublicSessionShareLocator } from "./control-ui-public-session-token.js";
 import { readSessionMessagesPageWithStatsAsync } from "./session-transcript-readers.js";
@@ -25,7 +25,7 @@ type PublicSessionShareScope = {
 };
 
 function resolvePublicSessionShareScope(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   locator: PublicSessionShareLocator,
 ): PublicSessionShareScope | null {
   const parsed = parseAgentSessionKey(locator.sessionKey);
@@ -60,7 +60,7 @@ function readAuthorizedEntry(
 }
 
 export function isPublicSessionShareActive(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   locator: PublicSessionShareLocator,
 ): boolean {
   const scope = resolvePublicSessionShareScope(cfg, locator);
@@ -69,7 +69,7 @@ export function isPublicSessionShareActive(
 
 /** Only the exact published generation is readable; this grants no Gateway session authority. */
 export async function readPublicSessionShare(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   locator: PublicSessionShareLocator,
   options: { offset?: number } = {},
 ): Promise<PublicSessionShareReadResult | null> {

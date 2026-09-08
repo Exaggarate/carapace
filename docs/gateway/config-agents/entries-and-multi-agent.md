@@ -27,8 +27,8 @@ for provider examples and precedence.
     entries: {
       main: {
         name: "Main Agent",
-        workspace: "~/.openclaw/workspace",
-        agentDir: "~/.openclaw/agents/main/agent",
+        workspace: "~/.carapace/workspace",
+        agentDir: "~/.carapace/agents/main/agent",
         model: "anthropic/claude-opus-4-6", // or { primary, fallbacks }
         utilityModel: "openai/gpt-5.4-mini",
         thinkingDefault: "high", // per-agent thinking level override
@@ -47,7 +47,7 @@ for provider examples and precedence.
           emoji: "🦥",
           avatar: "avatars/samantha.png",
         },
-        groupChat: { mentionPatterns: ["@openclaw"] },
+        groupChat: { mentionPatterns: ["@carapace"] },
         sandbox: { mode: "off" },
         runtime: {
           type: "acp",
@@ -55,7 +55,7 @@ for provider examples and precedence.
             agent: "codex",
             backend: "acpx",
             mode: "persistent", // persistent | oneshot
-            cwd: "/workspace/openclaw",
+            cwd: "/workspace/carapace",
           },
         },
         subagents: { allowAgents: ["*"] },
@@ -87,7 +87,7 @@ for provider examples and precedence.
 - `identity.avatar`: workspace-relative path, `http(s)` URL, or `data:` URI.
 - Local workspace-relative `identity.avatar` image files are limited to 2 MB. `http(s)` URLs and `data:` URIs are not checked against the local file-size limit.
 - `identity` derives defaults: `ackReaction` from `emoji`, `mentionPatterns` from `name`/`emoji`.
-- `subagents.allowAgents`: allowlist of configured agent ids for explicit `sessions_spawn.agentId` targets (`["*"]` = any configured target; default: same agent only). Include the requester id when self-targeted `agentId` calls should be allowed. Stale entries whose agent config was deleted are rejected by `sessions_spawn` and omitted from `agents_list`; run `openclaw doctor --fix` to clean them up, or add a minimal `agents.entries.*` entry if that target should remain spawnable while inheriting defaults.
+- `subagents.allowAgents`: allowlist of configured agent ids for explicit `sessions_spawn.agentId` targets (`["*"]` = any configured target; default: same agent only). Include the requester id when self-targeted `agentId` calls should be allowed. Stale entries whose agent config was deleted are rejected by `sessions_spawn` and omitted from `agents_list`; run `carapace doctor --fix` to clean them up, or add a minimal `agents.entries.*` entry if that target should remain spawnable while inheriting defaults.
 - Sandbox inheritance guard: if the requester session is sandboxed, `sessions_spawn` rejects targets that would run unsandboxed.
 - `subagents.requireAgentId`: when true, block `sessions_spawn` calls that omit `agentId` (forces explicit profile selection; default: false).
 - `subagents.maxConcurrent`: max concurrent child-agent runs across subagent execution. Default: `8`.
@@ -107,8 +107,8 @@ Run multiple isolated agents inside one Gateway. See [Multi-Agent](/concepts/mul
     ownership: "explicit",
     defaults: { heartbeat: { agentId: "home" }, systemAgent: { agentId: "home" } },
     entries: {
-      home: { workspace: "~/.openclaw/workspace-home" },
-      work: { workspace: "~/.openclaw/workspace-work" },
+      home: { workspace: "~/.carapace/workspace-home" },
+      work: { workspace: "~/.carapace/workspace-work" },
     },
   },
   bindings: [
@@ -140,7 +140,7 @@ Run multiple isolated agents inside one Gateway. See [Multi-Agent](/concepts/mul
 
 Within each tier, the first matching `bindings` entry wins.
 
-For `type: "acp"` entries, OpenClaw resolves by exact conversation identity (`match.channel` + account + `match.peer.id`) and does not use the route binding tier order above.
+For `type: "acp"` entries, Carapace resolves by exact conversation identity (`match.channel` + account + `match.peer.id`) and does not use the route binding tier order above.
 
 ### Per-agent access profiles
 
@@ -151,7 +151,7 @@ For `type: "acp"` entries, OpenClaw resolves by exact conversation identity (`ma
   agents: {
     entries: {
       personal: {
-        workspace: "~/.openclaw/workspace-personal",
+        workspace: "~/.carapace/workspace-personal",
         sandbox: { mode: "off" },
       },
     },
@@ -168,7 +168,7 @@ For `type: "acp"` entries, OpenClaw resolves by exact conversation identity (`ma
   agents: {
     entries: {
       family: {
-        workspace: "~/.openclaw/workspace-family",
+        workspace: "~/.carapace/workspace-family",
         sandbox: { mode: "all", scope: "agent", workspaceAccess: "ro" },
         tools: {
           allow: [
@@ -196,7 +196,7 @@ For `type: "acp"` entries, OpenClaw resolves by exact conversation identity (`ma
   agents: {
     entries: {
       public: {
-        workspace: "~/.openclaw/workspace-public",
+        workspace: "~/.carapace/workspace-public",
         sandbox: { mode: "all", scope: "agent", workspaceAccess: "none" },
         tools: {
           allow: [

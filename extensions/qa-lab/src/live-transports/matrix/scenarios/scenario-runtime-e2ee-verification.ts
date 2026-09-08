@@ -214,7 +214,7 @@ export async function runMatrixQaE2eeStaleDeviceHygieneScenario(
         baseUrl: context.baseUrl,
       });
       const secondary = await loginClient.loginWithPassword({
-        deviceName: "OpenClaw Matrix QA Stale Device",
+        deviceName: "Carapace Matrix QA Stale Device",
         password: driverPassword,
         userId: context.driverUserId,
       });

@@ -34,11 +34,11 @@ try {
   }
   assert.equal(typeof ownsRoot, "function", "packaged update ownership export is required");
   const result = await ownsRoot({
-    root: "/proof/openclaw",
+    root: "/proof/carapace",
     command: {
       programArguments: [process.execPath, `${current}/dist/index.js`, "gateway"],
       managedDefinition: {
-        programArguments: [process.execPath, "/proof/openclaw/dist/index.js", "gateway"],
+        programArguments: [process.execPath, "/proof/carapace/dist/index.js", "gateway"],
       },
       managedOverrides: { launcher: "command" },
     },

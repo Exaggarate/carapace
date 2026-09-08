@@ -1,16 +1,16 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const UPSTREAM_USER_TEXT_META_KEY = "upstreamUserText" as const;
 const MIRROR_IDENTITY_META_KEY = "mirrorIdentity" as const;
-const CODEX_META_KEY = "__openclaw";
+const CODEX_META_KEY = "__carapace";
 
 export function attachCodexMirrorIdentity<T extends AgentMessage>(message: T, identity: string): T {
   const existing = CODEX_META_KEY in message ? message[CODEX_META_KEY] : undefined;
   const baseMeta = asOptionalRecord(existing) ?? {};
   return {
     ...message,
-    __openclaw: { ...baseMeta, [MIRROR_IDENTITY_META_KEY]: identity },
+    __carapace: { ...baseMeta, [MIRROR_IDENTITY_META_KEY]: identity },
   };
 }
 
@@ -29,7 +29,7 @@ export function attachUpstreamUserText<T extends AgentMessage>(message: T, text:
   const baseMeta = asOptionalRecord(existing) ?? {};
   return {
     ...message,
-    __openclaw: { ...baseMeta, [UPSTREAM_USER_TEXT_META_KEY]: text },
+    __carapace: { ...baseMeta, [UPSTREAM_USER_TEXT_META_KEY]: text },
   };
 }
 

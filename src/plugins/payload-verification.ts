@@ -2,8 +2,8 @@
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { pathExists } from "../infra/fs-safe.js";
 import { resolveUserPath } from "../utils.js";
@@ -18,8 +18,8 @@ import {
 } from "./official-external-install-records.js";
 import { validatePackageExtensionEntriesForInstall } from "./package-entry-resolution.js";
 import {
-  auditOpenClawPeerDependencyLink,
-  resolveOpenClawHostDependency,
+  auditCarapacePeerDependencyLink,
+  resolveCarapaceHostDependency,
 } from "./plugin-peer-link.js";
 import type { PluginVerificationFailureReason } from "./runtime-degraded-state.js";
 
@@ -59,7 +59,7 @@ export function isPayloadMissing(env: NodeJS.ProcessEnv, rawInstallPath?: string
 /** Finds tracked install records whose package payload is absent on disk. */
 export async function collectMissingPluginInstallPayloads(params: {
   records: Record<string, PluginInstallRecord>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   skipDisabledPlugins?: boolean;
   syncOfficialPluginInstalls?: boolean;
   env?: NodeJS.ProcessEnv;
@@ -316,14 +316,14 @@ async function validatePackagePayload(params: {
 }): Promise<PluginPayloadSmokeFailure[]> {
   const failures: PluginPayloadSmokeFailure[] = [];
 
-  const hostDependency = resolveOpenClawHostDependency(params.manifest);
+  const hostDependency = resolveCarapaceHostDependency(params.manifest);
   // Older non-npm installs never guaranteed direct host links; only npm ownership can repair them.
   if (
     hostDependency &&
     (hostDependency.declaration === "peerDependencies" ||
       (params.installSourceIsAuthoritative && params.installSource === "npm"))
   ) {
-    const peerIssue = await auditOpenClawPeerDependencyLink({
+    const peerIssue = await auditCarapacePeerDependencyLink({
       packageDir: params.installPath,
       packageName: params.manifest.name ?? params.pluginId,
     });
@@ -331,10 +331,10 @@ async function validatePackagePayload(params: {
       failures.push({
         pluginId: params.pluginId,
         installPath: params.installPath,
-        reason: "missing-openclaw-peer-link",
+        reason: "missing-carapace-peer-link",
         detail: `Plugin declares ${
           hostDependency.declaration === "peerDependencies" ? "peerDependency" : "dependency"
-        } "openclaw" but ${
+        } "carapace" but ${
           hostDependency.declaration === "peerDependencies" ? "peer" : "host"
         } link audit failed: ${peerIssue.reason}.`,
       });
@@ -350,7 +350,7 @@ async function validatePackagePayload(params: {
       detail: `Plugin extension entry validation failed: ${
         extensionResolution.status === "invalid"
           ? extensionResolution.error
-          : "package.json openclaw.extensions is empty"
+          : "package.json carapace.extensions is empty"
       }`,
     });
     return failures;

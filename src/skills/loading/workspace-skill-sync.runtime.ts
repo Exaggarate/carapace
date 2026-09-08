@@ -1,10 +1,10 @@
 // Sandbox workspace skill synchronization is deferred behind the sandbox runtime boundary.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveSandboxPath } from "../../agents/sandbox-paths.js";
 import { canonicalizePath } from "../../agents/utils/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { tryReadJson, writeJson } from "../../infra/json-files.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
@@ -43,7 +43,7 @@ function resolveUniqueSyncedSkillDirName(base: string, used: Set<string>): strin
   }
 }
 
-const SYNCED_SKILLS_MANIFEST_NAME = ".openclaw-sync.json";
+const SYNCED_SKILLS_MANIFEST_NAME = ".carapace-sync.json";
 
 type SyncedSkillsManifest = {
   entryKeys: string[];
@@ -130,7 +130,7 @@ async function ensureSyncedSkillsDirectory(targetSkillsDir: string): Promise<voi
 export async function syncWorkspaceSkills(params: {
   sourceWorkspaceDir: string;
   targetWorkspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   skillFilter?: string[];
   agentId?: string;
   eligibility?: SkillEligibilityContext;
@@ -300,7 +300,7 @@ export async function syncWorkspaceSkills(params: {
             });
           }
         } catch (error) {
-          if (entry.skill.source === "openclaw-library") {
+          if (entry.skill.source === "carapace-library") {
             throw error;
           }
           copyFailed = true;

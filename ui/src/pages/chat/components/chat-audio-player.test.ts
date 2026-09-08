@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import "./chat-audio-player.ts";
 import { CHAT_AUDIO_WAVEFORM_MAX_BYTES } from "./chat-audio-waveform.ts";
 
-type ChatAudioPlayer = HTMLElementTagNameMap["openclaw-chat-audio-player"];
+type ChatAudioPlayer = HTMLElementTagNameMap["carapace-chat-audio-player"];
 
 function setMediaNumber(
   media: HTMLMediaElement,
@@ -15,7 +15,7 @@ function setMediaNumber(
 }
 
 async function createPlayer(label: string): Promise<ChatAudioPlayer> {
-  const player = document.createElement("openclaw-chat-audio-player");
+  const player = document.createElement("carapace-chat-audio-player");
   player.src = `https://example.com/${label}.mp3`;
   player.sourceIdentity = `media://${label}`;
   player.label = `${label}.mp3`;
@@ -33,7 +33,7 @@ afterEach(() => {
 
 describe("ChatAudioPlayer", () => {
   it("keeps the download action for normalized base64 audio", async () => {
-    const player = document.createElement("openclaw-chat-audio-player");
+    const player = document.createElement("carapace-chat-audio-player");
     player.src = "data:audio/wav;base64,UklGRg==";
     player.sourceIdentity = "inline-audio";
     player.label = "inline.wav";
@@ -179,8 +179,8 @@ describe("ChatAudioPlayer", () => {
       .mockResolvedValueOnce(new Response(null, { status: 202 }))
       .mockResolvedValueOnce(new Response(null, { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
-    const player = document.createElement("openclaw-chat-audio-player");
-    player.src = "/__openclaw__/assistant-media?source=voice.caf&mediaTicket=ticket";
+    const player = document.createElement("carapace-chat-audio-player");
+    player.src = "/__carapace__/assistant-media?source=voice.caf&mediaTicket=ticket";
     player.sourceIdentity = "/tmp/voice.caf";
     player.label = "voice.caf";
     player.playback = "transcode";
@@ -213,8 +213,8 @@ describe("ChatAudioPlayer", () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status: 202 }));
     vi.stubGlobal("fetch", fetchMock);
-    const player = document.createElement("openclaw-chat-audio-player");
-    player.src = "/__openclaw__/assistant-media?source=voice.caf&mediaTicket=ticket";
+    const player = document.createElement("carapace-chat-audio-player");
+    player.src = "/__carapace__/assistant-media?source=voice.caf&mediaTicket=ticket";
     player.sourceIdentity = "/tmp/voice.caf";
     player.label = "voice.caf";
     player.playback = "transcode";
@@ -233,7 +233,7 @@ describe("ChatAudioPlayer", () => {
     ).not.toContain("playback=1");
 
     fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
-    player.src = "/__openclaw__/assistant-media?source=voice.caf&mediaTicket=recovered";
+    player.src = "/__carapace__/assistant-media?source=voice.caf&mediaTicket=recovered";
     await player.updateComplete;
     await vi.runAllTimersAsync();
     await player.updateComplete;
@@ -334,7 +334,7 @@ describe("ChatAudioPlayer", () => {
     expect(media.getAttribute("src")).toBe("https://example.com/waveform-reuse.mp3");
 
     player.remove();
-    const refreshed = document.createElement("openclaw-chat-audio-player");
+    const refreshed = document.createElement("carapace-chat-audio-player");
     refreshed.src = "https://example.com/waveform-reuse.mp3?mediaTicket=fresh";
     refreshed.sourceIdentity = "media://waveform-reuse";
     refreshed.authToken = "different-principal";
@@ -604,7 +604,7 @@ describe("ChatAudioPlayer", () => {
       paused = true;
     });
 
-    player.src = "/__openclaw__/assistant-media?source=after.caf&mediaTicket=ticket";
+    player.src = "/__carapace__/assistant-media?source=after.caf&mediaTicket=ticket";
     player.sourceIdentity = "media://identity-after";
     player.label = "after.caf";
     player.playback = "transcode";

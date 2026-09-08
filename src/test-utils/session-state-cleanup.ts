@@ -7,11 +7,11 @@ import {
 import { drainFileLockStateForTest } from "../infra/file-lock.js";
 import { isPathInside } from "../infra/path-guards.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  listOpenClawAgentDatabasesForTest,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceAgentDatabaseByPath,
+  listCarapaceAgentDatabasesForTest,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 
 let fileLockDrainerForTests: typeof drainFileLockStateForTest | null = null;
 let sessionStoreWriterQueueDrainerForTests: typeof drainSessionStoreWriterQueuesForTest | null =
@@ -52,12 +52,12 @@ export async function cleanupSessionStateForTest(
   }
   // Close agent handles before shared state: releasing their leases can reopen
   // shared state. Unrelated fixtures keep their handles.
-  for (const database of listOpenClawAgentDatabasesForTest()) {
+  for (const database of listCarapaceAgentDatabasesForTest()) {
     if (isPathInside(options.stateDir, database.path)) {
-      closeOpenClawAgentDatabaseByPath(database.path);
+      closeCarapaceAgentDatabaseByPath(database.path);
     }
   }
-  closeOpenClawStateDatabaseByPath(
-    resolveOpenClawStateSqlitePath({ ...process.env, OPENCLAW_STATE_DIR: options.stateDir }),
+  closeCarapaceStateDatabaseByPath(
+    resolveCarapaceStateSqlitePath({ ...process.env, CARAPACE_STATE_DIR: options.stateDir }),
   );
 }

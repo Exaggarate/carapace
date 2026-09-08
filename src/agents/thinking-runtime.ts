@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   isThinkingLevelSupported,
   resolveSupportedThinkingLevel,
@@ -8,7 +8,7 @@ import {
 } from "../auto-reply/thinking.js";
 /** Resolves the concrete harness runtime that owns the next agent turn. */
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAvailableAgentHarnessPolicy } from "./harness/availability.js";
 import { resolveAutoAgentHarnessId } from "./harness/support.js";
 import type { AgentRuntimePolicyScope } from "./model-runtime-policy.js";
@@ -39,7 +39,7 @@ export function needsThinkHydration(
   agentRuntime: string,
 ): boolean {
   return (
-    agentRuntime !== "openclaw" || !hasResolvedThinkingCatalogEntry({ catalog, provider, model })
+    agentRuntime !== "carapace" || !hasResolvedThinkingCatalogEntry({ catalog, provider, model })
   );
 }
 
@@ -54,13 +54,13 @@ export function normalizeThinkingCatalogProviders<T extends ThinkingCatalogEntry
 
 /** Convert residual auto policy into the built-in fallback when no registry selection is needed. */
 export function concretizeAgentRuntime(runtime: string): string {
-  return runtime === "auto" ? "openclaw" : runtime;
+  return runtime === "auto" ? "carapace" : runtime;
 }
 
 /** Resolves an explicit session override before configured model/provider policy. */
 export function resolveEffectiveAgentRuntime(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     provider: string;
     modelId: string;
     modelApi?: string | null;
@@ -98,7 +98,7 @@ export function resolveEffectiveAgentRuntime(
         ...(params.agentScope
           ? { agentScope: params.agentScope, sessionKey: params.sessionKey }
           : {}),
-      }) ?? "openclaw"
+      }) ?? "carapace"
     );
   }
   return concretizeAgentRuntime(runtime);
@@ -106,7 +106,7 @@ export function resolveEffectiveAgentRuntime(
 
 /** Revalidates a turn-local thinking level after fallback selects its actual model/runtime. */
 export function resolveCandidateThinkingLevel(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider: string;
   modelId: string;
   level?: ThinkLevel;

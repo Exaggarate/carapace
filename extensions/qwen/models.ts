@@ -3,12 +3,12 @@ import {
   applyProviderNativeStreamingUsageCompat,
   buildManifestModelProviderConfig,
   supportsNativeStreamingUsageCompat,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "carapace/plugin-sdk/provider-catalog-shared";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 export const QWEN_BASE_URL = "https://coding-intl.dashscope.aliyuncs.com/v1";
 export const QWEN_GLOBAL_BASE_URL = QWEN_BASE_URL;

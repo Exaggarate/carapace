@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { observePostCoreCommand } from "../../scripts/e2e/lib/plugin-update/process-observer.mjs";
 
 const argv = "node\0entry.js\0update\0--json\0";
-const marker = "OPENCLAW_UPDATE_POST_CORE=1\0";
+const marker = "CARAPACE_UPDATE_POST_CORE=1\0";
 const procError = (code: string) => Object.assign(new Error(`proc read: ${code}`), { code });
 
 describe("plugin update command observation", () => {
@@ -70,7 +70,7 @@ describe("plugin update command observation", () => {
     "does not manufacture positive handoff evidence when %s is inaccessible",
     async (file) => {
       files.set("/proc/10/task/10/children", "11");
-      files.set("/proc/11/environ", "OPENCLAW_UPDATE_POST_CORE=0\0");
+      files.set("/proc/11/environ", "CARAPACE_UPDATE_POST_CORE=0\0");
       files.set(`/proc/11/${file}`, procError("EACCES"));
       const outcome = observePostCoreCommand(child, "update");
       await vi.advanceTimersByTimeAsync(20);
@@ -82,7 +82,7 @@ describe("plugin update command observation", () => {
   it("retains positive evidence and argv after process.title changes and the process exits", async () => {
     const outcome = observePostCoreCommand(child, "update");
     await vi.advanceTimersByTimeAsync(20);
-    files.set("/proc/11/cmdline", "openclaw-update\0");
+    files.set("/proc/11/cmdline", "carapace-update\0");
     files.set("/proc/11/environ", procError("EACCES"));
     files.set("/proc/12/cmdline", procError("ESRCH"));
     await vi.advanceTimersByTimeAsync(20);

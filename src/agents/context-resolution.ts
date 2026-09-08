@@ -2,10 +2,10 @@ import {
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
   supportsClaude1MContext,
-} from "@openclaw/llm-core";
-import { stripSelfProviderModelPrefix } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/llm-core";
+import { stripSelfProviderModelPrefix } from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   lookupCachedContextTokens,
   lookupCachedContextWindow,
@@ -24,7 +24,7 @@ export type ModelsConfig = {
 };
 
 export type ContextTokenResolutionParams = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider?: string;
   modelProvider?: string;
   model?: string;
@@ -65,7 +65,7 @@ function resolveProviderModelRef(params: {
 }
 
 function resolveConfiguredProviderModel(
-  cfg: OpenClawConfig | null | undefined,
+  cfg: CarapaceConfig | null | undefined,
   provider: string,
   model: string,
 ): ConfigModelEntry | undefined {
@@ -97,7 +97,7 @@ function resolveConfiguredProviderModel(
 }
 
 function resolveConfiguredRuntimeModel(
-  cfg: OpenClawConfig | null | undefined,
+  cfg: CarapaceConfig | null | undefined,
   provider: string,
   modelProvider: string | undefined,
   model: string,
@@ -122,7 +122,7 @@ function readAuthoredModelContextTokens(model: ConfigModelEntry | undefined): nu
     : undefined;
 }
 
-/** Returns only the per-model contextTokens value authored in OpenClaw config. */
+/** Returns only the per-model contextTokens value authored in Carapace config. */
 export function resolveAuthoredModelContextTokens(
   params: Pick<ContextTokenResolutionParams, "cfg" | "provider" | "modelProvider" | "model">,
 ): number | undefined {

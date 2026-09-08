@@ -1,4 +1,4 @@
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { PreparedModelRuntimePublicationSupersededError } from "./prepared-model-runtime.errors.js";
 import type { PreparedModelRuntimeOwner } from "./prepared-model-runtime.types.js";

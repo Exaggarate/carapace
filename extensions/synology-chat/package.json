@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/synology-chat",
+  "name": "@carapace/synology-chat",
   "version": "2026.9.2",
-  "description": "Synology Chat channel plugin for OpenClaw channels and direct messages.",
+  "description": "Synology Chat channel plugin for Carapace channels and direct messages.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -29,7 +29,7 @@
       "selectionLabel": "Synology Chat (Webhook)",
       "docsPath": "/channels/synology-chat",
       "docsLabel": "synology-chat",
-      "blurb": "Connect your Synology NAS Chat to OpenClaw with full agent capabilities.",
+      "blurb": "Connect your Synology NAS Chat to Carapace with full agent capabilities.",
       "order": 90,
       "setup": {
         "fields": [
@@ -83,7 +83,7 @@
       }
     },
     "install": {
-      "npmSpec": "@openclaw/synology-chat",
+      "npmSpec": "@carapace/synology-chat",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -91,7 +91,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

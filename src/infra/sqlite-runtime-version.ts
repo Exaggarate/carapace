@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core";
+import { isRecord } from "@carapace/normalization-core";
 
 type SqliteVersion = {
   major: number;

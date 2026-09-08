@@ -1,7 +1,7 @@
 // Feishu plugin module implements tool result behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { wrapExternalContent } from "openclaw/plugin-sdk/security-runtime";
-import { jsonResult } from "openclaw/plugin-sdk/tool-results";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { wrapExternalContent } from "carapace/plugin-sdk/security-runtime";
+import { jsonResult } from "carapace/plugin-sdk/tool-results";
 
 export function feishuExternalToolResult<TDetails>(details: TDetails) {
   // Only model-visible text is fenced; structured callers retain the exact remote payload.

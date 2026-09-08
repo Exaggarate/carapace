@@ -1,4 +1,4 @@
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
+import { closeCarapaceStateDatabaseForTest } from "carapace/plugin-sdk/channel-ingress-test-runtime";
 import { botNames, botOpenIds, httpServers, wsClients } from "./monitor.state.js";
 
 export function cleanupFeishuMonitorStateForTests(): void {
@@ -22,5 +22,5 @@ export function cleanupFeishuMonitorStateForTests(): void {
   httpServers.clear();
   botOpenIds.clear();
   botNames.clear();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 }

@@ -5,7 +5,7 @@ import {
   replaceSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewaySessionRow } from "../session-utils.types.js";
 import { sessionReadHandlers } from "./sessions-read.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
@@ -17,7 +17,7 @@ export function identifiedClient(profileId: string): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read", "operator.write"],
     },
@@ -30,7 +30,7 @@ export function identifiedClient(profileId: string): GatewayClient {
   };
 }
 
-export function requestContext(config: OpenClawConfig): GatewayRequestContext {
+export function requestContext(config: CarapaceConfig): GatewayRequestContext {
   return {
     chatAbortControllers: new Map(),
     getRuntimeConfig: () => config,
@@ -62,8 +62,8 @@ export async function listSessions(params: {
   };
 }
 
-export async function seedSessions(): Promise<OpenClawConfig> {
-  const config: OpenClawConfig = {
+export async function seedSessions(): Promise<CarapaceConfig> {
+  const config: CarapaceConfig = {
     agents: { list: [{ id: "main", default: true }, { id: "work" }] },
   };
   for (const [agentId, name, updatedAt, owner, overrides] of [

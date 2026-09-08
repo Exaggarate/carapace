@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { prepareAgentRuntimeAuth } from "./prepare-auth.js";
@@ -55,7 +55,7 @@ describe("prepared auth metadata ownership", () => {
     (selection) => {
       const selected = metadata("selected-auth");
       const ambient = metadata("ambient-auth");
-      const config: OpenClawConfig =
+      const config: CarapaceConfig =
         selection === "binding"
           ? {
               models: {

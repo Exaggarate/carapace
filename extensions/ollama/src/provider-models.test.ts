@@ -3,8 +3,8 @@ import { once } from "node:events";
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import type { Socket } from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
-import { jsonResponse, requestBodyText, requestUrl } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "@carapace/normalization-core";
+import { jsonResponse, requestBodyText, requestUrl } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OLLAMA_DEFAULT_CONTEXT_WINDOW } from "./defaults.js";
 import {
@@ -56,7 +56,7 @@ describe("ollama provider models", () => {
 
   it("declares every exact currently served Ollama Cloud model id", () => {
     const manifest = JSON.parse(
-      readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"),
+      readFileSync(new URL("../carapace.plugin.json", import.meta.url), "utf8"),
     ) as {
       modelCatalog: {
         providers: Record<

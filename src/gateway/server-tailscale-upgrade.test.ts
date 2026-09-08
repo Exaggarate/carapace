@@ -22,11 +22,11 @@ describe("managed Tailscale upgrade", () => {
     const fixture = fileURLToPath(
       new URL("../../test/fixtures/tailscale-legacy-route-fixture.mjs", import.meta.url),
     );
-    const marker = path.join(tempDirs.make("openclaw-tailscale-upgrade-"), "state");
+    const marker = path.join(tempDirs.make("carapace-tailscale-upgrade-"), "state");
     await writeFile(marker, JSON.stringify(config));
-    process.env.OPENCLAW_TEST_TAILSCALE_BINARY = fixture;
-    process.env.OPENCLAW_TEST_TAILSCALE_FIXTURE_MARKER = marker;
-    process.env.OPENCLAW_TEST_TAILSCALE_FIXTURE_MODE = mode;
+    process.env.CARAPACE_TEST_TAILSCALE_BINARY = fixture;
+    process.env.CARAPACE_TEST_TAILSCALE_FIXTURE_MARKER = marker;
+    process.env.CARAPACE_TEST_TAILSCALE_FIXTURE_MODE = mode;
     process.env.VITEST ??= "true";
     return marker;
   };
@@ -37,9 +37,9 @@ describe("managed Tailscale upgrade", () => {
     ["funnel", 19001],
   ] as const)("adopts a predecessor %s route to Gateway port %s", async (mode, port) => {
     const env = captureEnv([
-      "OPENCLAW_TEST_TAILSCALE_BINARY",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MARKER",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MODE",
+      "CARAPACE_TEST_TAILSCALE_BINARY",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MARKER",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MODE",
       "VITEST",
     ]);
     const marker = await installFixture(legacyRoute(mode === "funnel", port), mode);
@@ -54,7 +54,7 @@ describe("managed Tailscale upgrade", () => {
       });
       expect(JSON.parse(await readFile(marker, "utf8"))).toEqual({});
       expect(info).toHaveBeenCalledWith(
-        expect.stringContaining("adopted from a previous OpenClaw release"),
+        expect.stringContaining("adopted from a previous Carapace release"),
       );
     } finally {
       await cleanup?.();
@@ -97,9 +97,9 @@ describe("managed Tailscale upgrade", () => {
     ],
   ])("does not modify a %s", async (_label, config, recovery = /--https=443 --set-path=\/ off/) => {
     const env = captureEnv([
-      "OPENCLAW_TEST_TAILSCALE_BINARY",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MARKER",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MODE",
+      "CARAPACE_TEST_TAILSCALE_BINARY",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MARKER",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MODE",
       "VITEST",
     ]);
     const marker = await installFixture(config, "serve");
@@ -124,9 +124,9 @@ describe("managed Tailscale upgrade", () => {
 
   it("does not mutate an independent Tailscale Service", async () => {
     const env = captureEnv([
-      "OPENCLAW_TEST_TAILSCALE_BINARY",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MARKER",
-      "OPENCLAW_TEST_TAILSCALE_FIXTURE_MODE",
+      "CARAPACE_TEST_TAILSCALE_BINARY",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MARKER",
+      "CARAPACE_TEST_TAILSCALE_FIXTURE_MODE",
       "VITEST",
     ]);
     const marker = await installFixture({ Services: { "svc:other": legacyRoute() } }, "serve");

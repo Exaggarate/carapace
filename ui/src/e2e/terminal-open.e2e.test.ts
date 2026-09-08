@@ -17,7 +17,7 @@ async function openTerminalSidePanel(page: Page): Promise<Locator> {
   await page.goto(`${suite.server.baseUrl}chat`);
   await waitForControlUiGatewayReady(page);
   await openChatSidePanelType(page, "Terminal");
-  return page.locator(".sidebar-region__right-runtime openclaw-terminal-panel");
+  return page.locator(".sidebar-region__right-runtime carapace-terminal-panel");
 }
 
 async function canvasDigest(canvas: Locator): Promise<string> {
@@ -35,7 +35,7 @@ async function settleTerminalPaint(page: Page): Promise<void> {
 }
 
 async function cycleThemeMode(page: Page, currentMode: "Dark" | "Light" | "System") {
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("carapace-app-sidebar");
   const toggle = sidebar.getByRole("button", { name: `Color mode: ${currentMode}` });
   if (!(await toggle.isVisible())) {
     await sidebar.getByRole("button", { name: /^Identity and app menu for / }).click();
@@ -135,7 +135,7 @@ suite.define(() => {
               {
                 agentId: "main",
                 confined: false,
-                cwd: "/workspace/openclaw",
+                cwd: "/workspace/carapace",
                 sessionId: "terminal-retry-ready",
                 shell: "/bin/zsh",
               },

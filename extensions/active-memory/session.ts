@@ -1,9 +1,9 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import {
   deliveryContextFromSession,
   sessionDeliveryOrigin,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { normalizeOptionalString, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { normalizeOptionalString, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   ACTIVE_MEMORY_DEBUG_PREFIX,
   ACTIVE_MEMORY_STATUS_PREFIX,
@@ -14,7 +14,7 @@ import {
 } from "./types.js";
 
 function resolveCanonicalSessionKeyFromSessionId(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   agentId: string;
   sessionId?: string;
 }): string | undefined {
@@ -48,7 +48,7 @@ function resolveCanonicalSessionKeyFromSessionId(params: {
 }
 
 function resolveRecallRunChannelContext(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   agentId: string;
   sessionKey?: string;
   sessionId?: string;
@@ -203,7 +203,7 @@ function sanitizeDebugText(text: string): string {
 }
 
 async function persistPluginStatusLines(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   agentId: string;
   sessionKey?: string;
   statusLine?: string;

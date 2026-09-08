@@ -1,5 +1,5 @@
 // Markdown Core tests cover frontmatter behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import JSON5 from "json5";
 import { describe, expect, it } from "vitest";
 import {
@@ -27,7 +27,7 @@ description: |
 name: session-memory
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "disk",
         "events": ["command:new"],
@@ -36,20 +36,20 @@ metadata:
 ---
 `;
     const result = parseFrontmatterBlock(content);
-    expect(result.metadata).toBe('{"openclaw":{"emoji":"disk","events":["command:new"]}}');
+    expect(result.metadata).toBe('{"carapace":{"emoji":"disk","events":["command:new"]}}');
 
     const parsed = JSON5.parse(expectDefined(result.metadata, "result.metadata test invariant"));
-    expect(parsed.openclaw?.emoji).toBe("disk");
+    expect(parsed.carapace?.emoji).toBe("disk");
   });
 
   it("preserves inline JSON values", () => {
     const content = `---
 name: inline-json
-metadata: {"openclaw": {"events": ["test"]}}
+metadata: {"carapace": {"events": ["test"]}}
 ---
 `;
     const result = parseFrontmatterBlock(content);
-    expect(result.metadata).toBe('{"openclaw": {"events": ["test"]}}');
+    expect(result.metadata).toBe('{"carapace": {"events": ["test"]}}');
   });
 
   it("stringifies YAML objects and arrays", () => {
@@ -61,7 +61,7 @@ tags:
   - alpha
   - beta
 metadata:
-  openclaw:
+  carapace:
     events:
       - command:new
 ---
@@ -71,7 +71,7 @@ metadata:
     expect(result.retries).toBe("3");
     expect(JSON.parse(result.tags ?? "[]")).toEqual(["alpha", "beta"]);
     const parsed = JSON5.parse(result.metadata ?? "");
-    expect(parsed.openclaw?.events).toEqual(["command:new"]);
+    expect(parsed.carapace?.events).toEqual(["command:new"]);
   });
 
   it("preserves inline description values containing colons", () => {
@@ -133,11 +133,11 @@ metadata: owner: value
 name: sample-skill
 read_when: signals: user announcing a conversion task
 metadata:
-  openclaw:
+  carapace:
     emoji: beaker
 ---`);
 
-    expect(result.frontmatter.metadata).toBe('{"openclaw":{"emoji":"beaker"}}');
+    expect(result.frontmatter.metadata).toBe('{"carapace":{"emoji":"beaker"}}');
     expect(result.issues).toEqual([]);
   });
 
@@ -285,10 +285,10 @@ description: |-
     const content = `---
 name: sample-skill
 metadata:
-  openclaw: true
+  carapace: true
 ---`;
     const result = parseFrontmatterBlock(content);
-    expect(result.metadata).toBe('{"openclaw":true}');
+    expect(result.metadata).toBe('{"carapace":true}');
   });
 
   it("returns empty when frontmatter is missing", () => {

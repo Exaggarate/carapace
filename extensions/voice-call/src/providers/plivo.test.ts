@@ -127,7 +127,7 @@ describe("PlivoProvider", () => {
         authToken: "test-token",
       },
       {
-        publicUrl: "https://voice.openclaw.ai/voice/webhook?provider=plivo",
+        publicUrl: "https://github.com/Exaggarate/carapace",
       },
     );
 
@@ -143,7 +143,7 @@ describe("PlivoProvider", () => {
     const callbackMap = (provider as unknown as { callUuidToWebhookUrl: Map<string, string> })
       .callUuidToWebhookUrl;
 
-    expect(callbackMap.get("call-uuid")).toBe("https://voice.openclaw.ai/voice/webhook");
+    expect(callbackMap.get("call-uuid")).toBe("https://github.com/Exaggarate/carapace");
   });
 
   it("pins call-control transfer URLs to the configured publicUrl path", async () => {
@@ -153,7 +153,7 @@ describe("PlivoProvider", () => {
         authToken: "test-token",
       },
       {
-        publicUrl: "https://voice.openclaw.ai/voice/webhook?provider=plivo",
+        publicUrl: "https://github.com/Exaggarate/carapace",
       },
     );
     const apiRequest = vi.fn(async (_params: unknown) => ({}));
@@ -184,7 +184,7 @@ describe("PlivoProvider", () => {
         endpoint: "/Call/call-uuid/",
         body: expect.objectContaining({
           aleg_url:
-            "https://voice.openclaw.ai/voice/webhook?provider=plivo&flow=xml-speak&callId=internal-call-id",
+            "https://github.com/Exaggarate/carapace",
         }),
       }),
     );

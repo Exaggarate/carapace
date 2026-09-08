@@ -1,0 +1,4 @@
+interface:
+  display_name: "Carapace CI Limits"
+  short_description: "Tune Carapace CI fanout and runner budgets"
+  default_prompt: "Use $carapace-ci-limits to inspect Carapace CI pressure, tune runner-registration fanout safely, and document the exact validation before landing."

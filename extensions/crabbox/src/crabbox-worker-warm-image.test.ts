@@ -158,7 +158,7 @@ describe("Crabbox profile warm images", () => {
         expect(calls.filter(({ argv }) => argv[2] === "create")).toHaveLength(captures ? 1 : 0);
         if (!captures) {
           expect(calls.some(({ argv }) => argv[1] === "checkpoint")).toBe(false);
-          expect(fs.existsSync(path.join(stateDir, "state", "openclaw.sqlite"))).toBe(false);
+          expect(fs.existsSync(path.join(stateDir, "state", "carapace.sqlite"))).toBe(false);
         }
         expect(calls.at(-1)?.argv[1]).toBe("stop");
       },
@@ -201,10 +201,10 @@ describe("Crabbox profile warm images", () => {
     ]);
     const scrub = calls[0];
     expect(scrub?.argv).toContain("--script-stdin");
-    expect(scrub?.options.input).toContain("$HOME/.openclaw/cloud-workers");
+    expect(scrub?.options.input).toContain("$HOME/.carapace/cloud-workers");
 
     expect(scrub?.options.input).toContain('rm -rf "$worker_root"');
-    expect(scrub?.options.input).toContain('rm -rf "$HOME/.openclaw-worker/workspaces"');
+    expect(scrub?.options.input).toContain('rm -rf "$HOME/.carapace-worker/workspaces"');
     // Capture phases ride a full crabbox run/snapshot round trip; 60s starves
     // them under coordinator latency (live-measured on AWS 2026-08-26).
     expect(scrub?.options.timeoutMs).toBe(180_000);
@@ -212,10 +212,10 @@ describe("Crabbox profile warm images", () => {
     expect(provider.resolveDestroyTimeoutMs?.(PROFILE)).toBeGreaterThanOrEqual(
       calls.reduce((total, call) => total + call.options.timeoutMs, 0),
     );
-    const home = tempDirs.make("openclaw-crabbox-warm-scrub-");
+    const home = tempDirs.make("carapace-crabbox-warm-scrub-");
     const workspace = path.join(
       home,
-      ".openclaw",
+      ".carapace",
       "cloud-workers",
       LEASE_ID,
       "node-host",
@@ -224,9 +224,9 @@ describe("Crabbox profile warm images", () => {
       "session",
     );
     const npmCache = path.join(home, ".npm", "cached-package");
-    const sshWorkspace = path.join(home, ".openclaw-worker", "workspaces", "session");
-    const bundle = path.join(home, ".openclaw-worker", "bundle-hash", "index.js");
-    const gitSeed = path.join(home, ".openclaw-worker", "git-seeds", "gateway", "seed", "file");
+    const sshWorkspace = path.join(home, ".carapace-worker", "workspaces", "session");
+    const bundle = path.join(home, ".carapace-worker", "bundle-hash", "index.js");
+    const gitSeed = path.join(home, ".carapace-worker", "git-seeds", "gateway", "seed", "file");
     const bin = path.join(home, "bin");
     const workdir = path.join(home, "crabbox-workdir");
     const envFile = path.join(workdir, ".crabbox", "env", "forwarded.env");
@@ -244,9 +244,9 @@ describe("Crabbox profile warm images", () => {
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, file);
     }
-    const runtime = path.join(home, ".openclaw-worker", "node-runtimes", "a".repeat(64));
+    const runtime = path.join(home, ".carapace-worker", "node-runtimes", "a".repeat(64));
     fs.mkdirSync(runtime, { recursive: true });
-    const state = path.join(home, ".openclaw", "cloud-workers", LEASE_ID);
+    const state = path.join(home, ".carapace", "cloud-workers", LEASE_ID);
     fs.symlinkSync(runtime, path.join(state, "runtime"));
     const node =
       process.platform === "linux"
@@ -254,11 +254,11 @@ describe("Crabbox profile warm images", () => {
             process.execPath,
             [
               "-e",
-              'process.title = "openclaw-node"; process.stdout.write("ready"); setInterval(() => {}, 60000);',
+              'process.title = "carapace-node"; process.stdout.write("ready"); setInterval(() => {}, 60000);',
             ],
             {
               cwd: runtime,
-              env: { ...process.env, OPENCLAW_STATE_DIR: state },
+              env: { ...process.env, CARAPACE_STATE_DIR: state },
               detached: true,
               stdio: ["ignore", "pipe", "ignore"],
             },
@@ -297,7 +297,7 @@ describe("Crabbox profile warm images", () => {
       await stopNode();
     }
     expect(fs.existsSync(runtime)).toBe(true);
-    expect(fs.existsSync(path.join(home, ".openclaw", "cloud-workers"))).toBe(false);
+    expect(fs.existsSync(path.join(home, ".carapace", "cloud-workers"))).toBe(false);
     expect(fs.existsSync(sshWorkspace)).toBe(false);
     expect(fs.existsSync(envFile)).toBe(false);
     expect(fs.existsSync(scrubScript)).toBe(false);

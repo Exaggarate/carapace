@@ -77,8 +77,8 @@ describe("node worker portal stream command", () => {
   it.each([
     ["127.0.0.1", ""],
     ["::1", ""],
-    ["127.0.0.1", "/openclaw-gw"],
-    ["127.0.0.1", "/openclaw-gw/"],
+    ["127.0.0.1", "/carapace-gw"],
+    ["127.0.0.1", "/carapace-gw/"],
   ])(
     "attaches %s loopback through Gateway context %j and closes on cancellation",
     async (host, contextPath) => {

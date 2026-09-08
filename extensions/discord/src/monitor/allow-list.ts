@@ -2,18 +2,18 @@
 import {
   type AllowlistMatch,
   resolveAllowlistMatchByCandidates,
-} from "openclaw/plugin-sdk/allow-from";
+} from "carapace/plugin-sdk/allow-from";
 import {
   buildChannelKeyCandidates,
   resolveChannelEntryMatchWithFallback,
   resolveChannelMatchConfig,
   type ChannelMatchSource,
-} from "openclaw/plugin-sdk/channel-targets";
-import type { DiscordGuildEntry } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-targets";
+import type { DiscordGuildEntry } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { Guild, User } from "../internal/discord.js";
 import { formatDiscordUserTag } from "./format.js";
 

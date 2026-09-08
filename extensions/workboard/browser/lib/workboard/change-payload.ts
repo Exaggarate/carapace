@@ -1,5 +1,5 @@
-import type { WorkboardChange } from "@openclaw/workboard-contract";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { WorkboardChange } from "@carapace/workboard-contract";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function normalizeWorkboardChange(payload: unknown): WorkboardChange | null {
   if (!isRecord(payload)) {

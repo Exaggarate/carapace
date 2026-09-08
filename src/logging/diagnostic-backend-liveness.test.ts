@@ -2,7 +2,7 @@ import {
   emitDiagnosticEvent as emitPluginDiagnosticEvent,
   emitTrustedDiagnosticEvent as emitPluginTrustedDiagnosticEvent,
   emitTrustedDiagnosticEventWithPrivateData as emitPluginTrustedDiagnosticEventWithPrivateData,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
 // Backend silence allowances belong to one live execution, not diagnostic payloads.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {

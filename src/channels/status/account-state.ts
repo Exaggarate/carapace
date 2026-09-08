@@ -1,5 +1,5 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { redactToolPayloadTextWithConfig } from "../../logging/redact.js";
 import type { PluginRegistry } from "../../plugins/registry.js";
 import { getActivePluginRegistry } from "../../plugins/runtime.js";
@@ -42,7 +42,7 @@ type ChannelAccountStateInput = {
 };
 
 export function resolveUnavailableChannelAccountSnapshot(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     channelId: string;
     accountId: string;
@@ -70,7 +70,7 @@ export function resolveUnavailableChannelAccountSnapshot(
   // retain usable credentials and are excluded by the secrets runtime lookup.
   const lastError = owner
     ? new SecretSurfaceUnavailableError(owner).message
-    : pluginError && `${truncateUtf16Safe(pluginError, 1_000)}; run openclaw doctor`;
+    : pluginError && `${truncateUtf16Safe(pluginError, 1_000)}; run carapace doctor`;
   if (!lastError) {
     return undefined;
   }

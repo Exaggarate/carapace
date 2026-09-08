@@ -1,4 +1,4 @@
-import { err } from "@openclaw/normalization-core/result";
+import { err } from "@carapace/normalization-core/result";
 import { getTaskRegistryProcessState, type TaskRunOwner } from "./task-registry.process-state.js";
 import type { TaskRecord } from "./task-registry.types.js";
 

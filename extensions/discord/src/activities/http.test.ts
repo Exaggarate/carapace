@@ -3,9 +3,9 @@ import { createServer, request as createHttpRequest, type Server } from "node:ht
 import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildDiscordActivityCustomId } from "../component-custom-id.js";
 import { createDiscordActivityHttpHandler } from "./http.js";
@@ -266,7 +266,7 @@ describe("Discord Activity HTTP OAuth", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
     },
   ])("leaves the public prefix externally absent when $name", async ({ config }) => {
     const base = await startServer(createActivityTestRuntime(config));
@@ -768,7 +768,7 @@ describe("Discord Activity widget routes", () => {
 
 describe("Discord Activity shell assets", () => {
   it("serves the generated SDK from a dist plugin root", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-discord-activity-dist-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-discord-activity-dist-"));
     const vendorAssetPath = path.join(
       root,
       "dist",

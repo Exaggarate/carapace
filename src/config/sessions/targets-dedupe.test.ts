@@ -1,7 +1,7 @@
 import { realpathSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { dedupeSessionStoreTargetsBySqliteTarget } from "./targets.js";
 
@@ -10,7 +10,7 @@ describe("session store target dedupe", () => {
     "refreshes aliased SQLite locators between dedupe calls",
     async () => {
       await withTempHome(async (home) => {
-        const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+        const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, ".carapace") };
         const realDir = path.join(home, "real-stores");
         const aliasDir = path.join(home, "alias-stores");
         await fs.mkdir(realDir, { recursive: true });
@@ -48,7 +48,7 @@ describe("session store target dedupe", () => {
         agentId: `agent-${index}`,
         storePath: path.join(
           realHome,
-          ".openclaw",
+          ".carapace",
           "agents",
           `agent-${index}`,
           "sessions",

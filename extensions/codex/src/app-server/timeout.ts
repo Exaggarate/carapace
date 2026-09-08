@@ -1,7 +1,7 @@
 /**
- * Thin Codex app-server timeout adapter around OpenClaw's shared timeout helper.
+ * Thin Codex app-server timeout adapter around Carapace's shared timeout helper.
  */
-import { withTimeout as withSharedTimeout } from "openclaw/plugin-sdk/time-runtime";
+import { withTimeout as withSharedTimeout } from "carapace/plugin-sdk/time-runtime";
 
 function resolveAbortError(signal: AbortSignal): Error {
   return signal.reason instanceof Error

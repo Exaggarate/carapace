@@ -11,7 +11,7 @@ import { testApi } from "./logger.test-support.js";
 import { loggingState } from "./state.js";
 import { createSubsystemLogger } from "./subsystem.js";
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-subsystem-log-");
+const logPathTracker = createSuiteLogPathTracker("carapace-subsystem-log-");
 
 function installConsoleMethodSpy(method: "log" | "warn" | "error") {
   const spy = vi.fn();
@@ -370,8 +370,8 @@ describe("createSubsystemLogger().isEnabled", () => {
 
   it("keeps long-lived subsystem loggers on the current-day rolling file", async () => {
     const logDir = path.dirname(logPathTracker.nextPath());
-    const firstDay = path.join(logDir, "openclaw-2026-01-01.log");
-    const secondDay = path.join(logDir, "openclaw-2026-01-02.log");
+    const firstDay = path.join(logDir, "carapace-2026-01-01.log");
+    const secondDay = path.join(logDir, "carapace-2026-01-02.log");
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T08:00:00Z"));
     setLoggerOverride({ level: "info", consoleLevel: "silent", file: firstDay });
@@ -408,7 +408,7 @@ describe("createSubsystemLogger().isEnabled", () => {
   it("applies the new file and level to a retained logger", async () => {
     const firstFile = logPathTracker.nextPath();
     const secondFile = logPathTracker.nextPath();
-    vi.stubEnv("OPENCLAW_TEST_FILE_LOG", "1");
+    vi.stubEnv("CARAPACE_TEST_FILE_LOG", "1");
     applyLoggingConfig({ level: "info", consoleLevel: "silent", file: firstFile });
     const log = createSubsystemLogger("diagnostics");
 

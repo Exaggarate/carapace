@@ -1,5 +1,5 @@
 import type { Event, Filter, Relay } from "nostr-tools";
-import { chunkItems } from "openclaw/plugin-sdk/text-chunking";
+import { chunkItems } from "carapace/plugin-sdk/text-chunking";
 import {
   BUZZ_PROFILE_KIND,
   BUZZ_PROFILE_QUERY_CHUNK_SIZE,

@@ -1,5 +1,5 @@
-import { OpenClawFilePreviewModal } from "./file-preview-modal.ts";
+import { CarapaceFilePreviewModal } from "./file-preview-modal.ts";
 
-if (!customElements.get("openclaw-file-preview-modal")) {
-  customElements.define("openclaw-file-preview-modal", OpenClawFilePreviewModal);
+if (!customElements.get("carapace-file-preview-modal")) {
+  customElements.define("carapace-file-preview-modal", CarapaceFilePreviewModal);
 }

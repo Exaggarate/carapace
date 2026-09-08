@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 const MEMORY_INDEX_META_KEY = "memory_index_meta_v1";
 
@@ -17,12 +17,12 @@ type VectorProviderFinding = ProviderFailure & {
 };
 
 type InspectConfiguredProvider = (params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   env: NodeJS.ProcessEnv;
 }) => Promise<ProviderFailure | null>;
 
-function listConfiguredAgentIds(config: OpenClawConfig): string[] {
+function listConfiguredAgentIds(config: CarapaceConfig): string[] {
   const ids = new Set(Object.keys(config.agents?.entries ?? {}));
   for (const entry of config.agents?.list ?? []) {
     if (entry.id.trim()) {
@@ -37,7 +37,7 @@ async function readExistingVectorModel(databasePath: string): Promise<string | n
     return null;
   }
   const { openNodeSqliteDatabase, prepareSqliteReadOnlyLocationSync } =
-    await import("openclaw/plugin-sdk/sqlite-runtime");
+    await import("carapace/plugin-sdk/sqlite-runtime");
   let prepared: ReturnType<typeof prepareSqliteReadOnlyLocationSync> | undefined;
   let db: ReturnType<typeof openNodeSqliteDatabase> | undefined;
   let failure: unknown;
@@ -81,7 +81,7 @@ async function readExistingVectorModel(databasePath: string): Promise<string | n
   return model;
 }
 
-function resolveConfigPrefix(config: OpenClawConfig, agentId: string): string {
+function resolveConfigPrefix(config: CarapaceConfig, agentId: string): string {
   if (config.agents?.entries?.[agentId]?.memory?.search) {
     return `agents.entries.${agentId}.memory.search`;
   }
@@ -93,7 +93,7 @@ function resolveConfigPrefix(config: OpenClawConfig, agentId: string): string {
 
 export async function collectVectorProviderFindings(
   params: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     env: NodeJS.ProcessEnv;
     stateDir: string;
   },
@@ -107,7 +107,7 @@ export async function collectVectorProviderFindings(
       "agents",
       agentId,
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
     const model = await readExistingVectorModel(agentDatabasePath);
     if (!model) {

@@ -1,6 +1,6 @@
 // Covers question message finalization lifecycle and delivery races.
 import { setImmediate as nextTurn } from "node:timers/promises";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import type { QuestionRecord } from "../../packages/gateway-protocol/src/schema/questions.js";
 import {

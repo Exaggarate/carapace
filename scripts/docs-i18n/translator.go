@@ -21,9 +21,9 @@ const (
 	translateBaseDelay          = 15 * time.Second
 	defaultPromptTimeout        = 2 * time.Minute
 	defaultCommandWaitDelay     = 15 * time.Second
-	envDocsI18nPromptTimeout    = "OPENCLAW_DOCS_I18N_PROMPT_TIMEOUT"
-	envDocsI18nCommandWaitDelay = "OPENCLAW_DOCS_I18N_COMMAND_WAIT_DELAY"
-	envDocsI18nCodexExecutable  = "OPENCLAW_DOCS_I18N_CODEX_EXECUTABLE"
+	envDocsI18nPromptTimeout    = "CARAPACE_DOCS_I18N_PROMPT_TIMEOUT"
+	envDocsI18nCommandWaitDelay = "CARAPACE_DOCS_I18N_COMMAND_WAIT_DELAY"
+	envDocsI18nCodexExecutable  = "CARAPACE_DOCS_I18N_CODEX_EXECUTABLE"
 )
 
 var (
@@ -161,8 +161,8 @@ func (t *CodexTranslator) translateRaw(ctx context.Context, core string) (string
 
 func stripCodexI18nInputWrappers(text string) string {
 	replacer := strings.NewReplacer(
-		"<openclaw_docs_i18n_input>", "",
-		"</openclaw_docs_i18n_input>", "",
+		"<carapace_docs_i18n_input>", "",
+		"</carapace_docs_i18n_input>", "",
 	)
 	return strings.TrimSpace(replacer.Replace(text))
 }
@@ -229,7 +229,7 @@ func isRetryableTranslateError(err error) bool {
 }
 
 func runCodexExecPrompt(ctx context.Context, req codexPromptRequest) (string, error) {
-	outputFile, err := os.CreateTemp("", "openclaw-docs-i18n-codex-*.txt")
+	outputFile, err := os.CreateTemp("", "carapace-docs-i18n-codex-*.txt")
 	if err != nil {
 		return "", err
 	}
@@ -325,7 +325,7 @@ func isolatedCodexHomeBase() (string, error) {
 		}
 		cacheDir = filepath.Join(homeDir, ".cache")
 	}
-	base := filepath.Join(cacheDir, "openclaw-docs-i18n")
+	base := filepath.Join(cacheDir, "carapace-docs-i18n")
 	if err := os.MkdirAll(base, 0o700); err != nil {
 		return "", err
 	}
@@ -341,9 +341,9 @@ func docsCodexExecutable() string {
 
 func buildCodexTranslationPrompt(message string) string {
 	return "Translate the exact input below. Return only the translated text, with no tool calls, reasoning, or commentary. Do not wrap the response in an additional code fence; preserve every code fence already present in the input exactly.\n\n" +
-		"<openclaw_docs_i18n_input>\n" +
+		"<carapace_docs_i18n_input>\n" +
 		message +
-		"\n</openclaw_docs_i18n_input>\n"
+		"\n</carapace_docs_i18n_input>\n"
 }
 
 func codexExecFailure(output, model string) error {

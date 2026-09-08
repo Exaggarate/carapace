@@ -49,12 +49,12 @@ export const page = definePage({
         const ref = (data ?? { pluginId: "", id: "", params: {} }) as PluginTabRef & {
           params: Readonly<Record<string, string>>;
         };
-        return html`<openclaw-plugin-page
+        return html`<carapace-plugin-page
           .pluginId=${ref.pluginId}
           .tabId=${ref.id}
           .params=${ref.params}
         >
-        </openclaw-plugin-page>`;
+        </carapace-plugin-page>`;
       },
     })),
 });

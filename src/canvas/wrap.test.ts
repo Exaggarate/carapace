@@ -14,7 +14,7 @@ describe("buildWidgetDocument", () => {
     expect(createHash("sha256").update(html).digest("hex")).toBe(
       "c8f0ea0dea6648693a8972f602762716618563022f8248e8e7d99a8b1a723692",
     );
-    expect(html).toContain("openclaw:widget-host-init-ack");
+    expect(html).toContain("carapace:widget-host-init-ack");
     expect(html).toContain('request("host.open",{url})');
     // Widget links follow the Control UI activation contract: primary click and
     // middle-button auxclick, on bubble so a widget's preventDefault still wins.
@@ -26,12 +26,12 @@ describe("buildWidgetDocument", () => {
     expect(html).toContain('define(host,"controlUiBaseUrl"');
     expect(html).toContain("else push.call(waiting,{send,reject})");
     expect(html).toContain("else push.call(promptWaiting,{send,inline,reject})");
-    expect(html).toContain("openclaw:widget-prompt-host-ready");
+    expect(html).toContain("carapace:widget-prompt-host-ready");
     expect(html).toContain("widget host capabilities unavailable");
     expect(html).toContain("widget prompt host unavailable");
-    expect(html).toContain("openclaw:widget-chat-host");
-    expect(html).toContain("openclaw:widget-board-host");
-    expect(html).toContain("openclaw:widget-scroll");
+    expect(html).toContain("carapace:widget-chat-host");
+    expect(html).toContain("carapace:widget-board-host");
+    expect(html).toContain("carapace:widget-scroll");
     expect(html).toContain("event.isTrusted");
     expect(html).not.toContain("widget is not hosted on a board");
     const bridgeKeys = JSON.parse(html.match(/const keys=(\[[^\]]+\])/)?.[1] ?? "[]") as string[];

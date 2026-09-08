@@ -6,8 +6,8 @@ import type { BoardViewCallbacks } from "../../lib/board/view-types.ts";
 import { createApplicationContextProvider } from "../../test-helpers/application-context.ts";
 import { settleLitElement, settleLitElements } from "../../test-helpers/lit-settle.ts";
 
-type OpenClawBoardView = HTMLElementTagNameMap["openclaw-board-view"];
-type OpenClawBoardWidgetCell = HTMLElementTagNameMap["openclaw-board-widget-cell"];
+type CarapaceBoardView = HTMLElementTagNameMap["carapace-board-view"];
+type CarapaceBoardWidgetCell = HTMLElementTagNameMap["carapace-board-widget-cell"];
 
 export function boardWidget(overrides: Partial<BoardWidget> = {}): BoardWidget {
   return {
@@ -99,12 +99,12 @@ export function deferredValue<T>(): {
   return { promise, resolve };
 }
 
-export async function settleCells(view: OpenClawBoardView): Promise<OpenClawBoardWidgetCell[]> {
+export async function settleCells(view: CarapaceBoardView): Promise<CarapaceBoardWidgetCell[]> {
   // Cells appear during the view's own update, and a cell can schedule a further update
   // while completing, so both levels drain to Lit's settled state. Anything less lets a
   // frame's ticket-refresh timer be armed after the test has moved the clock on.
   await settleLitElement(view);
-  const cells = [...view.querySelectorAll("openclaw-board-widget-cell")];
+  const cells = [...view.querySelectorAll("carapace-board-widget-cell")];
   await settleLitElements(cells);
   await settleLitElement(view);
   return cells;
@@ -120,8 +120,8 @@ export async function mount(
     canMutate?: boolean;
     canGrant?: boolean;
   } = {},
-): Promise<OpenClawBoardView> {
-  const view = document.createElement("openclaw-board-view");
+): Promise<CarapaceBoardView> {
+  const view = document.createElement("carapace-board-view");
   view.snapshot = options.snapshot ?? snapshot();
   view.activeTabId = options.activeTabId ?? "main";
   view.widgetFrameUrl = options.widgetFrameUrl ?? (() => "about:blank");

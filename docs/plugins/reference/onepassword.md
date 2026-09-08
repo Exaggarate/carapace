@@ -7,19 +7,19 @@ title: "Onepassword plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 1Password SecretRef resolver and curated agent broker with approval policy and SQLite audit history.
 
 ## Distribution
 
-- Package: `@openclaw/onepassword`
-- Install route: included in OpenClaw
+- Package: `@carapace/onepassword`
+- Install route: included in Carapace
 
 ## Surface
 
-- CLI commands: `openclaw onepassword`
+- CLI commands: `carapace onepassword`
 - Contracts: `tools`
 
 ## Related docs

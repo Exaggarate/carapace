@@ -4,30 +4,30 @@ import path from "node:path";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
   capturePluginRegistration,
   createRuntimeEnv,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
   requireFirstPostJsonRecordRequest as requireFirstPostJsonRequest,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
+} from "carapace/plugin-sdk/provider-http-test-mocks";
 import {
   expectDashscopeVideoTaskPoll,
   expectExplicitVideoGenerationCapabilities,
   expectSuccessfulDashscopeVideoResult,
   mockSuccessfulDashscopeVideoTask,
-} from "openclaw/plugin-sdk/provider-test-contracts";
+} from "carapace/plugin-sdk/provider-test-contracts";
 // Alibaba tests cover video generation provider plugin behavior.
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import {
   DASHSCOPE_WAN_VIDEO_MODELS,
   DEFAULT_DASHSCOPE_WAN_VIDEO_MODEL,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 const {
@@ -256,7 +256,7 @@ describe("alibaba video generation provider", () => {
   ])("preserves actual profile precedence for %s", async (profileKey, envKey, expected) => {
     clearAlibabaAuthEnvironment();
     vi.stubEnv("QWEN_API_KEY", envKey);
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-alibaba-wan-auth-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-alibaba-wan-auth-"));
 
     try {
       saveAuthProfileStore(
@@ -280,7 +280,7 @@ describe("alibaba video generation provider", () => {
       // Saving the profile store opens the per-agent database under the temporary agent
       // dir, and clearing the snapshots does not release it, so Windows fails the removal
       // with EBUSY unless the cached handles are closed first.
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await fs.rm(agentDir, { force: true, recursive: true });
     }
   });

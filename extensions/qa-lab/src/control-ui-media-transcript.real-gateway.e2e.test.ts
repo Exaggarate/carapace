@@ -1,9 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import JSZip from "jszip";
-import { resolveStorePath, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import { resolveStorePath, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import { expect, it } from "vitest";
 import { transformMessages } from "../../../packages/ai/src/transcript-transform.ts";
 import type { AssistantMessage, Model } from "../../../packages/ai/src/types.ts";
@@ -20,7 +20,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const replayModel: Model<"openai-responses"> = {
   id: "gpt-5.6-luna",
   name: "Mock OpenAI",
@@ -35,7 +35,7 @@ const replayModel: Model<"openai-responses"> = {
 };
 
 type PersistedAssistantMessage = AssistantMessage & {
-  openclawDisplayContent?: Array<Record<string, unknown>>;
+  carapaceDisplayContent?: Array<Record<string, unknown>>;
 };
 
 async function createPptx(): Promise<Buffer> {
@@ -65,7 +65,7 @@ function historyHasAssistantText(history: unknown, text: string): boolean {
 
 function readRawAssistantMessages(stateDir: string): PersistedAssistantMessage[] {
   const database = openNodeSqliteDatabase(
-    path.join(stateDir, "agents", "qa", "agent", "openclaw-agent.sqlite"),
+    path.join(stateDir, "agents", "qa", "agent", "carapace-agent.sqlite"),
     { readOnly: true },
   );
   try {
@@ -113,7 +113,7 @@ suite.define(() => {
     });
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(gateway.gateway.tempRoot, "state"),
+      CARAPACE_STATE_DIR: path.join(gateway.gateway.tempRoot, "state"),
     };
     const seed = async (sessionKey: string, sessionId: string, content: unknown[]) => {
       const storePath = resolveStorePath(undefined, { agentId: "qa", env });
@@ -173,14 +173,14 @@ suite.define(() => {
             ({ gatewayUrl, token }) => {
               (
                 window as Window & {
-                  __OPENCLAW_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
+                  __CARAPACE_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
                 }
-              )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
+              )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
             },
             { gatewayUrl: gateway.gateway.wsUrl, token: gateway.gateway.token },
           );
           await page.goto(controlUiSessionUrl(suite.server.baseUrl, omittedSessionKey));
-          const visiblePane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+          const visiblePane = page.locator('carapace-chat-pane[aria-hidden="false"]');
           const omittedCard = visiblePane.locator(".chat-assistant-attachment-card", {
             hasText: "Omitted from history",
           });
@@ -195,7 +195,7 @@ suite.define(() => {
           }
 
           await navigateToControlUiSession(page, retainedSessionKey);
-          const retainedPane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+          const retainedPane = page.locator('carapace-chat-pane[aria-hidden="false"]');
           await retainedPane
             .locator(`img.chat-message-image[src="${retainedImageUrl}"]`)
             .waitFor({ state: "visible" });
@@ -276,9 +276,9 @@ suite.define(() => {
               ({ gatewayUrl, token }) => {
                 (
                   window as Window & {
-                    __OPENCLAW_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
+                    __CARAPACE_NATIVE_CONTROL_AUTH__?: { gatewayUrl: string; token: string };
                   }
-                )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
+                )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = { gatewayUrl, token };
               },
               { gatewayUrl: gateway.gateway.wsUrl, token: gateway.gateway.token },
             );
@@ -349,7 +349,7 @@ suite.define(() => {
               sessionKey: "agent:qa:main",
               limit: 30,
             });
-            const stateDir = gateway.gateway.runtimeEnv.OPENCLAW_STATE_DIR;
+            const stateDir = gateway.gateway.runtimeEnv.CARAPACE_STATE_DIR;
             if (!stateDir) {
               throw new Error("QA Gateway state directory is unavailable");
             }
@@ -358,7 +358,7 @@ suite.define(() => {
               Array.isArray(message.content) ? message.content : [],
             );
             const rawDisplayContent = rawAssistantMessages.flatMap((message) =>
-              Array.isArray(message.openclawDisplayContent) ? message.openclawDisplayContent : [],
+              Array.isArray(message.carapaceDisplayContent) ? message.carapaceDisplayContent : [],
             );
             if (captureUiProof) {
               await page.screenshot({ path: path.join(proofDir, "02-next-turn-result.png") });

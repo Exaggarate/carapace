@@ -13,7 +13,7 @@ import "../../../components/web-awesome.ts";
 import { t } from "../../../i18n/index.ts";
 import { formatDurationCompact, formatTimeAgo, formatTimeMs } from "../../../lib/format.ts";
 import { detectTextDirection } from "../../../lib/text-direction.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../../lit/carapace-element.ts";
 import {
   type ChatObserverDisplayPreference,
   loadChatObserverDisplayPreference,
@@ -211,7 +211,7 @@ function companionHintKey(
   return COMPANION_HINT_KEYS[hint];
 }
 
-export class ChatSessionRailElement extends OpenClawLightDomElement {
+export class ChatSessionRailElement extends CarapaceLightDomElement {
   @property({ attribute: false }) sessionKey = "";
   @property({ attribute: false }) digest: SessionObserverDigest | null = null;
   @property({ attribute: false }) running = false;
@@ -714,6 +714,6 @@ export class ChatSessionRailElement extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-session-rail")) {
-  customElements.define("openclaw-chat-session-rail", ChatSessionRailElement);
+if (!customElements.get("carapace-chat-session-rail")) {
+  customElements.define("carapace-chat-session-rail", ChatSessionRailElement);
 }

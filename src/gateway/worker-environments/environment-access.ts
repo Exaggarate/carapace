@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { withTimeout } from "../../infra/fs-safe.js";
 import type { WorkerProvider } from "../../plugins/types.js";
 import type { DesktopObserveRequester } from "../desktop/observe-requester.js";
@@ -20,7 +20,7 @@ const TUNNEL_START_TIMEOUT_MS = 3 * 60_000;
 
 type WorkerEnvironmentAccessOptions = {
   store: WorkerEnvironmentStore;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   prepareCurrentBundle: () => Promise<ExpectedWorkerBuild>;
   tunnelManager?: WorkerTunnelManager;
   nodeTunnelManager?: NodeWorkerTunnelManager;
@@ -177,7 +177,7 @@ export function createWorkerEnvironmentAccess(options: WorkerEnvironmentAccessOp
           sessionId,
           expectedBuild: {
             bundleHash: currentBundle.bundleHash,
-            openclawVersion: currentBundle.openclawVersion,
+            carapaceVersion: currentBundle.carapaceVersion,
             protocolFeatures: [...currentBundle.protocolFeatures],
           },
         });

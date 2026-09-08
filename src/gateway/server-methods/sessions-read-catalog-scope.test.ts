@@ -8,7 +8,7 @@ import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model
 import * as preparedRuntime from "../../agents/prepared-model-runtime.js";
 import type { PreparedModelRuntimeSnapshot } from "../../agents/prepared-model-runtime.types.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetAgentEventsForTest } from "../../infra/agent-events.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { resolveProviderPolicySurface } from "../../plugins/provider-public-artifacts.js";
@@ -16,7 +16,7 @@ import type { ProviderThinkingProfile } from "../../plugins/provider-thinking.ty
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { readPreparedGatewayModelCatalog } from "../server-model-catalog.js";
 import type { GatewaySessionRow, GatewaySessionsDefaults } from "../session-utils.types.js";
 import { agentsHandlers } from "./agents.js";
@@ -29,7 +29,7 @@ function identifiedClient(profileId: string): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read", "operator.write"],
     },
@@ -42,7 +42,7 @@ function identifiedClient(profileId: string): GatewayClient {
   };
 }
 
-function requestContext(config: OpenClawConfig): GatewayRequestContext {
+function requestContext(config: CarapaceConfig): GatewayRequestContext {
   return {
     chatAbortControllers: new Map(),
     getRuntimeConfig: () => config,
@@ -75,8 +75,8 @@ async function listSessions(params: {
   };
 }
 
-async function seedSessions(): Promise<OpenClawConfig> {
-  const config: OpenClawConfig = {
+async function seedSessions(): Promise<CarapaceConfig> {
+  const config: CarapaceConfig = {
     agents: { list: [{ id: "main", default: true }, { id: "work" }] },
   };
   await upsertSessionEntryCore(
@@ -116,7 +116,7 @@ function thinkingRegistry(
 }
 
 function preparedOwner(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   entries: ModelCatalogEntry[];
   pluginRegistry: PluginRegistry;
@@ -150,7 +150,7 @@ function preparedOwner(params: {
 }
 
 function publishedCatalogContext(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   owners: ReadonlyMap<string, PreparedModelRuntimeSnapshot>,
 ): GatewayRequestContext {
   vi.spyOn(preparedRuntime, "getPreparedModelRuntimeSnapshot").mockImplementation((input) =>
@@ -178,11 +178,11 @@ describe("sessions.list catalog scoping", () => {
     { model: "gpt-5.6-sol", runtime: "codex", level: "ultra" },
     { model: "gpt-5.6-terra", runtime: "codex", level: "ultra" },
     { model: "gpt-5.6-luna", runtime: "codex", level: "max" },
-    { model: "gpt-5.6-luna", runtime: "openclaw", level: "ultra" },
+    { model: "gpt-5.6-luna", runtime: "carapace", level: "ultra" },
   ] as const)(
     "projects $model/$runtime from its prepared provider owner",
     async ({ model, runtime, level }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const config = await seedSessions();
         config.agents!.defaults = {
           model: { primary: `openai/${model}` },
@@ -236,7 +236,7 @@ describe("sessions.list catalog scoping", () => {
   );
 
   it("keeps identical catalogs owner-scoped across registry replacement and full catalog completion", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const config = await seedSessions();
       config.agents!.defaults = {
         model: { primary: "dynamic-router/reasoner" },
@@ -327,7 +327,7 @@ describe("sessions.list catalog scoping", () => {
   });
 
   it("keeps unscoped listings owner-scoped when agents have distinct completed catalogs", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const config = await seedSessions();
       config.agents = {
         ...config.agents,
@@ -381,7 +381,7 @@ describe("sessions.list catalog scoping", () => {
   });
 
   it("uses only the requested agent's catalog for scoped listings", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const config = await seedSessions();
       config.agents = {
         ...config.agents,

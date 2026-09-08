@@ -1,7 +1,7 @@
 import path from "node:path";
 import { readConfigFileSnapshot } from "../../config/config.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ScheduledTaskAutoStartRecoveryError } from "../../daemon/schtasks-update-recovery.js";
 import { resolveGatewayService } from "../../daemon/service.js";
 import { isAbortError } from "../../infra/abort-signal.js";
@@ -25,9 +25,9 @@ import { readCurrentGitUpdateRecovery } from "../../infra/update-runner-git-reco
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { defaultRuntime } from "../../runtime.js";
 import {
-  parsePackageOpenClawSchemaVersions,
-  type OpenClawSchemaVersions,
-} from "../../state/openclaw-schema-versions.js";
+  parsePackageCarapaceSchemaVersions,
+  type CarapaceSchemaVersions,
+} from "../../state/carapace-schema-versions.js";
 import { formatCliCommand } from "../command-format.js";
 import {
   inspectGatewayRestart,
@@ -88,8 +88,8 @@ type MutableUpdateExecutionResult = {
   recoveryEnv: NodeJS.ProcessEnv | undefined;
   packageTransaction?: PackageUpdateTransaction;
   schemaVersions?: Awaited<ReturnType<typeof readUpdateStateSchemaVersions>>;
-  candidateSchemaVersions?: OpenClawSchemaVersions;
-  previousSchemaVersions?: OpenClawSchemaVersions;
+  candidateSchemaVersions?: CarapaceSchemaVersions;
+  previousSchemaVersions?: CarapaceSchemaVersions;
   previousVerified?: boolean;
   activationConfig?: UpdateConfigSnapshot;
 };
@@ -113,7 +113,7 @@ export async function executeMutableUpdate(params: {
   packageInstallEnv?: NodeJS.ProcessEnv;
   packageInstallTarget?: ResolvedGlobalInstallTarget;
   packageTargetVersion?: string;
-  packageTargetSchemaVersions?: OpenClawSchemaVersions;
+  packageTargetSchemaVersions?: CarapaceSchemaVersions;
   packageUpdateNodeRunner?: string;
   managedServiceNodeRunner?: string;
   managedServiceRootRedirect: ManagedServiceRootRedirect | null;
@@ -130,7 +130,7 @@ export async function executeMutableUpdate(params: {
   let admission: Awaited<ReturnType<typeof inspectUpdateDatabaseContexts>> | undefined;
   let gitContextPrepared = false;
   let admittedTargetSchemaVersions = params.packageTargetSchemaVersions;
-  const recheckSchemas = async (versions: OpenClawSchemaVersions | undefined) => {
+  const recheckSchemas = async (versions: CarapaceSchemaVersions | undefined) => {
     if (!admission) {
       throw new UpdatePreMutationError(
         "database-schema-preflight",
@@ -174,15 +174,15 @@ export async function executeMutableUpdate(params: {
   let recoveryEnv: NodeJS.ProcessEnv | undefined;
   let packageTransaction: PackageUpdateTransaction | undefined;
   let schemaVersions: Awaited<ReturnType<typeof readUpdateStateSchemaVersions>> | undefined;
-  let candidateSchemaVersions: OpenClawSchemaVersions | undefined;
-  let previousSchemaVersions: OpenClawSchemaVersions | undefined;
+  let candidateSchemaVersions: CarapaceSchemaVersions | undefined;
+  let previousSchemaVersions: CarapaceSchemaVersions | undefined;
   let previousVerified = false;
   let activationConfig: MutableUpdateExecutionResult["activationConfig"];
   const onConfigSnapshot: PackageInstallUpdateParams["onConfigSnapshot"] = (snapshot) => {
     activationConfig = snapshot;
   };
   let candidateFailureReason: string | undefined;
-  let validatedConfigSnapshot: { config: OpenClawConfig; hash?: string | null } | undefined;
+  let validatedConfigSnapshot: { config: CarapaceConfig; hash?: string | null } | undefined;
   const originalRecovery = () =>
     params.installKind === "git"
       ? readCurrentGitUpdateRecovery(params.root)
@@ -310,8 +310,8 @@ export async function executeMutableUpdate(params: {
         "managed-service-preflight",
         [
           `${updateLabel} cannot run from inside the gateway service process.`,
-          "That path replaces the active OpenClaw dist tree while the live gateway may still lazy-load old chunks.",
-          `Run \`${formatCliCommand("openclaw update")}\` from a terminal outside the gateway service.`,
+          "That path replaces the active Carapace dist tree while the live gateway may still lazy-load old chunks.",
+          `Run \`${formatCliCommand("carapace update")}\` from a terminal outside the gateway service.`,
         ].join("\n"),
       );
     }
@@ -455,7 +455,7 @@ export async function executeMutableUpdate(params: {
     }
     const config = snapshot.config;
     await recheckSchemas(admittedTargetSchemaVersions);
-    previousSchemaVersions = parsePackageOpenClawSchemaVersions(
+    previousSchemaVersions = parsePackageCarapaceSchemaVersions(
       await tryReadJson<unknown>(path.join(params.root, "package.json")),
     );
     schemaVersions = candidateSchemaVersions
@@ -679,7 +679,7 @@ export async function executeMutableUpdate(params: {
       steps: [
         {
           name: preMutationFailure ? err.reason : "update",
-          command: "openclaw update",
+          command: "carapace update",
           cwd: params.root,
           durationMs,
           exitCode: 1,

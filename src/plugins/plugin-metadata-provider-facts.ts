@@ -1,11 +1,11 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { collectManifestModelIdNormalizationPolicies } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { collectManifestModelIdNormalizationPolicies } from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 import type {
   PluginManifestProviderEndpoint,

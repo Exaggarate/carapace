@@ -1,5 +1,5 @@
 // Constructs channel plugin registries and plugin fixtures for tests.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
   ChannelCapabilities,
   ChannelId,

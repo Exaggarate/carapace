@@ -1,8 +1,8 @@
-import { resolveAgentModelPrimaryValue } from "openclaw/plugin-sdk/provider-onboard";
+import { resolveAgentModelPrimaryValue } from "carapace/plugin-sdk/provider-onboard";
 import { describe, expect, it } from "vitest";
 import { VENICE_DEFAULT_MODEL_REF, VENICE_MODEL_CATALOG } from "./models.js";
 import { applyVeniceConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 describe("Venice onboarding", () => {
   it("keeps generated model prices out of merge-mode config while selecting the default and alias", () => {

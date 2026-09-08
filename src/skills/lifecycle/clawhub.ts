@@ -1,7 +1,7 @@
 // ClawHub lifecycle facade: public API plus install/update coordination.
 import fs from "node:fs/promises";
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { err as resultError, ok, type Result } from "@carapace/normalization-core/result";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { downloadClawHubSkillArchive } from "../../infra/clawhub-artifacts.js";
 import type { ClawHubTrustErrorCode } from "../../infra/clawhub-install-trust.js";
 import { normalizeClawHubSha256Integrity } from "../../infra/clawhub-integrity.js";
@@ -336,7 +336,7 @@ export async function installSkillFromClawHub(params: {
   forceInstall?: boolean;
   confirmInstall?: () => boolean | Promise<boolean>;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
   /** True when a Claw lifecycle caller already owns package coordination. */
   clawManaged?: boolean;
@@ -384,7 +384,7 @@ export async function updateSkillsFromClawHub(params: {
   force?: boolean;
   forceInstall?: boolean;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onInstallPolicyWarning?: InstallSafetyOverrides["onInstallPolicyWarning"];
 }): Promise<UpdateClawHubSkillResult[]> {
   const lock = await readClawHubSkillsLockfile(params.workspaceDir);

@@ -1,5 +1,5 @@
 import type { ParsedMail } from "mailparser";
-import { truncateUtf8Prefix, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf8Prefix, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { ImapAccountConfig } from "./config.js";
 
 export function renderImapPrompt(

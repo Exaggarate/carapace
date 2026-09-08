@@ -1,7 +1,7 @@
 // Slack helper module supports account configured behavior.
-import { hasConfiguredAccountValue } from "openclaw/plugin-sdk/account-resolution";
-import type { SlackAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { hasConfiguredSecretInput } from "openclaw/plugin-sdk/secret-input";
+import { hasConfiguredAccountValue } from "carapace/plugin-sdk/account-resolution";
+import type { SlackAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { hasConfiguredSecretInput } from "carapace/plugin-sdk/secret-input";
 
 type SlackCredentialAccount = {
   identity: "bot" | "user";

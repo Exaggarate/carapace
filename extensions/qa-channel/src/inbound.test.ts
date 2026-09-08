@@ -1,8 +1,8 @@
 // Qa Channel tests cover inbound plugin behavior.
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
+import { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setQaChannelRuntime } from "../api.js";
 import { deleteQaBusMessage, editQaBusMessage, sendQaBusMessage } from "./bus-client.js";
@@ -22,8 +22,8 @@ vi.mock("./bus-client.js", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/outbound-media", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/outbound-media")>();
+vi.mock("carapace/plugin-sdk/outbound-media", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/outbound-media")>();
   return {
     ...actual,
     loadOutboundMediaFromUrl: vi.fn(async (mediaUrl: string) => ({
@@ -35,11 +35,11 @@ vi.mock("openclaw/plugin-sdk/outbound-media", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/media-store", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/media-store")>()),
+vi.mock("carapace/plugin-sdk/media-store", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/media-store")>()),
   saveMediaBuffer: vi.fn(async () => ({
     id: "stored-audio.ogg",
-    path: "/tmp/openclaw-media/stored-audio.ogg",
+    path: "/tmp/carapace-media/stored-audio.ogg",
     contentType: "audio/ogg",
   })),
 }));
@@ -489,7 +489,7 @@ describe("handleQaInbound", () => {
 
   it("marks group messages that match configured mention patterns", async () => {
     const runtime = createPluginRuntimeMock();
-    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/\b@?openclaw\b/i]);
+    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/\b@?carapace\b/i]);
     setQaChannelRuntime(runtime);
 
     await handleQaInbound(
@@ -502,7 +502,7 @@ describe("handleQaInbound", () => {
           },
           senderId: "alice",
           senderName: "Alice",
-          text: "@openclaw ping",
+          text: "@carapace ping",
         },
       }),
     );
@@ -698,7 +698,7 @@ describe("handleQaInbound", () => {
 
   it("skips configured group messages that miss mention activation", async () => {
     const runtime = createPluginRuntimeMock();
-    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/\b@?openclaw\b/i]);
+    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/\b@?carapace\b/i]);
     setQaChannelRuntime(runtime);
 
     await handleQaInbound(

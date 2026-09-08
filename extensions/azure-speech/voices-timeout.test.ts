@@ -1,7 +1,7 @@
 // Azure Speech voice list timeout integration proof.
 // A loopback server accepts the connection but never responds so this exercises
 // the real fetch abort path without depending on Azure latency.
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { listAzureSpeechVoices } from "./tts.js";
 

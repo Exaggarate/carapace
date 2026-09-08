@@ -2,7 +2,7 @@
 // aliases, model catalog validation, and rejected invalid patch payloads.
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import type { SessionCreatedActor } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { contextBudgetStatusFixture } from "../config/sessions/context-budget.test-support.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
@@ -60,7 +60,7 @@ const ANTHROPIC_OPUS_MODEL = "anthropic/claude-opus-4-6";
 const ANTHROPIC_OPUS_ID = "claude-opus-4-6";
 const OPENAI_GPT_MODEL = "openai/gpt-5.4";
 const OPENAI_GPT_ID = "gpt-5.4";
-const EMPTY_CFG = {} as OpenClawConfig;
+const EMPTY_CFG = {} as CarapaceConfig;
 
 type ApplySessionsPatchArgs = Parameters<typeof applySessionsPatchToStore>[0];
 type ProviderAuthMetadataSnapshot = NonNullable<
@@ -82,7 +82,7 @@ const BYTEPLUS_PROVIDER_AUTH_METADATA_SNAPSHOT = {
       origin: "bundled",
       rootDir: "/plugins/byteplus",
       source: "test",
-      manifestPath: "/plugins/byteplus/openclaw.plugin.json",
+      manifestPath: "/plugins/byteplus/carapace.plugin.json",
       providerAuthAliases: { "byteplus-plan": "byteplus" },
     } satisfies PluginManifestRecord,
   ],
@@ -91,7 +91,7 @@ const BYTEPLUS_PROVIDER_AUTH_METADATA_SNAPSHOT = {
 async function runPatch(params: {
   patch: ApplySessionsPatchArgs["patch"];
   store?: Record<string, SessionEntry>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   storeKey?: string;
   agentId?: string;
   loadGatewayModelCatalog?: ApplySessionsPatchArgs["loadGatewayModelCatalog"];
@@ -178,7 +178,7 @@ function expectModelSelection(
 
 async function applyMainModelPatch(params: {
   store?: Record<string, SessionEntry>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   model: string | null;
   catalogRefs?: string[];
   providerAuthMetadataSnapshot?: ProviderAuthMetadataSnapshot;
@@ -228,7 +228,7 @@ function expectAuthOverride(
   }
 }
 
-async function applySubagentModelPatch(cfg: OpenClawConfig) {
+async function applySubagentModelPatch(cfg: CarapaceConfig) {
   return expectPatchOk(
     await runPatch({
       cfg,
@@ -249,7 +249,7 @@ function makeKimiSubagentCfg(params: {
   agentPrimaryModel?: string;
   agentSubagentModel?: string;
   defaultsSubagentModel?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -269,10 +269,10 @@ function makeKimiSubagentCfg(params: {
         },
       ],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function createAllowlistedAnthropicModelCfg(): OpenClawConfig {
+function createAllowlistedAnthropicModelCfg(): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -282,7 +282,7 @@ function createAllowlistedAnthropicModelCfg(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("gateway sessions patch", () => {
@@ -302,7 +302,7 @@ describe("gateway sessions patch", () => {
         }
         if (context.modelId === "gpt-5.6-luna") {
           const levels =
-            context.agentRuntime === "openclaw"
+            context.agentRuntime === "carapace"
               ? (["off", "minimal", "low", "medium", "high", "max", "ultra"] as const)
               : (["off", "minimal", "low", "medium", "high", "max"] as const);
           return { levels: levels.map((id) => ({ id })) };
@@ -966,7 +966,7 @@ describe("gateway sessions patch", () => {
             model: { primary: `anthropic/${ANTHROPIC_OPUS_ID}` },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       store,
       model: ANTHROPIC_SONNET_MODEL,
       catalogRefs: [ANTHROPIC_SONNET_MODEL],
@@ -1386,7 +1386,7 @@ describe("gateway sessions patch", () => {
               },
               entries: { main: agentPolicy ? { modelPolicy: { allow: [] } } : {} },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           storeKey: "global",
           patch: { key: "global", model: override },
           loadGatewayModelCatalog: async () => [],
@@ -1432,7 +1432,7 @@ describe("gateway sessions patch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: { key: MAIN_SESSION_KEY, model: "lmstudio-moe/Local" },
         loadGatewayModelCatalog: loadCatalog(
           "lmstudio-moe/qwen3.6-35b-a3b",
@@ -1473,7 +1473,7 @@ describe("gateway sessions patch", () => {
               model: { primary: "ollama/qwen3:0.6b" },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: {
           key: MAIN_SESSION_KEY,
           thinkingLevel: "medium",
@@ -1497,7 +1497,7 @@ describe("gateway sessions patch", () => {
     async (sessionState) => {
       const cfg = {
         agents: { defaults: { model: { primary: "claude-cli/claude-fable-5" } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const loadGatewayModelCatalog = async () => [
         {
           provider: "claude-cli",
@@ -1557,7 +1557,7 @@ describe("gateway sessions patch", () => {
             model: { primary: "anthropic/claude-mythos-5" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       patch: {
         key: MAIN_SESSION_KEY,
         thinkingLevel: "medium",
@@ -1585,7 +1585,7 @@ describe("gateway sessions patch", () => {
               model: { primary: "gmn/gpt-5.4" },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: {
           key: MAIN_SESSION_KEY,
           thinkingLevel: "xhigh",
@@ -1622,7 +1622,7 @@ describe("gateway sessions patch", () => {
               },
             ],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         storeKey: "global",
         agentId: "work",
         patch: {
@@ -1645,7 +1645,7 @@ describe("gateway sessions patch", () => {
               model: { primary: "openai/gpt-5.5" },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: {
           key: MAIN_SESSION_KEY,
           thinkingLevel: "xhigh",
@@ -1657,7 +1657,7 @@ describe("gateway sessions patch", () => {
     expect(entry.thinkingLevel).toBe("xhigh");
   });
 
-  test("persists OpenClaw Luna Ultra through the runtime-aware provider profile", async () => {
+  test("persists Carapace Luna Ultra through the runtime-aware provider profile", async () => {
     const entry = expectPatchOk(
       await runPatch({
         cfg: {
@@ -1665,11 +1665,11 @@ describe("gateway sessions patch", () => {
             defaults: {
               model: { primary: "openai/gpt-5.6-luna" },
               models: {
-                "openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } },
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: { key: MAIN_SESSION_KEY, thinkingLevel: "ultra" },
         loadGatewayModelCatalog: async () => [],
       }),
@@ -1690,7 +1690,7 @@ describe("gateway sessions patch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         store: mainStoreEntry({ thinkingLevel: "ultra" }),
         patch: { key: MAIN_SESSION_KEY, model: "openai/gpt-5.6-luna" },
         loadGatewayModelCatalog: loadCatalog("openai/gpt-5.6-sol", "openai/gpt-5.6-luna"),
@@ -1700,14 +1700,14 @@ describe("gateway sessions patch", () => {
     expect(entry.thinkingLevel).toBe("max");
   });
 
-  test("honors an explicit OpenClaw session runtime override for Luna Ultra", async () => {
+  test("honors an explicit Carapace session runtime override for Luna Ultra", async () => {
     const entry = expectPatchOk(
       await runPatch({
         cfg: {
           agents: { defaults: { model: { primary: "openai/gpt-5.6-luna" } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         store: mainStoreEntry({
-          agentRuntimeOverride: "openclaw",
+          agentRuntimeOverride: "carapace",
           agentHarnessId: "codex",
         }),
         patch: { key: MAIN_SESSION_KEY, thinkingLevel: "ultra" },
@@ -1734,11 +1734,11 @@ describe("gateway sessions patch", () => {
           defaults: {
             model: { primary: "openai/gpt-5.6-luna" },
             models: {
-              "openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } },
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       store: mainStoreEntry({}),
       patch: { key: MAIN_SESSION_KEY, thinkingLevel: "ultra" },
       loadGatewayModelCatalog: async () => [],
@@ -1756,8 +1756,8 @@ describe("gateway sessions patch", () => {
     const result = await runPatch({
       cfg: {
         agents: { defaults: { model: { primary: "openai/gpt-5.6-luna" } } },
-      } as OpenClawConfig,
-      store: mainStoreEntry({ agentHarnessId: "openclaw" }),
+      } as CarapaceConfig,
+      store: mainStoreEntry({ agentHarnessId: "carapace" }),
       patch: { key: MAIN_SESSION_KEY, thinkingLevel: "ultra" },
       loadGatewayModelCatalog: async () => [],
     });
@@ -1776,7 +1776,7 @@ describe("gateway sessions patch", () => {
       await runPatch({
         cfg: {
           agents: { defaults: { model: { primary: "synthetic/plain" } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         store: mainStoreEntry({ thinkingLevel: "max" }),
         patch: { key: MAIN_SESSION_KEY, label: "new label" },
         loadGatewayModelCatalog,
@@ -2136,7 +2136,7 @@ describe("gateway sessions patch", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         patch: { key: MAIN_SESSION_KEY, model: "kimi-k2.6@work" },
         loadGatewayModelCatalog: async () => [
           { provider: "openai", id: "gpt-5.4", name: "gpt-5.4" },

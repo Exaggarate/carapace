@@ -52,7 +52,7 @@ async function withBrowser(
   const port = await getFreePort();
   const cdpUrl = `http://127.0.0.1:${port}`;
   const context = await getPlaywrightCore().chromium.launchPersistentContext(
-    path.join(tempDirs.make("openclaw-screenshot-geometry-"), "profile"),
+    path.join(tempDirs.make("carapace-screenshot-geometry-"), "profile"),
     {
       headless: true,
       ...(showScrollbars ? { ignoreDefaultArgs: ["--hide-scrollbars"] } : {}),
@@ -148,7 +148,7 @@ async function readLabelBox(page: Page, buffer: Buffer) {
   }, buffer.toString("base64"));
 }
 
-describe.runIf(process.env.OPENCLAW_BROWSER_SNAPSHOT_E2E === "1")(
+describe.runIf(process.env.CARAPACE_BROWSER_SNAPSHOT_E2E === "1")(
   "Chromium screenshot ownership",
   () => {
     it("captures a native full page without changing the page geometry", async () => {

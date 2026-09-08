@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/ssrf-runtime")>(
+    "carapace/plugin-sdk/ssrf-runtime",
   );
   return {
     ...actual,

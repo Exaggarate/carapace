@@ -1,8 +1,8 @@
 import {
   assertSecretOwnerAvailable,
   isSecretOwnerAvailable,
-} from "openclaw/plugin-sdk/channel-secret-owner-runtime";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-secret-owner-runtime";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   buildRealtimeVoiceSessionInstructions,
   buildRealtimeVoiceSpeakExactMessage,
@@ -24,9 +24,9 @@ import {
   type RealtimeVoiceProviderConfig,
   type RealtimeVoiceSessionHarness,
   type RealtimeVoiceWakeNamePolicy,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { discordRealtimeVoiceSecretOwnerId } from "../secret-config-contract.js";
 import { formatVoiceLogPreview } from "./log-preview.js";
 import { DiscordRealtimeConsults, type AgentProxyConsultState } from "./realtime-consults.js";
@@ -112,7 +112,7 @@ function isDiscordAgentProxyVoiceMode(mode: DiscordVoiceMode): boolean {
 
 export type DiscordRealtimeSessionParams = {
   accountId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   entry: VoiceSessionEntry;
   mode: Exclude<DiscordVoiceMode, "stt-tts">;
@@ -333,7 +333,7 @@ export class DiscordRealtimeSpeakerSession implements VoiceRealtimeSession {
       base:
         this.realtimeConfig?.instructions ??
         [
-          "You are OpenClaw's Discord voice interface.",
+          "You are Carapace's Discord voice interface.",
           "Keep spoken replies concise, natural, and suitable for a live Discord voice channel.",
         ].join("\n"),
       isAgentProxy,

@@ -6,7 +6,7 @@ import {
   replaceSessionEntry,
   replaceTranscriptEventsSync,
 } from "../../../../src/config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
 import { buildSessionEntry } from "./session-files.js";
 
@@ -14,7 +14,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("buildSessionEntry responsiveness", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.each(["archive", "sqlite"])(

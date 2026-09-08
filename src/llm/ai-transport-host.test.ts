@@ -6,7 +6,7 @@ import { extractToolResultText } from "../../packages/ai/src/providers/tool-resu
 import { resolveOpenAICompletionsCompat } from "../../packages/ai/src/transports/openai-completions-compat.js";
 import type { Context, Model } from "../../packages/ai/src/types.js";
 import { projectProviderError } from "../../packages/ai/src/utils/provider-error.js";
-import { createOpenClawReadTool } from "../agents/agent-tools.read.js";
+import { createCarapaceReadTool } from "../agents/agent-tools.read.js";
 import { createZeroUsageFixture } from "../agents/test-helpers/usage-fixtures.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "../logging/secret-redaction-registry.test-support.js";
@@ -14,7 +14,7 @@ import "./ai-transport-host.js";
 
 afterEach(resetSecretRedactionRegistryForTest);
 
-describe("OpenClaw provider error redaction", () => {
+describe("Carapace provider error redaction", () => {
   it("redacts registered opaque secrets from ordinary provider error messages", () => {
     const secret = "opaque-configured-provider-value";
     registerSecretValueForRedaction(secret);
@@ -28,7 +28,7 @@ describe("OpenClaw provider error redaction", () => {
   });
 });
 
-describe("OpenClaw provider tool-result redaction", () => {
+describe("Carapace provider tool-result redaction", () => {
   const toolResultContent = [
     {
       type: "resource" as const,
@@ -54,7 +54,7 @@ describe("OpenClaw provider tool-result redaction", () => {
       "API_KEY: str = computeKey()",
       "api_key: ConfigValue",
     ];
-    const readTool = createOpenClawReadTool({
+    const readTool = createCarapaceReadTool({
       name: "read",
       label: "read",
       description: "test read",

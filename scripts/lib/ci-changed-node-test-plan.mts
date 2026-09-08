@@ -143,7 +143,7 @@ function isTestOnlyPath(changedPath: string) {
 // Built-artifact test inputs below also require this lane even though they do
 // not change the bytes under test.
 const BUILD_INPUT_RE =
-  /^(?:src|extensions|packages)\/|^(?:openclaw\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$|^tsconfig[^/]*\.json$|^tsdown(?:\.[^/]+)?\.config\.ts$|^scripts\/(?:build-[^/]+|runtime-postbuild\.mts|tsdown-build\.mts|write-(?:plugin-sdk|unified)-entry-dts\.ts)$|^scripts\/lib\/(?:copy-assets\.ts|plugin-sdk-entries\.mts|(?:build-artifact-cache|compiler-input-snapshot|declaration-stage|tsdown-[^/]+)\.mts)$/u;
+  /^(?:src|extensions|packages)\/|^(?:carapace\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$|^tsconfig[^/]*\.json$|^tsdown(?:\.[^/]+)?\.config\.ts$|^scripts\/(?:build-[^/]+|runtime-postbuild\.mts|tsdown-build\.mts|write-(?:plugin-sdk|unified)-entry-dts\.ts)$|^scripts\/lib\/(?:copy-assets\.ts|plugin-sdk-entries\.mts|(?:build-artifact-cache|compiler-input-snapshot|declaration-stage|tsdown-[^/]+)\.mts)$/u;
 const BUILT_ARTIFACT_TEST_INPUTS = new Set([
   "extensions/browser/chrome-extension/relay-key.test-support.ts",
   "extensions/browser/src/browser/extension-install.native-host.e2e.test.ts",
@@ -170,7 +170,7 @@ export function hasBuildArtifactAffectingChange(changedPaths: string[]) {
 // lane's own orchestration (this planner, the CI workflow, composite
 // actions) — changes to the gate must not be able to skip the gated lane.
 const QA_SMOKE_SURFACE_RE =
-  /^(?:extensions\/(?:matrix|qa-lab|telegram)|qa)\/|^scripts\/(?:build-all\.mts|package-openclaw-for-docker\.mts)$|^scripts\/lib\/ci-changed-node-test-plan\.mts$|^\.github\/(?:workflows\/ci\.yml$|actions\/)/u;
+  /^(?:extensions\/(?:matrix|qa-lab|telegram)|qa)\/|^scripts\/(?:build-all\.mts|package-carapace-for-docker\.mts)$|^scripts\/lib\/ci-changed-node-test-plan\.mts$|^\.github\/(?:workflows\/ci\.yml$|actions\/)/u;
 
 /**
  * True when a pull request diff touches a QA-owned smoke surface. Broad
@@ -231,9 +231,9 @@ export function hasPromptSnapshotAffectingChange(changedPaths: string[], options
 // inside the embedded-runner neighborhood, whose session reachability is not
 // apparent from filenames.
 const SQLITE_SESSION_LIFECYCLE_PREFIX_RE =
-  /^(?:src\/(?:agents\/(?:sessions\/|[^/]*(?:session|transcript|compaction)[^/]*)|commands\/doctor-session-|config\/sessions\/|gateway\/(?:agent-turn\/agent-session-persist|server-chat\.(?:load-gateway-session-row|persist-session-lifecycle)|server-methods\/sessions|server\.sessions|session-|sessions-)|plugin-sdk\/session-|sessions\/|state\/openclaw-agent-(?:db|schema))|\.github\/actions\/setup-node-env\/)/u;
+  /^(?:src\/(?:agents\/(?:sessions\/|[^/]*(?:session|transcript|compaction)[^/]*)|commands\/doctor-session-|config\/sessions\/|gateway\/(?:agent-turn\/agent-session-persist|server-chat\.(?:load-gateway-session-row|persist-session-lifecycle)|server-methods\/sessions|server\.sessions|session-|sessions-)|plugin-sdk\/session-|sessions\/|state\/carapace-agent-(?:db|schema))|\.github\/actions\/setup-node-env\/)/u;
 const SQLITE_SESSION_LIFECYCLE_EXACT_RE =
-  /^(?:src\/config\/sessions\.ts|test\/helpers\/(?:openclaw-test-instance|sqlite-sessions-transcripts-flip-proof(?:-assertions)?)\.ts|test\/scripts\/(?:sqlite-sessions-transcripts-flip-proof(?:\.built-cli)?\.e2e\.test|vitest-e2e-global-setup\.test)\.ts|test\/vitest\/vitest\.e2e\.(?:config|global-setup)\.ts|scripts\/lib\/ci-changed-node-test-plan\.mts|\.github\/workflows\/ci\.yml|openclaw\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u;
+  /^(?:src\/config\/sessions\.ts|test\/helpers\/(?:carapace-test-instance|sqlite-sessions-transcripts-flip-proof(?:-assertions)?)\.ts|test\/scripts\/(?:sqlite-sessions-transcripts-flip-proof(?:\.built-cli)?\.e2e\.test|vitest-e2e-global-setup\.test)\.ts|test\/vitest\/vitest\.e2e\.(?:config|global-setup)\.ts|scripts\/lib\/ci-changed-node-test-plan\.mts|\.github\/workflows\/ci\.yml|carapace\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u;
 const SQLITE_SESSION_LIFECYCLE_ENTRY =
   "test/scripts/sqlite-sessions-transcripts-flip-proof.e2e.test.ts";
 const SQLITE_SESSION_LIFECYCLE_IMPORT_CANDIDATE_RE = /^src\/agents\/embedded-agent-runner\/run\//u;
@@ -428,7 +428,7 @@ function createChangedExtensionConfigShards(
                   // Counts size jobs only. Vitest owns the complete config inventory,
                   // including unrelated plugin roots, excludes and untracked tests.
                   env: {
-                    OPENCLAW_NODE_TEST_VITEST_ARGS_JSON: JSON.stringify([
+                    CARAPACE_NODE_TEST_VITEST_ARGS_JSON: JSON.stringify([
                       `--shard=${index + 1}/${chunks.length}`,
                     ]),
                   },

@@ -111,20 +111,20 @@ describe("update CLI shared helpers", () => {
   it.runIf(process.platform !== "win32")(
     "resolves update ownership from the lexical invocation path",
     async () => {
-      await withTestDir({ prefix: "openclaw-update-root-" }, async (base) => {
-        const storeRoot = path.join(base, "store", "openclaw");
-        const packageRoot = path.join(base, "global", "v11", "install", "node_modules", "openclaw");
+      await withTestDir({ prefix: "carapace-update-root-" }, async (base) => {
+        const storeRoot = path.join(base, "store", "carapace");
+        const packageRoot = path.join(base, "global", "v11", "install", "node_modules", "carapace");
         await fs.mkdir(path.dirname(packageRoot), { recursive: true });
         await fs.mkdir(storeRoot, { recursive: true });
         await fs.writeFile(
           path.join(storeRoot, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "1.0.0" }),
+          JSON.stringify({ name: "carapace", version: "1.0.0" }),
           "utf8",
         );
         await fs.symlink(storeRoot, packageRoot, "dir");
 
         const previousArgv = [...process.argv];
-        process.argv[1] = path.join(packageRoot, "openclaw.mjs");
+        process.argv[1] = path.join(packageRoot, "carapace.mjs");
         try {
           await expect(resolveUpdateRoot()).resolves.toBe(packageRoot);
         } finally {
@@ -143,22 +143,22 @@ describe("update CLI shared helpers", () => {
 
     await expect(
       resolveGlobalManager({
-        root: "/shared/store/openclaw",
+        root: "/shared/store/carapace",
         installKind: "package",
         timeoutMs: 1_000,
       }),
     ).rejects.toThrow(
-      "Update refused: package manager owner is unknown; no changes were made. Run this OpenClaw install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
+      "Update refused: package manager owner is unknown; no changes were made. Run this Carapace install through its active npm, pnpm, or Bun global shim, or reinstall it with that package manager, then retry.",
     );
     expect(runCommandWithTimeout).toHaveBeenCalledTimes(2);
   });
 
   it("publishes a successful fresh clone only after the clone completes", async () => {
-    await withTestDir({ prefix: "openclaw-update-clone-success-" }, async (base) => {
-      const checkoutDir = path.join(base, "nested", "openclaw");
+    await withTestDir({ prefix: "carapace-update-clone-success-" }, async (base) => {
+      const checkoutDir = path.join(base, "nested", "carapace");
       runCommandWithTimeout.mockImplementationOnce(async (argv: string[]) => {
         const stagingDir = cloneTarget(argv);
-        expect(stagingDir).toMatch(/[/\\]\.openclaw-clone-[^/\\]+$/u);
+        expect(stagingDir).toMatch(/[/\\]\.carapace-clone-[^/\\]+$/u);
         expect(stagingDir).not.toBe(checkoutDir);
         await expect(fs.stat(checkoutDir)).rejects.toMatchObject({ code: "ENOENT" });
         await fs.mkdir(path.join(stagingDir, ".git"), { recursive: true });
@@ -173,14 +173,14 @@ describe("update CLI shared helpers", () => {
       await expect(fs.readFile(path.join(checkoutDir, "checkout.marker"), "utf8")).resolves.toBe(
         "complete\n",
       );
-      await expect(fs.readdir(path.dirname(checkoutDir))).resolves.toEqual(["openclaw"]);
+      await expect(fs.readdir(path.dirname(checkoutDir))).resolves.toEqual(["carapace"]);
       expect(runCommandWithTimeout).toHaveBeenCalledWith(
         [
           "git",
           "clone",
           "--filter=blob:none",
-          "https://github.com/openclaw/openclaw.git",
-          expect.stringMatching(/[/\\]\.openclaw-clone-[^/\\]+$/u),
+          "https://github.com/Exaggarate/carapace.git",
+          expect.stringMatching(/[/\\]\.carapace-clone-[^/\\]+$/u),
         ],
         expect.objectContaining({ env: process.env, timeoutMs: 1_000 }),
       );
@@ -188,8 +188,8 @@ describe("update CLI shared helpers", () => {
   });
 
   it("removes a failed fresh clone without publishing the destination", async () => {
-    await withTestDir({ prefix: "openclaw-update-clone-failure-" }, async (base) => {
-      const checkoutDir = path.join(base, "openclaw");
+    await withTestDir({ prefix: "carapace-update-clone-failure-" }, async (base) => {
+      const checkoutDir = path.join(base, "carapace");
       runCommandWithTimeout.mockImplementationOnce(async (argv: string[]) => {
         const stagingDir = cloneTarget(argv);
         await fs.mkdir(path.join(stagingDir, ".git"), { recursive: true });
@@ -210,8 +210,8 @@ describe("update CLI shared helpers", () => {
   });
 
   it("preserves a destination created while a fresh clone is running", async () => {
-    await withTestDir({ prefix: "openclaw-update-clone-race-" }, async (base) => {
-      const checkoutDir = path.join(base, "openclaw");
+    await withTestDir({ prefix: "carapace-update-clone-race-" }, async (base) => {
+      const checkoutDir = path.join(base, "carapace");
       runCommandWithTimeout.mockImplementationOnce(async (argv: string[]) => {
         const stagingDir = cloneTarget(argv);
         await fs.mkdir(path.join(stagingDir, ".git"), { recursive: true });
@@ -227,13 +227,13 @@ describe("update CLI shared helpers", () => {
       await expect(fs.readFile(path.join(checkoutDir, "user.marker"), "utf8")).resolves.toBe(
         "keep\n",
       );
-      await expect(fs.readdir(base)).resolves.toEqual(["openclaw"]);
+      await expect(fs.readdir(base)).resolves.toEqual(["carapace"]);
     });
   });
 
   it("keeps an existing empty checkout destination retryable after clone failure", async () => {
-    await withTestDir({ prefix: "openclaw-update-clone-existing-" }, async (base) => {
-      const checkoutDir = path.join(base, "openclaw");
+    await withTestDir({ prefix: "carapace-update-clone-existing-" }, async (base) => {
+      const checkoutDir = path.join(base, "carapace");
       await fs.mkdir(checkoutDir);
       let attempt = 0;
       runCommandWithTimeout.mockImplementation(async (argv: string[]) => {
@@ -266,9 +266,9 @@ describe("update CLI shared helpers", () => {
   it.runIf(process.platform !== "win32")(
     "preserves a stable alias to an existing empty checkout destination",
     async () => {
-      await withTestDir({ prefix: "openclaw-update-clone-alias-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-update-clone-alias-" }, async (base) => {
         const targetDir = path.join(base, "checkout-target");
-        const checkoutDir = path.join(base, "openclaw");
+        const checkoutDir = path.join(base, "carapace");
         await fs.mkdir(targetDir);
         await fs.symlink(targetDir, checkoutDir, "dir");
         runCommandWithTimeout.mockImplementationOnce(async (argv: string[]) => {
@@ -295,10 +295,10 @@ describe("update CLI shared helpers", () => {
   it.runIf(process.platform !== "win32")(
     "publishes through the original target when an empty-directory alias is retargeted",
     async () => {
-      await withTestDir({ prefix: "openclaw-update-clone-alias-race-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-update-clone-alias-race-" }, async (base) => {
         const targetDir = path.join(base, "checkout-target");
         const replacementDir = path.join(base, "replacement-target");
-        const checkoutDir = path.join(base, "openclaw");
+        const checkoutDir = path.join(base, "carapace");
         await fs.mkdir(targetDir);
         await fs.mkdir(replacementDir);
         await fs.symlink(targetDir, checkoutDir, "dir");
@@ -325,8 +325,8 @@ describe("update CLI shared helpers", () => {
   );
 
   it("retains recovery files when publication and rollback both fail", async () => {
-    await withTestDir({ prefix: "openclaw-update-clone-rollback-" }, async (base) => {
-      const checkoutDir = path.join(base, "openclaw");
+    await withTestDir({ prefix: "carapace-update-clone-rollback-" }, async (base) => {
+      const checkoutDir = path.join(base, "carapace");
       await fs.mkdir(checkoutDir);
       runCommandWithTimeout.mockImplementationOnce(async (argv: string[]) => {
         const stagingDir = cloneTarget(argv);
@@ -361,7 +361,7 @@ describe("update CLI shared helpers", () => {
         "complete\n",
       );
       const recoveryDirs = (await fs.readdir(checkoutDir)).filter((entry) =>
-        entry.startsWith(".openclaw-clone-"),
+        entry.startsWith(".carapace-clone-"),
       );
       expect(recoveryDirs).toHaveLength(1);
       await expect(

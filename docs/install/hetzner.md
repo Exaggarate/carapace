@@ -1,14 +1,14 @@
 ---
-summary: "Run OpenClaw Gateway 24/7 on a Hetzner VPS with Docker"
+summary: "Run Carapace Gateway 24/7 on a Hetzner VPS with Docker"
 doc-schema-version: 1
 read_when:
-  - You want OpenClaw running 24/7 on a Hetzner VPS
+  - You want Carapace running 24/7 on a Hetzner VPS
   - You need Hetzner provisioning, firewall, or SSH tunnel guidance
   - You want a persistent Docker Gateway on a cloud VM
 title: "Hetzner"
 ---
 
-Run a persistent OpenClaw Gateway on a Debian or Ubuntu Hetzner VPS. This page
+Run a persistent Carapace Gateway on a Debian or Ubuntu Hetzner VPS. This page
 covers Hetzner provisioning, host security, and access; the shared
 [Docker VM runtime](/install/docker-vm-runtime) page owns container setup,
 persistence, custom binaries, verification, and updates.
@@ -83,9 +83,9 @@ On the VPS, follow [Docker VM runtime](/install/docker-vm-runtime) from
 maintained setup script uses these root-owned host paths by default:
 
 ```bash
-export OPENCLAW_CONFIG_DIR="$HOME/.openclaw"
-export OPENCLAW_WORKSPACE_DIR="$HOME/.openclaw/workspace"
-export OPENCLAW_AUTH_PROFILE_SECRET_DIR="$HOME/.openclaw-auth-profile-secrets"
+export CARAPACE_CONFIG_DIR="$HOME/.carapace"
+export CARAPACE_WORKSPACE_DIR="$HOME/.carapace/workspace"
+export CARAPACE_AUTH_PROFILE_SECRET_DIR="$HOME/.carapace-auth-profile-secrets"
 ```
 
 If a source build ends with `Killed` or exit code 137, resize the server before
@@ -119,10 +119,10 @@ Open `http://127.0.0.1:18789/` and paste the Gateway token from the VPS `.env`.
 To reprint the dashboard URL or approve a browser device, run on the VPS:
 
 ```bash
-cd openclaw
-docker compose run --rm openclaw-cli dashboard --no-open
-docker compose run --rm openclaw-cli devices list
-docker compose run --rm openclaw-cli devices approve <requestId>
+cd carapace
+docker compose run --rm carapace-cli dashboard --no-open
+docker compose run --rm carapace-cli devices list
+docker compose run --rm carapace-cli devices approve <requestId>
 ```
 
 If the tunnel fails with `administratively prohibited`, recheck
@@ -135,8 +135,8 @@ For teams that prefer Terraform, community-maintained projects provide remote
 state, cloud-init provisioning, deployment and backup scripts, firewall
 hardening, and SSH tunnel setup:
 
-- [openclaw-terraform-hetzner](https://github.com/andreesg/openclaw-terraform-hetzner)
-- [openclaw-docker-config](https://github.com/andreesg/openclaw-docker-config)
+- [carapace-terraform-hetzner](https://github.com/andreesg/carapace-terraform-hetzner)
+- [carapace-docker-config](https://github.com/andreesg/carapace-docker-config)
 
 <Note>
 These repositories are community-maintained. Report issues and contribute in
@@ -147,7 +147,7 @@ their respective repositories.
 
 - [Channels](/channels)
 - [Gateway configuration](/gateway/configuration)
-- [Updating](/install/docker-vm-runtime#update-openclaw)
+- [Updating](/install/docker-vm-runtime#update-carapace)
 
 ## Related
 

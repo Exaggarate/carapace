@@ -202,7 +202,7 @@ async function inspectNativeAclDenial(params: {
   batchMarkerPath: string;
   scriptPath: string;
 }): Promise<NativeStartupAclDiagnostics> {
-  const scriptEnv = { ...process.env, OPENCLAW_TASK_SCRIPT: params.scriptPath };
+  const scriptEnv = { ...process.env, CARAPACE_TASK_SCRIPT: params.scriptPath };
   const nodeOpen: NativeStartupAclDiagnostics["nodeOpen"] = {
     opened: false,
     readData: false,
@@ -227,20 +227,20 @@ async function inspectNativeAclDenial(params: {
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      '$ErrorActionPreference="Stop"; $stream=[System.IO.File]::OpenRead($env:OPENCLAW_TASK_SCRIPT); try { [void]$stream.ReadByte() } finally { $stream.Dispose() }',
+      '$ErrorActionPreference="Stop"; $stream=[System.IO.File]::OpenRead($env:CARAPACE_TASK_SCRIPT); try { [void]$stream.ReadByte() } finally { $stream.Dispose() }',
     ],
     scriptEnv,
   );
   const cmdType = inspectNativeAclCommand(
     getWindowsCmdExePath(),
-    ["/d", "/s", "/v:off", "/c", '"type "%OPENCLAW_TASK_SCRIPT%""'],
+    ["/d", "/s", "/v:off", "/c", '"type "%CARAPACE_TASK_SCRIPT%""'],
     scriptEnv,
     true,
   );
   await fs.rm(params.batchMarkerPath, { force: true });
   const cmdBatchResult = inspectNativeAclCommand(
     getWindowsCmdExePath(),
-    ["/d", "/s", "/v:off", "/c", '""%OPENCLAW_TASK_SCRIPT%""'],
+    ["/d", "/s", "/v:off", "/c", '""%CARAPACE_TASK_SCRIPT%""'],
     scriptEnv,
     true,
   );
@@ -263,12 +263,12 @@ export async function proveNativeStartupFallbackLaunch(params: {
   rootDir: string;
 }): Promise<NativeStartupFallbackProof> {
   const proofRoot = path.join(params.rootDir, "startup-fallback-proof");
-  const stateDir = path.join(proofRoot, "state & %OPENCLAW_STARTUP_PROBE% !");
+  const stateDir = path.join(proofRoot, "state & %CARAPACE_STARTUP_PROBE% !");
   const env: GatewayServiceEnv = {
     ...params.env,
     APPDATA: path.join(proofRoot, "appdata"),
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+    CARAPACE_STATE_DIR: stateDir,
   };
   const scriptPath = resolveTaskScriptPath(env);
   const probePath = path.join(proofRoot, "probe.cjs");
@@ -304,9 +304,9 @@ export async function proveNativeStartupFallbackLaunch(params: {
       `import { launchFallbackTaskScript } from ${JSON.stringify(new URL("./schtasks-runtime.ts", import.meta.url).href)};`,
       `const env = ${JSON.stringify({
         APPDATA: env.APPDATA,
-        OPENCLAW_CONFIG_PATH: env.OPENCLAW_CONFIG_PATH,
-        OPENCLAW_PROFILE: env.OPENCLAW_PROFILE,
-        OPENCLAW_STATE_DIR: env.OPENCLAW_STATE_DIR,
+        CARAPACE_CONFIG_PATH: env.CARAPACE_CONFIG_PATH,
+        CARAPACE_PROFILE: env.CARAPACE_PROFILE,
+        CARAPACE_STATE_DIR: env.CARAPACE_STATE_DIR,
       })};`,
       "const [mode, markerPath, parentPidPath, probePath] = process.argv.slice(2);",
       "fs.writeFileSync(parentPidPath, String(process.pid));",

@@ -12,15 +12,15 @@ import { createPrivateSqliteTempDirectory } from "../infra/sqlite-private-direct
 import { quoteSqliteIdentifier as quoteIdentifier } from "../infra/sqlite-schema-sql.js";
 import { publishVerifiedSqliteFile } from "../infra/sqlite-snapshot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
-import { getOpenClawStateRuntimeSchema } from "../state/openclaw-state-schema-compatibility.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
+import { getCarapaceStateRuntimeSchema } from "../state/carapace-state-schema-compatibility.js";
 import {
   AGENT_SECRET_TABLE_NAMES,
   STATE_SECRET_CONFIG_STATE_KEY_PREFIXES,
   STATE_SECRET_TABLE_NAMES,
 } from "../state/secret-state-tables.js";
 import { hashSnapshotArtifact } from "./manifest.js";
-import { buildSnapshotValidator } from "./openclaw-snapshot-copy.js";
+import { buildSnapshotValidator } from "./carapace-snapshot-copy.js";
 import { SNAPSHOT_SQLITE_FILENAME } from "./snapshot-provider.js";
 
 export const GIT_BACKUP_MANIFEST = "manifest.json";
@@ -519,8 +519,8 @@ function assertNoSqliteSidecarsSync(targetPath: string): void {
 function convergeRestoredSchema(database: DatabaseSync, identity: GitBackupIdentity): void {
   database.exec(
     identity.role === "global"
-      ? getOpenClawStateRuntimeSchema({ includeVersionLazyAdditiveTables: false })
-      : OPENCLAW_AGENT_SCHEMA_SQL,
+      ? getCarapaceStateRuntimeSchema({ includeVersionLazyAdditiveTables: false })
+      : CARAPACE_AGENT_SCHEMA_SQL,
   );
 }
 

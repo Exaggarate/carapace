@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 import type { DatabaseSync } from "node:sqlite";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import { openNodeSqliteDatabase } from "./node-sqlite.js";
 import {
   readStableSqliteFileGeneration,
@@ -260,7 +260,7 @@ function runSqliteForeignKeyCheck(database: DatabaseSync, databaseLabel: string)
     // table-valued pragma name and make a corrupt database appear clean.
     const statement = database.prepare("PRAGMA foreign_key_check;");
     statement.setReadBigInts(true);
-    // OpenClaw's Node >=24.16.0 floor includes iterate(), added in Node 22.13.
+    // Carapace's Node >=24.16.0 floor includes iterate(), added in Node 22.13.
     for (const violation of statement.iterate() as Iterable<SqliteForeignKeyViolation>) {
       violationCount += 1;
       retainSortedForeignKeyViolation(violations, violation);

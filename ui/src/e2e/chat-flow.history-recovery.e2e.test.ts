@@ -85,7 +85,7 @@ suite.define(() => {
       const startupRequestsBeforePeerDelete = (await gateway.getRequests("chat.startup")).length;
       await page.evaluate(() => {
         window.addEventListener("storage", (event) => {
-          if (event.key === "openclaw.control.chatSnapshots.invalidate.v1") {
+          if (event.key === "carapace.control.chatSnapshots.invalidate.v1") {
             document.documentElement.dataset.snapshotInvalidationReceived = "true";
           }
         });
@@ -102,11 +102,11 @@ suite.define(() => {
         });
         await peer.goto(`${suite.server.baseUrl}sessions`);
         await peer.waitForFunction(() =>
-          Boolean((document.querySelector("openclaw-app") as ChatFlowTestApp).runtime),
+          Boolean((document.querySelector("carapace-app") as ChatFlowTestApp).runtime),
         );
         await expect(
           peer.evaluate(async (sessionKey) => {
-            const sessions = (document.querySelector("openclaw-app") as ChatFlowTestApp).runtime
+            const sessions = (document.querySelector("carapace-app") as ChatFlowTestApp).runtime
               ?.context.sessions;
             if (!sessions) {
               throw new Error("session capability unavailable");
@@ -133,7 +133,7 @@ suite.define(() => {
   });
 
   it("restores reasoning and tool activity after navigating away from a session", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.history-recovery", artifactDirParent)
       : undefined;
@@ -420,7 +420,7 @@ suite.define(() => {
   });
 
   it("keeps evicted paginated history stable when returning to a session", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.history-recovery", artifactDirParent)
       : undefined;
@@ -440,14 +440,14 @@ suite.define(() => {
       await writeFile(
         path.join(artifactDir, `${name}.png`),
         await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-          page.locator('openclaw-chat-pane[aria-hidden="false"] .chat-thread'),
+          page.locator('carapace-chat-pane[aria-hidden="false"] .chat-thread'),
         ]),
       );
       // Keep post-assertion route states legible in the optional proof recording.
       await page.waitForTimeout(300);
     };
     const historyMessage = (seq: number, label: string) => ({
-      __openclaw: { id: `history-${seq}`, seq },
+      __carapace: { id: `history-${seq}`, seq },
       content: [
         {
           text: `${label} ${seq}\n${"retained transcript detail\n".repeat(3)}`,
@@ -582,7 +582,7 @@ suite.define(() => {
       );
       await sessionB.click();
       await page.getByText(/^recent retained message 140\n/).waitFor({ timeout: 10_000 });
-      const activePane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const activePane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const thread = activePane.locator(".chat-thread");
       await thread.hover();
       await page.mouse.wheel(0, -1_000_000);
@@ -626,7 +626,7 @@ suite.define(() => {
         ).chatSessionReturnSamples = samples;
         const deadline = performance.now() + 750;
         const sample = () => {
-          const pane = document.querySelector('openclaw-chat-pane[aria-hidden="false"]') as
+          const pane = document.querySelector('carapace-chat-pane[aria-hidden="false"]') as
             | (HTMLElement & {
                 state?: { chatMessages?: unknown[]; sessionKey?: string };
               })
@@ -697,7 +697,7 @@ suite.define(() => {
   });
 
   it("stores new input while offline and sends it after reconnect", async () => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.history-recovery", artifactDirParent)
       : undefined;
@@ -766,7 +766,7 @@ suite.define(() => {
         const item = await page.evaluate(
           (expectedPrompt) =>
             Object.entries(sessionStorage)
-              .filter(([key]) => key.startsWith("openclaw.control.chatComposer.v4:"))
+              .filter(([key]) => key.startsWith("carapace.control.chatComposer.v4:"))
               .flatMap(([, value]) => {
                 const parsed = JSON.parse(value) as {
                   sessions: Record<string, { queue?: ChatQueueItem[] }>;
@@ -821,7 +821,7 @@ suite.define(() => {
       expect(await gateway.getRequests("chat.send")).toHaveLength(0);
 
       await gateway.setOnline(true);
-      await page.locator("openclaw-chat-pane").waitFor({ state: "attached", timeout: 10_000 });
+      await page.locator("carapace-chat-pane").waitFor({ state: "attached", timeout: 10_000 });
 
       const request = await gateway.waitForRequest("chat.send");
       const params = requireRecord(request.params);
@@ -871,7 +871,7 @@ suite.define(() => {
           ]),
         );
       }
-      if (process.env.OPENCLAW_BEHAVIOR_PROOF === "1") {
+      if (process.env.CARAPACE_BEHAVIOR_PROOF === "1") {
         process.stdout.write(
           `${JSON.stringify({
             proof: "offline-chat-reconnect",

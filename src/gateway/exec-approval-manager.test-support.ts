@@ -4,9 +4,9 @@ import type { TestContext } from "vitest";
 import { createFixtureLifetime } from "../../test/helpers/fixture-lifetime.js";
 import type { ExecApprovalRequestPayload } from "../infra/exec-approvals.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import type { ExecApprovalManagerOptions } from "./exec-approval-manager.types.js";
 
@@ -24,20 +24,20 @@ export function createTestApprovalManager<TPayload = ExecApprovalRequestPayload>
     void fixture.verifyCleanup(async () => {
       await manager?.drain();
       if (databasePath) {
-        closeOpenClawStateDatabaseByPath(databasePath);
+        closeCarapaceStateDatabaseByPath(databasePath);
       }
     });
     return fixture.cleanup();
   });
-  const root = fixture.createTempDir("openclaw-test-approval-");
+  const root = fixture.createTempDir("carapace-test-approval-");
   databasePath = path.join(root, "state.sqlite");
   const databaseOptions = {
     path: databasePath,
-    env: { ...process.env, OPENCLAW_STATE_DIR: root },
+    env: { ...process.env, CARAPACE_STATE_DIR: root },
   };
   // Schema setup precedes the request's existing deadline, as at Gateway startup.
   try {
-    openOpenClawStateDatabase(databaseOptions);
+    openCarapaceStateDatabase(databaseOptions);
     manager = new ExecApprovalManager<TPayload>({
       ...options,
       persistence: { runtimeEpoch: randomUUID(), databaseOptions },

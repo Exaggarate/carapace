@@ -1,7 +1,7 @@
 // Configured state tests cover channel plugin configured-state detection and summaries.
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   hasBundledChannelPackageState,
   listBundledChannelIdsForPackageState,
@@ -65,7 +65,7 @@ describe("bundled channel configured-state metadata", () => {
         metadataKey: "configuredState",
         channelId: "irc",
         cfg: {},
-        env: { IRC_HOST: "irc.example.com", IRC_NICK: "openclaw" },
+        env: { IRC_HOST: "irc.example.com", IRC_NICK: "carapace" },
       }),
     ).toBe(true);
   });
@@ -174,7 +174,7 @@ describe("bundled channel configured-state metadata", () => {
   ] satisfies Array<{
     name: string;
     channelId: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     env: NodeJS.ProcessEnv;
   }>)("accepts the owner-specific $name contract", ({ channelId, cfg, env }) => {
     expect(

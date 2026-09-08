@@ -1,4 +1,4 @@
-import type { NodeListNode } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { NodeListNode } from "carapace/plugin-sdk/agent-harness-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCanvasTool } from "./tool.js";
 
@@ -7,8 +7,8 @@ const mocks = vi.hoisted(() => ({
   listNodes: vi.fn<() => Promise<NodeListNode[]>>(async () => []),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>()),
   callGatewayTool: mocks.callGatewayTool,
   listNodes: mocks.listNodes,
 }));
@@ -56,7 +56,7 @@ describe("Canvas presenter tool", () => {
       "tool-call",
       {
         action: "present",
-        target: "/__openclaw__/canvas/documents/cv_1/index.html",
+        target: "/__carapace__/canvas/documents/cv_1/index.html",
         x: "10.5",
         y: "-2",
         width: "640",
@@ -71,7 +71,7 @@ describe("Canvas presenter tool", () => {
       expect.objectContaining({
         command: "canvas.present",
         params: {
-          url: "/__openclaw__/canvas/documents/cv_1/index.html",
+          url: "/__carapace__/canvas/documents/cv_1/index.html",
           placement: { x: 10.5, y: -2, width: 640, height: 480 },
         },
         timeoutMs: 1500,
@@ -81,14 +81,14 @@ describe("Canvas presenter tool", () => {
     expect(result.details).toEqual({
       ok: true,
       node: "mac-1",
-      url: "/__openclaw__/canvas/documents/cv_1/index.html",
+      url: "/__carapace__/canvas/documents/cv_1/index.html",
     });
   });
 
   it("accepts target as the navigate URL alias", async () => {
     const result = await createCanvasTool().execute("tool-call", {
       action: "navigate",
-      target: "openclaw://widget/local",
+      target: "carapace://widget/local",
     });
 
     expect(mocks.callGatewayTool).toHaveBeenCalledWith(
@@ -96,13 +96,13 @@ describe("Canvas presenter tool", () => {
       expect.any(Object),
       expect.objectContaining({
         command: "canvas.navigate",
-        params: { url: "openclaw://widget/local" },
+        params: { url: "carapace://widget/local" },
       }),
     );
     expect(result.details).toEqual({
       ok: true,
       node: "mac-1",
-      url: "openclaw://widget/local",
+      url: "carapace://widget/local",
     });
   });
 

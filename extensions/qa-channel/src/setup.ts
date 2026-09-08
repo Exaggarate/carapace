@@ -1,6 +1,6 @@
 // Qa Channel setup module handles plugin onboarding behavior.
-import type { ChannelSetupInput } from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelSetupInput } from "carapace/plugin-sdk/channel-setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { DEFAULT_ACCOUNT_ID } from "./accounts.js";
 import type { CoreConfig } from "./types.js";
 
@@ -11,10 +11,10 @@ export type QaChannelSetupInput = ChannelSetupInput & {
 };
 
 export function applyQaSetup(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   input: QaChannelSetupInput;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const nextCfg = structuredClone(params.cfg) as CoreConfig;
   const section = nextCfg.channels?.["qa-channel"] ?? {};
   const accounts = { ...section.accounts };
@@ -42,5 +42,5 @@ export function applyQaSetup(params: {
       accounts,
     };
   }
-  return nextCfg as OpenClawConfig;
+  return nextCfg as CarapaceConfig;
 }

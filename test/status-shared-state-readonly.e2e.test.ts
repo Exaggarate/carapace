@@ -6,12 +6,12 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
 import { writePersistedInstalledPluginIndexInstallRecords } from "../src/plugins/installed-plugin-index-records.js";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 
 const DEGRADED_PLUGIN_ID = "status-degraded-plugin";
 
 function createUnavailablePluginFixture(): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-degraded-plugin-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-degraded-plugin-"));
   fs.writeFileSync(
     path.join(root, "package.json"),
     JSON.stringify({
@@ -19,12 +19,12 @@ function createUnavailablePluginFixture(): string {
       version: "1.0.0",
       type: "module",
       main: "./missing-main.js",
-      openclaw: { extensions: ["./index.js"] },
-      peerDependencies: { openclaw: ">=2026.1.1" },
+      carapace: { extensions: ["./index.js"] },
+      peerDependencies: { carapace: ">=2026.1.1" },
     }),
   );
   fs.writeFileSync(
-    path.join(root, "openclaw.plugin.json"),
+    path.join(root, "carapace.plugin.json"),
     JSON.stringify({
       id: DEGRADED_PLUGIN_ID,
       configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -66,7 +66,7 @@ function seedInspectableTask(db: DatabaseSync): void {
 describe("status shared-state ownership", () => {
   it("projects Gateway-owned runtime degradation across status processes", async () => {
     const pluginRoot = createUnavailablePluginFixture();
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "status-runtime-degradation",
       env: {
         STATUS_E2E_MISSING_SECRET: undefined,
@@ -125,7 +125,7 @@ describe("status shared-state ownership", () => {
         expect.objectContaining({
           pluginId: DEGRADED_PLUGIN_ID,
           state: "configured-unavailable",
-          diagnostic: expect.objectContaining({ reason: "missing-openclaw-peer-link" }),
+          diagnostic: expect.objectContaining({ reason: "missing-carapace-peer-link" }),
         }),
       ]);
 
@@ -157,7 +157,7 @@ describe("status shared-state ownership", () => {
   }, 120_000);
 
   it("keeps healthy and unreachable Gateway degradation summaries empty", async () => {
-    const instance = await createOpenClawTestInstance({ name: "status-runtime-healthy" });
+    const instance = await createCarapaceTestInstance({ name: "status-runtime-healthy" });
     try {
       await instance.startGateway();
       const healthy = await instance.cli(["status", "--json"]);
@@ -187,10 +187,10 @@ describe("status shared-state ownership", () => {
   ])(
     "does not create shared state during $name",
     async ({ name, args }) => {
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: `status-read-only-${name.replaceAll(" ", "-")}`,
       });
-      const databasePath = path.join(instance.stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(instance.stateDir, "state", "carapace.sqlite");
       try {
         expect(fs.existsSync(databasePath)).toBe(false);
 
@@ -209,8 +209,8 @@ describe("status shared-state ownership", () => {
   );
 
   it("reads committed tasks while the Gateway owns state and another writer is active", async () => {
-    const instance = await createOpenClawTestInstance({ name: "status-read-only-live-gateway" });
-    const databasePath = path.join(instance.stateDir, "state", "openclaw.sqlite");
+    const instance = await createCarapaceTestInstance({ name: "status-read-only-live-gateway" });
+    const databasePath = path.join(instance.stateDir, "state", "carapace.sqlite");
     let writer: DatabaseSync | undefined;
     try {
       await instance.startGateway();

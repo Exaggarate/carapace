@@ -1,15 +1,15 @@
 /** Validation and normalization for ACP session runtime options and config controls. */
 import { isAbsolute } from "node:path";
-import type { AcpRuntimeConfigOptionResult } from "@openclaw/acp-core/runtime/types";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import type { AcpRuntimeConfigOptionResult } from "@carapace/acp-core/runtime/types";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString as normalizeText,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { AcpSessionRuntimeOptions, SessionAcpMeta } from "../../config/sessions/types.js";
 import { AcpRuntimeError } from "../runtime/errors.js";
 
-export { normalizeOptionalString as normalizeText } from "@openclaw/normalization-core/string-coerce";
+export { normalizeOptionalString as normalizeText } from "@carapace/normalization-core/string-coerce";
 
 const MAX_RUNTIME_MODE_LENGTH = 64;
 const MAX_MODEL_LENGTH = 200;

@@ -36,11 +36,11 @@ import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { copyConfigResolutionFacts } from "./resolution-facts.js";
 import { applyConfigOverrides } from "./runtime-overrides.js";
 import { resolveShellEnvExpectedKeys } from "./shell-env-expected-keys.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 type ValidationPluginMetadataSnapshotLoader = {
-  load: (config: OpenClawConfig) => Pick<PluginMetadataSnapshot, "manifestRegistry">;
+  load: (config: CarapaceConfig) => Pick<PluginMetadataSnapshot, "manifestRegistry">;
   getManifestRegistry: () => PluginManifestRegistry | undefined;
   getSnapshot: () => PluginMetadataSnapshot | undefined;
 };
@@ -51,13 +51,13 @@ export type ConfigIoContext = {
   configPath: string;
   options: ConfigIoFactoryOptions;
   observeLoadConfigSnapshot: (snapshot: ConfigFileSnapshot) => ConfigFileSnapshot;
-  finalizeLoadedRuntimeConfig: (config: OpenClawConfig) => OpenClawConfig;
+  finalizeLoadedRuntimeConfig: (config: CarapaceConfig) => CarapaceConfig;
   createValidationPluginMetadataSnapshotLoader: (params: {
     effectiveConfigRaw: unknown;
     env: NodeJS.ProcessEnv;
     allowCurrentPluginMetadata?: boolean;
   }) => ValidationPluginMetadataSnapshotLoader;
-  resolveRuntimePreflightSourceConfig: (candidate: OpenClawConfig) => OpenClawConfig;
+  resolveRuntimePreflightSourceConfig: (candidate: CarapaceConfig) => CarapaceConfig;
   prepareRecoveryBackupCandidate: (
     candidate: ConfigRecoveryCandidate,
   ) => ConfigRecoveryCandidatePreparation;
@@ -66,7 +66,7 @@ export type ConfigIoContext = {
 export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): ConfigIoContext {
   const deps = normalizeConfigIoDeps(options);
   const configPath = resolveConfigPathForDeps(deps);
-  // The normalized default homedir already applies OPENCLAW_HOME. Path
+  // The normalized default homedir already applies CARAPACE_HOME. Path
   // resolvers need the original OS-home fallback or relative overrides expand twice.
   const pathResolution = { env: deps.env, homedir: options.homedir };
 
@@ -77,7 +77,7 @@ export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): Con
     return snapshot;
   }
 
-  function finalizeLoadedRuntimeConfig(cfg: OpenClawConfig): OpenClawConfig {
+  function finalizeLoadedRuntimeConfig(cfg: CarapaceConfig): CarapaceConfig {
     const duplicates = findDuplicateAgentDirs(cfg, pathResolution);
     if (duplicates.length > 0) {
       throw new DuplicateAgentDirError(duplicates);
@@ -131,7 +131,7 @@ export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): Con
     };
   }
 
-  function resolveRuntimePreflightSourceConfig(candidate: OpenClawConfig): OpenClawConfig {
+  function resolveRuntimePreflightSourceConfig(candidate: CarapaceConfig): CarapaceConfig {
     const env = { ...deps.env } as NodeJS.ProcessEnv;
     const resolvedIncludes = resolveConfigIncludesForRead(candidate, configPath, { ...deps, env });
     const resolution = resolveConfigForRead(resolvedIncludes, env, deps.lowerPrecedenceEnv);

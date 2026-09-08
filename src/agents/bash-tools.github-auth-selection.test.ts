@@ -101,22 +101,22 @@ describe.skipIf(process.platform === "win32")("selected GitHub profile authentic
       await fs.mkdir(artifacts, { recursive: true });
       const root = await fs.realpath(await fs.mkdtemp(path.join(artifacts, "github-auth-repro-")));
       const homeDir = path.join(root, "home");
-      const stateDir = path.join(homeDir, ".openclaw");
+      const stateDir = path.join(homeDir, ".carapace");
       await fs.mkdir(homeDir, { mode: 0o700 });
       try {
         await withEnvAsync(
           {
             HOME: homeDir,
             USERPROFILE: homeDir,
-            OPENCLAW_HOME: homeDir,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+            CARAPACE_HOME: homeDir,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
             ZDOTDIR: homeDir,
             XDG_CONFIG_HOME: path.join(homeDir, ".config"),
             XDG_DATA_HOME: path.join(homeDir, ".local", "share"),
             XDG_STATE_HOME: path.join(homeDir, ".local", "state"),
             XDG_CACHE_HOME: path.join(homeDir, ".cache"),
-            OPENCLAW_SERVICE_MARKER: service ? "synthetic-github-exec-proof" : undefined,
+            CARAPACE_SERVICE_MARKER: service ? "synthetic-github-exec-proof" : undefined,
             GH_CONFIG_DIR: undefined,
             GH_TOKEN: "synthetic-ambient-gh-token",
             GITHUB_TOKEN: "synthetic-ambient-github-token",

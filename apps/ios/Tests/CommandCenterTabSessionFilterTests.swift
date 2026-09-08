@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct CommandCenterTabSessionFilterTests {
     @Test func `hides direct agent device sessions`() {

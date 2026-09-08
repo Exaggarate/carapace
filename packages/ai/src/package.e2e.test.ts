@@ -17,7 +17,7 @@ const COMMAND_TIMEOUT_MS = 180_000;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 const compatibility = {
-  "@openclaw/ai/provider-types": {
+  "@carapace/ai/provider-types": {
     values: ["PROVIDER_CONTEXT_HANDOFF", "resolveProviderContext"],
     types: [
       "MediaContent",
@@ -32,7 +32,7 @@ const compatibility = {
       "VideoContent",
     ],
   },
-  "@openclaw/ai/providers": {
+  "@carapace/ai/providers": {
     values: [
       "BUILT_IN_API_PROVIDER_SOURCE_ID",
       "registerBuiltInApiProviders",
@@ -42,7 +42,7 @@ const compatibility = {
     ],
     types: [],
   },
-  "@openclaw/ai/internal/anthropic": {
+  "@carapace/ai/internal/anthropic": {
     values: [
       "streamAnthropic",
       "streamSimpleAnthropic",
@@ -96,7 +96,7 @@ const compatibility = {
       "AnthropicIterationUsageResult",
     ],
   },
-  "@openclaw/ai/internal/openai": {
+  "@carapace/ai/internal/openai": {
     values: [
       "streamOpenAICompletions",
       "streamSimpleOpenAICompletions",
@@ -156,7 +156,7 @@ const compatibility = {
       "ResponsesPromptObservation",
     ],
   },
-  "@openclaw/ai/internal/tool-schema": {
+  "@carapace/ai/internal/tool-schema": {
     values: [
       "extractToolSchemaModelCompat",
       "resolveUnsupportedToolSchemaKeywords",
@@ -278,7 +278,7 @@ function compatibilityTypeSource(): string {
     .join("\n");
 }
 
-describe("@openclaw/ai packed package", () => {
+describe("@carapace/ai packed package", () => {
   it("installs externally and preserves every published compatibility export", async () => {
     const repoRoot = process.cwd();
     const packageRoot = path.join(repoRoot, "packages", "ai");
@@ -292,7 +292,7 @@ describe("@openclaw/ai packed package", () => {
     if (!nodeTypesVersion) {
       throw new Error("root package is missing the @types/node version used by package checks");
     }
-    const tempDir = tempDirs.make("openclaw-ai-consumer-");
+    const tempDir = tempDirs.make("carapace-ai-consumer-");
 
     // The E2E global setup owns the exact-head build. Rebuilding this shared
     // package here can delete modules beneath concurrently running Gateways.

@@ -1,13 +1,13 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { createCapturedPluginRegistration } from "../plugins/captured-registration.js";
 import type {
   PluginCommandContext,
-  OpenClawPluginCommandDefinition,
+  CarapacePluginCommandDefinition,
 } from "../plugins/plugin-command.types.js";
 import { startPluginServices } from "../plugins/services.js";
-import type { OpenClawPluginToolFactory } from "../plugins/tool-types.js";
+import type { CarapacePluginToolFactory } from "../plugins/tool-types.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { defineFeatureContract } from "./feature-contract.js";
 import { defineFeaturePlugin, type FeatureInvocationContext } from "./feature-plugin.js";
@@ -60,8 +60,8 @@ describe("typed feature plugins", () => {
       { name: "fixture_inspect", outputSchema: contract.operations.inspect.output },
     ]);
     const captured = createCapturedPluginRegistration({ id: contract.pluginId });
-    let factory: OpenClawPluginToolFactory | undefined;
-    let command: OpenClawPluginCommandDefinition | undefined;
+    let factory: CarapacePluginToolFactory | undefined;
+    let command: CarapacePluginCommandDefinition | undefined;
     captured.api.registerTool = (tool) => {
       if (typeof tool === "function") {
         factory = tool;
@@ -160,7 +160,7 @@ describe("typed feature plugins", () => {
       }),
     });
     const captured = createCapturedPluginRegistration({ id: contract.pluginId });
-    let factory: OpenClawPluginToolFactory | undefined;
+    let factory: CarapacePluginToolFactory | undefined;
     captured.api.registerTool = (tool) => {
       if (typeof tool === "function") {
         factory = tool;

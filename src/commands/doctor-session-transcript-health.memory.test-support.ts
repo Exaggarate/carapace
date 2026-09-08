@@ -8,10 +8,10 @@ import { build } from "esbuild";
 import packageJson from "../../package.json" with { type: "json" };
 import { appendTranscriptEventsInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 
 export async function probeTranscriptHealthMemory(
   stateDir: string,
@@ -22,7 +22,7 @@ export async function probeTranscriptHealthMemory(
   const bundleDir = fs.mkdtempSync(path.join(cacheDir, "transcript-health-memory-"));
   const childPath = path.join(bundleDir, "child.mjs");
   try {
-    for (const schema of ["openclaw-agent-schema.sql", "openclaw-state-schema.sql"]) {
+    for (const schema of ["carapace-agent-schema.sql", "carapace-state-schema.sql"]) {
       fs.copyFileSync(path.join(process.cwd(), "src/state", schema), path.join(bundleDir, schema));
     }
     await build({
@@ -68,7 +68,7 @@ function seedTranscriptHealthHistory() {
   let sqlitePath = "";
 
   // Seed the canonical storage schema without making unrelated projection work part of this probe.
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       sqlitePath = database.path;
 
@@ -116,7 +116,7 @@ function seedTranscriptHealthHistory() {
     },
     { agentId: "main", env: process.env },
   );
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   return { sqlitePath, expectedDigest: hash.digest("hex") };
 }

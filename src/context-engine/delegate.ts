@@ -1,6 +1,6 @@
 // Context-engine delegates bridge custom engines to built-in compaction and memory prompt paths.
-import { normalizeStructuredPromptSection } from "@openclaw/ai/internal/shared";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeStructuredPromptSection } from "@carapace/ai/internal/shared";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   buildMemoryPromptSection,
   getActivePreparedMemoryPromptSection,
@@ -54,7 +54,7 @@ function assertCompactionSessionIdentity(params: {
 }
 
 /**
- * Delegate a context-engine compaction request to OpenClaw's built-in runtime compaction path.
+ * Delegate a context-engine compaction request to Carapace's built-in runtime compaction path.
  *
  * This is the same bridge used by the legacy context engine. Third-party
  * engines can call it from their own `compact()` implementations when they do

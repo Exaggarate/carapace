@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { createNonExitingRuntime } from "../runtime.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -28,7 +28,7 @@ vi.mock("../commands/onboarding-plugin-install.js", () => ({
   ensureOnboardingPluginInstalled: install,
 }));
 vi.mock("../commands/runtime-plugin-install.js", () => ({
-  ensureModelSelectionRuntimePlugins: async ({ cfg }: { cfg: OpenClawConfig }) => ({
+  ensureModelSelectionRuntimePlugins: async ({ cfg }: { cfg: CarapaceConfig }) => ({
     ok: true,
     cfg,
     codexInstalled: false,
@@ -63,7 +63,7 @@ it.each([false, true])(
     const workspaceDir = path.join(root, "workspace");
     const projectRoot = path.join(stateDir, "npm", "projects", "installed-provider");
     const pluginRoot = path.join(projectRoot, "node_modules", "@fixture", "installed-provider");
-    const config: OpenClawConfig = { gateway: { mode: "local" } };
+    const config: CarapaceConfig = { gateway: { mode: "local" } };
     const acceptedSurface = {
       channels: [],
       providers: ["installed-provider"],
@@ -92,11 +92,11 @@ it.each([false, true])(
     await withEnvAsync(
       {
         HOME: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
       },
       async () => {
         const env = { ...process.env };
@@ -125,11 +125,11 @@ it.each([false, true])(
             JSON.stringify({
               name: "@fixture/installed-provider",
               version: "1.0.0",
-              openclaw: { extensions: ["./index.cjs"] },
+              carapace: { extensions: ["./index.cjs"] },
             }),
           );
           fs.writeFileSync(
-            path.join(pluginRoot, "openclaw.plugin.json"),
+            path.join(pluginRoot, "carapace.plugin.json"),
             JSON.stringify({
               id: "installed-provider",
               providers: ["installed-provider"],

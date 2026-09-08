@@ -28,17 +28,17 @@ describe("Git updater release tag refresh", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   function fixture(releaseRemote = "upstream", forkRemote?: string) {
-    const directory = tempDirs.make("openclaw-update-tags-");
+    const directory = tempDirs.make("carapace-update-tags-");
     const upstream = path.join(directory, "upstream.git");
     const seed = path.join(directory, "seed");
     const root = path.join(directory, "installed");
     git(directory, "init", "--bare", "--initial-branch=main", upstream);
     git(directory, "clone", upstream, seed);
-    git(seed, "config", "user.name", "OpenClaw Test");
-    git(seed, "config", "user.email", "openclaw@example.invalid");
+    git(seed, "config", "user.name", "Carapace Test");
+    git(seed, "config", "user.email", "carapace@example.invalid");
     writeFileSync(
       path.join(seed, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "2026.9.1" }),
+      JSON.stringify({ name: "carapace", version: "2026.9.1" }),
     );
     git(seed, "add", ".");
     git(seed, "commit", "-m", "original release");

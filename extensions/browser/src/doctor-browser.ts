@@ -4,19 +4,19 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
 import {
   asNullableRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { parseBrowserMajorVersion, readBrowserVersion } from "./browser/chrome.executable-probe.js";
 import {
   resolveBrowserExecutableForPlatform,
   resolveGoogleChromeExecutableForPlatform,
 } from "./browser/chrome.executables.js";
-import { DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME, resolveBrowserConfig } from "./browser/config.js";
+import { DEFAULT_CARAPACE_BROWSER_PROFILE_NAME, resolveBrowserConfig } from "./browser/config.js";
 import { movePathToTrash } from "./browser/trash.js";
-import type { OpenClawConfig } from "./config/config.js";
+import type { CarapaceConfig } from "./config/config.js";
 import { formatCliCommand, note } from "./sdk-setup-tools.js";
 import { CONFIG_DIR, resolveUserPath } from "./utils.js";
 
@@ -50,7 +50,7 @@ type BrowserDoctorFilesystemDeps = {
   movePathToTrash?: (targetPath: string) => Promise<string>;
 };
 
-function collectChromeMcpProfiles(cfg: OpenClawConfig): ExistingSessionProfile[] {
+function collectChromeMcpProfiles(cfg: CarapaceConfig): ExistingSessionProfile[] {
   const browser = asNullableRecord(cfg.browser);
   if (!browser) {
     return [];
@@ -81,7 +81,7 @@ function collectChromeMcpProfiles(cfg: OpenClawConfig): ExistingSessionProfile[]
   return [...profiles.values()].toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
-function collectManagedProfiles(cfg: OpenClawConfig): ManagedProfile[] {
+function collectManagedProfiles(cfg: CarapaceConfig): ManagedProfile[] {
   const browser = asNullableRecord(cfg.browser);
   if (!browser) {
     return [];
@@ -100,7 +100,7 @@ function collectManagedProfiles(cfg: OpenClawConfig): ManagedProfile[] {
 
   for (const [profileName, rawProfile] of Object.entries(configuredProfiles)) {
     const profile = asNullableRecord(rawProfile);
-    const driver = normalizeOptionalString(profile?.driver) ?? "openclaw";
+    const driver = normalizeOptionalString(profile?.driver) ?? "carapace";
     if (driver !== "existing-session") {
       profiles.set(profileName, { name: profileName });
     }
@@ -117,7 +117,7 @@ function resolveManagedBrowserUserDataDir(configDir: string, profileName: string
   return path.join(resolveManagedBrowserProfileDir(configDir, profileName), "user-data");
 }
 
-function isLegacyClawdProfileConfigured(cfg: OpenClawConfig, legacyProfileDir: string): boolean {
+function isLegacyClawdProfileConfigured(cfg: CarapaceConfig, legacyProfileDir: string): boolean {
   const browser = asNullableRecord(cfg.browser);
   if (!browser) {
     return false;
@@ -146,7 +146,7 @@ function isLegacyClawdProfileConfigured(cfg: OpenClawConfig, legacyProfileDir: s
 
 /** Detects unmanaged legacy clawd browser profile residue on disk. */
 export function detectLegacyClawdBrowserProfileResidue(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps?: BrowserDoctorFilesystemDeps,
 ): LegacyClawdBrowserProfileResidue | null {
   const configDir = deps?.configDir ?? CONFIG_DIR;
@@ -170,7 +170,7 @@ export function detectLegacyClawdBrowserProfileResidue(
   const resolved = resolveBrowserConfig(cfg.browser, cfg);
   const defaultProfile = resolved.profiles[resolved.defaultProfile];
   if (
-    resolved.defaultProfile !== DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME ||
+    resolved.defaultProfile !== DEFAULT_CARAPACE_BROWSER_PROFILE_NAME ||
     defaultProfile?.driver === "existing-session"
   ) {
     return null;
@@ -181,7 +181,7 @@ export function detectLegacyClawdBrowserProfileResidue(
     legacyUserDataDir,
     canonicalUserDataDir: resolveManagedBrowserUserDataDir(
       configDir,
-      DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+      DEFAULT_CARAPACE_BROWSER_PROFILE_NAME,
     ),
   };
 }
@@ -191,14 +191,14 @@ function formatLegacyClawdBrowserProfileResidueNote(
 ): string {
   return [
     `- Legacy managed browser profile residue was found at ${residue.legacyProfileDir}.`,
-    `- The canonical OpenClaw-managed browser profile is ${residue.canonicalUserDataDir}.`,
-    `- If no browser is using the legacy profile, run ${formatCliCommand("openclaw doctor --fix")} to archive it safely instead of deleting it in place.`,
+    `- The canonical Carapace-managed browser profile is ${residue.canonicalUserDataDir}.`,
+    `- If no browser is using the legacy profile, run ${formatCliCommand("carapace doctor --fix")} to archive it safely instead of deleting it in place.`,
   ].join("\n");
 }
 
 /** Emits Browser doctor notes for Chrome MCP, managed Chrome, and legacy residue readiness. */
 export async function noteChromeMcpBrowserReadiness(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps?: {
     platform?: NodeJS.Platform;
     noteFn?: typeof note;
@@ -241,8 +241,8 @@ export async function noteChromeMcpBrowserReadiness(
     noteFn(
       [
         "- Chrome extension native bootstrap was not inspected; registration status is unavailable in Doctor.",
-        `- Run ${formatCliCommand("openclaw browser extension status --json")} to inspect it explicitly; this may request browser profile access.`,
-        `- Run ${formatCliCommand("openclaw browser extension install")} if setup or repair is needed.`,
+        `- Run ${formatCliCommand("carapace browser extension status --json")} to inspect it explicitly; this may request browser profile access.`,
+        `- Run ${formatCliCommand("carapace browser extension install")} if setup or repair is needed.`,
       ].join("\n"),
       "Browser extension bootstrap",
     );
@@ -279,8 +279,8 @@ export async function noteChromeMcpBrowserReadiness(
   if (!browserExecutable && managedProfiles.length > 0) {
     noteFn(
       [
-        `- OpenClaw-managed browser profile(s) are configured: ${managedProfileLabel}.`,
-        "- No Chromium-based browser executable was found on this host for OpenClaw-managed launch.",
+        `- Carapace-managed browser profile(s) are configured: ${managedProfileLabel}.`,
+        "- No Chromium-based browser executable was found on this host for Carapace-managed launch.",
         "- Install Chrome, Chromium, Brave, Edge, or set browser.executablePath explicitly.",
       ].join("\n"),
       "Browser",
@@ -288,7 +288,7 @@ export async function noteChromeMcpBrowserReadiness(
   }
 
   if (missingDisplay || shouldWarnRootNoSandbox) {
-    const lines = [`- OpenClaw-managed browser profile(s) are configured: ${managedProfileLabel}.`];
+    const lines = [`- Carapace-managed browser profile(s) are configured: ${managedProfileLabel}.`];
     if (missingDisplay) {
       lines.push(
         "- No DISPLAY or WAYLAND_DISPLAY is set, and browser.headless is false. Managed browser launch needs a desktop session, Xvfb, or browser.headless: true.",
@@ -318,7 +318,7 @@ export async function noteChromeMcpBrowserReadiness(
         "- These profiles use an explicit Chromium user data directory instead of Chrome's default auto-connect path.",
         `- Verify the matching Chromium-based browser is version ${CHROME_MCP_MIN_MAJOR}+ on the same host as the Gateway or node.`,
         `- Enable remote debugging in that browser's inspect page (${REMOTE_DEBUGGING_PAGES}).`,
-        "- Keep the browser running and accept the attach consent prompt the first time OpenClaw connects.",
+        "- Keep the browser running and accept the attach consent prompt the first time Carapace connects.",
       ].join("\n"),
       "Browser",
     );
@@ -331,10 +331,10 @@ export async function noteChromeMcpBrowserReadiness(
   if (!chrome) {
     const lines = [
       `- Chrome MCP existing-session is configured for profile(s): ${profileLabel}.`,
-      `- Google Chrome was not found on this host for auto-connect profile(s): ${autoProfileLabel}. OpenClaw does not bundle Chrome.`,
+      `- Google Chrome was not found on this host for auto-connect profile(s): ${autoProfileLabel}. Carapace does not bundle Chrome.`,
       `- Install Google Chrome ${CHROME_MCP_MIN_MAJOR}+ on the same host as the Gateway or node, or set browser.profiles.<name>.userDataDir for a different Chromium-based browser.`,
       `- Enable remote debugging in the browser inspect page (${REMOTE_DEBUGGING_PAGES}).`,
-      "- Keep the browser running and accept the attach consent prompt the first time OpenClaw connects.",
+      "- Keep the browser running and accept the attach consent prompt the first time Carapace connects.",
       "- Docker, headless, and sandbox browser flows stay on raw CDP; this check only applies to host-local Chrome MCP attach.",
     ];
     if (explicitProfiles.length > 0) {
@@ -369,7 +369,7 @@ export async function noteChromeMcpBrowserReadiness(
 
   lines.push(`- Enable remote debugging in the browser inspect page (${REMOTE_DEBUGGING_PAGES}).`);
   lines.push(
-    "- Keep the browser running and accept the attach consent prompt the first time OpenClaw connects.",
+    "- Keep the browser running and accept the attach consent prompt the first time Carapace connects.",
   );
   if (explicitProfiles.length > 0) {
     lines.push(
@@ -394,14 +394,14 @@ export async function maybeRepairOwnedChromeExtensionNativeHosts(): Promise<{
     reason: "Doctor does not inspect personal browser profiles",
     changes: [],
     warnings: [
-      `Chrome extension native-host repair skipped: Doctor does not inspect personal browser profiles. Run ${formatCliCommand("openclaw browser extension install")} to repair explicitly.`,
+      `Chrome extension native-host repair skipped: Doctor does not inspect personal browser profiles. Run ${formatCliCommand("carapace browser extension install")} to repair explicitly.`,
     ],
   };
 }
 
 /** Archives legacy clawd browser profile residue when doctor --fix is requested. */
 export async function maybeArchiveLegacyClawdBrowserProfileResidue(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   deps?: BrowserDoctorFilesystemDeps,
 ): Promise<{ changes: string[]; warnings: string[] }> {
   const residue = detectLegacyClawdBrowserProfileResidue(cfg, deps);

@@ -37,8 +37,8 @@ describe("groupCatalogSessionsByProject", () => {
 
   it("uses a custom group before the session project", () => {
     const result = groupCatalogSessionsByProject([
-      { ...session("grouped", "/work/openclaw"), customGroup: "Release" },
-      session("project", "/work/openclaw"),
+      { ...session("grouped", "/work/carapace"), customGroup: "Release" },
+      session("project", "/work/carapace"),
     ]);
 
     expect(result.groups).toMatchObject([
@@ -49,9 +49,9 @@ describe("groupCatalogSessionsByProject", () => {
         sessions: [{ threadId: "grouped" }],
       },
       {
-        key: "project:/work/openclaw",
-        legacySectionKey: "/work/openclaw",
-        label: "openclaw",
+        key: "project:/work/carapace",
+        legacySectionKey: "/work/carapace",
+        label: "carapace",
         sessions: [{ threadId: "project" }],
       },
     ]);
@@ -59,13 +59,13 @@ describe("groupCatalogSessionsByProject", () => {
 
   it("sorts custom groups ahead of project groups regardless of session order", () => {
     const result = groupCatalogSessionsByProject([
-      session("project", "/work/openclaw"),
-      { ...session("grouped", "/work/openclaw"), customGroup: "Release" },
+      session("project", "/work/carapace"),
+      { ...session("grouped", "/work/carapace"), customGroup: "Release" },
     ]);
 
     expect(result.groups.map((group) => group.key)).toEqual([
       "custom:Release",
-      "project:/work/openclaw",
+      "project:/work/carapace",
     ]);
   });
 
@@ -86,9 +86,9 @@ describe("groupCatalogSessionsByProject", () => {
   });
 
   it.each([
-    ["/Users/dev/openclaw/.claude/worktrees/fix-1", "/Users/dev/openclaw"],
-    ["/Users/dev/openclaw/.claude/worktrees/fix-1/ui/src", "/Users/dev/openclaw"],
-    ["C:\\Users\\dev\\openclaw\\.claude\\worktrees\\fix-1", "C:\\Users\\dev\\openclaw"],
+    ["/Users/dev/carapace/.claude/worktrees/fix-1", "/Users/dev/carapace"],
+    ["/Users/dev/carapace/.claude/worktrees/fix-1/ui/src", "/Users/dev/carapace"],
+    ["C:\\Users\\dev\\carapace\\.claude\\worktrees\\fix-1", "C:\\Users\\dev\\carapace"],
   ])("folds worktree cwd %s into %s", (worktreeCwd, expectedProject) => {
     const result = groupCatalogSessionsByProject([
       session("direct", expectedProject),
@@ -111,8 +111,8 @@ describe("groupCatalogSessionsByProject", () => {
   });
 
   it.each([
-    [" /Users/dev/openclaw/// ", "/Users/dev/openclaw", "openclaw"],
-    ["C:\\Users\\dev\\openclaw\\", "C:\\Users\\dev\\openclaw", "openclaw"],
+    [" /Users/dev/carapace/// ", "/Users/dev/carapace", "carapace"],
+    ["C:\\Users\\dev\\carapace\\", "C:\\Users\\dev\\carapace", "carapace"],
   ])("normalizes %s to project %s with label %s", (cwd, expectedPath, expectedLabel) => {
     const result = groupCatalogSessionsByProject([session("one", cwd)]);
 

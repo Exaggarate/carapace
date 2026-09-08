@@ -1,5 +1,5 @@
 // Codex plugin module implements periodic Computer Use health probes.
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
 import { defineCodexBuildState } from "../build-state.js";
 import type { CodexAppServerClient } from "./client.js";
 import { runCodexComputerUseLiveTest } from "./computer-use.js";
@@ -18,7 +18,7 @@ type ComputerUseHealthMonitorState = {
 };
 
 const getComputerUseHealthMonitorState = defineCodexBuildState(
-  "openclaw.codexComputerUseHealthMonitorState",
+  "carapace.codexComputerUseHealthMonitorState",
   (): ComputerUseHealthMonitorState => ({ monitors: new WeakMap() }),
 );
 

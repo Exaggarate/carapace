@@ -4,7 +4,7 @@ import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { resolveBoardWidgetContentKindResourceUrls } from "./board-widget-content-kinds.js";
 import {
   cleanupPluginLoaderFixturesForTest,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   resetPluginLoaderTestStateForTest,
   type TempPlugin,
   useNoBundledPlugins,
@@ -16,13 +16,13 @@ afterEach(resetPluginLoaderTestStateForTest);
 afterAll(cleanupPluginLoaderFixturesForTest);
 
 function updateDashboardManifest(plugin: TempPlugin, dashboard: Record<string, unknown>): void {
-  const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+  const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<string, unknown>;
   fs.writeFileSync(manifestPath, JSON.stringify({ ...manifest, dashboard }, null, 2), "utf8");
 }
 
 function loadFixture(plugin: TempPlugin) {
-  return loadOpenClawPlugins({
+  return loadCarapacePlugins({
     cache: false,
     workspaceDir: plugin.dir,
     config: {
@@ -37,7 +37,7 @@ function loadFixture(plugin: TempPlugin) {
 
 describe("plugin dashboard declarations", () => {
   it.each([
-    ["/__openclaw__/diagram/app.js", "/__openclaw__/diagram/app.js"],
+    ["/__carapace__/diagram/app.js", "/__carapace__/diagram/app.js"],
     ["/mcp-app-sandbox", "/mcp-app-sandbox"],
     ["/renderer/app.js?v=1#asset", "/renderer/app.js%3Fv=1%23asset"],
   ])("publishes private renderer path %s through its capability", (resourcePath, resolvedPath) => {
@@ -71,9 +71,9 @@ describe("plugin dashboard declarations", () => {
       registration &&
         resolveBoardWidgetContentKindResourceUrls(
           registration,
-          "https://gateway.test/__openclaw__/cap/token",
+          "https://gateway.test/__carapace__/cap/token",
         ),
-    ).toEqual({ [resourcePath]: `https://gateway.test/__openclaw__/cap/token${resolvedPath}` });
+    ).toEqual({ [resourcePath]: `https://gateway.test/__carapace__/cap/token${resolvedPath}` });
   });
 
   it("fails plugin load atomically for invalid board widget content kinds", () => {
@@ -86,7 +86,7 @@ describe("plugin dashboard declarations", () => {
           api.registerBoardWidgetContentKind({
             kind: "html",
             label: "Invalid",
-            resources: { surface: "canvas", paths: ["/__openclaw__/invalid/app.js"] },
+            resources: { surface: "canvas", paths: ["/__carapace__/invalid/app.js"] },
             validateSource() {},
             composeDocument() { return ""; },
           });
@@ -167,7 +167,7 @@ describe("plugin dashboard declarations", () => {
                 label: "Renderer",
                 resources: {
                   surface: "${kind}",
-                  paths: ["/__openclaw__/renderer/${resourceName}.js"],
+                  paths: ["/__carapace__/renderer/${resourceName}.js"],
                   ${isPublic ? "async readPublicResource() { return undefined; }," : ""}
                 },
                 validateSource() {},
@@ -180,7 +180,7 @@ describe("plugin dashboard declarations", () => {
       const firstPlugin = createRenderer(firstPublic, "first");
       const secondPlugin = createRenderer(secondPublic, "second");
       const plugins = [firstPlugin, secondPlugin];
-      const registry = loadOpenClawPlugins({
+      const registry = loadCarapacePlugins({
         cache: false,
         workspaceDir: firstPlugin.dir,
         config: {
@@ -456,7 +456,7 @@ describe("plugin dashboard declarations", () => {
       ],
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       workspaceDir: dataPlugin.dir,
       config: {

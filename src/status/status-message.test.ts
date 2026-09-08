@@ -90,7 +90,7 @@ describe("buildStatusMessageParts presentation", () => {
     );
     expect(parts.text).toContain("⏱️ Uptime: gateway 1h · system 2d");
     expect(parts.text).toContain("Telegram rich messages: on");
-    expect(parts.presentation.title).toMatch(/^🦞 OpenClaw /);
+    expect(parts.presentation.title).toMatch(/^🦞 Carapace /);
     const table = parts.presentation.blocks.find((block) => block.type === "table");
     expect(table).toBeDefined();
     if (table?.type !== "table") {
@@ -321,7 +321,7 @@ describe("buildStatusMessage context window", () => {
         updatedAt: 0,
         modelProvider: "openai",
         model: "gpt-5.6-sol",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         contextTokens: 272_000,
         contextTokensSource: "runtime",
         totalTokens: 11,
@@ -594,7 +594,7 @@ describe("buildStatusMessage context window", () => {
         modelOverrideFallbackOriginModel: "deepseek-v4-pro",
         modelProvider: "ollama-cloud",
         model: "deepseek-v4-pro",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         contextTokens: 128_000,
         contextTokensSource: "runtime",
         totalTokens: 50_000,
@@ -605,7 +605,7 @@ describe("buildStatusMessage context window", () => {
       sessionScope: "per-sender",
       queue: { mode: "steer", depth: 0 },
       modelAuth: "api-key",
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
     });
 
     expect(text).toContain("Model: ollama-cloud/qwen3.6-blue");

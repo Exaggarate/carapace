@@ -1,5 +1,5 @@
 import { PassThrough, type Readable } from "node:stream";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type { DiscordVoiceIngressContext } from "./ingress.js";
 import type { MockCallSource } from "./manager.e2e.test-support.js";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
@@ -78,14 +78,14 @@ defineDiscordVoiceTests(
         if (mode === "agent-proxy") {
           await emitFinalRealtimeUserTranscript(
             lastRealtimeBridgeParams(),
-            "OpenClaw, what changed?",
+            "Carapace, what changed?",
           );
         } else {
           await lastRealtimeBridgeParams().onToolCall?.(
             {
               itemId: "consult-after-recovery",
               callId: "consult-after-recovery",
-              name: "openclaw_agent_consult",
+              name: "carapace_agent_consult",
               args: { question: "what changed?" },
             },
             realtimeSessionMock,

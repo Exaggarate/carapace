@@ -1,6 +1,6 @@
 import { performance } from "node:perf_hooks";
 import { Duplex } from "node:stream";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { mockProcessPlatform } from "../../test-utils/vitest-spies.js";
 import * as childAdapter from "./adapters/child.js";

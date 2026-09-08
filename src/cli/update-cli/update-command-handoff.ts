@@ -1,4 +1,4 @@
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import { GATEWAY_SERVICE_RUNTIME_PID_ENV, isGatewayServiceEnv } from "../../daemon/constants.js";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import {
@@ -62,7 +62,7 @@ ${GATEWAY_ANCESTRY_SHELL_GUIDANCE}`;
 
 const ANCESTRY_BLOCK_MARKER = "inside the gateway process tree";
 const UPDATE_CHAT_HANDOFF_GUIDANCE =
-  "From chat, the OpenClaw owner can start the update with the gateway update action or /update, which hands it to a managed helper.";
+  "From chat, the Carapace owner can start the update with the gateway update action or /update, which hands it to a managed helper.";
 
 function appendUpdateChatHandoffGuidance(blockMessage: string): string {
   return blockMessage.includes(UPDATE_CHAT_HANDOFF_GUIDANCE)
@@ -107,7 +107,7 @@ export function gatewayMaintenanceBlockMessage(
         store.readProcessStartIdentity(owner.pid) === owner.startIdentity,
     )
   ) {
-    return "This maintenance command cannot stop the Gateway from inside its automatic triage process tree: stopping the service would cancel this repair. Use read-only diagnosis or safe offline artifact repair followed by an atomic `openclaw gateway restart`, or run stop-requiring maintenance from a shell outside automatic triage. Report this blocker if repair cannot proceed safely.";
+    return "This maintenance command cannot stop the Gateway from inside its automatic triage process tree: stopping the service would cancel this repair. Use read-only diagnosis or safe offline artifact repair followed by an atomic `carapace gateway restart`, or run stop-requiring maintenance from a shell outside automatic triage. Report this blocker if repair cannot proceed safely.";
   }
   return operation === "handoff" ? undefined : gatewayAncestryBlockMessage(state.runtime?.pid);
 }
@@ -125,7 +125,7 @@ export async function handoffUpdateFromGateway(params: {
   stopProgress: () => void;
 }): Promise<boolean> {
   if (
-    process.env.OPENCLAW_UPDATE_RUN_HANDOFF === "1" ||
+    process.env.CARAPACE_UPDATE_RUN_HANDOFF === "1" ||
     (process.platform !== "linux" && process.platform !== "darwin")
   ) {
     return false;
@@ -133,7 +133,7 @@ export async function handoffUpdateFromGateway(params: {
   const parentPid = parsePositivePid(params.state.runtime?.pid);
   const supervisor =
     detectRespawnSupervisor(process.env, process.platform, {
-      includeLinuxOpenClawGatewayServiceMarker: true,
+      includeLinuxCarapaceGatewayServiceMarker: true,
     }) ??
     (gatewayAncestryBlockMessage(parentPid)
       ? process.platform === "linux"
@@ -153,7 +153,7 @@ export async function handoffUpdateFromGateway(params: {
   if (!argv1) {
     throw new UpdatePreMutationError(
       "managed-service-handoff-failed",
-      "Cannot locate the installed updater; run `openclaw doctor` before retrying.",
+      "Cannot locate the installed updater; run `carapace doctor` before retrying.",
     );
   }
   const started = await startManagedServiceUpdateHandoff({
@@ -176,7 +176,7 @@ export async function handoffUpdateFromGateway(params: {
   if (started.status === "joined") {
     throw new UpdatePreMutationError(
       "managed-service-handoff-already-running",
-      "Another managed update is already running. Inspect `openclaw status --all` before retrying.",
+      "Another managed update is already running. Inspect `carapace status --all` before retrying.",
     );
   }
   const identity = {
@@ -185,11 +185,11 @@ export async function handoffUpdateFromGateway(params: {
     installRoot: started.installRoot,
   };
   const target = resolveInstallationTarget(env);
-  const statusCommand = formatInstallationTargetCommand(["openclaw", "status", "--all"], target, {
+  const statusCommand = formatInstallationTargetCommand(["carapace", "status", "--all"], target, {
     env,
   });
   const healthCommand = formatInstallationTargetCommand(
-    ["openclaw", "gateway", "status", "--deep"],
+    ["carapace", "gateway", "status", "--deep"],
     target,
     { env },
   );

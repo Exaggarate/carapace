@@ -1,9 +1,9 @@
 // Gateway session event broadcaster.
 // Projects transcript and lifecycle updates to websocket subscribers.
 import path from "node:path";
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   readTranscriptDisplayPosition,
   type TranscriptDisplayPosition,
@@ -279,7 +279,7 @@ async function handleTranscriptUpdateBroadcast(
       message = stored.message;
       messageSeq = stored.seq;
       transcriptPosition = readTranscriptDisplayPosition(
-        asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.transcriptPosition,
+        asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.transcriptPosition,
       );
     } catch (error) {
       if (!isSessionTranscriptProjectionUnavailableError(error)) {

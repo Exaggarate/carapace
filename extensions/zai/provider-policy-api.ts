@@ -3,8 +3,8 @@ import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
   ProviderWrapStreamFnContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type ZaiReasoningEffort = "low" | "high" | "max";
 type ZaiThinkingLevel = NonNullable<ProviderWrapStreamFnContext["thinkingLevel"]>;

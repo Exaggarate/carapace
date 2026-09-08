@@ -59,7 +59,7 @@ const PNG_BYTES = Buffer.from(
 const NORMALIZED_PNG_BYTES = Buffer.from("normalized-png");
 const fixtureDirs = useAutoCleanupTempDirTracker(afterAll);
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const iconFixtureDir = fixtureDirs.make("openclaw-plugin-icon-");
+const iconFixtureDir = fixtureDirs.make("carapace-plugin-icon-");
 const localIconPath = path.join(iconFixtureDir, "icon.png");
 writeFileSync(localIconPath, PNG_BYTES);
 const ICO_BYTES = Buffer.from([
@@ -67,24 +67,24 @@ const ICO_BYTES = Buffer.from([
 ]);
 const CATALOG_ICON_URL = "https://cdn.example.test/setup-tool.svg";
 const ICON_ROUTES = [
-  { label: "plugin", pathname: "/__openclaw__/plugin-icon/firecrawl" },
+  { label: "plugin", pathname: "/__carapace__/plugin-icon/firecrawl" },
   {
     label: "catalog",
-    pathname: `/__openclaw__/catalog-icon/${encodeURIComponent(CATALOG_ICON_URL)}`,
+    pathname: `/__carapace__/catalog-icon/${encodeURIComponent(CATALOG_ICON_URL)}`,
   },
 ] as const;
 const ALL_ICON_ROUTES = [
   ...ICON_ROUTES,
-  { label: "favicon", pathname: "/__openclaw__/link-favicon/example.com" },
+  { label: "favicon", pathname: "/__carapace__/link-favicon/example.com" },
 ];
 const INVALID_ICON_ROUTES = [
-  { label: "blank plugin id", pathname: "/__openclaw__/plugin-icon/" },
-  { label: "invalid plugin id", pathname: "/__openclaw__/plugin-icon/%20" },
-  { label: "malformed plugin id", pathname: "/__openclaw__/plugin-icon/%zz" },
-  { label: "nested plugin id", pathname: "/__openclaw__/plugin-icon/one/two" },
-  { label: "blank catalog URL", pathname: "/__openclaw__/catalog-icon/" },
-  { label: "malformed catalog URL", pathname: "/__openclaw__/catalog-icon/%zz" },
-  { label: "nested catalog URL", pathname: "/__openclaw__/catalog-icon/one/two" },
+  { label: "blank plugin id", pathname: "/__carapace__/plugin-icon/" },
+  { label: "invalid plugin id", pathname: "/__carapace__/plugin-icon/%20" },
+  { label: "malformed plugin id", pathname: "/__carapace__/plugin-icon/%zz" },
+  { label: "nested plugin id", pathname: "/__carapace__/plugin-icon/one/two" },
+  { label: "blank catalog URL", pathname: "/__carapace__/catalog-icon/" },
+  { label: "malformed catalog URL", pathname: "/__carapace__/catalog-icon/%zz" },
+  { label: "nested catalog URL", pathname: "/__carapace__/catalog-icon/one/two" },
 ] as const;
 
 let port = 0;
@@ -164,7 +164,7 @@ describe("Control UI plugin and catalog icon routes", () => {
     configForRequest = () => ({
       gateway: { controlUi: { automaticallyFetchFavicons: false } },
     });
-    const response = await request("/__openclaw__/link-favicon/example.com");
+    const response = await request("/__carapace__/link-favicon/example.com");
 
     expect(response.status).toBe(404);
     expect(mocks.authorize).toHaveBeenCalledOnce();
@@ -181,7 +181,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       return null;
     });
 
-    const response = await request("/__openclaw__/link-favicon/example.com", { token: "" });
+    const response = await request("/__carapace__/link-favicon/example.com", { token: "" });
 
     expect(response.status).toBe(401);
     expect(mocks.readRemoteMediaBuffer).not.toHaveBeenCalled();
@@ -202,14 +202,14 @@ describe("Control UI plugin and catalog icon routes", () => {
       gateway: { controlUi: { automaticallyFetchFavicons: true } },
     });
 
-    const response = await request(`/__openclaw__/link-favicon/${encodeURIComponent(hostname)}`);
+    const response = await request(`/__carapace__/link-favicon/${encodeURIComponent(hostname)}`);
 
     expect(response.status).toBe(404);
     expect(mocks.readRemoteMediaBuffer).not.toHaveBeenCalled();
   });
 
   it("fetches by default only through the fixed HTTPS path and strict media guard", async () => {
-    const response = await request("/__openclaw__/link-favicon/Example.COM");
+    const response = await request("/__carapace__/link-favicon/Example.COM");
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-disposition")).toBe('attachment; filename="link-favicon"');
@@ -248,7 +248,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       run: async (gateway) => {
         const started = process.hrtime.bigint();
         const favicon = sendRequest(gateway, {
-          path: "/__openclaw__/link-favicon/example.com",
+          path: "/__carapace__/link-favicon/example.com",
         });
         await validationStarted.promise;
         const health = sendRequest(gateway, { path: "/healthz" });
@@ -271,7 +271,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       contentType: "image/vnd.microsoft.icon",
     });
 
-    const response = await request("/__openclaw__/link-favicon/github.com");
+    const response = await request("/__carapace__/link-favicon/github.com");
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/x-icon");
@@ -316,8 +316,8 @@ describe("Control UI plugin and catalog icon routes", () => {
     });
     mocks.readRemoteMediaBuffer.mockRejectedValueOnce(new Error("upstream failed"));
 
-    const first = await request("/__openclaw__/link-favicon/missing.example");
-    const second = await request("/__openclaw__/link-favicon/missing.example");
+    const first = await request("/__carapace__/link-favicon/missing.example");
+    const second = await request("/__carapace__/link-favicon/missing.example");
 
     expect(first.status).toBe(404);
     expect(second.status).toBe(404);
@@ -426,7 +426,7 @@ describe("Control UI plugin and catalog icon routes", () => {
   it("does not use arbitrary remote URL parameters when no package icon exists", async () => {
     mocks.resolveIconSource.mockResolvedValueOnce(undefined);
     const response = await request(
-      "/__openclaw__/plugin-icon/firecrawl?url=http%3A%2F%2F127.0.0.1%2Fsecret",
+      "/__carapace__/plugin-icon/firecrawl?url=http%3A%2F%2F127.0.0.1%2Fsecret",
     );
 
     expect(response.status).toBe(404);
@@ -445,7 +445,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       rootPath: iconFixtureDir,
     });
 
-    const response = await request("/__openclaw__/plugin-icon/local-plugin");
+    const response = await request("/__carapace__/plugin-icon/local-plugin");
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/png");
@@ -484,7 +484,7 @@ describe("Control UI plugin and catalog icon routes", () => {
     try {
       // The owner imports Node's named binding; observe release before the fd number can be reused.
       syncBuiltinESMExports();
-      const response = await request("/__openclaw__/plugin-icon/empty-package");
+      const response = await request("/__carapace__/plugin-icon/empty-package");
       expect(response.status).toBe(404);
       expect(tracked?.closed).toBe(true);
     } finally {
@@ -501,7 +501,7 @@ describe("Control UI plugin and catalog icon routes", () => {
   });
 
   it("rejects a package icon redirected outside its package after discovery", async () => {
-    const fixtureRoot = tempDirs.make("openclaw-plugin-icon-swap-");
+    const fixtureRoot = tempDirs.make("carapace-plugin-icon-swap-");
     const packageRoot = path.join(fixtureRoot, "package");
     const assetsPath = path.join(packageRoot, "assets");
     const displacedAssetsPath = path.join(packageRoot, "assets-original");
@@ -519,7 +519,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       rootPath: packageRoot,
     });
 
-    const response = await request("/__openclaw__/plugin-icon/swapped-package");
+    const response = await request("/__carapace__/plugin-icon/swapped-package");
 
     expect(response.status).toBe(404);
     expect(mocks.encodeImage).not.toHaveBeenCalled();
@@ -528,7 +528,7 @@ describe("Control UI plugin and catalog icon routes", () => {
   it.skipIf(process.platform === "win32")(
     "rejects a substituted package icon FIFO without waiting for a writer",
     async () => {
-      const fixtureRoot = tempDirs.make("openclaw-plugin-icon-fifo-");
+      const fixtureRoot = tempDirs.make("carapace-plugin-icon-fifo-");
       const iconPath = path.join(fixtureRoot, "icon.png");
       execFileSync("mkfifo", [iconPath]);
       mocks.resolveIconSource.mockResolvedValueOnce({
@@ -540,7 +540,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       const startedAt = performance.now();
 
       try {
-        const response = await request("/__openclaw__/plugin-icon/fifo-package");
+        const response = await request("/__carapace__/plugin-icon/fifo-package");
 
         expect(response.status).toBe(404);
         expect(performance.now() - startedAt).toBeLessThan(200);
@@ -553,7 +553,7 @@ describe("Control UI plugin and catalog icon routes", () => {
 
   it("resolves encoded catalog URLs through the server-owned allowlist", async () => {
     const iconUrl = CATALOG_ICON_URL;
-    const response = await request(`/__openclaw__/catalog-icon/${encodeURIComponent(iconUrl)}`);
+    const response = await request(`/__carapace__/catalog-icon/${encodeURIComponent(iconUrl)}`);
 
     expect(response.status).toBe(200);
     expect(mocks.resolveCatalogIconUrl).toHaveBeenCalledWith({
@@ -568,7 +568,7 @@ describe("Control UI plugin and catalog icon routes", () => {
   it("does not fetch catalog URLs rejected by the server-owned allowlist", async () => {
     mocks.resolveCatalogIconUrl.mockReturnValueOnce(undefined);
     const response = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://untrusted.example/icon.png")}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent("https://untrusted.example/icon.png")}`,
     );
 
     expect(response.status).toBe(404);
@@ -583,7 +583,7 @@ describe("Control UI plugin and catalog icon routes", () => {
     });
 
     const response = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent(CATALOG_ICON_URL)}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent(CATALOG_ICON_URL)}`,
     );
 
     expect(response.status).toBe(200);
@@ -646,13 +646,13 @@ describe("Control UI plugin and catalog icon routes", () => {
 
   it("accepts one canonical scoped plugin id encoded as a single path segment", async () => {
     const response = await request(
-      `/__openclaw__/plugin-icon/${encodeURIComponent("@expediagroup/expedia-openclaw")}`,
+      `/__carapace__/plugin-icon/${encodeURIComponent("@expediagroup/expedia-carapace")}`,
     );
 
     expect(response.status).toBe(200);
     expect(mocks.resolveIconSource).toHaveBeenCalledWith({
       config: testConfig,
-      pluginId: "@expediagroup/expedia-openclaw",
+      pluginId: "@expediagroup/expedia-carapace",
     });
   });
 
@@ -660,11 +660,11 @@ describe("Control UI plugin and catalog icon routes", () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
     try {
       mocks.encodeImage.mockResolvedValueOnce({ data: PNG_BYTES });
-      const first = await request("/__openclaw__/plugin-icon/firecrawl");
+      const first = await request("/__carapace__/plugin-icon/firecrawl");
       const etag = first.headers.get("etag");
-      const cached = await request("/__openclaw__/plugin-icon/firecrawl");
+      const cached = await request("/__carapace__/plugin-icon/firecrawl");
       now.mockReturnValue(1_000 + PLUGIN_ICON_CACHE_TTL_MS + 1);
-      const refreshed = await request("/__openclaw__/plugin-icon/firecrawl", {
+      const refreshed = await request("/__carapace__/plugin-icon/firecrawl", {
         headers: { "If-None-Match": etag ?? "" },
       });
 
@@ -683,7 +683,7 @@ describe("Control UI plugin and catalog icon routes", () => {
 
   it("returns not found when plugin metadata is absent or catalog image validation fails", async () => {
     mocks.resolveIconSource.mockResolvedValueOnce(undefined);
-    const missing = await request("/__openclaw__/plugin-icon/missing");
+    const missing = await request("/__carapace__/plugin-icon/missing");
     expect(missing.status).toBe(404);
 
     mocks.readRemoteMediaBuffer.mockResolvedValueOnce({
@@ -691,7 +691,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       contentType: "text/html",
     });
     const invalid = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://cdn.example.test/not-an-image")}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent("https://cdn.example.test/not-an-image")}`,
     );
     expect(invalid.status).toBe(404);
 
@@ -700,7 +700,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       contentType: "image/png",
     });
     const mislabeled = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://cdn.example.test/mislabeled")}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent("https://cdn.example.test/mislabeled")}`,
     );
     expect(mislabeled.status).toBe(404);
 
@@ -710,13 +710,13 @@ describe("Control UI plugin and catalog icon routes", () => {
       contentType: "image/png",
     });
     const oversized = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://cdn.example.test/oversized")}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent("https://cdn.example.test/oversized")}`,
     );
     expect(oversized.status).toBe(404);
 
     mocks.readRemoteMediaBuffer.mockRejectedValueOnce(new Error("upstream failed"));
     const failed = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://cdn.example.test/broken")}`,
+      `/__carapace__/catalog-icon/${encodeURIComponent("https://cdn.example.test/broken")}`,
     );
     expect(failed.status).toBe(404);
   });
@@ -738,7 +738,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       void handlePluginIconHttpRequest(req, res, {
         auth: { mode: "token", token: "test-token", allowTailscale: false },
         config: {},
-        basePath: "/openclaw",
+        basePath: "/carapace",
       }).then((handled) => {
         if (!handled) {
           res.statusCode = 404;
@@ -754,7 +754,7 @@ describe("Control UI plugin and catalog icon routes", () => {
       const handledPort = (handledServer.address() as AddressInfo).port;
       for (const { pathname } of ICON_ROUTES) {
         for (const method of ["GET", "HEAD"]) {
-          const response = await fetch(`http://127.0.0.1:${handledPort}/openclaw${pathname}`, {
+          const response = await fetch(`http://127.0.0.1:${handledPort}/carapace${pathname}`, {
             headers: { Authorization: "Bearer test-token" },
             method,
           });

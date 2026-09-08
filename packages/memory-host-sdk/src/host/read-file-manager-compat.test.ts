@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { readMemoryFile } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { readMemoryFile } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 function requireMemoryReadSuccess(result: Awaited<ReturnType<typeof readMemoryFile>>) {
@@ -18,7 +18,7 @@ describe("MemoryIndexManager.readFile", () => {
   let extraDir: string;
 
   beforeAll(async () => {
-    workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-read-"));
+    workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mem-read-"));
     memoryDir = path.join(workspaceDir, "memory");
     extraDir = path.join(workspaceDir, "extra");
     await fs.mkdir(memoryDir, { recursive: true });

@@ -1,5 +1,5 @@
 /** Query helpers for discovering secret target registry entries. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { formatConcreteConfigPath, type ConcreteConfigPathSegment } from "../shared/dot-path.js";
 import { loadChannelSecretContractApi } from "./channel-contract-api.js";
@@ -28,15 +28,15 @@ let compiledSecretTargetRegistryState: {
   authProfilesTargetsById: Map<string, CompiledTargetRegistryEntry[]>;
   compiledSecretTargetRegistry: CompiledTargetRegistryEntry[];
   knownTargetIds: Set<string>;
-  openClawCompiledSecretTargets: CompiledTargetRegistryEntry[];
-  openClawTargetsById: Map<string, CompiledTargetRegistryEntry[]>;
+  carapaceCompiledSecretTargets: CompiledTargetRegistryEntry[];
+  carapaceTargetsById: Map<string, CompiledTargetRegistryEntry[]>;
   targetsByType: Map<string, CompiledTargetRegistryEntry[]>;
 } | null = null;
 
-let compiledCoreOpenClawTargetState: {
+let compiledCoreCarapaceTargetState: {
   knownTargetIds: Set<string>;
-  openClawCompiledSecretTargets: CompiledTargetRegistryEntry[];
-  openClawTargetsById: Map<string, CompiledTargetRegistryEntry[]>;
+  carapaceCompiledSecretTargets: CompiledTargetRegistryEntry[];
+  carapaceTargetsById: Map<string, CompiledTargetRegistryEntry[]>;
   planTargetsByType: Map<string, CompiledTargetRegistryEntry[]>;
 } | null = null;
 
@@ -46,7 +46,7 @@ let compiledCoreAuthProfileTargetState: {
 } | null = null;
 
 // Channel contract entries are process-stable; plugin install/reload is the owner of freshness.
-const compiledChannelOpenClawTargets = new Map<string, CompiledTargetRegistryEntry[] | null>();
+const compiledChannelCarapaceTargets = new Map<string, CompiledTargetRegistryEntry[] | null>();
 
 function buildTargetTypeIndex(
   compiledSecretTargetRegistry: CompiledTargetRegistryEntry[],
@@ -86,8 +86,8 @@ function buildConfigTargetIdIndex(
 
 function compileSecretTargetRegistryState(registry: SecretTargetRegistryEntry[]) {
   const compiledSecretTargetRegistry = registry.map(compileTargetRegistryEntry);
-  const openClawCompiledSecretTargets = compiledSecretTargetRegistry.filter(
-    (entry) => entry.configFile === "openclaw.json",
+  const carapaceCompiledSecretTargets = compiledSecretTargetRegistry.filter(
+    (entry) => entry.configFile === "carapace.json",
   );
   const authProfilesCompiledSecretTargets = compiledSecretTargetRegistry.filter(
     (entry) => entry.configFile === "auth-profile-store",
@@ -97,8 +97,8 @@ function compileSecretTargetRegistryState(registry: SecretTargetRegistryEntry[])
     authProfilesTargetsById: buildConfigTargetIdIndex(authProfilesCompiledSecretTargets),
     compiledSecretTargetRegistry,
     knownTargetIds: new Set(compiledSecretTargetRegistry.map((entry) => entry.id)),
-    openClawCompiledSecretTargets,
-    openClawTargetsById: buildConfigTargetIdIndex(openClawCompiledSecretTargets),
+    carapaceCompiledSecretTargets,
+    carapaceTargetsById: buildConfigTargetIdIndex(carapaceCompiledSecretTargets),
     targetsByType: buildTargetTypeIndex(compiledSecretTargetRegistry),
   };
 }
@@ -112,7 +112,7 @@ function getCompiledSecretTargetRegistryState() {
 }
 
 function getConfiguredSecretTargetRegistryState(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">,
 ) {
@@ -123,21 +123,21 @@ function getConfiguredSecretTargetRegistryState(
   );
 }
 
-function getCompiledCoreOpenClawTargetState() {
-  if (compiledCoreOpenClawTargetState) {
-    return compiledCoreOpenClawTargetState;
+function getCompiledCoreCarapaceTargetState() {
+  if (compiledCoreCarapaceTargetState) {
+    return compiledCoreCarapaceTargetState;
   }
   const compiledCoreSecretTargets = getCoreSecretTargetRegistry().map(compileTargetRegistryEntry);
-  const openClawCompiledSecretTargets = compiledCoreSecretTargets.filter(
-    (entry) => entry.configFile === "openclaw.json",
+  const carapaceCompiledSecretTargets = compiledCoreSecretTargets.filter(
+    (entry) => entry.configFile === "carapace.json",
   );
-  compiledCoreOpenClawTargetState = {
+  compiledCoreCarapaceTargetState = {
     knownTargetIds: new Set(compiledCoreSecretTargets.map((entry) => entry.id)),
-    openClawCompiledSecretTargets,
-    openClawTargetsById: buildConfigTargetIdIndex(openClawCompiledSecretTargets),
+    carapaceCompiledSecretTargets,
+    carapaceTargetsById: buildConfigTargetIdIndex(carapaceCompiledSecretTargets),
     planTargetsByType: buildTargetTypeIndex(compiledCoreSecretTargets),
   };
-  return compiledCoreOpenClawTargetState;
+  return compiledCoreCarapaceTargetState;
 }
 
 function getCompiledCoreAuthProfileTargetState() {
@@ -154,7 +154,7 @@ function getCompiledCoreAuthProfileTargetState() {
   return compiledCoreAuthProfileTargetState;
 }
 
-function getCompiledChannelOpenClawTargets(
+function getCompiledChannelCarapaceTargets(
   channelId: string,
 ): CompiledTargetRegistryEntry[] | null {
   const normalizedChannelId = channelId.trim();
@@ -166,18 +166,18 @@ function getCompiledChannelOpenClawTargets(
   ) {
     return null;
   }
-  if (compiledChannelOpenClawTargets.has(normalizedChannelId)) {
-    return compiledChannelOpenClawTargets.get(normalizedChannelId) ?? null;
+  if (compiledChannelCarapaceTargets.has(normalizedChannelId)) {
+    return compiledChannelCarapaceTargets.get(normalizedChannelId) ?? null;
   }
   const compiledEntries =
     loadChannelSecretContractApi({
       channelId: normalizedChannelId,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       env: process.env,
     })
-      ?.secretTargetRegistryEntries?.filter((entry) => entry.configFile === "openclaw.json")
+      ?.secretTargetRegistryEntries?.filter((entry) => entry.configFile === "carapace.json")
       .map(compileTargetRegistryEntry) ?? null;
-  compiledChannelOpenClawTargets.set(normalizedChannelId, compiledEntries);
+  compiledChannelCarapaceTargets.set(normalizedChannelId, compiledEntries);
   return compiledEntries;
 }
 
@@ -192,12 +192,12 @@ function normalizeAllowedTargetIds(targetIds?: Iterable<string>): Set<string> | 
   );
 }
 
-function configHasPluginEntries(config: OpenClawConfig): boolean {
+function configHasPluginEntries(config: CarapaceConfig): boolean {
   return Boolean(config.plugins?.entries && Object.keys(config.plugins.entries).length > 0);
 }
 
-function getConfiguredChannelOpenClawTargets(
-  config: OpenClawConfig,
+function getConfiguredChannelCarapaceTargets(
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): CompiledTargetRegistryEntry[] | null {
   const entries: CompiledTargetRegistryEntry[] = [];
@@ -218,7 +218,7 @@ function getConfiguredChannelOpenClawTargets(
     }
     entries.push(
       ...(contract.secretTargetRegistryEntries
-        ?.filter((entry) => entry.configFile === "openclaw.json")
+        ?.filter((entry) => entry.configFile === "carapace.json")
         .map(compileTargetRegistryEntry) ?? []),
     );
   }
@@ -359,7 +359,7 @@ export function isKnownSecretTargetId(value: unknown): value is string {
 /** Checks the static core registry without materializing plugin/channel contracts. */
 export function isKnownCoreSecretTargetId(value: unknown): value is string {
   return (
-    typeof value === "string" && getCompiledCoreOpenClawTargetState().knownTargetIds.has(value)
+    typeof value === "string" && getCompiledCoreCarapaceTargetState().knownTargetIds.has(value)
   );
 }
 
@@ -374,7 +374,7 @@ export function resolvePlanTargetAgainstRegistry(candidate: {
   providerId?: string;
   accountId?: string;
 }): ResolvedPlanTarget | null {
-  const coreEntries = getCompiledCoreOpenClawTargetState().planTargetsByType.get(candidate.type);
+  const coreEntries = getCompiledCoreCarapaceTargetState().planTargetsByType.get(candidate.type);
   if (coreEntries) {
     return resolvePlanTargetAgainstEntries(candidate, coreEntries);
   }
@@ -384,7 +384,7 @@ export function resolvePlanTargetAgainstRegistry(candidate: {
     if (/[\\/:]/.test(explicitChannelId)) {
       return null;
     }
-    const channelEntries = getCompiledChannelOpenClawTargets(explicitChannelId) ?? [];
+    const channelEntries = getCompiledChannelCarapaceTargets(explicitChannelId) ?? [];
     const channelTypeEntries = buildTargetTypeIndex(channelEntries).get(candidate.type);
     if (channelTypeEntries) {
       return resolvePlanTargetAgainstEntries(candidate, channelTypeEntries);
@@ -447,7 +447,7 @@ export function resolveSecretPlanTargetByPathCore(params: {
   pathSegments: string[];
   pathTokens?: readonly ConcreteConfigPathSegment[];
 }): ResolvedPlanTarget | null {
-  if (params.configFile === "openclaw.json") {
+  if (params.configFile === "carapace.json") {
     return resolveConfigSecretTargetByPath(params.pathSegments, params.pathTokens);
   }
   const pathTokens = params.pathTokens ?? params.pathSegments;
@@ -468,13 +468,13 @@ export function resolveSecretPlanTargetByPathCore(params: {
 }
 
 /**
- * Resolves an openclaw.json config path to the matching plan-capable secrets target.
+ * Resolves an carapace.json config path to the matching plan-capable secrets target.
  */
 export function resolveConfigSecretTargetByPath(
   pathSegments: string[],
   pathTokens: readonly ConcreteConfigPathSegment[] = pathSegments,
 ): ResolvedPlanTarget | null {
-  for (const entry of getCompiledCoreOpenClawTargetState().openClawCompiledSecretTargets) {
+  for (const entry of getCompiledCoreCarapaceTargetState().carapaceCompiledSecretTargets) {
     if (!entry.includeInPlan) {
       continue;
     }
@@ -491,7 +491,7 @@ export function resolveConfigSecretTargetByPath(
 
   const explicitChannelId = pathSegments[0] === "channels" ? (pathSegments[1]?.trim() ?? "") : "";
   const explicitChannelEntries = explicitChannelId
-    ? getCompiledChannelOpenClawTargets(explicitChannelId)
+    ? getCompiledChannelCarapaceTargets(explicitChannelId)
     : null;
   // Channel-owned contracts get first chance for explicit channel paths before bundled defaults.
   for (const entry of explicitChannelEntries ?? []) {
@@ -509,7 +509,7 @@ export function resolveConfigSecretTargetByPath(
     return resolved;
   }
 
-  for (const entry of getCompiledSecretTargetRegistryState().openClawCompiledSecretTargets) {
+  for (const entry of getCompiledSecretTargetRegistryState().carapaceCompiledSecretTargets) {
     if (!entry.includeInPlan) {
       continue;
     }
@@ -526,9 +526,9 @@ export function resolveConfigSecretTargetByPath(
   return null;
 }
 
-/** Discovers configured secret-bearing values in openclaw.json. */
+/** Discovers configured secret-bearing values in carapace.json. */
 export function discoverConfigSecretTargets(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: {
     env?: NodeJS.ProcessEnv;
     manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
@@ -538,10 +538,10 @@ export function discoverConfigSecretTargets(
 }
 
 /**
- * Discovers configured openclaw.json targets, optionally limited to selected registry ids.
+ * Discovers configured carapace.json targets, optionally limited to selected registry ids.
  */
 export function discoverConfigSecretTargetsByIds(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   targetIds?: Iterable<string>,
   options: {
     env?: NodeJS.ProcessEnv;
@@ -550,18 +550,18 @@ export function discoverConfigSecretTargetsByIds(
 ): DiscoveredConfigSecretTarget[] {
   const env = options.env ?? process.env;
   const allowedTargetIds = normalizeAllowedTargetIds(targetIds);
-  const coreState = getCompiledCoreOpenClawTargetState();
+  const coreState = getCompiledCoreCarapaceTargetState();
   const hasOnlyCoreTargetIds =
     allowedTargetIds !== null &&
     Array.from(allowedTargetIds).every((targetId) => coreState.knownTargetIds.has(targetId));
   const configuredChannelEntries =
     !options.manifestRegistry && !hasOnlyCoreTargetIds && !configHasPluginEntries(config)
-      ? getConfiguredChannelOpenClawTargets(config, env)
+      ? getConfiguredChannelCarapaceTargets(config, env)
       : null;
   const configuredEntries = hasOnlyCoreTargetIds
-    ? coreState.openClawCompiledSecretTargets
+    ? coreState.carapaceCompiledSecretTargets
     : configuredChannelEntries
-      ? [...coreState.openClawCompiledSecretTargets, ...configuredChannelEntries]
+      ? [...coreState.carapaceCompiledSecretTargets, ...configuredChannelEntries]
       : null;
   const configuredEntriesById = configuredEntries
     ? buildConfigTargetIdIndex(configuredEntries)
@@ -575,8 +575,8 @@ export function discoverConfigSecretTargetsByIds(
     : getConfiguredSecretTargetRegistryState(config, env, options.manifestRegistry);
   const discoveryEntries = resolveDiscoveryEntries({
     allowedTargetIds,
-    defaultEntries: configuredEntries ?? registryState?.openClawCompiledSecretTargets ?? [],
-    entriesById: configuredEntriesById ?? registryState?.openClawTargetsById ?? new Map(),
+    defaultEntries: configuredEntries ?? registryState?.carapaceCompiledSecretTargets ?? [],
+    entriesById: configuredEntriesById ?? registryState?.carapaceTargetsById ?? new Map(),
   });
   return discoverSecretTargetsFromEntries(config, discoveryEntries);
 }

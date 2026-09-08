@@ -1,16 +1,16 @@
 import type { Message } from "grammy/types";
-import { formatMediaPlaceholderText } from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStoredModelOverride } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_GROUP_HISTORY_LIMIT } from "openclaw/plugin-sdk/reply-history";
+import { formatMediaPlaceholderText } from "carapace/plugin-sdk/channel-inbound";
+import { resolveStoredModelOverride } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { DEFAULT_GROUP_HISTORY_LIMIT } from "carapace/plugin-sdk/reply-history";
 import {
   getSessionEntry,
   readAmbientTranscriptWatermark,
   resolveAmbientTranscriptWatermarkKey,
   type SessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { asFiniteNumber } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { stripInlineDirectiveTagsForDelivery } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { asFiniteNumber } from "carapace/plugin-sdk/string-coerce-runtime";
+import { stripInlineDirectiveTagsForDelivery } from "carapace/plugin-sdk/text-chunking";
 import { resolveDefaultModelForAgent } from "./bot-handlers.agent.runtime.js";
 import type { RegisterTelegramHandlerParams } from "./bot-handlers.types.js";
 import type { TelegramMediaRef } from "./bot-message-context.js";
@@ -56,8 +56,8 @@ function legacyAssistantTextKey(node: TelegramCachedMessageNode, botUserId?: num
     return undefined;
   }
   const timestamp = (
-    node.sourceMessage as Message & { openclaw_prompt_context_timestamp_ms?: unknown }
-  ).openclaw_prompt_context_timestamp_ms;
+    node.sourceMessage as Message & { carapace_prompt_context_timestamp_ms?: unknown }
+  ).carapace_prompt_context_timestamp_ms;
   const legacySelf =
     isTelegramMessageFromCurrentBot(node.sourceMessage, botUserId) ||
     (node.sourceMessage.from?.id === 0 && node.sourceMessage.from.is_bot);
@@ -83,7 +83,7 @@ export type ResolveTelegramSessionStateParams = {
   threadSpec: TelegramThreadSpec;
   botHasTopicsEnabled?: boolean;
   senderId?: string | number;
-  runtimeCfg: OpenClawConfig;
+  runtimeCfg: CarapaceConfig;
 };
 
 export type ResolvePromptContextAmbientWatermarkParams = {
@@ -434,7 +434,7 @@ export function createTelegramMessageContextRuntime({
     ctx: TelegramContext,
     msg: Message,
     replyChainNodes: TelegramCachedMessageNode[],
-    runtimeCfg: OpenClawConfig,
+    runtimeCfg: CarapaceConfig,
     runtimeTelegramCfg: TelegramAccountConfig,
     options?: TelegramMessageContextOptions,
     mediaByMessageId?: ReadonlyMap<string, TelegramMediaRef>,

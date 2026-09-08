@@ -1,5 +1,5 @@
 /** Shared state and owner-notification policy for cron auto-disable transitions. */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { cronFailureDetailLines } from "../failure-notification-text.js";
 import { isSystemMonitorDeclaration } from "../system-owned-declaration.js";
 import type { CronJob, CronJobState } from "../types.js";
@@ -50,7 +50,7 @@ export function autoDisableCronJob(params: {
   const text = [
     `⚠️ Automation "${name}" was auto-disabled after ${params.consecutiveErrors} consecutive ${autoDisableReasonLabel(params.reason)}.`,
     ...cronFailureDetailLines(errorReason),
-    `Fix the underlying cause, then run \`openclaw automations enable ${job.id}\` to re-enable it.`,
+    `Fix the underlying cause, then run \`carapace automations enable ${job.id}\` to re-enable it.`,
   ].join("\n");
   const notify = () => enqueueCronNotification(state, job, text, "auto-disabled");
 

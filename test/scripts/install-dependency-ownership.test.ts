@@ -11,7 +11,7 @@ const guard = fileURLToPath(
 );
 
 function fixture() {
-  const root = fs.realpathSync(createTempDir("openclaw-install-ownership-"));
+  const root = fs.realpathSync(createTempDir("carapace-install-ownership-"));
   const checkout = path.join(root, "checkout");
   const donor = path.join(root, "donor");
   fs.mkdirSync(checkout);

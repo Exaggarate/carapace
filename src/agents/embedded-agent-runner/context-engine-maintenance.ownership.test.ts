@@ -41,7 +41,7 @@ function createEngine(maintain: NonNullable<ContextEngine["maintain"]>): Context
 async function withTranscriptOwners(
   run: (owners: Awaited<ReturnType<typeof createTranscriptOwners>>) => Promise<void>,
 ) {
-  await withStateDirEnv("openclaw-maintenance-owners-", async ({ stateDir }) => {
+  await withStateDirEnv("carapace-maintenance-owners-", async ({ stateDir }) => {
     resetCommandQueueStateForTest();
     resetTaskRegistryForTests({ persist: false });
     resetTaskFlowRegistryForTests({ persist: false });

@@ -331,8 +331,8 @@ vi.mock("../plugins/loader.js", async () => {
     await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
   return {
     ...actual,
-    loadOpenClawPlugins: () => getTestPluginRegistry(),
+    loadCarapacePlugins: () => getTestPluginRegistry(),
   };
 });
-vi.stubEnv("OPENCLAW_SKIP_CHANNELS", "1");
-vi.stubEnv("OPENCLAW_SKIP_CRON", "1");
+vi.stubEnv("CARAPACE_SKIP_CHANNELS", "1");
+vi.stubEnv("CARAPACE_SKIP_CRON", "1");

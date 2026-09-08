@@ -1,8 +1,8 @@
 import { PassThrough } from "node:stream";
 import { DAVESession } from "@discordjs/voice";
 import { VoiceOpcodes, type VoiceSendPayload } from "discord-api-types/voice/v8";
-import { createOpenClawCodingTools } from "openclaw/plugin-sdk/agent-harness";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { createCarapaceCodingTools } from "carapace/plugin-sdk/agent-harness";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType } from "../internal/discord.js";
 import { createVoiceCaptureState } from "./capture-state.js";
@@ -151,7 +151,7 @@ function buildVoiceTestHarness() {
       active: false,
       queued: false,
       reason: "no_active_run",
-      message: "There is no active OpenClaw run to steer.",
+      message: "There is no active Carapace run to steer.",
       speak: true,
       show: true,
       suppress: false,
@@ -381,12 +381,12 @@ function buildVoiceTestHarness() {
     if (typeof args.senderIsOwner !== "boolean") {
       throw new Error("expected agent command owner identity");
     }
-    return createOpenClawCodingTools({
+    return createCarapaceCodingTools({
       config: {},
       senderIsOwner: args.senderIsOwner,
       messageProvider: "discord",
-      workspaceDir: "/tmp/openclaw-discord-voice-tools",
-      agentDir: "/tmp/openclaw-discord-voice-agent",
+      workspaceDir: "/tmp/carapace-discord-voice-tools",
+      agentDir: "/tmp/carapace-discord-voice-agent",
     }).map((tool) => tool.name);
   };
 
@@ -625,7 +625,7 @@ function buildVoiceTestHarness() {
     DAVESession,
     expectDefined,
     VoiceOpcodes,
-    createOpenClawCodingTools,
+    createCarapaceCodingTools,
     expect,
     it,
     vi,

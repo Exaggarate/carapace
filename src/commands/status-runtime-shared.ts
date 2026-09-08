@@ -1,8 +1,8 @@
 // Shared runtime probes used by status text and JSON commands.
 // Heavy modules stay lazily loaded so fast status output avoids security/provider/gateway costs.
 
-import type { Result } from "@openclaw/normalization-core/result";
-import type { OpenClawConfig } from "../config/types.js";
+import type { Result } from "@carapace/normalization-core/result";
+import type { CarapaceConfig } from "../config/types.js";
 import type { HeartbeatEventPayload } from "../infra/heartbeat-events.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import type { HealthSummary } from "./health.js";
@@ -17,8 +17,8 @@ const gatewayCallModuleLoader = createLazyImportLoader(() => import("../gateway/
 
 /** Runs the lightweight security audit used by status JSON/all output. */
 export async function resolveStatusSecurityAudit(params: {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   timeoutMs?: number;
 }) {
   const { runSecurityAudit } = await securityAuditModuleLoader.load();
@@ -42,7 +42,7 @@ export async function resolveStatusUsageSummary(params: StatusUsageSummaryOption
 
 /** Calls gateway health and lets errors propagate to deep status callers. */
 export async function resolveStatusGatewayHealth(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
 }) {
   const { callGateway } = await gatewayCallModuleLoader.load();
@@ -56,7 +56,7 @@ export async function resolveStatusGatewayHealth(params: {
 
 /** Calls gateway health but converts unreachable/failing probes into an error object. */
 export async function resolveStatusGatewayHealthSafe(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
   gatewayReachable: boolean;
   gatewayProbeError?: string | null;
@@ -84,7 +84,7 @@ export type StatusGatewayDiagnosticsResult = Result<unknown, string>;
 
 /** Reads gateway diagnostics while preserving whether data or an unavailable outcome was observed. */
 export async function resolveStatusGatewayDiagnosticsSafe(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
   gatewayReachable: boolean;
   type?: string;
@@ -112,7 +112,7 @@ export async function resolveStatusGatewayDiagnosticsSafe(params: {
 
 /** Reads the most recent gateway heartbeat only when the gateway probe succeeded. */
 async function resolveStatusLastHeartbeat(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
   gatewayReachable: boolean;
 }) {
@@ -129,7 +129,7 @@ async function resolveStatusLastHeartbeat(params: {
 }
 
 // Default bound for service-manager probes when status runs without an explicit
-// --timeout, so a wedged systemd/launchd socket cannot hang `openclaw status`.
+// --timeout, so a wedged systemd/launchd socket cannot hang `carapace status`.
 const DEFAULT_SERVICE_PROBE_TIMEOUT_MS = 5000;
 
 /** Resolves launchd/systemd summaries for the gateway and node services together. */
@@ -151,7 +151,7 @@ type StatusSecurityAudit = Awaited<ReturnType<typeof resolveStatusSecurityAudit>
 
 /** Resolves optional usage/deep runtime details plus service summaries for status output. */
 async function resolveStatusRuntimeDetails(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
   agentId?: string;
   usage?: boolean;
@@ -160,7 +160,7 @@ async function resolveStatusRuntimeDetails(params: {
   suppressHealthErrors?: boolean;
   resolveUsage?: (input: StatusUsageSummaryOptions) => Promise<StatusUsageSummary>;
   resolveHealth?: (input: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     timeoutMs?: number;
   }) => Promise<StatusGatewayHealth>;
 }) {
@@ -212,8 +212,8 @@ async function resolveStatusRuntimeDetails(params: {
 
 /** Resolves the full runtime snapshot, including optional security audit, for status JSON/text. */
 export async function resolveStatusRuntimeSnapshot(params: {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   timeoutMs?: number;
   agentId?: string;
   usage?: boolean;
@@ -222,13 +222,13 @@ export async function resolveStatusRuntimeSnapshot(params: {
   includeSecurityAudit?: boolean;
   suppressHealthErrors?: boolean;
   resolveSecurityAudit?: (input: {
-    config: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
+    config: CarapaceConfig;
+    sourceConfig: CarapaceConfig;
     timeoutMs?: number;
   }) => Promise<StatusSecurityAudit>;
   resolveUsage?: (input: StatusUsageSummaryOptions) => Promise<StatusUsageSummary>;
   resolveHealth?: (input: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     timeoutMs?: number;
   }) => Promise<StatusGatewayHealth>;
 }) {

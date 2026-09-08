@@ -6,9 +6,9 @@ import {
 } from "../../packages/gateway-protocol/src/index.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { emitSessionIdentityMutation } from "../sessions/session-lifecycle-events.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
   ensureGatewayOwnerProfile,
   ensureProfileForEmail,
@@ -16,7 +16,7 @@ import {
   setDisplayName,
   setUserProfileRole,
 } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createMentionInbox } from "./mention-inbox.js";
 import type { MentionCommittedInput, MentionInbox } from "./mention-inbox.types.js";
 import { invalidateOperatorRolePolicy } from "./operator-role-policy.js";
@@ -34,10 +34,10 @@ afterEach(() => vi.useRealTimers());
 
 async function withInbox(
   run: (fixture: Awaited<ReturnType<typeof createFixture>>) => Promise<void>,
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
   options: InboxFixtureOptions = {},
 ) {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const fixture = await createFixture(cfg, options);
     try {
       await run(fixture);
@@ -48,7 +48,7 @@ async function withInbox(
   });
 }
 
-async function createFixture(cfg: OpenClawConfig, options: InboxFixtureOptions) {
+async function createFixture(cfg: CarapaceConfig, options: InboxFixtureOptions) {
   const alice = ensureProfileForEmail("alice@mentions.example.test");
   const bob = ensureProfileForEmail("bob@mentions.example.test");
   const carol = ensureProfileForEmail("carol@mentions.example.test");
@@ -189,7 +189,7 @@ describe("temporary human mention Inbox", () => {
       await withInbox(async (f) => {
         vi.useFakeTimers();
         f.clients.length = 0;
-        const { db } = openOpenClawStateDatabase();
+        const { db } = openCarapaceStateDatabase();
         const storedSources = () =>
           db
             .prepare(
@@ -290,7 +290,7 @@ describe("temporary human mention Inbox", () => {
 
   it("persists entries and dismissal without changing sqlite_schema or user_version", async () => {
     const schema = () => {
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       return {
         schema: db.prepare("SELECT * FROM sqlite_schema ORDER BY type, name").all(),
         userVersion: db.prepare("PRAGMA user_version").get(),
@@ -319,7 +319,7 @@ describe("temporary human mention Inbox", () => {
       await withInbox(async (f) => {
         f.post("original");
         const retained = read(f.inbox, f.bobClient).items;
-        const { db } = openOpenClawStateDatabase();
+        const { db } = openCarapaceStateDatabase();
         for (const action of ["INSERT", "UPDATE", "DELETE"]) {
           db.exec(`CREATE TEMP TRIGGER reject_mention_${action} BEFORE ${action} ON config_machine_state
             WHEN ${action === "DELETE" ? "OLD" : "NEW"}.state_key LIKE 'notifications.mentions.%'
@@ -547,7 +547,7 @@ describe("temporary human mention Inbox", () => {
     { rolesEnabled: true, admin: false, visible: false },
     { rolesEnabled: true, admin: true, visible: true },
   ])("preserves shared-owner reads: %j", async ({ rolesEnabled, admin, visible }) => {
-    const cfg: OpenClawConfig = rolesEnabled
+    const cfg: CarapaceConfig = rolesEnabled
       ? {
           gateway: {
             roles: {
@@ -570,7 +570,7 @@ describe("temporary human mention Inbox", () => {
   });
 
   it("fences delayed push preparation on role revocation, session replacement, and disposal", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         roles: {
           default: "reader",
@@ -784,7 +784,7 @@ describe("human mention directory", () => {
   ] as const)(
     "applies offline recipient policy across directory, admission, and delivery: $name",
     async ({ role, sessionKey, entry, visible, storedSources }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "reader",
@@ -822,7 +822,7 @@ describe("human mention directory", () => {
           accepted: admission.ok,
           inboxKeys: read(f.inbox, f.bobClient).items.map((item) => item.sessionKey),
           pushedRecipients: f.push.mock.calls.map(([mention]) => mention.recipientProfileId),
-          storedSources: openOpenClawStateDatabase()
+          storedSources: openCarapaceStateDatabase()
             .db.prepare(
               "SELECT state_key FROM config_machine_state WHERE state_key GLOB 'notifications.mentions.source.*'",
             )

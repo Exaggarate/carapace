@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { makeTempDir } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SessionMcpRuntime } from "./agent-bundle-mcp-types.js";
 
 export async function probeMcpServer(runtime: SessionMcpRuntime, serverName: string, input = {}) {
@@ -42,7 +42,7 @@ async function handle(message) {
 for await (const line of readline.createInterface({ input: process.stdin })) void handle(JSON.parse(line));
 `,
   );
-  const config = (label = "old"): OpenClawConfig => ({
+  const config = (label = "old"): CarapaceConfig => ({
     plugins: { enabled: false },
     mcp: {
       servers: {

@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/runway-provider",
+  "name": "@carapace/runway-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw Runway video provider plugin",
+  "description": "Carapace Runway video provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

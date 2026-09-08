@@ -1,34 +1,34 @@
 ---
-summary: "CLI reference for `openclaw tui` (Gateway-backed or local embedded terminal UI)"
+summary: "CLI reference for `carapace tui` (Gateway-backed or local embedded terminal UI)"
 read_when:
   - You want a terminal UI for the Gateway (remote-friendly)
   - You want to pass url/token/session from scripts
   - You want to run the TUI in local embedded mode without a Gateway
-  - You want to use openclaw chat or openclaw tui --local
-title: "openclaw tui"
+  - You want to use carapace chat or carapace tui --local
+title: "carapace tui"
 ---
 
-# `openclaw tui`
+# `carapace tui`
 
 Open the terminal UI connected to the Gateway, or run it in local embedded
 mode.
 
 ```bash
-openclaw tui [target]
+carapace tui [target]
 ```
 
 `target` can be a Control UI session URL, a compact `host/agent/ref`, a bare
 short reference such as `movies-a1166b81`, or a literal `agent:...` session key.
 A URL or host target authoritatively selects that Gateway; a bare reference
 uses the configured or default Gateway. You can also paste a Control UI URL
-directly as `openclaw <url>` and place the TUI options before or after it, for example
-`openclaw <url> --token <token> --deliver`.
+directly as `carapace <url>` and place the TUI options before or after it, for example
+`carapace <url> --token <token> --deliver`.
 
 The bare-URL form accepts `--token`, `--password`, `--tls-fingerprint`,
 `--deliver`, `--thinking`, `--message`, `--timeout-ms`, and `--history-limit`.
 URL-valued messages work in either position, including
-`openclaw --message https://example.com/article <url>`.
-Use `openclaw tui <url>` when you need another TUI option; `--local`, `--url`,
+`carapace --message https://example.com/article <url>`.
+Use `carapace tui <url>` when you need another TUI option; `--local`, `--url`,
 and `--session` conflict with a session URL.
 
 Related guide: [TUI](/web/tui)
@@ -49,7 +49,7 @@ Related guide: [TUI](/web/tui)
 | `--timeout-ms <ms>`          | `agents.defaults.timeoutSeconds`          | Agent timeout. Invalid values log a warning and are ignored.                       |
 | `--history-limit <n>`        | `200`                                     | History entries to load on attach.                                                 |
 
-Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
+Aliases: `carapace chat` and `carapace terminal` invoke this command with
 `--local` implied.
 
 ## Notes
@@ -58,7 +58,7 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
 - Pass only one Gateway target. A URL target cannot combine with `--url`, and
   any positional target cannot combine with `--session` or local mode.
 - A URL or host target never reuses configured credentials or
-  `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD`. It uses the stored
+  `CARAPACE_GATEWAY_TOKEN` / `CARAPACE_GATEWAY_PASSWORD`. It uses the stored
   device token for that exact Gateway origin, or explicit `--token`/`--password`
   credentials. On first contact, pass one of those credentials once, approve
   the pairing request in that Gateway's Control UI, and retry; see
@@ -76,8 +76,8 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
   to that configured Gateway scope. URL or host targets for other origins never
   inherit them.
 - With no explicit URL or port, `tui` follows the active local Gateway port
-  recorded by the running Gateway. Explicit `--url`, `OPENCLAW_GATEWAY_URL`,
-  `OPENCLAW_GATEWAY_PORT`, and remote Gateway config keep precedence.
+  recorded by the running Gateway. Explicit `--url`, `CARAPACE_GATEWAY_URL`,
+  `CARAPACE_GATEWAY_PORT`, and remote Gateway config keep precedence.
 - Launched from inside a configured agent workspace directory, TUI auto-selects
   that agent for the session key default (unless `--session` is explicitly
   `agent:<id>:...`).
@@ -86,7 +86,7 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
 - Local mode requires exclusive ownership of the configured state directory. It
   refuses to start while a Gateway or another embedded writer owns that state;
   run without `--local` to use the active Gateway, or stop it first with
-  `openclaw gateway stop`.
+  `carapace gateway stop`.
 - Local mode adds `/auth [provider]` to the TUI command surface.
 - Plugin approval gates still apply in local mode: tools that require approval
   prompt for a decision in the terminal, nothing is silently auto-approved.
@@ -98,26 +98,26 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
 | Failure                                    | Recovery                                                                                                                                         |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | The Gateway predates short-link resolution | Copy the full session key from that Gateway's Control UI.                                                                                        |
-| Session missing or short ref ambiguous     | For the configured/local Gateway, run `openclaw sessions list`; for a URL/host target, choose a longer or full key in that Gateway's Control UI. |
+| Session missing or short ref ambiguous     | For the configured/local Gateway, run `carapace sessions list`; for a URL/host target, choose a longer or full key in that Gateway's Control UI. |
 | Gateway unreachable                        | The error names the selected origin. For a `*.ts.net` host, connect Tailscale and confirm the Gateway is reachable on the tailnet.               |
 | Identity-aware proxy rejected the upgrade  | Configure `gateway.remote.edgeAuth` for the configured remote Gateway; the error includes the relevant remote-access docs link.                  |
-| Stored device token revoked or rotated     | Rotate it with `openclaw devices rotate --device <deviceId> --role operator`, then reconnect.                                                    |
+| Stored device token revoked or rotated     | Rotate it with `carapace devices rotate --device <deviceId> --role operator`, then reconnect.                                                    |
 | TLS certificate pin mismatch               | The original TLS fingerprint error passes through unchanged; verify the configured or explicit pin before retrying.                              |
 
 ## Examples
 
 ```bash
-openclaw chat
-openclaw tui --local
-openclaw tui
-openclaw tui https://gateway.example/dashboard/main/movies-a1166b81
-openclaw https://gateway.example/dashboard/main/movies-a1166b81 --token <token>
-openclaw tui movies-a1166b81
-openclaw tui --url ws://127.0.0.1:18789 --token <token>
-openclaw tui --session main --deliver
-openclaw chat --message "Compare my config to the docs and tell me what to fix"
+carapace chat
+carapace tui --local
+carapace tui
+carapace tui https://gateway.example/dashboard/main/movies-a1166b81
+carapace https://gateway.example/dashboard/main/movies-a1166b81 --token <token>
+carapace tui movies-a1166b81
+carapace tui --url ws://127.0.0.1:18789 --token <token>
+carapace tui --session main --deliver
+carapace chat --message "Compare my config to the docs and tell me what to fix"
 # when run inside an agent workspace, infers that agent automatically
-openclaw tui --session bugfix
+carapace tui --session bugfix
 ```
 
 ## Config repair loop
@@ -125,25 +125,25 @@ openclaw tui --session bugfix
 Use local mode to have the embedded agent inspect the current config, compare
 it against the docs, and help repair it from the same terminal.
 
-If `openclaw config validate` is already failing, run `openclaw configure` or
-`openclaw doctor --fix` first; `openclaw chat` does not bypass the
+If `carapace config validate` is already failing, run `carapace configure` or
+`carapace doctor --fix` first; `carapace chat` does not bypass the
 invalid-config guard.
 
 ```bash
-openclaw chat
+carapace chat
 ```
 
 Then inside the TUI:
 
 ```text
-!openclaw config file
-!openclaw docs gateway auth token secretref
-!openclaw config validate
-!openclaw doctor
+!carapace config file
+!carapace docs gateway auth token secretref
+!carapace config validate
+!carapace doctor
 ```
 
-Apply targeted fixes with `openclaw config set` or `openclaw configure`, then
-rerun `openclaw config validate`. See [TUI](/web/tui) and
+Apply targeted fixes with `carapace config set` or `carapace configure`, then
+rerun `carapace config validate`. See [TUI](/web/tui) and
 [Config](/cli/config).
 
 ## Related

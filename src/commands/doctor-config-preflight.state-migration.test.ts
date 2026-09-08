@@ -13,7 +13,7 @@ import {
 import { ExitError } from "../runtime.js";
 import {
   expectMigrationIdentity,
-  getMaybeRepairPluginOpenClawHostLinksMock,
+  getMaybeRepairPluginCarapaceHostLinksMock,
   makePreflightConfigSnapshot,
   makeStartupConvergenceResult,
   makeStateMigrationResult,
@@ -25,7 +25,7 @@ import {
   type StateMigrationResult,
 } from "./doctor-config-preflight.state-migration.test-helpers.js";
 
-const maybeRepairPluginOpenClawHostLinks = getMaybeRepairPluginOpenClawHostLinksMock();
+const maybeRepairPluginCarapaceHostLinks = getMaybeRepairPluginCarapaceHostLinksMock();
 
 const autoMigrateLegacyStateDir = vi.hoisted(() =>
   vi.fn(async (): Promise<StateMigrationResult> => makeStateMigrationResult([], false)),
@@ -402,15 +402,15 @@ describe("runDoctorConfigPreflight state migration", () => {
 
   it("releases the startup lease when the fresh config guard rejects", async () => {
     readMigrationCheckpointStatus.mockReturnValue("stale");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-original-state";
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-original-state";
     let leaseEnv: NodeJS.ProcessEnv | undefined;
     acquireStartupMigrationLeaseWithWait.mockImplementationOnce(async ({ env }) => {
       leaseEnv = env;
       return {
         ...startupMigrationLease,
         release: vi.fn(() => {
-          expect(env.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-original-state");
+          expect(env.CARAPACE_STATE_DIR).toBe("/tmp/carapace-original-state");
           startupMigrationLeaseRelease();
         }),
       };
@@ -419,7 +419,7 @@ describe("runDoctorConfigPreflight state migration", () => {
       .fn<(_snapshot?: Record<string, unknown>) => Promise<boolean>>()
       .mockResolvedValueOnce(true)
       .mockImplementationOnce(async () => {
-        process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-drifted-state";
+        process.env.CARAPACE_STATE_DIR = "/tmp/carapace-drifted-state";
         return false;
       });
 
@@ -434,9 +434,9 @@ describe("runDoctorConfigPreflight state migration", () => {
       ).rejects.toThrow("selected config changed during startup");
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 
@@ -564,16 +564,16 @@ describe("runDoctorConfigPreflight state migration", () => {
 
   it("pins startup plugin convergence without re-persisting the installed record snapshot", async () => {
     readMigrationCheckpointStatus.mockReturnValue("stale");
-    const previousHostVersion = process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
-    process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = "2026.7.2-beta.7";
+    const previousHostVersion = process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
+    process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = "2026.7.2-beta.7";
 
     try {
       await runDoctorConfigPreflight(startupCheckpointOptions);
     } finally {
       if (previousHostVersion === undefined) {
-        delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+        delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
       } else {
-        process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = previousHostVersion;
+        process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = previousHostVersion;
       }
     }
 
@@ -587,7 +587,7 @@ describe("runDoctorConfigPreflight state migration", () => {
   it("repairs managed host links before plugin state migration", async () => {
     readMigrationCheckpointStatus.mockReturnValue("stale");
     const migrationOrder: string[] = [];
-    maybeRepairPluginOpenClawHostLinks.mockImplementationOnce(async ({ env, prompter }) => {
+    maybeRepairPluginCarapaceHostLinks.mockImplementationOnce(async ({ env, prompter }) => {
       migrationOrder.push("host-links");
       expect(env).not.toBe(process.env);
       expect(prompter).toEqual({ shouldRepair: true });
@@ -679,7 +679,7 @@ describe("runDoctorConfigPreflight state migration", () => {
         }),
       ).rejects.toBe(leaseError);
 
-      expect(maybeRepairPluginOpenClawHostLinks).not.toHaveBeenCalled();
+      expect(maybeRepairPluginCarapaceHostLinks).not.toHaveBeenCalled();
       expect(repairLegacyCronStoreWithoutPrompt).not.toHaveBeenCalled();
       expect(autoMigrateLegacyState).not.toHaveBeenCalled();
       expect(autoMigrateLegacyPluginDoctorState).not.toHaveBeenCalled();
@@ -829,7 +829,7 @@ describe("runDoctorConfigPreflight state migration", () => {
             pluginId: "discord",
             reason: "missing-install-path: install path missing",
             message: 'Plugin "discord" has no install path.',
-            guidance: ["Run `openclaw update repair` to retry plugin repair."],
+            guidance: ["Run `carapace update repair` to retry plugin repair."],
           },
         ],
         smokeFailures: [
@@ -953,7 +953,7 @@ describe("runDoctorConfigPreflight state migration", () => {
 
     expect(readStartupMigrationWarning()).toContain("Left legacy config health state in place.");
     expect(readStartupMigrationWarning()).toContain(
-      'Run "openclaw doctor --fix" against the same state/config, then restart the gateway.',
+      'Run "carapace doctor --fix" against the same state/config, then restart the gateway.',
     );
     expect(note.mock.calls.filter(([, title]) => title === "Doctor warnings")).toHaveLength(0);
     expect(recordSuccessfulStateMigrations).not.toHaveBeenCalled();
@@ -978,7 +978,7 @@ describe("runDoctorConfigPreflight state migration", () => {
     expect(warning?.length).toBeLessThan(2200);
     expect(warning).toContain("… (see startup log)");
     expect(warning).toContain(
-      'Run "openclaw doctor --fix" against the same state/config, then restart the gateway.',
+      'Run "carapace doctor --fix" against the same state/config, then restart the gateway.',
     );
   });
 
@@ -1002,7 +1002,7 @@ describe("runDoctorConfigPreflight state migration", () => {
           {
             reason: "Configured plugin discord is not installed.",
             message: "Configured plugin discord is not installed.",
-            guidance: ["Run `openclaw update repair` to retry plugin repair."],
+            guidance: ["Run `carapace update repair` to retry plugin repair."],
           },
         ],
       }),
@@ -1020,7 +1020,7 @@ describe("runDoctorConfigPreflight state migration", () => {
     expect(recordSuccessfulStateMigrations).not.toHaveBeenCalled();
     expect(recordSuccessfulStartupMigrations).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(
-      "- Configured plugin discord is not installed. Run `openclaw update repair` to retry plugin repair.",
+      "- Configured plugin discord is not installed. Run `carapace update repair` to retry plugin repair.",
       "Doctor warnings",
     );
     expect(startupMigrationLeaseRelease).toHaveBeenCalledOnce();
@@ -1041,8 +1041,8 @@ describe("runDoctorConfigPreflight state migration", () => {
             reason: "missing-main-entry: index.js",
             message: 'Plugin "discord" failed post-core payload smoke check (missing): index.js',
             guidance: [
-              "Run `openclaw update repair` to retry plugin repair.",
-              "Run `openclaw plugins inspect discord --runtime --json` for details.",
+              "Run `carapace update repair` to retry plugin repair.",
+              "Run `carapace plugins inspect discord --runtime --json` for details.",
             ],
           },
         ],
@@ -1096,7 +1096,7 @@ describe("runDoctorConfigPreflight state migration", () => {
       async () => snapshot,
       () =>
         expect(runDoctorConfigPreflight(startupCheckpointOptions)).rejects.toThrow(
-          "OpenClaw config is invalid",
+          "Carapace config is invalid",
         ),
     );
 

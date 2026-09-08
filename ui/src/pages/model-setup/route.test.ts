@@ -47,7 +47,7 @@ describe("model setup route", () => {
           phase: "connected",
           hello: {
             auth: { role: "operator", scopes: ["operator.admin"] },
-            features: { methods: ["openclaw.setup.detect"] },
+            features: { methods: ["carapace.setup.detect"] },
           },
         },
       },

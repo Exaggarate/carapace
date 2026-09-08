@@ -24,9 +24,9 @@ const loadConfigModule = createLazyRuntimeModule(() => import("../config/config.
 
 async function assertDoctorDatabaseSchemasCompatible(scope?: "state") {
   const [databasePreflight, agentDatabase, stateDatabase] = await Promise.all([
-    import("../state/openclaw-database-preflight.js"),
-    import("../state/openclaw-agent-db-contract.js"),
-    import("../state/openclaw-state-db-contract.js"),
+    import("../state/carapace-database-preflight.js"),
+    import("../state/carapace-agent-db-contract.js"),
+    import("../state/carapace-state-db-contract.js"),
   ]);
   const [{ createConfigIO }, targets] = await Promise.all([
     import("../config/io.js"),
@@ -38,7 +38,7 @@ async function assertDoctorDatabaseSchemasCompatible(scope?: "state") {
     pluginValidation: "core-only",
   }).readConfigFileSnapshot();
   const cfg = snapshot.sourceConfig ?? snapshot.config;
-  const databaseSchemas = await databasePreflight.preflightOpenClawDatabaseSchemas({
+  const databaseSchemas = await databasePreflight.preflightCarapaceDatabaseSchemas({
     env: process.env,
     scope,
     configuredAgentDatabaseTargets: (registeredDatabases) =>
@@ -48,12 +48,12 @@ async function assertDoctorDatabaseSchemasCompatible(scope?: "state") {
       { env: process.env },
     ),
     supportedVersions: {
-      state: stateDatabase.OPENCLAW_STATE_SCHEMA_VERSION,
-      agent: agentDatabase.OPENCLAW_AGENT_SCHEMA_VERSION,
+      state: stateDatabase.CARAPACE_STATE_SCHEMA_VERSION,
+      agent: agentDatabase.CARAPACE_AGENT_SCHEMA_VERSION,
     },
   });
   if (databaseSchemas.incompatible.length > 0) {
-    throw new databasePreflight.OpenClawDatabaseSchemaPreflightError(databaseSchemas.incompatible, {
+    throw new databasePreflight.CarapaceDatabaseSchemaPreflightError(databaseSchemas.incompatible, {
       operation: "doctor",
     });
   }
@@ -96,10 +96,10 @@ async function runDoctorHealthFlowWithResult(
   // Config loading can initialize SQLite-backed state before integrity runs.
   // Preserve the entry fact so doctor can report that automatic initialization.
   const stateDirExistedAtStart = stateDirectoryExistsAtDoctorStart();
-  intro("OpenClaw doctor");
+  intro("Carapace doctor");
 
-  const { resolveOpenClawPackageRoot } = await import("../infra/openclaw-root.js");
-  const root = await resolveOpenClawPackageRoot({
+  const { resolveCarapacePackageRoot } = await import("../infra/carapace-root.js");
+  const root = await resolveCarapacePackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -198,11 +198,11 @@ async function runDoctorHealthFlowWithResult(
       const { assertSessionStoreMigrationComplete } =
         await import("../config/sessions/startup-migration.js");
       assertSessionStoreMigrationComplete({ cfg: ctx.cfg, env: process.env, operation: "doctor" });
-      const { assertOpenClawDatabasesReady } =
-        await import("../state/openclaw-database-preflight.js");
+      const { assertCarapaceDatabasesReady } =
+        await import("../state/carapace-database-preflight.js");
       const { resolveConfiguredAgentDatabaseTargets } =
         await import("../config/sessions/targets.js");
-      await assertOpenClawDatabasesReady({
+      await assertCarapaceDatabasesReady({
         env: process.env,
         operation: "doctor",
         onDeferredSchemaPublication: (publication) => effectiveRuntime.log(publication.message),

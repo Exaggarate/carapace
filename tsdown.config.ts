@@ -65,7 +65,7 @@ const workerDeployVersion = (
   JSON.parse(fs.readFileSync("package.json", "utf8")) as { version: string }
 ).version;
 const OUTPUT_SOURCE_MAPS = process.env.OUTPUT_SOURCE_MAPS === "1";
-const RUN_NODE_SKIP_DTS_BUILD = process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD === "1";
+const RUN_NODE_SKIP_DTS_BUILD = process.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD === "1";
 const TSDOWN_DECLARATIONS = !RUN_NODE_SKIP_DTS_BUILD;
 export { createStateSchemaInlinePlugin, STATE_SCHEMA_INLINE_PLUGIN_NAME };
 
@@ -107,7 +107,7 @@ function buildInputOptions(
   options: InputOptionsArg,
   build?: { bundleAllDependencies?: boolean },
 ): InputOptionsReturn {
-  if (process.env.OPENCLAW_BUILD_VERBOSE === "1") {
+  if (process.env.CARAPACE_BUILD_VERBOSE === "1") {
     return undefined;
   }
 
@@ -271,7 +271,7 @@ function nodeWorkspacePackageBuildConfig(packageDir: string, config: UserConfig 
 }
 
 const bundledPluginBuildEntries = collectBundledPluginBuildEntries();
-const shouldBuildPrivateQaEntries = process.env.OPENCLAW_BUILD_PRIVATE_QA === "1";
+const shouldBuildPrivateQaEntries = process.env.CARAPACE_BUILD_PRIVATE_QA === "1";
 const selectedPluginSdkEntrypoints = shouldBuildPrivateQaEntries
   ? pluginSdkEntrypoints
   : productionPluginSdkEntrypoints;
@@ -320,7 +320,7 @@ const rootDependencyOptions = withExternalPackageSubpaths({
     "@discordjs/voice",
     "@larksuiteoapi/node-sdk",
     "@matrix-org/matrix-sdk-crypto-nodejs",
-    "@openclaw/ai",
+    "@carapace/ai",
     // Its native loader resolves optional platform packages from the package scope.
     "@openclaw/fs-safe",
     "@slack/bolt",
@@ -352,18 +352,18 @@ function shouldNeverBundleDeclarationDependency(id: string): boolean {
 
 function shouldAlwaysBundleDependency(id: string): boolean {
   return (
-    id === "openclaw/plugin-sdk/ssrf-runtime-internal" ||
-    id === "@openclaw/normalization-core" ||
-    id.startsWith("@openclaw/normalization-core/") ||
-    id === "@openclaw/retry" ||
-    id === "@openclaw/media-core" ||
-    id.startsWith("@openclaw/media-core/") ||
+    id === "carapace/plugin-sdk/ssrf-runtime-internal" ||
+    id === "@carapace/normalization-core" ||
+    id.startsWith("@carapace/normalization-core/") ||
+    id === "@carapace/retry" ||
+    id === "@carapace/media-core" ||
+    id.startsWith("@carapace/media-core/") ||
     [
-      "@openclaw/acp-core",
-      "@openclaw/session-url-contract",
-      "@openclaw/workboard-contract",
+      "@carapace/acp-core",
+      "@carapace/session-url-contract",
+      "@carapace/workboard-contract",
     ].includes(id) ||
-    id.startsWith("@openclaw/acp-core/") ||
+    id.startsWith("@carapace/acp-core/") ||
     id === "zod" ||
     id.startsWith("zod/")
   );
@@ -450,7 +450,7 @@ function buildCoreDistEntries(): Record<string, string> {
     "plugins/runtime/index": "src/plugins/runtime/index.ts",
     "llm-slug-generator": "src/hooks/llm-slug-generator.ts",
     "mcp/plugin-tools-serve": "src/mcp/plugin-tools-serve.ts",
-    "mcp/openclaw-tools-serve": "src/mcp/openclaw-tools-serve.ts",
+    "mcp/carapace-tools-serve": "src/mcp/carapace-tools-serve.ts",
   };
 }
 
@@ -541,13 +541,13 @@ function buildLlmCoreDistEntries(): Record<string, string> {
 
 function shouldExternalizeAgentCoreDependency(id: string): boolean {
   return (
-    id === "@openclaw/ai" ||
-    id.startsWith("@openclaw/ai/") ||
-    id === "@openclaw/llm-core" ||
-    id.startsWith("@openclaw/llm-core/") ||
+    id === "@carapace/ai" ||
+    id.startsWith("@carapace/ai/") ||
+    id === "@carapace/llm-core" ||
+    id.startsWith("@carapace/llm-core/") ||
     id === "ignore" ||
-    id === "openclaw" ||
-    id.startsWith("openclaw/") ||
+    id === "carapace" ||
+    id.startsWith("carapace/") ||
     id === "typebox" ||
     id.startsWith("typebox/") ||
     id === "yaml" ||
@@ -560,7 +560,7 @@ function shouldExternalizeGatewayProtocolDependency(id: string): boolean {
 }
 
 function shouldExternalizeGatewayClientDependency(id: string): boolean {
-  return ["ws", "@openclaw/gateway-protocol", "ipaddr.js"].some(
+  return ["ws", "@carapace/gateway-protocol", "ipaddr.js"].some(
     (dependency) => id === dependency || id.startsWith(`${dependency}/`),
   );
 }

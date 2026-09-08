@@ -57,7 +57,7 @@ const UPGRADE_SCOPES = [
 ];
 
 function deviceIdentityPath(label: string): string {
-  return path.join(tempDirs.make("openclaw-identity-scopes-"), `${label}.sqlite`);
+  return path.join(tempDirs.make("carapace-identity-scopes-"), `${label}.sqlite`);
 }
 
 async function configureGatewayAuth(
@@ -392,8 +392,8 @@ describe("gateway identity scope grants", () => {
     });
     const identityPath = deviceIdentityPath("identity-scope-device");
     const identity = loadOrCreateDeviceIdentity({ path: identityPath });
-    const configuredWorkspace = tempDirs.make("openclaw-identity-workspace-");
-    const outsideWorkspace = tempDirs.make("openclaw-identity-outside-");
+    const configuredWorkspace = tempDirs.make("carapace-identity-workspace-");
+    const outsideWorkspace = tempDirs.make("carapace-identity-outside-");
     testState.agentConfig = { workspace: configuredWorkspace };
 
     try {
@@ -622,7 +622,7 @@ describe("gateway identity scope grants", () => {
     await withGatewayServer(async ({ port }) => {
       const ws = await openWs(port, {
         ...TRUSTED_PROXY_HEADERS,
-        "x-openclaw-scopes": "operator.read",
+        "x-carapace-scopes": "operator.read",
       });
       try {
         const connected = await connectReq(ws, {
@@ -674,7 +674,7 @@ describe("gateway identity scope grants", () => {
 
       const reconnectWs = await openWs(port, {
         ...TRUSTED_PROXY_HEADERS,
-        "x-openclaw-scopes": "operator.read",
+        "x-carapace-scopes": "operator.read",
       });
       try {
         const reconnect = await connectReq(reconnectWs, {

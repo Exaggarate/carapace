@@ -102,17 +102,17 @@ describe("Doctor update run lifecycle", () => {
 
   it("executes the update under the admitted service environment and restores the caller", async () => {
     mockGitCheckout();
-    const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+    const originalStateDir = process.env.CARAPACE_STATE_DIR;
     mocks.runGatewayUpdate.mockImplementation(async () => {
       const run = await mocks.admitUpdateCommandRun.mock.results[0]!.value;
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(run.env.OPENCLAW_STATE_DIR);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(run.env.CARAPACE_STATE_DIR);
       return { status: "ok", mode: "git", root: "/repo/link", steps: [], durationMs: 0 };
     });
     await expect(runOffer({ confirm: vi.fn().mockResolvedValue(true) })).resolves.toEqual({
       updated: true,
       handled: true,
     });
-    expect(process.env.OPENCLAW_STATE_DIR).toBe(originalStateDir);
+    expect(process.env.CARAPACE_STATE_DIR).toBe(originalStateDir);
   });
 
   it("does not admit a declined update", async () => {

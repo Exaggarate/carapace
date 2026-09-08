@@ -171,11 +171,11 @@ async function waitForSettled(predicate: () => boolean): Promise<void> {
 
 describe("Buzz reconnect history catch-up", () => {
   beforeEach(() => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    // openclaw-temp-dir: allow extension tests cannot import root test helpers.
-    const stateDir = mkdtempSync(path.join(tmpdir(), "openclaw-buzz-catchup-"));
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    // carapace-temp-dir: allow extension tests cannot import root test helpers.
+    const stateDir = mkdtempSync(path.join(tmpdir(), "carapace-buzz-catchup-"));
     tempDirs.add(stateDir);
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     vi.clearAllMocks();
     relayMocks.historyRequests.length = 0;
     relayMocks.historySubscriptionCloses = 0;
@@ -215,9 +215,9 @@ describe("Buzz reconnect history catch-up", () => {
 
   afterEach(() => {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     for (const tempDir of tempDirs) {
       rmSync(tempDir, { recursive: true, force: true });

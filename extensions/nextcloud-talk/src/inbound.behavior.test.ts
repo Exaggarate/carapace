@@ -1,5 +1,5 @@
 // Nextcloud Talk tests cover inbound.behavior plugin behavior.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { OutboundReplyPayload, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
@@ -216,7 +216,7 @@ describe("nextcloud-talk inbound behavior", () => {
 
   it("drops unmentioned group traffic before dispatch", async () => {
     installRuntime({
-      buildMentionRegexes: vi.fn(() => [/@openclaw/i]),
+      buildMentionRegexes: vi.fn(() => [/@carapace/i]),
       matchesMentionPatterns: vi.fn(() => false),
     });
     createChannelPairingControllerMock.mockReturnValue({
@@ -254,7 +254,7 @@ describe("nextcloud-talk inbound behavior", () => {
   ])(
     "blocks %s group commands when room access allows chat but command access does not",
     async (_label, text) => {
-      const buildMentionRegexes = vi.fn(() => [/@openclaw/i]);
+      const buildMentionRegexes = vi.fn(() => [/@carapace/i]);
       const coreRuntime = createPluginRuntimeMock({
         channel: {
           text: { hasControlCommand: vi.fn((body?: string) => body === "/help") },
@@ -355,7 +355,7 @@ describe("nextcloud-talk inbound behavior", () => {
         text: { hasControlCommand },
         commands: { shouldHandleTextCommands: vi.fn(() => true) },
         mentions: {
-          buildMentionRegexes: vi.fn(() => [/@openclaw/i]),
+          buildMentionRegexes: vi.fn(() => [/@carapace/i]),
           matchesMentionPatterns: vi.fn(() => false),
         },
       },

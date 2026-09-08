@@ -103,7 +103,7 @@ export const forcedUnitFastTestFiles = [
   "src/install-sh-version.test.ts",
   "src/logger.test.ts",
   "src/mcp/channel-server.shutdown-unhandled-rejection.test.ts",
-  "src/mcp/openclaw-tools-serve.test.ts",
+  "src/mcp/carapace-tools-serve.test.ts",
   "src/media-generation/registry.test.ts",
   "src/node-host/plugin-node-host.test.ts",
   "src/node-host/invoke-system-run-plan.test.ts",
@@ -144,7 +144,7 @@ export const forcedUnitFastTestFiles = [
   "packages/terminal-core/src/restore.test.ts",
   "packages/terminal-core/src/table.test.ts",
   "src/test-helpers/state-dir-env.test.ts",
-  "src/test-utils/openclaw-test-state.test.ts",
+  "src/test-utils/carapace-test-state.test.ts",
   "src/test-utils/temp-home.test.ts",
   "src/utils.test.ts",
   "src/version.test.ts",
@@ -162,7 +162,7 @@ const ownerRoutedUnitTestPatterns = [
   // Real Git process-tree fixtures stay in serial tooling even when their
   // subprocess harness moves into shared test support.
   "test/scripts/ci-git-owner.test.ts",
-  "test/scripts/openclaw-performance-git-lifecycle.test.ts",
+  "test/scripts/carapace-performance-git-lifecycle.test.ts",
   "test/scripts/plugin-release-git-lifecycle.test.ts",
   "test/scripts/release-workflow-git-lifecycle.test.ts",
   "test/scripts/ci-linux-git.test.ts",

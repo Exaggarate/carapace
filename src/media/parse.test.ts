@@ -65,7 +65,7 @@ describe("splitMediaFromOutput", () => {
     ["media/inbound/image.png", "MEDIA:media/inbound/image.png"],
     ["./screenshot.png", "  MEDIA:./screenshot.png"],
     ["~/Pictures/My File.png", "MEDIA:~/Pictures/My File.png"],
-    ["~/.openclaw/media/browser/snap.png", "MEDIA:~/.openclaw/media/browser/snap.png"],
+    ["~/.carapace/media/browser/snap.png", "MEDIA:~/.carapace/media/browser/snap.png"],
     ["C:\\Users\\pete\\Pictures\\snap.png", "MEDIA:C:\\Users\\pete\\Pictures\\snap.png"],
     [
       "C:\\Users\\First Last\\workspace\\shot.png",

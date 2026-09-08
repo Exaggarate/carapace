@@ -1,8 +1,8 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 struct WatchChatDeliveryReceiptView: View {
-    let receipt: OpenClawWatchChatDeliveryReceipt
+    let receipt: CarapaceWatchChatDeliveryReceipt
 
     var body: some View {
         if let outcome = self.receipt.outcome {

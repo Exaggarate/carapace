@@ -1,6 +1,6 @@
 // Memory Core provider tests cover plugin runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import { describe, expect, it, vi } from "vitest";
 
 const managerDebug = {
@@ -37,7 +37,7 @@ import { createMemoryRuntime, memoryRuntime } from "./runtime-provider.js";
 
 describe("memoryRuntime", () => {
   it("preserves manager debug metadata", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     const result = await memoryRuntime.getMemorySearchManager({
       cfg,
@@ -52,7 +52,7 @@ describe("memoryRuntime", () => {
   });
 
   it("forwards optional diagnostic source inspection", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await memoryRuntime.getMemorySearchManager({
       cfg,
@@ -70,7 +70,7 @@ describe("memoryRuntime", () => {
   });
 
   it("keeps local-service acquisition scoped to each runtime instance", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const firstAcquire = vi.fn(async () => undefined);
     const secondAcquire = vi.fn(async () => undefined);
 
@@ -98,7 +98,7 @@ describe("memoryRuntime", () => {
   });
 
   it("binds the scoped state opener inside each lazy runtime instance", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const openKeyedStore = vi.fn();
     configureMemoryCoreDreamingStateMock.mockClear();
 
@@ -111,7 +111,7 @@ describe("memoryRuntime", () => {
   });
 
   it("delegates raw-hit authorization to the canonical session visibility filter", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const hits: MemorySearchResult[] = [
       {
         source: "sessions",

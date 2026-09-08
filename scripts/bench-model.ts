@@ -1,6 +1,6 @@
-// Bench Model script supports OpenClaw repository automation.
+// Bench Model script supports Carapace repository automation.
 import { pathToFileURL } from "node:url";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { expectDefined } from "../packages/normalization-core/src/expect.js";
 import { parseStrictIntegerOption } from "./lib/strict-integer-option.ts";
 
@@ -87,7 +87,7 @@ function parseArgs(argv = process.argv.slice(2)): CliOptions {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw model latency benchmark
+  console.log(`Carapace model latency benchmark
 
 Usage:
   node --import tsx scripts/bench-model.ts [options]
@@ -129,7 +129,7 @@ async function runModel(opts: {
   prompt: string;
 }): Promise<RunResult[]> {
   // Keep SDK initialization outside the measured model-call samples.
-  const { completeSimple } = await import("openclaw/plugin-sdk/llm");
+  const { completeSimple } = await import("carapace/plugin-sdk/llm");
   const results: RunResult[] = [];
   for (let i = 0; i < opts.runs; i += 1) {
     const started = Date.now();

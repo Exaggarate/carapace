@@ -271,7 +271,7 @@ export function resumeStagedPanes(
   narrow: boolean,
 ): void {
   const visiblePaneIds = new Set(visiblePanesOf(layout, narrow).map((pane) => pane.id));
-  for (const pane of root.querySelectorAll<StagedAttachmentPane>("openclaw-chat-pane")) {
+  for (const pane of root.querySelectorAll<StagedAttachmentPane>("carapace-chat-pane")) {
     if (visiblePaneIds.has(pane.paneId)) {
       pane.resumeStagedAttachments?.();
     }
@@ -285,7 +285,7 @@ export function closeStagedPane(
   paneId: string,
 ) {
   const survivingPane = panesOf(layout).find((candidate) => candidate.id !== paneId);
-  const mounted = [...root.querySelectorAll<StagedAttachmentPane>("openclaw-chat-pane")].filter(
+  const mounted = [...root.querySelectorAll<StagedAttachmentPane>("carapace-chat-pane")].filter(
     (candidate) => candidate.paneId === paneId,
   );
   // Clear every retained presentation first so their disconnects cannot

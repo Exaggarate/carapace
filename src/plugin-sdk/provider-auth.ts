@@ -10,7 +10,7 @@ import {
   buildCopilotIdeHeaders,
 } from "../agents/copilot-dynamic-headers.js";
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { cancelUnreadResponseBody } from "../infra/http-body.js";
 import { logWarn } from "../logger.js";
 import {
@@ -25,7 +25,7 @@ import {
   type CachedCopilotToken,
 } from "./provider-auth-copilot-cache.js";
 
-export type { OpenClawConfig } from "../config/config.js";
+export type { CarapaceConfig } from "../config/config.js";
 export type { CachedCopilotToken } from "./provider-auth-copilot-cache.js";
 export type { SecretInput } from "../config/types.secrets.js";
 export type { SecretInputMode } from "../plugins/provider-auth-types.js";
@@ -33,7 +33,7 @@ export type { ProviderAuthResult } from "../plugins/types.js";
 export type { ProviderAuthContext } from "../plugins/types.js";
 export type { AuthProfileStore, OAuthCredential } from "../agents/auth-profiles/types.js";
 
-export { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
+export { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
 export { normalizeGithubCopilotDomain, resolveAuthProfileOrder };
 export { CLAUDE_CLI_PROFILE_ID, CODEX_CLI_PROFILE_ID } from "../agents/auth-profiles/constants.js";
 export {
@@ -138,7 +138,7 @@ const COPILOT_PROVIDER_ID = "github-copilot";
 
 const COPILOT_TOKEN_EXCHANGE_TIMEOUT_MS = 30_000;
 
-function readGithubCopilotDomainFromConfig(config?: OpenClawConfig): string | undefined {
+function readGithubCopilotDomainFromConfig(config?: CarapaceConfig): string | undefined {
   const params = config?.models?.providers?.[COPILOT_PROVIDER_ID]?.params;
   const value = params && typeof params === "object" ? params.githubDomain : undefined;
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -177,7 +177,7 @@ function warnOnceOnRejectedConfigDomain(configured: string): void {
 function resolveGithubCopilotDomain(params?: {
   env?: NodeJS.ProcessEnv;
   explicit?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): string {
   const env = params?.env ?? process.env;
   const fromEnv = env.COPILOT_GITHUB_DOMAIN?.trim();
@@ -280,11 +280,11 @@ export async function resolveCopilotApiToken(params: {
    */
   githubDomain?: string;
   /**
-   * OpenClaw config used to resolve the persisted `githubDomain` provider
+   * Carapace config used to resolve the persisted `githubDomain` provider
    * param when an explicit `githubDomain` is not supplied. Precedence is
    * `COPILOT_GITHUB_DOMAIN` env > explicit `githubDomain` > config.
    */
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<{
   /** Copilot API token, from cache or fresh exchange. */
   token: string;

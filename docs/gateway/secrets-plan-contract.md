@@ -1,23 +1,23 @@
 ---
 summary: "Contract for `secrets apply` plans: target validation, path matching, and SQLite auth-profile target scope"
 read_when:
-  - Generating or reviewing `openclaw secrets apply` plans
+  - Generating or reviewing `carapace secrets apply` plans
   - Debugging `Invalid plan target path` errors
   - Understanding target type and path validation behavior
 title: "Secrets apply plan contract"
 ---
 
-This page defines the strict contract enforced by `openclaw secrets apply`. If a target does not match these rules, apply fails before mutating any file.
+This page defines the strict contract enforced by `carapace secrets apply`. If a target does not match these rules, apply fails before mutating any file.
 
 ## Plan file requirements
 
-`openclaw secrets apply --from <plan.json>` accepts regular files up to 16 MiB (16,777,216 bytes). The limit applies to the complete serialized file, including whitespace. Directories, FIFOs, device files, and files larger than the limit are rejected before JSON parsing or target validation.
+`carapace secrets apply --from <plan.json>` accepts regular files up to 16 MiB (16,777,216 bytes). The limit applies to the complete serialized file, including whitespace. Directories, FIFOs, device files, and files larger than the limit are rejected before JSON parsing or target validation.
 
-`openclaw secrets configure --plan-out <plan.json>` enforces the same limit on the UTF-8 serialized output before creating the file. Hand-written plans and external plan generators must also keep the serialized file within this boundary.
+`carapace secrets configure --plan-out <plan.json>` enforces the same limit on the UTF-8 serialized output before creating the file. Hand-written plans and external plan generators must also keep the serialized file within this boundary.
 
 ## Plan file shape
 
-`openclaw secrets apply --from <plan.json>` expects a `targets` array of plan targets:
+`carapace secrets apply --from <plan.json>` expects a `targets` array of plan targets:
 
 ```json5
 {
@@ -42,16 +42,16 @@ This page defines the strict contract enforced by `openclaw secrets apply`. If a
 }
 ```
 
-`openclaw secrets configure` generates plans in this shape. You can also hand-write or edit one.
+`carapace secrets configure` generates plans in this shape. You can also hand-write or edit one.
 
 ## Provider upserts and deletes
 
 Plans may also include two optional top-level fields that mutate the `secrets.providers` map alongside the per-target writes:
 
-- `providerUpserts` -- an object keyed by provider alias. Each value is a provider definition (the same shape accepted under `secrets.providers.<alias>` in `openclaw.json`, e.g. an `exec` or `file` provider).
+- `providerUpserts` -- an object keyed by provider alias. Each value is a provider definition (the same shape accepted under `secrets.providers.<alias>` in `carapace.json`, e.g. an `exec` or `file` provider).
 - `providerDeletes` -- an array of provider aliases to remove.
 
-`providerUpserts` runs before `targets`, so a `target.ref.provider` may reference a provider alias that the same plan introduces in `providerUpserts`. Without this ordering, plans that reference an alias not yet configured in `openclaw.json` fail with `provider "<alias>" is not configured`.
+`providerUpserts` runs before `targets`, so a `target.ref.provider` may reference a provider alias that the same plan introduces in `providerUpserts`. Without this ordering, plans that reference an alias not yet configured in `carapace.json` fail with `provider "<alias>" is not configured`.
 
 ```json5
 {
@@ -127,24 +127,24 @@ No writes are committed for an invalid plan: target resolution and path validati
 ## Runtime and audit scope notes
 
 - Ref-only SQLite auth-profile entries (`keyRef`/`tokenRef`) are included in runtime credential resolution and audit coverage.
-- `secrets apply` writes supported `openclaw.json` targets and SQLite auth-profile targets. Two optional scrub passes are on by default: `scrubEnv` removes migrated plaintext values from `.env` files in the effective state and active-config directories; `scrubAuthProfilesForProviderTargets` clears plaintext/unused-ref residue in auth stores for providers a plan just migrated. Set either option to `false` in the plan to skip that pass.
+- `secrets apply` writes supported `carapace.json` targets and SQLite auth-profile targets. Two optional scrub passes are on by default: `scrubEnv` removes migrated plaintext values from `.env` files in the effective state and active-config directories; `scrubAuthProfilesForProviderTargets` clears plaintext/unused-ref residue in auth stores for providers a plan just migrated. Set either option to `false` in the plan to skip that pass.
 - `scrubLegacyAuthJson` is a deprecated plan input and is always disabled. Doctor owns legacy `auth.json` migration; `secrets apply` does not read or rewrite it.
 
 ## Operator checks
 
 ```bash
 # Validate plan without writes
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
+carapace secrets apply --from /tmp/carapace-secrets-plan.json --dry-run
 
 # Then apply for real
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
+carapace secrets apply --from /tmp/carapace-secrets-plan.json
 
 # For exec-containing plans, opt in explicitly in both modes
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run --allow-exec
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --allow-exec
+carapace secrets apply --from /tmp/carapace-secrets-plan.json --dry-run --allow-exec
+carapace secrets apply --from /tmp/carapace-secrets-plan.json --allow-exec
 ```
 
-If apply fails with an invalid target path message, regenerate the plan with `openclaw secrets configure` or fix the target path to a supported shape above.
+If apply fails with an invalid target path message, regenerate the plan with `carapace secrets configure` or fix the target path to a supported shape above.
 
 ## Related docs
 

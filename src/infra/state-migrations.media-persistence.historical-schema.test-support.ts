@@ -1,4 +1,4 @@
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
 
 const HISTORICAL_AGENT_LEASE_SCHEMA = `CREATE TABLE IF NOT EXISTS state_leases (
   scope TEXT NOT NULL,
@@ -41,7 +41,7 @@ function removeSchemaRange(sql: string, startMarker: string, endMarker?: string)
 /** Exact schema bytes from 509a5f0373764, derived from current SQL with later additions removed. */
 export function historicalV15AgentSchemaSql(): string {
   const withoutPendingInputs = removeSchemaRange(
-    OPENCLAW_AGENT_SCHEMA_SQL,
+    CARAPACE_AGENT_SCHEMA_SQL,
     "\n-- Accepted input stays outside the active transcript until its exact turn owns execution.",
   );
   let sql = restoreHistoricalAgentLeaseSchema(withoutPendingInputs)

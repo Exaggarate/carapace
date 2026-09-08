@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Command } from "commander";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const runQaSuiteCommand = vi.hoisted(() => vi.fn());
@@ -32,7 +32,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("live transport suite runtime", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_QA_CREDENTIAL_SOURCE", "");
+    vi.stubEnv("CARAPACE_QA_CREDENTIAL_SOURCE", "");
     vi.clearAllMocks();
     runQaSuiteCommand.mockReset();
     loadMatrixQaE2eeRuntime.mockReset();
@@ -47,13 +47,13 @@ describe("live transport suite runtime", () => {
   it.each([undefined, 1, 2])(
     "forwards the dedicated Matrix concurrency %s through parsing and the live suite host",
     async (concurrency) => {
-      vi.stubEnv("OPENCLAW_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
+      vi.stubEnv("CARAPACE_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
       const qa = new Command().exitOverride().configureOutput({ writeErr: () => {} });
       matrixQaCliRegistration.register(qa);
 
       await qa.parseAsync([
         "node",
-        "openclaw",
+        "carapace",
         "matrix",
         "--provider-mode",
         "mock-openai",
@@ -85,7 +85,7 @@ describe("live transport suite runtime", () => {
     ["default selection", "failed"],
     ["plain selection", "ready"],
   ] as const)("prepares %s Matrix flows before workers start (%s)", async (caller, outcome) => {
-    vi.stubEnv("OPENCLAW_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
+    vi.stubEnv("CARAPACE_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
     const outputDir = tempDirs.make("matrix-suite-preparation-");
     const initialization = createDeferred<void>();
     const initializationStarted = createDeferred<void>();
@@ -109,7 +109,7 @@ describe("live transport suite runtime", () => {
       const scenarioIds = context.selectedScenarios.map((scenario) => scenario.id);
       return {
         evidence: {
-          kind: "openclaw.qa.evidence-summary",
+          kind: "carapace.qa.evidence-summary",
           schemaVersion: 2,
           generatedAt: new Date().toISOString(),
           evidenceMode: "full",
@@ -154,7 +154,7 @@ describe("live transport suite runtime", () => {
       caller === "dedicated"
         ? qa.parseAsync([
             "node",
-            "openclaw",
+            "carapace",
             "matrix",
             "--provider-mode",
             "mock-openai",
@@ -209,12 +209,12 @@ describe("live transport suite runtime", () => {
   it.each(["0", "1.5", "2junk"])(
     "rejects invalid dedicated Matrix concurrency %s before suite dispatch",
     async (concurrency) => {
-      vi.stubEnv("OPENCLAW_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
+      vi.stubEnv("CARAPACE_QA_MATRIX_DISABLE_FORCE_EXIT", "1");
       const qa = new Command().exitOverride().configureOutput({ writeErr: () => {} });
       matrixQaCliRegistration.register(qa);
 
       await expect(
-        qa.parseAsync(["node", "openclaw", "matrix", "--concurrency", concurrency]),
+        qa.parseAsync(["node", "carapace", "matrix", "--concurrency", concurrency]),
       ).rejects.toThrow("--concurrency must be a positive integer.");
       expect(runQaSuiteCommand).not.toHaveBeenCalled();
     },
@@ -320,7 +320,7 @@ describe("live transport suite runtime", () => {
   });
 
   it("normalizes the shared credential source environment override", async () => {
-    vi.stubEnv("OPENCLAW_QA_CREDENTIAL_SOURCE", " convex ");
+    vi.stubEnv("CARAPACE_QA_CREDENTIAL_SOURCE", " convex ");
 
     await runLiveTransportQaSuiteCommand({
       channelId: "buzz",

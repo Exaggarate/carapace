@@ -4,7 +4,7 @@
  * normalization local.
  */
 import { resolveMergedModelProviderEntry } from "../config/model-provider-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeSecretInput } from "../utils/normalize-secret-input.js";
 
 const AWS_BEARER_ENV = "AWS_BEARER_TOKEN_BEDROCK";
@@ -21,7 +21,7 @@ export type ResolvedProviderAuth = {
 };
 
 export function resolveDirectProviderCredentialMode(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   inferredMode: ResolvedProviderAuth["mode"];
 }): ResolvedProviderAuth["mode"] {

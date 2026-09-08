@@ -130,7 +130,7 @@ describe("runCronIsolatedAgentTurn — rooted runtime fallback", () => {
 
   it("skips an unsupported rooted runtime and reaches a later embedded candidate", async () => {
     resolveEffectiveAgentRuntimeMock.mockImplementation(({ modelId }: { modelId: string }) =>
-      modelId === "gpt-5.4" || modelId === "gpt-5" ? "openclaw" : "unsupported-harness",
+      modelId === "gpt-5.4" || modelId === "gpt-5" ? "carapace" : "unsupported-harness",
     );
     isCliProviderMock.mockReturnValue(false);
     runEmbeddedAgentMock.mockImplementation(

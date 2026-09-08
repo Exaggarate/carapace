@@ -16,7 +16,7 @@ const TEST_BUNDLE_HASH = "a".repeat(64);
 export const TEST_WORKER_CREDENTIAL = 'node worker/"credential\\secret?';
 export const TEST_WORKER_ENDPOINT: WorkerConnectionEndpoint = {
   kind: "unix",
-  socketPath: "/tmp/openclaw-worker/gateway.sock",
+  socketPath: "/tmp/carapace-worker/gateway.sock",
 };
 
 export const TEST_WORKER_SOURCE = String.raw`
@@ -55,7 +55,7 @@ const onMessage = (message) => {
     message === null ||
     Array.isArray(message) ||
     Object.keys(message).length !== 1 ||
-    message.type !== "openclaw-worker-start-v1"
+    message.type !== "carapace-worker-start-v1"
   ) {
     hardTerminate();
     return;
@@ -107,7 +107,7 @@ if (mode === "admission-rearm") {
 } else if (mode === "connection-failure" || mode === "connection-deadline") {
   const target = new URL(descriptor.connectionEndpoint.url).host;
   const report = (cause) => new Promise((resolve) => process.send(
-    { type: "openclaw-worker-connection-failure-v1", cause }, resolve,
+    { type: "carapace-worker-connection-failure-v1", cause }, resolve,
   ));
   await report("worker could not reach gateway " + target + ": certificate rejected " +
     descriptor.admission.credential + "; check TLS pin/publicUrl configuration");
@@ -151,7 +151,7 @@ if (mode === "admission-rearm") {
 } else if (mode === "diagnostic-retain") {
   fs.writeSync(2, "previous turn stderr " + descriptor.admission.credential + "\n");
   await new Promise((resolve) => process.send({
-    type: "openclaw-worker-connection-failure-v1",
+    type: "carapace-worker-connection-failure-v1",
     cause: "previous turn connection " + descriptor.admission.credential,
   }, resolve));
   finish(descriptor, completedResult, true);
@@ -249,7 +249,7 @@ export function testWorkerDescriptor(
       rpcSetVersion: WORKER_RPC_SET_VERSION,
       handshake: {
         bundleHash: TEST_BUNDLE_HASH,
-        openclawVersion: "2026.8.1",
+        carapaceVersion: "2026.8.1",
         protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
       },
     },
@@ -303,7 +303,7 @@ export function writeNodeWorkerFixture(root: string) {
   fs.mkdirSync(bundleDir, { recursive: true });
   fs.mkdirSync(workspaceDir, { recursive: true });
   fs.writeFileSync(path.join(bundleDir, "worker.mjs"), TEST_WORKER_SOURCE);
-  return { bundleRoot, env: { OPENCLAW_STATE_DIR: stateDir }, root, stateDir, workspaceDir };
+  return { bundleRoot, env: { CARAPACE_STATE_DIR: stateDir }, root, stateDir, workspaceDir };
 }
 
 export function testWorkerLaunchInput(

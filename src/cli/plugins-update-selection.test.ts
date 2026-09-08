@@ -56,36 +56,36 @@ describe("resolvePluginUpdateSelection", () => {
   it.each([
     {
       title: "maps an explicit unscoped npm dist-tag update to the tracked plugin id",
-      pluginId: "openclaw-codex-app-server",
-      packageNameWithSpec: "openclaw-codex-app-server",
-      installPath: "/tmp/openclaw-codex-app-server",
-      packageName: "openclaw-codex-app-server",
-      requestedSpec: "openclaw-codex-app-server@beta",
-      expectedPluginId: "openclaw-codex-app-server",
-      expectedTrackedId: "openclaw-codex-app-server",
-      expectedSpec: "openclaw-codex-app-server@beta",
+      pluginId: "carapace-codex-app-server",
+      packageNameWithSpec: "carapace-codex-app-server",
+      installPath: "/tmp/carapace-codex-app-server",
+      packageName: "carapace-codex-app-server",
+      requestedSpec: "carapace-codex-app-server@beta",
+      expectedPluginId: "carapace-codex-app-server",
+      expectedTrackedId: "carapace-codex-app-server",
+      expectedSpec: "carapace-codex-app-server@beta",
     },
     {
       title: "maps an explicit scoped npm dist-tag update to the tracked plugin id",
       pluginId: "voice-call",
-      packageNameWithSpec: "@openclaw/voice-call",
+      packageNameWithSpec: "@carapace/voice-call",
       installPath: "/tmp/voice-call",
-      packageName: "@openclaw/voice-call",
-      requestedSpec: "@openclaw/voice-call@beta",
+      packageName: "@carapace/voice-call",
+      requestedSpec: "@carapace/voice-call@beta",
       expectedPluginId: "voice-call",
       expectedTrackedId: "voice-call",
-      expectedSpec: "@openclaw/voice-call@beta",
+      expectedSpec: "@carapace/voice-call@beta",
     },
     {
       title: "maps an explicit npm version update to the tracked plugin id",
-      pluginId: "openclaw-codex-app-server",
-      packageNameWithSpec: "openclaw-codex-app-server",
-      installPath: "/tmp/openclaw-codex-app-server",
-      packageName: "openclaw-codex-app-server",
-      requestedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
-      expectedPluginId: "openclaw-codex-app-server",
-      expectedTrackedId: "openclaw-codex-app-server",
-      expectedSpec: "openclaw-codex-app-server@0.2.0-beta.4",
+      pluginId: "carapace-codex-app-server",
+      packageNameWithSpec: "carapace-codex-app-server",
+      installPath: "/tmp/carapace-codex-app-server",
+      packageName: "carapace-codex-app-server",
+      requestedSpec: "carapace-codex-app-server@0.2.0-beta.4",
+      expectedPluginId: "carapace-codex-app-server",
+      expectedTrackedId: "carapace-codex-app-server",
+      expectedSpec: "carapace-codex-app-server@0.2.0-beta.4",
     },
     {
       title: "maps a bare scoped npm package update to the tracked plugin id",
@@ -134,16 +134,16 @@ describe("resolvePluginUpdateSelection", () => {
     expect(
       resolvePluginUpdateSelection({
         installs: {
-          "openclaw-codex-app-server": createNpmInstall({
-            spec: "openclaw-codex-app-server@beta",
-            installPath: "/tmp/openclaw-codex-app-server",
-            resolvedName: "openclaw-codex-app-server",
+          "carapace-codex-app-server": createNpmInstall({
+            spec: "carapace-codex-app-server@beta",
+            installPath: "/tmp/carapace-codex-app-server",
+            resolvedName: "carapace-codex-app-server",
           }),
         },
-        rawId: "openclaw-codex-app-server",
+        rawId: "carapace-codex-app-server",
       }),
     ).toEqual({
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["carapace-codex-app-server"],
     });
   });
 
@@ -229,7 +229,7 @@ describe("resolvePluginUpdateSelection", () => {
 describe("resolveHookPackUpdateSelection", () => {
   it.each([
     { packageName: "@acme/demo-hooks", requestedSpec: "@acme/demo-hooks" },
-    { packageName: "openclaw-demo-hooks", requestedSpec: "openclaw-demo-hooks" },
+    { packageName: "carapace-demo-hooks", requestedSpec: "carapace-demo-hooks" },
     { packageName: "@acme/demo-hooks", requestedSpec: "@acme/demo-hooks@beta" },
     { packageName: "@acme/demo-hooks", requestedSpec: "@acme/demo-hooks@1.2.3" },
   ])(
@@ -291,8 +291,8 @@ describe("resolveHookPackUpdateSelection", () => {
       resolveHookPackUpdateSelection({
         installs: {
           constructor: createNpmHookInstall({
-            spec: "openclaw-hooks-constructor",
-            resolvedName: "openclaw-hooks-constructor",
+            spec: "carapace-hooks-constructor",
+            resolvedName: "carapace-hooks-constructor",
           }),
         },
         rawId: "constructor",

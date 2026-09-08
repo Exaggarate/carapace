@@ -1,7 +1,7 @@
 import path from "node:path";
 import { expect, it, vi } from "vitest";
 import * as sqliteQueries from "../../infra/kysely-sync.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   applySessionEntryLifecycleMutation,
   commitReplySessionInitialization,
@@ -12,7 +12,7 @@ import {
 import type { SessionEntry } from "./types.js";
 
 it("retains only declared reply rows and their stored model parent at each snapshot", async () => {
-  await withOpenClawTestState({ label: "reply-row-selection" }, async (state) => {
+  await withCarapaceTestState({ label: "reply-row-selection" }, async (state) => {
     const sessionKey = "agent:main:reply";
     const parentKey = "agent:main:matrix:group:!Parent:example.org";
     const storedParentKey = "agent:main:stored-parent";
@@ -89,7 +89,7 @@ it("retains only declared reply rows and their stored model parent at each snaps
 it.each(["upsert", "removal"] as const)(
   "projects a lifecycle %s without acquiring unrelated prompt payloads",
   async (operation) => {
-    await withOpenClawTestState({ label: `lifecycle-selected-${operation}` }, async (state) => {
+    await withCarapaceTestState({ label: `lifecycle-selected-${operation}` }, async (state) => {
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:selected",

@@ -7,7 +7,7 @@ import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 // Display-only pending facts span persistence and runtime acknowledgement, including
 // the gap between interrupted and replacement attempts. They never grant authority.
 const pendingChanges = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPermissionChanges"),
+  Symbol.for("carapace.sessionPermissionChanges"),
   () => new Map<string, { generation: string }>(),
 );
 

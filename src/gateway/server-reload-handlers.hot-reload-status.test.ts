@@ -9,7 +9,7 @@ import {
   getRuntimeAuthProfileStoreCredentialsRevision,
   getRuntimeAuthProfileStoreSnapshotsRevision,
 } from "../agents/auth-profiles/runtime-snapshots.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
 import { buildGatewayReloadPlan } from "./config-reload-plan.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
@@ -66,7 +66,7 @@ vi.mock("./config-reload.js", async () => {
 
 describe("startManagedGatewayConfigReloader hotReloadStatus plumbing", () => {
   it("forwards live status and invalidates config.get on watcher commit", async () => {
-    const initialConfig = { session: { store: "/tmp/sessions.json" } } as OpenClawConfig;
+    const initialConfig = { session: { store: "/tmp/sessions.json" } } as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     const broadcast = vi.fn();
     const invalidateMentions = vi.fn();
@@ -84,7 +84,7 @@ describe("startManagedGatewayConfigReloader hotReloadStatus plumbing", () => {
       initialSnapshotValid: true,
       initialSnapshotIssues: [],
       initialInternalWriteHash: null,
-      watchPath: "/tmp/openclaw.json",
+      watchPath: "/tmp/carapace.json",
       readSnapshot: vi.fn() as never,
       promoteSnapshot: vi.fn(async () => true) as never,
       subscribeToWrites: vi.fn(() => () => {}) as never,
@@ -121,7 +121,7 @@ describe("startManagedGatewayConfigReloader hotReloadStatus plumbing", () => {
         invalidate: vi.fn(),
       },
       channelManager: {} as never,
-      activateRuntimeSecrets: vi.fn(async (config: OpenClawConfig) => ({
+      activateRuntimeSecrets: vi.fn(async (config: CarapaceConfig) => ({
         sourceConfig: config,
         config,
         authStores: [],
@@ -148,14 +148,14 @@ describe("startManagedGatewayConfigReloader hotReloadStatus plumbing", () => {
     expect(reloader.hotReloadStatus?.()).toBe("disabled");
 
     hoisted.onConfigCandidateCommitted?.({
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       persistedHash: "persisted-1",
       changedPaths: ["gateway.port"],
     });
     expect(hoisted.invalidateConfigGetResponseCache).toHaveBeenCalledOnce();
     expect(broadcast).toHaveBeenCalledWith(
       "config.changed",
-      { path: "/tmp/openclaw.json", hash: "opaque:persisted-1", ts: expect.any(Number) },
+      { path: "/tmp/carapace.json", hash: "opaque:persisted-1", ts: expect.any(Number) },
       { dropIfSlow: true },
     );
     expect(invalidateMentions).not.toHaveBeenCalled();

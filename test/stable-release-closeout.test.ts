@@ -11,17 +11,17 @@ const release = {
   isDraft: false,
   isPrerelease: false,
   assets: [
-    { name: "OpenClaw-2026.6.8.zip", digest: `sha256:${"a".repeat(64)}` },
-    { name: "OpenClaw-2026.6.8.dmg", digest: `sha256:${"b".repeat(64)}` },
-    { name: "OpenClaw-2026.6.8.dSYM.zip", digest: `sha256:${"c".repeat(64)}` },
+    { name: "Carapace-2026.6.8.zip", digest: `sha256:${"a".repeat(64)}` },
+    { name: "Carapace-2026.6.8.dmg", digest: `sha256:${"b".repeat(64)}` },
+    { name: "Carapace-2026.6.8.dSYM.zip", digest: `sha256:${"c".repeat(64)}` },
   ],
 };
 const remainingAppAssets = [
-  "OpenClaw-Android-SHA256SUMS.txt",
-  "OpenClaw-Android.apk",
-  "OpenClawCompanion-SHA256SUMS.txt",
-  "OpenClawCompanion-Setup-arm64.exe",
-  "OpenClawCompanion-Setup-x64.exe",
+  "Carapace-Android-SHA256SUMS.txt",
+  "Carapace-Android.apk",
+  "CarapaceCompanion-SHA256SUMS.txt",
+  "CarapaceCompanion-Setup-arm64.exe",
+  "CarapaceCompanion-Setup-x64.exe",
 ];
 const changelog =
   "# Changelog\n\n## 2026.6.8\n\n### Fixes\n\n- Shipped fix.\n\n## 2026.6.7\n\n- Old.\n";
@@ -32,7 +32,7 @@ const validCloseoutParams = {
   mainChangelog: changelog,
   tagChangelog: changelog,
   mainAppcast:
-    "https://github.com/openclaw/openclaw/releases/download/v2026.6.8/OpenClaw-2026.6.8.zip\n",
+    "https://github.com/Exaggarate/carapace/releases/download/v2026.6.8/Carapace-2026.6.8.zip\n",
   release,
   releaseTagSha: "tag-sha",
   mainSha: "main-sha",
@@ -51,11 +51,11 @@ function shippedReplayFixture(version: string, mainVersion: string, complete: bo
   const tag = `v${version}`;
   const changelogSection = `## ${version}\n\n- Shipped release.`;
   const replayChangelog = `# Changelog\n\n${changelogSection}`;
-  const mainAppcast = `https://github.com/openclaw/openclaw/releases/download/${tag}/OpenClaw-${version}.zip\n`;
+  const mainAppcast = `https://github.com/Exaggarate/carapace/releases/download/${tag}/Carapace-${version}.zip\n`;
   const githubReleaseAssets = [
-    `OpenClaw-${version}.zip`,
-    `OpenClaw-${version}.dmg`,
-    `OpenClaw-${version}.dSYM.zip`,
+    `Carapace-${version}.zip`,
+    `Carapace-${version}.dmg`,
+    `Carapace-${version}.dSYM.zip`,
     ...(complete ? remainingAppAssets : []),
   ].map((name, index) => ({
     name,
@@ -179,11 +179,11 @@ describe("stable release closeout", () => {
         assets: [
           ...release.assets,
           {
-            name: "openclaw-2026.6.8-stable-main-closeout.json",
+            name: "carapace-2026.6.8-stable-main-closeout.json",
             digest: `sha256:${"d".repeat(64)}`,
           },
           {
-            name: "openclaw-2026.6.8-stable-main-closeout.json.sha256",
+            name: "carapace-2026.6.8-stable-main-closeout.json.sha256",
             digest: `sha256:${"e".repeat(64)}`,
           },
         ],
@@ -214,7 +214,7 @@ describe("stable release closeout", () => {
     });
 
     expect(first.manifest?.githubReleaseAssets[0]).toEqual({
-      name: "OpenClaw-2026.6.8.zip",
+      name: "Carapace-2026.6.8.zip",
       digest: null,
     });
     expect(replay.errors).toEqual([]);
@@ -274,7 +274,7 @@ describe("stable release closeout", () => {
       tagChangelog: changelog.replaceAll("2026.6.8", "2026.6.8-2"),
       release: correctionRelease,
       mainAppcast:
-        "https://github.com/openclaw/openclaw/releases/download/v2026.6.8-2/OpenClaw-2026.6.8-2.zip\n",
+        "https://github.com/Exaggarate/carapace/releases/download/v2026.6.8-2/Carapace-2026.6.8-2.zip\n",
       nowMs: Date.parse("2026-06-17T00:00:00Z"),
     });
 
@@ -296,7 +296,7 @@ describe("stable release closeout", () => {
         tagName: "v2026.6.8-2",
       },
       mainAppcast:
-        "https://github.com/openclaw/openclaw/releases/download/v2026.6.8-2/OpenClaw-2026.6.8.zip\n",
+        "https://github.com/Exaggarate/carapace/releases/download/v2026.6.8-2/Carapace-2026.6.8.zip\n",
       nowMs: Date.parse("2026-06-17T00:00:00Z"),
     });
 
@@ -333,21 +333,21 @@ describe("stable release closeout", () => {
       ...validCloseoutParams,
       mainAppcast: "<rss>stale main feed</rss>",
       publishedAppcast:
-        "https://github.com/openclaw/openclaw/releases/download/v2026.6.8/OpenClaw-2026.6.8.zip",
+        "https://github.com/Exaggarate/carapace/releases/download/v2026.6.8/Carapace-2026.6.8.zip",
       nowMs: Date.parse("2026-06-17T00:00:00Z"),
     });
 
     expect(result.errors).toContain(
-      "main appcast.xml does not point at OpenClaw-2026.6.8.zip from v2026.6.8.",
+      "main appcast.xml does not point at Carapace-2026.6.8.zip from v2026.6.8.",
     );
     expect(result.manifest).toBeNull();
   });
 
   it.each([
-    ["OpenClaw-2026.6.8.zip", null, "macos", "pending"],
-    ["OpenClaw-Android.apk", `sha256:${"D".repeat(64)}`, "android", "verified"],
-    ["OpenClawCompanion-Setup-x64.exe", `sha256:${"d".repeat(63)}`, "windows", "verified"],
-    ["OpenClawCompanion-SHA256SUMS.txt", `sha256:${"d".repeat(64)}\n`, "windows", "verified"],
+    ["Carapace-2026.6.8.zip", null, "macos", "pending"],
+    ["Carapace-Android.apk", `sha256:${"D".repeat(64)}`, "android", "verified"],
+    ["CarapaceCompanion-Setup-x64.exe", `sha256:${"d".repeat(63)}`, "windows", "verified"],
+    ["CarapaceCompanion-SHA256SUMS.txt", `sha256:${"d".repeat(64)}\n`, "windows", "verified"],
   ])("keeps noncanonical %s evidence pending", (assetName, digest, platform, appcast) => {
     const assets = [
       ...release.assets,
@@ -384,7 +384,7 @@ describe("stable release closeout", () => {
       nowMs: Date.parse("2026-06-17T00:00:00Z"),
     });
     const invalidAssets = assets.map((asset) =>
-      asset.name === "OpenClaw-Android.apk"
+      asset.name === "Carapace-Android.apk"
         ? { name: asset.name, digest: asset.digest.toUpperCase() }
         : asset,
     );
@@ -429,13 +429,13 @@ describe("stable release closeout", () => {
     });
 
     expect(result.errors).toContain(
-      "main package.json version is 2026.6.7, expected shipped version 2026.6.8 or a later stable OpenClaw CalVer.",
+      "main package.json version is 2026.6.7, expected shipped version 2026.6.8 or a later stable Carapace CalVer.",
     );
     expect(result.errors).toContain(
       "main CHANGELOG.md ## 2026.6.8 does not exactly match the shipped release section.",
     );
     expect(result.errors).toContain(
-      "main appcast.xml does not point at OpenClaw-2026.6.8.zip from v2026.6.8.",
+      "main appcast.xml does not point at Carapace-2026.6.8.zip from v2026.6.8.",
     );
     expect(result.errors).toContain(
       "rollback drill is older than 90 days: 2026-03-01. Run the private rollback drill before stable closeout.",
@@ -450,7 +450,7 @@ describe("stable release closeout", () => {
     });
 
     expect(result.errors).toContain(
-      "main package.json version is 2026.6.9-beta.1, expected shipped version 2026.6.8 or a later stable OpenClaw CalVer.",
+      "main package.json version is 2026.6.9-beta.1, expected shipped version 2026.6.8 or a later stable Carapace CalVer.",
     );
   });
 });

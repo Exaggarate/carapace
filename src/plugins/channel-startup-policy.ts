@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasExplicitChannelConfig } from "./channel-presence-policy.js";
 import {
   resolveEffectivePluginActivationState,
@@ -13,7 +13,7 @@ export function canStartConfiguredChannelPlugin(params: {
   origin: PluginOrigin;
   /** Declared channel ids for disable checks and bundled allowlist exceptions. */
   channelIds?: readonly string[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginsConfig: NormalizedPluginsConfig;
   activationSource: PluginActivationConfigSource;
 }): boolean {

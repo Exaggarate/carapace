@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ImageContent, TextContent } from "../../llm/types.js";
 import type { AgentMessage } from "../runtime/index.js";
 
@@ -43,7 +43,7 @@ export interface ModelChangeEntry extends SessionEntryBase {
 
 export interface CompactionEntry<T = unknown> extends SessionEntryBase {
   type: "compaction";
-  __openclaw?: { runId?: string; itemId?: string };
+  __carapace?: { runId?: string; itemId?: string };
   summary: string;
   firstKeptEntryId: string;
   tokensBefore: number;
@@ -114,7 +114,7 @@ export type FileEntry = SessionHeader | SessionEntry;
 
 export type AppendPersistenceOptions = {
   appendIntent?: "active-branch";
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   idempotencyLookup?: "scan" | "scan-assistant" | "caller-checked";
   invalidateSerializedPrefixCache?: boolean;
 };

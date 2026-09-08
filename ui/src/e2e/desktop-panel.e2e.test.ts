@@ -57,7 +57,7 @@ const workerDesktopEnvironment = {
 async function openPalette(page: import("playwright").Page) {
   await waitForControlUiGatewayReady(page);
   await page.evaluate(() => {
-    window.dispatchEvent(new CustomEvent("openclaw:command-palette-open"));
+    window.dispatchEvent(new CustomEvent("carapace:command-palette-open"));
   });
   await page.getByRole("combobox", { name: "Search chats and commands…" }).waitFor();
 }
@@ -66,7 +66,7 @@ async function openDesktopPanel(page: import("playwright").Page) {
   await page.goto(`${suite.server.baseUrl}activity`);
   await openPalette(page);
   await page.getByRole("option", { name: "Desktop", exact: true }).click();
-  const panel = page.locator("openclaw-desktop-panel");
+  const panel = page.locator("carapace-desktop-panel");
   await panel.locator("section[aria-label='Desktop']").waitFor();
   return panel;
 }
@@ -74,7 +74,7 @@ async function openDesktopPanel(page: import("playwright").Page) {
 async function openDirectDesktop(page: import("playwright").Page, environmentId: string) {
   await page.evaluate((targetEnvironmentId) => {
     window.dispatchEvent(
-      new CustomEvent("openclaw:desktop-toggle", {
+      new CustomEvent("carapace:desktop-toggle", {
         detail: { open: true, environmentId: targetEnvironmentId },
       }),
     );
@@ -110,7 +110,7 @@ async function openScriptedDesktop(
   // DesktopClient owns the real noVNC parser; only its RFB wire peer is scripted.
   const rfb = await installScriptedRfbServer(page, options);
   await openDirectDesktop(page, "worker-desktop-1");
-  const panel = page.locator("openclaw-desktop-panel");
+  const panel = page.locator("carapace-desktop-panel");
   await panel.locator(".desktop-surface canvas").waitFor();
   await expect.poll(rfb.events).toEqual(["authenticated:1"]);
   return { gateway, rfb, panel };
@@ -167,7 +167,7 @@ suite.define(() => {
         expect(await page.getByRole("option", { name: "Desktop", exact: true }).count()).toBe(1);
 
         await page.getByRole("option", { name: "Desktop", exact: true }).click();
-        const panel = page.locator("openclaw-desktop-panel");
+        const panel = page.locator("carapace-desktop-panel");
         await panel.locator("section[aria-label='Desktop']").waitFor();
         await panel.getByText("Desktop sources", { exact: true }).waitFor();
         await gateway.waitForRequest("environments.list");
@@ -269,7 +269,7 @@ suite.define(() => {
         source: { kind: "environment", environmentId: "missing-worker" },
         control: false,
       });
-      const panel = page.locator("openclaw-desktop-panel");
+      const panel = page.locator("carapace-desktop-panel");
       await panel.getByText(/requested worker desktop is temporarily unavailable/).waitFor();
       expect(await panel.getByText("Desktop sources", { exact: true }).count()).toBe(0);
       expect(await panel.getByText("This machine", { exact: true }).count()).toBe(0);
@@ -306,7 +306,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}chat`);
       await openDirectDesktop(page, "worker-desktop-1");
 
-      const panel = page.locator("openclaw-desktop-panel");
+      const panel = page.locator("carapace-desktop-panel");
       await panel.getByRole("alert").filter({ hasText: "inventory" }).waitFor();
       expect(await gateway.getRequests("desktop.observe")).toHaveLength(0);
       expect(await panel.getByText("Desktop sources", { exact: true }).count()).toBe(0);
@@ -365,7 +365,7 @@ suite.define(() => {
         .toBe(inventoryCount + 1);
       await page.evaluate(() => {
         window.dispatchEvent(
-          new CustomEvent("openclaw:desktop-toggle", { detail: { open: false } }),
+          new CustomEvent("carapace:desktop-toggle", { detail: { open: false } }),
         );
       });
       await gateway.resolveDeferred("environments.list", { environments: [] });
@@ -377,7 +377,7 @@ suite.define(() => {
       );
 
       expect(
-        await page.locator("openclaw-desktop-panel section[aria-label='Desktop']").count(),
+        await page.locator("carapace-desktop-panel section[aria-label='Desktop']").count(),
       ).toBe(0);
       expect(await gateway.getRequests("desktop.observe")).toHaveLength(0);
     });
@@ -415,7 +415,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}activity`);
       await openPalette(page);
       await page.getByRole("option", { name: "Desktop", exact: true }).click();
-      const panel = page.locator("openclaw-desktop-panel");
+      const panel = page.locator("carapace-desktop-panel");
       await panel.locator("section[aria-label='Desktop']").waitFor();
       await panel.getByRole("button", { name: "Dock to right", exact: true }).click();
       const bottom = await panel.evaluate((element) => {

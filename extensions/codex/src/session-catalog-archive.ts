@@ -1,7 +1,7 @@
-import { listAgentIds } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { sessionCatalogAdoptedSourceKey } from "openclaw/plugin-sdk/session-catalog";
+import { listAgentIds } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { sessionCatalogAdoptedSourceKey } from "carapace/plugin-sdk/session-catalog";
 import {
   sessionBindingIdentity,
   type CodexAppServerBindingStore,
@@ -15,7 +15,7 @@ import type { CodexSessionCatalogControl } from "./session-catalog-types.js";
 function assertNoPendingSupervisionBranch(params: {
   agentId: string;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: PluginRuntime;
   threadId: string;
   sourceHomeId?: string;
@@ -38,7 +38,7 @@ function assertNoPendingSupervisionBranch(params: {
   for (const adopted of adoptedEntries) {
     if (adopted.entry.initializationPending === true) {
       throw new CatalogParamsError(
-        "Codex session cannot be archived while its OpenClaw branch is initializing",
+        "Codex session cannot be archived while its Carapace branch is initializing",
       );
     }
     const sessionId = adopted.entry.sessionId?.trim();
@@ -58,7 +58,7 @@ function assertNoPendingSupervisionBranch(params: {
       binding.pendingSupervisionBranch?.sourceThreadId === params.threadId
     ) {
       throw new CatalogParamsError(
-        "Codex session cannot be archived until its OpenClaw branch starts",
+        "Codex session cannot be archived until its Carapace branch starts",
       );
     }
   }
@@ -68,7 +68,7 @@ function assertNoPendingSupervisionBranch(params: {
 export async function archiveLocalCodexSession(params: {
   agentId: string;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   control: CodexSessionCatalogControl;
   runtime: PluginRuntime;
   threadId: string;
@@ -91,7 +91,7 @@ export async function archiveLocalCodexSession(params: {
           requireIdleThread(thread, "archive");
           if (await params.bindingStore.hasOtherThreadOwner(params.threadId)) {
             throw new CatalogParamsError(
-              "Codex session cannot be archived while it is attached to an OpenClaw session",
+              "Codex session cannot be archived while it is attached to an Carapace session",
             );
           }
           await assertCodexArchiveDescendantsUnowned({

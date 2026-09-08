@@ -3,10 +3,10 @@ import path from "node:path";
 import { setImmediate } from "node:timers/promises";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import {
   measureSessionPhysicalDiskUsage,
   pruneSessionTranscriptArchivesToHighWater,
@@ -15,7 +15,7 @@ import {
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 
 export async function reclaimSqliteFreePages(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
 ): Promise<void> {
   let remaining: number | undefined;
   while (remaining === undefined || remaining > 0) {
@@ -23,7 +23,7 @@ export async function reclaimSqliteFreePages(
       await setImmediate();
     }
     // Reacquire after yielding: idle cached handles can be evicted between passes.
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     database.walMaintenance.checkpoint();
     // sqlite-allow-raw -- Physical budget decisions need current SQLite page accounting.
     const freePages = () =>
@@ -45,10 +45,10 @@ export async function reclaimSqliteFreePages(
 }
 
 export function hasCanonicalSessionTranscriptArchives(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
 ): boolean {
-  // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
-  const database = openOpenClawAgentDatabase(databaseOptions);
+  // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
+  const database = openCarapaceAgentDatabase(databaseOptions);
   const db = getSessionKysely(database.db);
   const table = executeSqliteQuerySync(
     database.db,
@@ -74,10 +74,10 @@ export function hasCanonicalSessionTranscriptArchives(
 }
 
 function readUnpublishedSessionTranscriptArchiveNames(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
 ): Set<string> {
-  // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
-  const database = openOpenClawAgentDatabase(databaseOptions);
+  // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
+  const database = openCarapaceAgentDatabase(databaseOptions);
   const db = getSessionKysely(database.db);
   const table = executeSqliteQuerySync(
     database.db,
@@ -103,15 +103,15 @@ function readUnpublishedSessionTranscriptArchiveNames(
 
 async function pruneCanonicalSessionTranscriptArchivesToHighWater(params: {
   archiveDirectory: string;
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   highWaterBytes: number;
   storePath: string;
 }): Promise<{ removedFiles: number; usage: SessionPhysicalDiskUsage }> {
   let usage = await measureSessionPhysicalDiskUsage(params.storePath);
   let removedFiles = 0;
   while (usage.totalBytes > params.highWaterBytes) {
-    // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
-    const database = openOpenClawAgentDatabase(params.databaseOptions);
+    // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
+    const database = openCarapaceAgentDatabase(params.databaseOptions);
     const db = getSessionKysely(database.db);
     const row = executeSqliteQuerySync(
       database.db,
@@ -145,7 +145,7 @@ async function pruneCanonicalSessionTranscriptArchivesToHighWater(params: {
         break;
       }
     }
-    runOpenClawAgentWriteTransaction((transactionDb) => {
+    runCarapaceAgentWriteTransaction((transactionDb) => {
       const transactionKysely = getSessionKysely(transactionDb.db);
       executeSqliteQuerySync(
         transactionDb.db,
@@ -163,7 +163,7 @@ async function pruneCanonicalSessionTranscriptArchivesToHighWater(params: {
 
 export async function pruneAllSessionTranscriptArchivesToHighWater(params: {
   archiveDirectory: string;
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   highWaterBytes: number;
   storePath: string;
 }): Promise<{ removedFiles: number; usage: SessionPhysicalDiskUsage }> {

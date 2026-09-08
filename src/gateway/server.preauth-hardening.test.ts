@@ -2,7 +2,7 @@
  * Gateway pre-auth hardening tests.
  */
 import http from "node:http";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import {
@@ -331,7 +331,7 @@ describe("gateway pre-auth hardening", () => {
           rpcSetVersion: 1,
           handshake: {
             bundleHash: "a".repeat(64),
-            openclawVersion: "2026.8.12",
+            carapaceVersion: "2026.8.12",
             protocolFeatures: [],
           },
         },
@@ -612,7 +612,7 @@ describe("gateway pre-auth hardening", () => {
   });
 
   it("closes idle unauthenticated sockets after the handshake timeout", async () => {
-    setEnvForTest("OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS", "200");
+    setEnvForTest("CARAPACE_TEST_HANDSHAKE_TIMEOUT_MS", "200");
 
     await expectIdlePreauthSocketClose();
   });
@@ -664,7 +664,7 @@ describe("gateway pre-auth hardening", () => {
   });
 
   it("rejects excess simultaneous unauthenticated sockets from the same client ip", async () => {
-    setEnvForTest("OPENCLAW_TEST_MAX_PREAUTH_CONNECTIONS_PER_IP", "1");
+    setEnvForTest("CARAPACE_TEST_MAX_PREAUTH_CONNECTIONS_PER_IP", "1");
     setGatewayAuthNoneForTest();
 
     const harness = await createGatewaySuiteHarness();
@@ -682,7 +682,7 @@ describe("gateway pre-auth hardening", () => {
   });
 
   it("rejects excess simultaneous unauthenticated sockets when trusted proxy headers are missing", async () => {
-    setEnvForTest("OPENCLAW_TEST_MAX_PREAUTH_CONNECTIONS_PER_IP", "1");
+    setEnvForTest("CARAPACE_TEST_MAX_PREAUTH_CONNECTIONS_PER_IP", "1");
     setGatewayAuthNoneForTest();
 
     await withTempConfig({
@@ -691,7 +691,7 @@ describe("gateway pre-auth hardening", () => {
           trustedProxies: ["127.0.0.1"],
         },
       },
-      prefix: "openclaw-preauth-proxy-",
+      prefix: "carapace-preauth-proxy-",
       run: async () => {
         const harness = await createGatewaySuiteHarness();
         try {

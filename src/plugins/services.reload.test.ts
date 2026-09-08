@@ -1,11 +1,11 @@
 import { afterEach, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { registerPluginHttpRoute } from "./http-registry.js";
 import { createEmptyPluginRegistry } from "./registry.js";
 import { listPluginServiceHealthFailures } from "./service-health.js";
 import { startPluginServices, type PluginServicesHandle } from "./services.js";
-import type { OpenClawPluginServiceContext } from "./types.js";
+import type { CarapacePluginServiceContext } from "./types.js";
 
 const handles = new Set<PluginServicesHandle>();
 afterEach(async () => {
@@ -13,14 +13,14 @@ afterEach(async () => {
   handles.clear();
 });
 
-const configFor = (endpoint: string): OpenClawConfig => ({
+const configFor = (endpoint: string): CarapaceConfig => ({
   diagnostics: { otel: { enabled: true, endpoint } },
 });
 
 it("replaces only selected services, retiring their routes and capabilities without losing sibling health", async () => {
-  const contexts: OpenClawPluginServiceContext[] = [];
-  const siblingContexts: OpenClawPluginServiceContext[] = [];
-  const stops: OpenClawConfig[] = [];
+  const contexts: CarapacePluginServiceContext[] = [];
+  const siblingContexts: CarapacePluginServiceContext[] = [];
+  const stops: CarapaceConfig[] = [];
   const broadcastPluginEvent = vi.fn();
   const registry = createEmptyPluginRegistry();
   registry.services.push(

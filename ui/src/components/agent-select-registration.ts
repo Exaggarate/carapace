@@ -1,11 +1,11 @@
 import { AgentSelect } from "./agent-select.ts";
 
-if (!customElements.get("openclaw-agent-select")) {
-  customElements.define("openclaw-agent-select", AgentSelect);
+if (!customElements.get("carapace-agent-select")) {
+  customElements.define("carapace-agent-select", AgentSelect);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-agent-select": AgentSelect;
+    "carapace-agent-select": AgentSelect;
   }
 }

@@ -169,7 +169,7 @@ describe("branch summarization", () => {
         id: "entry-1",
         parentId: "entry-0",
         timestamp: new Date(1).toISOString(),
-        customType: "openclaw.runtime-context",
+        customType: "carapace.runtime-context",
         content: "PRIVATE_RUNTIME_CONTEXT",
         display: false,
         details: { runtimeContextCarrier: true },
@@ -266,7 +266,7 @@ src/write.ts
             }
           : {
               role: "custom",
-              customType: "openclaw.operator-activity",
+              customType: "carapace.operator-activity",
               content: `private output marker ${"x".repeat(80_000)}`,
               display: true,
               timestamp: 2,

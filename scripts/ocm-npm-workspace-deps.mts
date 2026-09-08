@@ -7,11 +7,11 @@ import { delimiter, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { readCurrentGitCommit, resolveBuildIdentityEnvironment } from "./lib/build-identity.mts";
 
-const WORKSPACE_DIRS_ENV = "OPENCLAW_OCM_WORKSPACE_DEPENDENCY_DIRS";
-const REAL_NPM_ENV = "OPENCLAW_OCM_REAL_NPM_BIN";
+const WORKSPACE_DIRS_ENV = "CARAPACE_OCM_WORKSPACE_DEPENDENCY_DIRS";
+const REAL_NPM_ENV = "CARAPACE_OCM_REAL_NPM_BIN";
 const INTERNAL_NPM_BIN_ENV = "OCM_INTERNAL_NPM_BIN";
-const ALLOW_UNRELEASED_CHANGELOG_ENV = "OPENCLAW_PREPACK_ALLOW_UNRELEASED_CHANGELOG";
-const RUNTIME_BUILD_PROFILE_ENV = "OPENCLAW_OCM_RUNTIME_BUILD_PROFILE";
+const ALLOW_UNRELEASED_CHANGELOG_ENV = "CARAPACE_PREPACK_ALLOW_UNRELEASED_CHANGELOG";
+const RUNTIME_BUILD_PROFILE_ENV = "CARAPACE_OCM_RUNTIME_BUILD_PROFILE";
 const supportedRuntimeBuildProfiles = new Set(["sourcePerformance"]);
 
 type WorkspacePackage = { name: string; version: string; tarball: string };
@@ -60,7 +60,7 @@ export function buildInstallManifest(
   return {
     private: true,
     dependencies: {
-      openclaw: pathToFileURL(rootArchive).href,
+      carapace: pathToFileURL(rootArchive).href,
       ...Object.fromEntries(
         workspacePackages.map(({ name, tarball }) => [name, pathToFileURL(tarball).href]),
       ),
@@ -142,7 +142,7 @@ function runChecked(command: string, args: string[], options: SpawnSyncOptions =
 
 function supportsPreparedRuntimePack(env: NodeJS.ProcessEnv) {
   const script = `
-    const mod = await import("./scripts/openclaw-prepack.ts");
+    const mod = await import("./scripts/carapace-prepack.ts");
     process.exit(typeof mod.preparePrepackArtifacts === "function" ? 0 : 1);
   `;
   const result = runNpm(
@@ -166,7 +166,7 @@ function prepareRuntimePack(profile: string, env: NodeJS.ProcessEnv) {
     stdio: "inherit",
   });
   const script = `
-    const mod = await import("./scripts/openclaw-prepack.ts");
+    const mod = await import("./scripts/carapace-prepack.ts");
     await mod.preparePrepackArtifacts();
   `;
   runChecked(process.execPath, ["--import", "tsx", "--input-type=module", "--eval", script], {
@@ -178,8 +178,8 @@ function prepareRuntimePack(profile: string, env: NodeJS.ProcessEnv) {
 export function restoreRuntimePack(env: NodeJS.ProcessEnv, cwd: string = process.cwd()) {
   const script = `
     const { existsSync } = await import("node:fs");
-    if (existsSync("./scripts/openclaw-postpack.mjs")) {
-      const mod = await import("./scripts/openclaw-postpack.mjs");
+    if (existsSync("./scripts/carapace-postpack.mjs")) {
+      const mod = await import("./scripts/carapace-postpack.mjs");
       await mod.restorePrepackArtifacts();
     } else {
       // Historical source refs predate the composite lifecycle and only mutate CHANGELOG.md.
@@ -326,7 +326,7 @@ function patchRootArchiveWorkspaceDependencies(
     rootArchive,
     workspacePackages,
     outputDir,
-    "openclaw-root",
+    "carapace-root",
   );
 }
 
@@ -361,7 +361,7 @@ function main(): number {
     return result.status ?? 1;
   }
 
-  const packDir = mkdtempSync(join(tmpdir(), "openclaw-ocm-workspace-deps-"));
+  const packDir = mkdtempSync(join(tmpdir(), "carapace-ocm-workspace-deps-"));
   try {
     const workspacePackages = packWorkspaceDependencies(npm, workspaceDirs, packDir);
     const rootArchive = patchRootArchiveWorkspaceDependencies(

@@ -4,7 +4,7 @@
  * The diagnostic stream needs timing and size counters for reliability work,
  * but must not export raw provider payloads, transcripts, or audio content.
  */
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   emitTrustedDiagnosticEvent,
   type DiagnosticEventInput,

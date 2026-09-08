@@ -1,5 +1,5 @@
 // Owns atomic delivery-queue ownership changes across namespace versions.
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import type { DeliveryQueueDatabase } from "./delivery-queue-sqlite-bound.js";
 import {
   completeDeliveryQueueEntryInDatabase,
@@ -23,7 +23,7 @@ export function commitStagedDeliveryQueueEntryOnceAcrossNamespaces(params: {
   stagingQueueName: string;
   stateDir?: string;
 }): "created" | "existing" | "missing" {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const queueDb = getNodeSqliteKysely<DeliveryQueueDatabase>(database.db);
       const staging = executeSqliteQueryTakeFirstSync(
@@ -73,7 +73,7 @@ export function commitStagedDeliveryQueueEntryOnceAcrossNamespaces(params: {
       return "created";
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: "commit staged stable delivery queue owner",
@@ -88,7 +88,7 @@ export function upsertDeliveryQueueEntryOnceAcrossNamespaces(params: {
   entry: DeliveryQueueEntryState;
   stateDir?: string;
 }): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const owner = getDeliveryQueueEntryOwnersInDatabase(
         database,
@@ -108,7 +108,7 @@ export function upsertDeliveryQueueEntryOnceAcrossNamespaces(params: {
       );
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: "insert stable delivery queue owner",
@@ -140,7 +140,7 @@ export function replacePendingDeliveryQueueEntry(params: {
       `Delivery queue replacement id mismatch: ${params.expectedEntry.id} != ${params.replacementEntry.id}`,
     );
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const queueDb = getNodeSqliteKysely<DeliveryQueueDatabase>(database.db);
       const source = executeSqliteQueryTakeFirstSync(
@@ -168,7 +168,7 @@ export function replacePendingDeliveryQueueEntry(params: {
       );
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: "replace pending delivery queue entry",
@@ -182,7 +182,7 @@ export function completePendingDeliveryQueueEntry(params: {
   expectedEntry: DeliveryQueueEntryState;
   stateDir?: string;
 }): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const queueDb = getNodeSqliteKysely<DeliveryQueueDatabase>(database.db);
       const source = executeSqliteQueryTakeFirstSync(
@@ -204,7 +204,7 @@ export function completePendingDeliveryQueueEntry(params: {
       return true;
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: "complete pending delivery queue entry",
@@ -219,7 +219,7 @@ export function completePendingDeliveryQueueEntry(params: {
 export function movePendingDeliveryQueueEntryNamespace(
   params: MovePendingDeliveryQueueEntryNamespaceParams,
 ): "moved" | "source-changed" | "destination-exists" | "staging-missing" {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const queueDb = getNodeSqliteKysely<DeliveryQueueDatabase>(database.db);
       const source = executeSqliteQueryTakeFirstSync(
@@ -291,7 +291,7 @@ export function movePendingDeliveryQueueEntryNamespace(
       return "moved";
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: "migrate delivery queue namespace",

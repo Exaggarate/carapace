@@ -4,24 +4,24 @@ import {
   loadDeviceIdentityIfPresent,
   loadOrCreateDeviceIdentity,
 } from "../infra/device-identity.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { configureNodeHost } from "./config.js";
 import { resolveLocalNodeId } from "./local-id.js";
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 
 async function createState(label: string) {
-  const state = await createOpenClawTestState({ label, layout: "state-only", applyEnv: false });
+  const state = await createCarapaceTestState({ label, layout: "state-only", applyEnv: false });
   states.push(state);
   return state;
 }
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   while (states.length > 0) {
     await states.pop()?.cleanup();
   }
@@ -48,7 +48,7 @@ describe("resolveLocalNodeId", () => {
     await expect(resolveLocalNodeId(state.env)).resolves.toBe(identity.deviceId);
 
     // Once discovered, the same-install identity stays stable until process restart.
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(state.statePath("state"), { recursive: true });
     expect(loadDeviceIdentityIfPresent({ env: state.env })).toBeNull();
     await expect(resolveLocalNodeId(state.env)).resolves.toBe(identity.deviceId);
@@ -82,7 +82,7 @@ describe("resolveLocalNodeId", () => {
   it("retries after a failed canonical identity read", async () => {
     const state = await createState("local-node-id-retry");
     const legacyPath = await state.writeText("identity/device.json", "{}\n");
-    await expect(resolveLocalNodeId(state.env)).rejects.toThrow("openclaw doctor --fix");
+    await expect(resolveLocalNodeId(state.env)).rejects.toThrow("carapace doctor --fix");
 
     await fs.rm(legacyPath);
     const identity = loadOrCreateDeviceIdentity({ env: state.env });

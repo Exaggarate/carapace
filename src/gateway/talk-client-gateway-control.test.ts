@@ -142,7 +142,7 @@ describe("Talk client Gateway control owner", () => {
         sessionKey: sessionTarget.canonicalKey,
         active: true,
         aborted: true,
-        message: "Cancelled the active OpenClaw run.",
+        message: "Cancelled the active Carapace run.",
         speak: true,
         show: true,
         suppress: false,
@@ -153,7 +153,7 @@ describe("Talk client Gateway control owner", () => {
           ok: false,
           active: false,
           aborted: false,
-          message: "There is no active OpenClaw run to cancel.",
+          message: "There is no active Carapace run to cancel.",
         }))
         .mockResolvedValueOnce(cancelled);
       const runAgentConsult = vi.fn(async (_args: unknown, signal: AbortSignal) => {
@@ -190,7 +190,7 @@ describe("Talk client Gateway control owner", () => {
       owner.control.onToolCall?.({
         itemId: "item-consult",
         callId: "call-consult",
-        name: "openclaw_agent_consult",
+        name: "carapace_agent_consult",
         args: { question: "check the repository" },
       });
       await vi.waitFor(() => expect(runAgentConsult).toHaveBeenCalledOnce());
@@ -198,7 +198,7 @@ describe("Talk client Gateway control owner", () => {
         owner.control.onToolCall?.({
           itemId: callId,
           callId,
-          name: "openclaw_agent_control",
+          name: "carapace_agent_control",
           args: { text: "cancel", mode: "cancel" },
         });
       if (outcome === "cancelled") {
@@ -269,7 +269,7 @@ describe("Talk client Gateway control owner", () => {
     owner.control.onToolCall?.({
       itemId: "item-status",
       callId: "call-status",
-      name: "openclaw_agent_control",
+      name: "carapace_agent_control",
       args: { text: "status", mode: "status" },
     });
 
@@ -349,7 +349,7 @@ describe("Talk client Gateway control owner", () => {
         owner.control.onToolCall?.({
           itemId: "item-long",
           callId: "call-long",
-          name: "openclaw_agent_consult",
+          name: "carapace_agent_consult",
           args: { question: "long task" },
         });
       }
@@ -422,7 +422,7 @@ describe("Talk client Gateway control owner", () => {
           owner.control.onToolCall?.({
             itemId: "item-flush",
             callId: "call-flush",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             args: { question: "queued task" },
           });
         }
@@ -492,7 +492,7 @@ describe("Talk client Gateway control owner", () => {
           owner.control.onToolCall?.({
             itemId: "item-flush-completion",
             callId: "call-flush-completion",
-            name: "openclaw_agent_consult",
+            name: "carapace_agent_consult",
             args: { question: "queued task" },
           });
         }
@@ -674,7 +674,7 @@ describe("Talk client Gateway control owner", () => {
     first.control.onToolCall?.({
       itemId: "item-replacement",
       callId: "call-replacement",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "keep running" },
     });
     await runStarted.promise;

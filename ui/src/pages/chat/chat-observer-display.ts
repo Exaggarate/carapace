@@ -1,6 +1,6 @@
 import { getSafeLocalStorage } from "../../local-storage.ts";
 
-const OBSERVER_DISPLAY_STORAGE_KEY = "openclaw.chat.observerHud.display";
+const OBSERVER_DISPLAY_STORAGE_KEY = "carapace.chat.observerHud.display";
 
 export type ChatObserverDisplayPreference = "card" | "pill" | "off";
 

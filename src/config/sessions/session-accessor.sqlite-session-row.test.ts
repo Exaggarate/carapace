@@ -1,13 +1,13 @@
 import fs from "node:fs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createCanonicalFixtureSkill } from "../../skills/test-support/test-helpers.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   loadSessionEntry,
   onSessionIdentityMutation,
@@ -32,8 +32,8 @@ import type { InternalSessionEntry } from "./types.js";
 const tempDirs = createTempDirTracker();
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -43,7 +43,7 @@ describe("SQLite session row persistence", () => {
     async (kind) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-identity-decode-")),
+        CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-identity-decode-")),
       };
       const sessionKey = "agent:main:identity-decode";
       const scope = { agentId: "main", env, sessionKey };
@@ -52,7 +52,7 @@ describe("SQLite session row persistence", () => {
         skills: [],
       };
       await upsertSessionEntryCore(scope, { sessionId: "initial", updatedAt: 1, skillsSnapshot });
-      const database = openOpenClawAgentDatabase({ agentId: "main", env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env });
       const identities: string[] = [];
       const unsubscribe = onSessionIdentityMutation((mutation) => {
         if (
@@ -101,7 +101,7 @@ describe("SQLite session row persistence", () => {
     async (reader) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-large-selection-")),
+        CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-large-selection-")),
       };
       const knownKeys = ["agent:main:dashboard:z", "agent:main:dashboard:a"];
       for (const sessionKey of knownKeys) {
@@ -113,7 +113,7 @@ describe("SQLite session row persistence", () => {
         });
         recordSessionParticipant(scope, { identity: { type: "agent", id: "participant" } });
       }
-      const database = openOpenClawAgentDatabase({ agentId: "main", env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env });
       const compileOption = database.db
         .prepare("PRAGMA compile_options")
         .all()
@@ -155,7 +155,7 @@ describe("SQLite session row persistence", () => {
     async (mode) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-commit-fact-")),
+        CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-commit-fact-")),
       };
       const scope = { agentId: "main", env, sessionKey: "agent:main:commit-fact" };
       const skillsSnapshot = {
@@ -255,7 +255,7 @@ describe("SQLite session row persistence", () => {
     async ({ mode, sandbox, source }) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-stamp-")),
+        CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-stamp-")),
       };
       const scope = { agentId: "main", env, sessionKey: "agent:main:stamp" };
       const stamp = {
@@ -292,7 +292,7 @@ describe("SQLite session row persistence", () => {
         }
       }
       expect(loadSessionEntry(scope)).toMatchObject({ sessionId: "replacement", ...stamp });
-      const row = openOpenClawAgentDatabase({ agentId: "main", env })
+      const row = openCarapaceAgentDatabase({ agentId: "main", env })
         .db.prepare(
           "SELECT created_actor_type, created_actor_id, created_via, created_at, entry_json FROM session_nodes WHERE session_key = ?",
         )
@@ -318,7 +318,7 @@ describe("SQLite session row persistence", () => {
     async (preserveActivity) => {
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-stamp-fallback-")),
+        CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-stamp-fallback-")),
       };
       const scope = { agentId: "main", env, sessionKey: "agent:main:fallback" };
       const stamp = {
@@ -339,7 +339,7 @@ describe("SQLite session row persistence", () => {
   it("does not mint creator authority when replacing an unstamped node", async () => {
     const env = {
       ...process.env,
-      OPENCLAW_STATE_DIR: fs.realpathSync(tempDirs.make("session-unstamped-")),
+      CARAPACE_STATE_DIR: fs.realpathSync(tempDirs.make("session-unstamped-")),
     };
     const scope = { agentId: "main", env, sessionKey: "agent:main:unstamped" };
     await upsertSessionEntryCore(scope, {
@@ -366,8 +366,8 @@ describe("SQLite session row persistence", () => {
   });
 
   it("persists private workspace intent but excludes runtime-only resolved skills from SQLite JSON", async () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-sqlite-session-skills-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync(tempDirs.make("carapace-sqlite-session-skills-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sessionKey = "agent:main:runtime-skills";
     const resolvedSkills = [
       createCanonicalFixtureSkill({
@@ -381,7 +381,7 @@ describe("SQLite session row persistence", () => {
     const entry: InternalSessionEntry = {
       sessionId: "runtime-skills-session",
       updatedAt: 42,
-      pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+      pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       pendingWorktree: {
         name: "session-startup",
         titleSource: "Start work",
@@ -397,7 +397,7 @@ describe("SQLite session row persistence", () => {
 
     await upsertSessionEntryCore({ agentId: "main", env, sessionKey }, entry);
 
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     const row = database.db
       .prepare("SELECT entry_json FROM session_nodes WHERE session_key = ?")
       .get(sessionKey) as { entry_json: string };

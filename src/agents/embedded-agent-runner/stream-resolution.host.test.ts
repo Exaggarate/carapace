@@ -1,5 +1,5 @@
-import { createLlmRuntime, getAiTransportHost } from "@openclaw/ai";
-import type { Model } from "@openclaw/llm-core";
+import { createLlmRuntime, getAiTransportHost } from "@carapace/ai";
+import type { Model } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 
 describe("embedded stream transport host", () => {

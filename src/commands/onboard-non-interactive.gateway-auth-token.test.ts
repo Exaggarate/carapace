@@ -3,7 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { makeTempWorkspace } from "../test-helpers/workspace.js";
 import { setTestEnvValue } from "../test-utils/env.js";
 import {
@@ -30,7 +30,7 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
 
   beforeAll(async () => {
     envSnapshot = prepareOnboardGatewayTestEnv();
-    tempHome = await makeTempWorkspace("openclaw-onboard-auth-token-");
+    tempHome = await makeTempWorkspace("carapace-onboard-auth-token-");
     setTestEnvValue("HOME", tempHome);
     await loadGatewayOnboardModules();
   });
@@ -53,14 +53,14 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
   it("writes gateway token auth into config", async () => {
     await withStateDir("state-noninteractive-", async (stateDir) => {
       const token = "tok_test_123";
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
       testConfigStore.set(resolveTestConfigPath(), {
         gateway: {
           bind: "lan",
           auth: { mode: "password", password: "test-password" },
           tailscale: { mode: "serve" },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       await runNonInteractiveSetup(
         {
@@ -108,11 +108,11 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
       return;
     }
     await withStateDir("state-lan-", async (stateDir) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
 
       const port = getPseudoPort(40_000);
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "carapace");
 
       await runNonInteractiveSetup(
         {
@@ -150,8 +150,8 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
       return;
     }
     await withStateDir("state-token-ref-", async (stateDir) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
 
       const port = getPseudoPort(41_000);
 
@@ -159,7 +159,7 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
         {
           nonInteractive: true,
           mode: "local",
-          workspace: path.join(stateDir, "openclaw"),
+          workspace: path.join(stateDir, "carapace"),
           authChoice: "skip",
           skipSkills: true,
           skipHealth: true,
@@ -177,14 +177,14 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
       expect(cfg.gateway?.auth?.token).toEqual({
         source: "store",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "CARAPACE_GATEWAY_TOKEN",
       });
 
       // A ref persisted without its value would leave the gateway unauthenticatable.
       const { readSecretStoreValue } = await import("../secrets/store/secret-store.js");
       const stored = readSecretStoreValue({
         scope: { kind: "team" },
-        name: "OPENCLAW_GATEWAY_TOKEN",
+        name: "CARAPACE_GATEWAY_TOKEN",
       });
       expect(stored.ok).toBe(true);
       expect(stored.ok && stored.value.length).toBeGreaterThan(8);
@@ -197,15 +197,15 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
       return;
     }
     await withStateDir("state-token-ref-env-", async (stateDir) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", "ambient-gateway-token");
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", "ambient-gateway-token");
 
       await runNonInteractiveSetup(
         {
           nonInteractive: true,
           mode: "local",
-          workspace: path.join(stateDir, "openclaw"),
+          workspace: path.join(stateDir, "carapace"),
           authChoice: "skip",
           skipSkills: true,
           skipHealth: true,
@@ -220,13 +220,13 @@ describe("onboard (non-interactive): gateway auth token storage", () => {
       expect(cfg.gateway?.auth?.token).toEqual({
         source: "env",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "CARAPACE_GATEWAY_TOKEN",
       });
 
       // A store copy would silently outlive a later rotation of the env var.
       const { readSecretStoreValue } = await import("../secrets/store/secret-store.js");
       expect(
-        readSecretStoreValue({ scope: { kind: "team" }, name: "OPENCLAW_GATEWAY_TOKEN" }).ok,
+        readSecretStoreValue({ scope: { kind: "team" }, name: "CARAPACE_GATEWAY_TOKEN" }).ok,
       ).toBe(false);
     });
   }, 60_000);

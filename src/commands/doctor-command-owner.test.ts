@@ -49,7 +49,7 @@ describe("command owner health", () => {
         "No command owner is configured.",
         "A command owner is the human operator account allowed to run owner-only commands and approve dangerous actions, including /diagnostics, /export-session, /export-trajectory, /config, and exec approvals.",
         "CLI pairing approval records the first command owner. Control UI approval has an owner checkbox; otherwise set commands.ownerAllowFrom.",
-        "Fix: set commands.ownerAllowFrom to your channel user id, for example openclaw config set commands.ownerAllowFrom '[\"telegram:123456789\"]'",
+        "Fix: set commands.ownerAllowFrom to your channel user id, for example carapace config set commands.ownerAllowFrom '[\"telegram:123456789\"]'",
         "Restart the gateway after changing this if it is already running.",
       ].join("\n"),
       "Command owner",
@@ -59,13 +59,13 @@ describe("command owner health", () => {
   it.skipIf(process.platform === "win32")(
     "quotes a sender id without overriding the selected profile",
     () => {
-      vi.stubEnv("OPENCLAW_PROFILE", "owner-proof");
+      vi.stubEnv("CARAPACE_PROFILE", "owner-proof");
       const id = "@o'brien$(printf injected) --profile decoy:example.org";
       const hint = formatCommandOwnerHint({ cfg: {}, channel: "matrix", id });
       const command = hint.slice(hint.indexOf("`") + 1, hint.lastIndexOf("`"));
       const args = execFileSync(
         "/bin/sh",
-        ["-c", command.replace(/^openclaw /, "printf '%s\\n' ")],
+        ["-c", command.replace(/^carapace /, "printf '%s\\n' ")],
         {
           encoding: "utf8",
         },
@@ -103,7 +103,7 @@ describe("command owner health", () => {
         id: "123",
       }),
     ).toBe(
-      `Ask the operator to run \`openclaw config set commands.ownerAllowFrom '${JSON.stringify(expected)}'\` in a terminal to make this sender a command owner.`,
+      `Ask the operator to run \`carapace config set commands.ownerAllowFrom '${JSON.stringify(expected)}'\` in a terminal to make this sender a command owner.`,
     );
   });
 

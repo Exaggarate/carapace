@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, describe, expect, it, onTestFinished } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createPluginCliLoadSession,
   loadPluginCliDescriptors,
@@ -31,7 +31,7 @@ function countRegisterRuns(markerPath: string): number {
     : 0;
 }
 
-function setupCountingCliPlugin(): { config: OpenClawConfig; markerPath: string } {
+function setupCountingCliPlugin(): { config: CarapaceConfig; markerPath: string } {
   useNoBundledPlugins();
   const pluginDir = makePluginLoaderTempDir();
   const markerPath = path.join(makePluginLoaderTempDir(), "register-runs.log");
@@ -59,7 +59,7 @@ module.exports = {
         load: { paths: [path.join(pluginDir, "index.cjs")] },
         allow: ["counting-cli"],
       },
-    } as OpenClawConfig,
+    } as CarapaceConfig,
     markerPath,
   };
 }
@@ -70,7 +70,7 @@ describe("plugin CLI metadata registration count", () => {
 
     const session = createPluginCliLoadSession();
     onTestFinished(() => session.close());
-    // Stage order mirrors one `openclaw counting-cli --help` invocation: the unowned-primary
+    // Stage order mirrors one `carapace counting-cli --help` invocation: the unowned-primary
     // guard resolves plugin CLI root ownership, then command registration resolves descriptors
     // for the same primary. The CLI carries one preparation session through both stages.
     const ownerIds = await resolvePluginCliRootOwnerIds({

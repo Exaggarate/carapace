@@ -14,7 +14,7 @@ import {
   writeManagedGitHubProfileFiles,
 } from "../../agents/github-tool-identity.js";
 import { cleanupRetiredManagedGitHubProfiles } from "../../agents/github-tool-profile-cleanup.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveCommandEnv } from "../../process/exec-spawn.js";
 import * as secretsRuntime from "../../secrets/runtime-state.js";
 import {
@@ -25,7 +25,7 @@ import {
 } from "../../secrets/store/secret-store.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { dumpGitBackupDatabase } from "../../snapshot/git-backup-codec.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import {
   readUserGitHubConnection,
   resolvePersonalGitHubOwner,
@@ -38,9 +38,9 @@ import {
   setUserProfileRole,
 } from "../../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { GitHubCliUnavailableError } from "../github-cli-preflight.js";
 import { createGitHubOAuthLifecycle } from "../github-oauth-lifecycle.js";
 import { invalidateOperatorRolePolicy } from "../operator-role-policy.js";
@@ -76,9 +76,9 @@ const tokens = {
   refreshToken: "synthetic-refresh",
   refreshTokenExpiresInSeconds: 15552000,
 };
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let lifecycle: ReturnType<typeof createGitHubOAuthLifecycle>;
-let config: OpenClawConfig;
+let config: CarapaceConfig;
 let clients: Set<GatewayClient>;
 let context: GatewayRequestContext;
 let alice: GatewayClient;
@@ -143,7 +143,7 @@ async function connect(client = alice) {
 beforeEach(async () => {
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(new Date("2026-08-20T12:00:00Z"));
-  state = await createOpenClawTestState({ scenario: "minimal", applyEnv: true });
+  state = await createCarapaceTestState({ scenario: "minimal", applyEnv: true });
   config = { agents: { entries: { main: { workspace: state.workspaceDir } } } };
   clients = new Set();
   alice = user("alice@example.test");
@@ -223,7 +223,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
   it.each(["users.github.status", "tools.github.status"])(
     "%s reports execution authentication instead of a resolved preview credential",
     async (method) => {
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: CarapaceConfig = {
         ...config,
         gateway: {
           controlUi: {
@@ -448,7 +448,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
         const polled = await rpc(alice, "tools.github.authorize.poll", { requestId });
         expect(polled.mock.calls[0]?.[1]).toMatchObject({ status: "success" });
       }
-      config = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      config = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
       const identity =
         scope === "system" ? config.tools?.github : config.agents?.entries?.main?.tools?.github;
       if (!identity) {
@@ -531,7 +531,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
     });
     const connected = await connect();
     expect(connected.selection).toMatchObject({ scopes: ["workflow", "repo", "repo"] });
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.prepare(
       "UPDATE secret_store_entries SET value = ? WHERE scope_kind = 'identity' AND scope_id = ? AND name = 'github-connection'",
     ).run(
@@ -744,7 +744,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
     async (corrupt) => {
       await connect();
       const target = corrupt === "source-with-absent-target" ? undefined : await connect(bob);
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       for (const client of corrupt === "both"
         ? [alice, bob]
         : [corrupt.startsWith("source") ? alice : bob]) {
@@ -766,7 +766,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
 
   it("rolls back the profile merge on a real database failure instead of classifying it as corrupt credentials", async () => {
     const before = await connect();
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     db.exec(`CREATE TEMP TRIGGER reject_personal_merge BEFORE INSERT ON secret_store_entries
       BEGIN SELECT RAISE(ABORT, 'synthetic merge storage failure'); END`);
     expect(() => linkEmail("alice@example.test", owner(bob))).toThrow(
@@ -780,7 +780,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
 
   it("does not adopt credentials stranded on an alias by an older profile merge", async () => {
     await connect();
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare("UPDATE user_profiles SET merged_into = ? WHERE id = ?")
       .run(owner(bob), owner());
     expect((await rpc(alice, "users.github.status")).mock.calls[0]?.[1]).toMatchObject({
@@ -788,7 +788,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
     });
     await lifecycle.personal.maintain();
     expect(readUserGitHubConnection(owner(bob))).toBeUndefined();
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare("DELETE FROM user_profiles WHERE id = ?")
       .run(owner(bob));
     expect((await rpc(alice, "users.github.authorize.start")).mock.calls[0]?.[0]).toBe(false);
@@ -813,7 +813,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
     purgeExpiredSecretStoreEntries();
     await cleanupRetiredManagedGitHubProfiles({ config });
     expect(await fs.readFile(path.join(dir, "hosts.yml"), "utf8")).toContain(tokens.accessToken);
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     const manifest = await dumpGitBackupDatabase({
       snapshotPath: database.path,
       outputPath: state.path("redacted-backup"),
@@ -887,7 +887,7 @@ describe("personal GitHub through authenticated Gateway RPC", () => {
         throw new Error("Expected connection");
       }
       vi.setSystemTime(connection.selection.accessExpiresAtMs - 1);
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       db.exec(
         "CREATE TEMP TRIGGER reject_rotation BEFORE UPDATE ON secret_store_entries WHEN NEW.value LIKE '%synthetic-rotated-refresh%' BEGIN SELECT RAISE(ABORT, 'synthetic write failure'); END",
       );

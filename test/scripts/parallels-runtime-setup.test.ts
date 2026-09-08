@@ -21,7 +21,7 @@ describe("Parallels runtime companion setup", () => {
   it("leaves the shipped pre-consent CLI to provision its own companion version", async () => {
     const readCli = vi.fn((args: string[]) => {
       expect(args).toEqual(["plugins", "install", "--help"]);
-      return "Usage: openclaw plugins install [options] <spec>\n  --pin  Pin resolved version\n";
+      return "Usage: carapace plugins install [options] <spec>\n  --pin  Pin resolved version\n";
     });
     const installCli = vi.fn();
     await installSmokeRuntimeCompanions({ provider: "openai", readCli, installCli });
@@ -34,7 +34,7 @@ describe("Parallels runtime companion setup", () => {
     async (version) => {
       const readCli = vi.fn((args: string[]) =>
         args[0] === "--version"
-          ? `OpenClaw ${version} (abcdef0)\n`
+          ? `Carapace ${version} (abcdef0)\n`
           : "Options:\n  --accept-capabilities  Accept declared capabilities\n",
       );
       const installCli = vi.fn().mockResolvedValue(undefined);
@@ -42,7 +42,7 @@ describe("Parallels runtime companion setup", () => {
       expect(installCli).toHaveBeenCalledExactlyOnceWith([
         "plugins",
         "install",
-        `npm:@openclaw/codex@${version}`,
+        `npm:@carapace/codex@${version}`,
         "--pin",
         "--accept-capabilities",
       ]);
@@ -52,7 +52,7 @@ describe("Parallels runtime companion setup", () => {
   it("propagates companion installation failures before onboarding can continue", async () => {
     const error = new Error("existing plugin install must not be overwritten");
     const readCli = (args: string[]) =>
-      args[0] === "--version" ? "OpenClaw 2026.8.1" : "  --accept-capabilities  Accept\n";
+      args[0] === "--version" ? "Carapace 2026.8.1" : "  --accept-capabilities  Accept\n";
     const installCli = vi.fn().mockRejectedValue(error);
     await expect(
       installSmokeRuntimeCompanions({ provider: "openai", readCli, installCli }),
@@ -65,7 +65,7 @@ describe("Parallels runtime companion setup", () => {
     const installCli = vi.fn();
     await expect(
       installSmokeRuntimeCompanions({ provider: "openai", readCli, installCli }),
-    ).rejects.toThrow("could not resolve installed OpenClaw version");
+    ).rejects.toThrow("could not resolve installed Carapace version");
     expect(installCli).not.toHaveBeenCalled();
   });
 });
@@ -86,7 +86,7 @@ describe("Parallels Linux runtime prerequisites", () => {
       runShell: (script) => {
         const nodeRunner = shellQuote(process.execPath);
         const nodeCheckRunner = shellQuote(
-          'Object.defineProperty(process.versions, "node", { value: process.env.OPENCLAW_TEST_NODE_RELEASE }); eval(process.argv[1]);',
+          'Object.defineProperty(process.versions, "node", { value: process.env.CARAPACE_TEST_NODE_RELEASE }); eval(process.argv[1]);',
         );
         return execFileSync(
           "bash",
@@ -99,7 +99,7 @@ ${script}`,
           ],
           {
             encoding: "utf8",
-            env: { ...process.env, OPENCLAW_TEST_NODE_RELEASE: scenario.nodeVersion },
+            env: { ...process.env, CARAPACE_TEST_NODE_RELEASE: scenario.nodeVersion },
             timeout: 10_000,
           },
         );

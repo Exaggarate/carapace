@@ -1,5 +1,5 @@
 // LongCat tests cover the plugin-owned persisted catalog repair.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract-api.js";
 
@@ -23,7 +23,7 @@ const LEGACY_STOCK_MODEL = {
   },
 };
 
-function longcatConfig(models: unknown[]): OpenClawConfig {
+function longcatConfig(models: unknown[]): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -34,7 +34,7 @@ function longcatConfig(models: unknown[]): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("LongCat doctor contract", () => {

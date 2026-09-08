@@ -1,9 +1,9 @@
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { splitShellArgs } from "../utils/shell-argv.js";
 import { resolvePathViaExistingAncestorSync } from "./boundary-path.js";
 import {
@@ -81,21 +81,21 @@ function normalizeCommandBaseName(token: string | undefined): string {
   return base.replace(/\.(?:cmd|exe)$/u, "");
 }
 
-function stripOpenClawPackageRunner(argv: string[]): string[] {
+function stripCarapacePackageRunner(argv: string[]): string[] {
   const commandName = normalizeCommandBaseName(argv[0]);
-  if (commandName === "openclaw") {
+  if (commandName === "carapace") {
     return argv;
   }
   if (
     (commandName === "pnpm" || commandName === "npm" || commandName === "yarn") &&
-    normalizeCommandBaseName(argv[1]) === "openclaw"
+    normalizeCommandBaseName(argv[1]) === "carapace"
   ) {
     return argv.slice(1);
   }
   if (
     (commandName === "pnpm" || commandName === "npm" || commandName === "yarn") &&
     (argv[1] === "exec" || argv[1] === "dlx" || argv[1] === "run") &&
-    normalizeCommandBaseName(argv[2]) === "openclaw"
+    normalizeCommandBaseName(argv[2]) === "carapace"
   ) {
     return argv.slice(2);
   }
@@ -115,23 +115,23 @@ function stripOpenClawPackageRunner(argv: string[]): string[] {
         idx += 1;
       }
     }
-    if (normalizeCommandBaseName(argv[idx]) === "openclaw") {
+    if (normalizeCommandBaseName(argv[idx]) === "carapace") {
       return argv.slice(idx);
     }
   }
   return argv;
 }
 
-function parseOpenClawChannelsLoginShellCommand(raw: string): boolean {
+function parseCarapaceChannelsLoginShellCommand(raw: string): boolean {
   const argv = splitShellArgs(raw);
   if (!argv) {
     return false;
   }
-  const openclawArgv = stripOpenClawPackageRunner(argv);
+  const carapaceArgv = stripCarapacePackageRunner(argv);
   return (
-    normalizeCommandBaseName(openclawArgv[0]) === "openclaw" &&
-    (openclawArgv[1] === "channels" || openclawArgv[1] === "channel") &&
-    openclawArgv[2] === "login"
+    normalizeCommandBaseName(carapaceArgv[0]) === "carapace" &&
+    (carapaceArgv[1] === "channels" || carapaceArgv[1] === "channel") &&
+    carapaceArgv[2] === "login"
   );
 }
 
@@ -205,7 +205,7 @@ function expandSqliteDatabaseToken(token: string, stateDir: string): string | nu
     return null;
   }
   const stateVariable = expanded.match(
-    /^\$(?:OPENCLAW_STATE_DIR|\{OPENCLAW_STATE_DIR\})(?=$|[\\/])/u,
+    /^\$(?:CARAPACE_STATE_DIR|\{CARAPACE_STATE_DIR\})(?=$|[\\/])/u,
   );
   if (stateVariable) {
     expanded = `${stateDir}${expanded.slice(stateVariable[0].length)}`;
@@ -243,7 +243,7 @@ function targetsLiveStateSqliteDatabase(
   if (!stateDir) {
     return false;
   }
-  // External SQLite clients bypass OpenClaw's runtime/version guard and can join the live WAL.
+  // External SQLite clients bypass Carapace's runtime/version guard and can join the live WAL.
   // Resolve existing ancestors so an alias outside the state root cannot hide that ownership.
   const canonicalStateDir = resolvePathViaExistingAncestorSync(stateDir);
   return parseSqliteDatabaseTokens(argv).some((databaseToken) => {
@@ -300,7 +300,7 @@ export async function detectUnsafeExecControlShellCommand(
     if (parseExecApprovalShellCommand(candidate)) {
       return "approve";
     }
-    if (parseOpenClawChannelsLoginShellCommand(candidate)) {
+    if (parseCarapaceChannelsLoginShellCommand(candidate)) {
       return "channel-login";
     }
   }
@@ -336,8 +336,8 @@ export async function rejectUnsafeExecControlShellCommand(command: string): Prom
   if (unsafeKind === "channel-login") {
     throw new Error(
       [
-        "exec cannot run interactive OpenClaw channel login commands.",
-        "Run `openclaw channels login` in a terminal on the gateway host, or use the channel-specific login agent tool when available (for WhatsApp: `whatsapp_login`).",
+        "exec cannot run interactive Carapace channel login commands.",
+        "Run `carapace channels login` in a terminal on the gateway host, or use the channel-specific login agent tool when available (for WhatsApp: `whatsapp_login`).",
       ].join(" "),
     );
   }
@@ -354,8 +354,8 @@ export async function rejectUnsafeExecLiveStateSqliteShellCommand(
   }
   throw new Error(
     [
-      "external sqlite3 cannot open databases under the active OpenClaw state directory.",
-      "Use OpenClaw commands for live state, or inspect a private backup copy outside `OPENCLAW_STATE_DIR`.",
+      "external sqlite3 cannot open databases under the active Carapace state directory.",
+      "Use Carapace commands for live state, or inspect a private backup copy outside `CARAPACE_STATE_DIR`.",
     ].join(" "),
   );
 }

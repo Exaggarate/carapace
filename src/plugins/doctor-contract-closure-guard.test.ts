@@ -9,7 +9,7 @@ import { loadBundledPluginManifestRegistry } from "./manifest-registry.js";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "../..");
 const SOURCE_MODULE_EXTENSIONS = [".ts", ".mts", ".cts", ".js", ".mjs", ".cjs"] as const;
-const FORBIDDEN_SPECIFIER = "openclaw/plugin-sdk/agent-runtime";
+const FORBIDDEN_SPECIFIER = "carapace/plugin-sdk/agent-runtime";
 type ClosureKind = "doctor-contract" | "legacy-setup";
 // Static value imports only; type-only and lazy dynamic imports of these stay allowed.
 // Rules scoped to "doctor-contract" protect doctor enumeration cold-load cost;
@@ -30,48 +30,48 @@ const FORBIDDEN_SPECIFIER_RULES = new Map<string, { reason: string; kinds: Set<C
     {
       reason:
         "the deprecated broad barrel makes doctor enumeration cold-load the core agents graph; " +
-        "use openclaw/plugin-sdk/agent-scope-runtime or another focused subpath",
+        "use carapace/plugin-sdk/agent-scope-runtime or another focused subpath",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/doctor-repair-runtime",
+    "carapace/plugin-sdk/doctor-repair-runtime",
     {
       reason:
         "install-path, uninstall, and state-db schema repair cold-load the state-db/kysely graph; " +
-        "use openclaw/plugin-sdk/runtime-doctor-migrations, or defer the repair behind a dynamic import",
+        "use carapace/plugin-sdk/runtime-doctor-migrations, or defer the repair behind a dynamic import",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/runtime-doctor",
+    "carapace/plugin-sdk/runtime-doctor",
     {
       reason:
         "the retired package path exists only for shipped plugin artifacts; " +
-        "current source must use openclaw/plugin-sdk/runtime-doctor-migrations",
+        "current source must use carapace/plugin-sdk/runtime-doctor-migrations",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/ssrf-runtime",
+    "carapace/plugin-sdk/ssrf-runtime",
     {
       reason:
         "the SSRF runtime barrel cold-loads DNS, proxy state, and logging; " +
-        "legacy private-network config migration lives in openclaw/plugin-sdk/runtime-doctor-migrations",
+        "legacy private-network config migration lives in carapace/plugin-sdk/runtime-doctor-migrations",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/provider-model-shared",
+    "carapace/plugin-sdk/provider-model-shared",
     {
       reason:
         "the provider-model barrel cold-loads replay/endpoint/catalog helpers; " +
-        "use openclaw/plugin-sdk/model-ref-parse for provider/model reference parsing",
+        "use carapace/plugin-sdk/model-ref-parse for provider/model reference parsing",
       kinds: new Set(["doctor-contract"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/acp-runtime",
+    "carapace/plugin-sdk/acp-runtime",
     {
       reason:
         "the ACP runtime barrel cold-loads the ACP control-plane manager and backend registry; " +
@@ -80,7 +80,7 @@ const FORBIDDEN_SPECIFIER_RULES = new Map<string, { reason: string; kinds: Set<C
     },
   ],
   [
-    "openclaw/plugin-sdk/conversation-runtime",
+    "carapace/plugin-sdk/conversation-runtime",
     {
       reason:
         "the deprecated conversation barrel cold-loads binding-routing and the session-binding registry; " +
@@ -89,26 +89,26 @@ const FORBIDDEN_SPECIFIER_RULES = new Map<string, { reason: string; kinds: Set<C
     },
   ],
   [
-    "openclaw/plugin-sdk/provider-auth",
+    "carapace/plugin-sdk/provider-auth",
     {
       reason:
         "the provider-auth barrel cold-loads the auth-profile store, provider runtime, and plugin " +
-        "install graph (execa, kysely, commander); use openclaw/plugin-sdk/secret-provider-alias " +
+        "install graph (execa, kysely, commander); use carapace/plugin-sdk/secret-provider-alias " +
         "for the default secret provider alias",
       kinds: new Set(["doctor-contract"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/channel-secret-basic-runtime",
+    "carapace/plugin-sdk/channel-secret-basic-runtime",
     {
       reason:
         "the channel-secret barrel cold-loads secret-ref/account-routing modules; " +
-        "the canonical record guard is openclaw/plugin-sdk/string-coerce-runtime",
+        "the canonical record guard is carapace/plugin-sdk/string-coerce-runtime",
       kinds: new Set(["doctor-contract"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/plugin-state-store-runtime",
+    "carapace/plugin-sdk/plugin-state-store-runtime",
     {
       reason:
         "opening a keyed plugin-state store cold-loads the state-db/kysely graph; " +
@@ -117,7 +117,7 @@ const FORBIDDEN_SPECIFIER_RULES = new Map<string, { reason: string; kinds: Set<C
     },
   ],
   [
-    "openclaw/plugin-sdk/session-store-runtime",
+    "carapace/plugin-sdk/session-store-runtime",
     {
       reason:
         "the session-store barrel makes doctor enumeration cold-load the session-accessor/kysely graph; " +
@@ -126,38 +126,38 @@ const FORBIDDEN_SPECIFIER_RULES = new Map<string, { reason: string; kinds: Set<C
     },
   ],
   [
-    "openclaw/plugin-sdk/logging-core",
+    "carapace/plugin-sdk/logging-core",
     {
       reason:
         "the logging barrel makes doctor enumeration cold-load the diagnostic/config graph; " +
-        "use openclaw/plugin-sdk/security-runtime for redaction helpers",
+        "use carapace/plugin-sdk/security-runtime for redaction helpers",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/realtime-voice",
+    "carapace/plugin-sdk/realtime-voice",
     {
       reason:
         "the realtime-voice barrel makes doctor enumeration cold-load the agent-consult/session graph; " +
-        "use openclaw/plugin-sdk/realtime-voice-activation for activation-name helpers",
+        "use carapace/plugin-sdk/realtime-voice-activation for activation-name helpers",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/channel-outbound",
+    "carapace/plugin-sdk/channel-outbound",
     {
       reason:
         "the channel-outbound barrel makes doctor enumeration cold-load the reply-pipeline/channel-registry graph; " +
-        "use openclaw/plugin-sdk/channel-streaming-config for streaming config helpers",
+        "use carapace/plugin-sdk/channel-streaming-config for streaming config helpers",
       kinds: new Set(["doctor-contract"]),
     },
   ],
   [
-    "openclaw/plugin-sdk/memory-host-core",
+    "carapace/plugin-sdk/memory-host-core",
     {
       reason:
         "the memory-host barrel makes doctor enumeration cold-load the event-store/kysely graph; " +
-        "use openclaw/plugin-sdk/agent-scope-runtime for agent scope resolvers",
+        "use carapace/plugin-sdk/agent-scope-runtime for agent scope resolvers",
       kinds: new Set(["doctor-contract", "legacy-setup"]),
     },
   ],
@@ -298,7 +298,7 @@ function collectClosureEntries(): ClosureEntry[] {
   const entries: ClosureEntry[] = [];
   const env = {
     ...process.env,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(REPO_ROOT, "extensions"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.join(REPO_ROOT, "extensions"),
   };
   for (const record of loadBundledPluginManifestRegistry({ env }).plugins) {
     const pluginRoot = path.resolve(record.rootDir);
@@ -326,9 +326,9 @@ function collectClosureEntries(): ClosureEntry[] {
       continue;
     }
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-      openclaw?: { setupEntry?: unknown };
+      carapace?: { setupEntry?: unknown };
     };
-    const setupEntry = packageJson.openclaw?.setupEntry;
+    const setupEntry = packageJson.carapace?.setupEntry;
     if (typeof setupEntry !== "string") {
       continue;
     }
@@ -375,7 +375,7 @@ function collectForbiddenClosureImports(entry: ClosureEntry): string[] {
 
 function collectHeavyRuntimeDoctorMigrationImports(): string[] {
   const entryPath = path.join(REPO_ROOT, "src/plugin-sdk/runtime-doctor-migrations.ts");
-  const forbiddenPrefixes = ["src/plugin-state/plugin-state-store", "src/state/openclaw-state-db"];
+  const forbiddenPrefixes = ["src/plugin-state/plugin-state-store", "src/state/carapace-state-db"];
   const violations: string[] = [];
   const visited = new Set<string>();
   const pending = [entryPath];
@@ -409,14 +409,14 @@ function collectHeavyRuntimeDoctorMigrationImports(): string[] {
   return violations;
 }
 
-const PLUGIN_SDK_SPECIFIER_PREFIX = "openclaw/plugin-sdk/";
+const PLUGIN_SDK_SPECIFIER_PREFIX = "carapace/plugin-sdk/";
 
 function isKyselySpecifier(specifier: string): boolean {
   return specifier === "kysely" || specifier.startsWith("kysely/");
 }
 
 // The transitive walk follows relative imports (plugin-local, core src, and the
-// deep-relative package bridges) plus openclaw/plugin-sdk/* subpaths. Other bare
+// deep-relative package bridges) plus carapace/plugin-sdk/* subpaths. Other bare
 // specifiers are node builtins or npm/workspace packages; only the repo root
 // depends on kysely, so every kysely edge is reachable through this resolution.
 function collectTraversalValueReferences(filePath: string, source: string): ModuleReference[] {

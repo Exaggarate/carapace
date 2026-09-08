@@ -1,12 +1,12 @@
-import OpenClawChatUI
-import OpenClawKit
+import CarapaceChatUI
+import CarapaceKit
 import SwiftUI
 
 struct WatchMessageJournalView: View {
     @Environment(NodeAppModel.self) private var appModel
-    @State private var journal: OpenClawWatchMessageJournal?
-    @State private var entries: [OpenClawWatchMessageEntry] = []
-    @State private var pendingDiscard: OpenClawWatchMessageEntry?
+    @State private var journal: CarapaceWatchMessageJournal?
+    @State private var entries: [CarapaceWatchMessageEntry] = []
+    @State private var pendingDiscard: CarapaceWatchMessageEntry?
     @State private var isUpdating = false
     @State private var didLoad = false
     @State private var notice: String?
@@ -17,19 +17,19 @@ struct WatchMessageJournalView: View {
             if let warning = self.appModel.watchChatDeliveryWarning {
                 Section {
                     Text(warning)
-                        .font(OpenClawType.body)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(CarapaceType.body)
+                        .foregroundStyle(CarapaceBrand.warn)
                 }
             }
             if let notice = self.notice {
                 Section {
                     Text(notice)
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                     Button {
                         self.refreshID &+= 1
                     } label: {
                         Text("Try again")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                 }
             }
@@ -37,7 +37,7 @@ struct WatchMessageJournalView: View {
                 ProgressView()
             } else if self.entries.isEmpty, self.notice == nil {
                 Text("No saved Watch messages")
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                     .foregroundStyle(.secondary)
             }
             ForEach(self.entries) { entry in
@@ -48,7 +48,7 @@ struct WatchMessageJournalView: View {
             Section {
                 Text(
                     "Dismiss hides cards; receipts still expire after 48 hours. Needs review stays until discarded.")
-                    .font(OpenClawType.footnote)
+                    .font(CarapaceType.footnote)
                     .foregroundStyle(.secondary)
             }
         }
@@ -65,48 +65,48 @@ struct WatchMessageJournalView: View {
                 Task { await self.remove(entry) }
             } label: {
                 Text("Discard")
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
             }
         } message: { _ in
             Text("This deletes the saved Needs review message from iPhone.")
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
         }
     }
 
-    private func message(_ entry: OpenClawWatchMessageEntry) -> some View {
+    private func message(_ entry: CarapaceWatchMessageEntry) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(Self.statusTitle(entry))
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
             if let text = entry.displayText, !text.isEmpty {
                 Text(verbatim: text)
-                    .font(OpenClawType.body)
+                    .font(CarapaceType.body)
                     .lineLimit(8)
                     .textSelection(.enabled)
             }
             if let context = entry.command?.context {
                 Text(verbatim: "\(context.agentId) · \(context.sessionKey)")
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
             }
             if let gatewayID = entry.owner?.gatewayStableID {
                 Text(verbatim: gatewayID)
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
             }
             if let explanation = Self.explanation(entry) {
                 Text(explanation)
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.secondary)
             }
             if case let .reply(text) = entry.receipt?.terminal?.outcome {
                 DisclosureGroup {
                     Text(verbatim: text)
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                         .textSelection(.enabled)
                 } label: {
                     Text("Reply")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(CarapaceType.captionSemiBold)
                 }
             }
             HStack {
@@ -115,7 +115,7 @@ struct WatchMessageJournalView: View {
                         UIPasteboard.general.string = text
                     } label: {
                         Label("Copy message", systemImage: "doc.on.doc")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(CarapaceType.captionSemiBold)
                     }
                 }
                 Spacer()
@@ -124,7 +124,7 @@ struct WatchMessageJournalView: View {
                         self.pendingDiscard = entry
                     } label: {
                         Label("Discard…", systemImage: "trash")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(CarapaceType.captionSemiBold)
                     }
                     .disabled(self.isUpdating)
                 } else if entry.receipt?.terminal != nil {
@@ -132,7 +132,7 @@ struct WatchMessageJournalView: View {
                         Task { await self.remove(entry) }
                     } label: {
                         Label("Dismiss", systemImage: "xmark")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(CarapaceType.captionSemiBold)
                     }
                     .disabled(self.isUpdating)
                 }
@@ -142,7 +142,7 @@ struct WatchMessageJournalView: View {
         .padding(.vertical, 4)
     }
 
-    static func statusTitle(_ entry: OpenClawWatchMessageEntry) -> String {
+    static func statusTitle(_ entry: CarapaceWatchMessageEntry) -> String {
         if let terminal = entry.receipt?.terminal {
             switch terminal.outcome {
             case .reply: return String(localized: "Reply saved")
@@ -164,7 +164,7 @@ struct WatchMessageJournalView: View {
         }
     }
 
-    private static func explanation(_ entry: OpenClawWatchMessageEntry) -> String? {
+    private static func explanation(_ entry: CarapaceWatchMessageEntry) -> String? {
         if entry.phase == .needsReview {
             return String(
                 localized: "Saved by an older app; not sent again. Copy it to Chat to send it.")
@@ -190,7 +190,7 @@ struct WatchMessageJournalView: View {
                 self.didLoad = true
                 self.appModel.clearWatchChatStorageWarning(for: journal)
             }
-        } catch let error as OpenClawWatchChatDeliveryError {
+        } catch let error as CarapaceWatchChatDeliveryError {
             guard !Task.isCancelled else { return }
             self.notice = error.message
         } catch {
@@ -205,7 +205,7 @@ struct WatchMessageJournalView: View {
         }
     }
 
-    private func remove(_ entry: OpenClawWatchMessageEntry) async {
+    private func remove(_ entry: CarapaceWatchMessageEntry) async {
         guard let journal = self.journal, !self.isUpdating else { return }
         self.isUpdating = true
         defer { self.isUpdating = false }

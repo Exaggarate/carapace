@@ -1,5 +1,5 @@
 import { zstdDecompressSync } from "node:zlib";
-import type { Api, AssistantMessage, Context, Model } from "@openclaw/llm-core";
+import type { Api, AssistantMessage, Context, Model } from "@carapace/llm-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { configureAiTransportHost, getAiTransportHost } from "../host.js";
 import { responsesPromptObserver, type ResponsesPromptObservation } from "../internal/openai.js";
@@ -564,8 +564,8 @@ describe("OpenAI Responses provider prompt observer", () => {
       },
     });
     const options = {
-      openclawCodeModeToolSurface: true,
-      openclawCodeModeAllowedHostedToolTypes: new Set(["web_search"]),
+      carapaceCodeModeToolSurface: true,
+      carapaceCodeModeAllowedHostedToolTypes: new Set(["web_search"]),
       onPayload: async () => {
         await Promise.resolve();
         return {

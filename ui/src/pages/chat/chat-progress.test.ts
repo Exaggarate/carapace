@@ -113,8 +113,8 @@ describe("resolveWorkingProgress", () => {
             { runId: "active-run", ts: 2_000 },
           ],
           [
-            { runId, __openclawToolStreamReceivedAt: 100 },
-            { runId: "active-run", __openclawToolStreamReceivedAt: 2_500 },
+            { runId, __carapaceToolStreamReceivedAt: 100 },
+            { runId: "active-run", __carapaceToolStreamReceivedAt: 2_500 },
           ],
         ),
       ).toMatchObject({ runId: "active-run", startedAt: 2_000 });

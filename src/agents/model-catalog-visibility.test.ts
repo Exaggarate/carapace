@@ -3,7 +3,7 @@
  * Keeps provider/model allow and hide rules aligned with catalog row metadata.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveLogicalModelCatalogEntryState,
   resolveLogicalVisibleModelCatalog,
@@ -56,7 +56,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
       ];
 
       const result = await resolveLogicalVisibleModelCatalog({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         catalog,
         defaultProvider: "demo",
         view,
@@ -75,7 +75,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
     ];
 
     const result = await resolveLogicalVisibleModelCatalog({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       catalog,
       defaultProvider: "demo",
       view: "all",
@@ -95,7 +95,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
     ];
 
     const result = await resolveLogicalVisibleModelCatalog({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       catalog,
       defaultProvider: "openai",
       view: "all",
@@ -132,7 +132,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
           models: { "demo/alias-key": { alias: "legacy" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     // This unit test covers configured-row retention, not runtime plugin
     // discovery. Keep fake provider refs on the deterministic static path.
     const policy = createModelVisibilityPolicy({
@@ -166,7 +166,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
         { ...chatGPT, alias: "selected" },
       ];
       const result = await resolveLogicalVisibleModelCatalog({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         catalog,
         defaultProvider: "openai",
         view,
@@ -206,7 +206,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
     const chatGPTSelected = { ...chatGPT, status };
     const catalog = [platformAvailable, chatGPTSelected];
     const result = await resolveLogicalVisibleModelCatalog({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       catalog,
       routeVariants: catalog,
       defaultProvider: "openai",
@@ -227,7 +227,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
 
   it("omits physical capabilities while managed route selection is unresolved", async () => {
     const result = await resolveLogicalVisibleModelCatalog({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       catalog: [platform],
       defaultProvider: "openai",
       view: "all",
@@ -272,7 +272,7 @@ describe("resolveLogicalVisibleModelCatalog", () => {
       );
 
       const result = await resolveLogicalVisibleModelCatalog({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         catalog: [platformNano],
         routeVariants,
         defaultProvider: "openai",

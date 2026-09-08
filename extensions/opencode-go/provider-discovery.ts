@@ -1,5 +1,5 @@
 // Opencode Go provider module exposes offline catalog metadata to core discovery.
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 import { buildStaticOpencodeGoProviderConfig } from "./provider-catalog.js";
 
 const opencodeGoProviderDiscovery: ProviderPlugin = {

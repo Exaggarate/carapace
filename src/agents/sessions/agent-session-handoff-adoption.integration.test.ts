@@ -1,4 +1,4 @@
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { runActiveReplySteer } from "../../auto-reply/reply/agent-runner-steer-adoption.js";

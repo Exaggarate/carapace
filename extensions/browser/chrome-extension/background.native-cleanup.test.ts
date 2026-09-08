@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   cleanupBackgroundHarnesses,
@@ -85,7 +85,7 @@ async function fixture() {
   };
   const reconnect = async () => {
     socket.close();
-    h.alarmListener({ name: "openclaw-relay-watchdog" });
+    h.alarmListener({ name: "carapace-relay-watchdog" });
     await vi.waitFor(() => expect(h.relaySockets).toHaveLength(2));
     const next = h.relaySockets[1]!;
     await h.authenticate(next);

@@ -5,11 +5,11 @@ import path from "node:path";
 import {
   parseRemoteModelCatalogBundle,
   type RemoteModelCatalogBundle,
-} from "@openclaw/model-catalog-core";
+} from "@carapace/model-catalog-core";
 import {
   LITELLM_PRICING_URL,
   OPENROUTER_MODELS_URL,
-} from "@openclaw/model-catalog-core/model-catalog-pricing";
+} from "@carapace/model-catalog-core/model-catalog-pricing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   assembleModelCatalogBundle,
@@ -21,7 +21,7 @@ import {
   serializeModelCatalogBundle,
   summarizeModelCatalogBundle,
 } from "../../scripts/publish-model-catalog.mts";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { setRemoteModelCatalogOverlaySourcesForTest } from "../../src/model-catalog/remote-overlay.test-support.js";
 import {
   estimateAggregateUsageCost,
@@ -81,14 +81,14 @@ function modelsDevCatalog(
 }
 
 function publishedPricingParams(bundle: RemoteModelCatalogBundle, provider: string) {
-  const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-native-pricing-"));
+  const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-native-pricing-"));
   tempDirs.push(agentDir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", agentDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", agentDir);
   setRemoteModelCatalogOverlaySourcesForTest({
     bundledGeneratedAt: () => 1,
     readStoredCatalog: () => ({
       id: 1,
-      source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+      source_url: "https://github.com/Exaggarate/carapace",
       bundle_json: serializeModelCatalogBundle(bundle),
       generated_at: bundle.generatedAt,
       min_version: bundle.minVersion ?? null,
@@ -97,7 +97,7 @@ function publishedPricingParams(bundle: RemoteModelCatalogBundle, provider: stri
       checked_at: bundle.generatedAt,
     }),
   });
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     plugins: { allow: [provider], entries: { [provider]: { enabled: true } } },
   };
   return { config, agentDir, provider };
@@ -107,7 +107,7 @@ function writeFixtureManifest(root: string, pluginId: string, providers: Record<
   const pluginDir = path.join(root, "extensions", pluginId);
   fs.mkdirSync(pluginDir, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify({ id: pluginId, modelCatalog: { providers } }, null, 2)}\n`,
   );
 }
@@ -315,7 +315,7 @@ describe("publish model catalog", () => {
   );
 
   it("assembles and validates fixture manifests at the 200-model floor", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-publish-catalog-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-publish-catalog-"));
     tempDirs.push(root);
     writeFixtureManifest(root, "anthropic", { anthropic: fixtureProvider("claude", 100) });
     writeFixtureManifest(root, "openai", { openai: fixtureProvider("gpt", 100) });
@@ -1379,7 +1379,7 @@ describe("publish model catalog", () => {
     })),
   ])("publishes only verified source data: $source $scenario", ({ source, scenario }) => {
     const root = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-publish-failure-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "carapace-publish-failure-")),
     );
     tempDirs.push(root);
     const out = path.join(root, "catalog.json");

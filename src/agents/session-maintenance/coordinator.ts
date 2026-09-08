@@ -38,7 +38,7 @@ function recordPhase(sessionKey: string, owner: MaintenanceOwner, phase: string)
   }
 }
 const state = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionMaintenance"),
+  Symbol.for("carapace.sessionMaintenance"),
   () => ({
     sequence: 0,
     sessions: new Map<string, SessionMaintenance>(),

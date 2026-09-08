@@ -17,7 +17,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH } from "./lib/package-lifecycle-marker.mjs";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_PACKAGE_ROOT = join(scriptDir, "..");
-const DISABLE_POSTINSTALL_ENV = "OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL";
+const DISABLE_POSTINSTALL_ENV = "CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL";
 const DIST_INVENTORY_PATH = "dist/postinstall-inventory.json";
 // One budget covers all three prune walks (legacy-deps prepass, file listing,
 // empty-dir sweep). npm upgrades transiently hold old+new content-hashed dist
@@ -237,7 +237,7 @@ function pruneEmptyDistDirectories(params = {}) {
 }
 
 function isLegacyInstalledPluginDependencyDirName(name) {
-  return name === "node_modules" || /^\.openclaw-install-stage(?:-[^/]+)?$/iu.test(name);
+  return name === "node_modules" || /^\.carapace-install-stage(?:-[^/]+)?$/iu.test(name);
 }
 
 function pruneLegacyInstalledPluginDependencyDirs(params) {

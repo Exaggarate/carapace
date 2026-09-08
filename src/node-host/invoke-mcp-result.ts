@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { boundedJsonUtf8Bytes, jsonUtf8BytesOrInfinity } from "../infra/json-utf8-bytes.js";
 import { truncateUtf8Prefix } from "../utils/utf8-truncate.js";
 

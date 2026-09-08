@@ -3,10 +3,10 @@
  * Centralizes canonical shared SQLite and cross-agent OAuth refresh lock paths.
  */
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveStateDir } from "../../config/paths.js";
 import { readConfigMachineState } from "../../state/config-machine-state.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { resolveSharedMainAuthAgentDir } from "./shared-main-dir.js";
 
 export const SHARED_AUTH_STORE_STATE_KEY = "auth.sharedStore";
@@ -32,12 +32,12 @@ const sharedAuthStoreOwnershipByDatabasePath = new Map<string, SharedAuthStoreOw
 
 class InvalidSharedAuthStoreOwnershipError extends Error {
   readonly code = "INVALID_SHARED_AUTH_STORE_OWNERSHIP" as const;
-  readonly action = "openclaw doctor --fix" as const;
+  readonly action = "carapace doctor --fix" as const;
   readonly stateKey = SHARED_AUTH_STORE_STATE_KEY;
 
   constructor(value: unknown) {
     super(
-      `Config machine state ${SHARED_AUTH_STORE_STATE_KEY} has an invalid shared auth store location (${JSON.stringify(value)}); run openclaw doctor --fix.`,
+      `Config machine state ${SHARED_AUTH_STORE_STATE_KEY} has an invalid shared auth store location (${JSON.stringify(value)}); run carapace doctor --fix.`,
     );
     this.name = "InvalidSharedAuthStoreOwnershipError";
   }
@@ -61,14 +61,14 @@ function parseSharedAuthStoreOwnership(value: unknown): SharedAuthStoreOwnership
 export function resolveSharedAuthStoreOwnership(
   env: NodeJS.ProcessEnv = process.env,
 ): SharedAuthStoreOwnership {
-  const databasePath = path.resolve(resolveOpenClawStateSqlitePath(env));
+  const databasePath = path.resolve(resolveCarapaceStateSqlitePath(env));
   const cached = sharedAuthStoreOwnershipByDatabasePath.get(databasePath);
   if (cached) {
     return cached;
   }
   if (sharedAuthStoreOwnershipByDatabasePath.size >= SHARED_AUTH_STORE_OWNERSHIP_CACHE_LIMIT) {
     throw new Error(
-      "Shared auth store ownership cache exceeded its process root limit; restart OpenClaw.",
+      "Shared auth store ownership cache exceeded its process root limit; restart Carapace.",
     );
   }
   const ownership = parseSharedAuthStoreOwnership(
@@ -96,7 +96,7 @@ export function noteCommittedSharedAuthStoreOwnership(
   ownership: SharedAuthStoreOwnership,
   env: NodeJS.ProcessEnv = process.env,
 ): void {
-  const databasePath = path.resolve(resolveOpenClawStateSqlitePath(env));
+  const databasePath = path.resolve(resolveCarapaceStateSqlitePath(env));
   sharedAuthStoreOwnershipByDatabasePath.set(databasePath, ownership);
 }
 
@@ -104,7 +104,7 @@ export function noteCommittedSharedAuthStoreOwnership(
 export function reloadSharedAuthStoreOwnership(
   env: NodeJS.ProcessEnv = process.env,
 ): SharedAuthStoreOwnership {
-  const databasePath = path.resolve(resolveOpenClawStateSqlitePath(env));
+  const databasePath = path.resolve(resolveCarapaceStateSqlitePath(env));
   const ownership = parseSharedAuthStoreOwnership(
     readConfigMachineState<unknown>(SHARED_AUTH_STORE_STATE_KEY, { env, path: databasePath }),
   );
@@ -115,9 +115,9 @@ export function reloadSharedAuthStoreOwnership(
 /** Resolve the canonical shared auth database path. */
 export function resolveSharedAuthStorePath(env: NodeJS.ProcessEnv = process.env): string {
   if (resolveSharedAuthStoreOwnership(env).location === "state-db") {
-    return resolveOpenClawStateSqlitePath(env);
+    return resolveCarapaceStateSqlitePath(env);
   }
-  return path.join(resolveSharedMainAuthAgentDir(env), "openclaw-agent.sqlite");
+  return path.join(resolveSharedMainAuthAgentDir(env), "carapace-agent.sqlite");
 }
 
 /**

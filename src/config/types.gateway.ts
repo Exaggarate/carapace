@@ -20,7 +20,7 @@ export type GatewayTlsConfig = {
 };
 
 export type WideAreaDiscoveryConfig = {
-  /** Optional unicast DNS-SD domain (e.g. "openclaw.internal"). */
+  /** Optional unicast DNS-SD domain (e.g. "carapace.internal"). */
   domain?: string;
 };
 
@@ -134,7 +134,7 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
   /** If false, the Gateway will not serve the Control UI (default /). */
   enabled?: boolean;
-  /** Optional base path prefix for the Control UI (e.g. "/openclaw"). */
+  /** Optional base path prefix for the Control UI (e.g. "/carapace"). */
   basePath?: string;
   experimental?: {
     /** Allow native UI from user-installed plugins (default false; bundled UI stays available). */
@@ -159,7 +159,7 @@ export type GatewayControlUiConfig = {
   embedSandbox?: "strict" | "scripts" | "trusted";
   /**
    * DANGEROUS: Allow hosted embeds to load absolute external http(s) URLs.
-   * Default off; prefer hosted /__openclaw__/canvas or /__openclaw__/a2ui content.
+   * Default off; prefer hosted /__carapace__/canvas or /__carapace__/a2ui content.
    */
   allowExternalEmbedUrls?: boolean;
   /** Fetch public-site favicons through the Gateway for Control UI links (default true). */
@@ -487,7 +487,7 @@ export type GatewayNodePairingConfig = {
   /**
    * SSH-verified auto-approval for first-time node-role pairing (default: enabled).
    * The gateway connects back to the pairing host over SSH (BatchMode, strict
-   * host keys) and approves only when the remote `openclaw node identity`
+   * host keys) and approves only when the remote `carapace node identity`
    * output matches the pending request's device key. Set false to disable SSH
    * verification; this is independent of autoApproveCidrs, so unset that too for
    * manual-only node pairing. The object form tunes the probe:

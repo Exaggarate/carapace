@@ -1,12 +1,12 @@
 // Provides canonical default config values and model/provider defaults.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   collectManifestModelIdNormalizationPolicies,
   normalizeConfiguredProviderCatalogModelId,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { asPositiveFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
+import { asPositiveFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { DEFAULT_CONTEXT_TOKENS } from "../agents/defaults.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import {
@@ -24,7 +24,7 @@ import {
   normalizeProviderConfigForConfigDefaults,
 } from "./provider-policy.js";
 import type { ModelDefinitionConfig } from "./types.models.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 type WarnState = { warned: boolean };
 type ProviderPolicyDefaultsOptions = {
@@ -112,7 +112,7 @@ type SessionDefaultsOptions = {
   warnState?: WarnState;
 };
 
-export function applyMessageDefaults(cfg: OpenClawConfig): OpenClawConfig {
+export function applyMessageDefaults(cfg: CarapaceConfig): CarapaceConfig {
   const messages = cfg.messages;
   const hasAckScope = messages?.ackReactionScope !== undefined;
   if (hasAckScope) {
@@ -128,9 +128,9 @@ export function applyMessageDefaults(cfg: OpenClawConfig): OpenClawConfig {
 }
 
 export function applySessionDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: SessionDefaultsOptions = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const session = cfg.session;
   if (!session || session.mainKey === undefined) {
     return cfg;
@@ -140,7 +140,7 @@ export function applySessionDefaults(
   const warn = options.warn ?? console.warn;
   const warnState = options.warnState ?? defaultWarnState;
 
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...cfg,
     session: { ...session, mainKey: "main" },
   };
@@ -207,9 +207,9 @@ function buildManifestCatalogModelLookup(
 }
 
 export function applyModelDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: ProviderPolicyDefaultsOptions = {},
-): OpenClawConfig {
+): CarapaceConfig {
   let mutated = false;
   let nextCfg = cfg;
 
@@ -459,7 +459,7 @@ export function applyModelDefaults(
   };
 }
 
-export function applyAgentDefaults(cfg: OpenClawConfig): OpenClawConfig {
+export function applyAgentDefaults(cfg: CarapaceConfig): CarapaceConfig {
   const agents = cfg.agents;
   const defaults = agents?.defaults;
   const hasMax =
@@ -499,7 +499,7 @@ export function applyAgentDefaults(cfg: OpenClawConfig): OpenClawConfig {
   };
 }
 
-function hasAnthropicDefaultSignal(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolean {
+function hasAnthropicDefaultSignal(cfg: CarapaceConfig, env: NodeJS.ProcessEnv): boolean {
   if (env.ANTHROPIC_API_KEY?.trim() || env.ANTHROPIC_OAUTH_TOKEN?.trim()) {
     return true;
   }
@@ -526,9 +526,9 @@ function hasAnthropicDefaultSignal(cfg: OpenClawConfig, env: NodeJS.ProcessEnv):
 }
 
 export function applyContextPruningDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: ProviderPolicyDefaultsOptions = {},
-): OpenClawConfig {
+): CarapaceConfig {
   if (!cfg.agents?.defaults) {
     return cfg;
   }
@@ -546,7 +546,7 @@ export function applyContextPruningDefaults(
   );
 }
 
-export function applyCompactionDefaults(cfg: OpenClawConfig): OpenClawConfig {
+export function applyCompactionDefaults(cfg: CarapaceConfig): CarapaceConfig {
   const defaults = cfg.agents?.defaults;
   if (!defaults) {
     return cfg;

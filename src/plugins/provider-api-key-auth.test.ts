@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { loadAuthProfileStoreWithoutExternalProfiles } from "../agents/auth-profiles/store-runtime.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createProviderApiKeyAuthMethod } from "./provider-api-key-auth.js";
 
 describe("createProviderApiKeyAuthMethod", () => {
   it("persists non-interactive credentials through the runtime auth owner", async () => {
-    await withOpenClawTestState({ label: "provider-api-key-auth" }, async (state) => {
+    await withCarapaceTestState({ label: "provider-api-key-auth" }, async (state) => {
       const method = createProviderApiKeyAuthMethod({
         providerId: "example",
         methodId: "api-key",

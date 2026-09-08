@@ -90,19 +90,19 @@ export async function proveHotReloadBrowserLaunch({
       };
       const reset = async () => {
         await setBrowser({
-          defaultProfile: "openclaw",
+          defaultProfile: "carapace",
           headless: true,
           executablePath,
           attachOnly: false,
           cdpUrl: null,
           noSandbox: true,
           extraArgs: ["--enable-automation"],
-          profiles: { openclaw: null, retained: { cdpUrl: external.cdpUrl, attachOnly: true } },
+          profiles: { carapace: null, retained: { cdpUrl: external.cdpUrl, attachOnly: true } },
         });
       };
       const inspect = async () => {
-        await request("/start", "POST", "openclaw");
-        const status = await request<BrowserStatus>("/", "GET", "openclaw");
+        await request("/start", "POST", "carapace");
+        const status = await request<BrowserStatus>("/", "GET", "carapace");
         assert(status.pid, "Gateway must own the started Chrome process");
         const browser = await chromium.connectOverCDP(status.cdpUrl);
         try {
@@ -136,7 +136,7 @@ export async function proveHotReloadBrowserLaunch({
       await proveGroup("browser.defaultProfile", async () => {
         await reset();
         await inspect();
-        for (const profile of ["retained", "openclaw"]) {
+        for (const profile of ["retained", "carapace"]) {
           await setBrowser({ defaultProfile: profile });
           assert.equal((await request<BrowserStatus>("/")).profile, profile);
         }
@@ -191,7 +191,7 @@ export async function proveHotReloadBrowserLaunch({
         await reset();
         const previous = await inspect();
         await setBrowser({ attachOnly: true });
-        await assert.rejects(request("/start", "POST", "openclaw"), /attachOnly.*not running/);
+        await assert.rejects(request("/start", "POST", "carapace"), /attachOnly.*not running/);
         await waitForExit(previous.pid);
         await setBrowser({ attachOnly: false });
         assert.notEqual((await inspect()).pid, previous.pid);
@@ -223,7 +223,7 @@ export async function proveHotReloadBrowserLaunch({
         let outcome = "Chrome started with its sandbox enabled";
         let sandboxStarted = true;
         try {
-          await request("/start", "POST", "openclaw");
+          await request("/start", "POST", "carapace");
         } catch (error) {
           assert.match(String(error), /sandbox|zygote|Operation not permitted/i);
           sandboxStarted = false;
@@ -262,7 +262,7 @@ export async function proveHotReloadBrowserLaunch({
       });
       await reset();
     },
-    () => request("/stop", "POST", "openclaw"),
+    () => request("/stop", "POST", "carapace"),
     async () => {
       await externalOwner.close();
       await fs.rm(root, { recursive: true, force: true });

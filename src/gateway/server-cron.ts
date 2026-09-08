@@ -1,7 +1,7 @@
 // Gateway cron runtime service runs scheduled agent turns, heartbeat wakeups,
 // plugin hooks, notifications, and cron lifecycle cleanup.
 import fs from "node:fs/promises";
-import { finiteSecondsToTimerSafeMilliseconds } from "@openclaw/normalization-core/number-coercion";
+import { finiteSecondsToTimerSafeMilliseconds } from "@carapace/normalization-core/number-coercion";
 import { retireSessionMcpRuntime } from "../agents/agent-bundle-mcp-tools.js";
 import { isAgentDeletionBlocked } from "../agents/agent-lifecycle-registry.js";
 import {
@@ -32,7 +32,7 @@ import {
   listKnownSessionStoreAgentIds,
 } from "../config/sessions/targets.js";
 import type { AgentDefaultsConfig } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCronJobEffectiveAgentId } from "../cron/agent-id.js";
 import {
   buildCronCommandSummary,
@@ -265,7 +265,7 @@ async function finalizeCronCompletionAnnouncement(params: {
   runStartedAtMs?: number;
   abortSignal?: AbortSignal;
   deps: CliDeps;
-  resolveCronAgent: (requested?: string | null) => { agentId: string; cfg: OpenClawConfig };
+  resolveCronAgent: (requested?: string | null) => { agentId: string; cfg: CarapaceConfig };
   logger: ReturnType<typeof getChildLogger>;
   label: string;
   traceResolvedFailure?: boolean;
@@ -422,7 +422,7 @@ const CRON_ACTIVE_RUN_SHUTDOWN_DRAIN_MS = 10_000;
 
 /** Build the cron service state used by Gateway startup and lazy cron loading. */
 export function buildGatewayCronService(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: CliDeps;
   broadcast: (event: string, payload: unknown, opts?: { dropIfSlow?: boolean }) => void;
   env?: NodeJS.ProcessEnv;
@@ -436,15 +436,15 @@ export function buildGatewayCronService(params: {
   );
   const env = params.env ?? process.env;
   const storePath = resolveCronJobsStorePathFromConfig(params.cfg, env);
-  const cronEnabled = env.OPENCLAW_SKIP_CRON !== "1" && params.cfg.cron?.enabled !== false;
+  const cronEnabled = env.CARAPACE_SKIP_CRON !== "1" && params.cfg.cron?.enabled !== false;
   // Resolve once per cron service snapshot so every webhook route shares the
   // same explicit opt-in while omitted config keeps the guard strict.
   const webhookSsrfPolicy = mergeSsrFPolicies(params.cfg.cron?.webhookSsrfPolicy);
 
-  const findAgentEntry = (cfg: OpenClawConfig, agentId: string) =>
+  const findAgentEntry = (cfg: CarapaceConfig, agentId: string) =>
     listAgentEntries(cfg).find((entry) => normalizeAgentId(entry.id) === agentId);
 
-  const hasConfiguredAgent = (cfg: OpenClawConfig, agentId: string) =>
+  const hasConfiguredAgent = (cfg: CarapaceConfig, agentId: string) =>
     Boolean(findAgentEntry(cfg, agentId));
 
   const resolveCronAgent = (requested?: string | null) => {
@@ -470,7 +470,7 @@ export function buildGatewayCronService(params: {
   };
 
   const resolveCronSessionKey = (paramsValue: {
-    runtimeConfig: OpenClawConfig;
+    runtimeConfig: CarapaceConfig;
     agentId: string;
     requestedSessionKey?: string | null;
   }) => {

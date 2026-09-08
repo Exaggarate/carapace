@@ -101,13 +101,13 @@ async function buildSignedControlUiDevice(nonce: string) {
   const { buildDeviceAuthPayload } = await import("../../device-auth.js");
   const { loadOrCreateDeviceIdentity, publicKeyRawBase64UrlFromPem, signDevicePayload } =
     await import("../../../infra/device-identity.js");
-  const identityPath = path.join(tmpdir(), `openclaw-build-admission-${randomUUID()}.sqlite`);
+  const identityPath = path.join(tmpdir(), `carapace-build-admission-${randomUUID()}.sqlite`);
   temporaryIdentityPaths.push(identityPath);
   const identity = loadOrCreateDeviceIdentity({ path: identityPath });
   const signedAtMs = Date.now();
   const payload = buildDeviceAuthPayload({
     deviceId: identity.deviceId,
-    clientId: "openclaw-control-ui",
+    clientId: "carapace-control-ui",
     clientMode: "webchat",
     role: "operator",
     scopes: [],
@@ -300,7 +300,7 @@ describe("Control UI build admission over WebSocket", () => {
             minProtocol: PROTOCOL_VERSION,
             maxProtocol: PROTOCOL_VERSION,
             client: {
-              id: "openclaw-control-ui",
+              id: "carapace-control-ui",
               version: "2026.8.1",
               platform: "web",
               mode: "webchat",

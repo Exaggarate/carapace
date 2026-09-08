@@ -41,10 +41,10 @@ function readNonNegativeIntEnv(name, fallback) {
 }
 
 function resolveStateDir() {
-  if (process.env.OPENCLAW_STATE_DIR) {
-    return process.env.OPENCLAW_STATE_DIR;
+  if (process.env.CARAPACE_STATE_DIR) {
+    return process.env.CARAPACE_STATE_DIR;
   }
-  return path.join(process.env.HOME || os.homedir(), ".openclaw");
+  return path.join(process.env.HOME || os.homedir(), ".carapace");
 }
 
 function pathReferencesBundledRuntime(value, pluginDir) {
@@ -61,22 +61,22 @@ function pathsEqualForProbe(actual, expected) {
   return normalizePathForProbe(actual) === normalizePathForProbe(expected);
 }
 
-function resolveOpenClawEntry() {
-  if (process.env.OPENCLAW_ENTRY) {
-    return process.env.OPENCLAW_ENTRY;
+function resolveCarapaceEntry() {
+  if (process.env.CARAPACE_ENTRY) {
+    return process.env.CARAPACE_ENTRY;
   }
   for (const entry of ["dist/index.mjs", "dist/index.js"]) {
     if (fs.existsSync(entry)) {
       return entry;
     }
   }
-  throw new Error("Missing OPENCLAW_ENTRY and dist/index.(m)js");
+  throw new Error("Missing CARAPACE_ENTRY and dist/index.(m)js");
 }
 
 function readPluginsList() {
-  const entry = resolveOpenClawEntry();
+  const entry = resolveCarapaceEntry();
   const timeoutMs = readPositiveIntEnv(
-    "OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS",
+    "CARAPACE_BUNDLED_PLUGIN_LIST_TIMEOUT_MS",
     DEFAULT_PLUGIN_LIST_TIMEOUT_MS,
   );
   const result = spawnSync(process.execPath, [entry, "plugins", "list", "--json"], {
@@ -84,7 +84,7 @@ function readPluginsList() {
     encoding: "utf8",
     env: process.env,
     maxBuffer: readPositiveIntEnv(
-      "OPENCLAW_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES",
+      "CARAPACE_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES",
       DEFAULT_PLUGIN_LIST_MAX_BUFFER_BYTES,
     ),
     killSignal: "SIGKILL",
@@ -142,7 +142,7 @@ function parseJsonValue(text) {
 }
 
 function pluginRequiresConfig(pluginDir) {
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const manifestPath = path.join(pluginDir, "carapace.plugin.json");
   if (!fs.existsSync(manifestPath)) {
     throw new Error(`missing bundled plugin manifest: ${manifestPath}`);
   }
@@ -174,7 +174,7 @@ async function loadPackagedBundledEntries() {
 }
 
 async function loadManifestEntries() {
-  const explicit = (process.env.OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS || "")
+  const explicit = (process.env.CARAPACE_BUNDLED_PLUGIN_SWEEP_IDS || "")
     .split(/[,\s]+/u)
     .map((entry) => entry.trim())
     .filter(Boolean);
@@ -188,7 +188,7 @@ async function loadManifestEntries() {
     const found = manifestEntries.find((entry) => entry.id === lookup || entry.dir === lookup);
     if (!found) {
       throw new Error(
-        `OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: ${lookup}. Available: ${available}`,
+        `CARAPACE_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: ${lookup}. Available: ${available}`,
       );
     }
     return found;
@@ -197,11 +197,11 @@ async function loadManifestEntries() {
 
 async function selectedManifestEntries() {
   const allEntries = await loadManifestEntries();
-  const total = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_SWEEP_TOTAL", 1);
-  const index = readNonNegativeIntEnv("OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX", 0);
+  const total = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_SWEEP_TOTAL", 1);
+  const index = readNonNegativeIntEnv("CARAPACE_BUNDLED_PLUGIN_SWEEP_INDEX", 0);
   if (index >= total) {
     throw new Error(
-      `OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX must be in [0, ${total - 1}], got ${process.env.OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX}`,
+      `CARAPACE_BUNDLED_PLUGIN_SWEEP_INDEX must be in [0, ${total - 1}], got ${process.env.CARAPACE_BUNDLED_PLUGIN_SWEEP_INDEX}`,
     );
   }
 
@@ -214,7 +214,7 @@ async function selectedManifestEntries() {
 
 function assertInstalled(pluginId, pluginDir, requiresConfig, selectedPluginRoot = "") {
   const stateDir = resolveStateDir();
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   const config = readJson(configPath);
   const records = readPluginInstallRecords({ stateDir, configPath });
   const record = records[pluginId];
@@ -267,7 +267,7 @@ function assertInstalled(pluginId, pluginDir, requiresConfig, selectedPluginRoot
 
 function assertUninstalled(pluginId, pluginDir) {
   const stateDir = resolveStateDir();
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   const config = fs.existsSync(configPath) ? readJson(configPath) : {};
   const records = readPluginInstallRecords({ stateDir, configPath });
   if (records[pluginId]) {

@@ -1,5 +1,5 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { DiagnosticTraceContext } from "openclaw/plugin-sdk/diagnostic-runtime";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { DiagnosticTraceContext } from "carapace/plugin-sdk/diagnostic-runtime";
 import { wrapStreamFnWithDiagnosticModelCallEvents } from "../../../../src/agents/embedded-agent-runner/run/attempt.model-diagnostic-events.js";
 
 export function runModelCallAndCaptureTraceparent(params: {

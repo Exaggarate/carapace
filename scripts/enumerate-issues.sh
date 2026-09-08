@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Enumerate ALL open issues of openclaw/openclaw into our-fork/issues-full.json.
+# Enumerate ALL open issues of carapace/carapace into our-fork/issues-full.json.
 # Token is read internally from the host git-credentials file and used via a
 # 0600-perm header file — never printed, never passed on a command line.
 set -uo pipefail
-cd /home/ubuntu/openclaw-fork || { echo "ENUM_FAIL cd"; exit 0; }
+cd /home/ubuntu/carapace-fork || { echo "ENUM_FAIL cd"; exit 0; }
 
 TOKEN=$(grep -o 'https://[^:/@]*:[^@]*@github\.com' "$HOME/.git-credentials" 2>/dev/null | head -1 \
   | sed 's|^https://||; s|@github\.com$||' | cut -d: -f2-)
@@ -17,7 +17,7 @@ OUT=our-fork/issues-full.json
 : > "$OUT"
 PAGE=1
 while :; do
-  RESP=$(curl -s -H @"$HDR" "https://api.github.com/repos/openclaw/openclaw/issues?state=open&per_page=100&page=$PAGE")
+  RESP=$(curl -s -H @"$HDR" "https://api.github.com/repos/carapace/carapace/issues?state=open&per_page=100&page=$PAGE")
   if echo "$RESP" | jq -e '.message' >/dev/null 2>&1; then
     echo "ENUM_FAIL api:$(echo "$RESP" | jq -r '.message' | head -c 120) page:$PAGE"
     rm -f "$HDR"; exit 0

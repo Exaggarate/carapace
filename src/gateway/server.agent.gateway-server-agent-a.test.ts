@@ -44,7 +44,7 @@ import {
 
 installGatewayTestHooks({ scope: "suite" });
 
-const gatewaySuite = installConnectedSessionStoreGatewaySuite("openclaw-gw-session-", {
+const gatewaySuite = installConnectedSessionStoreGatewaySuite("carapace-gw-session-", {
   client: {
     id: "gateway-client",
     version: "1.0.0",
@@ -902,7 +902,7 @@ describe("gateway server agent", () => {
     // Inbound ids are random; compare the durable fact against its public
     // redaction contract because an id can resemble sensitive text.
     const transcriptMediaUrl = media?.[0]?.url ? redactSensitiveText(media[0].url) : undefined;
-    expect(pending.items[0]?.message["__openclaw"]?.media).toEqual(
+    expect(pending.items[0]?.message["__carapace"]?.media).toEqual(
       expect.arrayContaining([expect.objectContaining({ url: transcriptMediaUrl })]),
     );
     const inboundAfter = await listInboundMedia();

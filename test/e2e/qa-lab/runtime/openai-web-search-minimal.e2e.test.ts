@@ -6,7 +6,7 @@ import { testing } from "../../../../scripts/e2e/lib/openai-web-search-minimal/c
 const RAW_SCHEMA_ERROR =
   "400 The following tools cannot be used with reasoning.effort 'minimal': web_search.";
 const GATEWAY_SCHEMA_ERROR = "provider rejected the request schema or tool payload";
-const SUCCESS_MARKER = "OPENCLAW_SCHEMA_E2E_OK";
+const SUCCESS_MARKER = "CARAPACE_SCHEMA_E2E_OK";
 
 describe("scripts/e2e/lib/openai-web-search-minimal/client.mjs", () => {
   it("accepts only the expected raw schema rejection in reject mode", () => {

@@ -1,6 +1,6 @@
 // Session-list title reads: bounded transcript probes plus a watermark-validated
 // cache so list rendering never rescans transcripts that have not changed.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   isSessionTranscriptProjectionUnavailableError,
   readSessionTranscriptMessageEventPage,

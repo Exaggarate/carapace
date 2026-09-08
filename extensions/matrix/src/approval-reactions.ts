@@ -1,9 +1,9 @@
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 // Matrix plugin module implements approval reactions behavior.
-import { createApprovalReactionTargetStore } from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-runtime";
-import { createPluginStateErrorReporter } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeAccountId, normalizeOptionalAccountId } from "openclaw/plugin-sdk/routing";
+import { createApprovalReactionTargetStore } from "carapace/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "carapace/plugin-sdk/approval-runtime";
+import { createPluginStateErrorReporter } from "carapace/plugin-sdk/plugin-state-runtime";
+import { normalizeAccountId, normalizeOptionalAccountId } from "carapace/plugin-sdk/routing";
 import { getOptionalMatrixRuntime } from "./runtime.js";
 
 // Matrix keeps its own reaction emoji set (checkmark/cross render reliably across

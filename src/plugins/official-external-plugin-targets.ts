@@ -1,7 +1,7 @@
 // Lightweight static projections for deciding whether plugin repair can be skipped.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES } from "./official-external-plugin-bundled-catalogs.js";
 import type { OfficialExternalPluginCatalogManifest } from "./official-external-plugin-catalog.types.js";
 
@@ -32,7 +32,7 @@ export function hasOfficialExternalProviderTarget(params: {
 }): boolean {
   const providerIds = normalizeIds(params.providerIds);
   return BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES.some((entry) =>
-    entry.openclaw?.providers?.some(
+    entry.carapace?.providers?.some(
       (provider) =>
         envHasAny(params.env, provider.envVars) ||
         [provider.id, ...(provider.aliases ?? [])].some((providerId) => {
@@ -52,7 +52,7 @@ export function hasOfficialExternalContractTarget(params: {
     return false;
   }
   return BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES.some((entry) =>
-    entry.openclaw?.contracts?.[params.contract]?.some((providerId) => {
+    entry.carapace?.contracts?.[params.contract]?.some((providerId) => {
       const normalized = normalizeOptionalLowercaseString(providerId);
       return normalized ? providerIds.has(normalized) : false;
     }),
@@ -64,7 +64,7 @@ export function hasOfficialExternalWebContractEnvTarget(params: {
   env: NodeJS.ProcessEnv;
 }): boolean {
   return BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES.some((entry) => {
-    const manifest = entry.openclaw;
+    const manifest = entry.carapace;
     const contractIds = normalizeIds(manifest?.contracts?.[params.contract] ?? []);
     return manifest?.webSearchProviders?.some((provider) => {
       const providerId = normalizeOptionalLowercaseString(provider.id);
@@ -76,12 +76,12 @@ export function hasOfficialExternalWebContractEnvTarget(params: {
 }
 
 export function hasOfficialExternalChannelTarget(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): boolean {
   const channels = isRecord(params.config.channels) ? params.config.channels : undefined;
   return BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES.some((entry) => {
-    const channel = entry.openclaw?.channel;
+    const channel = entry.carapace?.channel;
     const channelId = normalizeOptionalLowercaseString(channel?.id);
     if (!channelId) {
       return false;
@@ -100,7 +100,7 @@ export function hasOfficialExternalWebSearchTarget(params: {
 }): boolean {
   const configuredId = normalizeOptionalLowercaseString(params.providerId);
   return BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES.some((entry) =>
-    entry.openclaw?.webSearchProviders?.some((provider) => {
+    entry.carapace?.webSearchProviders?.some((provider) => {
       const providerId = normalizeOptionalLowercaseString(provider.id);
       return (
         (configuredId !== undefined && providerId === configuredId) ||

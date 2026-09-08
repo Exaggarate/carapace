@@ -1,7 +1,7 @@
 /** Doctor repair for main sessions accidentally occupied by synthetic heartbeat transcripts. */
 import fs from "node:fs";
 import { StringDecoder } from "node:string_decoder";
-import { asNullableObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableObjectRecord } from "@carapace/normalization-core/record-coerce";
 import type { note } from "../../packages/terminal-core/src/note.js";
 import { isHeartbeatOkResponse, isHeartbeatUserMessage } from "../auto-reply/heartbeat-filter.js";
 import { formatSessionArchiveTimestamp } from "../config/sessions/artifacts.js";
@@ -262,7 +262,7 @@ function moveHeartbeatMainSessionEntry(params: {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.doctorHeartbeatMainSessionRepairTestApi")
+    Symbol.for("carapace.doctorHeartbeatMainSessionRepairTestApi")
   ] = {
     TRANSCRIPT_RECORD_MAX_CHARS,
     moveHeartbeatMainSessionEntry,

@@ -17,7 +17,7 @@ JS
 )
 CACHE_DIR="$ROOT_DIR/apps/macos/.build/cloudflared/$VERSION"
 mkdir -p "$CACHE_DIR"
-WORK="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-cloudflared.XXXXXX")"
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/carapace-cloudflared.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
 verified_download() {

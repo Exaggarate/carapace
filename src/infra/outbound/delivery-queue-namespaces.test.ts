@@ -3,9 +3,9 @@ import path from "node:path";
 import { constants } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
   commitStagedDeliveryQueueEntryOnceAcrossNamespaces,
   movePendingDeliveryQueueEntryNamespace,
@@ -18,7 +18,7 @@ import {
   upsertDeliveryQueueEntry,
 } from "../delivery-queue-sqlite.js";
 import type { DeliveryQueueCompletionRetention } from "../delivery-queue-sqlite.types.js";
-import { resolvePreferredOpenClawTmpDir } from "../tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../tmp-carapace-dir.js";
 import {
   LEGACY_OUTBOUND_DELIVERY_QUEUE_NAME,
   DELIVERY_QUEUE_MEDIA_STAGING_QUEUE_NAME,
@@ -32,13 +32,13 @@ describe("outbound delivery namespace ownership", () => {
   let stateDir: string;
 
   beforeEach(() => {
-    rootDir = fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-dq-owner-"));
+    rootDir = fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-dq-owner-"));
     stateDir = path.join(rootDir, "state");
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(rootDir, { recursive: true, force: true });
   });
 
@@ -83,8 +83,8 @@ describe("outbound delivery namespace ownership", () => {
         stateDir,
       });
     }
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     if (typeof database.db.setAuthorizer !== "function") {
       return;

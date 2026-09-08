@@ -35,7 +35,7 @@ afterEach(async () => {
 });
 
 async function fixture() {
-  const parent = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-feature-pack-"));
+  const parent = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-feature-pack-"));
   directories.push(parent);
   const rootDir = path.join(parent, "draft-review");
   await runPluginsInitCommand("draft-review", { directory: rootDir, type: "feature" });
@@ -47,7 +47,7 @@ async function fixture() {
     bundle: true,
     platform: "node",
     format: "esm",
-    external: ["openclaw/*"],
+    external: ["carapace/*"],
     logLevel: "silent",
   });
   await fs.writeFile(
@@ -68,12 +68,12 @@ describe("plugin artifact authoring", () => {
     const { rootDir, parent } = await fixture();
     await fs.appendFile(
       path.join(rootDir, "dist/index.js"),
-      '\nexport const __openclawCreateRequire = 1; export const createRequire = "author"; export const require = (name) => "local:" + name; export const globalThis = "author-global";\n' +
-        'if (__openclawCreateRequire !== 1 || createRequire !== "author" || require("value") !== "local:value" || globalThis !== "author-global") throw new Error("Author bindings changed");\n',
+      '\nexport const __carapaceCreateRequire = 1; export const createRequire = "author"; export const require = (name) => "local:" + name; export const globalThis = "author-global";\n' +
+        'if (__carapaceCreateRequire !== 1 || createRequire !== "author" || require("value") !== "local:value" || globalThis !== "author-global") throw new Error("Author bindings changed");\n',
     );
     await fs.appendFile(
       path.join(rootDir, "dist/name.cjs"),
-      '\nif (typeof require("openclaw/plugin-sdk/feature-plugin").defineFeaturePlugin !== "function") throw new Error("CommonJS SDK dependency failed");\n',
+      '\nif (typeof require("carapace/plugin-sdk/feature-plugin").defineFeaturePlugin !== "function") throw new Error("CommonJS SDK dependency failed");\n',
     );
     const writeJson = vi.spyOn(defaultRuntime, "writeJson").mockImplementation(() => {});
     const archive = path.join(await fs.realpath(rootDir), "draft-review.tgz");
@@ -94,9 +94,9 @@ describe("plugin artifact authoring", () => {
     const metadata = JSON.parse(await fs.readFile(path.join(packageRoot, "package.json"), "utf8"));
     expect(metadata.dependencies).toBeUndefined();
     expect(metadata.scripts).toBeUndefined();
-    expect(metadata.openclaw.controlUi).toBeUndefined();
+    expect(metadata.carapace.controlUi).toBeUndefined();
     const manifest = JSON.parse(
-      await fs.readFile(path.join(packageRoot, "openclaw.plugin.json"), "utf8"),
+      await fs.readFile(path.join(packageRoot, "carapace.plugin.json"), "utf8"),
     );
     expect(await fs.readFile(path.join(packageRoot, manifest.controlUi.entry), "utf8")).toContain(
       "Draft composer",
@@ -125,11 +125,11 @@ describe("plugin artifact authoring", () => {
           import.meta.url,
           "src",
         ),
-        transformOpenClawDependencies: true,
+        transformCarapaceDependencies: true,
       })(sourceEntryPath),
     );
     expect(sourceLoaded).toMatchObject({
-      __openclawCreateRequire: 1,
+      __carapaceCreateRequire: 1,
       createRequire: "author",
       globalThis: "author-global",
       default: { id: "draft-review" },
@@ -153,7 +153,7 @@ describe("plugin artifact authoring", () => {
     "packs $id with its installed runtime and metadata intact",
     async ({ id, filename, runtime, setup, inferred = false }) => {
       const parent = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tool-pack-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-tool-pack-")),
       );
       directories.push(parent);
       const rootDir = path.join(parent, "project");
@@ -163,7 +163,7 @@ describe("plugin artifact authoring", () => {
         name: id,
         version: "1.0.0",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: [inferred ? "./src/index.ts" : "./dist/index.js"],
           ...(runtime ? { runtimeExtensions: ["./dist/compiled.js"] } : {}),
           ...(setup
@@ -183,7 +183,7 @@ describe("plugin artifact authoring", () => {
       const entry = (
         marker: string,
         sharedPath = "./shared.js",
-      ) => `import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+      ) => `import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 import { shared } from ${JSON.stringify(sharedPath)}; shared.ready = true;
 export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name: "Packed tool", description: "Artifact fixture", tools: (tool) => [tool({ name: "artifact_echo", description: "Echo", optional: true, parameters: { type: "object", properties: {} }, execute: async () => ({ ok: true }) })] }), { artifactMarker: ${JSON.stringify(marker)}, shared });`;
       await fs.writeFile(
@@ -211,7 +211,7 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
         );
       }
       await runPluginsBuildCommand({ root: rootDir });
-      const sourceManifest = await fs.readFile(path.join(rootDir, "openclaw.plugin.json"));
+      const sourceManifest = await fs.readFile(path.join(rootDir, "carapace.plugin.json"));
       const writeJson = vi.spyOn(defaultRuntime, "writeJson").mockImplementation(() => {});
       await runPluginsPackCommand({ root: rootDir, json: true });
       const archive = path.join(rootDir, filename);
@@ -223,15 +223,15 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
       await extract({ file: archive, cwd: extracted, strict: true });
       const packageDir = path.join(extracted, "package");
       const manifest = JSON.parse(await fs.readFile(path.join(packageDir, "package.json"), "utf8"));
-      expect(await fs.readFile(path.join(packageDir, "openclaw.plugin.json"))).toEqual(
+      expect(await fs.readFile(path.join(packageDir, "carapace.plugin.json"))).toEqual(
         sourceManifest,
       );
-      expect(manifest.openclaw.compat).toEqual(packageManifest.openclaw.compat);
+      expect(manifest.carapace.compat).toEqual(packageManifest.carapace.compat);
       expect(
         await validatePackageExtensionEntriesForInstall({
           packageDir,
           manifest,
-          extensions: manifest.openclaw.extensions,
+          extensions: manifest.carapace.extensions,
         }),
       ).toEqual({ ok: true });
       const resolution = {
@@ -243,7 +243,7 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
       };
       const [entryPath] = resolvePackageRuntimeExtensionSources({
         ...resolution,
-        extensions: manifest.openclaw.extensions,
+        extensions: manifest.carapace.extensions,
       });
       const loaded = await loadToolPlugin({ rootDir: packageDir, entryPath: entryPath! });
       expect(loaded.entry).toMatchObject({
@@ -267,7 +267,7 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
               import.meta.url,
               "src",
             ),
-            transformOpenClawDependencies: true,
+            transformCarapaceDependencies: true,
           });
           expect(load(entryPath!)).toMatchObject({ default: { shared: { ready: true } } });
           expect(load(setupPath!)).toMatchObject({
@@ -295,7 +295,7 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
       bundle: true,
       platform: "node",
       format: "esm",
-      external: ["openclaw/*"],
+      external: ["carapace/*"],
       write: false,
       logLevel: "silent",
     });
@@ -337,9 +337,9 @@ export default Object.assign(defineToolPlugin({ id: ${JSON.stringify(id)}, name:
     const { rootDir, parent } = await fixture();
     const packagePath = path.join(rootDir, "package.json");
     const metadata = JSON.parse(await fs.readFile(packagePath, "utf8"));
-    delete metadata.openclaw.controlUi;
+    delete metadata.carapace.controlUi;
     await fs.writeFile(packagePath, JSON.stringify(metadata));
-    const manifestPath = path.join(rootDir, "openclaw.plugin.json");
+    const manifestPath = path.join(rootDir, "carapace.plugin.json");
     const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
     const directory = "dist/control-ui/prebuilt";
     manifest.controlUi = {

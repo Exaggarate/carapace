@@ -1,7 +1,7 @@
 // Codex tests cover app server policy plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerForModelProvider } from "./app-server-policy.js";
 import { assertCodexModelBackedReviewerEffectiveConfig } from "./config-reviewer.js";
@@ -294,7 +294,7 @@ describe("Codex app-server policy", () => {
   });
 
   it("checks the actual app-server home instead of the caller's ambient Codex home", async () => {
-    await withTempDir("openclaw-codex-review-home-", async (root) => {
+    await withTempDir("carapace-codex-review-home-", async (root) => {
       const ambientHome = path.join(root, "ambient");
       const effectiveHome = path.join(root, "effective");
       await Promise.all([
@@ -356,7 +356,7 @@ describe("Codex app-server policy", () => {
   it.each([["--profile", "work"], ["--profile=work"], ["-pwork"]])(
     "checks the selected native profile before trusting model-backed review: %j",
     async (...profileArgs) => {
-      await withTempDir("openclaw-codex-review-profile-", async (codexHome) => {
+      await withTempDir("carapace-codex-review-profile-", async (codexHome) => {
         await fs.writeFile(
           path.join(codexHome, "work.config.toml"),
           'openai_base_url = "http://localhost:8080/v1"\n',

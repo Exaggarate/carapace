@@ -1,5 +1,5 @@
 // Covers SuperGrok provider usage fetch parsing.
-import { createProviderUsageFetch, makeResponse } from "openclaw/plugin-sdk/test-env";
+import { createProviderUsageFetch, makeResponse } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { fetchXaiUsage } from "./usage.js";
 

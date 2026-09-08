@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/litellm-provider",
+  "name": "@carapace/litellm-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw LiteLLM provider plugin",
+  "description": "Carapace LiteLLM provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

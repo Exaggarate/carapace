@@ -3,8 +3,8 @@ import type {
   ProviderReplayPolicy,
   ProviderReplayPolicyContext,
   ProviderSanitizeReplayHistoryContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { buildStrictAnthropicReplayPolicy } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/plugin-entry";
+import { buildStrictAnthropicReplayPolicy } from "carapace/plugin-sdk/provider-model-shared";
 
 const OMITTED_COPILOT_REASONING_TEXT = "[assistant reasoning omitted]";
 

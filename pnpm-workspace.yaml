@@ -43,7 +43,7 @@ minimumReleaseAgeExclude:
   - "@openclaw/fs-safe-linux-x64-gnu@0.8.5"
   - "@openclaw/fs-safe-linux-x64-musl@0.8.5"
   - "@openclaw/fs-safe-win32-x64-msvc@0.8.5"
-  # Bot API 10.3 types replace OpenClaw's temporary rich-message bridge.
+  # Bot API 10.3 types replace Carapace's temporary rich-message bridge.
   - "@grammyjs/types@5.0.0"
   - "grammy@1.46.0"
 
@@ -111,7 +111,7 @@ allowBuilds:
   koffi: false
   protobufjs: true
   tree-sitter-bash: false
-  openclaw: true
+  carapace: true
   "@openclaw/proxyline": true
   clawpdf: true
   "@openclaw/crabline": true

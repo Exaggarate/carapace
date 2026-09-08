@@ -1,6 +1,6 @@
 import path from "node:path";
-import type { AssistantMessage, Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { AssistantMessage, Context, Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../../../test/helpers/promise.js";
@@ -175,7 +175,7 @@ async function run(
     transport?: "sse" | "websocket-cached";
     authProfileId?: string;
     asyncToolExecution?: boolean;
-    openclawCodeModeToolSurface?: boolean;
+    carapaceCodeModeToolSurface?: boolean;
   },
   requestModel: Model = model,
 ): Promise<AssistantMessage> {
@@ -186,7 +186,7 @@ async function run(
     authProfileId: options.authProfileId,
     reasoningEffort: options.reasoningEffort ?? "low",
     asyncToolExecution: options.asyncToolExecution,
-    openclawCodeModeToolSurface: options.openclawCodeModeToolSurface,
+    carapaceCodeModeToolSurface: options.carapaceCodeModeToolSurface,
     onPayload: options.onPayload,
     signal: options.signal,
   } as never);
@@ -208,17 +208,17 @@ describe("native OpenAI Responses SSE continuation", () => {
           turn += 1;
           return {
             headers: {
-              "x-openclaw-session-id": context.sessionId ?? "",
-              "x-openclaw-turn-id": `turn-${turn}`,
-              "x-openclaw-turn-attempt": "1",
+              "x-carapace-session-id": context.sessionId ?? "",
+              "x-carapace-turn-id": `turn-${turn}`,
+              "x-carapace-turn-attempt": "1",
             },
             metadata: {
-              openclaw_session_id: context.sessionId ?? "",
-              openclaw_turn_id: `turn-${turn}`,
-              openclaw_turn_attempt: "1",
-              openclaw_transport: context.transport,
+              carapace_session_id: context.sessionId ?? "",
+              carapace_turn_id: `turn-${turn}`,
+              carapace_turn_attempt: "1",
+              carapace_transport: context.transport,
             },
-            websocket: { headers: { "x-openclaw-session-id": context.sessionId ?? "" } },
+            websocket: { headers: { "x-carapace-session-id": context.sessionId ?? "" } },
           };
         },
       },
@@ -246,8 +246,8 @@ describe("native OpenAI Responses SSE continuation", () => {
 
     expect(second.stopReason).toBe("stop");
     expect(sseState.clientHeaders).toMatchObject([
-      { "x-openclaw-turn-id": "turn-1" },
-      { "x-openclaw-turn-id": "turn-2" },
+      { "x-carapace-turn-id": "turn-1" },
+      { "x-carapace-turn-id": "turn-2" },
     ]);
     expect(sseState.requests[1]).toMatchObject({
       previous_response_id: "resp_1",
@@ -375,11 +375,11 @@ describe("native OpenAI Responses SSE continuation", () => {
       });
       if (variant.startsWith("legacy")) {
         for (const message of messages) {
-          if ("openclawResponsesInputReplay" in message) {
+          if ("carapaceResponsesInputReplay" in message) {
             if (variant === "legacy without replay") {
-              delete message.openclawResponsesInputReplay;
-            } else if (isRecord(message.openclawResponsesInputReplay)) {
-              delete message.openclawResponsesInputReplay.reasoning;
+              delete message.carapaceResponsesInputReplay;
+            } else if (isRecord(message.carapaceResponsesInputReplay)) {
+              delete message.carapaceResponsesInputReplay.reasoning;
             }
           }
         }
@@ -415,7 +415,7 @@ describe("native OpenAI Responses SSE continuation", () => {
         );
       }
 
-      const dir = tempDirs.make("openclaw-responses-transcript-");
+      const dir = tempDirs.make("carapace-responses-transcript-");
       const scope = {
         agentId: "main",
         sessionId: "session-1",
@@ -629,7 +629,7 @@ describe("native OpenAI Responses SSE continuation", () => {
         { messages: [userMessage("call", 1)], tools: [functionTool("exec"), functionTool("wait")] },
         {
           asyncToolExecution: enabled,
-          openclawCodeModeToolSurface: codeMode,
+          carapaceCodeModeToolSurface: codeMode,
           onPayload: (payload) => ({
             ...payload,
             ...(multiAgent ? { multi_agent: { enabled: true } } : {}),

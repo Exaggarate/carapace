@@ -23,7 +23,7 @@ describe("isPubliclyKnownPluginId", () => {
       plugin: {
         id: "opencode",
         origin: "workspace" as const,
-        packageName: "@openclaw/opencode-provider",
+        packageName: "@carapace/opencode-provider",
       },
       expected: true,
     },

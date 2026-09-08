@@ -17,7 +17,7 @@ type ReadChunk = (
 ) => void;
 
 function openFile(body: string) {
-  const filePath = path.join(tempDirs.make("openclaw-ui-read-"), "asset.txt");
+  const filePath = path.join(tempDirs.make("carapace-ui-read-"), "asset.txt");
   fs.writeFileSync(filePath, body);
   const fd = fs.openSync(filePath, "r");
   vi.spyOn(fs, "closeSync");

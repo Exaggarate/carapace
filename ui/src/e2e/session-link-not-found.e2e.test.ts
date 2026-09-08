@@ -48,7 +48,7 @@ suite.define(() => {
         await page.goto(suite.server.baseUrl);
         await expect.poll(() => new URL(page.url()).pathname).toBe("/chat/main");
         const activeComposer = page.locator(
-          'openclaw-chat-pane[aria-hidden="false"] .agent-chat__input textarea',
+          'carapace-chat-pane[aria-hidden="false"] .agent-chat__input textarea',
         );
         await activeComposer.waitFor({ state: "visible" });
         expect(await activeComposer.count()).toBe(1);
@@ -137,9 +137,9 @@ suite.define(() => {
             .locator(".lazy-view-error__subtitle")
             .evaluate((element) => getComputedStyle(element).textWrap),
         ).toBe("balance");
-        expect(await page.locator("openclaw-chat-page").count()).toBe(0);
+        expect(await page.locator("carapace-chat-page").count()).toBe(0);
         expect(await page.locator(".agent-chat__input textarea").count()).toBe(0);
-        expect(await page.locator("openclaw-toast-host .app-toast").count()).toBe(0);
+        expect(await page.locator("carapace-toast-host .app-toast").count()).toBe(0);
         expect(await gateway.getRequests("chat.startup")).toHaveLength(1);
         expect(await gateway.getRequests("sessions.resolve")).toEqual([
           expect.objectContaining({
@@ -155,7 +155,7 @@ suite.define(() => {
         await page.goto(`${suite.server.baseUrl}${attemptedPath.slice(1)}`);
         await page.getByRole("button", { name: "View sessions" }).click();
         await expect.poll(() => new URL(page.url()).pathname).toBe("/sessions");
-        const sessionsHeader = page.locator("openclaw-sessions-page .sessions-hub-header");
+        const sessionsHeader = page.locator("carapace-sessions-page .sessions-hub-header");
         await sessionsHeader.waitFor({ state: "visible" });
         expect(await sessionsHeader.textContent()).toContain("Active sessions and defaults.");
       },

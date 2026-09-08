@@ -5,9 +5,9 @@ import { createRequire } from "node:module";
 import { createServer as createNetServer } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { HelloOk } from "@openclaw/gateway-protocol";
-import { normalizeAgentId } from "@openclaw/normalization-core/agent-id";
-import { buildControlUiSessionPath } from "@openclaw/session-url-contract";
+import type { HelloOk } from "@carapace/gateway-protocol";
+import { normalizeAgentId } from "@carapace/normalization-core/agent-id";
+import { buildControlUiSessionPath } from "@carapace/session-url-contract";
 import type { ConsoleMessage, Frame, Locator, Page, Request } from "playwright";
 import type { InlineConfig, Plugin, PreviewServer, ViteDevServer } from "vite";
 import { PROTOCOL_VERSION } from "../../../packages/gateway-protocol/src/version.js";
@@ -67,7 +67,7 @@ export function controlUiSessionUrl(
 
 export async function navigateToControlUiSession(page: Page, sessionKey: string): Promise<void> {
   const expectedPathname = await page.evaluate((sessionPath) => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: {
         context: {
           basePath: string;
@@ -76,7 +76,7 @@ export async function navigateToControlUiSession(page: Page, sessionKey: string)
       };
     };
     if (!app.runtime) {
-      throw new Error("OpenClaw application runtime is unavailable");
+      throw new Error("Carapace application runtime is unavailable");
     }
     const pathname = `${app.runtime.context.basePath}${sessionPath}`;
     const url = new URL(window.location.href);
@@ -87,7 +87,7 @@ export async function navigateToControlUiSession(page: Page, sessionKey: string)
   await page.waitForURL((url) => url.pathname === expectedPathname);
   await page.waitForFunction(
     (targetSessionKey) =>
-      [...document.querySelectorAll<HTMLElement>("openclaw-chat-pane")].some(
+      [...document.querySelectorAll<HTMLElement>("carapace-chat-pane")].some(
         (pane) =>
           pane.classList.contains("chat-pane-cache__pane--visible") &&
           (pane as HTMLElement & { sessionKey?: string }).sessionKey === targetSessionKey,
@@ -103,7 +103,7 @@ export function controlUiBundledGatewayUrl(baseUrl: string): string {
 }
 
 export function controlUiBundledSettingsStorageKey(baseUrl: string): string {
-  return `openclaw.control.settings.v1:${controlUiBundledGatewayUrl(baseUrl)}`;
+  return `carapace.control.settings.v1:${controlUiBundledGatewayUrl(baseUrl)}`;
 }
 
 export function createControlUiMockSameOriginGatewayScript(): string {
@@ -116,9 +116,9 @@ function installControlUiMockSameOriginGateway() {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   (
     window as Window & {
-      ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string };
+      ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string };
     }
-  )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+  )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
     gatewayUrl: `${protocol}//${window.location.host}`,
   };
 }
@@ -162,7 +162,7 @@ export async function waitForControlUiRoute(page: Page, target: ControlUiRouteTa
               };
             };
           }
-        >("openclaw-app");
+        >("carapace-app");
         // Native popup events can arrive before the app element is parsed.
         const state = app?.runtime?.router.getState();
         const pathname = window.location.pathname;
@@ -200,7 +200,7 @@ export async function waitForControlUiRoute(page: Page, target: ControlUiRouteTa
             };
           };
         }
-      >("openclaw-app");
+      >("carapace-app");
       return {
         hash: window.location.hash,
         pathname: window.location.pathname,
@@ -252,13 +252,13 @@ export async function clickBoardWidgetControl(page: Page, control: Locator): Pro
  */
 export async function waitForConfirmModal(page: Page): Promise<Locator> {
   await page.waitForFunction(() => {
-    const modal = [...document.querySelectorAll("openclaw-modal-dialog")].at(-1);
+    const modal = [...document.querySelectorAll("carapace-modal-dialog")].at(-1);
     const dialog = modal?.shadowRoot
       ?.querySelector("wa-dialog")
       ?.shadowRoot?.querySelector("dialog");
     return Boolean(dialog) && getComputedStyle(dialog as Element).opacity === "1";
   });
-  return page.locator("openclaw-modal-dialog").last();
+  return page.locator("carapace-modal-dialog").last();
 }
 
 export async function waitForControlUiSettingsTakeover(
@@ -266,7 +266,7 @@ export async function waitForControlUiSettingsTakeover(
   pathname = "/settings/appearance",
 ): Promise<{ search: Locator; sidebar: Locator }> {
   await waitForControlUiRoute(page, { pathname, routeId: "appearance" });
-  const appSidebar = page.locator("openclaw-app-sidebar");
+  const appSidebar = page.locator("carapace-app-sidebar");
   const sidebar = page.locator(".settings-sidebar");
   const search = sidebar.getByRole("searchbox", { name: "Search settings" });
   await appSidebar.waitFor({ state: "detached" });
@@ -600,13 +600,13 @@ async function installControlUiE2eUnhandledRejectionRing(page: Page): Promise<vo
   controlUiE2eUnhandledRejectionPages.add(page);
   await page.addInitScript(() => {
     const windowWithDiagnostics = window as Window & {
-      __OPENCLAW_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__?: Array<{
+      __CARAPACE_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__?: Array<{
         at: string;
         reason: unknown;
       }>;
     };
     const events: Array<{ at: string; reason: unknown }> = [];
-    windowWithDiagnostics["__OPENCLAW_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__"] = events;
+    windowWithDiagnostics["__CARAPACE_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__"] = events;
     window.addEventListener("unhandledrejection", (event) => {
       let reason: unknown;
       if (event.reason instanceof Error) {
@@ -768,7 +768,7 @@ export async function startControlUiE2eServer(
     clearScreen: false,
     configFile: false,
     define: {
-      "globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO": JSON.stringify(resolvedBuildInfo),
+      "globalThis.CARAPACE_CONTROL_UI_BUILD_INFO": JSON.stringify(resolvedBuildInfo),
     },
     logLevel: "error",
     optimizeDeps: {
@@ -856,7 +856,7 @@ function createBundledControlUiE2eConfig(
     configFile: false,
     define: {
       ...config.define,
-      "globalThis.OPENCLAW_CONTROL_UI_BUILD_INFO": JSON.stringify(
+      "globalThis.CARAPACE_CONTROL_UI_BUILD_INFO": JSON.stringify(
         DEFAULT_CONTROL_UI_E2E_BUILD_INFO,
       ),
     },
@@ -873,7 +873,7 @@ export async function buildProductionControlUiE2e(outDir: string, buildId: strin
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     NODE_ENV: "production",
-    OPENCLAW_CONTROL_UI_BUILD_ID: buildId,
+    CARAPACE_CONTROL_UI_BUILD_ID: buildId,
   };
   for (const key of Object.keys(env)) {
     if (key.startsWith("VITEST")) {
@@ -1025,7 +1025,7 @@ function normalizeScenario(
     agentModel:
       scenario.agentModel === undefined ? "openai/gpt-5.5" : scenario.agentModel?.trim() || null,
     assistantAgentId: scenario.assistantAgentId?.trim() || defaultAgentId,
-    assistantName: scenario.assistantName?.trim() || "OpenClaw",
+    assistantName: scenario.assistantName?.trim() || "Carapace",
     basePath,
     controlUiTabs: scenario.controlUiTabs ?? [],
     controlUiWidgetKinds: scenario.controlUiWidgetKinds ?? [],
@@ -1114,7 +1114,7 @@ export function createControlUiMockBootstrapConfig(scenario: ControlUiMockGatewa
       : []
     ).map(({ pluginId }) => ({
       pluginId,
-      path: `/__openclaw__/plugins/control-ui/${encodeURIComponent(pluginId)}/`,
+      path: `/__carapace__/plugins/control-ui/${encodeURIComponent(pluginId)}/`,
       match: "prefix",
     })),
     allowExternalEmbedUrls: false,
@@ -1179,8 +1179,8 @@ export type ControlUiMockGateway = {
   socketUrls: () => string[];
 };
 type MockGatewayWindow = Window & {
-  __OPENCLAW_CONTROL_UI_BASE_PATH__?: string;
-  openclawControlUiE2eGateway?: ControlUiMockGateway;
+  __CARAPACE_CONTROL_UI_BASE_PATH__?: string;
+  carapaceControlUiE2eGateway?: ControlUiMockGateway;
 };
 
 function installControlUiMockGateway(
@@ -1232,7 +1232,7 @@ function installControlUiMockGateway(
   };
 
   const scenario = input.scenario;
-  const serverBuildIdStateKey = "openclaw.control-ui-e2e.serverBuildId";
+  const serverBuildIdStateKey = "carapace.control-ui-e2e.serverBuildId";
   let serverBuildId = scenario.serverBuildId;
   let gatewayBootId =
     new URL(window.location.href).searchParams.get("mockGatewayBootId")?.trim() ||
@@ -1242,10 +1242,10 @@ function installControlUiMockGateway(
   } catch {
     // The scenario value remains authoritative when browser storage is unavailable.
   }
-  (window as MockGatewayWindow)["__OPENCLAW_CONTROL_UI_BASE_PATH__"] = scenario.basePath;
+  (window as MockGatewayWindow)["__CARAPACE_CONTROL_UI_BASE_PATH__"] = scenario.basePath;
   const protocolVersion = input.protocolVersion;
-  const methodResponseOverridesStorageKey = "openclaw.control-ui-e2e.method-responses.v1";
-  const canonicalSessionsStorageKey = "openclaw.control-ui-e2e.canonical-sessions.v1";
+  const methodResponseOverridesStorageKey = "carapace.control-ui-e2e.method-responses.v1";
+  const canonicalSessionsStorageKey = "carapace.control-ui-e2e.canonical-sessions.v1";
   const methodResponseOverrides: Record<string, unknown> = {};
   try {
     const storedOverrides = window.sessionStorage.getItem(methodResponseOverridesStorageKey);
@@ -1298,12 +1298,12 @@ function installControlUiMockGateway(
   }> = [];
   let sessionMessageEventIndex = 0;
   let sessionMessageEventTimer: number | null = null;
-  const offlineStateKey = "openclaw.control-ui-e2e.gatewayOffline";
+  const offlineStateKey = "carapace.control-ui-e2e.gatewayOffline";
   // Gateway-owned custom group catalog (sessions.groups.*). Persisted in
   // sessionStorage so a page reload keeps the catalog the way the real
   // gateway's SQLite store does; renames replay onto static sessions.list
   // fixtures because the real gateway rewrites member categories server-side.
-  const groupsStateKey = "openclaw.control-ui-e2e.sessionGroups";
+  const groupsStateKey = "carapace.control-ui-e2e.sessionGroups";
   let groupsState: {
     names: string[];
     defaults: Record<string, { cwd?: string; worktree?: boolean }>;
@@ -1336,7 +1336,7 @@ function installControlUiMockGateway(
   // and advance the hash so autosave -> reload flows round-trip edits the way
   // the real gateway does. Active only when the scenario ships a config.get
   // fixture with a raw string; persisted in sessionStorage like groupsState.
-  const configStateKey = "openclaw.control-ui-e2e.configState";
+  const configStateKey = "carapace.control-ui-e2e.configState";
   const baseConfigResponse: Record<string, unknown> | null = (() => {
     const configured = scenario.methodResponses["config.get"];
     return isRecord(configured) && typeof configured.raw === "string" ? configured : null;
@@ -1550,9 +1550,9 @@ function installControlUiMockGateway(
   type CommittedChatInput = {
     sessionId: string;
     runId: string;
-    message: Record<string, unknown> & { __openclaw: { id: string; seq: number } };
+    message: Record<string, unknown> & { __carapace: { id: string; seq: number } };
   };
-  const chatInputsStorageKey = "openclaw.control-ui-e2e.chatInputs";
+  const chatInputsStorageKey = "carapace.control-ui-e2e.chatInputs";
   let committedChatInputs: CommittedChatInput[] = [];
   let historyMessagesOverridden = false;
   try {
@@ -1568,13 +1568,13 @@ function installControlUiMockGateway(
     if (!isRecord(message) || message.role !== "user") {
       return undefined;
     }
-    const metadata = isRecord(message["__openclaw"]) ? message["__openclaw"] : undefined;
+    const metadata = isRecord(message["__carapace"]) ? message["__carapace"] : undefined;
     return metadata?.idempotencyKey ?? message.idempotencyKey;
   }
 
   function messageSequence(message: unknown): number {
     const metadata =
-      isRecord(message) && isRecord(message["__openclaw"]) ? message["__openclaw"] : null;
+      isRecord(message) && isRecord(message["__carapace"]) ? message["__carapace"] : null;
     return typeof metadata?.seq === "number" && Number.isSafeInteger(metadata.seq)
       ? metadata.seq
       : 0;
@@ -1593,7 +1593,7 @@ function installControlUiMockGateway(
         continue;
       }
       const next = messages.findIndex(
-        (message) => messageSequence(message) > source.message["__openclaw"].seq,
+        (message) => messageSequence(message) > source.message["__carapace"].seq,
       );
       messages.splice(next < 0 ? messages.length : next, 0, source.message);
     }
@@ -1624,7 +1624,7 @@ function installControlUiMockGateway(
         ...chatHistoryMessages(row.key).map(messageSequence),
         ...committedChatInputs
           .filter((source) => source.sessionId === row.sessionId)
-          .map((source) => source.message["__openclaw"].seq),
+          .map((source) => source.message["__carapace"].seq),
       ) + 1;
     const media = Array.isArray(params.attachments)
       ? params.attachments.filter(isRecord).map((attachment) => ({
@@ -1645,7 +1645,7 @@ function installControlUiMockGateway(
         content: params.message,
         timestamp: Date.now(),
         idempotencyKey: `${params.idempotencyKey}:user`,
-        __openclaw: {
+        __carapace: {
           id: `mock-user:${params.idempotencyKey}`,
           seq: sequence,
           ...(media.length ? { media } : {}),
@@ -1663,8 +1663,8 @@ function installControlUiMockGateway(
           sessionKey: row.key,
           sessionId: row.sessionId,
           clientRunId: source.runId,
-          messageId: source.message["__openclaw"].id,
-          messageSeq: source.message["__openclaw"].seq,
+          messageId: source.message["__carapace"].id,
+          messageSeq: source.message["__carapace"].seq,
           message: source.message,
         });
       });
@@ -1795,7 +1795,7 @@ function installControlUiMockGateway(
       const kind =
         method === "approval.resolve"
           ? params.kind === "system-agent"
-            ? "openclaw"
+            ? "carapace"
             : params.kind
           : /^(exec|plugin)\.approval\.resolve$/u.exec(method)?.[1];
       if (typeof kind === "string") {
@@ -1819,7 +1819,7 @@ function installControlUiMockGateway(
           .map((source) => ({
             runId: source.runId,
             state: "consumed",
-            consumedByEventId: source.message["__openclaw"].id,
+            consumedByEventId: source.message["__carapace"].id,
           })),
       };
     }
@@ -1854,7 +1854,7 @@ function installControlUiMockGateway(
     event: string,
     payload: unknown,
   ): void {
-    const approval = /^(exec|plugin|openclaw)\.approval\.(requested|resolved)$/u.exec(event);
+    const approval = /^(exec|plugin|carapace)\.approval\.(requested|resolved)$/u.exec(event);
     if (approval && isRecord(payload) && typeof payload.id === "string") {
       // The Gateway registers pending state before publishing its event. A later
       // bootstrap/reconnect list must describe the same approval as the live stream.
@@ -2089,7 +2089,7 @@ function installControlUiMockGateway(
     switch (method) {
       case "exec.approval.list":
       case "plugin.approval.list":
-      case "openclaw.approval.list":
+      case "carapace.approval.list":
         return [...(pendingApprovals.get(method)?.values() ?? [])].filter(
           (approval) =>
             typeof approval.expiresAtMs === "number" && approval.expiresAtMs > Date.now(),
@@ -2359,8 +2359,8 @@ function installControlUiMockGateway(
             !Array.isArray(params.attachments) ||
             params.attachments.length === 0)
             ? {
-                messageId: source.message["__openclaw"].id,
-                messageSeq: source.message["__openclaw"].seq,
+                messageId: source.message["__carapace"].id,
+                messageSeq: source.message["__carapace"].seq,
               }
             : {}),
         };
@@ -2369,7 +2369,7 @@ function installControlUiMockGateway(
         return { aborted: true };
       case "skills.proposals.list":
         return {
-          schema: "openclaw.skill-workshop.proposals-manifest.v1",
+          schema: "carapace.skill-workshop.proposals-manifest.v1",
           updatedAt: new Date().toISOString(),
           proposals: [],
           installedSkills: [],
@@ -2521,7 +2521,7 @@ function installControlUiMockGateway(
               ? params.agentId
               : scenario.defaultAgentId,
           shell: "/bin/zsh",
-          cwd: scenario.workspace || "/workspace/openclaw",
+          cwd: scenario.workspace || "/workspace/carapace",
           confined: false,
           attached: true,
           owner: "conn",
@@ -2588,7 +2588,7 @@ function installControlUiMockGateway(
       typeof response.sessionId === "string"
     ) {
       session = terminalSessions.get(response.sessionId);
-      data = "OpenClaw mock terminal\r\nType anything and the mock Gateway will echo it.\r\n$ ";
+      data = "Carapace mock terminal\r\nType anything and the mock Gateway will echo it.\r\n$ ";
     } else if (method === "terminal.input" && isRecord(params)) {
       session =
         typeof params.sessionId === "string" ? terminalSessions.get(params.sessionId) : undefined;
@@ -2970,7 +2970,7 @@ function installControlUiMockGateway(
     },
   };
 
-  (window as MockGatewayWindow).openclawControlUiE2eGateway = exposed;
+  (window as MockGatewayWindow).carapaceControlUiE2eGateway = exposed;
   const RoutedWebSocket = function (url: string | URL, protocols?: string | string[]) {
     const resolvedUrl = String(url);
     // Vite's dev client must keep its real socket: the mock would fake the
@@ -3069,7 +3069,7 @@ function createMockGatewayControls(
   const emitGatewayEvent = async (event: string, payload?: unknown) => {
     await page.evaluate(
       ({ eventName, eventPayload }) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3081,7 +3081,7 @@ function createMockGatewayControls(
 
   const deliverLatest = async (frame: unknown) => {
     await page.evaluate((payload) => {
-      const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+      const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
       if (!gateway) {
         throw new Error("Mock Gateway is not installed");
       }
@@ -3092,7 +3092,7 @@ function createMockGatewayControls(
   const getRequests = async (method?: string, match?: Record<string, unknown>) =>
     page.evaluate(
       ({ targetMethod, requestMatch }) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         return gateway?.findRequests(targetMethod, requestMatch) ?? [];
       },
       { targetMethod: method, requestMatch: match },
@@ -3102,7 +3102,7 @@ function createMockGatewayControls(
     async closeLatest(code, reason) {
       await page.evaluate(
         ({ closeCode, closeReason }) => {
-          const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+          const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
           if (!gateway) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -3115,7 +3115,7 @@ function createMockGatewayControls(
     async deferNext(method, match) {
       await page.evaluate(
         ({ targetMethod, requestMatch }) => {
-          const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+          const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
           if (!gateway) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -3140,20 +3140,20 @@ function createMockGatewayControls(
     getRequests,
     async getSocketCount() {
       return await page.evaluate(() => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         return gateway?.socketCount() ?? 0;
       });
     },
     async getSocketUrls() {
       return await page.evaluate(() => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         return gateway?.socketUrls() ?? [];
       });
     },
     async rejectDeferred(method, error) {
       await page.evaluate(
         ({ targetMethod, responseError }) => {
-          const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+          const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
           if (!gateway) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -3165,7 +3165,7 @@ function createMockGatewayControls(
     async resolveDeferred(method, payload) {
       await page.evaluate(
         ({ targetMethod, responsePayload }) => {
-          const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+          const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
           if (!gateway) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -3176,7 +3176,7 @@ function createMockGatewayControls(
     },
     async suspendLatest() {
       await page.evaluate(() => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3185,7 +3185,7 @@ function createMockGatewayControls(
     },
     async setOnline(online) {
       await page.evaluate((nextOnline) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3194,7 +3194,7 @@ function createMockGatewayControls(
     },
     async setGatewayBootId(bootId) {
       await page.evaluate((nextBootId) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3203,7 +3203,7 @@ function createMockGatewayControls(
     },
     async setServerBuildId(buildId) {
       await page.evaluate((nextBuildId) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3212,7 +3212,7 @@ function createMockGatewayControls(
     },
     async setOperatorScopes(scopes) {
       await page.evaluate((nextScopes) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3221,7 +3221,7 @@ function createMockGatewayControls(
     },
     async setHistoryMessages(messages) {
       await page.evaluate((nextMessages) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3232,7 +3232,7 @@ function createMockGatewayControls(
       methodResponses[method] = payload;
       await page.evaluate(
         ({ targetMethod, responsePayload }) => {
-          const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+          const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
           if (!gateway) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -3243,7 +3243,7 @@ function createMockGatewayControls(
     },
     async setSessionsListResponse(payload) {
       await page.evaluate((responsePayload) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3252,7 +3252,7 @@ function createMockGatewayControls(
     },
     async setSessionSharingPolicy(policy) {
       await page.evaluate((nextPolicy) => {
-        const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+        const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
         if (!gateway) {
           throw new Error("Mock Gateway is not installed");
         }
@@ -3267,7 +3267,7 @@ function createMockGatewayControls(
         try {
           await page.waitForFunction(
             ({ targetMethod, priorCount, requestMatch }) => {
-              const gateway = (window as MockGatewayWindow).openclawControlUiE2eGateway;
+              const gateway = (window as MockGatewayWindow).carapaceControlUiE2eGateway;
               const matching = gateway?.findRequests(targetMethod, requestMatch) ?? [];
               return matching.length > (priorCount ?? 0);
             },
@@ -3348,7 +3348,7 @@ async function captureControlUiE2eFailureDiagnosticsUnsafe(
     pageEvents?: ControlUiE2eDiagnosticEvent[];
   },
 ): Promise<void> {
-  const configuredDir = process.env.OPENCLAW_UI_E2E_DIAGNOSTIC_DIR?.trim();
+  const configuredDir = process.env.CARAPACE_UI_E2E_DIAGNOSTIC_DIR?.trim();
   const artifactDir = createControlUiE2eArtifactDir(
     "failure",
     configuredDir || path.join(resolveRepoRoot(), ".artifacts", "control-ui-e2e-timeouts", "local"),
@@ -3391,13 +3391,13 @@ async function captureControlUiE2eFailureDiagnosticsUnsafe(
         socketUrls?: () => string[];
       };
       const windowState = window as Window & {
-        __OPENCLAW_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__?: unknown[];
-        openclawControlUiE2eGateway?: MockGateway;
+        __CARAPACE_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__?: unknown[];
+        carapaceControlUiE2eGateway?: MockGateway;
       };
-      const app = document.querySelector("openclaw-app") as
+      const app = document.querySelector("carapace-app") as
         | (HTMLElement & { runtime?: Runtime })
         | null;
-      const shell = document.querySelector("openclaw-app-shell") as
+      const shell = document.querySelector("carapace-app-shell") as
         | (HTMLElement & { runtime?: Runtime })
         | null;
       const runtime = app?.runtime ?? shell?.runtime;
@@ -3475,13 +3475,13 @@ async function captureControlUiE2eFailureDiagnosticsUnsafe(
           url: window.location.href,
         },
         mockGateway: {
-          installed: Boolean(windowState.openclawControlUiE2eGateway),
-          requests: copy(windowState.openclawControlUiE2eGateway?.requests ?? []),
-          socketStates: copy(windowState.openclawControlUiE2eGateway?.socketStates?.() ?? []),
-          socketUrls: copy(windowState.openclawControlUiE2eGateway?.socketUrls?.() ?? []),
+          installed: Boolean(windowState.carapaceControlUiE2eGateway),
+          requests: copy(windowState.carapaceControlUiE2eGateway?.requests ?? []),
+          socketStates: copy(windowState.carapaceControlUiE2eGateway?.socketStates?.() ?? []),
+          socketUrls: copy(windowState.carapaceControlUiE2eGateway?.socketUrls?.() ?? []),
         },
         unhandledRejections: copy(
-          windowState["__OPENCLAW_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__"] ?? [],
+          windowState["__CARAPACE_CONTROL_UI_E2E_UNHANDLED_REJECTIONS__"] ?? [],
         ),
       };
     });

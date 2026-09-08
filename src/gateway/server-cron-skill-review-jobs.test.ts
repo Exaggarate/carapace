@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { CronService } from "../cron/service.js";
 import { saveCronJobsStore } from "../cron/store.js";
 import type { CronJob } from "../cron/types.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { reconcileSkillCollectionReviewJobs } from "./server-cron-skill-review-jobs.js";
 
 const logger = {
@@ -155,12 +155,12 @@ describe("reconcileSkillCollectionReviewJobs", () => {
     const cfg = {
       agents: {
         list: [
-          { id: "main", default: true, workspace: "/tmp/openclaw-shared" },
-          { id: "ops", workspace: "/tmp/openclaw-shared" },
+          { id: "main", default: true, workspace: "/tmp/carapace-shared" },
+          { id: "ops", workspace: "/tmp/carapace-shared" },
         ],
       },
       skills: { workshop: { autonomous: { mode: "propose" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await reconcileSkillCollectionReviewJobs({
       cron: { add, list, remove } as never,
@@ -210,9 +210,9 @@ describe("reconcileSkillCollectionReviewJobs", () => {
       },
     );
     const cfg = {
-      agents: { list: [{ id: "main", default: true, workspace: "/tmp/openclaw-main" }] },
+      agents: { list: [{ id: "main", default: true, workspace: "/tmp/carapace-main" }] },
       skills: { workshop: { autonomous: { mode: "propose" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       reconcileSkillCollectionReviewJobs({
@@ -227,9 +227,9 @@ describe("reconcileSkillCollectionReviewJobs", () => {
   });
 
   it("replaces retired jobs on the current database and converges once per agent after restart", async () => {
-    const testState = await createOpenClawTestState({ label: "skill-review-convergence" });
+    const testState = await createCarapaceTestState({ label: "skill-review-convergence" });
     const storePath = testState.statePath("cron", "jobs.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { ownership: "explicit", list: [{ id: "main", default: true }, { id: "ops" }] },
     };
     const deps = {
@@ -248,7 +248,7 @@ describe("reconcileSkillCollectionReviewJobs", () => {
         payload: { kind: "skillCollectionReview" },
       };
       await saveCronJobsStore(storePath, { version: 1, jobs: [monitorJob("main")] });
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       const version = db.prepare("PRAGMA user_version").get();
       db.prepare("UPDATE cron_jobs SET payload_kind = ?, job_json = ? WHERE job_id = ?").run(
         "skillCollectionReview",
@@ -283,7 +283,7 @@ describe("reconcileSkillCollectionReviewJobs", () => {
   });
 
   it("revokes an active review through gateway reconciliation before its final write", async () => {
-    const testState = await createOpenClawTestState({ label: "skill-review-revoke" });
+    const testState = await createCarapaceTestState({ label: "skill-review-revoke" });
     const workspaceDir = testState.workspaceDir;
     const finalWritePath = path.join(workspaceDir, "skills", "candidate", "SKILL.md");
     const started = createDeferred<AbortSignal>();
@@ -318,7 +318,7 @@ describe("reconcileSkillCollectionReviewJobs", () => {
           list: [{ id: "main", default: true, workspace: workspaceDir }],
         },
         skills: { workshop: { autonomous: { mode } } },
-      }) satisfies OpenClawConfig;
+      }) satisfies CarapaceConfig;
     let activeRun: Promise<unknown> | undefined;
 
     try {

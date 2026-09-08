@@ -12,7 +12,7 @@ import type {
   QaBusState,
   QaGatewayChild,
 } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { waitForHotReloadFact } from "./gateway-config-hot-reload-fixtures.js";
 
 type PolicyProof = {
@@ -98,7 +98,7 @@ export async function proveHotReloadPolicy({
 }) {
   const root = await fs.mkdtemp(path.join(temporaryRoot, "policy-"));
   const observations: Array<Record<string, unknown>> = [];
-  const initial = (await rpc<{ config: OpenClawConfig }>("config.get")).config;
+  const initial = (await rpc<{ config: CarapaceConfig }>("config.get")).config;
   await proveGroup("tts", async () => {
     const speech = await startSpeechFixture();
     try {
@@ -168,7 +168,7 @@ export async function proveHotReloadPolicy({
       await fs.mkdir(hookRoot, { recursive: true });
       await fs.writeFile(
         path.join(hookRoot, "HOOK.md"),
-        `---\nname: ${name}\ndescription: Synthetic hot reload recorder\nmetadata: {"openclaw":{"events":["${event}"]}}\n---\n`,
+        `---\nname: ${name}\ndescription: Synthetic hot reload recorder\nmetadata: {"carapace":{"events":["${event}"]}}\n---\n`,
       );
       await fs.writeFile(
         path.join(hookRoot, "handler.js"),
@@ -425,7 +425,7 @@ export async function proveHotReloadChannelPolicy({
   patchChannels: PolicyProof["patch"];
 }) {
   const channel = "qa-channel";
-  const initial = (await rpc<{ config: OpenClawConfig }>("config.get")).config;
+  const initial = (await rpc<{ config: CarapaceConfig }>("config.get")).config;
   const inbound = async (id: string, text: string, senderId = "qa-operator", group = false) => {
     const message = await transport.sendInbound({
       conversation: { kind: group ? "channel" : "direct", id },

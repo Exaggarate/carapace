@@ -37,9 +37,9 @@ describe("consumeRootOptionToken", () => {
     { args: ["--dev"], index: 0, expected: 1 },
     { args: ["--profile=work"], index: 0, expected: 1 },
     { args: ["--log-level=debug"], index: 0, expected: 1 },
-    { args: ["--container=openclaw-demo"], index: 0, expected: 1 },
+    { args: ["--container=carapace-demo"], index: 0, expected: 1 },
     { args: ["--profile", "work"], index: 0, expected: 2 },
-    { args: ["--container", "openclaw-demo"], index: 0, expected: 2 },
+    { args: ["--container", "carapace-demo"], index: 0, expected: 2 },
     { args: ["--profile", "-1"], index: 0, expected: 2 },
     { args: ["--log-level", "-1.5"], index: 0, expected: 2 },
     { args: ["--profile", "--no-color"], index: 0, expected: 1 },
@@ -60,7 +60,7 @@ describe("literal command discovery", () => {
       const options = { commandPath: ["models"], booleanFlags: ["--json"], mode };
       expect(
         getCommandPositionalsWithRootOptions(
-          ["node", "openclaw", "--json", "models", "status"],
+          ["node", "carapace", "--json", "models", "status"],
           options,
         ),
       ).toBeNull();
@@ -69,7 +69,7 @@ describe("literal command discovery", () => {
         ["--profile", "models", "models", "--json", "status"],
       ]) {
         expect(
-          getCommandPositionalsWithRootOptions(["node", "openclaw", ...args], options),
+          getCommandPositionalsWithRootOptions(["node", "carapace", ...args], options),
         ).toEqual(["status"]);
       }
     },
@@ -85,7 +85,7 @@ describe("literal command discovery", () => {
     { args: ["--"], expected: [] },
     { args: ["status", "--", "ignored"], expected: ["status"] },
   ])("discovers $args without promoting literal flags", ({ args, expected }) => {
-    expect(getRootOptionAwareCommandPath(["node", "openclaw", ...args], 2)).toEqual(expected);
+    expect(getRootOptionAwareCommandPath(["node", "carapace", ...args], 2)).toEqual(expected);
   });
 
   it.each([
@@ -94,7 +94,7 @@ describe("literal command discovery", () => {
     ["channels", "add", "--", "--channel", "example"],
   ])("retains the literal boundary in a delegated argument tail: %j", (...args) => {
     expect(
-      getCommandArgsWithRootOptions(["node", "openclaw", ...args], {
+      getCommandArgsWithRootOptions(["node", "carapace", ...args], {
         commandPath: ["channels", "add"],
         mode: "command-path",
       }),
@@ -103,7 +103,7 @@ describe("literal command discovery", () => {
 
   it("keeps literal root invocations out of conservative fast routes", () => {
     expect(
-      getCommandPositionalsWithRootOptions(["node", "openclaw", "--", "config", "get"], {
+      getCommandPositionalsWithRootOptions(["node", "carapace", "--", "config", "get"], {
         commandPath: ["config", "get"],
       }),
     ).toBeNull();

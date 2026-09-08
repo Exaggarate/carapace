@@ -15,11 +15,11 @@ import type {
   WorkboardProof,
   WorkboardRunAttempt,
   WorkboardWorkerLog,
-} from "@openclaw/workboard-contract";
+} from "@carapace/workboard-contract";
 import {
   configureSqliteConnectionPragmas,
   migrateSqliteSchemaToStrict,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   compileSqliteQueryBindings,
   executeSqliteQueryTakeFirstSync,
@@ -27,9 +27,9 @@ import {
   iterateSqliteQuerySync,
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   PersistedWorkboardAttachment,
   PersistedWorkboardBoard,

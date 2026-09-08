@@ -1,6 +1,6 @@
-import { normalizeFastMode } from "@openclaw/normalization-core/string-coerce";
+import { normalizeFastMode } from "@carapace/normalization-core/string-coerce";
 import { normalizeThinkLevel } from "../auto-reply/thinking.shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { modelKey } from "../shared/model-key.js";
 import { resolveAgentConfig } from "./agent-scope-config.js";
 
@@ -48,7 +48,7 @@ function legacyModelKey(provider: string, modelId: string): string | undefined {
 
 /** Resolves the config records merged into one model request. */
 export function resolveModelExtraParamSources(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   modelId?: string;
   agentId?: string;
@@ -70,7 +70,7 @@ export function resolveModelExtraParamSources(params: {
   return { defaultParams, modelParams, agentModelParams, agentParams: agent?.params };
 }
 
-/** Returns whether embedded OpenClaw would apply authored provider request parameters. */
+/** Returns whether embedded Carapace would apply authored provider request parameters. */
 export function hasAuthoredProviderRequestParams(
   params: Parameters<typeof resolveModelExtraParamSources>[0],
 ): boolean {

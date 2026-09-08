@@ -1,16 +1,16 @@
-# OpenClaw Synthetic Provider
+# Carapace Synthetic Provider
 
-Official OpenClaw provider plugin for Synthetic's hosted Anthropic-compatible
+Official Carapace provider plugin for Synthetic's hosted Anthropic-compatible
 API.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/synthetic-provider
-openclaw gateway restart
+carapace plugins install @carapace/synthetic-provider
+carapace gateway restart
 ```
 
 Configure `SYNTHETIC_API_KEY`, then select a `synthetic/<model-id>` model.
 
-See https://docs.openclaw.ai/providers/synthetic for model and configuration
+See ../../docs/providers/synthetic.md for model and configuration
 details.

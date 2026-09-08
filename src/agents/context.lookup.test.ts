@@ -2,7 +2,7 @@
 // model resolution.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { replaceDiscoveredContextTokenCache } from "./context-cache.js";
 import { ANTHROPIC_CONTEXT_1M_TOKENS } from "./context-resolution.js";
 import { CONTEXT_WINDOW_RUNTIME_STATE } from "./context-runtime-state.js";
@@ -20,8 +20,8 @@ const contextTestState = vi.hoisted(() => {
     loadConfigImpl: () => ({}) as unknown,
     discoveredModels: [] as DiscoveredModel[],
     staticCatalogModels: [] as DiscoveredModel[],
-    runtimeConfigSnapshot: null as OpenClawConfig | null,
-    runtimeConfigSourceSnapshot: null as OpenClawConfig | null,
+    runtimeConfigSnapshot: null as CarapaceConfig | null,
+    runtimeConfigSourceSnapshot: null as CarapaceConfig | null,
     loadModelCatalogOwnerSnapshot: vi.fn(async (_params: unknown) => ({
       modelCatalog: {
         entries: state.discoveredModels,
@@ -34,7 +34,7 @@ const contextTestState = vi.hoisted(() => {
         _params: unknown,
       ):
         | {
-            config: OpenClawConfig;
+            config: CarapaceConfig;
             modelCatalog: {
               entries: DiscoveredModel[];
               routeVariants: never[];
@@ -42,7 +42,7 @@ const contextTestState = vi.hoisted(() => {
             };
           }
         | undefined => ({
-        config: state.loadConfigImpl() as OpenClawConfig,
+        config: state.loadConfigImpl() as CarapaceConfig,
         modelCatalog: {
           entries: state.discoveredModels,
           routeVariants: [],
@@ -59,7 +59,7 @@ vi.mock("../config/config.js", () => ({
 }));
 
 vi.mock("../config/runtime-source-projection.js", () => ({
-  projectConfigOntoRuntimeSourceSnapshot: (config: OpenClawConfig) =>
+  projectConfigOntoRuntimeSourceSnapshot: (config: CarapaceConfig) =>
     contextTestState.runtimeConfigSnapshot && contextTestState.runtimeConfigSourceSnapshot
       ? contextTestState.runtimeConfigSourceSnapshot
       : config,
@@ -101,7 +101,7 @@ function createContextOverrideConfig(
   provider: string,
   model: string,
   contextWindow: number,
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -181,7 +181,7 @@ describe("lookupContextTokens", () => {
     }));
     contextTestState.getPublishedModelCatalogOwnerSnapshot.mockClear();
     contextTestState.getPublishedModelCatalogOwnerSnapshot.mockImplementation(() => ({
-      config: contextTestState.loadConfigImpl() as OpenClawConfig,
+      config: contextTestState.loadConfigImpl() as CarapaceConfig,
       modelCatalog: {
         entries: contextTestState.discoveredModels,
         routeVariants: [],
@@ -376,7 +376,7 @@ describe("lookupContextTokens", () => {
   it("loads the read-only catalog during warmup and preserves provider-owned context metadata", async () => {
     const config = {
       agents: { defaults: { workspace: "/tmp/context-catalog-workspace" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mockDiscoveryDeps([
       {
         id: "anthropic/claude-opus-4.7-20260219",
@@ -408,7 +408,7 @@ describe("lookupContextTokens", () => {
         defaults: { systemAgent: { agentId: "beta" } },
         entries: { alpha: {}, beta: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     mockDiscoveryDeps([
       {
         id: "anthropic/claude-opus-4.7-20260219",
@@ -438,7 +438,7 @@ describe("lookupContextTokens", () => {
         defaults: { systemAgent: { agentId: "beta" } },
         entries: { alpha: {}, beta: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const publishedConfig = createContextOverrideConfig("synthetic", "current-model", 222_000);
     contextTestState.getPublishedModelCatalogOwnerSnapshot.mockReturnValueOnce({
       config: publishedConfig,
@@ -679,7 +679,7 @@ describe("lookupContextTokens", () => {
           kilocode: { baseUrl: "https://example.invalid", models: configuredModels },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const { lookupContextTokens, resolveContextTokensForModel } = await importContextModule();
     lookupContextTokens(model);
     await flushAsyncWarmup();

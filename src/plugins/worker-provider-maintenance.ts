@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { validateCloudWorkerProfileSettings } from "../config/zod-schema.cloud-workers.js";
 import { runTasksWithConcurrency } from "../utils/run-with-concurrency.js";
 import { normalizePluginsConfig } from "./config-state.js";
@@ -10,7 +10,7 @@ import type { PluginRegistry } from "./registry-types.js";
 import type { WorkerProfile } from "./types.js";
 import { collectConfiguredWorkerProviderIds } from "./worker-provider-config.js";
 
-function configuredSettings(config: OpenClawConfig, providerId: string) {
+function configuredSettings(config: CarapaceConfig, providerId: string) {
   return Object.entries(config.cloudWorkers?.profiles ?? {})
     .filter(([, profile]) => normalizeCapabilityProviderId(profile.provider) === providerId)
     .toSorted(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
@@ -20,7 +20,7 @@ function configuredSettings(config: OpenClawConfig, providerId: string) {
 /** Maintains configured providers without loading plugins or borrowing a successor's authority. */
 export async function maintainConfiguredWorkerProviders(params: {
   getRegistry: () => PluginRegistry;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   signal: AbortSignal;
   warn: (message: string) => void;
 }): Promise<void> {

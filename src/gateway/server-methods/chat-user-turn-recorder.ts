@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
 import { runAgentHarnessBeforeMessageWriteHook } from "../../agents/harness/hook-helpers.js";
 import { measureDiagnosticsTimelineSpan } from "../../infra/diagnostics-timeline.js";
 import { redactSensitiveText } from "../../logging/redact.js";
@@ -160,7 +160,7 @@ export function createGatewayChatUserTurnController(params: {
     ...(selectedMentions && senderProfileId && mentionInbox
       ? {
           onOriginalInputCommitted: ({ message, anchor }: UserTurnOriginalInputCommit) => {
-            const stored = message["__openclaw"]?.humanMentions;
+            const stored = message["__carapace"]?.humanMentions;
             const text =
               extractTextFromChatContent(message.content, {
                 joinWith: "\n",

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
-import { coerceErrorMessage, stableStringify } from "@openclaw/normalization-core";
+import { coerceErrorMessage, stableStringify } from "@carapace/normalization-core";
 import {
   AgentSharedStoreOwnerError,
   assertAgentSessionStoreDeletionSafe,

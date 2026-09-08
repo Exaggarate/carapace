@@ -17,14 +17,14 @@ import {
 } from "./plugin-publication-artifact.mjs";
 import { runReleaseToolingGh, verifyReleaseToolingIdentity } from "./release-tooling-identity.mjs";
 
-export const CLAWHUB_PARENT_WORKFLOW = ".github/workflows/openclaw-release-publish.yml";
+export const CLAWHUB_PARENT_WORKFLOW = ".github/workflows/carapace-release-publish.yml";
 export const CLAWHUB_CHILD_WORKFLOW = ".github/workflows/plugin-clawhub-release.yml";
 export const CLAWHUB_TRANSACTIONS_JOB = "Seal ClawHub package transactions";
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const SHA = /^[a-f0-9]{40}$/u;
 const DIGEST = /^[a-f0-9]{64}$/u;
 const ID = /^[1-9][0-9]*$/u;
-const PACKAGE = /^@openclaw\/[a-z0-9][a-z0-9._-]*$/u;
+const PACKAGE = /^@carapace\/[a-z0-9][a-z0-9._-]*$/u;
 const VERSION =
   /^[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(?:-(?:alpha|beta)\.[1-9][0-9]*|-[1-9][0-9]*)?$/u;
 const ARTIFACT = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,254}$/u;
@@ -233,11 +233,11 @@ export function validateClawHubTransactions(value, expectedIdentity) {
 
 export function clawHubTransactionsArtifactName(identity) {
   validateClawHubIdentity(identity);
-  return `openclaw-clawhub-transactions-${identity.runId}-${identity.runAttempt}`;
+  return `carapace-clawhub-transactions-${identity.runId}-${identity.runAttempt}`;
 }
 export function clawHubParentArtifactName(identity) {
   validateClawHubIdentity(identity);
-  return `openclaw-clawhub-parent-authorization-v2-${identity.parentRunId}-${identity.parentRunAttempt}-${identity.runId}-${identity.runAttempt}`;
+  return `carapace-clawhub-parent-authorization-v2-${identity.parentRunId}-${identity.parentRunAttempt}-${identity.runId}-${identity.runAttempt}`;
 }
 export function createClawHubParentAuthorization(transactions, authorizationRoute) {
   const { identity: i, packages } = validateClawHubTransactions(transactions);
@@ -246,7 +246,7 @@ export function createClawHubParentAuthorization(transactions, authorizationRout
   }
   const receipt = {
     version: 2,
-    kind: "openclaw-clawhub-parent-authorization",
+    kind: "carapace-clawhub-parent-authorization",
     repository: i.parentRepository,
     workflow: i.parentWorkflow,
     runId: i.parentRunId,
@@ -316,7 +316,7 @@ function resolveAuthorizedClawHubChild(env, parentRunId, parentRunAttempt, runGh
       authorizedChildRunAttempt: pattern(explicitRunAttempt, ID, "Recovered ClawHub run attempt"),
     };
   }
-  const prefix = `openclaw-clawhub-parent-authorization-v2-${parentRunId}-${parentRunAttempt}-`;
+  const prefix = `carapace-clawhub-parent-authorization-v2-${parentRunId}-${parentRunAttempt}-`;
   const candidates = listRunArtifactNames(parentRunId, runGhJson).filter((name) =>
     name.startsWith(prefix),
   );
@@ -335,7 +335,7 @@ function resolveAuthorizedClawHubChild(env, parentRunId, parentRunAttempt, runGh
   return { authorizedChildRunId: child[1], authorizedChildRunAttempt: child[2] };
 }
 
-// Mirrors openclaw/clawhub convex/lib/openClawPublishAuthorization.ts RECOVERY_RECEIPT_KEYS /
+// Mirrors carapace/clawhub convex/lib/carapacePublishAuthorization.ts RECOVERY_RECEIPT_KEYS /
 // parseRecoveryReceipt / validateRecoveryReceipt: version 2, a human actor, the authorized
 // original child attempt, and an exact receipt within the verifier's 8 KiB file bound.
 export function createClawHubRecoveryApproval(env, runGhJson = api) {
@@ -354,7 +354,7 @@ export function createClawHubRecoveryApproval(env, runGhJson = api) {
   );
   const receipt = {
     version: 2,
-    kind: "openclaw-clawhub-recovery-approval",
+    kind: "carapace-clawhub-recovery-approval",
     repository: env.GITHUB_REPOSITORY,
     workflow: CLAWHUB_CHILD_WORKFLOW,
     runId: pattern(env.GITHUB_RUN_ID, ID, "Recovery run id"),

@@ -1,9 +1,9 @@
 // Channel route target tests cover target parsing and validation.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { collectChannelRouteTargets } from "./channel-route-targets.js";
 
-function targetMap(cfg: OpenClawConfig): Map<string, string[]> {
+function targetMap(cfg: CarapaceConfig): Map<string, string[]> {
   return new Map(
     collectChannelRouteTargets(cfg).map((target) => [target.agentId, target.channels]),
   );

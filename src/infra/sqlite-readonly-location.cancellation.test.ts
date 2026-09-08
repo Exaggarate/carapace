@@ -31,12 +31,12 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
 let cacheRoot: string;
 beforeEach(() => {
   processMocks.execFile.mockClear();
-  cacheRoot = tempDirs.make("openclaw-readonly-cancellation-cache-");
+  cacheRoot = tempDirs.make("carapace-readonly-cancellation-cache-");
   vi.stubEnv("XDG_CACHE_HOME", cacheRoot);
 });
 
 function createDatabase(): string {
-  const pathname = path.join(tempDirs.make("openclaw-readonly-cancellation-"), "source.sqlite");
+  const pathname = path.join(tempDirs.make("carapace-readonly-cancellation-"), "source.sqlite");
   const database = new (requireNodeSqlite().DatabaseSync)(pathname);
   database.exec("CREATE TABLE probe (value TEXT); INSERT INTO probe VALUES ('preserved');");
   database.close();
@@ -59,7 +59,7 @@ describe("SQLite read-only worker cancellation", () => {
   });
 
   it("joins a killed child before rejecting and removes its unpublished partial snapshot", async () => {
-    const fixture = tempDirs.make("openclaw-readonly-held-worker-");
+    const fixture = tempDirs.make("carapace-readonly-held-worker-");
     const worker = path.join(fixture, "worker.mjs");
     fs.writeFileSync(
       worker,
@@ -101,7 +101,7 @@ describe("SQLite read-only worker cancellation", () => {
       await childClosed;
       expect(child.signalCode).toBe("SIGKILL");
       expect(fs.existsSync(stagingRoot)).toBe(false);
-      expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+      expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
     } finally {
       controller.abort(reason);
       await Promise.allSettled([operation, childClosed]);
@@ -128,7 +128,7 @@ describe("SQLite read-only worker cancellation", () => {
       expect(prepared.cleanup()).toBe(true);
     }
     expect(fs.readFileSync(source)).toEqual(before);
-    expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+    expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
   });
 });
 
@@ -136,7 +136,7 @@ describe("read-only snapshot deadline", () => {
   it.each(["sync", "async"] as const)(
     "bounds the %s child and removes its unpublished copy",
     async (mode) => {
-      const root = tempDirs.make("openclaw-snapshot-timeout-");
+      const root = tempDirs.make("carapace-snapshot-timeout-");
       vi.stubEnv("XDG_CACHE_HOME", root);
       const worker = path.join(root, "blocked.mjs");
       fs.writeFileSync(
@@ -157,7 +157,7 @@ describe("read-only snapshot deadline", () => {
       await expect(run()).rejects.toThrow(/timed out after 30 seconds.*Stop the Gateway service/);
       expect(performance.now() - started).toBeLessThan(33_000);
       expect(fs.readFileSync(source, "utf8")).toBe("source must stay unchanged");
-      expect(fs.readdirSync(path.join(root, "openclaw"))).toEqual([]);
+      expect(fs.readdirSync(path.join(root, "carapace"))).toEqual([]);
     },
     40_000,
   );

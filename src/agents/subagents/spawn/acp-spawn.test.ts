@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { AcpRuntime } from "@openclaw/acp-core/runtime/types";
-import { expectDefined } from "@openclaw/normalization-core";
+import type { AcpRuntime } from "@carapace/acp-core/runtime/types";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AcpInitializeSessionInput } from "../../../acp/control-plane/manager.types.js";
 import {
@@ -14,7 +14,7 @@ import { createExecutionIdentityAdmissionToken } from "../../../audit/execution-
 import type { ThinkLevel } from "../../../auto-reply/thinking.shared.js";
 import { getLoadedChannelPluginForRead } from "../../../channels/plugins/registry-loaded.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { readAgentRuntimeExecutionLineage } from "../../../gateway/agent-runtime-execution-lineage.js";
 import type { AgentRuntimeIdentity } from "../../../gateway/agent-runtime-identity-token.js";
 import { readInProcessAgentRuntimeIdentity } from "../../../gateway/in-process-agent-runtime-identity.js";
@@ -44,7 +44,7 @@ import { setSubagentSpawnDepsForTest } from "./subagent-spawn-deps.js";
 
 type SessionBindingAdapterCapabilities = NonNullable<SessionBindingAdapter["capabilities"]>;
 
-function createDefaultSpawnConfig(): OpenClawConfig {
+function createDefaultSpawnConfig(): CarapaceConfig {
   return {
     acp: {
       enabled: true,
@@ -283,7 +283,7 @@ type CrossAgentWorkspaceFixture = {
   targetWorkspace: string;
 };
 
-function replaceSpawnConfig(next: OpenClawConfig): void {
+function replaceSpawnConfig(next: CarapaceConfig): void {
   const current = hoisted.state.cfg as Record<string, unknown>;
   for (const key of Object.keys(current)) {
     delete current[key];
@@ -366,7 +366,7 @@ async function createCrossAgentWorkspaceFixture(options?: {
   targetDirName?: string;
   createTargetWorkspace?: boolean;
 }): Promise<CrossAgentWorkspaceFixture> {
-  const workspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-acp-spawn-"));
+  const workspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-acp-spawn-"));
   const mainWorkspace = path.join(workspaceRoot, "main");
   const targetWorkspace = path.join(workspaceRoot, options?.targetDirName?.trim() || "claude-code");
   await fs.mkdir(mainWorkspace, { recursive: true });
@@ -1286,7 +1286,7 @@ describe("spawnAcpDirect", () => {
     expect(initInput.sessionKey).toMatch(/^agent:codex:acp:/);
   });
 
-  it("strips an inherited OpenClaw auth profile before ACP initialization", async () => {
+  it("strips an inherited Carapace auth profile before ACP initialization", async () => {
     replaceSpawnConfig({
       ...createDefaultSpawnConfig(),
       agents: {
@@ -1312,7 +1312,7 @@ describe("spawnAcpDirect", () => {
     );
   });
 
-  it("rejects an explicit OpenClaw auth profile for ACP runtimes", async () => {
+  it("rejects an explicit Carapace auth profile for ACP runtimes", async () => {
     const result = await spawnAcpDirect(
       {
         task: "Investigate flaky tests",
@@ -1325,7 +1325,7 @@ describe("spawnAcpDirect", () => {
     expect(result.status).toBe("error");
     expect(result).toHaveProperty(
       "error",
-      "ACP model overrides cannot select OpenClaw auth profiles; configure credentials in the ACP runtime instead.",
+      "ACP model overrides cannot select Carapace auth profiles; configure credentials in the ACP runtime instead.",
     );
     expect(hoisted.initializeSessionMock).not.toHaveBeenCalled();
   });
@@ -1644,7 +1644,7 @@ describe("spawnAcpDirect", () => {
     expect(agentCall?.params?.timeout).toBe(172_800);
   });
 
-  it("rejects OpenClaw config agent ids when runtime=acp targets a native agent", async () => {
+  it("rejects Carapace config agent ids when runtime=acp targets a native agent", async () => {
     replaceSpawnConfig({
       ...createDefaultSpawnConfig(),
       acp: {
@@ -1679,7 +1679,7 @@ describe("spawnAcpDirect", () => {
     });
     expect(result).toHaveProperty(
       "error",
-      'agentId "pleres" is an OpenClaw config agent, not an ACP harness. Use runtime="subagent" or omit runtime for OpenClaw config agents. Use runtime="acp" only with external ACP harness ids such as codex, claude, droid, gemini, or opencode, or configure agents.entries.*.runtime.type="acp" with runtime.acp.agent.',
+      'agentId "pleres" is an Carapace config agent, not an ACP harness. Use runtime="subagent" or omit runtime for Carapace config agents. Use runtime="acp" only with external ACP harness ids such as codex, claude, droid, gemini, or opencode, or configure agents.entries.*.runtime.type="acp" with runtime.acp.agent.',
     );
     expect(hoisted.initializeSessionMock).not.toHaveBeenCalled();
     expectGatewayMethodNotCalled("agent");
@@ -1724,7 +1724,7 @@ describe("spawnAcpDirect", () => {
     expect(agentCall?.params).not.toHaveProperty("attachments");
   });
 
-  it("maps OpenClaw ACP runtime agent aliases to their configured harness id", async () => {
+  it("maps Carapace ACP runtime agent aliases to their configured harness id", async () => {
     replaceSpawnConfig({
       ...createDefaultSpawnConfig(),
       agents: {

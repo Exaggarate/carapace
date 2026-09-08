@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   PluginHookSkillEvaluationFinding,
   PluginHookSkillProposalEvaluateResult,
@@ -358,7 +358,7 @@ function boundedOptional(value: string | undefined, maxLength: number): string |
 function storeOptions(
   env: NodeJS.ProcessEnv | undefined,
   agentId: string | undefined,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ) {
   return {
     ...(env ? { env } : {}),

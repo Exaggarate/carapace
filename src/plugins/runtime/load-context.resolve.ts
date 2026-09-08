@@ -2,7 +2,7 @@
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveConfigWidePluginMetadataSnapshot } from "../../config/io.plugin-metadata.js";
 import { applyPluginAutoEnable } from "../../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolvePluginActivationSourceConfig } from "../activation-source-config.js";
 import { resolvePluginControlPlaneWorkspace } from "../control-plane-workspace.js";
 import { extractPluginInstallRecordsFromInstalledPluginIndex } from "../installed-plugin-index-install-records.js";
@@ -17,8 +17,8 @@ import { createPluginRuntimeLoaderLogger, type PluginRuntimeLoadContext } from "
 
 /** Options accepted while resolving plugin runtime load context. */
 type PluginRuntimeLoadContextOptions = {
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   onlyPluginIds?: readonly string[];

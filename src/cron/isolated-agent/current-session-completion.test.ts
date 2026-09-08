@@ -21,11 +21,11 @@ import {
 } from "../../sessions/session-lifecycle-admission.js";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import { readAssistantDisplayContent } from "../../shared/assistant-display-content.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { resolveCronDeliveryPlan } from "../delivery-plan.js";
 import { makeCronJob } from "../delivery.test-helpers.js";
 import { createCliDeps } from "../isolated-agent.delivery.test-helpers.js";
@@ -37,7 +37,7 @@ const PNG = Buffer.from(
   "base64",
 );
 
-async function createCompletionFixture(state: OpenClawTestState) {
+async function createCompletionFixture(state: CarapaceTestState) {
   const sessionKey = "agent:main:webchat:direct:report";
   const sessionId = "report-session";
   const scope = {
@@ -130,7 +130,7 @@ describe("current-session completion delivery", () => {
   it.each([{ to: "recipient" }, { accountId: "work" }, { threadId: 0 }])(
     "preserves the committed report and reports unresolved explicit intent %j",
     async (coordinates) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const fixture = await createCompletionFixture(state);
         try {
           fixture.params.job.delivery = { mode: "announce", ...coordinates };
@@ -159,9 +159,9 @@ describe("current-session completion media", () => {
   it.each(["ordinary", "promotion-failure"] as const)(
     "publishes downloadable media and replays the original message after %s",
     async (mode) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const fixture = await createCompletionFixture(state);
-        const database = openOpenClawStateDatabase({ env: state.env });
+        const database = openCarapaceStateDatabase({ env: state.env });
         try {
           if (mode === "promotion-failure") {
             database.db.exec(`CREATE TEMP TRIGGER fail_report_promotion
@@ -208,7 +208,7 @@ describe("current-session completion media", () => {
   );
 
   it("keeps structured report text in both model and display history", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const fixture = await createCompletionFixture(state);
       try {
         fixture.payload.presentation = {
@@ -242,7 +242,7 @@ describe("current-session completion media", () => {
   it.each(["text-only", "missing-image", "media-only"] as const)(
     "preserves the completed result for %s output",
     async (mode) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const fixture = await createCompletionFixture(state);
         try {
           if (mode === "text-only") {
@@ -278,7 +278,7 @@ describe("current-session completion media", () => {
                 }),
               ]);
             } else {
-              expect(message).not.toHaveProperty("openclawDisplayContent");
+              expect(message).not.toHaveProperty("carapaceDisplayContent");
             }
             expect(fixture.records()).toEqual([]);
           }
@@ -290,7 +290,7 @@ describe("current-session completion media", () => {
   );
 
   it("preserves interleaved report text, media, and spoken-payload failure metadata", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const fixture = await createCompletionFixture(state);
       try {
         const secondImage = path.join(state.workspaceDir, "second.png");
@@ -329,7 +329,7 @@ describe("current-session completion media", () => {
   it.each([true, false])(
     "obeys workspaceOnly=%s for images beside the session store",
     async (workspaceOnly) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const fixture = await createCompletionFixture(state);
         try {
           const privateImage = path.join(path.dirname(fixture.scope.storePath), "private.png");
@@ -353,7 +353,7 @@ describe("current-session completion media", () => {
   );
 
   it("does not prepare media when the source generation changes while waiting", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const fixture = await createCompletionFixture(state);
       const admission = await beginSessionWorkAdmission({
         scope: fixture.scope.storePath,

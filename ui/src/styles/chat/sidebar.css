@@ -69,7 +69,7 @@
   --chat-composer-top-margin: 8px;
   --chat-transcript-composer-underlap: 30px;
   --chat-transcript-fade-height: 24px;
-  --chat-transcript-fade-stack-overlap: calc(20px * var(--openclaw-corner-radius-scale));
+  --chat-transcript-fade-stack-overlap: calc(20px * var(--carapace-corner-radius-scale));
 
   position: relative;
   display: flex;
@@ -118,7 +118,7 @@
   }
 }
 
-openclaw-chat-sidebar-region,
+carapace-chat-sidebar-region,
 .sidebar-region__right-runtime {
   display: contents;
 }
@@ -749,7 +749,7 @@ openclaw-chat-sidebar-region,
   cursor: var(--cursor-action);
 }
 
-/* openclaw-tooltip is display:contents, so the title span itself is the flex
+/* carapace-tooltip is display:contents, so the title span itself is the flex
    item; growing it pins the stop button to the card's right edge even for
    short titles. */
 .chat-tasks-rail__task-title {
@@ -1071,7 +1071,7 @@ openclaw-chat-sidebar-region,
   min-height: 0;
 }
 
-openclaw-session-discussion {
+carapace-session-discussion {
   display: flex;
   flex: 1 1 0;
   height: 100%;
@@ -2033,7 +2033,7 @@ openclaw-session-discussion {
   tab-size: 4;
 }
 
-openclaw-session-diff-menu[popover] {
+carapace-session-diff-menu[popover] {
   width: 0;
   height: 0;
   margin: 0;

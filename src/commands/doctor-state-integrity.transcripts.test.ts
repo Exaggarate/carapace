@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HEARTBEAT_TRANSCRIPT_PROMPT } from "../auto-reply/heartbeat.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   resolveSessionStorePathCore,
   resolveSessionTranscriptsDirForAgent,
@@ -14,8 +14,8 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import {
   clearTuiLastSessionPointers,
@@ -67,32 +67,32 @@ describe("doctor transcript and heartbeat session repairs", () => {
   beforeEach(() => {
     envSnapshot = captureEnv([
       "HOME",
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_OAUTH_DIR",
-      "OPENCLAW_AGENT_DIR",
+      "CARAPACE_HOME",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_OAUTH_DIR",
+      "CARAPACE_AGENT_DIR",
     ]);
-    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-state-integrity-"));
-    const stateDir = path.join(tempHome, ".openclaw");
+    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-state-integrity-"));
+    const stateDir = path.join(tempHome, ".carapace");
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    deleteTestEnvValue("OPENCLAW_OAUTH_DIR");
-    deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+    setTestEnvValue("CARAPACE_HOME", tempHome);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    deleteTestEnvValue("CARAPACE_OAUTH_DIR");
+    deleteTestEnvValue("CARAPACE_AGENT_DIR");
     fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
     routeStateOwnerState.owners = [];
     noteMock.mockClear();
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     fs.rmSync(tempHome, { recursive: true, force: true });
   });
 
   it("leaves legacy transcript diagnostics to the SQLite migration owner", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     writeSessionStore(cfg, {
       "agent:main:main:heartbeat": {
         heartbeatIsolatedBaseSessionKey: "agent:main:main",
@@ -118,7 +118,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   it.each(["default", "explicit"] as const)(
     "does not require JSONL files for %s SQLite session stores",
     async (location) => {
-      const cfg: OpenClawConfig =
+      const cfg: CarapaceConfig =
         location === "explicit"
           ? { session: { store: path.join(fs.realpathSync(tempHome), "sessions.sqlite") } }
           : {};
@@ -150,7 +150,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   );
 
   it("moves a non-default SQLite heartbeat main session without recreating sessions.json", async () => {
-    const cfg: OpenClawConfig = { agents: { entries: { main: {}, ops: {} } } };
+    const cfg: CarapaceConfig = { agents: { entries: { main: {}, ops: {} } } };
     setupSessionState(cfg, process.env, tempHome, "ops");
     const storePath = resolveSessionStorePathCore(cfg.session?.store, { agentId: "ops" });
     const mainKey = "agent:ops:main";
@@ -181,7 +181,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("does not create a recovery row when the SQLite main entry changes during confirmation", async () => {
-    const cfg: OpenClawConfig = { agents: { entries: { main: {}, ops: {} } } };
+    const cfg: CarapaceConfig = { agents: { entries: { main: {}, ops: {} } } };
     setupSessionState(cfg, process.env, tempHome, "ops");
     const storePath = resolveSessionStorePathCore(cfg.session?.store, { agentId: "ops" });
     const mainKey = "agent:ops:main";
@@ -229,7 +229,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
         runtimeIds: ["codex-cli"],
       },
     ];
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { model: { primary: "github-copilot/gpt-5.4-mini" } },
         entries: { main: {}, ops: {} },
@@ -280,7 +280,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("moves a heartbeat-poisoned main session and clears stale TUI restore pointers", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     setupSessionState(cfg, process.env, tempHome);
     const sessionsDir = resolveSessionTranscriptsDirForAgent("main", process.env, () => tempHome);
     fs.writeFileSync(
@@ -297,7 +297,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
         updatedAt: Date.now(),
       },
     });
-    const stateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+    const stateDir = process.env.CARAPACE_STATE_DIR ?? "";
     await writeTuiLastSessionKey({
       scopeKey: "default",
       sessionKey: "agent:main:main",
@@ -334,7 +334,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("does not move a mixed main transcript that has real user activity", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     setupSessionState(cfg, process.env, tempHome);
     const sessionsDir = resolveSessionTranscriptsDirForAgent("main", process.env, () => tempHome);
     fs.writeFileSync(
@@ -366,7 +366,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("repairs a multi-chunk heartbeat transcript without loading it via readFileSync", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     setupSessionState(cfg, process.env, tempHome);
     const sessionsDir = resolveSessionTranscriptsDirForAgent("main", process.env, () => tempHome);
     const transcriptPath = path.join(sessionsDir, "large-heartbeat-session.jsonl");
@@ -417,7 +417,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("declines repair when a single JSONL record exceeds the scanner record cap", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     setupSessionState(cfg, process.env, tempHome);
     const sessionsDir = resolveSessionTranscriptsDirForAgent("main", process.env, () => tempHome);
     const transcriptPath = path.join(sessionsDir, "oversized-record-session.jsonl");
@@ -492,7 +492,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("does not let synthetic heartbeat metadata override mixed transcript history", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-heartbeat-main-mixed-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-heartbeat-main-mixed-"));
     try {
       const transcriptPath = path.join(tempDir, "session.jsonl");
       fs.writeFileSync(
@@ -515,7 +515,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("does not let heartbeat-looking routing metadata skip mixed transcript checks", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-heartbeat-main-route-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-heartbeat-main-route-"));
     try {
       const transcriptPath = path.join(tempDir, "session.jsonl");
       fs.writeFileSync(
@@ -540,7 +540,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("does not classify transcripts with real user activity after 400 heartbeat messages", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-heartbeat-main-cap-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-heartbeat-main-cap-"));
     try {
       const transcriptPath = path.join(tempDir, "session.jsonl");
       const heartbeatMessages = Array.from({ length: 400 }, () =>
@@ -562,7 +562,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
   });
 
   it("keeps the heartbeat main-session helper conservative", () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-heartbeat-main-helper-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-heartbeat-main-helper-"));
     try {
       const transcriptPath = path.join(tempDir, "session.jsonl");
       fs.writeFileSync(
@@ -600,7 +600,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
       "main-session",
     );
 
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tui-pointer-clear-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tui-pointer-clear-"));
     try {
       await writeTuiLastSessionKey({
         scopeKey: "terminal",
@@ -625,7 +625,7 @@ describe("doctor transcript and heartbeat session repairs", () => {
         readTuiLastSessionKey({ scopeKey: "telegram", stateDir: tempDir }),
       ).resolves.toBe("agent:main:telegram:thread");
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
   });

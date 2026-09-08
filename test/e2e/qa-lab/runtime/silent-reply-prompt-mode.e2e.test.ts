@@ -114,7 +114,7 @@ describe("direct-channel silent-reply prompt contract", () => {
         providerMode: "mock-openai",
         primaryModel: MODEL_REF,
         alternateModel: MODEL_REF,
-        forcedRuntime: "openclaw",
+        forcedRuntime: "carapace",
         controlUiEnabled: false,
       })
       .catch(async (error: unknown) => {

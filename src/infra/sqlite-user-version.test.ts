@@ -8,7 +8,7 @@ vi.mock("../version.js", async (importOriginal) => {
 import { VERSION } from "../version.js";
 import {
   createNewerSqliteSchemaVersionError,
-  describeRunningOpenClawBuild,
+  describeRunningCarapaceBuild,
   readSqliteUserVersion,
 } from "./sqlite-user-version.js";
 
@@ -61,7 +61,7 @@ describe("createNewerSqliteSchemaVersionError", () => {
     const error = createNewerSqliteSchemaVersionError("test database", "/tmp/test.sqlite", 12, 11);
 
     expect(error.name).toBe("SqliteSchemaVersionError");
-    expect(error.message).toContain("https://docs.openclaw.ai/reference/database-schemas");
+    expect(error.message).toContain("https://github.com/Exaggarate/carapace");
   });
 
   it("names the refusing install and both schema versions", () => {
@@ -69,7 +69,7 @@ describe("createNewerSqliteSchemaVersionError", () => {
 
     expect(error.message).toContain("uses newer schema version 12");
     expect(error.message).toContain("this build supports 11");
-    expect(error.message).toContain(describeRunningOpenClawBuild());
+    expect(error.message).toContain(describeRunningCarapaceBuild());
     expect(error.message).toContain("supports schema 12 or newer");
   });
 
@@ -79,19 +79,19 @@ describe("createNewerSqliteSchemaVersionError", () => {
     const error = createNewerSqliteSchemaVersionError("test database", "/tmp/test.sqlite", 12, 11);
 
     expect(error.message).not.toContain("Do not downgrade");
-    expect(error.message).not.toContain("Upgrade OpenClaw");
+    expect(error.message).not.toContain("Upgrade Carapace");
   });
 });
 
-describe("describeRunningOpenClawBuild", () => {
+describe("describeRunningCarapaceBuild", () => {
   it("reports the version and the install root operators can act on", () => {
-    const described = describeRunningOpenClawBuild();
+    const described = describeRunningCarapaceBuild();
 
     expect(described).toContain(VERSION);
     expect(described).toContain("installed at ");
   });
 
   it("reports the loaded build commit", () => {
-    expect(describeRunningOpenClawBuild()).toContain("(aaaaaaa)");
+    expect(describeRunningCarapaceBuild()).toContain("(aaaaaaa)");
   });
 });

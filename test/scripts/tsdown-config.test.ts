@@ -63,10 +63,10 @@ if (sealed) registerHooks({ resolve(specifier, context, next) {
     throw new Error("sealed dependency escaped: " + specifier);
   return next(specifier, context);
 }});
-const { root, parseJsonWithJson5Fallback, resolvePreferredOpenClawTmpDir, resolveRuntimeProcessEntrypointUrl } = await import(pathToFileURL(entry).href);
+const { root, parseJsonWithJson5Fallback, resolvePreferredCarapaceTmpDir, resolveRuntimeProcessEntrypointUrl } = await import(pathToFileURL(entry).href);
 if (sealed) {
   assert.deepEqual(parseJsonWithJson5Fallback("{value:'bundled',}"), {value:"bundled"});
-  assert.equal(resolvePreferredOpenClawTmpDir({preferredDir:rootDir, tmpdir:()=>rootDir, platform:"linux"}), rootDir);
+  assert.equal(resolvePreferredCarapaceTmpDir({preferredDir:rootDir, tmpdir:()=>rootDir, platform:"linux"}), rootDir);
   assert.equal(resolveRuntimeProcessEntrypointUrl("githubExec").href, new URL("./github-exec-launcher.mjs", pathToFileURL(entry)).href);
 }
 const { configureFsSafeNative, getFsSafeNativeConfig, FsSafeError } = await import(pathToFileURL(observer).href);
@@ -96,7 +96,7 @@ describe("tsdown config", () => {
   it.each([false, true])(
     "runs the Docker-selected memory store with only production dependencies (verbose=%s)",
     async (verbose) => {
-      vi.stubEnv("OPENCLAW_BUILD_VERBOSE", verbose ? "1" : "0");
+      vi.stubEnv("CARAPACE_BUILD_VERBOSE", verbose ? "1" : "0");
       const entryName = "extensions/memory-lancedb/lancedb-store";
       const defaultConfig = configs.find((config) => config.name === TSDOWN_UNIFIED_CONFIG_GROUP);
       expect(defaultConfig?.entry).not.toHaveProperty(entryName);
@@ -110,7 +110,7 @@ describe("tsdown config", () => {
       );
       const source = (selected?.entry as Record<string, string> | undefined)?.[entryName];
       expect(source).toBeDefined();
-      const root = fs.realpathSync(createTempDir("openclaw-tsdown-memory-"));
+      const root = fs.realpathSync(createTempDir("carapace-tsdown-memory-"));
       const manifest = JSON.parse(
         fs.readFileSync("extensions/memory-lancedb/package.json", "utf8"),
       ) as {
@@ -206,7 +206,7 @@ describe("tsdown config", () => {
     expect(selected?.name).toBe(TSDOWN_UNIFIED_CONFIG_GROUP);
     const entries = selected?.entry ?? {};
     expect(Object.keys(entries)).toContain("discord");
-    const root = fs.realpathSync(createTempDir("openclaw-retained-config-doctors-"));
+    const root = fs.realpathSync(createTempDir("carapace-retained-config-doctors-"));
     fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ type: "module" }));
     const bundles = await build({
       ...selected,
@@ -330,7 +330,7 @@ describe("tsdown config", () => {
   it.each(["runtime", "worker"])(
     "preserves fs-safe package ownership and policy in relocated %s output",
     async (target) => {
-      const temporaryRoot = fs.realpathSync(createTempDir("openclaw-tsdown-fs-safe-"));
+      const temporaryRoot = fs.realpathSync(createTempDir("carapace-tsdown-fs-safe-"));
       const sourceRoot = path.join(temporaryRoot, "build");
       const relocatedRoot = path.join(temporaryRoot, "relocated");
       fs.mkdirSync(sourceRoot);
@@ -352,7 +352,7 @@ describe("tsdown config", () => {
             ? [
                 `import ${JSON.stringify(path.resolve("src/worker/worker-deploy-runtime.ts"))};`,
                 `export { parseJsonWithJson5Fallback } from ${JSON.stringify(path.resolve("src/utils/parse-json-compat.ts"))};`,
-                `export { resolvePreferredOpenClawTmpDir } from ${JSON.stringify(path.resolve("src/infra/tmp-openclaw-dir.ts"))};`,
+                `export { resolvePreferredCarapaceTmpDir } from ${JSON.stringify(path.resolve("src/infra/tmp-carapace-dir.ts"))};`,
                 `export { resolveRuntimeProcessEntrypointUrl } from ${JSON.stringify(path.resolve("src/infra/runtime-process-url.ts"))};`,
               ]
             : []),
@@ -440,13 +440,13 @@ describe("tsdown config", () => {
         if (worker) {
           await join([
             probe("default", "off", "fallback"),
-            ...["FS_SAFE_NATIVE_MODE", "OPENCLAW_FS_SAFE_NATIVE_MODE"].map((key) =>
+            ...["FS_SAFE_NATIVE_MODE", "CARAPACE_FS_SAFE_NATIVE_MODE"].map((key) =>
               probe(key, "off", "fallback", { [key]: "require" }),
             ),
           ]);
         } else {
           await join([
-            ...["FS_SAFE_NATIVE_MODE", "OPENCLAW_FS_SAFE_NATIVE_MODE"].map((key) =>
+            ...["FS_SAFE_NATIVE_MODE", "CARAPACE_FS_SAFE_NATIVE_MODE"].map((key) =>
               probe(key, "require", "native", { [key]: "require" }),
             ),
             probe("shared-config", "configured", "native"),
@@ -479,8 +479,8 @@ describe("tsdown config", () => {
   )(
     "preserves dependency package boundaries for $target (verbose=$verbose)",
     async ({ target, verbose }) => {
-      vi.stubEnv("OPENCLAW_BUILD_VERBOSE", verbose ? "1" : "0");
-      const root = fs.realpathSync(createTempDir("openclaw-tsdown-dependencies-"));
+      vi.stubEnv("CARAPACE_BUILD_VERBOSE", verbose ? "1" : "0");
+      const root = fs.realpathSync(createTempDir("carapace-tsdown-dependencies-"));
       const declarations = target === "declarations";
       const bundleAll = ["worker", "receiver", "github-launcher"].includes(target);
       const selected = configs.find(
@@ -505,7 +505,7 @@ describe("tsdown config", () => {
         "@lancedb/lancedb",
         "@larksuiteoapi/node-sdk",
         "@matrix-org/matrix-sdk-crypto-nodejs",
-        "@openclaw/ai",
+        "@carapace/ai",
         "@openclaw/crabline",
         "@openclaw/fs-safe",
         "@vitest/expect",
@@ -687,7 +687,7 @@ describe("tsdown config", () => {
   it("keeps public SDK types canonical without emitting private runtime declarations", () => {
     const [publicDeclarationSources = [], privateDeclarationSources = []] =
       TSDOWN_UNIFIED_DTS_CONFIG_GROUPS.filter((name) =>
-        name.startsWith("openclaw-dts-plugin-sdk-"),
+        name.startsWith("carapace-dts-plugin-sdk-"),
       ).map((name) => {
         const dts = configs.find((entry) => entry.name === name)?.dts;
         return dts && typeof dts === "object" && Array.isArray(dts.entry) ? dts.entry : [];
@@ -737,7 +737,7 @@ describe("tsdown config", () => {
     expect(workerConfig?.outDir).toBe("dist");
     expect(workerConfig?.shims).toBe(true);
     expect(workerConfig?.plugins).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: "openclaw:worker-deploy" })]),
+      expect.arrayContaining([expect.objectContaining({ name: "carapace:worker-deploy" })]),
     );
     expect(workerConfig?.outputOptions).toMatchObject({
       codeSplitting: false,

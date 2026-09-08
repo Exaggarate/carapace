@@ -1,51 +1,51 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-resolution";
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { formatAllowFromLowercase } from "openclaw/plugin-sdk/allow-from";
-import { createActionGate, ToolAuthorizationError } from "openclaw/plugin-sdk/channel-actions";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-resolution";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
+import { formatAllowFromLowercase } from "carapace/plugin-sdk/allow-from";
+import { createActionGate, ToolAuthorizationError } from "carapace/plugin-sdk/channel-actions";
 import {
   adaptScopedAccountAccessor,
   createHybridChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
+} from "carapace/plugin-sdk/channel-config-helpers";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionContext,
   ChannelMessageToolDiscovery,
-} from "openclaw/plugin-sdk/channel-contract";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+} from "carapace/plugin-sdk/channel-contract";
+import { createChatChannelPlugin } from "carapace/plugin-sdk/channel-core";
 import {
   defineChannelMessageAdapter,
   createRuntimeOutboundDelegates,
   createAccountStatusSink,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
+} from "carapace/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "carapace/plugin-sdk/channel-pairing";
 import {
   createAllowlistProviderGroupPolicyWarningCollector,
   createConditionalWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
-import { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
-import { getSessionBindingService } from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/channel-policy";
+import { PAIRING_APPROVED_MESSAGE } from "carapace/plugin-sdk/channel-status";
+import { getSessionBindingService } from "carapace/plugin-sdk/conversation-runtime";
 import {
   createChannelDirectoryAdapter,
   createRuntimeDirectoryLiveAdapter,
-} from "openclaw/plugin-sdk/directory-runtime";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { resolveLegacyInteractiveTextFallback } from "openclaw/plugin-sdk/interactive-runtime";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/directory-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { resolveLegacyInteractiveTextFallback } from "carapace/plugin-sdk/interactive-runtime";
+import { createLazyRuntimeNamedExport } from "carapace/plugin-sdk/lazy-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
 import {
   buildProbeChannelStatusSummary,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import type {
   ChannelMessageActionName,
   ChannelMeta,
@@ -1870,8 +1870,8 @@ export const feishuPlugin: ChannelPlugin<ResolvedFeishuAccount, FeishuProbeResul
       },
       auth: {
         login: async ({ cfg }) => {
-          const { createClackPrompter } = await import("openclaw/plugin-sdk/setup-runtime");
-          const { replaceConfigFile } = await import("openclaw/plugin-sdk/config-mutation");
+          const { createClackPrompter } = await import("carapace/plugin-sdk/setup-runtime");
+          const { replaceConfigFile } = await import("carapace/plugin-sdk/config-mutation");
           const prompter = createClackPrompter();
           const nextCfg = await runFeishuLogin({ cfg, prompter });
           if (nextCfg !== cfg) {

@@ -1,4 +1,4 @@
-import { createWebSearchProviderContractFields } from "openclaw/plugin-sdk/provider-web-search-contract";
+import { createWebSearchProviderContractFields } from "carapace/plugin-sdk/provider-web-search-contract";
 
 // Shared by the tool schema and runtime validation without loading search execution.
 export const PARALLEL_FREE_SESSION_ID_MAX_LENGTH = 100;
@@ -19,7 +19,7 @@ export function createParallelFreeWebSearchProviderBase() {
     envVars: [],
     placeholder: "(no key needed)",
     signupUrl: "https://parallel.ai",
-    docsUrl: "https://docs.openclaw.ai/tools/parallel-search",
+    docsUrl: "https://github.com/Exaggarate/carapace",
     credentialPath: "",
     ...createWebSearchProviderContractFields({
       credentialPath: "",

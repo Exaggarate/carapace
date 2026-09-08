@@ -1,5 +1,5 @@
 // Line tests cover auto reply row-overflow table delivery.
-import { chunkMarkdownText } from "openclaw/plugin-sdk/reply-runtime";
+import { chunkMarkdownText } from "carapace/plugin-sdk/reply-runtime";
 import { describe, expect, it } from "vitest";
 import { deliverLineAutoReply } from "./auto-reply-delivery.js";
 import { baseDeliveryParams, createDeps } from "./auto-reply-delivery.test-helpers.js";

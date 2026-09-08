@@ -265,8 +265,8 @@ describe("mergeAttemptToolMediaPayloads", () => {
   });
 
   it("uses exact structured Markdown references to select tool media", () => {
-    const selected = "/root/.openclaw/media/tool-image-generation/our-agent-soviet-meme.png";
-    const unselected = "/root/.openclaw/media/tool-image-generation/alternate.png";
+    const selected = "/root/.carapace/media/tool-image-generation/our-agent-soviet-meme.png";
+    const unselected = "/root/.carapace/media/tool-image-generation/alternate.png";
     const visibleReply = setReplyPayloadMetadata(
       { text: `Our agent.\n\n![Our Agent meme](${selected})` },
       { assistantMessageIndex: 7 },

@@ -58,7 +58,7 @@ describe("new-session model runtime", () => {
   it("lists terminal-capable CLI agents and selects the canonical catalog target", async () => {
     const { context, request } = contextWith(
       [{ id: "gpt-5.6-luna", name: "GPT-5.6 Luna", provider: "openai" }],
-      "openclaw",
+      "carapace",
       ["sessions.catalog.list"],
     );
     request.mockImplementation((method: string) =>

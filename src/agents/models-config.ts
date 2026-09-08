@@ -6,13 +6,13 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   getRuntimeConfig,
   getRuntimeConfigSourceSnapshot,
   projectConfigOntoRuntimeSourceSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../config/config.js";
 import { createConfigRuntimeEnv } from "../config/env-vars.js";
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
@@ -36,7 +36,7 @@ import {
   type ModelsJsonReadyResult,
   type ModelsJsonReadyState,
 } from "./models-config-state.js";
-import { planOpenClawModelsJson, type PreparedModelsConfigContext } from "./models-config.plan.js";
+import { planCarapaceModelsJson, type PreparedModelsConfigContext } from "./models-config.plan.js";
 import { repairPluginModelCatalogTransportMetadata } from "./plugin-model-catalog-repair.js";
 import {
   decodePluginModelCatalogRelativePathPluginId,
@@ -48,7 +48,7 @@ import {
   type PersistedPluginModelCatalog,
 } from "./plugin-model-catalog.js";
 
-type PreparedOpenClawModelsJsonSource = ModelsJsonReadyResult & {
+type PreparedCarapaceModelsJsonSource = ModelsJsonReadyResult & {
   fingerprint: string;
   workspaceDir?: string;
 };
@@ -58,7 +58,7 @@ type ModelsConfigPluginMetadataSnapshot = Pick<
   "index" | "manifestRegistry" | "owners" | "pluginIds"
 >;
 
-type EnsureOpenClawModelsJsonOptions = {
+type EnsureCarapaceModelsJsonOptions = {
   env?: NodeJS.ProcessEnv;
   pluginMetadataSnapshot?: ModelsConfigPluginMetadataSnapshot;
   preparedStaticProviderCatalog?: PreparedProviderStaticCatalog;
@@ -69,11 +69,11 @@ type EnsureOpenClawModelsJsonOptions = {
   onProviderCatalogOutcome?: (outcome: ProviderCatalogOutcome) => void;
 };
 
-type PlanOpenClawModelsJsonSourceOptions = EnsureOpenClawModelsJsonOptions & {
+type PlanCarapaceModelsJsonSourceOptions = EnsureCarapaceModelsJsonOptions & {
   authStore?: AuthProfileStore;
 };
 
-type PlannedOpenClawModelsJsonSource = Readonly<{
+type PlannedCarapaceModelsJsonSource = Readonly<{
   agentDir: string;
   modelsJsonContents: string | null;
   pluginCatalogs: readonly PersistedPluginModelCatalog[];
@@ -83,7 +83,7 @@ function listPreparedPluginModelCatalogs(agentDir: string) {
   const { catalogs, warnings } = loadPersistedPluginModelCatalogs(agentDir);
   if (warnings.length > 0) {
     throw new Error(
-      `Cannot safely prepare provider models until legacy catalog migration succeeds: ${warnings.join("; ")}. Run openclaw doctor --fix.`,
+      `Cannot safely prepare provider models until legacy catalog migration succeeds: ${warnings.join("; ")}. Run carapace doctor --fix.`,
     );
   }
   return catalogs;
@@ -176,7 +176,7 @@ async function writeModelsFileAtomicForModelsJson(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.modelsConfigTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.modelsConfigTestApi")] = {
     ensureModelsFileModeForModelsJson,
     writeModelsFileAtomicForModelsJson,
   };
@@ -254,10 +254,10 @@ function writePluginCatalogsForModelsJson(params: {
   });
 }
 
-function resolveModelsConfigInput(config?: OpenClawConfig): {
-  config: OpenClawConfig;
-  discoveryAuthConfig: OpenClawConfig;
-  sourceConfigForSecrets: OpenClawConfig;
+function resolveModelsConfigInput(config?: CarapaceConfig): {
+  config: CarapaceConfig;
+  discoveryAuthConfig: CarapaceConfig;
+  sourceConfigForSecrets: CarapaceConfig;
 } {
   const runtimeSource = getRuntimeConfigSourceSnapshot();
   if (!config) {
@@ -286,9 +286,9 @@ function resolveModelsConfigInput(config?: OpenClawConfig): {
 }
 
 function prepareModelsConfigContext(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   agentDirOverride?: string,
-  options: EnsureOpenClawModelsJsonOptions = {},
+  options: EnsureCarapaceModelsJsonOptions = {},
 ): PreparedModelsConfigContext {
   const resolved = resolveModelsConfigInput(config);
   const cfg = resolved.config;
@@ -345,11 +345,11 @@ async function withModelsJsonWriteLock<T>(targetPath: string, run: () => Promise
 }
 
 /** Ensures models.json and the agent SQLite catalog cache are current. */
-async function prepareOpenClawModelsJsonSource(
-  config?: OpenClawConfig,
+async function prepareCarapaceModelsJsonSource(
+  config?: CarapaceConfig,
   agentDirOverride?: string,
-  options: EnsureOpenClawModelsJsonOptions = {},
-): Promise<PreparedOpenClawModelsJsonSource> {
+  options: EnsureCarapaceModelsJsonOptions = {},
+): Promise<PreparedCarapaceModelsJsonSource> {
   const context = prepareModelsConfigContext(config, agentDirOverride, options);
   const { agentDir, pluginMetadataSnapshot, workspaceDir } = context;
   const targetPath = path.join(agentDir, "models.json");
@@ -375,7 +375,7 @@ async function prepareOpenClawModelsJsonSource(
       existingParsed: existingModelsFile.parsed,
       ...(pluginMetadataSnapshot ? { pluginMetadataSnapshot } : {}),
     });
-    const plan = await planOpenClawModelsJson({
+    const plan = await planCarapaceModelsJson({
       context,
       existingRaw: existingModelsFile.raw,
       existingParsed: existingParsedForMerge,
@@ -440,11 +440,11 @@ async function prepareOpenClawModelsJsonSource(
  * Plans the complete root/plugin catalog generation without mutating agent-owned state.
  * Control-plane inventory reads use this when their lifecycle generation may be superseded.
  */
-export async function planOpenClawModelsJsonSource(
-  config?: OpenClawConfig,
+export async function planCarapaceModelsJsonSource(
+  config?: CarapaceConfig,
   agentDirOverride?: string,
-  options: PlanOpenClawModelsJsonSourceOptions = {},
-): Promise<PlannedOpenClawModelsJsonSource> {
+  options: PlanCarapaceModelsJsonSourceOptions = {},
+): Promise<PlannedCarapaceModelsJsonSource> {
   const context = prepareModelsConfigContext(config, agentDirOverride, options);
   const { agentDir, pluginMetadataSnapshot } = context;
   const existingModelsFile = await readExistingModelsFile(path.join(agentDir, "models.json"));
@@ -455,7 +455,7 @@ export async function planOpenClawModelsJsonSource(
     pluginCatalogs: existingPluginCatalogs,
     ...(pluginMetadataSnapshot ? { pluginMetadataSnapshot } : {}),
   });
-  const plan = await planOpenClawModelsJson({
+  const plan = await planCarapaceModelsJson({
     context,
     ...(options.authStore ? { authStore: options.authStore } : {}),
     existingRaw: existingModelsFile.raw,
@@ -474,11 +474,11 @@ export async function planOpenClawModelsJsonSource(
 }
 
 /** Ensures models.json and the agent SQLite catalog cache are current. */
-export async function ensureOpenClawModelsJson(
-  config?: OpenClawConfig,
+export async function ensureCarapaceModelsJson(
+  config?: CarapaceConfig,
   agentDirOverride?: string,
-  options: EnsureOpenClawModelsJsonOptions = {},
+  options: EnsureCarapaceModelsJsonOptions = {},
 ): Promise<ModelsJsonReadyResult> {
-  const prepared = await prepareOpenClawModelsJsonSource(config, agentDirOverride, options);
+  const prepared = await prepareCarapaceModelsJsonSource(config, agentDirOverride, options);
   return { agentDir: prepared.agentDir, wrote: prepared.wrote };
 }

@@ -8,19 +8,19 @@ const { createTempDir } = createScriptTestHarness();
 it("validates setup early and forwards argument overrides into Docker", () => {
   const invalid = spawnSync("bash", [SCRIPT_PATH], {
     encoding: "utf8",
-    env: { ...process.env, OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: "180s" },
+    env: { ...process.env, CARAPACE_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: "180s" },
   });
   expect(invalid.status).toBe(2);
-  expect(invalid.stderr).toContain("invalid OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: 180s");
+  expect(invalid.stderr).toContain("invalid CARAPACE_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: 180s");
   expect(invalid.stderr).not.toMatch(/Cannot find package 'tsx'|docker/);
-  const root = createTempDir("openclaw-live-cli-capture-");
+  const root = createTempDir("carapace-live-cli-capture-");
   const controls = [
-    "OPENCLAW_LIVE_CLI_BACKEND_ARGS",
-    "OPENCLAW_LIVE_CLI_BACKEND_RESUME_ARGS",
-    "OPENCLAW_TEST_CONSOLE",
-    "OPENCLAW_LIVE_CLI_BACKEND_CACHE_PROBE",
-    "OPENCLAW_LIVE_CLI_BACKEND_ADVISORY",
-    "OPENCLAW_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP",
+    "CARAPACE_LIVE_CLI_BACKEND_ARGS",
+    "CARAPACE_LIVE_CLI_BACKEND_RESUME_ARGS",
+    "CARAPACE_TEST_CONSOLE",
+    "CARAPACE_LIVE_CLI_BACKEND_CACHE_PROBE",
+    "CARAPACE_LIVE_CLI_BACKEND_ADVISORY",
+    "CARAPACE_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP",
   ];
   for (const dir of ["scripts", "bin", "home"]) mkdirSync(path.join(root, dir));
   symlinkSync(path.resolve("scripts/lib"), path.join(root, "scripts/lib"));
@@ -34,7 +34,7 @@ it("validates setup early and forwards argument overrides into Docker", () => {
     env: {
       HOME: path.join(root, "home"),
       PATH: `${path.join(root, "bin")}:${process.env.PATH}`,
-      OPENCLAW_LIVE_DOCKER_TRUSTED_HARNESS_DIR: root,
+      CARAPACE_LIVE_DOCKER_TRUSTED_HARNESS_DIR: root,
       ...Object.fromEntries(controls.map((key) => [key, "forwarded"])),
     },
   });

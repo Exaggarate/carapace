@@ -7,10 +7,10 @@ import { loadOrCreateDeviceIdentity } from "../../src/infra/device-identity.js";
 import { sleep } from "../../src/utils.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../../src/utils/message-channel.js";
 import { acquireGatewayTestClient, GatewayTestClientCleanupError } from "./gateway-client.js";
-import { createOpenClawTestInstance, type OpenClawTestInstance } from "./openclaw-test-instance.js";
+import { createCarapaceTestInstance, type CarapaceTestInstance } from "./carapace-test-instance.js";
 import { runQaGatewayFixture } from "./qa-gateway-cleanup.js";
 
-export type GatewayInstance = OpenClawTestInstance;
+export type GatewayInstance = CarapaceTestInstance;
 
 const GATEWAY_CONNECT_STATUS_TIMEOUT_MS = 10_000;
 const GATEWAY_NODE_STATUS_TIMEOUT_MS = 15_000;
@@ -24,7 +24,7 @@ type PostJsonOptions = {
 };
 
 export async function spawnGatewayInstance(name: string): Promise<GatewayInstance> {
-  const inst = await createOpenClawTestInstance({ name });
+  const inst = await createCarapaceTestInstance({ name });
   try {
     await inst.startGateway();
     return inst;

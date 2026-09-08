@@ -3,7 +3,7 @@ import type { Command } from "commander";
 import type {
   LiveTransportQaCommandOptions as QaRunnerCommandOptions,
   QaRunnerCliRegistration,
-} from "openclaw/plugin-sdk/qa-runner-runtime";
+} from "carapace/plugin-sdk/qa-runner-runtime";
 import { parseQaCliPositiveIntegerOption } from "../../cli-options.js";
 import { DEFAULT_QA_LIVE_PROVIDER_MODE, formatQaProviderModeHelp } from "../../providers/index.js";
 import type { QaTransportAdapterFactory } from "../../qa-transport-registry.js";

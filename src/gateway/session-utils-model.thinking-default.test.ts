@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayModelThinkingProfile } from "./session-utils-model.js";
 
 describe("Gateway all-null thinking map", () => {
@@ -9,7 +9,7 @@ describe("Gateway all-null thinking map", () => {
       agentId: "main",
       provider: "metadata-fixture",
       model: "no-effort",
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
       modelCatalog: [
         {
           provider: "metadata-fixture",
@@ -35,10 +35,10 @@ describe("Gateway all-null thinking map", () => {
 });
 
 describe.each([
-  { agentRuntime: "openclaw", api: "openai-responses" as const },
+  { agentRuntime: "carapace", api: "openai-responses" as const },
   { agentRuntime: "codex", api: "openai-chatgpt-responses" as const },
 ])("Gateway model thinking defaults on $agentRuntime", ({ agentRuntime, api }) => {
-  it.each<{ name: string; cfg: OpenClawConfig; expected: string }>([
+  it.each<{ name: string; cfg: CarapaceConfig; expected: string }>([
     { name: "provider default", cfg: {}, expected: "low" },
     {
       name: "global override",

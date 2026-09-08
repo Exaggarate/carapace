@@ -2,7 +2,7 @@ import type { Message } from "grammy/types";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTelegramInboundBuffers } from "./bot-handlers.inbound-buffer.js";
 import type { TelegramMessagePipeline } from "./bot-handlers.message-pipeline.js";

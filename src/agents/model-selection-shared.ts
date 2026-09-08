@@ -4,7 +4,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog, stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
 import {
@@ -12,7 +12,7 @@ import {
   hasExplicitModelPolicyAllow,
 } from "../config/model-policy-allowlist-migration.js";
 import { parseModelPolicyWildcardRef } from "../config/model-policy-ref.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import { loadManifestMetadataSnapshot } from "../plugins/manifest-contract-eligibility.js";
@@ -36,7 +36,7 @@ import {
 } from "./model-ref-shared.js";
 import { findNormalizedProviderValue, parseModelRef } from "./model-selection-normalize.js";
 
-export { resolvePrimaryStringValue as normalizeModelSelection } from "@openclaw/normalization-core/string-coerce";
+export { resolvePrimaryStringValue as normalizeModelSelection } from "@carapace/normalization-core/string-coerce";
 
 // Shared model-selection helpers for config aliases, allowlists, provider
 // inference, and configured catalog rows used by CLI and runtime selectors.
@@ -73,7 +73,7 @@ type EffectiveModelAlias = ModelAliasCandidate & {
 
 function isStaticDefaultProviderAliasCandidate(
   candidate: ModelAliasCandidate,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   const raw = candidate.keyRaw.trim();
   const slash = raw.indexOf("/");
@@ -101,7 +101,7 @@ function hasSlashFormModelRef(raw: string): boolean {
 }
 
 function resolveManifestPluginsForModelIdNormalization(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   manifestPlugins?: ModelManifestPlugins;
   allowManifestNormalization?: boolean;
@@ -127,7 +127,7 @@ function resolveManifestPluginsForModelIdNormalization(params: {
 }
 
 function createModelManifestPluginContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   manifestPlugins?: ModelManifestPlugins;
   allowManifestNormalization?: boolean;
@@ -149,14 +149,14 @@ function createModelManifestPluginContext(params: {
   };
 }
 
-function listConfiguredModelMaps(cfg: OpenClawConfig, agentId?: string) {
+function listConfiguredModelMaps(cfg: CarapaceConfig, agentId?: string) {
   return [
     { models: cfg.agents?.defaults?.models },
     ...(agentId ? [{ models: resolveAgentConfig(cfg, agentId)?.models }] : []),
   ];
 }
 
-export function listModelAliasCandidates(cfg: OpenClawConfig, agentId?: string) {
+export function listModelAliasCandidates(cfg: CarapaceConfig, agentId?: string) {
   return listConfiguredModelMaps(cfg, agentId).flatMap(({ models }) =>
     Object.entries(models ?? {}).flatMap(([keyRaw, entryRaw]) => {
       if (parseModelPolicyWildcardRef(keyRaw)) {
@@ -275,7 +275,7 @@ function mergeModelCatalogEntries(params: {
 /** Infer a unique provider for a bare model from configured model rows. */
 export function inferUniqueProviderFromConfiguredModels(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     model: string;
     agentId?: string;
     allowManifestNormalization?: boolean;
@@ -392,7 +392,7 @@ function inferUniqueProviderFromCatalog(params: {
 /** Resolve the provider used when a model string omits provider/id syntax. */
 export function resolveBareModelDefaultProvider(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     catalog: readonly ModelCatalogEntry[];
     model: string;
     defaultProvider: string;
@@ -417,7 +417,7 @@ function isConcreteOpenRouterFreeModelRef(ref: ModelRef): boolean {
 
 function resolveConfiguredOpenRouterCompatFreeRef(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     defaultProvider: string;
     allowManifestNormalization?: boolean;
@@ -465,7 +465,7 @@ function resolveConfiguredOpenRouterCompatFreeRef(
 /** Resolve OpenRouter compatibility aliases such as openrouter:auto/free. */
 function resolveConfiguredOpenRouterCompatAlias(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentId?: string;
     raw: string;
     defaultProvider: string;
@@ -496,7 +496,7 @@ function resolveConfiguredOpenRouterCompatAlias(
 
 function parseModelRefWithCompatAlias(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentId?: string;
     raw: string;
     defaultProvider: string;
@@ -524,7 +524,7 @@ function parseModelRefWithCompatAlias(
 }
 
 function findExactConfiguredProviderRefParts(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   raw: string;
 }): ExactConfiguredProviderRefParts | null {
   const slash = params.raw.indexOf("/");
@@ -579,7 +579,7 @@ function normalizeExactConfiguredProviderRef(
 
 function resolveExactConfiguredProviderRef(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     raw: string;
     allowManifestNormalization?: boolean;
     allowPluginNormalization?: boolean;
@@ -596,7 +596,7 @@ function resolveExactConfiguredProviderRef(
 }
 
 type BuildModelAliasIndexParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   defaultProvider: string;
   agentId?: string;
   allowManifestNormalization?: boolean;
@@ -739,7 +739,7 @@ function buildSyntheticAllowedCatalogEntry(params: {
 
 export function resolveModelRefFromString(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentId?: string;
     raw: string;
     defaultProvider: string;
@@ -784,7 +784,7 @@ export function resolveModelRefFromString(
 /** Resolves legacy provider/model pairs whose model field may still contain an alias. */
 export function resolveModelAliasFromPair(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentId?: string;
     provider: string;
     model: string;
@@ -817,7 +817,7 @@ export function resolveModelAliasFromPair(
 /** Resolve the default configured model ref, including aliases and fallback provider rows. */
 export function resolveConfiguredModelRef(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     defaultProvider: string;
     defaultModel: string;
@@ -1009,7 +1009,7 @@ type AllowedModelSet = {
 /** Build explicit model override authorization without widening it for automatic fallbacks. */
 export function buildAllowedModelSet(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     catalog: ModelCatalogEntry[];
     defaultProvider: string;
     defaultModel?: string;
@@ -1217,7 +1217,7 @@ type ResolveAllowedModelRefResult =
 
 export function getModelRefStatus(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     catalog: ModelCatalogEntry[];
     ref: ModelRef;
     defaultProvider: string;
@@ -1243,7 +1243,7 @@ export function getModelRefStatus(
 /** Resolve a requested model string only if it is allowed by the supplied status check. */
 export function resolveAllowedModelRefFromAliasIndex(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     raw: string;
     defaultProvider: string;
     agentId?: string;
@@ -1286,7 +1286,7 @@ export function resolveAllowedModelRefFromAliasIndex(
 }
 
 /** True when config contains provider model rows that should seed catalogs. */
-function hasConfiguredProviderModelRows(cfg: OpenClawConfig): boolean {
+function hasConfiguredProviderModelRows(cfg: CarapaceConfig): boolean {
   const providers = cfg.models?.providers;
   if (!providers || typeof providers !== "object") {
     return false;
@@ -1294,7 +1294,7 @@ function hasConfiguredProviderModelRows(cfg: OpenClawConfig): boolean {
   return Object.values(providers).some((provider) => Array.isArray(provider?.models));
 }
 
-function hasConfiguredProviderRowsNeedingManifestLookup(cfg: OpenClawConfig): boolean {
+function hasConfiguredProviderRowsNeedingManifestLookup(cfg: CarapaceConfig): boolean {
   const providers = cfg.models?.providers;
   if (!providers || typeof providers !== "object") {
     return false;
@@ -1306,7 +1306,7 @@ function hasConfiguredProviderRowsNeedingManifestLookup(cfg: OpenClawConfig): bo
 }
 
 function hasConfiguredModelRefsNeedingManifestLookup(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   defaultProvider: string,
   agentId?: string,
 ): boolean {
@@ -1328,7 +1328,7 @@ function hasConfiguredModelRefsNeedingManifestLookup(
 }
 
 function hasConfiguredRowsNeedingManifestLookup(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   defaultProvider: string,
   agentId?: string,
 ): boolean {
@@ -1339,7 +1339,7 @@ function hasConfiguredRowsNeedingManifestLookup(
 }
 
 function resolveConfiguredModelManifestPlugins(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   manifestPlugins?: ModelManifestPlugins;
 }): ModelManifestPlugins {
@@ -1365,7 +1365,7 @@ function resolveConfiguredModelManifestPlugins(params: {
 
 /** Build catalog entries from configured provider model rows. */
 export function buildConfiguredModelCatalog(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   manifestPlugins?: ModelManifestPlugins;
 }): ModelCatalogEntry[] {
@@ -1442,7 +1442,7 @@ function isVllmQwenThinkingCompat(
 
 export function resolveHooksGmailModel(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     defaultProvider: string;
   } & ModelManifestNormalizationContext,
 ): ModelRef | null {
@@ -1480,7 +1480,7 @@ function resolvePolicyAliasAgentId(
 }
 
 export function resolveConfiguredModelPolicyAllow(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
 }): { refs: readonly string[]; configPath: string | null; repairConfigPath: string } {
   const defaults = params.cfg?.agents?.defaults;
@@ -1518,7 +1518,7 @@ export function resolveConfiguredModelPolicyAllow(params: {
 }
 
 export function parseConfiguredModelVisibilityEntries(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
 }): {
   exactModelRefs: string[];
@@ -1583,7 +1583,7 @@ export function isModelKeyAllowedBySet(allowedKeys: ReadonlySet<string>, key: st
 
 function resolveAllowedModelSelection(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     provider: string;
     model: string;
     allowAny: boolean;
@@ -1671,7 +1671,7 @@ export function dedupeModelCatalogEntries(
 
 export function createModelVisibilityPolicyWithFallbacks(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     catalog: ModelCatalogEntry[];
     defaultProvider: string;
     defaultModel?: string;

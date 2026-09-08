@@ -1,6 +1,6 @@
 // Channel MCP bridge tests cover request bridging between MCP and channel APIs.
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { OpenClawChannelBridge } from "./channel-bridge.js";
+import { CarapaceChannelBridge } from "./channel-bridge.js";
 import type { QueueEvent, WaitFilter } from "./channel-shared.js";
 
 const ONE_MINUTE_MS = 60 * 1_000;
@@ -50,13 +50,13 @@ type BridgeInternals = {
 };
 
 function makeBridge(verbose = false): BridgeInternals {
-  return new OpenClawChannelBridge({} as never, {
+  return new CarapaceChannelBridge({} as never, {
     claudeChannelMode: "off",
     verbose,
   }) as unknown as BridgeInternals;
 }
 
-describe("OpenClawChannelBridge — Claude permission authorization", () => {
+describe("CarapaceChannelBridge — Claude permission authorization", () => {
   test.each([
     { name: "non-owner", senderIsOwner: false, role: "user" },
     { name: "missing owner metadata", senderIsOwner: undefined, role: "user" },
@@ -158,7 +158,7 @@ describe("OpenClawChannelBridge — Claude permission authorization", () => {
   });
 });
 
-describe("OpenClawChannelBridge — pendingClaudePermissions / pendingApprovals memory bounds", () => {
+describe("CarapaceChannelBridge — pendingClaudePermissions / pendingApprovals memory bounds", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(0);
@@ -336,7 +336,7 @@ describe("OpenClawChannelBridge — pendingClaudePermissions / pendingApprovals 
       await bridge.sendNotification({ method: "channel/event" });
 
       expect(writes).toHaveLength(1);
-      expect(writes[0]).toBe("openclaw mcp: notification channel/event failed\n");
+      expect(writes[0]).toBe("carapace mcp: notification channel/event failed\n");
       expect(writes[0]).not.toContain("transport closed");
     } finally {
       writeSpy.mockRestore();
@@ -358,7 +358,7 @@ describe("OpenClawChannelBridge — pendingClaudePermissions / pendingApprovals 
       await bridge.dispatchGatewayEvent({ event: "exec.approval.requested", payload: {} });
 
       expect(writes).toHaveLength(1);
-      expect(writes[0]).toBe("openclaw mcp: gateway event exec.approval.requested failed\n");
+      expect(writes[0]).toBe("carapace mcp: gateway event exec.approval.requested failed\n");
       expect(writes[0]).not.toContain("handler boom");
     } finally {
       writeSpy.mockRestore();
@@ -380,9 +380,9 @@ describe("OpenClawChannelBridge — pendingClaudePermissions / pendingApprovals 
       await bridge.dispatchGatewayEvent({ event: "exec.approval.requested", payload: {} });
 
       expect(writes).toHaveLength(2);
-      expect(writes[0]).toBe("openclaw mcp: gateway event exec.approval.requested failed\n");
+      expect(writes[0]).toBe("carapace mcp: gateway event exec.approval.requested failed\n");
       expect(writes[1]).toBe(
-        "openclaw mcp: gateway event exec.approval.requested error: Error: handler boom\n",
+        "carapace mcp: gateway event exec.approval.requested error: Error: handler boom\n",
       );
     } finally {
       writeSpy.mockRestore();

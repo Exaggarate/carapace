@@ -1,11 +1,11 @@
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import type { ReplyPayload } from "../auto-reply/types.js";
 import {
   getLoadedChannelPlugin,
   resolveChannelApprovalAdapter,
 } from "../channels/plugins/index.js";
 import type { ExecApprovalForwardTarget } from "../config/types.approvals.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildApprovalResolvedReplyPayload,
   buildPluginApprovalResolvedReplyPayload,
@@ -124,7 +124,7 @@ function buildApprovalRenderPayload<TParams>(params: {
 }
 
 export function buildForwardedExecPendingPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   request: ExecApprovalRequest;
   target: ExecApprovalForwardTarget;
   nowMs: number;
@@ -147,7 +147,7 @@ export function buildForwardedExecPendingPayload(params: {
 }
 
 export function buildForwardedExecResolvedPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   resolved: ExecApprovalResolved;
   target: ExecApprovalForwardTarget;
 }): ReplyPayload {
@@ -165,7 +165,7 @@ export function buildForwardedExecResolvedPayload(params: {
 }
 
 export function buildForwardedPluginPendingPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   request: PluginApprovalRequest;
   target: ExecApprovalForwardTarget;
   nowMs: number;
@@ -187,7 +187,7 @@ export function buildForwardedPluginPendingPayload(params: {
 }
 
 export function buildForwardedPluginResolvedPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   resolved: PluginApprovalResolved;
   target: ExecApprovalForwardTarget;
 }): ReplyPayload {

@@ -52,7 +52,7 @@ describe("managed credential isolation", () => {
     "pins the verified %s credential for broker children across profile retirement and host changes",
     async (scope) => {
       const root = dirs.make("github-broker-snapshot-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", root);
+      vi.stubEnv("CARAPACE_STATE_DIR", root);
       const profileId = "ghp_33333333333333333333333333333333";
       const selected = { profileId, gitAuthor: { name: "Managed Author" } };
       const config =
@@ -182,7 +182,7 @@ describe("managed credential isolation", () => {
   it.each(["system", "agent", "personal"] as const)(
     "installs %s credentials without mutating native host authentication",
     async (scope) => {
-      const env = { OPENCLAW_STATE_DIR: dirs.make("github-managed-isolation-") };
+      const env = { CARAPACE_STATE_DIR: dirs.make("github-managed-isolation-") };
       const profileDir = resolveManagedGitHubProfileDir({
         agentId: "main",
         scope,
@@ -226,7 +226,7 @@ describe("managed credential isolation", () => {
   );
 
   it("rejects a corrupt CLI config and keeps YAML credential diagnostics private", async () => {
-    const env = { OPENCLAW_STATE_DIR: dirs.make("github-corrupt-config-") };
+    const env = { CARAPACE_STATE_DIR: dirs.make("github-corrupt-config-") };
     const profileId = "ghp_44444444444444444444444444444444";
     const profileDir = resolveManagedGitHubProfileDir({
       agentId: "main",
@@ -277,10 +277,10 @@ describe("managed credential isolation", () => {
     "rejects tokenless or corrupt $scope profile $hosts despite native authentication",
     async ({ scope, hosts }) => {
       const env = {
-        OPENCLAW_STATE_DIR: dirs.make("github-tokenless-isolation-"),
+        CARAPACE_STATE_DIR: dirs.make("github-tokenless-isolation-"),
         GH_TOKEN: "synthetic-ambient",
       };
-      vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+      vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
       const profileId = "ghp_22222222222222222222222222222222";
       const profileDir = resolveManagedGitHubProfileDir({
         agentId: "main",

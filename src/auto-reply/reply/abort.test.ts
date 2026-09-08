@@ -10,7 +10,7 @@ import {
   resetSubagentRegistryForTests,
   testing as subagentRegistryTesting,
 } from "../../agents/subagents/registry/subagent-registry.test-helpers.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   loadSessionEntry,
   markSessionAbortTarget,
@@ -100,7 +100,7 @@ vi.mock("../../acp/control-plane/manager.js", () => ({
   }),
 }));
 
-const suiteTempDirs = createSuiteTempRootTracker({ prefix: "openclaw-abort-" });
+const suiteTempDirs = createSuiteTempRootTracker({ prefix: "carapace-abort-" });
 
 describe("abort detection", () => {
   const trackedAbortMemoryKeys = new Set<string>();
@@ -146,7 +146,7 @@ describe("abort detection", () => {
       ...(typeof params?.commandsTextEnabled === "boolean"
         ? { commands: { text: params.commandsTextEnabled } }
         : {}),
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     if (params?.sessionIdsByKey) {
       for (const sessionKey of Object.keys(params.sessionIdsByKey)) {
         trackedAbortMemoryKeys.add(sessionKey);
@@ -157,7 +157,7 @@ describe("abort detection", () => {
   }
 
   async function runStopCommand(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionKey?: string;
     parentSessionKey?: string;
     from: string;
@@ -202,7 +202,7 @@ describe("abort detection", () => {
 
   function enqueueQueuedFollowupRun(params: {
     root: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionId: string;
     sessionKey: string;
   }) {
@@ -289,8 +289,8 @@ describe("abort detection", () => {
       "abort",
       "exit",
       "interrupt",
-      "stop openclaw",
-      "openclaw stop",
+      "stop carapace",
+      "carapace stop",
       "stop action",
       "stop current action",
       "stop run",
@@ -304,8 +304,8 @@ describe("abort detection", () => {
       "do not do that",
       "please stop",
       "stop please",
-      "STOP OPENCLAW",
-      "stop openclaw!!!",
+      "STOP CARAPACE",
+      "stop carapace!!!",
       "stop don’t do anything",
       "detente",
       "detén",
@@ -351,7 +351,7 @@ describe("abort detection", () => {
     expect(isAbortRequestText("Stop")).toBe(true);
     expect(isAbortRequestText("STOP")).toBe(true);
     expect(isAbortRequestText("stop action")).toBe(true);
-    expect(isAbortRequestText("stop openclaw!!!")).toBe(true);
+    expect(isAbortRequestText("stop carapace!!!")).toBe(true);
     expect(isAbortRequestText("停下来")).toBe(true);
     expect(isAbortRequestText("暂停")).toBe(true);
     expect(isAbortRequestText("やめて")).toBe(true);
@@ -360,8 +360,8 @@ describe("abort detection", () => {
     expect(isAbortRequestText("stopp")).toBe(true);
     expect(isAbortRequestText("pare")).toBe(true);
     expect(isAbortRequestText(" توقف ")).toBe(true);
-    expect(isAbortRequestText("/stop@openclaw_bot", { botUsername: "openclaw_bot" })).toBe(true);
-    expect(isAbortRequestText("/Stop@openclaw_bot", { botUsername: "openclaw_bot" })).toBe(true);
+    expect(isAbortRequestText("/stop@carapace_bot", { botUsername: "carapace_bot" })).toBe(true);
+    expect(isAbortRequestText("/Stop@carapace_bot", { botUsername: "carapace_bot" })).toBe(true);
     expect(
       isAbortRequestText("/stop@unresolved_bot", {
         targetedCommandMode: "pre-identity",
@@ -379,7 +379,7 @@ describe("abort detection", () => {
     ).toBe(false);
     expect(
       isAbortRequestText("/stop@some_other_bot", {
-        botUsername: "openclaw_bot",
+        botUsername: "carapace_bot",
         targetedCommandMode: "pre-identity",
       }),
     ).toBe(false);
@@ -1279,7 +1279,7 @@ describe("abort detection", () => {
 
     await expect(
       stopSubagentsForRequester({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         requesterSessionKey: sessionKey,
       }),
     ).resolves.toEqual({ stopped: 1, failed: 1 });
@@ -1353,7 +1353,7 @@ describe("abort detection", () => {
     });
 
     const result = await stopSubagentsForRequester({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       requesterSessionKey: sessionKey,
     });
 
@@ -1518,7 +1518,7 @@ describe("abort detection", () => {
     });
 
     const result = await stopSubagentsForRequester({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       requesterSessionKey: oldParentKey,
     });
 

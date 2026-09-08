@@ -13,7 +13,7 @@ import { isRecord } from "./record-shared.mjs";
 
 const CANDIDATE_MANIFEST_FILE = "full-release-candidate.json";
 const CANDIDATE_PRODUCER_WORKFLOW_PATH =
-  ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+  ".github/workflows/carapace-live-and-e2e-checks-reusable.yml";
 const FULL_RELEASE_WORKFLOW_PATHS = new Set([
   ".github/workflows/full-release-validation.yml",
   ".github/workflows/full-release-artifacts.yml",

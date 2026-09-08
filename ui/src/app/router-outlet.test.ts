@@ -40,7 +40,7 @@ function deferred<T>(): Deferred<T> {
 }
 
 function createOutlet(router: TestRouter, context: TestContext): RouterOutletElement {
-  const outlet = document.createElement("openclaw-router-outlet") as RouterOutletElement;
+  const outlet = document.createElement("carapace-router-outlet") as RouterOutletElement;
   outlet.router = router;
   outlet.retryContext = context;
   document.body.append(outlet);
@@ -59,7 +59,7 @@ async function settleOutlet(outlet: RouterOutletElement): Promise<void> {
   await settleLitElement(outlet);
 }
 
-describe("openclaw-router-outlet", () => {
+describe("carapace-router-outlet", () => {
   it("retains MCP Apps across route IDs that share an explicit owner", async () => {
     const teardownView = vi.fn(async () => undefined);
     const nextData = deferred<TestData>();

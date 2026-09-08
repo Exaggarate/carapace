@@ -5,8 +5,8 @@ import {
   type ChannelIngressContextBinding,
   type ChannelIngressIdentitySubjectInput,
   type IngressReasonCode,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { TwitchAccountConfig, TwitchChatMessage } from "./types.js";
 
 type TwitchAccessControlResult =

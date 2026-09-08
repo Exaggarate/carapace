@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { crc32 } from "node:zlib";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   downloadClawHubBootstrapReadback,
@@ -13,7 +13,7 @@ import {
   parseNpmViewFields,
   parseReleaseVerifyBetaArgs,
   readBoundedJsonResponse,
-  resolveOpenClawNpmPostpublishVerifier,
+  resolveCarapaceNpmPostpublishVerifier,
   runNpmViewWithRetry,
   runReleaseVerifierCommand,
   validateClawHubBootstrapEvidence,
@@ -103,7 +103,7 @@ describe("verifyBetaRelease workflow outcomes", () => {
     mkdirSync(join(rootDir, "extensions"));
     writeFileSync(join(rootDir, "package.json"), JSON.stringify({ version }));
     const run = {
-      workflowName: telegram ? "NPM Telegram Beta E2E" : "OpenClaw NPM Release",
+      workflowName: telegram ? "NPM Telegram Beta E2E" : "Carapace NPM Release",
       headBranch: "main",
       event: "workflow_dispatch",
       status: "completed",
@@ -119,8 +119,8 @@ describe("verifyBetaRelease workflow outcomes", () => {
 const fs = require("node:fs");
 const path = require("node:path");
 const args = process.argv.slice(2);
-if (path.basename(process.argv[1]) === "npm" && args[0] === "view" && args[1] === "openclaw@${version}") {
-  console.log(JSON.stringify({version: "${version}", "dist-tags.beta": "${version}", "dist.integrity": "sha512-test", "dist.tarball": "https://example.invalid/openclaw.tgz"}));
+if (path.basename(process.argv[1]) === "npm" && args[0] === "view" && args[1] === "carapace@${version}") {
+  console.log(JSON.stringify({version: "${version}", "dist-tags.beta": "${version}", "dist.integrity": "sha512-test", "dist.tarball": "https://example.invalid/carapace.tgz"}));
 } else if (args[0] === "run" && args[1] === "view" && args[2] === "44") {
   process.stdout.write(fs.readFileSync(path.join(path.dirname(process.argv[1]), "run.json")));
 } else {
@@ -140,7 +140,7 @@ if (path.basename(process.argv[1]) === "npm" && args[0] === "view" && args[1] ==
       "--skip-clawhub",
       "--workflow-ref",
       "main",
-      telegram ? "--npm-telegram-run" : "--openclaw-npm-run",
+      telegram ? "--npm-telegram-run" : "--carapace-npm-run",
       "44",
       "--evidence-out",
       "evidence.json",
@@ -161,7 +161,7 @@ if (path.basename(process.argv[1]) === "npm" && args[0] === "view" && args[1] ==
       const lines = await verifyBetaRelease(fixture.args, { rootDir: fixture.rootDir });
       const evidence = JSON.parse(readFileSync(join(fixture.rootDir, "evidence.json"), "utf8"));
 
-      expect(lines).toContain("openclaw npm OK: 2026.5.10-beta.3 (beta)");
+      expect(lines).toContain("carapace npm OK: 2026.5.10-beta.3 (beta)");
       expect(lines.some((line) => line.startsWith("NPM Telegram Beta E2E advisory:"))).toBe(true);
       expect(lines.some((line) => line.startsWith("NPM Telegram Beta E2E OK:"))).toBe(false);
       expect(evidence.workflowRuns).toEqual([
@@ -220,7 +220,7 @@ if (path.basename(process.argv[1]) === "npm" && args[0] === "view" && args[1] ==
     const fixture = workflowFixture(run, false);
 
     await expect(verifyBetaRelease(fixture.args, { rootDir: fixture.rootDir })).rejects.toThrow(
-      "OpenClaw NPM Release: run 44 is",
+      "Carapace NPM Release: run 44 is",
     );
   });
 });
@@ -231,7 +231,7 @@ describe("parseReleaseVerifyBetaArgs", () => {
       version: "2026.5.10-beta.3",
       tag: "v2026.5.10-beta.3",
       distTag: "beta",
-      repo: "openclaw/openclaw",
+      repo: "carapace/carapace",
       registry: "https://clawhub.ai",
       releaseSha: undefined,
       workflowRef: undefined,
@@ -260,10 +260,10 @@ describe("parseReleaseVerifyBetaArgs", () => {
         "--clawhub-workflow-ref",
         "v2026.5.10-beta.3",
         "--plugins",
-        "@openclaw/plugin-a,@openclaw/plugin-b",
+        "@carapace/plugin-a,@carapace/plugin-b",
         "--full-release-validation-run",
         "10",
-        "--openclaw-npm-run",
+        "--carapace-npm-run",
         "11",
         "--plugin-npm-run",
         "22",
@@ -272,7 +272,7 @@ describe("parseReleaseVerifyBetaArgs", () => {
         "--plugin-clawhub-bootstrap-run",
         "34",
         "--clawhub-bootstrap-plugins",
-        "@openclaw/plugin-b",
+        "@carapace/plugin-b",
         "--npm-telegram-run",
         "44",
         "--evidence-out",
@@ -287,13 +287,13 @@ describe("parseReleaseVerifyBetaArgs", () => {
       version: "2026.5.10-beta.3",
       tag: "v2026.5.10-beta.3",
       distTag: "beta",
-      repo: "openclaw/openclaw",
+      repo: "carapace/carapace",
       registry: "https://clawhub.ai",
       releaseSha: "a".repeat(40),
       workflowRef: "release/2026.5.10",
       clawHubWorkflowRef: "v2026.5.10-beta.3",
-      pluginSelection: ["@openclaw/plugin-a", "@openclaw/plugin-b"],
-      clawHubBootstrapPlugins: ["@openclaw/plugin-b"],
+      pluginSelection: ["@carapace/plugin-a", "@carapace/plugin-b"],
+      clawHubBootstrapPlugins: ["@carapace/plugin-b"],
       evidenceOut: ".artifacts/release-evidence.json",
       postpublishVerifier: "/tmp/trusted-postpublish.ts",
       skipPostpublish: false,
@@ -302,7 +302,7 @@ describe("parseReleaseVerifyBetaArgs", () => {
       rerunFailedClawHub: true,
       workflowRuns: {
         fullReleaseValidation: "10",
-        openclawNpm: "11",
+        carapaceNpm: "11",
         pluginNpm: "22",
         pluginClawHub: "33",
         pluginClawHubBootstrap: "34",
@@ -312,15 +312,15 @@ describe("parseReleaseVerifyBetaArgs", () => {
   });
 
   it("only accepts the trusted tooling postpublish verifier override", () => {
-    expect(resolveOpenClawNpmPostpublishVerifier("/tmp/release")).toBe(
-      "/tmp/release/scripts/openclaw-npm-postpublish-verify.ts",
+    expect(resolveCarapaceNpmPostpublishVerifier("/tmp/release")).toBe(
+      "/tmp/release/scripts/carapace-npm-postpublish-verify.ts",
     );
-    const trustedVerifier = resolve("scripts/openclaw-npm-postpublish-verify.ts");
-    expect(resolveOpenClawNpmPostpublishVerifier("/tmp/release", trustedVerifier)).toBe(
+    const trustedVerifier = resolve("scripts/carapace-npm-postpublish-verify.ts");
+    expect(resolveCarapaceNpmPostpublishVerifier("/tmp/release", trustedVerifier)).toBe(
       trustedVerifier,
     );
     expect(() =>
-      resolveOpenClawNpmPostpublishVerifier("/tmp/release", "/tmp/untrusted-verifier.ts"),
+      resolveCarapaceNpmPostpublishVerifier("/tmp/release", "/tmp/untrusted-verifier.ts"),
     ).toThrow("must select the trusted tooling verifier");
     expect(() =>
       parseReleaseVerifyBetaArgs([
@@ -349,7 +349,7 @@ describe("parseReleaseVerifyBetaArgs", () => {
       parseReleaseVerifyBetaArgs([
         "2026.5.10-beta.3",
         "--clawhub-bootstrap-plugins",
-        "@openclaw/plugin-b",
+        "@carapace/plugin-b",
       ]),
     ).toThrow("--clawhub-bootstrap-plugins requires --plugin-clawhub-bootstrap-run");
   });
@@ -376,7 +376,7 @@ describe("validateClawHubBootstrapEvidence", () => {
     run_attempt: 2,
     status: "completed",
     conclusion: "success",
-    html_url: "https://github.com/openclaw/openclaw/actions/runs/34",
+    html_url: "https://github.com/Exaggarate/carapace/actions/runs/34",
     created_at: "2026-07-10T00:00:00Z",
     updated_at: "2026-07-10T00:02:00Z",
   };
@@ -402,7 +402,7 @@ describe("validateClawHubBootstrapEvidence", () => {
   };
   const evidence = {
     schemaVersion: 2,
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     targetSha: releaseSha,
     workflowSha,
     runId: "34",
@@ -414,11 +414,11 @@ describe("validateClawHubBootstrapEvidence", () => {
     clawhubToolchainIntegrity,
     clawhubToolchainSha256,
     clawhubToolchainVersion,
-    requestedPlugins: ["@openclaw/meta"],
+    requestedPlugins: ["@carapace/meta"],
     verificationMode: "postpublish",
     packages: [
       {
-        packageName: "@openclaw/meta",
+        packageName: "@carapace/meta",
         version: "2026.7.1-beta.3",
         expectedSha256: packageSha,
         expectedSize: 123,
@@ -432,7 +432,7 @@ describe("validateClawHubBootstrapEvidence", () => {
           size: 123,
           npmIntegrity: "sha512-test",
           npmShasum: "1".repeat(40),
-          packageName: "@openclaw/meta",
+          packageName: "@carapace/meta",
           version: "2026.7.1-beta.3",
         },
       },
@@ -449,11 +449,11 @@ describe("validateClawHubBootstrapEvidence", () => {
     } = {},
   ) {
     return validateClawHubBootstrapEvidence({
-      repo: "openclaw/openclaw",
+      repo: "carapace/carapace",
       runId: "34",
       releaseSha,
       expectedVersion: "2026.7.1-beta.3",
-      expectedPackages: overrides.expectedPackages ?? ["@openclaw/meta"],
+      expectedPackages: overrides.expectedPackages ?? ["@carapace/meta"],
       run: overrides.run ?? run,
       readbackArtifact: overrides.readbackArtifact ?? readbackArtifact,
       readbackArchiveSha256: readbackSha,
@@ -497,7 +497,7 @@ describe("validateClawHubBootstrapEvidence", () => {
     expect(() => validate({ evidence: { ...evidence, targetSha: "e".repeat(40) } })).toThrow(
       "target SHA mismatch",
     );
-    expect(() => validate({ expectedPackages: ["@openclaw/other"] })).toThrow(
+    expect(() => validate({ expectedPackages: ["@carapace/other"] })).toThrow(
       "requested package set mismatch",
     );
   });
@@ -591,8 +591,8 @@ describe("downloadClawHubBootstrapReadback", () => {
     path: ".github/workflows/plugin-clawhub-new.yml",
     status: "completed",
     conclusion: "success",
-    repository: { full_name: "openclaw/openclaw" },
-    head_repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
+    head_repository: { full_name: "carapace/carapace" },
   };
 
   function createFixture(
@@ -649,7 +649,7 @@ describe("downloadClawHubBootstrapReadback", () => {
   }> {
     const fixture = createFixture(archive, overrides);
     const result = await downloadClawHubBootstrapReadback({
-      repo: "openclaw/openclaw",
+      repo: "carapace/carapace",
       runId: "34",
       run,
       readbackArtifact: fixture.readbackArtifact,
@@ -723,7 +723,7 @@ describe("parseNpmViewFields", () => {
           version: "2026.5.10-beta.3",
           "dist-tags.beta": "2026.5.10-beta.3",
           "dist.integrity": "sha512-test",
-          "dist.tarball": "https://registry.example/openclaw.tgz",
+          "dist.tarball": "https://registry.example/carapace.tgz",
         }),
         "beta",
       ),
@@ -731,7 +731,7 @@ describe("parseNpmViewFields", () => {
       version: "2026.5.10-beta.3",
       distTagVersion: "2026.5.10-beta.3",
       integrity: "sha512-test",
-      tarball: "https://registry.example/openclaw.tgz",
+      tarball: "https://registry.example/carapace.tgz",
     });
   });
 
@@ -743,7 +743,7 @@ describe("parseNpmViewFields", () => {
           "dist-tags": { beta: "2026.5.10-beta.3" },
           dist: {
             integrity: "sha512-test",
-            tarball: "https://registry.example/openclaw.tgz",
+            tarball: "https://registry.example/carapace.tgz",
           },
         }),
         "beta",
@@ -752,7 +752,7 @@ describe("parseNpmViewFields", () => {
       version: "2026.5.10-beta.3",
       distTagVersion: "2026.5.10-beta.3",
       integrity: "sha512-test",
-      tarball: "https://registry.example/openclaw.tgz",
+      tarball: "https://registry.example/carapace.tgz",
     });
   });
 });
@@ -763,7 +763,7 @@ describe("runNpmViewWithRetry", () => {
     const delays: number[] = [];
 
     await expect(
-      runNpmViewWithRetry(["view", "openclaw@2026.5.10-beta.3", "version", "--json"], {
+      runNpmViewWithRetry(["view", "carapace@2026.5.10-beta.3", "version", "--json"], {
         attempts: 3,
         delay: async (delayMs) => {
           delays.push(delayMs);
@@ -789,7 +789,7 @@ describe("runNpmViewWithRetry", () => {
     const delay = vi.fn(async () => {});
     let calls = 0;
     let timeoutError: CommandError | undefined;
-    const result = runNpmViewWithRetry(["view", "openclaw", "version"], {
+    const result = runNpmViewWithRetry(["view", "carapace", "version"], {
       attempts: 3,
       delay,
       run: () => {

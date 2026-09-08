@@ -45,16 +45,16 @@ data and restrict the target agent's tools and workspace separately.
 | `allowedSessionKeyPrefixes` | unrestricted                    | Case-insensitive prefixes for explicit request/mapping keys and the default/generated key. An empty list or all-blank list imposes no restriction; blank entries are otherwise ignored. See session policy below. |
 | `presets`                   | `[]`                            | Built-in mappings appended after custom mappings. Available preset: `"gmail"`; unknown names add no mappings.                                                                                                     |
 | `mappings`                  | `[]`                            | Ordered mapping list; first match wins. See [Mapping details](/gateway/config-hooks#mapping-details).                                                                                                             |
-| `transformsDir`             | `<config-dir>/hooks/transforms` | Transform directory, constrained to that root, including symlink containment. Normally `~/.openclaw/hooks/transforms`.                                                                                            |
+| `transformsDir`             | `<config-dir>/hooks/transforms` | Transform directory, constrained to that root, including symlink containment. Normally `~/.carapace/hooks/transforms`.                                                                                            |
 | `gmail`                     | unset                           | Gmail transport and processing defaults; see [Gmail integration](/gateway/config-hooks#gmail-integration).                                                                                                        |
 | `internal`                  | separate subsystem              | Internal event-hook configuration; see [Hooks](/automation/hooks). It does not enable HTTP ingress.                                                                                                               |
 
 `hooks.token` should be distinct from active Gateway shared-secret auth
-(`gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN` or `gateway.auth.password` /
-`OPENCLAW_GATEWAY_PASSWORD`). Startup logs a non-fatal warning on reuse;
-`openclaw security audit` reports a critical finding, including password auth
+(`gateway.auth.token` / `CARAPACE_GATEWAY_TOKEN` or `gateway.auth.password` /
+`CARAPACE_GATEWAY_PASSWORD`). Startup logs a non-fatal warning on reuse;
+`carapace security audit` reports a critical finding, including password auth
 supplied at audit time (`--auth password --password <password>`). Use
-`openclaw doctor --fix` to rotate a persisted reused hook token, then update all
+`carapace doctor --fix` to rotate a persisted reused hook token, then update all
 external senders.
 
 ### Hook HTTP contract
@@ -63,7 +63,7 @@ Paths below assume `hooks.path: "/hooks"`; replace that prefix if configured
 differently. Send `POST` with a JSON body and
 `Content-Type: application/json`.
 
-Authentication accepts `Authorization: Bearer <token>` or `x-openclaw-token`.
+Authentication accepts `Authorization: Bearer <token>` or `x-carapace-token`.
 A nonempty Bearer token takes precedence. A `token` query parameter is rejected
 with `400`, even if a valid header is also present. Missing or wrong credentials
 return `401`. After 20 failed attempts in a 60-second window, further invalid
@@ -208,7 +208,7 @@ workspace skill directories; move invalid modules there or remove an invalid
 ### Hook retries and fan-out
 
 Agent replay keys resolve in this order: `Idempotency-Key`,
-`X-OpenClaw-Idempotency-Key`, then payload `idempotencyKey`. Only trimmed nonempty
+`X-Carapace-Idempotency-Key`, then payload `idempotencyKey`. Only trimmed nonempty
 strings of at most 256 characters are used. The same key replays only for the
 same token, path, and resolved dispatch fields; changing the message or routing
 can create a new run. Pending admissions and admitted runs with unresolved
@@ -305,10 +305,10 @@ example and must be available to the reader. Gmail fields:
 | `hooks.gmail` field          | Runtime default              | Contract                                                                                                                                                      |
 | ---------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `account`                    | required                     | Gmail account already authorized in `gog`.                                                                                                                    |
-| `label`                      | `"INBOX"`                    | Gmail label to watch. OpenClaw excludes `SPAM`, `TRASH`, `DRAFT`, and `SENT` when launching the watcher.                                                      |
+| `label`                      | `"INBOX"`                    | Gmail label to watch. Carapace excludes `SPAM`, `TRASH`, `DRAFT`, and `SENT` when launching the watcher.                                                      |
 | `topic`                      | required                     | Full Pub/Sub topic path. Setup can provision the `gog-gmail-watch` topic.                                                                                     |
 | `subscription`               | `"gog-gmail-watch-push"`     | Pub/Sub subscription used by setup.                                                                                                                           |
-| `pushToken`                  | required                     | Authenticates incoming pushes to the watcher. Separate from `hooks.token`, which authenticates forwarding to OpenClaw. Setup generates one if absent.         |
+| `pushToken`                  | required                     | Authenticates incoming pushes to the watcher. Separate from `hooks.token`, which authenticates forwarding to Carapace. Setup generates one if absent.         |
 | `hookUrl`                    | local Gateway `/hooks/gmail` | Forwarding URL built from `hooks.path` and Gateway port unless configured.                                                                                    |
 | `includeBody`                | `true`                       | Include email body snippets. Set `false` in config to omit them.                                                                                              |
 | `maxBytes`                   | `20000`                      | Positive integer per-message body limit passed to the watcher. Also used to derive the Gmail HTTP body allowance.                                             |
@@ -333,7 +333,7 @@ retries](/gateway/config-hooks#hook-retries-and-fan-out).
 
 When `hooks.enabled: true` and `hooks.gmail.account` is set, the Gateway starts
 `gog gmail watch serve` if its executable and required transport configuration
-are available, and renews the watch. Set `OPENCLAW_SKIP_GMAIL_WATCHER=1` to opt out.
+are available, and renews the watch. Set `CARAPACE_SKIP_GMAIL_WATCHER=1` to opt out.
 Do not start a second foreground watcher on the same listener. Setup output can
 contain tokens; see the [CLI reference](/cli/webhooks).
 

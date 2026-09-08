@@ -5,14 +5,14 @@ import type { Context, UserMessage } from "../../../llm/types.js";
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
-  OPENCLAW_RUNTIME_CONTEXT_NOTICE,
-  OPENCLAW_RUNTIME_EVENT_HEADER,
+  CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
+  CARAPACE_RUNTIME_CONTEXT_NOTICE,
+  CARAPACE_RUNTIME_EVENT_HEADER,
   type RuntimeContextFragment,
 } from "../../internal-runtime-context.js";
 import type { CurrentInboundPromptContext } from "./params.js";
 
-const OPENCLAW_RUNTIME_EVENT_USER_PROMPT = "Continue the OpenClaw runtime event.";
+const CARAPACE_RUNTIME_EVENT_USER_PROMPT = "Continue the Carapace runtime event.";
 
 /** Hidden custom transcript message that carries runtime context into model conversion. */
 export type RuntimeContextCustomMessage = {
@@ -21,7 +21,7 @@ export type RuntimeContextCustomMessage = {
   content: string;
   display: false;
   details: {
-    source: "openclaw-runtime-context";
+    source: "carapace-runtime-context";
     runtimeContextCarrier: true;
     fragments?: RuntimeContextFragment[];
   };
@@ -76,7 +76,7 @@ export function resolveRuntimeContextPromptParts(params: {
   const runtimeOnly =
     !transcriptPrompt.trim() && Boolean(runtimeContext) && params.allowRuntimeOnly !== false;
   const prompt = runtimeOnly
-    ? OPENCLAW_RUNTIME_EVENT_USER_PROMPT
+    ? CARAPACE_RUNTIME_EVENT_USER_PROMPT
     : transcriptPrompt || params.effectivePrompt;
   return {
     prompt,
@@ -99,7 +99,7 @@ export function buildRuntimeContextMessageContent(params: {
   // model receives no user message alongside them.
   return [
     ...(params.kind === "runtime-event"
-      ? [OPENCLAW_RUNTIME_EVENT_HEADER, OPENCLAW_RUNTIME_CONTEXT_NOTICE, ""]
+      ? [CARAPACE_RUNTIME_EVENT_HEADER, CARAPACE_RUNTIME_CONTEXT_NOTICE, ""]
       : []),
     INTERNAL_RUNTIME_CONTEXT_BEGIN,
     params.runtimeContext,
@@ -118,14 +118,14 @@ export function buildRuntimeContextCustomMessage(
   }
   return {
     role: "custom",
-    customType: OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+    customType: CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
     content: buildRuntimeContextMessageContent({
       runtimeContext: trimmedRuntimeContext,
       kind: "next-turn",
     }),
     display: false,
     details: {
-      source: "openclaw-runtime-context",
+      source: "carapace-runtime-context",
       runtimeContextCarrier: true,
       ...(fragments?.length ? { fragments } : {}),
     },

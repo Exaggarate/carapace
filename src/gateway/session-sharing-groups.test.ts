@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadSessionEntry, upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { flushPendingSessionsChangedEvents } from "./server-methods/session-change-event.js";
 import { sessionGroupHandlers } from "./server-methods/sessions-groups.js";
 import type { GatewayRequestContext, RespondFn } from "./server-methods/types.js";
@@ -21,14 +21,14 @@ import {
 
 afterEach(() => {
   flushPendingSessionsChangedEvents();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("session sharing group mutations", () => {
   it.each(["rename", "delete"])(
     "refreshes groups after %s rejects changed member authority",
     async (action) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         putSessionGroups({ cfg: {}, names: ["Old"] });
         const sessionKey = "agent:main:changed-group-authority";
         await upsertSessionEntryCore(
@@ -84,7 +84,7 @@ describe("session sharing group mutations", () => {
     },
   );
   it("refuses restricted group drops at put admission while allowing retained groups", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       putSessionGroups({ cfg: {}, names: ["Projects"] });
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: "agent:main:restricted-put-member" },
@@ -119,7 +119,7 @@ describe("session sharing group mutations", () => {
   });
 
   it("rechecks late group members before committing a put drop", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const groups = putSessionGroups({ cfg: {}, names: ["Race"] });
       const viewer = roleClient("none", "put-viewer");
       const context = {
@@ -159,7 +159,7 @@ describe("session sharing group mutations", () => {
   });
 
   it("rechecks group members before committing a defaults update", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       putSessionGroups({ cfg: {}, names: ["Race"] });
       updateSessionGroupDefaults("Race", { cwd: "/repos/race", worktree: true });
       const viewer = client({ user: "viewer@example.com" });
@@ -202,7 +202,7 @@ describe("session sharing group mutations", () => {
   });
 
   it("filters group defaults and blocks updates for sessions the caller cannot mutate", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       putSessionGroups({ cfg: {}, names: ["Projects", "Personal"] });
       updateSessionGroupDefaults("Projects", { cwd: "/repos/projects", worktree: true });
       updateSessionGroupDefaults("Personal", { cwd: "/repos/personal", worktree: false });

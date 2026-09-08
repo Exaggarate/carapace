@@ -1,6 +1,6 @@
 import path from "node:path";
-import { createSessionProjection, reduceSessionProjection } from "@openclaw/gateway-client/browser";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { createSessionProjection, reduceSessionProjection } from "@carapace/gateway-client/browser";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { HEARTBEAT_PROMPT } from "../auto-reply/heartbeat.js";
@@ -20,7 +20,7 @@ import {
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import { createNestedToolActivity } from "../sessions/nested-tool-activity.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
 import * as userProfiles from "../state/user-profiles.js";
 import { buildControlUiUserAvatarPath } from "./control-ui-contract.js";
 import * as managedOutgoingMedia from "./managed-image-attachments.js";
@@ -66,7 +66,7 @@ function currentScope(storePath: string) {
 }
 
 async function createCursorSession(initialEvents?: unknown[]) {
-  const directory = tempDirs.make("openclaw-history-cursor-");
+  const directory = tempDirs.make("carapace-history-cursor-");
   const storePath = path.join(directory, "sessions.json");
   testState.sessionStorePath = storePath;
   await writeSessionStore({
@@ -116,7 +116,7 @@ function renderedMessages(messages: readonly unknown[]): unknown[] {
       return message;
     }
     const record = message as Record<string, unknown>;
-    const metadata = record["__openclaw"];
+    const metadata = record["__carapace"];
     if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
       return record;
     }
@@ -124,7 +124,7 @@ function renderedMessages(messages: readonly unknown[]): unknown[] {
       string,
       unknown
     >;
-    return { ...record, __openclaw: visibleMetadata };
+    return { ...record, __carapace: visibleMetadata };
   });
 }
 
@@ -159,7 +159,7 @@ describe("chat.history cursor catch-up", () => {
         {
           type: "custom",
           id: `old-bootstrap-${turn}`,
-          customType: "openclaw:bootstrap-context:full",
+          customType: "carapace:bootstrap-context:full",
         },
       );
     }
@@ -189,7 +189,7 @@ describe("chat.history cursor catch-up", () => {
     const cached = await callChat<History>(context, "chat.history");
     expect(cached.ok).toBe(true);
     expect(cached.payload?.messages).toMatchObject([
-      { __openclaw: { id: "reset", seq: 1, transcriptPosition: { rawSeq: 13 } } },
+      { __carapace: { id: "reset", seq: 1, transcriptPosition: { rawSeq: 13 } } },
     ]);
     let cursor = cached.payload!.deltaCursor;
     let projection = createSessionProjection({ sessionId, sessionKey }, cached.payload!.messages);
@@ -240,7 +240,7 @@ describe("chat.history cursor catch-up", () => {
         type: "custom",
         id: bootstrapId,
         parentId,
-        customType: "openclaw:bootstrap-context:full",
+        customType: "carapace:bootstrap-context:full",
       });
       parentId = bootstrapId;
     }
@@ -251,7 +251,7 @@ describe("chat.history cursor catch-up", () => {
     expect
       .soft(
         projection.messages.map(
-          (message) => asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.id,
+          (message) => asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.id,
         ),
       )
       .toEqual([
@@ -278,7 +278,7 @@ describe("chat.history cursor catch-up", () => {
     const reloaded = await callChat<History>(context, "chat.history");
     expect(
       reloaded.payload!.messages.map(
-        (message) => asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.id,
+        (message) => asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.id,
       ),
     ).toEqual([
       "reset",
@@ -368,7 +368,7 @@ describe("chat.history cursor catch-up", () => {
     const composed = composeTranscriptDisplay([...projection.messages]);
     expect(renderedMessages(composed)).toEqual(renderedMessages(fresh.payload?.messages ?? []));
     expect(
-      composed.map((message) => asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.id),
+      composed.map((message) => asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.id),
     ).toEqual(["cached", "exec", "first", "second", "wait", "later"]);
   });
 
@@ -387,7 +387,7 @@ describe("chat.history cursor catch-up", () => {
         message: {
           role: "user",
           content: `question ${index}`,
-          __openclaw: { senderIdentity: { type: "profile", id: profile.id } },
+          __carapace: { senderIdentity: { type: "profile", id: profile.id } },
         },
       });
       parentId = eventId;
@@ -417,7 +417,7 @@ describe("chat.history cursor catch-up", () => {
         for (const envelope of delta.payload?.messages ?? []) {
           expect(envelope).toMatchObject({
             message: {
-              __openclaw: {
+              __carapace: {
                 senderIdentity: { type: "profile", id: profile.id },
                 senderProfileAvatarUrl: avatarUrl,
               },
@@ -507,7 +507,7 @@ describe("chat.history cursor catch-up", () => {
     }
     const resolved = resolveSqliteTranscriptReadScope(scope);
     const databaseOptions = toDatabaseOptions(resolved);
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     const indexed = asOptionalRecord(
       database.db
         .prepare("SELECT indexed_seq FROM session_transcript_index_state WHERE session_id = ?")

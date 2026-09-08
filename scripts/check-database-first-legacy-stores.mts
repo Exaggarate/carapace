@@ -90,9 +90,9 @@ const isWrapperNode = (node: ts.Node): node is WrapperNode =>
   ts.isFunctionLike(node) && "body" in node;
 
 const databaseFirstLegacyStoreSourceRoots = ["src", "extensions", "packages"];
-const databaseFirstNativeSourceRoots = ["apps/macos/Sources/OpenClaw"];
+const databaseFirstNativeSourceRoots = ["apps/macos/Sources/Carapace"];
 const nativeLegacyPortGuardianMigrationPath =
-  "apps/macos/Sources/OpenClaw/PortGuardianRecordStore.swift";
+  "apps/macos/Sources/Carapace/PortGuardianRecordStore.swift";
 const nativeLegacyPortGuardianFilenamePattern = /\bport-guard\.(?:json|lock)\b/u;
 const unknownComputedPropertyName = "\0";
 
@@ -160,7 +160,7 @@ const fsSafeJsonStoreWriteMethods = new Set(["update", "updateOr", "write"]);
 
 const helperWriteModulePattern =
   /(?:^|\/)(?:file-lock|fs-safe|json-files|json-store|private-file-store|replace-file)(?:\.[cm]?[jt]s)?$/u;
-const fsSafePackageModulePattern = /^@openclaw\/fs-safe(?:\/(?:root|store))?$/u;
+const fsSafePackageModulePattern = /^@carapace\/fs-safe(?:\/(?:root|store))?$/u;
 
 const bridgeMarkerPattern = /\btranscriptLocator\b|sqlite-transcript:\/\//u;
 
@@ -200,7 +200,7 @@ const legacyStorePattern = new RegExp(
     /\bacp\/event-ledger\.json\b/u,
     /\bcache\/[^"'`]*\.json\b/u,
     /\bagents\/[^"'`]+\/agent\/(?:auth|models)\.json\b/u,
-    /\b(?:credentials\/oauth|github-copilot\.token|openrouter-models|auth-profiles|auth-state|exec-approvals|(?:openclaw-)?workspace-state)\.json\b/u,
+    /\b(?:credentials\/oauth|github-copilot\.token|openrouter-models|auth-profiles|auth-state|exec-approvals|(?:carapace-)?workspace-state)\.json\b/u,
     // Dynamic template spans resolve to `*`, so the start alternative also
     // catches `${workspaceKey}.attested` and `${workspaceDir}.attested`.
     /(?:^|[/\\])[^/\\"'`]+\.attested\b/u,
@@ -213,15 +213,15 @@ const legacyStorePattern = new RegExp(
     /\bidentity\/device\.json\b/u,
     /\bsubagents\/runs\.json\b/u,
     /\btmp\/skill-uploads\b/u,
-    /\b(?:crestodian|openclaw)\/rescue-pending\/[^"'`]*\.json\b/u,
+    /\b(?:crestodian|carapace)\/rescue-pending\/[^"'`]*\.json\b/u,
     /\bcron\/(?:runs\/[^"'`]+\.jsonl|jobs\.json|jobs-state\.json)\b/u,
     /\b(?:process-leases|session-toggles|known-users|msteams-conversations|msteams-polls|msteams-sso-tokens|bot-storage|sync-store|thread-bindings|inbound-dedupe|startup-verification|storage-meta|crypto-idb-snapshot|command-deploy-cache|plugin-binding-approvals|plugins\/installs|config-health|port-guard|restart-sentinel|gateway-restart-intent|gateway-supervisor-restart-handoff)\.json\b/u,
-    /\b(?:calls|ref-index|config-audit|audit\/(?:file-transfer|openclaw|system-agent|crestodian))\.jsonl\b/u,
+    /\b(?:calls|ref-index|config-audit|audit\/(?:file-transfer|carapace|system-agent|crestodian))\.jsonl\b/u,
     /\b(?:reply-cache|sent-echoes|events|claims)\.jsonl\b/u,
     /\bplugin-state\/state\.sqlite\b/u,
     /\btasks\/(?:runs\.sqlite|flows\/registry\.sqlite)\b/u,
-    /\bopenclaw-state\.sqlite\b/u,
-    /\bopenclaw-native-hook-relays\b/u,
+    /\bcarapace-state\.sqlite\b/u,
+    /\bcarapace-native-hook-relays\b/u,
     /(?:^|\/)(?:meta|file-meta)\.json$/u,
     /(?:^|\/)viewer\.html$/u,
     /(?:^|\/)qmd\/embed\.lock(?:\.lock)?$/u,
@@ -543,8 +543,8 @@ function collectLegacyExecApprovalsBoundaryViolations(
 
 function isHelperWriteModuleSource(source: string) {
   return (
-    source === "openclaw/plugin-sdk/file-access-runtime" ||
-    source === "openclaw/plugin-sdk/security-runtime" ||
+    source === "carapace/plugin-sdk/file-access-runtime" ||
+    source === "carapace/plugin-sdk/security-runtime" ||
     fsSafePackageModulePattern.test(source) ||
     helperWriteModulePattern.test(source)
   );

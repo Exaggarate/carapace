@@ -10,7 +10,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 const INSTALL_SMOKE = ".github/workflows/install-smoke.yml";
 const INSTALL_SMOKE_REUSABLE = ".github/workflows/install-smoke-reusable.yml";
-const RELEASE_CHECKS = ".github/workflows/openclaw-release-checks.yml";
+const RELEASE_CHECKS = ".github/workflows/carapace-release-checks.yml";
 
 type WorkflowStep = {
   env?: Record<string, string>;
@@ -148,11 +148,11 @@ describe("install smoke no-push root image transport", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          EXPECTED_WORKFLOW_REPOSITORY: "openclaw/openclaw",
+          EXPECTED_WORKFLOW_REPOSITORY: "carapace/carapace",
           GITHUB_OUTPUT: "/dev/null",
           GITHUB_WORKFLOW_SHA: "a".repeat(40),
           JOB_CONTEXT: JSON.stringify({
-            workflow_repository: "openclaw/openclaw",
+            workflow_repository: "carapace/carapace",
             workflow_sha: "b".repeat(40),
           }),
         },
@@ -189,7 +189,7 @@ describe("install smoke no-push root image transport", () => {
       expect(checkoutIndex, jobName).toBeLessThan(resolverIndex);
       for (const checkout of trustedCheckouts) {
         expect(checkout.with, jobName).toMatchObject({
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           ref: "main",
           "fetch-depth": 1,
           "persist-credentials": false,
@@ -218,7 +218,7 @@ describe("install smoke no-push root image transport", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          EXPECTED_WORKFLOW_REPOSITORY: "openclaw/openclaw",
+          EXPECTED_WORKFLOW_REPOSITORY: "carapace/carapace",
           GITHUB_WORKFLOW_SHA: "a".repeat(40),
           HARNESS_PATH: ".",
           JOB_CONTEXT: JSON.stringify({
@@ -227,17 +227,17 @@ describe("install smoke no-push root image transport", () => {
           }),
         },
       });
-    const malformedSha = runResolver("openclaw/openclaw", "not-a-sha");
+    const malformedSha = runResolver("carapace/carapace", "not-a-sha");
     expect(malformedSha.status).not.toBe(0);
     expect(malformedSha.stderr).toContain("job.workflow_sha must be a full lowercase commit SHA");
-    const wrongRepository = runResolver("attacker/openclaw", "b".repeat(40));
+    const wrongRepository = runResolver("attacker/carapace", "b".repeat(40));
     expect(wrongRepository.status).not.toBe(0);
     expect(wrongRepository.stderr).toContain(
       "job.workflow_repository must exactly match github.repository",
     );
     const manifest = step(preflight, "Build install-smoke CI manifest");
     expect(manifest.env).toEqual({
-      OPENCLAW_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE:
+      CARAPACE_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE:
         "${{ inputs.run_bun_global_install_smoke || 'false' }}",
     });
     const manifestRun = manifest.run;
@@ -246,7 +246,7 @@ describe("install smoke no-push root image transport", () => {
       throw new Error("Build install-smoke CI manifest must have a run script");
     }
     expect(manifestRun).toContain(
-      'dockerfile_image="openclaw-dockerfile-smoke-local:${target_sha}"',
+      'dockerfile_image="carapace-dockerfile-smoke-local:${target_sha}"',
     );
     expect(manifestRun).toContain(
       'run_bun_global_install_smoke="$workflow_bun_global_install_smoke"',
@@ -338,7 +338,7 @@ describe("install smoke no-push root image transport", () => {
     for (const jobName of ["root_dockerfile_smokes"]) {
       const consumer = job(workflow, jobName);
       expect(consumer.needs, jobName).toContain("root_dockerfile_image_ready");
-      expect(consumer.env?.OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE, jobName).toBe("1");
+      expect(consumer.env?.CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE, jobName).toBe("1");
       expect(step(consumer, "Checkout trusted release harness").if, jobName).toBeUndefined();
       expect(
         consumer.steps?.find((candidate) => candidate.name === "Log in to GHCR"),
@@ -404,7 +404,7 @@ describe("install smoke no-push root image transport", () => {
       );
       expect(selectedCheckout.env).toMatchObject({
         CHECKOUT_KIND: "preflight",
-        CHECKOUT_REPO: "openclaw/openclaw",
+        CHECKOUT_REPO: "carapace/carapace",
         CHECKOUT_REF: "${{ needs.preflight.outputs.target_sha }}",
         CHECKOUT_FALLBACK_REF: "${{ needs.preflight.outputs.target_sha }}",
         CHECKOUT_TOKEN: "",
@@ -413,11 +413,11 @@ describe("install smoke no-push root image transport", () => {
       });
       const gatewayNetwork = step(consumer, "Run Docker gateway network e2e");
       expect(gatewayNetwork.env, jobName).toMatchObject({
-        OPENCLAW_DOCKER_E2E_REPO_ROOT: "${{ github.workspace }}/.release-source",
-        OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS:
+        CARAPACE_DOCKER_E2E_REPO_ROOT: "${{ github.workspace }}/.release-source",
+        CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS:
           "${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}",
-        OPENCLAW_SELECTED_SHA: "${{ needs.preflight.outputs.target_sha }}",
-        OPENCLAW_TOOLING_SHA: "${{ steps.workflow.outputs.sha }}",
+        CARAPACE_SELECTED_SHA: "${{ needs.preflight.outputs.target_sha }}",
+        CARAPACE_TOOLING_SHA: "${{ steps.workflow.outputs.sha }}",
       });
     }
 
@@ -486,7 +486,7 @@ describe("install smoke no-push root image transport", () => {
           GIT_CONFIG_GLOBAL: "/dev/null",
           GIT_CONFIG_COUNT: "1",
           GIT_CONFIG_KEY_0: `url.${pathToFileURL(origin).href}.insteadOf`,
-          GIT_CONFIG_VALUE_0: "https://github.com/openclaw/openclaw.git",
+          GIT_CONFIG_VALUE_0: "https://github.com/Exaggarate/carapace.git",
         },
       });
       expect(fetched.status, fetched.stdout + fetched.stderr).toBe(0);
@@ -497,7 +497,7 @@ describe("install smoke no-push root image transport", () => {
         execFileSync("git", ["-C", selected, "config", "--local", "--list"], { encoding: "utf8" }),
       ).not.toMatch(/extraheader|AUTHORIZATION/i);
       const network = step(consumer, "Run Docker gateway network e2e");
-      const configuredRoot = network.env?.OPENCLAW_DOCKER_E2E_REPO_ROOT?.replace(
+      const configuredRoot = network.env?.CARAPACE_DOCKER_E2E_REPO_ROOT?.replace(
         "${{ github.workspace }}",
         workspace,
       );
@@ -514,12 +514,12 @@ describe("install smoke no-push root image transport", () => {
           ...process.env,
           PATH: `${bin}${path.delimiter}${process.env.PATH}`,
           DOCKER_CALLS: dockerCalls,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_SELECTED_SHA: selectedSha,
-          OPENCLAW_TOOLING_SHA: toolingSha,
-          OPENCLAW_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1",
-          OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
-          OPENCLAW_DOCKER_E2E_REPO_ROOT: repoRoot ?? "",
+          CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          CARAPACE_SELECTED_SHA: selectedSha,
+          CARAPACE_TOOLING_SHA: toolingSha,
+          CARAPACE_GATEWAY_NETWORK_E2E_SKIP_BUILD: "1",
+          CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
+          CARAPACE_DOCKER_E2E_REPO_ROOT: repoRoot ?? "",
         },
       });
       if (source === "selected") {
@@ -529,7 +529,7 @@ describe("install smoke no-push root image transport", () => {
       } else {
         expect(result.status).toBe(2);
         expect(result.stderr).toContain(
-          "selected source checkout does not match OPENCLAW_SELECTED_SHA",
+          "selected source checkout does not match CARAPACE_SELECTED_SHA",
         );
         expect(existsSync(dockerCalls)).toBe(false);
       }
@@ -657,9 +657,9 @@ describe("install smoke no-push root image transport", () => {
 
       const load = step(consumer, pair.loadName);
       expect(load.env, pair.consumerName).toMatchObject({
-        OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: `\${{ needs.${pair.producerName}.outputs.archive_sha256 }}`,
-        OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: `\${{ needs.${pair.producerName}.outputs.artifact_run_attempt }}`,
-        OPENCLAW_SHARED_IMAGE_RUN_ID: `\${{ needs.${pair.producerName}.outputs.artifact_run_id }}`,
+        CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: `\${{ needs.${pair.producerName}.outputs.archive_sha256 }}`,
+        CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: `\${{ needs.${pair.producerName}.outputs.artifact_run_attempt }}`,
+        CARAPACE_SHARED_IMAGE_RUN_ID: `\${{ needs.${pair.producerName}.outputs.artifact_run_id }}`,
         TARGET_SHA: `\${{ needs.${pair.producerName}.outputs.target_sha }}`,
         WORKFLOW_SHA: `\${{ needs.${pair.producerName}.outputs.workflow_sha }}`,
       });
@@ -673,9 +673,9 @@ describe("install smoke no-push root image transport", () => {
         ),
       ).toBe(false);
       expect(step(consumer, pair.testName).env).toMatchObject({
-        OPENCLAW_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:
+        CARAPACE_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:
           "${{ runner.temp }}/install-smoke-candidate-payload",
-        OPENCLAW_INSTALL_SMOKE_GROUP: pair.group,
+        CARAPACE_INSTALL_SMOKE_GROUP: pair.group,
       });
     }
 
@@ -720,14 +720,14 @@ describe("install smoke no-push root image transport", () => {
     expect(step(bunConsumer, "Run Bun global install candidate-payload smoke")).toMatchObject({
       "working-directory": ".release-harness",
       env: {
-        OPENCLAW_BUN_GLOBAL_SMOKE_HOST_BUILD: "0",
-        OPENCLAW_BUN_GLOBAL_SMOKE_PACKAGE_TGZ:
+        CARAPACE_BUN_GLOBAL_SMOKE_HOST_BUILD: "0",
+        CARAPACE_BUN_GLOBAL_SMOKE_PACKAGE_TGZ:
           "${{ runner.temp }}/install-smoke-candidate-payload/candidate.tgz",
       },
       run: "bash scripts/e2e/bun-global-install-smoke.sh",
     });
     expect(JSON.stringify(bunConsumer)).not.toContain("root_dockerfile_image");
-    expect(JSON.stringify(bunConsumer)).not.toContain("OPENCLAW_BUN_GLOBAL_SMOKE_DIST_IMAGE");
+    expect(JSON.stringify(bunConsumer)).not.toContain("CARAPACE_BUN_GLOBAL_SMOKE_DIST_IMAGE");
     expect(JSON.stringify(bunConsumer)).not.toContain(
       "./.release-harness/.github/actions/setup-node-env",
     );
@@ -750,7 +750,7 @@ describe("install smoke no-push root image transport", () => {
       target_sha: "${{ steps.payload.outputs.target_sha }}",
     });
     expect(step(producer, "Checkout trusted release harness").with).toMatchObject({
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       ref: "main",
       "fetch-depth": 1,
       "persist-credentials": false,
@@ -881,14 +881,14 @@ describe("install smoke no-push root image transport", () => {
     });
     expect(packageCandidate.run).toContain("--output-name candidate.tgz");
     expect(packageCandidate.run).not.toContain("--pack-json");
-    expect(packageCandidate.run).toContain("scripts/package-openclaw-for-docker.mts");
+    expect(packageCandidate.run).toContain("scripts/package-carapace-for-docker.mts");
     expect(packageCandidate.run).toContain(
-      "grep -Fq -- '--allow-unreleased-changelog' scripts/package-openclaw-for-docker.mts",
+      "grep -Fq -- '--allow-unreleased-changelog' scripts/package-carapace-for-docker.mts",
     );
-    expect(packageCandidate.run).not.toContain("[[ -f scripts/package-openclaw-for-docker.mts ]]");
+    expect(packageCandidate.run).not.toContain("[[ -f scripts/package-carapace-for-docker.mts ]]");
     expect(packageCandidate.run).toContain("package_args+=(--allow-unreleased-changelog)");
     expect(JSON.stringify(job(workflow, "bun_global_install_smoke"))).not.toContain(
-      "OPENCLAW_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG",
+      "CARAPACE_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG",
     );
   });
 });

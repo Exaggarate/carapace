@@ -2,9 +2,9 @@
 import { Buffer } from "node:buffer";
 import http, { type ClientRequest, type IncomingMessage } from "node:http";
 import https from "node:https";
-import { generateSecureUuid } from "openclaw/plugin-sdk/core";
-import { formatErrorMessage, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { generateSecureUuid } from "carapace/plugin-sdk/core";
+import { formatErrorMessage, toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
 
 export type SignalRpcOptions = {
   baseUrl: string;

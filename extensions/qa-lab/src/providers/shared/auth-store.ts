@@ -3,8 +3,8 @@ import path from "node:path";
 import {
   loadAuthProfileStoreWithoutExternalProfiles,
   type AuthProfileCredential,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { updateAuthProfileStoreWithLock } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/agent-runtime";
+import { updateAuthProfileStoreWithLock } from "carapace/plugin-sdk/provider-auth";
 
 type QaAuthProfileCredential = AuthProfileCredential;
 

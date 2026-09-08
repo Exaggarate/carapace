@@ -7,21 +7,21 @@ import {
   addSessionMember,
   removeSessionMember,
 } from "../../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  disposeOpenClawAgentDatabaseByPath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  disposeCarapaceAgentDatabaseByPath,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import * as profileAliases from "../../state/user-profile-list.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
 import { withEnvAsync } from "../../test-utils/env.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createGatewayBroadcaster } from "../server-broadcast.js";
 import { createSessionMessageSubscriberRegistry } from "../server-chat-state.js";
 import { GatewayClientRegistry } from "../server/client-registry.js";
@@ -92,11 +92,11 @@ async function withCreatorRows(
   }) => Promise<void>,
   count = 100,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
       scenario: "minimal",
       env: {
-        OPENCLAW_STATE_DIR: undefined,
+        CARAPACE_STATE_DIR: undefined,
         VITEST: undefined,
         VITEST_POOL_ID: undefined,
         VITEST_WORKER_ID: undefined,
@@ -104,7 +104,7 @@ async function withCreatorRows(
       },
     },
     async (state) => {
-      expect(process.env.OPENCLAW_STATE_DIR).toBeUndefined();
+      expect(process.env.CARAPACE_STATE_DIR).toBeUndefined();
       expect(process.env.VITEST).toBeUndefined();
       expect(process.env.NODE_ENV).toBe("production");
       expect(process.env.HOME).toBe(state.home);
@@ -156,11 +156,11 @@ function eventClients(profileId: string) {
 
 describe("creator preparation at synchronous fan-out boundaries", () => {
   it("keeps exact, non-profile and absent-caller comparisons storage-free", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         scenario: "minimal",
         env: {
-          OPENCLAW_STATE_DIR: undefined,
+          CARAPACE_STATE_DIR: undefined,
           VITEST: undefined,
           VITEST_POOL_ID: undefined,
           VITEST_WORKER_ID: undefined,
@@ -181,7 +181,7 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
         expect(matches({ type: "system", id: "caller" })).toBe(false);
         expect(matches(undefined)).toBe(false);
         expect(observer.finish("storage-free-comparisons", 0).allRootProbes).toBe(0);
-        expect(fs.existsSync(state.statePath("state", "openclaw.sqlite"))).toBe(false);
+        expect(fs.existsSync(state.statePath("state", "carapace.sqlite"))).toBe(false);
       },
     );
   });
@@ -242,14 +242,14 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
       const receive = () => canReceiveSessionEvent({ cfg: {}, client, sessionKeys: [sessionKey] });
       expect(receive()).toBe(true);
       const alternateRoot = `${stateDir}/absent-state`;
-      await withEnvAsync({ OPENCLAW_STATE_DIR: alternateRoot }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: alternateRoot }, async () => {
         expect(receive()).toBe(false);
         expect(fs.existsSync(alternateRoot)).toBe(false);
       });
       expect(receive()).toBe(true);
-      const pathname = `${stateDir}/state/openclaw.sqlite`;
-      closeOpenClawStateDatabaseByPath(pathname);
-      const reopened = openOpenClawStateDatabase({ path: pathname }).db;
+      const pathname = `${stateDir}/state/carapace.sqlite`;
+      closeCarapaceStateDatabaseByPath(pathname);
+      const reopened = openCarapaceStateDatabase({ path: pathname }).db;
       reopened.prepare("DELETE FROM user_profiles WHERE id = ?").run(creatorId);
       expect(receive()).toBe(false);
     });
@@ -374,7 +374,7 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
       );
       addSessionMember(scope, { identityId: callerId, addedBy: "fixture" });
       const recipients = eventClients(callerId);
-      let cfg: OpenClawConfig = {};
+      let cfg: CarapaceConfig = {};
       const decisions: Array<[string, boolean]> = [];
       const { broadcast } = createGatewayBroadcaster({
         clients: new GatewayClientRegistry(recipients.map(({ client }) => client)),
@@ -414,8 +414,8 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
       expect(recipients.map(({ socket }) => socket.send.mock.calls.length)).toEqual([2, 1]);
       removeSessionMember(scope, callerId);
       emit();
-      closeOpenClawAgentDatabaseByPath(
-        path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      closeCarapaceAgentDatabaseByPath(
+        path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
       );
       emit();
       expect(recipients.map(({ socket }) => socket.send.mock.calls.length)).toEqual([2, 1]);
@@ -439,10 +439,10 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
         });
       expect(receive()).toBe(true);
       // This fixture moves/recreates the file, so release path validation as well as the handle.
-      disposeOpenClawAgentDatabaseByPath(
-        path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      disposeCarapaceAgentDatabaseByPath(
+        path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite"),
       );
-      closeOpenClawStateDatabaseByPath(path.join(stateDir, "state", "openclaw.sqlite"));
+      closeCarapaceStateDatabaseByPath(path.join(stateDir, "state", "carapace.sqlite"));
       const legacyRoot = path.join(path.dirname(stateDir), ".clawdbot");
       fs.renameSync(stateDir, legacyRoot);
       expect(receive()).toBe(true);
@@ -464,7 +464,7 @@ describe("creator preparation at synchronous fan-out boundaries", () => {
 
   it("keeps configured, retired and agent-scoped sentinel stores distinct", async () => {
     await withCreatorRows(async ({ callerId, creatorId, keys }) => {
-      const cfg: OpenClawConfig = { agents: { list: [{ id: "work", default: true }] } };
+      const cfg: CarapaceConfig = { agents: { list: [{ id: "work", default: true }] } };
       const workKey = "agent:work:prepared-work";
       const client = eventClients(creatorId)[0]!.client;
       const receive = (sessionKeys: string[], agentId?: string) =>

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import type { ConversationRouteContext } from "./conversation-route-context.js";
 import type { SessionStateDeleteSnapshot } from "./session-accessor.sqlite-delete-snapshot.types.js";
 import type { SessionResetBoundaryRequest } from "./session-reset-boundary-event.js";
@@ -189,7 +189,7 @@ export type SessionEntryLifecycleMutationResult = {
 };
 
 export type DeletedAgentSessionEntryPurgeParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   agentId: string;
   storeAgentId: string;

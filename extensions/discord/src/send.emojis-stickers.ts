@@ -1,11 +1,11 @@
 // Discord plugin module implements send.emojis stickers behavior.
 import type { RESTGetAPIGuildEmojisResult } from "discord-api-types/v10";
-import { buildOutboundMediaLoadOptions } from "openclaw/plugin-sdk/media-runtime";
+import { buildOutboundMediaLoadOptions } from "carapace/plugin-sdk/media-runtime";
 import {
   normalizeOptionalLowercaseString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { loadWebMediaRaw } from "openclaw/plugin-sdk/web-media";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { loadWebMediaRaw } from "carapace/plugin-sdk/web-media";
 import { createGuildEmoji, createGuildSticker, listGuildEmojis } from "./internal/discord.js";
 import { normalizeEmojiName, resolveDiscordRest } from "./send.shared.js";
 import type {

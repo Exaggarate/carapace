@@ -1,4 +1,4 @@
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-types";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-types";
 import { discoverHuggingfaceModels, HUGGINGFACE_BASE_URL } from "./models.js";
 
 export async function buildHuggingfaceProvider(

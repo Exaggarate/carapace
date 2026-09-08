@@ -4,7 +4,7 @@ import { createServer, type Server, type ServerResponse } from "node:http";
 import {
   createRemoteEmbeddingProvider,
   type MemoryEmbeddingProviderCreateOptions,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createOpenAiEmbeddingProvider } from "./embedding-provider.js";
 

@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { runUpdateCommandRepair } from "../cli/update-cli/update-command-repair.js";
 import { admitUpdateCommandRun } from "../cli/update-cli/update-command-run.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { toErrorObject } from "./errors.js";
 import { UPDATE_RUN_ID_ENV } from "./update-control-plane-sentinel.js";
 import { prepareUnattendedUpdateRepair } from "./update-repair-agent.js";
@@ -50,7 +50,7 @@ describe("fresh candidate repair process", () => {
   ])(
     "preserves $source requester authority through replacement and candidate repair",
     async ({ requester, needsAuthority }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           prefix: "repair-child-boundary-",
           layout: "home",
@@ -190,7 +190,7 @@ describe("fresh candidate repair process", () => {
   );
 
   it("cancels the child and drains the parent oracle before returning", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { prefix: "repair-child-cancel-", layout: "home" },
       async (state) => {
         await candidate(
@@ -240,7 +240,7 @@ describe("fresh candidate repair process", () => {
   });
 
   it("records an unavailable candidate worker instead of falling back to old imports", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { prefix: "repair-child-missing-", layout: "home" },
       async (state) => {
         const events: UpdateRepairEvent[] = [];

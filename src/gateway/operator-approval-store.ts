@@ -1,9 +1,9 @@
 // Persistent operator approval lifecycle and first-answer-wins transitions.
 import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core/json-coercion";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { safeParseJson } from "@carapace/normalization-core/json-coercion";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
+import { normalizeUniqueTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { sql, type Selectable } from "kysely";
 import {
   type DecisionReceiptV1,
@@ -23,17 +23,17 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import type {
-  DB as OpenClawStateKyselyDatabase,
+  DB as CarapaceStateKyselyDatabase,
   OperatorApprovals,
-} from "../state/openclaw-state-db.generated.js";
+} from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   mintCronStandingGrantLocked,
   type CronStandingGrantMintSpec,
@@ -160,7 +160,7 @@ type TerminalizeOperatorApprovalsResult = {
 };
 
 type OperatorApprovalDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "operator_approvals" | "operator_approval_execution_identities"
 >;
 type OperatorApprovalRow = Selectable<OperatorApprovals>;
@@ -628,7 +628,7 @@ function operatorApprovalRemediation(
       return [
         {
           code: "inspect_state_integrity",
-          text: "Run openclaw doctor and inspect the shared state database before requesting the action again.",
+          text: "Run carapace doctor and inspect the shared state database before requesting the action again.",
         },
       ];
     default:
@@ -775,7 +775,7 @@ function projectCorruptOperatorApprovalReceipt(
     remediation: [
       {
         code: "inspect_state_integrity",
-        text: "Run openclaw doctor and inspect the shared state database before trusting this approval.",
+        text: "Run carapace doctor and inspect the shared state database before trusting this approval.",
       },
     ],
   };
@@ -1028,10 +1028,10 @@ function operatorApprovalExecutionLinkState(
 export function hasOperatorApprovalReceiptsForRun(params: {
   runId: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): boolean {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "operator_approvals")) {
         return false;
       }
@@ -1053,7 +1053,7 @@ export function hasOperatorApprovalReceiptsForRun(params: {
 export function summarizeOperatorApprovalReceiptsForRun(params: {
   context: OperatorApprovalReceiptContext;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   exactCount?: boolean;
 }): {
   count: number;
@@ -1061,7 +1061,7 @@ export function summarizeOperatorApprovalReceiptsForRun(params: {
   missingEvidence: string[];
 } {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "operator_approvals")) {
         return { count: 0, missingEvidence: [] };
       }
@@ -1134,10 +1134,10 @@ export function pageOperatorApprovalReceiptsForRun(params: {
   offset?: number;
   limit: number;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): OperatorApprovalReceiptPage {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "operator_approvals")) {
         return { entries: [] };
       }
@@ -1186,7 +1186,7 @@ export function pageOperatorApprovalReceiptsForRun(params: {
 }
 
 function selectOperatorApprovalRow(
-  database: ReturnType<typeof openOpenClawStateDatabase>,
+  database: ReturnType<typeof openCarapaceStateDatabase>,
   id: string,
 ): OperatorApprovalRow | undefined {
   const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
@@ -1197,7 +1197,7 @@ function selectOperatorApprovalRow(
 }
 
 function selectOperatorApprovalRowByLocator(
-  database: ReturnType<typeof openOpenClawStateDatabase>,
+  database: ReturnType<typeof openCarapaceStateDatabase>,
   locator: string,
 ): OperatorApprovalRow | undefined {
   const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
@@ -1213,7 +1213,7 @@ function selectOperatorApprovalRowByLocator(
 }
 
 function hasApprovalLocatorNamespaceConflict(params: {
-  database: ReturnType<typeof openOpenClawStateDatabase>;
+  database: ReturnType<typeof openCarapaceStateDatabase>;
   id: string;
   resolutionRef: string;
 }): boolean {
@@ -1243,7 +1243,7 @@ function matchesExpectedApprovalOwner(params: {
 }
 
 function denyCorruptPendingRow(params: {
-  database: ReturnType<typeof openOpenClawStateDatabase>;
+  database: ReturnType<typeof openCarapaceStateDatabase>;
   id: string;
   nowMs: number;
   createdAtMs: number;
@@ -1269,7 +1269,7 @@ function denyCorruptPendingRow(params: {
 }
 
 function expirePendingRow(params: {
-  database: ReturnType<typeof openOpenClawStateDatabase>;
+  database: ReturnType<typeof openCarapaceStateDatabase>;
   id: string;
   nowMs: number;
   createdAtMs: number;
@@ -1337,7 +1337,7 @@ function inputMatchesExistingRow(
 
 export function insertOperatorApproval(params: {
   approval: NewOperatorApproval;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): InsertOperatorApprovalResult {
   const input = params.approval;
   const id = requireApprovalId(input.id);
@@ -1373,7 +1373,7 @@ export function insertOperatorApproval(params: {
   };
   const executionIdentityBinding = normalizeExecutionIdentityBinding(input);
 
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
     executeSqliteQuerySync(
       database.db,
@@ -1480,10 +1480,10 @@ export function getOperatorApprovalDetailed(params: {
   id: string;
   allowTransportRef?: boolean;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): GetOperatorApprovalResult {
   const locator = requireApprovalId(params.id);
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     let row = params.allowTransportRef
       ? selectOperatorApprovalRowByLocator(database, locator)
@@ -1515,11 +1515,11 @@ export function listPendingOperatorApprovals(
     recordFilter?: (record: OperatorApprovalRecord) => boolean;
     limit?: number;
     nowMs?: number;
-    databaseOptions?: OpenClawStateDatabaseOptions;
+    databaseOptions?: CarapaceStateDatabaseOptions;
   } = {},
 ): OperatorApprovalRecord[] {
   expireDueOperatorApprovals({ nowMs: params.nowMs, databaseOptions: params.databaseOptions });
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
     const resultLimit = Math.max(
@@ -1600,7 +1600,7 @@ export function listTerminalOperatorApprovals(
     limit?: number;
     kind?: OperatorApprovalKind;
     nowMs?: number;
-    databaseOptions?: OpenClawStateDatabaseOptions;
+    databaseOptions?: CarapaceStateDatabaseOptions;
   } = {},
 ): ListTerminalOperatorApprovalsResult {
   const requestedLimit = Number.isSafeInteger(params.limit)
@@ -1612,7 +1612,7 @@ export function listTerminalOperatorApprovals(
   const retentionCutoffMs = (params.nowMs ?? Date.now()) - OPERATOR_APPROVAL_TERMINAL_RETENTION_MS;
   let cursor =
     params.cursor === undefined ? undefined : decodeOperatorApprovalHistoryCursor(params.cursor);
-  const database = openOpenClawStateDatabase(params.databaseOptions);
+  const database = openCarapaceStateDatabase(params.databaseOptions);
   const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
   const records: OperatorApprovalRecord[] = [];
   const pageSize = resultLimit + 1;
@@ -1682,7 +1682,7 @@ export function resolveOperatorApproval(params: {
   expectedKind?: OperatorApprovalKind;
   runtimeEpoch?: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   mcpToolGrant?: { agentId: string; server: string; tool: string };
   /** Cron-context allow-always mints this scoped grant in the same transaction. */
   standingGrant?: { kind: "cron" } & CronStandingGrantMintSpec & {
@@ -1695,7 +1695,7 @@ export function resolveOperatorApproval(params: {
     params.runtimeEpoch === undefined
       ? undefined
       : requireString(params.runtimeEpoch, "operator approval runtime epoch");
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     let row = selectOperatorApprovalRow(database, id);
     if (!row) {
@@ -1805,14 +1805,14 @@ export function forceDenyOperatorApproval(params: {
   expectedKind?: OperatorApprovalKind;
   runtimeEpoch?: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): ForceDenyOperatorApprovalResult {
   const id = requireApprovalId(params.id);
   const runtimeEpoch =
     params.runtimeEpoch === undefined
       ? undefined
       : requireString(params.runtimeEpoch, "operator approval runtime epoch");
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const row = selectOperatorApprovalRow(database, id);
     if (!row) {
@@ -1877,9 +1877,9 @@ export function forceDenyOperatorApproval(params: {
 
 export function expireDueOperatorApprovals(params: {
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): TerminalizeOperatorApprovalsResult {
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
     const dueRows = executeSqliteQuerySync(
@@ -1936,10 +1936,10 @@ export function expireDueOperatorApprovals(params: {
 export function closeOrphanedOperatorApprovals(params: {
   runtimeEpoch: string;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): TerminalizeOperatorApprovalsResult {
   const runtimeEpoch = requireString(params.runtimeEpoch, "operator approval runtime epoch");
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
     const orphanRows = executeSqliteQuerySync(
@@ -2006,7 +2006,7 @@ export function consumeOperatorApprovalAllowOnce(params: {
   runtimeEpoch?: string;
   redemptionWindowMs?: number;
   nowMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): ConsumeOperatorApprovalResult {
   const id = requireApprovalId(params.id);
   const consumerId = requireString(params.consumerId, "operator approval consumer id");
@@ -2017,7 +2017,7 @@ export function consumeOperatorApprovalAllowOnce(params: {
   if (params.redemptionWindowMs !== undefined && !isValidTimestamp(params.redemptionWindowMs)) {
     throw new Error("operator approval redemption window must be a non-negative safe integer");
   }
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const redemptionThresholdMs =
       params.redemptionWindowMs === undefined ? undefined : nowMs - params.redemptionWindowMs;
@@ -2101,13 +2101,13 @@ export function consumeOperatorApprovalAllowOnce(params: {
 export function pruneTerminalOperatorApprovals(params: {
   nowMs?: number;
   retentionMs?: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): number {
   const retentionMs = params.retentionMs ?? OPERATOR_APPROVAL_TERMINAL_RETENTION_MS;
   if (!Number.isSafeInteger(retentionMs) || retentionMs < 0) {
     throw new Error("operator approval retention must be a non-negative safe integer");
   }
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const nowMs = params.nowMs ?? Date.now();
     const cutoffMs = nowMs - retentionMs;
     const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);

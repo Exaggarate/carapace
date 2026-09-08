@@ -1,11 +1,11 @@
 // Sms tests cover twilio plugin behavior.
 import { createHmac } from "node:crypto";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { createMockIncomingRequest } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { createMockIncomingRequest } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cancelTrackedTextResponse } from "../../test-support/streaming-error-response.js";
 import { resolveTwilioStatusCallbackUrl } from "./public-webhook-url.js";
@@ -23,8 +23,8 @@ import type { ResolvedSmsAccount } from "./types.js";
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: (...args: unknown[]) => fetchWithSsrFGuardMock(...args),
@@ -380,7 +380,7 @@ describe("Twilio SMS helpers", () => {
     expect(resolveTwilioStatusCallbackUrl("   ")).toBe("");
   });
 
-  it("enforces OpenClaw's defensive 4,000-character status callback cap", () => {
+  it("enforces Carapace's defensive 4,000-character status callback cap", () => {
     const prefix = "https://gateway.example.com/webhooks/sms?x=";
     const suffix = "#rp=ct,rt,5xx&rt=5000&rc=1";
     const paddingLength = 4_000 - prefix.length - suffix.length;

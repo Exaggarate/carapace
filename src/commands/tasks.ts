@@ -1,9 +1,9 @@
 // Human-facing background task commands.
 // Handles task listing/show/cancel/notify/audit plus registry maintenance for tasks, flows, and sessions.
 
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateWithMarker } from "@openclaw/normalization-core/utf16-slice";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateWithMarker } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -76,7 +76,7 @@ function formatTaskLookupMiss(lookup: string): string {
   return formatLookupMiss({
     noun: "Task",
     value: sanitizeTerminalText(lookup),
-    listCommand: "openclaw tasks list",
+    listCommand: "carapace tasks list",
     valueLabel: "task id",
   });
 }
@@ -283,7 +283,7 @@ export async function tasksListCommand(
   }
   if (tasks.length === 0) {
     runtime.log(
-      `No background tasks found. Run ${formatCliCommand("openclaw tasks audit")} to check for stale task state.`,
+      `No background tasks found. Run ${formatCliCommand("carapace tasks audit")} to check for stale task state.`,
     );
     return;
   }
@@ -620,6 +620,6 @@ export async function tasksMaintenanceCommand(
     );
   }
   if (!opts.apply) {
-    runtime.log("Dry run only. Re-run with `openclaw tasks maintenance --apply` to write changes.");
+    runtime.log("Dry run only. Re-run with `carapace tasks maintenance --apply` to write changes.");
   }
 }

@@ -1,6 +1,6 @@
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createStartAccountContext } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BuzzBus } from "./buzz-bus.js";
 
@@ -50,7 +50,7 @@ const CHANNEL_ID = "7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c";
 const PRIVATE_KEY = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
 const BOT_PUBLIC_KEY = "a".repeat(64);
 
-function createBuzzConfig(name?: string): OpenClawConfig {
+function createBuzzConfig(name?: string): CarapaceConfig {
   return {
     channels: {
       buzz: {
@@ -60,10 +60,10 @@ function createBuzzConfig(name?: string): OpenClawConfig {
         groups: { [CHANNEL_ID]: {} },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function createUnavailableBuzzConfig(credential: "privateKey" | "authTag"): OpenClawConfig {
+function createUnavailableBuzzConfig(credential: "privateKey" | "authTag"): CarapaceConfig {
   vi.stubEnv("BUZZ_PRIVATE_KEY", PRIVATE_KEY);
   vi.stubEnv("BUZZ_AUTH_TAG", "ambient-auth-tag");
   return {
@@ -79,12 +79,12 @@ function createUnavailableBuzzConfig(credential: "privateKey" | "authTag"): Open
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function startTestGateway(
   options: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     accountId?: string;
     profileName?: string;
     setStatus?: Parameters<typeof startBuzzGatewayAccount>[0]["setStatus"];
@@ -116,7 +116,7 @@ function createMockBus(): BuzzBus {
     publicKey: BOT_PUBLIC_KEY,
     directory: new BuzzDirectoryState({
       publicKey: BOT_PUBLIC_KEY,
-      fallbackProfileName: "OpenClaw",
+      fallbackProfileName: "Carapace",
       channelIds: [CHANNEL_ID],
     }),
     refreshDirectory: vi.fn(async () => {}),

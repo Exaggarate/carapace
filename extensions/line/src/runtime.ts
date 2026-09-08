@@ -1,6 +1,6 @@
 // Line plugin module implements runtime behavior.
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
 
 type LineChannelRuntime = {
   buildTemplateMessageFromPayload?: typeof import("./template-messages.js").buildTemplateMessageFromPayload;

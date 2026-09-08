@@ -5,10 +5,10 @@ import path from "node:path";
 import type {
   ChannelDoctorAdapter,
   ChannelDoctorSequenceResult,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isPathStrictlyInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isPathStrictlyInside } from "carapace/plugin-sdk/file-access-runtime";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import {
   isValidAgentHarnessSessionStoreEntry,
   deleteSessionEntry,
@@ -16,12 +16,12 @@ import {
   loadTranscriptEventsSync,
   resolveSessionStoreBackupPaths,
   resolveStorePath,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract.js";
 
 const FEISHU_STATE_DIR = "feishu";
@@ -213,7 +213,7 @@ function isFeishuSessionEntry(key: string, value: unknown): boolean {
   );
 }
 
-function collectConfiguredAgentIds(cfg: OpenClawConfig): string[] {
+function collectConfiguredAgentIds(cfg: CarapaceConfig): string[] {
   const ids = new Set<string>();
   ids.add(resolveConfiguredDefaultAgentId(cfg));
   for (const agent of cfg.agents?.list ?? []) {
@@ -224,14 +224,14 @@ function collectConfiguredAgentIds(cfg: OpenClawConfig): string[] {
   return [...ids].toSorted();
 }
 
-function resolveConfiguredDefaultAgentId(cfg: OpenClawConfig): string {
+function resolveConfiguredDefaultAgentId(cfg: CarapaceConfig): string {
   const agents = cfg.agents?.list ?? [];
   const chosen = agents.find((agent) => agent?.default) ?? agents[0];
   return normalizeAgentId(typeof chosen?.id === "string" && chosen.id.trim() ? chosen.id : "main");
 }
 
 function collectFeishuSessionTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
 }): FeishuSessionTarget[] {
@@ -603,7 +603,7 @@ function collectRepairSessionEntries(
 }
 
 function inspectFeishuDoctorState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): FeishuDoctorInspection {
   const env = params.env ?? process.env;
@@ -740,7 +740,7 @@ function archiveSessionArtifacts(params: {
 }
 
 async function repairFeishuDoctorState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   now?: Date;
   inspection?: FeishuDoctorInspection;
@@ -872,7 +872,7 @@ function formatPreviewWarning(inspection: FeishuDoctorInspection): string {
     ...previewFindings,
     ...(remaining > 0 ? [`- ...and ${remaining} more Feishu state finding(s).`] : []),
     `- Repair will ${repairSummary}, while preserving Feishu App ID/secret config and healthy session entries.`,
-    '- Run "openclaw doctor --fix" to rebuild Feishu local state.',
+    '- Run "carapace doctor --fix" to rebuild Feishu local state.',
   ].join("\n");
 }
 
@@ -896,12 +896,12 @@ function formatRepairChange(report: FeishuDoctorRepairReport): string {
   ].join("\n");
 }
 
-function hasConfiguredFeishuChannel(cfg: OpenClawConfig): boolean {
+function hasConfiguredFeishuChannel(cfg: CarapaceConfig): boolean {
   return Boolean(cfg.channels?.feishu);
 }
 
 async function runFeishuDoctorSequence(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   shouldRepair: boolean;
 }): Promise<ChannelDoctorSequenceResult> {

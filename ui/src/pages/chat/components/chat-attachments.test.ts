@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import * as payloads from "../attachment-payload-store.ts";
 import {
@@ -77,13 +77,13 @@ function pasteEventWithFiles(files: File[]): ClipboardEvent {
 }
 
 describe("chat attachment read failures", () => {
-  let toastHost: HTMLElementTagNameMap["openclaw-toast-host"];
+  let toastHost: HTMLElementTagNameMap["carapace-toast-host"];
 
   beforeEach(() => {
     vi.stubGlobal("FileReader", StubFileReader as unknown as typeof FileReader);
     StubFileReader.failNames = new Set();
     StubFileReader.heldNames = new Set();
-    toastHost = document.createElement("openclaw-toast-host");
+    toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
   });
 

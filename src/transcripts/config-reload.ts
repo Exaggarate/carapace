@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { TranscriptsConfig } from "./config.js";
 
 function withoutTitles(config: TranscriptsConfig | undefined) {
@@ -29,13 +29,13 @@ export function transcriptCaptureConfigHash(config: TranscriptsConfig | undefine
 
 /** Compare authoritative config, including routing, credentials and full invitation URLs. */
 export function isTranscriptTitleOnlyConfigChange(
-  previous: OpenClawConfig | undefined,
-  candidate: OpenClawConfig | undefined,
+  previous: CarapaceConfig | undefined,
+  candidate: CarapaceConfig | undefined,
 ): boolean {
   if (!previous || !candidate || isDeepStrictEqual(previous.transcripts, candidate.transcripts)) {
     return false;
   }
-  const captureConfig = ({ transcripts, meta, ...config }: OpenClawConfig) => {
+  const captureConfig = ({ transcripts, meta, ...config }: CarapaceConfig) => {
     // Only writer bookkeeping is irrelevant to this reload decision. Other
     // metadata and every non-title config value retain their normal handling.
     const { lastTouchedVersion: _version, ...metadata } = meta ?? {};

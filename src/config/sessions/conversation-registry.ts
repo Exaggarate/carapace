@@ -1,14 +1,14 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  withOpenClawAgentDatabaseReadOnly,
-  type OpenClawAgentReadOnlyDatabase,
-} from "../../state/openclaw-agent-db-readonly.js";
+  withCarapaceAgentDatabaseReadOnly,
+  type CarapaceAgentReadOnlyDatabase,
+} from "../../state/carapace-agent-db-readonly.js";
 import {
-  getOpenClawAgentDatabaseIfOpen,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+  getCarapaceAgentDatabaseIfOpen,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import type { ConversationIdentity, ConversationKind } from "./conversation-identity.js";
 import {
   parseStoredConversationRouteContext,
@@ -58,7 +58,7 @@ export type ConversationRegistryScope = {
 
 export function resolveConversationRegistryScope(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): ConversationRegistryScope {
   const configuredStore = params.config.session?.store;
   return {
@@ -170,7 +170,7 @@ function selectConversationRows(
     ...(scope.storePath ? { storePath: scope.storePath } : {}),
   });
   const databaseOptions = toDatabaseOptions(resolved);
-  const readRows = (database: OpenClawAgentReadOnlyDatabase): ConversationRecord[] => {
+  const readRows = (database: CarapaceAgentReadOnlyDatabase): ConversationRecord[] => {
     const db = getSessionKysely(database.db);
     let query = db
       .selectFrom("conversations as c")
@@ -287,13 +287,13 @@ function selectConversationRows(
     const values = [...unique.values()].map(({ record }) => record);
     return options.limit === undefined ? values : values.slice(0, options.limit);
   };
-  const held = getOpenClawAgentDatabaseIfOpen(databaseOptions);
+  const held = getCarapaceAgentDatabaseIfOpen(databaseOptions);
   // Commit guards must see the owning transaction's rows without opening a
   // separate connection that would hide uncommitted conversation changes.
   if (held?.db.isTransaction) {
     return readRows(held);
   }
-  const read = withOpenClawAgentDatabaseReadOnly(readRows, databaseOptions);
+  const read = withCarapaceAgentDatabaseReadOnly(readRows, databaseOptions);
   return read.found ? read.value : [];
 }
 
@@ -311,7 +311,7 @@ export function registerConversationAddresses(
     ...(scope.env ? { env: scope.env } : {}),
     ...(scope.storePath ? { storePath: scope.storePath } : {}),
   });
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   for (const identity of identities) {
     upsertConversationIdentity(database, identity, discoveredAt);
   }

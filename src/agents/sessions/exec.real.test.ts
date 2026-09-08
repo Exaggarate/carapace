@@ -45,7 +45,7 @@ describe("execCommand process-tree cleanup", () => {
   });
 
   it("does not resolve a timeout while a SIGTERM-resistant descendant is alive", async () => {
-    const readyPath = join(tempDirs.make("openclaw-exec-tree-"), "ready.json");
+    const readyPath = join(tempDirs.make("carapace-exec-tree-"), "ready.json");
     const descendantScript = [
       "process.on('SIGTERM', () => {});",
       "setInterval(() => {}, 1000);",

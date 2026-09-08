@@ -14,11 +14,11 @@ import {
 } from "../config/sessions/transcript-write-context.js";
 import * as transcriptEvents from "../sessions/transcript-events.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   appendAssistantMirrorMessageByIdentity,
   appendSessionTranscriptMessageByIdentity,
@@ -39,17 +39,17 @@ import {
 describe("session transcript runtime SDK", () => {
   let tempDir: string;
   let storePath: string;
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "openclaw-sdk-transcript-", applyEnv: false });
+    state = await createCarapaceTestState({ prefix: "carapace-sdk-transcript-", applyEnv: false });
     tempDir = state.root;
     storePath = path.join(tempDir, "sessions.json");
   });
 
   afterEach(async () => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await state.cleanup();
   });
 
@@ -778,7 +778,7 @@ describe("session transcript runtime SDK", () => {
         agentId: "main",
         sessionId: "publish-session",
         sessionKey: "agent:main:main",
-        storePath: path.join(tempDir, "openclaw-agent.sqlite"),
+        storePath: path.join(tempDir, "carapace-agent.sqlite"),
       },
     });
     expect(internalUpdates).toEqual([
@@ -791,7 +791,7 @@ describe("session transcript runtime SDK", () => {
           agentId: "main",
           sessionId: "publish-session",
           sessionKey: "agent:main:main",
-          storePath: path.join(tempDir, "openclaw-agent.sqlite"),
+          storePath: path.join(tempDir, "carapace-agent.sqlite"),
         },
       },
     ]);
@@ -918,7 +918,7 @@ describe("session transcript runtime SDK", () => {
         agentId: "main",
         sessionId: "queued-publish-session",
         sessionKey: "agent:main:main",
-        storePath: path.join(tempDir, "openclaw-agent.sqlite"),
+        storePath: path.join(tempDir, "carapace-agent.sqlite"),
       },
     });
     await expect(readSessionTranscriptEvents(scope)).resolves.toEqual([

@@ -1,8 +1,8 @@
-// Temp home test helpers create isolated OpenClaw home directories for plugin tests.
+// Temp home test helpers create isolated Carapace home directories for plugin tests.
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import { cleanupSessionStateForTest } from "../../test-utils/session-state-cleanup.js";
 
@@ -18,9 +18,9 @@ const SHARED_HOME_ROOTS = new Map<string, SharedHomeRootState>();
 function setTempHome(base: string) {
   setTestEnvValue("HOME", base);
   setTestEnvValue("USERPROFILE", base);
-  // Ensure tests using HOME isolation aren't affected by leaked OPENCLAW_HOME.
-  deleteTestEnvValue("OPENCLAW_HOME");
-  setTestEnvValue("OPENCLAW_STATE_DIR", path.join(base, ".openclaw"));
+  // Ensure tests using HOME isolation aren't affected by leaked CARAPACE_HOME.
+  deleteTestEnvValue("CARAPACE_HOME");
+  setTestEnvValue("CARAPACE_STATE_DIR", path.join(base, ".carapace"));
 
   if (process.platform !== "win32") {
     return;
@@ -66,21 +66,21 @@ export async function withTempHomeCore<T>(
       throw new Error(`withTempHome: use built-in home env (got ${key})`);
     }
   }
-  const base = await allocateTempHomeBase(opts.prefix ?? "openclaw-test-home-");
+  const base = await allocateTempHomeBase(opts.prefix ?? "carapace-test-home-");
   const snapshot = captureEnv([
     "HOME",
     "USERPROFILE",
     "HOMEDRIVE",
     "HOMEPATH",
-    "OPENCLAW_HOME",
-    "OPENCLAW_STATE_DIR",
+    "CARAPACE_HOME",
+    "CARAPACE_STATE_DIR",
     ...envKeys,
   ]);
   let initialized = false;
   try {
     await fs.mkdir(base, { recursive: true });
     setTempHome(base);
-    await fs.mkdir(path.join(base, ".openclaw", "agents", "main", "sessions"), { recursive: true });
+    await fs.mkdir(path.join(base, ".carapace", "agents", "main", "sessions"), { recursive: true });
     if (opts.env) {
       for (const [key, raw] of Object.entries(opts.env)) {
         const value = typeof raw === "function" ? raw(base) : raw;
@@ -95,7 +95,7 @@ export async function withTempHomeCore<T>(
     return await fn(base);
   } finally {
     if (!opts.skipSessionCleanup) {
-      await cleanupSessionStateForTest({ stateDir: path.join(base, ".openclaw") }).catch(
+      await cleanupSessionStateForTest({ stateDir: path.join(base, ".carapace") }).catch(
         () => undefined,
       );
     }

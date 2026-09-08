@@ -1,7 +1,7 @@
 /** Writes, restores, and refreshes the installed plugin index in the state database. */
 import { existsSync } from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJson } from "@carapace/normalization-core/json-coercion";
 import {
   createPluginInstallRecordMap,
   inspectPluginInstallRecordMap,
@@ -16,8 +16,8 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import { resolveCompatibilityHostVersion } from "../version.js";
 import { withBundledPluginEnablementCompat } from "./bundled-compat.js";
 import { isBundledProviderCompatPlugin } from "./bundled-provider-compat.js";
@@ -70,7 +70,7 @@ export type InstalledPluginIndexWriteReceipt = {
   };
 };
 
-type InstalledPluginIndexDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type InstalledPluginIndexDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 type InstalledPluginIndexRow = Pick<
   InstalledPluginIndexDatabase["config_machine_state"],
   "state_key" | "value_json" | "updated_at_ms"
@@ -111,7 +111,7 @@ function assertWritableInstalledPluginIndexStoreOptions(
 ): void {
   if (options.filePath?.endsWith(".json")) {
     throw new Error(
-      "Explicit JSON installed plugin index paths are retired. Use the shared SQLite state DB or run openclaw doctor --fix to migrate legacy plugins/installs.json.",
+      "Explicit JSON installed plugin index paths are retired. Use the shared SQLite state DB or run carapace doctor --fix to migrate legacy plugins/installs.json.",
     );
   }
 }
@@ -197,7 +197,7 @@ function writePersistedInstalledPluginIndexToSqlite(
 ): InstalledPluginIndexWriteReceipt {
   assertWritableInstalledPluginIndexStoreOptions(options);
   const persisted = preparePersistedInstalledPluginIndex(index);
-  return runOpenClawStateWriteTransaction(({ db, path: databasePath }) => {
+  return runCarapaceStateWriteTransaction(({ db, path: databasePath }) => {
     const before = readInstalledPluginIndexRow(db);
     const previousRow = parseInstalledPluginIndexRow(before);
     if (previousRow) {
@@ -259,7 +259,7 @@ export async function restorePersistedInstalledPluginIndexIfCurrent(
   if (!existsSync(resolveInstalledPluginIndexStorePath(storeOptions))) {
     return false;
   }
-  const restored = runOpenClawStateWriteTransaction(({ db }) => {
+  const restored = runCarapaceStateWriteTransaction(({ db }) => {
     lease.assertOwnedInTransaction(db);
     const currentRow = parseInstalledPluginIndexRow(readInstalledPluginIndexRow(db));
     const currentRevision = currentRow ? currentRow.revision : null;
@@ -427,7 +427,7 @@ function resolveRefreshedPersistedInstalledPluginIndex(
     );
     if (foreignPluginIds.length > 0) {
       throw new Error(
-        `Plugin registry refresh cannot verify npm install ownership outside the selected state directory: ${foreignPluginIds.join(", ")}. Reinstall copied plugins in this state directory, then run \`openclaw plugins registry --refresh\` again.`,
+        `Plugin registry refresh cannot verify npm install ownership outside the selected state directory: ${foreignPluginIds.join(", ")}. Reinstall copied plugins in this state directory, then run \`carapace plugins registry --refresh\` again.`,
       );
     }
   }

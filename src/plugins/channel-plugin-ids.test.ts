@@ -1,7 +1,7 @@
 /** Tests channel plugin id resolution from config, manifests, and installed state. */
 import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { InstalledPluginIndex, InstalledPluginIndexRecord } from "./installed-plugin-index.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "./manifest-registry.js";
@@ -9,7 +9,7 @@ import { loadPluginMetadataSnapshot } from "./plugin-metadata-snapshot.js";
 
 const listPotentialConfiguredChannelIds = vi.hoisted(() => vi.fn());
 const listExplicitlyDisabledChannelIdsForConfig = vi.hoisted(() =>
-  vi.fn((config: OpenClawConfig) => {
+  vi.fn((config: CarapaceConfig) => {
     return Object.entries(config.channels ?? {})
       .filter(([, value]) => {
         return (
@@ -93,7 +93,7 @@ function withManifestLoadPaths<T extends { id: string }>(
   return {
     rootDir: `/tmp/plugins/${plugin.id}`,
     source: `/tmp/plugins/${plugin.id}/index.ts`,
-    manifestPath: `/tmp/plugins/${plugin.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/plugins/${plugin.id}/carapace.plugin.json`,
     skills: [],
     hooks: [],
     ...plugin,
@@ -410,8 +410,8 @@ function useManifestRegistryFixture(
 }
 
 function expectStartupPluginIds(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workerProviderIds?: readonly string[];
   expected: readonly string[];
@@ -508,12 +508,12 @@ function createStartupConfig(params: {
     };
   }
 
-  return config as OpenClawConfig;
+  return config as CarapaceConfig;
 }
 
 describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
   beforeEach(() => {
-    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: OpenClawConfig) => {
+    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: CarapaceConfig) => {
       if (Object.hasOwn(config, "channels")) {
         return Object.keys(config.channels ?? {});
       }
@@ -521,7 +521,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
     });
     listPotentialConfiguredChannelPresenceSignals
       .mockReset()
-      .mockImplementation((config: OpenClawConfig) => {
+      .mockImplementation((config: CarapaceConfig) => {
         return listPotentialConfiguredChannelIds(config).map((channelId: string) => ({
           channelId,
           source: "env",
@@ -547,7 +547,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
     ],
     [
       "keeps bundled startup sidecars with enabledByDefault at idle startup",
-      {} as OpenClawConfig,
+      {} as CarapaceConfig,
       ["demo-channel", "browser", "memory-core"],
     ],
     [
@@ -574,7 +574,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["demo-channel", "browser", "amazon-bedrock", "memory-core"],
     ],
     [
@@ -586,7 +586,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
         plugins: { entries: { "amazon-bedrock": { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["demo-channel", "browser", "memory-core"],
     ],
     [
@@ -594,17 +594,17 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       {
         channels: {},
         tts: { provider: "microsoft" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
       "activates the sole Talk speech provider from its capability alias",
-      { channels: {}, talk: { providers: { edge: {} } } } as OpenClawConfig,
+      { channels: {}, talk: { providers: { edge: {} } } } as CarapaceConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
       "activates the selected Talk realtime capability alias",
-      { channels: {}, talk: { realtime: { provider: "grok-voice" } } } as OpenClawConfig,
+      { channels: {}, talk: { realtime: { provider: "grok-voice" } } } as CarapaceConfig,
       ["browser", "xai", "memory-core"],
     ],
     [
@@ -612,7 +612,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       {
         channels: {},
         tts: { providers: { "tts-local-cli": { command: "say" } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "tts-local-cli", "memory-core"],
     ],
     [
@@ -620,7 +620,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       {
         channels: {},
         tts: { provider: "edge" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -629,7 +629,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         channels: {},
         tts: { provider: "gradium" },
         plugins: { entries: { gradium: { enabled: true } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "gradium", "memory-core"],
     ],
     [
@@ -645,7 +645,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -663,7 +663,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           list: [{ id: "reader", tts: { persona: "narrator" } }],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -680,7 +680,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["demo-channel", "browser", "microsoft", "memory-core"],
     ],
     [
@@ -701,7 +701,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["demo-channel", "browser", "microsoft", "memory-core"],
     ],
     [
@@ -712,7 +712,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           provider: "microsoft",
           providers: { microsoft: { enabled: false } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -721,7 +721,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         channels: {},
         tts: { provider: "microsoft" },
         plugins: { entries: { microsoft: { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -740,7 +740,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "google", "memory-core"],
     ],
     [
@@ -755,7 +755,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
         plugins: { entries: { google: { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -770,7 +770,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "google", "memory-core"],
     ],
     [
@@ -783,7 +783,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
         plugins: { entries: { openai: { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -795,7 +795,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -807,7 +807,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           allow: ["memory-core"],
           slots: { memory: "memory-core" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["memory-core"],
     ],
     [
@@ -819,7 +819,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -829,7 +829,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           list: [{ id: "researcher", memory: { search: { provider: "openai" } } }],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -850,7 +850,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "ollama", "memory-core"],
     ],
     [
@@ -871,7 +871,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -883,7 +883,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "generic-embedding", "memory-core"],
     ],
     [
@@ -895,7 +895,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -916,7 +916,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -931,7 +931,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         plugins: {
           slots: { memory: "none" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser"],
     ],
     [
@@ -943,7 +943,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -955,7 +955,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "llama-cpp", "memory-core"],
     ],
     [
@@ -967,7 +967,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -980,7 +980,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           defaults: {},
         },
         plugins: { entries: { openai: { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -993,7 +993,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           defaults: {},
         },
         plugins: { deny: ["openai"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -1008,7 +1008,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             { id: "researcher", memory: { search: { provider: "openai", fallback: "ollama" } } },
           ],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -1021,7 +1021,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           defaults: {},
           list: [{ id: "researcher", memory: { search: { enabled: true } } }],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -1037,7 +1037,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             { id: "researcher", memory: { search: { provider: "ollama" } } },
           ],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -1050,7 +1050,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           defaults: {},
           list: [{ id: "researcher" }],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -1073,7 +1073,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["brave"],
     ],
     [
@@ -1096,7 +1096,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       [],
     ],
     [
@@ -1119,7 +1119,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       [],
     ],
     [
@@ -1134,7 +1134,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
         plugins: { allow: ["browser"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser"],
     ],
     [
@@ -1153,7 +1153,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "external-env-channel-plugin", "memory-core"],
     ],
     [
@@ -1167,7 +1167,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -1210,7 +1210,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "memory-core"],
     });
   });
@@ -1219,7 +1219,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
     const registry = createManifestRegistryFixture();
     registry.plugins.push(
       withManifestLoadPaths({
-        id: "openclaw-qqbot",
+        id: "carapace-qqbot",
         channels: ["qqbot"],
         channelConfigs: {
           qqbot: {
@@ -1236,8 +1236,8 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
     const index = createInstalledPluginIndexFixture(registry);
     const sourceConfig = {
       channels: { qqbot: { appId: "app", clientSecret: "secret" } },
-      plugins: { entries: { "openclaw-qqbot": { enabled: true } } },
-    } as OpenClawConfig;
+      plugins: { entries: { "carapace-qqbot": { enabled: true } } },
+    } as CarapaceConfig;
     const runtimeConfig = applyPluginAutoEnable({
       config: sourceConfig,
       env: createPluginPlanningTestEnv(),
@@ -1253,7 +1253,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         index,
         manifestRegistry: registry,
       }).pluginIds,
-    ).toContain("openclaw-qqbot");
+    ).toContain("carapace-qqbot");
   });
 
   it("loads configured worker-provider owners from the activation source", () => {
@@ -1265,7 +1265,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           secondary: { provider: "STATIC-SSH" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: activationSourceConfig,
@@ -1279,7 +1279,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       channels: {},
       cloudWorkers: { profiles: { development: { provider: "static-ssh" } } },
       plugins: { allow: ["browser"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const effectiveConfig = applyPluginAutoEnable({
       config: authoredConfig,
       env: createPluginPlanningTestEnv(),
@@ -1295,7 +1295,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
 
   it("loads bundled worker-provider owners required by durable environments", () => {
     expectStartupPluginIds({
-      config: { channels: {} } as OpenClawConfig,
+      config: { channels: {} } as CarapaceConfig,
       workerProviderIds: [" Static-SSH ", "STATIC-SSH"],
       expected: ["browser", "memory-core", "qa-lab"],
     });
@@ -1303,7 +1303,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
 
   it("keeps durable external worker-provider owners behind explicit enablement", () => {
     expectStartupPluginIds({
-      config: { channels: {} } as OpenClawConfig,
+      config: { channels: {} } as CarapaceConfig,
       workerProviderIds: ["external-ssh"],
       expected: ["browser", "memory-core"],
     });
@@ -1311,7 +1311,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       config: {
         channels: {},
         plugins: { entries: { "external-worker-provider": { enabled: true } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       workerProviderIds: ["external-ssh"],
       expected: ["browser", "memory-core", "external-worker-provider"],
     });
@@ -1326,7 +1326,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         },
       },
       plugins: { entries: { "qa-lab": { enabled: false } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config,
@@ -1344,7 +1344,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         },
       },
       plugins: { allow: ["browser"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config,
@@ -1355,7 +1355,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
 
   it("keeps durable worker-provider owners behind disable and allowlist gates", () => {
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { enabled: false } } as OpenClawConfig,
+      config: { channels: {}, plugins: { enabled: false } } as CarapaceConfig,
       workerProviderIds: ["static-ssh"],
       expected: [],
     });
@@ -1363,17 +1363,17 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       config: {
         channels: {},
         plugins: { entries: { "qa-lab": { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser", "memory-core"],
     });
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { deny: ["qa-lab"] } } as OpenClawConfig,
+      config: { channels: {}, plugins: { deny: ["qa-lab"] } } as CarapaceConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser", "memory-core"],
     });
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { allow: ["browser"] } } as OpenClawConfig,
+      config: { channels: {}, plugins: { allow: ["browser"] } } as CarapaceConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser"],
     });
@@ -1396,7 +1396,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1419,7 +1419,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       plugins: {
         allow: ["browser"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const effectiveConfig = {
       ...rawConfig,
       plugins: {
@@ -1430,7 +1430,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1450,7 +1450,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeConfig = {
       ...activationSourceConfig,
       plugins: {
@@ -1466,7 +1466,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1587,7 +1587,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         plugins: {
           slots: { memory: "none" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     ],
     [
       "selected provider",
@@ -1630,7 +1630,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "demo-config-startup"],
     });
   });
@@ -1648,7 +1648,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "external-config-startup"],
     });
 
@@ -1663,7 +1663,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser"],
     });
   });
@@ -1673,7 +1673,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       enabled: true,
       config: { autoStart: { enabled: true } },
     };
-    const cases: Array<{ plugins: OpenClawConfig["plugins"]; expected: readonly string[] }> = [
+    const cases: Array<{ plugins: CarapaceConfig["plugins"]; expected: readonly string[] }> = [
       {
         plugins: {
           slots: { memory: "none" },
@@ -1714,7 +1714,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
 
     for (const testCase of cases) {
       expectStartupPluginIds({
-        config: { channels: {}, plugins: testCase.plugins } as OpenClawConfig,
+        config: { channels: {}, plugins: testCase.plugins } as CarapaceConfig,
         expected: testCase.expected,
       });
     }
@@ -1733,14 +1733,14 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeConfig = {
       ...activationSourceConfig,
       plugins: {
         ...activationSourceConfig.plugins,
         allow: ["browser", "external-config-startup"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1880,7 +1880,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeConfig = {
       channels: {},
       plugins: {
@@ -1897,7 +1897,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1913,7 +1913,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         defaultProfile: "docker-cdp",
       },
       channels: {},
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const effectiveConfig = {
       ...rawConfig,
       plugins: {
@@ -1923,7 +1923,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1969,7 +1969,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       { channelId: "demo-channel", source: "env" },
     ]);
 
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
 
     expectStartupPluginIds({
       config,
@@ -1991,7 +1991,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         plugins: {
           allow: ["browser"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: createPluginPlanningTestEnv(),
       expected: ["demo-channel", "browser"],
     });
@@ -2015,7 +2015,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2039,7 +2039,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2066,7 +2066,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2092,7 +2092,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "memory-core",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2108,7 +2108,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         config: {
           channels: {},
           plugins: { allow: ["browser"], slots: { memory: "none" } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
         workerProviderIds: ["static-ssh"],
@@ -2126,7 +2126,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           channels: {},
           cloudWorkers: { profiles: { development: { provider: "static-ssh" } } },
           plugins: { allow: ["browser"], slots: { memory: "none" } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2152,7 +2152,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2194,7 +2194,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2234,7 +2234,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           plugins: {
             allow: ["openai"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2252,7 +2252,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             allow: ["browser"],
             bundledDiscovery: "compat",
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2274,7 +2274,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
           plugins: {
             allow: ["browser"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2290,7 +2290,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             token: "stale",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: createPluginPlanningTestEnv(),
       expected: ["browser", "memory-core"],
     });
@@ -2299,14 +2299,14 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
   it("does not treat persisted auth alone as gateway startup intent", () => {
     listPotentialConfiguredChannelIds.mockImplementation(
       (
-        configForTest: OpenClawConfig,
+        configForTest: CarapaceConfig,
         _env: NodeJS.ProcessEnv,
         options?: { includePersistedAuthState?: boolean },
       ) => (options?.includePersistedAuthState === false ? [] : ["demo-channel"]),
     );
     listPotentialConfiguredChannelPresenceSignals.mockImplementation(
       (
-        _configForTest: OpenClawConfig,
+        _configForTest: CarapaceConfig,
         _env: NodeJS.ProcessEnv,
         options?: { includePersistedAuthState?: boolean },
       ) =>
@@ -2316,9 +2316,9 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
     );
 
     expectStartupPluginIds({
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       env: createPluginPlanningTestEnv({
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-with-persisted-demo-channel",
+        CARAPACE_STATE_DIR: "/tmp/carapace-with-persisted-demo-channel",
       }),
       expected: ["browser", "memory-core"],
     });
@@ -2339,7 +2339,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       ],
       diagnostics: [],
     });
-    const startupConfig: OpenClawConfig = {
+    const startupConfig: CarapaceConfig = {
       channels: {},
       plugins: { enabled: false, slots: { memory: "none" } },
     };
@@ -2356,7 +2356,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       [startupConfig, []],
       [{ channels: {}, plugins: { slots: { memory: "none" } } }, ["startup-owner"]],
       [{ channels: {}, plugins: { deny: ["startup-owner"] } }, []],
-    ] satisfies Array<[OpenClawConfig, string[]]>) {
+    ] satisfies Array<[CarapaceConfig, string[]]>) {
       const result = loadGatewayStartupPluginPlanWithMetadata({
         config,
         env: {},
@@ -2381,7 +2381,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             token: "configured",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: createPluginPlanningTestEnv(),
       index,
       manifestRegistry: registry,
@@ -2405,7 +2405,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
         plugins: {
           allow: ["workspace-demo-channel-plugin"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: createPluginPlanningTestEnv(),
       index,
       manifestRegistry: registry,
@@ -2435,7 +2435,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "memory-core", "memory-lancedb"],
     });
   });
@@ -2455,7 +2455,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
               "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2474,7 +2474,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "memory-lancedb"],
     });
   });
@@ -2491,7 +2491,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["browser", "memory-lancedb"],
     });
   });
@@ -2588,7 +2588,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             codex: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "openai", "codex", "memory-core"],
     });
   });
@@ -2613,23 +2613,23 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "anthropic", "openai", "codex", "memory-core"],
     });
   });
 
-  it("does not include Codex when an OpenAI model is manually pinned to OpenClaw", () => {
+  it("does not include Codex when an OpenAI model is manually pinned to Carapace", () => {
     expectStartupPluginIds({
       config: {
         agents: {
           defaults: {
             model: { primary: "openai/gpt-5.5" },
             models: {
-              "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "openai", "memory-core"],
     });
   });
@@ -2649,7 +2649,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
       config: createStartupConfig({
         enabledPluginIds: ["codex"],
       }),
-      env: { OPENCLAW_AGENT_RUNTIME: "codex" },
+      env: { CARAPACE_AGENT_RUNTIME: "codex" },
       expected: ["demo-channel", "browser", "memory-core"],
     });
   });
@@ -2681,7 +2681,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             "demo-provider-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "demo-provider-plugin", "memory-core"],
     });
   });
@@ -2696,7 +2696,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "anthropic", "memory-core"],
     });
   });
@@ -2732,7 +2732,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "memory-core"],
     });
   });
@@ -2754,7 +2754,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: ["demo-channel", "browser", "openai", "memory-core"],
     });
   });
@@ -2762,7 +2762,7 @@ describe("resolveGatewayStartupPluginIdsFromRegistry", () => {
 
 describe("resolveConfiguredChannelPluginIds", () => {
   beforeEach(() => {
-    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: OpenClawConfig) => {
+    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: CarapaceConfig) => {
       if (Object.hasOwn(config, "channels")) {
         return Object.keys(config.channels ?? {});
       }
@@ -2770,7 +2770,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
     });
     listPotentialConfiguredChannelPresenceSignals
       .mockReset()
-      .mockImplementation((config: OpenClawConfig) => {
+      .mockImplementation((config: CarapaceConfig) => {
         return listPotentialConfiguredChannelIds(config).map((channelId: string) => ({
           channelId,
           source: "config",
@@ -2798,7 +2798,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "demo-channel": { token: "configured" } },
         plugins: { allow: ["browser"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {},
       expected: ["demo-channel"],
     },
@@ -2807,7 +2807,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { deny: ["activation-only-channel-plugin"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: [],
     },
     {
@@ -2815,7 +2815,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { enabled: false },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: [],
     },
     {
@@ -2852,13 +2852,13 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { entries: { "activation-only-channel-plugin": { enabled: false } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expected: [],
     },
   ] satisfies Array<{
     name: string;
-    config: OpenClawConfig;
-    activationSourceConfig?: OpenClawConfig;
+    config: CarapaceConfig;
+    activationSourceConfig?: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
     expected: string[];
   }>)("$name", ({ config, activationSourceConfig, env, expected }) => {
@@ -2893,7 +2893,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -2908,7 +2908,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -2930,7 +2930,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -2971,11 +2971,11 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["external-env-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com",
-          EXTERNAL_ENV_CHANNEL_NICK: "openclaw",
+          EXTERNAL_ENV_CHANNEL_NICK: "carapace",
         } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
         ambientEnvTriggers: "suppress",
@@ -2994,7 +2994,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           channels: {
             "demo-channel": { enabled: true },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: { DEMO_FAKE_TEST_TRIGGER: "present" } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
@@ -3027,7 +3027,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -3046,7 +3046,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3069,7 +3069,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3085,7 +3085,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "stale-token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listExplicitConfiguredChannelIdsForConfig(config)).toStrictEqual([]);
     expect(
@@ -3126,7 +3126,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveConfiguredChannelPresencePolicy({
@@ -3171,7 +3171,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3190,7 +3190,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["external-env-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_TOKEN: "present",
@@ -3205,7 +3205,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
       plugins: {
         allow: ["external-env-channel-plugin"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       listConfiguredChannelIdsForReadOnlyScope({
@@ -3223,7 +3223,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com",
-          EXTERNAL_ENV_CHANNEL_NICK: "openclaw",
+          EXTERNAL_ENV_CHANNEL_NICK: "carapace",
         } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
       }),
@@ -3237,7 +3237,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
 
     expect(
       resolveConfiguredChannelPresencePolicy({
-        config: { plugins: { allow: ["external-env-channel-plugin"] } } as OpenClawConfig,
+        config: { plugins: { allow: ["external-env-channel-plugin"] } } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: { EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com" },
         includePersistedAuthState: false,
@@ -3255,7 +3255,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
         config: {
           channels: { "external-env-channel": { token: "configured" } },
           plugins: { allow: ["external-env-channel-plugin"] },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: { EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com" },
         includePersistedAuthState: false,
@@ -3296,7 +3296,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
         }),
         rootDir: slackRoot,
       } satisfies PluginManifestRecord;
-      const config = { plugins: { allow: ["slack"] } } as OpenClawConfig;
+      const config = { plugins: { allow: ["slack"] } } as CarapaceConfig;
 
       expect(
         resolveConfiguredChannelPresencePolicy({
@@ -3335,7 +3335,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
       plugins: {
         allow: ["browser"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveConfiguredChannelPresencePolicy({
@@ -3377,7 +3377,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               token: "configured",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3402,7 +3402,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3420,7 +3420,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["demo-channel"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3449,7 +3449,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
             enabled: false,
           },
         },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
     ).toEqual(["demo-channel", "trimmed-channel"]);
   });
 
@@ -3475,7 +3475,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "ambient",
@@ -3502,7 +3502,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["demo-other-channel"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "ambient",
@@ -3520,7 +3520,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               token: "configured",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3534,7 +3534,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "configured",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       listConfiguredAnnounceChannelIdsForConfig({
@@ -3543,7 +3543,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3556,7 +3556,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["clickclack"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3573,7 +3573,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3586,7 +3586,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["slack"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3600,7 +3600,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "configured",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       listConfiguredAnnounceChannelIdsForConfig({
@@ -3609,7 +3609,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3622,7 +3622,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["demo-channel"],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3639,7 +3639,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3665,7 +3665,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {},
         manifestRecords: [
@@ -3706,7 +3706,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         workspaceDir: "/tmp",
         env: {
           ACTIVATION_ONLY_CHANNEL_TOKEN: "ambient",

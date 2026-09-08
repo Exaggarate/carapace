@@ -55,7 +55,7 @@ describe("AppSidebar new group dialog", () => {
 
   it("moves captured sessions even when both leave the bounded list mid-write", async () => {
     const restoreDialogPolyfill = installDialogPolyfill();
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     await toastHost.updateComplete;
     try {
@@ -90,7 +90,7 @@ describe("AppSidebar new group dialog", () => {
       // so waiting on that keeps the negative assertions below from passing
       // before the continuation has had a chance to patch anything.
       await waitForFast(() =>
-        expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull(),
+        expect(document.body.querySelector("carapace-modal-dialog")).toBeNull(),
       );
       expect(harness.patchMany).toHaveBeenCalledWith(
         [
@@ -151,7 +151,7 @@ describe("AppSidebar new group dialog", () => {
 
       await waitForFast(() =>
         expect(
-          document.body.querySelector("openclaw-modal-dialog [role=alert]")?.textContent,
+          document.body.querySelector("carapace-modal-dialog [role=alert]")?.textContent,
         ).toContain(failure),
       );
       expect(harness.patchMany).toHaveBeenCalledWith(
@@ -164,10 +164,10 @@ describe("AppSidebar new group dialog", () => {
       expect(harness.patch).not.toHaveBeenCalled();
       expect(harness.refreshReplacement).toHaveBeenCalledOnce();
       document.body
-        .querySelector<HTMLButtonElement>('openclaw-modal-dialog button[type="button"]')
+        .querySelector<HTMLButtonElement>('carapace-modal-dialog button[type="button"]')
         ?.click();
       await waitForFast(() =>
-        expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull(),
+        expect(document.body.querySelector("carapace-modal-dialog")).toBeNull(),
       );
     } finally {
       restoreDialogPolyfill();

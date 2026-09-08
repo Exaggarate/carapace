@@ -4,13 +4,13 @@ import {
   formatErrorMessage,
   PlatformMessageNotDispatchedError,
   readErrorName,
-} from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { classifyTransientNetworkErrorCode } from "openclaw/plugin-sdk/retry-runtime";
+} from "carapace/plugin-sdk/error-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { classifyTransientNetworkErrorCode } from "carapace/plugin-sdk/retry-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const TELEGRAM_SUPERGROUP_MIGRATION_DESCRIPTION =
   "Bad Request: group chat was upgraded to a supergroup chat";

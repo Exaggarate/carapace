@@ -1,4 +1,4 @@
-import { truncateWithMarker } from "@openclaw/normalization-core/utf16-slice";
+import { truncateWithMarker } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { redactSensitiveText } from "../logging/redact.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -12,11 +12,11 @@ import type {
 type NoticeSource = { notices?: readonly string[] } | undefined;
 
 const STARTUP_MIGRATION_FOLLOW_UP =
-  'Run "openclaw doctor --fix" against the same state/config, then restart the gateway.';
+  'Run "carapace doctor --fix" against the same state/config, then restart the gateway.';
 
 export function formatStartupMigrationFailure(errors: readonly string[]): string {
   return [
-    "OpenClaw startup migrations did not complete cleanly; refusing to report the gateway ready.",
+    "Carapace startup migrations did not complete cleanly; refusing to report the gateway ready.",
     ...errors.map((error) => `- ${error}`),
     STARTUP_MIGRATION_FOLLOW_UP,
   ].join("\n");

@@ -14,7 +14,7 @@ import {
   WORKSPACE_CONTENT_RELOCATION_MIGRATION_KIND,
 } from "../agents/workspace-state-store.js";
 import { ensureAgentWorkspace, WORKSPACE_VANISHED_ERROR_CODE } from "../agents/workspace.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   autoMigrateLegacyState,
   detectLegacyStateMigrations,
@@ -29,14 +29,14 @@ import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
 import { hashSkillProposalContent, importLegacySkillProposal } from "../skills/workshop/store.js";
 import type { SkillProposalRecord } from "../skills/workshop/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  repairOpenClawStateDatabaseSchemaIfNeeded,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  repairCarapaceStateDatabaseSchemaIfNeeded,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { migrateLegacySkillWorkshopProposals } from "./doctor-skill-workshop-sqlite.js";
 import {
   createAppliedLegacyProposal,
@@ -45,22 +45,22 @@ import {
   seedLegacyV15ProposalRows,
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 beforeEach(async () => {
   resetLegacyWorkspaceStateCheckForTest();
-  state = await createOpenClawTestState({ label: "workshop-workspace-relocation" });
+  state = await createCarapaceTestState({ label: "workshop-workspace-relocation" });
 });
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetLegacyWorkspaceStateCheckForTest();
   await state.cleanup();
 });
 
 async function createLegacyWorkspace(userContent = false, skillsPath = "skills") {
   const workspaceDir = state.workspaceDir;
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       defaults: { skipBootstrap: true },
       entries: { main: { workspace: workspaceDir } },
@@ -229,7 +229,7 @@ describe("Workshop relocation and workspace survival", () => {
 
   it("captures a new attestation only for remaining filesystem moves", async () => {
     const fixture = await createLegacyWorkspace();
-    repairOpenClawStateDatabaseSchemaIfNeeded({ env: state.env });
+    repairCarapaceStateDatabaseSchemaIfNeeded({ env: state.env });
     deleteWorkspaceState(prepareWorkspaceStateDeletion(fixture.workspaceDir));
     const before = readWorkspaceStateSnapshot(fixture.workspaceDir);
     expect(before.attestation).toBeUndefined();
@@ -265,7 +265,7 @@ describe("Workshop relocation and workspace survival", () => {
     await interruptPendingWrite({ ...fixture, before });
 
     await expect(fs.readFile(skillFile, "utf8")).resolves.toBe(content);
-    const receipts = openOpenClawStateDatabase({ env: state.env }).db.prepare(`
+    const receipts = openCarapaceStateDatabase({ env: state.env }).db.prepare(`
       SELECT status,
         json_extract(report_json, '$.attestedAtMs') AS attested_at_ms,
         json_array_length(report_json, '$.moves') AS move_count,
@@ -308,7 +308,7 @@ describe("Workshop relocation and workspace survival", () => {
         target: {
           skillDir: destination,
           skillFile: path.join(destination, "SKILL.md"),
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       });
     }
@@ -327,7 +327,7 @@ describe("Workshop relocation and workspace survival", () => {
   it("resumes saved workspace cleanup after a pending proposal write interrupts relocation", async () => {
     const fixture = await createLegacyWorkspace();
     await interruptPendingWrite(fixture);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     await migrateLegacySkillWorkshopProposals({ config: fixture.config, env: state.env });
 
@@ -338,7 +338,7 @@ describe("Workshop relocation and workspace survival", () => {
   it("revokes pending relocation cleanup when the workspace is reset", async () => {
     const fixture = await createLegacyWorkspace();
     await interruptPendingWrite(fixture);
-    const database = openOpenClawStateDatabase({ env: state.env });
+    const database = openCarapaceStateDatabase({ env: state.env });
     const receipts = database.db.prepare(
       "SELECT source_key, status FROM migration_sources WHERE migration_kind = ? AND source_path = ?",
     );
@@ -358,7 +358,7 @@ describe("Workshop relocation and workspace survival", () => {
     const refreshed = readWorkspaceStateSnapshot(fixture.workspaceDir).attestation;
     expect(refreshed).toBeDefined();
     await fs.rm(projectFile);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     await migrateLegacySkillWorkshopProposals({ config: fixture.config, env: state.env });
 
@@ -381,7 +381,7 @@ describe("Workshop relocation and workspace survival", () => {
       if (condition === "recreated") {
         await fs.rename(replacement, fixture.workspaceDir);
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       await migrateLegacySkillWorkshopProposals({ config: fixture.config, env: state.env });
 
@@ -424,7 +424,7 @@ describe("Workshop relocation and workspace survival", () => {
         generatedHashes: new Map(),
         nowMs: refreshedAtMs,
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       await migrateLegacySkillWorkshopProposals({ config: fixture.config, env: state.env });
 

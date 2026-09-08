@@ -146,7 +146,7 @@ export function renderApplicationShell(host: ShellViewHost) {
   const homePanelAvailable = isHomePanelAvailable(context.gateway);
   const custodianPanelAvailable =
     // Scope-aware to match the store: admin-only, never advertisement alone.
-    canCallGatewayMethod(gatewaySnapshot, "openclaw.chat", "operator.admin");
+    canCallGatewayMethod(gatewaySnapshot, "carapace.chat", "operator.admin");
   const lazyElementState = host.lazyCustomElements.visibleState;
   const activeRoute = host.routeState.routeId ?? "chat";
   const sessionRoute = isSessionRouteId(activeRoute);
@@ -382,26 +382,26 @@ export function renderApplicationShell(host: ShellViewHost) {
     }
     ${
       isOptionalElementDefined(host.commandPaletteElement)
-        ? html`<openclaw-command-palette
+        ? html`<carapace-command-palette
             .desktopAvailable=${desktopPanelAvailable}
             .custodianAvailable=${custodianPanelAvailable}
             .onNavigate=${(routeId: RouteId, options?: ApplicationNavigationOptions) =>
               host.navigate(routeId, options)}
             .onSelectSession=${(sessionKey: string) => host.selectChatSession(sessionKey)}
             .onSlashCommand=${(command: string) => host.handleCommandPaletteSlashCommand(command)}
-          ></openclaw-command-palette>`
+          ></carapace-command-palette>`
         : nothing
     }
     ${
       isOptionalElementDefined(DEBUG_OVERLAY_ELEMENT)
-        ? html`<openclaw-debug-overlay></openclaw-debug-overlay>`
+        ? html`<carapace-debug-overlay></carapace-debug-overlay>`
         : nothing
     }
     ${
       !nativeEmbed && isOptionalElementDefined(KEYBOARD_SHORTCUTS_ELEMENT)
-        ? html`<openclaw-keyboard-shortcuts-dialog
+        ? html`<carapace-keyboard-shortcuts-dialog
             .sendShortcut=${normalizeChatSendShortcut(uiSettings.chatSendShortcut)}
-          ></openclaw-keyboard-shortcuts-dialog>`
+          ></carapace-keyboard-shortcuts-dialog>`
         : nothing
     }
     <div
@@ -421,7 +421,7 @@ export function renderApplicationShell(host: ShellViewHost) {
       ${
         nativeWebChrome && !onboarding
           ? html`
-              <openclaw-macos-titlebar-controls
+              <carapace-macos-titlebar-controls
                 ?inert=${navDrawerOpen}
                 .navCollapsed=${host.nativeNavCollapsed()}
                 .historyOnly=${settingsTakeover}
@@ -433,27 +433,27 @@ export function renderApplicationShell(host: ShellViewHost) {
                 .onToggleSidebar=${() => host.toggleNavigationSurface()}
                 .onOpenPalette=${() => host.openPalette()}
                 .onOpenNewSession=${() => host.handleNativeNewSession()}
-              ></openclaw-macos-titlebar-controls>
+              ></carapace-macos-titlebar-controls>
             `
           : nothing
       }
       ${
         nativeEmbed
           ? nothing
-          : html`<openclaw-app-topbar
+          : html`<carapace-app-topbar
               ?inert=${navDrawerOpen}
               .resourceBasePath=${context.resourceBasePath}
               .environment=${config.environment}
               .navDrawerOpen=${navDrawerOpen}
               .onOpenPalette=${() => host.openPalette()}
               .onToggleDrawer=${(trigger: HTMLElement) => host.toggleNavigationSurface(trigger)}
-            ></openclaw-app-topbar>`
+            ></carapace-app-topbar>`
       }
       ${
         !nativeEmbed && navCollapsed && !onboarding && !settingsTakeover && !mobileNavLayout
           ? html`
               <div class="shell-chrome-controls">
-                <openclaw-tooltip
+                <carapace-tooltip
                   .content=${`${t("nav.expand")} (${formatKeyboardShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.toggleSidebar)})`}
                 >
                   <button
@@ -468,7 +468,7 @@ export function renderApplicationShell(host: ShellViewHost) {
                   >
                     ${icons.panelLeftOpen}
                   </button>
-                </openclaw-tooltip>
+                </carapace-tooltip>
                 ${renderNewSessionLink({
                   basePath: context.basePath,
                   agentId: selectedAgentId,
@@ -477,7 +477,7 @@ export function renderApplicationShell(host: ShellViewHost) {
                   disabledReason: newSessionAccess.allowed ? undefined : newSessionAccess.reason,
                   onOpen: openNewSession,
                 })}
-                <openclaw-tooltip
+                <carapace-tooltip
                   .content=${`${t("chat.openCommandPalette")} (${formatKeyboardShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.commandPalette)})`}
                 >
                   <button
@@ -488,7 +488,7 @@ export function renderApplicationShell(host: ShellViewHost) {
                   >
                     ${icons.search}
                   </button>
-                </openclaw-tooltip>
+                </carapace-tooltip>
                 ${renderCollapsedAssistantToggles({
                   homeAvailable: homePanelAvailable,
                   custodianAvailable: custodianPanelAvailable,
@@ -588,7 +588,7 @@ export function renderApplicationShell(host: ShellViewHost) {
           onOpenApprovals: () => host.openApprovals(),
         })}
         ${nativeEmbed ? navigationContent : nothing}
-        <openclaw-router-outlet
+        <carapace-router-outlet
           ?inert=${pageActionsBlocked || reloadRequired}
           aria-disabled=${pageActionsBlocked || reloadRequired ? "true" : nothing}
           .router=${runtime.router}
@@ -596,9 +596,9 @@ export function renderApplicationShell(host: ShellViewHost) {
           .retentionScope=${gatewayPresentationScope(context.gateway)}
           .onNotFound=${() => host.replaceChatWithCurrentSession()}
           .notFoundRecoveryReady=${gatewayConnected}
-        ></openclaw-router-outlet>
+        ></carapace-router-outlet>
       </main>
-      <openclaw-terminal-panel
+      <carapace-terminal-panel
         ?inert=${navDrawerOpen}
         .client=${gatewayConnected ? gatewaySnapshot.client : null}
         .available=${terminalAvailable}
@@ -607,12 +607,12 @@ export function renderApplicationShell(host: ShellViewHost) {
         .suppressed=${settingsTakeover || nativeEmbed}
         .themeMode=${context.theme.resolvedMode}
         .basePath=${context.basePath}
-      ></openclaw-terminal-panel>
+      ></carapace-terminal-panel>
       ${
         sessionRoute
           ? nothing
           : html`
-              <openclaw-browser-panel
+              <carapace-browser-panel
                 ?inert=${navDrawerOpen}
                 data-chat-autotype-exempt
                 .client=${gatewayConnected ? gatewaySnapshot.client : null}
@@ -625,18 +625,18 @@ export function renderApplicationShell(host: ShellViewHost) {
                   settings: { token: context.gateway.connection.token },
                   password: context.gateway.connection.password,
                 })}
-              ></openclaw-browser-panel>
-              <openclaw-desktop-panel
+              ></carapace-browser-panel>
+              <carapace-desktop-panel
                 ?inert=${navDrawerOpen}
                 data-chat-autotype-exempt
                 .client=${gatewayConnected ? gatewaySnapshot.client : null}
                 .available=${desktopPanelAvailable}
                 .suppressed=${settingsTakeover || nativeEmbed}
                 .basePath=${context.basePath}
-              ></openclaw-desktop-panel>
+              ></carapace-desktop-panel>
             `
       }
-      <openclaw-assistant-panel
+      <carapace-assistant-panel
         ?inert=${navDrawerOpen}
         .custodianAvailable=${custodianPanelAvailable && !nativeEmbed}
         .homeAvailable=${homePanelAvailable && !nativeEmbed}
@@ -646,10 +646,10 @@ export function renderApplicationShell(host: ShellViewHost) {
         .pageRouteId=${activeRoute}
         .pageRouteFailed=${host.routeState.routeFailed === true}
         .minimizeRequestId=${host.custodianMinimizeRequestId}
-      ></openclaw-assistant-panel>
+      ></carapace-assistant-panel>
       ${
         isOptionalElementDefined(host.execApprovalElement)
-          ? html`<openclaw-exec-approval
+          ? html`<carapace-exec-approval
               .props=${{
                 queue: overlaySnapshot.approvalQueue,
                 busy: overlaySnapshot.approvalBusy,
@@ -660,7 +660,7 @@ export function renderApplicationShell(host: ShellViewHost) {
                   decision: Parameters<typeof context.overlays.decideApproval>[0],
                 ) => context.overlays.decideApproval(decision, approvalId),
               }}
-            ></openclaw-exec-approval>`
+            ></carapace-exec-approval>`
           : nothing
       }
       ${renderLazyDevicePairSetup(host, {
@@ -682,13 +682,13 @@ export function renderApplicationShell(host: ShellViewHost) {
       })}
       ${
         memoryImportActive && isOptionalElementDefined(host.onboardingMemoryImportElement)
-          ? html`<openclaw-onboarding-memory-import
+          ? html`<carapace-onboarding-memory-import
               .active=${true}
               .context=${context}
-            ></openclaw-onboarding-memory-import>`
+            ></carapace-onboarding-memory-import>`
           : nothing
       }
-      <openclaw-toast-host></openclaw-toast-host>
+      <carapace-toast-host></carapace-toast-host>
     </div>
   `;
   return html`${renderPluginSurface(

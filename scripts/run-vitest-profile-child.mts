@@ -49,7 +49,7 @@ try {
     // Vite appends this array to the configured setup, including scalar setup paths.
     profilingConfig.test = {
       globalSetup: [setup],
-      provide: { openclawVitestProfileDir: outputDir },
+      provide: { carapaceVitestProfileDir: outputDir },
     };
   }
   const normalizedFilters = filter.map((file) => normalizePath(file.replaceAll("\\", "/")));

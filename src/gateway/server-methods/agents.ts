@@ -2,7 +2,7 @@
 // reads/writes, identity merging, and safe deletion for operator clients.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeOptionalString as resolveOptionalStringParam } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString as resolveOptionalStringParam } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_CAPS,
   GATEWAY_CLIENT_IDS,
@@ -89,7 +89,7 @@ import {
 import { purgeAgentSessionStoreEntries } from "../../config/sessions.js";
 import { resolveSessionTranscriptsDirForAgent } from "../../config/sessions/paths.js";
 import type { IdentityConfig } from "../../config/types.base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isMissingPathError } from "../../infra/errors.js";
 import { withAgentExecApprovalsRemoved } from "../../infra/exec-approvals.js";
 import { root, FsSafeError, type ReadResult } from "../../infra/fs-safe.js";
@@ -100,7 +100,7 @@ import {
   readAgentDeletionJournal,
   type AgentDeletionJournalCleanupPath,
 } from "../../state/agent-deletion-journal.js";
-import { unregisterOpenClawAgentDatabase } from "../../state/openclaw-agent-db-registry.js";
+import { unregisterCarapaceAgentDatabase } from "../../state/carapace-agent-db-registry.js";
 import { resolveUserPath } from "../../utils.js";
 import { listAgentsForGateway } from "../session-utils.js";
 import {
@@ -159,9 +159,9 @@ const ALLOWED_FILE_NAMES = new Set<string>(WORKSPACE_BOOTSTRAP_FILENAMES);
 function resolveAgentWorkspaceFileOrRespondError(
   params: Record<string, unknown>,
   respond: RespondFn,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   workspaceDir: string;
   name: string;
@@ -300,7 +300,7 @@ async function listAgentFiles(workspaceDir: string, options?: { hideBootstrap?: 
   return files;
 }
 
-function resolveAgentIdOrError(agentIdRaw: string, cfg: OpenClawConfig) {
+function resolveAgentIdOrError(agentIdRaw: string, cfg: CarapaceConfig) {
   const normalized = normalizeAgentIdStrict(agentIdRaw);
   if (!normalized.ok) {
     return null;
@@ -328,7 +328,7 @@ type AgentDeletePathOutcome =
 class AgentCleanupIdentityMismatchError extends Error {}
 class AgentSharedAuthStoreOwnerError extends Error {}
 
-function agentOwnsSharedAuthStore(cfg: OpenClawConfig, agentId: string): boolean {
+function agentOwnsSharedAuthStore(cfg: CarapaceConfig, agentId: string): boolean {
   const agentDir = resolveAgentDir(cfg, agentId);
   return isSharedAuthStoreOwner({
     ownership: resolveSharedAuthStoreOwnership(),
@@ -650,12 +650,12 @@ function cleanupPathCovers(
 
 function unregisterAgentDeleteDatabases(agentId: string, databasePaths: string[]): void {
   for (const databasePath of databasePaths) {
-    unregisterOpenClawAgentDatabase({ agentId, path: databasePath });
+    unregisterCarapaceAgentDatabase({ agentId, path: databasePath });
   }
 }
 
 function prepareJournaledAgentDirOwnership(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   agentDir: string,
 ): void {

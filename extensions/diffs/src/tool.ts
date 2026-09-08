@@ -1,16 +1,16 @@
 // Diffs plugin module implements tool behavior.
 import fs from "node:fs/promises";
-import { optionalFiniteNumberSchema, stringEnum } from "openclaw/plugin-sdk/channel-actions";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { readFiniteNumberParam } from "openclaw/plugin-sdk/param-readers";
+import { optionalFiniteNumberSchema, stringEnum } from "carapace/plugin-sdk/channel-actions";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { readFiniteNumberParam } from "carapace/plugin-sdk/param-readers";
 import {
   asNonArrayRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import type { Static } from "typebox";
-import type { AnyAgentTool, OpenClawConfig, OpenClawPluginToolContext } from "../api.js";
+import type { AnyAgentTool, CarapaceConfig, CarapacePluginToolContext } from "../api.js";
 import type { DiffScreenshotter } from "./browser.runtime.js";
 import { resolveDiffImageRenderOptions } from "./config.js";
 import { DiffRenderInputError, renderDiffDocument } from "./render.js";
@@ -119,15 +119,15 @@ const DiffsToolSchema = Type.Object(
 type DiffsToolParams = Static<typeof DiffsToolSchema>;
 
 export function createDiffsTool(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   store: DiffArtifactStore;
   defaults: DiffToolDefaults;
   viewerBaseUrl?: string;
   languagePackAvailable?: boolean;
   screenshotter?: DiffScreenshotter;
-  context?: OpenClawPluginToolContext;
+  context?: CarapacePluginToolContext;
 }): AnyAgentTool {
-  const loadScreenshotter = async (config: OpenClawConfig) =>
+  const loadScreenshotter = async (config: CarapaceConfig) =>
     params.screenshotter ??
     new (await loadDiffsBrowserRuntime()).PlaywrightDiffScreenshotter({
       config,
@@ -425,7 +425,7 @@ async function renderDiffArtifactFile(params: {
 }
 
 function buildArtifactContext(
-  context: OpenClawPluginToolContext | undefined,
+  context: CarapacePluginToolContext | undefined,
 ): DiffArtifactContext | undefined {
   if (!context) {
     return undefined;

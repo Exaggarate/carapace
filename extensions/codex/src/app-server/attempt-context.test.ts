@@ -5,15 +5,15 @@ import path from "node:path";
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   clearMemoryPluginState,
   registerMemoryCapability,
-} from "openclaw/plugin-sdk/memory-host-core";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/memory-host-core";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  buildCodexOpenClawPromptContext,
+  buildCodexCarapacePromptContext,
   buildCodexWatchedSessionsContext,
   buildCodexWorkspaceBootstrapContext,
   buildCodexSystemPromptReport,
@@ -63,7 +63,7 @@ describe("Codex app-server attempt context", () => {
       },
       {
         type: "namespace",
-        name: "openclaw",
+        name: "carapace",
         description: "",
         tools: [
           {
@@ -229,7 +229,7 @@ describe("Codex app-server attempt context", () => {
 
       expect(context.threadDeveloperInstructions).toContain("Canonical agent instructions");
       expect(context.threadDeveloperInstructions).toContain(
-        "OpenClaw Agent Workspace Instructions",
+        "Carapace Agent Workspace Instructions",
       );
       expect(context.threadDeveloperInstructions).toContain(path.join(workspaceDir, "AGENTS.md"));
       expect(context.threadDeveloperInstructions).not.toContain("Canonical agent soul");
@@ -256,16 +256,16 @@ describe("Codex app-server attempt context", () => {
       const context = await buildCodexWorkspaceBootstrapContext({
         params: {
           sessionId: "session-1",
-          sessionKey: "agent:openclaw:session-1",
-          toolsAllow: ["openclaw"],
+          sessionKey: "agent:carapace:session-1",
+          toolsAllow: ["carapace"],
           pluginHarnessToolPolicyRestricted: true,
           config: { agents: { defaults: { workspace: workspaceDir } } },
         } as EmbeddedRunAttemptParams,
         resolvedWorkspace: workspaceDir,
         executionWorkspace: executionDir,
         effectiveWorkspace: executionDir,
-        sessionKey: "agent:openclaw:session-1",
-        sessionAgentId: "openclaw",
+        sessionKey: "agent:carapace:session-1",
+        sessionAgentId: "carapace",
         memoryToolNames: [],
         ringZeroActive: true,
       });
@@ -333,11 +333,11 @@ describe("Codex app-server attempt context", () => {
     });
   });
 
-  it("stitches watched-session context into the per-turn OpenClaw prompt context", () => {
+  it("stitches watched-session context into the per-turn Carapace prompt context", () => {
     const attempt = { config: {} } as EmbeddedRunAttemptParams;
 
     expect(
-      buildCodexOpenClawPromptContext({
+      buildCodexCarapacePromptContext({
         params: attempt,
         watchedSessionsContext: [
           "## Watched Sessions",

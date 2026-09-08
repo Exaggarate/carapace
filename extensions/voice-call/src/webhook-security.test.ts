@@ -1,6 +1,6 @@
 // Voice Call tests cover webhook security plugin behavior.
 import crypto from "node:crypto";
-import { MAX_DATE_TIMESTAMP_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_DATE_TIMESTAMP_MS } from "carapace/plugin-sdk/number-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   reconstructWebhookUrl,
@@ -441,7 +441,7 @@ describe("verifyPlivoWebhook", () => {
     const authToken = "test-auth-token";
     const nonce = "nonce-public-url-path";
     const postBody = "CallUUID=uuid&CallStatus=in-progress&From=%2B15550000000";
-    const attackerPathUrl = "https://voice.openclaw.ai/admin?flow=answer&callId=abc";
+    const attackerPathUrl = "https://github.com/Exaggarate/carapace";
     const signature = plivoV3Signature({
       authToken,
       urlWithQuery: attackerPathUrl,
@@ -452,7 +452,7 @@ describe("verifyPlivoWebhook", () => {
     const result = verifyPlivoWebhook(
       {
         headers: {
-          host: "voice.openclaw.ai",
+          host: "github.com/Exaggarate/carapace",
           "x-forwarded-proto": "https",
           "x-plivo-signature-v3": signature,
           "x-plivo-signature-v3-nonce": nonce,
@@ -463,13 +463,13 @@ describe("verifyPlivoWebhook", () => {
         query: { flow: "answer", callId: "abc" },
       },
       authToken,
-      { publicUrl: "https://voice.openclaw.ai/voice/webhook?provider=plivo" },
+      { publicUrl: "https://github.com/Exaggarate/carapace" },
     );
 
     expect(result.ok).toBe(false);
     expect(result.version).toBe("v3");
     expect(result.verificationUrl).toBe(
-      "https://voice.openclaw.ai/voice/webhook?flow=answer&callId=abc",
+      "https://github.com/Exaggarate/carapace",
     );
   });
 

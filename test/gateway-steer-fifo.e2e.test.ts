@@ -4,16 +4,16 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_CAPS } from "../packages/gateway-protocol/src/client-info.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { GatewayClient, type GatewayClientOptions } from "../src/gateway/client.js";
 import { buildMockOpenAiResponsesProvider } from "../src/gateway/test-openai-responses-model.js";
 import { GatewayChatClient } from "../src/tui/gateway-chat.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../src/utils/message-channel.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 import { createDeferred } from "./helpers/promise.js";
 
 type FirstResponseKind = "final" | "sequential-tools" | "tool";
@@ -32,7 +32,7 @@ type AgentEvent = {
 type GatewayFixture = {
   client: GatewayChatClient;
   diagnosticsClient: GatewayClient;
-  instance: OpenClawTestInstance;
+  instance: CarapaceTestInstance;
   modelServer: MockModelServer;
   events: AgentEvent[];
   chatErrors: Array<{ errorMessage?: string; runId?: string; state: "error" }>;
@@ -53,7 +53,7 @@ const WAIT_OPTS = { timeout: 30_000, interval: 20 } as const;
 const STEERING_PLUGIN_ID = "gateway-steering-tools";
 const STEERING_GATE_TOOL = "steering_gate";
 const STEERING_TAIL_TOOL = "steering_tail";
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const clients: GatewayChatClient[] = [];
 const diagnosticsClients: GatewayClient[] = [];
 const cleanupDirs: string[] = [];
@@ -327,7 +327,7 @@ async function writeSteeringToolsPlugin(
   await mkdir(pluginDir, { recursive: true });
   await Promise.all([
     writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       `${JSON.stringify({
         id: STEERING_PLUGIN_ID,
         name: "Gateway Steering Tools",
@@ -406,7 +406,7 @@ function createConfig(params: {
   fixtureDir: string;
   modelServer: MockModelServer;
   steeringTools?: SteeringToolsFixture;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const provider = buildMockOpenAiResponsesProvider(
     `${params.modelServer.baseUrl}/v1`,
     "steer-fifo",
@@ -428,7 +428,7 @@ function createConfig(params: {
         model: { primary: provider.modelRef },
         models: {
           [provider.modelRef]: {
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             params: { transport: "sse", openaiWsWarmup: false },
           },
         },
@@ -458,7 +458,7 @@ function createConfig(params: {
   };
 }
 
-async function connectDiagnosticsClient(instance: OpenClawTestInstance): Promise<GatewayClient> {
+async function connectDiagnosticsClient(instance: CarapaceTestInstance): Promise<GatewayClient> {
   let resolveHello!: () => void;
   let rejectHello!: (error: Error) => void;
   const hello = new Promise<void>((resolve, reject) => {
@@ -499,21 +499,21 @@ async function createGatewayFixture(
   name: string,
   options: { withSteeringTools?: boolean; steeringGateMode?: SteeringGateMode } = {},
 ): Promise<GatewayFixture> {
-  const fixtureDir = await mkdtemp(path.join(tmpdir(), `openclaw-${name}-`));
+  const fixtureDir = await mkdtemp(path.join(tmpdir(), `carapace-${name}-`));
   cleanupDirs.push(fixtureDir);
   const steeringTools = options.withSteeringTools
     ? await writeSteeringToolsPlugin(fixtureDir, options.steeringGateMode ?? "preflight")
     : undefined;
   const modelServer = await startMockModelServer();
   modelServers.push(modelServer);
-  const instance = await createOpenClawTestInstance({
+  const instance = await createCarapaceTestInstance({
     name,
     gatewayToken: "steer-fifo-token",
     config: createConfig({ fixtureDir, modelServer, steeringTools }),
     env: {
-      OPENCLAW_LOG_LEVEL: "debug",
-      OPENCLAW_SKIP_PROVIDERS: undefined,
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_LOG_LEVEL: "debug",
+      CARAPACE_SKIP_PROVIDERS: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
     },
   });
   instances.push(instance);
@@ -576,7 +576,7 @@ async function sendChat(params: {
   });
 }
 
-function redactedFixtureLogs(instance: OpenClawTestInstance): string {
+function redactedFixtureLogs(instance: CarapaceTestInstance): string {
   return instance
     .logs()
     .replaceAll("steer-fifo-token", "[REDACTED]")

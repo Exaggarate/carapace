@@ -1,7 +1,7 @@
 // Configure wizard tests cover guided setup routing across gateway, auth, channels, skills, and search.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { ConfigMutationConflictError } from "../config/mutate.js";
 import {
   createEnabledWebSearchConfig,
@@ -60,7 +60,7 @@ describe("runConfigureWizard", () => {
   it.each(["gateway", "daemon", "health", "web"] as const)(
     "configures %s without requiring an agent owner",
     async (section) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { alpha: {}, beta: {} } },
         gateway: { mode: "local" },
       };
@@ -87,7 +87,7 @@ describe("runConfigureWizard", () => {
 
   it("persists provider-owned web search config changes returned by setupSearch", async () => {
     setupBaseWizardState();
-    mocks.setupSearch.mockImplementation(async (cfg: OpenClawConfig) => {
+    mocks.setupSearch.mockImplementation(async (cfg: CarapaceConfig) => {
       const configured = createEnabledWebSearchConfig("firecrawl", {
         enabled: true,
         config: { webSearch: { apiKey: "fc-entered-key" } },
@@ -145,7 +145,7 @@ describe("runConfigureWizard", () => {
 
   it("keeps web_search disabled when provider setup has no credential", async () => {
     setupBaseWizardState();
-    mocks.setupSearch.mockImplementation(async (cfg: OpenClawConfig) => ({
+    mocks.setupSearch.mockImplementation(async (cfg: CarapaceConfig) => ({
       outcome: "completed",
       config: {
         ...cfg,
@@ -193,7 +193,7 @@ describe("runConfigureWizard", () => {
       [
         "No web search providers are currently available under this plugin policy.",
         "Enable plugins or remove deny rules, then rerun configure.",
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Web search",
     );
@@ -247,11 +247,11 @@ describe("runConfigureWizard", () => {
         envVars: [],
         placeholder: "(no key needed)",
         signupUrl: "https://duckduckgo.com/",
-        docsUrl: "https://docs.openclaw.ai/tools/web",
+        docsUrl: "https://github.com/Exaggarate/carapace",
         credentialPath: "",
       },
     ]);
-    mocks.setupSearch.mockImplementation(async (cfg: OpenClawConfig) => ({
+    mocks.setupSearch.mockImplementation(async (cfg: CarapaceConfig) => ({
       outcome: "completed",
       config: createEnabledWebSearchConfig("duckduckgo", {
         enabled: true,
@@ -297,7 +297,7 @@ describe("runConfigureWizard", () => {
         "Web search lets your agent look things up online using the `web_search` tool.",
         "Codex-capable models can use native Codex web search.",
         "Other models use a separate web search provider, which you can configure here.",
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Web search",
     );
@@ -305,7 +305,7 @@ describe("runConfigureWizard", () => {
       [
         "Codex-capable models can use native Codex web search instead of a separate provider.",
         "Other models need a separate web search provider.",
-        "If you do not choose one, OpenClaw can select a provider from available credentials; otherwise other models may not have web search.",
+        "If you do not choose one, Carapace can select a provider from available credentials; otherwise other models may not have web search.",
       ].join("\n"),
       "Codex native search",
     );
@@ -375,7 +375,7 @@ describe("runConfigureWizard", () => {
   });
 
   it("retries without dropping nested plugin config written during wizard flow (issue #64188)", async () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: CarapaceConfig = {
       plugins: {
         entries: {
           "github-copilot": {
@@ -473,7 +473,7 @@ describe("runConfigureWizard", () => {
     };
     const agents = requireRecord(retryCall.nextConfig.agents, "agents config");
     const defaults = requireRecord(agents.defaults, "agent defaults");
-    expect(String(defaults.workspace)).toContain("/.openclaw/workspace");
+    expect(String(defaults.workspace)).toContain("/.carapace/workspace");
     const githubCopilot = getPluginEntry(retryCall.nextConfig, "github-copilot");
     expect(githubCopilot.enabled).toBe(false);
     const pluginConfig = requireRecord(githubCopilot.config, "github-copilot config");

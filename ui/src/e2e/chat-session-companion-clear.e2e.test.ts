@@ -18,7 +18,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -85,7 +85,7 @@ async function withCompanion(run: (surface: CompanionSurface) => Promise<void>):
         sessionKey: initiatingSessionKey,
       });
       await openChatSidePanelType(page, "Side chat");
-      const companion = page.locator("openclaw-chat-session-rail");
+      const companion = page.locator("carapace-chat-session-rail");
       await companion.getByText(answer, { exact: true }).waitFor();
       // The embedded rail has no header of its own: its destructive clear is
       // contributed to the shared side-panel header by the active panel.
@@ -145,7 +145,7 @@ suite.define(() => {
         message: resetError,
       });
 
-      const visiblePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+      const visiblePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
       expect(await visiblePane.getByRole("alert").filter({ hasText: resetError }).count()).toBe(0);
       if (artifactDir) {
         await writeFile(
@@ -157,19 +157,19 @@ suite.define(() => {
       }
 
       await navigateToControlUiSession(page, initiatingSessionKey);
-      const initiatingPane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+      const initiatingPane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
       expect(await initiatingPane.getByRole("alert").filter({ hasText: resetError }).count()).toBe(
         0,
       );
       await initiatingPane
-        .locator("openclaw-chat-session-rail")
+        .locator("carapace-chat-session-rail")
         .getByText(answer, { exact: true })
         .waitFor();
       if (artifactDir) {
         await writeFile(
           path.join(artifactDir, "initiating-thread-preserved.png"),
           await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-            initiatingPane.locator("openclaw-chat-session-rail").getByText(answer, { exact: true }),
+            initiatingPane.locator("carapace-chat-session-rail").getByText(answer, { exact: true }),
           ]),
         );
       }

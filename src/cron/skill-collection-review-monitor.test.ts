@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSkillCollectionReviewMonitorSpecs } from "./skill-collection-review-monitor.js";
 
 describe("resolveSkillCollectionReviewMonitorSpecs", () => {
@@ -7,14 +7,14 @@ describe("resolveSkillCollectionReviewMonitorSpecs", () => {
     const cfg = {
       agents: {
         list: [
-          { id: "main", default: true, workspace: "/tmp/openclaw-shared" },
-          { id: "ops", workspace: "/tmp/openclaw-shared" },
-          { id: "solo", workspace: "/tmp/openclaw-solo" },
+          { id: "main", default: true, workspace: "/tmp/carapace-shared" },
+          { id: "ops", workspace: "/tmp/carapace-shared" },
+          { id: "solo", workspace: "/tmp/carapace-solo" },
         ],
         defaults: {},
       },
       skills: { workshop: { autonomous: { mode: "auto" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const specs = resolveSkillCollectionReviewMonitorSpecs(cfg, {
       schedulerSeed: "test-seed",
@@ -56,7 +56,7 @@ describe("resolveSkillCollectionReviewMonitorSpecs", () => {
   it("creates jobs for every agent in an explicit fleet", () => {
     const explicitFleet = {
       agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveSkillCollectionReviewMonitorSpecs(explicitFleet).map(({ agentId }) => agentId),
     ).toEqual(["ops", "research"]);
@@ -67,7 +67,7 @@ describe("resolveSkillCollectionReviewMonitorSpecs", () => {
         entries: { ops: {}, research: {} },
         defaults: { systemAgent: { agentId: "research" } },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       resolveSkillCollectionReviewMonitorSpecs(systemAgentFleet).map(({ agentId }) => agentId),
     ).toEqual(["ops", "research"]);
@@ -75,9 +75,9 @@ describe("resolveSkillCollectionReviewMonitorSpecs", () => {
 
   it("retains monitor rows while autonomous review is disabled", () => {
     const cfg = {
-      agents: { list: [{ id: "main", workspace: "/tmp/openclaw-disabled" }] },
+      agents: { list: [{ id: "main", workspace: "/tmp/carapace-disabled" }] },
       skills: { workshop: { autonomous: { mode: "propose" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const [spec] = resolveSkillCollectionReviewMonitorSpecs(cfg, {
       schedulerSeed: "test-seed",

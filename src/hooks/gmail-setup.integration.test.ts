@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 
 const describePosix = process.platform === "win32" ? describe.skip : describe;
 
@@ -9,7 +9,7 @@ describePosix("Gmail setup diagnostics through real command execution", () => {
   it.each(["login", "watch"])(
     "propagates a bounded %s failure without writing config",
     async (failure) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "gmail-diagnostics", scenario: "minimal" },
         async (state) => {
           const binDir = state.path("bin");

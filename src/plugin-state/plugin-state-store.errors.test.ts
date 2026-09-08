@@ -2,23 +2,23 @@ import { DatabaseSync } from "node:sqlite";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { runWithSqliteBusyTimeout } from "../infra/sqlite-busy-timeout.js";
 import {
-  clearOpenClawDatabaseQuarantine,
-  recordOpenClawDatabaseQuarantine,
-} from "../state/openclaw-quarantine-store.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+  clearCarapaceDatabaseQuarantine,
+  recordCarapaceDatabaseQuarantine,
+} from "../state/carapace-quarantine-store.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  clearOpenClawStateDatabaseOpenFailure,
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-  recordOpenClawStateDatabaseOpenFailure,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { claimOpenClawStateOwnership } from "../state/openclaw-state-ownership-operations.js";
+  clearCarapaceStateDatabaseOpenFailure,
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+  recordCarapaceStateDatabaseOpenFailure,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { claimCarapaceStateOwnership } from "../state/carapace-state-ownership-operations.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+  withCarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   closePluginStateDatabase,
   createPluginStateKeyedStore,
@@ -27,9 +27,9 @@ import {
   pluginStateEntriesInKeyRange,
 } from "./plugin-state-store.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 beforeAll(async () => {
-  testState = await createOpenClawTestState({ label: "plugin-state-open-errors" });
+  testState = await createCarapaceTestState({ label: "plugin-state-open-errors" });
 });
 beforeEach(() => testState?.applyEnv());
 afterEach(() => resetPluginStateStoreForTests());
@@ -37,15 +37,15 @@ afterAll(async () => testState?.cleanup());
 
 describe("plugin state open errors", () => {
   it("reports the opened database path for corrupt values with an explicit env", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-corrupt-explicit-env", applyEnv: false },
       async (state) => {
         const options = { namespace: "corrupt-env", maxEntries: 10, env: state.env };
         const sync = createPluginStateSyncKeyedStore<{ owner: string }>("discord", options);
         const store = createPluginStateKeyedStore<{ owner: string }>("discord", options);
         sync.register("key", { owner: "custom" });
-        const database = openOpenClawStateDatabase({ env: state.env });
-        expect(database.path).not.toBe(resolveOpenClawStateSqlitePath());
+        const database = openCarapaceStateDatabase({ env: state.env });
+        expect(database.path).not.toBe(resolveCarapaceStateSqlitePath());
         database.db
           .prepare("UPDATE plugin_state_entries SET value_json = ? WHERE namespace = ?")
           .run("invalid JSON", options.namespace);
@@ -112,7 +112,7 @@ describe("plugin state open errors", () => {
         }
         expect(callbackCalled).toBe(false);
         expect(
-          openOpenClawStateDatabase({ env: state.env })
+          openCarapaceStateDatabase({ env: state.env })
             .db.prepare("SELECT value_json FROM plugin_state_entries WHERE namespace = ?")
             .get(options.namespace),
         ).toEqual({ value_json: "invalid JSON" });
@@ -122,14 +122,14 @@ describe("plugin state open errors", () => {
 
   it("keeps warm ownership denials distinct from acquisition failures for the same path", async () => {
     // A different open database must not make this fixture's closed path look warm.
-    openOpenClawStateDatabase();
-    await withOpenClawTestState({ label: "plugin-state-ownership-errors" }, async () => {
+    openCarapaceStateDatabase();
+    await withCarapaceTestState({ label: "plugin-state-ownership-errors" }, async () => {
       const options = { namespace: "ownership", maxEntries: 10 };
       const store = createPluginStateKeyedStore("discord", options);
       const syncStore = createPluginStateSyncKeyedStore("discord", options);
       await store.register("k", { version: 1 });
-      claimOpenClawStateOwnership("fixture-supervisor", {
-        env: { ...process.env, OPENCLAW_SUPERVISOR_MODE: "external" },
+      claimCarapaceStateOwnership("fixture-supervisor", {
+        env: { ...process.env, CARAPACE_SUPERVISOR_MODE: "external" },
       });
 
       for (const code of ["PLUGIN_STATE_WRITE_FAILED", "PLUGIN_STATE_OPEN_FAILED"]) {
@@ -142,7 +142,7 @@ describe("plugin state open errors", () => {
         });
         await expect(store.lookup("k")).resolves.toEqual({ version: 1 });
         if (code === "PLUGIN_STATE_WRITE_FAILED") {
-          expect(closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath())).toBe(true);
+          expect(closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath())).toBe(true);
         }
       }
     });
@@ -154,7 +154,7 @@ describe("plugin state open errors", () => {
       maxEntries: 10,
     });
     store.register("k", { version: 1 });
-    const database = openOpenClawStateDatabase();
+    const database = openCarapaceStateDatabase();
     const blocker = new DatabaseSync(database.path);
     try {
       blocker.exec("BEGIN IMMEDIATE");
@@ -179,19 +179,19 @@ describe("plugin state open errors", () => {
       maxEntries: 10,
     });
     await store.register("k", { ok: true });
-    const databasePath = resolveOpenClawStateSqlitePath(testState?.env);
+    const databasePath = resolveCarapaceStateSqlitePath(testState?.env);
     closePluginStateDatabase();
 
-    recordOpenClawStateDatabaseOpenFailure(databasePath, new Error("latched failure"));
+    recordCarapaceStateDatabaseOpenFailure(databasePath, new Error("latched failure"));
     await expect(store.lookup("k")).rejects.toMatchObject({
       code: "PLUGIN_STATE_OPEN_FAILED",
       path: databasePath,
       message: "Failed to open the plugin state database.",
     });
-    clearOpenClawStateDatabaseOpenFailure(databasePath);
+    clearCarapaceStateDatabaseOpenFailure(databasePath);
 
     expect(
-      recordOpenClawDatabaseQuarantine({
+      recordCarapaceDatabaseQuarantine({
         env: testState?.env,
         kind: "state",
         path: databasePath,
@@ -208,12 +208,12 @@ describe("plugin state open errors", () => {
           code: "PLUGIN_STATE_OPEN_FAILED",
           path: databasePath,
           message:
-            "Failed to open the plugin state database.\nDatabase integrity verification failed. Restore or repair the state database, then run openclaw doctor --fix.",
+            "Failed to open the plugin state database.\nDatabase integrity verification failed. Restore or repair the state database, then run carapace doctor --fix.",
         });
       }
     } finally {
-      clearOpenClawStateDatabaseOpenFailure(databasePath);
-      expect(clearOpenClawDatabaseQuarantine(databasePath, { env: testState?.env })).toBe(true);
+      clearCarapaceStateDatabaseOpenFailure(databasePath);
+      expect(clearCarapaceDatabaseQuarantine(databasePath, { env: testState?.env })).toBe(true);
     }
   });
 
@@ -223,9 +223,9 @@ describe("plugin state open errors", () => {
       maxEntries: 10,
     });
     await store.register("k", { ok: true });
-    const databasePath = resolveOpenClawStateSqlitePath(testState?.env);
-    openOpenClawStateDatabase().db.exec(
-      `PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION + 1};`,
+    const databasePath = resolveCarapaceStateSqlitePath(testState?.env);
+    openCarapaceStateDatabase().db.exec(
+      `PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION + 1};`,
     );
     closePluginStateDatabase();
 
@@ -239,14 +239,14 @@ describe("plugin state open errors", () => {
           code: "PLUGIN_STATE_OPEN_FAILED",
           path: databasePath,
           message:
-            "Failed to open the plugin state database.\nThe state database uses a newer schema. Run an OpenClaw build that supports it.",
+            "Failed to open the plugin state database.\nThe state database uses a newer schema. Run an Carapace build that supports it.",
         });
       }
     } finally {
-      clearOpenClawStateDatabaseOpenFailure(databasePath);
+      clearCarapaceStateDatabaseOpenFailure(databasePath);
       const database = new DatabaseSync(databasePath);
       try {
-        database.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};`);
+        database.exec(`PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION};`);
       } finally {
         database.close();
       }

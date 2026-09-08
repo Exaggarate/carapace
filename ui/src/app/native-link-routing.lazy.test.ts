@@ -30,7 +30,7 @@ afterEach(async () => {
 });
 
 it("loads the native menu only on demand and opens only the latest right-click while loading", async () => {
-  vi.stubGlobal("webkit", { messageHandlers: { openclawLink: { postMessage: vi.fn() } } });
+  vi.stubGlobal("webkit", { messageHandlers: { carapaceLink: { postMessage: vi.fn() } } });
   routing = startNativeLinkRouting();
   await Promise.resolve();
   expect(menuLoad.started).not.toHaveBeenCalled();
@@ -55,15 +55,15 @@ it("loads the native menu only on demand and opens only the latest right-click w
   expect(rightClick(first).defaultPrevented).toBe(true);
   await vi.waitFor(() => expect(menuLoad.started).toHaveBeenCalledOnce());
   expect(rightClick(latest).defaultPrevented).toBe(true);
-  expect(document.querySelector("openclaw-native-link-menu")).toBeNull();
+  expect(document.querySelector("carapace-native-link-menu")).toBeNull();
   menuLoad.ready.resolve();
   await vi.dynamicImportSettled();
   // showMenu appends in the continuation after its awaited import; that microtask can run
   // after dynamicImportSettled resolves, so wait for the element instead of assuming it.
   await vi.waitFor(() =>
-    expect(document.querySelector("openclaw-native-link-menu")).not.toBeNull(),
+    expect(document.querySelector("carapace-native-link-menu")).not.toBeNull(),
   );
-  const menu = document.querySelector<NativeLinkMenu>("openclaw-native-link-menu");
+  const menu = document.querySelector<NativeLinkMenu>("carapace-native-link-menu");
   expect(menu?.trigger).toBe(latest);
   expect(append).toHaveBeenCalledOnce();
   expect(menuLoad.started).toHaveBeenCalledOnce();

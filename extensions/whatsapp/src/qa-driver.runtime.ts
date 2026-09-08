@@ -1,11 +1,11 @@
 // Whatsapp plugin module implements qa driver behavior.
 import type { ConnectionState, proto, WAMessage } from "baileys";
-import { formatLocationText } from "openclaw/plugin-sdk/channel-inbound";
+import { formatLocationText } from "carapace/plugin-sdk/channel-inbound";
 import {
   asBoolean,
   isRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   describeReplyContext,
   extractContextInfo,

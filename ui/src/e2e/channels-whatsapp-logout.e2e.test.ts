@@ -19,7 +19,7 @@ const suite = createControlUiE2eSuite({
 
 const QR_DATA_URL =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlY9Z8AAAAASUVORK5CYII=";
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -152,7 +152,7 @@ suite.define(() => {
         if (captureUiProofEnabled) {
           // The native dialog owns the scale/fade around this slotted detail panel.
           await waitForControlUiProofSurface(
-            page.locator("openclaw-modal-dialog").filter({ has: detail }).locator("dialog"),
+            page.locator("carapace-modal-dialog").filter({ has: detail }).locator("dialog"),
             [detail.getByRole("switch", { name: "Enabled" })],
           );
           await writeFile(
@@ -255,7 +255,7 @@ suite.define(() => {
             fullPage: true,
             path: path.join(
               uiProofArtifactDir,
-              `whatsapp-mutation-${process.env.OPENCLAW_UI_PROOF_LABEL ?? "rejected"}.png`,
+              `whatsapp-mutation-${process.env.CARAPACE_UI_PROOF_LABEL ?? "rejected"}.png`,
             ),
           });
         }
@@ -343,12 +343,12 @@ suite.define(() => {
             fullPage: true,
             path: path.join(
               uiProofArtifactDir,
-              `modal-escape-${process.env.OPENCLAW_UI_PROOF_LABEL ?? "dismissed"}.png`,
+              `modal-escape-${process.env.CARAPACE_UI_PROOF_LABEL ?? "dismissed"}.png`,
             ),
           });
         }
         await expect.poll(() => new URL(page.url()).pathname).toBe("/settings/channels");
-        await expect.poll(() => page.locator("openclaw-modal-dialog").count()).toBe(1);
+        await expect.poll(() => page.locator("carapace-modal-dialog").count()).toBe(1);
         await expect.poll(async () => gateway.getRequests("channels.logout")).toHaveLength(0);
         await expect(qr.getAttribute("src")).resolves.toBe(QR_DATA_URL);
         await expect
@@ -439,7 +439,7 @@ suite.define(() => {
       await gateway.closeLatest(1012, "Reconnect during logout confirmation");
       await expect.poll(() => gateway.getSocketCount()).toBeGreaterThan(socketCount);
       await confirm.getByRole("button", { name: "Logout" }).click();
-      await expect.poll(() => page.locator("openclaw-modal-dialog").count()).toBe(1);
+      await expect.poll(() => page.locator("carapace-modal-dialog").count()).toBe(1);
       await expect.poll(async () => gateway.getRequests("channels.logout")).toHaveLength(0);
     });
   });

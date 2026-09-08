@@ -1,10 +1,10 @@
-import { applyCompletionsAnthropicCacheControl } from "@openclaw/ai/transports";
-import { parseStrictFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { applyCompletionsAnthropicCacheControl } from "@carapace/ai/transports";
+import { parseStrictFiniteNumber } from "@carapace/normalization-core/number-coercion";
 // Proxy stream wrapper applies provider-specific wrappers around base stream functions.
 import {
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveProviderRequestPolicy } from "../../../agents/provider-attribution.js";
 import {
   getModelProviderRequestRouteFacts,
@@ -22,7 +22,7 @@ import {
 import { isAnthropicModelRef } from "./anthropic-family-cache-semantics.js";
 import { streamWithPayloadPatch } from "./stream-payload-utils.js";
 const KILOCODE_FEATURE_HEADER = "X-KILOCODE-FEATURE";
-const KILOCODE_FEATURE_DEFAULT = "openclaw";
+const KILOCODE_FEATURE_DEFAULT = "carapace";
 const KILOCODE_FEATURE_ENV_VAR = "KILOCODE_FEATURE";
 const BOOLEAN_PARAM_PARSE_OPTIONS = {
   truthy: ["1", "true", "yes", "on", "enable", "enabled"],

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionsPatchParams } from "../../packages/gateway-protocol/src/index.js";
 import { findModelCatalogEntry, type ModelCatalogEntry } from "../agents/model-catalog.js";
 import type { InternalSessionEntry as SessionEntry } from "../config/sessions.js";

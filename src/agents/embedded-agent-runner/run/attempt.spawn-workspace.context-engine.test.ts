@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 // Coverage for context-engine bootstrap, assembly, and turn finalization.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { HEARTBEAT_TRANSCRIPT_PROMPT } from "../../../auto-reply/heartbeat.js";
 import {
   appendTranscriptMessage,
   createSessionEntryWithTranscript,
 } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { CarapaceConfig } from "../../../config/types.js";
 import { clearMemoryPluginState } from "../../../plugins/memory-state.test-fixtures.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
 import { projectAgentRunAttemptTerminal } from "../../agent-run-terminal-outcome.js";
@@ -165,14 +165,14 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
             tools: {
               toolSearch: true,
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
         },
       });
 
       toolSearchControlsCase = mockParams(
-        hoisted.createOpenClawCodingToolsMock,
+        hoisted.createCarapaceCodingToolsMock,
         0,
-        "createOpenClawCodingTools options",
+        "createCarapaceCodingTools options",
       );
     } finally {
       await cleanupTempPaths(setupTempPaths);
@@ -194,12 +194,12 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     vi.restoreAllMocks();
   });
 
-  it("enables Tool Search controls for embedded OpenClaw runs when configured", async () => {
+  it("enables Tool Search controls for embedded Carapace runs when configured", async () => {
     expect(toolSearchControlsCase.includeToolSearchControls).toBe(true);
     expect(toolSearchControlsCase.toolSearchCatalogRef).toEqual({});
   });
 
-  it("carries the resolved context budget into OpenClaw tool construction", async () => {
+  it("carries the resolved context budget into Carapace tool construction", async () => {
     await createContextEngineAttemptRunner({
       contextEngine: createContextEngineBootstrapAndAssemble(),
       sessionKey,
@@ -211,7 +211,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     });
 
     expect(
-      mockParams(hoisted.createOpenClawCodingToolsMock, 0, "tool construction params")
+      mockParams(hoisted.createCarapaceCodingToolsMock, 0, "tool construction params")
         .modelContextWindowTokens,
     ).toBe(1_000_000);
   });
@@ -229,7 +229,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
           tools: {
             toolSearch: { enabled: true, mode: "directory" },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         clientTools: [
           {
             type: "function",
@@ -269,21 +269,21 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       },
     });
 
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenCalledTimes(1);
+    expect(hoisted.createCarapaceCodingToolsMock).toHaveBeenCalledTimes(1);
     const options = mockParams(
-      hoisted.createOpenClawCodingToolsMock,
+      hoisted.createCarapaceCodingToolsMock,
       0,
-      "createOpenClawCodingTools options",
+      "createCarapaceCodingTools options",
     );
     expect(options.includeToolSearchControls).toBe(true);
-    const optionsConfig = requireRecord(options.config, "createOpenClawCodingTools config");
+    const optionsConfig = requireRecord(options.config, "createCarapaceCodingTools config");
     const toolsConfig = requireRecord(
       optionsConfig.tools,
-      "createOpenClawCodingTools tools config",
+      "createCarapaceCodingTools tools config",
     );
     expect(toolsConfig.toolSearch).toEqual({
       enabled: true,
@@ -294,7 +294,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
   });
 
   it.each([false, true])("keeps lean replies direct (private: %s)", async (privateReply) => {
-    hoisted.createOpenClawCodingToolsMock.mockReturnValueOnce([
+    hoisted.createCarapaceCodingToolsMock.mockReturnValueOnce([
       {
         name: "message",
         label: "Message",
@@ -329,15 +329,15 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       },
     });
 
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenCalledTimes(1);
+    expect(hoisted.createCarapaceCodingToolsMock).toHaveBeenCalledTimes(1);
     const options = mockParams(
-      hoisted.createOpenClawCodingToolsMock,
+      hoisted.createCarapaceCodingToolsMock,
       0,
-      "createOpenClawCodingTools options",
+      "createCarapaceCodingTools options",
     );
     expect(options.includeToolSearchControls).toBe(!privateReply);
     const sessionOptions = mockParams(
@@ -350,7 +350,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
   });
 
   it("quarantines unsupported tool schemas before creating the model session", async () => {
-    hoisted.createOpenClawCodingToolsMock.mockReturnValue([
+    hoisted.createCarapaceCodingToolsMock.mockReturnValue([
       {
         name: "healthy_lookup",
         label: "Healthy Lookup",
@@ -384,7 +384,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
             codeMode: { enabled: false },
             toolSearch: false,
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       },
       createSession: () => {
         const session = createDefaultEmbeddedSession();
@@ -441,7 +441,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
           agents: {
             list: [{ id: "ops", tools: { codeMode: true } }],
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         model: {
           api: "openai-chatgpt-responses",
           provider: "gateway",
@@ -499,7 +499,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       },
     });
 
-    expect(observedOptions.at(-1)?.openclawCodeModeToolSurface).toBe(true);
+    expect(observedOptions.at(-1)?.carapaceCodeModeToolSurface).toBe(true);
     expect(payloads.at(-1)?.tools).toEqual([
       { type: "function", name: "exec" },
       { type: "function", name: "wait" },
@@ -722,12 +722,12 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     expectFields(
       findRecord(
         requireRecords(seen.messages, "seen messages"),
-        (message) => message.customType === "openclaw.runtime-context",
+        (message) => message.customType === "carapace.runtime-context",
         "runtime context message",
       ),
       {
         role: "custom",
-        customType: "openclaw.runtime-context",
+        customType: "carapace.runtime-context",
         display: false,
       },
     );
@@ -749,7 +749,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       modelCompleted?.data?.finalPromptText,
       traceArtifacts?.data?.finalPromptText,
     ]) {
-      expect(String(value)).not.toContain("OPENCLAW_INTERNAL_CONTEXT");
+      expect(String(value)).not.toContain("CARAPACE_INTERNAL_CONTEXT");
       expect(String(value)).not.toContain("secret runtime context");
     }
   });
@@ -1043,7 +1043,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
   });
 
   it("rebuilds skill prompt inputs from the sandbox workspace for non-rw sandbox runs", async () => {
-    const sandboxWorkspace = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sandbox-skills-"));
+    const sandboxWorkspace = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sandbox-skills-"));
     tempPaths.push(sandboxWorkspace);
     hoisted.resolveSandboxContextMock.mockResolvedValue({
       enabled: true,
@@ -1058,22 +1058,22 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       attemptOverrides: {
         skillsSnapshot: {
           prompt:
-            "<available_skills><skill><location>~/.openclaw/skills/smaug/SKILL.md</location></skill></available_skills>",
+            "<available_skills><skill><location>~/.carapace/skills/smaug/SKILL.md</location></skill></available_skills>",
           skills: [{ name: "smaug" }],
           resolvedSkills: [
             {
               name: "smaug",
               description: "Host copy",
               disableModelInvocation: false,
-              filePath: "/Users/alice/.openclaw/skills/smaug/SKILL.md",
-              baseDir: "/Users/alice/.openclaw/skills/smaug",
-              source: "openclaw-workspace",
+              filePath: "/Users/alice/.carapace/skills/smaug/SKILL.md",
+              baseDir: "/Users/alice/.carapace/skills/smaug",
+              source: "carapace-workspace",
               sourceInfo: {
-                path: "/Users/alice/.openclaw/skills/smaug/SKILL.md",
-                source: "openclaw-workspace",
+                path: "/Users/alice/.carapace/skills/smaug/SKILL.md",
+                source: "carapace-workspace",
                 scope: "project",
                 origin: "top-level",
-                baseDir: "/Users/alice/.openclaw/skills/smaug",
+                baseDir: "/Users/alice/.carapace/skills/smaug",
               },
             },
           ],
@@ -1564,7 +1564,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     expect(result.finalPromptText).toBe(seen.prompt);
     const runtimeContext = findRecord(
       requireRecords(seen.messages, "seen messages"),
-      (message) => message.customType === "openclaw.runtime-context",
+      (message) => message.customType === "carapace.runtime-context",
       "runtime context message",
     );
     expect(runtimeContext.content).toContain("secret runtime context");
@@ -1578,13 +1578,13 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       bootstrapFiles: [
         {
           name: "AGENTS.md",
-          path: "/tmp/openclaw-warning-workspace/AGENTS.md",
+          path: "/tmp/carapace-warning-workspace/AGENTS.md",
           content: "A".repeat(200),
           missing: false,
         },
       ],
       contextFiles: [
-        { path: "/tmp/openclaw-warning-workspace/AGENTS.md", content: "A".repeat(20) },
+        { path: "/tmp/carapace-warning-workspace/AGENTS.md", content: "A".repeat(20) },
       ],
     });
 
@@ -1600,7 +1600,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
               bootstrapTotalMaxChars: 50,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         prompt: "visible ask",
         transcriptPrompt: "visible ask",
       },
@@ -1622,21 +1622,21 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
   it("preserves bootstrap system context in the assembled system prompt", async () => {
     const seen: { prompt?: string; messages?: unknown[] } = {};
     hoisted.isWorkspaceBootstrapPendingMock.mockResolvedValueOnce(true);
-    hoisted.createOpenClawCodingToolsMock.mockImplementationOnce(() => [
+    hoisted.createCarapaceCodingToolsMock.mockImplementationOnce(() => [
       { name: "read", execute: async () => "" },
     ]);
     hoisted.resolveBootstrapContextForRunMock.mockResolvedValueOnce({
       bootstrapFiles: [
         {
           name: "BOOTSTRAP.md",
-          path: "/tmp/openclaw-bootstrap-workspace/BOOTSTRAP.md",
+          path: "/tmp/carapace-bootstrap-workspace/BOOTSTRAP.md",
           content: "Ask who I am.",
           missing: false,
         },
       ],
       contextFiles: [
         {
-          path: "/tmp/openclaw-bootstrap-workspace/BOOTSTRAP.md",
+          path: "/tmp/carapace-bootstrap-workspace/BOOTSTRAP.md",
           content: "Ask who I am.",
         },
       ],
@@ -1672,14 +1672,14 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     expect(promptInput.bootstrapMode).toBe("full");
     expect(promptInput.contextFiles).toEqual([
       {
-        path: "/tmp/openclaw-bootstrap-workspace/BOOTSTRAP.md",
+        path: "/tmp/carapace-bootstrap-workspace/BOOTSTRAP.md",
         content: "Ask who I am.",
       },
     ]);
   });
 
   it("includes hook-adjusted bootstrap files preloaded before routing", async () => {
-    const workspaceDir = "/tmp/openclaw-hook-workspace";
+    const workspaceDir = "/tmp/carapace-hook-workspace";
     hoisted.resolveBootstrapFilesForRunMock.mockResolvedValueOnce([
       {
         name: "BOOTSTRAP.md",
@@ -1795,12 +1795,12 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     // the runtime-context carrier instead of being prepended to the user text.
     expect(seenPrompt).toBe("what does this mean?");
     expect(seenPrompt).not.toContain("Reply target of current user message:");
-    expect(seenPrompt).not.toContain("OPENCLAW_INTERNAL_CONTEXT");
+    expect(seenPrompt).not.toContain("CARAPACE_INTERNAL_CONTEXT");
     expect(seenPrompt).not.toContain("secret runtime context");
     expect(result.finalPromptText).toBe(seenPrompt);
     const runtimeContext = findRecord(
       requireRecords(seenMessages, "seen messages"),
-      (message) => message.customType === "openclaw.runtime-context",
+      (message) => message.customType === "carapace.runtime-context",
       "runtime context message",
     );
     expect(runtimeContext.content).toContain("Reply target of current user message:");
@@ -1887,7 +1887,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     expect(JSON.stringify(seen.modelMessages)).not.toContain("secret runtime context");
     const runtimeContext = findRecord(
       requireRecords(seen.messages, "seen messages"),
-      (message) => message.customType === "openclaw.runtime-context",
+      (message) => message.customType === "carapace.runtime-context",
       "runtime context message",
     );
     expect(seen.systemPrompt).not.toContain("[Inter-session message]");
@@ -1947,8 +1947,8 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       },
     });
 
-    expect(seenPrompt).toBe("Continue the OpenClaw runtime event.");
-    expect(result.finalPromptText).toBe("Continue the OpenClaw runtime event.");
+    expect(seenPrompt).toBe("Continue the Carapace runtime event.");
+    expect(result.finalPromptText).toBe("Continue the Carapace runtime event.");
     expect(JSON.stringify(seenModelMessages)).toContain("dynamic hook context");
     expect(JSON.stringify(seenModelMessages)).toContain("internal heartbeat event");
     expect(JSON.stringify(seenModelMessages)).toContain("dynamic hook tail");
@@ -2008,7 +2008,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     const contextCompiled = trajectoryEvents.find((event) => event.type === "context.compiled");
     const runtimeContext = findRecord(
       requireRecords(seenMessages, "seen messages"),
-      (message) => message.customType === "openclaw.runtime-context",
+      (message) => message.customType === "carapace.runtime-context",
       "runtime context message",
     );
     expect(runtimeContext.content).toContain("internal heartbeat event");
@@ -2056,7 +2056,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
 
     expect(seenPrompt).toContain("Reply target of current user message:");
     expect(seenPrompt).toContain("Hello from the replied message");
-    expect(seenPrompt).toContain("Continue the OpenClaw runtime event.");
+    expect(seenPrompt).toContain("Continue the Carapace runtime event.");
     expect(result.finalPromptText).toBe(seenPrompt);
     const trajectoryEvents = await readTrajectoryEvents(tempPaths);
     const contextCompiled = trajectoryEvents.find((event) => event.type === "context.compiled");
@@ -2087,12 +2087,12 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       tempPaths,
       trajectory: true,
       attemptOverrides: {
-        prompt: "[OpenClaw room event]",
+        prompt: "[Carapace room event]",
         transcriptPrompt: "",
         currentInboundEventKind: "room_event",
         currentInboundContext: {
           text: [
-            "[OpenClaw room event]",
+            "[Carapace room event]",
             "inbound_event_kind: room_event",
             "visible_reply_contract: message_tool_only",
             "Room context:\n#2001 Alice: lunch at 2?\n#2002 Bob: works",
@@ -2122,14 +2122,14 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
 
     // The user prompt stays the bare room-event marker; the room context is
     // routed into the runtime-context carrier instead of the user text.
-    expect(seenPrompt).toBe("[OpenClaw room event]");
+    expect(seenPrompt).toBe("[Carapace room event]");
     expect(seenPrompt).not.toContain("inbound_event_kind: room_event");
-    expect(seenPrompt).not.toBe("Continue the OpenClaw runtime event.");
+    expect(seenPrompt).not.toBe("Continue the Carapace runtime event.");
     expect(seenPrompt).not.toContain("dynamic hook context");
     expect(seenPrompt).not.toContain("dynamic hook tail");
     const roomRuntimeContext = findRecord(
       requireRecords(seenMessages, "seen messages"),
-      (message) => message.customType === "openclaw.runtime-context",
+      (message) => message.customType === "carapace.runtime-context",
       "runtime context message",
     );
     expect(roomRuntimeContext.content).toContain("inbound_event_kind: room_event");
@@ -2146,7 +2146,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
     expect(contextCompiled?.data?.prompt).not.toContain(
       "visible_reply_contract: message_tool_only",
     );
-    expect(contextCompiled?.data?.prompt).toContain("[OpenClaw room event]");
+    expect(contextCompiled?.data?.prompt).toContain("[Carapace room event]");
   });
 
   it("skips blank visible prompts with replay history before provider submission", async () => {
@@ -2630,7 +2630,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
       tempPaths,
       attemptOverrides: {
         currentInboundEventKind: "room_event",
-        currentInboundContext: { text: "[OpenClaw room event]" },
+        currentInboundContext: { text: "[Carapace room event]" },
         suppressNextUserMessagePersistence: true,
         transcriptPrompt: "",
       },
@@ -2646,7 +2646,7 @@ describe("runEmbeddedAttempt context engine sessionKey forwarding", () => {
   });
 
   it("uses SQLite transcript messages for bootstrap without treating the marker as a file", async () => {
-    const storeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ctx-engine-sqlite-"));
+    const storeDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-ctx-engine-sqlite-"));
     tempPaths.push(storeDir);
     const storePath = path.join(storeDir, "sessions.json");
     const created = await createSessionEntryWithTranscript(
@@ -2810,7 +2810,7 @@ describe("runEmbeddedAttempt context engine mid-turn precheck integration", () =
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       },
     });
 
@@ -2858,7 +2858,7 @@ describe("runEmbeddedAttempt context engine mid-turn precheck integration", () =
               },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       },
       sessionMessages: [seedMessage],
       sessionPrompt: async (session) => {
@@ -2925,7 +2925,7 @@ describe("runEmbeddedAttempt tool-result guard budget wiring", () => {
         idempotencyKey: "restart-safe-run:user",
         ...(excludeFromContext ? { excludeFromContext: true as const } : {}),
         timestamp: 1,
-        __openclaw: { senderId: "alice-id", senderName: "Alice" },
+        __carapace: { senderId: "alice-id", senderName: "Alice" },
       };
       const recorder = createUserTurnTranscriptRecorder({
         message: admittedMessage,

@@ -1,7 +1,7 @@
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { attachModelProviderLocalServiceReconciler } from "../agents/provider-local-service-reconcile.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataRegistryView } from "./plugin-metadata-snapshot.types.js";
 import {
   resolveModelCatalogScope,
@@ -22,7 +22,7 @@ type ProviderRuntimePluginLookupParams = {
   provider: string;
   providerOwner?: string;
   modelId?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   applyAutoEnable?: boolean;
@@ -34,7 +34,7 @@ export type ProviderRuntimePluginHandle = ProviderRuntimePluginLookupParams & {
 };
 
 const MODEL_PROVIDER_RUNTIME_PLUGIN_HANDLE_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRuntimePluginHandle",
+  "carapace.modelProviderRuntimePluginHandle",
 );
 
 type ModelWithProviderRuntimePluginHandle = {
@@ -47,7 +47,7 @@ type ProviderRuntimePluginHandleParams = ProviderRuntimePluginLookupParams & {
 
 type ProviderHookParams<TContext> = {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   runtimeHandle?: ProviderRuntimePluginHandle;
@@ -93,7 +93,7 @@ export function createProviderHookRuntime(
 
   function hasConfiguredModelProvider(params: {
     provider: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
   }): boolean {
     return (
       findNormalizedProviderValue(params.config?.models?.providers, params.provider) !== undefined
@@ -101,7 +101,7 @@ export function createProviderHookRuntime(
   }
 
   function resolveLoadedProviderPluginsForHooks(params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
     onlyPluginIds?: string[];
@@ -189,7 +189,7 @@ export function createProviderHookRuntime(
   function resolveProviderHookPlugin(params: {
     provider: string;
     modelId?: string | null;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
   }): ProviderPlugin | undefined {

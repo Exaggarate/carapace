@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadBundledPluginPublicSurface } from "../plugin-sdk/test-helpers/public-surface-loader.js";
 import * as pluginState from "../plugin-state/plugin-state-store.js";
 import * as pluginModuleRuntime from "../plugins/loader-module-runtime.js";
@@ -45,11 +45,11 @@ it("prepares an agent-local Copilot BYOK harness without replacing the active ro
   vi.spyOn(pluginModuleRuntime, "createPluginModuleLoader").mockReturnValue(loadModule);
   const env = {
     ...process.env,
-    OPENCLAW_STATE_DIR: fs.realpathSync(makePluginLoaderTempDir()),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "0",
+    CARAPACE_STATE_DIR: fs.realpathSync(makePluginLoaderTempDir()),
+    CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "0",
   };
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       ownership: "explicit",
       entries: {

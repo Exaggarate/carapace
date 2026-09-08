@@ -13,7 +13,7 @@ function catalogCalls(request: ReturnType<typeof vi.fn>) {
 
 describe("new-session CLI-agent model targets", () => {
   it("retries only failed discovery when the picker reopens", async () => {
-    const { context, request } = contextWith(models, "openclaw", ["sessions.catalog.list"]);
+    const { context, request } = contextWith(models, "carapace", ["sessions.catalog.list"]);
     request.mockImplementation((method: string) => {
       if (method === "sessions.catalog.list") {
         return catalogCalls(request).length === 1
@@ -74,7 +74,7 @@ describe("new-session CLI-agent model targets", () => {
   });
 
   it("retries only failed discovery from its visible error action", async () => {
-    const { context, request } = contextWith(models, "openclaw", ["sessions.catalog.list"]);
+    const { context, request } = contextWith(models, "carapace", ["sessions.catalog.list"]);
     request.mockImplementation((method: string) => {
       if (method === "sessions.catalog.list") {
         return catalogCalls(request).length === 1
@@ -109,13 +109,13 @@ describe("new-session CLI-agent model targets", () => {
 
   it("ignores a stale response after reconnect replaces its owner", async () => {
     const oldCatalog = deferred<{ catalogs: Array<Record<string, unknown>> }>();
-    const { context: oldContext, request: oldRequest } = contextWith(models, "openclaw", [
+    const { context: oldContext, request: oldRequest } = contextWith(models, "carapace", [
       "sessions.catalog.list",
     ]);
     oldRequest.mockImplementation((method: string) =>
       method === "sessions.catalog.list" ? oldCatalog.promise : Promise.resolve({ models }),
     );
-    const { context: newContext, request: newRequest } = contextWith(models, "openclaw", [
+    const { context: newContext, request: newRequest } = contextWith(models, "carapace", [
       "sessions.catalog.list",
     ]);
     newRequest.mockImplementation((method: string) =>
@@ -165,7 +165,7 @@ describe("new-session CLI-agent model targets", () => {
   it("ignores a stale response after the same client switches agent owners", async () => {
     const mainCatalog = deferred<{ catalogs: Array<Record<string, unknown>> }>();
     const researchCatalog = deferred<{ catalogs: Array<Record<string, unknown>> }>();
-    const { context, request } = contextWith(models, "openclaw", ["sessions.catalog.list"]);
+    const { context, request } = contextWith(models, "carapace", ["sessions.catalog.list"]);
     request.mockImplementation((method: string, params?: { agentId?: string }) => {
       if (method !== "sessions.catalog.list") {
         return Promise.resolve({ models });

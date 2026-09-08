@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { redactSensitiveText } from "../logging/redact.js";
 import { collectNestedErrorCandidates } from "./error-graph-internal.js";
 import { formatErrorMessage } from "./errors.js";

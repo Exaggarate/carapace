@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { resolveDiscordAccount } from "../accounts.js";
 import { sendDiscordComponentMessage } from "../send.components.js";
 import { buildDiscordPresentationComponents } from "../shared-interactive.js";
@@ -7,7 +7,7 @@ import type { DiscordActivitiesRuntime } from "./runtime.js";
 
 const DISCORD_WIDGET_HTML_MAX_BYTES = 48 * 1024;
 
-type WidgetPresenter = Parameters<OpenClawPluginApi["registerWidgetPresenter"]>[0];
+type WidgetPresenter = Parameters<CarapacePluginApi["registerWidgetPresenter"]>[0];
 type WidgetPresenterContext = Parameters<WidgetPresenter["availability"]>[0];
 
 type DiscordWidgetPresenterDeps = {

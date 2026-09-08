@@ -1,16 +1,16 @@
 import {
   listAgentIds,
   resolveSessionAgentIdsStrict,
-} from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginNodeHostCommand } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginNodeHostCommand } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type {
   SessionCatalogEntrySnapshot,
   SessionCatalogProvider,
-} from "openclaw/plugin-sdk/session-catalog";
-import { publishSessionCatalogHost } from "openclaw/plugin-sdk/session-catalog-paging";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { publishSessionCatalogHost } from "carapace/plugin-sdk/session-catalog-paging";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexAppServerBindingStore } from "./app-server/session-binding.js";
 import type { CodexCatalogHome } from "./session-catalog-homes.js";
 import type { CatalogNode } from "./session-catalog-node-continue.js";
@@ -126,7 +126,7 @@ async function listVisiblePage(params: {
 async function listGatewayHost(params: {
   agentId: string;
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   control: CodexSessionCatalogControl;
   query: ReturnType<typeof readGatewayParams>;
   runtime: PluginRuntime;
@@ -151,7 +151,7 @@ async function listGatewayHost(params: {
     });
     params.signal?.throwIfAborted();
     const { listAdoptedSessionEntries } = await import("./session-catalog-adoption.js");
-    const { sessionCatalogAdoptedSourceKey } = await import("openclaw/plugin-sdk/session-catalog");
+    const { sessionCatalogAdoptedSourceKey } = await import("carapace/plugin-sdk/session-catalog");
     params.signal?.throwIfAborted();
     const adoptedSessions = await listAdoptedSessionEntries({
       agentId: params.agentId,
@@ -196,7 +196,7 @@ async function listGatewayHost(params: {
 export async function listCodexSessionCatalog(params: {
   agentId?: string;
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime: PluginRuntime;
   control: CodexSessionCatalogControlFactory;
   query?: CodexSessionCatalogParams;
@@ -324,7 +324,7 @@ export function createCodexSessionCatalogNodeHostCommands(
   controlFactory: CodexSessionCatalogControlFactory,
   configSources: CodexTerminalConfigSources,
   bindingStore?: CodexAppServerBindingStore,
-): OpenClawPluginNodeHostCommand[] {
+): CarapacePluginNodeHostCommand[] {
   // Node commands register before an agent request exists. Bind from the invoke payload so
   // explicit multi-agent Codex homes never collapse to an ambient default.
   const bindRequest = (paramsJSON?: string | null) => {
@@ -352,7 +352,7 @@ export function createCodexSessionCatalogNodeHostCommands(
       paramsJSON: JSON.stringify(request),
     };
   };
-  const commands: OpenClawPluginNodeHostCommand[] = [
+  const commands: CarapacePluginNodeHostCommand[] = [
     {
       command: CODEX_APP_SERVER_THREADS_LIST_COMMAND,
       cap: CODEX_APP_SERVER_THREADS_CAPABILITY,
@@ -441,7 +441,7 @@ export function createCodexSessionCatalogNodeHostCommands(
   ];
   // MacNodeHostWorker sets app ownership at launch. Its native catalog may use a
   // different home, so the embedded worker must not advertise a replacement reader.
-  return process.env.OPENCLAW_NODE_EXEC_HOST?.trim().toLowerCase() === "app"
+  return process.env.CARAPACE_NODE_EXEC_HOST?.trim().toLowerCase() === "app"
     ? commands.filter(({ command }) => command !== CODEX_CATALOG_TRANSCRIPT_READ_COMMAND)
     : commands;
 }

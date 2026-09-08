@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { isLikelyContextOverflowError } from "../failover/context-overflow.js";
 
 export function isCompactionFailureError(errorMessage?: string): boolean {

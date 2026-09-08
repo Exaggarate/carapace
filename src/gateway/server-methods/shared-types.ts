@@ -12,7 +12,7 @@ import type {
 } from "../../../packages/gateway-protocol/src/schema/frames.js";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.types.js";
 import type { CliDeps } from "../../cli/deps.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { AgentRunDelegatedAuthority } from "../../infra/agent-run-registry.js";
 import type {
   PluginApprovalRequest,
@@ -97,7 +97,7 @@ export type { GatewayOperatorRoleActor };
 
 export type { RespondFn } from "./response-types.js";
 
-/** Minimal hosted OpenClaw contract retained by the gateway request router. */
+/** Minimal hosted Carapace contract retained by the gateway request router. */
 /**
  * Structural mirror of the engine's SystemAgentAssistantTurn. Kept local as a
  * leaf contract: importing the assistant module here closes a madge cycle
@@ -184,7 +184,7 @@ type GatewayKernelContext = {
   configRevisionProjector: GatewayConfigRevisionProjector;
   cron: GatewayCronServiceContract;
   cronStorePath: string;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   /** Live reload owner, including same-config restart work and shutdown. */
   isConfigReloadSettled: () => boolean;
   /** Prepared listener certificate pin; undefined when Gateway TLS is disabled. */
@@ -253,7 +253,7 @@ type GatewayKernelContext = {
   recoveryRuntime?: GatewayRecoveryRuntime;
   /** Uses the lifecycle owner's module graph for plugin and detached agent turns. */
   createAgentTurnFacade?: InternalAgentTurnFacadeFactory;
-  enforceSharedGatewayAuthGenerationForConfigWrite?: (nextConfig: OpenClawConfig) => void;
+  enforceSharedGatewayAuthGenerationForConfigWrite?: (nextConfig: CarapaceConfig) => void;
   nodeRegistry: NodeRegistry;
   agentRunSeq: Map<string, number>;
   chatAbortControllers: Map<string, ChatAbortControllerEntry>;

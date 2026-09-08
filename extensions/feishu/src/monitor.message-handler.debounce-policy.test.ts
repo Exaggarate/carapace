@@ -1,19 +1,19 @@
 import {
   createInboundDebouncer,
   resolveInboundDebounceMs,
-} from "openclaw/plugin-sdk/channel-inbound-debounce";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-inbound-debounce";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { expect, it, vi } from "vitest";
 import * as dedup from "./dedup.js";
 import { createFeishuMessageReceiveHandler } from "./monitor.message-handler.js";
 
 it("changes Feishu batching timing on the running receive handler", async () => {
-  const cfg: OpenClawConfig = { messages: { inbound: { debounceMs: 0 } } };
+  const cfg: CarapaceConfig = { messages: { inbound: { debounceMs: 0 } } };
   setRuntimeConfigSnapshot(cfg, cfg);
   const claim = vi
     .spyOn(dedup, "claimUnprocessedFeishuMessage")

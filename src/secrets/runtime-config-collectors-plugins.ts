@@ -1,6 +1,6 @@
 /** Collects plugin config secret refs from runtime plugin metadata. */
 import { resolveConfigWidePluginManifestRegistry } from "../config/io.plugin-metadata.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   collectPluginConfigContractMatches,
   resolvePluginConfigContractsById,
@@ -30,7 +30,7 @@ import { isRecord } from "./shared.js";
 /** Collects SecretRef assignments from plugin-owned config contract paths. */
 export function collectPluginConfigAssignments(params: {
   /** Mutable config snapshot whose plugin config values will receive resolved secrets. */
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   /** Defaults from the source config, used while matching manifest-declared SecretInput paths. */
   defaults: SecretDefaults | undefined;
   /** Resolver context that receives assignments and inactive-surface warnings. */

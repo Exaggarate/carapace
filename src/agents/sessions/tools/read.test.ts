@@ -75,7 +75,7 @@ describe("read tool", () => {
   });
 
   it("reads managed inbound media refs as image files", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-media-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-read-media-"));
     const mediaId = `read-tool-${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
     const mediaPath = path.join(stateDir, "media", "inbound", mediaId);
     await fs.mkdir(path.dirname(mediaPath), { recursive: true });
@@ -83,7 +83,7 @@ describe("read tool", () => {
 
     const tool = createReadToolDefinition("/workspace", { autoResizeImages: false });
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const result = await tool.execute(
           "call-1",
           { path: `media://inbound/${mediaId}` },
@@ -115,7 +115,7 @@ describe("read tool", () => {
     { source: "embedded", modelHasVision: true },
     { source: "embedded", modelHasVision: undefined },
   ])("matches image attachments to $source vision capability $modelHasVision", async (testCase) => {
-    const stateDir = tempDirs.make("openclaw-read-vision-");
+    const stateDir = tempDirs.make("carapace-read-vision-");
     const imagePath = path.join(stateDir, "pixel.png");
     await fs.writeFile(imagePath, Buffer.from(ONE_PIXEL_PNG_BASE64, "base64"));
 
@@ -149,7 +149,7 @@ describe("read tool", () => {
   });
 
   it("converts BMP files to PNG attachments", async () => {
-    const tempDir = tempDirs.make("openclaw-read-bmp-");
+    const tempDir = tempDirs.make("carapace-read-bmp-");
     const filePath = path.join(tempDir, "pixel.bmp");
     await fs.writeFile(filePath, createTinyBmp());
     const tool = createReadToolDefinition(tempDir, { autoResizeImages: false });
@@ -171,7 +171,7 @@ describe("read tool", () => {
   });
 
   it("explains that directory paths must be listed before reading a file", async () => {
-    const tempDir = tempDirs.make("openclaw-read-directory-");
+    const tempDir = tempDirs.make("carapace-read-directory-");
     const tool = createReadToolDefinition(tempDir);
 
     await expect(
@@ -188,7 +188,7 @@ describe("read tool", () => {
   });
 
   it("returns not_found only for optional missing paths", async () => {
-    const tempDir = tempDirs.make("openclaw-read-optional-");
+    const tempDir = tempDirs.make("carapace-read-optional-");
     await fs.writeFile(path.join(tempDir, "present.txt"), "present");
     const tool = createReadToolDefinition(tempDir);
 
@@ -231,7 +231,7 @@ describe("read tool", () => {
   });
 
   it("treats ENOTDIR as optional not_found without swallowing permission errors", async () => {
-    const tempDir = tempDirs.make("openclaw-read-enotdir-");
+    const tempDir = tempDirs.make("carapace-read-enotdir-");
     await fs.writeFile(path.join(tempDir, "file.txt"), "present");
     const local = createReadToolDefinition(tempDir);
     const missing = await local.execute(
@@ -270,7 +270,7 @@ describe("read tool", () => {
   it.runIf(process.platform !== "win32")(
     "refuses a FIFO without waiting for a writer",
     async () => {
-      const tempDir = tempDirs.make("openclaw-read-fifo-");
+      const tempDir = tempDirs.make("carapace-read-fifo-");
       const fifoPath = path.join(tempDir, "live.pipe");
       expect(spawnSync("mkfifo", [fifoPath]).status).toBe(0);
       const tool = createReadToolDefinition(tempDir);
@@ -292,7 +292,7 @@ describe("read tool", () => {
       if (outcome.kind === "timeout") {
         const writer = spawn(
           "/bin/sh",
-          ["-c", 'while :; do printf x > "$1"; done', "openclaw-read-fifo", fifoPath],
+          ["-c", 'while :; do printf x > "$1"; done', "carapace-read-fifo", fifoPath],
           { stdio: "ignore" },
         );
         const writerExit = new Promise<void>((resolve) => {
@@ -316,7 +316,7 @@ describe("read tool", () => {
   );
 
   it("describes empty files instead of returning blank content", async () => {
-    const tempDir = tempDirs.make("openclaw-read-empty-");
+    const tempDir = tempDirs.make("carapace-read-empty-");
     await fs.writeFile(path.join(tempDir, "empty.txt"), "");
     const tool = createReadToolDefinition(tempDir);
 
@@ -354,7 +354,7 @@ describe("read tool", () => {
     ["LF", "\n"],
     ["CRLF", "\r\n"],
   ])("describes %s-only files instead of returning blank content", async (_label, contents) => {
-    const tempDir = tempDirs.make("openclaw-read-blank-line-");
+    const tempDir = tempDirs.make("carapace-read-blank-line-");
     await fs.writeFile(path.join(tempDir, "blank.txt"), contents);
     const tool = createReadToolDefinition(tempDir);
 
@@ -410,7 +410,7 @@ describe("read tool", () => {
   });
 
   it("resolves one Unicode-equivalent filename and names the correction", async () => {
-    const tempDir = tempDirs.make("openclaw-read-unicode-");
+    const tempDir = tempDirs.make("carapace-read-unicode-");
     const storedName = "re\u0301sume\u0301 3.04\u202fPM d\u2019accord.txt";
     await fs.writeFile(path.join(tempDir, storedName), "matched");
     const tool = createReadToolDefinition(tempDir);
@@ -429,7 +429,7 @@ describe("read tool", () => {
   });
 
   it("counts filename-resolution notes inside the complete 50 KiB read ceiling", async () => {
-    const tempDir = tempDirs.make("openclaw-read-unicode-budget-");
+    const tempDir = tempDirs.make("carapace-read-unicode-budget-");
     const storedName = "re\u0301sume\u0301 3.04\u202fPM d\u2019accord.txt";
     await fs.writeFile(path.join(tempDir, storedName), "x".repeat(DEFAULT_MAX_BYTES));
     const tool = createReadToolDefinition(tempDir);
@@ -448,7 +448,7 @@ describe("read tool", () => {
   });
 
   it("keeps an exact Unicode spelling ahead of equivalent filenames", async () => {
-    const tempDir = tempDirs.make("openclaw-read-unicode-exact-");
+    const tempDir = tempDirs.make("carapace-read-unicode-exact-");
     await fs.writeFile(path.join(tempDir, "report\u00a0.txt"), "exact");
     await fs.writeFile(path.join(tempDir, "report .txt"), "equivalent");
     const tool = createReadToolDefinition(tempDir);
@@ -465,7 +465,7 @@ describe("read tool", () => {
   });
 
   it("refuses ambiguous Unicode-equivalent filenames", async () => {
-    const tempDir = tempDirs.make("openclaw-read-unicode-ambiguous-");
+    const tempDir = tempDirs.make("carapace-read-unicode-ambiguous-");
     await fs.writeFile(path.join(tempDir, "d'accord.txt"), "straight");
     await fs.writeFile(path.join(tempDir, "d\u2019accord.txt"), "curly");
     const tool = createReadToolDefinition(tempDir);
@@ -482,7 +482,7 @@ describe("read tool", () => {
   });
 
   it("suggests a close filename without reading it", async () => {
-    const tempDir = tempDirs.make("openclaw-read-suggestion-");
+    const tempDir = tempDirs.make("carapace-read-suggestion-");
     await fs.writeFile(path.join(tempDir, "AGENTS.md"), "instructions");
     const tool = createReadToolDefinition(tempDir);
 
@@ -616,7 +616,7 @@ describe("read tool", () => {
         "Selected range contains 1 blank line.\n\n[1 more line in file. Use offset=2 to continue.]",
     },
   ])("accepts cursor 0 on $name", async ({ contents, offset, limit, expected }) => {
-    const tempDir = tempDirs.make("openclaw-read-cursor-zero-");
+    const tempDir = tempDirs.make("carapace-read-cursor-zero-");
     await fs.writeFile(path.join(tempDir, "synthetic.txt"), contents);
     const result = await createReadTool(tempDir).execute("read-zero", {
       path: "synthetic.txt",
@@ -790,7 +790,7 @@ describe("read tool", () => {
   });
 
   it("uses the shared Windows decoder for local filesystem reads", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-encoding-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-read-encoding-"));
     const filePath = path.join(tempDir, "legacy.txt");
     const legacyBytes = Buffer.from([0xc4, 0xe3, 0xba, 0xc3]);
     decodeWindowsTextFileBufferMock.mockReturnValueOnce("decoded legacy text");
@@ -883,7 +883,7 @@ describe("read tool", () => {
   );
 
   it("waits for an aliased queued write before reading the same new file", async () => {
-    const tempDir = tempDirs.make("openclaw-read-write-order-");
+    const tempDir = tempDirs.make("carapace-read-write-order-");
     const realDir = path.join(tempDir, "real");
     const aliasDir = path.join(tempDir, "alias");
     await fs.mkdir(realDir);
@@ -925,7 +925,7 @@ describe("read tool", () => {
   });
 
   it("queues every accepted Unicode spelling before reading a new file", async () => {
-    const tempDir = tempDirs.make("openclaw-read-unicode-order-");
+    const tempDir = tempDirs.make("carapace-read-unicode-order-");
     const writePath = path.join(tempDir, "caf\u00e9.txt");
     const readPath = path.join(tempDir, "cafe\u0301.txt");
     const blockerStarted = createDeferred();

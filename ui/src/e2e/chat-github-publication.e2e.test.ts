@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it } from "vitest";
 import { SESSION_PULL_REQUESTS_SUBSCRIBE_METHOD } from "../lib/session-pull-requests.ts";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -21,7 +21,7 @@ import {
 } from "./chat-github-publication.test-support.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const suite = createControlUiE2eSuite({ name: "Control UI personal GitHub publication" });
 
 function publicationContextOptions(): Parameters<typeof suite.newBrowserContext>[0] {
@@ -227,7 +227,7 @@ suite.define(() => {
     });
     await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
     await showPublicationBranch(gateway);
-    const panes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+    const panes = page.locator("carapace-chat-pane.chat-split-view__pane");
     await expect.poll(() => panes.count()).toBe(2);
     const first = panes.nth(0);
     const second = panes.nth(1);
@@ -434,9 +434,9 @@ suite.define(() => {
       await expect
         .poll(() => arrow.evaluate((element) => element === document.activeElement))
         .toBe(true);
-      await showPublicationBranch(gateway, "openclaw/updated-branch");
+      await showPublicationBranch(gateway, "carapace/updated-branch");
       await row
-        .getByText("openclaw/updated-branch", { exact: true })
+        .getByText("carapace/updated-branch", { exact: true })
         .waitFor({ state: "attached" });
       await arrow.click();
       await account.waitFor();
@@ -502,7 +502,7 @@ suite.define(() => {
                 ? {
                     workspaceResultConflict: {
                       paths: ["src/example.ts"],
-                      stagedResultRef: "refs/openclaw/worker-results/test",
+                      stagedResultRef: "refs/carapace/worker-results/test",
                       totalCount: 1,
                     },
                   }

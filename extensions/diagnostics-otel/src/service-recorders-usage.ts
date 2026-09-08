@@ -1,5 +1,5 @@
 import { SpanStatusCode } from "@opentelemetry/api";
-import { normalizeDiagnosticValue } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { normalizeDiagnosticValue } from "carapace/plugin-sdk/diagnostic-runtime";
 import { redactSensitiveText } from "../api.js";
 import type { DiagnosticEventMetadata, DiagnosticEventPayload } from "../api.js";
 import {
@@ -54,10 +54,10 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     hostPluginId?: string,
   ) => {
     const attrs = {
-      "openclaw.channel": evt.channel ?? "unknown",
-      "openclaw.agent": normalizeDiagnosticValue(evt.agentId),
-      "openclaw.provider": evt.provider ?? "unknown",
-      "openclaw.model": evt.model ?? "unknown",
+      "carapace.channel": evt.channel ?? "unknown",
+      "carapace.agent": normalizeDiagnosticValue(evt.agentId),
+      "carapace.provider": evt.provider ?? "unknown",
+      "carapace.model": evt.model ?? "unknown",
     };
     const genAiAttrs: Record<string, string> = {
       "gen_ai.operation.name": "chat",
@@ -67,30 +67,30 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
 
     const usage = evt.usage;
     if (usage.input) {
-      tokensCounter.add(usage.input, { ...attrs, "openclaw.token": "input" });
+      tokensCounter.add(usage.input, { ...attrs, "carapace.token": "input" });
       genAiTokenUsageHistogram.record(usage.input, {
         ...genAiAttrs,
         "gen_ai.token.type": "input",
       });
     }
     if (usage.output) {
-      tokensCounter.add(usage.output, { ...attrs, "openclaw.token": "output" });
+      tokensCounter.add(usage.output, { ...attrs, "carapace.token": "output" });
       genAiTokenUsageHistogram.record(usage.output, {
         ...genAiAttrs,
         "gen_ai.token.type": "output",
       });
     }
     if (usage.cacheRead) {
-      tokensCounter.add(usage.cacheRead, { ...attrs, "openclaw.token": "cache_read" });
+      tokensCounter.add(usage.cacheRead, { ...attrs, "carapace.token": "cache_read" });
     }
     if (usage.cacheWrite) {
-      tokensCounter.add(usage.cacheWrite, { ...attrs, "openclaw.token": "cache_write" });
+      tokensCounter.add(usage.cacheWrite, { ...attrs, "carapace.token": "cache_write" });
     }
     if (usage.promptTokens) {
-      tokensCounter.add(usage.promptTokens, { ...attrs, "openclaw.token": "prompt" });
+      tokensCounter.add(usage.promptTokens, { ...attrs, "carapace.token": "prompt" });
     }
     if (usage.total) {
-      tokensCounter.add(usage.total, { ...attrs, "openclaw.token": "total" });
+      tokensCounter.add(usage.total, { ...attrs, "carapace.token": "total" });
     }
 
     if (evt.costUsd) {
@@ -102,13 +102,13 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     if (evt.context?.limit) {
       contextHistogram.record(evt.context.limit, {
         ...attrs,
-        "openclaw.context": "limit",
+        "carapace.context": "limit",
       });
     }
     if (evt.context?.used) {
       contextHistogram.record(evt.context.used, {
         ...attrs,
-        "openclaw.context": "used",
+        "carapace.context": "used",
       });
     }
 
@@ -119,14 +119,14 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
       usage.promptTokens ?? (usage.input ?? 0) + (usage.cacheRead ?? 0) + (usage.cacheWrite ?? 0);
     const spanAttrs: Record<string, string | number> = {
       ...attrs,
-      "openclaw.tokens.input": usage.input ?? 0,
-      "openclaw.tokens.output": usage.output ?? 0,
-      "openclaw.tokens.cache_read": usage.cacheRead ?? 0,
-      "openclaw.tokens.cache_write": usage.cacheWrite ?? 0,
-      "openclaw.tokens.total": usage.total ?? 0,
+      "carapace.tokens.input": usage.input ?? 0,
+      "carapace.tokens.output": usage.output ?? 0,
+      "carapace.tokens.cache_read": usage.cacheRead ?? 0,
+      "carapace.tokens.cache_write": usage.cacheWrite ?? 0,
+      "carapace.tokens.total": usage.total ?? 0,
     };
     if (metadata.trusted && metadata.internal && hostPluginId) {
-      spanAttrs["openclaw.plugin"] = normalizeDiagnosticValue(hostPluginId);
+      spanAttrs["carapace.plugin"] = normalizeDiagnosticValue(hostPluginId);
     }
     assignGenAiSpanIdentityAttrs(spanAttrs, evt);
     assignPositiveNumberAttr(spanAttrs, "gen_ai.usage.input_tokens", genAiInputTokens);
@@ -138,7 +138,7 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
       usage.cacheWrite,
     );
 
-    const span = spanWithDuration("openclaw.model.usage", spanAttrs, evt.durationMs, {
+    const span = spanWithDuration("carapace.model.usage", spanAttrs, evt.durationMs, {
       parentContext: activeTrustedParentContext(evt, metadata),
       endTimeMs: evt.ts,
     });
@@ -149,8 +149,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     evt: Extract<DiagnosticEventPayload, { type: "webhook.received" }>,
   ) => {
     const attrs = {
-      "openclaw.channel": evt.channel ?? "unknown",
-      "openclaw.webhook": evt.updateType ?? "unknown",
+      "carapace.channel": evt.channel ?? "unknown",
+      "carapace.webhook": evt.updateType ?? "unknown",
     };
     webhookReceivedCounter.add(1, attrs);
   };
@@ -159,8 +159,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     evt: Extract<DiagnosticEventPayload, { type: "webhook.processed" }>,
   ) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.webhook": normalizeDiagnosticValue(evt.updateType),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.webhook": normalizeDiagnosticValue(evt.updateType),
     };
     if (typeof evt.durationMs === "number") {
       webhookDurationHistogram.record(evt.durationMs, attrs);
@@ -169,14 +169,14 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
       return;
     }
     const spanAttrs: Record<string, string | number> = { ...attrs };
-    const span = spanWithDuration("openclaw.webhook.processed", spanAttrs, evt.durationMs);
+    const span = spanWithDuration("carapace.webhook.processed", spanAttrs, evt.durationMs);
     span.end();
   };
 
   const recordWebhookError = (evt: Extract<DiagnosticEventPayload, { type: "webhook.error" }>) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.webhook": normalizeDiagnosticValue(evt.updateType),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.webhook": normalizeDiagnosticValue(evt.updateType),
     };
     webhookErrorCounter.add(1, attrs);
     if (!tracesEnabled) {
@@ -185,9 +185,9 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     const redactedError = redactSensitiveText(evt.error);
     const spanAttrs: Record<string, string | number> = {
       ...attrs,
-      "openclaw.error": redactedError,
+      "carapace.error": redactedError,
     };
-    const span = tracer.startSpan("openclaw.webhook.error", {
+    const span = tracer.startSpan("carapace.webhook.error", {
       attributes: spanAttrs,
     });
     span.setStatus({ code: SpanStatusCode.ERROR, message: redactedError });
@@ -198,8 +198,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     evt: Extract<DiagnosticEventPayload, { type: "message.queued" }>,
   ) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.source": normalizeDiagnosticValue(evt.source),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.source": normalizeDiagnosticValue(evt.source),
     };
     messageQueuedCounter.add(1, attrs);
     if (typeof evt.queueDepth === "number") {
@@ -211,8 +211,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     evt: Extract<DiagnosticEventPayload, { type: "message.received" }>,
   ) => {
     messageReceivedCounter.add(1, {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.source": normalizeDiagnosticValue(evt.source),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.source": normalizeDiagnosticValue(evt.source),
     });
   };
 
@@ -221,8 +221,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     metadata: DiagnosticEventMetadata,
   ) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.source": normalizeDiagnosticValue(evt.source),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.source": normalizeDiagnosticValue(evt.source),
     };
     messageDispatchStartedCounter.add(1, attrs);
     if (!tracesEnabled) {
@@ -235,7 +235,7 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     trackInternalOrTrustedSpan(
       evt,
       metadata,
-      spanWithDuration("openclaw.message.processed", attrs, undefined, {
+      spanWithDuration("carapace.message.processed", attrs, undefined, {
         parentContext: internalOrTrustedExplicitParentContext(evt, metadata),
         startTimeMs: evt.ts,
       }),
@@ -246,10 +246,10 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     evt: Extract<DiagnosticEventPayload, { type: "message.dispatch.completed" }>,
   ) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.outcome": evt.outcome,
-      "openclaw.reason": normalizeDiagnosticValue(evt.reason, "none"),
-      "openclaw.source": normalizeDiagnosticValue(evt.source),
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.outcome": evt.outcome,
+      "carapace.reason": normalizeDiagnosticValue(evt.reason, "none"),
+      "carapace.source": normalizeDiagnosticValue(evt.source),
     };
     messageDispatchCompletedCounter.add(1, attrs);
     messageDispatchDurationHistogram.record(evt.durationMs, attrs);
@@ -260,8 +260,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     metadata: DiagnosticEventMetadata,
   ) => {
     const attrs = {
-      "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-      "openclaw.outcome": evt.outcome ?? "unknown",
+      "carapace.channel": normalizeDiagnosticValue(evt.channel),
+      "carapace.outcome": evt.outcome ?? "unknown",
     };
     messageProcessedCounter.add(1, attrs);
     if (typeof evt.durationMs === "number") {
@@ -272,12 +272,12 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     }
     const spanAttrs: Record<string, string | number> = { ...attrs };
     if (evt.reason) {
-      spanAttrs["openclaw.reason"] = normalizeDiagnosticValue(evt.reason, "unknown");
+      spanAttrs["carapace.reason"] = normalizeDiagnosticValue(evt.reason, "unknown");
     }
     const trackedSpan = getTrackedInternalOrTrustedSpan(evt, metadata);
     const span =
       trackedSpan ??
-      spanWithDuration("openclaw.message.processed", spanAttrs, evt.durationMs, {
+      spanWithDuration("carapace.message.processed", spanAttrs, evt.durationMs, {
         parentContext: internalOrTrustedExplicitParentContext(evt, metadata),
         endTimeMs: evt.ts,
       });
@@ -294,8 +294,8 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
   };
 
   const messageDeliveryAttrs = (evt: MessageDeliveryDiagnosticEvent): Record<string, string> => ({
-    "openclaw.channel": normalizeDiagnosticValue(evt.channel),
-    "openclaw.delivery.kind": normalizeDiagnosticValue(evt.deliveryKind, "other"),
+    "carapace.channel": normalizeDiagnosticValue(evt.channel),
+    "carapace.delivery.kind": normalizeDiagnosticValue(evt.deliveryKind, "other"),
   });
 
   const recordMessageDeliveryStarted = (
@@ -310,17 +310,17 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
   ) => {
     const attrs = {
       ...messageDeliveryAttrs(evt),
-      "openclaw.outcome": "completed",
+      "carapace.outcome": "completed",
     };
     messageDeliveryDurationHistogram.record(evt.durationMs, attrs);
     if (!tracesEnabled) {
       return;
     }
     const span = spanWithDuration(
-      "openclaw.message.delivery",
+      "carapace.message.delivery",
       {
         ...attrs,
-        "openclaw.delivery.result_count": evt.resultCount,
+        "carapace.delivery.result_count": evt.resultCount,
       },
       evt.durationMs,
       { parentContext: activeInternalOrTrustedContext(evt, metadata), endTimeMs: evt.ts },
@@ -334,14 +334,14 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
   ) => {
     const attrs = {
       ...messageDeliveryAttrs(evt),
-      "openclaw.outcome": "error",
-      "openclaw.errorCategory": normalizeDiagnosticValue(evt.errorCategory, "other"),
+      "carapace.outcome": "error",
+      "carapace.errorCategory": normalizeDiagnosticValue(evt.errorCategory, "other"),
     };
     messageDeliveryDurationHistogram.record(evt.durationMs, attrs);
     if (!tracesEnabled) {
       return;
     }
-    const span = spanWithDuration("openclaw.message.delivery", attrs, evt.durationMs, {
+    const span = spanWithDuration("carapace.message.delivery", attrs, evt.durationMs, {
       parentContext: activeInternalOrTrustedContext(evt, metadata),
       endTimeMs: evt.ts,
     });
@@ -364,7 +364,7 @@ export function createUsageRecorders(runtime: DiagnosticsRecorderRuntime) {
     const span = trackTrustedSpan(
       evt,
       metadata,
-      spanWithDuration("openclaw.run", spanAttrs, undefined, {
+      spanWithDuration("carapace.run", spanAttrs, undefined, {
         parentContext: activeTrustedParentContext(evt, metadata),
         startTimeMs: evt.ts,
       }),

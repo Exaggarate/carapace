@@ -1,26 +1,26 @@
 {
-  "name": "@openclaw/migrate-hermes",
+  "name": "@carapace/migrate-hermes",
   "version": "2026.9.2",
   "private": true,
-  "description": "Hermes to OpenClaw migration provider",
+  "description": "Hermes to Carapace migration provider",
   "type": "module",
   "dependencies": {
     "dotenv": "17.4.2",
     "yaml": "2.9.0"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

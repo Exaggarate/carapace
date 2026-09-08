@@ -105,7 +105,7 @@ describe("native host registration", () => {
             if (!wroteProfile) {
               const manifestPath = path.join(
                 chromium.nativeManifestDir,
-                "ai.openclaw.browser_bootstrap.json",
+                "ai.carapace.browser_bootstrap.json",
               );
               const preRegistration = JSON.parse(await fs.readFile(manifestPath, "utf8")) as {
                 allowed_origins: string[];
@@ -267,11 +267,11 @@ describe("native host registration", () => {
       entries: { [extensionId]: { location: 4, path: installed } },
     });
     await fs.mkdir(chrome.nativeManifestDir, { recursive: true, mode: 0o700 });
-    const manifestPath = path.join(chrome.nativeManifestDir, "ai.openclaw.browser_bootstrap.json");
+    const manifestPath = path.join(chrome.nativeManifestDir, "ai.carapace.browser_bootstrap.json");
     await fs.writeFile(
       manifestPath,
       JSON.stringify({
-        name: "ai.openclaw.browser_bootstrap",
+        name: "ai.carapace.browser_bootstrap",
         path: "/foreign/host",
         allowed_origins: [`chrome-extension://${extensionId}/`],
       }),
@@ -306,7 +306,7 @@ describe("native host registration", () => {
     await fs.mkdir(chrome.userDataDir, { recursive: true, mode: 0o700 });
     await fs.mkdir(chrome.nativeManifestDir, { recursive: true, mode: 0o700 });
     await fs.writeFile(
-      path.join(chrome.nativeManifestDir, "ai.openclaw.browser_bootstrap.json"),
+      path.join(chrome.nativeManifestDir, "ai.carapace.browser_bootstrap.json"),
       JSON.stringify({ name: "foreign", path: "/foreign/host", allowed_origins: [] }),
       { mode: 0o600 },
     );
@@ -634,7 +634,7 @@ describe("native host registration", () => {
         nativeHostPath: path.join(versionDir, "native-host-entry.js"),
         env: {
           ...value.deps.env,
-          OPENCLAW_CONFIG_PATH: path.join(value.root, "config's dir", "openclaw.json"),
+          CARAPACE_CONFIG_PATH: path.join(value.root, "config's dir", "carapace.json"),
         },
       };
       const executed = path.join(value.root, "target-executed");
@@ -711,7 +711,7 @@ describe("native host registration", () => {
         state: "owned",
         extensionIds: registration.extensionIds,
       });
-      expect(brokenRegistration.issue).toContain("openclaw browser extension install");
+      expect(brokenRegistration.issue).toContain("carapace browser extension install");
       expect(brokenRegistration.issue.length).toBeLessThan(200);
       expect(broken.issues).toEqual([`Chromium: ${brokenRegistration.issue}`]);
       expect(JSON.stringify(broken)).not.toMatch(/pairingString|token|Bearer|runtime's version/u);

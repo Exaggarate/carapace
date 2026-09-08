@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { TtsDirectiveOverrides } from "./provider-types.js";
 import { assertSpeechRuntimeAvailable } from "./runtime-availability.js";
 import { normalizeSpeechText } from "./speech-text.js";
@@ -8,7 +8,7 @@ import { resolveTtsSynthesisTarget } from "./tts-synthesis.js";
 
 export async function streamSpeech(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;
@@ -80,7 +80,7 @@ export async function streamSpeech(params: {
 
 export async function textToSpeechStream(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;

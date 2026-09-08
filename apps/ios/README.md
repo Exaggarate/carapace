@@ -1,6 +1,6 @@
-# OpenClaw iOS
+# Carapace iOS
 
-OpenClaw iOS is the officially released iPhone app. It connects to an OpenClaw Gateway as a `role: node` for chat, voice, approvals, sharing, and device-aware automation.
+Carapace iOS is the officially released iPhone app. It connects to an Carapace Gateway as a `role: node` for chat, voice, approvals, sharing, and device-aware automation.
 
 ## Distribution Status
 
@@ -30,7 +30,7 @@ pnpm ios:open
 ```
 
 3. In Xcode:
-   - Scheme: `OpenClaw`
+   - Scheme: `Carapace`
    - Destination: connected iPhone (recommended for real behavior)
    - Build configuration: `Debug`
    - Run (`Product` -> `Run`)
@@ -46,7 +46,7 @@ pnpm ios:gen
 
 ### Watch companion build requirements
 
-The normal `OpenClaw` iPhone scheme embeds the Watch app, so even an iPhone-only
+The normal `Carapace` iPhone scheme embeds the Watch app, so even an iPhone-only
 build compiles the native Watch WebRTC library. Install the official
 [rustup toolchain manager](https://rustup.rs/), then install the pinned compiler
 and standard-library sources:
@@ -75,22 +75,22 @@ Verify the pinned Cargo is reachable from the build environment:
 cargo +nightly-2026-09-05 --version
 ```
 
-`apps/shared/OpenClawWatchRTC/build.sh` uses that exact toolchain with
+`apps/shared/CarapaceWatchRTC/build.sh` uses that exact toolchain with
 `cargo --locked` and `-Z build-std`; it never installs a toolchain or changes the
 global default. Select Xcode through its command-line-tool setting or
 `DEVELOPER_DIR`. The Watch device and simulator slices were verified with the
 watchOS 27 SDK; the app's deployment target remains watchOS 11. See the
-[native Watch module README](../shared/OpenClawWatchRTC/README.md) for supported
+[native Watch module README](../shared/CarapaceWatchRTC/README.md) for supported
 architectures, build output locations, and dependency notices.
 
-Run `OpenClawWatchTests` through the `OpenClawWatchApp` scheme for configuration,
+Run `CarapaceWatchTests` through the `CarapaceWatchApp` scheme for configuration,
 call lifecycle, and native codec coverage. These tests and signed simulator
 builds do not prove a real Watch microphone/speaker route, background audio,
 wrist-down behavior, Wi-Fi/cellular handoff, or multi-hour battery endurance.
 A native macOS provider roundtrip is interoperability evidence, not Watch
 hardware proof. Validate those behaviors separately through a physical Watch's
 normal **Enable Standalone Voice → Talk on Watch → Start** flow; see
-[Watch setup and limits](https://docs.openclaw.ai/platforms/ios#standalone-voice).
+[Watch setup and limits](../../docs/platforms/ios.md#standalone-voice).
 
 ## App Store Release Flow
 
@@ -101,19 +101,19 @@ Prereqs:
 - `xcodegen`
 - The pinned [Watch Rust toolchain](#watch-companion-build-requirements)
 - Ruby 3.4.10 and Bundler 2.6.9 (`fastlane` is installed from `apps/ios/Gemfile.lock`)
-- Apple account signed into Xcode for the canonical OpenClaw team (`FWJYW4S8P8`)
-- Fastlane Apple Developer Portal session for the canonical OpenClaw team when creating bundle IDs or enabling services
+- Apple account signed into Xcode for the canonical Carapace team (`FWJYW4S8P8`)
+- Fastlane Apple Developer Portal session for the canonical Carapace team when creating bundle IDs or enabling services
 - Release-owner access to the encrypted signing repo password (`MATCH_PASSWORD`)
-- App Store Connect app already created for `ai.openclawfoundation.app`
+- App Store Connect app already created for `ai.carapacefoundation.app`
 - App Store Connect API key set up in Keychain via `scripts/ios-app-store-connect-keychain-setup.sh` when auto-resolving a build number or uploading to App Store Connect
 
 Release behavior:
 
-- Local development uses the canonical `ai.openclawfoundation.app*` bundle IDs when the OpenClaw team is available, and unique `ai.openclawfoundation.app.test.*` bundle IDs only for non-canonical fallback teams.
-- App Store release uses canonical `ai.openclawfoundation.app*` bundle IDs through a temporary generated xcconfig in `apps/ios/build/AppStoreRelease.xcconfig`.
+- Local development uses the canonical `ai.carapacefoundation.app*` bundle IDs when the Carapace team is available, and unique `ai.carapacefoundation.app.test.*` bundle IDs only for non-canonical fallback teams.
+- App Store release uses canonical `ai.carapacefoundation.app*` bundle IDs through a temporary generated xcconfig in `apps/ios/build/AppStoreRelease.xcconfig`.
 - App Store release uses manual `Apple Distribution` signing with profile names pinned in `apps/ios/Config/AppStoreSigning.json`.
 - Fastlane owns one-time Developer Portal setup, encrypted `match` signing sync to the repo/branch pinned in `apps/ios/Config/AppStoreSigning.json`, and release handling.
-- App Store release also switches the app to `OpenClawPushMode=appStore`, which derives relay transport, official distribution, the canonical production relay, production APNs, production relay profile, `appleStrict` proof, and the App-Attest-capable entitlement file.
+- App Store release also switches the app to `CarapacePushMode=appStore`, which derives relay transport, official distribution, the canonical production relay, production APNs, production relay profile, `appleStrict` proof, and the App-Attest-capable entitlement file.
 - `pnpm ios:release:upload` generates App Store screenshots, archives and validates the IPA, uploads release notes and the rendered `apps/ios/APP-REVIEW-NOTES.md` attachment, uploads the IPA, and waits for Apple processing.
 - Agent-driven App Store uploads must use `pnpm ios:release:upload` as the only release path. If that command fails, stop and fix the failing screenshot, metadata, archive, validation, or upload step before trying again.
 - Do not treat `pnpm ios:release:archive`, `asc builds upload`, `asc release stage`, `asc publish appstore`, direct Fastlane lanes, or App Store Connect mutation commands as fallback upload paths after `pnpm ios:release:upload` fails.
@@ -133,7 +133,7 @@ Release behavior:
 
 Relay behavior for App Store builds:
 
-- App Store release builds use the canonical hosted relay at `https://ios-push-relay.openclaw.ai`.
+- App Store release builds use the canonical hosted relay at `https://github.com/Exaggarate/carapace`.
 - App Store release builds reject custom relay URL overrides. Future self-hosted relay support should use a separate explicit release path, not the public App Store build lane.
 
 Signing setup commands:
@@ -210,10 +210,10 @@ scripts/ios-app-store-connect-keychain-setup.sh \
 This should create `apps/ios/fastlane/.env` with non-secret App Store Connect variables while the private key stays in Keychain.
 
 3. Confirm the App Store Connect app and Apple Developer identifiers/capabilities exist for:
-   - `ai.openclawfoundation.app`
-   - `ai.openclawfoundation.app.share`
-   - `ai.openclawfoundation.app.activitywidget`
-   - `ai.openclawfoundation.app.watchkitapp`
+   - `ai.carapacefoundation.app`
+   - `ai.carapacefoundation.app.share`
+   - `ai.carapacefoundation.app.activitywidget`
+   - `ai.carapacefoundation.app.watchkitapp`
 
    The main app and share extension must both be associated with the App Group pinned in `apps/ios/Config/AppStoreSigning.json`. The main app must also have App Attest enabled.
 
@@ -244,14 +244,14 @@ pnpm ios:release:upload
    - generates deterministic App Store screenshots
    - uploads release notes, screenshots, and the App Review PDF attachment to the editable App Store version
    - generates `apps/ios/build/AppStoreRelease.xcconfig`
-   - archives `OpenClaw`
+   - archives `Carapace`
    - validates the exported IPA's push mode, signed entitlements, and embedded App Store profile
    - validates the IPA with Apple, uploads it, and waits for App Store Connect processing
    - leaves App Review submission for a maintainer to complete manually
 
 8. Expected outputs after a successful run:
-   - `apps/ios/build/app-store/OpenClaw-<version>.ipa`
-   - `apps/ios/build/app-store/OpenClaw-<version>.app.dSYM.zip`
+   - `apps/ios/build/app-store/Carapace-<version>.ipa`
+   - `apps/ios/build/app-store/Carapace-<version>.app.dSYM.zip`
    - Fastlane log line like `Uploaded iOS App Store build: version=<version> short=<short> build=<build>`
    - a complete App Store Connect build-upload record for that version and build
 
@@ -301,16 +301,16 @@ See `apps/ios/VERSIONING.md` for the detailed spec.
 ## APNs Expectations For Local/Manual Builds
 
 - The app calls `registerForRemoteNotifications()` at launch.
-- `apps/ios/Sources/OpenClaw.entitlements` derives `aps-environment` from the active build configuration/signing override.
-- App Attest relay builds use `apps/ios/Sources/OpenClawAppAttest.entitlements`; local/direct builds do not require App Attest provisioning.
+- `apps/ios/Sources/Carapace.entitlements` derives `aps-environment` from the active build configuration/signing override.
+- App Attest relay builds use `apps/ios/Sources/CarapaceAppAttest.entitlements`; local/direct builds do not require App Attest provisioning.
 - APNs token registration to gateway happens only after gateway connection (`push.apns.register`).
-- Local/manual Debug builds default to `OpenClawPushMode=localSandbox`, direct APNs registration, and a development `aps-environment` entitlement. Local/manual Release builds default to `OpenClawPushMode=localProduction` and direct production APNs registration.
+- Local/manual Debug builds default to `CarapacePushMode=localSandbox`, direct APNs registration, and a development `aps-environment` entitlement. Local/manual Release builds default to `CarapacePushMode=localProduction` and direct production APNs registration.
 - Your selected team/profile must support Push Notifications for the app bundle ID you are signing.
 - If push capability or provisioning is wrong, APNs registration fails at runtime (check Xcode logs for `APNs registration failed`).
-- The gateway host also needs direct APNs auth configured separately with `OPENCLAW_APNS_TEAM_ID`, `OPENCLAW_APNS_KEY_ID`, and either `OPENCLAW_APNS_PRIVATE_KEY_P8` or `OPENCLAW_APNS_PRIVATE_KEY_PATH`.
-- Recommended gateway-host storage for the APNs `.p8` file is `~/.openclaw/credentials/apns/AuthKey_<KEYID>.p8` with restrictive permissions, then point `OPENCLAW_APNS_PRIVATE_KEY_PATH` at that file.
+- The gateway host also needs direct APNs auth configured separately with `CARAPACE_APNS_TEAM_ID`, `CARAPACE_APNS_KEY_ID`, and either `CARAPACE_APNS_PRIVATE_KEY_P8` or `CARAPACE_APNS_PRIVATE_KEY_PATH`.
+- Recommended gateway-host storage for the APNs `.p8` file is `~/.carapace/credentials/apns/AuthKey_<KEYID>.p8` with restrictive permissions, then point `CARAPACE_APNS_PRIVATE_KEY_PATH` at that file.
 - `apps/ios/fastlane/.env` only covers App Store Connect / Fastlane auth; it does not provide gateway APNs credentials for local direct-push testing.
-- Debug builds default to sandbox APNs through `OpenClawPushMode=localSandbox`; Release builds default to production APNs through `OpenClawPushMode=localProduction`.
+- Debug builds default to sandbox APNs through `CarapacePushMode=localSandbox`; Release builds default to production APNs through `CarapacePushMode=localProduction`.
 
 ## APNs Expectations For Official Builds
 
@@ -320,7 +320,7 @@ See `apps/ios/VERSIONING.md` for the detailed spec.
 - The app persists the relay handle metadata locally so reconnects can republish the gateway registration without re-registering on every connect.
 - If the relay base URL changes in a later build, the app refreshes the relay registration instead of reusing the old relay origin.
 - App Store release mode uses the internal `production` relay profile, production APNs, App Attest, and a StoreKit app transaction JWS during registration.
-- Gateway-side relay sending is configured through `gateway.push.apns.relay.baseUrl` in `openclaw.json`. `OPENCLAW_APNS_RELAY_BASE_URL` remains a temporary env override only.
+- Gateway-side relay sending is configured through `gateway.push.apns.relay.baseUrl` in `carapace.json`. `CARAPACE_APNS_RELAY_BASE_URL` remains a temporary env override only.
 
 ## Official Build Relay Trust Model
 
@@ -342,7 +342,7 @@ See `apps/ios/VERSIONING.md` for the detailed spec.
   - Production APNs credentials and raw official-build APNs tokens stay in the relay deployment,
     not on the gateway.
 
-This exists to keep the hosted relay limited to genuine OpenClaw official builds and to ensure a
+This exists to keep the hosted relay limited to genuine Carapace official builds and to ensure a
 gateway can only send pushes for iOS devices that paired with that gateway.
 
 ## What Works Now (Concrete)
@@ -358,7 +358,7 @@ gateway can only send pushes for iOS devices that paired with that gateway.
 
 ## Computer Use Relationship
 
-The iOS app is not a Codex Computer Use backend. Computer Use and `cua-driver mcp` are macOS desktop-control paths; iOS exposes device capabilities as OpenClaw node commands through the gateway. Agents can drive the iPhone camera, screen recorder, location, voice, and other node capabilities with `node.invoke`, subject to iOS foreground/background limits.
+The iOS app is not a Codex Computer Use backend. Computer Use and `cua-driver mcp` are macOS desktop-control paths; iOS exposes device capabilities as Carapace node commands through the gateway. Agents can drive the iPhone camera, screen recorder, location, voice, and other node capabilities with `node.invoke`, subject to iOS foreground/background limits.
 
 ## Location Automation Use Case (Testing)
 
@@ -426,7 +426,7 @@ Automatic wake/reconnect hardening:
 5. If network path is unclear:
    - switch to manual host/port + TLS in Gateway Advanced settings
 6. In Xcode console, filter for subsystem/category signals:
-   - `ai.openclawfoundation.app`
+   - `ai.carapacefoundation.app`
    - `GatewayDiag`
    - `APNs registration failed`
 7. Validate background expectations:

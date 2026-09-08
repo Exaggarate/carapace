@@ -5,7 +5,7 @@ describe("plugin uninstall assertions", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("accepts an absent legacy plugin entry but rejects every present falsy residue", () => {
-    vi.stubEnv("OPENCLAW_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE", "legacy");
+    vi.stubEnv("CARAPACE_FROZEN_TARGET_PLUGIN_UNINSTALL_MODE", "legacy");
 
     expect(hasExpectedPluginUninstallConfigState({ plugins: { entries: {} } }, "fixture")).toBe(
       true,

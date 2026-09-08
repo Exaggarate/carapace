@@ -2,11 +2,11 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { ensureAgentProvenanceSchema } from "./agent-provenance.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "./carapace-state-db.js";
 import {
   ensureUserPreferencesSchema,
   getUserPreferences,
@@ -17,18 +17,18 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function stateOptions() {
-  return { path: join(tempDirs.make("openclaw-user-prefs-"), "openclaw.sqlite") };
+  return { path: join(tempDirs.make("carapace-user-prefs-"), "carapace.sqlite") };
 }
 
 function openWithoutFeatureSchemas() {
   const options = stateOptions();
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   db.exec("DROP TABLE IF EXISTS user_preferences; DROP TABLE IF EXISTS agent_provenance;");
   return { db, options };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("user preferences", () => {
@@ -71,11 +71,11 @@ describe("user preferences", () => {
 
   it("lazily creates the additive table and isolates profile rows", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     const version = database.prepare("PRAGMA user_version").get()?.user_version;
     database.exec("DROP TABLE user_preferences;");
-    closeOpenClawStateDatabaseForTest();
-    const reopened = openOpenClawStateDatabase(options).db;
+    closeCarapaceStateDatabaseForTest();
+    const reopened = openCarapaceStateDatabase(options).db;
     expect(tableExists(reopened, "user_preferences")).toBe(false);
 
     expect(setUserPreferences("profile-a", { beta: 2, alpha: { enabled: true } }, options)).toEqual(
@@ -161,7 +161,7 @@ describe("user preferences", () => {
       setUserPreferences("source", { "source-a": true, "source-b": true }, options),
     ).toMatchObject({ ok: true });
 
-    mergeUserPreferences(openOpenClawStateDatabase(options).db, "source", "target");
+    mergeUserPreferences(openCarapaceStateDatabase(options).db, "source", "target");
 
     expect(Object.keys(getUserPreferences("target", undefined, options))).toHaveLength(128);
     expect(getUserPreferences("target", ["source-a", "source-b"], options)).toEqual({

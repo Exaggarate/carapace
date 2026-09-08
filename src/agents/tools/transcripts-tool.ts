@@ -3,11 +3,11 @@
  *
  * Manages live capture, manual import, summarization, and process-local transcript sessions.
  */
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { Type } from "typebox";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createTranscriptsStore,
   exportTranscriptSummary,
@@ -280,7 +280,7 @@ async function statusTranscripts(ctx: TranscriptsRuntimeContext) {
   const omitted = visibleEntries.length - selectorLines.length;
   const selectorText = [
     ...(selectorLines.length ? ["Selectors:", ...selectorLines] : []),
-    ...(omitted ? [`${omitted} more; ask a local operator to run openclaw transcripts list.`] : []),
+    ...(omitted ? [`${omitted} more; ask a local operator to run carapace transcripts list.`] : []),
   ];
   const omittedNotice = "Additional active sessions omitted (display limit).";
   const activeLines: string[] = [];
@@ -333,7 +333,7 @@ export function createTranscriptsTool(options?: {
   agentAccountId?: string;
   caller?: TranscriptToolCaller;
   assertCallerActive?: () => void;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   stateDir?: string;
   logger?: TranscriptsLogger;
 }): AnyAgentTool {

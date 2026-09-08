@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult, makeCompactionSuccess } from "./run.overflow-compaction.fixture.js";
 import {
   createOverflowRunParams,
@@ -11,9 +11,9 @@ import {
 } from "./run.overflow-compaction.harness.js";
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
-let agentDatabase: typeof import("../../state/openclaw-agent-db.js");
+let agentDatabase: typeof import("../../state/carapace-agent-db.js");
 let sessionAccessor: typeof import("../../config/sessions/session-accessor.js");
 let activeEvents: typeof import("../../config/sessions/session-accessor.sqlite-active-events.js");
 let sqliteScope: typeof import("../../config/sessions/session-accessor.sqlite-scope.js");
@@ -22,7 +22,7 @@ let reconcile: typeof import("../../config/sessions/session-transcript-reconcile
 describe("runEmbeddedAgent transcript projection retry", () => {
   beforeAll(async () => {
     runEmbeddedAgent = await loadSharedRunIntegrationHarness();
-    agentDatabase = await import("../../state/openclaw-agent-db.js");
+    agentDatabase = await import("../../state/carapace-agent-db.js");
     sessionAccessor = await import("../../config/sessions/session-accessor.js");
     activeEvents = await import("../../config/sessions/session-accessor.sqlite-active-events.js");
     sqliteScope = await import("../../config/sessions/session-accessor.sqlite-scope.js");
@@ -31,15 +31,15 @@ describe("runEmbeddedAgent transcript projection retry", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.projection-retry" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.projection-retry" });
   });
 
   afterEach(async () => {
     await state?.cleanup();
     expect(
       agentDatabase
-        .listOpenClawAgentDatabasesForTest()
+        .listCarapaceAgentDatabasesForTest()
         .filter((database) => database.path.startsWith(`${state.stateDir}${path.sep}`)),
     ).toEqual([]);
     await expect(fs.stat(state.root)).rejects.toMatchObject({ code: "ENOENT" });
@@ -73,7 +73,7 @@ describe("runEmbeddedAgent transcript projection retry", () => {
         await originalWaitForProjection(scope, abortSignal);
         expect(
           agentDatabase
-            .openOpenClawAgentDatabase(databaseOptions)
+            .openCarapaceAgentDatabase(databaseOptions)
             .db.prepare(
               "SELECT needs_rebuild FROM session_transcript_index_state WHERE session_id = ?",
             )
@@ -102,7 +102,7 @@ describe("runEmbeddedAgent transcript projection retry", () => {
           return makeAttemptResult({ sessionIdUsed: sessionId });
         });
       mockedCompactDirect.mockImplementationOnce(async () => {
-        const database = agentDatabase.openOpenClawAgentDatabase(databaseOptions);
+        const database = agentDatabase.openCarapaceAgentDatabase(databaseOptions);
         database.db
           .prepare(
             "UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?",
@@ -142,8 +142,8 @@ describe("runEmbeddedAgent transcript projection retry", () => {
         { ...sessionTarget, expectedWriterRunId: "run-owned-projection-retry" },
         controller.signal,
       );
-      agentDatabase.closeOpenClawAgentDatabaseByPath(
-        agentDatabase.resolveOpenClawAgentSqlitePath(databaseOptions),
+      agentDatabase.closeCarapaceAgentDatabaseByPath(
+        agentDatabase.resolveCarapaceAgentSqlitePath(databaseOptions),
       );
       expect(
         activeEvents.readSessionTranscriptMessageEventPage(sessionTarget, {

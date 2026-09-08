@@ -1,14 +1,14 @@
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
   createDirectOutboundTestAdapter,
   createTestRegistry,
 } from "../test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   normalizeSessionDeliveryState,
   type DeliveryContext,
@@ -27,9 +27,9 @@ async function withCurrentOrigin(
     delivery?: CronDelivery;
     source?: DeliveryContext;
   },
-  check: (fixture: { cfg: OpenClawConfig; job: CronJob }) => Promise<void>,
+  check: (fixture: { cfg: CarapaceConfig; job: CronJob }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ layout: "home" }, async (state) => {
+  await withCarapaceTestState({ layout: "home" }, async (state) => {
     setActivePluginRegistry(
       createTestRegistry(
         ["telegram", "discord"].slice(0, options.channelCount ?? 1).map((id) => ({
@@ -44,7 +44,7 @@ async function withCurrentOrigin(
     );
     const sessionKey = `agent:main:${options.surface ?? "dashboard"}:current-origin`;
     const storePath = path.join(state.sessionsDir(), "sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { entries: { main: { workspace: state.workspaceDir } } },
       session: { store: storePath },
     };

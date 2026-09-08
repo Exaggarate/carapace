@@ -1,8 +1,8 @@
 // Memory Core tests cover bounded deep-phase consolidation behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginStateKeyedStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
+import { createPluginStateKeyedStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { filterConsolidationCandidates } from "./dreaming-consolidation-candidates.js";
 import { applyMemoryConsolidationPlan } from "./dreaming-consolidation.js";
@@ -203,7 +203,7 @@ describe("memory consolidation", () => {
     expect(result!.highlights).toHaveLength(8);
     for (const [index, highlight] of result!.highlights.entries()) {
       const [marker, entry] = highlight.split("\n");
-      expect(marker).toBe(`<!-- openclaw-memory-promotion:revision-${Math.floor(index / 2)} -->`);
+      expect(marker).toBe(`<!-- carapace-memory-promotion:revision-${Math.floor(index / 2)} -->`);
       expect(entry!.length).toBeLessThanOrEqual(184); // 180 excerpt characters plus the Markdown bullet/quotes.
       expect(entry).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/u);
     }
@@ -467,8 +467,8 @@ describe("memory consolidation", () => {
     const previous = [
       "# Memory",
       "",
-      "<!-- openclaw-memory-lineage:tea-preference -->",
-      "<!-- openclaw-memory-promotion:old-candidate -->",
+      "<!-- carapace-memory-lineage:tea-preference -->",
+      "<!-- carapace-memory-promotion:old-candidate -->",
       "- Old tea preference.",
       "- Unrelated adjacent fact.",
       "- Third fact.",
@@ -506,8 +506,8 @@ describe("memory consolidation", () => {
     const previous = [
       "# Memory",
       "",
-      "<!-- openclaw-memory-lineage:tea-preference -->",
-      "<!-- openclaw-memory-promotion:old-candidate -->",
+      "<!-- carapace-memory-lineage:tea-preference -->",
+      "<!-- carapace-memory-promotion:old-candidate -->",
       "- Old tea preference.",
       "- Adjacent fact.",
       "- Third fact.",
@@ -545,7 +545,7 @@ describe("memory consolidation", () => {
     expect(applied?.content).toContain("Adjacent fact.");
     expect(applied?.content).not.toContain("old-candidate");
     expect(applied?.content).not.toContain("Old tea preference.");
-    expect(applied?.content).toContain("openclaw-memory-lineage:tea-preference");
+    expect(applied?.content).toContain("carapace-memory-lineage:tea-preference");
   });
 
   it("rejects adding beside an existing matching lineage", async () => {
@@ -557,8 +557,8 @@ describe("memory consolidation", () => {
     const previous = [
       "# Memory",
       "",
-      "<!-- openclaw-memory-lineage:tea-preference -->",
-      "<!-- openclaw-memory-promotion:old-candidate -->",
+      "<!-- carapace-memory-lineage:tea-preference -->",
+      "<!-- carapace-memory-promotion:old-candidate -->",
       "- Old tea preference.",
       "- Two.",
       "- Three.",
@@ -640,7 +640,7 @@ describe("memory consolidation", () => {
     const memory = await fs.readFile(memoryPath, "utf8");
     expect(memory).toContain("Concurrent fact.");
     expect(memory).toContain("## Promoted From Short-Term Memory");
-    expect(memory).toContain(`openclaw-memory-promotion:${promoted.key}`);
+    expect(memory).toContain(`carapace-memory-promotion:${promoted.key}`);
     expect(memory).not.toContain("Original fact.");
     await expect(fs.readFile(path.join(workspaceDir, "DREAMS.md"), "utf8")).resolves.toContain(
       "Rewrite skipped: MEMORY.md changed while consolidation was running.",
@@ -683,7 +683,7 @@ describe("memory consolidation", () => {
     expect(applied).toMatchObject({ applied: 1, appended: 1 });
     const memory = await fs.readFile(memoryPath, "utf8");
     expect(memory).toContain("Foreground fact.");
-    expect(memory).toContain(`openclaw-memory-promotion:${promoted.key}`);
+    expect(memory).toContain(`carapace-memory-promotion:${promoted.key}`);
     await expect(fs.readFile(path.join(workspaceDir, "DREAMS.md"), "utf8")).resolves.toContain(
       "Fallback: append-only promotion.",
     );
@@ -766,7 +766,7 @@ describe("memory consolidation", () => {
     }
     await fs.writeFile(
       memoryPath,
-      `# Memory\n\n<!-- openclaw-memory-promotion:${promoted.key} -->\n- User prefers green tea.\n`,
+      `# Memory\n\n<!-- carapace-memory-promotion:${promoted.key} -->\n- User prefers green tea.\n`,
       "utf8",
     );
     const subagent = createSubagent("{}");

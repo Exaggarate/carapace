@@ -1,6 +1,6 @@
 // Sms tests cover send plugin behavior.
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveSmsAccount } from "./accounts.js";
 import {

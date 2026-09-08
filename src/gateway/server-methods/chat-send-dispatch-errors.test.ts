@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { retainLegacyDefaultAgentId } from "../../config/legacy.default-agent-owner.js";
@@ -12,7 +12,7 @@ import {
 import { SessionTranscriptProjectionUnavailableError } from "../../config/sessions/session-transcript-projection-error.js";
 import { onAgentRuntimeEvent } from "../../infra/agent-events.js";
 import * as sessionRunError from "../../sessions/session-run-error.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { abortChatRunById, registerChatAbortController } from "../chat-abort.js";
 import { createChatRunState } from "../server-chat-state.js";
 import * as sessionLifecycleState from "../session-lifecycle-state.js";
@@ -72,7 +72,7 @@ describe("createChatSendDispatchErrorLifecycle", () => {
   it.each(["fallback", "restart-safe"])(
     "records the rejected input before its durable failure through %s settlement",
     async (settlement) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const target = {
           agentId: "main",
           sessionKey: "agent:main:main",
@@ -217,7 +217,7 @@ describe("createChatSendDispatchErrorLifecycle", () => {
   );
 
   it("keeps restart-safe settlement successful when its notice cannot be written", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const target = {
         sessionKey: "agent:main:main",
         storePath: path.join(state.sessionsDir(), "sessions.json"),

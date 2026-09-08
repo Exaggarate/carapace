@@ -1,7 +1,7 @@
-type OpenClawCodingToolsFactory =
-  (typeof import("openclaw/plugin-sdk/agent-harness"))["createOpenClawCodingTools"];
+type CarapaceCodingToolsFactory =
+  (typeof import("carapace/plugin-sdk/agent-harness"))["createCarapaceCodingTools"];
 
 /** Mutable dependency seam shared by dynamic-tool construction and its behavioral tests. */
 export const dynamicToolBuildState: {
-  openClawCodingToolsFactory?: OpenClawCodingToolsFactory;
+  carapaceCodingToolsFactory?: CarapaceCodingToolsFactory;
 } = {};

@@ -9,7 +9,7 @@ import { controlUiSessionUrl, installMockGateway } from "../test-helpers/control
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
 const suite = createControlUiE2eSuite({ name: "Control UI warm owner-first refresh" });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const rosterMatch = { includeGlobal: true };
 
 function sessionRow(ownerId: string, key: string, label: string, updatedAt: number) {
@@ -101,9 +101,9 @@ suite.define(() => {
       const refreshProbe = await page.evaluateHandle(() => {
         const app = document.querySelector<
           HTMLElement & { runtime?: { context: ApplicationContext } }
-        >("openclaw-app");
+        >("carapace-app");
         const sidebar = document.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-          "openclaw-app-sidebar",
+          "carapace-app-sidebar",
         );
         const sessions = app?.runtime?.context.sessions;
         const row = sidebar?.querySelector('[data-session-key="agent:main:bob"]');

@@ -1,4 +1,4 @@
-import { asOptionalRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import { jsonUtf8Bytes } from "../infra/json-utf8-bytes.js";
 import {
   extractJsonNullableStringFieldPrefix,
@@ -75,7 +75,7 @@ function extractJsonStringFieldSuffix(source: string, field: string): string | u
 function recoverOversizedMultimodalTranscriptRecord(
   line: string,
 ): Record<string, unknown> | undefined {
-  const markerPrefix = "__openclaw_omitted_image_";
+  const markerPrefix = "__carapace_omitted_image_";
   if (line.includes(markerPrefix)) {
     return undefined;
   }
@@ -276,7 +276,7 @@ export function parseTranscriptRecord(line: string): TranscriptRecord | null {
       role,
       ...(idempotencyKey ? { idempotencyKey } : {}),
       content: [{ type: "text", text: TRANSCRIPT_OVERSIZED_MESSAGE_PLACEHOLDER }],
-      __openclaw: { truncated: true, reason: "oversized" },
+      __carapace: { truncated: true, reason: "oversized" },
     },
   };
   return {

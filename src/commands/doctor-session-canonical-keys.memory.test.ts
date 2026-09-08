@@ -10,13 +10,13 @@ import packageJson from "../../package.json" with { type: "json" };
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { canonicalMemoryTestSupportModuleUrl } from "./doctor-session-canonical-keys.memory.test-support.js";
 import { insertLegacySession } from "./doctor-session-canonical-keys.test-support.js";
 
@@ -24,11 +24,11 @@ const execFileAsync = promisify(execFile);
 const ROW_COUNT = 48;
 const ENTRY_PAYLOAD_BYTES = 512 * 1024;
 const CHILD_HEAP_MIB = 160;
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 let bundleDir: string | undefined;
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   await state?.cleanup();
   if (bundleDir) {
     fs.rmSync(bundleDir, { force: true, recursive: true });
@@ -44,7 +44,7 @@ function payloadFor(index: number): string {
 
 describe("canonical SQLite session repair memory", () => {
   it("keeps entry JSON streaming under a low child heap", async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       applyEnv: false,
       label: "canonical-memory",
       layout: "state-only",
@@ -61,7 +61,7 @@ describe("canonical SQLite session repair memory", () => {
       env: state.env,
     });
     fs.mkdirSync(path.dirname(storePath), { recursive: true });
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "main",
       env: state.env,
       path: resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -73,12 +73,12 @@ describe("canonical SQLite session repair memory", () => {
     bundleDir = fs.mkdtempSync(path.join(process.cwd(), "node_modules/.cache/canonical-memory-"));
     const childPath = path.join(bundleDir, "child.mjs");
     fs.copyFileSync(
-      path.join(process.cwd(), "src/state/openclaw-agent-schema.sql"),
-      path.join(bundleDir, "openclaw-agent-schema.sql"),
+      path.join(process.cwd(), "src/state/carapace-agent-schema.sql"),
+      path.join(bundleDir, "carapace-agent-schema.sql"),
     );
     fs.copyFileSync(
-      path.join(process.cwd(), "src/state/openclaw-state-schema.sql"),
-      path.join(bundleDir, "openclaw-state-schema.sql"),
+      path.join(process.cwd(), "src/state/carapace-state-schema.sql"),
+      path.join(bundleDir, "carapace-state-schema.sql"),
     );
     await esbuild({
       bundle: true,
@@ -113,9 +113,9 @@ describe("canonical SQLite session repair memory", () => {
       return JSON.parse(stdout) as { foundGroups: number; scannedStores: number };
     };
 
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await expect(runChild()).resolves.toMatchObject({ foundGroups: 0, scannedStores: 1 });
-    const writable = openOpenClawAgentDatabase({
+    const writable = openCarapaceAgentDatabase({
       agentId: "main",
       env: state.env,
       path: database.path,
@@ -154,10 +154,10 @@ describe("canonical SQLite session repair memory", () => {
       writable.db.exec("ROLLBACK");
       throw error;
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     await expect(runChild()).resolves.toMatchObject({ foundGroups: 0, scannedStores: 1 });
-    const verifier = openOpenClawAgentDatabase({
+    const verifier = openCarapaceAgentDatabase({
       agentId: "main",
       env: state.env,
       path: database.path,

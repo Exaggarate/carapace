@@ -25,7 +25,7 @@ type SessionWorkAdmissionHandoff = {
 // Runtime chunks can load separate module instances. Handoff tokens must still
 // resolve against the one process-wide admission registry.
 const SESSION_WORK_ADMISSION_HANDOFFS = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionWorkAdmissionHandoffs"),
+  Symbol.for("carapace.sessionWorkAdmissionHandoffs"),
   () => new Map<string, SessionWorkAdmissionHandoff>(),
 );
 

@@ -3,9 +3,9 @@ import crypto from "node:crypto";
 import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { redactIdentifier } from "openclaw/plugin-sdk/logging-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { redactIdentifier } from "carapace/plugin-sdk/logging-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createAcceptedWhatsAppSendResult } from "./inbound/send-result.test-helper.js";
 import type { ActiveWebListener } from "./inbound/types.js";
@@ -21,10 +21,10 @@ let sendWhatsAppUploadFile: typeof import("./send.js").sendWhatsAppUploadFile;
 let sendPollWhatsApp: typeof import("./send.js").sendPollWhatsApp;
 let sendReactionWhatsApp: typeof import("./send.js").sendReactionWhatsApp;
 let sendTypingWhatsApp: typeof import("./send.js").sendTypingWhatsApp;
-let resetLogger: typeof import("openclaw/plugin-sdk/runtime-env").resetLogger;
-let setLoggerOverride: typeof import("openclaw/plugin-sdk/runtime-env").setLoggerOverride;
+let resetLogger: typeof import("carapace/plugin-sdk/runtime-env").resetLogger;
+let setLoggerOverride: typeof import("carapace/plugin-sdk/runtime-env").setLoggerOverride;
 
-const WHATSAPP_TEST_CFG: OpenClawConfig = {
+const WHATSAPP_TEST_CFG: CarapaceConfig = {
   channels: { whatsapp: {} },
 };
 
@@ -45,9 +45,9 @@ vi.mock("./connection-controller-runtime-context.js", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-    "openclaw/plugin-sdk/outbound-media",
+vi.mock("carapace/plugin-sdk/outbound-media", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+    "carapace/plugin-sdk/outbound-media",
   );
   return {
     ...actual,
@@ -55,9 +55,9 @@ vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/media-runtime")>(
-    "openclaw/plugin-sdk/media-runtime",
+vi.mock("carapace/plugin-sdk/media-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/media-runtime")>(
+    "carapace/plugin-sdk/media-runtime",
   );
   return {
     ...actual,
@@ -90,7 +90,7 @@ describe("web outbound", () => {
       sendTypingWhatsApp,
     } = await import("./send.js"));
     const { resetLogger: loadedResetLogger, setLoggerOverride: loadedSetLoggerOverride } =
-      await import("openclaw/plugin-sdk/runtime-env");
+      await import("carapace/plugin-sdk/runtime-env");
     resetLogger = loadedResetLogger;
     setLoggerOverride = loadedSetLoggerOverride;
   });
@@ -345,7 +345,7 @@ describe("web outbound", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(result).toEqual({
@@ -450,7 +450,7 @@ describe("web outbound", () => {
 
     expect(error).toBeInstanceOf(PlatformMessageNotDispatchedError);
     expect(error).toMatchObject({
-      code: "OPENCLAW_PLATFORM_MESSAGE_NOT_DISPATCHED",
+      code: "CARAPACE_PLATFORM_MESSAGE_NOT_DISPATCHED",
       message: expect.stringMatching(
         /No active WhatsApp Web listener.*channels login.*account work/,
       ),
@@ -941,7 +941,7 @@ describe("web outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await sendMessageWhatsApp("+1555", "pic", {
       verbose: false,
@@ -1048,7 +1048,7 @@ describe("web outbound", () => {
   });
 
   it("redacts recipients and poll text in outbound logs", async () => {
-    const logPath = path.join(os.tmpdir(), `openclaw-outbound-${crypto.randomUUID()}.log`);
+    const logPath = path.join(os.tmpdir(), `carapace-outbound-${crypto.randomUUID()}.log`);
     setLoggerOverride({ level: "trace", file: logPath });
 
     await sendPollWhatsApp(

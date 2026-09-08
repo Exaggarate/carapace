@@ -9,7 +9,7 @@ import { createPluginRecord } from "./loader-records.js";
 import { resolvePluginCapabilityCatalogContext } from "./loader-runtime-load.js";
 import { createPluginRegistry } from "./registry.js";
 import type { PluginRuntime } from "./runtime/types.js";
-import type { AnyAgentTool, OpenClawPluginApi } from "./types.js";
+import type { AnyAgentTool, CarapacePluginApi } from "./types.js";
 
 describe("captured plugin registration", () => {
   it.each(["captured", "registry"] as const)(
@@ -94,7 +94,7 @@ describe("captured plugin registration", () => {
   it("rejects asynchronous captured factories without capturing promises", async () => {
     const captured = createCapturedPluginRegistration();
     const invalid = (() => Promise.reject(new Error("factory rejected"))) as unknown as Parameters<
-      OpenClawPluginApi["registerSpeechProvider"]
+      CarapacePluginApi["registerSpeechProvider"]
     >[0];
     expect(() => captured.api.registerSpeechProvider(invalid)).toThrow("must be synchronous");
     expect(captured.speechProviders).toEqual([]);
@@ -138,7 +138,7 @@ describe("captured plugin registration", () => {
     expect(descriptor?.machineOutput).toBe(machineOutput);
     expect(
       descriptor?.machineOutput?.({
-        argv: ["node", "openclaw", "captured-machine"],
+        argv: ["node", "carapace", "captured-machine"],
         stdoutIsTTY: false,
       }),
     ).toBe(true);
@@ -293,15 +293,15 @@ describe("captured plugin registration", () => {
     };
 
     await registration.handler({ ...event, toolName: "web_search" }, { runtime: "codex" });
-    await registration.handler({ ...event, toolName: "exec" }, { runtime: "openclaw" });
+    await registration.handler({ ...event, toolName: "exec" }, { runtime: "carapace" });
     await registration.handler({ ...event, toolName: "exec" }, { runtime: "codex" });
 
     expect(handler).toHaveBeenCalledOnce();
   });
 
   it("returns synthetic scheduled-turn ids independent of human-readable names", async () => {
-    let scheduleSessionTurn: OpenClawPluginApi["scheduleSessionTurn"] | undefined;
-    let registerSessionSchedulerJob: OpenClawPluginApi["registerSessionSchedulerJob"] | undefined;
+    let scheduleSessionTurn: CarapacePluginApi["scheduleSessionTurn"] | undefined;
+    let registerSessionSchedulerJob: CarapacePluginApi["registerSessionSchedulerJob"] | undefined;
     const captured = capturePluginRegistration({
       id: "captured-custom-plugin",
       name: "Captured Custom Plugin",

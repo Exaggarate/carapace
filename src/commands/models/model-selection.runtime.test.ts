@@ -6,12 +6,12 @@ import { resolveModelExtraParamSources } from "../../agents/model-extra-params.j
 import {
   readConfigFileSnapshot,
   resetConfigRuntimeState,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../../config/config.js";
 import { DEFAULT_MODEL_ALIASES } from "../../config/defaults.js";
 import { ConfigMutationConflictError } from "../../config/mutation-conflict.js";
 import {
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   resetPluginLoaderTestStateForTest,
 } from "../../plugins/loader.test-fixtures.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
@@ -29,16 +29,16 @@ import { modelsSetCommand } from "./set.js";
 describe("model command provider preparation", () => {
   let root: string;
   let configPath: string;
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   let runtime: RuntimeEnv;
 
   beforeEach(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-model-command-"));
-    configPath = path.join(root, "openclaw.json");
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-model-command-"));
+    configPath = path.join(root, "carapace.json");
     const pluginDir = path.join(root, "provider");
     fs.mkdirSync(pluginDir);
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "alias-fixture",
         providers: ["fixture", "custom"],
@@ -80,16 +80,16 @@ describe("model command provider preparation", () => {
     fs.writeFileSync(configPath, JSON.stringify(config));
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: root,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_STATE_DIR: root,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
       },
       run,
     );
   }
 
-  function readConfig(): OpenClawConfig {
+  function readConfig(): CarapaceConfig {
     return JSON.parse(fs.readFileSync(configPath, "utf8"));
   }
 
@@ -187,7 +187,7 @@ describe("model command provider preparation", () => {
               JSON.stringify({ ...config, agents: { $include: "agents.json" } }),
             );
           }
-          const readAgents = (): OpenClawConfig["agents"] =>
+          const readAgents = (): CarapaceConfig["agents"] =>
             included ? JSON.parse(fs.readFileSync(agentsPath, "utf8")) : readConfig().agents;
           await modelsAliasesAddCommand("friendly", "fixture/legacy", runtime);
           const expectedModels = {
@@ -257,7 +257,7 @@ describe("model command provider preparation", () => {
       if (provider === "openrouter") {
         const pluginDir = path.join(root, "provider");
         fs.writeFileSync(
-          path.join(pluginDir, "openclaw.plugin.json"),
+          path.join(pluginDir, "carapace.plugin.json"),
           JSON.stringify({
             id: "alias-fixture",
             providers: [provider],
@@ -357,7 +357,7 @@ describe("model command provider preparation", () => {
     const foreignDir = path.join(root, "aaa-foreign");
     fs.mkdirSync(foreignDir);
     fs.writeFileSync(
-      path.join(foreignDir, "openclaw.plugin.json"),
+      path.join(foreignDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "aaa-foreign",
         providers: ["foreign"],
@@ -375,7 +375,7 @@ describe("model command provider preparation", () => {
     config.plugins!.load!.paths!.unshift(foreignDir);
     config.agents!.entries!.probe = { workspace: root };
     await isolated(async () => {
-      const registry = loadOpenClawPlugins({ config, workspaceDir: root, env: process.env });
+      const registry = loadCarapacePlugins({ config, workspaceDir: root, env: process.env });
       expect(registry.providers.map((entry) => entry.pluginId)).toEqual([
         "aaa-foreign",
         "alias-fixture",
@@ -414,7 +414,7 @@ describe("model command provider preparation", () => {
             env: process.env,
             workspaceDir: root,
           });
-          const registry = loadOpenClawPlugins({ config, env: process.env, workspaceDir: root });
+          const registry = loadCarapacePlugins({ config, env: process.env, workspaceDir: root });
           expect(
             resolvePluginProviderRegistryCore({
               config,
@@ -453,7 +453,7 @@ describe("model command provider preparation", () => {
     config.agents!.defaults!.models = { [canonical]: {} };
     const providerDir = path.join(root, "provider");
     fs.writeFileSync(
-      path.join(providerDir, "openclaw.plugin.json"),
+      path.join(providerDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "alias-fixture",
         providers: ["anthropic"],
@@ -471,7 +471,7 @@ describe("model command provider preparation", () => {
     const marker = path.join(root, "unused-imported");
     fs.mkdirSync(unusedDir);
     fs.writeFileSync(
-      path.join(unusedDir, "openclaw.plugin.json"),
+      path.join(unusedDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "unused-provider",
         providers: ["openai"],

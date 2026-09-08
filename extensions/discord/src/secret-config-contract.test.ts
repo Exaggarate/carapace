@@ -1,4 +1,4 @@
-import type { ResolverContext } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
+import type { ResolverContext } from "carapace/plugin-sdk/channel-secret-basic-runtime";
 import { describe, expect, it } from "vitest";
 import {
   collectRuntimeConfigAssignments,

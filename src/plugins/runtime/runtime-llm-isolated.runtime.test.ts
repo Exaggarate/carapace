@@ -1,6 +1,6 @@
 // Isolated runtime.llm.complete tests cover zero-tool dispatch and policy enforcement.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   onTrustedInternalDiagnosticEvent,
   resetDiagnosticEventsForTest,
@@ -33,7 +33,7 @@ const cfg = {
       model: "openai/gpt-5.5",
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 function primeCompletionMocks() {
   hoisted.resolveSimpleCompletionSelectionForAgent.mockImplementation(
@@ -50,7 +50,7 @@ function primeCompletionMocks() {
     text: "isolated",
     provider: "openai",
     model: "gpt-5.5",
-    owner: { kind: "harness", id: "openclaw" },
+    owner: { kind: "harness", id: "carapace" },
     usage: {
       input: 3,
       output: 2,
@@ -147,7 +147,7 @@ describe("runtime.llm.complete isolated agent runtime", () => {
       text: "isolated",
       execution: {
         mode: "isolated-agent-runtime",
-        owner: { kind: "harness", id: "openclaw" },
+        owner: { kind: "harness", id: "carapace" },
       },
       usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 },
       audit: { caller: { kind: "plugin", id: "llm-task" } },

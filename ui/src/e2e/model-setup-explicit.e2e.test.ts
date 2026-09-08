@@ -55,14 +55,14 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
             featureMethods: [
-              "openclaw.setup.detect",
-              "openclaw.setup.activate.start",
-              "openclaw.setup.auth.start",
+              "carapace.setup.detect",
+              "carapace.setup.activate.start",
+              "carapace.setup.auth.start",
               "wizard.next",
             ],
             methodResponses: {
-              "openclaw.setup.detect": detection,
-              "openclaw.setup.activate.start": {
+              "carapace.setup.detect": detection,
+              "carapace.setup.activate.start": {
                 done: true,
                 status: "error",
                 error: "HTTP 401: review this provider credential and try again.",
@@ -79,13 +79,13 @@ suite.define(() => {
           );
           expect(await page.locator("[data-selected]").count()).toBe(0);
           await page.getByRole("button", { name: "Check again", exact: true }).click();
-          await gateway.waitForRequest("openclaw.setup.detect", { after: 1 });
+          await gateway.waitForRequest("carapace.setup.detect", { after: 1 });
           await page.getByRole("heading", { name: "Found on this Gateway" }).waitFor();
           for (const method of [
-            "openclaw.setup.activate.start",
-            "openclaw.setup.auth.start",
+            "carapace.setup.activate.start",
+            "carapace.setup.auth.start",
             "plugins.install",
-            "openclaw.setup.verify",
+            "carapace.setup.verify",
             "config.set",
             "config.patch",
             "config.apply",
@@ -99,7 +99,7 @@ suite.define(() => {
             ),
           });
           await page.locator('[data-candidate-kind="anthropic-api-key"] button').click();
-          const activated = await gateway.waitForRequest("openclaw.setup.activate.start");
+          const activated = await gateway.waitForRequest("carapace.setup.activate.start");
           expect(activated.params).toMatchObject({
             kind: "anthropic-api-key",
             nativeSessionCatalogsEnabled: false,
@@ -107,7 +107,7 @@ suite.define(() => {
           await page
             .getByText("HTTP 401: review this provider credential and try again.", { exact: false })
             .waitFor();
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(1);
           await page.screenshot({
             path: path.join(
               suite.artifactDir,
@@ -130,14 +130,14 @@ suite.define(() => {
       async ({ page }) => {
         const gateway = await installMockGateway(page, {
           featureMethods: [
-            "openclaw.setup.detect",
-            "openclaw.setup.auth.start",
+            "carapace.setup.detect",
+            "carapace.setup.auth.start",
             "wizard.next",
             "wizard.cancel",
           ],
           methodResponses: {
-            "openclaw.setup.detect": detection,
-            "openclaw.setup.auth.start": { done: false, status: "running" },
+            "carapace.setup.detect": detection,
+            "carapace.setup.auth.start": { done: false, status: "running" },
             "wizard.next": {
               done: false,
               status: "running",
@@ -156,7 +156,7 @@ suite.define(() => {
           .locator('[data-auth-choice="meta-api-key"]')
           .getByRole("button", { name: "Review & install" });
         await install.waitFor();
-        expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(0);
+        expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(0);
         expect(
           await page
             .locator('[data-auth-choice="custom-api-key"]')
@@ -165,11 +165,11 @@ suite.define(() => {
         ).toBe(true);
         await page.getByLabel("Show existing native conversations").check();
         await install.click();
-        expect((await gateway.waitForRequest("openclaw.setup.auth.start")).params).toMatchObject({
+        expect((await gateway.waitForRequest("carapace.setup.auth.start")).params).toMatchObject({
           authChoice: "meta-api-key",
           nativeSessionCatalogsEnabled: true,
         });
-        const dialog = page.locator("openclaw-modal-dialog");
+        const dialog = page.locator("carapace-modal-dialog");
         await dialog
           .getByText("Allow this provider plugin to call its inference endpoint?", { exact: true })
           .waitFor();
@@ -181,7 +181,7 @@ suite.define(() => {
         });
         await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
         await gateway.waitForRequest("wizard.cancel");
-        expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
+        expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
       },
     );
   });
@@ -198,15 +198,15 @@ suite.define(() => {
         const modelRef = "meta/fixture-model";
         const gateway = await installMockGateway(page, {
           featureMethods: [
-            "openclaw.setup.detect",
-            "openclaw.setup.auth.start",
+            "carapace.setup.detect",
+            "carapace.setup.auth.start",
             "wizard.next",
             "wizard.cancel",
-            "openclaw.setup.verify",
+            "carapace.setup.verify",
           ],
           methodResponses: {
-            "openclaw.setup.detect": detection,
-            "openclaw.setup.auth.start": { done: false, status: "running" },
+            "carapace.setup.detect": detection,
+            "carapace.setup.auth.start": { done: false, status: "running" },
             "wizard.next": {
               done: false,
               status: "running",
@@ -221,13 +221,13 @@ suite.define(() => {
         });
         await page.goto(suite.server.baseUrl + "settings/model-setup");
         await page.locator('[data-auth-choice="meta-api-key"] button').click();
-        const start = await gateway.waitForRequest("openclaw.setup.auth.start");
+        const start = await gateway.waitForRequest("carapace.setup.auth.start");
         expect(start.params).toMatchObject({
           agentId: "main",
           authChoice: "meta-api-key",
           nativeSessionCatalogsEnabled: false,
         });
-        const dialog = page.locator("openclaw-modal-dialog");
+        const dialog = page.locator("carapace-modal-dialog");
         await dialog.getByText("Accept Meta provider capabilities?", { exact: true }).waitFor();
         await page.screenshot({ path: path.join(suite.artifactDir, "meta-capability-review.png") });
         await gateway.setMethodResponse("wizard.next", {
@@ -265,13 +265,13 @@ suite.define(() => {
         const relaunched = await context.newPage();
         const afterRelaunch = await installMockGateway(relaunched, {
           featureMethods: [
-            "openclaw.setup.detect",
-            "openclaw.setup.auth.start",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.verify",
+            "carapace.setup.detect",
+            "carapace.setup.auth.start",
+            "carapace.setup.activate.start",
+            "carapace.setup.verify",
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               ...detection,
               configuredModel: modelRef,
               setupComplete: true,
@@ -281,9 +281,9 @@ suite.define(() => {
         });
         await relaunched.goto(suite.server.baseUrl + "settings/model-setup?firstRun=explicit");
         await relaunched.locator(".model-setup__current").waitFor();
-        expect(await afterRelaunch.getRequests("openclaw.setup.auth.start")).toHaveLength(0);
-        expect(await afterRelaunch.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
-        expect(await afterRelaunch.getRequests("openclaw.setup.verify")).toHaveLength(0);
+        expect(await afterRelaunch.getRequests("carapace.setup.auth.start")).toHaveLength(0);
+        expect(await afterRelaunch.getRequests("carapace.setup.activate.start")).toHaveLength(0);
+        expect(await afterRelaunch.getRequests("carapace.setup.verify")).toHaveLength(0);
         await relaunched.screenshot({ path: path.join(suite.artifactDir, "meta-relaunched.png") });
       },
     );
@@ -302,20 +302,20 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
             featureMethods: [
-              "openclaw.setup.detect",
-              "openclaw.setup.auth.start",
+              "carapace.setup.detect",
+              "carapace.setup.auth.start",
               "wizard.next",
               "wizard.cancel",
             ],
             methodResponses: {
-              "openclaw.setup.detect": detection,
-              "openclaw.setup.auth.start":
+              "carapace.setup.detect": detection,
+              "carapace.setup.auth.start":
                 outcome === "remote"
                   ? {
                       done: true,
                       status: "error",
                       error:
-                        "Run openclaw onboard on the Gateway host to configure this custom endpoint.",
+                        "Run carapace onboard on the Gateway host to configure this custom endpoint.",
                       activationRejection: {
                         disposition: "rejected-before-promotion",
                         status: "unavailable",
@@ -336,20 +336,20 @@ suite.define(() => {
           });
           await page.goto(suite.server.baseUrl + "settings/model-setup");
           await page.locator('[data-auth-choice="custom-api-key"] button').click();
-          expect((await gateway.waitForRequest("openclaw.setup.auth.start")).params).toMatchObject({
+          expect((await gateway.waitForRequest("carapace.setup.auth.start")).params).toMatchObject({
             authChoice: "custom-api-key",
             agentId: "main",
           });
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           if (outcome === "remote") {
             await dialog
               .getByText(
-                "Run openclaw onboard on the Gateway host to configure this custom endpoint.",
+                "Run carapace onboard on the Gateway host to configure this custom endpoint.",
                 { exact: false },
               )
               .waitFor();
             expect(await gateway.getRequests("wizard.next")).toHaveLength(0);
-            expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
+            expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
             await page.screenshot({
               path: path.join(suite.artifactDir, "custom-remote-handoff.png"),
             });
@@ -393,8 +393,8 @@ suite.define(() => {
                 .waitFor();
             }
           }
-          expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
           await page.screenshot({
             path: path.join(suite.artifactDir, "custom-endpoint-outcome.png"),
           });

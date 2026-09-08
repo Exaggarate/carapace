@@ -8,12 +8,12 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { estimateAcpEventRowBytes, estimateAcpSessionRowBytes } from "./event-ledger-bytes.js";
 import {
   cloneAcpLedgerValue,
@@ -34,7 +34,7 @@ function normalizeSqliteInteger(value: number | bigint | null): number {
 }
 
 type AcpLedgerDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "acp_replay_sessions" | "acp_replay_events"
 >;
 type AcpReplayEventRow = Pick<
@@ -487,7 +487,7 @@ function buildSqliteReplay(
 
 /** Creates the SQLite-backed ACP event ledger used by the state database. */
 export function createSqliteAcpEventLedger(
-  params: OpenClawStateDatabaseOptions & AcpLedgerOptions = {},
+  params: CarapaceStateDatabaseOptions & AcpLedgerOptions = {},
 ): AcpEventLedger {
   const normalized = normalizeAcpLedgerOptions(params);
   const dbOptions = { env: params.env, path: params.path };
@@ -495,8 +495,8 @@ export function createSqliteAcpEventLedger(
     ...normalized,
   };
   const mutate = (fn: (db: DatabaseSync) => void) =>
-    runOpenClawStateWriteTransaction((database) => fn(database.db), dbOptions);
-  const read = <T>(fn: (db: DatabaseSync) => T): T => fn(openOpenClawStateDatabase(dbOptions).db);
+    runCarapaceStateWriteTransaction((database) => fn(database.db), dbOptions);
+  const read = <T>(fn: (db: DatabaseSync) => T): T => fn(openCarapaceStateDatabase(dbOptions).db);
 
   return {
     async startSession(sessionParams) {

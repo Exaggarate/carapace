@@ -20,8 +20,8 @@ describe("resolveAmbientNodeProxyAgent", () => {
     "HTTP_PROXY",
     "https_proxy",
     "http_proxy",
-    "OPENCLAW_PROXY_ACTIVE",
-    "OPENCLAW_PROXY_CA_FILE",
+    "CARAPACE_PROXY_ACTIVE",
+    "CARAPACE_PROXY_CA_FILE",
   ] as const;
   const tempDirs: string[] = [];
 
@@ -42,7 +42,7 @@ describe("resolveAmbientNodeProxyAgent", () => {
   });
 
   function writeTempCa(contents: string): string {
-    const dir = mkdtempSync(path.join(os.tmpdir(), "openclaw-extension-shared-proxy-ca-"));
+    const dir = mkdtempSync(path.join(os.tmpdir(), "carapace-extension-shared-proxy-ca-"));
     tempDirs.push(dir);
     const caFile = path.join(dir, "proxy-ca.pem");
     writeFileSync(caFile, contents, "utf8");
@@ -52,8 +52,8 @@ describe("resolveAmbientNodeProxyAgent", () => {
   it("adds managed proxy CA trust to ambient Node proxy agents", async () => {
     const caFile = writeTempCa("extension-shared-managed-proxy-ca");
     vi.stubEnv("https_proxy", "https://proxy.example:8443");
-    vi.stubEnv("OPENCLAW_PROXY_ACTIVE", "1");
-    vi.stubEnv("OPENCLAW_PROXY_CA_FILE", caFile);
+    vi.stubEnv("CARAPACE_PROXY_ACTIVE", "1");
+    vi.stubEnv("CARAPACE_PROXY_CA_FILE", caFile);
 
     const agent = await resolveAmbientNodeProxyAgent<{ proxy: true }>();
 

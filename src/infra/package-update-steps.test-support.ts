@@ -8,7 +8,7 @@ export async function writePackageRoot(packageRoot: string, version: string): Pr
   await Promise.all([
     fs.writeFile(
       path.join(packageRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", version }),
+      JSON.stringify({ name: "carapace", version }),
       "utf8",
     ),
     fs.writeFile(path.join(packageRoot, "dist", "index.js"), "export {};\n", "utf8"),
@@ -21,7 +21,7 @@ export function createNpmTarget(globalRoot: string): ResolvedGlobalInstallTarget
     manager: "npm",
     command: "npm",
     globalRoot,
-    packageRoot: path.join(globalRoot, "openclaw"),
+    packageRoot: path.join(globalRoot, "carapace"),
     npmOwner: {
       version: "12.0.0",
       lifecyclePolicy: "allow-scripts",

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import os from "node:os";
-import { decodeMountInfoPath } from "@openclaw/normalization-core/mountinfo-path";
+import { decodeMountInfoPath } from "@carapace/normalization-core/mountinfo-path";
 import { z } from "zod";
 import { runCommandWithTimeout } from "../process/exec.js";
 

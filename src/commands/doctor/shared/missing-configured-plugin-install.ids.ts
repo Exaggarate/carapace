@@ -1,7 +1,7 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { listRawChannelPluginCatalogEntries } from "../../../channels/plugins/catalog.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveConfiguredChannelPresencePolicy } from "../../../plugins/channel-plugin-ids.js";
 import { collectConfiguredMemoryEmbeddingProviderIds } from "../../../plugins/gateway-startup-plugin-ids.js";
 import { collectConfiguredSpeechProviderIds } from "../../../plugins/gateway-startup-speech-providers.js";
@@ -29,7 +29,7 @@ function addConfiguredPluginId(ids: Set<string>, value: unknown): void {
   }
 }
 
-function addConfiguredAgentRuntimePluginIds(ids: Set<string>, cfg: OpenClawConfig): void {
+function addConfiguredAgentRuntimePluginIds(ids: Set<string>, cfg: CarapaceConfig): void {
   for (const runtime of collectConfiguredRuntimePluginIds(cfg)) {
     addConfiguredPluginId(ids, runtime);
   }
@@ -37,7 +37,7 @@ function addConfiguredAgentRuntimePluginIds(ids: Set<string>, cfg: OpenClawConfi
 
 function addConfiguredMemoryEmbeddingProviderPluginIds(
   ids: Set<string>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): void {
   const configuredProviderIds = collectConfiguredMemoryEmbeddingProviderIds(cfg);
   if (configuredProviderIds.size === 0) {
@@ -51,7 +51,7 @@ function addConfiguredMemoryEmbeddingProviderPluginIds(
   }
 }
 
-function addConfiguredSpeechProviderPluginIds(ids: Set<string>, cfg: OpenClawConfig): void {
+function addConfiguredSpeechProviderPluginIds(ids: Set<string>, cfg: CarapaceConfig): void {
   for (const pluginId of resolveOfficialExternalProviderContractPluginIds({
     contract: "speechProviders",
     providerIds: collectConfiguredSpeechProviderIds(cfg),
@@ -60,7 +60,7 @@ function addConfiguredSpeechProviderPluginIds(ids: Set<string>, cfg: OpenClawCon
   }
 }
 
-function addConfiguredWebFetchProviderPluginIds(ids: Set<string>, cfg: OpenClawConfig): void {
+function addConfiguredWebFetchProviderPluginIds(ids: Set<string>, cfg: CarapaceConfig): void {
   const webFetch = cfg.tools?.web?.fetch;
   if (webFetch?.enabled === false) {
     return;
@@ -79,7 +79,7 @@ function addConfiguredWebFetchProviderPluginIds(ids: Set<string>, cfg: OpenClawC
 
 function addEnvWebFetchProviderPluginIds(
   ids: Set<string>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): void {
   if (cfg.tools?.web?.fetch?.enabled === false) {
@@ -94,7 +94,7 @@ function addEnvWebFetchProviderPluginIds(
 }
 
 export function collectConfiguredPluginIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): Set<string> {
   const ids = new Set<string>();
@@ -136,7 +136,7 @@ export function collectConfiguredPluginIds(
   return ids;
 }
 
-export function collectBlockedPluginIds(cfg: OpenClawConfig): Set<string> {
+export function collectBlockedPluginIds(cfg: CarapaceConfig): Set<string> {
   const ids = new Set<string>();
   const deny = cfg.plugins?.deny;
   if (Array.isArray(deny)) {
@@ -156,7 +156,7 @@ export function collectBlockedPluginIds(cfg: OpenClawConfig): Set<string> {
 }
 
 export function collectConfiguredChannelIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): Set<string> {
   if (asNullableRecord(cfg.plugins)?.enabled === false) {
@@ -178,7 +178,7 @@ export function collectConfiguredChannelIds(
 }
 
 export function collectEffectiveConfiguredChannelOwnerPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   snapshot: PluginMetadataSnapshot;
   configuredChannelIds: ReadonlySet<string>;

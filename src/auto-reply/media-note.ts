@@ -1,9 +1,9 @@
 /** Builds compact prompt notes for inbound media attachments. */
 import path from "node:path";
-import { basenameFromAnyPath } from "@openclaw/media-core/file-name";
-import { isAudioFileName } from "@openclaw/media-core/mime";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { basenameFromAnyPath } from "@carapace/media-core/file-name";
+import { isAudioFileName } from "@carapace/media-core/mime";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { normalizeMediaFacts, type MediaFact } from "../media/media-facts.js";
 import { getMediaDir } from "../media/store.js";
 import type { RuntimeMsgContext as MsgContext } from "./templating.js";

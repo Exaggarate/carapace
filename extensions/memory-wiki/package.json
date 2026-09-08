@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/memory-wiki",
+  "name": "@carapace/memory-wiki",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw persistent wiki plugin",
+  "description": "Carapace persistent wiki plugin",
   "type": "module",
   "dependencies": {
     "mdast-util-from-markdown": "2.0.3",
@@ -11,19 +11,19 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/memory-core": "workspace:*",
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/memory-core": "workspace:*",
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,4 +1,4 @@
-import type { MemoryEmbeddingProviderCreateOptions } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+import type { MemoryEmbeddingProviderCreateOptions } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { describe, expect, it } from "vitest";
 import { createMistralEmbeddingProvider } from "./embedding-provider.js";
 import { mistralMemoryEmbeddingProviderAdapter } from "./memory-embedding-adapter.js";

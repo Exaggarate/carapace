@@ -1,7 +1,7 @@
 // Provides SQLite transaction helpers with nested savepoints.
 import type { DatabaseSync } from "node:sqlite";
 import { setTimeout as sleep } from "node:timers/promises";
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import { createSubsystemLogger, type SubsystemLogger } from "../logging/subsystem.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 // The cache-state module keeps this lifecycle edge off the kysely value graph
@@ -27,7 +27,7 @@ const DEFAULT_SLOW_TRANSACTION_HOLD_MS = 1_000;
 
 // The same native handle can cross transformed SDK module graphs. Retain the
 // first terminal failure even when an inner caller catches it and continues.
-const abortedTransactionSymbol = Symbol.for("openclaw.sqliteAbortedTransaction");
+const abortedTransactionSymbol = Symbol.for("carapace.sqliteAbortedTransaction");
 type TransactionDatabase = DatabaseSync & {
   [abortedTransactionSymbol]?: { error: unknown };
 };
@@ -41,7 +41,7 @@ function assertTransactionUsable(db: TransactionDatabase): void {
 
 const transactionLog = createSubsystemLogger("sqlite/transaction");
 const writeAdmissionServices = resolveGlobalSingleton(
-  Symbol.for("openclaw.sqliteWriteAdmissionServices"),
+  Symbol.for("carapace.sqliteWriteAdmissionServices"),
   () => new Map<string, Set<() => void>>(),
 );
 
@@ -312,12 +312,12 @@ function runSqliteTransactionSync<T>(
   if (db.isTransaction) {
     // SQLite targets the most recent matching savepoint. Reusing its name keeps
     // nested native/SDK calls correct without module-local depth or counters.
-    db.exec("SAVEPOINT openclaw_tx_nested");
+    db.exec("SAVEPOINT carapace_tx_nested");
     try {
       const result = operation();
       assertSyncTransactionResult(result);
       assertTransactionUsable(db);
-      db.exec("RELEASE SAVEPOINT openclaw_tx_nested");
+      db.exec("RELEASE SAVEPOINT carapace_tx_nested");
       return result;
     } catch (error) {
       const failure = db[abortedTransactionSymbol];
@@ -325,8 +325,8 @@ function runSqliteTransactionSync<T>(
         throw failure.error;
       }
       try {
-        db.exec("ROLLBACK TO SAVEPOINT openclaw_tx_nested");
-        db.exec("RELEASE SAVEPOINT openclaw_tx_nested");
+        db.exec("ROLLBACK TO SAVEPOINT carapace_tx_nested");
+        db.exec("RELEASE SAVEPOINT carapace_tx_nested");
       } catch {
         // SQLITE_FULL and RAISE(ROLLBACK) can remove the entire transaction,
         // including its savepoints. Never let a caught failure autocommit later.

@@ -88,7 +88,7 @@ async function createEscapedBundledSkillFixture(params?: {
 }
 
 beforeAll(async () => {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skills-containment-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skills-containment-"));
   fakeHome = path.join(tempRoot, "home");
   await fs.mkdir(fakeHome, { recursive: true });
   envSnapshot = setMockSkillsHomeEnv(fakeHome);
@@ -108,8 +108,8 @@ afterAll(async () => {
 
 describe("skill path containment", () => {
   it.each([
-    { source: "bundled", expectedSource: "openclaw-bundled" },
-    { source: "custodian", expectedSource: "openclaw-custodian" },
+    { source: "bundled", expectedSource: "carapace-bundled" },
+    { source: "custodian", expectedSource: "carapace-custodian" },
   ] as const)("loads hardlinked packaged $source skills", async ({ source, expectedSource }) => {
     const workspaceDir = await createTempWorkspaceDir();
     const bundledSkillsDir = path.join(workspaceDir, "package", "skills");
@@ -145,9 +145,9 @@ describe("skill path containment", () => {
   });
 
   it.each([
-    { source: "workspace", expectedSource: "openclaw-workspace" },
-    { source: "managed", expectedSource: "openclaw-managed" },
-    { source: "config-extra", expectedSource: "openclaw-extra" },
+    { source: "workspace", expectedSource: "carapace-workspace" },
+    { source: "managed", expectedSource: "carapace-managed" },
+    { source: "config-extra", expectedSource: "carapace-extra" },
   ] as const)(
     "rejects hardlinked $source skills while preserving ordinary files",
     async ({ source, expectedSource }) => {
@@ -227,7 +227,7 @@ describe("skill path containment", () => {
       const warningLine = firstWarningLine(warn);
       expect(warningLine).toContain("Skipping escaped skill path outside its configured root:");
       expect(warningLine).toContain("reason=symlink-escape");
-      expect(warningLine).toContain("source=openclaw-workspace");
+      expect(warningLine).toContain("source=carapace-workspace");
       expect(warningLine).toContain(`root=${path.join(workspaceDir, "skills")}`);
       expect(warningLine).toContain(`requested=${requestedPath}`);
       expect(warningLine).toContain("resolved=");
@@ -260,7 +260,7 @@ describe("skill path containment", () => {
       const entries = loadTestWorkspaceSkills(workspaceDir, { config, agentId: "main" });
 
       expect(entries).toEqual([]);
-      expect(firstWarningLine(warn)).toContain("source=openclaw-workshop");
+      expect(firstWarningLine(warn)).toContain("source=carapace-workshop");
       expect(firstWarningLine(warn)).toContain("reason=symlink-escape");
     },
   );
@@ -361,7 +361,7 @@ describe("skill path containment", () => {
         expect(entries.map((entry) => entry.skill.name)).not.toContain(skillName);
         const warningLine = firstWarningLine(warn);
         expect(warningLine).toContain("Skipping escaped skill path outside its configured root:");
-        expect(warningLine).toContain("source=openclaw-managed");
+        expect(warningLine).toContain("source=carapace-managed");
         expect(warningLine).toContain("reason=symlink-escape");
       } finally {
         await fs.unlink(symlinkPath).catch(() => undefined);
@@ -382,7 +382,7 @@ describe("skill path containment", () => {
       expect(entries.map((entry) => entry.skill.name)).not.toContain("outside-bundled-skill");
       const warningLine = firstWarningLine(warn);
       expect(warningLine).toContain("Skipping escaped skill path outside its configured root:");
-      expect(warningLine).toContain("source=openclaw-bundled");
+      expect(warningLine).toContain("source=carapace-bundled");
       expect(warningLine).toContain("reason=bundled-symlink-escape");
       expect(warningLine).toContain("hint=likely-stray-local-symlink-or-checkout-mutation");
       expect(warningLine).toContain(`requested=${requestedPath}`);
@@ -423,7 +423,7 @@ describe("skill path containment", () => {
 
       const frontmatter = loadSingleSkillDirectory({
         skillDir,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
         rootRealPath: path.parse(skillDir).root,
       })?.frontmatter;
 

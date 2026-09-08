@@ -28,7 +28,7 @@ export function validateSetupInferenceOwnerEvidence(params: {
       ok: false,
       status: "unknown",
       error:
-        "Inference succeeded, but its runtime did not report an owner that OpenClaw can safely reuse. No model or credential route was saved.",
+        "Inference succeeded, but its runtime did not report an owner that Carapace can safely reuse. No model or credential route was saved.",
     };
   }
   if (
@@ -59,7 +59,7 @@ export function validateSetupInferenceOwnerEvidence(params: {
       };
     }
     if (
-      successfulHarnessId !== "openclaw" &&
+      successfulHarnessId !== "carapace" &&
       (params.auth.runtimeOwnerKind !== "plugin-harness" ||
         params.auth.runtimeOwnerId?.trim() !== successfulHarnessId ||
         !params.auth.runtimeArtifactFingerprint ||

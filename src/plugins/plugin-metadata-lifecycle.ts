@@ -8,7 +8,7 @@ import { resetPluginCache } from "./plugin-cache.js";
 
 const pluginMetadataProcessMemoClears = new Set<() => void>();
 const gatewayMetadataOwners = resolveGlobalSingleton<Set<symbol>>(
-  Symbol.for("openclaw.gatewayPluginMetadataOwners"),
+  Symbol.for("carapace.gatewayPluginMetadataOwners"),
   () => new Set(),
 );
 

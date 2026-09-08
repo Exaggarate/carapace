@@ -1,6 +1,6 @@
 // Diagnostic log event tests cover structured events written to diagnostic logs.
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   onDiagnosticEvent,

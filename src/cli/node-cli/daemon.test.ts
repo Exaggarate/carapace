@@ -85,7 +85,7 @@ vi.mock("../../daemon/runtime-hints.js", () => ({
     "Logs: node service log",
     "Restart attempts: node restart log",
   ],
-  buildPlatformServiceStartHints: () => ["openclaw node install", "openclaw node start"],
+  buildPlatformServiceStartHints: () => ["carapace node install", "carapace node start"],
 }));
 
 vi.mock("../../daemon/systemd.js", async () => {
@@ -143,7 +143,7 @@ describe("runNodeDaemonInstall", () => {
     mocks.runtime.error.mockClear();
     mocks.runtime.writeJson.mockClear();
     mocks.runtime.exit.mockClear();
-    vi.stubEnv("OPENCLAW_NIX_MODE", undefined);
+    vi.stubEnv("CARAPACE_NIX_MODE", undefined);
     mocks.service.install.mockReset().mockResolvedValue(undefined);
     mocks.service.isLoaded.mockReset().mockResolvedValue(false);
     mocks.buildNodeInstallPlan.mockReset().mockResolvedValue({
@@ -287,7 +287,7 @@ describe("runNodeDaemonInstall", () => {
   it.each([false, true])(
     "rejects Nix installs before config or service inspection (json=%s)",
     async (json) => {
-      await withEnvAsync({ OPENCLAW_NIX_MODE: "1" }, async () => {
+      await withEnvAsync({ CARAPACE_NIX_MODE: "1" }, async () => {
         await runNodeDaemonInstall({ json, force: true });
       });
 
@@ -313,11 +313,11 @@ describe("runNodeDaemonInstall", () => {
   it.each([
     {
       restriction: "external Gateway supervision",
-      env: { OPENCLAW_SUPERVISOR_MODE: "external" },
+      env: { CARAPACE_SUPERVISOR_MODE: "external" },
     },
     {
       restriction: "noncanonical Gateway state",
-      env: { OPENCLAW_STATE_DIR: "/tmp/openclaw-node-custom-state" },
+      env: { CARAPACE_STATE_DIR: "/tmp/carapace-node-custom-state" },
     },
   ])("does not apply $restriction to Node installation", async ({ env }) => {
     mocks.service.isLoaded.mockResolvedValueOnce(false).mockResolvedValue(true);
@@ -534,7 +534,7 @@ describe("runNodeDaemonStatus", () => {
     );
     expect(mocks.runtime.exit).toHaveBeenCalledWith(1);
     expect(stdout()).not.toContain("not loaded");
-    expect(stdout()).not.toContain("openclaw node install");
+    expect(stdout()).not.toContain("carapace node install");
   });
 
   it("reports a failed service check as JSON without inventing node status", async () => {
@@ -595,17 +595,17 @@ describe("runNodeDaemonStatus", () => {
     const command: GatewayServiceCommandConfig = {
       programArguments: ["node", "node-host"],
       environment: {
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_GATEWAY_TOKEN: "gateway-token",
-        OPENCLAW_GATEWAY_PASSWORD: "gateway-password",
+        CARAPACE_PROFILE: "work",
+        CARAPACE_GATEWAY_TOKEN: "gateway-token",
+        CARAPACE_GATEWAY_PASSWORD: "gateway-password",
       },
       managedDefinition: {
         programArguments: ["node", "node-host"],
-        environment: { OPENCLAW_GATEWAY_TOKEN: "managed-base-token" },
+        environment: { CARAPACE_GATEWAY_TOKEN: "managed-base-token" },
       },
-      managedOverrides: { launcher: "command", environment: { keys: ["OPENCLAW_GATEWAY_TOKEN"] } },
+      managedOverrides: { launcher: "command", environment: { keys: ["CARAPACE_GATEWAY_TOKEN"] } },
       definitionPaths: ["/etc/systemd/user/node-definition.conf"],
-      environmentValueSources: { OPENCLAW_PROFILE: "file" },
+      environmentValueSources: { CARAPACE_PROFILE: "file" },
       reloadPending: true,
     };
     mocks.service.readCommand.mockResolvedValue(command);
@@ -615,7 +615,7 @@ describe("runNodeDaemonStatus", () => {
     expect(mocks.runtime.writeJson).toHaveBeenCalledWith({
       service: expect.objectContaining({
         command: expect.objectContaining({
-          environment: { OPENCLAW_PROFILE: "work" },
+          environment: { CARAPACE_PROFILE: "work" },
           definitionPaths: command.definitionPaths,
           environmentValueSources: command.environmentValueSources,
           reloadPending: true,
@@ -628,7 +628,7 @@ describe("runNodeDaemonStatus", () => {
     expect(payload).not.toContain("managed-base-token");
     expect(payload).not.toContain("managedDefinition");
     expect(payload).not.toContain("managedOverrides");
-    expect(command.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("gateway-token");
+    expect(command.environment?.CARAPACE_GATEWAY_TOKEN).toBe("gateway-token");
     expect(command.managedDefinition).toBeDefined();
     expect(command.managedOverrides).toBeDefined();
   });

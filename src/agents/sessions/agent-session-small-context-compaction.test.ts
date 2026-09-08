@@ -1,4 +1,4 @@
-import type { Context, Model, SimpleStreamOptions } from "openclaw/plugin-sdk/llm";
+import type { Context, Model, SimpleStreamOptions } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { applyAgentCompactionSettingsFromConfig } from "../agent-settings.js";

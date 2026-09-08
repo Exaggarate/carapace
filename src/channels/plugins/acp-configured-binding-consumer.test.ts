@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { resolveConfiguredAcpBindingSpecFromRecord } from "../../acp/persistent-bindings.types.js";
 import type { AgentAcpBinding } from "../../config/types.agents.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { acpConfiguredBindingConsumer } from "./acp-configured-binding-consumer.js";
 
 const binding: AgentAcpBinding = {
@@ -11,7 +11,7 @@ const binding: AgentAcpBinding = {
   match: { channel: "discord" },
 };
 
-function materializeThinking(cfg: OpenClawConfig): string | undefined {
+function materializeThinking(cfg: CarapaceConfig): string | undefined {
   const factory = acpConfiguredBindingConsumer.buildTargetFactory({
     cfg,
     binding,
@@ -41,7 +41,7 @@ const baseCfg = {
       },
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 describe("acpConfiguredBindingConsumer thinking precedence", () => {
   it("honors per-model params.thinking over the global default", () => {
@@ -55,7 +55,7 @@ describe("acpConfiguredBindingConsumer thinking precedence", () => {
         ...baseCfg.agents,
         list: [{ id: "codex", model: "ollama-cloud/glm-5.2:cloud", thinkingDefault: "high" }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(materializeThinking(cfg)).toBe("high");
   });
@@ -64,7 +64,7 @@ describe("acpConfiguredBindingConsumer thinking precedence", () => {
     const cfg = {
       ...baseCfg,
       agents: { ...baseCfg.agents, defaults: { thinkingDefault: "adaptive" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(materializeThinking(cfg)).toBe("adaptive");
   });

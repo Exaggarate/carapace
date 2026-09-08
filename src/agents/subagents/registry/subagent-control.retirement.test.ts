@@ -484,7 +484,7 @@ it.each(["default", "template", "fixed JSON-style", "exact SQLite"])(
 
 it("does not create a missing child database while binding cancellation", async () => {
   const childSessionKey = "agent:missing:subagent:unprepared";
-  const databasePath = path.join(fixture.stateDir, "agents/missing/agent/openclaw-agent.sqlite");
+  const databasePath = path.join(fixture.stateDir, "agents/missing/agent/carapace-agent.sqlite");
   registerSubagentRun({
     runId: "unprepared",
     childSessionKey,

@@ -1,6 +1,6 @@
 // Vydra provider module implements model/runtime integration.
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
-import type { VideoGenerationProvider } from "openclaw/plugin-sdk/video-generation";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
+import type { VideoGenerationProvider } from "carapace/plugin-sdk/video-generation";
 import { DEFAULT_VYDRA_VIDEO_MODEL, runVydraGeneration } from "./shared.js";
 
 const VYDRA_KLING_MODEL = "kling";

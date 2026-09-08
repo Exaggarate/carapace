@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import * as observeBridge from "../desktop/observe-bridge.js";
 import { STALE_WORKER_BUILD_REASON } from "./admission.js";
 import type { WorkerNodeDesktopCarrier } from "./node-desktop-carrier.js";
@@ -373,9 +373,9 @@ describe("worker environment service", () => {
     support.testState.stateDb.db
       .prepare("UPDATE worker_environments SET shared_host = NULL WHERE environment_id = ?")
       .run("worker-legacy-shared");
-    closeOpenClawStateDatabaseForTest();
-    support.testState.stateDb = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: support.testState.root },
+    closeCarapaceStateDatabaseForTest();
+    support.testState.stateDb = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: support.testState.root },
     });
     support.testState.store = createWorkerEnvironmentStore({
       database: support.testState.stateDb,

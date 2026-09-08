@@ -1,8 +1,8 @@
 // Feishu plugin module implements chat behavior.
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import type { OpenClawPluginApi } from "../runtime-api.js";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
+import type { CarapacePluginApi } from "../runtime-api.js";
 import { FeishuChatSchema, type FeishuChatParams } from "./chat-schema.js";
 import { resolveFeishuChatType } from "./chat-type.js";
 import { createFeishuClient } from "./client.js";
@@ -66,11 +66,11 @@ export async function getChatInfo(client: Lark.Client, chatId: string) {
 }
 
 function authorizeFeishuChatInfo(params: {
-  cfg: NonNullable<OpenClawPluginApi["config"]>;
+  cfg: NonNullable<CarapacePluginApi["config"]>;
   account: ReturnType<typeof resolveFeishuToolAccount>;
   chatId: string;
   chat: Awaited<ReturnType<typeof getChatInfo>>;
-  ctx: OpenClawPluginToolContext;
+  ctx: CarapacePluginToolContext;
 }): void {
   assertFeishuChatReadAllowed({
     cfg: params.cfg,
@@ -83,10 +83,10 @@ function authorizeFeishuChatInfo(params: {
 
 async function getAuthorizedFeishuChatInfo(params: {
   client: Lark.Client;
-  cfg: NonNullable<OpenClawPluginApi["config"]>;
+  cfg: NonNullable<CarapacePluginApi["config"]>;
   account: ReturnType<typeof resolveFeishuToolAccount>;
   chatId: string;
-  ctx: OpenClawPluginToolContext;
+  ctx: CarapacePluginToolContext;
 }) {
   const preliminary = resolveFeishuChatReadPreliminaryAuthorization({
     cfg: params.cfg,
@@ -237,7 +237,7 @@ export async function getFeishuMemberInfo(
   };
 }
 
-export function registerFeishuChatTools(api: OpenClawPluginApi) {
+export function registerFeishuChatTools(api: CarapacePluginApi) {
   if (!api.config) {
     return;
   }
@@ -249,7 +249,7 @@ export function registerFeishuChatTools(api: OpenClawPluginApi) {
   }
 
   api.registerTool(
-    (toolContext: OpenClawPluginToolContext) => ({
+    (toolContext: CarapacePluginToolContext) => ({
       name: "feishu_chat",
       resultContentSource: "network",
       label: "Feishu Chat",

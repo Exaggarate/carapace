@@ -1,6 +1,6 @@
 import type { TurnAdoptionLifecycle } from "../auto-reply/get-reply-options.types.js";
 import type { FinalizedMsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   normalizeOutboundReplyPayload,
   type OutboundReplyPayload,
@@ -35,7 +35,7 @@ type DirectDmRoutePeer = { kind: "direct"; id: string };
 type DirectDmRoute = { agentId: string; sessionKey: string; accountId?: string };
 
 type DispatchInboundDirectDmParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   channelLabel: string;
   accountId: string;

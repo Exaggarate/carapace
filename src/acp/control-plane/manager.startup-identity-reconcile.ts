@@ -3,8 +3,8 @@ import {
   identityHasStableSessionId,
   isSessionIdentityPending,
   resolveSessionIdentityFromMeta,
-} from "@openclaw/acp-core/runtime/session-identity";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/acp-core/runtime/session-identity";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import type {
   AcpSessionManagerDeps,
@@ -18,7 +18,7 @@ import { resolveAcpSessionTarget } from "./manager.utils.js";
 
 /** Resolves pending ACP session identities opportunistically during manager startup. */
 export async function runManagerStartupIdentityReconcile(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: Pick<AcpSessionManagerDeps, "listAcpSessions">;
   withSessionActor: WithManagerSessionActor;
   resolveSession: ResolveManagerSession;

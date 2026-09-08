@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   normalizePluginsConfigWithResolver,
   resolvePolicyPluginActivationState,
@@ -11,7 +11,7 @@ import { hasKind } from "./slots.js";
 /** Select active root contributions while leaving path validation and publication to consumers. */
 export function* iteratePluginRootContributions(params: {
   metadataSnapshot: Pick<PluginMetadataSnapshot, "manifestRegistry" | "normalizePluginId">;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   contribution: "skills" | "hooks";
   /** Availability is checked after activation and before claiming a memory slot. */
   isAvailable?: (record: PluginManifestRecord) => boolean;

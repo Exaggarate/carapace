@@ -1,7 +1,7 @@
 // Status-tool session resolution helpers keep storage lookup out of the tool body.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { resolveSessionEntryCandidateTarget, type SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildAgentMainSessionKey, parseAgentSessionKey } from "../../routing/session-key.js";
 import { resolveInternalSessionKey } from "./sessions-helpers.js";
 
@@ -15,7 +15,7 @@ type ResolvedStatusSessionEntry = {
 export function resolveSessionStatusEntry(params: {
   agentId: string;
   alias: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   includeAliasFallback?: boolean;
   keyRaw: string;
   mainKey: string;
@@ -95,7 +95,7 @@ function synthesizeImplicitCurrentSessionEntry(): SessionEntry {
 export function resolveImplicitCurrentSessionFallback(params: {
   agentId: string;
   allowFallback: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   fallbackKey: string;
 }): ResolvedStatusSessionEntry | null {
   const fallbackKey = params.fallbackKey.trim();

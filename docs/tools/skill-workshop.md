@@ -9,7 +9,7 @@ title: "Skill Workshop"
 sidebarTitle: "Skill Workshop"
 ---
 
-Skill Workshop is OpenClaw's governed path for creating and updating its own
+Skill Workshop is Carapace's governed path for creating and updating its own
 generated skills. Through this path, agents and operators create a **proposal** (pending
 draft with content, target binding, scanner state, hashes, and rollback
 metadata) that becomes a live skill only when applied.
@@ -29,8 +29,8 @@ when the Gateway supplies an authorized library target; those operations publish
 managed revisions rather than Workshop proposals.
 
 Workshop storage is installation-managed and separate from the session
-workspace and managed skill library. `OPENCLAW_STATE_DIR` selects the state
-directory; `~/.openclaw` is the default.
+workspace and managed skill library. `CARAPACE_STATE_DIR` selects the state
+directory; `~/.carapace` is the default.
 
 ## Personal library authoring
 
@@ -161,8 +161,8 @@ shell commands; a full-access policy permits them. File discovery does not need 
 
 Reviews support the embedded runtime and CLI runtimes that declare instruction
 isolation, disable their native tools, and use only the Gateway's restricted
-OpenClaw tool set, including Claude CLI. These CLI reviews retain the host-selected instruction snapshot;
-Workshop skill contents remain review material. OpenClaw carries the Workshop
+Carapace tool set, including Claude CLI. These CLI reviews retain the host-selected instruction snapshot;
+Workshop skill contents remain review material. Carapace carries the Workshop
 file root and prepared sandbox to the mediated tools. Changing the CLI working
 directory alone does not provide containment.
 
@@ -251,7 +251,7 @@ naming requirements. It gathers the sources with its existing tools, then calls
 skill, or create a proposal when neither exists.
 
 The resulting proposal stays `pending`; `/learn` never applies it. Review and
-apply it through the normal approval flow or with `openclaw skills workshop`.
+apply it through the normal approval flow or with `carapace skills workshop`.
 
 When the actual turn supports only personal publication, including paired-node
 personal CLI authoring, `/learn` stops without changing a skill. Ask normally
@@ -297,35 +297,35 @@ skill, and shows the proposal description, support-file count, and body size.
 Approval requests are bounded to finish before the agent tool watchdog. If no
 decision arrives before the prompt expires, the lifecycle action does not run:
 the proposal stays pending and unchanged. Decide later in the Skill Workshop UI or run
-`openclaw skills workshop apply|reject|quarantine <proposal-id>`. Agents should
+`carapace skills workshop apply|reject|quarantine <proposal-id>`. Agents should
 not retry an expired lifecycle action in a loop.
 
 ## CLI
 
 ```bash
 # Create
-openclaw skills workshop propose-create \
+carapace skills workshop propose-create \
   --name morning-catchup \
   --description "Daily inbox catch-up: triage, archive, surface, draft, plan" \
   --proposal ./PROPOSAL.md
 
 # Update an existing Workshop-generated skill
-openclaw skills workshop propose-update trip-planning --proposal ./PROPOSAL.md
+carapace skills workshop propose-update trip-planning --proposal ./PROPOSAL.md
 
 # List and inspect
-openclaw skills workshop list
-openclaw skills workshop inspect <proposal-id>
+carapace skills workshop list
+carapace skills workshop inspect <proposal-id>
 
 # Revise before approval
-openclaw skills workshop revise <proposal-id> --proposal ./PROPOSAL.md
+carapace skills workshop revise <proposal-id> --proposal ./PROPOSAL.md
 
 # Run installed plugin evaluators against the exact current draft
-openclaw skills workshop evaluate <proposal-id>
+carapace skills workshop evaluate <proposal-id>
 
 # Close out
-openclaw skills workshop apply <proposal-id>
-openclaw skills workshop reject <proposal-id> --reason "Duplicate"
-openclaw skills workshop quarantine <proposal-id> --reason "Needs security review"
+carapace skills workshop apply <proposal-id>
+carapace skills workshop reject <proposal-id> --reason "Duplicate"
+carapace skills workshop quarantine <proposal-id> --reason "Needs security review"
 ```
 
 Every subcommand takes `--agent <id>` (agent context; defaults to
@@ -361,7 +361,7 @@ tree, so any live skill asset drift requires a fresh evaluation.
 The lifecycle supports external optimization loops without embedding one.
 Controllers can consume `skills.proposals.events.list`, evaluate an exact
 `revisionHash`, revise with `expectedRevisionHash` and `correlationId`, then continue
-from the returned event sequence. OpenClaw does not schedule, auto-revise, or
+from the returned event sequence. Carapace does not schedule, auto-revise, or
 decide when such a loop should stop.
 
 ## Proposal content
@@ -388,7 +388,7 @@ Use `--proposal-dir` when the proposed skill needs files beside
 `PROPOSAL.md`:
 
 ```bash
-openclaw skills workshop propose-create \
+carapace skills workshop propose-create \
   --name weekly-update \
   --description "Friday wrap-up: stats, highlights, next week's top three" \
   --proposal-dir ./weekly-update-proposal
@@ -406,7 +406,7 @@ and paths outside the standard support folders.
 Directory drafts must be completely readable and fit within eight path
 components, including the filename. Evaluator bundles require all included target
 content to be readable and within sixteen path components. Root `.clawhub`,
-`.clawdhub`, and `.openclaw` metadata entries are excluded; those names nested
+`.clawdhub`, and `.carapace` metadata entries are excluded; those names nested
 elsewhere remain included. Unreadable included directories or deeper content
 produce an error. Fix the reported directory or reduce its nesting, then retry.
 For a collection restore failure, follow the
@@ -513,10 +513,10 @@ the available history is exhausted, the action becomes **Scan new work**.
 Historical review is manual even when
 `skills.workshop.autonomous.mode` is `off`. Each click starts a model run,
 so provider pricing and data-handling terms apply. The cursor and coverage counts
-are stored in the shared OpenClaw state database; transcript content is not copied
+are stored in the shared Carapace state database; transcript content is not copied
 into scan state.
 
-In `propose` and `auto` modes, OpenClaw can review one finished substantial turn
+In `propose` and `auto` modes, Carapace can review one finished substantial turn
 after the agent system becomes idle. It records the finished turn's boundary and
 reads that turn's model context asynchronously with the same provider and model.
 Review transcript and session metadata stay detached from foreground work.
@@ -628,7 +628,7 @@ proposals.
 
 ```text
 <state-dir>/
-  state/openclaw.sqlite
+  state/carapace.sqlite
   agents/<agentId>/
     agent/workshop-skills/<skill-name>/
       SKILL.md
@@ -647,15 +647,15 @@ proposals.
       templates/
 ```
 
-Unless overridden, `<state-dir>` is `~/.openclaw`.
+Unless overridden, `<state-dir>` is `~/.carapace`.
 
-- `state/openclaw.sqlite`: canonical proposal records and provenance, the active
+- `state/carapace.sqlite`: canonical proposal records and provenance, the active
   generation reference, proposal status, recorded skill usage, collection and
   experience review outcomes, and apply rollback metadata.
 - Each generation contains one `PROPOSAL.md` and all of that revision's support
   files. Revision publication never overwrites the active generation in place.
 - Generation files are flushed before publication. After the complete bundle is
-  renamed into place, OpenClaw syncs the `generations/` parent directory where
+  renamed into place, Carapace syncs the `generations/` parent directory where
   the platform supports directory flushing, before committing SQLite state.
   Platforms that report directory synchronization as unsupported retain atomic
   rename and process-interruption safety, but do not claim power-loss durability
@@ -668,7 +668,7 @@ Proposals created by older releases can still reference the earlier root-level
 next successful revision moves the proposal onto the generation layout and
 retires the previous bundle.
 
-Startup and `openclaw doctor --fix` use the same Workshop migration. It imports
+Startup and `carapace doctor --fix` use the same Workshop migration. It imports
 the previous `proposals.json`, `proposal.json`, and `rollback.json` metadata into
 SQLite after verifying each proposal, then removes the migrated JSON files.
 It moves applied legacy Workshop creates into `workshop-skills`, retargets
@@ -676,7 +676,7 @@ eligible pending creates, and marks outside updates stale before normal use.
 Pending updates follow their relocated skill in the same database commit.
 Ownership-only moves preserve the proposal's existing edit time.
 Interrupted moves resume without discarding those pending updates.
-If older workspace setup files remain, run `openclaw doctor --fix`.
+If older workspace setup files remain, run `carapace doctor --fix`.
 Startup defers the affected skill moves and backup conversion until Doctor
 has imported that workspace state.
 The migration infers each legacy proposal's owner from its row, origin metadata,
@@ -701,7 +701,7 @@ attestations keep their protection.
 
 If a proposal's draft is missing, Suggestions marks it unavailable. You can
 reject it, but cannot apply, evaluate, or revise content that is no longer there.
-Run `openclaw doctor --fix` to mark these proposals stale and remove them from
+Run `carapace doctor --fix` to mark these proposals stale and remove them from
 actionable Suggestions. Doctor preserves their metadata and remaining files.
 If a proposal has unfinished apply recovery, Reject and Quarantine refuse to
 dismiss it. Doctor leaves it pending and asks you to restore the draft before
@@ -728,16 +728,16 @@ or change the installed skill.
 | `Target skill changed after proposal creation` | Revise the proposal against the current target, or create a new proposal.                                                                                                                                   |
 | `Proposal scan failed`                         | Inspect scanner findings, then revise or quarantine the proposal.                                                                                                                                           |
 | `Support file paths must be under one of...`   | Move support files under `assets/`, `examples/`, `references/`, `scripts/`, or `templates/`.                                                                                                                |
-| Proposal does not show in list                 | Check the selected agent and `OPENCLAW_STATE_DIR`.                                                                                                                                                          |
+| Proposal does not show in list                 | Check the selected agent and `CARAPACE_STATE_DIR`.                                                                                                                                                          |
 | Agent cannot call `skill_workshop`             | Check the active tool policy and run mode. `coding` includes the tool; restrictive `tools.allow` policies must list it explicitly, and sandboxed runs must use a normal host-side agent session or the CLI. |
 
 ### Tool-policy diagnostic
 
-In `propose` and `auto` modes, `openclaw doctor` runs the
+In `propose` and `auto` modes, `carapace doctor` runs the
 `core/doctor/skill-workshop-tool-policy` check for the default agent. If policy
 hides `skill_workshop`, the warning names the first excluding config layer and
 the exact `allow` or `alsoAllow` change to make. Older runbooks may still use
-`openclaw plugins inspect skill-workshop`; that command now explains that Skill
+`carapace plugins inspect skill-workshop`; that command now explains that Skill
 Workshop is built in and prints the same policy hint when applicable.
 
 ## Related
@@ -747,4 +747,4 @@ Workshop is built in and prints the same policy hint when applicable.
 - [Creating skills](/tools/creating-skills) for hand-written `SKILL.md`
   basics
 - [Skills config](/tools/skills-config) for the full `skills.workshop` schema
-- [Skills CLI](/cli/skills) for `openclaw skills` commands
+- [Skills CLI](/cli/skills) for `carapace skills` commands

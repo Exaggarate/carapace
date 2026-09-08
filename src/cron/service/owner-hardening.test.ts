@@ -14,10 +14,10 @@ import {
   tryBeginGatewaySuspendAdmission,
 } from "../../process/gateway-work-admission.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateDirForDatabasePath } from "../../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateDirForDatabasePath } from "../../state/carapace-state-db.paths.js";
 import { advanceCronActiveJobGeneration, isCronJobActive } from "../active-jobs.js";
 import { cronOwnerHardeningEntrypoints } from "../owner-hardening-runtime.test-support.js";
 import { CronService } from "../service.js";
@@ -69,7 +69,7 @@ beforeEach(async () => {
     `
       import fs from "node:fs";
       import { CronService } from ${JSON.stringify(serviceUrl.href)};
-      import { openOpenClawStateDatabase } from ${JSON.stringify(stateDatabaseUrl.href)};
+      import { openCarapaceStateDatabase } from ${JSON.stringify(stateDatabaseUrl.href)};
       const [storePath, jobId, mode, releasePath, outputPath] = process.argv.slice(2);
       const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       const logger = { debug() {}, info() {}, warn() {}, error() {} };
@@ -106,7 +106,7 @@ beforeEach(async () => {
         await cron.run(jobId, "force");
       }
       if (mode === "crash-activation") {
-        const database = openOpenClawStateDatabase().db;
+        const database = openCarapaceStateDatabase().db;
         database.function("crash_activation", () => {
           process.kill(process.pid, "SIGKILL");
           return 0;
@@ -168,7 +168,7 @@ function spawnRunner(params: {
   releasePath: string;
   outputPath: string;
 }): ChildProcess {
-  const stateDir = resolveOpenClawStateDirForDatabasePath(openOpenClawStateDatabase().path);
+  const stateDir = resolveCarapaceStateDirForDatabasePath(openCarapaceStateDatabase().path);
   const child = spawn(
     process.execPath,
     [
@@ -181,7 +181,7 @@ function spawnRunner(params: {
       params.outputPath,
     ],
     {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
@@ -283,7 +283,7 @@ function makeParentService(storePath: string, runCommandJob = vi.fn()) {
 }
 
 function receipts(storePath: string, jobId: string) {
-  return openOpenClawStateDatabase()
+  return openCarapaceStateDatabase()
     .db.prepare(
       `SELECT receipt_id AS receiptId, status, agent_id AS agentId,
               started_at_ms AS startedAtMs
@@ -300,7 +300,7 @@ function receipts(storePath: string, jobId: string) {
 }
 
 function databaseUpdateReceiptToRunning(receiptId: string): void {
-  openOpenClawStateDatabase()
+  openCarapaceStateDatabase()
     .db.prepare(
       `UPDATE cron_run_receipts
           SET status = 'running', finished_at_ms = NULL, error_text = NULL
@@ -316,7 +316,7 @@ function claimMarkerlessReceipt(storePath: string, job: CronJob, startedAtMs: nu
     agentId: job.agentId!,
     startedAtMs,
   });
-  return runOpenClawStateWriteTransaction(({ db }) =>
+  return runCarapaceStateWriteTransaction(({ db }) =>
     claimCronRunReceiptInDatabase({
       database: db,
       prepared,
@@ -333,7 +333,7 @@ describe("cron durable run ownership", () => {
     const job = makeCommandJob("receipt-required", now + 60_000);
     await saveCronStore(storePath, { version: 1, jobs: [job] });
     inspectActiveCronRunReceipt({ storePath, jobId: job.id });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TRIGGER reject_cron_run_receipt
       BEFORE INSERT ON cron_run_receipts
@@ -390,7 +390,7 @@ describe("cron durable run ownership", () => {
     const job = makeCommandJob("receipt-finalization-failure", now + 60_000);
     await saveCronStore(storePath, { version: 1, jobs: [job] });
     inspectActiveCronRunReceipt({ storePath, jobId: job.id });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TRIGGER reject_cron_run_receipt_finish
       BEFORE UPDATE OF status ON cron_run_receipts
@@ -454,7 +454,7 @@ describe("cron durable run ownership", () => {
     const job = makeCommandJob("receipt-only-retry", now + 60_000);
     await saveCronStore(storePath, { version: 1, jobs: [job] });
     const receipt = claimMarkerlessReceipt(storePath, job, now);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TEMP TRIGGER reject_receipt_only_finish
       BEFORE UPDATE OF status ON cron_run_receipts
@@ -579,7 +579,7 @@ describe("cron durable run ownership", () => {
       outputPath,
     });
     await waitForLine(owner, "started");
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const unrelated = makeCommandJob("imported-during-foreign-run", now + 60_000);
     unrelated.state = {};
     upsertCronJobRow(database, cronStoreKey(storePath), unrelated, 1);
@@ -869,7 +869,7 @@ describe("cron durable run ownership", () => {
     });
     expect(receipts(storePath, job.id)[0]).toMatchObject({ status: "error" });
     const recovered = findCronTaskRunRecoveryInDatabase({
-      database: openOpenClawStateDatabase().db,
+      database: openCarapaceStateDatabase().db,
       jobId: job.id,
       startedAt: persisted!.state.lastRunAtMs!,
       storeKey: cronStoreKey(storePath),

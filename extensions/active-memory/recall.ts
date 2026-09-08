@@ -1,6 +1,6 @@
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import { normalizeActiveMemoryFastMode } from "./config.js";
 import { getModelRef } from "./query.js";
 import { runRecallSubagent } from "./recall-run.js";
@@ -68,8 +68,8 @@ function formatActiveMemoryFastMode(fastMode: ActiveMemoryFastMode | undefined):
 }
 
 function prepareRecallRunContext(params: {
-  api: OpenClawPluginApi;
-  runtimeConfig: OpenClawConfig;
+  api: CarapacePluginApi;
+  runtimeConfig: CarapaceConfig;
   config: ResolvedActiveRecallPluginConfig;
   agentId: string;
   sessionKey?: string;
@@ -110,8 +110,8 @@ function prepareRecallRunContext(params: {
 }
 
 type ActiveRecallParams = {
-  api: OpenClawPluginApi;
-  runtimeConfig: OpenClawConfig;
+  api: CarapacePluginApi;
+  runtimeConfig: CarapaceConfig;
   config: ResolvedActiveRecallPluginConfig;
   agentId: string;
   sessionKey?: string;

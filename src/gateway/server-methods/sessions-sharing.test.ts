@@ -19,11 +19,11 @@ import {
   listSessionMembers,
 } from "../../config/sessions/session-sharing-store.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import { ensureProfileForEmail, listProfiles, setDisplayName } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   attachGatewayLocalUserIngress,
   getGatewayLocalUserIngress,
@@ -77,7 +77,7 @@ vi.mock("../session-sharing.js", async () => {
 afterEach(() => {
   targetResolutionMock.calls = 0;
   targetResolutionMock.override = undefined;
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 async function call(
@@ -127,7 +127,7 @@ function sharingEvidenceEvents(broadcast: ReturnType<typeof vi.fn>): SessionShar
 
 describe("session sharing handlers", () => {
   it("preserves profile actors and distinguishes unknown from absent profileless evidence", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const member = ensureProfileForEmail("sharing-evidence-member@example.com");
       const profiled = identifiedClient("profile-ada", "Ada");
       const unknown = soloClient();
@@ -267,7 +267,7 @@ describe("session sharing handlers", () => {
   });
 
   it("keeps real actor-evidence profile ids while discarding beta synthetic actors", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:sharing-storage-projection";
       const sessionId = "session-sharing-storage-projection";
       await upsertSessionEntryCore({ agentId: "main", sessionKey }, { sessionId, updatedAt: 1 });
@@ -304,7 +304,7 @@ describe("session sharing handlers", () => {
   });
 
   it("admits bare fixed-store keys only through their persisted owner", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = state.path("shared-sessions.sqlite");
       await upsertSessionEntryCore(
         { agentId: "ops", sessionKey: "global", storePath },
@@ -342,7 +342,7 @@ describe("session sharing handlers", () => {
   it.each([undefined, "idle"])(
     "keeps hidden incognito rows from changing non-owner list metadata (search: %s)",
     async (search) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const incognitoKey = "agent:main:dashboard:incognito-private";
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey: "agent:main:main" },
@@ -372,7 +372,7 @@ describe("session sharing handlers", () => {
           {
             agentId: "main",
             sessionKey: incognitoKey,
-            storePath: resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main", env: state.env }),
+            storePath: resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main", env: state.env }),
           },
           {
             sessionId: "session-incognito",
@@ -397,13 +397,13 @@ describe("session sharing handlers", () => {
   );
 
   it("never previews sessions hidden from sessions.list", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:dashboard:incognito-preview";
       await upsertSessionEntryCore(
         {
           agentId: "main",
           sessionKey,
-          storePath: resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main", env: state.env }),
+          storePath: resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main", env: state.env }),
         },
         {
           sessionId: "session-incognito-preview",
@@ -438,7 +438,7 @@ describe("session sharing handlers", () => {
   });
 
   it("rejects a visibility mutation when the queued session instance changed", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:stale-sharing-mutation";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },
@@ -478,7 +478,7 @@ describe("session sharing handlers", () => {
   });
 
   it("authorizes runs against the resolved session so keyless runs cannot bypass restriction", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:main";
       const owner = { id: "owner@example.com", label: "Owner" };
       const outsider = identifiedClient("outsider");
@@ -523,7 +523,7 @@ describe("session sharing handlers", () => {
   });
 
   it("projects a shared session member's truthful role in sessions.list", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:shared-member";
       const memberIdentity = { id: "member@example.com", label: "Member" };
       await upsertSessionEntryCore(
@@ -565,7 +565,7 @@ describe("session sharing handlers", () => {
   it.each([undefined, "direct"])(
     "hides drafts after asynchronous catalog preparation (search: %s)",
     async (search) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const sessionKey = "agent:main:mid-await-draft";
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey },
@@ -646,7 +646,7 @@ describe("session sharing handlers", () => {
   );
 
   it("refills a paged session list after its first row becomes a draft", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const hiddenKey = "agent:main:mid-await-paged-draft";
       const visibleKey = "agent:main:mid-await-paged-visible";
       await upsertSessionEntryCore(
@@ -699,7 +699,7 @@ describe("session sharing handlers", () => {
   });
 
   it("lists current identities and adds members without decoding unrelated saved prompts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:profile-member";
       const profile = ensureProfileForEmail("member@example.com");
       setDisplayName(profile.id, "Member");
@@ -776,7 +776,7 @@ describe("session sharing handlers", () => {
   });
 
   it("revokes all member access while a session is draft and restores it when shared", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:member-transition";
       const owner = { id: "owner@example.com", label: "Owner" };
       const memberIdentity = { id: "member@example.com", label: "Member" };
@@ -874,7 +874,7 @@ describe("session sharing handlers", () => {
   });
 
   it("publishes canonical visibility and membership changes without changing the transcript", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:main";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },

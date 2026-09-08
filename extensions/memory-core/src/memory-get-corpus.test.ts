@@ -1,15 +1,15 @@
-import type { MemoryReadResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemoryReadResult } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
+} from "carapace/plugin-sdk/memory-host-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   resetMemoryToolMockState,
   setMemoryReadFileImpl,
 } from "./memory-tool-manager.test-mocks.js";
 import { createMemoryGetTool } from "./tools.js";
-import { asOpenClawConfig, createMemoryGetToolOrThrow } from "./tools.test-helpers.js";
+import { asCarapaceConfig, createMemoryGetToolOrThrow } from "./tools.test-helpers.js";
 
 const lookup = "memory/entities/alpha.md";
 const memoryHit = {
@@ -278,7 +278,7 @@ describe("memory_get corpus outcomes", () => {
     async (corpus) => {
       const get = vi.fn(async () => wikiHit);
       registerMemoryCorpusSupplement("memory-wiki", { search: async () => [], get });
-      const config = asOpenClawConfig({
+      const config = asCarapaceConfig({
         agents: { list: [{ id: "marketing-agent", default: true }] },
       });
       const tool = createMemoryGetTool({

@@ -1,13 +1,13 @@
 // Injects reconnect terminal outcomes into the generated real-runTui PTY backend.
 export const TUI_PTY_RECONNECT_FIXTURE = {
   variables: `
-      const disconnectReason = process.env.OPENCLAW_TUI_PTY_DISCONNECT_REASON;
-      const reconnectOutcome = process.env.OPENCLAW_TUI_PTY_RECONNECT_OUTCOME;
-      const reconnectMembership = process.env.OPENCLAW_TUI_PTY_RECONNECT_MEMBERSHIP;
+      const disconnectReason = process.env.CARAPACE_TUI_PTY_DISCONNECT_REASON;
+      const reconnectOutcome = process.env.CARAPACE_TUI_PTY_RECONNECT_OUTCOME;
+      const reconnectMembership = process.env.CARAPACE_TUI_PTY_RECONNECT_MEMBERSHIP;
       const replacementReconnect = ["replacement", "appeared", "gap"].includes(reconnectOutcome);
       let disconnectPending = disconnectReason === undefined
         ? 0
-        : Number(process.env.OPENCLAW_TUI_PTY_DISCONNECT_COUNT ?? 1);
+        : Number(process.env.CARAPACE_TUI_PTY_DISCONNECT_COUNT ?? 1);
       let reconnectHistoryReady = false;
       let reconnectRunId = "run-reconnect-fixture";
       let reconnectSessionKey = "agent:main:main";

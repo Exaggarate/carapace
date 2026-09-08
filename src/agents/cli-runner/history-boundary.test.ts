@@ -16,7 +16,7 @@ import {
 import { projectPublicSessionEntry } from "../../config/sessions/session-entry-projection.js";
 import { runWithoutOwnedSessionTranscriptWrites } from "../../config/sessions/transcript-write-context.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import { closeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { prepareSystemAgentRunAdmission } from "../admitted-run-context.js";
 import type { AuthProfileCredential } from "../auth-profiles/types.js";
 import { CURRENT_SESSION_VERSION, SessionManager } from "../sessions/session-manager.js";
@@ -28,7 +28,7 @@ const dirs = useAutoCleanupTempDirTracker(afterEach);
 const databases = new Set<string>();
 afterEach(() => {
   for (const database of databases) {
-    closeOpenClawAgentDatabaseByPath(database);
+    closeCarapaceAgentDatabaseByPath(database);
   }
   databases.clear();
 });
@@ -39,7 +39,7 @@ async function fixture(withHeader = true) {
     agentId: "main",
     sessionId: "history",
     sessionKey: "agent:main:history",
-    storePath: path.join(dir, "openclaw-agent.sqlite"),
+    storePath: path.join(dir, "carapace-agent.sqlite"),
   };
   databases.add(target.storePath);
   await upsertSessionEntryCore(target, { sessionId: target.sessionId, updatedAt: 1 });

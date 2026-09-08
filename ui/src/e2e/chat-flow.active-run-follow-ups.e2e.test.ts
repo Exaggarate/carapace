@@ -107,19 +107,19 @@ suite.define(() => {
         {
           role: "user",
           content: "run the long command",
-          __openclaw: { id: "user-a", idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: "user-a", idempotencyKey: `${runId}:user`, seq: 1 },
         },
         {
           role: "assistant",
           content: [{ type: "toolCall", id: "callExec", name: "exec", arguments: {} }],
-          __openclaw: { id: "exec-call", seq: 2 },
+          __carapace: { id: "exec-call", seq: 2 },
         },
         {
           role: "toolResult",
           toolCallId: "callExec",
           toolName: "exec",
           content: [{ type: "text", text: "process still running" }],
-          __openclaw: { id: "exec-result", seq: 3 },
+          __carapace: { id: "exec-result", seq: 3 },
         },
       ],
       inFlightRun: { runId, text: "" },
@@ -179,7 +179,7 @@ suite.define(() => {
         phase: "naming_worktree",
       });
       const startupIndicator = page.locator('.chat-working-indicator[role="status"]');
-      if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+      if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
         const startupProofDir = path.join(suite.artifactDir, "duplicate-session-naming");
         await page.screenshot({ path: path.join(startupProofDir, "steer.png"), fullPage: true });
       }
@@ -202,7 +202,7 @@ suite.define(() => {
         .toBe(1);
       await gateway.resolveDeferred("chat.send", { runId: steerRunId, status: "started" });
       const steerUser = {
-        __openclaw: {
+        __carapace: {
           id: "ui4-steer-user",
           idempotencyKey: `${steerRunId}:user`,
           seq: 4,
@@ -300,7 +300,7 @@ suite.define(() => {
       const durableFinalMessage = {
         role: "assistant",
         content: [{ text: finalText, type: "text" }],
-        __openclaw: { id: "ui4-final", seq: 5 },
+        __carapace: { id: "ui4-final", seq: 5 },
       };
       await gateway.emitGatewayEvent("session.message", {
         activeRunIds: [runId],
@@ -396,13 +396,13 @@ suite.define(() => {
         role: "user",
         content: initialText,
         timestamp: startedAt - 1_000,
-        __openclaw: { id: "order-user", idempotencyKey: `${runId}:user`, seq: 1 },
+        __carapace: { id: "order-user", idempotencyKey: `${runId}:user`, seq: 1 },
       };
       const steerMessage = {
         role: "user",
         content: steerText,
         timestamp: startedAt + 1_000,
-        __openclaw: {
+        __carapace: {
           id: "order-steer",
           idempotencyKey: `${steerRunId}:user`,
           seq: 2,
@@ -471,7 +471,7 @@ suite.define(() => {
             )
             .toEqual([initialText, beforeText, steerText, afterText]);
         } finally {
-          const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+          const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
           const artifactDir = artifactDirParent
             ? createControlUiE2eArtifactDir("chat-flow.active-run-follow-ups", artifactDirParent)
             : undefined;
@@ -503,13 +503,13 @@ suite.define(() => {
       role: "user",
       content: initialText,
       timestamp: startedAt - 1_000,
-      __openclaw: { id: "split-user", idempotencyKey: `${runId}:user`, seq: 1 },
+      __carapace: { id: "split-user", idempotencyKey: `${runId}:user`, seq: 1 },
     };
     const steerMessage = {
       role: "user",
       content: steerText,
       timestamp: startedAt + 3_000,
-      __openclaw: {
+      __carapace: {
         id: "split-steer",
         idempotencyKey: `${steerRunId}:user`,
         seq: 5,
@@ -530,7 +530,7 @@ suite.define(() => {
         state: "delta",
       });
     const capture = async (name: string) => {
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-flow.active-run-follow-ups", artifactDirParent)
         : undefined;
@@ -571,14 +571,14 @@ suite.define(() => {
             role: "assistant",
             content: "A",
             timestamp: startedAt,
-            __openclaw: { id: "split-a", idempotencyKey: runId, seq: 2 },
+            __carapace: { id: "split-a", idempotencyKey: runId, seq: 2 },
           },
           {
             role: "assistant",
             content: commentaryText,
             timestamp: startedAt + 1_000,
-            __openclaw: { id: "split-commentary", idempotencyKey: runId, seq: 3 },
-            openclawStreamFallback: {
+            __carapace: { id: "split-commentary", idempotencyKey: runId, seq: 3 },
+            carapaceStreamFallback: {
               itemId: "split-commentary-item",
               source: "segment",
               replacementText: commentaryText,
@@ -589,7 +589,7 @@ suite.define(() => {
             role: "assistant",
             content: "B",
             timestamp: startedAt + 2_000,
-            __openclaw: { id: "split-b", idempotencyKey: runId, seq: 4 },
+            __carapace: { id: "split-b", idempotencyKey: runId, seq: 4 },
           },
           steerMessage,
         ],
@@ -736,7 +736,7 @@ suite.define(() => {
 
       await gateway.setHistoryMessages([
         {
-          __openclaw: {
+          __carapace: {
             idempotencyKey: `${activeRunId}:user`,
           },
           content: [{ text: initialText, type: "text" }],

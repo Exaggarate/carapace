@@ -25,11 +25,11 @@ import {
 const MAX_TIMER_TIMEOUT_MS = 2_147_000_000;
 
 export function resolveTsgoTimeoutMs(env: NodeJS.ProcessEnv): number | undefined {
-  if (!env.OPENCLAW_TSGO_TIMEOUT_MS?.trim()) {
+  if (!env.CARAPACE_TSGO_TIMEOUT_MS?.trim()) {
     return undefined;
   }
   return Math.min(
-    readPositiveEnvInt("OPENCLAW_TSGO_TIMEOUT_MS", env, MAX_TIMER_TIMEOUT_MS),
+    readPositiveEnvInt("CARAPACE_TSGO_TIMEOUT_MS", env, MAX_TIMER_TIMEOUT_MS),
     MAX_TIMER_TIMEOUT_MS,
   );
 }
@@ -55,7 +55,7 @@ export function prepareTsgoCommand(
   if (sparseGuardError) {
     if (shouldSkipSparseTsgoGuardError(env)) {
       console.error(sparseGuardError);
-      console.error("[tsgo] skipping sparse-missing project because OPENCLAW_TSGO_SPARSE_SKIP=1");
+      console.error("[tsgo] skipping sparse-missing project because CARAPACE_TSGO_SPARSE_SKIP=1");
       return null;
     }
     throw new Error(sparseGuardError);
@@ -69,7 +69,7 @@ export function prepareTsgoCommand(
     timeoutMs = resolveTsgoTimeoutMs(env);
   } catch {
     throw new Error(
-      `[tsgo] OPENCLAW_TSGO_TIMEOUT_MS must be plain decimal digits with no leading zero, sign, exponent, or decimal point, between 1 and ${Number.MAX_SAFE_INTEGER}; got ${env.OPENCLAW_TSGO_TIMEOUT_MS}. Unset it to disable the watchdog.`,
+      `[tsgo] CARAPACE_TSGO_TIMEOUT_MS must be plain decimal digits with no leading zero, sign, exponent, or decimal point, between 1 and ${Number.MAX_SAFE_INTEGER}; got ${env.CARAPACE_TSGO_TIMEOUT_MS}. Unset it to disable the watchdog.`,
     );
   }
   return {
@@ -115,7 +115,7 @@ async function main(): Promise<void> {
       throw error;
     }
     console.error(
-      `[tsgo] no completion after ${command.timeoutMs}ms; killed the tsgo process tree. Raise OPENCLAW_TSGO_TIMEOUT_MS for intentionally longer builds, or unset it to disable the watchdog.`,
+      `[tsgo] no completion after ${command.timeoutMs}ms; killed the tsgo process tree. Raise CARAPACE_TSGO_TIMEOUT_MS for intentionally longer builds, or unset it to disable the watchdog.`,
     );
     process.exitCode = 1;
   }

@@ -1,6 +1,6 @@
 import { ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 

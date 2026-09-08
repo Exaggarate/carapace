@@ -174,7 +174,7 @@ describe("session mutation reconnect truth", () => {
       reconnectSameClient(publish);
       const worktreePreserved = {
         id: "wt-busy",
-        branch: "openclaw/busy",
+        branch: "carapace/busy",
         path: "/worktrees/busy",
         reason: "busy" as const,
       };

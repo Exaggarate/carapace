@@ -1,13 +1,13 @@
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelDoctorAdapter } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord plugin module implements doctor behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   asObjectRecord,
   collectChannelAccountScopes,
   collectProviderDangerousNameMatchingScopes,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { inspectDiscordAccount } from "./account-inspect.js";
 import { resolveDefaultDiscordAccountId } from "./accounts.js";
 import { normalizeCompatibilityConfig as normalizeDiscordCompatibilityConfig } from "./doctor-contract.js";
@@ -82,7 +82,7 @@ function collectDiscordIdLists(
   return refs;
 }
 
-export function scanDiscordNumericIdEntries(cfg: OpenClawConfig): DiscordNumericIdHit[] {
+export function scanDiscordNumericIdEntries(cfg: CarapaceConfig): DiscordNumericIdHit[] {
   const hits: DiscordNumericIdHit[] = [];
   const scanList = (pathLabel: string, list: unknown) => {
     if (!Array.isArray(list)) {
@@ -155,9 +155,9 @@ export function collectDiscordNumericIdWarnings(params: {
 }
 
 export function maybeRepairDiscordNumericIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   doctorFixCommand: string,
-): { config: OpenClawConfig; changes: string[]; warnings?: string[] } {
+): { config: CarapaceConfig; changes: string[]; warnings?: string[] } {
   const hits = scanDiscordNumericIdEntries(cfg);
   if (hits.length === 0) {
     return { config: cfg, changes: [] };
@@ -216,7 +216,7 @@ export function maybeRepairDiscordNumericIds(
 }
 
 export function collectDiscordMissingEnvTokenWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): string[] {
   if (resolveDefaultDiscordAccountId(params.cfg) !== "default") {
@@ -235,7 +235,7 @@ export function collectDiscordMissingEnvTokenWarnings(params: {
   ];
 }
 
-function collectDiscordTranscriptsAutoStartWarnings(cfg: OpenClawConfig): string[] {
+function collectDiscordTranscriptsAutoStartWarnings(cfg: CarapaceConfig): string[] {
   if (cfg.transcripts?.enabled === false || !Array.isArray(cfg.transcripts?.autoStart)) {
     return [];
   }
@@ -267,7 +267,7 @@ function collectDiscordTranscriptsAutoStartWarnings(cfg: OpenClawConfig): string
   });
 }
 
-function collectDiscordMutableAllowlistWarnings(cfg: OpenClawConfig): string[] {
+function collectDiscordMutableAllowlistWarnings(cfg: CarapaceConfig): string[] {
   const hits: Array<{ path: string; entry: string }> = [];
   const addHits = (pathLabel: string, list: unknown) => {
     if (!Array.isArray(list)) {

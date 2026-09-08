@@ -1,7 +1,7 @@
 export function createInstallGitCommitFixtureScript(source: "bundle" | "remote") {
   return `
     set -euo pipefail
-    source "$OPENCLAW_INSTALLER_SCRIPT"
+    source "$CARAPACE_INSTALLER_SCRIPT"
     run_quiet_step() { shift; "$@"; }
     tmp="$(mktemp -d)"
     trap 'rm -rf "$tmp"' EXIT
@@ -32,7 +32,7 @@ export function createInstallGitCommitFixtureScript(source: "bundle" | "remote")
       fi
     fi
     GIT_UPDATE=0
-    checkout_git_openclaw_ref "$repo" "$selected"
+    checkout_git_carapace_ref "$repo" "$selected"
     [[ "$(git -C "$repo" rev-parse HEAD)" == "$selected" ]]
     [[ -z "$(git -C "$repo" symbolic-ref --quiet HEAD || true)" ]]
     [[ "$GIT_REF_KIND" == immutable ]]
@@ -40,7 +40,7 @@ export function createInstallGitCommitFixtureScript(source: "bundle" | "remote")
     printf 'selected=%s kind=%s\\n' "$selected" "$GIT_REF_KIND"
     blob="$(git -C "$repo" rev-parse HEAD:state.txt)"
     for rejected in "$blob" 0000000000000000000000000000000000000001 'HEAD~1'; do
-      if (checkout_git_openclaw_ref "$repo" "$rejected") >"$tmp/rejected.log" 2>&1; then
+      if (checkout_git_carapace_ref "$repo" "$rejected") >"$tmp/rejected.log" 2>&1; then
         cat "$tmp/rejected.log"
         echo "unexpectedly accepted $rejected"
         exit 1

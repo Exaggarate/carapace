@@ -44,7 +44,7 @@ beforeEach(() => {
   mocks.getView.mockReturnValue(view);
   mocks.createTicket.mockReturnValue({
     ticket: "opaque-ticket",
-    url: "/__openclaw__/mcp-app#opaque-ticket",
+    url: "/__carapace__/mcp-app#opaque-ticket",
     expiresAtMs: nowMs + 60_000,
   });
 });
@@ -105,7 +105,7 @@ describe("materializeMcpAppChannelPresentation", () => {
               label: "Open app",
               action: {
                 type: "web-app",
-                url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+                url: "https://node.tailnet.ts.net/__carapace__/mcp-app#opaque-ticket",
               },
             },
           ],

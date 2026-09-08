@@ -21,7 +21,7 @@ scenario:
   execution:
     kind: flow
     retryCount: 0
-    summary: Run with mock-openai and --runtime-pair openclaw,codex to require child-request inherited history plus completion-derived output; live mode checks the visible delegated result.
+    summary: Run with mock-openai and --runtime-pair carapace,codex to require child-request inherited history plus completion-derived output; live mode checks the visible delegated result.
     channel: qa-channel
     config:
       contextNeedle: FORKED-CONTEXT-ALPHA
@@ -80,7 +80,7 @@ flow:
             expr: "!env.mock || (acceptedChild?.status === 'accepted' && acceptedChild.context === 'fork' && typeof acceptedChild.childSessionKey === 'string')"
             message: expected a successful fork receipt tied to the parent's sessions_spawn call
         # Independently inspect provider input, not the mock's success decision.
-        # Codex renders historical roles inside conversation_context; OpenClaw
+        # Codex renders historical roles inside conversation_context; Carapace
         # retains separate user items. Neither task text nor instructions count.
         - set: childRequests
           value:
@@ -88,7 +88,7 @@ flow:
               forkDebugRequests.flatMap((request) => {
                 const items = Array.isArray(request.body?.input) ? request.body.input : [];
                 const textOf = (item) => Array.isArray(item.content) ? item.content.filter((part) => part.type === 'input_text').map((part) => String(part.text ?? '')).join('\n').trim() : '';
-                const userTexts = items.filter((item) => item.role === 'user').map(textOf).filter((text) => !(text.includes('<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>') && text.endsWith('<<<END_OPENCLAW_INTERNAL_CONTEXT>>>')));
+                const userTexts = items.filter((item) => item.role === 'user').map(textOf).filter((text) => !(text.includes('<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>') && text.endsWith('<<<END_CARAPACE_INTERNAL_CONTEXT>>>')));
                 const latest = userTexts.at(-1) ?? '';
                 const projection = /<conversation_context>\n([\s\S]*)\n<\/conversation_context>\n\nCurrent user request:\n([\s\S]*)$/.exec(latest);
                 const current = projection?.[2] ?? latest;

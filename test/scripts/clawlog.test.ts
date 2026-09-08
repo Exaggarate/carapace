@@ -28,7 +28,7 @@ type MockLogOptions = {
 };
 
 function runClawlog(args: string[] = [], options: MockLogOptions = {}) {
-  const cwd = tempDirs.make("openclaw-clawlog-test-");
+  const cwd = tempDirs.make("carapace-clawlog-test-");
   const binDir = path.join(cwd, "bin");
   const callsPath = path.join(cwd, "backend-calls");
   mkdirSync(binDir);

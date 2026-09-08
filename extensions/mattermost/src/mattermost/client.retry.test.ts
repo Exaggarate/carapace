@@ -1,6 +1,6 @@
 // Mattermost tests cover client.retry plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMattermostClient, createMattermostDirectChannelWithRetry } from "./client.js";
 

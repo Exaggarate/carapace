@@ -3,13 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { z } from "zod";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runCommandBuffered } from "../process/exec.js";
-import type { OpenClawSchemaVersions } from "../state/openclaw-schema-versions.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import { readStateSchemaContentVersion } from "../state/openclaw-state-db-schema-version.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
-import { resolveOpenClawRegisteredAgentDatabasePath } from "../state/openclaw-state-db.paths.js";
+import type { CarapaceSchemaVersions } from "../state/carapace-schema-versions.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import { readStateSchemaContentVersion } from "../state/carapace-state-db-schema-version.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
+import { resolveCarapaceRegisteredAgentDatabasePath } from "../state/carapace-state-db.paths.js";
 import { resolveUserPath } from "./home-dir.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 import { openNodeSqliteDatabase } from "./node-sqlite.js";
@@ -32,7 +32,7 @@ export const UpdateCandidateStateSnapshotSchema = z.object({
   versions: UpdateStateSchemaVersionsSchema,
   pluginPaths: z.record(z.string(), z.string()),
 });
-type StateInput = { stateDir: string; config: OpenClawConfig; env?: NodeJS.ProcessEnv };
+type StateInput = { stateDir: string; config: CarapaceConfig; env?: NodeJS.ProcessEnv };
 type CandidateStateDatabase = Pick<
   DB,
   "agent_databases" | "agent_database_leases" | "state_leases"
@@ -46,7 +46,7 @@ export function resolveUpdateStateContentVersion(entry: UpdateStateSchemaVersion
 export function updateStateSchemaVersionsMatch(
   before: readonly UpdateStateSchemaVersion[],
   after: readonly UpdateStateSchemaVersion[],
-  params: { sharedPath: string; candidateSchemaVersions?: OpenClawSchemaVersions },
+  params: { sharedPath: string; candidateSchemaVersions?: CarapaceSchemaVersions },
 ): boolean {
   const versions = new Map(
     after.map((entry) => [entry.path, resolveUpdateStateContentVersion(entry)]),
@@ -103,7 +103,7 @@ function collectRegisteredPaths(db: DatabaseSync, shared: string, files: string[
       ).rows
     : [];
   return rows.map(({ path: stored }) => {
-    const source = resolveOpenClawRegisteredAgentDatabasePath(shared, stored);
+    const source = resolveCarapaceRegisteredAgentDatabasePath(shared, stored);
     // Discover registrations from the exact private generation being inspected.
     if (!files.includes(source)) {
       files.push(source);
@@ -127,7 +127,7 @@ async function withStateDatabaseSnapshot<T>(
 }
 
 async function collectStateDatabasePaths(input: StateInput): Promise<string[]> {
-  const shared = path.resolve(input.stateDir, "state", "openclaw.sqlite");
+  const shared = path.resolve(input.stateDir, "state", "carapace.sqlite");
   const files = new Set([shared]);
   let directories: string[] = [];
   try {
@@ -140,20 +140,20 @@ async function collectStateDatabasePaths(input: StateInput): Promise<string[]> {
     }
   }
   const configured = Object.entries(input.config.agents?.entries ?? {});
-  for (const directory of [input.env?.OPENCLAW_AGENT_DIR, input.env?.PI_CODING_AGENT_DIR]) {
+  for (const directory of [input.env?.CARAPACE_AGENT_DIR, input.env?.PI_CODING_AGENT_DIR]) {
     if (directory?.trim()) {
-      files.add(path.join(resolveUserPath(directory, input.env), "openclaw-agent.sqlite"));
+      files.add(path.join(resolveUserPath(directory, input.env), "carapace-agent.sqlite"));
     }
   }
   const projected = (input.config.agents?.list ?? []).map((agent) => [agent.id, agent] as const);
   for (const [id, agent] of [...configured, ...projected]) {
     directories.push(id);
     if (agent.agentDir) {
-      files.add(path.join(resolveUserPath(agent.agentDir, input.env), "openclaw-agent.sqlite"));
+      files.add(path.join(resolveUserPath(agent.agentDir, input.env), "carapace-agent.sqlite"));
     }
   }
   for (const id of new Set(["main", ...directories])) {
-    files.add(path.resolve(input.stateDir, "agents", id, "agent", "openclaw-agent.sqlite"));
+    files.add(path.resolve(input.stateDir, "agents", id, "agent", "carapace-agent.sqlite"));
   }
   return [...files].toSorted();
 }
@@ -163,7 +163,7 @@ export async function readUpdateStateSchemaVersionsInProcess(
   input: StateInput,
 ): Promise<UpdateStateSchemaVersion[]> {
   const versions: UpdateStateSchemaVersion[] = [];
-  const shared = path.resolve(input.stateDir, "state", "openclaw.sqlite");
+  const shared = path.resolve(input.stateDir, "state", "carapace.sqlite");
   const files = await collectStateDatabasePaths(input);
   for (const file of files) {
     versions.push({
@@ -218,9 +218,9 @@ export async function readUpdateStateSchemaVersions({
         mode: "versions",
         env: {
           HOME: sourceEnv.HOME,
-          OPENCLAW_HOME: sourceEnv.OPENCLAW_HOME,
+          CARAPACE_HOME: sourceEnv.CARAPACE_HOME,
           USERPROFILE: sourceEnv.USERPROFILE,
-          OPENCLAW_AGENT_DIR: sourceEnv.OPENCLAW_AGENT_DIR,
+          CARAPACE_AGENT_DIR: sourceEnv.CARAPACE_AGENT_DIR,
           PI_CODING_AGENT_DIR: sourceEnv.PI_CODING_AGENT_DIR,
         },
       }),
@@ -244,7 +244,7 @@ export async function snapshotUpdateCandidateState(
 ): Promise<z.infer<typeof UpdateCandidateStateSnapshotSchema>> {
   const { createVerifiedSqliteSnapshot } = await import("./sqlite-snapshot.js");
   const sourceRoot = path.resolve(input.stateDir);
-  const shared = path.join(sourceRoot, "state", "openclaw.sqlite");
+  const shared = path.join(sourceRoot, "state", "carapace.sqlite");
   const targetPath = (source: string) =>
     path.join(
       resolveUpdateCandidateStatePath(sourceRoot, input.targetStateDir, path.dirname(source)),
@@ -280,7 +280,7 @@ export async function snapshotUpdateCandidateState(
                   const reboundStored = path.relative(input.targetStateDir, rebound);
                   if (
                     stored !== reboundStored &&
-                    source === resolveOpenClawRegisteredAgentDatabasePath(shared, reboundStored)
+                    source === resolveCarapaceRegisteredAgentDatabasePath(shared, reboundStored)
                   ) {
                     // A legacy absolute/relative pair names exactly the same source.
                     // Collapse only that duplicate in the copy before its unique-key update.

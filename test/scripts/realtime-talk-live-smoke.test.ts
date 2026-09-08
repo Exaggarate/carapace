@@ -148,7 +148,7 @@ it.each([
       outputAudioPeakRms: Math.sqrt(outputAudioEnergy / 0.5),
     });
     vi.stubEnv("OPENAI_API_KEY", "test-key");
-    vi.stubEnv("OPENCLAW_REALTIME_OPENAI_MODEL", "gpt-realtime-2.1");
+    vi.stubEnv("CARAPACE_REALTIME_OPENAI_MODEL", "gpt-realtime-2.1");
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => Response.json({ value: "test-client-secret" })),

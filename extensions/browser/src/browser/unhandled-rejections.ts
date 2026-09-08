@@ -2,8 +2,8 @@
  * Browser-specific unhandled rejection filter for benign Playwright dialog
  * races.
  */
-import { collectErrorGraphCandidates } from "openclaw/plugin-sdk/error-runtime";
-import { registerUnhandledRejectionHandler } from "openclaw/plugin-sdk/runtime-env";
+import { collectErrorGraphCandidates } from "carapace/plugin-sdk/error-runtime";
+import { registerUnhandledRejectionHandler } from "carapace/plugin-sdk/runtime-env";
 
 const PLAYWRIGHT_DIALOG_METHODS = new Set([
   "Page.handleJavaScriptDialog",

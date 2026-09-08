@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { RunEmbeddedAgentParams } from "../../agents/embedded-agent-runner/run/params.js";
 import {
@@ -13,7 +13,7 @@ import {
   replaceSessionEntry,
   replaceSessionEntrySync,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { emitTrustedDiagnosticEvent } from "../../infra/diagnostic-events.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -34,9 +34,9 @@ import type {
   RealtimeVoiceProviderCapabilities,
 } from "../../talk/provider-types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { registerChatAbortController } from "../chat-abort.js";
 import { handleGatewayRequest } from "../server-methods.js";
 import { resolveSessionMutationAuthorization } from "../session-sharing.js";
@@ -82,8 +82,8 @@ vi.mock("../../talk/provider-resolver.js", () => ({
 }));
 vi.mock("../../talk/provider-registry.js", () => ({ listRealtimeVoiceProviders: () => [] }));
 
-let state: OpenClawTestState;
-let config: OpenClawConfig;
+let state: CarapaceTestState;
+let config: CarapaceConfig;
 let client: ReturnType<typeof sharingPolicyClient> & { connId: string };
 let callback: RealtimeVoiceAgentConsultRunner | undefined;
 let providerInstructions: string | undefined;
@@ -124,7 +124,7 @@ async function dispatch(
 }
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "talk-native-consult" });
+  state = await createCarapaceTestState({ label: "talk-native-consult" });
   config = {
     agents: {
       ownership: "explicit",
@@ -188,7 +188,7 @@ beforeEach(async () => {
       };
     },
   };
-  Object.defineProperty(provider, Symbol.for("openclaw.internal.realtime-voice-provider.v1"), {
+  Object.defineProperty(provider, Symbol.for("carapace.internal.realtime-voice-provider.v1"), {
     value: { isBrowserSessionConfigured: () => true, cancelBrowserSession: async () => undefined },
   });
   mocks.resolveProvider.mockReturnValue({ provider, providerConfig: {} });
@@ -783,7 +783,7 @@ describe.each(["browser-rpc", "browser-provider", "relay"] as const)(
           browserControl!.onToolCall?.({
             callId: "control",
             itemId: "control",
-            name: "openclaw_agent_control",
+            name: "carapace_agent_control",
             args: { text: "cancel", mode: "cancel" },
           });
           await vi.waitFor(() =>

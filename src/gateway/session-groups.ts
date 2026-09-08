@@ -3,22 +3,22 @@
 // which groups exist, their display order, and bulk member category updates.
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveAllAgentSessionStoreTargetsSync } from "../config/sessions.js";
 import {
   applySessionEntryReplacements,
   listSessionEntriesReadOnly,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { ensureColumn, tableHasColumn } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { ensureColumn, tableHasColumn } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   SessionMutationAuthorizationChangedError,
   type SessionMutationTarget,
@@ -26,7 +26,7 @@ import {
 
 // Write transactions must run on the same env-scoped handle as their
 // statements; a bare transaction would open the default state DB while the
-// SQL hits the override, losing atomicity under OPENCLAW_STATE_DIR overrides.
+// SQL hits the override, losing atomicity under CARAPACE_STATE_DIR overrides.
 
 type SessionGroupRecord = {
   name: string;
@@ -40,7 +40,7 @@ type SessionGroupDefaultsRecord = {
 };
 
 type SessionGroupsDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "session_groups" | "config_machine_state"
 >;
 
@@ -66,7 +66,7 @@ const ensuredSessionGroupDefaultsDatabases = new WeakSet<DatabaseSync>();
 const SIDEBAR_SECTION_ORDER_STATE_KEY = "sidebar.sectionOrder";
 
 function dbFor(env: NodeJS.ProcessEnv): DatabaseSync {
-  return openOpenClawStateDatabase({ env }).db;
+  return openCarapaceStateDatabase({ env }).db;
 }
 
 function kyselyFor(db: DatabaseSync) {
@@ -210,7 +210,7 @@ export function listSidebarSectionOrder(env: NodeJS.ProcessEnv = process.env): s
  * so a put can never leave dangling categories that resurrect the group.
  */
 export function putSessionGroups(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   names: readonly string[];
   sectionOrder?: readonly string[];
   env?: NodeJS.ProcessEnv;
@@ -242,7 +242,7 @@ export function putSessionGroups(params: {
     }
   }
   const now = Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = kyselyFor(db);
       const existing = new Map(
@@ -294,7 +294,7 @@ export function ensureSessionGroupRegistered(
     return false;
   }
   let inserted = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = kyselyFor(db);
       const existing = executeSqliteQuerySync(
@@ -334,7 +334,7 @@ function readCatalogEntry(db: DatabaseSync, name: string) {
 }
 
 function prepareCatalogRename(from: string, to: string, env: NodeJS.ProcessEnv) {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const source = readCatalogEntry(db, from);
       if (!source) {
@@ -362,7 +362,7 @@ function retireCatalogEntry(
   source: ReturnType<typeof readCatalogEntry>,
   env: NodeJS.ProcessEnv,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       // A successful concurrent defaults edit, reorder, or recreation owns the
       // retained source. Never erase it using a pre-sweep snapshot.
@@ -403,10 +403,10 @@ export function updateSessionGroupDefaults(
   if (!normalized) {
     throw new Error("group defaults update requires a non-empty name");
   }
-  const database = openOpenClawStateDatabase({ env });
+  const database = openCarapaceStateDatabase({ env });
   let updated = false;
   let defaultsSchemaEnsured = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = kyselyFor(db);
       const existing = executeSqliteQuerySync(
@@ -442,7 +442,7 @@ export function updateSessionGroupDefaults(
 }
 
 export function resolveSessionGroupMutationTargetsByName(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Map<string, SessionMutationTarget[]> {
   const targetsByName = new Map<string, SessionMutationTarget[]>();
@@ -468,7 +468,7 @@ export function resolveSessionGroupMutationTargetsByName(
  * bumping updatedAt: group maintenance must not reshuffle recency ordering.
  */
 async function updateMemberCategories(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   from: string,
   to: string | undefined,
   env: NodeJS.ProcessEnv,
@@ -512,7 +512,7 @@ async function updateMemberCategories(
 }
 
 type SessionGroupMutationParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   name: string;
   env?: NodeJS.ProcessEnv;
   assertCurrent?: () => void;

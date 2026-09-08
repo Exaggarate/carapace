@@ -1,11 +1,11 @@
 // Real config IO across setup prompts; package, auth, and host effects stay synthetic.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readConfigFileSnapshot, resetConfigRuntimeState } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 
 const controls = vi.hoisted(() => ({ mode: "remote", drift: () => {}, preEnsureDrift: () => {} }));
 
@@ -86,13 +86,13 @@ vi.mock("./configure.shared.js", async (importOriginal) => ({
   }),
 }));
 vi.mock("./onboard-remote.js", () => ({
-  promptRemoteGatewayConfig: async (config: OpenClawConfig) => ({
+  promptRemoteGatewayConfig: async (config: CarapaceConfig) => ({
     ...config,
     gateway: { ...config.gateway, mode: "remote", remote: { url: "wss://gateway.example.test" } },
   }),
 }));
 vi.mock("./configure.gateway.js", () => ({
-  promptGatewayConfig: async (config: OpenClawConfig) => ({
+  promptGatewayConfig: async (config: CarapaceConfig) => ({
     config: { ...config, gateway: { ...config.gateway, port: 19001 } },
     port: 19001,
   }),
@@ -114,7 +114,7 @@ const runtime = {
 afterEach(() => {
   controls.drift = () => {};
   controls.preEnsureDrift = () => {};
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
   vi.unstubAllEnvs();
 });
@@ -129,11 +129,11 @@ describe("setup config provenance", () => {
     "noninteractive-legacy-local",
   ])("preserves authored environment references through %s", async (flow) => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const stateDir = path.join(home, ".carapace");
+      const configPath = path.join(stateDir, "carapace.json");
       const workspace = path.join(home, "workspace");
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       vi.stubEnv("SETUP_PROVENANCE_TOKEN", "synthetic-before");
       await fs.mkdir(stateDir, { recursive: true });
       const firstAgent = flow === "noninteractive-first-local";
@@ -181,7 +181,7 @@ describe("setup config provenance", () => {
         controls.mode = flow.endsWith("remote") ? "remote" : "local";
         await runConfigureWizard({ command: "configure", sections: ["gateway"] }, runtime);
       }
-      const persisted = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+      const persisted = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
       expect(persisted.gateway?.auth?.token).toBe("${SETUP_PROVENANCE_TOKEN}");
       expect(persisted.gateway?.mode).toBe(flow.endsWith("remote") ? "remote" : "local");
       if (flow.endsWith("local")) {

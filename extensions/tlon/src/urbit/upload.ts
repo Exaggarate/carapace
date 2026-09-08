@@ -1,8 +1,8 @@
 /**
  * Upload an image from a URL to Tlon storage.
  */
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
-import { MAX_IMAGE_BYTES, readRemoteMediaBuffer } from "openclaw/plugin-sdk/media-runtime";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
+import { MAX_IMAGE_BYTES, readRemoteMediaBuffer } from "carapace/plugin-sdk/media-runtime";
 import { TLON_MEDIA_FETCH_TIMEOUTS } from "../media-fetch-timeouts.js";
 import { uploadFile } from "../tlon-api.js";
 

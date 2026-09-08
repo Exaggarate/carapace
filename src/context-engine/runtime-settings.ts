@@ -1,5 +1,5 @@
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import type { ContextEngineHostSupport } from "./host-compat.js";
 import type {
   ContextEngineRuntimeReasonCode,
@@ -72,7 +72,7 @@ export function buildContextEngineRuntimeSettings(params: {
   return {
     schemaVersion: 1,
     runtime: {
-      host: "openclaw",
+      host: "carapace",
       mode,
       harnessId: normalizeNullableString(params.harnessId),
       runtimeId: normalizeNullableString(params.runtimeId),

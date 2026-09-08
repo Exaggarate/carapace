@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/clawrouter",
+  "name": "@carapace/clawrouter",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw ClawRouter plugin",
+  "description": "Carapace ClawRouter plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

@@ -5,8 +5,8 @@ import path from "node:path";
 import { finished } from "node:stream/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { handleControlUiAssistantMediaRequest } from "./control-ui.js";
@@ -33,7 +33,7 @@ const PNG = Buffer.from(
 );
 let temp: string;
 let project: string;
-let cfg: OpenClawConfig;
+let cfg: CarapaceConfig;
 let entry: {
   sessionId: string;
   spawnedCwd?: string;
@@ -73,7 +73,7 @@ beforeEach(async () => {
   });
 });
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await fs.rm(temp, { recursive: true, force: true });
   vi.restoreAllMocks();
 });
@@ -113,7 +113,7 @@ async function request(
   const completed = finished(response.res);
   await handleControlUiAssistantMediaRequest(
     {
-      url: `/__openclaw__/assistant-media?${query}`,
+      url: `/__carapace__/assistant-media?${query}`,
       method: options.method ?? (options.allow ? "POST" : "GET"),
       headers: {},
       headersDistinct: {},
@@ -338,7 +338,7 @@ describe("assistant image session policy", () => {
   ] as const)(
     "applies the $cap role to $visibility session images",
     async ({ cap, visibility, available }) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(temp, "profile-state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(temp, "profile-state") }, async () => {
         cfg.gateway = {
           roles: {
             default: "viewer",
@@ -413,7 +413,7 @@ describe("assistant image session policy", () => {
     "keeps Gateway-owned inbound images available in a %s session",
     async (owner) => {
       entry[owner] = "remote-workspace";
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(temp, "state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(temp, "state") }, async () => {
         const id = "remote-session-upload.png";
         const source = `media://inbound/${id}`;
         const file = path.join(resolveStateDir(), "media", "inbound", id);
@@ -433,7 +433,7 @@ describe("assistant image session policy", () => {
   it.each(["visibility", "role assignment", "role definition"] as const)(
     "revalidates a named reader's saved media ticket after %s withdrawal",
     async (change) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(temp, "profile-state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(temp, "profile-state") }, async () => {
         cfg.gateway = {
           roles: {
             default: "viewer",
@@ -482,7 +482,7 @@ describe("assistant image session policy", () => {
   it.each(["metadata", "bytes"] as const)(
     "revalidates named reader access after asynchronous %s file preparation",
     async (operation) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(temp, "profile-state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(temp, "profile-state") }, async () => {
         cfg.gateway = {
           roles: {
             default: "viewer",
@@ -523,7 +523,7 @@ describe("assistant image session policy", () => {
   it.each(["metadata", "bytes"] as const)(
     "withdraws Gateway-local media after cloud dispatch during %s preparation",
     async (operation) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: path.join(temp, "placement-state") }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: path.join(temp, "placement-state") }, async () => {
         const { createWorkerSessionPlacementStore } =
           await import("./worker-environments/placement-store.js");
         const placements = createWorkerSessionPlacementStore();

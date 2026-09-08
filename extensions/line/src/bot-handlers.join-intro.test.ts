@@ -1,10 +1,10 @@
 import type { messagingApi, webhook } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LineAccountConfig } from "./types.js";
 
 type ReportChannelRoomJoin =
-  typeof import("openclaw/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin;
+  typeof import("carapace/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin;
 
 const { reportJoin, getGroupSummary, createClient } = vi.hoisted(() => {
   const summary = vi.fn<messagingApi.MessagingApiClient["getGroupSummary"]>();
@@ -17,7 +17,7 @@ const { reportJoin, getGroupSummary, createClient } = vi.hoisted(() => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-join-intro-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-join-intro-runtime", () => ({
   reportChannelRoomJoin: reportJoin,
 }));
 vi.mock("@line/bot-sdk", async (importOriginal) => {
@@ -52,7 +52,7 @@ function joinEvent(source: webhook.Source): webhook.JoinEvent {
 }
 
 function createContext(config: LineAccountConfig = {}) {
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { list: [{ id: "main" }, { id: "room-agent" }] },
     accessGroups: {
       empty: { type: "message.senders", members: {} },
@@ -99,7 +99,7 @@ describe("LINE group join introductions", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/channel-join-intro-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-join-intro-runtime");
     vi.doUnmock("@line/bot-sdk");
     vi.resetModules();
   });

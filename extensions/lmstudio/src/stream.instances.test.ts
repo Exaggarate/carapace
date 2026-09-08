@@ -1,10 +1,10 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
 import { afterEach, expect, it, vi } from "vitest";
 import { wrapLmstudioInferencePreload } from "./stream.js";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>()),
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>()),
   fetchWithSsrFGuard: async ({ url, init }: { url: string; init?: RequestInit }) => ({
     response: await fetch(url, init),
     release: async () => undefined,
@@ -27,7 +27,7 @@ it.each([
   "routes inference to the matching instance with stable identity (load=$needsLoad, replace=$replacePayload)",
   async ({ needsLoad, replacePayload }) => {
     const key = "qwen3.5-0.8b";
-    const instanceId = "openclaw-long-context";
+    const instanceId = "carapace-long-context";
     const calls: Array<{ path: string; body: unknown }> = [];
     vi.stubGlobal(
       "fetch",

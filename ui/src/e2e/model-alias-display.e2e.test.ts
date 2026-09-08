@@ -31,7 +31,7 @@ const models = [
 let proofDir: string | null;
 beforeEach(() => {
   proofDir =
-    process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+    process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
       ? createControlUiE2eArtifactDir("model-alias-display")
       : null;
 });

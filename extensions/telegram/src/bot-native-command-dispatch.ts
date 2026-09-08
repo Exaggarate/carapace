@@ -2,19 +2,19 @@ import type { Bot, Context } from "grammy";
 import {
   isChannelPartialDeliveryError,
   type ChannelInboundTurnPlan,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelStreamingBlockEnabled } from "openclaw/plugin-sdk/channel-outbound";
-import { resolveNativeCommandSessionTargets } from "openclaw/plugin-sdk/command-auth-native";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveChannelStreamingBlockEnabled } from "carapace/plugin-sdk/channel-outbound";
+import { resolveNativeCommandSessionTargets } from "carapace/plugin-sdk/command-auth-native";
 import type {
   ChannelGroupPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramAccountConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { PLUGIN_COMMAND_DISPATCH } from "openclaw/plugin-sdk/plugin-command-runtime";
-import { danger, logVerbose, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { PLUGIN_COMMAND_DISPATCH } from "carapace/plugin-sdk/plugin-command-runtime";
+import { danger, logVerbose, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { expandTelegramAllowFromWithAccessGroups } from "./access-groups.js";
 import { resolveTelegramAccountOwnerAgentId } from "./account-owner.js";
 import { resolveTelegramAccount } from "./accounts.js";
@@ -85,11 +85,11 @@ export type TelegramCommandExecutorParams = {
   runtime: RuntimeEnv;
   accountId: string;
   mediaMaxBytes?: number;
-  resolveGroupPolicy: (chatId: string | number, cfg: OpenClawConfig) => ChannelGroupPolicy;
+  resolveGroupPolicy: (chatId: string | number, cfg: CarapaceConfig) => ChannelGroupPolicy;
   resolveTelegramGroupConfig: (
     chatId: string | number,
     messageThreadId: number | undefined,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ) => TelegramResolvedGroupConfig;
   telegramDeps?: TelegramNativeCommandDeps;
   opts: Pick<
@@ -112,7 +112,7 @@ type TelegramCommandAuthResult = NonNullable<
 export type TelegramCommandDispatch = TelegramCommandExecutorParams &
   TelegramCommandAuthResult & {
     telegramDeps: TelegramNativeCommandDeps;
-    runtimeCfg: OpenClawConfig;
+    runtimeCfg: CarapaceConfig;
     runtimeTelegramCfg: TelegramAccountConfig;
     turnSettings: ReturnType<typeof resolveTelegramMessageTurnSettings>;
     threadSpec: ReturnType<typeof resolveTelegramThreadSpec>;
@@ -163,7 +163,7 @@ async function resolveTelegramNativeCommandThreadContext(params: {
 async function resolveTelegramCommandAuth(params: {
   msg: NonNullable<Context["message"]>;
   bot: Bot;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   telegramCfg: TelegramAccountConfig;
   readChannelAllowFromStore: TelegramBotDeps["readChannelAllowFromStore"];
@@ -489,7 +489,7 @@ export async function prepareTelegramCommandDispatch(
 export async function dispatchTelegramBuiltinTurn(params: {
   dispatch: TelegramCommandDispatch;
   prompt: string;
-  commandArgs?: import("openclaw/plugin-sdk/command-auth-native").CommandArgs;
+  commandArgs?: import("carapace/plugin-sdk/command-auth-native").CommandArgs;
 }): Promise<boolean> {
   const { dispatch } = params;
   const { skillFilter, groupSystemPrompt } = resolveTelegramGroupPromptSettings({

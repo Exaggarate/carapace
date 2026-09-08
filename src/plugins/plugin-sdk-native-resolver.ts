@@ -1,9 +1,9 @@
-/** Installs native Node resolution aliases so plugins can import the OpenClaw SDK in dev and tests. */
+/** Installs native Node resolution aliases so plugins can import the Carapace SDK in dev and tests. */
 import fs from "node:fs";
 import Module from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { isPathInside, isPathStrictlyInside } from "../infra/path-guards.js";
 import { pluginCacheExistsSync, pluginCacheRealpathSync } from "./plugin-cache-files.js";
 import { getPluginSdkHostFacts } from "./plugin-cache-sdk.js";
@@ -39,7 +39,7 @@ type ModuleWithResolver = typeof Module & {
 };
 
 /** Resolver install options for CJS `_resolveFilename` and modern ESM loader hooks. */
-type InstallOpenClawPluginSdkNativeResolverOptions = {
+type InstallCarapacePluginSdkNativeResolverOptions = {
   modulePath?: string;
   pluginModulePath?: string;
   allowedParentRoots?: readonly string[];
@@ -53,7 +53,7 @@ const moduleWithResolver = Module as ModuleWithResolver;
 const nodeResolveFilenameProperty = "_resolveFilename" as const;
 const INTERNAL_CORE_PACKAGE_ALIASES = [
   {
-    packageName: "@openclaw/markdown-core",
+    packageName: "@carapace/markdown-core",
     packageDir: "markdown-core",
     subpaths: [
       ["", "index.ts"],
@@ -71,7 +71,7 @@ const INTERNAL_CORE_PACKAGE_ALIASES = [
     // Mirrors packages/ai/package.json exports; dist file names do not follow
     // the src layout (dist/diagnostics.mjs <- src/utils/diagnostics.ts), so the
     // generic export-map derivation cannot be used here.
-    packageName: "@openclaw/ai",
+    packageName: "@carapace/ai",
     packageDir: "ai",
     subpaths: [
       ["", "index.ts"],
@@ -95,7 +95,7 @@ const INTERNAL_CORE_PACKAGE_ALIASES = [
     ],
   },
   {
-    packageName: "@openclaw/llm-core",
+    packageName: "@carapace/llm-core",
     packageDir: "llm-core",
     subpaths: [
       ["", "index.ts"],
@@ -108,7 +108,7 @@ const INTERNAL_CORE_PACKAGE_ALIASES = [
 ] as const;
 let installed = false;
 
-function resolveLoaderModulePath(options: InstallOpenClawPluginSdkNativeResolverOptions): string {
+function resolveLoaderModulePath(options: InstallCarapacePluginSdkNativeResolverOptions): string {
   return options.modulePath ?? fileURLToPath(options.moduleUrl ?? import.meta.url);
 }
 
@@ -187,14 +187,14 @@ function resolveLoaderPackageRootFromModulePath(modulePath: string): string {
           facts.nativePackage = isRecord(parsed)
             ? {
                 ...(typeof parsed.name === "string" ? { name: parsed.name } : {}),
-                hasOpenClawBin: isRecord(parsed.bin) && typeof parsed.bin.openclaw === "string",
+                hasCarapaceBin: isRecord(parsed.bin) && typeof parsed.bin.carapace === "string",
               }
             : null;
         } catch {
           facts.nativePackage = null;
         }
       }
-      if (facts.nativePackage?.name === "openclaw" || facts.nativePackage?.hasOpenClawBin) {
+      if (facts.nativePackage?.name === "carapace" || facts.nativePackage?.hasCarapaceBin) {
         roots.set(normalizedModulePath, cursor);
         return cursor;
       }
@@ -237,7 +237,7 @@ function resolveAllowedParentRoot(modulePath: string): string {
 }
 
 function resolveAllowedParentRoots(
-  options: InstallOpenClawPluginSdkNativeResolverOptions,
+  options: InstallCarapacePluginSdkNativeResolverOptions,
 ): string[] {
   const roots = new Set<string>();
   if (options.pluginModulePath) {
@@ -305,7 +305,7 @@ function resolveAliasTargetForParentPath(
 }
 
 function listInternalCorePackageNativeAliases(
-  options: InstallOpenClawPluginSdkNativeResolverOptions,
+  options: InstallCarapacePluginSdkNativeResolverOptions,
   packageRoot = resolveInternalCorePackageHostRoot(resolveLoaderModulePath(options)),
 ): Array<{
   request: string;
@@ -328,11 +328,11 @@ function listInternalCorePackageNativeAliases(
   const internalCorePackageAliases = [
     ...INTERNAL_CORE_PACKAGE_ALIASES,
     ...["media-core", "normalization-core", "acp-core"].map((packageDir) => ({
-      packageName: `@openclaw/${packageDir}`,
+      packageName: `@carapace/${packageDir}`,
       packageDir,
       subpaths: listWorkspacePackageExportAliasEntries({
         packageRoot,
-        packageName: `@openclaw/${packageDir}`,
+        packageName: `@carapace/${packageDir}`,
         packageDir,
       }).map((entry) => [entry.subpath, entry.srcFile] as const),
     })),
@@ -414,7 +414,7 @@ function clearNativeAliasesForParentRoots(parentRoots: readonly string[]): void 
 }
 
 function registerInternalCorePackageNativeAliases(
-  options: InstallOpenClawPluginSdkNativeResolverOptions,
+  options: InstallCarapacePluginSdkNativeResolverOptions,
 ): void {
   const packageRoot = resolveInternalCorePackageHostRoot(resolveLoaderModulePath(options));
   const registeredInternalCorePackageHosts = getPluginCache().sdk.native.registeredHosts;
@@ -427,8 +427,8 @@ function registerInternalCorePackageNativeAliases(
   registeredInternalCorePackageHosts.add(packageRoot);
 }
 
-export function installOpenClawPluginSdkNativeResolver(
-  options: InstallOpenClawPluginSdkNativeResolverOptions = {},
+export function installCarapacePluginSdkNativeResolver(
+  options: InstallCarapacePluginSdkNativeResolverOptions = {},
 ): void {
   const parentRoots = resolveAllowedParentRoots(options);
   clearNativeAliasesForParentRoots(parentRoots);
@@ -448,8 +448,8 @@ export function installOpenClawPluginSdkNativeResolver(
   installResolver();
 }
 
-export function installOpenClawInternalCorePackageNativeResolver(
-  options: Pick<InstallOpenClawPluginSdkNativeResolverOptions, "moduleUrl"> = {},
+export function installCarapaceInternalCorePackageNativeResolver(
+  options: Pick<InstallCarapacePluginSdkNativeResolverOptions, "moduleUrl"> = {},
 ): string[] {
   registerInternalCorePackageNativeAliases(options);
   installResolver();

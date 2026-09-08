@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   collectVitestAssertionDurations,
@@ -143,7 +143,7 @@ assert.equal(runVitestJsonReport(${JSON.stringify({ config: path.join(root, "mis
           {
             ...process.env,
             PATH: bin,
-            OPENCLAW_LIVE_USE_REAL_HOME: "0",
+            CARAPACE_LIVE_USE_REAL_HOME: "0",
             TSX_TSCONFIG_PATH: path.join(repoRoot, "tsconfig.json"),
           },
           30_000,
@@ -188,7 +188,7 @@ assert.equal(runVitestJsonReport(${JSON.stringify({ config: path.join(root, "mis
       for (const reportPath of reportPaths) {
         expect(path.dirname(reportPath)).toBe(os.tmpdir());
         expect(path.basename(reportPath)).toMatch(
-          /^openclaw-vitest-report-\d+-1234567890-[0-9a-f-]+\.json$/u,
+          /^carapace-vitest-report-\d+-1234567890-[0-9a-f-]+\.json$/u,
         );
       }
     } finally {
@@ -202,7 +202,7 @@ assert.equal(runVitestJsonReport(${JSON.stringify({ config: path.join(root, "mis
   it("fails when Vitest exits successfully without writing a JSON report", async () => {
     const { runVitestJsonReport } = await import("../../scripts/test-report-utils.mts");
     spawnSyncMock.mockReturnValue({ status: 0 });
-    const reportPath = path.join(os.tmpdir(), `openclaw-vitest-json-missing-${Date.now()}.json`);
+    const reportPath = path.join(os.tmpdir(), `carapace-vitest-json-missing-${Date.now()}.json`);
     const exitSpy = vi.spyOn(process, "exit").mockImplementation((code) => {
       throw new Error(`process.exit ${String(code)}`);
     });

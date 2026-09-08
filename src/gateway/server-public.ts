@@ -1,4 +1,4 @@
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import type { GatewaySuspendHandoffOwner } from "../infra/gateway-suspend-coordinator.js";
 import type { GatewayRestartEmitter } from "../infra/restart.js";
@@ -26,7 +26,7 @@ export type GatewayHostLifecycle = {
 export type GatewayStartupOperation = <T>(run: (signal: AbortSignal) => Promise<T>) => Promise<T>;
 
 export type GatewayServer = {
-  /** Process-local endpoint used by OpenClaw-managed Tailscale proxying. */
+  /** Process-local endpoint used by Carapace-managed Tailscale proxying. */
   getTailscaleIngressEndpoint: () => GatewayTailscaleIngressEndpoint | undefined;
   /** Fences WebSocket ingress and joins received work and connection cleanup before disposal. */
   close: (opts?: GatewayCloseOptions) => Promise<void>;
@@ -93,7 +93,7 @@ export type GatewayServerOptions = {
   startupStartedAt?: number;
   /**
    * Config snapshot already read by the CLI gateway preflight. Passing it avoids
-   * reparsing openclaw.json during server startup.
+   * reparsing carapace.json during server startup.
    */
   startupConfigSnapshotRead?: import("../config/io.js").ReadConfigFileSnapshotWithPluginMetadataResult;
   /** Restart request override; direct servers fail closed on restart-required reloads. */

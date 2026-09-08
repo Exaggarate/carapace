@@ -3,7 +3,7 @@ import {
   resolveAgentWorkspaceDir,
   resolveDefaultAgentId,
 } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 type DoctorWorkspaceSuggestionScope = {
   agentId: string;
@@ -13,7 +13,7 @@ type DoctorWorkspaceSuggestionScope = {
 
 /** Resolves every configured agent workspace while preserving invalid empty-roster failures. */
 export function resolveDoctorWorkspaceSuggestionScopes(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): DoctorWorkspaceSuggestionScope[] {
   const listedAgentIds = listAgentIds(cfg);
   const agentIds = listedAgentIds.length > 0 ? listedAgentIds : [resolveDefaultAgentId(cfg)];

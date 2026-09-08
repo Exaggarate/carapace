@@ -10,7 +10,7 @@ const fixture = fileURLToPath(new URL("./update-result-output.test-support.ts", 
 
 describe("failed update result output", () => {
   it("drains a noisy failure result before exiting so its recovery verdict reaches the helper", async () => {
-    const root = tempDirs.make("openclaw-update-result-output-");
+    const root = tempDirs.make("carapace-update-result-output-");
     const state = path.join(root, "state");
     await fs.mkdir(state);
     const result = await runCliProcessChild({
@@ -18,11 +18,11 @@ describe("failed update result output", () => {
       env: {
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: state,
-        OPENCLAW_CONFIG_PATH: path.join(state, "openclaw.json"),
-        OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
-        OPENCLAW_UPDATE_RUN_HANDOFF: "1",
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: state,
+        CARAPACE_CONFIG_PATH: path.join(state, "carapace.json"),
+        CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
+        CARAPACE_UPDATE_RUN_HANDOFF: "1",
         NODE_DISABLE_COMPILE_CACHE: "1",
         NO_COLOR: "1",
         TERM: "dumb",

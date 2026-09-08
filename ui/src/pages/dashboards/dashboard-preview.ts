@@ -3,9 +3,9 @@ import { property } from "lit/decorators.js";
 import type { ApplicationGatewaySnapshot } from "../../app/context.ts";
 import { NearViewportObserver } from "../../components/near-viewport-observer.ts";
 import { t } from "../../i18n/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 
-class OpenClawDashboardPreview extends OpenClawLightDomElement {
+class CarapaceDashboardPreview extends CarapaceLightDomElement {
   @property({ attribute: false }) gatewaySnapshot?: ApplicationGatewaySnapshot;
   @property({ attribute: false }) sessionKey = "";
   @property({ attribute: false }) agentId?: string;
@@ -36,14 +36,14 @@ class OpenClawDashboardPreview extends OpenClawLightDomElement {
       ? html`<div class="dashboard-preview__error">
           ${t("dashboardDocument.loadFailed", { error: this.error })}
         </div>`
-      : html`<openclaw-board-document
+      : html`<carapace-board-document
           .passive=${true}
           .gatewaySnapshot=${this.gatewaySnapshot}
           .preparedSession=${{ sessionKey: this.sessionKey, agentId: this.agentId }}
-        ></openclaw-board-document>`;
+        ></carapace-board-document>`;
   }
 }
 
-if (!customElements.get("openclaw-dashboard-preview")) {
-  customElements.define("openclaw-dashboard-preview", OpenClawDashboardPreview);
+if (!customElements.get("carapace-dashboard-preview")) {
+  customElements.define("carapace-dashboard-preview", CarapaceDashboardPreview);
 }

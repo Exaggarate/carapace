@@ -20,9 +20,9 @@ export function formatInstallationTargetCommand(
     options.env,
   );
   const selectors = [
-    ["OPENCLAW_STATE_DIR", target.stateDir],
-    ["OPENCLAW_CONFIG_PATH", target.configPath],
-    ["OPENCLAW_WORKSPACE_DIR", target.defaultWorkspaceDir],
+    ["CARAPACE_STATE_DIR", target.stateDir],
+    ["CARAPACE_CONFIG_PATH", target.configPath],
+    ["CARAPACE_WORKSPACE_DIR", target.defaultWorkspaceDir],
   ] as const;
   if (!windows) {
     const prefix = selectors.map(([key, value]) => `${key}=${quote(value)}`).join(" ");

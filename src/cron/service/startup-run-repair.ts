@@ -1,5 +1,5 @@
 /** Repairs interrupted and finalized cron runs while the service starts. */
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { resolveCronCompletionStatus } from "../completion-status.js";
 import { parseAbsoluteTimeMs } from "../parse.js";
 import type { CronRunLogEntry } from "../run-log-types.js";

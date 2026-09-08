@@ -7,7 +7,7 @@ import {
 } from "../../agents/embedded-agent-subscribe.openai-responses.test-helpers.js";
 import type { ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
 import type { ModelAliasIndex } from "../../agents/model-selection.js";
-import type { ModelDefinitionConfig, OpenClawConfig } from "../../config/config.js";
+import type { ModelDefinitionConfig, CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { withPluginMetadataSnapshotScope } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
@@ -74,7 +74,7 @@ type DirectiveApplyParams = Parameters<
   typeof import("./get-reply-directives-apply.js").applyInlineDirectiveOverrides
 >[0];
 
-function configWithModelAlias(alias: string): OpenClawConfig {
+function configWithModelAlias(alias: string): CarapaceConfig {
   return {
     commands: { text: true },
     agents: {
@@ -84,7 +84,7 @@ function configWithModelAlias(alias: string): OpenClawConfig {
         },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 function createAliasIndex(): ModelAliasIndex {
@@ -123,7 +123,7 @@ async function resolveModelDirective(params: {
   body: string;
   agentText?: string;
   authorized?: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   surface?: string;
   agentCfg?: Parameters<typeof resolveReplyDirectives>[0]["agentCfg"];
   opts?: Parameters<typeof resolveReplyDirectives>[0]["opts"];
@@ -206,9 +206,9 @@ async function resolveModelDirective(params: {
 describe("reply directive resolution", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     textRoutingMocks.shouldHandle.mockImplementation(
-      (params: { cfg: OpenClawConfig }) => params.cfg.commands?.text !== false,
+      (params: { cfg: CarapaceConfig }) => params.cfg.commands?.text !== false,
     );
     skillCommandMocks.listForWorkspace.mockReturnValue([]);
     directiveApplyMocks.apply.mockImplementation(async (params: DirectiveApplyParams) => ({
@@ -439,7 +439,7 @@ describe("reply directive resolution", () => {
 
     const { result, sessionEntry, sessionCtx } = await resolveModelDirective({
       body,
-      cfg: { commands: { text: true } } as OpenClawConfig,
+      cfg: { commands: { text: true } } as CarapaceConfig,
       surface: "webchat",
     });
 
@@ -478,7 +478,7 @@ describe("reply directive resolution", () => {
 
     const { result, sessionEntry } = await resolveModelDirective({
       body,
-      cfg: { commands: { text: true } } as OpenClawConfig,
+      cfg: { commands: { text: true } } as CarapaceConfig,
       surface: "webchat",
     });
 
@@ -497,7 +497,7 @@ describe("reply directive resolution", () => {
 
     const { result } = await resolveModelDirective({
       body,
-      cfg: { commands: { text: true } } as OpenClawConfig,
+      cfg: { commands: { text: true } } as CarapaceConfig,
       surface: "webchat",
     });
 
@@ -520,7 +520,7 @@ describe("reply directive resolution", () => {
       cfg: {
         ...configWithModelAlias("fable"),
         commands: { text: false },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       surface: "discord",
     });
 

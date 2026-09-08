@@ -1,13 +1,13 @@
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { expect, vi } from "vitest";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { ToolResultMessage } from "../../llm/types.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { PreparedAgentRunAdmission } from "../admitted-run-context.js";
 import type { EmbeddedRunCompactionRecoveryInput } from "./run/compaction-runtime.js";
 import type { PreparedEmbeddedRunInput } from "./run/execution-context.js";
@@ -21,14 +21,14 @@ export type RecoveryFixture = Awaited<ReturnType<typeof createRecoveryFixture>>;
 
 // The engine is synthetic; admission, writer claims, safety timeout, recovery,
 // hooks, session state, transcript writes, and reopen reads are composed for real.
-async function createRecoveryFixture(state: OpenClawTestState, options: FixtureOptions) {
+async function createRecoveryFixture(state: CarapaceTestState, options: FixtureOptions) {
   const { appendTranscriptMessage, loadTranscriptEvents, loadSessionEntry, replaceSessionEntry } =
     await import("../../config/sessions/session-accessor.js");
   const { resolveSessionTranscriptDatabasePath, resolveSessionTranscriptRuntimeTarget } =
     await import("../../config/sessions/session-accessor.transcript-target.js");
   const { waitForSessionTranscriptIndexReconcile } =
     await import("../../config/sessions/session-transcript-reconcile.js");
-  const { closeOpenClawAgentDatabaseByPath } = await import("../../state/openclaw-agent-db.js");
+  const { closeCarapaceAgentDatabaseByPath } = await import("../../state/carapace-agent-db.js");
   const { SessionManager } = await import("../sessions/session-manager.js");
   const { makeAgentAssistantMessage, makeAgentUserMessage } =
     await import("../test-helpers/agent-message-fixtures.js");
@@ -49,7 +49,7 @@ async function createRecoveryFixture(state: OpenClawTestState, options: FixtureO
   const { createHookRunnerWithRegistry } = await import("../../plugins/hooks.test-fixtures.js");
   const { buildContextEngineRuntimeSettings } =
     await import("../../context-engine/runtime-settings.js");
-  const { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } =
+  const { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } =
     await import("../../context-engine/host-compat.js");
 
   const memoryManager = options.inMemory ? SessionManager.inMemory(state.workspaceDir) : undefined;
@@ -58,7 +58,7 @@ async function createRecoveryFixture(state: OpenClawTestState, options: FixtureO
     agentId: "main",
     sessionId,
     sessionKey: `agent:main:${sessionId}`,
-    storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+    storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
   };
   const toolResult: ToolResultMessage = {
     role: "toolResult",
@@ -141,7 +141,7 @@ async function createRecoveryFixture(state: OpenClawTestState, options: FixtureO
       unsubscribe();
       forgetActiveSessionForShutdown(target.sessionId);
       forgetCommittedSuccessor();
-      closeOpenClawAgentDatabaseByPath(target.storePath);
+      closeCarapaceAgentDatabaseByPath(target.storePath);
     }
   };
   try {
@@ -285,13 +285,13 @@ async function createRecoveryFixture(state: OpenClawTestState, options: FixtureO
         workspaceDir: state.workspaceDir,
         provider: "fixture-provider",
         modelId: "fixture-model",
-        harnessRuntime: "openclaw",
+        harnessRuntime: "carapace",
         thinkLevel: "off",
         authProfileIdSource: "auto",
         resolveContextEnginePluginId: () => undefined,
         buildRuntimeSettings: ({ tokenBudget, degradedReason }) =>
           buildContextEngineRuntimeSettings({
-            contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+            contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
             promptTokenBudget: tokenBudget,
             degradedReason,
           }),
@@ -336,7 +336,7 @@ async function createRecoveryFixture(state: OpenClawTestState, options: FixtureO
     const snapshot = async () => {
       await drain();
       // Reopen independently: a cached manager can hide a durable append or leaf change.
-      closeOpenClawAgentDatabaseByPath(target.storePath);
+      closeCarapaceAgentDatabaseByPath(target.storePath);
       const manager = memoryManager ?? SessionManager.open(target, state.workspaceDir);
       const events = memoryManager
         ? memoryManager.getEntries()
@@ -437,7 +437,7 @@ export async function withRecoveryFixture(
   options: FixtureOptions,
   body: (fixture: RecoveryFixture) => Promise<void>,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "compaction-recovery", scenario: "minimal" },
     async (state) => {
       const fixture = await createRecoveryFixture(state, options);

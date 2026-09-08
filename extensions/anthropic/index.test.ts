@@ -1,17 +1,17 @@
-import { calculateCost, type Usage } from "openclaw/plugin-sdk/llm";
+import { calculateCost, type Usage } from "carapace/plugin-sdk/llm";
 import type {
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import {
   capturePluginRegistration,
   createRuntimeEnv,
   createTestWizardPrompter,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 // Anthropic tests cover index plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 
 const { probeClaudeCliAuthStatusMock } = vi.hoisted(() => ({
@@ -466,7 +466,7 @@ describe("anthropic provider replay hooks", () => {
               default: true,
               model: { primary: "anthropic/opus-4.7" },
               name: "Main",
-              workspace: "/tmp/openclaw-agent",
+              workspace: "/tmp/carapace-agent",
             },
           },
         },
@@ -504,7 +504,7 @@ describe("anthropic provider replay hooks", () => {
                 "anthropic/sonnet-4.6": { alias: "Sonnet shorthand" },
               },
               name: "Main",
-              workspace: "/tmp/openclaw-agent",
+              workspace: "/tmp/carapace-agent",
             },
           },
         },

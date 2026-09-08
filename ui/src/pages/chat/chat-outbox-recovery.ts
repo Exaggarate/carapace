@@ -223,4 +223,4 @@ class ChatOutboxRecovery extends LitElement {
     </details>`;
   }
 }
-customElements.define("openclaw-chat-outbox-recovery", ChatOutboxRecovery);
+customElements.define("carapace-chat-outbox-recovery", ChatOutboxRecovery);

@@ -1,13 +1,13 @@
-import { isRecord } from "@openclaw/normalization-core";
+import { isRecord } from "@carapace/normalization-core";
 import { patchSettings, type UiSettings } from "../../app/settings.ts";
 import { updateSidebarSessionLayout } from "./sidebar-layout-persistence.ts";
 import { openSlot, type SidebarLayout, type SidebarSlotId } from "./sidebar-layout.ts";
 
-const MIGRATION_MARKER_KEY = "openclaw.chat.sidePanel.legacyDockVisibility.v1";
+const MIGRATION_MARKER_KEY = "carapace.chat.sidePanel.legacyDockVisibility.v1";
 
 const LEGACY_DOCKS = [
-  { storageKey: "openclaw.browser.panel.v1", slot: "browser" },
-  { storageKey: "openclaw.desktopPanel", slot: "desktop" },
+  { storageKey: "carapace.browser.panel.v1", slot: "browser" },
+  { storageKey: "carapace.desktopPanel", slot: "desktop" },
 ] as const satisfies ReadonlyArray<{ storageKey: string; slot: SidebarSlotId }>;
 
 function legacyDockWasOpen(storage: Storage, storageKey: string): boolean {

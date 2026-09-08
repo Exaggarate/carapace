@@ -1,6 +1,6 @@
 // File Transfer plugin module implements descriptors behavior.
-import { optionalPositiveIntegerSchema } from "openclaw/plugin-sdk/channel-actions";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
+import { optionalPositiveIntegerSchema } from "carapace/plugin-sdk/channel-actions";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
 import { Type } from "typebox";
 
 type FileTransferToolDescriptor = Pick<

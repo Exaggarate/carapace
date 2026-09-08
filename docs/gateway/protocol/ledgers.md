@@ -146,7 +146,7 @@ only when the method was not advertised. A client may then retry `audit.list`
 only when its filters do not require message kind, direction, or channel
 support.
 
-Use [`openclaw audit`](/cli/audit) for text queries and bounded JSON exports.
+Use [`carapace audit`](/cli/audit) for text queries and bounded JSON exports.
 
 ## Task ledger RPCs
 

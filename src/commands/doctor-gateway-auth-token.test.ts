@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { withTempHome, writeStateDirDotEnv } from "../config/test-helpers.js";
 import { shouldRequireGatewayTokenForInstall } from "../gateway/auth-install-policy.js";
 import { withSecureTestNodeCommand } from "../secrets/test-node-command.test-support.js";
@@ -16,7 +16,7 @@ const envVar = (...parts: string[]) => parts.join("_");
 function createExecGatewayTokenConfig(
   markerPath: string,
   command = process.execPath,
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     gateway: {
       auth: {
@@ -44,7 +44,7 @@ function createExecGatewayTokenConfig(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("resolveGatewayAuthTokenForService", () => {
@@ -56,7 +56,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             token: "config-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
 
@@ -80,7 +80,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
@@ -102,7 +102,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
@@ -112,12 +112,12 @@ describe("resolveGatewayAuthTokenForService", () => {
   });
 
   it("reports skipped exec SecretRefs as unavailable without using ambient tokens", async () => {
-    const tmp = await fs.mkdtemp(join(tmpdir(), "openclaw-service-token-exec-ref-"));
+    const tmp = await fs.mkdtemp(join(tmpdir(), "carapace-service-token-exec-ref-"));
     const markerPath = join(tmp, "exec-ran");
     try {
       const resolved = await resolveGatewayAuthTokenForService(
         createExecGatewayTokenConfig(markerPath),
-        { OPENCLAW_GATEWAY_TOKEN: "ambient-token" } as NodeJS.ProcessEnv,
+        { CARAPACE_GATEWAY_TOKEN: "ambient-token" } as NodeJS.ProcessEnv,
       );
 
       expect(resolved).toEqual({
@@ -133,7 +133,7 @@ describe("resolveGatewayAuthTokenForService", () => {
   });
 
   it("executes exec SecretRefs for service token checks when explicitly allowed", async () => {
-    const tmp = await fs.mkdtemp(join(tmpdir(), "openclaw-service-token-exec-ref-"));
+    const tmp = await fs.mkdtemp(join(tmpdir(), "carapace-service-token-exec-ref-"));
     const markerPath = join(tmp, "exec-ran");
     try {
       await withSecureTestNodeCommand(async (command) => {
@@ -151,7 +151,7 @@ describe("resolveGatewayAuthTokenForService", () => {
     }
   });
 
-  it("does not fall back to OPENCLAW_GATEWAY_TOKEN when a SecretRef is unresolved", async () => {
+  it("does not fall back to CARAPACE_GATEWAY_TOKEN when a SecretRef is unresolved", async () => {
     const resolved = await resolveGatewayAuthTokenForService(
       {
         gateway: {
@@ -168,9 +168,9 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
-        OPENCLAW_GATEWAY_TOKEN: "env-fallback-token",
+        CARAPACE_GATEWAY_TOKEN: "env-fallback-token",
       } as NodeJS.ProcessEnv,
     );
 
@@ -180,7 +180,7 @@ describe("resolveGatewayAuthTokenForService", () => {
     });
   });
 
-  it("does not fall back to OPENCLAW_GATEWAY_TOKEN when a SecretRef resolves to empty", async () => {
+  it("does not fall back to CARAPACE_GATEWAY_TOKEN when a SecretRef resolves to empty", async () => {
     const resolved = await resolveGatewayAuthTokenForService(
       {
         gateway: {
@@ -197,10 +197,10 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "   ",
-        OPENCLAW_GATEWAY_TOKEN: "env-fallback-token",
+        CARAPACE_GATEWAY_TOKEN: "env-fallback-token",
       } as NodeJS.ProcessEnv,
     );
 
@@ -226,7 +226,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
 
@@ -246,7 +246,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             mode: "token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(true);
@@ -260,7 +260,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             mode: "password",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -268,7 +268,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
 
   it("requires token in inferred mode when password env exists only in shell", async () => {
     await withEnvAsync(
-      { [envVar("OPENCLAW", "GATEWAY", "PASSWORD")]: "password-from-env" },
+      { [envVar("CARAPACE", "GATEWAY", "PASSWORD")]: "password-from-env" },
       async () => {
         // pragma: allowlist secret
         const required = shouldRequireGatewayTokenForInstall(
@@ -276,7 +276,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             gateway: {
               auth: {},
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           process.env,
         );
         expect(required).toBe(true);
@@ -301,7 +301,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -315,10 +315,10 @@ describe("shouldRequireGatewayTokenForInstall", () => {
         },
         env: {
           vars: {
-            OPENCLAW_GATEWAY_PASSWORD: "configured-password", // pragma: allowlist secret
+            CARAPACE_GATEWAY_PASSWORD: "configured-password", // pragma: allowlist secret
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -326,7 +326,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
 
   it("does not require token in inferred mode when password env exists in state-dir .env", async () => {
     await withTempHome(async (_home) => {
-      await writeStateDirDotEnv("OPENCLAW_GATEWAY_PASSWORD=dotenv-password\n", {
+      await writeStateDirDotEnv("CARAPACE_GATEWAY_PASSWORD=dotenv-password\n", {
         env: process.env,
       });
 
@@ -335,7 +335,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
           gateway: {
             auth: {},
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         process.env,
       );
       expect(required).toBe(false);
@@ -348,7 +348,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
         gateway: {
           auth: {},
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(true);
@@ -361,7 +361,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
           auth: { mode: "none" },
           tailscale: { mode: "serve" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 

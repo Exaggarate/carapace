@@ -2,7 +2,7 @@ import {
   walkRootDirectory,
   type RootWalkEntry,
   type RootWalkOptions,
-} from "openclaw/plugin-sdk/root-walk";
+} from "carapace/plugin-sdk/root-walk";
 
 const MEMORY_WIKI_WALK_MAX_DEPTH = 128;
 const MEMORY_WIKI_WALK_MAX_ENTRIES = 20_000;

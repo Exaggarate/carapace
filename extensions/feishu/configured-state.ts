@@ -2,12 +2,12 @@ import {
   DEFAULT_ACCOUNT_ID,
   hasConfiguredAccountValue,
   mergeAccountConfig,
-} from "openclaw/plugin-sdk/account-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/account-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { FeishuConfig } from "./src/types.js";
 
 /** Feishu owns configured account credentials; ambient variables alone are not an account. */
-export function hasConfiguredFeishuChannelState(params: { cfg: OpenClawConfig }): boolean {
+export function hasConfiguredFeishuChannelState(params: { cfg: CarapaceConfig }): boolean {
   // SAFETY: Feishu's registered channel schema owns the shape of its config entry.
   const channel = params.cfg.channels?.feishu as FeishuConfig | undefined;
   if (!channel || channel.enabled === false) {

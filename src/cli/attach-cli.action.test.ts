@@ -59,14 +59,14 @@ vi.mock("../gateway/call.js", () => ({
           expiresAtMs: 2_000_000_000_000,
           mcpConfig: {
             mcpServers: {
-              openclaw: {
+              carapace: {
                 type: "http",
                 url: "http://127.0.0.1:9999/mcp",
-                headers: { Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}" },
+                headers: { Authorization: "Bearer ${CARAPACE_MCP_TOKEN}" },
               },
             },
           },
-          env: { OPENCLAW_MCP_TOKEN: "tok-123" },
+          env: { CARAPACE_MCP_TOKEN: "tok-123" },
         };
       }
       return {};
@@ -93,16 +93,16 @@ import { callGateway } from "../gateway/call.js";
 import { registerAttachCli } from "./attach-cli.js";
 
 async function runAttach(...args: string[]) {
-  const program = new Command().name("openclaw").exitOverride();
+  const program = new Command().name("carapace").exitOverride();
   await registerAttachCli(program);
-  await program.parseAsync(["node", "openclaw", "attach", ...args]);
+  await program.parseAsync(["node", "carapace", "attach", ...args]);
 }
 const tick = () =>
   new Promise<void>((resolve) => {
     setImmediate(resolve);
   });
 
-describe("openclaw attach (action)", () => {
+describe("carapace attach (action)", () => {
   beforeEach(() => {
     gatewayCalls.length = 0;
     logs.length = 0;
@@ -217,7 +217,7 @@ describe("openclaw attach (action)", () => {
         [
           "Session reference is ambiguous:",
           ...expectedLines,
-          "Pass a longer reference. Run `openclaw sessions list` to choose a full session key.",
+          "Pass a longer reference. Run `carapace sessions list` to choose a full session key.",
         ].join("\n"),
       );
       expect(Buffer.from(error.message, "utf8").toString("utf8")).toBe(error.message);
@@ -245,7 +245,7 @@ describe("openclaw attach (action)", () => {
     expect(out).toContain("agent:main:cli");
     expect(out).toContain("--mcp-config");
     expect(out).toContain("--strict-mcp-config");
-    expect(out).toContain("OPENCLAW_MCP_TOKEN");
+    expect(out).toContain("CARAPACE_MCP_TOKEN");
     expect(out).not.toContain("attach.revoke");
   });
 
@@ -376,8 +376,8 @@ describe("openclaw attach (action)", () => {
         sessionKey: "agent:main:spawn",
         token: "tok-123",
         expiresAtMs: 2_000_000_000_000,
-        mcpConfig: { mcpServers: { openclaw: {} } },
-        env: { OPENCLAW_MCP_TOKEN: "tok-123" },
+        mcpConfig: { mcpServers: { carapace: {} } },
+        env: { CARAPACE_MCP_TOKEN: "tok-123" },
       } as never;
     });
     vi.mocked(callGateway).mockImplementationOnce(async (p) => {
@@ -416,7 +416,7 @@ describe("openclaw attach (action)", () => {
       sessionKey: "agent:main:x",
       token: "tok-123",
       expiresAtMs: "soon",
-      mcpConfig: { mcpServers: { openclaw: {} } },
+      mcpConfig: { mcpServers: { carapace: {} } },
       env: {},
     } as never);
     await runAttach("--print-config");

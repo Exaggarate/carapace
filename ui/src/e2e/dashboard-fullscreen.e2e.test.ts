@@ -59,7 +59,7 @@ const boardSnapshot = {
       grantState: "pending",
       revision: 1,
       frameUrl: "about:blank#permissions",
-      declared: { tools: ["openclaw.data.read"], netOrigins: [] },
+      declared: { tools: ["carapace.data.read"], netOrigins: [] },
     },
   ],
 };
@@ -84,7 +84,7 @@ async function rememberMainTab(page: Page): Promise<void> {
 
 async function openFocusFromDashboards(page: Page, focusPath: string): Promise<void> {
   await page.goto(`${suite.server.baseUrl}dashboards`);
-  await page.locator("openclaw-app-shell").waitFor();
+  await page.locator("carapace-app-shell").waitFor();
   await page.goto(`${suite.server.baseUrl}${focusPath}`);
 }
 
@@ -122,7 +122,7 @@ suite.define(() => {
       await installMockGateway(page);
       await openFocusFromDashboards(page, "focus/not-supported");
       await page.getByRole("alert").getByText("This focused view is not supported.").waitFor();
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
       await closeFocusedView(page, "Back");
     });
   });
@@ -159,13 +159,13 @@ suite.define(() => {
         displayName: sessionRow.displayName,
         boardFace: sessionRow.boardFace,
       });
-      const document = page.locator("openclaw-board-document");
-      await document.locator("openclaw-board-view").waitFor();
+      const document = page.locator("carapace-board-document");
+      await document.locator("carapace-board-view").waitFor();
 
       expect(await gateway.getRequests("sessions.resolve")).toHaveLength(1);
       expect(await gateway.getRequests("sessions.describe")).toHaveLength(0);
       expect(await gateway.getRequests("sessions.list")).toHaveLength(initialSessionListCount);
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
       expect(await page.locator(".agent-chat").count()).toBe(0);
       expect((await gateway.getRequests("board.get"))[0]?.params).toEqual({
         sessionKey,
@@ -215,7 +215,7 @@ suite.define(() => {
       { serviceWorkers: "block", viewport: { width: 393, height: 852 } },
       async ({ page }) => {
         await page.addInitScript(() => {
-          Object.defineProperty(window, "__OPENCLAW_NATIVE_WEB_CHROME__", {
+          Object.defineProperty(window, "__CARAPACE_NATIVE_WEB_CHROME__", {
             value: true,
             configurable: true,
           });
@@ -237,15 +237,15 @@ suite.define(() => {
         });
 
         await page.goto(`${suite.server.baseUrl}${initialFocusPath}`);
-        const dashboardDocument = page.locator("openclaw-board-document");
-        await dashboardDocument.locator("openclaw-board-view").waitFor();
+        const dashboardDocument = page.locator("carapace-board-document");
+        await dashboardDocument.locator("carapace-board-view").waitFor();
 
-        expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+        expect(await page.locator("carapace-app-shell").count()).toBe(0);
         expect(
           await dashboardDocument.getByRole("button", { name: "Close dashboard" }).count(),
         ).toBe(0);
         const horizontalOverflow = await page.evaluate(() => {
-          const board = document.querySelector("openclaw-board-view");
+          const board = document.querySelector("carapace-board-view");
           return {
             document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             board: board ? board.scrollWidth - board.clientWidth : null,
@@ -339,7 +339,7 @@ suite.define(() => {
           });
 
           await page.goto(`${suite.server.baseUrl}${initialFocusPath}`);
-          const board = page.locator("openclaw-board-document openclaw-board-view");
+          const board = page.locator("carapace-board-document carapace-board-view");
           const frame = page.locator(
             '.board-widget[data-widget-name="long-dashboard"] .board-widget__frame',
           );
@@ -575,7 +575,7 @@ suite.define(() => {
       expect(await gateway.getRequests("sessions.resolve")).toHaveLength(1);
       expect(await gateway.getRequests("sessions.describe")).toHaveLength(0);
       expect(await gateway.getRequests("board.get")).toHaveLength(0);
-      expect(await page.locator("openclaw-board-document").count()).toBe(0);
+      expect(await page.locator("carapace-board-document").count()).toBe(0);
       await closeFocusedView(page, "Close dashboard");
     });
   });
@@ -589,8 +589,8 @@ suite.define(() => {
 
       await openFocusFromDashboards(page, initialFocusPath);
       await page.getByText("This session could not be found.", { exact: true }).waitFor();
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
-      expect(await page.locator("openclaw-board-document").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-board-document").count()).toBe(0);
       expect(await gateway.getRequests("board.get")).toHaveLength(0);
       await closeFocusedView(page, "Close dashboard");
     });
@@ -610,7 +610,7 @@ suite.define(() => {
       const alert = page.getByRole("alert");
       await alert.waitFor();
       await expect.poll(() => alert.textContent()).toContain("session routing is unavailable");
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
       await closeFocusedView(page, "Close dashboard");
     });
   });

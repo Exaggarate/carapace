@@ -7,12 +7,12 @@ import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   mockSessionsConfig,
   resetMockSessionsConfig,
@@ -72,8 +72,8 @@ async function withSqliteStore<T>(
     );
     return await run(storePath);
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(dir, { force: true, recursive: true });
   }
 }
@@ -180,13 +180,13 @@ describe("sessionsCommand model resolution", () => {
     );
   });
 
-  it("reports the owning Codex harness for locked sessions despite a stale OpenClaw override", async () => {
+  it("reports the owning Codex harness for locked sessions despite a stale Carapace override", async () => {
     setMockSessionsConfig(() => ({
       agents: {
         defaults: {
           model: { primary: "openai/gpt-5.5" },
           models: {
-            "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+            "openai/gpt-5.5": { agentRuntime: { id: "carapace" } },
           },
         },
       },
@@ -200,7 +200,7 @@ describe("sessionsCommand model resolution", () => {
           modelProvider: "openai",
           model: "gpt-5.5",
           agentHarnessId: "codex",
-          agentRuntimeOverride: "openclaw",
+          agentRuntimeOverride: "carapace",
           modelSelectionLocked: true,
         },
       },
@@ -222,7 +222,7 @@ describe("sessionsCommand model resolution", () => {
         defaults: {
           model: { primary: "openai/gpt-5.6" },
           models: {
-            "clawrouter/openai/gpt-5.6": { agentRuntime: { id: "openclaw" } },
+            "clawrouter/openai/gpt-5.6": { agentRuntime: { id: "carapace" } },
             "openai/gpt-5.6": { agentRuntime: { id: "codex" } },
           },
         },
@@ -242,7 +242,7 @@ describe("sessionsCommand model resolution", () => {
       updatedAt: Date.now() - 60_000,
       modelProvider: "clawrouter",
       model: "openai/gpt-5.6",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       contextTokens: 272_000,
       contextTokensSource: "runtime",
     } satisfies SessionEntry;
@@ -254,9 +254,9 @@ describe("sessionsCommand model resolution", () => {
         const databasePath = resolveSqliteTargetFromSessionStorePath(store, {
           agentId: "main",
         }).path;
-        const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+        const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
         const db = getNodeSqliteKysely<
-          Pick<OpenClawAgentKyselyDatabase, "session_nodes" | "session_windows">
+          Pick<CarapaceAgentKyselyDatabase, "session_nodes" | "session_windows">
         >(database.db);
         const persisted = executeSqliteQueryTakeFirstSync(
           database.db,
@@ -277,7 +277,7 @@ describe("sessionsCommand model resolution", () => {
         expect(persisted).toEqual({
           modelProvider: "clawrouter",
           model: "openai/gpt-5.6",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           sessionKey,
           sessionId: sessionEntry.sessionId,
           entryJson: expect.any(String),
@@ -290,7 +290,7 @@ describe("sessionsCommand model resolution", () => {
         expect(session).toMatchObject({
           modelProvider: "clawrouter",
           model: "openai/gpt-5.6",
-          agentRuntime: { id: "openclaw", source: "session" },
+          agentRuntime: { id: "carapace", source: "session" },
           contextTokens: 272_000,
         });
       },
@@ -319,11 +319,11 @@ describe("sessionsCommand model resolution", () => {
       "sessions-current-runtime-context",
       {
         "agent:main:main": {
-          sessionId: "stale-openclaw-window",
+          sessionId: "stale-carapace-window",
           updatedAt: Date.now() - 60_000,
           modelProvider: "openai",
           model: "gpt-5.6-sol",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 272_000,
           contextTokensSource: "runtime",
         },
@@ -332,7 +332,7 @@ describe("sessionsCommand model resolution", () => {
         const payload = await runSessionsJson<SessionsJsonPayload>(sessionsCommand, store);
         const session = payload.sessions?.find((row) => row.key === "agent:main:main");
 
-        expect(session?.agentRuntime).toEqual({ id: "openclaw", source: "session" });
+        expect(session?.agentRuntime).toEqual({ id: "carapace", source: "session" });
         expect(session?.contextTokens).toBe(1_000_000);
       },
     );
@@ -415,7 +415,7 @@ describe("sessionsCommand model resolution", () => {
         defaults: {
           model: { primary: "openai/gpt-5.6-sol" },
           models: {
-            "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } },
+            "openai/gpt-5.6-sol": { agentRuntime: { id: "carapace" } },
           },
         },
       },

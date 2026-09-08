@@ -1,7 +1,7 @@
 /**
  * Builds GitHub Copilot provider compatibility headers from message content.
  */
-import { projectCopilotRequestFacts } from "@openclaw/ai/internal/shared";
+import { projectCopilotRequestFacts } from "@carapace/ai/internal/shared";
 import type { Context } from "../llm/types.js";
 
 /** @deprecated GitHub Copilot provider-owned helper; do not use from third-party plugins. */

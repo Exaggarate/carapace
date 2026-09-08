@@ -3,11 +3,11 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ProviderAuthMethod } from "openclaw/plugin-sdk/core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ProviderAuthMethod } from "carapace/plugin-sdk/core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { azLoginDeviceCodeWithOptions, execAz, getAccessTokenResultAsync } from "./cli.js";
 import plugin from "./index.js";
@@ -45,8 +45,8 @@ vi.mock("node:child_process", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>();
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>();
   return {
     ...actual,
     runCommandWithTimeout: runCommandWithTimeoutMock,
@@ -54,9 +54,9 @@ vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/provider-auth", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-auth")>(
-    "openclaw/plugin-sdk/provider-auth",
+vi.mock("carapace/plugin-sdk/provider-auth", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/provider-auth")>(
+    "carapace/plugin-sdk/provider-auth",
   );
   return {
     ...actual,
@@ -197,7 +197,7 @@ function buildFoundryConfig(params?: {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
 function buildEntraProfileStore(
@@ -353,7 +353,7 @@ describe("microsoft-foundry plugin", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await provider.onModelSelected?.({
       config,
@@ -756,8 +756,8 @@ describe("microsoft-foundry plugin", () => {
     },
     async ({ signal }) => {
       const { runExec } = await vi.importActual<
-        typeof import("openclaw/plugin-sdk/process-runtime")
-      >("openclaw/plugin-sdk/process-runtime");
+        typeof import("carapace/plugin-sdk/process-runtime")
+      >("carapace/plugin-sdk/process-runtime");
       const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
       const proofDir = await fs.mkdtemp(path.join(os.tmpdir(), "foundry-cache-proof-"));
       const binDir = path.join(proofDir, "bin");
@@ -801,9 +801,9 @@ process.stdout.write(JSON.stringify({
 import fs from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import { upsertAuthProfile } from "openclaw/plugin-sdk/provider-auth";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import { upsertAuthProfile } from "carapace/plugin-sdk/provider-auth";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
 const { default: plugin } = await import(process.argv[3]);
 
 const proofDir = process.argv[2];
@@ -881,7 +881,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
               TMP: proofDir,
               SystemRoot: process.env.SystemRoot,
               ComSpec: process.env.ComSpec,
-              OPENCLAW_STATE_DIR: stateDir,
+              CARAPACE_STATE_DIR: stateDir,
               AZURE_CONFIG_DIR: azureDir,
               TSX_TSCONFIG_PATH: path.join(repoRoot, "tsconfig.json"),
               TSX_DISABLE_CACHE: "1",
@@ -994,7 +994,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
 
   it("keeps other configured Foundry models when switching the selected model", async () => {
     const provider = registerProvider();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       auth: {
         profiles: {
           "microsoft-foundry:default": {
@@ -1125,7 +1125,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
 
   it("infers OpenAI routing when adding a GPT deployment from a Claude-configured provider", async () => {
     const provider = registerProvider();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       models: {
         providers: {
           "microsoft-foundry": {
@@ -1958,7 +1958,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
     expect(provider?.models[0]?.compat?.maxTokensField).toBe("max_completion_tokens");
   });
 
-  it("emits only persisted-schema thinkingLevelMap level keys for Entra ID reasoning onboarding (openclaw#91011)", () => {
+  it("emits only persisted-schema thinkingLevelMap level keys for Entra ID reasoning onboarding (carapace#91011)", () => {
     // The persisted ModelDefinitionSchema only accepts these ModelThinkingLevel keys; if the writer
     // emits one outside the set, updateConfig rolls the Entra ID onboarding write back.
     const allowedThinkingLevels = new Set([
@@ -2072,7 +2072,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
 
   it("keeps persisted response-mode routing for custom deployment aliases", async () => {
     const provider = registerProvider();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       auth: {
         profiles: {
           "microsoft-foundry:entra": {
@@ -2217,7 +2217,7 @@ assert.equal(afterOldest, 130, "the evicted account must refresh through az");
 
   it("keeps Foundry profile selection compatible with unrelated AWS SDK profile modes", async () => {
     const provider = registerProvider();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...buildFoundryConfig({
         profileIds: ["microsoft-foundry:entra"],
         orderedProfileIds: ["microsoft-foundry:entra"],

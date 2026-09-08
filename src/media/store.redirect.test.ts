@@ -6,9 +6,9 @@ import { withServer } from "../plugin-sdk/test-helpers/http-test-server.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { saveMediaSource } from "./store.js";
 import { setMediaStoreNetworkDepsForTest } from "./store.test-support.js";
 
@@ -29,12 +29,12 @@ async function useActualSaveRemoteMedia(): Promise<void> {
 }
 
 describe("media store remote sources", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeAll(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-media-store-remote-",
+      prefix: "carapace-media-store-remote-",
     });
   });
 

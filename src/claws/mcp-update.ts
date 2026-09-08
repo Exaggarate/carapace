@@ -1,9 +1,9 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { setConfiguredMcpServer, unsetConfiguredMcpServer } from "../agents/mcp-config-mutation.js";
 import { withClawMcpLifecycleLease } from "../agents/mcp-lifecycle-lease.js";
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import {
   CLAW_MCP_REF_SCHEMA_VERSION,
   deleteClawMcpServerRef,
@@ -36,8 +36,8 @@ export class ClawMcpUpdateError extends Error {
 export async function applyClawMcpUpdate(
   updatePlan: ClawUpdatePlan,
   targetManifest: ClawManifest,
-  options: OpenClawStateDatabaseOptions & {
-    config: OpenClawConfig;
+  options: CarapaceStateDatabaseOptions & {
+    config: CarapaceConfig;
     sourceMcpServers: Record<string, Record<string, unknown>>;
     nowMs?: number;
     setServer?: typeof setConfiguredMcpServer;
@@ -46,7 +46,7 @@ export async function applyClawMcpUpdate(
     readRefsByName?: typeof readClawMcpServerRefsByName;
     planRemoval?: (
       ref: PersistedClawMcpServerRef,
-      options: OpenClawStateDatabaseOptions,
+      options: CarapaceStateDatabaseOptions,
     ) => { action: "remove" | "release" };
     upsertRef?: typeof upsertClawMcpServerRef;
     deleteRef?: typeof deleteClawMcpServerRef;

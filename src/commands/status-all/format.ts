@@ -1,9 +1,9 @@
 // Shared formatting helpers for status overview, gateway summaries, and JSON payloads.
 // These functions keep text and JSON status surfaces aligned without pulling in command orchestration.
 
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveGatewayPort } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import type { GatewayServiceLoadState } from "../../daemon/service-types.js";
 import { projectGatewayUrlForDiagnostics } from "../../gateway/connection-details.js";
 import { resolveControlUiLinks } from "../../gateway/control-ui-links.js";
@@ -59,7 +59,7 @@ type StatusManagedService = {
   label: string;
   installed: boolean | null;
   loadState?: GatewayServiceLoadState;
-  managedByOpenClaw?: boolean;
+  managedByCarapace?: boolean;
   loadedText: string;
   runtimeShort?: string | null;
   runtime?: {
@@ -169,7 +169,7 @@ function formatStatusServiceValue(params: StatusManagedService): string {
   if (params.installed === false && !inspectionFailed) {
     return `${params.label} not installed`;
   }
-  const installedPrefix = params.managedByOpenClaw ? "installed · " : "";
+  const installedPrefix = params.managedByCarapace ? "installed · " : "";
   const loadedText = inspectionDetail
     ? `${params.loadedText} (inspection failed: ${redactSensitiveText(inspectionDetail, { mode: "tools" })})`
     : params.loadedText;
@@ -187,7 +187,7 @@ function formatStatusServiceValue(params: StatusManagedService): string {
 
 /** Returns the dashboard URL when the Control UI is enabled for the current gateway binding. */
 function resolveStatusDashboardUrl(params: {
-  cfg: Pick<OpenClawConfig, "gateway">;
+  cfg: Pick<CarapaceConfig, "gateway">;
 }): string | null {
   if (!(params.cfg.gateway?.controlUi?.enabled ?? true)) {
     return null;
@@ -252,7 +252,7 @@ function buildStatusOverviewRows(params: {
 
 /** Builds overview rows directly from raw scan/update/gateway inputs. */
 export function buildStatusOverviewSurfaceRows(params: {
-  cfg: Pick<OpenClawConfig, "update" | "gateway" | "telemetry">;
+  cfg: Pick<CarapaceConfig, "update" | "gateway" | "telemetry">;
   update: StatusUpdateLike;
   tailscaleMode: string;
   tailscaleDns?: string | null;
@@ -418,7 +418,7 @@ function buildGatewayStatusSummaryParts(params: {
 
 /** Builds gateway/dashboard/service values for overview rows. */
 function buildStatusGatewaySurfaceValues(params: {
-  cfg: Pick<OpenClawConfig, "gateway">;
+  cfg: Pick<CarapaceConfig, "gateway">;
   advertisedControlUiLinks?: { httpUrl: string; wsUrl: string };
   gatewayMode: "local" | "remote";
   remoteUrlMissing: boolean;
@@ -472,7 +472,7 @@ function buildStatusGatewaySurfaceValues(params: {
   };
 }
 
-/** Builds the stable gateway object used by `openclaw status --json`. */
+/** Builds the stable gateway object used by `carapace status --json`. */
 export function buildGatewayStatusJsonPayload(params: {
   gatewayMode: "local" | "remote";
   gatewayConnection: {

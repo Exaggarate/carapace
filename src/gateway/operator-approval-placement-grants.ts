@@ -7,18 +7,18 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import type { PluginApprovalRequestPayload } from "../infra/plugin-approvals.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { find as findWorkerSessionPlacement } from "./worker-environments/placement-row-codec.js";
 
 const PLACEMENT_GRANT_TTL_MS = 30 * 24 * 60 * 60_000;
 
 type PlacementGrantDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "operator_approvals" | "worker_environments" | "worker_session_placements"
 >;
 
@@ -79,7 +79,7 @@ function hasExactAttachedSession(value: string, sessionId: string): boolean {
 }
 
 function isPlacementBindingCurrent(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   binding: PlacementStandingGrantMintSpec,
 ): boolean {
   const placement = findWorkerSessionPlacement(database.db, binding.sessionId);
@@ -113,7 +113,7 @@ function isPlacementBindingCurrent(
 
 /** Resolves the exact active node-backed placement from Gateway-owned rows. */
 function resolvePlacementStandingGrantBinding(
-  input: PlacementGrantResolutionInput & { databaseOptions?: OpenClawStateDatabaseOptions },
+  input: PlacementGrantResolutionInput & { databaseOptions?: CarapaceStateDatabaseOptions },
 ): PlacementStandingGrantMintSpec | null {
   if (
     !input.pluginId.trim() ||
@@ -126,7 +126,7 @@ function resolvePlacementStandingGrantBinding(
   ) {
     return null;
   }
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const stateDb = getNodeSqliteKysely<PlacementGrantDatabase>(database.db);
     const candidates = executeSqliteQuerySync(
       database.db,
@@ -185,7 +185,7 @@ function resolveRetainedGrant(params: {
   binding: PlacementStandingGrantMintSpec;
   runtimeEpoch: string;
   nowMs: number;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): ConsumePlacementStandingGrantResult {
   const key = placementGrantKey(params.binding);
   const grant = params.grants.get(key);
@@ -204,7 +204,7 @@ function resolveRetainedGrant(params: {
     params.grants.delete(key);
     return { outcome: "pairing-changed" };
   }
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const bindingMatches =
       grant.sessionKey === params.binding.sessionKey &&
       grant.environmentId === params.binding.environmentId &&
@@ -243,7 +243,7 @@ function resolveRetainedGrant(params: {
 
 export function createPlacementStandingGrantRuntime(params: {
   runtimeEpoch: string;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   now?: () => number;
 }): PlacementStandingGrantRuntime {
   const grants = new Map<string, PlacementStandingGrantRecord>();
@@ -258,7 +258,7 @@ export function createPlacementStandingGrantRuntime(params: {
         return false;
       }
       try {
-        const retained = runOpenClawStateWriteTransaction((database) => {
+        const retained = runCarapaceStateWriteTransaction((database) => {
           if (!isPlacementBindingCurrent(database, grant)) {
             return null;
           }

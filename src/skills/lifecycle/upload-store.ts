@@ -6,7 +6,7 @@ import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { DEFAULT_MAX_ARCHIVE_BYTES_ZIP } from "../../infra/archive.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -17,12 +17,12 @@ import {
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
 import { withTempWorkspace } from "../../infra/private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import { validateRequestedSkillSlug } from "./archive-install.js";
 import {
   deleteOwnedSkillUpload,
@@ -53,7 +53,7 @@ const SHA256_PATTERN = /^[a-f0-9]{64}$/i;
 const UPLOAD_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-type SkillUploadStoreOptions = OpenClawStateDatabaseOptions & {
+type SkillUploadStoreOptions = CarapaceStateDatabaseOptions & {
   installLeaseHeartbeatMs?: number;
   installLeaseMs?: number;
   now?: () => number;
@@ -220,7 +220,7 @@ function decodeBase64Chunk(dataBase64: string): Buffer {
 
 function requireUploadMetadata(
   uploadId: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): SkillUploadMetadataRow {
   const row = readSkillUploadMetadata(uploadId, options);
   if (!row) {
@@ -232,7 +232,7 @@ function requireUploadMetadata(
 function assertNotExpired(
   row: SkillUploadMetadataRow,
   nowMs: number,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): void {
   const validNow = asDateTimestampMs(nowMs);
   if (validNow === undefined) {
@@ -264,7 +264,7 @@ function matchesBegin(
 }
 
 async function cleanupExpiredUploads(params: {
-  options: OpenClawStateDatabaseOptions;
+  options: CarapaceStateDatabaseOptions;
   nowMs: number;
   lockRoot: string;
   excludeUploadId?: string;
@@ -283,7 +283,7 @@ async function cleanupExpiredUploads(params: {
       continue;
     }
     await withLock(`${params.lockRoot}:upload:${row.upload_id}`, async () => {
-      runOpenClawStateWriteTransaction(({ db }) => {
+      runCarapaceStateWriteTransaction(({ db }) => {
         const transactionDb = getNodeSqliteKysely<SkillUploadDatabase>(db);
         if (hasLiveSkillUploadInstallLease(db, transactionDb, row.upload_id, validNow)) {
           return;
@@ -373,7 +373,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
   );
 
   function lockRoot(): string {
-    return openOpenClawStateDatabase(stateOptions).path;
+    return openCarapaceStateDatabase(stateOptions).path;
   }
 
   return {
@@ -397,7 +397,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
           throw new SkillUploadRequestError("invalid upload expiry");
         }
 
-        return runOpenClawStateWriteTransaction(({ db }) => {
+        return runCarapaceStateWriteTransaction(({ db }) => {
           const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
           if (keyHash) {
             const existing = executeSqliteQueryTakeFirstSync(
@@ -475,7 +475,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
       return await withLock(`${root}:upload:${uploadId}`, async () => {
         const currentTime = now();
         assertNotExpired(requireUploadMetadata(uploadId, stateOptions), currentTime, stateOptions);
-        return runOpenClawStateWriteTransaction(({ db }) => {
+        return runCarapaceStateWriteTransaction(({ db }) => {
           const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
           const row = executeSqliteQueryTakeFirstSync(
             db,
@@ -566,7 +566,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
         const committedAt = now();
         assertNotExpired(requireUploadMetadata(uploadId, stateOptions), committedAt, stateOptions);
 
-        return runOpenClawStateWriteTransaction(({ db }) => {
+        return runCarapaceStateWriteTransaction(({ db }) => {
           const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
           const current = executeSqliteQueryTakeFirstSync(
             db,
@@ -623,7 +623,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
         const leaseOwner = randomUUID();
         const currentTime = now();
         assertNotExpired(requireUploadMetadata(uploadId, stateOptions), currentTime, stateOptions);
-        const row = runOpenClawStateWriteTransaction(({ db }) => {
+        const row = runCarapaceStateWriteTransaction(({ db }) => {
           const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
           const current = executeSqliteQueryTakeFirstSync(
             db,
@@ -699,8 +699,8 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
         try {
           return await withTempWorkspace(
             {
-              rootDir: tempRootDir ?? resolvePreferredOpenClawTmpDir(),
-              prefix: "openclaw-skill-upload-",
+              rootDir: tempRootDir ?? resolvePreferredCarapaceTmpDir(),
+              prefix: "carapace-skill-upload-",
             },
             async (tmp) => {
               const archivePath = path.join(tmp.dir, "archive.zip");
@@ -722,7 +722,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
           );
         } finally {
           clearInterval(heartbeat);
-          runOpenClawStateWriteTransaction(({ db }) => {
+          runCarapaceStateWriteTransaction(({ db }) => {
             const kysely = getNodeSqliteKysely<SkillUploadDatabase>(db);
             executeSqliteQuerySync(
               db,
@@ -742,7 +742,7 @@ function createSkillUploadStore(options?: SkillUploadStoreOptions) {
 export const defaultSkillUploadStore = createSkillUploadStore();
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.skillUploadStoreTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.skillUploadStoreTestApi")] = {
     createSkillUploadStore,
   };
 }

@@ -1,12 +1,12 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
 import { signalPlugin } from "./channel.js";
 import * as client from "./client-adapter.js";
 
 describe("Signal account media limits", () => {
   it.each(["work", undefined])("enforces the resolved account cap for %s", async (accountId) => {
-    const state = await createOpenClawTestState({ prefix: "signal-account-media-" });
+    const state = await createCarapaceTestState({ prefix: "signal-account-media-" });
     const delivered: Buffer[] = [];
     const request = vi
       .spyOn(client, "signalRpcRequest")

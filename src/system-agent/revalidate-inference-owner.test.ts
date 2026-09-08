@@ -14,7 +14,7 @@ import {
 } from "../plugins/runtime/gateway-request-scope.js";
 import { setPluginRuntimeLoadContext } from "../plugins/runtime/load-context.js";
 import { resolvePluginRuntimeLoadContext } from "../plugins/runtime/load-context.resolve.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { SystemAgentConfiguredRoute } from "./inference-route.js";
 import {
   loadSetupInferencePluginGeneration,
@@ -34,13 +34,13 @@ function embeddedRoute(agentHarnessRuntimeOverride: string): SystemAgentConfigur
     model: "gpt-5.6-sol",
     modelLabel: "openai/gpt-5.6-sol",
     agentId: "main",
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     agentHarnessRuntimeOverride,
     sourceConfig: {},
     runConfig: {
       agents: {
         defaults: {
-          workspace: "/tmp/openclaw-workspace",
+          workspace: "/tmp/carapace-workspace",
         },
       },
     },
@@ -49,8 +49,8 @@ function embeddedRoute(agentHarnessRuntimeOverride: string): SystemAgentConfigur
 
 describe("revalidateSetupInferenceOwner", () => {
   it("loads newly installed package facts after the install lease cached their absence", async () => {
-    await withOpenClawTestState(
-      { label: "setup-plugin-generation", env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" } },
+    await withCarapaceTestState(
+      { label: "setup-plugin-generation", env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" } },
       async (state) => {
         const config = {
           plugins: {
@@ -66,9 +66,9 @@ describe("revalidateSetupInferenceOwner", () => {
           await state.writeJson("plugin/package.json", {
             name: "@fixture/runtime",
             version: "1.0.0",
-            openclaw: { extensions: ["./index.js"] },
+            carapace: { extensions: ["./index.js"] },
           });
-          await state.writeJson("plugin/openclaw.plugin.json", {
+          await state.writeJson("plugin/carapace.plugin.json", {
             id: "fixture-runtime",
             agentHarnesses: ["fixture-runtime"],
             configSchema: { type: "object" },
@@ -104,7 +104,7 @@ describe("revalidateSetupInferenceOwner", () => {
       const metadataSnapshot = createPluginMetadataSnapshot({
         config: route.runConfig,
         manifestRegistry: makeRegistry([]),
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
       });
       const probingRegistry = createEmptyPluginRegistry();
       setPluginRuntimeLoadContext(
@@ -153,14 +153,14 @@ describe("revalidateSetupInferenceOwner", () => {
       expect(resolveMetadataSnapshot).toHaveBeenCalledWith({
         config: route.runConfig,
         env: process.env,
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
         allowCurrent: false,
       });
       expect(mocks.loadAgentRuntimePluginRegistryHandle).toHaveBeenCalledWith({
         config: route.runConfig,
         metadataSnapshot,
         preferBuiltPluginArtifacts,
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
         selections: [
           { provider: "openai", modelId: "gpt-5.6-sol", runtime: "codex", agentId: "main" },
         ],
@@ -168,14 +168,14 @@ describe("revalidateSetupInferenceOwner", () => {
     },
   );
 
-  it("does not reload the built-in OpenClaw harness", async () => {
+  it("does not reload the built-in Carapace harness", async () => {
     const binding = {} as SystemAgentVerifiedInferenceBinding;
     mocks.loadAgentRuntimePluginRegistryHandle.mockClear();
 
     await expect(
       revalidateSetupInferenceOwner({
         route: embeddedRoute("auto"),
-        auth: { agentHarnessId: "openclaw", authFingerprint: "auth" },
+        auth: { agentHarnessId: "carapace", authFingerprint: "auth" },
         deps: {
           createSystemAgentVerifiedInferenceBinding: vi.fn(async () => binding),
         },

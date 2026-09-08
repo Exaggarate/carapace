@@ -3,12 +3,12 @@
  *
  * Reads bounded, redacted session transcript history after session visibility filtering.
  */
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import type { ChatPendingInputsPage } from "../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { capArrayByJsonBytes } from "../../gateway/session-transcript-readers.js";
 import { jsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
 import { redactToolPayloadText } from "../../logging/redact.js";
@@ -248,7 +248,7 @@ function boundPendingInputs(page: ChatPendingInputsPage) {
     const result = sanitizeHistoryMessage(item.message, Math.max(1, Math.floor(messageBudget / 8)));
     redacted ||= result.redacted;
     const record = asOptionalRecord(result.message);
-    const media = asOptionalRecord(record?.["__openclaw"])?.media;
+    const media = asOptionalRecord(record?.["__carapace"])?.media;
     const message = { role: "user", content: record?.content, ...(media ? { media } : {}) };
     const oversized = jsonUtf8Bytes(message) > messageBudget;
     truncated ||= result.truncated || oversized;
@@ -289,7 +289,7 @@ function readHistoryMessageSeq(message: unknown): number | undefined {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return undefined;
   }
-  const meta = (message as Record<string, unknown>)["__openclaw"];
+  const meta = (message as Record<string, unknown>)["__carapace"];
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
     return undefined;
   }
@@ -301,7 +301,7 @@ function readHistoryMessageId(message: unknown): string | undefined {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return undefined;
   }
-  const meta = (message as Record<string, unknown>)["__openclaw"];
+  const meta = (message as Record<string, unknown>)["__carapace"];
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
     return undefined;
   }
@@ -363,7 +363,7 @@ function buildSessionsHistoryOmittedPlaceholder(source: unknown): Record<string,
     content: "[sessions_history omitted: message too large]",
     ...(seq !== undefined || id !== undefined
       ? {
-          __openclaw: {
+          __carapace: {
             ...(seq !== undefined ? { seq } : {}),
             ...(id !== undefined ? { id } : {}),
           },
@@ -429,7 +429,7 @@ export function createSessionsHistoryTool(opts?: {
   agentSessionKey?: string;
   requesterAgentIdOverride?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   callGateway?: GatewayCaller;
   sessionLinkBase?: string;
 }): AnyAgentTool {

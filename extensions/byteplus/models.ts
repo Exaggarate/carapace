@@ -1,8 +1,8 @@
 /**
  * BytePlus model catalog helpers derived from the plugin manifest.
  */
-import { buildManifestProviderCatalogFamily } from "openclaw/plugin-sdk/provider-catalog-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildManifestProviderCatalogFamily } from "carapace/plugin-sdk/provider-catalog-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 export const BYTEPLUS_PROVIDER_CATALOG = buildManifestProviderCatalogFamily({
   surfaces: [

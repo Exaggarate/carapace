@@ -1,16 +1,16 @@
-import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+import { resolveSessionAgentIdStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 // Discord plugin module implements thread bindings.manager behavior.
 import {
   registerSessionBindingAdapter,
   unregisterSessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
 import {
   getRuntimeConfigSnapshot,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { createDiscordRestClient } from "../client.js";
 import { getChannel } from "../internal/discord.js";
 import {
@@ -85,7 +85,7 @@ function isDirectConversationBindingId(value?: string | null): boolean {
 export function createThreadBindingManager(params: {
   accountId?: string;
   token?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   persist?: boolean;
   enableSweeper?: boolean;
   idleTimeoutMs?: number;

@@ -1,5 +1,5 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import type { RealtimeVoiceAgentControlResult } from "openclaw/plugin-sdk/realtime-voice";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import type { RealtimeVoiceAgentControlResult } from "carapace/plugin-sdk/realtime-voice";
 import { vi, type Mock } from "vitest";
 const {
   createConnectionMock,
@@ -204,7 +204,7 @@ const {
         active: false,
         queued: false,
         reason: "no_active_run",
-        message: "There is no active OpenClaw run to steer.",
+        message: "There is no active Carapace run to steer.",
         speak: true,
         show: true,
         suppress: false,
@@ -257,10 +257,10 @@ export const voiceTestMocks = {
   canonicalizeRealtimeVoiceProviderIdMock,
 };
 
-vi.mock("openclaw/plugin-sdk/channel-secret-owner-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-secret-owner-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-secret-owner-runtime")
-  >("openclaw/plugin-sdk/channel-secret-owner-runtime");
+    typeof import("carapace/plugin-sdk/channel-secret-owner-runtime")
+  >("carapace/plugin-sdk/channel-secret-owner-runtime");
   return {
     ...actual,
     assertSecretOwnerAvailable: assertSecretOwnerAvailableMock,
@@ -289,9 +289,9 @@ vi.mock("./sdk-runtime.js", () => ({
   }),
 }));
 
-vi.mock("openclaw/plugin-sdk/routing", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/routing")>(
-    "openclaw/plugin-sdk/routing",
+vi.mock("carapace/plugin-sdk/routing", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/routing")>(
+    "carapace/plugin-sdk/routing",
   );
   return {
     ...actual,
@@ -299,30 +299,30 @@ vi.mock("openclaw/plugin-sdk/routing", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/agent-runtime")>(
-    "openclaw/plugin-sdk/agent-runtime",
+vi.mock("carapace/plugin-sdk/agent-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/agent-runtime")>(
+    "carapace/plugin-sdk/agent-runtime",
   );
   return {
     ...actual,
     agentCommandFromIngress: agentCommandMock,
-    resolveAgentDir: vi.fn(() => "/tmp/openclaw-agent"),
+    resolveAgentDir: vi.fn(() => "/tmp/carapace-agent"),
   };
 });
 
-vi.mock("openclaw/plugin-sdk/realtime-bootstrap-context", async () => {
+vi.mock("carapace/plugin-sdk/realtime-bootstrap-context", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/realtime-bootstrap-context")
-  >("openclaw/plugin-sdk/realtime-bootstrap-context");
+    typeof import("carapace/plugin-sdk/realtime-bootstrap-context")
+  >("carapace/plugin-sdk/realtime-bootstrap-context");
   return {
     ...actual,
     resolveRealtimeBootstrapContextInstructions: resolveRealtimeBootstrapContextInstructionsMock,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -335,7 +335,7 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("carapace/plugin-sdk/system-event-runtime", () => ({
   enqueueRoutedSystemEvent: (
     text: unknown,
     route: { sessionKey: unknown },
@@ -343,9 +343,9 @@ vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
   ) => enqueueSystemEventMock(text, { ...options, sessionKey: route.sessionKey }),
 }));
 
-vi.mock("openclaw/plugin-sdk/realtime-voice", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/realtime-voice")>(
-    "openclaw/plugin-sdk/realtime-voice",
+vi.mock("carapace/plugin-sdk/realtime-voice", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/realtime-voice")>(
+    "carapace/plugin-sdk/realtime-voice",
   );
   return {
     ...actual,

@@ -1,4 +1,4 @@
-import { formatCompactTokenCount } from "@openclaw/normalization-core";
+import { formatCompactTokenCount } from "@carapace/normalization-core";
 
 /** Formats a token count for compact human-facing status text. */
 export function formatTokenCount(value?: number): string {

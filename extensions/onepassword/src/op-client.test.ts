@@ -21,8 +21,8 @@ describe("OpClient", () => {
 
   beforeAll(async () => {
     // Only the immutable interpreter is shared; executable and token trust stay per-test.
-    // openclaw-temp-dir: allow plugin tests cannot import the core-only tracker.
-    interpreterRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onepassword-node-"));
+    // carapace-temp-dir: allow plugin tests cannot import the core-only tracker.
+    interpreterRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-onepassword-node-"));
     interpreter = createTrustedNodeFixture(interpreterRoot);
   });
 
@@ -33,8 +33,8 @@ describe("OpClient", () => {
   });
 
   beforeEach(async () => {
-    // openclaw-temp-dir: allow plugin tests cannot import the core-only tracker.
-    root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onepassword-"));
+    // carapace-temp-dir: allow plugin tests cannot import the core-only tracker.
+    root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-onepassword-"));
     tempDirs.push(root);
     opBin = path.join(root, process.platform === "win32" ? "op.exe" : "op");
     tokenFile = path.join(root, "service-account-token");

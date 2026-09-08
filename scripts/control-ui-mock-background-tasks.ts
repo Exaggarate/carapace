@@ -3,7 +3,7 @@ function historyMessage(role: "assistant" | "user", text: string, timestamp: num
     content: [{ type: "text", text }],
     role,
     timestamp,
-    __openclaw:
+    __carapace:
       role === "user" ? { senderId: "mock-operator", senderName: "Riley Example" } : undefined,
   };
 }
@@ -14,7 +14,7 @@ function finishedTask(n: number, now: number) {
     taskId: `task-mock-finished-${n}`,
     status: n === 3 ? "failed" : "completed",
     runtime: "subagent",
-    agentId: "openclaw-mock",
+    agentId: "carapace-mock",
     title: `Finished mock task number ${n} with a fairly long title`,
     createdAt: now - n * 600_000,
     startedAt: now - n * 600_000,
@@ -40,8 +40,8 @@ function taskDetailCase(task: { id: string; title: string } & Record<string, unk
 
 export function buildBackgroundTasksMock(baseTime: number) {
   const now = Date.now();
-  const taskSessionKey = "agent:openclaw-mock:subagent:mock-task-1";
-  const secondTaskSessionKey = "agent:openclaw-mock:subagent:mock-task-2";
+  const taskSessionKey = "agent:carapace-mock:subagent:mock-task-1";
+  const secondTaskSessionKey = "agent:carapace-mock:subagent:mock-task-2";
   const requesterSessionKey = "agent:main:main";
   const tasks = [
     {
@@ -49,7 +49,7 @@ export function buildBackgroundTasksMock(baseTime: number) {
       taskId: "task-mock-running",
       status: "running",
       runtime: "subagent",
-      agentId: "openclaw-mock",
+      agentId: "carapace-mock",
       title: "Map run-status indicator code",
       createdAt: now - 25_000,
       startedAt: now - 25_000,
@@ -67,7 +67,7 @@ export function buildBackgroundTasksMock(baseTime: number) {
       taskId: "task-mock-running-2",
       status: "running",
       runtime: "subagent",
-      agentId: "openclaw-mock",
+      agentId: "carapace-mock",
       title: "Audit gateway event scope guards",
       createdAt: now - 95_000,
       startedAt: now - 95_000,

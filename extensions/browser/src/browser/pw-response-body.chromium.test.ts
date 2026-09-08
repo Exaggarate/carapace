@@ -11,11 +11,11 @@ import { getFreePort } from "./test-port.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-describe.runIf(process.env.OPENCLAW_BROWSER_RESPONSE_E2E === "1")(
+describe.runIf(process.env.CARAPACE_BROWSER_RESPONSE_E2E === "1")(
   "Chromium response body deadline",
   () => {
     it("settles a streamed response without closing the tab or consuming late body bytes", async () => {
-      const rootDir = tempDirs.make("openclaw-response-deadline-");
+      const rootDir = tempDirs.make("carapace-response-deadline-");
       const streams = new Set<ServerResponse>();
       const server = createServer((request, response) => {
         if (request.url === "/api") {

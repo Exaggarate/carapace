@@ -10,11 +10,11 @@ import {
   type NodeHostConfig,
 } from "../node-host/config.js";
 import { readConfigMachineStateWithMetadata } from "../state/config-machine-state.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { acquireGatewayLock } from "./gateway-lock.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 import {
@@ -22,20 +22,20 @@ import {
   migrateLegacyNodeHostConfig,
 } from "./state-migrations.node-host.js";
 
-type NodeHostConfigDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type NodeHostConfigDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 const fixtureDigest = ["fixture", "digest"].join("-");
 
 describe("legacy node-host Doctor migration", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       cleanup();
     });
   });
 
   function useStateDir(): { env: NodeJS.ProcessEnv; stateDir: string } {
-    const stateDir = tempDirs.make("openclaw-node-host-migration-");
-    return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir }, stateDir };
+    const stateDir = tempDirs.make("carapace-node-host-migration-");
+    return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir }, stateDir };
   }
 
   function legacyConfig(overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -49,7 +49,7 @@ describe("legacy node-host Doctor migration", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/carapace-gw",
       },
       ...overrides,
     };
@@ -71,7 +71,7 @@ describe("legacy node-host Doctor migration", () => {
     gatewayHost?: string;
     updatedAtMs: number;
   }): void {
-    const database = openOpenClawStateDatabase({ env: params.env });
+    const database = openCarapaceStateDatabase({ env: params.env });
     executeSqliteQuerySync(
       database.db,
       getNodeSqliteKysely<NodeHostConfigDatabase>(database.db)
@@ -87,7 +87,7 @@ describe("legacy node-host Doctor migration", () => {
               port: 18443,
               tls: false,
               tlsFingerprint: fixtureDigest,
-              contextPath: "/openclaw-gw",
+              contextPath: "/carapace-gw",
             },
             installedAppsSharing: false,
           } satisfies NodeHostConfig),
@@ -134,7 +134,7 @@ describe("legacy node-host Doctor migration", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/carapace-gw",
       },
       installedAppsSharing: false,
     });
@@ -437,6 +437,6 @@ describe("legacy node-host Doctor migration", () => {
 
     expect(result.warnings[0]).toContain("source or Doctor claim remains after cleanup");
     expect(fs.existsSync(sourcePath)).toBe(true);
-    await expect(loadNodeHostConfig(env)).rejects.toThrow("openclaw doctor --fix");
+    await expect(loadNodeHostConfig(env)).rejects.toThrow("carapace doctor --fix");
   });
 });

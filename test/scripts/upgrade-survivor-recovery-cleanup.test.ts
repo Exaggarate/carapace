@@ -30,7 +30,7 @@ describe.skipIf(process.platform === "win32")("recovery survivor package provena
     | "missing-pack-integrity";
 
   async function packageEvidence({
-    requested = "openclaw@2026.7.1-2",
+    requested = "carapace@2026.7.1-2",
     installedVersion = "2026.7.1-2",
     packShape = "array",
     viewShape = "object",
@@ -57,12 +57,12 @@ describe.skipIf(process.platform === "win32")("recovery survivor package provena
     const metadata = {
       version: fault === "metadata-version" ? "2026.1.1" : installedVersion,
       dist: {
-        tarball: `https://registry.npmjs.org/openclaw/-/openclaw-${installedVersion}.tgz`,
+        tarball: `https://registry.npmjs.org/carapace/-/carapace-${installedVersion}.tgz`,
         ...(fault === "missing-metadata-integrity" ? {} : { integrity }),
       },
     };
     const packed = {
-      name: "openclaw",
+      name: "carapace",
       version: fault === "pack-version" ? "2026.1.1" : installedVersion,
       ...(fault === "missing-pack-integrity"
         ? {}
@@ -80,13 +80,13 @@ describe.skipIf(process.platform === "win32")("recovery survivor package provena
 const fs = require("node:fs");
 const args = process.argv.slice(2);
 fs.appendFileSync(${JSON.stringify(calls)}, JSON.stringify(args) + "\\n");
-if (args[1] !== ${JSON.stringify(`openclaw@${installedVersion}`)}) {
+if (args[1] !== ${JSON.stringify(`carapace@${installedVersion}`)}) {
   throw new Error("package evidence must use the installed exact baseline");
 }
 if (args[0] === "view") {
   console.log(JSON.stringify(${JSON.stringify(viewShape === "array" ? [metadata] : metadata)}));
 } else if (args[0] === "pack") {
-  console.log(JSON.stringify(${JSON.stringify(packShape === "array" ? [packed] : { openclaw: packed })}));
+  console.log(JSON.stringify(${JSON.stringify(packShape === "array" ? [packed] : { carapace: packed })}));
 } else {
   throw new Error("unexpected npm command");
 }
@@ -107,10 +107,10 @@ if (args[0] === "view") {
         PATH: [bin, path.dirname(process.execPath), "/usr/bin", "/bin"].join(path.delimiter),
         HOME: root,
         TMPDIR: runtime,
-        OPENCLAW_STATE_DIR: state,
-        OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
-        OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: runtime,
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION: installedVersion,
+        CARAPACE_STATE_DIR: state,
+        CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
+        CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: runtime,
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_VERSION: installedVersion,
       },
       10_000,
     );
@@ -128,21 +128,21 @@ if (args[0] === "view") {
   }
 
   it.each([
-    { requested: "openclaw@2026.7.1-2", installedVersion: "2026.7.1-2", packShape: "array" },
+    { requested: "carapace@2026.7.1-2", installedVersion: "2026.7.1-2", packShape: "array" },
     {
-      requested: "openclaw@2026.8.2",
+      requested: "carapace@2026.8.2",
       installedVersion: "2026.8.2",
       packShape: "name-keyed",
       viewShape: "array",
     },
-    { requested: "openclaw@latest", installedVersion: "2026.8.2", packShape: "array" },
+    { requested: "carapace@latest", installedVersion: "2026.8.2", packShape: "array" },
   ] as const)(
     "verifies $requested against installed $installedVersion ($packShape)",
     async (entry) => {
       const fixture = await packageEvidence(entry);
       expect(fixture.result.error).toBeUndefined();
       expect(fixture.result.status, fixture.result.stderr).toBe(0);
-      const exactSpec = `openclaw@${entry.installedVersion}`;
+      const exactSpec = `carapace@${entry.installedVersion}`;
       expect(fixture.calls).toEqual([
         ["view", exactSpec, "version", "dist", "--json"],
         ["pack", exactSpec, "--ignore-scripts", "--dry-run", "--json"],
@@ -173,13 +173,13 @@ describe("recovery survivor evidence", () => {
     expect(recoveryVolumeSpec({})).toEqual({ sessions: 2, eventsPerSession: 8 });
     expect(
       recoveryVolumeSpec({
-        OPENCLAW_UPGRADE_SURVIVOR_VOLUME_SESSIONS: "1",
-        OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: "150000",
+        CARAPACE_UPGRADE_SURVIVOR_VOLUME_SESSIONS: "1",
+        CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: "150000",
       }),
     ).toEqual({ sessions: 1, eventsPerSession: 150000 });
     for (const invalid of ["0", "-1", "1.5", "9007199254740992"]) {
       expect(() =>
-        recoveryVolumeSpec({ OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: invalid }),
+        recoveryVolumeSpec({ CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: invalid }),
       ).toThrow();
     }
   });
@@ -274,7 +274,7 @@ describe("recovery survivor evidence", () => {
     const wal = `${database}-wal`;
     const shm = `${database}-shm`;
     const unrelatedShm = path.join(root, "unrelated.sqlite-shm");
-    const sharedShm = path.join(root, "state", "openclaw.sqlite-shm");
+    const sharedShm = path.join(root, "state", "carapace.sqlite-shm");
     fs.mkdirSync(path.dirname(sharedShm));
     for (const file of [database, wal, shm, unrelatedShm, sharedShm]) {
       fs.writeFileSync(file, "original bytes");
@@ -426,7 +426,7 @@ describe("recovery survivor evidence", () => {
       role: "assistant",
       content: [{ type: "text", text: id }],
     }));
-    const messages = expected.map(({ id, ...message }) => ({ ...message, __openclaw: { id } }));
+    const messages = expected.map(({ id, ...message }) => ({ ...message, __carapace: { id } }));
     expect(() =>
       assertRecoveryHistory({ sessionId: "session", messages }, "session", expected),
     ).not.toThrow();

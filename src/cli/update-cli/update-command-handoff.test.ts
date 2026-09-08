@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
 import type { GatewayServiceState } from "../../daemon/service-types.js";
 import { resolveRuntimeWorkerUrl } from "../../infra/runtime-worker-url.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import { triageTestRuntimeEntrypoints } from "../../infra/triage-runtime.test-support.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import {
@@ -19,17 +19,17 @@ afterEach(() => tempDirs.cleanup());
 it.runIf(process.platform === "darwin").each(["cancel", "cancel-output-first", "transfer"])(
   "settles the initiating CLI's owned handoff lifetime: %s",
   async (mode) => {
-    const root = await fs.realpath(await tempDirs.make("openclaw-cli-handoff-lifetime-"));
+    const root = await fs.realpath(await tempDirs.make("carapace-cli-handoff-lifetime-"));
     const callerPath = path.join(root, "caller.mjs");
     const preloadPath = path.join(root, "handoff-order.cjs");
     const tracePath = path.join(root, "trace.jsonl");
     const resultPath = path.join(root, "result.json");
     const managerPath = path.join(root, "manager-calls");
-    const leasePath = path.join(resolvePreferredOpenClawTmpDir(), "managed-update-handoffs.sqlite");
+    const leasePath = path.join(resolvePreferredCarapaceTmpDir(), "managed-update-handoffs.sqlite");
     await fs.mkdir(path.join(root, "dist"));
     await fs.writeFile(
       path.join(root, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "1.0.0", type: "module" }),
+      JSON.stringify({ name: "carapace", version: "1.0.0", type: "module" }),
     );
     await fs.writeFile(path.join(root, "dist/index.mjs"), "throw new Error('unexpected updater');");
     // The task-owned manager rejects every service command; host launchd is never invoked.
@@ -46,7 +46,7 @@ const record=(event,data={})=>fs.appendFileSync(${JSON.stringify(tracePath)},JSO
 if(process.argv[1]===${JSON.stringify(callerPath)} && ${mode !== "transfer"}) {
   const sqlite=require('node:sqlite'), Original=sqlite.DatabaseSync;
   sqlite.DatabaseSync=new Proxy(Original,{construct(target,args,newTarget) {
-    if(String(args[0])===${JSON.stringify(path.join(root, "state/openclaw.sqlite"))}) {
+    if(String(args[0])===${JSON.stringify(path.join(root, "state/carapace.sqlite"))}) {
       const db=new Original(${JSON.stringify(leasePath)},{readOnly:true});
       const lease=db.prepare('SELECT owner FROM managed_update_handoffs WHERE install_root=?').get(${JSON.stringify(root)});
       db.close();record('publication-denied',{ready:!!lease});
@@ -92,11 +92,11 @@ process.stdin.once('end',()=>{if(child.exitCode===null&&child.signalCode===null)
     const gateway = spawn(process.execPath, [gatewayPath], {
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: root,
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-        OPENCLAW_LAUNCHD_LABEL: `ai.openclaw.handoff-test.${process.pid}`,
-        OPENCLAW_UPDATE_RUN_HANDOFF: undefined,
-        OPENCLAW_SUPERVISOR_MODE: undefined,
+        CARAPACE_STATE_DIR: root,
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+        CARAPACE_LAUNCHD_LABEL: `ai.carapace.handoff-test.${process.pid}`,
+        CARAPACE_UPDATE_RUN_HANDOFF: undefined,
+        CARAPACE_SUPERVISOR_MODE: undefined,
         PATH: `${root}${path.delimiter}${process.env.PATH ?? ""}`,
         NODE_OPTIONS: `--require=${JSON.stringify(preloadPath)}`,
       },
@@ -173,7 +173,7 @@ describe("gatewayMaintenanceBlockMessage", () => {
     expect(message).toContain("inside the gateway process tree");
     expect(message).toContain("from a shell outside the gateway service");
     expect(message).not.toContain("stop the gateway service first");
-    expect(message).not.toContain("openclaw update");
+    expect(message).not.toContain("carapace update");
   });
 
   it("returns undefined when the pid is not an ancestor", () => {

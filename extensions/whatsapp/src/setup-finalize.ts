@@ -5,9 +5,9 @@ import {
   createSetupTranslator,
   type ChannelSetupWizard,
   type DmPolicy,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/setup";
-import { formatCliCommand, formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/setup";
+import { formatCliCommand, formatDocsLink } from "carapace/plugin-sdk/setup-tools";
 import {
   resolveDefaultWhatsAppAccountId,
   resolveWhatsAppAccount,
@@ -24,7 +24,7 @@ const t = createSetupTranslator();
 
 type SetupPrompter = Parameters<NonNullable<ChannelSetupWizard["finalize"]>>[0]["prompter"];
 type SetupRuntime = Parameters<NonNullable<ChannelSetupWizard["finalize"]>>[0]["runtime"];
-type WhatsAppConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["whatsapp"]>;
+type WhatsAppConfig = NonNullable<NonNullable<CarapaceConfig["channels"]>["whatsapp"]>;
 type WhatsAppAccountConfig = NonNullable<NonNullable<WhatsAppConfig["accounts"]>[string]>;
 
 function trimPromptText(value: string | null | undefined): string {
@@ -35,7 +35,7 @@ function isDefaultWhatsAppAccountKey(accountId: string): boolean {
   return accountId.trim().toLowerCase() === DEFAULT_ACCOUNT_ID;
 }
 
-function shouldWriteDefaultWhatsAppAccountConfigAtAccountScope(cfg: OpenClawConfig): boolean {
+function shouldWriteDefaultWhatsAppAccountConfigAtAccountScope(cfg: CarapaceConfig): boolean {
   const accounts = cfg.channels?.whatsapp?.accounts;
   if (!accounts) {
     return false;
@@ -46,7 +46,7 @@ function shouldWriteDefaultWhatsAppAccountConfigAtAccountScope(cfg: OpenClawConf
   return Object.keys(accounts).some((accountId) => !isDefaultWhatsAppAccountKey(accountId));
 }
 
-function resolveDefaultWhatsAppAccountWriteKey(cfg: OpenClawConfig): string {
+function resolveDefaultWhatsAppAccountWriteKey(cfg: CarapaceConfig): string {
   const accounts = cfg.channels?.whatsapp?.accounts;
   if (!accounts) {
     return DEFAULT_ACCOUNT_ID;
@@ -55,7 +55,7 @@ function resolveDefaultWhatsAppAccountWriteKey(cfg: OpenClawConfig): string {
   return match ?? DEFAULT_ACCOUNT_ID;
 }
 
-function resolveWhatsAppConfigPathPrefix(cfg: OpenClawConfig, accountId: string): string {
+function resolveWhatsAppConfigPathPrefix(cfg: CarapaceConfig, accountId: string): string {
   if (
     accountId === DEFAULT_ACCOUNT_ID &&
     shouldWriteDefaultWhatsAppAccountConfigAtAccountScope(cfg)
@@ -68,11 +68,11 @@ function resolveWhatsAppConfigPathPrefix(cfg: OpenClawConfig, accountId: string)
 }
 
 function mergeWhatsAppConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   patch: Partial<WhatsAppAccountConfig>,
   options?: { unsetOnUndefined?: string[] },
-): OpenClawConfig {
+): CarapaceConfig {
   const channelConfig: WhatsAppConfig = { ...cfg.channels?.whatsapp };
   const mutableChannelConfig = channelConfig as Record<string, unknown>;
   const targetPathPrefix = resolveWhatsAppConfigPathPrefix(cfg, accountId);
@@ -134,30 +134,30 @@ function mergeWhatsAppConfig(
 }
 
 function setWhatsAppDmPolicy(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   dmPolicy: DmPolicy,
-): OpenClawConfig {
+): CarapaceConfig {
   return mergeWhatsAppConfig(cfg, accountId, { dmPolicy });
 }
 
 function setWhatsAppAllowFrom(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   allowFrom?: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   return mergeWhatsAppConfig(cfg, accountId, { allowFrom }, { unsetOnUndefined: ["allowFrom"] });
 }
 
 function setWhatsAppSelfChatMode(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   selfChatMode: boolean,
-): OpenClawConfig {
+): CarapaceConfig {
   return mergeWhatsAppConfig(cfg, accountId, { selfChatMode });
 }
 
-async function detectWhatsAppLinked(cfg: OpenClawConfig, accountId: string): Promise<boolean> {
+async function detectWhatsAppLinked(cfg: CarapaceConfig, accountId: string): Promise<boolean> {
   const { authDir } = resolveWhatsAppAuthDir({ cfg, accountId });
   return hasWebCredsSync(authDir);
 }
@@ -198,13 +198,13 @@ async function promptWhatsAppOwnerAllowFrom(params: {
 }
 
 async function applyWhatsAppOwnerAllowlist(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   existingAllowFrom: string[];
   messageLines: string[];
   prompter: SetupPrompter;
   title: string;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const { normalized, allowFrom } = await promptWhatsAppOwnerAllowFrom({
     prompter: params.prompter,
     existingAllowFrom: params.existingAllowFrom,
@@ -240,11 +240,11 @@ function parseWhatsAppAllowFromEntries(raw: string): { entries: string[]; invali
 }
 
 async function promptWhatsAppDmAccess(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   forceAllowFrom: boolean;
   prompter: SetupPrompter;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const accountId = params.accountId.trim() || DEFAULT_ACCOUNT_ID;
   const account = resolveWhatsAppAccount({ cfg: params.cfg, accountId });
   const existingPolicy = account.dmPolicy ?? "pairing";
@@ -382,7 +382,7 @@ async function promptWhatsAppDmAccess(params: {
 }
 
 export async function finalizeWhatsAppSetup(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   forceAllowFrom: boolean;
   prompter: SetupPrompter;
@@ -472,7 +472,7 @@ export async function finalizeWhatsAppSetup(params: {
   } else if (!linked) {
     await params.prompter.note(
       t("wizard.whatsapp.linkLater", {
-        command: formatCliCommand("openclaw channels login"),
+        command: formatCliCommand("carapace channels login"),
       }),
       "WhatsApp",
     );

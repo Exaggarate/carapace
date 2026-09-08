@@ -19,13 +19,13 @@ const mocks = vi.hoisted(() => ({
   })),
   formatDoctorNonInteractiveHint: vi.fn(
     () =>
-      "Recommended follow-up: run openclaw doctor --non-interactive in a terminal or approvals-capable OpenClaw surface.",
+      "Recommended follow-up: run carapace doctor --non-interactive in a terminal or approvals-capable Carapace surface.",
   ),
   writeRestartSentinel: vi.fn(async (_payload: RestartSentinelPayload) => undefined),
   scheduleGatewaySigusr1Restart: vi.fn((_opts?: ScheduleGatewayRestartArgs) => ({
     scheduled: true,
   })),
-  triggerOpenClawRestart: vi.fn(() => ({ ok: true, method: "launchctl" })),
+  triggerCarapaceRestart: vi.fn(() => ({ ok: true, method: "launchctl" })),
 }));
 
 vi.mock("../../config/commands.flags.js", () => ({
@@ -69,7 +69,7 @@ vi.mock("../../infra/restart-sentinel.js", async () => {
 
 vi.mock("../../infra/restart.js", () => ({
   scheduleGatewaySigusr1Restart: mocks.scheduleGatewaySigusr1Restart,
-  triggerOpenClawRestart: mocks.triggerOpenClawRestart,
+  triggerCarapaceRestart: mocks.triggerCarapaceRestart,
 }));
 
 const { handleRestartCommand } = await import("./commands-session.js");
@@ -119,8 +119,8 @@ describe("handleRestartCommand", () => {
     mocks.formatDoctorNonInteractiveHint.mockClear();
     mocks.writeRestartSentinel.mockClear();
     mocks.scheduleGatewaySigusr1Restart.mockClear();
-    mocks.triggerOpenClawRestart.mockReset();
-    mocks.triggerOpenClawRestart.mockReturnValue({ ok: true, method: "launchctl" });
+    mocks.triggerCarapaceRestart.mockReset();
+    mocks.triggerCarapaceRestart.mockReturnValue({ ok: true, method: "launchctl" });
   });
 
   it("writes a routed restart sentinel before restarting from chat", async () => {
@@ -142,13 +142,13 @@ describe("handleRestartCommand", () => {
     expect(sentinelPayload?.message).toBe("/restart");
     expect(sentinelPayload?.continuation).toBeNull();
     expect(sentinelPayload?.doctorHint).toBe(
-      "Recommended follow-up: run openclaw doctor --non-interactive in a terminal or approvals-capable OpenClaw surface.",
+      "Recommended follow-up: run carapace doctor --non-interactive in a terminal or approvals-capable Carapace surface.",
     );
     expect(sentinelPayload?.stats).toEqual({
       mode: "gateway.restart",
       reason: "/restart",
     });
-    expect(mocks.triggerOpenClawRestart).toHaveBeenCalledTimes(1);
+    expect(mocks.triggerCarapaceRestart).toHaveBeenCalledTimes(1);
   });
 
   it("prepares the routed sentinel only when SIGUSR1 restart emits", async () => {
@@ -159,7 +159,7 @@ describe("handleRestartCommand", () => {
 
       expect(result?.reply?.text).toContain("SIGUSR1");
       expect(mocks.writeRestartSentinel).not.toHaveBeenCalled();
-      expect(mocks.triggerOpenClawRestart).not.toHaveBeenCalled();
+      expect(mocks.triggerCarapaceRestart).not.toHaveBeenCalled();
 
       const scheduledArgs = mocks.scheduleGatewaySigusr1Restart.mock.calls.at(-1)?.[0];
       await scheduledArgs?.emitHooks?.beforeEmit?.();
@@ -219,7 +219,7 @@ describe("handleRestartCommand", () => {
 
   it("adopts the durable ingress claim before the fallback restart path", async () => {
     const order: string[] = [];
-    mocks.triggerOpenClawRestart.mockImplementationOnce(() => {
+    mocks.triggerCarapaceRestart.mockImplementationOnce(() => {
       order.push("trigger");
       return { ok: true, method: "launchctl" };
     });
@@ -256,7 +256,7 @@ describe("handleRestartCommand", () => {
       ),
     ).rejects.toThrow("ingress adoption lost");
 
-    expect(mocks.triggerOpenClawRestart).not.toHaveBeenCalled();
+    expect(mocks.triggerCarapaceRestart).not.toHaveBeenCalled();
     expect(mocks.scheduleGatewaySigusr1Restart).not.toHaveBeenCalled();
   });
 
@@ -278,11 +278,11 @@ describe("handleRestartCommand", () => {
       expect(result).toEqual({
         shouldContinue: false,
         reply: {
-          text: "You are not authorized to use this owner-only command. Ask the operator to run `openclaw config set commands.ownerAllowFrom '[\"telegram:user-1\"]'` in a terminal to make this sender a command owner.",
+          text: "You are not authorized to use this owner-only command. Ask the operator to run `carapace config set commands.ownerAllowFrom '[\"telegram:user-1\"]'` in a terminal to make this sender a command owner.",
         },
       });
       expect(mocks.writeRestartSentinel).not.toHaveBeenCalled();
-      expect(mocks.triggerOpenClawRestart).not.toHaveBeenCalled();
+      expect(mocks.triggerCarapaceRestart).not.toHaveBeenCalled();
     },
   );
 
@@ -292,11 +292,11 @@ describe("handleRestartCommand", () => {
     const result = await handleRestartCommand(restartCommandParams(), true);
 
     expect(result?.reply?.text).toContain("could not persist");
-    expect(mocks.triggerOpenClawRestart).not.toHaveBeenCalled();
+    expect(mocks.triggerCarapaceRestart).not.toHaveBeenCalled();
   });
 
   it("clears the success sentinel when fallback restart fails", async () => {
-    mocks.triggerOpenClawRestart.mockReturnValueOnce({
+    mocks.triggerCarapaceRestart.mockReturnValueOnce({
       ok: false,
       method: "launchctl",
     });

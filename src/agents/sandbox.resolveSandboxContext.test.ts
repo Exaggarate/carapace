@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { createWarnLogCapture } from "../logging/test-helpers/warn-log-capture.js";
 import type { SkillUsagePath } from "../skills/types.js";
@@ -77,7 +77,7 @@ async function createSandboxFixtureDir(prefix: string): Promise<string> {
 }
 
 beforeAll(async () => {
-  sandboxFixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sandbox-context-"));
+  sandboxFixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sandbox-context-"));
 });
 
 afterAll(async () => {
@@ -92,7 +92,7 @@ describe("resolveSandboxContext", () => {
     it.each(["per-sender", "global"] as const)(
       "bypasses the selected main session in %s scope",
       async (scope) => {
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           session: { scope },
           agents: {
             ownership: "explicit",
@@ -107,7 +107,7 @@ describe("resolveSandboxContext", () => {
           config: cfg,
           agentId: "main",
           sessionKey: scope === "global" ? "global" : "agent:main:main",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/carapace-test",
         });
 
         expect(result).toBeNull();
@@ -136,7 +136,7 @@ describe("resolveSandboxContext", () => {
     }));
     const restore = registerSandboxBackend("test-off-backend", backendFactory);
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -152,14 +152,14 @@ describe("resolveSandboxContext", () => {
         resolveSandboxContext({
           config: cfg,
           sessionKey: "agent:main:cron:job:run:uuid",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/carapace-test",
         }),
       ).resolves.toBeNull();
       await expect(
         resolveSandboxContext({
           config: cfg,
           sessionKey: "agent:main:subagent:child",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/carapace-test",
         }),
       ).resolves.toBeNull();
 
@@ -197,7 +197,7 @@ describe("resolveSandboxContext", () => {
       }),
     }));
     const restore = registerSandboxBackend("required-backend", backendFactory);
-    const warnLogs = createWarnLogCapture("openclaw-required-sandbox-workspace");
+    const warnLogs = createWarnLogCapture("carapace-required-sandbox-workspace");
 
     try {
       const sandbox = await resolveSandboxContext({
@@ -236,7 +236,7 @@ describe("resolveSandboxContext", () => {
   }, 15_000);
 
   it("treats main session aliases as main in non-main mode", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { mainKey: "work" },
       agents: {
         defaults: {
@@ -250,7 +250,7 @@ describe("resolveSandboxContext", () => {
       await resolveSandboxContext({
         config: cfg,
         sessionKey: "main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       }),
     ).toBeNull();
 
@@ -258,7 +258,7 @@ describe("resolveSandboxContext", () => {
       await resolveSandboxContext({
         config: cfg,
         sessionKey: "agent:main:main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       }),
     ).toBeNull();
 
@@ -266,7 +266,7 @@ describe("resolveSandboxContext", () => {
       await ensureSandboxWorkspaceForSession({
         config: cfg,
         sessionKey: "work",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       }),
     ).toBeNull();
 
@@ -274,7 +274,7 @@ describe("resolveSandboxContext", () => {
       await ensureSandboxWorkspaceForSession({
         config: cfg,
         sessionKey: "agent:main:main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       }),
     ).toBeNull();
   }, 15_000);
@@ -304,7 +304,7 @@ describe("resolveSandboxContext", () => {
       resolveWorkdir: () => "/runtime/workspace",
     });
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -328,7 +328,7 @@ describe("resolveSandboxContext", () => {
         execOverrides: { host: "node", node: "build-node", security: "allowlist" },
         sessionKey: "agent:worker:task",
         skillsSnapshot,
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       });
 
       expect(result?.backendId).toBe("test-backend");
@@ -352,7 +352,7 @@ describe("resolveSandboxContext", () => {
       const workspace = await ensureSandboxWorkspaceForSession({
         config: cfg,
         sessionKey: "agent:worker:task",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       });
       expect(workspace?.containerWorkdir).toBe("/runtime/workspace");
     } finally {
@@ -385,7 +385,7 @@ describe("resolveSandboxContext", () => {
       };
     });
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -432,7 +432,7 @@ describe("resolveSandboxContext", () => {
       throw backendFailure;
     });
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -533,7 +533,7 @@ describe("resolveSandboxContext", () => {
       }),
     }));
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -585,7 +585,7 @@ describe("resolveSandboxContext", () => {
       }),
     }));
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -639,7 +639,7 @@ describe("resolveSandboxContext", () => {
       },
     }));
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -690,7 +690,7 @@ describe("resolveSandboxContext", () => {
     }));
     const restore = registerSandboxBackend("docker", backendFactory);
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -707,7 +707,7 @@ describe("resolveSandboxContext", () => {
       const result = await resolveSandboxContext({
         config: cfg,
         sessionKey: "agent:worker:docker",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       });
 
       expect(result?.backendId).toBe("docker");
@@ -746,7 +746,7 @@ describe("resolveSandboxContext", () => {
     }));
     const restore = registerSandboxBackend("podman", backendFactory);
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: {
@@ -763,11 +763,11 @@ describe("resolveSandboxContext", () => {
       const result = await resolveSandboxContext({
         config: cfg,
         sessionKey: "agent:worker:podman",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       });
 
       expect(result?.backendId).toBe("podman");
-      const workspaceStat = await fs.stat("/tmp/openclaw-test");
+      const workspaceStat = await fs.stat("/tmp/carapace-test");
       const expectedUser =
         workspaceStat.uid === 0 || workspaceStat.gid === 0
           ? undefined
@@ -807,7 +807,7 @@ describe("resolveSandboxContext", () => {
       }),
     }));
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         browser: {
           ssrfPolicy: { dangerouslyAllowPrivateNetwork: true },
         },
@@ -828,7 +828,7 @@ describe("resolveSandboxContext", () => {
       await resolveSandboxContext({
         config: cfg,
         sessionKey: "agent:worker:browser",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
       });
 
       const browserCalls = ensureSandboxBrowserMock.mock.calls as unknown as Array<
@@ -855,7 +855,7 @@ describe("resolveSandboxContext", () => {
     ];
     syncSkillsToWorkspaceMock.mockResolvedValueOnce(skillUsagePaths);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -883,7 +883,7 @@ describe("resolveSandboxContext", () => {
         {
           sourceWorkspaceDir?: string;
           targetWorkspaceDir?: string;
-          config?: OpenClawConfig;
+          config?: CarapaceConfig;
           agentId?: string;
           eligibility?: unknown;
         },
@@ -906,7 +906,7 @@ describe("resolveSandboxContext", () => {
     const workspaceDir = await createSandboxFixtureDir("workspace");
     const userOwnedSandboxSkillsDir = path.join(
       workspaceDir,
-      ".openclaw",
+      ".carapace",
       "sandbox-skills",
       "skills",
       "user-owned",
@@ -914,14 +914,14 @@ describe("resolveSandboxContext", () => {
     await fs.mkdir(userOwnedSandboxSkillsDir, { recursive: true });
     await fs.writeFile(path.join(userOwnedSandboxSkillsDir, "SKILL.md"), "# User owned\n");
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           sandbox: {
             mode: "all",
             scope: "session",
             workspaceAccess: "rw",
-            workspaceRoot: path.join(workspaceDir, ".openclaw", "sandboxes"),
+            workspaceRoot: path.join(workspaceDir, ".carapace", "sandboxes"),
           },
         },
       },
@@ -939,7 +939,7 @@ describe("resolveSandboxContext", () => {
         {
           sourceWorkspaceDir?: string;
           targetWorkspaceDir?: string;
-          config?: OpenClawConfig;
+          config?: CarapaceConfig;
           agentId?: string;
           eligibility?: unknown;
         },
@@ -948,15 +948,15 @@ describe("resolveSandboxContext", () => {
     const [syncOptions] = syncCalls[0] ?? [];
     expect(syncOptions?.sourceWorkspaceDir).toBe(workspaceDir);
     expect(syncOptions?.targetWorkspaceDir).toContain(
-      path.join(".openclaw", "sandbox", "skills-workspaces"),
+      path.join(".carapace", "sandbox", "skills-workspaces"),
     );
     expect(syncOptions?.targetWorkspaceDir).toMatch(
-      /[\\/]workspace-[a-f0-9]{32}[\\/]\.openclaw[\\/]sandbox-skills$/,
+      /[\\/]workspace-[a-f0-9]{32}[\\/]\.carapace[\\/]sandbox-skills$/,
     );
     expect(syncOptions?.targetWorkspaceDir).not.toBe(
-      path.join(workspaceDir, ".openclaw", "sandbox-skills"),
+      path.join(workspaceDir, ".carapace", "sandbox-skills"),
     );
-    expect(syncOptions?.targetWorkspaceDir?.startsWith(path.join(workspaceDir, ".openclaw"))).toBe(
+    expect(syncOptions?.targetWorkspaceDir?.startsWith(path.join(workspaceDir, ".carapace"))).toBe(
       false,
     );
     expect(syncOptions?.config).toBe(cfg);
@@ -979,7 +979,7 @@ describe("resolveSandboxContext", () => {
   it("uses the SSH backend remote workspace for sandbox workspace info", async () => {
     syncSkillsToWorkspaceMock.mockClear();
     const workspaceDir = await createSandboxFixtureDir("ssh-workspace");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -989,7 +989,7 @@ describe("resolveSandboxContext", () => {
             workspaceAccess: "rw",
             ssh: {
               target: "ssh.example.test",
-              workspaceRoot: "/remote/openclaw",
+              workspaceRoot: "/remote/carapace",
             },
           },
         },
@@ -1004,11 +1004,11 @@ describe("resolveSandboxContext", () => {
 
     expect(result?.workspaceDir).toBe(workspaceDir);
     expect(result?.containerWorkdir).toMatch(
-      /^\/remote\/openclaw\/openclaw-ssh-workspace-[a-f0-9]{32}\/workspace$/,
+      /^\/remote\/carapace\/carapace-ssh-workspace-[a-f0-9]{32}\/workspace$/,
     );
     expect(result?.containerWorkdir).not.toBe("/workspace");
     expect(result?.skillsWorkspaceDir).toContain(
-      path.join(".openclaw", "sandbox", "skills-workspaces"),
+      path.join(".carapace", "sandbox", "skills-workspaces"),
     );
   }, 15_000);
 
@@ -1017,7 +1017,7 @@ describe("resolveSandboxContext", () => {
     const workspaceDir = await createSandboxFixtureDir("shared-workspace");
     const userOwnedSandboxSkillsDir = path.join(
       workspaceDir,
-      ".openclaw",
+      ".carapace",
       "sandbox-skills",
       "skills",
       "user-owned",
@@ -1025,7 +1025,7 @@ describe("resolveSandboxContext", () => {
     await fs.mkdir(userOwnedSandboxSkillsDir, { recursive: true });
     await fs.writeFile(path.join(userOwnedSandboxSkillsDir, "SKILL.md"), "# User owned\n");
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -1056,13 +1056,13 @@ describe("resolveSandboxContext", () => {
     const [syncOptions] = syncCalls[0] ?? [];
     expect(syncOptions?.sourceWorkspaceDir).toBe(workspaceDir);
     expect(syncOptions?.targetWorkspaceDir).toContain(
-      path.join(".openclaw", "sandbox", "skills-workspaces"),
+      path.join(".carapace", "sandbox", "skills-workspaces"),
     );
     expect(syncOptions?.targetWorkspaceDir).toMatch(
-      /[\\/]shared-[a-f0-9]{8}[\\/]\.openclaw[\\/]sandbox-skills$/,
+      /[\\/]shared-[a-f0-9]{8}[\\/]\.carapace[\\/]sandbox-skills$/,
     );
     expect(syncOptions?.targetWorkspaceDir).not.toBe(
-      path.join(workspaceDir, ".openclaw", "sandbox-skills"),
+      path.join(workspaceDir, ".carapace", "sandbox-skills"),
     );
     await expect(
       fs.readFile(path.join(userOwnedSandboxSkillsDir, "SKILL.md"), "utf8"),

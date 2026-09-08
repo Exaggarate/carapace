@@ -1,12 +1,12 @@
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolveActiveEmbeddedRunSessionId } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolveActiveEmbeddedRunSessionId } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   appendSessionTranscriptMessageByIdentity,
   readSessionTranscriptEvents,
   withSessionTranscriptWriteLock,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
 import { expect, it, vi } from "vitest";
 import type { CodexSteeringQueueOptions } from "./attempt-steering.js";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
@@ -336,7 +336,7 @@ it("keeps one steering prefix and source through degraded tainted native complet
     ).toEqual([prefixText, steerText, codaText]);
     expect(messages.find((message) => messageText(message) === codaText)).toMatchObject({
       stopReason: "stop",
-      __openclaw: { turnTainted: true, settlementWarning: expect.any(Object) },
+      __carapace: { turnTainted: true, settlementWarning: expect.any(Object) },
     });
     expect(resolveActiveEmbeddedRunSessionId(fixture.target.sessionKey)).toBeUndefined();
   } finally {

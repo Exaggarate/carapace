@@ -1,4 +1,4 @@
-import { sleepWithAbort } from "openclaw/plugin-sdk/realtime-voice-provider";
+import { sleepWithAbort } from "carapace/plugin-sdk/realtime-voice-provider";
 import type { ClientOptions, RawData } from "ws";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {

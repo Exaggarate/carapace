@@ -1,6 +1,6 @@
 /** Tests Codex CLI bundle-MCP config override generation. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { retireSessionMcpRuntime } from "../agent-bundle-mcp-manager-api.js";
 import { AuthStorage } from "../sessions/auth-storage.js";
@@ -26,7 +26,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
       const serverPath = await writeCliMcpPolicyProbeServer();
       const workspaceDir = cliBundleMcpHarness.bundleProbeWorkspaceDir;
       const sessionId = "codex-independent-policy-owner";
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: { enabled: false },
         agents: {
           entries: { main: {}, worker: { tools: { deny: ["docs__delete_docs"] } } },
@@ -39,7 +39,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
       };
       const authStorage = AuthStorage.inMemory();
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: cliBundleMcpHarness.bundleProbeHomeDir },
+        { CARAPACE_STATE_DIR: cliBundleMcpHarness.bundleProbeHomeDir },
         async () => {
           try {
             const patch = await buildCodexUserMcpServersThreadConfigPatchForRun({
@@ -93,7 +93,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
       enabled: false,
       mode: "codex-config-overrides",
       backend: { command: "codex", args: ["exec"] },
-      workspaceDir: "/tmp/openclaw-cli-codex-web-search-disabled",
+      workspaceDir: "/tmp/carapace-cli-codex-web-search-disabled",
       toolOverrides: { webSearch: false },
     });
 
@@ -106,7 +106,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
       enabled: true,
       mode: "codex-config-overrides",
       backend: { command: "codex", args: ["exec"] },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-codex-deny",
+      workspaceDir: "/tmp/carapace-bundle-mcp-codex-deny",
       config: {
         plugins: { enabled: false },
         mcp: {
@@ -126,7 +126,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
 
   it("projects configured wildcard filters as exact Codex CLI overrides", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { allow: ["docs__*"] },
       mcp: {
@@ -155,7 +155,7 @@ describe("prepareCliBundleMcpConfig codex", () => {
 
   it("hides non-model MCP tools from Codex without an explicit policy", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
     };
@@ -181,17 +181,17 @@ describe("prepareCliBundleMcpConfig codex", () => {
         args: ["exec", "--json"],
         resumeArgs: ["exec", "resume", "{sessionId}"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-codex",
+      workspaceDir: "/tmp/carapace-bundle-mcp-codex",
       config: { plugins: { enabled: false } },
       additionalConfig: {
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
             headers: {
-              Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-              "x-session-key": "${OPENCLAW_MCP_SESSION_KEY}",
-              "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+              Authorization: "Bearer ${CARAPACE_MCP_TOKEN}",
+              "x-session-key": "${CARAPACE_MCP_SESSION_KEY}",
+              "x-carapace-cli-capture-key": "${CARAPACE_MCP_CLI_CAPTURE_KEY}",
             },
           },
         },
@@ -204,14 +204,14 @@ describe("prepareCliBundleMcpConfig codex", () => {
       "exec",
       "--json",
       "-c",
-      'mcp_servers={ openclaw = { url = "http://127.0.0.1:23119/mcp", default_tools_approval_mode = "approve", bearer_token_env_var = "OPENCLAW_MCP_TOKEN", env_http_headers = { x-session-key = "OPENCLAW_MCP_SESSION_KEY", x-openclaw-cli-capture-key = "OPENCLAW_MCP_CLI_CAPTURE_KEY" } } }',
+      'mcp_servers={ carapace = { url = "http://127.0.0.1:23119/mcp", default_tools_approval_mode = "approve", bearer_token_env_var = "CARAPACE_MCP_TOKEN", env_http_headers = { x-session-key = "CARAPACE_MCP_SESSION_KEY", x-carapace-cli-capture-key = "CARAPACE_MCP_CLI_CAPTURE_KEY" } } }',
     ]);
     expect(prepared.backend.resumeArgs).toEqual([
       "exec",
       "resume",
       "{sessionId}",
       "-c",
-      'mcp_servers={ openclaw = { url = "http://127.0.0.1:23119/mcp", default_tools_approval_mode = "approve", bearer_token_env_var = "OPENCLAW_MCP_TOKEN", env_http_headers = { x-session-key = "OPENCLAW_MCP_SESSION_KEY", x-openclaw-cli-capture-key = "OPENCLAW_MCP_CLI_CAPTURE_KEY" } } }',
+      'mcp_servers={ carapace = { url = "http://127.0.0.1:23119/mcp", default_tools_approval_mode = "approve", bearer_token_env_var = "CARAPACE_MCP_TOKEN", env_http_headers = { x-session-key = "CARAPACE_MCP_SESSION_KEY", x-carapace-cli-capture-key = "CARAPACE_MCP_CLI_CAPTURE_KEY" } } }',
     ]);
     expect(prepared.cleanup).toBeUndefined();
   });

@@ -10,7 +10,7 @@ import {
   type GatewayHello,
 } from "../cli/state-dir-gateway-check.js";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildGatewayConnectionDetails,
   buildGatewayProbeConnectionDetails,
@@ -70,11 +70,11 @@ function noteCliGatewayVersionSkew(status: StatusSummary | undefined): void {
   }
   note(
     [
-      `This command is OpenClaw ${VERSION}; the running Gateway is OpenClaw ${gatewayVersion}.`,
-      "Check `openclaw --version`, `which openclaw`, and `openclaw gateway status --deep`.",
-      "If this mismatch is unexpected, update PATH so `openclaw` points to the version you want, or reinstall the Gateway service from that same OpenClaw install.",
+      `This command is Carapace ${VERSION}; the running Gateway is Carapace ${gatewayVersion}.`,
+      "Check `carapace --version`, `which carapace`, and `carapace gateway status --deep`.",
+      "If this mismatch is unexpected, update PATH so `carapace` points to the version you want, or reinstall the Gateway service from that same Carapace install.",
     ].join("\n"),
-    "OpenClaw version mismatch",
+    "Carapace version mismatch",
   );
 }
 
@@ -95,13 +95,13 @@ function noteGatewayStateDirectory(
   });
   if (comparison.kind === "warn") {
     note(
-      `${comparison.message}\nRun plugin inspection and doctor --fix with the Gateway's OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH. To change the managed service, run \`openclaw gateway install --force\` from the intended profile and review operator-owned service overrides.`,
+      `${comparison.message}\nRun plugin inspection and doctor --fix with the Gateway's CARAPACE_STATE_DIR and CARAPACE_CONFIG_PATH. To change the managed service, run \`carapace gateway install --force\` from the intended profile and review operator-owned service overrides.`,
       "Gateway state directory mismatch",
     );
   }
 }
 
-async function noteInstalledGatewayStateDirectory(cfg: OpenClawConfig, timeoutMs: number) {
+async function noteInstalledGatewayStateDirectory(cfg: CarapaceConfig, timeoutMs: number) {
   // A remote Gateway can use a loopback tunnel or have no configured URL.
   // Neither case makes the local installed service authoritative.
   if (cfg.gateway?.mode === "remote") {
@@ -130,7 +130,7 @@ async function noteInstalledGatewayStateDirectory(cfg: OpenClawConfig, timeoutMs
  */
 export async function checkGatewayHealth(params: {
   runtime: RuntimeEnv;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs?: number;
 }): Promise<{ healthOk: boolean; authenticated: boolean; status?: StatusSummary }> {
   const timeoutMs =
@@ -207,7 +207,7 @@ export async function checkGatewayHealth(params: {
       note(
         [
           `Channel status probe failed: ${sanitizeTerminalText(formatErrorMessage(channelsResult.reason))}`,
-          `Retry: ${formatCliCommand("openclaw channels status --probe")}`,
+          `Retry: ${formatCliCommand("carapace channels status --probe")}`,
         ].join("\n"),
         "Channel warnings",
       );
@@ -221,7 +221,7 @@ export async function checkGatewayHealth(params: {
       note(
         [
           `Exporter diagnostics failed: ${sanitizeTerminalText(formatErrorMessage(exporterResult.reason))}`,
-          `Retry: ${formatCliCommand("openclaw gateway stability --type telemetry.exporter")}`,
+          `Retry: ${formatCliCommand("carapace gateway stability --type telemetry.exporter")}`,
         ].join("\n"),
         "Telemetry exporters",
       );
@@ -273,7 +273,7 @@ export async function checkGatewayHealth(params: {
 
 /** Probes gateway memory readiness without forcing deep embedding checks. */
 export async function probeGatewayMemoryStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs?: number;
 }): Promise<GatewayMemoryProbe> {
   const timeoutMs =

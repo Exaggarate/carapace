@@ -1,14 +1,14 @@
 import { getPublicKey, nip19 } from "nostr-tools";
-import { createAccountListHelpers, mergeAccountConfig } from "openclaw/plugin-sdk/account-helpers";
+import { createAccountListHelpers, mergeAccountConfig } from "carapace/plugin-sdk/account-helpers";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/account-id";
-import { assertSecretOwnerAvailable } from "openclaw/plugin-sdk/channel-secret-owner-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/account-id";
+import { assertSecretOwnerAvailable } from "carapace/plugin-sdk/channel-secret-owner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveSecretInputString } from "carapace/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { BuzzAccountIdSchema, type BuzzConfig, type BuzzConfigInput } from "./config-schema.js";
 import { parseBuzzTarget } from "./target.js";
 
@@ -25,7 +25,7 @@ export interface ResolvedBuzzAccount {
   config: BuzzConfig;
 }
 
-function resolveChannelConfig(cfg: OpenClawConfig): BuzzConfigInput | undefined {
+function resolveChannelConfig(cfg: CarapaceConfig): BuzzConfigInput | undefined {
   return (cfg.channels as Record<string, unknown> | undefined)?.buzz as BuzzConfigInput | undefined;
 }
 
@@ -42,7 +42,7 @@ export const {
 });
 
 export function resolveBuzzAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): { accountId: string; config: BuzzConfig; configPath: string; allowEnv: boolean } {
   const requestedId = params.accountId?.trim();
@@ -104,7 +104,7 @@ export function resolveBuzzPublicKey(privateKey: string): string {
 }
 
 export function resolveBuzzAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ResolvedBuzzAccount {
   const { accountId, config, configPath, allowEnv } = resolveBuzzAccountConfig(params);
@@ -138,7 +138,7 @@ export function resolveBuzzAccount(params: {
   }
   return {
     accountId,
-    name: normalizeOptionalString(config.name) ?? "OpenClaw",
+    name: normalizeOptionalString(config.name) ?? "Carapace",
     enabled: config.enabled !== false,
     configured: Boolean(relayUrl && (privateKey || privateKeyResolution.ref)),
     relayUrl,

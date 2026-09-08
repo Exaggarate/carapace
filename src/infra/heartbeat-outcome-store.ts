@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { Insertable, Selectable } from "kysely";
 import type { EmbeddedRunTrigger } from "../agents/embedded-agent-runner/run/params.js";
 import type { HeartbeatToolResponse } from "../auto-reply/heartbeat-tool-response.js";
@@ -6,8 +6,8 @@ import {
   resolveSqliteScope,
   toDatabaseOptions,
 } from "../config/sessions/session-accessor.sqlite-scope.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
+import { runCarapaceAgentWriteTransaction } from "../state/carapace-agent-db.js";
 import type { HeartbeatWakeSource } from "./heartbeat-wake.js";
 import {
   executeSqliteQuerySync,
@@ -22,9 +22,9 @@ const HEARTBEAT_OUTCOME_WAKE_REASON_MAX_CHARS = 1_000;
 const HEARTBEAT_OUTCOME_TASK_NAME_MAX_CHARS = 200;
 const HEARTBEAT_OUTCOME_MAX_TASKS = 32;
 
-type HeartbeatOutcomeTable = OpenClawAgentKyselyDatabase["heartbeat_outcomes"];
+type HeartbeatOutcomeTable = CarapaceAgentKyselyDatabase["heartbeat_outcomes"];
 type HeartbeatOutcomeDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "heartbeat_outcomes" | "session_nodes"
 >;
 type HeartbeatOutcomeRow = Selectable<HeartbeatOutcomeTable>;
@@ -133,7 +133,7 @@ export function persistHeartbeatOutcome(params: {
     context_claimed_at: null,
     updated_at: Date.now(),
   };
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     ({ db }) => {
       const agentDb = getNodeSqliteKysely<HeartbeatOutcomeDatabase>(db);
       const owner = executeSqliteQueryTakeFirstSync(
@@ -185,7 +185,7 @@ export function claimHeartbeatOutcomeForRun(params: {
   runId: string;
   env?: NodeJS.ProcessEnv;
 }): PersistedHeartbeatOutcome | undefined {
-  return runOpenClawAgentWriteTransaction(
+  return runCarapaceAgentWriteTransaction(
     ({ db }) => {
       const agentDb = getNodeSqliteKysely<HeartbeatOutcomeDatabase>(db);
       const row = executeSqliteQuerySync(

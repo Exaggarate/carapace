@@ -3,7 +3,7 @@ import type {
   MigrationPlan,
   MigrationProviderContext,
   MigrationProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 
 function isMemoryOnlyMigration(ctx: MigrationProviderContext): boolean {
   return Boolean(

@@ -1,11 +1,11 @@
 // Diffs plugin module implements plugin behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { resolveLivePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
+import { resolveLivePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
 import {
-  resolvePreferredOpenClawTmpDir,
-  type OpenClawConfig,
-  type OpenClawPluginApi,
+  resolvePreferredCarapaceTmpDir,
+  type CarapaceConfig,
+  type CarapacePluginApi,
 } from "../api.js";
 import {
   resolveDiffsPluginDefaults,
@@ -24,14 +24,14 @@ const DIFF_ARTIFACT_MAX_ENTRIES = 2_048;
 const DIFF_ARTIFACT_MAX_BYTES_PER_ENTRY = 32 * 1024 * 1024;
 const DIFF_ARTIFACT_MAX_BYTES_PER_NAMESPACE = 256 * 1024 * 1024;
 
-export function registerDiffsPlugin(api: OpenClawPluginApi): void {
+export function registerDiffsPlugin(api: CarapacePluginApi): void {
   // CLI metadata has no runtime state, and this plugin exposes no CLI commands.
   if (api.registrationMode === "cli-metadata") {
     return;
   }
 
   const store = new DiffArtifactStore({
-    rootDir: path.join(resolvePreferredOpenClawTmpDir(), "openclaw-diffs"),
+    rootDir: path.join(resolvePreferredCarapaceTmpDir(), "carapace-diffs"),
     blobStore: api.runtime.state.openBlobStore<DiffArtifactBlobMetadata>({
       namespace: DIFF_ARTIFACT_NAMESPACE,
       maxEntries: DIFF_ARTIFACT_MAX_ENTRIES,
@@ -44,13 +44,13 @@ export function registerDiffsPlugin(api: OpenClawPluginApi): void {
   const resolveCurrentPluginConfig = () =>
     resolveLivePluginConfigObject(
       api.runtime.config?.current
-        ? () => api.runtime.config.current() as OpenClawConfig
+        ? () => api.runtime.config.current() as CarapaceConfig
         : undefined,
       "diffs",
       api.pluginConfig as Record<string, unknown>,
     ) ?? {};
   const resolveCurrentAccessConfig = () => {
-    const currentConfig = (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+    const currentConfig = (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
     const pluginConfig = resolveCurrentPluginConfig();
     return {
       allowRemoteViewer: resolveDiffsPluginSecurity(pluginConfig).allowRemoteViewer,
@@ -68,7 +68,7 @@ export function registerDiffsPlugin(api: OpenClawPluginApi): void {
           (ctx.getRuntimeConfig?.() ??
             ctx.runtimeConfig ??
             ctx.config ??
-            api.runtime.config.current()) as OpenClawConfig, // SAFETY: The tool only reads this immutable runtime snapshot.
+            api.runtime.config.current()) as CarapaceConfig, // SAFETY: The tool only reads this immutable runtime snapshot.
         store,
         defaults: resolveDiffsPluginDefaults(pluginConfig),
         viewerBaseUrl: resolveDiffsPluginViewerBaseUrl(pluginConfig),
@@ -98,8 +98,8 @@ export function registerDiffsPlugin(api: OpenClawPluginApi): void {
   }));
 }
 
-function resolveDiffsLanguagePackAvailability(api: OpenClawPluginApi): boolean {
-  const currentConfig = (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+function resolveDiffsLanguagePackAvailability(api: CarapacePluginApi): boolean {
+  const currentConfig = (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
   const plugins = currentConfig.plugins;
   if (plugins?.enabled === false) {
     return false;
@@ -126,7 +126,7 @@ function hasSiblingLanguagePackRuntime(rootDir: string | undefined): boolean {
     path.join(languagePackRoot, "dist", "assets", "viewer-runtime.js"),
   ];
   return (
-    fs.existsSync(path.join(languagePackRoot, "openclaw.plugin.json")) &&
+    fs.existsSync(path.join(languagePackRoot, "carapace.plugin.json")) &&
     runtimePaths.some((runtimePath) => fs.existsSync(runtimePath))
   );
 }

@@ -46,7 +46,7 @@ function parkExpiringRun(method: "callValue" | "agentWait") {
   const pending: PendingBridgeState = {
     id: `bridge:${method}:1`,
     method,
-    args: method === "agentWait" ? ["collector-1"] : ["openclaw:core:slow", {}],
+    args: method === "agentWait" ? ["collector-1"] : ["carapace:core:slow", {}],
     promise: new Promise(() => {}),
     reply: owner.inbox.createReply(`bridge:${method}:1`),
     cancel,
@@ -91,26 +91,26 @@ describe("Code Mode worker lifecycle", () => {
     const vm = await QuickJS.create({ wasm, memoryLimit: config.memoryLimitBytes });
     let snapshot: Snapshot;
     try {
-      vm.newFunction("__openclawHostRequest", (_method, _args, id) =>
+      vm.newFunction("__carapaceHostRequest", (_method, _args, id) =>
         vm.newString(id.toString()),
-      ).consume((handle) => vm.global.setProp("__openclawHostRequest", handle));
-      vm.newFunction("__openclawHostCancelRequest", () => vm.undefined).consume((handle) =>
-        vm.global.setProp("__openclawHostCancelRequest", handle),
+      ).consume((handle) => vm.global.setProp("__carapaceHostRequest", handle));
+      vm.newFunction("__carapaceHostCancelRequest", () => vm.undefined).consume((handle) =>
+        vm.global.setProp("__carapaceHostCancelRequest", handle),
       );
       for (const [name, value] of Object.entries({
-        __openclawCatalog: [],
-        __openclawNamespaces: [],
-        __openclawApiFiles: [],
-        __openclawSwarmEnabled: false,
-        __openclawMaxPendingToolCalls: config.maxPendingToolCalls,
+        __carapaceCatalog: [],
+        __carapaceNamespaces: [],
+        __carapaceApiFiles: [],
+        __carapaceSwarmEnabled: false,
+        __carapaceMaxPendingToolCalls: config.maxPendingToolCalls,
       })) {
         vm.hostToHandle(value).consume((handle) => vm.global.setProp(name, handle));
       }
-      vm.evalCode(CODE_MODE_CONTROLLER_SOURCE, "openclaw-code-mode:controller.js").dispose();
+      vm.evalCode(CODE_MODE_CONTROLLER_SOURCE, "carapace-code-mode:controller.js").dispose();
       // The previous worker wrapped the same program without recording its source coordinates.
       vm.evalCode(
-        'globalThis.__openclawResult = (async () => {\nawait yield_control();\nthrow new Error("legacy failure");\n})()',
-        "openclaw-code-mode:user.js",
+        'globalThis.__carapaceResult = (async () => {\nawait yield_control();\nthrow new Error("legacy failure");\n})()',
+        "carapace-code-mode:user.js",
         EvalFlags.ASYNC,
       ).dispose();
       vm.executePendingJobs();
@@ -134,7 +134,7 @@ describe("Code Mode worker lifecycle", () => {
     if (result.status !== "failed") {
       throw new Error("Expected legacy guest failure");
     }
-    expect(result.error).toMatch(/openclaw-code-mode:user\.js:3:\d+/);
+    expect(result.error).toMatch(/carapace-code-mode:user\.js:3:\d+/);
   });
 
   it.each(["const helper = 1;", "const helper = 'é🦞';"])(
@@ -159,7 +159,7 @@ describe("Code Mode worker lifecycle", () => {
       if (result.status !== "failed") {
         throw new Error("Expected guest syntax failure");
       }
-      expect(result.error).toContain("openclaw-code-mode:user.js:1:15");
+      expect(result.error).toContain("carapace-code-mode:user.js:1:15");
     },
   );
 

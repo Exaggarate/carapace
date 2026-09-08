@@ -1,12 +1,12 @@
-# OpenClaw Kilo Gateway Provider
+# Carapace Kilo Gateway Provider
 
-Official OpenClaw provider plugin for Kilo Gateway.
+Official Carapace provider plugin for Kilo Gateway.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/kilocode-provider
-openclaw gateway restart
+carapace plugins install @carapace/kilocode-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/kilocode> for setup and configuration.
+See <../../docs/providers/kilocode.md> for setup and configuration.

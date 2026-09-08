@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { reloadTaskRegistryFromStore } from "../tasks/task-registry.js";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { CronService } from "./service.js";
 import { createNoopLogger, installCronTestHooks } from "./service.test-harness.js";
 import type { CronServiceDeps } from "./service/state.js";
@@ -35,8 +35,8 @@ function createService(params: {
 
 describe("cron state contracts", () => {
   it("persists create, edit, restart, scheduled execution, and removal across schedule types", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-state-lifecycle-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-state-lifecycle-" },
       async (state) => {
         resetTaskRegistryForTests({ persist: false });
         const storePath = state.path("cron", "jobs.json");
@@ -171,8 +171,8 @@ describe("cron state contracts", () => {
   });
 
   it("deduplicates isolated scheduler execution and persisted run history across reload", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-state-dedup-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-state-dedup-" },
       async (state) => {
         resetTaskRegistryForTests({ persist: false });
         const storePath = state.path("cron", "jobs.json");

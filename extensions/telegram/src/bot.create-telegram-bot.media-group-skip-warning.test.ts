@@ -1,5 +1,5 @@
 // Telegram tests cover bot.create telegram bot.media group skip warning plugin behavior.
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { telegramBotInfoForTest } from "./bot.create-telegram-bot.test-support.js";
 
@@ -8,7 +8,7 @@ const saveMediaBuffer = vi.fn();
 const readRemoteMediaBuffer = vi.fn();
 const rootRead = vi.fn();
 
-vi.mock("openclaw/plugin-sdk/file-access-runtime", () => ({
+vi.mock("carapace/plugin-sdk/file-access-runtime", () => ({
   root: async (rootDir: string) => ({
     read: async (relativePath: string, options?: { maxBytes?: number }) =>
       await rootRead({ rootDir, relativePath, maxBytes: options?.maxBytes }),
@@ -131,7 +131,7 @@ function createChannelPostContext(params: {
       media_group_id: params.mediaGroupId,
       photo: [{ file_id: params.photoFileId }],
     },
-    me: { username: "openclaw_bot" },
+    me: { username: "carapace_bot" },
     getFile: async () => ({ file_path: `photos/${params.photoFileId}.jpg` }),
   };
 }

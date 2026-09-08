@@ -162,7 +162,7 @@ describe("MCP App model context", () => {
       kind: "conversation-data",
       text: `MCP App context snapshot:\n${JSON.stringify({ text })}`,
     });
-    expect(lease?.legacyText).toContain("[[OPENCLAW_INTERNAL_CONTEXT_END]]");
+    expect(lease?.legacyText).toContain("[[CARAPACE_INTERNAL_CONTEXT_END]]");
     expect(lease?.legacyText).not.toContain(INTERNAL_RUNTIME_CONTEXT_END);
     expect(activeRuntime.pendingMcpAppModelContext?.text).toBe(text);
   });

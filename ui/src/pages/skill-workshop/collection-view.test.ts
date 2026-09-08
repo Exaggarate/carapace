@@ -9,7 +9,7 @@ import "./skill-workshop-page.ts";
 
 afterEach(() => {
   document.body.replaceChildren();
-  localStorage.removeItem("openclaw:control-ui:skill-workshop-mode:v1");
+  localStorage.removeItem("carapace:control-ui:skill-workshop-mode:v1");
 });
 
 describe("Workshop installed comparisons", () => {
@@ -50,7 +50,7 @@ describe("Workshop installed comparisons", () => {
       name: "early and late edits",
     },
   ])("opens the complete differing saved comparison for a $name", async ({ previous, current }) => {
-    localStorage.setItem("openclaw:control-ui:skill-workshop-mode:v1", "skills");
+    localStorage.setItem("carapace:control-ui:skill-workshop-mode:v1", "skills");
     const state = createSkillWorkshopState();
     state.skillWorkshopAgentId = "research";
     state.skillWorkshopLoaded = true;
@@ -96,7 +96,7 @@ describe("Workshop installed comparisons", () => {
       },
     ];
     const page = document.createElement(
-      "openclaw-skill-workshop-page",
+      "carapace-skill-workshop-page",
     ) as SkillWorkshopPageTestElement;
     page.data = skillWorkshopRouteData(state);
     page.context = createContext(vi.fn());

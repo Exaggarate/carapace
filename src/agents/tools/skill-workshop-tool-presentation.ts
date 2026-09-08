@@ -1,5 +1,5 @@
-import { stableStringify } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { stableStringify } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveSkillProposalName } from "../../skills/workshop/frontmatter.js";
 import { PROPOSAL_DRAFT_FILE } from "../../skills/workshop/store-record.js";
 import type {
@@ -182,7 +182,7 @@ export function formatProposalInspect(
     `Proposal: ${safeId}`,
     `Selected artifact: ${safePath} (${artifact.sizeBytes} bytes)`,
     "Content omitted: the complete artifact projection exceeds the selected-model inspect budget.",
-    `Next: inspect a smaller listed artifact with artifact_path, or run openclaw skills workshop inspect ${safeId} for complete operator output.`,
+    `Next: inspect a smaller listed artifact with artifact_path, or run carapace skills workshop inspect ${safeId} for complete operator output.`,
     "",
   ];
   const manifest = formatArtifactManifest(artifacts, maxChars - summary.join("\n").length);

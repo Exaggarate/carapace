@@ -1,9 +1,9 @@
 // Validates and normalizes provider asset attachments for music generation.
-import { canonicalizeBase64 } from "@openclaw/media-core/base64";
-import { maxBytesForKind } from "@openclaw/media-core/constants";
-import { extensionForMime } from "@openclaw/media-core/mime";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { canonicalizeBase64 } from "@carapace/media-core/base64";
+import { maxBytesForKind } from "@carapace/media-core/constants";
+import { extensionForMime } from "@carapace/media-core/mime";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { readProviderBinaryResponse } from "../agents/provider-http-errors.js";
 import { readResponseWithLimit } from "../infra/http-body.js";
 import {

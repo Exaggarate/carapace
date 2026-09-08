@@ -147,7 +147,7 @@ export function createWorkerTunnelManager(options: WorkerTunnelManagerOptions = 
         ssh: request.ssh,
         pinnedHostKey: request.ssh.hostKey,
         resolveIdentity: request.resolveIdentity,
-        temporaryDirectoryPrefix: "openclaw-worker-workspace-",
+        temporaryDirectoryPrefix: "carapace-worker-workspace-",
       });
       if (!isCurrent(entry)) {
         await prepared.dispose();

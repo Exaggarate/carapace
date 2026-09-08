@@ -12,8 +12,8 @@ import { runManagedCommand, terminateManagedChild } from "../../../lib/managed-c
 import { readPluginInstallRecords } from "../plugin-index-sqlite.mjs";
 
 const expectedVersion = process.argv[2];
-const runtimeRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT;
-const artifactRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
+const runtimeRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT;
+const artifactRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
 assert(
   expectedVersion && runtimeRoot && artifactRoot,
   "Doctor proof requires candidate version and survivor roots",
@@ -21,8 +21,8 @@ assert(
 const proofRoot = fs.mkdtempSync(path.join(runtimeRoot, "formerly-bundled-doctor-"));
 const proofArtifacts = path.join(artifactRoot, path.basename(proofRoot));
 const home = path.join(proofRoot, "home");
-const stateDir = path.join(home, ".openclaw");
-const configPath = path.join(stateDir, "openclaw.json");
+const stateDir = path.join(home, ".carapace");
+const configPath = path.join(stateDir, "carapace.json");
 const workspace = path.join(proofRoot, "workspace");
 for (const directory of [stateDir, workspace, proofArtifacts]) {
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -30,16 +30,16 @@ for (const directory of [stateDir, workspace, proofArtifacts]) {
 const env = {
   ...process.env,
   HOME: home,
-  OPENCLAW_HOME: home,
-  OPENCLAW_STATE_DIR: stateDir,
-  OPENCLAW_CONFIG_PATH: configPath,
-  OPENCLAW_AGENT_DIR: path.join(stateDir, "agents", "main", "agent"),
-  OPENCLAW_TEST_WORKSPACE_DIR: workspace,
+  CARAPACE_HOME: home,
+  CARAPACE_STATE_DIR: stateDir,
+  CARAPACE_CONFIG_PATH: configPath,
+  CARAPACE_AGENT_DIR: path.join(stateDir, "agents", "main", "agent"),
+  CARAPACE_TEST_WORKSPACE_DIR: workspace,
   XDG_CONFIG_HOME: path.join(home, ".config"),
   XDG_CACHE_HOME: path.join(home, ".cache"),
   XDG_DATA_HOME: path.join(home, ".local", "share"),
 };
-delete env.OPENCLAW_PROFILE;
+delete env.CARAPACE_PROFILE;
 
 function writeJson(name, value) {
   fs.writeFileSync(path.join(proofArtifacts, name), `${JSON.stringify(value, null, 2)}\n`, {
@@ -47,7 +47,7 @@ function writeJson(name, value) {
   });
 }
 
-function cli(name, args, { json = true, binary = "openclaw" } = {}) {
+function cli(name, args, { json = true, binary = "carapace" } = {}) {
   console.log(`Formerly bundled Doctor proof: ${name}`);
   const result = spawnSync(binary, args, {
     cwd: workspace,
@@ -88,14 +88,14 @@ function assertInstalled(inventory) {
   return plugin;
 }
 
-const packageName = "@openclaw/duckduckgo-plugin";
+const packageName = "@carapace/duckduckgo-plugin";
 const publishedVersion = "2026.8.1";
 assert.notEqual(
   expectedVersion,
   publishedVersion,
   "Doctor proof requires candidate and latest to differ",
 );
-const prepublishRoot = process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR;
+const prepublishRoot = process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR;
 assert(prepublishRoot, "Doctor proof requires the candidate plugin prepublish artifact");
 const manifest = JSON.parse(
   fs.readFileSync(path.join(prepublishRoot, "prepublish-plugin-registry.json"), "utf8"),
@@ -128,13 +128,13 @@ const portFile = path.join(proofRoot, "registry-port");
 const registryLog = fs.openSync(path.join(proofArtifacts, "registry.log"), "w", 0o600);
 const registryEnv = {
   ...env,
-  OPENCLAW_NPM_REGISTRY_UPSTREAM: process.env.npm_config_registry || "https://registry.npmjs.org",
-  OPENCLAW_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
-  OPENCLAW_NPM_REGISTRY_PORT: "0",
+  CARAPACE_NPM_REGISTRY_UPSTREAM: process.env.npm_config_registry || "https://registry.npmjs.org",
+  CARAPACE_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
+  CARAPACE_NPM_REGISTRY_PORT: "0",
 };
 // Beta retains its tag policy; stable repair must ignore the stale latest tag.
-registryEnv.OPENCLAW_NPM_REGISTRY_DIST_TAGS = `beta=${expectedVersion}`;
-delete registryEnv.OPENCLAW_NPM_REGISTRY_MERGE_UPSTREAM;
+registryEnv.CARAPACE_NPM_REGISTRY_DIST_TAGS = `beta=${expectedVersion}`;
+delete registryEnv.CARAPACE_NPM_REGISTRY_MERGE_UPSTREAM;
 // The last version becomes latest. Both manifests and archives are real package bytes.
 let registry;
 const registryRun = runManagedCommand({
@@ -188,7 +188,7 @@ try {
   });
   const port = listener.address().port;
   await promisify(listener.close.bind(listener))();
-  env.OPENCLAW_GATEWAY_PORT = String(port);
+  env.CARAPACE_GATEWAY_PORT = String(port);
   const config = {
     agents: { defaults: { workspace, model: { primary: "survivor/gpt-5.6-luna" } } },
     models: {
@@ -261,7 +261,7 @@ try {
   );
   assert.equal(
     payload.name,
-    "@openclaw/duckduckgo-plugin",
+    "@carapace/duckduckgo-plugin",
     "Doctor installed the wrong npm package",
   );
   assert.equal(
@@ -289,7 +289,7 @@ try {
     configPath,
     initialValidation: before,
     skippedInstallRejected: true,
-    repairCommand: ["openclaw", "doctor", "--fix", "--non-interactive"],
+    repairCommand: ["carapace", "doctor", "--fix", "--non-interactive"],
     plugin: { id: plugin.id, version: plugin.version, origin: plugin.origin },
     install: { source: inspect.install.source, name: payload.name, version: payload.version },
     capabilityConsent: "trusted-official exemption; no operator acceptance recorded",

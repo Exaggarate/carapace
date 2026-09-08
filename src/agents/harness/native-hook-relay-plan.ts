@@ -1,4 +1,4 @@
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import {
   buildNativeHookRelayCommandWithStateDatabase,
   resolveNativeHookRelayCommandTimeoutMs,
@@ -25,7 +25,7 @@ export function buildNativeHookRelayCommandPlan(
     "provider" | "agentId" | "sessionKey" | "config" | "preToolUseLoopDetection" | "command"
   > & { relayId: string; generation: string },
 ): NativeHookRelayCommandPlan {
-  const stateDbPath = resolveOpenClawStateSqlitePath();
+  const stateDbPath = resolveCarapaceStateSqlitePath();
   const policy = { ...params, preToolUseLoopDetection: params.preToolUseLoopDetection !== false };
   const facts = new Map(
     NATIVE_HOOK_RELAY_EVENTS.map((event) => [

@@ -29,7 +29,7 @@ const DOCKER_ALL_SCHEDULER_PATH = "scripts/test-docker-all.mts";
 const DOCKER_E2E_PACKAGE_HELPER_PATH = "scripts/lib/docker-e2e-package.sh";
 const DOCKER_E2E_IMAGE_HELPER_PATH = "scripts/lib/docker-e2e-image.sh";
 const DOCKER_E2E_SCENARIOS_PATH = "scripts/lib/docker-e2e-scenarios.mts";
-const OPENCLAW_E2E_INSTANCE_HELPER_PATH = "scripts/lib/openclaw-e2e-instance.sh";
+const CARAPACE_E2E_INSTANCE_HELPER_PATH = "scripts/lib/carapace-e2e-instance.sh";
 const COMPOSE_SETUP_E2E_PATH = "scripts/e2e/compose-setup.sh";
 const CLI_INSTALLER_DISTRIBUTION_E2E_PATH = "scripts/e2e/cli-installer-distribution-docker.sh";
 const DOCKER_PACKAGE_INSTALL_E2E_PATH = "scripts/e2e/docker-package-install.sh";
@@ -37,7 +37,7 @@ const DOCKER_PACKAGE_INSTALL_E2E_PATH = "scripts/e2e/docker-package-install.sh";
 const SURVIVOR_SERVICE_SHOW_ARGS = [
   "--user",
   "show",
-  "openclaw-gateway.service",
+  "carapace-gateway.service",
   "--property",
   "Id,ActiveState,SubState,Result,NRestarts,StartLimitBurst,MainPID,ExecMainStatus,ExecMainCode,KillMode,TasksCurrent,MemoryCurrent",
 ];
@@ -212,9 +212,9 @@ function runSurvivorDiagnostics(
 }
 
 function survivorPostCoreFixture() {
-  const workDir = realpathSync(tempDirs.make("openclaw-survivor-post-core-"));
+  const workDir = realpathSync(tempDirs.make("carapace-survivor-post-core-"));
   const artifacts = join(workDir, "artifacts");
-  const resultDir = join(workDir, "openclaw-update-post-core-fixture");
+  const resultDir = join(workDir, "carapace-update-post-core-fixture");
   mkdirSync(artifacts);
   mkdirSync(resultDir);
   const resultPath = join(resultDir, "plugins.json");
@@ -228,11 +228,11 @@ function survivorPostCoreFixture() {
       ...process.env,
       HOME: workDir,
       TMPDIR: workDir,
-      OPENCLAW_STATE_DIR: workDir,
-      OPENCLAW_CONFIG_PATH: join(workDir, "absent"),
-      OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
-      OPENCLAW_UPDATE_POST_CORE: "1",
-      OPENCLAW_UPDATE_POST_CORE_RESULT_PATH: resultPath,
+      CARAPACE_STATE_DIR: workDir,
+      CARAPACE_CONFIG_PATH: join(workDir, "absent"),
+      CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
+      CARAPACE_UPDATE_POST_CORE: "1",
+      CARAPACE_UPDATE_POST_CORE_RESULT_PATH: resultPath,
       NODE_OPTIONS: "--no-warnings",
     },
   };
@@ -242,7 +242,7 @@ function copySurvivorCaptureClosure(workDir: string) {
   const library = join(workDir, "lib");
   mkdirSync(join(library, "upgrade-survivor"), { recursive: true });
   for (const name of [
-    "openclaw-state-paths.mjs",
+    "carapace-state-paths.mjs",
     "plugin-index-sqlite.mjs",
     "env-limits.mjs",
     "text-file-utils.mjs",
@@ -401,7 +401,7 @@ async function forEachUpgradeSurvivorSystemctlShim(
   targetPid?: number,
 ): Promise<void> {
   for (const scriptPath of [UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH]) {
-    const workDir = tempDirs.make("openclaw-systemctl-shim-");
+    const workDir = tempDirs.make("carapace-systemctl-shim-");
     const binDir = join(workDir, "bin");
     const pidPath = join(workDir, "gateway.pid");
     const childPidPath = join(workDir, "child.pid");
@@ -420,8 +420,8 @@ async function forEachUpgradeSurvivorSystemctlShim(
     const pid = targetPid ?? Number.parseInt(readFileSync(childPidPath, "utf8"), 10);
     writeFileSync(pidPath, `${pid}\n`);
     const fixtureEnv = {
-      OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(workDir, "systemctl.log"),
-      OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: pidPath,
+      CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(workDir, "systemctl.log"),
+      CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: pidPath,
     };
     const shimPath = installUpgradeSurvivorSystemctlShim(
       workDir,
@@ -446,7 +446,7 @@ esac
       sleep: "#!/usr/bin/env bash\nexit 97\n",
     });
     const run = (command: "is-active" | "stop", procStat?: string) =>
-      spawnSync("bash", [shimPath, "--user", command, "openclaw-gateway.service"], {
+      spawnSync("bash", [shimPath, "--user", command, "carapace-gateway.service"], {
         encoding: "utf8",
         env: {
           ...process.env,
@@ -515,12 +515,12 @@ describe("docker build helper", () => {
   it("allows deployments to build an immutable sandbox image tag", () => {
     const script = readFileSync("scripts/sandbox-setup.sh", "utf8");
     expect(script).toContain(
-      'IMAGE_NAME="${OPENCLAW_SANDBOX_IMAGE:-openclaw-sandbox:bookworm-slim}"',
+      'IMAGE_NAME="${CARAPACE_SANDBOX_IMAGE:-carapace-sandbox:bookworm-slim}"',
     );
   });
 
   it("treats Docker registry auth 5xx failures as transient build failures", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-transient-");
+    const workDir = tempDirs.make("carapace-docker-build-transient-");
     const logPath = join(workDir, "docker-build.log");
     writeFileSync(
       logPath,
@@ -540,7 +540,7 @@ docker_build_transient_failure "$LOG_PATH"
   });
 
   it("detects Docker builder memory exhaustion failures", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-memory-");
+    const workDir = tempDirs.make("carapace-docker-build-memory-");
     const logPath = join(workDir, "docker-build.log");
     writeFileSync(
       logPath,
@@ -559,7 +559,7 @@ docker_build_resource_exhausted_failure "$LOG_PATH"
   });
 
   it("detects compiler processes killed by the OOM killer", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-killed-compiler-");
+    const workDir = tempDirs.make("carapace-docker-build-killed-compiler-");
     const logPath = join(workDir, "docker-build.log");
     writeFileSync(logPath, "c++: fatal error: Killed signal terminated program cc1plus\n");
 
@@ -573,7 +573,7 @@ docker_build_resource_exhausted_failure "$LOG_PATH"
   });
 
   it("retries Corepack connect timeouts without misreading Dockerfile comments as OOM", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-connect-timeout-");
+    const workDir = tempDirs.make("carapace-docker-build-connect-timeout-");
     const logPath = join(workDir, "docker-build.log");
     writeFileSync(
       logPath,
@@ -611,7 +611,7 @@ fi
 
     expect(cleanupSmoke).toContain('source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"');
     expect(cleanupSmoke).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_CLEANUP_SMOKE_DOCKER_TIMEOUT:-600s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_CLEANUP_SMOKE_DOCKER_TIMEOUT:-600s}}"',
     );
     expect(cleanupSmoke).toContain(
       'docker_e2e_docker_run_cmd run --rm --platform "$PLATFORM" -t "$IMAGE_NAME"',
@@ -620,7 +620,7 @@ fi
 
     expect(installE2eSmoke).toContain('source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"');
     expect(installE2eSmoke).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_INSTALL_E2E_DOCKER_TIMEOUT:-2700s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_INSTALL_E2E_DOCKER_TIMEOUT:-2700s}}"',
     );
     expect(installE2eSmoke).toContain("docker_e2e_docker_run_cmd run --rm \\");
     expect(installE2eSmoke).not.toContain("docker run --rm \\");
@@ -637,13 +637,13 @@ fi
     expect(runner).toContain('-v "$DOCKER_SOCKET:/var/run/docker.sock"');
     expect(runner).toContain('-v "$SCENARIO_ROOT:$SCENARIO_ROOT"');
     expect(runner).toContain("scripts/docker/sandbox/Dockerfile.browser");
-    expect(scenario).toContain('from "openclaw/plugin-sdk/agent-harness-runtime"');
+    expect(scenario).toContain('from "carapace/plugin-sdk/agent-harness-runtime"');
     expect(scenario).toContain('"sandbox", "list", "--browser", "--json"');
     expect(scenario).not.toMatch(/from\s+["'][.]{1,2}\/.*src\//u);
   });
 
   it("cleans only the sidecar task's containers when the runner exits early", () => {
-    const workDir = realpathSync(tempDirs.make("openclaw-sidecar-cleanup-"));
+    const workDir = realpathSync(tempDirs.make("carapace-sidecar-cleanup-"));
     const binDir = join(workDir, "bin");
     const scenarioRoot = join(workDir, "scenario");
     const buildRoot = join(workDir, "build");
@@ -687,7 +687,7 @@ if (args[0] === "ps") {
   const filterIndex = args.indexOf("--filter");
   const filter = filterIndex < 0 ? undefined : args[filterIndex + 1];
   for (const container of containers) {
-    if (!filter || filter === "label=openclaw.sessionKey=" + container.scopeKey) console.log(container.name);
+    if (!filter || filter === "label=carapace.sessionKey=" + container.scopeKey) console.log(container.name);
   }
 } else if (args[0] === "rm") {
   fs.writeFileSync(file, JSON.stringify(containers.filter((container) => !args.slice(1).includes(container.name))));
@@ -700,7 +700,7 @@ if (args[0] === "ps") {
       env: {
         ...process.env,
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
-        OPENCLAW_DOCKER_SOCKET: join(workDir, "missing.sock"),
+        CARAPACE_DOCKER_SOCKET: join(workDir, "missing.sock"),
       },
     });
 
@@ -719,18 +719,18 @@ if (args[0] === "ps") {
     expect(cleanupRun).toContain('*" --max-old-space-size="*');
     expect(cleanupRun).toContain('*" --max_old_space_size="*');
     expect(cleanupRun.indexOf("ensure_cleanup_smoke_node_options")).toBeLessThan(
-      cleanupRun.indexOf("pnpm build >/tmp/openclaw-cleanup-build.log"),
+      cleanupRun.indexOf("pnpm build >/tmp/carapace-cleanup-build.log"),
     );
   });
 
   it("rejects invalid cleanup-smoke log byte limits", () => {
-    const workDir = tempDirs.make("openclaw-cleanup-smoke-log-invalid-");
+    const workDir = tempDirs.make("carapace-cleanup-smoke-log-invalid-");
     const logPath = join(workDir, "cleanup.log");
     writeFileSync(logPath, "cleanup output\n");
     const script = `
 set -euo pipefail
 LOG_PATH=${shellQuote(logPath)}
-export OPENCLAW_CLEANUP_SMOKE_LOG_PRINT_BYTES=64kb
+export CARAPACE_CLEANUP_SMOKE_LOG_PRINT_BYTES=64kb
 
 ${cleanupSmokeLogTailHelpers()}
 
@@ -740,18 +740,18 @@ print_log_tail "$LOG_PATH"
     const result = spawnSync("bash", ["-lc", script], { encoding: "utf8" });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_CLEANUP_SMOKE_LOG_PRINT_BYTES: 64kb");
+    expect(result.stderr).toContain("invalid CARAPACE_CLEANUP_SMOKE_LOG_PRINT_BYTES: 64kb");
     expect(result.stdout).toBe("");
   });
 
   it("normalizes zero-padded cleanup-smoke log byte limits", () => {
-    const workDir = tempDirs.make("openclaw-cleanup-smoke-log-tail-");
+    const workDir = tempDirs.make("carapace-cleanup-smoke-log-tail-");
     const logPath = join(workDir, "cleanup.log");
     writeFileSync(logPath, "old-cleanup-output-recent\n");
     const script = `
 set -euo pipefail
 LOG_PATH=${shellQuote(logPath)}
-export OPENCLAW_CLEANUP_SMOKE_LOG_PRINT_BYTES=0008
+export CARAPACE_CLEANUP_SMOKE_LOG_PRINT_BYTES=0008
 
 ${cleanupSmokeLogTailHelpers()}
 
@@ -781,8 +781,8 @@ print_log_tail "$LOG_PATH"
     for (const scriptPath of [CODEX_MEDIA_PATH_SCENARIO_PATH, OPENAI_CHAT_TOOLS_SCENARIO_PATH]) {
       const script = readFileSync(scriptPath, "utf8");
 
-      expect(script, scriptPath).toContain("source scripts/lib/openclaw-e2e-instance.sh");
-      expect(script, scriptPath).toContain('openclaw_e2e_print_log "$CLIENT_LOG"');
+      expect(script, scriptPath).toContain("source scripts/lib/carapace-e2e-instance.sh");
+      expect(script, scriptPath).toContain('carapace_e2e_print_log "$CLIENT_LOG"');
       expect(script, scriptPath).not.toContain('cat "$CLIENT_LOG"');
     }
   });
@@ -792,7 +792,7 @@ print_log_tail "$LOG_PATH"
     expect(runCleanupDefaultPlatform({ GITHUB_ACTIONS: "true" }, "x86_64")).toBe("linux/amd64");
     expect(runCleanupDefaultPlatform({}, "arm64")).toBe("linux/arm64");
     expect(
-      runCleanupDefaultPlatform({ OPENCLAW_CLEANUP_SMOKE_PLATFORM: "linux/s390x" }, "x86_64"),
+      runCleanupDefaultPlatform({ CARAPACE_CLEANUP_SMOKE_PLATFORM: "linux/s390x" }, "x86_64"),
     ).toBe("linux/s390x");
   });
 
@@ -804,8 +804,8 @@ print_log_tail "$LOG_PATH"
 
     expectTextToIncludeAll(helper, [
       "docker_build_on_missing_enabled()",
-      "OPENCLAW_DOCKER_BUILD_ON_MISSING",
-      "OPENCLAW_TESTBOX",
+      "CARAPACE_DOCKER_BUILD_ON_MISSING",
+      "CARAPACE_TESTBOX",
     ]);
 
     expect(e2eImageHelper).toContain("docker_build_on_missing_enabled");
@@ -814,10 +814,10 @@ print_log_tail "$LOG_PATH"
     expect(e2eImageHelper).toContain('docker_e2e_docker_cmd pull "$image_name"');
     expect(liveBuild).toContain('source "$SCRIPT_ROOT_DIR/scripts/lib/docker-e2e-container.sh"');
     expect(liveBuild).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_LIVE_DOCKER_PULL_TIMEOUT:-600s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_LIVE_DOCKER_PULL_TIMEOUT:-600s}}"',
     );
     expect(liveBuild).toContain(
-      'LIVE_IMAGE_PULL_ATTEMPTS="${OPENCLAW_LIVE_DOCKER_PULL_ATTEMPTS:-3}"',
+      'LIVE_IMAGE_PULL_ATTEMPTS="${CARAPACE_LIVE_DOCKER_PULL_ATTEMPTS:-3}"',
     );
     expect(liveBuild).toContain('docker_e2e_docker_cmd image inspect "$LIVE_IMAGE_NAME"');
     expect(liveBuild).toContain('docker_e2e_docker_cmd pull "$LIVE_IMAGE_NAME"');
@@ -841,12 +841,12 @@ print_log_tail "$LOG_PATH"
       "node scripts/e2e/lib/openwebui/http-probe.mjs 'http://$OW_NAME:$WEBUI_PORT/' lt500",
     );
     expect(liveCliBackend).toContain(
-      'OPENCLAW_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
+      'CARAPACE_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"',
     );
     expect(liveCliBackend).toContain("codex-cli is no longer a bundled CLI backend");
     expect(liveCliBackend).not.toContain("==> Direct Codex CLI probe ok");
     expect(liveCliBackend).not.toContain(
-      'echo "==> Reuse live-test image: $LIVE_IMAGE_NAME (OPENCLAW_SKIP_DOCKER_BUILD=1)"',
+      'echo "==> Reuse live-test image: $LIVE_IMAGE_NAME (CARAPACE_SKIP_DOCKER_BUILD=1)"',
     );
   });
 
@@ -865,17 +865,17 @@ print_log_tail "$LOG_PATH"
     const sourceResult = resolveEntrypoint(process.cwd());
     expect(sourceResult.status, sourceResult.stderr).toBe(0);
     expect(sourceResult.stdout.trim()).toBe(
-      join(process.cwd(), "scripts/lib/openclaw-test-state.mts"),
+      join(process.cwd(), "scripts/lib/carapace-test-state.mts"),
     );
 
-    const compiledRoot = tempDirs.make("openclaw-compiled-test-state-");
+    const compiledRoot = tempDirs.make("carapace-compiled-test-state-");
     const missingResult = resolveEntrypoint(compiledRoot);
     expect(missingResult.status).toBe(1);
-    expect(missingResult.stderr).toContain("OpenClaw test-state entrypoint not found");
+    expect(missingResult.stderr).toContain("Carapace test-state entrypoint not found");
 
     const compiledDir = join(compiledRoot, "scripts/lib");
     mkdirSync(compiledDir, { recursive: true });
-    const compiledEntrypoint = join(compiledDir, "openclaw-test-state.mjs");
+    const compiledEntrypoint = join(compiledDir, "carapace-test-state.mjs");
     writeFileSync(compiledEntrypoint, "", "utf8");
     const compiledResult = resolveEntrypoint(compiledRoot);
     expect(compiledResult.status, compiledResult.stderr).toBe(0);
@@ -883,15 +883,15 @@ print_log_tail "$LOG_PATH"
   });
 
   it("runs current TypeScript and frozen JavaScript Docker harness entrypoints", () => {
-    const fixtureRoot = tempDirs.make("openclaw-docker-script-entrypoint-");
+    const fixtureRoot = tempDirs.make("carapace-docker-script-entrypoint-");
     const scriptStem = join(fixtureRoot, "fixture");
     const runFixture = (value: string) =>
       spawnSync(
         "bash",
         [
           "-c",
-          `source "${OPENCLAW_E2E_INSTANCE_HELPER_PATH}"; openclaw_e2e_run_script_entrypoint "$1" "$2"`,
-          "openclaw-docker-script-entrypoint",
+          `source "${CARAPACE_E2E_INSTANCE_HELPER_PATH}"; carapace_e2e_run_script_entrypoint "$1" "$2"`,
+          "carapace-docker-script-entrypoint",
           scriptStem,
           value,
         ],
@@ -937,10 +937,10 @@ print_log_tail "$LOG_PATH"
     const releaseUpgradeScenario = readFileSync(RELEASE_UPGRADE_USER_JOURNEY_SCENARIO_PATH, "utf8");
     expect(gatewayRunner).toContain("node scripts/e2e/lib/gateway-network/client.mts");
     expect(kitchenSinkRunner).toContain(
-      "openclaw_e2e_run_script_entrypoint scripts/e2e/kitchen-sink-rpc-walk",
+      "carapace_e2e_run_script_entrypoint scripts/e2e/kitchen-sink-rpc-walk",
     );
     expect(releaseUpgradeScenario).toContain(
-      "openclaw_e2e_run_script_entrypoint \\\n      scripts/lib/release-upgrade-baseline",
+      "carapace_e2e_run_script_entrypoint \\\n      scripts/lib/release-upgrade-baseline",
     );
     expect(gatewayRunner).not.toContain("node --import tsx");
     expect(imageHelper).not.toContain('node --import tsx "$entrypoint"');
@@ -965,14 +965,14 @@ print_log_tail "$LOG_PATH"
     const runProbe = (value: string) => {
       const script = [
         "source scripts/lib/docker-e2e-image.sh",
-        "docker_e2e_read_nonnegative_decimal_env OPENCLAW_SAMPLE_RESOURCE_LIMIT 2048",
+        "docker_e2e_read_nonnegative_decimal_env CARAPACE_SAMPLE_RESOURCE_LIMIT 2048",
       ].join("\n");
       return spawnSync("bash", ["-c", script], {
         cwd: process.cwd(),
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_SAMPLE_RESOURCE_LIMIT: value,
+          CARAPACE_SAMPLE_RESOURCE_LIMIT: value,
         },
       });
     };
@@ -982,11 +982,11 @@ print_log_tail "$LOG_PATH"
     const overprecise = runProbe("12.1234567");
     const decimal = runProbe("12.5");
     expect(invalid.status).toBe(2);
-    expect(invalid.stderr).toContain("invalid OPENCLAW_SAMPLE_RESOURCE_LIMIT: 12mb");
+    expect(invalid.stderr).toContain("invalid CARAPACE_SAMPLE_RESOURCE_LIMIT: 12mb");
     expect(overlarge.status).toBe(2);
-    expect(overlarge.stderr).toContain("invalid OPENCLAW_SAMPLE_RESOURCE_LIMIT: 9999999999");
+    expect(overlarge.stderr).toContain("invalid CARAPACE_SAMPLE_RESOURCE_LIMIT: 9999999999");
     expect(overprecise.status).toBe(2);
-    expect(overprecise.stderr).toContain("invalid OPENCLAW_SAMPLE_RESOURCE_LIMIT: 12.1234567");
+    expect(overprecise.stderr).toContain("invalid CARAPACE_SAMPLE_RESOURCE_LIMIT: 12.1234567");
     expect(decimal.status).toBe(0);
     expect(decimal.stdout.trimEnd()).toBe("12.5");
   });
@@ -994,7 +994,7 @@ print_log_tail "$LOG_PATH"
   it("keeps Testbox image-build fallback before isolating live MCP code-mode runtime flags", () => {
     const script = readFileSync(MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH, "utf8");
     const buildIndex = script.indexOf('docker_e2e_build_or_reuse "$IMAGE_NAME"');
-    const unsetIndex = script.indexOf("unset OPENCLAW_TESTBOX");
+    const unsetIndex = script.indexOf("unset CARAPACE_TESTBOX");
 
     expect(buildIndex).toBeGreaterThanOrEqual(0);
     expect(unsetIndex).toBeGreaterThan(buildIndex);
@@ -1002,7 +1002,7 @@ print_log_tail "$LOG_PATH"
   });
 
   it("wraps centralized Docker builds with the timeout helper", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-timeout-");
+    const workDir = tempDirs.make("carapace-docker-build-timeout-");
     writeExecutables(join(workDir, "bin"), {
       timeout: `#!/bin/bash
 set -euo pipefail
@@ -1020,7 +1020,7 @@ printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_DOCKER_BUILD_TIMEOUT=17s
+export CARAPACE_DOCKER_BUILD_TIMEOUT=17s
 
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 
@@ -1034,7 +1034,7 @@ grep -q '^build -t demo-image .$' "$TMPDIR/docker-seen"
   });
 
   it("prints heartbeat progress for long successful centralized Docker builds", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-heartbeat-");
+    const workDir = tempDirs.make("carapace-docker-build-heartbeat-");
     const script = repoShell(workDir)`
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 
@@ -1049,7 +1049,7 @@ output="$(docker_build_maybe_print_heartbeat e2e-build 1 1 "$TMPDIR/build.log")"
   });
 
   it("stops the tracked build command without retrying when interrupted", async () => {
-    const workDir = tempDirs.make("openclaw-docker-build-signal-");
+    const workDir = tempDirs.make("carapace-docker-build-signal-");
     writeExecutables(join(workDir, "bin"), {
       docker: `#!/bin/bash
 set -euo pipefail
@@ -1077,7 +1077,7 @@ ROOT_DIR=${shellQuote(process.cwd())}
 TMPDIR=${shellQuote(workDir)}
 export ROOT_DIR TMPDIR
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_DOCKER_BUILD_RETRIES=3
+export CARAPACE_DOCKER_BUILD_RETRIES=3
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 docker_build_run e2e-build -t demo-image .
 `,
@@ -1142,7 +1142,7 @@ docker_build_run e2e-build -t demo-image .
   });
 
   it("does not delay fast successful centralized Docker builds until the next heartbeat", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-fast-heartbeat-");
+    const workDir = tempDirs.make("carapace-docker-build-fast-heartbeat-");
     writeExecutables(join(workDir, "bin"), {
       timeout: `#!/bin/bash
 set -euo pipefail
@@ -1159,7 +1159,7 @@ printf "quick docker build log\\n"
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS=30
+export CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS=30
 
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 
@@ -1176,7 +1176,7 @@ output="$(docker_build_run e2e-build -t demo-image .)"
   it("normalizes zero-padded centralized Docker build heartbeat intervals", () => {
     const script = repoRootShell`
 export ROOT_DIR
-export OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS=08
+export CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS=08
 
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 
@@ -1189,7 +1189,7 @@ source "$ROOT_DIR/scripts/lib/docker-build.sh"
   it("normalizes zero-padded centralized Docker build retry counts", () => {
     const script = repoRootShell`
 export ROOT_DIR
-export OPENCLAW_DOCKER_BUILD_RETRIES=08
+export CARAPACE_DOCKER_BUILD_RETRIES=08
 
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 
@@ -1202,20 +1202,20 @@ source "$ROOT_DIR/scripts/lib/docker-build.sh"
   it.each([
     [
       "retry count",
-      "OPENCLAW_DOCKER_BUILD_RETRIES",
+      "CARAPACE_DOCKER_BUILD_RETRIES",
       "2x",
-      "invalid OPENCLAW_DOCKER_BUILD_RETRIES: 2x",
+      "invalid CARAPACE_DOCKER_BUILD_RETRIES: 2x",
     ],
     [
       "heartbeat interval",
-      "OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS",
+      "CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS",
       "soon",
-      "invalid OPENCLAW_DOCKER_BUILD_HEARTBEAT_SECONDS: soon",
+      "invalid CARAPACE_DOCKER_BUILD_HEARTBEAT_SECONDS: soon",
     ],
   ])(
     "rejects invalid centralized Docker build %s before invoking docker",
     (_label, envName, value, expectedError) => {
-      const workDir = tempDirs.make("openclaw-docker-build-config-");
+      const workDir = tempDirs.make("carapace-docker-build-config-");
       const markerPath = join(workDir, "docker-invoked");
 
       writeExecutables(join(workDir, "bin"), {
@@ -1250,11 +1250,11 @@ docker_build_run e2e-build -t demo-image .
   );
 
   it("fails centralized Docker builds fast when timeout is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-timeout-required-");
+    const workDir = tempDirs.make("carapace-docker-build-timeout-required-");
     mkdirSync(join(workDir, "bin"));
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
-export OPENCLAW_DOCKER_BUILD_TIMEOUT=19s
+export CARAPACE_DOCKER_BUILD_TIMEOUT=19s
 
 dirname() {
   /usr/bin/dirname "$@"
@@ -1298,7 +1298,7 @@ stdout="$(<"$TMPDIR/stdout")"
   });
 
   it("keeps setup-style Docker builds compatible when timeout is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-build-timeout-optional-");
+    const workDir = tempDirs.make("carapace-docker-build-timeout-optional-");
     writeExecutables(join(workDir, "bin"), {
       env: `#!/bin/sh
 while [ "$#" -gt 0 ]; do
@@ -1320,7 +1320,7 @@ printf "%s\\n" "$*" >"$TMPDIR/docker-seen"
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
-export OPENCLAW_DOCKER_BUILD_TIMEOUT=23s
+export CARAPACE_DOCKER_BUILD_TIMEOUT=23s
 
 dirname() {
   /usr/bin/dirname "$@"
@@ -1352,10 +1352,10 @@ docker_build_exec -t setup-image .
   it.each([
     {
       title: "keeps reused Docker image probes behind the timeout-aware helper",
-      tempPrefix: "openclaw-docker-image-reuse-timeout-",
+      tempPrefix: "carapace-docker-image-reuse-timeout-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 export DOCKER_COMMAND_TIMEOUT=3s
-export OPENCLAW_SKIP_DOCKER_BUILD=1
+export CARAPACE_SKIP_DOCKER_BUILD=1
 
 mkdir -p "$TMPDIR/bin"
 cat >"$TMPDIR/bin/timeout" <<'SH'
@@ -1384,7 +1384,7 @@ docker() {
     "image inspect")
       return 1
       ;;
-    "pull openclaw-reuse-image")
+    "pull carapace-reuse-image")
       return 0
       ;;
     *)
@@ -1397,24 +1397,24 @@ export -f docker
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 
 docker_e2e_build_or_reuse \\
-  openclaw-reuse-image \\
+  carapace-reuse-image \\
   reuse-timeout-proof \\
   "$ROOT_DIR/scripts/e2e/Dockerfile" \\
   "$ROOT_DIR" \\
   functional
 
 test "$(grep -c '^--kill-after=30s 3s|' "$TMPDIR/timeout-seen")" = "2"
-grep -q '^image inspect openclaw-reuse-image$' "$TMPDIR/docker-seen"
-grep -q '^pull openclaw-reuse-image$' "$TMPDIR/docker-seen"
+grep -q '^image inspect carapace-reuse-image$' "$TMPDIR/docker-seen"
+grep -q '^pull carapace-reuse-image$' "$TMPDIR/docker-seen"
 `,
     },
     {
       title: "explains how to opt out when Docker rejects default resource limits",
-      tempPrefix: "openclaw-docker-resource-diagnostic-",
+      tempPrefix: "carapace-docker-resource-diagnostic-",
       scriptSource: (workDir: string) => repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 docker() {
   printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -1453,7 +1453,7 @@ stderr="$(<"$TMPDIR/stderr")"
 [[ "$stderr" = before\\ Docker* ]] || exit 1
 [[ "$stderr" = *"NanoCPUs can not be set"* ]] || exit 1
 [[ "$stderr" = *"Docker E2E resource limits are incompatible with this Docker runtime"* ]] || exit 1
-[[ "$stderr" = *"OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1"* ]] || exit 1
+[[ "$stderr" = *"CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1"* ]] || exit 1
 [[ "$(grep -c '^run ' "$TMPDIR/docker-seen")" = "1" ]] || exit 1
 test "$(<"$TMPDIR/tail-seen")" = "-c 65536"
 [[ "$(<"$TMPDIR/mktemp-seen")" = -d* ]] || exit 1
@@ -1462,11 +1462,11 @@ test "$(<"$TMPDIR/tail-seen")" = "-c 65536"
     },
     {
       title: "does not suggest resource opt-out for other Docker failures",
-      tempPrefix: "openclaw-docker-resource-unrelated-",
+      tempPrefix: "carapace-docker-resource-unrelated-",
       scriptSource: (workDir: string) => repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 docker() {
   printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -1488,13 +1488,13 @@ set -e
 stderr="$(<"$TMPDIR/stderr")"
 [[ "$status" = "125" ]] || exit 1
 [[ "$stderr" = *"No such image: cgroup-helper"* ]] || exit 1
-[[ "$stderr" != *"OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS"* ]] || exit 1
+[[ "$stderr" != *"CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS"* ]] || exit 1
 [[ "$(grep -c '^run ' "$TMPDIR/docker-seen")" = "1" ]] || exit 1
 `,
     },
     {
       title: "rejects invalid Docker run pids limits before invoking docker",
-      tempPrefix: "openclaw-docker-resource-pids-",
+      tempPrefix: "carapace-docker-resource-pids-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 docker() {
@@ -1505,18 +1505,18 @@ export -f docker
 source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
 
 set +e
-OPENCLAW_DOCKER_E2E_PIDS_LIMIT=many docker_e2e_docker_cmd run demo 2>"$TMPDIR/stderr"
+CARAPACE_DOCKER_E2E_PIDS_LIMIT=many docker_e2e_docker_cmd run demo 2>"$TMPDIR/stderr"
 status="$?"
 set -e
 
 [[ "$status" = "2" ]] || exit 1
-[[ "$(<"$TMPDIR/stderr")" = *"invalid OPENCLAW_DOCKER_E2E_PIDS_LIMIT: many"* ]] || exit 1
+[[ "$(<"$TMPDIR/stderr")" = *"invalid CARAPACE_DOCKER_E2E_PIDS_LIMIT: many"* ]] || exit 1
 [[ ! -e "$TMPDIR/docker-seen" ]] || exit 1
 `,
     },
     {
       title: "rejects invalid package-backed Docker run pids limits before invoking docker",
-      tempPrefix: "openclaw-docker-package-pids-",
+      tempPrefix: "carapace-docker-package-pids-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 dirname() {
@@ -1531,22 +1531,22 @@ export -f docker
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
 set +e
-OPENCLAW_DOCKER_E2E_PIDS_LIMIT=many docker_e2e_docker_run_cmd run demo 2>"$TMPDIR/stderr"
+CARAPACE_DOCKER_E2E_PIDS_LIMIT=many docker_e2e_docker_run_cmd run demo 2>"$TMPDIR/stderr"
 status="$?"
 set -e
 
 [[ "$status" = "2" ]] || exit 1
-[[ "$(<"$TMPDIR/stderr")" = *"invalid OPENCLAW_DOCKER_E2E_PIDS_LIMIT: many"* ]] || exit 1
+[[ "$(<"$TMPDIR/stderr")" = *"invalid CARAPACE_DOCKER_E2E_PIDS_LIMIT: many"* ]] || exit 1
 [[ ! -e "$TMPDIR/docker-seen" ]] || exit 1
 `,
     },
     {
       title: "diagnoses rejected resource limits through the canonical package helper",
-      tempPrefix: "openclaw-docker-package-diagnostic-",
+      tempPrefix: "carapace-docker-package-diagnostic-",
       scriptSource: (workDir: string) => repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 timeout() {
   if [[ "$1" = "--kill-after=1s" ]]; then
@@ -1573,19 +1573,19 @@ stderr="$(<"$TMPDIR/stderr")"
 [[ "$status" = "125" ]] || exit 1
 [[ "$stderr" = *"controller pids is not available"* ]] || exit 1
 [[ "$stderr" = *"Docker E2E resource limits are incompatible with this Docker runtime"* ]] || exit 1
-[[ "$stderr" = *"OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1"* ]] || exit 1
+[[ "$stderr" = *"CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1"* ]] || exit 1
 [[ "$(grep -c '^run ' "$TMPDIR/docker-seen")" = "1" ]] || exit 1
 `,
     },
     {
       title: "removes functional Docker build package inputs after the build",
-      tempPrefix: "openclaw-docker-build-cleanup-",
+      tempPrefix: "carapace-docker-build-cleanup-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 node() {
   local script="$1"
   shift
-  if [[ "$script" != "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-openclaw-for-docker.mjs" ]]; then
+  if [[ "$script" != "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-carapace-for-docker.mjs" ]]; then
     command node "$script" "$@"
     return
   fi
@@ -1621,19 +1621,19 @@ docker_build_run() {
   local arg
   for arg in "$@"; do
     case "$arg" in
-      openclaw_package=*)
-        build_context="\${arg#openclaw_package=}"
+      carapace_package=*)
+        build_context="\${arg#carapace_package=}"
         ;;
     esac
   done
 
   test -n "$build_context"
-  test -f "$build_context/openclaw-current.tgz"
+  test -f "$build_context/carapace-current.tgz"
   printf "%s\\n" "$build_context" >"$TMPDIR/build-context-seen"
 }
 
 docker_e2e_build_or_reuse \\
-  openclaw-test-image \\
+  carapace-test-image \\
   cleanup-proof \\
   "$ROOT_DIR/scripts/e2e/Dockerfile" \\
   "$ROOT_DIR" \\
@@ -1641,8 +1641,8 @@ docker_e2e_build_or_reuse \\
 
 test -f "$TMPDIR/build-context-seen"
 leftovers="$(find "$TMPDIR" -maxdepth 1 \\( \\
-  -name 'openclaw-docker-e2e-pack.*' \\
-  -o -name 'openclaw-docker-e2e-package-context.*' \\
+  -name 'carapace-docker-e2e-pack.*' \\
+  -o -name 'carapace-docker-e2e-package-context.*' \\
 \\) -print)"
 if [[ -n "$leftovers" ]]; then
   printf 'leftover functional build inputs:\\n%s\\n' "$leftovers" >&2
@@ -1652,14 +1652,14 @@ fi
     },
     {
       title: "keeps caller-provided functional Docker build packages",
-      tempPrefix: "openclaw-docker-build-external-package-",
+      tempPrefix: "carapace-docker-build-external-package-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 external_dir="$TMPDIR/external-package"
 mkdir -p "$external_dir"
-printf fixture >"$external_dir/openclaw-current.tgz"
-OPENCLAW_CURRENT_PACKAGE_TGZ="$external_dir/openclaw-current.tgz"
-export OPENCLAW_CURRENT_PACKAGE_TGZ
+printf fixture >"$external_dir/carapace-current.tgz"
+CARAPACE_CURRENT_PACKAGE_TGZ="$external_dir/carapace-current.tgz"
+export CARAPACE_CURRENT_PACKAGE_TGZ
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 
@@ -1668,27 +1668,27 @@ docker_build_run() {
   local arg
   for arg in "$@"; do
     case "$arg" in
-      openclaw_package=*)
-        build_context="\${arg#openclaw_package=}"
+      carapace_package=*)
+        build_context="\${arg#carapace_package=}"
         ;;
     esac
   done
 
   test -n "$build_context"
-  test -f "$build_context/openclaw-current.tgz"
+  test -f "$build_context/carapace-current.tgz"
   printf "%s\\n" "$build_context" >"$TMPDIR/build-context-seen"
 }
 
 docker_e2e_build_or_reuse \\
-  openclaw-test-image \\
+  carapace-test-image \\
   external-package-proof \\
   "$ROOT_DIR/scripts/e2e/Dockerfile" \\
   "$ROOT_DIR" \\
   functional
 
 test -f "$TMPDIR/build-context-seen"
-test -f "$OPENCLAW_CURRENT_PACKAGE_TGZ"
-leftovers="$(find "$TMPDIR" -maxdepth 1 -name 'openclaw-docker-e2e-package-context.*' -print)"
+test -f "$CARAPACE_CURRENT_PACKAGE_TGZ"
+leftovers="$(find "$TMPDIR" -maxdepth 1 -name 'carapace-docker-e2e-package-context.*' -print)"
 if [[ -n "$leftovers" ]]; then
   printf 'leftover functional build context:\\n%s\\n' "$leftovers" >&2
   exit 1
@@ -1697,7 +1697,7 @@ fi
     },
     {
       title: "cleans generated package mounts after harness Docker runs",
-      tempPrefix: "openclaw-docker-package-mount-cleanup-",
+      tempPrefix: "carapace-docker-package-mount-cleanup-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 export DOCKER_COMMAND_TIMEOUT=3s
 
@@ -1728,7 +1728,7 @@ export PATH="$TMPDIR/bin:$PATH"
 node() {
   local script="$1"
   shift
-  if [[ "$script" != "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-openclaw-for-docker.mjs" ]]; then
+  if [[ "$script" != "$DOCKER_E2E_PACKAGE_LIB_DIR/../package-carapace-for-docker.mjs" ]]; then
     command node "$script" "$@"
     return
   fi
@@ -1843,12 +1843,12 @@ grep -q '^OOMKilled=true$' "$TMPDIR/failure-stderr"
 test "$(wc -c <"$TMPDIR/failure-stderr")" -lt 5000
 test -f "$TMPDIR/package-mount-seen"
 test ! -e "$pack_dir"
-test -z "$(find "$TMPDIR" -maxdepth 1 -name 'openclaw-docker-e2e-container.*' -print)"
+test -z "$(find "$TMPDIR" -maxdepth 1 -name 'carapace-docker-e2e-container.*' -print)"
 
 external_dir="$TMPDIR/external-package"
 mkdir -p "$external_dir"
-printf fixture >"$external_dir/openclaw-current.tgz"
-docker_e2e_package_mount_args "$external_dir/openclaw-current.tgz"
+printf fixture >"$external_dir/carapace-current.tgz"
+docker_e2e_package_mount_args "$external_dir/carapace-current.tgz"
 export DOCKER_STUB_STATUS=23
 export DOCKER_STUB_INSPECT_STATUS=9
 export DOCKER_STUB_INSPECT_ERROR="daemon unavailable"
@@ -1868,32 +1868,32 @@ test "$(cat "$TMPDIR/docker-timeout-seen")" = "--kill-after=30s 3600s"
 grep -qx "container-0" "$TMPDIR/docker-rm-seen"
 test "$(tail -n 2 "$TMPDIR/docker-lifecycle")" = $'run container-0\\nrm container-0'
 test ! -s "$TMPDIR/success-stderr"
-test -f "$external_dir/openclaw-current.tgz"
+test -f "$external_dir/carapace-current.tgz"
 `,
     },
     {
       title: "propagates shared E2E command timeouts into package-backed containers",
-      tempPrefix: "openclaw-docker-package-timeout-env-",
+      tempPrefix: "carapace-docker-package-timeout-env-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
-package="$TMPDIR/openclaw-current.tgz"
+package="$TMPDIR/carapace-current.tgz"
 printf fixture >"$package"
-export OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=42s
-export OPENCLAW_E2E_COMMAND_TIMEOUT=23s
+export CARAPACE_E2E_NPM_INSTALL_TIMEOUT=42s
+export CARAPACE_E2E_COMMAND_TIMEOUT=23s
 docker_e2e_package_mount_args "$package"
 printf "%s\\n" "\${DOCKER_E2E_PACKAGE_ARGS[@]}" >"$TMPDIR/package-args"
 
 grep -qx -- "-e" "$TMPDIR/package-args"
-grep -qx -- "OPENCLAW_CURRENT_PACKAGE_TGZ=/tmp/openclaw-current.tgz" "$TMPDIR/package-args"
-grep -qx -- "OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=42s" "$TMPDIR/package-args"
-grep -qx -- "OPENCLAW_E2E_COMMAND_TIMEOUT=23s" "$TMPDIR/package-args"
+grep -qx -- "CARAPACE_CURRENT_PACKAGE_TGZ=/tmp/carapace-current.tgz" "$TMPDIR/package-args"
+grep -qx -- "CARAPACE_E2E_NPM_INSTALL_TIMEOUT=42s" "$TMPDIR/package-args"
+grep -qx -- "CARAPACE_E2E_COMMAND_TIMEOUT=23s" "$TMPDIR/package-args"
 `,
     },
     {
       title:
         "keeps both harness run wrappers available when the package helper is sourced directly",
-      tempPrefix: "openclaw-docker-package-helper-guard-",
+      tempPrefix: "carapace-docker-package-helper-guard-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 mkdir -p "$TMPDIR/bin"
@@ -1929,7 +1929,7 @@ docker_e2e_run_detached_with_harness image-name
     },
     {
       title: "forwards harness stdin to backgrounded Docker runs",
-      tempPrefix: "openclaw-docker-harness-stdin-",
+      tempPrefix: "carapace-docker-harness-stdin-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 mkdir -p "$TMPDIR/bin"
@@ -1987,9 +1987,9 @@ grep -Fxq 'printf "heredoc reached docker\\n"' "$TMPDIR/docker-stdin-seen"
     },
     {
       title: "bounds printed Docker E2E logs to the configured tail",
-      tempPrefix: "openclaw-docker-e2e-log-print-tail-",
+      tempPrefix: "carapace-docker-e2e-log-print-tail-",
       scriptSource: (workDir: string) => repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES=64
+export CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES=64
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
 
@@ -2001,7 +2001,7 @@ output="$(run_logged_print_heartbeat plugins-run 30 bash -c 'printf "DO_NOT_PRIN
     },
     {
       title: "prints heartbeat progress for long successful Docker E2E log captures",
-      tempPrefix: "openclaw-docker-e2e-log-heartbeat-",
+      tempPrefix: "carapace-docker-e2e-log-heartbeat-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
@@ -2015,9 +2015,9 @@ output="$(docker_e2e_maybe_print_log_heartbeat plugins-run 1 1 "$TMPDIR/run.log"
     },
     {
       title: "cleans the heartbeat command when the wrapper is terminated",
-      tempPrefix: "openclaw-docker-e2e-log-term-cleanup-",
+      tempPrefix: "carapace-docker-e2e-log-term-cleanup-",
       scriptSource: (workDir: string) => repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_HEARTBEAT_TERM_GRACE_SECONDS=1
+export CARAPACE_DOCKER_E2E_HEARTBEAT_TERM_GRACE_SECONDS=1
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
 
@@ -2052,7 +2052,7 @@ exit 1
     },
     {
       title: "cleans harness containers when heartbeat-wrapped Docker runs are terminated",
-      tempPrefix: "openclaw-docker-e2e-harness-term-cleanup-",
+      tempPrefix: "carapace-docker-e2e-harness-term-cleanup-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 mkdir -p "$TMPDIR/bin"
@@ -2125,12 +2125,12 @@ for _ in $(seq 1 50); do
   /bin/sleep 0.01
 done
 grep -qx "container-term" "$TMPDIR/docker-rm-seen"
-test -z "$(find "$TMPDIR" -maxdepth 1 -name 'openclaw-docker-e2e-container.*' -print)"
+test -z "$(find "$TMPDIR" -maxdepth 1 -name 'carapace-docker-e2e-container.*' -print)"
 `,
     },
     {
       title: "normalizes zero-padded Docker E2E stats heartbeat intervals",
-      tempPrefix: "openclaw-docker-e2e-stats-zero-heartbeat-",
+      tempPrefix: "carapace-docker-e2e-stats-zero-heartbeat-",
       scriptSource: (workDir: string) => repoShell(workDir)`
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
@@ -2180,7 +2180,7 @@ heartbeat_elapsed="\${BASH_REMATCH[1]}"
   });
 
   it("derives the browser CDP image from the shared functional image", () => {
-    const workDir = tempDirs.make("openclaw-browser-cdp-shared-image-");
+    const workDir = tempDirs.make("carapace-browser-cdp-shared-image-");
     writeExecutables(join(workDir, "bin"), {
       docker: `#!/usr/bin/env bash
 printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -2230,15 +2230,15 @@ exec "$@"
 TMPDIR=${shellQuote(workDir)}
 export ROOT_DIR TMPDIR
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_SKIP_DOCKER_BUILD=1
-export OPENCLAW_DOCKER_E2E_IMAGE=shared-functional
-export OPENCLAW_DOCKER_ALL_LANE_NAME=browser-cdp-snapshot
+export CARAPACE_SKIP_DOCKER_BUILD=1
+export CARAPACE_DOCKER_E2E_IMAGE=shared-functional
+export CARAPACE_DOCKER_ALL_LANE_NAME=browser-cdp-snapshot
 
 bash "$ROOT_DIR/scripts/e2e/browser-cdp-snapshot-docker.sh"
 
 grep -q '^image inspect shared-functional$' "$TMPDIR/docker-seen"
-grep -Fq 'build -t openclaw-browser-cdp-snapshot-e2e:browser-cdp-snapshot' "$TMPDIR/docker-seen"
-grep -Fq ' openclaw-browser-cdp-snapshot-e2e:browser-cdp-snapshot ' "$TMPDIR/docker-seen"
+grep -Fq 'build -t carapace-browser-cdp-snapshot-e2e:browser-cdp-snapshot' "$TMPDIR/docker-seen"
+grep -Fq ' carapace-browser-cdp-snapshot-e2e:browser-cdp-snapshot ' "$TMPDIR/docker-seen"
 if grep -Fq ' shared-functional ' "$TMPDIR/docker-seen"; then
   echo "browser CDP lane reused the shared image without Chromium" >&2
   exit 1
@@ -2253,21 +2253,21 @@ fi
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES: "64kb",
-        OPENCLAW_SKIP_DOCKER_BUILD: "1",
+        CARAPACE_BROWSER_CDP_SNAPSHOT_MAX_BYTES: "64kb",
+        CARAPACE_SKIP_DOCKER_BUILD: "1",
       },
     });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES: 64kb");
+    expect(result.stderr).toContain("invalid CARAPACE_BROWSER_CDP_SNAPSHOT_MAX_BYTES: 64kb");
   });
 
   it("forwards browser CDP snapshot byte limits into the Docker runner", () => {
     const runner = readFileSync(BROWSER_CDP_SNAPSHOT_DOCKER_E2E_PATH, "utf8");
     expect(runner).toContain(
-      "docker_e2e_read_positive_int_env OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES 524288",
+      "docker_e2e_read_positive_int_env CARAPACE_BROWSER_CDP_SNAPSHOT_MAX_BYTES 524288",
     );
-    expect(runner).toContain('-e "OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES=$SNAPSHOT_MAX_BYTES"');
+    expect(runner).toContain('-e "CARAPACE_BROWSER_CDP_SNAPSHOT_MAX_BYTES=$SNAPSHOT_MAX_BYTES"');
   });
 
   it("uses Playwright Chromium for the browser CDP snapshot image", () => {
@@ -2279,7 +2279,7 @@ fi
 
   it("opens the browser CDP fixture before snapshotting", () => {
     const runner = readFileSync(BROWSER_CDP_SNAPSHOT_DOCKER_E2E_PATH, "utf8");
-    const quarantineIndex = runner.indexOf("mkdir -p /tmp/openclaw-browser-cdp");
+    const quarantineIndex = runner.indexOf("mkdir -p /tmp/carapace-browser-cdp");
     const configIndex = runner.indexOf("node scripts/e2e/lib/fixture.mjs browser-cdp");
     const openIndex = runner.indexOf(
       'browser \\"\\${base_args[@]}\\" --browser-profile docker-cdp open',
@@ -2303,7 +2303,7 @@ fi
   });
 
   it("fails Docker commands fast when timeout is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-timeout-required-");
+    const workDir = tempDirs.make("carapace-docker-timeout-required-");
     mkdirSync(join(workDir, "bin"));
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
@@ -2331,7 +2331,7 @@ stderr="$(<"$TMPDIR/stderr")"
   });
 
   it("uses a Node watchdog for Docker commands when timeout is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-node-timeout-");
+    const workDir = tempDirs.make("carapace-docker-node-timeout-");
     writeExecutables(join(workDir, "bin"), {
       node: `#!/bin/bash\nexec ${shellQuote(process.execPath)} "$@"\n`,
       docker: `#!/bin/bash\ninput="$(/bin/cat)"\nprintf "%s|%s\\n" "$*" "$input" >"$TMPDIR/docker-seen"\nexit 13\n`,
@@ -2340,8 +2340,8 @@ stderr="$(<"$TMPDIR/stderr")"
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
 export DOCKER_COMMAND_TIMEOUT=7s
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
 
@@ -2353,14 +2353,14 @@ set -e
 stderr="$(<"$TMPDIR/stderr")"
 [[ "$status" = "13" ]]
 [[ "$stderr" = *"timeout command not found; using Node watchdog for Docker command timeout 7s"* ]]
-[[ "$(<"$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 16 --pids-limit 2048 -i demo|payload" ]]
+[[ "$(<"$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 16 --pids-limit 2048 -i demo|payload" ]]
 `;
 
     execFileSync("bash", ["-lc", script], { encoding: "utf8" });
   });
 
   it("adds default Docker run resource limits without overriding explicit limits", () => {
-    const workDir = tempDirs.make("openclaw-docker-resource-limits-");
+    const workDir = tempDirs.make("carapace-docker-resource-limits-");
     writeExecutables(join(workDir, "bin"), {
       timeout: `#!/bin/bash
 set -euo pipefail
@@ -2374,9 +2374,9 @@ shift 2
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=32
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=32
 
 docker() {
   printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -2386,30 +2386,30 @@ export -f docker
 source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
 
 docker_e2e_docker_cmd run demo
-OPENCLAW_DOCKER_E2E_MEMORY=12g OPENCLAW_DOCKER_E2E_CPUS=4 OPENCLAW_DOCKER_E2E_PIDS_LIMIT=512 docker_e2e_docker_cmd run demo
-OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8 OPENCLAW_DOCKER_E2E_MEMORY=12g OPENCLAW_DOCKER_E2E_CPUS=16 OPENCLAW_DOCKER_E2E_PIDS_LIMIT=512 docker_e2e_docker_cmd run demo
+CARAPACE_DOCKER_E2E_MEMORY=12g CARAPACE_DOCKER_E2E_CPUS=4 CARAPACE_DOCKER_E2E_PIDS_LIMIT=512 docker_e2e_docker_cmd run demo
+CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8 CARAPACE_DOCKER_E2E_MEMORY=12g CARAPACE_DOCKER_E2E_CPUS=16 CARAPACE_DOCKER_E2E_PIDS_LIMIT=512 docker_e2e_docker_cmd run demo
 docker_e2e_docker_cmd run --memory 2g --cpus 3 --pids-limit 99 demo
-OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1 docker_e2e_docker_cmd run demo
+CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS=1 docker_e2e_docker_cmd run demo
 
-[[ "$(sed -n '1p' "$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 16 --pids-limit 2048 demo" ]]
-[[ "$(sed -n '2p' "$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 12g --cpus 4 --pids-limit 512 demo" ]]
-[[ "$(sed -n '3p' "$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 12g --cpus 8 --pids-limit 512 demo" ]]
-[[ "$(sed -n '4p' "$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 2g --cpus 3 --pids-limit 99 demo" ]]
-[[ "$(sed -n '5p' "$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 demo" ]]
+[[ "$(sed -n '1p' "$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 16 --pids-limit 2048 demo" ]]
+[[ "$(sed -n '2p' "$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 12g --cpus 4 --pids-limit 512 demo" ]]
+[[ "$(sed -n '3p' "$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 12g --cpus 8 --pids-limit 512 demo" ]]
+[[ "$(sed -n '4p' "$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 2g --cpus 3 --pids-limit 99 demo" ]]
+[[ "$(sed -n '5p' "$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 demo" ]]
 `;
 
     execFileSync("bash", ["-lc", script], { encoding: "utf8" });
   });
 
   it("runs Docker when resource diagnostic capture is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-resource-no-temp-");
+    const workDir = tempDirs.make("carapace-docker-resource-no-temp-");
     const missingTmpDir = join(workDir, "missing");
     const script = repoRootShell`
 TMPDIR=${shellQuote(missingTmpDir)}
 export ROOT_DIR TMPDIR
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 docker() {
   printf "%s\\n" "$*" >>${shellQuote(join(workDir, "docker-seen"))}
@@ -2439,7 +2439,7 @@ set -e
     ["HUP", "129"],
   ] as const) {
     it(`escalates Docker watchdog children that ignore parent SIG${shellSignal}`, () => {
-      const workDir = tempDirs.make("openclaw-docker-node-signal-");
+      const workDir = tempDirs.make("carapace-docker-node-signal-");
       writeExecutables(join(workDir, "bin"), {
         node: `#!/bin/bash\nexec ${shellQuote(process.execPath)} "$@"\n`,
         docker: `#!/bin/bash
@@ -2455,7 +2455,7 @@ TMPDIR=${shellQuote(workDir)}
 export ROOT_DIR TMPDIR
 export PATH="$TMPDIR/bin"
 export DOCKER_COMMAND_TIMEOUT=30s
-export OPENCLAW_DOCKER_TIMEOUT_KILL_GRACE_MS=100
+export CARAPACE_DOCKER_TIMEOUT_KILL_GRACE_MS=100
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
 
@@ -2487,7 +2487,7 @@ exit 1
   }
 
   it("uses plain timeout when kill-after is unsupported", () => {
-    const workDir = tempDirs.make("openclaw-docker-plain-timeout-");
+    const workDir = tempDirs.make("carapace-docker-plain-timeout-");
     writeExecutables(join(workDir, "bin"), {
       timeout: `#!/bin/bash
 set -euo pipefail
@@ -2521,7 +2521,7 @@ grep -q '^image inspect demo$' "$TMPDIR/docker-seen"
   });
 
   it("uses gtimeout when timeout is unavailable", () => {
-    const workDir = tempDirs.make("openclaw-docker-gtimeout-");
+    const workDir = tempDirs.make("carapace-docker-gtimeout-");
     writeExecutables(join(workDir, "bin"), {
       gtimeout: `#!/bin/bash
 set -euo pipefail
@@ -2536,10 +2536,10 @@ shift 2
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
-export OPENCLAW_DOCKER_E2E_RUN_TIMEOUT=13s
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_RUN_TIMEOUT=13s
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 docker() {
   printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -2550,19 +2550,19 @@ source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
 
 docker_e2e_docker_run_cmd run demo
 
-[[ "$(<"$TMPDIR/timeout-seen")" = "gtimeout:--kill-after=30s 13s|docker run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
-[[ "$(<"$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
+[[ "$(<"$TMPDIR/timeout-seen")" = "gtimeout:--kill-after=30s 13s|docker run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
+[[ "$(<"$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
 `;
 
     execFileSync("bash", ["-lc", script], { encoding: "utf8" });
   });
 
   it("keeps package-backed Docker runs bounded when the package helper is sourced directly", () => {
-    const workDir = tempDirs.make("openclaw-docker-package-timeout-required-");
+    const workDir = tempDirs.make("carapace-docker-package-timeout-required-");
     mkdirSync(join(workDir, "bin"));
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
-export OPENCLAW_DOCKER_E2E_RUN_TIMEOUT=11s
+export CARAPACE_DOCKER_E2E_RUN_TIMEOUT=11s
 
 dirname() {
   /usr/bin/dirname "$@"
@@ -2590,7 +2590,7 @@ stderr="$(<"$TMPDIR/stderr")"
   });
 
   it("uses gtimeout for package-backed Docker runs sourced through the package helper", () => {
-    const workDir = tempDirs.make("openclaw-docker-package-gtimeout-");
+    const workDir = tempDirs.make("carapace-docker-package-gtimeout-");
     writeExecutables(join(workDir, "bin"), {
       gtimeout: `#!/bin/bash
 set -euo pipefail
@@ -2605,10 +2605,10 @@ shift 2
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin"
-export OPENCLAW_DOCKER_E2E_RUN_TIMEOUT=15s
-export OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS=8
-unset OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
-unset OPENCLAW_DOCKER_E2E_MEMORY OPENCLAW_DOCKER_E2E_CPUS OPENCLAW_DOCKER_E2E_PIDS_LIMIT
+export CARAPACE_DOCKER_E2E_RUN_TIMEOUT=15s
+export CARAPACE_DOCKER_E2E_AVAILABLE_CPUS=8
+unset CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS
+unset CARAPACE_DOCKER_E2E_MEMORY CARAPACE_DOCKER_E2E_CPUS CARAPACE_DOCKER_E2E_PIDS_LIMIT
 
 dirname() {
   /usr/bin/dirname "$@"
@@ -2623,8 +2623,8 @@ source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
 docker_e2e_docker_run_cmd run demo
 
-[[ "$(<"$TMPDIR/timeout-seen")" = "gtimeout:--kill-after=30s 15s|docker run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
-[[ "$(<"$TMPDIR/docker-seen")" = "run -e OPENCLAW_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
+[[ "$(<"$TMPDIR/timeout-seen")" = "gtimeout:--kill-after=30s 15s|docker run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
+[[ "$(<"$TMPDIR/docker-seen")" = "run -e CARAPACE_NO_AUTO_UPDATE=1 --memory 8g --cpus 8 --pids-limit 2048 demo" ]]
 `;
 
     execFileSync("bash", ["-lc", script], { encoding: "utf8" });
@@ -2635,19 +2635,19 @@ docker_e2e_docker_run_cmd run demo
     expectTextToIncludeAll(runner, [
       "append_positive_int_env()",
       "append_positive_number_env()",
-      "append_positive_int_env OPENCLAW_PLUGIN_LIFECYCLE_PHASE_TIMEOUT_MS",
-      "append_positive_int_env OPENCLAW_PLUGIN_LIFECYCLE_TIMEOUT_KILL_GRACE_MS",
-      "append_positive_int_env OPENCLAW_PLUGIN_LIFECYCLE_METRIC_POLL_MS",
-      "append_positive_int_env OPENCLAW_PLUGIN_LIFECYCLE_MAX_RSS_KB",
-      "append_positive_int_env OPENCLAW_PLUGIN_LIFECYCLE_MAX_WALL_MS",
-      "append_positive_number_env OPENCLAW_PLUGIN_LIFECYCLE_MAX_CPU_CORE_RATIO",
+      "append_positive_int_env CARAPACE_PLUGIN_LIFECYCLE_PHASE_TIMEOUT_MS",
+      "append_positive_int_env CARAPACE_PLUGIN_LIFECYCLE_TIMEOUT_KILL_GRACE_MS",
+      "append_positive_int_env CARAPACE_PLUGIN_LIFECYCLE_METRIC_POLL_MS",
+      "append_positive_int_env CARAPACE_PLUGIN_LIFECYCLE_MAX_RSS_KB",
+      "append_positive_int_env CARAPACE_PLUGIN_LIFECYCLE_MAX_WALL_MS",
+      "append_positive_number_env CARAPACE_PLUGIN_LIFECYCLE_MAX_CPU_CORE_RATIO",
       'docker_e2e_run_with_harness \\\n  "${DOCKER_ENV_ARGS[@]}"',
     ]);
   });
 
   it.each([
-    ["phase timeout", "OPENCLAW_PLUGIN_LIFECYCLE_PHASE_TIMEOUT_MS", "150ms"],
-    ["CPU ratio", "OPENCLAW_PLUGIN_LIFECYCLE_MAX_CPU_CORE_RATIO", "0"],
+    ["phase timeout", "CARAPACE_PLUGIN_LIFECYCLE_PHASE_TIMEOUT_MS", "150ms"],
+    ["CPU ratio", "CARAPACE_PLUGIN_LIFECYCLE_MAX_CPU_CORE_RATIO", "0"],
   ])(
     "rejects invalid plugin lifecycle Docker %s overrides before package setup",
     (_label, envName, value) => {
@@ -2655,14 +2655,14 @@ docker_e2e_docker_run_cmd run demo
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_CURRENT_PACKAGE_TGZ: "/tmp/openclaw-missing-package.tgz",
+          CARAPACE_CURRENT_PACKAGE_TGZ: "/tmp/carapace-missing-package.tgz",
           [envName]: value,
         },
       });
 
       expect(result.status).toBe(2);
       expect(result.stderr).toContain(`invalid ${envName}: ${value}`);
-      expect(result.stderr).not.toContain("OpenClaw package tarball does not exist");
+      expect(result.stderr).not.toContain("Carapace package tarball does not exist");
     },
   );
 
@@ -2675,25 +2675,25 @@ docker_e2e_docker_run_cmd run demo
     const pluginCorrupt = readFileSync(PLUGIN_UPDATE_CORRUPT_SCENARIO_PATH, "utf8");
 
     expect(multiNode).toContain(
-      'openclaw_e2e_install_package "$ARTIFACTS/install-a.log" "OpenClaw package under node-A prefix" "$NPM_PREFIX_A"',
+      'carapace_e2e_install_package "$ARTIFACTS/install-a.log" "Carapace package under node-A prefix" "$NPM_PREFIX_A"',
     );
     expectTextToIncludeAll(updateChannel, [
-      'openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=dev --no-fund --no-audit',
-      'openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$pkg_tgz_path"',
-      "openclaw_e2e_print_log /tmp/openclaw-git-install.log",
-      'openclaw_e2e_print_log "$package_install_log"',
+      'carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=dev --no-fund --no-audit',
+      'carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$pkg_tgz_path"',
+      "carapace_e2e_print_log /tmp/carapace-git-install.log",
+      'carapace_e2e_print_log "$package_install_log"',
     ]);
 
-    expect(updateChannel).not.toContain("cat /tmp/openclaw-git-install.log");
+    expect(updateChannel).not.toContain("cat /tmp/carapace-git-install.log");
     expect(updateChannel).not.toContain('cat "$package_install_log"');
     expectTextToIncludeAll(doctorSwitch, [
-      'openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=dev --no-fund --no-audit',
-      'openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$package_tgz"',
-      "openclaw_e2e_print_log /tmp/openclaw-git-install.log",
+      'carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=dev --no-fund --no-audit',
+      'carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$package_tgz"',
+      "carapace_e2e_print_log /tmp/carapace-git-install.log",
     ]);
     for (const script of [releaseUpgrade, upgradeSurvivor, pluginCorrupt]) {
       expect(script).toContain(
-        'openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g',
+        'carapace_e2e_maybe_timeout "${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g',
       );
     }
   });
@@ -2704,19 +2704,19 @@ docker_e2e_docker_run_cmd run demo
 
     for (const script of [runner, publishedRunner]) {
       expectTextToIncludeAll(script, [
-        "openclaw-upgrade-survivor-runtime",
-        "OPENCLAW_UPGRADE_SURVIVOR_TMPDIR",
-        "OPENCLAW_UPGRADE_SURVIVOR_TEST_STATE_TMPDIR",
-        'export npm_config_cache="${OPENCLAW_UPGRADE_SURVIVOR_NPM_CACHE:-$OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT/npm-cache}"',
+        "carapace-upgrade-survivor-runtime",
+        "CARAPACE_UPGRADE_SURVIVOR_TMPDIR",
+        "CARAPACE_UPGRADE_SURVIVOR_TEST_STATE_TMPDIR",
+        'export npm_config_cache="${CARAPACE_UPGRADE_SURVIVOR_NPM_CACHE:-$CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT/npm-cache}"',
         'export NPM_CONFIG_CACHE="$npm_config_cache"',
         'chmod 700 "$npm_config_cache" || true',
       ]);
 
       expect(script).not.toContain('export TMPDIR="$ARTIFACT_ROOT/tmp"');
-      expect(script).not.toContain('export TMPDIR="$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/tmp"');
+      expect(script).not.toContain('export TMPDIR="$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/tmp"');
       expect(script).not.toContain('export npm_config_cache="$ARTIFACT_ROOT/npm-cache"');
       expect(script).not.toContain(
-        'export npm_config_cache="$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/npm-cache"',
+        'export npm_config_cache="$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/npm-cache"',
       );
     }
   });
@@ -2728,13 +2728,13 @@ docker_e2e_docker_run_cmd run demo
 
     for (const script of [runner, publishedRunner]) {
       expect(script).toContain("source scripts/e2e/lib/prepublish-plugin-registry.sh");
-      expect(script).toContain("openclaw_prepublish_plugin_registry_start");
+      expect(script).toContain("carapace_prepublish_plugin_registry_start");
     }
     expectTextToIncludeAll(registryHelper, [
-      'OPENCLAW_NPM_REGISTRY_UPSTREAM="${OPENCLAW_NPM_REGISTRY_UPSTREAM:-https://registry.npmjs.org}"',
+      'CARAPACE_NPM_REGISTRY_UPSTREAM="${CARAPACE_NPM_REGISTRY_UPSTREAM:-https://registry.npmjs.org}"',
       '[[ "$candidate_version" =~ -(alpha|beta)\\.[1-9][0-9]*$ ]]',
       'dist_tags="latest=0.0.0,$dist_tags"',
-      'OPENCLAW_NPM_REGISTRY_DIST_TAGS="$dist_tags"',
+      'CARAPACE_NPM_REGISTRY_DIST_TAGS="$dist_tags"',
       'export NPM_CONFIG_REGISTRY="http://127.0.0.1:$(cat "$port_file")"',
       'export npm_config_registry="$NPM_CONFIG_REGISTRY"',
     ]);
@@ -2794,37 +2794,37 @@ docker_e2e_docker_run_cmd run demo
     expect(publishedRunner).not.toContain("assert-prepublish-recovery-idle");
     expect(publishedRunner).not.toContain('if [ "$candidate_version" = "2026.6.35" ]; then');
     expect(publishedRunner).toContain(
-      'local tarball="$fixture_root/openclaw-brave-plugin-${candidate_version}.tgz"',
+      'local tarball="$fixture_root/carapace-brave-plugin-${candidate_version}.tgz"',
     );
     expect(publishedRunner).toContain('FIXTURE_PACKAGE_VERSION="$candidate_version"');
     expect(publishedRunner).toContain("version,");
     expect(publishedRunner).toContain(
-      'registry_args+=("@openclaw/brave-plugin" "$candidate_version" "$tarball")',
+      'registry_args+=("@carapace/brave-plugin" "$candidate_version" "$tarball")',
     );
     expect(
       publishedRunner.indexOf("phase assert-prepublish-requests assert_prepublish_plugin_install"),
     ).toBeLessThan(publishedRunner.indexOf("phase doctor run_doctor"));
     const discordInstallIndex = runner.indexOf(
-      'openclaw_e2e_fixture_plugin_command openclaw -- \\\n    plugins install "npm:@openclaw/discord@$package_version" --pin',
+      'carapace_e2e_fixture_plugin_command carapace -- \\\n    plugins install "npm:@carapace/discord@$package_version" --pin',
     );
     const whatsappInstallIndex = runner.indexOf(
-      'openclaw_e2e_fixture_plugin_command openclaw -- \\\n      plugins install "clawhub:@openclaw/whatsapp@$package_version"',
+      'carapace_e2e_fixture_plugin_command carapace -- \\\n      plugins install "clawhub:@carapace/whatsapp@$package_version"',
     );
     const clawhubRequestIndex = runner.indexOf(
-      'assert-prepublish-requests "$OPENCLAW_CLAWHUB_URL" "@openclaw/whatsapp" "$package_version"',
+      'assert-prepublish-requests "$CARAPACE_CLAWHUB_URL" "@carapace/whatsapp" "$package_version"',
     );
     const codexInstallIndex = runner.indexOf(
-      'openclaw_e2e_fixture_plugin_command openclaw -- \\\n      plugins install "npm:@openclaw/codex@$package_version" --pin',
+      'carapace_e2e_fixture_plugin_command carapace -- \\\n      plugins install "npm:@carapace/codex@$package_version" --pin',
     );
     expect(discordInstallIndex).toBeGreaterThan(-1);
     expect(discordInstallIndex).toBeLessThan(whatsappInstallIndex);
     expect(whatsappInstallIndex).toBeLessThan(clawhubRequestIndex);
     expect(clawhubRequestIndex).toBeLessThan(codexInstallIndex);
     expect(
-      runner.match(/openclaw_e2e_fixture_plugin_command openclaw -- \\\n\s+plugins install/gu),
+      runner.match(/carapace_e2e_fixture_plugin_command carapace -- \\\n\s+plugins install/gu),
     ).toHaveLength(3);
     expect(runner).not.toContain("--accept-capabilities");
-    expect(runner).toContain('park-companion-install "$OPENCLAW_CONFIG_PATH" "$authored_config"');
+    expect(runner).toContain('park-companion-install "$CARAPACE_CONFIG_PATH" "$authored_config"');
     expectTextToIncludeAll(runner, [
       "install_status=$?",
       "restore_status=$?",
@@ -2848,7 +2848,7 @@ docker_e2e_docker_run_cmd run demo
         'if [ "$SCENARIO" = "watchos-direct-node" ] || [ "$SCENARIO" = "mobile-pairing-reconnect" ]; then',
         "  unset OPENAI_API_KEY DISCORD_BOT_TOKEN TELEGRAM_BOT_TOKEN",
         "else",
-        '  export OPENAI_API_KEY="sk-openclaw-upgrade-survivor"',
+        '  export OPENAI_API_KEY="sk-carapace-upgrade-survivor"',
         '  export DISCORD_BOT_TOKEN="upgrade-survivor-discord-token"',
         '  export TELEGRAM_BOT_TOKEN="123456:upgrade-survivor-telegram-token"',
         "fi",
@@ -2865,15 +2865,15 @@ docker_e2e_docker_run_cmd run demo
       expectTextToIncludeAll(script, [
         "prepublish-artifacts",
         "prepublish-plugin-registry.json",
-        "unset OPENCLAW_CLAWHUB_URL CLAWHUB_URL",
-        'export OPENCLAW_CLAWHUB_URL="http://127.0.0.1:$(cat "$port_file")"',
-        'openclaw_e2e_stop_process "${clawhub_fixture_pid:-}"',
+        "unset CARAPACE_CLAWHUB_URL CLAWHUB_URL",
+        'export CARAPACE_CLAWHUB_URL="http://127.0.0.1:$(cat "$port_file")"',
+        'carapace_e2e_stop_process "${clawhub_fixture_pid:-}"',
       ]);
       expect(script).not.toContain("CLAWHUB_EXPECTED_VERSION");
       expect(script).not.toContain("/__fixture__/requests");
       expect(script).not.toContain("https://clawhub.ai");
       const fixtureDirectoryIndex = script.indexOf('mkdir -p "$fixture_root"');
-      const registryStartIndex = script.indexOf("openclaw_prepublish_plugin_registry_start");
+      const registryStartIndex = script.indexOf("carapace_prepublish_plugin_registry_start");
       expect(fixtureDirectoryIndex).toBeGreaterThanOrEqual(0);
       expect(registryStartIndex).toBeGreaterThanOrEqual(0);
       expect(fixtureDirectoryIndex).toBeLessThan(registryStartIndex);
@@ -2884,14 +2884,14 @@ docker_e2e_docker_run_cmd run demo
       "assert_prepublish_fixture_idle",
       "assert-no-requests",
       "config-parking.mjs",
-      "'^(GATEWAY_AUTH_TOKEN_REF|OPENCLAW_CLAWHUB_URL)='",
-      "OPENCLAW_CLAWHUB_URL=%s",
+      "'^(GATEWAY_AUTH_TOKEN_REF|CARAPACE_CLAWHUB_URL)='",
+      "CARAPACE_CLAWHUB_URL=%s",
     ]);
     for (const script of [runner, updateRestartAuth]) {
       expect(script).not.toContain("assert-no-requests");
     }
     expect(updateRestartAuth).toContain("park-restart-probe");
-    expect(updateRestartAuth).toContain('"$OPENCLAW_CONFIG_PATH"');
+    expect(updateRestartAuth).toContain('"$CARAPACE_CONFIG_PATH"');
     expect(publishedRunner).not.toContain(
       '\nexport MATRIX_ACCESS_TOKEN="upgrade-survivor-matrix-token"\n',
     );
@@ -2902,26 +2902,26 @@ docker_e2e_docker_run_cmd run demo
     expect(runner).toContain(
       'source "$HARNESS_ROOT_DIR/scripts/e2e/lib/prepublish-plugin-registry.sh"',
     );
-    expect(runner).toContain("openclaw_prepublish_plugin_registry_configure_docker_args");
+    expect(runner).toContain("carapace_prepublish_plugin_registry_configure_docker_args");
     expect(runner).not.toContain("configure_prepublish_plugin_registry()");
     expect(
       runner.match(
-        /-v "\$HARNESS_ROOT_DIR\/scripts\/e2e\/lib\/clawhub-fixture-server\.cjs:\/tmp\/openclaw-clawhub-fixture-server\.cjs:ro"/gu,
+        /-v "\$HARNESS_ROOT_DIR\/scripts\/e2e\/lib\/clawhub-fixture-server\.cjs:\/tmp\/carapace-clawhub-fixture-server\.cjs:ro"/gu,
       ),
     ).toHaveLength(2);
     expect(
       runner.match(
-        /-e OPENCLAW_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER=\/tmp\/openclaw-clawhub-fixture-server\.cjs/gu,
+        /-e CARAPACE_UPGRADE_SURVIVOR_CLAWHUB_FIXTURE_SERVER=\/tmp\/carapace-clawhub-fixture-server\.cjs/gu,
       ),
     ).toHaveLength(2);
     expect(
       runner.match(
-        /-v "\$HARNESS_ROOT_DIR\/scripts\/e2e\/lib\/upgrade-survivor\/config-parking\.mjs:\/tmp\/openclaw-config-parking\.mjs:ro"/gu,
+        /-v "\$HARNESS_ROOT_DIR\/scripts\/e2e\/lib\/upgrade-survivor\/config-parking\.mjs:\/tmp\/carapace-config-parking\.mjs:ro"/gu,
       ),
     ).toHaveLength(2);
     expect(
       runner.match(
-        /-e OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER=\/tmp\/openclaw-config-parking\.mjs/gu,
+        /-e CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER=\/tmp\/carapace-config-parking\.mjs/gu,
       ),
     ).toHaveLength(2);
   });
@@ -2950,12 +2950,12 @@ docker_e2e_docker_run_cmd run demo
     ]) {
       const script = readFileSync(scriptPath, "utf8");
 
-      expect(script).toContain("openclaw_live_run_staged_script scripts/test-live --");
+      expect(script).toContain("carapace_live_run_staged_script scripts/test-live --");
       expect(script).not.toContain("node --import tsx scripts/test-live.mts --");
     }
   });
 
-  it("wraps package-backed scenario OpenClaw CLI calls with the shared timeout helper", () => {
+  it("wraps package-backed scenario Carapace CLI calls with the shared timeout helper", () => {
     const paths = [
       CODEX_ON_DEMAND_DOCKER_E2E_PATH,
       CODEX_MEDIA_PATH_SCENARIO_PATH,
@@ -2973,10 +2973,10 @@ docker_e2e_docker_run_cmd run demo
     for (const path of paths) {
       const script = readFileSync(path, "utf8");
 
-      expect(script, path).toContain("openclaw_e2e_enable_openclaw_cli_timeout");
+      expect(script, path).toContain("carapace_e2e_enable_carapace_cli_timeout");
     }
     expect(readFileSync(RELEASE_UPGRADE_USER_JOURNEY_SCENARIO_PATH, "utf8")).toContain(
-      'openclaw_e2e_run_command node "$baseline_entry" onboard',
+      'carapace_e2e_run_command node "$baseline_entry" onboard',
     );
   });
 
@@ -2986,23 +2986,23 @@ docker_e2e_docker_run_cmd run demo
     expect(script).toContain("{ exec 3>&-; } 2>/dev/null || true");
     expect(script).toContain("--suppress-gateway-token-output");
     expect(script).not.toContain("exec 3>&- 2>/dev/null || true");
-    expect(script).not.toContain('"$HOME/.openclaw/agents/main/agent/auth-profiles.json"');
+    expect(script).not.toContain('"$HOME/.carapace/agents/main/agent/auth-profiles.json"');
   });
 
   it("prints channel-add failures through the shared E2E logger", () => {
     const script = readFileSync(NPM_ONBOARD_CHANNEL_AGENT_DOCKER_E2E_PATH, "utf8");
     expect(script).toContain(
-      'openclaw_e2e_run_logged channel-add "$OPENCLAW_E2E_CLI_BIN" channels add --channel "$CHANNEL" "${CHANNEL_ADD_ARGS[@]}"',
+      'carapace_e2e_run_logged channel-add "$CARAPACE_E2E_CLI_BIN" channels add --channel "$CHANNEL" "${CHANNEL_ADD_ARGS[@]}"',
     );
-    expect(script).not.toContain("/tmp/openclaw-channel-add.log");
+    expect(script).not.toContain("/tmp/carapace-channel-add.log");
   });
 
   it("runs an authorized frozen target's shipped typed-onboarding journey", () => {
     const runner = readFileSync(RELEASE_TYPED_ONBOARDING_DOCKER_E2E_PATH, "utf8");
 
     expectTextToIncludeAll(runner, [
-      'openclaw_resolve_frozen_core_harness_capabilities "$TARGET_ROOT_DIR"',
-      'openclaw_resolve_frozen_target_file "$TARGET_ROOT_DIR"',
+      'carapace_resolve_frozen_core_harness_capabilities "$TARGET_ROOT_DIR"',
+      'carapace_resolve_frozen_target_file "$TARGET_ROOT_DIR"',
       "scripts/e2e/lib/release-typed-onboarding/scenario.sh",
       '-v "$SCENARIO_PATH:/app/scripts/e2e/lib/release-typed-onboarding/scenario.sh:ro"',
     ]);
@@ -3012,7 +3012,7 @@ docker_e2e_docker_run_cmd run demo
     expectOrderedScriptFragments(readFileSync(RELEASE_TYPED_ONBOARDING_SCENARIO_PATH, "utf8"), [
       'wait_for_log "Continue?"',
       "send $'y\\r'",
-      'wait_for_log "Help make OpenClaw better?"',
+      'wait_for_log "Help make Carapace better?"',
       "send $'\\r'",
       'wait_for_log "What should we call your first agent?"',
       "send $'\\r'",
@@ -3020,7 +3020,7 @@ docker_e2e_docker_run_cmd run demo
       "send $'ollama\\r'",
     ]);
     expectOrderedScriptFragments(readFileSync(ONBOARD_SCENARIO_PATH, "utf8"), [
-      'wait_for_log "Help make OpenClaw better?"',
+      'wait_for_log "Help make Carapace better?"',
       "send $'\\r'",
       'wait_for_log "What should we call your first agent?"',
       "send $'\\r'",
@@ -3038,7 +3038,7 @@ docker_e2e_docker_run_cmd run demo
       {
         path: RELEASE_TYPED_ONBOARDING_SCENARIO_PATH,
         scratch:
-          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-release-typed-onboarding.XXXXXX")"',
+          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-release-typed-onboarding.XXXXXX")"',
         logDir: 'LOG_DIR="$scenario_tmp/logs"',
         requestLog: 'MOCK_REQUEST_LOG="$scenario_tmp/openai-requests.jsonl"',
         expectedPaths: [
@@ -3049,18 +3049,18 @@ docker_e2e_docker_run_cmd run demo
           'input_fifo_dir="$(mktemp -d "$scenario_tmp/input.XXXXXX")"',
         ],
         removed: [
-          "/tmp/openclaw-release-typed-onboarding-openai.jsonl",
-          "/tmp/openclaw-release-typed-onboarding-install.log",
-          "/tmp/openclaw-release-typed-onboarding.log",
-          "/tmp/openclaw-release-typed-onboarding-openai.log",
-          "/tmp/openclaw-release-typed-onboarding-agent.log",
-          'mktemp -d "/tmp/openclaw-release-typed-onboarding.XXXXXX"',
+          "/tmp/carapace-release-typed-onboarding-openai.jsonl",
+          "/tmp/carapace-release-typed-onboarding-install.log",
+          "/tmp/carapace-release-typed-onboarding.log",
+          "/tmp/carapace-release-typed-onboarding-openai.log",
+          "/tmp/carapace-release-typed-onboarding-agent.log",
+          'mktemp -d "/tmp/carapace-release-typed-onboarding.XXXXXX"',
         ],
       },
       {
         path: RELEASE_USER_JOURNEY_SCENARIO_PATH,
         scratch:
-          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-release-user-journey.XXXXXX")"',
+          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-release-user-journey.XXXXXX")"',
         logDir: 'LOG_DIR="$scenario_tmp/logs"',
         requestLog: 'MOCK_REQUEST_LOG="$scenario_tmp/openai-requests.jsonl"',
         extraState: 'CLICKCLACK_STATE="$scenario_tmp/clickclack.json"',
@@ -3075,21 +3075,21 @@ docker_e2e_docker_run_cmd run demo
           'plugin_b_dir="$(mktemp -d "$scenario_tmp/plugin-b.XXXXXX")"',
         ],
         removed: [
-          "/tmp/openclaw-release-user-journey-openai.jsonl",
-          "/tmp/openclaw-release-user-journey-clickclack.json",
-          "/tmp/openclaw-release-user-journey-install.log",
-          "/tmp/openclaw-release-user-journey-onboard.log",
-          "/tmp/openclaw-release-user-journey-agent.log",
-          "/tmp/openclaw-release-user-journey-plugin-a-install-path.txt",
-          "/tmp/openclaw-release-user-journey-plugin-a-source-path.txt",
-          'mktemp -d "/tmp/openclaw-release-journey-plugin-a.XXXXXX"',
-          'mktemp -d "/tmp/openclaw-release-journey-plugin-b.XXXXXX"',
+          "/tmp/carapace-release-user-journey-openai.jsonl",
+          "/tmp/carapace-release-user-journey-clickclack.json",
+          "/tmp/carapace-release-user-journey-install.log",
+          "/tmp/carapace-release-user-journey-onboard.log",
+          "/tmp/carapace-release-user-journey-agent.log",
+          "/tmp/carapace-release-user-journey-plugin-a-install-path.txt",
+          "/tmp/carapace-release-user-journey-plugin-a-source-path.txt",
+          'mktemp -d "/tmp/carapace-release-journey-plugin-a.XXXXXX"',
+          'mktemp -d "/tmp/carapace-release-journey-plugin-b.XXXXXX"',
         ],
       },
       {
         path: RELEASE_UPGRADE_USER_JOURNEY_SCENARIO_PATH,
         scratch:
-          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-release-upgrade-user-journey.XXXXXX")"',
+          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-release-upgrade-user-journey.XXXXXX")"',
         logDir: 'LOG_DIR="$scenario_tmp/logs"',
         requestLog: 'MOCK_REQUEST_LOG="$scenario_tmp/openai-requests.jsonl"',
         extraState: 'CLICKCLACK_STATE="$scenario_tmp/clickclack.json"',
@@ -3104,21 +3104,21 @@ docker_e2e_docker_run_cmd run demo
           'plugins install "$plugin_dir" --force',
         ],
         removed: [
-          "/tmp/openclaw-release-upgrade-user-journey-openai.jsonl",
-          "/tmp/openclaw-release-upgrade-user-journey-clickclack.json",
-          "/tmp/openclaw-release-upgrade-baseline-install.log",
-          "/tmp/openclaw-release-upgrade-candidate-install.log",
-          "/tmp/openclaw-release-upgrade-onboard.log",
-          "/tmp/openclaw-release-upgrade-agent.log",
-          'mktemp -d "/tmp/openclaw-release-upgrade-plugin.XXXXXX"',
+          "/tmp/carapace-release-upgrade-user-journey-openai.jsonl",
+          "/tmp/carapace-release-upgrade-user-journey-clickclack.json",
+          "/tmp/carapace-release-upgrade-baseline-install.log",
+          "/tmp/carapace-release-upgrade-candidate-install.log",
+          "/tmp/carapace-release-upgrade-onboard.log",
+          "/tmp/carapace-release-upgrade-agent.log",
+          'mktemp -d "/tmp/carapace-release-upgrade-plugin.XXXXXX"',
         ],
       },
       {
         path: NPM_ONBOARD_CHANNEL_AGENT_DOCKER_E2E_PATH,
         scratch:
-          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-npm-onboard-channel-agent.XXXXXX")"',
+          'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-npm-onboard-channel-agent.XXXXXX")"',
         requestLog: 'MOCK_REQUEST_LOG="$scenario_tmp/mock-openai-requests.jsonl"',
-        removed: ["/tmp/openclaw-mock-openai-requests.jsonl"],
+        removed: ["/tmp/carapace-mock-openai-requests.jsonl"],
       },
     ];
 
@@ -3148,7 +3148,7 @@ docker_e2e_docker_run_cmd run demo
       for (const stalePath of removed) {
         expect(script, path).not.toContain(stalePath);
       }
-      expect(script, path).not.toMatch(/\/tmp\/openclaw-release-[\w-]+\.(?:log|json|err|txt)/u);
+      expect(script, path).not.toMatch(/\/tmp\/carapace-release-[\w-]+\.(?:log|json|err|txt)/u);
     }
   });
 
@@ -3158,14 +3158,14 @@ docker_e2e_docker_run_cmd run demo
 
     expect(multiNode).toContain('timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" bash -lc');
     expect(upgradeSurvivor).toContain(
-      'ROOT_DIR="$(cd "${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$HARNESS_ROOT_DIR}" && pwd)"',
+      'ROOT_DIR="$(cd "${CARAPACE_DOCKER_E2E_REPO_ROOT:-$HARNESS_ROOT_DIR}" && pwd)"',
     );
     expect(upgradeSurvivor).toContain('DOCKER_E2E_HARNESS_ROOT_DIR="$HARNESS_ROOT_DIR"');
     expect(upgradeSurvivor).toContain(
-      '-v "$HARNESS_ROOT_DIR/scripts/e2e/lib/upgrade-survivor/run.sh:/tmp/openclaw-upgrade-survivor-run.sh:ro"',
+      '-v "$HARNESS_ROOT_DIR/scripts/e2e/lib/upgrade-survivor/run.sh:/tmp/carapace-upgrade-survivor-run.sh:ro"',
     );
     expect(upgradeSurvivor).toContain(
-      'timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" bash /tmp/openclaw-upgrade-survivor-run.sh',
+      'timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" bash /tmp/carapace-upgrade-survivor-run.sh',
     );
     expect(upgradeSurvivor).toContain('timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" bash -lc');
     for (const script of [multiNode, upgradeSurvivor]) {
@@ -3213,7 +3213,7 @@ printf '%s\\n' "$seconds"
   });
 
   it("records an interrupted upgrade survivor phase as failed", async () => {
-    const workDir = tempDirs.make("openclaw-upgrade-survivor-signal-");
+    const workDir = tempDirs.make("carapace-upgrade-survivor-signal-");
     const binDir = join(workDir, "bin");
     const markerPath = join(workDir, "npm-started");
     const summaryPath = join(workDir, "artifacts", "summary.json");
@@ -3234,14 +3234,14 @@ exec "$@"
       env: {
         ...process.env,
         FAKE_NPM_MARKER: markerPath,
-        OPENCLAW_TEST_STATE_FUNCTION_B64: Buffer.from(
-          "openclaw_test_state_create() { :; }",
+        CARAPACE_TEST_STATE_FUNCTION_B64: Buffer.from(
+          "carapace_test_state_create() { :; }",
         ).toString("base64"),
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.7.1-2",
-        OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE_SPEC: join(workDir, "unused.tgz"),
-        OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
-        OPENCLAW_UPGRADE_SURVIVOR_STATE_HOME_ROOT: join(workDir, "state-home"),
-        OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: summaryPath,
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.7.1-2",
+        CARAPACE_UPGRADE_SURVIVOR_CANDIDATE_SPEC: join(workDir, "unused.tgz"),
+        CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
+        CARAPACE_UPGRADE_SURVIVOR_STATE_HOME_ROOT: join(workDir, "state-home"),
+        CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: summaryPath,
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
       },
       stdio: "ignore",
@@ -3299,20 +3299,20 @@ exec "$@"
   it("keeps multi-node update Docker artifacts isolated by default", () => {
     const multiNode = readFileSync(MULTI_NODE_UPDATE_DOCKER_E2E_PATH, "utf8");
     expect(multiNode).toContain(
-      'RUN_ID="${OPENCLAW_MULTI_NODE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"',
+      'RUN_ID="${CARAPACE_MULTI_NODE_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"',
     );
     expect(multiNode).toContain(
-      'ARTIFACT_DIR="${OPENCLAW_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update/$RUN_ID}"',
+      'ARTIFACT_DIR="${CARAPACE_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update/$RUN_ID}"',
     );
     expect(multiNode).toContain('-v "$ARTIFACT_DIR:/tmp/artifacts"');
     expect(multiNode).not.toContain(
-      'ARTIFACT_DIR="${OPENCLAW_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update}"',
+      'ARTIFACT_DIR="${CARAPACE_MULTI_NODE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/multi-node-update}"',
     );
   });
 
   it("reuses the shared bare image for multi-node update targeted runs", () => {
-    const workDir = tempDirs.make("openclaw-multi-node-shared-image-");
-    writeFileSync(join(workDir, "openclaw-current.tgz"), "fake package");
+    const workDir = tempDirs.make("carapace-multi-node-shared-image-");
+    writeFileSync(join(workDir, "carapace-current.tgz"), "fake package");
     writeExecutables(join(workDir, "bin"), {
       docker: `#!/usr/bin/env bash
 printf "%s\\n" "$*" >>"$TMPDIR/docker-seen"
@@ -3346,16 +3346,16 @@ exec "$@"
 TMPDIR=${shellQuote(workDir)}
 export ROOT_DIR TMPDIR
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_SKIP_DOCKER_BUILD=1
-export OPENCLAW_DOCKER_E2E_IMAGE=shared-bare
-export OPENCLAW_CURRENT_PACKAGE_TGZ="$TMPDIR/openclaw-current.tgz"
-export OPENCLAW_MULTI_NODE_ARTIFACT_DIR="$TMPDIR/artifacts"
+export CARAPACE_SKIP_DOCKER_BUILD=1
+export CARAPACE_DOCKER_E2E_IMAGE=shared-bare
+export CARAPACE_CURRENT_PACKAGE_TGZ="$TMPDIR/carapace-current.tgz"
+export CARAPACE_MULTI_NODE_ARTIFACT_DIR="$TMPDIR/artifacts"
 
 bash "$ROOT_DIR/scripts/e2e/multi-node-update-docker.sh"
 
 grep -q '^image inspect shared-bare$' "$TMPDIR/docker-seen"
 grep -Fq ' shared-bare ' "$TMPDIR/docker-seen"
-if grep -Fq 'openclaw-multi-node-update-e2e' "$TMPDIR/docker-seen"; then
+if grep -Fq 'carapace-multi-node-update-e2e' "$TMPDIR/docker-seen"; then
   echo "multi-node update lane ignored the shared targeted image" >&2
   exit 1
 fi
@@ -3364,80 +3364,80 @@ fi
     execFileSync("bash", ["-lc", script], { encoding: "utf8" });
   });
 
-  it("bounds upgrade survivor foreground OpenClaw CLI calls", () => {
+  it("bounds upgrade survivor foreground Carapace CLI calls", () => {
     const runner = readFileSync(UPGRADE_SURVIVOR_DOCKER_E2E_PATH, "utf8");
     const publishedRunner = readFileSync(UPGRADE_SURVIVOR_RUN_SCRIPT, "utf8");
     const updateRestartAuth = readFileSync(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH, "utf8");
 
     expectTextToIncludeAll(runner, [
-      'source "$HARNESS_ROOT_DIR/scripts/lib/openclaw-e2e-instance.sh"',
-      'START_BUDGET_SECONDS="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
-      'STATUS_BUDGET_SECONDS="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
-      '-e OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS="$START_BUDGET_SECONDS"',
-      '-e OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS="$STATUS_BUDGET_SECONDS"',
-      'START_BUDGET="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
-      'STATUS_BUDGET="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
-      'COMMAND_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
-      '-e OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT="$COMMAND_TIMEOUT"',
-      'command_timeout="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
-      'openclaw_e2e_maybe_timeout "$command_timeout" env -u OPENCLAW_GATEWAY_TOKEN',
-      'openclaw_e2e_maybe_timeout "$command_timeout" openclaw doctor --fix --non-interactive',
-      'openclaw_e2e_maybe_timeout "$command_timeout" openclaw config validate',
-      'openclaw_e2e_maybe_timeout "$command_timeout" openclaw gateway status',
-      'openclaw gateway --port "$PORT" --bind loopback --allow-unconfigured',
-      'PROBE_TIMEOUT_MS="$(openclaw_e2e_read_nonnegative_int_env OPENCLAW_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS 60000)"',
-      "openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS 5000",
-      "openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES 1048576",
-      '-e OPENCLAW_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS="$PROBE_TIMEOUT_MS"',
-      '-e OPENCLAW_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS="$PROBE_ATTEMPT_TIMEOUT_MS"',
-      '-e OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES="$PROBE_MAX_BODY_BYTES"',
+      'source "$HARNESS_ROOT_DIR/scripts/lib/carapace-e2e-instance.sh"',
+      'START_BUDGET_SECONDS="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
+      'STATUS_BUDGET_SECONDS="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
+      '-e CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS="$START_BUDGET_SECONDS"',
+      '-e CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS="$STATUS_BUDGET_SECONDS"',
+      'START_BUDGET="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
+      'STATUS_BUDGET="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
+      'COMMAND_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
+      '-e CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT="$COMMAND_TIMEOUT"',
+      'command_timeout="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
+      'carapace_e2e_maybe_timeout "$command_timeout" env -u CARAPACE_GATEWAY_TOKEN',
+      'carapace_e2e_maybe_timeout "$command_timeout" carapace doctor --fix --non-interactive',
+      'carapace_e2e_maybe_timeout "$command_timeout" carapace config validate',
+      'carapace_e2e_maybe_timeout "$command_timeout" carapace gateway status',
+      'carapace gateway --port "$PORT" --bind loopback --allow-unconfigured',
+      'PROBE_TIMEOUT_MS="$(carapace_e2e_read_nonnegative_int_env CARAPACE_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS 60000)"',
+      "carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS 5000",
+      "carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES 1048576",
+      '-e CARAPACE_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS="$PROBE_TIMEOUT_MS"',
+      '-e CARAPACE_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS="$PROBE_ATTEMPT_TIMEOUT_MS"',
+      '-e CARAPACE_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES="$PROBE_MAX_BODY_BYTES"',
       "readyz_probe_args=(",
-      'readyz_probe_args+=(--allow-failing "$OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING")',
+      'readyz_probe_args+=(--allow-failing "$CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING")',
       "readyz_probe_args+=(--allow-degraded-ready)",
       'node scripts/e2e/lib/upgrade-survivor/probe-gateway.mjs "${readyz_probe_args[@]}"',
-      "OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING",
-      "OPENCLAW_UPGRADE_SURVIVOR_READYZ_ALLOW_DEGRADED",
+      "CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_FAILING",
+      "CARAPACE_UPGRADE_SURVIVOR_READYZ_ALLOW_DEGRADED",
     ]);
 
     expect(publishedRunner).toContain(
-      'COMMAND_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
+      'COMMAND_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
     );
     expect(publishedRunner).toContain(
-      'budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
+      'budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS 90)"',
     );
     expect(publishedRunner).toContain(
-      'budget="$(openclaw_e2e_read_positive_int_env OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
+      'budget="$(carapace_e2e_read_positive_int_env CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS 30)"',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw --version',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace --version',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw config validate >"$BASELINE_CONFIG_VALIDATE_LOG"',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace config validate >"$BASELINE_CONFIG_VALIDATE_LOG"',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${update_env[@]}" openclaw',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${update_env[@]}" carapace',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" openclaw',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" "${root_cli_env[@]}" carapace',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw update repair',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace update repair',
     );
     expect(publishedRunner).toContain("--accept-capabilities --yes --no-restart --json");
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw config validate',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace config validate',
     );
     expect(publishedRunner).toContain(
-      'openclaw_e2e_maybe_timeout "$COMMAND_TIMEOUT" openclaw gateway status',
+      'carapace_e2e_maybe_timeout "$COMMAND_TIMEOUT" carapace gateway status',
     );
-    expect(publishedRunner).toContain('openclaw gateway --port "$port" --bind loopback');
+    expect(publishedRunner).toContain('carapace gateway --port "$port" --bind loopback');
 
     expect(updateRestartAuth).toContain(
-      'command_timeout="${OPENCLAW_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
+      'command_timeout="${CARAPACE_UPGRADE_SURVIVOR_COMMAND_TIMEOUT:-900s}"',
     );
     expectTextToIncludeAll(updateRestartAuth, [
-      "command=(env -u OPENCLAW_GATEWAY_TOKEN -u OPENCLAW_GATEWAY_PASSWORD openclaw gateway install --force --json)",
-      'openclaw_e2e_maybe_timeout "$command_timeout" "${command[@]}"',
+      "command=(env -u CARAPACE_GATEWAY_TOKEN -u CARAPACE_GATEWAY_PASSWORD carapace gateway install --force --json)",
+      'carapace_e2e_maybe_timeout "$command_timeout" "${command[@]}"',
     ]);
   });
 
@@ -3449,7 +3449,7 @@ fi
       const stateDir = join(workDir, "state");
       mkdirSync(artifacts);
       mkdirSync(stateDir);
-      const configPath = join(stateDir, "openclaw.json");
+      const configPath = join(stateDir, "carapace.json");
       const authored = '{"gateway":{"mode":"local","port":18789},"channels":{"whatsapp":{}}}\n';
       writeFileSync(configPath, authored);
       const childPath = join(workDir, "listener.mjs");
@@ -3459,7 +3459,7 @@ fi
         childPath,
         `import fs from "node:fs";
 import http from "node:http";
-const identity = { pid: process.pid, managed: process.env.OPENCLAW_SYSTEMD_UNIT === "openclaw-gateway.service" };
+const identity = { pid: process.pid, managed: process.env.CARAPACE_SYSTEMD_UNIT === "carapace-gateway.service" };
 const server = http.createServer((_req, res) => res.end(JSON.stringify(identity)));
 const port = fs.existsSync(process.env.PORT_FILE) ? Number(fs.readFileSync(process.env.PORT_FILE, "utf8")) : 0;
 server.listen(port, "127.0.0.1", () => {
@@ -3469,24 +3469,24 @@ server.listen(port, "127.0.0.1", () => {
 });
 `,
       );
-      const executable = join(workDir, "bin", "openclaw");
+      const executable = join(workDir, "bin", "carapace");
       const stagedUnit = join(workDir, "staged.service");
       writeFileSync(
         stagedUnit,
         buildSystemdUnit({
           programArguments: [process.execPath, executable, "gateway"],
-          environment: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" },
+          environment: { CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" },
         }),
       );
       writeExecutables(join(workDir, "bin"), {
-        openclaw: `#!${process.execPath}
+        carapace: `#!${process.execPath}
 const fs = require("node:fs"), path = require("node:path"), { spawn, spawnSync } = require("node:child_process");
 if (process.argv[2] === "doctor") process.exit(0);
 if (process.argv[3] === "install") {
-  const unit = path.join(process.env.HOME, ".config/systemd/user/openclaw-gateway.service");
+  const unit = path.join(process.env.HOME, ".config/systemd/user/carapace-gateway.service");
   fs.mkdirSync(path.dirname(unit), { recursive: true });
   fs.copyFileSync(process.env.STAGED_UNIT, unit);
-  for (const args of [["daemon-reload"], ["enable", "openclaw-gateway.service"], ["restart", "openclaw-gateway.service"]]) {
+  for (const args of [["daemon-reload"], ["enable", "carapace-gateway.service"], ["restart", "carapace-gateway.service"]]) {
     const result = spawnSync("systemctl", ["--user", ...args], { stdio: "inherit" });
     if (result.status !== 0) process.exit(result.status ?? 1);
   }
@@ -3496,7 +3496,7 @@ const child = spawn(process.execPath, [process.env.LISTENER_SCRIPT], { stdio: "i
 child.once("exit", () => process.exit(0));
 // A wrapper exit must not strand the listening child outside its service owner.
 process.on("SIGTERM", () => {
-  if (!process.env.OPENCLAW_SYSTEMD_UNIT) process.exit(0);
+  if (!process.env.CARAPACE_SYSTEMD_UNIT) process.exit(0);
 });
 `,
       });
@@ -3505,21 +3505,21 @@ process.on("SIGTERM", () => {
         HOME: workDir,
         PATH: `${join(workDir, "bin")}:${process.env.PATH}`,
         npm_config_prefix: workDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.3.13",
-        OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
-        OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
-        OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(artifacts, "systemctl-shim.pid"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(artifacts, "systemctl-shim.log"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: join(
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.3.13",
+        CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+        CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
+        CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(artifacts, "systemctl-shim.pid"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(artifacts, "systemctl-shim.log"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: join(
           artifacts,
           "systemctl-shim-gateway.log",
         ),
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON: join(artifacts, "install.json"),
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR: join(artifacts, "install.err"),
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: join(workDir, "registry"),
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON: join(artifacts, "install.json"),
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR: join(artifacts, "install.err"),
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: join(workDir, "registry"),
         GATEWAY_AUTH_TOKEN_REF: "survivor-fixture-token",
         STAGED_UNIT: stagedUnit,
         LISTENER_SCRIPT: childPath,
@@ -3530,19 +3530,19 @@ process.on("SIGTERM", () => {
       const setup =
         lane === "published"
           ? source.slice(0, source.indexOf("phase storage-preflight"))
-          : `source ${shellQuote(OPENCLAW_E2E_INSTANCE_HELPER_PATH)}\nsource ${shellQuote(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH)}`;
+          : `source ${shellQuote(CARAPACE_E2E_INSTANCE_HELPER_PATH)}\nsource ${shellQuote(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH)}`;
       const script = `${setup}
 trap - EXIT ERR INT TERM
 assert_prepublish_fixture_idle() { :; }
 assert_baseline_state() { :; }
 check_gateway_status() { :; }
 # This fixture chooses an ephemeral port; retain the actual readiness implementation.
-eval "$(declare -f openclaw_e2e_wait_gateway_ready | sed '1s/openclaw_e2e_wait_gateway_ready/fixture_wait_gateway_ready/')"
-openclaw_e2e_wait_gateway_ready() {
+eval "$(declare -f carapace_e2e_wait_gateway_ready | sed '1s/carapace_e2e_wait_gateway_ready/fixture_wait_gateway_ready/')"
+carapace_e2e_wait_gateway_ready() {
   for _ in {1..200}; do [ -s "$PORT_FILE" ] && break; sleep 0.01; done
   fixture_wait_gateway_ready "$1" "$2" 20 "$(cat "$PORT_FILE")" "\${5:-strict}"
 }
-${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restart_probe_current_install 18789 "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"'}
+${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restart_probe_current_install 18789 "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG"'}
 `;
       const systemctlPath = join(
         lane === "published" ? join(artifacts, "npm-prefix") : workDir,
@@ -3573,11 +3573,11 @@ ${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restar
         expect(readFileSync(configPath, "utf8")).toBe(authored);
         const url = `http://127.0.0.1:${readFileSync(portPath, "utf8")}/readyz`;
         if (lane === "published") {
-          expect(systemctl("is-active", "openclaw-gateway.service").status).toBe(3);
+          expect(systemctl("is-active", "carapace-gateway.service").status).toBe(3);
           expect(records()).toHaveLength(1);
           expect(isProcessRunning(records()[0]!.pid)).toBe(false);
           await expect(fetch(url, { signal: AbortSignal.timeout(1_000) })).rejects.toThrow();
-          expect(systemctl("start", "openclaw-gateway.service").status).toBe(0);
+          expect(systemctl("start", "carapace-gateway.service").status).toBe(0);
           for (let attempt = 0; attempt < 200 && records().length < 2; attempt++) {
             await delay(10);
           }
@@ -3587,7 +3587,7 @@ ${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restar
           await fetch(url, { signal: AbortSignal.timeout(1_000) })
         ).json()) as { pid: number; managed: boolean };
         expect(initial.managed).toBe(true);
-        expect(systemctl("restart", "openclaw-gateway.service").status).toBe(0);
+        expect(systemctl("restart", "carapace-gateway.service").status).toBe(0);
         const expectedStarts = lane === "published" ? 3 : 2;
         for (let attempt = 0; attempt < 200 && records().length < expectedStarts; attempt++) {
           await delay(10);
@@ -3599,10 +3599,10 @@ ${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restar
         expect(replacement.managed).toBe(true);
         expect(replacement.pid).not.toBe(initial.pid);
         expect(isProcessRunning(initial.pid)).toBe(false);
-        expect(systemctl("stop", "openclaw-gateway.service").status).toBe(0);
+        expect(systemctl("stop", "carapace-gateway.service").status).toBe(0);
         await expect(fetch(url, { signal: AbortSignal.timeout(1_000) })).rejects.toThrow();
       } finally {
-        systemctl("stop", "openclaw-gateway.service");
+        systemctl("stop", "carapace-gateway.service");
         for (const { pid } of records()) {
           try {
             process.kill(pid, "SIGKILL");
@@ -3615,7 +3615,7 @@ ${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restar
 
   it("returns the gateway readiness failure when startup is called conditionally", () => {
     const workDir = tempDirs.make("survivor-start-failure-");
-    writeExecutables(join(workDir, "bin"), { openclaw: "#!/bin/sh\nexit 17\n" });
+    writeExecutables(join(workDir, "bin"), { carapace: "#!/bin/sh\nexit 17\n" });
     const source = readFileSync(UPGRADE_SURVIVOR_RUN_SCRIPT, "utf8");
     const start = source.slice(
       source.indexOf("start_gateway() {"),
@@ -3627,7 +3627,7 @@ ${lane === "published" ? "prepare_update_restart_probe" : 'prepare_update_restar
         "-c",
         repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
-source "$ROOT_DIR/${OPENCLAW_E2E_INSTANCE_HELPER_PATH}"
+source "$ROOT_DIR/${CARAPACE_E2E_INSTANCE_HELPER_PATH}"
 GATEWAY_LOG="$TMPDIR/gateway.log"
 UPDATE_RESTART_MODE=manual
 ${start}
@@ -3643,15 +3643,15 @@ exit "$start_status"
   });
 
   it("scopes candidate setup Doctor markers without creating legacy device identities", () => {
-    const workDir = tempDirs.make("openclaw-upgrade-survivor-doctor-env-");
+    const workDir = tempDirs.make("carapace-upgrade-survivor-doctor-env-");
     writeExecutables(join(workDir, "bin"), {
-      openclaw: `#!/usr/bin/env bash
+      carapace: `#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\\n' "$@" >"$CAPTURE_DIR/doctor-argv"
 {
-  printf 'OPENCLAW_UPDATE_IN_PROGRESS=%s\\n' "\${OPENCLAW_UPDATE_IN_PROGRESS-unset}"
-  printf 'OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=%s\\n' "\${OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR-unset}"
-  printf 'OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=%s\\n' "\${OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE-unset}"
+  printf 'CARAPACE_UPDATE_IN_PROGRESS=%s\\n' "\${CARAPACE_UPDATE_IN_PROGRESS-unset}"
+  printf 'CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=%s\\n' "\${CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR-unset}"
+  printf 'CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=%s\\n' "\${CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE-unset}"
 } >"$CAPTURE_DIR/doctor-env"
 exit 23
 `,
@@ -3660,18 +3660,18 @@ exit 23
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
 export CAPTURE_DIR="$TMPDIR"
-export OPENCLAW_STATE_DIR="$TMPDIR/state"
-export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
-export OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$ROOT_DIR/${UPGRADE_SURVIVOR_CONFIG_PARKING_PATH}"
-mkdir -p "$OPENCLAW_STATE_DIR"
-printf '%s\n' '{"gateway":{"mode":"local"}}' >"$OPENCLAW_CONFIG_PATH"
-unset OPENCLAW_UPDATE_IN_PROGRESS
-unset OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR
-unset OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE
-source "$ROOT_DIR/${OPENCLAW_E2E_INSTANCE_HELPER_PATH}"
+export CARAPACE_STATE_DIR="$TMPDIR/state"
+export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
+export CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$ROOT_DIR/${UPGRADE_SURVIVOR_CONFIG_PARKING_PATH}"
+mkdir -p "$CARAPACE_STATE_DIR"
+printf '%s\n' '{"gateway":{"mode":"local"}}' >"$CARAPACE_CONFIG_PATH"
+unset CARAPACE_UPDATE_IN_PROGRESS
+unset CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR
+unset CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE
+source "$ROOT_DIR/${CARAPACE_E2E_INSTANCE_HELPER_PATH}"
 source "$ROOT_DIR/${UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH}"
 install_update_restart_systemctl_shim() { :; }
-openclaw_e2e_maybe_timeout() {
+carapace_e2e_maybe_timeout() {
   shift
   "$@"
 }
@@ -3680,9 +3680,9 @@ if prepare_update_restart_probe_current_install 18789 "$TMPDIR/gateway.log" >/de
   exit 3
 fi
 {
-  printf 'OPENCLAW_UPDATE_IN_PROGRESS=%s\\n' "\${OPENCLAW_UPDATE_IN_PROGRESS-unset}"
-  printf 'OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=%s\\n' "\${OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR-unset}"
-  printf 'OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=%s\\n' "\${OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE-unset}"
+  printf 'CARAPACE_UPDATE_IN_PROGRESS=%s\\n' "\${CARAPACE_UPDATE_IN_PROGRESS-unset}"
+  printf 'CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=%s\\n' "\${CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR-unset}"
+  printf 'CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=%s\\n' "\${CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE-unset}"
 } >"$CAPTURE_DIR/parent-env"
 `;
 
@@ -3705,17 +3705,17 @@ fi
     ]);
     expect(readFileSync(join(workDir, "doctor-env"), "utf8")).toBe(
       [
-        "OPENCLAW_UPDATE_IN_PROGRESS=1",
-        "OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=1",
-        "OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=1",
+        "CARAPACE_UPDATE_IN_PROGRESS=1",
+        "CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=1",
+        "CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=1",
         "",
       ].join("\n"),
     );
     expect(readFileSync(join(workDir, "parent-env"), "utf8")).toBe(
       [
-        "OPENCLAW_UPDATE_IN_PROGRESS=unset",
-        "OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=unset",
-        "OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=unset",
+        "CARAPACE_UPDATE_IN_PROGRESS=unset",
+        "CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR=unset",
+        "CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE=unset",
         "",
       ].join("\n"),
     );
@@ -3729,11 +3729,11 @@ fi
   ] as const)(
     "restores the canonical authored config after %s failure",
     (failureStage, expectedStatus) => {
-      const workDir = tempDirs.make(`openclaw-upgrade-survivor-${failureStage}-failure-`);
+      const workDir = tempDirs.make(`carapace-upgrade-survivor-${failureStage}-failure-`);
       writeExecutables(join(workDir, "bin"), {
-        openclaw: `#!/usr/bin/env bash
+        carapace: `#!/usr/bin/env bash
 set -euo pipefail
-printf '%s %s\n' "$OPENCLAW_CONFIG_PATH" "$*" >>"$CAPTURE_DIR/openclaw-calls"
+printf '%s %s\n' "$CARAPACE_CONFIG_PATH" "$*" >>"$CAPTURE_DIR/carapace-calls"
 if [ "\${1:-}" = doctor ]; then
   [ "$FAILURE_STAGE" != doctor ] || exit 41
   exit 0
@@ -3741,7 +3741,7 @@ fi
 if [ "\${1:-}" = gateway ] && [ "\${2:-}" = install ]; then
   [ "$FAILURE_STAGE" != install ] || exit 44
   sleep 30 >/dev/null 2>&1 &
-  printf '%s\\n' "$!" >"$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE"
+  printf '%s\\n' "$!" >"$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE"
   exit 0
 fi
 exec sleep 30
@@ -3752,25 +3752,25 @@ exec sleep 30
 export PATH="$TMPDIR/bin:$PATH"
 export CAPTURE_DIR="$TMPDIR"
 export FAILURE_STAGE="${failureStage}"
-export OPENCLAW_STATE_DIR="$TMPDIR/state"
-export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
-export OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$ROOT_DIR/${UPGRADE_SURVIVOR_CONFIG_PARKING_PATH}"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$TMPDIR/gateway.pid"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$TMPDIR/service.log"
-export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON="$TMPDIR/install.json"
-export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR="$TMPDIR/install.err"
+export CARAPACE_STATE_DIR="$TMPDIR/state"
+export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
+export CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$ROOT_DIR/${UPGRADE_SURVIVOR_CONFIG_PARKING_PATH}"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$TMPDIR/gateway.pid"
+export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$TMPDIR/service.log"
+export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_JSON="$TMPDIR/install.json"
+export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SERVICE_INSTALL_ERR="$TMPDIR/install.err"
 export GATEWAY_AUTH_TOKEN_REF=upgrade-survivor-token
-mkdir -p "$OPENCLAW_STATE_DIR"
+mkdir -p "$CARAPACE_STATE_DIR"
 authored_config='{"channels":{"discord":{"dm":{"policy":"allowlist","allowFrom":["123"]}}}}'
-printf '%s\n' "$authored_config" >"$OPENCLAW_CONFIG_PATH"
-source "$ROOT_DIR/${OPENCLAW_E2E_INSTANCE_HELPER_PATH}"
+printf '%s\n' "$authored_config" >"$CARAPACE_CONFIG_PATH"
+source "$ROOT_DIR/${CARAPACE_E2E_INSTANCE_HELPER_PATH}"
 source "$ROOT_DIR/${UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH}"
 install_update_restart_systemctl_shim() { :; }
-openclaw_e2e_maybe_timeout() {
+carapace_e2e_maybe_timeout() {
   shift
   "$@"
 }
-openclaw_e2e_wait_gateway_ready() {
+carapace_e2e_wait_gateway_ready() {
   [ "$FAILURE_STAGE" != readiness ] || return 42
 }
 write_update_restart_service_auth_env() {
@@ -3779,7 +3779,7 @@ write_update_restart_service_auth_env() {
 status=0
 prepare_update_restart_probe_current_install 18789 "$TMPDIR/gateway.log" >/dev/null 2>&1 || status=$?
 printf '%s\n' "$status" >"$CAPTURE_DIR/status"
-cmp -s "$OPENCLAW_CONFIG_PATH" <(printf '%s\n' "$authored_config")
+cmp -s "$CARAPACE_CONFIG_PATH" <(printf '%s\n' "$authored_config")
 [ ! -e "$TMPDIR/gateway.log.authored-config" ]
 if [ -n "\${gateway_pid:-}" ]; then
   kill "$gateway_pid" >/dev/null 2>&1 || true
@@ -3791,16 +3791,16 @@ fi
 
       expect(result.status, result.stderr).toBe(0);
       expect(readFileSync(join(workDir, "status"), "utf8")).toBe(`${expectedStatus}\n`);
-      const calls = readFileSync(join(workDir, "openclaw-calls"), "utf8");
-      expect(calls).toContain(join(workDir, "state", "openclaw.json"));
-      expect(calls).not.toContain("OPENCLAW_CONFIG_PATH=");
+      const calls = readFileSync(join(workDir, "carapace-calls"), "utf8");
+      expect(calls).toContain(join(workDir, "state", "carapace.json"));
+      expect(calls).not.toContain("CARAPACE_CONFIG_PATH=");
     },
   );
 
   it("prefers restore failure and retains the authored config snapshot", () => {
-    const workDir = tempDirs.make("openclaw-upgrade-survivor-restore-failure-");
+    const workDir = tempDirs.make("carapace-upgrade-survivor-restore-failure-");
     writeExecutables(join(workDir, "bin"), {
-      openclaw: `#!/usr/bin/env bash
+      carapace: `#!/usr/bin/env bash
 set -euo pipefail
 exit 41
 `,
@@ -3821,16 +3821,16 @@ process.exit(result.status ?? 1);
 
     const script = repoShell(workDir)`
 export PATH="$TMPDIR/bin:$PATH"
-export OPENCLAW_STATE_DIR="$TMPDIR/state"
-export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
+export CARAPACE_STATE_DIR="$TMPDIR/state"
+export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
 export REAL_CONFIG_PARKING_HELPER="$ROOT_DIR/${UPGRADE_SURVIVOR_CONFIG_PARKING_PATH}"
-export OPENCLAW_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$TMPDIR/bin/config-parking-wrapper.mjs"
-mkdir -p "$OPENCLAW_STATE_DIR"
-printf '%s\n' '{"channels":{"discord":{"dm":{"policy":"allowlist"}}}}' >"$OPENCLAW_CONFIG_PATH"
-source "$ROOT_DIR/${OPENCLAW_E2E_INSTANCE_HELPER_PATH}"
+export CARAPACE_UPGRADE_SURVIVOR_CONFIG_PARKING_HELPER="$TMPDIR/bin/config-parking-wrapper.mjs"
+mkdir -p "$CARAPACE_STATE_DIR"
+printf '%s\n' '{"channels":{"discord":{"dm":{"policy":"allowlist"}}}}' >"$CARAPACE_CONFIG_PATH"
+source "$ROOT_DIR/${CARAPACE_E2E_INSTANCE_HELPER_PATH}"
 source "$ROOT_DIR/${UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH}"
 install_update_restart_systemctl_shim() { :; }
-openclaw_e2e_maybe_timeout() {
+carapace_e2e_maybe_timeout() {
   shift
   "$@"
 }
@@ -3844,7 +3844,7 @@ printf '%s\n' "$status" >"$TMPDIR/status"
     expect(result.status, result.stderr).toBe(0);
     expect(readFileSync(join(workDir, "status"), "utf8")).toBe("57\n");
     expect(existsSync(join(workDir, "gateway.log.authored-config"))).toBe(true);
-    expect(JSON.parse(readFileSync(join(workDir, "state", "openclaw.json"), "utf8"))).toEqual({
+    expect(JSON.parse(readFileSync(join(workDir, "state", "carapace.json"), "utf8"))).toEqual({
       plugins: { enabled: false },
       gateway: expect.objectContaining({ reload: { mode: "off" } }),
     });
@@ -3877,9 +3877,9 @@ printf '%s\n' "$status" >"$TMPDIR/status"
     for (const script of [updateRestartAuth]) {
       expectTextToIncludeAll(script, [
         'supervisor_script="${pid_file}.supervisor.mjs"',
-        'OPENCLAW_SYSTEMCTL_SHIM_EXEC_START="$exec_start"',
-        'if (key.startsWith("OPENCLAW_UPDATE_")) {',
-        "delete childEnv.OPENCLAW_COMPATIBILITY_HOST_VERSION;",
+        'CARAPACE_SYSTEMCTL_SHIM_EXEC_START="$exec_start"',
+        'if (key.startsWith("CARAPACE_UPDATE_")) {',
+        "delete childEnv.CARAPACE_COMPATIBILITY_HOST_VERSION;",
         'process.on("SIGTERM", stop);',
         "const stopTimeoutMs = 30_000;",
         "process.kill(-pid, signal);",
@@ -3897,7 +3897,7 @@ printf '%s\n' "$status" >"$TMPDIR/status"
       ]);
     }
     for (const script of [runner, publishedRunner]) {
-      expect(script).toContain("systemctl --user stop openclaw-gateway.service");
+      expect(script).toContain("systemctl --user stop carapace-gateway.service");
     }
   });
 
@@ -3967,7 +3967,7 @@ printf '%s\n' "$status" >"$TMPDIR/status"
       writeFileSync(
         childPath,
         `import fs from "node:fs";
-fs.writeFileSync(process.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH, ${JSON.stringify(JSON.stringify(result))});
+fs.writeFileSync(process.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH, ${JSON.stringify(JSON.stringify(result))});
 process.stdout.write("original stdout\\n");
 process.exit(${code});
 `,
@@ -4047,10 +4047,10 @@ process.exit(${code});
         rmSync(resultPath);
       }
       if (scenario === "missing-context") {
-        env.OPENCLAW_UPDATE_POST_CORE = "";
+        env.CARAPACE_UPDATE_POST_CORE = "";
       }
       if (scenario === "wrong-file") {
-        env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH = join(dirname(resultPath), "source-config.json");
+        env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH = join(dirname(resultPath), "source-config.json");
       }
       if (scenario === "outside-tmp") {
         env.TMPDIR = artifacts;
@@ -4126,9 +4126,9 @@ process.exit(78);
       const artifactSetup = published
         ? source.slice(
             source.indexOf("ARTIFACT_ROOT="),
-            source.indexOf("export OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT="),
+            source.indexOf("export CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT="),
           )
-        : 'ARTIFACT_ROOT="$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT"';
+        : 'ARTIFACT_ROOT="$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT"';
       const update = published
         ? source.slice(
             source.indexOf("update_candidate() {"),
@@ -4139,16 +4139,16 @@ process.exit(78);
             .split('if [ "$update_status" -ne 0 ]; then')[0]! + "\nlane_exit=$update_status";
       const bin = join(workDir, "bin");
       writeExecutables(bin, {
-        openclaw: `#!${process.execPath}
+        carapace: `#!${process.execPath}
 const fs = require("node:fs"), path = require("node:path"), { spawnSync } = require("node:child_process");
-fs.appendFileSync(path.join(process.env.TMPDIR,"invocations.jsonl"), JSON.stringify({argv:process.argv.slice(2), options:process.env.NODE_OPTIONS, artifactRoot:process.env.OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT})+"\\n");
-if (process.env.OPENCLAW_UPDATE_POST_CORE === "1") {
-  fs.writeFileSync(process.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH, JSON.stringify({status:"error",changed:false,sync:{changed:false,switchedToBundled:[],switchedToNpm:[],warnings:[],errors:[]},npm:{changed:false,outcomes:[]},integrityDrifts:[]}));
+fs.appendFileSync(path.join(process.env.TMPDIR,"invocations.jsonl"), JSON.stringify({argv:process.argv.slice(2), options:process.env.NODE_OPTIONS, artifactRoot:process.env.CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT})+"\\n");
+if (process.env.CARAPACE_UPDATE_POST_CORE === "1") {
+  fs.writeFileSync(process.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH, JSON.stringify({status:"error",changed:false,sync:{changed:false,switchedToBundled:[],switchedToNpm:[],warnings:[],errors:[]},npm:{changed:false,outcomes:[]},integrityDrifts:[]}));
   process.exit(0);
 }
 if (process.argv[2] !== "update") process.exit(0);
-const resultDir = fs.mkdtempSync(path.join(process.env.TMPDIR,"openclaw-update-post-core-"));
-const child = spawnSync(process.execPath, [__filename,"update","--json"], {env:{...process.env, OPENCLAW_UPDATE_POST_CORE:"1",OPENCLAW_UPDATE_POST_CORE_RESULT_PATH:path.join(resultDir,"plugins.json")}});
+const resultDir = fs.mkdtempSync(path.join(process.env.TMPDIR,"carapace-update-post-core-"));
+const child = spawnSync(process.execPath, [__filename,"update","--json"], {env:{...process.env, CARAPACE_UPDATE_POST_CORE:"1",CARAPACE_UPDATE_POST_CORE_RESULT_PATH:path.join(resultDir,"plugins.json")}});
 if (child.status !== 0) process.exit(90);
 fs.rmSync(resultDir,{recursive:true});
 process.exit(78);
@@ -4160,14 +4160,14 @@ process.exit(78);
           "-c",
           `
 ${artifactSetup}
-openclaw_e2e_maybe_timeout() { shift; "$@"; }
-openclaw_e2e_print_log() { :; }
-candidate_update_spec() { printf "%s" "$OPENCLAW_CURRENT_PACKAGE_TGZ"; }
+carapace_e2e_maybe_timeout() { shift; "$@"; }
+carapace_e2e_print_log() { :; }
+candidate_update_spec() { printf "%s" "$CARAPACE_CURRENT_PACKAGE_TGZ"; }
 COMMAND_TIMEOUT=900s
 command_timeout=900s
 ROOT_MANAGED_VPS=0
 UPDATE_RESTART_MODE=auto-auth
-baseline_spec=openclaw@2026.7.1-2
+baseline_spec=carapace@2026.7.1-2
 candidate_version=2026.8.1
 CANDIDATE_KIND=tarball
 UPDATE_JSON="$ARTIFACT_ROOT/update.json"
@@ -4183,11 +4183,11 @@ exit "$lane_exit"
           encoding: "utf8",
           env: {
             ...env,
-            OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: published ? undefined : artifacts,
-            OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
+            CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: published ? undefined : artifacts,
+            CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
             PATH: `${bin}:${process.env.PATH}`,
-            OPENCLAW_UPDATE_POST_CORE: "",
-            OPENCLAW_CURRENT_PACKAGE_TGZ: join(workDir, "candidate.tgz"),
+            CARAPACE_UPDATE_POST_CORE: "",
+            CARAPACE_CURRENT_PACKAGE_TGZ: join(workDir, "candidate.tgz"),
           },
         },
       );
@@ -4227,11 +4227,11 @@ exit "$lane_exit"
   );
 
   it("exposes the published survivor service through the manager fixture", () => {
-    const workDir = tempDirs.make("openclaw-published-survivor-manager-");
+    const workDir = tempDirs.make("carapace-published-survivor-manager-");
     const unitDir = join(workDir, ".config", "systemd", "user");
     mkdirSync(unitDir, { recursive: true });
     writeFileSync(
-      join(unitDir, "openclaw-gateway.service"),
+      join(unitDir, "carapace-gateway.service"),
       "[Service]\nExecStart=/usr/bin/node /fixture/gateway.mjs\n",
     );
     const source = readFileSync(UPGRADE_SURVIVOR_RUN_SCRIPT, "utf8");
@@ -4244,7 +4244,7 @@ exit "$lane_exit"
 trap - EXIT ERR INT TERM
 install_update_restart_systemctl_shim
 test -x "$npm_config_prefix/bin/busctl"
-"$npm_config_prefix/bin/busctl" --user --json=short call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager LoadUnit s openclaw-gateway.service
+"$npm_config_prefix/bin/busctl" --user --json=short call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager LoadUnit s carapace-gateway.service
 `,
       ],
       {
@@ -4252,23 +4252,23 @@ test -x "$npm_config_prefix/bin/busctl"
         env: {
           ...process.env,
           HOME: workDir,
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.4.15",
-          OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: join(workDir, "artifacts", "summary.json"),
-          OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.4.15",
+          CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: join(workDir, "artifacts", "summary.json"),
+          CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
         },
       },
     );
     expect(result.status, result.stdout + result.stderr).toBe(0);
     expect(JSON.parse(result.stdout.trim())).toEqual({
       type: "o",
-      data: ["/org/freedesktop/systemd1/unit/openclaw_2dgateway_2eservice"],
+      data: ["/org/freedesktop/systemd1/unit/carapace_2dgateway_2eservice"],
     });
   });
 
   it.each(["unchanged", "pid-only", "request-only", "replaced"])(
     "requires an update-owned service replacement after consent recovery (%s)",
     (mode) => {
-      const workDir = tempDirs.make("openclaw-survivor-recovery-restart-");
+      const workDir = tempDirs.make("carapace-survivor-recovery-restart-");
       const artifacts = join(workDir, "artifacts");
       const bin = join(workDir, "bin");
       mkdirSync(artifacts);
@@ -4277,15 +4277,15 @@ test -x "$npm_config_prefix/bin/busctl"
       const invocation = join(artifacts, "update-invoked");
       writeFileSync(pidFile, "12345\n");
       // An earlier baseline restart must not count for the recovery invocation.
-      writeFileSync(logFile, "--user restart openclaw-gateway.service\n");
+      writeFileSync(logFile, "--user restart carapace-gateway.service\n");
       writeExecutables(bin, {
         systemctl: "#!/usr/bin/env bash\nexit 0\n",
-        openclaw: `#!${process.execPath}
+        carapace: `#!${process.execPath}
 const fs = require("node:fs");
 if (process.argv[2] !== "update") throw new Error("expected updater invocation");
 fs.writeFileSync(${JSON.stringify(invocation)}, "update\\n");
-if (["pid-only", "replaced"].includes(process.env.RESTART_TEST_MODE)) fs.writeFileSync(process.env.OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE, "23456\\n");
-if (["request-only", "replaced"].includes(process.env.RESTART_TEST_MODE)) fs.appendFileSync(process.env.OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG, "--user restart openclaw-gateway.service\\n");
+if (["pid-only", "replaced"].includes(process.env.RESTART_TEST_MODE)) fs.writeFileSync(process.env.CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE, "23456\\n");
+if (["request-only", "replaced"].includes(process.env.RESTART_TEST_MODE)) fs.appendFileSync(process.env.CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG, "--user restart carapace-gateway.service\\n");
 console.log(JSON.stringify({status:"ok",after:{version:"2026.8.1"},steps:[{name:"global update",exitCode:0}]}));
 `,
       });
@@ -4300,7 +4300,7 @@ console.log(JSON.stringify({status:"ok",after:{version:"2026.8.1"},steps:[{name:
           "-c",
           `set -eu
 source ${shellQuote(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH)}
-openclaw_e2e_maybe_timeout() { shift; "$@"; }
+carapace_e2e_maybe_timeout() { shift; "$@"; }
 candidate_update_spec() { printf '%s' fixture.tgz; }
 read_installed_version() { printf '%s' 2026.8.1; }
 ARTIFACT_ROOT=${shellQuote(artifacts)}
@@ -4313,7 +4313,7 @@ ROOT_MANAGED_VPS=0
 UPDATE_RESTART_MODE=auto-auth
 SCENARIO=base
 update_repair_required=1
-baseline_spec=openclaw@2026.4.15
+baseline_spec=carapace@2026.4.15
 candidate_version=2026.8.1
 CANDIDATE_KIND=tarball
 ${update}
@@ -4326,8 +4326,8 @@ update_candidate 1
             ...process.env,
             PATH: `${bin}:${process.env.PATH ?? ""}`,
             RESTART_TEST_MODE: mode,
-            OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: pidFile,
-            OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: logFile,
+            CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: pidFile,
+            CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: logFile,
           },
         },
       );
@@ -4356,7 +4356,7 @@ update_candidate 1
         }),
       );
       writeFileSync(
-        join(root, "openclaw.plugin.json"),
+        join(root, "carapace.plugin.json"),
         JSON.stringify({
           id: "example",
           version: "1.0.0",
@@ -4364,7 +4364,7 @@ update_candidate 1
         }),
       );
       writeFileSync(
-        join(state, "openclaw.json"),
+        join(state, "carapace.json"),
         JSON.stringify({
           credentials: "PRIVATE_CONFIG_FIELD",
           plugins: { installs: { secret: "PRIVATE_CONFIG_RECORD" } },
@@ -4395,7 +4395,7 @@ update_candidate 1
         credentials: "PRIVATE_INDEX_TOP_LEVEL",
       };
       if (storage !== "historical") {
-        const dbPath = join(state, "state", "openclaw.sqlite");
+        const dbPath = join(state, "state", "carapace.sqlite");
         mkdirSync(dirname(dbPath), { recursive: true });
         const writer = spawnSync(
           process.execPath,
@@ -4428,7 +4428,7 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
       }
       const stateFiles = () =>
         readdirSync(state, { recursive: true, withFileTypes: true })
-          .filter((entry) => entry.isFile() && entry.name !== "openclaw.sqlite-shm")
+          .filter((entry) => entry.isFile() && entry.name !== "carapace.sqlite-shm")
           .map((entry) => {
             const file = join(entry.parentPath, entry.name);
             const stat = statSync(file);
@@ -4442,7 +4442,7 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
           });
       const before = stateFiles();
       const shmIdentity = () => {
-        const stat = statSync(join(state, "state", "openclaw.sqlite-shm"));
+        const stat = statSync(join(state, "state", "carapace.sqlite-shm"));
         return [stat.dev, stat.ino, stat.size, stat.nlink];
       };
       const shmBefore = storage === "wal" ? shmIdentity() : undefined;
@@ -4453,8 +4453,8 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
         {
           env: {
             ...env,
-            OPENCLAW_STATE_DIR: state,
-            OPENCLAW_CONFIG_PATH: join(state, "openclaw.json"),
+            CARAPACE_STATE_DIR: state,
+            CARAPACE_CONFIG_PATH: join(state, "carapace.json"),
           },
           encoding: "utf8",
           cwd: workDir,
@@ -4547,7 +4547,7 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
     }
     const captured = runSurvivorDiagnostics("capture", artifacts, ["update-candidate", "1"], {
       ...env,
-      OPENCLAW_STATE_DIR: state,
+      CARAPACE_STATE_DIR: state,
     });
     expect(captured.status, captured.stderr).toBe(0);
     const published = runSurvivorDiagnostics("publish", artifacts, [join(workDir, "public")]);
@@ -4567,9 +4567,9 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
   it.each([false, true])(
     "retains a failed service child and only sanitized diagnostics (candidate redactor: %s)",
     async (candidateRedactorPresent) => {
-      const workDir = tempDirs.make("openclaw-survivor-diagnostics-");
+      const workDir = tempDirs.make("carapace-survivor-diagnostics-");
       const artifacts = join(workDir, "artifacts");
-      const state = join(workDir, "home", ".openclaw");
+      const state = join(workDir, "home", ".carapace");
       const unitDir = join(workDir, "home", ".config", "systemd", "user");
       mkdirSync(artifacts);
       mkdirSync(join(state, "logs"), { recursive: true });
@@ -4577,14 +4577,14 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
       mkdirSync(join(artifacts, "npm-prefix"));
       const secret = "sk-survivor-secret-should-never-be-uploaded";
       const privateSentinel = "PRIVATE_CONFIG_AND_NPM_PREFIX_SENTINEL";
-      writeFileSync(join(state, "openclaw.json"), JSON.stringify({ privateSentinel }));
+      writeFileSync(join(state, "carapace.json"), JSON.stringify({ privateSentinel }));
       writeFileSync(join(state, "auth-profiles.json"), privateSentinel);
       writeFileSync(join(artifacts, "npm-prefix", "credential"), privateSentinel);
       writeFileSync(join(artifacts, "config-recipe.json"), privateSentinel);
       writeFileSync(join(state, "gateway.systemd.env"), `API_KEY=${secret}\n`);
       writeFileSync(join(state, "logs", "gateway-restart.log"), `restart: token=${secret}\n`);
       writeFileSync(
-        join(unitDir, "openclaw-gateway.service"),
+        join(unitDir, "carapace-gateway.service"),
         `[Service]\nExecStart=${process.execPath} gateway --token ${secret}\nWorkingDirectory=/safe/service\nEnvironment="API_KEY=${secret}"\n`,
       );
       writeFileSync(join(artifacts, "doctor.log"), `doctor: token=${secret}\n`);
@@ -4606,9 +4606,9 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
       const supervisor = spawn(process.execPath, [supervisorPath], {
         env: {
           ...process.env,
-          OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-          OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-          OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(childPath)}`,
+          CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+          CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+          CARAPACE_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(childPath)}`,
         },
         stdio: "ignore",
       });
@@ -4617,9 +4617,9 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
       expect(observation.last).toMatchObject({ code: 78, signal: null });
       const managerEnv = {
         HOME: join(workDir, "home"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(artifacts, "systemctl-shim.log"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(workDir, "missing.pid"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(artifacts, "systemctl-shim.log"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(workDir, "missing.pid"),
       };
       const shimPath = installUpgradeSurvivorSystemctlShim(workDir, managerEnv);
       const shown = spawnSync("bash", [shimPath, ...SURVIVOR_SERVICE_SHOW_ARGS], {
@@ -4633,13 +4633,13 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
       expect(shown.stdout).toContain("ExecMainStatus=78");
       const fixtureEnv = {
         HOME: join(workDir, "home"),
-        OPENCLAW_STATE_DIR: state,
-        OPENCLAW_CONFIG_PATH: join(state, "openclaw.json"),
+        CARAPACE_STATE_DIR: state,
+        CARAPACE_CONFIG_PATH: join(state, "carapace.json"),
         npm_config_prefix: join(artifacts, "npm-prefix"),
       };
       // One candidate is absent; the other has a redactor that must never execute.
       if (candidateRedactorPresent) {
-        const candidate = join(artifacts, "npm-prefix", "lib", "node_modules", "openclaw");
+        const candidate = join(artifacts, "npm-prefix", "lib", "node_modules", "carapace");
         mkdirSync(join(candidate, "dist", "plugin-sdk"), { recursive: true });
         writeFileSync(join(candidate, "package.json"), '{"type":"module"}');
         writeFileSync(
@@ -4700,11 +4700,11 @@ ${storage === "wal" ? 'process.kill(process.pid, "SIGKILL");' : ""}`,
   it.each([UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH])(
     "retains supervisor bootstrap stderr without inventing a child exit in %s",
     async (scriptPath) => {
-      const workDir = tempDirs.make("openclaw-survivor-bootstrap-");
+      const workDir = tempDirs.make("carapace-survivor-bootstrap-");
       const unitDir = join(workDir, ".config", "systemd", "user");
       mkdirSync(unitDir, { recursive: true });
       writeFileSync(
-        join(unitDir, "openclaw-gateway.service"),
+        join(unitDir, "carapace-gateway.service"),
         `[Service]\nExecStart="${process.execPath}" unused\n`,
       );
       const binDir = join(workDir, "bin");
@@ -4720,12 +4720,12 @@ exec ${shellQuote(process.execPath)} "$@"
       const fixtureEnv = {
         ...process.env,
         HOME: workDir,
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(workDir, "systemctl.log"),
-        OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(workDir, "supervisor.pid"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG: join(workDir, "systemctl.log"),
+        CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE: join(workDir, "supervisor.pid"),
       };
       const shimPath = installUpgradeSurvivorSystemctlShim(workDir, fixtureEnv, scriptPath);
-      const started = spawnSync("bash", [shimPath, "--user", "start", "openclaw-gateway.service"], {
+      const started = spawnSync("bash", [shimPath, "--user", "start", "carapace-gateway.service"], {
         encoding: "utf8",
         env: { ...fixtureEnv, PATH: `${binDir}:${process.env.PATH ?? ""}` },
       });
@@ -4752,7 +4752,7 @@ exec ${shellQuote(process.execPath)} "$@"
   );
 
   it("refuses unsafe private inputs before host publication", () => {
-    const workDir = tempDirs.make("openclaw-survivor-unsafe-diagnostics-");
+    const workDir = tempDirs.make("carapace-survivor-unsafe-diagnostics-");
     const artifacts = join(workDir, "artifacts");
     mkdirSync(artifacts);
     const privatePath = join(workDir, "private");
@@ -4770,8 +4770,8 @@ exec ${shellQuote(process.execPath)} "$@"
     const fixtureEnv = {
       ...process.env,
       HOME: workDir,
-      OPENCLAW_STATE_DIR: workDir,
-      OPENCLAW_CONFIG_PATH: join(workDir, "absent"),
+      CARAPACE_STATE_DIR: workDir,
+      CARAPACE_CONFIG_PATH: join(workDir, "absent"),
     };
     const result = spawnSync(
       process.execPath,
@@ -4801,7 +4801,7 @@ exec ${shellQuote(process.execPath)} "$@"
         scriptPath === UPGRADE_SURVIVOR_RUN_SCRIPT
           ? source.split("\nphase storage-preflight storage_preflight")[0]
           : extractUpgradeSurvivorPayload(source).split(
-              "\nopenclaw_e2e_eval_test_state_from_b64",
+              "\ncarapace_e2e_eval_test_state_from_b64",
             )[0];
       for (const [exitCode, blocked, completed] of [
         [78, false, true],
@@ -4809,7 +4809,7 @@ exec ${shellQuote(process.execPath)} "$@"
         [0, true, true],
         [0, false, false],
       ] as const) {
-        const workDir = tempDirs.make("openclaw-survivor-exit-diagnostics-");
+        const workDir = tempDirs.make("carapace-survivor-exit-diagnostics-");
         const artifacts = join(workDir, "artifacts");
         mkdirSync(artifacts);
         if (blocked) {
@@ -4832,12 +4832,12 @@ exit ${exitCode}
             env: {
               ...process.env,
               HOME: workDir,
-              OPENCLAW_STATE_DIR: workDir,
-              OPENCLAW_CONFIG_PATH: join(workDir, "absent"),
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.7.1-2",
-              OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
-              OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
-              OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
+              CARAPACE_STATE_DIR: workDir,
+              CARAPACE_CONFIG_PATH: join(workDir, "absent"),
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.7.1-2",
+              CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(workDir, "runtime"),
+              CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
+              CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: join(artifacts, "summary.json"),
             },
           },
         );
@@ -4874,7 +4874,7 @@ exit ${exitCode}
   ] as const)(
     "checks self-upgrade %s against its package contract: %s",
     (phase, fixture, exitCode) => {
-      const workDir = tempDirs.make("openclaw-self-upgrade-wizard-");
+      const workDir = tempDirs.make("carapace-self-upgrade-wizard-");
       const source = readFileSync(
         "scripts/e2e/lib/upgrade-survivor/update-run-package-self-upgrade.sh",
         "utf8",
@@ -4918,7 +4918,7 @@ exit ${exitCode}
           `set -euo pipefail
 ${assertions}
 ${source.slice(targetStart, waitEnd)}
-openclaw_e2e_print_log() { cat "$1"; }
+carapace_e2e_print_log() { cat "$1"; }
 gateway_call() {
   printf '%s\\n' "$1" >>"$PROBE_CALLS"
   : >"$4"
@@ -4974,7 +4974,7 @@ ${invocation}
   ] as const)(
     "retains self-upgrade RPC evidence through the actual launcher: %s (exit %s, blocked publication: %s)",
     (scenario, expectedStatus, blockedPublication) => {
-      const workDir = tempDirs.make("openclaw-self-upgrade-diagnostics-");
+      const workDir = tempDirs.make("carapace-self-upgrade-diagnostics-");
       const artifacts = join(workDir, "private");
       const publicRoot = join(workDir, "public");
       const fixtureRoot = join(workDir, "historical");
@@ -4985,7 +4985,7 @@ ${invocation}
         join(fixtureRoot, "extensions/qa-channel/package.json"),
         '{"version":"2026.4.25"}',
       );
-      for (const file of ["package.json", "openclaw.plugin.json", "index.js", "setup-entry.js"]) {
+      for (const file of ["package.json", "carapace.plugin.json", "index.js", "setup-entry.js"]) {
         writeFileSync(join(pluginRoot, file), "{}");
       }
       if (blockedPublication) {
@@ -5026,7 +5026,7 @@ case " $* " in
 esac
 `,
         corepack: "#!/bin/sh\nexit 0\n",
-        openclaw: `#!/bin/sh
+        carapace: `#!/bin/sh
 printf '{"ok":${rpcStatus === 0},"fixture":"named RPC response"}\\n'
 printf 'controlled RPC stderr token=SELF_UPGRADE_SECRET\\n' >&2
 exit ${rpcStatus}
@@ -5053,11 +5053,11 @@ exit 0
             PATH: `${binDir}:${process.env.PATH ?? ""}`,
             TEST_REPO_ROOT: process.cwd(),
             TEST_FIXTURE_ROOT: fixtureRoot,
-            OPENCLAW_SKIP_DOCKER_BUILD: "1",
-            OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF: "1",
-            OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR: artifacts,
-            OPENCLAW_UPDATE_RUN_SELF_UPGRADE_RUNTIME_ROOT: join(workDir, "runtime"),
-            OPENCLAW_DOCKER_ALL_LOG_DIR: publicRoot,
+            CARAPACE_SKIP_DOCKER_BUILD: "1",
+            CARAPACE_QA_ALLOW_UPDATE_RUN_SELF: "1",
+            CARAPACE_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR: artifacts,
+            CARAPACE_UPDATE_RUN_SELF_UPGRADE_RUNTIME_ROOT: join(workDir, "runtime"),
+            CARAPACE_DOCKER_ALL_LOG_DIR: publicRoot,
           },
         },
       );
@@ -5099,7 +5099,7 @@ exit 0
   it.each(["config-recipe", "../config-recipe", "wizard-not-a-declared-rpc"])(
     "rejects candidate-selected private RPC evidence: %s",
     (rpcName) => {
-      const workDir = tempDirs.make("openclaw-rpc-diagnostics-contract-");
+      const workDir = tempDirs.make("carapace-rpc-diagnostics-contract-");
       const artifacts = join(workDir, "private");
       mkdirSync(join(artifacts, "diagnostics"), { recursive: true });
       writeFileSync(join(artifacts, "diagnostics/last-rpc"), rpcName);
@@ -5131,7 +5131,7 @@ exit 0
         [42, false],
         [0, false],
       ] as const) {
-        const workDir = tempDirs.make("openclaw-survivor-host-publication-");
+        const workDir = tempDirs.make("carapace-survivor-host-publication-");
         const artifacts = join(workDir, "private");
         const registry = join(workDir, "registry");
         const publicRoot = join(workDir, "public");
@@ -5157,11 +5157,11 @@ set -euo pipefail
 if [ "$1" = run ]; then
   printf "%s\\n" "$@" >"$TMPDIR/docker-args"
   test ! -e "$TMPDIR/public"
-  test ! -e "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR/diagnostics/raw.json"
-  test ! -e "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR/diagnostics/post-core.json"
+  test ! -e "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR/diagnostics/raw.json"
+  test ! -e "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR/diagnostics/post-core.json"
   if [ "${capturePresent}" = true ]; then
-    printf "startup failure token=HOST_PUBLICATION_SECRET\\n" >"$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR/update.err"
-    ${shellQuote(process.execPath)} ${shellQuote(join(process.cwd(), UPGRADE_SURVIVOR_DIAGNOSTICS_PATH))} capture "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR" update-candidate ${exitCode}
+    printf "startup failure token=HOST_PUBLICATION_SECRET\\n" >"$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR/update.err"
+    ${shellQuote(process.execPath)} ${shellQuote(join(process.cwd(), UPGRADE_SURVIVOR_DIAGNOSTICS_PATH))} capture "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR" update-candidate ${exitCode}
   fi
   exit ${exitCode}
 fi
@@ -5176,22 +5176,22 @@ exit 0
             HOME: workDir,
             TMPDIR: workDir,
             PATH: `${binDir}:${process.env.PATH ?? ""}`,
-            OPENCLAW_CONFIG_PATH: join(workDir, "absent"),
-            OPENCLAW_STATE_DIR: workDir,
-            OPENCLAW_SKIP_DOCKER_BUILD: "1",
-            OPENCLAW_CURRENT_PACKAGE_TGZ: join(workDir, "candidate.tgz"),
-            OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
-            OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR: artifacts,
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: publishedBaseline ? "1" : "0",
-            OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@2026.7.1-2",
-            OPENCLAW_DOCKER_ALL_LOG_DIR: "public",
+            CARAPACE_CONFIG_PATH: join(workDir, "absent"),
+            CARAPACE_STATE_DIR: workDir,
+            CARAPACE_SKIP_DOCKER_BUILD: "1",
+            CARAPACE_CURRENT_PACKAGE_TGZ: join(workDir, "candidate.tgz"),
+            CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
+            CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR: artifacts,
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: publishedBaseline ? "1" : "0",
+            CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@2026.7.1-2",
+            CARAPACE_DOCKER_ALL_LOG_DIR: "public",
           },
         });
         expect(result.status, result.stdout + result.stderr).toBe(exitCode);
         const dockerArgs = readFileSync(join(workDir, "docker-args"), "utf8");
-        expect(dockerArgs).toContain(`${artifacts}:/tmp/openclaw-upgrade-survivor-artifacts`);
+        expect(dockerArgs).toContain(`${artifacts}:/tmp/carapace-upgrade-survivor-artifacts`);
         expect(dockerArgs).not.toContain(publicRoot);
-        expect(dockerArgs).not.toContain(":/tmp/openclaw-upgrade-survivor-artifacts/diagnostics");
+        expect(dockerArgs).not.toContain(":/tmp/carapace-upgrade-survivor-artifacts/diagnostics");
         if (capturePresent) {
           const directories = readdirSync(publicRoot);
           expect(directories).toHaveLength(1);
@@ -5215,7 +5215,7 @@ exit 0
   );
 
   it("stops supervised gateway restarts after the systemd burst limit", async () => {
-    const workDir = tempDirs.make("openclaw-update-restart-supervisor-");
+    const workDir = tempDirs.make("carapace-update-restart-supervisor-");
     const scripts = [readFileSync(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH, "utf8")];
 
     for (const [index, script] of scripts.entries()) {
@@ -5233,9 +5233,9 @@ exit 0
         env: {
           ...process.env,
           COUNT_FILE: countPath,
-          OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-          OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-          OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: command,
+          CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+          CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+          CARAPACE_SYSTEMCTL_SHIM_EXEC_START: command,
         },
         stdio: "ignore",
       });
@@ -5250,7 +5250,7 @@ exit 0
   });
 
   it("allows a supervised gateway to drain within the systemd stop timeout", async () => {
-    const workDir = tempDirs.make("openclaw-update-restart-graceful-stop-");
+    const workDir = tempDirs.make("carapace-update-restart-graceful-stop-");
     const scripts = [readFileSync(UPGRADE_SURVIVOR_UPDATE_RESTART_AUTH_PATH, "utf8")];
 
     for (const [index, script] of scripts.entries()) {
@@ -5268,9 +5268,9 @@ exit 0
       const supervisor = spawn(process.execPath, [supervisorPath], {
         env: {
           ...process.env,
-          OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-          OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-          OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: command,
+          CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+          CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+          CARAPACE_SYSTEMCTL_SHIM_EXEC_START: command,
           STATE_FILE: statePath,
         },
         stdio: "ignore",
@@ -5294,12 +5294,12 @@ exit 0
   });
 
   it("preserves the ClawHub fixture URL across a supervised gateway restart", async () => {
-    const workDir = tempDirs.make("openclaw-update-restart-clawhub-env-");
+    const workDir = tempDirs.make("carapace-update-restart-clawhub-env-");
     const gatewayPath = join(workDir, "gateway.mjs");
     writeFileSync(
       gatewayPath,
       `import fs from "node:fs";
-fs.appendFileSync(process.env.URLS_FILE, process.env.OPENCLAW_CLAWHUB_URL + "\\n");
+fs.appendFileSync(process.env.URLS_FILE, process.env.CARAPACE_CLAWHUB_URL + "\\n");
 const starts = fs.readFileSync(process.env.URLS_FILE, "utf8").trim().split("\\n").length;
 process.exit(starts === 1 ? 1 : 78);
 `,
@@ -5319,10 +5319,10 @@ process.exit(starts === 1 ? 1 : 78);
       const supervisor = spawn(process.execPath, [supervisorPath], {
         env: {
           ...process.env,
-          OPENCLAW_CLAWHUB_URL: "http://127.0.0.1:43123",
-          OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-          OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-          OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
+          CARAPACE_CLAWHUB_URL: "http://127.0.0.1:43123",
+          CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+          CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+          CARAPACE_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
           URLS_FILE: urlsPath,
         },
         stdio: "ignore",
@@ -5345,7 +5345,7 @@ process.exit(starts === 1 ? 1 : 78);
   it.skipIf(process.platform === "win32")(
     "terminates supervised gateway descendants at the systemd stop timeout",
     async () => {
-      const workDir = tempDirs.make("openclaw-update-restart-process-group-");
+      const workDir = tempDirs.make("carapace-update-restart-process-group-");
       const descendantPath = writeTermIgnoringDescendant(workDir);
       const gatewayPath = join(workDir, "gateway.mjs");
       writeFileSync(
@@ -5385,9 +5385,9 @@ setInterval(() => {}, 1_000);
             ...process.env,
             DESCENDANT_PID_FILE: descendantPidPath,
             DESCENDANT_SCRIPT: descendantPath,
-            OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-            OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-            OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
+            CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+            CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+            CARAPACE_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
             STATE_FILE: statePath,
           },
           stdio: "ignore",
@@ -5421,7 +5421,7 @@ setInterval(() => {}, 1_000);
   it.skipIf(process.platform === "win32")(
     "drains the previous gateway process group before restarting",
     async () => {
-      const workDir = tempDirs.make("openclaw-update-restart-process-group-restart-");
+      const workDir = tempDirs.make("carapace-update-restart-process-group-restart-");
       const descendantPath = writeTermIgnoringDescendant(workDir);
       const gatewayPath = join(workDir, "restart-gateway.mjs");
       writeFileSync(
@@ -5470,9 +5470,9 @@ if (starts === 1) {
             ...process.env,
             DESCENDANT_PID_FILE: descendantPidPath,
             DESCENDANT_SCRIPT: descendantPath,
-            OPENCLAW_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
-            OPENCLAW_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
-            OPENCLAW_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
+            CARAPACE_SYSTEMCTL_SHIM_DAEMON_LOG: logPath,
+            CARAPACE_SYSTEMCTL_SHIM_MANAGER_ENV: "{}",
+            CARAPACE_SYSTEMCTL_SHIM_EXEC_START: `${shellQuote(process.execPath)} ${shellQuote(gatewayPath)}`,
             REPLACEMENT_FILE: replacementPath,
             STARTS_FILE: startsPath,
           },
@@ -5492,17 +5492,17 @@ if (starts === 1) {
   );
 
   it.each([
-    ["start budget", "OPENCLAW_UPGRADE_SURVIVOR_START_BUDGET_SECONDS", "90s"],
-    ["status budget", "OPENCLAW_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS", "30s"],
-    ["probe timeout", "OPENCLAW_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS", "soon"],
-    ["probe attempt timeout", "OPENCLAW_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS", "0"],
-    ["probe body cap", "OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES", "64bytes"],
+    ["start budget", "CARAPACE_UPGRADE_SURVIVOR_START_BUDGET_SECONDS", "90s"],
+    ["status budget", "CARAPACE_UPGRADE_SURVIVOR_STATUS_BUDGET_SECONDS", "30s"],
+    ["probe timeout", "CARAPACE_UPGRADE_SURVIVOR_PROBE_TIMEOUT_MS", "soon"],
+    ["probe attempt timeout", "CARAPACE_UPGRADE_SURVIVOR_PROBE_ATTEMPT_TIMEOUT_MS", "0"],
+    ["probe body cap", "CARAPACE_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES", "64bytes"],
   ])("rejects invalid upgrade survivor Docker %s before Docker setup", (_label, envName, value) => {
     const result = spawnSync("bash", [UPGRADE_SURVIVOR_DOCKER_E2E_PATH], {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_UPGRADE_SURVIVOR_E2E_SKIP_BUILD: "1",
+        CARAPACE_UPGRADE_SURVIVOR_E2E_SKIP_BUILD: "1",
         [envName]: value,
       },
     });
@@ -5520,27 +5520,27 @@ if (starts === 1) {
     expectTextToIncludeInOrder(runner, [
       "update_status=$?",
       'if [ "$update_status" -ne 0 ]; then',
-      'echo "openclaw update failed" >&2',
-      'openclaw config validate --json >"$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
+      'echo "carapace update failed" >&2',
+      'carapace config validate --json >"$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
       'echo "post-update config validation probe status=$validate_status" >&2',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err" >&2 || true',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json" >&2 || true',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err" >&2 || true',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json" >&2 || true',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err" >&2 || true',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json" >&2 || true',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err" >&2 || true',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json" >&2 || true',
       'exit "$update_status"',
     ]);
     expectTextToIncludeInOrder(publishedRunner, [
       "local update_status=0",
-      'openclaw "${update_args[@]}" >"$update_json" 2>"$update_err" || update_status=$?',
+      'carapace "${update_args[@]}" >"$update_json" 2>"$update_err" || update_status=$?',
       "assert-recoverable-update-json",
       "assert-successful-update-json",
-      'echo "openclaw update failed before the recoverable post-core boundary" >&2',
-      'openclaw config validate --json >"$POST_UPDATE_VALIDATE_JSON"',
+      'echo "carapace update failed before the recoverable post-core boundary" >&2',
+      'carapace config validate --json >"$POST_UPDATE_VALIDATE_JSON"',
       'echo "post-update config validation probe status=$validate_status" >&2',
-      'openclaw_e2e_print_log "$POST_UPDATE_VALIDATE_ERR" >&2 || true',
-      'openclaw_e2e_print_log "$POST_UPDATE_VALIDATE_JSON" >&2 || true',
-      'openclaw_e2e_print_log "$update_err" >&2 || true',
-      'openclaw_e2e_print_log "$update_json" >&2 || true',
+      'carapace_e2e_print_log "$POST_UPDATE_VALIDATE_ERR" >&2 || true',
+      'carapace_e2e_print_log "$POST_UPDATE_VALIDATE_JSON" >&2 || true',
+      'carapace_e2e_print_log "$update_err" >&2 || true',
+      'carapace_e2e_print_log "$update_json" >&2 || true',
       'return "$update_status"',
     ]);
     expect(publishedRunner).not.toContain("update_args+=(--accept-capabilities)");
@@ -5551,49 +5551,49 @@ if (starts === 1) {
       "phase transcript-export node scripts/e2e/lib/upgrade-survivor/assertions.mjs assert-meeting-transcript-export",
       "phase gateway-start ensure_gateway_started",
     ]);
-    expect(publishedRunner).not.toContain("systemctl --user restart openclaw-gateway.service");
+    expect(publishedRunner).not.toContain("systemctl --user restart carapace-gateway.service");
     expect(publishedRunner).toContain("phase recovery-update-restart update_candidate 1");
 
     expectTextToIncludeAll(runner, [
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/doctor.log"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.err"',
-      'openclaw_e2e_print_log "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.json"',
-      'openclaw_e2e_print_log "$GATEWAY_LOG"',
-      'openclaw_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG"',
-      'openclaw_e2e_print_log "$log_file"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/doctor.log"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.err"',
+      'carapace_e2e_print_log "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.json"',
+      'carapace_e2e_print_log "$GATEWAY_LOG"',
+      'carapace_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG"',
+      'carapace_e2e_print_log "$log_file"',
     ]);
 
-    expect(runner).not.toContain('cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err"');
-    expect(runner).not.toContain('cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json"');
+    expect(runner).not.toContain('cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.err"');
+    expect(runner).not.toContain('cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/update.json"');
     expect(runner).not.toContain(
-      'cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err"',
+      'cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.err"',
     );
     expect(runner).not.toContain(
-      'cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
+      'cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/post-update-validate.json"',
     );
-    expect(runner).not.toContain('cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/doctor.log"');
-    expect(runner).not.toContain('cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.err"');
-    expect(runner).not.toContain('cat "$OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.json"');
+    expect(runner).not.toContain('cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/doctor.log"');
+    expect(runner).not.toContain('cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.err"');
+    expect(runner).not.toContain('cat "$CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT/status.json"');
     expect(runner).not.toContain('cat "$GATEWAY_LOG"');
     expect(runner).not.toContain('cat "$SYSTEMCTL_SHIM_DAEMON_LOG"');
     expect(runner).not.toContain('cat "$log_file"');
-    expect(runner).not.toContain('openclaw_e2e_print_log "$SYSTEMCTL_SHIM_LOG"');
+    expect(runner).not.toContain('carapace_e2e_print_log "$SYSTEMCTL_SHIM_LOG"');
 
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$BASELINE_INSTALL_LOG"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$BASELINE_CONFIG_VALIDATE_LOG"');
-    expect(updateRestartAuth).toContain('openclaw_e2e_print_log "$result_err"');
-    expect(updateRestartAuth).toContain('openclaw_e2e_print_log "$result_out"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$update_err"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$update_json"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$DOCTOR_LOG"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$GATEWAY_LOG"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$STATUS_ERR"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$STATUS_JSON"');
-    expect(publishedRunner).toContain('openclaw_e2e_print_log "$log_file"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$BASELINE_INSTALL_LOG"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$BASELINE_CONFIG_VALIDATE_LOG"');
+    expect(updateRestartAuth).toContain('carapace_e2e_print_log "$result_err"');
+    expect(updateRestartAuth).toContain('carapace_e2e_print_log "$result_out"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$update_err"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$update_json"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$DOCTOR_LOG"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$GATEWAY_LOG"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$STATUS_ERR"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$STATUS_JSON"');
+    expect(publishedRunner).toContain('carapace_e2e_print_log "$log_file"');
     expect(publishedRunner).not.toContain('cat "$BASELINE_INSTALL_LOG"');
     expect(publishedRunner).not.toContain('cat "$BASELINE_CONFIG_VALIDATE_LOG"');
     expect(updateRestartAuth).not.toContain('cat "$result_err"');
@@ -5605,12 +5605,12 @@ if (starts === 1) {
     expect(publishedRunner).not.toContain('cat "$STATUS_ERR"');
     expect(publishedRunner).not.toContain('cat "$STATUS_JSON"');
     expect(publishedRunner).not.toContain('cat "$log_file"');
-    expect(publishedRunner).not.toContain('openclaw_e2e_print_log "$SYSTEMCTL_SHIM_LOG"');
-    expect(publishedRunner).not.toContain('openclaw_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG"');
+    expect(publishedRunner).not.toContain('carapace_e2e_print_log "$SYSTEMCTL_SHIM_LOG"');
+    expect(publishedRunner).not.toContain('carapace_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG"');
   });
 
   it("preserves caller-owned file descriptors around harness runs", () => {
-    const workDir = tempDirs.make("openclaw-docker-harness-fd-");
+    const workDir = tempDirs.make("carapace-docker-harness-fd-");
     const script = String.raw`
 set -euo pipefail
 ROOT_DIR=${shellQuote(process.cwd())}
@@ -5684,26 +5684,26 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
   it("wires the Codex npm plugin live assertion boundary into Docker", () => {
     const runner = readFileSync(CODEX_NPM_PLUGIN_LIVE_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      "docker_e2e_print_log /tmp/openclaw-codex-plugin-pack.log",
+      "docker_e2e_print_log /tmp/carapace-codex-plugin-pack.log",
       "scripts/e2e/lib/plugins/npm-registry-server.mjs",
       'CODEX_PLUGIN_SPEC="npm:${CODEX_PLUGIN_REGISTRY_PACKAGE}@${CODEX_PLUGIN_REGISTRY_VERSION}"',
       'export NPM_CONFIG_REGISTRY="http://127.0.0.1:$(cat "$registry_port_file")"',
       "trap cleanup_scenario EXIT",
-      'openclaw_e2e_stop_process "${registry_pid:-}"',
+      'carapace_e2e_stop_process "${registry_pid:-}"',
       'if [ "$status" -ne 0 ] && [ "$debug_logs_dumped" -eq 0 ]; then',
       "assert-agent-error",
       "assert-followthrough",
       "followthrough-turn.mjs",
-      "if openclaw_e2e_run_command node scripts/e2e/lib/codex-npm-plugin-live/followthrough-turn.mjs",
-      "docker_e2e_read_positive_int_env OPENCLAW_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS 420",
-      'docker_e2e_read_positive_int_env OPENCLAW_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"',
-      '-e "OPENCLAW_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS=$AGENT_TURN_TIMEOUT_SECONDS"',
-      '-e "OPENCLAW_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
+      "if carapace_e2e_run_command node scripts/e2e/lib/codex-npm-plugin-live/followthrough-turn.mjs",
+      "docker_e2e_read_positive_int_env CARAPACE_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS 420",
+      'docker_e2e_read_positive_int_env CARAPACE_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"',
+      '-e "CARAPACE_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS=$AGENT_TURN_TIMEOUT_SECONDS"',
+      '-e "CARAPACE_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
       '--timeout "$AGENT_TURN_TIMEOUT_SECONDS"',
     ]);
-    expect(runner).not.toContain("cat /tmp/openclaw-codex-plugin-pack.log");
+    expect(runner).not.toContain("cat /tmp/carapace-codex-plugin-pack.log");
     expect(runner).not.toContain('CODEX_PLUGIN_SPEC="npm-pack:$container_path"');
-    expect(runner).not.toContain("trap 'openclaw_e2e_stop_process \"${registry_pid:-}\"' EXIT");
+    expect(runner).not.toContain("trap 'carapace_e2e_stop_process \"${registry_pid:-}\"' EXIT");
     expectTextToIncludeAll(runner, [
       "'continuesSourceReplyProgress'",
       'FOLLOWTHROUGH_PROGRESS_FINAL_MODE="explicit"',
@@ -5721,12 +5721,12 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     expectTextToIncludeAll(scenario, [
       'if ! kill -0 "$gateway_pid" 2>/dev/null',
       'echo "gateway exited before listening" >&2',
-      'openclaw_e2e_print_log "$GATEWAY_LOG" >&2',
+      'carapace_e2e_print_log "$GATEWAY_LOG" >&2',
     ]);
   });
 
   it("writes the packaged Codex follow-through result independently of stdout logs", () => {
-    const workDir = tempDirs.make("openclaw-codex-followthrough-");
+    const workDir = tempDirs.make("carapace-codex-followthrough-");
     const packageRoot = join(workDir, "package");
     const runtimeDir = join(packageRoot, "dist", "plugin-sdk");
     const outputPath = join(workDir, "result.json");
@@ -5793,31 +5793,31 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     [
       "Codex npm plugin live",
       CODEX_NPM_PLUGIN_LIVE_DOCKER_E2E_PATH,
-      "OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TEXT_FILE_BYTES",
+      "CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TEXT_FILE_BYTES",
       "64kb",
     ],
     [
       "Codex npm plugin live agent timeout",
       CODEX_NPM_PLUGIN_LIVE_DOCKER_E2E_PATH,
-      "OPENCLAW_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS",
+      "CARAPACE_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS",
       "420s",
     ],
     [
       "npm onboard channel-agent",
       NPM_ONBOARD_CHANNEL_AGENT_DOCKER_E2E_PATH,
-      "OPENCLAW_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES",
+      "CARAPACE_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES",
       "64kb",
     ],
     [
       "plugins",
       PLUGINS_DOCKER_E2E_PATH,
-      "OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS",
+      "CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS",
       "soon",
     ],
     [
       "release user journey",
       RELEASE_USER_JOURNEY_DOCKER_E2E_PATH,
-      "OPENCLAW_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES",
+      "CARAPACE_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES",
       "64kb",
     ],
   ])(
@@ -5827,7 +5827,7 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_SKIP_DOCKER_BUILD: "1",
+          CARAPACE_SKIP_DOCKER_BUILD: "1",
           [envName]: value,
         },
       });
@@ -5843,33 +5843,33 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
       [
         CODEX_NPM_PLUGIN_LIVE_DOCKER_E2E_PATH,
         [
-          ["OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TEXT_FILE_BYTES", "1048576"],
-          ["OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_ERROR_TAIL_BYTES", "65536"],
-          ["OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_FILES", "64"],
-          ["OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_WALK_ENTRIES", "4096"],
-          ["OPENCLAW_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_SCAN_BYTES", "2097152"],
-          ["OPENCLAW_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS", "420"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TEXT_FILE_BYTES", "1048576"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_ERROR_TAIL_BYTES", "65536"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_FILES", "64"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_WALK_ENTRIES", "4096"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_ASSERT_MAX_TRANSCRIPT_SCAN_BYTES", "2097152"],
+          ["CARAPACE_CODEX_NPM_PLUGIN_AGENT_TIMEOUT_SECONDS", "420"],
         ],
       ],
       [
         NPM_ONBOARD_CHANNEL_AGENT_DOCKER_E2E_PATH,
         [
-          ["OPENCLAW_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES", "1048576"],
-          ["OPENCLAW_NPM_ONBOARD_STATUS_TEXT_MAX_BYTES", "1048576"],
+          ["CARAPACE_NPM_ONBOARD_JSON_ARTIFACT_MAX_BYTES", "1048576"],
+          ["CARAPACE_NPM_ONBOARD_STATUS_TEXT_MAX_BYTES", "1048576"],
         ],
       ],
       [
         PLUGINS_DOCKER_E2E_PATH,
         [
-          ["OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES", "1048576"],
-          ["OPENCLAW_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS", "30000"],
+          ["CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_BODY_MAX_BYTES", "1048576"],
+          ["CARAPACE_PLUGINS_E2E_CLAWHUB_PREFLIGHT_TIMEOUT_MS", "30000"],
         ],
       ],
       [
         RELEASE_USER_JOURNEY_DOCKER_E2E_PATH,
         [
-          ["OPENCLAW_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS", "5000"],
-          ["OPENCLAW_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES", "1048576"],
+          ["CARAPACE_RELEASE_USER_JOURNEY_HTTP_TIMEOUT_MS", "5000"],
+          ["CARAPACE_RELEASE_USER_JOURNEY_HTTP_BODY_MAX_BYTES", "1048576"],
         ],
       ],
     ] as const;
@@ -5888,7 +5888,7 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
   it("gives Codex on-demand package installs enough time to reach Codex assertions", () => {
     const runner = readFileSync(CODEX_ON_DEMAND_DOCKER_E2E_PATH, "utf8");
     expect(runner).toContain(
-      'export OPENCLAW_E2E_NPM_INSTALL_TIMEOUT="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-1200s}"',
+      'export CARAPACE_E2E_NPM_INSTALL_TIMEOUT="${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-1200s}"',
     );
   });
 
@@ -5907,7 +5907,7 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
       [KITCHEN_SINK_PLUGIN_DOCKER_E2E_PATH, "scripts/e2e/lib/kitchen-sink-plugin/assertions.mjs"],
     ] as const) {
       const runner = readFileSync(runnerPath, "utf8");
-      expect(runner).toContain(`openclaw_resolve_frozen_target_file`);
+      expect(runner).toContain(`carapace_resolve_frozen_target_file`);
       expect(runner).toContain(`${assertionPath}:ro`);
     }
   });
@@ -5917,21 +5917,21 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     const registryHelper = readFileSync(PREPUBLISH_PLUGIN_REGISTRY_HELPER_PATH, "utf8");
 
     expectTextToIncludeAll(runner, [
-      "OPENCLAW_DOCKER_ALL_LANES=codex-on-demand",
+      "CARAPACE_DOCKER_ALL_LANES=codex-on-demand",
       "source scripts/e2e/lib/prepublish-plugin-registry.sh",
       'docker_e2e_package_mount_args "$PACKAGE_TGZ"',
-      "openclaw_prepublish_plugin_registry_start_mounted",
-      "'[\"@openclaw/codex\"]'",
+      "carapace_prepublish_plugin_registry_start_mounted",
+      "'[\"@carapace/codex\"]'",
     ]);
     expectTextToIncludeAll(registryHelper, [
-      'OPENCLAW_NPM_REGISTRY_DIST_TAGS="$dist_tags"',
-      'OPENCLAW_NPM_REGISTRY_UPSTREAM="${OPENCLAW_NPM_REGISTRY_UPSTREAM:-https://registry.npmjs.org}"',
+      'CARAPACE_NPM_REGISTRY_DIST_TAGS="$dist_tags"',
+      'CARAPACE_NPM_REGISTRY_UPSTREAM="${CARAPACE_NPM_REGISTRY_UPSTREAM:-https://registry.npmjs.org}"',
     ]);
-    expect(runner.indexOf("openclaw_e2e_install_package")).toBeLessThan(
+    expect(runner.indexOf("carapace_e2e_install_package")).toBeLessThan(
       runner.indexOf("\nconfigure_plugin_registry\n"),
     );
     expect(runner.indexOf("\nconfigure_plugin_registry\n")).toBeLessThan(
-      runner.indexOf("\nopenclaw onboard --non-interactive"),
+      runner.indexOf("\ncarapace onboard --non-interactive"),
     );
   });
 
@@ -5941,11 +5941,11 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     expectTextToIncludeAll(runner, [
       'source "$ROOT_DIR/scripts/e2e/lib/prepublish-plugin-registry.sh"',
       'docker_e2e_package_mount_args "$PACKAGE_TGZ"',
-      "openclaw_prepublish_plugin_registry_start_mounted",
-      "'[\"@openclaw/codex\"]'",
+      "carapace_prepublish_plugin_registry_start_mounted",
+      "'[\"@carapace/codex\"]'",
     ]);
-    expect(runner.indexOf("openclaw_prepublish_plugin_registry_start_mounted")).toBeLessThan(
-      runner.indexOf("\nopenclaw_e2e_install_package"),
+    expect(runner.indexOf("carapace_prepublish_plugin_registry_start_mounted")).toBeLessThan(
+      runner.indexOf("\ncarapace_e2e_install_package"),
     );
   });
 
@@ -5969,26 +5969,26 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
   it("threads the live plugin tool output cap into the Docker harness", () => {
     const runner = readFileSync(LIVE_PLUGIN_TOOL_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      'source "$ROOT_DIR/scripts/lib/openclaw-e2e-instance.sh"',
-      'AGENT_TURN_TIMEOUT_SECONDS="$(openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS 300)"',
-      'AGENT_TURN_TIMEOUT_SECONDS="$(openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS")"',
-      'COMMAND_TIMEOUT="${OPENCLAW_E2E_COMMAND_TIMEOUT:-$((10#$AGENT_TURN_TIMEOUT_SECONDS + 60))s}"',
-      'AGENT_OUTPUT_MAX_BYTES="$(openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES 1048576)"',
-      'AGENT_OUTPUT_DUMP_BYTES="$(openclaw_e2e_read_nonnegative_int_env OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES 16384)"',
-      'SESSION_SCAN_MAX_ENTRIES="$(openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES 50000)"',
-      '-e "OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES=$AGENT_OUTPUT_DUMP_BYTES"',
-      '-e "OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES=$AGENT_OUTPUT_MAX_BYTES"',
-      '-e "OPENCLAW_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES=$SESSION_SCAN_MAX_ENTRIES"',
-      '-e "OPENCLAW_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
-      "OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES",
-      'tail -c "$agent_output_dump_bytes" /tmp/openclaw-agent.json',
+      'source "$ROOT_DIR/scripts/lib/carapace-e2e-instance.sh"',
+      'AGENT_TURN_TIMEOUT_SECONDS="$(carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS 300)"',
+      'AGENT_TURN_TIMEOUT_SECONDS="$(carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS")"',
+      'COMMAND_TIMEOUT="${CARAPACE_E2E_COMMAND_TIMEOUT:-$((10#$AGENT_TURN_TIMEOUT_SECONDS + 60))s}"',
+      'AGENT_OUTPUT_MAX_BYTES="$(carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES 1048576)"',
+      'AGENT_OUTPUT_DUMP_BYTES="$(carapace_e2e_read_nonnegative_int_env CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES 16384)"',
+      'SESSION_SCAN_MAX_ENTRIES="$(carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES 50000)"',
+      '-e "CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES=$AGENT_OUTPUT_DUMP_BYTES"',
+      '-e "CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES=$AGENT_OUTPUT_MAX_BYTES"',
+      '-e "CARAPACE_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES=$SESSION_SCAN_MAX_ENTRIES"',
+      '-e "CARAPACE_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
+      "CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES",
+      'tail -c "$agent_output_dump_bytes" /tmp/carapace-agent.json',
     ]);
     const earlyTimeoutEnvIndex = runner.indexOf(
-      "openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS 300",
+      "carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS 300",
     );
     const profileSourceIndex = runner.indexOf('source "$PROFILE_FILE"');
     const finalTimeoutEnvIndex = runner.lastIndexOf(
-      "openclaw_e2e_read_positive_int_env OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS",
+      "carapace_e2e_read_positive_int_env CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS",
     );
     const dockerBuildIndex = runner.indexOf("docker_e2e_build_or_reuse");
     expect(earlyTimeoutEnvIndex).toBeGreaterThanOrEqual(0);
@@ -5998,19 +5998,19 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     expect(finalTimeoutEnvIndex).toBeGreaterThan(profileSourceIndex);
 
     expect(runner).not.toContain(
-      'AGENT_OUTPUT_MAX_BYTES="${OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES:-1048576}"',
+      'AGENT_OUTPUT_MAX_BYTES="${CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES:-1048576}"',
     );
 
-    const dumpLogsStart = runner.indexOf("openclaw_e2e_dump_logs \\");
+    const dumpLogsStart = runner.indexOf("carapace_e2e_dump_logs \\");
     const dumpLogsEnd = runner.indexOf("\n}", dumpLogsStart);
-    expect(runner.slice(dumpLogsStart, dumpLogsEnd)).not.toContain("/tmp/openclaw-agent.json");
+    expect(runner.slice(dumpLogsStart, dumpLogsEnd)).not.toContain("/tmp/carapace-agent.json");
   });
 
   it.each([
-    ["timeout", "OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS", "1e3"],
-    ["output cap", "OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES", "64kb"],
-    ["output dump cap", "OPENCLAW_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES", "64kb"],
-    ["session scan cap", "OPENCLAW_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES", "0"],
+    ["timeout", "CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS", "1e3"],
+    ["output cap", "CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_MAX_BYTES", "64kb"],
+    ["output dump cap", "CARAPACE_LIVE_PLUGIN_TOOL_AGENT_OUTPUT_DUMP_BYTES", "64kb"],
+    ["session scan cap", "CARAPACE_LIVE_PLUGIN_TOOL_SESSION_SCAN_MAX_ENTRIES", "0"],
   ])(
     "rejects invalid live plugin tool Docker %s values before Docker setup",
     (_label, envName, value) => {
@@ -6018,8 +6018,8 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_LIVE_PLUGIN_TOOL_HOST_BUILD: "0",
-          OPENCLAW_SKIP_DOCKER_BUILD: "1",
+          CARAPACE_LIVE_PLUGIN_TOOL_HOST_BUILD: "0",
+          CARAPACE_SKIP_DOCKER_BUILD: "1",
           [envName]: value,
         },
       });
@@ -6034,10 +6034,10 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
     const runner = readFileSync(LIVE_PLUGIN_TOOL_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
       'npm pack --pack-destination "$fixture_dir" --silent',
-      "/tmp/openclaw-live-plugin-tool-pack.log",
+      "/tmp/carapace-live-plugin-tool-pack.log",
       "find \"$fixture_dir\" -maxdepth 1 -type f -name '*.tgz' | sort",
       "Expected one packed fixture plugin tarball",
-      "openclaw_e2e_dump_logs /tmp/openclaw-live-plugin-tool-pack.log",
+      "carapace_e2e_dump_logs /tmp/carapace-live-plugin-tool-pack.log",
       'plugin_tgz="${plugin_tgzs[0]}"',
     ]);
 
@@ -6070,10 +6070,10 @@ grep -Fxq preserved "$TMPDIR/caller-fd"
   });
 
   it.each([
-    ["printed log bytes", "OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES", "64kb"],
-    ["heartbeat termination grace", "OPENCLAW_DOCKER_E2E_HEARTBEAT_TERM_GRACE_SECONDS", "soon"],
+    ["printed log bytes", "CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES", "64kb"],
+    ["heartbeat termination grace", "CARAPACE_DOCKER_E2E_HEARTBEAT_TERM_GRACE_SECONDS", "soon"],
   ])("rejects invalid Docker E2E %s before setup", (_label, envName, value) => {
-    const workDir = tempDirs.make("openclaw-docker-e2e-log-invalid-");
+    const workDir = tempDirs.make("carapace-docker-e2e-log-invalid-");
     const script = repoShell(workDir)`
 export ${envName}=${shellQuote(value)}
 
@@ -6090,9 +6090,9 @@ run_logged_print_heartbeat plugins-run 30 bash -c 'printf "should not print\\\\n
   });
 
   it("rejects invalid Docker E2E log heartbeat env before harness setup", () => {
-    const workDir = tempDirs.make("openclaw-docker-e2e-log-heartbeat-invalid-");
+    const workDir = tempDirs.make("carapace-docker-e2e-log-heartbeat-invalid-");
     const script = repoShell(workDir)`
-export OPENCLAW_DOCKER_E2E_LOG_HEARTBEAT_SECONDS=1e3
+export CARAPACE_DOCKER_E2E_LOG_HEARTBEAT_SECONDS=1e3
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
@@ -6106,12 +6106,12 @@ docker_e2e_run_logged_print_with_harness plugins-run image-name
     const result = spawnSync("bash", ["-lc", script], { encoding: "utf8" });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_DOCKER_E2E_LOG_HEARTBEAT_SECONDS: 1e3");
+    expect(result.stderr).toContain("invalid CARAPACE_DOCKER_E2E_LOG_HEARTBEAT_SECONDS: 1e3");
     expect(result.stdout).toBe("");
   });
 
   it("preserves heredoc stdin through Docker E2E heartbeat logging", () => {
-    const workDir = tempDirs.make("openclaw-docker-e2e-log-stdin-");
+    const workDir = tempDirs.make("carapace-docker-e2e-log-stdin-");
     const script = repoShell(workDir)`
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
@@ -6127,7 +6127,7 @@ SH
   });
 
   it("preserves failing heredoc output and status through Docker E2E heartbeat logging", () => {
-    const workDir = tempDirs.make("openclaw-docker-e2e-log-failing-stdin-");
+    const workDir = tempDirs.make("carapace-docker-e2e-log-failing-stdin-");
     const script = repoShell(workDir)`
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
@@ -6146,7 +6146,7 @@ SH
   });
 
   it("does not delay fast successful Docker E2E log captures until the next heartbeat", () => {
-    const workDir = tempDirs.make("openclaw-docker-e2e-log-fast-heartbeat-");
+    const workDir = tempDirs.make("carapace-docker-e2e-log-fast-heartbeat-");
     const script = repoShell(workDir)`
 
 source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
@@ -6205,7 +6205,7 @@ source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
     );
     expect(packageRunner.match(/verify-fs-safe-native\.mjs[^\n]+--mode require/gu)).toHaveLength(3);
     expect(packageRunner).toContain("bash scripts/e2e/bun-global-install-smoke.sh");
-    expect(packageRunner.match(/-e OPENCLAW_FS_SAFE_NATIVE_CONTRACT/g)).toHaveLength(4);
+    expect(packageRunner.match(/-e CARAPACE_FS_SAFE_NATIVE_CONTRACT/g)).toHaveLength(4);
     expectTextToIncludeAll(packageRunner, [
       'MUSL_FS_SAFE_NATIVE_OUTCOME="passed"',
       'MUSL_FS_SAFE_NATIVE_OUTCOME="not-applicable"',
@@ -6213,19 +6213,19 @@ source "$ROOT_DIR/scripts/lib/docker-e2e-logs.sh"
     ]);
     expect(updateRunner).toContain('mv "$platform_package" "$platform_package.omitted"');
     expect(updateRunner).toContain("--mode fallback");
-    expect(updateRunner).toContain("-e OPENCLAW_FS_SAFE_NATIVE_CONTRACT");
+    expect(updateRunner).toContain("-e CARAPACE_FS_SAFE_NATIVE_CONTRACT");
   });
 
   it("verifies fs-safe through a pnpm-style linked package root", () => {
-    const root = realpathSync(tempDirs.make("openclaw-linked-package-proof-"));
+    const root = realpathSync(tempDirs.make("carapace-linked-package-proof-"));
     const modules = join(root, "node_modules");
-    const virtualModules = join(modules, ".pnpm/openclaw@fixture/node_modules");
-    const physicalRoot = join(virtualModules, "openclaw");
-    const logicalRoot = join(modules, "openclaw");
+    const virtualModules = join(modules, ".pnpm/carapace@fixture/node_modules");
+    const physicalRoot = join(virtualModules, "carapace");
+    const logicalRoot = join(modules, "carapace");
     const fsSafe = join(virtualModules, "@openclaw/fs-safe");
     mkdirSync(physicalRoot, { recursive: true });
     mkdirSync(fsSafe, { recursive: true });
-    writeFileSync(join(physicalRoot, "package.json"), '{"name":"openclaw"}');
+    writeFileSync(join(physicalRoot, "package.json"), '{"name":"carapace"}');
     writeFileSync(
       join(physicalRoot, "cli.cjs"),
       'process.stdout.write(require.resolve("@openclaw/fs-safe"));',
@@ -6279,7 +6279,7 @@ export async function sha256File(file) {
   });
 
   it("builds and cleans package-lane images without touching shared image tags", () => {
-    const root = realpathSync(tempDirs.make("openclaw-package-image-owner-"));
+    const root = realpathSync(tempDirs.make("carapace-package-image-owner-"));
     for (const file of [
       DOCKER_PACKAGE_INSTALL_E2E_PATH,
       DOCKER_E2E_IMAGE_HELPER_PATH,
@@ -6331,11 +6331,11 @@ process.exit(73);
       env: {
         PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`,
         TMPDIR: root,
-        OPENCLAW_CURRENT_PACKAGE_TGZ: tarball,
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
-        OPENCLAW_DOCKER_E2E_IMAGE: "shared-bare:fixture",
-        OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
-        OPENCLAW_DOCKER_BUILD_ON_MISSING: "0",
+        CARAPACE_CURRENT_PACKAGE_TGZ: tarball,
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry,
+        CARAPACE_DOCKER_E2E_IMAGE: "shared-bare:fixture",
+        CARAPACE_DOCKER_E2E_REQUIRE_LOCAL_IMAGE: "1",
+        CARAPACE_DOCKER_BUILD_ON_MISSING: "0",
       },
     });
     expect(result.status, result.stdout + result.stderr).toBe(73);
@@ -6357,10 +6357,10 @@ process.exit(73);
     const runs = calls.filter((args) => args[0] === "run");
     expect(runs).toHaveLength(4);
     for (const args of runs) {
-      expect(args).toContain(`${tarball}:/tmp/openclaw-current.tgz:ro`);
-      expect(args).toContain(`${registry}:/tmp/openclaw-prepublish-plugin-registry:ro`);
+      expect(args).toContain(`${tarball}:/tmp/carapace-current.tgz:ro`);
+      expect(args).toContain(`${registry}:/tmp/carapace-prepublish-plugin-registry:ro`);
       expect(args[args.indexOf("--entrypoint") + 1]).toBe(
-        "/opt/openclaw-e2e/scripts/e2e/lib/prepublish-plugin-registry.sh",
+        "/opt/carapace-e2e/scripts/e2e/lib/prepublish-plugin-registry.sh",
       );
     }
   });
@@ -6371,22 +6371,22 @@ process.exit(73);
     expect(dockerfile).not.toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).not.toContain("COPY . .");
     expect(dockerfile).toMatch(
-      /^COPY --from=openclaw_package --chown=appuser:appuser openclaw-current\.tgz \/tmp\/openclaw-current\.tgz$/m,
+      /^COPY --from=carapace_package --chown=appuser:appuser carapace-current\.tgz \/tmp\/carapace-current\.tgz$/m,
     );
     // Cache registry dependencies by manifest, not by each PR's built tarball.
     expect(dockerfile).toContain(
-      "COPY --from=functional-manifest --chown=appuser:appuser /tmp/openclaw-deps /tmp/openclaw-deps",
+      "COPY --from=functional-manifest --chown=appuser:appuser /tmp/carapace-deps /tmp/carapace-deps",
     );
     expect(dockerfile).toContain("npm install --omit=dev --no-fund --no-audit");
     expect(dockerfile).not.toContain("npm install -g --prefix");
     expect(dockerfile).toContain(
-      "COPY --from=functional-deps --chown=appuser:appuser /tmp/openclaw-deps/node_modules /app/node_modules",
+      "COPY --from=functional-deps --chown=appuser:appuser /tmp/carapace-deps/node_modules /app/node_modules",
     );
     // Complete the lifecycle before the self-link lets pruning cycle back into /app.
     const postinstallIndex = dockerfile.indexOf(
       "node /app/scripts/postinstall-bundled-plugins.mjs",
     );
-    const selfLinkIndex = dockerfile.indexOf("ln -sfn /app /app/node_modules/openclaw");
+    const selfLinkIndex = dockerfile.indexOf("ln -sfn /app /app/node_modules/carapace");
     expect(postinstallIndex).toBeGreaterThan(-1);
     expect(selfLinkIndex).toBeGreaterThan(postinstallIndex);
   });
@@ -6394,14 +6394,14 @@ process.exit(73);
   it("keeps onboarding Docker E2E resource-guarded", () => {
     const runner = readFileSync(ONBOARD_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      "OPENCLAW_ONBOARD_MAX_MEMORY_MIB",
-      "OPENCLAW_ONBOARD_MAX_CPU_PERCENT",
-      'COMMAND_TIMEOUT="${OPENCLAW_ONBOARD_COMMAND_TIMEOUT:-${OPENCLAW_E2E_COMMAND_TIMEOUT:-300s}}"',
-      'GATEWAY_WAIT_ATTEMPTS="$(openclaw_e2e_read_positive_int_env OPENCLAW_ONBOARD_GATEWAY_WAIT_ATTEMPTS 20)"',
-      'GATEWAY_WAIT_INTERVAL_S="$(docker_e2e_read_nonnegative_decimal_env OPENCLAW_ONBOARD_GATEWAY_WAIT_INTERVAL_S 1)"',
-      '-e "OPENCLAW_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
-      '-e "OPENCLAW_ONBOARD_GATEWAY_WAIT_ATTEMPTS=$GATEWAY_WAIT_ATTEMPTS"',
-      '-e "OPENCLAW_ONBOARD_GATEWAY_WAIT_INTERVAL_S=$GATEWAY_WAIT_INTERVAL_S"',
+      "CARAPACE_ONBOARD_MAX_MEMORY_MIB",
+      "CARAPACE_ONBOARD_MAX_CPU_PERCENT",
+      'COMMAND_TIMEOUT="${CARAPACE_ONBOARD_COMMAND_TIMEOUT:-${CARAPACE_E2E_COMMAND_TIMEOUT:-300s}}"',
+      'GATEWAY_WAIT_ATTEMPTS="$(carapace_e2e_read_positive_int_env CARAPACE_ONBOARD_GATEWAY_WAIT_ATTEMPTS 20)"',
+      'GATEWAY_WAIT_INTERVAL_S="$(docker_e2e_read_nonnegative_decimal_env CARAPACE_ONBOARD_GATEWAY_WAIT_INTERVAL_S 1)"',
+      '-e "CARAPACE_E2E_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
+      '-e "CARAPACE_ONBOARD_GATEWAY_WAIT_ATTEMPTS=$GATEWAY_WAIT_ATTEMPTS"',
+      '-e "CARAPACE_ONBOARD_GATEWAY_WAIT_INTERVAL_S=$GATEWAY_WAIT_INTERVAL_S"',
       '--name "$CONTAINER_NAME"',
       "docker_e2e_sample_stats_until_exit \\",
       '"$STATS_LOG" \\',
@@ -6426,7 +6426,7 @@ process.exit(73);
       expect(runner, path).toContain(
         'DOCKER_COMMAND_TIMEOUT="$DOCKER_RUN_TIMEOUT" docker_e2e_docker_run_cmd run --name "$CONTAINER_NAME"',
       );
-      expect(runner, path).toContain('DOCKER_RUN_TIMEOUT="${OPENCLAW_');
+      expect(runner, path).toContain('DOCKER_RUN_TIMEOUT="${CARAPACE_');
       expect(runner, path).toContain("docker_e2e_sample_stats_until_exit \\");
       expect(runner, path).toContain('"$STATS_LOG" \\');
       expect(runner, path).toContain('"$RUN_LOG" \\');
@@ -6465,7 +6465,7 @@ process.exit(73);
     expect(pluginBinding).toContain("const scanBytes = 65536");
     expect(pluginBinding).toContain("fs.statSync(logPath)");
     expect(pluginBinding).toContain("fs.readSync(fd, buffer, 0, length, stat.size - length)");
-    expect(pluginBinding).not.toContain("process.env.OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES");
+    expect(pluginBinding).not.toContain("process.env.CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES");
     expect(pluginBinding).not.toContain('readFileSync(logPath, "utf8")');
   });
 
@@ -6483,12 +6483,12 @@ process.exit(73);
   it("keeps Open WebUI Docker E2E resource-guarded", () => {
     const runner = readFileSync(OPENWEBUI_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      'validate_positive_int OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS "$PROVIDER_TIMEOUT_SECONDS"',
-      'validate_positive_int OPENCLAW_OPENWEBUI_FETCH_TIMEOUT_MS "$PROBE_FETCH_TIMEOUT_MS"',
-      "docker_e2e_read_tcp_port_env OPENCLAW_OPENWEBUI_GATEWAY_PORT 18789",
-      "docker_e2e_read_tcp_port_env OPENCLAW_OPENWEBUI_PORT 8080",
-      "OPENCLAW_OPENWEBUI_MAX_MEMORY_MIB",
-      "OPENCLAW_OPENWEBUI_MAX_CPU_PERCENT",
+      'validate_positive_int CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS "$PROVIDER_TIMEOUT_SECONDS"',
+      'validate_positive_int CARAPACE_OPENWEBUI_FETCH_TIMEOUT_MS "$PROBE_FETCH_TIMEOUT_MS"',
+      "docker_e2e_read_tcp_port_env CARAPACE_OPENWEBUI_GATEWAY_PORT 18789",
+      "docker_e2e_read_tcp_port_env CARAPACE_OPENWEBUI_PORT 8080",
+      "CARAPACE_OPENWEBUI_MAX_MEMORY_MIB",
+      "CARAPACE_OPENWEBUI_MAX_CPU_PERCENT",
       'STATS_LOG="$(mktemp',
       'PROBE_LOG="$(mktemp',
       'STATS_STOP_FILE="$(mktemp',
@@ -6496,7 +6496,7 @@ process.exit(73);
       "start_openwebui_stats_sampler()",
       "start_openwebui_stats_sampler\n",
       'node "$entry" doctor --fix --yes --force',
-      `openclaw_e2e_exec_gateway "$entry" '"$PORT"' lan`,
+      `carapace_e2e_exec_gateway "$entry" '"$PORT"' lan`,
       'for container_name in "$GW_NAME" "$OW_NAME"; do',
       '"$GW_NAME" \\',
       '"$OW_NAME" \\',
@@ -6517,8 +6517,8 @@ process.exit(73);
   });
 
   it.each([
-    ["gateway", "OPENCLAW_OPENWEBUI_GATEWAY_PORT", "1e3"],
-    ["webui", "OPENCLAW_OPENWEBUI_PORT", "65536"],
+    ["gateway", "CARAPACE_OPENWEBUI_GATEWAY_PORT", "1e3"],
+    ["webui", "CARAPACE_OPENWEBUI_PORT", "65536"],
   ])("rejects invalid Open WebUI Docker %s ports before Docker setup", (_label, envName, value) => {
     const result = spawnSync("bash", [OPENWEBUI_DOCKER_E2E_PATH], {
       encoding: "utf8",
@@ -6534,8 +6534,8 @@ process.exit(73);
   });
 
   it.each([
-    ["provider", "OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS", "300s"],
-    ["fetch", "OPENCLAW_OPENWEBUI_FETCH_TIMEOUT_MS", "8000ms"],
+    ["provider", "CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS", "300s"],
+    ["fetch", "CARAPACE_OPENWEBUI_FETCH_TIMEOUT_MS", "8000ms"],
   ])(
     "rejects invalid Open WebUI Docker %s timeouts before Docker setup",
     (_label, envName, value) => {
@@ -6559,10 +6559,10 @@ process.exit(73);
       env: {
         ...process.env,
         OPENAI_API_KEY: "",
-        OPENCLAW_OPENWEBUI_FETCH_TIMEOUT_MS: "09000",
-        OPENCLAW_OPENWEBUI_GATEWAY_PORT: "018789",
-        OPENCLAW_OPENWEBUI_PORT: "08080",
-        OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "08",
+        CARAPACE_OPENWEBUI_FETCH_TIMEOUT_MS: "09000",
+        CARAPACE_OPENWEBUI_GATEWAY_PORT: "018789",
+        CARAPACE_OPENWEBUI_PORT: "08080",
+        CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS: "08",
       },
     });
 
@@ -6572,12 +6572,12 @@ process.exit(73);
   });
 
   it.each([
-    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "OPENCLAW_MCP_CODE_MODE_GATEWAY_PORT", "1e3"],
-    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "OPENCLAW_MCP_CODE_MODE_MOCK_PORT", "65536"],
-    [MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH, "OPENCLAW_MCP_CODE_MODE_LIVE_GATEWAY_PORT", "0"],
-    [CODEX_MEDIA_PATH_DOCKER_E2E_PATH, "OPENCLAW_CODEX_MEDIA_PATH_PORT", "18790tcp"],
-    [OPENAI_CHAT_TOOLS_DOCKER_E2E_PATH, "OPENCLAW_OPENAI_CHAT_TOOLS_PORT", "0"],
-    [OPENAI_WEB_SEARCH_MINIMAL_E2E_PATH, "OPENCLAW_OPENAI_WEB_SEARCH_MINIMAL_PORT", "18789tcp"],
+    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "CARAPACE_MCP_CODE_MODE_GATEWAY_PORT", "1e3"],
+    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "CARAPACE_MCP_CODE_MODE_MOCK_PORT", "65536"],
+    [MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH, "CARAPACE_MCP_CODE_MODE_LIVE_GATEWAY_PORT", "0"],
+    [CODEX_MEDIA_PATH_DOCKER_E2E_PATH, "CARAPACE_CODEX_MEDIA_PATH_PORT", "18790tcp"],
+    [OPENAI_CHAT_TOOLS_DOCKER_E2E_PATH, "CARAPACE_OPENAI_CHAT_TOOLS_PORT", "0"],
+    [OPENAI_WEB_SEARCH_MINIMAL_E2E_PATH, "CARAPACE_OPENAI_WEB_SEARCH_MINIMAL_PORT", "18789tcp"],
   ])("rejects invalid Docker E2E ports before setup", (scriptPath, envName, value) => {
     const result = spawnSync("bash", [scriptPath], {
       encoding: "utf8",
@@ -6593,15 +6593,15 @@ process.exit(73);
   });
 
   it.each([
-    ["timeout", "OPENCLAW_CODEX_MEDIA_PATH_TIMEOUT_SECONDS", "180s"],
-    ["log tail cap", "OPENCLAW_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES", "64kb"],
+    ["timeout", "CARAPACE_CODEX_MEDIA_PATH_TIMEOUT_SECONDS", "180s"],
+    ["log tail cap", "CARAPACE_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES", "64kb"],
   ])("rejects invalid Codex media path Docker %s before Docker setup", (_label, envName, value) => {
     const result = spawnSync("bash", [CODEX_MEDIA_PATH_DOCKER_E2E_PATH], {
       encoding: "utf8",
       env: {
         ...process.env,
         [envName]: value,
-        OPENCLAW_SKIP_DOCKER_BUILD: "1",
+        CARAPACE_SKIP_DOCKER_BUILD: "1",
       },
     });
 
@@ -6613,24 +6613,24 @@ process.exit(73);
   it("forwards Codex media path client limits into Docker", () => {
     const runner = readFileSync(CODEX_MEDIA_PATH_DOCKER_E2E_PATH, "utf8");
     expect(runner).toContain(
-      'LOG_TAIL_MAX_BYTES="$(docker_e2e_read_positive_int_env OPENCLAW_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES 2097152)"',
+      'LOG_TAIL_MAX_BYTES="$(docker_e2e_read_positive_int_env CARAPACE_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES 2097152)"',
     );
     expect(runner).toContain(
-      '-e "OPENCLAW_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES=$LOG_TAIL_MAX_BYTES"',
+      '-e "CARAPACE_CODEX_MEDIA_PATH_LOG_TAIL_MAX_BYTES=$LOG_TAIL_MAX_BYTES"',
     );
   });
 
   it.each([
-    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "OPENCLAW_MCP_CODE_MODE_CLIENT_TIMEOUT_MS", "1e3"],
+    [MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH, "CARAPACE_MCP_CODE_MODE_CLIENT_TIMEOUT_MS", "1e3"],
     [
       MCP_CODE_MODE_GATEWAY_DOCKER_E2E_PATH,
-      "OPENCLAW_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES",
+      "CARAPACE_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES",
       "64bytes",
     ],
-    [MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH, "OPENCLAW_MCP_CODE_MODE_CLIENT_TIMEOUT_MS", "1e3"],
+    [MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH, "CARAPACE_MCP_CODE_MODE_CLIENT_TIMEOUT_MS", "1e3"],
     [
       MCP_CODE_MODE_GATEWAY_LIVE_DOCKER_E2E_PATH,
-      "OPENCLAW_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES",
+      "CARAPACE_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES",
       "64bytes",
     ],
   ])("rejects invalid MCP code-mode client env before setup", (scriptPath, envName, value) => {
@@ -6639,7 +6639,7 @@ process.exit(73);
       env: {
         ...process.env,
         [envName]: value,
-        OPENCLAW_SKIP_DOCKER_BUILD: "1",
+        CARAPACE_SKIP_DOCKER_BUILD: "1",
       },
     });
 
@@ -6655,10 +6655,10 @@ process.exit(73);
       const runner = readFileSync(scriptPath, "utf8");
 
       expectTextToIncludeAll(runner, [
-        'CLIENT_TIMEOUT_MS="$(docker_e2e_read_positive_int_env OPENCLAW_MCP_CODE_MODE_CLIENT_TIMEOUT_MS 300000)"',
-        'CLIENT_BODY_MAX_BYTES="$(docker_e2e_read_positive_int_env OPENCLAW_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES 1048576)"',
-        '-e "OPENCLAW_MCP_CODE_MODE_CLIENT_TIMEOUT_MS=$CLIENT_TIMEOUT_MS"',
-        '-e "OPENCLAW_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES=$CLIENT_BODY_MAX_BYTES"',
+        'CLIENT_TIMEOUT_MS="$(docker_e2e_read_positive_int_env CARAPACE_MCP_CODE_MODE_CLIENT_TIMEOUT_MS 300000)"',
+        'CLIENT_BODY_MAX_BYTES="$(docker_e2e_read_positive_int_env CARAPACE_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES 1048576)"',
+        '-e "CARAPACE_MCP_CODE_MODE_CLIENT_TIMEOUT_MS=$CLIENT_TIMEOUT_MS"',
+        '-e "CARAPACE_MCP_CODE_MODE_CLIENT_BODY_MAX_BYTES=$CLIENT_BODY_MAX_BYTES"',
       ]);
     },
   );
@@ -6668,8 +6668,8 @@ process.exit(73);
 
     expectTextToIncludeAll(runner, [
       "MCP_CODE_MODE_SEED_ENV_ARGS=()",
-      "OPENCLAW_FROZEN_TARGET_MCP_MEMORY_CONFIG_MODE=agent",
-      "OPENCLAW_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE=legacy",
+      "CARAPACE_FROZEN_TARGET_MCP_MEMORY_CONFIG_MODE=agent",
+      "CARAPACE_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE=legacy",
       '"${MCP_CODE_MODE_SEED_ENV_ARGS[@]}"',
     ]);
     for (const path of [
@@ -6678,21 +6678,21 @@ process.exit(73);
       "scripts/e2e/session-runtime-context-docker.sh",
     ]) {
       const source = readFileSync(path, "utf8");
-      expect(source).not.toContain('-e "OPENCLAW_SELECTED_SHA=$OPENCLAW_SELECTED_SHA"');
-      expect(source).not.toContain('-e "OPENCLAW_TOOLING_SHA=$OPENCLAW_TOOLING_SHA"');
+      expect(source).not.toContain('-e "CARAPACE_SELECTED_SHA=$CARAPACE_SELECTED_SHA"');
+      expect(source).not.toContain('-e "CARAPACE_TOOLING_SHA=$CARAPACE_TOOLING_SHA"');
     }
     const liveGateway = readFileSync("scripts/test-live-gateway-models-docker.sh", "utf8");
-    expect(liveGateway).not.toContain("OPENCLAW_SELECTED_SHA");
-    expect(liveGateway).not.toContain("OPENCLAW_TOOLING_SHA");
+    expect(liveGateway).not.toContain("CARAPACE_SELECTED_SHA");
+    expect(liveGateway).not.toContain("CARAPACE_TOOLING_SHA");
     expectTextToIncludeAll(liveGateway, [
-      'openclaw_resolve_frozen_live_cli_backend_package_mode "$ROOT_DIR"',
-      "OPENCLAW_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE=legacy",
+      'carapace_resolve_frozen_live_cli_backend_package_mode "$ROOT_DIR"',
+      "CARAPACE_FROZEN_TARGET_LIVE_CLI_BACKEND_PACKAGE_MODE=legacy",
     ]);
   });
 
   it.each([
-    ["timeout", "OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", "180s"],
-    ["body cap", "OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", "64kb"],
+    ["timeout", "CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", "180s"],
+    ["body cap", "CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", "64kb"],
   ])("rejects invalid OpenAI chat tools Docker %s before auth setup", (_label, envName, value) => {
     const result = spawnSync("bash", [OPENAI_CHAT_TOOLS_DOCKER_E2E_PATH], {
       encoding: "utf8",
@@ -6713,12 +6713,12 @@ process.exit(73);
     const client = readFileSync("scripts/e2e/lib/openai-chat-tools/client.mjs", "utf8");
     const writer = readFileSync("scripts/e2e/lib/openai-chat-tools/write-config.mjs", "utf8");
     const consumed = new Set(
-      [...`${client}\n${writer}`.matchAll(/["`](OPENCLAW_OPENAI_CHAT_TOOLS_[A-Z0-9_]+)["`]/gu)]
+      [...`${client}\n${writer}`.matchAll(/["`](CARAPACE_OPENAI_CHAT_TOOLS_[A-Z0-9_]+)["`]/gu)]
         .map((match) => match[1])
         .filter((envName): envName is string => envName !== undefined),
     );
     const forwarded = new Set(
-      [...runner.matchAll(/-e\s+"(OPENCLAW_OPENAI_CHAT_TOOLS_[A-Z0-9_]+)=/gu)]
+      [...runner.matchAll(/-e\s+"(CARAPACE_OPENAI_CHAT_TOOLS_[A-Z0-9_]+)=/gu)]
         .map((match) => match[1])
         .filter((envName): envName is string => envName !== undefined),
     );
@@ -6733,12 +6733,12 @@ process.exit(73);
     const runner = readFileSync(KITCHEN_SINK_RPC_DOCKER_E2E_PATH, "utf8");
     const walk = readFileSync("scripts/e2e/kitchen-sink-rpc-walk.mts", "utf8");
     const consumed = new Set(
-      [...walk.matchAll(/\b(?:env|process\.env)\.(OPENCLAW_KITCHEN_SINK_[A-Z0-9_]+)/gu)]
+      [...walk.matchAll(/\b(?:env|process\.env)\.(CARAPACE_KITCHEN_SINK_[A-Z0-9_]+)/gu)]
         .map((match) => match[1])
         .filter((envName): envName is string => envName !== undefined),
     );
     const forwarded = new Set(
-      [...runner.matchAll(/\b(OPENCLAW_KITCHEN_SINK_[A-Z0-9_]+)\b/gu)]
+      [...runner.matchAll(/\b(CARAPACE_KITCHEN_SINK_[A-Z0-9_]+)\b/gu)]
         .map((match) => match[1])
         .filter((envName): envName is string => envName !== undefined),
     );
@@ -6752,7 +6752,7 @@ process.exit(73);
   it("keeps the kitchen-sink RPC Docker watchdog above the internal walk budgets", () => {
     const runner = readFileSync(KITCHEN_SINK_RPC_DOCKER_E2E_PATH, "utf8");
     expect(runner).toContain(
-      'DOCKER_RUN_TIMEOUT="${OPENCLAW_KITCHEN_SINK_RPC_DOCKER_RUN_TIMEOUT:-1500s}"',
+      'DOCKER_RUN_TIMEOUT="${CARAPACE_KITCHEN_SINK_RPC_DOCKER_RUN_TIMEOUT:-1500s}"',
     );
   });
 
@@ -6761,27 +6761,27 @@ process.exit(73);
     const sweep = readFileSync("scripts/e2e/lib/kitchen-sink-plugin/sweep.sh", "utf8");
 
     expectTextToIncludeAll(runner, [
-      'KITCHEN_SINK_CLI_TIMEOUT="${OPENCLAW_KITCHEN_SINK_PLUGIN_CLI_TIMEOUT:-${KITCHEN_SINK_CLI_TIMEOUT:-180s}}"',
-      "docker_e2e_read_positive_int_env OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES 65536",
-      "docker_e2e_read_positive_int_env OPENCLAW_CLAWHUB_FIXTURE_WAIT_ATTEMPTS 600",
-      '-e "OPENCLAW_CLAWHUB_FIXTURE_WAIT_ATTEMPTS=$CLAW_HUB_FIXTURE_WAIT_ATTEMPTS"',
-      '-e "OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES=$OPENCLAW_DOCKER_E2E_LOG_PRINT_BYTES"',
+      'KITCHEN_SINK_CLI_TIMEOUT="${CARAPACE_KITCHEN_SINK_PLUGIN_CLI_TIMEOUT:-${KITCHEN_SINK_CLI_TIMEOUT:-180s}}"',
+      "docker_e2e_read_positive_int_env CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES 65536",
+      "docker_e2e_read_positive_int_env CARAPACE_CLAWHUB_FIXTURE_WAIT_ATTEMPTS 600",
+      '-e "CARAPACE_CLAWHUB_FIXTURE_WAIT_ATTEMPTS=$CLAW_HUB_FIXTURE_WAIT_ATTEMPTS"',
+      '-e "CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES=$CARAPACE_DOCKER_E2E_LOG_PRINT_BYTES"',
       '-e "KITCHEN_SINK_CLI_TIMEOUT=$KITCHEN_SINK_CLI_TIMEOUT"',
     ]);
 
     expectTextToIncludeAll(sweep, [
       'KITCHEN_SINK_CLI_TIMEOUT="${KITCHEN_SINK_CLI_TIMEOUT:-180s}"',
-      "run_kitchen_sink_openclaw_logged()",
-      "run_kitchen_sink_openclaw_capture()",
+      "run_kitchen_sink_carapace_logged()",
+      "run_kitchen_sink_carapace_capture()",
       'local log_file="${KITCHEN_SINK_TMP_DIR}/${safe_label}.log"',
     ]);
 
     for (const line of sweep.split("\n")) {
-      if (!line.includes('node "$OPENCLAW_ENTRY" plugins')) {
+      if (!line.includes('node "$CARAPACE_ENTRY" plugins')) {
         continue;
       }
 
-      expect(line).toContain("openclaw_e2e_maybe_timeout");
+      expect(line).toContain("carapace_e2e_maybe_timeout");
     }
   });
 
@@ -6806,7 +6806,7 @@ process.exit(73);
     expect(packageRunner).not.toMatch(/(^|\n)\s*docker rm -f/u);
     expect(packageRunner).toContain("docker_e2e_docker_cmd rm -f");
     expect(packageRunner).toContain(
-      'DOCKER_RUN_TIMEOUT="${OPENCLAW_DOCKER_PACKAGE_INSTALL_RUN_TIMEOUT:-120s}"',
+      'DOCKER_RUN_TIMEOUT="${CARAPACE_DOCKER_PACKAGE_INSTALL_RUN_TIMEOUT:-120s}"',
     );
     expect(packageRunner).toContain(
       'DOCKER_COMMAND_TIMEOUT="$DOCKER_RUN_TIMEOUT" docker_e2e_docker_run_cmd run -d',
@@ -6875,19 +6875,19 @@ process.exit(73);
 
     expectTextToIncludeAll(packageRunner, [
       "--user root",
-      "npm install -g /tmp/openclaw-current.tgz",
-      "runuser -u appuser -- openclaw --version",
-      "runuser -u appuser -- openclaw --help",
+      "npm install -g /tmp/carapace-current.tgz",
+      "runuser -u appuser -- carapace --version",
+      "runuser -u appuser -- carapace --help",
       'corepack prepare "$1" --activate',
       "pnpm list --global --json",
       'test -f "$package_root/package.json"',
       'test "$PNPM_PACKAGE_VERSION" = "$PACKAGE_VERSION"',
-      "pnpm add --global openclaw@file:/tmp/openclaw-current.tgz",
+      "pnpm add --global carapace@file:/tmp/carapace-current.tgz",
       'pnpm approve-builds --global "$artifact_build"',
       "bun@1.4.0",
-      'test "$(command -v openclaw)" = "/usr/local/bin/openclaw"',
-      'test "$(command -v openclaw)" = "$PNPM_HOME/bin/openclaw"',
-      "OPENCLAW_BUN_GLOBAL_SMOKE_PROOF_PATH",
+      'test "$(command -v carapace)" = "/usr/local/bin/carapace"',
+      'test "$(command -v carapace)" = "$PNPM_HOME/bin/carapace"',
+      "CARAPACE_BUN_GLOBAL_SMOKE_PROOF_PATH",
       'PACKAGE_HARNESS_DIR="$(mktemp -d',
       "chmod -R a+rX",
       '-v "$PACKAGE_HARNESS_DIR:/repo:ro"',
@@ -6898,23 +6898,23 @@ process.exit(73);
     expect(packageRunner).not.toContain('-v "$ROOT_DIR:/repo:ro"');
     expectTextToIncludeAll(installerRunner, [
       "bash /tmp/install.sh",
-      "--version file:/tmp/openclaw-current.tgz",
+      "--version file:/tmp/carapace-current.tgz",
       'source "$HOME/.bashrc"',
       "hash -r",
-      "bash /tmp/openclaw-source/scripts/install-cli.sh",
+      "bash /tmp/carapace-source/scripts/install-cli.sh",
       "--install-method git",
-      "--prefix /tmp/openclaw-prefix",
+      "--prefix /tmp/carapace-prefix",
       "--node-version 24.19.0",
       "apt-get install -y --no-install-recommends curl",
       "command -v curl >/dev/null",
       'chmod 0555 "$SOURCE_PROOF_SCRIPT"',
-      'SOURCE_MEMORY="${OPENCLAW_CLI_INSTALLER_SOURCE_MEMORY:-16g}"',
+      'SOURCE_MEMORY="${CARAPACE_CLI_INSTALLER_SOURCE_MEMORY:-16g}"',
       '--memory "$SOURCE_MEMORY"',
       "runuser -u appuser",
       'test -r "$0"',
       'test -x "$0"',
-      'grep -Fq "/tmp/openclaw-source/dist/entry.js" "$prefix_cli"',
-      "openclaw update status --json",
+      'grep -Fq "/tmp/carapace-source/dist/entry.js" "$prefix_cli"',
+      "carapace update status --json",
       "expected git install kind",
     ]);
     expect(installerRunner.match(/--memory "\$SOURCE_MEMORY"/gu)).toHaveLength(1);
@@ -6922,17 +6922,17 @@ process.exit(73);
       installerRunner.indexOf('echo "==> install-cli.sh dedicated-prefix source-checkout proof"'),
     );
     expectTextToIncludeAll(updateRunner, [
-      "openclaw update --channel beta",
-      'OPENCLAW_NPM_REGISTRY_DIST_TAGS="latest=0.0.0,beta=$package_version"',
-      'OPENCLAW_NPM_REGISTRY_UPSTREAM="${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_URL:-https://registry.npmjs.org}"',
+      "carapace update --channel beta",
+      'CARAPACE_NPM_REGISTRY_DIST_TAGS="latest=0.0.0,beta=$package_version"',
+      'CARAPACE_NPM_REGISTRY_UPSTREAM="${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_URL:-https://registry.npmjs.org}"',
       "assert-update beta",
       "assert-config-channel beta",
       "assert-installed-version",
       "assert-status-kind package",
-      "openclaw update --channel stable",
+      "carapace update --channel stable",
     ]);
-    expect(updateRunner).toContain("openclaw update --channel beta --yes --json --no-restart");
-    expect(updateRunner).not.toContain("openclaw update --channel beta --tag");
+    expect(updateRunner).toContain("carapace update --channel beta --yes --json --no-restart");
+    expect(updateRunner).not.toContain("carapace update --channel beta --tag");
   });
 
   it("routes the gateway network client through the timeout-aware run helper", () => {
@@ -6949,9 +6949,9 @@ process.exit(73);
     const runner = readFileSync(GATEWAY_NETWORK_DOCKER_E2E_PATH, "utf8");
     expect(runner).toContain('[[ "$FROZEN_CONTEXT" == "1" ]]');
     expect(runner).toContain("scripts/e2e/lib/gateway-network/client.mjs");
-    expect(runner).toContain('-v "$LEGACY_GATEWAY_LIB:/tmp/openclaw-selected-e2e-lib:ro"');
-    expect(runner).toContain("node /tmp/openclaw-selected-e2e-lib/gateway-network/client.mjs");
-    expect(runner).not.toContain("/tmp/openclaw-gateway-network-client.mjs");
+    expect(runner).toContain('-v "$LEGACY_GATEWAY_LIB:/tmp/carapace-selected-e2e-lib:ro"');
+    expect(runner).toContain("node /tmp/carapace-selected-e2e-lib/gateway-network/client.mjs");
+    expect(runner).not.toContain("/tmp/carapace-gateway-network-client.mjs");
   });
 
   it("proves gateway suspension across a same-container process restart", () => {
@@ -6973,7 +6973,7 @@ process.exit(73);
       'rm "$CAPABILITIES_PATH"',
       'rmdir "$CAPABILITIES_DIR"',
       'if [[ "$SUSPENSION_CAPABILITY" == "unsupported" ]]',
-      "openclaw_frozen_target_omissions_authorized",
+      "carapace_frozen_target_omissions_authorized",
       "run_suspension_phase() {",
       "GW_MODE=suspension-$stage-restart",
       "run_suspension_phase pre",
@@ -6984,12 +6984,12 @@ process.exit(73);
       'docker_e2e_docker_cmd stop "$GW_NAME"',
       'docker_e2e_docker_cmd start "$GW_NAME"',
       'if [[ "$restarted_container_id" != "$container_id" ]]',
-      "openclaw_e2e_probe_http http://127.0.0.1:$PORT/readyz ok 400",
+      "carapace_e2e_probe_http http://127.0.0.1:$PORT/readyz ok 400",
       'run_logged_print "gateway-network-suspension-$stage"',
       '"phase":"container-restart","durationMs":%d',
     ]);
     expect(runner).not.toContain('source "$ROOT_DIR/scripts/lib/live-docker-auth.sh"');
-    expect(runner).not.toContain("openclaw_live_chown_bind_dirs_for_container_user");
+    expect(runner).not.toContain("carapace_live_chown_bind_dirs_for_container_user");
     expect(runner).not.toContain("gateway-network-capabilities-dir");
     expect(runner).not.toContain("IMAGE_USER=");
     expect(runner).not.toContain("--user 0:0");
@@ -7012,8 +7012,8 @@ process.exit(73);
   });
 
   it.each([
-    ["connect", "OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS", "100ms"],
-    ["ready", "OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS", "1e3"],
+    ["connect", "CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS", "100ms"],
+    ["ready", "CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS", "1e3"],
   ])(
     "rejects invalid gateway network client %s timeout before Docker setup",
     (_label, envName, value) => {
@@ -7022,7 +7022,7 @@ process.exit(73);
         env: {
           ...process.env,
           [envName]: value,
-          OPENCLAW_SKIP_DOCKER_BUILD: "1",
+          CARAPACE_SKIP_DOCKER_BUILD: "1",
         },
       });
 
@@ -7035,18 +7035,18 @@ process.exit(73);
   it("forwards gateway network client timeout env into the Docker client", () => {
     const runner = readFileSync(GATEWAY_NETWORK_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      "docker_e2e_read_positive_int_env OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS 80000",
-      "docker_e2e_read_positive_int_env OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS 80000",
-      '-e "OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS=$CLIENT_CONNECT_TIMEOUT_MS"',
-      '-e "OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS=$CONNECT_READY_TIMEOUT_MS"',
+      "docker_e2e_read_positive_int_env CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS 80000",
+      "docker_e2e_read_positive_int_env CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS 80000",
+      '-e "CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS=$CLIENT_CONNECT_TIMEOUT_MS"',
+      '-e "CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS=$CONNECT_READY_TIMEOUT_MS"',
       '"${CLIENT_LIMIT_ENV_ARGS[@]}"',
     ]);
   });
 
   it("requires TCP readiness for the gateway network runner", () => {
     const runner = readFileSync(GATEWAY_NETWORK_DOCKER_E2E_PATH, "utf8");
-    expect(runner).toContain("openclaw_e2e_probe_tcp 127.0.0.1 $PORT");
-    expect(runner).not.toMatch(/openclaw_e2e_probe_tcp[^\n]*\|\|[^\n]*gateway-net-e2e\.log/u);
+    expect(runner).toContain("carapace_e2e_probe_tcp 127.0.0.1 $PORT");
+    expect(runner).not.toMatch(/carapace_e2e_probe_tcp[^\n]*\|\|[^\n]*gateway-net-e2e\.log/u);
   });
 
   it.each([
@@ -7058,7 +7058,7 @@ process.exit(73);
     expect(stageStart).toBeGreaterThanOrEqual(0);
     const installIndex = dockerfile.indexOf("pnpm install --frozen-lockfile", stageStart);
     expect(installIndex).toBeGreaterThan(stageStart);
-    const root = tempDirs.make("openclaw-docker-lifecycle-");
+    const root = tempDirs.make("carapace-docker-lifecycle-");
     // Execute with the image's explicit file inputs, without the later full-source COPY.
     const copies = dockerfile.slice(stageStart, installIndex).matchAll(/^COPY (.+)$/gm);
     for (const [, instruction] of copies) {
@@ -7137,7 +7137,7 @@ done
     expect(scheduler).toContain("path.dirname(process.execPath)");
     expect(scheduler).toContain("env.PATH = [...new Set(pathEntries)].join(path.delimiter)");
     expect(scheduler).toContain(
-      'env.push(["OPENCLAW_DOCKER_ALL_PNPM_COMMAND", baseEnv.OPENCLAW_DOCKER_ALL_PNPM_COMMAND]);',
+      'env.push(["CARAPACE_DOCKER_ALL_PNPM_COMMAND", baseEnv.CARAPACE_DOCKER_ALL_PNPM_COMMAND]);',
     );
   });
 
@@ -7146,19 +7146,19 @@ done
     const openWebUiRunner = readFileSync(OPENWEBUI_DOCKER_E2E_PATH, "utf8");
 
     expect(scenarios).toContain(
-      '"OPENCLAW_INSTALL_TAG=beta OPENCLAW_E2E_MODELS=openai OPENCLAW_INSTALL_E2E_IMAGE=openclaw-install-e2e-openai:local OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE=0 OPENCLAW_INSTALL_E2E_OPENAI_MODEL=openai/gpt-5.4-mini OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS=120 OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS=120"',
+      '"CARAPACE_INSTALL_TAG=beta CARAPACE_E2E_MODELS=openai CARAPACE_INSTALL_E2E_IMAGE=carapace-install-e2e-openai:local CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE=0 CARAPACE_INSTALL_E2E_OPENAI_MODEL=openai/gpt-5.4-mini CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS=120 CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS=120"',
     );
     expect(scenarios).toContain(
-      '"OPENCLAW_INSTALL_TAG=beta OPENCLAW_E2E_MODELS=anthropic OPENCLAW_INSTALL_E2E_IMAGE=openclaw-install-e2e-anthropic:local"',
+      '"CARAPACE_INSTALL_TAG=beta CARAPACE_E2E_MODELS=anthropic CARAPACE_INSTALL_E2E_IMAGE=carapace-install-e2e-anthropic:local"',
     );
     expect(scenarios).toContain('"test-install-sh-e2e-docker.sh"');
     expect(scenarios).not.toContain("pnpm test:install:e2e");
     expect(scenarios).toContain(
-      '"OPENCLAW_OPENWEBUI_MODEL=openai/gpt-5.4-mini OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui"',
+      '"CARAPACE_OPENWEBUI_MODEL=openai/gpt-5.4-mini CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui"',
     );
     expect(scenarios).not.toContain("OPENWEBUI_SMOKE_MODE=models");
     expect(openWebUiRunner).toContain(
-      'SMOKE_MODE="${OPENWEBUI_SMOKE_MODE:-${OPENCLAW_OPENWEBUI_SMOKE_MODE:-chat}}"',
+      'SMOKE_MODE="${OPENWEBUI_SMOKE_MODE:-${CARAPACE_OPENWEBUI_SMOKE_MODE:-chat}}"',
     );
     expect(openWebUiRunner).toContain('-e "OPENWEBUI_SMOKE_MODE=$SMOKE_MODE"');
   });
@@ -7168,8 +7168,8 @@ done
     const wrapper = readFileSync("scripts/test-install-sh-e2e-docker.sh", "utf8");
 
     expectTextToIncludeAll(runner, [
-      'AGENT_TURNS_PARALLEL="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
-      'AGENT_TOOL_SMOKE="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
+      'AGENT_TURNS_PARALLEL="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
+      'AGENT_TOOL_SMOKE="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
       "time_phase",
       "phase_mark_start",
       "run_agent_turn_bg",
@@ -7178,24 +7178,24 @@ done
       "SKIP: Anthropic billing drift during installer agent tool smoke",
       'run_agent_turn_bg "image write"',
       'run_agent_turn_logged_or_skip_profile "read proof copy"',
-      "OPENCLAW_INSTALL_E2E_OPENAI_MODEL",
-      "OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS",
-      'AGENT_TURN_TIMEOUT_SECONDS="$(read_positive_int_env OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300)"',
+      "CARAPACE_INSTALL_E2E_OPENAI_MODEL",
+      "CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS",
+      'AGENT_TURN_TIMEOUT_SECONDS="$(read_positive_int_env CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300)"',
     ]);
 
     expect(runner).not.toContain('run_agent_turn_bg "read proof"');
 
     expectTextToIncludeAll(wrapper, [
-      "OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL",
-      "OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE",
-      "OPENCLAW_INSTALL_E2E_OPENAI_MODEL",
-      "OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS",
-      "docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300",
-      'docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"',
-      '-e OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS="$AGENT_TURN_TIMEOUT_SECONDS"',
-      "OPENCLAW_INSTALL_E2E_PROFILE_FILE",
-      "OPENCLAW_PROFILE_FILE",
-      "OPENCLAW_TESTBOX_PROFILE_FILE",
+      "CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL",
+      "CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE",
+      "CARAPACE_INSTALL_E2E_OPENAI_MODEL",
+      "CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS",
+      "docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300",
+      'docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"',
+      '-e CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS="$AGENT_TURN_TIMEOUT_SECONDS"',
+      "CARAPACE_INSTALL_E2E_PROFILE_FILE",
+      "CARAPACE_PROFILE_FILE",
+      "CARAPACE_TESTBOX_PROFILE_FILE",
       "read_profile_env_value",
       'source "$PROFILE_FILE"',
       'export "$key"',
@@ -7210,7 +7210,7 @@ done
     expect(scenarios).toContain('"plugins-offline"');
     expect(scenarios).toContain("`bundled-plugin-install-uninstall-${index}`");
     expect(scenarios).toContain("pnpm test:docker:bundled-plugin-install-uninstall");
-    expect(scenarios).toContain("OPENCLAW_PLUGINS_E2E_CLAWHUB=0");
+    expect(scenarios).toContain("CARAPACE_PLUGINS_E2E_CLAWHUB=0");
   });
 
   it("allows plugin update smoke to tolerate config metadata migrations", () => {
@@ -7255,7 +7255,7 @@ done
     expect(start).toBeGreaterThanOrEqual(0);
     expect(end).toBeGreaterThan(start);
     const probe = runner.slice(start + startMarker.length, end);
-    const workDir = tempDirs.make("openclaw-multi-node-health-timeout-");
+    const workDir = tempDirs.make("carapace-multi-node-health-timeout-");
     const preloadPath = join(workDir, "stalling-fetch.mjs");
 
     writeFileSync(
@@ -7326,13 +7326,13 @@ done
     const doctorRunner = readFileSync(DOCTOR_SWITCH_DOCKER_E2E_PATH, "utf8");
     expect(doctorRunner).toContain("scripts/e2e/lib/doctor-install-switch/scenario.sh");
     expectTextToIncludeAll(doctorRunner, [
-      'TARGET_ROOT_DIR="$(cd "${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" && pwd)"',
+      'TARGET_ROOT_DIR="$(cd "${CARAPACE_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" && pwd)"',
       'TARGET_CONTRACT_DIR="$TARGET_ROOT_DIR/scripts/e2e/lib/doctor-install-switch"',
       'source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"',
       '"$TARGET_CONTRACT_DIR:/app/scripts/e2e/lib/doctor-install-switch:ro"',
     ]);
     expectTextToIncludeAll(doctorScenario, [
-      "OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR=1",
+      "CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR=1",
       "scripts/e2e/lib/package-compat.mjs",
     ]);
 
@@ -7350,7 +7350,7 @@ done
 
     expect(pluginsSweep).toContain("scripts/e2e/lib/package-compat.mjs");
     expect(pluginUpdateProbe).toContain("../package-compat.mjs");
-    expect(scripts.join("\n")).toContain("OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT");
+    expect(scripts.join("\n")).toContain("CARAPACE_PACKAGE_ACCEPTANCE_LEGACY_COMPAT");
     expect(scripts.join("\n")).toContain(
       "Package $package_version must support gateway install --wrapper.",
     );
@@ -7361,11 +7361,11 @@ done
   });
 
   it("keeps the doctor switch systemctl shim system scope empty", () => {
-    const home = tempDirs.make("openclaw-doctor-systemctl-shim-");
+    const home = tempDirs.make("carapace-doctor-systemctl-shim-");
     const env = { ...process.env, HOME: home };
     const loadState = spawnSync(
       DOCTOR_SWITCH_SYSTEMCTL_SHIM_PATH,
-      ["show", "--property=LoadState", "--value", "openclaw-gateway.service"],
+      ["show", "--property=LoadState", "--value", "carapace-gateway.service"],
       { encoding: "utf8", env },
     );
     const unitPath = spawnSync(
@@ -7381,27 +7381,27 @@ done
   });
 
   it("reports the installed doctor switch unit through the systemd manager", async () => {
-    const home = tempDirs.make("openclaw-doctor-busctl-shim-");
-    const serviceName = "openclaw-gateway.service";
+    const home = tempDirs.make("carapace-doctor-busctl-shim-");
+    const serviceName = "carapace-gateway.service";
     const unitPath = join(home, ".config", "systemd", "user", serviceName);
     mkdirSync(join(home, ".config", "systemd", "user"), { recursive: true });
     writeFileSync(
       unitPath,
       [
         "[Service]",
-        'ExecStart=/usr/bin/node "/opt/openclaw git/dist/index.js" gateway --port 18789',
-        'WorkingDirectory="/opt/openclaw git"',
-        'Environment="GREETING=hello world" OPENCLAW_PROFILE=fixture',
-        "EnvironmentFile=-%h/.openclaw/gateway.systemd.env",
+        'ExecStart=/usr/bin/node "/opt/carapace git/dist/index.js" gateway --port 18789',
+        'WorkingDirectory="/opt/carapace git"',
+        'Environment="GREETING=hello world" CARAPACE_PROFILE=fixture',
+        "EnvironmentFile=-%h/.carapace/gateway.systemd.env",
         "UnsetEnvironment=STALE_FLAG",
       ].join("\n"),
     );
 
     const manager = "org.freedesktop.systemd1";
-    const objectPath = "/org/freedesktop/systemd1/unit/openclaw_2dgateway_2eservice";
+    const objectPath = "/org/freedesktop/systemd1/unit/carapace_2dgateway_2eservice";
     const programArguments = [
       "/usr/bin/node",
-      "/opt/openclaw git/dist/index.js",
+      "/opt/carapace git/dist/index.js",
       "gateway",
       "--port",
       "18789",
@@ -7450,9 +7450,9 @@ done
         type: "a(sasbttttuii)",
         data: [[programArguments[0], programArguments, false, ...Array(7).fill(0)]],
       },
-      { type: "s", data: "/opt/openclaw git" },
-      { type: "as", data: ["GREETING=hello world", "OPENCLAW_PROFILE=fixture"] },
-      { type: "a(sb)", data: [[join(home, ".openclaw", "gateway.systemd.env"), true]] },
+      { type: "s", data: "/opt/carapace git" },
+      { type: "as", data: ["GREETING=hello world", "CARAPACE_PROFILE=fixture"] },
+      { type: "a(sb)", data: [[join(home, ".carapace", "gateway.systemd.env"), true]] },
       { type: "as", data: ["STALE_FLAG"] },
     ]);
     expect(
@@ -7482,15 +7482,15 @@ done
       await import("../../src/daemon/systemd-service-files.js");
     expect(
       await readSystemdServiceExecStart(
-        { HOME: home, PATH: `${binDir}:${process.env.PATH}`, OPENCLAW_SYSTEMD_UNIT: serviceName },
+        { HOME: home, PATH: `${binDir}:${process.env.PATH}`, CARAPACE_SYSTEMD_UNIT: serviceName },
         { requireEffective: true },
       ),
     ).toMatchObject({
       programArguments,
-      workingDirectory: "/opt/openclaw git",
+      workingDirectory: "/opt/carapace git",
       sourcePath: unitPath,
       definitionPaths: [unitPath],
-      environment: { GREETING: "hello world", OPENCLAW_PROFILE: "fixture" },
+      environment: { GREETING: "hello world", CARAPACE_PROFILE: "fixture" },
     });
 
     const unexpected = spawnSync(
@@ -7506,14 +7506,14 @@ done
   });
 
   it("distinguishes a missing named doctor switch unit from failed or unsupported inspection", async () => {
-    const home = tempDirs.make("openclaw-doctor-busctl-absence-");
+    const home = tempDirs.make("carapace-doctor-busctl-absence-");
     const binDir = join(home, "bin");
-    const serviceName = "openclaw-gateway-fixture.service";
+    const serviceName = "carapace-gateway-fixture.service";
     const unitPath = join(home, ".config/systemd/user", serviceName);
     writeExecutables(binDir, {
-      // Bind fixture identity here: native manager children do not inherit OpenClaw selectors.
+      // Bind fixture identity here: native manager children do not inherit Carapace selectors.
       busctl: readFileSync(DOCTOR_SWITCH_BUSCTL_SHIM_PATH, "utf8").replace(
-        "process.env.OPENCLAW_SYSTEMD_UNIT",
+        "process.env.CARAPACE_SYSTEMD_UNIT",
         JSON.stringify(serviceName),
       ),
       "systemd-exec-start.mjs": readFileSync(DOCTOR_SWITCH_SYSTEMD_EXEC_START_PATH, "utf8"),
@@ -7521,7 +7521,7 @@ done
     const env = {
       HOME: home,
       PATH: `${binDir}:${process.env.PATH}`,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-fixture",
+      CARAPACE_SYSTEMD_UNIT: "carapace-gateway-fixture",
     };
     const { readSystemdServiceExecStart } =
       await import("../../src/daemon/systemd-service-files.js");
@@ -7555,7 +7555,7 @@ done
     mkdirSync(dirname(unitPath), { recursive: true });
     writeFileSync(
       unitPath,
-      "[Service]\nExecStart=/usr/bin/node /opt/profile/openclaw.mjs gateway\nEnvironment=OLD=stale\nEnvironment=\nEnvironment=KEEP=current REMOVE=value\nUnsetEnvironment=KEEP\nUnsetEnvironment=\nUnsetEnvironment=REMOVE\nEnvironmentFile=/missing/required.env\nEnvironmentFile=\n",
+      "[Service]\nExecStart=/usr/bin/node /opt/profile/carapace.mjs gateway\nEnvironment=OLD=stale\nEnvironment=\nEnvironment=KEEP=current REMOVE=value\nUnsetEnvironment=KEEP\nUnsetEnvironment=\nUnsetEnvironment=REMOVE\nEnvironmentFile=/missing/required.env\nEnvironmentFile=\n",
     );
     const command = await readSystemdServiceExecStart(env, { requireEffective: true });
     expect(command?.sourcePath).toBe(unitPath);
@@ -7570,7 +7570,7 @@ done
       "--json=short",
       "get-property",
       "org.freedesktop.systemd1",
-      "/org/freedesktop/systemd1/unit/openclaw_2dgateway_2dfixture_2eservice",
+      "/org/freedesktop/systemd1/unit/carapace_2dgateway_2dfixture_2eservice",
       "org.freedesktop.systemd1.Unit",
       "FragmentPath",
       "DropInPaths",
@@ -7586,28 +7586,28 @@ done
     const scenario = readFileSync(DOCTOR_SWITCH_SCENARIO_PATH, "utf8");
 
     expectTextToIncludeAll(runner, [
-      'NPM_INSTALL_TIMEOUT="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}"',
-      'COMMAND_TIMEOUT="${OPENCLAW_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT:-900s}"',
-      '-e "OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=$NPM_INSTALL_TIMEOUT"',
-      '-e "OPENCLAW_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
+      'NPM_INSTALL_TIMEOUT="${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}"',
+      'COMMAND_TIMEOUT="${CARAPACE_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT:-900s}"',
+      '-e "CARAPACE_E2E_NPM_INSTALL_TIMEOUT=$NPM_INSTALL_TIMEOUT"',
+      '-e "CARAPACE_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT=$COMMAND_TIMEOUT"',
     ]);
 
     expectTextToIncludeAll(scenario, [
-      'command_timeout="${OPENCLAW_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT:-900s}"',
+      'command_timeout="${CARAPACE_DOCKER_DOCTOR_SWITCH_COMMAND_TIMEOUT:-900s}"',
       "use_default_service_identity() {",
       "local account_home",
       'account_home="$(node -p \'require("node:os").userInfo().homedir\')"',
       'export HOME="$account_home"',
       'export USERPROFILE="$account_home"',
-      "unset OPENCLAW_HOME OPENCLAW_STATE_DIR OPENCLAW_CONFIG_PATH",
-      'openclaw_test_state_create "switch-${name}" empty\n  use_default_service_identity',
-      'openclaw_e2e_maybe_timeout "$command_timeout" bash -c "$install_cmd"',
-      'openclaw_e2e_maybe_timeout "$command_timeout" bash -c "$doctor_cmd"',
-      'openclaw_e2e_maybe_timeout "$command_timeout" "$npm_bin" gateway install --wrapper "$wrapper" --force',
+      "unset CARAPACE_HOME CARAPACE_STATE_DIR CARAPACE_CONFIG_PATH",
+      'carapace_test_state_create "switch-${name}" empty\n  use_default_service_identity',
+      'carapace_e2e_maybe_timeout "$command_timeout" bash -c "$install_cmd"',
+      'carapace_e2e_maybe_timeout "$command_timeout" bash -c "$doctor_cmd"',
+      'carapace_e2e_maybe_timeout "$command_timeout" "$npm_bin" gateway install --wrapper "$wrapper" --force',
     ]);
 
     expect(
-      scenario.match(/unset OPENCLAW_HOME OPENCLAW_STATE_DIR OPENCLAW_CONFIG_PATH/gu),
+      scenario.match(/unset CARAPACE_HOME CARAPACE_STATE_DIR CARAPACE_CONFIG_PATH/gu),
     ).toHaveLength(1);
     expect(scenario.match(/export USERPROFILE="\$account_home"/gu)).toHaveLength(1);
     expect(scenario.match(/^ {2}use_default_service_identity$/gmu)).toHaveLength(3);
@@ -7620,51 +7620,51 @@ done
     const directRunner = extractUpgradeSurvivorPayload(wrapper);
 
     expectTextToIncludeAll(wrapper, [
-      'OPENCLAW_TEST_STATE_FUNCTION_B64="$(docker_e2e_test_state_function_b64)"',
-      '-e OPENCLAW_TEST_STATE_FUNCTION_B64="$OPENCLAW_TEST_STATE_FUNCTION_B64"',
+      'CARAPACE_TEST_STATE_FUNCTION_B64="$(docker_e2e_test_state_function_b64)"',
+      '-e CARAPACE_TEST_STATE_FUNCTION_B64="$CARAPACE_TEST_STATE_FUNCTION_B64"',
     ]);
-    expect(wrapper).not.toContain("OPENCLAW_TEST_STATE_SCRIPT_B64");
+    expect(wrapper).not.toContain("CARAPACE_TEST_STATE_SCRIPT_B64");
     expectTextToIncludeAll(publishedRunner, [
       'if [ "$UPDATE_RESTART_MODE" = "auto-auth" ]; then',
       'account_home="$(getent passwd "$(id -u)" | cut -d: -f6)"',
       'if [ -z "$account_home" ]; then',
       'export HOME="$account_home"',
       'export USERPROFILE="$account_home"',
-      "unset OPENCLAW_HOME",
-      'export OPENCLAW_STATE_DIR="$account_home/.openclaw"',
-      'export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"',
+      "unset CARAPACE_HOME",
+      'export CARAPACE_STATE_DIR="$account_home/.carapace"',
+      'export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"',
     ]);
 
-    expect(publishedRunner.indexOf("unset OPENCLAW_HOME")).toBeLessThan(
-      publishedRunner.indexOf('export OPENCLAW_STATE_DIR="$account_home/.openclaw"'),
+    expect(publishedRunner.indexOf("unset CARAPACE_HOME")).toBeLessThan(
+      publishedRunner.indexOf('export CARAPACE_STATE_DIR="$account_home/.carapace"'),
     );
     expect(
-      publishedRunner.indexOf('export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"'),
+      publishedRunner.indexOf('export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"'),
     ).toBeLessThan(
       publishedRunner.indexOf("node scripts/e2e/lib/upgrade-survivor/assertions.mjs seed"),
     );
 
     expectTextToIncludeAll(directRunner, [
-      'openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_FUNCTION_B64:?missing OPENCLAW_TEST_STATE_FUNCTION_B64}"',
+      'carapace_e2e_eval_test_state_from_b64 "${CARAPACE_TEST_STATE_FUNCTION_B64:?missing CARAPACE_TEST_STATE_FUNCTION_B64}"',
       'if [ "$UPDATE_RESTART_MODE" = "auto-auth" ]; then',
       'account_home="$(getent passwd "$(id -u)" | cut -d: -f6)"',
-      'openclaw_test_state_create "$account_home" upgrade-survivor',
+      'carapace_test_state_create "$account_home" upgrade-survivor',
       'export HOME="$account_home"',
       'export USERPROFILE="$account_home"',
-      'export OPENCLAW_STATE_DIR="$account_home/.openclaw"',
-      'export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"',
-      "unset OPENCLAW_HOME",
+      'export CARAPACE_STATE_DIR="$account_home/.carapace"',
+      'export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"',
+      "unset CARAPACE_HOME",
       "else",
-      "openclaw_test_state_create upgrade-survivor upgrade-survivor",
+      "carapace_test_state_create upgrade-survivor upgrade-survivor",
     ]);
-    expect(directRunner.indexOf('openclaw_test_state_create "$account_home"')).toBeLessThan(
-      directRunner.indexOf("unset OPENCLAW_HOME"),
+    expect(directRunner.indexOf('carapace_test_state_create "$account_home"')).toBeLessThan(
+      directRunner.indexOf("unset CARAPACE_HOME"),
     );
-    expect(directRunner.indexOf("unset OPENCLAW_HOME")).toBeLessThan(
+    expect(directRunner.indexOf("unset CARAPACE_HOME")).toBeLessThan(
       directRunner.indexOf("prepare_update_restart_probe_current_install"),
     );
     expect(
-      directRunner.indexOf('export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"'),
+      directRunner.indexOf('export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"'),
     ).toBeLessThan(
       directRunner.indexOf("node scripts/e2e/lib/upgrade-survivor/assertions.mjs seed"),
     );
@@ -7673,12 +7673,12 @@ done
   it("bounds doctor install switch command log diagnostics", () => {
     const scenario = readFileSync(DOCTOR_SWITCH_SCENARIO_PATH, "utf8");
     expectTextToIncludeAll(scenario, [
-      'openclaw_e2e_print_log "$npm_log"',
-      'openclaw_e2e_print_log "$install_log"',
-      'openclaw_e2e_print_log "$doctor_log"',
-      'openclaw_e2e_print_log "$reinstall_log"',
-      'openclaw_e2e_print_log "$env_repair_log"',
-      'openclaw_e2e_print_log "$clear_log"',
+      'carapace_e2e_print_log "$npm_log"',
+      'carapace_e2e_print_log "$install_log"',
+      'carapace_e2e_print_log "$doctor_log"',
+      'carapace_e2e_print_log "$reinstall_log"',
+      'carapace_e2e_print_log "$env_repair_log"',
+      'carapace_e2e_print_log "$clear_log"',
     ]);
 
     expect(scenario).not.toContain('cat "$npm_log"');
@@ -7690,13 +7690,13 @@ done
   });
 
   it("prepares pnpm workspace package fixtures without package dependencies", () => {
-    const root = tempDirs.make("openclaw-update-channel-fixture-");
+    const root = tempDirs.make("carapace-update-channel-fixture-");
     mkdirSync(join(root, "patches"));
     mkdirSync(join(root, "dist"));
     writeFileSync(join(root, "dist/build-info.json"), JSON.stringify({ version: "2026.5.6" }));
     writeFileSync(
       join(root, "package.json"),
-      `${JSON.stringify({ name: "openclaw", version: "2026.5.6", scripts: {} }, null, 2)}\n`,
+      `${JSON.stringify({ name: "carapace", version: "2026.5.6", scripts: {} }, null, 2)}\n`,
       "utf8",
     );
     writeFileSync(
@@ -7738,28 +7738,28 @@ done
     const probe = readFileSync(BUNDLED_PLUGIN_INSTALL_UNINSTALL_PROBE_PATH, "utf8");
     const runtimeSmoke = readFileSync(BUNDLED_PLUGIN_INSTALL_UNINSTALL_RUNTIME_SMOKE_PATH, "utf8");
     const forwardedRuntimeEnv = [
-      "OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS",
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS",
+      "CARAPACE_BUNDLED_PLUGIN_LIST_TIMEOUT_MS",
+      "CARAPACE_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_READY_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_HTTP_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS",
+      "CARAPACE_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS",
     ] as const;
 
     expectTextToIncludeAll(runner, [
-      "OPENCLAW_BUNDLED_PLUGIN_SWEEP_TOTAL",
-      "OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX",
-      "OPENCLAW_BUNDLED_PLUGIN_SWEEP_COMMAND_TIMEOUT",
-      "OPENCLAW_PLUGIN_LIFECYCLE_TRACE",
-      "docker_e2e_read_tcp_port_env OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE 19000",
-      '-e "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE=$RUNTIME_PORT_BASE"',
+      "CARAPACE_BUNDLED_PLUGIN_SWEEP_TOTAL",
+      "CARAPACE_BUNDLED_PLUGIN_SWEEP_INDEX",
+      "CARAPACE_BUNDLED_PLUGIN_SWEEP_COMMAND_TIMEOUT",
+      "CARAPACE_PLUGIN_LIFECYCLE_TRACE",
+      "docker_e2e_read_tcp_port_env CARAPACE_BUNDLED_PLUGIN_RUNTIME_PORT_BASE 19000",
+      '-e "CARAPACE_BUNDLED_PLUGIN_RUNTIME_PORT_BASE=$RUNTIME_PORT_BASE"',
       "scripts/e2e/lib/bundled-plugin-install-uninstall/sweep.sh",
       'tee "$RUN_LOG"',
     ]);
@@ -7770,19 +7770,19 @@ done
     }
 
     for (const [envName, fallback] of [
-      ["OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS", "30000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES", "4194304"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS", "1048576"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES", "262144"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES", "16777216"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS", "900000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_MS", "60000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS", "210000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS", "1000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", "120000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS", "5000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS", "10000"],
-      ["OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS", "1000"],
+      ["CARAPACE_BUNDLED_PLUGIN_LIST_TIMEOUT_MS", "30000"],
+      ["CARAPACE_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES", "4194304"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS", "1048576"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES", "262144"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES", "16777216"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_READY_MS", "900000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_MS", "60000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS", "210000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS", "1000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", "120000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_HTTP_MS", "5000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS", "10000"],
+      ["CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS", "1000"],
     ] as const) {
       expect(runner, `${envName} host validation`).toContain(
         `docker_e2e_read_positive_int_env ${envName} ${fallback}`,
@@ -7791,14 +7791,14 @@ done
     }
 
     expect(runner).not.toContain('cat "$RUN_LOG"');
-    expect(probe).toContain('"openclaw.plugin.json"');
+    expect(probe).toContain('"carapace.plugin.json"');
     expect(runtimeSmoke).toContain(
-      'readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS", 900000)',
+      'readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_READY_MS", 900000)',
     );
     expectTextToIncludeAll(sweep, [
       "read -r plugin_id plugin_dir requires_config",
-      'node "$OPENCLAW_ENTRY" plugins install "$plugin_id"',
-      'node "$OPENCLAW_ENTRY" plugins uninstall "$plugin_id" --force',
+      'node "$CARAPACE_ENTRY" plugins install "$plugin_id"',
+      'node "$CARAPACE_ENTRY" plugins uninstall "$plugin_id" --force',
       "now_ms()",
       "lifecycle_trace_enabled()",
       "if lifecycle_trace_enabled; then",
@@ -7811,11 +7811,11 @@ done
   });
 
   it.each([
-    ["list timeout", "OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS", "100ms"],
-    ["runtime port base", "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE", "99999"],
-    ["runtime log scan", "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES", "64bytes"],
-    ["runtime command timeout", "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", "soon"],
-    ["runtime teardown grace", "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS", "0"],
+    ["list timeout", "CARAPACE_BUNDLED_PLUGIN_LIST_TIMEOUT_MS", "100ms"],
+    ["runtime port base", "CARAPACE_BUNDLED_PLUGIN_RUNTIME_PORT_BASE", "99999"],
+    ["runtime log scan", "CARAPACE_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES", "64bytes"],
+    ["runtime command timeout", "CARAPACE_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", "soon"],
+    ["runtime teardown grace", "CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS", "0"],
   ])(
     "rejects invalid bundled plugin Docker %s values before Docker setup",
     (_label, envName, value) => {
@@ -7823,7 +7823,7 @@ done
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_SKIP_DOCKER_BUILD: "1",
+          CARAPACE_SKIP_DOCKER_BUILD: "1",
           [envName]: value,
         },
       });
@@ -7836,11 +7836,11 @@ done
 
   it("passes installer tag env to bash, not curl", () => {
     const runner = readFileSync(INSTALL_E2E_RUNNER_PATH, "utf8");
-    expect(runner).toContain('OPENCLAW_BETA=1 bash "$installer"');
-    expect(runner).toContain('OPENCLAW_VERSION="$INSTALL_TAG" bash "$installer"');
-    expect(runner).not.toContain('OPENCLAW_BETA=1 curl -fsSL "$INSTALL_URL" | bash');
+    expect(runner).toContain('CARAPACE_BETA=1 bash "$installer"');
+    expect(runner).toContain('CARAPACE_VERSION="$INSTALL_TAG" bash "$installer"');
+    expect(runner).not.toContain('CARAPACE_BETA=1 curl -fsSL "$INSTALL_URL" | bash');
     expect(runner).not.toContain(
-      'OPENCLAW_VERSION="$INSTALL_TAG" curl -fsSL "$INSTALL_URL" | bash',
+      'CARAPACE_VERSION="$INSTALL_TAG" curl -fsSL "$INSTALL_URL" | bash',
     );
   });
 
@@ -7871,10 +7871,10 @@ done
     expect(start).toBeGreaterThanOrEqual(0);
     expect(end).toBeGreaterThan(start);
     expectTextToIncludeAll(helper, [
-      "OPENCLAW_INSTALL_E2E_SESSION_SCAN_BYTES",
-      "OPENCLAW_INSTALL_E2E_SESSION_LINE_BYTES",
-      "OPENCLAW_INSTALL_E2E_SESSION_SCAN_DEPTH",
-      "OPENCLAW_INSTALL_E2E_SESSION_SCAN_NODES",
+      "CARAPACE_INSTALL_E2E_SESSION_SCAN_BYTES",
+      "CARAPACE_INSTALL_E2E_SESSION_LINE_BYTES",
+      "CARAPACE_INSTALL_E2E_SESSION_SCAN_DEPTH",
+      "CARAPACE_INSTALL_E2E_SESSION_SCAN_NODES",
       "fs.createReadStream",
       "Buffer.concat",
       "skippedOversizedLines",
@@ -7907,10 +7907,10 @@ done
     expectTextToIncludeAll(helper, [
       'jsonl="$(session_jsonl_path "$profile" "$session_id")"',
       'if [[ ! -f "$jsonl" ]]',
-      'openclaw --profile "$profile" sessions export-trajectory',
+      'carapace --profile "$profile" sessions export-trajectory',
       '--session-key "agent:main:explicit:${session_id}"',
       '--workspace "$export_workspace"',
-      'jsonl="$export_workspace/.openclaw/trajectory-exports/scan/events.jsonl"',
+      'jsonl="$export_workspace/.carapace/trajectory-exports/scan/events.jsonl"',
       'rm -rf "$export_workspace"',
     ]);
   });
@@ -7921,20 +7921,20 @@ done
     const client = readFileSync(OPENAI_WEB_SEARCH_MINIMAL_CLIENT_PATH, "utf8");
 
     expectTextToIncludeAll(runner, [
-      'PORT="$(docker_e2e_read_tcp_port_env OPENCLAW_OPENAI_WEB_SEARCH_MINIMAL_PORT 18789)"',
+      'PORT="$(docker_e2e_read_tcp_port_env CARAPACE_OPENAI_WEB_SEARCH_MINIMAL_PORT 18789)"',
       'MOCK_PORT="443"',
       '-e "PORT=$PORT"',
       '-e "MOCK_PORT=$MOCK_PORT"',
       "scripts/e2e/lib/openai-web-search-minimal/scenario.sh",
     ]);
 
-    expect(runner).not.toContain("OPENCLAW_OPENAI_WEB_SEARCH_MINIMAL_MOCK_PORT");
+    expect(runner).not.toContain("CARAPACE_OPENAI_WEB_SEARCH_MINIMAL_MOCK_PORT");
 
     expectTextToIncludeAll(scenario, [
       'export NODE_EXTRA_CA_CERTS="$TLS_CA_CERT"',
       'MOCK_TLS_CERT="$TLS_SERVER_CERT"',
       'MOCK_TLS_KEY="$TLS_SERVER_KEY"',
-      'openclaw_e2e_wait_mock_openai "$MOCK_PORT" 80 400 "https://api.openai.com:$MOCK_PORT"',
+      'carapace_e2e_wait_mock_openai "$MOCK_PORT" 80 400 "https://api.openai.com:$MOCK_PORT"',
       "scripts/e2e/lib/openai-web-search-minimal/client.mjs",
     ]);
 
@@ -7951,11 +7951,11 @@ done
   it("cleans OpenAI web search smoke processes through the E2E helpers", () => {
     const scenario = readFileSync(OPENAI_WEB_SEARCH_MINIMAL_SCENARIO_PATH, "utf8");
     expectTextToIncludeAll(scenario, [
-      'openclaw_e2e_terminate_gateways "${gateway_pid:-}"',
-      'openclaw_e2e_stop_process "${mock_pid:-}"',
-      'gateway_pid="$(openclaw_e2e_start_gateway "$entry" "$PORT" "$GATEWAY_LOG")"',
-      'openclaw_e2e_wait_mock_openai "$MOCK_PORT" 80 400 "https://api.openai.com:$MOCK_PORT"',
-      'openclaw_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$PORT"',
+      'carapace_e2e_terminate_gateways "${gateway_pid:-}"',
+      'carapace_e2e_stop_process "${mock_pid:-}"',
+      'gateway_pid="$(carapace_e2e_start_gateway "$entry" "$PORT" "$GATEWAY_LOG")"',
+      'carapace_e2e_wait_mock_openai "$MOCK_PORT" 80 400 "https://api.openai.com:$MOCK_PORT"',
+      'carapace_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$PORT"',
     ]);
 
     expect(scenario).not.toContain("fetch('http://127.0.0.1:${MOCK_PORT}/health')");
@@ -7967,43 +7967,43 @@ done
   it("runs agents delete shared workspace smoke through one managed gateway", () => {
     const runner = readFileSync(AGENTS_DELETE_SHARED_WORKSPACE_DOCKER_E2E_PATH, "utf8");
     expectTextToIncludeAll(runner, [
-      'entry="$(openclaw_e2e_resolve_entrypoint)"',
+      'entry="$(carapace_e2e_resolve_entrypoint)"',
       'node "$entry" agents add alpha --workspace "$SHARED_WORKSPACE" --non-interactive',
       'node "$entry" agents add ops --workspace "$SHARED_WORKSPACE" --non-interactive',
-      'gateway_pid="$(openclaw_e2e_start_gateway "$entry" 18789 "$gateway_log")"',
-      'openclaw_e2e_wait_gateway_ready "$gateway_pid" "$gateway_log" 300 18789',
+      'gateway_pid="$(carapace_e2e_start_gateway "$entry" 18789 "$gateway_log")"',
+      'carapace_e2e_wait_gateway_ready "$gateway_pid" "$gateway_log" 300 18789',
       'node "$entry" agents delete ops --force --json > "$output_file"',
       'node "$entry" agents list --json > "$agents_file"',
       'node scripts/e2e/lib/fixture.mjs agents-delete-assert "$output_file" "$agents_file"',
-      'openclaw_e2e_terminate_gateways "${gateway_pid:-}"',
-      'openclaw_e2e_print_log "$gateway_log" >&2',
+      'carapace_e2e_terminate_gateways "${gateway_pid:-}"',
+      'carapace_e2e_print_log "$gateway_log" >&2',
       "trap cleanup EXIT",
       "trap dump_logs_on_error ERR",
     ]);
 
-    expect(runner.match(/openclaw_e2e_start_gateway/gu)).toHaveLength(1);
-    expect(runner.match(/openclaw_e2e_wait_gateway_ready/gu)).toHaveLength(1);
-    expect(runner).not.toContain("run_openclaw()");
+    expect(runner.match(/carapace_e2e_start_gateway/gu)).toHaveLength(1);
+    expect(runner.match(/carapace_e2e_wait_gateway_ready/gu)).toHaveLength(1);
+    expect(runner).not.toContain("run_carapace()");
     expect(runner).not.toContain("for _ in");
   });
 
   it("keeps OpenAI web search smoke logs isolated per run", () => {
     const scenario = readFileSync(OPENAI_WEB_SEARCH_MINIMAL_SCENARIO_PATH, "utf8");
     expectTextToIncludeAll(scenario, [
-      'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-openai-web-search-minimal.XXXXXX")"',
+      'scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-openai-web-search-minimal.XXXXXX")"',
       'MOCK_REQUEST_LOG="$scenario_tmp/requests.jsonl"',
       'GATEWAY_LOG="$scenario_tmp/gateway.log"',
       'MOCK_LOG="$scenario_tmp/mock.log"',
       'CLIENT_SUCCESS_LOG="$scenario_tmp/client-success.log"',
       'CLIENT_REJECT_LOG="$scenario_tmp/client-reject.log"',
-      'openclaw_e2e_print_log "$file"',
+      'carapace_e2e_print_log "$file"',
       'rm -rf "$scenario_tmp"',
     ]);
 
     expect(scenario).not.toContain("sed -n '1,260p'");
-    expect(scenario).not.toContain("/tmp/openclaw-openai-web-search-minimal-requests.jsonl");
-    expect(scenario).not.toContain("/tmp/openclaw-openai-web-search-minimal-client-success.log");
-    expect(scenario).not.toContain("/tmp/openclaw-openai-web-search-minimal-client-reject.log");
+    expect(scenario).not.toContain("/tmp/carapace-openai-web-search-minimal-requests.jsonl");
+    expect(scenario).not.toContain("/tmp/carapace-openai-web-search-minimal-client-success.log");
+    expect(scenario).not.toContain("/tmp/carapace-openai-web-search-minimal-client-reject.log");
   });
 
   it("keeps ClawHub plugin Docker smoke hermetic by default", () => {
@@ -8013,20 +8013,20 @@ done
 
     expectTextToIncludeAll(runner, [
       "scripts/e2e/lib/plugins/sweep.sh",
-      "OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB",
-      "OPENCLAW_PLUGINS_E2E_LIVE_NPM_REGISTRY",
+      "CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB",
+      "CARAPACE_PLUGINS_E2E_LIVE_NPM_REGISTRY",
     ]);
 
     expect(sweep).toContain("scripts/e2e/lib/plugins/clawhub.sh");
     expectTextToIncludeAll(clawhub, [
       "start_clawhub_fixture_server()",
-      'OPENCLAW_CLAWHUB_URL="http://127.0.0.1:',
-      "OPENCLAW_PLUGINS_E2E_LIVE_CLAWHUB",
-      "OPENCLAW_PLUGINS_E2E_LIVE_NPM_REGISTRY",
+      'CARAPACE_CLAWHUB_URL="http://127.0.0.1:',
+      "CARAPACE_PLUGINS_E2E_LIVE_CLAWHUB",
+      "CARAPACE_PLUGINS_E2E_LIVE_NPM_REGISTRY",
       "live ClawHub can rate-limit CI",
-      '[[ -n "${OPENCLAW_CLAWHUB_URL:-}" || -n "${CLAWHUB_URL:-}" ]]',
+      '[[ -n "${CARAPACE_CLAWHUB_URL:-}" || -n "${CLAWHUB_URL:-}" ]]',
       "Ignoring ambient ClawHub URL for fixture-mode plugin E2E",
-      "unset OPENCLAW_CLAWHUB_URL CLAWHUB_URL",
+      "unset CARAPACE_CLAWHUB_URL CLAWHUB_URL",
     ]);
   });
 
@@ -8036,7 +8036,7 @@ done
 
     expectTextToIncludeAll(runner, [
       "--reporter=verbose -t",
-      'DOCKER_RUN_TIMEOUT="${OPENCLAW_PLUGIN_BINDING_COMMAND_ESCAPE_DOCKER_RUN_TIMEOUT:-900s}"',
+      'DOCKER_RUN_TIMEOUT="${CARAPACE_PLUGIN_BINDING_COMMAND_ESCAPE_DOCKER_RUN_TIMEOUT:-900s}"',
       'DOCKER_COMMAND_TIMEOUT="$DOCKER_RUN_TIMEOUT" docker_e2e_docker_run_cmd run --rm',
       'docker_e2e_docker_cmd rm -f "$CONTAINER_NAME"',
       "lets authorized (plugin-owned binding commands fall through to command processing|gateway-style plugin commands escape plugin-owned bindings)",
@@ -8051,7 +8051,7 @@ done
       "keeps unauthorized plugin-owned binding slash text routed to the bound plugin",
     );
 
-    expect(dockerfile).toContain("OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL=1");
+    expect(dockerfile).toContain("CARAPACE_DISABLE_BUNDLED_PLUGIN_POSTINSTALL=1");
     expect(dockerfile).toContain("pnpm install --frozen-lockfile --ignore-scripts\n");
   });
 
@@ -8071,9 +8071,9 @@ done
     const npmRegistry = readFileSync(PLUGINS_DOCKER_NPM_REGISTRY_PATH, "utf8");
 
     expectTextToIncludeAll(sweep, [
-      'OPENCLAW_PLUGINS_CLI_TIMEOUT="${OPENCLAW_PLUGINS_CLI_TIMEOUT:-180s}"',
-      "run_plugins_openclaw_capture()",
-      'openclaw_e2e_maybe_timeout "$OPENCLAW_PLUGINS_CLI_TIMEOUT" node "$OPENCLAW_ENTRY" "$@" >"$output_file"',
+      'CARAPACE_PLUGINS_CLI_TIMEOUT="${CARAPACE_PLUGINS_CLI_TIMEOUT:-180s}"',
+      "run_plugins_carapace_capture()",
+      'carapace_e2e_maybe_timeout "$CARAPACE_PLUGINS_CLI_TIMEOUT" node "$CARAPACE_ENTRY" "$@" >"$output_file"',
       "plugins_lifecycle_trace_enabled()",
       "print_plugins_stderr_log()",
       "Plugin sweep command timed out after %s: %s",
@@ -8083,15 +8083,15 @@ done
       'plugins install "$dir_plugin" --force',
       "plugins update demo-plugin-dir",
       "start_npm_fixture_registry",
-      'plugins install "npm:@openclaw/demo-plugin-npm@0.0.1" --force',
+      'plugins install "npm:@carapace/demo-plugin-npm@0.0.1" --force',
       "plugins update demo-plugin-npm",
       'plugins install "git:$git_update_repo_url@main" --force',
       "plugins update demo-plugin-git-update",
     ]);
-    expect(runner).toContain('PLUGINS_CLI_TIMEOUT="${OPENCLAW_PLUGINS_CLI_TIMEOUT:-180s}"');
-    expect(runner).toContain('-e "OPENCLAW_PLUGINS_CLI_TIMEOUT=$PLUGINS_CLI_TIMEOUT"');
-    expect(runner).toContain("OPENCLAW_PLUGIN_LIFECYCLE_TRACE");
-    expect(sweep).not.toContain('run_logged install-npm node "$OPENCLAW_ENTRY"');
+    expect(runner).toContain('PLUGINS_CLI_TIMEOUT="${CARAPACE_PLUGINS_CLI_TIMEOUT:-180s}"');
+    expect(runner).toContain('-e "CARAPACE_PLUGINS_CLI_TIMEOUT=$PLUGINS_CLI_TIMEOUT"');
+    expect(runner).toContain("CARAPACE_PLUGIN_LIFECYCLE_TRACE");
+    expect(sweep).not.toContain('run_logged install-npm node "$CARAPACE_ENTRY"');
     for (const [path, script] of [
       [PLUGINS_DOCKER_SWEEP_PATH, sweep],
       [PLUGINS_DOCKER_MARKETPLACE_PATH, marketplace],
@@ -8099,8 +8099,8 @@ done
     ] as const) {
       const unboundedPluginCliLines = script
         .split("\n")
-        .filter((line) => line.includes('node "$OPENCLAW_ENTRY" plugins'))
-        .filter((line) => !line.includes("openclaw_e2e_maybe_timeout"));
+        .filter((line) => line.includes('node "$CARAPACE_ENTRY" plugins'))
+        .filter((line) => !line.includes("carapace_e2e_maybe_timeout"));
 
       expect(unboundedPluginCliLines, path).toEqual([]);
     }
@@ -8116,7 +8116,7 @@ done
     ]);
 
     expectTextToIncludeAll(npmRegistry, [
-      "OPENCLAW_NPM_REGISTRY_DIST_TAGS",
+      "CARAPACE_NPM_REGISTRY_DIST_TAGS",
       "Object.fromEntries(distTagOverrides)",
       "existing.latestVersion = version",
       "packageArgs.length % 3",
@@ -8125,8 +8125,8 @@ done
     expectTextToIncludeAll(clawhub, [
       'plugins install "$CLAWHUB_PLUGIN_SPEC"',
       'plugins update "$CLAWHUB_PLUGIN_ID"',
-      'openclaw_e2e_maybe_timeout "$OPENCLAW_PLUGINS_CLI_TIMEOUT"',
-      "clawhub:@openclaw/kitchen-sink",
+      'carapace_e2e_maybe_timeout "$CARAPACE_PLUGINS_CLI_TIMEOUT"',
+      "clawhub:@carapace/kitchen-sink",
     ]);
   });
 });

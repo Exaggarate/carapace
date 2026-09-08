@@ -7,13 +7,13 @@ import {
   select as clackSelect,
   text as clackText,
 } from "@clack/prompts";
-import { readByteStreamWithLimit } from "@openclaw/media-core/read-byte-stream-with-limit";
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { readByteStreamWithLimit } from "@carapace/media-core/read-byte-stream-with-limit";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolveExpiresAtMsFromDurationMs } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { styleSelectParams } from "../../../packages/terminal-core/src/prompt-select-styled-params.js";
 import { stylePromptMessage } from "../../../packages/terminal-core/src/prompt-style.js";
 import { resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
@@ -32,7 +32,7 @@ import { formatCliCommand } from "../../cli/command-format.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import { logConfigUpdated } from "../../config/logging.js";
 import { normalizeAgentModelRefForConfig } from "../../config/model-input.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isRemoteEnvironment } from "../../infra/remote-env.js";
 import {
   applyProviderAuthConfigPatch,
@@ -185,13 +185,13 @@ function validateOpenAICodexApiKeyInput(value: string): string | undefined {
   if (looksLikeJwtToken(trimmed) || looksLikeStructuredCredential(trimmed)) {
     // OAuth/token material belongs in token profiles; storing it as an API key
     // would make provider auth fail later with misleading model errors.
-    return `That looks like token or OAuth material, not an OpenAI API key. Use ${formatCliCommand("openclaw models auth paste-token --provider openai")} for token auth material.`;
+    return `That looks like token or OAuth material, not an OpenAI API key. Use ${formatCliCommand("carapace models auth paste-token --provider openai")} for token auth material.`;
   }
   return "That does not look like an OpenAI API key.";
 }
 
 type ResolvedModelsAuthContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   agentDir: string;
   workspaceDir: string;
@@ -234,7 +234,7 @@ function mergeSetupProviders(
 
 function preferSetupAuthProviders(params: {
   providers: readonly ProviderPlugin[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir: string;
   requestedProvider?: string;
 }): ProviderPlugin[] {
@@ -260,7 +260,7 @@ function preferSetupAuthProviders(params: {
 async function resolveModelsAuthContext(params?: {
   requestedProvider?: string;
   rawAgentId?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<ResolvedModelsAuthContext> {
   const config = params?.config ?? (await loadValidConfigOrThrow());
   const { agentId, agentDir } = await resolveModelsAuthAgent(params?.rawAgentId, config);
@@ -293,7 +293,7 @@ async function resolveModelsAuthContext(params?: {
   };
 }
 
-async function resolveModelsAuthAgent(rawAgentId?: string | null, config?: OpenClawConfig) {
+async function resolveModelsAuthAgent(rawAgentId?: string | null, config?: CarapaceConfig) {
   const cfg = config ?? (await loadValidConfigOrThrow());
   return resolveModelsTargetAgent(cfg, rawAgentId ?? undefined, { kind: "mutation" });
 }
@@ -316,7 +316,7 @@ function resolveRequestedProviderOrThrow(
     .toSorted((a, b) => a.localeCompare(b));
   const availableText = available.length > 0 ? available.join(", ") : "(none)";
   throw new Error(
-    `Unknown provider "${requested}". Loaded providers: ${availableText}. Verify plugins via \`${formatCliCommand("openclaw plugins list --json")}\`.`,
+    `Unknown provider "${requested}". Loaded providers: ${availableText}. Verify plugins via \`${formatCliCommand("carapace plugins list --json")}\`.`,
   );
 }
 
@@ -401,7 +401,7 @@ async function pickProviderTokenMethod(params: {
 async function persistProviderAuthResult(params: {
   result: ProviderAuthResult;
   profiles?: ProviderAuthResult["profiles"];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   agentDir: string;
   runtime: RuntimeEnv;
@@ -462,7 +462,7 @@ async function persistProviderAuthResult(params: {
     }
   }
 
-  // Auth login owns the credential store. Keep openclaw.json untouched unless
+  // Auth login owns the credential store. Keep carapace.json untouched unless
   // the provider explicitly returns a config patch or the user opts into a
   // default-model write.
   if (shouldUpdateConfig) {
@@ -511,7 +511,7 @@ async function persistProviderAuthResult(params: {
     params.runtime.log(
       params.setDefault
         ? `Default model set to ${defaultModel}`
-        : `Default model available: ${defaultModel} (current default unchanged; run ${formatCliCommand(`openclaw models set ${defaultModel}`)} to apply)`,
+        : `Default model available: ${defaultModel} (current default unchanged; run ${formatCliCommand(`carapace models set ${defaultModel}`)} to apply)`,
     );
   }
   if (params.result.notes && params.result.notes.length > 0) {
@@ -521,7 +521,7 @@ async function persistProviderAuthResult(params: {
 }
 
 function resolveConfiguredAuthSelectionForProvider(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   provider: string,
 ): { createIfMissing: boolean; order?: string[] } {
   const providerAuthKey = resolveProviderIdForAuth(provider, { config: cfg });
@@ -545,7 +545,7 @@ function resolveConfiguredAuthSelectionForProvider(
 }
 
 async function runProviderAuthMethod(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   agentDir: string;
   workspaceDir: string;
@@ -609,7 +609,7 @@ export async function modelsAuthSetupTokenCommand(
 ) {
   if (!process.stdin.isTTY) {
     throw new Error(
-      `setup-token requires an interactive TTY. In automation, use ${formatCliCommand("openclaw models auth paste-token --provider <provider>")} instead.`,
+      `setup-token requires an interactive TTY. In automation, use ${formatCliCommand("carapace models auth paste-token --provider <provider>")} instead.`,
     );
   }
 
@@ -620,7 +620,7 @@ export async function modelsAuthSetupTokenCommand(
   const tokenProviders = listProvidersWithTokenMethods(providers);
   if (tokenProviders.length === 0) {
     throw new Error(
-      `No provider token-auth plugins found. Install one via \`${formatCliCommand("openclaw plugins install")}\`.`,
+      `No provider token-auth plugins found. Install one via \`${formatCliCommand("carapace plugins install")}\`.`,
     );
   }
 
@@ -628,7 +628,7 @@ export async function modelsAuthSetupTokenCommand(
     resolveRequestedProviderOrThrow(tokenProviders, opts.provider) ?? tokenProviders[0] ?? null;
   if (!provider) {
     throw new Error(
-      `No token-capable provider is available. Run ${formatCliCommand("openclaw plugins list")} to verify provider plugins are installed.`,
+      `No token-capable provider is available. Run ${formatCliCommand("carapace plugins list")} to verify provider plugins are installed.`,
     );
   }
 
@@ -674,7 +674,7 @@ export async function modelsAuthPasteTokenCommand(
   const rawProvider = normalizeOptionalString(opts.provider);
   if (!rawProvider) {
     throw new Error(
-      `Missing --provider. Run ${formatCliCommand("openclaw models status")} or ${formatCliCommand("openclaw plugins list")} to choose a provider.`,
+      `Missing --provider. Run ${formatCliCommand("carapace models status")} or ${formatCliCommand("carapace plugins list")} to choose a provider.`,
     );
   }
   const provider = normalizeManualAuthProvider(rawProvider);
@@ -690,7 +690,7 @@ export async function modelsAuthPasteTokenCommand(
       return validateAnthropicSetupToken(trimmed.replaceAll(/\s+/g, ""));
     }
     if (isOpenAIProvider(provider) && looksLikeOpenAIApiKey(trimmed)) {
-      return `That looks like an OpenAI API key. Use ${formatCliCommand("openclaw models auth paste-api-key --provider openai")} for API-key auth.`;
+      return `That looks like an OpenAI API key. Use ${formatCliCommand("carapace models auth paste-api-key --provider openai")} for API-key auth.`;
     }
     return undefined;
   };
@@ -724,9 +724,9 @@ export async function modelsAuthPasteTokenCommand(
   logConfigUpdated(runtime);
   runtime.log(`Auth profile: ${profileId} (${provider}/token)`);
   if (provider === "anthropic") {
-    runtime.log("Anthropic setup-token auth is supported in OpenClaw.");
-    runtime.log("OpenClaw prefers Claude CLI reuse when it is available on the host.");
-    runtime.log("Anthropic staff told us this OpenClaw path is allowed again.");
+    runtime.log("Anthropic setup-token auth is supported in Carapace.");
+    runtime.log("Carapace prefers Claude CLI reuse when it is available on the host.");
+    runtime.log("Anthropic staff told us this Carapace path is allowed again.");
   }
 }
 
@@ -743,7 +743,7 @@ export async function modelsAuthPasteApiKeyCommand(
   const rawProvider = normalizeOptionalString(opts.provider);
   if (!rawProvider) {
     throw new Error(
-      `Missing --provider. Run ${formatCliCommand("openclaw models status")} or ${formatCliCommand("openclaw plugins list")} to choose a provider.`,
+      `Missing --provider. Run ${formatCliCommand("carapace models status")} or ${formatCliCommand("carapace plugins list")} to choose a provider.`,
     );
   }
   const provider = normalizeManualAuthProvider(rawProvider);
@@ -837,7 +837,7 @@ export async function modelsAuthAddCommand(opts: { agent?: string }, runtime: Ru
       const method = tokenMethods.find((candidate) => candidate.id === methodId);
       if (!method) {
         throw new Error(
-          `Unknown token auth method "${methodId}". Run ${formatCliCommand("openclaw models auth login --provider " + providerPlugin.id)} to choose interactively.`,
+          `Unknown token auth method "${methodId}". Run ${formatCliCommand("carapace models auth login --provider " + providerPlugin.id)} to choose interactively.`,
         );
       }
       await runProviderAuthMethod({
@@ -918,7 +918,7 @@ export type ModelsAuthLoginFlowResult = {
 };
 
 export type ModelsAuthLoginFlowOptions = LoginOptions & {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
   env?: NodeJS.ProcessEnv;
@@ -970,7 +970,7 @@ function maybeLogOpenAICodexNativeSearchTip(runtime: RuntimeEnv, providerId: str
     return;
   }
   runtime.log(
-    `Tip: Codex-capable models can use native Codex web search. Configure the \`web_search\` tool with \`${formatCliCommand("openclaw configure --section web")}\`. Docs: https://docs.openclaw.ai/tools/web`,
+    `Tip: Codex-capable models can use native Codex web search. Configure the \`web_search\` tool with \`${formatCliCommand("carapace configure --section web")}\`. Docs: https://github.com/Exaggarate/carapace`,
   );
 }
 
@@ -1003,12 +1003,12 @@ export async function runModelsAuthLoginFlowCore(
   }
   if (authProviders.length === 0) {
     throw new Error(
-      `No provider plugins found. Install one via \`${formatCliCommand("openclaw plugins install")}\`.`,
+      `No provider plugins found. Install one via \`${formatCliCommand("carapace plugins install")}\`.`,
     );
   }
   if (useProviderPicker) {
     await prompter.note(
-      `Provider "${requestedProviderId}" uses its own CLI login. Select a provider with an OpenClaw auth flow.`,
+      `Provider "${requestedProviderId}" uses its own CLI login. Select a provider with an Carapace auth flow.`,
       "Provider auth",
     );
   } else if (requestedProviderId && !requestedProvider) {
@@ -1018,8 +1018,8 @@ export async function runModelsAuthLoginFlowCore(
     [
       "Scope: System / agent",
       `Agent: ${context.agentId}`,
-      "Location: the machine running OpenClaw",
-      `For personal model accounts on a Gateway, run ${formatCliCommand("openclaw models accounts login --help")}.`,
+      "Location: the machine running Carapace",
+      `For personal model accounts on a Gateway, run ${formatCliCommand("carapace models accounts login --help")}.`,
     ].join("\n"),
     "Provider sign-in",
   );
@@ -1038,7 +1038,7 @@ export async function runModelsAuthLoginFlowCore(
 
   if (!selectedProvider) {
     throw new Error(
-      `Unknown provider. Run ${formatCliCommand("openclaw models status")} or ${formatCliCommand("openclaw plugins list")} to see available provider plugins.`,
+      `Unknown provider. Run ${formatCliCommand("carapace models status")} or ${formatCliCommand("carapace plugins list")} to see available provider plugins.`,
     );
   }
 
@@ -1050,7 +1050,7 @@ export async function runModelsAuthLoginFlowCore(
 
   if (!chosenMethod) {
     throw new Error(
-      `Unknown auth method. Run ${formatCliCommand("openclaw models auth login --provider " + selectedProvider.id)} without --method to choose interactively.`,
+      `Unknown auth method. Run ${formatCliCommand("carapace models auth login --provider " + selectedProvider.id)} without --method to choose interactively.`,
     );
   }
 
@@ -1070,7 +1070,7 @@ export async function runModelsAuthLoginFlowCore(
       });
       if (!clearedStore) {
         throw new Error(
-          "auth store is busy; close other OpenClaw commands using this state directory and retry",
+          "auth store is busy; close other Carapace commands using this state directory and retry",
         );
       }
       opts.runtime.log(
@@ -1117,7 +1117,7 @@ export async function runModelsAuthLoginFlowCore(
 export async function modelsAuthLoginCommand(opts: LoginOptions, runtime: RuntimeEnv) {
   if (!process.stdin.isTTY) {
     throw new Error(
-      `models auth login requires an interactive TTY. In automation, use ${formatCliCommand("openclaw models auth paste-token --provider <provider>")} when token auth is available.`,
+      `models auth login requires an interactive TTY. In automation, use ${formatCliCommand("carapace models auth paste-token --provider <provider>")} when token auth is available.`,
     );
   }
 

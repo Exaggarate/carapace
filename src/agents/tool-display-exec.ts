@@ -3,8 +3,8 @@
  *
  * Turns common shell commands into short redacted labels for tool timelines and transcripts.
  */
-import { asOptionalObjectRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalObjectRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { formatInlineCodeSpan } from "../shared/markdown-code.js";
@@ -341,9 +341,9 @@ function summarizeKnownExec(words: string[], hereInput?: ShellWords["hereInput"]
     return `run ${bin} ${script}`;
   }
 
-  if (bin === "openclaw") {
+  if (bin === "carapace") {
     const sub = firstPositional(words, 1);
-    return sub ? `run openclaw ${sub}` : "run openclaw";
+    return sub ? `run carapace ${sub}` : "run carapace";
   }
 
   const arg = firstPositional(words, 1);
@@ -532,10 +532,10 @@ function classifyWorkspacePath(
     if (!segment) {
       continue;
     }
-    if (segment === ".openclaw" && segments[index + 1] === "workspace") {
+    if (segment === ".carapace" && segments[index + 1] === "workspace") {
       return "agent";
     }
-    if (segment === ".openclaw" && segments[index + 1] === "sandboxes") {
+    if (segment === ".carapace" && segments[index + 1] === "sandboxes") {
       return "sandbox";
     }
     if (/[-_]workspace$/i.test(segment) && segment.toLowerCase() !== "workspace") {
@@ -626,7 +626,7 @@ const KNOWN_SUMMARY_PREFIXES = [
   "run build",
   "start app",
   "run lint",
-  "run openclaw",
+  "run carapace",
   "run node script",
   "run node ",
   "run python",

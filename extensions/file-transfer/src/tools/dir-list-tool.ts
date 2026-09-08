@@ -1,7 +1,7 @@
 // File Transfer plugin module implements dir list tool behavior.
-import type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { wrapExternalContent } from "openclaw/plugin-sdk/security-runtime";
+import type { AnyAgentTool } from "carapace/plugin-sdk/agent-harness-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { wrapExternalContent } from "carapace/plugin-sdk/security-runtime";
 import { appendFileTransferAudit } from "../shared/audit.js";
 import { readClampedInt } from "../shared/params.js";
 import {

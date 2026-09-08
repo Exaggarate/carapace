@@ -8,7 +8,7 @@ import { stampConfigWriteMetadata } from "../../../config/io.meta.js";
 import { containsConfigIncludeDirective } from "../../../config/io.read-helpers.js";
 import { prepareConfigWriteTopology } from "../../../config/io.write-topology.js";
 import { findLegacyConfigIssues } from "../../../config/legacy.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../../../config/types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../../../config/types.js";
 import {
   validateConfigObjectRaw,
   validateConfigObjectWithPlugins,
@@ -18,7 +18,7 @@ import { applyLegacyDoctorMigrations } from "./legacy-config-compat.js";
 import { findDoctorLegacyConfigIssues } from "./legacy-config-issues.js";
 
 type AutomaticConfigRepairPlan = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   snapshot: ConfigFileSnapshot;
   changes: string[];
 };
@@ -33,7 +33,7 @@ function admitAutomaticConfigRepairSnapshot(snapshot: ConfigFileSnapshot): boole
   );
 }
 
-function prepareAutomaticConfigRepairWrite(snapshot: ConfigFileSnapshot, config: OpenClawConfig) {
+function prepareAutomaticConfigRepairWrite(snapshot: ConfigFileSnapshot, config: CarapaceConfig) {
   const unsetPaths = resolveManagedUnsetPathsForWrite(undefined);
   return stampConfigWriteMetadata(
     applyUnsetPathsForWrite(

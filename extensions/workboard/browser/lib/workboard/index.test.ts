@@ -1,8 +1,8 @@
-import { GatewayProtocolRequestError as GatewayRequestError } from "@openclaw/gateway-client/browser";
+import { GatewayProtocolRequestError as GatewayRequestError } from "@carapace/gateway-client/browser";
 // @vitest-environment node
 // Control UI tests cover workboard behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewaySessionRow } from "../../api/types.ts";
 import { workboardTestHost } from "../../test/host.setup.ts";

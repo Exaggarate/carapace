@@ -149,7 +149,7 @@ describe("classifyRunForRevive", () => {
     },
     {
       name: "skips a run whose head repository is a fork",
-      runOverrides: { head_repository: { full_name: "fork/openclaw" } },
+      runOverrides: { head_repository: { full_name: "fork/carapace" } },
       expected: { action: "skip", reason: "fork-head-repository" },
     },
     {
@@ -181,7 +181,7 @@ describe("classifyRunForRevive", () => {
       runOverrides,
       pullCreatedAt = prCreatedAt,
       expectedHeadBranch = "automation/refresh",
-      expectedRepoFullName = "openclaw/openclaw",
+      expectedRepoFullName = "carapace/carapace",
       expected,
     }) => {
       expect(
@@ -333,7 +333,7 @@ function fakeGithub(options: {
   return { github, calls };
 }
 
-const context = { repo: { owner: "openclaw", repo: "openclaw" } };
+const context = { repo: { owner: "carapace", repo: "carapace" } };
 const core = { info: () => {}, setFailed: () => {} };
 
 function recordingCore() {
@@ -363,7 +363,7 @@ function githubActionsCheck(runId: number, overrides: Partial<FakeCheckRun> = {}
     conclusion: "cancelled",
     status: "completed",
     app: { slug: "github-actions" },
-    details_url: `https://github.com/openclaw/openclaw/actions/runs/${runId}/job/456`,
+    details_url: `https://github.com/Exaggarate/carapace/actions/runs/${runId}/job/456`,
     ...overrides,
   };
 }
@@ -377,7 +377,7 @@ function cancelledRun(runId: number, overrides: Partial<FakeWorkflowRun> = {}): 
     run_attempt: 1,
     created_at: new Date(NOW - HOURS).toISOString(),
     head_branch: "automation/refresh",
-    head_repository: { full_name: "openclaw/openclaw" },
+    head_repository: { full_name: "carapace/carapace" },
     ...overrides,
   };
 }
@@ -408,7 +408,7 @@ describe("runPrCiSweeper", () => {
       context: context as never,
       core: core as never,
       dryRun: true,
-      appSlug: "openclaw-barnacle",
+      appSlug: "carapace-barnacle",
       now: NOW,
     });
     expect(results).toEqual([
@@ -568,7 +568,7 @@ describe("runPrCiSweeper", () => {
       github: github as never,
       context: context as never,
       core: loggedCore as never,
-      appSlug: "openclaw-barnacle",
+      appSlug: "carapace-barnacle",
       now: NOW,
     });
 
@@ -589,8 +589,8 @@ describe("runPrCiSweeper", () => {
     });
     expect(calls.filter((call) => call.method === "pulls.update").map((call) => call.args)).toEqual(
       [
-        { owner: "openclaw", repo: "openclaw", pull_number: 210, state: "closed" },
-        { owner: "openclaw", repo: "openclaw", pull_number: 210, state: "open" },
+        { owner: "carapace", repo: "carapace", pull_number: 210, state: "closed" },
+        { owner: "carapace", repo: "carapace", pull_number: 210, state: "open" },
       ],
     );
     expect(logs.at(-1)).toContain("1 re-fire");
@@ -652,7 +652,7 @@ describe("runPrCiSweeper", () => {
     expect(calls.filter((call) => call.method === "actions.reRunWorkflow")).toEqual([
       {
         method: "actions.reRunWorkflow",
-        args: { owner: "openclaw", repo: "openclaw", run_id: 1234 },
+        args: { owner: "carapace", repo: "carapace", run_id: 1234 },
       },
     ]);
     // Discovery plus the pre-mutation revalidation both list the head's checks.
@@ -660,8 +660,8 @@ describe("runPrCiSweeper", () => {
     expect(checkLists).toHaveLength(2);
     for (const call of checkLists) {
       expect(call.args).toEqual({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         ref: generated.head.sha,
         filter: "latest",
         per_page: 100,
@@ -754,7 +754,7 @@ describe("runPrCiSweeper", () => {
     expect(calls.filter((call) => call.method === "actions.reRunWorkflow")).toEqual([
       {
         method: "actions.reRunWorkflow",
-        args: { owner: "openclaw", repo: "openclaw", run_id: 100 },
+        args: { owner: "carapace", repo: "carapace", run_id: 100 },
       },
     ]);
     expect(
@@ -770,7 +770,7 @@ describe("runPrCiSweeper", () => {
     { name: "missing head branch", replacement: { head_branch: null } },
     {
       name: "fork head repository",
-      replacement: { head_repository: { full_name: "someone-else/openclaw" } },
+      replacement: { head_repository: { full_name: "someone-else/carapace" } },
     },
     { name: "missing head repository", replacement: { head_repository: undefined } },
     {
@@ -806,7 +806,7 @@ describe("runPrCiSweeper", () => {
       expect(calls.filter((call) => call.method === "actions.reRunWorkflow")).toEqual([
         {
           method: "actions.reRunWorkflow",
-          args: { owner: "openclaw", repo: "openclaw", run_id: 100 },
+          args: { owner: "carapace", repo: "carapace", run_id: 100 },
         },
       ]);
       expect(
@@ -917,7 +917,7 @@ describe("runPrCiSweeper", () => {
   it.each([
     { name: "missing", detailsUrl: null },
     { name: "undefined", detailsUrl: undefined },
-    { name: "malformed", detailsUrl: "https://github.com/openclaw/openclaw/actions/runs/nope" },
+    { name: "malformed", detailsUrl: "https://github.com/Exaggarate/carapace/actions/runs/nope" },
   ])("does not revive when an Actions replacement has a $name run URL", async ({ detailsUrl }) => {
     const generated = autoMergePr(46, "a".repeat(40));
     const { github, calls } = fakeGithub({
@@ -970,7 +970,7 @@ describe("runPrCiSweeper", () => {
     expect(calls.filter((call) => call.method === "actions.reRunWorkflow")).toEqual([
       {
         method: "actions.reRunWorkflow",
-        args: { owner: "openclaw", repo: "openclaw", run_id: 100 },
+        args: { owner: "carapace", repo: "carapace", run_id: 100 },
       },
     ]);
   });

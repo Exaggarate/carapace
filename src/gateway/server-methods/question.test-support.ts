@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import type { QuestionRequestQuestion } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   claimAgentRunDelegatedAuthority,
   clearAgentRunContext,
@@ -75,7 +75,7 @@ export function installQuestionTestHooks() {
 export async function callQuestionRpc(
   method: string,
   params: Record<string, unknown>,
-  options?: { client?: GatewayClient; cfg?: OpenClawConfig },
+  options?: { client?: GatewayClient; cfg?: CarapaceConfig },
 ) {
   const calls: Parameters<RespondFn>[] = [];
   const respond: RespondFn = (...args) => calls.push(args);

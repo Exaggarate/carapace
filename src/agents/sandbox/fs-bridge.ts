@@ -4,7 +4,7 @@
  * Resolves container paths to mounted host paths and executes guarded reads, writes, stats, renames, and deletes.
  */
 import fs from "node:fs";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { readFileDescriptorBoundedSync } from "../../infra/boundary-file-read.js";
 import { parseDirectoryEntries, type DirectoryEntry } from "../../infra/directory-entries.js";
 import type {

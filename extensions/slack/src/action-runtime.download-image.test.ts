@@ -1,9 +1,9 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getImageMetadata } from "openclaw/plugin-sdk/media-runtime";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { getImageMetadata } from "carapace/plugin-sdk/media-runtime";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { slackActionRuntime } from "./action-runtime.js";
 import { createSlackActions } from "./channel-actions.js";
@@ -34,7 +34,7 @@ describe("Slack downloaded image results", () => {
   ])(
     "returns a $expected px image for configured limit $configured",
     async ({ configured, expected }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { imageMaxDimensionPx: configured } },
         channels: { slack: { botToken: "test-token", channels: { C123: { enabled: true } } } },
       };

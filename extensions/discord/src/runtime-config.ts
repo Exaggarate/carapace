@@ -1,12 +1,12 @@
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord helper module supports runtime config behavior.
 import {
   getRuntimeConfigSourceSnapshot,
   getRuntimeConfigSnapshot,
   selectApplicableRuntimeConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 
-export function selectDiscordRuntimeConfig(inputConfig: OpenClawConfig): OpenClawConfig {
+export function selectDiscordRuntimeConfig(inputConfig: CarapaceConfig): CarapaceConfig {
   return (
     selectApplicableRuntimeConfig({
       inputConfig,
@@ -28,7 +28,7 @@ function withSourceActivities(
 }
 
 /** Restores plugin-owned sensitive Activity config onto the resolved runtime shape. */
-export function selectDiscordActivitiesRuntimeConfig(inputConfig: OpenClawConfig): OpenClawConfig {
+export function selectDiscordActivitiesRuntimeConfig(inputConfig: CarapaceConfig): CarapaceConfig {
   const runtimeConfig = selectDiscordRuntimeConfig(inputConfig);
   const sourceDiscord = getRuntimeConfigSourceSnapshot()?.channels?.discord;
   if (!sourceDiscord) {

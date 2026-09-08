@@ -1,12 +1,12 @@
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolveStorePath, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolveStorePath, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   appendSqliteTrajectoryRuntimeEvents,
-  closeOpenClawAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesForTest,
   formatSqliteSessionFileMarker,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it } from "vitest";
 import { captureRuntimeParityCell } from "./runtime-parity.js";
 import { createTempDirHarness } from "./temp-dir.test-helper.js";
@@ -17,7 +17,7 @@ afterEach(async () => {
   // Fixtures point a state dir at these temp workspaces, so the shared and per-agent
   // SQLite handles stay cached and Windows fails the removal with EBUSY. The agent close
   // releases its leases through shared state and reopens it, so the store is released second.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await tempDirs.cleanup();
 });
@@ -32,7 +32,7 @@ async function seedSession(params: {
   updatedAt: number;
 }) {
   const tempRoot = params.tempRoot ?? (await tempDirs.makeTempDir("qa-runtime-selection-"));
-  const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(tempRoot, "state") };
+  const env = { ...process.env, CARAPACE_STATE_DIR: path.join(tempRoot, "state") };
   const storePath = resolveStorePath(undefined, { agentId: "qa", env });
   await upsertSessionEntry({
     agentId: "qa",
@@ -64,7 +64,7 @@ async function seedSession(params: {
     appendSqliteTrajectoryRuntimeEvents(
       { agentId: "qa", env, sessionId: params.sessionId, storePath },
       params.trajectoryEvents.map((event, index) => ({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: params.sessionId,
         source: "runtime",

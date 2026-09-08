@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createDeferredCore } from "../shared/deferred.js";
 import type { GatewayRequestOptions } from "./server-methods/types.js";
 

@@ -91,17 +91,17 @@ const CORE_GATEWAY_METHOD_SPECS = [
   ["plugin.approval.resolve", null, "operator.approvals", "<=2026.7"],
   ["plugins.uiDescriptors", "plugin-host-hooks", "operator.read", "<=2026.7"],
   ["plugins.sessionAction", "plugin-host-hooks", "dynamic", "<=2026.7"],
-  ["openclaw.chat", "system-agent", "operator.admin", "<=2026.7"],
-  ["openclaw.chat.history", "system-agent", "operator.admin", "2026.7"],
-  ["openclaw.changes.list", "system-changes", "operator.admin", "<=2026.7"],
-  ["openclaw.approval.list", "system-agent", "operator.approvals", "<=2026.7"],
-  ["openclaw.setup.detect", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.chat", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.chat.history", "system-agent", "operator.admin", "2026.7"],
+  ["carapace.changes.list", "system-changes", "operator.admin", "<=2026.7"],
+  ["carapace.approval.list", "system-agent", "operator.approvals", "<=2026.7"],
+  ["carapace.setup.detect", "system-agent", "operator.admin", "<=2026.7"],
   // Failed activation candidates are non-mutating probes. Keep this admin-only
   // without the shared three-write budget so the automatic ladder can finish.
-  ["openclaw.setup.activate", "system-agent", "operator.admin", "<=2026.7"],
-  ["openclaw.setup.activate.start", "system-agent", "operator.admin", "2026.8"],
-  ["openclaw.setup.auth.start", "system-agent", "operator.admin", "<=2026.7"],
-  ["openclaw.setup.prepare.start", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.setup.activate", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.setup.activate.start", "system-agent", "operator.admin", "2026.8"],
+  ["carapace.setup.auth.start", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.setup.prepare.start", "system-agent", "operator.admin", "<=2026.7"],
   ["wizard.start", "wizard", "operator.admin", "<=2026.7"],
   ["wizard.next", "wizard", "operator.admin", "<=2026.7"],
   ["wizard.cancel", "wizard", "operator.admin", "<=2026.7"],
@@ -441,7 +441,7 @@ const CORE_GATEWAY_METHOD_SPECS = [
   // sessions.files.* trusted-operator read domain.
   ["sessions.diff", "sessions-diff", "operator.read", "<=2026.7"],
   // Additive protocol methods append here to preserve existing advertised indices.
-  ["openclaw.setup.verify", "system-agent", "operator.admin", "<=2026.7"],
+  ["carapace.setup.verify", "system-agent", "operator.admin", "<=2026.7"],
   // Cloud-worker mutations depend on the loaded provider registry and owned
   // reconciler, so advertise them early but gate dispatch until sidecars are ready.
   [

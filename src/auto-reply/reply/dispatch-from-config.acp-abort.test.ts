@@ -6,7 +6,7 @@ import type {
   SessionAcpMeta,
 } from "../../acp/control-plane/manager.types.js";
 import { resolveAcpSessionTarget } from "../../acp/control-plane/manager.utils.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type {
   AcpRuntime,
   AcpRuntimeEnsureInput,
@@ -89,7 +89,7 @@ async function raceWithTimeoutResult<T>(
 function createMockAcpSessionManager() {
   return {
     resolveSession: (params: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       sessionKey: string;
       agentId?: string;
     }): AcpSessionResolution => {
@@ -121,7 +121,7 @@ function createMockAcpSessionManager() {
     }),
     runTurn: vi.fn(
       async (params: {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         sessionKey: string;
         agentId?: string;
         text?: string;
@@ -309,7 +309,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyOptions: { abortSignal: abortController.signal },
     });
@@ -386,7 +386,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (resolverCtx) => {
         resolverCtx.AcpDispatchTailAfterReset = true;
@@ -436,7 +436,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (resolverCtx) => {
         resolverCtx.AcpDispatchTailAfterReset = true;
@@ -516,7 +516,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -647,7 +647,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (resolverCtx) => {
         resolverCtx.AcpDispatchTailAfterReset = true;
@@ -712,7 +712,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -775,7 +775,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -839,7 +839,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -899,7 +899,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -982,7 +982,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -1033,7 +1033,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver,
     });
@@ -1073,7 +1073,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyOptions: { abortSignal: callerAbort.signal },
       replyResolver,
@@ -1116,7 +1116,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (_resolverCtx, options) => {
         resolverStarted();
@@ -1166,7 +1166,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (_resolverCtx, options) => {
         resolverStarted();
@@ -1238,7 +1238,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: vi.fn(),
     });
@@ -1318,7 +1318,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver,
     });
@@ -1381,7 +1381,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
       cfg: {
         diagnostics: { enabled: true },
         session: { sendPolicy: { default: "allow" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver,
     });
@@ -1443,7 +1443,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
       cfg: {
         diagnostics: { enabled: true },
         session: { sendPolicy: { default: "allow" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher: createDispatcher(),
       replyOptions: { abortSignal: callerAbort.signal },
       replyResolver,
@@ -1498,7 +1498,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
       cfg: {
         diagnostics: { enabled: true },
         session: { sendPolicy: { default: "allow" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver: async (_resolverCtx, options) => {
         await options?.onBlockReply?.(acknowledgement);
@@ -1567,7 +1567,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
         session: {
           sendPolicy: { default: "allow" },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       dispatcher,
       replyResolver,
     });
@@ -1614,7 +1614,7 @@ describe("dispatchReplyFromConfig ACP abort", () => {
           session: {
             sendPolicy: { default: "allow" },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         dispatcher,
         replyOptions: { sourceReplyDeliveryMode: "automatic" },
         replyResolver,

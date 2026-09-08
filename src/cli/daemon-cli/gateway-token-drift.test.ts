@@ -1,6 +1,6 @@
 // Gateway token drift tests cover daemon detection of gateway token/config mismatches.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { resolveGatewayTokenForDriftCheck } from "./gateway-token-drift.js";
 
 describe("resolveGatewayTokenForDriftCheck", () => {
@@ -13,9 +13,9 @@ describe("resolveGatewayTokenForDriftCheck", () => {
             token: "config-token",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        CARAPACE_GATEWAY_TOKEN: "env-token",
       } as NodeJS.ProcessEnv,
     });
 
@@ -37,7 +37,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
             token: { source: "env", provider: "default", id: "SERVICE_GATEWAY_TOKEN" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {
         SERVICE_GATEWAY_TOKEN: "service-token",
       } as NodeJS.ProcessEnv,
@@ -65,7 +65,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
               token: "remote-token",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: {} as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrow(/gateway\.auth\.token/i);
@@ -85,7 +85,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
             token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
     });
     expect(token).toBeUndefined();
@@ -99,9 +99,9 @@ describe("resolveGatewayTokenForDriftCheck", () => {
             password: "config-password",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {
-        OPENCLAW_GATEWAY_PASSWORD: "env-password",
+        CARAPACE_GATEWAY_PASSWORD: "env-password",
       } as NodeJS.ProcessEnv,
     });
 
@@ -122,9 +122,9 @@ describe("resolveGatewayTokenForDriftCheck", () => {
               token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: {
-          OPENCLAW_GATEWAY_PASSWORD: "env-password",
+          CARAPACE_GATEWAY_PASSWORD: "env-password",
         } as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrow(/gateway\.auth\.token/i);

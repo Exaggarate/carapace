@@ -1,8 +1,8 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   ProviderCatalogOutcome,
   ProviderCatalogResult,
@@ -19,15 +19,15 @@ import type { ProviderConfig } from "./models-config.providers.secret-helpers.js
 import { resolveProviderIdForAuth } from "./provider-auth-aliases.js";
 
 type CatalogContext = {
-  config?: OpenClawConfig;
-  discoveryAuthConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  discoveryAuthConfig?: CarapaceConfig;
   explicitProviders?: Record<string, ProviderConfig> | null;
 };
 
 export function buildPluginCatalogConfig(
   ctx: CatalogContext,
   provider: ProviderPlugin,
-): OpenClawConfig {
+): CarapaceConfig {
   const providers = { ...ctx.config?.models?.providers, ...ctx.explicitProviders };
   if (Object.keys(providers).length === 0) {
     return ctx.config ?? {};

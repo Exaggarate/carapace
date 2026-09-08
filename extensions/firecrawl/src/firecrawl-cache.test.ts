@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createFirecrawlFreeWebSearchProvider,
@@ -46,7 +46,7 @@ describe.each(["keyed", "free", "standalone"] as const)("Firecrawl %s search cac
   });
 
   async function search(query: string, cacheTtlMinutes: number) {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { web: { search: { cacheTtlMinutes } } },
       plugins: {
         entries: {

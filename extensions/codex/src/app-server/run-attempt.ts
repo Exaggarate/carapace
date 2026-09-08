@@ -1,4 +1,4 @@
-import type { EmbeddedRunAttemptParamsV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParamsV2 } from "carapace/plugin-sdk/agent-harness-runtime";
 import { createCodexAttemptPreparationTiming } from "./attempt-preparation-timing.js";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import { activateCodexAttemptTurn } from "./run-attempt-active-turn.js";

@@ -12,8 +12,8 @@ export function combineTestHomeSelections(modes: readonly TestHomeSelection[]): 
 
 export const LIVE_TEST_TRIGGER_ENV_KEYS = [
   "LIVE",
-  "OPENCLAW_LIVE_TEST",
-  "OPENCLAW_LIVE_GATEWAY",
+  "CARAPACE_LIVE_TEST",
+  "CARAPACE_LIVE_GATEWAY",
 ] as const;
 
 export function isTruthyTestEnvValue(value: string | undefined): boolean {
@@ -27,7 +27,7 @@ export function resolveTestHomePolicy(
 ) {
   const hermetic = mode === "hermetic";
   const live = !hermetic && LIVE_TEST_TRIGGER_ENV_KEYS.some((key) => env[key] === "1");
-  const allowRealHome = !hermetic && isTruthyTestEnvValue(env.OPENCLAW_LIVE_USE_REAL_HOME);
+  const allowRealHome = !hermetic && isTruthyTestEnvValue(env.CARAPACE_LIVE_USE_REAL_HOME);
   return {
     hermetic,
     live,
@@ -41,8 +41,8 @@ export function assertTestHomeSelection(env: NodeJS.ProcessEnv, mode: TestHomeSe
   if (policy.live && policy.allowRealHome && mode !== "live-aware") {
     throw new Error(
       "[vitest] explicit real-home live execution requires a known wholly live-aware selection; " +
-        `the selection is ${mode}. Run hermetic tests without LIVE, OPENCLAW_LIVE_TEST, ` +
-        "OPENCLAW_LIVE_GATEWAY and OPENCLAW_LIVE_USE_REAL_HOME " +
+        `the selection is ${mode}. Run hermetic tests without LIVE, CARAPACE_LIVE_TEST, ` +
+        "CARAPACE_LIVE_GATEWAY and CARAPACE_LIVE_USE_REAL_HOME " +
         "(node scripts/run-vitest.mjs <test-path>), then run the intended live selection " +
         "separately with node scripts/test-live.mts -- <live-test-path>. " +
         "Custom configs are not evaluated to establish home policy.",

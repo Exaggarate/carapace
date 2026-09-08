@@ -1,13 +1,13 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 /** Normalizes provider auth input metadata collected from plugin setup flows. */
 import {
   normalizeOptionalLowercaseString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope-config.js";
 import { isMalformedApiKeyInput } from "../agents/auth-profiles/credential-state.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { normalizeSecretInput } from "../utils/normalize-secret-input.js";
@@ -60,7 +60,7 @@ export const validateApiKeyInput = (value: string) => {
     return "Required";
   }
   if (isMalformedApiKeyInput(normalized)) {
-    return "Paste the API key value, not an OpenClaw onboarding command.";
+    return "Paste the API key value, not an Carapace onboarding command.";
   }
   return undefined;
 };
@@ -136,7 +136,7 @@ export async function ensureApiKeyFromOptionEnvOrPrompt(params: {
   token: string | undefined;
   tokenProvider: string | undefined;
   secretInputMode?: SecretInputMode;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   expectedProviders: string[];
@@ -184,7 +184,7 @@ export async function ensureApiKeyFromOptionEnvOrPrompt(params: {
 
 /** Resolves an API key from environment or interactive prompt and records the chosen secret mode. */
 export async function ensureApiKeyFromEnvOrPrompt(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   provider: string;

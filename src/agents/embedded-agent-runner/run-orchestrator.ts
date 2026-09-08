@@ -1,14 +1,14 @@
 /**
  * Embedded-agent run orchestration implementation.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   createAgentLifecycleTerminalBackstop,
   resolveAgentLifecycleTerminalMetadata,
 } from "../../auto-reply/reply/agent-lifecycle-terminal.js";
 import { SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
 import { getRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { revokeMessageActionTurnCapability } from "../../gateway/message-action-turn-capability.js";
 import {
   captureAgentRunLifecycleGeneration,
@@ -85,7 +85,7 @@ import { assertAgentHarnessRunAdmission, backfillSessionKey } from "./run/sessio
 import { prepareEmbeddedSessionActiveProjectKeys } from "./session-prompt-state.js";
 import type { EmbeddedAgentRunResult } from "./types.js";
 
-const EMPTY_EMBEDDED_AGENT_CONFIG: OpenClawConfig = Object.freeze({});
+const EMPTY_EMBEDDED_AGENT_CONFIG: CarapaceConfig = Object.freeze({});
 
 export function runEmbeddedAgent(
   paramsInput: RunEmbeddedAgentParams,

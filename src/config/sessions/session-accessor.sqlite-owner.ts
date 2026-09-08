@@ -1,10 +1,10 @@
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/openclaw-agent-db-additive-columns.js";
+import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/carapace-agent-db-additive-columns.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { ensureColumn } from "../../state/openclaw-state-db-schema-helpers.js";
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { ensureColumn } from "../../state/carapace-state-db-schema-helpers.js";
 import type { SessionAccessScope } from "./session-accessor.sqlite-contract.js";
 import { publishSessionEntryCacheInvalidation } from "./session-accessor.sqlite-entry-cache.js";
 import { hasSqliteSessionOwnerColumns } from "./session-accessor.sqlite-owner-projection.js";
@@ -16,7 +16,7 @@ import {
 import type { SessionActor, SessionOwnerAssignment } from "./session-entry-provenance.js";
 
 export function replaceSessionOwnerInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKey: string,
   owner: SessionOwnerAssignment | undefined,
 ): boolean {
@@ -64,7 +64,7 @@ export function assignSessionOwner(
     assignedBy: params.assignedBy,
     assignedAt: params.assignedAt ?? Date.now(),
   };
-  const updated = runOpenClawAgentWriteTransaction(
+  const updated = runCarapaceAgentWriteTransaction(
     (database) => {
       params.assertCurrent?.();
       return replaceSessionOwnerInTransaction(database, resolved.sessionKey, owner);

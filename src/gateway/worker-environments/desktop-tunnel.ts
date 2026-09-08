@@ -113,7 +113,7 @@ export function createWorkerDesktopTunnels(deps: {
         pinnedHostKey: request.ssh.hostKey,
         resolveIdentity: request.resolveIdentity,
         // macOS Unix sockets allow 103 bytes; share one short private directory with SSH credentials.
-        temporaryDirectoryPrefix: "/tmp/openclaw-worker-desktop-",
+        temporaryDirectoryPrefix: "/tmp/carapace-worker-desktop-",
       });
       if (!isCurrent()) {
         throw new Error("Worker desktop tunnel stopped before connecting");
@@ -281,7 +281,7 @@ export function createWorkerDesktopTunnels(deps: {
         ssh: request.ssh,
         pinnedHostKey: request.ssh.hostKey,
         resolveIdentity: request.resolveIdentity,
-        temporaryDirectoryPrefix: "openclaw-worker-desktop-app-",
+        temporaryDirectoryPrefix: "carapace-worker-desktop-app-",
       });
       try {
         abortController.signal.throwIfAborted();

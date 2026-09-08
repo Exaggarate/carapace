@@ -1,4 +1,4 @@
-// OpenClaw assistant planning converts fuzzy user text into one safe command.
+// Carapace assistant planning converts fuzzy user text into one safe command.
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -95,7 +95,7 @@ export async function planSystemAgentCommandWithConfiguredModel(params: {
   const result = await runConfiguredSystemAgentText({
     prompt,
     systemPrompt: SYSTEM_AGENT_ASSISTANT_SYSTEM_PROMPT,
-    runIdPrefix: "openclaw-planner",
+    runIdPrefix: "carapace-planner",
     verifiedInference: params.verifiedInference,
     deps: params.deps,
     responseFormat: SYSTEM_AGENT_PLANNER_RESPONSE_SCHEMA,
@@ -115,7 +115,7 @@ export async function planSystemAgentGreetingWithConfiguredModel(params: {
   const result = await runConfiguredSystemAgentText({
     prompt: buildSystemAgentGreetingUserPrompt(params),
     systemPrompt: SYSTEM_AGENT_GREETING_SYSTEM_PROMPT,
-    runIdPrefix: "openclaw-greeting",
+    runIdPrefix: "carapace-greeting",
     verifiedInference: params.verifiedInference,
     deps: params.deps,
     timeoutMs: params.timeoutMs,
@@ -162,7 +162,7 @@ async function runConfiguredSystemAgentText(params: {
     );
     const shared = {
       sessionId: `${runId}-session`,
-      // OpenClaw is the planner surface, but the configured roster owner supplies runtime policy.
+      // Carapace is the planner surface, but the configured roster owner supplies runtime policy.
       agentId: route.agentId,
       trigger: "manual" as const,
       sessionFile: `in-memory:${runId}`,
@@ -179,8 +179,8 @@ async function runConfiguredSystemAgentText(params: {
       runId,
       extraSystemPrompt: params.systemPrompt,
       extraSystemPromptStatic: params.systemPrompt,
-      messageChannel: "openclaw",
-      messageProvider: "openclaw",
+      messageChannel: "carapace",
+      messageProvider: "carapace",
       disableTools: true,
       disableTrajectory: true,
       ...(responseFormat ? { streamParams: { responseFormat } } : {}),
@@ -250,7 +250,7 @@ async function requireVerifiedPlannerRoute(
 }
 
 async function createTempPlannerDir(): Promise<string> {
-  return await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-planner-"));
+  return await fs.mkdtemp(path.join(os.tmpdir(), "carapace-planner-"));
 }
 
 async function removeTempPlannerDir(dir: string): Promise<void> {

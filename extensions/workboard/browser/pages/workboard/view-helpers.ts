@@ -1,5 +1,5 @@
 import { html, nothing } from "lit";
-import type { ControlUiHost } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiHost } from "carapace/plugin-sdk/control-ui";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import type { GatewaySessionRow } from "../../api/types.ts";
 import { t } from "../../i18n/index.ts";
@@ -221,7 +221,7 @@ export function engineBlockedByRuntime(
     return null;
   }
   const normalized = runtime.toLowerCase();
-  if (normalized === "openclaw" || normalized === "pi") {
+  if (normalized === "carapace" || normalized === "pi") {
     return null;
   }
   return t("workboard.engineDisabledRuntime", {

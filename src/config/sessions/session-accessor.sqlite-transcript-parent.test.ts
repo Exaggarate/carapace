@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { runSqliteImmediateTransactionSync } from "../../infra/sqlite-transaction.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
   replaceTranscriptEventsSync,
   resolveSessionTranscriptDatabasePath,
@@ -22,7 +22,7 @@ async function createTranscript(events: TranscriptEvent[]) {
     agentId: "main",
     sessionId: "ancestry",
     sessionKey: "agent:main:ancestry",
-    storePath: path.join(tempDirs.make("openclaw-ancestry-"), "sessions.json"),
+    storePath: path.join(tempDirs.make("carapace-ancestry-"), "sessions.json"),
   };
   await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
   replaceTranscriptEventsSync(scope, [
@@ -31,7 +31,7 @@ async function createTranscript(events: TranscriptEvent[]) {
   ]);
   return {
     scope,
-    database: openOpenClawAgentDatabase({
+    database: openCarapaceAgentDatabase({
       agentId: scope.agentId,
       path: resolveSessionTranscriptDatabasePath(scope),
     }),

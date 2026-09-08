@@ -1,6 +1,6 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-scope-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import type { CodexAppServerStartOptions } from "./app-server/config-contracts.js";
 import type { resolveCodexSupervisionAppServerRuntimeOptions } from "./app-server/config-runtime.js";
@@ -33,7 +33,7 @@ import {
   toCatalogSession,
 } from "./session-catalog-parsing.js";
 import {
-  isOpenClawManagedCodexThread,
+  isCarapaceManagedCodexThread,
   readCodexSessionMeta,
 } from "./session-catalog-provenance.js";
 import type {
@@ -49,7 +49,7 @@ const CODEX_SESSION_CATALOG_LIST_CACHE_MAX_ENTRIES = 32;
 
 type CodexCatalogRequestOptions = {
   agentDir: string;
-  config: OpenClawConfig | undefined;
+  config: CarapaceConfig | undefined;
   startOptions: CodexAppServerStartOptions;
 };
 
@@ -217,7 +217,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
               if (
                 !metadata ||
                 !isInteractiveThreadSource(metadata.source) ||
-                metadata.originator === "openclaw"
+                metadata.originator === "carapace"
               ) {
                 throw unverified();
               }
@@ -258,7 +258,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
       const requests = params.createRequestSnapshot();
       const deadline = params.now() + requests.requestTimeoutMs;
       // Keep config/home sampling before the import and charge cold loading to this deadline.
-      const { sanitizeTerminalText } = await import("openclaw/plugin-sdk/text-chunking");
+      const { sanitizeTerminalText } = await import("carapace/plugin-sdk/text-chunking");
 
       for (let pageIndex = 0; pageIndex < maxPages; pageIndex += 1) {
         const remainingTimeoutMs = Math.ceil(deadline - params.now());
@@ -271,7 +271,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
             limit: limit - sessions.length,
             modelProviders: [],
             // Match Codex's resume picker/latest-session ordering so a session
-            // created outside OpenClaw enters the first catalog page immediately.
+            // created outside Carapace enters the first catalog page immediately.
             sortKey: "updated_at",
             sortDirection: "desc",
             ...(cwd ? { cwd } : {}),
@@ -283,7 +283,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
           backwardsCursor = readControlCursor(response.backwardsCursor, "backwards response");
         }
         for (const thread of response.data) {
-          if (await isOpenClawManagedCodexThread(thread, params.localSessionsRoot)) {
+          if (await isCarapaceManagedCodexThread(thread, params.localSessionsRoot)) {
             const rolloutPath = typeof thread.path === "string" ? thread.path.trim() : "";
             managedThreads.push({
               threadId: thread.id,
@@ -342,10 +342,10 @@ function createCodexSessionCatalogControlFromRequests(params: {
 
 /** Builds the passive catalog over the Codex plugin's canonical shared client. */
 export function createCodexSessionCatalogControl(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   getPluginConfig: () => unknown;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => CarapaceConfig | undefined;
   resolveRuntimeOptions: typeof resolveCodexSupervisionAppServerRuntimeOptions;
   now?: () => number;
   managedThreads?: CodexManagedThreadStore;
@@ -360,11 +360,11 @@ export function createCodexSessionCatalogControl(params: {
     ...(params.env ? { env: params.env } : {}),
   });
   const requestOptionsByConfig = new WeakMap<
-    OpenClawConfig,
+    CarapaceConfig,
     Map<string, CodexCatalogRequestOptions>
   >();
   const catalogPagesByConfig = new WeakMap<
-    OpenClawConfig,
+    CarapaceConfig,
     Map<string, CodexCatalogPageCacheEntry>
   >();
   const resolveRequestOptions = (

@@ -1,13 +1,13 @@
 // Matrix plugin module implements setup dm policy behavior.
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
-import type { DmPolicy } from "openclaw/plugin-sdk/config-contracts";
+import { createChannelDmPolicy } from "carapace/plugin-sdk/channel-dm-policy";
+import type { DmPolicy } from "carapace/plugin-sdk/config-contracts";
 import {
   addWildcardAllowFrom,
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeAllowFromEntries,
   type ChannelSetupDmPolicy,
-} from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/setup";
 import { resolveDefaultMatrixAccountId, resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import { resolveMatrixConfigFieldPath, updateMatrixAccountConfig } from "./matrix/config-update.js";
 import type { CoreConfig, MatrixConfig } from "./types.js";

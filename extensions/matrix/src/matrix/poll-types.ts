@@ -11,8 +11,8 @@ import {
   M_POLL_KIND_DISCLOSED,
   type PollKind as MatrixPollKind,
 } from "matrix-js-sdk/lib/@types/polls.js";
-import { normalizePollInput, type PollInput } from "openclaw/plugin-sdk/poll-runtime";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizePollInput, type PollInput } from "carapace/plugin-sdk/poll-runtime";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const M_POLL_START = "m.poll.start" as const;
 const M_POLL_RESPONSE = "m.poll.response" as const;

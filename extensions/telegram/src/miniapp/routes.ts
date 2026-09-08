@@ -1,19 +1,19 @@
 import crypto from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   BOOTSTRAP_HANDOFF_OPERATOR_SCOPES,
   issueDeviceBootstrapToken,
-} from "openclaw/plugin-sdk/device-bootstrap";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/device-bootstrap";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   createFixedWindowRateLimiter,
   resolveRequestClientIp,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
-} from "openclaw/plugin-sdk/webhook-ingress";
-import { readJsonWebhookBodyOrReject } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-ingress";
+import { readJsonWebhookBodyOrReject } from "carapace/plugin-sdk/webhook-request-guards";
 import { resolveTelegramAccount } from "../accounts.js";
 import { validateTelegramMiniAppInitData } from "./init-data.js";
 import type { TelegramMiniAppLaunchTickets } from "./launch-ticket.js";
@@ -38,7 +38,7 @@ const rateLimit = createFixedWindowRateLimiter({
 });
 
 export function registerTelegramMiniAppRoutes(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   launchTickets: TelegramMiniAppLaunchTickets,
 ): void {
   api.registerHttpRoute({
@@ -46,7 +46,7 @@ export function registerTelegramMiniAppRoutes(
     match: "prefix",
     auth: "plugin",
     handler: async (req, res) => {
-      const url = new URL(req.url ?? "", "http://openclaw.local");
+      const url = new URL(req.url ?? "", "http://carapace.local");
       if (url.pathname === TELEGRAM_MINIAPP_PATH_PREFIX) {
         await handlePage(req, res, url);
         return true;
@@ -80,7 +80,7 @@ async function handlePage(req: IncomingMessage, res: ServerResponse, url: URL): 
 }
 
 async function handleAuth(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   launchTickets: TelegramMiniAppLaunchTickets,
   req: IncomingMessage,
   res: ServerResponse,
@@ -173,8 +173,8 @@ async function handleAuth(
   });
 }
 
-function currentConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+function currentConfig(api: CarapacePluginApi): CarapaceConfig {
+  return (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
 }
 
 function parseAuthBody(

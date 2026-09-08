@@ -1,22 +1,22 @@
 /** Auth execution stays deferred until a setup or doctor hook is invoked. */
-import { formatCliCommand, parseDurationMs } from "openclaw/plugin-sdk/cli-runtime";
-import { resolveExpiresAtMsFromDurationMs } from "openclaw/plugin-sdk/number-runtime";
+import { formatCliCommand, parseDurationMs } from "carapace/plugin-sdk/cli-runtime";
+import { resolveExpiresAtMsFromDurationMs } from "carapace/plugin-sdk/number-runtime";
 import type {
   ProviderAuthContext,
   ProviderAuthMethod,
   ProviderAuthMethodNonInteractiveContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   applyAuthProfileConfig,
   type AuthProfileStore,
   buildTokenProfileId,
   listProfilesForProvider,
-  type OpenClawConfig as ProviderAuthConfig,
+  type CarapaceConfig as ProviderAuthConfig,
   type ProviderAuthResult,
   suggestOAuthProfileIdForLegacyDefault,
   validateAnthropicSetupToken,
-} from "openclaw/plugin-sdk/provider-auth";
-import { upsertAuthProfileWithLockOrThrow } from "openclaw/plugin-sdk/provider-auth-api-key";
+} from "carapace/plugin-sdk/provider-auth";
+import { upsertAuthProfileWithLockOrThrow } from "carapace/plugin-sdk/provider-auth-api-key";
 import * as claudeCliAuth from "./cli-auth-seam.js";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import { buildAnthropicCliMigrationResult } from "./cli-migration.js";
@@ -28,10 +28,10 @@ type ProviderAuthMethodNonInteractiveValidationContext = Parameters<
 >[0];
 
 const ANTHROPIC_SETUP_TOKEN_NOTE_LINES = [
-  "Anthropic setup-token auth is supported in OpenClaw.",
-  "OpenClaw prefers the native Claude CLI runtime when it is available on the host.",
-  "Anthropic staff told us this OpenClaw path is allowed again.",
-  `If you want a direct API billing path instead, use ${formatCliCommand("openclaw models auth login --provider anthropic --method api-key --set-default")} or ${formatCliCommand("openclaw models auth login --provider anthropic --method cli --set-default")}.`,
+  "Anthropic setup-token auth is supported in Carapace.",
+  "Carapace prefers the native Claude CLI runtime when it is available on the host.",
+  "Anthropic staff told us this Carapace path is allowed again.",
+  `If you want a direct API billing path instead, use ${formatCliCommand("carapace models auth login --provider anthropic --method api-key --set-default")} or ${formatCliCommand("carapace models auth login --provider anthropic --method cli --set-default")}.`,
 ] as const;
 
 function normalizeAnthropicSetupTokenInput(value: string): string {
@@ -215,7 +215,7 @@ export function buildAnthropicAuthDoctorHint(params: {
     }`,
     `- auth store oauth profiles: ${storeOauthProfiles || "(none)"}`,
     `- suggested profile: ${suggested}`,
-    `Fix: run "${formatCliCommand("openclaw doctor --yes")}"`,
+    `Fix: run "${formatCliCommand("carapace doctor --yes")}"`,
   ].join("\n");
 }
 

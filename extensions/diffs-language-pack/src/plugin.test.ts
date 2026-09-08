@@ -4,10 +4,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { beforeAll, describe, expect, it } from "vitest";
-import type { OpenClawPluginApi, OpenClawPluginHttpRouteHandler } from "../api.js";
+import type { CarapacePluginApi, CarapacePluginHttpRouteHandler } from "../api.js";
 import { registerDiffsLanguagePackPlugin } from "./plugin.js";
 
 const execFileAsync = promisify(execFile);
@@ -51,19 +51,19 @@ beforeAll(async () => {
   await ensureViewerRuntimeForTests();
 }, 120_000);
 
-function captureHandler(): OpenClawPluginHttpRouteHandler {
-  let registeredHttpRouteHandler: OpenClawPluginHttpRouteHandler | undefined;
+function captureHandler(): CarapacePluginHttpRouteHandler {
+  let registeredHttpRouteHandler: CarapacePluginHttpRouteHandler | undefined;
   const api = createTestPluginApi({
     id: "diffs-language-pack",
     name: "Diffs Language Pack",
     description: "Diffs Language Pack",
     source: "test",
     config: {},
-    registerHttpRoute(params: Parameters<OpenClawPluginApi["registerHttpRoute"]>[0]) {
+    registerHttpRoute(params: Parameters<CarapacePluginApi["registerHttpRoute"]>[0]) {
       registeredHttpRouteHandler = params.handler;
     },
   });
-  registerDiffsLanguagePackPlugin(api as unknown as OpenClawPluginApi);
+  registerDiffsLanguagePackPlugin(api as unknown as CarapacePluginApi);
   if (!registeredHttpRouteHandler) {
     throw new Error("expected the plugin to register an HTTP route");
   }

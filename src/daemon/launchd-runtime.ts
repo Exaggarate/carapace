@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import {
   parseStrictInteger,
   parseStrictPositiveInteger,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { parseTcpPort, parseTcpPortFromArgs } from "../infra/tcp-port.js";
 import { sleep } from "../utils.js";
 import { GATEWAY_SERVICE_KIND } from "./constants.js";
@@ -70,7 +70,7 @@ export async function resolveLaunchAgentGatewayContext(env: GatewayServiceEnv): 
   port: number | null;
   probeHosts: readonly string[];
 }> {
-  const serviceKind = env.OPENCLAW_SERVICE_KIND?.trim();
+  const serviceKind = env.CARAPACE_SERVICE_KIND?.trim();
   if (serviceKind && serviceKind !== GATEWAY_SERVICE_KIND) {
     return { port: null, probeHosts: [] };
   }
@@ -78,8 +78,8 @@ export async function resolveLaunchAgentGatewayContext(env: GatewayServiceEnv): 
   return {
     port:
       parseTcpPortFromArgs(command?.programArguments) ??
-      parseTcpPort(command?.environment?.OPENCLAW_GATEWAY_PORT ?? "") ??
-      parseTcpPort(env.OPENCLAW_GATEWAY_PORT ?? ""),
+      parseTcpPort(command?.environment?.CARAPACE_GATEWAY_PORT ?? "") ??
+      parseTcpPort(env.CARAPACE_GATEWAY_PORT ?? ""),
     probeHosts: await resolveGatewayServiceProbeHosts({ env, command }),
   };
 }
@@ -102,7 +102,7 @@ export function formatLaunchAgentGuiSessionError(params: {
     "This usually means you are running from SSH/headless context or as the wrong user (including sudo).",
     `Fix: sign in to the macOS desktop as the target user and rerun \`${params.actionHint}\`.`,
     "For headless VM setups, enable auto-login for the target user so macOS creates the GUI session after boot.",
-    "Headless deployments should use a dedicated logged-in user session or a custom LaunchDaemon (not shipped): https://docs.openclaw.ai/gateway",
+    "Headless deployments should use a dedicated logged-in user session or a custom LaunchDaemon (not shipped): https://github.com/Exaggarate/carapace",
   ].join("\n");
 }
 

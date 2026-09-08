@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import JSON5 from "json5";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { redactSupportString } from "../logging/diagnostic-support-redaction.js";
 import { runCommandBuffered } from "../process/exec.js";
 import { resolveUserPath } from "./home-dir.js";
@@ -31,7 +31,7 @@ import {
 import { buildUpdateDoctorEnv } from "./update-runner-doctor.js";
 
 export type UpdateCandidateRehearsal = {
-  sourceConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
   sourceConfigHash: string | null | undefined;
   stateDir: string;
   configPath: string;
@@ -43,13 +43,13 @@ export type UpdateCandidateRehearsal = {
 };
 
 function isolatedConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   sourceRoot: string,
   stateDir: string,
   port: number,
   sourceEnv: NodeJS.ProcessEnv,
   pluginPaths: Record<string, string>,
-): OpenClawConfig {
+): CarapaceConfig {
   const copied = structuredClone(config);
   const projectPluginPath = (value: string) => {
     const projected = pluginPaths[resolveUserPath(value, sourceEnv)];
@@ -120,7 +120,7 @@ function isolatedConfig(
 
 /** One disposable generation, shared by candidate diagnostics and every turn of a repair run. */
 export async function prepareUpdateCandidateRehearsal(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   sourceConfigHash?: string | null;
   candidateRoot: string;
   stateDir: string;
@@ -139,10 +139,10 @@ export async function prepareUpdateCandidateRehearsal(params: {
     return milliseconds;
   };
   const tempDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-canary-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-canary-")),
   );
   const sourceEnv = params.env ?? process.env;
-  const configPath = path.join(tempDir, "openclaw.json");
+  const configPath = path.join(tempDir, "carapace.json");
   const workspaceDir = path.join(tempDir, "workspace");
   const copiedAgentDir = (directory: string | undefined) =>
     directory?.trim()
@@ -163,31 +163,31 @@ export async function prepareUpdateCandidateRehearsal(params: {
     XDG_CACHE_HOME: path.join(tempDir, "cache"),
     XDG_DATA_HOME: path.join(tempDir, "data"),
     XDG_STATE_HOME: path.join(tempDir, "state"),
-    OPENCLAW_HOME: tempDir,
-    OPENCLAW_STATE_DIR: tempDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_WORKSPACE_DIR: workspaceDir,
-    OPENCLAW_AGENT_DIR: copiedAgentDir(sourceEnv.OPENCLAW_AGENT_DIR),
+    CARAPACE_HOME: tempDir,
+    CARAPACE_STATE_DIR: tempDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_WORKSPACE_DIR: workspaceDir,
+    CARAPACE_AGENT_DIR: copiedAgentDir(sourceEnv.CARAPACE_AGENT_DIR),
     PI_CODING_AGENT_DIR: copiedAgentDir(sourceEnv.PI_CODING_AGENT_DIR),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-    OPENCLAW_SKIP_CHANNELS: "1",
-    OPENCLAW_SKIP_PROVIDERS: "1",
-    OPENCLAW_SKIP_CRON: "1",
-    OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-    OPENCLAW_SKIP_CANVAS_HOST: "1",
-    OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-    OPENCLAW_SKIP_STARTUP_MODEL_PREWARM: "1",
-    OPENCLAW_NO_AUTO_UPDATE: "1",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+    CARAPACE_SKIP_CHANNELS: "1",
+    CARAPACE_SKIP_PROVIDERS: "1",
+    CARAPACE_SKIP_CRON: "1",
+    CARAPACE_SKIP_GMAIL_WATCHER: "1",
+    CARAPACE_SKIP_CANVAS_HOST: "1",
+    CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+    CARAPACE_SKIP_STARTUP_MODEL_PREWARM: "1",
+    CARAPACE_NO_AUTO_UPDATE: "1",
     NODE_DISABLE_COMPILE_CACHE: "1",
-    OPENCLAW_GATEWAY_SERVICE_PID: undefined,
-    OPENCLAW_GATEWAY_PORT: undefined,
-    OPENCLAW_COMPATIBILITY_HOST_VERSION: undefined,
-    OPENCLAW_GATEWAY_TOKEN: undefined,
-    OPENCLAW_GATEWAY_PASSWORD: undefined,
-    OPENCLAW_PROFILE: undefined,
-    OPENCLAW_DIAGNOSTICS_TIMELINE_PATH: undefined,
-    OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+    CARAPACE_GATEWAY_SERVICE_PID: undefined,
+    CARAPACE_GATEWAY_PORT: undefined,
+    CARAPACE_COMPATIBILITY_HOST_VERSION: undefined,
+    CARAPACE_GATEWAY_TOKEN: undefined,
+    CARAPACE_GATEWAY_PASSWORD: undefined,
+    CARAPACE_PROFILE: undefined,
+    CARAPACE_DIAGNOSTICS_TIMELINE_PATH: undefined,
+    CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
     ...buildUpdateDoctorEnv({
       allowGatewayServiceRepair: false,
       allowGatewayActivation: false,
@@ -201,7 +201,7 @@ export async function prepareUpdateCandidateRehearsal(params: {
     ...SUPERVISOR_HINT_ENV_VARS,
     CONTROL_PLANE_UPDATE_SENTINEL_META_ENV,
     UPDATE_RUN_ID_ENV,
-    "OPENCLAW_UPDATE_RUN_HANDOFF",
+    "CARAPACE_UPDATE_RUN_HANDOFF",
     POST_CORE_UPDATE_ENV,
     POST_CORE_UPDATE_CHANNEL_ENV,
     POST_CORE_UPDATE_RESULT_PATH_ENV,
@@ -230,9 +230,9 @@ export async function prepareUpdateCandidateRehearsal(params: {
           candidateRoot: params.candidateRoot,
           env: {
             HOME: sourceEnv.HOME,
-            OPENCLAW_HOME: sourceEnv.OPENCLAW_HOME,
+            CARAPACE_HOME: sourceEnv.CARAPACE_HOME,
             USERPROFILE: sourceEnv.USERPROFILE,
-            OPENCLAW_AGENT_DIR: sourceEnv.OPENCLAW_AGENT_DIR,
+            CARAPACE_AGENT_DIR: sourceEnv.CARAPACE_AGENT_DIR,
             PI_CODING_AGENT_DIR: sourceEnv.PI_CODING_AGENT_DIR,
           },
         }),

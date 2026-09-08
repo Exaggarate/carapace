@@ -13,7 +13,7 @@ function createBootstrapRegistry() {
       origin: "bundled",
       rootDir: `/source/extensions/${id}`,
       source: `/source/extensions/${id}/index.ts`,
-      manifestPath: `/source/extensions/${id}/openclaw.plugin.json`,
+      manifestPath: `/source/extensions/${id}/carapace.plugin.json`,
       packageName: `@example/${id}`,
       packageVersion: "1.2.3",
       channels: [],

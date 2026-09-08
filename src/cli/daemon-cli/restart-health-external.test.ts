@@ -21,7 +21,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 4300, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 4300, commandLine: "carapace-gateway" }],
       hints: [],
       errors: ["listener inspection warning"],
     });
@@ -53,7 +53,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 4300, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 4300, commandLine: "carapace-gateway" }],
       hints: [],
     });
     callGateway
@@ -76,7 +76,7 @@ describe("restart health", () => {
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
-      listeners: [{ pid: 4200, commandLine: "openclaw-gateway" }],
+      listeners: [{ pid: 4200, commandLine: "carapace-gateway" }],
       hints: [],
     });
     callGateway.mockImplementation(
@@ -110,7 +110,7 @@ describe("restart health", () => {
       inspectPortUsage.mockResolvedValue({
         port: 18789,
         status: "busy",
-        listeners: [{ pid: listenerPid, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: listenerPid, commandLine: "carapace-gateway" }],
         hints: [],
       });
       callGateway.mockRejectedValue(gatewayResponseError("device identity required"));

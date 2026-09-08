@@ -1,9 +1,9 @@
 // Shares provider registry normalization helpers across plugin paths.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import type { PluginMetadataRegistryView } from "./plugin-metadata-snapshot.types.js";
 import type { ProviderPlugin } from "./provider-plugin.types.js";

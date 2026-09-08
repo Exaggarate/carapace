@@ -1,7 +1,7 @@
 // Gateway RPC handlers for cron job CRUD, run logs, wake, and delivery previews.
-import { parseBoolean } from "@openclaw/normalization-core/boolean-coercion";
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseBoolean } from "@carapace/normalization-core/boolean-coercion";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   type CronListParams,
   ErrorCodes,
@@ -19,7 +19,7 @@ import {
   validateCronUpdateParams,
   validateWakeParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { bindCronSelfRemovalCommitGuard } from "../../cron/active-jobs.js";
 import { tryResolveCronJobEffectiveAgentId } from "../../cron/agent-id.js";
 import { resolveCronJobConfigRevision } from "../../cron/config-revision.js";
@@ -263,7 +263,7 @@ function compactCronListJob(job: CronJob) {
 }
 
 async function assertValidCronUpdatePatch(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   defaultAgentId?: string;
   currentJob: CronJob;
   patch: CronJobPatch;
@@ -432,7 +432,7 @@ type CronSessionVisibility = (sessionKey: string, agentId?: string) => boolean;
 
 function resolveCronSessionVisibility(
   client: GatewayClient | null,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): CronSessionVisibility | undefined {
   const identity = client?.internal?.agentRuntimeIdentity;
   if (identity && getCronManagementAuthority(identity)) {

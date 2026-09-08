@@ -80,7 +80,7 @@ describe("Telegram media failure notices", () => {
           date: 1736380800,
           photo: [{ file_id: "topic-attachment" }],
         },
-        me: { username: "openclaw_bot", has_topics_enabled: true },
+        me: { username: "carapace_bot", has_topics_enabled: true },
         getFile: async () => ({ file_path: "photos/topic-attachment.jpg" }),
       });
 
@@ -129,7 +129,7 @@ describe("Telegram media failure notices", () => {
           caption: "Channel attachment",
           photo: [{ file_id: "channel-attachment" }],
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({ file_path: "photos/channel-attachment.jpg" }),
       });
       expect(telegramMediaHarnessSendMessageSpy).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe("Telegram media failure notices", () => {
           caption: index === 0 ? "Album attachment" : undefined,
           photo: [{ file_id: `album-${index}` }],
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({ file_path: `photos/album-${index}.jpg` }),
       });
     }

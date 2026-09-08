@@ -1,9 +1,9 @@
 import {
   createAcceptedChannelDeliveryResult,
   createChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { MessageReceipt, MessageReceiptPartKind } from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import type { MessageReceipt, MessageReceiptPartKind } from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 
 export type FeishuReplyDeliverySource = {
   messageId?: string;

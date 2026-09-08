@@ -3,7 +3,7 @@
  */
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { ChannelId } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   resolveCommandAuthorization as resolveNativeCommandAuthorization,
   type CommandAuthorization as NativeCommandAuthorization,
@@ -21,13 +21,13 @@ import {
 
 const baseCfg = {
   commands: { useAccessGroups: true },
-} as unknown as OpenClawConfig;
+} as unknown as CarapaceConfig;
 
 async function resolveAuthorization(params: {
   senderId: string;
   configuredAllowFrom?: string[];
   configuredGroupAllowFrom?: string[];
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }) {
   return resolveSenderCommandAuthorization({
     cfg: params.cfg ?? baseCfg,
@@ -87,7 +87,7 @@ describe("plugin-sdk/command-auth", () => {
   });
 
   it("keeps command status builders on their focused subpath", () => {
-    const cfg = { commands: { config: false, debug: false } } as unknown as OpenClawConfig;
+    const cfg = { commands: { config: false, debug: false } } as unknown as CarapaceConfig;
 
     expect(buildHelpMessage(cfg)).toContain("/commands for full list");
     expect(buildCommandsMessage(cfg)).toContain("More: /tools for available capabilities");
@@ -160,7 +160,7 @@ describe("plugin-sdk/command-auth", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(result.effectiveGroupAllowFrom).toEqual(["accessGroup:admins", "group-admin"]);

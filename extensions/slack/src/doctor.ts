@@ -1,11 +1,11 @@
 // Slack plugin module implements doctor behavior.
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelDoctorAdapter } from "carapace/plugin-sdk/channel-contract";
 import {
   collectStandardAllowlistLists,
   createDangerousNameMatchingMutableAllowlistWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { GroupPolicy, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/channel-policy";
+import type { GroupPolicy, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { inspectSlackAccount } from "./account-inspect.js";
 import { listSlackAccountIds, mergeSlackAccountConfig } from "./accounts.js";
 import {
@@ -88,7 +88,7 @@ function looksLikeSlackChannelNameKey(channelKey: string): boolean {
 
 // Startup resolution updates ctx.channelsConfig, but inbound authorization captures the authored
 // channels map and key list when createSlackMonitorContext runs. Diagnose those authored keys.
-function collectSlackNameKeyedChannelWarnings({ cfg }: { cfg: OpenClawConfig }): string[] {
+function collectSlackNameKeyedChannelWarnings({ cfg }: { cfg: CarapaceConfig }): string[] {
   const warnings = new Set<string>();
   const slackCfg = asObjectRecord(asObjectRecord(cfg.channels)?.slack);
   const providerChannels = asObjectRecord(slackCfg?.channels);
@@ -180,7 +180,7 @@ function slackAccountConfigPath(accountId: string): string {
 }
 
 async function collectSlackUserIdentityWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<string[]> {
   const warnings: string[] = [];

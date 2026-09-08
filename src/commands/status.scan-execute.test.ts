@@ -31,7 +31,7 @@ describe("executeStatusScanFromOverview", () => {
       cfg: { channels: {} },
       sourceConfig: { channels: {} },
       configDiagnostics: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         issues: [{ path: "gateway.port", message: "invalid" }],
       },
       secretDiagnostics: ["diag"],

@@ -1,6 +1,6 @@
-import type { BrowserConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveGatewayPort } from "openclaw/plugin-sdk/gateway-config-runtime";
-import { isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { BrowserConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveGatewayPort } from "carapace/plugin-sdk/gateway-config-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
 import { resolveBrowserConfig } from "./config.js";
 import { ensureExtensionRelayToken } from "./extension-relay/relay-auth.js";
 
@@ -13,7 +13,7 @@ type BrowserExtensionPairing = {
   topology: "local" | "browser-node" | "direct-remote";
 };
 
-type PairingConfig = OpenClawConfig & { browser?: BrowserConfig };
+type PairingConfig = CarapaceConfig & { browser?: BrowserConfig };
 
 function firstExtensionRelayPort(cfg: PairingConfig): number {
   const resolved = resolveBrowserConfig(cfg.browser, cfg);

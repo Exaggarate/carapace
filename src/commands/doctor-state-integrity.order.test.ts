@@ -1,26 +1,26 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { noteStateIntegrity } from "./doctor-state-integrity.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("doctor state integrity ordering", () => {
   it("orders equal-time SQLite recovery warnings by session key", async () => {
-    await withStateDirEnv("openclaw-doctor-state-order-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-doctor-state-order-", async ({ stateDir }) => {
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const storePath = storeTemplate.replace("{agentId}", "main");
       const cfg = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storeTemplate },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       for (const suffix of ["zeta", "alpha", "middle", "beta"]) {
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey: `agent:main:subagent:${suffix}`, storePath },

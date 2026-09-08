@@ -7,9 +7,9 @@ import {
   unregisterAcpRuntimeBackend,
   testing,
   readAcpSessionEntry,
-} from "openclaw/plugin-sdk/acp-runtime";
-import { createAdmittedHostCapabilityTestFixture } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/acp-runtime";
+import { createAdmittedHostCapabilityTestFixture } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { expect, it } from "vitest";
 import {
   AcpxRuntime,
@@ -24,7 +24,7 @@ const script = fileURLToPath(new URL("../test/fixtures/owner-agent.mjs", import.
 it.each(["global", "shared-project"])(
   "isolates real ACPX histories for two owners of %s across restart and controls",
   async (sessionKey) => {
-    await withOpenClawTestState({ label: "acpx-owner-process" }, async (state) => {
+    await withCarapaceTestState({ label: "acpx-owner-process" }, async (state) => {
       const directory = state.root;
       const cfg = {
         agents: { ownership: "explicit" as const, entries: { main: {}, work: {} } },
@@ -40,7 +40,7 @@ it.each(["global", "shared-project"])(
         new AcpxRuntime({
           cwd: directory,
           sessionStore: store,
-          openclawLegacyBareSessionKeys: new Set(
+          carapaceLegacyBareSessionKeys: new Set(
             (await fs.readdir(path.join(directory, "sessions")))
               .filter((name) => name.endsWith(".json"))
               .map((name) => decodeURIComponent(name.slice(0, -5))),
@@ -49,8 +49,8 @@ it.each(["global", "shared-project"])(
             overrides: { [harness]: [process.execPath, script, peerDirectory] },
           }),
           pluginToolsMcpBridgeEnabled: true,
-          openclawToolsMcpBridgeEnabled: true,
-          mcpServers: ["openclaw-plugin-tools", "openclaw-tools", "user-server"].map((name) => ({
+          carapaceToolsMcpBridgeEnabled: true,
+          mcpServers: ["carapace-plugin-tools", "carapace-tools", "user-server"].map((name) => ({
             name,
             command: process.execPath,
             args: ["server.mjs"],
@@ -115,11 +115,11 @@ it.each(["global", "shared-project"])(
           const first = await turn(handle, `${agentId}-first`);
           expect(first).toMatchObject({ history: [`${agentId}-first`] });
           expect(first.mcpServers).toEqual([
-            ...["openclaw-plugin-tools", "openclaw-tools"].map((name) => ({
+            ...["carapace-plugin-tools", "carapace-tools"].map((name) => ({
               name,
               command: process.execPath,
-              args: ["server.mjs", "--openclaw-agent-id", agentId],
-              env: [{ name: "OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY", value: sessionKey }],
+              args: ["server.mjs", "--carapace-agent-id", agentId],
+              env: [{ name: "CARAPACE_TOOLS_MCP_AGENT_SESSION_KEY", value: sessionKey }],
             })),
             { name: "user-server", command: process.execPath, args: ["server.mjs"], env: [] },
           ]);

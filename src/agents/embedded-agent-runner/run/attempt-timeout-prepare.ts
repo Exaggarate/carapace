@@ -1,5 +1,5 @@
 /** Owns the execution deadline, approval pauses, and one compaction grace. */
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { observeAgentRunApprovalWait } from "../../agent-run-approval-wait.js";
 import type { AgentSession } from "../../sessions/index.js";
 import { log } from "../logger.js";

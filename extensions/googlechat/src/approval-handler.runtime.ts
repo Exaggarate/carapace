@@ -5,15 +5,15 @@ import {
   type ExpiredApprovalView,
   type PendingApprovalView,
   type ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
 import {
   formatChannelApprovalResolvedLabel,
   type ExecApprovalDecision,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveGoogleChatAccount, type ResolvedGoogleChatAccount } from "./accounts.js";
 import { sendGoogleChatMessage, updateGoogleChatMessage } from "./api.js";
 import {
@@ -33,7 +33,7 @@ import { resolveGoogleChatOutboundSpace } from "./targets.js";
 import type { GoogleChatCardV2 } from "./types.js";
 
 const log = createSubsystemLogger("googlechat/approvals");
-const GOOGLECHAT_APPROVAL_CARD_ID = "openclaw-approval";
+const GOOGLECHAT_APPROVAL_CARD_ID = "carapace-approval";
 const MAX_TEXT_PARAGRAPH_CHARS = 1800;
 
 type GoogleChatApprovalHandlerContext = {
@@ -232,7 +232,7 @@ function buildPendingPayload(params: {
     view.approvalKind === "plugin"
       ? "Plugin Approval Required"
       : view.approvalKind === "system-agent"
-        ? "OpenClaw Change Requires Approval"
+        ? "Carapace Change Requires Approval"
         : "Exec Approval Required";
   const subtitle = `Expires in ${Math.max(0, Math.ceil((view.expiresAtMs - nowMs) / 1000))}s`;
   const card: GoogleChatCardV2 = {
@@ -278,7 +278,7 @@ function buildResolvedPayload(view: ResolvedApprovalView): GoogleChatFinalDelive
           view.approvalKind === "plugin"
             ? "Plugin"
             : view.approvalKind === "system-agent"
-              ? "OpenClaw Change"
+              ? "Carapace Change"
               : "Exec"
         } Approval: ${decisionLabel}`,
         subtitle: resolvedBy ? `Resolved by ${resolvedBy}` : "Resolved",
@@ -300,7 +300,7 @@ function buildExpiredPayload(view: ExpiredApprovalView): GoogleChatFinalDelivery
           view.approvalKind === "plugin"
             ? "Plugin"
             : view.approvalKind === "system-agent"
-              ? "OpenClaw Change"
+              ? "Carapace Change"
               : "Exec"
         } Approval Expired`,
         subtitle: "This approval request expired before it was resolved.",

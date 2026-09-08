@@ -23,12 +23,12 @@ async function expectPathMissing(targetPath: string): Promise<void> {
 }
 
 describe("resolveOAuthRefreshLockPath", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   let stateDir = "";
 
   beforeEach(async () => {
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-lock-path-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-lock-path-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   });
 
   afterEach(async () => {
@@ -133,12 +133,12 @@ describe("resolveOAuthRefreshLockPath", () => {
 });
 
 describe("resolveOAuthRefreshLockPath fuzz", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   let stateDir = "";
 
   beforeEach(async () => {
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-lock-path-fuzz-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-auth-lock-path-fuzz-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   });
 
   afterEach(async () => {

@@ -1,6 +1,6 @@
 # Telegram E2E verification map
 
-This map is the maintained source for proving what an OpenClaw Telegram user
+This map is the maintained source for proving what an Carapace Telegram user
 sees through the dedicated QA user account.
 
 ## Baseline preconditions
@@ -64,7 +64,7 @@ before the scenario finishes.
 ```json
 {
   "actions": [
-    { "type": "command", "argv": ["pnpm", "openclaw", "status", "--json"], "cwd": "repo" }
+    { "type": "command", "argv": ["pnpm", "carapace", "status", "--json"], "cwd": "repo" }
   ]
 }
 ```

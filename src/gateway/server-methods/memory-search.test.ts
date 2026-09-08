@@ -1,12 +1,12 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentSelectionRequiredError } from "../../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { MemoryProviderStatus, MemorySearchResult } from "../../memory-host-sdk/host/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { GatewayRequestContext, RespondFn } from "./types.js";
 
 const getActiveMemorySearchManagerCore = vi.hoisted(() => vi.fn());
@@ -20,9 +20,9 @@ vi.mock("../../agents/agent-scope.js", async (importOriginal) => ({
 
 import { memorySearchHandlers } from "./memory-search.js";
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
-function createConfig(workspaceDir: string): OpenClawConfig {
+function createConfig(workspaceDir: string): CarapaceConfig {
   return {
     memory: {
       search: {
@@ -37,7 +37,7 @@ function createConfig(workspaceDir: string): OpenClawConfig {
   };
 }
 
-async function invokeMemorySearch(params: unknown, cfg: OpenClawConfig) {
+async function invokeMemorySearch(params: unknown, cfg: CarapaceConfig) {
   const respond = vi.fn();
   await expectDefined(
     memorySearchHandlers["memory.search"],
@@ -68,7 +68,7 @@ function createStubManager() {
 
 describe("memory.search gateway method", () => {
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       label: "gateway-memory-search",
       layout: "state-only",
     });
@@ -235,7 +235,7 @@ describe("memory.search gateway method", () => {
   });
 
   it("returns unavailable when no memory manager is configured", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     getActiveMemorySearchManagerCore.mockResolvedValue({
       manager: null,
       error: "memory plugin unavailable",
@@ -307,13 +307,13 @@ describe("memory.search gateway method", () => {
         warning:
           "Memory index is stale: embedding request timed out. Search results may be incomplete.",
         action:
-          "Run: openclaw memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.",
+          "Run: carapace memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.",
       },
       undefined,
     );
   });
 
-  it("preserves OpenClaw index ownership and configured provider intent", async () => {
+  it("preserves Carapace index ownership and configured provider intent", async () => {
     const cfg = createConfig(testState.workspaceDir);
     const manager = createStubManager();
     manager.status.mockReturnValue({
@@ -327,7 +327,7 @@ describe("memory.search gateway method", () => {
           status: "mismatched",
           reason: "index provenance classifier changed",
           code: "provenance_version",
-          owner: "openclaw",
+          owner: "carapace",
         },
       },
     });
@@ -344,9 +344,9 @@ describe("memory.search gateway method", () => {
         results: [],
         stale: true,
         warning:
-          "Memory index is stale: index provenance classifier changed (owner: openclaw, code: provenance_version). Search results may be incomplete.",
+          "Memory index is stale: index provenance classifier changed (owner: carapace, code: provenance_version). Search results may be incomplete.",
         action:
-          "Run: openclaw memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
+          "Run: carapace memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.",
       },
       undefined,
     );

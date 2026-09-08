@@ -1,8 +1,8 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type {
   PluginManifestProviderEndpoint,
   PluginManifestProviderRequestProvider,
@@ -145,8 +145,8 @@ function readCompatBoolean(
   return asBoolean((compat as Record<string, unknown>)[key]);
 }
 
-const OPENCLAW_ATTRIBUTION_PRODUCT = "OpenClaw";
-const OPENCLAW_ATTRIBUTION_ORIGINATOR = "openclaw";
+const CARAPACE_ATTRIBUTION_PRODUCT = "Carapace";
+const CARAPACE_ATTRIBUTION_ORIGINATOR = "carapace";
 const OPENROUTER_ATTRIBUTION_CATEGORIES =
   "cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent";
 
@@ -158,8 +158,8 @@ const OPENAI_RESPONSES_APIS = new Set([
 ]);
 const OPENAI_RESPONSES_PROVIDERS = new Set(["openai", "azure-openai", "azure-openai-responses"]);
 
-function formatOpenClawUserAgent(version: string): string {
-  return `${OPENCLAW_ATTRIBUTION_ORIGINATOR}/${version}`;
+function formatCarapaceUserAgent(version: string): string {
+  return `${CARAPACE_ATTRIBUTION_ORIGINATOR}/${version}`;
 }
 
 function resolveUrlHostname(value: unknown): string | undefined {
@@ -322,7 +322,7 @@ function resolveProviderAttributionIdentity(
   env: RuntimeVersionEnv = process.env as RuntimeVersionEnv,
 ): ProviderAttributionIdentity {
   return {
-    product: OPENCLAW_ATTRIBUTION_PRODUCT,
+    product: CARAPACE_ATTRIBUTION_PRODUCT,
     version: resolveRuntimeServiceVersion(env),
   };
 }
@@ -337,10 +337,10 @@ function buildOpenRouterAttributionPolicy(
     verification: "vendor-documented",
     hook: "request-headers",
     docsUrl: "https://openrouter.ai/docs/app-attribution",
-    reviewNote: "Documented app attribution headers. Verified in OpenClaw runtime wrapper.",
+    reviewNote: "Documented app attribution headers. Verified in Carapace runtime wrapper.",
     ...identity,
     headers: {
-      "HTTP-Referer": "https://openclaw.ai",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
       "X-OpenRouter-Title": identity.product,
       "X-OpenRouter-Categories": OPENROUTER_ATTRIBUTION_CATEGORIES,
     },
@@ -359,7 +359,7 @@ function buildNvidiaAttributionPolicy(
       "NVIDIA NIM billing invoke-origin attribution header. Applied only on verified NVIDIA routes.",
     ...resolveProviderAttributionIdentity(env),
     headers: {
-      "X-BILLING-INVOKE-ORIGIN": OPENCLAW_ATTRIBUTION_PRODUCT,
+      "X-BILLING-INVOKE-ORIGIN": CARAPACE_ATTRIBUTION_PRODUCT,
     },
   };
 }
@@ -378,7 +378,7 @@ function buildGoogleAttributionPolicy(
       "Gemini API partner integration guidance requires x-goog-api-client on partner and library traffic.",
     ...identity,
     headers: {
-      "x-goog-api-client": `${OPENCLAW_ATTRIBUTION_ORIGINATOR}/${identity.version}`,
+      "x-goog-api-client": `${CARAPACE_ATTRIBUTION_ORIGINATOR}/${identity.version}`,
     },
   };
 }
@@ -396,9 +396,9 @@ function buildOpenAIAttributionPolicy(
       "OpenAI native traffic supports hidden originator/User-Agent attribution. Verified against the Codex wire contract.",
     ...identity,
     headers: {
-      originator: OPENCLAW_ATTRIBUTION_ORIGINATOR,
+      originator: CARAPACE_ATTRIBUTION_ORIGINATOR,
       version: identity.version,
-      "User-Agent": formatOpenClawUserAgent(identity.version),
+      "User-Agent": formatCarapaceUserAgent(identity.version),
     },
   };
 }
@@ -415,7 +415,7 @@ function buildOpenCodeGoAttributionPolicy(env: RuntimeVersionEnv): ProviderAttri
       "OpenCode Go requires coding agents to identify themselves with a specific User-Agent.",
     ...identity,
     headers: {
-      "User-Agent": formatOpenClawUserAgent(identity.version),
+      "User-Agent": formatCarapaceUserAgent(identity.version),
     },
   };
 }
@@ -430,12 +430,12 @@ function buildXaiAttributionPolicy(
     verification: "vendor-hidden-api-spec",
     hook: "request-headers",
     reviewNote:
-      "xAI api.x.ai accepts a standard openclaw User-Agent. Companion originator/version headers mirror the OpenAI attribution shape for consistency; they are not validated against an xAI-specific spec and are expected to be ignored by xAI's OpenAI-compatible surface.",
+      "xAI api.x.ai accepts a standard carapace User-Agent. Companion originator/version headers mirror the OpenAI attribution shape for consistency; they are not validated against an xAI-specific spec and are expected to be ignored by xAI's OpenAI-compatible surface.",
     ...identity,
     headers: {
-      originator: OPENCLAW_ATTRIBUTION_ORIGINATOR,
+      originator: CARAPACE_ATTRIBUTION_ORIGINATOR,
       version: identity.version,
-      "User-Agent": formatOpenClawUserAgent(identity.version),
+      "User-Agent": formatCarapaceUserAgent(identity.version),
     },
   };
 }
@@ -542,7 +542,7 @@ export function resolveProviderRequestPolicy(
     endpointClass === "opencode-go-native"
   ) {
     // The documented identification contract belongs to Go's native endpoint.
-    // A custom baseUrl is a proxy and must not inherit OpenClaw attribution.
+    // A custom baseUrl is a proxy and must not inherit Carapace attribution.
     attributionProvider = "opencode-go";
   }
   if (!attributionProvider && endpointClass === "nvidia-native") {

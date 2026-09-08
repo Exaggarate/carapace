@@ -143,7 +143,7 @@ export async function runSidebarAttentionScopeFlow(params: SidebarAttentionScope
         sessionKey: "agent:main:main",
       },
     });
-    const sidebar = page.locator("openclaw-app-sidebar");
+    const sidebar = page.locator("carapace-app-sidebar");
     const automationRows = sidebar.locator('[data-attention-kind="cronFailed"]');
     const approvalRow = sidebar.locator('[data-approval-id="approval-global"]');
     const openAutomations = async () => {
@@ -200,7 +200,7 @@ export async function runSidebarAttentionScopeFlow(params: SidebarAttentionScope
 
     await sidebar.getByRole("link", { name: "Automations", exact: true }).click();
     await waitForControlUiRoute(page, { pathname: "/automations", routeId: "cron" });
-    const pageScope = page.locator(".agent-scope-control openclaw-agent-select");
+    const pageScope = page.locator(".agent-scope-control carapace-agent-select");
     await pageScope.locator(".agent-select__trigger").click();
     await pageScope
       .locator("wa-dropdown-item[data-agent-option]")
@@ -292,7 +292,7 @@ export async function runSidebarAttentionScopeFlow(params: SidebarAttentionScope
     });
 
     const sidebarUpdate = sidebar.locator(
-      'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+      'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
     );
     await expect.poll(() => sidebar.locator(".sidebar-issues-button__count").count()).toBe(1);
     await sidebar.locator(".sidebar-issues-button").click();

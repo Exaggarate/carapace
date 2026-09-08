@@ -1,14 +1,14 @@
 // Discord type declarations define plugin contracts.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { DiscordLivePolicyReader } from "./live-policy.js";
 import type { DiscordDispatchReplyFromConfig } from "./native-command.types.js";
 import type { ThreadBindingManager } from "./thread-bindings.js";
 
-type DiscordConfig = NonNullable<OpenClawConfig["channels"]>["discord"];
+type DiscordConfig = NonNullable<CarapaceConfig["channels"]>["discord"];
 
 export type DiscordCommandArgContext = {
   readPolicy?: DiscordLivePolicyReader;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordConfig;
   accountId: string;
   sessionPrefix: string;

@@ -29,9 +29,9 @@ describe("tool-result projection persistence at dispatch", () => {
       ambiguousToolResultBaseKeys: [],
       frozenToolResults: [{ key, sourceHash: "source", texts: [key] }],
     });
-    manager.appendCustomEntry("openclaw.cache-ttl", snapshot("older"));
-    const activeMarker = manager.appendCustomEntry("openclaw.cache-ttl", snapshot("active"));
-    manager.appendCustomEntry("openclaw.cache-ttl", snapshot("sibling"));
+    manager.appendCustomEntry("carapace.cache-ttl", snapshot("older"));
+    const activeMarker = manager.appendCustomEntry("carapace.cache-ttl", snapshot("active"));
+    manager.appendCustomEntry("carapace.cache-ttl", snapshot("sibling"));
     manager.branch(activeMarker);
 
     const restored = createToolResultPromptProjectionState();
@@ -42,7 +42,7 @@ describe("tool-result projection persistence at dispatch", () => {
     const markers = () =>
       manager
         .getEntries()
-        .filter((entry) => entry.type === "custom" && entry.customType === "openclaw.cache-ttl");
+        .filter((entry) => entry.type === "custom" && entry.customType === "carapace.cache-ttl");
     persistToolResultProjections(restored, appendEntry);
     expect(markers()).toHaveLength(3);
 
@@ -69,7 +69,7 @@ describe("tool-result projection persistence at dispatch", () => {
       const marker = manager.getEntries().at(-1);
       expect(marker).toMatchObject({
         type: "custom",
-        customType: "openclaw.cache-ttl",
+        customType: "carapace.cache-ttl",
         data: { frozenToolResults: expect.any(Array) },
       });
       expect(marker?.type === "custom" && marker.data).toEqual(

@@ -32,10 +32,10 @@ describe("runtime-import", () => {
 
     expect(
       await captureRuntimeImportSpecifier(
-        "file:///C:/Users/alice/openclaw/dist/subagent-registry.js",
+        "file:///C:/Users/alice/carapace/dist/subagent-registry.js",
         ["./subagent-registry.runtime.js"],
       ),
-    ).toBe("file:///C:/Users/alice/openclaw/dist/subagent-registry.runtime.js");
+    ).toBe("file:///C:/Users/alice/carapace/dist/subagent-registry.runtime.js");
   });
 
   it("resolves absolute Windows runtime import parts directly", async () => {
@@ -43,10 +43,10 @@ describe("runtime-import", () => {
 
     expect(
       await captureRuntimeImportSpecifier(
-        "file:///C:/Users/alice/openclaw/dist/subagent-registry.js",
-        ["D:\\OpenClaw\\dist\\subagent-registry.runtime.js"],
+        "file:///C:/Users/alice/carapace/dist/subagent-registry.js",
+        ["D:\\Carapace\\dist\\subagent-registry.runtime.js"],
       ),
-    ).toBe("file:///D:/OpenClaw/dist/subagent-registry.runtime.js");
+    ).toBe("file:///D:/Carapace/dist/subagent-registry.runtime.js");
   });
 
   it("keeps non-Windows import paths unchanged", () => {
@@ -62,16 +62,16 @@ describe("runtime-import", () => {
     const importModule = vi.fn(async (specifier: string) => ({ specifier }));
 
     const result = await importRuntimeModule(
-      "C:\\Users\\alice\\openclaw\\dist\\subagent-registry.js",
+      "C:\\Users\\alice\\carapace\\dist\\subagent-registry.js",
       ["./subagent-registry.runtime.js"],
       importModule,
     );
 
     expect(importModule.mock.calls[0]?.[0]).toBe(
-      "file:///C:/Users/alice/openclaw/dist/subagent-registry.runtime.js",
+      "file:///C:/Users/alice/carapace/dist/subagent-registry.runtime.js",
     );
     expect(result).toEqual({
-      specifier: "file:///C:/Users/alice/openclaw/dist/subagent-registry.runtime.js",
+      specifier: "file:///C:/Users/alice/carapace/dist/subagent-registry.runtime.js",
     });
   });
 });

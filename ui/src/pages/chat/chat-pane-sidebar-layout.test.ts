@@ -59,8 +59,8 @@ async function renderLayout(container: HTMLElement, layout: SidebarLayout, narro
     }),
     container,
   );
-  await customElements.whenDefined("openclaw-chat-sidebar-region");
-  await container.querySelector("openclaw-chat-sidebar-region")?.updateComplete;
+  await customElements.whenDefined("carapace-chat-sidebar-region");
+  await container.querySelector("carapace-chat-sidebar-region")?.updateComplete;
 }
 
 afterEach(() => {

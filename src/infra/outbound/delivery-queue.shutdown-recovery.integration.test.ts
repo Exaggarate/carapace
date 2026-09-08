@@ -43,7 +43,7 @@ describe("outbound recovery shutdown", () => {
   });
 
   it("restores a reserved row when shutdown wins before provider dispatch", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const intentIds = ["lifecycle-fence-a", "lifecycle-fence-b"];
     for (const id of intentIds) {
       await enqueueDeliveryOnce(

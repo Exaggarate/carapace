@@ -3,7 +3,7 @@ import { resolveAgentConfig, resolveSessionAgentId } from "../agents/agent-scope
 import { resolveExecTarget } from "../agents/bash-tools.exec-runtime.js";
 import { SESSION_PERMISSION_BY_EXEC_MODE } from "../agents/session-permission-exec-mode.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   normalizeExecAsk,
   normalizeExecSecurity,
@@ -18,7 +18,7 @@ type LegacySessionEntry = SessionEntry & { execSecurity?: unknown; execAsk?: unk
 /** Retires session exec overrides without granting the full-mode approval-floor bypass. */
 export function repairLegacySessionExecPolicy(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): void {
   const messages: string[] = [];
@@ -86,7 +86,7 @@ export function repairLegacySessionExecPolicy(params: {
   // after their transactions commit; failed scans never claim applied changes.
   if (messages.length > 0) {
     if (!params.apply) {
-      messages.push('- Run "openclaw doctor --fix" to migrate legacy session exec policy.');
+      messages.push('- Run "carapace doctor --fix" to migrate legacy session exec policy.');
     }
     note(messages.join("\n"), "Session exec policy");
   }

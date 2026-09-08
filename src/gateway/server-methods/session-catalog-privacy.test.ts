@@ -9,7 +9,7 @@ import {
   loadSessionEntryReadOnly,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -24,14 +24,14 @@ import {
 } from "../../plugins/session-catalog.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { sessionCatalogHandlers } from "./session-catalog.js";
 import type { GatewayClient, GatewayRequestContext } from "./types.js";
 
 async function withCatalog(
   run: (fixture: Awaited<ReturnType<typeof createCatalog>>) => Promise<void>,
 ) {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const previousRegistry = getActivePluginRegistry() ?? createEmptyPluginRegistry();
     try {
       await run(await createCatalog());
@@ -44,7 +44,7 @@ async function withCatalog(
 async function createCatalog() {
   const caller = ensureProfileForEmail("catalog-caller@example.test");
   const other = ensureProfileForEmail("catalog-other@example.test");
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     gateway: {
       roles: {
         default: "writer",

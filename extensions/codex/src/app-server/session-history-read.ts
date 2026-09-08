@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { SessionEntry } from "openclaw/plugin-sdk/agent-sessions";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { SessionEntry } from "carapace/plugin-sdk/agent-sessions";
 import {
   readCodexSessionContext,
   SessionTranscriptReadFenceError,
   type SessionTranscriptContextVersion,
-} from "openclaw/plugin-sdk/codex-session-transcript-runtime";
+} from "carapace/plugin-sdk/codex-session-transcript-runtime";
 import type {
   SessionTranscriptTargetParams,
   TranscriptTurnAdmission,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   CodexHistoryRejection,
   codexHistoryRejectionReason,
@@ -84,7 +84,7 @@ export async function readCodexNativeHistory<T>(
     }
     // The legacy file codec is needed only for explicit file imports, never native SQLite reads.
     const { buildSessionContext, migrateSessionEntries, parseSessionEntries } =
-      await import("openclaw/plugin-sdk/agent-sessions");
+      await import("carapace/plugin-sdk/agent-sessions");
     const entries = parseSessionEntries(await fs.readFile(target.sessionFile, "utf-8"));
     return consume(
       (function* () {

@@ -204,7 +204,7 @@ export function defineBundledProviderAuthLiteralParityTests(shardIndex: number):
   );
   const parityPluginIdSet = new Set(parityPluginIds);
   const parityCases = allParityCases.filter((entry) => parityPluginIdSet.has(entry.pluginId));
-  const probeAgentDir = mkdtempSync(path.join(tmpdir(), "openclaw-auth-parity-"));
+  const probeAgentDir = mkdtempSync(path.join(tmpdir(), "carapace-auth-parity-"));
   const registrationResultByPluginId = new Map<
     string,
     PromiseSettledResult<CapturedPluginRegistration>

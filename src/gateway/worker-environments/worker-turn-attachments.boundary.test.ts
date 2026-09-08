@@ -90,8 +90,8 @@ describe("current attachments in an active remote placement", () => {
       };
       const originalFiles = new Map<string, Buffer>();
       const userFiles = [
-        "openclaw-inbound-project/report.txt",
-        "openclaw-inbound-12345678-1234-4234-8234-123456789ab-/report.txt",
+        "carapace-inbound-project/report.txt",
+        "carapace-inbound-12345678-1234-4234-8234-123456789ab-/report.txt",
       ];
       let workerManifestPaths: string[] = [];
       let acceptedManifestPaths: string[] = [];
@@ -249,7 +249,7 @@ describe("current attachments in an active remote placement", () => {
           expect(capture.code, capture.stderr).toBe(0);
           const manifestRef = capture.stdout.trim();
           const raw = await readFile(
-            path.join(remoteHome, ".openclaw-worker", "manifests", `${manifestRef.slice(7)}.json`),
+            path.join(remoteHome, ".carapace-worker", "manifests", `${manifestRef.slice(7)}.json`),
             "utf8",
           );
           const current = parseWorkerWorkspaceManifest(raw, manifestRef);

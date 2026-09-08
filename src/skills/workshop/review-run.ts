@@ -1,6 +1,6 @@
 import { prepareSystemAgentRunAdmission } from "../../agents/admitted-run-context.js";
 import type { RunEmbeddedAgentParams } from "../../agents/embedded-agent-runner/run/params.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createBackgroundWorkOwner } from "../../process/background-work.js";
 import { getGatewayRestartDrainSignal } from "../../process/gateway-work-admission.js";
 
@@ -10,7 +10,7 @@ const reviews = createBackgroundWorkOwner({ owner: "core:skill-workshop", maxCon
 export async function runSkillWorkshopReview(
   params: RunEmbeddedAgentParams & {
     agentId: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     reviewKind: "experience" | "history-scan";
   },
 ) {
@@ -35,8 +35,8 @@ export async function runSkillWorkshopReview(
       preparedRunAdmission,
       abortSignal,
       lane: reviews.lane,
-      agentHarnessId: "openclaw",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessId: "carapace",
+      agentHarnessRuntimeOverride: "carapace",
       // Review prompts and cloned prefixes are sized for this exact model.
       modelSelectionLocked: true,
       modelFallbacksOverride: [],

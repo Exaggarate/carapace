@@ -1,4 +1,4 @@
-import { defineControlUiPlugin } from "openclaw/plugin-sdk/control-ui";
+import { defineControlUiPlugin } from "carapace/plugin-sdk/control-ui";
 import { createWorkboardClient } from "./api/gateway.ts";
 import { createWorkboardCatalogRuntime } from "./catalog.ts";
 import { bindWorkboardHost } from "./host.ts";

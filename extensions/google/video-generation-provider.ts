@@ -1,6 +1,6 @@
 // Google provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   createProviderOperationDeadline,
   executeProviderOperationWithRetry,
@@ -8,15 +8,15 @@ import {
   readProviderJsonResponse,
   resolveProviderOperationTimeoutMs,
   waitProviderOperationPollInterval,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   GeneratedVideoAsset,
   VideoGenerationProvider,
   VideoGenerationRequest,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 import { parseGeminiAuth, resolveGoogleGenerativeAiApiOrigin } from "./api.js";
 import { canonicalizeGoogleProviderBase64 } from "./base64.js";
 import {

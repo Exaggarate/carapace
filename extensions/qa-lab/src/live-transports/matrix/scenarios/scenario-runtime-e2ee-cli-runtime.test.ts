@@ -15,8 +15,8 @@ vi.mock("node:fs/promises", async (importOriginal) => {
 });
 
 const fixture = vi.hoisted(() => ({ tempRoot: "" }));
-vi.mock("openclaw/plugin-sdk/temp-path", () => ({
-  resolvePreferredOpenClawTmpDir: () => fixture.tempRoot,
+vi.mock("carapace/plugin-sdk/temp-path", () => ({
+  resolvePreferredCarapaceTmpDir: () => fixture.tempRoot,
 }));
 
 const constructors = [

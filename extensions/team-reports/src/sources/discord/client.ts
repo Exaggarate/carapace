@@ -1,4 +1,4 @@
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { z } from "zod";
 import type { DiscordSourceConfig, SourceRuntime, SourceStatus } from "../../types.js";
 import { checkAbort, parseApiBase, wait } from "../http.js";

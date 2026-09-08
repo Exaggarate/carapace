@@ -199,7 +199,7 @@ describe("memory plugin state", () => {
   });
 
   it("drops malformed public memory artifacts instead of crashing the sort", async () => {
-    // Record-shaped artifact as shipped by @mem0/openclaw-mem0 <= 1.0.14 —
+    // Record-shaped artifact as shipped by @mem0/carapace-mem0 <= 1.0.14 —
     // none of the file-backed fields the sort dereferences.
     const recordShapedArtifact = {
       id: "mem0:memory:1",
@@ -208,7 +208,7 @@ describe("memory plugin state", () => {
       content: "memory text",
     } as unknown as MemoryPluginPublicArtifact;
 
-    registerMemoryCapability("openclaw-mem0", {
+    registerMemoryCapability("carapace-mem0", {
       publicArtifacts: {
         async listArtifacts() {
           return [
@@ -239,7 +239,7 @@ describe("memory plugin state", () => {
   });
 
   it("ignores a non-array public artifact listing", async () => {
-    registerMemoryCapability("openclaw-mem0", {
+    registerMemoryCapability("carapace-mem0", {
       publicArtifacts: {
         async listArtifacts() {
           return { artifacts: [] } as unknown as MemoryPluginPublicArtifact[];

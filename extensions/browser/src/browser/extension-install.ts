@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import {
   chromeStoreInstallRequests,
   type ChromeStoreInstallRequest,
@@ -27,11 +27,11 @@ import {
 } from "./extension-install-layout.js";
 import { BROWSER_NATIVE_HOST_NAME } from "./extension-native-host.js";
 
-const OWNED_LAUNCHER_MARKER = "# OpenClaw native messaging bootstrap v1";
+const OWNED_LAUNCHER_MARKER = "# Carapace native messaging bootstrap v1";
 const BROWSER_EXTENSION_INSTALL_WAIT_DEFAULT_MS = 30_000;
 const BROWSER_EXTENSION_INSTALL_WAIT_MIN_MS = 1_000;
 const BROWSER_EXTENSION_INSTALL_WAIT_MAX_MS = 120_000;
-const NATIVE_HOST_DESCRIPTION = "OpenClaw browser extension bootstrap";
+const NATIVE_HOST_DESCRIPTION = "Carapace browser extension bootstrap";
 export {
   FOUNDATION_CHROME_WEB_STORE_URL,
   removeChromeStoreInstallRequests,
@@ -70,8 +70,8 @@ function resolveInstallStateDir(deps: ExtensionInstallDeps): string {
 
 function resolveInstallConfigPath(deps: ExtensionInstallDeps): string | undefined {
   const env = deps.env ?? process.env;
-  const explicit = env.OPENCLAW_CONFIG_PATH?.trim();
-  return explicit ? resolveStateDir({ ...env, OPENCLAW_STATE_DIR: explicit }) : undefined;
+  const explicit = env.CARAPACE_CONFIG_PATH?.trim();
+  return explicit ? resolveStateDir({ ...env, CARAPACE_STATE_DIR: explicit }) : undefined;
 }
 
 function shellQuote(value: string): string {
@@ -108,7 +108,7 @@ function launcherPathForManifest(manifestPath: string, deps: ExtensionInstallDep
 
 function expectedExtensionIds(extensionIds: string[]): string[] {
   // The Store ID also authorizes trusted unpacked builds that preserve it;
-  // it never proves that an arbitrary extension path is OpenClaw-owned.
+  // it never proves that an arbitrary extension path is Carapace-owned.
   return [...new Set([...extensionIds, FOUNDATION_CHROME_WEB_STORE_EXTENSION_ID])].toSorted();
 }
 
@@ -165,7 +165,7 @@ function parseOwnedLauncherTargets(params: {
     ]),
   ].join(" ");
   const pattern = new RegExp(
-    `^#!/bin/sh\\n${escapeRegExp(OWNED_LAUNCHER_MARKER)}\\nexport OPENCLAW_STATE_DIR=${quotedValue}\\n(?:export OPENCLAW_CONFIG_PATH=${quotedValue}\\n)?exec ${command} "\\$@"\\n$`,
+    `^#!/bin/sh\\n${escapeRegExp(OWNED_LAUNCHER_MARKER)}\\nexport CARAPACE_STATE_DIR=${quotedValue}\\n(?:export CARAPACE_CONFIG_PATH=${quotedValue}\\n)?exec ${command} "\\$@"\\n$`,
     "u",
   );
   // Decode only shellQuote's two target words after the entire ownership grammar matches.
@@ -228,8 +228,8 @@ async function resolveLauncherInstall(params: {
     content: [
       "#!/bin/sh",
       OWNED_LAUNCHER_MARKER,
-      `export OPENCLAW_STATE_DIR=${shellQuote(resolveInstallStateDir(params.deps))}`,
-      ...(configPath ? [`export OPENCLAW_CONFIG_PATH=${shellQuote(configPath)}`] : []),
+      `export CARAPACE_STATE_DIR=${shellQuote(resolveInstallStateDir(params.deps))}`,
+      ...(configPath ? [`export CARAPACE_CONFIG_PATH=${shellQuote(configPath)}`] : []),
       `exec ${command.map(shellQuote).join(" ")} "$@"`,
       "",
     ].join("\n"),
@@ -314,7 +314,7 @@ async function inspectRegistration(
       }
     } catch {
       issue =
-        "registered native host runtime or entry is unavailable or unsafe; run openclaw browser extension install";
+        "registered native host runtime or entry is unavailable or unsafe; run carapace browser extension install";
     }
     return {
       product: root.product,
@@ -480,18 +480,18 @@ export async function installChromeExtensionBootstrap(params: {
           : await requestChromeStoreInstall(root, deps);
       if (request) {
         params.onProgress?.(
-          `Requested the OpenClaw Store extension for ${root.label}. Restart Chrome if needed, then approve OpenClaw in chrome://extensions.`,
+          `Requested the Carapace Store extension for ${root.label}. Restart Chrome if needed, then approve Carapace in chrome://extensions.`,
         );
       }
     } catch (error) {
       preRegistrationIssues.push(
-        `${root.label}: Store installation request refused (${error instanceof Error ? error.message : String(error)}). Add OpenClaw directly: ${FOUNDATION_CHROME_WEB_STORE_URL}`,
+        `${root.label}: Store installation request refused (${error instanceof Error ? error.message : String(error)}). Add Carapace directly: ${FOUNDATION_CHROME_WEB_STORE_URL}`,
       );
     }
   }
   if (preRegisteredRoots > 0) {
     params.onProgress?.(
-      `Native bootstrap is ready. Add OpenClaw from the Chrome Web Store: ${FOUNDATION_CHROME_WEB_STORE_URL}. For development, load unpacked from ${installed}.`,
+      `Native bootstrap is ready. Add Carapace from the Chrome Web Store: ${FOUNDATION_CHROME_WEB_STORE_URL}. For development, load unpacked from ${installed}.`,
     );
   } else {
     preRegistrationIssues.push(
@@ -519,7 +519,7 @@ export async function installChromeExtensionBootstrap(params: {
     now() < deadline
   ) {
     if (!announcedWait) {
-      params.onProgress?.("Waiting for Chrome to verify the OpenClaw extension…");
+      params.onProgress?.("Waiting for Chrome to verify the Carapace extension…");
       announcedWait = true;
     }
     await sleep(Math.min(500, Math.max(1, deadline - now())));
@@ -592,7 +592,7 @@ export async function browserExtensionStatus(params: {
       unavailableRegistration,
     issues: [
       ...(installedCopy.present && !installedCopy.owned
-        ? [`Chrome extension copy is not OpenClaw-owned: ${installedPath}`]
+        ? [`Chrome extension copy is not Carapace-owned: ${installedPath}`]
         : []),
       ...discovery.issues,
       ...storeInstallRequests.flatMap((entry) =>
@@ -605,7 +605,7 @@ export async function browserExtensionStatus(params: {
   };
 }
 
-/** Remove only registrations and launchers that carry OpenClaw ownership. */
+/** Remove only registrations and launchers that carry Carapace ownership. */
 export async function uninstallChromeExtensionNativeHosts(
   params: { deps?: ExtensionInstallDeps } = {},
 ): Promise<{ removed: string[]; refused: string[]; manualRequired: boolean }> {

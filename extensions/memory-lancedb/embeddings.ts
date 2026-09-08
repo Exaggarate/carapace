@@ -1,17 +1,17 @@
 import { Buffer } from "node:buffer";
 import { resolve as resolveFilePath } from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
-import type { MemoryEmbeddingProvider } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { ensureGlobalUndiciEnvProxyDispatcher } from "openclaw/plugin-sdk/runtime-env";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { textResult, type AgentToolResult } from "openclaw/plugin-sdk/tool-results";
-import type { OpenClawPluginApi } from "./api.js";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage, toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { resolveGlobalSingleton } from "carapace/plugin-sdk/global-singleton";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { canonicalizeBase64 } from "carapace/plugin-sdk/media-runtime";
+import type { MemoryEmbeddingProvider } from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
+import { ensureGlobalUndiciEnvProxyDispatcher } from "carapace/plugin-sdk/runtime-env";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { textResult, type AgentToolResult } from "carapace/plugin-sdk/tool-results";
+import type { CarapacePluginApi } from "./api.js";
 import type { MemoryConfig } from "./config.js";
 
 type OpenAiEmbeddingClient = {
@@ -22,7 +22,7 @@ type OpenAiEmbeddingClient = {
 };
 const loadOpenAiModule = createLazyRuntimeModule(() => import("openai"));
 const loadMemoryEmbeddingProviderModule = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/memory-core-host-engine-embeddings"),
+  () => import("carapace/plugin-sdk/memory-core-host-engine-embeddings"),
 );
 
 type EmbeddingConfig = MemoryConfig["embedding"];
@@ -38,7 +38,7 @@ export type Embeddings = {
 };
 
 type AgentEmbeddingProvider = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir: string;
   promise: Promise<MemoryEmbeddingProvider>;
   activeUses: number;
@@ -51,7 +51,7 @@ type ProviderAdapterLifecycleState = {
 };
 
 const PROVIDER_ADAPTER_LIFECYCLE = resolveGlobalSingleton<ProviderAdapterLifecycleState>(
-  Symbol.for("openclaw.memoryLanceDbEmbeddingProviderLifecycle.v1"),
+  Symbol.for("carapace.memoryLanceDbEmbeddingProviderLifecycle.v1"),
   // Plugin reload replaces the service instance. Retain failed closes process-wide so
   // the next instance cannot create a provider before its predecessor retires.
   () => ({ retainedProviders: new Set(), tail: Promise.resolve() }),
@@ -220,10 +220,10 @@ class ProviderAdapterEmbeddings implements Embeddings {
   private closePromise: Promise<void> | null = null;
   private closed = false;
 
-  constructor(private api: OpenClawPluginApi) {}
+  constructor(private api: CarapacePluginApi) {}
 
   private getProvider(agentId: string, embedding: EmbeddingConfig): AgentEmbeddingProvider {
-    const config = (this.api.runtime.config?.current?.() ?? this.api.config) as OpenClawConfig;
+    const config = (this.api.runtime.config?.current?.() ?? this.api.config) as CarapaceConfig;
     const agentDir = this.api.runtime.agent.resolveAgentDir(config, agentId);
     const existing = this.providers.get(agentId);
     if (existing?.config === config && existing.agentDir === agentDir) {
@@ -304,7 +304,7 @@ class ProviderAdapterEmbeddings implements Embeddings {
   }
 
   private async createProvider(
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     agentDir: string,
     embedding: EmbeddingConfig,
   ): Promise<MemoryEmbeddingProvider> {
@@ -315,7 +315,7 @@ class ProviderAdapterEmbeddings implements Embeddings {
   }
 
   private async createProviderAfterRetirement(
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     agentDir: string,
     embedding: EmbeddingConfig,
   ): Promise<MemoryEmbeddingProvider> {
@@ -512,7 +512,7 @@ export class MemoryRecallEmbeddingError extends Error {
   }
 }
 
-export function createEmbeddings(api: OpenClawPluginApi): Embeddings {
+export function createEmbeddings(api: CarapacePluginApi): Embeddings {
   const provider = new ProviderAdapterEmbeddings(api);
   let direct: { fingerprint: string; client: OpenAiCompatibleEmbeddings } | undefined;
   let closed = false;

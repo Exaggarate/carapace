@@ -23,7 +23,7 @@ import { buildCliRespawnPlan } from "../entry.respawn.js";
 import { forceKillChildProcessTree } from "../process/child-process-tree.js";
 import { isPidAlive, getFileLockProcessStartTime } from "../shared/pid-alive.js";
 import { SKIPPED_UPDATE_OUTCOMES } from "../shared/update-outcome.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { resolveExecutableFromPathEnv } from "./executable-path.js";
 import { installationTargetEnv, resolveInstallationTarget } from "./installation-target-context.js";
 import { resolveNodeSqliteLocation } from "./node-sqlite.js";
@@ -56,14 +56,14 @@ import { looksLikeGitCheckout } from "./update-runner-install-surface.js";
 // The activation deadline covers Gateway drain plus this shutdown reserve.
 const PARENT_EXIT_SHUTDOWN_RESERVE_MS = 30_000;
 const HANDOFF_READY_TIMEOUT_MS = 30_000;
-const HANDOFF_READY_MARKER = "OPENCLAW_UPDATE_HANDOFF_READY\n";
+const HANDOFF_READY_MARKER = "CARAPACE_UPDATE_HANDOFF_READY\n";
 const HANDOFF_BUSY_MARKER = "HANDOFF_BUSY ";
 const HANDOFF_ACTIVATION_MARKER = "park\n";
 const HANDOFF_NOTICE_MARKER = "before-park\n";
 const SERVICE_IDENTITY_ENV_VARS = new Set<string>([
-  "OPENCLAW_LAUNCHD_LABEL",
-  "OPENCLAW_SYSTEMD_UNIT",
-  "OPENCLAW_WINDOWS_TASK_NAME",
+  "CARAPACE_LAUNCHD_LABEL",
+  "CARAPACE_SYSTEMD_UNIT",
+  "CARAPACE_WINDOWS_TASK_NAME",
 ] as const);
 type HandoffChild = ChildProcess & {
   stdin: NonNullable<ChildProcess["stdin"]>;
@@ -111,7 +111,7 @@ function appendLog(line) {
   }
 }
 
-const { assertOpenClawStateWriteAllowed, createManagedHandoffLeaseStore, resolveImmutableSqliteFileUri } =
+const { assertCarapaceStateWriteAllowed, createManagedHandoffLeaseStore, resolveImmutableSqliteFileUri } =
   require("./runtime/${MANAGED_HANDOFF_RUNTIME_ENTRY}");
 const leaseStore = createManagedHandoffLeaseStore({
   databasePath: params.updateLeaseDatabasePath,
@@ -197,7 +197,7 @@ function assertStateDatabaseWriteAllowed(database) {
     if (ownsDatabase) {
       db.exec("PRAGMA query_only = ON; PRAGMA trusted_schema = OFF;");
     }
-    assertOpenClawStateWriteAllowed({ database: db, databasePath: params.stateDatabasePath });
+    assertCarapaceStateWriteAllowed({ database: db, databasePath: params.stateDatabasePath });
   } finally {
     if (ownsDatabase) {
       db.close();
@@ -648,7 +648,7 @@ async function admitTriageScope() {
         readProcessStartIdentity(params.parentPid) !== params.parentStartIdentity)
   ) {
     throw new Error(
-      "automatic triage primary ownership changed before native admission; run openclaw triage manually",
+      "automatic triage primary ownership changed before native admission; run carapace triage manually",
     );
   }
   const scope = await inspectTriageScope();
@@ -699,7 +699,7 @@ async function enterTriageAfterUpdate(continuation) {
     params.serviceRecovery?.kind !== "systemd" ||
     typeof process.execve !== "function"
   ) {
-    appendLog("automatic triage continuation unavailable; run openclaw triage manually");
+    appendLog("automatic triage continuation unavailable; run carapace triage manually");
     return;
   }
   const primary = await inspectSystemdService(params.serviceRecovery.unit);
@@ -711,11 +711,11 @@ async function enterTriageAfterUpdate(continuation) {
     !ownsManagedUpdateLease()
   ) {
     appendLog(
-      "automatic triage could not verify the installed service after update restoration; run openclaw triage manually",
+      "automatic triage could not verify the installed service after update restoration; run carapace triage manually",
     );
     return;
   }
-  const scopeUnit = params.scopeUnit.replace(/^openclaw-update-/, "openclaw-triage-");
+  const scopeUnit = params.scopeUnit.replace(/^carapace-update-/, "carapace-triage-");
   const action = {
     kind: "triage", phase: "reserved",
     lifetime: { kind: "native", unit: params.serviceRecovery.unit, scope: scopeUnit, placement: { kind: "pending" } },
@@ -727,11 +727,11 @@ async function enterTriageAfterUpdate(continuation) {
   try {
     retargeted = leaseStore.retarget(managedUpdateLease, continuation.failure.installationRoot, action);
   } catch (error) {
-    appendLog("automatic triage destination admission failed: " + String(error) + "; run openclaw triage manually");
+    appendLog("automatic triage destination admission failed: " + String(error) + "; run carapace triage manually");
     return;
   }
   if (!retargeted) {
-    appendLog("automatic triage lost its completed update owner; run openclaw triage manually");
+    appendLog("automatic triage lost its completed update owner; run carapace triage manually");
     return;
   }
   if (retargeted.kind === "busy") {
@@ -750,7 +750,7 @@ async function enterTriageAfterUpdate(continuation) {
     triageTransition: true,
     failure: continuation.failure,
     commandArgv: continuation.commandArgv,
-    commandLabel: "openclaw triage (automatic)",
+    commandLabel: "carapace triage (automatic)",
     scopeUnit,
     primaryFragment: primary.FragmentPath,
   });
@@ -907,7 +907,7 @@ async function restoreGatewayService(reason, decision = params.recovery, childSt
     ? runServiceCommand(...args) : Promise.resolve({ code: 1, stdout: "", stderr: "recovery ownership lost" });
   const restart = () => runOwnedUpdateCommand("recovery", params.recoveryCommandArgv,
     params.recoveryTimeoutMs, params.cwd, previousGeneration
-      ? { ...process.env, OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: "1" } : process.env);
+      ? { ...process.env, CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: "1" } : process.env);
   if (!ownsRecovery()) return false;
   // Activation may consume or replace the notification. Annotate only the
   // observed revision; notification persistence never decides recovery safety.
@@ -1187,7 +1187,7 @@ async function runOwnedUpdateCommand(phase, commandArgv, timeoutMs, cwd = params
         env:
           params.action === "triage"
             ? { ...env, NODE_DISABLE_COMPILE_CACHE: "1" }
-            : phase === "update" ? { ...env, OPENCLAW_UPDATE_RUN_HANDOFF: "1" } : env,
+            : phase === "update" ? { ...env, CARAPACE_UPDATE_RUN_HANDOFF: "1" } : env,
         detached: true,
         stdio: ["pipe", "pipe", outputFd, "ipc", "pipe"],
       },
@@ -1355,7 +1355,7 @@ async function runOwnedUpdateCommand(phase, commandArgv, timeoutMs, cwd = params
       });
       if (params.action === "triage") {
         admissionDeadline = setTimeout(() => {
-          appendLog("installed candidate did not admit triage; run openclaw triage manually");
+          appendLog("installed candidate did not admit triage; run carapace triage manually");
           stopTriageScope();
         }, 30000);
         leaseWatch = setInterval(() => {
@@ -1415,7 +1415,7 @@ async function runOwnedUpdateCommand(phase, commandArgv, timeoutMs, cwd = params
     );
     if (params.action === "triage" && !triageAdmitted) {
       appendLog(
-        "installed candidate cannot accept automatic triage; run openclaw triage manually",
+        "installed candidate cannot accept automatic triage; run carapace triage manually",
       );
       process.exitCode = 1;
     }
@@ -1815,7 +1815,7 @@ function resolveManagedServiceCliArgv(
   if (execPath && !/^(?:node|bun)(?:\.exe)?$/iu.test(path.basename(execPath))) {
     return [execPath, ...args];
   }
-  return ["openclaw", ...args];
+  return ["carapace", ...args];
 }
 
 export function formatManagedServiceUpdateCommand(
@@ -1837,7 +1837,7 @@ export function formatManagedServiceUpdateCommand(
 
 export function buildManagedServiceHandoffUnavailableMessage(command: string): string {
   return [
-    "OpenClaw updates cannot safely run inside the live gateway process without a managed-service handoff.",
+    "Carapace updates cannot safely run inside the live gateway process without a managed-service handoff.",
     `Stop the foreground Gateway, run \`${command}\` from a shell, then launch the Gateway again. For a managed deployment, use its host's stop, update, and restart workflow.`,
   ].join("\n");
 }
@@ -1912,7 +1912,7 @@ function resolveGatewayServiceRecovery(
   }
   if (supervisor === "schtasks") {
     const taskName =
-      env.OPENCLAW_WINDOWS_TASK_NAME?.trim() || resolveGatewayWindowsTaskName(env.OPENCLAW_PROFILE);
+      env.CARAPACE_WINDOWS_TASK_NAME?.trim() || resolveGatewayWindowsTaskName(env.CARAPACE_PROFILE);
     return { kind: "schtasks", taskName };
   }
   return undefined;
@@ -2009,7 +2009,7 @@ async function spawnManagedServiceUpdateHandoff(
     installationTarget.stateDir,
     "logs",
     "support",
-    `openclaw-update-failure-${randomUUID()}.json`,
+    `carapace-update-failure-${randomUUID()}.json`,
   );
   const logPath = path.join(dir, "handoff.log");
   const commandArgv = params.action
@@ -2023,7 +2023,7 @@ async function spawnManagedServiceUpdateHandoff(
         argv1: params.argv1 ?? process.argv[1],
       });
   const commandLabel = params.action
-    ? "openclaw triage (automatic)"
+    ? "carapace triage (automatic)"
     : formatManagedServiceUpdateCommand(
         {
           timeoutMs: params.timeoutMs,
@@ -2059,7 +2059,7 @@ async function spawnManagedServiceUpdateHandoff(
     const normalized = params.handoffId.trim().replace(/[^A-Za-z0-9_.:@-]+/gu, "-");
     const suffix =
       normalized.replace(/^-+|-+$/gu, "").slice(0, 80) || `${process.pid}-${Date.now()}`;
-    scopeUnit = `openclaw-${params.action ? "triage" : "update"}-${suffix}.scope`;
+    scopeUnit = `carapace-${params.action ? "triage" : "update"}-${suffix}.scope`;
     spawnArgs.unshift(
       "--user",
       "--scope",
@@ -2072,7 +2072,7 @@ async function spawnManagedServiceUpdateHandoff(
     );
     spawnCommand = systemdRun;
   }
-  const stateDatabasePath = resolveOpenClawStateSqlitePath(serviceEnv);
+  const stateDatabasePath = resolveCarapaceStateSqlitePath(serviceEnv);
   const parentExitTimeoutMs = Math.min(
     2_147_483_647,
     Math.max(0, params.restartDrainTimeoutMs) + PARENT_EXIT_SHUTDOWN_RESERVE_MS,
@@ -2082,7 +2082,7 @@ async function spawnManagedServiceUpdateHandoff(
     // Resolve relative/default target selectors before entering the helper scratch directory.
     ...installationTargetEnv(resolveInstallationTarget(serviceEnv)),
     [CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]: metaPath,
-    OPENCLAW_UPDATE_RUN_HANDOFF: "1",
+    CARAPACE_UPDATE_RUN_HANDOFF: "1",
     ...(metaFile.meta.runId ? { [UPDATE_RUN_ID_ENV]: metaFile.meta.runId } : {}),
   };
   for (const key of SUPERVISOR_HINT_ENV_VARS) {
@@ -2144,18 +2144,18 @@ async function spawnManagedServiceUpdateHandoff(
     triageContextPath,
     triageInputPath,
     triageContextCommand: formatInstallationTargetCommand(
-      ["openclaw", "triage", "--update-result", triageContextPath],
+      ["carapace", "triage", "--update-result", triageContextPath],
       installationTarget,
       { env: serviceEnv },
     ),
     triageRecoveryCommand: formatInstallationTargetCommand(
-      ["openclaw", "triage"],
+      ["carapace", "triage"],
       installationTarget,
       { env: serviceEnv },
     ),
     // This hint becomes a model/channel notice; host paths remain in the helper log.
     triageHint:
-      "Update triage runs after service recovery; see the managed update helper log for the outcome and the installation-specific openclaw triage command.",
+      "Update triage runs after service recovery; see the managed update helper log for the outcome and the installation-specific carapace triage command.",
     commandLabel,
     handoffId: params.handoffId,
     nonFailureSkippedReasons: Object.keys(SKIPPED_UPDATE_OUTCOMES),
@@ -2294,7 +2294,7 @@ export async function startManagedServiceUpdateHandoff(
 ): Promise<ManagedServiceUpdateHandoffResult> {
   if (params.action && params.supervisor !== "systemd") {
     throw new Error(
-      "Automatic managed triage requires a Linux user-systemd scope; run openclaw triage manually.",
+      "Automatic managed triage requires a Linux user-systemd scope; run carapace triage manually.",
     );
   }
   if (
@@ -2395,7 +2395,7 @@ export async function isCurrentManagedServiceUpdateHandoffProcess(params: {
   root: string;
   runId: string | undefined;
 }): Promise<boolean> {
-  if (process.env.OPENCLAW_UPDATE_RUN_HANDOFF !== "1" || !params.runId) {
+  if (process.env.CARAPACE_UPDATE_RUN_HANDOFF !== "1" || !params.runId) {
     return false;
   }
   const meta = await readControlPlaneUpdateSentinelMeta();
@@ -2522,7 +2522,7 @@ export async function transferManagedServiceUpdateHandoff(
 
 /** Internal helper/orchestrator pipe protocol; standalone updates own their service stop. */
 export async function activateManagedServiceUpdateHandoff(): Promise<boolean> {
-  if (process.env.OPENCLAW_UPDATE_RUN_HANDOFF !== "1") {
+  if (process.env.CARAPACE_UPDATE_RUN_HANDOFF !== "1") {
     return false;
   }
   await new Promise<void>((resolve, reject) => {

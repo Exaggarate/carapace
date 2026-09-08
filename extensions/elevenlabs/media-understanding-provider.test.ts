@@ -1,6 +1,6 @@
 // Elevenlabs tests cover media understanding provider plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { mockPinnedHostnameResolution } from "openclaw/plugin-sdk/test-env";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { mockPinnedHostnameResolution } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { elevenLabsMediaUnderstandingProvider } from "./media-understanding-provider.js";
 

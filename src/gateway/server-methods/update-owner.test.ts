@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { withGatewayToolCallerIdentity } from "../../agents/tools/gateway-caller-context.js";
 import { createGatewayTool } from "../../agents/tools/gateway-tool.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { listUpdateRuns } from "../../infra/update-run-ledger.js";
 import type { GatewayRequestContext } from "./types.js";
 import {
@@ -41,7 +41,7 @@ vi.mock("../server-plugins.js", () => ({
 }));
 
 describe("update.run current owner authority", () => {
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   beforeEach(() => {
     config = { commands: { ownerAllowFrom: ["owner"] } };
     host.context = { getRuntimeConfig: () => config } as GatewayRequestContext;
@@ -83,7 +83,7 @@ describe("update.run current owner authority", () => {
           reason: "owner_required",
           ackDelivered: false,
           message: expect.stringContaining(
-            `openclaw config set commands.ownerAllowFrom '${JSON.stringify(change === "revoked" ? ["slack:owner"] : ["replacement", "slack:owner"])}'`,
+            `carapace config set commands.ownerAllowFrom '${JSON.stringify(change === "revoked" ? ["slack:owner"] : ["replacement", "slack:owner"])}'`,
           ),
         });
         expect(listUpdateRuns()).toEqual([
@@ -138,7 +138,7 @@ describe("update.run current owner authority", () => {
       reason: "owner_required",
       ackDelivered: true,
       message: expect.stringContaining(
-        'openclaw config set commands.ownerAllowFrom \'["replacement","slack:owner"]\'',
+        'carapace config set commands.ownerAllowFrom \'["replacement","slack:owner"]\'',
       ),
     });
     expect(runGatewayUpdateMock).not.toHaveBeenCalled();
@@ -148,7 +148,7 @@ describe("update.run current owner authority", () => {
     expect(sendGatewayLifecycleNoticeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         message: expect.stringContaining(
-          'openclaw config set commands.ownerAllowFrom \'["replacement","slack:owner"]\'',
+          'carapace config set commands.ownerAllowFrom \'["replacement","slack:owner"]\'',
         ),
       }),
     );

@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { runOpenClawStateWriteTransaction } from "../../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../../state/carapace-state-db.js";
 import { noteCronJobsStoreCommit } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
 import {
@@ -62,7 +62,7 @@ export function commitCronRuntimeRows<T>(params: {
 }): T {
   const storeKey = cronStoreKey(params.state.deps.storePath);
   const jobIds = new Set(params.jobIds);
-  const committed = runOpenClawStateWriteTransaction(
+  const committed = runCarapaceStateWriteTransaction(
     ({ db }) => {
       const rows = loadCronRows(db, storeKey, jobIds);
       const rowsByJobId = new Map(rows.map((row) => [row.job_id, row] as const));

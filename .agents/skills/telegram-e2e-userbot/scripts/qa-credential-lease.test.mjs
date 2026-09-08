@@ -3,8 +3,8 @@ import test from "node:test";
 import { acquireQaLease, QaCredentialBrokerError } from "./qa-credential-lease.mjs";
 
 const env = {
-  OPENCLAW_QA_CONVEX_SITE_URL: "https://broker.example.test/",
-  OPENCLAW_QA_CONVEX_SECRET_CI: "ci-secret",
+  CARAPACE_QA_CONVEX_SITE_URL: "https://broker.example.test/",
+  CARAPACE_QA_CONVEX_SECRET_CI: "ci-secret",
 };
 
 test("a resumed event loop cannot use a lease whose confirmation expired", async () => {
@@ -88,7 +88,7 @@ test("uses the authenticated Convex CLI when broker variables are absent", async
 
   assert.deepEqual(cliCalls, [
     {
-      args: ["env", "--deployment", "reminiscent-ibex-847", "get", "OPENCLAW_QA_CONVEX_SECRET_CI"],
+      args: ["env", "--deployment", "reminiscent-ibex-847", "get", "CARAPACE_QA_CONVEX_SECRET_CI"],
       options: { cwd: "/repo/qa/convex-credential-broker" },
     },
   ]);
@@ -103,12 +103,12 @@ test("rejects a partial explicit broker configuration instead of mixing sources"
   await assert.rejects(
     acquireQaLease({
       kind: "telegram-test-userbot",
-      env: { OPENCLAW_QA_CONVEX_SITE_URL: "https://broker.example.test" },
+      env: { CARAPACE_QA_CONVEX_SITE_URL: "https://broker.example.test" },
       runConvexCliImpl: async () => {
         cliCalls += 1;
       },
     }),
-    /Set both OPENCLAW_QA_CONVEX_SITE_URL and OPENCLAW_QA_CONVEX_SECRET_CI/u,
+    /Set both CARAPACE_QA_CONVEX_SITE_URL and CARAPACE_QA_CONVEX_SECRET_CI/u,
   );
   assert.equal(cliCalls, 0);
 });
@@ -138,7 +138,7 @@ test("rejects remote cleartext broker URLs before fetch", async () => {
   await assert.rejects(
     acquireQaLease({
       kind: "telegram-test-userbot",
-      env: { ...env, OPENCLAW_QA_CONVEX_SITE_URL: "http://broker.example.test" },
+      env: { ...env, CARAPACE_QA_CONVEX_SITE_URL: "http://broker.example.test" },
       fetchImpl: async () => {
         fetchCalls += 1;
         return Response.json({ status: "ok" });
@@ -166,8 +166,8 @@ test("allows explicit IPv4 and IPv6 loopback HTTP for local broker development",
       kind: "telegram-test-userbot",
       env: {
         ...env,
-        OPENCLAW_QA_ALLOW_INSECURE_HTTP: "1",
-        OPENCLAW_QA_CONVEX_SITE_URL: siteUrl,
+        CARAPACE_QA_ALLOW_INSECURE_HTTP: "1",
+        CARAPACE_QA_CONVEX_SITE_URL: siteUrl,
       },
       fetchImpl,
     });
@@ -364,7 +364,7 @@ test("hydrates an authenticated broker payload above the inline threshold", asyn
         credentialId: "credential-chunked",
         leaseToken: "lease-token-chunked",
         payload: {
-          __openclawQaCredentialPayloadChunksV1: true,
+          __carapaceQaCredentialPayloadChunksV1: true,
           chunkCount: chunks.length,
           byteLength: Buffer.byteLength(serialized, "utf8"),
         },
@@ -425,7 +425,7 @@ test("heartbeat loss stops delayed chunk hydration before returning credentials"
         credentialId: "credential-delayed-chunk",
         leaseToken: "lease-token-delayed-chunk",
         payload: {
-          __openclawQaCredentialPayloadChunksV1: true,
+          __carapaceQaCredentialPayloadChunksV1: true,
           chunkCount: 2,
           byteLength: 4,
         },

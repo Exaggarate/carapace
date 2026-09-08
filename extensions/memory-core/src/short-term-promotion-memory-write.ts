@@ -1,15 +1,15 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
+import { replaceFileAtomic } from "carapace/plugin-sdk/security-runtime";
 
 export function buildPromotionMarker(candidateKey: string): string {
-  return `<!-- openclaw-memory-promotion:${candidateKey} -->`;
+  return `<!-- carapace-memory-promotion:${candidateKey} -->`;
 }
 
 export function extractPromotionKeys(content: string): string[] {
   // Source paths can contain spaces; the comment boundary terminates a key.
-  return [...content.matchAll(/<!--\s*openclaw-memory-promotion:([^\n]*?)\s*-->/giu)]
+  return [...content.matchAll(/<!--\s*carapace-memory-promotion:([^\n]*?)\s*-->/giu)]
     .map((match) => match[1]?.trim())
     .filter((key): key is string => Boolean(key));
 }
@@ -166,7 +166,7 @@ export async function commitMemoryContent(
         ) {
           throw new MemoryWriteConflictError(params.conflictMessage);
         }
-        // OpenClaw writers are serialized. The recoverable preimage covers the
+        // Carapace writers are serialized. The recoverable preimage covers the
         // accepted race with external editors between this check and rename.
       },
       fileSystem: {

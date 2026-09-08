@@ -1,4 +1,4 @@
-// Codex App Server Protocol Source script supports OpenClaw repository automation.
+// Codex App Server Protocol Source script supports Carapace repository automation.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -102,14 +102,14 @@ export function buildCodexProtocolFixtureCommand(
 }
 
 export function resolveCodexProtocolMinFreeBytes(env: NodeJS.ProcessEnv = process.env): number {
-  const raw = env.OPENCLAW_CODEX_PROTOCOL_MIN_FREE_BYTES;
+  const raw = env.CARAPACE_CODEX_PROTOCOL_MIN_FREE_BYTES;
   if (raw === undefined || raw.trim() === "") {
     return DEFAULT_PROTOCOL_GENERATION_MIN_FREE_BYTES;
   }
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed < 0) {
     throw new Error(
-      `OPENCLAW_CODEX_PROTOCOL_MIN_FREE_BYTES must be a non-negative byte count, got ${raw}`,
+      `CARAPACE_CODEX_PROTOCOL_MIN_FREE_BYTES must be a non-negative byte count, got ${raw}`,
     );
   }
   return Math.floor(parsed);
@@ -143,7 +143,7 @@ export function validateCodexProtocolGenerationHeadroom(params: {
       `${params.pathLabel} has ${formatBytes(params.freeBytes)} free; requires at least ${formatBytes(
         params.minFreeBytes,
       )}.`,
-      "Run this check on Crabbox/Testbox, free local disk, or set OPENCLAW_CODEX_PROTOCOL_MIN_FREE_BYTES=0 to override intentionally.",
+      "Run this check on Crabbox/Testbox, free local disk, or set CARAPACE_CODEX_PROTOCOL_MIN_FREE_BYTES=0 to override intentionally.",
     ].join("\n"),
   );
 }
@@ -170,7 +170,7 @@ export async function resolveCodexAppServerProtocolSource(repoRoot: string): Pro
   throw new Error(
     [
       "Codex app-server protocol schema not found.",
-      "Set OPENCLAW_CODEX_REPO to a checkout of openai/codex, or keep a sibling `codex` checkout next to the primary OpenClaw checkout.",
+      "Set CARAPACE_CODEX_REPO to a checkout of openai/codex, or keep a sibling `codex` checkout next to the primary Carapace checkout.",
       `Checked: ${checked.join(", ") || "<none>"}`,
     ].join("\n"),
   );
@@ -309,7 +309,7 @@ function readGitCommit(cwd: string, ref: string): string {
 
 async function collectCodexRepoCandidates(repoRoot: string): Promise<string[]> {
   const candidates = [
-    process.env.OPENCLAW_CODEX_REPO,
+    process.env.CARAPACE_CODEX_REPO,
     path.resolve(repoRoot, "../codex"),
     await resolvePrimaryWorktreeSiblingCodex(repoRoot),
   ];

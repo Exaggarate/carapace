@@ -129,7 +129,7 @@ function runChangedPathsWorkflow(repo: string, base: string, env: NodeJS.Process
 
 describe("run-opengrep.sh", () => {
   it("fails before scanning with official installation advice when opengrep is missing", () => {
-    const repo = createTempDir("openclaw-run-opengrep-missing-");
+    const repo = createTempDir("carapace-run-opengrep-missing-");
     copyRunOpengrepFiles(repo);
     writeFile(path.join(repo, "security/opengrep/precise.yml"), "rules: []\n");
 
@@ -160,7 +160,7 @@ describe("run-opengrep.sh", () => {
   });
 
   it("validates the rulepack when only OpenGrep rulepack files changed", () => {
-    const repo = createTempDir("openclaw-run-opengrep-");
+    const repo = createTempDir("carapace-run-opengrep-");
     git(repo, "init", "-q");
     git(repo, "config", "user.email", "test@example.com");
     git(repo, "config", "user.name", "Test User");
@@ -178,7 +178,7 @@ describe("run-opengrep.sh", () => {
       env: {
         ...process.env,
         PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-        OPENCLAW_OPENGREP_BASE_REF: "HEAD",
+        CARAPACE_OPENGREP_BASE_REF: "HEAD",
       },
       encoding: "utf8",
     });
@@ -188,7 +188,7 @@ describe("run-opengrep.sh", () => {
   });
 
   it("writes empty SARIF when a changed scan has no first-party paths", () => {
-    const repo = createTempDir("openclaw-run-opengrep-empty-sarif-");
+    const repo = createTempDir("carapace-run-opengrep-empty-sarif-");
     git(repo, "init", "-q");
     git(repo, "config", "user.email", "test@example.com");
     git(repo, "config", "user.name", "Test User");
@@ -210,7 +210,7 @@ describe("run-opengrep.sh", () => {
       env: {
         ...process.env,
         PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-        OPENCLAW_OPENGREP_BASE_REF: "HEAD",
+        CARAPACE_OPENGREP_BASE_REF: "HEAD",
       },
       encoding: "utf8",
     });
@@ -241,7 +241,7 @@ describe("run-opengrep.sh", () => {
   ])(
     "fails when changed-path discovery hits $failure",
     ({ baseRef, failedGitCommand, errorText }) => {
-      const repo = createTempDir("openclaw-run-opengrep-discovery-failure-");
+      const repo = createTempDir("carapace-run-opengrep-discovery-failure-");
       git(repo, "init", "-q");
       git(repo, "config", "user.email", "test@example.com");
       git(repo, "config", "user.name", "Test User");
@@ -279,7 +279,7 @@ describe("run-opengrep.sh", () => {
           env: {
             ...process.env,
             PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
-            OPENCLAW_OPENGREP_BASE_REF: baseRef,
+            CARAPACE_OPENGREP_BASE_REF: baseRef,
           },
           encoding: "utf8",
         },
@@ -298,7 +298,7 @@ describe("run-opengrep.sh", () => {
     let staleBase: string;
 
     beforeAll(() => {
-      source = sourceDirs.make("openclaw-opengrep-source-");
+      source = sourceDirs.make("carapace-opengrep-source-");
       git(source, "init", "-q", "--initial-branch=main");
       git(source, "config", "user.email", "test@example.com");
       git(source, "config", "user.name", "Test User");
@@ -333,7 +333,7 @@ describe("run-opengrep.sh", () => {
     ])(
       "prepares and scans a shallow $shape checkout without unrelated base fetches",
       ({ branch, depth, partial, passes }) => {
-        const repo = createTempDir("openclaw-opengrep-shallow-");
+        const repo = createTempDir("carapace-opengrep-shallow-");
         git(
           source,
           "clone",
@@ -361,7 +361,7 @@ describe("run-opengrep.sh", () => {
           branch === "feature" && depth === 2,
         );
         const { argsPath, binDir } = installOpengrepStub(repo);
-        const trace = path.join(createTempDir("openclaw-opengrep-trace-"), "git.jsonl");
+        const trace = path.join(createTempDir("carapace-opengrep-trace-"), "git.jsonl");
         const result = runChangedPathsWorkflow(repo, staleBase, {
           ...process.env,
           PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
@@ -403,7 +403,7 @@ describe("OpenGrep GitHub SARIF uploads", () => {
   it.each(["opengrep-precise.yml", "opengrep-precise-full.yml"])(
     "%s preserves raw evidence and uploads only findings without accepted source suppression",
     (workflowName) => {
-      const repo = createTempDir("openclaw-opengrep-sarif-");
+      const repo = createTempDir("carapace-opengrep-sarif-");
       const ignored = [
         { ruleId: "in-source", suppressions: [{ kind: "inSource" }] },
         { ruleId: "accepted", suppressions: [{ kind: "inSource", status: "accepted" }] },
@@ -484,7 +484,7 @@ describe("OpenGrep GitHub SARIF uploads", () => {
   it.each(["{", JSON.stringify({ version: "2.1.0", runs: [{ results: "invalid" }] })])(
     "fails malformed reports without emitting an upload payload: %s",
     (raw) => {
-      const repo = createTempDir("openclaw-opengrep-sarif-invalid-");
+      const repo = createTempDir("carapace-opengrep-sarif-invalid-");
       const inputPath = path.join(repo, "raw.sarif");
       writeFile(inputPath, raw);
       const result = spawnSync(process.execPath, ["scripts/opengrep-github-sarif.mjs", inputPath], {

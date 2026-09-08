@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 /** v1 shipped in 2026.8.2. This proves cleanup eligibility, never v2 authority. */
 export function canCleanupLegacyManagedHandoff(
@@ -31,7 +31,7 @@ export function canCleanupLegacyManagedHandoff(
   );
 }
 
-export const MANAGED_SERVICE_UPDATE_HANDOFF_TEMP_PREFIX = "openclaw-update-run-handoff-";
+export const MANAGED_SERVICE_UPDATE_HANDOFF_TEMP_PREFIX = "carapace-update-run-handoff-";
 const MANAGED_SERVICE_UPDATE_HANDOFF_STALE_TTL_MS = 24 * 60 * 60_000;
 
 export async function cleanupStaleManagedServiceUpdateHandoffs(params?: {

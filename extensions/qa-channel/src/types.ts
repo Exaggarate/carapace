@@ -1,5 +1,5 @@
 // Qa Channel type declarations define plugin contracts.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 type QaChannelActionConfig = {
   messages?: boolean;
@@ -38,7 +38,7 @@ type QaChannelConfig = QaChannelAccountConfig & {
   defaultAccount?: string;
 };
 
-export type CoreConfig = OpenClawConfig & {
+export type CoreConfig = CarapaceConfig & {
   channels?: {
     "qa-channel"?: QaChannelConfig;
   };

@@ -101,28 +101,28 @@ explicitly unsupported even though the ACP spawn and child are observable.
 
 <AccordionGroup>
   <Accordion title="Non-blocking, push-based completion">
-    - `sessions_spawn` returns a run id after startup is accepted, without waiting for the child task to finish. Spawns from an OpenClaw cloud worker can first wait for child provisioning and node enrollment.
+    - `sessions_spawn` returns a run id after startup is accepted, without waiting for the child task to finish. Spawns from an Carapace cloud worker can first wait for child provisioning and node enrollment.
     - Announcing sub-agents report back to the parent/requester session on completion.
     - Agent turns that need those announced results should call `sessions_yield` when available. That ends the current turn and lets the completion event arrive as the next model-visible message. Collectors instead require explicit result collection.
     - Announced completion is push-based. Once spawned, do **not** poll `/subagents list`, `sessions_list`, or `sessions_history` in a loop just to wait for it to finish; check status on-demand only when debugging.
     - Child output is a report/evidence for the requester agent to synthesize. It is not user-authored instruction text and cannot override system, developer, or user policy.
     - A child run ending does not by itself complete the requester's user-facing goal. The requester compares the result with the requested outcome and continues in-scope work, including review findings and failed checks, before replying. Persistent child sessions can be continued with `sessions_send`.
     - Report the overall goal as blocked only when continuation requires new user authority or an unavailable external decision. Ordinary fixable findings are continuation work, not a terminal blocker.
-    - On completion, OpenClaw best-effort closes tracked browser tabs/processes opened by that sub-agent session before the announce cleanup flow continues.
+    - On completion, Carapace best-effort closes tracked browser tabs/processes opened by that sub-agent session before the announce cleanup flow continues.
 
   </Accordion>
   <Accordion title="Completion delivery">
-    - OpenClaw hands completions back to the requester session through an `agent` turn with a stable idempotency key.
-    - If the requester run is still active, OpenClaw first tries to wake/steer that run instead of starting a second visible reply path.
+    - Carapace hands completions back to the requester session through an `agent` turn with a stable idempotency key.
+    - If the requester run is still active, Carapace first tries to wake/steer that run instead of starting a second visible reply path.
     - If an active requester cannot accept steering, including a busy CLI run, the handoff waits in the same session lane and starts after the current turn releases its claim. A failed wake does not start a competing turn or discard the completion.
     - A successful in-session parent handoff completes sub-agent delivery even when the parent decides no visible user update is needed. External completion delivery requires a confirmed send, not merely an answer saved in the requester transcript.
     - Native sub-agents do not get the message tool. They return plain assistant text to the parent/requester agent; human-visible replies stay owned by the parent/requester agent's normal delivery policy.
     - Queue acceptance is not delivery. If direct handoff cannot be used, delivery falls back to queue routing; the completion remains `session_queued`, rather than delivered, until the durable queue settles.
     - Automatic completion delivery retries for up to 30 minutes, starting around 15 seconds and capping the backoff at 5 minutes. Permanent failure or deadline expiry leaves the successful child task visibly blocked instead of discarding its result.
     - Missing or empty external delivery receipts remain unconfirmed and follow that bounded retry policy. An adapter-reported unconfirmed send remains ambiguous, never intentional suppression. Empty requester output still uses the existing completion fallback; it is not an outbound-hook cancellation. A confirmed message-tool send to the requester still counts as delivery.
-    - If an outbound hook intentionally suppresses a completion, the child can remain completed while its task delivery is marked `failed` with the suppression reason. OpenClaw does not retry or start another requester turn to bypass that decision. Inspect the task error and hook policy before manually retrying.
-    - Blocked canonical results are retained for 7 days. Operators can retry or intentionally dismiss them from the Tasks page or with `openclaw tasks retry` / `openclaw tasks dismiss`; retry can duplicate a visible result after an ambiguous provider acknowledgement.
-    - Delivery keeps the resolved requester route: thread-bound or conversation-bound completion routes win when available. If the completion origin only provides a channel, OpenClaw fills the missing target/account from the requester session's recorded delivery context so direct delivery still works.
+    - If an outbound hook intentionally suppresses a completion, the child can remain completed while its task delivery is marked `failed` with the suppression reason. Carapace does not retry or start another requester turn to bypass that decision. Inspect the task error and hook policy before manually retrying.
+    - Blocked canonical results are retained for 7 days. Operators can retry or intentionally dismiss them from the Tasks page or with `carapace tasks retry` / `carapace tasks dismiss`; retry can duplicate a visible result after an ambiguous provider acknowledgement.
+    - Delivery keeps the resolved requester route: thread-bound or conversation-bound completion routes win when available. If the completion origin only provides a channel, Carapace fills the missing target/account from the requester session's recorded delivery context so direct delivery still works.
 
   </Accordion>
   <Accordion title="Completion handoff metadata">
@@ -144,7 +144,7 @@ explicitly unsupported even though the ACP spawn and child are observable.
     - For persistent thread-bound sessions, use `sessions_spawn` with `thread: true` and `mode: "session"`.
     - If the requester channel does not support thread bindings, use `mode: "run"` instead of retrying an impossible thread-bound combination.
     - For ACP harness sessions (Claude Code, Gemini CLI, OpenCode, or explicit Codex ACP/acpx), use `sessions_spawn` with `runtime: "acp"` when the tool advertises that runtime. See [ACP delivery model](/tools/acp-agents#delivery-model) when debugging completions or agent-to-agent loops. When the `codex` plugin is enabled, Codex chat/thread control should prefer `/codex ...` over ACP unless the user explicitly asks for ACP/acpx.
-    - OpenClaw hides `runtime: "acp"` until ACP is enabled, the requester is not sandboxed, and a backend plugin such as `acpx` is loaded. `runtime: "acp"` expects an external ACP harness id, or an `agents.entries.*` entry with `runtime.type="acp"`; use the default sub-agent runtime for normal OpenClaw config agents from `agents_list`.
+    - Carapace hides `runtime: "acp"` until ACP is enabled, the requester is not sandboxed, and a backend plugin such as `acpx` is loaded. `runtime: "acp"` expects an external ACP harness id, or an `agents.entries.*` entry with `runtime.type="acp"`; use the default sub-agent runtime for normal Carapace config agents from `agents_list`.
 
   </Accordion>
 </AccordionGroup>
@@ -184,8 +184,8 @@ session to confirm the effective tool list.
 
 - **Model:** native sub-agents inherit the caller unless you set `agents.defaults.subagents.model` (or per-agent `agents.entries.*.subagents.model`). ACP runtime spawns use the same configured subagent model when present; otherwise the ACP harness keeps its own default. An explicit `sessions_spawn.model` still wins.
 - **Thinking:** native sub-agents inherit the caller's active turn, including one-shot thinking overrides, unless you set `agents.defaults.subagents.thinking` (or per-agent `agents.entries.*.subagents.thinking`). ACP runtime spawns also apply `agents.defaults.models["provider/model"].params.thinking` for the selected model. An explicit `sessions_spawn.thinking` still wins.
-- **Run timeout:** pass `runTimeoutSeconds` to set a timeout for a specific native, ACP, or visible sub-agent run. When omitted, OpenClaw uses `agents.defaults.subagents.runTimeoutSeconds` if configured; otherwise it falls back to `0` (no timeout). An explicit `0` disables the timeout for that run.
-- **Process lifetime:** a detached OpenClaw sub-agent has its own run lifecycle. A background task created inside an external CLI backend is different: it shares the parent CLI subprocess and stops if that parent reaches `agents.defaults.timeoutSeconds`.
+- **Run timeout:** pass `runTimeoutSeconds` to set a timeout for a specific native, ACP, or visible sub-agent run. When omitted, Carapace uses `agents.defaults.subagents.runTimeoutSeconds` if configured; otherwise it falls back to `0` (no timeout). An explicit `0` disables the timeout for that run.
+- **Process lifetime:** a detached Carapace sub-agent has its own run lifecycle. A background task created inside an external CLI backend is different: it shares the parent CLI subprocess and stops if that parent reaches `agents.defaults.timeoutSeconds`.
 - **Task delivery:** native sub-agents receive their delegated task in a `[Subagent Task]` message appended after any forked history. Inherited task envelopes are context, not the current child's assignment. The sub-agent system prompt carries runtime rules and routing context, not a hidden duplicate of the task.
 
 Accepted native sub-agent spawns report their actual initialized `context`
@@ -196,7 +196,7 @@ the provider prefix when the ref has one.
 
 ### Delegation prompt mode
 
-`agents.defaults.subagents.delegationMode` controls prompt guidance only; it does not change tool policy or enforce delegation. With no explicit setting, OpenClaw uses `prefer` in each agent's main session and `suggest` in every other session.
+`agents.defaults.subagents.delegationMode` controls prompt guidance only; it does not change tool policy or enforce delegation. With no explicit setting, Carapace uses `prefer` in each agent's main session and `suggest` in every other session.
 
 - `suggest`: keep the standard prompt nudge to use sub-agents for larger or slower work.
 - `prefer`: tell the agent to stay responsive and delegate anything more involved than a direct reply through `sessions_spawn`.
@@ -271,7 +271,7 @@ In `prefer` mode, hidden sub-agents are for internal legwork that the user does 
   `"delete"` archives the session immediately after announce (still keeps the transcript via rename).
 </ParamField>
 <ParamField path="expectsCompletionMessage" type="boolean" default="true">
-  Set `false` for fire-and-forget children. When the child finishes, OpenClaw skips the completion handoff to the requester (no announce or steer turn), records the delivery as not required, and still runs child cleanup. Inspect such children with `subagents` or `sessions_history`. `collect: true` always uses `false`.
+  Set `false` for fire-and-forget children. When the child finishes, Carapace skips the completion handoff to the requester (no announce or steer turn), records the delivery as not required, and still runs child cleanup. Inspect such children with `subagents` or `sessions_history`. `collect: true` always uses `false`.
 </ParamField>
 <ParamField path="sandbox" type='"inherit" | "require"' default="inherit">
   `require` rejects the spawn unless the target child runtime is sandboxed.
@@ -302,7 +302,7 @@ their latest assistant turn back to the requester; external delivery stays with
 the parent/requester agent.
 </Warning>
 
-With `visible: true`, `group`, `model`, `cwd`, and a same-agent `context: "fork"` are supported. Use this durable mode for coding, multi-step work, or results the user or parent may revisit, steer, or keep; it appears in the sidebar when the web UI is available and still works without it. Pass `group` to place the new session in that sidebar group atomically; omitted or blank values leave it ungrouped. A sandboxed target restricts `cwd` to that agent's workspace. Non-admin callers may use `cwd` only inside a configured agent workspace. With `worktree: true`, omitting `cwd` inherits the same-agent parent's live managed repository and creates a separate worktree. Other spawns use the target agent workspace; for another repository, ask the operator to start the session from a registered project. Do not replace a rejected persistent spawn with the synchronous `openclaw agent` CLI, whose command deadline defaults to 600 seconds. Thread binding, `mode: "session"`, thinking overrides, `lightContext`, and attachment staging are unavailable on this path because visible sessions are persistent dashboard sessions created through `sessions.create`. The default `mode: "run"`, empty `attachments`, and an empty `attachAs.mountPath` are accepted without changing that behavior. The new dashboard child inherits the requester's effective tool-policy ceiling before its first turn. Session listing and addressing obey `tools.sessions.visibility`; the default `all` scope covers sessions across agents on the Gateway for unsandboxed callers. Cross-agent access is on by default and governed by `tools.agentToAgent`; use `allow` to restrict agent pairs or set `enabled: false` to block ordinary cross-agent access (requester-owned native subagent and ACP child sessions stay reachable under `tree` or `all`). Set `agent` for same-agent-only access, `tree` for current plus spawned scope (main retains its same-agent exception), or `self` for current-session-only access. Sandbox spawned-only clamps still apply. Cross-agent owned children are included by `tree`, not `agent`; preserve explicit `tree` for that workflow. See [Session tools](/concepts/session-tool#visibility) and [Managed worktrees](/concepts/managed-worktrees).
+With `visible: true`, `group`, `model`, `cwd`, and a same-agent `context: "fork"` are supported. Use this durable mode for coding, multi-step work, or results the user or parent may revisit, steer, or keep; it appears in the sidebar when the web UI is available and still works without it. Pass `group` to place the new session in that sidebar group atomically; omitted or blank values leave it ungrouped. A sandboxed target restricts `cwd` to that agent's workspace. Non-admin callers may use `cwd` only inside a configured agent workspace. With `worktree: true`, omitting `cwd` inherits the same-agent parent's live managed repository and creates a separate worktree. Other spawns use the target agent workspace; for another repository, ask the operator to start the session from a registered project. Do not replace a rejected persistent spawn with the synchronous `carapace agent` CLI, whose command deadline defaults to 600 seconds. Thread binding, `mode: "session"`, thinking overrides, `lightContext`, and attachment staging are unavailable on this path because visible sessions are persistent dashboard sessions created through `sessions.create`. The default `mode: "run"`, empty `attachments`, and an empty `attachAs.mountPath` are accepted without changing that behavior. The new dashboard child inherits the requester's effective tool-policy ceiling before its first turn. Session listing and addressing obey `tools.sessions.visibility`; the default `all` scope covers sessions across agents on the Gateway for unsandboxed callers. Cross-agent access is on by default and governed by `tools.agentToAgent`; use `allow` to restrict agent pairs or set `enabled: false` to block ordinary cross-agent access (requester-owned native subagent and ACP child sessions stay reachable under `tree` or `all`). Set `agent` for same-agent-only access, `tree` for current plus spawned scope (main retains its same-agent exception), or `self` for current-session-only access. Sandbox spawned-only clamps still apply. Cross-agent owned children are included by `tree`, not `agent`; preserve explicit `tree` for that workflow. See [Session tools](/concepts/session-tool#visibility) and [Managed worktrees](/concepts/managed-worktrees).
 
 If a call fails with `Parameters require visible=true`, omit the named group or worktree options to keep the hidden or ACP runtime. To create a visible session instead, use `visible: true` with `runtime: "subagent"` and omit `mode`, `thread`, `thinking`, `lightContext`, `attachments`, `attachAs`, swarm options, and the ACP-only `streamTo` and `resumeSessionId`. Worktree names and base refs also require `worktree: true`. Adding `visible: true` alone does not make an ACP call compatible.
 
@@ -330,7 +330,7 @@ because they already have control meanings.
 Ends the current model turn and waits for announced child completion events
 to arrive as the next message. Use it when the requester needs results from
 announcing children before answering. It does not collect Swarm results:
-collectors require `agents_wait`, or an awaited `agents.run()` in OpenClaw
+collectors require `agents_wait`, or an awaited `agents.run()` in Carapace
 Code Mode, and do not send completion notifications.
 
 `sessions_yield` is the waiting primitive for announced completions. Do not replace it with polling
@@ -378,7 +378,7 @@ context is asking for its own audience, so it runs as a separate sibling and
 delivers there instead. The paused run stays resumable, and a later default
 follow-up still continues it.
 
-When active children exist, OpenClaw injects a compact runtime-generated
+When active children exist, Carapace injects a compact runtime-generated
 `Active Subagents` prompt block into normal turns so the requester can see
 the current child sessions, run ids, statuses, labels, tasks, and
 `taskName` aliases without polling. The task and label fields in that
@@ -422,7 +422,7 @@ enablement, timeouts, and `spawnSessions`.
     `sessions_spawn` with `thread: true` (and optionally `mode: "session"`).
   </Step>
   <Step title="Bind">
-    OpenClaw creates or binds a thread to that session target in the active channel.
+    Carapace creates or binds a thread to that session target in the active channel.
   </Step>
   <Step title="Route follow-ups">
     Replies and follow-up messages in that thread route to the bound session.
@@ -475,13 +475,13 @@ that would run unsandboxed.
 
 Use `agents_list` to see which agent ids are currently allowed for
 `sessions_spawn`. The response includes each listed agent's effective
-model and embedded runtime metadata so callers can distinguish OpenClaw, Codex
+model and embedded runtime metadata so callers can distinguish Carapace, Codex
 app-server, and other configured native runtimes.
 
 `allowAgents` entries must point at configured agent ids in `agents.entries.*`.
 `["*"]` means any configured target agent plus the requester. If an agent config
 is deleted but its id remains in `allowAgents`, `sessions_spawn` rejects that id
-and `agents_list` omits it. Run `openclaw doctor --fix` to clean stale
+and `agents_list` omits it. Run `carapace doctor --fix` to clean stale
 allowlist entries, or add a minimal `agents.entries.*` entry when the target should
 remain spawnable while inheriting defaults.
 
@@ -602,7 +602,7 @@ Delivery depends on requester depth:
 
 - Top-level requester sessions use a follow-up `agent` call with external delivery (`deliver=true`).
 - Nested requester subagent sessions receive an internal follow-up injection (`deliver=false`) so the orchestrator can synthesize child results in-session.
-- If a nested requester subagent session is gone, OpenClaw falls back to that session's requester when available.
+- If a nested requester subagent session is gone, Carapace falls back to that session's requester when available.
 
 For top-level requester sessions, completion-mode direct delivery first
 resolves any bound conversation/thread route and hook override, then fills
@@ -658,7 +658,7 @@ transcript from within an agent turn:
 ## Tool policy
 
 Sub-agents use the same profile and tool-policy pipeline as the parent or
-target agent first. After that, OpenClaw applies the sub-agent restriction
+target agent first. After that, Carapace applies the sub-agent restriction
 layer.
 
 Sub-agents always lose `gateway`, `agents_list`, `session_status`, `progress_card`, `cron`,
@@ -729,13 +729,13 @@ Sub-agents use a dedicated in-process queue lane:
 - **Concurrency:** `agents.defaults.subagents.maxConcurrent` (default `8`)
 
 Retained blocked completions also protect the gateway from unbounded fan-out.
-OpenClaw warns when the delivery backlog reaches 25 and blocks new subagent
+Carapace warns when the delivery backlog reaches 25 and blocks new subagent
 spawns at 50 until operators retry or dismiss enough retained deliveries. It
 does not prune results to make room.
 
 ## Liveness and recovery
 
-OpenClaw does not treat `endedAt` absence as permanent proof that a
+Carapace does not treat `endedAt` absence as permanent proof that a
 sub-agent is still alive. Unended runs older than the stale-run window
 (2 hours, or the configured run timeout plus a short grace period,
 whichever is longer) stop counting as active/pending in `/subagents list`,
@@ -759,17 +759,17 @@ If saving an accepted recovery temporarily fails, the Gateway retries adopting
 that same execution into its original task. Cancellation, replacement by a newer
 run, or another Gateway restart prevents that adoption.
 
-For sub-agents that announce completion, OpenClaw also attempts a notice to the
+For sub-agents that announce completion, Carapace also attempts a notice to the
 original requester: “Resumed your interrupted task after the Gateway restart.”
 Failed or suppressed notices are retried without launching another recovery
 turn; completion continues through the normal delivery path.
 
 Automatic restart recovery is bounded per child session. If the same
 sub-agent child is accepted for orphan recovery repeatedly inside the
-rapid re-wedge window, OpenClaw persists a recovery tombstone on that
+rapid re-wedge window, Carapace persists a recovery tombstone on that
 session and stops auto-resuming it on later restarts. Run
-`openclaw tasks maintenance --apply` to reconcile the task record, or
-`openclaw doctor --fix` to clear stale aborted recovery flags on
+`carapace tasks maintenance --apply` to reconcile the task record, or
+`carapace doctor --fix` to clear stale aborted recovery flags on
 tombstoned sessions.
 
 <Note>

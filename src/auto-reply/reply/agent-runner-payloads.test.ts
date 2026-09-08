@@ -1,6 +1,6 @@
 // Tests reply payload construction and metadata propagation from agent runs.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildEmbeddedRunPayloads } from "../../agents/embedded-agent-runner/run/payloads.js";
 import type { ChannelThreadingAdapter } from "../../channels/plugins/types.public.js";

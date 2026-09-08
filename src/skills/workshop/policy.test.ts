@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { PLUGIN_APPROVAL_DESCRIPTION_MAX_LENGTH } from "../../infra/plugin-approvals.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { resolveSkillWorkshopToolApproval as resolveSkillWorkshopToolApprovalImpl } from "./policy.js";
 import { proposeCreateSkill as proposeCreateSkillImpl } from "./service.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 const pendingApprovalConfig = {
   skills: {
     workshop: {
@@ -18,7 +18,7 @@ const pendingApprovalConfig = {
     },
   },
 };
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 
 const resolveSkillWorkshopToolApproval = (
   params: OptionalWorkshopConfig<Parameters<typeof resolveSkillWorkshopToolApprovalImpl>[0]>,
@@ -33,9 +33,9 @@ const proposeCreateSkill = (
 ) => proposeCreateSkillImpl({ config: {}, agentId: "main", ...params });
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-policy-",
+    prefix: "carapace-skill-workshop-policy-",
   });
 });
 
@@ -46,7 +46,7 @@ afterEach(async () => {
 
 describe("resolveSkillWorkshopToolApproval", () => {
   it("describes the target proposal and bounds the approval wait", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-policy-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-policy-workspace-");
     const description = "d".repeat(160);
     const proposal = await proposeCreateSkill({
       workspaceDir,
@@ -95,7 +95,7 @@ describe("resolveSkillWorkshopToolApproval", () => {
   });
 
   it("bounds approval metadata without splitting UTF-16 surrogates", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-policy-long-name-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-policy-long-name-");
     const description = "d".repeat(160);
     const content = "# Long name\n";
     const proposalIdLength = 60 + 1 + 8 + 1 + 10;
@@ -143,7 +143,7 @@ describe("resolveSkillWorkshopToolApproval", () => {
   });
 
   it("renders proposal-controlled fields without approval-line injection", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-policy-controls-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-policy-controls-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       name: "Line\nBreak\u202eSpoof",
@@ -172,7 +172,7 @@ describe("resolveSkillWorkshopToolApproval", () => {
   });
 
   it("falls back to the action description when the proposal cannot be resolved", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-policy-missing-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-policy-missing-");
 
     const result = await resolveSkillWorkshopToolApproval({
       toolName: "skill_workshop",

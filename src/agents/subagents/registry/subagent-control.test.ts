@@ -18,7 +18,7 @@ import {
   replaceSessionEntrySync,
 } from "../../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { rotateAgentEventLifecycleGeneration } from "../../../infra/agent-events.js";
 import {
   beginSessionWorkAdmission,
@@ -137,7 +137,7 @@ let tempRoot = "";
 let tempStoreIndex = 0;
 
 beforeAll(() => {
-  tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-subagent-control-"));
+  tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-subagent-control-"));
 });
 
 afterAll(() => {
@@ -149,10 +149,10 @@ function nextSessionStorePath(label: string) {
   return path.join(tempRoot, `${tempStoreIndex}-${label}.json`);
 }
 
-function cfgWithSessionStore(storePath = nextSessionStorePath("sessions")): OpenClawConfig {
+function cfgWithSessionStore(storePath = nextSessionStorePath("sessions")): CarapaceConfig {
   return {
     session: { store: storePath },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function writeSessionStoreFixture(label: string, store: Record<string, unknown>) {
@@ -2944,7 +2944,7 @@ describe("listControlledSubagentRuns", () => {
         ownership: "explicit",
         entries: { research: {}, ops: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(listControlledSubagentRuns("global", "research", cfg).map((run) => run.runId)).toEqual([
       "run-research",
     ]);

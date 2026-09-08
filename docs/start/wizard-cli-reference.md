@@ -1,8 +1,8 @@
 ---
-summary: "Step-by-step behavior for openclaw onboard: what each step does, config it writes, and internals"
+summary: "Step-by-step behavior for carapace onboard: what each step does, config it writes, and internals"
 doc-schema-version: 1
 read_when:
-  - You need detailed behavior for a specific openclaw onboard step
+  - You need detailed behavior for a specific carapace onboard step
   - You are debugging onboarding results or integrating onboarding clients
 title: "CLI setup reference"
 sidebarTitle: "CLI reference"
@@ -11,7 +11,7 @@ sidebarTitle: "CLI reference"
 This page covers step-by-step onboarding behavior, outputs, and internals.
 For a walkthrough, see [Onboarding (CLI)](/start/wizard). For the full CLI flag
 reference (every `--flag`, non-interactive examples, provider-specific
-commands), see [`openclaw onboard`](/cli/onboard).
+commands), see [`carapace onboard`](/cli/onboard).
 
 ## What the wizard does
 
@@ -23,7 +23,7 @@ detected AI access, verifies it, saves config, and opens the web
 dashboard with a foreground Gateway. It uses agent name `main` and full access,
 leaves telemetry consent unset, and skips route confirmation, memory import,
 and app recommendations. **Ctrl+C** stops the Gateway without removing config;
-`openclaw gateway install` enables background operation later.
+`carapace gateway install` enables background operation later.
 
 Custom setup keeps the full guided prompts. If quick start finds no usable
 route, it continues with manual provider setup and the remaining guided steps,
@@ -31,7 +31,7 @@ including Gateway service installation. The quick-start defaults for agent name
 (`main`), access mode (full access), and telemetry (consent unset) stay.
 See [Guided default](/start/wizard#guided-default).
 
-The classic wizard (`openclaw onboard --classic`) in local mode walks you through:
+The classic wizard (`carapace onboard --classic`) in local mode walks you through:
 
 - Workspace location and bootstrap files
 - Model and auth setup (Anthropic, OpenAI Code subscription OAuth, xAI, OpenCode, custom endpoints, and more provider-owned auth flows)
@@ -81,7 +81,7 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
       `--import-source`, and `--import-secrets`) cannot be combined with
       `--reset`; run the import without `--reset`.
     - Without `--reset`, invalid config or legacy keys stop the wizard and ask
-      you to run `openclaw doctor` before continuing.
+      you to run `carapace doctor` before continuing.
 
   </Step>
   <Step title="Risk acknowledgment">
@@ -96,7 +96,7 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
 
   </Step>
   <Step title="Workspace">
-    - Default `~/.openclaw/workspace` (configurable).
+    - Default `~/.carapace/workspace` (configurable).
     - Seeds workspace files needed for first-run bootstrap.
     - On rerun, an existing agent roster keeps its fleet-wide workspace unless
       you explicitly confirm the move. Non-interactive reruns warn and preserve
@@ -141,13 +141,13 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
     - Other bundled or separately installed channel plugins can add their own
       onboarding steps. See the complete [channel catalog](/channels).
     - DM security: default is pairing. First DM sends a code; approve via
-      `openclaw pairing approve <channel> <code>` or use allowlists.
+      `carapace pairing approve <channel> <code>` or use allowlists.
   </Step>
   <Step title="Web search">
     - Pick a provider (Brave, Codex Hosted Search, DuckDuckGo, Exa, Firecrawl,
       Gemini, Grok, Kimi, MiniMax Search, Ollama Web Search, Parallel,
       Perplexity, SearXNG, or Tavily) or skip.
-    - Skip this step with `--skip-search`; reconfigure later with `openclaw configure --section web`.
+    - Skip this step with `--skip-search`; reconfigure later with `carapace configure --section web`.
 
   </Step>
   <Step title="Skills">
@@ -156,7 +156,7 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
     - Installs optional dependencies for trusted bundled skills when the required
       installer is available.
     - Skips unavailable Homebrew, uv, and Go installers, then groups the affected
-      skills with manual setup guidance. Run `openclaw doctor` after installing
+      skills with manual setup guidance. Run `carapace doctor` after installing
       the missing prerequisites.
 
   </Step>
@@ -167,7 +167,7 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
       - Wizard attempts `loginctl enable-linger <user>` so gateway stays up after logout.
       - May prompt for sudo (writes `/var/lib/systemd/linger`); it tries without sudo first.
     - Native Windows: Scheduled Task first
-      - If task creation is denied, OpenClaw falls back to a per-user Startup-folder login item and starts the gateway immediately.
+      - If task creation is denied, Carapace falls back to a per-user Startup-folder login item and starts the gateway immediately.
       - Scheduled Tasks remain preferred because they provide better supervisor status.
     - Runtime selection: Node is the primary, default, and recommended runtime. Bun 1.4+ with WAL-reset-safe `node:sqlite` is available as an explicit opt-in.
     - A SecretRef-managed `gateway.auth.token` is validated without copying its
@@ -179,8 +179,8 @@ described [above](/start/wizard-cli-reference#what-the-wizard-does).
 
   </Step>
   <Step title="Health check">
-    - Starts gateway (if needed) and runs `openclaw health`.
-    - `openclaw status --deep` adds the live gateway health probe to status output, including channel probes when supported.
+    - Starts gateway (if needed) and runs `carapace health`.
+    - `carapace status --deep` adds the live gateway health probe to status output, including channel probes when supported.
 
   </Step>
   <Step title="Finish">
@@ -231,7 +231,7 @@ What you set:
 
 <Note>
 If the gateway is loopback-only and not discoverable, use SSH tunneling or a tailnet manually.
-Plaintext `ws://` is accepted for loopback, private IP literals, `.local`, and Tailnet `*.ts.net` URLs; other private-DNS names need `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1`.
+Plaintext `ws://` is accepted for loopback, private IP literals, `.local`, and Tailnet `*.ts.net` URLs; other private-DNS names need `CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1`.
 </Note>
 
 ## Auth and model options
@@ -250,7 +250,7 @@ instead of exiting. Explicit `--auth-choice` runs still fail fast for automation
   <Accordion title="Anthropic setup token">
     Supports the long-lived token created by `claude setup-token`. Choose
     **Anthropic setup-token** during onboarding, or manage it later with
-    [`openclaw models auth`](/cli/models#auth-profiles).
+    [`carapace models auth`](/cli/models#auth-profiles).
   </Accordion>
   <Accordion title="OpenAI Code subscription (OAuth)">
     Browser flow; paste `code#state`.
@@ -275,12 +275,12 @@ instead of exiting. Explicit `--auth-choice` runs still fail fast for automation
 
     Adding or reauthenticating OpenAI preserves an existing explicit primary
     model, including `openai/gpt-5.5`. If the account does not expose GPT-5.6,
-    select `openai/gpt-5.5` explicitly; OpenClaw does not silently downgrade it.
+    select `openai/gpt-5.5` explicitly; Carapace does not silently downgrade it.
 
   </Accordion>
   <Accordion title="xAI (Grok) OAuth">
     Browser sign-in for eligible SuperGrok or X Premium accounts. This is the
-    recommended xAI path for most users. OpenClaw stores the resulting auth
+    recommended xAI path for most users. Carapace stores the resulting auth
     profile for Grok models, Grok `web_search`, `x_search`, and `code_execution`.
   </Accordion>
   <Accordion title="xAI (Grok) device code">
@@ -368,11 +368,11 @@ Model behavior:
 
 Credential and profile paths:
 
-- Agent-local auth profiles (API keys, tokens, and OAuth): `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` (`auth_profile_store`).
-- Shared auth profiles: `~/.openclaw/state/openclaw.sqlite`; agent-local profiles override this read-through base. Older installs keep the shared store in the main agent's database until `openclaw doctor --fix` relocates it.
-- Legacy import only: `auth-profiles.json`, per-agent `auth.json`, and `~/.openclaw/credentials/oauth.json`. Run `openclaw doctor --fix` to import them into SQLite; new logins do not write these files.
+- Agent-local auth profiles (API keys, tokens, and OAuth): `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite` (`auth_profile_store`).
+- Shared auth profiles: `~/.carapace/state/carapace.sqlite`; agent-local profiles override this read-through base. Older installs keep the shared store in the main agent's database until `carapace doctor --fix` relocates it.
+- Legacy import only: `auth-profiles.json`, per-agent `auth.json`, and `~/.carapace/credentials/oauth.json`. Run `carapace doctor --fix` to import them into SQLite; new logins do not write these files.
 
-Paths respect `$OPENCLAW_STATE_DIR`. See [Auth credential semantics](/auth-credential-semantics#agent-copy-portability) for shared-store and agent-local behavior.
+Paths respect `$CARAPACE_STATE_DIR`. See [Auth credential semantics](/auth-credential-semantics#agent-copy-portability) for shared-store and agent-local behavior.
 
 Credential storage mode:
 
@@ -391,7 +391,7 @@ Credential storage mode:
   - Existing resolvable named auth profiles are reused unchanged, including existing `env`, `file`, `exec`, and `store` references; no new `apiKey` or `keyRef` is written and no additional provider env var is required.
   - For new custom-provider credentials, non-interactive `ref` mode stores `models.providers.<id>.apiKey` as `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`.
   - In that custom-provider case, `--custom-api-key` requires `CUSTOM_API_KEY` to be set; otherwise onboarding fails fast.
-  - Existing plaintext profile credentials remain unchanged; reference mode does not migrate them. Run `openclaw secrets configure --apply`, then `openclaw secrets audit --check`. See [Secrets management](/gateway/secrets).
+  - Existing plaintext profile credentials remain unchanged; reference mode does not migrate them. Run `carapace secrets configure --apply`, then `carapace secrets audit --check`. See [Secrets management](/gateway/secrets).
 - Gateway setup generates a secret in token mode by default. Interactive storage
   choices are **Generate/store plaintext secret** (default) or **Use SecretRef**.
   Existing password mode, `--gateway-auth password`, or `--gateway-password <value>`
@@ -407,7 +407,7 @@ Run auth setup **on the Gateway host**, using the same OS user and state directo
 as the Gateway. Over SSH, use an interactive terminal:
 
 ```bash
-openclaw configure --section model
+carapace configure --section model
 ```
 
 Choose your provider's supported auth method. For a browser OAuth flow, open the
@@ -417,7 +417,7 @@ offers device-code login, complete the displayed URL/code in your local browser
 while the Gateway host's login process waits. The completed login persists the
 credential on that host in SQLite; no credential file handoff is needed.
 
-For a specific agent, run `openclaw models auth login --provider <id> --agent <agentId>`
+For a specific agent, run `carapace models auth login --provider <id> --agent <agentId>`
 on the Gateway host. See [Models CLI](/cli/models#auth-profiles) and
 [OAuth](/concepts/oauth).
 
@@ -427,21 +427,21 @@ For unattended setup, use a provider API key with
 the Gateway service as well as the onboarding process. See
 [Authentication](/gateway/authentication).
 
-Verify the result on the Gateway host with `openclaw models status` (add
+Verify the result on the Gateway host with `carapace models status` (add
 `--agent <agentId>` for a specific agent). Remote-client onboarding only configures
 the local client connection; it does not set up provider credentials on the server.
 Do not copy `auth-profiles.json` or replace a SQLite database to transfer a login.
 
 ## Outputs and internals
 
-Typical fields in `~/.openclaw/openclaw.json`:
+Typical fields in `~/.carapace/carapace.json`:
 
 - `agents.defaults.workspace`
 - `agents.defaults.skipBootstrap` when `--skip-bootstrap` is passed
 - `agents.defaults.model` and provider config when the selected provider needs it
 - `tools.profile` (local onboarding defaults to `"coding"` when unset; existing explicit values are preserved)
 - `gateway.*` (mode, bind, auth, tailscale)
-- `session.dmScope` (onboarding preserves explicit values and otherwise leaves it unset, so the `main` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `per-channel-peer`; `openclaw security audit` recommends isolation when it detects multi-user DM traffic)
+- `session.dmScope` (onboarding preserves explicit values and otherwise leaves it unset, so the `main` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `per-channel-peer`; `carapace security audit` recommends isolation when it detects multi-user DM traffic)
 - `channels.telegram.botToken`, `channels.discord.token`, `channels.matrix.*`, `channels.signal.*`, `channels.imessage.*`
 - Channel allowlists when you opt in during prompts. Discord, Matrix,
   Microsoft Teams, and Slack resolve names to IDs when possible; other channels
@@ -456,12 +456,12 @@ Typical fields in `~/.openclaw/openclaw.json`:
 - `wizard.lastRunMode`
 - `wizard.securityAcknowledgedAt`
 
-`openclaw agents add` writes `agents.entries.*` and optional `bindings`.
+`carapace agents add` writes `agents.entries.*` and optional `bindings`.
 
-WhatsApp credentials go under `~/.openclaw/credentials/whatsapp/<accountId>/`.
+WhatsApp credentials go under `~/.carapace/credentials/whatsapp/<accountId>/`.
 Active sessions and transcripts are stored in
-`~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`. The
-`~/.openclaw/agents/<agentId>/sessions/` directory is used for legacy migration
+`~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`. The
+`~/.carapace/agents/<agentId>/sessions/` directory is used for legacy migration
 inputs and archive/support artifacts.
 
 <Note>
@@ -481,14 +481,14 @@ The results screen lists the detected applications and shows: "App names were ma
 powerful and full system access is risky):
 
 ```bash
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --auth-choice apiKey \
   --anthropic-api-key "$ANTHROPIC_API_KEY"
 ```
 
 `--mode` defaults to `local`. `--json` changes output format but does not imply
 non-interactive mode. For complete flag semantics and Gateway SecretRef
-examples, see [`openclaw onboard`](/cli/onboard). Provider-specific scripts live
+examples, see [`carapace onboard`](/cli/onboard). Provider-specific scripts live
 in [CLI automation](/start/wizard-cli-automation).
 
 ## Gateway wizard RPC
@@ -513,7 +513,7 @@ than automatically retrying or claiming successful activation.
 
 - Downloads the appropriate release asset from the official `signal-cli` GitHub releases (native build, Linux x86-64 only)
 - On other platforms (macOS, non-x64 Linux), installs via Homebrew instead
-- Stores the release-asset install under `~/.openclaw/tools/signal-cli/<version>/`
+- Stores the release-asset install under `~/.carapace/tools/signal-cli/<version>/`
 - Writes `channels.signal.transport.cliPath` with `kind: "managed-native"` in config
 - Native Windows is not supported yet; run onboarding inside WSL2 to get the Linux install path
 
@@ -521,4 +521,4 @@ than automatically retrying or claiming successful activation.
 
 - Onboarding hub: [Onboarding (CLI)](/start/wizard)
 - Automation and scripts: [CLI Automation](/start/wizard-cli-automation)
-- Command reference: [`openclaw onboard`](/cli/onboard)
+- Command reference: [`carapace onboard`](/cli/onboard)

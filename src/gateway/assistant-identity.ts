@@ -1,13 +1,13 @@
 // Gateway assistant identity resolver.
 // Combines agent config and workspace identity files for Control UI display.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { listAgentEntries } from "../agents/agent-scope-config.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { loadAgentIdentityFromWorkspace } from "../agents/identity-file.js";
 import { resolveAgentIdentity } from "../agents/identity.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
   AVATAR_MAX_DATA_URL_CHARS,
@@ -102,7 +102,7 @@ function normalizeEmojiValue(value: string | undefined): string | undefined {
 }
 
 // Presentation may choose the first roster entry even when ambient work needs an explicit owner.
-export function resolveAssistantAgentId(cfg: OpenClawConfig, agentId?: string | null): string {
+export function resolveAssistantAgentId(cfg: CarapaceConfig, agentId?: string | null): string {
   return normalizeAgentId(
     agentId ?? tryResolveLegacyCompatibilityAgentId(cfg) ?? listAgentEntries(cfg)[0]?.id ?? "main",
   );
@@ -110,7 +110,7 @@ export function resolveAssistantAgentId(cfg: OpenClawConfig, agentId?: string | 
 
 /** Resolve the display name/avatar/emoji for an agent-facing assistant identity. */
 export function resolveAssistantIdentity(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string | null;
   workspaceDir?: string | null;
 }): ResolvedAssistantIdentity {

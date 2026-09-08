@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import type { Context, Model } from "@openclaw/llm-core";
+import type { Context, Model } from "@carapace/llm-core";
 import OpenAI from "openai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";

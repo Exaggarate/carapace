@@ -2,7 +2,7 @@
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { bundledDistPluginFile } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledDistPluginFile } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   writePackageDistInventory,
@@ -35,7 +35,7 @@ import {
   type CommandRunner,
 } from "./update-global.js";
 
-const execFileSyncMock = vi.hoisted(() => vi.fn(() => "/tmp/openclaw-test-global-npmrc\n"));
+const execFileSyncMock = vi.hoisted(() => vi.fn(() => "/tmp/carapace-test-global-npmrc\n"));
 const TELEGRAM_RUNTIME_API = bundledDistPluginFile("telegram", "runtime-api.js");
 
 vi.mock("node:child_process", async (importOriginal) => {
@@ -49,7 +49,7 @@ vi.mock("node:child_process", async (importOriginal) => {
 async function writeGlobalPackageJson(packageRoot: string, version = "1.0.0") {
   await fs.writeFile(
     path.join(packageRoot, "package.json"),
-    JSON.stringify({ name: "openclaw", version }),
+    JSON.stringify({ name: "carapace", version }),
     "utf-8",
   );
 }
@@ -100,68 +100,68 @@ describe("update global helpers", () => {
   });
 
   it("prefers explicit package spec overrides", () => {
-    envSnapshot = captureEnv(["OPENCLAW_UPDATE_PACKAGE_SPEC"]);
-    process.env.OPENCLAW_UPDATE_PACKAGE_SPEC = "file:/tmp/openclaw.tgz";
+    envSnapshot = captureEnv(["CARAPACE_UPDATE_PACKAGE_SPEC"]);
+    process.env.CARAPACE_UPDATE_PACKAGE_SPEC = "file:/tmp/carapace.tgz";
 
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "latest" })).toBe(
-      "file:/tmp/openclaw.tgz",
+    expect(resolveGlobalInstallSpec({ packageName: "carapace", tag: "latest" })).toBe(
+      "file:/tmp/carapace.tgz",
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "carapace",
         tag: "beta",
-        env: { OPENCLAW_UPDATE_PACKAGE_SPEC: "openclaw@next" },
+        env: { CARAPACE_UPDATE_PACKAGE_SPEC: "carapace@next" },
       }),
-    ).toBe("openclaw@next");
+    ).toBe("carapace@next");
   });
 
   it("maps main and explicit package targets to install specs", () => {
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "main" })).toBe(
-      "github:openclaw/openclaw#main",
+    expect(resolveGlobalInstallSpec({ packageName: "carapace", tag: "main" })).toBe(
+      "github:carapace/carapace#main",
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
-        tag: "github:openclaw/openclaw#feature/my-branch",
+        packageName: "carapace",
+        tag: "github:carapace/carapace#feature/my-branch",
       }),
-    ).toBe("github:openclaw/openclaw#feature/my-branch");
+    ).toBe("github:carapace/carapace#feature/my-branch");
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
-        tag: "https://example.com/openclaw-main.tgz",
+        packageName: "carapace",
+        tag: "https://example.com/carapace-main.tgz",
       }),
-    ).toBe("https://example.com/openclaw-main.tgz");
+    ).toBe("https://example.com/carapace-main.tgz");
   });
 
   it.each([
-    { packageName: "openclaw", spec: "openclaw@1.2.3", expected: "1.2.3" },
-    { packageName: "openclaw", spec: "openclaw@v1.2.3", expected: "1.2.3" },
-    { packageName: "openclaw", spec: "openclaw@=1.2.3", expected: "1.2.3" },
-    { packageName: "openclaw", spec: "openclaw@=v1.2.3", expected: "1.2.3" },
+    { packageName: "carapace", spec: "carapace@1.2.3", expected: "1.2.3" },
+    { packageName: "carapace", spec: "carapace@v1.2.3", expected: "1.2.3" },
+    { packageName: "carapace", spec: "carapace@=1.2.3", expected: "1.2.3" },
+    { packageName: "carapace", spec: "carapace@=v1.2.3", expected: "1.2.3" },
     {
-      packageName: "@openclaw/core",
-      spec: "@openclaw/core@2026.7.30-beta.1",
+      packageName: "@carapace/core",
+      spec: "@carapace/core@2026.7.30-beta.1",
       expected: "2026.7.30-beta.1",
     },
-    { packageName: "openclaw", spec: "openclaw@^1.2.3", expected: null },
-    { packageName: "openclaw", spec: "openclaw@~1.2.3", expected: null },
-    { packageName: "openclaw", spec: "openclaw@>=1.2.3", expected: null },
-    { packageName: "openclaw", spec: "openclaw@1.2.x", expected: null },
-    { packageName: "openclaw", spec: "openclaw@1.2", expected: null },
-    { packageName: "openclaw", spec: "openclaw@*", expected: null },
-    { packageName: "openclaw", spec: "openclaw@latest", expected: null },
-    { packageName: "openclaw", spec: "openclaw@beta", expected: null },
-    { packageName: "openclaw", spec: "openclaw@next", expected: null },
-    { packageName: "openclaw", spec: "openclaw@main", expected: null },
-    { packageName: "openclaw", spec: "openclaw@nightly", expected: null },
-    { packageName: "openclaw", spec: "openclaw@V1.2.3", expected: null },
-    { packageName: "openclaw", spec: "openclaw@npm:@vendor/openclaw@1.2.3", expected: null },
-    { packageName: "openclaw", spec: "openclaw@file:../candidate", expected: null },
-    { packageName: "openclaw", spec: "openclaw@../candidate", expected: null },
-    { packageName: "openclaw", spec: "openclaw@https://example.test/openclaw.tgz", expected: null },
-    { packageName: "openclaw", spec: "openclaw@github:openclaw/openclaw#main", expected: null },
-    { packageName: "openclaw", spec: "other@1.2.3", expected: null },
-    { packageName: "openclaw", spec: "1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@^1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@~1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@>=1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@1.2.x", expected: null },
+    { packageName: "carapace", spec: "carapace@1.2", expected: null },
+    { packageName: "carapace", spec: "carapace@*", expected: null },
+    { packageName: "carapace", spec: "carapace@latest", expected: null },
+    { packageName: "carapace", spec: "carapace@beta", expected: null },
+    { packageName: "carapace", spec: "carapace@next", expected: null },
+    { packageName: "carapace", spec: "carapace@main", expected: null },
+    { packageName: "carapace", spec: "carapace@nightly", expected: null },
+    { packageName: "carapace", spec: "carapace@V1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@npm:@vendor/carapace@1.2.3", expected: null },
+    { packageName: "carapace", spec: "carapace@file:../candidate", expected: null },
+    { packageName: "carapace", spec: "carapace@../candidate", expected: null },
+    { packageName: "carapace", spec: "carapace@https://example.test/carapace.tgz", expected: null },
+    { packageName: "carapace", spec: "carapace@github:carapace/carapace#main", expected: null },
+    { packageName: "carapace", spec: "other@1.2.3", expected: null },
+    { packageName: "carapace", spec: "1.2.3", expected: null },
   ])("derives an expected installed version only for an exact npm spec: $spec", (testCase) => {
     expect(resolveExpectedInstalledVersionFromSpec(testCase.packageName, testCase.spec)).toBe(
       testCase.expected,
@@ -172,8 +172,8 @@ describe("update global helpers", () => {
     expect(canResolveRegistryVersionForPackageTarget("latest")).toBe(true);
     expect(canResolveRegistryVersionForPackageTarget("2026.3.22")).toBe(true);
     expect(canResolveRegistryVersionForPackageTarget("main")).toBe(false);
-    expect(canResolveRegistryVersionForPackageTarget("github:openclaw/openclaw#main")).toBe(false);
-    expect(canResolveRegistryVersionForPackageTarget("/tmp/openclaw.tgz")).toBe(false);
+    expect(canResolveRegistryVersionForPackageTarget("github:carapace/carapace#main")).toBe(false);
+    expect(canResolveRegistryVersionForPackageTarget("/tmp/carapace.tgz")).toBe(false);
   });
 
   it("resolves scoped package paths from the package manager global root", async () => {
@@ -189,12 +189,12 @@ describe("update global helpers", () => {
         manager: "npm",
         runCommand,
         timeoutMs: 1000,
-        packageName: "@kevins8/openclaw",
+        packageName: "@kevins8/carapace",
       }),
     ).resolves.toMatchObject({
       manager: "npm",
       globalRoot,
-      packageRoot: path.join(globalRoot, "@kevins8", "openclaw"),
+      packageRoot: path.join(globalRoot, "@kevins8", "carapace"),
     });
   });
 
@@ -206,9 +206,9 @@ describe("update global helpers", () => {
     ["11.16.0", "allow-scripts-advisory"],
     ["12.0.0", "allow-scripts"],
   ] as const)("binds npm %s lifecycle policy to the owning executable", async (version, policy) => {
-    await withTestDir({ prefix: "openclaw-npm-owner-" }, async (prefix) => {
+    await withTestDir({ prefix: "carapace-npm-owner-" }, async (prefix) => {
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       const owningNpm = path.join(prefix, "bin", "npm");
       await Promise.all([
         fs.mkdir(packageRoot, { recursive: true }),
@@ -233,7 +233,7 @@ describe("update global helpers", () => {
           runCommand,
           timeoutMs: 1000,
           pkgRoot: packageRoot,
-          packageName: "openclaw",
+          packageName: "carapace",
         }),
       ).resolves.toMatchObject({
         command: owningNpm,
@@ -295,20 +295,20 @@ describe("update global helpers", () => {
 
   it("resolves portable Git paths from process-local app data only", async () => {
     await withMockedWindowsPlatform(async () => {
-      await withTestDir({ prefix: "openclaw-update-portable-git-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-update-portable-git-" }, async (base) => {
         envSnapshot = captureEnv(["LOCALAPPDATA"]);
         const injectedLocalAppData = path.join(base, "injected-local-app-data");
         const trustedLocalAppData = path.join(base, "trusted-local-app-data");
         const injectedGitDir = path.join(
           injectedLocalAppData,
-          "OpenClaw",
+          "Carapace",
           "deps",
           "portable-git",
           "cmd",
         );
         const trustedGitDir = path.join(
           trustedLocalAppData,
-          "OpenClaw",
+          "Carapace",
           "deps",
           "portable-git",
           "cmd",
@@ -335,14 +335,14 @@ describe("update global helpers", () => {
   });
 
   it("detects install managers from resolved roots and on-disk presence", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-global-" }, async (base) => {
       const npmRoot = path.join(base, "npm-root");
       const pnpmRoot = path.join(base, "pnpm-root");
       const bunRoot = path.join(base, ".bun", "install", "global", "node_modules");
-      const pkgRoot = path.join(pnpmRoot, "openclaw");
+      const pkgRoot = path.join(pnpmRoot, "carapace");
       await fs.mkdir(pkgRoot, { recursive: true });
-      await fs.mkdir(path.join(npmRoot, "openclaw"), { recursive: true });
-      await fs.mkdir(path.join(bunRoot, "openclaw"), { recursive: true });
+      await fs.mkdir(path.join(npmRoot, "carapace"), { recursive: true });
+      await fs.mkdir(path.join(bunRoot, "carapace"), { recursive: true });
 
       envSnapshot = captureEnv(["BUN_INSTALL"]);
       process.env.BUN_INSTALL = path.join(base, ".bun");
@@ -362,8 +362,8 @@ describe("update global helpers", () => {
       );
       await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("npm");
 
-      await fs.rm(path.join(npmRoot, "openclaw"), { recursive: true, force: true });
-      await fs.rm(path.join(pnpmRoot, "openclaw"), { recursive: true, force: true });
+      await fs.rm(path.join(npmRoot, "carapace"), { recursive: true, force: true });
+      await fs.rm(path.join(pnpmRoot, "carapace"), { recursive: true, force: true });
       await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("bun");
     });
   });
@@ -371,13 +371,13 @@ describe("update global helpers", () => {
   it.each([
     {
       name: "keeps npm self-updates on the running package root when the PATH probe diverges",
-      prefix: "openclaw-update-ephemeral-probe-",
-      packageParts: ["openclaw"],
+      prefix: "carapace-update-ephemeral-probe-",
+      packageParts: ["carapace"],
       packageOptions: {},
     },
     {
       name: "keeps scoped npm self-updates on the running package root",
-      prefix: "openclaw-update-scoped-probe-",
+      prefix: "carapace-update-scoped-probe-",
       packageParts: ["@scope", "cli"],
       packageOptions: { packageName: "@scope/cli" },
     },
@@ -429,10 +429,10 @@ describe("update global helpers", () => {
 
   it("keeps the npm probe when the package root is not globally installed", async () => {
     await withMockedPlatform("darwin", async () => {
-      await withTestDir({ prefix: "openclaw-update-probe-only-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-update-probe-only-" }, async (base) => {
         const nvmPrefix = path.join(base, "home", ".nvm", "versions", "node", "v24.5.0");
         const nvmRoot = path.join(nvmPrefix, "lib", "node_modules");
-        const pkgRoot = path.join(base, "checkout", "node_modules", "openclaw");
+        const pkgRoot = path.join(base, "checkout", "node_modules", "carapace");
         await fs.mkdir(pkgRoot, { recursive: true });
 
         const runCommand = vi.fn(createNpmRootRunner({ defaultNpmRoot: nvmRoot }));
@@ -448,7 +448,7 @@ describe("update global helpers", () => {
           manager: "npm",
           command: "npm",
           globalRoot: nvmRoot,
-          packageRoot: path.join(nvmRoot, "openclaw"),
+          packageRoot: path.join(nvmRoot, "carapace"),
           npmOwner: { version: "12.0.0", lifecyclePolicy: "allow-scripts" },
         });
         expect(runCommand.mock.calls.map(([argv]) => argv)).toContainEqual(["npm", "root", "-g"]);
@@ -458,9 +458,9 @@ describe("update global helpers", () => {
 
   it("falls back to the running package root when the npm root probe fails", async () => {
     await withMockedPlatform("darwin", async () => {
-      await withTestDir({ prefix: "openclaw-update-probe-failure-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-update-probe-failure-" }, async (base) => {
         const globalRoot = path.join(base, "usr", "local", "lib", "node_modules");
-        const pkgRoot = path.join(globalRoot, "openclaw");
+        const pkgRoot = path.join(globalRoot, "carapace");
         await fs.mkdir(pkgRoot, { recursive: true });
 
         const runCommand: CommandRunner = async () => ({ stdout: "", stderr: "", code: 1 });
@@ -484,9 +484,9 @@ describe("update global helpers", () => {
   });
 
   it("does not infer npm ownership from path shape alone when the owning npm binary is absent", async () => {
-    await withTestDir({ prefix: "openclaw-update-npm-missing-bin-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-npm-missing-bin-" }, async (base) => {
       const brewRoot = path.join(base, "opt", "homebrew", "lib", "node_modules");
-      const pkgRoot = path.join(brewRoot, "openclaw");
+      const pkgRoot = path.join(brewRoot, "carapace");
       const pathNpmRoot = path.join(base, "nvm", "lib", "node_modules");
       await fs.mkdir(pkgRoot, { recursive: true });
 
@@ -495,12 +495,12 @@ describe("update global helpers", () => {
       await expect(
         detectGlobalInstallManagerForRoot(runCommand, pkgRoot, 1000),
       ).resolves.toBeNull();
-      expect(globalInstallArgs("npm", "openclaw@latest", pkgRoot)).toEqual([
+      expect(globalInstallArgs("npm", "carapace@latest", pkgRoot)).toEqual([
         "npm",
         "i",
         "-g",
-        "--allow-scripts=openclaw",
-        "openclaw@latest",
+        "--allow-scripts=carapace",
+        "carapace@latest",
         "--no-fund",
         "--no-audit",
         "--loglevel=error",
@@ -510,14 +510,14 @@ describe("update global helpers", () => {
   });
 
   it("honors an explicitly selected direct npm node_modules package root", async () => {
-    await withTestDir({ prefix: "openclaw-update-managed-service-root-" }, async (base) => {
-      const managedNpmRoot = path.join(base, ".openclaw", "npm", "node_modules");
-      const pkgRoot = path.join(managedNpmRoot, "openclaw");
+    await withTestDir({ prefix: "carapace-update-managed-service-root-" }, async (base) => {
+      const managedNpmRoot = path.join(base, ".carapace", "npm", "node_modules");
+      const pkgRoot = path.join(managedNpmRoot, "carapace");
       const pathNpmRoot = path.join(base, "shell", "lib", "node_modules");
       const otherPnpmRoot = path.join(base, "pnpm", "global", "5", "node_modules");
       const customNpm = path.join(base, "bin", "npm");
       await fs.mkdir(pkgRoot, { recursive: true });
-      await fs.mkdir(path.join(otherPnpmRoot, "openclaw"), { recursive: true });
+      await fs.mkdir(path.join(otherPnpmRoot, "carapace"), { recursive: true });
 
       const runCommand: CommandRunner = async (argv) => {
         if (argv[1] === "--version") {
@@ -578,11 +578,11 @@ describe("update global helpers", () => {
   });
 
   it("preserves bun ownership for direct node_modules package roots", async () => {
-    await withTestDir({ prefix: "openclaw-update-managed-bun-root-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-managed-bun-root-" }, async (base) => {
       envSnapshot = captureEnv(["BUN_INSTALL"]);
       process.env.BUN_INSTALL = path.join(base, ".bun");
       const bunRoot = path.join(process.env.BUN_INSTALL, "install", "global", "node_modules");
-      const pkgRoot = path.join(bunRoot, "openclaw");
+      const pkgRoot = path.join(bunRoot, "carapace");
       const pathNpmRoot = path.join(base, "shell", "lib", "node_modules");
       await fs.mkdir(pkgRoot, { recursive: true });
 
@@ -606,10 +606,10 @@ describe("update global helpers", () => {
   });
 
   it("detects custom pnpm global layouts from the running package root", async () => {
-    await withTestDir({ prefix: "openclaw-update-pnpm-custom-root-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-pnpm-custom-root-" }, async (base) => {
       const customGlobalDir = path.join(base, "custom-pnpm");
       const customGlobalRoot = path.join(customGlobalDir, "5", "node_modules");
-      const pkgRoot = path.join(customGlobalRoot, "openclaw");
+      const pkgRoot = path.join(customGlobalRoot, "carapace");
       const defaultPnpmRoot = path.join(base, "default-pnpm", "5", "node_modules");
       await fs.mkdir(pkgRoot, { recursive: true });
       await fs.writeFile(
@@ -655,16 +655,16 @@ describe("update global helpers", () => {
   });
 
   it("detects custom pnpm global layouts from virtual-store package roots", async () => {
-    await withTestDir({ prefix: "openclaw-update-pnpm-virtual-root-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-pnpm-virtual-root-" }, async (base) => {
       const customGlobalDir = path.join(base, "custom-pnpm");
       const customGlobalRoot = path.join(customGlobalDir, "5", "node_modules");
       const pkgRoot = path.join(
         customGlobalDir,
         "5",
         ".pnpm",
-        "openclaw@file+..+pack+openclaw-2026.5.6.tgz",
+        "carapace@file+..+pack+carapace-2026.5.6.tgz",
         "node_modules",
-        "openclaw",
+        "carapace",
       );
       const defaultPnpmRoot = path.join(base, "default-pnpm", "5", "node_modules");
       await fs.mkdir(customGlobalRoot, { recursive: true });
@@ -704,85 +704,85 @@ describe("update global helpers", () => {
         manager: "pnpm",
         command: "pnpm",
         globalRoot: customGlobalRoot,
-        packageRoot: path.join(customGlobalRoot, "openclaw"),
+        packageRoot: path.join(customGlobalRoot, "carapace"),
       });
     });
   });
 
   it("builds global install argv for each supported manager", () => {
-    expect(globalInstallArgs("npm", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("npm", "carapace@latest")).toEqual([
       "npm",
       "i",
       "-g",
-      "--allow-scripts=openclaw",
-      "openclaw@latest",
+      "--allow-scripts=carapace",
+      "carapace@latest",
       "--no-fund",
       "--no-audit",
       "--loglevel=error",
       "--min-release-age=0",
     ]);
-    expect(globalInstallArgs("pnpm", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("pnpm", "carapace@latest")).toEqual([
       "pnpm",
       "add",
       "-g",
-      "--allow-build=openclaw",
-      "openclaw@latest",
+      "--allow-build=carapace",
+      "carapace@latest",
     ]);
-    expect(globalInstallArgs("pnpm", "github:openclaw/openclaw#release/2026.5.12")).toEqual([
+    expect(globalInstallArgs("pnpm", "github:carapace/carapace#release/2026.5.12")).toEqual([
       "pnpm",
       "add",
       "-g",
-      "--allow-build=openclaw",
-      "github:openclaw/openclaw#release/2026.5.12",
+      "--allow-build=carapace",
+      "github:carapace/carapace#release/2026.5.12",
     ]);
-    expect(globalInstallArgs("bun", "openclaw@latest")).toEqual([
+    expect(globalInstallArgs("bun", "carapace@latest")).toEqual([
       "bun",
       "add",
       "-g",
       "--trust",
-      "openclaw@latest",
+      "carapace@latest",
     ]);
-    expect(globalInstallArgs("bun", "/tmp/openclaw-current.tgz")).toEqual([
+    expect(globalInstallArgs("bun", "/tmp/carapace-current.tgz")).toEqual([
       "bun",
       "add",
       "-g",
       "--trust",
-      "openclaw@file:/tmp/openclaw-current.tgz",
+      "carapace@file:/tmp/carapace-current.tgz",
     ]);
-    expect(globalInstallArgs("bun", "https://example.test/openclaw.tgz")).toEqual([
+    expect(globalInstallArgs("bun", "https://example.test/carapace.tgz")).toEqual([
       "bun",
       "add",
       "-g",
       "--trust",
-      "openclaw@https://example.test/openclaw.tgz",
+      "carapace@https://example.test/carapace.tgz",
     ]);
-    expect(globalInstallArgs("bun", "github:openclaw/openclaw#main")).toEqual([
+    expect(globalInstallArgs("bun", "github:carapace/carapace#main")).toEqual([
       "bun",
       "add",
       "-g",
       "--trust",
-      "openclaw@github:openclaw/openclaw#main",
+      "carapace@github:carapace/carapace#main",
     ]);
-    expect(globalInstallFallbackArgs("npm", "openclaw@latest")).toEqual([
+    expect(globalInstallFallbackArgs("npm", "carapace@latest")).toEqual([
       "npm",
       "i",
       "-g",
-      "--allow-scripts=openclaw",
-      "openclaw@latest",
+      "--allow-scripts=carapace",
+      "carapace@latest",
       "--omit=optional",
       "--no-fund",
       "--no-audit",
       "--loglevel=error",
       "--min-release-age=0",
     ]);
-    expect(globalInstallFallbackArgs("pnpm", "openclaw@latest")).toBeNull();
+    expect(globalInstallFallbackArgs("pnpm", "carapace@latest")).toBeNull();
   });
 
   it("resolves npm prefix layouts for normal global roots", () => {
-    expect(resolveNpmGlobalPrefixLayoutFromGlobalRoot("/opt/openclaw/lib/node_modules")).toEqual({
-      prefix: "/opt/openclaw",
-      globalRoot: "/opt/openclaw/lib/node_modules",
-      binDir: "/opt/openclaw/bin",
+    expect(resolveNpmGlobalPrefixLayoutFromGlobalRoot("/opt/carapace/lib/node_modules")).toEqual({
+      prefix: "/opt/carapace",
+      globalRoot: "/opt/carapace/lib/node_modules",
+      binDir: "/opt/carapace/bin",
     });
     expect(resolveNpmGlobalPrefixLayoutFromPrefix("/tmp/stage")).toEqual({
       prefix: "/tmp/stage",
@@ -793,29 +793,29 @@ describe("update global helpers", () => {
   });
 
   it("cleans only renamed package directories", async () => {
-    await withTestDir({ prefix: "openclaw-update-cleanup-" }, async (root) => {
-      await fs.mkdir(path.join(root, ".openclaw-123"), { recursive: true });
-      await fs.mkdir(path.join(root, ".openclaw-456"), { recursive: true });
-      await fs.writeFile(path.join(root, ".openclaw-file"), "nope", "utf8");
-      await fs.mkdir(path.join(root, "openclaw"), { recursive: true });
+    await withTestDir({ prefix: "carapace-update-cleanup-" }, async (root) => {
+      await fs.mkdir(path.join(root, ".carapace-123"), { recursive: true });
+      await fs.mkdir(path.join(root, ".carapace-456"), { recursive: true });
+      await fs.writeFile(path.join(root, ".carapace-file"), "nope", "utf8");
+      await fs.mkdir(path.join(root, "carapace"), { recursive: true });
 
       await expect(
         cleanupGlobalRenameDirs({
           globalRoot: root,
-          packageName: "openclaw",
+          packageName: "carapace",
         }),
       ).resolves.toEqual({
-        removed: [".openclaw-123", ".openclaw-456"],
+        removed: [".carapace-123", ".carapace-456"],
       });
-      const packageDirStat = await fs.stat(path.join(root, "openclaw"));
-      const markerFileStat = await fs.stat(path.join(root, ".openclaw-file"));
+      const packageDirStat = await fs.stat(path.join(root, "carapace"));
+      const markerFileStat = await fs.stat(path.join(root, ".carapace-file"));
       expect(packageDirStat.isDirectory()).toBe(true);
       expect(markerFileStat.isFile()).toBe(true);
     });
   });
 
   it("checks installed dist against the packaged inventory", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-pkg-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-update-global-pkg-" }, async (packageRoot) => {
       await writeGlobalPackageJson(packageRoot);
       for (const relativePath of BUNDLED_RUNTIME_SIDECAR_PATHS) {
         const absolutePath = path.join(packageRoot, relativePath);
@@ -843,7 +843,7 @@ describe("update global helpers", () => {
   });
 
   it("keeps package-root lifecycle state outside dist verification", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-lifecycle-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-update-global-lifecycle-" }, async (packageRoot) => {
       await writeGlobalPackageJson(packageRoot, "2026.7.2");
       for (const relativePath of BUNDLED_RUNTIME_SIDECAR_PATHS) {
         const absolutePath = path.join(packageRoot, relativePath);
@@ -857,12 +857,12 @@ describe("update global helpers", () => {
   });
 
   it("reports bundled plugin install stages during installed dist verification", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-plugin-stage-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-update-global-plugin-stage-" }, async (packageRoot) => {
       await writeGlobalPackageJson(packageRoot);
       await fs.mkdir(path.join(packageRoot, "dist", "extensions", "brave"), { recursive: true });
       await writePackageDistInventory(packageRoot);
 
-      for (const stageDir of [".openclaw-install-stage", ".openclaw-install-stage-retry"]) {
+      for (const stageDir of [".carapace-install-stage", ".carapace-install-stage-retry"]) {
         const stagedFile = path.join(
           packageRoot,
           "dist",
@@ -880,17 +880,17 @@ describe("update global helpers", () => {
       }
 
       await expect(collectInstalledGlobalPackageErrors({ packageRoot })).resolves.toEqual([
-        "unexpected packaged dist file dist/extensions/brave/.openclaw-install-stage-retry/node_modules/typebox/build/compile/code.mjs",
-        "unexpected packaged dist file dist/extensions/brave/.openclaw-install-stage/node_modules/typebox/build/compile/code.mjs",
+        "unexpected packaged dist file dist/extensions/brave/.carapace-install-stage-retry/node_modules/typebox/build/compile/code.mjs",
+        "unexpected packaged dist file dist/extensions/brave/.carapace-install-stage/node_modules/typebox/build/compile/code.mjs",
       ]);
     });
   });
 
   it("flags global package roots that resolve into source checkouts", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-source-checkout-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-update-global-source-checkout-" }, async (base) => {
       const checkoutRoot = path.join(base, "checkout");
       const globalRoot = path.join(base, "prefix", "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await fs.mkdir(path.join(checkoutRoot, ".git"), { recursive: true });
       await fs.mkdir(path.join(checkoutRoot, "src"), { recursive: true });
       await fs.mkdir(path.join(checkoutRoot, "extensions"), { recursive: true });
@@ -907,7 +907,7 @@ describe("update global helpers", () => {
   });
 
   it("does not require private QA sidecars when the inventory is missing", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-legacy-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-update-global-legacy-" }, async (packageRoot) => {
       await writeGlobalPackageJson(packageRoot);
 
       await expect(collectInstalledGlobalPackageErrors({ packageRoot })).resolves.toStrictEqual([]);
@@ -916,7 +916,7 @@ describe("update global helpers", () => {
 
   it("fails closed on newer installs when the inventory is missing", async () => {
     await withTestDir(
-      { prefix: "openclaw-update-global-missing-inventory-new-" },
+      { prefix: "carapace-update-global-missing-inventory-new-" },
       async (packageRoot) => {
         await writeGlobalPackageJson(packageRoot, "2026.4.15");
 
@@ -929,7 +929,7 @@ describe("update global helpers", () => {
 
   it("rejects invalid inventory files during global verify", async () => {
     await withTestDir(
-      { prefix: "openclaw-update-global-invalid-inventory-" },
+      { prefix: "carapace-update-global-invalid-inventory-" },
       async (packageRoot) => {
         await writeGlobalPackageJson(packageRoot, "2026.4.15");
         await fs.mkdir(path.join(packageRoot, "dist"), { recursive: true });
@@ -947,9 +947,9 @@ describe("update global helpers", () => {
   });
 
   it("verifies legacy sidecars for installed bundled plugins without inventory", async () => {
-    await withTestDir({ prefix: "openclaw-update-global-legacy-plugin-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-update-global-legacy-plugin-" }, async (packageRoot) => {
       await writeGlobalPackageJson(packageRoot);
-      await writeBundledPluginPackageJson(packageRoot, "telegram", "@openclaw/telegram");
+      await writeBundledPluginPackageJson(packageRoot, "telegram", "@carapace/telegram");
 
       await expect(collectInstalledGlobalPackageErrors({ packageRoot })).resolves.toContain(
         `missing bundled runtime sidecar ${TELEGRAM_RUNTIME_API}`,
@@ -959,10 +959,10 @@ describe("update global helpers", () => {
 
   it("still enforces critical sidecars when the inventory omits them", async () => {
     await withTestDir(
-      { prefix: "openclaw-update-global-critical-sidecars-" },
+      { prefix: "carapace-update-global-critical-sidecars-" },
       async (packageRoot) => {
         await writeGlobalPackageJson(packageRoot, "2026.4.15");
-        await writeBundledPluginPackageJson(packageRoot, "telegram", "@openclaw/telegram");
+        await writeBundledPluginPackageJson(packageRoot, "telegram", "@carapace/telegram");
         await writePackageDistInventory(packageRoot);
 
         await expect(collectInstalledGlobalPackageErrors({ packageRoot })).resolves.toContain(
@@ -974,10 +974,10 @@ describe("update global helpers", () => {
 
   it("ignores stale metadata for non-packaged private QA plugins during inventory verify", async () => {
     await withTestDir(
-      { prefix: "openclaw-update-global-stale-private-qa-" },
+      { prefix: "carapace-update-global-stale-private-qa-" },
       async (packageRoot) => {
         await writeGlobalPackageJson(packageRoot, "2026.4.15");
-        await writeBundledPluginPackageJson(packageRoot, "qa-lab", "@openclaw/qa-lab");
+        await writeBundledPluginPackageJson(packageRoot, "qa-lab", "@carapace/qa-lab");
         await writePackageDistInventory(packageRoot);
 
         await expect(collectInstalledGlobalPackageErrors({ packageRoot })).resolves.toStrictEqual(

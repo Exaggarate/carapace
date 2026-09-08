@@ -1,7 +1,7 @@
 // Exercise history preparation and prompt submission together: child state belongs after history.
 import { Type } from "typebox";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../../internal-runtime-context.js";
+import { CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../../internal-runtime-context.js";
 import type { SubagentRunRecord } from "../../subagents/registry/subagent-registry.types.js";
 import type { AnyAgentTool } from "../../tools/common.js";
 import {
@@ -19,7 +19,7 @@ let registry: typeof import("../../subagents/registry/subagent-registry.test-hel
 
 async function captureAttempt(codeModeOverride: boolean) {
   resetEmbeddedAttemptHarness();
-  getHoisted().createOpenClawCodingToolsMock.mockReturnValue([
+  getHoisted().createCarapaceCodingToolsMock.mockReturnValue([
     {
       name: "sessions_spawn",
       label: "Spawn",
@@ -58,7 +58,7 @@ function expectSubagentCarrier(messages: unknown[], state: string) {
   expect(messages).toContainEqual(
     expect.objectContaining({
       role: "custom",
-      customType: OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+      customType: CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
       display: false,
       content: expect.stringContaining(state),
     }),

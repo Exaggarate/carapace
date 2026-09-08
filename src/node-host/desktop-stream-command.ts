@@ -1,6 +1,6 @@
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
 import type { DesktopHostConfig } from "../config/types.desktop.js";
 import { classifyRfbSecurity, connectRfbServer } from "../gateway/desktop/rfb-probe.js";

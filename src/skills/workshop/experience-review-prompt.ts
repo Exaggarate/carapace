@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { RunSkillUsage } from "../runtime/run-usage.js";
 import { SKILL_WORKSHOP_MAINTENANCE_PROMPT } from "./maintenance-prompt.js";
 

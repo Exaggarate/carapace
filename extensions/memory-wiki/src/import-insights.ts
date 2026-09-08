@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 // Memory Wiki plugin module implements import insights behavior.
 import {
   loadMemoryWikiCompiledDashboards,

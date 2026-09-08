@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   validateConfigPatchParams,
@@ -103,7 +103,7 @@ describe("Cloud Workers mutation requests", () => {
         navigate: vi.fn(),
       } as unknown as ApplicationContext;
       const provider = createApplicationContextProvider(context);
-      const page = document.createElement("openclaw-cloud-workers-page");
+      const page = document.createElement("carapace-cloud-workers-page");
       provider.append(page);
       document.body.append(provider);
       try {

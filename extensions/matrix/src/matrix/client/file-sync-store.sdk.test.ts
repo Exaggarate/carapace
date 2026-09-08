@@ -4,8 +4,8 @@ import path from "node:path";
 import { ClientEvent, createClient, type ISyncResponse } from "matrix-js-sdk/lib/matrix.js";
 import { RustCrypto } from "matrix-js-sdk/lib/rust-crypto/rust-crypto.js";
 import { SyncState } from "matrix-js-sdk/lib/sync.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installMatrixTestRuntime } from "../../test-runtime.js";
 import { SqliteBackedMatrixSyncStore } from "./file-sync-store.js";
@@ -60,7 +60,7 @@ describe("Matrix SDK sync-cache verification routing", () => {
   beforeEach(() => {
     resetPluginStateStoreForTests();
     installMatrixTestRuntime();
-    storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sync-sdk-"));
+    storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sync-sdk-"));
     // SDK HTTP deadlines leave timers after completed requests. Advance them only
     // after the real sync loop stops, without delaying this contract test by 80s.
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });

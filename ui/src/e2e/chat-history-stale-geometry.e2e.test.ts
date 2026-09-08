@@ -20,7 +20,7 @@ const sessionId = "durable-geometry-session";
 
 function historyMessage(seq: number, text: string) {
   return {
-    __openclaw: { id: `durable-geometry-${seq}`, seq },
+    __carapace: { id: `durable-geometry-${seq}`, seq },
     content: [{ type: seq % 2 === 0 ? "output_text" : "input_text", text }],
     role: seq % 2 === 0 ? "assistant" : "user",
     timestamp: 1_800_000_000_000 + seq,
@@ -29,7 +29,7 @@ function historyMessage(seq: number, text: string) {
 
 suite.define(() => {
   it("discards stale transcript geometry before restored history bootstrap", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-history-stale-geometry", artifactRoot)
       : undefined;

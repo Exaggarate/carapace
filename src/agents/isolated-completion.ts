@@ -8,9 +8,9 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withTempWorkspace } from "../infra/private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import type { AssistantMessage, Model } from "../llm/types.js";
 import { withPluginRuntimeGenerationScope } from "../plugins/runtime/generation-scope.js";
 import { prepareSystemAgentRunAdmission } from "./admitted-run-context.js";
@@ -53,7 +53,7 @@ import { resolveEffectiveAgentRuntime } from "./thinking-runtime.js";
 import type { UsageLike } from "./usage.js";
 
 type RunIsolatedCompletionParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   model: string;
   /** Explicit credential owner. CLI and harness paths must not replace it with another profile. */
@@ -173,7 +173,7 @@ function hasCliSideEffectEvidence(result: {
 }
 
 async function runCliIsolatedCompletion(params: {
-  request: RunIsolatedCompletionParams & { config: OpenClawConfig };
+  request: RunIsolatedCompletionParams & { config: CarapaceConfig };
   provider: string;
   modelProvider: string;
   agentId: string;
@@ -181,7 +181,7 @@ async function runCliIsolatedCompletion(params: {
   workspaceDir: string;
 }): Promise<{ model: string; text: string; usage?: UsageLike }> {
   return await withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-isolated-completion-" },
+    { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-isolated-completion-" },
     async ({ dir }) => {
       const { runCliAgent } = await import("./cli-runner.runtime.js");
       params.request.assertCurrent?.();
@@ -219,7 +219,7 @@ async function runCliIsolatedCompletion(params: {
           abortSignal: params.request.abortSignal,
           assertCurrent: params.request.assertCurrent,
           executionMode: "side-question",
-          cliToolAvailability: { native: [], openClaw: [] },
+          cliToolAvailability: { native: [], carapace: [] },
           disableTools: true,
           disableCliLiveSession: true,
           cleanupCliLiveSessionOnRunEnd: true,
@@ -320,9 +320,9 @@ function resolveCliOwner(params: {
 }
 
 async function resolveHarness(runtime: string): Promise<AgentHarness> {
-  if (runtime === "openclaw") {
-    const { createOpenClawAgentHarness } = await import("./harness/builtin-openclaw.js");
-    return createOpenClawAgentHarness();
+  if (runtime === "carapace") {
+    const { createCarapaceAgentHarness } = await import("./harness/builtin-carapace.js");
+    return createCarapaceAgentHarness();
   }
   const harness = getRegisteredAgentHarness(runtime)?.harness;
   if (!harness) {
@@ -337,7 +337,7 @@ async function resolveHarness(runtime: string): Promise<AgentHarness> {
 function prepareIsolatedHostAuthorization<
   T extends Pick<AgentHarnessIsolatedCompletionParams, "model" | "auth">,
 >(harness: AgentHarness, authorization: T): T {
-  if (harness.id === "openclaw") {
+  if (harness.id === "carapace") {
     return authorization;
   }
   // External harnesses are the provider egress boundary. Keep credentials
@@ -358,7 +358,7 @@ function prepareIsolatedHostAuthorization<
 }
 
 async function prepareHostAuthorization(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   agentDir: string;
   provider: string;

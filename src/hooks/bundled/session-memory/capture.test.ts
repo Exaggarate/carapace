@@ -18,7 +18,7 @@ describe("session memory capture", () => {
       agentId: "main",
       sessionId: "capture",
       sessionKey: "agent:main:capture",
-      storePath: path.join(tempDirs.make("openclaw-memory-capture-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-memory-capture-"), "sessions.json"),
     };
   });
 
@@ -83,7 +83,7 @@ describe("session memory capture", () => {
     await accessor.replaceTranscriptEvents(scope, [
       {
         ...message("restricted", null, "user"),
-        message: { role: "user", content: "restricted", __openclaw: { senderIsOwner: false } },
+        message: { role: "user", content: "restricted", __carapace: { senderIsOwner: false } },
       },
       { type: "compaction", id: "compact", parentId: "restricted", summary: "summary" },
       message("chosen", "compact", "assistant"),

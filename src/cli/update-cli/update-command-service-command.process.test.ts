@@ -1,12 +1,12 @@
 import { expect, it } from "vitest";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { formatCliProcessFailure, runCliProcessChild } from "../cli-process-child.test-helpers.js";
 
 it.each(["restart", "install", "stop", "missing candidate"] as const)(
   "handles %s after replacing the updater's module files",
   async (scenario) => {
-    await withOpenClawTestState(
-      { prefix: "openclaw-update-command-replacement-", scenario: "minimal", applyEnv: false },
+    await withCarapaceTestState(
+      { prefix: "carapace-update-command-replacement-", scenario: "minimal", applyEnv: false },
       async (state) => {
         const script = String.raw`
           import assert from "node:assert/strict";
@@ -64,7 +64,7 @@ it.each(["restart", "install", "stop", "missing candidate"] as const)(
               'fs.writeFileSync(' + JSON.stringify(receipt) + ', JSON.stringify({',
               '  args: process.argv.slice(2),',
               '  node: process.execPath,',
-              '  config: process.env.OPENCLAW_CONFIG_PATH,',
+              '  config: process.env.CARAPACE_CONFIG_PATH,',
               '  compileCacheDisabled: process.env.NODE_DISABLE_COMPILE_CACHE,',
               '}));',
             ].join("\n"));
@@ -73,7 +73,7 @@ it.each(["restart", "install", "stop", "missing candidate"] as const)(
             assert.deepEqual(observed, {
               args: ["gateway", scenario, scenario === "restart" ? "--preserve-definition" : "--force", "--json"],
               node: process.execPath,
-              config: process.env.OPENCLAW_CONFIG_PATH,
+              config: process.env.CARAPACE_CONFIG_PATH,
               compileCacheDisabled: "1",
             });
           }

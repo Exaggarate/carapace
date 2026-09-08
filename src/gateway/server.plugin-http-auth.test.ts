@@ -224,7 +224,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         return true;
       });
       await withGatewayServer({
-        prefix: "openclaw-public-preview-",
+        prefix: "carapace-public-preview-",
         resolvedAuth: AUTH_TOKEN,
         overrides: { controlUiEnabled, controlUiBasePath: "/control", handlePluginRequest: plugin },
         run: async (server) => {
@@ -234,7 +234,7 @@ describe("gateway plugin HTTP auth boundary", () => {
           });
           expect(response.res.statusCode).toBe(controlUiEnabled ? 200 : 404);
           expect(response.getBody()).toContain(
-            controlUiEnabled ? 'content="OpenClaw dashboard"' : "Not Found",
+            controlUiEnabled ? 'content="Carapace dashboard"' : "Not Found",
           );
           for (const route of ["/control/share", "/control/share/api/private"]) {
             expect((await sendRequest(server, { path: route })).res.statusCode).toBe(404);
@@ -247,7 +247,7 @@ describe("gateway plugin HTTP auth boundary", () => {
 
   test("serves unauthenticated liveness/readiness probe routes when no other route handles them", async () => {
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-probes-test-",
+      prefix: "carapace-plugin-http-probes-test-",
       resolvedAuth: AUTH_TOKEN,
       run: async (server) => {
         await expectProbeRoutesHealthy(server);
@@ -259,7 +259,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     const handlePluginRequest = createHealthzPluginHandler();
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-probes-shadow-test-",
+      prefix: "carapace-plugin-http-probes-shadow-test-",
       resolvedAuth: AUTH_NONE,
       overrides: { handlePluginRequest },
       run: async (server) => {
@@ -270,7 +270,7 @@ describe("gateway plugin HTTP auth boundary", () => {
 
   test("rejects non-GET/HEAD methods on probe routes", async () => {
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-probes-method-test-",
+      prefix: "carapace-plugin-http-probes-method-test-",
       resolvedAuth: AUTH_NONE,
       run: async (server) => {
         const postResponse = await sendRequest(server, { path: "/healthz", method: "POST" });
@@ -302,7 +302,7 @@ describe("gateway plugin HTTP auth boundary", () => {
           trustedProxies: ["203.0.113.10"],
         },
       },
-      prefix: "openclaw-plugin-http-runtime-scope-trusted-proxy-test-",
+      prefix: "carapace-plugin-http-runtime-scope-trusted-proxy-test-",
       run: async () => {
         const server = createTestGatewayServer({
           resolvedAuth: {
@@ -323,7 +323,7 @@ describe("gateway plugin HTTP auth boundary", () => {
           headers: {
             "x-forwarded-user": "operator",
             "x-forwarded-for": "198.51.100.20",
-            "x-openclaw-scopes": "operator.read",
+            "x-carapace-scopes": "operator.read",
           },
         });
       },
@@ -345,7 +345,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-runtime-scope-bearer-test-",
+      prefix: "carapace-plugin-http-runtime-scope-bearer-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: {
         handlePluginRequest,
@@ -356,7 +356,7 @@ describe("gateway plugin HTTP auth boundary", () => {
           path: "/secure-hook",
           authorization: "Bearer test-token",
           headers: {
-            "x-openclaw-scopes": "operator.read",
+            "x-carapace-scopes": "operator.read",
           },
         });
       },
@@ -379,7 +379,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-runtime-scope-bearer-trusted-operator-test-",
+      prefix: "carapace-plugin-http-runtime-scope-bearer-trusted-operator-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: {
         handlePluginRequest,
@@ -419,7 +419,7 @@ describe("gateway plugin HTTP auth boundary", () => {
 
     await withTempConfig({
       cfg: createMattermostCallbackConfig("/api/channels/mattermost/command"),
-      prefix: "openclaw-plugin-http-auth-mm-callback-",
+      prefix: "carapace-plugin-http-auth-mm-callback-",
       run: async () => {
         const server = createTestGatewayServer({
           resolvedAuth: AUTH_TOKEN,
@@ -455,7 +455,7 @@ describe("gateway plugin HTTP auth boundary", () => {
 
     await withTempConfig({
       cfg: createMattermostCallbackConfig("/api/channels/nostr/default/profile"),
-      prefix: "openclaw-plugin-http-auth-mm-misconfig-",
+      prefix: "carapace-plugin-http-auth-mm-misconfig-",
       run: async () => {
         const server = createTestGatewayServer({
           resolvedAuth: AUTH_TOKEN,
@@ -487,7 +487,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-auth-wildcard-handler-test-",
+      prefix: "carapace-plugin-http-auth-wildcard-handler-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: {
         handlePluginRequest,
@@ -555,7 +555,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-unattributable-webhook-test-",
+      prefix: "carapace-plugin-http-unattributable-webhook-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: {
         handlePluginRequest,
@@ -610,7 +610,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-auth-wildcard-default-test-",
+      prefix: "carapace-plugin-http-auth-wildcard-default-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: { handlePluginRequest },
       run: async (server) => {
@@ -665,7 +665,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-precedence-test-",
+      prefix: "carapace-plugin-http-control-ui-precedence-test-",
       handlePluginRequest,
       run: async (server) => {
         const response = await sendRequest(server, {
@@ -683,8 +683,8 @@ describe("gateway plugin HTTP auth boundary", () => {
     { label: "root-mounted", basePath: "", path: "/settings/plugins" },
     {
       label: "base-path-mounted",
-      basePath: "/openclaw",
-      path: "/openclaw/settings/plugins",
+      basePath: "/carapace",
+      path: "/carapace/settings/plugins",
     },
   ])(
     "reserves the $label plugin manager GET while preserving writes",
@@ -701,7 +701,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       });
 
       await withGatewayServer({
-        prefix: "openclaw-plugin-http-plugin-manager-reserved-test-",
+        prefix: "carapace-plugin-http-plugin-manager-reserved-test-",
         resolvedAuth: AUTH_NONE,
         overrides: {
           controlUiEnabled: true,
@@ -732,7 +732,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-approval-reservation-test-",
+      prefix: "carapace-plugin-http-approval-reservation-test-",
       handlePluginRequest,
       run: async (server) => {
         const response = await sendRequest(server, { path: "/approve/plugin%3Arequest.json" });
@@ -752,7 +752,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-approval-write-reservation-test-",
+      prefix: "carapace-plugin-http-approval-write-reservation-test-",
       handlePluginRequest,
       run: async (server) => {
         for (const method of ["POST", "PUT"] as const) {
@@ -779,7 +779,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withPluginGatewayServer({
-      prefix: "openclaw-plugin-http-disabled-approval-reservation-test-",
+      prefix: "carapace-plugin-http-disabled-approval-reservation-test-",
       resolvedAuth: AUTH_NONE,
       overrides: {
         controlUiEnabled: false,
@@ -815,10 +815,10 @@ describe("gateway plugin HTTP auth boundary", () => {
     },
     {
       label: "base-path-mounted prefix PUT",
-      basePath: "/openclaw",
-      routePath: "/openclaw/focus",
+      basePath: "/carapace",
+      routePath: "/carapace/focus",
       match: "prefix" as const,
-      requestPath: "/openclaw/focus/dashboard/roboclaw/session-ref",
+      requestPath: "/carapace/focus/dashboard/roboclaw/session-ref",
       method: "PUT",
     },
   ])(
@@ -832,7 +832,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       });
 
       await withGatewayServer({
-        prefix: "openclaw-plugin-http-focus-ownership-test-",
+        prefix: "carapace-plugin-http-focus-ownership-test-",
         resolvedAuth: AUTH_NONE,
         overrides: {
           controlUiEnabled: true,
@@ -860,10 +860,10 @@ describe("gateway plugin HTTP auth boundary", () => {
     },
     {
       label: "base-path-mounted",
-      basePath: "/openclaw",
-      rootPath: "/openclaw/focus",
-      descendantPath: "/openclaw/focus/dashboard/roboclaw/session-ref",
-      lookalikePath: "/openclaw/focused",
+      basePath: "/carapace",
+      rootPath: "/carapace/focus",
+      descendantPath: "/carapace/focus/dashboard/roboclaw/session-ref",
+      lookalikePath: "/carapace/focused",
     },
   ])(
     "uses focus as the $label unclaimed fallback without reserving lookalikes",
@@ -876,7 +876,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       });
 
       await withGatewayServer({
-        prefix: "openclaw-plugin-http-focus-fallback-test-",
+        prefix: "carapace-plugin-http-focus-fallback-test-",
         resolvedAuth: AUTH_NONE,
         overrides: {
           controlUiEnabled: true,
@@ -911,8 +911,8 @@ describe("gateway plugin HTTP auth boundary", () => {
     { label: "root-mounted", basePath: "", path: "/focus/terminal" },
     {
       label: "base-path-mounted",
-      basePath: "/openclaw",
-      path: "/openclaw/focus/desktop",
+      basePath: "/carapace",
+      path: "/carapace/focus/desktop",
     },
   ])(
     "returns 404 for an unclaimed $label focus request when control ui serving is disabled",
@@ -925,7 +925,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       });
 
       await withPluginGatewayServer({
-        prefix: "openclaw-plugin-http-disabled-focus-fallback-test-",
+        prefix: "carapace-plugin-http-disabled-focus-fallback-test-",
         resolvedAuth: AUTH_NONE,
         overrides: {
           controlUiEnabled: false,
@@ -956,7 +956,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-webhook-post-test-",
+      prefix: "carapace-plugin-http-control-ui-webhook-post-test-",
       handlePluginRequest,
       run: async (server) => {
         const response = await sendRequest(server, {
@@ -984,7 +984,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-shadow-test-",
+      prefix: "carapace-plugin-http-control-ui-shadow-test-",
       handlePluginRequest,
       run: async (server) => {
         const response = await sendRequest(server, { path: "/my-plugin/inbound" });
@@ -1000,7 +1000,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     const handlePluginRequest = vi.fn(async () => false);
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-fallthrough-test-",
+      prefix: "carapace-plugin-http-control-ui-fallthrough-test-",
       handlePluginRequest,
       run: async (server) => {
         const response = await sendRequest(server, { path: "/chat" });
@@ -1016,7 +1016,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     const handlePluginRequest = vi.fn(async () => false);
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-probes-test-",
+      prefix: "carapace-plugin-http-control-ui-probes-test-",
       handlePluginRequest,
       run: async (server) => {
         await expectProbeRoutesHealthy(server);
@@ -1029,7 +1029,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     const handlePluginRequest = createHealthzPluginHandler();
 
     await withRootMountedControlUiServer({
-      prefix: "openclaw-plugin-http-control-ui-probe-shadow-test-",
+      prefix: "carapace-plugin-http-control-ui-probe-shadow-test-",
       handlePluginRequest,
       run: async (server) => {
         await expectHealthzProbeReserved({ server, handlePluginRequest });
@@ -1049,7 +1049,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
 
     await withGatewayServer({
-      prefix: "openclaw-plugin-http-auth-encoded-order-test-",
+      prefix: "carapace-plugin-http-auth-encoded-order-test-",
       resolvedAuth: AUTH_TOKEN,
       overrides: { handlePluginRequest },
       run: async (server) => {
@@ -1062,7 +1062,7 @@ describe("gateway plugin HTTP auth boundary", () => {
   test.each(["0.0.0.0", "::"])(
     "returns 404 (not 500) for non-hook routes with hooks enabled and bindHost=%s",
     async (bindHost) => {
-      await withGatewayTempConfig("openclaw-plugin-http-hooks-bindhost-", async () => {
+      await withGatewayTempConfig("carapace-plugin-http-hooks-bindhost-", async () => {
         const handleHooksRequest = createHooksHandler(bindHost);
         const server = createTestGatewayServer({
           resolvedAuth: AUTH_NONE,
@@ -1078,7 +1078,7 @@ describe("gateway plugin HTTP auth boundary", () => {
   );
 
   test("rejects query-token hooks requests with bindHost=::", async () => {
-    await withGatewayTempConfig("openclaw-plugin-http-hooks-query-token-", async () => {
+    await withGatewayTempConfig("carapace-plugin-http-hooks-query-token-", async () => {
       const handleHooksRequest = createHooksHandler("::");
       const server = createTestGatewayServer({
         resolvedAuth: AUTH_NONE,

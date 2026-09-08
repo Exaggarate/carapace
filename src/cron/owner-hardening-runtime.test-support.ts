@@ -9,7 +9,7 @@ export const cronOwnerHardeningEntrypoints = {
   },
   stateDatabase: {
     currentModuleUrl,
-    sourceWorkerName: "../state/openclaw-state-db",
-    distWorkerPath: "state/openclaw-state-db.js",
+    sourceWorkerName: "../state/carapace-state-db",
+    distWorkerPath: "state/carapace-state-db.js",
   },
 } as const;

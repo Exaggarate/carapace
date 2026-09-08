@@ -1,13 +1,13 @@
 {
   "entries": [
     {
-      "name": "@wecom/wecom-openclaw-plugin",
-      "description": "OpenClaw WeCom channel plugin by the Tencent WeCom team.",
+      "name": "@wecom/wecom-carapace-plugin",
+      "description": "Carapace WeCom channel plugin by the Tencent WeCom team.",
       "source": "external",
       "kind": "channel",
-      "openclaw": {
+      "carapace": {
         "plugin": {
-          "id": "wecom-openclaw-plugin",
+          "id": "wecom-carapace-plugin",
           "label": "WeCom"
         },
         "contracts": {
@@ -35,20 +35,20 @@
           }
         },
         "install": {
-          "npmSpec": "@wecom/wecom-openclaw-plugin@2026.7.2",
+          "npmSpec": "@wecom/wecom-carapace-plugin@2026.7.2",
           "defaultChoice": "npm",
           "expectedIntegrity": "sha512-7kqdBIOF3SgDDoBoFtO6jxnxofbYSgbKdxZDNabD0y0jg2xKcVqlXZOOJ9+XQho/QOtIFrnRH2IRnPukFEYwJg=="
         }
       }
     },
     {
-      "name": "openclaw-plugin-yuanbao",
-      "description": "OpenClaw Yuanbao channel plugin by the Tencent Yuanbao team.",
+      "name": "carapace-plugin-yuanbao",
+      "description": "Carapace Yuanbao channel plugin by the Tencent Yuanbao team.",
       "source": "external",
       "kind": "channel",
-      "openclaw": {
+      "carapace": {
         "plugin": {
-          "id": "openclaw-plugin-yuanbao",
+          "id": "carapace-plugin-yuanbao",
           "label": "Yuanbao"
         },
         "contracts": {
@@ -76,26 +76,26 @@
           }
         },
         "install": {
-          "npmSpec": "openclaw-plugin-yuanbao@2.18.2",
+          "npmSpec": "carapace-plugin-yuanbao@2.18.2",
           "defaultChoice": "npm",
           "expectedIntegrity": "sha512-cL85zWLePhi/GWRsXL8ogS4tejNuCE/J0V/OYhDFJzElF2TmndVCUAXaJdssgv/ULJ9sBaic88wAzRllIgZIwA=="
         }
       }
     },
     {
-      "name": "@tencent-connect/openclaw-qqbot",
-      "description": "OpenClaw QQ Bot channel plugin by the Tencent Connect team.",
+      "name": "@tencent-connect/carapace-qqbot",
+      "description": "Carapace QQ Bot channel plugin by the Tencent Connect team.",
       "source": "external",
       "kind": "channel",
-      "openclaw": {
+      "carapace": {
         "plugin": {
-          "id": "openclaw-qqbot",
+          "id": "carapace-qqbot",
           "label": "QQ Bot"
         },
         "setupFeatures": {
           "configPromotion": "preserve-root"
         },
-        "legacyNpmPackageNames": ["@openclaw/qqbot"],
+        "legacyNpmPackageNames": ["@carapace/qqbot"],
         "contracts": {
           "tools": ["qqbot_platform_api", "qqbot_remind"]
         },
@@ -127,11 +127,11 @@
           "docsSource": "official",
           "docsInventory": {
             "package": {
-              "name": "@tencent-connect/openclaw-qqbot",
-              "description": "OpenClaw QQ Bot channel plugin by the Tencent Connect team.",
-              "openclaw": {
+              "name": "@tencent-connect/carapace-qqbot",
+              "description": "Carapace QQ Bot channel plugin by the Tencent Connect team.",
+              "carapace": {
                 "install": {
-                  "npmSpec": "@tencent-connect/openclaw-qqbot",
+                  "npmSpec": "@tencent-connect/carapace-qqbot",
                   "defaultChoice": "npm"
                 },
                 "release": {
@@ -142,7 +142,7 @@
             },
             "manifest": {
               "id": "qqbot",
-              "description": "OpenClaw QQ Bot channel plugin for group and direct-message workflows.",
+              "description": "Carapace QQ Bot channel plugin for group and direct-message workflows.",
               "channels": ["qqbot"],
               "contracts": {
                 "tools": []
@@ -170,7 +170,7 @@
                       {
                         "anyOf": [
                           {
-                            "const": "openclaw:approval-disabled"
+                            "const": "carapace:approval-disabled"
                           },
                           {
                             "type": "string",
@@ -202,7 +202,7 @@
                             {
                               "anyOf": [
                                 {
-                                  "const": "openclaw:approval-disabled"
+                                  "const": "carapace:approval-disabled"
                                 },
                                 {
                                   "type": "string",
@@ -242,24 +242,24 @@
           }
         },
         "install": {
-          "npmSpec": "@tencent-connect/openclaw-qqbot@2.0.3",
+          "npmSpec": "@tencent-connect/carapace-qqbot@2.0.3",
           "defaultChoice": "npm",
           "expectedIntegrity": "sha512-yngu/2cPeZjJfIfHWCXWB2/6KlDHrb9vpOUjKLdQxePLSp6wCn3CFOALcBIVq/9o6jlYz9WTU9idW6nfX1xpFA=="
         }
       }
     },
     {
-      "name": "@tencent-weixin/openclaw-weixin",
-      "description": "OpenClaw Weixin channel plugin by the Tencent Weixin team.",
+      "name": "@tencent-weixin/carapace-weixin",
+      "description": "Carapace Weixin channel plugin by the Tencent Weixin team.",
       "source": "external",
       "kind": "channel",
-      "openclaw": {
+      "carapace": {
         "plugin": {
-          "id": "openclaw-weixin",
+          "id": "carapace-weixin",
           "label": "Weixin"
         },
         "channel": {
-          "id": "openclaw-weixin",
+          "id": "carapace-weixin",
           "label": "Weixin",
           "selectionLabel": "Weixin（微信）",
           "detailLabel": "Weixin",
@@ -270,7 +270,7 @@
           "order": 75
         },
         "channelConfigs": {
-          "openclaw-weixin": {
+          "carapace-weixin": {
             "label": "Weixin",
             "description": "Personal WeChat conversation channel.",
             "schema": {
@@ -280,7 +280,7 @@
           }
         },
         "install": {
-          "npmSpec": "@tencent-weixin/openclaw-weixin@2.4.8",
+          "npmSpec": "@tencent-weixin/carapace-weixin@2.4.8",
           "defaultChoice": "npm",
           "expectedIntegrity": "sha512-hhO9prUQwzfSpIL6XGWazRsxNs89K+Mis3iQW6a8eum4AIDxOUiTFMg4nlNVD/au0SjAx5CcJjo3KYWZqGpgQA==",
           "minHostVersion": ">=2026.5.12"
@@ -288,17 +288,17 @@
       }
     },
     {
-      "name": "@zalo-platforms/openclaw-zaloclawbot",
-      "description": "OpenClaw Zalo ClawBot channel plugin by the Zalo Platforms team.",
+      "name": "@zalo-platforms/carapace-zaloclawbot",
+      "description": "Carapace Zalo ClawBot channel plugin by the Zalo Platforms team.",
       "source": "external",
       "kind": "channel",
-      "openclaw": {
+      "carapace": {
         "plugin": {
-          "id": "openclaw-zaloclawbot",
+          "id": "carapace-zaloclawbot",
           "label": "Zalo ClawBot"
         },
         "channel": {
-          "id": "openclaw-zaloclawbot",
+          "id": "carapace-zaloclawbot",
           "label": "Zalo ClawBot",
           "selectionLabel": "Zalo ClawBot (QR)",
           "detailLabel": "Zalo ClawBot",
@@ -309,7 +309,7 @@
           "order": 82
         },
         "channelConfigs": {
-          "openclaw-zaloclawbot": {
+          "carapace-zaloclawbot": {
             "label": "Zalo ClawBot",
             "description": "Personal Zalo assistant — QR-onboarded, owner-bound.",
             "schema": {
@@ -319,7 +319,7 @@
           }
         },
         "install": {
-          "npmSpec": "@zalo-platforms/openclaw-zaloclawbot@0.1.4",
+          "npmSpec": "@zalo-platforms/carapace-zaloclawbot@0.1.4",
           "defaultChoice": "npm",
           "expectedIntegrity": "sha512-5IxZriHJYACLLGqkCPPsTP9tas62kXEOFqTFAFMdunAM3SPhIJwVFRp0WvoP/m7L2PX85weD0g8LOtxM93VDYg==",
           "minHostVersion": ">=2026.4.10"

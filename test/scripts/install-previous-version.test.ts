@@ -12,7 +12,7 @@ function runInstallerVersionSelection(
   runner: string,
   options: { target: string; versions: string[]; previous?: string; skipPrevious?: boolean },
 ) {
-  const root = tempDirs.make("openclaw-install-previous-");
+  const root = tempDirs.make("carapace-install-previous-");
   const binDir = path.join(root, "bin");
   const callsFile = path.join(root, "calls.argv");
   mkdirSync(binDir);
@@ -62,13 +62,13 @@ exit ${fixtureStop}
       FIXTURE_TARGET: options.target,
       FIXTURE_VERSIONS: JSON.stringify(options.versions),
       OPENAI_API_KEY: "fixture-api-key",
-      OPENCLAW_E2E_MODELS: "openai",
-      OPENCLAW_INSTALL_TAG: options.target,
-      OPENCLAW_INSTALL_E2E_PREVIOUS: options.previous ?? "",
-      OPENCLAW_INSTALL_SMOKE_PREVIOUS: options.previous ?? "",
-      OPENCLAW_INSTALL_E2E_SKIP_PREVIOUS: options.skipPrevious ? "1" : "0",
-      OPENCLAW_INSTALL_SMOKE_SKIP_PREVIOUS: options.skipPrevious ? "1" : "0",
-      OPENCLAW_INSTALL_SMOKE_HEARTBEAT_INTERVAL: "0",
+      CARAPACE_E2E_MODELS: "openai",
+      CARAPACE_INSTALL_TAG: options.target,
+      CARAPACE_INSTALL_E2E_PREVIOUS: options.previous ?? "",
+      CARAPACE_INSTALL_SMOKE_PREVIOUS: options.previous ?? "",
+      CARAPACE_INSTALL_E2E_SKIP_PREVIOUS: options.skipPrevious ? "1" : "0",
+      CARAPACE_INSTALL_SMOKE_SKIP_PREVIOUS: options.skipPrevious ? "1" : "0",
+      CARAPACE_INSTALL_SMOKE_HEARTBEAT_INTERVAL: "0",
     },
   });
   const fields = readFileSync(callsFile, "utf8").split("\0").slice(0, -1);
@@ -101,7 +101,7 @@ describe.each(["e2e", "smoke"])("%s installer upgrade baseline", (runner) => {
         ],
       });
       expect(result.status, result.stderr).toBe(fixtureStop);
-      expect(result.calls).toContainEqual(["install", "-g", `openclaw@${previous}`]);
+      expect(result.calls).toContainEqual(["install", "-g", `carapace@${previous}`]);
     },
   );
 
@@ -123,8 +123,8 @@ describe.each(["e2e", "smoke"])("%s installer upgrade baseline", (runner) => {
     });
     expect(result.status, result.stderr).toBe(fixtureStop);
     expect(result.calls).toEqual([
-      ["view", runner === "e2e" ? "openclaw@2026.7.1" : "openclaw", "version"],
-      ["install", "-g", "openclaw@2026.6.1"],
+      ["view", runner === "e2e" ? "carapace@2026.7.1" : "carapace", "version"],
+      ["install", "-g", "carapace@2026.6.1"],
     ]);
   });
 
@@ -136,7 +136,7 @@ describe.each(["e2e", "smoke"])("%s installer upgrade baseline", (runner) => {
     });
     expect(result.status, result.stderr).toBe(fixtureStop);
     expect(result.calls).toEqual([
-      ["view", runner === "e2e" ? "openclaw@2026.7.1" : "openclaw", "version"],
+      ["view", runner === "e2e" ? "carapace@2026.7.1" : "carapace", "version"],
       ["installer"],
     ]);
   });

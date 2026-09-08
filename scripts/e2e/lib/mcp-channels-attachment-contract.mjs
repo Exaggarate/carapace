@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 
 const CANONICAL_SEEDED_ATTACHMENT = {
-  type: "openclaw_media",
+  type: "carapace_media",
   media: {
     url: "media://inbound/seeded-image.png",
     contentType: "image/png",

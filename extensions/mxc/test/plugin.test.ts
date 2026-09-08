@@ -1,21 +1,21 @@
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   PluginRuntimeLifecycleRegistration,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRegistryFixture } from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRegistryFixture } from "carapace/plugin-sdk/plugin-test-contracts";
 import {
   createEmptyPluginRegistry,
   createPluginRecord,
   getActivePluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   getSandboxBackendFactory,
   getSandboxBackendManager,
   getSandboxBackendWorkdirResolver,
-} from "openclaw/plugin-sdk/sandbox";
+} from "carapace/plugin-sdk/sandbox";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 const {
@@ -73,7 +73,7 @@ const nonFullRegistrationModes = [
   "setup-only",
   "setup-runtime",
   "cli-metadata",
-] as const satisfies readonly OpenClawPluginApi["registrationMode"][];
+] as const satisfies readonly CarapacePluginApi["registrationMode"][];
 
 function setProcessPlatformForTest(platform: NodeJS.Platform): void {
   Object.defineProperty(process, "platform", {
@@ -91,7 +91,7 @@ function restoreProcessPlatformForTest(): void {
 
 function createApi(
   pluginConfig: Record<string, unknown> | undefined = {},
-  registrationMode: OpenClawPluginApi["registrationMode"] = "full",
+  registrationMode: CarapacePluginApi["registrationMode"] = "full",
 ) {
   const lifecycles: PluginRuntimeLifecycleRegistration[] = [];
   const registerService = vi.fn();

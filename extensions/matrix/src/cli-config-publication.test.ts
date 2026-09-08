@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   mutateConfigFile,
   readConfigFileSnapshotForWrite,
-} from "openclaw/plugin-sdk/config-mutation";
+} from "carapace/plugin-sdk/config-mutation";
 import {
   clearRuntimeConfigSnapshot,
   getRuntimeConfig,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, expect, it, vi } from "vitest";
 import { createMatrixCliAccountConfigPublisher } from "./cli-shared.js";
 import { updateMatrixAccountConfig } from "./matrix/config-update.js";
@@ -26,7 +26,7 @@ it.each(["paired resolved", "unpaired", "paired replaced"])(
   async (mode) => {
     await withTempHome(
       async (home) => {
-        const configPath = path.join(home, ".openclaw", "openclaw.json");
+        const configPath = path.join(home, ".carapace", "carapace.json");
         const source = {
           channels: {
             matrix: {
@@ -34,7 +34,7 @@ it.each(["paired resolved", "unpaired", "paired replaced"])(
               accessToken: { source: "env", provider: "default", id: "MATRIX_TEST_SECRET" },
             },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await fs.writeFile(configPath, JSON.stringify(source));
         const { snapshot } = await readConfigFileSnapshotForWrite();
         expect(snapshot.valid).toBe(true);
@@ -83,7 +83,7 @@ it.each(["paired resolved", "unpaired", "paired replaced"])(
       },
       {
         env: {
-          OPENCLAW_CONFIG_PATH: (home) => path.join(home, ".openclaw", "openclaw.json"),
+          CARAPACE_CONFIG_PATH: (home) => path.join(home, ".carapace", "carapace.json"),
           MATRIX_TEST_SECRET: "synthetic-resolved-token",
         },
       },

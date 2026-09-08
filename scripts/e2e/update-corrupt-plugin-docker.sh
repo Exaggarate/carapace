@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Verifies `openclaw update` succeeds when a managed external plugin is corrupt.
+# Verifies `carapace update` succeeds when a managed external plugin is corrupt.
 # The lane installs the prepared candidate, corrupts an npm-managed plugin,
 # then updates to a synthetic future package with the same storage schema.
 set -euo pipefail
@@ -9,32 +9,32 @@ source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 source "$ROOT_DIR/scripts/lib/frozen-target-compat.sh"
 
-TARGET_ROOT_DIR="$(cd "${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" && pwd)"
-CORRUPT_UPDATE_SCENARIO="$(openclaw_resolve_frozen_target_file "$TARGET_ROOT_DIR" \
+TARGET_ROOT_DIR="$(cd "${CARAPACE_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}" && pwd)"
+CORRUPT_UPDATE_SCENARIO="$(carapace_resolve_frozen_target_file "$TARGET_ROOT_DIR" \
   scripts/e2e/lib/plugin-update/corrupt-update-scenario.sh \
   "$ROOT_DIR/scripts/e2e/lib/plugin-update/corrupt-update-scenario.sh")"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-update-corrupt-plugin-e2e" OPENCLAW_UPDATE_CORRUPT_PLUGIN_E2E_IMAGE)"
-SKIP_BUILD="${OPENCLAW_UPDATE_CORRUPT_PLUGIN_E2E_SKIP_BUILD:-0}"
+IMAGE_NAME="$(docker_e2e_resolve_image "carapace-update-corrupt-plugin-e2e" CARAPACE_UPDATE_CORRUPT_PLUGIN_E2E_IMAGE)"
+SKIP_BUILD="${CARAPACE_UPDATE_CORRUPT_PLUGIN_E2E_SKIP_BUILD:-0}"
 cleanup() {
   docker_e2e_cleanup_package_tgz "${PACKAGE_TGZ:-}"
 }
 trap cleanup EXIT
 
-PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz update-corrupt-plugin "${OPENCLAW_CURRENT_PACKAGE_TGZ:-}")"
+PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz update-corrupt-plugin "${CARAPACE_CURRENT_PACKAGE_TGZ:-}")"
 # Bare lanes mount the package artifact instead of baking app sources into the image.
 docker_e2e_package_mount_args "$PACKAGE_TGZ"
 
 docker_e2e_build_or_reuse "$IMAGE_NAME" update-corrupt-plugin "$ROOT_DIR/scripts/e2e/Dockerfile" "$ROOT_DIR" "bare" "$SKIP_BUILD"
-OPENCLAW_TEST_STATE_SCRIPT_B64="$(docker_e2e_test_state_shell_b64 update-corrupt-plugin empty)"
+CARAPACE_TEST_STATE_SCRIPT_B64="$(docker_e2e_test_state_shell_b64 update-corrupt-plugin empty)"
 
 echo "Running corrupt plugin update tolerance E2E..."
 docker_e2e_run_with_harness \
   -v "$CORRUPT_UPDATE_SCENARIO:/app/scripts/e2e/lib/plugin-update/corrupt-update-scenario.sh:ro" \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_SKIP_CHANNELS=1 \
-  -e OPENCLAW_SKIP_PROVIDERS=1 \
-  -e "OPENCLAW_TEST_STATE_SCRIPT_B64=$OPENCLAW_TEST_STATE_SCRIPT_B64" \
+  -e CARAPACE_SKIP_CHANNELS=1 \
+  -e CARAPACE_SKIP_PROVIDERS=1 \
+  -e "CARAPACE_TEST_STATE_SCRIPT_B64=$CARAPACE_TEST_STATE_SCRIPT_B64" \
   "${DOCKER_E2E_PACKAGE_ARGS[@]}" \
   "$IMAGE_NAME" \
   bash scripts/e2e/lib/plugin-update/corrupt-update-scenario.sh

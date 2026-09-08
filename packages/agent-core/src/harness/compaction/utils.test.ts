@@ -1,4 +1,4 @@
-import type { Message } from "@openclaw/llm-core";
+import type { Message } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import type { AgentMessage } from "../../types.js";
 import { estimateTokens } from "./compaction.js";

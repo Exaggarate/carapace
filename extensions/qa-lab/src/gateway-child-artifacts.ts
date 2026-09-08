@@ -1,9 +1,9 @@
 // Qa Lab plugin module owns sanitized gateway debug artifacts and temp cleanup.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { closeQaRuntimeStores } from "openclaw/plugin-sdk/qa-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { closeQaRuntimeStores } from "carapace/plugin-sdk/qa-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { ensureRepoBoundDirectory } from "./cli-paths.js";
 import { redactQaGatewayDebugText } from "./gateway-log-redaction.js";
 

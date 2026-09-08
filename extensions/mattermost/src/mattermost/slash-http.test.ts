@@ -1,9 +1,9 @@
 // Mattermost tests cover slash http plugin behavior.
 import { createServer, IncomingMessage, type ServerResponse } from "node:http";
 import { Socket } from "node:net";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, RuntimeEnv } from "../../runtime-api.js";
+import type { CarapaceConfig, RuntimeEnv } from "../../runtime-api.js";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import type { MattermostClient } from "./client.js";
 const clientMocks = vi.hoisted(() => ({
@@ -181,7 +181,7 @@ async function runSlashRequest(params: {
 }) {
   const handler = createSlashCommandHttpHandler({
     account: accountFixture,
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     runtime: {} as RuntimeEnv,
     registeredCommands: params.registeredCommands ?? [],
   });
@@ -201,7 +201,7 @@ async function validateMattermostSlashCommandToken(params: {
   clientMocks.createMattermostClient.mockReturnValue(params.client);
   const handler = createSlashCommandHttpHandler({
     account: { ...accountFixture, accountId: `${slashTestAccountId}:${params.accountId}` },
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     runtime: {} as RuntimeEnv,
     registeredCommands: [params.registeredCommand],
     log: params.log,
@@ -258,7 +258,7 @@ describe("slash-http", () => {
   it("rejects non-POST methods", async () => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
     });
@@ -275,7 +275,7 @@ describe("slash-http", () => {
   it("rejects malformed payloads", async () => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
     });
@@ -353,7 +353,7 @@ describe("slash-http", () => {
   ])("delivers $name and then closes the connection", async (scenario) => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
       bodyTimeoutMs: scenario.bodyTimeoutMs,

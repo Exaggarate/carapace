@@ -16,13 +16,13 @@ suite.define(() => {
         viewport: { width, height: 900 },
       });
       const page = await context.newPage();
-      const mediaUrl = "/__openclaw__/assistant-media?source=notes.txt&mediaTicket=text-preview";
+      const mediaUrl = "/__carapace__/assistant-media?source=notes.txt&mediaTicket=text-preview";
       let reads = 0;
       let downloads = 0;
       page.on("download", () => {
         downloads += 1;
       });
-      await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+      await page.route("**/__carapace__/assistant-media?**", async (route) => {
         reads += 1;
         expect(route.request().headers().authorization).toBeUndefined();
         await route.fulfill({
@@ -60,7 +60,7 @@ suite.define(() => {
         await card
           .getByRole("button", { name: "Open pasted-notes.txt in the side panel", exact: true })
           .click();
-        const panel = page.locator("openclaw-chat-detail-panel:visible");
+        const panel = page.locator("carapace-chat-detail-panel:visible");
         await panel.locator("a[download]").waitFor();
         await page.screenshot({ path: path.join(suite.artifactDir, `text-preview-${width}.png`) });
         await panel.locator("pre").waitFor();

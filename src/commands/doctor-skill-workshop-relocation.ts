@@ -3,7 +3,7 @@ import path from "node:path";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { assertWorkspaceStateMigrationReady } from "../agents/workspace-legacy-state.js";
 import { resolveCanonicalWorkspacePath } from "../agents/workspace-state-identity.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isMissingPathError } from "../infra/errors.js";
 import { pathExists } from "../infra/fs-safe.js";
 import { isPathInside } from "../infra/path-guards.js";
@@ -33,7 +33,7 @@ type OwnerAgentInference = {
 
 export function resolveLegacyWorkshopWorkspaceDir(
   skillDir: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): string | undefined {
   const source = path.resolve(skillDir);
@@ -64,7 +64,7 @@ export function resolveLegacyWorkshopWorkspaceDir(
 }
 
 export function inferOwnerAgentId(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   record: SkillProposalRecord;
   workspaceDir: string | undefined;
@@ -97,7 +97,7 @@ async function verifyRelocationDestination(params: {
   skillKey: string;
   destinationSkillDir: string;
   destinationSkillFile: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): Promise<boolean> {
   const content = await readWorkspaceSkillFile(params.destinationSkillFile);
@@ -155,7 +155,7 @@ function retargetWorkshopProposal(
       ...record.target,
       skillDir: target.skillDir,
       skillFile: target.skillFile,
-      source: "openclaw-workshop",
+      source: "carapace-workshop",
     },
   };
 }
@@ -229,7 +229,7 @@ export async function readLegacyWorkshopSourceStat(workspaceDir: string, source:
 
 export function classifyWorkshopRelocation(
   records: LegacyWorkshopProposal[],
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   deferredSources: ReadonlySet<string> = new Set(),
 ) {
@@ -273,7 +273,7 @@ export function classifyWorkshopRelocation(
 
 export async function planWorkshopRelocation(
   records: LegacyWorkshopProposal[],
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   deferredSources: ReadonlySet<string> = new Set(),
 ) {

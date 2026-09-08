@@ -77,7 +77,7 @@ async function observeMockSends(page: Page) {
         if (frame.method === "chat.send") {
           const params = frame.params;
           const queue = Object.keys(sessionStorage)
-            .filter((key) => key.startsWith("openclaw.control.chatComposer.v4:"))
+            .filter((key) => key.startsWith("carapace.control.chatComposer.v4:"))
             .flatMap((key) => {
               const stored = JSON.parse(sessionStorage.getItem(key)!) as StoredComposerState;
               return Object.values(stored.sessions).flatMap((session) => session.queue ?? []);
@@ -152,7 +152,7 @@ suite.define(() => {
           await page.locator("[data-settings-follow-up-mode]").selectOption("steer");
           await gateway.waitForRequest("config.patch");
           await page.goto(`${suite.server.baseUrl}chat`);
-          const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+          const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
           const composer = pane.locator(".agent-chat__composer-combobox textarea");
           const steer = pane.getByRole("button", {
             name: "Steer into the active run",
@@ -271,7 +271,7 @@ suite.define(() => {
             expect(outcome, JSON.stringify(evidence)).toBe("sent");
             const payloads = await page.evaluate(async () => {
               const database = await new Promise<IDBDatabase>((resolve, reject) => {
-                const request = indexedDB.open("openclaw-control-ui");
+                const request = indexedDB.open("carapace-control-ui");
                 request.onsuccess = () => resolve(request.result);
                 request.addEventListener("error", () =>
                   reject(request.error ?? new Error("IndexedDB request failed")),
@@ -352,7 +352,7 @@ suite.define(() => {
                 page.evaluate(
                   (deliveredRunId) =>
                     Object.keys(sessionStorage)
-                      .filter((key) => key.startsWith("openclaw.control.chatComposer.v4:"))
+                      .filter((key) => key.startsWith("carapace.control.chatComposer.v4:"))
                       .flatMap((key) =>
                         Object.values(
                           (JSON.parse(sessionStorage.getItem(key)!) as StoredComposerState)
@@ -398,7 +398,7 @@ suite.define(() => {
               .poll(() =>
                 page.evaluate(async () => {
                   const database = await new Promise<IDBDatabase>((resolve, reject) => {
-                    const request = indexedDB.open("openclaw-control-ui");
+                    const request = indexedDB.open("carapace-control-ui");
                     request.onsuccess = () => resolve(request.result);
                     request.addEventListener("error", () =>
                       reject(request.error ?? new Error("IndexedDB request failed")),

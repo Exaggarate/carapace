@@ -103,7 +103,7 @@ export abstract class ChatPaneRetainedPresentation extends ChatPaneBoard {
     const title = t("chat.board.resetTitle");
     const description = t("chat.board.resetDescription");
     return html`
-      <openclaw-modal-dialog
+      <carapace-modal-dialog
         label=${title}
         description=${description}
         @modal-cancel=${() => this.settleResetConfirmation(false)}
@@ -133,7 +133,7 @@ export abstract class ChatPaneRetainedPresentation extends ChatPaneBoard {
             </button>
           </div>
         </div>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `;
   }
 

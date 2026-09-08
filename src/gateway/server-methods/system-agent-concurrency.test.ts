@@ -33,7 +33,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("openclaw.chat concurrency", () => {
+describe("carapace.chat concurrency", () => {
   it("tracks every accepted request as active while serializing expensive execution", async () => {
     const firstStarted = createDeferred();
     const secondStarted = createDeferred();
@@ -56,7 +56,7 @@ describe("openclaw.chat concurrency", () => {
     const activeAtResponse: number[] = [];
     const context = { systemAgentSessions: sessions } as unknown as GatewayRequestContext;
     const handleChat = (sessionId: string) =>
-      systemAgentHandlers["openclaw.chat"]!({
+      systemAgentHandlers["carapace.chat"]!({
         params: { sessionId, message: "yes" },
         client: defaultClient,
         context,

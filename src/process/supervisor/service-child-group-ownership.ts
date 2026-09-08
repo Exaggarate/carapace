@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 import { isPidDefinitelyDead } from "../../shared/pid-alive.js";
 
 type GroupMember = { pid: number; pgid: number; state: string };

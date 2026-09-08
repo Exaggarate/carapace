@@ -33,7 +33,7 @@ function snapshotDiagnostic(snapshot) {
 }
 
 const snapshotMaxBytes = readPositiveIntEnvWithEmptyFallback(
-  "OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES",
+  "CARAPACE_BROWSER_CDP_SNAPSHOT_MAX_BYTES",
   DEFAULT_SNAPSHOT_MAX_BYTES,
 );
 const snapshot = readBoundedSnapshot(snapshotPath, snapshotMaxBytes);
@@ -41,7 +41,7 @@ const snapshot = readBoundedSnapshot(snapshotPath, snapshotMaxBytes);
 for (const needle of [
   'button "Save"',
   'link "Docs"',
-  "https://docs.openclaw.ai/browser-cdp-live",
+  "https://github.com/Exaggarate/carapace",
   'generic "Clickable Card"',
   "cursor:pointer",
   'Iframe "Child"',

@@ -74,12 +74,12 @@ function renderPersonAvatar(person: PresenceViewer, showPresence = false) {
     >`;
   }
   return html`<span class="activity-feed__person-avatar">
-    <openclaw-viewer-avatar
+    <carapace-viewer-avatar
       .identity=${{ type: "profile", id: person.id }}
       .user=${person}
       .markAsViewer=${false}
       variant="footer"
-    ></openclaw-viewer-avatar>
+    ></carapace-viewer-avatar>
     ${
       showPresence && (person.entries?.length ?? 0) > 0
         ? html`<span
@@ -288,12 +288,12 @@ function renderSessionLink(context: ApplicationContext, row: GatewaySessionRow) 
               ></span>`
             : nothing
         }
-        <openclaw-viewer-avatar
+        <carapace-viewer-avatar
           .identity=${row.owner?.actor.identity ?? row.createdActor?.identity}
           .user=${owner}
           .markAsViewer=${false}
           variant="footer"
-        ></openclaw-viewer-avatar>
+        ></carapace-viewer-avatar>
       </span>
       <span class="activity-feed__session-main">
         <span class="activity-feed__session-title">${resolveSessionDisplayName(row.key, row)}</span>
@@ -388,12 +388,12 @@ function renderIdentityHeader(
   return html`
     <section class="activity-feed__identity" data-activity-identity=${identity.id}>
       <div class="activity-feed__identity-main">
-        <openclaw-viewer-avatar
+        <carapace-viewer-avatar
           .identity=${{ type: "profile", id: identity.id }}
           .user=${identity}
           .markAsViewer=${false}
           variant="profile"
-        ></openclaw-viewer-avatar>
+        ></carapace-viewer-avatar>
         <div class="activity-feed__identity-copy">
           <h2>${presenceViewerLabel(identity)}</h2>
           ${identity.email ? html`<p>${identity.email}</p>` : nothing}
@@ -414,7 +414,7 @@ function renderIdentityHeader(
                   ${device ? html`<span>${device}</span>` : nothing}
                   ${
                     entry.ip
-                      ? html`<openclaw-ip-location .ip=${entry.ip}></openclaw-ip-location>`
+                      ? html`<carapace-ip-location .ip=${entry.ip}></carapace-ip-location>`
                       : nothing
                   }
                   ${

@@ -1,4 +1,4 @@
-import type { MatrixVerificationBootstrapResult } from "@openclaw/matrix/test-api.js";
+import type { MatrixVerificationBootstrapResult } from "@carapace/matrix/test-api.js";
 import type { MatrixQaScenarioContext } from "./scenario-runtime-shared.js";
 
 export function createMatrixQaE2eeTestContext(

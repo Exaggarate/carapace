@@ -6,12 +6,12 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 import { setTimeout as delay } from "node:timers/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveHooksConfig } from "../hooks.js";
 
 const mocks = vi.hoisted(() => ({
   enqueueSystemEvent: vi.fn(),
-  getRuntimeConfig: vi.fn<() => OpenClawConfig>(),
+  getRuntimeConfig: vi.fn<() => CarapaceConfig>(),
   requestHeartbeat: vi.fn(),
   runCronIsolatedAgentTurn: vi.fn(),
 }));
@@ -31,7 +31,7 @@ vi.mock("../../infra/system-events.js", () => ({
 
 const { createGatewayHooksRequestHandler } = await import("./hooks.js");
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: { entries: { main: { default: true } } },
   hooks: {
     enabled: true,

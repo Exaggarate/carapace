@@ -3,7 +3,7 @@
  * Resolves prepared plugin manifest suppression rules so
  * built-in catalog entries can be hidden or blocked consistently.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildManifestBuiltInModelSuppressionResolver } from "../plugins/manifest-model-suppression.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 
@@ -12,7 +12,7 @@ export function resolveBuiltInModelSuppressionFromManifest(params: {
   provider?: string | null;
   id?: string | null;
   baseUrl?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   unconditionalOnly?: boolean;
   workspaceDir?: string;
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -30,7 +30,7 @@ export function shouldSuppressBuiltInModelCore(params: {
   provider?: string | null;
   id?: string | null;
   baseUrl?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }) {
   return resolveBuiltInModelSuppressionFromManifest(params)?.suppress ?? false;
@@ -44,7 +44,7 @@ export function shouldSuppressBuiltInModelCore(params: {
 export function shouldUnconditionallySuppress(params: {
   provider?: string | null;
   id?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): boolean {
   return (
@@ -58,7 +58,7 @@ export function buildSuppressedBuiltInModelError(params: {
   provider?: string | null;
   id?: string | null;
   baseUrl?: string | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): string | undefined {
   return resolveBuiltInModelSuppressionFromManifest(params)?.errorMessage;
@@ -66,7 +66,7 @@ export function buildSuppressedBuiltInModelError(params: {
 
 /** Build a reusable suppression predicate for repeated catalog filtering. */
 export function buildShouldSuppressBuiltInModelCore(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): (input: { provider?: string | null; id?: string | null; baseUrl?: string | null }) => boolean {
   const resolver = buildManifestBuiltInModelSuppressionResolver({

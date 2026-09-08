@@ -1,5 +1,5 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { TObject } from "typebox";
 import { ErrorCodes, errorShape } from "../../packages/gateway-protocol/src/schema/error-codes.js";
 import {
@@ -10,9 +10,9 @@ import {
 import { callGatewayFromCli } from "../cli/gateway-rpc.js";
 import type { GatewayRequestHandlerOptions } from "../gateway/server-methods/types.js";
 import { formatErrorMessage } from "../infra/errors.js";
-import type { OpenClawPluginApi } from "../plugins/plugin-api.types.js";
-import type { OpenClawPluginConfigSchema } from "../plugins/plugin-config-schema.types.js";
-import type { OpenClawPluginNodeInvokePolicy } from "../plugins/plugin-registration.types.js";
+import type { CarapacePluginApi } from "../plugins/plugin-api.types.js";
+import type { CarapacePluginConfigSchema } from "../plugins/plugin-config-schema.types.js";
+import type { CarapacePluginNodeInvokePolicy } from "../plugins/plugin-registration.types.js";
 import { parseAgentSessionKey } from "../sessions/session-key-utils.js";
 import type { MeetingPluginConfig as SharedMeetingPluginConfig } from "./plugin-config.js";
 import type { MeetingPluginJoinRequest } from "./session-types.js";
@@ -49,9 +49,9 @@ export type MeetingPluginEntryOptions<
   Runtime extends MeetingPluginRuntime<Request>,
 > = {
   cap: string;
-  configSchema: OpenClawPluginConfigSchema & { parse(value: unknown): Config };
-  createNodePolicy(config: Config): OpenClawPluginNodeInvokePolicy;
-  createRuntime(params: { api: OpenClawPluginApi; config: Config }): Runtime;
+  configSchema: CarapacePluginConfigSchema & { parse(value: unknown): Config };
+  createNodePolicy(config: Config): CarapacePluginNodeInvokePolicy;
+  createRuntime(params: { api: CarapacePluginApi; config: Config }): Runtime;
   description: string;
   disabledMessage: string;
   gatewayMethodPrefix: string;
@@ -64,13 +64,13 @@ export type MeetingPluginEntryOptions<
   normalizeRequesterSessionKey(value: unknown, trustedOwner: boolean): string | undefined;
   normalizeToolAgentId(agentId: string | undefined): string | undefined;
   normalizeUrl(url: string): string;
-  registerCli(api: OpenClawPluginApi, config: Config): void;
+  registerCli(api: CarapacePluginApi, config: Config): void;
   registerNodeWhen(config: Config): boolean;
   resolveGatewayTimeoutMs(config: Config): number;
   resolveToolRuntime(
-    api: OpenClawPluginApi,
+    api: CarapacePluginApi,
     agentId: string | undefined,
-  ): Promise<OpenClawPluginApi["runtime"] | undefined>;
+  ): Promise<CarapacePluginApi["runtime"] | undefined>;
   toolDescription: string;
   toolLabel: string;
   toolName: string;
@@ -176,7 +176,7 @@ export function createMeetingPluginEntryOptions<
     action: MeetingToolAction;
     config: Config;
     raw: Record<string, unknown>;
-    runtime?: OpenClawPluginApi["runtime"];
+    runtime?: CarapacePluginApi["runtime"];
   }) => {
     try {
       const timeoutMs = options.resolveGatewayTimeoutMs(params.config);
@@ -206,7 +206,7 @@ export function createMeetingPluginEntryOptions<
     name: options.name,
     description: options.description,
     configSchema: options.configSchema,
-    register(api: OpenClawPluginApi) {
+    register(api: CarapacePluginApi) {
       const config = options.configSchema.parse(api.pluginConfig) as Config;
       let runtime: Runtime | undefined;
       const ensureRuntime = async () => {

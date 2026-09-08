@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type {
-  OpenClawPluginCommandDefinition,
+  CarapacePluginCommandDefinition,
   PluginCommandContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const resolveTelegramMiniAppUrls = vi.hoisted(() => vi.fn());
@@ -21,8 +21,8 @@ const { registerTelegramMiniAppCommand } = await import("./command.js");
 
 function registerDashboardCommand(
   api: Parameters<typeof registerTelegramMiniAppCommand>[0],
-): OpenClawPluginCommandDefinition {
-  const commands: OpenClawPluginCommandDefinition[] = [];
+): CarapacePluginCommandDefinition {
+  const commands: CarapacePluginCommandDefinition[] = [];
   registerTelegramMiniAppCommand(
     {
       ...api,
@@ -81,8 +81,8 @@ describe("registerTelegramMiniAppCommand", () => {
 
   it("returns a web app button for owner DM invocations", async () => {
     resolveTelegramMiniAppUrls.mockResolvedValue({
-      pageUrl: "https://host.tailnet.ts.net/__openclaw_tg_miniapp/",
-      controlUiUrl: "https://host.tailnet.ts.net/openclaw",
+      pageUrl: "https://host.tailnet.ts.net/__carapace_tg_miniapp/",
+      controlUiUrl: "https://host.tailnet.ts.net/carapace",
       gatewayUrl: "wss://host.tailnet.ts.net",
     });
     const command = registerDashboardCommand(
@@ -108,7 +108,7 @@ describe("registerTelegramMiniAppCommand", () => {
       }),
     );
 
-    expect(result.text).toBe("Open OpenClaw dashboard.");
+    expect(result.text).toBe("Open Carapace dashboard.");
     expect(result.presentation?.blocks).toEqual([
       {
         type: "buttons",
@@ -116,7 +116,7 @@ describe("registerTelegramMiniAppCommand", () => {
           {
             label: "Open dashboard",
             webApp: {
-              url: "https://host.tailnet.ts.net/__openclaw_tg_miniapp/?accountId=ops#launchTicket=launch-ticket",
+              url: "https://host.tailnet.ts.net/__carapace_tg_miniapp/?accountId=ops#launchTicket=launch-ticket",
             },
           },
         ],

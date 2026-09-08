@@ -10,7 +10,7 @@
 // adds a defense-in-depth substantial-echo check using the active boot prompt
 // as the comparison source. Refs #53732.
 
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 
 const MIN_ECHO_CHARS = 80;
 

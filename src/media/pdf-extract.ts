@@ -1,5 +1,5 @@
 // PDF extraction helpers read PDF text through configured document extraction.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   DocumentExtractedImage,
   DocumentExtractionResult,
@@ -19,7 +19,7 @@ export async function extractPdfContent(params: {
   minTextChars: number;
   password?: string;
   pageNumbers?: number[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   onImageExtractionError?: (error: unknown) => void;
 }): Promise<PdfExtractedContent> {
   // The document owner strips config and loader-only fields before plugin dispatch.

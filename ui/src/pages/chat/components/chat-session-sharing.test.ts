@@ -212,7 +212,7 @@ describe("chat session sharing menu", () => {
     );
     expect(root.querySelector(".chat-pane__sharing-owner")?.textContent?.trim()).toBe("Owner");
     expect(
-      root.querySelector(".chat-pane__sharing-owner openclaw-session-owner-chip"),
+      root.querySelector(".chat-pane__sharing-owner carapace-session-owner-chip"),
     ).not.toBeNull();
     const ownerLink = root.querySelector<HTMLAnchorElement>(
       ".chat-pane__sharing-owner a.person-activity-link",
@@ -332,10 +332,10 @@ describe("chat session sharing menu", () => {
     ];
 
     for (const human of humans) {
-      expect(human?.querySelector("openclaw-session-owner-chip")).not.toBeNull();
+      expect(human?.querySelector("carapace-session-owner-chip")).not.toBeNull();
     }
     for (const nonHuman of nonHumans) {
-      expect(nonHuman?.querySelector("openclaw-session-owner-chip")).toBeNull();
+      expect(nonHuman?.querySelector("carapace-session-owner-chip")).toBeNull();
       expect(nonHuman?.querySelector(".chat-pane__sharing-member-icon svg")).not.toBeNull();
     }
   });
@@ -399,7 +399,7 @@ describe("chat session sharing menu", () => {
     expect(indicator?.textContent?.trim()).toBe("");
     expect(
       root
-        .querySelector("a.person-activity-avatar-link:has(openclaw-session-owner-chip)")
+        .querySelector("a.person-activity-avatar-link:has(carapace-session-owner-chip)")
         ?.getAttribute("href"),
     ).toBe("/activity/owner");
   });

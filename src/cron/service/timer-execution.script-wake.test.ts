@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { resolveAgentMainSessionKey } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { HeartbeatRunOptions } from "../../infra/heartbeat-runner-execution.js";
 import {
   resolveHeartbeatPreflight,
@@ -51,7 +51,7 @@ describe("cron script immediate wake", () => {
       vi.useFakeTimers();
       const now = Date.parse("2026-08-24T12:00:00.000Z");
       vi.setSystemTime(now);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { heartbeat: { every: "0m" } },
           list: [{ id: "main" }, { id: "finn" }],

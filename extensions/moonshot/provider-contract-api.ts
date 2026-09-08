@@ -1,6 +1,6 @@
 // Moonshot API module exposes the plugin public contract.
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const noopAuth = async () => ({ profiles: [] });
 

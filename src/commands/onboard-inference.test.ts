@@ -115,7 +115,7 @@ describe("detectInferenceBackends", () => {
   it.each(["home", "codex-home"] as const)(
     "reads passive credentials only from selected %s",
     async (selection) => {
-      const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-passive-login-"));
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-passive-login-"));
       try {
         const processHome = path.join(root, "process");
         const selectedHome = path.join(root, "selected");

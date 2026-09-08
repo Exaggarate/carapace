@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/buzz",
+  "name": "@carapace/buzz",
   "version": "2026.9.2",
-  "description": "Connect OpenClaw agents to Buzz rooms",
+  "description": "Connect Carapace agents to Buzz rooms",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -12,18 +12,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -45,7 +45,7 @@
       "selectionLabel": "Buzz",
       "docsPath": "/channels/buzz",
       "docsLabel": "buzz",
-      "blurb": "Connect OpenClaw agents to Buzz team rooms.",
+      "blurb": "Connect Carapace agents to Buzz team rooms.",
       "markdownCapable": true,
       "order": 56,
       "setup": {
@@ -82,8 +82,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/buzz",
-      "npmSpec": "@openclaw/buzz",
+      "clawhubSpec": "clawhub:@carapace/buzz",
+      "npmSpec": "@carapace/buzz",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -91,7 +91,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 // Systemd tests cover Linux service install, start, stop, and status behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { err as resultErr, ok } from "@openclaw/normalization-core/result";
+import { expectDefined } from "@carapace/normalization-core";
+import { err as resultErr, ok } from "@carapace/normalization-core/result";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildGatewayInstallPlan } from "../commands/daemon-install-helpers.js";
 import type { ExecResult } from "./exec-file.js";
@@ -40,7 +40,7 @@ const findSystemGatewayServicesMock = vi.hoisted(() =>
         label: string;
         detail: string;
         scope: "user" | "system";
-        marker?: "openclaw" | "clawdbot";
+        marker?: "carapace" | "clawdbot";
         legacy?: boolean;
       }>
     >
@@ -119,9 +119,9 @@ import {
 } from "./systemd.js";
 
 const TEST_SERVICE_HOME = "/home/test";
-const TEST_MANAGED_HOME = "/tmp/openclaw-test-home";
-const GATEWAY_SERVICE = "openclaw-gateway.service";
-const NODE_SERVICE = "openclaw-node.service";
+const TEST_MANAGED_HOME = "/tmp/carapace-test-home";
+const GATEWAY_SERVICE = "carapace-gateway.service";
+const NODE_SERVICE = "carapace-node.service";
 
 const createExecFileError = (
   message: string,
@@ -162,7 +162,7 @@ function gatewaySystemdServiceFixture(
   env: SystemdServiceFixture["env"],
   overrides: Omit<SystemdServiceFixtureOverrides, "workingDirectory"> = {},
 ): SystemdServiceFixture {
-  return systemdServiceFixture(env, ["/usr/bin/openclaw", "gateway", "run"], {
+  return systemdServiceFixture(env, ["/usr/bin/carapace", "gateway", "run"], {
     workingDirectory: "/tmp",
     ...overrides,
   });
@@ -172,7 +172,7 @@ function nodeSystemdServiceFixture(
   env: SystemdServiceFixture["env"],
   overrides: Omit<SystemdServiceFixtureOverrides, "workingDirectory"> = {},
 ): SystemdServiceFixture {
-  return systemdServiceFixture(env, ["/usr/bin/openclaw", "node", "run"], {
+  return systemdServiceFixture(env, ["/usr/bin/carapace", "node", "run"], {
     workingDirectory: "/tmp",
     ...overrides,
   });
@@ -182,7 +182,7 @@ function gatewayPortSystemdServiceFixture(
   env: SystemdServiceFixture["env"],
   port: string,
 ): SystemdServiceFixture {
-  return gatewaySystemdServiceFixture(env, { environment: { OPENCLAW_GATEWAY_PORT: port } });
+  return gatewaySystemdServiceFixture(env, { environment: { CARAPACE_GATEWAY_PORT: port } });
 }
 
 function requireFirstWrite(write: ReturnType<typeof vi.fn>): string {
@@ -336,7 +336,7 @@ function mockSystemdManagerProperties(
     const propertyOutput = args.includes("LoadUnit")
       ? JSON.stringify({
           type: "o",
-          data: ["/org/freedesktop/systemd1/unit/openclaw_2dgateway_2eservice"],
+          data: ["/org/freedesktop/systemd1/unit/carapace_2dgateway_2eservice"],
         })
       : args.includes("org.freedesktop.systemd1.Unit")
         ? unitOutput
@@ -357,10 +357,10 @@ function mockSystemdManagerSnapshot(snapshot: SystemdManagerSnapshotFixture): vo
 }
 
 async function expectExecStartWithoutEnvironment(envFileLine: string) {
-  mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run", envFileLine]);
+  mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run", envFileLine]);
 
   const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-  expect(command?.programArguments).toEqual(["/usr/bin/openclaw", "gateway", "run"]);
+  expect(command?.programArguments).toEqual(["/usr/bin/carapace", "gateway", "run"]);
   expect(command?.environment).toBeUndefined();
 }
 
@@ -562,7 +562,7 @@ describe("systemd availability", () => {
     execFileMock.mockImplementationOnce(systemctlUserSuccess("status"));
 
     await expect(
-      isSystemdUserServiceAvailable({ USER: "openclaw", SUDO_USER: "admin" }),
+      isSystemdUserServiceAvailable({ USER: "carapace", SUDO_USER: "admin" }),
     ).resolves.toBe(true);
     expect(execFileMock).toHaveBeenCalledTimes(1);
   });
@@ -570,15 +570,15 @@ describe("systemd availability", () => {
   it("resolves the effective non-root account instead of stale SUDO_USER", () => {
     mockEffectiveUid(1000);
     vi.spyOn(os, "userInfo").mockReturnValue({
-      username: "openclaw",
+      username: "carapace",
       uid: 1000,
       gid: 1000,
       shell: "/bin/bash",
-      homedir: "/home/openclaw",
+      homedir: "/home/carapace",
     });
 
-    expect(resolveSystemdUserServiceAccount({ USER: "openclaw", SUDO_USER: "admin" })).toBe(
-      "openclaw",
+    expect(resolveSystemdUserServiceAccount({ USER: "carapace", SUDO_USER: "admin" })).toBe(
+      "carapace",
     );
   });
 });
@@ -605,7 +605,7 @@ describe("isSystemdServiceEnabled", () => {
     err.code = "ENOENT";
     vi.spyOn(fs, "access").mockRejectedValueOnce(err);
 
-    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } });
+    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/carapace-test-home" } });
 
     expect(result).toBe(false);
     expect(execFileMock).not.toHaveBeenCalled();
@@ -728,7 +728,7 @@ describe("isSystemdServiceEnabled", () => {
     vi.spyOn(fs, "access").mockResolvedValue(undefined);
     execFileMock
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--user", "is-enabled", "openclaw-gateway.service"]);
+        expect(args).toEqual(["--user", "is-enabled", "carapace-gateway.service"]);
         const err = new Error("Failed to connect to bus") as Error & { code?: number };
         err.code = 1;
         cb(err, "", "Failed to connect to bus");
@@ -736,13 +736,13 @@ describe("isSystemdServiceEnabled", () => {
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
         expect(args[0]).toBe("--machine");
         expect(args[1]).toMatch(/^[^@]+@$/);
-        expect(args.slice(2)).toEqual(["--user", "is-enabled", "openclaw-gateway.service"]);
+        expect(args.slice(2)).toEqual(["--user", "is-enabled", "carapace-gateway.service"]);
         const err = new Error("permission denied") as Error & { code?: number };
         err.code = 1;
         cb(err, "", "permission denied");
       });
     await expect(
-      isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } }),
+      isSystemdServiceEnabled({ env: { HOME: "/tmp/carapace-test-home" } }),
     ).rejects.toThrow("systemctl is-enabled unavailable: permission denied");
   });
 
@@ -752,12 +752,12 @@ describe("isSystemdServiceEnabled", () => {
       // On Ubuntu 24.04, `systemctl --user is-enabled <unit>` exits with
       // code 4 and prints "not-found" to stdout when the unit doesn't exist.
       const err = new Error(
-        "Command failed: systemctl --user is-enabled openclaw-gateway.service",
+        "Command failed: systemctl --user is-enabled carapace-gateway.service",
       ) as Error & { code?: number };
       err.code = 4;
       cb(err, "not-found\n", "");
     });
-    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } });
+    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/carapace-test-home" } });
     expect(result).toBe(false);
   });
 });
@@ -813,7 +813,7 @@ describe("isSystemdUnitActive", () => {
   });
 });
 
-describe("system-scope gateway unit detection (openclaw#87577)", () => {
+describe("system-scope gateway unit detection (carapace#87577)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     execFileMock.mockReset();
@@ -842,18 +842,18 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     // resolution is handled separately by doctor (issue #79375).
     mockUnitFileLayout({
       user: true,
-      system: "/etc/systemd/system/openclaw-gateway.service",
+      system: "/etc/systemd/system/carapace-gateway.service",
     });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result?.scope).toBe("user");
     expect(result?.unitName).toBe(GATEWAY_SERVICE);
-    expect(result?.unitPath).toContain("/.config/systemd/user/openclaw-gateway.service");
+    expect(result?.unitPath).toContain("/.config/systemd/user/carapace-gateway.service");
   });
 
   it("findSystemdGatewayInstallation reports the dueling state when both units exist", async () => {
     mockUnitFileLayout({
       user: true,
-      system: "/etc/systemd/system/openclaw-gateway.service",
+      system: "/etc/systemd/system/carapace-gateway.service",
     });
     const installation = await findSystemdGatewayInstallation({ HOME: TEST_MANAGED_HOME });
     expect(installation.kind).toBe("dueling");
@@ -861,11 +861,11 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
       throw new Error("expected dueling installation");
     }
     expect(installation.user.scope).toBe("user");
-    expect(installation.user.unitPath).toContain("/.config/systemd/user/openclaw-gateway.service");
+    expect(installation.user.unitPath).toContain("/.config/systemd/user/carapace-gateway.service");
     expect(installation.system).toEqual({
       scope: "system",
       unitName: GATEWAY_SERVICE,
-      unitPath: "/etc/systemd/system/openclaw-gateway.service",
+      unitPath: "/etc/systemd/system/carapace-gateway.service",
     });
   });
 
@@ -877,7 +877,7 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("findSystemdGatewayInstallation reports system-only", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     const installation = await findSystemdGatewayInstallation({ HOME: TEST_MANAGED_HOME });
     expect(installation.kind).toBe("system");
   });
@@ -890,10 +890,10 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw-rescue.service",
-        detail: "unit: /etc/systemd/system/openclaw-rescue.service",
+        label: "carapace-rescue.service",
+        detail: "unit: /etc/systemd/system/carapace-rescue.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
       },
     ]);
     const installation = await findSystemdGatewayInstallation({ HOME: TEST_MANAGED_HOME });
@@ -910,15 +910,15 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   it("formatDuelingScopesWarning renders remediation only for the dueling state", async () => {
     mockUnitFileLayout({
       user: true,
-      system: "/etc/systemd/system/openclaw-gateway.service",
+      system: "/etc/systemd/system/carapace-gateway.service",
     });
     const installation = await findSystemdGatewayInstallation({ HOME: TEST_MANAGED_HOME });
     const warning = formatDuelingScopesWarning(installation, 18789);
-    expect(warning).toContain("/.config/systemd/user/openclaw-gateway.service");
-    expect(warning).toContain("/etc/systemd/system/openclaw-gateway.service");
+    expect(warning).toContain("/.config/systemd/user/carapace-gateway.service");
+    expect(warning).toContain("/etc/systemd/system/carapace-gateway.service");
     expect(warning).toContain("18789");
     expect(warning).toContain(
-      "Run `openclaw doctor` interactively to inspect both scopes and review supported cleanup.",
+      "Run `carapace doctor` interactively to inspect both scopes and review supported cleanup.",
     );
     // The unguarded startup path must not hand out a destructive command.
     expect(warning).not.toContain("rm ");
@@ -934,7 +934,7 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
           system: {
             scope: "system",
             unitName: GATEWAY_SERVICE,
-            unitPath: "/etc/systemd/system/openclaw-gateway.service",
+            unitPath: "/etc/systemd/system/carapace-gateway.service",
           },
         },
         18789,
@@ -943,20 +943,20 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("findInstalledSystemdGatewayScope detects system-scope unit in /etc/systemd/system", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result).toEqual({
       scope: "system",
       unitName: GATEWAY_SERVICE,
-      unitPath: "/etc/systemd/system/openclaw-gateway.service",
+      unitPath: "/etc/systemd/system/carapace-gateway.service",
     });
   });
 
   it("findInstalledSystemdGatewayScope falls back to /usr/lib/systemd/system", async () => {
-    mockUnitFileLayout({ system: "/usr/lib/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/usr/lib/systemd/system/carapace-gateway.service" });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result?.scope).toBe("system");
-    expect(result?.unitPath).toBe("/usr/lib/systemd/system/openclaw-gateway.service");
+    expect(result?.unitPath).toBe("/usr/lib/systemd/system/carapace-gateway.service");
   });
 
   it("findInstalledSystemdGatewayScope returns null when no unit file exists", async () => {
@@ -971,17 +971,17 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "carapace.service",
+        detail: "unit: /etc/systemd/system/carapace.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
       },
     ]);
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result).toEqual({
       scope: "system",
-      unitName: "openclaw.service",
-      unitPath: "/etc/systemd/system/openclaw.service",
+      unitName: "carapace.service",
+      unitPath: "/etc/systemd/system/carapace.service",
     });
   });
 
@@ -1006,14 +1006,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "carapace.service",
+        detail: "unit: /etc/systemd/system/carapace.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
       },
     ]);
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
-      expect(args).toEqual(["is-enabled", "openclaw.service"]);
+      expect(args).toEqual(["is-enabled", "carapace.service"]);
       cb(null, "enabled\n", "");
     });
     await expect(isSystemdServiceEnabled({ env: { HOME: TEST_MANAGED_HOME } })).resolves.toBe(true);
@@ -1024,10 +1024,10 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "carapace.service",
+        detail: "unit: /etc/systemd/system/carapace.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
       },
     ]);
     mockEffectiveUid(1000);
@@ -1035,14 +1035,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     await expect(
       restartSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } }),
     ).rejects.toThrow(
-      /openclaw\.service is a system-scope unit \(\/etc\/systemd\/system\/openclaw\.service\); run `sudo systemctl restart openclaw\.service`/,
+      /carapace\.service is a system-scope unit \(\/etc\/systemd\/system\/carapace\.service\); run `sudo systemctl restart carapace\.service`/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
     expect(write).not.toHaveBeenCalled();
   });
 
   it("isSystemdServiceEnabled reports true for an enabled system-scope unit", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args).toEqual(["is-enabled", GATEWAY_SERVICE]);
       cb(null, "enabled\n", "");
@@ -1051,7 +1051,7 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("isSystemdServiceEnabled reports false for a disabled system-scope unit", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args).toEqual(["is-enabled", GATEWAY_SERVICE]);
       cb(createExecFileError("disabled", { code: 1 }), "disabled\n", "");
@@ -1062,14 +1062,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("readSystemdServiceRuntime queries the system manager for system-scope units", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args[0]).toBe("show");
       expect(args).not.toContain("--user");
       cb(
         null,
         [
-          "Id=openclaw-gateway.service",
+          "Id=carapace-gateway.service",
           "ActiveState=active",
           "SubState=running",
           "MainPID=4242",
@@ -1080,24 +1080,24 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     const runtime = await readSystemdServiceRuntime({ HOME: TEST_MANAGED_HOME });
     expect(runtime.status).toBe("running");
     expect(runtime.pid).toBe(4242);
-    expect(runtime.systemd?.unit).toBe("openclaw-gateway.service");
+    expect(runtime.systemd?.unit).toBe("carapace-gateway.service");
   });
 
   it("restartSystemdService refuses to use the user manager when the unit is system-scope and the caller is not root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     mockEffectiveUid(1000);
     const { stdout, write } = createWritableStreamMock();
     await expect(
       restartSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } }),
     ).rejects.toThrow(
-      /system-scope unit .* run `sudo systemctl restart openclaw-gateway\.service`/,
+      /system-scope unit .* run `sudo systemctl restart carapace-gateway\.service`/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
     expect(write).not.toHaveBeenCalled();
   });
 
   it("restartSystemdService restarts the system unit directly when running as root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     mockEffectiveUid(0);
     execFileMock
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -1115,7 +1115,7 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("startSystemdService clears the start-limit latch before starting the system unit", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     mockEffectiveUid(0);
     execFileMock
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -1132,11 +1132,11 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("stopSystemdService surfaces sudo guidance for system-scope units without root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/carapace-gateway.service" });
     mockEffectiveUid(1000);
     const { stdout } = createWritableStreamMock();
     await expect(stopSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } })).rejects.toThrow(
-      /sudo systemctl stop openclaw-gateway\.service/,
+      /sudo systemctl stop carapace-gateway\.service/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
   });
@@ -1146,7 +1146,7 @@ describe("isNonFatalSystemdInstallProbeError", () => {
   it("matches wrapper-only WSL install probe failures", () => {
     expect(
       isNonFatalSystemdInstallProbeError(
-        new Error("Command failed: systemctl --user is-enabled openclaw-gateway.service"),
+        new Error("Command failed: systemctl --user is-enabled carapace-gateway.service"),
       ),
     ).toBe(true);
   });
@@ -1229,7 +1229,7 @@ describe("readSystemdServiceRuntime", () => {
   it.each(["exit", "timeout", "signal"] as const)(
     "reports a missing unit only after a completed show command (%s)",
     async (termination) => {
-      const detail = "Unit openclaw-gateway.service could not be found.";
+      const detail = "Unit carapace-gateway.service could not be found.";
       const accessSpy = vi
         .spyOn(fs, "access")
         .mockRejectedValue(Object.assign(new Error("ENOENT"), { code: "ENOENT" }));
@@ -1270,7 +1270,7 @@ describe("readSystemdServiceRuntime", () => {
     "does not call an installed unit missing when systemd disagrees with its definition (%s)",
     async (result) => {
       const accessSpy = vi.spyOn(fs, "access").mockImplementation(async (pathArg) => {
-        if (pathLikeToString(pathArg) === "/etc/systemd/system/openclaw-gateway.service") {
+        if (pathLikeToString(pathArg) === "/etc/systemd/system/carapace-gateway.service") {
           return;
         }
         throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
@@ -1280,7 +1280,7 @@ describe("readSystemdServiceRuntime", () => {
           cb(null, "LoadState=not-found\nActiveState=inactive\nSubState=dead", "");
           return;
         }
-        const detail = "Unit openclaw-gateway.service could not be found.";
+        const detail = "Unit carapace-gateway.service could not be found.";
         cb(createExecFileError(detail, { stderr: detail }), "", detail);
       });
 
@@ -1289,7 +1289,7 @@ describe("readSystemdServiceRuntime", () => {
           {
             status: result === "error" ? "unknown" : "stopped",
             ...(result === "error"
-              ? { detail: "Unit openclaw-gateway.service could not be found." }
+              ? { detail: "Unit carapace-gateway.service could not be found." }
               : {}),
             missingUnit: false,
           },
@@ -1373,7 +1373,7 @@ describe("readSystemdServiceRuntime", () => {
           [
             null,
             [
-              "Id=openclaw-gateway.service",
+              "Id=carapace-gateway.service",
               "ActiveState=active",
               "SubState=running",
               "MainPID=1234",
@@ -1401,7 +1401,7 @@ describe("readSystemdServiceRuntime", () => {
       lastExitStatus: 0,
       lastExitReason: "running",
       systemd: {
-        unit: "openclaw-gateway.service",
+        unit: "carapace-gateway.service",
         killMode: "process",
         tasksCurrent: 807,
         memoryCurrent: 11_918_534_246,
@@ -1410,7 +1410,7 @@ describe("readSystemdServiceRuntime", () => {
   });
 
   // Regression for #84698: status probes must bound the systemctl subprocess so a
-  // wedged systemd socket cannot hang `openclaw status` (which advertises --timeout).
+  // wedged systemd socket cannot hang `carapace status` (which advertises --timeout).
   it("passes a kill-backed timeout to systemctl when a read deadline is set", async () => {
     execFileMock.mockReset();
     execFileMock.mockImplementation(execFileResult(null, "", ""));
@@ -1442,7 +1442,7 @@ describe("readSystemdServiceRuntime", () => {
         execFileResult(
           null,
           [
-            "Id=openclaw-gateway.service",
+            "Id=carapace-gateway.service",
             "ActiveState=failed",
             "SubState=failed",
             "Result=exit-code",
@@ -1471,37 +1471,37 @@ describe("readSystemdServiceRuntime", () => {
 describe("resolveSystemdUnitPath", () => {
   it.each([
     {
-      name: "uses default service name when OPENCLAW_PROFILE is unset",
+      name: "uses default service name when CARAPACE_PROFILE is unset",
       env: { HOME: "/home/test" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway.service",
+      expected: "/home/test/.config/systemd/user/carapace-gateway.service",
     },
     {
-      name: "uses profile-specific service name when OPENCLAW_PROFILE is set to a custom value",
-      env: { HOME: "/home/test", OPENCLAW_PROFILE: "jbphoenix" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway-jbphoenix.service",
+      name: "uses profile-specific service name when CARAPACE_PROFILE is set to a custom value",
+      env: { HOME: "/home/test", CARAPACE_PROFILE: "jbphoenix" },
+      expected: "/home/test/.config/systemd/user/carapace-gateway-jbphoenix.service",
     },
     {
-      name: "prefers OPENCLAW_SYSTEMD_UNIT over OPENCLAW_PROFILE",
+      name: "prefers CARAPACE_SYSTEMD_UNIT over CARAPACE_PROFILE",
       env: {
         HOME: "/home/test",
-        OPENCLAW_PROFILE: "jbphoenix",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit",
+        CARAPACE_PROFILE: "jbphoenix",
+        CARAPACE_SYSTEMD_UNIT: "custom-unit",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "handles OPENCLAW_SYSTEMD_UNIT with .service suffix",
+      name: "handles CARAPACE_SYSTEMD_UNIT with .service suffix",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit.service",
+        CARAPACE_SYSTEMD_UNIT: "custom-unit.service",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "trims whitespace from OPENCLAW_SYSTEMD_UNIT",
+      name: "trims whitespace from CARAPACE_SYSTEMD_UNIT",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "  custom-unit  ",
+        CARAPACE_SYSTEMD_UNIT: "  custom-unit  ",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
@@ -1512,8 +1512,8 @@ describe("resolveSystemdUnitPath", () => {
 
 describe("splitArgsPreservingQuotes", () => {
   it("splits on whitespace outside quotes", () => {
-    expect(splitArgsPreservingQuotes('/usr/bin/openclaw gateway start --name "My Bot"')).toEqual([
-      "/usr/bin/openclaw",
+    expect(splitArgsPreservingQuotes('/usr/bin/carapace gateway start --name "My Bot"')).toEqual([
+      "/usr/bin/carapace",
       "gateway",
       "start",
       "--name",
@@ -1523,50 +1523,50 @@ describe("splitArgsPreservingQuotes", () => {
 
   it("supports systemd-style backslash escaping", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --name "My \\"Bot\\"" --foo bar', {
+      splitArgsPreservingQuotes('carapace --name "My \\"Bot\\"" --foo bar', {
         escapeMode: "backslash",
       }),
-    ).toEqual(["openclaw", "--name", 'My "Bot"', "--foo", "bar"]);
+    ).toEqual(["carapace", "--name", 'My "Bot"', "--foo", "bar"]);
   });
 
   it("supports schtasks-style escaped quotes while preserving other backslashes", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --path "C:\\\\Program Files\\\\OpenClaw"', {
+      splitArgsPreservingQuotes('carapace --path "C:\\\\Program Files\\\\Carapace"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--path", "C:\\\\Program Files\\\\OpenClaw"]);
+    ).toEqual(["carapace", "--path", "C:\\\\Program Files\\\\Carapace"]);
 
     expect(
-      splitArgsPreservingQuotes('openclaw --label "My \\"Quoted\\" Name"', {
+      splitArgsPreservingQuotes('carapace --label "My \\"Quoted\\" Name"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--label", 'My "Quoted" Name']);
+    ).toEqual(["carapace", "--label", 'My "Quoted" Name']);
   });
 });
 
 describe("parseSystemdEnvAssignments", () => {
   it("parses single-quoted whole assignments", () => {
     expect(
-      parseSystemdEnvAssignments("'OPENCLAW_GATEWAY_TOKEN=single quoted token' FOO=bar"),
+      parseSystemdEnvAssignments("'CARAPACE_GATEWAY_TOKEN=single quoted token' FOO=bar"),
     ).toEqual([
-      { key: "OPENCLAW_GATEWAY_TOKEN", value: "single quoted token" },
+      { key: "CARAPACE_GATEWAY_TOKEN", value: "single quoted token" },
       { key: "FOO", value: "bar" },
     ]);
   });
 
   it("keeps apostrophes inside unquoted assignment values literal", () => {
-    expect(parseSystemdEnvAssignments("FOO=can't OPENCLAW_GATEWAY_TOKEN=token")).toEqual([
+    expect(parseSystemdEnvAssignments("FOO=can't CARAPACE_GATEWAY_TOKEN=token")).toEqual([
       { key: "FOO", value: "can't" },
-      { key: "OPENCLAW_GATEWAY_TOKEN", value: "token" },
+      { key: "CARAPACE_GATEWAY_TOKEN", value: "token" },
     ]);
   });
 });
 
 describe("parseSystemdExecStart", () => {
   it("preserves quoted arguments", () => {
-    const execStart = '/usr/bin/openclaw gateway start --name "My Bot"';
+    const execStart = '/usr/bin/carapace gateway start --name "My Bot"';
     expect(parseSystemdExecStart(execStart)).toEqual([
-      "/usr/bin/openclaw",
+      "/usr/bin/carapace",
       "gateway",
       "start",
       "--name",
@@ -1620,7 +1620,7 @@ describe("readSystemdServiceExecStart", () => {
         throw Object.assign(new Error("missing base"), { code: "ENOENT" });
       });
       mockSystemdManagerSnapshot({
-        programArguments: ["/opt/operator/openclaw", "gateway", "run"],
+        programArguments: ["/opt/operator/carapace", "gateway", "run"],
         fragmentPath,
         dropInPaths,
         environmentFiles: [["gateway.env", false]],
@@ -1630,7 +1630,7 @@ describe("readSystemdServiceExecStart", () => {
       await expect(
         readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME }, { requireEffective: true }),
       ).resolves.toEqual({
-        programArguments: ["/opt/operator/openclaw", "gateway", "run"],
+        programArguments: ["/opt/operator/carapace", "gateway", "run"],
         environment: { OWNER: "global" },
         environmentValueSources: { OWNER: "file" },
         sourcePath: fragmentPath,
@@ -1656,32 +1656,32 @@ describe("readSystemdServiceExecStart", () => {
   });
 
   it("requires manager-effective inspection for an existing unit only in strict mode", async () => {
-    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run"]);
+    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run"]);
     mockSystemdManagerProperties(new Error("manager-effective-secret-canary"));
 
     await expect(
       readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME }, { requireEffective: true }),
     ).rejects.toThrow();
     await expect(readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME })).resolves.toMatchObject({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
     });
   });
 
   it("parses continued environment assignments using systemd syntax", async () => {
     mockReadGatewayServiceFile([
       "[Service]",
-      "ExecStart = /usr/bin/openclaw gateway run",
-      "Environment = OPENCLAW_GATEWAY_TOKEN=one \\", // pragma: allowlist secret
+      "ExecStart = /usr/bin/carapace gateway run",
+      "Environment = CARAPACE_GATEWAY_TOKEN=one \\", // pragma: allowlist secret
       "  # ignored continuation comment",
-      "  OPENCLAW_GATEWAY_PASSWORD=two", // pragma: allowlist secret
+      "  CARAPACE_GATEWAY_PASSWORD=two", // pragma: allowlist secret
     ]);
     mockSystemdManagerProperties(new Error("manager unavailable"));
 
     await expect(readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME })).resolves.toMatchObject({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environment: {
-        OPENCLAW_GATEWAY_TOKEN: "one",
-        OPENCLAW_GATEWAY_PASSWORD: "two",
+        CARAPACE_GATEWAY_TOKEN: "one",
+        CARAPACE_GATEWAY_PASSWORD: "two",
       },
     });
   });
@@ -1690,7 +1690,7 @@ describe("readSystemdServiceExecStart", () => {
     "accepts manager LoadState=not-found before inspecting empty service properties (local=%s)",
     async (local) => {
       if (local) {
-        mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run"]);
+        mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run"]);
       } else {
         vi.spyOn(fs, "readFile").mockRejectedValue(
           Object.assign(new Error("missing base"), { code: "ENOENT" }),
@@ -1719,7 +1719,7 @@ describe("readSystemdServiceExecStart", () => {
       Object.assign(new Error("missing base"), { code: "ENOENT" }),
     );
     mockSystemdManagerProperties(
-      buildSystemdManagerPropertyOutput({ programArguments: ["/usr/bin/openclaw", "gateway"] }),
+      buildSystemdManagerPropertyOutput({ programArguments: ["/usr/bin/carapace", "gateway"] }),
       unit,
     );
     if (loaded) {
@@ -1737,10 +1737,10 @@ describe("readSystemdServiceExecStart", () => {
   });
 
   it("does not mistake an unreadable required environment file for a missing base unit", async () => {
-    const environmentFile = `${TEST_SERVICE_HOME}/.openclaw/effective.env`;
+    const environmentFile = `${TEST_SERVICE_HOME}/.carapace/effective.env`;
     mockReadGatewayServiceFile([
       "[Service]",
-      "ExecStart=/usr/bin/openclaw gateway run",
+      "ExecStart=/usr/bin/carapace gateway run",
       `EnvironmentFile=${environmentFile}`,
     ]);
 
@@ -1748,15 +1748,15 @@ describe("readSystemdServiceExecStart", () => {
       readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME }, { requireEffective: true }),
     ).rejects.toThrow();
     await expect(readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME })).resolves.toMatchObject({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
     });
   });
 
   it("requires manager-effective environment files while preserving optional manager files", async () => {
-    const environmentFile = `${TEST_SERVICE_HOME}/.openclaw/effective.env`;
-    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run"]);
+    const environmentFile = `${TEST_SERVICE_HOME}/.carapace/effective.env`;
+    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run"]);
     mockSystemdManagerSnapshot({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environmentFiles: [[environmentFile, false]],
     });
     await expect(
@@ -1764,22 +1764,22 @@ describe("readSystemdServiceExecStart", () => {
     ).rejects.toThrow();
 
     mockSystemdManagerSnapshot({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environmentFiles: [[environmentFile, true]],
     });
     await expect(
       readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME }, { requireEffective: true }),
-    ).resolves.toMatchObject({ programArguments: ["/usr/bin/openclaw", "gateway", "run"] });
+    ).resolves.toMatchObject({ programArguments: ["/usr/bin/carapace", "gateway", "run"] });
   });
 
   it.each(["ENOENT", "EACCES"])(
     "enforces only active EnvironmentFile inputs (%s)",
     async (code) => {
-      const inactive = `${TEST_SERVICE_HOME}/.openclaw/retired.env`;
-      const active = `${TEST_SERVICE_HOME}/.openclaw/current.env`;
+      const inactive = `${TEST_SERVICE_HOME}/.carapace/retired.env`;
+      const active = `${TEST_SERVICE_HOME}/.carapace/current.env`;
       const dropIn = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/environment.conf`;
       mockReadGatewayServiceFile(
-        ["[Service]", "ExecStart=/usr/bin/openclaw gateway run", `EnvironmentFile=${inactive}`],
+        ["[Service]", "ExecStart=/usr/bin/carapace gateway run", `EnvironmentFile=${inactive}`],
         {
           [inactive]: Object.assign(new Error("retired environment unavailable"), { code }),
           [active]: "ACTIVE_VALUE=current\n",
@@ -1787,7 +1787,7 @@ describe("readSystemdServiceExecStart", () => {
         },
       );
       mockSystemdManagerSnapshot({
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
         environmentFiles: [[active, false]],
         dropInPaths: [dropIn],
       });
@@ -1800,7 +1800,7 @@ describe("readSystemdServiceExecStart", () => {
         managedOverrides: { environment: { keys: ["ACTIVE_VALUE"], resetFiles: true } },
       });
       mockSystemdManagerSnapshot({
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
         environmentFiles: [[inactive, false]],
       });
       await expect(
@@ -1810,16 +1810,16 @@ describe("readSystemdServiceExecStart", () => {
   );
 
   it("reports one manager-effective command snapshot while retaining the managed base definition", async () => {
-    const effectiveArguments = ["/opt/operator/openclaw", "gateway", "run"];
-    const objectPath = "/org/freedesktop/systemd1/unit/openclaw_2dgateway_2eservice";
-    const managedEnvironmentFile = `${TEST_SERVICE_HOME}/.openclaw/managed.env`;
-    const effectiveEnvironmentFile = `${TEST_SERVICE_HOME}/.openclaw/operator.env`;
+    const effectiveArguments = ["/opt/operator/carapace", "gateway", "run"];
+    const objectPath = "/org/freedesktop/systemd1/unit/carapace_2dgateway_2eservice";
+    const managedEnvironmentFile = `${TEST_SERVICE_HOME}/.carapace/managed.env`;
+    const effectiveEnvironmentFile = `${TEST_SERVICE_HOME}/.carapace/operator.env`;
     const dropInPath = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/operator.conf`;
     mockReadGatewayServiceFile(
       [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
-        "WorkingDirectory=/srv/managed-openclaw",
+        "ExecStart=/usr/bin/carapace gateway run",
+        "WorkingDirectory=/srv/managed-carapace",
         "Environment=BASE_INLINE=base BASE_SHARED=inline",
         `EnvironmentFile=${managedEnvironmentFile}`,
       ],
@@ -1830,8 +1830,8 @@ describe("readSystemdServiceExecStart", () => {
           "WorkingDirectory=/ignored-unit-section",
           "[Service]",
           "ExecStart=",
-          "ExecStart=/opt/operator/openclaw gateway run",
-          "WorkingDirectory=/srv/operator-openclaw",
+          "ExecStart=/opt/operator/carapace gateway run",
+          "WorkingDirectory=/srv/operator-carapace",
           "Environment=",
           "Environment=INLINE=inline \\",
           " SHARED=inline REMOVE_NAME=inline REMOVE_EXACT=inline",
@@ -1850,7 +1850,7 @@ describe("readSystemdServiceExecStart", () => {
     );
     mockSystemdManagerSnapshot({
       programArguments: effectiveArguments,
-      workingDirectory: "!/srv/operator-openclaw",
+      workingDirectory: "!/srv/operator-carapace",
       environment: ["INLINE=inline", "SHARED=inline", "REMOVE_NAME=inline", "REMOVE_EXACT=inline"],
       environmentFiles: [[effectiveEnvironmentFile, false]],
       unsetEnvironment: ["REMOVE_NAME", "REMOVE_EXACT=matching", "KEEP_EXACT=wrong"],
@@ -1864,7 +1864,7 @@ describe("readSystemdServiceExecStart", () => {
 
     expect(command).toMatchObject({
       programArguments: effectiveArguments,
-      workingDirectory: "/srv/operator-openclaw",
+      workingDirectory: "/srv/operator-carapace",
       environment: {
         INLINE: "inline",
         SHARED: "file",
@@ -1878,8 +1878,8 @@ describe("readSystemdServiceExecStart", () => {
         KEEP_EXACT: "file",
       },
       managedDefinition: {
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-        workingDirectory: "/srv/managed-openclaw",
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
+        workingDirectory: "/srv/managed-carapace",
         environment: { BASE_INLINE: "base", BASE_SHARED: "file", BASE_FILE: "base" },
         environmentValueSources: {
           BASE_INLINE: "inline",
@@ -1921,18 +1921,18 @@ describe("readSystemdServiceExecStart", () => {
   it("reads a drop-in-only ExecStart while the managed base remains the ownership anchor", async () => {
     const dropInPath = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/operator.conf`;
     mockReadGatewayServiceFile(
-      ["[Service]", "WorkingDirectory=/srv/managed-openclaw", "Environment=MANAGED_VALUE=base"],
-      { [dropInPath]: "[Service]\nExecStart=/opt/operator/openclaw gateway run" },
+      ["[Service]", "WorkingDirectory=/srv/managed-carapace", "Environment=MANAGED_VALUE=base"],
+      { [dropInPath]: "[Service]\nExecStart=/opt/operator/carapace gateway run" },
     );
     mockSystemdManagerSnapshot({
-      programArguments: ["/opt/operator/openclaw", "gateway", "run"],
-      workingDirectory: "/srv/operator-openclaw",
+      programArguments: ["/opt/operator/carapace", "gateway", "run"],
+      workingDirectory: "/srv/operator-carapace",
       environment: ["OPERATOR_VALUE=effective"],
       dropInPaths: [dropInPath],
     });
 
     await expect(readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME })).resolves.toMatchObject({
-      programArguments: ["/opt/operator/openclaw", "gateway", "run"],
+      programArguments: ["/opt/operator/carapace", "gateway", "run"],
       managedDefinition: { programArguments: [], environment: { MANAGED_VALUE: "base" } },
       managedOverrides: { launcher: "command" },
     });
@@ -1942,8 +1942,8 @@ describe("readSystemdServiceExecStart", () => {
   });
 
   it("fairly reserves the shared deadline across all three manager queries", async () => {
-    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run"]);
-    mockSystemdManagerSnapshot({ programArguments: ["/usr/bin/openclaw", "gateway", "run"] });
+    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run"]);
+    mockSystemdManagerSnapshot({ programArguments: ["/usr/bin/carapace", "gateway", "run"] });
     vi.spyOn(performance, "now")
       .mockReturnValueOnce(1_000)
       .mockReturnValueOnce(1_000)
@@ -1958,12 +1958,12 @@ describe("readSystemdServiceExecStart", () => {
   it.each([false, true])("reports pending manager reload only when it is %s", async (pending) => {
     const dropInPath = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/operator.conf`;
     const readFile = mockReadGatewayServiceFile(
-      ["[Service]", "ExecStart=/usr/bin/openclaw gateway run"],
-      { [dropInPath]: "[Service]\nWorkingDirectory=/srv/operator-openclaw" },
+      ["[Service]", "ExecStart=/usr/bin/carapace gateway run"],
+      { [dropInPath]: "[Service]\nWorkingDirectory=/srv/operator-carapace" },
     );
     mockSystemdManagerSnapshot({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-      workingDirectory: "/srv/operator-openclaw",
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
+      workingDirectory: "/srv/operator-carapace",
       dropInPaths: [dropInPath],
       needDaemonReload: pending,
     });
@@ -1981,23 +1981,23 @@ describe("readSystemdServiceExecStart", () => {
     const workingDirectory = `${TEST_SERVICE_HOME}/Open Claw`;
     mockReadGatewayServiceFile([
       "[Service]",
-      "ExecStart=%h/bin/openclaw gateway --unit %n",
+      "ExecStart=%h/bin/carapace gateway --unit %n",
       'WorkingDirectory=-"%h/Open Claw"',
-      "Environment=OPENCLAW_HOME=%h/openclaw UNIT_NAME=%n",
+      "Environment=CARAPACE_HOME=%h/carapace UNIT_NAME=%n",
     ]);
     mockSystemdManagerSnapshot({
-      programArguments: [`${TEST_SERVICE_HOME}/bin/openclaw`, "gateway", "--unit", GATEWAY_SERVICE],
+      programArguments: [`${TEST_SERVICE_HOME}/bin/carapace`, "gateway", "--unit", GATEWAY_SERVICE],
       workingDirectory: `!${workingDirectory}`,
-      environment: [`OPENCLAW_HOME=${TEST_SERVICE_HOME}/openclaw`, `UNIT_NAME=${GATEWAY_SERVICE}`],
+      environment: [`CARAPACE_HOME=${TEST_SERVICE_HOME}/carapace`, `UNIT_NAME=${GATEWAY_SERVICE}`],
     });
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
 
     expect(command).toEqual({
-      programArguments: [`${TEST_SERVICE_HOME}/bin/openclaw`, "gateway", "--unit", GATEWAY_SERVICE],
+      programArguments: [`${TEST_SERVICE_HOME}/bin/carapace`, "gateway", "--unit", GATEWAY_SERVICE],
       workingDirectory,
-      environment: { OPENCLAW_HOME: `${TEST_SERVICE_HOME}/openclaw`, UNIT_NAME: GATEWAY_SERVICE },
-      environmentValueSources: { OPENCLAW_HOME: "inline", UNIT_NAME: "inline" },
+      environment: { CARAPACE_HOME: `${TEST_SERVICE_HOME}/carapace`, UNIT_NAME: GATEWAY_SERVICE },
+      environmentValueSources: { CARAPACE_HOME: "inline", UNIT_NAME: "inline" },
       sourcePath: `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}`,
       definitionPaths: [`${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}`],
     });
@@ -2010,9 +2010,9 @@ describe("readSystemdServiceExecStart", () => {
       mockReadGatewayServiceFile(
         [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          "WorkingDirectory=/srv/openclaw",
-          "Environment=OPENCLAW_GATEWAY_TOKEN=shared NODE_COMPILE_CACHE=/tmp/cache",
+          "ExecStart=/usr/bin/carapace gateway run",
+          "WorkingDirectory=/srv/carapace",
+          "Environment=CARAPACE_GATEWAY_TOKEN=shared NODE_COMPILE_CACHE=/tmp/cache",
         ],
         {
           [dropInPath]: [
@@ -2020,28 +2020,28 @@ describe("readSystemdServiceExecStart", () => {
             comment,
             "ExecStart=",
             comment,
-            "ExecStart=/usr/bin/openclaw gateway run",
+            "ExecStart=/usr/bin/carapace gateway run",
             comment,
-            "WorkingDirectory=/srv/openclaw",
+            "WorkingDirectory=/srv/carapace",
             comment,
-            "Environment=OPENCLAW_GATEWAY_TOKEN=shared NODE_COMPILE_CACHE=/tmp/cache",
+            "Environment=CARAPACE_GATEWAY_TOKEN=shared NODE_COMPILE_CACHE=/tmp/cache",
           ].join("\n"),
         },
       );
       mockSystemdManagerSnapshot({
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-        workingDirectory: "/srv/openclaw",
-        environment: ["OPENCLAW_GATEWAY_TOKEN=shared", "NODE_COMPILE_CACHE=/tmp/cache"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
+        workingDirectory: "/srv/carapace",
+        environment: ["CARAPACE_GATEWAY_TOKEN=shared", "NODE_COMPILE_CACHE=/tmp/cache"],
         dropInPaths: [dropInPath],
       });
 
       const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
 
       expect(command).toMatchObject({
-        managedDefinition: { environment: { OPENCLAW_GATEWAY_TOKEN: "shared" } },
+        managedDefinition: { environment: { CARAPACE_GATEWAY_TOKEN: "shared" } },
         managedOverrides: {
           launcher: "command",
-          environment: { keys: ["OPENCLAW_GATEWAY_TOKEN", "NODE_COMPILE_CACHE"] },
+          environment: { keys: ["CARAPACE_GATEWAY_TOKEN", "NODE_COMPILE_CACHE"] },
         },
       });
     },
@@ -2050,11 +2050,11 @@ describe("readSystemdServiceExecStart", () => {
   it("preserves managed removals while clearing superseded drop-in ownership in directive order", async () => {
     const firstDropIn = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/10-file.conf`;
     const resetDropIn = `${TEST_SERVICE_HOME}/.config/systemd/user/${GATEWAY_SERVICE}.d/20-reset.conf`;
-    const operatorEnv = `${TEST_SERVICE_HOME}/.openclaw/operator.env`;
+    const operatorEnv = `${TEST_SERVICE_HOME}/.carapace/operator.env`;
     mockReadGatewayServiceFile(
       [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
+        "ExecStart=/usr/bin/carapace gateway run",
         "Environment=FOO=base BAR=base",
         "UnsetEnvironment=BAR",
       ],
@@ -2065,7 +2065,7 @@ describe("readSystemdServiceExecStart", () => {
       },
     );
     mockSystemdManagerSnapshot({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environment: ["FOO=base", "BAR=base"],
       dropInPaths: [firstDropIn, resetDropIn],
     });
@@ -2073,7 +2073,7 @@ describe("readSystemdServiceExecStart", () => {
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
 
     expect(command).toMatchObject({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
       environment: { FOO: "base", BAR: "base" },
       environmentValueSources: { FOO: "inline", BAR: "inline" },
       managedDefinition: { environment: { FOO: "base" } },
@@ -2083,14 +2083,14 @@ describe("readSystemdServiceExecStart", () => {
   });
 
   it("reads manager-expanded EnvironmentFile globs in deterministic precedence order", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-glob-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-systemd-glob-"));
     const env = { HOME: home };
     const unitPath = resolveSystemdUnitPath(env);
     const environmentDir = path.join(home, "env.d");
     try {
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
       await fs.mkdir(environmentDir, { mode: 0o700 });
-      await fs.writeFile(unitPath, "[Service]\nExecStart=/usr/bin/openclaw gateway run\n", {
+      await fs.writeFile(unitPath, "[Service]\nExecStart=/usr/bin/carapace gateway run\n", {
         mode: 0o644,
       });
       await fs.writeFile(path.join(environmentDir, "20-override.env"), "SHARED=second\n", {
@@ -2100,7 +2100,7 @@ describe("readSystemdServiceExecStart", () => {
         mode: 0o600,
       });
       mockSystemdManagerSnapshot({
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
         environment: ["SHARED=inline"],
         fragmentPath: unitPath,
         environmentFiles: [[path.join(environmentDir, "*.env"), false]],
@@ -2129,13 +2129,13 @@ describe("readSystemdServiceExecStart", () => {
     async ({ properties }) => {
       mockReadGatewayServiceFile([
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
-        "WorkingDirectory=/srv/managed-openclaw",
+        "ExecStart=/usr/bin/carapace gateway run",
+        "WorkingDirectory=/srv/managed-carapace",
         "Environment=MANAGED_VALUE=base",
       ]);
       mockSystemdManagerProperties(
         buildSystemdManagerPropertyOutput({
-          programArguments: ["/opt/operator/openclaw", "gateway", "run"],
+          programArguments: ["/opt/operator/carapace", "gateway", "run"],
           environment: ["OPERATOR_VALUE=effective"],
         }),
         properties,
@@ -2143,13 +2143,13 @@ describe("readSystemdServiceExecStart", () => {
 
       await expect(readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME })).resolves.toMatchObject(
         {
-          programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-          workingDirectory: "/srv/managed-openclaw",
+          programArguments: ["/usr/bin/carapace", "gateway", "run"],
+          workingDirectory: "/srv/managed-carapace",
           environment: { MANAGED_VALUE: "base" },
           environmentValueSources: { MANAGED_VALUE: "inline" },
           managedDefinition: {
-            programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-            workingDirectory: "/srv/managed-openclaw",
+            programArguments: ["/usr/bin/carapace", "gateway", "run"],
+            workingDirectory: "/srv/managed-carapace",
             environment: { MANAGED_VALUE: "base" },
             environmentValueSources: { MANAGED_VALUE: "inline" },
           },
@@ -2160,7 +2160,7 @@ describe("readSystemdServiceExecStart", () => {
   );
 
   it("bounds manager lookup for callers without a timeout before local fallback", async () => {
-    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run"]);
+    mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/carapace gateway run"]);
     execFileMock.mockReset();
     execFileMock.mockImplementation((command, _args, options, callback) => {
       expect(command).toBe("busctl");
@@ -2172,22 +2172,22 @@ describe("readSystemdServiceExecStart", () => {
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
 
-    expect(command?.programArguments).toEqual(["/usr/bin/openclaw", "gateway", "run"]);
+    expect(command?.programArguments).toEqual(["/usr/bin/carapace", "gateway", "run"]);
     expect(command?.managedDefinition).toEqual({
-      programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+      programArguments: ["/usr/bin/carapace", "gateway", "run"],
     });
     expect(command?.managedOverrides).toEqual({ launcher: "command", environment: true });
     expect(execFileMock).toHaveBeenCalledTimes(1);
   });
 
-  it("loads OPENCLAW_GATEWAY_TOKEN from EnvironmentFile", async () => {
+  it("loads CARAPACE_GATEWAY_TOKEN from EnvironmentFile", async () => {
     const readFileSpy = mockReadGatewayServiceFile(
-      ["[Service]", "ExecStart=/usr/bin/openclaw gateway run", "EnvironmentFile=%h/.openclaw/.env"],
-      { [`${TEST_SERVICE_HOME}/.openclaw/.env`]: "OPENCLAW_GATEWAY_TOKEN=env-file-token\n" },
+      ["[Service]", "ExecStart=/usr/bin/carapace gateway run", "EnvironmentFile=%h/.carapace/.env"],
+      { [`${TEST_SERVICE_HOME}/.carapace/.env`]: "CARAPACE_GATEWAY_TOKEN=env-file-token\n" },
     );
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-    expect(command?.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("env-file-token");
+    expect(command?.environment?.CARAPACE_GATEWAY_TOKEN).toBe("env-file-token");
     expect(readFileSpy).toHaveBeenCalledTimes(2);
   });
 
@@ -2195,31 +2195,31 @@ describe("readSystemdServiceExecStart", () => {
     mockReadGatewayServiceFile(
       [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
-        "EnvironmentFile=%h/.openclaw/.env",
-        'Environment="OPENCLAW_GATEWAY_TOKEN=inline-token"',
+        "ExecStart=/usr/bin/carapace gateway run",
+        "EnvironmentFile=%h/.carapace/.env",
+        'Environment="CARAPACE_GATEWAY_TOKEN=inline-token"',
       ],
-      { [`${TEST_SERVICE_HOME}/.openclaw/.env`]: "OPENCLAW_GATEWAY_TOKEN=env-file-token\n" },
+      { [`${TEST_SERVICE_HOME}/.carapace/.env`]: "CARAPACE_GATEWAY_TOKEN=env-file-token\n" },
     );
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-    expect(command?.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("env-file-token");
-    expect(command?.environmentValueSources?.OPENCLAW_GATEWAY_TOKEN).toBe("inline-and-file");
+    expect(command?.environment?.CARAPACE_GATEWAY_TOKEN).toBe("env-file-token");
+    expect(command?.environmentValueSources?.CARAPACE_GATEWAY_TOKEN).toBe("inline-and-file");
   });
 
   it("applies managed directive resets before ordered environment assignments and removals", async () => {
-    const staleFile = `${TEST_SERVICE_HOME}/.openclaw/stale.env`;
+    const staleFile = `${TEST_SERVICE_HOME}/.carapace/stale.env`;
     const readFileSpy = mockReadGatewayServiceFile(
       [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
+        "ExecStart=/usr/bin/carapace gateway run",
         "Environment=STALE_INLINE=discarded",
         "Environment=",
         'Environment=PLAIN=first "QUOTED=value with spaces" REPEATED=first',
         "Environment='REPEATED=last value' INLINE_FILE=inline REMOVE_NAME=inline REMOVE_EXACT=inline KEEP_MISMATCH=inline",
         `EnvironmentFile=${staleFile}`,
         "EnvironmentFile=",
-        "EnvironmentFile=%h/.openclaw/.env",
+        "EnvironmentFile=%h/.carapace/.env",
         "UnsetEnvironment=PLAIN",
         "UnsetEnvironment=",
         "UnsetEnvironment=REMOVE_NAME",
@@ -2227,7 +2227,7 @@ describe("readSystemdServiceExecStart", () => {
       ],
       {
         [staleFile]: "STALE_FILE=discarded\n",
-        [`${TEST_SERVICE_HOME}/.openclaw/.env`]: [
+        [`${TEST_SERVICE_HOME}/.carapace/.env`]: [
           "INLINE_FILE=file",
           "FILE_ONLY=from-file",
           "REMOVE_NAME=file",
@@ -2260,84 +2260,84 @@ describe("readSystemdServiceExecStart", () => {
   });
 
   it("ignores missing optional EnvironmentFile entries", async () => {
-    await expectExecStartWithoutEnvironment("EnvironmentFile=-%h/.openclaw/missing.env");
+    await expectExecStartWithoutEnvironment("EnvironmentFile=-%h/.carapace/missing.env");
   });
 
   it("keeps parsing when non-optional EnvironmentFile entries are missing", async () => {
-    await expectExecStartWithoutEnvironment("EnvironmentFile=%h/.openclaw/missing.env");
+    await expectExecStartWithoutEnvironment("EnvironmentFile=%h/.carapace/missing.env");
   });
 
   it("supports multiple EnvironmentFile entries and quoted paths", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/carapace-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          'EnvironmentFile=%h/.openclaw/first.env "%h/.openclaw/second env.env"',
+          "ExecStart=/usr/bin/carapace gateway run",
+          'EnvironmentFile=%h/.carapace/first.env "%h/.carapace/second env.env"',
         ].join("\n");
       }
-      if (pathValue === "/home/test/.openclaw/first.env") {
-        return "OPENCLAW_GATEWAY_TOKEN=first-token\n"; // pragma: allowlist secret
+      if (pathValue === "/home/test/.carapace/first.env") {
+        return "CARAPACE_GATEWAY_TOKEN=first-token\n"; // pragma: allowlist secret
       }
-      if (pathValue === "/home/test/.openclaw/second env.env") {
-        return 'OPENCLAW_GATEWAY_PASSWORD="second password"\n'; // pragma: allowlist secret
+      if (pathValue === "/home/test/.carapace/second env.env") {
+        return 'CARAPACE_GATEWAY_PASSWORD="second password"\n'; // pragma: allowlist secret
       }
       throw new Error(`unexpected readFile path: ${pathValue}`);
     });
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "first-token",
-      OPENCLAW_GATEWAY_PASSWORD: "second password", // pragma: allowlist secret
+      CARAPACE_GATEWAY_TOKEN: "first-token",
+      CARAPACE_GATEWAY_PASSWORD: "second password", // pragma: allowlist secret
     });
   });
 
   it("resolves relative EnvironmentFile paths from the unit directory", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/carapace-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
+          "ExecStart=/usr/bin/carapace gateway run",
           "EnvironmentFile=./gateway.env ./override.env",
         ].join("\n");
       }
       if (pathValue.endsWith("/.config/systemd/user/gateway.env")) {
         return [
-          "OPENCLAW_GATEWAY_TOKEN=relative-token", // pragma: allowlist secret
-          "OPENCLAW_GATEWAY_PASSWORD=relative-password", // pragma: allowlist secret
+          "CARAPACE_GATEWAY_TOKEN=relative-token", // pragma: allowlist secret
+          "CARAPACE_GATEWAY_PASSWORD=relative-password", // pragma: allowlist secret
         ].join("\n");
       }
       if (pathValue.endsWith("/.config/systemd/user/override.env")) {
-        return "OPENCLAW_GATEWAY_TOKEN=override-token\n"; // pragma: allowlist secret
+        return "CARAPACE_GATEWAY_TOKEN=override-token\n"; // pragma: allowlist secret
       }
       throw new Error(`unexpected readFile path: ${pathValue}`);
     });
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "override-token",
-      OPENCLAW_GATEWAY_PASSWORD: "relative-password", // pragma: allowlist secret
+      CARAPACE_GATEWAY_TOKEN: "override-token",
+      CARAPACE_GATEWAY_PASSWORD: "relative-password", // pragma: allowlist secret
     });
   });
 
   it("parses EnvironmentFile content with comments and quoted values", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/carapace-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          "EnvironmentFile=%h/.openclaw/gateway.env",
+          "ExecStart=/usr/bin/carapace gateway run",
+          "EnvironmentFile=%h/.carapace/gateway.env",
         ].join("\n");
       }
-      if (pathValue === "/home/test/.openclaw/gateway.env") {
+      if (pathValue === "/home/test/.carapace/gateway.env") {
         return [
           "# comment",
           "; another comment",
-          'OPENCLAW_GATEWAY_TOKEN="quoted token"', // pragma: allowlist secret
-          'OPENCLAW_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"', // pragma: allowlist secret
+          'CARAPACE_GATEWAY_TOKEN="quoted token"', // pragma: allowlist secret
+          'CARAPACE_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"', // pragma: allowlist secret
           'MIXED_API_KEY="55\\"55" "FIVE" cinco',
           'UNQUOTED_QUOTES_API_KEY=foo"bar"',
         ].join("\n");
@@ -2347,14 +2347,14 @@ describe("readSystemdServiceExecStart", () => {
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "quoted token",
-      OPENCLAW_GATEWAY_PASSWORD: 'symbol " \\ $ `', // pragma: allowlist secret
+      CARAPACE_GATEWAY_TOKEN: "quoted token",
+      CARAPACE_GATEWAY_PASSWORD: 'symbol " \\ $ `', // pragma: allowlist secret
       MIXED_API_KEY: '55"55FIVEcinco',
       UNQUOTED_QUOTES_API_KEY: 'foo"bar"',
     });
     expect(command?.environmentValueSources).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "file",
-      OPENCLAW_GATEWAY_PASSWORD: "file", // pragma: allowlist secret
+      CARAPACE_GATEWAY_TOKEN: "file",
+      CARAPACE_GATEWAY_PASSWORD: "file", // pragma: allowlist secret
       MIXED_API_KEY: "file",
       UNQUOTED_QUOTES_API_KEY: "file",
     });
@@ -2371,13 +2371,13 @@ describe("stageSystemdService", () => {
       nodeEnvFilePath: string;
     }) => Promise<void>,
   ): Promise<void> {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-stage-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-systemd-stage-"));
     const home = path.join(tempHomeRoot, "home");
-    const stateDir = path.join(home, ".openclaw");
+    const stateDir = path.join(home, ".carapace");
     const env = {
       HOME: home,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-stage-test",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_SYSTEMD_UNIT: "carapace-gateway-stage-test",
     };
     const unitPath = resolveSystemdUnitPath(env);
     const envFilePath = path.join(stateDir, "gateway.systemd.env");
@@ -2403,7 +2403,7 @@ describe("stageSystemdService", () => {
       code: 1,
       termination: "exit",
       stdout: "",
-      stderr: `Call failed: Unit ${env.OPENCLAW_SYSTEMD_UNIT ?? "openclaw-gateway-work"}.service not found.`,
+      stderr: `Call failed: Unit ${env.CARAPACE_SYSTEMD_UNIT ?? "carapace-gateway-work"}.service not found.`,
     }));
     assertNoSystemSystemdOwnershipMock.mockReset();
     assertNoSystemSystemdOwnershipMock.mockResolvedValue();
@@ -2418,16 +2418,16 @@ describe("stageSystemdService", () => {
           unitPath,
           [
             "[Unit]",
-            "Description=OpenClaw Gateway (v2026.7.1-2)",
+            "Description=Carapace Gateway (v2026.7.1-2)",
             "",
             "[Service]",
             comment,
-            "ExecStart=/usr/bin/openclaw gateway run",
-            "Environment=OPENCLAW_SERVICE_MARKER=openclaw \\",
+            "ExecStart=/usr/bin/carapace gateway run",
+            "Environment=CARAPACE_SERVICE_MARKER=carapace \\",
             "  # managed stamps span physical lines",
-            "  OPENCLAW_SERVICE_KIND=gateway",
-            'Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2 "OTHER_SETTING=kept value"',
-            "Environment=OPENCLAW_GATEWAY_PORT=18789",
+            "  CARAPACE_SERVICE_KIND=gateway",
+            'Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2 "OTHER_SETTING=kept value"',
+            "Environment=CARAPACE_GATEWAY_PORT=18789",
             "",
           ].join("\n"),
           { encoding: "utf8", mode: 0o644 },
@@ -2437,11 +2437,11 @@ describe("stageSystemdService", () => {
         await expect(refreshLegacySystemdServiceMetadata(env, 5_000)).resolves.toBe(true);
 
         const unit = await fs.readFile(unitPath, "utf8");
-        expect(unit).toContain("Description=OpenClaw Gateway\n");
-        expect(unit.split("\n")).toContain("ExecStart=/usr/bin/openclaw gateway run");
-        expect(unit).not.toContain("OPENCLAW_SERVICE_VERSION");
+        expect(unit).toContain("Description=Carapace Gateway\n");
+        expect(unit.split("\n")).toContain("ExecStart=/usr/bin/carapace gateway run");
+        expect(unit).not.toContain("CARAPACE_SERVICE_VERSION");
         expect(unit).toContain('Environment="OTHER_SETTING=kept value"');
-        expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
+        expect(unit).toContain("Environment=CARAPACE_GATEWAY_PORT=18789");
         expect(execFileMock).toHaveBeenCalledTimes(1);
         for (const [, timeoutMs] of assertNoSystemSystemdOwnershipMock.mock.calls) {
           expect(timeoutMs).toBeGreaterThan(0);
@@ -2460,11 +2460,11 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, unitPath }) => {
       const previous = [
         "[Unit]",
-        "Description=OpenClaw Gateway (v2026.7.1-2)",
+        "Description=Carapace Gateway (v2026.7.1-2)",
         "",
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
-        "Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2",
+        "ExecStart=/usr/bin/carapace gateway run",
+        "Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2",
         "",
       ].join("\n");
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
@@ -2482,24 +2482,24 @@ describe("stageSystemdService", () => {
     {
       label: "version marker does not match the Description",
       environment: [
-        "Environment=OPENCLAW_SERVICE_MARKER=openclaw",
-        "Environment=OPENCLAW_SERVICE_KIND=gateway",
-        "Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-1",
+        "Environment=CARAPACE_SERVICE_MARKER=carapace",
+        "Environment=CARAPACE_SERVICE_KIND=gateway",
+        "Environment=CARAPACE_SERVICE_VERSION=2026.7.1-1",
       ],
     },
     {
       label: "managed markers were reset",
       environment: [
-        "Environment=OPENCLAW_SERVICE_MARKER=openclaw OPENCLAW_SERVICE_KIND=gateway",
+        "Environment=CARAPACE_SERVICE_MARKER=carapace CARAPACE_SERVICE_KIND=gateway",
         "Environment=",
-        "Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2",
+        "Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2",
       ],
     },
   ])("preserves a unit when $label", async ({ environment }) => {
     await withStageFixture(async ({ env, unitPath }) => {
       const previous = [
         "[Unit]",
-        "Description=OpenClaw Gateway (v2026.7.1-2)",
+        "Description=Carapace Gateway (v2026.7.1-2)",
         "",
         "[Service]",
         ...environment,
@@ -2520,12 +2520,12 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, unitPath }) => {
       const previous = [
         "[Unit]",
-        "Description=OpenClaw Gateway (v2026.7.1-2)",
+        "Description=Carapace Gateway (v2026.7.1-2)",
         "",
         "[Service]",
-        "Environment=OPENCLAW_SERVICE_MARKER=openclaw",
-        "Environment=OPENCLAW_SERVICE_KIND=gateway",
-        "Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2",
+        "Environment=CARAPACE_SERVICE_MARKER=carapace",
+        "Environment=CARAPACE_SERVICE_KIND=gateway",
+        "Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2",
         "",
       ].join("\n");
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
@@ -2545,12 +2545,12 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, unitPath }) => {
       const previous = [
         "[Unit]",
-        "Description=OpenClaw Gateway (v2026.7.1-2)",
+        "Description=Carapace Gateway (v2026.7.1-2)",
         "",
         "[Service]",
-        "Environment=OPENCLAW_SERVICE_MARKER=openclaw",
-        "Environment=OPENCLAW_SERVICE_KIND=gateway",
-        "Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2",
+        "Environment=CARAPACE_SERVICE_MARKER=carapace",
+        "Environment=CARAPACE_SERVICE_KIND=gateway",
+        "Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2",
         "",
       ].join("\n");
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
@@ -2576,18 +2576,18 @@ describe("stageSystemdService", () => {
       await fs.writeFile(unitPath, previous, { encoding: "utf8", mode: 0o644 });
       mockSystemctlStatusOk();
       assertNoSystemSystemdOwnershipMock.mockRejectedValueOnce(
-        new Error("system scope owns openclaw-gateway-stage-test.service"),
+        new Error("system scope owns carapace-gateway-stage-test.service"),
       );
 
       await expect(
         stageSystemdService(gatewayPortSystemdServiceFixture(env, "18789")),
-      ).rejects.toThrow("system scope owns openclaw-gateway-stage-test.service");
+      ).rejects.toThrow("system scope owns carapace-gateway-stage-test.service");
 
       await expect(fs.readFile(unitPath, "utf8")).resolves.toBe(previous);
       await expect(fs.access(envFilePath)).rejects.toMatchObject({ code: "ENOENT" });
       await expect(fs.access(`${unitPath}.bak`)).rejects.toMatchObject({ code: "ENOENT" });
       expect(assertNoSystemSystemdOwnershipMock).toHaveBeenCalledWith(
-        "openclaw-gateway-stage-test.service",
+        "carapace-gateway-stage-test.service",
       );
     });
   });
@@ -2603,10 +2603,10 @@ describe("stageSystemdService", () => {
         stageSystemdService(
           gatewaySystemdServiceFixture(env, {
             environment: {
-              OPENCLAW_GATEWAY_PORT: "18789",
-              OPENCLAW_GATEWAY_TOKEN: "new-token",
+              CARAPACE_GATEWAY_PORT: "18789",
+              CARAPACE_GATEWAY_TOKEN: "new-token",
             },
-            environmentValueSources: { OPENCLAW_GATEWAY_TOKEN: "file" },
+            environmentValueSources: { CARAPACE_GATEWAY_TOKEN: "file" },
           }),
         ),
       ).rejects.toThrow("system ownership appeared");
@@ -2619,7 +2619,7 @@ describe("stageSystemdService", () => {
   it("restores existing unit and environment files after a publication race", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath }) => {
       const previous = "[Unit]\nDescription=Previous gateway\n";
-      const previousEnv = "OPENCLAW_GATEWAY_TOKEN=previous-token\n";
+      const previousEnv = "CARAPACE_GATEWAY_TOKEN=previous-token\n";
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
       await fs.writeFile(unitPath, previous, { encoding: "utf8", mode: 0o400 });
       await fs.writeFile(envFilePath, previousEnv, { encoding: "utf8", mode: 0o400 });
@@ -2634,10 +2634,10 @@ describe("stageSystemdService", () => {
         stageSystemdService(
           gatewaySystemdServiceFixture(env, {
             environment: {
-              OPENCLAW_GATEWAY_PORT: "18789",
-              OPENCLAW_GATEWAY_TOKEN: "new-token",
+              CARAPACE_GATEWAY_PORT: "18789",
+              CARAPACE_GATEWAY_TOKEN: "new-token",
             },
-            environmentValueSources: { OPENCLAW_GATEWAY_TOKEN: "file" },
+            environmentValueSources: { CARAPACE_GATEWAY_TOKEN: "file" },
           }),
         ),
       ).rejects.toThrow("system ownership appeared");
@@ -2654,17 +2654,17 @@ describe("stageSystemdService", () => {
   });
 
   it("uses the profile-derived gateway unit name for ownership checks", async () => {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-profile-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-systemd-profile-"));
     const env = {
       HOME: path.join(tempHomeRoot, "home"),
-      OPENCLAW_STATE_DIR: path.join(tempHomeRoot, "state"),
-      OPENCLAW_PROFILE: "work",
+      CARAPACE_STATE_DIR: path.join(tempHomeRoot, "state"),
+      CARAPACE_PROFILE: "work",
     };
     try {
       mockSystemctlStatusOk();
       await stageSystemdService(gatewayPortSystemdServiceFixture(env, "18789"));
       expect(assertNoSystemSystemdOwnershipMock).toHaveBeenCalledWith(
-        "openclaw-gateway-work.service",
+        "carapace-gateway-work.service",
       );
     } finally {
       await fs.rm(tempHomeRoot, { recursive: true, force: true });
@@ -2694,7 +2694,7 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, stateDir, unitPath, envFilePath }) => {
       await fs.writeFile(
         path.join(stateDir, ".env"),
-        ["OPENCLAW_GATEWAY_TOKEN=dotenv-token", "LLM_API_KEY=dotenv-key"].join("\n"),
+        ["CARAPACE_GATEWAY_TOKEN=dotenv-token", "LLM_API_KEY=dotenv-key"].join("\n"),
         { encoding: "utf8", mode: 0o600 },
       );
 
@@ -2703,20 +2703,20 @@ describe("stageSystemdService", () => {
       await stageSystemdService(
         gatewaySystemdServiceFixture(env, {
           environment: {
-            OPENCLAW_GATEWAY_TOKEN: "dotenv-token",
+            CARAPACE_GATEWAY_TOKEN: "dotenv-token",
             LLM_API_KEY: "dotenv-key",
-            OPENCLAW_GATEWAY_PORT: "18789",
+            CARAPACE_GATEWAY_PORT: "18789",
           },
         }),
       );
 
       const unit = await fs.readFile(unitPath, "utf8");
 
-      expect(unit).toContain("Description=OpenClaw Gateway");
-      expect(unit).not.toContain("OPENCLAW_SERVICE_VERSION");
+      expect(unit).toContain("Description=Carapace Gateway");
+      expect(unit).not.toContain("CARAPACE_SERVICE_VERSION");
       expect(unit).not.toContain("EnvironmentFile=");
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=dotenv-token");
+      expect(unit).toContain("Environment=CARAPACE_GATEWAY_PORT=18789");
+      expect(unit).not.toContain("Environment=CARAPACE_GATEWAY_TOKEN=dotenv-token");
       expect(unit).not.toContain("Environment=LLM_API_KEY=dotenv-key");
       await expect(fs.access(envFilePath)).rejects.toMatchObject({ code: "ENOENT" });
     });
@@ -2724,7 +2724,7 @@ describe("stageSystemdService", () => {
 
   it("drops previously managed dotenv keys on restage while preserving operator entries", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, stateDir }) => {
-      const wrapperPath = path.join(stateDir, "openclaw-wrapper");
+      const wrapperPath = path.join(stateDir, "carapace-wrapper");
       await fs.writeFile(wrapperPath, "#!/bin/sh\nexit 0\n", { mode: 0o755 });
       await fs.writeFile(
         envFilePath,
@@ -2738,7 +2738,7 @@ describe("stageSystemdService", () => {
           "[Service]",
           `ExecStart=${wrapperPath} gateway run`,
           `EnvironmentFile=-${envFilePath}`,
-          "Environment=OPENCLAW_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
+          "Environment=CARAPACE_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
         ].join("\n"),
         { encoding: "utf8", mode: 0o644 },
       );
@@ -2747,7 +2747,7 @@ describe("stageSystemdService", () => {
       await stageSystemdService(
         systemdServiceFixture(env, [wrapperPath, "gateway", "run"], {
           workingDirectory: "/tmp",
-          environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+          environment: { CARAPACE_GATEWAY_PORT: "18789" },
         }),
       );
 
@@ -2758,7 +2758,7 @@ describe("stageSystemdService", () => {
 
   it("round-trips file-managed secrets through parse, repair planning, and emit", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, stateDir }) => {
-      const wrapperPath = path.join(stateDir, "openclaw-wrapper");
+      const wrapperPath = path.join(stateDir, "carapace-wrapper");
       const fileBackedOpenAiKey = "file-backed-openai-test-key";
       await fs.writeFile(wrapperPath, "#!/bin/sh\nexit 0\n", { mode: 0o755 });
       await fs.chmod(wrapperPath, 0o755);
@@ -2774,8 +2774,8 @@ describe("stageSystemdService", () => {
           `ExecStart=${wrapperPath} gateway --port 18789`,
           `EnvironmentFile=-${envFilePath}`,
           "Environment=HOME=" + env.HOME,
-          "Environment=OPENCLAW_GATEWAY_PORT=18789",
-          "Environment=OPENCLAW_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
+          "Environment=CARAPACE_GATEWAY_PORT=18789",
+          "Environment=CARAPACE_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
         ].join("\n"),
         { encoding: "utf8", mode: 0o644 },
       );
@@ -2783,7 +2783,7 @@ describe("stageSystemdService", () => {
       const command = await readSystemdServiceExecStart(env);
       expect(command?.environment?.OPENAI_API_KEY).toBe(fileBackedOpenAiKey);
       expect(command?.environmentValueSources?.OPENAI_API_KEY).toBe("file");
-      expect(command?.environmentValueSources?.OPENCLAW_SERVICE_MANAGED_ENV_KEYS).toBe("inline");
+      expect(command?.environmentValueSources?.CARAPACE_SERVICE_MANAGED_ENV_KEYS).toBe("inline");
 
       const plan = await buildGatewayInstallPlan({
         env: { ...env, PATH: "/usr/bin:/bin" },
@@ -2808,7 +2808,7 @@ describe("stageSystemdService", () => {
         },
       });
       expect(plan.environmentValueSources?.OPENAI_API_KEY).toBe("file");
-      expect(plan.environment.OPENCLAW_SERVICE_MANAGED_ENV_KEYS).toBe("OPENAI_API_KEY");
+      expect(plan.environment.CARAPACE_SERVICE_MANAGED_ENV_KEYS).toBe("OPENAI_API_KEY");
 
       mockSystemctlStatusOk();
       await stageSystemdService({
@@ -2823,7 +2823,7 @@ describe("stageSystemdService", () => {
       ]);
       expect(rewrittenUnit).toContain(`EnvironmentFile=-${envFilePath}`);
       expect(rewrittenUnit).toContain(
-        "Environment=OPENCLAW_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
+        "Environment=CARAPACE_SERVICE_MANAGED_ENV_KEYS=OPENAI_API_KEY",
       );
       expect(rewrittenUnit).not.toContain(fileBackedOpenAiKey);
       expect(rewrittenEnvFile).toBe(`OPENAI_API_KEY=${fileBackedOpenAiKey}\n`);
@@ -2840,19 +2840,19 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: createWritableStreamMock().stdout,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/carapace", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "file-backed-token",
-          OPENCLAW_GATEWAY_PASSWORD: gatewayPassword,
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "OPENCLAW_GATEWAY_PASSWORD,OPENCLAW_GATEWAY_TOKEN", // pragma: allowlist secret
-          OPENCLAW_SERVICE_KIND: "node",
+          CARAPACE_GATEWAY_TOKEN: "file-backed-token",
+          CARAPACE_GATEWAY_PASSWORD: gatewayPassword,
+          CARAPACE_GATEWAY_PORT: "18789",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "CARAPACE_GATEWAY_PASSWORD,CARAPACE_GATEWAY_TOKEN", // pragma: allowlist secret
+          CARAPACE_SERVICE_KIND: "node",
         },
         environmentValueSources: {
-          openclaw_gateway_token: "file",
-          openclaw_gateway_password: "file", // pragma: allowlist secret
-          openclaw_service_managed_env_keys: "inline",
+          carapace_gateway_token: "file",
+          carapace_gateway_password: "file", // pragma: allowlist secret
+          carapace_service_managed_env_keys: "inline",
         },
       });
 
@@ -2863,16 +2863,16 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${nodeEnvFilePath}`);
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=file-backed-token");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_PASSWORD=");
+      expect(unit).toContain("Environment=CARAPACE_GATEWAY_PORT=18789");
+      expect(unit).not.toContain("Environment=CARAPACE_GATEWAY_TOKEN=file-backed-token");
+      expect(unit).not.toContain("Environment=CARAPACE_GATEWAY_PASSWORD=");
       expect(envFile).toBe(
-        'OPENCLAW_GATEWAY_TOKEN=file-backed-token\nOPENCLAW_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"\n',
+        'CARAPACE_GATEWAY_TOKEN=file-backed-token\nCARAPACE_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"\n',
       );
       expect(envFileStat.mode & 0o777).toBe(0o600);
       await expect(readSystemdServiceExecStart(env)).resolves.toMatchObject({
         environment: {
-          OPENCLAW_GATEWAY_PASSWORD: gatewayPassword,
+          CARAPACE_GATEWAY_PASSWORD: gatewayPassword,
         },
       });
       await expect(fs.access(envFilePath)).rejects.toThrow();
@@ -2882,7 +2882,7 @@ describe("stageSystemdService", () => {
   it("migrates operator entries from the legacy gateway env file when writing node env files", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, nodeEnvFilePath }) => {
       const legacyGatewayEnvFile =
-        ["OPENCLAW_GATEWAY_TOKEN=legacy-node-token", "OPENROUTER_API_KEY=operator-key"].join("\n") +
+        ["CARAPACE_GATEWAY_TOKEN=legacy-node-token", "OPENROUTER_API_KEY=operator-key"].join("\n") +
         "\n";
       await fs.writeFile(envFilePath, legacyGatewayEnvFile, {
         encoding: "utf8",
@@ -2894,12 +2894,12 @@ describe("stageSystemdService", () => {
       await stageSystemdService(
         nodeSystemdServiceFixture(env, {
           environment: {
-            OPENCLAW_GATEWAY_TOKEN: "fresh-file-token",
-            OPENCLAW_GATEWAY_PORT: "18789",
-            OPENCLAW_SERVICE_KIND: "node",
+            CARAPACE_GATEWAY_TOKEN: "fresh-file-token",
+            CARAPACE_GATEWAY_PORT: "18789",
+            CARAPACE_SERVICE_KIND: "node",
           },
           environmentValueSources: {
-            OPENCLAW_GATEWAY_TOKEN: "file",
+            CARAPACE_GATEWAY_TOKEN: "file",
           },
         }),
       );
@@ -2911,9 +2911,9 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${nodeEnvFilePath}`);
-      expect(unit).not.toContain("OPENCLAW_GATEWAY_TOKEN=fresh-file-token");
+      expect(unit).not.toContain("CARAPACE_GATEWAY_TOKEN=fresh-file-token");
       expect(nodeEnvFile).toBe(
-        "OPENROUTER_API_KEY=operator-key\nOPENCLAW_GATEWAY_TOKEN=fresh-file-token\n",
+        "OPENROUTER_API_KEY=operator-key\nCARAPACE_GATEWAY_TOKEN=fresh-file-token\n",
       );
       expect(gatewayEnvFile).toBe(legacyGatewayEnvFile);
     });
@@ -2921,11 +2921,11 @@ describe("stageSystemdService", () => {
 
   it("clears stale node file-backed managed keys without touching the gateway env file", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, nodeEnvFilePath }) => {
-      await fs.writeFile(envFilePath, "OPENCLAW_GATEWAY_TOKEN=stale-token\n", {
+      await fs.writeFile(envFilePath, "CARAPACE_GATEWAY_TOKEN=stale-token\n", {
         encoding: "utf8",
         mode: 0o600,
       });
-      await fs.writeFile(nodeEnvFilePath, "OPENCLAW_GATEWAY_TOKEN=stale-node-token\n", {
+      await fs.writeFile(nodeEnvFilePath, "CARAPACE_GATEWAY_TOKEN=stale-node-token\n", {
         encoding: "utf8",
         mode: 0o600,
       });
@@ -2935,11 +2935,11 @@ describe("stageSystemdService", () => {
       await stageSystemdService(
         nodeSystemdServiceFixture(env, {
           environment: {
-            OPENCLAW_GATEWAY_PORT: "18789",
-            OPENCLAW_SERVICE_KIND: "node",
+            CARAPACE_GATEWAY_PORT: "18789",
+            CARAPACE_SERVICE_KIND: "node",
           },
           environmentValueSources: {
-            OPENCLAW_GATEWAY_TOKEN: "file",
+            CARAPACE_GATEWAY_TOKEN: "file",
           },
         }),
       );
@@ -2949,7 +2949,7 @@ describe("stageSystemdService", () => {
       expect(unit).not.toContain("EnvironmentFile=");
       await expect(fs.readFile(nodeEnvFilePath, "utf8")).resolves.toBe("");
       await expect(fs.readFile(envFilePath, "utf8")).resolves.toBe(
-        "OPENCLAW_GATEWAY_TOKEN=stale-token\n",
+        "CARAPACE_GATEWAY_TOKEN=stale-token\n",
       );
     });
   });
@@ -2967,7 +2967,7 @@ describe("stageSystemdService", () => {
         gatewaySystemdServiceFixture(env, {
           environment: {
             LLM_API_KEY: "$SECRET_FROM_SHELL",
-            OPENCLAW_GATEWAY_PORT: "18789",
+            CARAPACE_GATEWAY_PORT: "18789",
           },
           environmentValueSources: {
             LLM_API_KEY: "inline-and-file",
@@ -2993,13 +2993,13 @@ describe("stageSystemdService", () => {
           [
             "[Service]",
             comment,
-            "ExecStart=/usr/bin/openclaw node run",
+            "ExecStart=/usr/bin/carapace node run",
             comment,
-            "Environment=FOO=bar OPENCLAW_GATEWAY_TOKEN=inline-token BAZ=qux",
-            "Environment=OPENCLAW_GATEWAY_TOKEN=token-only-line",
-            "Environment='OPENCLAW_GATEWAY_TOKEN=single-quoted-token' FROM_SINGLE=kept",
+            "Environment=FOO=bar CARAPACE_GATEWAY_TOKEN=inline-token BAZ=qux",
+            "Environment=CARAPACE_GATEWAY_TOKEN=token-only-line",
+            "Environment='CARAPACE_GATEWAY_TOKEN=single-quoted-token' FROM_SINGLE=kept",
             "Environment=",
-            "Environment=OPENCLAW_GATEWAY_PORT=18789",
+            "Environment=CARAPACE_GATEWAY_PORT=18789",
           ].join("\n"),
           { encoding: "utf8", mode: 0o600 },
         );
@@ -3010,12 +3010,12 @@ describe("stageSystemdService", () => {
         await stageSystemdService(
           nodeSystemdServiceFixture(env, {
             environment: {
-              OPENCLAW_GATEWAY_TOKEN: "fresh-token",
-              OPENCLAW_GATEWAY_PORT: "18789",
-              OPENCLAW_SERVICE_KIND: "node",
+              CARAPACE_GATEWAY_TOKEN: "fresh-token",
+              CARAPACE_GATEWAY_PORT: "18789",
+              CARAPACE_SERVICE_KIND: "node",
             },
             environmentValueSources: {
-              OPENCLAW_GATEWAY_TOKEN: "file",
+              CARAPACE_GATEWAY_TOKEN: "file",
             },
           }),
         );
@@ -3026,15 +3026,15 @@ describe("stageSystemdService", () => {
           fs.stat(`${unitPath}.bak`),
         ]);
 
-        expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-token");
-        expect(backupUnit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=inline-token");
-        expect(backupUnit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=token-only-line");
+        expect(unit).not.toContain("Environment=CARAPACE_GATEWAY_TOKEN=fresh-token");
+        expect(backupUnit).not.toContain("Environment=CARAPACE_GATEWAY_TOKEN=inline-token");
+        expect(backupUnit).not.toContain("Environment=CARAPACE_GATEWAY_TOKEN=token-only-line");
         expect(backupUnit).not.toContain("single-quoted-token");
         expect(backupUnit).toContain("[Service]");
-        expect(backupUnit.split("\n")).toContain("ExecStart=/usr/bin/openclaw node run");
+        expect(backupUnit.split("\n")).toContain("ExecStart=/usr/bin/carapace node run");
         expect(backupUnit).toContain("Environment=FOO=bar BAZ=qux");
         expect(backupUnit).toContain("Environment=FROM_SINGLE=kept\nEnvironment=\n");
-        expect(backupUnit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
+        expect(backupUnit).toContain("Environment=CARAPACE_GATEWAY_PORT=18789");
         expect(backupStat.mode & 0o777).toBe(0o600);
       });
     },
@@ -3047,10 +3047,10 @@ describe("stageSystemdService", () => {
         unitPath,
         [
           "[Service]",
-          "ExecStart=/opt/operator/openclaw gateway run --operator-flag",
-          "Environment=OPENCLAW_GATEWAY_TOKEN=legacy-token CUSTOM_SETTING=kept \\",
+          "ExecStart=/opt/operator/carapace gateway run --operator-flag",
+          "Environment=CARAPACE_GATEWAY_TOKEN=legacy-token CUSTOM_SETTING=kept \\",
           "  # legacy installer note",
-          "  OPENCLAW_GATEWAY_PASSWORD=legacy-password",
+          "  CARAPACE_GATEWAY_PASSWORD=legacy-password",
           "RestartSec=17",
         ].join("\n"),
         { encoding: "utf8", mode: 0o644 },
@@ -3066,10 +3066,10 @@ describe("stageSystemdService", () => {
         fs.stat(unitPath),
         fs.stat(`${unitPath}.bak`),
       ]);
-      expect(unit).not.toContain("OPENCLAW_GATEWAY_TOKEN");
-      expect(unit).not.toContain("OPENCLAW_GATEWAY_PASSWORD");
-      expect(backup).not.toContain("OPENCLAW_GATEWAY_TOKEN");
-      expect(backup).not.toContain("OPENCLAW_GATEWAY_PASSWORD");
+      expect(unit).not.toContain("CARAPACE_GATEWAY_TOKEN");
+      expect(unit).not.toContain("CARAPACE_GATEWAY_PASSWORD");
+      expect(backup).not.toContain("CARAPACE_GATEWAY_TOKEN");
+      expect(backup).not.toContain("CARAPACE_GATEWAY_PASSWORD");
       expect(backup).toContain("CUSTOM_SETTING=kept");
       expect(backup).toContain("RestartSec=17");
       expect(unitStat.mode & 0o777).toBe(0o600);
@@ -3081,7 +3081,7 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, unitPath }) => {
       const backupPath = `${unitPath}.bak`;
       const previous =
-        "[Service]\nEnvironment=OPENCLAW_GATEWAY_TOKEN=legacy-token CUSTOM_SETTING=kept\n";
+        "[Service]\nEnvironment=CARAPACE_GATEWAY_TOKEN=legacy-token CUSTOM_SETTING=kept\n";
       await fs.mkdir(path.dirname(backupPath), { recursive: true, mode: 0o755 });
       await fs.writeFile(backupPath, previous, { encoding: "utf8", mode: 0o640 });
       await fs.chmod(backupPath, 0o640);
@@ -3091,10 +3091,10 @@ describe("stageSystemdService", () => {
         stageSystemdService(
           gatewaySystemdServiceFixture(env, {
             environment: {
-              OPENCLAW_GATEWAY_PORT: "18789",
-              OPENCLAW_GATEWAY_TOKEN: "invalid\nmultiline",
+              CARAPACE_GATEWAY_PORT: "18789",
+              CARAPACE_GATEWAY_TOKEN: "invalid\nmultiline",
             },
-            environmentValueSources: { OPENCLAW_GATEWAY_TOKEN: "file" },
+            environmentValueSources: { CARAPACE_GATEWAY_TOKEN: "file" },
           }),
         ),
       ).rejects.toThrow("systemd EnvironmentFile values must be single-line");
@@ -3111,7 +3111,7 @@ describe("stageSystemdService", () => {
       await fs.writeFile(
         path.join(stateDir, ".env"),
         [
-          "OPENCLAW_GATEWAY_TOKEN=stale-token",
+          "CARAPACE_GATEWAY_TOKEN=stale-token",
           "LLM_API_KEY=dotenv-key",
           "toString=dotenv-string",
         ].join("\n"),
@@ -3123,7 +3123,7 @@ describe("stageSystemdService", () => {
       await stageSystemdService(
         gatewaySystemdServiceFixture(env, {
           environment: {
-            OPENCLAW_GATEWAY_TOKEN: "fresh-token",
+            CARAPACE_GATEWAY_TOKEN: "fresh-token",
             LLM_API_KEY: "dotenv-key",
             constructor: "inline-constructor",
             toString: "dotenv-string",
@@ -3134,7 +3134,7 @@ describe("stageSystemdService", () => {
       const unit = await fs.readFile(unitPath, "utf8");
 
       expect(unit).not.toContain("EnvironmentFile=");
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-token");
+      expect(unit).toContain("Environment=CARAPACE_GATEWAY_TOKEN=fresh-token");
       expect(unit).not.toContain("Environment=LLM_API_KEY=dotenv-key");
       expect(unit).toContain("Environment=constructor=inline-constructor");
       expect(unit).not.toContain("Environment=toString=dotenv-string");
@@ -3144,12 +3144,12 @@ describe("stageSystemdService", () => {
 
   it("clears stale inline-managed keys from env file on re-stage (#76860)", async () => {
     await withStageFixture(async ({ env, stateDir, unitPath, envFilePath }) => {
-      // Existing env file carries a stale OPENCLAW_GATEWAY_TOKEN that the
+      // Existing env file carries a stale CARAPACE_GATEWAY_TOKEN that the
       // operator previously wrote there but staging now supplies inline.
       await fs.writeFile(
         envFilePath,
         [
-          "OPENCLAW_GATEWAY_TOKEN=stale-gateway-token",
+          "CARAPACE_GATEWAY_TOKEN=stale-gateway-token",
           "OPENROUTER_API_KEY=or-operator-key",
           "NODE_OPTIONS=--require=/tmp/stale-preload.cjs",
         ].join("\n") + "\n",
@@ -3166,23 +3166,23 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: createWritableStreamMock().stdout,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
         workingDirectory: "/tmp",
-        // Staging manages OPENCLAW_GATEWAY_TOKEN inline; OPENCLAW_SERVICE_MANAGED_ENV_KEYS
-        // marks it as an OpenClaw-managed key so the stale env-file copy is cleared.
+        // Staging manages CARAPACE_GATEWAY_TOKEN inline; CARAPACE_SERVICE_MANAGED_ENV_KEYS
+        // marks it as an Carapace-managed key so the stale env-file copy is cleared.
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "fresh-gateway-token",
+          CARAPACE_GATEWAY_TOKEN: "fresh-gateway-token",
           LLM_API_KEY: "dotenv-key",
           OPENROUTER_API_KEY: "or-operator-key",
           NODE_OPTIONS: "",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "OPENCLAW_GATEWAY_TOKEN",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "CARAPACE_GATEWAY_TOKEN",
         },
         environmentValueSources: {
-          OPENCLAW_GATEWAY_TOKEN: "inline-and-file",
+          CARAPACE_GATEWAY_TOKEN: "inline-and-file",
           LLM_API_KEY: "inline",
           OPENROUTER_API_KEY: "file",
           NODE_OPTIONS: "inline",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "inline",
+          CARAPACE_SERVICE_MANAGED_ENV_KEYS: "inline",
         },
       });
 
@@ -3192,13 +3192,13 @@ describe("stageSystemdService", () => {
       ]);
       // Stale inline-managed key must be removed from the env file so the
       // fresh inline Environment= value wins (EnvironmentFile would override it).
-      expect(envFile).not.toContain("OPENCLAW_GATEWAY_TOKEN");
+      expect(envFile).not.toContain("CARAPACE_GATEWAY_TOKEN");
       expect(envFile).not.toContain("NODE_OPTIONS");
       expect(unit).toContain("Environment=NODE_OPTIONS=\n");
       // Operator-added key not managed inline must survive.
       expect(envFile).toContain("OPENROUTER_API_KEY=or-operator-key");
       expect(envFile).not.toContain("LLM_API_KEY");
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-gateway-token");
+      expect(unit).toContain("Environment=CARAPACE_GATEWAY_TOKEN=fresh-gateway-token");
       expect(unit).not.toContain("Environment=OPENROUTER_API_KEY=or-operator-key");
       expect(unit).not.toContain("Environment=LLM_API_KEY=dotenv-key");
     });
@@ -3372,14 +3372,14 @@ describe("systemd service install and uninstall", () => {
       nodeEnvFilePath: string;
     }) => Promise<void>,
   ): Promise<void> {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-systemd-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-node-systemd-"));
     const home = path.join(tempHomeRoot, "home");
-    const stateDir = path.join(home, ".openclaw");
+    const stateDir = path.join(home, ".carapace");
     const env = {
       HOME: home,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
-      OPENCLAW_SERVICE_KIND: "node",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_SYSTEMD_UNIT: "carapace-node",
+      CARAPACE_SERVICE_KIND: "node",
     };
     const unitPath = resolveSystemdUnitPath(env);
     const nodeEnvFilePath = path.join(stateDir, "node.systemd.env");
@@ -3399,11 +3399,11 @@ describe("systemd service install and uninstall", () => {
       code: 1,
       termination: "exit",
       stdout: "",
-      stderr: `Call failed: Unit ${env.OPENCLAW_SYSTEMD_UNIT ?? "openclaw-gateway-work"}.service not found.`,
+      stderr: `Call failed: Unit ${env.CARAPACE_SYSTEMD_UNIT ?? "carapace-gateway-work"}.service not found.`,
     }));
   });
 
-  it("activates the OPENCLAW_SYSTEMD_UNIT override during install", async () => {
+  it("activates the CARAPACE_SYSTEMD_UNIT override during install", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath }) => {
       execFileMock
         .mockImplementationOnce(systemctlUserSuccess("status"))
@@ -3413,18 +3413,18 @@ describe("systemd service install and uninstall", () => {
 
       await installSystemdService(
         nodeSystemdServiceFixture(env, {
-          description: "OpenClaw Node Host",
+          description: "Carapace Node Host",
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            CARAPACE_SYSTEMD_UNIT: "carapace-node",
           },
         }),
       );
 
       const unit = await fs.readFile(unitPath, "utf8");
-      expect(unitPath).toMatch(/openclaw-node\.service$/);
-      expect(unit).toContain("Description=OpenClaw Node Host");
-      expect(unit).toContain("openclaw node run");
-      expect(unit).not.toContain("OPENCLAW_SERVICE_VERSION");
+      expect(unitPath).toMatch(/carapace-node\.service$/);
+      expect(unit).toContain("Description=Carapace Node Host");
+      expect(unit).toContain("carapace node run");
+      expect(unit).not.toContain("CARAPACE_SERVICE_VERSION");
       expect(execFileMock).toHaveBeenCalledTimes(4);
     });
   });
@@ -3432,7 +3432,7 @@ describe("systemd service install and uninstall", () => {
   it.each([
     {
       name: "an equal-valued launcher override",
-      directive: "ExecStart=/usr/bin/openclaw node run",
+      directive: "ExecStart=/usr/bin/carapace node run",
       shouldWarn: true,
     },
     {
@@ -3447,13 +3447,13 @@ describe("systemd service install and uninstall", () => {
         const dropInPath = path.join(`${unitPath}.d`, "operator.conf");
         await fs.mkdir(path.dirname(dropInPath), { recursive: true, mode: 0o755 });
         await fs.writeFile(dropInPath, `[Service]\n${directive}\n`, { mode: 0o644 });
-        await fs.writeFile(unitPath, "[Service]\nExecStart=/usr/bin/openclaw node run\n", {
+        await fs.writeFile(unitPath, "[Service]\nExecStart=/usr/bin/carapace node run\n", {
           mode: 0o644,
         });
         mockSystemdManagerSnapshot({
-          programArguments: ["/usr/bin/openclaw", "node", "run"],
+          programArguments: ["/usr/bin/carapace", "node", "run"],
           workingDirectory: "/tmp",
-          environment: ["OPENCLAW_SYSTEMD_UNIT=openclaw-node"],
+          environment: ["CARAPACE_SYSTEMD_UNIT=carapace-node"],
           fragmentPath: unitPath,
           dropInPaths: [dropInPath],
         });
@@ -3470,7 +3470,7 @@ describe("systemd service install and uninstall", () => {
         await installSystemdService(
           nodeSystemdServiceFixture(env, {
             warn,
-            environment: { OPENCLAW_SYSTEMD_UNIT: "openclaw-node" },
+            environment: { CARAPACE_SYSTEMD_UNIT: "carapace-node" },
           }),
         );
 
@@ -3495,7 +3495,7 @@ describe("systemd service install and uninstall", () => {
             [
               createExecFileError("enable failed"),
               "",
-              "Unit file openclaw-node.service does not exist.",
+              "Unit file carapace-node.service does not exist.",
             ],
             "enable",
             NODE_SERVICE,
@@ -3508,7 +3508,7 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService(
         nodeSystemdServiceFixture(env, {
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            CARAPACE_SYSTEMD_UNIT: "carapace-node",
           },
         }),
       );
@@ -3536,7 +3536,7 @@ describe("systemd service install and uninstall", () => {
             [
               createExecFileError(`${action} interrupted`, { termination }),
               "",
-              "Unit file openclaw-node.service does not exist.",
+              "Unit file carapace-node.service does not exist.",
             ],
             action,
             NODE_SERVICE,
@@ -3546,7 +3546,7 @@ describe("systemd service install and uninstall", () => {
         await expect(
           installSystemdService(
             nodeSystemdServiceFixture(env, {
-              environment: { OPENCLAW_SYSTEMD_UNIT: "openclaw-node" },
+              environment: { CARAPACE_SYSTEMD_UNIT: "carapace-node" },
             }),
           ),
         ).rejects.toThrow(`systemctl ${action} failed:`);
@@ -3568,7 +3568,7 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService(
         nodeSystemdServiceFixture(installEnv, {
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            CARAPACE_SYSTEMD_UNIT: "carapace-node",
           },
         }),
       );
@@ -3580,13 +3580,13 @@ describe("systemd service install and uninstall", () => {
   it("uses the sudo-u target user for install activation machine-scope retry", async () => {
     await withNodeSystemdFixture(async ({ env }) => {
       mockEffectiveUid(process.getuid?.() ?? 1000);
-      const installEnv = { ...env, USER: "openclaw", SUDO_USER: "admin" };
-      mockNodeInstallNoMediumFailure("openclaw");
+      const installEnv = { ...env, USER: "carapace", SUDO_USER: "admin" };
+      mockNodeInstallNoMediumFailure("carapace");
 
       await installSystemdService(
         nodeSystemdServiceFixture(installEnv, {
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            CARAPACE_SYSTEMD_UNIT: "carapace-node",
           },
         }),
       );
@@ -3606,10 +3606,10 @@ describe("systemd service install and uninstall", () => {
         installSystemdService({
           env,
           stdout: createWritableStreamMock().stdout,
-          programArguments: ["/usr/bin/openclaw", "node", "run"],
+          programArguments: ["/usr/bin/carapace", "node", "run"],
           workingDirectory: "/tmp",
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            CARAPACE_SYSTEMD_UNIT: "carapace-node",
           },
         }),
       ).rejects.toThrow("systemctl --user unavailable: Failed to connect to bus: No medium found");
@@ -3620,19 +3620,19 @@ describe("systemd service install and uninstall", () => {
 
   it.each([
     "Access denied",
-    "Unit openclaw-node.service is not loaded properly: Invalid argument.",
-    "Failed to disable unit: Access denied.\nUnit openclaw-node.service is not active.",
+    "Unit carapace-node.service is not loaded properly: Invalid argument.",
+    "Failed to disable unit: Access denied.\nUnit carapace-node.service is not active.",
     "Unit is not loaded.",
     "Unit inactive.",
     "Unit unrelated.service is not active.",
   ])("refuses to remove the unit when systemctl disable fails: %s", async (detail) => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Node\n", {
         encoding: "utf8",
         mode: 0o644,
       });
-      await fs.writeFile(nodeEnvFilePath, "OPENCLAW_GATEWAY_TOKEN=preserved-token\n", {
+      await fs.writeFile(nodeEnvFilePath, "CARAPACE_GATEWAY_TOKEN=preserved-token\n", {
         encoding: "utf8",
         mode: 0o600,
       });
@@ -3652,17 +3652,17 @@ describe("systemd service install and uninstall", () => {
       await expect(uninstallSystemdService({ env, stdout })).rejects.toThrow(
         `systemctl disable failed: ${detail}`,
       );
-      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("OpenClaw Node");
+      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("Carapace Node");
       await expect(fs.readFile(nodeEnvFilePath, "utf8")).resolves.toContain("preserved-token");
     });
   });
 
   it.each([
-    "Unit file openclaw-node.service does not exist.",
-    "Failed to disable unit: Unit file openclaw-node.service does not exist.",
-    "Unit openclaw-node.service could not be found.",
-    "Failed to stop openclaw-node.service: Unit openclaw-node.service not loaded.",
-    "Failed to stop openclaw-node.service: Unit openclaw-node.service is not active.",
+    "Unit file carapace-node.service does not exist.",
+    "Failed to disable unit: Unit file carapace-node.service does not exist.",
+    "Unit carapace-node.service could not be found.",
+    "Failed to stop carapace-node.service: Unit carapace-node.service not loaded.",
+    "Failed to stop carapace-node.service: Unit carapace-node.service is not active.",
   ])("keeps missing or inactive systemd unit removal idempotent: %s", async (detail) => {
     await withNodeSystemdFixture(async ({ env }) => {
       execFileMock
@@ -3683,21 +3683,21 @@ describe("systemd service install and uninstall", () => {
     });
   });
 
-  it("disables the OPENCLAW_SYSTEMD_UNIT override during uninstall", async () => {
+  it("disables the CARAPACE_SYSTEMD_UNIT override during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Node\n", {
         encoding: "utf8",
         mode: 0o644,
       });
-      await fs.writeFile(`${unitPath}.bak`, "[Unit]\nDescription=Previous OpenClaw Node\n", {
+      await fs.writeFile(`${unitPath}.bak`, "[Unit]\nDescription=Previous Carapace Node\n", {
         mode: 0o644,
       });
       await fs.writeFile(
         nodeEnvFilePath,
         [
-          "OPENCLAW_GATEWAY_TOKEN=stale-node-token",
-          "OPENCLAW_GATEWAY_PASSWORD=stale-password",
+          "CARAPACE_GATEWAY_TOKEN=stale-node-token",
+          "CARAPACE_GATEWAY_PASSWORD=stale-password",
           "OPENROUTER_API_KEY=operator-key",
           "LLM_API_KEY=$SECRET_FROM_SHELL",
           "LITERAL_API_KEY=\\$SECRET_FROM_SHELL",
@@ -3738,11 +3738,11 @@ describe("systemd service install and uninstall", () => {
   it("removes a password-only node environment file during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Node\n", {
         encoding: "utf8",
         mode: 0o644,
       });
-      await fs.writeFile(nodeEnvFilePath, "OPENCLAW_GATEWAY_PASSWORD=stale-password\n", {
+      await fs.writeFile(nodeEnvFilePath, "CARAPACE_GATEWAY_PASSWORD=stale-password\n", {
         encoding: "utf8",
         mode: 0o600,
       });
@@ -3762,16 +3762,16 @@ describe("systemd service install and uninstall", () => {
   it("preserves node env file values when unit removal fails during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Node\n", {
         encoding: "utf8",
         mode: 0o644,
       });
-      await fs.writeFile(`${unitPath}.bak`, "[Unit]\nDescription=Previous OpenClaw Node\n", {
+      await fs.writeFile(`${unitPath}.bak`, "[Unit]\nDescription=Previous Carapace Node\n", {
         mode: 0o644,
       });
       await fs.writeFile(
         nodeEnvFilePath,
-        "OPENCLAW_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
+        "CARAPACE_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
         { encoding: "utf8", mode: 0o600 },
       );
 
@@ -3788,12 +3788,12 @@ describe("systemd service install and uninstall", () => {
         "EACCES: permission denied",
       );
 
-      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("OpenClaw Node");
+      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("Carapace Node");
       await expect(fs.readFile(`${unitPath}.bak`, "utf8")).resolves.toContain(
-        "Previous OpenClaw Node",
+        "Previous Carapace Node",
       );
       await expect(fs.readFile(nodeEnvFilePath, "utf8")).resolves.toBe(
-        "OPENCLAW_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
+        "CARAPACE_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
       );
       expect(execFileMock).toHaveBeenCalledTimes(2);
     });
@@ -3873,7 +3873,7 @@ describe("uninstallLegacySystemdUnits", () => {
   it.each(["exit", "signal"] as const)(
     "preserves a legacy unit file when disable fails after status %s",
     async (termination) => {
-      const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-legacy-unit-"));
+      const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-legacy-unit-"));
       const env = { HOME: path.join(tempHomeRoot, "home") };
       const unitPath = path.join(
         env.HOME,
@@ -3921,7 +3921,7 @@ describe("uninstallLegacySystemdUnits", () => {
   );
 
   it("discovers and removes an orphaned legacy backup", async () => {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-legacy-backup-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-legacy-backup-"));
     const env = { HOME: path.join(tempHomeRoot, "home") };
     const backupPath = path.join(
       env.HOME,
@@ -3932,7 +3932,7 @@ describe("uninstallLegacySystemdUnits", () => {
     );
     try {
       await fs.mkdir(path.dirname(backupPath), { recursive: true, mode: 0o755 });
-      await fs.writeFile(backupPath, "Environment=OPENCLAW_GATEWAY_TOKEN=legacy-token\n", {
+      await fs.writeFile(backupPath, "Environment=CARAPACE_GATEWAY_TOKEN=legacy-token\n", {
         mode: 0o600,
       });
       execFileMock.mockImplementation(execFileSuccess());
@@ -3950,7 +3950,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
   async function withUserUnitFixture(
     run: (context: { env: Record<string, string>; unitPath: string }) => Promise<void>,
   ): Promise<void> {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-user-unit-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-user-unit-"));
     const home = path.join(tempHomeRoot, "home");
     const env = { HOME: home };
     const unitPath = resolveSystemdUnitPath(env);
@@ -3969,7 +3969,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
 
   it("disables and removes the user-scope unit when systemctl is available", async () => {
     await withUserUnitFixture(async ({ env, unitPath }) => {
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Gateway\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Gateway\n", {
         encoding: "utf8",
         mode: 0o644,
       });
@@ -3997,7 +3997,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
 
   it("reports removed:false without throwing when the unit file is already absent", async () => {
     await withUserUnitFixture(async ({ env, unitPath }) => {
-      await fs.writeFile(`${unitPath}.bak`, "Environment=OPENCLAW_GATEWAY_TOKEN=orphaned-token\n", {
+      await fs.writeFile(`${unitPath}.bak`, "Environment=CARAPACE_GATEWAY_TOKEN=orphaned-token\n", {
         mode: 0o600,
       });
       execFileMock
@@ -4015,7 +4015,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
 
   it("removes the unit file only when systemctl is unavailable", async () => {
     await withUserUnitFixture(async ({ env, unitPath }) => {
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Gateway\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Gateway\n", {
         encoding: "utf8",
         mode: 0o644,
       });
@@ -4040,7 +4040,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
     "preserves the unit file when disable fails after status %s",
     async (termination) => {
       await withUserUnitFixture(async ({ env, unitPath }) => {
-        await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Gateway\n", {
+        await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Gateway\n", {
           encoding: "utf8",
           mode: 0o644,
         });
@@ -4078,7 +4078,7 @@ describe("uninstallUserSystemdGatewayUnit", () => {
 
   it("surfaces daemon-reload failure after removing the disabled unit", async () => {
     await withUserUnitFixture(async ({ env, unitPath }) => {
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Gateway\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Carapace Gateway\n", {
         encoding: "utf8",
         mode: 0o644,
       });
@@ -4263,17 +4263,17 @@ describe("systemd service control", () => {
     execFileMock
       .mockImplementationOnce(execFileSuccess())
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        assertUserSystemctlArgs(args, "reset-failed", "openclaw-gateway-work.service");
+        assertUserSystemctlArgs(args, "reset-failed", "carapace-gateway-work.service");
         // args[0] is the "--user" scope flag; the systemctl verb is args[1].
         restartSequence.push(args[1] ?? "");
         cb(null, "", "");
       })
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        assertUserSystemctlArgs(args, "restart", "openclaw-gateway-work.service");
+        assertUserSystemctlArgs(args, "restart", "carapace-gateway-work.service");
         restartSequence.push(args[1] ?? "");
         cb(null, "", "");
       });
-    await assertRestartSuccess({ OPENCLAW_PROFILE: "work" });
+    await assertRestartSuccess({ CARAPACE_PROFILE: "work" });
     // reset-failed must clear any start-limit-hit latch before the restart so a
     // crash-looped unit can recover.
     expect(restartSequence).toEqual(["reset-failed", "restart"]);

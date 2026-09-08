@@ -9,12 +9,12 @@ import {
   type AssistantMessageEventStreamContract,
   type SimpleStreamOptions,
   type StreamFunction,
-} from "@openclaw/ai";
-import { prepareModelForSimpleCompletion } from "@openclaw/ai/transports";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple, type Context, type Model } from "openclaw/plugin-sdk/llm";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveAgentModelPrimaryValue } from "openclaw/plugin-sdk/provider-onboard";
+} from "@carapace/ai";
+import { prepareModelForSimpleCompletion } from "@carapace/ai/transports";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple, type Context, type Model } from "carapace/plugin-sdk/llm";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { resolveAgentModelPrimaryValue } from "carapace/plugin-sdk/provider-onboard";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildMetaProvider } from "./api.js";
 import plugin from "./index.js";
@@ -125,7 +125,7 @@ describe("meta provider", () => {
     }
     const model = {
       ...resolveCatalogModel(CATALOG_CAP_MODEL_ID),
-      api: "openclaw-provider-stream:meta:muse-spark-1.3",
+      api: "carapace-provider-stream:meta:muse-spark-1.3",
     } as Model;
 
     for (const hook of [provider.wrapStreamFn, provider.wrapSimpleCompletionStreamFn]) {
@@ -161,7 +161,7 @@ describe("meta provider", () => {
     }
     const model = {
       ...resolveCatalogModel(CATALOG_CAP_MODEL_ID),
-      api: "openclaw-provider-stream:meta:muse-spark-1.3",
+      api: "carapace-provider-stream:meta:muse-spark-1.3",
     } as Model;
     let capturedPayload: Record<string, unknown> | undefined;
     const baseStreamFn: StreamFn = (streamModel, _context, options) => {
@@ -355,7 +355,7 @@ describe("meta provider", () => {
     });
 
     const preparedModel = prepareModelForSimpleCompletion({ apiRegistry: registry, model });
-    expect(preparedModel.api).toMatch(/^openclaw-provider-simple:/);
+    expect(preparedModel.api).toMatch(/^carapace-provider-simple:/);
 
     const result = await runtime.completeSimple(preparedModel, { messages: [] });
 

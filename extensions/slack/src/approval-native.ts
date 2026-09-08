@@ -1,17 +1,17 @@
 // Slack plugin module implements approval native behavior.
-import { createApproverRestrictedNativeApprovalCapability } from "openclaw/plugin-sdk/approval-delivery-runtime";
-import { createLazyChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
+import { createApproverRestrictedNativeApprovalCapability } from "carapace/plugin-sdk/approval-delivery-runtime";
+import { createLazyChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-adapter-runtime";
 import type {
   ChannelApprovalKind,
   ChannelApprovalNativeRuntimeAdapter,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   createChannelNativeOriginTargetResolver,
   createNativeApprovalForwardingFallbackSuppressor,
-} from "openclaw/plugin-sdk/approval-native-runtime";
-import type { ChannelApprovalCapability } from "openclaw/plugin-sdk/channel-contract";
-import { normalizeMessageChannel } from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/approval-native-runtime";
+import type { ChannelApprovalCapability } from "carapace/plugin-sdk/channel-contract";
+import { normalizeMessageChannel } from "carapace/plugin-sdk/routing";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { listSlackAccountIds } from "./accounts.js";
 import {
   getSlackApprovalApproversForTeam,

@@ -243,7 +243,7 @@ describe("dependency guard script", () => {
         candidates: untrustedAuthorCandidate,
         pullRequest: { author_association: "COLLABORATOR" },
         isDependencyApprover: async (login) =>
-          login === "security-user" || login === "repo-admin" ? "openclaw-secops" : null,
+          login === "security-user" || login === "repo-admin" ? "carapace-secops" : null,
         getRepositoryRoleName: async () => "maintain",
       }),
     ).resolves.toBeNull();
@@ -268,7 +268,7 @@ describe("dependency guard script", () => {
       }),
     ).resolves.toEqual({
       login: "maintainer",
-      reason: "pull request author; OpenClaw organization member with repository maintain role",
+      reason: "pull request author; Carapace organization member with repository maintain role",
     });
 
     const rejectedAuthorRoles: Array<[string, string]> = [
@@ -294,9 +294,9 @@ describe("dependency guard script", () => {
       .mockResolvedValueOnce({ permission: "admin", role_name: "admin" });
     const checks = createGuardApproverChecks({
       api: { request },
-      owner: "openclaw",
-      repo: "openclaw",
-      securityTeamSlug: "openclaw-secops",
+      owner: "carapace",
+      repo: "carapace",
+      securityTeamSlug: "carapace-secops",
       explicitSecurityApprovers: new Set(),
     });
 
@@ -310,15 +310,15 @@ describe("dependency guard script", () => {
     const body = renderTrustedDependencyComment({
       actor: {
         login: "maintainer",
-        reason: "pull request author; OpenClaw organization member with repository maintain role",
+        reason: "pull request author; Carapace organization member with repository maintain role",
       },
       headSha,
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- carapace:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph changes noted");
     expect(body).toContain("informational");
-    expect(body).toContain("OpenClaw organization member with Maintain or Admin repository access");
+    expect(body).toContain("Carapace organization member with Maintain or Admin repository access");
     expect(body).toContain("@maintainer");
     expect(body).toContain(headSha);
     expect(body).not.toContain("are blocked");
@@ -432,27 +432,27 @@ describe("dependency guard script", () => {
 
   it("trusts only configured dependency guard marker comment authors", () => {
     const trustedAuthors = dependencyGuardCommentAuthors(
-      "github-actions[bot], openclaw-autoscrub[bot]",
+      "github-actions[bot], carapace-autoscrub[bot]",
     );
     expect(dependencyGuardCommentAuthors(undefined)).toEqual(new Set(["github-actions[bot]"]));
 
     expect(
       isDependencyGuardMarkerComment(
         {
-          body: "<!-- openclaw:dependency-graph-guard -->",
-          user: { login: "openclaw-autoscrub[bot]" },
+          body: "<!-- carapace:dependency-graph-guard -->",
+          user: { login: "carapace-autoscrub[bot]" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- carapace:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(true);
     expect(
       isDependencyGuardMarkerComment(
         {
-          body: "<!-- openclaw:dependency-graph-guard -->",
+          body: "<!-- carapace:dependency-graph-guard -->",
           user: { login: "contributor" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- carapace:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(false);
@@ -462,7 +462,7 @@ describe("dependency guard script", () => {
           body: "no marker",
           user: { login: "github-actions[bot]" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- carapace:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(false);
@@ -481,7 +481,7 @@ describe("dependency guard script", () => {
       ],
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- carapace:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph changes are blocked");
     expect(body).toContain("`pnpm-lock.yaml` changed.");
     expect(body).toContain("`tools/nested/pnpm-lock.yaml` changed.");
@@ -552,14 +552,14 @@ describe("dependency guard script", () => {
     const sameRepoPullRequest = {
       head: {
         ref: "contributor/change",
-        repo: { full_name: "openclaw/openclaw" },
+        repo: { full_name: "carapace/carapace" },
         sha: headSha,
       },
     };
     const forkPullRequest = {
       head: {
         ref: "contributor/change",
-        repo: { full_name: "external/openclaw" },
+        repo: { full_name: "external/carapace" },
         sha: headSha,
       },
     };
@@ -567,29 +567,29 @@ describe("dependency guard script", () => {
       maintainer_can_modify: true,
       head: {
         ref: "contributor/change",
-        repo: { full_name: "external/openclaw" },
+        repo: { full_name: "external/carapace" },
         sha: headSha,
       },
     };
 
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         pullRequest: sameRepoPullRequest,
       }),
     ).toBe(true);
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         pullRequest: forkPullRequest,
       }),
     ).toBe(false);
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         pullRequest: editableForkPullRequest,
       }),
     ).toBe(true);
@@ -602,7 +602,7 @@ describe("dependency guard script", () => {
       lockfileChanges: ["pnpm-lock.yaml", "tools/nested/pnpm-lock.yaml"],
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- carapace:dependency-graph-guard -->");
     expect(body).toContain("Dependency lockfile changes were removed");
     expect(body).toContain("did not change dependency graph fields in package manifests");
     expect(body).toContain("`pnpm-lock.yaml`");
@@ -684,26 +684,26 @@ describe("dependency guard script", () => {
     const commit = await createAutoscrubCommit(
       { baseApi, writeApi },
       {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         pullRequest: {
           base: { sha: "base-sha" },
           head: { ref: "contributor/change", sha: headSha },
         },
         lockfileChanges: ["pnpm-lock.yaml"],
-        targetRepository: { owner: "contributor", repo: "openclaw" },
+        targetRepository: { owner: "contributor", repo: "carapace" },
       },
     );
 
     expect(commit).toEqual({ sha: staleSha });
     expect(calls.map((call) => `${call.api}:${call.path}`)).toEqual([
-      "base:/repos/openclaw/openclaw/contents/pnpm-lock.yaml?ref=base-sha",
+      "base:/repos/carapace/carapace/contents/pnpm-lock.yaml?ref=base-sha",
       "write:graphql",
     ]);
     expect(calls[1]?.variables).toMatchObject({
       input: {
         branch: {
-          repositoryNameWithOwner: "contributor/openclaw",
+          repositoryNameWithOwner: "contributor/carapace",
           branchName: "contributor/change",
         },
         expectedHeadOid: headSha,
@@ -723,7 +723,7 @@ describe("dependency guard script", () => {
   it("renders a cleared guard comment that preserves approval freshness", () => {
     const body = renderClearedDependencyGuardComment({ headSha });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- carapace:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph guard cleared");
     expect(body).toContain(headSha);
     expect(body).toContain("requires a fresh `/allow-dependencies-change` comment");
@@ -776,7 +776,7 @@ describe("dependency guard script", () => {
       )) as typeof fetch;
 
     try {
-      await expect(githubApi("token").request("/repos/openclaw/openclaw")).rejects.toMatchObject({
+      await expect(githubApi("token").request("/repos/carapace/carapace")).rejects.toMatchObject({
         message: `403 Forbidden: GitHub error response body exceeded ${GITHUB_ERROR_BODY_MAX_BYTES} bytes`,
         status: 403,
       });
@@ -793,7 +793,7 @@ describe("dependency guard script", () => {
 
     await expect(
       githubApi("token", { fetchImpl, retryDelaysMs: [0] }).request(
-        "/repos/openclaw/openclaw/pulls/1/files",
+        "/repos/carapace/carapace/pulls/1/files",
       ),
     ).resolves.toEqual({ ok: true });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
@@ -806,7 +806,7 @@ describe("dependency guard script", () => {
 
     await expect(
       githubApi("token", { fetchImpl, retryDelaysMs: [0] }).request(
-        "/repos/openclaw/openclaw/issues/1/comments",
+        "/repos/carapace/carapace/issues/1/comments",
         { method: "POST", body: "{}" },
       ),
     ).rejects.toMatchObject({ status: 503 });
@@ -822,7 +822,7 @@ describe("dependency guard script", () => {
             headers: { "content-length": "65" },
           }),
         )) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/carapace/carapace");
 
     await expect(request).rejects.toThrow("GitHub response body exceeded 64 bytes");
     expect(GITHUB_RESPONSE_BODY_MAX_BYTES).toBeGreaterThan(64);
@@ -843,9 +843,9 @@ describe("dependency guard script", () => {
         markFetchStarted();
         return new Promise(() => {});
       }) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/carapace/carapace");
     const rejection = expect(request).rejects.toThrow(
-      /GitHub API GET \/repos\/openclaw\/openclaw exceeded timeout 5ms/u,
+      /GitHub API GET \/repos\/carapace\/carapace exceeded timeout 5ms/u,
     );
 
     await fetchStarted;
@@ -877,9 +877,9 @@ describe("dependency guard script", () => {
           ),
         );
       }) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/carapace/carapace");
     const rejection = expect(request).rejects.toThrow(
-      /GitHub API GET \/repos\/openclaw\/openclaw exceeded timeout 5ms/u,
+      /GitHub API GET \/repos\/carapace\/carapace exceeded timeout 5ms/u,
     );
 
     await fetchStarted;

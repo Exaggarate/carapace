@@ -198,7 +198,7 @@ describe("concurrent worker workspace results", () => {
           path.join(payload, "result.bin"),
           path.join(input.workspaceDir, "result.bin"),
         );
-        const manifests = path.join(input.manifestHome, ".openclaw-worker", "manifests");
+        const manifests = path.join(input.manifestHome, ".carapace-worker", "manifests");
         await fs.mkdir(manifests, { recursive: true });
         for (const snapshot of [base, current]) {
           await fs.writeFile(
@@ -276,7 +276,7 @@ describe("concurrent worker workspace results", () => {
             const uploaded = await node.exec(
               {
                 ...nodeIdentity,
-                argv: ["openclaw-internal-workspace-transfer"],
+                argv: ["carapace-internal-workspace-transfer"],
                 transfer: {
                   direction: "upload",
                   token: "fixture-upload",

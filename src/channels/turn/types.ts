@@ -21,7 +21,7 @@ import type {
 } from "../../auto-reply/templating.js";
 import type { GroupKeyResolution } from "../../config/sessions/types.js";
 import type { DmScope } from "../../config/types.base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { OutboundPayloadDeliverySuppressionReason } from "../../infra/outbound/deliver-types.js";
 import type {
   DeliverOutboundPayloadsParams,
@@ -316,7 +316,7 @@ type ChannelTurnReplyPipelineOptions = Omit<
 
 /** Fully assembled channel turn ready to build the dispatch runner. */
 export type AssembledChannelTurn = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId?: string;
   agentId: string;
@@ -414,7 +414,7 @@ export type ChannelTurnPlan<
 type PreparedChannelTurnPlan<TDispatchResult = DispatchFromConfigResult> = RoutedChannelTurn<
   InboundPreparedChannelTurn<TDispatchResult>
 > & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 };
 
 /** Resolved turn shape returned by adapters before final run/dispatch handling. */

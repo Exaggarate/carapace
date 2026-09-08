@@ -1,4 +1,4 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import * as startupRepair from "../../commands/doctor/shared/automatic-startup-config-repair.js";
 import {
   cloneEnvWithPlatformSemantics,
@@ -10,7 +10,7 @@ import { GATEWAY_CONFIG_SELECTION_ENV_KEYS } from "../../config/gateway-env-sele
 import { CONFIG_AUDIT_STORE_LABEL } from "../../config/io.audit.js";
 import type { ConfigFileSnapshot } from "../../config/types.js";
 import { ExitError, type RuntimeEnv } from "../../runtime.js";
-import { withArtifactPreservingStateReads } from "../../state/openclaw-state-db-readonly.js";
+import { withArtifactPreservingStateReads } from "../../state/carapace-state-db-readonly.js";
 import { formatCliCommand } from "../command-format.js";
 import type { GatewayRunPreBootstrapOptions } from "./future-config-guard.js";
 import { enforceGatewayRunFutureConfigGuard } from "./future-config-guard.js";
@@ -58,7 +58,7 @@ export function getGatewayStartGuardErrors(params: {
   }
   if (!params.configExists) {
     return [
-      `Missing config. Run \`${formatCliCommand("openclaw setup")}\` or set gateway.mode=local (or pass --allow-unconfigured).`,
+      `Missing config. Run \`${formatCliCommand("carapace setup")}\` or set gateway.mode=local (or pass --allow-unconfigured).`,
     ];
   }
   return [
@@ -66,7 +66,7 @@ export function getGatewayStartGuardErrors(params: {
       ? [
           "Gateway start blocked: existing config is missing gateway.mode.",
           "Treat this as suspicious or clobbered config.",
-          `Re-run \`${formatCliCommand("openclaw onboard --mode local")}\` or \`${formatCliCommand("openclaw setup")}\`, set gateway.mode=local manually, or pass --allow-unconfigured.`,
+          `Re-run \`${formatCliCommand("carapace onboard --mode local")}\` or \`${formatCliCommand("carapace setup")}\`, set gateway.mode=local manually, or pass --allow-unconfigured.`,
         ].join(" ")
       : `Gateway start blocked: set gateway.mode=local (current: ${params.mode}) or pass --allow-unconfigured.`,
     `Config write audit: ${CONFIG_AUDIT_STORE_LABEL}`,
@@ -84,8 +84,8 @@ async function pinGatewayRunRuntimePaths(): Promise<void> {
 
 const GATEWAY_RESET_SELECTION_ENV_KEYS = new Set([
   ...GATEWAY_CONFIG_SELECTION_ENV_KEYS,
-  "OPENCLAW_PROFILE",
-  "OPENCLAW_WORKSPACE_DIR",
+  "CARAPACE_PROFILE",
+  "CARAPACE_WORKSPACE_DIR",
 ]);
 
 function resolveGatewayConfigSelectionSignature(env: NodeJS.ProcessEnv): string {
@@ -126,7 +126,7 @@ function resolveGatewayRunDotEnvPaths(params: {
 }
 
 function resolveInvocationDestructiveOverride(): string | undefined {
-  if (process.env.OPENCLAW_SERVICE_MARKER?.trim()) {
+  if (process.env.CARAPACE_SERVICE_MARKER?.trim()) {
     delete process.env[ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS_ENV];
     return undefined;
   }
@@ -134,7 +134,7 @@ function resolveInvocationDestructiveOverride(): string | undefined {
 }
 
 function applyInvocationDestructiveOverride(value: string | undefined): void {
-  if (process.env.OPENCLAW_SERVICE_MARKER?.trim() || value === undefined) {
+  if (process.env.CARAPACE_SERVICE_MARKER?.trim() || value === undefined) {
     delete process.env[ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS_ENV];
   } else {
     process.env[ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS_ENV] = value;
@@ -351,7 +351,7 @@ async function guardGatewayRunSelectedConfig(
     }
     if (!snapshot.valid && params.opts.reset) {
       // Invalid config source is untrusted. In particular, applying its env block could let an
-      // off-root $include self-authorize OPENCLAW_INCLUDE_ROOTS on the next read. Only explicit dev
+      // off-root $include self-authorize CARAPACE_INCLUDE_ROOTS on the next read. Only explicit dev
       // reset may proceed as the recovery path; ordinary startup skips mutation-capable bootstrap.
       lastGuardedGatewayRunSnapshot = snapshot;
       return true;
@@ -668,7 +668,7 @@ export async function prepareGatewayRunBootstrap(params: GatewayRunGuardParams):
           allowUnconfigured: params.opts.allowUnconfigured === true,
           dev:
             Boolean(params.opts.dev) ||
-            normalizeOptionalLowercaseString(process.env.OPENCLAW_PROFILE) === "dev",
+            normalizeOptionalLowercaseString(process.env.CARAPACE_PROFILE) === "dev",
         }
       : undefined;
   if (guarded && params.opts.reset && lastGuardedGatewayRunSnapshot) {

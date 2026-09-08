@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
 import {
   createLegacyCompatChannelDmPolicy,
@@ -16,7 +16,7 @@ describe("legacy channel setup compatibility", () => {
           accounts: { work: { dmPolicy: "disabled", allowFrom: ["U1"] } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(policy.getCurrent(initial, "work")).toBe("disabled");
     expect(policy.setPolicy(initial, "open", "work")).toMatchObject({
@@ -45,7 +45,7 @@ describe("legacy channel setup compatibility", () => {
     const prompter = { note, text } as unknown as WizardPrompter;
     const cfg = {
       channels: { slack: { allowFrom: ["U1"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const promptParams = {
       channel: "slack",
       prompter,
@@ -76,7 +76,7 @@ describe("legacy channel setup compatibility", () => {
         channels: {
           slack: { allowFrom: ["U1"], accounts: { work: { allowFrom: ["U3"] } } },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       ...promptParams,
       defaultAccountId: "work",
       resolveAccount: () => ({ allowFrom: ["U3"] }),

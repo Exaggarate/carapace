@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { html, nothing } from "lit";
 import { buildControlUiResourcePath } from "../../../../src/gateway/control-ui-resource-routes.js";
 import { isIncognitoSessionKey } from "../../../../src/shared/incognito-session-key.js";
@@ -130,7 +130,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
     }
     ${
       split || layout.expanded
-        ? html`<openclaw-tooltip .content=${focusLabel}>
+        ? html`<carapace-tooltip .content=${focusLabel}>
             <button
               class="btn btn--ghost btn--icon chat-icon-btn chat-panel-focus"
               type="button"
@@ -143,12 +143,12 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
             >
               ${layout.expanded ? icons.minimize : icons.maximize}
             </button>
-          </openclaw-tooltip>`
+          </carapace-tooltip>`
         : nothing
     }
     ${
       split && side && swapLabel
-        ? html`<openclaw-tooltip .content=${swapLabel}>
+        ? html`<carapace-tooltip .content=${swapLabel}>
             <button
               class="btn btn--ghost btn--icon chat-icon-btn chat-panel-swap"
               type="button"
@@ -157,7 +157,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
             >
               ${icons.arrowLeftRight}
             </button>
-          </openclaw-tooltip>`
+          </carapace-tooltip>`
         : nothing
     }
     ${
@@ -341,7 +341,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
     const currentLayout = sidebarLayout ?? this.state?.sidebarLayout;
     const sidePanelOpen = currentLayout?.open === true && !currentLayout.expanded;
     const toggleSidePanel = () => this.setChatSidePanelOpen(!sidePanelOpen, sidebarLayout);
-    const sidePanelAction = html`<openclaw-tooltip
+    const sidePanelAction = html`<carapace-tooltip
       .content=${t(sidePanelOpen ? "chat.sidePanel.minimize" : "chat.sidePanel.label")}
     >
       <button
@@ -353,9 +353,9 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
       >
         ${sidePanelOpen ? icons.panelRightClose : icons.panelRightOpen}
       </button>
-    </openclaw-tooltip>`;
+    </carapace-tooltip>`;
     const browserPanelAction = sessionWorkspace.onToggleBrowser
-      ? html`<openclaw-tooltip .content=${t("browser.toggle")}>
+      ? html`<carapace-tooltip .content=${t("browser.toggle")}>
           <button
             class="btn btn--ghost btn--icon chat-icon-btn chat-browser-panel-toggle"
             type="button"
@@ -364,7 +364,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
           >
             ${icons.globe}
           </button>
-        </openclaw-tooltip>`
+        </carapace-tooltip>`
       : nothing;
     const backgroundTasksAction = catalog ? nothing : renderBackgroundTasksToggle(backgroundTasks);
     const sessionRailMode = this.selectedSessionRailMode(this.state?.sessionKey ?? "");
@@ -572,13 +572,13 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
       sessionRailAction: nothing,
       workspaceAction: nothing,
       presence: viewers?.length
-        ? html`<openclaw-viewer-facepile
+        ? html`<carapace-viewer-facepile
             class="chat-pane__presence"
             .staticUsers=${viewers}
             .maxVisible=${4}
             .personActivity=${personActivity}
             variant="session"
-          ></openclaw-viewer-facepile>`
+          ></carapace-viewer-facepile>`
         : nothing,
       faceControl: nothing,
       sharingControl:
@@ -603,7 +603,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
       }),
       sessionMenuAction:
         row && this.state
-          ? html`<openclaw-chat-header-session-menu
+          ? html`<carapace-chat-header-session-menu
               .session=${{
                 label:
                   normalizeOptionalString(row.label) ??
@@ -648,7 +648,7 @@ export abstract class ChatPaneHeader extends ChatPaneDiscussion {
                 window.dispatchEvent(new Event(COMMAND_PALETTE_OPEN_EVENT))}
               .onSettingsChange=${this.state.applySettings}
               .onAction=${(action: HeaderMenuAction) => this.handleHeaderSessionAction(action, row)}
-            ></openclaw-chat-header-session-menu>`
+            ></carapace-chat-header-session-menu>`
           : nothing,
       nativeGateways: this.nativeGateways,
       gatewaysSnapshot: this.gatewaysSnapshot,

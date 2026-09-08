@@ -10,7 +10,7 @@ import {
   isSessionLifecycleMutationActive,
   runExclusiveSessionLifecycleMutation,
 } from "../../sessions/session-lifecycle-admission.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createRuntimeAgent } from "./runtime-agent.js";
 
 describe("plugin runtime session creation", () => {
@@ -83,7 +83,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("creates a canonical transcript with trusted initial session state", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-session-create" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-session-create" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:harness:codex:supervision:codex-native-thread";
       const initialPluginExtensions = {
@@ -179,7 +179,7 @@ describe("plugin runtime session creation", () => {
   // Plugin-owned CLI fork creation with colors lives in runtime-agent.session-color.test.ts.
 
   it("rolls back the exact created entry and transcript when initialization fails", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-session-create-rollback" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-session-create-rollback" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:codex-binding-failure";
       await expect(
@@ -214,7 +214,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rolls back a plugin-owned locked CLI session when initialization fails", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-cli-session-rollback" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-cli-session-rollback" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:catalog-adopt:claude:rollback";
       const storePath = runtime.session.resolveStorePath(undefined, { agentId: "main" });
@@ -257,7 +257,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rolls back an unlocked harness entry through the ordinary lifecycle path", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-unlocked-session-create-rollback" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -281,12 +281,12 @@ describe("plugin runtime session creation", () => {
   });
 
   it("does not run initialization when the durable initial row cannot be written", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-initial-write-failure" },
       async (state) => {
         const runtime = createRuntimeAgent();
         const key = "agent:main:dashboard:codex-initial-write-failure";
-        fs.mkdirSync(path.join(state.agentDir(), "openclaw-agent.sqlite"), { recursive: true });
+        fs.mkdirSync(path.join(state.agentDir(), "carapace-agent.sqlite"), { recursive: true });
         let initializerRan = false;
 
         await expect(
@@ -312,7 +312,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rolls back the original entry and transcript when final patch persistence fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-final-patch-rollback" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -346,7 +346,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rolls back an unlocked harness entry when final patch persistence fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-unlocked-final-patch-rollback" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -374,7 +374,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("fences work admission until trusted initialization completes", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-session-create-fence" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-session-create-fence" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:codex-binding-fence";
       const callbackStarted = createDeferred();
@@ -440,7 +440,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rejects an ordinary same-key create while trusted initialization is pending", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-ordinary-race" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -496,7 +496,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rejects creation while pre-existing session work is admitted", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-session-create-active" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-session-create-active" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:codex-binding-active";
       const workStarted = createDeferred();
@@ -534,7 +534,7 @@ describe("plugin runtime session creation", () => {
     { label: "Operator label", displayName: "Original title snapshot" },
     { label: "Older automatically promoted label", displayName: undefined },
   ])("recovers an exact initializer without replacing $label or its title", async (naming) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-recovery" },
       async (state) => {
         const runtime = createRuntimeAgent();
@@ -611,7 +611,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("does not recover an initializer from a different spawned workspace", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-recovery-cwd-mismatch" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -659,7 +659,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("does not recover an initializing row with different trusted ownership", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-recovery-mismatch" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -705,7 +705,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("does not recover or roll back a locked CLI row owned by another plugin", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-cli-recovery-owner" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-cli-recovery-owner" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:catalog-adopt:claude:foreign";
       const storePath = runtime.session.resolveStorePath(undefined, { agentId: "main" });
@@ -751,7 +751,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rejects work for a persisted initializer without an active process fence", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-restart-admission" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -782,7 +782,7 @@ describe("plugin runtime session creation", () => {
   it.each(["label", "displayName"] as const)(
     "preserves a concurrent %s change before finalization",
     async (field) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "plugin-runtime-session-create-rollback-race" },
         async () => {
           const runtime = createRuntimeAgent();
@@ -826,7 +826,7 @@ describe("plugin runtime session creation", () => {
   );
 
   it("rejects title mutation in the pluginExtensions-only final patch", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-title-final-patch" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-title-final-patch" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:title-final-patch";
       await expect(
@@ -843,7 +843,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("rejects an empty harness initializer without leaving a session entry", async () => {
-    await withOpenClawTestState({ label: "plugin-runtime-session-create-invalid" }, async () => {
+    await withCarapaceTestState({ label: "plugin-runtime-session-create-invalid" }, async () => {
       const runtime = createRuntimeAgent();
       const key = "agent:main:dashboard:invalid-harness";
 
@@ -861,7 +861,7 @@ describe("plugin runtime session creation", () => {
   });
 
   it("does not initialize over an existing placeholder entry", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-runtime-session-create-placeholder" },
       async () => {
         const runtime = createRuntimeAgent();
@@ -910,7 +910,7 @@ describe("plugin runtime session work admission", () => {
   const sessionId = "voice-session-id";
 
   beforeEach(async () => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-session-admission-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-session-admission-"));
     storePath = path.join(tempDir, "sessions.json");
     await createRuntimeAgent().session.upsertSessionEntry({
       storePath,

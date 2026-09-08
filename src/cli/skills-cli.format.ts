@@ -1,4 +1,4 @@
-// Formatting layer for `openclaw skills` commands; keeps discovery data separate from terminal UI.
+// Formatting layer for `carapace skills` commands; keeps discovery data separate from terminal UI.
 import { sanitizeForLog, stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import {
   decorativeEmoji,
@@ -38,7 +38,7 @@ function appendClawHubHint(output: string, json?: boolean): string {
   if (json) {
     return output;
   }
-  const command = formatCliCommand("openclaw skills");
+  const command = formatCliCommand("carapace skills");
   return `${output}\n\nTip: use \`${command} search\`, \`${command} install\`, and \`${command} update\` for ClawHub-backed skills.`;
 }
 
@@ -142,7 +142,7 @@ export function formatSkillsList(report: SkillStatusReport, opts: SkillsListOpti
 
   if (skills.length === 0) {
     const message = opts.eligible
-      ? `No eligible skills found. Run \`${formatCliCommand("openclaw skills list")}\` to see all skills.`
+      ? `No eligible skills found. Run \`${formatCliCommand("carapace skills list")}\` to see all skills.`
       : "No skills found.";
     return appendClawHubHint(message, opts.json);
   }
@@ -200,7 +200,7 @@ export function formatSkillInfo(
     }
     const safeRequestedName = sanitizeJsonString(sanitizeForLog(requestedName));
     return appendClawHubHint(
-      `Skill "${safeRequestedName}" not found. Run \`${formatCliCommand("openclaw skills list")}\` to see available skills.`,
+      `Skill "${safeRequestedName}" not found. Run \`${formatCliCommand("carapace skills list")}\` to see available skills.`,
       opts.json,
     );
   }
@@ -279,10 +279,10 @@ export function formatSkillInfo(
       `  Save via UI: ${theme.muted("Control UI → Skills → ")}${safeName}${theme.muted(" → Save key")}`,
     );
     lines.push(
-      `  Save via CLI: ${formatCliCommand(`openclaw config set skills.entries.${safeSkillKey}.apiKey YOUR_KEY`)}`,
+      `  Save via CLI: ${formatCliCommand(`carapace config set skills.entries.${safeSkillKey}.apiKey YOUR_KEY`)}`,
     );
     lines.push(
-      `  Stored in: ${theme.muted("$OPENCLAW_CONFIG_PATH")} ${theme.muted("(default: ~/.openclaw/openclaw.json)")}`,
+      `  Stored in: ${theme.muted("$CARAPACE_CONFIG_PATH")} ${theme.muted("(default: ~/.carapace/carapace.json)")}`,
     );
   }
 

@@ -1,6 +1,6 @@
 // Message-tool idempotency key and delivery fingerprint helpers.
 // Extracted from message-tool-execution to keep that module within the lint line budget.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ChannelMessageActionName } from "../../channels/plugins/types.public.js";
 import { sha256Base64UrlPrefix } from "../../infra/crypto-digest.js";
 import type { GatewayCallOptions } from "./gateway.js";

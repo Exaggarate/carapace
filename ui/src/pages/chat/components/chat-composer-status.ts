@@ -67,10 +67,10 @@ export function renderFallbackIndicator(status: FallbackStatus | null | undefine
       : "compaction-indicator compaction-indicator--fallback";
   const icon = phase === "cleared" ? icons.check : icons.brain;
   return html`
-    <openclaw-tooltip .content=${details}>
+    <carapace-tooltip .content=${details}>
       <div class=${className} role="status" aria-live="polite" aria-label=${details}>
         ${icon} ${message}
       </div>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }

@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { makeCronJob } from "./delivery.test-helpers.js";
 import { materializeLegacyDefaultCronJobOwners } from "./legacy-default-agent-owner-migration.js";
 import { CronService } from "./service.js";
@@ -15,7 +15,7 @@ import { loadCronRows, replaceCronRows } from "./store/row-codec.js";
 import type { CronStoreFile } from "./types.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -24,16 +24,16 @@ const migrate = (storePath: string, env: NodeJS.ProcessEnv) =>
 
 function fixture(label: string) {
   const root = tempDirs.make(label);
-  const env = { OPENCLAW_STATE_DIR: root } as NodeJS.ProcessEnv;
+  const env = { CARAPACE_STATE_DIR: root } as NodeJS.ProcessEnv;
   const storePath = path.join(root, "cron", "jobs.json");
   const storeKey = cronStoreKey(storePath);
-  const database = openOpenClawStateDatabase({ env }).db;
+  const database = openCarapaceStateDatabase({ env }).db;
   replaceCronRows(database, storeKey, { version: 1, jobs: [makeCronJob({ id: "ownerless" })] });
   return { env, storePath, storeKey, database };
 }
 
 it("preserves undecodable JSON while assigning its owner", async () => {
-  const { env, storePath, storeKey, database } = fixture("openclaw-cron-owner-");
+  const { env, storePath, storeKey, database } = fixture("carapace-cron-owner-");
   database
     .prepare("UPDATE cron_jobs SET agent_id = ' ', job_json = ? WHERE store_key = ?")
     .run("{malformed", storeKey);
@@ -46,7 +46,7 @@ it("preserves undecodable JSON while assigning its owner", async () => {
 });
 
 it("preserves a session-scoped owner stored only in job JSON", async () => {
-  const { env, storePath, storeKey, database } = fixture("openclaw-cron-json-owner-");
+  const { env, storePath, storeKey, database } = fixture("carapace-cron-json-owner-");
   const row = loadCronRows(database, storeKey)[0];
   const jobJson = JSON.parse(row?.job_json ?? "{}") as Record<string, unknown>;
   delete jobJson.agentId;
@@ -66,9 +66,9 @@ it("preserves a session-scoped owner stored only in job JSON", async () => {
 });
 
 it("materializes before scheduler startup", async () => {
-  const { env, storePath } = fixture("openclaw-cron-startup-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
-  closeOpenClawStateDatabaseForTest();
+  const { env, storePath } = fixture("carapace-cron-startup-");
+  vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
+  closeCarapaceStateDatabaseForTest();
   const cron = new CronService({
     storePath,
     cronEnabled: true,
@@ -87,8 +87,8 @@ it("materializes before scheduler startup", async () => {
 });
 
 it("owns rows imported from a JSON-only store on first startup load", async () => {
-  const root = tempDirs.make("openclaw-cron-json-startup-");
-  const env = { OPENCLAW_STATE_DIR: root } as NodeJS.ProcessEnv;
+  const root = tempDirs.make("carapace-cron-json-startup-");
+  const env = { CARAPACE_STATE_DIR: root } as NodeJS.ProcessEnv;
   const storePath = path.join(root, "cron", "jobs.json");
   const storeKey = cronStoreKey(storePath);
   await fs.mkdir(path.dirname(storePath), { recursive: true });
@@ -96,7 +96,7 @@ it("owns rows imported from a JSON-only store on first startup load", async () =
     storePath,
     JSON.stringify({ version: 1, jobs: [makeCronJob({ id: "json-only" })] }),
   );
-  vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR);
+  vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR);
 
   const realLoad = cronStoreModule.loadCronJobsStoreWithConfigJobs;
   let imported = false;
@@ -108,7 +108,7 @@ it("owns rows imported from a JSON-only store on first startup load", async () =
         const legacyStore = JSON.parse(
           await fs.readFile(requestedStorePath, "utf8"),
         ) as CronStoreFile;
-        replaceCronRows(openOpenClawStateDatabase({ env }).db, storeKey, legacyStore);
+        replaceCronRows(openCarapaceStateDatabase({ env }).db, storeKey, legacyStore);
       }
       return await realLoad(requestedStorePath);
     });
@@ -126,7 +126,7 @@ it("owns rows imported from a JSON-only store on first startup load", async () =
     await cron.start();
     expect(imported).toBe(true);
     expect(cron.getLoadedJobs()?.[0]?.agentId).toBe("ops");
-    expect(loadCronRows(openOpenClawStateDatabase({ env }).db, storeKey)[0]?.agent_id).toBe("ops");
+    expect(loadCronRows(openCarapaceStateDatabase({ env }).db, storeKey)[0]?.agent_id).toBe("ops");
   } finally {
     cron.stop();
     loadSpy.mockRestore();

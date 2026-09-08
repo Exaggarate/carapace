@@ -17,12 +17,12 @@ import {
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { t } from "../../i18n/index.ts";
 import { registerSettingsEnglish } from "../../i18n/locales/en-settings.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 
 registerSettingsEnglish();
 
-class DevicePermissionsPage extends OpenClawLightDomElement {
+class DevicePermissionsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -129,13 +129,13 @@ class DevicePermissionsPage extends OpenClawLightDomElement {
       ${renderSettingsPageHeader({
         title: titleForRoute("device-permissions"),
         subtitle: html`${t(snapshot?.device.platform === "ios" ? "configPage.deviceSettings.permissionsIntroIos" : "configPage.deviceSettings.permissionsIntro")}
-        ${renderLearnMoreLink(snapshot?.device.platform === "ios" ? "https://docs.openclaw.ai/platforms/ios" : "https://docs.openclaw.ai/platforms/macos")}`,
+        ${renderLearnMoreLink(snapshot?.device.platform === "ios" ? "https://github.com/Exaggarate/carapace" : "https://github.com/Exaggarate/carapace")}`,
       })}
       ${renderSettingsWorkspace(renderSettingsPage(body))}
     `;
   }
 }
 
-if (!customElements.get("openclaw-device-permissions-page")) {
-  customElements.define("openclaw-device-permissions-page", DevicePermissionsPage);
+if (!customElements.get("carapace-device-permissions-page")) {
+  customElements.define("carapace-device-permissions-page", DevicePermissionsPage);
 }

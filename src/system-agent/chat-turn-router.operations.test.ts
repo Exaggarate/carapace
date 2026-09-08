@@ -19,7 +19,7 @@ import {
   expectDefined,
   SystemAgentInferenceUnavailableError,
   verifyConfigAfterSystemAgentWrite,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type WizardPrompter,
 } from "./chat-engine.test-support.js";
 import { ChatTurnRouter } from "./chat-turn-router.js";
@@ -43,7 +43,7 @@ function createRouterHarness(
     "shared verified inference test fixture",
   );
   const session = {
-    sessionId: "openclaw-operations-router-test",
+    sessionId: "carapace-operations-router-test",
     verifiedInference,
     proposalRef: {},
   };
@@ -87,7 +87,7 @@ describe("SystemAgentChatEngine operations", () => {
         const importMemory = vi.fn(async () => ({
           status: "workspace-missing" as const,
           providers: [] as [],
-          workspace: "/tmp/openclaw-no-workspace",
+          workspace: "/tmp/carapace-no-workspace",
         }));
         const router = createRouterHarness(
           {
@@ -186,7 +186,7 @@ describe("SystemAgentChatEngine operations", () => {
     expect(reply.action).toBe("none");
     expect(reply.handoff).toBeUndefined();
     expect(reply.text).toContain("Opening the menu wizard");
-    expect(reply.text).toContain("run `openclaw onboard`");
+    expect(reply.text).toContain("run `carapace onboard`");
   });
 
   it("starts the channel wizard from an agent-loop directive", async () => {
@@ -219,10 +219,10 @@ describe("SystemAgentChatEngine operations", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const changedConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verifiedInference = await createAmbientVerifiedBinding(baseConfig);
     const readConfigFileSnapshot = vi
       .fn()
@@ -253,7 +253,7 @@ describe("SystemAgentChatEngine operations", () => {
     const config = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8@anthropic:oauth" } },
       auth: { profiles: { "anthropic:oauth": { provider: "anthropic", mode: "oauth" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let credential = {
       type: "oauth" as const,
       provider: "anthropic",
@@ -300,7 +300,7 @@ describe("SystemAgentChatEngine operations", () => {
     const config = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8@anthropic:oauth" } },
       auth: { profiles: { "anthropic:oauth": { provider: "anthropic", mode: "oauth" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let credential = {
       type: "oauth" as const,
       provider: "anthropic",
@@ -337,7 +337,7 @@ describe("SystemAgentChatEngine operations", () => {
     const reply = await engine.handle("yes, apply that exact port change");
 
     expect(runConfigSet).toHaveBeenCalledOnce();
-    expect(reply.text).toContain("[openclaw] done: config.set");
+    expect(reply.text).toContain("[carapace] done: config.set");
   });
 
   it("proves delegated config persistence stops when async preparation closes authority", async () => {
@@ -416,7 +416,7 @@ describe("SystemAgentChatEngine operations", () => {
     expect(call.surface).toBe("gateway");
     // A question is not consent: mutations stay locked for this turn.
     expect(call.approvalArmed).toBe(false);
-    expect(call.session.sessionId).toMatch(/^openclaw-/);
+    expect(call.session.sessionId).toMatch(/^carapace-/);
     // The same session flows into every turn for real multi-turn memory.
     await router.resolveTurn("and the gateway?");
     expect(runAgentTurn.mock.calls[1]?.[0]).toMatchObject({
@@ -451,10 +451,10 @@ describe("SystemAgentChatEngine operations", () => {
         ...baseConfig.agents,
         list: baseConfig.agents.list.map((agent) => ({ ...agent, model: "openai/gpt-5.6-sol" })),
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const verifiedInference = await createAmbientVerifiedBinding(baseConfig);
     const reboundInference = await createAmbientVerifiedBinding(changedConfig);
-    let currentConfig: OpenClawConfig = baseConfig;
+    let currentConfig: CarapaceConfig = baseConfig;
     const executeOperation = vi.fn(async (_operation, runtime, options) => {
       currentConfig = changedConfig;
       options.onVerifiedInferenceChanged?.(reboundInference);
@@ -512,7 +512,7 @@ describe("SystemAgentChatEngine operations", () => {
       mocks.readConfigFileSnapshot.mockResolvedValue({
         exists: true,
         valid: false,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         hash: "h",
         config: {},
         sourceConfig: {},
@@ -543,7 +543,7 @@ describe("SystemAgentChatEngine operations", () => {
     mocks.readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: false,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       hash: "h",
       config: {},
       sourceConfig: {},
@@ -556,14 +556,14 @@ describe("SystemAgentChatEngine operations", () => {
 
     expect(reply).toContain("failed validation");
     expect(reply).toContain("The write was applied");
-    expect(reply).toContain("openclaw doctor --fix");
+    expect(reply).toContain("carapace doctor --fix");
   });
 
-  it("keeps doctor repair outside OpenClaw when no post-write repair is proposed", async () => {
+  it("keeps doctor repair outside Carapace when no post-write repair is proposed", async () => {
     mocks.readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: false,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       hash: "h",
       config: {},
       sourceConfig: {},
@@ -572,8 +572,8 @@ describe("SystemAgentChatEngine operations", () => {
 
     const reply = await verifyConfigAfterSystemAgentWrite(async () => ({ text: "" }));
 
-    expect(reply).toContain("with OpenClaw stopped");
-    expect(reply).toContain("openclaw doctor --fix");
+    expect(reply).toContain("with Carapace stopped");
+    expect(reply).toContain("carapace doctor --fix");
     expect(reply).toContain("machine running it");
   });
 
@@ -581,7 +581,7 @@ describe("SystemAgentChatEngine operations", () => {
     mocks.readConfigFileSnapshot.mockResolvedValue({
       exists: false,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       hash: null,
       config: {},
       sourceConfig: {},
@@ -594,8 +594,8 @@ describe("SystemAgentChatEngine operations", () => {
     expect(resolveRepair).not.toHaveBeenCalled();
     expect(reply).toContain("The write was applied");
     expect(reply).toContain("post-write verification is unavailable");
-    expect(reply).toContain("openclaw.json was not found");
-    expect(reply).toContain("openclaw doctor --fix");
+    expect(reply).toContain("carapace.json was not found");
+    expect(reply).toContain("carapace doctor --fix");
   });
 
   it("warns when the applied write cannot be read back for verification", async () => {
@@ -607,8 +607,8 @@ describe("SystemAgentChatEngine operations", () => {
     expect(resolveRepair).not.toHaveBeenCalled();
     expect(reply).toContain("The write was applied");
     expect(reply).toContain("post-write verification is unavailable");
-    expect(reply).toContain("openclaw.json could not be read");
-    expect(reply).toContain("openclaw doctor --fix");
+    expect(reply).toContain("carapace.json could not be read");
+    expect(reply).toContain("carapace doctor --fix");
   });
 
   it("stays quiet when the post-write validation passes", async () => {
@@ -675,7 +675,7 @@ describe("SystemAgentChatEngine CLI loop backends", () => {
           model: { primary: "claude-cli/claude-opus-4-8" },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const snapshot = configSnapshot(config);
     const inference = await createCliVerifiedBinding(config);
     const inferenceDeps = {
@@ -736,7 +736,7 @@ describe("SystemAgentChatEngine CLI loop backends", () => {
           model: { primary: "claude-cli/claude-opus-4-8" },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const snapshot = configSnapshot(config);
     const inference = await createCliVerifiedBinding(config);
     const inferenceDeps = {

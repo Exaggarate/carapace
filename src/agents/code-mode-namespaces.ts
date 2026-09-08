@@ -3,7 +3,7 @@
  * namespaced tool scopes here; code mode receives descriptors, virtual API
  * files, and a guarded invocation runtime.
  */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { tokTypes } from "acorn";
 import { isRecord } from "../../packages/normalization-core/src/record-coerce.js";
 import type { PluginToolMcpMeta } from "../plugins/tool-metadata.js";
@@ -23,7 +23,7 @@ export type { CodeModeApiVirtualFile } from "./code-mode-mcp-api.js";
 
 const FORBIDDEN_NAMESPACE_PATH_SEGMENTS = new Set(["__proto__", "constructor", "prototype"]);
 const NAMESPACE_PATH_KEY_SEPARATOR = "\u0000";
-const CODE_MODE_NAMESPACE_TOOL_CALL = Symbol.for("openclaw.codeMode.namespaceToolCall");
+const CODE_MODE_NAMESPACE_TOOL_CALL = Symbol.for("carapace.codeMode.namespaceToolCall");
 const RESERVED_NAMESPACE_GLOBALS = new Set([
   "ALL_TOOLS",
   "agents",

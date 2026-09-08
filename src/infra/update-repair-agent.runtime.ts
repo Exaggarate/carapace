@@ -1,10 +1,10 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { resolveEffectiveToolPolicy } from "../agents/agent-tools.policy.js";
 import { resolveExecToolConfig } from "../agents/lazy-exec-tool.js";
 import { resolveSandboxConfigForAgent } from "../agents/sandbox/config.js";
 import { isToolAllowedByPolicies } from "../agents/tool-policy-match.js";
 import { mergeAlsoAllowPolicy, resolveToolProfilePolicy } from "../agents/tool-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SystemAgentConfiguredRoute } from "../system-agent/inference-route.js";
 import { sanitizeHostExecEnv } from "./host-env-security.js";
 import {
@@ -50,8 +50,8 @@ export async function withUpdateRepairEnvironment<T>(
       "XDG_CACHE_HOME",
       "XDG_DATA_HOME",
       "XDG_STATE_HOME",
-      "OPENCLAW_HOME",
-      "OPENCLAW_AGENT_DIR",
+      "CARAPACE_HOME",
+      "CARAPACE_AGENT_DIR",
       "PI_CODING_AGENT_DIR",
     ]) {
       environment[key] = target.environment[key];
@@ -121,7 +121,7 @@ export async function prepareUpdateRepairInference(signal: AbortSignal, timeoutM
 function repairRunConfig(
   route: SystemAgentConfiguredRoute,
   fallbacks: string[],
-): Result<{ runConfig: OpenClawConfig; modelFallbacks: string[] }, string> {
+): Result<{ runConfig: CarapaceConfig; modelFallbacks: string[] }, string> {
   const base = route.runConfig;
   const exec = resolveExecToolConfig({ cfg: base, agentId: route.agentId });
   if (
@@ -178,7 +178,7 @@ function repairRunConfig(
       {
         ...base.agents?.defaults?.models?.[ref],
         ...base.agents?.entries?.[route.agentId]?.models?.[ref],
-        agentRuntime: { id: "openclaw" },
+        agentRuntime: { id: "carapace" },
       },
     ]),
   );

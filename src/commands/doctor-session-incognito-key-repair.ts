@@ -4,25 +4,25 @@ import {
   rewriteDoctorSessionEntries,
 } from "../config/sessions/session-accessor.js";
 import { publishSessionEntryCacheInvalidation } from "../config/sessions/session-accessor.sqlite-entry-cache.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   executeSqliteQuerySync,
   getNodeSqliteKysely,
   iterateSqliteQuerySync,
 } from "../infra/kysely-sync.js";
 import { isIncognitoSessionKey, parseAgentSessionKey } from "../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-  type OpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  isCarapaceAgentDatabaseOpen,
+  type CarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { runDoctorAgentDatabaseOperation } from "./doctor-agent-database-operation.js";
 import {
   collectSharedStateSessionKeys,
@@ -45,7 +45,7 @@ export type ReservedIncognitoKeyRepairReport = {
 
 export function repairReservedIncognitoSessionKeys(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): ReservedIncognitoKeyRepairReport {
   const targets = listExistingAgentDatabaseTargets(params.cfg, params.env).map((target) => ({
@@ -53,7 +53,7 @@ export function repairReservedIncognitoSessionKeys(params: {
     databaseOptions: resolveTargetSqliteOptions(target, params.env),
   }));
   const reservedKeys = new Set<string>();
-  const sharedDatabase = params.apply ? openOpenClawStateDatabase({ env: params.env }) : undefined;
+  const sharedDatabase = params.apply ? openCarapaceStateDatabase({ env: params.env }) : undefined;
   const journalRenames = sharedDatabase
     ? readRepairJournal(sharedDatabase.db)
     : readRepairJournalReadOnly(params.env);
@@ -62,7 +62,7 @@ export function repairReservedIncognitoSessionKeys(params: {
       agentId: target.agentId,
       path: target.sqlitePath,
       run: () =>
-        withOpenClawAgentDatabaseReadOnly(
+        withCarapaceAgentDatabaseReadOnly(
           (database) => listReservedIncognitoKeys(database.db),
           databaseOptions,
         ),
@@ -93,7 +93,7 @@ export function repairReservedIncognitoSessionKeys(params: {
       agentId: target.agentId,
       path: target.sqlitePath,
       run: () =>
-        withOpenClawAgentDatabaseReadOnly(
+        withCarapaceAgentDatabaseReadOnly(
           (database) => collectOccupiedSessionKeys(database.db),
           databaseOptions,
         ),
@@ -114,20 +114,20 @@ export function repairReservedIncognitoSessionKeys(params: {
   );
   const renames = [...journalRenames, ...newRenames];
   const renameMap = new Map(renames.map((item) => [item.from, item.to]));
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => writeRepairJournal(database.db, renames),
     { env: params.env },
     { operationLabel: "doctor.journal-reserved-incognito-session-keys" },
   );
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => rewriteSharedStateSessionKeys(database.db, renameMap),
     { env: params.env },
     { operationLabel: "doctor.rename-reserved-incognito-shared-state-keys" },
   );
   for (const { target, databaseOptions } of targets) {
-    const wasOpen = isOpenClawAgentDatabaseOpen(target.sqlitePath);
+    const wasOpen = isCarapaceAgentDatabaseOpen(target.sqlitePath);
     try {
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => applyReservedIncognitoKeyRenameColumns(database, renames),
         databaseOptions,
         { operationLabel: "doctor.rename-reserved-incognito-session-keys" },
@@ -143,11 +143,11 @@ export function repairReservedIncognitoSessionKeys(params: {
       });
     } finally {
       if (!wasOpen) {
-        closeOpenClawAgentDatabaseByPath(target.sqlitePath);
+        closeCarapaceAgentDatabaseByPath(target.sqlitePath);
       }
     }
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => deleteRepairJournal(database.db),
     { env: params.env },
     { operationLabel: "doctor.complete-reserved-incognito-session-keys" },
@@ -179,7 +179,7 @@ function planReservedIncognitoKeyRenames(
 }
 
 function applyReservedIncognitoKeyRenameColumns(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   renames: readonly ReservedKeyRename[],
 ): void {
   if (renames.length === 0) {
@@ -203,7 +203,7 @@ function legacyIncognitoSessionKey(sessionKey: string): string {
 }
 
 function listReservedIncognitoKeys(database: DatabaseSync): string[] {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<CarapaceAgentKyselyDatabase>(database);
   const keys = new Set<string>();
   for (const row of executeSqliteQuerySync(
     database,
@@ -221,7 +221,7 @@ function listReservedIncognitoKeys(database: DatabaseSync): string[] {
 }
 
 function collectOccupiedSessionKeys(database: DatabaseSync): Set<string> {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<CarapaceAgentKyselyDatabase>(database);
   const keys = new Set<string>();
   const collect = (values: Array<string | null>) => {
     for (const value of values) {
@@ -285,7 +285,7 @@ function collectOccupiedSessionKeys(database: DatabaseSync): Set<string> {
 }
 
 function updateSessionKeyColumns(database: DatabaseSync, rename: ReservedKeyRename): void {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<CarapaceAgentKyselyDatabase>(database);
   const update = (query: Parameters<typeof executeSqliteQuerySync>[1]) =>
     executeSqliteQuerySync(database, query);
   update(

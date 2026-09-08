@@ -1,8 +1,8 @@
 // Browser tests cover proxy files plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { extractOriginalFilename } from "openclaw/plugin-sdk/media-runtime";
-import { createTempHomeEnv, type TempHomeEnv } from "openclaw/plugin-sdk/test-env";
+import { extractOriginalFilename } from "carapace/plugin-sdk/media-runtime";
+import { createTempHomeEnv, type TempHomeEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { BROWSER_PROXY_MAX_FILE_BYTES } from "../browser-proxy-envelope.js";
 import { persistBrowserProxyResultFiles } from "./proxy-files.js";
@@ -14,7 +14,7 @@ describe("persistBrowserProxyResultFiles", () => {
   let tempHome: TempHomeEnv;
 
   beforeEach(async () => {
-    tempHome = await createTempHomeEnv("openclaw-browser-proxy-files-");
+    tempHome = await createTempHomeEnv("carapace-browser-proxy-files-");
   });
 
   afterEach(async () => {
@@ -35,7 +35,7 @@ describe("persistBrowserProxyResultFiles", () => {
     const savedPath = result.path;
     expect(typeof savedPath).toBe("string");
     expect(path.normalize(savedPath ?? "")).toContain(
-      `${path.sep}.openclaw${path.sep}media${path.sep}browser${path.sep}`,
+      `${path.sep}.carapace${path.sep}media${path.sep}browser${path.sep}`,
     );
     await expect(fs.readFile(savedPath ?? "", "utf8")).resolves.toBe("hello from browser proxy");
   });
@@ -56,7 +56,7 @@ describe("persistBrowserProxyResultFiles", () => {
     ]);
 
     const savedPath = result.download.path;
-    expect(path.dirname(savedPath)).toBe(path.join(tempHome.home, ".openclaw", "media", "browser"));
+    expect(path.dirname(savedPath)).toBe(path.join(tempHome.home, ".carapace", "media", "browser"));
     expect(extractOriginalFilename(savedPath)).toBe(expectedFilename);
     expect(result.download.suggestedFilename).toBe("website-title.pdf");
     await expect(fs.readFile(savedPath, "utf8")).resolves.toBe(contents);
@@ -134,7 +134,7 @@ describe("persistBrowserProxyResultFiles", () => {
     expect((error as Error).message).toBe("browser proxy files exceed 16 MiB aggregate limit");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -154,7 +154,7 @@ describe("persistBrowserProxyResultFiles", () => {
     expect((error as Error).message).toBe("browser proxy file exceeds 10 MiB limit");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -182,7 +182,7 @@ describe("persistBrowserProxyResultFiles", () => {
     expect(error).toHaveProperty("message", "browser proxy file contains malformed base64 data");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -207,7 +207,7 @@ describe("persistBrowserProxyResultFiles", () => {
     ).rejects.toThrow("browser proxy file contains malformed base64 data");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -225,7 +225,7 @@ describe("persistBrowserProxyResultFiles", () => {
       ),
     ).rejects.toThrow("browser proxy response exceeds 256 file limit");
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -256,7 +256,7 @@ describe("persistBrowserProxyResultFiles", () => {
       "browser proxy returned an invalid file envelope",
     );
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".carapace", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 

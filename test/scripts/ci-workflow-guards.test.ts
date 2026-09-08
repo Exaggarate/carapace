@@ -21,7 +21,7 @@ import { devNull, tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runInNewContext } from "node:vm";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { minimatch } from "minimatch";
 import ts from "typescript";
 import { afterEach, describe, expect, it } from "vitest";
@@ -80,7 +80,7 @@ const PUBLISH_GENERATED_PR_ACTION = ".github/actions/publish-generated-pr/action
 const SETUP_ANDROID_TOOLCHAIN_ACTION = ".github/actions/setup-android-toolchain/action.yml";
 const MATURITY_SCORECARD_WORKFLOW = ".github/workflows/maturity-scorecard.yml";
 const MATURITY_SCORECARD_WORKFLOW_REF =
-  "openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main";
+  "carapace/carapace/.github/workflows/maturity-scorecard.yml@refs/heads/main";
 const OIDC_BOUND_MAIN_REUSABLE_WORKFLOWS = new Set<string>();
 const AMBIGUOUS_MAIN_PUSH_DIAGNOSTIC =
   "::error title=ambiguous main push::github.event.before is zero; refusing to infer a diff base for a created or recreated main branch.";
@@ -252,7 +252,7 @@ function evaluateWorkflowExpression(
       },
     },
     vars: {
-      OPENCLAW_CI_RUNNER_BACKEND: context.runnerBackend ?? "",
+      CARAPACE_CI_RUNNER_BACKEND: context.runnerBackend ?? "",
     },
   });
 }
@@ -297,7 +297,7 @@ function renderCiGateEnvironment(
     return String(
       evaluateWorkflowExpression(expression, {
         eventName: "workflow_dispatch",
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         ...context,
         preflightOutputs,
@@ -318,14 +318,14 @@ function runPreflightNodeInvocation(
     workflowRevision: string;
   },
 ) {
-  const root = tempDirs.make("openclaw-preflight-runtime-");
+  const root = tempDirs.make("carapace-preflight-runtime-");
   const binDir = path.join(root, "bin");
   const argsPath = path.join(root, "node-args");
   mkdirSync(binDir, { recursive: true });
   const nodePath = path.join(binDir, "node");
   writeFileSync(
     nodePath,
-    '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$OPENCLAW_NODE_ARGS"\ncat >/dev/null\n',
+    '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$CARAPACE_NODE_ARGS"\ncat >/dev/null\n',
   );
   chmodSync(nodePath, 0o755);
   const result = spawnSync("bash", ["-c", script], {
@@ -333,9 +333,9 @@ function runPreflightNodeInvocation(
     env: {
       ...process.env,
       GITHUB_EVENT_NAME: options.eventName,
-      OPENCLAW_CI_CHECKOUT_REVISION: options.checkoutRevision,
-      OPENCLAW_CI_WORKFLOW_REVISION: options.workflowRevision,
-      OPENCLAW_NODE_ARGS: argsPath,
+      CARAPACE_CI_CHECKOUT_REVISION: options.checkoutRevision,
+      CARAPACE_CI_WORKFLOW_REVISION: options.workflowRevision,
+      CARAPACE_NODE_ARGS: argsPath,
       PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
     },
   });
@@ -347,7 +347,7 @@ function runWorkflowShellScript(
   script: string,
   options: { cwd?: string; env?: NodeJS.ProcessEnv },
 ) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-workflow-shell-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-workflow-shell-"));
   const modulePaths: string[] = [];
   try {
     let moduleIndex = 0;
@@ -358,7 +358,7 @@ function runWorkflowShellScript(
         (_match, _marker: string, body: string) => {
           const modulePath = path.join(
             moduleRoot,
-            `.openclaw-${path.basename(root)}-${moduleIndex}.mjs`,
+            `.carapace-${path.basename(root)}-${moduleIndex}.mjs`,
           );
           moduleIndex += 1;
           modulePaths.push(modulePath);
@@ -388,7 +388,7 @@ function runWorkflowShellScript(
 }
 
 function runCiChangedScopeFixture(changedPaths: string[]): Record<string, string> {
-  const outputPath = path.join(tempDirs.make("openclaw-ci-scope-"), "scope.out");
+  const outputPath = path.join(tempDirs.make("carapace-ci-scope-"), "scope.out");
   writeGitHubOutput(
     detectChangedScope(changedPaths),
     outputPath,
@@ -423,7 +423,7 @@ function runCiManifestFixture(options: {
   androidCiCapabilities?: boolean;
   nativeI18nCapabilities?: boolean;
   macosNodeParts?: boolean;
-  openClawKitTests?: boolean;
+  carapaceKitTests?: boolean;
   protocolCoverage?: boolean;
   packageVersion?: string;
   qaSmokePlan?: boolean;
@@ -443,7 +443,7 @@ function runCiManifestFixture(options: {
   remoteTagRefs?: Record<string, string>;
   scopeEnv?: Record<string, string>;
 }) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-manifest-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-ci-manifest-"));
   try {
     const scriptsDir = path.join(root, "scripts", "lib");
     mkdirSync(scriptsDir, { recursive: true });
@@ -474,8 +474,8 @@ function runCiManifestFixture(options: {
             configs: ["test/vitest/bundled.config.ts"],
             includePatterns: options.changedPaths,
             env: {
-              OPENCLAW_CI_TEST_COMPACT_MODE: options.compactMode ?? "full",
-              OPENCLAW_CI_TEST_RUNNER_BACKEND: options.runnerBackend ?? "",
+              CARAPACE_CI_TEST_COMPACT_MODE: options.compactMode ?? "full",
+              CARAPACE_CI_TEST_RUNNER_BACKEND: options.runnerBackend ?? "",
             },
             requiresDist: false,
             runner: "ubuntu-24.04",
@@ -645,8 +645,8 @@ function runCiManifestFixture(options: {
         ...((options.androidCiCapabilities ?? options.bundledPlanner)
           ? ["android-ci-contract-v2"]
           : []),
-        ...((options.openClawKitTests ?? options.bundledPlanner)
-          ? ["openclawkit-tests-contract-v1"]
+        ...((options.carapaceKitTests ?? options.bundledPlanner)
+          ? ["carapacekit-tests-contract-v1"]
           : []),
         ...(options.bundledPlanner ? ["docker-seed-e2e-contract-v1"] : []),
         ...((options.targetHostedRunnerProfileContract ?? options.bundledPlanner)
@@ -686,7 +686,7 @@ function runCiManifestFixture(options: {
         const [command, endpoint, queryFlag, query] = process.argv.slice(2);
         const baseRef = ${JSON.stringify(`refs/tags/v${options.packageVersion}`)};
         if (process.env.GH_TOKEN !== "test-token" || command !== "api" ||
-            endpoint !== "repos/openclaw/openclaw/commits/" + encodeURIComponent(baseRef) ||
+            endpoint !== "repos/carapace/carapace/commits/" + encodeURIComponent(baseRef) ||
             queryFlag !== "--jq" || query !== ".sha") {
           throw new Error("Expected authenticated, fully qualified correction base lookup");
         }
@@ -717,12 +717,12 @@ function runCiManifestFixture(options: {
         env: {
           PATH: `${fixtureBin}${path.delimiter}${process.env.PATH ?? ""}`,
           GH_TOKEN: correctionStep.env?.GH_TOKEN === "${{ github.token }}" ? "test-token" : "",
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_OUTPUT: correctionOutput,
           TARGET_CONTEXT_REF:
-            options.scopeEnv?.OPENCLAW_CI_TARGET_CONTEXT_TARGET === "true"
-              ? options.scopeEnv.OPENCLAW_CI_TARGET_CONTEXT_REF
-              : options.scopeEnv?.OPENCLAW_CI_HISTORICAL_TARGET_TAG,
+            options.scopeEnv?.CARAPACE_CI_TARGET_CONTEXT_TARGET === "true"
+              ? options.scopeEnv.CARAPACE_CI_TARGET_CONTEXT_REF
+              : options.scopeEnv?.CARAPACE_CI_HISTORICAL_TARGET_TAG,
         },
       });
       if (correction.status !== 0) {
@@ -758,40 +758,40 @@ function runCiManifestFixture(options: {
         PATH: options.remoteTagRefs
           ? `${fixtureBin}${path.delimiter}${process.env.PATH ?? ""}`
           : process.env.PATH,
-        OPENCLAW_CI_CHANGED_PATHS_JSON:
+        CARAPACE_CI_CHANGED_PATHS_JSON:
           options.changedPaths === undefined ? undefined : JSON.stringify(options.changedPaths),
-        OPENCLAW_CI_CHECKOUT_REVISION: "a".repeat(40),
-        OPENCLAW_CI_CORRECTION_BASE_SHA: correctionBaseSha,
-        OPENCLAW_CI_DOCS_CHANGED: "true",
-        OPENCLAW_CI_DOCS_ONLY: "false",
-        OPENCLAW_CI_EVENT_NAME: options.eventName ?? "workflow_dispatch",
-        OPENCLAW_CI_HISTORICAL_TARGET:
+        CARAPACE_CI_CHECKOUT_REVISION: "a".repeat(40),
+        CARAPACE_CI_CORRECTION_BASE_SHA: correctionBaseSha,
+        CARAPACE_CI_DOCS_CHANGED: "true",
+        CARAPACE_CI_DOCS_ONLY: "false",
+        CARAPACE_CI_EVENT_NAME: options.eventName ?? "workflow_dispatch",
+        CARAPACE_CI_HISTORICAL_TARGET:
           (options.historicalCompatibility ?? true) &&
           (options.eventName ?? "workflow_dispatch") === "workflow_dispatch"
             ? "true"
             : "false",
-        OPENCLAW_CI_RELEASE_GATE: String(options.releaseGate ?? false),
-        OPENCLAW_CI_RELEASE_CANDIDATE_TARGET:
+        CARAPACE_CI_RELEASE_GATE: String(options.releaseGate ?? false),
+        CARAPACE_CI_RELEASE_CANDIDATE_TARGET:
           options.releaseCandidateCompatibility === true ? "true" : "false",
-        OPENCLAW_CI_TARGET_CONTEXT_TARGET:
+        CARAPACE_CI_TARGET_CONTEXT_TARGET:
           options.targetContextCompatibility === true ? "true" : "false",
-        OPENCLAW_CI_REPOSITORY: options.repository ?? "openclaw/openclaw",
-        OPENCLAW_CI_RUN_ANDROID: "true",
-        OPENCLAW_CI_RUN_CONTROL_UI_I18N: "true",
-        OPENCLAW_CI_RUN_IOS_BUILD: "true",
-        OPENCLAW_CI_RUN_MACOS: "true",
-        OPENCLAW_CI_RUN_NATIVE_I18N: "true",
-        OPENCLAW_CI_RUN_NODE: String(options.runNode ?? true),
-        OPENCLAW_CI_RUN_NODE_FAST_CI_ROUTING: String(options.nodeFastCiRouting ?? false),
-        OPENCLAW_CI_RUN_NODE_FAST_ONLY: String(options.nodeFastOnly ?? false),
-        OPENCLAW_CI_RUN_NODE_FAST_PLUGIN_CONTRACTS: String(
+        CARAPACE_CI_REPOSITORY: options.repository ?? "carapace/carapace",
+        CARAPACE_CI_RUN_ANDROID: "true",
+        CARAPACE_CI_RUN_CONTROL_UI_I18N: "true",
+        CARAPACE_CI_RUN_IOS_BUILD: "true",
+        CARAPACE_CI_RUN_MACOS: "true",
+        CARAPACE_CI_RUN_NATIVE_I18N: "true",
+        CARAPACE_CI_RUN_NODE: String(options.runNode ?? true),
+        CARAPACE_CI_RUN_NODE_FAST_CI_ROUTING: String(options.nodeFastCiRouting ?? false),
+        CARAPACE_CI_RUN_NODE_FAST_ONLY: String(options.nodeFastOnly ?? false),
+        CARAPACE_CI_RUN_NODE_FAST_PLUGIN_CONTRACTS: String(
           options.nodeFastPluginContracts ?? false,
         ),
-        OPENCLAW_CI_RUNNER_BACKEND: options.runnerBackend ?? options.runnerProfile ?? "",
-        OPENCLAW_CI_RUNNER_PROFILE: options.runnerProfile ?? options.runnerBackend ?? "blacksmith",
-        OPENCLAW_CI_RUN_SKILLS_PYTHON: "true",
-        OPENCLAW_CI_RUN_WINDOWS: "true",
-        OPENCLAW_CI_WORKFLOW_REVISION: "b".repeat(40),
+        CARAPACE_CI_RUNNER_BACKEND: options.runnerBackend ?? options.runnerProfile ?? "",
+        CARAPACE_CI_RUNNER_PROFILE: options.runnerProfile ?? options.runnerBackend ?? "blacksmith",
+        CARAPACE_CI_RUN_SKILLS_PYTHON: "true",
+        CARAPACE_CI_RUN_WINDOWS: "true",
+        CARAPACE_CI_WORKFLOW_REVISION: "b".repeat(40),
         ...options.scopeEnv,
       },
     });
@@ -826,8 +826,8 @@ const readFrozenAdditionalCheckRows = (() => {
         historicalCompatibility: true,
         changedPaths: [],
         scopeEnv: {
-          OPENCLAW_CI_CHECKOUT_REVISION: "a".repeat(40),
-          OPENCLAW_CI_WORKFLOW_REVISION: "b".repeat(40),
+          CARAPACE_CI_CHECKOUT_REVISION: "a".repeat(40),
+          CARAPACE_CI_WORKFLOW_REVISION: "b".repeat(40),
         },
       });
       expect(manifest.status, manifest.output).toBe(0);
@@ -848,7 +848,7 @@ function runRunnerProfileFixture(options: {
   runAttempt?: number;
   targetSupportsContract: boolean;
 }) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-runner-profile-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-ci-runner-profile-"));
   try {
     const workflowPath = path.join(root, ".github", "workflows", "ci.yml");
     mkdirSync(path.dirname(workflowPath), { recursive: true });
@@ -873,8 +873,8 @@ function runRunnerProfileFixture(options: {
         CONFIGURED_RUNNER_PROFILE: options.configuredProfile ?? "",
         GITHUB_EVENT_NAME: options.eventName,
         GITHUB_OUTPUT: outputPath,
-        GITHUB_REPOSITORY: options.repository ?? "openclaw/openclaw",
-        HEAD_REPOSITORY: options.headRepository ?? options.repository ?? "openclaw/openclaw",
+        GITHUB_REPOSITORY: options.repository ?? "carapace/carapace",
+        HEAD_REPOSITORY: options.headRepository ?? options.repository ?? "carapace/carapace",
         GITHUB_RUN_ATTEMPT: String(options.runAttempt ?? 1),
       },
     });
@@ -902,7 +902,7 @@ function runCiReleaseRefValidation(options: {
   comparisonStatus?: string;
   apiError?: "ref" | "comparison";
 }) {
-  const root = tempDirs.make("openclaw-ci-target-context-");
+  const root = tempDirs.make("carapace-ci-target-context-");
   const outputPath = path.join(root, "github-output");
   const binPath = path.join(root, "bin");
   const resolvedSha = options.resolvedSha ?? "b".repeat(40);
@@ -920,7 +920,7 @@ function runCiReleaseRefValidation(options: {
 set -euo pipefail
 if [[ "$1" == "-C" ]]; then shift 2; fi
 if [[ "$*" == "remote get-url origin" ]]; then
-  printf '%s\\n' 'https://github.com/openclaw/openclaw.git'
+  printf '%s\\n' 'https://github.com/Exaggarate/carapace.git'
 else
   echo 'fatal: could not read Username for https://github.com: terminal prompts disabled' >&2
   exit 128
@@ -973,11 +973,11 @@ fi
       env: {
         ...process.env,
         GH_TOKEN: step.env?.GH_TOKEN === "${{ github.token }}" ? "test-token" : "",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_OUTPUT: outputPath,
-        MOCK_REF_ENDPOINT: `repos/openclaw/openclaw/commits/${encodeURIComponent(ref)}`,
+        MOCK_REF_ENDPOINT: `repos/carapace/carapace/commits/${encodeURIComponent(ref)}`,
         MOCK_REF_SHA: resolvedSha,
-        MOCK_COMPARE_ENDPOINT: `repos/openclaw/openclaw/compare/${options.targetSha}...${resolvedSha}`,
+        MOCK_COMPARE_ENDPOINT: `repos/carapace/carapace/compare/${options.targetSha}...${resolvedSha}`,
         MOCK_COMPARE_STATUS: options.comparisonStatus ?? "ahead",
         MOCK_API_ERROR: options.apiError ?? "",
         RUNNER_TEMP: root,
@@ -1009,7 +1009,7 @@ function runCandidateTrustClassification(options: {
   targetRef?: string;
   workflowRevision?: string;
 }) {
-  const root = tempDirs.make("openclaw-ci-candidate-trust-");
+  const root = tempDirs.make("carapace-ci-candidate-trust-");
   const outputPath = path.join(root, "github-output");
   const binPath = path.join(root, "bin");
   const defaultRevision = options.defaultRevision ?? "b".repeat(40);
@@ -1100,7 +1100,7 @@ function runMaturityInvocationScenario(options: {
       CALLER_WORKFLOW_REF: options.callerWorkflowRef,
       JOB_WORKFLOW_FILE_PATH: MATURITY_SCORECARD_WORKFLOW,
       JOB_WORKFLOW_REF: options.jobWorkflowRef ?? MATURITY_SCORECARD_WORKFLOW_REF,
-      JOB_WORKFLOW_REPOSITORY: "openclaw/openclaw",
+      JOB_WORKFLOW_REPOSITORY: "carapace/carapace",
       PATH: process.env.PATH ?? "",
       PUBLISH_PULL_REQUEST: String(options.publishPullRequest),
     },
@@ -1118,7 +1118,7 @@ function runMaturityArtifactCopyScenario(
   const copyStep = workflow.jobs.publish_generated_pr.steps.find(
     (step: { name?: string }) => step.name === "Validate and copy generated PR files",
   );
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-maturity-copy-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-maturity-copy-"));
   const staging = path.join(root, "staging");
   try {
     for (const generatedPath of MATURITY_GENERATED_PR_PATHS) {
@@ -1173,7 +1173,7 @@ function readQaProfileEvidenceWorkflow() {
 type QaProfileTimeoutFixtureMode = "natural-124" | "self-kill" | "term" | "kill";
 
 function runQaProfileTimeoutFixture(mode: QaProfileTimeoutFixtureMode) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-qa-profile-timeout-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-qa-profile-timeout-"));
   try {
     const selectedRoot = path.join(root, "selected");
     mkdirSync(selectedRoot);
@@ -1314,7 +1314,7 @@ function runQaProfileFailureGate(options: { allowFailures: boolean; qaExitCode?:
 }
 
 function readReleaseChecksWorkflow() {
-  return parse(readFileSync(".github/workflows/openclaw-release-checks.yml", "utf8"));
+  return parse(readFileSync(".github/workflows/carapace-release-checks.yml", "utf8"));
 }
 
 function readCriticalQualityWorkflow() {
@@ -1395,7 +1395,7 @@ function runDiffBaseFixture(options: {
   manual?: boolean;
   apiError?: "ref" | "comparison";
 }) {
-  const root = tempDirs.make("openclaw-ci-diff-base-");
+  const root = tempDirs.make("carapace-ci-diff-base-");
   runGit(root, ["init", "-q", "-b", "main"]);
   runGit(root, ["config", "commit.gpgsign", "false"]);
   runGit(root, ["config", "user.email", "ci-fixture@example.com"]);
@@ -1437,8 +1437,8 @@ function runDiffBaseFixture(options: {
       "shift",
       'if [ "$1" = --method ]; then [ "$2" = GET ] || exit 64; shift 2; fi',
       'case "$*" in',
-      `  'repos/openclaw/openclaw/commits/${encodeURIComponent(`refs/heads/${defaultBranch}`)} --jq .sha') kind=ref ;;`,
-      `  'repos/openclaw/openclaw/compare/${parentSha}...${headSha} --jq .merge_base_commit.sha') kind=comparison ;;`,
+      `  'repos/carapace/carapace/commits/${encodeURIComponent(`refs/heads/${defaultBranch}`)} --jq .sha') kind=ref ;;`,
+      `  'repos/carapace/carapace/compare/${parentSha}...${headSha} --jq .merge_base_commit.sha') kind=comparison ;;`,
       "  *) exit 64 ;;",
       "esac",
       `printf '%s\\n' '${parentSha}'`,
@@ -1447,7 +1447,7 @@ function runDiffBaseFixture(options: {
     fixtureEnv.PATH = `${bin}${path.delimiter}${process.env.PATH ?? ""}`;
     fixtureEnv.GH_TOKEN = evaluateWorkflowExpression(diffBaseStep.env.GH_TOKEN, {
       eventName: "workflow_dispatch",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       workflowToken: "test-token",
     });
@@ -1462,7 +1462,7 @@ function runDiffBaseFixture(options: {
       EVENT_BASE_SHA: eventBaseSha,
       GITHUB_EVENT_NAME: options.manual ? "workflow_dispatch" : "push",
       GITHUB_OUTPUT: outputPath,
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       PULL_REQUEST_NUMBER: "",
       RELEASE_GATE: "false",
       ...fixtureEnv,
@@ -1527,7 +1527,7 @@ function commitProtocolFixture(repo: string, message: string): string {
 }
 
 function createQaProtocolTopology() {
-  const root = tempDirs.make("openclaw-qa-protocol-topology-");
+  const root = tempDirs.make("carapace-qa-protocol-topology-");
   const origin = path.join(root, "origin");
   const checkout = path.join(root, "checkout");
   const releaseBranch = "release/2026.8.1";
@@ -1668,7 +1668,7 @@ function runProtocolSinceFixture(checkout: string, baseSha: string) {
     JSON.stringify({
       compilerOptions: {
         paths: {
-          "@openclaw/normalization-core/record-coerce": [
+          "@carapace/normalization-core/record-coerce": [
             "./packages/normalization-core/src/record-coerce.ts",
           ],
         },
@@ -1710,7 +1710,7 @@ function runCheckShardFixture(options: {
   typeCalls: { row: string; command: string; localCheck: string | null }[];
   rows: { name: string; status: number | null }[];
 } {
-  const root = tempDirs.make("openclaw-ci-guards-");
+  const root = tempDirs.make("carapace-ci-guards-");
   const fakeBin = path.join(root, "bin");
   const callsPath = path.join(root, "pnpm-calls.txt");
   const typeCallsPath = path.join(root, "type-calls.txt");
@@ -1726,7 +1726,7 @@ function runCheckShardFixture(options: {
       path.join(root, "scripts/run-tsgo-core-test-shards.mjs"),
       `import { appendFileSync } from "node:fs";
 const args = process.argv.slice(2);
-appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.OPENCLAW_LOCAL_CHECK ?? "<unset>", "node " + args.join(" ")].join("\\t") + "\\n");
+appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.CARAPACE_LOCAL_CHECK ?? "<unset>", "node " + args.join(" ")].join("\\t") + "\\n");
 if (args[args.indexOf("--stripe") + 1] === process.env.FAIL_TYPE_STRIPE) process.exit(17);
 `,
     );
@@ -1743,7 +1743,7 @@ if (args[args.indexOf("--stripe") + 1] === process.env.FAIL_TYPE_STRIPE) process
       path.join(root, "scripts/check-native-state-schema-version.mjs"),
       `
 import { appendFileSync } from "node:fs";
-appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.OPENCLAW_LOCAL_CHECK ?? "<unset>", "node scripts/check-native-state-schema-version.mjs"].join("\\t") + "\\n");
+appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.CARAPACE_LOCAL_CHECK ?? "<unset>", "node scripts/check-native-state-schema-version.mjs"].join("\\t") + "\\n");
 `,
     );
   }
@@ -1762,7 +1762,7 @@ appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.OPENCL
     'printf "%s\\n" "$*" >> "$PNPM_CALLS"',
     ...(typeCheck
       ? [
-          'printf "%s\\t%s\\tpnpm %s\\n" "$TYPE_ROW" "${OPENCLAW_LOCAL_CHECK-<unset>}" "$*" >> "$TYPE_CALLS"',
+          'printf "%s\\t%s\\tpnpm %s\\n" "$TYPE_ROW" "${CARAPACE_LOCAL_CHECK-<unset>}" "$*" >> "$TYPE_CALLS"',
         ]
       : []),
   ]);
@@ -1773,7 +1773,7 @@ appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.OPENCL
   const context: Parameters<typeof evaluateWorkflowExpression>[1] = {
     eventName:
       options.types?.eventName ?? (options.frozenTarget ? "workflow_dispatch" : "pull_request"),
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     runAttempt: 1,
     frozenTarget: options.frozenTarget,
     hostedRunnerProfileContract: options.types?.hostedContract ?? true,
@@ -1834,7 +1834,7 @@ appendFileSync(process.env.TYPE_CALLS, [process.env.TYPE_ROW, process.env.OPENCL
           TASK: options.task ?? "guards",
           ...(typeCheck
             ? {
-                OPENCLAW_LOCAL_CHECK: undefined,
+                CARAPACE_LOCAL_CHECK: undefined,
                 TYPE_ROW: row.name,
                 TYPE_CALLS: typeCallsPath,
                 FAIL_TYPE_STRIPE: options.types?.failStripe,
@@ -1885,7 +1885,7 @@ function runDependencyCheckFixture(options: {
   output: string;
   status: number | null;
 } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-deadcode-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-ci-deadcode-"));
   try {
     const fakeBin = path.join(root, "bin");
     const callsPath = path.join(root, "pnpm-calls.txt");
@@ -1948,7 +1948,7 @@ function runControlUiI18nSourceFixture(options: {
   compatibilityTarget: boolean;
   hasVerifyScript: boolean;
 }): { calls: string[]; output: string; summary: string; status: number | null } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-control-ui-i18n-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-ci-control-ui-i18n-"));
   try {
     const fakeBin = path.join(root, "bin");
     const callsPath = path.join(root, "pnpm-calls.txt");
@@ -2023,7 +2023,7 @@ describe("ci workflow guards", () => {
         typeof fetchDepth === "string"
           ? evaluateWorkflowExpression(fetchDepth, {
               eventName: "workflow_dispatch",
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runAttempt: 1,
               resolveTargetOutputs: { package_mode: packageMode },
             })
@@ -2118,7 +2118,7 @@ NODE_prefix: for (const value of ["heredoc-body-preserved"]) {
   console.log(value);
   break NODE_prefix;
 }
-console.log(mkdtempSync(join(tmpdir(), 'openclaw-workflow-child-')));
+console.log(mkdtempSync(join(tmpdir(), 'carapace-workflow-child-')));
 NODE
 `,
       {},
@@ -2188,7 +2188,7 @@ NODE
     const workflow = readWorkflow(workflowPath);
     const steps = workflow.jobs.dispatch.steps as WorkflowStep[];
     const receiverDispatchSteps = steps.filter((step) =>
-      step.run?.includes("repos/openclaw/clawsweeper/dispatches"),
+      step.run?.includes("repos/carapace/clawsweeper/dispatches"),
     );
     const eventTypes = receiverDispatchSteps.map((step) => {
       const matches = [...(step.run ?? "").matchAll(/\bevent_type\s*:\s*"([^"]+)"/gu)];
@@ -2271,8 +2271,8 @@ NODE
     expect(guard).toContain("github.event.action != 'labeled'");
     expect(guard).toContain("github.event.action != 'unlabeled'");
     expect(guard).toContain("github.actor != 'clawsweeper[bot]'");
-    expect(guard).toContain("github.actor != 'openclaw-clawsweeper[bot]'");
-    expect(guard).not.toContain("openclaw-barnacle[bot]");
+    expect(guard).toContain("github.actor != 'carapace-clawsweeper[bot]'");
+    expect(guard).not.toContain("carapace-barnacle[bot]");
   });
 
   it("routes stale bug issues through ClawSweeper instead of Barnacle closure", () => {
@@ -2384,11 +2384,11 @@ NODE
     expect(
       preflightSteps.find((step: WorkflowStep) => step.name === "Build CI manifest").env,
     ).toMatchObject({
-      OPENCLAW_CI_RELEASE_SCOPE: "${{ inputs.release_scope || 'full' }}",
-      OPENCLAW_CI_PULL_REQUEST_NUMBER: "${{ inputs.pull_request_number }}",
-      OPENCLAW_CI_TARGET_REF: "${{ inputs.target_ref }}",
-      OPENCLAW_CI_TARGET_CONTEXT_REF: "${{ inputs.target_context_ref }}",
-      OPENCLAW_CI_HISTORICAL_TARGET_TAG: "${{ inputs.historical_target_tag }}",
+      CARAPACE_CI_RELEASE_SCOPE: "${{ inputs.release_scope || 'full' }}",
+      CARAPACE_CI_PULL_REQUEST_NUMBER: "${{ inputs.pull_request_number }}",
+      CARAPACE_CI_TARGET_REF: "${{ inputs.target_ref }}",
+      CARAPACE_CI_TARGET_CONTEXT_REF: "${{ inputs.target_context_ref }}",
+      CARAPACE_CI_HISTORICAL_TARGET_TAG: "${{ inputs.historical_target_tag }}",
     });
     const validationStep = preflightSteps.find(
       (step: WorkflowStep) => step.name === "Validate release-gate dispatch",
@@ -2425,7 +2425,7 @@ NODE
     expect(changedScopeStep.if).toContain(
       "github.event_name == 'workflow_dispatch' && inputs.release_gate",
     );
-    expect(changedScopeStep.env?.OPENCLAW_ALLOW_RELEASE_GENERATED_MIX).toContain(
+    expect(changedScopeStep.env?.CARAPACE_ALLOW_RELEASE_GENERATED_MIX).toContain(
       "github.event_name == 'workflow_dispatch'",
     );
     expect(changedScopeStep.run).toContain('elif [ "${{ github.event_name }}" = "pull_request" ]');
@@ -2439,13 +2439,13 @@ NODE
     );
     const workflowSource = readFileSync(".github/workflows/ci.yml", "utf8");
     expect(workflowSource).toContain(
-      "OPENCLAW_CI_RUN_MACOS: ${{ github.event_name == 'workflow_dispatch' && !inputs.release_gate && 'true' || steps.changed_scope.outputs.run_macos || 'false' }}",
+      "CARAPACE_CI_RUN_MACOS: ${{ github.event_name == 'workflow_dispatch' && !inputs.release_gate && 'true' || steps.changed_scope.outputs.run_macos || 'false' }}",
     );
     expect(workflowSource).toContain(
-      "OPENCLAW_CI_RUN_IOS_BUILD: ${{ github.event_name == 'workflow_dispatch' && !inputs.release_gate && 'true' || steps.changed_scope.outputs.run_ios_build || 'false' }}",
+      "CARAPACE_CI_RUN_IOS_BUILD: ${{ github.event_name == 'workflow_dispatch' && !inputs.release_gate && 'true' || steps.changed_scope.outputs.run_ios_build || 'false' }}",
     );
     expect(workflowSource).toContain(
-      "OPENCLAW_CI_RUN_ANDROID: ${{ github.event_name == 'workflow_dispatch' && (inputs.release_gate || inputs.include_android) && 'true' || steps.changed_scope.outputs.run_android || 'false' }}",
+      "CARAPACE_CI_RUN_ANDROID: ${{ github.event_name == 'workflow_dispatch' && (inputs.release_gate || inputs.include_android) && 'true' || steps.changed_scope.outputs.run_android || 'false' }}",
     );
 
     for (const [jobName, job] of Object.entries(workflow.jobs)) {
@@ -2457,7 +2457,7 @@ NODE
         evaluateWorkflowExpression(runsOn, {
           eventName: "workflow_dispatch",
           releaseGate: true,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           runnerBackend: "hybrid",
         }),
@@ -2487,13 +2487,13 @@ NODE
       const context = {
         eventName,
         releaseGate,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         env: { HISTORICAL_TARGET: String(historical), MACOS_PRIMARY_PHASE: "release" },
-        fileHashes: { "apps/shared/OpenClawWatchRTC/Cargo.toml": "present" },
+        fileHashes: { "apps/shared/CarapaceWatchRTC/Cargo.toml": "present" },
         preflightOutputs: {
           compatibility_target: String(historical),
-          run_openclawkit_tests: "true",
+          run_carapacekit_tests: "true",
           release_scope: "full",
         },
       };
@@ -2517,8 +2517,8 @@ NODE
                 "Swift build (release)",
               ],
               tests: [
-                "OpenClawKit Talk-trait opt-out (no ElevenLabsKit when default traits disabled)",
-                "OpenClawKit tests",
+                "CarapaceKit Talk-trait opt-out (no ElevenLabsKit when default traits disabled)",
+                "CarapaceKit tests",
                 "Swabble tests",
                 "Swift test",
               ],
@@ -2610,7 +2610,7 @@ NODE
         eventName,
         releaseGate,
         releaseScope: "",
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         preflightOutputs: {
           ...manifest.outputs,
@@ -2661,8 +2661,8 @@ NODE
         expect(selectedPhases(name), name).toEqual([full ? "release" : "tests"]);
       }
       for (const name of [
-        "OpenClawKit Talk-trait opt-out (no ElevenLabsKit when default traits disabled)",
-        "OpenClawKit tests",
+        "CarapaceKit Talk-trait opt-out (no ElevenLabsKit when default traits disabled)",
+        "CarapaceKit tests",
         "Swift test",
       ]) {
         expect(selectedPhases(name), name).toEqual(["tests"]);
@@ -2704,13 +2704,13 @@ NODE
   it("serializes the shared Swift package suite on hosted macOS retries", () => {
     const macosSwift = readCiWorkflow().jobs["macos-swift"];
 
-    expect(macosSwift.env.OPENCLAWKIT_TEST_EXECUTION).toContain("github.run_attempt > 1");
-    const openClawKitTests = macosSwift.steps.find(
-      (candidate: WorkflowStep) => candidate.name === "OpenClawKit tests",
+    expect(macosSwift.env.CARAPACEKIT_TEST_EXECUTION).toContain("github.run_attempt > 1");
+    const carapaceKitTests = macosSwift.steps.find(
+      (candidate: WorkflowStep) => candidate.name === "CarapaceKit tests",
     );
-    expect(openClawKitTests?.run).toContain('if [[ "$OPENCLAWKIT_TEST_EXECUTION" == "parallel" ]]');
-    expect(openClawKitTests?.run).toContain("--parallel");
-    expect(openClawKitTests?.run).toContain("--no-parallel");
+    expect(carapaceKitTests?.run).toContain('if [[ "$CARAPACEKIT_TEST_EXECUTION" == "parallel" ]]');
+    expect(carapaceKitTests?.run).toContain("--parallel");
+    expect(carapaceKitTests?.run).toContain("--no-parallel");
   });
 
   it("keeps Testbox pull request validation off leased runner capacity", () => {
@@ -2889,12 +2889,12 @@ NODE
     expect(controlUiResolveBase.if).not.toContain("chore(ui): refresh control ui locales");
     const controlResolveCondition = controlUiResolveBase.if.replace(/\s+/gu, " ");
     expect(controlResolveCondition).toBe(
-      "github.repository == 'openclaw/openclaw' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
+      "github.repository == 'carapace/carapace' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
     );
     expect(controlResolveCondition).not.toContain("inputs.token_preflight_only");
     expect(controlResolveCondition).not.toContain("github.ref_type");
     expect(nativeResolveBase.if).toBe(
-      "github.repository == 'openclaw/openclaw' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
+      "github.repository == 'carapace/carapace' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
     );
     expect(controlUiWorkflow.on.workflow_dispatch.inputs.token_preflight_only).toEqual({
       description: "Verify generated PR App permissions without running locale generation.",
@@ -2926,13 +2926,13 @@ NODE
       );
     }
     expect(refreshStep.env.OPENAI_API_KEY).toBe(
-      "${{ secrets.OPENCLAW_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
+      "${{ secrets.CARAPACE_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
     );
-    expect(refreshStep.env.OPENCLAW_CONTROL_UI_I18N_MODEL).toBe(
-      "${{ secrets.OPENCLAW_I18N_MODEL }}",
+    expect(refreshStep.env.CARAPACE_CONTROL_UI_I18N_MODEL).toBe(
+      "${{ secrets.CARAPACE_I18N_MODEL }}",
     );
-    expect(refreshStep.env.OPENCLAW_I18N_FALLBACK_MODEL).toBe(
-      "${{ secrets.OPENCLAW_I18N_FALLBACK_MODEL }}",
+    expect(refreshStep.env.CARAPACE_I18N_FALLBACK_MODEL).toBe(
+      "${{ secrets.CARAPACE_I18N_FALLBACK_MODEL }}",
     );
     expect(refreshStep.env.FULL_REFRESH).toBe("${{ inputs.full_refresh || false }}");
     expect(refreshStep.run).toContain("args+=(--force)");
@@ -2950,13 +2950,13 @@ NODE
     );
     expect(nativePublishStep.with["generated-paths"].trim().split("\n")).toEqual([
       "apps/.i18n/native",
-      "apps/android/app/src/main/java/ai/openclaw/app/i18n/NativeStringResources.kt",
+      "apps/android/app/src/main/java/ai/carapace/app/i18n/NativeStringResources.kt",
       "apps/android/app/src/main/res/values*/assistant.xml",
       "apps/android/app/src/main/res/values*/strings.xml",
       "apps/android/app/src/thirdParty/res/values*/accessibility_strings.xml",
       "apps/android/wear/src/main/res/values*/strings.xml",
       "apps/ios/Resources/Localizable.xcstrings",
-      "apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings",
+      "apps/macos/Sources/Carapace/Resources/Localizable.xcstrings",
       "apps/ios/Sources/*.lproj/InfoPlist.strings",
       "apps/ios/WatchApp/*.lproj/InfoPlist.strings",
       "apps/ios/ShareExtension/*.lproj/InfoPlist.strings",
@@ -2969,17 +2969,17 @@ NODE
     );
     expect(nativePublishStep.with["auto-merge"]).toBe("true");
     expect(controlUiRefreshStep.env.OPENAI_API_KEY).toBe(
-      "${{ secrets.OPENCLAW_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
+      "${{ secrets.CARAPACE_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
     );
-    expect(controlUiRefreshStep.env.OPENCLAW_CONTROL_UI_I18N_MODEL).toBe(
-      "${{ secrets.OPENCLAW_I18N_MODEL }}",
+    expect(controlUiRefreshStep.env.CARAPACE_CONTROL_UI_I18N_MODEL).toBe(
+      "${{ secrets.CARAPACE_I18N_MODEL }}",
     );
-    expect(controlUiRefreshStep.env.OPENCLAW_I18N_FALLBACK_MODEL).toBe(
-      "${{ secrets.OPENCLAW_I18N_FALLBACK_MODEL }}",
+    expect(controlUiRefreshStep.env.CARAPACE_I18N_FALLBACK_MODEL).toBe(
+      "${{ secrets.CARAPACE_I18N_FALLBACK_MODEL }}",
     );
     expect(controlUiRefreshStep.env.FULL_REFRESH).toBe("${{ inputs.full_refresh || false }}");
     expect(controlUiRefreshStep.run).toContain("args+=(--force)");
-    expect(controlUiRefreshStep.env.OPENCLAW_CONTROL_UI_I18N_AUTH_OPTIONAL).toBe("0");
+    expect(controlUiRefreshStep.env.CARAPACE_CONTROL_UI_I18N_AUTH_OPTIONAL).toBe("0");
     const controlUiArtifactStep = controlUiWorkflow.jobs.refresh.steps.find(
       (step: { name?: string }) => step.name === "Prepare locale artifact",
     );
@@ -3281,7 +3281,7 @@ NODE
       expect(actionPublishStep.run).not.toContain(forbidden);
     }
     expect(readFileSync(".github/workflows/ci.yml", "utf8")).toContain(
-      "OPENCLAW_ALLOW_RELEASE_GENERATED_MIX",
+      "CARAPACE_ALLOW_RELEASE_GENERATED_MIX",
     );
 
     for (const [
@@ -3377,7 +3377,7 @@ NODE
       const result = runGeneratedPublisherScenario(null, { autoMerge: true });
 
       expect(result.branchExists).toBe(true);
-      expect(result.mergeCalls).toContain("pr merge https://github.com/openclaw/openclaw/pull/1");
+      expect(result.mergeCalls).toContain("pr merge https://github.com/Exaggarate/carapace/pull/1");
       expect(result.mergeCalls).toContain("--auto --squash --match-head-commit");
       expect(result.summary).toContain("Enabled squash auto-merge for exact generated head");
     },
@@ -3770,7 +3770,7 @@ NODE
       ["test/fixtures/old.md", "docs/new.md", "true", "false"],
       ["docs/removed.md", null, "true", "true"],
     ] as const) {
-      const root = tempDirs.make("openclaw-docs-diff-");
+      const root = tempDirs.make("carapace-docs-diff-");
       const origin = path.join(root, "origin");
       const checkout = path.join(root, "checkout");
       mkdirSync(path.dirname(path.join(origin, source)), { recursive: true });
@@ -3883,26 +3883,26 @@ NODE
     const run = job.steps.find(
       (step: WorkflowStep) => step.name === "Run changed Docker seed owner lanes",
     ) as WorkflowStep;
-    const parallelism = run.env?.OPENCLAW_DOCKER_ALL_PARALLELISM;
+    const parallelism = run.env?.CARAPACE_DOCKER_ALL_PARALLELISM;
     expect(run).toMatchObject({
       run: "pnpm test:docker:all",
       env: {
-        OPENCLAW_DOCKER_ALL_LANES: "${{ needs.preflight.outputs.docker_seed_lanes }}",
-        OPENCLAW_DOCKER_ALL_LIVE_MODE: "skip",
-        OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "1",
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@latest",
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "legacy-operator-state",
-        OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
-        OPENCLAW_DOCKER_ALL_TAIL_PARALLELISM: parallelism,
+        CARAPACE_DOCKER_ALL_LANES: "${{ needs.preflight.outputs.docker_seed_lanes }}",
+        CARAPACE_DOCKER_ALL_LIVE_MODE: "skip",
+        CARAPACE_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "1",
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@latest",
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "legacy-operator-state",
+        CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+        CARAPACE_DOCKER_ALL_TAIL_PARALLELISM: parallelism,
       },
     });
     expect(parallelism).toContain("&& 3 || 1");
   });
 
   it.each([
-    { repository: "openclaw/openclaw", ref: "refs/heads/main", expected: true },
-    { repository: "openclaw/openclaw", ref: "refs/heads/feature", expected: false },
-    { repository: "fork/openclaw", ref: "refs/heads/main", expected: false },
+    { repository: "carapace/carapace", ref: "refs/heads/main", expected: true },
+    { repository: "carapace/carapace", ref: "refs/heads/feature", expected: false },
+    { repository: "fork/carapace", ref: "refs/heads/main", expected: false },
   ])(
     "gates only canonical main pushes admitted by CI ($repository $ref)",
     ({ repository, ref, expected }) => {
@@ -3945,7 +3945,7 @@ NODE
     const result = runCiManifestFixture({
       bundledPlanner: true,
       eventName: "push",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       changedPaths: paths,
       scopeEnv: { GITHUB_REF: "refs/heads/main" },
     });
@@ -4055,7 +4055,7 @@ NODE
         );
       }
       expect(job.strategy["max-parallel"]).toBe(3);
-      expect(runStep.env.OPENCLAW_VITEST_MAX_WORKERS).toBe(2);
+      expect(runStep.env.CARAPACE_VITEST_MAX_WORKERS).toBe(2);
     },
   );
 
@@ -4079,7 +4079,7 @@ NODE
       const pnpm = path.join(bin, "pnpm");
       writeFileSync(
         pnpm,
-        '#!/bin/sh\nprintf "project_parallelism=%s\\n" "${OPENCLAW_TEST_PROJECTS_PARALLEL:-1}"\n',
+        '#!/bin/sh\nprintf "project_parallelism=%s\\n" "${CARAPACE_TEST_PROJECTS_PARALLEL:-1}"\n',
       );
       chmodSync(pnpm, 0o755);
       for (const task of ["test-1", "test-2"]) {
@@ -4091,7 +4091,7 @@ NODE
               PATH: `${bin}${path.delimiter}${process.env.PATH}`,
               TASK: task,
               RUNNER_ENVIRONMENT: runner,
-              OPENCLAW_TEST_PROJECTS_PARALLEL: undefined,
+              CARAPACE_TEST_PROJECTS_PARALLEL: undefined,
             },
           });
           expect(result.status, result.stdout + result.stderr).toBe(0);
@@ -4099,7 +4099,7 @@ NODE
         }
       }
       expect(job.strategy["max-parallel"]).toBe(2);
-      expect(job.env.OPENCLAW_VITEST_MAX_WORKERS).toBe(1);
+      expect(job.env.CARAPACE_VITEST_MAX_WORKERS).toBe(1);
     },
   );
 
@@ -4219,7 +4219,7 @@ NODE
       const result = runCiReleaseRefValidation({ ref: contextRef, targetSha });
       expect(result.status, contextRef).toBe(1);
       expect(result.output).toContain(
-        "target_context_ref must be a canonical OpenClaw release branch.",
+        "target_context_ref must be a canonical Carapace release branch.",
       );
     }
 
@@ -4288,13 +4288,13 @@ NODE
   ] as const)("rejects wrong-namespace $kind ref $ref before remote admission", (identity) => {
     const result = runCiReleaseRefValidation({ ...identity, targetSha: "a".repeat(40) });
     expect(result.status).not.toBe(0);
-    expect(result.output).toContain("must be a canonical OpenClaw release");
+    expect(result.output).toContain("must be a canonical Carapace release");
     expect(result.outputs).not.toHaveProperty("eligible");
   });
 
   // Native Windows Node cannot execute this fixture's POSIX gh child shim.
   it.skipIf(process.platform === "win32")("protects correction credentials", () => {
-    const root = tempDirs.make("openclaw-ci-correction-order-");
+    const root = tempDirs.make("carapace-ci-correction-order-");
     const trusted = path.join(root, ".ci-harness/scripts/lib");
     const eventsPath = path.join(root, "events");
     const outputPath = path.join(root, "output");
@@ -4326,7 +4326,7 @@ NODE
     writeExecutable(path.join(bin, "gh"), [
       "#!/bin/sh",
       '[ "$GH_TOKEN" = test-token ] || exit 4',
-      `[ "$*" = 'api repos/openclaw/openclaw/commits/refs%2Ftags%2Fv2026.9.1 --jq .sha' ] || exit 64`,
+      `[ "$*" = 'api repos/carapace/carapace/commits/refs%2Ftags%2Fv2026.9.1 --jq .sha' ] || exit 64`,
       `printf 'lookup\\n' >> ${quoteShell(eventsPath)}`,
       `printf '%s\\n' '${"a".repeat(40)}'`,
     ]);
@@ -4334,7 +4334,7 @@ NODE
       eventName: "workflow_dispatch" as const,
       releaseGate: true,
       releaseScope: "npm-stable",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       targetContextRef: "release/2026.9.1-1",
       workflowToken: "test-token",
@@ -4393,7 +4393,7 @@ NODE
       [".github/workflows/ci.yml", 2],
       [".github/workflows/ios-periphery.yml", 1],
       [".github/workflows/macos-periphery.yml", 1],
-      [".github/workflows/shared-openclawkit-periphery.yml", 2],
+      [".github/workflows/shared-carapacekit-periphery.yml", 2],
     ] as const) {
       const source = readFileSync(workflowPath, "utf8");
       expect(source.match(/\/Applications\/Xcode_26\.6\.app/gu), workflowPath).toHaveLength(
@@ -4488,7 +4488,7 @@ NODE
     expect(source).toContain('task: useCompatibleAndroidCi ? "build-play-compat" : "build-play"');
     expect(androidJob.name).toBe("${{ matrix.check_name || 'android' }}");
     expect(runStep.env.CI_RUNNER_BACKEND).toContain(
-      "vars.OPENCLAW_CI_RUNNER_BACKEND == 'hybrid' && github.run_attempt > 1",
+      "vars.CARAPACE_CI_RUNNER_BACKEND == 'hybrid' && github.run_attempt > 1",
     );
     expect(runStep.run).toContain(":app:testPlayDebugUnitTest");
     expect(runStep.run).toContain(":app:testThirdPartyDebugUnitTest");
@@ -4532,7 +4532,7 @@ NODE
         ),
         "Android task runner",
       );
-      const root = tempDirs.make("openclaw-android-tier-");
+      const root = tempDirs.make("carapace-android-tier-");
       const callsPath = path.join(root, "gradle-calls.jsonl");
       writeExecutable(path.join(root, "gradlew"), [
         "#!/usr/bin/env node",
@@ -4550,7 +4550,7 @@ NODE
             ]),
           ),
           GITHUB_EVENT_NAME: context.eventName,
-          OPENCLAW_ROBOLECTRIC_INIT: "robolectric.gradle",
+          CARAPACE_ROBOLECTRIC_INIT: "robolectric.gradle",
           GRADLE_CALLS: callsPath,
           FAIL_GRADLE_TASK: failTask,
         },
@@ -4578,7 +4578,7 @@ NODE
           eventName,
           releaseGate,
           historicalCompatibility: true,
-          changedPaths: ["apps/android/app/src/main/java/ai/openclaw/app/Example.kt"],
+          changedPaths: ["apps/android/app/src/main/java/ai/carapace/app/Example.kt"],
         });
         expect(manifest.status, manifest.output).toBe(0);
         const rows: Record<string, unknown>[] = JSON.parse(
@@ -4598,7 +4598,7 @@ NODE
         const context = {
           eventName,
           releaseGate,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           preflightOutputs: manifest.outputs,
         };
@@ -4671,7 +4671,7 @@ NODE
       { paths: ["apps/android/gradle/wrapper/gradle-wrapper.properties"], build: true },
       { paths: ["apps/android/gradlew"], build: true },
       { paths: ["apps/android/Config/Version.properties"], build: true },
-      { paths: ["apps/android/app/src/main/java/ai/openclaw/app/Example.kt"], build: false },
+      { paths: ["apps/android/app/src/main/java/ai/carapace/app/Example.kt"], build: false },
       { paths: ["apps/android/wear/src/main/Example.kt"], build: false },
       { paths: ["docs/ci.md"], build: false },
       { paths: [], build: true },
@@ -4686,7 +4686,7 @@ NODE
         eventName: "pull_request",
         runNode: false,
         changedPaths: paths,
-        ...(json ? { scopeEnv: { OPENCLAW_CI_CHANGED_PATHS_JSON: json } } : {}),
+        ...(json ? { scopeEnv: { CARAPACE_CI_CHANGED_PATHS_JSON: json } } : {}),
       });
       expect(manifest.status, manifest.output).toBe(0);
       const rows: Record<string, unknown>[] = JSON.parse(
@@ -4700,7 +4700,7 @@ NODE
         ),
         {
           eventName: "pull_request",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
       );
@@ -4717,7 +4717,7 @@ NODE
     ])("propagates %s failure from %s", (task, failTask) => {
       const result = runAndroidTask(
         { task, lint: true, build_benchmark: true },
-        { eventName: "pull_request", repository: "openclaw/openclaw", runAttempt: 1 },
+        { eventName: "pull_request", repository: "carapace/carapace", runAttempt: 1 },
         failTask,
       );
       expect(result.status).toBe(23);
@@ -4744,7 +4744,7 @@ NODE
       headSha: "a".repeat(40),
       sha: "b".repeat(40),
       ref: "refs/pull/7/merge",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       workflow: "CI",
       runAttempt: 1,
       runId,
@@ -4988,7 +4988,7 @@ NODE
     });
 
     it.each([
-      ["openclaw/openclaw", "refs/heads/topic", "CI-v7-refs/heads/topic"],
+      ["carapace/carapace", "refs/heads/topic", "CI-v7-refs/heads/topic"],
       ["contributor/fork", "refs/heads/main", `CI-v7-refs/heads/main-${"b".repeat(40)}`],
       ["contributor/fork", "refs/heads/topic", `CI-v7-refs/heads/topic-${"b".repeat(40)}`],
     ])("preserves push grouping for %s on %s", (repository, ref, group) => {
@@ -5011,7 +5011,7 @@ NODE
         bundledPlanner: true,
         eventName: "pull_request",
         changedPaths: [buildImpact ? "src/fixture.ts" : "src/plugins/contracts/fixture-a.test.ts"],
-        scopeEnv: { OPENCLAW_CI_RUN_UI_TESTS: String(uiE2e) },
+        scopeEnv: { CARAPACE_CI_RUN_UI_TESTS: String(uiE2e) },
         changedPlannerSource: `
         export const createChangedNodeTestShards = (_paths, options = {}) => {
           console.log("dedicated-coverage:" + JSON.stringify(options));
@@ -5050,7 +5050,7 @@ NODE
         expect(
           evaluateWorkflowExpression(`\${{ ${readCiWorkflow().jobs[job].if} }}`, {
             eventName: "pull_request",
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
             preflightOutputs: manifest.outputs,
           }),
@@ -5084,7 +5084,7 @@ NODE
         eventName,
         runnerProfile,
         scopeEnv: {
-          OPENCLAW_CI_WORKFLOW_REVISION: (frozenTarget ? "b" : "a").repeat(40),
+          CARAPACE_CI_WORKFLOW_REVISION: (frozenTarget ? "b" : "a").repeat(40),
         },
       });
       expect(manifest.status, manifest.output).toBe(0);
@@ -5118,9 +5118,9 @@ NODE
       const step = job.steps.find(
         (candidate: WorkflowStep) => candidate.name === `Run ${family} contract shard`,
       );
-      expect(step.env.OPENCLAW_CONTRACT_INCLUDE_PATTERNS_JSON).toBe("${{ toJson(matrix) }}");
-      expect(step.env.OPENCLAW_TEST_PROJECTS_PARALLEL).toBe(family === "channel" ? "4" : undefined);
-      const fixture = tempDirs.make("openclaw-contract-groups-");
+      expect(step.env.CARAPACE_CONTRACT_INCLUDE_PATTERNS_JSON).toBe("${{ toJson(matrix) }}");
+      expect(step.env.CARAPACE_TEST_PROJECTS_PARALLEL).toBe(family === "channel" ? "4" : undefined);
+      const fixture = tempDirs.make("carapace-contract-groups-");
       const binDir = path.join(fixture, "bin");
       mkdirSync(binDir);
       const commandLog = path.join(fixture, "commands.jsonl");
@@ -5129,8 +5129,8 @@ NODE
         pnpm,
         String.raw`#!${process.execPath}
 const fs = require("node:fs");
-const files = JSON.parse(fs.readFileSync(process.env.OPENCLAW_VITEST_INCLUDE_FILE, "utf8"));
-const record = { args: process.argv.slice(2), files, parallel: process.env.OPENCLAW_TEST_PROJECTS_PARALLEL ?? null };
+const files = JSON.parse(fs.readFileSync(process.env.CARAPACE_VITEST_INCLUDE_FILE, "utf8"));
+const record = { args: process.argv.slice(2), files, parallel: process.env.CARAPACE_TEST_PROJECTS_PARALLEL ?? null };
 fs.appendFileSync(process.env.CONTRACT_COMMAND_LOG, JSON.stringify({ ...record, phase: "start" }) + "\n");
 setImmediate(() => {
   fs.appendFileSync(process.env.CONTRACT_COMMAND_LOG, JSON.stringify({ ...record, phase: "end" }) + "\n");
@@ -5149,8 +5149,8 @@ setImmediate(() => {
             RUNNER_TEMP: fixture,
             CONTRACT_COMMAND_LOG: commandLog,
             CONTRACT_FIRST_EXIT: String(firstExit),
-            OPENCLAW_TEST_PROJECTS_PARALLEL: step.env.OPENCLAW_TEST_PROJECTS_PARALLEL,
-            OPENCLAW_CONTRACT_INCLUDE_PATTERNS_JSON: JSON.stringify({
+            CARAPACE_TEST_PROJECTS_PARALLEL: step.env.CARAPACE_TEST_PROJECTS_PARALLEL,
+            CARAPACE_CONTRACT_INCLUDE_PATTERNS_JSON: JSON.stringify({
               task: `contracts-${family}s`,
               groups: [
                 { checkName: "first-envelope", includePatterns: ["first.test.ts"] },
@@ -5197,7 +5197,7 @@ setImmediate(() => {
     expect(workflow.jobs["ci-gate"]["runs-on"]).toBe("ubuntu-24.04");
     const context = {
       eventName: "pull_request",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       runnerBackend: "hybrid",
     } as const;
@@ -5213,8 +5213,8 @@ setImmediate(() => {
         { runAttempt: 2 },
         { runnerBackend: "github" },
         { eventName: "workflow_dispatch" },
-        { repository: "contributor/openclaw" },
-        { authorAssociation: "NONE", headRepository: "contributor/openclaw" },
+        { repository: "contributor/carapace" },
+        { authorAssociation: "NONE", headRepository: "contributor/carapace" },
       ] as const) {
         expect(evaluateWorkflowExpression(expression, { ...context, ...override }), jobName).toBe(
           "ubuntu-24.04",
@@ -5246,15 +5246,15 @@ setImmediate(() => {
         ],
       },
       {
-        file: "openclaw-npm-preflight.yml",
+        file: "carapace-npm-preflight.yml",
         runner: "blacksmith-32vcpu-ubuntu-2404",
         jobs: [
-          "check_openclaw_npm",
-          "prepare_openclaw_npm",
+          "check_carapace_npm",
+          "prepare_carapace_npm",
           "check_sdk_npm",
           "check_dependencies_npm",
           "check_contents_npm",
-          "verify_openclaw_npm",
+          "verify_carapace_npm",
         ],
       },
       {
@@ -5277,7 +5277,7 @@ setImmediate(() => {
         ],
       },
       {
-        file: "openclaw-performance.yml",
+        file: "carapace-performance.yml",
         runner: "blacksmith-16vcpu-ubuntu-2404",
         jobs: ["kova", "source_performance"],
       },
@@ -5287,12 +5287,12 @@ setImmediate(() => {
         jobs: ["run_package_telegram_e2e"],
       },
       {
-        file: "openclaw-live-and-e2e-checks-reusable.yml",
+        file: "carapace-live-and-e2e-checks-reusable.yml",
         runner: "blacksmith-32vcpu-ubuntu-2404",
         jobs: ["validate_docker_openwebui"],
       },
       {
-        file: "openclaw-release-checks.yml",
+        file: "carapace-release-checks.yml",
         runner: "blacksmith-8vcpu-ubuntu-2404",
         jobs: ["qa_lab_runtime_pair_lane_release_checks"],
       },
@@ -5301,7 +5301,7 @@ setImmediate(() => {
     const workflow = parse(readFileSync(`.github/workflows/${file}`, "utf8"));
     const runsOn = workflow.jobs[job]["runs-on"];
     const supportsHostedInput =
-      file === "openclaw-npm-preflight.yml" || file === "openclaw-live-and-e2e-checks-reusable.yml";
+      file === "carapace-npm-preflight.yml" || file === "carapace-live-and-e2e-checks-reusable.yml";
 
     for (const runnerBackend of ["github", "", "blacksmith", "hybrid"] as const) {
       for (const useGithubHostedRunners of [false, true]) {
@@ -5313,7 +5313,7 @@ setImmediate(() => {
           typeof runsOn === "string" && runsOn.startsWith("${{")
             ? evaluateWorkflowExpression(runsOn, {
                 eventName: "workflow_dispatch",
-                repository: "openclaw/openclaw",
+                repository: "carapace/carapace",
                 runAttempt: 1,
                 runnerBackend,
                 useGithubHostedRunners,
@@ -5373,7 +5373,7 @@ setImmediate(() => {
         options: {
           configuredProfile: "hybrid",
           eventName: "pull_request" as const,
-          headRepository: "contributor/openclaw",
+          headRepository: "contributor/carapace",
           targetSupportsContract: true,
         },
       },
@@ -5393,7 +5393,7 @@ setImmediate(() => {
         options: {
           configuredProfile: "blacksmith",
           eventName: "push" as const,
-          repository: "fork/openclaw",
+          repository: "fork/carapace",
           targetSupportsContract: true,
         },
       },
@@ -5433,14 +5433,14 @@ setImmediate(() => {
     });
     expect(invalid.status).toBe(1);
     expect(invalid.output).toContain(
-      "OPENCLAW_CI_RUNNER_BACKEND must be github, hybrid, or blacksmith",
+      "CARAPACE_CI_RUNNER_BACKEND must be github, hybrid, or blacksmith",
     );
 
     const workflow = readCiWorkflow();
     expect(workflow.jobs.preflight.outputs.runner_profile).toBe(
       "${{ steps.runner_profile.outputs.runner_profile }}",
     );
-    expect(workflow.jobs.preflight["runs-on"]).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND");
+    expect(workflow.jobs.preflight["runs-on"]).toContain("vars.CARAPACE_CI_RUNNER_BACKEND");
 
     const dispatchManifest = runCiManifestFixture({
       bundledPlanner: true,
@@ -5483,7 +5483,7 @@ setImmediate(() => {
         evaluateWorkflowExpression(runsOn, {
           eventName: "workflow_dispatch",
           matrix: lintMatrix,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           runnerBackend,
           ...overrides,
@@ -5514,16 +5514,16 @@ setImmediate(() => {
           matrix: { runner: "blacksmith-16vcpu-ubuntu-2404", task: "test-types" },
         }),
       ).toBe("ubuntu-24.04");
-      expect(evaluateDispatch("hybrid", { ...frozenFrv, repository: "fork/openclaw" })).toBe(
+      expect(evaluateDispatch("hybrid", { ...frozenFrv, repository: "fork/carapace" })).toBe(
         "ubuntu-24.04",
       );
       expect(
         evaluateWorkflowExpression(runsOn, {
           authorAssociation: "NONE",
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
           matrix: lintMatrix,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           runnerBackend: "blacksmith",
         }),
@@ -5586,9 +5586,9 @@ setImmediate(() => {
       .toSorted();
     const canonicalPullRequest = {
       eventName: "pull_request",
-      headRepository: "openclaw/openclaw",
+      headRepository: "carapace/carapace",
       matrix: { runner: "blacksmith-32vcpu-ubuntu-2404" },
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
     } as const;
     expect(configurableJobs).toEqual(Object.keys(expectedHostedRunners).toSorted());
@@ -5616,7 +5616,7 @@ setImmediate(() => {
           "untrusted fork",
           {
             authorAssociation: "NONE",
-            headRepository: "contributor/openclaw",
+            headRepository: "contributor/carapace",
             runnerBackend: "hybrid",
           },
           hostedRunner,
@@ -5625,7 +5625,7 @@ setImmediate(() => {
           "returning-contributor fork",
           {
             authorAssociation: "CONTRIBUTOR",
-            headRepository: "contributor/openclaw",
+            headRepository: "contributor/carapace",
             runnerBackend: "hybrid",
           },
           expectedHybridForkRunners[jobName as keyof typeof expectedHostedRunners],
@@ -5641,7 +5641,7 @@ setImmediate(() => {
           evaluateWorkflowExpression(expression, {
             ...canonicalPullRequest,
             authorAssociation: "CONTRIBUTOR",
-            headRepository: "contributor/openclaw",
+            headRepository: "contributor/carapace",
             runnerBackend,
             runAttempt: 2,
           }),
@@ -5711,7 +5711,7 @@ setImmediate(() => {
           "untrusted fork pull request",
           {
             authorAssociation: "NONE",
-            headRepository: "contributor/openclaw",
+            headRepository: "contributor/carapace",
             runnerBackend: "hybrid",
           },
           "ubuntu-24.04",
@@ -5746,9 +5746,9 @@ setImmediate(() => {
       .toSorted();
     const canonicalPullRequest = {
       eventName: "pull_request",
-      headRepository: "openclaw/openclaw",
+      headRepository: "carapace/carapace",
       matrix: { task: "build-play" },
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
     } as const;
     const evaluateTimeout = (
@@ -5771,7 +5771,7 @@ setImmediate(() => {
         );
       }
       expect(jobs[jobName]?.["timeout-minutes"], jobName).toContain(
-        "vars.OPENCLAW_CI_RUNNER_BACKEND == 'github'",
+        "vars.CARAPACE_CI_RUNNER_BACKEND == 'github'",
       );
     }
     expect(routeDependentTimeoutJobs).toEqual(Object.keys(expectedHostedTimeouts).toSorted());
@@ -5780,21 +5780,21 @@ setImmediate(() => {
       ["GitHub override", { runnerBackend: "github" }, "ubuntu-24.04"],
       ["hybrid retry", { runnerBackend: "hybrid", runAttempt: 2 }, "ubuntu-24.04"],
       ["manual dispatch", { eventName: "workflow_dispatch" }, "ubuntu-24.04"],
-      ["non-canonical repository", { repository: "contributor/openclaw" }, "ubuntu-24.04"],
+      ["non-canonical repository", { repository: "contributor/carapace" }, "ubuntu-24.04"],
       ["untrusted author", { authorAssociation: "NONE" }, "ubuntu-24.04"],
       [
         "untrusted fork",
-        { authorAssociation: "FIRST_TIME_CONTRIBUTOR", headRepository: "contributor/openclaw" },
+        { authorAssociation: "FIRST_TIME_CONTRIBUTOR", headRepository: "contributor/carapace" },
         "ubuntu-24.04",
       ],
       [
         "trusted fork first attempt",
-        { headRepository: "contributor/openclaw" },
+        { headRepository: "contributor/carapace" },
         "blacksmith-8vcpu-ubuntu-2404",
       ],
       [
         "trusted fork retry",
-        { headRepository: "contributor/openclaw", runAttempt: 2 },
+        { headRepository: "contributor/carapace", runAttempt: 2 },
         "ubuntu-24.04",
       ],
       ["same-repository Blacksmith retry", { runAttempt: 2 }, "blacksmith-8vcpu-ubuntu-2404"],
@@ -5829,7 +5829,7 @@ setImmediate(() => {
     const prepare = securitySteps
       .slice(0, checkoutIndex)
       .find((step) => step.env?.PR_COMMIT_COUNT !== undefined);
-    const root = tempDirs.make("openclaw-security-checkout-");
+    const root = tempDirs.make("carapace-security-checkout-");
     let depth = checkout.with?.["fetch-depth"];
     if (prepare?.run) {
       const output = path.join(root, "depth-output");
@@ -5847,7 +5847,7 @@ setImmediate(() => {
       );
       depth = evaluateWorkflowExpression(depth, {
         eventName: "pull_request",
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         steps: { [expectDefined(prepare.id, "depth output step")]: { outputs } },
       });
@@ -5956,7 +5956,7 @@ setImmediate(() => {
       ),
       "security checkout depth",
     );
-    const output = path.join(tempDirs.make("openclaw-security-depth-"), "output");
+    const output = path.join(tempDirs.make("carapace-security-depth-"), "output");
     const result = spawnSync("bash", ["-e", "-c", step.run], {
       encoding: "utf8",
       timeout: 5_000,
@@ -6072,7 +6072,7 @@ setImmediate(() => {
           step: expect.objectContaining({ name: "Setup Node environment" }),
         },
         {
-          file: ".github/workflows/openclaw-npm-preflight.yml",
+          file: ".github/workflows/carapace-npm-preflight.yml",
           mode: "read-write",
           step: expect.objectContaining({ name: "Setup Node environment" }),
         },
@@ -6088,9 +6088,9 @@ setImmediate(() => {
       /(?:^|\n)\s*(?:\.artifacts\/build-all-cache|dist\/|dist-runtime\/|packages\/\*\/dist\/|extensions\/\*\/dist\/|~\/\.cache\/ms-playwright|~\/\.local\/share\/pnpm|~\/\.cache\/pnpm|node_modules)(?:\n|$)/u;
     for (const { file, step } of directCaches) {
       if (step.uses?.startsWith("actions/cache/save@")) {
-        if (step.with?.path === ".cache/openclaw-cross-os-npm-cache/_cacache") {
+        if (step.with?.path === ".cache/carapace-cross-os-npm-cache/_cacache") {
           expect([
-            ".github/workflows/openclaw-cross-os-release-checks-reusable.yml",
+            ".github/workflows/carapace-cross-os-release-checks-reusable.yml",
             ".github/workflows/release-npm-cache-warm.yml",
           ]).toContain(file);
           const workflow = parse(readFileSync(file, "utf8"));
@@ -6100,7 +6100,7 @@ setImmediate(() => {
             ),
           ) as { if?: string } | undefined;
           const authority = `${owner?.if ?? ""} ${step.if ?? ""}`;
-          expect(authority).toContain("github.repository == 'openclaw/openclaw'");
+          expect(authority).toContain("github.repository == 'carapace/carapace'");
           expect(authority).toContain("github.event_name == 'workflow_dispatch'");
           continue;
         }
@@ -6143,7 +6143,7 @@ setImmediate(() => {
       "utf8",
     );
     const cachePaths =
-      "node_modules\nui/node_modules\npackages/*/node_modules\nextensions/*/node_modules\nexamples/*/node_modules\n.cache/openclaw-pnpm-store\n";
+      "node_modules\nui/node_modules\npackages/*/node_modules\nextensions/*/node_modules\nexamples/*/node_modules\n.cache/carapace-pnpm-store\n";
 
     expect(action.inputs["cache-mode"].default).toBe("off");
     expect(action.inputs["dependency-cache"].default).toBe("false");
@@ -6158,7 +6158,7 @@ setImmediate(() => {
       "inputs.cache-mode != 'off' && inputs.dependency-cache == 'true'",
     );
     expect(configureStore.run).toContain(
-      'echo "PNPM_CONFIG_STORE_DIR=$GITHUB_WORKSPACE/.cache/openclaw-pnpm-store"',
+      'echo "PNPM_CONFIG_STORE_DIR=$GITHUB_WORKSPACE/.cache/carapace-pnpm-store"',
     );
     expect(resolve.if).toBe("inputs.cache-mode != 'off' && inputs.dependency-cache == 'true'");
     expect(resolve.run).toContain('node "$GITHUB_ACTION_PATH/dependency-fingerprint.mjs"');
@@ -6169,7 +6169,7 @@ setImmediate(() => {
     expect(actionSteps.indexOf(resolve)).toBeLessThan(actionSteps.indexOf(restore));
     for (const cleanup of [prepare, prepareFallback]) {
       expect(cleanup.run).toContain('rm -rf "$GITHUB_WORKSPACE/node_modules"');
-      expect(cleanup.run).toContain('"$GITHUB_WORKSPACE/.cache/openclaw-pnpm-store"');
+      expect(cleanup.run).toContain('"$GITHUB_WORKSPACE/.cache/carapace-pnpm-store"');
       expect(cleanup.run).toContain('"$GITHUB_WORKSPACE/packages"');
       expect(cleanup.run).toContain("-name node_modules");
     }
@@ -6206,7 +6206,7 @@ setImmediate(() => {
     expect(installScript).toContain("-name node_modules");
     expect(installScript).toContain('"${PNPM_CONFIG_STORE_DIR:?}"');
     expect(installScript.match(/run_pnpm_install/g)).toHaveLength(5);
-    expect(installScript).toContain('echo "OPENCLAW_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"');
+    expect(installScript).toContain('echo "CARAPACE_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"');
     expect(installScript).toContain(
       'echo "pnpm_config_verify_deps_before_run=false" >> "$GITHUB_ENV"',
     );
@@ -6237,8 +6237,8 @@ setImmediate(() => {
     });
     expect(preflightRestore?.step.if).toContain("github.ref == 'refs/heads/main'");
     expect(preflightRestore?.step.if).toContain("github.event_name == 'pull_request'");
-    expect(preflightRestore?.step.if).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND != 'github'");
-    expect(preflightRestore?.step.if).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND != 'hybrid'");
+    expect(preflightRestore?.step.if).toContain("vars.CARAPACE_CI_RUNNER_BACKEND != 'github'");
+    expect(preflightRestore?.step.if).toContain("vars.CARAPACE_CI_RUNNER_BACKEND != 'hybrid'");
     expect(workflow.jobs["pnpm-store-warmup"].if).toContain(
       "needs.preflight.outputs.runner_profile == 'github'",
     );
@@ -6282,21 +6282,21 @@ setImmediate(() => {
           runner: "blacksmith-32vcpu-ubuntu-2404",
           task: "lint",
         },
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
       } as const;
       const scenarios = [
         { eventName: "push", trusted: true },
-        { eventName: "pull_request", headRepository: "openclaw/openclaw", trusted: true },
-        { eventName: "pull_request", headRepository: "contributor/openclaw", trusted: false },
+        { eventName: "pull_request", headRepository: "carapace/carapace", trusted: true },
+        { eventName: "pull_request", headRepository: "contributor/carapace", trusted: false },
         {
           eventName: "pull_request",
-          headRepository: "contributor/openclaw",
+          headRepository: "contributor/carapace",
           authorAssociation: "NONE",
           trusted: false,
         },
         { eventName: "workflow_dispatch", trusted: false },
-        { eventName: "push", repository: "contributor/openclaw", trusted: false },
+        { eventName: "push", repository: "contributor/carapace", trusted: false },
       ] as const;
       for (const runnerBackend of ["", "blacksmith", "github", "hybrid"] as const) {
         for (const runAttempt of [1, 2]) {
@@ -6440,7 +6440,7 @@ setImmediate(() => {
       status: 23,
     },
   ])("executes the dependency install recipe: $name", ({ cache, frozen, exits, modes, status }) => {
-    const root = tempDirs.make("openclaw-install-recipe-");
+    const root = tempDirs.make("carapace-install-recipe-");
     const workspace = path.join(root, "workspace");
     const bin = path.join(root, "bin");
     const store = path.join(root, "store");
@@ -6551,7 +6551,7 @@ process.exit(JSON.parse(process.env.RECIPE_EXITS)[count] ?? 99);
     expect(existsSync(githubEnv)).toBe(cache && status === 0);
     if (cache && status === 0) {
       expect(readFileSync(githubEnv, "utf8")).toBe(
-        "OPENCLAW_BUILD_ALL_NO_PNPM=1\npnpm_config_verify_deps_before_run=false\n",
+        "CARAPACE_BUILD_ALL_NO_PNPM=1\npnpm_config_verify_deps_before_run=false\n",
       );
     }
   });
@@ -6570,12 +6570,12 @@ process.exit(JSON.parse(process.env.RECIPE_EXITS)[count] ?? 99);
         await stopRegistry?.();
         fixtureDirs.cleanup();
       });
-      const root = fixtureDirs.make("openclaw-dependency-cache-");
+      const root = fixtureDirs.make("carapace-dependency-cache-");
       const source = path.join(root, "source");
       const registry = path.join(root, "registry");
       const workspace = path.join(root, "workspace");
       const consumer = path.join(workspace, "packages", "consumer");
-      const store = path.join(workspace, ".cache", "openclaw-pnpm-store");
+      const store = path.join(workspace, ".cache", "carapace-pnpm-store");
       let userHome = path.join(root, "producer-home");
       mkdirSync(userHome, { recursive: true });
       mkdirSync(source, { recursive: true });
@@ -6800,7 +6800,7 @@ server.listen(0, "127.0.0.1", () => {
             workspace,
             "node_modules",
             "packages/consumer/node_modules",
-            ".cache/openclaw-pnpm-store",
+            ".cache/carapace-pnpm-store",
           ],
           { stdio: "pipe" },
         );
@@ -6916,7 +6916,7 @@ server.listen(0, "127.0.0.1", () => {
       template.replace(/\$\{\{([\s\S]*?)\}\}/gu, (_, expression: string) =>
         String(
           runInNewContext(expression.replace(/inputs\.([a-z-]+)/gu, 'inputs["$1"]'), {
-            github: { repository: "openclaw/openclaw", run_id: runId, run_attempt: runAttempt },
+            github: { repository: "carapace/carapace", run_id: runId, run_attempt: runAttempt },
             inputs: { "build-all-cache-scope": "full", "node-version": "24.x" },
             runner: { os: "Linux", arch: "X64" },
             hashFiles: () => "unchanged-source",
@@ -6968,16 +6968,16 @@ server.listen(0, "127.0.0.1", () => {
     }
 
     const releaseChecks = parse(
-      readFileSync(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml", "utf8"),
+      readFileSync(".github/workflows/carapace-live-and-e2e-checks-reusable.yml", "utf8"),
     );
-    const repoE2eWorkflow = readWorkflow(".github/workflows/openclaw-repo-e2e-reusable.yml");
+    const repoE2eWorkflow = readWorkflow(".github/workflows/carapace-repo-e2e-reusable.yml");
     const pipelines = [
       releaseChecks.jobs.validate_repo_e2e_gateway,
       releaseChecks.jobs.validate_repo_e2e_runtime,
     ];
     expect(releaseChecks.jobs.validate_live_docker_provider_suites.env).toMatchObject({
-      OPENCLAW_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
-      OPENCLAW_TOOLING_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
+      CARAPACE_SELECTED_SHA: "${{ needs.validate_selected_ref.outputs.selected_sha }}",
+      CARAPACE_TOOLING_SHA: "${{ needs.validate_selected_ref.outputs.workflow_sha }}",
     });
     const repoE2eRows = pipelines.flatMap((pipeline) => JSON.parse(pipeline.with.suites)) as Array<{
       name: string;
@@ -6992,7 +6992,7 @@ server.listen(0, "127.0.0.1", () => {
       // Each profile starts independently; a slow/full declaration build cannot hold up UI readers.
       expect(pipeline.needs).toBe("validate_selected_ref");
       expect(pipeline.if).toBe("inputs.include_repo_e2e && inputs.live_suite_filter == ''");
-      expect(pipeline.uses).toBe("./.github/workflows/openclaw-repo-e2e-reusable.yml");
+      expect(pipeline.uses).toBe("./.github/workflows/carapace-repo-e2e-reusable.yml");
       expect(pipeline.with.ref).toBe("${{ needs.validate_selected_ref.outputs.selected_sha }}");
       expect(pipeline.with.advisory).toBe("${{ inputs.advisory }}");
       expect(pipeline.with.allow_frozen_target_scenario_omissions).toBe(
@@ -7009,9 +7009,9 @@ server.listen(0, "127.0.0.1", () => {
       target_script: "test:e2e:agent-plugin-gateway",
     });
     expect(repoE2eWorkflow.env).toMatchObject({
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
-      OPENCLAW_VITEST_MAX_WORKERS: "2",
+      CARAPACE_BUILD_PRIVATE_QA: "1",
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "1",
+      CARAPACE_VITEST_MAX_WORKERS: "2",
     });
     const producer = repoE2eWorkflow.jobs.build;
     const repoE2e = repoE2eWorkflow.jobs.test;
@@ -7050,27 +7050,27 @@ server.listen(0, "127.0.0.1", () => {
     expect(repoE2eIndex).toBeGreaterThan(sandboxSetupIndex);
     expect(repoE2eSteps[repoE2eIndex]).toMatchObject({
       env: {
-        OPENCLAW_E2E_WORKERS: "2",
-        OPENCLAW_E2E_USE_PREBUILT_DIST: "1",
+        CARAPACE_E2E_WORKERS: "2",
+        CARAPACE_E2E_USE_PREBUILT_DIST: "1",
         TARGET_REQUIRED_SCRIPT: "${{ matrix.target_script || '' }}",
       },
     });
     const repoE2eRun = repoE2eSteps[repoE2eIndex]?.run;
-    expect(repoE2eRun).toContain("OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
+    expect(repoE2eRun).toContain("CARAPACE_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS");
     expect(repoE2eRun).toContain("Selected target does not provide required repo E2E capability");
     expect(repoE2eRun).toContain("selected target does not provide this newer repo E2E capability");
     expect(repoE2eRun).toContain("${{ matrix.command }}");
     const targetedGroupStep = releaseChecks.jobs.plan_docker_lane_groups.steps.find(
       (step: WorkflowStep) => step.name === "Build targeted Docker lane groups",
     );
-    expect(targetedGroupStep.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS).toBe(
+    expect(targetedGroupStep.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIOS).toBe(
       "${{ inputs.published_upgrade_survivor_scenarios }}",
     );
     expect(releaseChecks.jobs.validate_docker_lanes["timeout-minutes"]).toBe(
       "${{ matrix.group.timeout_minutes || 60 }}",
     );
     expect(releaseChecks.jobs.validate_docker_lanes.strategy["max-parallel"]).toBe(32);
-    expect(releaseChecks.jobs.validate_docker_lanes.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS).toBe(
+    expect(releaseChecks.jobs.validate_docker_lanes.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIOS).toBe(
       "${{ matrix.group.published_upgrade_survivor_scenarios || inputs.published_upgrade_survivor_scenarios }}",
     );
   });
@@ -7106,7 +7106,7 @@ server.listen(0, "127.0.0.1", () => {
       },
     });
     expect(uploadStep).toMatchObject({
-      if: "success() && github.repository == 'openclaw/openclaw' && github.ref == 'refs/heads/main'",
+      if: "success() && github.repository == 'carapace/carapace' && github.ref == 'refs/heads/main'",
       uses: UPLOAD_ARTIFACT_V7,
       with: {
         "if-no-files-found": "error",
@@ -7119,7 +7119,7 @@ server.listen(0, "127.0.0.1", () => {
   });
 
   it("fingerprints dependency install inputs without ordinary script churn", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-dependency-fingerprint-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-dependency-fingerprint-"));
     try {
       const helper = path.resolve(".github/actions/setup-node-env/dependency-fingerprint.mjs");
       const writeManifest = (manifest: Record<string, unknown>) => {
@@ -7135,7 +7135,7 @@ server.listen(0, "127.0.0.1", () => {
       execFileSync("git", ["init", "-q"], { cwd: root });
       writeManifest({
         name: "fixture",
-        openclaw: { schemaVersions: { agent: 17, state: 6 } },
+        carapace: { schemaVersions: { agent: 17, state: 6 } },
         scripts: {
           "pnpm:devPreinstall": "node scripts/check-install-dependency-ownership.mjs",
           postinstall: "node scripts/postinstall-bundled-plugins.mjs",
@@ -7203,7 +7203,7 @@ server.listen(0, "127.0.0.1", () => {
       // or any audited install hook, so schema churn must stay warm.
       writeManifest({
         name: "fixture",
-        openclaw: { schemaVersions: { agent: 17, state: 7 } },
+        carapace: { schemaVersions: { agent: 17, state: 7 } },
         scripts: {
           "pnpm:devPreinstall": "node scripts/check-install-dependency-ownership.mjs",
           postinstall: "node scripts/postinstall-bundled-plugins.mjs",
@@ -7284,7 +7284,7 @@ server.listen(0, "127.0.0.1", () => {
     const transformSteps = (action.runs.steps as WorkflowStep[]).filter((step) =>
       step.name?.includes("Vitest transform cache"),
     );
-    const output = path.join(tempDirs.make("openclaw-transform-generation-"), "output");
+    const output = path.join(tempDirs.make("carapace-transform-generation-"), "output");
     for (const os of ["Linux", "macOS", "Windows"]) {
       for (const mode of ["off", "restore", "read-write"]) {
         for (const flags of [
@@ -7297,7 +7297,7 @@ server.listen(0, "127.0.0.1", () => {
             const hashes: string[][] = [];
             const steps: Record<string, { outputs: Record<string, string> }> = {};
             const context = {
-              github: { repository: "openclaw/openclaw", run_id: 10, run_attempt: 2 },
+              github: { repository: "carapace/carapace", run_id: 10, run_attempt: 2 },
               inputs: {
                 "cache-mode": mode,
                 "vitest-fs-cache": flags[0],
@@ -7381,9 +7381,9 @@ server.listen(0, "127.0.0.1", () => {
                 "src/state/*.sql",
                 "!**/node_modules/**",
               ]);
-              const prefix = `openclaw/openclaw-vitest-fs-v3-protected-${os}-X64-node-24.x-${generation}-`;
+              const prefix = `carapace/carapace-vitest-fs-v3-protected-${os}-X64-node-24.x-${generation}-`;
               expect(cacheInputs).toEqual({
-                path: "/var/tmp/openclaw-vitest-fs-cache",
+                path: "/var/tmp/carapace-vitest-fs-cache",
                 key: `${prefix}10-2`,
                 "restore-keys": `${prefix}\n`,
               });
@@ -7468,11 +7468,11 @@ server.listen(0, "127.0.0.1", () => {
     expect(readerStep.with.key).toContain("github.run_id");
     expect(readerStep.with.key).toContain("github.run_attempt");
     expect(configureStep.if).toContain("inputs.restore-test-caches == 'true'");
-    expect(configureStep.run).toContain("OPENCLAW_VITEST_FS_MODULE_CACHE_PATH=$cache_root");
-    expect(configureStep.run).toContain(".openclaw-transform-generation");
+    expect(configureStep.run).toContain("CARAPACE_VITEST_FS_MODULE_CACHE_PATH=$cache_root");
+    expect(configureStep.run).toContain(".carapace-transform-generation");
     expect(configureStep.run).not.toContain("protected Vitest transform seed");
     expect(configureStep.env.CACHE_WRITER).toBe("0");
-    expect(configureStep.run).toContain("OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER=");
+    expect(configureStep.run).toContain("CARAPACE_VITEST_FS_MODULE_CACHE_WRITER=");
     expect(compileEpochStep.run).toContain('if [ "$CACHE_SCOPE" = "build" ]');
     expect(compileEpochStep.run).toContain("date -u +%Y%m%d");
     expect(compileEpochStep.run).toContain("GITHUB_RUN_ID");
@@ -7487,7 +7487,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(compileConfigureStep.if).toContain("inputs.restore-test-caches == 'true'");
     expect(compileConfigureStep.run).toContain("NODE_COMPILE_CACHE=$cache_root");
     expect(compileConfigureStep.run).toContain("NODE_COMPILE_CACHE_PORTABLE=1");
-    expect(compileConfigureStep.run).toContain("OPENCLAW_NODE_COMPILE_CACHE_WRITER=0");
+    expect(compileConfigureStep.run).toContain("CARAPACE_NODE_COMPILE_CACHE_WRITER=0");
     expect(buildSetupNodeStep.with).toMatchObject({
       "cache-mode": "${{ needs.preflight.outputs.cache_mode }}",
       "node-compile-cache": "true",
@@ -7506,7 +7506,7 @@ server.listen(0, "127.0.0.1", () => {
       expect(
         evaluateWorkflowExpression(setup.with["restore-test-caches"], {
           eventName: "push",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend: "github",
           runAttempt: 1,
         }),
@@ -7515,7 +7515,7 @@ server.listen(0, "127.0.0.1", () => {
       expect(
         evaluateWorkflowExpression(setup.with["restore-test-caches"], {
           eventName: "push",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend: "blacksmith",
           runAttempt: 1,
         }),
@@ -7538,7 +7538,7 @@ server.listen(0, "127.0.0.1", () => {
         evaluateWorkflowExpression(fastCoreSetup.with["restore-test-caches"], {
           eventName: "push",
           matrix: { task },
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend: "github",
           runAttempt: 1,
         }),
@@ -7550,7 +7550,7 @@ server.listen(0, "127.0.0.1", () => {
         evaluateWorkflowExpression(fastCoreSetup.with["restore-test-caches"], {
           eventName: "push",
           matrix: { task },
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend: "github",
           runAttempt: 1,
         }),
@@ -7561,7 +7561,7 @@ server.listen(0, "127.0.0.1", () => {
       evaluateWorkflowExpression(fastCoreSetup.with["restore-test-caches"], {
         eventName: "push",
         matrix: { task: "bundled-protocol" },
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runnerBackend: "blacksmith",
         runAttempt: 1,
       }),
@@ -7625,7 +7625,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(warmer.on).toHaveProperty("workflow_dispatch");
     expect(warmer.on.push.branches).toEqual(["main"]);
     expect(warmer.on.repository_dispatch.types).toEqual(["vitest-cache-warm"]);
-    expect(warmer.jobs.warm.if).toContain("github.repository == 'openclaw/openclaw'");
+    expect(warmer.jobs.warm.if).toContain("github.repository == 'carapace/carapace'");
     expect(warmer.jobs.warm.strategy).toEqual({
       "fail-fast": false,
       matrix: { platform: ["linux", "macos"] },
@@ -7638,7 +7638,7 @@ server.listen(0, "127.0.0.1", () => {
           const context = {
             eventName,
             matrix: { platform },
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
             runnerBackend,
           };
@@ -7688,16 +7688,16 @@ server.listen(0, "127.0.0.1", () => {
       'import { createVitestCacheWarmGroups } from "./scripts/lib/ci-node-test-plan.mts";',
     );
     expect(seedStep.run).toMatch(
-      /const groups = createVitestCacheWarmGroups\(\);[\s\S]*appendFileSync\(\s*process\.env\.GITHUB_ENV,[\s\S]*OPENCLAW_NODE_TEST_GROUPS_JSON=\$\{JSON\.stringify\(groups\)\}/u,
+      /const groups = createVitestCacheWarmGroups\(\);[\s\S]*appendFileSync\(\s*process\.env\.GITHUB_ENV,[\s\S]*CARAPACE_NODE_TEST_GROUPS_JSON=\$\{JSON\.stringify\(groups\)\}/u,
     );
-    expect(warmerSource).not.toContain("OPENCLAW_NODE_TEST_CONFIGS_JSON");
-    expect(warmerSource).toContain('"OPENCLAW_NODE_TEST_PLAN_CONCURRENCY=1"');
-    expect(seedStep.run).toContain('"OPENCLAW_NODE_TEST_PLAN_CONTINUE_ON_FAILURE=1"');
+    expect(warmerSource).not.toContain("CARAPACE_NODE_TEST_CONFIGS_JSON");
+    expect(warmerSource).toContain('"CARAPACE_NODE_TEST_PLAN_CONCURRENCY=1"');
+    expect(seedStep.run).toContain('"CARAPACE_NODE_TEST_PLAN_CONTINUE_ON_FAILURE=1"');
     expect(warmStep.id).toBe("warm-caches");
     expect(warmStep["continue-on-error"]).toBe(true);
     expect(warmStep.env).toMatchObject({
-      OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER: "1",
-      OPENCLAW_NODE_COMPILE_CACHE_WRITER: "1",
+      CARAPACE_VITEST_FS_MODULE_CACHE_WRITER: "1",
+      CARAPACE_NODE_COMPILE_CACHE_WRITER: "1",
     });
     expect(warmerSetup["continue-on-error"]).not.toBe(true);
     for (const legacyInput of [
@@ -7810,7 +7810,7 @@ server.listen(0, "127.0.0.1", () => {
       warmerSteps.indexOf(boundarySaveStep),
     );
     expect(warmerSteps.indexOf(boundaryCleanupStep)).toBeLessThan(warmerSteps.indexOf(buildStep));
-    const cleanupRoot = tempDirs.make("openclaw-native-sdk-cleanup-");
+    const cleanupRoot = tempDirs.make("carapace-native-sdk-cleanup-");
     const sdkOutput = path.join(cleanupRoot, "packages/plugin-sdk/dist/native.d.ts");
     const sdkSource = path.join(cleanupRoot, "packages/plugin-sdk/src/core.ts");
     const siblingOutput = path.join(cleanupRoot, "packages/normalization-core/dist/index.js");
@@ -7856,7 +7856,7 @@ server.listen(0, "127.0.0.1", () => {
       parse(readFileSync(".github/workflows/vitest-cache-warm.yml", "utf8")).concurrency.group,
     );
     const seed = warmer.jobs["warm-release-npm"];
-    for (const repository of ["openclaw/openclaw", "example/fork"]) {
+    for (const repository of ["carapace/carapace", "example/fork"]) {
       for (const eventName of [
         "push",
         "pull_request",
@@ -7865,7 +7865,7 @@ server.listen(0, "127.0.0.1", () => {
         "workflow_dispatch",
       ] as const) {
         expect(evaluateWorkflowExpression(seed.if, { repository, eventName, runAttempt: 1 })).toBe(
-          repository === "openclaw/openclaw" &&
+          repository === "carapace/carapace" &&
             (eventName === "schedule" || eventName === "workflow_dispatch"),
         );
       }
@@ -7876,19 +7876,19 @@ server.listen(0, "127.0.0.1", () => {
       steps.find((entry) => entry.run),
       "npm seed install",
     );
-    expect(install.run).toContain("openclaw@latest --ignore-scripts --omit=dev");
+    expect(install.run).toContain("carapace@latest --ignore-scripts --omit=dev");
     expect(install.env).toEqual({
-      NPM_CONFIG_CACHE: "${{ github.workspace }}/.cache/openclaw-cross-os-npm-cache",
+      NPM_CONFIG_CACHE: "${{ github.workspace }}/.cache/carapace-cross-os-npm-cache",
     });
     const save = expectDefined(
       steps.find((entry) => entry.uses?.startsWith("actions/cache/save@")),
       "npm seed publication",
     );
     expect(save.with).toMatchObject({
-      path: ".cache/openclaw-cross-os-npm-cache/_cacache",
+      path: ".cache/carapace-cross-os-npm-cache/_cacache",
       enableCrossOsArchive: true,
     });
-    expect(save.with?.key).toMatch(/^openclaw-cross-os-npm-v1-seed-/u);
+    expect(save.with?.key).toMatch(/^carapace-cross-os-npm-v1-seed-/u);
     expect(save["continue-on-error"]).toBe(true);
     expect(save.if ?? "").not.toMatch(/always\(|failure\(|cancelled\(/u);
     expect(steps.indexOf(save)).toBeGreaterThan(steps.indexOf(install));
@@ -7903,7 +7903,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(source).toContain("createNodeTestShardBundles");
     expect(workflow.jobs["build-artifacts"]["runs-on"]).toContain("blacksmith-32vcpu-ubuntu-2404");
     expect(workflow.jobs["build-artifacts"]["timeout-minutes"]).toBe(
-      "${{ (vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' || (vars.OPENCLAW_CI_RUNNER_BACKEND == 'hybrid' && github.run_attempt > 1) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 35 || 20 }}",
+      "${{ (vars.CARAPACE_CI_RUNNER_BACKEND == 'github' || (vars.CARAPACE_CI_RUNNER_BACKEND == 'hybrid' && github.run_attempt > 1) || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)) && 35 || 20 }}",
     );
     // PR events validate the artifact build on hosted runners (landing gate
     // stays satisfiable during Blacksmith outages); Testbox leases are
@@ -7977,7 +7977,7 @@ server.listen(0, "127.0.0.1", () => {
     const runStep = additionalJob.steps.find(
       (step: WorkflowStep) => step.name === "Run additional check shard",
     );
-    expect(runStep.env.OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY).toBe(16);
+    expect(runStep.env.CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY).toBe(16);
 
     // O(1) disks: Blacksmith caps sticky disks per installation, and the old
     // per-PR/per-config keys minted new disks until every mount 429-failed
@@ -8011,7 +8011,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(boundaryMount.with.key).toBe("${{ github.repository }}-ext-boundary-v2");
     expect(lintMount.with.key).toBe(boundaryMount.with.key);
     for (const gate of [boundaryMount, lintMount]) {
-      expect(gate.if).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND != 'github'");
+      expect(gate.if).toContain("vars.CARAPACE_CI_RUNNER_BACKEND != 'github'");
     }
     expect(hostedLintCache.if).toBe(
       "needs.preflight.outputs.cache_mode != 'off' && matrix.task == 'lint' && steps.extension-boundary-inputs.outputs.enabled == 'true' && (needs.preflight.outputs.runner_profile == 'github' || needs.preflight.outputs.runner_profile == 'hybrid')",
@@ -8106,7 +8106,7 @@ server.listen(0, "127.0.0.1", () => {
       expect(gate.run).toContain(".source-fingerprint");
       expect(gate.run).not.toContain("git rev-parse HEAD:");
       expect(gate.run).not.toContain("BOUNDARY_CONFIG_HASH");
-      expect(gate.if).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND != 'github'");
+      expect(gate.if).toContain("vars.CARAPACE_CI_RUNNER_BACKEND != 'github'");
     }
     // Seeding is writer-only work: PR mounts never commit, so seeding there
     // would burn wall clock on a discarded clone.
@@ -8139,9 +8139,9 @@ server.listen(0, "127.0.0.1", () => {
     // budget 429-failed every mount fleet-wide.
     expect(mountWith.key).toBe("${{ github.repository }}-gradle-v2-${{ matrix.task }}");
     expect(androidSteps.find((step) => step.name === "Mount Gradle sticky disk")?.if).toContain(
-      "vars.OPENCLAW_CI_RUNNER_BACKEND != 'github'",
+      "vars.CARAPACE_CI_RUNNER_BACKEND != 'github'",
     );
-    expect(pointStep.if).toContain("vars.OPENCLAW_CI_RUNNER_BACKEND != 'github'");
+    expect(pointStep.if).toContain("vars.CARAPACE_CI_RUNNER_BACKEND != 'github'");
     // Single semantic writer: protected pushes commit explicitly (on-change's
     // allocated-byte heuristic can miss a same-size refresh and strand the
     // fingerprint marker); PR clones stay read-only.
@@ -8154,7 +8154,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(pointEnv.GRADLE_DEPS_FINGERPRINT).toContain("hashFiles(");
     expect(pointEnv.GRADLE_DEPS_FINGERPRINT).toContain("apps/android/gradle/libs.versions.toml");
     expect(pointEnv.STICKY_WRITER).toContain("github.event_name != 'pull_request'");
-    expect(pointStep.run).toContain(".openclaw-gradle-deps-fingerprint");
+    expect(pointStep.run).toContain(".carapace-gradle-deps-fingerprint");
     expect(pointStep.run).toContain('rm -rf "$sticky_root/gradle-user-home"');
   });
 
@@ -8189,7 +8189,7 @@ server.listen(0, "127.0.0.1", () => {
       if: "startsWith(matrix.task, 'test-') && needs.preflight.outputs.cache_mode != 'off'",
       uses: CACHE_V5,
       with: {
-        path: "/var/tmp/openclaw-robolectric-m2",
+        path: "/var/tmp/carapace-robolectric-m2",
       },
     });
     const cacheKey = String(restoreStep.with?.key);
@@ -8212,10 +8212,10 @@ server.listen(0, "127.0.0.1", () => {
     );
 
     expect(configureStep.if).toBe("startsWith(matrix.task, 'test-')");
-    expect(configureStep.run).toContain("OPENCLAW_ROBOLECTRIC_M2");
-    expect(configureStep.run).toContain("OPENCLAW_ROBOLECTRIC_INIT");
+    expect(configureStep.run).toContain("CARAPACE_ROBOLECTRIC_M2");
+    expect(configureStep.run).toContain("CARAPACE_ROBOLECTRIC_INIT");
     expect(configureStep.run).toContain(
-      'systemProperty "maven.repo.local", System.getenv("OPENCLAW_ROBOLECTRIC_M2")',
+      'systemProperty "maven.repo.local", System.getenv("CARAPACE_ROBOLECTRIC_M2")',
     );
     expect(workflowSource).not.toContain("robolectric.dependency.repo.url");
 
@@ -8224,7 +8224,7 @@ server.listen(0, "127.0.0.1", () => {
       uses: CACHE_SAVE_V5,
       with: {
         key: "${{ steps.robolectric-cache.outputs.cache-primary-key }}",
-        path: "/var/tmp/openclaw-robolectric-m2",
+        path: "/var/tmp/carapace-robolectric-m2",
       },
     });
 
@@ -8234,7 +8234,7 @@ server.listen(0, "127.0.0.1", () => {
       ),
     );
     for (const task of ["test-play", "test-play-compat", "test-third-party", "test-wear"]) {
-      expect(taskCases.get(task), task).toContain('--init-script "$OPENCLAW_ROBOLECTRIC_INIT"');
+      expect(taskCases.get(task), task).toContain('--init-script "$CARAPACE_ROBOLECTRIC_INIT"');
     }
     for (const task of ["build-play", "build-wear", "build-play-compat", "ktlint"]) {
       expect(taskCases.get(task), task).not.toContain("--init-script");
@@ -8342,7 +8342,7 @@ server.listen(0, "127.0.0.1", () => {
         BLACKSMITH_ENV: "production-amd64",
         BLACKSMITH_REGION: "us-test-1",
         RETIRED_ARCHITECTURE: "amd64",
-        RETIRED_KEY: "openclaw/openclaw-not-retired",
+        RETIRED_KEY: "carapace/carapace-not-retired",
         RETIRED_REGION: "us-test-1",
       },
     });
@@ -8354,7 +8354,7 @@ server.listen(0, "127.0.0.1", () => {
         BLACKSMITH_ENV: "production-amd64",
         BLACKSMITH_REGION: "us-test-1",
         RETIRED_ARCHITECTURE: "amd64",
-        RETIRED_KEY: " openclaw/openclaw-active-key ",
+        RETIRED_KEY: " carapace/carapace-active-key ",
         RETIRED_REGION: "us-test-1",
       },
     });
@@ -8414,7 +8414,7 @@ server.listen(0, "127.0.0.1", () => {
     const step = job.steps.find(
       (entry: WorkflowStep) => entry.name === "Run additional check shard",
     );
-    const selector = String(step?.env?.OPENCLAW_ADDITIONAL_BOUNDARY_SHARD ?? "");
+    const selector = String(step?.env?.CARAPACE_ADDITIONAL_BOUNDARY_SHARD ?? "");
     const rows = readFrozenAdditionalCheckRows();
     const selected = rows
       .filter((row) => row.group === "boundaries")
@@ -8434,7 +8434,7 @@ server.listen(0, "127.0.0.1", () => {
       "lint:tmp:sqlite-transaction-boundary",
       "lint:tmp:session-transcript-reader-boundary",
     ];
-    const root = tempDirs.make("openclaw-session-boundary-workflow-");
+    const root = tempDirs.make("carapace-session-boundary-workflow-");
     const binDir = path.join(root, "bin");
     const callsPath = path.join(root, "pnpm-calls.txt");
     mkdirSync(binDir);
@@ -8548,8 +8548,8 @@ server.listen(0, "127.0.0.1", () => {
         historicalCompatibility: frozen,
         changedPaths: [],
         scopeEnv: {
-          OPENCLAW_CI_CHECKOUT_REVISION: "a".repeat(40),
-          OPENCLAW_CI_WORKFLOW_REVISION: (frozen ? "b" : "a").repeat(40),
+          CARAPACE_CI_CHECKOUT_REVISION: "a".repeat(40),
+          CARAPACE_CI_WORKFLOW_REVISION: (frozen ? "b" : "a").repeat(40),
         },
       });
       expect(manifest.status, manifest.output).toBe(0);
@@ -8621,7 +8621,7 @@ server.listen(0, "127.0.0.1", () => {
           evaluateWorkflowExpression(`\${{ ${ensureRevisionStep.if} }}`, {
             eventName,
             matrix: { group },
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
           }),
           `${revision} preparation for ${eventName}/${group}`,
@@ -8650,7 +8650,7 @@ server.listen(0, "127.0.0.1", () => {
       eventName = "workflow_dispatch",
       fail = false,
     ) => {
-      const root = tempDirs.make("openclaw-plugin-sdk-api-workflow-");
+      const root = tempDirs.make("carapace-plugin-sdk-api-workflow-");
       const binDir = path.join(root, "bin");
       const callsPath = path.join(root, "pnpm-calls.txt");
       const summaryPath = path.join(root, "summary.md");
@@ -8763,7 +8763,7 @@ server.listen(0, "127.0.0.1", () => {
     ]);
     expect(steps[1]).toEqual({
       name: "Prepare Git owner",
-      uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+      uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
     });
     expect(steps[0]).toMatchObject({
       uses: CHECKOUT_V6,
@@ -8787,9 +8787,9 @@ server.listen(0, "127.0.0.1", () => {
       },
       with: {
         "openai-api-key":
-          "${{ secrets.OPENCLAW_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
+          "${{ secrets.CARAPACE_DOCS_AGENT_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}",
         "prompt-file": ".github/codex/prompts/docs-agent.md",
-        model: "${{ vars.OPENCLAW_CI_OPENAI_MODEL_BARE }}",
+        model: "${{ vars.CARAPACE_CI_OPENAI_MODEL_BARE }}",
         effort: "medium",
         sandbox: "workspace-write",
         "safety-strategy": "drop-sudo",
@@ -8856,20 +8856,20 @@ server.listen(0, "127.0.0.1", () => {
     ]);
     expect(steps[3]).toEqual({
       name: "Prepare Git owner",
-      if: "env.OPENCLAW_DOCS_SYNC_TOKEN != ''",
-      uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+      if: "env.CARAPACE_DOCS_SYNC_TOKEN != ''",
+      uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
     });
     expect(steps[1]).toMatchObject({ with: { "fetch-depth": 0 } });
     expect(steps[2]).toMatchObject({
       with: {
-        repository: "openclaw/clawhub",
+        repository: "carapace/clawhub",
         ref: "main",
         path: "clawhub-source",
         "fetch-depth": 1,
         "persist-credentials": false,
       },
     });
-    expect(steps.slice(1).every((step) => step.if === "env.OPENCLAW_DOCS_SYNC_TOKEN != ''")).toBe(
+    expect(steps.slice(1).every((step) => step.if === "env.CARAPACE_DOCS_SYNC_TOKEN != ''")).toBe(
       true,
     );
     expect(source).not.toContain("setup-python");
@@ -8898,7 +8898,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(clone).toContain('publish = os.path.join(workspace, "publish")');
     expect(clone).toContain('subprocess.run(["rm", "-rf", publish], check=True)');
     expect(clone).toContain(
-      "https://x-access-token:{os.environ['OPENCLAW_DOCS_SYNC_TOKEN']}@github.com/openclaw/docs.git",
+      "https://x-access-token:{os.environ['CARAPACE_DOCS_SYNC_TOKEN']}@github.com/Exaggarate/carapace/docs.git",
     );
     const calls = [...`${clone}\n${publish}`.matchAll(/run_git\(([\s\S]*?)\)(?=\n|$)/gu)].map(
       (match) => match[1]!,
@@ -8935,7 +8935,7 @@ server.listen(0, "127.0.0.1", () => {
   it("pins plugin publication owners before selected checkout and preserves Git deadlines", () => {
     const owner = {
       name: "Prepare Git owner",
-      uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+      uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
     };
     const clawhub = parse(readFileSync(".github/workflows/plugin-clawhub-release.yml", "utf8"));
     const npm = parse(readFileSync(".github/workflows/plugin-npm-release.yml", "utf8"));
@@ -8987,7 +8987,7 @@ server.listen(0, "127.0.0.1", () => {
     const workflow = parse(readFileSync(".github/workflows/mantis-discord-smoke.yml", "utf8"));
     const owner = {
       name: "Prepare Git owner",
-      uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+      uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
     };
     const actionSteps = action.runs.steps as WorkflowStep[];
     const discordSteps = workflow.jobs.validate_selected_ref.steps as WorkflowStep[];
@@ -9208,7 +9208,7 @@ server.listen(0, "127.0.0.1", () => {
       expect(
         evaluateWorkflowExpression(checkoutStep.with["fetch-depth"], {
           eventName,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           steps: { checkout_depth: { outputs: {} } },
         }),
@@ -9269,7 +9269,7 @@ server.listen(0, "127.0.0.1", () => {
       const context = {
         eventName,
         releaseGate,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         steps: { checkout_ref: { outputs: { sha: checkoutRevision } } },
         targetRef,
@@ -9283,11 +9283,11 @@ server.listen(0, "127.0.0.1", () => {
       ]);
       const invocationOptions = (step: WorkflowStep) => ({
         checkoutRevision: String(
-          evaluateWorkflowExpression(step.env?.OPENCLAW_CI_CHECKOUT_REVISION, context),
+          evaluateWorkflowExpression(step.env?.CARAPACE_CI_CHECKOUT_REVISION, context),
         ),
         eventName,
         workflowRevision: String(
-          evaluateWorkflowExpression(step.env?.OPENCLAW_CI_WORKFLOW_REVISION, context),
+          evaluateWorkflowExpression(step.env?.CARAPACE_CI_WORKFLOW_REVISION, context),
         ),
       });
       expect(
@@ -9352,13 +9352,13 @@ server.listen(0, "127.0.0.1", () => {
     expect(harnessIndex).toBeLessThan(consumerIndex);
     const workflowSha = "a".repeat(40);
     for (const eventName of ["push", "pull_request", "workflow_dispatch"] as const) {
-      for (const headRepository of ["openclaw/openclaw", "contributor/openclaw"]) {
+      for (const headRepository of ["carapace/carapace", "contributor/carapace"]) {
         for (const selectedSha of [workflowSha, "b".repeat(40)]) {
           expect(
             evaluateWorkflowExpression(harnessStep.if, {
               eventName,
               headRepository,
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runAttempt: 1,
               steps: { checkout_ref: { outputs: { sha: selectedSha } } },
               workflowSha,
@@ -9555,7 +9555,7 @@ server.listen(0, "127.0.0.1", () => {
     );
     expect(python.with).toEqual({ "python-version": "3.12" });
     expect(owner.uses).toBe(
-      "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+      "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
     );
     expect(owner.with).toBeUndefined();
     expect(steps.indexOf(python)).toBeLessThan(steps.indexOf(owner));
@@ -9632,7 +9632,7 @@ server.listen(0, "127.0.0.1", () => {
         expect(
           evaluateWorkflowExpression(checkoutStep?.with?.["fetch-depth"], {
             eventName,
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
           }),
           `${workflowPath} ${eventName}`,
@@ -9814,7 +9814,7 @@ server.listen(0, "127.0.0.1", () => {
       [".github/workflows/ci.yml", "macos-swift"],
       [".github/workflows/codeql-macos-critical-security.yml", "macos"],
       [".github/workflows/macos-periphery.yml", "scan"],
-      [".github/workflows/shared-openclawkit-periphery.yml", "scan-macos"],
+      [".github/workflows/shared-carapacekit-periphery.yml", "scan-macos"],
     ] as const) {
       const workflow = parse(readFileSync(workflowPath, "utf8"));
       const steps = workflow.jobs[jobName].steps as WorkflowStep[];
@@ -9847,7 +9847,7 @@ server.listen(0, "127.0.0.1", () => {
         ),
         "Apple asset preparation step",
       );
-      const root = tempDirs.make("openclaw-apple-assets-workflow-");
+      const root = tempDirs.make("carapace-apple-assets-workflow-");
       const marker = path.join(root, "prepared");
       if (testCase.helperPresent) {
         mkdirSync(path.join(root, "scripts"));
@@ -9883,11 +9883,11 @@ server.listen(0, "127.0.0.1", () => {
       for (const phase of ["smoke", "tests", "release"]) {
         const context: Parameters<typeof evaluateWorkflowExpression>[1] = {
           eventName: "workflow_dispatch",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           env: { HISTORICAL_TARGET: String(historical) },
           matrix: { phase },
-          fileHashes: hasWatchRtc ? { "apps/shared/OpenClawWatchRTC/Cargo.toml": "present" } : {},
+          fileHashes: hasWatchRtc ? { "apps/shared/CarapaceWatchRTC/Cargo.toml": "present" } : {},
         };
         expect(evaluateWorkflowExpression(`\${{ ${install.if} }}`, context)).toBe(expected);
         expect(evaluateWorkflowExpression(`\${{ ${engine.if} }}`, context)).toBe(
@@ -9965,7 +9965,7 @@ server.listen(0, "127.0.0.1", () => {
     expect(iosLintStep.run).toContain("skipping iOS lint for this frozen target");
 
     const runCacheFixture = (artifactState: "no-build" | "absent" | "incomplete" | "complete") => {
-      const root = tempDirs.make(`openclaw-swift-cache-${artifactState}-`);
+      const root = tempDirs.make(`carapace-swift-cache-${artifactState}-`);
       const binDir = path.join(root, "bin");
       const buildDir = path.join(root, "apps/macos/.build");
       const frameworkDir = path.join(
@@ -10026,7 +10026,7 @@ printf '%s\\n' "$*" >> "$SWIFT_CALLS"
       artifactState: "absent" | "incomplete" | "complete",
       buildOutcome: "recover" | "fail",
     ) => {
-      const root = tempDirs.make(`openclaw-swift-build-${artifactState}-${buildOutcome}-`);
+      const root = tempDirs.make(`carapace-swift-build-${artifactState}-${buildOutcome}-`);
       const binDir = path.join(root, "bin");
       const frameworkDir = path.join(
         root,
@@ -10074,7 +10074,7 @@ exit 1
     };
 
     const releaseBuildCommand =
-      "build --package-path apps/macos --product OpenClaw --configuration release";
+      "build --package-path apps/macos --product Carapace --configuration release";
     const packageResetCommand = "package --package-path apps/macos reset";
 
     const absentFramework = runBuildFixture("absent", "fail");
@@ -10158,7 +10158,7 @@ exit 1
     expect(testStep.run).toContain("swift_test_args+=(--no-parallel)");
 
     for (const buildExitCode of [0, 23]) {
-      const root = tempDirs.make(`openclaw-swift-test-${buildExitCode}-`);
+      const root = tempDirs.make(`carapace-swift-test-${buildExitCode}-`);
       const binDir = path.join(root, "bin");
       const callsPath = path.join(root, "swift-calls");
       const outputPath = path.join(root, "github-output");
@@ -10276,7 +10276,7 @@ if (args[0] === 'delete-keychain') fs.unlinkSync(args.at(-1));
     )?.[0];
     expect(discoveryBlock).toBeTruthy();
 
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-mantis-runner-ip-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-mantis-runner-ip-"));
     try {
       const fakeBin = path.join(root, "bin");
       const callCount = path.join(root, "curl-calls");
@@ -10517,7 +10517,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(
         evaluateWorkflowExpression(expression, {
           eventName,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           matrix: { task },
           preflightOutputs: { diff_base_revision: base },
@@ -10703,7 +10703,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(
       evaluateWorkflowExpression(workflow.jobs["check-test-types-hosted-core-shard"].if, {
         eventName: "pull_request",
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         runnerProfile: "hybrid",
         preflightOutputs: manifest.outputs,
@@ -10724,7 +10724,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     { changedPaths: ["src/commands/doctor.test.ts"], eventName: "workflow_dispatch" as const },
     {
       changedPaths: ["src/commands/doctor.test.ts"],
-      scopeEnv: { OPENCLAW_CI_CHANGED_PATHS_JSON: "invalid" },
+      scopeEnv: { CARAPACE_CI_CHANGED_PATHS_JSON: "invalid" },
       invalid: true,
     },
   ])("retains full type owners for ineligible manifest inputs %j", (options) => {
@@ -11061,7 +11061,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const checkShardRun = checkShardStep.run;
     const hostedCoreLint = workflow.jobs["check-lint-hosted-core-shard"];
     const hostedCoreTypes = workflow.jobs["check-test-types-hosted-core-shard"];
-    expect(manifestStep.env.OPENCLAW_CI_RUNNER_PROFILE).toBe(
+    expect(manifestStep.env.CARAPACE_CI_RUNNER_PROFILE).toBe(
       "${{ steps.runner_profile.outputs.runner_profile }}",
     );
     expect(manifestStep.run).toContain("runnerBackend: runnerProfile");
@@ -11090,7 +11090,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
           eventName: "workflow_dispatch",
           frozenTarget: true,
           hostedRunnerProfileContract: false,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerProfile: "blacksmith",
           runAttempt: 1,
         }),
@@ -11100,7 +11100,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
           eventName: "workflow_dispatch",
           frozenTarget: true,
           hostedRunnerProfileContract: true,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerProfile: "github",
           runAttempt: 1,
         }),
@@ -11115,7 +11115,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
             eventName: "pull_request",
             frozenTarget: false,
             hostedRunnerProfileContract: true,
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runnerProfile,
             runAttempt: 1,
           }),
@@ -11156,7 +11156,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       releaseGate?: boolean;
       stripe?: number;
     }) => {
-      const root = tempDirs.make("openclaw-hosted-lint-owner-");
+      const root = tempDirs.make("carapace-hosted-lint-owner-");
       const binDir = path.join(root, "bin");
       const callsPath = path.join(root, "calls.txt");
       const goEnvPath = path.join(root, "go-env.txt");
@@ -11188,7 +11188,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
             frozenTarget,
             matrix: { stripe },
             releaseGate,
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runnerProfile: profile,
             runAttempt: 1,
           }),
@@ -11214,7 +11214,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
           HOSTED_RUNNER_STRIPES: profile === "blacksmith" ? "false" : "true",
           LINT_CALLS: callsPath,
           LINT_GO_ENV: goEnvPath,
-          OPENCLAW_LOCAL_CHECK: "0",
+          CARAPACE_LOCAL_CHECK: "0",
           PATH: `${binDir}:${process.env.PATH ?? ""}`,
           RELEASE_GATE: releaseGate ? "true" : "false",
           RUN_CONTROL_UI_I18N: "false",
@@ -11244,7 +11244,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         ? stripes
         : evaluateWorkflowExpression(stripes, {
             eventName: "pull_request",
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runnerProfile: "hybrid",
             runAttempt: 1,
             ...context,
@@ -11497,7 +11497,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(checksFastRun.run).toContain("pnpm check:coercion-helpers");
     expect(checksFastRun.run).toContain("bun-launcher)");
     expect(checksFastRun.run).toContain(
-      "OPENCLAW_E2E_SKIP_BUILD=1 OPENCLAW_TEST_BUN_LAUNCHER=1 pnpm test test/openclaw-launcher.e2e.test.ts",
+      "CARAPACE_E2E_SKIP_BUILD=1 CARAPACE_TEST_BUN_LAUNCHER=1 pnpm test test/carapace-launcher.e2e.test.ts",
     );
     expect(checksFastRun.run).toContain(
       "for required_script in check:max-lines-ratchet check:assertion-safety config:docs:check plugins:inventory:check; do",
@@ -11651,11 +11651,11 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
   ])(
     "executes standalone changed-path-facts coverage for $label",
     ({ changedPath, taskOverride }) => {
-      const root = tempDirs.make("openclaw-fast-ci-routing-");
+      const root = tempDirs.make("carapace-fast-ci-routing-");
       const changedPaths = [changedPath];
       const scopeEnv = Object.fromEntries(
         Object.entries(runCiChangedScopeFixture(changedPaths)).map(([key, value]) => [
-          `OPENCLAW_CI_${key.toUpperCase()}`,
+          `CARAPACE_CI_${key.toUpperCase()}`,
           value,
         ]),
       );
@@ -11664,7 +11664,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         eventName: "pull_request",
         historicalCompatibility: false,
         changedPaths,
-        scopeEnv: { ...scopeEnv, OPENCLAW_CI_DOCS_CHANGED: "false" },
+        scopeEnv: { ...scopeEnv, CARAPACE_CI_DOCS_CHANGED: "false" },
       });
       expect(manifest.status, manifest.output).toBe(0);
       expect(
@@ -11756,10 +11756,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       selectedJobs: ["macos-node", "checks-windows"],
     },
     ...[
-      ".github/workflows/openclaw-performance.yml",
-      "test/scripts/openclaw-performance-workflow.test-support.ts",
-      "test/scripts/openclaw-performance-git-lifecycle.test.ts",
-      "test/scripts/openclaw-performance-workflow.test.ts",
+      ".github/workflows/carapace-performance.yml",
+      "test/scripts/carapace-performance-workflow.test-support.ts",
+      "test/scripts/carapace-performance-git-lifecycle.test.ts",
+      "test/scripts/carapace-performance-workflow.test.ts",
     ].map((changedPath) => ({
       label: `Performance owner ${changedPath}`,
       changedPath,
@@ -11805,7 +11805,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     },
     {
       label: "shared native",
-      changedPath: "apps/shared/OpenClawKit/Sources/Foo.swift",
+      changedPath: "apps/shared/CarapaceKit/Sources/Foo.swift",
       selectedJobs: ["macos-node", "macos-swift", "ios-build", "android"],
     },
     { label: "docs", changedPath: "docs/ci.md", selectedJobs: [] },
@@ -11857,13 +11857,13 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       const context = {
         eventName,
         releaseGate,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
         steps: { changed_scope: { outputs: scopeOutputs } },
       };
       const scopeEnv = Object.fromEntries(
         Object.entries(manifestStep.env)
-          .filter(([key]) => key.startsWith("OPENCLAW_CI_RUN_"))
+          .filter(([key]) => key.startsWith("CARAPACE_CI_RUN_"))
           .map(([key, expression]) => [
             key,
             String(evaluateWorkflowExpression(expression, context)),
@@ -11943,18 +11943,18 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         bundledPlanner: true,
         packageVersion,
         scopeEnv: {
-          OPENCLAW_CI_TARGET_REF: "a".repeat(40),
-          OPENCLAW_CI_TARGET_CONTEXT_REF: context === "release branch" ? branch : "",
-          OPENCLAW_CI_TARGET_CONTEXT_TARGET: String(context === "release branch"),
-          OPENCLAW_CI_HISTORICAL_TARGET_TAG: context === "release tag" ? `v${packageVersion}` : "",
-          OPENCLAW_CI_HISTORICAL_TARGET: String(context === "release tag"),
-          OPENCLAW_CI_RUN_UI_TESTS: "true",
+          CARAPACE_CI_TARGET_REF: "a".repeat(40),
+          CARAPACE_CI_TARGET_CONTEXT_REF: context === "release branch" ? branch : "",
+          CARAPACE_CI_TARGET_CONTEXT_TARGET: String(context === "release branch"),
+          CARAPACE_CI_HISTORICAL_TARGET_TAG: context === "release tag" ? `v${packageVersion}` : "",
+          CARAPACE_CI_HISTORICAL_TARGET: String(context === "release tag"),
+          CARAPACE_CI_RUN_UI_TESTS: "true",
         },
       };
       const full = runCiManifestFixture(options);
       const qualification = runCiManifestFixture({
         ...options,
-        scopeEnv: { ...options.scopeEnv, OPENCLAW_CI_RELEASE_SCOPE: scope },
+        scopeEnv: { ...options.scopeEnv, CARAPACE_CI_RELEASE_SCOPE: scope },
       });
       expect(full.status, full.output).toBe(0);
       expect(qualification.status, qualification.output).toBe(0);
@@ -11965,7 +11965,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         ...full.outputs,
         release_scope: scope,
         run_macos_swift: "false",
-        run_openclawkit_tests: "false",
+        run_carapacekit_tests: "false",
         run_ios_build: "false",
         run_android: "false",
         run_android_job: "false",
@@ -11987,7 +11987,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         expect(
           evaluateWorkflowExpression(readCiWorkflow().jobs[jobName].if, {
             eventName: "workflow_dispatch",
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
             preflightOutputs: {
               ...qualification.outputs,
@@ -12025,12 +12025,12 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
           ...(peeled ? { "refs/tags/v2026.9.1^{}": peeled.repeat(40) } : {}),
         },
         scopeEnv: {
-          OPENCLAW_CI_RELEASE_SCOPE: "npm-stable",
-          OPENCLAW_CI_TARGET_REF: "a".repeat(40),
-          OPENCLAW_CI_TARGET_CONTEXT_REF: context === "branch" ? "release/2026.9.1-1" : "",
-          OPENCLAW_CI_TARGET_CONTEXT_TARGET: String(context === "branch"),
-          OPENCLAW_CI_HISTORICAL_TARGET_TAG: context === "tag" ? "v2026.9.1-1" : "",
-          OPENCLAW_CI_HISTORICAL_TARGET: String(context === "tag"),
+          CARAPACE_CI_RELEASE_SCOPE: "npm-stable",
+          CARAPACE_CI_TARGET_REF: "a".repeat(40),
+          CARAPACE_CI_TARGET_CONTEXT_REF: context === "branch" ? "release/2026.9.1-1" : "",
+          CARAPACE_CI_TARGET_CONTEXT_TARGET: String(context === "branch"),
+          CARAPACE_CI_HISTORICAL_TARGET_TAG: context === "tag" ? "v2026.9.1-1" : "",
+          CARAPACE_CI_HISTORICAL_TARGET: String(context === "tag"),
         },
       });
       expect(result.status === 0, result.output).toBe(accepted);
@@ -12050,36 +12050,36 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     { label: "stable target", packageVersion: "2026.9.1" },
     { label: "alpha target", packageVersion: "2026.9.1-alpha.1" },
     { label: "PR event", eventName: "pull_request" as const },
-    { label: "fork repository", repository: "example/openclaw" },
+    { label: "fork repository", repository: "example/carapace" },
     { label: "PR release gate", releaseGate: true },
-    { label: "PR number", scopeEnv: { OPENCLAW_CI_PULL_REQUEST_NUMBER: "123" } },
-    { label: "mutable target", scopeEnv: { OPENCLAW_CI_TARGET_REF: "release/2026.9.1" } },
-    { label: "wrong target", scopeEnv: { OPENCLAW_CI_TARGET_REF: "c".repeat(40) } },
-    { label: "unvalidated branch", scopeEnv: { OPENCLAW_CI_TARGET_CONTEXT_TARGET: "false" } },
+    { label: "PR number", scopeEnv: { CARAPACE_CI_PULL_REQUEST_NUMBER: "123" } },
+    { label: "mutable target", scopeEnv: { CARAPACE_CI_TARGET_REF: "release/2026.9.1" } },
+    { label: "wrong target", scopeEnv: { CARAPACE_CI_TARGET_REF: "c".repeat(40) } },
+    { label: "unvalidated branch", scopeEnv: { CARAPACE_CI_TARGET_CONTEXT_TARGET: "false" } },
     {
       label: "wrong release train",
-      scopeEnv: { OPENCLAW_CI_TARGET_CONTEXT_REF: "release/2026.9.2" },
+      scopeEnv: { CARAPACE_CI_TARGET_CONTEXT_REF: "release/2026.9.2" },
     },
     {
       label: "wrong release tag",
       scopeEnv: {
-        OPENCLAW_CI_TARGET_CONTEXT_TARGET: "false",
-        OPENCLAW_CI_HISTORICAL_TARGET: "true",
-        OPENCLAW_CI_HISTORICAL_TARGET_TAG: "v2026.9.2-beta.1",
+        CARAPACE_CI_TARGET_CONTEXT_TARGET: "false",
+        CARAPACE_CI_HISTORICAL_TARGET: "true",
+        CARAPACE_CI_HISTORICAL_TARGET_TAG: "v2026.9.2-beta.1",
       },
     },
-    { label: "unknown scope", scopeEnv: { OPENCLAW_CI_RELEASE_SCOPE: "package" } },
+    { label: "unknown scope", scopeEnv: { CARAPACE_CI_RELEASE_SCOPE: "package" } },
     ...["2026.9.1-beta.1", "2026.9.1-alpha.1", "2026.9.33", "2026.9.33-1"].map(
       (packageVersion) => ({
         label: `npm-stable with ${packageVersion}`,
         packageVersion,
-        scopeEnv: { OPENCLAW_CI_RELEASE_SCOPE: "npm-stable" },
+        scopeEnv: { CARAPACE_CI_RELEASE_SCOPE: "npm-stable" },
       }),
     ),
     {
       label: "correction package in a different release context",
       packageVersion: "2026.9.1-1",
-      scopeEnv: { OPENCLAW_CI_RELEASE_SCOPE: "npm-stable" },
+      scopeEnv: { CARAPACE_CI_RELEASE_SCOPE: "npm-stable" },
     },
   ])(
     "rejects scoped npm CI qualification for $label",
@@ -12090,10 +12090,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         packageVersion: "2026.9.1-beta.1",
         ...options,
         scopeEnv: {
-          OPENCLAW_CI_RELEASE_SCOPE: "npm-beta",
-          OPENCLAW_CI_TARGET_REF: "a".repeat(40),
-          OPENCLAW_CI_TARGET_CONTEXT_REF: "release/2026.9.1",
-          OPENCLAW_CI_TARGET_CONTEXT_TARGET: "true",
+          CARAPACE_CI_RELEASE_SCOPE: "npm-beta",
+          CARAPACE_CI_TARGET_REF: "a".repeat(40),
+          CARAPACE_CI_TARGET_CONTEXT_REF: "release/2026.9.1",
+          CARAPACE_CI_TARGET_CONTEXT_TARGET: "true",
           ...scopeEnv,
         },
       });
@@ -12104,10 +12104,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
   );
 
   it.each([
-    ["pull_request", "openclaw/openclaw", true],
-    ["pull_request", "example/openclaw", false],
-    ["push", "openclaw/openclaw", false],
-    ["workflow_dispatch", "openclaw/openclaw", false],
+    ["pull_request", "carapace/carapace", true],
+    ["pull_request", "example/carapace", false],
+    ["push", "carapace/carapace", false],
+    ["workflow_dispatch", "carapace/carapace", false],
   ] as const)(
     "forwards changed paths only to canonical PR fallback (%s, %s)",
     (eventName, repository, forwardsChangedPaths) => {
@@ -12254,7 +12254,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(legacy.outputs.use_compatible_android_ci).toBe("true");
     expect(legacy.outputs.run_ios_build).toBe("false");
     expect(legacy.outputs.run_native_i18n).toBe("false");
-    expect(legacy.outputs.run_openclawkit_tests).toBe("false");
+    expect(legacy.outputs.run_carapacekit_tests).toBe("false");
     expect(legacy.outputs.run_qa_smoke_ci).toBe("false");
     expect(legacy.outputs.run_docker_seed_e2e).toBe("false");
     expect(legacy.outputs.docker_seed_lanes).toBe("");
@@ -12287,7 +12287,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(current.outputs.use_compatible_android_ci).toBe("false");
     expect(current.outputs.run_ios_build).toBe("true");
     expect(current.outputs.run_native_i18n).toBe("true");
-    expect(current.outputs.run_openclawkit_tests).toBe("true");
+    expect(current.outputs.run_carapacekit_tests).toBe("true");
     expect(current.outputs.run_qa_smoke_ci).toBe("true");
     expect(current.outputs.run_docker_seed_e2e).toBe("false");
     expect(current.outputs.docker_seed_lanes).toBe("");
@@ -12341,8 +12341,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect.objectContaining({
         check_name: "bundled-node-plan",
         env: {
-          OPENCLAW_CI_TEST_COMPACT_MODE: "full",
-          OPENCLAW_CI_TEST_RUNNER_BACKEND: "blacksmith",
+          CARAPACE_CI_TEST_COMPACT_MODE: "full",
+          CARAPACE_CI_TEST_RUNNER_BACKEND: "blacksmith",
         },
         shard_name: "bundled-node-plan",
       }),
@@ -12366,8 +12366,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         expect.objectContaining({
           check_name: "bundled-node-plan",
           env: {
-            OPENCLAW_CI_TEST_COMPACT_MODE: "push",
-            OPENCLAW_CI_TEST_RUNNER_BACKEND: runnerBackend ?? "blacksmith",
+            CARAPACE_CI_TEST_COMPACT_MODE: "push",
+            CARAPACE_CI_TEST_RUNNER_BACKEND: runnerBackend ?? "blacksmith",
           },
         }),
       );
@@ -12430,8 +12430,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         expect.objectContaining({
           check_name: "bundled-node-plan",
           env: {
-            OPENCLAW_CI_TEST_COMPACT_MODE: "pull-request",
-            OPENCLAW_CI_TEST_RUNNER_BACKEND: "blacksmith",
+            CARAPACE_CI_TEST_COMPACT_MODE: "pull-request",
+            CARAPACE_CI_TEST_RUNNER_BACKEND: "blacksmith",
           },
         }),
         expect.objectContaining({ check_name: "changed-extension-fallback-plan" }),
@@ -12659,8 +12659,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const swiftLint = workflow.jobs["macos-swift"].steps.find(
       (step: { name?: string }) => step.name === "Swift lint",
     );
-    const openClawKitTests = workflow.jobs["macos-swift"].steps.find(
-      (step: { name?: string }) => step.name === "OpenClawKit tests",
+    const carapaceKitTests = workflow.jobs["macos-swift"].steps.find(
+      (step: { name?: string }) => step.name === "CarapaceKit tests",
     );
     expect(swiftInstall.run).toContain("brew install xcodegen swiftlint");
     expect(swiftInstall.run).not.toContain("brew install xcodegen swiftlint swiftformat");
@@ -12689,8 +12689,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(swiftInstall.run).toContain('elif [[ "$HISTORICAL_TARGET" == "true" ]]');
     expect(swiftLint.run).toContain("swiftlint lint --config config/swiftlint.yml");
     expect(swiftLint.run).toContain('elif [[ "$HISTORICAL_TARGET" == "true" ]]');
-    expect(openClawKitTests.if).toBe(
-      "matrix.phase == 'tests' && needs.preflight.outputs.run_openclawkit_tests == 'true'",
+    expect(carapaceKitTests.if).toBe(
+      "matrix.phase == 'tests' && needs.preflight.outputs.run_carapacekit_tests == 'true'",
     );
 
     const checkShard = workflow.jobs["check-shard"].steps.find(
@@ -12744,7 +12744,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(uiInstall.run).toContain(
       "Target does not provide a supported Playwright Chromium installer.",
     );
-    expect(uiInstall.run).not.toContain("OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM");
+    expect(uiInstall.run).not.toContain("CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM");
     const playwrightVersion = JSON.parse(readFileSync("package.json", "utf8")).devDependencies
       .playwright;
     expect(playwrightVersion).toBe(
@@ -12779,7 +12779,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       eventName: scenario.frozenTarget ? "workflow_dispatch" : "pull_request",
       frozenTarget: scenario.frozenTarget,
       preflightOutputs: { compatibility_target: String(scenario.compatibilityTarget) },
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       runnerBackend: "hybrid",
     } as const;
@@ -12797,7 +12797,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(ui["timeout-minutes"]).toBe(20);
     expect(workflow.jobs["ci-gate"].needs).toContain("checks-ui");
 
-    const root = tempDirs.make("openclaw-ui-workflow-");
+    const root = tempDirs.make("carapace-ui-workflow-");
     const bin = path.join(root, "bin");
     const callsPath = path.join(root, "calls.txt");
     const argsPath = path.join(root, "vitest-args.json");
@@ -12808,7 +12808,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         "set -euo pipefail",
         `printf '%s\\n' '${command} '"$*" >> "$UI_COMMAND_CALLS"`,
         ...(command === "node"
-          ? ['printf "%s\\n" "$OPENCLAW_NODE_TEST_VITEST_ARGS_JSON" > "$UI_VITEST_ARGS"']
+          ? ['printf "%s\\n" "$CARAPACE_NODE_TEST_VITEST_ARGS_JSON" > "$UI_VITEST_ARGS"']
           : []),
       ]);
     }
@@ -12830,7 +12830,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
           resolveValue(value),
         ]),
       );
-      expect(env.OPENCLAW_NODE_TEST_PLAN_CONCURRENCY).toBe("1");
+      expect(env.CARAPACE_NODE_TEST_PLAN_CONCURRENCY).toBe("1");
       const flags = [
         "--maxWorkers",
         "3",
@@ -12857,17 +12857,17 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         expect(result.status, result.stdout + result.stderr).toBe(0);
       }
       if (!scenario.compatibilityTarget) {
-        env.OPENCLAW_NODE_TEST_VITEST_ARGS_JSON = readFileSync(argsPath, "utf8");
-        expect(JSON.parse(env.OPENCLAW_NODE_TEST_VITEST_ARGS_JSON)).toEqual(flags);
+        env.CARAPACE_NODE_TEST_VITEST_ARGS_JSON = readFileSync(argsPath, "utf8");
+        expect(JSON.parse(env.CARAPACE_NODE_TEST_VITEST_ARGS_JSON)).toEqual(flags);
         const forwarded: string[][] = [];
         expect(
           await runShardPlans(resolveShardPlans(env), {
-            concurrency: Number(env.OPENCLAW_NODE_TEST_PLAN_CONCURRENCY),
+            concurrency: Number(env.CARAPACE_NODE_TEST_PLAN_CONCURRENCY),
             env,
             scratchDir: root,
             runChild: async (args, childEnv) => {
               forwarded.push(args);
-              expect(childEnv.OPENCLAW_TEST_PROJECTS_PARALLEL).toBe("1");
+              expect(childEnv.CARAPACE_TEST_PROJECTS_PARALLEL).toBe("1");
               return 0;
             },
           }),
@@ -12894,7 +12894,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         ":(glob)extensions/*/browser/**/*.e2e.test.ts",
         "extensions/qa-lab/src/control-ui-media-transcript.real-gateway.e2e.test.ts",
         "extensions/qa-lab/src/session-host-command-state.real-gateway.e2e.test.ts",
-        "extensions/qa-lab/src/control-ui-openclaw-delegation.real-gateway.e2e.test.ts",
+        "extensions/qa-lab/src/control-ui-carapace-delegation.real-gateway.e2e.test.ts",
         "extensions/qa-lab/src/control-ui-automation-management.real-gateway.e2e.test.ts",
       ],
       { encoding: "utf8" },
@@ -12918,7 +12918,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
           // A Gateway created by the suite's server factory supplies its own UI;
           // a separate backend in a test can still use the shared UI bundle.
-          if (inSuiteServer && node.expression.text === "createOpenClawTestInstance") {
+          if (inSuiteServer && node.expression.text === "createCarapaceTestInstance") {
             ownsPrivateServer = true;
             return;
           }
@@ -13010,7 +13010,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "extensions/*/browser/**/*.e2e.test.ts",
       "extensions/qa-lab/src/control-ui-media-transcript.real-gateway.e2e.test.ts",
       "extensions/qa-lab/src/session-host-command-state.real-gateway.e2e.test.ts",
-      "extensions/qa-lab/src/control-ui-openclaw-delegation.real-gateway.e2e.test.ts",
+      "extensions/qa-lab/src/control-ui-carapace-delegation.real-gateway.e2e.test.ts",
       "extensions/qa-lab/src/control-ui-automation-management.real-gateway.e2e.test.ts",
     ]);
     expect(projects.map((project) => project.test.name)).toEqual([
@@ -13067,7 +13067,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(localSelected.flat().toSorted()).toEqual(trackedUiE2eFiles);
     expect(new Set(localSelected.flat()).size).toBe(trackedUiE2eFiles.length);
 
-    const ordinaryConfig = createUiE2eVitestConfig({ OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY: "1" }, []);
+    const ordinaryConfig = createUiE2eVitestConfig({ CARAPACE_UI_E2E_SKIP_REAL_GATEWAY: "1" }, []);
     const ordinaryProjects = ordinaryConfig.test?.projects as typeof projects;
     const ordinarySelected = ordinaryProjects.map((project) => selectedFiles(project.test));
     expect(selectedFiles(ordinaryConfig.test as typeof rootTest)).toEqual(ordinary);
@@ -13091,11 +13091,11 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       [serialFile],
     ]);
 
-    const includeDir = tempDirs.make("openclaw-ui-e2e-project-includes-");
+    const includeDir = tempDirs.make("carapace-ui-e2e-project-includes-");
     const includeFile = path.join(includeDir, "include.json");
     writeFileSync(includeFile, JSON.stringify([bundledFile, serialFile]));
     const narrowedByFile = createUiE2eVitestConfig(
-      { OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY: "1", OPENCLAW_VITEST_INCLUDE_FILE: includeFile },
+      { CARAPACE_UI_E2E_SKIP_REAL_GATEWAY: "1", CARAPACE_VITEST_INCLUDE_FILE: includeFile },
       [],
     );
     const includeProjects = narrowedByFile.test?.projects as typeof projects;
@@ -13108,7 +13108,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
 
     writeFileSync(includeFile, JSON.stringify(["ui/src/e2e/*.e2e.test.ts"]));
     const narrowedByGlob = createUiE2eVitestConfig(
-      { OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY: "1", OPENCLAW_VITEST_INCLUDE_FILE: includeFile },
+      { CARAPACE_UI_E2E_SKIP_REAL_GATEWAY: "1", CARAPACE_VITEST_INCLUDE_FILE: includeFile },
       [],
     );
     const globProjects = narrowedByGlob.test?.projects as typeof projects;
@@ -13195,7 +13195,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       uiE2E.steps.find((step: WorkflowStep) => step.name === "Test Control UI end-to-end"),
       "Control UI E2E suite",
     );
-    const commandRoot = tempDirs.make("openclaw-ui-e2e-project-command-");
+    const commandRoot = tempDirs.make("carapace-ui-e2e-project-command-");
     const commandBin = path.join(commandRoot, "bin");
     const commandArgs = path.join(commandRoot, "args");
     mkdirSync(commandBin);
@@ -13232,7 +13232,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       evaluateWorkflowExpression(`\${{ ${uiE2E.if} }}`, {
         eventName: "workflow_dispatch",
         preflightOutputs: { compatibility_target: "true", run_ui_tests: "true" },
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 1,
       }),
     ).toBe(false);
@@ -13251,7 +13251,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     );
     expect(uiE2e["runs-on"]).not.toBe(ui["runs-on"]);
     expect(uiE2e["timeout-minutes"]).toBe(25);
-    expect(uiE2e.env).toEqual({ OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY: "1" });
+    expect(uiE2e.env).toEqual({ CARAPACE_UI_E2E_SKIP_REAL_GATEWAY: "1" });
     expect(uiE2e.strategy["fail-fast"]).toBe(false);
     expect(uiE2e.strategy["max-parallel"]).toBe(14);
     expect(uiE2e.strategy.matrix).toBe("${{ fromJson(needs.preflight.outputs.ui_e2e_matrix) }}");
@@ -13357,8 +13357,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "same-repo pull request first attempt",
         context: {
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
         expected: { blacksmith: true, dependencyCache: "true" },
@@ -13367,8 +13367,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "same-repo pull request with GitHub backend",
         context: {
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
+          repository: "carapace/carapace",
           runnerBackend: "github",
           runAttempt: 1,
         },
@@ -13378,8 +13378,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "same-repo pull request with hybrid backend",
         context: {
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
+          repository: "carapace/carapace",
           runnerBackend: "hybrid",
           runAttempt: 1,
         },
@@ -13389,8 +13389,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "same-repo pull request retry",
         context: {
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
+          repository: "carapace/carapace",
           runAttempt: 2,
         },
         expected: { blacksmith: false, dependencyCache: "false" },
@@ -13399,8 +13399,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "same-repo pull request with hybrid backend retry",
         context: {
           eventName: "pull_request",
-          headRepository: "openclaw/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "carapace/carapace",
+          repository: "carapace/carapace",
           runnerBackend: "hybrid",
           runAttempt: 2,
         },
@@ -13410,7 +13410,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "canonical hybrid push retry",
         context: {
           eventName: "push",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend: "hybrid",
           runAttempt: 2,
         },
@@ -13423,8 +13423,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         context: {
           authorAssociation: "CONTRIBUTOR",
           eventName: "pull_request",
-          headRepository: "contributor/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "contributor/carapace",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
         expected: { blacksmith: true, dependencyCache: "false" },
@@ -13434,8 +13434,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         context: {
           authorAssociation: "NONE",
           eventName: "pull_request",
-          headRepository: "contributor/openclaw",
-          repository: "openclaw/openclaw",
+          headRepository: "contributor/carapace",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
         expected: { blacksmith: false, dependencyCache: "false" },
@@ -13444,7 +13444,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "workflow dispatch",
         context: {
           eventName: "workflow_dispatch",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
         expected: { blacksmith: false, dependencyCache: "false" },
@@ -13453,7 +13453,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "canonical push retry",
         context: {
           eventName: "push",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 2,
         },
         expected: { blacksmith: true, dependencyCache: "true" },
@@ -13515,7 +13515,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     );
     expect(scenario.if).toBe("matrix.task == 'control-ui'");
     expect(scenario.env).toEqual({
-      OPENCLAW_UI_E2E_DIAGNOSTIC_DIR:
+      CARAPACE_UI_E2E_DIAGNOSTIC_DIR:
         ".artifacts/control-ui-e2e-timeouts/shard-${{ matrix.shard }}-attempt-${{ github.run_attempt }}",
       VITEST_SHARD_INDEX: "${{ matrix.shard }}",
       VITEST_SHARD_COUNT: "${{ matrix.vitest_shard_count }}",
@@ -13548,8 +13548,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(browserExtension.run).toBe("pnpm test:e2e:browser-extension");
     for (const { job } of routedUiE2eJobs) {
       const jobContract = JSON.stringify(job);
-      expect(jobContract).not.toContain("OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM");
-      expect(jobContract).not.toContain("OPENCLAW_VITEST_NO_OUTPUT_RETRY");
+      expect(jobContract).not.toContain("CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM");
+      expect(jobContract).not.toContain("CARAPACE_VITEST_NO_OUTPUT_RETRY");
     }
 
     const realGatewaySteps = uiE2eRealGateway.steps.filter((step: WorkflowStep) =>
@@ -13577,15 +13577,15 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     );
     expect(realGatewayBuild.if).toBeUndefined();
     expect(realGatewayBuild["continue-on-error"]).toBeUndefined();
-    expect(realGatewayBuild.env).toEqual({ OPENCLAW_BUILD_PRIVATE_QA: "1" });
+    expect(realGatewayBuild.env).toEqual({ CARAPACE_BUILD_PRIVATE_QA: "1" });
     const realGatewayBuildIndex = uiE2eRealGateway.steps.indexOf(realGatewayBuild);
     expect(realGatewayBuildIndex).toBeGreaterThan(uiE2eRealGateway.steps.indexOf(realGatewaySetup));
     expect(realGatewayBuildIndex).toBeLessThan(realGatewayIndex);
     expect(realGatewayStep.env).toEqual({
       FROZEN_TARGET: "${{ needs.preflight.outputs.frozen_target }}",
-      OPENCLAW_CAPTURE_UI_PROOF:
+      CARAPACE_CAPTURE_UI_PROOF:
         "${{ github.event_name == 'workflow_dispatch' && inputs.capture_ui_proof && '1' || '0' }}",
-      OPENCLAW_UI_E2E_ARTIFACT_DIR: proofUpload.with.path,
+      CARAPACE_UI_E2E_ARTIFACT_DIR: proofUpload.with.path,
     });
     expect(proofUploadIndex).toBeGreaterThan(realGatewayIndex);
   });
@@ -13600,7 +13600,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const timeline = `${artifactRoot}/widget-prompt-failure.json`;
     for (const job of [
       readCiWorkflow().jobs["checks-ui-e2e"],
-      readWorkflow(".github/workflows/openclaw-repo-e2e-reusable.yml").jobs.test,
+      readWorkflow(".github/workflows/carapace-repo-e2e-reusable.yml").jobs.test,
     ]) {
       const upload = expectDefined(
         job.steps.find(
@@ -13611,7 +13611,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(
         evaluateWorkflowExpression(`\${{ ${upload.if} }}`, {
           eventName: "workflow_dispatch",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
           failed,
           fileHashes: captured ? { [timeline]: "present" } : {},
@@ -13644,7 +13644,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         ),
         "real-Gateway command",
       );
-      const directory = tempDirs.make("openclaw-real-gateway-command-");
+      const directory = tempDirs.make("carapace-real-gateway-command-");
       const bin = path.join(directory, "bin");
       const argsPath = path.join(directory, "args");
       const callsPath = path.join(directory, "calls");
@@ -13694,9 +13694,9 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(args.slice(6).toSorted()).toEqual(uiE2eRealGatewayTestFiles.toSorted());
       expect(
         resolveRunVitestSpawnEnv(
-          { CI: "true", OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "120000" },
+          { CI: "true", CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "120000" },
           args.slice(1),
-        ).OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS,
+        ).CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS,
       ).toBe("300000");
     },
   );
@@ -13734,10 +13734,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(buildArtifactSteps.some((step: WorkflowStep) => step.run === "pnpm ui:build")).toBe(
       false,
     );
-    expect(nodeHelpSmoke.run).toBe("node openclaw.mjs --help");
-    expect(nodeStatusSmoke.run).toBe("node openclaw.mjs status --json --timeout 1");
-    expect(bunSmoke.run).toContain("bun openclaw.mjs --help");
-    expect(bunSmoke.run).toContain("bun openclaw.mjs status --json --timeout 1");
+    expect(nodeHelpSmoke.run).toBe("node carapace.mjs --help");
+    expect(nodeStatusSmoke.run).toBe("node carapace.mjs status --json --timeout 1");
+    expect(bunSmoke.run).toContain("bun carapace.mjs --help");
+    expect(bunSmoke.run).toContain("bun carapace.mjs status --json --timeout 1");
   });
 
   it("keeps automatic source-only Control UI locale drift advisory and manual CI strict", () => {
@@ -13778,7 +13778,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         {
           eventName: "workflow_dispatch",
           releaseGate: false,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
       ),
@@ -13789,7 +13789,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         {
           eventName: "workflow_dispatch",
           releaseGate: true,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runAttempt: 1,
         },
       ),
@@ -13854,7 +13854,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(workflow.jobs.preflight.outputs.strict_native_i18n).toBe(
       "${{ github.event_name == 'workflow_dispatch' && !inputs.release_gate && 'true' || steps.changed_scope.outputs.strict_native_i18n }}",
     );
-    expect(manifestStep.env.OPENCLAW_CI_RUN_NATIVE_I18N).toBe(
+    expect(manifestStep.env.CARAPACE_CI_RUN_NATIVE_I18N).toBe(
       "${{ github.event_name == 'workflow_dispatch' && 'true' || steps.changed_scope.outputs.run_native_i18n || 'false' }}",
     );
     expect(sourceStep.run).toContain("pnpm native:i18n:verify");
@@ -13890,20 +13890,20 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(memoryBarrier).toBeLessThan(
       verifierStep.run.indexOf('run_verifier "doctor-plugin-index"'),
     );
-    expect(verifierStep.env.OPENCLAW_STARTUP_MEMORY_PLUGINS_LIST_MB).toBe(
+    expect(verifierStep.env.CARAPACE_STARTUP_MEMORY_PLUGINS_LIST_MB).toBe(
       "${{ runner.environment == 'github-hosted' && '425' || '400' }}",
     );
     expect(verifierStep.env.PARALLEL_BUILT_VERIFIERS).toBe(
       "${{ runner.environment != 'github-hosted' && 'true' || 'false' }}",
     );
     expect(verifierStep.run).toContain(
-      'OPENCLAW_VITEST_FS_MODULE_CACHE_PATH="${RUNNER_TEMP}/vitest-module-cache/${name}"',
+      'CARAPACE_VITEST_FS_MODULE_CACHE_PATH="${RUNNER_TEMP}/vitest-module-cache/${name}"',
     );
     expect(verifierStep.run).toContain(
       "test/scripts/doctor-config-preflight-plugin-index.built-cli.e2e.test.ts",
     );
     expect(verifierStep.run).toContain(
-      "env OPENCLAW_E2E_USE_PREBUILT_DIST=1 OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS=660000 node scripts/run-vitest.mjs run",
+      "env CARAPACE_E2E_USE_PREBUILT_DIST=1 CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS=660000 node scripts/run-vitest.mjs run",
     );
     expect(verifierStep.run).toContain("--config test/vitest/vitest.e2e.config.ts");
     expect(verifierStep.run).toContain("Selected target predates");
@@ -13950,8 +13950,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       'start_check "discord-component-attachments" run_discord_component_attachments',
     );
     expect(verifierStep.run).toContain('["discord-component-attachments"]="skipped"');
-    expect(verifierStep.run).toContain("OPENCLAW_E2E_USE_PREBUILT_DIST=1 OPENCLAW_E2E_WORKERS=1");
-    expect(verifierStep.run).toContain("OPENCLAW_E2E_VERBOSE=1 OPENCLAW_VITEST_MAX_WORKERS=1");
+    expect(verifierStep.run).toContain("CARAPACE_E2E_USE_PREBUILT_DIST=1 CARAPACE_E2E_WORKERS=1");
+    expect(verifierStep.run).toContain("CARAPACE_E2E_VERBOSE=1 CARAPACE_VITEST_MAX_WORKERS=1");
     const upload = steps.find(
       (entry: WorkflowStep) => entry.name === "Upload Discord component attachment proof",
     );
@@ -13993,7 +13993,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       )?.[1],
       "Discord proof report validator",
     );
-    const scratch = tempDirs.make("openclaw-discord-proof-report-");
+    const scratch = tempDirs.make("carapace-discord-proof-report-");
     const fullName =
       "Discord show_widget contextual presenter process proof preserves component attachment filenames through the public Gateway message action";
     const report = {
@@ -14041,7 +14041,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         step.if === undefined ||
           evaluateWorkflowExpression(step.if, {
             eventName: "workflow_dispatch",
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runAttempt: 1,
             frozenTarget: frozen,
             fileHashes: present ? { [file]: "fixture-hash" } : {},
@@ -14072,7 +14072,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       steps.findIndex((entry: WorkflowStep) => entry.name === "Build dist"),
     );
     expect(step["continue-on-error"]).not.toBe(true);
-    const root = tempDirs.make("openclaw-browser-proof-report-");
+    const root = tempDirs.make("carapace-browser-proof-report-");
     const file = "extensions/browser/src/browser/extension-install.native-host.e2e.test.ts";
     const fullName =
       "native host registration launches with the exact custom installation context when Chrome has no selectors";
@@ -14109,7 +14109,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       `
       import fs from 'node:fs';
       const args = process.argv.slice(2);
-      fs.writeFileSync('invocation.json', JSON.stringify({ args, prebuilt: process.env.OPENCLAW_E2E_USE_PREBUILT_DIST }));
+      fs.writeFileSync('invocation.json', JSON.stringify({ args, prebuilt: process.env.CARAPACE_E2E_USE_PREBUILT_DIST }));
       const outputIndex = args.indexOf('--outputFile.json');
       if (outputIndex >= 0 && ${JSON.stringify(state)} !== 'missing-report') {
         fs.writeFileSync(args[outputIndex + 1], ${JSON.stringify(state === "malformed" ? "{" : JSON.stringify(report))});
@@ -14179,7 +14179,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(verifier.run.indexOf(selection)).toBeLessThan(
         verifier.run.indexOf('start_check "channels"'),
       );
-      const root = tempDirs.make("openclaw-sqlite-verifier-");
+      const root = tempDirs.make("carapace-sqlite-verifier-");
       mkdirSync(path.join(root, "scripts"));
       writeFileSync(
         path.join(root, "scripts/run-vitest.mjs"),
@@ -14187,8 +14187,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       import { writeFileSync } from "node:fs";
       writeFileSync("invocation.json", JSON.stringify({
         args: process.argv.slice(2),
-        prebuilt: process.env.OPENCLAW_E2E_USE_PREBUILT_DIST,
-        watchdog: process.env.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS,
+        prebuilt: process.env.CARAPACE_E2E_USE_PREBUILT_DIST,
+        watchdog: process.env.CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS,
       }));
       process.exit(${exitCode});
     `,
@@ -14348,7 +14348,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(run.slice(tuiPty, tuiPtyWait)).toContain("src/tui/tui-pty-local.e2e.test.ts");
     expect(run.slice(tuiPty, tuiPtyWait)).toContain("--testNamePattern");
     expect(run.slice(tuiPty, tuiPtyWait)).toContain(
-      "launches openclaw (chat as local mode|tui against a real Gateway) through a real PTY",
+      "launches carapace (chat as local mode|tui against a real Gateway) through a real PTY",
     );
     expect(run).toContain("wait_checks()");
     // Startup memory, artifact writers, and TUI retain explicit barriers;
@@ -14527,7 +14527,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       },
       {
         configs: ["test/vitest/vitest.infra.config.ts"],
-        env: { OPENCLAW_VITEST_MAX_WORKERS: "2" },
+        env: { CARAPACE_VITEST_MAX_WORKERS: "2" },
         requiresDist: false,
         runner: "ubuntu-24.04",
         shard_name: "core-runtime-infra-misc",
@@ -14570,20 +14570,20 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const context = {
       eventName: "pull_request" as const,
       matrix: row,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
     };
     const packedEnv = evaluateWorkflowExpression(
-      runStep.env.OPENCLAW_NODE_TEST_GROUPS_GZIP_BASE64,
+      runStep.env.CARAPACE_NODE_TEST_GROUPS_GZIP_BASE64,
       context,
     );
     const legacyEnv = evaluateWorkflowExpression(
-      runStep.env.OPENCLAW_NODE_TEST_GROUPS_JSON,
+      runStep.env.CARAPACE_NODE_TEST_GROUPS_JSON,
       context,
     );
     expect(legacyEnv).toBe("");
     expect(
-      resolveShardPlans({ OPENCLAW_NODE_TEST_GROUPS_GZIP_BASE64: String(packedEnv) }).map((plan) =>
+      resolveShardPlans({ CARAPACE_NODE_TEST_GROUPS_GZIP_BASE64: String(packedEnv) }).map((plan) =>
         plan.kind === "group" ? plan.plan : plan,
       ),
     ).toEqual(projectedGroups);
@@ -14612,7 +14612,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const groups = [
       {
         configs: ["test/vitest/vitest.infra.config.ts"],
-        env: { OPENCLAW_CI_TEST_GROUP: "legacy" },
+        env: { CARAPACE_CI_TEST_GROUP: "legacy" },
         includePatterns: ["src/legacy.test.ts"],
         requiresDist: false,
         runner: "ubuntu-24.04",
@@ -14666,20 +14666,20 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const context = {
       eventName: "workflow_dispatch" as const,
       matrix: row,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
     };
     const packedEnv = evaluateWorkflowExpression(
-      runStep.env.OPENCLAW_NODE_TEST_GROUPS_GZIP_BASE64,
+      runStep.env.CARAPACE_NODE_TEST_GROUPS_GZIP_BASE64,
       context,
     );
     const legacyEnv = evaluateWorkflowExpression(
-      runStep.env.OPENCLAW_NODE_TEST_GROUPS_JSON,
+      runStep.env.CARAPACE_NODE_TEST_GROUPS_JSON,
       context,
     );
     expect(packedEnv).toBe("");
     expect(
-      resolveShardPlans({ OPENCLAW_NODE_TEST_GROUPS_JSON: String(legacyEnv) }).map((plan) =>
+      resolveShardPlans({ CARAPACE_NODE_TEST_GROUPS_JSON: String(legacyEnv) }).map((plan) =>
         plan.kind === "group" ? plan.plan : plan,
       ),
     ).toEqual(row.groups);
@@ -14760,25 +14760,25 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(manifestStep.run).toContain("requires_ripgrep:");
     expect(manifestStep.run).toContain("src/agents/sessions/tools/index.test.ts");
     expect(nodeTestJob["timeout-minutes"]).toBe("${{ matrix.timeout_minutes || 60 }}");
-    expect(runStep.env.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS).toBe(
+    expect(runStep.env.CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS).toBe(
       "${{ needs.preflight.outputs.compatibility_target == 'true' && '660000' || '300000' }}",
     );
-    expect(runStep.env.OPENCLAW_VITEST_NO_OUTPUT_RETRY).toBe("1");
-    expect(runStep.env.OPENCLAW_NODE_TEST_ENV_JSON).toBe("${{ toJson(matrix.env) }}");
-    expect(runStep.env.OPENCLAW_NODE_TEST_TARGETS_JSON).toBe("${{ toJson(matrix.targets) }}");
-    expect(runStep.env.OPENCLAW_NODE_TEST_GROUPS_GZIP_BASE64).toBe(
+    expect(runStep.env.CARAPACE_VITEST_NO_OUTPUT_RETRY).toBe("1");
+    expect(runStep.env.CARAPACE_NODE_TEST_ENV_JSON).toBe("${{ toJson(matrix.env) }}");
+    expect(runStep.env.CARAPACE_NODE_TEST_TARGETS_JSON).toBe("${{ toJson(matrix.targets) }}");
+    expect(runStep.env.CARAPACE_NODE_TEST_GROUPS_GZIP_BASE64).toBe(
       "${{ matrix.groups_gzip_base64 || '' }}",
     );
-    expect(runStep.env.OPENCLAW_NODE_TEST_GROUPS_JSON).toBe(
+    expect(runStep.env.CARAPACE_NODE_TEST_GROUPS_JSON).toBe(
       "${{ matrix.groups && toJson(matrix.groups) || '' }}",
     );
-    expect(runStep.env.OPENCLAW_NODE_TEST_VITEST_ARGS_JSON).toBe(
+    expect(runStep.env.CARAPACE_NODE_TEST_VITEST_ARGS_JSON).toBe(
       "${{ needs.preflight.outputs.compatibility_target == 'true' && '[\"--hookTimeout=600000\"]' || '[]' }}",
     );
     expect(buildRuntimeStep).toMatchObject({
       if: "matrix.pretest_build_mode != null",
       env: {
-        OPENCLAW_BUILD_PRIVATE_QA: "${{ matrix.pretest_build_mode == 'private-qa' && '1' || '0' }}",
+        CARAPACE_BUILD_PRIVATE_QA: "${{ matrix.pretest_build_mode == 'private-qa' && '1' || '0' }}",
         VITEST: "1",
       },
       run: "pnpm build qaRuntime",
@@ -14830,7 +14830,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(resourceStep.run).toContain('if [ "$workers" -gt "$cores" ]; then');
     expect(resourceStep.run).toContain('workers="$cores"');
     expect(resourceStep.run.indexOf('workers="$cores"')).toBeLessThan(
-      resourceStep.run.indexOf("OPENCLAW_VITEST_MAX_WORKERS"),
+      resourceStep.run.indexOf("CARAPACE_VITEST_MAX_WORKERS"),
     );
   });
 
@@ -14855,7 +14855,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "startup_builder=(node scripts/ensure-cli-startup-build.mjs)",
     );
     expect(qaBuild.run.match(/pnpm build qaRuntime/gu)).toHaveLength(1);
-    expect(qaBuild.run).not.toContain("package-openclaw-for-docker");
+    expect(qaBuild.run).not.toContain("package-carapace-for-docker");
     expect(additionalChecks.run).toContain(
       "boundary_runner=(node --import tsx scripts/run-additional-boundary-checks.mts)",
     );
@@ -14899,7 +14899,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       const step = job.steps.find(
         (candidate: WorkflowStep) => candidate.name === "Check Control UI performance against base",
       );
-      const root = tempDirs.make("openclaw-performance-workflow-");
+      const root = tempDirs.make("carapace-performance-workflow-");
       const summary = path.join(root, "summary.md");
       writeFileSync(path.join(root, "package.json"), "{}");
       for (const compatibility of ["true", "false"]) {
@@ -14957,7 +14957,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     ];
 
     expect(workflow.on.pull_request).not.toHaveProperty("paths-ignore");
-    expect(gate.name).toBe("openclaw/ci-gate");
+    expect(gate.name).toBe("carapace/ci-gate");
     expect(gate.needs).toEqual([...requiredJobs, ...selectedJobs]);
     // Every job in the file is gated; a new lane cannot slip in ungated.
     expect(gate.needs.toSorted()).toEqual(
@@ -14994,7 +14994,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
               cancelled,
               draft,
               eventName,
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runAttempt: 1,
             }),
             JSON.stringify({ cancelled, draft, eventName }),
@@ -15520,7 +15520,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(maturityWorkflow.jobs.generate_qa_evidence.with.trusted_ref).toBe("${{ inputs.ref }}");
 
       const topology = createQaProtocolTopology();
-      const checkout = tempDirs.make("openclaw-qa-protocol-fetch-");
+      const checkout = tempDirs.make("carapace-qa-protocol-fetch-");
       runGit(checkout, ["init", "-q", "-b", "main"]);
       runGit(checkout, ["remote", "add", "origin", topology.origin]);
       runGit(checkout, [
@@ -15575,7 +15575,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(steps.filter((step) => step.name === "Prepare Git owner")).toHaveLength(1);
       expect(steps[ownerIndex]).toEqual({
         name: "Prepare Git owner",
-        uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+        uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
       });
       expect(steps[ownerIndex - 1]?.name).toBe(
         job === "validate_selected_ref"
@@ -15749,7 +15749,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         type: "string",
       },
       ref: {
-        description: "OpenClaw branch, tag, or SHA containing the maturity score source",
+        description: "Carapace branch, tag, or SHA containing the maturity score source",
         required: true,
         type: "string",
       },
@@ -15781,22 +15781,22 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(maturityWorkflow.on.workflow_call.inputs).not.toHaveProperty("publish_pull_request");
     expect(maturityWorkflow.on.workflow_call.secrets.OPENAI_API_KEY.required).toBe(true);
     expect(
-      maturityWorkflow.on.workflow_call.secrets.OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY
+      maturityWorkflow.on.workflow_call.secrets.CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY
         .required,
     ).toBe(false);
     expect(Object.keys(maturityWorkflow.on.workflow_call.secrets).toSorted()).toEqual([
       "CLAWSWEEPER_APP_PRIVATE_KEY",
       "MANTIS_GITHUB_APP_PRIVATE_KEY",
       "OPENAI_API_KEY",
-      "OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY",
-      "OPENCLAW_QA_CONVEX_SECRET_CI",
-      "OPENCLAW_QA_CONVEX_SITE_URL",
+      "CARAPACE_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY",
+      "CARAPACE_QA_CONVEX_SECRET_CI",
+      "CARAPACE_QA_CONVEX_SITE_URL",
     ]);
     for (const secret of [
       "CLAWSWEEPER_APP_PRIVATE_KEY",
       "MANTIS_GITHUB_APP_PRIVATE_KEY",
-      "OPENCLAW_QA_CONVEX_SECRET_CI",
-      "OPENCLAW_QA_CONVEX_SITE_URL",
+      "CARAPACE_QA_CONVEX_SECRET_CI",
+      "CARAPACE_QA_CONVEX_SITE_URL",
     ]) {
       expect(maturityWorkflow.on.workflow_call.secrets[secret].required).toBe(false);
     }
@@ -15845,7 +15845,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     });
     expect(qaAuthorizeStep.with?.script).toContain("callerWorkflowRef !== calledWorkflowRef");
     expect(qaAuthorizeStep.with?.script).toContain(
-      'job.workflow_repository === "openclaw/openclaw"',
+      'job.workflow_repository === "carapace/carapace"',
     );
     expect(qaAuthorizeStep.with?.script).toContain("job.workflow_ref === calledWorkflowRef");
     expect(qaAuthorizeStep.with?.script).toContain(
@@ -15925,7 +15925,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(permissionStep.with?.script).toContain('new Set(["admin", "maintain", "write"])');
       expect(permissionStep.with?.script).toContain("callerWorkflowRef !== calledWorkflowRef");
       expect(permissionStep.with?.script).toContain(
-        'job.workflow_repository === "openclaw/openclaw"',
+        'job.workflow_repository === "carapace/carapace"',
       );
       expect(permissionStep.with?.script).toContain("job.workflow_ref === calledWorkflowRef");
       expect(permissionStep.with?.script).toContain("if (!trustedMainCaller)");
@@ -15933,7 +15933,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         name: "Checkout trusted QA harness",
         uses: CHECKOUT_V6,
         with: {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           ref: "main",
           "fetch-depth": 1,
           "persist-credentials": false,
@@ -15944,7 +15944,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       );
       expect(checkoutSteps).toHaveLength(1);
       expect(checkoutSteps[0]?.with).toMatchObject({
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         ref: "main",
       });
       expect(restoreTrusted).toMatchObject({
@@ -15991,7 +15991,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       ).toBe(false);
       expect(installSelected["working-directory"]).toBe("selected");
       expect(installSelected.run).toContain(
-        '--store-dir "$RUNNER_TEMP/openclaw-qa-selected-pnpm-store"',
+        '--store-dir "$RUNNER_TEMP/carapace-qa-selected-pnpm-store"',
       );
       for (const installFlag of [
         "--frozen-lockfile",
@@ -16046,8 +16046,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const runProfileStep = qaShardJob.steps.find(
       (step: WorkflowStep) => step.name === "Run QA profile shard",
     );
-    expect(runProfileStep.env?.OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF).toBe("1");
-    expect(runProfileStep.env?.OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe("120000");
+    expect(runProfileStep.env?.CARAPACE_QA_ALLOW_UPDATE_RUN_SELF).toBe("1");
+    expect(runProfileStep.env?.CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe("120000");
     expect(runProfileStep.env?.PROTOCOL_SINCE_BASE_SHA).toBe(
       "${{ needs.validate_selected_ref.outputs.protocol_base_revision }}",
     );
@@ -16184,8 +16184,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(generateJob.with).not.toHaveProperty("fail_on_qa_failure");
     expect(generateJob.secrets).toMatchObject({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      CARAPACE_QA_CONVEX_SECRET_CI: "${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
+      CARAPACE_QA_CONVEX_SITE_URL: "${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     });
 
     const maturityPermissionStep = expectDefined(
@@ -16216,7 +16216,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     );
     expect(maturityPermissionStep.with?.script).toContain(`"${MATURITY_SCORECARD_WORKFLOW_REF}"`);
     expect(maturityPermissionStep.with?.script).toContain(
-      'job.workflow_repository === "openclaw/openclaw"',
+      'job.workflow_repository === "carapace/carapace"',
     );
     expect(maturityPermissionStep.with?.script).toContain("job.workflow_ref === calledWorkflowRef");
     expect(workflowStep.env.JOB_CONTEXT).toBe("${{ toJSON(job) }}");
@@ -16277,7 +16277,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       `github.workflow_ref == '${MATURITY_SCORECARD_WORKFLOW_REF}' &&`,
       `needs.validate_selected_ref.outputs.workflow_file_path == '${MATURITY_SCORECARD_WORKFLOW}' &&`,
       `needs.validate_selected_ref.outputs.workflow_ref == '${MATURITY_SCORECARD_WORKFLOW_REF}' &&`,
-      "needs.validate_selected_ref.outputs.workflow_repository == 'openclaw/openclaw' }}",
+      "needs.validate_selected_ref.outputs.workflow_repository == 'carapace/carapace' }}",
     ].join(" ");
     expect(publisherPreflight.needs).toBe("validate_selected_ref");
     expect(publisherPreflight.if).toBe("${{ inputs.publish_pull_request }}");
@@ -16529,7 +16529,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       );
       const producerScript = expectDefined(producerStep?.run, "QA evidence producer script");
       const consumerScript = expectDefined(consumerStep?.run, "QA evidence consumer script");
-      const root = tempDirs.make("openclaw-qa-profile-artifact-");
+      const root = tempDirs.make("carapace-qa-profile-artifact-");
       const evidencePath = path.join(root, "qa-evidence.json");
       const manifestPath = path.join(root, "qa-profile-evidence-manifest.json");
       const protocolBaseSha = "b".repeat(40);
@@ -16579,7 +16579,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         writeFileSync(
           evidencePath,
           `${JSON.stringify({
-            kind: "openclaw.qa.evidence-summary",
+            kind: "carapace.qa.evidence-summary",
             schemaVersion: 2,
             generatedAt: "2026-08-05T00:00:00.000Z",
             evidenceMode: "full",
@@ -16686,7 +16686,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     "keeps a reusable maturity call artifact-only even when its caller was dispatched",
     () => {
       const callerWorkflowRef =
-        "openclaw/openclaw/.github/workflows/openclaw-release-checks.yml@refs/heads/main";
+        "carapace/carapace/.github/workflows/carapace-release-checks.yml@refs/heads/main";
       const artifactOnly = runMaturityInvocationScenario({
         callerEventName: "workflow_dispatch",
         callerWorkflowRef,
@@ -16743,7 +16743,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
   it("keeps exact release validation identity separate from release context", () => {
     const fullReleaseWorkflow = readWorkflow(".github/workflows/full-release-validation.yml");
     const releaseWorkflow = readReleaseChecksWorkflow();
-    const telegramWorkflow = readWorkflow(".github/workflows/openclaw-release-telegram-qa.yml");
+    const telegramWorkflow = readWorkflow(".github/workflows/carapace-release-telegram-qa.yml");
     const telegramProvenanceHelper = readFileSync("scripts/release-telegram-provenance.sh", "utf8");
     const fullReleaseDispatchStep = fullReleaseWorkflow.jobs.release_checks_candidate.steps.find(
       (step: WorkflowStep) => step.name === "Dispatch release checks candidate phase",
@@ -16897,8 +16897,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(job.with).not.toHaveProperty("publish_pull_request");
     expect(job.secrets).toMatchObject({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      CARAPACE_QA_CONVEX_SECRET_CI: "${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}",
+      CARAPACE_QA_CONVEX_SITE_URL: "${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}",
     });
     expect(summaryJob.needs).toContain("maturity_scorecard_release_checks");
     expect(verifyStep.env.MATURITY_SCORECARD_RELEASE_CHECKS_RESULT).toBe(
@@ -16957,16 +16957,16 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     // build. Today that holds vacuously — the smoke set has no docker-lane
     // scenario, so the step performs exactly one private build and no pack;
     // the run step fails closed if a docker-lane scenario returns.
-    expect(smokeBuildStep.run).toContain("OPENCLAW_BUILD_PRIVATE_QA=1 pnpm build qaRuntime");
+    expect(smokeBuildStep.run).toContain("CARAPACE_BUILD_PRIVATE_QA=1 pnpm build qaRuntime");
     expect(smokeBuildStep.run.match(/pnpm build qaRuntime/g)).toHaveLength(1);
-    expect(smokeBuildStep.run).not.toContain("package-openclaw-for-docker");
+    expect(smokeBuildStep.run).not.toContain("package-carapace-for-docker");
     expect(smokeBuildStep.run).not.toContain("npm pack");
-    expect(smokeBuildStep.env).not.toHaveProperty("OPENCLAW_BUILD_PRIVATE_QA");
+    expect(smokeBuildStep.env).not.toHaveProperty("CARAPACE_BUILD_PRIVATE_QA");
     const smokePlanRunStep = smokeProfileJob.steps.find(
       (step: WorkflowStep) => step.name === "Run smoke profile part",
     );
     expect(smokePlanRunStep.run).toContain("restore the public pack step in ci.yml");
-    expect(smokePlanRunStep.run).not.toContain("OPENCLAW_CURRENT_PACKAGE_TGZ");
+    expect(smokePlanRunStep.run).not.toContain("CARAPACE_CURRENT_PACKAGE_TGZ");
     expect(workflow.jobs["qa-smoke-ci-artifacts"]).toBeUndefined();
     expect(workflow.jobs["qa-smoke-ci"]).toBeUndefined();
     expect(smokeProfileJob.needs).toEqual(["preflight"]);
@@ -16983,13 +16983,13 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       ["hybrid PR", { runnerBackend: "hybrid", eventName: "pull_request" }, 4],
       ["hybrid retry", { runnerBackend: "hybrid", scopeEnv: { GITHUB_RUN_ATTEMPT: "2" } }, 6],
       ["missing attempt", { runnerBackend: "hybrid", scopeEnv: { GITHUB_RUN_ATTEMPT: "" } }, 6],
-      ["other repository", { runnerBackend: "hybrid", repository: "example/openclaw" }, 6],
+      ["other repository", { runnerBackend: "hybrid", repository: "example/carapace" }, 6],
       [
         "current hybrid dispatch",
         {
           runnerBackend: "hybrid",
           eventName: "workflow_dispatch",
-          scopeEnv: { OPENCLAW_CI_CHECKOUT_REVISION: "b".repeat(40) },
+          scopeEnv: { CARAPACE_CI_CHECKOUT_REVISION: "b".repeat(40) },
         },
         6,
       ],
@@ -17036,7 +17036,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       expect(
         evaluateWorkflowExpression(smokeProfileJob.strategy["max-parallel"], {
           eventName: "push",
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runnerBackend,
           runAttempt: 1,
         }),
@@ -17067,18 +17067,18 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "console.log(`[skip] ${partId} is not declared by this checkout's smoke plan`)",
     );
     expect(smokeRunStep.run).toContain("No QA smoke runs assigned");
-    expect(smokeRunStep.run).toContain("node openclaw.mjs qa run");
-    expect(smokeRunStep.run).not.toContain("pnpm openclaw qa run");
+    expect(smokeRunStep.run).toContain("node carapace.mjs qa run");
+    expect(smokeRunStep.run).not.toContain("pnpm carapace qa run");
     expect(smokeRunStep.run).toContain(
-      "timeout --signal=TERM --kill-after=15s 10m node openclaw.mjs qa run",
+      "timeout --signal=TERM --kill-after=15s 10m node carapace.mjs qa run",
     );
     expect(smokeRunStep.run).toContain("--qa-profile smoke-ci");
     expect(smokeRunStep.run).toContain("--concurrency 10");
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toBe(
+    expect(smokeRunStep.env.CARAPACE_QA_SUITE_WORKER_START_STAGGER_MS).toBe(
       "${{ needs.preflight.outputs.runner_profile == 'blacksmith' && '0' || '1500' }}",
     );
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'0'");
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'1500'");
+    expect(smokeRunStep.env.CARAPACE_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'0'");
+    expect(smokeRunStep.env.CARAPACE_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'1500'");
     expect(smokeRunStep.run).toContain('scenario_args+=(--scenario "$scenario_id")');
     expect(smokeRunStep.run).toContain('done <<< "$PROFILE_RUNS_TSV"');
     expect(smokeRunStep.run).not.toContain('pids+=("$!")');
@@ -17105,10 +17105,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
   it("keeps push docs validation ClawHub-backed", () => {
     const workflow = readFileSync(".github/workflows/docs.yml", "utf8");
 
-    expect(workflow).toContain("repository: openclaw/clawhub");
+    expect(workflow).toContain("repository: carapace/clawhub");
     expect(workflow).toContain("path: clawhub-source");
     expect(workflow).toContain(
-      "OPENCLAW_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source",
+      "CARAPACE_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source",
     );
   });
 
@@ -17131,7 +17131,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "utf8",
     );
     const rawSocketQuery = readFileSync(
-      ".github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql",
+      ".github/codeql/carapace-boundary/queries/raw-socket-callsite-classification.ql",
       "utf8",
     );
     const networkSelector = workflow.slice(
@@ -17165,7 +17165,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       'codex_transport="extensions/codex/src/app-server/transport-websocket.ts"',
     );
     expect(workflow).toContain(
-      "network_codeql_contract_pattern='^\\.github/codeql/(codeql-network-runtime-boundary-critical-quality\\.yml|openclaw-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\\.ql)$'",
+      "network_codeql_contract_pattern='^\\.github/codeql/(codeql-network-runtime-boundary-critical-quality\\.yml|carapace-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\\.ql)$'",
     );
     expect(workflow).toContain(
       'if grep -Eq "$network_codeql_contract_pattern" "$changed_files" ||',
@@ -17173,7 +17173,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(workflow).not.toContain('grep -Fv "$codex_transport: " "$added_lines"');
     expect(workflow).toContain("packages/net-policy/src/");
     expect(workflow).toContain(
-      "grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|OPENCLAW_PROXY_' \"$added_lines\"",
+      "grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|CARAPACE_PROXY_' \"$added_lines\"",
     );
     expect(workflow).toContain('echo "full_codeql=true" >> "$GITHUB_OUTPUT"');
     expect(workflow).toContain(
@@ -17214,9 +17214,9 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         CRABBOX_ACCESS_CLIENT_ID: "${{ secrets.CRABBOX_ACCESS_CLIENT_ID }}",
         CRABBOX_ACCESS_CLIENT_SECRET: "${{ secrets.CRABBOX_ACCESS_CLIENT_SECRET }}",
         CRABBOX_COORDINATOR:
-          "${{ secrets.CRABBOX_COORDINATOR || secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR }}",
+          "${{ secrets.CRABBOX_COORDINATOR || secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR }}",
         CRABBOX_COORDINATOR_TOKEN:
-          "${{ secrets.CRABBOX_COORDINATOR_TOKEN || secrets.OPENCLAW_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}",
+          "${{ secrets.CRABBOX_COORDINATOR_TOKEN || secrets.CARAPACE_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}",
         GH_APP_TOKEN:
           "${{ steps.app-token.outputs.token || steps.app-token-fallback.outputs.token }}",
         GH_TOKEN: "${{ github.token }}",
@@ -17241,9 +17241,9 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     ]);
     expect(publisher).toContain("const CHECK_NAME = CRABBOX_GATE_CHECK_NAME");
     expect(readFileSync("scripts/pr-lib/crabbox-gate-contract.mjs", "utf8")).toContain(
-      'CRABBOX_GATE_CHECK_NAME = "openclaw/crabbox-gate"',
+      'CRABBOX_GATE_CHECK_NAME = "carapace/crabbox-gate"',
     );
-    expect(publisher).not.toContain('const CHECK_NAME = "openclaw/ci-gate"');
+    expect(publisher).not.toContain('const CHECK_NAME = "carapace/ci-gate"');
     expect(Object.keys(workflow.on.workflow_dispatch.inputs).toSorted()).toEqual([
       "base_sha",
       "head_sha",
@@ -17255,7 +17255,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
 it("pins generated publisher and maturity owners before credentials and selected checkout", () => {
   const pinned = {
     name: "Prepare Git owner",
-    uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+    uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
   };
   const action = parse(readFileSync(PUBLISH_GENERATED_PR_ACTION, "utf8"));
   expect(action.runs.steps.map(({ name }: WorkflowStep) => name)).toEqual([
@@ -17317,7 +17317,7 @@ describe("Linux App validation routing", () => {
             !step.if ||
             evaluateWorkflowExpression(`\${{ ${step.if} }}`, {
               eventName,
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runAttempt: 1,
             }),
         );
@@ -17378,7 +17378,7 @@ it("reports stale Linux release requests before selected code runs", () => {
   const requestStep = expectDefined((job.steps as WorkflowStep[])[0], "first request validation");
   const requestSha = "a".repeat(40);
   const requestRun = {
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     event: "workflow_dispatch",
     name: "Linux App Release Request",
     head_branch: "main",
@@ -17386,14 +17386,14 @@ it("reports stale Linux release requests before selected code runs", () => {
     conclusion: "success",
   };
   const github = {
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     workflow_sha: requestSha,
     event: { workflow_run: requestRun },
   };
   const admitted = (context: typeof github) => runInNewContext(job.if, { github: context });
-  expect(admitted({ ...github, repository: "untrusted/openclaw" })).toBe(false);
+  expect(admitted({ ...github, repository: "untrusted/carapace" })).toBe(false);
   for (const changedRun of [
-    { repository: { full_name: "untrusted/openclaw" } },
+    { repository: { full_name: "untrusted/carapace" } },
     { event: "push" },
     { name: "Another workflow" },
     { head_branch: "topic" },
@@ -17406,7 +17406,7 @@ it("reports stale Linux release requests before selected code runs", () => {
   for (const workflowSha of ["b".repeat(40), requestSha]) {
     expect(admitted({ ...github, workflow_sha: workflowSha })).toBe(true);
     expect(requestStep.name).toBe("Validate trusted release request");
-    const output = path.join(tempDirs.make("openclaw-linux-request-"), "output");
+    const output = path.join(tempDirs.make("carapace-linux-request-"), "output");
     writeFileSync(output, "");
     const result = spawnSync("bash", ["-c", expectDefined(requestStep.run, "request validation")], {
       encoding: "utf8",
@@ -17434,7 +17434,7 @@ it("reports stale Linux release requests before selected code runs", () => {
 it("pins simple release admission owners before selected checkout and preserves Git contracts", () => {
   const pinned = {
     name: "Prepare Git owner",
-    uses: "openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
+    uses: "carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475",
   };
   const workflows = [
     {
@@ -17494,7 +17494,7 @@ it("pins simple release admission owners before selected checkout and preserves 
   expect(releaseDocs).not.toContain("release-publish/");
   expect(linux.permissions).toEqual({});
   expect(linux.jobs.validate_release.if).toContain(
-    "github.event.workflow_run.repository.full_name == 'openclaw/openclaw'",
+    "github.event.workflow_run.repository.full_name == 'carapace/carapace'",
   );
   expect(linux.jobs.validate_release.if).toContain(
     "github.event.workflow_run.event == 'workflow_dispatch'",
@@ -17584,7 +17584,7 @@ it("pins simple release admission owners before selected checkout and preserves 
   expect(releaseRequest.run).toContain("Release request title does not match");
   expect(releaseRequest.run).toContain('echo "release_tag=${BASH_REMATCH[1]}"');
   expect(releaseRequest.run).toContain('echo "desktop_test_bundles=${BASH_REMATCH[3]}"');
-  const requestRoot = tempDirs.make("openclaw-linux-release-request-");
+  const requestRoot = tempDirs.make("carapace-linux-release-request-");
   const requestOutput = path.join(requestRoot, "output");
   const acceptedRequest = spawnSync("bash", ["-c", releaseRequest.run ?? ""], {
     encoding: "utf8",
@@ -17693,7 +17693,7 @@ it("pins simple release admission owners before selected checkout and preserves 
   );
   expect(buildLinuxBundles["working-directory"]).toBe("apps/linux/src-tauri");
   expect(buildLinuxBundles.env?.LDAI_RUNTIME_FILE).toBe(
-    "${{ runner.temp }}/openclaw-tauri-cache/tauri/.appimage-runtime-x86_64",
+    "${{ runner.temp }}/carapace-tauri-cache/tauri/.appimage-runtime-x86_64",
   );
   expect(buildLinuxBundles.run).toContain('\\"createUpdaterArtifacts\\":false');
   expect(buildLinuxBundles.run).toContain('\\"useLocalToolsDir\\":false');
@@ -17702,10 +17702,10 @@ it("pins simple release admission owners before selected checkout and preserves 
     "Linux unsigned bundle staging",
   );
   expect(stageLinuxBundles.run).toContain(
-    'cp "${debs[0]}" "dist/linux-app/release/OpenClaw-${version}-amd64.deb"',
+    'cp "${debs[0]}" "dist/linux-app/release/Carapace-${version}-amd64.deb"',
   );
   expect(stageLinuxBundles.run).toContain(
-    'cp "${appimages[0]}" "dist/linux-app/unsigned/OpenClaw-${version}-amd64.AppImage"',
+    'cp "${appimages[0]}" "dist/linux-app/unsigned/Carapace-${version}-amd64.AppImage"',
   );
   const buildLinuxJson = JSON.stringify(linux.jobs.build_linux);
   expect(buildLinuxJson).not.toContain("${{ secrets.");
@@ -17815,7 +17815,7 @@ it("pins simple release admission owners before selected checkout and preserves 
     'printf \'%s  %s\\n\' "$MINISIGN_BINARY_SHA256" "${RUNNER_TEMP}/bin/minisign"',
   );
   expect(signAppImage.run).toContain(
-    'appimage="dist/signing-input/OpenClaw-${version}-amd64.AppImage"',
+    'appimage="dist/signing-input/Carapace-${version}-amd64.AppImage"',
   );
   expect(signAppImage.run).toContain('"${RUNNER_TEMP}/bin/cargo-tauri" signer sign "$appimage"');
   expect(signAppImage.run).toContain(
@@ -18019,10 +18019,10 @@ it("pins simple release admission owners before selected checkout and preserves 
     "Linux release publication step",
   );
   expect(publishLinuxBundles.run).toContain(
-    'linux_signature=$(cat "dist/input/linux/signatures/OpenClaw-${version}-amd64.AppImage.sig")',
+    'linux_signature=$(cat "dist/input/linux/signatures/Carapace-${version}-amd64.AppImage.sig")',
   );
   expect(publishLinuxBundles.run).toContain(
-    '--arg linux_url "${url_base}/OpenClaw-${version}-amd64.AppImage"',
+    '--arg linux_url "${url_base}/Carapace-${version}-amd64.AppImage"',
   );
   expect(publishLinuxBundles.run).toContain(
     '"linux-x86_64": {signature: $linux_signature, url: $linux_url}',
@@ -18156,7 +18156,7 @@ it("pins simple release admission owners before selected checkout and preserves 
     expect(finalizeIndex, `${contract.label} finalize`).toBe(buildIndex + 1);
     for (const index of [prepareIndex, buildIndex, finalizeIndex]) {
       expect(steps[index]?.env?.XDG_CACHE_HOME, `${contract.label} cache path`).toBe(
-        "${{ runner.temp }}/openclaw-tauri-cache",
+        "${{ runner.temp }}/carapace-tauri-cache",
       );
     }
     expect(steps[prepareIndex]?.run, contract.label).toContain(`${contract.helper} prepare`);
@@ -18200,7 +18200,7 @@ it("pins simple release admission owners before selected checkout and preserves 
     finalizerSource.indexOf('"$plugin" --appdir "$appdir"'),
   );
   expect(finalizerSource).toContain('LDAI_RUNTIME_FILE="$runtime"');
-  const architectureRoot = tempDirs.make("openclaw-appimage-architecture-");
+  const architectureRoot = tempDirs.make("carapace-appimage-architecture-");
   const architectureBin = path.join(architectureRoot, "bin");
   const architectureCache = path.join(architectureRoot, "cache");
   mkdirSync(architectureBin);
@@ -18259,7 +18259,7 @@ it("pins simple release admission owners before selected checkout and preserves 
     expect(existsSync(rejectedCache)).toBe(false);
   }
   if (process.platform === "linux") {
-    const selectedTagRoot = tempDirs.make("openclaw-linux-release-v2026.8.2-");
+    const selectedTagRoot = tempDirs.make("carapace-linux-release-v2026.8.2-");
     const trustedTools = path.join(
       selectedTagRoot,
       ".release-tooling/apps/linux/scripts/tauri-appimage-tools.sh",
@@ -18288,8 +18288,8 @@ it("pins simple release admission owners before selected checkout and preserves 
       selectedTagRoot,
       "apps/linux/src-tauri/target/release/bundle/appimage",
     );
-    const appDir = path.join(bundleDir, "OpenClaw.AppDir");
-    const appImage = path.join(bundleDir, "OpenClaw_2026.8.2_amd64.AppImage");
+    const appDir = path.join(bundleDir, "Carapace.AppDir");
+    const appImage = path.join(bundleDir, "Carapace_2026.8.2_amd64.AppImage");
     const cacheRoot = path.join(selectedTagRoot, ".cache");
     const toolSourceDir = path.join(selectedTagRoot, "tool-sources");
     const fakeBin = path.join(selectedTagRoot, "fake-bin");
@@ -18586,8 +18586,8 @@ it("pins simple release admission owners before selected checkout and preserves 
     const armToolSourceDir = path.join(selectedTagRoot, "arm-tool-sources");
     const armCacheRoot = path.join(selectedTagRoot, ".arm-cache");
     const armBundleDir = path.join(selectedTagRoot, "arm-bundle");
-    const armAppDir = path.join(armBundleDir, "OpenClaw.AppDir");
-    const armAppImage = path.join(armBundleDir, "OpenClaw_2026.8.2_arm64.AppImage");
+    const armAppDir = path.join(armBundleDir, "Carapace.AppDir");
+    const armAppImage = path.join(armBundleDir, "Carapace_2026.8.2_arm64.AppImage");
     const armPluginSentinel = path.join(selectedTagRoot, "arm-plugin-executed");
     mkdirSync(armToolSourceDir);
     const armToolSources = new Map<string, Buffer>();
@@ -18713,9 +18713,9 @@ it("pins simple release admission owners before selected checkout and preserves 
       };
     };
 
-    const signingRoot = tempDirs.make("openclaw-linux-signing-job-");
+    const signingRoot = tempDirs.make("carapace-linux-signing-job-");
     const signingInput = path.join(signingRoot, "dist/signing-input");
-    const finalizedArtifact = path.join(signingInput, "OpenClaw-2026.8.2-amd64.AppImage");
+    const finalizedArtifact = path.join(signingInput, "Carapace-2026.8.2-amd64.AppImage");
     mkdirSync(signingInput, { recursive: true });
     writeFileSync(finalizedArtifact, "trusted-finalized-bytes");
     const linuxSigningTools = writeSigningToolFixtures(signingRoot);
@@ -18741,35 +18741,35 @@ it("pins simple release admission owners before selected checkout and preserves 
     expect(readFileSync(finalizedArtifact, "utf8")).toBe("trusted-finalized-bytes");
     expect(
       readFileSync(
-        path.join(signingRoot, "dist/linux-app/release/OpenClaw-2026.8.2-amd64.AppImage"),
+        path.join(signingRoot, "dist/linux-app/release/Carapace-2026.8.2-amd64.AppImage"),
         "utf8",
       ),
     ).toBe("trusted-finalized-bytes");
     expect(
       readFileSync(
-        path.join(signingRoot, "dist/linux-app/signatures/OpenClaw-2026.8.2-amd64.AppImage.sig"),
+        path.join(signingRoot, "dist/linux-app/signatures/Carapace-2026.8.2-amd64.AppImage.sig"),
         "utf8",
       ),
     ).toBe(
-      `${Buffer.from("ephemeral-signature:OpenClaw-2026.8.2-amd64.AppImage").toString("base64")}\n`,
+      `${Buffer.from("ephemeral-signature:Carapace-2026.8.2-amd64.AppImage").toString("base64")}\n`,
     );
     expect(readFileSync(linuxSigningTools.tauriLog, "utf8")).toBe(
-      "signer sign dist/signing-input/OpenClaw-2026.8.2-amd64.AppImage\n",
+      "signer sign dist/signing-input/Carapace-2026.8.2-amd64.AppImage\n",
     );
     expect(readFileSync(linuxSigningTools.minisignLog, "utf8")).toBe(
-      "OpenClaw-2026.8.2-amd64.AppImage\n",
+      "Carapace-2026.8.2-amd64.AppImage\n",
     );
     expect(existsSync(path.join(signingRoot, ".release-tooling"))).toBe(false);
     expect(existsSync(path.join(signingRoot, "apps"))).toBe(false);
 
-    const desktopSigningRoot = tempDirs.make("openclaw-desktop-signing-job-");
+    const desktopSigningRoot = tempDirs.make("carapace-desktop-signing-job-");
     const macosInput = path.join(
       desktopSigningRoot,
-      "dist/signing-input/macos/OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz",
+      "dist/signing-input/macos/Carapace-2026.8.2-darwin-aarch64.app.tar.gz",
     );
     const windowsInput = path.join(
       desktopSigningRoot,
-      "dist/signing-input/windows/OpenClaw-2026.8.2-windows-x86_64.exe",
+      "dist/signing-input/windows/Carapace-2026.8.2-windows-x86_64.exe",
     );
     mkdirSync(path.dirname(macosInput), { recursive: true });
     mkdirSync(path.dirname(windowsInput), { recursive: true });
@@ -18801,7 +18801,7 @@ it("pins simple release admission owners before selected checkout and preserves 
       readFileSync(
         path.join(
           desktopSigningRoot,
-          "dist/desktop-test/macos/release/OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz",
+          "dist/desktop-test/macos/release/Carapace-2026.8.2-darwin-aarch64.app.tar.gz",
         ),
         "utf8",
       ),
@@ -18810,7 +18810,7 @@ it("pins simple release admission owners before selected checkout and preserves 
       readFileSync(
         path.join(
           desktopSigningRoot,
-          "dist/desktop-test/windows/release/OpenClaw-2026.8.2-windows-x86_64.exe",
+          "dist/desktop-test/windows/release/Carapace-2026.8.2-windows-x86_64.exe",
         ),
         "utf8",
       ),
@@ -18820,31 +18820,31 @@ it("pins simple release admission owners before selected checkout and preserves 
         readFileSync(
           path.join(
             desktopSigningRoot,
-            "dist/desktop-test/macos/signatures/OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz.sig",
+            "dist/desktop-test/macos/signatures/Carapace-2026.8.2-darwin-aarch64.app.tar.gz.sig",
           ),
           "utf8",
         ),
         "base64",
       ).toString(),
-    ).toContain("OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz");
+    ).toContain("Carapace-2026.8.2-darwin-aarch64.app.tar.gz");
     expect(
       Buffer.from(
         readFileSync(
           path.join(
             desktopSigningRoot,
-            "dist/desktop-test/windows/signatures/OpenClaw-2026.8.2-windows-x86_64.exe.sig",
+            "dist/desktop-test/windows/signatures/Carapace-2026.8.2-windows-x86_64.exe.sig",
           ),
           "utf8",
         ),
         "base64",
       ).toString(),
-    ).toContain("OpenClaw-2026.8.2-windows-x86_64.exe");
+    ).toContain("Carapace-2026.8.2-windows-x86_64.exe");
     expect(readFileSync(desktopSigningTools.tauriLog, "utf8")).toBe(
-      "signer sign dist/signing-input/macos/OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz\n" +
-        "signer sign dist/signing-input/windows/OpenClaw-2026.8.2-windows-x86_64.exe\n",
+      "signer sign dist/signing-input/macos/Carapace-2026.8.2-darwin-aarch64.app.tar.gz\n" +
+        "signer sign dist/signing-input/windows/Carapace-2026.8.2-windows-x86_64.exe\n",
     );
     expect(readFileSync(desktopSigningTools.minisignLog, "utf8")).toBe(
-      "OpenClaw-2026.8.2-darwin-aarch64.app.tar.gz\nOpenClaw-2026.8.2-windows-x86_64.exe\n",
+      "Carapace-2026.8.2-darwin-aarch64.app.tar.gz\nCarapace-2026.8.2-windows-x86_64.exe\n",
     );
     expect(existsSync(path.join(desktopSigningRoot, ".release-tooling"))).toBe(false);
     expect(existsSync(path.join(desktopSigningRoot, "apps"))).toBe(false);
@@ -18882,7 +18882,7 @@ it("pins simple release admission owners before selected checkout and preserves 
     '"+refs/heads/${PUBLIC_RELEASE_BRANCH}:refs/remotes/origin/${PUBLIC_RELEASE_BRANCH}"',
   );
   expect(macosBody.indexOf("--checkout-git 120")).toBeLessThan(
-    macosBody.indexOf("pnpm release:openclaw:npm:check"),
+    macosBody.indexOf("pnpm release:carapace:npm:check"),
   );
 
   const placeholder = parse(readFileSync(workflows[2].file, "utf8"));
@@ -18899,12 +18899,12 @@ it("pins simple release admission owners before selected checkout and preserves 
 });
 
 it("pins every Performance Git owner before checkout and preserves Git deadlines", () => {
-  const source = readFileSync(".github/workflows/openclaw-performance.yml", "utf8");
+  const source = readFileSync(".github/workflows/carapace-performance.yml", "utf8");
   const workflow = parse(source);
   const targets = [
     ["resolve_target", "Checkout target metadata", undefined, 10],
-    ["kova", "Checkout OpenClaw", "Decide lane", 240],
-    ["source_performance", "Checkout OpenClaw source target", undefined, 120],
+    ["kova", "Checkout Carapace", "Decide lane", 240],
+    ["source_performance", "Checkout Carapace source target", undefined, 120],
     ["publish", "Checkout performance publisher helper", "Decide report publication lane", 30],
   ] as const;
   for (const [jobId, checkout, decision, timeout] of targets) {
@@ -18918,7 +18918,7 @@ it("pins every Performance Git owner before checkout and preserves Git deadlines
     }
     expect(steps[index]).toEqual({
       name: "Prepare Git owner",
-      uses: "openclaw/openclaw/.github/actions/git-owner@a379bbd73e30b84a89aca4d54744ab9ca19082e7",
+      uses: "carapace/carapace/.github/actions/git-owner@a379bbd73e30b84a89aca4d54744ab9ca19082e7",
       ...(decision ? { if: "steps.lane.outputs.run == 'true'" } : {}),
     });
     expect(job["timeout-minutes"]).toBe(timeout);
@@ -18975,7 +18975,7 @@ describe("frozen CI compatibility contracts", () => {
   it("skips current-only launcher and QA contracts for frozen targets", () => {
     const source = readFileSync(".github/workflows/ci.yml", "utf8");
     expect(source).toContain(
-      `if: \${{ needs.preflight.outputs.frozen_target != 'true' }}\n        run: |\n          bun openclaw.mjs --help`,
+      `if: \${{ needs.preflight.outputs.frozen_target != 'true' }}\n        run: |\n          bun carapace.mjs --help`,
     );
     expect(source).toContain(
       "[skip] ${partId} is not declared by this checkout's legacy smoke plan",

@@ -1,11 +1,11 @@
 // Openai tests cover tts plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import {
   finalizeDebugProxyCapture,
   getDebugProxyCaptureStore,
   initializeDebugProxyCapture,
-} from "openclaw/plugin-sdk/proxy-capture";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/proxy-capture";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installDebugProxyTestResetHooks } from "../test-support/debug-proxy-env-test-helpers.js";
 import { createStreamingErrorResponse } from "../test-support/streaming-error-response.js";
@@ -17,7 +17,7 @@ import {
   openaiTTS,
 } from "./tts.js";
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: async ({
     url,
     init,
@@ -44,10 +44,10 @@ const officialEndpointValidationCases = [
 
 describe("openai tts", () => {
   const originalFetch = globalThis.fetch;
-  let openClawState: OpenClawTestState;
+  let carapaceState: CarapaceTestState;
 
   beforeEach(async () => {
-    openClawState = await createOpenClawTestState({
+    carapaceState = await createCarapaceTestState({
       layout: "state-only",
       prefix: "openai-tts-capture-",
     });
@@ -57,7 +57,7 @@ describe("openai tts", () => {
     globalThis.fetch = originalFetch;
     vi.unstubAllEnvs();
     vi.restoreAllMocks();
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   });
 
   // Install after local teardown so the proxy snapshot is restored before the
@@ -117,8 +117,8 @@ describe("openai tts", () => {
   });
 
   describe("openaiTTS diagnostics", () => {
-    it("adds OpenClaw attribution headers to native OpenAI speech requests", async () => {
-      vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+    it("adds Carapace attribution headers to native OpenAI speech requests", async () => {
+      vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
       const fetchMock = vi.fn<typeof fetch>(
         async (_url, _init) => new Response(Buffer.from("audio-bytes"), { status: 200 }),
       );
@@ -138,9 +138,9 @@ describe("openai tts", () => {
       const init = expectDefined(initValue, "fetch init");
       const headers = init?.headers as Record<string, string> | undefined;
       expect(url).toBe("https://api.openai.com/v1/audio/speech");
-      expect(headers?.originator).toBe("openclaw");
+      expect(headers?.originator).toBe("carapace");
       expect(headers?.version).toBe("2026.3.22");
-      expect(headers?.["User-Agent"]).toBe("openclaw/2026.3.22");
+      expect(headers?.["User-Agent"]).toBe("carapace/2026.3.22");
     });
 
     it("sends instructions to custom OpenAI-compatible endpoints", async () => {
@@ -396,8 +396,8 @@ describe("openai tts", () => {
 
     it("records TTS exchanges in debug proxy capture mode", async () => {
       proxyReset.captureProxyEnv();
-      process.env.OPENCLAW_DEBUG_PROXY_ENABLED = "1";
-      process.env.OPENCLAW_DEBUG_PROXY_SESSION_ID = "tts-session";
+      process.env.CARAPACE_DEBUG_PROXY_ENABLED = "1";
+      process.env.CARAPACE_DEBUG_PROXY_SESSION_ID = "tts-session";
 
       globalThis.fetch = vi
         .fn<typeof fetch>()
@@ -408,8 +408,8 @@ describe("openai tts", () => {
         id: "tts-session",
         startedAt: Date.now(),
         mode: "test",
-        sourceScope: "openclaw",
-        sourceProcess: "openclaw",
+        sourceScope: "carapace",
+        sourceProcess: "carapace",
       });
 
       await openaiTTS({
@@ -435,8 +435,8 @@ describe("openai tts", () => {
 
     it("does not double-capture TTS exchanges when the global fetch patch is installed", async () => {
       proxyReset.captureProxyEnv();
-      process.env.OPENCLAW_DEBUG_PROXY_ENABLED = "1";
-      process.env.OPENCLAW_DEBUG_PROXY_SESSION_ID = "tts-patched-session";
+      process.env.CARAPACE_DEBUG_PROXY_ENABLED = "1";
+      process.env.CARAPACE_DEBUG_PROXY_SESSION_ID = "tts-patched-session";
 
       globalThis.fetch = vi
         .fn<typeof fetch>()

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { root as fsRoot } from "../infra/fs-safe.js";
 import { GITHUB_PUBLICATION_CONFIG_GUARD_JS } from "./github-publication-base.js";
 import {
@@ -73,7 +73,7 @@ for (const name of ["info/grafts", "info/attributes"]) {
   if (name === "info/grafts" && bytes.length) throw Error("Publication snapshot has Git grafts");
   if (name === "info/attributes") noFilters(bytes);
 }
-const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-publication-index-"));
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-publication-index-"));
 try {
   const index = path.resolve(cwd, text(["rev-parse", "--git-path", "index"]));
   env.GIT_INDEX_FILE = path.join(temporary, "index");

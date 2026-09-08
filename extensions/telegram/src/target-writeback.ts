@@ -1,17 +1,17 @@
 // Telegram plugin module implements target writeback behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   readConfigFileSnapshotForWrite,
   replaceConfigFile,
-} from "openclaw/plugin-sdk/config-mutation";
+} from "carapace/plugin-sdk/config-mutation";
 import {
   loadCronStore,
   resolveCronStorePath,
   saveCronStore,
-} from "openclaw/plugin-sdk/cron-store-runtime";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/cron-store-runtime";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { telegramMessagingTargetsMatch } from "./normalize.js";
 import {
   normalizeTelegramChatId,
@@ -76,7 +76,7 @@ function rewriteTargetIfMatch(params: {
 }
 
 function replaceTelegramDefaultToTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sourceTarget: string;
   resolvedTarget: string;
 }): boolean {
@@ -115,7 +115,7 @@ function replaceTelegramDefaultToTargets(params: {
 }
 
 export async function maybePersistResolvedTelegramTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   rawTarget: string;
   resolvedChatId: string;
   verbose?: boolean;

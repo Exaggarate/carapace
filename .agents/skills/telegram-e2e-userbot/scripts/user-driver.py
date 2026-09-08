@@ -39,7 +39,7 @@ CONFIG_PATH = STATE_DIR / "config.local.json"
 BOT_CREDENTIALS_PATH = STATE_ROOT / "credentials.local.json"
 TDLIB_CACHE_ROOT = Path(
     os.environ.get("TELEGRAM_USER_DRIVER_TDLIB_CACHE_DIR")
-    or (Path.home() / ".cache/openclaw/telegram-e2e-userbot/tdlib")
+    or (Path.home() / ".cache/carapace/telegram-e2e-userbot/tdlib")
 ).expanduser()
 
 
@@ -93,7 +93,7 @@ def valid_base64(value):
 
 
 # TDLib 1.8.67. Older TDLib (e.g. 1.8.0) reports messageUnsupported for some
-# current OpenClaw message types; keep the pin and hashes in one move.
+# current Carapace message types; keep the pin and hashes in one move.
 TDLIB_PACKAGE_VERSION = "0.1008067.0"
 TDLIB_PREBUILT = {
     ("darwin", "arm64"): (
@@ -227,7 +227,7 @@ def resolve_sut(config, bot_config):
         return {"username": username.lstrip("@"), "id": int(user_id)}
     token = (
         os.environ.get("TELEGRAM_E2E_SUT_BOT_TOKEN")
-        or os.environ.get("OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN")
+        or os.environ.get("CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN")
         or bot_config.get("sutBotToken")
         or bot_config.get("botAToken")
         or bot_config.get("BOTA")
@@ -244,7 +244,7 @@ def default_chat(config, bot_config):
     return (
         os.environ.get("TELEGRAM_USER_DRIVER_CHAT_ID")
         or os.environ.get("TELEGRAM_E2E_GROUP_ID")
-        or os.environ.get("OPENCLAW_QA_TELEGRAM_GROUP_ID")
+        or os.environ.get("CARAPACE_QA_TELEGRAM_GROUP_ID")
         or str(config.get("defaultChatId") or "")
         or str(bot_config.get("groupId") or "")
     )
@@ -405,7 +405,7 @@ class UserDriver:
             "api_id": int(api_id),
             "api_hash": api_hash,
             "system_language_code": "en",
-            "device_model": "OpenClaw Telegram User Driver",
+            "device_model": "Carapace Telegram User Driver",
             "system_version": sys.platform,
             "application_version": "1",
             "enable_storage_optimizer": True,

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { markRuntimeCompactionDelegate } from "../../context-engine/compaction-watchdog.js";
 import { delegateCompactionToRuntime } from "../../context-engine/delegate.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import { buildContextEngineRuntimeSettings } from "../../context-engine/runtime-settings.js";
 import type {
   ContextEngine,
@@ -110,7 +110,7 @@ function makeRecoveryInput(
           agentId: "main",
           sessionId: runParams.sessionId,
           sessionKey: runParams.sessionKey ?? baseRunParams.sessionKey,
-          storePath: path.join(runParams.workspaceDir, "openclaw-agent.sqlite"),
+          storePath: path.join(runParams.workspaceDir, "carapace-agent.sqlite"),
         },
       },
       assertActive: () => {
@@ -141,13 +141,13 @@ function makeRecoveryInput(
     workspaceDir: "/tmp/workspace",
     provider: "openai",
     modelId: "gpt-5.5",
-    harnessRuntime: "openclaw",
+    harnessRuntime: "carapace",
     thinkLevel: "off",
     authProfileIdSource: "auto",
     resolveContextEnginePluginId: () => undefined,
     buildRuntimeSettings: ({ tokenBudget, degradedReason }) =>
       buildContextEngineRuntimeSettings({
-        contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
         provider: "openai",
         requestedModel: "gpt-5.5",
         resolvedModel: "gpt-5.5",
@@ -499,8 +499,8 @@ describe("createEmbeddedRunCompactionRuntime", () => {
       sessionId: "session-1",
       sessionKey: "agent:main:session-1",
       storePath: path.join(
-        tempDirs.make("openclaw-overflow-compaction-session-"),
-        "openclaw-agent.sqlite",
+        tempDirs.make("carapace-overflow-compaction-session-"),
+        "carapace-agent.sqlite",
       ),
     };
     const admission = prepareSystemAgentRunAdmission(

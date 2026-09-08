@@ -1,5 +1,5 @@
-# Raft (OpenClaw plugin)
+# Raft (Carapace plugin)
 
-Raft CLI wake bridge channel plugin for OpenClaw.
+Raft CLI wake bridge channel plugin for Carapace.
 
-Docs: https://docs.openclaw.ai/channels/raft
+Docs: ../../docs/channels/raft.md

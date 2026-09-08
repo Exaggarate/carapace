@@ -3086,7 +3086,7 @@ with Path(__file__).with_name("scans.jsonl").open("a", encoding="utf-8") as reco
             "password_validator.go",
             ".env.example",
             "private/parser.py",
-            ".agents/skills/openclaw-secret-scanning-maintainer/SKILL.md",
+            ".agents/skills/carapace-secret-scanning-maintainer/SKILL.md",
             "design-tokens/colors.json",
             "design-tokens.json",
             "design_tokens.json",

@@ -28,11 +28,11 @@ import {
   detectMime,
   estimateStringChars,
   truncateUtf16Safe,
-} from "./openclaw-runtime-io.js";
+} from "./carapace-runtime-io.js";
 import {
   resolveCanonicalRootMemoryFile,
   shouldSkipRootMemoryAuxiliaryPath,
-} from "./openclaw-runtime-memory.js";
+} from "./carapace-runtime-memory.js";
 import { retryTransientMemoryRead } from "./read-retry.js";
 import type { MemoryEntryProvenance, MemoryExtraPath } from "./types.js";
 
@@ -189,7 +189,7 @@ function shouldDescendMemoryEntry(
   if (shouldSkipPath?.(entry.path)) {
     return false;
   }
-  return entry.kind === "directory" && entry.name !== ".openclaw-repair";
+  return entry.kind === "directory" && entry.name !== ".carapace-repair";
 }
 
 class MemorySourceScanError extends Error {

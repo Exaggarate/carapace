@@ -1,5 +1,5 @@
 /** Shared model, harness, and auth preparation for embedded compaction. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../../plugins/provider-runtime-model.types.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { isDefaultAgentRuntimeId, normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
@@ -34,9 +34,9 @@ import {
 } from "./compaction-runtime-context.js";
 
 export function projectCodexHostTranscriptBytePreflightConfig(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   active: boolean,
-): OpenClawConfig | undefined {
+): CarapaceConfig | undefined {
   const compaction = config?.agents?.defaults?.compaction;
   if (
     !active ||
@@ -57,7 +57,7 @@ export function projectCodexHostTranscriptBytePreflightConfig(
 
 /** Resolves the shared policy, target, and harness ownership for either compaction entry point. */
 export function resolveCompactionRuntimeSelection(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider?: string | null;
   modelId?: string | null;
   authProfileId?: string | null;
@@ -125,7 +125,7 @@ export function resolveCompactionRuntimeSelection(params: {
   const attemptNativeHarnessCompaction = Boolean(
     selectedRuntime &&
     selectedRuntime !== "auto" &&
-    selectedRuntime !== "openclaw" &&
+    selectedRuntime !== "carapace" &&
     (!isOpenAIProvider(provider) || target.nativeHarnessCompaction === true),
   );
   return {
@@ -151,7 +151,7 @@ export function resolveCompactionRuntimeSelection(params: {
 
 /** Prepares one ordered auth-attempt set and converges it on a single compaction harness. */
 export async function prepareCompactionHarnessAuth(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   metadataProvider?: string;
   modelId: string;

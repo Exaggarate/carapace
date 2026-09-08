@@ -1,11 +1,11 @@
 // Deepinfra provider module implements model/runtime integration.
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   buildSingleProviderApiKeyCatalog,
   type ProviderCatalogContext,
   type ProviderCatalogResult,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
 import { DEEPINFRA_BASE_URL } from "./media-models.js";
 import {
   DEEPINFRA_MODEL_CATALOG,

@@ -68,7 +68,7 @@ describe("docker build cache layout", () => {
         dockerfile,
         `${path} should use a shared pnpm store cache under the active user's home`,
       ).toMatch(
-        /--mount=type=cache,id=openclaw-pnpm-store,target=\/(?:root|home\/appuser)\/\.local\/share\/pnpm\/store,sharing=locked/,
+        /--mount=type=cache,id=carapace-pnpm-store,target=\/(?:root|home\/appuser)\/\.local\/share\/pnpm\/store,sharing=locked/,
       );
     }
   });
@@ -102,7 +102,7 @@ describe("docker build cache layout", () => {
       /chmod 0644 "\$installer"; \\\n\s+su - linuxbrew -c "NONINTERACTIVE=1 CI=1 \/bin\/bash '\$installer'" \|\| exit 1/u,
     );
     expect(dockerfile).not.toMatch(/curl[^\n]+\|\s*(?:bash|sh)/u);
-    expect(dockerfile).toContain("source=package.json,target=/tmp/openclaw-package.json");
+    expect(dockerfile).toContain("source=package.json,target=/tmp/carapace-package.json");
     expect(dockerfile).toContain(
       'npm install -g "$pnpm_spec" "--allow-scripts=$pnpm_spec" && pnpm --version;',
     );

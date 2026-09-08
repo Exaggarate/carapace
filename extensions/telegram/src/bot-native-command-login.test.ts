@@ -2,12 +2,12 @@
 import {
   createEmptyPluginRegistry,
   withPluginRuntimeRegistryScope,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { ModelsAuthLoginFlowOptions } from "openclaw/plugin-sdk/provider-auth-login-flow-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import type { SessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { ModelsAuthLoginFlowOptions } from "carapace/plugin-sdk/provider-auth-login-flow-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import type { SessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TelegramNativeCommandDeps } from "./bot-native-command-deps.runtime.js";
 import { createTelegramGroupCommandContext } from "./bot-native-commands.fixture-test-support.js";
@@ -46,9 +46,9 @@ vi.mock("./bot-native-commands.runtime.js", () => ({
     }),
   ),
 }));
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("carapace/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/session-store-runtime")>(
+    "carapace/plugin-sdk/session-store-runtime",
   );
   return {
     ...actual,
@@ -64,7 +64,7 @@ type TelegramLoginFlow = NonNullable<TelegramNativeCommandDeps["runModelsAuthLog
 let loginAccountIndex = 0;
 
 function registerLoginCommand(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   loginFlow: LoginFlowMock;
   accountId?: string;
   allowFrom?: string[];
@@ -126,7 +126,7 @@ describe("registerTelegramNativeCommands /login", () => {
         ({ storePath, sessionKey }: { storePath: string; sessionKey: string }) =>
           loginSessionMocks.loadSessionStore(storePath)[sessionKey],
       );
-    loginSessionMocks.resolveStorePath.mockReset().mockReturnValue("/tmp/openclaw-sessions.json");
+    loginSessionMocks.resolveStorePath.mockReset().mockReturnValue("/tmp/carapace-sessions.json");
     loginSessionMocks.updateSessionStoreEntry.mockReset().mockImplementation(async (params) => {
       const current = loginSessionMocks.loadSessionStore(params.storePath)[params.sessionKey];
       if (!current) {
@@ -163,7 +163,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
 
@@ -214,7 +214,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
 
@@ -273,7 +273,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
     if (!nativeCommandCallbackDispatcher) {
@@ -336,7 +336,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
       allowFrom: ["200"],
     });
@@ -365,7 +365,7 @@ describe("registerTelegramNativeCommands /login", () => {
           allowFrom: { telegram: ["200"] },
           ownerAllowFrom: ["999"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
 
@@ -373,7 +373,7 @@ describe("registerTelegramNativeCommands /login", () => {
 
     expect(loginFlow).not.toHaveBeenCalled();
     expect(sendMessage.mock.calls.map((call) => String(call[1]))).toContain(
-      "Only a configured OpenClaw owner can start Codex login from Telegram.",
+      "Only a configured Carapace owner can start Codex login from Telegram.",
     );
   });
 
@@ -400,7 +400,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
 
@@ -427,7 +427,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
     });
 
@@ -457,7 +457,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
       runtime,
     });
@@ -508,7 +508,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
       abortSignal: shutdown.signal,
     });
@@ -540,7 +540,7 @@ describe("registerTelegramNativeCommands /login", () => {
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       loginFlow,
       abortSignal: account.signal,
     });
@@ -591,7 +591,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -613,7 +613,7 @@ describe("registerTelegramNativeCommands /login", () => {
     await vi.waitFor(() =>
       expect(loginSessionMocks.updateSessionStoreEntry).toHaveBeenCalledWith({
         sessionKey: "agent:main:main",
-        storePath: "/tmp/openclaw-sessions.json",
+        storePath: "/tmp/carapace-sessions.json",
         requireWriteSuccess: true,
         skipMaintenance: true,
         update: expect.any(Function),
@@ -664,7 +664,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -725,7 +725,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -775,7 +775,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -829,7 +829,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -858,7 +858,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });
@@ -905,7 +905,7 @@ describe("registerTelegramNativeCommands /login", () => {
       accountId: "default",
       cfg: {
         commands: { native: true, ownerAllowFrom: ["200"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       allowFrom: ["200"],
       loginFlow: runModelsAuthLoginFlow,
     });

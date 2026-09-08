@@ -5,8 +5,8 @@ import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import { Value } from "typebox/value";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -885,7 +885,7 @@ function descriptor(socketPath: string, workspaceDir: string): WorkerLaunchDescr
       rpcSetVersion: WORKER_RPC_SET_VERSION,
       handshake: {
         bundleHash: BUNDLE_HASH,
-        openclawVersion: "worker-test",
+        carapaceVersion: "worker-test",
         protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
       },
     },
@@ -921,7 +921,7 @@ async function setup(options?: FakeGatewayOptions): Promise<{
   const gateway = new FakeWorkerGateway(options);
   gateways.push(gateway);
   await gateway.start();
-  const workspaceDir = await mkdtemp(path.join(tmpdir(), "openclaw-worker-workspace-"));
+  const workspaceDir = await mkdtemp(path.join(tmpdir(), "carapace-worker-workspace-"));
   tempDirs.push(workspaceDir);
   return { gateway, workspaceDir, launch: descriptor(gateway.socketPath, workspaceDir) };
 }
@@ -1070,7 +1070,7 @@ describe("worker runtime", () => {
 
   it.each([false, true])("uses only prepared prompt inputs (Gateway extra: %s)", async (extra) => {
     const { gateway, workspaceDir, launch } = await setup();
-    const promptDir = path.join(workspaceDir, ".openclaw");
+    const promptDir = path.join(workspaceDir, ".carapace");
     const literalPrompt = path.join(workspaceDir, "not-a-prompt-file.md");
     await mkdir(promptDir);
     await writeFile(path.join(workspaceDir, "AGENTS.md"), "prepared-worker-context");
@@ -1142,7 +1142,7 @@ describe("worker runtime", () => {
     launch.assignment.toolAuthority.allowedToolNames = ["browser"];
     launch.assignment.browser = {
       cdpUrl: "http://127.0.0.1:9222",
-      launcherPath: "/usr/local/bin/openclaw-worker-browser",
+      launcherPath: "/usr/local/bin/carapace-worker-browser",
     };
 
     await expect(runWorkerDescriptor(launch)).resolves.toMatchObject({ status: "completed" });
@@ -1231,7 +1231,7 @@ describe("worker runtime", () => {
       authority: ["read"] as const,
       browser: {
         cdpUrl: "http://127.0.0.1:9222",
-        launcherPath: "/usr/local/bin/openclaw-worker-browser",
+        launcherPath: "/usr/local/bin/carapace-worker-browser",
       },
     },
   ])("fails before inference when Browser authority and descriptor disagree", async (testCase) => {
@@ -1436,7 +1436,7 @@ describe("worker runtime", () => {
   it.each(["initial admission", "running turn"] as const)(
     "marks only an initial admission deadline as safe to re-arm: %s",
     async (phase) => {
-      const workspaceDir = await mkdtemp(path.join(tmpdir(), "openclaw-worker-admission-"));
+      const workspaceDir = await mkdtemp(path.join(tmpdir(), "carapace-worker-admission-"));
       tempDirs.push(workspaceDir);
       const launch = descriptor(path.join(workspaceDir, "gateway.sock"), workspaceDir);
       const connection = createWorkerConnection({
@@ -1862,7 +1862,7 @@ describe("worker runtime", () => {
           scopeKey,
           timeoutSec: null,
           onSettledBeforeNotify: () => {
-            settledStateDirs.push(process.env.OPENCLAW_STATE_DIR);
+            settledStateDirs.push(process.env.CARAPACE_STATE_DIR);
           },
         });
         if (visibility === "hidden-background") {
@@ -1873,7 +1873,7 @@ describe("worker runtime", () => {
         const closing = environment.close();
         await Promise.resolve();
 
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(environment.stateDir);
+        expect(process.env.CARAPACE_STATE_DIR).toBe(environment.stateDir);
         await expect(stat(environment.stateDir)).resolves.toBeDefined();
         releaseFinalizer.resolve();
         await run.promise;
@@ -1936,28 +1936,28 @@ describe("worker runtime", () => {
 
   it("executes coding tools locally without reading the preexisting auth profile", async () => {
     const { gateway, workspaceDir, launch } = await setup({ inferencePlans: ["tool", "text"] });
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    const previousConfigPath = process.env.CARAPACE_CONFIG_PATH;
     const trapStateDir = path.join(workspaceDir, "state-trap");
     const authDir = path.join(trapStateDir, "agents", "main", "agent");
     const configTrap = path.join(workspaceDir, "config-trap");
     await mkdir(authDir, { recursive: true });
     await writeFile(path.join(authDir, "auth-profiles.json"), "not valid json", "utf8");
     await mkdir(configTrap);
-    process.env.OPENCLAW_STATE_DIR = trapStateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configTrap;
+    process.env.CARAPACE_STATE_DIR = trapStateDir;
+    process.env.CARAPACE_CONFIG_PATH = configTrap;
     try {
       await expect(runWorkerDescriptor(launch)).resolves.toMatchObject({ status: "completed" });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
       if (previousConfigPath === undefined) {
-        delete process.env.OPENCLAW_CONFIG_PATH;
+        delete process.env.CARAPACE_CONFIG_PATH;
       } else {
-        process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+        process.env.CARAPACE_CONFIG_PATH = previousConfigPath;
       }
     }
 
@@ -1996,8 +1996,8 @@ describe("worker runtime", () => {
       const binding = {
         token: "worker-turn-fixture-token",
         login: "worker-fixture",
-        branch: "openclaw/session-fixture",
-        remoteUrl: "https://github.com/openclaw/worker-fixture.git",
+        branch: "carapace/session-fixture",
+        remoteUrl: "https://github.com/Exaggarate/carapace/worker-fixture.git",
       };
       launch.assignment.github = binding;
       const environment = await createWorkerRuntimeEnvironment(SESSION_ID);
@@ -2008,12 +2008,12 @@ describe("worker runtime", () => {
             maxBuffer: 4_096,
             logOutput: false,
           });
-        await git(["init", "--quiet", "--initial-branch=openclaw-worker"]);
+        await git(["init", "--quiet", "--initial-branch=carapace-worker"]);
         await git([
           "-c",
           "user.name=Worker Fixture",
           "-c",
-          "user.email=worker@openclaw.invalid",
+          "user.email=worker@carapace.invalid",
           "commit",
           "--quiet",
           "--allow-empty",
@@ -2089,7 +2089,7 @@ describe("worker runtime", () => {
       launch.assignment.github = {
         login: "worker-a",
         token: "worker-turn-a-token",
-        branch: "openclaw/session-fixture",
+        branch: "carapace/session-fixture",
       };
       const input = new PassThrough();
       const output = new PassThrough();
@@ -2123,7 +2123,7 @@ describe("worker runtime", () => {
           expect(profileDir).not.toBe("");
           return profileDir;
         });
-        const stateDir = process.env.OPENCLAW_STATE_DIR!;
+        const stateDir = process.env.CARAPACE_STATE_DIR!;
         const next = structuredClone(launch);
         next.assignment.runId = "worker-next-run-2";
         next.assignment.turnId = "worker-next-turn-2";
@@ -2138,7 +2138,7 @@ describe("worker runtime", () => {
         next.assignment.github = {
           login: "worker-b",
           token: "worker-turn-b-token",
-          branch: "openclaw/session-fixture",
+          branch: "carapace/session-fixture",
         };
         input.write(
           `${JSON.stringify({ type: "turn", turnId: next.assignment.turnId, descriptor: next })}\n`,
@@ -2224,7 +2224,7 @@ describe("worker runtime", () => {
     launch.assignment.github = {
       token: "worker-profile-write-fixture-token",
       login: "worker-fixture",
-      branch: "openclaw/session-fixture",
+      branch: "carapace/session-fixture",
     };
     const environment = await createWorkerRuntimeEnvironment(SESSION_ID);
     try {
@@ -2346,7 +2346,7 @@ describe("worker runtime", () => {
 
   it("rejects a dot-dot workspace escape before worker connection", async () => {
     const { workspaceDir, launch } = await setup();
-    const outside = await mkdtemp(path.join(tmpdir(), "openclaw-worker-outside-"));
+    const outside = await mkdtemp(path.join(tmpdir(), "carapace-worker-outside-"));
     tempDirs.push(outside);
     launch.assignment.workspaceDir = path.join(workspaceDir, "..", path.basename(outside));
     launch.assignment.permissionMode = "workspace";

@@ -1,4 +1,4 @@
-import type { RealtimeVoiceBridge } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceBridge } from "carapace/plugin-sdk/realtime-voice";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { buildXaiRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 

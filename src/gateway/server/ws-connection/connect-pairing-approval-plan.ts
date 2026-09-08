@@ -3,7 +3,7 @@
 import {
   normalizeSortedUniqueTrimmedStringList,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import type { ConnectPairingRequiredReason } from "../../../../packages/gateway-protocol/src/connect-error-details.js";
 import { getBoundDeviceBootstrapProfile } from "../../../infra/device-bootstrap.js";
 import type { getPairedDevice } from "../../../infra/device-pairing.js";

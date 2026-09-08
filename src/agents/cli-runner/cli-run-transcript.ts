@@ -202,7 +202,7 @@ export async function persistCliAssistantTranscript(params: {
         // existing keyed-segment contract without hiding narration or media.
         ...(params.yielded && params.stopReason === "stop"
           ? {
-              openclawStreamFallback: {
+              carapaceStreamFallback: {
                 replacementText: params.text,
                 source: "segment",
                 itemId: runParams.runId,
@@ -248,7 +248,7 @@ export async function persistCliRunBlock(
     content: [{ type: "text" as const, text: block.message }],
     timestamp: nowMs,
     idempotencyKey: `hook-block:before_agent_run:user:${params.runId}`,
-    __openclaw: {
+    __carapace: {
       beforeAgentRunBlocked: {
         blockedBy: block.pluginId,
         blockedAt: nowMs,

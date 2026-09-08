@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { Command } from "commander";
 
 export const COLD_READ_COMMAND_PATHS: string[][] = [

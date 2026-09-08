@@ -3,7 +3,7 @@ import {
   type AssistantMessage,
   type Message,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { processCompletionsStream } from "../../packages/ai/src/transports/openai-completions-stream.js";
 import { onAgentEventForRun } from "../infra/agent-events.js";
 import { runAgentLoop, type AgentEvent } from "../plugin-sdk/agent-core.js";

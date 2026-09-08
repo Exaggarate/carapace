@@ -7,25 +7,25 @@ import {
   createConfigWriteAuditRecordBase,
   finalizeConfigWriteAuditRecord,
 } from "../config/io.audit.js";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runInitialConfigWriteHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 
 describe("Doctor model metadata corruption persistence", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("strips an audit-proven generated fallback row and rematerializes catalog capabilities", async () => {
     await withTempHome(async (home) => {
       await withEnvOverride(
         {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
         },
         async () => {
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             gateway: { mode: "local" },
             models: {
               providers: {
@@ -84,7 +84,7 @@ describe("Doctor model metadata corruption persistence", () => {
               pid: 1,
               ppid: 0,
               cwd: "/tmp",
-              argv: ["openclaw", "update", "finalize", "--yes", "--channel", "dev"],
+              argv: ["carapace", "update", "finalize", "--yes", "--channel", "dev"],
               execArgv: [],
             },
           });

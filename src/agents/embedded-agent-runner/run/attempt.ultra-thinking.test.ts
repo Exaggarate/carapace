@@ -46,7 +46,7 @@ describe("runEmbeddedAttempt Ultra thinking", () => {
     const providerThinkingLevel = hoisted.applyExtraParamsToAgentMock.mock.calls.at(-1)?.[5];
 
     expect(promptInput.proactiveSubagentOrchestration).toBe(true);
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenLastCalledWith(
+    expect(hoisted.createCarapaceCodingToolsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ requesterThinkingLevel: "ultra" }),
     );
     expect(sessionOptions.thinkingLevel).toBe("max");
@@ -73,7 +73,7 @@ describe("runEmbeddedAttempt Ultra thinking", () => {
     const providerThinkingLevel = hoisted.applyExtraParamsToAgentMock.mock.calls.at(-1)?.[5];
 
     expect(promptInput.proactiveSubagentOrchestration).toBe(false);
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenLastCalledWith(
+    expect(hoisted.createCarapaceCodingToolsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ requesterThinkingLevel: "max" }),
     );
     expect(sessionOptions.thinkingLevel).toBe("max");

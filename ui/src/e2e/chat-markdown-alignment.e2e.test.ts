@@ -185,7 +185,7 @@ suite.define(() => {
           hasText: "Markdown parser fidelity",
         });
         await markdown.waitFor();
-        if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+        if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
           await page.screenshot({
             animations: "disabled",
             fullPage: true,

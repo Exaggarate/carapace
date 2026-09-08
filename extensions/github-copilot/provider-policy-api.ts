@@ -1,4 +1,4 @@
-import type { ProviderDefaultThinkingPolicyContext } from "openclaw/plugin-sdk/core";
+import type { ProviderDefaultThinkingPolicyContext } from "carapace/plugin-sdk/core";
 import { resolveCopilotThinkingLevelMap } from "./model-metadata.js";
 
 export function resolveThinkingProfile(context: ProviderDefaultThinkingPolicyContext) {

@@ -7,7 +7,7 @@ import {
   resolveAmbientTranscriptWatermarkKey,
   updateAmbientTranscriptWatermark,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTelegramMessageContextRuntime } from "./bot-handlers.message-context.js";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
@@ -34,7 +34,7 @@ const telegramChatWindowContext: TelegramPromptContextEntry = {
 const tempDirs: string[] = [];
 
 function createTempSessionStorePath(): string {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-watermark-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-telegram-watermark-"));
   tempDirs.push(tempDir);
   return path.join(tempDir, "sessions.json");
 }
@@ -365,7 +365,7 @@ describe("buildTelegramMessageContext prompt context", () => {
     };
     const previousBotReply = {
       messageId: "11",
-      sender: "OpenClaw (you)",
+      sender: "Carapace (you)",
       timestamp: 1_700_000_001_000,
       body: "LLM request failed.",
     };
@@ -402,7 +402,7 @@ describe("buildTelegramMessageContext prompt context", () => {
               },
               {
                 message_id: "9",
-                sender: "OpenClaw (you)",
+                sender: "Carapace (you)",
                 timestamp_ms: 1_699_999_999_000,
                 body: "explicit reply target",
                 is_reply_target: true,

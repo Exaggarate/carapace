@@ -1,7 +1,7 @@
 // Bundles language-server metadata exposed by plugins.
 import path from "node:path";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isRecord } from "../utils.js";
 import {
   inspectBundleServerRuntimeSupport,
@@ -151,7 +151,7 @@ export function inspectBundleLspRuntimeSupport(params: {
 /** Loads and merges enabled bundle LSP config across plugin manifests. */
 export function loadEnabledBundleLspConfig(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
 }): { config: BundleLspConfig; diagnostics: Array<{ pluginId: string; message: string }> } {
   return loadEnabledBundleConfig({

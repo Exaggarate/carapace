@@ -159,7 +159,7 @@ function sameExistingPath(left: string, right: string): boolean {
 }
 
 function resolveExplicitEnvBundledPluginsDir(env: NodeJS.ProcessEnv): string | undefined {
-  const envOverride = env.OPENCLAW_BUNDLED_PLUGINS_DIR?.trim();
+  const envOverride = env.CARAPACE_BUNDLED_PLUGINS_DIR?.trim();
   if (!envOverride) {
     return undefined;
   }

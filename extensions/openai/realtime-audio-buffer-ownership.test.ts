@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import type { RealtimeVoiceBridge } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceBridge } from "carapace/plugin-sdk/realtime-voice";
 import { describe, expect, it, vi } from "vitest";
 import WebSocket, { type RawData, WebSocketServer } from "ws";
 import { openAIRealtimeHost } from "./realtime-host.js";

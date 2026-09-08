@@ -370,7 +370,7 @@ function parseOptions(argv: string[] = process.argv.slice(2)): CliOptions {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw Gateway concurrency benchmark
+  console.log(`Carapace Gateway concurrency benchmark
 
 Usage:
   pnpm test:gateway:concurrency -- [options]
@@ -459,7 +459,7 @@ function readDiagnosticsTimelineSpans(
       const event: unknown = JSON.parse(line);
       if (
         !isRecord(event) ||
-        event.schemaVersion !== "openclaw.diagnostics.v1" ||
+        event.schemaVersion !== "carapace.diagnostics.v1" ||
         typeof event.timestamp !== "string" ||
         !Number.isFinite(Date.parse(event.timestamp))
       ) {
@@ -855,7 +855,7 @@ async function runTurn(
   const started = await rpc<{ runId?: string; status?: string }>("agent", {
     sessionKey: options?.sessionKey ?? `agent:main:gateway-concurrency-${index + 1}`,
     message: toolEvents
-      ? `OPENCLAW_E2E_DRAFTPROOF benchmark tool stream ${index + 1}.`
+      ? `CARAPACE_E2E_DRAFTPROOF benchmark tool stream ${index + 1}.`
       : `Reply with benchmark stream ${index + 1}.`,
     deliver: false,
     idempotencyKey: requestedRunId,
@@ -1042,7 +1042,7 @@ async function runGatewaySample(options: {
   visibleObserver: boolean;
   workspaceFanout: boolean;
 }): Promise<BenchmarkRun> {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-gateway-concurrency-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-gateway-concurrency-"));
   const [port, mockPort] = await Promise.all([getFreePort(), getFreePort()]);
   const runStartedAt = performance.now();
   const timelinePath = path.join(root, "diagnostics-timeline.jsonl");
@@ -1079,7 +1079,7 @@ async function runGatewaySample(options: {
           MOCK_PORT: String(mockPort),
           MOCK_REQUEST_LOG: requestLogPath,
           MOCK_RESPONSE_CHUNK_DELAY_MS: String(options.streamChunkDelayMs),
-          SUCCESS_MARKER: "OpenClaw gateway concurrency benchmark streaming response.",
+          SUCCESS_MARKER: "Carapace gateway concurrency benchmark streaming response.",
         },
       });
       mockOutput = captureChildOutput(mockProvider);
@@ -1102,11 +1102,11 @@ async function runGatewaySample(options: {
               caseEnv: {
                 ...(options.diagnosticsTimeline
                   ? {
-                      OPENCLAW_DIAGNOSTICS: "timeline",
-                      OPENCLAW_DIAGNOSTICS_TIMELINE_PATH: timelinePath,
+                      CARAPACE_DIAGNOSTICS: "timeline",
+                      CARAPACE_DIAGNOSTICS_TIMELINE_PATH: timelinePath,
                     }
                   : {}),
-                OPENCLAW_SKIP_CHANNELS: "1",
+                CARAPACE_SKIP_CHANNELS: "1",
               },
             }),
             OPENAI_API_KEY: "gateway-concurrency-benchmark",

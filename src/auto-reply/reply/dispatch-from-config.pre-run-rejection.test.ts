@@ -1,7 +1,7 @@
 // Tests invocation rejection outcomes through shared dispatch and the diagnostic bus.
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { clearAgentHarnesses } from "../../agents/harness/registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   onDiagnosticEvent,
   type DiagnosticMessageProcessedEvent,
@@ -31,7 +31,7 @@ let resetReplyRunRegistry: () => void;
 
 const REJECTED_MODEL = "openai/REJECTED_PRIVATE_TOKEN";
 const SESSION_KEY = "agent:main:session";
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   diagnostics: { enabled: true },
   messages: { visibleReplies: "automatic" },
 };

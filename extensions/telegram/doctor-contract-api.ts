@@ -1,5 +1,5 @@
 // Telegram API module exposes the plugin public contract.
-import { definePluginDoctorMigrationFromPlans } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import { definePluginDoctorMigrationFromPlans } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { detectTelegramLegacyStateMigrations } from "./src/state-migrations.js";
 
 export { normalizeCompatibilityConfig, legacyConfigRules } from "./config-doctor-api.js";

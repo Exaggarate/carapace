@@ -5,7 +5,7 @@ import type {
   Model,
   StreamOptions,
   UserMessage,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";

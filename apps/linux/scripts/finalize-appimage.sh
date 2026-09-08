@@ -61,7 +61,7 @@ if [[ ${#remaining_libraries[@]} -gt 0 ]]; then
   exit 1
 fi
 
-output=$(mktemp "$bundle_dir/.openclaw-appimage.XXXXXX")
+output=$(mktemp "$bundle_dir/.carapace-appimage.XXXXXX")
 rm -f -- "$output"
 trap 'rm -f -- "$output"' EXIT
 

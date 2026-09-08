@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { detectBundleManifestFormat, loadBundleManifest } from "./bundle-manifest.js";
-import { discoverConfiguredPluginLoadPaths, discoverOpenClawPlugins } from "./discovery.js";
+import { discoverConfiguredPluginLoadPaths, discoverCarapacePlugins } from "./discovery.js";
 import { buildInstalledPluginIndexRecords } from "./installed-plugin-index-record-builder.js";
 import { loadPluginManifestRegistryCore } from "./manifest-registry.js";
 import {
@@ -100,11 +100,11 @@ describe("plugin package facts", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "@fixture/shared-entry",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "shared-entry",
         configSchema: { type: "object" },
@@ -183,11 +183,11 @@ describe("plugin package facts", () => {
     expect(pluginCacheExistsSync(path.join(root, "missing.json"))).toBe(false);
   });
   it("carries the checked package generation through discovery, manifests, and index hashes", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-plugin-cache-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-plugin-cache-"));
     const bundledDir = path.join(root, "bundled");
     const pluginDir = path.join(bundledDir, "generation-owner");
     fs.mkdirSync(pluginDir, { recursive: true });
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     const packagePath = path.join(pluginDir, "package.json");
     const writeGeneration = (version: string) => {
       const manifest = JSON.stringify({
@@ -198,7 +198,7 @@ describe("plugin package facts", () => {
       const packageJson = JSON.stringify({
         name: "@fixture/generation-owner",
         version,
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       });
       fs.writeFileSync(manifestPath, manifest);
       fs.writeFileSync(packagePath, packageJson);
@@ -210,18 +210,18 @@ describe("plugin package facts", () => {
       'throw new Error("metadata executed runtime");',
     );
     const env = {
-      OPENCLAW_HOME: path.join(root, "home"),
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_HOME: path.join(root, "home"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
     };
-    const discovery = discoverOpenClawPlugins({ env, installRecords: {} });
+    const discovery = discoverCarapacePlugins({ env, installRecords: {} });
     expect(
       discovery.candidates.find((candidate) => candidate.idHint === "generation-owner"),
     ).toBeDefined();
     writeGeneration("2.0.0");
     const open = vi.spyOn(fs, "openSync");
     const read = vi.spyOn(fs, "readFileSync");
-    expect(discoverOpenClawPlugins({ env, installRecords: {} })).toBe(discovery);
+    expect(discoverCarapacePlugins({ env, installRecords: {} })).toBe(discovery);
     const registry = loadPluginManifestRegistryCore({ env, discovery, installRecords: {} });
     const records = buildInstalledPluginIndexRecords({
       candidates: discovery.candidates,

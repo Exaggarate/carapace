@@ -1,5 +1,5 @@
 // Shared policy evidence path and value helpers.
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function ocPathSegment(value: string): string {
   if (/^(?:[A-Za-z0-9_-]+|#\d+)$/.test(value)) {
@@ -30,7 +30,7 @@ export function collectPolicyConfiguredAgents(agents: Record<string, unknown>) {
           .toSorted(([a], [b]) => a.localeCompare(b))
           .map(([agentId, value]) => ({
             agentId,
-            sourceBase: `oc://openclaw.config/agents/entries/${ocPathSegment(agentId)}`,
+            sourceBase: `oc://carapace.config/agents/entries/${ocPathSegment(agentId)}`,
             value,
           }))
       : [];
@@ -41,7 +41,7 @@ export function collectPolicyConfiguredAgents(agents: Record<string, unknown>) {
           isRecord(value) && typeof value.id === "string" && value.id.trim() !== ""
             ? value.id.trim()
             : `agent-${index}`,
-        sourceBase: `oc://openclaw.config/agents/list/#${index}`,
+        sourceBase: `oc://carapace.config/agents/list/#${index}`,
         value,
       }))
     : [];

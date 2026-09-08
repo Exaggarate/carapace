@@ -11,14 +11,14 @@ const resolveApiKeyForProviderMock = vi.hoisted(() =>
   })),
 );
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
 async function buildTransportProofProvider() {
   vi.resetModules();
-  vi.doUnmock("openclaw/plugin-sdk/provider-http");
-  vi.doMock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+  vi.doUnmock("carapace/plugin-sdk/provider-http");
+  vi.doMock("carapace/plugin-sdk/provider-auth-runtime", () => ({
     resolveApiKeyForProvider: resolveApiKeyForProviderMock,
   }));
   const { buildOpenRouterMusicGenerationProvider } = await import("./music-generation-provider.js");

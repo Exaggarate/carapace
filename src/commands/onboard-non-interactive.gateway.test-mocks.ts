@@ -2,7 +2,7 @@
 // vi.mock calls live here so sibling suites share one config-write/daemon/health surface.
 import path from "node:path";
 import { vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import {
   createOnboardTestConfigStore,
   createThrowingRuntime,
@@ -69,7 +69,7 @@ vi.mock("../plugins/plugin-lifecycle-lease.js", () => ({
     pluginLifecycleLeaseState.depth += 1;
     try {
       return await run({
-        databasePath: path.join(path.dirname(resolveTestConfigPath()), "openclaw.sqlite"),
+        databasePath: path.join(path.dirname(resolveTestConfigPath()), "carapace.sqlite"),
         signal: new AbortController().signal,
         assertOwned: () => {},
         assertOwnedInTransaction: () => {},
@@ -81,7 +81,7 @@ vi.mock("../plugins/plugin-lifecycle-lease.js", () => ({
 }));
 
 export const capturedReplaceConfigFileCalls: Array<{
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   writeOptions?: { allowConfigSizeDrop?: boolean; unsetPaths?: string[][] };
 }> = [];
 
@@ -92,7 +92,7 @@ vi.mock("../config/config.js", async (importActual) => {
       nextConfig,
       writeOptions,
     }: {
-      nextConfig: OpenClawConfig;
+      nextConfig: CarapaceConfig;
       writeOptions?: { allowConfigSizeDrop?: boolean; unsetPaths?: string[][] };
     }) => {
       configWritePluginLeaseDepths.push(pluginLifecycleLeaseState.depth);
@@ -103,7 +103,7 @@ vi.mock("../config/config.js", async (importActual) => {
       testConfigStore.set(resolveTestConfigPath(), nextConfig);
     },
     resolveConfigWriteAfterWrite: actual.resolveConfigWriteAfterWrite,
-    resolveGatewayPort: (cfg: OpenClawConfig) => cfg.gateway?.port ?? 18789,
+    resolveGatewayPort: (cfg: CarapaceConfig) => cfg.gateway?.port ?? 18789,
     transformConfigFileWithRetry: async (
       params: Parameters<typeof import("../config/config.js").transformConfigFileWithRetry>[0],
     ) => {
@@ -137,7 +137,7 @@ vi.mock("./onboard-helpers.js", () => {
     return trimmed === "undefined" || trimmed === "null" ? "" : trimmed;
   };
   return {
-    DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+    DEFAULT_WORKSPACE: "/tmp/carapace-workspace",
     applyWizardMetadata: (cfg: unknown) => cfg,
     ensureWorkspaceAndSessions: ensureWorkspaceAndSessionsMock,
     normalizeGatewayTokenInput,

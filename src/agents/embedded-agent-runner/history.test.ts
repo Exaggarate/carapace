@@ -1,6 +1,6 @@
 // Coverage for resolving channel and DM history limits from session keys.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { buildAgentPeerSessionKey } from "../../routing/session-key.js";
 import type { AgentMessage } from "../runtime/index.js";
 import { getHistoryLimitFromSessionKey, limitHistoryTurns } from "./history.js";
@@ -31,7 +31,7 @@ describe("getHistoryLimitFromSessionKey", () => {
         telegram: { dmHistoryLimit: 15 },
         whatsapp: { dmHistoryLimit: 20 },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("telegram:dm:123", config)).toBe(15);
     expect(getHistoryLimitFromSessionKey("whatsapp:dm:123", config)).toBe(20);
@@ -41,7 +41,7 @@ describe("getHistoryLimitFromSessionKey", () => {
   it("keeps backward compatibility for dm and direct session kinds", () => {
     const config = {
       channels: { telegram: { dmHistoryLimit: 10 } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("telegram:dm:123", config)).toBe(10);
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:dm:123", config)).toBe(10);
@@ -54,7 +54,7 @@ describe("getHistoryLimitFromSessionKey", () => {
     // used for per-contact history limit overrides.
     const config = {
       channels: { telegram: { dmHistoryLimit: 10, dms: { "123": { historyLimit: 7 } } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:dm:123:thread:999", config)).toBe(7);
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:dm:123:topic:555", config)).toBe(7);
@@ -72,7 +72,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           accounts: { work: { dmHistoryLimit: 11, dms: { "123": { historyLimit: 22 } } } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:work:direct:456", config)).toBe(11);
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:work:direct:123", config)).toBe(22);
@@ -89,7 +89,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           accounts: { direct: { dmHistoryLimit: 12, dms: { peer: { historyLimit: 41 } } } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       getHistoryLimitFromSessionKey("agent:main:telegram:direct:direct:peer", config, {
@@ -116,7 +116,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           dms: { "direct:peer": { historyLimit: 31 }, peer: { historyLimit: 32 } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       getHistoryLimitFromSessionKey("agent:main:telegram:direct:direct:peer", config, {
@@ -143,7 +143,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const sessionKey = buildAgentPeerSessionKey({
       agentId: "main",
       channel: "telegram",
@@ -174,7 +174,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           accounts: { work: { dmHistoryLimit: 11, dms: { "123": { historyLimit: 22 } } } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       getHistoryLimitFromSessionKey("agent:main:telegram:direct:123", config, {
@@ -208,7 +208,7 @@ describe("getHistoryLimitFromSessionKey", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const route = { accountId, peerId: "peer", chatType: "direct" as const };
       const sessionKey = buildAgentPeerSessionKey({
         agentId: "main",
@@ -262,7 +262,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const route = { accountId: "direct", peerId: "123", chatType: "direct" as const };
     const sessionKey = buildAgentPeerSessionKey({
       agentId: "main",
@@ -310,7 +310,7 @@ describe("getHistoryLimitFromSessionKey", () => {
       channels: {
         telegram: { dms: { "user:thread:abc": { historyLimit: 9 } } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:dm:user:thread:abc", config)).toBe(9);
   });
@@ -335,7 +335,7 @@ describe("getHistoryLimitFromSessionKey", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const sessionKey = buildAgentPeerSessionKey({
         agentId: "main",
         channel: "telegram",
@@ -364,7 +364,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("telegram:dm:123", config)).toBe(5);
     expect(getHistoryLimitFromSessionKey("telegram:dm:456", config)).toBe(15);
@@ -384,7 +384,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           dms: { "user@example.com": { historyLimit: 7 } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("agent:main:telegram:dm:789", config)).toBe(3);
     expect(getHistoryLimitFromSessionKey("msteams:dm:user@example.com", config)).toBe(7);
@@ -396,7 +396,7 @@ describe("getHistoryLimitFromSessionKey", () => {
         slack: { historyLimit: 10, dmHistoryLimit: 15 },
         discord: { historyLimit: 8 },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("agent:beta:slack:channel:c1", config)).toBe(10);
     expect(getHistoryLimitFromSessionKey("discord:channel:123456", config)).toBe(8);
@@ -409,7 +409,7 @@ describe("getHistoryLimitFromSessionKey", () => {
         telegram: { historyLimit: 10 },
         discord: { dmHistoryLimit: 10 },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("telegram:slash:123", config)).toBeUndefined();
     expect(getHistoryLimitFromSessionKey("unknown:dm:123", config)).toBeUndefined();
@@ -432,7 +432,7 @@ describe("getHistoryLimitFromSessionKey", () => {
     for (const provider of providers) {
       const config = {
         channels: { [provider]: { dmHistoryLimit: 5, historyLimit: 12 } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       expect(getHistoryLimitFromSessionKey(`${provider}:dm:123`, config)).toBe(5);
       expect(getHistoryLimitFromSessionKey(`${provider}:channel:123`, config)).toBe(12);
@@ -457,7 +457,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const cases: Array<[string, string | undefined, number | undefined]> = [
       // Account values win for every scope the resolver supports.
@@ -500,7 +500,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     for (const accountId of ["work-team", "Work Team", "WORK TEAM"]) {
       expect(getHistoryLimitFromSessionKey("telegram:channel:c1", config, { accountId })).toBe(40);
@@ -522,7 +522,7 @@ describe("getHistoryLimitFromSessionKey", () => {
           accounts: { off: { historyLimit: 0, dmHistoryLimit: 0 } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(getHistoryLimitFromSessionKey("slack:channel:c1", config, { accountId: "off" })).toBe(0);
     expect(getHistoryLimitFromSessionKey("slack:dm:u1", config, { accountId: "off" })).toBe(0);
@@ -554,7 +554,7 @@ describe("account-scoped limits change the retained transcript", () => {
         accounts: { "Work Team": { historyLimit: 2 } },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 
   const sessionKey = "agent:main:telegram:channel:c1";
   const messages = transcript(40);

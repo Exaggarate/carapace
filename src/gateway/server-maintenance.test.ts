@@ -2,7 +2,7 @@
 // stale chat buffers, expired runs, health summaries, and timer disposal.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { managedWorktrees } from "../agents/worktrees/service.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isGatewayWorkAdmissionClosed,
   onGatewaySuspendAdmissionChange,
@@ -448,7 +448,7 @@ describe("startGatewayMaintenanceTimers", () => {
   it("updates attachment cleanup policy between sweeps without restarting maintenance", async () => {
     vi.useFakeTimers();
     const { startGatewayMaintenanceTimers } = await import("./server-maintenance.js");
-    let config: OpenClawConfig = { attachments: { ttlHours: 24 } };
+    let config: CarapaceConfig = { attachments: { ttlHours: 24 } };
 
     const timers = startGatewayMaintenanceTimers({
       ...createMaintenanceTimerDeps(),

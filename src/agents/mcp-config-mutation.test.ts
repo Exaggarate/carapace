@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withContendedConfigMutation } from "../../test/helpers/config-mutation-lock.js";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { readConfigFileSnapshot } from "../config/config.js";
 import { listConfiguredMcpServers, mcpConfigInternal } from "../config/mcp-config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   setConfiguredMcpServer,
   unsetConfiguredMcpServer,
@@ -49,25 +49,25 @@ function seedOAuthState(name: string) {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function withMcpConfigHome(run: () => Promise<void>): Promise<void> {
   await withTempHome(
     async () => {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       try {
         await run();
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
     {
-      prefix: "openclaw-mcp-config-oauth-",
+      prefix: "carapace-mcp-config-oauth-",
       skipSessionCleanup: true,
       env: {
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_STATE_DIR: (home) => path.join(home, ".openclaw"),
+        CARAPACE_CONFIG_PATH: undefined,
+        CARAPACE_STATE_DIR: (home) => path.join(home, ".carapace"),
       },
     },
   );
@@ -118,8 +118,8 @@ describe("configured MCP OAuth cleanup", () => {
       const { operator, requester } = seedOAuthState(serverName);
       const configPath = initial.path;
       const config = JSON.parse(await fs.readFile(configPath, "utf8"));
-      config.messages = { responsePrefix: "${OPENCLAW_TEST_MCP_PREFIX}" };
-      vi.stubEnv("OPENCLAW_TEST_MCP_PREFIX", "before-lock");
+      config.messages = { responsePrefix: "${CARAPACE_TEST_MCP_PREFIX}" };
+      vi.stubEnv("CARAPACE_TEST_MCP_PREFIX", "before-lock");
       const raw = JSON.stringify(config);
       await fs.writeFile(configPath, raw);
       const result = await withContendedConfigMutation(
@@ -127,13 +127,13 @@ describe("configured MCP OAuth cleanup", () => {
         () => mutate(serverName),
         async () => {
           expect(await fs.readFile(configPath, "utf8")).toBe(raw);
-          vi.stubEnv("OPENCLAW_TEST_MCP_PREFIX", "after-lock");
+          vi.stubEnv("CARAPACE_TEST_MCP_PREFIX", "after-lock");
         },
       );
 
       expect(result.ok).toBe(true);
       expect(JSON.parse(await fs.readFile(configPath, "utf8")).messages.responsePrefix).toBe(
-        "${OPENCLAW_TEST_MCP_PREFIX}",
+        "${CARAPACE_TEST_MCP_PREFIX}",
       );
       const fresh = await readConfigFileSnapshot();
       expect(fresh.valid).toBe(true);

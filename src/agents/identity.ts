@@ -4,7 +4,7 @@
  * prefixes, and human-delay settings.
  */
 import type { HumanDelayConfig, IdentityConfig } from "../config/types.base.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveAgentEntry } from "./agent-scope-config.js";
 
@@ -12,7 +12,7 @@ const DEFAULT_ACK_REACTION = "👀";
 
 /** Resolve the configured identity block for one agent. */
 export function resolveAgentIdentity(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): IdentityConfig | undefined {
   // Keep merged-config request normalization for raw Plugin SDK agent ids.
@@ -21,7 +21,7 @@ export function resolveAgentIdentity(
 
 /** Resolve the acknowledgement reaction using account, channel, global, then identity fallback. */
 export function resolveAckReaction(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   opts?: { channel?: string; accountId?: string },
 ): string {
@@ -57,7 +57,7 @@ export function resolveAckReaction(
 
 /** Build the automatic `[name]` prefix for an agent identity. */
 export function resolveIdentityNamePrefix(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string | undefined {
   const name = resolveAgentIdentity(cfg, agentId)?.name?.trim();
@@ -69,7 +69,7 @@ export function resolveIdentityNamePrefix(
 
 /** Resolve the outbound message prefix, preserving explicit empty prefixes. */
 function resolveMessagePrefix(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   opts?: { configured?: string; hasAllowFrom?: boolean; fallback?: string },
 ): string {
@@ -83,12 +83,12 @@ function resolveMessagePrefix(
     return "";
   }
 
-  return resolveIdentityNamePrefix(cfg, agentId) ?? opts?.fallback ?? "[openclaw]";
+  return resolveIdentityNamePrefix(cfg, agentId) ?? opts?.fallback ?? "[carapace]";
 }
 
 /** Helper to extract a channel config value by dynamic key. */
 function getChannelConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: string,
 ): Record<string, unknown> | undefined {
   const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -100,7 +100,7 @@ function getChannelConfig(
 
 /** Resolve the optional response prefix, expanding `auto` to the identity name prefix. */
 export function resolveResponsePrefix(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   opts?: { channel?: string; accountId?: string },
 ): string | undefined {
@@ -143,7 +143,7 @@ export function resolveResponsePrefix(
 
 /** Resolve message and response prefix values together for channel delivery. */
 export function resolveEffectiveMessagesConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   opts?: {
     hasAllowFrom?: boolean;
@@ -166,7 +166,7 @@ export function resolveEffectiveMessagesConfig(
 
 /** Resolve per-agent human-delay settings over global agent defaults. */
 export function resolveHumanDelayConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): HumanDelayConfig | undefined {
   const defaults = cfg.agents?.defaults?.humanDelay;

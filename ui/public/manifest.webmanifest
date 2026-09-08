@@ -1,6 +1,6 @@
 {
-  "name": "OpenClaw Control",
-  "short_name": "OpenClaw",
+  "name": "Carapace Control",
+  "short_name": "Carapace",
   "description": "Multi-channel AI gateway control panel",
   "start_url": "./",
   "display": "standalone",

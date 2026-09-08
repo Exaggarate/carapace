@@ -4,7 +4,7 @@ import {
   buildSessionCreationStamp,
   inheritSessionCreationPolicy,
 } from "../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import { createSessionListEntryFilter } from "./session-sharing.js";
 
@@ -67,8 +67,8 @@ it("lets configured agents win id-only owner facet collisions", async () => {
     const result = await listSessionFixture({
       cfg: {
         agents: { list: [{ id: "shared-id", identity: { name: "Shared agent" } }] },
-      } as OpenClawConfig,
-      storePath: "/tmp/openclaw-session-owner-order",
+      } as CarapaceConfig,
+      storePath: "/tmp/carapace-session-owner-order",
       store,
       opts: { archived: "all" },
     });
@@ -103,8 +103,8 @@ it("returns the complete deterministic owner facet independently of pagination",
   };
 
   const result = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owners",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owners",
     store,
     opts: { archived: "all", limit: 1 },
   });
@@ -142,8 +142,8 @@ it("returns the complete deterministic owner facet independently of pagination",
   expect(getUserProfileDisplay).toHaveBeenCalledTimes(2);
 
   const filtered = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owners",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owners",
     store,
     opts: { archived: "all", ownerId: "profile-bob", limit: 1 },
   });
@@ -168,8 +168,8 @@ it("prepends an owner window without advancing shared-page pagination", async ()
   };
 
   const result = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owner-first",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owner-first",
     store,
     opts: { archived: "all", limit: 1 },
     ownerFirstActorId: "profile-bob",
@@ -233,8 +233,8 @@ it("projects only durable profiles and configured agents as effective owners", a
           { id: "research", identity: { name: "Research" } },
         ],
       },
-    } as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owner-candidates",
+    } as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owner-candidates",
     store,
     opts: { archived: "all" },
   });
@@ -309,8 +309,8 @@ it("filters immutable creator and effective owner separately while preserving pr
     },
   } satisfies Record<string, SessionEntry>;
   const result = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owners",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owners",
     store,
     opts: { archived: "all" },
   });
@@ -343,8 +343,8 @@ it("filters immutable creator and effective owner separately while preserving pr
     },
   ]);
   const creatorFiltered = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owners",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owners",
     store,
     opts: { archived: "all", creatorId: "profile-ada" },
   });
@@ -359,8 +359,8 @@ it("filters immutable creator and effective owner separately while preserving pr
     },
   );
   const ownerFiltered = await listSessionFixture({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-owners",
+    cfg: {} as CarapaceConfig,
+    storePath: "/tmp/carapace-session-owners",
     store,
     opts: { archived: "all", ownerId: "profile-bob" },
   });
@@ -401,7 +401,7 @@ it("filters immutable creator and effective owner separately while preserving pr
     };
     const query = {
       cfg: {},
-      storePath: "/tmp/openclaw-session-owners",
+      storePath: "/tmp/carapace-session-owners",
       store: rows,
       opts: { creatorId: "profile-ada" },
     };
@@ -480,12 +480,12 @@ it("deduplicates participants in order, excludes the owner, and filters sessions
       updatedAt: 1,
     },
   };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { list: [{ id: "research", identity: { name: "Research" } }] },
   };
   const result = await listSessionFixture({
     cfg,
-    storePath: "/tmp/openclaw-session-participants",
+    storePath: "/tmp/carapace-session-participants",
     store,
     opts: { archived: "all" },
     involvingActorId: "profile-ada",
@@ -514,7 +514,7 @@ it("deduplicates participants in order, excludes the owner, and filters sessions
 
   const unfiltered = await listSessionFixture({
     cfg,
-    storePath: "/tmp/openclaw-session-participants",
+    storePath: "/tmp/carapace-session-participants",
     store,
     opts: { archived: "all" },
   });
@@ -532,7 +532,7 @@ it("deduplicates participants in order, excludes the owner, and filters sessions
   }
   const selected = await listSessionFixture({
     cfg,
-    storePath: "/tmp/openclaw-session-participants",
+    storePath: "/tmp/carapace-session-participants",
     store,
     opts: { archived: "all", includePeople: true, involvingProfileId: "profile-ada", limit: 1 },
   });
@@ -599,7 +599,7 @@ it.each(["spawn", "talk", "cron"] as const)(
     }
     const query = {
       cfg: { agents: { list: [{ id: "main" }, { id: "research" }] } },
-      storePath: "/tmp/openclaw-session-profile-alias",
+      storePath: "/tmp/carapace-session-profile-alias",
       store,
       opts: { archived: "all" as const, includePeople: true },
     };
@@ -680,7 +680,7 @@ it("returns a canonical selected person and orders merged owners without borrowi
   };
   const query = {
     cfg: {},
-    storePath: "/tmp/openclaw-session-selected-person",
+    storePath: "/tmp/carapace-session-selected-person",
     store,
     opts: { archived: "all" as const, includePeople: true, involvingProfileId: "former", limit: 1 },
   };
@@ -708,7 +708,7 @@ it("returns a canonical selected person and orders merged owners without borrowi
 it("reports the authoritative admission bound even when the visible participant list is smaller", async () => {
   const result = await listSessionFixture({
     cfg: {},
-    storePath: "/tmp/openclaw-session-bound",
+    storePath: "/tmp/carapace-session-bound",
     store: {
       "agent:main:capped": {
         sessionId: "capped",
@@ -745,7 +745,7 @@ it("preserves list output across visibility, scope, owner, and search filters", 
     agents: {
       list: [{ id: "main", default: true }, { id: "work" }],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const store: Record<string, SessionEntry> = {
     global: {
       createdActor: { type: "human", source: "profile", id: "profile-bob" },
@@ -808,7 +808,7 @@ it("preserves list output across visibility, scope, owner, and search filters", 
     },
     connect: {
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         mode: "webchat",
         platform: "test",
         version: "test",
@@ -828,7 +828,7 @@ it("preserves list output across visibility, scope, owner, and search filters", 
       ...(entryFilter ? { entryFilter } : {}),
       opts,
       store,
-      storePath: "/tmp/openclaw-session-filter-parity",
+      storePath: "/tmp/carapace-session-filter-parity",
     });
     return {
       count: result.count,
@@ -918,7 +918,7 @@ it("keeps the serialized list response deterministic for the current filter path
         defaults: { model: { primary: "openai/gpt-5.4" } },
         list: [{ id: "main", default: true, model: { primary: "openai/gpt-5.4" } }],
       },
-    } as OpenClawConfig,
+    } as CarapaceConfig,
     opts: { archived: "all", includeGlobal: true, search: "needle" },
     store: {
       global: {
@@ -937,10 +937,10 @@ it("keeps the serialized list response deterministic for the current filter path
         updatedAt: 999_999,
       },
     },
-    storePath: "/tmp/openclaw-session-byte-parity",
+    storePath: "/tmp/carapace-session-byte-parity",
   });
   const expectedSerializedResponse = [
-    '{"ts":1000000,"path":"/tmp/openclaw-session-byte-parity","count":1,"totalCount":1,"limitApplied":100,"nextOffset":null,"hasMore":false,"owners":[]',
+    '{"ts":1000000,"path":"/tmp/carapace-session-byte-parity","count":1,"totalCount":1,"limitApplied":100,"nextOffset":null,"hasMore":false,"owners":[]',
     ',"defaults":{"modelProvider":"openai","model":"gpt-5.4","contextTokens":200000,"agentRuntime":{"id":"codex","cloudPlacementSupported":false,"devicePlacementSupported":false,"source":"implicit"},"thinkingLevels":[{"id":"off","label":"off"},{"id":"minimal","label":"minimal"},{"id":"low","label":"low"},{"id":"medium","label":"medium"},{"id":"high","label":"high"},{"id":"xhigh","label":"xhigh"}],"thinkingOptions":["off","minimal","low","medium","high","xhigh"],"thinkingDefault":"off"}',
     ',"sessions":[{"key":"global","visibility":"shared","permissionModePending":false,"createdActor":{"type":"system","id":"creator-b","identity":{"type":"legacy","actorType":"system","source":null,"id":"creator-b"}},"kind":"global","classification":"global","agentId":"main","isMain":false,"isBackground":false,"subject":"needle global","updatedAt":999999,"archived":false,"pinned":false,"unread":false,"sessionId":"session-global","thinkingLevels":[{"id":"off","label":"off"},{"id":"minimal","label":"minimal"},{"id":"low","label":"low"},{"id":"medium","label":"medium"},{"id":"high","label":"high"}],"thinkingOptions":["off","minimal","low","medium","high"],"thinkingDefault":"off","effectiveFastMode":false,"effectiveFastModeSource":"default","fastAutoOnSeconds":60,"totalTokens":1,"totalTokensFresh":true,"estimatedCostUsd":0,"effectiveResponseUsage":"off","effectiveQueueMode":"steer","modelProvider":"openai","model":"gpt-5.4","modelOverrideSource":null,"agentRuntime":{"id":"codex","cloudPlacementSupported":false,"devicePlacementSupported":false,"source":"implicit"},"contextTokens":100}]}',
   ].join("");

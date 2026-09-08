@@ -39,7 +39,7 @@ let uploadDirectoryToSshTarget: typeof import("./ssh.js").uploadDirectoryToSshTa
 beforeAll(async () => {
   vi.resetModules();
   ({ uploadDirectoryToSshTarget } = await import("./ssh.js"));
-  localDir = tempDirs.make("openclaw-ssh-stream-test-");
+  localDir = tempDirs.make("carapace-ssh-stream-test-");
 });
 
 beforeEach(() => {

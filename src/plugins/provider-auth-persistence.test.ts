@@ -5,33 +5,33 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { ensureAuthProfileStore } from "../agents/auth-profiles/store-runtime.js";
 import { runSecretsAudit } from "../secrets/audit.js";
 import { readSecretStoreValue } from "../secrets/store/secret-store.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { persistProviderAuthProfileBatch } from "./provider-auth-persistence.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("provider auth protected persistence", () => {
   it("stores a provider-minted token behind a resolvable ref without an audit finding", async () => {
-    const rootDir = tempDirs.make("openclaw-provider-auth-store-");
+    const rootDir = tempDirs.make("carapace-provider-auth-store-");
     const stateDir = path.join(rootDir, "state");
     const agentDir = path.join(stateDir, "agents", "main", "agent");
-    const configPath = path.join(rootDir, "openclaw.json");
+    const configPath = path.join(rootDir, "carapace.json");
     await fs.writeFile(configPath, "{}\n", "utf8");
     const env = {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
 
     await withEnvAsync(
-      { OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_STATE_DIR: stateDir },
+      { CARAPACE_CONFIG_PATH: configPath, CARAPACE_STATE_DIR: stateDir },
       async () => {
         const persisted = await persistProviderAuthProfileBatch({
           profiles: [

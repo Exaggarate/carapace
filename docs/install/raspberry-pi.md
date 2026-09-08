@@ -1,13 +1,13 @@
 ---
-summary: "Host OpenClaw on a Raspberry Pi for always-on self-hosting"
+summary: "Host Carapace on a Raspberry Pi for always-on self-hosting"
 read_when:
-  - Setting up OpenClaw on a Raspberry Pi
-  - Running OpenClaw on ARM devices
+  - Setting up Carapace on a Raspberry Pi
+  - Running Carapace on ARM devices
   - Building a cheap always-on personal AI
 title: "Raspberry Pi"
 ---
 
-Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is just the gateway (models run in the cloud via API), even a modest Pi handles the workload well -- typical hardware cost is **$35-80 one-time**, no monthly fees.
+Run a persistent, always-on Carapace Gateway on a Raspberry Pi. Since the Pi is just the gateway (models run in the cloud via API), even a modest Pi handles the workload well -- typical hardware cost is **$35-80 one-time**, no monthly fees.
 
 ## Hardware compatibility
 
@@ -89,15 +89,15 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 
   </Step>
 
-  <Step title="Install OpenClaw">
+  <Step title="Install Carapace">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
+    curl -fsSL https://github.com/Exaggarate/carapace | bash -s -- --no-onboard
     ```
   </Step>
 
   <Step title="Run onboarding">
     ```bash
-    openclaw onboard --install-daemon
+    carapace onboard --install-daemon
     ```
 
     Follow the wizard. API keys are recommended over OAuth for headless devices. Telegram is the easiest channel to start with.
@@ -106,9 +106,9 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 
   <Step title="Verify">
     ```bash
-    openclaw status
-    systemctl --user status openclaw-gateway.service
-    journalctl --user -u openclaw-gateway.service -f
+    carapace status
+    systemctl --user status carapace-gateway.service
+    journalctl --user -u carapace-gateway.service -f
     ```
   </Step>
 
@@ -116,7 +116,7 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
     On your computer, get a dashboard URL from the Pi:
 
     ```bash
-    ssh user@gateway-host 'openclaw dashboard --no-open'
+    ssh user@gateway-host 'carapace dashboard --no-open'
     ```
 
     Then create an SSH tunnel in another terminal:
@@ -132,15 +132,15 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 
 ## Performance tips
 
-**Use a USB SSD** -- SD cards are slow and wear out. A USB SSD dramatically improves performance and survives more write cycles; use it for `OPENCLAW_STATE_DIR` if you keep the OS on SD. See the [Pi USB boot guide](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#usb-mass-storage-boot).
+**Use a USB SSD** -- SD cards are slow and wear out. A USB SSD dramatically improves performance and survives more write cycles; use it for `CARAPACE_STATE_DIR` if you keep the OS on SD. See the [Pi USB boot guide](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#usb-mass-storage-boot).
 
-**Enable module compile cache** -- Speeds up repeated CLI invocations on lower-power Pi hosts. `OPENCLAW_NO_RESPAWN=1` keeps routine Gateway restarts in-process, avoiding extra process handoffs and keeping PID tracking simple on small hosts:
+**Enable module compile cache** -- Speeds up repeated CLI invocations on lower-power Pi hosts. `CARAPACE_NO_RESPAWN=1` keeps routine Gateway restarts in-process, avoiding extra process handoffs and keeping PID tracking simple on small hosts:
 
 ```bash
-grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
-export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
-mkdir -p /var/tmp/openclaw-compile-cache
-export OPENCLAW_NO_RESPAWN=1
+grep -q 'NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
+export NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache
+mkdir -p /var/tmp/carapace-compile-cache
+export CARAPACE_NO_RESPAWN=1
 EOF
 source ~/.bashrc
 ```
@@ -154,20 +154,20 @@ echo 'gpu_mem=16' | sudo tee -a /boot/config.txt
 sudo systemctl disable bluetooth
 ```
 
-**systemd drop-in for host-specific startup tuning** -- The managed unit owns the generic restart policy (`Restart=always`, `RestartSec=5`). If this Pi is mostly running OpenClaw, add a service drop-in for host-specific startup settings only:
+**systemd drop-in for host-specific startup tuning** -- The managed unit owns the generic restart policy (`Restart=always`, `RestartSec=5`). If this Pi is mostly running Carapace, add a service drop-in for host-specific startup settings only:
 
 ```bash
-systemctl --user edit openclaw-gateway.service
+systemctl --user edit carapace-gateway.service
 ```
 
 ```ini
 [Service]
-Environment=OPENCLAW_NO_RESPAWN=1
-Environment=NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
+Environment=CARAPACE_NO_RESPAWN=1
+Environment=NODE_COMPILE_CACHE=/var/tmp/carapace-compile-cache
 TimeoutStartSec=90
 ```
 
-Then `systemctl --user daemon-reload && systemctl --user restart openclaw-gateway.service`. On a headless Pi, also enable lingering once so the user service survives logout: `sudo loginctl enable-linger "$(whoami)"`.
+Then `systemctl --user daemon-reload && systemctl --user restart carapace-gateway.service`. On a headless Pi, also enable lingering once so the user service survives logout: `sudo loginctl enable-linger "$(whoami)"`.
 
 ## Recommended model setup
 
@@ -188,20 +188,20 @@ Since the Pi only runs the gateway, use cloud-hosted API models -- do not run lo
 
 ## ARM binary notes
 
-Most OpenClaw features work on ARM64 without changes (Node.js, Telegram, WhatsApp/Baileys, Chromium). The binaries that occasionally lack ARM builds are typically optional Go/Rust CLI tools shipped by skills. Verify architecture with `uname -m` (should show `aarch64`), then check a missing binary's release page for `linux-arm64` / `aarch64` artifacts before falling back to building from source.
+Most Carapace features work on ARM64 without changes (Node.js, Telegram, WhatsApp/Baileys, Chromium). The binaries that occasionally lack ARM builds are typically optional Go/Rust CLI tools shipped by skills. Verify architecture with `uname -m` (should show `aarch64`), then check a missing binary's release page for `linux-arm64` / `aarch64` artifacts before falling back to building from source.
 
 ## Persistence and backups
 
-OpenClaw state lives under:
+Carapace state lives under:
 
-- `~/.openclaw/` -- `openclaw.json`, shared and per-agent SQLite auth stores, channel/provider state, sessions.
-- `~/.openclaw/workspace/` -- agent workspace (SOUL.md, memory, artifacts).
+- `~/.carapace/` -- `carapace.json`, shared and per-agent SQLite auth stores, channel/provider state, sessions.
+- `~/.carapace/workspace/` -- agent workspace (SOUL.md, memory, artifacts).
 
 These survive reboots and benefit from SSD over SD card for both performance and longevity. Take a portable snapshot with:
 
 ```bash
-openclaw backup create
-openclaw backup restore <archive.tar.gz> --target <fresh-directory>
+carapace backup create
+carapace backup restore <archive.tar.gz> --target <fresh-directory>
 ```
 
 Restore verifies and extracts into a fresh staging directory; activation is a
@@ -214,7 +214,7 @@ for the rollback warnings and activation sequence.
 
 **Slow performance** -- Use a USB SSD instead of an SD card. Check for CPU throttling with `vcgencmd get_throttled` (should return `0x0`).
 
-**Service will not start** -- Check logs with `journalctl --user -u openclaw-gateway.service --no-pager -n 100` and run `openclaw doctor --non-interactive`. If this is a headless Pi, also verify lingering is enabled: `sudo loginctl enable-linger "$(whoami)"`.
+**Service will not start** -- Check logs with `journalctl --user -u carapace-gateway.service --no-pager -n 100` and run `carapace doctor --non-interactive`. If this is a headless Pi, also verify lingering is enabled: `sudo loginctl enable-linger "$(whoami)"`.
 
 **ARM binary issues** -- If a skill fails with "exec format error", check whether the binary has an ARM64 build. Verify architecture with `uname -m` (should show `aarch64`).
 
@@ -224,7 +224,7 @@ for the rollback warnings and activation sequence.
 
 - [Channels](/channels) -- connect Telegram, WhatsApp, Discord, and more
 - [Gateway configuration](/gateway/configuration) -- all config options
-- [Updating](/install/updating) -- keep OpenClaw up to date
+- [Updating](/install/updating) -- keep Carapace up to date
 
 ## Related
 

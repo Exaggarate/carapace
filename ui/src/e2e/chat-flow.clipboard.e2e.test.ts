@@ -100,7 +100,7 @@ suite.define(() => {
   it.each(["tool-diff", "selection", "agent-id"] as const)(
     "reports clipboard failure from the %s action",
     async (surface) => {
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-flow.clipboard", artifactDirParent)
         : undefined;
@@ -242,7 +242,7 @@ suite.define(() => {
         await deferClipboard(page);
         await copy.click();
         expect(await copy.isDisabled()).toBe(true);
-        const picker = page.locator("openclaw-agents-page openclaw-agent-select");
+        const picker = page.locator("carapace-agents-page carapace-agent-select");
         await picker.locator(".agent-select__trigger").click();
         await picker
           .locator("wa-dropdown-item[data-agent-option]")
@@ -320,7 +320,7 @@ suite.define(() => {
         } else if (dismissal === "replacement") {
           await selectBubbleText(bubble);
         } else if (dismissal === "navigation") {
-          const sidebar = page.locator("openclaw-app-sidebar");
+          const sidebar = page.locator("carapace-app-sidebar");
           await sidebar.locator(".sidebar-identity-card").click();
           await sidebar
             .locator('wa-dropdown.sidebar-identity-menu wa-dropdown-item[value="command:usage"]')
@@ -396,7 +396,7 @@ suite.define(() => {
         });
         expect(await gateway.getRequests("chat.send")).toHaveLength(0);
 
-        const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactDirParent
           ? createControlUiE2eArtifactDir("chat-flow.clipboard", artifactDirParent)
           : undefined;
@@ -449,7 +449,7 @@ suite.define(() => {
       });
       expect(await gateway.getRequests("chat.send")).toHaveLength(0);
 
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-flow.clipboard", artifactDirParent)
         : undefined;

@@ -1,26 +1,26 @@
 import path from "node:path";
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { z } from "zod";
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
 import { isChannelConfigMetadataKey } from "../channels/config-metadata.js";
 import { isBuiltInModelProviderOverlayId } from "../config/model-provider-config.js";
 import { resolveIsNixMode } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveOfficialExternalProviderPluginIds } from "../plugins/official-external-plugin-catalog.js";
 import { isPubliclyKnownPluginId } from "../plugins/plugin-public-identity.js";
 import { listEnabledPluginRecords } from "../plugins/plugin-runtime-inventory.js";
 import { updateConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { VERSION } from "../version.js";
 import { isTruthyEnvValue } from "./env.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "./kysely-sync.js";
 
-const DEFAULT_TELEMETRY_ENDPOINT = "https://telemetry.openclaw.ai/api/latest-version";
+const DEFAULT_TELEMETRY_ENDPOINT = "https://github.com/Exaggarate/carapace";
 const TELEMETRY_STATE_KEY = "telemetry.updateCheck";
 const TELEMETRY_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const TELEMETRY_FAILURE_BACKOFF_MS = 60 * 1000;
@@ -92,16 +92,16 @@ const pendingSuccesses = new Map<string, SuccessfulTelemetryState>();
  * means the caller is deliberately exercising this path, so it still reports.
  */
 function isAutomatedEnvironment(): boolean {
-  if (process.env.OPENCLAW_TELEMETRY_ENDPOINT?.trim()) {
+  if (process.env.CARAPACE_TELEMETRY_ENDPOINT?.trim()) {
     return false;
   }
   return isTruthyEnvValue(process.env.CI);
 }
 
-function isUpdateCheckDisabled(config: OpenClawConfig): boolean {
+function isUpdateCheckDisabled(config: CarapaceConfig): boolean {
   return (
     config.update?.checkOnStart === false ||
-    isTruthyEnvValue(process.env.OPENCLAW_NO_AUTO_UPDATE) ||
+    isTruthyEnvValue(process.env.CARAPACE_NO_AUTO_UPDATE) ||
     isAutomatedEnvironment() ||
     resolveIsNixMode()
   );
@@ -115,9 +115,9 @@ function isDoNotTrackEnabled(): boolean {
 function countRecentSessions(nowMs: number): number {
   try {
     return (
-      withExistingOpenClawStateDatabaseReadOnly(({ db: database }) => {
+      withExistingCarapaceStateDatabaseReadOnly(({ db: database }) => {
         const db =
-          getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "session_state_events">>(database);
+          getNodeSqliteKysely<Pick<CarapaceStateKyselyDatabase, "session_state_events">>(database);
         const row = executeSqliteQueryTakeFirstSync(
           database,
           db
@@ -135,11 +135,11 @@ function countRecentSessions(nowMs: number): number {
 }
 
 function resolveTelemetryEndpoint(): string {
-  return process.env.OPENCLAW_TELEMETRY_ENDPOINT?.trim() || DEFAULT_TELEMETRY_ENDPOINT;
+  return process.env.CARAPACE_TELEMETRY_ENDPOINT?.trim() || DEFAULT_TELEMETRY_ENDPOINT;
 }
 
 export function buildTelemetryUserAgent(surface: TelemetrySurface): string {
-  return `openclaw/${VERSION} (${process.platform}; node/${process.versions.node}; ${process.arch}; ${surface})`;
+  return `carapace/${VERSION} (${process.platform}; node/${process.versions.node}; ${process.arch}; ${surface})`;
 }
 
 function readTelemetryState(databasePath?: string): TelemetryState {
@@ -183,7 +183,7 @@ function persistTelemetrySuccess(
   }
 }
 
-export function resolveTelemetryStatus(config: OpenClawConfig): {
+export function resolveTelemetryStatus(config: CarapaceConfig): {
   enabled: boolean;
   reason: TelemetryStatusReason;
   endpoint: string;
@@ -214,7 +214,7 @@ export function resolveTelemetryStatus(config: OpenClawConfig): {
 }
 
 export function buildTelemetryPayload(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: { surface: TelemetrySurface },
 ): TelemetryPayload {
   const enabledPlugins = listEnabledPluginRecords(config);
@@ -271,7 +271,7 @@ export function buildTelemetryPayload(
 }
 
 export async function checkTelemetryUpdate(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: TelemetryUpdateOptions,
 ): Promise<TelemetryUpdate | null> {
   if (isUpdateCheckDisabled(config)) {
@@ -279,7 +279,7 @@ export async function checkTelemetryUpdate(
   }
 
   const endpoint = resolveTelemetryEndpoint();
-  const databasePath = path.resolve(resolveOpenClawStateSqlitePath());
+  const databasePath = path.resolve(resolveCarapaceStateSqlitePath());
   const pendingKey = JSON.stringify([endpoint, databasePath]);
   let state = readTelemetryState(databasePath);
   const pending = pendingSuccesses.get(pendingKey);
@@ -294,7 +294,7 @@ export async function checkTelemetryUpdate(
     ? { version: state.latestVersion, ...(state.note ? { note: state.note } : {}) }
     : null;
   const nowMs = options.nowMs ?? Date.now();
-  const stateDirectory = process.env.OPENCLAW_STATE_DIR;
+  const stateDirectory = process.env.CARAPACE_STATE_DIR;
   if (
     state.lastPingAt !== undefined &&
     nowMs >= state.lastPingAt &&

@@ -109,19 +109,19 @@ def exercise(app, Atspi, GLib, *, remote_only, local_start_failure):
         if text_content(node):
             raise RuntimeError(f"Expected an empty {label!r}; refusing a remote connection")
 
-    wait("Welcome to OpenClaw", "heading")
+    wait("Welcome to Carapace", "heading")
     if local_start_failure:
         for attempt in range(2):
             click("Get started")
             wait("Where should your assistant live?", "heading")
             click("On this computer", "toggle button", prefix=True)
             click("Continue")
-            wait("OpenClaw needs attention", "heading")
+            wait("Carapace needs attention", "heading")
             wait(START_FAILURE)
             wait("Try again", "push button")
             if attempt == 0:
                 click("Try again")
-                wait("Welcome to OpenClaw", "heading")
+                wait("Welcome to Carapace", "heading")
         calls = Path("cli-calls.log").read_text().splitlines()
         if calls.count("gateway install --json") != 2:
             raise RuntimeError(f"Expected two failed Gateway installs, observed {calls!r}")
@@ -144,7 +144,7 @@ def exercise(app, Atspi, GLib, *, remote_only, local_start_failure):
         print("PASS: native first-run remote choices", flush=True)
         return
     click("Back")
-    wait("Welcome to OpenClaw", "heading")
+    wait("Welcome to Carapace", "heading")
     click("Get started")
     click("On this computer", "toggle button", prefix=True)
     click("Continue")
@@ -157,7 +157,7 @@ def exercise(app, Atspi, GLib, *, remote_only, local_start_failure):
         "Development",
         predicate=lambda node: node.get_state_set().contains(Atspi.StateType.SELECTED),
     )
-    wait("Install OpenClaw", "push button")
+    wait("Install Carapace", "push button")
     print("PASS: native first-run remote choices and local development channel", flush=True)
 
 
@@ -264,8 +264,8 @@ def main():
     binary = args.binary.resolve(strict=True)
     if not os.access(binary, os.X_OK):
         parser.error("The native app binary must be executable")
-    if shutil.which("openclaw", path="/usr/bin:/bin"):
-        parser.error("The minimal system PATH must not contain an OpenClaw CLI")
+    if shutil.which("carapace", path="/usr/bin:/bin"):
+        parser.error("The minimal system PATH must not contain an Carapace CLI")
     if args.artifacts_dir:
         args.artifacts_dir = args.artifacts_dir.resolve()
         args.artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -283,7 +283,7 @@ def main():
 
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, interrupted)
-    with tempfile.TemporaryDirectory(prefix="openclaw-first-run-") as directory:
+    with tempfile.TemporaryDirectory(prefix="carapace-first-run-") as directory:
         root = Path(directory)
         # Allowlisting drops CLI/config overrides, credentials and existing desktop state.
         env = {
@@ -313,7 +313,7 @@ def main():
             path.mkdir(mode=0o700, parents=True)
             env[variable] = str(path)
         if args.local_start_failure:
-            cli = root / ".openclaw/bin/openclaw"
+            cli = root / ".carapace/bin/carapace"
             cli.parent.mkdir(mode=0o700, parents=True)
             cli.write_text(
                 "#!/usr/bin/python3\n"
@@ -322,7 +322,7 @@ def main():
                 "command = ' '.join(sys.argv[1:])\n"
                 "with Path('cli-calls.log').open('a') as log: log.write(command + '\\n')\n"
                 "if command == '--version':\n"
-                "    print('OpenClaw fixture')\n"
+                "    print('Carapace fixture')\n"
                 "elif command == 'gateway status --json':\n"
                 "    print(json.dumps({'service': {'loaded': False}, 'rpc': {'ok': False}}))\n"
                 "elif command == 'gateway install --json':\n"

@@ -22,7 +22,7 @@ function transcriptMessage(
     role,
     content,
     timestamp: Date.UTC(2026, 7, 19, 12, 0, seq),
-    __openclaw: role === "user" ? { id, idempotencyKey: runId, seq } : { id, runId, seq },
+    __carapace: role === "user" ? { id, idempotencyKey: runId, seq } : { id, runId, seq },
   };
 }
 
@@ -34,7 +34,7 @@ suite.define(() => {
     });
     const page = await context.newPage();
     const runId = "nested-run";
-    const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("nested-tool-collapse", artifactRoot)
       : undefined;
@@ -70,7 +70,7 @@ suite.define(() => {
             timestamp: Date.UTC(2026, 7, 19, 12, 0, seq + 1),
           }),
           idempotencyKey,
-          __openclaw: { id: childId, seq: seq + 1, idempotencyKey },
+          __carapace: { id: childId, seq: seq + 1, idempotencyKey },
         },
       ];
     });
@@ -174,7 +174,7 @@ suite.define(() => {
 
     expect(rowKeys[0]).toMatch(/^agent-run:/u);
     expect(rowKeys).toEqual([rowKeys[0], rowKeys[0], rowKeys[0]]);
-    const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-agent-run-transcript", artifactRoot)
       : undefined;
@@ -341,7 +341,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}chat`);
       const transcript = page.locator(".chat-thread-inner");
       await transcript.getByText("Caption ready for the second run.", { exact: true }).waitFor();
-      const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-agent-run-transcript", artifactRoot)
         : undefined;
@@ -441,7 +441,7 @@ suite.define(() => {
       content: finalText,
       idempotencyKey: `cli-assistant:${runId}`,
       timestamp: Date.UTC(2026, 7, 19, 12, 1),
-      __openclaw: {
+      __carapace: {
         id: "assistant-after-hidden-heartbeat",
         seq: 1,
         turnBoundary: true,
@@ -539,7 +539,7 @@ suite.define(() => {
     });
     expect(overlappingRows).toEqual([]);
 
-    const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-agent-run-transcript", artifactRoot)
       : undefined;

@@ -31,7 +31,7 @@ import {
 import { streamSessionTranscriptLines } from "../config/sessions/transcript-stream.js";
 import { scanSessionTranscriptTree } from "../config/sessions/transcript-tree.js";
 import { captureOwnedTranscriptWriteAssertion } from "../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveGatewaySessionStoreTarget } from "./session-utils.js";
 
@@ -93,7 +93,7 @@ type RestoreCheckpointSessionParams = {
 };
 
 type PersistSessionCompactionCheckpointParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   sessionId: string;

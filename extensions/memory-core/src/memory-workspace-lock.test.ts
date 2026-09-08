@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { getFileLockProcessStartTime } from "openclaw/plugin-sdk/process-runtime";
+import { getFileLockProcessStartTime } from "carapace/plugin-sdk/process-runtime";
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from "vitest";
 import { withMemoryWorkspaceLock } from "./memory-workspace-lock.js";
 import { auditShortTermPromotionArtifacts } from "./short-term-promotion-artifacts.js";

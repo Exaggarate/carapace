@@ -1,9 +1,9 @@
 // Coverage for registry-backed model forward-compatibility fallbacks.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { guardModelFixtureAuth } from "./model.fixture.test-support.js";
 import {
   buildForwardCompatTemplate,
@@ -12,10 +12,10 @@ import {
 import { resolveModelWithRegistry } from "./model.js";
 import { createProviderRuntimeTestMock } from "./model.provider-runtime.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let auth: ReturnType<typeof guardModelFixtureAuth>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ label: "model-forward-compat" });
+  state = await createCarapaceTestState({ label: "model-forward-compat" });
   auth = guardModelFixtureAuth(state.root);
 });
 afterEach(async () => {

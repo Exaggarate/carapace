@@ -13,9 +13,9 @@ import {
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { acquireGatewayLock } from "../infra/gateway-lock.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { runCliProcessChild } from "./cli-process-child.test-helpers.js";
 import {
@@ -43,7 +43,7 @@ describe("gateway-backed CLI process exit", () => {
     { status: "ok" as const, text: "pong", exitCode: 0 },
     { status: "error" as const, text: "provider failed", exitCode: 1 },
   ])("exits $exitCode after an agent turn reports $status", async ({ status, text, exitCode }) => {
-    const root = tempDirs.make(`openclaw-agent-turn-${status}-`);
+    const root = tempDirs.make(`carapace-agent-turn-${status}-`);
     const gateway = await startAgentTurnGateway({ status, text });
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
       mode: "remote",
@@ -72,7 +72,7 @@ describe("gateway-backed CLI process exit", () => {
   ])(
     "validates a $label nodes timeout before opening a Gateway connection",
     async ({ timeout, valid }) => {
-      const root = tempDirs.make("openclaw-nodes-timeout-");
+      const root = tempDirs.make("carapace-nodes-timeout-");
       const token = "test-token";
       const gateway = await startNodePairingGateway({ token });
       const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
@@ -105,7 +105,7 @@ describe("gateway-backed CLI process exit", () => {
   );
 
   it("dispatches node pairing mutations without opening the writable state database", async () => {
-    const root = tempDirs.make("openclaw-node-pairing-cli-");
+    const root = tempDirs.make("carapace-node-pairing-cli-");
     const token = "test-token";
     const gateway = await startNodePairingGateway({ token });
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
@@ -123,13 +123,13 @@ describe("gateway-backed CLI process exit", () => {
     expect(result, result.stderr).toMatchObject({ code: 0, signal: null, stderr: "" });
     expect(JSON.parse(result.stdout)).toEqual({ approved: true });
     expect(gateway.calls).toEqual(["node.pair.list", "node.pair.approve"]);
-    await expect(fs.stat(path.join(stateDir, "state", "openclaw.sqlite"))).rejects.toMatchObject({
+    await expect(fs.stat(path.join(stateDir, "state", "carapace.sqlite"))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
 
   it("uses existing device auth without persisting a hello-issued token or coordinator state", async () => {
-    const root = tempDirs.make("openclaw-node-pairing-stored-auth-");
+    const root = tempDirs.make("carapace-node-pairing-stored-auth-");
     const storedToken = "stored-device-token";
     const gateway = await startNodePairingGateway(
       { deviceToken: storedToken },
@@ -142,8 +142,8 @@ describe("gateway-backed CLI process exit", () => {
     const stateEnv = {
       ...process.env,
       HOME: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: stateDir,
     };
     const identity = loadOrCreateDeviceIdentity({ env: stateEnv });
     storeOriginDeviceToken({
@@ -154,7 +154,7 @@ describe("gateway-backed CLI process exit", () => {
       scopes: ["operator.admin"],
       env: stateEnv,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const before = await snapshotDirectoryContents(stateDir);
 
     const result = await runIsolatedGatewayCli({
@@ -179,7 +179,7 @@ describe("gateway-backed CLI process exit", () => {
   });
 
   it("calls a reachable Gateway with explicit auth without creating shared state", async () => {
-    const root = tempDirs.make("openclaw-gateway-call-explicit-auth-");
+    const root = tempDirs.make("carapace-gateway-call-explicit-auth-");
     const token = "configured-token";
     const gateway = await startGatewayStabilityRpcServer({ token }, "issued-device-token");
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
@@ -203,7 +203,7 @@ describe("gateway-backed CLI process exit", () => {
   });
 
   it("calls a reachable Gateway with stored auth without changing shared state", async () => {
-    const root = tempDirs.make("openclaw-gateway-call-stored-auth-");
+    const root = tempDirs.make("carapace-gateway-call-stored-auth-");
     const storedToken = "stored-device-token";
     const gateway = await startGatewayStabilityRpcServer(
       { deviceToken: storedToken },
@@ -216,8 +216,8 @@ describe("gateway-backed CLI process exit", () => {
     const stateEnv = {
       ...process.env,
       HOME: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: stateDir,
     };
     const identity = loadOrCreateDeviceIdentity({ env: stateEnv });
     storeOriginDeviceToken({
@@ -228,7 +228,7 @@ describe("gateway-backed CLI process exit", () => {
       scopes: ["operator.admin"],
       env: stateEnv,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const before = await snapshotSharedStateArtifacts(stateDir);
 
     const result = await runIsolatedGatewayCli({
@@ -259,7 +259,7 @@ describe("gateway-backed CLI process exit", () => {
   ])(
     "requires a reachable status RPC without changing $label shared state",
     async ({ label, seeded }) => {
-      const root = tempDirs.make(`openclaw-gateway-status-${label}-`);
+      const root = tempDirs.make(`carapace-gateway-status-${label}-`);
       const token = "configured-token";
       const gateway = await startGatewayStabilityRpcServer({ token }, "issued-device-token");
       const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
@@ -269,8 +269,8 @@ describe("gateway-backed CLI process exit", () => {
       const stateEnv = {
         ...process.env,
         HOME: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
       };
       if (seeded) {
         const identity = loadOrCreateDeviceIdentity({ env: stateEnv });
@@ -282,10 +282,10 @@ describe("gateway-backed CLI process exit", () => {
           scopes: ["operator.admin"],
           env: stateEnv,
         });
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
       const before = await snapshotSharedStateArtifacts(stateDir);
-      expect(Object.keys(before).includes("openclaw.sqlite")).toBe(seeded);
+      expect(Object.keys(before).includes("carapace.sqlite")).toBe(seeded);
 
       const result = await runIsolatedGatewayCli({
         args: [
@@ -315,9 +315,9 @@ describe("gateway-backed CLI process exit", () => {
   );
 
   it.runIf(process.platform !== "win32")(
-    "runs gateway status through one OpenClaw entry process",
+    "runs gateway status through one Carapace entry process",
     async () => {
-      const root = tempDirs.make("openclaw-gateway-status-entry-process-");
+      const root = tempDirs.make("carapace-gateway-status-entry-process-");
       const pidLogPath = path.join(root, "entry-pids");
       const preloadPath = path.join(root, "track-entry-pid.mjs");
       const token = "configured-token";
@@ -332,7 +332,7 @@ describe("gateway-backed CLI process exit", () => {
           'import fs from "node:fs";',
           'const entry = process.argv[1]?.replaceAll("\\\\", "/");',
           'if (entry?.endsWith("/src/entry.ts")) {',
-          "  fs.appendFileSync(process.env.OPENCLAW_ENTRY_PID_LOG, `${process.pid}\\n`);",
+          "  fs.appendFileSync(process.env.CARAPACE_ENTRY_PID_LOG, `${process.pid}\\n`);",
           "}",
           "",
         ].join("\n"),
@@ -356,10 +356,10 @@ describe("gateway-backed CLI process exit", () => {
         configPath,
         env: {
           NODE_OPTIONS: `--import=${pathToFileURL(preloadPath).href}`,
-          OPENCLAW_ENTRY_PID_LOG: pidLogPath,
-          OPENCLAW_NODE_EXTRA_CA_CERTS_READY: "1",
-          OPENCLAW_NODE_OPTIONS_READY: undefined,
-          OPENCLAW_NO_RESPAWN: undefined,
+          CARAPACE_ENTRY_PID_LOG: pidLogPath,
+          CARAPACE_NODE_EXTRA_CA_CERTS_READY: "1",
+          CARAPACE_NODE_OPTIONS_READY: undefined,
+          CARAPACE_NO_RESPAWN: undefined,
         },
       });
 
@@ -380,7 +380,7 @@ describe("gateway-backed CLI process exit", () => {
   it.runIf(process.platform === "linux")(
     "reports a socat-owned port through the gateway status entry process",
     async () => {
-      const root = tempDirs.make("openclaw-gateway-status-socat-");
+      const root = tempDirs.make("carapace-gateway-status-socat-");
       const listenerPath = path.join(root, "socat-listener.mjs");
       const port = await getFreePort();
       const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
@@ -400,7 +400,7 @@ describe("gateway-backed CLI process exit", () => {
           "",
         ].join("\n"),
       );
-      const listener = spawn(process.execPath, [listenerPath, String(port), "openclaw"], {
+      const listener = spawn(process.execPath, [listenerPath, String(port), "carapace"], {
         stdio: ["ignore", "pipe", "pipe"],
       });
       let listenerStderr = "";
@@ -508,9 +508,9 @@ describe("gateway-backed CLI process exit", () => {
   ])(
     "renders an unreachable gateway as expected guidance for devices $label",
     async ({ label, args, machineOutput }) => {
-      const root = tempDirs.make(`openclaw-devices-${label}-transport-`);
+      const root = tempDirs.make(`carapace-devices-${label}-transport-`);
       const stateDir = path.join(root, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const port = await getFreePort();
       await fs.mkdir(stateDir, { recursive: true });
       await fs.writeFile(
@@ -534,13 +534,13 @@ describe("gateway-backed CLI process exit", () => {
       }
       expect(result.stderr).toContain(`Gateway not reachable at ws://127.0.0.1:${port}`);
       expect(result.stderr).toContain(
-        "Start it with `openclaw gateway run` or check `openclaw gateway status`.",
+        "Start it with `carapace gateway run` or check `carapace gateway status`.",
       );
       expect(result.stderr).not.toContain("The CLI command failed");
       expect(result.stderr).not.toContain("Could not start the CLI");
-      expect(result.stderr).not.toContain("OPENCLAW_DEBUG");
+      expect(result.stderr).not.toContain("CARAPACE_DEBUG");
       expect(result.stderr).not.toContain("Stack:");
-      expect(result.stderr).not.toContain("openclaw doctor");
+      expect(result.stderr).not.toContain("carapace doctor");
     },
   );
 
@@ -580,7 +580,7 @@ describe("gateway-backed CLI process exit", () => {
   });
 
   it("rejects invalid remote config before a node pairing mutation without opening state", async () => {
-    const root = tempDirs.make("openclaw-node-pairing-invalid-config-");
+    const root = tempDirs.make("carapace-node-pairing-invalid-config-");
     const gateway = await startNodePairingGateway({ token: "test-token" });
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
       mode: "remtoe",
@@ -599,7 +599,7 @@ describe("gateway-backed CLI process exit", () => {
       ok: false,
       error: {
         type: "cli_error",
-        message: expect.stringContaining("OpenClaw config is invalid:"),
+        message: expect.stringContaining("Carapace config is invalid:"),
       },
       issues: [
         {
@@ -609,25 +609,25 @@ describe("gateway-backed CLI process exit", () => {
         },
       ],
     });
-    expect(result.stderr).toContain("OpenClaw config is invalid");
+    expect(result.stderr).toContain("Carapace config is invalid");
     expect(result.stderr).toContain("gateway.mode");
     expect(gateway.calls).toEqual([]);
-    await expect(fs.stat(path.join(stateDir, "state", "openclaw.sqlite"))).rejects.toMatchObject({
+    await expect(fs.stat(path.join(stateDir, "state", "carapace.sqlite"))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
 
   it("exits promptly after cron list emits complete output", async () => {
-    const root = tempDirs.make("openclaw-gateway-cli-exit-");
+    const root = tempDirs.make("carapace-gateway-cli-exit-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const caTriggerPath = path.join(root, "load-default-ca.mjs");
     const token = "test-token";
     const gateway = await startCronListGateway(token);
     await fs.mkdir(stateDir, { recursive: true });
     await fs.writeFile(
       caTriggerPath,
-      `if (process.env.OPENCLAW_NODE_OPTIONS_READY === "1") {
+      `if (process.env.CARAPACE_NODE_OPTIONS_READY === "1") {
   const { getCACertificates } = await import("node:tls");
   getCACertificates("default");
 }
@@ -666,10 +666,10 @@ describe("gateway-backed CLI process exit", () => {
         NODE_ENV: undefined,
         NODE_OPTIONS: undefined,
         NODE_USE_SYSTEM_CA: "1",
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_NODE_OPTIONS_READY: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_NODE_OPTIONS_READY: undefined,
+        CARAPACE_STATE_DIR: stateDir,
         VITEST: undefined,
       },
       onStdout: (stdout) => {
@@ -708,9 +708,9 @@ describe("gateway-backed CLI process exit", () => {
   ])(
     "renders missing $label credentials as expected guidance, not a crash",
     async ({ label, args, gatewayOwnsLock, method }) => {
-      const root = tempDirs.make(`openclaw-${label.replaceAll(" ", "-")}-credentials-human-`);
+      const root = tempDirs.make(`carapace-${label.replaceAll(" ", "-")}-credentials-human-`);
       const stateDir = path.join(root, "state");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const port = await getFreePort();
       await fs.mkdir(stateDir, { recursive: true });
       await fs.writeFile(
@@ -722,9 +722,9 @@ describe("gateway-backed CLI process exit", () => {
       const gatewayEnv = {
         ...process.env,
         HOME: root,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
       };
       const lock = gatewayOwnsLock
         ? await acquireGatewayLock({
@@ -738,7 +738,7 @@ describe("gateway-backed CLI process exit", () => {
       try {
         if (gatewayOwnsLock) {
           expect(lock).not.toBeNull();
-          openOpenClawStateDatabase({ env: gatewayEnv });
+          openCarapaceStateDatabase({ env: gatewayEnv });
         }
         const result = await runIsolatedGatewayCli({ args, root, stateDir, configPath });
 
@@ -752,12 +752,12 @@ describe("gateway-backed CLI process exit", () => {
         expect(result.stderr).toContain(`Config: ${configPath}`);
         expect(result.stderr).not.toContain("The CLI command failed");
         expect(result.stderr).not.toContain("Could not start the CLI");
-        expect(result.stderr).not.toContain("OPENCLAW_DEBUG");
+        expect(result.stderr).not.toContain("CARAPACE_DEBUG");
         expect(result.stderr).not.toContain("Stack:");
-        expect(result.stderr).not.toContain("openclaw doctor");
+        expect(result.stderr).not.toContain("carapace doctor");
       } finally {
         if (gatewayOwnsLock) {
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
         }
         await lock?.release();
       }
@@ -768,9 +768,9 @@ describe("gateway-backed CLI process exit", () => {
     { label: "channels config-only status", args: ["channels", "status"] },
     { label: "gateway reachability status", args: ["gateway", "status"] },
   ])("returns success after delivering $label", async ({ args }) => {
-    const root = tempDirs.make("openclaw-degraded-status-");
+    const root = tempDirs.make("carapace-degraded-status-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const port = await getFreePort();
     await fs.mkdir(stateDir, { recursive: true });
     await fs.writeFile(
@@ -790,7 +790,7 @@ describe("gateway-backed CLI process exit", () => {
     { label: "omitted", timeout: undefined, valid: true },
     { label: "positive", timeout: "10000", valid: true },
   ])("validates a $label channels capabilities timeout", async ({ timeout, valid }) => {
-    const root = tempDirs.make("openclaw-capabilities-timeout-");
+    const root = tempDirs.make("carapace-capabilities-timeout-");
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, { mode: "local" });
 
     const result = await runIsolatedGatewayCli({

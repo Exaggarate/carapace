@@ -3,7 +3,7 @@
  *
  * Combines plugin contracts, availability, config signals, auth profiles, env candidates, and base URL guards.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizePluginsConfig } from "../../plugins/config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { createInstalledPluginEnabledPredicate } from "../../plugins/installed-plugin-index.js";
@@ -75,7 +75,7 @@ function listCapabilityAuthSignals(params: {
 function hasAvailableCapabilityPlugin(
   params: {
     snapshot: CapabilityMetadataSnapshot;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
   },
   accepts: (plugin: PluginManifestRecord) => boolean,
 ): boolean {
@@ -103,7 +103,7 @@ function hasConfiguredCapabilityProviderSignal(params: {
   plugin: PluginManifestRecord;
   key: CapabilityContractKey;
   providerId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   authStore?: AuthProfileStore;
 }): boolean {
   const metadataKey = metadataKeyForCapabilityContract(params.key);
@@ -150,7 +150,7 @@ function hasConfiguredCapabilityProviderSignal(params: {
 
 /** Returns the active capability metadata snapshot when one is already loaded. */
 export function getCurrentCapabilityMetadataSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
 }): PluginMetadataSnapshot | undefined {
   const workspaceDir = params.workspaceDir ?? getActivePluginRegistryWorkspaceDirFromState();
@@ -162,7 +162,7 @@ export function getCurrentCapabilityMetadataSnapshot(params: {
 
 /** Loads capability metadata from current config/workspace plugin state. */
 export function loadCapabilityMetadataSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): Pick<PluginMetadataSnapshot, "index" | "plugins"> {
@@ -178,7 +178,7 @@ export function loadCapabilityMetadataSnapshot(params: {
 export function hasSnapshotCapabilityAvailability(params: {
   snapshot: CapabilityMetadataSnapshot;
   key: CapabilityContractKey;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   authStore?: AuthProfileStore;
 }): boolean {
   return hasAvailableCapabilityPlugin(params, (plugin) =>
@@ -198,7 +198,7 @@ export function hasSnapshotCapabilityAvailability(params: {
 export function hasSnapshotProviderEnvAvailability(params: {
   snapshot: CapabilityMetadataSnapshot;
   providerId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): boolean {
   return hasAvailableCapabilityPlugin(params, (plugin) =>
     hasNonEmptyManifestEnvCandidate(
@@ -213,7 +213,7 @@ export function hasSnapshotCapabilityProviderAvailability(params: {
   snapshot: CapabilityMetadataSnapshot;
   key: CapabilityContractKey;
   providerId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   authStore?: AuthProfileStore;
 }): boolean {
   return hasAvailableCapabilityPlugin(params, (plugin) => {

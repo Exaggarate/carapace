@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw LongCat provider plugin."
+summary: "Carapace LongCat provider plugin."
 read_when:
   - You are installing, configuring, or auditing the longcat plugin
 title: "LongCat plugin reference"
@@ -7,15 +7,15 @@ title: "LongCat plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw LongCat provider plugin.
+Carapace LongCat provider plugin.
 
 ## Distribution
 
-- Package: `@openclaw/longcat-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/longcat-provider`
+- Package: `@carapace/longcat-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/longcat-provider`
 
 ## Surface
 

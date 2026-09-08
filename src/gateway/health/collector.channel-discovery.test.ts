@@ -5,7 +5,7 @@ import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setGatewayPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -15,12 +15,12 @@ import {
   createTestRegistry,
 } from "../../test-utils/channel-plugins.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { collectGatewayHealthSnapshot } from "./collector.js";
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 
 afterEach(async () => {
   vi.restoreAllMocks();
@@ -34,8 +34,8 @@ describe("Gateway health channel discovery", () => {
   it.each(["missing", "empty"] as const)(
     "uses admitted channels and configured failures without credential discovery (%s runtime snapshot)",
     async (runtime) => {
-      state = await createOpenClawTestState({ label: "health-channel-discovery" });
-      const config: OpenClawConfig = {
+      state = await createCarapaceTestState({ label: "health-channel-discovery" });
+      const config: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { main: {} } },
         channels: {
           "failed-chat": {

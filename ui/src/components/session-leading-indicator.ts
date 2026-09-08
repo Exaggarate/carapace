@@ -84,11 +84,11 @@ export function renderSessionLeadingState(
       return {
         running,
         leadingIndicator: renderSessionGlyph({
-          content: html`<openclaw-channel-avatar
+          content: html`<carapace-channel-avatar
             .routeUrl=${session.channelAvatarUrl}
             .authTokens=${avatarAuth?.authTokens ?? []}
             .authReady=${avatarAuth?.authReady ?? false}
-          ></openclaw-channel-avatar>`,
+          ></carapace-channel-avatar>`,
           running,
           queued,
           circular: true,
@@ -141,12 +141,12 @@ export function renderSessionLeadingState(
       leadingIndicator: renderSessionGlyph({
         // The owner chip stays visible until a usable avatar blob loads, so a
         // slow, unauthenticated, or 404 route never leaves an empty lead slot.
-        content: html`<openclaw-channel-avatar
+        content: html`<carapace-channel-avatar
           .routeUrl=${session.channelAvatarUrl}
           .authTokens=${avatarAuth?.authTokens ?? []}
           .authReady=${avatarAuth?.authReady ?? false}
           .fallback=${ownerChip ?? nothing}
-        ></openclaw-channel-avatar>`,
+        ></carapace-channel-avatar>`,
         running,
         queued,
         badge: session.unread && !session.hasActiveRun ? renderSessionUnreadBadge() : nothing,

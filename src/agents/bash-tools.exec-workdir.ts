@@ -5,7 +5,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { safeRealpathSync } from "../infra/boundary-path.js";
 import type { ExecHost } from "../infra/exec-approvals.js";
 import { isPathInside, safeStatSync } from "../infra/path-guards.js";

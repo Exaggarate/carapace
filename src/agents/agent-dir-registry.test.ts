@@ -14,7 +14,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("agent directory registry", () => {
   it("unregisters only the requested owner", () => {
-    const agentDir = path.join("/tmp", `openclaw-agent-dir-registry-${process.pid}`);
+    const agentDir = path.join("/tmp", `carapace-agent-dir-registry-${process.pid}`);
     registerResolvedAgentDir({ agentId: "first", agentDir });
     registerResolvedAgentDir({ agentId: "second", agentDir });
 
@@ -26,7 +26,7 @@ describe("agent directory registry", () => {
   });
 
   it("detects registered ownership on either side of a cleanup boundary", () => {
-    const root = path.join("/tmp", `openclaw-agent-dir-overlap-${process.pid}`);
+    const root = path.join("/tmp", `carapace-agent-dir-overlap-${process.pid}`);
     const agentDir = path.join(root, "agent");
     registerResolvedAgentDir({ agentId: "current", agentDir });
 
@@ -39,7 +39,7 @@ describe("agent directory registry", () => {
     expect(
       isPathOwnedByAnotherRegisteredAgent({
         agentId: "deleted",
-        pathname: path.join(agentDir, "openclaw-agent.sqlite"),
+        pathname: path.join(agentDir, "carapace-agent.sqlite"),
       }),
     ).toBe(true);
     expect(
@@ -53,7 +53,7 @@ describe("agent directory registry", () => {
   });
 
   it("keeps ownership stable through a symlinked parent after the agent dir is removed", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-dir-registry-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-agent-dir-registry-"));
     const realRoot = path.join(root, "real");
     const linkedRoot = path.join(root, "linked");
     const realAgentDir = path.join(realRoot, "agent");
@@ -89,10 +89,10 @@ describe("agent directory registry", () => {
   });
 
   it("matches tilde paths against the effective custom home", () => {
-    const root = tempDirs.make("openclaw-agent-dir-home-");
+    const root = tempDirs.make("carapace-agent-dir-home-");
     const customHome = path.join(root, "home");
     const agentDir = path.join(customHome, "agents", "main", "agent");
-    const env = { HOME: customHome, OPENCLAW_HOME: customHome };
+    const env = { HOME: customHome, CARAPACE_HOME: customHome };
     fs.mkdirSync(customHome, { recursive: true });
 
     try {

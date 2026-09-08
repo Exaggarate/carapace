@@ -1,5 +1,5 @@
 ---
-summary: "How OpenClaw rotates auth profiles and falls back across models"
+summary: "How Carapace rotates auth profiles and falls back across models"
 read_when:
   - Diagnosing auth profile rotation, cooldowns, or model fallback behavior
   - Updating failover rules for auth profiles or models
@@ -8,7 +8,7 @@ title: "Model failover"
 sidebarTitle: "Model failover"
 ---
 
-OpenClaw handles failures in two stages:
+Carapace handles failures in two stages:
 
 1. **Auth profile rotation** within the current provider.
 2. **Model fallback** to the next model in `agents.defaults.model.fallbacks`.
@@ -23,7 +23,7 @@ available. No additional configuration is required.
 Thinking-level recovery applies only when the provider identifies a reasoning or
 thinking parameter. Model/account restrictions and unrelated unsupported options
 keep their original failure classification and follow the configured fallback
-policy; OpenClaw does not retry them with thinking disabled.
+policy; Carapace does not retry them with thinking disabled.
 
 ## Runtime flow
 
@@ -56,36 +56,36 @@ The selection source controls whether the fallback chain is allowed:
 
 - **Configured default**: `agents.defaults.model.primary` uses `agents.defaults.model.fallbacks`.
 - **Agent primary**: `agents.entries.*.model` is strict unless that agent's model object includes its own `fallbacks`. Use `fallbacks: []` to make the strict behavior explicit, or a non-empty list to opt that agent into model fallback.
-- **Runtime fallback**: the fallback candidate applies only to the current turn. The next turn starts from the selected primary again. OpenClaw still recognizes previously stored `modelOverrideSource: "auto"` entries, probes their configured origin every 5 minutes, and clears them once the origin recovers. `/new`, `/reset`, and `sessions.reset` also clear those entries.
-- **User session override**: `/model`, the model picker, `session_status(model=...)`, and `sessions.patch` write `modelOverrideSource: "user"`. This is an exact session selection. If the selected provider/model fails before producing a reply, OpenClaw reports the failure instead of answering from an unrelated configured fallback.
-- **Legacy session override**: older session entries may have `modelOverride` without `modelOverrideSource`. OpenClaw treats those as user overrides so an explicit old selection is not silently converted into fallback behavior.
+- **Runtime fallback**: the fallback candidate applies only to the current turn. The next turn starts from the selected primary again. Carapace still recognizes previously stored `modelOverrideSource: "auto"` entries, probes their configured origin every 5 minutes, and clears them once the origin recovers. `/new`, `/reset`, and `sessions.reset` also clear those entries.
+- **User session override**: `/model`, the model picker, `session_status(model=...)`, and `sessions.patch` write `modelOverrideSource: "user"`. This is an exact session selection. If the selected provider/model fails before producing a reply, Carapace reports the failure instead of answering from an unrelated configured fallback.
+- **Legacy session override**: older session entries may have `modelOverride` without `modelOverrideSource`. Carapace treats those as user overrides so an explicit old selection is not silently converted into fallback behavior.
 - **Cron payload model**: a cron job `payload.model` / `--model` is a job primary, not a user session override. It uses configured fallbacks unless the job provides `payload.fallbacks`; `payload.fallbacks: []` makes the cron run strict.
 
-Outside group and channel conversations, OpenClaw sends a visible notice when a turn moves onto fallback and another notice when a later turn succeeds on the selected primary. Group and channel conversations keep the same fallback state and lifecycle events without posting these notices. Persisted notice state prevents repeated notices when consecutive turns use the same selected/active pair, while model selection itself remains unchanged.
+Outside group and channel conversations, Carapace sends a visible notice when a turn moves onto fallback and another notice when a later turn succeeds on the selected primary. Group and channel conversations keep the same fallback state and lifecycle events without posting these notices. Persisted notice state prevents repeated notices when consecutive turns use the same selected/active pair, while model selection itself remains unchanged.
 
 ## Auth failure skip cache
 
-By default, every new turn keeps the existing fallback retry behavior: OpenClaw retries each configured fallback candidate again, including non-primary candidates that recently failed with `auth` or `auth_permanent`.
+By default, every new turn keeps the existing fallback retry behavior: Carapace retries each configured fallback candidate again, including non-primary candidates that recently failed with `auth` or `auth_permanent`.
 
 Opt in to suppress repeat auth failures with:
 
 ```bash
-OPENCLAW_FALLBACK_SKIP_TTL_MS=60000
+CARAPACE_FALLBACK_SKIP_TTL_MS=60000
 ```
 
-When enabled, OpenClaw records an in-memory, session-scoped skip marker for a non-primary fallback candidate after an auth-class failure. The key includes the session, provider, model, and selected automatic or explicit profile ID. Switching profiles does not inherit another profile's failure marker. Primary candidates are never skipped, so an explicit user model selection still surfaces the real auth error. The cache is process-local and clears on Gateway restart.
+When enabled, Carapace records an in-memory, session-scoped skip marker for a non-primary fallback candidate after an auth-class failure. The key includes the session, provider, model, and selected automatic or explicit profile ID. Switching profiles does not inherit another profile's failure marker. Primary candidates are never skipped, so an explicit user model selection still surfaces the real auth error. The cache is process-local and clears on Gateway restart.
 
 The value is a TTL in milliseconds. `0` or unset disables the cache. Positive values are clamped between 1 second and 10 minutes.
 
 ## User-visible fallback notices
 
-Outside group and channel conversations, OpenClaw sends a status notice in the same reply surface when a session moves onto an auto-selected fallback:
+Outside group and channel conversations, Carapace sends a status notice in the same reply surface when a session moves onto an auto-selected fallback:
 
 ```text
 ↪️ Model Fallback: <fallback> (selected <primary>; <reason>)
 ```
 
-When a later probe succeeds and the session returns to the selected primary, OpenClaw sends:
+When a later probe succeeds and the session returns to the selected primary, Carapace sends:
 
 ```text
 ↪️ Model Fallback cleared: <primary> (was <fallback>)
@@ -97,12 +97,12 @@ When a fallback answers, the Control UI shows the successful answer once and rem
 
 ## Auth storage (keys + OAuth)
 
-OpenClaw uses **auth profiles** for both API keys and OAuth tokens.
+Carapace uses **auth profiles** for both API keys and OAuth tokens.
 
-- Secrets and runtime auth-routing state live in `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`.
+- Secrets and runtime auth-routing state live in `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`.
 - Config `auth.profiles` / `auth.order` are **metadata + routing only** (no secrets).
 - Legacy `credentials/oauth.json`, `auth-profiles.json`, `auth-state.json`, and
-  per-agent `auth.json` files are imported only by `openclaw doctor --fix`.
+  per-agent `auth.json` files are imported only by `carapace doctor --fix`.
   Runtime fails closed for the affected agent until credential-bearing legacy
   files are migrated; it never silently imports or falls back to them.
 
@@ -112,7 +112,7 @@ Credential types:
 
 - `type: "api_key"` → `{ provider, key }`
 - `type: "oauth"` → `{ provider, access, refresh, expires, email? }` (+ `projectId`/`enterpriseUrl` for some providers)
-- `type: "token"` → static bearer-style token, optionally expiring; OpenClaw does not refresh it (used for `aws-sdk` and other credential-chain auth modes)
+- `type: "token"` → static bearer-style token, optionally expiring; Carapace does not refresh it (used for `aws-sdk` and other credential-chain auth modes)
 
 ## Profile IDs
 
@@ -121,15 +121,15 @@ OAuth logins create distinct profiles so multiple accounts can coexist.
 - Default: `provider:default` when no email is available.
 - OAuth with email: `provider:<email>` (for example `openai:user@example.com`).
 
-Profiles live in the per-agent `openclaw-agent.sqlite` auth profile store.
+Profiles live in the per-agent `carapace-agent.sqlite` auth profile store.
 
 ## Rotation order
 
-When a provider has multiple profiles, OpenClaw chooses an order like this:
+When a provider has multiple profiles, Carapace chooses an order like this:
 
 <Steps>
   <Step title="Stored order override">
-    The per-agent order set with `openclaw models auth order set --provider <id> <profileIds...>`.
+    The per-agent order set with `carapace models auth order set --provider <id> <profileIds...>`.
   </Step>
   <Step title="Explicit config">
     `auth.order[provider]` (if set).
@@ -142,7 +142,7 @@ When a provider has multiple profiles, OpenClaw chooses an order like this:
   </Step>
 </Steps>
 
-If no explicit order is configured, OpenClaw uses a round-robin order:
+If no explicit order is configured, Carapace uses a round-robin order:
 
 - **Primary key:** profile type (**OAuth, then static token, then API key**).
 - **Secondary key for OAuth:** profiles with a currently usable access token before
@@ -153,16 +153,16 @@ If no explicit order is configured, OpenClaw uses a round-robin order:
 
 ### Session stickiness (cache-friendly)
 
-OpenClaw **pins the automatically chosen auth profile per session** to keep provider caches warm. It does **not** rotate on every request. An automatic pin may rotate or clear when:
+Carapace **pins the automatically chosen auth profile per session** to keep provider caches warm. It does **not** rotate on every request. An automatic pin may rotate or clear when:
 
 - the session is reset (`/new` / `/reset`)
 - a compaction completes (compaction count increments)
 - the profile is in cooldown/disabled
 
-Manual selection via `/model …@<profileId> -s` sets a **user override**. A valid user pin survives `/new`, `/reset`, session rollover, compaction, and cooldown windows. It remains the first preference when eligible; while that exact profile is in cooldown or disabled, OpenClaw tries the next eligible same-provider profile without replacing the stored pin. OpenClaw clears the pin when the profile disappears, no longer matches the selected provider, or the user selects another explicit profile. `/model default -s` clears the model override while retaining a compatible auth pin and clearing an incompatible one.
+Manual selection via `/model …@<profileId> -s` sets a **user override**. A valid user pin survives `/new`, `/reset`, session rollover, compaction, and cooldown windows. It remains the first preference when eligible; while that exact profile is in cooldown or disabled, Carapace tries the next eligible same-provider profile without replacing the stored pin. Carapace clears the pin when the profile disappears, no longer matches the selected provider, or the user selects another explicit profile. `/model default -s` clears the model override while retaining a compatible auth pin and clearing an incompatible one.
 
 <Note>
-Auto-pinned and user-pinned auth profiles are both retry preferences: OpenClaw tries the selected profile first while it is eligible, then may rotate to another same-provider profile on auth failures, rate limits, billing limits, or timeouts. A user pin stays persisted during that temporary rotation, so new runs prefer it again after its cooldown expires without changing the selected model or runtime. This auth rotation does not loosen model selection: an explicit user provider/model selection remains strict and reports failure after its same-provider auth profiles are exhausted.
+Auto-pinned and user-pinned auth profiles are both retry preferences: Carapace tries the selected profile first while it is eligible, then may rotate to another same-provider profile on auth failures, rate limits, billing limits, or timeouts. A user pin stays persisted during that temporary rotation, so new runs prefer it again after its cooldown expires without changing the selected model or runtime. This auth rotation does not loosen model selection: an explicit user provider/model selection remains strict and reports failure after its same-provider auth profiles are exhausted.
 </Note>
 
 ### OpenAI Codex subscription plus API-key backup
@@ -181,13 +181,13 @@ Use `auth.order.openai` for the user-facing order:
 }
 ```
 
-Use `openai:*` for both ChatGPT/Codex OAuth profiles and OpenAI API-key profiles. When the subscription hits a Codex usage limit, OpenClaw records the exact reset time when Codex provides one, tries the next ordered auth profile, and keeps the run inside the Codex harness. Once the reset time passes, the subscription profile is eligible again and the next automatic selection can return to it.
+Use `openai:*` for both ChatGPT/Codex OAuth profiles and OpenAI API-key profiles. When the subscription hits a Codex usage limit, Carapace records the exact reset time when Codex provides one, tries the next ordered auth profile, and keeps the run inside the Codex harness. Once the reset time passes, the subscription profile is eligible again and the next automatic selection can return to it.
 
-Use a user-pinned profile to make one account/key the durable first preference for that session. If it becomes unavailable, OpenClaw temporarily rotates through the remaining eligible `auth.order.openai` profiles and returns to the pinned profile after recovery.
+Use a user-pinned profile to make one account/key the durable first preference for that session. If it becomes unavailable, Carapace temporarily rotates through the remaining eligible `auth.order.openai` profiles and returns to the pinned profile after recovery.
 
 ## Cooldowns
 
-When a profile fails due to auth/rate-limit errors (or a timeout that looks like rate limiting), OpenClaw marks it in cooldown and moves to the next profile.
+When a profile fails due to auth/rate-limit errors (or a timeout that looks like rate limiting), Carapace marks it in cooldown and moves to the next profile.
 
 CLI-backed runtimes settle profile health only after their resume, fork, and fresh-session recovery attempts finish. A terminal credential failure cools down the exact selected profile before model fallback; a successful run clears stale failure state. Transcript, format, context, pre-provider timeout, and ambient CLI failures without a selected profile do not change shared profile health.
 
@@ -195,7 +195,7 @@ CLI-backed runtimes settle profile health only after their resume, fork, and fre
   <Accordion title="What lands in the rate-limit / timeout bucket">
     That rate-limit bucket is broader than plain `429`: it also includes provider messages such as `Too many concurrent requests`, `ThrottlingException`, `concurrency limit reached`, `workers_ai ... quota limit exceeded`, `throttled`, `resource exhausted`, and periodic usage-window limits such as `weekly limit reached` or `monthly limit exhausted`.
 
-    Format/invalid-request errors are usually terminal because retrying the same payload would fail the same way, so OpenClaw surfaces them instead of rotating auth profiles. Known retry-repair paths can opt in explicitly: for example Cloud Code Assist tool call ID validation failures are sanitized and retried once through the `allowFormatRetry` policy.
+    Format/invalid-request errors are usually terminal because retrying the same payload would fail the same way, so Carapace surfaces them instead of rotating auth profiles. Known retry-repair paths can opt in explicitly: for example Cloud Code Assist tool call ID validation failures are sanitized and retried once through the `allowFormatRetry` policy.
 
     OpenAI-compatible **provider-completed** stop/finish reasons such as `Unhandled stop reason: error`, `stop reason: error`, `reason: error`, and `Provider finish_reason: error` are classified as **`server_error`** (HTTP-like status 500), not timeout. They remain failover-eligible for model/profile rotation, but diagnostics keep the provider finish-reason text instead of rewriting the user copy to "LLM request timed out." Transport-shaped finish reasons such as `Provider finish_reason: abort`, `network_error`, and `malformed_response` stay in the timeout/failover bucket (status 408).
 
@@ -205,12 +205,12 @@ CLI-backed runtimes settle profile health only after their resume, fork, and fre
 
   </Accordion>
   <Accordion title="SDK retry-after caps">
-    Some provider SDKs may otherwise sleep for a long `Retry-After` window before returning control to OpenClaw. For Stainless-based SDKs such as Anthropic and OpenAI, OpenClaw caps SDK-internal `retry-after-ms` / `retry-after` waits at 60 seconds by default and surfaces longer retryable responses immediately so this failover path can run. Tune or disable the cap with `OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS`; see [Retry behavior](/concepts/retry).
+    Some provider SDKs may otherwise sleep for a long `Retry-After` window before returning control to Carapace. For Stainless-based SDKs such as Anthropic and OpenAI, Carapace caps SDK-internal `retry-after-ms` / `retry-after` waits at 60 seconds by default and surfaces longer retryable responses immediately so this failover path can run. Tune or disable the cap with `CARAPACE_SDK_RETRY_MAX_WAIT_SECONDS`; see [Retry behavior](/concepts/retry).
   </Accordion>
   <Accordion title="Model-scoped cooldowns">
     Rate-limit cooldowns can also be model-scoped:
 
-    - OpenClaw records `cooldownModel` for rate-limit failures when the failing model id is known.
+    - Carapace records `cooldownModel` for rate-limit failures when the failing model id is known.
     - A sibling model on the same provider can still be tried when the cooldown is scoped to a different model.
     - Billing/disabled windows still block the whole profile across models.
 
@@ -241,12 +241,12 @@ State is stored in the per-agent SQLite auth state under `usageStats`:
 
 ## Billing disables
 
-Billing/credit failures (for example "insufficient credits" / "credit balance too low") are treated as failover-worthy. OpenClaw marks the credential as **disabled** for ten minutes initially and rotates to the next eligible profile/provider.
+Billing/credit failures (for example "insufficient credits" / "credit balance too low") are treated as failover-worthy. Carapace marks the credential as **disabled** for ten minutes initially and rotates to the next eligible profile/provider.
 
 Configured inline API keys cannot retry during an active disable window. After the window expires, they become eligible again; another billing failure starts a new ten-minute window. Stored auth profiles can also recover through bounded primary-provider probes during a disable window. Recharging does not itself clear persisted state, and upgrading leaves an already-active window at its existing deadline.
 
 <Note>
-Not every billing-shaped response is `402`, and not every HTTP `402` lands here. OpenClaw keeps explicit billing text in the billing lane even when a provider returns `401` or `403` instead, but provider-specific matchers stay scoped to the provider that owns them (for example OpenRouter `403 Key limit exceeded`).
+Not every billing-shaped response is `402`, and not every HTTP `402` lands here. Carapace keeps explicit billing text in the billing lane even when a provider returns `401` or `403` instead, but provider-specific matchers stay scoped to the provider that owns them (for example OpenRouter `403 Key limit exceeded`).
 
 Meanwhile temporary `402` usage-window and organization/workspace spend-limit errors are classified as `rate_limit` when the message looks retryable (for example `weekly usage limit exhausted`, `daily limit reached, resets tomorrow`, or `organization spending limit exceeded`). Those stay on the short cooldown/failover path instead of the long billing-disable path.
 </Note>
@@ -270,13 +270,13 @@ Overloaded and rate-limit errors allow one same-provider auth-profile rotation b
 
 ## Model fallback
 
-If all profiles for a provider fail, OpenClaw moves to the next model in `agents.defaults.model.fallbacks` when the failure matches one of the failover reasons listed below. This includes `model_not_found` for HTTP 404 responses unless the response body identifies a more specific condition such as context overflow, session expiry, billing, authentication, or request format. Provider errors that do not expose enough detail are still labeled precisely in fallback state: `empty_response` means the provider returned no usable message or status, `no_error_details` means the provider explicitly returned `Unknown error (no error details in response)`, and `unclassified` means OpenClaw preserved the raw preview but no classifier matched it yet.
+If all profiles for a provider fail, Carapace moves to the next model in `agents.defaults.model.fallbacks` when the failure matches one of the failover reasons listed below. This includes `model_not_found` for HTTP 404 responses unless the response body identifies a more specific condition such as context overflow, session expiry, billing, authentication, or request format. Provider errors that do not expose enough detail are still labeled precisely in fallback state: `empty_response` means the provider returned no usable message or status, `no_error_details` means the provider explicitly returned `Unknown error (no error details in response)`, and `unclassified` means Carapace preserved the raw preview but no classifier matched it yet.
 
 Provider-busy signals such as `ModelNotReadyException` land in the overloaded bucket and follow the same one-rotation-then-fallback policy as rate limits.
 
-The failover controller owns OpenClaw's transient recovery budget. Rate limits receive up to **10 total attempts** before profile rotation or model fallback. Jittered exponential waits cap at 30 seconds, while provider `retry-after` and `retry-after-ms` hints remain minimum waits even beyond that cap. Other transient failures retain eight retries and a 90-second retry window. Once that budget or window is exhausted, recovery proceeds to eligible profile rotation, configured model fallback, or a visible error. Continuations preserve the transcript instead of replaying the original user request. Recovery and any fallback winner remain turn-local.
+The failover controller owns Carapace's transient recovery budget. Rate limits receive up to **10 total attempts** before profile rotation or model fallback. Jittered exponential waits cap at 30 seconds, while provider `retry-after` and `retry-after-ms` hints remain minimum waits even beyond that cap. Other transient failures retain eight retries and a 90-second retry window. Once that budget or window is exhausted, recovery proceeds to eligible profile rotation, configured model fallback, or a visible error. Continuations preserve the transcript instead of replaying the original user request. Recovery and any fallback winner remain turn-local.
 
-The embedded runtime's existing session setting `retry.provider.maxRetries` overrides its recovery retry budget; `0` disables retries, and rate limits remain capped at 10 total attempts. It is not an `openclaw.json` key and does not change a native harness's internal request retries. Native harnesses may finish their own request retries before OpenClaw begins continuation recovery; the reply runner does not add another whole-turn replay loop. See [Retry policy](/concepts/retry) for pacing and exclusions.
+The embedded runtime's existing session setting `retry.provider.maxRetries` overrides its recovery retry budget; `0` disables retries, and rate limits remain capped at 10 total attempts. It is not an `carapace.json` key and does not change a native harness's internal request retries. Native harnesses may finish their own request retries before Carapace begins continuation recovery; the reply runner does not add another whole-turn replay loop. See [Retry policy](/concepts/retry) for pacing and exclusions.
 
 While waiting, the Control UI shows one transient **Retrying… n/10** indicator for rate limits. Retried failures do not become persisted assistant messages; terminal failure retains one error. History hides recovered empty or reasoning-only errors without rewriting stored transcripts.
 
@@ -284,17 +284,17 @@ Visible failure messages preserve the provider's HTTP status independently of re
 
 Provider overloads and HTTP 5xx failures use transient recovery guidance. A message saying only that a model is "not available" does not establish that it was retired or that your configuration needs to change. Configuration guidance requires a missing-model response or an explicit account/model restriction. Codex turn errors retain their overload and HTTP-status information even after Codex stops retrying the turn.
 
-When a run starts from the configured default primary, a cron job primary, an agent primary with explicit fallbacks, or an auto-selected fallback override, OpenClaw can walk the matching configured fallback chain. Agent primaries without explicit fallbacks and explicit user selections (for example `/model ollama/qwen3.5:27b`, the model picker, `sessions.patch`, or one-off CLI provider/model overrides) are strict: if that provider/model is unreachable or fails before producing a reply, OpenClaw reports the failure instead of answering from an unrelated fallback.
+When a run starts from the configured default primary, a cron job primary, an agent primary with explicit fallbacks, or an auto-selected fallback override, Carapace can walk the matching configured fallback chain. Agent primaries without explicit fallbacks and explicit user selections (for example `/model ollama/qwen3.5:27b`, the model picker, `sessions.patch`, or one-off CLI provider/model overrides) are strict: if that provider/model is unreachable or fails before producing a reply, Carapace reports the failure instead of answering from an unrelated fallback.
 
 ### Candidate chain rules
 
-OpenClaw builds the candidate list from the currently requested `provider/model` plus configured fallbacks.
+Carapace builds the candidate list from the currently requested `provider/model` plus configured fallbacks.
 
 <AccordionGroup>
   <Accordion title="Rules">
     - The requested model is always first.
     - Explicit configured fallbacks are deduplicated but not filtered by the model allowlist. They are treated as explicit operator intent.
-    - If the current run is already on a configured fallback in the same provider family, OpenClaw keeps using the full configured chain.
+    - If the current run is already on a configured fallback in the same provider family, Carapace keeps using the full configured chain.
     - When no explicit fallback override is supplied, configured fallbacks are tried before the configured primary even if the requested model uses a different provider.
     - When no explicit fallback override is supplied to the fallback runner, the configured primary is appended at the end so the chain can settle back onto the normal default once earlier candidates are exhausted.
     - When a caller supplies `fallbacksOverride`, the runner uses exactly the requested model plus that override list. An empty list disables model fallback and prevents the configured primary from being appended as a hidden retry target.
@@ -327,11 +327,11 @@ OpenClaw builds the candidate list from the currently requested `provider/model`
   </Tab>
 </Tabs>
 
-A final provider refusal ends the current turn. OpenClaw surfaces it without automatic recovery turns, compaction retries, or switching to an unrelated model. A queued or later user message still starts its own turn.
+A final provider refusal ends the current turn. Carapace surfaces it without automatic recovery turns, compaction retries, or switching to an unrelated model. A queued or later user message still starts its own turn.
 
 ### Cooldown skip vs probe behavior
 
-When every auth profile for a provider is already in cooldown, OpenClaw does not automatically skip that provider forever. It makes a per-candidate decision:
+When every auth profile for a provider is already in cooldown, Carapace does not automatically skip that provider forever. It makes a per-candidate decision:
 
 <AccordionGroup>
   <Accordion title="Per-candidate decisions">
@@ -354,12 +354,12 @@ Live model switching follows these rules:
 - System-driven model changes such as fallback rotation, heartbeat overrides, or compaction never mark a pending live switch on their own.
 - User-driven model overrides are treated as exact selections for fallback policy, so an unreachable selected provider surfaces as a failure instead of being masked by `agents.defaults.model.fallbacks`.
 - Runtime fallback candidates remain turn-local. The next turn starts from the current selected model, including a manual selection that arrived during the previous run.
-- Previously stored auto fallback overrides remain supported: OpenClaw periodically probes their configured origin and clears the override when it recovers; `/new`, `/reset`, and `sessions.reset` clear auto-sourced overrides immediately.
+- Previously stored auto fallback overrides remain supported: Carapace periodically probes their configured origin and clears the override when it recovers; `/new`, `/reset`, and `sessions.reset` clear auto-sourced overrides immediately.
 - Outside group and channel conversations, user replies announce fallback transitions and fallback-cleared recovery once per state change. Repeated turns with the same selected/active pair do not repeat the notice; group and channel conversations retain the same fallback state and lifecycle events without posting it.
 - `/status` shows the selected model and, when fallback state differs, the active fallback model and reason.
 - Live-session reconciliation prefers persisted session overrides over stale runtime model fields.
-- If a live-switch error points at a later candidate in the active fallback chain, OpenClaw jumps directly to that selected model instead of walking unrelated candidates first.
-- If a live switch selects a model outside the active fallback chain, OpenClaw returns the original switch to the agent, reply, or isolated-cron retry owner so the selected model can complete the same turn.
+- If a live-switch error points at a later candidate in the active fallback chain, Carapace jumps directly to that selected model instead of walking unrelated candidates first.
+- If a live switch selects a model outside the active fallback chain, Carapace returns the original switch to the agent, reply, or isolated-cron retry owner so the selected model can complete the same turn.
 
 The active run carries its chosen candidate directly. Live reconciliation changes that candidate only for an explicit pending user switch, so no temporary fallback override or rollback is needed.
 
@@ -381,7 +381,7 @@ Exhaustion summaries preserve the structured attempt records. The fallback runne
 That cooldown summary is model-aware:
 
 - unrelated model-scoped rate limits are ignored for the attempted provider/model chain
-- if the remaining block is a matching model-scoped rate limit, OpenClaw reports the last matching expiry that still blocks that model
+- if the remaining block is a matching model-scoped rate limit, Carapace reports the last matching expiry that still blocks that model
 
 ## Related config
 

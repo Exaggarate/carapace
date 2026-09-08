@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import {
   appendTranscriptMessage,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { chatHistoryHandlers } from "./chat-history-handler.js";
 
@@ -13,7 +13,7 @@ describe("chat history request byte budgets", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s returns a small tail with a lossless back-scroll cursor",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const scope = {
           agentId: "main",
           sessionKey: "agent:main:budgeted-history",

@@ -24,7 +24,7 @@ const fixtures = vi.hoisted(() => {
   const winner = {
     name: " @fixture/Shared ",
     kind: " plugin ",
-    openclaw: {
+    carapace: {
       plugin: { id: " Shared " },
       channel: { id: "Channel" },
       providers: [{ id: " Model ", aliases: [" Alias "] }],
@@ -35,7 +35,7 @@ const fixtures = vi.hoisted(() => {
     return {
       name: `@fixture/${prefix}`,
       kind: "plugin",
-      openclaw: {
+      carapace: {
         plugin: { id },
         channel: {
           id: `${prefix}-channel`,
@@ -57,21 +57,21 @@ const fixtures = vi.hoisted(() => {
   };
   const accepted = {
     name: "@fixture/accepted",
-    openclaw: { plugin: { id: "SourceFiltered" } },
+    carapace: { plugin: { id: "SourceFiltered" } },
     install: { candidates: [{ sourceRef: "public-npm", package: "@fixture/accepted" }] },
   };
   const shadow = targetEntry("Shared", "shadow");
-  const pluginShadow = { name: "@fixture/plugin-shadow", openclaw: { plugin: { id: "Shared" } } };
+  const pluginShadow = { name: "@fixture/plugin-shadow", carapace: { plugin: { id: "Shared" } } };
   const otherKind = {
     name: "@fixture/other-kind",
     kind: "channel",
-    openclaw: { plugin: { id: "Shared" } },
+    carapace: { plugin: { id: "Shared" } },
   };
-  const lowercase = { name: "@fixture/shared", openclaw: { plugin: { id: "shared" } } };
+  const lowercase = { name: "@fixture/shared", carapace: { plugin: { id: "shared" } } };
   const fallback = { id: "FallbackOnly", name: "@fixture/fallback" };
   const mutable: OfficialExternalPluginCatalogEntry = {
     name: "@fixture/mutable",
-    openclaw: { plugin: { id: "Mutable" }, providers: [{ id: "OriginalProvider" }] },
+    carapace: { plugin: { id: "Mutable" }, providers: [{ id: "OriginalProvider" }] },
   };
   return {
     winner,
@@ -165,10 +165,10 @@ describe("bundled official external catalog behavior", () => {
   it("observes mutations to returned rows in later lookups and projections", () => {
     const entry = getOfficialExternalPluginCatalogEntry("Mutable")!;
     const originalName = entry.name;
-    const originalManifest = entry.openclaw;
+    const originalManifest = entry.carapace;
     try {
       entry.name = "@fixture/renamed";
-      entry.openclaw = {
+      entry.carapace = {
         plugin: { id: "Renamed" },
         channel: { id: "RenamedChannel", label: "Renamed" },
       };
@@ -190,7 +190,7 @@ describe("bundled official external catalog behavior", () => {
       ).toBe(false);
     } finally {
       entry.name = originalName;
-      entry.openclaw = originalManifest;
+      entry.carapace = originalManifest;
     }
   });
 

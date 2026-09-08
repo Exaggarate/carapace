@@ -79,20 +79,20 @@ async function prepareInstanceBindingTest(options?: {
     .mockImplementation(actualIo.writeConfigFile);
   onTestFinished(() => configWriter.mockRestore());
   const coordinator = installInstanceBindingProbeCoordinator(options);
-  const bundledRoot = tempDirs.make("openclaw-instance-binding-");
+  const bundledRoot = tempDirs.make("carapace-instance-binding-");
   await writeInstanceBindingProbePlugin(bundledRoot);
   if (options?.channels) {
     await writeChannelBindingProbePlugin(bundledRoot, options.channelIds);
   }
-  process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
-  delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
-  process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
-  process.env.OPENCLAW_SKIP_CHANNELS = "1";
-  process.env.OPENCLAW_SKIP_CRON = "1";
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "0";
+  delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
+  process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
+  process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+  process.env.CARAPACE_SKIP_CHANNELS = "1";
+  process.env.CARAPACE_SKIP_CRON = "1";
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("gateway test hooks did not install OPENCLAW_CONFIG_PATH");
+    throw new Error("gateway test hooks did not install CARAPACE_CONFIG_PATH");
   }
   const config = {
     plugins: {
@@ -240,7 +240,7 @@ describe("gateway plugin instance bindings", () => {
       channelEnv = undefined;
       channelCleanup = undefined;
       delete (globalThis as Record<PropertyKey, unknown>)[INSTANCE_BINDING_PROBE_KEY];
-      delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+      delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
       if (channelProof) {
         const proof = channelProof;
         channelProof = undefined;
@@ -251,8 +251,8 @@ describe("gateway plugin instance bindings", () => {
             (monitor) => monitor.stopped && monitor.abortSignal.aborted,
           ),
           skipEnvRestored:
-            process.env.OPENCLAW_SKIP_CHANNELS === skippedBefore?.channels &&
-            process.env.OPENCLAW_SKIP_PROVIDERS === skippedBefore?.providers,
+            process.env.CARAPACE_SKIP_CHANNELS === skippedBefore?.channels &&
+            process.env.CARAPACE_SKIP_PROVIDERS === skippedBefore?.providers,
         };
         proof.events.push({ event: "cleanup" });
         console.info(
@@ -374,12 +374,12 @@ describe("gateway plugin instance bindings", () => {
       const stopHooks: NonNullable<InstanceBindingProbeCoordinator["channelStops"]> = [];
       coordinator.channelStops = stopHooks;
       skippedBefore = {
-        channels: process.env.OPENCLAW_SKIP_CHANNELS,
-        providers: process.env.OPENCLAW_SKIP_PROVIDERS,
+        channels: process.env.CARAPACE_SKIP_CHANNELS,
+        providers: process.env.CARAPACE_SKIP_PROVIDERS,
       };
-      channelEnv = captureEnv(["OPENCLAW_SKIP_CHANNELS", "OPENCLAW_SKIP_PROVIDERS"]);
-      delete process.env.OPENCLAW_SKIP_CHANNELS;
-      delete process.env.OPENCLAW_SKIP_PROVIDERS;
+      channelEnv = captureEnv(["CARAPACE_SKIP_CHANNELS", "CARAPACE_SKIP_PROVIDERS"]);
+      delete process.env.CARAPACE_SKIP_CHANNELS;
+      delete process.env.CARAPACE_SKIP_PROVIDERS;
 
       // Each activation registers its own plugin instances without changing shared config.
       coordinator.channelIds = firstIds;
@@ -525,7 +525,7 @@ describe("gateway plugin instance bindings", () => {
       expect(startupMetadata?.byPluginId.get("instance-binding-probe")?.name).toBe(
         "Startup plugin",
       );
-      const manifestPath = path.join(bundledRoot, "instance-binding-probe", "openclaw.plugin.json");
+      const manifestPath = path.join(bundledRoot, "instance-binding-probe", "carapace.plugin.json");
       const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
       await fs.writeFile(manifestPath, JSON.stringify({ ...manifest, name: "Changed plugin" }));
       const initialRegistrationCount = coordinator.runtimes.length;
@@ -595,12 +595,12 @@ describe("gateway plugin instance bindings", () => {
       }
       channelProof = proof;
       skippedBefore = {
-        channels: process.env.OPENCLAW_SKIP_CHANNELS,
-        providers: process.env.OPENCLAW_SKIP_PROVIDERS,
+        channels: process.env.CARAPACE_SKIP_CHANNELS,
+        providers: process.env.CARAPACE_SKIP_PROVIDERS,
       };
-      channelEnv = captureEnv(["OPENCLAW_SKIP_CHANNELS", "OPENCLAW_SKIP_PROVIDERS"]);
-      delete process.env.OPENCLAW_SKIP_CHANNELS;
-      delete process.env.OPENCLAW_SKIP_PROVIDERS;
+      channelEnv = captureEnv(["CARAPACE_SKIP_CHANNELS", "CARAPACE_SKIP_PROVIDERS"]);
+      delete process.env.CARAPACE_SKIP_CHANNELS;
+      delete process.env.CARAPACE_SKIP_PROVIDERS;
       const port = await getFreePort();
       const hotReloadRecovery = vi.fn(() => ({ status: "emitted" as const }));
       const server = await startTestGatewayServer(port, {
@@ -805,7 +805,7 @@ describe("gateway plugin instance bindings", () => {
 // A real plugin registry replacement must own accounts before their first route exists.
 describe("Gateway plugin replacement channel ownership", () => {
   const channelId = "reload-webhook";
-  const channelKey = Symbol.for("openclaw.test.reloadWebhookChannel");
+  const channelKey = Symbol.for("carapace.test.reloadWebhookChannel");
   let server: Awaited<ReturnType<typeof startTestGatewayServer>> | undefined;
   let socket: Awaited<ReturnType<typeof connectWebchatClient>> | undefined;
   let releasePending = createDeferredCore();
@@ -816,7 +816,7 @@ describe("Gateway plugin replacement channel ownership", () => {
     await server?.close({ reason: "webhook reload cleanup" });
     delete (globalThis as Record<PropertyKey, unknown>)[channelKey];
     delete (globalThis as Record<PropertyKey, unknown>)[INSTANCE_BINDING_PROBE_KEY];
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
   });
 
   it.each([
@@ -882,7 +882,7 @@ describe("Gateway plugin replacement channel ownership", () => {
     const coordinator = installInstanceBindingProbeCoordinator(
       teardownFails ? { serviceStopFailure: "rejection" } : undefined,
     );
-    const bundledRoot = tempDirs.make("openclaw-instance-binding-");
+    const bundledRoot = tempDirs.make("carapace-instance-binding-");
     await writeInstanceBindingProbePlugin(bundledRoot);
     const pluginDir = path.join(bundledRoot, channelId);
     await fs.mkdir(pluginDir);
@@ -892,11 +892,11 @@ describe("Gateway plugin replacement channel ownership", () => {
         name: channelId,
         type: "commonjs",
         main: "index.js",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
     );
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: channelId,
         activation: { onStartup: true },
@@ -908,17 +908,17 @@ describe("Gateway plugin replacement channel ownership", () => {
       path.join(pluginDir, "index.js"),
       `module.exports = {
       id: "reload-webhook",
-      register(api) { api.registerChannel({ plugin: globalThis[Symbol.for("openclaw.test.reloadWebhookChannel")] }); }
+      register(api) { api.registerChannel({ plugin: globalThis[Symbol.for("carapace.test.reloadWebhookChannel")] }); }
     };`,
     );
-    process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
-    process.env.OPENCLAW_SKIP_CRON = "1";
-    delete process.env.OPENCLAW_SKIP_CHANNELS;
-    delete process.env.OPENCLAW_SKIP_PROVIDERS;
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "0";
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_SKIP_CRON = "1";
+    delete process.env.CARAPACE_SKIP_CHANNELS;
+    delete process.env.CARAPACE_SKIP_PROVIDERS;
+    const configPath = process.env.CARAPACE_CONFIG_PATH;
     if (!configPath) {
       throw new Error("Gateway fixture did not set config path");
     }

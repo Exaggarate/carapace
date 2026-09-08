@@ -1,13 +1,13 @@
 // Workshop types define generated skill draft, policy, and config contracts.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginHookSkillProposalEvaluationOutcome } from "../../plugins/hook-types.js";
 import type { SkillScanFinding } from "../security/scanner.js";
 
 /** Schema id for persisted skill workshop proposal records. */
-export const SKILL_WORKSHOP_SCHEMA = "openclaw.skill-workshop.proposal.v1" as const;
+export const SKILL_WORKSHOP_SCHEMA = "carapace.skill-workshop.proposal.v1" as const;
 export const SKILL_WORKSHOP_MANIFEST_SCHEMA =
-  "openclaw.skill-workshop.proposals-manifest.v1" as const;
-export const SKILL_WORKSHOP_ROLLBACK_SCHEMA = "openclaw.skill-workshop.rollback.v1" as const;
+  "carapace.skill-workshop.proposals-manifest.v1" as const;
+export const SKILL_WORKSHOP_ROLLBACK_SCHEMA = "carapace.skill-workshop.rollback.v1" as const;
 export const MAX_SKILL_PROPOSAL_ORIGIN_RUN_IDS = 4096;
 
 type SkillProposalKind = "create" | "update";
@@ -227,7 +227,7 @@ export type SkillProposalCreateInput = {
   workspaceDir: string;
   agentId?: string;
   eventActor?: SkillProposalEventActor;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   name: string;
   description: string;
@@ -244,7 +244,7 @@ export type SkillProposalUpdateInput = {
   workspaceDir: string;
   agentId?: string;
   eventActor?: SkillProposalEventActor;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   skillName: string;
   description?: string;
@@ -269,7 +269,7 @@ export type SkillProposalReviseInput = {
   workspaceDir: string;
   agentId?: string;
   eventActor?: SkillProposalEventActor;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   proposalId: string;
   expectedRevisionHash?: string;
@@ -286,7 +286,7 @@ export type SkillProposalActionInput = {
   workspaceDir: string;
   agentId?: string;
   eventActor?: SkillProposalEventActor;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   proposalId: string;
   expectedRevisionHash?: string;
@@ -298,7 +298,7 @@ export type SkillProposalEvaluateInput = {
   workspaceDir: string;
   agentId?: string;
   eventActor?: SkillProposalEventActor;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   proposalId: string;
   expectedRevisionHash?: string;
@@ -308,7 +308,7 @@ export type SkillProposalEvaluateInput = {
 
 export type SkillProposalEventsListInput = {
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   proposalId?: string;
   afterSequence?: number;

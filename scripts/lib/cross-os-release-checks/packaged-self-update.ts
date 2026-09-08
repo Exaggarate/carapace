@@ -20,7 +20,7 @@ import {
   runDashboardSmoke,
   runModelsSet,
   runOnboard,
-  runOpenClaw,
+  runCarapace,
   startGateway,
   waitForGateway,
 } from "./runtime.ts";
@@ -51,7 +51,7 @@ export async function runPackagedSelfUpdateTransition(
     args: string[],
     options: { check?: boolean; env?: NodeJS.ProcessEnv; timeoutMs?: number } = {},
   ) =>
-    runOpenClaw({
+    runCarapace({
       lane,
       env,
       args,

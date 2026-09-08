@@ -10,10 +10,10 @@ import {
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
 } from "../plugins/runtime.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.js";
 import type { PluginEntryConfig } from "./types.plugins.js";
 
-const mockLoadConfig = vi.hoisted(() => vi.fn<() => OpenClawConfig>());
+const mockLoadConfig = vi.hoisted(() => vi.fn<() => CarapaceConfig>());
 const mockReadConfigFileSnapshot = vi.hoisted(() =>
   vi.fn<(options?: { observe?: boolean }) => Promise<ConfigFileSnapshot>>(),
 );
@@ -23,7 +23,7 @@ const mockGetCurrentPluginMetadataSnapshot = vi.hoisted(() => vi.fn());
 let readBestEffortRuntimeConfigSchema: typeof import("./runtime-schema.js").readBestEffortRuntimeConfigSchema;
 let loadGatewayRuntimeConfigSchema: typeof import("./runtime-schema.js").loadGatewayRuntimeConfigSchema;
 
-function explicitMainRoster(): OpenClawConfig {
+function explicitMainRoster(): CarapaceConfig {
   return { agents: { list: [{ id: "main" }] } };
 }
 
@@ -63,9 +63,9 @@ vi.mock("../plugins/current-plugin-metadata-snapshot.js", async (importOriginal)
     mockGetCurrentPluginMetadataSnapshot(...args),
 }));
 
-function makeSnapshot(params: { valid: boolean; config?: OpenClawConfig }): ConfigFileSnapshot {
+function makeSnapshot(params: { valid: boolean; config?: CarapaceConfig }): ConfigFileSnapshot {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     raw: "{}",
     parsed: params.config ?? {},

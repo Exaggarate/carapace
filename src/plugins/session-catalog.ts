@@ -9,7 +9,7 @@ import type {
 } from "../../packages/gateway-protocol/src/schema/sessions-catalog.js";
 import { listAgentIds, resolveSessionAgentIds } from "../agents/agent-scope.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginRuntime } from "./runtime/types.js";
 
 export type SessionCatalogListProviderParams = {
@@ -226,7 +226,7 @@ type SessionCatalogEntry = SessionCatalogEntrySummary["entry"];
 
 export function listSessionCatalogEntries(params: {
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: PluginRuntime;
   sessionEntries?: SessionCatalogEntrySnapshot;
 }): SessionCatalogAgentEntry[] {
@@ -272,7 +272,7 @@ export function sessionCatalogAdoptedSessionKey(prefix: string, source: string):
 
 export function listAdoptedSessionCatalogSessions(params: {
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginId: string;
   runtime: PluginRuntime;
   sessionEntries?: SessionCatalogEntrySnapshot;

@@ -1,15 +1,15 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { parseAgentSessionKey } from "carapace/plugin-sdk/routing";
 import {
   listSessionCatalogEntries,
   sessionCatalogAdoptedSessionKey,
   sessionCatalogAdoptedSourceKey,
   type SessionCatalogEntrySnapshot,
-} from "openclaw/plugin-sdk/session-catalog";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-paths";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-paths";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexThread } from "./app-server/protocol.js";
 import { CatalogParamsError } from "./session-catalog-parsing.js";
 import type { CodexSessionCatalogSession } from "./session-catalog-types.js";
@@ -105,7 +105,7 @@ function readNodeSessionMarker(entry: CatalogSessionEntry): CodexNodeSessionMark
 
 export function listNodeAdoptedSessionEntries(params: {
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime: PluginRuntime;
   includeInitializing?: boolean;
   sessionEntries?: SessionCatalogEntrySnapshot;
@@ -135,7 +135,7 @@ export function listNodeAdoptedSessionEntries(params: {
     const sourceKey = sessionCatalogAdoptedSourceKey(marker.sourceHostId, marker.sourceThreadId);
     if (adopted.has(sourceKey)) {
       throw new Error(
-        `multiple OpenClaw sessions adopt Codex thread ${marker.sourceThreadId} on ${marker.sourceHostId}`,
+        `multiple Carapace sessions adopt Codex thread ${marker.sourceThreadId} on ${marker.sourceHostId}`,
       );
     }
     adopted.set(sourceKey, {
@@ -150,7 +150,7 @@ export function listNodeAdoptedSessionEntries(params: {
 
 export function findNodeAdoptedSessionEntry(params: {
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: PluginRuntime;
   hostId: string;
   threadId: string;
@@ -176,12 +176,12 @@ export function nodeSessionMarker(params: {
 }
 
 export async function finalizeNodeAdoptedSession(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   adopted: AdoptedSessionEntry;
   marker: CodexNodeSessionMarker;
 }): Promise<void> {
   const changedError = () =>
-    new CatalogParamsError("Codex OpenClaw session changed before it could be bound. Retry.");
+    new CatalogParamsError("Codex Carapace session changed before it could be bound. Retry.");
   let finalized: CatalogSessionEntry | null;
   try {
     finalized = await params.api.runtime.agent.session.patchSessionEntry({
@@ -241,8 +241,8 @@ export async function finalizeNodeAdoptedSession(params: {
 
 export async function createOrReuseNodeAdoptedSession(params: {
   agentId: string;
-  api: OpenClawPluginApi;
-  config: OpenClawConfig;
+  api: CarapacePluginApi;
+  config: CarapaceConfig;
   hostId: string;
   nodeId: string;
   record: CodexSessionCatalogSession;

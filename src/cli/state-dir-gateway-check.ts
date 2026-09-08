@@ -1,6 +1,6 @@
 import path from "node:path";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayService } from "../daemon/service.js";
 import {
   buildGatewayConnectionDetails,
@@ -24,7 +24,7 @@ export type CliGatewayStateDirOutcome =
   | { kind: "refuse"; message: string };
 
 export const GATEWAY_SERVICE_PATHS_UNVERIFIED =
-  "Installed Gateway service state and config paths could not be verified. Inspect the service environment with `openclaw gateway status --deep` before repairing plugin state.";
+  "Installed Gateway service state and config paths could not be verified. Inspect the service environment with `carapace gateway status --deep` before repairing plugin state.";
 
 export async function inspectInstalledGatewayStatePaths(
   timeoutMs = STATE_DIR_CHECK_TIMEOUT_MS,
@@ -34,9 +34,9 @@ export async function inspectInstalledGatewayStatePaths(
   try {
     const serviceEnv = { ...process.env };
     // CLI overrides select its store; only recorded service values describe the other store.
-    delete serviceEnv.OPENCLAW_STATE_DIR;
-    delete serviceEnv.OPENCLAW_CONFIG_PATH;
-    delete serviceEnv.OPENCLAW_HOME;
+    delete serviceEnv.CARAPACE_STATE_DIR;
+    delete serviceEnv.CARAPACE_CONFIG_PATH;
+    delete serviceEnv.CARAPACE_HOME;
     const command = await resolveGatewayService().readCommand(serviceEnv, {
       timeoutMs,
       requireEffective: true,
@@ -47,7 +47,7 @@ export async function inspectInstalledGatewayStatePaths(
     const environment = command.environment;
     if (
       !environment ||
-      !["OPENCLAW_STATE_DIR", "OPENCLAW_HOME", "HOME", "USERPROFILE"].some((key) =>
+      !["CARAPACE_STATE_DIR", "CARAPACE_HOME", "HOME", "USERPROFILE"].some((key) =>
         environment[key]?.trim(),
       )
     ) {
@@ -76,7 +76,7 @@ export function compareCliGatewayStateDirs(params: {
   const cliConfigPath = resolveIdentityPathViaExistingAncestorSync(params.cliConfigPath);
   const gatewayStateDir = resolveIdentityPathViaExistingAncestorSync(params.gatewayStateDir);
   const gatewayConfigPath = resolveIdentityPathViaExistingAncestorSync(
-    params.gatewayConfigPath ?? path.join(gatewayStateDir, "openclaw.json"),
+    params.gatewayConfigPath ?? path.join(gatewayStateDir, "carapace.json"),
   );
   const differences = [
     cliStateDir !== gatewayStateDir &&
@@ -98,7 +98,7 @@ export function compareCliGatewayStateDirs(params: {
     kind: "refuse",
     message: [
       `No credentials or configuration were written. CLI and ${params.source} use different ${detail}.`,
-      `Fix: run OPENCLAW_STATE_DIR=${quoteCliArg(gatewayStateDir)} OPENCLAW_CONFIG_PATH=${quoteCliArg(gatewayConfigPath)} ${params.command ?? "openclaw configure"}.`,
+      `Fix: run CARAPACE_STATE_DIR=${quoteCliArg(gatewayStateDir)} CARAPACE_CONFIG_PATH=${quoteCliArg(gatewayConfigPath)} ${params.command ?? "carapace configure"}.`,
       params.source === "live Gateway"
         ? "To write another local store intentionally, stop the running Gateway first."
         : "To write another local store intentionally, uninstall or reconfigure the divergent Gateway service first.",
@@ -108,7 +108,7 @@ export function compareCliGatewayStateDirs(params: {
 
 export async function checkCliGatewayStateDir(params: {
   command: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<CliGatewayStateDirOutcome> {
   const cliStateDir = resolveStateDir(process.env);
   const cliConfigPath = resolveConfigPath(process.env);

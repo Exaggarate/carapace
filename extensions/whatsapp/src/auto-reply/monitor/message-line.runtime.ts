@@ -1,13 +1,13 @@
 // Whatsapp plugin module implements message line behavior.
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 export {
   formatInboundEnvelope,
   type EnvelopeFormatOptions,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 
-type WhatsAppMessagePrefixConfig = OpenClawConfig;
+type WhatsAppMessagePrefixConfig = CarapaceConfig;
 
 function resolveIdentityNamePrefix(
   cfg: WhatsAppMessagePrefixConfig,
@@ -29,5 +29,5 @@ export function resolveMessagePrefix(
   if (opts?.hasAllowFrom === true) {
     return "";
   }
-  return resolveIdentityNamePrefix(cfg, agentId) ?? opts?.fallback ?? "[openclaw]";
+  return resolveIdentityNamePrefix(cfg, agentId) ?? opts?.fallback ?? "[carapace]";
 }

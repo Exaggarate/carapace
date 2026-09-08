@@ -110,7 +110,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       report: REPORT,
     });
@@ -135,7 +135,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       report: REPORT,
     });
@@ -152,7 +152,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       report: REPORT,
     });
@@ -173,7 +173,7 @@ describe("dated TODO issue upsert", () => {
     await expect(
       runDatedTodoUpsert({
         github,
-        context: { repo: { owner: "openclaw", repo: "openclaw" } },
+        context: { repo: { owner: "carapace", repo: "carapace" } },
         core,
         report: REPORT,
       }),
@@ -190,7 +190,7 @@ describe("dated TODO issue upsert", () => {
     const first = harness([tracker]);
     await runDatedTodoUpsert({
       github: first.github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core: first.core,
       report: REPORT,
     });
@@ -201,7 +201,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github: retry.github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core: retry.core,
       report: REPORT,
     });
@@ -218,7 +218,7 @@ describe("dated TODO issue upsert", () => {
     const first = harness([tracker]);
     await runDatedTodoUpsert({
       github: first.github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core: first.core,
       report: REPORT,
     });
@@ -227,7 +227,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github: spoofed.github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core: spoofed.core,
       report: REPORT,
     });
@@ -240,7 +240,7 @@ describe("dated TODO issue upsert", () => {
 
     await runDatedTodoUpsert({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       report: REPORT,
     });

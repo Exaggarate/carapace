@@ -1,9 +1,9 @@
 // Gateway HTTP session history endpoint.
 // Serves JSON and SSE history snapshots backed by transcript files.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_IDS,
   GATEWAY_CLIENT_MODES,

@@ -2,9 +2,9 @@
 import { existsSync, watch, type FSWatcher } from "node:fs";
 import path from "node:path";
 import type {
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginService,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
 import { defineCodexBuildState } from "../build-state.js";
 import { resolveMacOSDesktopCodexAppPathCandidates } from "./desktop-app-paths.js";
 import {
@@ -41,7 +41,7 @@ type DesktopGenerationState = {
   armEpoch?: number;
   rearmTimer?: NodeJS.Timeout;
   rearmDelayMs?: number;
-  context?: OpenClawPluginServiceContext;
+  context?: CarapacePluginServiceContext;
   readFingerprint?: () => Promise<string>;
   resolveWatchPaths?: () => string[];
   pathExists?: (watchedPath: string) => boolean;
@@ -49,7 +49,7 @@ type DesktopGenerationState = {
 };
 
 const state = defineCodexBuildState(
-  "openclaw.codexDesktopGenerationState",
+  "carapace.codexDesktopGenerationState",
   (): DesktopGenerationState => ({}),
 );
 
@@ -74,7 +74,7 @@ export function createCodexDesktopGenerationService(
     pathExists: existsSync,
     watchPath: (watchedPath, options, listener) => watch(watchedPath, options, listener),
   },
-): OpenClawPluginService {
+): CarapacePluginService {
   return {
     id: "codex-desktop-generation",
     async start(ctx) {

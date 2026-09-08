@@ -4,7 +4,7 @@ import process from "node:process";
 import { runNativeHookRelayCliFromArgv } from "./native-hook-relay-cli.js";
 import { drainOneShotOutput } from "./one-shot-output.js";
 
-process.title = "openclaw-hooks";
+process.title = "carapace-hooks";
 let exitCode = 1;
 try {
   exitCode = await runNativeHookRelayCliFromArgv(process.argv);

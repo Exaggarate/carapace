@@ -3,7 +3,7 @@
  *
  * Infers child completion from persisted session entries when registry updates arrive late.
  */
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
 import { getRuntimeConfig } from "../../../config/config.js";
 import {
   resolveAgentIdFromSessionKey,
@@ -15,7 +15,7 @@ import {
   loadSessionEntryReadOnly,
 } from "../../../config/sessions/session-accessor.js";
 import { normalizeStoreSessionKey } from "../../../config/sessions/store-entry.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { SubagentRunOutcome } from "../announce/subagent-announce-output.js";
 import {
   SUBAGENT_ENDED_REASON_COMPLETE,
@@ -74,7 +74,7 @@ function freshSessionStartedAt(
 export function loadSubagentSessionEntry(params: {
   childSessionKey: string;
   storeCache?: SubagentSessionStoreCache;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): SessionEntry | undefined {
   const key = params.childSessionKey.trim();
   if (!key) {
@@ -98,7 +98,7 @@ export function loadSubagentSessionEntry(params: {
 /** Resolve a child session entry without depending on the file-backed store shape. */
 function loadSubagentSessionEntryForAccessor(params: {
   childSessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): SessionEntry | undefined {
   const key = params.childSessionKey.trim();
   if (!key) {
@@ -119,7 +119,7 @@ export function resolveSubagentRunOrphanReason(params: {
   entry: SubagentRunRecord;
   includeStaleUnended?: boolean;
   now?: number;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): SubagentRunOrphanReason | null {
   const childSessionKey = params.entry.childSessionKey?.trim();
   if (!childSessionKey) {
@@ -228,7 +228,7 @@ export function resolveSubagentSessionCompletion(params: {
   fallbackEndedAt: number;
   notBeforeMs?: number;
   storeCache?: SubagentSessionStoreCache;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): SubagentSessionCompletion | null {
   return resolveCompletionFromSessionEntry(
     loadSubagentSessionEntry({
@@ -246,7 +246,7 @@ export function resolveSubagentSessionStartedAt(params: {
   childSessionKey: string;
   notBeforeMs?: number;
   storeCache?: SubagentSessionStoreCache;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): number | undefined {
   const sessionEntry = loadSubagentSessionEntry({
     childSessionKey: params.childSessionKey,

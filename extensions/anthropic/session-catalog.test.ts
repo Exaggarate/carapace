@@ -1,15 +1,15 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { SessionCatalogProvider as RegisteredSessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+} from "carapace/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import type { SessionCatalogProvider as RegisteredSessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { adoptedSourceKey } from "./session-catalog-adoption.js";
 import { listClaudeSessions } from "./session-catalog-discovery.js";
@@ -79,24 +79,24 @@ function bindTestCatalogOwner(provider: RegisteredSessionCatalogProvider): Sessi
   } as SessionCatalogProvider;
 }
 
-function registerClaudeSessionCatalog(api: OpenClawPluginApi): void {
+function registerClaudeSessionCatalog(api: CarapacePluginApi): void {
   registerClaudeSessionDiscovery({
     ...api,
     registerNodeHostCommand: api.registerNodeHostCommand ?? (() => {}),
   });
 }
 
-function createClaudeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
-  const commands: OpenClawPluginNodeHostCommand[] = [];
+function createClaudeSessionNodeHostCommands(): CarapacePluginNodeHostCommand[] {
+  const commands: CarapacePluginNodeHostCommand[] = [];
   registerClaudeSessionDiscovery({
     id: "anthropic",
     config: {},
     runtime: createPluginRuntimeMock(),
     registerSessionCatalog: () => {},
-    registerNodeHostCommand: (command: OpenClawPluginNodeHostCommand) => {
+    registerNodeHostCommand: (command: CarapacePluginNodeHostCommand) => {
       commands.push(command);
     },
-  } as unknown as OpenClawPluginApi);
+  } as unknown as CarapacePluginApi);
   return commands;
 }
 
@@ -113,7 +113,7 @@ function captureCatalogProvider(runtime: PluginRuntime): SessionCatalogProvider 
     registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
       provider = bindTestCatalogOwner(candidate);
     },
-  } as unknown as OpenClawPluginApi);
+  } as unknown as CarapacePluginApi);
   if (!provider) {
     throw new Error("expected Anthropic session catalog registration");
   }
@@ -129,8 +129,8 @@ const nodeHostMocks = vi.hoisted(() => ({
   userShellPaths: new Map<string, string>(),
 }));
 
-vi.mock("openclaw/plugin-sdk/node-host", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/node-host")>();
+vi.mock("carapace/plugin-sdk/node-host", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/node-host")>();
   return {
     ...actual,
     runNodePtyCommand: nodeHostMocks.runNodePtyCommand,
@@ -172,7 +172,7 @@ vi.mock("openclaw/plugin-sdk/node-host", async (importOriginal) => {
 });
 
 async function createHome(): Promise<string> {
-  const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-claude-catalog-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-claude-catalog-"));
   homes.push(home);
   return home;
 }
@@ -271,7 +271,7 @@ async function writeIndexedDesktopSession(
       {
         sessionId,
         fullPath: path.join(home, ".claude", "projects", "-workspace", `${sessionId}.jsonl`),
-        projectPath: "/work/openclaw",
+        projectPath: "/work/carapace",
         isSidechain: false,
       },
     ],
@@ -280,7 +280,7 @@ async function writeIndexedDesktopSession(
   await writeDesktopMetadata(home, metadataName, {
     sessionId: localSessionId,
     cliSessionId: sessionId,
-    cwd: "/work/openclaw",
+    cwd: "/work/carapace",
     title,
     ...metadata,
   });
@@ -661,7 +661,7 @@ describe("Claude session catalog", () => {
           },
         },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
 
     expect(listBoundClaudeSessions(api)).toEqual(
       new Map([
@@ -760,8 +760,8 @@ describe("Claude session catalog", () => {
     const createSessionEntry = vi.fn(async (params: Record<string, unknown>) => ({
       key: `agent:main:${String(params.key)}`,
       agentId: "main",
-      sessionId: "openclaw-adopted",
-      entry: { sessionId: "openclaw-adopted", updatedAt: Date.now() },
+      sessionId: "carapace-adopted",
+      entry: { sessionId: "carapace-adopted", updatedAt: Date.now() },
     }));
     const config = {
       agents: {
@@ -771,7 +771,7 @@ describe("Claude session catalog", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let provider: SessionCatalogProvider | undefined;
     const api = {
       id: "anthropic",
@@ -788,7 +788,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     registerClaudeSessionCatalog(api);
 
     expect(provider?.resolveCreateSession?.({})).toEqual({
@@ -813,7 +813,7 @@ describe("Claude session catalog", () => {
     expect(createSessionEntry).toHaveBeenCalledWith(
       expect.objectContaining({
         // Adoption shows the user's /rename via displayName; labels stay unseeded
-        // because OpenClaw labels are unique and duplicate CLI titles must adopt.
+        // because Carapace labels are unique and duplicate CLI titles must adopt.
         displayName: "Renamed source",
         spawnedCwd: "/work/source",
         initialEntry: expect.objectContaining({
@@ -834,7 +834,7 @@ describe("Claude session catalog", () => {
   });
 
   it("does not advertise creation without a configured Claude CLI route", () => {
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     let provider: SessionCatalogProvider | undefined;
     const api = {
       id: "anthropic",
@@ -843,7 +843,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
 
     registerClaudeSessionCatalog(api);
 
@@ -874,7 +874,7 @@ describe("Claude session catalog", () => {
     for (const routedModel of ["anthropic/claude-opus-4-8", "anthropic/claude-sonnet-4-6"]) {
       const config = {
         agents: { defaults: { models: { [routedModel]: { agentRuntime: { id: "claude-cli" } } } } },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       let provider: SessionCatalogProvider | undefined;
       const api = {
         id: "anthropic",
@@ -883,7 +883,7 @@ describe("Claude session catalog", () => {
         registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
           provider = bindTestCatalogOwner(candidate);
         },
-      } as unknown as OpenClawPluginApi;
+      } as unknown as CarapacePluginApi;
 
       registerClaudeSessionCatalog(api);
 
@@ -907,12 +907,12 @@ describe("Claude session catalog", () => {
           {
             id: "research",
             models: {
-              "anthropic/claude-opus-4-8": { agentRuntime: { id: "openclaw" } },
+              "anthropic/claude-opus-4-8": { agentRuntime: { id: "carapace" } },
             },
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let provider: SessionCatalogProvider | undefined;
     const api = {
       id: "anthropic",
@@ -921,7 +921,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
 
     registerClaudeSessionCatalog(api);
 
@@ -949,7 +949,7 @@ describe("Claude session catalog", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let provider: SessionCatalogProvider | undefined;
     const api = {
       id: "anthropic",
@@ -958,7 +958,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
 
     registerClaudeSessionCatalog(api);
 
@@ -987,7 +987,7 @@ describe("Claude session catalog", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     let provider: SessionCatalogProvider | undefined;
     const api = {
       id: "anthropic",
@@ -996,7 +996,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
 
     registerClaudeSessionCatalog(api);
 
@@ -1023,7 +1023,7 @@ describe("Claude session catalog", () => {
         pluginExtensions: { anthropic: { sessionCatalog: { sourceThreadId: sessionId } } },
       }),
     },
-  ])("links a catalog row to an existing OpenClaw session via $label", async ({ entry }) => {
+  ])("links a catalog row to an existing Carapace session via $label", async ({ entry }) => {
     const home = await createHome();
     process.env.HOME = home;
     const sessionId = "claude-bound-session";
@@ -1079,8 +1079,8 @@ describe("Claude session catalog", () => {
     const createSessionEntry = vi.fn(async (params: Record<string, unknown>) => ({
       key: `agent:main:${String(params.key)}`,
       agentId: "main",
-      sessionId: "openclaw-adopted",
-      entry: { sessionId: "openclaw-adopted", updatedAt: Date.now() },
+      sessionId: "carapace-adopted",
+      entry: { sessionId: "carapace-adopted", updatedAt: Date.now() },
     }));
     const provider = captureCatalogProvider({
       config: { current: () => ({}) },
@@ -1185,7 +1185,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     registerClaudeSessionCatalog(api);
 
     const hosts = await provider?.list({ hostIds: ["node:node-a"] });
@@ -1303,7 +1303,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     registerClaudeSessionCatalog(api);
 
     const hosts = await provider?.list({ hostIds: ["node:node-view"] });
@@ -3050,7 +3050,7 @@ describe("Claude session catalog", () => {
     const api = {
       runtime: {},
       registerSessionCatalog,
-    } as unknown as OpenClawPluginApi;
+    } as unknown as CarapacePluginApi;
     registerClaudeSessionCatalog(api);
     expect(registerSessionCatalog).toHaveBeenCalledWith(
       expect.objectContaining({ id: "claude", label: "Claude Code" }),
@@ -3318,7 +3318,7 @@ describe("Claude session catalog", () => {
       registerSessionCatalog: (candidate: RegisteredSessionCatalogProvider) => {
         provider = bindTestCatalogOwner(candidate);
       },
-    } as unknown as OpenClawPluginApi);
+    } as unknown as CarapacePluginApi);
 
     await writeBrokenClaudeNpmShim(shellBinDir);
     nodeHostMocks.userShellPaths.set("claude", shellBinDir);

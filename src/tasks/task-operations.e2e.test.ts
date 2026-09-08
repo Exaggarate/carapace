@@ -16,8 +16,8 @@ import { resetConfigRuntimeState } from "../config/config.js";
 import { setHeartbeatWakeHandler } from "../infra/heartbeat-wake.js";
 import { peekSystemEvents, resetSystemEventsForTest } from "../infra/system-events.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createRunningTaskRunCore, recordTaskRunProgressByRunIdCore } from "./task-executor.js";
 import { createTaskRecord, getTaskById, reloadTaskRegistryFromStore } from "./task-registry.js";
 import {
@@ -85,7 +85,7 @@ function resetTaskOperationsRuntime(): void {
   resetTaskFlowRegistryForTests({ persist: false });
   resetSystemEventsForTest();
   resetConfigRuntimeState();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 }
 
 describe("task operations product boundary", () => {
@@ -95,15 +95,15 @@ describe("task operations product boundary", () => {
   });
 
   it("runs persisted task operations through CLI, chat, notification, audit, and maintenance", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "home",
         scenario: "minimal",
-        prefix: "openclaw-task-operations-e2e-",
+        prefix: "carapace-task-operations-e2e-",
         env: {
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_GATEWAY_PASSWORD: undefined,
-          OPENCLAW_GATEWAY_URL: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_GATEWAY_PASSWORD: undefined,
+          CARAPACE_GATEWAY_URL: undefined,
         },
       },
       async () => {

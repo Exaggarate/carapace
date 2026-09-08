@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { normalizeSkillIndexName } from "../discovery/skill-index.js";
 import {
@@ -29,11 +29,11 @@ import type {
 type SkillProposalScopeOptions = {
   agentId: string;
   env?: NodeJS.ProcessEnv;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };
 
 type RequiredProposalReadOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   reconcile?: boolean;
 };
 
@@ -108,7 +108,7 @@ export async function inspectSkillProposal(
 
 export async function resolvePendingSkillProposal(input: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   proposalId?: string;
   name?: string;

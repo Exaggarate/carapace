@@ -1,8 +1,8 @@
 // Memory Core owns crash-safe SQLite coordination leases shared across processes.
 import type { DatabaseSync } from "node:sqlite";
-import { extractErrorCode, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import { extractErrorCode, toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 
 export type MemorySqliteLeaseHandle = {
   release: () => void;

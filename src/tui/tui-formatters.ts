@@ -1,5 +1,5 @@
-import { asOptionalObjectRecord as asMessageRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asOptionalObjectRecord as asMessageRecord } from "@carapace/normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 // Formats terminal-safe strings for TUI messages and status surfaces.
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { hasTerminalControl } from "../../packages/terminal-core/src/safe-text.js";
@@ -538,7 +538,7 @@ function extractPairingQrTerminalText(record: Record<string, unknown>): string {
     }
     const blockRecord = block as Record<string, unknown>;
     if (
-      blockRecord.type === "openclaw_pairing_qr" &&
+      blockRecord.type === "carapace_pairing_qr" &&
       typeof blockRecord.terminalText === "string"
     ) {
       const text = sanitizeRenderableText(blockRecord.terminalText).trim();
@@ -599,7 +599,7 @@ function extractUserAttachmentText(record: Record<string, unknown>): string {
   }
 
   // Gateway-persisted attachment-only turns keep blank content and carry
-  // their authoritative attachments in __openclaw.media instead.
+  // their authoritative attachments in __carapace.media instead.
   return (readPersistedMediaFacts(record) ?? [])
     .filter((fact) => fact.path || fact.url || fact.contentType || fact.kind)
     .map((fact) => (isImageMediaFact(fact) ? "Attached image" : "Attached file"))

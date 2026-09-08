@@ -41,7 +41,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
     await expect(runOffer({ root: "/repo/link", confirm })).resolves.toEqual({ updated: false });
 
     expect(confirm).toHaveBeenCalledWith({
-      message: "Update OpenClaw from git before running doctor?",
+      message: "Update Carapace from git before running doctor?",
       initialValue: true,
     });
     expect(mocks.note).not.toHaveBeenCalledWith(
@@ -198,7 +198,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
         }),
       );
       expect(mocks.note).toHaveBeenCalledWith(
-        "Restarted the running gateway service after updating OpenClaw.",
+        "Restarted the running gateway service after updating Carapace.",
         "Update",
       );
     },
@@ -256,7 +256,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
       if (outcome === "healthy") {
         expect(runtime.exit).not.toHaveBeenCalled();
         expect(mocks.note).toHaveBeenCalledWith(
-          "Restarted the running gateway service after updating OpenClaw.",
+          "Restarted the running gateway service after updating Carapace.",
           "Update",
         );
         expect(mocks.waitForHealthyRestart.mock.invocationCallOrder[0]).toBeLessThan(
@@ -272,7 +272,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
           expect.stringContaining("Update completed, but gateway service restart failed"),
         );
         expect(mocks.note).not.toHaveBeenCalledWith(
-          "Restarted the running gateway service after updating OpenClaw.",
+          "Restarted the running gateway service after updating Carapace.",
           "Update",
         );
       }
@@ -287,7 +287,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
     "verifies the preserved doctor service port from $source",
     async ({ args, envPort, expected }) => {
       const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
-      const serviceEnv = { ...createManagedDoctorEnvironment(), OPENCLAW_GATEWAY_PORT: envPort };
+      const serviceEnv = { ...createManagedDoctorEnvironment(), CARAPACE_GATEWAY_PORT: envPort };
       mockGitCheckout();
       mockManagedService({
         verdict: { kind: "owned", refreshDefinition: false, fingerprint: "opaque" },
@@ -425,7 +425,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
       const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
       const serviceEnv = {
         ...createManagedDoctorEnvironment(),
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-work.service",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway-work.service",
       };
       mockGitCheckout();
       mockManagedService({
@@ -497,7 +497,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
       expect.stringContaining("source checkout may be partially mutated"),
       "Update",
     );
-    expect(mocks.note).toHaveBeenCalledWith(expect.stringContaining("openclaw triage"), "Update");
+    expect(mocks.note).toHaveBeenCalledWith(expect.stringContaining("carapace triage"), "Update");
     expect(mocks.triageCommand).toHaveBeenCalledOnce();
   });
 
@@ -611,7 +611,7 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
     expect(mocks.triageCommand).toHaveBeenCalledOnce();
     expect(mocks.note).toHaveBeenCalledWith(expect.stringContaining(`(${reason})`), "Update");
     expect(mocks.note).toHaveBeenCalledWith(
-      expect.stringContaining("Run `openclaw triage` on this machine"),
+      expect.stringContaining("Run `carapace triage` on this machine"),
       "Update",
     );
     if (reason === "state-migration-started") {
@@ -648,13 +648,13 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
     const recoveryNote = mocks.note.mock.calls.find((call) =>
       String(call[0]).includes("rollback-checkout-dirty"),
     )?.[0];
-    expect(recoveryNote).toContain("Run `openclaw triage` on this machine");
+    expect(recoveryNote).toContain("Run `carapace triage` on this machine");
     expect(recoveryNote).not.toContain("remains stopped");
     expect(recoveryNote).not.toContain("Keep the gateway stopped");
   });
 
   it("preserves the active profile in unsafe recovery guidance", async () => {
-    vi.stubEnv("OPENCLAW_PROFILE", "work");
+    vi.stubEnv("CARAPACE_PROFILE", "work");
     mockGitCheckout();
     mockManagedService({
       verdict: { kind: "owned", refreshDefinition: true, fingerprint: "opaque" },
@@ -671,14 +671,14 @@ describe("maybeOfferUpdateBeforeDoctor", () => {
     );
 
     expect(mocks.note).toHaveBeenCalledWith(
-      expect.stringContaining("Run `openclaw --profile work triage`"),
+      expect.stringContaining("Run `carapace --profile work triage`"),
       "Update",
     );
   });
 
   it("leaves a running gateway alone when service repair is externally managed", async () => {
     mockGitCheckout();
-    process.env.OPENCLAW_SERVICE_REPAIR_POLICY = "external";
+    process.env.CARAPACE_SERVICE_REPAIR_POLICY = "external";
     mocks.runGatewayUpdate.mockResolvedValue({
       status: "ok",
       mode: "git",

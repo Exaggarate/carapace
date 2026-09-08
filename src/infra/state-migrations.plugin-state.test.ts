@@ -6,16 +6,16 @@ import {
   resetPluginStateStoreForTests,
 } from "../plugin-state/plugin-state-store.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { runLegacyMigrationPlans } from "./state-migrations.plugin-state.js";
 
 describe("legacy migration plan failure isolation", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "migration-plan-isolation" });
+    state = await createCarapaceTestState({ label: "migration-plan-isolation" });
   });
 
   afterEach(async () => {
@@ -30,7 +30,7 @@ describe("legacy migration plan failure isolation", () => {
       const sourcePath = await state.writeText("legacy-import.json", "legacy source\n");
       const earlierPath = await state.writeText("earlier.txt", "earlier artifact\n");
       const laterPath = await state.writeText("later.txt", "later artifact\n");
-      const env = { ...state.env, OPENCLAW_STATE_DIR: importStateDir };
+      const env = { ...state.env, CARAPACE_STATE_DIR: importStateDir };
       const store = createPluginStateKeyedStore<string>("migration-fixture", {
         namespace: "failure-isolation",
         maxEntries: 4,
@@ -92,7 +92,7 @@ describe("legacy migration plan failure isolation", () => {
       expect(fs.readFileSync(sourcePath, "utf8")).toBe("legacy source\n");
       expect(fs.existsSync(`${sourcePath}.migrated`)).toBe(false);
       expect(await store.lookup("scope:conflict")).toBe("canonical");
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
 
       shouldFail = false;
       const repaired = await run();
@@ -104,7 +104,7 @@ describe("legacy migration plan failure isolation", () => {
       expect(await store.lookup("scope:conflict")).toBe("incoming");
       expect(fs.existsSync(sourcePath)).toBe(false);
       expect(fs.readFileSync(`${sourcePath}.migrated`, "utf8")).toBe("legacy source\n");
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
       await expect(run()).resolves.toEqual({ changes: [], warnings: [] });
     },
   );
@@ -123,7 +123,7 @@ describe("legacy migration plan failure isolation", () => {
       const sourcePath = await state.writeText("reply-cache.jsonl", original);
       const unrelatedPath = await state.writeText("unrelated.txt", "independent artifact\n");
       const importStateDir = state.statePath("shared-source-owner");
-      const env = { ...state.env, OPENCLAW_STATE_DIR: importStateDir };
+      const env = { ...state.env, CARAPACE_STATE_DIR: importStateDir };
       const counter = createPluginStateKeyedStore<{ counter: number }>("migration-fixture", {
         namespace: "shared-counter",
         maxEntries: 1,
@@ -188,7 +188,7 @@ describe("legacy migration plan failure isolation", () => {
 
       expect(counterObservedMove).toEqual([cleanupFirst]);
       expect(fs.readFileSync(`${unrelatedPath}.moved`, "utf8")).toBe("independent artifact\n");
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
       expect(await counter.lookup("counter")).toEqual(
         failure === "capacity" ? undefined : { counter: 1 },
       );
@@ -216,7 +216,7 @@ describe("legacy migration plan failure isolation", () => {
       expect(await counter.lookup("counter")).toEqual({ counter: 9000 });
       expect(fs.existsSync(sourcePath)).toBe(false);
       expect(fs.readFileSync(`${sourcePath}.migrated`, "utf8")).toBe(original);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
       await expect(run()).resolves.toEqual({ changes: [], warnings: [] });
     },
   );
@@ -225,7 +225,7 @@ describe("legacy migration plan failure isolation", () => {
     "keeps source cleanup scoped and before unrelated imports (cleanup throws: %s)",
     async (cleanupThrows) => {
       const importStateDir = state.statePath("cleanup-owner");
-      const env = { ...state.env, OPENCLAW_STATE_DIR: importStateDir };
+      const env = { ...state.env, CARAPACE_STATE_DIR: importStateDir };
       const storeOptions = { namespace: "old-rows", maxEntries: 4 };
       const ambient = createPluginStateKeyedStore<string>("migration-fixture", {
         ...storeOptions,
@@ -252,7 +252,7 @@ describe("legacy migration plan failure isolation", () => {
           stateDir: importStateDir,
           readEntries: () => [{ key: "first", value: "imported" }],
           removeSource: async () => {
-            cleanupScopes.push(process.env.OPENCLAW_STATE_DIR);
+            cleanupScopes.push(process.env.CARAPACE_STATE_DIR);
             if (cleanupThrows) {
               throw new Error("synthetic cleanup failure");
             }
@@ -284,7 +284,7 @@ describe("legacy migration plan failure isolation", () => {
       expect(laterObservedCleanup).toEqual([!cleanupThrows]);
       expect(await ambient.lookup("legacy")).toBe("ambient");
       expect(await owner.lookup("legacy")).toBe(cleanupThrows ? "owner" : undefined);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
       expect(result.changes).toContainEqual(expect.stringContaining("Migrated 1 Later rows entry"));
       expect(result.warnings).toEqual(
         cleanupThrows ? [expect.stringContaining("synthetic cleanup failure")] : [],

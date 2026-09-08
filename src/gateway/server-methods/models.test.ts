@@ -1,7 +1,7 @@
 // Models method tests cover slow catalog timeouts, configured/all views,
 // validation errors, and protocol response shapes.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { resolveAgentDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
@@ -15,15 +15,15 @@ import { testing as cliBackendsTesting } from "../../agents/cli-backends.test-su
 import type { PreparedModelRuntimeAuth } from "../../agents/prepared-model-runtime-auth.js";
 import { materializePreparedModelCatalog } from "../../agents/prepared-model-runtime.full-catalog.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import type { GatewayAgentRuntime } from "../../shared/session-types.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { assertPluginMetadataSnapshotConsistency } from "../plugin-metadata.test-helpers.js";
 import {
   type PreparedGatewayModelCatalogSnapshot,
@@ -32,7 +32,7 @@ import {
 import { modelsHandlers } from "./models.js";
 import type { RespondFn } from "./types.js";
 
-const OPENCLAW_DEVICE_PLACEMENT: NonNullable<GatewayAgentRuntime["devicePlacement"]> = {
+const CARAPACE_DEVICE_PLACEMENT: NonNullable<GatewayAgentRuntime["devicePlacement"]> = {
   requiredNodeCommands: [],
   consumesWorkerSlot: true,
 };
@@ -63,7 +63,7 @@ const modelPluginMetadataSnapshot = await vi.hoisted(async () => {
       enabledByDefault: true,
       rootDir: "/test/anthropic",
       source: "/test/anthropic/index.js",
-      manifestPath: "/test/anthropic/openclaw.plugin.json",
+      manifestPath: "/test/anthropic/carapace.plugin.json",
     },
     {
       id: "byteplus",
@@ -80,7 +80,7 @@ const modelPluginMetadataSnapshot = await vi.hoisted(async () => {
       origin: "bundled",
       rootDir: "/test/byteplus",
       source: "/test/byteplus/index.js",
-      manifestPath: "/test/byteplus/openclaw.plugin.json",
+      manifestPath: "/test/byteplus/carapace.plugin.json",
     },
     {
       id: "github-copilot",
@@ -101,7 +101,7 @@ const modelPluginMetadataSnapshot = await vi.hoisted(async () => {
       origin: "bundled",
       rootDir: "/test/github-copilot",
       source: "/test/github-copilot/index.js",
-      manifestPath: "/test/github-copilot/openclaw.plugin.json",
+      manifestPath: "/test/github-copilot/carapace.plugin.json",
     },
   ];
   const index: PluginMetadataSnapshot["index"] = {
@@ -197,7 +197,7 @@ const withoutOpenAIEnvAuth = async <T>(run: () => Promise<T>): Promise<T> =>
   await withEnvAsync(
     {
       CODEX_API_KEY: undefined,
-      CODEX_HOME: "/__openclaw_models_list_test__/codex",
+      CODEX_HOME: "/__carapace_models_list_test__/codex",
       OPENAI_API_KEY: undefined,
       OPENAI_BASE_URL: undefined,
       OPENAI_OAUTH_TOKEN: undefined,
@@ -218,13 +218,13 @@ const withoutAnthropicEnvAuth = async <T>(run: () => Promise<T>): Promise<T> =>
     run,
   );
 
-let modelsTestState: OpenClawTestState;
+let modelsTestState: CarapaceTestState;
 
 beforeAll(async () => {
   assertPluginMetadataSnapshotConsistency(modelPluginMetadataSnapshot as PluginMetadataSnapshot);
-  modelsTestState = await createOpenClawTestState({
+  modelsTestState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-models-list-",
+    prefix: "carapace-models-list-",
     agentEnv: "main",
   });
 });
@@ -235,8 +235,8 @@ afterAll(async () => {
 });
 
 async function withModelsTestState<T>(
-  options: NonNullable<Parameters<typeof createOpenClawTestState>[0]>,
-  run: (state: OpenClawTestState) => Promise<T>,
+  options: NonNullable<Parameters<typeof createCarapaceTestState>[0]>,
+  run: (state: CarapaceTestState) => Promise<T>,
 ): Promise<T> {
   clearRuntimeAuthProfileStoreSnapshots();
   await modelsTestState.writeAuthProfiles({ version: 1, profiles: {} });
@@ -266,8 +266,8 @@ function requestModelsList(params: {
   view: "default" | "configured" | "provider-config" | "all";
   agentId?: string;
   respond?: ReturnType<typeof vi.fn>;
-  runtimeConfig?: OpenClawConfig;
-  getRuntimeConfig?: () => OpenClawConfig;
+  runtimeConfig?: CarapaceConfig;
+  getRuntimeConfig?: () => CarapaceConfig;
   loadGatewayModelCatalog: (params?: {
     agentId?: string;
     agentDir?: string;
@@ -280,7 +280,7 @@ function requestModelsList(params: {
   preparedAuthModes?: PreparedModelRuntimeAuth["authModes"];
 }) {
   const respond = params.respond ?? vi.fn();
-  const runtimeConfig = params.runtimeConfig ?? ({} as OpenClawConfig);
+  const runtimeConfig = params.runtimeConfig ?? ({} as CarapaceConfig);
   const getRuntimeConfig = params.getRuntimeConfig ?? (() => runtimeConfig);
   const resolveOwnerFacts = () => {
     const config = getRuntimeConfig();
@@ -432,10 +432,10 @@ describe("models.list", () => {
   it("uses the replacement owner config for the whole catalog projection", async () => {
     const initialConfig = {
       agents: { defaults: { models: { "test/old": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const latestConfig = {
       agents: { defaults: { models: { "test/demo": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     let currentConfig = initialConfig;
     const loadGatewayModelCatalog = vi.fn(async () => {
       if (currentConfig === initialConfig) {
@@ -463,10 +463,10 @@ describe("models.list", () => {
   it("escalates to the full owner when replacement config adds a provider wildcard", async () => {
     const initialConfig = {
       agents: { defaults: { models: { "test/demo": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const latestConfig = {
       agents: { defaults: { models: { "test/*": {} } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     let currentConfig = initialConfig;
     let firstLoad = true;
     const loadGatewayModelCatalog = vi.fn(async (_params?: { readOnly?: boolean }) => {
@@ -535,7 +535,7 @@ describe("models.list", () => {
       "claude-fable-5",
       "claude-sonnet-4-6",
     ];
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       agents: {
         defaults: {
           models: Object.fromEntries(
@@ -600,7 +600,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const loadGatewayModelCatalog = vi.fn(async () => [
       { id: modelId, name: modelId, provider: "anthropic", reasoning: false },
       {
@@ -647,7 +647,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const materializedCatalog = materializePreparedModelCatalog(
       {
         entries: [{ id: modelId, name: modelId, provider: "anthropic", reasoning: false }],
@@ -714,7 +714,7 @@ describe("models.list", () => {
           anthropic: { models: modelIds.map((id) => ({ id, name: id })) },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const { request, respond } = requestModelsList({
       view: "configured",
       runtimeConfig,
@@ -761,7 +761,7 @@ describe("models.list", () => {
           anthropic: { models: [{ id: modelId, name: "Claude Mythos 5" }] },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const materializedCatalog = materializePreparedModelCatalog(
       {
         entries: [{ id: modelId, name: "Claude Mythos 5", provider: "anthropic" }],
@@ -836,7 +836,7 @@ describe("models.list", () => {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -846,7 +846,7 @@ describe("models.list", () => {
           vllm: sourceProvider,
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const runtimeConfig = {
       ...sourceConfig,
       models: {
@@ -858,7 +858,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const loadGatewayModelCatalog = vi.fn(() =>
       Promise.resolve([
         {
@@ -922,7 +922,7 @@ describe("models.list", () => {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -946,7 +946,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     setRuntimeConfigSnapshot(config, config);
     try {
       const { request, respond } = requestModelsList({
@@ -990,7 +990,7 @@ describe("models.list", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
       try {
@@ -1014,10 +1014,10 @@ describe("models.list", () => {
                 name: "GPT Test",
                 provider: "openai",
                 agentRuntime: {
-                  id: "openclaw",
+                  id: "carapace",
                   cloudPlacementSupported: true,
                   cloudPlacementExecutionMode: "worker-turn",
-                  devicePlacement: OPENCLAW_DEVICE_PLACEMENT,
+                  devicePlacement: CARAPACE_DEVICE_PLACEMENT,
                   devicePlacementSupported: true,
                   source: "implicit",
                 },
@@ -1050,7 +1050,7 @@ describe("models.list", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
       try {
@@ -1077,10 +1077,10 @@ describe("models.list", () => {
                 name: "GPT Test",
                 provider: "openai",
                 agentRuntime: {
-                  id: "openclaw",
+                  id: "carapace",
                   cloudPlacementSupported: true,
                   cloudPlacementExecutionMode: "worker-turn",
-                  devicePlacement: OPENCLAW_DEVICE_PLACEMENT,
+                  devicePlacement: CARAPACE_DEVICE_PLACEMENT,
                   devicePlacementSupported: true,
                   source: "implicit",
                 },
@@ -1109,7 +1109,7 @@ describe("models.list", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const { request, respond } = requestModelsList({
         view: "configured",
         runtimeConfig,
@@ -1131,10 +1131,10 @@ describe("models.list", () => {
               name: "GPT Test",
               provider: "openai",
               agentRuntime: {
-                id: "openclaw",
+                id: "carapace",
                 cloudPlacementSupported: true,
                 cloudPlacementExecutionMode: "worker-turn",
-                devicePlacement: OPENCLAW_DEVICE_PLACEMENT,
+                devicePlacement: CARAPACE_DEVICE_PLACEMENT,
                 devicePlacementSupported: true,
                 source: "implicit",
               },
@@ -1161,7 +1161,7 @@ describe("models.list", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const { request, respond } = requestModelsList({
         view: "configured",
         runtimeConfig,
@@ -1215,7 +1215,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     try {
@@ -1260,7 +1260,7 @@ describe("models.list", () => {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -1278,7 +1278,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     try {
@@ -1424,7 +1424,7 @@ describe("models.list", () => {
             vllm: { apiKey: "test-key" },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       const loadConfiguredCatalog = vi.fn(() => Promise.resolve(catalog));
       const { request: configuredRequest, respond: configuredRespond } = requestModelsList({
@@ -1530,7 +1530,7 @@ describe("models.list", () => {
       await withModelsTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-models-list-local-wildcard-",
+          prefix: "carapace-models-list-local-wildcard-",
           agentEnv: "main",
           env: { VLLM_API_KEY: undefined },
         },
@@ -1562,7 +1562,7 @@ describe("models.list", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig;
+          } as unknown as CarapaceConfig;
           const expected = {
             models: [
               {
@@ -1601,7 +1601,7 @@ describe("models.list", () => {
       await withModelsTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-models-list-codex-alias-",
+          prefix: "carapace-models-list-codex-alias-",
           agentEnv: "main",
         },
         async (state) => {
@@ -1670,7 +1670,7 @@ describe("models.list", () => {
         await withModelsTestState(
           {
             layout: "state-only",
-            prefix: "openclaw-models-list-cli-runtime-",
+            prefix: "carapace-models-list-cli-runtime-",
             agentEnv: "main",
           },
           async () => {
@@ -1689,7 +1689,7 @@ describe("models.list", () => {
                     },
                   },
                 },
-              } as unknown as OpenClawConfig;
+              } as unknown as CarapaceConfig;
               const { request, respond } = requestModelsList({
                 view: "all",
                 runtimeConfig,
@@ -1745,7 +1745,7 @@ describe("models.list", () => {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -1768,7 +1768,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const { request, respond } = requestModelsList({
       view: "all",
@@ -1804,7 +1804,7 @@ describe("models.list", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const { request, respond } = requestModelsList({
       view: "all",
@@ -1835,12 +1835,12 @@ describe("models.list", () => {
     "${UNRELATED_KEY}",
     "$malformed-template",
   ])("uses an exact hydrated runtime snapshot with opaque key %s", async (apiKey) => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       secrets: {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -1863,7 +1863,7 @@ describe("models.list", () => {
       sourceConfig.models?.providers?.vllm,
       "source vLLM provider",
     );
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...sourceConfig,
       models: {
         providers: {
@@ -1906,7 +1906,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-expired-profile-",
+        prefix: "carapace-models-list-expired-profile-",
         agentEnv: "main",
       },
       async (state) => {
@@ -1948,7 +1948,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-stale-runtime-profile-",
+        prefix: "carapace-models-list-stale-runtime-profile-",
         agentEnv: "main",
       },
       async (state) => {
@@ -2006,7 +2006,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-env-profile-",
+        prefix: "carapace-models-list-env-profile-",
         agentEnv: "main",
         env: {
           DEMO_PROVIDER_TOKEN: "test-token",
@@ -2060,7 +2060,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-file-profile-",
+        prefix: "carapace-models-list-file-profile-",
         agentEnv: "main",
       },
       async (state) => {
@@ -2087,12 +2087,12 @@ describe("models.list", () => {
               providers: {
                 "mounted-json": {
                   source: "file",
-                  path: "/tmp/openclaw-test-secrets.json",
+                  path: "/tmp/carapace-test-secrets.json",
                   mode: "json",
                 },
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           loadGatewayModelCatalog: vi.fn(() =>
             Promise.resolve([{ id: "demo-model", name: "Demo Model", provider: "demo-provider" }]),
           ),
@@ -2125,7 +2125,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-inline-cooldown-",
+        prefix: "carapace-models-list-inline-cooldown-",
         agentEnv: "main",
       },
       async (state) => {
@@ -2140,7 +2140,7 @@ describe("models.list", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
         const catalog = [{ id: "qwen-remote", name: "Qwen Remote", provider: "cliproxyapi" }];
         const writeCooldown = (disabledUntil: number) =>
           state.writeAuthProfiles({
@@ -2207,7 +2207,7 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-hydrated-file-profile-",
+        prefix: "carapace-models-list-hydrated-file-profile-",
         agentEnv: "main",
       },
       async (state) => {
@@ -2250,12 +2250,12 @@ describe("models.list", () => {
                 providers: {
                   "mounted-json": {
                     source: "file",
-                    path: "/tmp/openclaw-test-secrets.json",
+                    path: "/tmp/carapace-test-secrets.json",
                     mode: "json",
                   },
                 },
               },
-            } as OpenClawConfig,
+            } as CarapaceConfig,
             loadGatewayModelCatalog: vi.fn(() =>
               Promise.resolve([
                 { id: "demo-model", name: "Demo Model", provider: "demo-provider" },
@@ -2301,7 +2301,7 @@ describe("models.list", () => {
         providers: {
           "mounted-json": {
             source: "file",
-            path: "/tmp/openclaw-test-secrets.json",
+            path: "/tmp/carapace-test-secrets.json",
             mode: "json",
           },
         },
@@ -2320,10 +2320,10 @@ describe("models.list", () => {
     await withModelsTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-models-list-provider-profile-",
+        prefix: "carapace-models-list-provider-profile-",
         agentEnv: "main",
         env: {
-          OPENCLAW_TEST_PROFILE_API_KEY: "test-token",
+          CARAPACE_TEST_PROFILE_API_KEY: "test-token",
           VLLM_API_KEY: undefined,
         },
       },
@@ -2337,7 +2337,7 @@ describe("models.list", () => {
               keyRef: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_TEST_PROFILE_API_KEY",
+                id: "CARAPACE_TEST_PROFILE_API_KEY",
               },
             },
           },
@@ -2359,7 +2359,7 @@ describe("models.list", () => {
             },
           },
           ...(fixture.secrets ? { secrets: fixture.secrets } : {}),
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const { request, respond } = requestModelsList({
           view: "all",

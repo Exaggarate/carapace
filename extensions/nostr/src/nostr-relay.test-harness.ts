@@ -2,7 +2,7 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import type { Socket } from "node:net";
 import { verifyEvent, type Event } from "nostr-tools";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { WebSocketServer } from "ws";
 
 export const PREFIX_ACK_REASON = "connection failure: historical diagnostic";

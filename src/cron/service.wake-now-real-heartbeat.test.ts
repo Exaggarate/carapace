@@ -5,7 +5,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createHeartbeatToolResponsePayload } from "../auto-reply/heartbeat-tool-response.js";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveAgentMainSessionKey } from "../config/sessions.js";
 import {
   resolveSqliteScope,
@@ -28,9 +28,9 @@ import {
 import { getQueueSize } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { resetCronActiveJobs, waitForActiveCronJobs } from "./active-jobs.js";
 import { CronService, type CronEvent } from "./service.js";
 import type { CronServiceDeps } from "./service/state.js";
@@ -47,14 +47,14 @@ afterEach(() => {
   setHeartbeatsEnabled(true);
   resetSystemEventsForTest();
   resetCronActiveJobs();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   vi.restoreAllMocks();
 });
 
 const noopLogger = { debug() {}, info() {}, warn() {}, error() {} };
 
 function makeSandbox() {
-  const dir = tempDirs.make("openclaw-cron-real-heartbeat-");
+  const dir = tempDirs.make("carapace-cron-real-heartbeat-");
   return {
     dir,
     cronStorePath: path.join(dir, "cron", "jobs.json"),
@@ -103,7 +103,7 @@ async function runMainCronCase(
     resolveFinished = resolve;
   });
 
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: {
       defaults: {
         workspace: sandbox.dir,
@@ -382,7 +382,7 @@ describe("main cron with the real heartbeat runner", () => {
       throw new Error("expected completed cron run");
     }
     const sessionKey = result.expectedMainSessionKey;
-    const db = openOpenClawAgentDatabase(
+    const db = openCarapaceAgentDatabase(
       toDatabaseOptions(
         resolveSqliteScope({
           agentId: "main",

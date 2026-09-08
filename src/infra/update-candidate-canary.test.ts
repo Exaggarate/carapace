@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { validateUpdateCandidateCanary } from "./update-candidate-canary.js";
 import { prepareUpdateCandidateRehearsal } from "./update-candidate-rehearsal.js";
 import { CONTROL_PLANE_UPDATE_SENTINEL_META_ENV } from "./update-control-plane-sentinel.js";
@@ -63,7 +63,7 @@ beforeEach(async () => {
       children.set(child.pid, child);
       childEnv = options.env;
       if (args.includes("gateway")) {
-        void fs.readFile(options.env.OPENCLAW_CONFIG_PATH!, "utf8").then((raw) => {
+        void fs.readFile(options.env.CARAPACE_CONFIG_PATH!, "utf8").then((raw) => {
           candidateConfig = JSON.parse(raw) as Record<string, unknown>;
         });
       } else {
@@ -162,8 +162,8 @@ describe("update candidate canary", () => {
         [CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]: path.join(root, "live-sentinel.json"),
         [POST_CORE_UPDATE_RESULT_PATH_ENV]: path.join(root, "live-result.json"),
         [POST_CORE_UPDATE_SOURCE_CONFIG_PATH_ENV]: path.join(root, "live-config.json"),
-        OPENCLAW_UPDATE_RUN_HANDOFF: "1",
-        OPENCLAW_SYSTEMD_UNIT: "source-gateway.service",
+        CARAPACE_UPDATE_RUN_HANDOFF: "1",
+        CARAPACE_SYSTEMD_UNIT: "source-gateway.service",
         CUSTOM_PROVIDER_KEY: "synthetic-provider-credential",
       },
       timeoutMs: 3_000,
@@ -191,19 +191,19 @@ describe("update candidate canary", () => {
       ["gateway", "run"],
     ]);
     expect(requests).toEqual(["/startupz", "/startupz", "/readyz"]);
-    expect(childEnv.OPENCLAW_STATE_DIR).not.toBe(root);
+    expect(childEnv.CARAPACE_STATE_DIR).not.toBe(root);
     expect(childEnv).toMatchObject({
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_NO_AUTO_UPDATE: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_NO_AUTO_UPDATE: "1",
       CUSTOM_PROVIDER_KEY: "synthetic-provider-credential",
     });
     for (const key of [
       CONTROL_PLANE_UPDATE_SENTINEL_META_ENV,
       POST_CORE_UPDATE_RESULT_PATH_ENV,
       POST_CORE_UPDATE_SOURCE_CONFIG_PATH_ENV,
-      "OPENCLAW_UPDATE_RUN_HANDOFF",
-      "OPENCLAW_SYSTEMD_UNIT",
+      "CARAPACE_UPDATE_RUN_HANDOFF",
+      "CARAPACE_SYSTEMD_UNIT",
     ]) {
       expect(childEnv[key]).toBeUndefined();
     }
@@ -221,17 +221,17 @@ describe("update candidate canary", () => {
       mocks.signal.mock.calls.filter(([pid]) => pid === gatewayPid).map(([, signal]) => signal),
     ).toEqual(["SIGTERM", "SIGKILL"]);
     expect(result.logTail.join("\n")).toContain("startupz: started");
-    await expect(fs.access(childEnv.OPENCLAW_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(fs.access(childEnv.CARAPACE_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("reuses caller-owned rehearsal changes across validations until the caller disposes them", async () => {
-    const config: OpenClawConfig = { logging: { level: "info" } };
+    const config: CarapaceConfig = { logging: { level: "info" } };
     const observed: Array<{ configPath: string; level: string | undefined }> = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
-        const configPath = childEnv.OPENCLAW_CONFIG_PATH!;
-        const current = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+        const configPath = childEnv.CARAPACE_CONFIG_PATH!;
+        const current = JSON.parse(await fs.readFile(configPath, "utf8")) as CarapaceConfig;
         observed.push({ configPath, level: current.logging?.level });
         return Response.json({ status: "started", ready: true });
       }),
@@ -253,7 +253,7 @@ describe("update candidate canary", () => {
         timeoutMs: 3_000,
       });
       expect(first.status).toBe("ok");
-      const copied = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8")) as OpenClawConfig;
+      const copied = JSON.parse(await fs.readFile(rehearsal.configPath, "utf8")) as CarapaceConfig;
       copied.logging = { ...copied.logging, level: "debug" };
       const repairedConfig = JSON.stringify(copied);
       await fs.writeFile(rehearsal.configPath, repairedConfig);
@@ -374,7 +374,7 @@ describe("update candidate canary", () => {
     expect(result.status).toBe("error");
     expect(mocks.spawn).toHaveBeenCalledOnce();
     expect(mocks.signal.mock.calls.map(([, signal]) => signal)).toEqual(["SIGTERM", "SIGKILL"]);
-    await expect(fs.access(childEnv.OPENCLAW_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(fs.access(childEnv.CARAPACE_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("rejects a zero-exit continuation worker without its compiled schema contract before boot", async () => {

@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { addSessionMember } from "../config/sessions/session-sharing-store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { GatewayClient, GatewayRequestContext } from "./server-methods/types.js";
 import {
   authorizeResolvedSessionMutation,
@@ -14,7 +14,7 @@ import {
   SessionMutationAuthorizationChangedError,
 } from "./session-sharing.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 function sandboxRoleClient(role: "view" | "write"): GatewayClient {
   const profile = ensureProfileForEmail(`sandbox-required-${role}@example.test`);
@@ -23,7 +23,7 @@ function sandboxRoleClient(role: "view" | "write"): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read", "operator.write"],
     },
@@ -39,8 +39,8 @@ function sandboxRoleClient(role: "view" | "write"): GatewayClient {
 
 describe("session sharing sandbox requirements", () => {
   it("denies sandbox-required members host execution without changing session provenance", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "view",

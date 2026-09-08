@@ -37,7 +37,7 @@ function fullMatrixChildren() {
             conclusion: "success",
             started_at: "2026-08-29T03:25:00Z",
             completed_at: "2026-08-29T03:26:00Z",
-            html_url: `https://github.com/openclaw/openclaw/actions/runs/${runId}/job/${index + 1}`,
+            html_url: `https://github.com/Exaggarate/carapace/actions/runs/${runId}/job/${index + 1}`,
           })),
         },
       ],
@@ -57,12 +57,12 @@ function fullMatrixChildren() {
       dispatchActor: "github-actions[bot]",
       triggeringActor: "github-actions[bot]",
       displayTitle: key,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       errors: [],
       workflow: `${key}.yml`,
       workflowRef: "main",
       workflowSha: SHA,
-      url: `https://github.com/openclaw/openclaw/actions/runs/${runId}`,
+      url: `https://github.com/Exaggarate/carapace/actions/runs/${runId}`,
       createdAt: "2026-08-29T03:25:00Z",
       updatedAt: "2026-08-29T03:26:00Z",
     };
@@ -270,7 +270,7 @@ describe("full release artifact contract", () => {
           : tryReadReleaseDecisionArtifact(
               { attempt: 1, headSha: SHA },
               "123",
-              "openclaw/openclaw",
+              "carapace/carapace",
               (args) => {
                 download(args);
                 return "";
@@ -298,7 +298,7 @@ describe("full release artifact contract", () => {
           : tryReadReleaseDecisionArtifact(
               { attempt: 1, headSha: SHA },
               "123",
-              "openclaw/openclaw",
+              "carapace/carapace",
               (args) => {
                 download(args);
                 return "";

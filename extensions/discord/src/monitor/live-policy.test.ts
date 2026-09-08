@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   clearRuntimeConfigSnapshot,
   createRuntimeConfigReader,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDiscordLivePolicyReader } from "./live-policy.js";
 import type { resolveDiscordAllowlistConfig } from "./provider.allowlist.js";
@@ -17,8 +17,8 @@ vi.mock("./provider.allowlist.js", () => ({
 }));
 
 type ResolvedAllowlist = Awaited<ReturnType<typeof resolveDiscordAllowlistConfig>>;
-const publish = (cfg: OpenClawConfig) => setRuntimeConfigSnapshot(cfg, cfg);
-const config = (allowFrom: string[]): OpenClawConfig => ({
+const publish = (cfg: CarapaceConfig) => setRuntimeConfigSnapshot(cfg, cfg);
+const config = (allowFrom: string[]): CarapaceConfig => ({
   channels: { discord: { token: "synthetic-token", allowFrom, dmPolicy: "allowlist" } },
 });
 
@@ -54,7 +54,7 @@ describe("Discord live account policy", () => {
   });
 
   it("preserves prepared named-account policy until an authored policy changes", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           token: "synthetic-token",
@@ -90,7 +90,7 @@ describe("Discord live account policy", () => {
     expect(await read()).toMatchObject({ dmEnabled: false, allowFrom: ["222"] });
     expect(mocks.resolveAllowlist).not.toHaveBeenCalled();
 
-    const cleared: OpenClawConfig = {
+    const cleared: CarapaceConfig = {
       channels: {
         discord: {
           ...cfg.channels?.discord,

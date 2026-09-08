@@ -2,7 +2,7 @@
  * Submits or skips the prompt after build/preflight and before stream execution.
  * It may assume prompt context is assembled and admission state is published.
  */
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import type { ImageContent } from "../../../llm/types.js";
 import type { createTrajectoryRuntimeRecorder } from "../../../trajectory/runtime.js";
 import type { AgentMessage } from "../../runtime/index.js";

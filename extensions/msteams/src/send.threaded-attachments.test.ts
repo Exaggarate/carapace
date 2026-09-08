@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client as TeamsApiClient } from "@microsoft/teams.api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import {
   editMessageMSTeams,
   sendAdaptiveCardMSTeams,
@@ -29,16 +29,16 @@ const mockState = vi.hoisted(() => ({
   ]),
 }));
 
-vi.mock("openclaw/plugin-sdk/outbound-media", () => ({
+vi.mock("carapace/plugin-sdk/outbound-media", () => ({
   loadOutboundMediaFromUrl: mockState.loadOutboundMediaFromUrl,
 }));
 
-vi.mock("openclaw/plugin-sdk/markdown-table-runtime", () => ({
+vi.mock("carapace/plugin-sdk/markdown-table-runtime", () => ({
   resolveMarkdownTableMode: vi.fn(() => "off"),
 }));
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("carapace/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/text-chunking")>();
   return {
     ...actual,
     convertMarkdownTables: (text: string) => text,
@@ -122,7 +122,7 @@ async function withRealTeamsSdkHttp<T>(
   try {
     const port = (server.address() as AddressInfo).port;
     const api = new TeamsApiClient(serviceUrl);
-    // OpenClaw's minimal SDK ambient declaration omits the real client's public HTTP transport.
+    // Carapace's minimal SDK ambient declaration omits the real client's public HTTP transport.
     const transport = (api as unknown as { http: TeamsSdkHttpTransport }).http;
     for (const method of ["post", "put"] as const) {
       vi.spyOn(transport, method).mockImplementation(async (destination, data) => {
@@ -263,7 +263,7 @@ const structuredRoutingCases: StructuredRoutingCase[] = [
 
 type StructuredSender = {
   label: string;
-  send: (cfg: OpenClawConfig) => Promise<unknown>;
+  send: (cfg: CarapaceConfig) => Promise<unknown>;
 };
 
 const structuredSenders: StructuredSender[] = [
@@ -310,7 +310,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
           conversationId,
           ref: {
             serviceUrl,
-            agent: { id: "28:bot", name: "OpenClaw", role: "bot" },
+            agent: { id: "28:bot", name: "Carapace", role: "bot" },
             user: { id: "29:user" },
             conversation: { id: conversationId, conversationType },
             ...(threadId ? { threadId } : {}),
@@ -328,7 +328,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
         });
 
         const result = await sendMessageMSTeams({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           to: conversationId,
           text: "Here is the report",
           mediaUrl: "https://media.example.com/report.pdf",
@@ -359,7 +359,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
 
   it("delivers a workspace-relative attachment through the real Teams SDK and Bot Framework", async () => {
     const workspaceDir = await realpath(
-      await mkdtemp(join(tmpdir(), "openclaw-msteams-sdk-media-")),
+      await mkdtemp(join(tmpdir(), "carapace-msteams-sdk-media-")),
     );
     const filePath = join(workspaceDir, "report.pdf");
     const fileContents = Buffer.from("%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF\n");
@@ -369,8 +369,8 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
 
     try {
       await writeFile(filePath, fileContents);
-      const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-        "openclaw/plugin-sdk/outbound-media",
+      const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+        "carapace/plugin-sdk/outbound-media",
       );
       mockState.loadOutboundMediaFromUrl.mockImplementation(actual.loadOutboundMediaFromUrl);
 
@@ -381,7 +381,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
           conversationId,
           ref: {
             serviceUrl,
-            agent: { id: "28:bot", name: "OpenClaw", role: "bot" },
+            agent: { id: "28:bot", name: "Carapace", role: "bot" },
             user: { id: "29:user" },
             conversation: { id: conversationId, conversationType: "channel" },
             threadId: "workspace-thread-root",
@@ -396,7 +396,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
         });
 
         await sendMessageMSTeams({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           to: conversationId,
           text: "Workspace report",
           mediaUrl: "report.pdf",
@@ -443,7 +443,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
         conversationId,
         ref: {
           serviceUrl,
-          agent: { id: "28:bot", name: "OpenClaw", role: "bot" },
+          agent: { id: "28:bot", name: "Carapace", role: "bot" },
           user: { id: "29:user" },
           conversation: { id: conversationId, conversationType: "personal" },
         },
@@ -456,7 +456,7 @@ describe("Microsoft Teams SharePoint attachment thread routing", () => {
       });
 
       const result = await sendMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: conversationId,
         text: "Here is the image",
         mediaUrl: "https://media.example.com/image.png",
@@ -491,7 +491,7 @@ describe.each(structuredSenders)("Microsoft Teams $label thread routing", ({ sen
           conversationId,
           ref: {
             serviceUrl,
-            agent: { id: "28:bot", name: "OpenClaw", role: "bot" },
+            agent: { id: "28:bot", name: "Carapace", role: "bot" },
             user: { id: "29:user" },
             conversation: { id: conversationId, conversationType },
             activityId: "incoming-activity-1",
@@ -505,7 +505,7 @@ describe.each(structuredSenders)("Microsoft Teams $label thread routing", ({ sen
           log: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
         });
 
-        await send({} as OpenClawConfig);
+        await send({} as CarapaceConfig);
 
         expect(requests).toHaveLength(1);
         expect(requests[0]).toMatchObject({
@@ -553,7 +553,7 @@ describe("Teams text preparation at the SDK HTTP boundary", () => {
           conversationId,
           ref: {
             serviceUrl,
-            agent: { id: "28:bot", name: "OpenClaw", role: "bot" },
+            agent: { id: "28:bot", name: "Carapace", role: "bot" },
             user: { id: "29:user" },
             conversation: { id: conversationId, conversationType: "channel" },
           },

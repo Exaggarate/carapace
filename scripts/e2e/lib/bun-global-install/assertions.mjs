@@ -16,7 +16,7 @@ const PARENT_TERMINATION_SIGNALS = ["SIGINT", "SIGTERM", "SIGHUP"];
 
 const usage = () => {
   console.error(
-    "Usage: assertions.mjs <run-with-timeout|assert-bun-version|assert-image-providers|assert-openclaw-trusted|assert-release-versions|configure-runtime|assert-agent-turn> [...]",
+    "Usage: assertions.mjs <run-with-timeout|assert-bun-version|assert-image-providers|assert-carapace-trusted|assert-release-versions|configure-runtime|assert-agent-turn> [...]",
   );
   process.exit(2);
 };
@@ -86,9 +86,9 @@ const resolveSignalExitCode = (signal) => {
 
 const runWithTimeout = async (timeout, command, commandArgs) => {
   const killGrace = parsePositiveNumber(
-    process.env.OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS ??
+    process.env.CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS ??
       String(DEFAULT_TIMEOUT_KILL_GRACE_MS),
-    "OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS",
+    "CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS",
   );
   const child = spawn(command, commandArgs, {
     detached: process.platform !== "win32",
@@ -216,7 +216,7 @@ if (mode === "assert-bun-version") {
 }
 
 if (mode === "assert-image-providers") {
-  const raw = process.env.OPENCLAW_IMAGE_PROVIDERS_JSON ?? "";
+  const raw = process.env.CARAPACE_IMAGE_PROVIDERS_JSON ?? "";
   let parsed;
   try {
     parsed = JSON.parse(raw);
@@ -250,7 +250,7 @@ if (mode === "assert-release-versions") {
   const aiManifest = JSON.parse(fs.readFileSync(aiManifestPath, "utf8"));
   const rootVersion = rootManifest.version;
   const aiVersion = aiManifest.version;
-  const rootAiVersion = rootManifest.dependencies?.["@openclaw/ai"];
+  const rootAiVersion = rootManifest.dependencies?.["@carapace/ai"];
   if (
     typeof rootVersion !== "string" ||
     typeof aiVersion !== "string" ||
@@ -258,30 +258,30 @@ if (mode === "assert-release-versions") {
     rootAiVersion !== aiVersion
   ) {
     throw new Error(
-      `candidate version mismatch: openclaw=${String(rootVersion)}, dependency=${String(rootAiVersion)}, @openclaw/ai=${String(aiVersion)}`,
+      `candidate version mismatch: carapace=${String(rootVersion)}, dependency=${String(rootAiVersion)}, @carapace/ai=${String(aiVersion)}`,
     );
   }
   process.stdout.write(aiVersion);
   process.exit(0);
 }
 
-if (mode === "assert-openclaw-trusted") {
+if (mode === "assert-carapace-trusted") {
   const [packageRoot, globalManifestPath, untrustedOutputPath] = args;
   if (!packageRoot || !globalManifestPath || !untrustedOutputPath) {
     usage();
   }
   const globalManifest = JSON.parse(fs.readFileSync(globalManifestPath, "utf8"));
-  if (!globalManifest.trustedDependencies?.includes?.("openclaw")) {
-    throw new Error("Bun global manifest does not trust OpenClaw lifecycle scripts");
+  if (!globalManifest.trustedDependencies?.includes?.("carapace")) {
+    throw new Error("Bun global manifest does not trust Carapace lifecycle scripts");
   }
   const untrustedOutput = fs.readFileSync(untrustedOutputPath, "utf8");
-  if (/(?:^|\s)(?:\.?[\\/])?node_modules[\\/]openclaw(?:\s|@|$)/imu.test(untrustedOutput)) {
-    throw new Error(`OpenClaw lifecycle scripts remain blocked by Bun:\n${untrustedOutput}`);
+  if (/(?:^|\s)(?:\.?[\\/])?node_modules[\\/]carapace(?:\s|@|$)/imu.test(untrustedOutput)) {
+    throw new Error(`Carapace lifecycle scripts remain blocked by Bun:\n${untrustedOutput}`);
   }
-  const pendingPath = path.join(packageRoot, ".openclaw-lifecycle-pending");
-  const legacyGuardPath = path.join(packageRoot, "dist", "openclaw-install-guard");
+  const pendingPath = path.join(packageRoot, ".carapace-lifecycle-pending");
+  const legacyGuardPath = path.join(packageRoot, "dist", "carapace-install-guard");
   if (fs.existsSync(pendingPath) || fs.existsSync(legacyGuardPath)) {
-    throw new Error("OpenClaw package lifecycle did not complete");
+    throw new Error("Carapace package lifecycle did not complete");
   }
   process.exit(0);
 }

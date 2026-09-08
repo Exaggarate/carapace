@@ -10,10 +10,10 @@ import type {
   PluginRecord as RegistryPluginRecord,
   PluginRegistryParams,
 } from "./registry-types.js";
-import type { OpenClawPluginGatewayRuntimeScopeSurface } from "./types.js";
+import type { CarapacePluginGatewayRuntimeScopeSurface } from "./types.js";
 
 export type PluginHttpRouteRegistration = RegistryTypesPluginHttpRouteRegistration & {
-  gatewayRuntimeScopeSurface?: OpenClawPluginGatewayRuntimeScopeSurface;
+  gatewayRuntimeScopeSurface?: CarapacePluginGatewayRuntimeScopeSurface;
 };
 
 export type { PluginRecord, PluginRegistry } from "./registry-types.js";

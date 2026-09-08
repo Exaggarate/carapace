@@ -1,9 +1,9 @@
-import { parseAccessGroupAllowFromEntry } from "openclaw/plugin-sdk/access-groups";
+import { parseAccessGroupAllowFromEntry } from "carapace/plugin-sdk/access-groups";
 import type {
   ChannelIngressIdentifierKind,
   StableChannelIngressIdentityParams,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const MATTERMOST_USER_NAME_KIND =
   "plugin:mattermost-user-name" as const satisfies ChannelIngressIdentifierKind;

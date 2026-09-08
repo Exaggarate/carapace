@@ -33,8 +33,8 @@ function assert(condition, message) {
 
 function configPath() {
   return (
-    process.env.OPENCLAW_CONFIG_PATH ??
-    path.join(process.env.HOME ?? "", ".openclaw", "openclaw.json")
+    process.env.CARAPACE_CONFIG_PATH ??
+    path.join(process.env.HOME ?? "", ".carapace", "carapace.json")
   );
 }
 
@@ -45,7 +45,7 @@ function writeConfig(cfg) {
 function authProfilesPath() {
   return path.join(
     process.env.HOME ?? "",
-    ".openclaw",
+    ".carapace",
     "agents",
     "main",
     "agent",
@@ -54,7 +54,7 @@ function authProfilesPath() {
 }
 
 function stateDir() {
-  return process.env.OPENCLAW_STATE_DIR ?? path.dirname(configPath());
+  return process.env.CARAPACE_STATE_DIR ?? path.dirname(configPath());
 }
 
 function readStateText() {
@@ -76,7 +76,7 @@ function configureMockOpenAi() {
 
 function assertOpenAiEnvRef() {
   const rawKey = process.argv[3];
-  assert(fs.existsSync(configPath()), "openclaw.json missing");
+  assert(fs.existsSync(configPath()), "carapace.json missing");
   assertNoLegacyPrimaryAuthRows(stateDir());
   assertOpenAiEnvAuthProfileStore(readCanonicalAuthProfileStoreText(stateDir()), {
     missingMessage: "OpenAI env ref was not persisted",
@@ -127,7 +127,7 @@ function assertSessionMemoryHookEnabled() {
   if (cfg?.hooks?.internal?.entries?.["session-memory"]?.enabled === true) {
     return;
   }
-  if (process.env.OPENCLAW_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE === "interactive") {
+  if (process.env.CARAPACE_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE === "interactive") {
     process.stdout.write("session-memory hook unavailable in selected interactive onboarding\n");
     return;
   }
@@ -176,7 +176,7 @@ function assertImageDescribe() {
   assert(payload.ok === true, `image describe failed: ${JSON.stringify(payload)}`);
   assert(payload.capability === "image.describe", "wrong image describe capability");
   const output = payload.outputs?.[0];
-  assert(output?.text?.includes("OPENCLAW_E2E_OK"), "image description marker missing");
+  assert(output?.text?.includes("CARAPACE_E2E_OK"), "image description marker missing");
   assert(output.provider === "openai", `unexpected image provider: ${output?.provider}`);
   assert(
     fileContainsText(requestLogPath, "/v1/responses"),
@@ -220,7 +220,7 @@ function assertPluginUninstalled() {
   );
   const managedRoot = path.join(
     process.env.HOME ?? "",
-    ".openclaw",
+    ".carapace",
     "plugins",
     "installed",
     pluginId,

@@ -1,5 +1,5 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ChatItem, MessageGroup } from "../../lib/chat/chat-types.ts";
 import { normalizeRoleForGrouping } from "../../lib/chat/message-normalizer.ts";
 import { resolveMessageVisibleContent } from "../../lib/chat/message-visibility.ts";
@@ -92,7 +92,7 @@ export function groupMessages(items: ChatItem[]): Array<ChatItem | MessageGroup>
     const userTurnIdentity = role === "user" ? (steerTarget ?? userTurnRunId(item.message)) : null;
     const shouldSplitBySender = role === "user" || role === "assistant";
     const startsProjectedTurn =
-      asRecord(asRecord(item.message)?.["__openclaw"])?.turnBoundary === true;
+      asRecord(asRecord(item.message)?.["__carapace"])?.turnBoundary === true;
     const splitsAssistantKind =
       role === "assistant" &&
       currentGroup?.role === "assistant" &&

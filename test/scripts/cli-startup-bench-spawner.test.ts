@@ -35,7 +35,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("reuses warm state for gateway health while isolating fresh-state samples", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-state-scope-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-state-scope-test-"));
     try {
       const fixturePath = path.join(tmpDir, "record-home.mjs");
       const homeLogPath = path.join(tmpDir, "homes.log");
@@ -43,7 +43,7 @@ describe("CLI startup benchmark script spawners", () => {
         fixturePath,
         [
           'import { appendFileSync } from "node:fs";',
-          "appendFileSync(process.env.OPENCLAW_BENCH_HOME_LOG, `${process.env.HOME}\\n`);",
+          "appendFileSync(process.env.CARAPACE_BENCH_HOME_LOG, `${process.env.HOME}\\n`);",
           "console.log('{\"ok\":true}');",
           "",
         ].join("\n"),
@@ -75,7 +75,7 @@ describe("CLI startup benchmark script spawners", () => {
           cwd: process.cwd(),
           env: {
             ...process.env,
-            OPENCLAW_BENCH_HOME_LOG: homeLogPath,
+            CARAPACE_BENCH_HOME_LOG: homeLogPath,
           },
           stdio: "pipe",
         },
@@ -111,7 +111,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("requires authenticated gateway health probes to exit successfully", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-connected-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-connected-test-"));
     try {
       const fixturePath = path.join(tmpDir, "transport-error.mjs");
       fs.writeFileSync(
@@ -154,7 +154,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("does not require unrelated fixture cases for a narrowed preset", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -217,7 +217,7 @@ describe("CLI startup benchmark script spawners", () => {
             cwd: process.cwd(),
             env: {
               ...process.env,
-              OPENCLAW_STARTUP_BENCH_ENFORCE_NONCANONICAL_ARCH: "1",
+              CARAPACE_STARTUP_BENCH_ENFORCE_NONCANONICAL_ARCH: "1",
             },
             stdio: "pipe",
           },
@@ -229,7 +229,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("rejects narrowed preset reports with no matching current cases", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-empty-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-empty-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -280,7 +280,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("rejects narrowed preset reports with unrelated current cases when baseline checks run", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-overlap-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-overlap-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -322,7 +322,7 @@ describe("CLI startup benchmark script spawners", () => {
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_STARTUP_BENCH_ENFORCE_NONCANONICAL_ARCH: "1",
+            CARAPACE_STARTUP_BENCH_ENFORCE_NONCANONICAL_ARCH: "1",
           },
         },
       );
@@ -337,7 +337,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("allows skip-baseline reports without fixture case overlap", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-skip-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-skip-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -386,7 +386,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("skips x64 startup budgets on noncanonical architectures", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-arch-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-arch-test-"));
     try {
       const archShimPath = path.join(tmpDir, "arch-shim.mjs");
       const baselinePath = path.join(tmpDir, "baseline.json");
@@ -504,7 +504,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("fails reused reports with timed-out samples", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-timeout-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-timeout-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -560,7 +560,7 @@ describe("CLI startup benchmark script spawners", () => {
   });
 
   it("fails reused reports with missing RSS samples", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-budget-rss-test-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bench-budget-rss-test-"));
     try {
       const baselinePath = path.join(tmpDir, "baseline.json");
       const reportPath = path.join(tmpDir, "current.json");
@@ -612,7 +612,7 @@ describe("CLI startup benchmark script spawners", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_STARTUP_BENCH_MAX_RSS_REGRESSION_PCT: "20pct",
+          CARAPACE_STARTUP_BENCH_MAX_RSS_REGRESSION_PCT: "20pct",
         },
       },
     );
@@ -620,7 +620,7 @@ describe("CLI startup benchmark script spawners", () => {
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
     expect(result.stderr).toContain(
-      "OPENCLAW_STARTUP_BENCH_MAX_RSS_REGRESSION_PCT must be a non-negative number",
+      "CARAPACE_STARTUP_BENCH_MAX_RSS_REGRESSION_PCT must be a non-negative number",
     );
     expect(result.stderr).not.toContain("at ");
   });

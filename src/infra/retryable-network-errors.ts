@@ -1,2 +1,2 @@
 // Keep transient network policy aligned across retries and process-level handling.
-export { hasRetryableConnectionErrorCode, isTransientNetworkError } from "@openclaw/ai/diagnostics";
+export { hasRetryableConnectionErrorCode, isTransientNetworkError } from "@carapace/ai/diagnostics";

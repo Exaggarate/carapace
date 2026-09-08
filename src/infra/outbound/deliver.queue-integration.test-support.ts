@@ -1,5 +1,5 @@
 import type { ChannelOutboundAdapter } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { drainPendingDeliveriesCore, type DeliverFn } from "./delivery-queue-recovery.js";
 import { createRecoveryLog } from "./delivery-queue.test-helpers.js";
 
@@ -63,7 +63,7 @@ export async function drainMatrixReconnect(opts: {
   await drainPendingDeliveriesCore({
     drainKey: "matrix:reconnect-test",
     logLabel: "Matrix reconnect drain",
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     log: createRecoveryLog(),
     stateDir: opts.stateDir,
     deliver: opts.deliver,

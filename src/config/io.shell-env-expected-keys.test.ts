@@ -28,10 +28,10 @@ describe("config io shell env expected keys", () => {
   it.each(["loadConfig", "readBestEffortConfig"] as const)(
     "%s includes env keys from a configured plugin without executing its runtime",
     async (read) => {
-      const home = createGeneratedPluginTempRoot("openclaw-shell-env-metadata-");
+      const home = createGeneratedPluginTempRoot("carapace-shell-env-metadata-");
       const pluginDir = path.join(home, "configured-plugin");
-      const configPath = path.join(home, "state", "openclaw.json");
-      writeJson(path.join(pluginDir, "openclaw.plugin.json"), {
+      const configPath = path.join(home, "state", "carapace.json");
+      writeJson(path.join(pluginDir, "carapace.plugin.json"), {
         id: "shell-fixture",
         providers: ["shell-fixture"],
         channels: ["shell-fixture"],
@@ -45,7 +45,7 @@ describe("config io shell env expected keys", () => {
       writeJson(path.join(pluginDir, "package.json"), {
         name: "shell-fixture",
         version: "1.0.0",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
           channel: {
             id: "shell-fixture",
@@ -65,10 +65,10 @@ describe("config io shell env expected keys", () => {
       });
       const env = {
         HOME: home,
-        OPENCLAW_STATE_DIR: path.dirname(configPath),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(home, "empty-bundled"),
+        CARAPACE_STATE_DIR: path.dirname(configPath),
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(home, "empty-bundled"),
       };
-      fs.mkdirSync(env.OPENCLAW_BUNDLED_PLUGINS_DIR);
+      fs.mkdirSync(env.CARAPACE_BUNDLED_PLUGINS_DIR);
 
       await createConfigIO({ configPath, env, homedir: () => home, observe: false })[read]();
 
@@ -79,7 +79,7 @@ describe("config io shell env expected keys", () => {
         "SHELL_FIXTURE_CHANNEL_KEY",
       ]);
       expect(expectedKeys).toEqual(
-        expect.arrayContaining(["OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD"]),
+        expect.arrayContaining(["CARAPACE_GATEWAY_TOKEN", "CARAPACE_GATEWAY_PASSWORD"]),
       );
     },
   );

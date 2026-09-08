@@ -3,9 +3,9 @@
 import { writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { WebSocket } from "ws";
 import { type HelloOk, PROTOCOL_VERSION } from "../../packages/gateway-protocol/src/index.js";
 import { acquireGatewayTestClient } from "../../test/helpers/gateway-client.js";
@@ -71,7 +71,7 @@ export async function connectGatewayClient(params: {
   const role = params.role ?? "operator";
   const scopes = params.scopes ?? (role === "node" ? [] : undefined);
   const platform = params.platform ?? process.platform;
-  const identityRoot = process.env.OPENCLAW_STATE_DIR ?? process.env.HOME ?? os.tmpdir();
+  const identityRoot = process.env.CARAPACE_STATE_DIR ?? process.env.HOME ?? os.tmpdir();
   const deviceIdentity =
     params.deviceIdentity ??
     loadOrCreateDeviceIdentity({
@@ -280,12 +280,12 @@ export async function startGatewayWithClient(params: {
 }) {
   const gatewayStartupEnv = captureEnv([
     ...GATEWAY_STARTUP_MUTATED_ENV_KEYS,
-    "OPENCLAW_CONFIG_PATH",
+    "CARAPACE_CONFIG_PATH",
   ]);
   let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
   try {
     await writeFile(params.configPath, `${JSON.stringify(params.cfg, null, 2)}\n`);
-    process.env.OPENCLAW_CONFIG_PATH = params.configPath;
+    process.env.CARAPACE_CONFIG_PATH = params.configPath;
     clearRuntimeConfigSnapshot();
     clearConfigCache();
     clearSessionStoreCacheForTest();

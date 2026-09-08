@@ -3,8 +3,8 @@
  * Maps deprecated and plugin-defined provider IDs to canonical credential
  * providers, with trusted workspace plugin handling and snapshot-owned metadata.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
@@ -21,7 +21,7 @@ import type {
 
 /** Inputs that control plugin metadata and trust scope for auth alias lookup. */
 export type ProviderAuthAliasLookupParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   includeUntrustedWorkspacePlugins?: boolean;

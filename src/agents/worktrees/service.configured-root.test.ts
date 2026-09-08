@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ManagedWorktreeService, IDLE_GC_MS } from "./service.js";
 import { useManagedWorktreeTestRepository } from "./service.test-support.js";
 
@@ -16,20 +16,20 @@ describe("configured managed worktree root", () => {
   let service: ManagedWorktreeService;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worktree-root-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worktree-root-"));
     repo = await initializeRepository(root);
     stateDir = path.join(root, "state");
     worktreeRoot = undefined;
     now = Date.now();
     service = new ManagedWorktreeService({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       now: () => now,
       getConfig: () => ({ worktreeRoot }),
     });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -48,7 +48,7 @@ describe("configured managed worktree root", () => {
       expect(record.path).toBe(path.join(worktreeRoot, record.repoFingerprint, record.name));
       expect(await fs.readFile(path.join(record.path, "README.md"), "utf8")).toBe("base\n");
       expect((await service.list()).map((entry) => entry.id)).toEqual([record.id]);
-      await expect(fs.stat(path.join(stateDir, "state", "openclaw.sqlite"))).resolves.toBeDefined();
+      await expect(fs.stat(path.join(stateDir, "state", "carapace.sqlite"))).resolves.toBeDefined();
       await expect(fs.stat(path.join(worktreeRoot, "state"))).rejects.toMatchObject({
         code: "ENOENT",
       });

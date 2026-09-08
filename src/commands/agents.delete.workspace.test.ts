@@ -3,7 +3,7 @@ import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
 import { listSessionEntriesCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
@@ -98,7 +98,7 @@ const arrangeAgentsDeleteTest = createAgentsDeleteFixture((cfg) => {
 const readJsonLogs = () => readAgentDeleteJsonLogs(runtime.log.mock.calls);
 
 function expectSessionStore(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   sessions: Record<string, { sessionId: string; updatedAt: number }>,
   agentId = "ops",
 ) {
@@ -150,16 +150,16 @@ describe("agents delete workspace lifecycle", () => {
   });
 
   it("deletes workspace state after local workspace removal", async () => {
-    await withStateDirEnv("openclaw-agents-delete-workspace-state-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-workspace-state-", async ({ stateDir }) => {
       const opsWorkspace = path.join(stateDir, "workspace-ops");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
             { id: "ops", workspace: opsWorkspace },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({
         stateDir,
         cfg,
@@ -178,17 +178,17 @@ describe("agents delete workspace lifecycle", () => {
   });
 
   it("finishes agent-directory cleanup when workspace state deletion fails", async () => {
-    await withStateDirEnv("openclaw-agents-delete-state-failure-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-state-failure-", async ({ stateDir }) => {
       const opsWorkspace = path.join(stateDir, "workspace-ops");
       const opsAgentDir = path.join(stateDir, "agents", "ops", "agent");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
             { id: "ops", workspace: opsWorkspace },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({ stateDir, cfg, deletedAgentId: "ops", sessions: {} });
       workspaceStateMocks.deleteWorkspaceState.mockImplementationOnce(() => {
         throw new Error("state database unavailable");
@@ -208,9 +208,9 @@ describe("agents delete workspace lifecycle", () => {
   });
 
   it("refuses deleting the sole configured agent", async () => {
-    await withStateDirEnv("openclaw-agents-delete-main-alias-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-main-alias-", async ({ stateDir }) => {
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [{ id: "ops", default: true, workspace: path.join(stateDir, "workspace-ops") }],
         },
@@ -255,9 +255,9 @@ describe("agents delete workspace lifecycle", () => {
   });
 
   it("preserves canonical main-agent keys when deleting another agent", async () => {
-    await withStateDirEnv("openclaw-agents-delete-shared-store-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-shared-store-", async ({ stateDir }) => {
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: path.join(stateDir, "shared-sessions.sqlite") },
         agents: {
           list: [
@@ -302,7 +302,7 @@ describe("agents delete workspace lifecycle", () => {
     ["another agent workspace overlaps a child path", "", "ops-child"],
     ["deleting a parent workspace that contains another agent workspace", "main-child", ""],
   ])("skips workspace removal when %s (#70890)", async (_relationship, mainPath, opsPath) => {
-    await withStateDirEnv("openclaw-agents-delete-shared-workspace-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-shared-workspace-", async ({ stateDir }) => {
       const sharedWorkspace = path.join(stateDir, "workspace-shared");
       const mainWorkspace = path.join(sharedWorkspace, mainPath);
       const opsWorkspace = path.join(sharedWorkspace, opsPath);
@@ -310,7 +310,7 @@ describe("agents delete workspace lifecycle", () => {
       await fs.mkdir(opsWorkspace, { recursive: true });
 
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: mainWorkspace },
@@ -346,21 +346,21 @@ describe("agents delete workspace lifecycle", () => {
   it.runIf(process.platform !== "win32")(
     "skips workspace removal when another agent reaches the same directory through a symlink (#70890)",
     async () => {
-      await withStateDirEnv("openclaw-agents-delete-symlink-workspace-", async ({ stateDir }) => {
+      await withStateDirEnv("carapace-agents-delete-symlink-workspace-", async ({ stateDir }) => {
         const realWorkspace = path.join(stateDir, "workspace-real");
         const aliasWorkspace = path.join(stateDir, "workspace-alias");
         await fs.mkdir(realWorkspace, { recursive: true });
         await fs.symlink(realWorkspace, aliasWorkspace, "dir");
 
         const now = Date.now();
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             list: [
               { id: "main", workspace: realWorkspace },
               { id: "ops", workspace: aliasWorkspace },
             ],
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await arrangeAgentsDeleteTest({
           stateDir,
           cfg,
@@ -385,21 +385,21 @@ describe("agents delete workspace lifecycle", () => {
   );
 
   it("trashes workspace when no other agent shares it", async () => {
-    await withStateDirEnv("openclaw-agents-delete-unique-workspace-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-unique-workspace-", async ({ stateDir }) => {
       const opsWorkspace = path.join(stateDir, "workspace-ops");
       const mainWorkspace = path.join(stateDir, "workspace-main");
       await fs.mkdir(opsWorkspace, { recursive: true });
       await fs.mkdir(mainWorkspace, { recursive: true });
 
       const now = Date.now();
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: mainWorkspace },
             { id: "ops", workspace: opsWorkspace },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({
         stateDir,
         cfg,
@@ -428,18 +428,18 @@ describe("agents delete workspace lifecycle", () => {
   });
 
   it("retains workspace state when workspace trash fails", async () => {
-    await withStateDirEnv("openclaw-agents-delete-trash-failure-", async ({ stateDir }) => {
+    await withStateDirEnv("carapace-agents-delete-trash-failure-", async ({ stateDir }) => {
       const opsWorkspace = path.join(stateDir, "workspace-ops");
       const opsAgentDir = path.join(stateDir, "agents", "ops", "agent");
       const opsSessionsDir = path.join(stateDir, "agents", "ops", "sessions");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", workspace: path.join(stateDir, "workspace-main") },
             { id: "ops", workspace: opsWorkspace },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await arrangeAgentsDeleteTest({ stateDir, cfg, sessions: {} });
       fsSafeMocks.movePathToTrash.mockRejectedValueOnce(new Error("trash unavailable"));
 

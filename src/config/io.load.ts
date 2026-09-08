@@ -22,13 +22,13 @@ import {
 } from "./io.warnings.js";
 import { migrateLegacyContextBudgetConfig, migratePersistedImplicitMainRoster } from "./legacy.js";
 import { materializeRuntimeConfig } from "./materialize.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 export function loadConfigFromContext(
   context: ConfigIoContext,
   options: { skipSuspiciousRecovery?: boolean } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const { deps, configPath, pathResolution } = context;
   let envBeforeRead: Record<string, string | undefined> | undefined;
   try {
@@ -90,7 +90,7 @@ export function loadConfigFromContext(
     // valid, which would run with defaults and poison lastKnownGood.
     if (typeof validationConfigRaw === "object" && validationConfigRaw !== null) {
       const duplicates = findDuplicateAgentDirs(
-        validationConfigRaw as OpenClawConfig,
+        validationConfigRaw as CarapaceConfig,
         pathResolution,
       );
       if (duplicates.length > 0) {

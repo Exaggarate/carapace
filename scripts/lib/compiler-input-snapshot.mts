@@ -126,7 +126,7 @@ export class CompilerInputSnapshot {
           if (
             id === ".ci-harness" ||
             id === ".worktrees" ||
-            id === ".cache/openclaw-pnpm-store" ||
+            id === ".cache/carapace-pnpm-store" ||
             id === ".cache/vitest" ||
             (!installed &&
               [".git", ".artifacts", ".claude", ".agents", ".local", "dist"].includes(entry.name))

@@ -36,7 +36,7 @@ import {
   resolveAuthProfileDatabasePath,
 } from "../agents/auth-profiles/sqlite.js";
 import { buildProviderAuthRecoveryHint } from "../agents/provider-auth-recovery-hint.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HealthFinding } from "../flows/health-checks.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { isRecord } from "../utils.js";
@@ -61,12 +61,12 @@ export function noteSharedAuthStoreStatus(env: NodeJS.ProcessEnv = process.env):
     return;
   }
   note(
-    "Shared auth profiles still live in the main agent database. Run `openclaw doctor --fix` to move them into shared SQLite state and make the main agent deletable.",
+    "Shared auth profiles still live in the main agent database. Run `carapace doctor --fix` to move them into shared SQLite state and make the main agent deletable.",
     "Shared auth store",
   );
 }
 
-function hasConfiguredCodexOAuthProfile(cfg: OpenClawConfig): boolean {
+function hasConfiguredCodexOAuthProfile(cfg: CarapaceConfig): boolean {
   return Object.values(cfg.auth?.profiles ?? {}).some(
     (profile) =>
       (profile.provider === OPENAI_PROVIDER_ID || profile.provider === LEGACY_CODEX_PROVIDER_ID) &&
@@ -154,7 +154,7 @@ function legacyCodexProviderOverrideToHealthFinding(providerOverride: unknown): 
 }
 
 /** Emits a warning when legacy Codex transport overrides can shadow configured Codex OAuth. */
-export function noteLegacyCodexProviderOverride(cfg: OpenClawConfig): void {
+export function noteLegacyCodexProviderOverride(cfg: CarapaceConfig): void {
   const providerOverride = cfg.models?.providers?.[LEGACY_CODEX_PROVIDER_ID];
   if (!providerOverride) {
     return;
@@ -189,7 +189,7 @@ function formatAuthNoteTitle(
   return labelStores ? `${title} (${target.label})` : title;
 }
 
-function listAuthProfileHealthTargets(cfg: OpenClawConfig): AuthProfileHealthTarget[] {
+function listAuthProfileHealthTargets(cfg: CarapaceConfig): AuthProfileHealthTarget[] {
   const targets = new Map<string, AuthProfileHealthTarget>();
   if (hasAnyAuthProfileStoreSource() || Object.keys(cfg.auth?.profiles ?? {}).length > 0) {
     targets.set(resolveSharedAuthStorePath(), { label: "Shared" });
@@ -250,14 +250,14 @@ function formatOAuthRefreshFailureDoctorLine(params: {
 
 async function resolveAuthIssueHint(
   issue: AuthIssue,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   store: ReturnType<typeof ensureAuthProfileStore>,
 ): Promise<string | null> {
   if (issue.reasonCode === "invalid_expires") {
     return "Invalid token expires metadata. Set a future Unix ms timestamp or remove expires.";
   }
   if (issue.reasonCode === "malformed_api_key") {
-    return "Paste the API key value, not an OpenClaw onboarding command.";
+    return "Paste the API key value, not an Carapace onboarding command.";
   }
   const providerHint = await formatAuthDoctorHint({
     cfg,
@@ -275,7 +275,7 @@ async function resolveAuthIssueHint(
 
 async function formatAuthIssueLine(
   issue: AuthIssue,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   store: ReturnType<typeof ensureAuthProfileStore>,
 ): Promise<string> {
   const remaining =
@@ -311,8 +311,8 @@ function authProfileIssueToHealthFinding(params: {
     fixHint:
       params.hint ??
       (params.issue.status === "expiring"
-        ? "Run `openclaw doctor --fix` to refresh expiring OAuth profiles, or re-authenticate static tokens."
-        : "Run `openclaw doctor --fix` to refresh OAuth profiles, or re-authenticate this provider."),
+        ? "Run `carapace doctor --fix` to refresh expiring OAuth profiles, or re-authenticate static tokens."
+        : "Run `carapace doctor --fix` to refresh OAuth profiles, or re-authenticate this provider."),
   };
 }
 
@@ -383,7 +383,7 @@ function isAuthProfileHealthIssue(profile: AuthHealthSummary["profiles"][number]
 }
 
 function loadAuthProfileHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: AuthProfileHealthTarget;
   allowKeychainPrompt: boolean;
   readOnly?: boolean;
@@ -419,7 +419,7 @@ function loadAuthProfileHealth(params: {
 }
 
 async function collectAuthProfileHealthFindingsForTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   allowKeychainPrompt: boolean;
   target: AuthProfileHealthTarget;
   labelStores: boolean;
@@ -459,7 +459,7 @@ async function collectAuthProfileHealthFindingsForTarget(params: {
 
 /** Collects read-only structured findings for auth profile health. */
 export async function collectAuthProfileHealthFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   allowKeychainPrompt?: boolean;
 }): Promise<readonly HealthFinding[]> {
   const activeTargets = listAuthProfileHealthTargets(params.cfg);
@@ -488,7 +488,7 @@ export async function collectAuthProfileHealthFindings(params: {
 }
 
 async function noteAuthProfileHealthForTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: DoctorPrompter;
   allowKeychainPrompt: boolean;
   target: AuthProfileHealthTarget;
@@ -557,7 +557,7 @@ async function noteAuthProfileHealthForTarget(params: {
 
 /** Checks configured agent auth stores and emits doctor notes for stale or unusable profiles. */
 export async function noteAuthProfileHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: DoctorPrompter;
   allowKeychainPrompt: boolean;
 }): Promise<void> {

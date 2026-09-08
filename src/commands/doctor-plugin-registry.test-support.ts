@@ -18,8 +18,8 @@ export async function readRequiredPersistedInstalledPluginIndex(
 
 export function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
     ...overrides,
   };
@@ -32,7 +32,7 @@ export function createCandidate(rootDir: string, id = "demo"): PluginCandidate {
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id,
       name: id,
@@ -64,7 +64,7 @@ export function createBundledCandidate(params: {
     "utf8",
   );
   fs.writeFileSync(
-    path.join(params.rootDir, "openclaw.plugin.json"),
+    path.join(params.rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: params.id,
       name: params.id,
@@ -78,7 +78,7 @@ export function createBundledCandidate(params: {
     JSON.stringify({
       name: params.packageName,
       version: params.version,
-      ...(packageManifest ? { openclaw: packageManifest } : {}),
+      ...(packageManifest ? { carapace: packageManifest } : {}),
     }),
     "utf8",
   );
@@ -154,14 +154,14 @@ export function createManagedNpmPlugin(params: {
       name: params.packageName,
       version: params.version,
       ...(params.peerDependencies ? { peerDependencies: params.peerDependencies } : {}),
-      openclaw: {
+      carapace: {
         extensions: ["."],
       },
     }),
     "utf8",
   );
   fs.writeFileSync(
-    path.join(packageDir, "openclaw.plugin.json"),
+    path.join(packageDir, "carapace.plugin.json"),
     JSON.stringify({
       id: params.id,
       name: params.id,
@@ -238,7 +238,7 @@ export function expectedPluginIndexRecord(params: {
     pluginId: params.pluginId,
     ...(params.packageName ? { packageName: params.packageName } : {}),
     ...(params.packageVersion ? { packageVersion: params.packageVersion } : {}),
-    manifestPath: path.join(params.rootDir, "openclaw.plugin.json"),
+    manifestPath: path.join(params.rootDir, "carapace.plugin.json"),
     manifestHash: expect.any(String),
     manifestFile: {
       size: expect.any(Number),

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import type { Model } from "@openclaw/llm-core";
+import type { Model } from "@carapace/llm-core";
 import OpenAI from "openai";
 import { expect, vi } from "vitest";
 import { WebSocketServer } from "ws";

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { crabboxCommandError } from "./crabbox-worker-command-error.js";
 import { runCrabboxCommand, type CrabboxCommandRunner } from "./crabbox-worker-command.js";
 import {
@@ -140,7 +140,7 @@ export function createCrabboxWarmImageManager(dependencies: {
       .filter(({ value }) => Object.hasOwn(value.allocations, id));
     if (entries.length > 1) {
       throw new Error(
-        `Crabbox lease ${id} has conflicting warm-image owners; run openclaw doctor --fix.`,
+        `Crabbox lease ${id} has conflicting warm-image owners; run carapace doctor --fix.`,
       );
     }
     const entry = entries[0];
@@ -178,7 +178,7 @@ export function createCrabboxWarmImageManager(dependencies: {
       assertCurrent(context);
       if (matches(openStore().lookup(key))) {
         warnOnce(
-          `checkpoint retirement (${operation.checkpointId} deletion obligation retained; retry during periodic maintenance or next warm-image-enabled worker teardown; inspect with openclaw crabbox warm-images)`,
+          `checkpoint retirement (${operation.checkpointId} deletion obligation retained; retry during periodic maintenance or next warm-image-enabled worker teardown; inspect with carapace crabbox warm-images)`,
           error,
         );
       }
@@ -280,7 +280,7 @@ export function createCrabboxWarmImageManager(dependencies: {
     }
     if (openStore().entries().length >= WARM_IMAGE_MAX_ENTRIES) {
       throw new Error(
-        "Crabbox warm-image profile capacity is full; stop outstanding workers or resolve cleanup with openclaw crabbox warm-images before retrying.",
+        "Crabbox warm-image profile capacity is full; stop outstanding workers or resolve cleanup with carapace crabbox warm-images before retrying.",
       );
     }
   };

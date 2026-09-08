@@ -11,7 +11,7 @@ import { resetConfigOverrides } from "../config/runtime-overrides.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resetAgentEventsForTest } from "../infra/agent-events.js";
 import { registerSkillsChangeListener } from "../skills/runtime/refresh.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
@@ -21,18 +21,18 @@ import { buildMockOpenAiResponsesProvider } from "./test-openai-responses-model.
 const execFileAsync = promisify(execFile);
 const ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 function resetGatewayState(): void {
@@ -51,13 +51,13 @@ describe("Gateway agent skill refresh", () => {
     { timeout: 90_000 },
     async () => {
       const env = captureEnv([...ENV_KEYS]);
-      const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-skill-refresh-"));
-      const stateDir = path.join(home, ".openclaw");
+      const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-skill-refresh-"));
+      const stateDir = path.join(home, ".carapace");
       const workspace = path.join(home, "workspace");
       const seedSkillFile = path.join(workspace, "skills", "seed-proof", "SKILL.md");
       const canonicalSkillFile = path.join(workspace, "skills", "canonical-proof", "SKILL.md");
       const bundledPluginsDir = path.join(home, "empty-bundled-plugins");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await Promise.all([
         fs.mkdir(path.dirname(seedSkillFile), { recursive: true }),
         fs.mkdir(bundledPluginsDir, { recursive: true }),
@@ -67,20 +67,20 @@ describe("Gateway agent skill refresh", () => {
       await initializeGitWorkspace(workspace);
       for (const [key, value] of Object.entries({
         HOME: home,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       })) {
         setTestEnvValue(key, value);
       }
-      deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-      deleteTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY");
+      deleteTestEnvValue("CARAPACE_CONFIG_PATH");
+      deleteTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY");
       resetGatewayState();
 
       const requests: string[] = [];
@@ -154,7 +154,7 @@ describe("Gateway agent skill refresh", () => {
           models: { mode: "replace", providers: { [provider.providerId]: provider.config } },
           plugins: { slots: { memory: "none" } },
           tools: { profile: "coding" },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         gateway = await startGatewayWithClient({
           cfg,
           configPath,
@@ -227,7 +227,7 @@ describe("Gateway agent skill refresh", () => {
         const local = await execFileAsync(
           process.execPath,
           [
-            path.join(process.cwd(), "openclaw.mjs"),
+            path.join(process.cwd(), "carapace.mjs"),
             "agent",
             "--local",
             "--agent",
@@ -316,8 +316,8 @@ async function expectNoAdditionalLifecycleChanges(
 
 async function initializeGitWorkspace(workspace: string): Promise<void> {
   await execFileAsync("git", ["init", "-b", "main", workspace]);
-  await execFileAsync("git", ["-C", workspace, "config", "user.name", "OpenClaw Tests"]);
-  await execFileAsync("git", ["-C", workspace, "config", "user.email", "tests@openclaw.invalid"]);
+  await execFileAsync("git", ["-C", workspace, "config", "user.name", "Carapace Tests"]);
+  await execFileAsync("git", ["-C", workspace, "config", "user.email", "tests@carapace.invalid"]);
   await execFileAsync("git", ["-C", workspace, "add", "."]);
   await execFileAsync("git", ["-C", workspace, "commit", "-m", "initial"]);
 }

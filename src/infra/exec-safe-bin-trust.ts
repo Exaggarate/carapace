@@ -5,7 +5,7 @@ import {
   normalizeSortedUniqueStringEntries,
   sortUniqueStrings,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import { sameFsObject, swapAsciiCase } from "./path-case.js";
 
 // Keep defaults to OS-managed immutable bins only.

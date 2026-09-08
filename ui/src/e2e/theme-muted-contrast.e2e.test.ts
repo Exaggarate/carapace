@@ -6,7 +6,7 @@ import { controlUiBundledGatewayUrl, installMockGateway } from "../test-helpers/
 import { resolveRenderedColors, type RenderedColor } from "../test-helpers/rendered-colors.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 const themeCases = [
   { family: "claw", mode: "dark", resolved: "dark" },
@@ -158,7 +158,7 @@ suite.define(() => {
       await context.addInitScript(
         ({ gatewayUrl, initialMode, initialTheme }) => {
           localStorage.setItem(
-            `openclaw.control.settings.v1:${gatewayUrl}`,
+            `carapace.control.settings.v1:${gatewayUrl}`,
             JSON.stringify({ gatewayUrl, theme: initialTheme, themeMode: initialMode }),
           );
         },
@@ -437,7 +437,7 @@ suite.define(() => {
             },
             "skills.proposals.list": {
               proposals: [proposal],
-              schema: "openclaw.skill-workshop.proposals-manifest.v1",
+              schema: "carapace.skill-workshop.proposals-manifest.v1",
               installedSkills: [],
               updatedAt,
             },

@@ -6,15 +6,15 @@ import { SQLITE_READONLY_CHILD_ARG } from "../infra/sqlite-readonly-worker.js";
 import * as coordinators from "../infra/state-database-coordinator.js";
 import { DoctorStateMigrationRefusalError } from "../infra/state-migrations.messages.js";
 import {
-  assertNoOpenClawAgentDatabaseLeasesReadOnly,
-  claimOpenClawAgentDatabaseLease,
-} from "../state/openclaw-agent-db-lease.js";
-import { recordOpenClawDatabaseQuarantine } from "../state/openclaw-quarantine-store.js";
+  assertNoCarapaceAgentDatabaseLeasesReadOnly,
+  claimCarapaceAgentDatabaseLease,
+} from "../state/carapace-agent-db-lease.js";
+import { recordCarapaceDatabaseQuarantine } from "../state/carapace-quarantine-store.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runDoctorHealthFlow } from "./doctor-health.js";
 import { mocks } from "./doctor-health.test-support.js";
 
@@ -72,18 +72,18 @@ describe("Doctor maintenance admission", () => {
   it.each(["gateway", "state", "agent"] as const)(
     "refuses the live %s owner before spawning a database snapshot",
     async (owner) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         mocks.config.mockReturnValue({});
         mocks.packageRoot.mockReturnValue(undefined);
-        const database = openOpenClawStateDatabase({ env: state.env });
+        const database = openCarapaceStateDatabase({ env: state.env });
         if (owner === "agent") {
-          claimOpenClawAgentDatabaseLease({
+          claimCarapaceAgentDatabaseLease({
             agentId: "main",
-            path: state.statePath("agents/main/agent/openclaw-agent.sqlite"),
+            path: state.statePath("agents/main/agent/carapace-agent.sqlite"),
             env: state.env,
           });
         }
-        closeOpenClawStateDatabaseByPath(database.path);
+        closeCarapaceStateDatabaseByPath(database.path);
         const before = fs.existsSync(state.configPath)
           ? fs.readFileSync(state.configPath, "utf8")
           : undefined;
@@ -125,8 +125,8 @@ describe("Doctor maintenance admission", () => {
 
 describe("Doctor agent lease admission", () => {
   it("admits a restored primary database without opening or clearing its quarantine store", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const pathname = state.statePath("state/openclaw.sqlite");
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const pathname = state.statePath("state/carapace.sqlite");
       fs.mkdirSync(state.statePath("state"), { recursive: true });
       const db = openNodeSqliteDatabase(pathname);
       db.exec(
@@ -134,16 +134,16 @@ describe("Doctor agent lease admission", () => {
       );
       db.close();
       expect(
-        recordOpenClawDatabaseQuarantine({
+        recordCarapaceDatabaseQuarantine({
           env: state.env,
           kind: "state",
           path: pathname,
           reason: "previous corrupt generation",
         }),
       ).toBe(true);
-      const quarantine = state.statePath("state/openclaw-quarantine.sqlite");
+      const quarantine = state.statePath("state/carapace-quarantine.sqlite");
       const before = [fs.readFileSync(pathname), fs.readFileSync(quarantine)];
-      expect(() => assertNoOpenClawAgentDatabaseLeasesReadOnly({ env: state.env })).not.toThrow();
+      expect(() => assertNoCarapaceAgentDatabaseLeasesReadOnly({ env: state.env })).not.toThrow();
       expect([fs.readFileSync(pathname), fs.readFileSync(quarantine)]).toEqual(before);
     });
   });

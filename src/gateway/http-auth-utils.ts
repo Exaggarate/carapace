@@ -4,10 +4,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { getRuntimeConfig } from "../config/io.js";
 import type { GatewayOperatorRoleDefinition } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { verifyDeviceToken } from "../infra/device-pairing-tokens.js";
 import { listDevicePairing } from "../infra/device-pairing.js";
 import { verifyPairingToken } from "../infra/pairing-token.js";
@@ -113,7 +113,7 @@ type GatewayHttpRequestAuthParams = {
 };
 
 type GatewayHttpRequestAuthCheckParams = Omit<GatewayHttpRequestAuthParams, "res"> & {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 };
 
 type GatewayHttpConnectAuthorizer = (
@@ -526,7 +526,7 @@ export async function checkGatewayHttpRequestAuth(params: {
   trustedProxies?: string[];
   allowRealIpFallback?: boolean;
   rateLimiter?: AuthRateLimiter;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }): Promise<GatewayHttpRequestAuthCheckResult> {
   return await checkGatewayHttpRequestAuthWith(params, authorizeHttpGatewayConnect);
 }
@@ -591,7 +591,7 @@ export async function authorizeScopedGatewayHttpRequestOrReply(params: {
     requestAuth: AuthorizedGatewayHttpRequest,
   ) => string[];
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requestAuth: AuthorizedGatewayHttpRequest;
   operatorScopes: string[];
 } | null> {
@@ -647,7 +647,7 @@ export function resolveTrustedHttpOperatorScopes(
     return [];
   }
 
-  const headerValue = getHeader(req, "x-openclaw-scopes");
+  const headerValue = getHeader(req, "x-carapace-scopes");
   // Missing headers preserve trusted-client defaults; present empty headers grant nothing.
   const scopes =
     headerValue === undefined
@@ -710,7 +710,7 @@ export function authorizeOpenAiCompatibleHttpModelOverride(
   req: IncomingMessage,
   requestAuth: AuthorizedGatewayHttpRequest,
 ): { allowed: true } | { allowed: false; missingScope: typeof ADMIN_SCOPE } {
-  const requestedModelOverride = normalizeOptionalString(getHeader(req, "x-openclaw-model"));
+  const requestedModelOverride = normalizeOptionalString(getHeader(req, "x-carapace-model"));
   if (!requestedModelOverride || resolveOpenAiCompatibleHttpSenderIsOwner(req, requestAuth)) {
     return { allowed: true };
   }

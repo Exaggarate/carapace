@@ -5,27 +5,27 @@ import {
   loadExactSessionEntryReadOnly,
   loadTranscriptEvents,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
 import * as subscriptions from "./server-runtime-subscriptions.js";
 import { disconnectGatewayClient, startGatewayWithClient } from "./test-helpers.e2e.js";
 import { buildMockOpenAiResponsesProvider } from "./test-openai-responses-model.js";
 
 it("binds a first native chat.send before streaming and persists its stopped partial", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     label: "first-turn-binding",
     env: {
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
     },
   });
   const runId = "first-native-turn";
@@ -74,7 +74,7 @@ it("binds a first native chat.send before streaming and persists its stopped par
           model: { primary: provider.modelRef },
           models: {
             [provider.modelRef]: {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: { transport: "sse", openaiWsWarmup: false },
             },
           },
@@ -89,7 +89,7 @@ it("binds a first native chat.send before streaming and persists its stopped par
       plugins: { slots: { memory: "none" } },
       tools: { profile: "minimal" },
       gateway: { auth: { mode: "token", token: "first-turn-test" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     gateway = await startGatewayWithClient({
       cfg,
       configPath: state.configPath,
@@ -212,7 +212,7 @@ it("binds a first native chat.send before streaming and persists its stopped par
       expect.objectContaining({
         message: expect.objectContaining({
           content: [{ type: "text", text: partial }],
-          openclawAbort: { aborted: true, origin: "stop-command", runId },
+          carapaceAbort: { aborted: true, origin: "stop-command", runId },
         }),
       }),
     );

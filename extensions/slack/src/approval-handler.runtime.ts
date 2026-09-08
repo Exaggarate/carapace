@@ -10,14 +10,14 @@ import {
   type PluginApprovalPendingView,
   type PluginApprovalResolvedView,
   type ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
-import { buildApprovalPresentationFromActionDescriptors } from "openclaw/plugin-sdk/approval-reply-runtime";
-import { formatChannelApprovalResolvedLabel } from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { logError } from "openclaw/plugin-sdk/logging-core";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
+import { buildApprovalPresentationFromActionDescriptors } from "carapace/plugin-sdk/approval-reply-runtime";
+import { formatChannelApprovalResolvedLabel } from "carapace/plugin-sdk/approval-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { logError } from "carapace/plugin-sdk/logging-core";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { SLACK_APPROVAL_HEADER_BLOCK_ID } from "./approval-actions.js";
 import {
   isSlackAnyNativeApprovalClientEnabled,
@@ -56,7 +56,7 @@ const SLACK_CONTEXT_ELEMENTS_MAX = 10;
 const SLACK_TEXT_OBJECT_MAX = 3000;
 
 type SlackExecApprovalConfig = NonNullable<
-  NonNullable<NonNullable<OpenClawConfig["channels"]>["slack"]>["execApprovals"]
+  NonNullable<NonNullable<CarapaceConfig["channels"]>["slack"]>["execApprovals"]
 >;
 
 type SlackApprovalHandlerContext = {
@@ -186,7 +186,7 @@ function buildSlackApprovalPayload(input: SlackApprovalRenderInput): SlackPendin
   const { phase, view } = input;
   const isPlugin = view.approvalKind === "plugin";
   const isSystemAgent = view.approvalKind === "system-agent";
-  const approvalName = isPlugin ? "Plugin" : isSystemAgent ? "OpenClaw change" : "Exec";
+  const approvalName = isPlugin ? "Plugin" : isSystemAgent ? "Carapace change" : "Exec";
   let heading: string;
   let description: string;
   if (phase === "pending") {
@@ -195,7 +195,7 @@ function buildSlackApprovalPayload(input: SlackApprovalRenderInput): SlackPendin
       view.approvalKind === "plugin"
         ? resolveSlackPluginDescription(view)
         : isSystemAgent
-          ? "An OpenClaw change needs your approval."
+          ? "An Carapace change needs your approval."
           : "A command needs your approval.";
   } else if (phase === "resolved") {
     const decisionLabel = formatChannelApprovalResolvedLabel(view);

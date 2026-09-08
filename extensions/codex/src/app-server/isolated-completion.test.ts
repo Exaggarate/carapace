@@ -1,5 +1,5 @@
-import type { AgentHarnessV2 } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { AgentHarnessV2 } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({

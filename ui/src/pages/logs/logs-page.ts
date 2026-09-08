@@ -18,7 +18,7 @@ import {
   isMissingOperatorReadScopeError,
 } from "../../lib/gateway-errors.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { StreamAutoFollowController } from "../../lit/stream-auto-follow-controller.ts";
 import {
@@ -32,7 +32,7 @@ import { renderLogs } from "./view.ts";
 const LOG_BUFFER_LIMIT = 2000;
 const LOGS_POLL_INTERVAL_MS = 2000;
 
-class LogsPage extends OpenClawLightDomElement {
+class LogsPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -267,7 +267,7 @@ class LogsPage extends OpenClawLightDomElement {
         }),
       onExport: (lines, label) => {
         const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-        downloadTextFile(`openclaw-logs-${label}-${stamp}.log`, `${lines.join("\n")}\n`);
+        downloadTextFile(`carapace-logs-${label}-${stamp}.log`, `${lines.join("\n")}\n`);
       },
       onScroll: (event) => this.streamFollow.handleScroll(event),
     });
@@ -282,6 +282,6 @@ class LogsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-logs-page")) {
-  customElements.define("openclaw-logs-page", LogsPage);
+if (!customElements.get("carapace-logs-page")) {
+  customElements.define("carapace-logs-page", LogsPage);
 }

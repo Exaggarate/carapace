@@ -21,7 +21,7 @@ function createPackageFixture(params: {
   includeSource?: boolean;
 }): { packageDir: string; sourceEntry: string; manifest: PackageManifest } {
   const packageDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-runtime-entry-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-runtime-entry-")),
   );
   packageRoots.push(packageDir);
   const sourceEntry = `./src/entry${params.sourceExtension}`;
@@ -40,7 +40,7 @@ function createPackageFixture(params: {
     manifest: {
       name: "runtime-entry-fixture",
       version: "1.0.0",
-      openclaw: { extensions: [sourceEntry], setupEntry: sourceEntry },
+      carapace: { extensions: [sourceEntry], setupEntry: sourceEntry },
     },
   };
 }
@@ -138,7 +138,7 @@ describe("canonical installed package runtime entries", () => {
         const installParams = {
           packageDir,
           extensions,
-          manifest: { ...manifest, openclaw: { ...manifest.openclaw, extensions } },
+          manifest: { ...manifest, carapace: { ...manifest.carapace, extensions } },
         };
         expect(await validatePackageExtensionEntriesForInstall(installParams)).toEqual({
           ok: false,

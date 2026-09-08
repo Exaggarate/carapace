@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sortUniqueStrings, uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { sortUniqueStrings, uniqueValues } from "@carapace/normalization-core/string-normalization";
 import type { ChatType } from "../../channels/chat-type.js";
 import {
   getChannelPlugin,
@@ -16,7 +16,7 @@ import {
 } from "../../channels/plugins/message-action-discovery.js";
 import type { ChannelMessageCapability } from "../../channels/plugins/message-capabilities.js";
 import type { ChannelMessageActionName } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveAllowedMessageActions } from "../../infra/outbound/outbound-policy.js";
 import { normalizeAccountId, parseSessionDeliveryRoute } from "../../routing/session-key.js";
 import { INTERNAL_MESSAGE_CHANNEL, normalizeMessageChannel } from "../../utils/message-channel.js";
@@ -25,7 +25,7 @@ import { appendMessageToolReadHint } from "./message-tool-description.js";
 import { buildMessageToolSchemaFromActions } from "./message-tool-schema-scoping.js";
 import { MESSAGE_TOOL_SCHEMA_BUILDERS } from "./message-tool-schema.js";
 export type MessageToolDiscoveryParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   currentChatType?: ChatType;
   currentChannelProvider?: string;
   currentChannelId?: string;
@@ -41,7 +41,7 @@ export type MessageToolDiscoveryParams = {
 };
 
 type MessageActionDiscoveryInput = Omit<ChannelMessageActionDiscoveryInput, "cfg" | "channel"> & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string;
   preparedMessageToolCatalog?: PreparedMessageToolCatalog;
 };

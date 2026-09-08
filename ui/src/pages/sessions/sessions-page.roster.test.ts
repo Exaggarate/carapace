@@ -27,7 +27,7 @@ function deferred<T>() {
 }
 
 async function createPage(context: ApplicationContext): Promise<TestSessionsPage> {
-  const page = document.createElement("openclaw-sessions-page") as TestSessionsPage;
+  const page = document.createElement("carapace-sessions-page") as TestSessionsPage;
   page.context = context;
   page.render = () => nothing;
   document.body.append(page);

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   assertAgentSessionStoreDeletionSafe,
   prepareAgentDeleteDatabases,
@@ -11,7 +11,7 @@ import {
 } from "../agents/agent-lifecycle-registry.js";
 import { listAgentEntries } from "../agents/agent-scope.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   AgentConfigPreconditionError,
   deleteAgentConfigEntry,
@@ -20,13 +20,13 @@ import { withAgentExecApprovalsRemoved } from "../infra/exec-approvals.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { readAgentDeletionJournalInDatabase } from "../state/agent-deletion-journal.js";
 import type {
-  OpenClawStateDatabase,
-  OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db-contract.js";
+  CarapaceStateDatabase,
+  CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db-contract.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { digestClawAgentConfig } from "./agent-config-digest.js";
 import { deletionEffects, type ClawCleanupTargets } from "./lifecycle-delete-support.js";
 import {
@@ -42,8 +42,8 @@ type ClawAgentConfigRemovalParams = {
   expectedRemovalSurfaceDigest: string;
   expectedState: "present" | "missing";
   fallbackWorkspace: string;
-  config?: OpenClawConfig;
-  stateDatabase?: OpenClawStateDatabaseOptions;
+  config?: CarapaceConfig;
+  stateDatabase?: CarapaceStateDatabaseOptions;
   onModified: () => Error;
   quiesceMonitors?: (operationId: string) => Promise<void>;
   drainMonitors?: (operationId: string) => Promise<void>;
@@ -52,13 +52,13 @@ type ClawAgentConfigRemovalParams = {
 type ClawAgentConfigRemovalResult = {
   agentRemoved: boolean;
   cleanupTargets: ClawCleanupTargets;
-  configBeforeDelete: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  configBeforeDelete: CarapaceConfig;
+  nextConfig: CarapaceConfig;
 };
 
 export { digestClawAgentConfig } from "./agent-config-digest.js";
 
-export function digestClawAgentRemovalSurface(config: OpenClawConfig, agentId: string): string {
+export function digestClawAgentRemovalSurface(config: CarapaceConfig, agentId: string): string {
   const normalizedId = normalizeAgentId(agentId);
   const surface = {
     bindings: (config.bindings ?? []).filter(
@@ -146,9 +146,9 @@ async function commitClawAgentConfigRemoval(
 }
 
 type CommittedClawAgentRemoval = ClawAgentConfigRemovalResult & {
-  assertCurrent: (database?: OpenClawStateDatabase) => void;
+  assertCurrent: (database?: CarapaceStateDatabase) => void;
   drainMonitors: () => Promise<void>;
-  completeDeletion: (database: OpenClawStateDatabase) => void;
+  completeDeletion: (database: CarapaceStateDatabase) => void;
   runDatabaseCleanup: AgentDeletionOperation["runDatabaseCleanup"];
 };
 
@@ -162,7 +162,7 @@ export async function withClawAgentConfigRemoval<T>(
   const expectedInstall = structuredClone(params.expectedInstall);
   const stateOptions = {
     ...params.stateDatabase,
-    path: openOpenClawStateDatabase(params.stateDatabase).path,
+    path: openCarapaceStateDatabase(params.stateDatabase).path,
   };
   return await withAgentDeletion(
     params.agentId,
@@ -175,14 +175,14 @@ export async function withClawAgentConfigRemoval<T>(
         params.fallbackWorkspace,
         stateOptions.env,
       );
-      const matchesInstall = (database: OpenClawStateDatabase) =>
+      const matchesInstall = (database: CarapaceStateDatabase) =>
         expectedInstall === undefined ||
         isDeepStrictEqual(
           readClawInstallRecordFromDatabase(database.db, params.agentId) ?? null,
           expectedInstall,
         );
       // Validate and claim together: a stale install snapshot must never fence a replacement.
-      const { existingJournal, deletion } = runOpenClawStateWriteTransaction((database) => {
+      const { existingJournal, deletion } = runCarapaceStateWriteTransaction((database) => {
         if (!matchesInstall(database)) {
           throw params.onModified();
         }
@@ -199,8 +199,8 @@ export async function withClawAgentConfigRemoval<T>(
       }, stateOptions);
       let committed = false;
       let monitorEffectsStarted = false;
-      const assertCurrent = (database?: OpenClawStateDatabase) => {
-        const check = (current: OpenClawStateDatabase) => {
+      const assertCurrent = (database?: CarapaceStateDatabase) => {
+        const check = (current: CarapaceStateDatabase) => {
           deletion.assertCurrent(current);
           if (!matchesInstall(current)) {
             throw new Error(`Claw removal no longer owns agent ${params.agentId}.`);
@@ -209,7 +209,7 @@ export async function withClawAgentConfigRemoval<T>(
         if (database) {
           check(database);
         } else {
-          runOpenClawStateWriteTransaction(check, stateOptions);
+          runCarapaceStateWriteTransaction(check, stateOptions);
         }
       };
       try {
@@ -254,7 +254,7 @@ export async function withClawAgentConfigRemoval<T>(
         }
         if (expectedInstall) {
           // Result construction is pure; only the live operation may publish retry status.
-          runOpenClawStateWriteTransaction((database) => {
+          runCarapaceStateWriteTransaction((database) => {
             try {
               assertCurrent(database);
             } catch {

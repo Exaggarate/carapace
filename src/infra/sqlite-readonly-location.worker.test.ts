@@ -20,7 +20,7 @@ async function expectWorkerFailure(error: unknown, message: string): Promise<voi
   process.argv = [
     process.execPath,
     "sqlite-readonly-location.worker.ts",
-    "--openclaw-sqlite-readonly-child",
+    "--carapace-sqlite-readonly-child",
     "async",
     "/synthetic/database.sqlite",
   ];

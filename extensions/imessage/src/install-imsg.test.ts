@@ -1,8 +1,8 @@
 // iMessage tests cover imsg CLI install behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { resolveBrewExecutableMock, runPluginCommandWithTimeoutMock } = vi.hoisted(() => ({
@@ -10,15 +10,15 @@ const { resolveBrewExecutableMock, runPluginCommandWithTimeoutMock } = vi.hoiste
   runPluginCommandWithTimeoutMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/setup-tools", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/setup-tools")>();
+vi.mock("carapace/plugin-sdk/setup-tools", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/setup-tools")>();
   return {
     ...actual,
     resolveBrewExecutable: resolveBrewExecutableMock,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/run-command", () => ({
+vi.mock("carapace/plugin-sdk/run-command", () => ({
   runPluginCommandWithTimeout: runPluginCommandWithTimeoutMock,
 }));
 
@@ -38,7 +38,7 @@ describe("installIMessageCli", () => {
 
   it("installs imsg through Homebrew on macOS", async () => {
     setProcessPlatform("darwin");
-    await withTempDir("openclaw-imsg-brew-", async (brewPrefix) => {
+    await withTempDir("carapace-imsg-brew-", async (brewPrefix) => {
       await fs.mkdir(path.join(brewPrefix, "bin"), { recursive: true });
       await fs.writeFile(path.join(brewPrefix, "bin", "imsg"), "");
       resolveBrewExecutableMock.mockReturnValue("/opt/homebrew/bin/brew");
@@ -63,7 +63,7 @@ describe("installIMessageCli", () => {
 
   it("updates imsg when its Homebrew formula is installed", async () => {
     setProcessPlatform("darwin");
-    await withTempDir("openclaw-imsg-brew-", async (brewPrefix) => {
+    await withTempDir("carapace-imsg-brew-", async (brewPrefix) => {
       const cellar = path.join(brewPrefix, "Cellar");
       const formulaCliPath = path.join(cellar, "imsg", "0.13.1", "bin", "imsg");
       const cliPath = path.join(brewPrefix, "bin", "imsg");
@@ -128,7 +128,7 @@ describe("installIMessageCli", () => {
 
   it("preserves a PATH imsg that shadows an installed Homebrew formula", async () => {
     setProcessPlatform("darwin");
-    await withTempDir("openclaw-imsg-shadow-", async (tmpDir) => {
+    await withTempDir("carapace-imsg-shadow-", async (tmpDir) => {
       const cliPath = path.join(tmpDir, "local", "bin", "imsg");
       const cellar = path.join(tmpDir, "Cellar");
       await fs.mkdir(path.dirname(cliPath), { recursive: true });

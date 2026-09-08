@@ -16,17 +16,17 @@ import {
 import { operatorMcpOAuthIdentity } from "../agents/mcp-oauth-identity.js";
 import { createMcpOAuthClientProvider } from "../agents/mcp-oauth-provider.js";
 import { resolveMcpOAuthAccessToken } from "../agents/mcp-oauth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { clearHealthChecksForTest } from "../flows/health-check-registry.js";
 import { requestDevicePairing } from "../infra/device-pairing.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runDoctorLintCli } from "./doctor-lint.js";
 
 const mocks = vi.hoisted(() => ({
@@ -43,7 +43,7 @@ vi.mock("../infra/device-pairing.js", async (importOriginal) => {
   return {
     ...actual,
     listDevicePairingReadOnly(baseDir?: string) {
-      mocks.pairingReadState(baseDir ?? process.env.OPENCLAW_STATE_DIR);
+      mocks.pairingReadState(baseDir ?? process.env.CARAPACE_STATE_DIR);
       return actual.listDevicePairingReadOnly(baseDir);
     },
   };
@@ -67,8 +67,8 @@ const runtime = {
 
 const originalEnv = {
   HOME: process.env.HOME,
-  OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-  OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+  CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+  CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
 };
 
 describe("doctor lint state isolation", () => {
@@ -80,7 +80,7 @@ describe("doctor lint state isolation", () => {
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     restoreEnv(originalEnv);
   });
 
@@ -90,10 +90,10 @@ describe("doctor lint state isolation", () => {
     { label: "--only with profile", selection: "only", profile: "work", isolated: false },
     { label: "default selection", selection: "default", profile: undefined, isolated: false },
   ] as const)("keeps retired device-auth detection scoped for $label", async (entry) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
-        prefix: "openclaw-doctor-lint-device-auth-",
-        env: { OPENCLAW_TEST_FAST: "1", OPENCLAW_PROFILE: entry.profile },
+        prefix: "carapace-doctor-lint-device-auth-",
+        env: { CARAPACE_TEST_FAST: "1", CARAPACE_PROFILE: entry.profile },
       },
       async (state) => {
         await state.writeConfig({
@@ -110,8 +110,8 @@ describe("doctor lint state isolation", () => {
           state.stateDir,
         );
         const sourcePath = await state.writeText("identity/device-auth.json", "legacy-file-marker");
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
-        closeOpenClawStateDatabaseByPath(databasePath);
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
+        closeCarapaceStateDatabaseByPath(databasePath);
         const before = snapshotSqliteFamily(databasePath);
         const actual = await vi.importActual<
           typeof import("../flows/doctor-health-contributions.js")
@@ -157,8 +157,8 @@ describe("doctor lint state isolation", () => {
                   message: expect.stringContaining(sourcePath),
                   fixHint: expect.stringContaining(
                     entry.profile
-                      ? "openclaw --profile work doctor --fix"
-                      : "openclaw doctor --fix",
+                      ? "carapace --profile work doctor --fix"
+                      : "carapace doctor --fix",
                   ),
                 }),
                 expect.objectContaining({
@@ -200,8 +200,8 @@ describe("doctor lint state isolation", () => {
               ),
             ).toBe(true);
           }
-          expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
-          expect(process.env.OPENCLAW_PROFILE).toBe(entry.profile);
+          expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
+          expect(process.env.CARAPACE_PROFILE).toBe(entry.profile);
         } finally {
           stdout.mockRestore();
         }
@@ -212,9 +212,9 @@ describe("doctor lint state isolation", () => {
   it.each(["legacy-main", "state-db"] as const)(
     "retains auth findings and source paths when mixed lint uses %s shared auth",
     async (location) => {
-      await withOpenClawTestState({ prefix: "openclaw-doctor-lint-auth-" }, async (state) => {
+      await withCarapaceTestState({ prefix: "carapace-doctor-lint-auth-" }, async (state) => {
         const customDir = state.path("custom-agent");
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           gateway: { mode: "local" },
           agents: {
             ownership: "explicit",
@@ -259,9 +259,9 @@ describe("doctor lint state isolation", () => {
         const expected = [
           [
             "diagnostic-provider:alpha",
-            path.join(state.agentDir("alpha"), "openclaw-agent.sqlite"),
+            path.join(state.agentDir("alpha"), "carapace-agent.sqlite"),
           ],
-          ["diagnostic-provider:custom", path.join(customDir, "openclaw-agent.sqlite")],
+          ["diagnostic-provider:custom", path.join(customDir, "carapace-agent.sqlite")],
           ["diagnostic-provider:shared", resolveSharedAuthStorePath()],
         ];
         const actual = await vi.importActual<
@@ -269,10 +269,10 @@ describe("doctor lint state isolation", () => {
         >("../flows/doctor-health-contributions.js");
         const checks = await actual.resolveDoctorContributionHealthChecks();
         const privateInspection = vi.fn(async () => {
-          expect(process.env.OPENCLAW_STATE_DIR).not.toBe(state.stateDir);
+          expect(process.env.CARAPACE_STATE_DIR).not.toBe(state.stateDir);
           // Runtime inspectors can refresh OAuth state; that write must stay private.
           writeConfigMachineState("doctorLint.synthetic.privateWrite", true);
-          closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath());
+          closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath());
           return [];
         });
         mocks.resolveDoctorContributionHealthChecks.mockResolvedValue(
@@ -318,9 +318,9 @@ describe("doctor lint state isolation", () => {
   );
 
   it("restores the private view after an auth detector throws", async () => {
-    await withOpenClawTestState({ prefix: "openclaw-doctor-lint-auth-throw-" }, async (state) => {
+    await withCarapaceTestState({ prefix: "carapace-doctor-lint-auth-throw-" }, async (state) => {
       await state.writeConfig({ memory: { search: { enabled: false } } });
-      const sourceConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+      const sourceConfigPath = process.env.CARAPACE_CONFIG_PATH;
       const observedStates: Array<string | undefined> = [];
       mocks.resolveDoctorContributionHealthChecks.mockResolvedValue([
         {
@@ -328,7 +328,7 @@ describe("doctor lint state isolation", () => {
           kind: "core",
           description: "checks source auth state",
           async detect() {
-            observedStates.push(process.env.OPENCLAW_STATE_DIR);
+            observedStates.push(process.env.CARAPACE_STATE_DIR);
             throw new Error("synthetic auth detector failure");
           },
         },
@@ -337,7 +337,7 @@ describe("doctor lint state isolation", () => {
           kind: "core",
           description: "checks private runtime state",
           async detect() {
-            observedStates.push(process.env.OPENCLAW_STATE_DIR);
+            observedStates.push(process.env.CARAPACE_STATE_DIR);
             return [];
           },
         },
@@ -363,8 +363,8 @@ describe("doctor lint state isolation", () => {
             message: "health check threw: synthetic auth detector failure",
           }),
         ]);
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(state.stateDir);
-        expect(process.env.OPENCLAW_CONFIG_PATH).toBe(sourceConfigPath);
+        expect(process.env.CARAPACE_STATE_DIR).toBe(state.stateDir);
+        expect(process.env.CARAPACE_CONFIG_PATH).toBe(sourceConfigPath);
       } finally {
         stdout.mockRestore();
       }
@@ -372,14 +372,14 @@ describe("doctor lint state isolation", () => {
   });
 
   it("keeps runtime schema OAuth inspection off the writable source state", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-oauth-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-oauth-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const serverUrl = "https://mcp.example.test/rpc";
     const identity = operatorMcpOAuthIdentity("oauth-proof", serverUrl);
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, "{}\n");
     await createMcpOAuthClientProvider({ identity }).saveTokens({
@@ -387,8 +387,8 @@ describe("doctor lint state isolation", () => {
       token_type: "Bearer",
       expires_in: 3600,
     });
-    const databasePath = resolveOpenClawStateSqlitePath(process.env);
-    closeOpenClawStateDatabaseByPath(databasePath);
+    const databasePath = resolveCarapaceStateSqlitePath(process.env);
+    closeCarapaceStateDatabaseByPath(databasePath);
     const lock = new DatabaseSync(databasePath);
     lock.exec("BEGIN IMMEDIATE");
     const before = snapshotSqliteFamily(databasePath);
@@ -427,7 +427,7 @@ describe("doctor lint state isolation", () => {
       stdout.mockRestore();
       lock.exec("ROLLBACK");
       lock.close();
-      closeOpenClawStateDatabaseByPath(databasePath);
+      closeCarapaceStateDatabaseByPath(databasePath);
       fs.rmSync(rootDir, { recursive: true, force: true });
     }
   });
@@ -449,14 +449,14 @@ function restoreEnv(values: typeof originalEnv): void {
   } else {
     process.env.HOME = values.HOME;
   }
-  if (values.OPENCLAW_CONFIG_PATH === undefined) {
-    delete process.env.OPENCLAW_CONFIG_PATH;
+  if (values.CARAPACE_CONFIG_PATH === undefined) {
+    delete process.env.CARAPACE_CONFIG_PATH;
   } else {
-    process.env.OPENCLAW_CONFIG_PATH = values.OPENCLAW_CONFIG_PATH;
+    process.env.CARAPACE_CONFIG_PATH = values.CARAPACE_CONFIG_PATH;
   }
-  if (values.OPENCLAW_STATE_DIR === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+  if (values.CARAPACE_STATE_DIR === undefined) {
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = values.OPENCLAW_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = values.CARAPACE_STATE_DIR;
   }
 }

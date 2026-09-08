@@ -9,8 +9,8 @@ import type {
   ProviderResponse,
   StreamOptions,
   Usage,
-} from "@openclaw/llm-core";
-import { asNonArrayRecord, asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/llm-core";
+import { asNonArrayRecord, asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   appendAssistantMessageDiagnostic,
   createAssistantMessageDiagnostic,
@@ -186,7 +186,7 @@ type ProviderAcceptanceObserver = (acceptance: ProviderAcceptance) => void;
 type ProviderAcceptanceOptions = Pick<StreamOptions, "onResponse" | "signal">;
 type ProviderStreamCancel = (reason: Error) => void | Promise<void>;
 
-const providerAcceptanceObserver: unique symbol = Symbol("openclaw.providerAcceptanceObserver");
+const providerAcceptanceObserver: unique symbol = Symbol("carapace.providerAcceptanceObserver");
 
 function readProviderAcceptanceObserver(options: unknown): ProviderAcceptanceObserver | undefined {
   if (options === null || typeof options !== "object") {
@@ -214,7 +214,7 @@ function writeProviderAcceptanceObserver<T extends object>(
   return options;
 }
 
-/** Attach an OpenClaw-internal provider acceptance observer to one model call. */
+/** Attach an Carapace-internal provider acceptance observer to one model call. */
 export function withProviderAcceptanceObserver<T extends object>(
   options: T,
   observer: ProviderAcceptanceObserver,

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { MessageFlags } from "discord-api-types/v10";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import type { DiscordComponentMessageSpec } from "./components.js";
 import { sendDiscordComponentMessage } from "./send.components.js";

@@ -57,7 +57,7 @@ const MACOS_DESKTOP_CHATGPT_APP_SERVER_COMMAND =
 describe("managed Codex app-server binary", () => {
   let root: string;
   beforeEach(async () => {
-    root = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-codex-owner-")));
+    root = await realpath(await mkdtemp(path.join(os.tmpdir(), "carapace-codex-owner-")));
   });
   afterEach(async () => {
     setManagedCodexPluginRoot(undefined);
@@ -86,7 +86,7 @@ describe("managed Codex app-server binary", () => {
 
   it("resolves native dependencies from the real package behind an isolated install shim", async () => {
     const installRoot = await realpath(
-      await mkdtemp(path.join(os.tmpdir(), "openclaw-codex-isolated-")),
+      await mkdtemp(path.join(os.tmpdir(), "carapace-codex-isolated-")),
     );
     try {
       const platform = process.platform === "win32" ? "win32" : "linux";
@@ -162,7 +162,7 @@ describe("managed Codex app-server binary", () => {
   it.each(["source", "bundled"])(
     "selects the owner-local package ahead of a stale ancestor shim (%s)",
     async (layout) => {
-      const installRoot = path.join(root, "node_modules", "openclaw");
+      const installRoot = path.join(root, "node_modules", "carapace");
       const pluginRoot =
         layout === "source"
           ? path.join(installRoot, "extensions", "codex")
@@ -191,13 +191,13 @@ describe("managed Codex app-server binary", () => {
         root,
         "npm",
         "projects",
-        "openclaw-codex-fixture--g-0123456789abcdef",
+        "carapace-codex-fixture--g-0123456789abcdef",
       );
-      const pluginRoot = path.join(generation, "node_modules", "@openclaw", "codex");
+      const pluginRoot = path.join(generation, "node_modules", "@carapace", "codex");
       await mkdir(pluginRoot, { recursive: true });
       const launcher = await writePackageLauncher(generation);
       // The flat project and an ancestor shim do not own this plugin's dependency.
-      await writePackageLauncher(path.join(root, "npm", "projects", "openclaw-codex-fixture"));
+      await writePackageLauncher(path.join(root, "npm", "projects", "carapace-codex-fixture"));
       await writeExecutable(managedCommandPath(root, platform));
 
       await expect(
@@ -268,7 +268,7 @@ describe("managed Codex app-server binary", () => {
       const explicit = resolveCodexAppServerRuntimeOptions({
         pluginConfig:
           source === "config" ? { appServer: { command: "/operator/config-codex" } } : {},
-        env: { OPENCLAW_CODEX_APP_SERVER_BIN: "/operator/env-codex" },
+        env: { CARAPACE_CODEX_APP_SERVER_BIN: "/operator/env-codex" },
         codexConfigToml: null,
         requirementsToml: null,
       }).start;

@@ -1,5 +1,5 @@
 /** Classifies systemd/systemctl unavailable errors into user-facing categories. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 export type SystemdUnavailableKind =
   | "missing_systemctl"

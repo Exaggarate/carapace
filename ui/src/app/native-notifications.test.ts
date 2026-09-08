@@ -7,14 +7,14 @@ import {
 } from "./native-notifications.ts";
 
 // Wire contract shared with the Mac app bridge; asserted literally on purpose.
-const NATIVE_NOTIFICATIONS_STATUS_EVENT = "openclaw:native-notifications-status";
+const NATIVE_NOTIFICATIONS_STATUS_EVENT = "carapace:native-notifications-status";
 
 type NativeNotificationsMessage = {
   type: "status" | "request-permission" | "send-test";
 };
 
 type NativeNotificationsTestWindow = Window & {
-  __OPENCLAW_NATIVE_NOTIFICATIONS__?: unknown;
+  __CARAPACE_NATIVE_NOTIFICATIONS__?: unknown;
 };
 
 let capability: NativeNotificationsCapability | null = null;
@@ -24,7 +24,7 @@ afterEach(() => {
   capability = null;
   Reflect.deleteProperty(
     window as NativeNotificationsTestWindow,
-    "__OPENCLAW_NATIVE_NOTIFICATIONS__",
+    "__CARAPACE_NATIVE_NOTIFICATIONS__",
   );
   vi.unstubAllGlobals();
 });
@@ -32,7 +32,7 @@ afterEach(() => {
 function installBridge() {
   const postMessage = vi.fn<(message: NativeNotificationsMessage) => void>();
   vi.stubGlobal("webkit", {
-    messageHandlers: { openclawNotifications: { postMessage } },
+    messageHandlers: { carapaceNotifications: { postMessage } },
   });
   return postMessage;
 }
@@ -53,7 +53,7 @@ describe("native notifications", () => {
 
   it("accepts the permission-only native snapshot", () => {
     installBridge();
-    (window as NativeNotificationsTestWindow)["__OPENCLAW_NATIVE_NOTIFICATIONS__"] = {
+    (window as NativeNotificationsTestWindow)["__CARAPACE_NATIVE_NOTIFICATIONS__"] = {
       permission: "granted",
     };
 

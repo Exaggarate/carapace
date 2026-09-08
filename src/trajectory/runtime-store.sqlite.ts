@@ -1,6 +1,6 @@
 // SQLite trajectory runtime store owns session-scoped runtime event rows.
 
-import { parseDateStringTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { parseDateStringTimestampMs } from "@carapace/normalization-core/number-coercion";
 import {
   resolveSqliteReadScope,
   toDatabaseOptions,
@@ -12,17 +12,17 @@ import {
   iterateSqliteQuerySync,
 } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { TRAJECTORY_RUNTIME_CAPTURE_MAX_BYTES } from "./paths.js";
 import type { TrajectoryEvent } from "./types.js";
 
 type SqliteTrajectoryRuntimeDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "trajectory_runtime_events"
 >;
 
@@ -59,7 +59,7 @@ type TrajectoryRuntimeRun = {
 
 // The runtime store owns this process-local cadence. Database handles are cached,
 // so a WeakMap rate-limits work without retaining closed agent databases.
-const lastGlobalSweepAtByDatabase = new WeakMap<OpenClawAgentDatabase, number>();
+const lastGlobalSweepAtByDatabase = new WeakMap<CarapaceAgentDatabase, number>();
 
 /** Appends runtime trajectory events to the per-agent SQLite session store. */
 export function appendSqliteTrajectoryRuntimeEvents(
@@ -79,8 +79,8 @@ export function appendSqliteTrajectoryRuntimeEvents(
     Math.floor(scope.maxGlobalRuntimeBytes ?? TRAJECTORY_RUNTIME_GLOBAL_MAX_BYTES),
   );
   const sweepAt = Date.now();
-  let sweptDatabase: OpenClawAgentDatabase | undefined;
-  runOpenClawAgentWriteTransaction((database) => {
+  let sweptDatabase: CarapaceAgentDatabase | undefined;
+  runCarapaceAgentWriteTransaction((database) => {
     const db = getTrajectoryKysely(database.db);
     let seq = readNextTrajectorySeq(database, scope.sessionId);
     for (const event of events) {
@@ -140,7 +140,7 @@ export function loadSqliteTrajectoryRuntimeEventRowsSync(
     tailEvents?: number;
   },
 ): SqliteTrajectoryRuntimeEventRow[] {
-  const read = withOpenClawAgentDatabaseReadOnly(
+  const read = withCarapaceAgentDatabaseReadOnly(
     (database) => {
       const db = getTrajectoryKysely(database.db);
       const tailEvents =
@@ -181,7 +181,7 @@ export function loadSqliteTrajectoryRuntimeEventRowsSync(
 }
 
 function sweepSqliteTrajectoryRuntimeRetention(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   currentSessionId: string,
   now: number,
   maxGlobalRuntimeBytes: number,
@@ -211,7 +211,7 @@ function sweepSqliteTrajectoryRuntimeRetention(
   deleteSqliteTrajectoryRuntimeRuns(database, [...deletedRuns]);
 }
 
-function readSqliteTrajectoryRuntimeRuns(database: OpenClawAgentDatabase): TrajectoryRuntimeRun[] {
+function readSqliteTrajectoryRuntimeRuns(database: CarapaceAgentDatabase): TrajectoryRuntimeRun[] {
   const db = getTrajectoryKysely(database.db);
   const rows = executeSqliteQuerySync(
     database.db,
@@ -235,7 +235,7 @@ function readSqliteTrajectoryRuntimeRuns(database: OpenClawAgentDatabase): Traje
 }
 
 function deleteSqliteTrajectoryRuntimeRuns(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   runs: readonly TrajectoryRuntimeRun[],
 ): void {
   const db = getTrajectoryKysely(database.db);
@@ -274,7 +274,7 @@ function getTrajectoryKysely(database: import("node:sqlite").DatabaseSync) {
   return getNodeSqliteKysely<SqliteTrajectoryRuntimeDatabase>(database);
 }
 
-function readNextTrajectorySeq(database: OpenClawAgentDatabase, sessionId: string): number {
+function readNextTrajectorySeq(database: CarapaceAgentDatabase, sessionId: string): number {
   const db = getTrajectoryKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -290,7 +290,7 @@ function readNextTrajectorySeq(database: OpenClawAgentDatabase, sessionId: strin
 }
 
 function trimSqliteTrajectoryRuntimeWindow(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   maxRuntimeBytes: number,
 ): void {

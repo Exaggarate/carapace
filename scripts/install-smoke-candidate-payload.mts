@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const MANIFEST_NAME = "install-smoke-candidate-payload.json";
-const SCHEMA = "openclaw.install-smoke-candidate-payload/v1";
+const SCHEMA = "carapace.install-smoke-candidate-payload/v1";
 const PAYLOAD_FILES = [
   { name: "candidate.tgz", role: "package" },
   { name: "candidate-pack.json", role: "package-metadata" },
@@ -230,8 +230,8 @@ export async function sealInstallSmokeCandidatePayload(
   const sourceTarballPath = path.join(options.packageDir, "candidate.tgz");
   await assertRegularFile(sourceTarballPath, "candidate package tarball");
   const packageJson = readPackageJsonFromTarball(sourceTarballPath);
-  if (packageJson.name !== "openclaw") {
-    throw new Error("candidate package tarball must contain the openclaw package");
+  if (packageJson.name !== "carapace") {
+    throw new Error("candidate package tarball must contain the carapace package");
   }
   const packageVersion = assertVersion(packageJson.version, "candidate package version");
   const packageMetadata = readPackageTarballMetadata(sourceTarballPath);
@@ -257,7 +257,7 @@ export async function sealInstallSmokeCandidatePayload(
         {
           entryCount: packageMetadata.entryCount,
           filename: "candidate.tgz",
-          name: "openclaw",
+          name: "carapace",
           size: packageSize,
           unpackedSize: packageMetadata.unpackedSize,
           version: packageVersion,

@@ -2,7 +2,7 @@
 // Apple Watch cannot use generic WebSockets on-device, so node events use bounded HTTPS polls.
 import { randomBytes, randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   GATEWAY_CLIENT_IDS,
   GATEWAY_CLIENT_MODES,
@@ -14,7 +14,7 @@ import {
   type ConnectParams,
   type HelloOk,
 } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   getBoundDeviceBootstrapProfile,
   redeemDeviceBootstrapTokenProfile,
@@ -139,7 +139,7 @@ type WatchNodeSession = {
 
 type WatchNodeHttpRuntimeOptions = {
   nodeRegistry: NodeRegistry;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   broadcast: GatewayBroadcastFn;
   rateLimiter?: AuthRateLimiter;
   nodeReapprovalCoordinator?: NodeReapprovalCoordinator;
@@ -173,7 +173,7 @@ function readBearerToken(req: IncomingMessage): string | null {
 
 function resolveWatchClientAddress(
   req: IncomingMessage,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): { clientIp?: string; rateLimitKey: string } {
   const attribution = readPreparedGatewayIngressAttribution(req);
   if (attribution && attribution.kind !== "unattributable-proxy") {

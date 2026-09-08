@@ -12,7 +12,7 @@ import {
 } from "../commands/onboard-inference.js";
 import { createMergePatch } from "../config/merge-patch.js";
 import { normalizeAgentModelRefForConfig } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { enablePluginInConfig, enablePluginWithCapabilityConsent } from "../plugins/enable.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
@@ -105,8 +105,8 @@ export async function buildTestPlan(params: {
   modelRef?: string;
   authChoice?: string;
   apiKey?: string;
-  cfg: OpenClawConfig;
-  sourceCfg: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceCfg: CarapaceConfig;
   configSnapshot?: SystemAgentConfigSnapshot;
   workspaceDir: string;
   pluginWorkspaceDir: string;
@@ -246,7 +246,7 @@ export async function buildTestPlan(params: {
         modelRef: route.modelLabel,
         config: cfg,
         executionConfig: route.runConfig,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId: route.agentId,
         agentDir: route.agentDir,
         ...(route.runner === "embedded" && route.agentHarnessRuntimeOverride
@@ -275,7 +275,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId,
         persistModelRef: `${persistProvider}/${ref.model}`,
       };
@@ -291,7 +291,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId,
         persistModelRef: modelRef,
       };
@@ -324,7 +324,7 @@ export async function buildTestPlan(params: {
           modelRef,
           agentHarnessRuntimeOverride: "codex",
           config: preparedAuth.config,
-          agentId: "openclaw",
+          agentId: "carapace",
           routeAgentId,
           agentDir: params.agentDir,
           cleanupBundleMcpOnRunEnd: true,
@@ -343,7 +343,7 @@ export async function buildTestPlan(params: {
         modelRef,
         agentHarnessRuntimeOverride: "codex",
         config: cfg,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId,
         agentDir: params.agentDir,
         cleanupBundleMcpOnRunEnd: true,
@@ -361,7 +361,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId,
         persistModelRef: modelRef,
       };
@@ -377,7 +377,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "carapace",
         routeAgentId,
         persistModelRef: modelRef,
       };
@@ -394,7 +394,7 @@ export async function buildTestPlan(params: {
         if (params.isRemoteProviderAuth) {
           return {
             error:
-              "For a custom provider, run openclaw onboard --auth-choice custom-api-key on the Gateway host, then return here and refresh connections.",
+              "For a custom provider, run carapace onboard --auth-choice custom-api-key on the Gateway host, then return here and refresh connections.",
           };
         }
         if (!params.prompter) {
@@ -531,7 +531,7 @@ export async function buildTestPlan(params: {
         };
       }
       let result: ProviderAuthResult;
-      let preparedConfig: OpenClawConfig;
+      let preparedConfig: CarapaceConfig;
       try {
         if (interactive) {
           if (!params.prompter) {

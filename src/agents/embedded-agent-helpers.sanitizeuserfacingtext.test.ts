@@ -3,7 +3,7 @@
  * Includes reasoning/tool-call cleanup and internal event prompt formatting.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { markInboundContextLabel } from "../auto-reply/reply/inbound-context-marker.js";
 import { createCommandError } from "../process/command-error.js";
@@ -266,7 +266,7 @@ describe("sanitizeUserFacingText", () => {
     "rewrites disk-space failures with errorContext: %s",
     (input) => {
       expect(renderUserFacingText(input, { errorContext: true })).toBe(
-        "OpenClaw could not write local session data because the disk is full. Free some disk space and try again.",
+        "Carapace could not write local session data because the disk is full. Free some disk space and try again.",
       );
     },
   );
@@ -386,9 +386,9 @@ describe("sanitizeUserFacingText", () => {
   it("strips internal tool trace warning lines from error-context delivery text", () => {
     const input = [
       "Visible intro.",
-      "⚠️ 🛠️ `run openclaw definitely-not-a-real-subcommand (agent)` failed",
-      "⚠️ 🛠️ gh search issues --repo openclaw/openclaw --state open --no-search-pages.jsonl /tmp/openclaw_open_unlabeled_current.json (agent) failed",
-      "⚠️ 🛠️ gh search issues --repo openclaw/openclaw --state open (agent) failed: command timed out",
+      "⚠️ 🛠️ `run carapace definitely-not-a-real-subcommand (agent)` failed",
+      "⚠️ 🛠️ gh search issues --repo carapace/carapace --state open --no-search-pages.jsonl /tmp/carapace_open_unlabeled_current.json (agent) failed",
+      "⚠️ 🛠️ gh search issues --repo carapace/carapace --state open (agent) failed: command timed out",
       "🛠️ run git status",
       "📖 Read: lines 1-40 from secret.md",
       "Visible outro.",
@@ -409,7 +409,7 @@ describe("sanitizeUserFacingText", () => {
     const input = [
       "Example:",
       "```",
-      "⚠️ 🛠️ `run openclaw definitely-not-a-real-subcommand (agent)` failed",
+      "⚠️ 🛠️ `run carapace definitely-not-a-real-subcommand (agent)` failed",
       "```",
     ].join("\n");
 
@@ -547,7 +547,7 @@ describe("sanitizeUserFacingText", () => {
   it("strips marked internal runtime context blocks but keeps real reply text", () => {
     const input = [
       INTERNAL_RUNTIME_CONTEXT_BEGIN,
-      "OpenClaw runtime context (internal):",
+      "Carapace runtime context (internal):",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
       "[Internal task completion event]",
@@ -566,12 +566,12 @@ describe("sanitizeUserFacingText", () => {
     const input = [
       markInboundContextLabel("Conversation info:"),
       "```json",
-      '{"chat_id":"channel:123","sender":"OpenClaw"}',
+      '{"chat_id":"channel:123","sender":"Carapace"}',
       "```",
       "",
       markInboundContextLabel("Sender:"),
       "```json",
-      '{"label":"OpenClaw (123)"}',
+      '{"label":"Carapace (123)"}',
       "```",
       "",
       "Pong",
@@ -646,7 +646,7 @@ describe("sanitizeUserFacingText", () => {
 
   it("drops legacy unmarked internal runtime context when it leaks into user-facing text", () => {
     const input = [
-      "OpenClaw runtime context (internal):",
+      "Carapace runtime context (internal):",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
       "[Internal task completion event]",
@@ -660,7 +660,7 @@ describe("sanitizeUserFacingText", () => {
     const input = [
       "Visible intro.",
       "",
-      "OpenClaw runtime context (internal):",
+      "Carapace runtime context (internal):",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
       "[Internal task completion event]",
@@ -687,12 +687,12 @@ describe("sanitizeUserFacingText", () => {
 
   it("strips copied next-turn runtime context prefaces from user-facing text", () => {
     const input = [
-      "OpenClaw runtime context for the immediately preceding user message.",
+      "Carapace runtime context for the immediately preceding user message.",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
       "secret runtime context",
-      "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       "",
       "Visible reply.",
     ].join("\n");
@@ -702,7 +702,7 @@ describe("sanitizeUserFacingText", () => {
 
   it("strips copied runtime event prefaces when no visible text remains", () => {
     const input = [
-      "OpenClaw runtime event.",
+      "Carapace runtime event.",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
     ].join("\n");
 
@@ -711,7 +711,7 @@ describe("sanitizeUserFacingText", () => {
 
   it("does not strip ordinary text that merely mentions internal marker strings", () => {
     const input = [
-      "The literal header `OpenClaw runtime context (internal):` appears in this note.",
+      "The literal header `Carapace runtime context (internal):` appears in this note.",
       "The phrase `[Internal task completion event]` is also mentioned as an example.",
     ].join("\n");
 
@@ -720,7 +720,7 @@ describe("sanitizeUserFacingText", () => {
 
   it("does not strip text that starts with the legacy header phrase but is not the canonical block", () => {
     const input =
-      "OpenClaw runtime context (internal): is the label used by the old runtime block formatter.";
+      "Carapace runtime context (internal): is the label used by the old runtime block formatter.";
 
     expect(sanitizeUserFacingText(input)).toBe(input);
   });

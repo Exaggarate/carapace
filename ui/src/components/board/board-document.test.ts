@@ -22,7 +22,7 @@ it("binds an acknowledged conversation only while the dashboard document is moun
     request,
     addEventListener: vi.fn(() => removeListener),
   } as unknown as GatewayBrowserClient;
-  const element = document.createElement("openclaw-board-document");
+  const element = document.createElement("carapace-board-document");
   mounted.push(element);
   element.sessionKey = "agent:work:main";
   element.gatewaySnapshot = {
@@ -43,7 +43,7 @@ it("binds an acknowledged conversation only while the dashboard document is moun
     }),
   );
   await element.updateComplete;
-  expect(element.querySelector("openclaw-board-view")).not.toBeNull();
+  expect(element.querySelector("carapace-board-view")).not.toBeNull();
   element.gatewaySnapshot = {
     client,
     phase: "connected",
@@ -72,7 +72,7 @@ it("uses a prepared gallery session without describing it again", async () => {
     request,
     addEventListener: vi.fn(() => vi.fn()),
   } as unknown as GatewayBrowserClient;
-  const element = document.createElement("openclaw-board-document");
+  const element = document.createElement("carapace-board-document");
   mounted.push(element);
   element.preparedSession = { sessionKey: "dashboard", agentId: "main" };
   element.gatewaySnapshot = {
@@ -136,7 +136,7 @@ it("keeps passive documents live with saved HTML and pure core reports only", as
     request,
     addEventListener: vi.fn(() => vi.fn()),
   } as unknown as GatewayBrowserClient;
-  const element = document.createElement("openclaw-board-document");
+  const element = document.createElement("carapace-board-document");
   mounted.push(element);
   element.passive = true;
   element.preparedSession = { sessionKey: "dashboard", agentId: "main" };
@@ -156,7 +156,7 @@ it("keeps passive documents live with saved HTML and pure core reports only", as
   document.body.append(element);
 
   const view = await vi.waitFor(() => {
-    const current = element.querySelector("openclaw-board-view");
+    const current = element.querySelector("carapace-board-view");
     expect(current).not.toBeNull();
     return current!;
   });

@@ -72,7 +72,7 @@ function baseRunParams(overrides: Partial<CliDispatchParams> = {}): CliDispatchP
       agentId: "main",
       sessionId: overrides.sessionId ?? "recall-session",
       sessionKey: overrides.sessionKey ?? "agent:main:recall",
-      storePath: "/tmp/recall/openclaw-agent.sqlite",
+      storePath: "/tmp/recall/carapace-agent.sqlite",
     },
     sessionFile: "/tmp/recall/session.jsonl",
     workspaceDir: "/tmp/recall/workspace",
@@ -366,7 +366,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       agentId: "main",
       sessionId: "recall-session",
       sessionKey: "agent:main:recall",
-      storePath: path.join(dir, "openclaw-agent.sqlite"),
+      storePath: path.join(dir, "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(sessionTarget, {
       sessionId: sessionTarget.sessionId,
@@ -419,7 +419,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       agentId: "main",
       sessionId: "recall-session",
       sessionKey: "agent:main:recall",
-      storePath: "/tmp/recall/custom/openclaw-agent.sqlite",
+      storePath: "/tmp/recall/custom/carapace-agent.sqlite",
     };
     const params = baseRunParams({
       sessionTarget,
@@ -443,7 +443,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       requireExplicitMessageTarget: true,
       cliToolAvailability: {
         native: [],
-        openClaw: ["memory_search", "memory_get", "notes_retrieve_context"],
+        carapace: ["memory_search", "memory_get", "notes_retrieve_context"],
       },
     });
     // Embedded toolsAllow must never reach the CLI runner: it fails closed.
@@ -554,7 +554,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__carapace__memory_search",
           result: { content: [] },
           isError: false,
           resultContentSource: "network",
@@ -566,7 +566,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_get",
+          name: "mcp__carapace__memory_get",
           result: { details: { status: "error" } },
           isError: false,
         },
@@ -574,7 +574,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       emitAgentEvent({
         runId: "other-run",
         stream: "tool",
-        data: { phase: "result", name: "mcp__openclaw__memory_get", isError: true },
+        data: { phase: "result", name: "mcp__carapace__memory_get", isError: true },
       });
       return cliRunResult();
     });
@@ -590,7 +590,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
     emitAgentEvent({
       runId: params.runId,
       stream: "tool",
-      data: { phase: "result", name: "mcp__openclaw__memory_search", isError: false },
+      data: { phase: "result", name: "mcp__carapace__memory_search", isError: false },
     });
     expect(observed).toHaveLength(2);
   });
@@ -620,7 +620,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "start",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__carapace__memory_search",
           toolCallId: "call-1",
           args: { query: "wings" },
         },
@@ -630,7 +630,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__carapace__memory_search",
           toolCallId: "call-1",
           result: { content: [] },
           isError: false,
@@ -708,8 +708,8 @@ describe("detached CLI transcript ownership", () => {
   it.each([false, true])(
     "does not mirror a detached turn into durable metadata (existing: %s)",
     async (existing) => {
-      const root = tempDirs.make("openclaw-detached-cli-");
-      const storePath = path.join(root, "final", "openclaw-agent.sqlite");
+      const root = tempDirs.make("carapace-detached-cli-");
+      const storePath = path.join(root, "final", "carapace-agent.sqlite");
       const params = baseRunParams({
         agentId: "main",
         sessionPersistence: "detached",

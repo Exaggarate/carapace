@@ -3,7 +3,7 @@
  */
 import fs from "node:fs/promises";
 import type { Command } from "commander";
-import { FsSafeError, readRegularFile } from "openclaw/plugin-sdk/security-runtime";
+import { FsSafeError, readRegularFile } from "carapace/plugin-sdk/security-runtime";
 import { resolveBrowserActRequestTimeoutMs } from "../../browser/act-policy.js";
 import type { BrowserActRequest, BrowserFormField } from "../../browser/client-actions.types.js";
 import { normalizeBrowserFormFields } from "../../browser/form-fields.js";
@@ -113,7 +113,7 @@ const ACTIONS_INPUT_MAX_BYTES = 1_000_000;
 function createActionsInputTooLargeError(source: string, cause?: unknown): FsSafeError {
   return new FsSafeError(
     "too-large",
-    `${source} exceeds ${ACTIONS_INPUT_MAX_BYTES} bytes. Split the batch plan into smaller files or run multiple openclaw browser batch commands.`,
+    `${source} exceeds ${ACTIONS_INPUT_MAX_BYTES} bytes. Split the batch plan into smaller files or run multiple carapace browser batch commands.`,
     { cause },
   );
 }

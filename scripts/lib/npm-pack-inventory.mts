@@ -159,7 +159,7 @@ function withoutPackageScripts<T>(packageRoot: string, run: () => T): T {
 }
 
 export function collectNpmPackInventory(packageRoot: string, options: NpmPackInventoryOptions) {
-  const sandboxRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-npm-pack-inventory-"));
+  const sandboxRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-npm-pack-inventory-"));
   const sandbox = {
     cacheDir: path.join(sandboxRoot, "cache"),
     configDir: path.join(sandboxRoot, "config"),

@@ -6,8 +6,8 @@ import {
   loadAuthProfileStoreForRuntime,
   loadAuthProfileStoreWithoutExternalProfiles,
 } from "../agents/auth-profiles/store-runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   registryContainsRuntimePluginIds,
@@ -16,8 +16,8 @@ import {
 import type { PluginCapabilityCatalogContext } from "./capability-catalog-context.types.js";
 import { isPluginRegistryLoadInFlight, resolvePluginRegistryLoadCacheKey } from "./loader-cache.js";
 import { createLazyPluginRuntime } from "./loader-module-runtime.js";
-import { loadOpenClawPluginsWithInternalOverrides } from "./loader-runtime-load.js";
-import { loadOpenClawPlugins, type PluginLoadOptions } from "./loader.js";
+import { loadCarapacePluginsWithInternalOverrides } from "./loader-runtime-load.js";
+import { loadCarapacePlugins, type PluginLoadOptions } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   makePluginLoaderTempDir,
@@ -82,7 +82,7 @@ async function withFactoryPlugin(
   });
   if (manifest) {
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "carapace.plugin.json"),
       JSON.stringify({
         id: plugin.id,
         configSchema: { type: "object", additionalProperties: false },
@@ -92,10 +92,10 @@ async function withFactoryPlugin(
   }
   await withEnvAsync(
     {
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
     },
     async () =>
       await run(
@@ -116,7 +116,7 @@ async function withFactoryPlugin(
 }
 
 function loadRestricted(options: PluginLoadOptions) {
-  return loadOpenClawPluginsWithInternalOverrides(
+  return loadCarapacePluginsWithInternalOverrides(
     { ...options, cache: false },
     {
       runtime: {
@@ -163,8 +163,8 @@ const registerFactories = `
 afterEach(() => {
   vi.restoreAllMocks();
   clearRuntimeAuthProfileStoreSnapshots();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetPluginLoaderTestStateForTest();
 });
 afterAll(cleanupPluginLoaderFixturesForTest);
@@ -205,7 +205,7 @@ describe.each(["cjs", "ts"] as const)("%s capability factory registration", (ext
         const loadOptions = { ...options, capabilityCatalogContext: context };
         const registry = mode.startsWith("restricted")
           ? loadRestricted(loadOptions)
-          : loadOpenClawPlugins(loadOptions);
+          : loadCarapacePlugins(loadOptions);
         expect(registry.plugins).toContainEqual(
           expect.objectContaining({ id: "factory-owner", status: "loaded" }),
         );
@@ -270,14 +270,14 @@ describe.each(["cjs", "ts"] as const)("%s capability factory registration", (ext
           },
         });
         const cacheKey = resolvePluginRegistryLoadCacheKey(authored);
-        const registry = loadOpenClawPlugins(authored);
+        const registry = loadCarapacePlugins(authored);
         expect(inFlightAtRegistration).toBe(true);
         expect(registryContainsRuntimePluginIds(registry, ["factory-owner"])).toBe(true);
         expect(isPluginRegistryLoadInFlight(authored)).toBe(false);
         expect(resolvePluginRegistryLoadCacheKey(authored)).toBe(cacheKey);
         expect(pluginLoaderCacheState.get(cacheKey)).toBe(registry);
         expect(resolveCompatibleRuntimePluginRegistry(authored)).toBe(registry);
-        expect(loadOpenClawPlugins(authored)).toBe(registry);
+        expect(loadCarapacePlugins(authored)).toBe(registry);
         expect(authored).not.toHaveProperty("capabilityCatalogContext");
         expect(authored.runtimeOptions).toEqual({});
       },
@@ -343,11 +343,11 @@ describe.each(["cjs", "ts"] as const)("%s capability factory registration", (ext
     await withFactoryPlugin(extension, registerFactories, (options) => {
       const firstContext = createContext();
       const firstOptions = { ...options, capabilityCatalogContext: firstContext };
-      const first = loadOpenClawPlugins(firstOptions);
+      const first = loadCarapacePlugins(firstOptions);
       expect(first.speechProviders).toHaveLength(1);
-      expect(loadOpenClawPlugins(firstOptions)).toBe(first);
+      expect(loadCarapacePlugins(firstOptions)).toBe(first);
       const secondContext = createContext();
-      const second = loadOpenClawPlugins({ ...options, capabilityCatalogContext: secondContext });
+      const second = loadCarapacePlugins({ ...options, capabilityCatalogContext: secondContext });
       expect(second).not.toBe(first);
       expect(Reflect.get(first.speechProviders[0]!.provider, contextSymbol)).toBe(firstContext);
       expect(Reflect.get(second.speechProviders[0]!.provider, contextSymbol)).toBe(secondContext);
@@ -382,7 +382,7 @@ describe.each(["cjs", "ts"] as const)("%s capability factory registration", (ext
       });
       api.registerRealtimeVoiceProvider(() => { ${body} });`,
         async (options) => {
-          const registry = loadOpenClawPlugins({
+          const registry = loadCarapacePlugins({
             ...options,
             capabilityCatalogContext: createContext(),
           });

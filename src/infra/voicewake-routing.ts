@@ -1,5 +1,5 @@
 // Persists and resolves voice wake routing rules.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 
@@ -116,7 +116,7 @@ export async function loadVoiceWakeRoutingConfig(
 ): Promise<VoiceWakeRoutingConfig> {
   const config = readConfigMachineState<VoiceWakeRoutingConfig>(
     VOICEWAKE_ROUTING_STATE_KEY,
-    baseDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: baseDir } } : {},
+    baseDir ? { env: { ...process.env, CARAPACE_STATE_DIR: baseDir } } : {},
   );
   return config ? normalizeVoiceWakeRoutingConfig(config) : { ...DEFAULT_ROUTING };
 }

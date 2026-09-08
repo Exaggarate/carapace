@@ -9,7 +9,7 @@ import { BEFORE_TOOL_CALL_HOOK_CONTEXT } from "../agents/before-tool-call-metada
 import { runCodeModeScriptHeadless, type CodeModeHeadlessResult } from "../agents/code-mode.js";
 import { clearToolSearchCatalog } from "../agents/tool-search.js";
 import { jsonResult, type AnyAgentTool } from "../agents/tools/common.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createCronScriptRuntimeFixture as createCronScriptRuntime } from "./trigger-script.test-helpers.js";
 
 type EvaluatorDeps = Parameters<typeof createCronScriptRuntime>[0];
@@ -33,7 +33,7 @@ function abortReason(signal: AbortSignal | undefined): Error {
   return reason instanceof Error ? reason : new Error("preparation aborted");
 }
 
-function createPreparedRuntime(config: OpenClawConfig) {
+function createPreparedRuntime(config: CarapaceConfig) {
   const tool = wrapToolWithBeforeToolCallHook(
     {
       name: "probe",
@@ -57,7 +57,7 @@ function createEvaluator(
     >[0],
   ) => Promise<CodeModeHeadlessResult>,
 ) {
-  const config = {} as OpenClawConfig;
+  const config = {} as CarapaceConfig;
   const prepareRuntime = vi.fn(async () => createPreparedRuntime(config));
   return {
     evaluate: createCronScriptRuntime({ config, runHeadless, prepareRuntime }).evaluateTrigger,
@@ -73,7 +73,7 @@ describe("cron trigger script evaluator", () => {
   it("cancels the real headless worker and bridge when its evaluation catalog closes", async () => {
     const entered = createDeferred();
     const release = createDeferred();
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     let context: HeadlessParams["ctx"] | undefined;
     let aborts = 0;
     const prepared = createPreparedRuntime(config);
@@ -137,10 +137,10 @@ describe("cron trigger script evaluator", () => {
   it.each(["trigger", "payload"] as const)(
     "does not scaffold an implicit ACP workspace during %s execution (#92015)",
     async (mode) => {
-      const parentRepo = tempDirs.make("openclaw-cron-acp-workspace-");
+      const parentRepo = tempDirs.make("carapace-cron-acp-workspace-");
       expect(spawnSync("git", ["init", "-q"], { cwd: parentRepo }).status).toBe(0);
-      const workspaceDir = path.join(parentRepo, ".openclaw", "workspace");
-      const config: OpenClawConfig = {
+      const workspaceDir = path.join(parentRepo, ".carapace", "workspace");
+      const config: CarapaceConfig = {
         agents: {
           defaults: { workspace: workspaceDir },
           entries: {
@@ -181,7 +181,7 @@ describe("cron trigger script evaluator", () => {
   );
 
   it("runs the documented exec contract from a canonically captured pinned cap", async () => {
-    const workspaceDir = tempDirs.make("openclaw-cron-canonical-cap-");
+    const workspaceDir = tempDirs.make("carapace-cron-canonical-cap-");
     // The configured default exec host is a nonexistent node: only the
     // restrict-only gateway pin can make this command run.
     const config = {
@@ -194,14 +194,14 @@ describe("cron trigger script evaluator", () => {
           ask: "off",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const evaluate = createCronScriptRuntime({ config }).evaluateTrigger;
 
     await expect(
       evaluate({
         jobId: "job-canonical-pinned-exec",
         script:
-          'await exec({ command: "printf openclaw-canonical-ok", host: "node", node: "remote" }); return { fire: false };',
+          'await exec({ command: "printf carapace-canonical-ok", host: "node", node: "remote" }); return { fire: false };',
         state: null,
         toolsAllow: ["exec", "process"],
         scheduledToolPolicy: { version: 1, mode: "trusted" },
@@ -211,12 +211,12 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("keeps an uncanonicalized alias-name cap fail-closed for exec", async () => {
-    const workspaceDir = tempDirs.make("openclaw-cron-alias-collision-");
+    const workspaceDir = tempDirs.make("carapace-cron-alias-collision-");
     const evaluate = createCronScriptRuntime({
       config: {
         agents: { defaults: { workspace: workspaceDir } },
         tools: { exec: { host: "gateway", security: "full", ask: "off" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     }).evaluateTrigger;
 
     const result = await evaluate({
@@ -345,7 +345,7 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("single-flights concurrent runtime preparation for the same job", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     let release: ((runtime: ReturnType<typeof createPreparedRuntime>) => void) | undefined;
     const pending = new Promise<ReturnType<typeof createPreparedRuntime>>((resolve) => {
       release = resolve;
@@ -367,7 +367,7 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("retries shared runtime preparation for a still-live evaluator after its owner aborts", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const prepareRuntime = vi.fn(async (params: PrepareParams) => {
       if (prepareRuntime.mock.calls.length === 1) {
         return await new Promise<never>((_resolve, reject) => {
@@ -404,7 +404,7 @@ describe("cron trigger script evaluator", () => {
   it("retries shared runtime preparation after an earlier evaluator reaches its deadline", async () => {
     vi.useFakeTimers();
     try {
-      const config = {} as OpenClawConfig;
+      const config = {} as CarapaceConfig;
       const prepareRuntime = vi.fn(async (params: PrepareParams) => {
         if (prepareRuntime.mock.calls.length === 1) {
           return await new Promise<never>((_resolve, reject) => {
@@ -442,7 +442,7 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("invalidates a cached runtime when toolsAllow changes", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const prepareRuntime = vi.fn(async (_params: PrepareParams) => createPreparedRuntime(config));
     const runHeadless = vi.fn(async () => completed({ value: { fire: false } }));
     const evaluate = createCronTriggerEvaluator({ config, prepareRuntime, runHeadless });
@@ -468,7 +468,7 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("forwards scheduled provenance and invalidates cached authority when it changes", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const prepareRuntime = vi.fn(async (_params: PrepareParams) => createPreparedRuntime(config));
     const runHeadless = vi.fn(async () => completed({ value: { fire: false } }));
     const evaluate = createCronTriggerEvaluator({ config, prepareRuntime, runHeadless });
@@ -560,7 +560,7 @@ describe("cron trigger script evaluator", () => {
   });
 
   it("cancels runtime preparation when its only evaluator aborts", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     let preparationSignal: AbortSignal | undefined;
     const prepareRuntime = vi.fn(async (params: { signal?: AbortSignal }): Promise<never> => {
       preparationSignal = params.signal;
@@ -600,7 +600,7 @@ describe("cron trigger script evaluator", () => {
   it("keeps the internal evaluation deadline classified as timeout", async () => {
     vi.useFakeTimers();
     try {
-      const config = {} as OpenClawConfig;
+      const config = {} as CarapaceConfig;
       const prepareRuntime = vi.fn(async (params: { signal?: AbortSignal }): Promise<never> => {
         return await new Promise<never>((_resolve, reject) => {
           params.signal?.addEventListener("abort", () => reject(abortReason(params.signal)), {
@@ -645,7 +645,7 @@ describe("cron script runtime elapsed-time budgets", () => {
   )(
     "preserves the integer $budgetMs ms $mode budget when the wall clock jumps $clockDirection",
     async ({ mode, timeoutSeconds, budgetMs, clockDirection }) => {
-      const config = {} as OpenClawConfig;
+      const config = {} as CarapaceConfig;
       const initialWallClockMs = Date.now();
       let wallClockJumpMs = 0;
       const wallClock = vi
@@ -694,7 +694,7 @@ describe("cron script runtime elapsed-time budgets", () => {
   )(
     "survives a $clockDirection wall-clock jump after the real $budgetMs ms $mode handoff",
     async ({ mode, timeoutSeconds, budgetMs, clockDirection }) => {
-      const config = {} as OpenClawConfig;
+      const config = {} as CarapaceConfig;
       const initialWallClockMs = Date.now();
       let wallClockJumpMs = 0;
       const wallClock = vi
@@ -753,7 +753,7 @@ describe("cron script runtime elapsed-time budgets", () => {
 
 describe("cron script payload evaluator", () => {
   it("exposes a stream batch beside the script payload state", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runHeadless = vi.fn(async (_params: HeadlessParams) => completed({ value: {} }));
     const runtime = createCronScriptRuntime({
       config,
@@ -787,7 +787,7 @@ describe("cron script payload evaluator", () => {
   });
 
   it("uses payload-grade capped budgets and exposes frozen trigger state", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runHeadless = vi.fn(async (_params: HeadlessParams) =>
       completed({
         value: {
@@ -841,7 +841,7 @@ describe("cron script payload evaluator", () => {
   });
 
   it("uses payload defaults and accepts an omitted result state", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runHeadless = vi.fn(async (_params: HeadlessParams) => completed({ value: {} }));
     const runtime = createCronScriptRuntime({
       config,
@@ -859,7 +859,7 @@ describe("cron script payload evaluator", () => {
   });
 
   it("canonicalizes returned state to the JSON value that will be persisted", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runtime = createCronScriptRuntime({
       config,
       runHeadless: vi.fn(async () =>
@@ -885,7 +885,7 @@ describe("cron script payload evaluator", () => {
     [{ nextCheck: "tomorrowish" }, "nextCheck must be a positive duration"],
     [{ state: "x".repeat(17 * 1024) }, "state exceeds the 16KB limit"],
   ] as const)("rejects an invalid result %#", async (value, error) => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runtime = createCronScriptRuntime({
       config,
       runHeadless: vi.fn(async () => completed({ value })),
@@ -898,7 +898,7 @@ describe("cron script payload evaluator", () => {
   });
 
   it("surfaces executor failures through the cron error contract", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const runtime = createCronScriptRuntime({
       config,
       runHeadless: vi.fn(async () => ({

@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/google-meet",
+  "name": "@carapace/google-meet",
   "version": "2026.9.2",
-  "description": "OpenClaw Google Meet participant plugin for joining calls through Chrome or Twilio transports.",
+  "description": "Carapace Google Meet participant plugin for joining calls through Chrome or Twilio transports.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "dependencies": {
@@ -12,23 +12,23 @@
     "typebox": "1.3.18"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/google-meet",
+      "npmSpec": "@carapace/google-meet",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.20"
     },
@@ -36,7 +36,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

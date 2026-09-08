@@ -4,9 +4,9 @@ import {
   type EmbeddingProvider,
   type EmbeddingProviderAdapter,
   type EmbeddingProviderCreateOptions,
-} from "openclaw/plugin-sdk/embedding-providers";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/embedding-providers";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
 import {
   DEFAULT_LLAMA_CPP_EMBEDDING_CACHE_FILE,
   DEFAULT_LLAMA_CPP_EMBEDDING_MODEL,
@@ -30,12 +30,12 @@ type LlamaCppLocalOptions = {
   modelCacheDir?: string;
 };
 
-type AcquireLocalService = OpenClawPluginApi["runtime"]["llm"]["acquireLocalService"];
+type AcquireLocalService = CarapacePluginApi["runtime"]["llm"]["acquireLocalService"];
 type LocalServiceAwareOptions = EmbeddingProviderCreateOptions & {
   acquireLocalService?: AcquireLocalService;
 };
 
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("carapace.localEmbeddingRuntimeFacts");
 
 type LlamaCppModelIdentity = {
   model: string;
@@ -183,7 +183,7 @@ export const llamaCppEmbeddingProviderAdapter: EmbeddingProviderAdapter = {
   defaultModel: DEFAULT_LLAMA_CPP_EMBEDDING_MODEL,
   transport: "local",
   formatSetupError: (error) =>
-    `Managed local embeddings are unavailable. Run \`openclaw configure\`, choose llama.cpp, and retry. ${error instanceof Error ? error.message : String(error)}`,
+    `Managed local embeddings are unavailable. Run \`carapace configure\`, choose llama.cpp, and retry. ${error instanceof Error ? error.message : String(error)}`,
   resolveIndexIdentity: (options) => {
     const local = readIdentityLocalOptions(options);
     return resolveModelIdentity(local, options.dimensions);

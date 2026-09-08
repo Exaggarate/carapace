@@ -1,4 +1,4 @@
-import type { EnvironmentSummary, SystemInfoResult } from "@openclaw/gateway-protocol";
+import type { EnvironmentSummary, SystemInfoResult } from "@carapace/gateway-protocol";
 import type { DevicesProps } from "../pages/devices/view.types.ts";
 
 export const deviceSystemInfo: SystemInfoResult = {

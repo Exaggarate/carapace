@@ -1,4 +1,4 @@
-import { resolveProviderIdForAuth } from "openclaw/plugin-sdk/provider-auth-aliases";
+import { resolveProviderIdForAuth } from "carapace/plugin-sdk/provider-auth-aliases";
 import { createCodexAppServerConfig } from "./config-options.js";
 
 // Cold callers remain complete without a registered Gateway runtime.

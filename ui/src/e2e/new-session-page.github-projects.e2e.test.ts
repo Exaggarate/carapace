@@ -21,11 +21,11 @@ const remoteSearchResult = {
   credential: "missing",
   projects: [
     {
-      name: "openclaw",
-      fullName: "openclaw/openclaw",
+      name: "carapace",
+      fullName: "carapace/carapace",
       description: "Personal AI assistant",
-      cloneUrl: "https://github.com/openclaw/openclaw.git",
-      webUrl: "https://github.com/openclaw/openclaw",
+      cloneUrl: "https://github.com/Exaggarate/carapace.git",
+      webUrl: "https://github.com/Exaggarate/carapace",
       private: false,
     },
   ],
@@ -71,8 +71,8 @@ suite.define(() => {
         const projects = page.locator("wa-popover.new-session-page__project-popover");
         await projects
           .getByRole("searchbox", { name: "Search projects or paste a Git URL" })
-          .fill("openclaw");
-        await projects.getByRole("button", { name: /openclaw\/openclaw/u }).click();
+          .fill("carapace");
+        await projects.getByRole("button", { name: /carapace\/carapace/u }).click();
 
         await captureProjectUiProof(suite, page, "github-worktree-direct.png");
         const checkout = page.locator("#new-session-checkout-trigger");
@@ -100,7 +100,7 @@ suite.define(() => {
 
         const create = await gateway.waitForRequest("sessions.create");
         expect(create.params).toMatchObject({
-          projectGitUrl: "https://github.com/openclaw/openclaw.git",
+          projectGitUrl: "https://github.com/Exaggarate/carapace.git",
           worktree: true,
           message: "inspect the worktree",
         });
@@ -127,7 +127,7 @@ suite.define(() => {
     },
   ])("keeps GitHub selection inert and $name", async ({ failure, worktree }) => {
     // Both capture gates share this attempt's screenshots, custody report, and video.
-    const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+    const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
       ? path.join(suite.artifactDir, "project-registry")
       : undefined;
     const context = await suite.browser.newContext({
@@ -162,7 +162,7 @@ suite.define(() => {
       releaseMedia = resolve;
     });
     let metadataRequested = false;
-    await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+    await page.route("**/__carapace__/assistant-media?**", async (route) => {
       const metadata = new URL(route.request().url()).searchParams.has("meta");
       metadataRequested ||= metadata;
       await mediaBlocked;
@@ -182,7 +182,7 @@ suite.define(() => {
         role: "user",
         content: message,
         timestamp: acceptedAt,
-        __openclaw: {
+        __carapace: {
           id: "pending:accepted-project-input",
           senderId: "synthetic-author",
           senderName: "Synthetic Author",
@@ -282,20 +282,20 @@ suite.define(() => {
       const search = place.getByRole("searchbox", {
         name: "Search projects or paste a Git URL",
       });
-      await search.fill("openclaw");
+      await search.fill("carapace");
 
       const searchRequest = await gateway.waitForRequest("projects.searchRemote");
-      expect(searchRequest.params).toEqual({ query: "openclaw" });
+      expect(searchRequest.params).toEqual({ query: "carapace" });
       await place
         .getByText(
           "No Control UI GitHub credential or shared Gateway environment token is configured; public GitHub results only.",
         )
         .waitFor();
-      await place.getByRole("button", { name: /openclaw\/openclaw/u }).click();
+      await place.getByRole("button", { name: /carapace\/carapace/u }).click();
 
       expect(await gateway.getRequests("projects.add")).toHaveLength(0);
       await pollLocatorText(trigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw/openclaw",
+        "carapace/carapace",
       );
       expect(await trigger.getAttribute("data-project-id")).toBeNull();
 
@@ -327,7 +327,7 @@ suite.define(() => {
         message,
         attachments: [{ type: "image", mimeType: "image/png", content: ONE_PIXEL_PNG_B64 }],
         permissionMode: "read-only",
-        projectGitUrl: "https://github.com/openclaw/openclaw.git",
+        projectGitUrl: "https://github.com/Exaggarate/carapace.git",
         ...(worktree ? { worktree: true } : {}),
       });
       expect(create.params).not.toHaveProperty("cwd");
@@ -436,8 +436,8 @@ suite.define(() => {
       if (!failure) {
         const promoted = {
           ...pendingInput.message,
-          __openclaw: {
-            ...pendingInput.message["__openclaw"],
+          __carapace: {
+            ...pendingInput.message["__carapace"],
             id: pendingInput.id,
             idempotencyKey: `${runId}:user`,
             seq: 4,

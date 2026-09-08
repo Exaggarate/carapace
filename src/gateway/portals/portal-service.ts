@@ -106,10 +106,10 @@ export function createGatewayPortalService(params: {
       throw new Error("Gateway listener must start before opening a portal");
     }
     const scheme = params.tlsOptions ? "https" : "http";
-    const tokenQuery = `openclaw_portal=${portal.token}`;
+    const tokenQuery = `carapace_portal=${portal.token}`;
     const publicUrl = `${scheme}://${formatPortalHost(host)}:${portal.listenPort}${portal.path ?? "/"}`;
     const openableUrl = new URL(publicUrl);
-    openableUrl.searchParams.set("openclaw_portal", portal.token);
+    openableUrl.searchParams.set("carapace_portal", portal.token);
     return {
       id: portal.id,
       title: portal.title,

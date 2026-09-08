@@ -4,12 +4,12 @@ import type { ModelRef } from "../../agents/model-ref-shared.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.js";
 import { resolveUnsuffixedSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   TURN_MODEL_CHANNEL_REF,
   TURN_MODEL_DEFAULT_REF,
@@ -46,7 +46,7 @@ const mocks = vi.hoisted(() => ({
 registerGetReplyBaselineBypass();
 registerGetReplyRuntimeOverrides(mocks);
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 let getReplyFromConfig: typeof import("./get-reply.js").getReplyFromConfig;
 let resolveAgentWorkspaceDirMock: typeof import("../../agents/agent-scope.js").resolveAgentWorkspaceDir;
@@ -59,7 +59,7 @@ function createConfig(params: {
   storePath: string;
   workspaceDir: string;
   modelByChannel?: Record<string, Record<string, string>>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return markCompleteReplyConfig({
     session: { store: params.storePath },
     agents: {
@@ -70,7 +70,7 @@ function createConfig(params: {
       },
     },
     channels: params.modelByChannel ? { modelByChannel: params.modelByChannel } : undefined,
-  } as OpenClawConfig);
+  } as CarapaceConfig);
 }
 
 async function seedFixtureStore(
@@ -91,7 +91,7 @@ async function seedFixtureStore(
 
 async function observeReplySelection(params: {
   fixture: TurnModelDifferentialFixture;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   sessionStore: Record<string, SessionEntry>;
 }): Promise<TurnModelSelectionVerdict> {
@@ -150,9 +150,9 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  state = await createOpenClawTestState({
+  state = await createCarapaceTestState({
     label: "turn-model-reply",
-    env: { OPENCLAW_TEST_FAST: "1" },
+    env: { CARAPACE_TEST_FAST: "1" },
   });
   const actualChannelModel = await vi.importActual<
     typeof import("../../channels/model-overrides.js")

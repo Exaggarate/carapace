@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   CONTROL_UI_PLUGIN_MAX_ASSET_BYTES,
   CONTROL_UI_PLUGIN_MAX_BUILD_BYTES,
@@ -50,7 +50,7 @@ export async function buildPluginControlUi(params: {
     // Browser bundles embed the host SDK and workspace packages, so resolve them
     // from source whenever a source checkout is present. NODE_ENV=production would
     // otherwise prefer compiled dist left behind by an earlier build, and stale
-    // bytes change the content hash that openclaw.plugin.json commits.
+    // bytes change the content hash that carapace.plugin.json commits.
     alias: buildPluginLoaderAliasMap(entry, process.argv[1], import.meta.url, "src"),
   });
   if (
@@ -88,7 +88,7 @@ export async function buildPluginControlUi(params: {
         .readFile(path.join(outputDir, path.basename(file.path)))
         .catch(() => null);
       if (!existing?.equals(Buffer.from(file.contents))) {
-        throw new Error("Control UI build is missing or stale. Run openclaw plugins build.");
+        throw new Error("Control UI build is missing or stale. Run carapace plugins build.");
       }
     }
     return declaration;

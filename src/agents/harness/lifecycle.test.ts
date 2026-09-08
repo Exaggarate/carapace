@@ -1,7 +1,7 @@
 // Verifies harness lifecycle capability checks, diagnostics, and trace scoping.
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import {
   onTrustedInternalDiagnosticEvent,
@@ -21,7 +21,7 @@ import {
   getCoreTtsAttemptResultMediaUrls,
   markCoreTtsAttemptResult,
 } from "../tools/tts-tool-result-provenance.js";
-import { createOpenClawAgentHarness } from "./builtin-openclaw.js";
+import { createCarapaceAgentHarness } from "./builtin-carapace.js";
 import { AgentHarnessPreflightError, resolveAgentHarnessPreflightOwner } from "./errors.js";
 import {
   runAgentHarnessLifecycleAttempt,
@@ -419,11 +419,11 @@ describe("AgentHarness lifecycle runner", () => {
     expect(runAttempt).toHaveBeenCalledOnce();
   });
 
-  it("advertises OpenClaw embedded host capabilities", async () => {
-    const harness = createOpenClawAgentHarness();
+  it("advertises Carapace embedded host capabilities", async () => {
+    const harness = createCarapaceAgentHarness();
 
     expect(harness.contextEngineHostCapabilities).toEqual(
-      OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
+      CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
     );
   });
 

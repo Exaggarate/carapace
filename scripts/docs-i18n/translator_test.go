@@ -144,7 +144,7 @@ func TestCodexTranslatorStripsInputWrapperEcho(t *testing.T) {
 		systemPrompt: "Translate from English to German.",
 		thinking:     "high",
 		runPrompt: func(context.Context, codexPromptRequest) (string, error) {
-			return "<openclaw_docs_i18n_input>\nÜbersetzt\n</openclaw_docs_i18n_input>", nil
+			return "<carapace_docs_i18n_input>\nÜbersetzt\n</carapace_docs_i18n_input>", nil
 		},
 	}
 
@@ -187,9 +187,9 @@ func TestBuildCodexTranslationPromptIncludesGuardrailsAndInput(t *testing.T) {
 		"Return only the translated text",
 		"Do not wrap the response in an additional code fence",
 		"preserve every code fence already present in the input exactly",
-		"<openclaw_docs_i18n_input>",
+		"<carapace_docs_i18n_input>",
 		"Hello\nworld",
-		"</openclaw_docs_i18n_input>",
+		"</carapace_docs_i18n_input>",
 	} {
 		if !strings.Contains(prompt, want) {
 			t.Fatalf("expected %q in prompt:\n%s", want, prompt)
@@ -209,7 +209,7 @@ func TestRunCodexExecPromptUsesOutputLastMessage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("EXPECTED_CODEX_HOME_BASE", filepath.Join(cacheDir, "openclaw-docs-i18n"))
+	t.Setenv("EXPECTED_CODEX_HOME_BASE", filepath.Join(cacheDir, "carapace-docs-i18n"))
 	fakeCodex := filepath.Join(dir, "codex")
 	if err := os.WriteFile(fakeCodex, []byte(`#!/bin/sh
 set -eu
@@ -315,7 +315,7 @@ printf 'translated from codex\n' > "$out"
 	if got != "translated from codex" {
 		t.Fatalf("unexpected output %q", got)
 	}
-	entries, err := os.ReadDir(filepath.Join(cacheDir, "openclaw-docs-i18n"))
+	entries, err := os.ReadDir(filepath.Join(cacheDir, "carapace-docs-i18n"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -450,7 +450,7 @@ printf 'translated\n' > "$out"
 			t.Setenv("TEST_CALLS", callsPath)
 			t.Setenv(envDocsI18nCodexExecutable, fakeCodex)
 			t.Setenv(envDocsI18nModel, "private-primary")
-			t.Setenv("OPENCLAW_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
+			t.Setenv("CARAPACE_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
 			translator, err := NewCodexTranslator("en", "de", nil, "high")
 			if err != nil {
 				t.Fatal(err)
@@ -489,7 +489,7 @@ printf 'translated\n' > "$out"
 
 func TestCodexTranslatorRejectsPrivateModelDisclosure(t *testing.T) {
 	t.Setenv(envDocsI18nModel, "private-primary")
-	t.Setenv("OPENCLAW_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
+	t.Setenv("CARAPACE_DOCS_I18N_FALLBACK_MODEL", "private-fallback")
 	for _, model := range []string{"private-primary", "private-fallback"} {
 		translator, err := NewCodexTranslator("en", "de", nil, "high")
 		if err != nil {

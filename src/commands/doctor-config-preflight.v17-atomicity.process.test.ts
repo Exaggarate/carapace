@@ -14,9 +14,9 @@ const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 
 describe("doctor schema-17 repair atomicity", () => {
   it("rolls back rejected v17 repair through doctor --fix", () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-v17-atomicity-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-v17-atomicity-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     fs.mkdirSync(path.join(stateDir, "agents", "main", "sessions"), { recursive: true });
     fs.writeFileSync(configPath, "{}\n");
     const databasePath = seedV17AdditiveRepairDatabase(stateDir, {
@@ -27,10 +27,10 @@ describe("doctor schema-17 repair atomicity", () => {
       runtimeRoot,
       {
         ...process.env,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_TEST_FAST: "1",
         NO_COLOR: "1",
       },
       ["doctor", "--fix", "--non-interactive", "--yes", "--no-workspace-suggestions"],

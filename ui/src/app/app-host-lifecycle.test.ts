@@ -14,9 +14,9 @@ type ShellLifecycle = {
 
 afterEach(resetAppHostTestGlobals);
 
-describe("OpenClaw shell event lifecycle", () => {
+describe("Carapace shell event lifecycle", () => {
   it("retires host, window, and document actions on disconnect and reconnects once", () => {
-    const shell = document.createElement("openclaw-app-shell") as ShellChromeHost & ShellLifecycle;
+    const shell = document.createElement("carapace-app-shell") as ShellChromeHost & ShellLifecycle;
     const navigate = vi.spyOn(shell, "navigate").mockImplementation(() => {});
     const onSlashCommand = vi.fn();
     const target = { owner: shell, onSlashCommand };

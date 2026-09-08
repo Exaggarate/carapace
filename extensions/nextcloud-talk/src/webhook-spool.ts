@@ -3,11 +3,11 @@ import {
   createChannelIngressMonitor,
   type ChannelIngressQueue,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resolvePersistentDedupePluginStateNamespace } from "openclaw/plugin-sdk/persistent-dedupe";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { resolvePersistentDedupePluginStateNamespace } from "carapace/plugin-sdk/persistent-dedupe";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { z } from "zod";
 import {
   NEXTCLOUD_TALK_REPLAY_DEDUPE_MAX_ENTRIES,

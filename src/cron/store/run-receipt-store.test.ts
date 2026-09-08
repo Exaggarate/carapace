@@ -7,9 +7,9 @@ import {
 import { createExecutionIdentityAdmissionToken } from "../../audit/execution-identity-admission.js";
 import * as pidAlive from "../../shared/pid-alive.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   advanceCronActiveJobGeneration,
   bindCronJobAdmittedRun,
@@ -68,7 +68,7 @@ function claim(storePath: string, job: CronJob, startedAtMs: number) {
     agentId: job.agentId!,
     startedAtMs,
   });
-  return runOpenClawStateWriteTransaction(({ db }) =>
+  return runCarapaceStateWriteTransaction(({ db }) =>
     claimCronRunReceiptInDatabase({
       database: db,
       prepared,
@@ -78,7 +78,7 @@ function claim(storePath: string, job: CronJob, startedAtMs: number) {
 }
 
 function receipts(storePath: string, jobId: string) {
-  return openOpenClawStateDatabase()
+  return openCarapaceStateDatabase()
     .db.prepare(
       `SELECT receipt_id AS receiptId, status, agent_id AS agentId,
               started_at_ms AS startedAtMs, error_text AS error
@@ -97,7 +97,7 @@ function receipts(storePath: string, jobId: string) {
 
 function makeForeignOwner(handle: CronRunReceiptHandle) {
   const ownerPid = 2_147_483_646;
-  openOpenClawStateDatabase()
+  openCarapaceStateDatabase()
     .db.prepare("UPDATE cron_run_receipts SET owner_pid = ? WHERE receipt_id = ?")
     .run(ownerPid, handle.receiptId);
   releaseLocalCronRunReceiptOwnership(handle);
@@ -198,16 +198,16 @@ describe("cron run receipt store", () => {
       const { storePath } = await makeStorePath();
       const job = makeJob("lazy-lookup");
       await saveCronStore(storePath, { version: 1, jobs: [job] });
-      openOpenClawStateDatabase().db.exec("DROP TABLE cron_run_receipts");
+      openCarapaceStateDatabase().db.exec("DROP TABLE cron_run_receipts");
 
-      const result = runOpenClawStateWriteTransaction(({ db }) =>
+      const result = runCarapaceStateWriteTransaction(({ db }) =>
         testCase === "single"
           ? findActiveCronRunReceiptInDatabase({ database: db, storePath, jobId: job.id })
           : listActiveCronRunReceiptJobIdsInDatabase(db, storePath),
       );
       expect(result).toEqual(testCase === "single" ? undefined : new Set());
       expect(
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             "SELECT name FROM sqlite_schema WHERE type = 'table' AND name = 'cron_run_receipts'",
           )
@@ -244,7 +244,7 @@ describe("cron run receipt store", () => {
       await saveCronStore(storePath, { version: 1, jobs: [job] });
       const abandoned = claim(storePath, job, startedAtMs);
       if (owner === "dead") {
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare("UPDATE cron_run_receipts SET owner_pid = ? WHERE receipt_id = ?")
           .run(2_147_483_647, abandoned.receiptId);
         releaseLocalCronRunReceiptOwnership(abandoned);
@@ -347,7 +347,7 @@ describe("cron run receipt store", () => {
       agentId: job.agentId!,
       startedAtMs: Date.now(),
     });
-    const running = runOpenClawStateWriteTransaction(({ db }) =>
+    const running = runCarapaceStateWriteTransaction(({ db }) =>
       activateCronRunReceiptInDatabase({
         database: db,
         handle: foreign.handle,
@@ -357,7 +357,7 @@ describe("cron run receipt store", () => {
     );
 
     expect(() =>
-      runOpenClawStateWriteTransaction(({ db }) =>
+      runCarapaceStateWriteTransaction(({ db }) =>
         claimCronRunReceiptInDatabase({
           database: db,
           prepared,
@@ -376,7 +376,7 @@ describe("cron run receipt store", () => {
     const job = makeJob("stale-binding");
     await saveCronStore(storePath, { version: 1, jobs: [job] });
     const abandoned = claim(storePath, job, 230);
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare("UPDATE cron_run_receipts SET owner_pid = ? WHERE receipt_id = ?")
       .run(2_147_483_647, abandoned.receiptId);
     const replacement = claim(storePath, job, 240);
@@ -391,7 +391,7 @@ describe("cron run receipt store", () => {
     expect(bindCronRunReceiptExecution({ admitted, handle: abandoned })).toBe("missing");
     expect(bindCronRunReceiptExecution({ admitted, handle: replacement })).toBe("bound");
     expect(
-      openOpenClawStateDatabase()
+      openCarapaceStateDatabase()
         .db.prepare(
           `SELECT binding.owner_id
            FROM execution_owner_lifecycle_bindings AS binding
@@ -447,7 +447,7 @@ describe("cron run receipt store", () => {
       expect(retainedIds.has(receiptId)).toBe(true);
     }
     expect(
-      openOpenClawStateDatabase()
+      openCarapaceStateDatabase()
         .db.prepare(
           `SELECT binding.owner_id
            FROM execution_owner_lifecycle_bindings AS binding

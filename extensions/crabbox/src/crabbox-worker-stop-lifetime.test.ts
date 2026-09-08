@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { runCommandWithTimeout, type SpawnResult } from "openclaw/plugin-sdk/process-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { runCommandWithTimeout, type SpawnResult } from "carapace/plugin-sdk/process-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { stopCrabboxLease } from "./crabbox-worker-command.js";
 import {
@@ -110,7 +110,7 @@ describe("Crabbox stop lifetime", () => {
   ])(
     "preserves $entrance custody through late $outcome",
     async ({ entrance, exitCode, elapsedMs, outcome }) => {
-      const marker = path.join(tempDirs.make("openclaw-crabbox-stop-"), "release");
+      const marker = path.join(tempDirs.make("carapace-crabbox-stop-"), "release");
       const started = createDeferred<void>();
       let childResult: SpawnResult | undefined;
       let armed = false;

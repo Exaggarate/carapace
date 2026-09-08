@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { createLazyPromiseLoader } from "../shared/lazy-runtime.js";
@@ -18,7 +18,7 @@ export const taskRegistryLog = createSubsystemLogger("tasks/registry");
 export const TASK_FLOW_SYNC_RETRY_DELAYS_MS = [1_000, 5_000, 25_000, 120_000, 600_000] as const;
 
 const taskRegistryProcessState = getTaskRegistryProcessState();
-const TASK_REGISTRY_REVISION_KEY = Symbol.for("openclaw.taskRegistry.revision");
+const TASK_REGISTRY_REVISION_KEY = Symbol.for("carapace.taskRegistry.revision");
 type TaskRegistryRevisionGlobal = typeof globalThis & {
   [TASK_REGISTRY_REVISION_KEY]?: { value: number };
 };
@@ -58,10 +58,10 @@ export type TaskRegistryDeliveryRuntime = {
   resolveTaskControlUiSessionUrl?: (typeof import("./task-registry-delivery-runtime.js"))["resolveTaskControlUiSessionUrl"];
 };
 export const TASK_REGISTRY_DELIVERY_RUNTIME_OVERRIDE_KEY = Symbol.for(
-  "openclaw.taskRegistry.deliveryRuntimeOverride",
+  "carapace.taskRegistry.deliveryRuntimeOverride",
 );
 export const TASK_REGISTRY_CONTROL_RUNTIME_OVERRIDE_KEY = Symbol.for(
-  "openclaw.taskRegistry.controlRuntimeOverride",
+  "carapace.taskRegistry.controlRuntimeOverride",
 );
 const require = createRequire(import.meta.url);
 const TASK_REGISTRY_CONTROL_RUNTIME_CANDIDATES = [

@@ -1,10 +1,10 @@
 // Deepinfra tests cover onboard plugin behavior.
-import * as providerAuth from "openclaw/plugin-sdk/provider-auth-runtime";
+import * as providerAuth from "carapace/plugin-sdk/provider-auth-runtime";
 import {
-  type OpenClawConfig,
+  type CarapaceConfig,
   resolveAgentModelPrimaryValue,
-} from "openclaw/plugin-sdk/provider-onboard";
-import { captureEnv } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/provider-onboard";
+import { captureEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEEPINFRA_BASE_URL } from "./media-models.js";
 import { applyDeepInfraConfig } from "./onboard.js";
@@ -12,7 +12,7 @@ import { DEEPINFRA_DEFAULT_MODEL_REF, DEEPINFRA_MODEL_CATALOG } from "./provider
 
 const { resolveEnvApiKey } = providerAuth;
 
-const emptyCfg: OpenClawConfig = {};
+const emptyCfg: CarapaceConfig = {};
 
 describe("DeepInfra provider config", () => {
   describe("constants", () => {
@@ -34,7 +34,7 @@ describe("DeepInfra provider config", () => {
       ({ cost }) => {
         const ref = "deepinfra/fixture/authored";
         const model = { ...DEEPINFRA_MODEL_CATALOG[0]!, id: "fixture/authored", cost };
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           models: { providers: { deepinfra: { baseUrl: DEEPINFRA_BASE_URL, models: [model] } } },
           agents: {
             defaults: { model: { primary: ref }, models: { [ref]: { alias: "Authored" } } },
@@ -68,7 +68,7 @@ describe("DeepInfra provider config", () => {
     });
 
     it("preserves an existing alias on the selected model", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             models: {

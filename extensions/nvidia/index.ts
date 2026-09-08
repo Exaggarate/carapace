@@ -1,7 +1,7 @@
-// Nvidia plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Nvidia plugin entrypoint registers its Carapace integration.
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import { applyNvidiaConfig, NVIDIA_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildLiveNvidiaProvider, buildSelectableNvidiaProvider } from "./provider-catalog.js";
 
 const PROVIDER_ID = "nvidia";

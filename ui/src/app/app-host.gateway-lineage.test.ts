@@ -1,4 +1,4 @@
-import { parseControlUiFocusLocation } from "@openclaw/session-url-contract";
+import { parseControlUiFocusLocation } from "@carapace/session-url-contract";
 import { render } from "lit";
 /* @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -96,7 +96,7 @@ function createGatewayHarness() {
 }
 
 function createGatewaySurface(gateway: ApplicationGateway, pathname = "/chat") {
-  const app = document.createElement("openclaw-app") as unknown as {
+  const app = document.createElement("carapace-app") as unknown as {
     runtime: Pick<
       ApplicationRuntime,
       | "context"
@@ -170,25 +170,25 @@ describe("Control UI Gateway target lineage", () => {
       for (const action of ["onConfirm", "onCancel"] as const) {
         app.pendingGatewayUrl = "wss://pending-gateway.example";
         draw();
-        const confirmations = container.querySelectorAll("openclaw-gateway-url-confirmation");
+        const confirmations = container.querySelectorAll("carapace-gateway-url-confirmation");
         expect(confirmations).toHaveLength(1);
         const confirmation = confirmations[0] as HTMLElement & {
           props: { pendingGatewayUrl: string; onConfirm(): void; onCancel(): void };
         };
-        expect(confirmation.closest("openclaw-tooltip-provider")).not.toBeNull();
+        expect(confirmation.closest("carapace-tooltip-provider")).not.toBeNull();
         expect(confirmation.props.pendingGatewayUrl).toBe(app.pendingGatewayUrl);
         if (pathname.startsWith("/approve/")) {
-          expect(container.querySelector("openclaw-approval-page")).toBeNull();
+          expect(container.querySelector("carapace-approval-page")).toBeNull();
         }
         confirmation.props[action]();
         draw();
-        expect(container.querySelector("openclaw-gateway-url-confirmation")).toBeNull();
+        expect(container.querySelector("carapace-gateway-url-confirmation")).toBeNull();
         expect(app.pendingGatewayUrl).toBeNull();
       }
       expect(app.runtime.confirmPendingGatewayConnection).toHaveBeenCalledOnce();
       expect(app.runtime.cancelPendingGatewayConnection).toHaveBeenCalledOnce();
       if (pathname.startsWith("/approve/")) {
-        expect(container.querySelector("openclaw-approval-page")).not.toBeNull();
+        expect(container.querySelector("carapace-approval-page")).not.toBeNull();
       }
     } finally {
       render(null, container);
@@ -245,7 +245,7 @@ describe("Control UI Gateway target lineage", () => {
       pane.applyGatewaySnapshot(gateway.snapshot);
       const releasePane = gateway.subscribe(pane.applyGatewaySnapshot.bind(pane));
       const releaseOutbox = subscribeChatOutboxProjection(state);
-      const app = document.createElement("openclaw-app") as unknown as {
+      const app = document.createElement("carapace-app") as unknown as {
         runtime: Pick<ApplicationRuntime, "context" | "documentMode">;
         synchronizeGateway: (gateway: ApplicationGateway) => void;
         render: () => unknown;
@@ -257,7 +257,7 @@ describe("Control UI Gateway target lineage", () => {
         render(app.render(), shellContainer);
       };
       drawShell();
-      const originalShell = shellContainer.querySelector("openclaw-app-shell");
+      const originalShell = shellContainer.querySelector("carapace-app-shell");
       expect(originalShell).not.toBeNull();
       const releaseShell = gateway.subscribe(drawShell);
       const composer = document.createElement("div");
@@ -283,7 +283,7 @@ describe("Control UI Gateway target lineage", () => {
         expect(activeQueuedMessageEdit(state)).toBe(captured);
         gateway.connect();
         expect(gateway.snapshot.phase).toBe("reconnecting");
-        expect(shellContainer.querySelector("openclaw-app-shell")).toBe(originalShell);
+        expect(shellContainer.querySelector("carapace-app-shell")).toBe(originalShell);
         // Hello precedes recovery resolution. Neither a replacement transport nor
         // pending authentication can act on the old owner's retained correction.
         clients[1]!.opts.onHello?.(hello);
@@ -319,7 +319,7 @@ describe("Control UI Gateway target lineage", () => {
           expect(clients[1]!.request).not.toHaveBeenCalledWith("chat.send", expect.anything());
         }
         expect(listStoredChatOutboxes(state)).toEqual(outboxes);
-        expect(shellContainer.querySelector("openclaw-app-shell")).toBe(originalShell);
+        expect(shellContainer.querySelector("carapace-app-shell")).toBe(originalShell);
         expect(pane.state).toBe(state);
         expect(state.client).not.toBe(initialClient);
         expect.soft(Boolean(active)).toBe(sameOwner);
@@ -363,15 +363,15 @@ describe("Control UI Gateway target lineage", () => {
 
     const surface = renderGatewaySurface(gateway);
 
-    expect(surface).toContain("<openclaw-login-gate");
-    expect(surface).not.toContain("<openclaw-app-shell");
+    expect(surface).toContain("<carapace-login-gate");
+    expect(surface).not.toContain("<carapace-app-shell");
   });
 
   it("re-scopes credentials when the login draft changes Gateway", () => {
     const { gateway, clients } = createGatewayHarness();
     gateway.connect({ token: "old-token", password: "old-password" });
     clients[0]?.opts.onClose?.({ code: 1006, reason: "login required", willRetry: true });
-    const app = document.createElement("openclaw-app") as unknown as {
+    const app = document.createElement("carapace-app") as unknown as {
       runtime: Pick<ApplicationRuntime, "context" | "documentMode">;
       render: () => { strings: readonly string[] };
       synchronizeGateway: (gateway: ApplicationGateway) => void;
@@ -389,7 +389,7 @@ describe("Control UI Gateway target lineage", () => {
     app.synchronizeGateway(gateway);
     const container = document.createElement("div");
     render(app.render(), container);
-    const loginGate = container.querySelector("openclaw-login-gate") as unknown as {
+    const loginGate = container.querySelector("carapace-login-gate") as unknown as {
       props: {
         onGatewayUrlChange: (value: string) => void;
         onConnect: () => void;
@@ -424,7 +424,7 @@ describe("Control UI Gateway target lineage", () => {
     expect(gateway.snapshot.phase).toBe("starting");
     expect(surface).toContain('class="connect-splash connect-splash--skeleton"');
     expect(surface).toContain("Gateway starting…");
-    expect(surface).not.toContain("<openclaw-login-gate");
+    expect(surface).not.toContain("<carapace-login-gate");
   });
 
   it("shows startup progress after a manual connection attempt", () => {
@@ -435,7 +435,7 @@ describe("Control UI Gateway target lineage", () => {
       reason: "manual connection required",
       willRetry: true,
     });
-    const app = document.createElement("openclaw-app") as unknown as {
+    const app = document.createElement("carapace-app") as unknown as {
       runtime: Pick<ApplicationRuntime, "context" | "documentMode">;
       render: () => { strings: readonly string[] };
       synchronizeGateway: (gateway: ApplicationGateway) => void;
@@ -453,7 +453,7 @@ describe("Control UI Gateway target lineage", () => {
     app.synchronizeGateway(gateway);
     const container = document.createElement("div");
     render(app.render(), container);
-    const loginGate = container.querySelector("openclaw-login-gate") as unknown as {
+    const loginGate = container.querySelector("carapace-login-gate") as unknown as {
       props: { onConnect: () => void };
     };
 
@@ -473,11 +473,11 @@ describe("Control UI Gateway target lineage", () => {
     render(app.render(), container);
 
     expect(container.innerHTML).toContain("Gateway starting…");
-    expect(container.innerHTML).not.toContain("<openclaw-login-gate");
+    expect(container.innerHTML).not.toContain("<carapace-login-gate");
 
     clients[1]?.opts.onHello?.(HELLO);
     render(app.render(), container);
-    expect(container.innerHTML).toContain("<openclaw-app-shell");
+    expect(container.innerHTML).toContain("<carapace-app-shell");
   });
 
   it.each(["desktop", "terminal"] as const)(
@@ -513,8 +513,8 @@ describe("Control UI Gateway target lineage", () => {
 
     const surface = renderGatewaySurface(gateway);
 
-    expect(surface).toContain("<openclaw-app-shell");
-    expect(surface).not.toContain("<openclaw-login-gate");
+    expect(surface).toContain("<carapace-app-shell");
+    expect(surface).not.toContain("<carapace-login-gate");
   });
 
   it("retains a replacement Gateway's dashboard after its own successful hello", () => {
@@ -527,7 +527,7 @@ describe("Control UI Gateway target lineage", () => {
 
     const surface = renderGatewaySurface(gateway);
 
-    expect(surface).toContain("<openclaw-app-shell");
-    expect(surface).not.toContain("<openclaw-login-gate");
+    expect(surface).toContain("<carapace-app-shell");
+    expect(surface).not.toContain("<carapace-login-gate");
   });
 });

@@ -35,7 +35,7 @@ function setupHardlinkHookWorkspace(hookName: string): {
   hookDir: string;
   outsideDir: string;
 } {
-  const root = tempDirs.make("openclaw-hooks-workspace-hardlink-");
+  const root = tempDirs.make("carapace-hooks-workspace-hardlink-");
   const hooksRoot = path.join(root, "hooks");
   fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -111,7 +111,7 @@ describe("hooks workspace", () => {
   it.each(discoveryModes)(
     "rejects package traversal without scanning unlisted children (%s)",
     (mode) => {
-      const root = tempDirs.make("openclaw-hooks-workspace-");
+      const root = tempDirs.make("carapace-hooks-workspace-");
       const hooksRoot = path.join(root, "hooks");
       fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -132,7 +132,7 @@ describe("hooks workspace", () => {
   );
 
   it.each(discoveryModes)("does not recurse into declared packs or collections (%s)", (mode) => {
-    const root = tempDirs.make("openclaw-hooks-workspace-nested-");
+    const root = tempDirs.make("carapace-hooks-workspace-nested-");
     const hooksRoot = path.join(root, "hooks");
     const pkgDir = path.join(hooksRoot, "pkg");
     const nestedPack = path.join(pkgDir, "nested-pack");
@@ -150,7 +150,7 @@ describe("hooks workspace", () => {
   });
 
   it("accepts package.json hook paths within package directory", () => {
-    const root = tempDirs.make("openclaw-hooks-workspace-ok-");
+    const root = tempDirs.make("carapace-hooks-workspace-ok-");
     const hooksRoot = path.join(root, "hooks");
     fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -168,7 +168,7 @@ describe("hooks workspace", () => {
   });
 
   it("warns, skips oversized metadata, and continues discovering other hooks", () => {
-    const root = tempDirs.make("openclaw-hooks-oversized-mixed-");
+    const root = tempDirs.make("carapace-hooks-oversized-mixed-");
     const hooksRoot = path.join(root, "hooks");
     fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -188,7 +188,7 @@ describe("hooks workspace", () => {
   });
 
   it("loads hooks whose metadata sits exactly at the byte limit", () => {
-    const root = tempDirs.make("openclaw-hooks-exact-limit-");
+    const root = tempDirs.make("carapace-hooks-exact-limit-");
     const hooksRoot = path.join(root, "hooks");
     fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -213,7 +213,7 @@ describe("hooks workspace", () => {
   it.each(discoveryModes)(
     "still loads a plain hook when its package.json is oversized (%s)",
     (mode) => {
-      const root = tempDirs.make("openclaw-hooks-oversized-compat-");
+      const root = tempDirs.make("carapace-hooks-oversized-compat-");
       const hooksRoot = path.join(root, "hooks");
       fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -233,7 +233,7 @@ describe("hooks workspace", () => {
   it.each(discoveryModes)(
     "rejects package symlink escapes without scanning unlisted children (%s)",
     (mode) => {
-      const root = tempDirs.make("openclaw-hooks-workspace-link-");
+      const root = tempDirs.make("carapace-hooks-workspace-link-");
       const hooksRoot = path.join(root, "hooks");
       fs.mkdirSync(hooksRoot, { recursive: true });
 
@@ -304,7 +304,7 @@ describe("hooks workspace", () => {
   });
 
   it("does not let workspace hooks override managed hooks with the same name", () => {
-    const root = tempDirs.make("openclaw-hooks-collision-");
+    const root = tempDirs.make("carapace-hooks-collision-");
     const workspaceDir = path.join(root, "workspace");
     const managedHooksDir = path.join(root, "managed-hooks");
     const workspaceHookDir = path.join(workspaceDir, "hooks", "session-memory");
@@ -318,7 +318,7 @@ describe("hooks workspace", () => {
         [
           "---",
           "name: session-memory",
-          'metadata: {"openclaw":{"events":["command:new"]}}',
+          'metadata: {"carapace":{"events":["command:new"]}}',
           "---",
         ].join("\n"),
       );
@@ -330,17 +330,17 @@ describe("hooks workspace", () => {
       bundledHooksDir: path.join(root, "bundled-none"),
     });
     expect(entries).toHaveLength(1);
-    expect(entries[0]?.hook.source).toBe("openclaw-managed");
+    expect(entries[0]?.hook.source).toBe("carapace-managed");
   });
 
   it("treats configured extraDirs as managed hook sources", () => {
-    const root = tempDirs.make("openclaw-hooks-extra-");
+    const root = tempDirs.make("carapace-hooks-extra-");
     const workspaceDir = path.join(root, "workspace");
     const extraHookDir = path.join(root, "shared-hooks", "shared-hook");
     fs.mkdirSync(extraHookDir, { recursive: true });
     fs.writeFileSync(
       path.join(extraHookDir, "HOOK.md"),
-      ["---", "name: shared-hook", 'metadata: {"openclaw":{"events":["command:new"]}}', "---"].join(
+      ["---", "name: shared-hook", 'metadata: {"carapace":{"events":["command:new"]}}', "---"].join(
         "\n",
       ),
     );
@@ -362,6 +362,6 @@ describe("hooks workspace", () => {
 
     expect(entries).toHaveLength(1);
     expect(entries[0]?.hook.name).toBe("shared-hook");
-    expect(entries[0]?.hook.source).toBe("openclaw-managed");
+    expect(entries[0]?.hook.source).toBe("carapace-managed");
   });
 });

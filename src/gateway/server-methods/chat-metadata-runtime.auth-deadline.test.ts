@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createChatMetadataHarness,
   createChatMetadataOwner,
@@ -12,7 +12,7 @@ describe("gateway chat metadata auth deadlines", () => {
     { at: 20_000, available: false },
   ])("reads a cached static token at $at without publication", async ({ at, available }) => {
     const clock = vi.spyOn(Date, "now").mockReturnValue(10_000);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       auth: { order: { acme: ["acme:primary"] } },
       agents: {
         defaults: { model: { primary: "acme/model" }, models: { "acme/model": {} } },
@@ -68,7 +68,7 @@ describe("gateway chat metadata auth deadlines", () => {
     "keeps cached metadata current at $name without publication",
     async ({ cooldownUntil, at, before, after }) => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(10_000);
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         auth: { order: { acme: ["acme:primary"] } },
         agents: {
           defaults: { model: { primary: "acme/model" }, models: { "acme/model": {} } },

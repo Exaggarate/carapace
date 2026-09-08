@@ -91,7 +91,7 @@ export function createTestChatPane(params: {
   client: GatewayBrowserClient;
   sessions: SessionCapability;
 }) {
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
   Object.defineProperty(pane, "isConnected", {
     configurable: true,
     value: true,
@@ -142,12 +142,12 @@ export function nativeHistoryMessage(seq: number, text = `message ${seq}`) {
   return {
     role: seq % 2 === 0 ? "assistant" : "user",
     content: [{ type: "text", text }],
-    __openclaw: { seq },
+    __carapace: { seq },
   };
 }
 
 export function nativeHistorySeq(message: unknown): number | undefined {
-  const metadata = (message as Record<string, unknown>)["__openclaw"] as
+  const metadata = (message as Record<string, unknown>)["__carapace"] as
     | Record<string, unknown>
     | undefined;
   return typeof metadata?.seq === "number" ? metadata.seq : undefined;

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing OpenClaw release tag to receive Linux companion bundles, for example v2026.7.1
+        description: Existing Carapace release tag to receive Linux companion bundles, for example v2026.7.1
         required: true
         type: string
       desktop-test-bundles:

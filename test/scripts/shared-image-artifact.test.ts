@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 
 const HELPER = resolve("scripts/docker/shared-image-artifact.sh");
@@ -15,7 +15,7 @@ const ARTIFACT_ID = "789";
 const ARTIFACT_NAME = "docker-e2e-shared-images-release-aabbccddeeff-123456-2";
 const ARTIFACT_RUN_ATTEMPT = "2";
 const ARTIFACT_RUN_ID = "123456";
-const IMAGE_REFS = ["openclaw-docker-e2e-bare:pkg-test", "openclaw-docker-e2e-functional:pkg-test"];
+const IMAGE_REFS = ["carapace-docker-e2e-bare:pkg-test", "carapace-docker-e2e-functional:pkg-test"];
 
 function imageId(ref: string): string {
   return `sha256:${createHash("sha256").update(ref).digest("hex")}`;
@@ -85,7 +85,7 @@ function verifyUploadedArtifact(
 }
 
 function createFixture() {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-shared-image-artifact-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-shared-image-artifact-"));
   const bin = join(root, "bin");
   const artifactDir = join(root, "artifact");
   const dockerLog = join(root, "docker.log");
@@ -281,12 +281,12 @@ printf '%s\\n' "$*" >> "$FAKE_SLEEP_LOG"
     FAKE_GH_STATE: ghState,
     FAKE_SLEEP_LOG: sleepLog,
     GH_TOKEN: "test-token",
-    GITHUB_REPOSITORY: "openclaw/openclaw",
+    GITHUB_REPOSITORY: "carapace/carapace",
     GITHUB_RUN_ATTEMPT: "2",
     GITHUB_RUN_ID: "123456",
     PATH: `${bin}:${process.env.PATH ?? ""}`,
     RUNNER_TEMP: root,
-    OPENCLAW_SHARED_IMAGE_PACKAGE_SHA256: PACKAGE_SHA256,
+    CARAPACE_SHARED_IMAGE_PACKAGE_SHA256: PACKAGE_SHA256,
   };
   return { artifactDir, dockerLog, env, ghLog, root, sleepLog };
 }
@@ -297,9 +297,9 @@ function expectedArchiveEnv(fixture: ReturnType<typeof createFixture>): NodeJS.P
   );
   return {
     ...fixture.env,
-    OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: manifest.archive.sha256,
-    OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: String(manifest.runAttempt),
-    OPENCLAW_SHARED_IMAGE_RUN_ID: String(manifest.runId),
+    CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: manifest.archive.sha256,
+    CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: String(manifest.runAttempt),
+    CARAPACE_SHARED_IMAGE_RUN_ID: String(manifest.runId),
   };
 }
 
@@ -310,10 +310,10 @@ describe("shared Docker image artifacts", () => {
       const verified = verifyUploadedArtifact(fixture);
       expect(verified.status, `${verified.stdout}\n${verified.stderr}`).toBe(0);
       expect(readFileSync(fixture.ghLog, "utf8")).toContain(
-        `api --method GET repos/openclaw/openclaw/actions/artifacts/${ARTIFACT_ID}`,
+        `api --method GET repos/carapace/carapace/actions/artifacts/${ARTIFACT_ID}`,
       );
       expect(readFileSync(fixture.ghLog, "utf8")).toContain(
-        `api --method GET repos/openclaw/openclaw/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}`,
+        `api --method GET repos/carapace/carapace/actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}`,
       );
 
       writeFileSync(fixture.ghLog, "");
@@ -548,7 +548,7 @@ describe("shared Docker image artifacts", () => {
         packageSourceSha: TARGET_SHA,
         runAttempt: 2,
         runId: 123456,
-        schema: "openclaw.shared-docker-image-artifact/v1",
+        schema: "carapace.shared-docker-image-artifact/v1",
         schemaVersion: 1,
         targetSha: TARGET_SHA,
         workflowSha: WORKFLOW_SHA,
@@ -585,7 +585,7 @@ describe("shared Docker image artifacts", () => {
         {
           env: {
             ...expectedArchiveEnv(fixture),
-            OPENCLAW_SHARED_IMAGE_RUN_ID: "654321",
+            CARAPACE_SHARED_IMAGE_RUN_ID: "654321",
           },
           imageRefs: IMAGE_REFS,
           expected: "run ID",
@@ -594,14 +594,14 @@ describe("shared Docker image artifacts", () => {
           env: expectedArchiveEnv(fixture),
           imageRefs: [
             expectDefined(IMAGE_REFS[0], "first shared Docker image reference"),
-            "openclaw-docker-e2e-functional:wrong",
+            "carapace-docker-e2e-functional:wrong",
           ],
           expected: "image ref 1",
         },
         {
           env: {
             ...expectedArchiveEnv(fixture),
-            OPENCLAW_SHARED_IMAGE_PACKAGE_SHA256: "d".repeat(64),
+            CARAPACE_SHARED_IMAGE_PACKAGE_SHA256: "d".repeat(64),
           },
           imageRefs: IMAGE_REFS,
           expected: "package SHA-256",
@@ -678,15 +678,15 @@ describe("shared Docker image artifacts", () => {
       expect(packed.status, packed.stderr).toBe(0);
 
       const missingRunEnv = expectedArchiveEnv(fixture);
-      delete missingRunEnv.OPENCLAW_SHARED_IMAGE_RUN_ID;
-      delete missingRunEnv.OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT;
+      delete missingRunEnv.CARAPACE_SHARED_IMAGE_RUN_ID;
+      delete missingRunEnv.CARAPACE_SHARED_IMAGE_RUN_ATTEMPT;
       const missingRun = runHelper({
         artifactDir: fixture.artifactDir,
         command: "load",
         env: missingRunEnv,
       });
       expect(missingRun.status).not.toBe(0);
-      expect(missingRun.stderr).toContain("OPENCLAW_SHARED_IMAGE_RUN_ID");
+      expect(missingRun.stderr).toContain("CARAPACE_SHARED_IMAGE_RUN_ID");
       expect(readFileSync(fixture.dockerLog, "utf8")).not.toContain("image load");
 
       const missing = runHelper({
@@ -694,8 +694,8 @@ describe("shared Docker image artifacts", () => {
         command: "load",
         env: {
           ...fixture.env,
-          OPENCLAW_SHARED_IMAGE_RUN_ATTEMPT: "2",
-          OPENCLAW_SHARED_IMAGE_RUN_ID: "123456",
+          CARAPACE_SHARED_IMAGE_RUN_ATTEMPT: "2",
+          CARAPACE_SHARED_IMAGE_RUN_ID: "123456",
         },
       });
       expect(missing.status).not.toBe(0);
@@ -707,7 +707,7 @@ describe("shared Docker image artifacts", () => {
         command: "load",
         env: {
           ...expectedArchiveEnv(fixture),
-          OPENCLAW_SHARED_IMAGE_ARCHIVE_SHA256: "d".repeat(64),
+          CARAPACE_SHARED_IMAGE_ARCHIVE_SHA256: "d".repeat(64),
         },
       });
       expect(mismatched.status).not.toBe(0);

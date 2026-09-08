@@ -1,4 +1,4 @@
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import type { MsgContext } from "../../auto-reply/templating.js";
 import {
   bindHostChannelContextAdmissionEvidence,

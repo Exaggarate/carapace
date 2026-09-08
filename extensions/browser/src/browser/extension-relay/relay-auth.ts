@@ -1,7 +1,7 @@
 /**
  * Extension relay auth material.
  *
- * The relay authenticates the loopback link between OpenClaw and the paired
+ * The relay authenticates the loopback link between Carapace and the paired
  * Chrome extension with a host-local secret. It is persisted per machine in the
  * credentials dir, so the gateway host and every browser node host each own an
  * independent token — the extension pairs with whichever machine runs its
@@ -10,8 +10,8 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { createSecretFileAtomic, tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file";
-import { resolveOAuthDir } from "openclaw/plugin-sdk/state-paths";
+import { createSecretFileAtomic, tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file";
+import { resolveOAuthDir } from "carapace/plugin-sdk/state-paths";
 import { extractErrorCode } from "../../infra/errors.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 
@@ -111,7 +111,7 @@ export function readExtensionRelayToken(env: NodeJS.ProcessEnv = process.env): s
 
 /**
  * Read the host-local relay token, creating it on first use. Called from relay
- * startup and `openclaw browser extension pair` — both run on the machine that
+ * startup and `carapace browser extension pair` — both run on the machine that
  * hosts the browser, so they resolve the same per-host secret.
  *
  * The create is atomic (O_CREAT|O_EXCL): the gateway service and the pair CLI

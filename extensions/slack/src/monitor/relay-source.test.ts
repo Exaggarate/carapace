@@ -1,5 +1,5 @@
 import type { AddressInfo } from "node:net";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import {

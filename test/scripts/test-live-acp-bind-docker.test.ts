@@ -46,7 +46,7 @@ it.each([
 ])(
   "prepares $mode Claude from $existing at installed version $installedVersion",
   ({ existing, installedVersion, mode, key, installs: shouldInstall }) => {
-    const home = createTempDir("openclaw-acp-claude-setup-");
+    const home = createTempDir("carapace-acp-claude-setup-");
     const bin = path.join(home, "bin");
     const prefix = path.join(home, "npm");
     const installedBin = path.join(prefix, "bin");
@@ -64,7 +64,7 @@ it.each([
     mkdirSync(bin);
     mkdirSync(installedBin, { recursive: true });
     mkdirSync(sdkDir, { recursive: true });
-    writeFileSync(path.join(acpxDir, "package.json"), '{"name":"@openclaw/acpx"}\n');
+    writeFileSync(path.join(acpxDir, "package.json"), '{"name":"@carapace/acpx"}\n');
     writeFileSync(
       path.join(adapterDir, "package.json"),
       '{"name":"@agentclientprotocol/claude-agent-acp"}\n',
@@ -105,13 +105,13 @@ it.each([
         HOME: home,
         PATH: `${bin}:${path.dirname(process.execPath)}:/usr/bin:/bin`,
         NPM_CONFIG_PREFIX: prefix,
-        OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR: path.resolve("scripts"),
-        OPENCLAW_DOCKER_AUTH_PRESTAGED: "1",
-        OPENCLAW_LIVE_ACP_BIND_AGENT: "claude",
-        OPENCLAW_LIVE_ACP_BIND_CLAUDE_AUTH: mode,
-        OPENCLAW_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS: "180",
+        CARAPACE_LIVE_DOCKER_SCRIPTS_DIR: path.resolve("scripts"),
+        CARAPACE_DOCKER_AUTH_PRESTAGED: "1",
+        CARAPACE_LIVE_ACP_BIND_AGENT: "claude",
+        CARAPACE_LIVE_ACP_BIND_CLAUDE_AUTH: mode,
+        CARAPACE_LIVE_ACP_BIND_SETUP_TIMEOUT_SECONDS: "180",
         ANTHROPIC_API_KEY: "ambient-fixture-key",
-        OPENCLAW_LIVE_ACP_BIND_ANTHROPIC_API_KEY: "fixture-key",
+        CARAPACE_LIVE_ACP_BIND_ANTHROPIC_API_KEY: "fixture-key",
         TEST_CALLS: calls,
         TEST_INSTALLS: installs,
         TEST_CLAUDE_FIXTURE: fixture,

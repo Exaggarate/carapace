@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { createSystemAgentSession } from "./agent-turn.js";
 import { runSystemAgentTurnWithDeps as runSystemAgentTurnWithDepsImpl } from "./agent-turn.test-support.js";
 import { SystemAgentInferenceUnavailableError } from "./inference-error.js";
@@ -109,9 +109,9 @@ describe("system-agent terminal failure cleanup", () => {
       }),
     },
   ])("clears partial session state after $name", async ({ runEmbeddedAgent }) => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-turn-failure-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-turn-failure-"));
 
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
     };
     const { binding, deps } = await createSystemAgentVerifiedInferenceTestFixture(config);
@@ -138,7 +138,7 @@ describe("system-agent terminal failure cleanup", () => {
           readConfigFileSnapshot: vi.fn(async () => ({
             exists: true,
             valid: true,
-            path: "/tmp/openclaw.json",
+            path: "/tmp/carapace.json",
             hash: "hash",
             config,
             runtimeConfig: config,

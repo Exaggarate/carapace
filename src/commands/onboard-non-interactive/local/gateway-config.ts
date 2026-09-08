@@ -4,11 +4,11 @@
  * This module owns port/bind/auth validation and existing-setting preservation
  * before the final config write happens.
  */
-import { validateDottedDecimalIPv4Input } from "@openclaw/net-policy/ipv4";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { validateDottedDecimalIPv4Input } from "@carapace/net-policy/ipv4";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { formatCliCommand } from "../../../cli/command-format.js";
 import { formatInvalidPortOption } from "../../../cli/error-format.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   isValidEnvSecretRefId,
   resolveSecretInputRef,
@@ -23,7 +23,7 @@ import type { OnboardOptions } from "../../onboard-types.js";
 
 /** Resolves what `gateway.auth.token` should hold once setup owns the token value. */
 function resolveGeneratedTokenInput(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   secretInputMode: OnboardOptions["secretInputMode"];
   token: string | undefined;
   ambientEnvOnly: boolean;
@@ -32,7 +32,7 @@ function resolveGeneratedTokenInput(params: {
     return params.token ?? randomToken();
   }
   if (params.ambientEnvOnly) {
-    return createGatewayEnvSecretRef(params.config, "OPENCLAW_GATEWAY_TOKEN");
+    return createGatewayEnvSecretRef(params.config, "CARAPACE_GATEWAY_TOKEN");
   }
   return provisionGatewayTokenStoreRef({
     config: params.config,
@@ -42,12 +42,12 @@ function resolveGeneratedTokenInput(params: {
 
 /** Applies gateway CLI options to the pending config and returns normalized runtime settings. */
 export function applyNonInteractiveGatewayConfig(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
   defaultPort: number;
 }): {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   port: number;
   bind: string;
   authMode: string;
@@ -106,8 +106,8 @@ export function applyNonInteractiveGatewayConfig(params: {
       normalizeOptionalString(existingGateway?.customBindHost ?? ""),
     );
     if (customBindHostIssue) {
-      const setCommand = formatCliCommand("openclaw config set gateway.customBindHost <ipv4>");
-      const interactiveCommand = formatCliCommand("openclaw onboard");
+      const setCommand = formatCliCommand("carapace config set gateway.customBindHost <ipv4>");
+      const interactiveCommand = formatCliCommand("carapace onboard");
       rejectOnboardingOption(
         opts,
         runtime,
@@ -127,7 +127,7 @@ export function applyNonInteractiveGatewayConfig(params: {
 
   let nextConfig = params.nextConfig;
   const explicitGatewayToken = normalizeGatewayTokenInput(opts.gatewayToken);
-  const envGatewayToken = normalizeGatewayTokenInput(process.env.OPENCLAW_GATEWAY_TOKEN);
+  const envGatewayToken = normalizeGatewayTokenInput(process.env.CARAPACE_GATEWAY_TOKEN);
   const existingTokenInput = nextConfig.gateway?.auth?.token;
   const existingTokenRef = resolveSecretInputRef({
     value: existingTokenInput,
@@ -135,7 +135,7 @@ export function applyNonInteractiveGatewayConfig(params: {
   }).ref;
   const existingPlaintextToken = normalizeGatewayTokenInput(existingTokenInput);
   // Resolution order on re-onboard: explicit --gateway-token > persisted
-  // plaintext > ambient OPENCLAW_GATEWAY_TOKEN > randomToken(). Ambient env
+  // plaintext > ambient CARAPACE_GATEWAY_TOKEN > randomToken(). Ambient env
   // must not rotate a token already written to disk — a stale shell or
   // launchd env var otherwise breaks already-paired clients.
   const gatewayToken =
@@ -150,7 +150,7 @@ export function applyNonInteractiveGatewayConfig(params: {
         rejectOnboardingOption(
           opts,
           runtime,
-          "Invalid --gateway-token-ref-env. Use an environment variable name like OPENCLAW_GATEWAY_TOKEN.",
+          "Invalid --gateway-token-ref-env. Use an environment variable name like CARAPACE_GATEWAY_TOKEN.",
         );
         return null;
       }
@@ -169,7 +169,7 @@ export function applyNonInteractiveGatewayConfig(params: {
         rejectOnboardingOption(
           opts,
           runtime,
-          `Environment variable "${gatewayTokenRefEnv}" is missing or empty. Export it first, then rerun ${formatCliCommand("openclaw onboard --non-interactive")}.`,
+          `Environment variable "${gatewayTokenRefEnv}" is missing or empty. Export it first, then rerun ${formatCliCommand("carapace onboard --non-interactive")}.`,
         );
         return null;
       }
@@ -186,7 +186,7 @@ export function applyNonInteractiveGatewayConfig(params: {
       };
     } else if (!explicitGatewayToken && existingTokenRef) {
       // Preserve an already-configured SecretRef on re-onboard. Without this
-      // branch, an ambient OPENCLAW_GATEWAY_TOKEN (or randomToken() fallback)
+      // branch, an ambient CARAPACE_GATEWAY_TOKEN (or randomToken() fallback)
       // would silently overwrite {source, provider, id} with a plaintext
       // literal, de-secretref-ing the gateway.
       nextConfig = {
@@ -202,7 +202,7 @@ export function applyNonInteractiveGatewayConfig(params: {
       };
     } else {
       // `--secret-input-mode ref` covers the gateway token too. An ambient
-      // OPENCLAW_GATEWAY_TOKEN keeps its env ref so a later rotation still wins;
+      // CARAPACE_GATEWAY_TOKEN keeps its env ref so a later rotation still wins;
       // copying it into the store would silently pin the stale value. Anything else
       // is a value setup itself holds, with nothing for an env/file/exec ref to point
       // at, so the shared secret store keeps it and config keeps only the reference.
@@ -232,7 +232,7 @@ export function applyNonInteractiveGatewayConfig(params: {
     const password =
       input === undefined
         ? (nextConfig.gateway?.auth?.password ??
-          normalizeOptionalString(process.env.OPENCLAW_GATEWAY_PASSWORD))
+          normalizeOptionalString(process.env.CARAPACE_GATEWAY_PASSWORD))
         : normalizeOptionalString(input);
     if (!password) {
       rejectOnboardingOption(
@@ -253,7 +253,7 @@ export function applyNonInteractiveGatewayConfig(params: {
             ? {
                 password:
                   opts.secretInputMode === "ref"
-                    ? createGatewayEnvSecretRef(nextConfig, "OPENCLAW_GATEWAY_PASSWORD")
+                    ? createGatewayEnvSecretRef(nextConfig, "CARAPACE_GATEWAY_PASSWORD")
                     : password,
               }
             : {}),

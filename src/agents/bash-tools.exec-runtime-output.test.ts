@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAX_SAFE_TIMEOUT_DELAY_MS } from "../../packages/gateway-client/src/timeouts.js";
 import type { ManagedRun } from "../process/supervisor/index.js";
@@ -248,7 +248,7 @@ describe("runExecProcess POSIX command wrapper", () => {
     expect(supervisorMock.spawn.mock.calls[1]?.[0].timeoutMs).toBe(MAX_SAFE_TIMEOUT_DELAY_MS);
   });
 
-  it("wraps command with PATH export if OPENCLAW_PREPEND_PATH is present", async () => {
+  it("wraps command with PATH export if CARAPACE_PREPEND_PATH is present", async () => {
     if (process.platform === "win32") {
       return;
     }
@@ -273,7 +273,7 @@ describe("runExecProcess POSIX command wrapper", () => {
       "supervisorMock.spawn.mock.calls[0] test invariant",
     )[0];
     expect(spawnCall.argv.join(" ")).toContain(
-      'export PATH="${OPENCLAW_PREPEND_PATH}${PATH:+:$PATH}"; unset OPENCLAW_PREPEND_PATH; echo test',
+      'export PATH="${CARAPACE_PREPEND_PATH}${PATH:+:$PATH}"; unset CARAPACE_PREPEND_PATH; echo test',
     );
   });
 

@@ -1,7 +1,7 @@
 // Slack plugin module adapts suggested prompts for Assistant View and Agent View.
 import type { App } from "@slack/bolt";
 import { WebAPIPlatformError } from "@slack/web-api";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { formatSlackError } from "../errors.js";
 
 type SlackSuggestedPrompt = { title: string; message: string };

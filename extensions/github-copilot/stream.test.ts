@@ -1,10 +1,10 @@
 // Github Copilot tests cover stream plugin behavior.
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple, type Context, type Model } from "openclaw/plugin-sdk/llm";
-import { buildCopilotIdeHeaders } from "openclaw/plugin-sdk/provider-auth";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { streamSimple, type Context, type Model } from "carapace/plugin-sdk/llm";
+import { buildCopilotIdeHeaders } from "carapace/plugin-sdk/provider-auth";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { wrapCopilotProviderStream } from "./stream.js";
 
@@ -771,7 +771,7 @@ describe("wrapCopilotAnthropicStream", () => {
     });
   });
 
-  it("does not claim provider transport before OpenClaw chooses one", () => {
+  it("does not claim provider transport before Carapace chooses one", () => {
     expect(
       wrapCopilotProviderStream({
         streamFn: undefined,

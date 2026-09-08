@@ -1,9 +1,9 @@
 // Orchestrates security audit collection and report formatting.
 import path from "node:path";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
   hasAgentRosterProperty,
   listAgentEntries,
@@ -13,11 +13,11 @@ import { tryResolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveExecDefaults } from "../agents/exec-defaults.js";
 import { resolveSandboxConfigForAgent } from "../agents/sandbox/config.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/config.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/config.js";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
 import { copyConfigResolutionFacts } from "../config/resolution-facts.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { SecurityAuditSuppression } from "../config/types.openclaw.js";
+import type { SecurityAuditSuppression } from "../config/types.carapace.js";
 import {
   canMaterializeGatewayAuthSecretRefsWithoutExec,
   materializeGatewayAuthSecretRefs,
@@ -88,8 +88,8 @@ type AgentSkillMcpBoundaryCandidate =
 export type { SecurityAuditReport } from "./audit.types.js";
 
 type SecurityAuditOptions = {
-  config: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  sourceConfig?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   platform?: NodeJS.Platform;
   deep?: boolean;
@@ -124,8 +124,8 @@ type SecurityAuditOptions = {
 };
 
 type AuditExecutionContext = {
-  cfg: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   platform: NodeJS.Platform;
   includeFilesystem: boolean;
@@ -245,17 +245,17 @@ function normalizeSuppressionText(value: string | undefined): string {
 }
 
 async function materializeAuditGatewayAuthRefs(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const materializeParams = {
     cfg: params.cfg,
     env: params.env,
     mode: params.cfg.gateway?.auth?.mode,
     hasTokenOverride: false,
     hasPasswordOverride: false,
-    hasTokenFallback: Boolean(normalizeOptionalString(params.env.OPENCLAW_GATEWAY_TOKEN)),
-    hasPasswordFallback: Boolean(normalizeOptionalString(params.env.OPENCLAW_GATEWAY_PASSWORD)),
+    hasTokenFallback: Boolean(normalizeOptionalString(params.env.CARAPACE_GATEWAY_TOKEN)),
+    hasPasswordFallback: Boolean(normalizeOptionalString(params.env.CARAPACE_GATEWAY_PASSWORD)),
   };
   if (!canMaterializeGatewayAuthSecretRefsWithoutExec(materializeParams)) {
     return params.cfg;
@@ -267,7 +267,7 @@ async function materializeAuditGatewayAuthRefs(params: {
   }
 }
 
-function shouldMaterializeHooksGatewayAuthRefs(cfg: OpenClawConfig): boolean {
+function shouldMaterializeHooksGatewayAuthRefs(cfg: CarapaceConfig): boolean {
   return cfg.hooks?.enabled === true && Boolean(normalizeOptionalString(cfg.hooks.token));
 }
 
@@ -367,7 +367,7 @@ async function collectFilesystemFindings(params: {
         checkId: "fs.state_dir.perms_world_writable",
         severity: "critical",
         title: "State dir is world-writable",
-        detail: `${formatPermissionDetail(params.stateDir, stateDirPerms)}; other users can write into your OpenClaw state.`,
+        detail: `${formatPermissionDetail(params.stateDir, stateDirPerms)}; other users can write into your Carapace state.`,
         remediation: formatPermissionRemediation({
           targetPath: params.stateDir,
           perms: stateDirPerms,
@@ -381,7 +381,7 @@ async function collectFilesystemFindings(params: {
         checkId: "fs.state_dir.perms_group_writable",
         severity: "warn",
         title: "State dir is group-writable",
-        detail: `${formatPermissionDetail(params.stateDir, stateDirPerms)}; group users can write into your OpenClaw state.`,
+        detail: `${formatPermissionDetail(params.stateDir, stateDirPerms)}; group users can write into your Carapace state.`,
         remediation: formatPermissionRemediation({
           targetPath: params.stateDir,
           perms: stateDirPerms,
@@ -471,8 +471,8 @@ async function collectFilesystemFindings(params: {
 }
 
 function collectGatewayConfigFindings(
-  cfg: OpenClawConfig,
-  sourceConfig: OpenClawConfig,
+  cfg: CarapaceConfig,
+  sourceConfig: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   options: { gatewayAuthOverride?: SecurityAuditGatewayAuthOverride } = {},
 ): SecurityAuditFinding[] {
@@ -574,7 +574,7 @@ async function collectPluginSecurityAuditFindings(
   return collectorResults.flat();
 }
 
-function collectElevatedFindings(cfg: OpenClawConfig): SecurityAuditFinding[] {
+function collectElevatedFindings(cfg: CarapaceConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const enabled = cfg.tools?.elevated?.enabled;
   const allowFrom = cfg.tools?.elevated?.allowFrom ?? {};
@@ -609,7 +609,7 @@ function collectElevatedFindings(cfg: OpenClawConfig): SecurityAuditFinding[] {
   return findings;
 }
 
-function collectExecRuntimeFindings(cfg: OpenClawConfig): SecurityAuditFinding[] {
+function collectExecRuntimeFindings(cfg: CarapaceConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const globalExecHost = cfg.tools?.exec?.host;
   const globalStrictInlineEval = cfg.tools?.exec?.strictInlineEval === true;
@@ -927,7 +927,7 @@ function collectExecRuntimeFindings(cfg: OpenClawConfig): SecurityAuditFinding[]
   return findings;
 }
 
-function collectAgentRosterFindings(cfg: OpenClawConfig): SecurityAuditFinding[] {
+function collectAgentRosterFindings(cfg: CarapaceConfig): SecurityAuditFinding[] {
   const agents = listAgentEntries(cfg);
   // A missing roster is the supported pre-roster compatibility state and is
   // materialized by config loading. An explicitly authored empty roster is invalid.
@@ -953,7 +953,7 @@ function collectAgentRosterFindings(cfg: OpenClawConfig): SecurityAuditFinding[]
       detail: explicitOwnership
         ? `Expected no agents.entries default=true entries with agents.ownership=explicit, found ${defaultCount}.`
         : `Expected a resolvable default agent (sole entry, one default=true marker, or agents.ownership=explicit); found ${defaultCount} default markers across ${agents.length} configured agents.`,
-      remediation: "Run `openclaw doctor --fix` to repair the authored agent roster.",
+      remediation: "Run `carapace doctor --fix` to repair the authored agent roster.",
     },
   ];
 }
@@ -964,7 +964,7 @@ function formatNamesPreview(names: readonly string[]): string {
   return `${visible.join(", ")}${suffix}`;
 }
 
-function listConfiguredMcpServerNames(cfg: OpenClawConfig): string[] {
+function listConfiguredMcpServerNames(cfg: CarapaceConfig): string[] {
   return Object.entries(cfg.mcp?.servers ?? {})
     .filter(([, server]) => server?.enabled !== false)
     .map(([name]) => name)
@@ -1020,7 +1020,7 @@ function hasOwnSkillsAllowlist(entry: object | undefined): boolean {
   return Boolean(entry && Object.hasOwn(entry, "skills"));
 }
 
-function collectAgentSkillMcpBoundaryScopes(cfg: OpenClawConfig): AgentSkillMcpBoundaryScope[] {
+function collectAgentSkillMcpBoundaryScopes(cfg: CarapaceConfig): AgentSkillMcpBoundaryScope[] {
   const agents = listAgentEntries(cfg);
   const defaultsHaveSkillAllowlist = hasOwnSkillsAllowlist(cfg.agents?.defaults);
   const candidates: AgentSkillMcpBoundaryCandidate[] = [
@@ -1087,7 +1087,7 @@ function collectAgentSkillMcpBoundaryScopes(cfg: OpenClawConfig): AgentSkillMcpB
 }
 
 async function collectAgentSkillMcpBoundaryFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   stateDir: string;
 }): Promise<SecurityAuditFinding[]> {
   const scopes = collectAgentSkillMcpBoundaryScopes(params.cfg);
@@ -1138,7 +1138,7 @@ async function collectAgentSkillMcpBoundaryFindings(params: {
       `\nMCP server registries visible to the gateway configuration/state:\n${sources
         .map((source) => `- ${source.label}: ${formatNamesPreview(source.names)}`)
         .join("\n")}\n` +
-      "agents.*.skills filters OpenClaw skill visibility and snapshots; it is not a shell-time authorization boundary. " +
+      "agents.*.skills filters Carapace skill visibility and snapshots; it is not a shell-time authorization boundary. " +
       "A host exec process can run external MCP clients or read a global mcporter registry unless sandbox, filesystem, network, or MCP credential boundaries block it.",
     remediation:
       'For agents that need per-agent MCP isolation, set their exec policy to security="deny" or a tight allowlist, run them in sandbox/container/OS-user isolation where the global MCP registry is not readable, split sensitive MCP servers into a separate gateway/trust boundary, or require per-agent MCP credentials at the server layer.',
@@ -1146,7 +1146,7 @@ async function collectAgentSkillMcpBoundaryFindings(params: {
   return findings;
 }
 
-function collectOpenExecSurfacePaths(cfg: OpenClawConfig): string[] {
+function collectOpenExecSurfacePaths(cfg: CarapaceConfig): string[] {
   const channels = asNullableRecord(cfg.channels);
   if (!channels) {
     return [];
@@ -1214,7 +1214,7 @@ function collectInterpreterAllowlistHits(params: {
 }
 
 async function maybeProbeGateway(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   timeoutMs: number;
   probe: ProbeGatewayFn;

@@ -1,5 +1,5 @@
 // Memory Core plugin module owns ranked search-window filtering and diagnostics.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   formatMemoryIndexRebuildGuidance,
   resolveMemoryIndexIdentityDiagnostic,
@@ -9,9 +9,9 @@ import {
   type MemorySearchRuntimeDebug,
   type MemorySearchResult,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
 import { filterMemorySearchHitsBySessionVisibility } from "./session-search-visibility.js";
 import { buildMemorySearchUnavailableResult } from "./tools.shared.js";
 
@@ -29,7 +29,7 @@ export function buildPausedMemoryIndexUnavailableResult(
       ? `the current memory configuration no longer matches the index (${diagnostic.reason})`
       : diagnostic.code === "metadata_missing"
         ? `the memory index metadata is missing (${diagnostic.reason}); no configuration change is needed`
-        : `this OpenClaw version changed the memory index format (${diagnostic.reason}); no configuration change is needed`;
+        : `this Carapace version changed the memory index format (${diagnostic.reason}); no configuration change is needed`;
   return buildMemorySearchUnavailableResult(diagnostic.reason, {
     warning: `Tell the user: memory search is paused because ${cause}.`,
     action: `Tell the user to run: ${formatMemoryIndexRebuildGuidance(params.status, params.agentId)}`,
@@ -48,11 +48,11 @@ type MemorySearchToolQuery = {
   requestedCorpus?: "memory" | "wiki" | "all" | "sessions";
   sessionKey?: string;
   activeProjectKeys?: readonly string[];
-  conversationRecall?: OpenClawPluginToolContext["conversationRecall"];
+  conversationRecall?: CarapacePluginToolContext["conversationRecall"];
 };
 
 type MemorySearchToolVisibility = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sandboxed: boolean;
 };

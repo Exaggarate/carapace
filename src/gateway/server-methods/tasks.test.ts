@@ -4,7 +4,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TASKS_LIST_CURSOR_MAX_LENGTH } from "../../../packages/gateway-protocol/src/index.js";
 import {
@@ -14,10 +14,10 @@ import {
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { addSessionMember } from "../../config/sessions/session-sharing-store.js";
 import type { GatewayOperatorRoleDefinition } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { emitAgentEvent } from "../../infra/agent-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
   createTaskRecord as createTaskRecordOrNull,
@@ -41,7 +41,7 @@ import {
   runTaskHandler,
 } from "./tasks.test-helpers.js";
 
-const stateDirEnvSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const stateDirEnvSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 const cancelSessionMock = vi.fn();
 const mainSessionTaskScope = {
   requesterSessionKey: "agent:main:main",
@@ -60,8 +60,8 @@ function createTaskRecord(params: Parameters<typeof createTaskRecordOrNull>[0]):
 }
 
 beforeEach(async () => {
-  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-tasks-"));
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-tasks-"));
+  setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
   resetTaskRegistryForTests();
   cancelSessionMock.mockReset();
   setTaskRegistryControlRuntimeForTests({
@@ -79,8 +79,8 @@ afterEach(async () => {
   resetTaskRegistryControlRuntimeForTests();
   resetTaskRegistryForTests();
   stateDirEnvSnapshot.restore();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   await fs.rm(stateDir, { recursive: true, force: true });
 });
 
@@ -467,7 +467,7 @@ describe("tasks gateway handlers", () => {
         agents: "*",
         scopes: ["operator.read", "operator.write"],
       };
-      const config: OpenClawConfig =
+      const config: CarapaceConfig =
         access === "incognito"
           ? {}
           : { gateway: { roles: { default: "guest", definitions: { guest } } } };
@@ -701,7 +701,7 @@ describe("tasks gateway handlers", () => {
       ...mainSessionTaskScope,
       runId: "run-sanitized",
       label:
-        "Compile artifact\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Compile artifact\nCarapace runtime context (internal): Keep internal details private.",
       task: "Compile artifact",
       status: "running",
       deliveryStatus: "pending",
@@ -709,20 +709,20 @@ describe("tasks gateway handlers", () => {
     recordTaskProgressByRunId({
       runId: "run-sanitized",
       progressSummary:
-        "Bundling output\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Bundling output\nCarapace runtime context (internal): Keep internal details private.",
     });
     emitAgentEvent({
       runId: "run-sanitized",
       stream: "assistant",
-      data: { text: "OpenClaw runtime context (internal): Keep internal details private." },
+      data: { text: "Carapace runtime context (internal): Keep internal details private." },
     });
     markTaskTerminalById({
       taskId: task.taskId,
       status: "failed",
       endedAt: Date.now(),
       terminalSummary:
-        "Failed after build\nOpenClaw runtime context (internal): Keep internal details private.",
-      error: "Tool failed\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Failed after build\nCarapace runtime context (internal): Keep internal details private.",
+      error: "Tool failed\nCarapace runtime context (internal): Keep internal details private.",
     });
 
     const { calls, payload } = await getTaskPayload(task.taskId);
@@ -732,7 +732,7 @@ describe("tasks gateway handlers", () => {
     expect(payload?.task?.error).toBe("Tool failed");
     expect(payload?.task).not.toHaveProperty("lastActivity");
     expect(payload?.task?.prompt).toBe("Compile artifact");
-    expect(JSON.stringify(calls[0]?.[1])).not.toContain("OpenClaw runtime context");
+    expect(JSON.stringify(calls[0]?.[1])).not.toContain("Carapace runtime context");
   });
 
   it("exposes tool activity in task summaries", async () => {

@@ -1,6 +1,6 @@
-import * as engineSessions from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import * as sessionTranscriptHit from "openclaw/plugin-sdk/session-transcript-hit";
+import * as engineSessions from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import * as sessionTranscriptHit from "carapace/plugin-sdk/session-transcript-hit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { filterMemorySearchHitsBySessionVisibility } from "./session-search-visibility.js";
 import {
@@ -8,22 +8,22 @@ import {
   sessionEntry,
   type TestSessionEntry,
 } from "./session-search-visibility.test-support.js";
-import { asOpenClawConfig } from "./tools.test-helpers.js";
+import { asCarapaceConfig } from "./tools.test-helpers.js";
 
 let combinedSessionStore: Record<string, TestSessionEntry> = {};
 
 function entryWithCutoff(cutoff: unknown) {
   const entry = {};
-  Object.defineProperty(entry, Symbol.for("openclaw.memory.sessionResetRecallCutoff"), {
+  Object.defineProperty(entry, Symbol.for("carapace.memory.sessionResetRecallCutoff"), {
     enumerable: false,
     value: cutoff,
   });
   return entry;
 }
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-sessions", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/memory-core-host-engine-sessions", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/memory-core-host-engine-sessions")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/memory-core-host-engine-sessions")>();
   return {
     ...actual,
     buildSessionEntry: vi.fn(async () => entryWithCutoff({ state: "absent" })),
@@ -31,9 +31,9 @@ vi.mock("openclaw/plugin-sdk/memory-core-host-engine-sessions", async (importOri
   };
 });
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: vi.fn(() => ({
@@ -78,7 +78,7 @@ describe("reset-generation session search visibility", () => {
 
     await expect(
       filterMemorySearchHitsBySessionVisibility({
-        cfg: asOpenClawConfig({ tools: { sessions: { visibility: "self" } } }),
+        cfg: asCarapaceConfig({ tools: { sessions: { visibility: "self" } } }),
         agentId: "main",
         requesterSessionKey: sessionKey,
         sandboxed: false,
@@ -119,7 +119,7 @@ describe("reset-generation session search visibility", () => {
       );
 
       const filtered = await filterMemorySearchHitsBySessionVisibility({
-        cfg: asOpenClawConfig({ tools: { sessions: { visibility: "self" } } }),
+        cfg: asCarapaceConfig({ tools: { sessions: { visibility: "self" } } }),
         agentId: "main",
         requesterSessionKey: `${anchorSessionKey}:active-memory:123456abcdef`,
         sandboxed: false,
@@ -151,7 +151,7 @@ describe("reset-generation session search visibility", () => {
     ];
 
     const filtered = await filterMemorySearchHitsBySessionVisibility({
-      cfg: asOpenClawConfig({ tools: { sessions: { visibility: "self" } } }),
+      cfg: asCarapaceConfig({ tools: { sessions: { visibility: "self" } } }),
       agentId: "main",
       requesterSessionKey: `${anchorSessionKey}:active-memory:123456abcdef`,
       sandboxed: false,
@@ -186,7 +186,7 @@ describe("reset-generation session search visibility", () => {
       );
 
       const filtered = await filterMemorySearchHitsBySessionVisibility({
-        cfg: asOpenClawConfig({ tools: { sessions: { visibility: "self" } } }),
+        cfg: asCarapaceConfig({ tools: { sessions: { visibility: "self" } } }),
         agentId: "main",
         requesterSessionKey: `${anchorSessionKey}:active-memory:123456abcdef`,
         sandboxed: false,
@@ -245,7 +245,7 @@ describe("reset-generation session search visibility", () => {
       const hit: MemorySearchResult = searchHit(path, "sessions", snippet);
 
       const filtered = await filterMemorySearchHitsBySessionVisibility({
-        cfg: asOpenClawConfig({ tools: { sessions: { visibility: "self" } } }),
+        cfg: asCarapaceConfig({ tools: { sessions: { visibility: "self" } } }),
         agentId: "main",
         requesterSessionKey: `${anchorSessionKey}:active-memory:123456abcdef`,
         sandboxed: false,

@@ -12,7 +12,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 import { writePluginInspectFixture } from "./plugin-inspect.test-support.js";
 
 const SCRIPT_PATH = path.resolve("scripts/e2e/lib/clawhub-fixture-server.cjs");
-const PACKAGE_NAME = "@openclaw/kitchen-sink";
+const PACKAGE_NAME = "@carapace/kitchen-sink";
 const PACKAGE_PATH = `/api/v1/packages/${encodeURIComponent(PACKAGE_NAME)}`;
 const KITCHEN_SINK_VERSION = "0.2.5";
 type FixtureServerChild = ChildProcessByStdio<null, Readable, Readable>;
@@ -49,7 +49,7 @@ async function stopServer(child: FixtureServerChild) {
 }
 
 async function startFixtureServer(profile: string, args: string[] = [], cwd = process.cwd()) {
-  const root = tempDirs.make("openclaw-clawhub-fixture-server-");
+  const root = tempDirs.make("carapace-clawhub-fixture-server-");
   const portFile = path.join(root, "port");
   const child = spawn(process.execPath, [SCRIPT_PATH, profile, portFile, ...args], {
     cwd,
@@ -194,19 +194,19 @@ describe("ClawHub fixture server", () => {
   });
 
   it("serves exact prepublish tarballs through the ClawHub artifact contract", async () => {
-    const root = tempDirs.make("openclaw-clawhub-prepublish-");
-    const isolatedCwd = tempDirs.make("openclaw-clawhub-isolated-");
+    const root = tempDirs.make("carapace-clawhub-prepublish-");
+    const isolatedCwd = tempDirs.make("carapace-clawhub-isolated-");
     const packageDir = path.join(root, "package");
-    const tarball = "openclaw-whatsapp-2026.8.1-beta.1.tgz";
+    const tarball = "carapace-whatsapp-2026.8.1-beta.1.tgz";
     const tarballPath = path.join(root, tarball);
     const version = "2026.8.1-beta.1";
     mkdirSync(packageDir);
     writeFileSync(
       path.join(packageDir, "package.json"),
-      `${JSON.stringify({ name: "@openclaw/whatsapp", version, openclaw: { extensions: ["./index.js"] } })}\n`,
+      `${JSON.stringify({ name: "@carapace/whatsapp", version, carapace: { extensions: ["./index.js"] } })}\n`,
     );
     writeFileSync(
-      path.join(packageDir, "openclaw.plugin.json"),
+      path.join(packageDir, "carapace.plugin.json"),
       `${JSON.stringify({ id: "whatsapp", configSchema: { type: "object" } })}\n`,
     );
     execFileSync("tar", ["-czf", tarballPath, "-C", root, "package"]);
@@ -218,9 +218,9 @@ describe("ClawHub fixture server", () => {
     mkdirSync(path.join(coreRoot, "package"), { recursive: true });
     writeFileSync(
       path.join(coreRoot, "package", "package.json"),
-      JSON.stringify({ name: "@openclaw/ai", version }),
+      JSON.stringify({ name: "@carapace/ai", version }),
     );
-    const coreTarball = "openclaw-ai.tgz";
+    const coreTarball = "carapace-ai.tgz";
     execFileSync("tar", ["-czf", path.join(root, coreTarball), "-C", coreRoot, "package"]);
     const coreSha256 = createHash("sha256")
       .update(readFileSync(path.join(root, coreTarball)))
@@ -230,8 +230,8 @@ describe("ClawHub fixture server", () => {
       manifestPath,
       `${JSON.stringify({
         packages: [
-          { name: "@openclaw/ai", version, tarball: coreTarball, sha256: coreSha256 },
-          { name: "@openclaw/whatsapp", version, tarball, sha256 },
+          { name: "@carapace/ai", version, tarball: coreTarball, sha256: coreSha256 },
+          { name: "@carapace/whatsapp", version, tarball, sha256 },
         ],
       })}\n`,
     );
@@ -245,24 +245,24 @@ describe("ClawHub fixture server", () => {
     const stateDir = path.join(isolatedCwd, "state");
     const installPath = path.join(
       stateDir,
-      "npm/projects/whatsapp/node_modules/@openclaw/whatsapp",
+      "npm/projects/whatsapp/node_modules/@carapace/whatsapp",
     );
     cpSync(packageDir, installPath, { recursive: true });
     const registryDir = path.join(isolatedCwd, "registry");
     mkdirSync(registryDir);
     cpSync(tarballPath, path.join(registryDir, tarball));
     const registryManifest = JSON.stringify({
-      schema: "openclaw.prepublish-plugin-registry/v1",
+      schema: "carapace.prepublish-plugin-registry/v1",
       schemaVersion: 1,
       sourceSha: "a".repeat(40),
       candidateVersion: version,
-      packages: [{ name: "@openclaw/whatsapp", version, tarball, sha256 }],
+      packages: [{ name: "@carapace/whatsapp", version, tarball, sha256 }],
     });
     writeFileSync(path.join(registryDir, "prepublish-plugin-registry.json"), registryManifest);
     const npmRecord: PluginInstallRecord = {
       source: "npm",
-      spec: `@openclaw/whatsapp@${version}`,
-      resolvedName: "@openclaw/whatsapp",
+      spec: `@carapace/whatsapp@${version}`,
+      resolvedName: "@carapace/whatsapp",
       resolvedVersion: version,
       integrity: npmIntegrity,
       installPath,
@@ -347,18 +347,18 @@ ${runner.slice(boundary)}
             HOME: isolatedCwd,
             FIXTURE_VERSION: version,
             FIXTURE_PENDING: deniedPluginId ? "1" : "0",
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CLAWHUB_URL: baseUrl,
-            OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
-            OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: createHash("sha256")
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CLAWHUB_URL: baseUrl,
+            CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
+            CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: createHash("sha256")
               .update(registryManifest)
               .digest("hex"),
-            OPENCLAW_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
-            OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.7.1-2",
-            OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "base",
-            OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "manual",
-            OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(isolatedCwd, "runtime"),
-            OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(
+            CARAPACE_DOCKER_E2E_SELECTED_SHA: "a".repeat(40),
+            CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.7.1-2",
+            CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "base",
+            CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "manual",
+            CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(isolatedCwd, "runtime"),
+            CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(
               isolatedCwd,
               "artifacts/summary.json",
             ),
@@ -399,14 +399,14 @@ ${runner.slice(boundary)}
     expect(
       runPrepublishAssertion(
         baseUrl,
-        "@openclaw/whatsapp",
+        "@carapace/whatsapp",
         version,
         "required",
         isolatedCwd,
         "complete",
       ).status,
     ).toBe(1);
-    const whatsappPath = `/api/v1/packages/${encodeURIComponent("@openclaw/whatsapp")}`;
+    const whatsappPath = `/api/v1/packages/${encodeURIComponent("@carapace/whatsapp")}`;
     const detail = await fetchJson(baseUrl, whatsappPath);
     expect(detail.package).toMatchObject({
       latestVersion: version,
@@ -432,7 +432,7 @@ ${runner.slice(boundary)}
     });
     const auditMessages: string[] = [];
     const trust = await checkClawHubPackageTrust({
-      subject: { kind: "plugin", packageName: "@openclaw/whatsapp" },
+      subject: { kind: "plugin", packageName: "@carapace/whatsapp" },
       version,
       baseUrl,
       mode: "update",
@@ -440,12 +440,12 @@ ${runner.slice(boundary)}
     });
     expect(security).toEqual({
       package: {
-        name: "@openclaw/whatsapp",
-        displayName: "@openclaw/whatsapp",
+        name: "@carapace/whatsapp",
+        displayName: "@carapace/whatsapp",
         family: "code-plugin",
       },
       release: {
-        releaseId: `fixture:@openclaw/whatsapp@${version}`,
+        releaseId: `fixture:@carapace/whatsapp@${version}`,
         version,
         artifactKind: "npm-pack",
         artifactSha256: sha256,
@@ -489,11 +489,11 @@ ${runner.slice(boundary)}
       `GET ${whatsappPath}/versions/${version}/artifact/download`,
     ]);
     expect(
-      runPrepublishAssertion(baseUrl, "@openclaw/whatsapp", version, undefined, isolatedCwd).status,
+      runPrepublishAssertion(baseUrl, "@carapace/whatsapp", version, undefined, isolatedCwd).status,
     ).toBe(0);
     const completeWithMinimum = runPrepublishAssertion(
       baseUrl,
-      "@openclaw/whatsapp",
+      "@carapace/whatsapp",
       version,
       "required",
       isolatedCwd,
@@ -522,7 +522,7 @@ ${runner.slice(boundary)}
       await response.arrayBuffer();
     }
     expect(
-      runPrepublishAssertion(baseUrl, "@openclaw/whatsapp", version, "required", isolatedCwd, 2)
+      runPrepublishAssertion(baseUrl, "@carapace/whatsapp", version, "required", isolatedCwd, 2)
         .status,
     ).toBe(0);
     for (let attempt = 2; attempt < 4; attempt += 1) {
@@ -532,10 +532,10 @@ ${runner.slice(boundary)}
         await response.arrayBuffer();
       }
     }
-    expect(runPrepublishAssertion(baseUrl, "@openclaw/whatsapp", version).status).toBe(1);
+    expect(runPrepublishAssertion(baseUrl, "@carapace/whatsapp", version).status).toBe(1);
     const complete = runPrepublishAssertion(
       baseUrl,
-      "@openclaw/whatsapp",
+      "@carapace/whatsapp",
       version,
       "required",
       isolatedCwd,
@@ -548,7 +548,7 @@ ${runner.slice(boundary)}
     expect((await fetch(`${baseUrl}${whatsappPath}`)).status).toBe(200);
     const partial = runPrepublishAssertion(
       baseUrl,
-      "@openclaw/whatsapp",
+      "@carapace/whatsapp",
       version,
       "required",
       isolatedCwd,
@@ -557,13 +557,13 @@ ${runner.slice(boundary)}
     );
     expect(partial.status).toBe(1);
 
-    expect((await fetch(`${baseUrl}/api/v1/packages/%40openclaw%2Fforeign`)).status).toBe(404);
+    expect((await fetch(`${baseUrl}/api/v1/packages/%40carapace%2Fforeign`)).status).toBe(404);
     for (const requestPath of completeRequestPaths.slice(1, 3)) {
       expect((await fetch(`${baseUrl}${requestPath}`)).status).toBe(200);
     }
     const foreign = runPrepublishAssertion(
       baseUrl,
-      "@openclaw/whatsapp",
+      "@carapace/whatsapp",
       version,
       "required",
       isolatedCwd,
@@ -587,7 +587,7 @@ ${runner.slice(boundary)}
     }
     const aboveMaximum = runPrepublishAssertion(
       maximumBaseUrl,
-      "@openclaw/whatsapp",
+      "@carapace/whatsapp",
       version,
       "required",
       isolatedCwd,
@@ -598,7 +598,7 @@ ${runner.slice(boundary)}
     expect(aboveMaximum.stderr).toContain(
       "expected 2-16 complete ClawHub artifact audit sequences",
     );
-    expect((await fetch(`${baseUrl}/api/v1/packages/%40openclaw%2Fai`)).status).toBe(404);
+    expect((await fetch(`${baseUrl}/api/v1/packages/%40carapace%2Fai`)).status).toBe(404);
   });
 
   it("serves separate plugin-family and skill search fixtures", async () => {

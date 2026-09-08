@@ -140,7 +140,7 @@ describe("worker placement dispatch coordinator", () => {
   it("admits a genuinely later dispatch only after the earlier Stop releases its admission closure", async () => {
     const stopping = createDeferredCore();
     const finishStop = createDeferredCore();
-    const scope = "/tmp/openclaw-coordinator-predecessor-admission.sqlite";
+    const scope = "/tmp/carapace-coordinator-predecessor-admission.sqlite";
     const identities = [REQUEST.sessionKey, REQUEST.sessionId];
     const dispatch = vi.fn(async () => ({ state: "active" }));
     const service = {

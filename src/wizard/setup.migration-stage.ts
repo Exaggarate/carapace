@@ -5,7 +5,7 @@ import { resolveAgentDir } from "../agents/agent-scope-config.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { clearRuntimeAuthProfileStoreSnapshot } from "../agents/auth-profiles/store.js";
 import { resolveGatewayLockDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isNotFoundPathError } from "../infra/path-guards.js";
 import { summarizeMigrationItems } from "../plugin-sdk/migration.js";
 import type {
@@ -15,15 +15,15 @@ import type {
   MigrationPlan,
 } from "../plugins/types.js";
 import {
-  registerOpenClawAgentDatabase,
-  unregisterOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db-registry.js";
+  registerCarapaceAgentDatabase,
+  unregisterCarapaceAgentDatabase,
+} from "../state/carapace-agent-db-registry.js";
 import {
-  disposeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  disposeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { hashSetupMigrationConfig } from "./setup.migration-canonical.js";
 import {
   assertDisjointPromotionTargets,
@@ -62,23 +62,23 @@ type SetupMigrationStage = {
   staged: SetupMigrationStagePaths;
   final: SetupMigrationStagePaths;
   configRuntime: MigrationConfigRuntime;
-  getFinalConfig: () => OpenClawConfig;
-  getStagedConfig: () => OpenClawConfig;
-  replaceStagedConfig: (config: OpenClawConfig) => void;
+  getFinalConfig: () => CarapaceConfig;
+  getStagedConfig: () => CarapaceConfig;
+  replaceStagedConfig: (config: CarapaceConfig) => void;
   projectPlanToStage: (plan: MigrationPlan) => MigrationPlan;
   projectResultToFinal: (result: MigrationApplyResult) => MigrationApplyResult;
   promote: (params: {
-    expectedConfig: OpenClawConfig;
+    expectedConfig: CarapaceConfig;
     continuation: Omit<
       SetupMigrationPromotionContinuation,
       "stagedReportDir" | "stagedRoots" | "workspaceDir"
     >;
-    readConfigFile: () => Promise<OpenClawConfig>;
+    readConfigFile: () => Promise<CarapaceConfig>;
     commitConfigFile: (
-      config: OpenClawConfig,
-      expectedConfig: OpenClawConfig,
-    ) => Promise<OpenClawConfig>;
-  }) => Promise<{ config: OpenClawConfig; resume: SetupMigrationPromotionResume }>;
+      config: CarapaceConfig,
+      expectedConfig: CarapaceConfig,
+    ) => Promise<CarapaceConfig>;
+  }) => Promise<{ config: CarapaceConfig; resume: SetupMigrationPromotionResume }>;
   cleanup: () => Promise<void>;
 };
 
@@ -96,7 +96,7 @@ async function findExistingAncestor(candidate: string): Promise<string> {
 
 async function makePrivateStageNear(target: string, label: string): Promise<string> {
   const ancestor = await findExistingAncestor(path.dirname(path.resolve(target)));
-  const staged = await fs.mkdtemp(path.join(ancestor, `.openclaw-${label}-`));
+  const staged = await fs.mkdtemp(path.join(ancestor, `.carapace-${label}-`));
   await fs.chmod(staged, 0o700);
   return staged;
 }
@@ -149,14 +149,14 @@ function projectPlanTargets(
 }
 
 function createInMemoryConfigRuntime(params: {
-  finalConfig: OpenClawConfig;
-  stagedConfig: OpenClawConfig;
-  projectToFinal: (config: OpenClawConfig) => OpenClawConfig;
+  finalConfig: CarapaceConfig;
+  stagedConfig: CarapaceConfig;
+  projectToFinal: (config: CarapaceConfig) => CarapaceConfig;
 }): {
   runtime: MigrationConfigRuntime;
-  getFinalConfig: () => OpenClawConfig;
-  getStagedConfig: () => OpenClawConfig;
-  replaceConfigs: (next: { finalConfig: OpenClawConfig; stagedConfig: OpenClawConfig }) => void;
+  getFinalConfig: () => CarapaceConfig;
+  getStagedConfig: () => CarapaceConfig;
+  replaceConfigs: (next: { finalConfig: CarapaceConfig; stagedConfig: CarapaceConfig }) => void;
 } {
   let finalConfig = structuredClone(params.finalConfig);
   let stagedConfig = structuredClone(params.stagedConfig);
@@ -259,10 +259,10 @@ export async function createSetupMigrationStage(params: {
   stateDir: string;
   workspaceDir: string;
   reportDir: string;
-  targetConfig: OpenClawConfig;
+  targetConfig: CarapaceConfig;
 }): Promise<SetupMigrationStage> {
   const agentId = resolveDefaultAgentId(params.targetConfig);
-  const finalEnv = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const finalEnv = { ...process.env, CARAPACE_STATE_DIR: params.stateDir };
   const finalAgentDir = resolveAgentDir(params.targetConfig, agentId, finalEnv);
   const stagedStateDir = await makePrivateStageNear(params.stateDir, "migration-state");
   const stagedWorkspaceDir = await makePrivateStageNear(params.workspaceDir, "migration-workspace");
@@ -273,8 +273,8 @@ export async function createSetupMigrationStage(params: {
     params.providerId,
     path.basename(params.reportDir),
   );
-  const stageEnv = { ...process.env, OPENCLAW_STATE_DIR: stagedStateDir };
-  const stagedConfig: OpenClawConfig = {
+  const stageEnv = { ...process.env, CARAPACE_STATE_DIR: stagedStateDir };
+  const stagedConfig: CarapaceConfig = {
     ...structuredClone(params.targetConfig),
     agents: {
       ...structuredClone(params.targetConfig.agents),
@@ -303,14 +303,14 @@ export async function createSetupMigrationStage(params: {
     [finalPaths.reportDir, stagedPaths.reportDir],
   ] as const;
   const toFinal = toStage.map(([finalPath, stagedPath]) => [stagedPath, finalPath] as const);
-  const projectConfigToFinal = (config: OpenClawConfig) =>
-    projectValue(config, toFinal) as OpenClawConfig;
+  const projectConfigToFinal = (config: CarapaceConfig) =>
+    projectValue(config, toFinal) as CarapaceConfig;
   const configs = createInMemoryConfigRuntime({
     finalConfig: params.targetConfig,
     stagedConfig,
     projectToFinal: projectConfigToFinal,
   });
-  openOpenClawAgentDatabase({ agentId, env: stageEnv });
+  openCarapaceAgentDatabase({ agentId, env: stageEnv });
   let databasesDisposed = false;
   let finalAgentDatabaseRegistered = false;
   let retainForRecovery = false;
@@ -320,9 +320,9 @@ export async function createSetupMigrationStage(params: {
       return;
     }
     clearRuntimeAuthProfileStoreSnapshot(stagedAgentDir);
-    const stagedAgentDatabasePath = path.join(stagedAgentDir, "openclaw-agent.sqlite");
-    disposeOpenClawAgentDatabaseByPath(stagedAgentDatabasePath, { env: stageEnv });
-    closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath(stageEnv));
+    const stagedAgentDatabasePath = path.join(stagedAgentDir, "carapace-agent.sqlite");
+    disposeCarapaceAgentDatabaseByPath(stagedAgentDatabasePath, { env: stageEnv });
+    closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath(stageEnv));
     databasesDisposed = true;
   };
 
@@ -428,9 +428,9 @@ export async function createSetupMigrationStage(params: {
           await fs.mkdir(path.dirname(component.finalPath), { recursive: true, mode: 0o700 });
           await fs.rename(component.stagedPath, component.finalPath);
           if (component.name === "agent") {
-            registerOpenClawAgentDatabase({
+            registerCarapaceAgentDatabase({
               agentId,
-              path: path.join(finalAgentDir, "openclaw-agent.sqlite"),
+              path: path.join(finalAgentDir, "carapace-agent.sqlite"),
               env: finalEnv,
             });
             finalAgentDatabaseRegistered = true;
@@ -438,7 +438,7 @@ export async function createSetupMigrationStage(params: {
           component.status = "promoted";
           await writePromotionJournal(journalPath, journal);
         }
-        let committed: OpenClawConfig;
+        let committed: CarapaceConfig;
         try {
           committed = await commitConfigFile(configTarget, expectedConfig);
         } catch (error) {
@@ -452,7 +452,7 @@ export async function createSetupMigrationStage(params: {
             retainForRecovery = true;
             await writePromotionJournal(journalPath, journal);
             throw new Error(
-              `Migration config commit is indeterminate. Review ${journalPath} and run openclaw doctor before retrying.`,
+              `Migration config commit is indeterminate. Review ${journalPath} and run carapace doctor before retrying.`,
               { cause: error },
             );
           }
@@ -467,9 +467,9 @@ export async function createSetupMigrationStage(params: {
           throw error;
         }
         if (finalAgentDatabaseRegistered) {
-          unregisterOpenClawAgentDatabase({
+          unregisterCarapaceAgentDatabase({
             agentId,
-            path: path.join(finalAgentDir, "openclaw-agent.sqlite"),
+            path: path.join(finalAgentDir, "carapace-agent.sqlite"),
             env: finalEnv,
           });
           finalAgentDatabaseRegistered = false;
@@ -483,7 +483,7 @@ export async function createSetupMigrationStage(params: {
         retainForRecovery = true;
         await writePromotionJournal(journalPath, journal);
         throw new Error(
-          `Migration promotion could not be rolled back. Review ${journalPath} and run openclaw doctor before retrying.`,
+          `Migration promotion could not be rolled back. Review ${journalPath} and run carapace doctor before retrying.`,
           { cause: error },
         );
       }

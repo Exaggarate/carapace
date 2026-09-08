@@ -1,17 +1,17 @@
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import type { Selectable } from "kysely";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 
 export type SkillWorkshopDatabase = Pick<
-  OpenClawStateDatabase,
+  CarapaceStateDatabase,
   | "skill_workshop_proposal_events"
   | "skill_workshop_proposal_rollbacks"
   | "skill_workshop_proposals"
@@ -22,10 +22,10 @@ export type SkillWorkshopStoreOptions = {
   env?: NodeJS.ProcessEnv;
   stateDir?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 export type SkillWorkshopDirectoryStoreOptions = SkillWorkshopStoreOptions & {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 };
 
 const SCHEMA_SQL = `
@@ -99,11 +99,11 @@ const ensuredDatabases = new WeakSet<DatabaseSync>();
 
 export function databaseOptions(
   options: SkillWorkshopStoreOptions = {},
-): OpenClawStateDatabaseOptions {
+): CarapaceStateDatabaseOptions {
   if (options.stateDir) {
     return {
       ...(options.env ? { env: options.env } : {}),
-      path: path.join(path.resolve(options.stateDir), "state", "openclaw.sqlite"),
+      path: path.join(path.resolve(options.stateDir), "state", "carapace.sqlite"),
     };
   }
   return options.env ? { env: options.env } : {};
@@ -111,11 +111,11 @@ export function databaseOptions(
 
 export function ensureSkillWorkshopSchema(options: SkillWorkshopStoreOptions = {}): void {
   const dbOptions = databaseOptions(options);
-  const database = openOpenClawStateDatabase(dbOptions);
+  const database = openCarapaceStateDatabase(dbOptions);
   if (ensuredDatabases.has(database.db)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       // sqlite-allow-raw -- Feature-local additive schema DDL; proposal rows use Kysely.
       db.exec(SCHEMA_SQL);
@@ -128,7 +128,7 @@ export function ensureSkillWorkshopSchema(options: SkillWorkshopStoreOptions = {
 
 export function openSkillWorkshopStore(options: SkillWorkshopStoreOptions = {}) {
   ensureSkillWorkshopSchema(options);
-  const database = openOpenClawStateDatabase(databaseOptions(options));
+  const database = openCarapaceStateDatabase(databaseOptions(options));
   return {
     database,
     kysely: getNodeSqliteKysely<SkillWorkshopDatabase>(database.db),

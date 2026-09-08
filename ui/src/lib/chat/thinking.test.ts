@@ -15,7 +15,7 @@ describe("chat thinking helpers", () => {
       id: "no-effort",
       name: "No selectable effort",
       reasoning: true,
-      agentRuntime: { id: "openclaw", source: "model" },
+      agentRuntime: { id: "carapace", source: "model" },
       thinkingLevels: [],
       thinkingDefault: "off",
     };
@@ -51,7 +51,7 @@ describe("chat thinking helpers", () => {
         id: "no-effort",
         name: "No selectable effort",
         reasoning: true,
-        agentRuntime: { id: "openclaw", source: "model" },
+        agentRuntime: { id: "carapace", source: "model" },
         thinkingDefault: "off",
         ...(source === "catalog" ? { thinkingLevels: [] } : {}),
       };
@@ -128,7 +128,7 @@ describe("chat thinking helpers", () => {
     name: "GPT-5.6 Luna",
     provider: "openai",
     reasoning: true,
-    agentRuntime: { id: "openclaw", source: "model" },
+    agentRuntime: { id: "carapace", source: "model" },
     thinkingLevels: [
       { id: "max", label: "max" },
       { id: "ultra", label: "ultra" },
@@ -192,7 +192,7 @@ describe("chat thinking helpers", () => {
             modelProvider: "openai",
             model: "gpt-5.6-luna",
             contextTokens: null,
-            agentRuntime: { id: "openclaw", source: "model" },
+            agentRuntime: { id: "carapace", source: "model" },
             thinkingLevels: lunaModel.thinkingLevels,
             thinkingDefault: lunaModel.thinkingDefault,
           },
@@ -215,8 +215,8 @@ describe("chat thinking helpers", () => {
   );
 
   it.each([
-    { sessionRuntime: "openclaw", catalogRuntime: "openclaw" },
-    { sessionRuntime: undefined, catalogRuntime: "openclaw" },
+    { sessionRuntime: "carapace", catalogRuntime: "carapace" },
+    { sessionRuntime: undefined, catalogRuntime: "carapace" },
     { sessionRuntime: "codex", catalogRuntime: undefined },
   ])(
     "inherits catalog thinking metadata when runtimes do not conflict ($sessionRuntime / $catalogRuntime)",

@@ -1,4 +1,4 @@
-import type { RealtimeVoiceBridge } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceBridge } from "carapace/plugin-sdk/realtime-voice";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 
@@ -7,7 +7,7 @@ const mocks = await vi.hoisted(async () => {
   return createOpenAIRealtimeMockState();
 });
 vi.mock("ws", () => ({ default: mocks.FakeWebSocket }));
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth", () => ({
   isProviderAuthProfileConfigured: mocks.isProviderAuthProfileConfiguredMock,
   resolveProviderAuthProfileApiKey: mocks.resolveProviderAuthProfileApiKeyMock,
 }));

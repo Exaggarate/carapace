@@ -607,7 +607,7 @@ export function renderModelProviders(props: ModelProvidersViewProps) {
                 >`
               : nothing
           }
-          <openclaw-tooltip
+          <carapace-tooltip
             .content=${props.refreshing ? t("modelProviders.refreshing") : t("common.refresh")}
           >
             <button
@@ -619,7 +619,7 @@ export function renderModelProviders(props: ModelProvidersViewProps) {
             >
               ${icons.refresh}
             </button>
-          </openclaw-tooltip>
+          </carapace-tooltip>
         `,
       },
       providerRows,

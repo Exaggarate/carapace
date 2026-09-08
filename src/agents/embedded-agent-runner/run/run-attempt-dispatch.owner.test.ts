@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { getAgentEventLifecycleGeneration } from "../../../infra/agent-events.js";
 import { createEmptyPluginRegistry } from "../../../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../../../plugins/runtime.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import {
   createOperationalRunInstanceRef,
   prepareAgentRunAdmission,
@@ -42,7 +42,7 @@ it.each([
 ])(
   "dispatches the generic harness for $agentId/global with policy $sandboxSessionKey, remote skills $remoteSkills, and one-shot $oneShotCliRun",
   async ({ agentId, sandboxSessionKey, remoteSkills, oneShotCliRun }) => {
-    await withOpenClawTestState({ label: "harness-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "harness-owner" }, async (state) => {
       const config = {
         agents: {
           ownership: "explicit" as const,

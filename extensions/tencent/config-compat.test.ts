@@ -1,5 +1,5 @@
 // Tencent tests cover config compatibility repair behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { migrateTencentTokenHubModelDefaults } from "./config-compat.js";
 
@@ -22,7 +22,7 @@ describe("Tencent config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = migrateTencentTokenHubModelDefaults(config);
 
@@ -55,7 +55,7 @@ describe("Tencent config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = migrateTencentTokenHubModelDefaults(config);
 
@@ -80,7 +80,7 @@ describe("Tencent config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = migrateTencentTokenHubModelDefaults(config);
 
@@ -102,7 +102,7 @@ describe("Tencent config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = migrateTencentTokenHubModelDefaults(config);
 

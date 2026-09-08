@@ -18,7 +18,7 @@ type TooltipProviderElement = HTMLElement & {
 };
 
 function createTooltip(content: string, triggerText = "trigger") {
-  const tooltip = document.createElement("openclaw-tooltip") as TooltipElement;
+  const tooltip = document.createElement("carapace-tooltip") as TooltipElement;
   tooltip.content = content;
   const trigger = document.createElement("button");
   trigger.textContent = triggerText;
@@ -27,7 +27,7 @@ function createTooltip(content: string, triggerText = "trigger") {
 }
 
 function createRichTooltip(content: string, triggerText = "trigger") {
-  const tooltip = document.createElement("openclaw-tooltip") as TooltipElement;
+  const tooltip = document.createElement("carapace-tooltip") as TooltipElement;
   const trigger = document.createElement("button");
   trigger.textContent = triggerText;
   const card = document.createElement("div");
@@ -38,7 +38,7 @@ function createRichTooltip(content: string, triggerText = "trigger") {
 }
 
 function createProvider() {
-  return document.createElement("openclaw-tooltip-provider") as TooltipProviderElement;
+  return document.createElement("carapace-tooltip-provider") as TooltipProviderElement;
 }
 
 function focusTrigger(trigger: HTMLElement) {
@@ -75,13 +75,13 @@ function webAwesomeTooltip(tooltip: TooltipElement) {
 }
 
 function expectOpenCount(count: number) {
-  const open = [...document.querySelectorAll<TooltipElement>("openclaw-tooltip")].filter(
+  const open = [...document.querySelectorAll<TooltipElement>("carapace-tooltip")].filter(
     (tooltip) => webAwesomeTooltip(tooltip)?.open,
   );
   expect(open).toHaveLength(count);
 }
 
-describe("openclaw-tooltip", () => {
+describe("carapace-tooltip", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -139,7 +139,7 @@ describe("openclaw-tooltip", () => {
     expect(styles).toContain("--wa-tooltip-border-color:");
     expect(styles).toContain("--wa-tooltip-border-width: 1px");
     expect(styles).toContain("--wa-tooltip-border-style: solid");
-    expect(styles).toContain("--wa-tooltip-arrow-size: var(--openclaw-tooltip-arrow-size, 0px)");
+    expect(styles).toContain("--wa-tooltip-arrow-size: var(--carapace-tooltip-arrow-size, 0px)");
     expect(styles).toContain("var(--overlay-border, var(--border-strong))");
     expect(styles).toContain("var(--overlay-shadow, var(--shadow-md))");
     expect(styles).toContain("@media (prefers-reduced-motion: reduce)");
@@ -177,7 +177,7 @@ describe("openclaw-tooltip", () => {
     if (!foreignDocument) {
       throw new Error("Expected iframe document");
     }
-    const tooltip = document.createElement("openclaw-tooltip") as TooltipElement;
+    const tooltip = document.createElement("carapace-tooltip") as TooltipElement;
     tooltip.content = "Cross-realm tooltip";
     const trigger = foreignDocument.createElement("button");
     trigger.textContent = "trigger";
@@ -469,7 +469,7 @@ describe("openclaw-tooltip", () => {
   });
 
   it("describes the focusable element inside a wrapper trigger", async () => {
-    const tooltip = document.createElement("openclaw-tooltip") as TooltipElement;
+    const tooltip = document.createElement("carapace-tooltip") as TooltipElement;
     const row = document.createElement("div");
     const link = document.createElement("a");
     link.href = "#session";
@@ -695,7 +695,7 @@ describe("title tooltips", () => {
     label.dispatchEvent(new MouseEvent("pointerover", { bubbles: true, composed: true }));
 
     expect(trigger.title).toBe("");
-    const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip");
+    const tooltip = document.querySelector<TooltipElement>("carapace-tooltip");
     expect(tooltip).not.toBeNull();
     await tooltip!.updateComplete;
     vi.advanceTimersByTime(150);
@@ -715,7 +715,7 @@ describe("title tooltips", () => {
     await explicit.tooltip.updateComplete;
 
     dispatchMousePointer(trigger, "pointerover");
-    const delegated = [...document.querySelectorAll<TooltipElement>("openclaw-tooltip")].find(
+    const delegated = [...document.querySelectorAll<TooltipElement>("carapace-tooltip")].find(
       (tooltip) => tooltip !== explicit.tooltip,
     );
     expect(delegated).toBeDefined();
@@ -744,7 +744,7 @@ describe("title tooltips", () => {
       const activate = () =>
         input === "pointer" ? dispatchMousePointer(trigger, "pointerover") : focusTrigger(trigger);
       activate();
-      const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip")!;
+      const tooltip = document.querySelector<TooltipElement>("carapace-tooltip")!;
       await tooltip.updateComplete;
       vi.advanceTimersByTime(150);
       expectOpenCount(1);
@@ -784,7 +784,7 @@ describe("title tooltips", () => {
     trigger.title = "Pin widget";
     document.body.append(trigger);
     dispatchMousePointer(trigger, "pointerover");
-    const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip")!;
+    const tooltip = document.querySelector<TooltipElement>("carapace-tooltip")!;
     expect(tooltip).not.toBeNull();
     await tooltip.updateComplete;
     vi.advanceTimersByTime(150);
@@ -808,7 +808,7 @@ describe("title tooltips", () => {
     trigger.title = "Action unavailable";
     document.body.append(trigger);
     dispatchMousePointer(trigger, "pointerover");
-    const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip")!;
+    const tooltip = document.querySelector<TooltipElement>("carapace-tooltip")!;
     await tooltip.updateComplete;
     vi.advanceTimersByTime(150);
     expectOpenCount(1);
@@ -843,7 +843,7 @@ describe("title tooltips", () => {
     shadow.append(trigger);
     document.body.append(parent);
     focusTrigger(trigger);
-    const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip")!;
+    const tooltip = document.querySelector<TooltipElement>("carapace-tooltip")!;
     expect(tooltip).not.toBeNull();
     await tooltip.updateComplete;
     expect(tooltip.content).toBe("Inherited hint");
@@ -864,7 +864,7 @@ describe("title tooltips", () => {
     svg.append(rect);
     document.body.append(svg);
     dispatchMousePointer(rect, "pointerover");
-    const tooltip = document.querySelector<TooltipElement>("openclaw-tooltip")!;
+    const tooltip = document.querySelector<TooltipElement>("carapace-tooltip")!;
     expect(tooltip).not.toBeNull();
     await tooltip.updateComplete;
     await webAwesomeTooltip(tooltip)?.updateComplete;

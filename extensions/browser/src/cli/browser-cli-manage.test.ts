@@ -189,7 +189,7 @@ describe("browser manage output", () => {
             profiles: [
               {
                 name: "remote",
-                driver: "openclaw",
+                driver: "carapace",
                 transport: "cdp",
                 running: true,
                 tabCount: 1,
@@ -327,7 +327,7 @@ describe("browser manage output", () => {
         ? {
             enabled: true,
             profile: "remote",
-            driver: "openclaw",
+            driver: "carapace",
             transport: "cdp",
             running: true,
             cdpReady: true,
@@ -364,8 +364,8 @@ describe("browser manage output", () => {
       req.path === "/"
         ? {
             enabled: true,
-            profile: "openclaw",
-            driver: "openclaw",
+            profile: "carapace",
+            driver: "carapace",
             transport: "cdp",
             running: true,
             cdpReady: true,
@@ -485,7 +485,7 @@ describe("browser manage output", () => {
     ).rejects.toThrow("__exit__:1");
 
     expect(getBrowserCliRuntimeCapture().runtimeErrors.at(-1)).toContain(
-      "--driver must be openclaw or existing-session",
+      "--driver must be carapace or existing-session",
     );
     expect(getBrowserManageCallBrowserRequestMock()).not.toHaveBeenCalled();
   });
@@ -501,7 +501,7 @@ describe("browser manage output", () => {
               label: "Chrome extension version",
               status: "warn",
               summary: "running 2.0.0; bundled 2.2.0 (mismatch)",
-              fixHint: "Reload the OpenClaw extension.",
+              fixHint: "Reload the Carapace extension.",
             },
           ],
           status: {
@@ -529,7 +529,7 @@ describe("browser manage output", () => {
     });
 
     expect(lastRuntimeLog()).toContain(
-      "WARN extension-version: running 2.0.0; bundled 2.2.0 (mismatch); Reload the OpenClaw extension.",
+      "WARN extension-version: running 2.0.0; bundled 2.2.0 (mismatch); Reload the Carapace extension.",
     );
     expect(process.exitCode).toBe(0);
     expect(getBrowserManageCallBrowserRequestMock().mock.calls[0]?.[1]).toMatchObject({
@@ -583,7 +583,7 @@ describe("browser manage output", () => {
               label: "Chrome extension version",
               status: "warn",
               summary: "running 2.0.0; bundled 2.2.0 (mismatch)",
-              fixHint: "Reload the OpenClaw extension.",
+              fixHint: "Reload the Carapace extension.",
             },
           ],
           status: {
@@ -656,8 +656,8 @@ describe("browser manage output", () => {
           checks: [],
           status: {
             enabled: true,
-            profile: "openclaw",
-            driver: "openclaw",
+            profile: "carapace",
+            driver: "carapace",
             transport: "cdp",
             running: true,
             cdpReady: true,
@@ -691,7 +691,7 @@ describe("browser manage output", () => {
         };
       }
       if (req.path === "/profiles") {
-        return { profiles: [{ name: "openclaw", running: true }] };
+        return { profiles: [{ name: "carapace", running: true }] };
       }
       if (req.path === "/tabs") {
         return {
@@ -729,7 +729,7 @@ describe("browser manage output", () => {
           checks: [],
           status: {
             enabled: false,
-            profile: "openclaw",
+            profile: "carapace",
             transport: "cdp",
             running: false,
           },
@@ -766,14 +766,14 @@ describe("browser manage output", () => {
           checks: [],
           status: {
             enabled: true,
-            profile: "openclaw",
+            profile: "carapace",
             transport: "cdp",
             running: true,
           },
         };
       }
       if (req.path === "/profiles") {
-        return { profiles: [{ name: "openclaw", running: true }] };
+        return { profiles: [{ name: "carapace", running: true }] };
       }
       if (req.path === "/tabs") {
         return { running: true, tabs: [] };
@@ -805,7 +805,7 @@ describe("browser manage output", () => {
     expect(output).toContain(
       "FAIL gateway: Gateway auth SecretRef is unavailable in this command path",
     );
-    expect(output).toContain("OPENCLAW_GATEWAY_TOKEN");
+    expect(output).toContain("CARAPACE_GATEWAY_TOKEN");
     expect(output).not.toContain("GatewaySecretRefUnavailableError");
     expect(getBrowserCliRuntime().writeJson).not.toHaveBeenCalled();
     expect(getBrowserCliRuntime().exit).not.toHaveBeenCalled();

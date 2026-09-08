@@ -1,5 +1,5 @@
 // Openai tests cover image generation provider plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIImageGenerationProvider } from "./image-generation-provider.js";
 
@@ -51,18 +51,18 @@ const {
   logInfoMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth")>()),
+vi.mock("carapace/plugin-sdk/provider-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-auth")>()),
   ensureAuthProfileStore: ensureAuthProfileStoreMock,
   isProviderApiKeyConfigured: isProviderApiKeyConfiguredMock,
   listProfilesForProvider: listProfilesForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", () => ({
+vi.mock("carapace/plugin-sdk/provider-http", () => ({
   assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,
   postJsonRequest: postJsonRequestMock,
   postMultipartRequest: postMultipartRequestMock,
@@ -72,7 +72,7 @@ vi.mock("openclaw/plugin-sdk/provider-http", () => ({
   sanitizeConfiguredModelProviderRequest: sanitizeConfiguredModelProviderRequestMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/logging-core", () => ({
+vi.mock("carapace/plugin-sdk/logging-core", () => ({
   createSubsystemLogger: vi.fn(() => ({
     info: logInfoMock,
     warn: vi.fn(),
@@ -329,7 +329,7 @@ describe("openai image generation provider", () => {
     listProfilesForProvider: listProfilesForProviderMock,
     isProviderApiKeyConfigured: isProviderApiKeyConfiguredMock,
   });
-  const emptyConfig: OpenClawConfig = {};
+  const emptyConfig: CarapaceConfig = {};
   type OpenAIImageRequest = Parameters<typeof provider.generateImage>[0];
   const generateOpenAIImage = (
     prompt: string,
@@ -760,7 +760,7 @@ describe("openai image generation provider", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await generateOpenAIImage("Create an image through a provider overlay", {
       cfg,
     });
@@ -897,7 +897,7 @@ describe("openai image generation provider", () => {
 
   it("allows loopback image requests for openai only inside the QA harness envelope", async () => {
     mockGeneratedPngResponse();
-    vi.stubEnv("OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER", "1");
+    vi.stubEnv("CARAPACE_QA_ALLOW_LOCAL_IMAGE_PROVIDER", "1");
 
     const result = await generateOpenAIImage("Draw a QA lighthouse", {
       cfg: {
@@ -919,7 +919,7 @@ describe("openai image generation provider", () => {
 
   it("uses a model-specific QA image endpoint without changing the text provider route", async () => {
     mockGeneratedPngResponse();
-    vi.stubEnv("OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER", "1");
+    vi.stubEnv("CARAPACE_QA_ALLOW_LOCAL_IMAGE_PROVIDER", "1");
 
     await generateOpenAIImage("Draw a QA lighthouse", {
       model: "gpt-image-1",

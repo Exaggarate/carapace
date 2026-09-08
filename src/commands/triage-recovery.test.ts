@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveInstallationTarget } from "../infra/installation-target-context.js";
 import { readRestartSentinelReadOnly, writeRestartSentinel } from "../infra/restart-sentinel.js";
 import type { UpdateRunResult } from "../infra/update-runner-types.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { triageCommand } from "./triage.js";
 import { createTriageRuntime, withTriageTerminal } from "./triage.test-support.js";
 
@@ -49,7 +49,7 @@ function failedUpdate(root: string): UpdateRunResult {
     steps: [
       {
         name: "doctor",
-        command: "openclaw doctor --fix",
+        command: "carapace doctor --fix",
         cwd: root,
         exitCode: 1,
         durationMs: 12,
@@ -85,7 +85,7 @@ describe("triage external recovery handoff", () => {
     mocks.resolveExecutablePath.mockImplementation((binary: typeof agent) =>
       available.has(binary) ? `/usr/local/bin/${binary}` : undefined,
     );
-    await withOpenClawTestState({ layout: "split" }, async () => {
+    await withCarapaceTestState({ layout: "split" }, async () => {
       await withTriageTerminal(true, () =>
         triageCommand(createTriageRuntime(), {
           noExport: true,
@@ -103,7 +103,7 @@ describe("triage external recovery handoff", () => {
   it.each(printOnlyModes)(
     "never launches an explicitly selected agent in $mode mode",
     async ({ json, nonInteractive, terminal }) => {
-      await withOpenClawTestState({ layout: "split" }, async () => {
+      await withCarapaceTestState({ layout: "split" }, async () => {
         const runtime = createTriageRuntime();
         await withTriageTerminal(terminal, () =>
           triageCommand(runtime, { json, nonInteractive, noExport: true, agent: "opencode" }),
@@ -129,7 +129,7 @@ describe("triage external recovery handoff", () => {
     mocks.resolveExecutablePath.mockImplementation((agent: string) =>
       agent === "claude" ? "/usr/local/bin/claude" : undefined,
     );
-    await withOpenClawTestState({ layout: "split" }, async () => {
+    await withCarapaceTestState({ layout: "split" }, async () => {
       const runtime = createTriageRuntime();
       await expect(
         withTriageTerminal(true, () => triageCommand(runtime, { noExport: true, agent: "pi" })),
@@ -149,7 +149,7 @@ describe("triage external recovery handoff", () => {
     mocks.writeDiagnosticSupportExport.mockRejectedValue(
       new Error("Diagnostics chunk unavailable"),
     );
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
       const target = resolveInstallationTarget();
       const update = failedUpdate(state.statePath("install"));
       const doctorStep = update.steps[0]!;
@@ -185,9 +185,9 @@ describe("triage external recovery handoff", () => {
           cwd: state.workspaceDir,
           stdio: "inherit",
           env: expect.objectContaining({
-            OPENCLAW_STATE_DIR: target.stateDir,
-            OPENCLAW_CONFIG_PATH: target.configPath,
-            OPENCLAW_WORKSPACE_DIR: target.defaultWorkspaceDir,
+            CARAPACE_STATE_DIR: target.stateDir,
+            CARAPACE_CONFIG_PATH: target.configPath,
+            CARAPACE_WORKSPACE_DIR: target.defaultWorkspaceDir,
           }),
         }),
       );
@@ -210,7 +210,7 @@ describe("triage external recovery handoff", () => {
               name: "doctor",
               exitCode: 1,
               stderrTail: expect.stringContaining(
-                "Migration failed at $OPENCLAW_STATE_DIR/install/runtime-entry.js",
+                "Migration failed at $CARAPACE_STATE_DIR/install/runtime-entry.js",
               ),
               stdoutTail: "compiler-output-cause",
             },
@@ -237,7 +237,7 @@ describe("triage external recovery handoff", () => {
   it.each(["mkdir", "writeFile"] as const)(
     "launches native recovery when the prompt artifact %s is denied",
     async (operation) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const target = resolveInstallationTarget();
         await fs.access(target.stateDir);
         await fs.access(state.home);
@@ -276,7 +276,7 @@ describe("triage external recovery handoff", () => {
   it.each(printOnlyModes)(
     "keeps prompt artifact failure explicit without interactive handoff in $mode mode",
     async ({ json, nonInteractive, terminal }) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const target = resolveInstallationTarget();
         vi.spyOn(fs, "writeFile").mockRejectedValue(
           Object.assign(new Error("EACCES: support artifact permission denied"), {
@@ -313,7 +313,7 @@ describe("standalone triage update evidence", () => {
   ])(
     "reads a failed $status sentinel without consuming it or exposing routing instructions",
     async ({ status, reason }) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
         const saved = await writeRestartSentinel({
           kind: "update",
           status,
@@ -330,7 +330,7 @@ describe("standalone triage update evidence", () => {
             steps: [
               {
                 name: "doctor",
-                command: "openclaw doctor --fix",
+                command: "carapace doctor --fix",
                 log: {
                   exitCode: 1,
                   stderrTail: " \n",
@@ -348,7 +348,7 @@ describe("standalone triage update evidence", () => {
         const evidence = JSON.parse(/```json\n([\s\S]+?)\n```/u.exec(prompt)?.[1] ?? "");
         expect(evidence.result.recovery).toBeUndefined();
         expect(prompt).toContain(
-          "EACCES: cannot open $OPENCLAW_STATE_DIR/install/runtime-entry.js",
+          "EACCES: cannot open $CARAPACE_STATE_DIR/install/runtime-entry.js",
         );
         for (const omitted of [
           secret,
@@ -366,7 +366,7 @@ describe("standalone triage update evidence", () => {
   );
 
   it("prefers the current updater failure over an older pending notification", async () => {
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
       await writeRestartSentinel({
         kind: "update",
         status: "error",
@@ -395,7 +395,7 @@ describe("standalone triage update evidence", () => {
   ])(
     "does not project a $status/$reason notification as a failed update",
     async ({ status, reason }) => {
-      await withOpenClawTestState({ layout: "split" }, async () => {
+      await withCarapaceTestState({ layout: "split" }, async () => {
         await writeRestartSentinel({
           kind: "update",
           status,
@@ -411,8 +411,8 @@ describe("standalone triage update evidence", () => {
   );
 
   it("keeps an absent update outcome unknown without creating a state database", async () => {
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
-      const databasePath = path.join(state.stateDir, "state", "openclaw.sqlite");
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
+      const databasePath = path.join(state.stateDir, "state", "carapace.sqlite");
       await expect(fs.access(databasePath)).rejects.toMatchObject({ code: "ENOENT" });
       await triageCommand(createTriageRuntime(), { json: true, noExport: true });
       await expect(fs.access(databasePath)).rejects.toMatchObject({ code: "ENOENT" });

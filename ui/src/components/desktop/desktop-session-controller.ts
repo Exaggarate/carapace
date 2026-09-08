@@ -1,4 +1,4 @@
-import type { EnvironmentSummary } from "@openclaw/gateway-protocol";
+import type { EnvironmentSummary } from "@carapace/gateway-protocol";
 import type { ReactiveControllerHost } from "lit";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import type { GatewaySessionRow } from "../../api/types.ts";

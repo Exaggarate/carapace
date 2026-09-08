@@ -4,7 +4,7 @@ import { createModelVisibilityPolicy } from "../agents/model-visibility-policy.j
 import { registerModelsCli } from "../cli/models-cli.js";
 import type {
   ConfigFileSnapshot,
-  OpenClawConfig,
+  CarapaceConfig,
   TransformConfigFileParams,
 } from "../config/config.js";
 import { stampConfigWriteMetadata } from "../config/io.meta.js";
@@ -21,7 +21,7 @@ vi.mock("../config/config.js", async () => {
   const readConfigFileSnapshot = async (): Promise<ConfigFileSnapshot> => {
     const config = structuredClone(mocks.currentConfig);
     return {
-      path: "/tmp/openclaw-models-set-fixture.json",
+      path: "/tmp/carapace-models-set-fixture.json",
       exists: true,
       raw: JSON.stringify(config),
       parsed: config,
@@ -64,11 +64,11 @@ function makeRuntime() {
   return { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
 }
 
-function getWrittenConfig(): OpenClawConfig {
+function getWrittenConfig(): CarapaceConfig {
   if (!mocks.writtenConfig) {
     throw new Error("expected config write");
   }
-  return mocks.writtenConfig as OpenClawConfig;
+  return mocks.writtenConfig as CarapaceConfig;
 }
 
 function expectWrittenPrimaryModel(model: string) {

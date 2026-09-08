@@ -1,7 +1,7 @@
 // Loads hosted official catalogs while preserving feed authority and snapshot freshness.
 import { createHash } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { cancelUnreadResponseBody, readResponseWithLimit } from "../infra/http-body.js";

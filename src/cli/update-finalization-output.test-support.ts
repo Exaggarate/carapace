@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 const require = createRequire(import.meta.url);
 const root = process.env.HOME!;
 // Keep real install discovery inside the fixture; only the completion case has a CLI binary.
-await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
 const [runtimeProcessEntrypointsJson, scenario, ...args] = process.argv.slice(2);
 const borrowed = scenario?.startsWith("borrowed-");
 const blockedChildSource = `
@@ -20,7 +20,7 @@ process.stdin.on('end', () => process.exit(0));
 `;
 if (scenario === "completion-hang") {
   await fs.writeFile(
-    path.join(root, "openclaw.mjs"),
+    path.join(root, "carapace.mjs"),
     `import { writeFileSync } from 'node:fs';
 writeFileSync(${JSON.stringify(path.join(root, "completion.pid"))}, String(process.pid));
 process.on('SIGTERM', () => {}); setTimeout(() => process.exit(0), 10_000);`,
@@ -38,10 +38,10 @@ export async function doctorCommand() {
     console.log(JSON.stringify({ ok: true, checksRun: 1, checksSkipped: 0, findings: [] }));
     return;
   }
-  if (process.env.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION !== '0') {
+  if (process.env.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION !== '0') {
     throw new Error('Update Doctor unexpectedly allowed gateway activation');
   }
-  intro('OpenClaw doctor');
+  intro('Carapace doctor');
   note('Doctor panel diagnostic', 'Repair');
   if (!process.argv.includes('--no-workspace-suggestions')) note('Doctor workspace diagnostic', 'Workspace');
   console.log('Doctor console diagnostic');
@@ -61,10 +61,10 @@ async function triageCommand() {
   const contextIndex = process.argv.indexOf('--update-result');
   if (contextIndex < 0) throw new Error('Missing update failure artifact');
   await fs.readFile(process.argv[contextIndex + 1], 'utf8');
-  const promptPath = path.join(process.env.OPENCLAW_STATE_DIR, 'logs', 'support', 'triage-fixture-prompt.md');
+  const promptPath = path.join(process.env.CARAPACE_STATE_DIR, 'logs', 'support', 'triage-fixture-prompt.md');
   await fs.mkdir(path.dirname(promptPath), { recursive: true });
   await fs.writeFile(promptPath, 'Synthetic update failure debugging prompt.\\n');
-  const suggestedCommands = ['openclaw triage --run'];
+  const suggestedCommands = ['carapace triage --run'];
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify({ promptPath, bundlePath: null, bundleError: null, findings: { error: 0, warning: 0, info: 0 }, detectedAgents: [], suggestedCommands }));
   } else {
@@ -76,10 +76,10 @@ async function triageCommand() {
 try {
   if (process.argv[2] === 'doctor') await doctorCommand();
   else if (process.argv.slice(2).join(' ') === 'config validate --json') {
-    if (process.env.OPENCLAW_UPDATE_IN_PROGRESS !== '0') {
+    if (process.env.CARAPACE_UPDATE_IN_PROGRESS !== '0') {
       throw new Error('Config validation must use strict mode');
     }
-    console.log(JSON.stringify({ valid: true, path: process.env.OPENCLAW_CONFIG_PATH, warnings: [] }));
+    console.log(JSON.stringify({ valid: true, path: process.env.CARAPACE_CONFIG_PATH, warnings: [] }));
   }
   else if (process.argv[2] === 'triage') await triageCommand();
   else throw new Error('Unexpected installed CLI command: ' + process.argv[2]);
@@ -202,13 +202,13 @@ const { enableConsoleCapture } = await import("../logging/console.js");
 const { withConsoleLogsRoutedToStderrForJson, applyResolvedCommandOutputMode } =
   await import("./json-output-mode.js");
 const { isCommandJsonOutputMode } = await import("./program/json-mode.js");
-process.argv = [process.execPath, path.join(root, "openclaw.mjs"), ...args];
+process.argv = [process.execPath, path.join(root, "carapace.mjs"), ...args];
 enableConsoleCapture();
 const run = () =>
   withConsoleLogsRoutedToStderrForJson(
     process.argv,
     async () => {
-      const program = new Command().name("openclaw");
+      const program = new Command().name("carapace");
       program.hook("preAction", (_root, command) => {
         applyResolvedCommandOutputMode(isCommandJsonOutputMode(command));
       });

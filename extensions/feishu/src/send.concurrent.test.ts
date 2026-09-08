@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig } from "../runtime-api.js";
 
@@ -26,11 +26,11 @@ vi.mock("./accounts.js", () => ({
   resolveFeishuAccount: mockResolveFeishuAccount,
   resolveFeishuRuntimeAccount: mockResolveFeishuAccount,
 }));
-vi.mock("openclaw/plugin-sdk/markdown-table-runtime", () => ({
+vi.mock("carapace/plugin-sdk/markdown-table-runtime", () => ({
   resolveMarkdownTableMode: mockResolveMarkdownTableMode,
 }));
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("carapace/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/text-chunking")>();
   return { ...actual, convertMarkdownTables: mockConvertMarkdownTables };
 });
 vi.mock("./runtime.js", () => ({

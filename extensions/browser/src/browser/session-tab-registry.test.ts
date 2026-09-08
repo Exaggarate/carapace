@@ -1,5 +1,5 @@
 // Browser tests cover process-local session tab cleanup behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const clientMocks = vi.hoisted(() => ({
@@ -78,13 +78,13 @@ describe("session tab registry", () => {
       sessionKey: "Agent:Main:Main",
       targetId: "tab-a",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9222" },
-      profile: "OpenClaw",
+      profile: "Carapace",
     });
     trackSessionBrowserTab({
       sessionKey: "agent:main:main",
       targetId: "tab-b",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9222" },
-      profile: "OpenClaw",
+      profile: "Carapace",
     });
     const closeTab = vi.fn(async () => {});
 
@@ -97,12 +97,12 @@ describe("session tab registry", () => {
     expect(closeTab).toHaveBeenNthCalledWith(1, {
       targetId: "tab-a",
       baseUrl: "http://127.0.0.1:9222",
-      profile: "openclaw",
+      profile: "carapace",
     });
     expect(closeTab).toHaveBeenNthCalledWith(2, {
       targetId: "tab-b",
       baseUrl: "http://127.0.0.1:9222",
-      profile: "openclaw",
+      profile: "carapace",
     });
   });
 
@@ -111,7 +111,7 @@ describe("session tab registry", () => {
       sessionKey: "agent:main:main",
       targetId: "RAW_TARGET",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9222" },
-      profile: "OpenClaw",
+      profile: "Carapace",
     });
 
     await expect(
@@ -120,7 +120,7 @@ describe("session tab registry", () => {
     expect(clientMocks.browserCloseTabByRawTargetId).toHaveBeenCalledWith(
       "http://127.0.0.1:9222",
       "RAW_TARGET",
-      { profile: "openclaw" },
+      { profile: "carapace" },
     );
   });
 
@@ -175,7 +175,7 @@ describe("session tab registry", () => {
       sessionKey: "agent:main:main",
       targetId: "shared-tab",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9222" },
-      profile: "openclaw",
+      profile: "carapace",
       now: 1_000,
     });
     let finishClose!: () => void;
@@ -452,7 +452,7 @@ describe("session tab registry", () => {
     trackSessionBrowserTab({
       sessionKey: "agent:main:main",
       targetId: "RAW-A",
-      profile: "openclaw",
+      profile: "carapace",
       ownership: { status: "non-durable", reason: "browser-identity-lookup-failed" },
       aliases: ["RAW-A", "t1", "docs"],
       now: 1_000,
@@ -460,7 +460,7 @@ describe("session tab registry", () => {
     touchSessionBrowserTab({
       sessionKey: "agent:main:main",
       targetId: "docs",
-      profile: "openclaw",
+      profile: "carapace",
       now: 9_000,
     });
     const closeTab = vi.fn(async () => {});
@@ -471,7 +471,7 @@ describe("session tab registry", () => {
     untrackSessionBrowserTab({
       sessionKey: "agent:main:main",
       targetId: "t1",
-      profile: "openclaw",
+      profile: "carapace",
     });
     await expect(
       closeTrackedBrowserTabsForSessions({
@@ -487,7 +487,7 @@ describe("session tab registry", () => {
       sessionKey: "agent:main:main",
       targetId: "RAW-A",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9001" },
-      profile: "openclaw",
+      profile: "carapace",
       aliases: ["shared"],
       now: 1_000,
     });
@@ -495,7 +495,7 @@ describe("session tab registry", () => {
       sessionKey: "agent:main:main",
       targetId: "RAW-B",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9002" },
-      profile: "openclaw",
+      profile: "carapace",
       aliases: ["shared"],
       now: 1_000,
     });
@@ -503,7 +503,7 @@ describe("session tab registry", () => {
       sessionKey: "agent:main:main",
       targetId: "shared",
       route: { kind: "browser-control", baseUrl: "http://127.0.0.1:9001" },
-      profile: "openclaw",
+      profile: "carapace",
       now: 9_000,
     });
     const closeTab = vi.fn(async () => {});
@@ -514,7 +514,7 @@ describe("session tab registry", () => {
     expect(closeTab).toHaveBeenCalledWith({
       targetId: "RAW-B",
       baseUrl: "http://127.0.0.1:9002",
-      profile: "openclaw",
+      profile: "carapace",
     });
   });
 

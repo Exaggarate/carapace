@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { mergeMissing } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { mergeMissing } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const ELEVENLABS_API_KEY_ENV = "ELEVENLABS_API_KEY";
 const PROFILE_CANDIDATES = [".profile", ".zprofile", ".zshrc", ".bashrc"] as const;

@@ -1,7 +1,7 @@
 // Vydra tests cover shared URL extraction and download behavior.
 import { once } from "node:events";
 import http from "node:http";
-import { installPinnedHostnameTestHooks } from "openclaw/plugin-sdk/test-media-understanding";
+import { installPinnedHostnameTestHooks } from "carapace/plugin-sdk/test-media-understanding";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { downloadVydraAsset, extractVydraResultUrls } from "./shared.js";
 

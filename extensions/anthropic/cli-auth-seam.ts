@@ -1,9 +1,9 @@
-import { runUtf8CommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { runUtf8CommandWithTimeout } from "carapace/plugin-sdk/process-runtime";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgram,
-} from "openclaw/plugin-sdk/windows-spawn";
+} from "carapace/plugin-sdk/windows-spawn";
 import { CLAUDE_CLI_CLEAR_ENV } from "./cli-constants.js";
 
 const CLAUDE_CLI_AUTH_METHODS = [

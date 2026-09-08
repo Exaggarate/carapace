@@ -35,7 +35,7 @@ function pairingQrMessage(expiresAtMs: number): { content: Record<string, unknow
   return {
     content: [
       {
-        type: "openclaw_pairing_qr",
+        type: "carapace_pairing_qr",
         image_url: "data:image/png;base64,cXJwbmc=",
         expiresAtMs,
       },

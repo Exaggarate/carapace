@@ -62,7 +62,7 @@ jobs:
               "HEAD",
               "--",
               "apps/ios/",
-              "apps/shared/OpenClawKit/Sources/",
+              "apps/shared/CarapaceKit/Sources/",
               "apps/swabble/Sources/SwabbleKit/",
               ".github/workflows/ios-periphery.yml",
               ".github/workflows/ios-periphery-comment.yml",
@@ -123,16 +123,16 @@ jobs:
         run: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:$PATH"
-          watch_toolchain="$(awk -F '"' '/^channel =/ { print $2; exit }' apps/shared/OpenClawWatchRTC/rust-toolchain.toml)"
+          watch_toolchain="$(awk -F '"' '/^channel =/ { print $2; exit }' apps/shared/CarapaceWatchRTC/rust-toolchain.toml)"
           test -n "$watch_toolchain"
           rustup toolchain install "$watch_toolchain" --profile minimal --component rust-src
 
       - name: Install iOS Swift tooling
         run: |
-          periphery_dir="$RUNNER_TEMP/openclaw-periphery"
+          periphery_dir="$RUNNER_TEMP/carapace-periphery"
           ./scripts/install-periphery.sh "$periphery_dir"
           echo "$periphery_dir" >> "$GITHUB_PATH"
-          swift_tools_dir="$RUNNER_TEMP/openclaw-swift-tools"
+          swift_tools_dir="$RUNNER_TEMP/carapace-swift-tools"
           # Homebrew's xcodegen bottle can arrive corrupted on runner images;
           # use the repo's pinned, checksummed release installer like ci.yml.
           ./scripts/install-xcodegen.sh "$swift_tools_dir"

@@ -2,17 +2,17 @@
 import {
   resolveOutboundSendDep,
   type OutboundSendDeps,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   attachChannelToResult,
   createAttachedChannelResultAdapter,
-} from "openclaw/plugin-sdk/channel-send-result";
+} from "carapace/plugin-sdk/channel-send-result";
 import {
   resolvePayloadMediaUrls,
   resolveTextChunksWithFallback,
   sendPayloadMediaSequence,
-} from "openclaw/plugin-sdk/reply-payload";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   chunkTextForOutbound,
   normalizeStringEntries,

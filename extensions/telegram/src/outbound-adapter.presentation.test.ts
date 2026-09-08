@@ -1,5 +1,5 @@
 // Telegram presentation rendering tests for the outbound adapter.
-import { adaptMessagePresentationForChannel } from "openclaw/plugin-sdk/interactive-runtime";
+import { adaptMessagePresentationForChannel } from "carapace/plugin-sdk/interactive-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageTelegramMock = vi.fn();
@@ -193,7 +193,7 @@ describe("telegramOutbound presentation", () => {
               label: "Launch",
               action: {
                 type: "web-app" as const,
-                url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+                url: "https://node.tailnet.ts.net/__carapace__/mcp-app#opaque-ticket",
               },
             },
           ],
@@ -223,7 +223,7 @@ describe("telegramOutbound presentation", () => {
         {
           text: "Launch",
           web_app: {
-            url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+            url: "https://node.tailnet.ts.net/__carapace__/mcp-app#opaque-ticket",
           },
         },
       ],

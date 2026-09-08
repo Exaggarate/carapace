@@ -8,7 +8,7 @@ const MOBILE_COMPOSER_OVERLAY_QUERY =
 const pointerOpenedDropdowns = new WeakSet<HTMLElement>();
 const POINTER_RESTORED_FOCUS_ATTRIBUTE = "data-chat-pointer-restored-focus";
 const POINTER_OPENED_PICKER_ATTRIBUTE = "data-chat-pointer-opened-picker";
-const CHAT_COMPOSER_DISMISS_INVOCATIONS_EVENT = "openclaw-composer-dismiss-invocations";
+const CHAT_COMPOSER_DISMISS_INVOCATIONS_EVENT = "carapace-composer-dismiss-invocations";
 
 let composerPickerDismissalInstalled = false;
 

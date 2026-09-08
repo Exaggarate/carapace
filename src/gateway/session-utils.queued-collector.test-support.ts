@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import { subagentRuns } from "../agents/subagents/registry/subagent-registry-memory.js";
 import {
@@ -19,9 +19,9 @@ import { clearAgentRunContext, registerAgentRunContext } from "../infra/agent-ru
 import { resetGatewayWorkAdmission } from "../process/gateway-work-admission.js";
 import { onSessionLifecycleEvent } from "../sessions/session-lifecycle-events.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { registerChatAbortController } from "./chat-abort.js";
 import { buildAgentSessionPatch } from "./server-methods/agent-session-patch.js";
 import { createChatAbortContext } from "./server-methods/chat.abort.test-helpers.js";
@@ -36,7 +36,7 @@ import type { SessionsListResult } from "./session-utils.types.js";
 
 export function useQueuedCollectorFixture() {
   const parentKey = "agent:main:dashboard:queued-projection";
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let stopLifecycleListener: (() => void) | undefined;
   const launchedRunIds: string[] = [];
 
@@ -45,7 +45,7 @@ export function useQueuedCollectorFixture() {
     schedulerTesting.reset();
     resetSubagentRegistryForTests({ persist: false });
     resetAgentEventsForTest({ preserveListeners: true });
-    state = await createOpenClawTestState({ label: "queued-collector-projection" });
+    state = await createCarapaceTestState({ label: "queued-collector-projection" });
     state.applyEnv();
     await state.writeConfig({
       session: { mainKey: "main", scope: "per-sender" },

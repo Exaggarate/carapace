@@ -1,10 +1,10 @@
 // Public file-oriented media-understanding runtime for image, audio, video, and
 // structured extraction calls outside normal channel message handling.
 import path from "node:path";
-import { kindFromMime, mimeTypeFromFilePath } from "@openclaw/media-core/mime";
-import { hasHttpUrlPrefix } from "@openclaw/net-policy/url-protocol";
+import { kindFromMime, mimeTypeFromFilePath } from "@carapace/media-core/mime";
+import { hasHttpUrlPrefix } from "@carapace/net-policy/url-protocol";
 import { resolveAgentDir, resolveDefaultAgentDir } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { DEFAULT_MAX_BYTES } from "./defaults.constants.js";
 import { normalizeImageDescriptionInput } from "./image-input-normalize.js";
 import { describeImageWithModel } from "./image-runtime.js";
@@ -146,7 +146,7 @@ export async function runMediaUnderstandingFile(
     params.timeoutMs > 0
       ? Math.ceil(params.timeoutMs / 1000)
       : undefined;
-  const cfg: OpenClawConfig =
+  const cfg: CarapaceConfig =
     requestPrompt || requestTimeoutSeconds !== undefined
       ? ({
           ...params.cfg,
@@ -168,7 +168,7 @@ export async function runMediaUnderstandingFile(
               },
             },
           },
-        } as OpenClawConfig)
+        } as CarapaceConfig)
       : params.cfg;
   const ctx = buildFileContext({
     ...params,
@@ -330,7 +330,7 @@ async function readImageDescriptionInput(params: {
   filePath: string;
   mediaUrl?: string;
   mime?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs: number;
 }): Promise<{ buffer: Buffer; fileName: string; mime?: string }> {
   const attachments = normalizeMediaAttachments(
@@ -397,7 +397,7 @@ export async function describeVideoFile(
 
 /** Prepares the largest input that any configured transcription fallback can accept. */
 export async function resolveAudioInputBudget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): Promise<{ enabled: false } | { enabled: true; maxBytes: number }> {
   const { cfg } = params;
   const config = cfg.tools?.media?.audio;
@@ -425,7 +425,7 @@ export async function resolveAudioInputBudget(params: {
 export async function transcribeAudioFile(
   params: TranscribeAudioFileParams,
 ): Promise<RunMediaUnderstandingFileResult> {
-  const cfg: OpenClawConfig =
+  const cfg: CarapaceConfig =
     params.language || params.prompt
       ? ({
           ...params.cfg,
@@ -442,7 +442,7 @@ export async function transcribeAudioFile(
               },
             },
           },
-        } as OpenClawConfig)
+        } as CarapaceConfig)
       : params.cfg;
   const result = await runMediaUnderstandingFile({ ...params, cfg, capability: "audio" });
   return result;

@@ -1,19 +1,19 @@
 // Memory Core plugin module implements manager source state behavior.
 import type { DatabaseSync } from "node:sqlite";
-import type { ResolvedMemorySearchConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { ResolvedMemorySearchConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildFileEntry,
   listMemoryFiles,
   runWithConcurrency,
   type MemoryFileEntry,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
   sqliteStringSet,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 
 export type MemorySourceFileStateRow = {
   path: string;

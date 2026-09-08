@@ -86,17 +86,17 @@ describe("runCommandWithRuntime", () => {
         },
       );
 
-    const originalDebug = process.env.OPENCLAW_DEBUG;
-    delete process.env.OPENCLAW_DEBUG;
+    const originalDebug = process.env.CARAPACE_DEBUG;
+    delete process.env.CARAPACE_DEBUG;
     try {
       await run();
-      process.env.OPENCLAW_DEBUG = "1";
+      process.env.CARAPACE_DEBUG = "1";
       await run();
     } finally {
       if (originalDebug === undefined) {
-        delete process.env.OPENCLAW_DEBUG;
+        delete process.env.CARAPACE_DEBUG;
       } else {
-        process.env.OPENCLAW_DEBUG = originalDebug;
+        process.env.CARAPACE_DEBUG = originalDebug;
       }
     }
 
@@ -110,7 +110,7 @@ describe("runCommandWithRuntime", () => {
   it("bubbles JSON-mode failures to the process-level owner", async () => {
     const originalArgv = process.argv;
     const runtime = { error: vi.fn(), exit: vi.fn() };
-    process.argv = ["node", "openclaw", "backup", "verify", "missing.tgz", "--json"];
+    process.argv = ["node", "carapace", "backup", "verify", "missing.tgz", "--json"];
     try {
       await withConsoleLogsRoutedToStderrForJson(process.argv, async () => {
         applyResolvedCommandOutputMode(true);
@@ -131,32 +131,32 @@ describe("runCommandWithRuntime", () => {
 
 describe("shouldSkipRespawnForArgv", () => {
   it.each([
-    { argv: ["node", "openclaw", "--help"] },
-    { argv: ["node", "openclaw", "-V"] },
-    { argv: ["node", "openclaw", "tui"] },
-    { argv: ["node", "openclaw", "terminal"] },
-    { argv: ["node", "openclaw", "chat"] },
-    { argv: ["node", "openclaw", "hooks", "relay", "--relay-id", "relay-1"] },
-    { argv: ["node", "openclaw", "gateway"] },
-    { argv: ["node", "openclaw", "gateway", "--port", "14720", "--bind", "loopback"] },
-    { argv: ["node", "openclaw", "gateway", "run", "--port=14720", "--bind", "loopback"] },
-    { argv: ["node", "openclaw", "gateway", "status"] },
-    { argv: ["node", "openclaw", "--", "gateway", "run"] },
-    { argv: ["node", "openclaw", "gateway", "--", "status"] },
-    { argv: ["node", "openclaw", "gateway", "--token", "test-token", "status"] },
+    { argv: ["node", "carapace", "--help"] },
+    { argv: ["node", "carapace", "-V"] },
+    { argv: ["node", "carapace", "tui"] },
+    { argv: ["node", "carapace", "terminal"] },
+    { argv: ["node", "carapace", "chat"] },
+    { argv: ["node", "carapace", "hooks", "relay", "--relay-id", "relay-1"] },
+    { argv: ["node", "carapace", "gateway"] },
+    { argv: ["node", "carapace", "gateway", "--port", "14720", "--bind", "loopback"] },
+    { argv: ["node", "carapace", "gateway", "run", "--port=14720", "--bind", "loopback"] },
+    { argv: ["node", "carapace", "gateway", "status"] },
+    { argv: ["node", "carapace", "--", "gateway", "run"] },
+    { argv: ["node", "carapace", "gateway", "--", "status"] },
+    { argv: ["node", "carapace", "gateway", "--token", "test-token", "status"] },
     {
-      argv: ["node", "openclaw", "--profile", "server", "gateway", "run", "--allow-unconfigured"],
+      argv: ["node", "carapace", "--profile", "server", "gateway", "run", "--allow-unconfigured"],
     },
     {
-      argv: ["node", "openclaw", "--profile", "server", "gateway", "status", "--json"],
+      argv: ["node", "carapace", "--profile", "server", "gateway", "status", "--json"],
     },
   ] as const)("skips respawn for argv %j", ({ argv }) => {
     expect(shouldSkipRespawnForArgv([...argv]), argv.join(" ")).toBe(true);
   });
 
   it.each([
-    { argv: ["node", "openclaw", "status"] },
-    { argv: ["node", "openclaw", "gateway", "call", "health"] },
+    { argv: ["node", "carapace", "status"] },
+    { argv: ["node", "carapace", "gateway", "call", "health"] },
   ] as const)("keeps respawn path for argv %j", ({ argv }) => {
     expect(shouldSkipRespawnForArgv([...argv]), argv.join(" ")).toBe(false);
   });
@@ -164,7 +164,7 @@ describe("shouldSkipRespawnForArgv", () => {
   it("keeps native hook relay respawn behavior unchanged on Windows", () => {
     expect(
       shouldSkipRespawnForArgv(
-        ["node", "openclaw", "hooks", "relay", "--relay-id", "relay-1"],
+        ["node", "carapace", "hooks", "relay", "--relay-id", "relay-1"],
         "win32",
       ),
     ).toBe(false);
@@ -173,22 +173,22 @@ describe("shouldSkipRespawnForArgv", () => {
 
 describe("shouldSkipStartupEnvironmentRespawnForArgv", () => {
   it.each([
-    { argv: ["node", "openclaw", "--help"] },
-    { argv: ["node", "openclaw", "hooks", "relay", "--relay-id", "relay-1"] },
-    { argv: ["node", "openclaw", "gateway"] },
-    { argv: ["node", "openclaw", "gateway", "run", "--port=14720"] },
-    { argv: ["node", "openclaw", "--", "gateway", "run"] },
+    { argv: ["node", "carapace", "--help"] },
+    { argv: ["node", "carapace", "hooks", "relay", "--relay-id", "relay-1"] },
+    { argv: ["node", "carapace", "gateway"] },
+    { argv: ["node", "carapace", "gateway", "run", "--port=14720"] },
+    { argv: ["node", "carapace", "--", "gateway", "run"] },
   ] as const)("skips startup env respawn for argv %j", ({ argv }) => {
     expect(shouldSkipStartupEnvironmentRespawnForArgv([...argv]), argv.join(" ")).toBe(true);
   });
 
   it.each([
-    { argv: ["node", "openclaw", "tui"] },
-    { argv: ["node", "openclaw", "terminal"] },
-    { argv: ["node", "openclaw", "chat"] },
-    { argv: ["node", "openclaw", "status"] },
-    { argv: ["node", "openclaw", "gateway", "--", "status"] },
-    { argv: ["node", "openclaw", "--", "gateway", "run", "--force"] },
+    { argv: ["node", "carapace", "tui"] },
+    { argv: ["node", "carapace", "terminal"] },
+    { argv: ["node", "carapace", "chat"] },
+    { argv: ["node", "carapace", "status"] },
+    { argv: ["node", "carapace", "gateway", "--", "status"] },
+    { argv: ["node", "carapace", "--", "gateway", "run", "--force"] },
   ] as const)("allows startup env respawn for argv %j", ({ argv }) => {
     expect(shouldSkipStartupEnvironmentRespawnForArgv([...argv]), argv.join(" ")).toBe(false);
   });
@@ -196,7 +196,7 @@ describe("shouldSkipStartupEnvironmentRespawnForArgv", () => {
   it("keeps native hook relay startup environment respawn on Windows", () => {
     expect(
       shouldSkipStartupEnvironmentRespawnForArgv(
-        ["node", "openclaw", "hooks", "relay", "--relay-id", "relay-1"],
+        ["node", "carapace", "hooks", "relay", "--relay-id", "relay-1"],
         "win32",
       ),
     ).toBe(false);
@@ -210,13 +210,13 @@ describe("dns cli", () => {
     try {
       const program = new Command();
       registerDnsCli(program);
-      await program.parseAsync(["dns", "setup", "--domain", "openclaw.internal"], { from: "user" });
+      await program.parseAsync(["dns", "setup", "--domain", "carapace.internal"], { from: "user" });
       const output = log.mock.calls.map((call) => call.join(" ")).join("\\n");
       expect(output).toContain("DNS setup");
-      expect(output).toContain("openclaw.internal");
+      expect(output).toContain("carapace.internal");
       expect(writeJson).toHaveBeenCalledWith({
         gateway: { bind: "auto" },
-        discovery: { wideArea: { domain: "openclaw.internal." } },
+        discovery: { wideArea: { domain: "carapace.internal." } },
       });
     } finally {
       writeJson.mockRestore();

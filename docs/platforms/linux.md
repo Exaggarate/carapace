@@ -10,17 +10,17 @@ title: "Linux app"
 
 The Gateway is fully supported on Linux. Node is the primary, default, and
 recommended runtime; Bun 1.4+ builds with WAL-reset-safe `node:sqlite` can run
-OpenClaw as an explicit opt-in. Use `pnpm` rather than Bun for dependency
+Carapace as an explicit opt-in. Use `pnpm` rather than Bun for dependency
 installation.
 
 ## Desktop companion
 
-The OpenClaw Linux companion is a Tauri desktop app for local and remote
+The Carapace Linux companion is a Tauri desktop app for local and remote
 Gateways. It:
 
 - walks new users through choosing a local Gateway, a discovered remote Gateway,
   a manually entered Gateway URL, or an SSH tunnel
-- installs the OpenClaw CLI and Node in a private managed runtime when local
+- installs the Carapace CLI and Node in a private managed runtime when local
   setup needs them, rather than requiring a global CLI install; release builds
   install the stable channel automatically, while development builds ask for
   the channel first
@@ -80,7 +80,7 @@ started can be retried immediately.
 Model Setup can resume an activation across a Gateway restart or app reopen
 while its temporary recovery record is valid. Recovery stays bound to the same
 Gateway, agent, and authentication. When the known activation target still
-matches the selected model, OpenClaw verifies that exact model before continuing
+matches the selected model, Carapace verifies that exact model before continuing
 guided onboarding rather than activating the provider again. For an unresolved
 result, use **Verify & use selected model** to explicitly verify and adopt a
 displayed model, or wait for the setup attempt's bounded window to end before
@@ -119,10 +119,10 @@ Control UI in a regular browser for [Talk mode](/nodes/talk).
 
 Stable releases built from `main` or their matching `release/YYYY.M.PATCH` branch
 ship `.deb` and AppImage bundles as assets on the
-[GitHub release](https://github.com/openclaw/openclaw/releases) for the tag,
-named `OpenClaw-<version>-amd64.deb` and `OpenClaw-<version>-amd64.AppImage`,
+[GitHub release](https://github.com/Exaggarate/carapace/releases) for the tag,
+named `Carapace-<version>-amd64.deb` and `Carapace-<version>-amd64.AppImage`,
 with a `SHA256SUMS.linux-app.txt` checksum file next to them. Download the
-`.deb` and install it with `sudo apt install ./OpenClaw-<version>-amd64.deb`,
+`.deb` and install it with `sudo apt install ./Carapace-<version>-amd64.deb`,
 or mark the AppImage executable and run it directly. The AppImage runtime
 needs FUSE 2 (`sudo apt install libfuse2`, or `libfuse2t64` on Ubuntu 24.04+);
 without it, run the AppImage with `APPIMAGE_EXTRACT_AND_RUN=1`.
@@ -180,7 +180,7 @@ apps/linux/scripts/finalize-appimage.sh \
 ```
 
 The `Linux App` CI workflow uploads the same bundles as the
-`openclaw-linux-companion` artifact for pull requests touching the app and for
+`carapace-linux-companion` artifact for pull requests touching the app and for
 manual runs. See `apps/linux/README.md` in the repository for Linux build
 dependencies and development commands.
 
@@ -227,8 +227,8 @@ The CLI remains the simplest option for a headless server or VPS. Use a manual
 SSH tunnel when connecting without the Linux desktop companion:
 
 1. Install Node 26 (recommended), or another supported release: Node 24.16+ or Node 26.1+.
-2. On npm 12 or npm 11.16+, run `npm i -g openclaw@latest --allow-scripts=openclaw`. On npm 11.15 and earlier, omit `--allow-scripts=openclaw`.
-3. `openclaw onboard --install-daemon`
+2. On npm 12 or npm 11.16+, run `npm i -g carapace@latest --allow-scripts=carapace`. On npm 11.15 and earlier, omit `--allow-scripts=carapace`.
+3. `carapace onboard --install-daemon`
 4. From your laptop: `ssh -N -L 18789:127.0.0.1:18789 <user>@<host>`
 5. Open `http://127.0.0.1:18789/` and authenticate with the configured shared
    secret (token by default; password if `gateway.auth.mode` is `"password"`).
@@ -238,7 +238,7 @@ Full server guide: [Linux Server](/vps). Step-by-step VPS example:
 
 ## Node capabilities
 
-The bundled Linux Node plugin gives the CLI `openclaw node` service device capabilities without requiring the desktop app. Commands are advertised to the Gateway only when their capability is enabled and the required local tool exists.
+The bundled Linux Node plugin gives the CLI `carapace node` service device capabilities without requiring the desktop app. Commands are advertised to the Gateway only when their capability is enabled and the required local tool exists.
 
 | Capability                              | Default | Requirement                                                           |
 | --------------------------------------- | ------- | --------------------------------------------------------------------- |
@@ -246,7 +246,7 @@ The bundled Linux Node plugin gives the CLI `openclaw node` service device capab
 | Camera photos and clips (`camera.*`)    | Off     | FFmpeg, V4L2 camera access, and PulseAudio or PipeWire for clip audio |
 | Location (`location.get`)               | Off     | GeoClue2 and its `where-am-i` demo                                    |
 
-Configure the plugin in `openclaw.json`:
+Configure the plugin in `carapace.json`:
 
 ```json5
 {
@@ -269,8 +269,8 @@ Restart the node service after changing these settings. Availability is determin
 The Gateway approves the node's command and capability surface separately from device pairing. On first start, or after enabling more capabilities, approve the pending surface:
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
+carapace nodes pending
+carapace nodes approve <requestId>
 ```
 
 A node can be connected and device-paired while its effective `caps` and `commands` remain empty until this approval completes.
@@ -298,34 +298,34 @@ Canvas bridge or its A2UI push commands.
 Install with one of:
 
 ```bash
-openclaw onboard --install-daemon
-openclaw gateway install
-openclaw configure   # select "Gateway service" when prompted
+carapace onboard --install-daemon
+carapace gateway install
+carapace configure   # select "Gateway service" when prompted
 ```
 
 Repair or migrate an existing install:
 
 ```bash
-openclaw doctor
+carapace doctor
 ```
 
-`openclaw gateway install` renders a systemd **user** unit by default. Full
+`carapace gateway install` renders a systemd **user** unit by default. Full
 service guidance, including the **system**-level unit variant for shared or
 always-on hosts, lives in the [Gateway runbook](/gateway#supervision-and-service-lifecycle).
 
 Write a unit by hand only for a custom setup. Minimal user-unit example
-(`~/.config/systemd/user/openclaw-gateway[-<profile>].service`):
+(`~/.config/systemd/user/carapace-gateway[-<profile>].service`):
 
 ```ini
 [Unit]
-Description=OpenClaw Gateway (profile: <profile>)
+Description=Carapace Gateway (profile: <profile>)
 After=network-online.target
 Wants=network-online.target
 StartLimitBurst=5
 StartLimitIntervalSec=60
 
 [Service]
-ExecStart=/usr/local/bin/openclaw gateway --port 18789
+ExecStart=/usr/local/bin/carapace gateway --port 18789
 Restart=always
 RestartSec=5
 RestartPreventExitStatus=78
@@ -339,22 +339,22 @@ KillMode=mixed
 WantedBy=default.target
 ```
 
-Hand-written units do not inherit the adaptive heap sizing that `openclaw gateway install` writes for managed Gateway services. Prefer the managed installer, or set an explicit heap limit in the custom supervisor after accounting for native-memory headroom.
+Hand-written units do not inherit the adaptive heap sizing that `carapace gateway install` writes for managed Gateway services. Prefer the managed installer, or set an explicit heap limit in the custom supervisor after accounting for native-memory headroom.
 
 Enable it:
 
 ```bash
-systemctl --user enable --now openclaw-gateway[-<profile>].service
+systemctl --user enable --now carapace-gateway[-<profile>].service
 ```
 
 ## Memory pressure and OOM kills
 
 On Linux, the kernel picks an OOM victim when a host, VM, or container cgroup
 runs out of memory. The Gateway is a poor victim because it owns long-lived
-sessions and channel connections, so OpenClaw biases transient child
+sessions and channel connections, so Carapace biases transient child
 processes to be killed first when possible.
 
-For eligible Linux child spawns, OpenClaw wraps the command in a short
+For eligible Linux child spawns, Carapace wraps the command in a short
 `/bin/sh` shim that attempts to raise the child's own `oom_score_adj` to
 `1000`, then `exec`s the real command. This is unprivileged: a process may
 always raise its own OOM score.
@@ -365,10 +365,10 @@ Covered child process surfaces:
 - PTY shell children
 - MCP stdio server children
 - Managed local model and embedding service children
-- OpenClaw-launched browser/Chrome processes (via the plugin SDK process runtime)
+- Carapace-launched browser/Chrome processes (via the plugin SDK process runtime)
 
 The wrapper is Linux-only and skipped when `/bin/sh` is unavailable, or when
-the child env sets `OPENCLAW_CHILD_OOM_SCORE_ADJ` to `0`, `false`, `no`, or
+the child env sets `CARAPACE_CHILD_OOM_SCORE_ADJ` to `0`, `false`, `no`, or
 `off`.
 Use this opt-out only for controlled diagnosis: it removes child-first OOM
 protection and makes the Gateway more likely to be selected as the victim under
@@ -378,7 +378,7 @@ Managed local model and embedding services fall back to direct spawn when their
 effective environment defines `SHELLOPTS`, `BASHOPTS`, a `BASH_FUNC_*` key, or
 a reserved `OC_INTERNAL_OOM_EXEC_{BASH_ENV,ENV,CDPATH,PS4}` carrier. Exact
 environment fidelity and shell startup safety take precedence in these cases,
-so OpenClaw does not attempt to change `oom_score_adj`; use the verification
+so Carapace does not attempt to change `oom_score_adj`; use the verification
 below to check the child's effective value.
 
 Verify a child process:

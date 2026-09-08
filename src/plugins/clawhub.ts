@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import JSZip from "jszip";
 import { visibleWidth } from "../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
@@ -199,9 +199,9 @@ function isTrustedSourceLinkedOfficialPackage(pkg: NonNullable<ClawHubPackageDet
     pkg.channel === "official" &&
     pkg.isOfficial &&
     pkg.verification?.tier === "source-linked" &&
-    (sourceRepo === "openclaw/openclaw" ||
-      sourceRepo === "github.com/openclaw/openclaw" ||
-      sourceRepo === "https://github.com/openclaw/openclaw")
+    (sourceRepo === "carapace/carapace" ||
+      sourceRepo === "github.com/Exaggarate/carapace" ||
+      sourceRepo === "https://github.com/Exaggarate/carapace")
   );
 }
 
@@ -1108,7 +1108,7 @@ function validateClawHubPluginPackage(params: {
   if (pkg.family === "skill") {
     const installRef = pkg.ownerHandle ? `@${pkg.ownerHandle}/${pkg.name}` : pkg.name;
     return buildClawHubInstallFailure(
-      `"${pkg.name}" is a skill. Use "openclaw skills install ${installRef}" instead.`,
+      `"${pkg.name}" is a skill. Use "carapace skills install ${installRef}" instead.`,
       CLAWHUB_INSTALL_ERROR_CODE.SKILL_PACKAGE,
     );
   }
@@ -1132,7 +1132,7 @@ function validateClawHubPluginPackage(params: {
     !satisfiesPluginApiRange(runtimeVersion, compatibility.pluginApiRange)
   ) {
     return buildClawHubInstallFailure(
-      `Plugin "${pkg.name}" requires plugin API ${compatibility.pluginApiRange}, but this OpenClaw runtime exposes ${runtimeVersion}.`,
+      `Plugin "${pkg.name}" requires plugin API ${compatibility.pluginApiRange}, but this Carapace runtime exposes ${runtimeVersion}.`,
       CLAWHUB_INSTALL_ERROR_CODE.INCOMPATIBLE_PLUGIN_API,
     );
   }
@@ -1155,12 +1155,12 @@ function validateClawHubPluginPackage(params: {
     }
     if (minGatewayVersionCheck.kind === "unknown_host_version") {
       return buildClawHubInstallFailure(
-        `Plugin "${pkg.name}" requires OpenClaw >=${minGatewayVersionCheck.requirement.minimumLabel}, but this host version could not be determined. Re-run from a released build or set OPENCLAW_VERSION and retry.`,
+        `Plugin "${pkg.name}" requires Carapace >=${minGatewayVersionCheck.requirement.minimumLabel}, but this host version could not be determined. Re-run from a released build or set CARAPACE_VERSION and retry.`,
         CLAWHUB_INSTALL_ERROR_CODE.UNKNOWN_GATEWAY_VERSION,
       );
     }
     return buildClawHubInstallFailure(
-      `Plugin "${pkg.name}" requires OpenClaw >=${minGatewayVersionCheck.requirement.minimumLabel}, but this host is ${minGatewayVersionCheck.currentVersion}.`,
+      `Plugin "${pkg.name}" requires Carapace >=${minGatewayVersionCheck.requirement.minimumLabel}, but this host is ${minGatewayVersionCheck.currentVersion}.`,
       CLAWHUB_INSTALL_ERROR_CODE.INCOMPATIBLE_GATEWAY,
     );
   }
@@ -1443,7 +1443,7 @@ export async function installPluginFromClawHub(
       );
     }
     const clawhubRegistry = resolveClawHubBaseUrl(params.baseUrl);
-    const clawhubAuthority = isDefaultClawHubBaseUrl(params.baseUrl) ? "openclaw" : "third-party";
+    const clawhubAuthority = isDefaultClawHubBaseUrl(params.baseUrl) ? "carapace" : "third-party";
     params.logger?.info?.(
       `Downloading ${detail.package?.family === "bundle-plugin" ? "bundle" : "plugin"} ${releaseLabel} from ClawHub…`,
     );

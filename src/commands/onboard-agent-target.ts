@@ -17,7 +17,7 @@ import {
 } from "../config/model-input.js";
 import type { OptionalBootstrapFileName } from "../config/types.agent-defaults.js";
 import type { AgentEntryConfig } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { applyPrimaryModel } from "../plugins/provider-model-primary.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -32,7 +32,7 @@ export type OnboardingAgentTarget = {
 };
 
 export function resolveOnboardingAgentTarget(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   explicitAgentId?: string,
 ): OnboardingAgentTarget {
   const agentId = normalizeAgentId(
@@ -46,13 +46,13 @@ export function resolveOnboardingAgentTarget(
 }
 
 /** Resolve the configured System Agent as the owner of onboarding effects. */
-export function resolveSystemAgentOnboardingTarget(config: OpenClawConfig): OnboardingAgentTarget {
+export function resolveSystemAgentOnboardingTarget(config: CarapaceConfig): OnboardingAgentTarget {
   return resolveOnboardingAgentTarget(config, config.agents?.defaults?.systemAgent?.agentId);
 }
 
 /** Resolve onboarding setup to its existing or pending first-agent owner. */
 export function resolveOnboardingSetupTarget(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pendingAgent?: { name: string; workspaceDir: string },
 ): OnboardingAgentTarget {
   if (config.agents?.ownership === "explicit") {
@@ -89,11 +89,11 @@ export async function ensureOnboardingAgentWorkspace(
 }
 
 function replaceOnboardingAgentEntry(
-  config: OpenClawConfig,
-  updated: OpenClawConfig,
+  config: CarapaceConfig,
+  updated: CarapaceConfig,
   target: OnboardingAgentTarget,
   nextEntry: AgentEntryConfig,
-): OpenClawConfig {
+): CarapaceConfig {
   const entries = listAgentEntries(config);
   const index = entries.findIndex((entry) => normalizeAgentId(entry.id) === target.agentId);
   const nextEntries = [...entries];
@@ -114,10 +114,10 @@ function replaceOnboardingAgentEntry(
 }
 
 export function applyOnboardingWorkspace(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: OnboardingAgentTarget,
   workspace: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const entry = resolveMutableAgentEntry(config, target.agentId);
   // Explicit fleets own workspace at the selected entry even when it inherited
   // the global default; legacy owners stay global until they author an override.
@@ -134,10 +134,10 @@ export function applyOnboardingWorkspace(
 }
 
 export function applyOnboardingPrimaryModel(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: OnboardingAgentTarget,
   model: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const entry = resolveMutableAgentEntry(config, target.agentId);
   if (entry?.model === undefined && config.agents?.ownership !== "explicit") {
     return applyPrimaryModel(config, model);
@@ -163,9 +163,9 @@ export function applyOnboardingPrimaryModel(
 
 /** Expose one agent's effective model settings through the defaults-based provider contract. */
 export function prepareAgentModelDefaults(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: OnboardingAgentTarget,
-): OpenClawConfig {
+): CarapaceConfig {
   const entry = resolveMutableAgentEntry(config, target.agentId);
   return {
     ...config,
@@ -183,10 +183,10 @@ export function prepareAgentModelDefaults(
 
 /** Apply a model-default mutation to one agent without flattening it globally. */
 export function applyAgentModelDefaults(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: OnboardingAgentTarget,
-  mutate: (config: OpenClawConfig) => OpenClawConfig,
-): OpenClawConfig {
+  mutate: (config: CarapaceConfig) => CarapaceConfig,
+): CarapaceConfig {
   return projectAgentModelDefaults(
     config,
     target,
@@ -196,10 +196,10 @@ export function applyAgentModelDefaults(
 
 /** Move a defaults-based model mutation onto one agent while preserving its other config changes. */
 export function projectAgentModelDefaults(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: OnboardingAgentTarget,
-  updated: OpenClawConfig,
-): OpenClawConfig {
+  updated: CarapaceConfig,
+): CarapaceConfig {
   const entry = resolveMutableAgentEntry(config, target.agentId);
   if (!entry && config.agents?.ownership !== "explicit") {
     return updated;

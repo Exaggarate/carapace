@@ -1,8 +1,8 @@
 // Qa Lab plugin module implements slack desktop smoke behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { pathExists } from "openclaw/plugin-sdk/security-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { pathExists } from "carapace/plugin-sdk/security-runtime";
 import { ensureRepoBoundDirectory, resolveRepoRelativeOutputDir } from "../cli-paths.js";
 import { toQaError } from "../errors.js";
 import {
@@ -147,17 +147,17 @@ const CODEX_APPROVAL_POST_PENDING_BUDGET_MS =
 const CODEX_APPROVAL_SCENARIO_BUDGET_MS =
   CODEX_APPROVAL_PENDING_TIMEOUT_MS + CODEX_APPROVAL_POST_PENDING_BUDGET_MS;
 const DEFAULT_REMOTE_COMMAND_TIMEOUT_SECONDS = 600;
-const CRABBOX_BIN_ENV = "OPENCLAW_MANTIS_CRABBOX_BIN";
-const CRABBOX_PROVIDER_ENV = "OPENCLAW_MANTIS_CRABBOX_PROVIDER";
-const CRABBOX_CLASS_ENV = "OPENCLAW_MANTIS_CRABBOX_CLASS";
-const CRABBOX_MARKET_ENV = "OPENCLAW_MANTIS_CRABBOX_MARKET";
-const CRABBOX_LEASE_ID_ENV = "OPENCLAW_MANTIS_CRABBOX_LEASE_ID";
-const CRABBOX_KEEP_ENV = "OPENCLAW_MANTIS_KEEP_VM";
-const CRABBOX_IDLE_TIMEOUT_ENV = "OPENCLAW_MANTIS_CRABBOX_IDLE_TIMEOUT";
-const CRABBOX_TTL_ENV = "OPENCLAW_MANTIS_CRABBOX_TTL";
-const HYDRATE_MODE_ENV = "OPENCLAW_MANTIS_HYDRATE_MODE";
-const SLACK_URL_ENV = "OPENCLAW_MANTIS_SLACK_URL";
-const SLACK_CHANNEL_ID_ENV = "OPENCLAW_MANTIS_SLACK_CHANNEL_ID";
+const CRABBOX_BIN_ENV = "CARAPACE_MANTIS_CRABBOX_BIN";
+const CRABBOX_PROVIDER_ENV = "CARAPACE_MANTIS_CRABBOX_PROVIDER";
+const CRABBOX_CLASS_ENV = "CARAPACE_MANTIS_CRABBOX_CLASS";
+const CRABBOX_MARKET_ENV = "CARAPACE_MANTIS_CRABBOX_MARKET";
+const CRABBOX_LEASE_ID_ENV = "CARAPACE_MANTIS_CRABBOX_LEASE_ID";
+const CRABBOX_KEEP_ENV = "CARAPACE_MANTIS_KEEP_VM";
+const CRABBOX_IDLE_TIMEOUT_ENV = "CARAPACE_MANTIS_CRABBOX_IDLE_TIMEOUT";
+const CRABBOX_TTL_ENV = "CARAPACE_MANTIS_CRABBOX_TTL";
+const HYDRATE_MODE_ENV = "CARAPACE_MANTIS_HYDRATE_MODE";
+const SLACK_URL_ENV = "CARAPACE_MANTIS_SLACK_URL";
+const SLACK_CHANNEL_ID_ENV = "CARAPACE_MANTIS_SLACK_CHANNEL_ID";
 
 function normalizeHydrateMode(
   value: string | undefined,
@@ -392,43 +392,43 @@ function buildCrabboxEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const next = {
     ...env,
   };
-  if (!trimToValue(next.OPENCLAW_LIVE_OPENAI_KEY) && trimToValue(next.OPENAI_API_KEY)) {
-    next.OPENCLAW_LIVE_OPENAI_KEY = next.OPENAI_API_KEY;
+  if (!trimToValue(next.CARAPACE_LIVE_OPENAI_KEY) && trimToValue(next.OPENAI_API_KEY)) {
+    next.CARAPACE_LIVE_OPENAI_KEY = next.OPENAI_API_KEY;
   }
-  if (!trimToValue(next.OPENCLAW_MANTIS_SLACK_BOT_TOKEN) && trimToValue(next.SLACK_BOT_TOKEN)) {
-    next.OPENCLAW_MANTIS_SLACK_BOT_TOKEN = next.SLACK_BOT_TOKEN;
-  }
-  if (
-    !trimToValue(next.OPENCLAW_MANTIS_SLACK_BOT_TOKEN) &&
-    trimToValue(next.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN)
-  ) {
-    next.OPENCLAW_MANTIS_SLACK_BOT_TOKEN = next.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN;
-  }
-  if (!trimToValue(next.OPENCLAW_MANTIS_SLACK_APP_TOKEN) && trimToValue(next.SLACK_APP_TOKEN)) {
-    next.OPENCLAW_MANTIS_SLACK_APP_TOKEN = next.SLACK_APP_TOKEN;
+  if (!trimToValue(next.CARAPACE_MANTIS_SLACK_BOT_TOKEN) && trimToValue(next.SLACK_BOT_TOKEN)) {
+    next.CARAPACE_MANTIS_SLACK_BOT_TOKEN = next.SLACK_BOT_TOKEN;
   }
   if (
-    !trimToValue(next.OPENCLAW_MANTIS_SLACK_APP_TOKEN) &&
-    trimToValue(next.OPENCLAW_QA_SLACK_SUT_APP_TOKEN)
+    !trimToValue(next.CARAPACE_MANTIS_SLACK_BOT_TOKEN) &&
+    trimToValue(next.CARAPACE_QA_SLACK_SUT_BOT_TOKEN)
   ) {
-    next.OPENCLAW_MANTIS_SLACK_APP_TOKEN = next.OPENCLAW_QA_SLACK_SUT_APP_TOKEN;
+    next.CARAPACE_MANTIS_SLACK_BOT_TOKEN = next.CARAPACE_QA_SLACK_SUT_BOT_TOKEN;
+  }
+  if (!trimToValue(next.CARAPACE_MANTIS_SLACK_APP_TOKEN) && trimToValue(next.SLACK_APP_TOKEN)) {
+    next.CARAPACE_MANTIS_SLACK_APP_TOKEN = next.SLACK_APP_TOKEN;
   }
   if (
-    !trimToValue(next.OPENCLAW_MANTIS_SLACK_CHANNEL_ID) &&
-    trimToValue(next.OPENCLAW_QA_SLACK_CHANNEL_ID)
+    !trimToValue(next.CARAPACE_MANTIS_SLACK_APP_TOKEN) &&
+    trimToValue(next.CARAPACE_QA_SLACK_SUT_APP_TOKEN)
   ) {
-    next.OPENCLAW_MANTIS_SLACK_CHANNEL_ID = next.OPENCLAW_QA_SLACK_CHANNEL_ID;
+    next.CARAPACE_MANTIS_SLACK_APP_TOKEN = next.CARAPACE_QA_SLACK_SUT_APP_TOKEN;
+  }
+  if (
+    !trimToValue(next.CARAPACE_MANTIS_SLACK_CHANNEL_ID) &&
+    trimToValue(next.CARAPACE_QA_SLACK_CHANNEL_ID)
+  ) {
+    next.CARAPACE_MANTIS_SLACK_CHANNEL_ID = next.CARAPACE_QA_SLACK_CHANNEL_ID;
   }
   return next;
 }
 
 function resolveSlackGatewayEnvPayload(env: NodeJS.ProcessEnv): SlackGatewayCredentialPayload {
-  const channelId = trimToValue(env.OPENCLAW_QA_SLACK_CHANNEL_ID);
-  const sutBotToken = trimToValue(env.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN);
-  const sutAppToken = trimToValue(env.OPENCLAW_QA_SLACK_SUT_APP_TOKEN);
+  const channelId = trimToValue(env.CARAPACE_QA_SLACK_CHANNEL_ID);
+  const sutBotToken = trimToValue(env.CARAPACE_QA_SLACK_SUT_BOT_TOKEN);
+  const sutAppToken = trimToValue(env.CARAPACE_QA_SLACK_SUT_APP_TOKEN);
   if (!channelId || !sutBotToken || !sutAppToken) {
     throw new Error(
-      "Gateway setup requires OPENCLAW_QA_SLACK_CHANNEL_ID, OPENCLAW_QA_SLACK_SUT_BOT_TOKEN, and OPENCLAW_QA_SLACK_SUT_APP_TOKEN when using --credential-source env.",
+      "Gateway setup requires CARAPACE_QA_SLACK_CHANNEL_ID, CARAPACE_QA_SLACK_SUT_BOT_TOKEN, and CARAPACE_QA_SLACK_SUT_APP_TOKEN when using --credential-source env.",
     );
   }
   return {
@@ -471,8 +471,8 @@ async function prepareGatewayCredentialEnv(params: {
     return {};
   }
   if (
-    trimToValue(params.env.OPENCLAW_MANTIS_SLACK_BOT_TOKEN) &&
-    trimToValue(params.env.OPENCLAW_MANTIS_SLACK_APP_TOKEN)
+    trimToValue(params.env.CARAPACE_MANTIS_SLACK_BOT_TOKEN) &&
+    trimToValue(params.env.CARAPACE_MANTIS_SLACK_APP_TOKEN)
   ) {
     return {};
   }
@@ -486,16 +486,16 @@ async function prepareGatewayCredentialEnv(params: {
   });
   const leaseHeartbeat = startQaCredentialLeaseHeartbeat(credentialLease);
   const payload = credentialLease.payload;
-  params.env.OPENCLAW_MANTIS_SLACK_BOT_TOKEN = payload.sutBotToken;
-  params.env.OPENCLAW_MANTIS_SLACK_APP_TOKEN = payload.sutAppToken;
-  params.env.OPENCLAW_MANTIS_SLACK_CHANNEL_ID =
-    trimToValue(params.env.OPENCLAW_MANTIS_SLACK_CHANNEL_ID) ?? payload.channelId;
-  params.env.OPENCLAW_QA_SLACK_CHANNEL_ID =
-    trimToValue(params.env.OPENCLAW_QA_SLACK_CHANNEL_ID) ?? payload.channelId;
-  params.env.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN =
-    trimToValue(params.env.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN) ?? payload.sutBotToken;
-  params.env.OPENCLAW_QA_SLACK_SUT_APP_TOKEN =
-    trimToValue(params.env.OPENCLAW_QA_SLACK_SUT_APP_TOKEN) ?? payload.sutAppToken;
+  params.env.CARAPACE_MANTIS_SLACK_BOT_TOKEN = payload.sutBotToken;
+  params.env.CARAPACE_MANTIS_SLACK_APP_TOKEN = payload.sutAppToken;
+  params.env.CARAPACE_MANTIS_SLACK_CHANNEL_ID =
+    trimToValue(params.env.CARAPACE_MANTIS_SLACK_CHANNEL_ID) ?? payload.channelId;
+  params.env.CARAPACE_QA_SLACK_CHANNEL_ID =
+    trimToValue(params.env.CARAPACE_QA_SLACK_CHANNEL_ID) ?? payload.channelId;
+  params.env.CARAPACE_QA_SLACK_SUT_BOT_TOKEN =
+    trimToValue(params.env.CARAPACE_QA_SLACK_SUT_BOT_TOKEN) ?? payload.sutBotToken;
+  params.env.CARAPACE_QA_SLACK_SUT_APP_TOKEN =
+    trimToValue(params.env.CARAPACE_QA_SLACK_SUT_APP_TOKEN) ?? payload.sutAppToken;
   return {
     credentialLease,
     leaseHeartbeat,
@@ -559,25 +559,25 @@ setup_gateway=${setupGateway}
 approval_checkpoints=${approvalCheckpoints}
 slack_channel_id=${slackChannelId}
 approval_checkpoint_scenarios_json=${checkpointScenarioJson}
-remote_command_timeout_seconds="\${OPENCLAW_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS:-${remoteCommandTimeoutSeconds}}"
-if [ -z "\${OPENCLAW_QA_SLACK_CHANNEL_ID:-}" ] && [ -n "$slack_channel_id" ]; then
-  export OPENCLAW_QA_SLACK_CHANNEL_ID="$slack_channel_id"
+remote_command_timeout_seconds="\${CARAPACE_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS:-${remoteCommandTimeoutSeconds}}"
+if [ -z "\${CARAPACE_QA_SLACK_CHANNEL_ID:-}" ] && [ -n "$slack_channel_id" ]; then
+  export CARAPACE_QA_SLACK_CHANNEL_ID="$slack_channel_id"
 fi
 case "$remote_command_timeout_seconds" in
   ''|*[!0-9]*)
-    echo "OPENCLAW_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS must be an integer number of seconds." >&2
+    echo "CARAPACE_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS must be an integer number of seconds." >&2
     exit 2
     ;;
 esac
 if [ "$remote_command_timeout_seconds" -le 0 ]; then
-  echo "OPENCLAW_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS must be greater than zero." >&2
+  echo "CARAPACE_MANTIS_REMOTE_COMMAND_TIMEOUT_SECONDS must be greater than zero." >&2
   exit 2
 fi
 rm -rf "$out"
 mkdir -p "$out"
 export DISPLAY="\${DISPLAY:-:99}"
-if [ -n "\${OPENCLAW_LIVE_OPENAI_KEY:-}" ] && [ -z "\${OPENAI_API_KEY:-}" ]; then
-  export OPENAI_API_KEY="$OPENCLAW_LIVE_OPENAI_KEY"
+if [ -n "\${CARAPACE_LIVE_OPENAI_KEY:-}" ] && [ -z "\${OPENAI_API_KEY:-}" ]; then
+  export OPENAI_API_KEY="$CARAPACE_LIVE_OPENAI_KEY"
 fi
 if ! command -v node >/dev/null 2>&1; then
   sudo apt-get update -y >"$out/node-apt.log" 2>&1
@@ -599,11 +599,11 @@ if [ -z "$browser_bin" ]; then
   echo "No browser binary found. Checked BROWSER, CHROME_BIN, google-chrome, chromium, chromium-browser." >&2
   exit 127
 fi
-team_id="\${OPENCLAW_QA_SLACK_TEAM_ID:-}"
-auth_test_token="\${OPENCLAW_QA_SLACK_SUT_BOT_TOKEN:-\${OPENCLAW_MANTIS_SLACK_BOT_TOKEN:-}}"
+team_id="\${CARAPACE_QA_SLACK_TEAM_ID:-}"
+auth_test_token="\${CARAPACE_QA_SLACK_SUT_BOT_TOKEN:-\${CARAPACE_MANTIS_SLACK_BOT_TOKEN:-}}"
 if [ -z "$slack_url_override" ] && [ -z "$team_id" ] && [ -n "$auth_test_token" ]; then
   node --input-type=module >"$out/slack-auth-test.json" 2>"$out/slack-auth-test.err" <<'MANTIS_SLACK_AUTH'
-const token = process.env.OPENCLAW_QA_SLACK_SUT_BOT_TOKEN || process.env.OPENCLAW_MANTIS_SLACK_BOT_TOKEN;
+const token = process.env.CARAPACE_QA_SLACK_SUT_BOT_TOKEN || process.env.CARAPACE_MANTIS_SLACK_BOT_TOKEN;
 const response = await fetch("https://slack.com/api/auth.test", {
   method: "POST",
   headers: { authorization: \`Bearer \${token}\` },
@@ -616,16 +616,16 @@ MANTIS_SLACK_AUTH
   team_id="$(node --input-type=module -e 'import fs from "node:fs"; const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(value.team_id || "");' "$out/slack-auth-test.json" || true)"
 fi
 slack_url="$slack_url_override"
-if [ -z "$slack_url" ] && [ -n "$team_id" ] && [ -n "\${OPENCLAW_QA_SLACK_CHANNEL_ID:-}" ]; then
-  slack_url="https://app.slack.com/client/$team_id/$OPENCLAW_QA_SLACK_CHANNEL_ID"
+if [ -z "$slack_url" ] && [ -n "$team_id" ] && [ -n "\${CARAPACE_QA_SLACK_CHANNEL_ID:-}" ]; then
+  slack_url="https://app.slack.com/client/$team_id/$CARAPACE_QA_SLACK_CHANNEL_ID"
 fi
-profile="\${OPENCLAW_MANTIS_SLACK_BROWSER_PROFILE_DIR:-$HOME/.config/openclaw-mantis/slack-chrome-profile}"
+profile="\${CARAPACE_MANTIS_SLACK_BROWSER_PROFILE_DIR:-$HOME/.config/carapace-mantis/slack-chrome-profile}"
 mkdir -p "$profile"
 if [ "$setup_gateway" = "1" ]; then
-  export SLACK_BOT_TOKEN="\${OPENCLAW_MANTIS_SLACK_BOT_TOKEN:-\${SLACK_BOT_TOKEN:-}}"
-  export SLACK_APP_TOKEN="\${OPENCLAW_MANTIS_SLACK_APP_TOKEN:-\${SLACK_APP_TOKEN:-}}"
+  export SLACK_BOT_TOKEN="\${CARAPACE_MANTIS_SLACK_BOT_TOKEN:-\${SLACK_BOT_TOKEN:-}}"
+  export SLACK_APP_TOKEN="\${CARAPACE_MANTIS_SLACK_APP_TOKEN:-\${SLACK_APP_TOKEN:-}}"
   if [ -z "$SLACK_BOT_TOKEN" ] || [ -z "$SLACK_APP_TOKEN" ]; then
-    echo "Gateway setup requires OPENCLAW_MANTIS_SLACK_BOT_TOKEN and OPENCLAW_MANTIS_SLACK_APP_TOKEN." >&2
+    echo "Gateway setup requires CARAPACE_MANTIS_SLACK_BOT_TOKEN and CARAPACE_MANTIS_SLACK_APP_TOKEN." >&2
     exit 2
   fi
   if [ -z "$slack_url" ] && [ -n "$team_id" ]; then
@@ -706,7 +706,7 @@ run_mantis_remote_body() {
         exit 3
         ;;
     esac
-    node_root="$HOME/.cache/openclaw-mantis/node-v$node_version-linux-$node_arch"
+    node_root="$HOME/.cache/carapace-mantis/node-v$node_version-linux-$node_arch"
     if [ ! -x "$node_root/bin/node" ]; then
       node_tmp="$(mktemp -d)"
       node_archive="node-v$node_version-linux-$node_arch.tar.xz"
@@ -795,8 +795,8 @@ console.log(match[1] + " " + match[2]);
     exit 3
   fi
   if [ "$setup_gateway" = "1" ]; then
-    export OPENCLAW_HOME="$HOME/.openclaw-mantis/slack-openclaw"
-    mkdir -p "$OPENCLAW_HOME"
+    export CARAPACE_HOME="$HOME/.carapace-mantis/slack-carapace"
+    mkdir -p "$CARAPACE_HOME"
     cat >"$out/slack.socket.patch.json5" <<MANTIS_SLACK_PATCH
 {
   gateway: {
@@ -824,14 +824,14 @@ console.log(match[1] + " " + match[2]);
   },
 }
 MANTIS_SLACK_PATCH
-    pnpm openclaw config patch --file "$out/slack.socket.patch.json5" --dry-run
-    pnpm openclaw config patch --file "$out/slack.socket.patch.json5"
-    nohup pnpm openclaw gateway run --dev --allow-unconfigured --port 38973 --cli-backend-logs </dev/null >"$out/openclaw-gateway.log" 2>&1 &
+    pnpm carapace config patch --file "$out/slack.socket.patch.json5" --dry-run
+    pnpm carapace config patch --file "$out/slack.socket.patch.json5"
+    nohup pnpm carapace gateway run --dev --allow-unconfigured --port 38973 --cli-backend-logs </dev/null >"$out/carapace-gateway.log" 2>&1 &
     gateway_pid="$!"
-    echo "$gateway_pid" >"$out/openclaw-gateway.pid"
+    echo "$gateway_pid" >"$out/carapace-gateway.pid"
     sleep 12
     if ! kill -0 "$gateway_pid" >/dev/null 2>&1; then
-      echo "OpenClaw gateway exited during startup." >&2
+      echo "Carapace gateway exited during startup." >&2
       wait "$gateway_pid" || true
       exit 1
     fi
@@ -847,37 +847,37 @@ MANTIS_SLACK_PATCH
         cp -a "$slack_qa_output_dir"/. "$out/slack-qa"/
       fi
     }
-    qa_args=(openclaw qa slack --repo-root . --output-dir "$slack_qa_output_dir" --provider-mode "$provider_mode" --model "$primary_model" --alt-model "$alternate_model" --credential-source "$credential_source" --credential-role "$credential_role")
+    qa_args=(carapace qa slack --repo-root . --output-dir "$slack_qa_output_dir" --provider-mode "$provider_mode" --model "$primary_model" --alt-model "$alternate_model" --credential-source "$credential_source" --credential-role "$credential_role")
     if [ "$fast_mode" = "1" ]; then
       qa_args+=(--fast)
     fi
     if [ "$approval_checkpoints" = "1" ]; then
       checkpoint_dir="$out/approval-checkpoints"
       mkdir -p "$checkpoint_dir"
-      export OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_DIR="$checkpoint_dir"
-      export OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS="\${OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS:-${approvalCheckpointTimeoutMs}}"
-      export OPENCLAW_MANTIS_APPROVAL_CHECKPOINT_SCENARIOS_JSON="$approval_checkpoint_scenarios_json"
-      export OPENCLAW_MANTIS_APPROVAL_BROWSER_BIN="$browser_bin"
+      export CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_DIR="$checkpoint_dir"
+      export CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS="\${CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS:-${approvalCheckpointTimeoutMs}}"
+      export CARAPACE_MANTIS_APPROVAL_CHECKPOINT_SCENARIOS_JSON="$approval_checkpoint_scenarios_json"
+      export CARAPACE_MANTIS_APPROVAL_BROWSER_BIN="$browser_bin"
       cat >"$out/approval-checkpoint-watcher.mjs" <<'MANTIS_APPROVAL_WATCHER'
 	import { spawn } from "node:child_process";
 	import fs from "node:fs/promises";
 	import path from "node:path";
 
-const checkpointDir = process.env.OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_DIR;
+const checkpointDir = process.env.CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_DIR;
 const timeoutMs = Number.parseInt(
-  process.env.OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS || "${approvalCheckpointTimeoutMs}",
+  process.env.CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS || "${approvalCheckpointTimeoutMs}",
   10,
 );
 	const scenarioIds = JSON.parse(
-	  process.env.OPENCLAW_MANTIS_APPROVAL_CHECKPOINT_SCENARIOS_JSON || "[]",
+	  process.env.CARAPACE_MANTIS_APPROVAL_CHECKPOINT_SCENARIOS_JSON || "[]",
 	);
-	const browserBin = process.env.OPENCLAW_MANTIS_APPROVAL_BROWSER_BIN;
+	const browserBin = process.env.CARAPACE_MANTIS_APPROVAL_BROWSER_BIN;
 
 if (!checkpointDir) {
-  throw new Error("OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_DIR is required.");
+  throw new Error("CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_DIR is required.");
 }
 if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-  throw new Error("OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS must be a positive integer.");
+  throw new Error("CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS must be a positive integer.");
 }
 if (!Array.isArray(scenarioIds) || scenarioIds.length === 0) {
   throw new Error("At least one approval checkpoint scenario id is required.");
@@ -966,7 +966,7 @@ async function waitForCheckpoint(filePath) {
 	    "</style></head><body><main class='wrap'>" +
 	    '<div class="channel"># Slack native approval checkpoint</div>' +
 	    '<section class="message"><div class="avatar">OC</div><div class="content">' +
-	    '<div class="meta"><span class="name">openclaw</span><span class="app">APP</span><span class="state">' +
+	    '<div class="meta"><span class="name">carapace</span><span class="app">APP</span><span class="state">' +
 	    htmlEscape(stateLabel) +
 	    "</span></div>" +
 	    '<h1 class="title">' + htmlEscape(title) + "</h1>" +
@@ -980,7 +980,7 @@ async function waitForCheckpoint(filePath) {
 
 	async function captureScreenshot(screenshotPath, checkpoint) {
 	  if (!browserBin) {
-	    throw new Error("OPENCLAW_MANTIS_APPROVAL_BROWSER_BIN is required to render approval checkpoint screenshots.");
+	    throw new Error("CARAPACE_MANTIS_APPROVAL_BROWSER_BIN is required to render approval checkpoint screenshots.");
 	  }
 	  const htmlPath = screenshotPath + ".html";
 	  await fs.writeFile(htmlPath, renderCheckpointHtml(checkpoint), "utf8");
@@ -1132,8 +1132,8 @@ cat >"$out/remote-metadata.json" <<MANTIS_REMOTE_METADATA
   "openedUrl": "$slack_url",
   "gatewaySetup": $setup_gateway,
   "approvalCheckpoints": $approval_checkpoints,
-  "gatewayAlive": $(if [ "$setup_gateway" = "1" ] && [ -f "$out/openclaw-gateway.pid" ] && kill -0 "$(cat "$out/openclaw-gateway.pid")" >/dev/null 2>&1; then echo true; else echo false; fi),
-  "gatewayPid": "$(if [ -f "$out/openclaw-gateway.pid" ]; then cat "$out/openclaw-gateway.pid"; fi)",
+  "gatewayAlive": $(if [ "$setup_gateway" = "1" ] && [ -f "$out/carapace-gateway.pid" ] && kill -0 "$(cat "$out/carapace-gateway.pid")" >/dev/null 2>&1; then echo true; else echo false; fi),
+  "gatewayPid": "$(if [ -f "$out/carapace-gateway.pid" ]; then cat "$out/carapace-gateway.pid"; fi)",
   "gatewayPort": 38973,
   "qaExitCode": $qa_status,
   "credentialSource": "$credential_source",
@@ -1260,14 +1260,14 @@ export async function runMantisSlackDesktopSmoke(
   const slackChannelId =
     trimToValue(opts.slackChannelId) ??
     trimToValue(env[SLACK_CHANNEL_ID_ENV]) ??
-    trimToValue(env.OPENCLAW_QA_SLACK_CHANNEL_ID) ??
+    trimToValue(env.CARAPACE_QA_SLACK_CHANNEL_ID) ??
     DEFAULT_SLACK_CHANNEL_ID;
   const slackUrl = trimToValue(opts.slackUrl) ?? trimToValue(env[SLACK_URL_ENV]);
   const runner = opts.commandRunner ?? defaultCommandRunner;
   const explicitLeaseId = trimToValue(opts.leaseId) ?? trimToValue(env[CRABBOX_LEASE_ID_ENV]);
   const keepLease = opts.keepLease ?? (gatewaySetup || isTruthyOptIn(env[CRABBOX_KEEP_ENV]));
   const createdLease = explicitLeaseId === undefined;
-  const remoteOutputDir = `/tmp/openclaw-mantis-slack-desktop-${startedAt
+  const remoteOutputDir = `/tmp/carapace-mantis-slack-desktop-${startedAt
     .toISOString()
     .replace(/[^0-9A-Za-z]/gu, "-")}`;
   let credentialLease: SlackGatewayCredentialLease | undefined;
@@ -1399,7 +1399,7 @@ export async function runMantisSlackDesktopSmoke(
       throw toQaError(remoteRunError);
     }
     if (gatewaySetup && !gatewaySetupCompleted) {
-      throw new Error("Slack desktop gateway setup did not report a live OpenClaw gateway.");
+      throw new Error("Slack desktop gateway setup did not report a live Carapace gateway.");
     }
     if (!gatewaySetup && !slackQaCompleted) {
       const detail =

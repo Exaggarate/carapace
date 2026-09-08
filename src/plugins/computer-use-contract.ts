@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { type Static, type TSchema, Type } from "typebox";
 import { Compile } from "typebox/compile";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandContext,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeHostCommandAvailabilityContext,
+  CarapacePluginNodeHostCommandContext,
 } from "./types.node-host.js";
 
 export const COMPUTER_USE_V2_ACTION_NAMES = [
@@ -69,7 +69,7 @@ const ESCALATION_REASONS = [
   "other",
 ] as const;
 const COMPUTER_RESOURCE_HANDLE_PATTERN =
-  "^openclaw:computer-resource:v1:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
+  "^carapace:computer-resource:v1:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 const COMPUTER_EXECUTION_ID_PATTERN =
   "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$";
 
@@ -545,9 +545,9 @@ export type ComputerUseProvider = {
   label: string;
   capabilities(): ComputerUseCapabilityDescriptor;
   isAvailable(): boolean;
-  prepare?: (context: OpenClawPluginNodeHostCommandAvailabilityContext) => Promise<void> | void;
+  prepare?: (context: CarapacePluginNodeHostCommandAvailabilityContext) => Promise<void> | void;
   watchAvailability?: (
-    context: OpenClawPluginNodeHostCommandAvailabilityContext,
+    context: CarapacePluginNodeHostCommandAvailabilityContext,
     onChange: () => void,
   ) => (() => void) | void;
   openExecution(context: {
@@ -560,7 +560,7 @@ export type ComputerUseProvider = {
 // the full plugin API type here creates an import cycle through the gateway
 // server-method types that consume this contract.
 type ComputerUseRegistrationApi = {
-  registerNodeHostCommand(command: OpenClawPluginNodeHostCommand): void;
+  registerNodeHostCommand(command: CarapacePluginNodeHostCommand): void;
 };
 
 /** Register the canonical node-host command pair for one node-local provider. */
@@ -595,7 +595,7 @@ export function registerComputerUseProvider(
   };
   const getExecution = async (
     paramsJSON: string | null | undefined,
-    context?: OpenClawPluginNodeHostCommandContext,
+    context?: CarapacePluginNodeHostCommandContext,
   ) => {
     const { executionId } = executionEnvelopeFromParams(paramsJSON);
     if (!executionId) {

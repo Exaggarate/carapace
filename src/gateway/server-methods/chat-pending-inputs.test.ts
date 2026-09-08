@@ -1,18 +1,18 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   stageSessionPendingInput,
   upsertSessionEntryCore,
   loadTranscriptEvents,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { chatMessageGetHandlers } from "./chat-message-get-handler.js";
 import { readChatPendingInputs } from "./chat-pending-inputs.js";
 import type { GatewayRequestContext } from "./types.js";
 
 describe("pending input read boundary", () => {
   it("keeps cancelled input readable and sanitized without changing the transcript or crossing a reset", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:accepted",
@@ -28,7 +28,7 @@ describe("pending input read boundary", () => {
             content: "Accepted input ".repeat(2000),
             timestamp: 1,
             idempotencyKey: "queued:user",
-            __openclaw: {
+            __carapace: {
               media: [
                 {
                   kind: "image",
@@ -48,7 +48,7 @@ describe("pending input read boundary", () => {
         expect(page).toMatchObject({
           total: 1,
           items: [
-            { state: "cancelled", message: { __openclaw: { id: displayId, truncated: true } } },
+            { state: "cancelled", message: { __carapace: { id: displayId, truncated: true } } },
           ],
         });
         expect(page.items[0]).not.toHaveProperty("runId");
@@ -89,7 +89,7 @@ describe("pending input read boundary", () => {
   });
 
   it("does not reveal an input hidden by the canonical history visibility policy", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:hidden-input",

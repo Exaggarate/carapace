@@ -1,12 +1,12 @@
 import {
   estimateStringChars,
   estimateTokensFromChars,
-} from "@openclaw/normalization-core/cjk-chars";
+} from "@carapace/normalization-core/cjk-chars";
 import {
   asNonNegativeFiniteNumber,
   asPositiveFiniteNumber,
-} from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   deriveSessionTotalTokens,
   hasNonzeroUsage,
@@ -74,7 +74,7 @@ function extractTranscriptUsageSnapshot(
     (typeof costUsd === "number" &&
       Number.isFinite(costUsd) &&
       (source === "artifact" || costUsd > 0));
-  const isDeliveryMirror = modelProvider === "openclaw" && model === "delivery-mirror";
+  const isDeliveryMirror = modelProvider === "carapace" && model === "delivery-mirror";
   if (!hasMeaningfulUsage && !modelProvider && !model) {
     return null;
   }
@@ -156,7 +156,7 @@ export function aggregateSessionTranscriptUsage(
       const model = typeof message.model === "string" ? message.model.trim() : undefined;
       if (
         (message.role === "user" || message.role === "assistant") &&
-        !(message.role === "assistant" && provider === "openclaw" && model === "delivery-mirror")
+        !(message.role === "assistant" && provider === "carapace" && model === "delivery-mirror")
       ) {
         const estimatedChars = estimateTranscriptMessageChars(message);
         estimatedTranscriptChars += estimatedChars;

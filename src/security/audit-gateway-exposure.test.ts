@@ -1,6 +1,6 @@
 // Covers gateway exposure audit classification.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { collectGatewayConfigFindings } from "./audit-gateway-config.js";
 
 function hasFinding(
@@ -38,7 +38,7 @@ function requireFinding(
 
 describe("security audit gateway exposure findings", () => {
   it("warns when the MCP Apps bridge is enabled", () => {
-    const cfg: OpenClawConfig = { mcp: { apps: { enabled: true } } };
+    const cfg: CarapaceConfig = { mcp: { apps: { enabled: true } } };
     expect(collectGatewayConfigFindings(cfg, cfg, {})).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ checkId: "mcp.apps.enabled", severity: "warn" }),
@@ -62,7 +62,7 @@ describe("security audit gateway exposure findings", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedDangerousDetails: [
           "hooks.gmail.allowUnsafeExternalContent=true",
           "hooks.mappings[0].allowUnsafeExternalContent=true",
@@ -92,7 +92,7 @@ describe("security audit gateway exposure findings", () => {
           bind: "lan",
           auth: { mode: "token", token: "very-long-browser-token-0123456789" },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_required",
         severity: "critical",
@@ -105,7 +105,7 @@ describe("security audit gateway exposure findings", () => {
           bind: "loopback",
           controlUi: { allowedOrigins: ["*"] },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_wildcard",
         severity: "warn",
@@ -119,7 +119,7 @@ describe("security audit gateway exposure findings", () => {
           auth: { mode: "token", token: "very-long-browser-token-0123456789" },
           controlUi: { allowedOrigins: ["*"] },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_wildcard",
         severity: "critical",
@@ -136,7 +136,7 @@ describe("security audit gateway exposure findings", () => {
   });
 
   it("flags dangerous host-header origin fallback and suppresses missing allowed-origins finding", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         bind: "lan",
         auth: { mode: "token", token: "very-long-browser-token-0123456789" },
@@ -174,7 +174,7 @@ describe("security audit gateway exposure findings", () => {
             token: "very-long-token-1234567890",
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "warn" as const,
     },
     {
@@ -189,7 +189,7 @@ describe("security audit gateway exposure findings", () => {
             token: "very-long-token-1234567890",
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
     {
@@ -206,7 +206,7 @@ describe("security audit gateway exposure findings", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "warn" as const,
     },
     {
@@ -223,7 +223,7 @@ describe("security audit gateway exposure findings", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
     {
@@ -240,7 +240,7 @@ describe("security audit gateway exposure findings", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
     {
@@ -257,7 +257,7 @@ describe("security audit gateway exposure findings", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
     {
@@ -274,7 +274,7 @@ describe("security audit gateway exposure findings", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
   ])("scores X-Real-IP fallback risk by gateway exposure: $name", ({ cfg, expectedSeverity }) => {
@@ -301,7 +301,7 @@ describe("security audit gateway exposure findings", () => {
         discovery: {
           mdns: { mode: "full" },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "warn" as const,
     },
     {
@@ -317,7 +317,7 @@ describe("security audit gateway exposure findings", () => {
         discovery: {
           mdns: { mode: "full" },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expectedSeverity: "critical" as const,
     },
   ])("scores mDNS full mode risk by gateway bind mode: $name", ({ cfg, expectedSeverity }) => {
@@ -333,7 +333,7 @@ describe("security audit gateway exposure findings", () => {
   it.each(["loopback", "lan"] as const)("evaluates trusted-proxy auth guardrails on %s", (bind) => {
     const cases: Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       expectedCheckId: string;
       expectedSeverity: "warn" | "critical";
     }> = [
@@ -494,7 +494,7 @@ describe("security audit gateway exposure findings", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const findings = collectGatewayConfigFindings(cfg, cfg, {});
     const finding = requireFinding(findings, "gateway.trusted_proxy_auth", "same-host proxy");
     expect(finding.severity).toBe("critical");
@@ -522,7 +522,7 @@ describe("security audit gateway exposure findings", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       requireFinding(
@@ -553,7 +553,7 @@ describe("security audit gateway exposure findings", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       collectGatewayConfigFindings(cfg, cfg, {}).some(

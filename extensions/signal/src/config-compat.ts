@@ -1,8 +1,8 @@
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
 // Signal compatibility migration moves shipped flat transport config into account ownership.
-import type { ChannelDoctorConfigMutation } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ChannelDoctorConfigMutation } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SignalTransportConfig } from "./account-types.js";
 import {
   allocateSignalManagedNativePort,
@@ -27,15 +27,15 @@ const LEGACY_TRANSPORT_FIELDS = [
 ] as const;
 
 const PENDING_LEGACY_TRANSPORT_WARNING =
-  "- channels.signal: legacy auto transport is ambiguous while its endpoint is unavailable; bring the endpoint online and rerun openclaw doctor --fix, or replace the retired fields with an explicit account-owned transport in openclaw.json.";
+  "- channels.signal: legacy auto transport is ambiguous while its endpoint is unavailable; bring the endpoint online and rerun carapace doctor --fix, or replace the retired fields with an explicit account-owned transport in carapace.json.";
 const PENDING_LEGACY_INVALID_URL_WARNING =
-  "- channels.signal: legacy httpUrl is invalid; keep the current config, correct httpUrl, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpUrl is invalid; keep the current config, correct httpUrl, then run carapace doctor --fix.";
 const PENDING_LEGACY_INVALID_HOST_WARNING =
-  "- channels.signal: legacy httpHost is invalid; keep the current config, correct httpHost, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpHost is invalid; keep the current config, correct httpHost, then run carapace doctor --fix.";
 const PENDING_LEGACY_INVALID_PORT_WARNING =
-  "- channels.signal: legacy httpPort must be an integer between 1 and 65535; correct httpPort, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpPort must be an integer between 1 and 65535; correct httpPort, then run carapace doctor --fix.";
 const PENDING_LEGACY_CONTAINER_ACCOUNT_WARNING =
-  "- channels.signal: legacy container transport requires an account number; add channels.signal.account (or the relevant channels.signal.accounts.*.account) and rerun openclaw doctor --fix.";
+  "- channels.signal: legacy container transport requires an account number; add channels.signal.account (or the relevant channels.signal.accounts.*.account) and rerun carapace doctor --fix.";
 
 type DetectTransport = (params: {
   url: string;
@@ -376,9 +376,9 @@ function shouldMaterializeTransport(entries: Record<string, unknown>[], index: n
 }
 
 export function clearLegacySignalTransportFieldsForAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const next = structuredClone(params.cfg);
   const signal = next.channels?.signal as unknown;
   if (!isRecord(signal)) {
@@ -471,10 +471,10 @@ function allocateMigratedManagedPorts(params: {
 }
 
 function applyMigratedSignalTransports(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entries: Record<string, unknown>[];
   transports: Array<SignalTransportConfig | undefined>;
-}): OpenClawConfig | undefined {
+}): CarapaceConfig | undefined {
   const next = structuredClone(params.cfg);
   const nextSignal = next.channels?.signal as unknown;
   if (!isRecord(nextSignal)) {
@@ -510,7 +510,7 @@ function applyMigratedSignalTransports(params: {
   return next;
 }
 
-function hasContainerTransportWithoutEffectiveAccount(cfg: OpenClawConfig): boolean {
+function hasContainerTransportWithoutEffectiveAccount(cfg: CarapaceConfig): boolean {
   const signal = cfg.channels?.signal as unknown;
   if (!isRecord(signal)) {
     return false;
@@ -556,7 +556,7 @@ function hasContainerTransportWithoutEffectiveAccount(cfg: OpenClawConfig): bool
   return false;
 }
 
-function prepareLegacySignalTransportMigration(cfg: OpenClawConfig):
+function prepareLegacySignalTransportMigration(cfg: CarapaceConfig):
   | ChannelDoctorConfigMutation
   | {
       signal: Record<string, unknown>;
@@ -605,7 +605,7 @@ function prepareLegacySignalTransportMigration(cfg: OpenClawConfig):
 }
 
 function finishLegacySignalTransportMigration(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   entries: Record<string, unknown>[],
   resolvedTransports: Array<SignalTransportConfig | undefined>,
 ): ChannelDoctorConfigMutation {
@@ -649,7 +649,7 @@ function finishLegacySignalTransportMigration(
 }
 
 export async function migrateLegacySignalTransportConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   detect?: DetectTransport;
 }): Promise<ChannelDoctorConfigMutation> {
   const prepared = prepareLegacySignalTransportMigration(params.cfg);
@@ -678,7 +678,7 @@ export async function migrateLegacySignalTransportConfig(params: {
 }
 
 export function migrateLegacySignalTransportConfigSync(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): ChannelDoctorConfigMutation {
   const prepared = prepareLegacySignalTransportMigration(cfg);
   if ("config" in prepared) {

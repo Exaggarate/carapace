@@ -2,23 +2,23 @@ import { createHash } from "node:crypto";
 import { closeSync } from "node:fs";
 import { mkdir, realpath, rm } from "node:fs/promises";
 import { basename, dirname, relative, resolve, sep } from "node:path";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { stringify as stringifyYaml } from "yaml";
 import { listAgentEntries, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { openLocalAgentAvatarFile } from "../agents/identity-avatar-file.js";
 import { MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES } from "../agents/workspace-bootstrap-read.js";
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
 import { FsSafeError, root as fsSafeRoot } from "../infra/fs-safe.js";
 import { AVATAR_MAX_BYTES, isAvatarDataUrl, isAvatarHttpUrl } from "../shared/avatar-policy.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { resolveUserPath } from "../utils.js";
 import { readClawStatus } from "./lifecycle-state.js";
 import type { PackageRemovalDeps } from "./package-remove.js";
 import { readClawManifestFile } from "./reader.js";
 import { isPortableClawAvatar } from "./schema-portability.js";
-import { parseClawManifest, parseClawOpenClawProfile } from "./schema.js";
+import { parseClawManifest, parseClawCarapaceProfile } from "./schema.js";
 import { MAX_CLAW_MANIFEST_BYTES, MAX_MANAGED_WORKSPACE_BYTES } from "./source-limits.js";
 import { materializeClawToolProfile } from "./tool-profile-consent.js";
 import {
@@ -27,15 +27,15 @@ import {
   CLAW_SCHEMA_VERSION,
   type ClawManifest,
   type ClawMcpServer,
-  type ClawOpenClawExtension,
-  type ClawOpenClawProfile,
+  type ClawCarapaceExtension,
+  type ClawCarapaceProfile,
   type ClawPackagePreflight,
 } from "./types.js";
 
-export const CLAW_EXPORT_RESULT_SCHEMA_VERSION = "openclaw.clawExportResult.v1" as const;
+export const CLAW_EXPORT_RESULT_SCHEMA_VERSION = "carapace.clawExportResult.v1" as const;
 const MAX_EXPORT_FILE_BYTES = 1024 * 1024;
 
-type AgentConfig = NonNullable<NonNullable<OpenClawConfig["agents"]>["list"]>[number];
+type AgentConfig = NonNullable<NonNullable<CarapaceConfig["agents"]>["list"]>[number];
 type ClawBootstrapFileName = (typeof CLAW_BOOTSTRAP_FILE_NAMES)[number];
 
 function decodeUtf8(content: Buffer): string | undefined {
@@ -52,7 +52,7 @@ type ClawExportResult = {
   agentId: string;
   outputDirectory: string;
   manifest: ClawManifest;
-  openClawProfile?: ClawOpenClawProfile;
+  carapaceProfile?: ClawCarapaceProfile;
   filesWritten: string[];
 };
 
@@ -83,10 +83,10 @@ function portableAgent(agent: AgentConfig, avatar: string | undefined): ClawMani
   };
 }
 
-function portableOpenClawProfile(
+function portableCarapaceProfile(
   agent: AgentConfig,
-  extensions: ClawOpenClawExtension[],
-): ClawOpenClawProfile | undefined {
+  extensions: ClawCarapaceExtension[],
+): ClawCarapaceProfile | undefined {
   const configuredTools = {
     ...(agent.tools?.profile ? { profile: agent.tools.profile } : {}),
     ...(agent.tools?.allow?.length ? { allow: agent.tools.allow } : {}),
@@ -94,7 +94,7 @@ function portableOpenClawProfile(
     ...(agent.tools?.deny?.length ? { deny: agent.tools.deny } : {}),
     ...(agent.tools?.fs?.workspaceOnly === true ? { fs: { workspaceOnly: true as const } } : {}),
   };
-  let tools: NonNullable<ClawOpenClawProfile["agent"]["tools"]> = configuredTools;
+  let tools: NonNullable<ClawCarapaceProfile["agent"]["tools"]> = configuredTools;
   if (configuredTools.profile || configuredTools.allow?.length) {
     try {
       tools = materializeClawToolProfile({ tools: configuredTools }).tools ?? {};
@@ -198,7 +198,7 @@ function isClawBootstrapFileName(value: string): value is ClawBootstrapFileName 
   return (CLAW_BOOTSTRAP_FILE_NAMES as readonly string[]).includes(value);
 }
 function readPortableAvatar(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agent: AgentConfig;
   workspace: string;
 }): { source?: string; sidecar?: { path: string; content: Buffer } } {
@@ -311,8 +311,8 @@ function portableMcpServer(server: Record<string, unknown>): ClawMcpServer {
 export async function exportClawAgent(
   agentId: string,
   outputDirectory: string,
-  options: OpenClawStateDatabaseOptions & {
-    config: OpenClawConfig;
+  options: CarapaceStateDatabaseOptions & {
+    config: CarapaceConfig;
     packageDeps?: PackageRemovalDeps;
     packagePreflight?: ClawPackagePreflight;
     sourceMcpServers?: Record<string, Record<string, unknown>>;
@@ -484,10 +484,10 @@ export async function exportClawAgent(
       version: pkg.version,
     }))
     .toSorted((left, right) => comparePortableText(left.id, right.id));
-  const openClawProfile = portableOpenClawProfile(agent, extensions);
-  const openClawProfilePath = "profiles/openclaw.yml";
-  const openClawProfileRaw = openClawProfile
-    ? Buffer.from(stringifyYaml(openClawProfile))
+  const carapaceProfile = portableCarapaceProfile(agent, extensions);
+  const carapaceProfilePath = "profiles/carapace.yml";
+  const carapaceProfileRaw = carapaceProfile
+    ? Buffer.from(stringifyYaml(carapaceProfile))
     : undefined;
   const portablePackages = record.packages
     .filter((pkg) => !pkg.extension)
@@ -548,11 +548,11 @@ export async function exportClawAgent(
       parsed.diagnostics.map((diagnostic) => diagnostic.message).join("; "),
     );
   }
-  if (openClawProfile) {
-    const parsedProfile = parseClawOpenClawProfile(openClawProfile);
+  if (carapaceProfile) {
+    const parsedProfile = parseClawCarapaceProfile(carapaceProfile);
     if (!parsedProfile.ok) {
       throw new ClawExportError(
-        "export_openclaw_profile_invalid",
+        "export_carapace_profile_invalid",
         parsedProfile.diagnostics.map((diagnostic) => diagnostic.message).join("; "),
       );
     }
@@ -579,23 +579,23 @@ export async function exportClawAgent(
       await output.write(path, file.content, { mkdir: true, overwrite: false });
       filesWritten.push(path);
     }
-    if (openClawProfileRaw) {
-      await output.write(openClawProfilePath, openClawProfileRaw, {
+    if (carapaceProfileRaw) {
+      await output.write(carapaceProfilePath, carapaceProfileRaw, {
         mkdir: true,
         overwrite: false,
       });
-      filesWritten.push(openClawProfilePath);
+      filesWritten.push(carapaceProfilePath);
     }
     const packageJson = {
-      name: `openclaw-claw-${record.install.agentId}`,
+      name: `carapace-claw-${record.install.agentId}`,
       version: derivativePackageVersion(manifest, [
         ...contents,
         ...(clawMarkdownBody ? [{ path: "CLAW.md#body", content: clawMarkdownBody }] : []),
-        ...(openClawProfileRaw ? [{ path: openClawProfilePath, content: openClawProfileRaw }] : []),
+        ...(carapaceProfileRaw ? [{ path: carapaceProfilePath, content: carapaceProfileRaw }] : []),
         ...(exportedBootstrap ? [{ path: "BOOTSTRAP.md", content: exportedBootstrap }] : []),
       ]),
       type: "module",
-      openclaw: { claw: "CLAW.md" },
+      carapace: { claw: "CLAW.md" },
     };
     await output.write("package.json", Buffer.from(`${JSON.stringify(packageJson, null, 2)}\n`), {
       overwrite: false,
@@ -627,7 +627,7 @@ export async function exportClawAgent(
     agentId,
     outputDirectory: target,
     manifest,
-    ...(openClawProfile ? { openClawProfile } : {}),
+    ...(carapaceProfile ? { carapaceProfile } : {}),
     filesWritten,
   };
 }

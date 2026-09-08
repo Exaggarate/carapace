@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import { wrapExternalContent } from "openclaw/plugin-sdk/security-runtime";
+import type { AnyAgentTool } from "carapace/plugin-sdk/agent-harness-runtime";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
+import { wrapExternalContent } from "carapace/plugin-sdk/security-runtime";
 import { appendFileTransferAudit } from "../shared/audit.js";
 import { IMAGE_MIME_INLINE_SET, TEXT_INLINE_MAX_BYTES } from "../shared/mime.js";
 import { humanSize } from "../shared/params.js";

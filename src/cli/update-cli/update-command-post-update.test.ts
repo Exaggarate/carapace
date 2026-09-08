@@ -10,7 +10,7 @@ import {
 } from "../../infra/update-run-ledger.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
 import { defaultRuntime } from "../../runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createManagedServiceIdentityFixture } from "./update-command-post-update.test-support.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -112,7 +112,7 @@ import { resolveUpdatedGatewayRestartPort } from "./update-command-service.js";
 
 type FinishUpdateParams = Parameters<typeof finishUpdate>[0];
 const stdinIsTTYDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
-const programArguments = ["/usr/bin/node", "/tmp/openclaw-update/dist/index.js", "gateway"];
+const programArguments = ["/usr/bin/node", "/tmp/carapace-update/dist/index.js", "gateway"];
 
 function managedServiceState(
   env: NodeJS.ProcessEnv = {},
@@ -157,7 +157,7 @@ function taskRecovery(record: (phase: string) => void = () => {}) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   if (stdinIsTTYDescriptor) {
@@ -212,7 +212,7 @@ async function finishSuccessfulPackageSwitch(
   },
   overrides: Partial<FinishUpdateParams> = {},
 ): Promise<void> {
-  const packageRoot = params.packageRoot ?? "/tmp/openclaw-update";
+  const packageRoot = params.packageRoot ?? "/tmp/carapace-update";
   const previousRoot = params.previousRoot ?? packageRoot;
   await finishUpdate({
     result: {
@@ -311,9 +311,9 @@ describe("successful update finalization ordering", () => {
   });
 
   it("restarts when completion cache refresh reports failure", async () => {
-    const root = tempDirs.make("openclaw-completion-failure-");
+    const root = tempDirs.make("carapace-completion-failure-");
     await fs.writeFile(
-      path.join(root, "openclaw.mjs"),
+      path.join(root, "carapace.mjs"),
       'process.stderr.write("injected completion cache failure"); process.exit(1);',
     );
 
@@ -331,7 +331,7 @@ describe("successful update finalization ordering", () => {
       vi.mocked(defaultRuntime.log).mock.invocationCallOrder[warningIndex] ??
         Number.POSITIVE_INFINITY,
     );
-    expect(logCalls[warningIndex]?.join(" ")).toContain("openclaw completion --write-state");
+    expect(logCalls[warningIndex]?.join(" ")).toContain("carapace completion --write-state");
   });
 
   it("restarts when shell completion cache generation returns false", async () => {
@@ -340,7 +340,7 @@ describe("successful update finalization ordering", () => {
       shell: "zsh",
       profileInstalled: true,
       cacheExists: true,
-      cachePath: "/tmp/openclaw-completion.zsh",
+      cachePath: "/tmp/carapace-completion.zsh",
       usesSlowPattern: true,
     });
     mocks.ensureCompletionCache.mockResolvedValueOnce(false);
@@ -350,8 +350,8 @@ describe("successful update finalization ordering", () => {
     const output = vi.mocked(defaultRuntime.log).mock.calls.flat().map(String).join("\n");
     expect(output).toContain("completion cache generation failed");
     expect(output).toContain("Resolve the reported error before retrying");
-    expect(output).not.toContain("source /tmp/openclaw-completion.zsh");
-    expect(output).toContain("openclaw completion --write-state --install");
+    expect(output).not.toContain("source /tmp/carapace-completion.zsh");
+    expect(output).toContain("carapace completion --write-state --install");
     expect(mocks.restartService).toHaveBeenCalledOnce();
     expect(mocks.restartService.mock.invocationCallOrder[0]).toBeLessThan(
       mocks.ensureCompletionCache.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
@@ -359,8 +359,8 @@ describe("successful update finalization ordering", () => {
   });
 
   it("keeps JSON completion cache failures silent and restarts", async () => {
-    const root = tempDirs.make("openclaw-json-completion-failure-");
-    await fs.writeFile(path.join(root, "openclaw.mjs"), "process.exit(1);");
+    const root = tempDirs.make("carapace-json-completion-failure-");
+    await fs.writeFile(path.join(root, "carapace.mjs"), "process.exit(1);");
     Object.defineProperty(process.stdin, "isTTY", { configurable: true, value: true });
 
     await finishSuccessfulPackageSwitch({
@@ -464,9 +464,9 @@ describe("successful update finalization ordering", () => {
       denied: true,
     },
   ])("$name", async ({ denied }) => {
-    const home = tempDirs.make("openclaw-finalize-wrapper-");
+    const home = tempDirs.make("carapace-finalize-wrapper-");
     const previousRoot = path.join(home, "old-root");
-    const wrapper = path.join(home, ".local", "bin", "openclaw");
+    const wrapper = path.join(home, ".local", "bin", "carapace");
     await fs.mkdir(path.dirname(wrapper), { recursive: true });
     await fs.writeFile(
       wrapper,
@@ -483,7 +483,7 @@ describe("successful update finalization ordering", () => {
       .mockImplementationOnce(async ({ result }) => ({ result, rolledBack: false }));
     const retained = {
       name: "package backup retained",
-      command: "openclaw update",
+      command: "carapace update",
       cwd: previousRoot,
       durationMs: 0,
       exitCode: 0,
@@ -534,29 +534,29 @@ describe("successful update finalization ordering", () => {
     };
     const ownedManagedUpdateEnv = {
       ...process.env,
-      OPENCLAW_LIFECYCLE_TEST_MARKER: "owned",
+      CARAPACE_LIFECYCLE_TEST_MARKER: "owned",
     };
     mocks.readConfig.mockImplementationOnce(async () => {
       expect(mocks.leaseActive).toBe(true);
-      expect(process.env.OPENCLAW_LIFECYCLE_TEST_MARKER).toBe("owned");
+      expect(process.env.CARAPACE_LIFECYCLE_TEST_MARKER).toBe("owned");
       return validConfigSnapshot;
     });
     mocks.loadPluginRecords.mockImplementationOnce(async () => {
       expect(mocks.leaseActive).toBe(true);
-      expect(process.env.OPENCLAW_LIFECYCLE_TEST_MARKER).toBe("owned");
+      expect(process.env.CARAPACE_LIFECYCLE_TEST_MARKER).toBe("owned");
       return pluginInstallRecords;
     });
     mocks.updatePlugins.mockImplementationOnce(
       async (params: { pluginInstallRecords: unknown }) => {
         expect(mocks.leaseActive).toBe(true);
-        expect(process.env.OPENCLAW_LIFECYCLE_TEST_MARKER).toBe("owned");
+        expect(process.env.CARAPACE_LIFECYCLE_TEST_MARKER).toBe("owned");
         expect(params.pluginInstallRecords).toBe(pluginInstallRecords);
         return successfulPluginUpdate;
       },
     );
     mocks.completePluginUpdate.mockImplementationOnce(async () => {
       expect(mocks.leaseActive).toBe(false);
-      expect(process.env.OPENCLAW_LIFECYCLE_TEST_MARKER).toBe("owned");
+      expect(process.env.CARAPACE_LIFECYCLE_TEST_MARKER).toBe("owned");
       return {
         pluginUpdate: successfulPluginUpdate,
         configSnapshot: validConfigSnapshot,
@@ -577,14 +577,14 @@ describe("successful update finalization ordering", () => {
 
   it("removes operator overrides and process identity from the managed install environment", async () => {
     const identity = createManagedServiceIdentityFixture(
-      tempDirs.make("openclaw-post-update-service-home-"),
+      tempDirs.make("carapace-post-update-service-home-"),
     );
     const managedEnvironment = {
       ANTHROPIC_API_KEY: "managed-provider",
       MANAGED_VALUE: "base",
-      OPENCLAW_SERVICE_MARKER: "openclaw",
-      OPENCLAW_SERVICE_KIND: "gateway",
-      OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.work",
+      CARAPACE_SERVICE_MARKER: "carapace",
+      CARAPACE_SERVICE_KIND: "gateway",
+      CARAPACE_LAUNCHD_LABEL: "ai.carapace.work",
     };
     const effectiveEnvironment = {
       ...managedEnvironment,
@@ -604,13 +604,13 @@ describe("successful update finalization ordering", () => {
     vi.stubEnv("OPENAI_API_KEY", effectiveEnvironment.OPENAI_API_KEY);
     vi.stubEnv("UNSET_PROVIDER_KEY", "removed-by-drop-in");
     vi.stubEnv("GEMINI_API_KEY", "allowed-runtime-credential");
-    vi.stubEnv("OPENCLAW_PROFILE", "caller-only-profile");
-    const callerStateDir = path.join(identity.home, ".openclaw-caller-only-profile");
-    vi.stubEnv("OPENCLAW_STATE_DIR", callerStateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(callerStateDir, "openclaw.json"));
+    vi.stubEnv("CARAPACE_PROFILE", "caller-only-profile");
+    const callerStateDir = path.join(identity.home, ".carapace-caller-only-profile");
+    vi.stubEnv("CARAPACE_STATE_DIR", callerStateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(callerStateDir, "carapace.json"));
     try {
       const ownedUpdateEnvironment: NodeJS.ProcessEnv = { ...process.env, ...effectiveEnvironment };
-      for (const key of ["OPENCLAW_PROFILE", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]) {
+      for (const key of ["CARAPACE_PROFILE", "CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]) {
         delete ownedUpdateEnvironment[key];
       }
       await finishSuccessfulPackageSwitch({
@@ -623,12 +623,12 @@ describe("successful update finalization ordering", () => {
       expect(installEnv?.ANTHROPIC_API_KEY).toBe("managed-provider");
       expect(installEnv?.MANAGED_VALUE).toBe("base");
       expect(installEnv?.GEMINI_API_KEY).toBe("allowed-runtime-credential");
-      expect(installEnv?.OPENCLAW_PROFILE).toBeUndefined();
-      expect(installEnv?.OPENCLAW_STATE_DIR).toBeUndefined();
-      expect(installEnv?.OPENCLAW_CONFIG_PATH).toBeUndefined();
-      expect(installEnv?.OPENCLAW_SERVICE_MARKER).toBeUndefined();
-      expect(installEnv?.OPENCLAW_SERVICE_KIND).toBeUndefined();
-      expect(installEnv?.OPENCLAW_LAUNCHD_LABEL).toBe("ai.openclaw.work");
+      expect(installEnv?.CARAPACE_PROFILE).toBeUndefined();
+      expect(installEnv?.CARAPACE_STATE_DIR).toBeUndefined();
+      expect(installEnv?.CARAPACE_CONFIG_PATH).toBeUndefined();
+      expect(installEnv?.CARAPACE_SERVICE_MARKER).toBeUndefined();
+      expect(installEnv?.CARAPACE_SERVICE_KIND).toBeUndefined();
+      expect(installEnv?.CARAPACE_LAUNCHD_LABEL).toBe("ai.carapace.work");
     } finally {
       vi.unstubAllEnvs();
       identity.restore();
@@ -639,27 +639,27 @@ describe("successful update finalization ordering", () => {
     const { createConfigIO } =
       await vi.importActual<typeof import("../../config/io.js")>("../../config/io.js");
     mocks.createServiceConfigIO.mockImplementation(createConfigIO);
-    const home = tempDirs.make("openclaw-restart-config-");
-    const configPath = path.join(home, "openclaw.json");
+    const home = tempDirs.make("carapace-restart-config-");
+    const configPath = path.join(home, "carapace.json");
     await fs.writeFile(configPath, JSON.stringify({ gateway: { mode: "local", port: 19600 } }));
     expect(
       await resolveUpdatedGatewayRestartPort({
         config: { gateway: { port: 19601 } },
-        processEnv: { OPENCLAW_GATEWAY_PORT: "19602" },
-        serviceEnv: { HOME: home, OPENCLAW_STATE_DIR: home, OPENCLAW_CONFIG_PATH: configPath },
+        processEnv: { CARAPACE_GATEWAY_PORT: "19602" },
+        serviceEnv: { HOME: home, CARAPACE_STATE_DIR: home, CARAPACE_CONFIG_PATH: configPath },
         serviceCommand: {
-          programArguments: ["/usr/bin/node", "/srv/openclaw/dist/index.js", "gateway"],
+          programArguments: ["/usr/bin/node", "/srv/carapace/dist/index.js", "gateway"],
         },
       }),
     ).toBe(19600);
-    expect(await fs.readdir(home)).toEqual(["openclaw.json"]);
+    expect(await fs.readdir(home)).toEqual(["carapace.json"]);
   });
 
   describe("managed service finalization", () => {
     let identity: ReturnType<typeof createManagedServiceIdentityFixture>;
     beforeEach(() => {
       identity = createManagedServiceIdentityFixture(
-        tempDirs.make("openclaw-post-update-service-home-"),
+        tempDirs.make("carapace-post-update-service-home-"),
       );
     });
     afterEach(() => {
@@ -681,7 +681,7 @@ describe("successful update finalization ordering", () => {
         const serviceEnv = {
           ...process.env,
           HOME: identity.home,
-          OPENCLAW_STATE_DIR: identity.home,
+          CARAPACE_STATE_DIR: identity.home,
         };
         const run = {
           runId: createUpdateRun({ trigger: "cli" }, { env: serviceEnv }).runId,
@@ -796,7 +796,7 @@ describe("successful update finalization ordering", () => {
           restartFailed
             ? {
                 packageTransaction: {
-                  backupRoot: "/tmp/previous-openclaw",
+                  backupRoot: "/tmp/previous-carapace",
                   rollback: vi.fn(),
                   complete: vi.fn(async () => undefined),
                 },
@@ -887,7 +887,7 @@ describe("successful update finalization ordering", () => {
       mocks.createServiceConfigIO.mockReturnValue({
         readBestEffortConfig: async () => ({ gateway: { port: 19304 } }),
       });
-      vi.stubEnv("OPENCLAW_GATEWAY_PORT", "");
+      vi.stubEnv("CARAPACE_GATEWAY_PORT", "");
       await finishSuccessfulPackageSwitch({
         restartEnvironment: { ...process.env },
         sealed,
@@ -959,7 +959,7 @@ describe("successful update finalization ordering", () => {
       },
     ])("canonical sealed post-update $name", async ({ activated, unloaded }) => {
       const serviceEnv = { MANAGED_VALUE: "revalidated" };
-      const env = { OPENCLAW_STATE_DIR: tempDirs.make("update-retention-fact-") };
+      const env = { CARAPACE_STATE_DIR: tempDirs.make("update-retention-fact-") };
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       mocks.readServiceState.mockResolvedValueOnce(
         managedServiceState(serviceEnv, { environment: serviceEnv }, unloaded),
@@ -991,7 +991,7 @@ describe("successful update finalization ordering", () => {
           serviceEnv,
           serviceUpdateVerdict: {
             kind: "owned",
-            root: "/tmp/openclaw-update",
+            root: "/tmp/carapace-update",
             refreshDefinition: false,
             fingerprint: "sealed",
           },
@@ -1032,7 +1032,7 @@ describe("successful update finalization ordering", () => {
     });
 
     it("leaves native service management blocked when HOME is relocated", async () => {
-      const home = tempDirs.make("openclaw-post-update-relocated-home-");
+      const home = tempDirs.make("carapace-post-update-relocated-home-");
       process.env.HOME = home;
       process.env.USERPROFILE = home;
 

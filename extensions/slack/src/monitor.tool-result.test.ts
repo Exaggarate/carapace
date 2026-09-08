@@ -1,13 +1,13 @@
 // Slack tests cover monitor.tool result plugin behavior.
-import { CURRENT_MESSAGE_MARKER } from "openclaw/plugin-sdk/channel-mention-gating";
-import { expectPairingReplyText } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { HISTORY_CONTEXT_MARKER } from "openclaw/plugin-sdk/reply-history";
-import { resetInboundDedupe } from "openclaw/plugin-sdk/reply-runtime";
+import { CURRENT_MESSAGE_MARKER } from "carapace/plugin-sdk/channel-mention-gating";
+import { expectPairingReplyText } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { HISTORY_CONTEXT_MARKER } from "carapace/plugin-sdk/reply-history";
+import { resetInboundDedupe } from "carapace/plugin-sdk/reply-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   defaultSlackTestConfig,
@@ -442,7 +442,7 @@ describe("monitorSlackProvider tool results", () => {
     expect(latestCtx?.RawBody).toBe("caption\n\n[slack attachment unavailable]");
     expect(mockFetch).toHaveBeenCalledOnce();
 
-    if (process.env.OPENCLAW_SLACK_FORWARDED_IMAGE_PROOF === "1") {
+    if (process.env.CARAPACE_SLACK_FORWARDED_IMAGE_PROOF === "1") {
       console.log(
         JSON.stringify({
           verdict: "PASS",
@@ -518,7 +518,7 @@ describe("monitorSlackProvider tool results", () => {
   });
 
   async function expectMentionPatternMessageAccepted(text: string): Promise<void> {
-    setRequireMentionChannelConfig(["\\bopenclaw\\b"]);
+    setRequireMentionChannelConfig(["\\bcarapace\\b"]);
     replyMock.mockResolvedValue({ text: "hi" });
 
     await runSlackMessageOnce(monitorSlackProvider, {
@@ -533,11 +533,11 @@ describe("monitorSlackProvider tool results", () => {
   }
 
   it("accepts channel messages when mentionPatterns match", async () => {
-    await expectMentionPatternMessageAccepted("openclaw: hello");
+    await expectMentionPatternMessageAccepted("carapace: hello");
   });
 
   it("accepts channel messages when mentionPatterns match even if another user is mentioned", async () => {
-    await expectMentionPatternMessageAccepted("openclaw: hello <@U2>");
+    await expectMentionPatternMessageAccepted("carapace: hello <@U2>");
   });
 
   it("treats replies to bot threads as implicit mentions", async () => {
@@ -736,7 +736,7 @@ describe("monitorSlackProvider tool results", () => {
   });
 
   it("applies acknowledgement scope changes without reconnecting the running monitor", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       messages: { ackReaction: "eyes", ackReactionScope: "off" },
       channels: { slack: { dmPolicy: "open", allowFrom: ["*"] } },
     };
@@ -747,7 +747,7 @@ describe("monitorSlackProvider tool results", () => {
     try {
       const handler = await getSlackHandlerOrThrow("message");
       for (const [index, scope] of (["off", "all", "off"] as const).entries()) {
-        const nextConfig: OpenClawConfig = {
+        const nextConfig: CarapaceConfig = {
           ...config,
           messages: { ...config.messages, ackReactionScope: scope },
         };

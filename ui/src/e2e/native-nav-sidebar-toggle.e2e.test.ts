@@ -1,5 +1,5 @@
-// Shipped apps stamp `openclaw-native-nav`; current apps advertise web chrome
-// at document start and stamp `openclaw-native-web-chrome` at document end.
+// Shipped apps stamp `carapace-native-nav`; current apps advertise web chrome
+// at document start and stamp `carapace-native-web-chrome` at document end.
 // Plain browsers keep their normal in-page controls.
 import path from "node:path";
 import type { BrowserContext, Page } from "playwright";
@@ -30,7 +30,7 @@ let TOAST_PROOF_DIR: string;
 beforeEach(() => {
   TOAST_PROOF_DIR = createControlUiE2eArtifactDir("toast-layering");
 });
-const railProofDirParent = process.env.OPENCLAW_UI_RAIL_PROOF_DIR?.trim();
+const railProofDirParent = process.env.CARAPACE_UI_RAIL_PROOF_DIR?.trim();
 let railProofDir: string | undefined;
 beforeEach(() => {
   railProofDir = railProofDirParent
@@ -115,23 +115,23 @@ suite.define(() => {
       // document.documentElement exists, so defer until the DOM is parsed.
       await page.addInitScript(() => {
         const nativeWindow = window as Window & {
-          openclawNavMessages?: unknown[];
+          carapaceNavMessages?: unknown[];
         };
-        nativeWindow.openclawNavMessages = [];
+        nativeWindow.carapaceNavMessages = [];
         Object.defineProperty(window, "webkit", {
           configurable: true,
           value: {
             messageHandlers: {
-              openclawNav: {
+              carapaceNav: {
                 postMessage(message: unknown) {
-                  nativeWindow.openclawNavMessages?.push(message);
+                  nativeWindow.carapaceNavMessages?.push(message);
                 },
               },
             },
           },
         });
         const stamp = () =>
-          document.documentElement.classList.add("openclaw-native-macos", "openclaw-native-nav");
+          document.documentElement.classList.add("carapace-native-macos", "carapace-native-nav");
         if (document.documentElement) {
           stamp();
         } else {
@@ -165,7 +165,7 @@ suite.define(() => {
 
     expect(
       await page.evaluate(() => ({
-        titlebarRegistered: customElements.get("openclaw-macos-titlebar-controls") !== undefined,
+        titlebarRegistered: customElements.get("carapace-macos-titlebar-controls") !== undefined,
         titlebarRequested: performance
           .getEntriesByType("resource")
           .some((entry) => entry.name.includes("macos-titlebar-controls")),
@@ -198,7 +198,7 @@ suite.define(() => {
       module: /\/assets\/app-sidebar-[A-Za-z0-9_-]{8}\.js(?:\?.*)?$/u,
       pathname: "new",
       readySelector: ".new-session-page__message",
-      tag: "openclaw-app-sidebar",
+      tag: "carapace-app-sidebar",
     };
     let held!: Awaited<ReturnType<typeof holdModuleResponse>>;
     const errors: string[] = [];
@@ -254,10 +254,10 @@ suite.define(() => {
         /\/assets\/sidebar-attention-panel\.runtime-[^/?]+\.js(?:\?.*)?$/u,
       );
       const attention = await page
-        .locator("openclaw-app-sidebar openclaw-sidebar-attention")
+        .locator("carapace-app-sidebar carapace-sidebar-attention")
         .elementHandle();
       expect(attention).not.toBeNull();
-      const inbox = page.locator("openclaw-app-sidebar .sidebar-issues-button");
+      const inbox = page.locator("carapace-app-sidebar .sidebar-issues-button");
       const dialog = page.getByRole("dialog", { name: "Inbox" });
       try {
         await inbox.click();
@@ -282,7 +282,7 @@ suite.define(() => {
           // The native event does not generate an outside pointer that could
           // accidentally dismiss an Inbox resurrected by the old import.
           await page.evaluate(() => {
-            window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+            window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
           });
           await expect
             .poll(() => page.getByRole("button", { name: "Collapse sidebar" }).isVisible())
@@ -340,10 +340,10 @@ suite.define(() => {
 
     await page.keyboard.press("Enter");
     await expect.poll(() => toggle.getAttribute("aria-label")).toBe("Collapse sidebar");
-    expect(await page.locator("openclaw-tooltip[open]").count()).toBe(0);
+    expect(await page.locator("carapace-tooltip[open]").count()).toBe(0);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
     });
     await expect.poll(() => expand.getAttribute("aria-label")).toBe("Expand sidebar");
     await expect
@@ -357,7 +357,7 @@ suite.define(() => {
     await expect.poll(() => tooltip.getAttribute("open")).toBe("");
     await page.keyboard.press("Enter");
     await expect.poll(() => toggle.getAttribute("aria-label")).toBe("Collapse sidebar");
-    expect(await page.locator("openclaw-tooltip[open]").count()).toBe(0);
+    expect(await page.locator("carapace-tooltip[open]").count()).toBe(0);
   });
 
   it("hides the web chrome cluster when the native titlebar toggle is present", async () => {
@@ -366,8 +366,8 @@ suite.define(() => {
     await expect
       .poll(() =>
         page.evaluate(() => {
-          const messages = (window as Window & { openclawNavMessages?: unknown[] })
-            .openclawNavMessages;
+          const messages = (window as Window & { carapaceNavMessages?: unknown[] })
+            .carapaceNavMessages;
           return messages?.find(
             (message) =>
               typeof message === "object" &&
@@ -378,7 +378,7 @@ suite.define(() => {
       )
       .toMatchObject({ type: "nav-state", collapsed: false });
     const initialWidth = await page.evaluate(() => {
-      const messages = (window as Window & { openclawNavMessages?: unknown[] }).openclawNavMessages;
+      const messages = (window as Window & { carapaceNavMessages?: unknown[] }).carapaceNavMessages;
       const message = messages?.find(
         (candidate) =>
           typeof candidate === "object" &&
@@ -397,7 +397,7 @@ suite.define(() => {
     // Collapse through the native titlebar path; the whole web chrome cluster
     // hides (native titlebar provides search and new-thread while collapsed).
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))
@@ -406,8 +406,8 @@ suite.define(() => {
       .poll(() =>
         page.evaluate(() =>
           (
-            window as Window & { openclawNavMessages?: Array<{ collapsed?: boolean }> }
-          ).openclawNavMessages?.some((message) => message.collapsed === true),
+            window as Window & { carapaceNavMessages?: Array<{ collapsed?: boolean }> }
+          ).carapaceNavMessages?.some((message) => message.collapsed === true),
         ),
       )
       .toBe(true);
@@ -419,12 +419,12 @@ suite.define(() => {
       .toBe(true);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-open-search"));
+      window.dispatchEvent(new CustomEvent("carapace:native-open-search"));
     });
     await expect.poll(() => page.locator(".cmd-palette-overlay").isVisible()).toBe(true);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-new-session"));
+      window.dispatchEvent(new CustomEvent("carapace:native-new-session"));
     });
     await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
   });
@@ -542,7 +542,7 @@ suite.define(() => {
 
     await page.evaluate(() => {
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("carapace:native-history-state", {
           detail: { canGoBack: true, canGoForward: false },
         }),
       );
@@ -551,7 +551,7 @@ suite.define(() => {
     await expect.poll(() => forward.isDisabled()).toBe(true);
     await page.evaluate(() => {
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("carapace:native-history-state", {
           detail: { canGoBack: false, canGoForward: true },
         }),
       );
@@ -659,7 +659,7 @@ suite.define(() => {
 
     await page.keyboard.press("Meta+K");
     const palette = page.locator(".cmd-palette");
-    const paletteDialog = page.locator("openclaw-modal-dialog.palette");
+    const paletteDialog = page.locator("carapace-modal-dialog.palette");
     await page.locator(".cmd-palette__input:not([disabled])").waitFor({ state: "visible" });
     const paletteAnimationName = await palette.evaluate(
       (element) => getComputedStyle(element).animationName,
@@ -671,7 +671,7 @@ suite.define(() => {
     });
     await page.keyboard.press("Escape");
 
-    const sidebar = page.locator("openclaw-app-sidebar");
+    const sidebar = page.locator("carapace-app-sidebar");
     await sidebar.locator(".sidebar-identity-card").click();
     const buildLink = sidebar.getByRole("link", {
       name: "Control UI build details",
@@ -681,7 +681,7 @@ suite.define(() => {
     await buildLink.hover();
     await page.clock.runFor(600);
     const hoverCardMotion = await sidebar
-      .locator("openclaw-sidebar-build-chip openclaw-tooltip")
+      .locator("carapace-sidebar-build-chip carapace-tooltip")
       .evaluate((tooltip) => {
         const webAwesomeTooltip = tooltip.shadowRoot?.querySelector("wa-tooltip");
         const popup = webAwesomeTooltip?.shadowRoot?.querySelector("wa-popup");
@@ -830,7 +830,7 @@ suite.define(() => {
     await expect.poll(() => dialog.isVisible()).toBe(true);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:debug-overlay-request"));
+      window.dispatchEvent(new CustomEvent("carapace:debug-overlay-request"));
     });
     const debugOverlay = page.locator(".debug-overlay");
     await debugOverlay.waitFor();
@@ -887,7 +887,7 @@ suite.define(() => {
       await page
         .locator('wa-dropdown-item[value="hide-catalog"]')
         .evaluate((element) => (element as HTMLElement).click());
-      const host = drawer.locator("openclaw-toast-host");
+      const host = drawer.locator("carapace-toast-host");
       const toast = host.locator(".app-toast");
       await toast.waitFor();
       await expect.poll(() => toast.textContent()).toContain("Codex hidden");
@@ -917,7 +917,7 @@ suite.define(() => {
         await expect.poll(() => drawer.count()).toBe(0);
       }
       expect(page.viewportSize()).toEqual(finalViewport);
-      const retainedHost = page.locator(".shell > openclaw-toast-host");
+      const retainedHost = page.locator(".shell > carapace-toast-host");
       await expect.poll(() => retainedHost.getAttribute("data-toast-placement")).toBe("shell");
       const retainedToast = retainedHost.locator(".app-toast");
       await expect.poll(() => retainedToast.textContent()).toContain("Codex hidden");
@@ -1001,7 +1001,7 @@ suite.define(() => {
     // the web hamburger would be a duplicate control.
     await expect.poll(() => page.locator(".topbar-nav-toggle").isVisible()).toBe(false);
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))
@@ -1009,7 +1009,7 @@ suite.define(() => {
     // Closing through the native toggle restores focus to the content anchor,
     // not the hidden hamburger the drawer recorded as its trigger.
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("carapace:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))

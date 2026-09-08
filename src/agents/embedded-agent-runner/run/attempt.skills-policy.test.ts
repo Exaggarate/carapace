@@ -81,7 +81,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
       },
     },
   ])("preserves caller-dependent tool schemas for $label", async ({ context }) => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-review-parity-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-review-parity-"));
     tempPaths.push(workspaceDir);
     const foregroundPromptContext = {
       agentId: "main",
@@ -108,7 +108,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
       toolNames: string[];
       toolDigest: string;
     }> = [];
-    hoisted.createOpenClawCodingToolsMock.mockImplementation((...args: unknown[]) => {
+    hoisted.createCarapaceCodingToolsMock.mockImplementation((...args: unknown[]) => {
       const options = args[0] as {
         messageChannel?: string;
         runId?: string;
@@ -125,7 +125,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
       runId?: string;
       senderId?: string | null;
     }) => {
-      const tools = hoisted.createOpenClawCodingToolsMock(options) as AnyAgentTool[];
+      const tools = hoisted.createCarapaceCodingToolsMock(options) as AnyAgentTool[];
       const toolNames = tools.map((entry) => entry.name);
       const snapshot = beginPromptCacheObservation({
         sessionId: "embedded-session",
@@ -169,7 +169,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
   });
 
   it("preserves tool schemas and source bytes while hiding unreadable draft-review skills", async () => {
-    const sessionRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-review-parity-"));
+    const sessionRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-review-parity-"));
     tempPaths.push(sessionRoot);
     const transcriptFile = path.join(sessionRoot, "transcript.jsonl");
     const storeFile = path.join(sessionRoot, "sessions.json");
@@ -221,7 +221,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
     for (const review of [false, true]) {
       const session = review ? reviewSession : foregroundSession;
       resetEmbeddedAttemptHarness();
-      hoisted.createOpenClawCodingToolsMock.mockReturnValue(codingTools);
+      hoisted.createCarapaceCodingToolsMock.mockReturnValue(codingTools);
       hoisted.resolveEmbeddedRunSkillEntriesMock.mockReturnValue({
         shouldLoadSkillEntries: true,
         skillEntries: [createFixtureSkillEntry("demo")],
@@ -390,7 +390,7 @@ describe("runEmbeddedAttempt skill policy projections", () => {
           return { content: [{ type: "text" as const, text: "ok" }], details: undefined };
         },
       }) as AnyAgentTool;
-    hoisted.createOpenClawCodingToolsMock.mockImplementation((...args: unknown[]) => {
+    hoisted.createCarapaceCodingToolsMock.mockImplementation((...args: unknown[]) => {
       const options = args[0] as {
         config?: Parameters<typeof createToolSearchTools>[0]["config"];
         toolSearchCatalogRef?: ToolSearchCatalogRef;

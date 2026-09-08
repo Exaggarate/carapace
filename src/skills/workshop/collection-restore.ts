@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { pathExists } from "../../infra/fs-safe.js";
 import type { PluginHookSkillArtifact } from "../../plugins/hook-types.js";
 import {
@@ -31,7 +31,7 @@ type SkillCollectionChange = {
 
 export async function restoreLatestSkillCollectionBackup(params: {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<SkillCollectionRestoreResult> {
@@ -78,7 +78,7 @@ export async function restoreLatestSkillCollectionBackup(params: {
         const keySourceDir = liveExists ? skillDir : path.join(backupDir, "skills", relativeDir);
         const loaded = loadSingleSkillDirectory({
           skillDir: keySourceDir,
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
           rootRealPath: await fs.realpath(keySourceDir),
         });
         if (!loaded) {

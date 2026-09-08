@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -9,7 +9,7 @@ describe("cli json stdout contract", () => {
     {
       name: "the search query is missing",
       args: ["plugins", "search", "--json"],
-      message: "Usage: openclaw plugins search <query>",
+      message: "Usage: carapace plugins search <query>",
     },
     {
       name: "ClawHub transport fails",
@@ -24,8 +24,8 @@ describe("cli json stdout contract", () => {
         )}`;
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=${preload}`,
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
           CLAWHUB_CONFIG_PATH: path.join(tempHome, "missing-clawhub.json"),
           CLAWHUB_TOKEN: "",
           CLAWHUB_AUTH_TOKEN: "",
@@ -43,7 +43,7 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stderr).toContain(testCase.message);
       },
-      { prefix: "openclaw-plugins-json-failure-e2e-" },
+      { prefix: "carapace-plugins-json-failure-e2e-" },
     );
   });
 
@@ -62,14 +62,14 @@ describe("cli json stdout contract", () => {
           ok: false,
           error: {
             type: "cli_error",
-            message: "Usage: openclaw plugins search <query>",
+            message: "Usage: carapace plugins search <query>",
           },
         });
         expect(result.stdout).not.toMatch(/[\u001B\u0007]/u);
-        expect(result.stderr).toContain("Usage: openclaw plugins search <query>");
+        expect(result.stderr).toContain("Usage: carapace plugins search <query>");
         expect(result.stderr).toContain("\u001B[?25h");
       },
-      { prefix: "openclaw-plugins-json-tty-failure-e2e-" },
+      { prefix: "carapace-plugins-json-tty-failure-e2e-" },
     );
   });
 
@@ -89,10 +89,10 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "isolated-state");
-        const configPath = path.join(tempHome, "missing-openclaw.json");
+        const configPath = path.join(tempHome, "missing-carapace.json");
         const source =
           testCase.source === "git"
-            ? "ssh://marketplace.invalid/openclaw/unavailable.git"
+            ? "ssh://marketplace.invalid/carapace/unavailable.git"
             : path.join(tempHome, "missing-marketplace");
         const ttyPreload = Buffer.from(
           'Object.defineProperty(process.stdout, "isTTY", { value: true, configurable: true }); Object.defineProperty(process.stderr, "isTTY", { value: true, configurable: true });',
@@ -106,10 +106,10 @@ describe("cli json stdout contract", () => {
           {
             GIT_SSH_COMMAND: `${JSON.stringify(process.execPath)} -e "process.exit(1)"`,
             GIT_TERMINAL_PROMPT: "0",
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-            OPENCLAW_STATE_DIR: stateDir,
-            ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_STATE_DIR: stateDir,
+            ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
             ...("tty" in testCase
               ? { NODE_OPTIONS: `--import=data:text/javascript;base64,${ttyPreload}` }
               : {}),
@@ -161,7 +161,7 @@ describe("cli json stdout contract", () => {
           code: "ENOENT",
         });
       },
-      { prefix: "openclaw-marketplace-json-failure-e2e-" },
+      { prefix: "carapace-marketplace-json-failure-e2e-" },
     );
   });
 });

@@ -1,16 +1,16 @@
 import { mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { GatewayRequestHandlerOptions } from "openclaw/plugin-sdk/gateway-runtime";
-import type { OpenClawPluginApi, OpenClawPluginService } from "openclaw/plugin-sdk/plugin-entry";
+import type { GatewayRequestHandlerOptions } from "carapace/plugin-sdk/gateway-runtime";
+import type { CarapacePluginApi, CarapacePluginService } from "carapace/plugin-sdk/plugin-entry";
 import { afterEach, expect, it, vi } from "vitest";
 import plugin from "../index.js";
 import { LogbookStore } from "./store.js";
 
 const cardReads = vi.hoisted(() => ({ queries: 0, payloadRows: 0 }));
 
-vi.mock("openclaw/plugin-sdk/sqlite-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/sqlite-runtime")>();
+vi.mock("carapace/plugin-sdk/sqlite-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/sqlite-runtime")>();
   return {
     ...actual,
     openNodeSqliteDatabase: (...args: Parameters<typeof actual.openNodeSqliteDatabase>) => {
@@ -55,8 +55,8 @@ it("hydrates a timeline once and counts status without reading card payloads", a
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-07-03T12:00:00"));
   const stateDir = realpathSync(mkdtempSync(path.join(tmpdir(), "logbook-card-reads-")));
-  const services: OpenClawPluginService[] = [];
-  const methods = new Map<string, Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1]>();
+  const services: CarapacePluginService[] = [];
+  const methods = new Map<string, Parameters<CarapacePluginApi["registerGatewayMethod"]>[1]>();
   const context = {
     stateDir,
     config: {},
@@ -85,12 +85,12 @@ it("hydrates a timeline once and counts status without reading card payloads", a
     runtime: {},
     session: { controls: { registerControlUiDescriptor() {} } },
     registerNodeInvokePolicy() {},
-    registerService: (service: OpenClawPluginService) => services.push(service),
+    registerService: (service: CarapacePluginService) => services.push(service),
     registerGatewayMethod: (
       method: string,
-      handler: Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1],
+      handler: Parameters<CarapacePluginApi["registerGatewayMethod"]>[1],
     ) => methods.set(method, handler),
-  } as unknown as OpenClawPluginApi);
+  } as unknown as CarapacePluginApi);
   const service = services[0]!;
   try {
     await service.start(context);

@@ -1,5 +1,5 @@
 // Github Copilot tests cover replay policy transport dispatch.
-import type { ProviderReplayPolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { ProviderReplayPolicyContext } from "carapace/plugin-sdk/plugin-entry";
 import { describe, expect, it } from "vitest";
 import {
   buildGithubCopilotReplayPolicy,

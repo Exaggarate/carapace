@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
-import { coerceErrorMessage, stableStringify } from "@openclaw/normalization-core";
+import { coerceErrorMessage, stableStringify } from "@carapace/normalization-core";
 import { preflightPluginInstall } from "../plugins/plugin-install-preflight.js";
 import type { RuntimeEnv } from "../runtime.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import {
   digestClawPackageRef,
   replaceClawPackageRefExpected,
@@ -48,7 +48,7 @@ export async function applyClawPackageUpdate(
   updatePlan: ClawUpdatePlan,
   _targetManifest: ClawManifest,
   targetAddPlan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     installPackages?: typeof installClawPackages;
     readRefs?: typeof readClawPackageRefs;
     replaceExpected?: typeof replaceClawPackageRefExpected;

@@ -213,7 +213,7 @@ describe("sidebar attention refresh ownership", () => {
       ...sources,
       sidebarAttention: store,
     } as unknown as ApplicationContext);
-    const element = document.createElement("openclaw-sidebar-attention") as SidebarAttentionElement;
+    const element = document.createElement("carapace-sidebar-attention") as SidebarAttentionElement;
     provider.append(element);
     document.body.append(provider);
 
@@ -232,7 +232,7 @@ describe("sidebar attention refresh ownership", () => {
     await element.updateComplete;
     const panel = element.querySelector(".sidebar-issues-panel");
     expect(panel).not.toBeNull();
-    expect(panel?.closest("openclaw-menu-surface")).not.toBeNull();
+    expect(panel?.closest("carapace-menu-surface")).not.toBeNull();
     panel!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     await element.updateComplete;
     expect(element.querySelector(".sidebar-issues-panel")).toBeNull();
@@ -426,7 +426,7 @@ describe("sidebar attention refresh ownership", () => {
       if (
         method === "exec.approval.list" ||
         method === "plugin.approval.list" ||
-        method === "openclaw.approval.list"
+        method === "carapace.approval.list"
       ) {
         return Promise.resolve([]);
       }
@@ -661,7 +661,7 @@ describe("sidebar attention refresh ownership", () => {
       phase: "connected",
       hello: {
         auth: { role: "operator", scopes: ["operator.admin"] },
-        features: { methods: ["openclaw.chat"] },
+        features: { methods: ["carapace.chat"] },
       },
       assistantAgentId: "main",
       sessionKey: "agent:main:main",
@@ -713,7 +713,7 @@ describe("sidebar attention refresh ownership", () => {
     store.activate(SidebarAttentionStoreController);
     stores.add(store);
     const provider = createApplicationContextProvider({ ...context, sidebarAttention: store });
-    const element = document.createElement("openclaw-sidebar-attention") as SidebarAttentionElement;
+    const element = document.createElement("carapace-sidebar-attention") as SidebarAttentionElement;
     provider.append(element);
     document.body.append(provider);
     await waitForFast(() =>
@@ -743,7 +743,7 @@ describe("sidebar attention refresh ownership", () => {
       Array.from(
         panel.querySelectorAll("header button"),
         (button) => button.getAttribute("aria-label") ?? button.textContent,
-      ).some((label) => label?.includes("Ask OpenClaw")),
+      ).some((label) => label?.includes("Ask Carapace")),
     ).toBe(false);
 
     const { custodianAlertStore } = await import("../pages/custodian/custodian-alert-store.ts");
@@ -752,7 +752,7 @@ describe("sidebar attention refresh ownership", () => {
       const alertAction = panel.querySelector<HTMLButtonElement>(
         '[data-attention-kind="modelAuthExpired"] .sidebar-issues-panel__action:not(.sidebar-issues-panel__action--primary)',
       )!;
-      expect(alertAction.textContent?.trim()).toBe("Ask OpenClaw");
+      expect(alertAction.textContent?.trim()).toBe("Ask Carapace");
       alertAction.click();
       await waitForFast(() =>
         expect(dispatch).toHaveBeenCalledWith(
@@ -806,7 +806,7 @@ describe("update attention", () => {
         features: { methods: ["update.status"] },
       },
     };
-    const element = document.createElement("openclaw-sidebar-attention") as SidebarAttentionElement;
+    const element = document.createElement("carapace-sidebar-attention") as SidebarAttentionElement;
     element.context = {
       gateway: { snapshot: gatewaySnapshot },
       overlays: { snapshot: overlaySnapshot },
@@ -823,7 +823,7 @@ describe("update attention", () => {
   });
 
   it("keeps restart reconciliation visible after update metadata clears", () => {
-    const element = document.createElement("openclaw-sidebar-attention") as SidebarAttentionElement;
+    const element = document.createElement("carapace-sidebar-attention") as SidebarAttentionElement;
     element.context = {
       gateway: { snapshot: { phase: "connected" } },
       overlays: {

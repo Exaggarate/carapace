@@ -193,7 +193,7 @@ describe("conversation turn correlation", () => {
 
     const registry: Map<unknown, unknown> | undefined = Object.getOwnPropertyDescriptor(
       globalThis,
-      Symbol.for("openclaw.pendingConversationTurns"),
+      Symbol.for("carapace.pendingConversationTurns"),
     )?.value;
     if (!registry) {
       throw new Error("pending-turn registry was not initialized");

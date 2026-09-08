@@ -7,16 +7,16 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DESTINATION="$1"
 shift
 [[ "$#" -gt 0 ]] || { echo "ERROR: No worker architectures requested" >&2; exit 1; }
-case "${OPENCLAW_MAC_SIGNING_VARIANT:-standard}" in
+case "${CARAPACE_MAC_SIGNING_VARIANT:-standard}" in
   standard|elevation-host) ;;
   *) echo "ERROR: Unknown Mac signing variant" >&2; exit 1 ;;
 esac
 # Scratch follows the caller's temp volume; only installed payloads need to
 # share the destination volume so publishing remains a rename, not a copy.
-SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-mac-worker.XXXXXX")"
+SCRATCH="$(mktemp -d "${TMPDIR:-/tmp}/carapace-mac-worker.XXXXXX")"
 trap 'rm -rf "$SCRATCH"' EXIT
 mkdir -p "$(dirname "$DESTINATION")"
-STAGE="$(cd "$(dirname "$DESTINATION")" && mktemp -d "$PWD/.openclaw-mac-worker.XXXXXX")"
+STAGE="$(cd "$(dirname "$DESTINATION")" && mktemp -d "$PWD/.carapace-mac-worker.XXXXXX")"
 trap 'rm -rf "$STAGE" "$SCRATCH"' EXIT
 mkdir -p "$SCRATCH/home" "$SCRATCH/package"
 
@@ -24,9 +24,9 @@ mkdir -p "$SCRATCH/home" "$SCRATCH/package"
 # installer main discovers launchd by UID even with a new HOME.
 # Use the build's pinned pnpm packer, not the host npm's expanding file globs.
 TARBALL="$(env -i HOME="$SCRATCH/home" PATH="$PATH" TMPDIR="$SCRATCH" \
-  node "$ROOT_DIR/scripts/package-openclaw-for-docker.mjs" \
+  node "$ROOT_DIR/scripts/package-carapace-for-docker.mjs" \
   --skip-build --pnpm-pack --allow-unreleased-changelog --output-dir "$SCRATCH/package" \
-  --output-name openclaw.tgz)"
+  --output-name carapace.tgz)"
 [[ -f "$TARBALL" ]] || { echo "ERROR: Canonical worker package missing" >&2; exit 1; }
 
 for arch in "$@"; do
@@ -37,19 +37,19 @@ for arch in "$@"; do
   esac
   mkdir -p "$SCRATCH/$arch/home" "$SCRATCH/$arch/tmp"
   env -i HOME="$SCRATCH/$arch/home" PATH="/usr/bin:/bin:/usr/sbin:/sbin" \
-    TMPDIR="$SCRATCH/$arch/tmp" OPENCLAW_INSTALL_CLI_SH_NO_RUN=1 \
+    TMPDIR="$SCRATCH/$arch/tmp" CARAPACE_INSTALL_CLI_SH_NO_RUN=1 \
     bash -c '
       set -euo pipefail
       source "$1/scripts/install-cli.sh"
       PREFIX="$2/prefix"
-      OPENCLAW_VERSION="$3"
+      CARAPACE_VERSION="$3"
       install_node darwin "$4"
       export PATH="$(node_dir)/bin:$PATH"
       "$(node_bin)" -e '\''if (process.arch !== process.argv[1]) process.exit(1)'\'' "$4" || {
         echo "ERROR: Cannot execute requested Node architecture $4; x64 on ARM requires Rosetta" >&2
         exit 1
       }
-      install_openclaw
+      install_carapace
       mv "$(node_dir)" "$2/installed"
     ' bash "$ROOT_DIR" "$STAGE/$arch" "$TARBALL" "$node_arch"
   # Unused Intel prebuilds can trigger macOS compatibility warnings even when

@@ -1,14 +1,14 @@
-// Lmstudio plugin entrypoint registers its OpenClaw integration.
+// Lmstudio plugin entrypoint registers its Carapace integration.
 import {
   definePluginEntry,
-  type OpenClawConfig,
-  type OpenClawPluginApi,
+  type CarapaceConfig,
+  type CarapacePluginApi,
   type ProviderAuthContext,
   type ProviderAuthMethodNonInteractiveContext,
   type ProviderAuthResult,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { CUSTOM_LOCAL_AUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
+} from "carapace/plugin-sdk/plugin-entry";
+import { CUSTOM_LOCAL_AUTH_MARKER } from "carapace/plugin-sdk/provider-auth";
+import { buildProviderToolCompatFamilyHooks } from "carapace/plugin-sdk/provider-tools";
 import { lmstudioMemoryEmbeddingProviderAdapter } from "./memory-embedding-adapter.js";
 import {
   LMSTUDIO_DEFAULT_API_KEY_ENV_VAR,
@@ -24,7 +24,7 @@ import { wrapLmstudioInferencePreload } from "./src/stream.js";
 
 const PROVIDER_ID = "lmstudio";
 
-function resolveLmstudioAugmentedCatalogEntries(config: OpenClawConfig | undefined) {
+function resolveLmstudioAugmentedCatalogEntries(config: CarapaceConfig | undefined) {
   if (!config) {
     return [];
   }
@@ -51,7 +51,7 @@ export default definePluginEntry({
   id: PROVIDER_ID,
   name: "LM Studio Provider",
   description: "Bundled LM Studio provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     api.registerEmbeddingProvider(lmstudioMemoryEmbeddingProviderAdapter);
     api.registerProvider({
       id: PROVIDER_ID,

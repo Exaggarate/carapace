@@ -25,7 +25,7 @@ const message = vi.hoisted(() =>
 const createClientOptions = vi.hoisted(() => vi.fn());
 const loadOutboundMediaFromUrl = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/outbound-media", () => ({ loadOutboundMediaFromUrl }));
+vi.mock("carapace/plugin-sdk/outbound-media", () => ({ loadOutboundMediaFromUrl }));
 
 vi.mock("./accounts.js", () => ({
   resolveClickClackAccount: () => ({
@@ -197,7 +197,7 @@ describe("sendClickClackText routing", () => {
       "general",
       "durable",
       expect.objectContaining({
-        nonce: "openclaw-text:4a171ee0c18d243d8d3c510320ab1b1d317afd95b0204abec18312e57307fb24",
+        nonce: "carapace-text:4a171ee0c18d243d8d3c510320ab1b1d317afd95b0204abec18312e57307fb24",
       }),
     );
   });
@@ -456,13 +456,13 @@ describe("sendClickClackMedia", () => {
       buffer: Buffer.from("const proof = true;"),
       filename: "viewer-proof.ts",
       contentType: "text/typescript",
-      nonce: "openclaw-upload:59191af0ade27fb1ed08162b9eed248d0b62f878fba7da53d16e32cacf34f6a1",
+      nonce: "carapace-upload:59191af0ade27fb1ed08162b9eed248d0b62f878fba7da53d16e32cacf34f6a1",
     });
     expect(createChannelMessage).toHaveBeenCalledWith(
       "general",
       "Artifact proof",
       expect.objectContaining({
-        nonce: "openclaw-media:59191af0ade27fb1ed08162b9eed248d0b62f878fba7da53d16e32cacf34f6a1",
+        nonce: "carapace-media:59191af0ade27fb1ed08162b9eed248d0b62f878fba7da53d16e32cacf34f6a1",
       }),
     );
     expect(attachUpload).toHaveBeenCalledWith("msg_out", "upl_1");
@@ -592,7 +592,7 @@ describe("reconcileClickClackUnknownSend", () => {
     expect(result.status).toBe("sent");
     expect(findMessageByNonce).toHaveBeenCalledWith({
       workspaceId: "wsp_1",
-      nonce: "openclaw-text:4a171ee0c18d243d8d3c510320ab1b1d317afd95b0204abec18312e57307fb24",
+      nonce: "carapace-text:4a171ee0c18d243d8d3c510320ab1b1d317afd95b0204abec18312e57307fb24",
     });
     expect(createChannelMessage).not.toHaveBeenCalled();
     expect(createUpload).not.toHaveBeenCalled();
@@ -648,11 +648,11 @@ describe("reconcileClickClackUnknownSend", () => {
     expect(result).toEqual({ status: "not_sent" });
     expect(findUploadByNonce).toHaveBeenCalledWith({
       workspaceId: "wsp_1",
-      nonce: "openclaw-upload:b7ec5953ddec187b357faecde36f1abf0ef8590b1cda47c199c562b9e2e24432",
+      nonce: "carapace-upload:b7ec5953ddec187b357faecde36f1abf0ef8590b1cda47c199c562b9e2e24432",
     });
     expect(findMessageByNonce).toHaveBeenCalledWith({
       workspaceId: "wsp_1",
-      nonce: "openclaw-media:b7ec5953ddec187b357faecde36f1abf0ef8590b1cda47c199c562b9e2e24432",
+      nonce: "carapace-media:b7ec5953ddec187b357faecde36f1abf0ef8590b1cda47c199c562b9e2e24432",
     });
     expect(createChannelMessage).not.toHaveBeenCalled();
     expect(attachUpload).not.toHaveBeenCalled();

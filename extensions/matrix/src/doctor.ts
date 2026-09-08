@@ -1,17 +1,17 @@
 // Matrix plugin module implements doctor behavior.
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelDoctorAdapter } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   detectPluginInstallPathIssue,
   formatPluginInstallPathIssue,
   removePluginFromConfig,
-} from "openclaw/plugin-sdk/doctor-repair-runtime";
+} from "carapace/plugin-sdk/doctor-repair-runtime";
 import {
   legacyConfigRules as MATRIX_LEGACY_CONFIG_RULES,
   normalizeCompatibilityConfig as normalizeMatrixCompatibilityConfig,
 } from "./doctor-contract.js";
 
-export async function collectMatrixInstallPathWarnings(cfg: OpenClawConfig): Promise<string[]> {
+export async function collectMatrixInstallPathWarnings(cfg: CarapaceConfig): Promise<string[]> {
   const issue = await detectPluginInstallPathIssue({
     pluginId: "matrix",
     install: cfg.plugins?.installs?.matrix,
@@ -22,11 +22,11 @@ export async function collectMatrixInstallPathWarnings(cfg: OpenClawConfig): Pro
   return formatPluginInstallPathIssue({
     issue,
     pluginLabel: "Matrix",
-    defaultInstallCommand: "openclaw plugins install @openclaw/matrix",
+    defaultInstallCommand: "carapace plugins install @carapace/matrix",
   }).map((entry) => `- ${entry}`);
 }
 
-export async function cleanStaleMatrixPluginConfig(cfg: OpenClawConfig) {
+export async function cleanStaleMatrixPluginConfig(cfg: CarapaceConfig) {
   const issue = await detectPluginInstallPathIssue({
     pluginId: "matrix",
     install: cfg.plugins?.installs?.matrix,
@@ -60,7 +60,7 @@ export async function cleanStaleMatrixPluginConfig(cfg: OpenClawConfig) {
 }
 
 export async function runMatrixDoctorSequence(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   shouldRepair: boolean;
 }): Promise<{ changeNotes: string[]; warningNotes: string[] }> {

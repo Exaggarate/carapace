@@ -26,8 +26,8 @@ export async function withWindowsEnv(
   const env = {
     USERPROFILE: tmpDir,
     APPDATA: path.join(tmpDir, "AppData", "Roaming"),
-    OPENCLAW_PROFILE: "default",
-    OPENCLAW_GATEWAY_PORT: "18789",
+    CARAPACE_PROFILE: "default",
+    CARAPACE_GATEWAY_PORT: "18789",
   };
   try {
     await run({ tmpDir, env });
@@ -47,7 +47,7 @@ export function resetSchtasksBaseMocks() {
 
 export async function writeGatewayScript(
   env: Record<string, string>,
-  port = Number(env.OPENCLAW_GATEWAY_PORT || "18789"),
+  port = Number(env.CARAPACE_GATEWAY_PORT || "18789"),
 ) {
   const scriptPath = resolveTaskScriptPath(env);
   await fs.mkdir(path.dirname(scriptPath), { recursive: true });
@@ -55,8 +55,8 @@ export async function writeGatewayScript(
     scriptPath,
     [
       "@echo off",
-      `set "OPENCLAW_GATEWAY_PORT=${port}"`,
-      `"C:\\Program Files\\nodejs\\node.exe" "C:\\Users\\steipete\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js" gateway --port ${port}`,
+      `set "CARAPACE_GATEWAY_PORT=${port}"`,
+      `"C:\\Program Files\\nodejs\\node.exe" "C:\\Users\\steipete\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js" gateway --port ${port}`,
       "",
     ].join("\r\n"),
     "utf8",

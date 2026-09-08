@@ -7,7 +7,7 @@ import type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.typ
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { setPluginToolMeta } from "../plugins/tool-metadata.js";
-import type { createOpenClawCodingTools } from "./agent-tools.js";
+import type { createCarapaceCodingTools } from "./agent-tools.js";
 import type { AnyAgentTool } from "./tools/common.js";
 
 function mockTool(params: {
@@ -42,7 +42,7 @@ const effectiveInventoryState = vi.hoisted(() => ({
   normalizeToolsMock: vi.fn((options: { tools: AnyAgentTool[] }) => options.tools),
   staticCatalogModelMock: vi.fn((_options: unknown) => undefined as unknown),
   normalizeTransportMock: vi.fn((_options: unknown) => undefined as unknown),
-  createToolsMock: vi.fn<typeof createOpenClawCodingTools>(
+  createToolsMock: vi.fn<typeof createCarapaceCodingTools>(
     (_options) =>
       [
         mockTool({ name: "exec", label: "Exec", description: "Run shell commands" }),
@@ -62,7 +62,7 @@ vi.mock("./agent-scope.js", async () => {
 });
 
 vi.mock("./agent-tools.js", () => ({
-  createOpenClawCodingTools: (options?: Parameters<typeof createOpenClawCodingTools>[0]) =>
+  createCarapaceCodingTools: (options?: Parameters<typeof createCarapaceCodingTools>[0]) =>
     effectiveInventoryState.createToolsMock(options),
 }));
 
@@ -116,7 +116,7 @@ async function loadHarness(options?: {
   effectiveInventoryState.normalizeTransportMock = vi.fn((_options: unknown) => undefined);
   effectiveInventoryState.createToolsMock =
     options?.createToolsMock ??
-    vi.fn<typeof createOpenClawCodingTools>((_options) => effectiveInventoryState.tools);
+    vi.fn<typeof createCarapaceCodingTools>((_options) => effectiveInventoryState.tools);
   return {
     resolveEffectiveToolInventory,
     createToolsMock: effectiveInventoryState.createToolsMock,
@@ -138,7 +138,7 @@ describe("resolveEffectiveToolInventory", () => {
     effectiveInventoryState.normalizeToolsMock = vi.fn((options) => options.tools);
     effectiveInventoryState.staticCatalogModelMock = vi.fn((_options: unknown) => undefined);
     effectiveInventoryState.normalizeTransportMock = vi.fn((_options: unknown) => undefined);
-    effectiveInventoryState.createToolsMock = vi.fn<typeof createOpenClawCodingTools>(
+    effectiveInventoryState.createToolsMock = vi.fn<typeof createCarapaceCodingTools>(
       (_options) => effectiveInventoryState.tools,
     );
     setActivePluginRegistry(createEmptyPluginRegistry());
@@ -1002,7 +1002,7 @@ describe("resolveEffectiveToolInventory", () => {
   });
 
   it("passes resolved model compat into effective tool creation", async () => {
-    const createToolsMock = vi.fn<typeof createOpenClawCodingTools>(() => [
+    const createToolsMock = vi.fn<typeof createCarapaceCodingTools>(() => [
       mockTool({ name: "exec", label: "Exec", description: "Run shell commands" }),
     ]);
     const { resolveEffectiveToolInventory: resolveEffectiveToolInventoryLocal } = await loadHarness(

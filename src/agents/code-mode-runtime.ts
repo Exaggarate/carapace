@@ -1,8 +1,8 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
+import { uniqueValues } from "@carapace/normalization-core/string-normalization";
 import { normalizeAgentModelRefForConfig } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { modelKey } from "../shared/model-key.js";
 import { clampNumber } from "../utils.js";
@@ -104,7 +104,7 @@ function normalizeCodeModeRawConfig(value: unknown): Record<string, unknown> | u
 }
 
 function readCodeModeRawConfig(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   agentId?: string,
   model?: { provider: string; modelId: string },
 ): Record<string, unknown> {
@@ -150,7 +150,7 @@ function readLanguages(value: unknown): CodeModeLanguage[] {
 
 /** Resolves Code Mode runtime limits and language support from config. */
 export function resolveCodeModeConfig(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   agentId?: string,
   model?: { provider: string; modelId: string },
 ): CodeModeConfig {
@@ -250,7 +250,7 @@ export function resolveCodeModeHeadlessConfig(
   );
   return resolveCodeModeConfig({
     tools: { codeMode: { ...base, ...definedOverrides } },
-  } as OpenClawConfig);
+  } as CarapaceConfig);
 }
 
 function isRuntimeInterruptedError(error: unknown): boolean {

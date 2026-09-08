@@ -1,8 +1,8 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Voice Call tests cover response generator plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "../api.js";
+import type { CarapacePluginApi } from "../api.js";
 import { VoiceCallConfigSchema } from "./config.js";
 import { generateVoiceResponse } from "./response-generator.js";
 
@@ -119,21 +119,21 @@ function createAgentRuntime(
       run: (signal: AbortSignal) => Promise<unknown>,
     ) => await run(new AbortController().signal),
   );
-  const resolveAgentDir = vi.fn((_cfg: OpenClawConfig, agentId: string) => {
-    return `/tmp/openclaw/agents/${agentId}`;
+  const resolveAgentDir = vi.fn((_cfg: CarapaceConfig, agentId: string) => {
+    return `/tmp/carapace/agents/${agentId}`;
   });
-  const resolveAgentWorkspaceDir = vi.fn((_cfg: OpenClawConfig, agentId: string) => {
-    return `/tmp/openclaw/workspace/${agentId}`;
+  const resolveAgentWorkspaceDir = vi.fn((_cfg: CarapaceConfig, agentId: string) => {
+    return `/tmp/carapace/workspace/${agentId}`;
   });
-  const resolveAgentIdentity = vi.fn((_cfg: OpenClawConfig, agentId: string) => ({
+  const resolveAgentIdentity = vi.fn((_cfg: CarapaceConfig, agentId: string) => ({
     name: `${agentId} tester`,
   }));
   const resolveStorePath = vi.fn((_store: string | undefined, params: { agentId?: string }) => {
-    return `/tmp/openclaw/${params.agentId ?? "main"}/sessions.json`;
+    return `/tmp/carapace/${params.agentId ?? "main"}/sessions.json`;
   });
   const resolveSessionFilePath = vi.fn(
     (_sessionId: string, _entry: unknown, params: { agentId?: string }) => {
-      return `/tmp/openclaw/${params.agentId ?? "main"}/sessions/session.jsonl`;
+      return `/tmp/carapace/${params.agentId ?? "main"}/sessions/session.jsonl`;
     },
   );
 
@@ -160,7 +160,7 @@ function createAgentRuntime(
       runWithWorkAdmission,
       resolveSessionFilePath,
     },
-  } as unknown as OpenClawPluginApi["runtime"]["agent"];
+  } as unknown as CarapacePluginApi["runtime"]["agent"];
 
   return {
     runtime,
@@ -194,7 +194,7 @@ function requireEmbeddedAgentArgs(runEmbeddedAgent: ReturnType<typeof vi.fn>) {
 async function runGenerateVoiceResponse(
   payloads: Array<Record<string, unknown>>,
   overrides?: {
-    runtime?: OpenClawPluginApi["runtime"]["agent"];
+    runtime?: CarapacePluginApi["runtime"]["agent"];
     transcript?: Array<{ speaker: "user" | "bot"; text: string }>;
     userMessage?: string;
     onEarlyText?: (text: string) => Promise<boolean>;
@@ -204,7 +204,7 @@ async function runGenerateVoiceResponse(
   const voiceConfig = VoiceCallConfigSchema.parse({
     responseTimeoutMs: 5000,
   });
-  const coreConfig = {} as OpenClawConfig;
+  const coreConfig = {} as CarapaceConfig;
   const runtime = overrides?.runtime ?? createAgentRuntime(payloads).runtime;
   const userMessage = overrides?.userMessage ?? "hello there";
 
@@ -337,7 +337,7 @@ describe("generateVoiceResponse", () => {
     expect(args.onBlockReplyFlush).toEqual(expect.any(Function));
     expect(runWithWorkAdmission).toHaveBeenCalledWith(
       {
-        storePath: "/tmp/openclaw/main/sessions.json",
+        storePath: "/tmp/carapace/main/sessions.json",
         sessionKey: "agent:main:voice:15550001111",
       },
       expect.any(Function),
@@ -631,7 +631,7 @@ describe("generateVoiceResponse", () => {
 
     const result = await generateVoiceResponse({
       voiceConfig,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       from: "+15550001111",
@@ -654,7 +654,7 @@ describe("generateVoiceResponse", () => {
       "session entry patch",
     );
     expect(patchSessionEntryCall[0]).toMatchObject({
-      storePath: "/tmp/openclaw/main/sessions.json",
+      storePath: "/tmp/carapace/main/sessions.json",
       sessionKey: "agent:main:voice:15550001111",
       replaceEntry: true,
     });
@@ -681,7 +681,7 @@ describe("generateVoiceResponse", () => {
 
     const result = await generateVoiceResponse({
       voiceConfig,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       from: "+15550001111",
@@ -714,7 +714,7 @@ describe("generateVoiceResponse", () => {
       sessionId: "catalog-adopted-session",
       updatedAt: 100,
       agentHarnessId: "codex",
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
       modelSelectionLocked: true,
       pluginExtensions: {
         codex: {
@@ -729,7 +729,7 @@ describe("generateVoiceResponse", () => {
 
     const result = await generateVoiceResponse({
       voiceConfig,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       sessionKey,
@@ -767,7 +767,7 @@ describe("generateVoiceResponse", () => {
       name: "plugin-owned runtime request",
       entry: {
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         modelSelectionLocked: true,
         pluginOwnerId: "voice-call",
       },
@@ -802,7 +802,7 @@ describe("generateVoiceResponse", () => {
 
     const result = await generateVoiceResponse({
       voiceConfig,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       sessionKey: "voice:call:call-123",
@@ -833,7 +833,7 @@ describe("generateVoiceResponse", () => {
 
     await generateVoiceResponse({
       voiceConfig,
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       sessionKey: "meet-room-1",
@@ -860,7 +860,7 @@ describe("generateVoiceResponse", () => {
     const generate = (sessionKey: string) =>
       generateVoiceResponse({
         voiceConfig,
-        coreConfig: {} as OpenClawConfig,
+        coreConfig: {} as CarapaceConfig,
         agentRuntime: runtime,
         callId: "call-123",
         sessionKey,
@@ -922,7 +922,7 @@ describe("generateVoiceResponse", () => {
       resolveStorePath,
       sessionStore,
     } = createAgentRuntime([{ text: '{"spoken":"Default agent."}' }]);
-    const coreConfig = {} as OpenClawConfig;
+    const coreConfig = {} as CarapaceConfig;
 
     await generateVoiceResponse({
       voiceConfig: VoiceCallConfigSchema.parse({ responseTimeoutMs: 5000 }),
@@ -944,17 +944,17 @@ describe("generateVoiceResponse", () => {
       throw new Error("Expected default voice session entry");
     }
     const args = requireEmbeddedAgentArgs(runEmbeddedAgent);
-    expect(args.agentDir).toBe("/tmp/openclaw/agents/main");
+    expect(args.agentDir).toBe("/tmp/carapace/agents/main");
     expect(args.agentId).toBe("main");
     expect(args.sessionKey).toBe("agent:main:voice:15550001111");
     expect(args.sessionTarget).toStrictEqual({
       agentId: "main",
       sessionId: defaultSessionEntry.sessionId,
       sessionKey: "agent:main:voice:15550001111",
-      storePath: "/tmp/openclaw/main/sessions.json",
+      storePath: "/tmp/carapace/main/sessions.json",
     });
     expect(args.sandboxSessionKey).toBe("agent:main:voice:15550001111");
-    expect(args.workspaceDir).toBe("/tmp/openclaw/workspace/main");
+    expect(args.workspaceDir).toBe("/tmp/carapace/workspace/main");
     expect(args.sessionFile).toBeUndefined();
   });
 
@@ -968,7 +968,7 @@ describe("generateVoiceResponse", () => {
       resolveStorePath,
       sessionStore,
     } = createAgentRuntime([{ text: '{"spoken":"Voice agent."}' }]);
-    const coreConfig = {} as OpenClawConfig;
+    const coreConfig = {} as CarapaceConfig;
 
     const result = await generateVoiceResponse({
       voiceConfig: VoiceCallConfigSchema.parse({
@@ -994,17 +994,17 @@ describe("generateVoiceResponse", () => {
       throw new Error("Expected routed voice session entry");
     }
     const args = requireEmbeddedAgentArgs(runEmbeddedAgent);
-    expect(args.agentDir).toBe("/tmp/openclaw/agents/voice");
+    expect(args.agentDir).toBe("/tmp/carapace/agents/voice");
     expect(args.agentId).toBe("voice");
     expect(args.sessionKey).toBe("agent:voice:voice:15550001111");
     expect(args.sessionTarget).toStrictEqual({
       agentId: "voice",
       sessionId: voiceSessionEntry.sessionId,
       sessionKey: "agent:voice:voice:15550001111",
-      storePath: "/tmp/openclaw/voice/sessions.json",
+      storePath: "/tmp/carapace/voice/sessions.json",
     });
     expect(args.sandboxSessionKey).toBe("agent:voice:voice:15550001111");
-    expect(args.workspaceDir).toBe("/tmp/openclaw/workspace/voice");
+    expect(args.workspaceDir).toBe("/tmp/carapace/workspace/voice");
     expect(args.sessionFile).toBeUndefined();
   });
 
@@ -1015,7 +1015,7 @@ describe("generateVoiceResponse", () => {
 
     await generateVoiceResponse({
       voiceConfig: VoiceCallConfigSchema.parse({ agentId: "voice", responseTimeoutMs: 5000 }),
-      coreConfig: {} as OpenClawConfig,
+      coreConfig: {} as CarapaceConfig,
       agentRuntime: runtime,
       callId: "call-123",
       agentId: "support",
@@ -1045,7 +1045,7 @@ describe("generateVoiceResponse", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = await generateVoiceResponse({
       voiceConfig: VoiceCallConfigSchema.parse({

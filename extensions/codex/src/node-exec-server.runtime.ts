@@ -5,12 +5,12 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { stripVTControlCharacters } from "node:util";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { OpenClawPluginNodeHostCommandIo } from "openclaw/plugin-sdk/node-host";
-import { killProcessTree } from "openclaw/plugin-sdk/process-runtime";
-import { sanitizeEnvVars } from "openclaw/plugin-sdk/sandbox";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { CarapacePluginNodeHostCommandIo } from "carapace/plugin-sdk/node-host";
+import { killProcessTree } from "carapace/plugin-sdk/process-runtime";
+import { sanitizeEnvVars } from "carapace/plugin-sdk/sandbox";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
 import {
   isManagedCodexDesktopCommand,
   resolveManagedCodexAppServerStartOptions,
@@ -161,7 +161,7 @@ function createNodeExecServerProcessOwner(
 export async function runCodexNodeExecServer(params: {
   assertExecAuthorized: () => void;
   workspaceDir: string;
-  io: OpenClawPluginNodeHostCommandIo;
+  io: CarapacePluginNodeHostCommandIo;
   activeProcesses: Set<() => Promise<void>>;
   onFrameReceiver: (receiver: (message: Uint8Array) => Promise<void> | void) => void;
 }): Promise<string> {
@@ -188,7 +188,7 @@ export async function runCodexNodeExecServer(params: {
       throw nodeExecServerAbortError(io.signal);
     }
     return await withTempWorkspace(
-      { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "codex-node-exec-server-" },
+      { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "codex-node-exec-server-" },
       async ({ dir }) => {
         const codexHome = path.join(dir, ".codex");
         // Codex canonicalizes CODEX_HOME during startup and rejects missing directories.

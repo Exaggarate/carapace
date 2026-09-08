@@ -1,9 +1,9 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Model } from "carapace/plugin-sdk/llm";
 /**
  * Tests provider stream shared helpers and stream hook capture.
  */
-import { createRequireRecord, createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord, createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import { createAssistantMessageEventStream } from "../llm/utils/event-stream.js";
 import {

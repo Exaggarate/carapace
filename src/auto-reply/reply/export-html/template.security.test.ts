@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { generateExportHtmlVendorAssets } from "../../../../scripts/runtime-postbuild.mts";
 
@@ -71,10 +71,10 @@ async function renderTemplate(sessionData: SessionData) {
     (currentHtml, [name, value]) =>
       currentHtml.replace(
         new RegExp(
-          `(<(?:script|style)\\b(?=[^>]*\\bdata-openclaw-export-placeholder="${name}")[^>]*>)(</(?:script|style)>)`,
+          `(<(?:script|style)\\b(?=[^>]*\\bdata-carapace-export-placeholder="${name}")[^>]*>)(</(?:script|style)>)`,
         ),
         (_match: string, openTag: string, closeTag: string) =>
-          `${openTag.replace(/\sdata-openclaw-export-placeholder="[^"]*"/, "")}${value}${closeTag}`,
+          `${openTag.replace(/\sdata-carapace-export-placeholder="[^"]*"/, "")}${value}${closeTag}`,
       ),
     templateHtml,
   );
@@ -225,7 +225,7 @@ describe("export html security hardening", () => {
             role: "user",
             content: "Synthetic consultation instructions",
             display: false,
-            provenance: { kind: "internal_system", sourceTool: "openclaw_agent_consult" },
+            provenance: { kind: "internal_system", sourceTool: "carapace_agent_consult" },
           },
         },
         {

@@ -1,12 +1,12 @@
 // Stepfun tests cover index plugin behavior.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
 import {
   registerProviderPlugin,
   requireRegisteredProvider,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
 import { describe, expect, it, vi } from "vitest";
 import stepfunPlugin from "./index.js";
 import {
@@ -32,7 +32,7 @@ type StepFunManifest = {
 };
 
 function readManifest(): StepFunManifest {
-  return JSON.parse(readFileSync(resolve(import.meta.dirname, "openclaw.plugin.json"), "utf-8"));
+  return JSON.parse(readFileSync(resolve(import.meta.dirname, "carapace.plugin.json"), "utf-8"));
 }
 
 describe("stepfun provider registration", () => {

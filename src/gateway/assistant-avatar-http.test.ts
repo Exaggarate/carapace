@@ -4,7 +4,7 @@ import type { IncomingMessage } from "node:http";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readImageMetadataFromHeader } from "../media/image-ops.js";
 import { encodePngRgba } from "../media/png-encode.js";
 import { AVATAR_MAX_BYTES } from "../shared/avatar-limits.js";
@@ -75,7 +75,7 @@ it.each(
 )(
   "preserves the bytes of a $sourceKind $format avatar",
   async ({ filename, mime, body, sourceKind }) => {
-    const workspace = tempRoots.make("openclaw-avatar-animation-");
+    const workspace = tempRoots.make("carapace-avatar-animation-");
     if (filename) {
       fs.writeFileSync(path.join(workspace, filename), body);
     }
@@ -86,7 +86,7 @@ it.each(
         : sourceKind === "percent-data"
           ? `data:${mime},${Array.from(body, (byte) => `%${byte.toString(16).padStart(2, "0")}`).join("")}`
           : `data:${mime};base64,${sourceKind === "escaped-base64" ? encodeURIComponent(base64) : base64}`;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { list: [{ id: "main", workspace, identity: { avatar } }] },
     };
     const url = resolveGatewayAssistantAvatar({
@@ -111,12 +111,12 @@ it.each(
 it.each(["local", "data"])(
   "serves a cached authenticated thumbnail for a versioned %s avatar",
   async (sourceKind) => {
-    const workspace = tempRoots.make("openclaw-avatar-thumbnail-");
+    const workspace = tempRoots.make("carapace-avatar-thumbnail-");
     const pixels = randomBytes(640 * 640 * 4);
     const original = encodePngRgba(pixels, 640, 640);
     const avatarPath = path.join(workspace, "avatar.png");
     fs.writeFileSync(avatarPath, original);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: { controlUi: { basePath: "/control" } },
       agents: {
         list: [

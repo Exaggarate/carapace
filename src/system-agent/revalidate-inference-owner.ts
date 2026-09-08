@@ -3,7 +3,7 @@ import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import type { AgentExecutionAuthBinding } from "../agents/execution-auth-binding.js";
 import type { AgentHarnessPluginSelection } from "../agents/harness/runtime-plugin-load-plan.js";
 import { loadAgentRuntimePluginRegistryHandle } from "../agents/runtime-plugins.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { loadInstalledPluginIndexInstallRecordsSync } from "../plugins/installed-plugin-index-record-reader.js";
 import { loadInstalledPluginIndex } from "../plugins/installed-plugin-index.js";
@@ -27,7 +27,7 @@ type RevalidationDeps = SystemAgentVerifiedInferenceDeps & {
 
 /** Setup owns fresh package facts without replacing the Gateway's startup generation. */
 export function loadSetupInferencePluginGeneration(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir: string;
   selection: AgentHarnessPluginSelection;
   pendingPluginInstalls?: Record<string, PluginInstallRecord>;
@@ -105,7 +105,7 @@ export async function revalidateSetupInferenceOwner(params: {
     params.ownerPluginIds?.length ||
     (params.route.runner === "embedded" &&
       successfulHarnessId &&
-      successfulHarnessId !== "openclaw")
+      successfulHarnessId !== "carapace")
   ) {
     const workspaceDir = resolveAgentWorkspaceDir(
       params.route.runConfig,

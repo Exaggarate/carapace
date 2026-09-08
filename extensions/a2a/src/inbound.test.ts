@@ -1,4 +1,4 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
 import { describe, expect, it, vi } from "vitest";
 import { dispatchA2aInbound } from "./inbound.js";
 import { A2aTaskStore } from "./task-store.js";

@@ -38,7 +38,7 @@ suite.define(() => {
           release = resolve;
         });
         const proof = { requested: false, release: () => release() };
-        Object.defineProperty(window, "openclawMicrophoneAccessE2e", { value: proof });
+        Object.defineProperty(window, "carapaceMicrophoneAccessE2e", { value: proof });
         navigator.mediaDevices.getUserMedia = (constraints) => {
           proof.requested = true;
           return permission.then(() => getUserMedia(constraints));
@@ -50,8 +50,8 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(
             () =>
-              (window as Window & { openclawMicrophoneAccessE2e?: { requested: boolean } })
-                .openclawMicrophoneAccessE2e?.requested,
+              (window as Window & { carapaceMicrophoneAccessE2e?: { requested: boolean } })
+                .carapaceMicrophoneAccessE2e?.requested,
           ),
         )
         .toBe(true);
@@ -68,8 +68,8 @@ suite.define(() => {
       await expect.poll(() => guidance.isVisible()).toBe(true);
       await page.evaluate(() =>
         (
-          window as Window & { openclawMicrophoneAccessE2e?: { release: () => void } }
-        ).openclawMicrophoneAccessE2e?.release(),
+          window as Window & { carapaceMicrophoneAccessE2e?: { release: () => void } }
+        ).carapaceMicrophoneAccessE2e?.release(),
       );
       await expect
         .poll(() => page.locator('.agent-chat__voice-activity[data-status="listening"]').count())
@@ -102,8 +102,8 @@ suite.define(() => {
           .poll(() =>
             page.evaluate(() => {
               const proof = (
-                window as Window & { openclawMicrophoneLossE2e?: MicrophoneLossE2eProof }
-              ).openclawMicrophoneLossE2e;
+                window as Window & { carapaceMicrophoneLossE2e?: MicrophoneLossE2eProof }
+              ).carapaceMicrophoneLossE2e;
               return {
                 status: document
                   .querySelector(".agent-chat__voice-activity")
@@ -127,8 +127,8 @@ suite.define(() => {
 
       await page.evaluate(() => {
         (
-          window as Window & { openclawMicrophoneLossE2e?: MicrophoneLossE2eProof }
-        ).openclawMicrophoneLossE2e?.endMicrophone();
+          window as Window & { carapaceMicrophoneLossE2e?: MicrophoneLossE2eProof }
+        ).carapaceMicrophoneLossE2e?.endMicrophone();
       });
 
       const alert = page.locator('.agent-chat__talk-status[role="alert"]');
@@ -139,8 +139,8 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(() => {
             const proof = (
-              window as Window & { openclawMicrophoneLossE2e?: MicrophoneLossE2eProof }
-            ).openclawMicrophoneLossE2e;
+              window as Window & { carapaceMicrophoneLossE2e?: MicrophoneLossE2eProof }
+            ).carapaceMicrophoneLossE2e;
             return {
               tracksStopped: proof?.tracksStopped,
               peerClosed: proof?.peerClosed,

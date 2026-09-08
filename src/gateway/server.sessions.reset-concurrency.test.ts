@@ -11,7 +11,7 @@ import { createSessionDiffBaselineCaptureClaim } from "../config/sessions/sessio
 import type { InternalSessionEntry, SessionDiffBaseline } from "../config/sessions/types.js";
 import { ensureSessionDiffBaseline } from "../sessions/session-diff-baseline.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withLocalGatewayRequestScope } from "./local-request-context.js";
 import { writeSessionStore } from "./test-helpers.js";
 import {
@@ -40,7 +40,7 @@ vi.mock("../sessions/session-diff.js", async (importOriginal) => ({
 }));
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function resetFromCaller(key: string, current: () => boolean) {

@@ -7,7 +7,7 @@ import {
   loadSessionEntry,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginStateSyncKeyedStore } from "../plugin-state/plugin-state-store.js";
 import * as pluginModuleRuntime from "../plugins/loader-module-runtime.js";
 import {
@@ -18,7 +18,7 @@ import {
 import { getActivePluginRegistry } from "../plugins/runtime.js";
 import { createPluginRuntime } from "../plugins/runtime/index.js";
 import { createNonExitingRuntime } from "../runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { sessionsCleanupCommand } from "./sessions-cleanup.js";
 
 const OWNER_PLUGIN_ID = "cleanup-owner";
@@ -64,7 +64,7 @@ function writeCleanupPlugins(bundledRoot: string) {
     };`,
   });
   fs.writeFileSync(
-    path.join(owner.dir, "openclaw.plugin.json"),
+    path.join(owner.dir, "carapace.plugin.json"),
     JSON.stringify({
       id: owner.id,
       activation: { onStartup: false, onAgentHarnesses: [HARNESS_ID] },
@@ -73,7 +73,7 @@ function writeCleanupPlugins(bundledRoot: string) {
   );
   fs.writeFileSync(
     path.join(owner.dir, "package.json"),
-    JSON.stringify({ name: `@openclaw/${owner.id}`, openclaw: { extensions: ["./index.cjs"] } }),
+    JSON.stringify({ name: `@carapace/${owner.id}`, carapace: { extensions: ["./index.cjs"] } }),
   );
   const unrelated = writePlugin({
     id: "unrelated-cleanup-plugin",
@@ -113,12 +113,12 @@ describe("offline sessions cleanup harness ownership", () => {
   ] as const)(
     "reclaims allowed $label ownership and reports policy exclusions without running unrelated plugins",
     async ({ metadata, activation }) => {
-      await withOpenClawTestState({ label: "offline-harness-cleanup" }, async (state) => {
+      await withCarapaceTestState({ label: "offline-harness-cleanup" }, async (state) => {
         const bundledRoot = state.path("bundled-plugins");
         const { owner, unrelated } = writeCleanupPlugins(bundledRoot);
-        vi.stubEnv("OPENCLAW_DISABLE_BUNDLED_PLUGINS", undefined);
-        vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", bundledRoot);
-        const cfg: OpenClawConfig = {
+        vi.stubEnv("CARAPACE_DISABLE_BUNDLED_PLUGINS", undefined);
+        vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", bundledRoot);
+        const cfg: CarapaceConfig = {
           agents: {
             defaults: { model: { primary: "other-provider/other-model" } },
             entries: { main: { default: true, workspace: state.workspaceDir } },

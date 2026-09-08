@@ -1,8 +1,8 @@
-// Minimal @openclaw/ai consumer: one isolated runtime, built-in providers,
-// one streamed completion. Uses only the public package surface — no OpenClaw
+// Minimal @carapace/ai consumer: one isolated runtime, built-in providers,
+// one streamed completion. Uses only the public package surface — no Carapace
 // application code. See README.md for build prerequisites and run commands.
-import { createLlmRuntime } from "@openclaw/ai";
-import { registerBuiltInApiProviders } from "@openclaw/ai/providers";
+import { createLlmRuntime } from "@carapace/ai";
+import { registerBuiltInApiProviders } from "@carapace/ai/providers";
 
 const MODELS = {
   anthropic: {
@@ -49,7 +49,7 @@ const providerFlag = args.indexOf("--provider");
 const provider = providerFlag === -1 ? "anthropic" : args[providerFlag + 1];
 const prompt =
   args.filter((_, i) => i !== providerFlag && i !== providerFlag + 1).join(" ") ||
-  "Reply with one short sentence: what is @openclaw/ai?";
+  "Reply with one short sentence: what is @carapace/ai?";
 
 const model = MODELS[provider];
 if (!model) {

@@ -1,9 +1,9 @@
-// Input-mode parsing helpers for `openclaw config set` values, refs, providers, and batches.
+// Input-mode parsing helpers for `carapace config set` values, refs, providers, and batches.
 import fs from "node:fs";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import JSON5 from "json5";
 import { rejectConfigNonFiniteNumbers } from "../config/io.read-helpers.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";

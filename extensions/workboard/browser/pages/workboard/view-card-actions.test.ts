@@ -1,5 +1,5 @@
 import "../../test/dom.setup.ts";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { nothing, render } from "lit";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { getWorkboardState } from "../../lib/workboard/runtime.ts";

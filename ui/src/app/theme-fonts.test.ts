@@ -10,7 +10,7 @@ import {
 } from "./typography.ts";
 
 const fontLinks = () => [
-  ...document.querySelectorAll<HTMLLinkElement>('link[id^="openclaw-typeface-"]'),
+  ...document.querySelectorAll<HTMLLinkElement>('link[id^="carapace-typeface-"]'),
 ];
 const hrefs = () => fontLinks().map((link) => link.getAttribute("href"));
 

@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-type LoggingConfig = OpenClawConfig["logging"];
+type LoggingConfig = CarapaceConfig["logging"];
 type InternalLoggingConfig = NonNullable<LoggingConfig> & {
   [fullContextToolPayloadRedaction]: true;
 };

@@ -23,7 +23,7 @@ export function resolvePluginRouteRuntimeOperatorScopes(
     surface === "trusted-operator"
       ? requestAuth.trustDeclaredOperatorScopes
       : requestAuth.authMethod === "trusted-proxy" &&
-        getHeader(req, "x-openclaw-scopes") !== undefined;
+        getHeader(req, "x-carapace-scopes") !== undefined;
   if (useTrustedScopes) {
     return resolveTrustedHttpOperatorScopes(req, requestAuth);
   }

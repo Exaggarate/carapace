@@ -2,7 +2,7 @@
  * Shared invalid-config formatting, logging, and error helpers for config reads and mutations.
  * All terminal-facing text is sanitized here so callers can reuse the same failure surface.
  */
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 import type { DedupeCache } from "../infra/dedupe.js";
 import { formatConfigIssueLines } from "./issue-format.js";
 

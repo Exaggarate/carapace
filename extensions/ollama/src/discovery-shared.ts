@@ -1,14 +1,14 @@
 // Ollama plugin module implements discovery shared behavior.
 import { isIPv4 } from "node:net";
-import type { ProviderCatalogResult } from "openclaw/plugin-sdk/plugin-entry";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogResult } from "carapace/plugin-sdk/plugin-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import type {
   ModelProviderConfig,
   ModelDefinitionConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { coerceSecretRef } from "openclaw/plugin-sdk/secret-input-runtime";
-import { isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { coerceSecretRef } from "carapace/plugin-sdk/secret-input-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { OLLAMA_DEFAULT_API_KEY, OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 import { readProviderBaseUrl } from "./provider-base-url.js";
 import { resolveOllamaApiBase } from "./provider-models.js";

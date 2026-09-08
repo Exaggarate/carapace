@@ -6,8 +6,8 @@ import http from "node:http";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import {
-  OPENCLAW_CRABLINE_CHANNEL_CAPABILITY_MATRIX_PATH,
-  OPENCLAW_CRABLINE_PROVIDER_READINESS_PATH,
+  CARAPACE_CRABLINE_CHANNEL_CAPABILITY_MATRIX_PATH,
+  CARAPACE_CRABLINE_PROVIDER_READINESS_PATH,
 } from "@openclaw/crabline";
 import { z } from "zod";
 import { createQaCrablineTransportAdapter } from "../../extensions/qa-lab/src/crabline-transport.ts";
@@ -33,8 +33,8 @@ const transport = await createQaCrablineTransportAdapter({
   selection: {
     channel: "telegram",
     channelDriver: "crabline",
-    capabilityMatrixPath: OPENCLAW_CRABLINE_CHANNEL_CAPABILITY_MATRIX_PATH,
-    providerReadinessArtifactPath: OPENCLAW_CRABLINE_PROVIDER_READINESS_PATH,
+    capabilityMatrixPath: CARAPACE_CRABLINE_CHANNEL_CAPABILITY_MATRIX_PATH,
+    providerReadinessArtifactPath: CARAPACE_CRABLINE_PROVIDER_READINESS_PATH,
   },
 });
 const channelConfig = transport.createGatewayConfig({ baseUrl: "http://127.0.0.1" });

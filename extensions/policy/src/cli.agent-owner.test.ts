@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Command } from "commander";
-import { clearConfigCache } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { clearConfigCache } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPolicyCli } from "./cli.js";
 
@@ -28,7 +28,7 @@ async function runPolicyCli(args: readonly string[]) {
   const previousExitCode = process.exitCode;
   process.exitCode = undefined;
   try {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerPolicyCli(program);
     await program.parseAsync(["policy", ...args], { from: "user" });
     const lastOutput = output.at(-1) ?? "";
@@ -52,8 +52,8 @@ async function writeExplicitFleetConfig(): Promise<{
     fs.mkdir(alphaWorkspace, { recursive: true }),
     fs.mkdir(betaWorkspace, { recursive: true }),
   ]);
-  const configPath = join(workspaceDir, "openclaw.jsonc");
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+  const configPath = join(workspaceDir, "carapace.jsonc");
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
   await writeFixture(configPath, {
     agents: {
       ownership: "explicit",
@@ -75,7 +75,7 @@ async function writeExplicitFleetConfig(): Promise<{
 describe("policy CLI agent ownership", () => {
   beforeEach(async () => {
     workspaceDir = await fs.mkdtemp(join(tmpdir(), "policy-cli-owner-"));
-    vi.stubEnv("OPENCLAW_WORKSPACE_DIR", workspaceDir);
+    vi.stubEnv("CARAPACE_WORKSPACE_DIR", workspaceDir);
   });
 
   afterEach(async () => {
@@ -173,26 +173,26 @@ describe("policy CLI agent ownership", () => {
       args: ["check", "--agent", "ghost", "--json"],
       profile: "",
       container: "",
-      hint: "openclaw agents list",
+      hint: "carapace agents list",
     },
     {
       name: "check with an active profile",
       args: ["check", "--agent", "ghost", "--json"],
       profile: "testprof",
       container: "",
-      hint: "openclaw --profile testprof agents list",
+      hint: "carapace --profile testprof agents list",
     },
     {
       name: "relative compare with an active container",
       args: ["compare", "--agent", "ghost", "--baseline", "baseline.policy.jsonc", "--json"],
       profile: "testprof",
       container: "testbox",
-      hint: "openclaw --container testbox agents list",
+      hint: "carapace --container testbox agents list",
     },
   ])("rejects an unknown explicit owner for $name with runnable guidance", async (testCase) => {
     await writeExplicitFleetConfig();
-    vi.stubEnv("OPENCLAW_PROFILE", testCase.profile);
-    vi.stubEnv("OPENCLAW_CONTAINER_HINT", testCase.container);
+    vi.stubEnv("CARAPACE_PROFILE", testCase.profile);
+    vi.stubEnv("CARAPACE_CONTAINER_HINT", testCase.container);
 
     const { exitCode, output } = await runPolicyCli(testCase.args);
 

@@ -340,8 +340,8 @@ describe("registerOnboardCommand", () => {
   });
 
   it("forwards --gateway-token-ref-env", async () => {
-    await runCli(["onboard", "--gateway-token-ref-env", "OPENCLAW_GATEWAY_TOKEN"]);
-    expect(setupWizardOptions().gatewayTokenRefEnv).toBe("OPENCLAW_GATEWAY_TOKEN");
+    await runCli(["onboard", "--gateway-token-ref-env", "CARAPACE_GATEWAY_TOKEN"]);
+    expect(setupWizardOptions().gatewayTokenRefEnv).toBe("CARAPACE_GATEWAY_TOKEN");
   });
 
   it("forwards onboarding migration flags", async () => {
@@ -371,7 +371,7 @@ describe("registerOnboardCommand", () => {
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 
-  it("routes --modern through the inference-gated OpenClaw entrypoint", async () => {
+  it("routes --modern through the inference-gated Carapace entrypoint", async () => {
     await runCli(["onboard", "--modern", "--json"]);
 
     expect(mocks.runSystemAgentWithInference).toHaveBeenCalledWith(

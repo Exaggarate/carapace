@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { listConnectedNodePluginTools } from "../../gateway/node-plugin-tool-snapshot.js";
 import { NODE_MCP_TOOLS_CALL_COMMAND } from "../../infra/node-commands.js";
 import type { GatewayCallOptions } from "./gateway.js";

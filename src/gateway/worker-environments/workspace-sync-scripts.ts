@@ -47,8 +47,8 @@ if [ "$actual" != "$base" ]; then
   printf '%s\n' 'worker git base does not match the synced pack' >&2
   exit 2
 fi
-git update-ref refs/heads/openclaw-worker "$base"
-git symbolic-ref HEAD refs/heads/openclaw-worker
+git update-ref refs/heads/carapace-worker "$base"
+git symbolic-ref HEAD refs/heads/carapace-worker
 git read-tree "$base"
 git ls-files --stage -z | node -e '
 const childProcess = require("node:child_process");
@@ -282,7 +282,7 @@ function eligiblePaths() {
   for (const relative of nulPaths(["--full-name", "--cached", "--others", "--exclude-standard"])) {
     addSelected(relative);
   }
-  removeSelected(".openclaw-base.pack");
+  removeSelected(".carapace-base.pack");
   const includePath = path.join(root, ".worktreeinclude");
   const hasIncludes = fs.existsSync(includePath) && fs.lstatSync(includePath).isFile();
   const ignored = new Set(nulPaths(["--full-name", "--others", "--ignored", "--exclude-standard",
@@ -305,7 +305,7 @@ function eligiblePaths() {
   }
   for (const priorManifestDigest of priorManifestDigests) {
     if (!/^[a-f0-9]{64}$/.test(priorManifestDigest)) fail("invalid prior workspace manifest digest");
-    const priorPath = path.join(process.env.HOME, ".openclaw-worker", "manifests", priorManifestDigest + ".json");
+    const priorPath = path.join(process.env.HOME, ".carapace-worker", "manifests", priorManifestDigest + ".json");
     const priorRaw = readManifestFile(priorPath);
     if (crypto.createHash("sha256").update(priorRaw).digest("hex") !== priorManifestDigest) {
       fail("prior workspace manifest digest mismatch");
@@ -321,7 +321,7 @@ function eligiblePaths() {
     }
     for (const entry of prior.entries) {
       if (!entry || typeof entry.path !== "string") fail("invalid prior workspace manifest entry");
-      if (entry.path !== ".openclaw-base.pack" && !isDerivedWorkspacePath(entry.path, isStagedInput(entry.path))) {
+      if (entry.path !== ".carapace-base.pack" && !isDerivedWorkspacePath(entry.path, isStagedInput(entry.path))) {
         addSelected(entry.path);
       }
     }
@@ -454,7 +454,7 @@ function preserveWindowsFileModes(entries, manifestRoot) {
   }
 }
 async function main() {
-  const workerRoot = path.join(process.env.HOME, ".openclaw-worker");
+  const workerRoot = path.join(process.env.HOME, ".carapace-worker");
   const manifestRoot = path.join(workerRoot, "manifests");
   ensurePrivateDirectory(workerRoot);
   ensurePrivateDirectory(manifestRoot);

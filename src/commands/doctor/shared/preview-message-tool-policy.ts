@@ -1,15 +1,15 @@
-import { isRecord as hasRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as hasRecord } from "@carapace/normalization-core/record-coerce";
 import { listAgentEntries, resolveAgentConfig } from "../../../agents/agent-scope-config.js";
 import { resolveProviderToolPolicy } from "../../../agents/provider-tool-policy.js";
 import { pickSandboxToolPolicy } from "../../../agents/sandbox-tool-policy.js";
 import { isToolAllowedByPolicies } from "../../../agents/tool-policy-match.js";
 import { mergeAlsoAllowPolicy, resolveToolProfilePolicy } from "../../../agents/tool-policy.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { AgentToolsConfig, ToolsConfig } from "../../../config/types.tools.js";
 import { resolveDoctorPrimaryModelRef } from "./primary-model-ref.js";
 
 export function resolveMessageToolAvailability(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   globalTools?: ToolsConfig;
   agentTools?: AgentToolsConfig;
@@ -57,7 +57,7 @@ export function resolveMessageToolAvailability(params: {
 
 export const SOURCE_REPLY_RUNTIME_MESSAGE_ALLOW = ["message"];
 
-export function collectUnavailableSourceReplyTargets(cfg: OpenClawConfig): string[] {
+export function collectUnavailableSourceReplyTargets(cfg: CarapaceConfig): string[] {
   const agents = listAgentEntries(cfg).filter(hasRecord);
   if (agents.length === 0) {
     const available = resolveMessageToolAvailability({

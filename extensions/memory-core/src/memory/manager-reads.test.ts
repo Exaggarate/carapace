@@ -3,8 +3,8 @@ import {
   listSessionTranscriptCorpusEntriesForAgent,
   sessionPathForFile,
   sessionPathForSessionIdentity,
-} from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import { deleteSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import { deleteSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createManagerIndexFixture } from "./manager-index.test-support.js";
 

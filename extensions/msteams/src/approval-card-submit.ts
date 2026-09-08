@@ -1,6 +1,6 @@
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { resolveApprovalOverGateway } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import { resolveApprovalOverGateway } from "carapace/plugin-sdk/approval-gateway-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { msTeamsApprovalAuth } from "./approval-auth.js";
 import {
   msTeamsApprovalControls,
@@ -15,12 +15,12 @@ function isMSTeamsApprovalSubmit(value: unknown): boolean {
   if (!isRecord(value)) {
     return false;
   }
-  if (value.openclawAction === "approval") {
+  if (value.carapaceAction === "approval") {
     return true;
   }
   const action = isRecord(value.action) ? value.action : undefined;
   const data = action?.data;
-  return isRecord(data) && data.openclawAction === "approval";
+  return isRecord(data) && data.carapaceAction === "approval";
 }
 
 export async function maybeHandleMSTeamsApprovalCardSubmit(params: {

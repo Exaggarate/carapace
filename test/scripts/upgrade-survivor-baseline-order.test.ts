@@ -35,7 +35,7 @@ plugin_registry_pid=synthetic
 NPM_CONFIG_REGISTRY=initial-registry
 manager_registry="$NPM_CONFIG_REGISTRY"
 ${routing}
-openclaw_e2e_stop_process() { :; }
+carapace_e2e_stop_process() { :; }
 configure_plugin_registry() {
   NPM_CONFIG_REGISTRY="\${1:-candidate}-registry"
   printf 'registry=%s\\n' "$NPM_CONFIG_REGISTRY"
@@ -91,14 +91,14 @@ it.each([
   { scenario: "sqlite-volume", mode: "manual" },
   { scenario: "sqlite-volume", mode: "auto-auth" },
 ])("preserves all $scenario migration rows after $mode baseline setup", ({ scenario, mode }) => {
-  const root = tempDirs.make("openclaw-survivor-baseline-order-");
+  const root = tempDirs.make("carapace-survivor-baseline-order-");
   const authoredPath = path.join(root, "authored.json");
   const resultPath = path.join(root, "result.json");
   const probePath = path.join(root, "probe.mjs");
   const bin = path.join(root, "bin");
   mkdirSync(bin);
   writeFileSync(
-    path.join(bin, "openclaw"),
+    path.join(bin, "carapace"),
     '#!/usr/bin/env bash\nexec node --import "$TSX_IMPORT" "$PROBE_SCRIPT" "$@"\n',
     { mode: 0o755 },
   );
@@ -134,8 +134,8 @@ it.each([
 import fs from "node:fs";
 import path, { delimiter, join, resolve } from "node:path";
 import { assertSessionStoreMigrationComplete } from ${JSON.stringify(startupModule.href)};
-const state = process.env.OPENCLAW_STATE_DIR;
-const volume = process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO === "sqlite-volume";
+const state = process.env.CARAPACE_STATE_DIR;
+const volume = process.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIO === "sqlite-volume";
 const stores = volume
   ? ["agents/main/sessions/sessions.json", "agents/ops/sessions/sessions.json"]
   : ["sessions/sessions.json"];
@@ -151,7 +151,7 @@ if (process.argv[2] === "startup") {
   fs.writeFileSync(process.env.PROBE_LIVE, "live");
 } else {
   assert.equal(process.argv[2], "update");
-  if (process.env.OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE === "auto-auth") {
+  if (process.env.CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE === "auto-auth") {
     assert.equal(fs.readFileSync(process.env.PROBE_READY, "utf8"), "ready");
     assert.equal(fs.existsSync(process.env.PROBE_LIVE), false, "baseline must be offline before specimens and initial update");
   }
@@ -175,20 +175,20 @@ if (process.argv[2] === "startup") {
   const phases = source.slice(boundary);
   const script = `${setup}
 trap - EXIT ERR INT TERM
-openclaw_e2e_eval_test_state_from_b64() { :; }
-openclaw_test_state_create() {
-  export OPENCLAW_STATE_DIR="$FIXTURE_HOME/.openclaw"
-  export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
-  export OPENCLAW_TEST_WORKSPACE_DIR="$FIXTURE_HOME/workspace"
-  mkdir -p "$OPENCLAW_STATE_DIR" "$OPENCLAW_TEST_WORKSPACE_DIR"
-  cp "$AUTHORED_CONFIG" "$OPENCLAW_CONFIG_PATH"
+carapace_e2e_eval_test_state_from_b64() { :; }
+carapace_test_state_create() {
+  export CARAPACE_STATE_DIR="$FIXTURE_HOME/.carapace"
+  export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
+  export CARAPACE_TEST_WORKSPACE_DIR="$FIXTURE_HOME/workspace"
+  mkdir -p "$CARAPACE_STATE_DIR" "$CARAPACE_TEST_WORKSPACE_DIR"
+  cp "$AUTHORED_CONFIG" "$CARAPACE_CONFIG_PATH"
 }
 getent() { printf 'fixture:x:1000:1000:fixture:%s:/bin/bash\n' "$FIXTURE_HOME"; }
 install_update_restart_systemctl_shim() { :; }
 
 assert_baseline_state() { :; }
 check_gateway_status() { :; }
-openclaw_e2e_probe_tcp() { [ -f "$PROBE_LIVE" ]; }
+carapace_e2e_probe_tcp() { [ -f "$PROBE_LIVE" ]; }
 run_update_restart_probe_gateway() {
   node --import "$TSX_IMPORT" "$PROBE_SCRIPT" startup
 }
@@ -220,16 +220,16 @@ ${phases}
       PROBE_READY: path.join(root, "ready"),
       PROBE_LIVE: path.join(root, "live"),
       TSX_IMPORT: path.resolve("node_modules/tsx/dist/loader.mjs"),
-      OPENCLAW_TEST_STATE_FUNCTION_B64: "Og==",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE: "openclaw@2026.8.1",
-      OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: mode,
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: scenario,
-      OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
-      OPENCLAW_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
-      OPENCLAW_UPGRADE_SURVIVOR_VOLUME_SESSIONS: "12",
-      OPENCLAW_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: "3",
-      OPENCLAW_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS: "6",
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: "",
+      CARAPACE_TEST_STATE_FUNCTION_B64: "Og==",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE: "carapace@2026.8.1",
+      CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: mode,
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIO: scenario,
+      CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: path.join(root, "runtime"),
+      CARAPACE_UPGRADE_SURVIVOR_SUMMARY_JSON: path.join(root, "artifacts", "summary.json"),
+      CARAPACE_UPGRADE_SURVIVOR_VOLUME_SESSIONS: "12",
+      CARAPACE_UPGRADE_SURVIVOR_VOLUME_EVENTS_PER_SESSION: "3",
+      CARAPACE_UPGRADE_SURVIVOR_VOLUME_CRON_JOBS: "6",
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: "",
     },
   });
   expect(result.status, result.stdout + result.stderr).toBe(0);
@@ -247,13 +247,13 @@ it("authors the default cron job before adding ops and retains both CLI creation
   const artifacts = join(root, "artifacts");
   const workspace = join(root, "workspace");
   const state = join(root, "state");
-  const configPath = join(root, "openclaw.json");
+  const configPath = join(root, "carapace.json");
   const ledgerPath = join(artifacts, "legacy-operator-baseline.json");
   mkdirSync(bin);
   mkdirSync(artifacts);
   mkdirSync(state);
   writeFileSync(configPath, "{}");
-  const cliPath = join(bin, "openclaw");
+  const cliPath = join(bin, "carapace");
   // Model the shipped API boundary: ownerless creation needs an unambiguous
   // roster, an explicit owner must exist, and global listing may fail later.
   writeFileSync(
@@ -264,9 +264,9 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const args = process.argv.slice(2);
-const configPath = process.env.OPENCLAW_CONFIG_PATH;
+const configPath = process.env.CARAPACE_CONFIG_PATH;
 const cfg = JSON.parse(fs.readFileSync(configPath, "utf8"));
-const approvalPath = path.join(process.env.OPENCLAW_STATE_DIR, "exec-approvals.json");
+const approvalPath = path.join(process.env.CARAPACE_STATE_DIR, "exec-approvals.json");
 if (args[0] === "--help") {
   process.stdout.write("  approvals Manage exec approvals\\n");
 } else if (args[0] === "setup" && args[1] === "--help") {
@@ -319,12 +319,12 @@ if (args[0] === "--help") {
       timeout: 10_000,
       env: {
         PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "legacy-operator-state",
-        OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
-        OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: "baseline",
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_WORKSPACE_DIR: workspace,
-        OPENCLAW_STATE_DIR: state,
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "legacy-operator-state",
+        CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifacts,
+        CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: "baseline",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_WORKSPACE_DIR: workspace,
+        CARAPACE_STATE_DIR: state,
         GATEWAY_AUTH_TOKEN_REF: "survivor-test-token",
       },
     });

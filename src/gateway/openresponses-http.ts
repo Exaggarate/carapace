@@ -1,14 +1,14 @@
 /**
  * OpenResponses HTTP Handler
  *
- * Implements the OpenResponses `/v1/responses` endpoint for OpenClaw Gateway.
+ * Implements the OpenResponses `/v1/responses` endpoint for Carapace Gateway.
  *
  * @see https://www.open-responses.com/
  */
 
 import { createHash, randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveIntegerOption } from "@carapace/normalization-core/number-coercion";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
 import { isClientToolNameConflictError } from "../agents/agent-tool-definition-adapter.js";
 import type { ImageContent } from "../agents/command/types.js";
@@ -164,7 +164,7 @@ function createResponseSessionScope(params: {
   return normalizeResponseSessionScope({
     authSubject: resolveResponseSessionAuthSubject(params),
     agentId: params.agentId,
-    requestedSessionKey: getHeader(params.req, "x-openclaw-session-key"),
+    requestedSessionKey: getHeader(params.req, "x-carapace-session-key"),
   });
 }
 
@@ -808,7 +808,7 @@ export async function handleOpenResponsesHttpRequest(
         output: [
           createAssistantOutputItem({
             id: outputItemId,
-            text: assistantText || "No response from OpenClaw.",
+            text: assistantText || "No response from Carapace.",
             phase: "final_answer",
             status: "completed",
           }),
@@ -894,7 +894,7 @@ export async function handleOpenResponsesHttpRequest(
         pending: pendingAssistantText,
         resultText: finalResultText,
         streamedText: streamedAssistantText,
-        fallbackText: finalToolCalls ? "" : "No response from OpenClaw.",
+        fallbackText: finalToolCalls ? "" : "No response from Carapace.",
       });
       if (!finalText.startsWith(streamedAssistantText)) {
         finalizeUnrepresentableAssistantReplacement();

@@ -1,11 +1,11 @@
 // Device Pair plugin module implements notify behavior.
 import { randomUUID } from "node:crypto";
-import type { OpenClawPluginService } from "openclaw/plugin-sdk/core";
-import { listDevicePairing } from "openclaw/plugin-sdk/device-bootstrap";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapacePluginService } from "carapace/plugin-sdk/core";
+import { listDevicePairing } from "carapace/plugin-sdk/device-bootstrap";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEVICE_PAIR_NOTIFY_MAX_SEEN_AGE_MS,
   DEVICE_PAIR_NOTIFY_SEEN_REQUEST_MAX_ENTRIES,
@@ -83,7 +83,7 @@ type NotifySubscriberStore = PluginStateKeyedStore<NotifySubscription> & {
   deleteIf: NonNullable<PluginStateKeyedStore<NotifySubscription>["deleteIf"]>;
 };
 
-function openNotifySubscriberStore(api: OpenClawPluginApi): NotifySubscriberStore {
+function openNotifySubscriberStore(api: CarapacePluginApi): NotifySubscriberStore {
   const store = api.runtime.state.openKeyedStore<NotifySubscription>({
     namespace: DEVICE_PAIR_NOTIFY_SUBSCRIBER_NAMESPACE,
     maxEntries: DEVICE_PAIR_NOTIFY_SUBSCRIBER_MAX_ENTRIES,
@@ -97,7 +97,7 @@ function openNotifySubscriberStore(api: OpenClawPluginApi): NotifySubscriberStor
 }
 
 function openNotifySeenRequestStore(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
 ): PluginStateKeyedStore<NotifySeenRequest> {
   return api.runtime.state.openKeyedStore<NotifySeenRequest>({
     namespace: DEVICE_PAIR_NOTIFY_SEEN_REQUEST_NAMESPACE,
@@ -147,7 +147,7 @@ function nextNotifySubscription(
 }
 
 async function registerNotifySubscriber(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   target: NotifyTarget;
   mode: NotifySubscription["mode"];
   refresh: boolean;
@@ -224,7 +224,7 @@ function shouldNotifySubscriberForRequest(
 }
 
 async function notifySubscriber(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   subscriber: NotifySubscription;
   text: string;
 }): Promise<boolean> {
@@ -256,7 +256,7 @@ async function notifySubscriber(params: {
   }
 }
 
-async function notifyPendingPairingRequests(params: { api: OpenClawPluginApi }): Promise<void> {
+async function notifyPendingPairingRequests(params: { api: CarapacePluginApi }): Promise<void> {
   const subscriberStore = openNotifySubscriberStore(params.api);
   const seenRequestStore = openNotifySeenRequestStore(params.api);
   const [subscriberEntries, seenRequestEntries, pairing] = await Promise.all([
@@ -331,7 +331,7 @@ async function notifyPendingPairingRequests(params: { api: OpenClawPluginApi }):
   }
 }
 
-async function runNotifyPoll(api: OpenClawPluginApi): Promise<void> {
+async function runNotifyPoll(api: CarapacePluginApi): Promise<void> {
   if (notifyPollInFlight) {
     return;
   }
@@ -344,7 +344,7 @@ async function runNotifyPoll(api: OpenClawPluginApi): Promise<void> {
 }
 
 export async function armPairNotifyOnce(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   ctx: {
     channel: string;
     senderId?: string;
@@ -372,7 +372,7 @@ export async function armPairNotifyOnce(params: {
 }
 
 export async function handleNotifyCommand(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   ctx: {
     channel: string;
     senderId?: string;
@@ -449,7 +449,7 @@ export async function handleNotifyCommand(params: {
   return { text: "Usage: /pair notify on|off|once|status" };
 }
 
-export function createPairingNotifierService(api: OpenClawPluginApi): OpenClawPluginService {
+export function createPairingNotifierService(api: CarapacePluginApi): CarapacePluginService {
   let notifyInterval: ReturnType<typeof setInterval> | null = null;
 
   return {

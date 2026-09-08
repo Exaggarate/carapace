@@ -2,18 +2,18 @@ import type { CallbackQuery, Message } from "grammy/types";
 import {
   resolveApprovalOverGateway,
   type ApprovalResolveResult,
-} from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/approval-gateway-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import type { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   buildPluginBindingResolvedText,
   parsePluginBindingApprovalCustomId,
   resolvePluginConversationBindingApproval,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { isApprovalNotFoundError } from "openclaw/plugin-sdk/error-runtime";
-import { logVerbose, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { isApprovalNotFoundError } from "carapace/plugin-sdk/error-runtime";
+import { logVerbose, sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { TelegramApprovalCallback } from "./approval-callback-data.js";
 import {
   buildTelegramCanonicalApprovalTerminalText,
@@ -88,7 +88,7 @@ type LegacyApprovalCallback = NonNullable<ReturnType<typeof parseExecApprovalCom
 export function createTelegramCallbackApprovalRuntime(params: {
   accountId: RegisterTelegramHandlerParams["accountId"];
   telegramDeps: RegisterTelegramHandlerParams["telegramDeps"];
-  runtimeCfg: OpenClawConfig;
+  runtimeCfg: CarapaceConfig;
   senderId: string;
   actions: TelegramCallbackMessageActions;
 }) {

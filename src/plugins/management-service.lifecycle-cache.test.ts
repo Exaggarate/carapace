@@ -67,7 +67,7 @@ function dependencyMetadataSnapshot(params: {
 }) {
   const snapshot = metadataSnapshot(params.pluginId);
   const origin = params.origin ?? "global";
-  const rootDir = `/__openclaw_plugin_dependency_health__/${params.pluginId}`;
+  const rootDir = `/__carapace_plugin_dependency_health__/${params.pluginId}`;
   const record = {
     ...snapshot.index.plugins[0]!,
     enabled: params.enabled ?? true,
@@ -124,16 +124,16 @@ describe("plugin management catalog lifecycle", () => {
         source: "hosted",
         entries: [
           {
-            id: "@openclaw/diffs",
+            id: "@carapace/diffs",
             title: "Diffs",
             state: "available",
             featured: true,
-            publisher: { id: "openclaw", trust: "official" },
+            publisher: { id: "carapace", trust: "official" },
             install: {
               candidates: [
                 {
                   sourceRef: "public-clawhub",
-                  package: "@openclaw/diffs",
+                  package: "@carapace/diffs",
                   version: "2026.6.11",
                   integrity: `sha256:${"a".repeat(64)}`,
                 },
@@ -229,11 +229,11 @@ describe("plugin management catalog lifecycle", () => {
       channelEnabled,
       dependencyError,
     }) => {
-      const env = { OPENCLAW_STATE_DIR: "/__openclaw_management_selected_root__" };
+      const env = { CARAPACE_STATE_DIR: "/__carapace_management_selected_root__" };
       const readMode = vi
         .spyOn(bundledDiscoveryState, "readBundledDiscoveryModeMemoized")
         .mockImplementation((selectedEnv) =>
-          selectedEnv?.OPENCLAW_STATE_DIR === env.OPENCLAW_STATE_DIR
+          selectedEnv?.CARAPACE_STATE_DIR === env.CARAPACE_STATE_DIR
             ? (selectedMode ?? mode)
             : mode,
         );

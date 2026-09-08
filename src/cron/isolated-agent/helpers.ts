@@ -2,8 +2,8 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+} from "@carapace/normalization-core/string-coerce";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import { isExecLikeToolName } from "../../agents/tool-error-summary.js";
 import { isHeartbeatAcknowledgementText } from "../../auto-reply/heartbeat.js";
 import {

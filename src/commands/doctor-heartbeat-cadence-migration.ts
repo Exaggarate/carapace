@@ -2,7 +2,7 @@
 import { note } from "../../packages/terminal-core/src/note.js";
 import { tryResolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   applyHeartbeatMonitorJobs,
   heartbeatMonitorAddOptions,
@@ -29,7 +29,7 @@ type HeartbeatCadenceMigrationResult = {
   warnings: string[];
 };
 
-function createDoctorCronService(storePath: string, cfg: OpenClawConfig): CronService {
+function createDoctorCronService(storePath: string, cfg: CarapaceConfig): CronService {
   const noop = () => {};
   const log = { debug: noop, info: noop, warn: noop, error: noop };
   return new CronService({
@@ -48,7 +48,7 @@ function createDoctorCronService(storePath: string, cfg: OpenClawConfig): CronSe
 }
 
 async function loadHeartbeatMonitorPlanReadOnly(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   storePath: string,
   env: NodeJS.ProcessEnv,
 ): Promise<HeartbeatMonitorPlan> {
@@ -86,13 +86,13 @@ function cadenceFinding(params: {
     path: params.storePath,
     target: params.change.agentId,
     requirement: `heartbeat-monitor-${params.change.kind}`,
-    fixHint: `Run ${formatCliCommand("openclaw doctor --fix")} to materialize heartbeat cadence in cron.`,
+    fixHint: `Run ${formatCliCommand("carapace doctor --fix")} to materialize heartbeat cadence in cron.`,
   };
 }
 
 /** Reports heartbeat monitor rows that do not yet match cadence config. */
 export async function collectHeartbeatCadenceMigrationFindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<readonly HealthFinding[]> {
   const storePath = resolveCronJobsStorePathFromConfig(cfg, env);
@@ -107,7 +107,7 @@ export async function collectHeartbeatCadenceMigrationFindings(
         message: `Heartbeat cadence could not be inspected: ${errorMessage(error)}`,
         path: storePath,
         requirement: "heartbeat-monitor-inspection",
-        fixHint: `Run ${formatCliCommand("openclaw doctor --fix")} after resolving the cron store error.`,
+        fixHint: `Run ${formatCliCommand("carapace doctor --fix")} after resolving the cron store error.`,
       },
     ];
   }
@@ -115,7 +115,7 @@ export async function collectHeartbeatCadenceMigrationFindings(
 
 /** Creates or updates the stable monitor rows used by heartbeat execution. */
 export async function ensureHeartbeatMonitorJobs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   storePath: string,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<Map<string, CronJob>> {
@@ -134,7 +134,7 @@ export async function ensureHeartbeatMonitorJobs(
 
 /** Previews or applies config-to-cron heartbeat cadence materialization. */
 export async function maybeMigrateHeartbeatCadenceToCron(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   shouldRepair: boolean;
   env?: NodeJS.ProcessEnv;
 }): Promise<HeartbeatCadenceMigrationResult> {

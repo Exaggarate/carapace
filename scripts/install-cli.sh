@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# OpenClaw CLI installer (non-interactive, no onboarding)
-# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- [--json] [--prefix <path>] [--version <ver>] [--node-version <ver>] [--onboard]
+# Carapace CLI installer (non-interactive, no onboarding)
+# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- [--json] [--prefix <path>] [--version <ver>] [--node-version <ver>] [--onboard]
 
 ensure_home_env() {
   if [[ -n "${HOME:-}" && "${HOME}" != "/" && -d "${HOME}" ]]; then
@@ -67,14 +67,14 @@ resolve_installer_path() {
   esac
 }
 
-OPENCLAW_EFFECTIVE_HOME="$(resolve_home_path "${OPENCLAW_HOME:-$HOME}")"
-PREFIX="${OPENCLAW_PREFIX:-${HOME}/.openclaw}"
-OPENCLAW_VERSION="${OPENCLAW_VERSION:-latest}"
+CARAPACE_EFFECTIVE_HOME="$(resolve_home_path "${CARAPACE_HOME:-$HOME}")"
+PREFIX="${CARAPACE_PREFIX:-${HOME}/.carapace}"
+CARAPACE_VERSION="${CARAPACE_VERSION:-latest}"
 REQUIRED_COMPATIBLE_VERSION=""
 DEFAULT_NODE_VERSION="24.19.0"
-NODE_VERSION="${OPENCLAW_NODE_VERSION:-${DEFAULT_NODE_VERSION}}"
+NODE_VERSION="${CARAPACE_NODE_VERSION:-${DEFAULT_NODE_VERSION}}"
 NODE_VERSION_REQUESTED=0
-if [[ -n "${OPENCLAW_NODE_VERSION:-}" ]]; then
+if [[ -n "${CARAPACE_NODE_VERSION:-}" ]]; then
   NODE_VERSION_REQUESTED=1
 fi
 MIN_NODE_24_VERSION="24.16.0"
@@ -82,10 +82,10 @@ MIN_NODE_26_VERSION="26.1.0"
 SUPPORTED_NODE_VERSION_LABEL="Node 24.16.0+ or Node 26.1.0+"
 NODE_RELEASE_VERSION_CORE=""
 APK_NODE_BIN_DIR="/usr/bin"
-NPM_LOGLEVEL="${OPENCLAW_NPM_LOGLEVEL:-error}"
-INSTALL_METHOD="${OPENCLAW_INSTALL_METHOD:-npm}"
-GIT_DIR="${OPENCLAW_GIT_DIR:-${OPENCLAW_EFFECTIVE_HOME}/openclaw}"
-GIT_UPDATE="${OPENCLAW_GIT_UPDATE:-1}"
+NPM_LOGLEVEL="${CARAPACE_NPM_LOGLEVEL:-error}"
+INSTALL_METHOD="${CARAPACE_INSTALL_METHOD:-npm}"
+GIT_DIR="${CARAPACE_GIT_DIR:-${CARAPACE_EFFECTIVE_HOME}/carapace}"
+GIT_UPDATE="${CARAPACE_GIT_UPDATE:-1}"
 JSON=0
 RUN_ONBOARD=0
 SET_NPM_PREFIX=0
@@ -97,26 +97,26 @@ print_usage() {
   cat <<EOF
 Usage: install-cli.sh [options]
   --json                              Emit NDJSON events (no human output)
-  --prefix <path>                     Install prefix (default: ~/.openclaw; use \$OPENCLAW_PREFIX to override)
+  --prefix <path>                     Install prefix (default: ~/.carapace; use \$CARAPACE_PREFIX to override)
   --install-method, --method npm|git  Install via npm (default) or from a git checkout
   --npm                               Shortcut for --install-method npm
   --git, --github                     Shortcut for --install-method git
-  --git-dir, --dir <path>             Checkout directory (default: ~/openclaw, or \$OPENCLAW_HOME/openclaw)
-  --version <ver>                     OpenClaw version (default: latest)
+  --git-dir, --dir <path>             Checkout directory (default: ~/carapace, or \$CARAPACE_HOME/carapace)
+  --version <ver>                     Carapace version (default: latest)
   --compatible-with <ver>             Refuse a CLI that cannot modify config written by <ver>
   --node-version <ver>                Node version (default: 24.19.0)
-  --onboard                           Run "openclaw onboard" after install
+  --onboard                           Run "carapace onboard" after install
   --no-onboard                        Skip onboarding (default)
   --set-npm-prefix                    Force npm prefix to ~/.npm-global if current prefix is not writable (Linux)
 
 Environment variables:
-  OPENCLAW_NPM_LOGLEVEL=error|warn|notice  Default: error (hide npm deprecation noise)
-  OPENCLAW_INSTALL_METHOD=git|npm
-  OPENCLAW_HOME=...
-  OPENCLAW_PREFIX=...
-  OPENCLAW_VERSION=latest|next|<semver>
-  OPENCLAW_GIT_DIR=...
-  OPENCLAW_GIT_UPDATE=0|1
+  CARAPACE_NPM_LOGLEVEL=error|warn|notice  Default: error (hide npm deprecation noise)
+  CARAPACE_INSTALL_METHOD=git|npm
+  CARAPACE_HOME=...
+  CARAPACE_PREFIX=...
+  CARAPACE_VERSION=latest|next|<semver>
+  CARAPACE_GIT_DIR=...
+  CARAPACE_GIT_UPDATE=0|1
 EOF
 }
 
@@ -157,7 +157,7 @@ download_file() {
 }
 
 cleanup_legacy_submodules() {
-  local repo_dir="${1:-${OPENCLAW_GIT_DIR:-${OPENCLAW_EFFECTIVE_HOME}/openclaw}}"
+  local repo_dir="${1:-${CARAPACE_GIT_DIR:-${CARAPACE_EFFECTIVE_HOME}/carapace}}"
   local legacy_dir="${repo_dir}/Peekaboo"
   if [[ -d "$legacy_dir" ]]; then
     emit_json step name legacy-submodule status start path "$legacy_dir"
@@ -385,7 +385,7 @@ parse_args() {
         if [[ $# -lt 2 || "${2:-}" == --* ]]; then
           fail "Missing value for $1"
         fi
-        OPENCLAW_VERSION="$2"
+        CARAPACE_VERSION="$2"
         shift 2
         ;;
       --compatible-with)
@@ -793,24 +793,24 @@ to_lowercase_ascii() {
   printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]'
 }
 
-is_openclaw_source_package_install_spec() {
+is_carapace_source_package_install_spec() {
   local value="${1:-}"
   local normalized_value=""
   normalized_value="$(to_lowercase_ascii "$value")"
-  normalized_value="${normalized_value#openclaw@}"
+  normalized_value="${normalized_value#carapace@}"
 
   [[ "$normalized_value" == "main" ]] && return 0
-  [[ "$normalized_value" =~ ^github:openclaw/openclaw($|[#/]) ]] && return 0
+  [[ "$normalized_value" =~ ^github:carapace/carapace($|[#/]) ]] && return 0
 
   normalized_value="${normalized_value#git+}"
-  [[ "$normalized_value" =~ ^https?://github\.com/openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-  [[ "$normalized_value" =~ ^ssh://git@github\.com[:/]openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-  [[ "$normalized_value" =~ ^git://github\.com/openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-  [[ "$normalized_value" =~ ^git@github\.com:openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
+  [[ "$normalized_value" =~ ^https?://github\.com/carapace/carapace(\.git)?($|[?#]) ]] && return 0
+  [[ "$normalized_value" =~ ^ssh://git@github\.com[:/]carapace/carapace(\.git)?($|[?#]) ]] && return 0
+  [[ "$normalized_value" =~ ^git://github\.com/carapace/carapace(\.git)?($|[?#]) ]] && return 0
+  [[ "$normalized_value" =~ ^git@github\.com:carapace/carapace(\.git)?($|[?#]) ]] && return 0
   return 1
 }
 
-openclaw_version_is_compatible_with() {
+carapace_version_is_compatible_with() {
   local candidate="$1"
   local config_writer="$2"
 
@@ -893,29 +893,29 @@ process.exit(compare(candidate, writer) < 0 ? 1 : 0);
 NODE
 }
 
-require_openclaw_version_compatible() {
+require_carapace_version_compatible() {
   local candidate="$1"
   local config_writer="${REQUIRED_COMPATIBLE_VERSION:-}"
   if [[ -z "$config_writer" ]]; then
     return 0
   fi
 
-  if openclaw_version_is_compatible_with "$candidate" "$config_writer"; then
+  if carapace_version_is_compatible_with "$candidate" "$config_writer"; then
     return 0
   fi
   local status="$?"
   if [[ "$status" -eq 2 ]]; then
-    fail "Cannot compare resolved OpenClaw version '${candidate}' with config writer '${config_writer}'."
+    fail "Cannot compare resolved Carapace version '${candidate}' with config writer '${config_writer}'."
   fi
-  fail "OpenClaw ${candidate} is older than config writer ${config_writer}. Choose a newer CLI channel or retry after the channel is updated."
+  fail "Carapace ${candidate} is older than config writer ${config_writer}. Choose a newer CLI channel or retry after the channel is updated."
 }
 
-resolve_npm_openclaw_version() {
+resolve_npm_carapace_version() {
   local requested="$1"
-  "$(npm_bin)" view "openclaw@${requested}" version 2>/dev/null | awk 'NF { value = $0 } END { print value }'
+  "$(npm_bin)" view "carapace@${requested}" version 2>/dev/null | awk 'NF { value = $0 } END { print value }'
 }
 
-resolve_git_checkout_openclaw_version() {
+resolve_git_checkout_carapace_version() {
   local repo_dir="$1"
   "$(node_bin)" -e '
     const fs = require("node:fs");
@@ -926,13 +926,13 @@ resolve_git_checkout_openclaw_version() {
   ' "$repo_dir"
 }
 
-resolve_git_openclaw_ref() {
-  local requested="${OPENCLAW_VERSION:-latest}"
+resolve_git_carapace_ref() {
+  local requested="${CARAPACE_VERSION:-latest}"
   local resolved_version=""
 
   case "$requested" in
     ""|latest)
-      resolved_version="$("$(npm_bin)" view "openclaw" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
+      resolved_version="$("$(npm_bin)" view "carapace" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
       if [[ -n "$resolved_version" ]]; then
         echo "v${resolved_version}"
         return 0
@@ -941,7 +941,7 @@ resolve_git_openclaw_ref() {
       return 0
       ;;
     next|beta)
-      resolved_version="$("$(npm_bin)" view "openclaw" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
+      resolved_version="$("$(npm_bin)" view "carapace" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
       if [[ -n "$resolved_version" ]]; then
         echo "v${resolved_version}"
         return 0
@@ -984,7 +984,7 @@ verify_git_rebase_recovery() {
     [[ ! -d "$git_dir/rebase-merge" && ! -d "$git_dir/rebase-apply" ]]
 }
 
-checkout_git_openclaw_ref() {
+checkout_git_carapace_ref() {
   local repo_dir="$1"
   local ref="$2"
   local original_head=""
@@ -1164,7 +1164,7 @@ ensure_pnpm() {
   [[ "$spec" == pnpm@* ]] || spec="pnpm@12.3.4"
   version="${spec#pnpm@}"
   version="${version%%+*}"
-  pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-pnpm.XXXXXX")" || return 1
+  pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-pnpm.XXXXXX")" || return 1
   TMPFILES+=("$pnpm_dir")
   if [[ -x "$(node_dir)/bin/corepack" ]]; then
     corepack_cmd="$(node_dir)/bin/corepack"
@@ -1329,9 +1329,9 @@ const fail = (message) => { process.stderr.write(`${message}\n`); process.exit(1
 if (!parsed) fail("Unable to determine npm version; no package changes were made.");
 if (+parsed[1] < 12 && (+parsed[1] !== 11 || +parsed[2] < 16)) process.exit(0);
 const normalized = spec.trim();
-const unaliased = normalized.toLowerCase().startsWith("openclaw@") ? normalized.slice(9).trim() : normalized;
+const unaliased = normalized.toLowerCase().startsWith("carapace@") ? normalized.slice(9).trim() : normalized;
 const explicit = (value) => /\.(?:tgz|tar\.gz)$/i.test(value) || value.includes("://") || value.includes("#") || /^(?:file|github|git\+(?:ssh|https|http|file)|npm):/i.test(value);
-let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "openclaw";
+let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "carapace";
 const alias = /^npm:/i.test(identity);
 if (alias) identity = /^npm:(@[^/]+\/[^@]+|[^@]+?)(?:@.*)?$/i.exec(identity)?.[1] ?? "";
 const filePrefix = /^file:/i.test(identity) ? "file:" : "";
@@ -1368,7 +1368,7 @@ publish_executable_wrapper() {
   local target="$1" target_dir="" temp="" backup=""
   target_dir="${target%/*}"
   mkdir -p "$target_dir"
-  temp="$(mktemp "${target_dir}/.openclaw-wrapper.XXXXXX")" || return 1
+  temp="$(mktemp "${target_dir}/.carapace-wrapper.XXXXXX")" || return 1
   TMPFILES+=("$temp")
   cat > "$temp"
   chmod +x "$temp"
@@ -1388,10 +1388,10 @@ commit_wrapper_backup() {
   WRAPPER_BACKUP_PATH=""
 }
 
-install_openclaw() {
-  local requested="${OPENCLAW_VERSION:-latest}"
-  if is_openclaw_source_package_install_spec "$requested"; then
-    fail "npm installs do not support OpenClaw GitHub source targets like '${requested}'. Use --install-method git --version main, latest, beta, an exact version, or a built .tgz package."
+install_carapace() {
+  local requested="${CARAPACE_VERSION:-latest}"
+  if is_carapace_source_package_install_spec "$requested"; then
+    fail "npm installs do not support Carapace GitHub source targets like '${requested}'. Use --install-method git --version main, latest, beta, an exact version, or a built .tgz package."
   fi
   local freshness_flag="--min-release-age=0"
   local min_release_age=""
@@ -1415,13 +1415,13 @@ install_openclaw() {
   if [[ -n "${REQUIRED_COMPATIBLE_VERSION:-}" ]]; then
     # || true: a failed npm view must reach the explicit fail below instead
     # of dying silently through set -e with no error event.
-    resolved_requested="$(resolve_npm_openclaw_version "$requested" || true)"
+    resolved_requested="$(resolve_npm_carapace_version "$requested" || true)"
     if [[ -z "$resolved_requested" ]]; then
-      fail "Could not resolve OpenClaw ${requested} before compatibility checking."
+      fail "Could not resolve Carapace ${requested} before compatibility checking."
     fi
-    require_openclaw_version_compatible "$resolved_requested"
+    require_carapace_version_compatible "$resolved_requested"
   fi
-  local install_spec="openclaw@${resolved_requested}"
+  local install_spec="carapace@${resolved_requested}"
   if [[ "$resolved_requested" == *"://"* || "$resolved_requested" == /* || "$resolved_requested" == ./* || "$resolved_requested" == ../* || "$resolved_requested" =~ ^(file|github|git\+|npm): || "$resolved_requested" =~ \.(tgz|tar\.gz)$ ]]; then
     install_spec="$resolved_requested"
   fi
@@ -1429,35 +1429,35 @@ install_openclaw() {
   npm_cmd="$(npm_bin)"
   local npm_cwd="$PWD"
   lifecycle_arg="$(npm_lifecycle_allow_arg "$npm_cmd" "$install_spec" "$npm_cwd")" || return 1
-  emit_json step name openclaw status start version "$requested"
-  log "Installing OpenClaw (${requested})..."
+  emit_json step name carapace status start version "$requested"
+  log "Installing Carapace (${requested})..."
   if [[ "$SET_NPM_PREFIX" -eq 1 ]]; then
     fix_npm_prefix_if_needed
   fi
 
   local installed_entry lifecycle_pending legacy_install_guard
-  installed_entry="$(node_dir)/lib/node_modules/openclaw/dist/entry.js"
-  lifecycle_pending="$(node_dir)/lib/node_modules/openclaw/.openclaw-lifecycle-pending"
-  legacy_install_guard="$(node_dir)/lib/node_modules/openclaw/dist/openclaw-install-guard"
+  installed_entry="$(node_dir)/lib/node_modules/carapace/dist/entry.js"
+  lifecycle_pending="$(node_dir)/lib/node_modules/carapace/.carapace-lifecycle-pending"
+  legacy_install_guard="$(node_dir)/lib/node_modules/carapace/dist/carapace-install-guard"
   local npm_install_args=(install -g --prefix "$(node_dir)" "${npm_args[@]}")
   [[ -z "$lifecycle_arg" ]] || npm_install_args+=("$lifecycle_arg")
   npm_install_args+=("$install_spec")
   if ! env -u NPM_CONFIG_BEFORE -u npm_config_before -u NPM_CONFIG_MIN_RELEASE_AGE -u npm_config_min_release_age -u npm_config_min-release-age "$npm_cmd" "${npm_install_args[@]}" || [[ ! -f "$installed_entry" || -e "$lifecycle_pending" || -e "$legacy_install_guard" ]]; then
-    log "npm install openclaw@${resolved_requested} did not produce a usable package; retrying once"
+    log "npm install carapace@${resolved_requested} did not produce a usable package; retrying once"
     if ! env -u NPM_CONFIG_BEFORE -u npm_config_before -u NPM_CONFIG_MIN_RELEASE_AGE -u npm_config_min_release_age -u npm_config_min-release-age "$npm_cmd" "${npm_install_args[@]}" || [[ ! -f "$installed_entry" || -e "$lifecycle_pending" || -e "$legacy_install_guard" ]]; then
-      emit_json error message "npm install did not produce a usable OpenClaw package"
-      log "ERROR: npm install did not produce a usable OpenClaw package"
+      emit_json error message "npm install did not produce a usable Carapace package"
+      log "ERROR: npm install did not produce a usable Carapace package"
       return 1
     fi
   fi
 
   mkdir -p "${PREFIX}/bin"
-  publish_executable_wrapper "${PREFIX}/bin/openclaw" <<EOF
+  publish_executable_wrapper "${PREFIX}/bin/carapace" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec "${PREFIX}/tools/node/bin/node" "$(node_dir)/lib/node_modules/openclaw/dist/entry.js" "\$@"
+exec "${PREFIX}/tools/node/bin/node" "$(node_dir)/lib/node_modules/carapace/dist/entry.js" "\$@"
 EOF
-  emit_json step name openclaw status ok version "$requested"
+  emit_json step name carapace status ok version "$requested"
 }
 
 ensure_pnpm_git_prepare_allowlist() {
@@ -1503,10 +1503,10 @@ clone_git_checkout_transactionally() {
   if [[ -d "$repo_dir" && -z "$(ls -A "$repo_dir" 2>/dev/null || true)" ]]; then
     preserve_repo_dir=1
     repo_dir="$(cd "$repo_dir" && pwd -P)"
-    staging_dir="$(mktemp -d "${repo_dir}/.openclaw-clone.XXXXXX")"
+    staging_dir="$(mktemp -d "${repo_dir}/.carapace-clone.XXXXXX")"
   else
     repo_dir="${parent_dir}/$(basename "$repo_dir")"
-    staging_dir="$(mktemp -d "${parent_dir}/.openclaw-clone.XXXXXX")"
+    staging_dir="$(mktemp -d "${parent_dir}/.carapace-clone.XXXXXX")"
   fi
   TMPFILES+=("$staging_dir")
 
@@ -1573,9 +1573,9 @@ NODE
   fi
 }
 
-install_openclaw_from_git() {
+install_carapace_from_git() {
   local repo_dir="$1"
-  local repo_url="https://github.com/openclaw/openclaw.git"
+  local repo_url="https://github.com/Exaggarate/carapace.git"
   local fresh_checkout=0
 
   if [[ -z "$repo_dir" ]]; then
@@ -1588,11 +1588,11 @@ install_openclaw_from_git() {
     repo_dir="$(cd "$(dirname "$repo_dir")" && pwd -P)/$(basename "$repo_dir")"
   fi
 
-  emit_json step name openclaw status start method git repo "$repo_url"
+  emit_json step name carapace status start method git repo "$repo_url"
   if [[ -d "$repo_dir/.git" ]]; then
-    log "Installing Openclaw from git checkout: ${repo_dir}"
+    log "Installing Carapace from git checkout: ${repo_dir}"
   else
-    log "Installing Openclaw from GitHub (${repo_url})..."
+    log "Installing Carapace from GitHub (${repo_url})..."
   fi
 
   emit_json step name git-tools status start
@@ -1623,13 +1623,13 @@ install_openclaw_from_git() {
   fi
 
   local git_ref
-  git_ref="$(resolve_git_openclaw_ref)"
+  git_ref="$(resolve_git_carapace_ref)"
   if [[ -z "$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)" ]]; then
     log "Using git ref: ${git_ref}"
     if [[ "$fresh_checkout" -eq 0 ]]; then
       emit_json step name git-update status start
     fi
-    checkout_git_openclaw_ref "$repo_dir" "$git_ref"
+    checkout_git_carapace_ref "$repo_dir" "$git_ref"
     if [[ "$fresh_checkout" -eq 0 ]]; then
       emit_json step name git-update status ok
     fi
@@ -1645,11 +1645,11 @@ install_openclaw_from_git() {
 
   if [[ -n "${REQUIRED_COMPATIBLE_VERSION:-}" ]]; then
     local resolved_version
-    resolved_version="$(resolve_git_checkout_openclaw_version "$repo_dir" 2>/dev/null || true)"
+    resolved_version="$(resolve_git_checkout_carapace_version "$repo_dir" 2>/dev/null || true)"
     if [[ -z "$resolved_version" ]]; then
       fail "Could not resolve the Git checkout version before compatibility checking."
     fi
-    require_openclaw_version_compatible "$resolved_version"
+    require_carapace_version_compatible "$resolved_version"
   fi
 
   cleanup_legacy_submodules "$repo_dir"
@@ -1678,12 +1678,12 @@ install_openclaw_from_git() {
   emit_json step name cli-build status ok
 
   mkdir -p "${PREFIX}/bin"
-  publish_executable_wrapper "${PREFIX}/bin/openclaw" <<EOF
+  publish_executable_wrapper "${PREFIX}/bin/carapace" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 exec "${PREFIX}/tools/node/bin/node" "${repo_dir}/dist/entry.js" "\$@"
 EOF
-  emit_json step name openclaw status ok method git
+  emit_json step name carapace status ok method git
 }
 
 is_gateway_daemon_loaded() {
@@ -1725,7 +1725,7 @@ try {
 }
 
 refresh_gateway_service_if_loaded() {
-  local claw="${PREFIX}/bin/openclaw" refresh_output
+  local claw="${PREFIX}/bin/carapace" refresh_output
   if [[ ! -x "$claw" ]]; then
     return 0
   fi
@@ -1742,7 +1742,7 @@ refresh_gateway_service_if_loaded() {
     if [[ -n "$refresh_output" ]]; then
       emit_json step name gateway-service status warn reason definition-mutation-denied
       printf '%s\n' "Code installed; gateway service definition left unchanged; ${refresh_output}." >&2
-      printf '%s\n' "Run openclaw gateway status --deep, verify the installation owner, and restart it manually if needed." >&2
+      printf '%s\n' "Run carapace gateway status --deep, verify the installation owner, and restart it manually if needed." >&2
       return 0
     fi
     emit_json step name gateway-service status warn reason install-failed
@@ -1761,7 +1761,7 @@ main() {
   PREFIX="$(resolve_installer_path "$PREFIX")"
   GIT_DIR="$(resolve_installer_path "$GIT_DIR")"
 
-  if [[ "${OPENCLAW_NO_ONBOARD:-0}" == "1" ]]; then
+  if [[ "${CARAPACE_NO_ONBOARD:-0}" == "1" ]]; then
     RUN_ONBOARD=0
   fi
 
@@ -1775,33 +1775,33 @@ main() {
 
   install_node "$(os_detect)" "$(arch_detect)"
   if [[ "$INSTALL_METHOD" == "git" ]]; then
-    install_openclaw_from_git "$GIT_DIR"
+    install_carapace_from_git "$GIT_DIR"
   elif [[ "$INSTALL_METHOD" == "npm" ]]; then
     ensure_git
     if [[ "$SET_NPM_PREFIX" -eq 1 ]]; then
       fix_npm_prefix_if_needed
     fi
-    install_openclaw
+    install_carapace
   else
     fail "Unknown install method: ${INSTALL_METHOD} (use npm or git)"
   fi
 
   local installed_version
-  if ! installed_version="$("${PREFIX}/bin/openclaw" --version 2>/dev/null | head -n 1 | tr -d '\r')" ||
+  if ! installed_version="$("${PREFIX}/bin/carapace" --version 2>/dev/null | head -n 1 | tr -d '\r')" ||
     [[ -z "$installed_version" ]]; then
-    fail "Installed OpenClaw CLI did not return a version successfully from ${PREFIX}/bin/openclaw."
+    fail "Installed Carapace CLI did not return a version successfully from ${PREFIX}/bin/carapace."
   fi
   commit_wrapper_backup
 
   refresh_gateway_service_if_loaded
   emit_json "done" version "$installed_version"
-  log "OpenClaw installed (${installed_version})."
+  log "Carapace installed (${installed_version})."
 
   if [[ "$RUN_ONBOARD" -eq 1 ]]; then
-    "${PREFIX}/bin/openclaw" onboard
+    "${PREFIX}/bin/carapace" onboard
   fi
 }
 
-if [[ "${OPENCLAW_INSTALL_CLI_SH_NO_RUN:-0}" != "1" ]]; then
+if [[ "${CARAPACE_INSTALL_CLI_SH_NO_RUN:-0}" != "1" ]]; then
   main "$@"
 fi

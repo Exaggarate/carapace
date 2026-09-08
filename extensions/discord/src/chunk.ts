@@ -1,11 +1,11 @@
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
-import { chunkByParagraph, type ChunkMode } from "openclaw/plugin-sdk/reply-chunking";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { resolveIntegerOption } from "carapace/plugin-sdk/number-runtime";
+import { chunkByParagraph, type ChunkMode } from "carapace/plugin-sdk/reply-chunking";
 import {
   avoidTrailingHighSurrogateBreak,
   chunkTextForOutbound,
   findCodeRegions,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 
 type ChunkDiscordTextOpts = {
   /** Max characters per Discord message. Default: 2000. */

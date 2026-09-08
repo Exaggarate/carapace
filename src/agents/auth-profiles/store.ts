@@ -7,7 +7,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isSqliteLockError } from "../../infra/sqlite-transaction.js";
 import { isUserModelAuthProfileId } from "../../state/user-model-account-id.js";
 import { readUserModelAuthProfile } from "../../state/user-model-accounts.js";
@@ -116,7 +116,7 @@ type LoadAuthProfileStoreOptions = {
   /** Materialize only this explicitly selected personal account into the returned view. */
   profileId?: string;
   allowKeychainPrompt?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   database?: AuthProfileDatabase;
   externalCli?: ExternalCliAuthDiscovery;
   inheritedAuthDir?: string;
@@ -153,7 +153,7 @@ export function withAuthProfileStoreAgentDir<T>(
   sharedStateDir: string,
   run: () => T,
 ): T {
-  const env = { ...process.env, OPENCLAW_STATE_DIR: sharedStateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: sharedStateDir };
   let sharedStore: AuthProfileStore | undefined;
   if (resolveSharedAuthStoreOwnership(env).location === "state-db") {
     const shared = loadPersistedSharedAuthProfileStore(env);
@@ -274,7 +274,7 @@ function preserveLegacyOAuthRefsOnSave(params: {
 
 type ResolvedExternalCliOverlayOptions = {
   allowKeychainPrompt?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   externalCliProviderIds?: Iterable<string>;
   externalCliProfileIds?: Iterable<string>;
 };
@@ -327,7 +327,7 @@ const testing = {
   },
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.authProfileStoreTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.authProfileStoreTestApi")] =
     testing;
 }
 
@@ -748,7 +748,7 @@ function assertAuthProfilePersistenceOwner(
 ): void {
   if (
     stateDir &&
-    path.resolve(resolveStateDir({ ...owner.env, OPENCLAW_STATE_DIR: stateDir })) !==
+    path.resolve(resolveStateDir({ ...owner.env, CARAPACE_STATE_DIR: stateDir })) !==
       path.resolve(resolveStateDir(owner.env))
   ) {
     throw new Error("explicit auth state directory does not match the captured owner");
@@ -1261,7 +1261,7 @@ export function createAuthProfileStoreRuntime(
     if (
       params.options?.readOnly === true ||
       params.options?.syncExternalCli === false ||
-      process.env.OPENCLAW_AUTH_STORE_READONLY === "1"
+      process.env.CARAPACE_AUTH_STORE_READONLY === "1"
     ) {
       return params.store;
     }
@@ -1706,7 +1706,7 @@ export function createAuthProfileStoreRuntime(
     options?: {
       profileId?: string;
       allowKeychainPrompt?: boolean;
-      config?: OpenClawConfig;
+      config?: CarapaceConfig;
       externalCli?: ExternalCliAuthDiscovery;
       externalCliProviderIds?: Iterable<string>;
       externalCliProfileIds?: Iterable<string>;

@@ -1,4 +1,4 @@
-import type { TalkCatalogResult } from "@openclaw/gateway-protocol";
+import type { TalkCatalogResult } from "@carapace/gateway-protocol";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import {
   discoverRealtimeTalkInputs,

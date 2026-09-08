@@ -1,16 +1,16 @@
 // Openai plugin module implements shared behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createLazyRuntimeModule,
   createLazyRuntimeSurface,
-} from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/lazy-runtime";
 import {
   buildFirstTemplateModel,
   findCatalogTemplate,
   matchesExactOrPrefix,
-} from "openclaw/plugin-sdk/provider-model-metadata";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-model-metadata";
+import type { ProviderPlugin } from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildOpenAIReplayPolicy } from "./replay-policy.js";
 import { resolveOpenAITransportTurnState } from "./transport-policy.js";
 
@@ -36,7 +36,7 @@ const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
 
 export const OPENAI_DEFAULT_RUNTIME_CONTEXT_TOKENS = 272_000;
 
-export function resolveConfiguredOpenAIBaseUrl(cfg: OpenClawConfig | undefined): string {
+export function resolveConfiguredOpenAIBaseUrl(cfg: CarapaceConfig | undefined): string {
   return normalizeOptionalString(cfg?.models?.providers?.openai?.baseUrl) ?? OPENAI_API_BASE_URL;
 }
 

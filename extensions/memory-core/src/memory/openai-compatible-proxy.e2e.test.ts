@@ -6,7 +6,7 @@ import { connect } from "node:net";
 import path from "node:path";
 import type { Duplex } from "node:stream";
 import { promisify } from "node:util";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -81,9 +81,9 @@ describe("OpenAI-compatible embedding proxy CLI", () => {
     });
     const proxyPort = await listen(proxy);
 
-    const root = tempDirs.make("openclaw-memory-proxy-");
+    const root = tempDirs.make("carapace-memory-proxy-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await fs.mkdir(stateDir, { recursive: true });
     await fs.writeFile(
       configPath,
@@ -104,7 +104,7 @@ describe("OpenAI-compatible embedding proxy CLI", () => {
 
     const result = await execFileAsync(
       process.execPath,
-      [path.resolve("openclaw.mjs"), "memory", "status", "--deep", "--agent", "main"],
+      [path.resolve("carapace.mjs"), "memory", "status", "--deep", "--agent", "main"],
       {
         cwd: path.resolve("."),
         encoding: "utf8",
@@ -119,9 +119,9 @@ describe("OpenAI-compatible embedding proxy CLI", () => {
           NO_COLOR: "1",
           NO_PROXY: "",
           no_proxy: "",
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_STATE_DIR: stateDir,
           USERPROFILE: root,
           VITEST: undefined,
         },

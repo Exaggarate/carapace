@@ -17,7 +17,7 @@ import {
   mutateSkillLibrary,
 } from "../skills/library/service.js";
 import { resolveSkillLibraryActor } from "../skills/library/store.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { selectResolvedUserProfileById } from "../state/user-profiles-internal.js";
 import {
   activateLibrarySelection,
@@ -34,7 +34,7 @@ export function invalidateSkillAuthoringForOtherRequester(
 ): void {
   for (const grant of active.get(sessionKey) ?? []) {
     if (grant.profileId !== profileId) {
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       if (
         !profileId ||
         selectResolvedUserProfileById(db, grant.profileId)?.id !==
@@ -140,7 +140,7 @@ export function prepareGatewaySkillAuthoring(
     },
     assertWorkspaceCurrent() {
       assertCurrent();
-      if (!resolveSkillLibraryActor(openOpenClawStateDatabase().db, authority).admin) {
+      if (!resolveSkillLibraryActor(openCarapaceStateDatabase().db, authority).admin) {
         throw new SkillLibraryError(
           "FORBIDDEN",
           "Workspace authoring requires current administrator authority.",

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { getBuzzRuntime } from "./runtime.js";
 import { BUZZ_MAX_CONFIGURED_ROOMS } from "./subscription-budget.js";
 

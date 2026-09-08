@@ -1,4 +1,4 @@
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { createAgentRunDirectAbortError } from "../agents/run-termination.js";
 import type { ManagedWorktreeService } from "../agents/worktrees/service.js";
 import { getRuntimeConfig } from "../config/config.js";

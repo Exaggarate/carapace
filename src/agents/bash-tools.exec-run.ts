@@ -1,7 +1,7 @@
 /**
  * Exec tool policy, host dispatch, and process lifecycle pipeline.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveStateDir } from "../config/paths.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import {
@@ -120,7 +120,7 @@ export function createExecTool(
       }),
     ));
   const defaultBackgroundMs = clampWithDefault(
-    defaults?.backgroundMs ?? readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS"),
+    defaults?.backgroundMs ?? readEnvInt("CARAPACE_BASH_YIELD_MS", "PI_BASH_YIELD_MS"),
     10_000,
     10,
     120_000,

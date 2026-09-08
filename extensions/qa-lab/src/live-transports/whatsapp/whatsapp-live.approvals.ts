@@ -3,9 +3,9 @@ import { randomUUID } from "node:crypto";
 import type {
   WhatsAppQaDriverObservedMessage,
   WhatsAppQaDriverSession,
-} from "@openclaw/whatsapp/api.js";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "@carapace/whatsapp/api.js";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   assertApprovalDecisionResult,
   formatApprovalResultValue,

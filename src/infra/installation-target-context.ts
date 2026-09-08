@@ -11,7 +11,7 @@ export type InstallationTarget = Readonly<{
 }>;
 
 const installationTargetContext = resolveGlobalSingleton(
-  Symbol.for("openclaw.installationTargetContext"),
+  Symbol.for("carapace.installationTargetContext"),
   () => new AsyncLocalStorage<InstallationTarget | undefined>(),
 );
 
@@ -36,9 +36,9 @@ export function getInstallationTarget(): InstallationTarget | undefined {
 export function installationTargetEnv(target: InstallationTarget | undefined) {
   return target
     ? Object.freeze({
-        OPENCLAW_STATE_DIR: target.stateDir,
-        OPENCLAW_CONFIG_PATH: target.configPath,
-        OPENCLAW_WORKSPACE_DIR: target.defaultWorkspaceDir,
+        CARAPACE_STATE_DIR: target.stateDir,
+        CARAPACE_CONFIG_PATH: target.configPath,
+        CARAPACE_WORKSPACE_DIR: target.defaultWorkspaceDir,
       })
     : undefined;
 }

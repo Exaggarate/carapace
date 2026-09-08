@@ -18,7 +18,7 @@ import * as bundledTypeboxFormat from "typebox/format";
 import * as bundledTypeboxValue from "typebox/value";
 import * as bundledAgentCore from "../../../plugin-sdk/agent-core.js";
 import * as bundledLlm from "../../../plugin-sdk/llm.js";
-import { installOpenClawInternalCorePackageNativeResolver } from "../../../plugins/plugin-sdk-native-resolver.js";
+import { installCarapaceInternalCorePackageNativeResolver } from "../../../plugins/plugin-sdk-native-resolver.js";
 import {
   buildPluginLoaderAliasMap,
   buildPluginLoaderJitiOptions,
@@ -52,12 +52,12 @@ const VIRTUAL_MODULES: Record<string, unknown> = {
   "@sinclair/typebox/compile": bundledTypeboxCompile,
   "@sinclair/typebox/format": bundledTypeboxFormat,
   "@sinclair/typebox/value": bundledTypeboxValue,
-  "openclaw/plugin-sdk/agent-core": bundledAgentCore,
-  "@openclaw/plugin-sdk/agent-core": bundledAgentCore,
-  "openclaw/plugin-sdk/llm": bundledLlm,
-  "@openclaw/plugin-sdk/llm": bundledLlm,
-  "openclaw/plugin-sdk/agent-sessions": bundledAgentSessions,
-  "@openclaw/plugin-sdk/agent-sessions": bundledAgentSessions,
+  "carapace/plugin-sdk/agent-core": bundledAgentCore,
+  "@carapace/plugin-sdk/agent-core": bundledAgentCore,
+  "carapace/plugin-sdk/llm": bundledLlm,
+  "@carapace/plugin-sdk/llm": bundledLlm,
+  "carapace/plugin-sdk/agent-sessions": bundledAgentSessions,
+  "@carapace/plugin-sdk/agent-sessions": bundledAgentSessions,
 };
 
 const require = createRequire(import.meta.url);
@@ -70,7 +70,7 @@ let extensionCacheCwd: string | undefined;
 let extensionCacheGeneration = 0;
 const extensionFactoryCache = new Map<string, ExtensionFactory>();
 const EXTENSION_LOADER_ALIAS_IMPORT_PATTERN =
-  /(?:@openclaw\/plugin-sdk|openclaw\/plugin-sdk|@sinclair\/typebox|typebox)(?:\/[A-Za-z0-9_-]+)?/u;
+  /(?:@carapace\/plugin-sdk|carapace\/plugin-sdk|@sinclair\/typebox|typebox)(?:\/[A-Za-z0-9_-]+)?/u;
 const RELATIVE_EXTENSION_IMPORT_PATTERN =
   /(?:import\s*(?:[^'"]*?\s*from\s*)?["']\.{1,2}\/|export\s*(?:[^'"]*?\s*from\s*)["']\.{1,2}\/|import\s*\(\s*["']\.{1,2}\/|require\s*\(\s*["']\.{1,2}\/)/u;
 const COMMONJS_EXTENSION_EXPORT_PATTERN = /\b(?:module\.exports|exports\.)/u;
@@ -430,7 +430,7 @@ async function loadExtensionSourceTransformModule(
   context: ExtensionLoadContext,
 ): Promise<ExtensionFactory | undefined> {
   if (!context.sourceTransformLoader) {
-    installOpenClawInternalCorePackageNativeResolver({ moduleUrl: import.meta.url });
+    installCarapaceInternalCorePackageNativeResolver({ moduleUrl: import.meta.url });
     const createJitiLoader = await loadCreateJitiLoaderFactory();
     const aliases = isBunBinary
       ? {}

@@ -9,9 +9,9 @@ import { type AgentsConfig, getRuntimeConfig as getMockedRuntimeConfig } from ".
 import { loadSessionEntry, updateSessionEntry } from "../config/sessions/session-accessor.js";
 import { SQLITE_SESSION_WRITER_QUEUES } from "../config/sessions/store-writer-state.js";
 import {
-  disposeOpenClawAgentDatabaseByPath,
-  listOpenClawAgentDatabasesForTest,
-} from "../state/openclaw-agent-db.js";
+  disposeCarapaceAgentDatabaseByPath,
+  listCarapaceAgentDatabasesForTest,
+} from "../state/carapace-agent-db.js";
 import { createGatewayConfigOverrides } from "./test-helpers.config-runtime.js";
 import {
   installGatewayTestHooks,
@@ -32,9 +32,9 @@ installConnectedControlUiServerSuite((started) => {
 describe("Gateway RPC fixture session writes", () => {
   test.each(["raw WebSocket", "rpcReq"])("%s preserves queued session writes", async (request) => {
     const dir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-rpc-writes-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gw-rpc-writes-")),
     );
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "carapace-agent.sqlite");
     testState.sessionStorePath = storePath;
     const scope = { agentId: "main", sessionKey: "agent:main:main", storePath };
     const planning = createDeferred();
@@ -76,12 +76,12 @@ describe("Gateway RPC fixture session writes", () => {
       release.resolve();
       await Promise.allSettled([...writes, ...drains]);
       // This custom store lives outside the Gateway HOME and owns its own disposal.
-      disposeOpenClawAgentDatabaseByPath(storePath);
+      disposeCarapaceAgentDatabaseByPath(storePath);
       testState.sessionStorePath = undefined;
       await fs.rm(dir, { recursive: true, force: true });
     }
     expect(
-      listOpenClawAgentDatabasesForTest().some((database) => database.path === storePath),
+      listCarapaceAgentDatabasesForTest().some((database) => database.path === storePath),
     ).toBe(false);
   });
 });
@@ -123,7 +123,7 @@ describe("Gateway fixture config publication", () => {
   test("publishes agent-only edits and removals without overwriting authored config", async () => {
     const actual = await vi.importActual<typeof import("../config/io.js")>("../config/io.js");
     const { writeConfigFile } = createGatewayConfigOverrides(actual);
-    const configPath = process.env.OPENCLAW_CONFIG_PATH!;
+    const configPath = process.env.CARAPACE_CONFIG_PATH!;
     const store = path.join(path.dirname(configPath), "agents", "{agentId}", "sessions.json");
     const authoredConfig = {
       agents: {

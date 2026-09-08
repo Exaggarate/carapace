@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import net from "node:net";
 import { performance } from "node:perf_hooks";
 import { MessageChannel } from "node:worker_threads";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { clearRuntimeConfigSnapshot } from "../../config/runtime-snapshot.js";
 import {
   captureGatewayRestartTraceHandoff,
@@ -163,8 +163,8 @@ export async function runGatewayLoop(params: {
 }) {
   // macOS/BSD process inspection reports process.title instead of the original
   // argv. Give the long-running Gateway a verifiable identity for lock readers.
-  if (process.title === "openclaw") {
-    process.title = "openclaw-gateway";
+  if (process.title === "carapace") {
+    process.title = "carapace-gateway";
   }
   let startupStartedAt: number;
   const processStartedAt = performance.timeOrigin;
@@ -172,7 +172,7 @@ export async function runGatewayLoop(params: {
   // listeners. Without this, every subsequent lifecycle path (SIGUSR1,
   // SIGTERM-with-intent, restart iteration hook, stability bundle writer)
   // depends on a dynamic import() call. After an in-place package upgrade
-  // (e.g. `npm install -g openclaw@latest` triggered via update.run),
+  // (e.g. `npm install -g carapace@latest` triggered via update.run),
   // dist/ chunk hashes rotate while the process is still running. The next
   // SIGUSR1 — including the one update.run schedules for itself — would
   // hit ERR_MODULE_NOT_FOUND from inside its async IIFE, reject silently,
@@ -185,7 +185,7 @@ export async function runGatewayLoop(params: {
   const supervisorMode = eagerLifecycleRuntime.detectGatewayRespawnSupervisor(
     process.env,
     process.platform,
-    { includeLinuxOpenClawGatewayServiceMarker: true },
+    { includeLinuxCarapaceGatewayServiceMarker: true },
   );
   let lock = await acquireGatewayLock({ port: params.lockPort });
   // Process-owned signal handling must survive gaps with no listening server.
@@ -549,7 +549,7 @@ export async function runGatewayLoop(params: {
       }
     } else {
       gatewayLog.info(
-        `restart mode: in-process restart (${respawn.detail ?? "OPENCLAW_NO_RESPAWN"})`,
+        `restart mode: in-process restart (${respawn.detail ?? "CARAPACE_NO_RESPAWN"})`,
       );
     }
     if (!isUpdateRestart && isUpdateProcessRestartReason(activeRestartRequest?.restartReason)) {
@@ -1136,7 +1136,7 @@ export async function runGatewayLoop(params: {
           gatewayLog.warn("SIGUSR1 restart ignored (not authorized; commands.restart=false).");
           gatewayLog.warn(
             "An unauthorized SIGUSR1 restart signal was received and ignored. " +
-              "If a pending gateway restart needs to be applied, run `openclaw gateway restart` " +
+              "If a pending gateway restart needs to be applied, run `carapace gateway restart` " +
               "or restart the gateway through your service manager.",
           );
           return;

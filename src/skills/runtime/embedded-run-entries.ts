@@ -1,5 +1,5 @@
 // Embedded run entry helpers serialize runtime skill metadata for agent run records.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadSkillLibrarySelection } from "../library/selection.js";
 import { resolveSkillRuntimeConfig } from "../loading/runtime-config.js";
 import {
@@ -13,7 +13,7 @@ import type { SkillEligibilityContext, SkillEntry, SkillSnapshot } from "../type
 export function resolveEmbeddedRunSkillEntries(params: {
   workspaceDir: string;
   executionSkillsDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   eligibility?: SkillEligibilityContext;
   skillsSnapshot?: SkillSnapshot;

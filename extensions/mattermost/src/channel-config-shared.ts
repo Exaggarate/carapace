@@ -1,11 +1,11 @@
 // Mattermost helper module supports channel config shared behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { formatNormalizedAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import { formatNormalizedAllowFromEntries } from "carapace/plugin-sdk/allow-from";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMattermostGatewayAuthBypassPaths } from "./gateway-auth-bypass.js";
 import {
   isMattermostConfigured,

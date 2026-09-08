@@ -6,8 +6,8 @@ import type { ISyncData, IRooms, IStoredClientOpts } from "matrix-js-sdk/lib/mat
 import type {
   PluginStateKeyedStore,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixSqliteStateEnv } from "../sqlite-state.js";
 
 export const MATRIX_SYNC_CACHE_VERSION = 1;

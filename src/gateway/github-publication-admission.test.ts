@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferredCore } from "../shared/deferred.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { updateUserGitHubConnection } from "../state/user-github-connections.js";
 import { readPersonalGitHubPublication } from "./github-personal-publication-store.js";
 import {
@@ -32,8 +32,8 @@ const rejection = (idempotencyKey: string) => ({
 });
 
 function sharedAdmission(surface: "local" | "deferred" | "claim") {
-  const db = openOpenClawStateDatabase().db;
-  const placements = createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() });
+  const db = openCarapaceStateDatabase().db;
+  const placements = createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() });
   const coordinator = createTestGitHubPublicationCoordinator({ placements });
   const sessionId = surface === "local" ? SESSION_ID : REQUEST.sessionId;
   const sessionKey = surface === "local" ? SESSION_KEY : REQUEST.sessionKey;

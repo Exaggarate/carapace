@@ -1,18 +1,18 @@
 {
-  "name": "@openclaw/moonshot-provider",
+  "name": "@carapace/moonshot-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw Moonshot provider plugin",
+  "description": "Carapace Moonshot provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/moonshot-provider",
-      "npmSpec": "@openclaw/moonshot-provider",
+      "clawhubSpec": "clawhub:@carapace/moonshot-provider",
+      "npmSpec": "@carapace/moonshot-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9"
     },
@@ -20,7 +20,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {
@@ -30,6 +30,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   }
 }

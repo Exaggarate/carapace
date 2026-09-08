@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { t } from "../wizard/i18n/index.js";
 import { runQuickstartForegroundGateway } from "./onboard-quickstart-host.js";
 
 type HostDeps = NonNullable<Parameters<typeof runQuickstartForegroundGateway>[1]>;
 
-function createHostHarness(config: OpenClawConfig = { gateway: { auth: { mode: "none" } } }) {
+function createHostHarness(config: CarapaceConfig = { gateway: { auth: { mode: "none" } } }) {
   const events: string[] = [];
   const gateway = createDeferred();
   const readiness = createDeferred<{ ok: boolean }>();
@@ -43,10 +43,10 @@ function createHostHarness(config: OpenClawConfig = { gateway: { auth: { mode: "
 
 describe("runQuickstartForegroundGateway", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "");
-    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "");
-    vi.stubEnv("OPENCLAW_GATEWAY_PORT", "");
-    vi.stubEnv("OPENCLAW_LOCALE", "en");
+    vi.stubEnv("CARAPACE_GATEWAY_TOKEN", "");
+    vi.stubEnv("CARAPACE_GATEWAY_PASSWORD", "");
+    vi.stubEnv("CARAPACE_GATEWAY_PORT", "");
+    vi.stubEnv("CARAPACE_LOCALE", "en");
   });
 
   afterEach(() => {
@@ -87,9 +87,9 @@ describe("runQuickstartForegroundGateway", () => {
       expect(h.runtime.log).toHaveBeenCalledWith("Dashboard: http://127.0.0.1:19431/dashboard/");
       expect(h.runtime.log).toHaveBeenCalledWith(expect.stringContaining("Ctrl+C"));
       expect(h.runtime.log).toHaveBeenCalledWith(
-        expect.stringContaining("openclaw gateway install"),
+        expect.stringContaining("carapace gateway install"),
       );
-      expect(h.runtime.log).toHaveBeenCalledWith(expect.stringContaining("openclaw dashboard"));
+      expect(h.runtime.log).toHaveBeenCalledWith(expect.stringContaining("carapace dashboard"));
 
       h.gateway.resolve();
       await host;

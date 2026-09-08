@@ -1,10 +1,10 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { AgentMessage, StreamFn } from "openclaw/plugin-sdk/agent-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { AgentMessage, StreamFn } from "carapace/plugin-sdk/agent-core";
 /** Exercises provider runtime loading, ordering, and manifest-backed discovery paths. */
-import { createRequireRecord, createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord, createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { ModelProviderConfig, OpenClawConfig } from "../config/types.js";
+import type { ModelProviderConfig, CarapaceConfig } from "../config/types.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { createPluginMetadataSnapshotFixture } from "./plugin-metadata.test-support.js";
 import type { ProviderExternalAuthProfile } from "./provider-external-auth.types.js";
@@ -61,7 +61,7 @@ const resolveBundledProviderPolicySurfaceMock = vi.fn<ResolveBundledProviderPoli
 const resolveProviderPolicySurfaceMock = vi.fn<ResolveProviderPolicySurface>((_providerId) => null);
 const providerRuntimeWarnMock = vi.fn();
 
-let getAiTransportHost: typeof import("@openclaw/ai").getAiTransportHost;
+let getAiTransportHost: typeof import("@carapace/ai").getAiTransportHost;
 let attachModelProviderRuntimePluginHandle: typeof import("./provider-hook-runtime.js").attachModelProviderRuntimePluginHandle;
 let resolveProviderPluginsForHooks: typeof import("./provider-hook-runtime.js").resolveProviderPluginsForHooks;
 let resolveLoadedProviderPluginsForHooks: typeof import("./provider-hook-runtime.js").resolveLoadedProviderPluginsForHooks;
@@ -412,7 +412,7 @@ describe("provider-runtime", () => {
       resolveLoadedProviderPluginsForHooks,
     } = await import("./provider-hook-runtime.js"));
     await import("../agents/ai-transport-runtime-host.js");
-    ({ getAiTransportHost } = await import("@openclaw/ai"));
+    ({ getAiTransportHost } = await import("@carapace/ai"));
     ({ createEmptyPluginRegistry } = await import("./registry-empty.js"));
     ({ resetPluginRuntimeStateForTest, setActivePluginRegistry } = await import("./runtime.js"));
   });
@@ -1047,14 +1047,14 @@ describe("provider-runtime", () => {
           demo: { enabled: true, config: { endpoint: "https://one.example" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const secondConfig = {
       plugins: {
         entries: {
           demo: { enabled: true, config: { endpoint: "https://two.example" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config: firstConfig }),
@@ -1081,7 +1081,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const secondConfig = {
       plugins: {
         entries: {
@@ -1089,7 +1089,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true, config: { queryMode: "recent" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config: firstConfig }),
@@ -1104,7 +1104,7 @@ describe("provider-runtime", () => {
   it.each(["config", "default"] as const)(
     "uses refreshed same-id metadata after %s runtime invalidation",
     async (cacheOwner) => {
-      const config: OpenClawConfig | undefined = cacheOwner === "config" ? {} : undefined;
+      const config: CarapaceConfig | undefined = cacheOwner === "config" ? {} : undefined;
       setActivePluginRegistry(
         createEmptyPluginRegistry(),
         "metadata-owner",
@@ -1126,7 +1126,7 @@ describe("provider-runtime", () => {
                 origin: "config",
                 rootDir: `/plugins/${source}`,
                 source: `/plugins/${source}/index.js`,
-                manifestPath: `/plugins/${source}/openclaw.plugin.json`,
+                manifestPath: `/plugins/${source}/carapace.plugin.json`,
               },
             ],
             diagnostics: [],
@@ -1195,11 +1195,11 @@ describe("provider-runtime", () => {
       label: "Demo two",
       auth: [],
     };
-    const config = {} as OpenClawConfig;
-    const envSnapshot = captureEnv(["HOME", "OPENCLAW_HOME"]);
+    const config = {} as CarapaceConfig;
+    const envSnapshot = captureEnv(["HOME", "CARAPACE_HOME"]);
     try {
       setTestEnvValue("HOME", "/home/one");
-      deleteTestEnvValue("OPENCLAW_HOME");
+      deleteTestEnvValue("CARAPACE_HOME");
       resolvePluginProvidersMock.mockReturnValueOnce([firstProvider]);
       expect(resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config })).toMatchObject(
         firstProvider,
@@ -1497,15 +1497,15 @@ describe("provider-runtime", () => {
           demo: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const firstConfig = {
       ...baseConfig,
       agents: { defaults: { model: "openai/gpt-5.4" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const secondConfig = {
       ...baseConfig,
       agents: { defaults: { model: "anthropic/claude-sonnet-4-5" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const metadataSnapshot = {
       ...createPluginMetadataSnapshotFixture(),
       workspaceDir: "/tmp/snapshot-workspace",
@@ -1560,7 +1560,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const secondConfig = {
       plugins: {
         entries: {
@@ -1568,7 +1568,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true, config: { queryMode: "recent" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     for (const config of [firstConfig, secondConfig]) {
       expect(

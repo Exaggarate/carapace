@@ -3,7 +3,7 @@ name: github
 description: "GitHub CLI for issues, PRs, CI/check logs, comments, reviews, releases, repos, and gh api queries."
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "🐙",
         "requires": { "bins": ["gh"] },
@@ -51,7 +51,7 @@ When creating or refreshing a PR body, append this final footer only when the Ru
 
 ```text
 ---
-[View the OpenClaw team session](<sessionUrl>)
+[View the Carapace team session](<sessionUrl>)
 ```
 
 URLs work directly: `gh pr view https://github.com/owner/repo/pull/55`.

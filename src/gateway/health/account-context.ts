@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { inspectChannelAccount } from "../../channels/account-inspection.js";
 import { hasConfiguredUnavailableCredentialStatus } from "../../channels/account-snapshot-fields.js";
 import {
@@ -6,7 +6,7 @@ import {
   resolveChannelAccountEnabled,
 } from "../../channels/account-summary.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 
 const PUBLIC_IMESSAGE_FULL_DISK_ACCESS_ERROR =
@@ -60,7 +60,7 @@ const hasAccountValue = (account: unknown): boolean => account !== null && accou
 
 function resolveProbeAccountEnabled(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   account: unknown;
   diagnostics: string[];
@@ -82,7 +82,7 @@ function resolveProbeAccountEnabled(params: {
 
 async function resolveProbeAccountConfigured(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   account: unknown;
   diagnostics: string[];
@@ -105,7 +105,7 @@ async function resolveProbeAccountConfigured(params: {
 
 export async function resolveHealthAccountContext(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
 }): Promise<{
   probeAccount: unknown;

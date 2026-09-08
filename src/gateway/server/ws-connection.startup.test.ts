@@ -40,10 +40,10 @@ import {
   NODE_PAIRING_SETUP_BOOTSTRAP_PROFILE,
 } from "../../shared/device-bootstrap-profile.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   AUTH_RATE_LIMIT_SCOPE_BOOTSTRAP_TOKEN,
   createAuthRateLimiter,
@@ -68,7 +68,7 @@ type StartupConnectResponse = {
 
 afterEach(() => {
   resetGatewayWorkAdmission();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function attachStartupNodeConnect(params: {
@@ -416,7 +416,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
   );
 
   it("admits the exact cloud-worker setup node through restart startup", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "gateway-startup-cloud-worker", layout: "state-only" },
       async (state) => {
         const { store, setupId } = seedProvisioningNodeSetup();
@@ -463,7 +463,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
   ] as const)(
     "admits same-device uncertain startup setup retry in %s unless destroy was requested (%s)",
     async (environmentState, destroyRequested) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "gateway-startup-cloud-worker-uncertain-retry", layout: "state-only" },
         async (state) => {
           const { store, setupId } = seedProvisioningNodeSetup();
@@ -492,7 +492,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
             }),
           ).resolves.toMatchObject({ completion: { deliveryState: "uncertain" } });
           if (environmentState !== "provisioning") {
-            openOpenClawStateDatabase()
+            openCarapaceStateDatabase()
               .db.prepare(
                 "UPDATE worker_environments SET state = ?, lease_id = ? WHERE node_setup_id = ?",
               )
@@ -547,7 +547,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
   it.each(["cloud bootstrap", "paired shared-token"] as const)(
     "keeps restart-startup %s authentication tracked until its node mutation and handshake settle",
     async (connectionKind) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "gateway-startup-cloud-worker-drain-race", layout: "state-only" },
         async (state) => {
           const { store, setupId } = seedProvisioningNodeSetup();
@@ -634,7 +634,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
   );
 
   it("keeps non-cloud and wrong cloud setup tokens startup-unavailable", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "gateway-startup-cloud-worker-reject", layout: "state-only" },
       async (state) => {
         const { store, setupId } = seedProvisioningNodeSetup();
@@ -696,7 +696,7 @@ describe("attachGatewayWsConnectionHandler startup readiness", () => {
   it.each(["exact bootstrap", "mixed bootstrap and shared token"] as const)(
     "keeps an invalid %s opaque and rate-limited without consulting setup state",
     async (credentialShape) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "gateway-startup-cloud-worker-invalid", layout: "state-only" },
         async (state) => {
           const { store } = seedProvisioningNodeSetup();

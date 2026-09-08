@@ -3,15 +3,15 @@ import type {
   AudioTranscriptionRequest,
   AudioTranscriptionResult,
   MediaUnderstandingProvider,
-} from "openclaw/plugin-sdk/media-understanding";
+} from "carapace/plugin-sdk/media-understanding";
 import {
   assertOkOrThrowHttpError,
   buildAudioTranscriptionFormData,
   postTranscriptionRequest,
   readProviderJsonObjectResponse,
   resolveProviderHttpRequestConfig,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { createXaiMediaUnderstandingProviderMetadata } from "./capability-provider-metadata.js";
 import { XAI_BASE_URL } from "./model-definitions.js";
 

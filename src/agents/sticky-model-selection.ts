@@ -1,8 +1,8 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { mutateConfigFileWithRetry } from "../config/config.js";
 import { resolveIsNixMode } from "../config/paths.js";
 import type { ModelSelectionScope } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -20,7 +20,7 @@ export type StickyModelSelectionPolicy = {
 
 /** Resolve preference only; callers must separately authorize config writes. */
 export function resolveStickyModelSelectionScope(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   scope?: ModelSelectionScope;
 }): ModelSelectionScope {
   return params.scope ?? params.cfg.agents?.defaults?.modelSelectionScope ?? "session";
@@ -29,7 +29,7 @@ export function resolveStickyModelSelectionScope(params: {
 /** Resolve the exact layer a selection may update before presenting or applying it. */
 export function resolveStickyModelSelectionPolicy(params: {
   canPersistConfig: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   scope?: ModelSelectionScope;
 }): StickyModelSelectionPolicy {
   const scope = resolveStickyModelSelectionScope(params);
@@ -78,7 +78,7 @@ export function persistStickyModelSelectionBestEffort(params: {
     if (!warnedImmutableConfig) {
       warnedImmutableConfig = true;
       log.warn(
-        `skipped sticky model persistence agentId=${params.agentId} model=${params.model} reason=config is immutable in OPENCLAW_NIX_MODE`,
+        `skipped sticky model persistence agentId=${params.agentId} model=${params.model} reason=config is immutable in CARAPACE_NIX_MODE`,
       );
     }
     return "skipped-immutable";

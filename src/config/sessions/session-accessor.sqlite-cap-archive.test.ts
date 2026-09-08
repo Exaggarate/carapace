@@ -1,8 +1,8 @@
 import { expect, it, onTestFinished } from "vitest";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   applySessionEntryLifecycleMutation,
   loadSessionEntry,
@@ -13,7 +13,7 @@ import { useTempSessionsFixture } from "./test-helpers.js";
 import type { SessionEntry } from "./types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const fixture = useTempSessionsFixture("openclaw-sqlite-cap-archive-");
+const fixture = useTempSessionsFixture("carapace-sqlite-cap-archive-");
 
 async function replaceWithoutMaintenance(
   scope: { sessionKey: string; storePath: string },
@@ -77,7 +77,7 @@ it("persists reasons and caps the least-recently-touched active row after dashbo
     },
   });
 
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: "main",
     path: resolveSqliteTargetFromSessionStorePath(storePath).path,
   });
@@ -86,7 +86,7 @@ it("persists reasons and caps the least-recently-touched active row after dashbo
     try {
       expect(database.db.isOpen).toBe(false);
     } finally {
-      closeOpenClawAgentDatabaseByPath(database.path);
+      closeCarapaceAgentDatabaseByPath(database.path);
     }
   });
   expect(result).toMatchObject({ archived: 3, capArchived: 1, capped: 1, pruned: 0 });

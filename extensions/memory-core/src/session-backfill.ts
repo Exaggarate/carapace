@@ -1,6 +1,6 @@
 import path from "node:path";
-import { listSessionTranscriptCorpusEntriesForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import { listSessionTranscriptCorpusEntriesForAgent } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import { removeBackfillDiaryEntries, writeBackfillDiaryEntries } from "./dreaming-dreams-file.js";
 import type { SessionIngestionFileState } from "./dreaming-ingestion-state.js";
 import {

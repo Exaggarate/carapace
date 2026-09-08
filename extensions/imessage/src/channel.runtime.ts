@@ -1,10 +1,10 @@
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
+import { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
 // Imessage plugin module implements channel behavior.
 import {
   createAccountStatusSink,
   resolveOutboundSendDep,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
 import {
   listEnabledIMessageAccounts,
   resolveIMessageAccount,
@@ -103,7 +103,7 @@ export async function startIMessageGatewayAccount(
   );
   const ownerAccountId = resolveIMessageDuplicateSourceOwner({ cfg: ctx.cfg, account });
   if (ownerAccountId) {
-    // openclaw/openclaw#65141: this account shares a local Messages source with
+    // carapace/carapace#65141: this account shares a local Messages source with
     // an already-owning account, so spawning a second `imsg rpc` would deliver
     // every inbound twice. Keep the account enabled for outbound sends, status,
     // and capability surfaces; just park the watcher slot until shutdown. Lifecycle stays silent:

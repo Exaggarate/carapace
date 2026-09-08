@@ -1,12 +1,12 @@
 {
   "provenance": {
-    "source": "https://github.com/openclaw/openclaw/pull/131617",
+    "source": "https://github.com/Exaggarate/carapace/pull/131617",
     "captured": "2026-08-28",
     "head": "baa73943fbcd7b47f5432d36d4d242f8170dc141",
     "endpoints": [
-      "GET /repos/openclaw/openclaw/actions/runs/33155056361",
-      "GET /repos/openclaw/openclaw/actions/runs/33155056361/attempts/3/jobs?per_page=100&page={1,2,3}",
-      "GET /repos/openclaw/openclaw/actions/jobs/{id} for all 14 queued config-64 aliases",
+      "GET /repos/carapace/carapace/actions/runs/33155056361",
+      "GET /repos/carapace/carapace/actions/runs/33155056361/attempts/3/jobs?per_page=100&page={1,2,3}",
+      "GET /repos/carapace/carapace/actions/jobs/{id} for all 14 queued config-64 aliases",
       "GraphQL pullRequest(number:131617).statusCheckRollup.contexts(first:100,after:$cursor)"
     ],
     "trimming": "Keep config-62, queued config-64 and CI gate from 239 rollup nodes. Keep config-62 and ALL 15 config-64 jobs from 207 attempt jobs, in captured order. Counts/pageInfo describe the trimmed single page. Remove nonconsumed fields only. No successful config-64 CheckRun exists in the captured rollup.",
@@ -77,7 +77,7 @@
                   "conclusion": "SUCCESS",
                   "databaseId": 98802776296,
                   "kind": "CheckRun",
-                  "name": "openclaw/ci-gate",
+                  "name": "carapace/ci-gate",
                   "status": "COMPLETED"
                 }
               ]

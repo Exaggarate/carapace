@@ -2,7 +2,7 @@
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type SlackAppContext = {
   entities?: unknown;

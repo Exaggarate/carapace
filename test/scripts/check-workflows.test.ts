@@ -304,7 +304,7 @@ describe("check-workflows", () => {
     const ci = probe.steps.find((step) => step.name === "Run Windows CI tests")!;
     expect(ci.if).toBe("${{ inputs.run_windows_ci }}");
     expect(ci.run).toContain("pnpm test:windows:ci");
-    expect(ci.env).toMatchObject({ OPENCLAW_VITEST_MAX_WORKERS: 1 });
+    expect(ci.env).toMatchObject({ CARAPACE_VITEST_MAX_WORKERS: 1 });
     expect(native.steps).not.toContainEqual(ci);
     expect(probe.steps.some((step) => step.id?.startsWith("native_"))).toBe(false);
     expect(
@@ -376,7 +376,7 @@ describe("check-workflows", () => {
     expect(proof.env).toMatchObject({
       EXPECTED_HEAD: "${{ inputs.target_ref }}",
       CI_WINDOWS_SCHTASKS_ROOT:
-        "${{ runner.temp }}\\openclaw-schtasks-${{ github.run_id }}-${{ github.run_attempt }}",
+        "${{ runner.temp }}\\carapace-schtasks-${{ github.run_id }}-${{ github.run_attempt }}",
       CI_WINDOWS_SCHTASKS_TEST_ID: "${{ github.run_id }}-${{ github.run_attempt }}",
       CI_WINDOWS_SCHTASKS_PROOF_PATH:
         "${{ github.workspace }}\\.artifacts\\windows-schtasks\\proof.json",

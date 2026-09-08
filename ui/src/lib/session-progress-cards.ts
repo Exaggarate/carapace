@@ -4,9 +4,9 @@ import type {
   ProgressCardGetResult,
   ProgressCardPutResult,
   ProgressCardStep,
-} from "@openclaw/gateway-protocol";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/gateway-protocol";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { GatewayRequestError } from "../api/gateway.ts";
 import type { ApplicationGateway } from "../app/gateway.ts";
 import { createGatewayConnectionLifecycle } from "./gateway-connection-lifecycle.ts";

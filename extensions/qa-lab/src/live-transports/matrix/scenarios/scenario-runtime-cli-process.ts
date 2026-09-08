@@ -1,11 +1,11 @@
-import { spawn as startOpenClawCliProcess } from "node:child_process";
+import { spawn as startCarapaceCliProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { runQaWindowsTaskkill } from "../../../windows-system-tools.js";
 
 type MatrixQaTaskkillRunner = NonNullable<Parameters<typeof runQaWindowsTaskkill>[0]["runCommand"]>;
 
-export function resolveMatrixQaOpenClawCliEntryPath(cwd: string): string {
+export function resolveMatrixQaCarapaceCliEntryPath(cwd: string): string {
   const mjsEntryPath = path.join(cwd, "dist", "index.mjs");
   if (existsSync(mjsEntryPath)) {
     return mjsEntryPath;
@@ -14,7 +14,7 @@ export function resolveMatrixQaOpenClawCliEntryPath(cwd: string): string {
 }
 
 export function killMatrixQaCliChild(
-  child: ReturnType<typeof startOpenClawCliProcess>,
+  child: ReturnType<typeof startCarapaceCliProcess>,
   signal: NodeJS.Signals,
   runTaskkill?: MatrixQaTaskkillRunner,
 ): void {

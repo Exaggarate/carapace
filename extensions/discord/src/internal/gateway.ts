@@ -15,8 +15,8 @@ import {
   type GatewaySendPayload,
   type GatewayVoiceStateUpdateData,
 } from "discord-api-types/v10";
-import { asSafeIntegerInRange, MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asSafeIntegerInRange, MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type * as ws from "ws";
 import { Plugin, type Client } from "./client.js";
 import { canResumeAfterGatewayClose, isFatalGatewayCloseCode } from "./gateway-close-codes.js";
@@ -364,7 +364,7 @@ export class GatewayPlugin extends Plugin {
         d: {
           token: this.client?.options.token ?? "",
           intents: this.options.intents ?? 0,
-          properties: { os: process.platform, browser: "openclaw", device: "openclaw" },
+          properties: { os: process.platform, browser: "carapace", device: "carapace" },
           shard: this.options.shard,
         },
       } as GatewayIdentify,

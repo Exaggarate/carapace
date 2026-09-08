@@ -1,13 +1,13 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   listSessionCatalogEntries,
   sessionCatalogAdoptedSessionKey,
   sessionCatalogAdoptedSourceKey,
   type SessionCatalogEntrySnapshot,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexThread } from "./app-server/protocol.js";
 import {
   reclaimCurrentCodexSessionGeneration,
@@ -100,7 +100,7 @@ function readCodexSupervisionMarker(entry: {
 export async function listAdoptedSessionEntries(params: {
   agentId?: string;
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   runtime: PluginRuntime;
   sessionEntries?: SessionCatalogEntrySnapshot;
 }): Promise<Map<string, AdoptedSessionEntry>> {
@@ -145,7 +145,7 @@ export async function listAdoptedSessionEntries(params: {
     );
     if (adopted.has(sourceKey)) {
       throw new Error(
-        `multiple OpenClaw sessions adopt Codex thread ${sourceThreadId} from the same home`,
+        `multiple Carapace sessions adopt Codex thread ${sourceThreadId} from the same home`,
       );
     }
     adopted.set(sourceKey, { key: sessionKey, sessionId, agentId, boundThreadId });
@@ -156,7 +156,7 @@ export async function listAdoptedSessionEntries(params: {
 async function findAdoptedSessionEntry(params: {
   agentId?: string;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: PluginRuntime;
   threadId: string;
   sourceHomeId?: string;
@@ -206,7 +206,7 @@ function matchesPendingAdoptionBinding(
 async function ensurePendingAdoptionBinding(params: {
   initialization: Parameters<Parameters<typeof createImportedCodexSession>[0]["afterImport"]>[1];
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   identity: ReturnType<typeof sessionBindingIdentity>;
   sourceThreadId: string;
   connectionFingerprint: string;
@@ -226,7 +226,7 @@ async function ensurePendingAdoptionBinding(params: {
   });
   params.initialization.assertCurrent();
   if (!ownsGeneration) {
-    throw new Error(`failed to claim the OpenClaw session generation for ${params.sourceThreadId}`);
+    throw new Error(`failed to claim the Carapace session generation for ${params.sourceThreadId}`);
   }
   const existing = params.bindingStore.read(params.identity);
   params.initialization.assertCurrent();
@@ -234,7 +234,7 @@ async function ensurePendingAdoptionBinding(params: {
     if (matchesPendingAdoptionBinding(existing, params)) {
       return;
     }
-    throw new Error(`OpenClaw session is already bound to Codex thread ${existing.threadId}`);
+    throw new Error(`Carapace session is already bound to Codex thread ${existing.threadId}`);
   }
   const binding = {
     threadId: params.sourceThreadId,
@@ -251,9 +251,9 @@ async function ensurePendingAdoptionBinding(params: {
 
 async function createOrReuseAdoptedSession(params: {
   agentId: string;
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   sourceThread: CodexThread;
   connectionFingerprint: string;
   sourceHomeId?: string;
@@ -340,9 +340,9 @@ async function createOrReuseAdoptedSession(params: {
 
 type ContinueLocalCodexSessionParams = {
   agentId: string;
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   control: CodexSessionCatalogControl;
   threadId: string;
   hostId?: string;
@@ -365,7 +365,7 @@ async function continueLocalCodexSessionInner(
     // Catalog state can race archive/reset. Restore only the same locked generation
     // under the session-store write lock so a stale Open Chat cannot revive a replacement.
     const changedError = () =>
-      new CatalogParamsError("Codex OpenClaw session changed before it could be opened. Retry.");
+      new CatalogParamsError("Codex Carapace session changed before it could be opened. Retry.");
     const restored = await params.api.runtime.agent.session.patchSessionEntry({
       sessionKey: existing.key,
       readConsistency: "latest",
@@ -426,7 +426,7 @@ async function continueLocalCodexSessionInner(
   return { sessionKey: adopted.key, disposition: "forked" };
 }
 
-/** Creates one locked OpenClaw branch whose first harness run forks the Codex source. */
+/** Creates one locked Carapace branch whose first harness run forks the Codex source. */
 export async function continueLocalCodexSession(params: ContinueLocalCodexSessionParams): Promise<{
   sessionKey: string;
   disposition: CodexSessionDisposition;

@@ -2,13 +2,13 @@
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { parseStrictFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { parseStrictFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { Command } from "commander";
 import { buildBundleMcpToolsFromCatalog } from "../agents/agent-bundle-mcp-materialize.js";
 import type { McpToolCatalog } from "../agents/agent-bundle-mcp-types.js";
@@ -32,7 +32,7 @@ import { resolveMcpTransportConfig } from "../agents/mcp-transport-config.js";
 import { parseConfigValue } from "../auto-reply/reply/config-value.js";
 import { listConfiguredMcpServers } from "../config/mcp-config.js";
 import type { McpCodexToolApprovalMode } from "../config/types.mcp.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   startOAuthLoopbackCallbackServer,
@@ -298,7 +298,7 @@ async function collectMcpDoctorIssues(params: {
   name: string;
   server: Record<string, unknown>;
   probe: boolean;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: string;
 }): Promise<McpDoctorIssue[]> {
   const issues: McpDoctorIssue[] = [];
@@ -332,14 +332,14 @@ async function collectMcpDoctorIssues(params: {
             issues.push(
               issue(
                 "warning",
-                `OAuth credentials require additional authorization; run ${formatCliCommand(`openclaw mcp login ${name}`)}`,
+                `OAuth credentials require additional authorization; run ${formatCliCommand(`carapace mcp login ${name}`)}`,
               ),
             );
           } else if (authStatus.state !== "authorized") {
             issues.push(
               issue(
                 "warning",
-                `OAuth credentials are not authorized; run ${formatCliCommand(`openclaw mcp login ${name}`)}`,
+                `OAuth credentials are not authorized; run ${formatCliCommand(`carapace mcp login ${name}`)}`,
               ),
             );
           }
@@ -405,12 +405,12 @@ async function collectMcpDoctorIssues(params: {
 }
 
 async function probeMcpServerIssues(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   name: string;
   server: Record<string, unknown>;
 }): Promise<McpDoctorIssue[]> {
   const runtime = await createSessionMcpRuntime({
-    sessionId: "openclaw-cli-mcp-doctor",
+    sessionId: "carapace-cli-mcp-doctor",
     workspaceDir: process.cwd(),
     cfg: buildMcpProbeConfig({
       config: params.config,
@@ -569,9 +569,9 @@ function formatMcpProbeResult(catalog: McpToolCatalog) {
 }
 
 function buildMcpProbeConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   servers: Record<string, Record<string, unknown>>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     ...params.config,
     mcp: {
@@ -622,7 +622,7 @@ function failOnMcpProbeIssues(params: Parameters<typeof resolveMcpProbeIssue>[0]
 }
 
 async function probeMcpServersOrFail(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   servers: Record<string, Record<string, unknown>>;
   path: string;
 }): Promise<ReturnType<typeof formatMcpProbeResult>> {
@@ -633,7 +633,7 @@ async function probeMcpServersOrFail(params: {
     ]),
   );
   const runtime = await createSessionMcpRuntime({
-    sessionId: "openclaw-cli-mcp-probe",
+    sessionId: "carapace-cli-mcp-probe",
     workspaceDir: process.cwd(),
     cfg: buildMcpProbeConfig({ config: params.config, servers: probeServers }),
     manifestRegistry: { plugins: [] },
@@ -647,17 +647,17 @@ async function probeMcpServersOrFail(params: {
   }
 }
 
-const OPENCLAW_MCP_REGISTRY_SCOPE_NOTE =
-  "Note: this command only shows OpenClaw-managed mcp.servers entries and does not include mcporter servers from config/mcporter.json.";
+const CARAPACE_MCP_REGISTRY_SCOPE_NOTE =
+  "Note: this command only shows Carapace-managed mcp.servers entries and does not include mcporter servers from config/mcporter.json.";
 
 export function registerMcpCli(program: Command) {
   const mcp = program
     .command("mcp")
-    .description("Manage OpenClaw mcp.servers config and channel bridge");
+    .description("Manage Carapace mcp.servers config and channel bridge");
 
   mcp
     .command("serve")
-    .description("Expose OpenClaw channels over MCP stdio")
+    .description("Expose Carapace channels over MCP stdio")
     .option("--url <url>", "Gateway WebSocket URL (defaults to gateway.remote.url when configured)")
     .option("--token <token>", "Gateway token (if required)")
     .option("--token-file <path>", "Read gateway token from file")
@@ -682,8 +682,8 @@ export function registerMcpCli(program: Command) {
         ) {
           throw new Error('Invalid --claude-channel-mode value. Use "auto", "on", or "off".');
         }
-        const { serveOpenClawChannelMcp } = await import("../mcp/channel-server.js");
-        await serveOpenClawChannelMcp({
+        const { serveCarapaceChannelMcp } = await import("../mcp/channel-server.js");
+        await serveCarapaceChannelMcp({
           gatewayUrl: opts.url as string | undefined,
           gatewayToken,
           gatewayPassword,
@@ -692,7 +692,7 @@ export function registerMcpCli(program: Command) {
         });
       } catch (err) {
         defaultRuntime.error(
-          `MCP server failed to start: ${formatErrorMessage(err)}. Run ${formatCliCommand("openclaw gateway status --deep --require-rpc")} to inspect Gateway health.`,
+          `MCP server failed to start: ${formatErrorMessage(err)}. Run ${formatCliCommand("carapace gateway status --deep --require-rpc")} to inspect Gateway health.`,
         );
         defaultRuntime.exit(1);
       }
@@ -700,7 +700,7 @@ export function registerMcpCli(program: Command) {
 
   mcp
     .command("list")
-    .description("List OpenClaw-managed MCP servers from mcp.servers")
+    .description("List Carapace-managed MCP servers from mcp.servers")
     .option("--json", "Print JSON")
     .action(async (opts: { json?: boolean }) => {
       const loaded = await listConfiguredMcpServers();
@@ -715,12 +715,12 @@ export function registerMcpCli(program: Command) {
       const names = entries.map(([name]) => name);
       if (names.length === 0) {
         defaultRuntime.log(
-          `No OpenClaw-managed MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand('openclaw mcp set <name> \'{"command":"uvx","args":["context7-mcp"]}\'')}.`,
+          `No Carapace-managed MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand('carapace mcp set <name> \'{"command":"uvx","args":["context7-mcp"]}\'')}.`,
         );
-        defaultRuntime.log(OPENCLAW_MCP_REGISTRY_SCOPE_NOTE);
+        defaultRuntime.log(CARAPACE_MCP_REGISTRY_SCOPE_NOTE);
         return;
       }
-      defaultRuntime.log(`OpenClaw-managed MCP servers (${loaded.path}):`);
+      defaultRuntime.log(`Carapace-managed MCP servers (${loaded.path}):`);
       for (const [name, server] of entries) {
         const connectedPrincipals = countConnectedMcpPrincipals(name, server);
         const connected =
@@ -730,12 +730,12 @@ export function registerMcpCli(program: Command) {
         defaultRuntime.log(`- ${name}${connected}`);
       }
       defaultRuntime.log("");
-      defaultRuntime.log(OPENCLAW_MCP_REGISTRY_SCOPE_NOTE);
+      defaultRuntime.log(CARAPACE_MCP_REGISTRY_SCOPE_NOTE);
     });
 
   mcp
     .command("show")
-    .description("Show one OpenClaw-managed MCP server or the full mcp.servers config")
+    .description("Show one Carapace-managed MCP server or the full mcp.servers config")
     .argument("[name]", "MCP server name")
     .option("--json", "Print JSON")
     .action(async (name: string | undefined, opts: { json?: boolean }) => {
@@ -746,7 +746,7 @@ export function registerMcpCli(program: Command) {
       const value = name ? loaded.mcpServers[name] : loaded.mcpServers;
       if (name && !value) {
         fail(
-          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
           opts.json,
         );
       }
@@ -755,9 +755,9 @@ export function registerMcpCli(program: Command) {
         return;
       }
       if (name) {
-        defaultRuntime.log(`OpenClaw-managed MCP server "${name}" (${loaded.path}):`);
+        defaultRuntime.log(`Carapace-managed MCP server "${name}" (${loaded.path}):`);
       } else {
-        defaultRuntime.log(`OpenClaw-managed MCP servers (${loaded.path}):`);
+        defaultRuntime.log(`Carapace-managed MCP servers (${loaded.path}):`);
       }
       printJson(value ?? {});
     });
@@ -836,13 +836,13 @@ export function registerMcpCli(program: Command) {
         : loaded.mcpServers;
       if (!servers) {
         fail(
-          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
           opts.json,
         );
       }
       if (name && loaded.mcpServers[name]?.enabled === false) {
         fail(
-          `MCP server "${name}" is disabled in ${loaded.path}. Run ${formatCliCommand(`openclaw mcp configure ${name} --enable`)} before probing it.`,
+          `MCP server "${name}" is disabled in ${loaded.path}. Run ${formatCliCommand(`carapace mcp configure ${name} --enable`)} before probing it.`,
           opts.json,
         );
       }
@@ -851,12 +851,12 @@ export function registerMcpCli(program: Command) {
       // emitting its empty envelope so machine consumers see a stable shape.
       if (!opts.json && Object.keys(servers).length === 0) {
         defaultRuntime.log(
-          `No MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand("openclaw mcp add <name> --command <command>")}.`,
+          `No MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand("carapace mcp add <name> --command <command>")}.`,
         );
         return;
       }
       const runtime = await createSessionMcpRuntime({
-        sessionId: "openclaw-cli-mcp-probe",
+        sessionId: "carapace-cli-mcp-probe",
         workspaceDir: process.cwd(),
         cfg: buildMcpProbeConfig({ config: loaded.config, servers }),
         manifestRegistry: { plugins: [] },
@@ -909,7 +909,7 @@ export function registerMcpCli(program: Command) {
         : loaded.mcpServers;
       if (!selected) {
         fail(
-          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
           opts.json,
         );
       }
@@ -952,7 +952,7 @@ export function registerMcpCli(program: Command) {
       }
       if (servers.length === 0) {
         defaultRuntime.log(
-          `No MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand("openclaw mcp add <name> --command <command>")}.`,
+          `No MCP servers configured in ${loaded.path}. Add one with ${formatCliCommand("carapace mcp add <name> --command <command>")}.`,
         );
         return;
       }
@@ -1134,7 +1134,7 @@ export function registerMcpCli(program: Command) {
         defaultRuntime.log(`Saved MCP server "${name}" to ${result.path}.`);
         if (server.auth === "oauth") {
           defaultRuntime.log(
-            `Run ${formatCliCommand(`openclaw mcp login ${name}`)} to authorize this MCP server.`,
+            `Run ${formatCliCommand(`carapace mcp login ${name}`)} to authorize this MCP server.`,
           );
         }
       },
@@ -1142,7 +1142,7 @@ export function registerMcpCli(program: Command) {
 
   mcp
     .command("set")
-    .description("Set one OpenClaw-managed MCP server from a JSON object")
+    .description("Set one Carapace-managed MCP server from a JSON object")
     .argument("<name>", "MCP server name")
     .argument("<value>", 'JSON object, for example {"command":"uvx","args":["context7-mcp"]}')
     .action(async (name: string, rawValue: string) => {
@@ -1182,7 +1182,7 @@ export function registerMcpCli(program: Command) {
       }
       if (!result.updated) {
         fail(
-          `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
         );
       }
       defaultRuntime.log(`Updated MCP tool selection for "${name}" in ${result.path}.`);
@@ -1249,7 +1249,7 @@ export function registerMcpCli(program: Command) {
         const current = loaded.mcpServers[name];
         if (!current) {
           fail(
-            `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+            `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
           );
         }
         const next = { ...current };
@@ -1366,7 +1366,7 @@ export function registerMcpCli(program: Command) {
         }
         if (!result.updated) {
           fail(
-            `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+            `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
           );
         }
         defaultRuntime.log(`Updated MCP server "${name}" in ${result.path}.`);
@@ -1386,7 +1386,7 @@ export function registerMcpCli(program: Command) {
       const server = loaded.mcpServers[name];
       if (!server) {
         fail(
-          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
         );
       }
       if (asRecord(server.oauth)?.identity === "per-requester") {
@@ -1414,7 +1414,7 @@ export function registerMcpCli(program: Command) {
       }
 
       let callbackServer: OAuthLoopbackCallbackServer | undefined;
-      const manualCommand = formatCliCommand(`openclaw mcp login ${name} --code <code>`);
+      const manualCommand = formatCliCommand(`carapace mcp login ${name} --code <code>`);
       try {
         const session = await startMcpOAuthAuthorization(identity, resolved, {});
         if (session.status === "authorized") {
@@ -1437,7 +1437,7 @@ export function registerMcpCli(program: Command) {
         defaultRuntime.log(`Open this URL to authorize "${name}":`);
         defaultRuntime.log(session.authorizationUrl);
         if (callbackServer) {
-          defaultRuntime.log("Waiting for the browser to return to OpenClaw...");
+          defaultRuntime.log("Waiting for the browser to return to Carapace...");
           defaultRuntime.log(`If the callback cannot reach this terminal, run ${manualCommand}.`);
         } else {
           defaultRuntime.log(`After approval, run ${manualCommand}.`);
@@ -1476,7 +1476,7 @@ export function registerMcpCli(program: Command) {
       const server = loaded.mcpServers[name];
       if (!server) {
         fail(
-          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${loaded.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
         );
       }
       if (asRecord(server.oauth)?.identity === "per-requester") {
@@ -1504,7 +1504,7 @@ export function registerMcpCli(program: Command) {
 
   mcp
     .command("unset")
-    .description("Remove one OpenClaw-managed MCP server")
+    .description("Remove one Carapace-managed MCP server")
     .argument("<name>", "MCP server name")
     .action(async (name: string) => {
       const result = await unsetConfiguredMcpServer({ name });
@@ -1513,7 +1513,7 @@ export function registerMcpCli(program: Command) {
       }
       if (!result.removed) {
         fail(
-          `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("openclaw mcp list")} to see configured servers.`,
+          `No MCP server named "${name}" in ${result.path}. Run ${formatCliCommand("carapace mcp list")} to see configured servers.`,
         );
       }
       defaultRuntime.log(`Removed MCP server "${name}" from ${result.path}.`);

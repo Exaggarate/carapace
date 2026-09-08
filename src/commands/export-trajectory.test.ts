@@ -75,14 +75,14 @@ describe("exportTrajectoryCommand", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getRuntimeConfig.mockReturnValue({});
-    mocks.resolveStorePath.mockReturnValue("/tmp/openclaw/sessions.json");
+    mocks.resolveStorePath.mockReturnValue("/tmp/carapace/sessions.json");
     mocks.resolveExplicitStorePath.mockImplementation(
       (params: { storePath: string }) => params.storePath,
     );
     mocks.loadSessionEntryReadOnly.mockReturnValue({ sessionId: "session-1", updatedAt: 1 });
     mocks.exportTrajectoryForCommand.mockResolvedValue({
-      outputDir: "/tmp/workspace/.openclaw/trajectory-exports/export",
-      displayPath: ".openclaw/trajectory-exports/export",
+      outputDir: "/tmp/workspace/.carapace/trajectory-exports/export",
+      displayPath: ".carapace/trajectory-exports/export",
       sessionId: "session-1",
       eventCount: 2,
       runtimeEventCount: 0,
@@ -98,7 +98,7 @@ describe("exportTrajectoryCommand", () => {
     await expectTrajectoryFailure(
       exportTrajectoryCommand({}, runtime),
       runtime,
-      "--session-key is required. Run openclaw sessions to choose a session.",
+      "--session-key is required. Run carapace sessions to choose a session.",
     );
     expect(mocks.resolveStorePath).not.toHaveBeenCalled();
     expect(mocks.loadSessionEntryReadOnly).not.toHaveBeenCalled();
@@ -184,7 +184,7 @@ describe("exportTrajectoryCommand", () => {
     [
       "unknown",
       "nope-agent",
-      'Unknown agent id "nope-agent". Run openclaw agents list to see configured agents.',
+      'Unknown agent id "nope-agent". Run carapace agents list to see configured agents.',
     ],
     ["empty", "", "--agent must not be blank"],
     ["whitespace-only", "   ", "--agent must not be blank"],
@@ -295,20 +295,20 @@ describe("exportTrajectoryCommand", () => {
       const runtime = createRuntime();
       mocks.getRuntimeConfig.mockReturnValue({
         agents: { list: [{ id: "main" }, { id: "work" }] },
-        session: { store: "/tmp/openclaw/agents/{agentId}/sessions/sessions.json" },
+        session: { store: "/tmp/carapace/agents/{agentId}/sessions/sessions.json" },
       });
-      mocks.resolveStorePath.mockReturnValue("/tmp/openclaw/agents/work/sessions/sessions.json");
+      mocks.resolveStorePath.mockReturnValue("/tmp/carapace/agents/work/sessions/sessions.json");
 
       await exportTrajectoryCommand({ sessionKey, agent: "work" }, runtime);
 
       expect(mocks.resolveStorePath).toHaveBeenCalledWith(
-        "/tmp/openclaw/agents/{agentId}/sessions/sessions.json",
+        "/tmp/carapace/agents/{agentId}/sessions/sessions.json",
         { agentId: "work" },
       );
       expect(mocks.loadSessionEntryReadOnly).toHaveBeenCalledWith({
         agentId: "work",
         sessionKey,
-        storePath: "/tmp/openclaw/agents/work/sessions/sessions.json",
+        storePath: "/tmp/carapace/agents/work/sessions/sessions.json",
       });
     },
   );
@@ -317,8 +317,8 @@ describe("exportTrajectoryCommand", () => {
     ["home-prefixed", "~/x/sessions.json", "/home/demo/x/sessions.json"],
     [
       "agent template",
-      "/tmp/openclaw/agents/{agentId}/sessions/sessions.json",
-      "/tmp/openclaw/agents/work/sessions/sessions.json",
+      "/tmp/carapace/agents/{agentId}/sessions/sessions.json",
+      "/tmp/carapace/agents/work/sessions/sessions.json",
     ],
   ])(
     "resolves explicit --store %s paths through the shared resolver",
@@ -349,20 +349,20 @@ describe("exportTrajectoryCommand", () => {
   it("uses configured session.store when no explicit store is provided", async () => {
     const runtime = createRuntime();
     mocks.getRuntimeConfig.mockReturnValue({
-      session: { store: "/tmp/openclaw/agents/{agentId}/sessions/sessions.json" },
+      session: { store: "/tmp/carapace/agents/{agentId}/sessions/sessions.json" },
     });
-    mocks.resolveStorePath.mockReturnValue("/tmp/openclaw/agents/work/sessions/sessions.json");
+    mocks.resolveStorePath.mockReturnValue("/tmp/carapace/agents/work/sessions/sessions.json");
 
     await exportTrajectoryCommand({ sessionKey: "agent:work:telegram:direct:123" }, runtime);
 
     expect(mocks.resolveStorePath).toHaveBeenCalledWith(
-      "/tmp/openclaw/agents/{agentId}/sessions/sessions.json",
+      "/tmp/carapace/agents/{agentId}/sessions/sessions.json",
       { agentId: "work" },
     );
     expect(mocks.loadSessionEntryReadOnly).toHaveBeenCalledWith({
       agentId: "work",
       sessionKey: "agent:work:telegram:direct:123",
-      storePath: "/tmp/openclaw/agents/work/sessions/sessions.json",
+      storePath: "/tmp/carapace/agents/work/sessions/sessions.json",
     });
   });
 
@@ -375,7 +375,7 @@ describe("exportTrajectoryCommand", () => {
     expect(mocks.loadSessionEntryReadOnly).toHaveBeenCalledWith({
       agentId: "main",
       sessionKey: "agent:main:telegram:direct:123",
-      storePath: "/tmp/openclaw/sessions.json",
+      storePath: "/tmp/carapace/sessions.json",
     });
   });
 
@@ -389,7 +389,7 @@ describe("exportTrajectoryCommand", () => {
     expect(mocks.loadSessionEntryReadOnly).toHaveBeenCalledWith({
       agentId: "main",
       sessionKey: "agent:main:telegram:direct:123",
-      storePath: "/tmp/openclaw/sessions.json",
+      storePath: "/tmp/carapace/sessions.json",
     });
   });
 
@@ -400,7 +400,7 @@ describe("exportTrajectoryCommand", () => {
     await expectTrajectoryFailure(
       exportTrajectoryCommand({ sessionKey: "agent:main:telegram:direct:123" }, runtime),
       runtime,
-      "Session not found: agent:main:telegram:direct:123. Run openclaw sessions to see available sessions.",
+      "Session not found: agent:main:telegram:direct:123. Run carapace sessions to see available sessions.",
     );
 
     expect(mocks.resolveSessionTranscriptReadTarget).not.toHaveBeenCalled();
@@ -454,7 +454,7 @@ describe("exportTrajectoryCommand", () => {
         agentId: "main",
         sessionId: "session-1",
         sessionKey: "agent:main:telegram:direct:123",
-        storePath: "/tmp/openclaw/sessions.json",
+        storePath: "/tmp/carapace/sessions.json",
       },
       workspaceDir: "/tmp/workspace",
     });

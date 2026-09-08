@@ -1,16 +1,16 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
 import {
   buildChannelOutboundSessionRoute,
   buildThreadAwareOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelDirectoryAdapter } from "openclaw/plugin-sdk/directory-runtime";
-import { parseThreadSessionSuffix } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-core";
+import { createChannelMessageAdapterFromOutbound } from "carapace/plugin-sdk/channel-outbound";
+import { createChannelDirectoryAdapter } from "carapace/plugin-sdk/directory-runtime";
+import { parseThreadSessionSuffix } from "carapace/plugin-sdk/routing";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import { BuzzConfigSchema } from "./config-schema.js";
 import {
   listBuzzDirectoryGroupsFromConfig,
@@ -62,7 +62,7 @@ export const buzzPlugin = createChatChannelPlugin<ResolvedBuzzAccount, BuzzProbe
       selectionLabel: "Buzz",
       docsPath: "/channels/buzz",
       docsLabel: "buzz",
-      blurb: "Connect OpenClaw agents to Buzz team rooms.",
+      blurb: "Connect Carapace agents to Buzz team rooms.",
       markdownCapable: true,
       order: 56,
     },

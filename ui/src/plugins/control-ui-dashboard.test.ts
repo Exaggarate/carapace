@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { BoardGetParams } from "@openclaw/gateway-protocol";
+import type { BoardGetParams } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import type { ControlUiHost, ControlUiViewContext } from "../../../src/plugin-sdk/control-ui.js";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
@@ -14,7 +14,7 @@ import { createApplicationContextProvider } from "../test-helpers/application-co
 import "./control-ui-dashboard.ts";
 import "./control-ui-view.runtime.ts";
 
-type DashboardElement = HTMLElementTagNameMap["openclaw-plugin-session-dashboard"] & {
+type DashboardElement = HTMLElementTagNameMap["carapace-plugin-session-dashboard"] & {
   updateComplete: Promise<boolean>;
 };
 
@@ -52,7 +52,7 @@ async function mountDashboard(
   capabilities: { canMutate?: boolean; canGrant?: boolean } = {},
   container: HTMLElement = document.body,
 ): Promise<DashboardElement> {
-  const element = document.createElement("openclaw-plugin-session-dashboard");
+  const element = document.createElement("carapace-plugin-session-dashboard");
   element.session = session;
   element.client = client;
   element.connected = true;
@@ -145,7 +145,7 @@ describe("Plugin session dashboard", () => {
       const initial: BoardGetParams = hydrateOwner ? { sessionKey } : session;
       const element = await mountDashboard(initial, client, {}, provider);
 
-      await customElements.whenDefined("openclaw-board-view");
+      await customElements.whenDefined("carapace-board-view");
       await vi.waitFor(() => {
         expect(reportError).not.toHaveBeenCalled();
         expect(
@@ -223,7 +223,7 @@ describe("Plugin session dashboard", () => {
         element.querySelector(".plugin-session-dashboard__toggle")?.getAttribute("aria-expanded"),
       ).toBe("true"),
     );
-    expect(element.querySelector("openclaw-board-view")).not.toBeNull();
+    expect(element.querySelector("carapace-board-view")).not.toBeNull();
   });
 
   it("updates mounted dashboard controls immediately when gateway permissions change", async () => {
@@ -249,8 +249,8 @@ describe("Plugin session dashboard", () => {
       },
     );
 
-    await vi.waitFor(() => expect(element.querySelector("openclaw-board-view")).not.toBeNull());
-    const board = element.querySelector("openclaw-board-view")!;
+    await vi.waitFor(() => expect(element.querySelector("carapace-board-view")).not.toBeNull());
+    const board = element.querySelector("carapace-board-view")!;
     await board.updateComplete;
     await vi.waitFor(() =>
       expect(board.querySelector('[data-test-id="board-grant-allow"]')).not.toBeNull(),
@@ -265,7 +265,7 @@ describe("Plugin session dashboard", () => {
     element.canGrant = false;
     await element.updateComplete;
     await board.updateComplete;
-    await board.querySelector("openclaw-board-widget-cell")?.updateComplete;
+    await board.querySelector("carapace-board-widget-cell")?.updateComplete;
 
     expect(board.canMutate).toBe(false);
     expect(board.canGrant).toBe(false);
@@ -275,7 +275,7 @@ describe("Plugin session dashboard", () => {
     element.canGrant = true;
     await element.updateComplete;
     await board.updateComplete;
-    await board.querySelector("openclaw-board-widget-cell")?.updateComplete;
+    await board.querySelector("carapace-board-widget-cell")?.updateComplete;
 
     expect(board.canMutate).toBe(true);
     expect(board.canGrant).toBe(true);
@@ -368,8 +368,8 @@ describe("Plugin session dashboard", () => {
       },
     ]);
     const element = await mountDashboard({ sessionKey: "agent:main:workboard-collapse" }, client);
-    await vi.waitFor(() => expect(element.querySelector("openclaw-board-view")).not.toBeNull());
-    const board = element.querySelector("openclaw-board-view")!;
+    await vi.waitFor(() => expect(element.querySelector("carapace-board-view")).not.toBeNull());
+    const board = element.querySelector("carapace-board-view")!;
     expect(board.active).toBe(true);
 
     element.querySelector<HTMLButtonElement>(".plugin-session-dashboard__toggle")?.click();

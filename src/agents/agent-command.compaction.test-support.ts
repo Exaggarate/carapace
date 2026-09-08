@@ -16,7 +16,7 @@ import {
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import { createSessionDiffBaselineCaptureClaim } from "../config/sessions/session-diff-baseline-capture.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { rotateAgentEventLifecycleGeneration } from "../infra/agent-events.js";
 import { defaultRuntime } from "../runtime.js";
 import type { runAgentAttempt } from "./command/attempt-execution.runtime.js";
@@ -39,7 +39,7 @@ type CaptureSessionDiffBaseline =
 type CliCompaction = typeof import("./command/cli-compaction.js").runCliTurnCompactionLifecycle;
 
 const compactionTestState = vi.hoisted(() => ({
-  cfg: undefined as OpenClawConfig | undefined,
+  cfg: undefined as CarapaceConfig | undefined,
   workspaceDir: undefined as string | undefined,
   agentDir: undefined as string | undefined,
   runAgentAttemptMock: vi.fn<RunAgentAttempt>(),
@@ -103,11 +103,11 @@ vi.mock("./agent-scope.js", async () => {
     markAutoFallbackPrimaryProbe: vi.fn(),
     resolveAutoFallbackPrimaryProbe: () => undefined,
     resolveAgentConfig: () => undefined,
-    resolveAgentDir: () => compactionTestState.agentDir ?? "/tmp/openclaw-agent",
+    resolveAgentDir: () => compactionTestState.agentDir ?? "/tmp/carapace-agent",
     resolveDefaultAgentId: () => "main",
     resolveEffectiveModelFallbacks: () => undefined,
     resolveSessionAgentId: () => "main",
-    resolveAgentWorkspaceDir: () => compactionTestState.workspaceDir ?? "/tmp/openclaw-workspace",
+    resolveAgentWorkspaceDir: () => compactionTestState.workspaceDir ?? "/tmp/carapace-workspace",
   };
 });
 
@@ -281,7 +281,7 @@ export function registerAgentCommandCompactionTestHooks(): void {
         return { deliverySucceeded: true };
       },
     );
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-rotation-e2e-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-rotation-e2e-"));
     compactionTestState.workspaceDir = path.join(tmpDir, "workspace");
     compactionTestState.agentDir = path.join(tmpDir, "agent");
     await fs.mkdir(compactionTestState.workspaceDir, { recursive: true });
@@ -297,7 +297,7 @@ export function registerAgentCommandCompactionTestHooks(): void {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   });
 
   afterEach(async () => {

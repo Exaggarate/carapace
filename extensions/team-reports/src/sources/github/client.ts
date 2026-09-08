@@ -1,5 +1,5 @@
-import { parseRetryAfterHeaderSeconds } from "openclaw/plugin-sdk/retry-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { parseRetryAfterHeaderSeconds } from "carapace/plugin-sdk/retry-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { z } from "zod";
 import type { GithubSourceConfig, SourceRuntime, SourceStatus } from "../../types.js";
 import { checkAbort, createResponseParser, parseApiBase, wait } from "../http.js";

@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/openai-provider",
+  "name": "@carapace/openai-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw OpenAI provider plugins",
+  "description": "Carapace OpenAI provider plugins",
   "type": "module",
   "dependencies": {
     "libopus-wasm": "0.2.0",
@@ -11,9 +11,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

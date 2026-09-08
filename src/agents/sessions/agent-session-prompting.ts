@@ -35,12 +35,12 @@ function rethrowPromptFinalizationFailure(failed: boolean, error: unknown): void
 
 /** @internal Host preparation runs after SDK prompt hooks and owns its run cancellation. */
 export const agentSessionSetPromptPreparation: unique symbol = Symbol.for(
-  "openclaw.agent-session.set-prompt-preparation",
+  "carapace.agent-session.set-prompt-preparation",
 );
 
 /** @internal Queue prompt-owned context with cleanup for preflight exits. */
 export const agentSessionQueuePromptContext: unique symbol = Symbol.for(
-  "openclaw.agent-session.queue-prompt-context",
+  "carapace.agent-session.queue-prompt-context",
 );
 
 export abstract class AgentSessionPrompting extends AgentSessionBase {
@@ -190,7 +190,7 @@ export abstract class AgentSessionPrompting extends AgentSessionBase {
       role: "user",
       content: this.createUserContent(text, images),
       timestamp: Date.now(),
-      ...(imageFactIndexes ? { __openclaw: { mediaImageBlockFactIndexes: imageFactIndexes } } : {}),
+      ...(imageFactIndexes ? { __carapace: { mediaImageBlockFactIndexes: imageFactIndexes } } : {}),
     } satisfies PersistedUserTurnMessage;
     // Admission facts must precede accepted steering input. Keep expanded runtime
     // content separate from the prepared display text used during persistence.

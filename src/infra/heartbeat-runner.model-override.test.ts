@@ -1,6 +1,6 @@
 // Covers heartbeat model override routing.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveAgentMainSessionKey, resolveMainSessionKey } from "../config/sessions.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import {
@@ -19,7 +19,7 @@ type SeedSessionInput = {
   lastTo: string;
   updatedAt?: number;
 };
-type AgentDefaultsConfig = NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>;
+type AgentDefaultsConfig = NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]>;
 type HeartbeatConfig = NonNullable<AgentDefaultsConfig["heartbeat"]>;
 
 function expectReplyOptions(options: unknown, expected: Record<string, unknown>) {
@@ -57,7 +57,7 @@ async function withHeartbeatFixture(
       };
       return run({ tmpDir, storePath, replySpy, seedSession });
     },
-    { prefix: "openclaw-hb-model-" },
+    { prefix: "carapace-hb-model-" },
   );
 }
 
@@ -68,7 +68,7 @@ afterEach(() => {
 describe("runHeartbeatOnce – heartbeat model override", () => {
   async function runHeartbeatWithSeed(params: {
     seedSession: (sessionKey: string, input: SeedSessionInput) => Promise<void>;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     sessionKey: string;
     replySpy: HeartbeatReplySpy;
     agentId?: string;
@@ -111,7 +111,7 @@ describe("runHeartbeatOnce – heartbeat model override", () => {
     source?: Parameters<typeof runHeartbeatOnce>[0]["source"];
   }) {
     return withHeartbeatFixture(async ({ tmpDir, storePath, replySpy, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -148,7 +148,7 @@ describe("runHeartbeatOnce – heartbeat model override", () => {
     heartbeat: Partial<HeartbeatConfig>;
   }): Promise<void> {
     await withHeartbeatFixture(async ({ tmpDir, storePath, replySpy, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             heartbeat: {
@@ -261,7 +261,7 @@ describe("runHeartbeatOnce – heartbeat model override", () => {
 
   it("uses isolated session key when isolatedSession is enabled", async () => {
     await withHeartbeatFixture(async ({ tmpDir, storePath, replySpy, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -290,7 +290,7 @@ describe("runHeartbeatOnce – heartbeat model override", () => {
 
   it("uses main session key when isolatedSession is not set", async () => {
     await withHeartbeatFixture(async ({ tmpDir, storePath, replySpy, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

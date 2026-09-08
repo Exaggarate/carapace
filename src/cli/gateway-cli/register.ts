@@ -1,6 +1,6 @@
 // Commander registration for gateway status, health, diagnostics, discovery, and run commands.
-import { formatByteSize } from "@openclaw/normalization-core";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { formatByteSize } from "@carapace/normalization-core";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 import type { Command } from "commander";
 import { formatDocsLink } from "../../../packages/terminal-core/src/links.js";
 import { colorize, isRich, theme } from "../../../packages/terminal-core/src/theme.js";
@@ -448,13 +448,13 @@ export function registerGatewayCli(program: Command, deps: GatewayCliDependencie
         "after",
         () =>
           `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-            ["openclaw gateway run", "Run the gateway in the foreground."],
-            ["openclaw gateway status", "Show service status plus connectivity/capability."],
-            ["openclaw gateway auth-token --show", "Reveal the shared token interactively."],
-            ["openclaw gateway discover", "Find local and wide-area gateway beacons."],
-            ["openclaw gateway stability", "Show recent stability diagnostics."],
-            ["openclaw gateway call health", "Call a gateway RPC method directly."],
-          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.openclaw.ai/cli/gateway")}\n`,
+            ["carapace gateway run", "Run the gateway in the foreground."],
+            ["carapace gateway status", "Show service status plus connectivity/capability."],
+            ["carapace gateway auth-token --show", "Reveal the shared token interactively."],
+            ["carapace gateway discover", "Find local and wide-area gateway beacons."],
+            ["carapace gateway stability", "Show recent stability diagnostics."],
+            ["carapace gateway call health", "Call a gateway RPC method directly."],
+          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "github.com/Exaggarate/carapace")}\n`,
       ),
   );
 
@@ -496,7 +496,7 @@ export function registerGatewayCli(program: Command, deps: GatewayCliDependencie
             // Setup detection owns a 30s worker deadline; its transport must
             // leave enough grace for the Gateway to return the typed outcome.
             const callOpts =
-              method === "openclaw.setup.detect" &&
+              method === "carapace.setup.detect" &&
               command.getOptionValueSource("timeout") === "default"
                 ? { ...opts, timeout: String(SETUP_INFERENCE_DETECT_RPC_TIMEOUT_MS) }
                 : opts;

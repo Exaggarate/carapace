@@ -5,7 +5,7 @@
  * trusted policies, approvals, normal hooks, and final owner approval must
  * remain in this sequence.
  */
-import type { ToolLoopWarning } from "@openclaw/agent-core";
+import type { ToolLoopWarning } from "@carapace/agent-core";
 import { getRuntimeConfig } from "../config/config.js";
 import { freezeDiagnosticTraceContext } from "../infra/diagnostic-trace-context.js";
 import { getGlobalHookRunnerRegistry } from "../plugins/hook-runner-global-state.js";

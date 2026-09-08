@@ -1,6 +1,6 @@
 // Plugins CLI policy tests cover plugin command policy checks and warnings.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { recordInstalledPluginIndexInstallOwner } from "../plugins/installed-plugin-index-install-owner.js";
 import { recordPluginManifestInstallOwner } from "../plugins/manifest-install-owner.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "../plugins/manifest-registry.js";
@@ -38,7 +38,7 @@ vi.mock("../plugins/official-external-plugin-catalog.js", async (importOriginal)
     inventory.hostedCatalog(...args),
 }));
 
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_CARAPACE_NIX_MODE = process.env.CARAPACE_NIX_MODE;
 
 describe("plugins cli policy mutations", () => {
   let readInstallRecords: (typeof import("../plugins/installed-plugin-index-record-reader.js"))["loadInstalledPluginIndexInstallRecordsSync"];
@@ -64,7 +64,7 @@ describe("plugins cli policy mutations", () => {
       await vi.importActual<typeof import("../plugins/slots.js")>("../plugins/slots.js");
     enablePluginInConfigMock.mockImplementation((config, pluginId, options) =>
       enable.enableExplicitlySelectedPluginInConfig(
-        config as OpenClawConfig,
+        config as CarapaceConfig,
         pluginId as string,
         options as Parameters<typeof enable.enableExplicitlySelectedPluginInConfig>[2],
       ),
@@ -80,10 +80,10 @@ describe("plugins cli policy mutations", () => {
   afterEach(() => {
     expect(inventory.hostedCatalog).not.toHaveBeenCalled();
     clearPluginMetadataLifecycleCaches();
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    if (ORIGINAL_CARAPACE_NIX_MODE === undefined) {
+      delete process.env.CARAPACE_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.CARAPACE_NIX_MODE = ORIGINAL_CARAPACE_NIX_MODE;
     }
   });
 
@@ -91,7 +91,7 @@ describe("plugins cli policy mutations", () => {
     ids: string[],
     kinds: Record<string, "memory" | "context-engine"> = {},
   ) {
-    inventory.load.mockImplementation(({ config }: { config: OpenClawConfig }) => {
+    inventory.load.mockImplementation(({ config }: { config: CarapaceConfig }) => {
       const installRecords = readInstallRecords();
       const installedManifests = loadPluginManifestRegistryMock({
         installRecords,
@@ -104,7 +104,7 @@ describe("plugins cli policy mutations", () => {
             origin: "bundled",
             rootDir: `/tmp/bundled-${id}`,
             source: `/tmp/bundled-${id}/index.js`,
-            manifestPath: `/tmp/bundled-${id}/openclaw.plugin.json`,
+            manifestPath: `/tmp/bundled-${id}/carapace.plugin.json`,
             channels: [],
             providers: [],
             cliBackends: [],
@@ -145,7 +145,7 @@ describe("plugins cli policy mutations", () => {
     });
   }
 
-  function requireFirstWrittenConfig(): OpenClawConfig {
+  function requireFirstWrittenConfig(): CarapaceConfig {
     const call = configWriteMock.mock.calls[0];
     if (!call) {
       throw new Error("expected configWriteMock to be called");
@@ -158,8 +158,8 @@ describe("plugins cli policy mutations", () => {
   }
 
   function requirePluginEntries(
-    config: OpenClawConfig,
-  ): NonNullable<NonNullable<OpenClawConfig["plugins"]>["entries"]> {
+    config: CarapaceConfig,
+  ): NonNullable<NonNullable<CarapaceConfig["plugins"]>["entries"]> {
     if (!config.plugins?.entries) {
       throw new Error("expected plugin entries in config");
     }
@@ -167,14 +167,14 @@ describe("plugins cli policy mutations", () => {
   }
 
   it("refreshes the persisted plugin registry after enabling a plugin", async () => {
-    const sourceConfig = {} as OpenClawConfig;
+    const sourceConfig = {} as CarapaceConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(sourceConfig);
     mockPluginRegistry(["alpha"]);
 
@@ -200,11 +200,11 @@ describe("plugins cli policy mutations", () => {
   });
 
   it("rejects enabling an unconsented installed plugin without --accept-capabilities", async () => {
-    await withTempDir("openclaw-cli-capability-consent-", async (rootDir) => {
+    await withTempDir("carapace-cli-capability-consent-", async (rootDir) => {
       createColdPluginFixture({ rootDir, pluginId: "alpha" });
       const sourceConfig = {
         plugins: { entries: { alpha: { enabled: false } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(sourceConfig);
       setInstalledPluginIndexInstallRecords({
         alpha: { source: "npm", spec: "@acme/alpha", installPath: rootDir },
@@ -239,7 +239,7 @@ describe("plugins cli policy mutations", () => {
       expectsConsent: false,
     },
   ])("$name", async ({ commandArgs, enabled, expectsConsent }) => {
-    await withTempDir("openclaw-cli-capability-consent-enabled-", async (rootDir) => {
+    await withTempDir("carapace-cli-capability-consent-enabled-", async (rootDir) => {
       const fixture = createColdPluginFixture({ rootDir, pluginId: "alpha" });
       loadPluginManifestRegistryMock.mockReturnValue({
         plugins: [
@@ -254,7 +254,7 @@ describe("plugins cli policy mutations", () => {
               origin: "global",
               rootDir,
               source: fixture.runtimeSource,
-              manifestPath: `${rootDir}/openclaw.plugin.json`,
+              manifestPath: `${rootDir}/carapace.plugin.json`,
             },
             "alpha",
           ),
@@ -263,7 +263,7 @@ describe("plugins cli policy mutations", () => {
       });
       const sourceConfig = {
         plugins: { entries: { alpha: { enabled } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(sourceConfig);
       setInstalledPluginIndexInstallRecords({
         alpha: { source: "npm", spec: "@acme/alpha", installPath: rootDir },
@@ -309,13 +309,13 @@ describe("plugins cli policy mutations", () => {
       reason: "blocked by allowlist",
     },
   ])("fails without mutations when $policy blocks enablement", async ({ plugins, reason }) => {
-    await withTempDir("openclaw-cli-blocked-capability-consent-", async (rootDir) => {
+    await withTempDir("carapace-cli-blocked-capability-consent-", async (rootDir) => {
       const fixture = createColdPluginFixture({
         rootDir,
         pluginId: "alpha",
         manifest: { kind: "memory" },
       });
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: CarapaceConfig = {
         plugins: {
           ...plugins,
           entries: { alpha: { enabled: false } },
@@ -337,7 +337,7 @@ describe("plugins cli policy mutations", () => {
               origin: "global",
               rootDir,
               source: fixture.runtimeSource,
-              manifestPath: `${rootDir}/openclaw.plugin.json`,
+              manifestPath: `${rootDir}/carapace.plugin.json`,
               channels: [fixture.channelId],
               providers: [fixture.providerId],
               cliBackends: [],
@@ -370,17 +370,17 @@ describe("plugins cli policy mutations", () => {
   });
 
   it("refuses plugin enablement in Nix mode before config mutation", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.CARAPACE_NIX_MODE;
+    process.env.CARAPACE_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "enable", "alpha"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "CARAPACE_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.CARAPACE_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.CARAPACE_NIX_MODE = previous;
       }
     }
 
@@ -394,7 +394,7 @@ describe("plugins cli policy mutations", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     mockPluginRegistry(["alpha"]);
 
     await runPluginsCommand(["plugins", "disable", "alpha"]);
@@ -423,14 +423,14 @@ describe("plugins cli policy mutations", () => {
   it.each(compatibilityPluginIds)(
     "enables compatibility id $alias through canonical plugin $pluginId",
     async ({ alias, pluginId }) => {
-      const sourceConfig = {} as OpenClawConfig;
+      const sourceConfig = {} as CarapaceConfig;
       const enabledConfig = {
         plugins: {
           entries: {
             [pluginId]: { enabled: true },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(sourceConfig);
       mockPluginRegistry([pluginId]);
 
@@ -456,7 +456,7 @@ describe("plugins cli policy mutations", () => {
             [pluginId]: { enabled: true },
           },
         },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
       mockPluginRegistry([pluginId]);
 
       await runPluginsCommand(["plugins", "disable", alias]);
@@ -487,7 +487,7 @@ describe("plugins cli policy mutations", () => {
           origin: "bundled",
           rootDir: "/tmp/bundled-alpha",
           source: "/tmp/bundled-alpha/index.js",
-          manifestPath: "/tmp/bundled-alpha/openclaw.plugin.json",
+          manifestPath: "/tmp/bundled-alpha/carapace.plugin.json",
           providers: ["alpha-provider"],
           channels: ["alpha-channel"],
           cliBackends: [],
@@ -502,7 +502,7 @@ describe("plugins cli policy mutations", () => {
     await expect(runPluginsCommand(["plugins", command, id])).rejects.toThrow("__exit__:1");
 
     expect(runtimeErrors).toContain(
-      `Plugin not found: ${id}. Run \`openclaw plugins list\` to see installed plugins, or \`openclaw plugins search ${id}\` to look for installable plugins.`,
+      `Plugin not found: ${id}. Run \`carapace plugins list\` to see installed plugins, or \`carapace plugins search ${id}\` to look for installable plugins.`,
     );
     expect(configWriteMock).not.toHaveBeenCalled();
     expect(writePersistedInstalledPluginIndexInstallRecordsWithLeaseMock).not.toHaveBeenCalled();
@@ -531,7 +531,7 @@ describe("plugins cli policy mutations", () => {
   });
 
   it("does not create a channel config when disabling a channel plugin by policy", async () => {
-    pluginCliConfigMock.mockReturnValue({} as OpenClawConfig);
+    pluginCliConfigMock.mockReturnValue({} as CarapaceConfig);
     mockPluginRegistry(["twitch"]);
 
     await runPluginsCommand(["plugins", "disable", "twitch"]);

@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   loadSessionCostSummary,
@@ -109,7 +109,7 @@ describe("session usage reporting pricing", () => {
       expectedCost: 0.125,
     },
   ])("keeps logs, summaries, and charts consistent for $name", async (testCase) => {
-    const root = tempDirs.make("openclaw-usage-reporting-");
+    const root = tempDirs.make("carapace-usage-reporting-");
     const sessionFile = path.join(root, "transcript.jsonl");
     const timestamp = Date.UTC(2026, 7, 1, 12);
     const usage = {
@@ -145,7 +145,7 @@ describe("session usage reporting pricing", () => {
       },
     ];
     await fs.writeFile(sessionFile, entries.map((entry) => JSON.stringify(entry)).join("\n"));
-    const config: OpenClawConfig = testCase.pricing
+    const config: CarapaceConfig = testCase.pricing
       ? {
           models: {
             providers: {
@@ -168,7 +168,7 @@ describe("session usage reporting pricing", () => {
         }
       : {};
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => {
       const params = { agentId: "main", sessionFile, config };
       const logs = await loadSessionLogs(params);
       expect(logs).toEqual([

@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SessionGitHubPublicationResult } from "../../packages/gateway-protocol/src/index.js";
 import {
@@ -9,16 +9,16 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { CURRENT_SESSION_VERSION } from "../config/sessions/version.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGitHubPublicationTranscriptReporter } from "./github-publication-transcript.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("GitHub publication transcript reporting", () => {
@@ -70,7 +70,7 @@ describe("GitHub publication transcript reporting", () => {
       count: 1,
     },
   ])("preserves canonical report visibility after $label", async ({ tail, count }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const identity = {
         agentId: "main",
         sessionKey: "agent:main:main",
@@ -123,7 +123,7 @@ describe("GitHub publication transcript reporting", () => {
   it.each(["missing", "legacy"])(
     "keeps the %s header migration boundary before reporting",
     async (header) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const identity = {
           agentId: "main",
           sessionKey: "agent:main:main",
@@ -158,7 +158,7 @@ describe("GitHub publication transcript reporting", () => {
     },
   );
   it("marks a publication reported only after the transcript commits and allows retry after failure", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const identity = {
         agentId: "main",
         sessionKey: "agent:main:main",
@@ -172,7 +172,7 @@ describe("GitHub publication transcript reporting", () => {
         message: "Publication failed.",
         nextAction: "Retry.",
       } satisfies SessionGitHubPublicationResult;
-      const database = openOpenClawAgentDatabase({ agentId: identity.agentId });
+      const database = openCarapaceAgentDatabase({ agentId: identity.agentId });
       database.db.exec(
         "CREATE TEMP TRIGGER reject_report BEFORE INSERT ON transcript_events WHEN json_extract(NEW.event_json, '$.type') = 'message' BEGIN SELECT RAISE(ABORT, 'report insert failed'); END",
       );
@@ -201,7 +201,7 @@ describe("GitHub publication transcript reporting", () => {
     });
   });
   it("reports on the active branch while preserving large unrelated evidence", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const identity = {
         agentId: "main",
         sessionKey: "agent:main:main",
@@ -247,7 +247,7 @@ describe("GitHub publication transcript reporting", () => {
           appendParentId: "opaque",
         },
       ]);
-      const database = openOpenClawAgentDatabase({ agentId: identity.agentId });
+      const database = openCarapaceAgentDatabase({ agentId: identity.agentId });
       const readEvidence = () =>
         database.db
           .prepare("SELECT event_json FROM transcript_events WHERE session_id = ? ORDER BY seq")
@@ -279,12 +279,12 @@ describe("GitHub publication transcript reporting", () => {
       result: {
         requestId: "publication-success",
         status: "published",
-        url: "https://github.com/openclaw/openclaw/pull/1",
-        repository: "openclaw/openclaw",
-        branch: "openclaw/task",
+        url: "https://github.com/Exaggarate/carapace/pull/1",
+        repository: "carapace/carapace",
+        branch: "carapace/task",
         headCommit: "a".repeat(40),
       } satisfies SessionGitHubPublicationResult,
-      visibleText: "https://github.com/openclaw/openclaw/pull/1",
+      visibleText: "https://github.com/Exaggarate/carapace/pull/1",
     },
     {
       label: "failed",
@@ -300,7 +300,7 @@ describe("GitHub publication transcript reporting", () => {
   ])(
     "appends one projected assistant message for a $label result",
     async ({ result, visibleText }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const sessionKey = "agent:main:main";
         const sessionId = "publication-transcript";
         await upsertSessionEntryCore({ agentId: "main", sessionKey }, { sessionId, updatedAt: 1 });

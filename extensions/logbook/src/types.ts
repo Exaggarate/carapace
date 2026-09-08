@@ -1,5 +1,5 @@
 // Shared Logbook domain shapes used by the store, pipeline, and gateway methods.
-import type { Generated } from "openclaw/plugin-sdk/sqlite-runtime";
+import type { Generated } from "carapace/plugin-sdk/sqlite-runtime";
 
 export type LogbookFrame = {
   id: number;

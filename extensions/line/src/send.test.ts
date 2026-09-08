@@ -1,7 +1,7 @@
 import { HTTPFetchError } from "@line/bot-sdk";
 // Line tests cover send plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { expectDefined } from "@carapace/normalization-core";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -61,7 +61,7 @@ vi.mock("@line/bot-sdk", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-config-runtime", () => ({
   requireRuntimeConfig: requireRuntimeConfigMock,
 }));
 
@@ -73,13 +73,13 @@ vi.mock("./channel-access-token.js", () => ({
   resolveLineChannelAccessToken: resolveLineChannelAccessTokenMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", () => ({
   recordChannelActivity: recordChannelActivityMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -87,7 +87,7 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   resolvePinnedHostnameWithPolicy: resolvePinnedHostnameWithPolicyMock,
 }));
 
@@ -112,12 +112,12 @@ describe("LINE send helpers", () => {
 
   afterAll(() => {
     vi.doUnmock("@line/bot-sdk");
-    vi.doUnmock("openclaw/plugin-sdk/plugin-config-runtime");
+    vi.doUnmock("carapace/plugin-sdk/plugin-config-runtime");
     vi.doUnmock("./accounts.js");
     vi.doUnmock("./channel-access-token.js");
-    vi.doUnmock("openclaw/plugin-sdk/channel-activity-runtime");
-    vi.doUnmock("openclaw/plugin-sdk/runtime-env");
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-activity-runtime");
+    vi.doUnmock("carapace/plugin-sdk/runtime-env");
+    vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 

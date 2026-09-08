@@ -1,5 +1,5 @@
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createSubsystemLogger, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createSubsystemLogger, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type { APIVoiceState, Client } from "../internal/discord.js";
 import { formatMention } from "../mentions.js";
 import type { DiscordLivePolicyReader } from "../monitor/live-policy.js";
@@ -96,7 +96,7 @@ export class DiscordVoiceManager {
   constructor(params: {
     readPolicy?: DiscordLivePolicyReader;
     client: Client;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     discordConfig: DiscordAccountConfig;
     accountId: string;
     runtime: RuntimeEnv;

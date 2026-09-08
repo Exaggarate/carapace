@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type PhysicalSender = (method: string, params?: Record<string, unknown>) => Promise<unknown>;
 type EventSender = (method: string, params: unknown) => void;
@@ -28,7 +28,7 @@ type OwnedStream = {
   closing?: Promise<unknown>;
 };
 
-const STREAM_PREFIX = "openclaw-fetch-stream:";
+const STREAM_PREFIX = "carapace-fetch-stream:";
 const REQUEST_COMMANDS = new Set([
   "Fetch.continueRequest",
   "Fetch.continueResponse",
@@ -280,7 +280,7 @@ export class RelayFetch {
         lease: {
           owner,
           emit,
-          prefix: `openclaw-fetch:${this.instanceId}:${++this.nextLease}:`,
+          prefix: `carapace-fetch:${this.instanceId}:${++this.nextLease}:`,
           pauses: new Map(),
           operations: new Set(),
           control: Promise.resolve(),

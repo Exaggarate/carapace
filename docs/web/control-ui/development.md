@@ -30,7 +30,7 @@ Static asset URLs support percent-encoded filenames. Contained symlinks retain t
 Optional absolute base (fixed asset URLs):
 
 ```bash
-OPENCLAW_CONTROL_UI_BASE_PATH=/openclaw/ pnpm ui:build
+CARAPACE_CONTROL_UI_BASE_PATH=/carapace/ pnpm ui:build
 ```
 
 Local development (separate dev server):

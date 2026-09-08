@@ -46,7 +46,7 @@ const hash = (value: unknown) => createHash("sha256").update(canonical(value)).d
 const identity = telegramProofIdentitySchema.parse({
   request_id: "a".repeat(64),
   plan_sha256: hash(plan),
-  repository: { id: "1", full_name: "openclaw/openclaw" },
+  repository: { id: "1", full_name: "carapace/carapace" },
   pull_request: 1,
   candidate_sha: "b".repeat(40),
   scenario: "telegram-bot-e2e-proof",
@@ -396,7 +396,7 @@ describe("Telegram live-send admission", () => {
     });
     try {
       expect(await redeemTelegramReviewProof(identity)).toBe(12345);
-      const endpoint = "https://clawsweeper.openclaw.ai/internal/exact-review/proof/producer";
+      const endpoint = "https://github.com/Exaggarate/carapace";
       expect(new URL(requests[0]!.url).searchParams.get("audience")).toBe(endpoint);
       expect(requests[1]).toEqual({
         url: endpoint,

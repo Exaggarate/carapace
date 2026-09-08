@@ -2,7 +2,7 @@
 import { css, html, type PropertyValues, type TemplateResult } from "lit";
 import { property, query } from "lit/decorators.js";
 import { t } from "../i18n/index.ts";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 import { renderCopyButton } from "./copy-button.ts";
 import { type FileKind, fileKindForPath } from "./file-kind.ts";
 import { icons } from "./icons.ts";
@@ -14,7 +14,7 @@ type FilePreviewModalFile = {
   contents: string;
 };
 
-export class OpenClawFilePreviewModal extends OpenClawLitElement {
+export class CarapaceFilePreviewModal extends CarapaceLitElement {
   @property({ attribute: false }) files: FilePreviewModalFile[] = [];
   @property() activePath = "";
   @property() query = "";
@@ -490,9 +490,9 @@ export class OpenClawFilePreviewModal extends OpenClawLitElement {
     const searchPlaceholder = this.searchPlaceholder || t("filePreview.searchPlaceholder");
 
     return html`
-      <openclaw-modal-dialog
+      <carapace-modal-dialog
         label=${label}
-        style="--openclaw-modal-width: min(1100px, 92vw); --openclaw-modal-max-height: 86vh;"
+        style="--carapace-modal-width: min(1100px, 92vw); --carapace-modal-max-height: 86vh;"
         @modal-cancel=${this.emitClose}
         @keydown=${this.handleKeydown}
       >
@@ -539,7 +539,7 @@ export class OpenClawFilePreviewModal extends OpenClawLitElement {
             </button>
           </footer>
         </div>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `;
   }
 
@@ -755,6 +755,6 @@ function iconForFile(path: string) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-file-preview-modal": OpenClawFilePreviewModal;
+    "carapace-file-preview-modal": CarapaceFilePreviewModal;
   }
 }

@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { runQaGatewayCliCommand } from "./gateway-child-command.js";
 import { QaGatewayChildLifecycle, type QaGatewayStopOptions } from "./gateway-child-lifecycle.js";
 import {

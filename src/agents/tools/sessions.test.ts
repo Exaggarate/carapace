@@ -1,9 +1,9 @@
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 // Sessions tool tests cover list/send helpers, announce-target resolution,
 // and assistant-visible text sanitization.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelMessagingAdapter } from "../../channels/plugins/types.public.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../../config/io.js";
@@ -14,7 +14,7 @@ import {
   getOwnedSessionTranscriptWriterFence,
   withOwnedSessionTranscriptWrites,
 } from "../../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { GatewayClientRequestError } from "../../gateway/client.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
@@ -79,8 +79,8 @@ vi.mock("../../plugin-sdk/facade-runtime.js", async () => {
 });
 
 type SessionsToolTestConfig = {
-  agents?: OpenClawConfig["agents"];
-  bindings?: OpenClawConfig["bindings"];
+  agents?: CarapaceConfig["agents"];
+  bindings?: CarapaceConfig["bindings"];
   session: {
     scope: "per-sender";
     mainKey: string;
@@ -1088,7 +1088,7 @@ describe("sessions_send gating", () => {
 
     expect(requireDetails(result)).toMatchObject({
       status: "error",
-      error: 'Agent "агент✨" not found. Run openclaw agents list to see configured agents.',
+      error: 'Agent "агент✨" not found. Run carapace agents list to see configured agents.',
     });
     expect(callGatewayMock).not.toHaveBeenCalled();
   });
@@ -1148,7 +1148,7 @@ describe("sessions_send gating", () => {
   });
 
   it("keeps an exact-incarnation send synchronous to its scoped lifecycle grant", async () => {
-    await withTestDir({ prefix: "openclaw-exact-session-send-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-exact-session-send-" }, async (dir) => {
       const { runSessionsSendA2AFlow } = await import("./sessions-send-tool.a2a.js");
       vi.mocked(runSessionsSendA2AFlow).mockClear();
       const storePath = path.join(dir, "sessions.json");
@@ -1315,7 +1315,7 @@ describe("sessions_send gating", () => {
     const details = requireDetails(result);
     expect(details.status).toBe("forbidden");
     expect(String(details.error)).toBe(
-      "Session send denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect OpenClaw logs.",
+      "Session send denied because spawned-session ownership lookup failed (transient); retry once, then ask the operator to inspect Carapace logs.",
     );
     expect(String(details.error)).not.toContain(
       "Session not visible from this sandboxed agent session",
@@ -2006,7 +2006,7 @@ describe("sessions_send agent-main materialization provenance", () => {
       }
       return {};
     });
-    // Mirror production assembly (openclaw-tools.ts): no callGateway override, so
+    // Mirror production assembly (carapace-tools.ts): no callGateway override, so
     // ensureConfiguredAgentMainSession takes the trusted in-process branch.
     const tool = createSessionsSendTool({
       agentSessionKey: "agent:main:dashboard:req-provenance",

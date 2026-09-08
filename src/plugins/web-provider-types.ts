@@ -1,6 +1,6 @@
 // Defines web provider plugin schema and runtime types.
 import type { TSchema } from "typebox";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type {
   RuntimeWebFetchMetadata,
@@ -31,7 +31,7 @@ export type WebFetchProviderToolDefinition = {
 };
 
 type WebSearchProviderContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   searchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebSearchMetadata;
   agentDir?: string;
@@ -42,7 +42,7 @@ export type WebSearchProviderToolExecutionContext = {
 };
 
 type WebFetchProviderContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   fetchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebFetchMetadata;
 };
@@ -60,7 +60,7 @@ type WebFetchProviderConfiguredCredentialFallback = {
 };
 
 type WebSearchRuntimeMetadataContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   searchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebSearchMetadata;
   resolvedCredential?: {
@@ -71,7 +71,7 @@ type WebSearchRuntimeMetadataContext = {
 };
 
 export type WebSearchProviderSetupContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
   quickstartDefaults?: boolean;
@@ -81,7 +81,7 @@ export type WebSearchProviderSetupContext = {
 export type WebFetchCredentialResolutionSource = "config" | "secretRef" | "env" | "missing";
 
 type WebFetchRuntimeMetadataContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   fetchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebFetchMetadata;
   resolvedCredential?: {
@@ -111,13 +111,13 @@ export type WebSearchProviderPlugin = {
   inactiveSecretPaths?: string[];
   getCredentialValue: (searchConfig?: Record<string, unknown>) => unknown;
   setCredentialValue: (searchConfigTarget: Record<string, unknown>, value: unknown) => void;
-  getConfiguredCredentialValue?: (config?: OpenClawConfig) => unknown;
-  setConfiguredCredentialValue?: (configTarget: OpenClawConfig, value: unknown) => void;
+  getConfiguredCredentialValue?: (config?: CarapaceConfig) => unknown;
+  setConfiguredCredentialValue?: (configTarget: CarapaceConfig, value: unknown) => void;
   getConfiguredCredentialFallback?: (
-    config?: OpenClawConfig,
+    config?: CarapaceConfig,
   ) => WebSearchProviderConfiguredCredentialFallback | undefined;
-  applySelectionConfig?: (config: OpenClawConfig) => OpenClawConfig;
-  runSetup?: (ctx: WebSearchProviderSetupContext) => OpenClawConfig | Promise<OpenClawConfig>;
+  applySelectionConfig?: (config: CarapaceConfig) => CarapaceConfig;
+  runSetup?: (ctx: WebSearchProviderSetupContext) => CarapaceConfig | Promise<CarapaceConfig>;
   resolveRuntimeMetadata?: (
     ctx: WebSearchRuntimeMetadataContext,
   ) => Partial<RuntimeWebSearchMetadata> | Promise<Partial<RuntimeWebSearchMetadata>>;
@@ -143,12 +143,12 @@ export type WebFetchProviderPlugin = {
   inactiveSecretPaths?: string[];
   getCredentialValue: (fetchConfig?: Record<string, unknown>) => unknown;
   setCredentialValue: (fetchConfigTarget: Record<string, unknown>, value: unknown) => void;
-  getConfiguredCredentialValue?: (config?: OpenClawConfig) => unknown;
-  setConfiguredCredentialValue?: (configTarget: OpenClawConfig, value: unknown) => void;
+  getConfiguredCredentialValue?: (config?: CarapaceConfig) => unknown;
+  setConfiguredCredentialValue?: (configTarget: CarapaceConfig, value: unknown) => void;
   getConfiguredCredentialFallback?: (
-    config?: OpenClawConfig,
+    config?: CarapaceConfig,
   ) => WebFetchProviderConfiguredCredentialFallback | undefined;
-  applySelectionConfig?: (config: OpenClawConfig) => OpenClawConfig;
+  applySelectionConfig?: (config: CarapaceConfig) => CarapaceConfig;
   resolveRuntimeMetadata?: (
     ctx: WebFetchRuntimeMetadataContext,
   ) => Partial<RuntimeWebFetchMetadata> | Promise<Partial<RuntimeWebFetchMetadata>>;

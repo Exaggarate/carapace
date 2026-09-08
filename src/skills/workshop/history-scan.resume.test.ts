@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { SkillHistoryScanCandidate } from "./history-scan-candidates.js";
 import type { SkillHistoryScanPromptSession } from "./history-scan-prompt.js";
 
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../../agents/agent-scope.js", () => ({
   resolveAgentConfig: vi.fn(() => undefined),
-  resolveAgentDir: vi.fn(() => "/tmp/openclaw-history-scan-agent"),
+  resolveAgentDir: vi.fn(() => "/tmp/carapace-history-scan-agent"),
 }));
 
 vi.mock("../../agents/embedded-agent-runner/model.js", () => ({
@@ -81,10 +81,10 @@ describe("Skill Workshop history scan resume", () => {
   it.each(["failure", "missing completion"] as const)(
     "replays the valid batch after %s and honors completion before transport failure",
     async (interruption) => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-history-scan-resume-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-history-scan-resume-"));
       const workspaceDir = path.join(tempDir, "workspace");
       const storePath = path.join(tempDir, "sessions.json");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(tempDir, "state") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(tempDir, "state") };
       const validUpdatedAtMs = Date.parse("2026-07-16T12:00:00.000Z");
       const invalid = candidate("invalid", validUpdatedAtMs + 1_000);
       const valid = candidate("valid", validUpdatedAtMs);
@@ -142,7 +142,7 @@ describe("Skill Workshop history scan resume", () => {
         expect(reviewedRunIds[1]).toBe(reviewedRunIds[0]);
         expect(historyScanStore(env).lookup(stateKey)?.pending).toBeUndefined();
       } finally {
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         await fs.rm(tempDir, { recursive: true, force: true });
         vi.clearAllMocks();
         mocks.candidates = [];
@@ -151,10 +151,10 @@ describe("Skill Workshop history scan resume", () => {
   );
 
   it("resumes only proposals owned by the active agent", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-history-scan-owner-resume-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-history-scan-owner-resume-"));
     const workspaceDir = path.join(tempDir, "workspace");
     const storePath = path.join(tempDir, "sessions.json");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(tempDir, "state") };
+    const env = { ...process.env, CARAPACE_STATE_DIR: path.join(tempDir, "state") };
     const session = candidate("active-agent-session", Date.parse("2026-07-16T12:00:00.000Z"));
     const params = {
       agentId: "agent-a",
@@ -217,7 +217,7 @@ describe("Skill Workshop history scan resume", () => {
       expect(recoveredProposalIds).toEqual([[agentAProposalId]]);
       expect(recoveredProposalIds[0]).not.toContain(agentBProposalId);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(tempDir, { recursive: true, force: true });
       vi.clearAllMocks();
       mocks.candidates = [];

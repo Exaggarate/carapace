@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { Api } from "grammy";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   PROXY_FIXTURE_HOST,
   PROXY_FIXTURE_PAYLOAD,
   withProxyFixture,
-} from "openclaw/plugin-sdk/test-env";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/test-env";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { resolveMedia } from "./bot/delivery.resolve-media.js";
 import type { TelegramContext } from "./bot/types.js";
@@ -25,9 +25,9 @@ beforeEach(() => {
     "all_proxy",
     "NO_PROXY",
     "no_proxy",
-    "OPENCLAW_PROXY_URL",
-    "OPENCLAW_PROXY_ACTIVE",
-    "OPENCLAW_DEBUG_PROXY_ENABLED",
+    "CARAPACE_PROXY_URL",
+    "CARAPACE_PROXY_ACTIVE",
+    "CARAPACE_DEBUG_PROXY_ENABLED",
   ]) {
     vi.stubEnv(key, undefined);
   }
@@ -43,7 +43,7 @@ it.each(["explicit", "environment", "ALL_PROXY", "standard-over-managed"])(
         vi.stubEnv("HTTPS_PROXY", socksProxy);
       }
       if (mode === "standard-over-managed") {
-        vi.stubEnv("OPENCLAW_PROXY_URL", httpProxy);
+        vi.stubEnv("CARAPACE_PROXY_URL", httpProxy);
       }
       if (mode === "ALL_PROXY") {
         vi.stubEnv("ALL_PROXY", socksProxy);
@@ -85,7 +85,7 @@ it("preserves direct fallback when environment proxy initialization rejects a ma
 });
 
 it("downloads distinct concurrent attachments, cancels an in-flight body, and recovers through SOCKS", async () => {
-  await withOpenClawTestState({ label: "telegram-socks-media" }, async () => {
+  await withCarapaceTestState({ label: "telegram-socks-media" }, async () => {
     await withProxyFixture(async ({ socksProxy, waitForSocketsClosed }) => {
       const token = "12345:fixture-token";
       const apiRoot = `http://${PROXY_FIXTURE_HOST}`;

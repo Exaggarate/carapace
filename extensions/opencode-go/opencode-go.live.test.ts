@@ -1,5 +1,5 @@
-import { completeSimple, type Model } from "openclaw/plugin-sdk/llm";
-import { extractNonEmptyAssistantText, isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+import { completeSimple, type Model } from "carapace/plugin-sdk/llm";
+import { extractNonEmptyAssistantText, isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { describe, expect, it } from "vitest";
 import {
   buildOpencodeGoLiveProviderConfig,

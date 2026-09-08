@@ -8,10 +8,10 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
 
 const suite = createControlUiE2eSuite({ name: "workspace panel startup" });
 const panels = [
-  { name: "terminal", tag: "openclaw-terminal-panel", selector: ".tp-header" },
-  { name: "browser", tag: "openclaw-browser-panel", selector: ".bp" },
-  { name: "desktop", tag: "openclaw-desktop-panel", selector: ".bp" },
-  { name: "custodian", tag: "openclaw-assistant-panel", selector: ".assistant-panel" },
+  { name: "terminal", tag: "carapace-terminal-panel", selector: ".tp-header" },
+  { name: "browser", tag: "carapace-browser-panel", selector: ".bp" },
+  { name: "desktop", tag: "carapace-desktop-panel", selector: ".bp" },
+  { name: "custodian", tag: "carapace-assistant-panel", selector: ".assistant-panel" },
 ] as const;
 
 suite.define(() => {
@@ -31,7 +31,7 @@ suite.define(() => {
                 value(this: Storage, key: string) {
                   if (
                     this === local &&
-                    /^openclaw\.(terminal|browser|custodian)\.panel\.v1$/.test(key)
+                    /^carapace\.(terminal|browser|custodian)\.panel\.v1$/.test(key)
                   ) {
                     performance.mark(`panel-layout-read:${key}`);
                   }
@@ -59,8 +59,8 @@ suite.define(() => {
               "terminal.open",
               "browser.request",
               "desktop.observe",
-              "openclaw.chat",
-              "openclaw.chat.history",
+              "carapace.chat",
+              "carapace.chat.history",
             ],
             methodResponses: {
               "terminal.list": { sessions: [] },
@@ -72,7 +72,7 @@ suite.define(() => {
                 shell: "/bin/bash",
               },
               "environments.list": { environments: [] },
-              "openclaw.chat.history": { turns: [] },
+              "carapace.chat.history": { turns: [] },
             },
           });
           await page.goto(`${suite.server.baseUrl}new`);
@@ -89,15 +89,15 @@ suite.define(() => {
             const reads = await page.evaluate(() =>
               Object.fromEntries(
                 ["terminal", "browser", "custodian"].map((kind) => {
-                  const key = `openclaw.${kind}.panel.v1`;
+                  const key = `carapace.${kind}.panel.v1`;
                   return [key, performance.getEntriesByName(`panel-layout-read:${key}`).length];
                 }),
               ),
             );
             expect(reads).toEqual({
-              "openclaw.terminal.panel.v1": 1,
-              "openclaw.browser.panel.v1": 1,
-              "openclaw.custodian.panel.v1": 1,
+              "carapace.terminal.panel.v1": 1,
+              "carapace.browser.panel.v1": 1,
+              "carapace.custodian.panel.v1": 1,
             });
             const sources = (
               await Promise.all(
@@ -129,7 +129,7 @@ suite.define(() => {
             await page.evaluate(
               (name) =>
                 window.dispatchEvent(
-                  new CustomEvent(`openclaw:${name}-toggle`, { detail: { open: true } }),
+                  new CustomEvent(`carapace:${name}-toggle`, { detail: { open: true } }),
                 ),
               panel.name,
             );

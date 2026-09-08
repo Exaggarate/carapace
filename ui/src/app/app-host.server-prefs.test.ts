@@ -18,7 +18,7 @@ type ShellServerPreferencesState = {
   reconcileServerUiPrefs: (runtimeConfig: ApplicationContext["runtimeConfig"]) => void;
 };
 
-describe("OpenClaw shell locale preferences", () => {
+describe("Carapace shell locale preferences", () => {
   beforeEach(() => {
     vi.stubGlobal("localStorage", createStorageMock());
     resetServerUiPrefsSync();
@@ -32,7 +32,7 @@ describe("OpenClaw shell locale preferences", () => {
   });
 
   it("uses canonical server locale provenance and clears a stale local pin", () => {
-    localStorage.setItem("openclaw.i18n.locale", "fr");
+    localStorage.setItem("carapace.i18n.locale", "fr");
     const setLocale = vi.spyOn(i18n, "setLocale").mockResolvedValue();
     const useSystemLocale = vi.spyOn(i18n, "useSystemLocale").mockResolvedValue();
     const state: {
@@ -58,7 +58,7 @@ describe("OpenClaw shell locale preferences", () => {
       runtimeConfig,
     } as unknown as ApplicationContext;
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellServerPreferencesState;
     shell.runtime = { context };
 
@@ -97,7 +97,7 @@ describe("OpenClaw shell locale preferences", () => {
       runtimeConfig,
     } as unknown as ApplicationContext;
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellServerPreferencesState;
     shell.runtime = { context };
 
@@ -133,7 +133,7 @@ describe("OpenClaw shell locale preferences", () => {
       runtimeConfig,
     } as unknown as ApplicationContext;
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellServerPreferencesState;
     shell.runtime = { context };
 

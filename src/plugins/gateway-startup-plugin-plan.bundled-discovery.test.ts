@@ -17,7 +17,7 @@ function buildStartupFixture() {
     const rootDir = `/tmp/plugins/${pluginId}`;
     return {
       pluginId,
-      manifestPath: `${rootDir}/openclaw.plugin.json`,
+      manifestPath: `${rootDir}/carapace.plugin.json`,
       manifestHash: `${pluginId}-manifest`,
       rootDir,
       origin: "bundled",
@@ -65,7 +65,7 @@ function buildStartupFixture() {
       cliBackends: [],
       rootDir: `/tmp/plugins/${id}`,
       source: `/tmp/plugins/${id}/index.ts`,
-      manifestPath: `/tmp/plugins/${id}/openclaw.plugin.json`,
+      manifestPath: `/tmp/plugins/${id}/carapace.plugin.json`,
       skills: [],
       hooks: [],
     })),
@@ -83,16 +83,16 @@ describe("gateway startup plan under bundledDiscovery compat", () => {
     // Two-root regression (#123416): the plan's default-startup fallback must
     // read compat from the plan env, not the process root.
     const compatRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plan-compat-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plan-compat-")),
     );
     const plainRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plan-plain-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plan-plain-")),
     );
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", compatRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", compatRoot);
       writeConfigMachineState("plugins.bundledDiscovery", "compat");
-      setTestEnvValue("OPENCLAW_STATE_DIR", plainRoot);
+      setTestEnvValue("CARAPACE_STATE_DIR", plainRoot);
       clearBundledDiscoveryModeMemo();
 
       const { index, manifestRegistry } = buildStartupFixture();
@@ -109,7 +109,7 @@ describe("gateway startup plan under bundledDiscovery compat", () => {
         agents: { defaults: { model: { primary: "openai/gpt-5.4" } } },
         plugins: { allow: ["some-other-plugin"] },
       };
-      const planEnv = { ...process.env, OPENCLAW_STATE_DIR: compatRoot };
+      const planEnv = { ...process.env, CARAPACE_STATE_DIR: compatRoot };
 
       const compatPlan = resolveGatewayStartupPluginPlanFromRegistry({
         config,

@@ -70,7 +70,7 @@ export default {
   cacheDir: ${JSON.stringify(path.join(root, ".vite"))},
   test: {
     ...tooling.test, dir: ${JSON.stringify(root)}, include: ["progress-*.test.ts"], maxWorkers: 1,
-    // Pure Vitest fixtures need no OpenClaw environment setup or shared-state runner.
+    // Pure Vitest fixtures need no Carapace environment setup or shared-state runner.
     setupFiles: [], runner: undefined,
     sequence: { ...tooling.test.sequence, sequencer: OrderedFixtures },
   },
@@ -79,7 +79,7 @@ export default {
       );
       const env = { ...process.env };
       for (const key of Object.keys(env)) {
-        if (key.startsWith("VITEST") || key.startsWith("OPENCLAW_")) {
+        if (key.startsWith("VITEST") || key.startsWith("CARAPACE_")) {
           delete env[key];
         }
       }
@@ -88,9 +88,9 @@ export default {
         GITHUB_ACTIONS: "false",
         NO_COLOR: "1",
         FORCE_COLOR: "0",
-        OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "module-cache"),
-        OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: String(silenceMs),
-        OPENCLAW_VITEST_NO_OUTPUT_HEARTBEAT_MS: "400",
+        CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "module-cache"),
+        CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: String(silenceMs),
+        CARAPACE_VITEST_NO_OUTPUT_HEARTBEAT_MS: "400",
       });
 
       // Register and uninstall without awaiting so each watchdog captures its

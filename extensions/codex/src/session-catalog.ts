@@ -1,13 +1,13 @@
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginNodeInvokePolicy,
+} from "carapace/plugin-sdk/plugin-entry";
 import type {
   SessionCatalogHost,
   SessionCatalogProvider,
-} from "openclaw/plugin-sdk/session-catalog";
+} from "carapace/plugin-sdk/session-catalog";
 import type { CodexAppServerBindingStore } from "./app-server/session-binding.js";
 import { resolveCodexCatalogCreateSession } from "./session-catalog-create.js";
 import type { CodexCatalogHome } from "./session-catalog-homes.js";
@@ -47,7 +47,7 @@ export {
 } from "./session-catalog-parsing.js";
 
 /** Allows read-only catalog and transcript commands on supported paired-node platforms. */
-export function createCodexSessionCatalogNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+export function createCodexSessionCatalogNodeInvokePolicies(): CarapacePluginNodeInvokePolicy[] {
   return [
     {
       commands: [
@@ -150,11 +150,11 @@ function resolveLocalCatalogHomeForThread(params: {
 }
 
 function registerCodexSessionCatalog(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   bindingStore: CodexAppServerBindingStore;
   control: CodexSessionCatalogControlFactory;
   getPluginConfig: () => unknown;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => CarapaceConfig | undefined;
   resolveRuntimeOptions: CodexTerminalConfigSources["resolveRuntimeOptions"];
 }): void {
   const catalogHomes = (agentId: string, allowProcessHomeFallback?: boolean) => {
@@ -165,7 +165,7 @@ function registerCodexSessionCatalog(params: {
   };
   const resolveRequestAgentId = (agentId?: string) =>
     resolveSessionAgentIdsStrict({
-      config: params.getRuntimeConfig() ?? (params.api.config as OpenClawConfig),
+      config: params.getRuntimeConfig() ?? (params.api.config as CarapaceConfig),
       agentId,
     }).sessionAgentId;
   const bindRequest = (request: {
@@ -199,7 +199,7 @@ function registerCodexSessionCatalog(params: {
     resolveCreateSession: ({ agentId }) =>
       resolveCodexCatalogCreateSession(
         params.api.runtime.modelConfig,
-        params.getRuntimeConfig() ?? (params.api.config as OpenClawConfig),
+        params.getRuntimeConfig() ?? (params.api.config as CarapaceConfig),
         agentId,
       ),
     list: async (query) => {
@@ -260,7 +260,7 @@ function registerCodexSessionCatalog(params: {
     continueSession: async (request) => {
       const config = params.getRuntimeConfig();
       if (!config) {
-        throw new Error("OpenClaw runtime config is unavailable");
+        throw new Error("Carapace runtime config is unavailable");
       }
       if (request.hostId.startsWith("node:")) {
         const agentId = resolveRequestAgentId(request.agentId);
@@ -315,7 +315,7 @@ function registerCodexSessionCatalog(params: {
       }
       const config = params.getRuntimeConfig();
       if (!config) {
-        throw new Error("OpenClaw runtime config is unavailable");
+        throw new Error("Carapace runtime config is unavailable");
       }
       const { agentId, source, control } = bindLocalRequest(request);
       await archiveLocalCodexSession({

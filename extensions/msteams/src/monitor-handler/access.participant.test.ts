@@ -1,4 +1,4 @@
-import type { ResolveStableChannelMessageIngressParams } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import type { ResolveStableChannelMessageIngressParams } from "carapace/plugin-sdk/channel-ingress-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { installMSTeamsTestRuntime } from "../monitor-handler.test-helpers.js";
 import { resolveMSTeamsSenderAccess } from "./access.js";
@@ -6,9 +6,9 @@ import { resolveMSTeamsSenderAccess } from "./access.js";
 const observed = vi.hoisted(() =>
   vi.fn<(params: ResolveStableChannelMessageIngressParams) => void>(),
 );
-vi.mock("openclaw/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/channel-ingress-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/channel-ingress-runtime")>();
   return {
     ...actual,
     resolveStableChannelMessageIngress: (params: ResolveStableChannelMessageIngressParams) => {

@@ -7,7 +7,7 @@ import { withUpdateFailureTriage } from "./update-cli/update-command-triage.js";
 
 await runCliWithExitFinalization({
   run: async () => {
-    const root = process.env.OPENCLAW_STATE_DIR!;
+    const root = process.env.CARAPACE_STATE_DIR!;
     await withUpdateFailureTriage(
       { json: true, invocationCwd: root },
       { root, env: process.env },
@@ -33,7 +33,7 @@ await runCliWithExitFinalization({
           root,
           installKindChanged: false,
           configSnapshot: {
-            path: process.env.OPENCLAW_CONFIG_PATH!,
+            path: process.env.CARAPACE_CONFIG_PATH!,
             exists: false,
             raw: null,
             parsed: {},

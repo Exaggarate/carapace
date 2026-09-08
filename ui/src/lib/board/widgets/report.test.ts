@@ -21,7 +21,7 @@ function widget(props: Record<string, unknown>): BoardWidget {
 }
 
 async function mount(props: Record<string, unknown>) {
-  const element = document.createElement("openclaw-report-widget");
+  const element = document.createElement("carapace-report-widget");
   element.widget = widget(props);
   document.body.append(element);
   await element.updateComplete;

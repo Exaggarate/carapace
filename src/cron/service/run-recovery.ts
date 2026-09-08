@@ -1,7 +1,7 @@
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { noteCronJobsStoreCommit } from "../store.js";
 import { cronStoreKey } from "../store/key.js";
 import {
@@ -66,7 +66,7 @@ function exactReceiptMatches(
 
 function repairInDatabase(params: {
   state: CronServiceState;
-  database: OpenClawStateDatabase;
+  database: CarapaceStateDatabase;
   proposal: CronRunRecoveryProposal;
   proposedReceiptIsStale: boolean;
   mode: "startup" | "reclaim";
@@ -301,7 +301,7 @@ export function recoverCronRunProposal(
   const proposedReceiptIsStale = proposal.receipt
     ? isCronRunReceiptOwnerStale(proposal.receipt, state.deps.nowMs())
     : true;
-  const result = runOpenClawStateWriteTransaction(
+  const result = runCarapaceStateWriteTransaction(
     (database) => repairInDatabase({ state, database, proposal, proposedReceiptIsStale, mode }),
     {},
     { operationLabel: "cron.run-recovery" },
@@ -323,7 +323,7 @@ export function recomputeUnownedCronSchedules(
 } {
   const storeKey = cronStoreKey(state.deps.storePath);
   const nowMs = state.deps.nowMs();
-  const result = runOpenClawStateWriteTransaction(
+  const result = runCarapaceStateWriteTransaction(
     ({ db }) => {
       const notifications: DeferredCronNotifications = [];
       let changed = false;

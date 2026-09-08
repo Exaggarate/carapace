@@ -46,7 +46,7 @@ describe("qa runtime parity timing reporting", () => {
     const summary = makeRuntimeParitySummary();
     for (const scenario of summary.scenarios) {
       if (scenario.runtimeParity) {
-        scenario.runtimeParity.cells.openclaw.bootstrapWallClockMs = 4_000;
+        scenario.runtimeParity.cells.carapace.bootstrapWallClockMs = 4_000;
         scenario.runtimeParity.cells.codex.bootstrapWallClockMs = 12_000;
       }
     }
@@ -54,27 +54,27 @@ describe("qa runtime parity timing reporting", () => {
     const report = buildQaRuntimeParityReport({ summary });
 
     expect(report.pass).toBe(true);
-    expect(report.timing.openclaw.totalWallClockMs).toBe(40);
+    expect(report.timing.carapace.totalWallClockMs).toBe(40);
     expect(report.timing.codex.totalWallClockMs).toBe(37);
     expect(report.timing.bootstrap).toEqual({
-      openclaw: { totalWallClockMs: 8_000, p50WallClockMs: 4_000, p90WallClockMs: 4_000 },
+      carapace: { totalWallClockMs: 8_000, p50WallClockMs: 4_000, p90WallClockMs: 4_000 },
       codex: { totalWallClockMs: 24_000, p50WallClockMs: 12_000, p90WallClockMs: 12_000 },
     });
     expect(report.scenarios[0]).toMatchObject({
-      openclawWallClockMs: 20,
+      carapaceWallClockMs: 20,
       codexWallClockMs: 18,
-      openclawBootstrapWallClockMs: 4_000,
+      carapaceBootstrapWallClockMs: 4_000,
       codexBootstrapWallClockMs: 12_000,
       fasterRuntime: "codex",
     });
     const markdown = renderQaRuntimeParityMarkdownReport(report);
     expect(markdown).toContain("## Gateway Bootstrap (Excluded From Runtime Timing)");
-    expect(markdown).toContain("| openclaw | 8000 ms | 4000 ms | 4000 ms |");
+    expect(markdown).toContain("| carapace | 8000 ms | 4000 ms | 4000 ms |");
     expect(markdown).toContain("| codex | 24000 ms | 12000 ms | 12000 ms |");
-    expect(markdown).toContain("- gateway bootstrap (excluded): openclaw 4000 ms; codex 12000 ms");
+    expect(markdown).toContain("- gateway bootstrap (excluded): carapace 4000 ms; codex 12000 ms");
   });
 
-  it("reports when OpenClaw is faster without changing the parity verdict", () => {
+  it("reports when Carapace is faster without changing the parity verdict", () => {
     const summary = makeRuntimeParitySummary();
     for (const scenario of summary.scenarios) {
       if (scenario.runtimeParity) {
@@ -83,12 +83,12 @@ describe("qa runtime parity timing reporting", () => {
     }
     const report = buildQaRuntimeParityReport({ summary });
     expect(report.pass).toBe(true);
-    expect(report.timing.fasterRuntime).toBe("openclaw");
+    expect(report.timing.fasterRuntime).toBe("carapace");
     expect(report.timing.speedupPercent).toBeCloseTo(50);
     expect(report.scenarios[0]).toMatchObject({
-      openclawWallClockMs: 20,
+      carapaceWallClockMs: 20,
       codexWallClockMs: 30,
-      fasterRuntime: "openclaw",
+      fasterRuntime: "carapace",
     });
     expect(report.scenarios[0]?.speedupPercent).toBeCloseTo(50);
   });
@@ -97,37 +97,37 @@ describe("qa runtime parity timing reporting", () => {
     const summary = makeRuntimeParitySummary();
     for (const scenario of summary.scenarios) {
       if (scenario.runtimeParity) {
-        scenario.runtimeParity.cells.openclaw.wallClockMs = 0;
+        scenario.runtimeParity.cells.carapace.wallClockMs = 0;
       }
     }
     const report = buildQaRuntimeParityReport({ summary });
-    expect(report.timing.fasterRuntime).toBe("openclaw");
+    expect(report.timing.fasterRuntime).toBe("carapace");
     expect(report.timing.speedupPercent).toBeNull();
     expect(report.scenarios[0]).toMatchObject({
-      fasterRuntime: "openclaw",
+      fasterRuntime: "carapace",
       speedupPercent: null,
     });
   });
 
   it("compares only paired captures while retaining independently measured totals", () => {
     const timing = summarizeRuntimeParityTiming([
-      { openclawWallClockMs: 20, codexWallClockMs: 30 },
-      { openclawWallClockMs: 1_000, codexWallClockMs: null },
+      { carapaceWallClockMs: 20, codexWallClockMs: 30 },
+      { carapaceWallClockMs: 1_000, codexWallClockMs: null },
     ]);
 
-    expect(timing.openclaw.totalWallClockMs).toBe(1_020);
+    expect(timing.carapace.totalWallClockMs).toBe(1_020);
     expect(timing.codex.totalWallClockMs).toBe(30);
-    expect(timing.fasterRuntime).toBe("openclaw");
+    expect(timing.fasterRuntime).toBe("carapace");
     expect(timing.speedupPercent).toBeCloseTo(50);
   });
 
   it("does not compare independently measured totals without a complete pair", () => {
     const timing = summarizeRuntimeParityTiming([
-      { openclawWallClockMs: 20, codexWallClockMs: null },
-      { openclawWallClockMs: null, codexWallClockMs: 30 },
+      { carapaceWallClockMs: 20, codexWallClockMs: null },
+      { carapaceWallClockMs: null, codexWallClockMs: 30 },
     ]);
 
-    expect(timing.openclaw.totalWallClockMs).toBe(20);
+    expect(timing.carapace.totalWallClockMs).toBe(20);
     expect(timing.codex.totalWallClockMs).toBe(30);
     expect(timing.fasterRuntime).toBeNull();
     expect(timing.speedupPercent).toBeNull();

@@ -32,7 +32,7 @@ import { runNodeMain } from ${JSON.stringify(implementationUrl)};
 fs.writeFileSync(${JSON.stringify(wrapperPidPath)}, String(process.ppid));
 process.exit(await runNodeMain({
   cwd: ${JSON.stringify(checkoutRoot)},
-  env: { ...process.env, OPENCLAW_FORCE_BUILD: "1", OPENCLAW_RUNNER_LOG: "0" },
+  env: { ...process.env, CARAPACE_FORCE_BUILD: "1", CARAPACE_RUNNER_LOG: "0" },
   spawn: (_command, _args, options) => spawn(process.execPath, [${JSON.stringify(childPath)}], {
     ...options, stdio: "ignore",
   }),

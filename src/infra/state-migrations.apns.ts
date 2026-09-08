@@ -1,9 +1,9 @@
 // Doctor-only import for the retired APNs registration JSON store.
 import path from "node:path";
 import { root, type Root } from "@openclaw/fs-safe";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -66,7 +66,7 @@ const RELAY_REGISTRATION_KEYS = new Set([
 ]);
 
 type ApnsMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "apns_registrations" | "apns_registration_tombstones"
 >;
 
@@ -191,7 +191,7 @@ function importAndRecordReceipt(params: {
   const sourceKey = resolveLegacyMigrationSourceKey("apns-json", params.sourcePath);
   const runId = `${sourceKey}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<ApnsMigrationDatabase>(db);
       const existingReceipt = readLegacyMigrationReceiptFromDatabase(db, sourceKey);

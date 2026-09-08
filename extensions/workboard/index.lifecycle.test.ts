@@ -1,15 +1,15 @@
 import { Command } from "commander";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi, OpenClawPluginService } from "./api.js";
+import type { CarapacePluginApi, CarapacePluginService } from "./api.js";
 import plugin from "./index.js";
 import { registerWorkboardGatewayMethods } from "./runtime-api.js";
 import { WorkboardStore } from "./src/store.js";
 
-function registerGeneration(register: (api: OpenClawPluginApi) => void = plugin.register) {
-  const services: OpenClawPluginService[] = [];
-  const methods = new Map<string, Parameters<OpenClawPluginApi["registerGatewayMethod"]>[1]>();
+function registerGeneration(register: (api: CarapacePluginApi) => void = plugin.register) {
+  const services: CarapacePluginService[] = [];
+  const methods = new Map<string, Parameters<CarapacePluginApi["registerGatewayMethod"]>[1]>();
   let gatewayStart = () => {};
   let gatewayStop = () => {};
   const captured = capturePluginRegistration({
@@ -39,7 +39,7 @@ function registerGeneration(register: (api: OpenClawPluginApi) => void = plugin.
   const emit = vi.fn();
   const serviceContext = {
     config: {},
-    stateDir: process.env.OPENCLAW_STATE_DIR!,
+    stateDir: process.env.CARAPACE_STATE_DIR!,
     logger: { ...captured.api.logger, warn },
     gatewayEvents: { emit, onSessionsChanged: () => () => {} },
   };

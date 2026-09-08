@@ -4,9 +4,9 @@ import type { PluginJsonValue } from "./host-hook-json.js";
 
 const log = createSubsystemLogger("plugins");
 
-export type OpenClawPluginGatewayEventScope = "operator.read" | "operator.write" | "operator.admin";
+export type CarapacePluginGatewayEventScope = "operator.read" | "operator.write" | "operator.admin";
 
-export type OpenClawPluginSessionsChangedEvent = {
+export type CarapacePluginSessionsChangedEvent = {
   sessionKey: string;
   agentId?: string;
   label?: string;
@@ -15,28 +15,28 @@ export type OpenClawPluginSessionsChangedEvent = {
   phase?: string;
 };
 
-type SessionsChangedHandler = (event: OpenClawPluginSessionsChangedEvent) => unknown;
+type SessionsChangedHandler = (event: CarapacePluginSessionsChangedEvent) => unknown;
 
 const sessionsChangedHandlers = resolveGlobalSet<SessionsChangedHandler>(
-  Symbol.for("openclaw.pluginSessionsChangedHandlers"),
+  Symbol.for("carapace.pluginSessionsChangedHandlers"),
   "plugin-registry",
 );
 
-export type OpenClawPluginGatewayEvents = {
+export type CarapacePluginGatewayEvents = {
   emit: (
     event: string,
     payload: PluginJsonValue,
-    opts: { scope: OpenClawPluginGatewayEventScope },
+    opts: { scope: CarapacePluginGatewayEventScope },
   ) => void;
   /**
    * Native plugins can already read full session entries through the injected runtime;
    * this notice only avoids polling and does not widen session access.
    */
-  onSessionsChanged: (handler: (event: OpenClawPluginSessionsChangedEvent) => void) => () => void;
+  onSessionsChanged: (handler: (event: CarapacePluginSessionsChangedEvent) => void) => () => void;
 };
 
 export function subscribePluginSessionsChanged(
-  handler: (event: OpenClawPluginSessionsChangedEvent) => void,
+  handler: (event: CarapacePluginSessionsChangedEvent) => void,
 ): () => void {
   const subscription: SessionsChangedHandler = (event) => handler(event);
   sessionsChangedHandlers.add(subscription);
@@ -61,7 +61,7 @@ export function queuePluginSessionsChanged(payload: unknown): void {
     return;
   }
   const subscriptions = [...sessionsChangedHandlers];
-  const event: OpenClawPluginSessionsChangedEvent = {
+  const event: CarapacePluginSessionsChangedEvent = {
     sessionKey: source.sessionKey,
     ...(typeof source.agentId === "string" ? { agentId: source.agentId } : {}),
     ...(typeof source.label === "string" ? { label: source.label } : {}),

@@ -1,6 +1,6 @@
 /** Session-scoped embedded LSP runtime and tool materialization for agent bundles. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import { toErrorObject } from "../infra/errors.js";
 import { logDebug, logWarn } from "../logger.js";
@@ -535,7 +535,7 @@ function formatLspResult(
 
 export async function createBundleLspToolRuntime(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   reservedToolNames?: Iterable<string>;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   dependencies?: BundleLspRuntimeDependencies;

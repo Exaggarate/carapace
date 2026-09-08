@@ -19,7 +19,7 @@ function createRegistry(origin: PluginManifestRecord["origin"]): PluginManifestR
         channelConfigs: { "schema-channel": { schema: malformedSchema } },
         cliBackends: [],
         hooks: [],
-        manifestPath: "/plugins/schema-owner/openclaw.plugin.json",
+        manifestPath: "/plugins/schema-owner/carapace.plugin.json",
         origin,
         providers: [],
         rootDir: "/plugins/schema-owner",

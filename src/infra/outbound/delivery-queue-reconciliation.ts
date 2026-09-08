@@ -3,7 +3,7 @@ import type {
   ChannelMessageUnknownSendContext,
   ChannelMessageUnknownSendReconciliationResult,
 } from "../../channels/message/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../errors.js";
 import { resolveOutboundChannelMessageAdapter } from "./channel-resolution.js";
 import type { QueuedDelivery } from "./delivery-queue-types.js";
@@ -28,7 +28,7 @@ type UnknownSendQueueEntry = Pick<
 export function buildUnknownSendContext(params: {
   entry: UnknownSendQueueEntry;
   payloads: readonly ReplyPayload[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelMessageUnknownSendContext {
   const { entry } = params;
   return {
@@ -58,7 +58,7 @@ export function buildUnknownSendContext(params: {
 export async function reconcileUnknownQueuedDelivery(params: {
   entry: UnknownSendQueueEntry;
   payloads: readonly ReplyPayload[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   warn: (message: string) => void;
 }): Promise<ChannelMessageUnknownSendReconciliationResult | null> {
   const adapter = resolveOutboundChannelMessageAdapter({

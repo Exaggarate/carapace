@@ -158,7 +158,7 @@ class BeforeToolCallBlockedError extends Error {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.beforeToolCallBlockedErrorTestApi")
+    Symbol.for("carapace.beforeToolCallBlockedErrorTestApi")
   ] = {
     create(message: string): Error {
       return new BeforeToolCallBlockedError(message);

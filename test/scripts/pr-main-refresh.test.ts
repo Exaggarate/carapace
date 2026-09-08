@@ -17,7 +17,7 @@ import { createMainRefreshFixture } from "./pr-main-refresh.test-support.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const describePosix = process.platform === "win32" ? describe.skip : describe;
-const fixture = () => createMainRefreshFixture(tempDirs.make("openclaw-pr-main-refresh-"));
+const fixture = () => createMainRefreshFixture(tempDirs.make("carapace-pr-main-refresh-"));
 
 function recoverFixtureLock(f: ReturnType<typeof fixture>, oid: string) {
   const pgid = Number(/^pgid=(\d+)$/m.exec(f.git(f.canonical, "cat-file", "blob", oid))?.[1]);
@@ -30,7 +30,7 @@ function recoverFixtureLock(f: ReturnType<typeof fixture>, oid: string) {
       f.canonical,
       "for-each-ref",
       "--format=%(refname)",
-      "refs/openclaw/pr-operation-locks/42",
+      "refs/carapace/pr-operation-locks/42",
     ),
   ).toBe("");
 }
@@ -119,7 +119,7 @@ describePosix("native PR main refresh boundaries", () => {
         branch: null,
       });
     }
-    const owner = f.git(f.canonical, "rev-parse", "refs/openclaw/pr-operation-locks/42");
+    const owner = f.git(f.canonical, "rev-parse", "refs/carapace/pr-operation-locks/42");
     expect(failed.stderr).toContain(`lock-recover 42 ${owner} --confirmed-no-running-tools`);
     recoverFixtureLock(f, owner);
     f.configure({ failDetach: false, failPrFetch: false });
@@ -179,14 +179,14 @@ describePosix("native PR main refresh boundaries", () => {
       "PR_AUTHOR_ACCESS_AT_PREP=maintainer\n",
     );
     expect(
-      f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/openclaw/pr-operation-locks"),
+      f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/carapace/pr-operation-locks"),
     ).toBe("");
     expect(f.git(f.canonical, "rev-parse", "HEAD")).toBe(f.main);
     expect(f.events().filter((e) => e.kind === "unexpected-push")).toEqual([]);
     const lockWrites = f
       .events()
       .filter(
-        (e) => e.kind === "git-decision" && e.args?.includes("refs/openclaw/pr-operation-locks/42"),
+        (e) => e.kind === "git-decision" && e.args?.includes("refs/carapace/pr-operation-locks/42"),
       );
     expect(lockWrites).toHaveLength(2);
     expect(lockWrites[1]?.args?.at(-1)).toBe(lockWrites[0]?.args?.at(-2));
@@ -237,8 +237,8 @@ fi
 ${readFileSync(gitShim, "utf8")}
 `,
     );
-    f.env.OPENCLAW_PR_PUSH_MODE = "git";
-    f.env.OPENCLAW_ALLOW_UNSIGNED_GIT_PUSH = "1";
+    f.env.CARAPACE_PR_PUSH_MODE = "git";
+    f.env.CARAPACE_ALLOW_UNSIGNED_GIT_PUSH = "1";
     const firstPublish = f.run("prepare-sync-head");
     expect(firstPublish.status, firstPublish.stdout + firstPublish.stderr).toBe(0);
     expect(f.git(f.origin, "rev-parse", "refs/heads/topic")).toBe(published);
@@ -306,7 +306,7 @@ ${readFileSync(gitShim, "utf8")}
     expect(result.stdout).toContain("merge-run complete for PR #42");
     const landed = f.git(f.origin, "rev-parse", "refs/heads/main");
     expect(
-      JSON.parse(f.git(f.canonical, "show", "refs/openclaw/pr-merge-outcomes/42:outcome.json")),
+      JSON.parse(f.git(f.canonical, "show", "refs/carapace/pr-merge-outcomes/42:outcome.json")),
     ).toMatchObject({ phase: "complete", head: f.head, main: f.main, landed });
     expect(f.git(f.canonical, "rev-parse", `${landed}^{tree}`)).toBe(
       f.git(f.canonical, "rev-parse", `${f.head}^{tree}`),
@@ -321,7 +321,7 @@ ${readFileSync(gitShim, "utf8")}
     ).toHaveLength(2);
     expect(existsSync(f.worktree)).toBe(false);
     expect(
-      f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/openclaw/pr-operation-locks"),
+      f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/carapace/pr-operation-locks"),
     ).toBe("");
   });
 
@@ -342,9 +342,9 @@ ${readFileSync(gitShim, "utf8")}
           f.canonical,
           "for-each-ref",
           "--format=%(refname)",
-          "refs/openclaw/pr-operation-locks",
+          "refs/carapace/pr-operation-locks",
         ),
-      ).toBe("refs/openclaw/pr-operation-locks/42");
+      ).toBe("refs/carapace/pr-operation-locks/42");
     },
   );
 
@@ -529,7 +529,7 @@ ${readFileSync(gitShim, "utf8")}
         );
         expect(f.git(f.worktree, "status", "--porcelain")).toBe("");
       }
-      const owner = f.git(f.canonical, "rev-parse", "refs/openclaw/pr-operation-locks/42");
+      const owner = f.git(f.canonical, "rev-parse", "refs/carapace/pr-operation-locks/42");
       expect(failed.stderr).toContain(`lock-recover 42 ${owner} --confirmed-no-running-tools`);
       recoverFixtureLock(f, owner);
       f.configure({ failFetchAt: 0 });
@@ -577,14 +577,14 @@ printf 'replacement=%s\\n' "$PR_MAIN_SHA"
       const readyPath = join(f.root, "fetch-ready.fifo");
       const holdPath = join(f.root, "fetch-hold.fifo");
       execFileSync("mkfifo", [readyPath, holdPath]);
-      f.env.OPENCLAW_TEST_FETCH_READY = readyPath;
-      f.env.OPENCLAW_TEST_FETCH_HOLD = holdPath;
+      f.env.CARAPACE_TEST_FETCH_READY = readyPath;
+      f.env.CARAPACE_TEST_FETCH_HOLD = holdPath;
       writeFileSync(
         join(f.root, "hold-upload-pack"),
         `#!/usr/bin/env bash
 set -euo pipefail
-printf '%s\\t%s\\n' "$$" "$(ps -o pgid= -p "$$")" > "$OPENCLAW_TEST_FETCH_READY"
-read -r release < "$OPENCLAW_TEST_FETCH_HOLD"
+printf '%s\\t%s\\n' "$$" "$(ps -o pgid= -p "$$")" > "$CARAPACE_TEST_FETCH_READY"
+read -r release < "$CARAPACE_TEST_FETCH_HOLD"
 `,
         { mode: 0o755 },
       );
@@ -622,7 +622,7 @@ read -r release < "$OPENCLAW_TEST_FETCH_HOLD"
         controller.once("error", reject);
         controller.once("close", resolve);
       });
-      const lockRef = "refs/openclaw/pr-operation-locks/42";
+      const lockRef = "refs/carapace/pr-operation-locks/42";
       const ownerFields = (oid: string) =>
         Object.fromEntries(
           f
@@ -722,7 +722,7 @@ read -r release < "$OPENCLAW_TEST_FETCH_HOLD"
       writeFileSync(join(f.local, "gates.env"), "GATES_MODE=full\n");
       f.configure({ moveAtCi: true });
       if (strict) {
-        f.env.OPENCLAW_PR_STRICT_DRIFT = "1";
+        f.env.CARAPACE_PR_STRICT_DRIFT = "1";
       }
       const before = f.events().length;
       const result = f.run("merge-verify");
@@ -794,7 +794,7 @@ read -r release < "$OPENCLAW_TEST_FETCH_HOLD"
     ]);
     expect(ghCalls.some((e) => e.args?.includes("merge"))).toBe(false);
     expect(f.git(f.origin, "rev-parse", "refs/heads/main")).toBe(f.main);
-    expect(f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/openclaw")).toBe("");
+    expect(f.git(f.canonical, "for-each-ref", "--format=%(refname)", "refs/carapace")).toBe("");
   });
 
   for (const bash of ["bash", ...(process.platform === "darwin" ? ["/bin/bash"] : [])]) {

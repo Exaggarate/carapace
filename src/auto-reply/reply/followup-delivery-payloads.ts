@@ -1,7 +1,7 @@
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import type { MessagingToolSend } from "../../agents/embedded-agent-messaging.types.js";
 import type { ReplyToMode } from "../../config/types.base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { stripHeartbeatToken } from "../heartbeat.js";
 import { copyReplyPayloadMetadata, setReplyPayloadMetadata } from "../reply-payload.js";
 import type { OriginatingChannelType } from "../templating.js";
@@ -17,7 +17,7 @@ import {
 
 /** Strips empty/heartbeat payloads, applies threading, and dedupes message-tool sends. */
 export function resolveFollowupDeliveryPayloads(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   payloads: ReplyPayload[];
   messageProvider?: string;
   originatingAccountId?: string;

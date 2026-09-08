@@ -14,7 +14,7 @@ import type { WorkerEnvironmentRecord } from "./store.js";
 
 export const BUILD = {
   bundleHash: "a".repeat(64),
-  openclawVersion: "2026.8.13",
+  carapaceVersion: "2026.8.13",
   protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
 };
 

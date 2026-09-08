@@ -11,9 +11,9 @@ import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vite
 import { createDeferred } from "../../test/helpers/promise.js";
 import { drainGlobalSingletonLifecycleState } from "../shared/global-singleton.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import * as runtimeBuild from "./prepared-model-runtime.build.js";
 import {
   acquireAgentRunPreparedModelRuntime,
@@ -30,7 +30,7 @@ import {
 
 const mocks = getPreparedModelRuntimeMocks();
 const testApi = getPreparedModelRuntimeTestApi();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 const configuredInput = () => ({
   config: {},
   agentId: "default",
@@ -85,7 +85,7 @@ const coldAdmissionCases: Array<{
 
 describe("prepared model runtime cancelled admission ownership", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-runtime-cancelled-admission" });
+    state = await createCarapaceTestState({ label: "prepared-runtime-cancelled-admission" });
     await resetPreparedModelRuntimeHarness(state);
     pendingBuildReleases = [];
     buildBatchSpy = vi.spyOn(runtimeBuild, "startSerializedSnapshotBuildBatch");
@@ -271,11 +271,11 @@ describe("prepared model runtime cancelled admission ownership", () => {
       const prepared = getPreparedModelRuntimeSnapshot(configuredInput());
       expect(prepared).toBeDefined();
       await drainGlobalSingletonLifecycleState(event);
-      const builds = mocks.ensureOpenClawModelsJson.mock.calls.length;
+      const builds = mocks.ensureCarapaceModelsJson.mock.calls.length;
       mocks.mutationListener?.({ affectsInheritedStores: true, profileSetChanged: true });
       await nextTurn();
       expect(getPreparedModelRuntimeSnapshot(configuredInput())).toBeUndefined();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(builds);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(builds);
       expect(prepared?.isCurrent()).toBe(false);
       await expect(
         loadPublishedGatewayReplyDispatchRuntime({ agentId: "default" }),
@@ -296,7 +296,7 @@ describe("prepared model runtime cancelled admission ownership", () => {
           published();
         }
       });
-      mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, agentDir) => {
+      mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, agentDir) => {
         entered.resolve();
         await release.promise;
         return { agentDir: String(agentDir), wrote: false };
@@ -356,7 +356,7 @@ describe("prepared model runtime cancelled admission ownership", () => {
     const entered = createDeferred();
     const release = createDeferred();
     const input = { config: {}, agentDir: state.agentDir("queued") };
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, agentDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, agentDir) => {
       entered.resolve();
       await release.promise;
       return { agentDir: String(agentDir), wrote: false };
@@ -373,7 +373,7 @@ describe("prepared model runtime cancelled admission ownership", () => {
       await expect(first).rejects.toThrow(/closed|superseded/);
       await expect(second).rejects.toThrow(/closed|superseded/);
       expect(getPreparedModelRuntimeSnapshot(input)).toBeUndefined();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
     } finally {
       release.resolve();
       await Promise.allSettled([first, second, closing]);

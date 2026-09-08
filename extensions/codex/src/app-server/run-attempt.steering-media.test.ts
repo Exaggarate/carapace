@@ -5,14 +5,14 @@ import {
   queueAgentHarnessMessage,
   resolveActiveEmbeddedRunSessionId,
   runAgentHarnessGatewayQuestion,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   readVisibleSessionTranscriptMessageEntries,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { createSolidPngBuffer } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { createSolidPngBuffer } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import type { CodexUserInput } from "./protocol.js";
 import {
@@ -85,7 +85,7 @@ async function createMediaFixture(scenario: Scenario) {
     role: "user",
     content: "compare these attachments",
     timestamp: 1_750_000_000_000,
-    __openclaw: {
+    __carapace: {
       media,
       ...(canonical
         ? {
@@ -116,7 +116,7 @@ async function createMediaFixture(scenario: Scenario) {
   const recorder = {
     message:
       scenario === "resolved"
-        ? { ...message, __openclaw: { media: [green, { kind: "image" }, blue] } }
+        ? { ...message, __carapace: { media: [green, { kind: "image" }, blue] } }
         : message,
     resolveMessage: vi.fn(async (): Promise<UserMessage> => message),
     getAdmissionReceipt: () => undefined,
@@ -289,7 +289,7 @@ describe("Codex active-run steering media", () => {
       }
       fixture.options.media = [{ path: imagePath, contentType: "image/png" }];
       fixture.options.imageOrder = ["offloaded"];
-      fixture.message["__openclaw"] = { media: fixture.options.media };
+      fixture.message["__carapace"] = { media: fixture.options.media };
       fixture.options.userTurnTranscriptRecorder = fixture.recorder;
       const harness = createStartedThreadHarness();
       await withActiveMediaTurn(fixture, harness, async () => {
@@ -364,9 +364,9 @@ describe("Codex active-run steering media", () => {
             ...fact,
             hydrationSuppressed: true,
           }));
-          fixture.message["__openclaw"] = { media: fixture.options.media };
+          fixture.message["__carapace"] = { media: fixture.options.media };
         } else {
-          fixture.message["__openclaw"] = {
+          fixture.message["__carapace"] = {
             media: fixture.options.media,
             mediaImageLayout: { slots: [], suppressedFactIndexes: [0, 1] },
           };

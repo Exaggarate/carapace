@@ -1,6 +1,6 @@
 // Shared harness for extra-params wrapper tests.
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { Context, Model, SimpleStreamOptions } from "../../llm/types.js";
 import * as providerRuntime from "../../plugins/provider-hook-runtime.js";
 import type { ProviderPlugin } from "../../plugins/types.js";
@@ -14,7 +14,7 @@ type ProviderHook<K extends keyof ProviderPlugin> = Extract<
 >;
 type ProviderHookCall<K extends keyof ProviderPlugin> = {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   context: Parameters<ProviderHook<K>>[0];
 };
@@ -88,7 +88,7 @@ type RunExtraParamsCaseParams<
   applyModelId?: string;
   applyProvider?: string;
   callerHeaders?: Record<string, string>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   model: Model<TApi>;
   mockProviderRuntime?: boolean;
   options?: SimpleStreamOptions;

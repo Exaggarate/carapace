@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveOsHomeDir } from "../../infra/home-dir.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { resolveConfigDir } from "../../utils.js";
@@ -44,7 +44,7 @@ function resolveCompactHomePrefixes(): string[] {
 /** Compact prompt-facing skill paths while preserving managed paths that `~` cannot reach. */
 export function compactPromptSkills(
   skills: Skill[],
-  options: { config?: OpenClawConfig; agentId?: string } = {},
+  options: { config?: CarapaceConfig; agentId?: string } = {},
 ): Skill[] {
   const prefixes = resolveCompactHomePrefixes();
   if (prefixes.length === 0) {
@@ -61,7 +61,7 @@ export function compactPromptSkills(
 }
 
 function resolvePreservedPromptSkillPathRoots(options: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
 }): string[] {
   const configDir = resolveConfigDir();
@@ -95,7 +95,7 @@ function isContainerStateHomeWherePromptTildeEscapes(home: string): boolean {
   const configDir = path.resolve(resolveConfigDir());
   return (
     home === "/data" &&
-    (configDir === "/data/.openclaw" || isPathInside("/data/.openclaw", configDir))
+    (configDir === "/data/.carapace" || isPathInside("/data/.carapace", configDir))
   );
 }
 

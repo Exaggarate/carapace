@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: openclaw
+  name: carapace
   labels:
-    app: openclaw
+    app: carapace
 spec:
   type: ClusterIP
   selector:
-    app: openclaw
+    app: carapace
   ports:
     - name: gateway
       port: 18789

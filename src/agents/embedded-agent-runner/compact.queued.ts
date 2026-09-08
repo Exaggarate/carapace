@@ -1,13 +1,13 @@
 /**
  * Queues embedded-agent session compaction onto the correct command lane.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   loadSessionEntryReadOnly,
   type SessionTranscriptRuntimeTarget,
 } from "../../config/sessions/session-accessor.js";
 import { projectPublicSessionEntry } from "../../config/sessions/session-entry-projection.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import { ensureContextEnginesInitialized } from "../../context-engine/init.js";
 import {
   resolveContextEngine,
@@ -332,7 +332,7 @@ async function compactEmbeddedAgentSessionImpl(
   const runtimeSelection = resolveCompactionRuntimeSelection(requestedSelection);
   // Native control operations reuse the backend's existing authenticated session.
   // Run them before generic model preparation so subscription-only CLI sessions do
-  // not incorrectly require an OpenClaw model API credential.
+  // not incorrectly require an Carapace model API credential.
   const nativeCliResult = await compactNativeCliSession({
     runtime: runtimeSelection.selectedHarnessRuntime,
     compactParams: {
@@ -462,7 +462,7 @@ async function compactResolvedContextEngine(
     preparedRuntimePlan: params.runtimePlan,
     selectedHarnessRuntime: lockedHarnessRuntime,
   });
-  const lockedNativeHarness = Boolean(lockedHarnessRuntime && lockedHarnessRuntime !== "openclaw");
+  const lockedNativeHarness = Boolean(lockedHarnessRuntime && lockedHarnessRuntime !== "carapace");
   // Ensure the policy-selected harness plugin so selection can pick implicit codex.
   await ensureSelectedAgentHarnessPlugin({
     config: params.config,
@@ -519,7 +519,7 @@ async function compactResolvedContextEngine(
     return lockedCompactionRuntimeFailure(host.transcriptBytePreflightHarness);
   }
   const attemptNativeHarnessCompaction =
-    selectedNativeHarnessCompaction && preparedHarnessRuntime !== "openclaw";
+    selectedNativeHarnessCompaction && preparedHarnessRuntime !== "carapace";
   const runtimeAuthPlan = runtimeAuthPreparation.plan;
   const effectiveRuntimeModel = await materializePreparedRuntimeModel<ProviderRuntimeModel>({
     plan: runtimeAuthPlan,
@@ -588,7 +588,7 @@ async function compactResolvedContextEngine(
     contextEnginePluginId: resolveContextEngineOwnerPluginId(contextEngine),
   });
   const contextEngineRuntimeSettings = buildContextEngineRuntimeSettings({
-    contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+    contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
     provider: ceProvider,
     requestedModel: params.model,
     resolvedModel: ceModelId,

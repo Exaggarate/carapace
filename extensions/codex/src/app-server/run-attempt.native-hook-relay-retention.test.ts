@@ -3,12 +3,12 @@ import path from "node:path";
 import {
   invokeNativeHookRelay,
   nativeHookRelayTesting,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
 import {
   createAdmittedHostCapabilityTestFixture,
   createMockPluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import { nativeHookRelayUnregisterQueue } from "./native-hook-relay-state.js";
@@ -273,7 +273,7 @@ describe("runCodexAppServerAttempt native hook relay retention", () => {
         );
         expect(continuationHistory?.filter((message) => message.role === "custom")).toEqual([
           expect.objectContaining({
-            customType: "openclaw.sessions_yield",
+            customType: "carapace.sessions_yield",
             content:
               "Waiting for child\n\n[Context: The previous turn ended intentionally via sessions_yield while waiting for a follow-up event.]",
             display: false,

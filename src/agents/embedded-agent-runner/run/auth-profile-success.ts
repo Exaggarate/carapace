@@ -1,7 +1,7 @@
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { MODEL_APIS, type ModelApi } from "../../../config/types.models.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import type { ProviderRouteOverridePresence } from "../../../plugin-sdk/provider-model-types.js";
 import { resolveProviderModelRoutes } from "../../../plugins/provider-model-routes.js";
@@ -83,7 +83,7 @@ export function reportEmbeddedRunSuccessfulAuthBinding(input: {
   modelApi: string;
   modelBaseUrl?: string;
   requestTransportOverrides?: ProviderRouteOverridePresence;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentHarnessId: string;
   pluginHarnessOwnsTransport: boolean;
   pluginHarnessOwnsAuthBootstrap: boolean;

@@ -1,7 +1,7 @@
 // Tests usage-line formatting for agent runner completion summaries.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getReplyPayloadMetadata, setReplyPayloadMetadata } from "../reply-payload.js";
 import { appendUsageLine, resolveResponseUsageLine } from "./agent-runner-usage-line.js";
 
@@ -110,8 +110,8 @@ describe("appendUsageLine", () => {
             },
           },
         },
-      } as OpenClawConfig,
-      agentDir: "/tmp/openclaw-main-agent",
+      } as CarapaceConfig,
+      agentDir: "/tmp/carapace-main-agent",
       usage,
       provider: "fixture",
       model: "priced",
@@ -129,7 +129,7 @@ describe("appendUsageLine", () => {
     expect(
       resolveResponseUsageLine({
         config: { messages: { responseUsage: mode } },
-        agentDir: "/tmp/openclaw-main-agent",
+        agentDir: "/tmp/carapace-main-agent",
         usage: { cost: { total: 0.25 } },
       }),
     ).toBeUndefined();

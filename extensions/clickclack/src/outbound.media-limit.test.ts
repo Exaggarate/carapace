@@ -1,7 +1,7 @@
 import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { sendClickClackMedia } from "./outbound.js";
 

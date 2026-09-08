@@ -23,8 +23,8 @@ const suite = createControlUiE2eSuite({
 
 const baseTime = 1_700_000_000_000;
 let artifactDir: string;
-const captureOwnershipProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const ownershipProofPhase = process.env.OPENCLAW_UI_PROOF_PHASE?.trim() || "candidate";
+const captureOwnershipProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const ownershipProofPhase = process.env.CARAPACE_UI_PROOF_PHASE?.trim() || "candidate";
 let ownershipProofDir: string;
 
 const authStatusWithUsage = {
@@ -228,7 +228,7 @@ async function closeChat(fixture: { context: BrowserContext; page: Page }): Prom
 }
 
 async function setSelectedAgent(page: Page, name: string): Promise<void> {
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("carapace-app-sidebar");
   await sidebar.getByRole("button", { name: /Switch agent/ }).click();
   await sidebar.getByRole("menuitemradio", { name, exact: true }).click();
 }
@@ -261,7 +261,7 @@ async function replyToAgentMetadata(gateway: MockGatewayControls, agentId: "main
 
 async function visibleAuthState(page: Page) {
   return await page.evaluate(() => {
-    const pane = document.querySelector("openclaw-chat-pane.chat-pane-cache__pane--visible") as
+    const pane = document.querySelector("carapace-chat-pane.chat-pane-cache__pane--visible") as
       | (HTMLElement & {
           state?: {
             assistantAgentId?: string | null;
@@ -320,7 +320,7 @@ async function pauseForOwnershipProof(page: Page): Promise<void> {
 }
 
 async function openVisibleQuotaPopover(page: Page) {
-  const visiblePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
+  const visiblePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
   const popover = visiblePane.locator(".context-usage__popover");
   if (!(await popover.isVisible())) {
     await visiblePane.locator(".context-ring").click();
@@ -394,7 +394,7 @@ suite.define(() => {
           .trim(),
       ).toBe("Provider: OpenAI");
       const popoverText = (await page.locator(".context-usage__popover").textContent()) ?? "";
-      expect(popoverText).not.toContain("openclaw");
+      expect(popoverText).not.toContain("carapace");
       expect(popoverText).not.toContain("gateway-injected");
       expect(popoverText).not.toContain("Model:");
     } finally {
@@ -443,7 +443,7 @@ suite.define(() => {
       const contextRing = page.locator(".context-ring");
       await contextRing.waitFor({ state: "visible" });
       await page.waitForFunction(() => {
-        const pane = document.querySelector("openclaw-chat-pane") as
+        const pane = document.querySelector("carapace-chat-pane") as
           | (HTMLElement & {
               state?: { modelAuthStatusResult?: { providers?: unknown[] } | null };
             })
@@ -456,7 +456,7 @@ suite.define(() => {
       await popover.screenshot({ path: path.join(artifactDir, "04-usage-unavailable.png") });
       expect(await page.locator('[data-chat-provider-usage="true"]').count()).toBe(0);
       const popoverText = (await popover.textContent()) ?? "";
-      expect(popoverText).not.toContain("openclaw");
+      expect(popoverText).not.toContain("carapace");
       expect(popoverText).not.toContain("gateway-injected");
       expect(popoverText).not.toContain("Model:");
     } finally {
@@ -547,7 +547,7 @@ suite.define(() => {
       let popover = await openVisibleQuotaPopover(page);
       expect(
         await page
-          .locator("openclaw-chat-pane.chat-pane-cache__pane--visible")
+          .locator("carapace-chat-pane.chat-pane-cache__pane--visible")
           .locator('[data-chat-provider-usage="true"]')
           .count(),
       ).toBe(0);
@@ -555,7 +555,7 @@ suite.define(() => {
       await pauseForOwnershipProof(page);
 
       await page.evaluate(() => {
-        const pane = document.querySelector("openclaw-chat-pane.chat-pane-cache__pane--visible") as
+        const pane = document.querySelector("carapace-chat-pane.chat-pane-cache__pane--visible") as
           | (HTMLElement & {
               state?: {
                 assistantName: string;
@@ -589,7 +589,7 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(() => {
             const pane = document.querySelector(
-              "openclaw-chat-pane.chat-pane-cache__pane--visible",
+              "carapace-chat-pane.chat-pane-cache__pane--visible",
             ) as
               | (HTMLElement & {
                   state?: {
@@ -606,7 +606,7 @@ suite.define(() => {
             };
           }),
         )
-        .toEqual({ name: "OpenClaw", avatar: null, renderedAvatar: null });
+        .toEqual({ name: "Carapace", avatar: null, renderedAvatar: null });
       await gateway.emitGatewayEvent("presence", {
         presence: [
           {
@@ -632,7 +632,7 @@ suite.define(() => {
         await writeFile(
           path.join(ownershipProofDir, "01-work-loading.png"),
           await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-            page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible .context-ring"),
+            page.locator("carapace-chat-pane.chat-pane-cache__pane--visible .context-ring"),
           ]),
         );
       }
@@ -661,7 +661,7 @@ suite.define(() => {
         await writeFile(
           path.join(ownershipProofDir, "02-after-delayed-main.png"),
           await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-            page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible .context-ring"),
+            page.locator("carapace-chat-pane.chat-pane-cache__pane--visible .context-ring"),
           ]),
         );
       }
@@ -698,14 +698,14 @@ suite.define(() => {
         await writeFile(
           path.join(ownershipProofDir, "03-work-settled.png"),
           await takeControlUiViewportScreenshot(page, page.locator(".shell"), [
-            page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible .context-ring"),
+            page.locator("carapace-chat-pane.chat-pane-cache__pane--visible .context-ring"),
           ]),
         );
       }
       popover = await openVisibleQuotaPopover(page);
       expect(
         await page
-          .locator("openclaw-chat-pane.chat-pane-cache__pane--visible .context-ring")
+          .locator("carapace-chat-pane.chat-pane-cache__pane--visible .context-ring")
           .getAttribute("aria-label"),
       ).toBe("Session context usage: 90k of 300k (30%)");
       expect((await gateway.getRequests("chat.startup")).at(-1)?.params).toMatchObject({

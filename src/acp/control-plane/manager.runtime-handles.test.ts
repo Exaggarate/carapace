@@ -11,7 +11,7 @@ import {
   installAcpSessionManagerTestLifecycle,
   mockCallArg,
   readySessionMeta,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type SessionAcpMeta,
 } from "./manager.test-helpers.js";
 
@@ -197,7 +197,7 @@ describe("AcpSessionManager runtime handles", () => {
           safeBins: ["git"],
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const denyCfg = {
       ...baseCfg,
       tools: {
@@ -206,7 +206,7 @@ describe("AcpSessionManager runtime handles", () => {
           safeBins: ["node"],
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const manager = new AcpSessionManager();
     await manager.runTurn({
@@ -491,7 +491,7 @@ describe("AcpSessionManager runtime handles", () => {
     );
     const cfg = {
       acp: { ...baseCfg.acp, backend: "primary-backend", fallbacks: ["fallback-backend"] },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await new AcpSessionManager().runTurn({
       provenance: "system",
@@ -557,7 +557,7 @@ describe("AcpSessionManager runtime handles", () => {
     );
     const cfg = {
       acp: { ...baseCfg.acp, backend: "primary-backend", fallbacks: ["fallback-backend"] },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await new AcpSessionManager().runTurn({
       provenance: "system",

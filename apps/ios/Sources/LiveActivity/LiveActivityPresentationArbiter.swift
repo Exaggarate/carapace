@@ -1,7 +1,7 @@
 import Foundation
 
 struct LiveActivityPresentationRequest: Equatable {
-    var state: OpenClawActivityAttributes.ContentState
+    var state: CarapaceActivityAttributes.ContentState
     var staleDate: Date?
     var agentName: String
     var sessionKey: String
@@ -71,7 +71,7 @@ struct LiveActivityPresentationArbiter {
 
     static func voiceStatus(
         isListening: Bool,
-        isSpeaking: Bool) -> OpenClawActivityAttributes.ContentState.Status
+        isSpeaking: Bool) -> CarapaceActivityAttributes.ContentState.Status
     {
         if isSpeaking {
             return .voiceSpeaking

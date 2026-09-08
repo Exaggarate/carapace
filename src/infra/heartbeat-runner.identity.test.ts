@@ -7,7 +7,7 @@ import {
   listSessionEntriesReadOnly,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import { installHeartbeatRunnerTestRuntime } from "./heartbeat-runner.test-harness.js";
@@ -27,7 +27,7 @@ import {
 
 installHeartbeatRunnerTestRuntime({ includeSlack: true });
 
-function mockReplyWithSystemEvents(replySpy: HeartbeatReplySpy, cfg: OpenClawConfig) {
+function mockReplyWithSystemEvents(replySpy: HeartbeatReplySpy, cfg: CarapaceConfig) {
   const blocks: Array<string | undefined> = [];
   replySpy.mockImplementation(async (ctx, opts) => {
     const eventContext = getReplySystemEventContext(opts);
@@ -61,7 +61,7 @@ describe("runHeartbeatOnce identity", () => {
     async ({ isolatedSession, expectedSessionKey }) => {
       await withTempHeartbeatSandbox(async ({ tmpDir, replySpy }) => {
         const storeTemplate = path.join(tmpDir, "agents", "{agentId}", "sessions.json");
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -135,7 +135,7 @@ describe("runHeartbeatOnce identity", () => {
   it("runs a global hook wake for an agent without a heartbeat schedule", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, replySpy }) => {
       const storeTemplate = path.join(tmpDir, "agents", "{agentId}", "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { workspace: tmpDir },
           entries: { main: { default: true }, hooks: {} },
@@ -177,7 +177,7 @@ describe("runHeartbeatOnce identity", () => {
   it("keeps a global hook event owned by another agent queued for its owner", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, replySpy }) => {
       const storeTemplate = path.join(tmpDir, "agents", "{agentId}", "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: { workspace: tmpDir },
           entries: { main: { default: true }, alpha: {}, beta: {} },
@@ -253,7 +253,7 @@ describe("runHeartbeatOnce identity", () => {
     { name: "heartbeat ok", replyText: "HEARTBEAT_OK", showOk: true },
   ])("forwards agent identity on $name delivery", async ({ replyText, showOk }) => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

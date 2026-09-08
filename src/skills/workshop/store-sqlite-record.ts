@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core";
+import { safeParseJson } from "@carapace/normalization-core";
 import type { Insertable } from "kysely";
 import {
   executeSqliteQuerySync,

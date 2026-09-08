@@ -1,6 +1,6 @@
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
 // Ollama tests cover embedding provider plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createStreamingResponse } from "../../test-support/streaming-error-response.js";
 
@@ -13,7 +13,7 @@ const { fetchConfiguredLocalOriginWithSsrFGuardMock } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: vi.fn(),
   formatErrorMessage: coerceErrorMessage,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin: (baseUrl: string) => {
@@ -23,7 +23,7 @@ vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
 }));
 
 // Import-resolution gating for this private helper is covered in sdk-alias.test.ts.
-vi.mock("openclaw/plugin-sdk/ssrf-runtime-internal", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime-internal", () => ({
   fetchConfiguredLocalOriginWithSsrFGuard: fetchConfiguredLocalOriginWithSsrFGuardMock,
 }));
 
@@ -50,15 +50,15 @@ type MemoryEmbeddingOptions = Parameters<typeof ollamaMemoryEmbeddingProviderAda
 function createProviderConfig(
   provider: Record<string, unknown>,
   providerId = "ollama",
-): OpenClawConfig {
-  return { models: { providers: { [providerId]: provider } } } as unknown as OpenClawConfig;
+): CarapaceConfig {
+  return { models: { providers: { [providerId]: provider } } } as unknown as CarapaceConfig;
 }
 
 function embeddingOptions<T extends EmbeddingProviderOptions | MemoryEmbeddingOptions>(
   overrides: Partial<T> = {},
 ): T {
   return {
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     provider: "ollama",
     model: "nomic-embed-text",
     fallback: "none",

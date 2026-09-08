@@ -55,7 +55,7 @@ describe("ensureSkillsWatcher", () => {
     createdWatchers.length = 0;
     pluginSkillsMocks.resolvePluginSkillRoots.mockClear();
     pluginSkillsMocks.resolvePluginSkillRootsFromMetadata.mockClear();
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-fixture-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-fixture-"));
     fixtureWorkspaceDir = await createFixtureDirectory("workspace");
     await createFixtureDirectory("workspace/skills");
   });
@@ -111,14 +111,14 @@ describe("ensureSkillsWatcher", () => {
   });
 
   it("does not watch home-scoped personal skills for a non-default state directory", async () => {
-    const createdRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-isolated-"));
+    const createdRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-isolated-"));
     const root = await fs.realpath(createdRoot);
     try {
       await withEnvAsync(
         {
           HOME: root,
-          OPENCLAW_HOME: undefined,
-          OPENCLAW_STATE_DIR: path.join(root, "scratch-state"),
+          CARAPACE_HOME: undefined,
+          CARAPACE_STATE_DIR: path.join(root, "scratch-state"),
         },
         async () => {
           await fs.mkdir(path.join(root, ".agents", "skills"), { recursive: true });
@@ -134,7 +134,7 @@ describe("ensureSkillsWatcher", () => {
   });
 
   it("keeps SKILL.md file watches in chokidar polling mode", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-polling-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-polling-"));
     const previousPolling = process.env.CHOKIDAR_USEPOLLING;
     try {
       process.env.CHOKIDAR_USEPOLLING = "true";
@@ -157,7 +157,7 @@ describe("ensureSkillsWatcher", () => {
 
   it("does not double-refresh polling SKILL.md changes from raw events", async () => {
     vi.useFakeTimers();
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-polling-raw-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-polling-raw-"));
     const previousPolling = process.env.CHOKIDAR_USEPOLLING;
     const seen: SkillsChangeEvent[] = [];
     try {
@@ -352,8 +352,8 @@ describe("ensureSkillsWatcher", () => {
   it.runIf(process.platform !== "win32")(
     "watches allowed symlink skill targets without following every root symlink",
     async () => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-symlink-"));
-      const targetRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-symlink-target-"));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-symlink-"));
+      const targetRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-symlink-target-"));
       try {
         const workspaceSkillsDir = path.join(workspaceDir, "skills");
         const targetSkillDir = path.join(targetRoot, "linked-skill");
@@ -405,11 +405,11 @@ describe("ensureSkillsWatcher", () => {
     "does not watch untrusted companion skills symlink targets",
     async () => {
       const workspaceDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-watch-untrusted-link-"),
+        path.join(os.tmpdir(), "carapace-watch-untrusted-link-"),
       );
-      const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-untrusted-repo-"));
+      const repoDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-untrusted-repo-"));
       const outsideDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-watch-untrusted-target-"),
+        path.join(os.tmpdir(), "carapace-watch-untrusted-target-"),
       );
       try {
         await fs.writeFile(
@@ -718,10 +718,10 @@ describe("ensureSkillsWatcher", () => {
     "does not watch untrusted plugin skill symlink targets",
     async () => {
       const pluginDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-plugin-skills-untrusted-link-"),
+        path.join(os.tmpdir(), "carapace-plugin-skills-untrusted-link-"),
       );
       const outsideDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-plugin-skills-untrusted-target-"),
+        path.join(os.tmpdir(), "carapace-plugin-skills-untrusted-target-"),
       );
       try {
         await fs.mkdir(path.join(pluginDir, "skills"), { recursive: true });

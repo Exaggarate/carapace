@@ -24,7 +24,7 @@ const suite = createSessionManagementE2eSuite();
 
 suite.define(() => {
   it("keeps long group titles on one line and reveals them on hover", async () => {
-    const groupName = "OpenClaw Bugfixes / Miscellaneous Product Work and Release Coordination";
+    const groupName = "Carapace Bugfixes / Miscellaneous Product Work and Release Coordination";
     const context = await suite.browser.newContext({
       colorScheme: "dark",
       locale: "en-US",
@@ -140,7 +140,7 @@ suite.define(() => {
       await row.hover();
       await row.getByRole("button", { name: "Open session menu" }).click();
       await page.getByRole("menuitem", { name: "Rename…" }).click();
-      const dialog = page.locator('openclaw-modal-dialog[label="Rename session"]');
+      const dialog = page.locator('carapace-modal-dialog[label="Rename session"]');
       await dialog.getByRole("textbox", { name: "Rename session" }).fill("Rejected rename");
       await dialog.getByRole("button", { name: "Save" }).click();
       await gateway.waitForRequest("sessions.patch");
@@ -195,7 +195,7 @@ suite.define(() => {
       await page.getByRole("menuitem", { name: "Rename…" }).click();
 
       await page.getByRole("dialog", { name: "Rename session" }).waitFor({ state: "visible" });
-      const dialog = page.locator('openclaw-modal-dialog[label="Rename session"]');
+      const dialog = page.locator('carapace-modal-dialog[label="Rename session"]');
       const name = dialog.getByRole("textbox", { name: "Rename session" });
       await name.waitFor({ state: "visible" });
       await expect.poll(() => name.inputValue()).toBe("Original name");
@@ -511,7 +511,7 @@ suite.define(() => {
       await page.locator("wa-popover.sessions-filter-popover[open]").waitFor();
       await page.locator(".session-groupby__select").selectOption("category");
       await page.getByRole("button", { name: "New group" }).click();
-      const field = page.locator("openclaw-modal-dialog input");
+      const field = page.locator("carapace-modal-dialog input");
       await field.waitFor({ state: "visible" });
       await field.fill("X".repeat(513));
       await field.press("Enter");
@@ -521,7 +521,7 @@ suite.define(() => {
         message: "group name exceeds 512 characters",
       });
 
-      const error = page.locator('openclaw-modal-dialog [role="alert"]');
+      const error = page.locator('carapace-modal-dialog [role="alert"]');
       await error.waitFor({ state: "visible" });
       await expect.poll(() => error.textContent()).toContain("group name exceeds 512 characters");
       expect(await field.inputValue()).toBe("X".repeat(513));
@@ -603,7 +603,7 @@ suite.define(() => {
       const renameDialog = page.getByRole("dialog", { name: 'Rename group "Research"' });
       await renameDialog.waitFor({ state: "visible" });
       await expect
-        .poll(() => page.locator("openclaw-modal-dialog input").inputValue())
+        .poll(() => page.locator("carapace-modal-dialog input").inputValue())
         .toBe("Research");
       await captureUiProof(suite, page, "sidebar-group-rename-dialog.png");
       await submitInputDialog(page, "Projects");
@@ -637,7 +637,7 @@ suite.define(() => {
       await page
         .getByRole("dialog", { name: 'Delete group "Projects"' })
         .waitFor({ state: "visible" });
-      const deleteConfirm = page.locator("openclaw-modal-dialog");
+      const deleteConfirm = page.locator("carapace-modal-dialog");
       await expect
         .poll(() => deleteConfirm.textContent())
         .toContain("The group is removed. Its sessions move back to the session list.");

@@ -2,7 +2,7 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   handleDynamicToolCallWithTimeout,
@@ -386,7 +386,7 @@ describe("dynamic tool execution helpers", () => {
       contentItems: [
         {
           type: "inputText",
-          text: "OpenClaw dynamic tool call timed out after 1ms while running tool message.",
+          text: "Carapace dynamic tool call timed out after 1ms while running tool message.",
         },
       ],
     });
@@ -401,12 +401,12 @@ describe("dynamic tool execution helpers", () => {
         content: [
           {
             type: "text",
-            text: "OpenClaw dynamic tool call timed out after 1ms while running tool message.",
+            text: "Carapace dynamic tool call timed out after 1ms while running tool message.",
           },
         ],
         details: {
           status: "timed_out",
-          error: "OpenClaw dynamic tool call timed out after 1ms while running tool message.",
+          error: "Carapace dynamic tool call timed out after 1ms while running tool message.",
         },
       },
       isError: true,
@@ -416,7 +416,7 @@ describe("dynamic tool execution helpers", () => {
   it.each([
     { tool: "session_status", deadlineMs: 600_000 },
     { tool: "agents_wait", deadlineMs: 630_000 },
-    { tool: "openclaw", deadlineMs: 930_000 },
+    { tool: "carapace", deadlineMs: 930_000 },
   ])("enforces the resolved $tool cap at $deadlineMs ms", async ({ tool, deadlineMs }) => {
     vi.useFakeTimers();
     const call = {
@@ -567,7 +567,7 @@ describe("dynamic tool execution helpers", () => {
     { tool: "sessions_send", timeoutSeconds: 1, completionMs: 6_000 },
     { tool: "agents_wait", timeoutSeconds: 600, completionMs: 600_000 },
     { tool: "agents_wait", timeoutSeconds: 600, completionMs: 605_000 },
-    { tool: "openclaw", timeoutSeconds: 1, completionMs: 600_000 },
+    { tool: "carapace", timeoutSeconds: 1, completionMs: 600_000 },
   ])(
     "preserves the $tool result after $completionMs ms",
     async ({ tool, timeoutSeconds, completionMs }) => {
@@ -640,7 +640,7 @@ describe("dynamic tool execution helpers", () => {
     expect(result).toEqual({
       success: false,
       contentItems: [
-        { type: "inputText", text: "OpenClaw dynamic tool call aborted before execution." },
+        { type: "inputText", text: "Carapace dynamic tool call aborted before execution." },
       ],
     });
     expect(result.diagnosticTerminalReason).toBe("cancelled");
@@ -650,10 +650,10 @@ describe("dynamic tool execution helpers", () => {
     expect(onAgentToolResult).toHaveBeenCalledWith({
       toolName: "memory_search",
       result: {
-        content: [{ type: "text", text: "OpenClaw dynamic tool call aborted before execution." }],
+        content: [{ type: "text", text: "Carapace dynamic tool call aborted before execution." }],
         details: {
           status: "cancelled",
-          error: "OpenClaw dynamic tool call aborted before execution.",
+          error: "Carapace dynamic tool call aborted before execution.",
         },
       },
       isError: true,
@@ -701,7 +701,7 @@ describe("dynamic tool execution helpers", () => {
     expect(result.diagnosticTerminalReason).toBe("failed");
   });
 
-  it.each(["memory_search", "openclaw"])(
+  it.each(["memory_search", "carapace"])(
     "preserves enclosing timeout provenance for active %s aborts",
     async (tool) => {
       const controller = new AbortController();
@@ -934,7 +934,7 @@ describe("dynamic tool execution helpers", () => {
         currentTurnHadNonTerminalDynamicToolResult: false,
         activeAppServerTurnRequests: 0,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
       }),
     ).toBe(true);
     expect(
@@ -945,7 +945,7 @@ describe("dynamic tool execution helpers", () => {
         currentTurnHadNonTerminalDynamicToolResult: true,
         activeAppServerTurnRequests: 0,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
       }),
     ).toBe(false);
     expect(
@@ -956,7 +956,7 @@ describe("dynamic tool execution helpers", () => {
         currentTurnHadNonTerminalDynamicToolResult: false,
         activeAppServerTurnRequests: 1,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
       }),
     ).toBe(false);
     expect(
@@ -967,7 +967,7 @@ describe("dynamic tool execution helpers", () => {
         currentTurnHadNonTerminalDynamicToolResult: false,
         activeAppServerTurnRequests: 0,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 1,
+        pendingCarapaceDynamicToolCompletionIdsCount: 1,
       }),
     ).toBe(false);
   });
@@ -977,7 +977,7 @@ describe("dynamic tool execution helpers", () => {
       resolveTerminalDynamicToolBatchAction({
         activeAppServerTurnRequests: 1,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
         currentTurnHadNonTerminalDynamicToolResult: false,
         hasPendingTerminalDynamicToolRelease: true,
       }),
@@ -986,7 +986,7 @@ describe("dynamic tool execution helpers", () => {
       resolveTerminalDynamicToolBatchAction({
         activeAppServerTurnRequests: 0,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
         currentTurnHadNonTerminalDynamicToolResult: true,
         hasPendingTerminalDynamicToolRelease: true,
       }),
@@ -995,7 +995,7 @@ describe("dynamic tool execution helpers", () => {
       resolveTerminalDynamicToolBatchAction({
         activeAppServerTurnRequests: 0,
         activeTurnItemIdsCount: 0,
-        pendingOpenClawDynamicToolCompletionIdsCount: 0,
+        pendingCarapaceDynamicToolCompletionIdsCount: 0,
         currentTurnHadNonTerminalDynamicToolResult: false,
         hasPendingTerminalDynamicToolRelease: true,
       }),

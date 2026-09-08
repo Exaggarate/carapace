@@ -1,11 +1,11 @@
 // Persists per-shard Vitest timing samples for later scheduling.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveShardTimingKey, type VitestShardTimingSpec } from "./vitest-shard-metadata.mts";
 
-const TIMINGS_FILE_ENV_KEY = "OPENCLAW_TEST_PROJECTS_TIMINGS_PATH";
-const TIMINGS_DISABLE_ENV_KEY = "OPENCLAW_TEST_PROJECTS_TIMINGS";
+const TIMINGS_FILE_ENV_KEY = "CARAPACE_TEST_PROJECTS_TIMINGS_PATH";
+const TIMINGS_DISABLE_ENV_KEY = "CARAPACE_TEST_PROJECTS_TIMINGS";
 
 function shouldUseShardTimings(env: NodeJS.ProcessEnv = process.env): boolean {
   return env[TIMINGS_DISABLE_ENV_KEY] !== "0";

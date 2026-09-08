@@ -1,8 +1,8 @@
 // Searxng helper module supports config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeSecretInput } from "openclaw/plugin-sdk/secret-input";
-import { resolveReadOnlyEnvSecretRef } from "openclaw/plugin-sdk/secret-ref-readonly";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeSecretInput } from "carapace/plugin-sdk/secret-input";
+import { resolveReadOnlyEnvSecretRef } from "carapace/plugin-sdk/secret-ref-readonly";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const SEARXNG_BASE_URL_ENV_VAR = "SEARXNG_BASE_URL";
 const SEARXNG_BASE_URL_PATH = "plugins.entries.searxng.config.webSearch.baseUrl";
@@ -20,7 +20,7 @@ function normalizeBaseUrl(value: unknown): string | undefined {
 }
 
 function resolveSearxngWebSearchConfig(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): SearxngPluginConfig["webSearch"] | undefined {
   const pluginConfig = config?.plugins?.entries?.searxng?.config as SearxngPluginConfig | undefined;
   const webSearch = pluginConfig?.webSearch;
@@ -30,7 +30,7 @@ function resolveSearxngWebSearchConfig(
   return undefined;
 }
 
-export function resolveSearxngBaseUrl(config?: OpenClawConfig): string | undefined {
+export function resolveSearxngBaseUrl(config?: CarapaceConfig): string | undefined {
   const webSearch = resolveSearxngWebSearchConfig(config);
   const resolved = resolveReadOnlyEnvSecretRef({
     value: webSearch?.baseUrl,
@@ -48,10 +48,10 @@ export function resolveSearxngBaseUrl(config?: OpenClawConfig): string | undefin
   return normalizeBaseUrl(process.env[SEARXNG_BASE_URL_ENV_VAR]);
 }
 
-export function resolveSearxngCategories(config?: OpenClawConfig): string | undefined {
+export function resolveSearxngCategories(config?: CarapaceConfig): string | undefined {
   return normalizeOptionalString(resolveSearxngWebSearchConfig(config)?.categories);
 }
 
-export function resolveSearxngLanguage(config?: OpenClawConfig): string | undefined {
+export function resolveSearxngLanguage(config?: CarapaceConfig): string | undefined {
   return normalizeOptionalString(resolveSearxngWebSearchConfig(config)?.language);
 }

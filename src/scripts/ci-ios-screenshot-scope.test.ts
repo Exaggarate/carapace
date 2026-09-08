@@ -7,14 +7,14 @@ describe("shouldRunIosScreenshots", () => {
   it("conservatively routes screenshot-pipeline owners to release capture", () => {
     for (const changedPath of [
       "apps/ios/Sources/RootTabs.swift",
-      "apps/ios/UITests/OpenClawSnapshotUITests.swift",
+      "apps/ios/UITests/CarapaceSnapshotUITests.swift",
       "apps/ios/WatchApp/Sources/WatchVoiceControls.swift",
       "apps/ios/project.yml",
       "apps/ios/Tests/Info.plist",
       "apps/ios/Resources/Localizable.xcstrings",
       "apps/ios/fastlane/Fastfile",
-      "apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatView.swift",
-      "apps/shared/OpenClawKit/Tests/OpenClawKitTests/ChatPasteboardTests.swift",
+      "apps/shared/CarapaceKit/Sources/CarapaceChatUI/ChatView.swift",
+      "apps/shared/CarapaceKit/Tests/CarapaceKitTests/ChatPasteboardTests.swift",
       "apps/swabble/Sources/SwabbleKit/WakeWordGate.swift",
       "scripts/ios-screenshots.sh",
       "scripts/ios-screenshot-evidence.mjs",
@@ -31,7 +31,7 @@ describe("shouldRunIosScreenshots", () => {
     }
 
     for (const changedPath of [
-      "apps/android/app/src/main/java/ai/openclaw/app/MainActivity.kt",
+      "apps/android/app/src/main/java/ai/carapace/app/MainActivity.kt",
       "docs/ci.md",
       "ui/src/pages/activity/activity-page.ts",
     ]) {

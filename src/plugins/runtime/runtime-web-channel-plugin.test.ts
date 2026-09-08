@@ -55,7 +55,7 @@ describe("runtime web channel plugin", () => {
   });
 
   it("reloads replaced monitor artifacts and dependencies after plugin lifecycle clears", async () => {
-    const pluginRoot = fs.realpathSync(tempDirs.make("openclaw-web-runtime-replacement-"));
+    const pluginRoot = fs.realpathSync(tempDirs.make("carapace-web-runtime-replacement-"));
     const modulePath = path.join(pluginRoot, "runtime-api.js");
     const dependencyPath = path.join(pluginRoot, "dependency.js");
     fs.writeFileSync(path.join(pluginRoot, "package.json"), '{"type":"commonjs"}\n', "utf8");

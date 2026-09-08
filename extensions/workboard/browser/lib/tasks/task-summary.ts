@@ -1,7 +1,7 @@
 import {
   TaskSummarySchema,
   type TaskSummary as ProtocolTaskSummary,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import { Value } from "typebox/value";
 
 export type TaskSummary = Omit<ProtocolTaskSummary, "taskId"> & { taskId: string };

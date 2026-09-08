@@ -1,6 +1,6 @@
 import http from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getDeliveryQueueEntryStatus } from "../infra/delivery-queue-sqlite.js";
 import { scheduleSessionDelivery } from "../infra/session-delivery-queue-runtime.js";
 import {
@@ -95,7 +95,7 @@ describe("session delivery clock-jump integration", () => {
       const initialTime = Date.now();
       const wallClock = vi.spyOn(Date, "now").mockReturnValue(initialTime);
       const { envSnapshot, tempHome, workspaceDir } = await setupGatewayTempHome({
-        prefix: "openclaw-session-delivery-gateway-",
+        prefix: "carapace-session-delivery-gateway-",
       });
       let gateway: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
       let providerServer: http.Server | undefined;
@@ -141,7 +141,7 @@ describe("session delivery clock-jump integration", () => {
           gateway: { auth: { mode: "token", token } },
           plugins: { slots: { memory: "none" } },
           tools: { profile: "minimal" },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         const { id } = await enqueueClaimedSessionDelivery(
           {
             kind: "agentTurn",

@@ -3,7 +3,7 @@ import type { MsgContext } from "../../auto-reply/templating.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import type { ChannelRouteRef } from "../../plugin-sdk/channel-route.js";
 import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
-import { runOpenClawAgentWriteTransaction } from "../../state/openclaw-agent-db.js";
+import { runCarapaceAgentWriteTransaction } from "../../state/carapace-agent-db.js";
 import type { DeliveryContext } from "../../utils/delivery-context.types.js";
 import {
   resolveAccessStorePath,
@@ -92,7 +92,7 @@ export async function createSessionEntryWithTranscript<TError = string>(
       sessionKey: normalizedKey,
     });
     await runExclusiveSqliteSessionWrite(transcriptScope, async () => {
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         commitGuard?.();
         ensureTranscriptHeader(database, transcriptScope, cwd);
       }, toDatabaseOptions(transcriptScope));

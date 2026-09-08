@@ -1,10 +1,10 @@
 import type {
   AgentHarnessSessionForkParams,
   AgentHarnessSessionForkResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexSessionCatalogControlFactory } from "../session-catalog-types.js";
 import { codexLastTerminalTurnId, codexUpstreamBaseline } from "../session-upstream-marker.js";
 import { forkCanonicalCodexSession } from "./canonical-session-fork.js";
@@ -34,7 +34,7 @@ export async function forkCodexUpstreamSession(
     bindingStore: CodexAppServerBindingStore;
     controlFactory: CodexSessionCatalogControlFactory;
     harnessRuntimeId: string;
-    resolveConfig?: () => OpenClawConfig | undefined;
+    resolveConfig?: () => CarapaceConfig | undefined;
     runtime: PluginRuntime;
   },
 ): Promise<AgentHarnessSessionForkResult> {

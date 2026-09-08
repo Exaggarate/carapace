@@ -22,7 +22,7 @@ describe("ModelProvidersPage usage convergence", () => {
   it("waits for the route loader before starting provider requests, including after reconnect", async () => {
     const harness = createHarness("main");
     const page = document.createElement(
-      "openclaw-model-providers-page",
+      "carapace-model-providers-page",
     ) as ModelProvidersPageTestElement;
     page.context = harness.context;
     document.body.append(page);

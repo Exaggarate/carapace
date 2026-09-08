@@ -2,11 +2,11 @@ import { html, nothing, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
 import { beginNativeWindowDrag } from "../app/native-window-drag.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 import "./tooltip.ts";
 
-class MacosTitlebarControls extends OpenClawLightDomContentsElement {
+class MacosTitlebarControls extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) navCollapsed = false;
   @property({ attribute: false }) historyOnly = false;
   @property({ attribute: false }) canGoBack = false;
@@ -86,7 +86,7 @@ class MacosTitlebarControls extends OpenClawLightDomContentsElement {
     className: string;
   }) {
     return html`
-      <openclaw-tooltip .content=${options.tooltip ?? options.label}>
+      <carapace-tooltip .content=${options.tooltip ?? options.label}>
         <button
           type="button"
           class="topbar-icon-btn macos-titlebar-controls__button ${options.className}"
@@ -99,11 +99,11 @@ class MacosTitlebarControls extends OpenClawLightDomContentsElement {
         >
           ${options.icon}
         </button>
-      </openclaw-tooltip>
+      </carapace-tooltip>
     `;
   }
 }
 
-if (!customElements.get("openclaw-macos-titlebar-controls")) {
-  customElements.define("openclaw-macos-titlebar-controls", MacosTitlebarControls);
+if (!customElements.get("carapace-macos-titlebar-controls")) {
+  customElements.define("carapace-macos-titlebar-controls", MacosTitlebarControls);
 }

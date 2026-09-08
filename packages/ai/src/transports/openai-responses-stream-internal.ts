@@ -1,5 +1,5 @@
-import { appendAssistantThinking } from "@openclaw/llm-core/event-stream";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { appendAssistantThinking } from "@carapace/llm-core/event-stream";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { ResponseOutputItem } from "openai/resources/responses/responses.js";
 import {
   AZURE_RESPONSES_TEXT_CONTENT_PART_TYPE,
@@ -311,7 +311,7 @@ export async function processResponsesStream<TApi extends Api>(
       stage: "responses",
       abort: options?.abortFirstEventStream,
       onTimeout: options?.onFirstEventTimeout,
-      hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable OPENCLAW_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
+      hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable CARAPACE_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
     }),
     options?.signal,
   );

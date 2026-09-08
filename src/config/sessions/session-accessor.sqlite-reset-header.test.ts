@@ -4,13 +4,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { SessionManager } from "../../agents/sessions/session-manager.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   appendTranscriptMessage,
   applySessionEntryLifecycleMutation,
@@ -22,12 +22,12 @@ import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target
 import { CURRENT_SESSION_VERSION } from "./version.js";
 
 describe("SQLite reset boundary transcript header", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
   let storePath: string;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
-      prefix: "openclaw-reset-header-",
+    testState = await createCarapaceTestState({
+      prefix: "carapace-reset-header-",
       layout: "state-only",
     });
     const tempDir = testState.sessionsDir();
@@ -36,7 +36,7 @@ describe("SQLite reset boundary transcript header", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await testState.cleanup();
   });
 
@@ -45,7 +45,7 @@ describe("SQLite reset boundary transcript header", () => {
     if (!target.path) {
       throw new Error("expected SQLite database path");
     }
-    const owner = openOpenClawAgentDatabase({
+    const owner = openCarapaceAgentDatabase({
       agentId: target.agentId ?? "main",
       path: target.path,
     });

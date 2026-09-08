@@ -1,9 +1,9 @@
 // Slack tests cover channel plugin behavior.
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { slackPlugin } from "./channel.js";
 import { registerSlackInstallationState } from "./installation-identity-state.js";
@@ -80,7 +80,7 @@ beforeEach(async () => {
   } as never);
 });
 
-async function getSlackConfiguredState(cfg: OpenClawConfig) {
+async function getSlackConfiguredState(cfg: CarapaceConfig) {
   const account = slackPlugin.config.resolveAccount(cfg, "default");
   const inspectedAccount = slackPlugin.config.inspectAccount?.(cfg, "default") ?? account;
   return {
@@ -274,7 +274,7 @@ describe("slackPlugin actions", () => {
   });
 
   it("honors the selected Slack account during message tool discovery", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           botToken: "xoxb-root",
@@ -354,7 +354,7 @@ describe("slackPlugin actions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setSlackRuntime({
       config: {
         loadConfig: () => cfg,
@@ -400,7 +400,7 @@ describe("slackPlugin actions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await pairing.notifyApproval({
       cfg,
       id: "team:T12345678:user:U12345678",
@@ -427,7 +427,7 @@ describe("slackPlugin actions", () => {
             appToken: "xapp-test",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     const downloadFile = findSchemaEntry(discovery?.schema, ["download-file"], "Slack schema");
     const downloadProperties = requireRecord(downloadFile.properties, "download-file properties");
@@ -639,7 +639,7 @@ describe("slackPlugin status", () => {
           appToken: "test-app-token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const account = slackPlugin.config.resolveAccount(cfg, "default");
 
     const result = await slackPlugin.status!.probeAccount!({
@@ -663,8 +663,8 @@ describe("slackPlugin status", () => {
     const probeSpy = vi.spyOn(probeModule, "probeSlack").mockResolvedValueOnce({
       ok: true,
       status: 200,
-      bot: { id: "B1", name: "openclaw-bot" },
-      team: { id: "T1", name: "OpenClaw" },
+      bot: { id: "B1", name: "carapace-bot" },
+      team: { id: "T1", name: "Carapace" },
     });
     const cfg = {
       channels: {
@@ -677,7 +677,7 @@ describe("slackPlugin status", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const account = slackPlugin.config.resolveAccount(cfg, "work");
 
     const result = await slackPlugin.status!.probeAccount!({
@@ -690,8 +690,8 @@ describe("slackPlugin status", () => {
     expect(result).toEqual({
       ok: true,
       status: 200,
-      bot: { id: "B1", name: "openclaw-bot" },
-      team: { id: "T1", name: "OpenClaw" },
+      bot: { id: "B1", name: "carapace-bot" },
+      team: { id: "T1", name: "Carapace" },
     });
   });
 
@@ -701,7 +701,7 @@ describe("slackPlugin status", () => {
         ok: true,
         warning: "Slack bot token is a user token",
         bot: { id: "UUSER", name: "human-installer" },
-        team: { id: "T1", name: "OpenClaw" },
+        team: { id: "T1", name: "Carapace" },
       },
     });
 
@@ -711,7 +711,7 @@ describe("slackPlugin status", () => {
         tone: "warn",
       },
       { text: "Bot: @human-installer" },
-      { text: "Team: OpenClaw (T1)" },
+      { text: "Team: Carapace (T1)" },
     ]);
   });
 
@@ -737,7 +737,7 @@ describe("slackPlugin status", () => {
     }
 
     const route = await resolveRoute({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       agentId: "main",
       target: "channel:C1",
       currentSessionKey: "agent:main:slack:channel:C1:thread:1712345678.123456",
@@ -757,12 +757,12 @@ describe("slackPlugin status", () => {
     }
 
     const channelRoute = await resolveRoute({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       agentId: "main",
       target: "team:T123:channel:C456",
     });
     const dmRoute = await resolveRoute({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       agentId: "main",
       accountId: "default",
       target: "team:T123:user:U456",
@@ -785,7 +785,7 @@ describe("slackPlugin status", () => {
     }
 
     const route = await resolveRoute({
-      cfg: { session: { dmScope: "per-channel-peer" } } as OpenClawConfig,
+      cfg: { session: { dmScope: "per-channel-peer" } } as CarapaceConfig,
       agentId: "main",
       target: "w09g2dj0275",
     });
@@ -821,7 +821,7 @@ describe("slackPlugin status", () => {
             appToken: "xapp-test",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       target: "d0aewsdhaqh",
       threadId: "1778110574.653649",
@@ -868,7 +868,7 @@ describe("slackPlugin status", () => {
             appToken: "xapp-test",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       target: "channel:D123",
     });
@@ -903,7 +903,7 @@ describe("slackPlugin status", () => {
               botToken: "test",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         agentId: "main",
         target: "D0NOUSER001",
         threadId: "1778110574.653649",
@@ -923,7 +923,7 @@ describe("slackPlugin status", () => {
     });
 
     const route = await resolveRoute({
-      cfg: { channels: { slack: { botToken: "xoxb-test" } } } as OpenClawConfig,
+      cfg: { channels: { slack: { botToken: "xoxb-test" } } } as CarapaceConfig,
       agentId: "main",
       target: "g08gqh53ejm",
     });
@@ -1008,7 +1008,7 @@ describe("slackPlugin security", () => {
             allowFrom: ["  slack:U123  "],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       account: slackPlugin.config.resolveAccount(
         {
           channels: {
@@ -1019,7 +1019,7 @@ describe("slackPlugin security", () => {
               allowFrom: ["  slack:U123  "],
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         "default",
       ),
     });
@@ -1756,7 +1756,7 @@ describe("slackPlugin outbound", () => {
   it("retains media and every reply receipt without losing an earlier question card", async () => {
     const questionId = "ask_0123456789abcdef0123456789abcdef";
     const questionMeta = {
-      slackQuestionActionIds: ["openclaw:question_button:1:1"],
+      slackQuestionActionIds: ["carapace:question_button:1:1"],
       [SLACK_QUESTION_FINALIZATION_BLOCKS]: [{ type: "divider" as const }],
     };
     const createResult = (messageId: string, kind: "media" | "card") => ({
@@ -1849,7 +1849,7 @@ describe("slackPlugin agentPrompt", () => {
       "- Use `presentation` buttons/selects for discrete choices or parameter picks instead of asking the user to type one.",
     );
     expect(hints).toContain(
-      "- Slack plain text sends: write standard Markdown; OpenClaw converts it to Slack mrkdwn, including `**bold**`, headings, lists, and `[label](url)` links.",
+      "- Slack plain text sends: write standard Markdown; Carapace converts it to Slack mrkdwn, including `**bold**`, headings, lists, and `[label](url)` links.",
     );
     expect(hints).toContain(
       "- For row-and-column data, use an explicit `presentation` table block; Slack renders it as a native table and retains a linear text summary for accessibility. Markdown pipe tables are not auto-promoted.",
@@ -2030,7 +2030,7 @@ describe("slackPlugin config", () => {
     async ({ slack, expectedTransportSource }) => {
       const { configured, snapshot } = await getSlackConfiguredState({
         channels: { slack },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
 
       expect(configured).toBe(true);
       expect(snapshot).toMatchObject({
@@ -2044,7 +2044,7 @@ describe("slackPlugin config", () => {
   );
 
   it("treats HTTP mode accounts with bot token + signing secret as configured", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           mode: "http",
@@ -2061,7 +2061,7 @@ describe("slackPlugin config", () => {
   });
 
   it("keeps socket mode requiring app token", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           mode: "socket",
@@ -2089,7 +2089,7 @@ describe("slackPlugin config", () => {
         appTokenSource: "none",
         config: {},
       } as never,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: undefined,
     });
 
@@ -2116,7 +2116,7 @@ describe("slackPlugin config", () => {
           signingSecret: { source: "env", provider: "default", id: "SLACK_SIGNING_SECRET" },
         },
       } as never,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       runtime: undefined,
     });
 

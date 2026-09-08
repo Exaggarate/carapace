@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerRuntimeOptions } from "./config.js";
 import { setManagedCodexPluginRoot } from "./managed-binary.js";
@@ -14,7 +14,7 @@ import {
 import { CODEX_APP_SERVER_VERSION } from "./version.js";
 
 const LIVE =
-  process.env.OPENCLAW_LIVE_TEST === "1" && process.env.OPENCLAW_LIVE_CODEX_RESTRICTED_MCP === "1";
+  process.env.CARAPACE_LIVE_TEST === "1" && process.env.CARAPACE_LIVE_CODEX_RESTRICTED_MCP === "1";
 const describeLive = LIVE ? describe : describe.skip;
 
 describeLive("Codex restricted MCP real-binary lifecycle", () => {
@@ -28,7 +28,7 @@ describeLive("Codex restricted MCP real-binary lifecycle", () => {
   });
 
   it("starts with inherited MCP disabled and exposes no tools", async () => {
-    await withTempDir("openclaw-codex-restricted-mcp-", async (root) => {
+    await withTempDir("carapace-codex-restricted-mcp-", async (root) => {
       const agentDir = path.join(root, "agent");
       const workspace = path.join(root, "workspace");
       const launchMarker = path.join(root, "mcp-launched");
@@ -47,7 +47,7 @@ describeLive("Codex restricted MCP real-binary lifecycle", () => {
         expect(client.getServerVersion()).toBe(CODEX_APP_SERVER_VERSION);
         const signal = AbortSignal.timeout(60_000);
         const params = createParams(path.join(root, "session.jsonl"), workspace);
-        params.toolsAllow = ["openclaw"];
+        params.toolsAllow = ["carapace"];
         params.provider = "openai";
         params.modelId = "gpt-5.6-luna";
         params.model = {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { formatCliCommand } from "../cli/command-format.js";
 import type { PreManagedServiceStop } from "../cli/update-cli/update-command-service-maintenance.js";
 import { isDefaultInstallIdentity, resolveConfigPath, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolvePathViaExistingAncestorSync } from "../infra/boundary-path.js";
 import {
   acquireGatewayLifecycleCoordinator,
@@ -11,7 +11,7 @@ import {
 } from "../infra/state-database-coordinator.js";
 import { DoctorUnreadableStateDatabaseError } from "../infra/state-repair-message.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import type { DoctorOptions } from "./doctor-prompter.js";
 import { isDoctorUpdateRepairMode, resolveDoctorRepairMode } from "./doctor-repair-mode.js";
 import {
@@ -52,7 +52,7 @@ function assertDoctorMaintenanceInspection(
   throw new Error(
     kind === "owned" && inspection.blockMessage
       ? inspection.blockMessage
-      : `Gateway service ownership or shutdown could not be verified. Run ${formatCliCommand("openclaw gateway status --deep", env)} and stop it through its service owner before retrying.`,
+      : `Gateway service ownership or shutdown could not be verified. Run ${formatCliCommand("carapace gateway status --deep", env)} and stop it through its service owner before retrying.`,
   );
 }
 
@@ -60,7 +60,7 @@ export async function beginDoctorMaintenance(params: {
   options: DoctorOptions;
   root: string | null;
   runtime: RuntimeEnv;
-}): Promise<{ release(): Promise<void>; finish(cfg: OpenClawConfig): Promise<void> } | undefined> {
+}): Promise<{ release(): Promise<void>; finish(cfg: CarapaceConfig): Promise<void> } | undefined> {
   if (!(params.options.repair === true || params.options.yes === true)) {
     return undefined;
   }
@@ -80,15 +80,15 @@ export async function beginDoctorMaintenance(params: {
     try {
       if (repairStoresMayBeOpen) {
         repairStoresMayBeOpen = false;
-        const [{ closeOpenClawAgentDatabasesAsync }, { closeOpenClawStateDatabaseByPath }] =
+        const [{ closeCarapaceAgentDatabasesAsync }, { closeCarapaceStateDatabaseByPath }] =
           await Promise.all([
-            import("../state/openclaw-agent-db.js"),
-            import("../state/openclaw-state-db.js"),
+            import("../state/carapace-agent-db.js"),
+            import("../state/carapace-state-db.js"),
           ]);
         // Agent handles release leases through shared state. Close them before
         // handing off the coordinators, or the restarted Gateway sees Doctor as a writer.
-        await closeOpenClawAgentDatabasesAsync();
-        closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath(env));
+        await closeCarapaceAgentDatabasesAsync();
+        closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath(env));
       }
     } finally {
       for (const coordinator of coordinators.splice(0).toReversed()) {
@@ -154,33 +154,33 @@ export async function beginDoctorMaintenance(params: {
         );
       }
     }
-    const databasePath = path.resolve(resolveOpenClawStateSqlitePath(env));
+    const databasePath = path.resolve(resolveCarapaceStateSqlitePath(env));
     // Hold the reentrant lifecycle coordinators, not an in-tree Gateway lock:
     // individual migrations acquire their own in-tree locks under this scope.
     // Gateway ownership lasts until that process stops, not for a short transaction.
     coordinators.push(acquireGatewayLifecycleCoordinator({ databasePath, busyTimeoutMs: 0 }));
     coordinators.push(acquireStateDatabaseCoordinator({ databasePath, busyTimeoutMs: 250 }));
-    const { assertNoOpenClawAgentDatabaseLeasesReadOnly, OpenClawAgentDatabaseLeaseActiveError } =
-      await import("../state/openclaw-agent-db-lease.js");
+    const { assertNoCarapaceAgentDatabaseLeasesReadOnly, CarapaceAgentDatabaseLeaseActiveError } =
+      await import("../state/carapace-agent-db-lease.js");
     try {
-      assertNoOpenClawAgentDatabaseLeasesReadOnly({ env });
+      assertNoCarapaceAgentDatabaseLeasesReadOnly({ env });
     } catch (error) {
-      if (error instanceof OpenClawAgentDatabaseLeaseActiveError) {
+      if (error instanceof CarapaceAgentDatabaseLeaseActiveError) {
         throw error;
       }
       // Classify unreadable state under the held owners without opening a writer.
-      const { preflightOpenClawDatabaseSchemas } =
-        await import("../state/openclaw-database-preflight.js");
-      const { OPENCLAW_STATE_SCHEMA_VERSION } =
-        await import("../state/openclaw-state-db-contract.js");
-      const { OPENCLAW_AGENT_SCHEMA_VERSION } =
-        await import("../state/openclaw-agent-db-contract.js");
-      const schemas = await preflightOpenClawDatabaseSchemas({
+      const { preflightCarapaceDatabaseSchemas } =
+        await import("../state/carapace-database-preflight.js");
+      const { CARAPACE_STATE_SCHEMA_VERSION } =
+        await import("../state/carapace-state-db-contract.js");
+      const { CARAPACE_AGENT_SCHEMA_VERSION } =
+        await import("../state/carapace-agent-db-contract.js");
+      const schemas = await preflightCarapaceDatabaseSchemas({
         env,
         scope: "state",
         supportedVersions: {
-          state: OPENCLAW_STATE_SCHEMA_VERSION,
-          agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+          state: CARAPACE_STATE_SCHEMA_VERSION,
+          agent: CARAPACE_AGENT_SCHEMA_VERSION,
         },
       });
       const unreadable = schemas.indeterminate.find((database) => database.kind === "state");
@@ -196,7 +196,7 @@ export async function beginDoctorMaintenance(params: {
       throw error;
     }
     throw new Error(
-      `Doctor could not enter maintenance. ${String(error)} Stop the Gateway service and other OpenClaw processes using this state, then run ${formatCliCommand("openclaw doctor --fix", env)} from an independent shell.`,
+      `Doctor could not enter maintenance. ${String(error)} Stop the Gateway service and other Carapace processes using this state, then run ${formatCliCommand("carapace doctor --fix", env)} from an independent shell.`,
       { cause: error },
     );
   }
@@ -243,7 +243,7 @@ export async function beginDoctorMaintenance(params: {
       });
       if (!health.healthy) {
         throw new Error(
-          `Doctor repaired state, but the managed Gateway did not become ready: ${renderRestartDiagnostics(health).join(" ")}. Run ${formatCliCommand("openclaw gateway status --deep", env)}.`,
+          `Doctor repaired state, but the managed Gateway did not become ready: ${renderRestartDiagnostics(health).join(" ")}. Run ${formatCliCommand("carapace gateway status --deep", env)}.`,
         );
       }
       params.runtime.log("Gateway restarted and verified after Doctor repair.");

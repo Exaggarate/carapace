@@ -1,4 +1,4 @@
-import { normalizeOptionalString as normalizeText } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString as normalizeText } from "@carapace/normalization-core/string-coerce";
 import { normalizeInternalTurnContext } from "../../auto-reply/internal-turn-source.js";
 import type { MsgContext } from "../../auto-reply/templating.js";
 import { normalizeChatType } from "../../channels/chat-type.js";

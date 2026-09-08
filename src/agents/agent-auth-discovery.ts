@@ -1,5 +1,5 @@
 /** Discovers agent runtime credentials from auth profiles, env, and synthetic providers. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   prepareProviderSyntheticAuthWithPlugin,
   resolveProviderSyntheticAuthWithPlugin,

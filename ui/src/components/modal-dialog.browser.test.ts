@@ -16,7 +16,7 @@ afterEach(() => {
 });
 
 async function mountModal(host = container, variant = "", autofocus = true) {
-  const modal = document.createElement("openclaw-modal-dialog");
+  const modal = document.createElement("carapace-modal-dialog");
   modal.label = "Edit details";
   modal.className = variant;
   modal.style.setProperty("--wa-transition-normal", "150ms");
@@ -73,7 +73,7 @@ describe.runIf(browserMode)("modal native focus ownership", () => {
     const { userEvent } = await import("vitest/browser");
     const { modal, dialog, notes } = await mountModal();
     notes.value = "Unsaved draft";
-    const tooltip = document.createElement("openclaw-tooltip");
+    const tooltip = document.createElement("carapace-tooltip");
     tooltip.content = "Draft editing help";
     tooltip.anchor = notes;
     modal.append(tooltip);

@@ -77,7 +77,7 @@ function resolveLifecycleAgentId(rawAgent: string | undefined): string | undefin
 
 function listHint(agent?: string): string {
   const agentFlag = agent ? ` --agent ${agent}` : "";
-  return formatCliCommand(`openclaw sessions list${agentFlag} --json`);
+  return formatCliCommand(`carapace sessions list${agentFlag} --json`);
 }
 
 function notFoundResult(key: string, agent?: string): SessionsLifecycleResult {
@@ -92,8 +92,8 @@ function notFoundResult(key: string, agent?: string): SessionsLifecycleResult {
 const WORKTREE_PRESERVATION_REASON_COPY = {
   "owner-mismatch": "registered to another owner",
   busy: "still in use by a live run or another cleanup",
-  "foreign-lock": "Git reports a lock owned outside OpenClaw",
-  "snapshot-failed": "OpenClaw could not create a safety snapshot",
+  "foreign-lock": "Git reports a lock owned outside Carapace",
+  "snapshot-failed": "Carapace could not create a safety snapshot",
   "cleanup-failed": "cleanup did not finish normally",
 } as const satisfies Record<WorktreePreservationReason, string>;
 
@@ -181,7 +181,7 @@ function outputLifecycleResults(
           if (result.worktreePreserved) {
             const preserved = result.worktreePreserved;
             runtime.error(
-              `Worktree ${preserved.branch} at ${preserved.path} needs attention: ${WORKTREE_PRESERVATION_REASON_COPY[preserved.reason]}. Inspect it with ${formatCliCommand("openclaw worktrees list")}.`,
+              `Worktree ${preserved.branch} at ${preserved.path} needs attention: ${WORKTREE_PRESERVATION_REASON_COPY[preserved.reason]}. Inspect it with ${formatCliCommand("carapace worktrees list")}.`,
             );
           }
           break;

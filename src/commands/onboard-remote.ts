@@ -1,4 +1,4 @@
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-origin-scope.js";
 /**
  * Interactive remote gateway onboarding.
@@ -6,7 +6,7 @@ import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-or
  * It can discover gateways, validate remote WebSocket security, and store
  * a remote Gateway secret as plaintext or a secret reference.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { isSecureWebSocketUrl } from "../gateway/net.js";
 import { discoverGatewayBeacons, type GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
@@ -43,7 +43,7 @@ export function validateGatewayWebSocketUrl(value: string): string | undefined {
   }
   if (
     !isSecureWebSocketUrl(trimmed, {
-      allowPrivateWs: process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1",
+      allowPrivateWs: process.env.CARAPACE_ALLOW_INSECURE_PRIVATE_WS === "1",
     })
   ) {
     return t("wizard.remote.insecureRemoteUrl");
@@ -53,10 +53,10 @@ export function validateGatewayWebSocketUrl(value: string): string | undefined {
 
 /** Prompts for remote gateway connection and auth settings. */
 export async function promptRemoteGatewayConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   prompter: WizardPrompter,
   options?: { secretInputMode?: SecretInputMode; remoteOriginUrl?: string },
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   let selectedBeacon: GatewayBonjourBeacon | null = null;
   let suggestedUrl = cfg.gateway?.remote?.url ?? DEFAULT_GATEWAY_URL;
   let discoveryRemote:
@@ -75,7 +75,7 @@ export async function promptRemoteGatewayConfig(
     await prompter.note(
       [
         "Bonjour discovery requires dns-sd (macOS) or avahi-browse (Linux).",
-        "Docs: https://docs.openclaw.ai/gateway/discovery",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Discovery",
     );
@@ -163,7 +163,7 @@ export async function promptRemoteGatewayConfig(
           [
             "Start a tunnel before using the CLI:",
             `ssh -N -L 18789:127.0.0.1:18789 <user>@${host}${target.sshPort ? ` -p ${target.sshPort}` : ""}`,
-            "Docs: https://docs.openclaw.ai/gateway/remote",
+            "Docs: https://github.com/Exaggarate/carapace",
           ].join("\n"),
           t("wizard.remote.sshTunnelTitle"),
         );
@@ -206,10 +206,10 @@ export async function promptRemoteGatewayConfig(
         provider: "gateway-remote-token",
         config: cfg,
         prompter,
-        preferredEnvVar: "OPENCLAW_GATEWAY_TOKEN",
+        preferredEnvVar: "CARAPACE_GATEWAY_TOKEN",
         copy: {
           sourceMessage: t("wizard.remote.gatewayTokenStoredMessage"),
-          envVarPlaceholder: "OPENCLAW_GATEWAY_TOKEN",
+          envVarPlaceholder: "CARAPACE_GATEWAY_TOKEN",
         },
       });
       token = resolved.ref;

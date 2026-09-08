@@ -149,7 +149,7 @@ async function recoverAfterTransportDrop(scenario: TransportDropScenario = {}) {
         genericCompactionRecoveryAllowed: false,
         snapshot: () => ({
           thinkLevel: "off",
-          agentHarness: { id: "openclaw" },
+          agentHarness: { id: "carapace" },
           outerContextTokenMeta: {},
           pluginHarnessOwnsTransport: false,
         }),
@@ -617,7 +617,7 @@ describe("recoverEmbeddedRunAttempt", () => {
       lastAssistant: assistant,
       currentAttemptAssistant: assistant,
       settledTurnFinalizationContext: {
-        source: "openclaw-transcript",
+        source: "carapace-transcript",
         messages: messagesSnapshot,
       },
       replayMetadata: { hadPotentialSideEffects: false, replaySafe: true },

@@ -1,9 +1,9 @@
-import { notifyLlmRequestActivity } from "@openclaw/ai/internal/runtime";
+import { notifyLlmRequestActivity } from "@carapace/ai/internal/runtime";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
   type AssistantMessageEventStream,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StreamFn } from "../../runtime/index.js";
 import { wrapStreamFnRepairMalformedToolCallArguments } from "./attempt.tool-call-argument-repair.js";

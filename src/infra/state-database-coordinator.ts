@@ -26,7 +26,7 @@ type CoordinatorOptions = {
 
 export class StateDatabaseCoordinatorContentionError extends SqliteCoordinatorError {
   constructor(family: CoordinatorFamily) {
-    super(`another OpenClaw process owns ${family}`);
+    super(`another Carapace process owns ${family}`);
     this.name = "StateDatabaseCoordinatorContentionError";
   }
 }
@@ -34,7 +34,7 @@ export class StateDatabaseCoordinatorContentionError extends SqliteCoordinatorEr
 export class StateSchemaMutationConflictError extends SqliteCoordinatorError {
   constructor(databasePath: string, cause: unknown) {
     super(
-      `OpenClaw refused shared state schema mutation at ${databasePath} because another Gateway owns that state directory. Stop that Gateway or perform the update through its managed restart path, then retry.`,
+      `Carapace refused shared state schema mutation at ${databasePath} because another Gateway owns that state directory. Stop that Gateway or perform the update through its managed restart path, then retry.`,
       cause,
     );
     this.name = "StateSchemaMutationConflictError";
@@ -43,7 +43,7 @@ export class StateSchemaMutationConflictError extends SqliteCoordinatorError {
 
 export function resolveStateLifecycleRuntimeDirectory(): string {
   return process.platform === "win32"
-    ? path.join(os.homedir(), "AppData", "Local", "OpenClaw", "locks")
+    ? path.join(os.homedir(), "AppData", "Local", "Carapace", "locks")
     : "/tmp";
 }
 
@@ -56,7 +56,7 @@ function resolveLifecycleCoordinatorPath(
   // The predecessor state-local coordinator shipped only in v2026.8.1-beta.2.
   // Keep one current stable runtime path; beta-only peers are not upgrade-compatible.
   const suffix =
-    params.uid === undefined ? "openclaw-state-locks" : `openclaw-state-locks-${params.uid}`;
+    params.uid === undefined ? "carapace-state-locks" : `carapace-state-locks-${params.uid}`;
   return path.join(
     canonicalRuntimeDirectory,
     suffix,

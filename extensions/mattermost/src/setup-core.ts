@@ -1,17 +1,17 @@
 // Mattermost plugin module implements setup core behavior.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
 import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   applyAccountNameToChannelSection,
   applySetupAccountConfigPatch,
   migrateBaseNameToDefaultAccount,
-} from "openclaw/plugin-sdk/setup";
-import { createSetupInputPresenceValidator } from "openclaw/plugin-sdk/setup-runtime";
+} from "carapace/plugin-sdk/setup";
+import { createSetupInputPresenceValidator } from "carapace/plugin-sdk/setup-runtime";
 import {
   inspectMattermostAccount,
   type ResolvedMattermostAccount,
@@ -32,16 +32,16 @@ export function isMattermostConfigured(account: ResolvedMattermostAccount): bool
   return tokenConfigured && Boolean(account.baseUrl);
 }
 
-export function resolveMattermostAccountWithSecrets(cfg: OpenClawConfig, accountId: string) {
+export function resolveMattermostAccountWithSecrets(cfg: CarapaceConfig, accountId: string) {
   return inspectMattermostAccount({ cfg, accountId });
 }
 
 export function applyMattermostSetupConfigPatch(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   name?: string;
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const namedConfig = applyAccountNameToChannelSection({
     cfg: params.cfg,
     channelKey: channel,

@@ -4,9 +4,9 @@ import {
   createEmptyPluginRegistry,
   createStartAccountContext,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { setZaloRuntime, type OpenClawConfig, type PluginRuntime } from "../runtime-api.js";
+import { setZaloRuntime, type CarapaceConfig, type PluginRuntime } from "../runtime-api.js";
 import { resolveZaloAccount } from "./accounts.js";
 import { zaloPlugin } from "./channel.js";
 
@@ -92,7 +92,7 @@ describe("configured Zalo gateway with a pre-aborted lifecycle", () => {
       },
     },
   ] as const)("performs only the account probe in $mode mode", async ({ channel }) => {
-    const cfg = { channels: { zalo: channel } } as OpenClawConfig;
+    const cfg = { channels: { zalo: channel } } as CarapaceConfig;
     const account = resolveZaloAccount({ cfg });
     const abort = new AbortController();
     abort.abort();

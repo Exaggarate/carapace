@@ -1,8 +1,8 @@
 // Reconcile invocation projections before grouping so summaries and expanded
 // cards consume the same calls, regardless of history/live delivery order.
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   isToolCallContentType,
   isToolResultContentType,
@@ -119,7 +119,7 @@ function readProjections(item: MessageItem, index: number): Projection[] {
     const raw = asRecord(block)!;
     const id = resolveToolBlockId(raw, message)!;
     const call = isToolCallContentType(raw.type);
-    const live = message["__openclawToolStreamLive"] === true;
+    const live = message["__carapaceToolStreamLive"] === true;
     const [card] = extractToolCardsCached({ ...message, content: [raw] });
     return {
       source,
@@ -142,7 +142,7 @@ function readProjections(item: MessageItem, index: number): Projection[] {
           : 2
         : !live
           ? 3
-          : message["__openclawToolStreamResultReceived"] === true
+          : message["__carapaceToolStreamResultReceived"] === true
             ? 2
             : 1,
       block: {
@@ -241,7 +241,7 @@ function coalesceTurn(items: ChatItem[]): ChatItem[] {
     } else {
       invocation.result = preferProjection(invocation.result, projection);
     }
-    if (projection.source.message["__openclawToolStreamLive"] === true) {
+    if (projection.source.message["__carapaceToolStreamLive"] === true) {
       invocation.live = projection.source.message;
     }
     if (projection.source.standalone) {
@@ -269,7 +269,7 @@ function coalesceTurn(items: ChatItem[]): ChatItem[] {
       continue;
     }
     const message = owner.source.message;
-    const metadata = asRecord(message["__openclaw"]);
+    const metadata = asRecord(message["__carapace"]);
     // History already composed durable activity. An earlier live echo must not
     // drag it across an intervening stream or above its parent call.
     const index = readTranscriptDisplayPosition(metadata?.transcriptPosition)?.activity
@@ -281,7 +281,7 @@ function coalesceTurn(items: ChatItem[]): ChatItem[] {
       message.messageId ??
       metadata?.id ??
       result?.source.message.messageId ??
-      asRecord(result?.source.message["__openclaw"])?.id;
+      asRecord(result?.source.message["__carapace"])?.id;
     const content = [
       ...(invocation.call ? [{ ...invocation.call.block, name: invocation.call.name }] : []),
       ...(result ? [{ ...result.block, name: invocation.call?.name ?? result.name }] : []),
@@ -295,8 +295,8 @@ function coalesceTurn(items: ChatItem[]): ChatItem[] {
       Boolean(invocation.live),
       completed,
       transcript,
-      invocation.live?.["__openclawToolStreamDiffStat"],
-      invocation.live?.["__openclawToolStreamReceivedAt"],
+      invocation.live?.["__carapaceToolStreamDiffStat"],
+      invocation.live?.["__carapaceToolStreamReceivedAt"],
       (names.get(identity(owner))?.size ?? 0) > 1 ? owner.name : undefined,
     ]);
     const bundle = bundles.get(bundleKey);
@@ -316,12 +316,12 @@ function coalesceTurn(items: ChatItem[]): ChatItem[] {
         ...(transcript ? { messageId: transcript } : {}),
         ...(invocation.live
           ? {
-              __openclawToolStreamLive: true,
-              __openclawToolStreamResultReceived: completed,
-              __openclawToolStreamDiffStat: completed
+              __carapaceToolStreamLive: true,
+              __carapaceToolStreamResultReceived: completed,
+              __carapaceToolStreamDiffStat: completed
                 ? undefined
-                : invocation.live["__openclawToolStreamDiffStat"],
-              __openclawToolStreamReceivedAt: invocation.live["__openclawToolStreamReceivedAt"],
+                : invocation.live["__carapaceToolStreamDiffStat"],
+              __carapaceToolStreamReceivedAt: invocation.live["__carapaceToolStreamReceivedAt"],
             }
           : {}),
       },

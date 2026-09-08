@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Discord tests cover runtime plugin behavior.
 import {
   ChannelType,
@@ -7,8 +7,8 @@ import {
   PermissionFlagsBits,
   type RESTGetAPIGuildEmojisResult,
 } from "discord-api-types/v10";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig, DiscordActionConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig, DiscordActionConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayPlugin } from "../internal/gateway.js";
 import { createInternalTestClient } from "../internal/test-builders.test-support.js";
@@ -148,9 +148,9 @@ const DISCORD_TEST_CFG = {
       groupPolicy: "open",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
-function discordAllowlistCfg(guilds: Record<string, unknown>): OpenClawConfig {
+function discordAllowlistCfg(guilds: Record<string, unknown>): CarapaceConfig {
   return {
     channels: {
       discord: {
@@ -159,7 +159,7 @@ function discordAllowlistCfg(guilds: Record<string, unknown>): OpenClawConfig {
         guilds,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 type MockCallSource = { mock: { calls: Array<Array<unknown>> } };
@@ -189,7 +189,7 @@ function handleMessagingAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: CarapaceConfig = DISCORD_TEST_CFG,
   options?: {
     reply?: ChannelMessageActionContext["reply"];
     mediaAccess?: {
@@ -214,7 +214,7 @@ function handleGuildAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: CarapaceConfig = DISCORD_TEST_CFG,
   options?: {
     mediaLocalRoots?: readonly string[];
     conversationReadOrigin?: "delegated" | "direct-operator";
@@ -227,7 +227,7 @@ function handleModerationAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig, defaultValue?: boolean) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: CarapaceConfig = DISCORD_TEST_CFG,
 ) {
   return handleDiscordModerationAction(action, params, isActionEnabled, cfg);
 }
@@ -296,7 +296,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleMessagingAction(
       "react",
@@ -880,7 +880,7 @@ describe("handleDiscordMessagingAction", () => {
             groupPolicy: "disabled",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: {
         id: "444",
         guild_id: "111",
@@ -927,7 +927,7 @@ describe("handleDiscordMessagingAction", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: {
         id: "444",
         type: ChannelType.DM,
@@ -944,7 +944,7 @@ describe("handleDiscordMessagingAction", () => {
             dmPolicy: "pairing",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: {
         id: "444",
         name: "qa-group",
@@ -966,7 +966,7 @@ describe("handleDiscordMessagingAction", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       channel: {
         id: "444",
         name: "blocked-group",
@@ -1008,7 +1008,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleMessagingAction(
       "reactions",
@@ -1036,7 +1036,7 @@ describe("handleDiscordMessagingAction", () => {
           dmPolicy: "pairing",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       handleMessagingAction(
@@ -1064,7 +1064,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       handleMessagingAction(
@@ -1096,7 +1096,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       handleMessagingAction(
@@ -1248,7 +1248,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await handleMessagingAction("readMessages", { channelId: "C1" }, enableAllActions, cfg);
     expect(readMessagesDiscord).toHaveBeenCalledWith(
       "C1",
@@ -1479,10 +1479,10 @@ describe("handleDiscordMessagingAction", () => {
     });
     fetchGuildInfoDiscord.mockResolvedValueOnce({
       id: "111",
-      name: "Friends of OpenClaw",
+      name: "Friends of Carapace",
     });
     const cfg = discordAllowlistCfg({
-      "friends-of-openclaw": {
+      "friends-of-carapace": {
         channels: {
           "222": { enabled: true },
         },
@@ -1515,7 +1515,7 @@ describe("handleDiscordMessagingAction", () => {
   });
 
   it("fails closed for Discord message reads when provider config is missing", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await expect(
       handleMessagingAction("readMessages", { channelId: "C1" }, enableAllActions, cfg),
@@ -1558,7 +1558,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await handleMessagingAction(
       "fetchMessage",
       { guildId: "G1", channelId: "C1", messageId: "M1" },
@@ -1576,10 +1576,10 @@ describe("handleDiscordMessagingAction", () => {
     });
     fetchGuildInfoDiscord.mockResolvedValueOnce({
       id: "111",
-      name: "Friends of OpenClaw",
+      name: "Friends of Carapace",
     });
     const cfg = discordAllowlistCfg({
-      "friends-of-openclaw": {
+      "friends-of-carapace": {
         channels: {
           "222": { enabled: true },
         },
@@ -1826,7 +1826,7 @@ describe("handleDiscordMessagingAction", () => {
   });
 
   it("fails closed for Discord guild-wide searches when provider config is missing", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     await expect(
       handleMessagingAction(
@@ -2719,7 +2719,7 @@ describe("handleDiscordGuildAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const result = await handleGuildAction(
       "memberInfo",
       {
@@ -3691,7 +3691,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleDiscordAction(
       { action: "timeout", guildId: "G1", userId: "U1", durationMinutes: 5, accountId: "ops" },
@@ -3716,7 +3716,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       handleDiscordAction(
@@ -3737,7 +3737,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleDiscordAction(
       { action: "kick", guildId: "G1", userId: "U1", accountId: "ops" },
@@ -3756,7 +3756,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       handleDiscordAction(
@@ -3779,7 +3779,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await handleDiscordAction(
       { action: "channelCreate", guildId: "G1", name: "alerts", accountId: "ops" },

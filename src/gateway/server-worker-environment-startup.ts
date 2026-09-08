@@ -1,9 +1,9 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { getRuntimeConfig } from "../config/config.js";
 import { loadOrCreateProcessDeviceIdentity } from "../infra/device-identity.js";
 import { getPairedDevice } from "../infra/device-pairing.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { getGatewayPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-state.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import type { WorkerExecutionMode } from "../plugins/types.js";
@@ -333,7 +333,7 @@ export async function createGatewayWorkerEnvironmentRuntime(params: {
         metadata = getGatewayPluginMetadataSnapshot();
         generation = bootstrapProducers.get(mode);
         if (!generation || generation.registry !== registry || generation.metadata !== metadata) {
-          const packageRoot = resolveOpenClawPackageRootSync({
+          const packageRoot = resolveCarapacePackageRootSync({
             moduleUrl: import.meta.url,
             argv1: process.argv[1],
             cwd: process.cwd(),
@@ -341,7 +341,7 @@ export async function createGatewayWorkerEnvironmentRuntime(params: {
           const runningBuildId = resolveRuntimeServiceBuildId();
           if (!metadata || !packageRoot || !runningBuildId) {
             throw new Error(
-              "Cloud node bootstrap requires the running build and plugin inventory; build OpenClaw and restart the Gateway",
+              "Cloud node bootstrap requires the running build and plugin inventory; build Carapace and restart the Gateway",
             );
           }
           const producer = createNodeBootstrapArtifactProvider({

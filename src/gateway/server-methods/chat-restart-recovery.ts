@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import type { HumanMention } from "../../../packages/gateway-protocol/src/index.js";
-import { OPENCLAW_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
+import { CARAPACE_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
 import { listActiveEmbeddedRunSessionIds } from "../../agents/embedded-agent-runner/active-run-projections.js";
 import { shouldComputeCommandAuthorized } from "../../auto-reply/command-detection.js";
 import { replyRunRegistry } from "../../auto-reply/reply/reply-run-registry.js";
@@ -21,7 +21,7 @@ import {
   type SessionTranscriptTurnLifecyclePatch,
 } from "../../config/sessions/session-accessor.js";
 import { buildRestartRecoveryExpectedState } from "../../config/sessions/session-transcript-turn-state.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadOrCreateProcessDeviceIdentity } from "../../infra/device-identity.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { findRestartRecoveryUnsafeChatAdmissionHook } from "../../plugins/restart-recovery-hook-safety.js";
@@ -40,7 +40,7 @@ import type { GatewayRequestContext } from "./types.js";
 
 export { hasRestartRecoveryTerminalRun };
 
-const RESTART_SAFE_CHAT_REQUEST_VERIFIER_DOMAIN = "openclaw.chat.restart-retry.v1";
+const RESTART_SAFE_CHAT_REQUEST_VERIFIER_DOMAIN = "carapace.chat.restart-retry.v1";
 const log = createSubsystemLogger("gateway/restart-recovery");
 
 type RestartSafeChatRequest = {
@@ -74,7 +74,7 @@ type DurableChatClaimResolution =
   | { kind: "pending"; message: string }
   | { kind: "rejected"; message: string; unavailable?: true };
 
-function hasRestartUnsafeMessageSemantics(rawMessage: string, cfg: OpenClawConfig): boolean {
+function hasRestartUnsafeMessageSemantics(rawMessage: string, cfg: CarapaceConfig): boolean {
   if (
     shouldComputeCommandAuthorized(rawMessage, cfg) ||
     rawMessage.startsWith("/") ||
@@ -118,7 +118,7 @@ export function createRestartSafeChatRequest(params: {
   message: string;
   mentions?: readonly HumanMention[];
   senderIsOwner: boolean;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): RestartSafeChatRequest | undefined {
   if (params.goalRequestFingerprint) {
     // Goal admission owns literal intent; slash-looking objectives are not commands.
@@ -164,7 +164,7 @@ function isAdoptedRestartRecoveryClaim(
 
 export async function resolveDurableChatClaim(params: {
   canonicalSessionKey: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   clientRunId: string;
   entry?: SessionEntry;
   persistedSessionKey: string;
@@ -248,7 +248,7 @@ function isRestartSafeChatSession(params: {
     entry.archivedAt === undefined &&
     entry.initializationPending !== true &&
     entry.pendingFinalDelivery === undefined &&
-    (entry.agentHarnessId === undefined || entry.agentHarnessId === OPENCLAW_AGENT_RUNTIME_ID) &&
+    (entry.agentHarnessId === undefined || entry.agentHarnessId === CARAPACE_AGENT_RUNTIME_ID) &&
     entry.pluginOwnerId === undefined &&
     entry.spawnedBy === undefined &&
     entry.subagentRole === undefined &&
@@ -314,7 +314,7 @@ function hasRestartUnsafeChatWork(params: {
 
 export function resolveRestartSafeChatAdmission(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   clientRunId: string;
   context: Pick<GatewayRequestContext, "chatAbortControllers" | "chatQueuedTurns">;
   entry?: SessionEntry;

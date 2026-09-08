@@ -2,10 +2,10 @@ import {
   SessionsCreateParamsSchema,
   SessionPermissionModeSchema,
   SessionToolOverridesSchema,
-} from "@openclaw/gateway-protocol";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { hasNonEmptyString as isNonEmptyString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/gateway-protocol";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { hasNonEmptyString as isNonEmptyString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { Value } from "typebox/value";
 import type { HumanMention } from "../chat/chat-types.ts";
 import { readHumanMentions } from "../chat/human-mentions.ts";

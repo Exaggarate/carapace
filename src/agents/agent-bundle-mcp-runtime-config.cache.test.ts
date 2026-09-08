@@ -28,7 +28,7 @@ afterEach(async () => {
 });
 
 async function createBundle() {
-  const rootDir = await tempHarness.createTempDir("openclaw-bundle-metadata-cache-");
+  const rootDir = await tempHarness.createTempDir("carapace-bundle-metadata-cache-");
   await writeBundleTextFiles(rootDir, {
     ".claude-plugin/plugin.json": JSON.stringify({ name: "cache-bundle" }),
     ".mcp.json": JSON.stringify({ mcpServers: { bundled: { command: "original" } } }),

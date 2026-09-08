@@ -3,7 +3,7 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { createTempDirTracker } from "../helpers/temp-dir.js";
 
@@ -14,7 +14,7 @@ const BASH_PATH = process.platform === "darwin" ? "/bin/bash" : "bash";
 const tempDirs = createTempDirTracker();
 const sharedTempDirs = createTempDirTracker();
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const PRODUCER_SHA = "0".repeat(40);
 const VERIFIER_SHA = "c".repeat(40);
 const DEFAULT_INPUTS = {
@@ -168,9 +168,9 @@ function createRepo(options: { plistBuildVersion?: string } = {}, dirs = tempDir
     join(origin, "package.json"),
     `${JSON.stringify({ name: "x", version: "2026.7.1" }, null, 2)}\n`,
   );
-  mkdirSync(join(origin, "apps/macos/Sources/OpenClaw/Resources"), { recursive: true });
+  mkdirSync(join(origin, "apps/macos/Sources/Carapace/Resources"), { recursive: true });
   writeFileSync(
-    join(origin, "apps/macos/Sources/OpenClaw/Resources/Info.plist"),
+    join(origin, "apps/macos/Sources/Carapace/Resources/Info.plist"),
     plistFor("2026.7.1", options.plistBuildVersion ?? "2026070100"),
   );
   mkdirSync(join(origin, "docs/install"), { recursive: true });
@@ -321,8 +321,8 @@ function normalizedEvidence(options: {
       "203",
       1,
       1,
-      "OpenClaw Release Checks",
-      "openclaw-release-checks.yml",
+      "Carapace Release Checks",
+      "carapace-release-checks.yml",
       "-release-checks-independent",
     ],
     [
@@ -330,8 +330,8 @@ function normalizedEvidence(options: {
       "207",
       1,
       2,
-      "OpenClaw Release Checks",
-      "openclaw-release-checks.yml",
+      "Carapace Release Checks",
+      "carapace-release-checks.yml",
       "-release-checks-candidate",
     ],
     ...(npmTelegramRequired
@@ -347,7 +347,7 @@ function normalizedEvidence(options: {
           ],
         ] as const)
       : []),
-    ["productPerformance", "204", 3, 2, "OpenClaw Performance", "openclaw-performance.yml", ""],
+    ["productPerformance", "204", 3, 2, "Carapace Performance", "carapace-performance.yml", ""],
   ] as const;
   const children = roles
     .filter(([role]) => !npmBetaCoverage || role !== "productPerformance")
@@ -394,7 +394,7 @@ function normalizedEvidence(options: {
     rerunGroup: "all",
     root,
     runReleaseSoak: soak,
-    schema: "openclaw.release-validation-evidence/v4",
+    schema: "carapace.release-validation-evidence/v4",
     producerOnTrustedMainLineage: !protectedTagRoute,
     trustedWorkflowFullRef,
     trustedWorkflowRef,
@@ -453,7 +453,7 @@ if (
   verifierFileIndex < 0 ||
   reuseRequestIndex < 0 ||
   !isDeepStrictEqual(JSON.parse(process.argv[reuseRequestIndex + 1]), JSON.parse(process.env.FAKE_REUSE_REQUEST)) ||
-  process.argv[repoIndex + 1] !== "openclaw/openclaw" ||
+  process.argv[repoIndex + 1] !== "carapace/carapace" ||
   process.argv[trustedRefIndex + 1] !== process.env.FAKE_TRUSTED_WORKFLOW_REF ||
   process.argv[trustedFullRefIndex + 1] !== process.env.FAKE_TRUSTED_WORKFLOW_FULL_REF ||
   process.argv[trustedShaIndex + 1] !== process.env.FAKE_TRUSTED_WORKFLOW_SHA ||
@@ -471,7 +471,7 @@ if (fixture.exitCode) {
   process.stdout.write(
     \`\${fixture.rawOutput ?? JSON.stringify({
       error: fixture.error ?? "fixture validator rejection",
-      schema: "openclaw.release-validation-evidence/v3",
+      schema: "carapace.release-validation-evidence/v3",
       valid: false,
     })}\\n\`,
   );
@@ -502,7 +502,7 @@ function setUpFixtures(runs: RunFixture[]): {
   writeFileSync(
     fixtureName(
       fixtures,
-      "repos/openclaw/openclaw/actions/workflows/full-release-validation.yml/runs",
+      "repos/carapace/carapace/actions/workflows/full-release-validation.yml/runs",
     ),
     JSON.stringify({ workflow_runs: runs.map(({ runId }) => ({ id: Number(runId) })) }),
   );
@@ -624,7 +624,7 @@ function runResolver(args: {
         }),
         FAKE_VERIFIER_SHA: verifierSha,
         GITHUB_OUTPUT: "",
-        OPENCLAW_RELEASE_CI_SUMMARY_VALIDATOR: args.validatorPath,
+        CARAPACE_RELEASE_CI_SUMMARY_VALIDATOR: args.validatorPath,
         PATH: `${args.binDir}:${process.env.PATH}`,
       },
     },
@@ -688,7 +688,7 @@ describe("scripts/github/find-reusable-release-validation.sh", () => {
               ...DEFAULT_INPUTS,
               telegramWaiver: `${version}-owner-approved`,
               targetVersion: version,
-              releasePackageSpec: `openclaw@${version}`,
+              releasePackageSpec: `carapace@${version}`,
             }
           : DEFAULT_INPUTS,
       });
@@ -829,7 +829,7 @@ describe("scripts/github/find-reusable-release-validation.sh", () => {
     const { clone, priorSha } = getSharedRepo();
     const validationInputs = {
       ...DEFAULT_INPUTS,
-      npmTelegramPackageSpec: "openclaw@2026.7.2-beta.7",
+      npmTelegramPackageSpec: "carapace@2026.7.2-beta.7",
       npmTelegramProviderMode: "live-frontier",
       npmTelegramScenario: "telegram-status-command",
     };
@@ -858,7 +858,7 @@ describe("scripts/github/find-reusable-release-validation.sh", () => {
       const { clone, priorSha } = getSharedRepo();
       const validationInputs = {
         ...DEFAULT_INPUTS,
-        npmTelegramPackageSpec: "openclaw@2026.7.1",
+        npmTelegramPackageSpec: "carapace@2026.7.1",
       };
       const record = normalizedEvidence({ targetSha: priorSha, validationInputs, releaseProfile });
       for (const child of record.children) {
@@ -1207,7 +1207,7 @@ describe("scripts/github/find-reusable-release-validation.sh", () => {
       expected: "validation inputs differ",
       label: "different npm Telegram package",
       recordOptions: {
-        validationInputs: { ...DEFAULT_INPUTS, npmTelegramPackageSpec: "openclaw@old" },
+        validationInputs: { ...DEFAULT_INPUTS, npmTelegramPackageSpec: "carapace@old" },
       },
       resolverOptions: {},
     },

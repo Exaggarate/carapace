@@ -1,4 +1,4 @@
-import { resolvePositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolvePositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { readResponseBodySnippet } from "../infra/http-error-body.js";
 /**
  * Adapts MiniMax VLM image-understanding requests for agent image inputs.
@@ -130,7 +130,7 @@ export async function minimaxUnderstandImage(params: {
       defaultHeaders: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "MM-API-Source": "OpenClaw",
+        "MM-API-Source": "Carapace",
       },
       request: params.request,
       provider: params.provider ?? "minimax",

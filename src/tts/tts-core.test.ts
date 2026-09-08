@@ -1,6 +1,6 @@
 // TTS core tests cover provider selection, synthesis, and error handling.
 import { readFileSync } from "node:fs";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import type { AssistantMessage, Model, Usage } from "../llm/types.js";
 import type { SpeechModelOverridePolicy } from "./provider-types.js";

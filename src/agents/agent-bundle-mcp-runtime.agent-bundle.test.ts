@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadEnabledBundleMcpConfig } from "../plugins/bundle-mcp.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { getPluginToolMeta } from "../plugins/tool-metadata.js";
@@ -108,7 +108,7 @@ process.on("SIGINT", shutdown);
 
 it("discovers an installed Agent Plugins bundle and executes its real stdio tool", async () => {
   const stateDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-bundle-runtime-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-bundle-runtime-")),
   );
   tempDirs.push(stateDir);
   const pluginId = "agent-bundle-probe";
@@ -141,16 +141,16 @@ it("discovers an installed Agent Plugins bundle and executes its real stdio tool
     "utf8",
   );
 
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     plugins: { entries: { [pluginId]: { enabled: true } } },
   };
   await withEnvAsync(
     {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_CONFIG_PATH: undefined,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_HOME: undefined,
+      CARAPACE_CONFIG_PATH: undefined,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
     },
     async () => {
       clearPluginMetadataLifecycleCaches();

@@ -1,7 +1,7 @@
 /** Tests /tools status output for compact and verbose tool inventory modes. */
-import type { ChatCommandDefinition } from "openclaw/plugin-sdk/native-command-registry";
+import type { ChatCommandDefinition } from "carapace/plugin-sdk/native-command-registry";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import * as commandsRegistry from "./commands-registry.js";
 import { buildCommandsMessage, buildHelpMessage, buildToolsMessage } from "./status.js";
 
@@ -42,7 +42,7 @@ describe("tools product copy", () => {
   it("mentions /tools in command discovery copy", () => {
     const cfg = {
       commands: { config: false, debug: false },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(buildCommandsMessage(cfg)).toContain("/tools - List available runtime tools.");
     expect(buildCommandsMessage(cfg)).toContain("More: /tools for available capabilities");

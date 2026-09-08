@@ -72,7 +72,7 @@ export async function dockChatSidePanel(
 
 export async function activateChatHeaderPanelAction(page: Page, label: string): Promise<void> {
   await page.locator(".chat-header-session-menu__trigger").click();
-  const menu = page.locator("openclaw-chat-header-session-menu");
+  const menu = page.locator("carapace-chat-header-session-menu");
   const action = menu
     .locator('wa-dropdown-item[value^="quick:panels:"]')
     .filter({ hasText: label });
@@ -87,7 +87,7 @@ export async function activateChatHeaderPanelAction(page: Page, label: string): 
   await action.waitFor({ state: "visible" });
   await action.click();
   await page.waitForFunction(() => {
-    const dropdown = document.querySelector("openclaw-chat-header-session-menu wa-dropdown");
+    const dropdown = document.querySelector("carapace-chat-header-session-menu wa-dropdown");
     // Web Awesome clears `open` before its hide animation; reopening while the popup is active
     // skips showMenu setup and can let the previous close hide the newly opened submenu.
     const popup = dropdown?.shadowRoot?.querySelector("wa-popup");

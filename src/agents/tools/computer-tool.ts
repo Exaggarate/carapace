@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import type { ComputerUseV2ActionName } from "../../plugins/computer-use-contract.js";
 import { sleep } from "../../utils/sleep.js";
@@ -36,7 +36,7 @@ export type { ComputerContextEpoch, ComputerToolTransport } from "./computer-too
 export { invalidateComputerFrameIfMissing } from "./computer-tool-result.js";
 
 export function createComputerTool(options?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   modelHasVision?: boolean;
   /** Stable run scope used to deduplicate a replayed model tool call on the node. */
   idempotencyScope?: string;

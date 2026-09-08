@@ -4,7 +4,7 @@ import type {
   GatewayClientMode,
   GatewayClientName,
 } from "../../packages/gateway-protocol/src/client-info.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { OperatorScope } from "../gateway/operator-scopes.js";
 import type { DeviceIdentity } from "../infra/device-identity.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
@@ -88,7 +88,7 @@ export async function isImplicitLocalGatewayTargetFromCli(opts: GatewayRpcOpts):
 
 /** Local fallback is safe only for unavailable or explicitly supported older local Gateways. */
 export async function canFallbackToImplicitLocalGateway(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   error: unknown;
   legacyMethod?: string;
   legacyAgentId?: boolean;

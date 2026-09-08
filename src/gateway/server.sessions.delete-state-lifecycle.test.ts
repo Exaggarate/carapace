@@ -18,8 +18,8 @@ import {
   onSessionIdentityMutation,
   type SessionIdentityMutation,
 } from "../sessions/session-lifecycle-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
 import { loadGatewayWorkerEnvironmentStartupState } from "./server-worker-environment-startup.js";
 import type { SessionCompanionAskDeps } from "./session-companion-ask.js";
@@ -60,8 +60,8 @@ afterEach(() => {
   }
   companions.clear();
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 test("repository ownership survives reset and archive, then permanent deletion releases it", async () => {
@@ -71,7 +71,7 @@ test("repository ownership survives reset and archive, then permanent deletion r
   const repository = repositories.create({
     agentId: "main",
     sessionKey,
-    url: "https://github.com/openclaw/fixture.git",
+    url: "https://github.com/Exaggarate/carapace/fixture.git",
     runSetupScript: false,
     assertCurrent: () => {},
   });

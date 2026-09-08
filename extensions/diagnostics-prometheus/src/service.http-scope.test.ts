@@ -17,7 +17,7 @@ const runtimeScope = vi.hoisted(() => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: () => runtimeScope.current(),
 }));
 

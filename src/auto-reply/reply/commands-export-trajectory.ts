@@ -4,7 +4,7 @@ import { formatErrorMessage } from "../../infra/errors.js";
 import type { ReplyPayload } from "../types.js";
 import { formatCommandExecResult, formatCommandExecText } from "./command-exec-result.js";
 import { parseExportCommandOutputPath } from "./commands-export-common.js";
-import { buildCurrentOpenClawCliExecRequest } from "./commands-openclaw-cli.js";
+import { buildCurrentCarapaceCliExecRequest } from "./commands-carapace-cli.js";
 import {
   buildPrivateCommandApprovalRequest,
   deliverPrivateCommandReply,
@@ -14,7 +14,7 @@ import {
 } from "./commands-private-route.js";
 import type { HandleCommandsParams } from "./commands-types.js";
 
-const EXPORT_TRAJECTORY_DOCS_URL = "https://docs.openclaw.ai/tools/trajectory";
+const EXPORT_TRAJECTORY_DOCS_URL = "https://github.com/Exaggarate/carapace";
 const EXPORT_TRAJECTORY_EXEC_SCOPE_KEY = "chat:export-trajectory";
 const MAX_TRAJECTORY_EXPORT_ENCODED_REQUEST_CHARS = 8192;
 const EXPORT_TRAJECTORY_PRIVATE_ROUTE_UNAVAILABLE =
@@ -183,8 +183,8 @@ function buildTrajectoryExportExecRequest(
   }
   const args = ["sessions", "export-trajectory", "--request-json-base64", encodedRequest, "--json"];
   return {
-    ...buildCurrentOpenClawCliExecRequest(args),
-    displayCommand: ["openclaw", ...args].join(" "),
+    ...buildCurrentCarapaceCliExecRequest(args),
+    displayCommand: ["carapace", ...args].join(" "),
     encodedRequest,
     request,
   };

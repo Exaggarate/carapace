@@ -12,11 +12,11 @@ import type {
 import type {
   ChannelInboundMediaInput,
   NormalizedLocation,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { renderTelegramTextEntities } from "./inbound-text-entities.js";
 
 type TelegramMediaMessage = Pick<

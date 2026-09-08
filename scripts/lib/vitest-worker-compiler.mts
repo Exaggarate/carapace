@@ -76,14 +76,14 @@ async function compileVitestWorkerArtifacts(directory: string): Promise<void> {
     deps: {
       // Root runtime dependencies stay external; bundled workspace code owns its private deps.
       alwaysBundle: (id) =>
-        (id.startsWith("@openclaw/") || id.startsWith("openclaw/")) &&
+        (id.startsWith("@carapace/") || id.startsWith("carapace/")) &&
         id !== "@openclaw/fs-safe" &&
         !id.startsWith("@openclaw/fs-safe/"),
     },
     logLevel: "warn",
     plugins: [
       {
-        name: "openclaw:maintenance-service-boundary",
+        name: "carapace:maintenance-service-boundary",
         resolveId(id, importer) {
           if (
             importer &&
@@ -100,7 +100,7 @@ async function compileVitestWorkerArtifacts(directory: string): Promise<void> {
         },
       },
       {
-        name: "openclaw:worker-build-inputs",
+        name: "carapace:worker-build-inputs",
         load(id) {
           recordInput(id);
           return null;

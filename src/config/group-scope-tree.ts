@@ -1,9 +1,9 @@
 // Resolves canonical group policy scopes prepared by channel plugins.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ChannelId } from "../channels/plugins/channel-id.types.js";
 import { resolveChannelGroups } from "./channel-groups.js";
 import { resolveToolsBySender } from "./tools-by-sender.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import type { GroupToolPolicyBySenderConfig, GroupToolPolicyConfig } from "./types.tools.js";
 
 export type ScopeNode = {
@@ -32,7 +32,7 @@ export function scopeKey(...segments: Array<readonly [prefix: string, value: str
 type ScopeToolPolicySender = Omit<Parameters<typeof resolveToolsBySender>[0], "toolsBySender">;
 
 export function buildChannelGroupsScopeTree(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: ChannelId,
   accountId?: string | null,
 ): ScopeTree {

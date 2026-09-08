@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
+import { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   approveChannelPairingCode,
@@ -11,18 +11,18 @@ import {
   removeChannelAllowFromStoreEntry,
   upsertChannelPairingRequest,
 } from "../pairing/pairing-store.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createPluginRuntimeMock } from "./test-helpers/plugin-runtime-mock.js";
 
 let stateDir: string;
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   fs.rmSync(stateDir, { recursive: true, force: true });
 });
 
 function createPairingFixture() {
-  stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-scoped-pairing-"));
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-scoped-pairing-"));
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const core = createPluginRuntimeMock({
     channel: {
       pairing: {
@@ -61,7 +61,7 @@ describe("channel pairing account isolation", () => {
       code: alpha.code,
       created: false,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(listChannelPairingRequests("demo", env, "alpha")).resolves.toMatchObject([
       { id: "shared-sender", code: alpha.code, meta: { name: "Alpha sender", accountId: "alpha" } },
     ]);
@@ -120,7 +120,7 @@ describe("channel pairing account isolation", () => {
     });
     await expect(listChannelPairingRequests("other", env, "beta")).resolves.toEqual([]);
     expect(replies).toHaveLength(1);
-    expect(replies[0]).toContain(`openclaw pairing approve demo ${stored.code}`);
+    expect(replies[0]).toContain(`carapace pairing approve demo ${stored.code}`);
     await expect(pairing.issueChallenge(challenge)).resolves.toEqual({ created: false });
     expect(replies).toHaveLength(1);
     await expect(

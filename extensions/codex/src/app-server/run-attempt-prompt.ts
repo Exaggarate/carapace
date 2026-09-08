@@ -4,12 +4,12 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   resolveAgentHarnessBeforePromptBuildResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { ImageContent } from "openclaw/plugin-sdk/llm";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { ImageContent } from "carapace/plugin-sdk/llm";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildCodexSystemPromptReport,
-  prependCodexOpenClawPromptContext,
+  prependCodexCarapacePromptContext,
   readContextEngineThreadBootstrapProjection,
   resolveCodexDeliveryHintPreservedInputRange,
   resolveContextEngineBootstrapProjectionDecision,
@@ -52,7 +52,7 @@ export async function prepareCodexAttemptPrompt(context: CodexAttemptContext) {
     workspaceBootstrapContext,
     buildActiveContextEngineRuntimeContext,
     baseDeveloperInstructions,
-    buildOpenClawPromptContext,
+    buildCarapacePromptContext,
     skillsCollaborationInstructions,
     promptState,
     codexContextProjectionMaxChars,
@@ -93,7 +93,7 @@ export async function prepareCodexAttemptPrompt(context: CodexAttemptContext) {
     // Older hosts retain ordinary text history, but cannot claim restored attachments.
     const prepare = params.hostCapabilities.prepareContextMedia;
     if (!prepare) {
-      const media = asOptionalRecord(Reflect.get(message, "__openclaw"))?.media;
+      const media = asOptionalRecord(Reflect.get(message, "__carapace"))?.media;
       if (
         (Array.isArray(media) && media.length) ||
         (message.role === "user" &&
@@ -101,7 +101,7 @@ export async function prepareCodexAttemptPrompt(context: CodexAttemptContext) {
           message.content.some((part) => part.type === "image"))
       ) {
         throw new CodexContextAttachmentError(
-          "Saved attachments require a newer OpenClaw host. Update the Gateway and Codex plugin together, then retry.",
+          "Saved attachments require a newer Carapace host. Update the Gateway and Codex plugin together, then retry.",
         );
       }
       return { images: [] };
@@ -333,9 +333,9 @@ export async function prepareCodexAttemptPrompt(context: CodexAttemptContext) {
     },
     includeWorkspaceReferences = true,
   ) => {
-    const turnPromptText = prependCodexOpenClawPromptContext(
+    const turnPromptText = prependCodexCarapacePromptContext(
       promptBuildResult.prompt,
-      buildOpenClawPromptContext(includeWorkspaceReferences),
+      buildCarapacePromptContext(includeWorkspaceReferences),
       {
         preservePromptWithoutContext:
           params.bootstrapContextMode === "lightweight" &&

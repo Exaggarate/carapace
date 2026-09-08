@@ -2,9 +2,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, OpenClawPluginApi, OpenClawPluginToolContext } from "../api.js";
+import type { CarapaceConfig, CarapacePluginApi, CarapacePluginToolContext } from "../api.js";
 import type { DiffScreenshotter } from "./browser.runtime.js";
 import { resolveDiffsPluginDefaults } from "./config.js";
 import { registerDiffsPlugin } from "./plugin.js";
@@ -13,13 +13,13 @@ import { createDiffStoreHarness } from "./test-helpers.js";
 import { createDiffsTool } from "./tool.js";
 import type { DiffRenderOptions } from "./types.js";
 
-const { resolvePreferredOpenClawTmpDir } = vi.hoisted(() => ({
-  resolvePreferredOpenClawTmpDir: vi.fn(),
+const { resolvePreferredCarapaceTmpDir } = vi.hoisted(() => ({
+  resolvePreferredCarapaceTmpDir: vi.fn(),
 }));
 
 vi.mock("../api.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api.js")>()),
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
 }));
 
 vi.mock("./browser.runtime.js", () => {
@@ -35,14 +35,14 @@ describe("diffs tool", () => {
   let blobStore: Awaited<ReturnType<typeof createDiffStoreHarness>>["blobStore"];
 
   beforeEach(async () => {
-    resolvePreferredOpenClawTmpDir.mockReturnValue(os.tmpdir());
+    resolvePreferredCarapaceTmpDir.mockReturnValue(os.tmpdir());
     ({
       rootDir,
       store,
       blobStore,
       cleanup: cleanupRootDir,
-    } = await createDiffStoreHarness("openclaw-diffs-tool-"));
-    resolvePreferredOpenClawTmpDir.mockReturnValue(rootDir);
+    } = await createDiffStoreHarness("carapace-diffs-tool-"));
+    resolvePreferredCarapaceTmpDir.mockReturnValue(rootDir);
   });
 
   afterEach(async () => {
@@ -72,8 +72,8 @@ describe("diffs tool", () => {
   });
 
   it("uses current public origin for retained tools after config reload", async () => {
-    let config: OpenClawConfig = { gateway: { publicOrigin: "https://first.example" } };
-    const registerTool = vi.fn<OpenClawPluginApi["registerTool"]>();
+    let config: CarapaceConfig = { gateway: { publicOrigin: "https://first.example" } };
+    const registerTool = vi.fn<CarapacePluginApi["registerTool"]>();
     const api = createTestPluginApi({ id: "diffs", config, registerTool });
     api.runtime.state = {
       ...api.runtime.state,
@@ -135,7 +135,7 @@ describe("diffs tool", () => {
       getConfig: () => ({}),
       store,
       defaults: DEFAULT_DIFFS_TOOL_DEFAULTS,
-      viewerBaseUrl: "https://example.com/openclaw",
+      viewerBaseUrl: "https://example.com/carapace",
     });
 
     const result = await tool.execute?.("tool-viewer-config", {
@@ -146,10 +146,10 @@ describe("diffs tool", () => {
     });
 
     expect(readTextContent(result, 0)).toContain(
-      "https://example.com/openclaw/plugins/diffs/view/",
+      "https://example.com/carapace/plugins/diffs/view/",
     );
     expect(String((result.details as Record<string, unknown>).viewerUrl)).toContain(
-      "https://example.com/openclaw/plugins/diffs/view/",
+      "https://example.com/carapace/plugins/diffs/view/",
     );
   });
 
@@ -158,7 +158,7 @@ describe("diffs tool", () => {
       getConfig: () => ({}),
       store,
       defaults: DEFAULT_DIFFS_TOOL_DEFAULTS,
-      viewerBaseUrl: "https://example.com/openclaw",
+      viewerBaseUrl: "https://example.com/carapace",
     });
 
     const result = await tool.execute?.("tool-viewer-override", {
@@ -646,7 +646,7 @@ function createToolWithScreenshotter(
   store: DiffArtifactStore,
   screenshotter: DiffScreenshotter,
   defaults = DEFAULT_DIFFS_TOOL_DEFAULTS,
-  context: OpenClawPluginToolContext = {
+  context: CarapacePluginToolContext = {
     agentId: "main",
     sessionId: "session-123",
     messageChannel: "discord",

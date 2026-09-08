@@ -1,5 +1,5 @@
 import { setImmediate } from "node:timers/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it } from "vitest";
 import { createNodeBootstrapFixture } from "./crabbox-worker-node-enrollment.test-support.js";
 import {
@@ -17,7 +17,7 @@ const enrollment = (waitForDeviceId: () => Promise<string>) => ({
   mode: "connect" as const,
   setupCode: "setup-code",
   setupId: "setup-id",
-  openclawVersion: "2026.8.1",
+  carapaceVersion: "2026.8.1",
   nodeBootstrap: createNodeBootstrapFixture(),
   displayName: "Cancelled worker",
   waitForDeviceId,

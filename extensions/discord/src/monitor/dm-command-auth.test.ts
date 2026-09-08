@@ -10,14 +10,14 @@ const participantResolutions = vi.hoisted(
     [] as Array<
       ReturnType<
         NonNullable<
-          import("openclaw/plugin-sdk/channel-ingress-runtime").ChannelIngressIdentityDescriptor["resolveParticipant"]
+          import("carapace/plugin-sdk/channel-ingress-runtime").ChannelIngressIdentityDescriptor["resolveParticipant"]
         >
       >
     >,
 );
-vi.mock("openclaw/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/channel-ingress-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/channel-ingress-runtime")>();
   return {
     ...actual,
     defineStableChannelIngressIdentity: (

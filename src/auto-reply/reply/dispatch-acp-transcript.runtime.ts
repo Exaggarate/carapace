@@ -1,17 +1,17 @@
-// Bridges ACP transcript events into persisted OpenClaw session transcripts.
-import { resolveAcpSessionCwd } from "@openclaw/acp-core/runtime/session-identifiers";
+// Bridges ACP transcript events into persisted Carapace session transcripts.
+import { resolveAcpSessionCwd } from "@carapace/acp-core/runtime/session-identifiers";
 import type { AgentRunTerminalOutcome } from "../../agents/agent-run-terminal-outcome.js";
 import { persistAcpTurnTranscript } from "../../agents/command/attempt-execution.js";
 import { resolveSessionStorePathCore } from "../../config/sessions.js";
 import { loadSessionEntryReadOnly } from "../../config/sessions/session-accessor.js";
 import type { PrepareAssistantTranscriptMessage } from "../../config/sessions/transcript-assistant-delivery.js";
 import type { SessionAcpMeta } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { UserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
 import type { ReplyDispatchAssistantTranscript } from "../get-reply-options.types.js";
 
 export async function persistAcpDispatchTranscript(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   expectedSessionId?: string;

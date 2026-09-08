@@ -1,5 +1,5 @@
-import { isValidAgentId, normalizeAgentId } from "@openclaw/normalization-core/agent-id";
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { isValidAgentId, normalizeAgentId } from "@carapace/normalization-core/agent-id";
+import { uniqueValues } from "@carapace/normalization-core/string-normalization";
 import { z } from "zod";
 import { CONTROL_UI_ENVIRONMENT_COLORS } from "../gateway/control-ui-bootstrap-contract.js";
 import {

@@ -1,4 +1,4 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { formatSqliteErrorCodeSuffix } from "./sqlite-error-diagnostics.js";
 import {
   prepareSqliteReadOnlyLocationInProcess,

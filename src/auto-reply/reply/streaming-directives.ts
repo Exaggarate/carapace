@@ -1,5 +1,5 @@
 // Converts streaming reply directives into payload delivery decisions.
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import {
   parseInlineDirectives,
   stripInlineDirectiveTagsForDelivery,

@@ -121,7 +121,7 @@ export function installPreCommitFixture(dir: string): string {
 }
 
 export function createContentGuardFixture(tempDirs: string[]): string {
-  const dir = makeTempRepoRoot(tempDirs, "openclaw-content-guard-");
+  const dir = makeTempRepoRoot(tempDirs, "carapace-content-guard-");
   run(dir, "git", ["init", "-q", "--initial-branch=main"]);
   installPreCommitFixture(dir);
   return dir;

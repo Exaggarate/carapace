@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.ts";
 import type { SessionsListResult } from "../api/types.ts";

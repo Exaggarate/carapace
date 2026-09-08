@@ -1,8 +1,8 @@
 import type {
   ChannelIngressContextBinding,
   ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
+import type { ReplyToMode } from "carapace/plugin-sdk/config-contracts";
 import { resolveWhatsAppGroupConversationId } from "./group-conversation.js";
 
 type WhatsAppInboundIngressDecision = Pick<

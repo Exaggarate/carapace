@@ -8,14 +8,14 @@ sidebarTitle: "Onboarding: CLI"
 ---
 
 ```bash
-openclaw onboard
+carapace onboard
 ```
 
 CLI onboarding is the recommended terminal setup path on macOS, Linux, and
 Windows (native or WSL2). On a fresh install, **Quick start** detects available AI
 access, waits for you to choose a connection, verifies your choice with a real
 completion, and opens the web dashboard with a foreground Gateway. **Custom setup** preserves the full
-guided flow. `openclaw setup` runs the same flow ([Setup](/cli/setup) covers
+guided flow. `carapace setup` runs the same flow ([Setup](/cli/setup) covers
 the `--baseline` config-only variant). Windows desktop users can also start
 from [Windows Hub](/platforms/windows).
 
@@ -28,8 +28,8 @@ resumes on the next run.
 
 The classic wizard remains available for remote Gateway setup, channel pairing,
 daemon controls, skills, and imports. Run it explicitly
-with `openclaw onboard --classic`; the guided inference picker does not delegate
-into it. After inference passes, OpenClaw can use `open channel wizard for
+with `carapace onboard --classic`; the guided inference picker does not delegate
+into it. After inference passes, Carapace can use `open channel wizard for
 <channel>` to hand channel setup that needs secrets to a masked terminal wizard.
 Workspace skills and web search are configured the same conversational way:
 `configure skills` and `configure web search` host those setup flows in the
@@ -38,31 +38,31 @@ wizard.
 For a local Gateway, `configure gateway` guides port, bind, auth, and Tailscale
 settings but saves config without restarting; say `restart gateway` afterward,
 or use `open gateway wizard` for masked terminal credential entry and then run
-`openclaw gateway restart`. Remote Gateway mode remains an onboarding or
-`openclaw configure` choice rather than a hosted chat wizard.
+`carapace gateway restart`. Remote Gateway mode remains an onboarding or
+`carapace configure` choice rather than a hosted chat wizard.
 
 After onboarding has created the default agent workspace, `import memory` can
 copy detected local memory into it. This conversational import does not change
 config or import credentials or skills, needs no Gateway restart, and reports
 per-source partial or failed copies honestly.
-To change the model provider or its authentication, exit OpenClaw and run
-`openclaw onboard`; OpenClaw does not open guided or classic provider flows.
+To change the model provider or its authentication, exit Carapace and run
+`carapace onboard`; Carapace does not open guided or classic provider flows.
 
 <Info>
-On a fresh install, run `npx openclaw@latest` and choose **Quick start** for the
-browser dashboard. Reopen it later with `openclaw dashboard`.
+On a fresh install, run `npx carapace@latest` and choose **Quick start** for the
+browser dashboard. Reopen it later with `carapace dashboard`.
 Docs: [Dashboard](/web/dashboard).
 </Info>
 
 ## Locale
 
 The wizard localizes fixed onboarding copy. It uses the first nonblank value from
-`OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then
+`CARAPACE_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then
 falls back to English. Supported locales: `en`, `zh-CN`, `zh-TW`.
 
 ```bash
-OPENCLAW_LOCALE=zh-CN openclaw onboard
-OPENCLAW_LOCALE=en openclaw onboard # Explicit English override
+CARAPACE_LOCALE=zh-CN carapace onboard
+CARAPACE_LOCALE=en carapace onboard # Explicit English override
 ```
 
 Product names, commands, config keys, URLs, provider IDs, model IDs, and
@@ -71,8 +71,8 @@ plugin/channel labels stay in English regardless of locale.
 To reconfigure non-inference settings later:
 
 ```bash
-openclaw configure
-openclaw agents add <name>
+carapace configure
+carapace agents add <name>
 ```
 
 <Note>
@@ -83,8 +83,8 @@ openclaw agents add <name>
 The classic wizard includes a web search step where you can pick a provider: Brave,
 DuckDuckGo, Exa, Firecrawl, Gemini, Grok, Kimi, MiniMax Search, Ollama Web
 Search, Perplexity, SearXNG, or Tavily. Some need an API key; others are
-key-free. Configure this later with `openclaw configure --section web`, or say
-`configure web search` in the OpenClaw chat to run the same provider setup
+key-free. Configure this later with `carapace configure --section web`, or say
+`configure web search` in the Carapace chat to run the same provider setup
 conversationally. Docs: [Web tools](/tools/web).
 </Tip>
 
@@ -126,8 +126,8 @@ Quick start follows this path:
 5. Save the verified route, prepare the agent workspace, and persist Gateway
    settings.
 6. Start the Gateway in the foreground and open the browser dashboard. Press
-   **Ctrl+C** to stop it; config persists. Use `openclaw gateway install` later
-   for background operation, `openclaw` for the TUI, or `openclaw dashboard` to
+   **Ctrl+C** to stop it; config persists. Use `carapace gateway install` later
+   for background operation, `carapace` for the TUI, or `carapace dashboard` to
    reopen the web UI.
 
 The quick-start choice is not offered for configured installs, remote Gateway
@@ -135,13 +135,13 @@ chat setup, non-interactive runs, or runs with `--skip-ui` or `--tui`.
 
 Re-running the command on a configured installation offers the current default
 model first. Select it for a verification and repair pass. A failed check never
-replaces the configured model automatically; onboarding waits for your next choice. Run `openclaw channels add` or `openclaw configure` for
-later non-inference additions; use `openclaw onboard` for provider or auth route
+replaces the configured model automatically; onboarding waits for your next choice. Run `carapace channels add` or `carapace configure` for
+later non-inference additions; use `carapace onboard` for provider or auth route
 changes.
 
 ## Classic wizard setup modes
 
-Run `openclaw onboard --classic` to open the full wizard. Its **Setup mode**
+Run `carapace onboard --classic` to open the full wizard. Its **Setup mode**
 menu is built from the current installation:
 
 - With no configured default model, **QuickStart (recommended)** is selected by
@@ -167,7 +167,7 @@ directly instead of showing a menu that could discard the requested import.
     - Gateway port **18789**
     - Gateway auth **Token** (auto-generated, even on loopback)
     - Tool policy: `tools.profile: "coding"` for new setups (an existing explicit profile is preserved)
-    - DM sessions: onboarding preserves an explicit `session.dmScope` and otherwise leaves it unset, so the `"main"` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `"per-channel-peer"`; `openclaw security audit` recommends isolation when it detects multi-user DM traffic. Details: [CLI setup reference](/start/wizard-cli-reference#outputs-and-internals)
+    - DM sessions: onboarding preserves an explicit `session.dmScope` and otherwise leaves it unset, so the `"main"` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `"per-channel-peer"`; `carapace security audit` recommends isolation when it detects multi-user DM traffic. Details: [CLI setup reference](/start/wizard-cli-reference#outputs-and-internals)
     - Tailscale exposure **Off**
     - Telegram and WhatsApp DMs default to **allowlist**: Telegram asks for a numeric Telegram user ID, WhatsApp asks for a phone number
 
@@ -186,7 +186,7 @@ or changes anything on the remote host.
 
 Local mode (default) walks through these steps:
 
-1. **Workspace** - directory for agent files (default `~/.openclaw/workspace`). Seeds bootstrap files.
+1. **Workspace** - directory for agent files (default `~/.carapace/workspace`). Seeds bootstrap files.
 2. **Model/Auth** - pick a provider auth flow (API key, OAuth, or
    provider-specific manual auth), including Custom Provider
    (OpenAI-compatible, OpenAI Responses-compatible, Anthropic-compatible, or
@@ -209,7 +209,7 @@ Local mode (default) walks through these steps:
    `exec`), with a fast preflight check before saving. After model/auth setup,
    the wizard offers an optional live completion test; a failure can return to
    model/auth setup once or be ignored without blocking the rest of the
-   classic wizard. Ignoring it does not unlock OpenClaw; conversational setup
+   classic wizard. Ignoring it does not unlock Carapace; conversational setup
    still requires a passing inference check.
 3. **Gateway** - port, bind address, secret storage, and Tailscale exposure.
    Generates a Gateway secret in token mode by default, without asking you to
@@ -246,22 +246,22 @@ Migration import options (`--flow import`, `--import-from`, `--import-source`,
 and `--import-secrets`) cannot be combined with `--reset`; run the import
 without `--reset`.
 Without `--reset`, an invalid config or legacy keys make onboarding ask you to
-run `openclaw doctor` first.
+run `carapace doctor` first.
 </Note>
 
 `--flow import` runs a detected migration flow (for example Hermes) in the
 classic wizard instead of fresh setup; see [Migrate](/cli/migrate) and the migration guides under
-[Install](/install/migrating-hermes). `openclaw onboard --modern` is a
-compatibility alias for [OpenClaw](/cli/openclaw). It uses the same
-inference gate as `openclaw setup`: verified inference starts the
+[Install](/install/migrating-hermes). `carapace onboard --modern` is a
+compatibility alias for [Carapace](/cli/carapace). It uses the same
+inference gate as `carapace setup`: verified inference starts the
 assistant, while an interactive failure returns to guided inference setup.
 
 ## Add another agent
 
-Use `openclaw agents add <name>` to create a separate agent with its own
+Use `carapace agents add <name>` to create a separate agent with its own
 workspace, sessions, and auth profiles. Running without `--workspace` starts
 an interactive flow for name, workspace, auth, channels, and bindings - it is
-not the full `openclaw onboard` wizard.
+not the full `carapace onboard` wizard.
 
 What it sets:
 
@@ -271,7 +271,7 @@ What it sets:
 
 Notes:
 
-- Default workspace: `~/.openclaw/workspace-<agentId>` (or under
+- Default workspace: `~/.carapace/workspace-<agentId>` (or under
   `agents.defaults.workspace` if that is set).
 - Add `bindings` to route inbound messages to this agent (onboarding can do this for you).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
@@ -281,11 +281,11 @@ Notes:
 For detailed step-by-step behavior and config outputs, see
 [CLI setup reference](/start/wizard-cli-reference).
 For non-interactive examples, see [CLI automation](/start/wizard-cli-automation).
-For the full flag reference, see [`openclaw onboard`](/cli/onboard).
+For the full flag reference, see [`carapace onboard`](/cli/onboard).
 
 ## Related docs
 
-- CLI command reference: [`openclaw onboard`](/cli/onboard)
+- CLI command reference: [`carapace onboard`](/cli/onboard)
 - Onboarding overview: [Onboarding overview](/start/onboarding-overview)
 - macOS app onboarding: [Onboarding](/start/onboarding)
 - Agent first-run ritual: [Agent Bootstrapping](/start/bootstrapping)

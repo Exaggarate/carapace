@@ -1,18 +1,18 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@carapace/normalization-core/string-coerce";
 import type { AgentModelPrimaryWriteTarget } from "../../agents/agent-scope.js";
 /** Parameter contracts for the canonical directive transaction handler. */
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import type { ModelAliasIndex } from "../../agents/model-selection.js";
 import type { ModelVisibilityPolicy } from "../../agents/model-visibility-policy.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { MsgContext } from "../templating.js";
 import type { InlineDirectives } from "./directive-handling.parse.js";
 import type { ElevatedLevel, ReasoningLevel, ThinkLevel, VerboseLevel } from "./directives.js";
 
 /** Core directive handler inputs that do not depend on the inbound message shape. */
 type HandleDirectiveOnlyCoreParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   directives: InlineDirectives;
   sessionEntry: SessionEntry;

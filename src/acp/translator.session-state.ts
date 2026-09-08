@@ -1,11 +1,11 @@
 /** Gateway-backed ACP session snapshots, controls, metadata, and usage updates. */
 import type { SessionInfo } from "@agentclientprotocol/sdk";
-import { toAcpSessionLineageMeta } from "@openclaw/acp-core/session-lineage-meta";
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+import { toAcpSessionLineageMeta } from "@carapace/acp-core/session-lineage-meta";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeFastMode,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { GatewayClient } from "../gateway/client.js";
 import type { GatewaySessionRow, SessionsListResult } from "../gateway/session-utils.js";
 import {

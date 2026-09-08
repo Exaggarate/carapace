@@ -69,7 +69,7 @@ function restoreStderrIsTTY(): void {
 }
 
 function createRegisteredCronCommand(): Command {
-  const program = new Command().name("openclaw");
+  const program = new Command().name("carapace");
   registerCronCli(program);
   const cron = program.commands.find((command) => command.name() === "cron");
   if (!cron) {
@@ -101,7 +101,7 @@ describe("cron machine-output help", () => {
     );
     expect(jsonOption?.defaultValue).toBeUndefined();
     for (const commandName of [name, ...aliases]) {
-      expect(isCronMachineOutput(["node", "openclaw", "cron", commandName])).toBe(true);
+      expect(isCronMachineOutput(["node", "carapace", "cron", commandName])).toBe(true);
     }
   });
 
@@ -128,7 +128,7 @@ describe("cron machine-output help", () => {
       for (const commandName of [command.name(), ...command.aliases()]) {
         for (const root of ["cron", "automations"]) {
           for (const parentOptions of gatewayOptions) {
-            const argv = ["node", "openclaw", root, ...parentOptions, commandName];
+            const argv = ["node", "carapace", root, ...parentOptions, commandName];
             expect(isCronMachineOutput(argv), argv.join(" ")).toBe(reservesMachineOutput);
           }
         }
@@ -143,9 +143,9 @@ describe("cron machine-output help", () => {
     { root: "cron", option: "--token", value: "test-token" },
     { root: "cron", option: "--password", value: "test-password" },
   ])("preserves JSON mode for $root $option before status", async ({ root, option, value }) => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     registerCronCli(program);
-    const argv = ["node", "openclaw", root, option, value, "status"];
+    const argv = ["node", "carapace", root, option, value, "status"];
     const writeJson = vi.spyOn(defaultRuntime, "writeJson").mockImplementation(() => {});
     callGatewayFromCli.mockResolvedValueOnce({ enabled: true });
     program.hook("preAction", (_parent, command) => {
@@ -266,7 +266,7 @@ describe("cron show pagination guard (regression for #83856)", () => {
     await expect(runCronShow("missing")).rejects.toThrow("exit 1");
     expect(defaultRuntime.error).toHaveBeenCalledWith(
       expect.stringContaining(
-        "Automation not found: missing. Run `openclaw cron list` to see recent automation ids.",
+        "Automation not found: missing. Run `carapace cron list` to see recent automation ids.",
       ),
     );
   });
@@ -304,7 +304,7 @@ describe("cron disable hint", () => {
       patch: { enabled: params.command === "enable" },
     });
     if (params.expectedHint) {
-      expect(stderrWrite).toHaveBeenCalledWith(expect.stringContaining("openclaw cron list --all"));
+      expect(stderrWrite).toHaveBeenCalledWith(expect.stringContaining("carapace cron list --all"));
     } else {
       expect(stderrWrite).not.toHaveBeenCalled();
     }

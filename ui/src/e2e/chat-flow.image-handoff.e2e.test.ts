@@ -42,7 +42,7 @@ suite.define(() => {
         });
         let metadataRequested = false;
         let imageRequested = false;
-        await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+        await page.route("**/__carapace__/assistant-media?**", async (route) => {
           const request = route.request();
           const url = new URL(request.url());
           expect(url.searchParams.get("source")).toBe(source);
@@ -168,7 +168,7 @@ suite.define(() => {
               role: "user",
               content: prompt,
               timestamp: acceptedAt,
-              __openclaw: {
+              __carapace: {
                 id: "pending:accepted-image-input",
                 mediaImageLayout: { slots: [{ kind: "inline", factIndex: 0 }] },
                 media: [{ path: source, contentType: "image/png", fileName: "stable-preview.png" }],
@@ -204,8 +204,8 @@ suite.define(() => {
 
           const canonical = {
             ...pendingInput.message,
-            __openclaw: {
-              ...pendingInput.message["__openclaw"],
+            __carapace: {
+              ...pendingInput.message["__carapace"],
               id: pendingInput.id,
               seq: 1,
               idempotencyKey: `${runId}:user`,

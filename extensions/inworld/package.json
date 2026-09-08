@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/inworld-speech",
+  "name": "@carapace/inworld-speech",
   "version": "2026.9.2",
-  "description": "OpenClaw Inworld speech plugin.",
+  "description": "Carapace Inworld speech plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/inworld-speech",
-      "npmSpec": "@openclaw/inworld-speech",
+      "clawhubSpec": "clawhub:@carapace/inworld-speech",
+      "npmSpec": "@carapace/inworld-speech",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

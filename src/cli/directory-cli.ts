@@ -1,9 +1,9 @@
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 // Directory CLI for chat-channel identity lookup: self, peers, groups, and group members.
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
@@ -84,19 +84,19 @@ export function registerDirectoryCli(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw directory self --channel slack", "Show the connected account identity."],
+          ["carapace directory self --channel slack", "Show the connected account identity."],
           [
-            'openclaw directory peers list --channel slack --query "alice"',
+            'carapace directory peers list --channel slack --query "alice"',
             "Search contact/user IDs by name.",
           ],
-          ["openclaw directory groups list --channel discord", "List available groups/channels."],
+          ["carapace directory groups list --channel discord", "List available groups/channels."],
           [
-            "openclaw directory groups members --channel discord --group-id <id>",
+            "carapace directory groups members --channel discord --group-id <id>",
             "List members for a specific group.",
           ],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/directory",
-          "docs.openclaw.ai/cli/directory",
+          "github.com/Exaggarate/carapace",
         )}\n`,
     )
     .action(() => {

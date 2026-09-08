@@ -1,4 +1,4 @@
-import type { TranscriptUtterance } from "openclaw/plugin-sdk/transcripts";
+import type { TranscriptUtterance } from "carapace/plugin-sdk/transcripts";
 
 export type DiscordVoiceTranscriptCapture = {
   sessionId: string;

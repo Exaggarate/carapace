@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { AgentHarnessPreflightError } from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { startCodexAttemptThread } from "./attempt-startup.js";
 import {
@@ -122,7 +122,7 @@ async function startIsolatedPairedAttempt(params: {
   params.harness.send({ id: threadStart.id, result: threadStartResult(params.sessionId) });
   const result = await run;
   const environmentId = (environmentAdd.params as { environmentId?: string }).environmentId;
-  expect(environmentId).toMatch(/^openclaw-node-/u);
+  expect(environmentId).toMatch(/^carapace-node-/u);
   expect(
     readHarnessMessages(params.harness.writes).filter(({ method }) => method === "environment/add"),
   ).toHaveLength(1);

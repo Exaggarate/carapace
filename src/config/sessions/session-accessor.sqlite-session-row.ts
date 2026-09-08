@@ -1,4 +1,4 @@
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
 import {
   deliveryContextFromSession,
   sessionDeliveryChannel,

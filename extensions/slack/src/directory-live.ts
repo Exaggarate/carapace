@@ -3,12 +3,12 @@ import type { ConversationsListResponse, UsersListResponse } from "@slack/web-ap
 import type {
   ChannelDirectoryEntry,
   DirectoryConfigParams,
-} from "openclaw/plugin-sdk/directory-runtime";
+} from "carapace/plugin-sdk/directory-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveSlackAccount } from "./accounts.js";
 import { createSlackLookupClient } from "./client.js";
 import { collectSlackCursorPages, fetchSlackChannelListPage } from "./cursor-pages.js";

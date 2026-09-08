@@ -1,11 +1,11 @@
-import type { NormalizedModelCatalogRow } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { NormalizedModelCatalogRow } from "@carapace/model-catalog-core/model-catalog-types";
 /** Dependency-light model catalog snapshots for default model-list views. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { modelCatalogRowToEntry } from "../../agents/model-catalog-entry.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
 import { modelTransportRoutesMatch } from "../../agents/model-compat-catalog.js";
 import { modelKey } from "../../agents/model-ref-shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import {
@@ -41,7 +41,7 @@ function routeKey(entry: ModelCatalogEntry): string {
 }
 
 function resolveConfiguredProviderCoverage(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   providerIds: ReadonlySet<string>,
   ownedProviderIds: ReadonlySet<string>,
 ): ReadonlySet<string> {
@@ -127,7 +127,7 @@ function mergeSnapshotEntries(snapshots: readonly ModelCatalogSnapshot[]): Model
 
 /** Builds an auth-scoped snapshot from manifest metadata already loaded by the command. */
 export async function loadScopedListModelCatalogSnapshot(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir: string;
   inheritedAuthDir?: string;

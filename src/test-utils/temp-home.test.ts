@@ -28,8 +28,8 @@ describe("createTempHomeEnv", () => {
       const marker = path.join(sibling.home, "keep.txt");
       await fs.writeFile(marker, "sibling");
       try {
-        await withEnvAsync({ USERPROFILE: undefined, OPENCLAW_STATE_DIR: "" }, async () => {
-          const keys = ["HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "OPENCLAW_STATE_DIR"];
+        await withEnvAsync({ USERPROFILE: undefined, CARAPACE_STATE_DIR: "" }, async () => {
+          const keys = ["HOME", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "CARAPACE_STATE_DIR"];
           const previous = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
           const snapshot = captureEnv(keys);
           const fault = new Error(`failed ${stage} acquisition`);
@@ -78,12 +78,12 @@ describe("createTempHomeEnv", () => {
   it("sets home env vars and restores them on cleanup", async () => {
     const previousHome = process.env.HOME;
     const previousUserProfile = process.env.USERPROFILE;
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
 
-    const tempHome = await createTempHomeEnv("openclaw-temp-home-");
+    const tempHome = await createTempHomeEnv("carapace-temp-home-");
     expect(process.env.HOME).toBe(tempHome.home);
     expect(process.env.USERPROFILE).toBe(tempHome.home);
-    expect(process.env.OPENCLAW_STATE_DIR).toBe(path.join(tempHome.home, ".openclaw"));
+    expect(process.env.CARAPACE_STATE_DIR).toBe(path.join(tempHome.home, ".carapace"));
     const homeStat = await fs.stat(tempHome.home);
     expect(homeStat.isDirectory()).toBe(true);
 
@@ -91,7 +91,7 @@ describe("createTempHomeEnv", () => {
 
     expect(process.env.HOME).toBe(previousHome);
     expect(process.env.USERPROFILE).toBe(previousUserProfile);
-    expect(process.env.OPENCLAW_STATE_DIR).toBe(previousStateDir);
+    expect(process.env.CARAPACE_STATE_DIR).toBe(previousStateDir);
     await expectPathMissing(tempHome.home);
   });
 });
@@ -134,8 +134,8 @@ describe("withTempHome acquisition", () => {
       await fs.writeFile(path.join(callerHome, "keep"), "caller-owned");
       await withEnvAsync(
         {
-          OPENCLAW_HOME: callerHome,
-          OPENCLAW_STATE_DIR: path.join(callerHome, ".openclaw"),
+          CARAPACE_HOME: callerHome,
+          CARAPACE_STATE_DIR: path.join(callerHome, ".carapace"),
           ACQUISITION_ADDED: undefined,
           ACQUISITION_CHANGED: "",
           ACQUISITION_DELETED: "caller",

@@ -5,7 +5,7 @@ import type {
   ChannelPlugin,
   ChannelThreadingAdapter,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { isRetryableDeliveryNotSentError } from "../../infra/delivery-recovery.shared.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -697,7 +697,7 @@ describe("routeReply", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const res = await routeTestReply({
       payload: { text: "native command response" },
@@ -726,7 +726,7 @@ describe("routeReply", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await expectSlackNoDelivery(
       { text: SILENT_REPLY_TOKEN },
@@ -741,15 +741,15 @@ describe("routeReply", () => {
 
   it("applies responsePrefix when routing", async () => {
     const cfg = {
-      channels: { slack: { responsePrefix: "[openclaw]" } },
-    } as unknown as OpenClawConfig;
+      channels: { slack: { responsePrefix: "[carapace]" } },
+    } as unknown as CarapaceConfig;
     await routeTestReply({
       payload: { text: "hi" },
       channel: "slack",
       to: "channel:C123",
       cfg,
     });
-    expect(lastDeliveryPayload().text).toBe("[openclaw] hi");
+    expect(lastDeliveryPayload().text).toBe("[carapace] hi");
   });
 
   it("interpolates responsePrefix from the routed channel and account", async () => {
@@ -762,7 +762,7 @@ describe("routeReply", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     await routeTestReply({
       payload: { text: "hi" },
       channel: "slack",
@@ -800,7 +800,7 @@ describe("routeReply", () => {
         ],
       },
       messages: {},
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     await routeTestReply({
       payload: { text: "hi" },
       channel: "slack",
@@ -947,7 +947,7 @@ describe("routeReply", () => {
             baseUrl: "https://chat.example.com",
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
     });
     expectLastDeliveryFields({
       channel: "mattermost",
@@ -991,7 +991,7 @@ describe("routeReply", () => {
           enabled: true,
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     await routeTestReply({
       payload: { text: "hi" },
       channel: "msteams",

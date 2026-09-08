@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import {
   isModelSelectionLocked,
   MODEL_SELECTION_LOCKED_MESSAGE,
-} from "openclaw/plugin-sdk/model-session-runtime";
-import type { PluginCommandContext, PluginCommandResult } from "openclaw/plugin-sdk/plugin-entry";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/model-session-runtime";
+import type { PluginCommandContext, PluginCommandResult } from "carapace/plugin-sdk/plugin-entry";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { closeCodexStartupClientBestEffort } from "./app-server/attempt-client-cleanup.js";
 import { normalizeCodexAppServerBindingModelProvider } from "./app-server/auth-profile.js";
 import {
@@ -330,7 +330,7 @@ export async function resumeThread(
     return MODEL_SELECTION_LOCKED_MESSAGE;
   }
   if (!ctx.sessionId) {
-    return "Cannot attach a Codex thread because this command did not include an OpenClaw session id.";
+    return "Cannot attach a Codex thread because this command did not include an Carapace session id.";
   }
   const scope = resolveCodexConversationControlScope(ctx);
   const identity = sessionBindingIdentity({
@@ -497,7 +497,7 @@ export async function resumeThread(
             onResponse: commitResumedThread,
           },
         );
-        return `Attached this OpenClaw session to Codex thread ${formatCodexDisplayText(
+        return `Attached this Carapace session to Codex thread ${formatCodexDisplayText(
           normalizedThreadId,
         )}.${pendingResumeConfiguration ? " The next turn will validate its tools and apply this session's configuration before continuing." : ""}`;
       }),

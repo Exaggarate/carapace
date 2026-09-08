@@ -3,16 +3,16 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { DiagnosticSecurityEvent } from "../infra/diagnostic-events.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   requestDeferredPluginInstall,
   resolvePluginInstallTransaction,
@@ -161,7 +161,7 @@ describe("isImmutableGitCommitRef", () => {
 });
 
 describe("installPluginFromGitSpec", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   const trackedTempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   beforeEach(async () => {
@@ -169,7 +169,7 @@ describe("installPluginFromGitSpec", () => {
     installPluginFromInstalledPackageDirMock.mockReset();
     preflightPluginGitInstallPolicyMock.mockReset();
     preflightPluginGitInstallPolicyMock.mockResolvedValue(null);
-    state = await createOpenClawTestState({ label: "git-install" });
+    state = await createCarapaceTestState({ label: "git-install" });
     const globalConfig = await state.writeText("global-npmrc", "");
     vi.stubEnv("NPM_CONFIG_GLOBALCONFIG", globalConfig);
   });
@@ -272,7 +272,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("does not emit git install success when committing the managed repo fails", async () => {
-    const gitRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-install-fail-"));
+    const gitRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-install-fail-"));
     const gitDir = path.join(gitRoot, "not-a-directory");
     await fs.writeFile(gitDir, "file blocks nested managed repo creation", "utf8");
     try {
@@ -484,7 +484,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("reports effective install mode for requested git update without an installed target", async () => {
-    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-install-mode-"));
+    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-install-mode-"));
     try {
       runCommandWithTimeoutMock
         .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
@@ -521,7 +521,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("stages the clone beside the managed repo so replacement stays on one filesystem (#99885)", async () => {
-    const gitDir = trackedTempDirs.make("openclaw-git-install-stage-");
+    const gitDir = trackedTempDirs.make("carapace-git-install-stage-");
     try {
       runCommandWithTimeoutMock
         .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
@@ -567,7 +567,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("reviews the final copied artifact before publishing a deferred git install", async () => {
-    const gitDir = trackedTempDirs.make("openclaw-git-consent-stage-");
+    const gitDir = trackedTempDirs.make("carapace-git-consent-stage-");
     runCommandWithTimeoutMock
       .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
       .mockResolvedValueOnce({ code: 0, stdout: "abc123\n", stderr: "" })
@@ -608,7 +608,7 @@ describe("installPluginFromGitSpec", () => {
     expect(reviewedArtifactDir).not.toBe(firstInstallOptions()?.packageDir);
     expect(
       path.basename(expectDefined(reviewedArtifactDir, "reviewed artifact test invariant")),
-    ).toMatch(/^\.openclaw-install-stage-/);
+    ).toMatch(/^\.carapace-install-stage-/);
     await expect(fs.readFile(path.join(result.targetDir, "index.js"), "utf8")).resolves.toBe(
       "reviewed capabilities",
     );
@@ -616,7 +616,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("preserves a deferred git consent rejection without publishing its staged artifact", async () => {
-    const gitDir = trackedTempDirs.make("openclaw-git-consent-rejection-");
+    const gitDir = trackedTempDirs.make("carapace-git-consent-rejection-");
     runCommandWithTimeoutMock
       .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
       .mockResolvedValueOnce({ code: 0, stdout: "abc123\n", stderr: "" })
@@ -658,8 +658,8 @@ describe("installPluginFromGitSpec", () => {
     ).rejects.toThrow();
   });
 
-  it("falls back to the OpenClaw temp root when target workspace creation fails", async () => {
-    const gitDir = trackedTempDirs.make("openclaw-git-install-stage-fallback-");
+  it("falls back to the Carapace temp root when target workspace creation fails", async () => {
+    const gitDir = trackedTempDirs.make("carapace-git-install-stage-fallback-");
     runCommandWithTimeoutMock
       .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
       .mockResolvedValueOnce({ code: 0, stdout: "abc123\n", stderr: "" })
@@ -688,7 +688,7 @@ describe("installPluginFromGitSpec", () => {
 
       expect(result.ok).toBe(true);
       const cloneWorkspaceCalls = mkdtempSpy.mock.calls.filter(([prefix]) =>
-        path.basename(prefix).startsWith("openclaw-git-plugin-"),
+        path.basename(prefix).startsWith("carapace-git-plugin-"),
       );
       expect(cloneWorkspaceCalls).toHaveLength(2);
       const targetPrefix = cloneWorkspaceCalls[0]?.[0];
@@ -700,11 +700,11 @@ describe("installPluginFromGitSpec", () => {
       expect(path.dirname(expectDefined(targetPrefix, "targetPrefix test invariant"))).toBe(
         await fs.realpath(path.dirname(persistentRepoDir)),
       );
-      // withTempDir roots fallback staging at resolvePreferredOpenClawTmpDir(), which
-      // prefers /tmp/openclaw and only degrades to a uid-scoped os.tmpdir path when
+      // withTempDir roots fallback staging at resolvePreferredCarapaceTmpDir(), which
+      // prefers /tmp/carapace and only degrades to a uid-scoped os.tmpdir path when
       // that is unsafe. Recompute it here so the assertion holds on every host.
       expect(path.dirname(expectDefined(fallbackPrefix, "fallbackPrefix test invariant"))).toBe(
-        await fs.realpath(resolvePreferredOpenClawTmpDir()),
+        await fs.realpath(resolvePreferredCarapaceTmpDir()),
       );
       expect(runCommandWithTimeoutMock).toHaveBeenCalledTimes(3);
     } finally {
@@ -713,7 +713,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("keeps dry-run clone staging out of managed state", async () => {
-    const caseDir = trackedTempDirs.make("openclaw-git-dry-run-stage-");
+    const caseDir = trackedTempDirs.make("carapace-git-dry-run-stage-");
     const gitDir = path.join(caseDir, "git");
     try {
       runCommandWithTimeoutMock
@@ -751,7 +751,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("uses a credential-free managed repo path for authenticated git URLs", async () => {
-    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-install-path-"));
+    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-install-path-"));
     try {
       runCommandWithTimeoutMock
         .mockResolvedValueOnce({ code: 0, stdout: "", stderr: "" })
@@ -846,7 +846,7 @@ describe("installPluginFromGitSpec", () => {
   });
 
   it("keeps the existing managed repo when replacement install fails", async () => {
-    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-install-preserve-"));
+    const gitDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-install-preserve-"));
     const normalizedSpec = "git:https://github.com/acme/demo.git";
     const existingRepoDir = expectedGitRepoDir({ gitDir, normalizedSpec });
     const markerPath = path.join(existingRepoDir, "existing.txt");

@@ -10,7 +10,7 @@ import {
   resolveDefaultAgentId,
 } from "../../agents/agent-scope-config.js";
 import { resolveSandboxConfigForAgent } from "../../agents/sandbox/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { isTerminalConfigEnabled } from "./enabled.js";
 
@@ -41,7 +41,7 @@ export type TerminalLaunchResolution =
 type TerminalLaunchPolicy = {
   resolve: (agentId?: string) => TerminalLaunchResolution;
   isEnabled: () => boolean;
-  prepareConfig: (config: OpenClawConfig, options: { restartPending: boolean }) => void;
+  prepareConfig: (config: CarapaceConfig, options: { restartPending: boolean }) => void;
   commitConfig: () => void;
   acceptConfig: (options: { retireRejectedRestart: boolean }) => void;
 };
@@ -80,7 +80,7 @@ function resolveTerminalShell(params: {
  * main session on the host, so a host terminal is allowed there.
  */
 function resolveTerminalLaunch(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   configuredShell?: string;
   env?: NodeJS.ProcessEnv;
@@ -123,11 +123,11 @@ function resolveTerminalLaunch(params: {
 }
 
 /** Maintains fail-closed terminal admission across deferred config restarts. */
-export function createTerminalLaunchPolicy(initialConfig: OpenClawConfig): TerminalLaunchPolicy {
+export function createTerminalLaunchPolicy(initialConfig: CarapaceConfig): TerminalLaunchPolicy {
   let activeConfig = initialConfig;
   let hasPendingRestart = false;
-  let preparedConfig: OpenClawConfig | null = null;
-  let appliedConfigWhileRestartPending: OpenClawConfig | null = null;
+  let preparedConfig: CarapaceConfig | null = null;
+  let appliedConfigWhileRestartPending: CarapaceConfig | null = null;
   const createRestrictions = () => ({
     disabled: false,
     blockedAgents: new Map<string, TerminalLaunchBlock>(),
@@ -135,7 +135,7 @@ export function createTerminalLaunchPolicy(initialConfig: OpenClawConfig): Termi
   const restartRestrictions = createRestrictions();
   const commitRestrictions = createRestrictions();
   const committedTerminalConfig = () => appliedConfigWhileRestartPending ?? activeConfig;
-  const resolveForConfig = (config: OpenClawConfig, agentId?: string, shellConfig = config) => {
+  const resolveForConfig = (config: CarapaceConfig, agentId?: string, shellConfig = config) => {
     return resolveTerminalLaunch({
       config,
       agentId,
@@ -143,7 +143,7 @@ export function createTerminalLaunchPolicy(initialConfig: OpenClawConfig): Termi
     });
   };
   const accumulateRestrictions = (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     restrictions: ReturnType<typeof createRestrictions>,
   ) => {
     if (!isTerminalConfigEnabled(config)) {
@@ -261,8 +261,8 @@ export function buildTerminalEnv(baseEnv: NodeJS.ProcessEnv): Record<string, str
     }
   }
   env.TERM = env.TERM ?? "xterm-256color";
-  // Lets shells and prompts detect that they are inside an OpenClaw terminal.
-  env.OPENCLAW_TERMINAL = "1";
+  // Lets shells and prompts detect that they are inside an Carapace terminal.
+  env.CARAPACE_TERMINAL = "1";
   return env;
 }
 

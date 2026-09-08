@@ -1,5 +1,5 @@
 // Single agent-turn command registration; delegates execution to the Gateway-backed agent command.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { formatDocsLink } from "../../../packages/terminal-core/src/links.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
@@ -12,7 +12,7 @@ function collectFallback(value: string, previous: string[]): string[] {
   return [...previous, value];
 }
 
-/** Register `openclaw agent` for one Gateway-backed agent turn. */
+/** Register `carapace agent` for one Gateway-backed agent turn. */
 export function registerAgentTurnCommand(
   program: Command,
   args: { agentChannelOptions: string },
@@ -56,29 +56,29 @@ export function registerAgentTurnCommand(
         `
 ${theme.heading("Examples:")}
 ${formatHelpExamples([
-  ['openclaw agent --to +15555550123 --message "status update"', "Start a new session."],
-  ['openclaw agent --agent ops --message "Summarize logs"', "Use a specific agent."],
-  ["openclaw agent --agent ops --message-file ./task.md", "Read a multiline message file."],
+  ['carapace agent --to +15555550123 --message "status update"', "Start a new session."],
+  ['carapace agent --agent ops --message "Summarize logs"', "Use a specific agent."],
+  ["carapace agent --agent ops --message-file ./task.md", "Read a multiline message file."],
   [
-    'openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"',
+    'carapace agent --session-key agent:ops:incident-42 --message "Summarize status"',
     "Target an exact session key.",
   ],
   [
-    'openclaw agent --session-id 1234 --message "Summarize inbox" --thinking medium',
+    'carapace agent --session-id 1234 --message "Summarize inbox" --thinking medium',
     "Target a session with explicit thinking level.",
   ],
   [
-    'openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json',
+    'carapace agent --to +15555550123 --message "Trace logs" --verbose on --json',
     "Enable verbose logging and JSON output.",
   ],
-  ['openclaw agent --to +15555550123 --message "Summon reply" --deliver', "Deliver reply."],
+  ['carapace agent --to +15555550123 --message "Summon reply" --deliver', "Deliver reply."],
   [
-    'openclaw agent --agent ops --message "Generate report" --deliver --reply-channel slack --reply-to "#reports"',
+    'carapace agent --agent ops --message "Generate report" --deliver --reply-channel slack --reply-to "#reports"',
     "Send reply to a different channel/target.",
   ],
 ])}
 
-${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.openclaw.ai/cli/agent")}`,
+${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "github.com/Exaggarate/carapace")}`,
     )
     .action(async (opts): Promise<void> => {
       const verboseLevel =
@@ -137,20 +137,20 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.openclaw.ai/cli/age
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ['openclaw agent exec "Fix the failing test"', "Run in the current directory."],
+          ['carapace agent exec "Fix the failing test"', "Run in the current directory."],
           [
-            "openclaw agent exec --message-file task.md --cwd ./repo",
+            "carapace agent exec --message-file task.md --cwd ./repo",
             "Read a prompt file and set the workspace.",
           ],
           [
-            'openclaw agent exec "Summarize this repo" --model openai/gpt-5.6-sol --fallback anthropic/claude-sonnet-4-6 --json',
+            'carapace agent exec "Summarize this repo" --model openai/gpt-5.6-sol --fallback anthropic/claude-sonnet-4-6 --json',
             "Use an explicit fallback chain and JSON output.",
           ],
           [
-            'openclaw agent exec "Inspect this repo" --model ollama/qwen3.5:9b --code-mode code --local-model-lean --json',
+            'carapace agent exec "Inspect this repo" --model ollama/qwen3.5:9b --code-mode code --local-model-lean --json',
             "Force Code Mode with the lean local-model tool surface.",
           ],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agent#agent-exec", "docs.openclaw.ai/cli/agent#agent-exec")}`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agent#agent-exec", "github.com/Exaggarate/carapace#agent-exec")}`,
     )
     .action(async (message: string | undefined, opts, command): Promise<void> => {
       const parentOpts = command.parent?.opts() as

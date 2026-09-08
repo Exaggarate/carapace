@@ -14,7 +14,7 @@ import {
 
 const identity = requestIdentitySchema.parse({
   request_id: "a".repeat(64),
-  repository: { id: "123", full_name: "openclaw/openclaw" },
+  repository: { id: "123", full_name: "carapace/carapace" },
   pull_request: 42,
   candidate_sha: "b".repeat(40),
   scenario: "web-ui-chat-proof",
@@ -330,8 +330,8 @@ describe("trusted finalizer CLI", () => {
       };
       const mockPath = path.join(temp, "mock-api.mjs");
       const routes = {
-        "https://api.github.com/repos/openclaw/openclaw/actions/runs/456/attempts/1": run,
-        "https://api.github.com/repos/openclaw/openclaw/actions/runs/456/attempts/1/jobs?per_page=100":
+        "https://api.github.com/repos/carapace/carapace/actions/runs/456/attempts/1": run,
+        "https://api.github.com/repos/carapace/carapace/actions/runs/456/attempts/1/jobs?per_page=100":
           {
             total_count: fault === "incomplete-jobs" ? 2 : 1,
             jobs: [
@@ -344,8 +344,8 @@ describe("trusted finalizer CLI", () => {
               },
             ],
           },
-        "https://api.github.com/repos/openclaw/openclaw/pulls/42": pr,
-        "https://api.github.com/repos/openclaw/openclaw/actions/runs/456/artifacts?per_page=100&name=mantis-request-web-ui-456-1":
+        "https://api.github.com/repos/carapace/carapace/pulls/42": pr,
+        "https://api.github.com/repos/carapace/carapace/actions/runs/456/artifacts?per_page=100&name=mantis-request-web-ui-456-1":
           { total_count: 1, artifacts: [artifact] },
       };
       writeFileSync(
@@ -357,7 +357,7 @@ describe("trusted finalizer CLI", () => {
           "globalThis.fetch = async (url, options) => {",
           "  const key = String(url);",
           "  if (Object.hasOwn(routes, key)) return Response.json(routes[key]);",
-          '  if (key === "https://api.github.com/repos/openclaw/openclaw/actions/artifacts/789/zip") {',
+          '  if (key === "https://api.github.com/repos/carapace/carapace/actions/artifacts/789/zip") {',
           fault === "redirect"
             ? 'return new Response(null, { status: 302, headers: { location: "https://fixture.blob.core.windows.net/evidence" } });'
             : "return new Response(archive);",
@@ -378,7 +378,7 @@ describe("trusted finalizer CLI", () => {
             REQUEST_ID: identity.request_id,
             TARGET_PR: "42",
             CANDIDATE_SHA: identity.candidate_sha,
-            GITHUB_REPOSITORY: "openclaw/openclaw",
+            GITHUB_REPOSITORY: "carapace/carapace",
             GITHUB_REPOSITORY_ID: "123",
             GITHUB_WORKFLOW_SHA: identity.workflow.sha,
             GITHUB_REF: "refs/heads/mantis-proof-v1",

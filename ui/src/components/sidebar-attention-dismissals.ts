@@ -1,8 +1,8 @@
 // Per-gateway, per-browser snooze state for the sidebar attention chips.
 // Deliberately client-side chrome (like nav width / dock layout), not gateway
 // state: dismissing a nag on one device should not acknowledge it everywhere.
-import { gatewayOriginScope } from "@openclaw/gateway-client/browser";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { gatewayOriginScope } from "@carapace/gateway-client/browser";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import type { UpdateAvailable, UpdateScheduleState } from "../api/types.ts";
 import type { ScopeUpgradeState } from "../app/device-scope-upgrade-availability.ts";
 import { getSafeLocalStorage } from "../local-storage.ts";
@@ -20,7 +20,7 @@ export type SidebarAttentionDismissal = { kind: SidebarAttentionKind; signature:
 
 export type SidebarAttentionDismissals = Partial<Record<SidebarAttentionKind, string[]>>;
 
-const DISMISSED_STORE_PREFIX = "openclaw.control.sidebarAttention.v1:";
+const DISMISSED_STORE_PREFIX = "carapace.control.sidebarAttention.v1:";
 
 export function dismissalStoreKey(gatewayUrl: string): string {
   return `${DISMISSED_STORE_PREFIX}${gatewayOriginScope(gatewayUrl)}`;

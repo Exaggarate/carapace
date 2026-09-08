@@ -1,7 +1,7 @@
 import { html, nothing, render } from "lit";
 import { AsyncDirective } from "lit/async-directive.js";
 import { directive, type ElementPart } from "lit/directive.js";
-import type { ControlUiComponentHandle, ControlUiHost } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiComponentHandle, ControlUiHost } from "carapace/plugin-sdk/control-ui";
 import { workboardHost } from "../host.ts";
 
 type Components = ControlUiHost["components"];

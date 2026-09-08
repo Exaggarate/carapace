@@ -1,6 +1,6 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceProtocol
 
 enum AppleReviewDemoMode {
     static let setupCode = "APPLE-REVIEW-DEMO"
@@ -15,7 +15,7 @@ enum AppleReviewDemoMode {
 }
 
 enum ScreenshotFixtureMode {
-    static let gatewayName = "OpenClaw Gateway"
+    static let gatewayName = "Carapace Gateway"
     static let gatewayAddress = "Gateway on local network"
     static let gatewayID = "screenshot-fixture-gateway"
 }
@@ -30,7 +30,7 @@ struct LocalChatFixture {
     let modelID: String
     let modelName: String
     let modelSelectionTarget: String
-    let additionalModels: [OpenClawChatModelChoice]
+    let additionalModels: [CarapaceChatModelChoice]
     let responsePrefix: String
     let seedMessages: [String]
     let agents: [AgentSummary]
@@ -78,14 +78,14 @@ struct LocalChatFixture {
         modelName: "GPT-5.6 Sol",
         modelSelectionTarget: "global",
         additionalModels: [
-            OpenClawChatModelChoice(
+            CarapaceChatModelChoice(
                 modelID: "claude-opus-4-1",
                 name: "Claude Opus 4.1",
                 provider: "anthropic",
                 contextWindow: 200_000),
         ],
-        responsePrefix: "OpenClaw is connected to your gateway.",
-        seedMessages: ProcessInfo.processInfo.arguments.contains("--openclaw-empty-chat-fixture")
+        responsePrefix: "Carapace is connected to your gateway.",
+        seedMessages: ProcessInfo.processInfo.arguments.contains("--carapace-empty-chat-fixture")
             ? []
             : ["Ready when you are. I can check a project, coordinate an agent, or prepare the next step."],
         agents: [
@@ -93,7 +93,7 @@ struct LocalChatFixture {
                 id: "main",
                 name: "Molty",
                 identity: ["emoji": AnyCodable("M")],
-                workspace: "OpenClaw",
+                workspace: "Carapace",
                 workspacegit: false,
                 model: ["provider": AnyCodable("openai"), "model": AnyCodable("gpt-5.6-sol")],
                 agentruntime: ["kind": AnyCodable("gateway")],
@@ -104,7 +104,7 @@ struct LocalChatFixture {
                 id: "research",
                 name: "Research",
                 identity: ["emoji": AnyCodable("RS")],
-                workspace: "OpenClaw",
+                workspace: "Carapace",
                 workspacegit: false,
                 model: ["provider": AnyCodable("openai"), "model": AnyCodable("gpt-5.6-sol")],
                 agentruntime: ["kind": AnyCodable("gateway")],
@@ -115,7 +115,7 @@ struct LocalChatFixture {
                 id: "automation",
                 name: "Automation",
                 identity: ["emoji": AnyCodable("AU")],
-                workspace: "OpenClaw",
+                workspace: "Carapace",
                 workspacegit: false,
                 model: ["provider": AnyCodable("openai"), "model": AnyCodable("gpt-5.6-sol")],
                 agentruntime: ["kind": AnyCodable("gateway")],
@@ -125,35 +125,35 @@ struct LocalChatFixture {
         ])
 }
 
-struct LocalFixtureChatTransport: OpenClawChatTransport {
+struct LocalFixtureChatTransport: CarapaceChatTransport {
     var supportsComposerCapabilities: Bool {
         true
     }
 
     func loadComposerCapabilityCatalog(
         sessionKey _: String,
-        agentID _: String?) async -> OpenClawChatComposerCapabilityCatalog
+        agentID _: String?) async -> CarapaceChatComposerCapabilityCatalog
     {
-        OpenClawChatComposerCapabilityCatalog(
+        CarapaceChatComposerCapabilityCatalog(
             sessionSettingsAvailable: true,
             modelMutationAvailable: true,
             effortMutationAvailable: true,
             webSearchBaseEnabled: true,
             webSearchAvailable: true,
             skills: [
-                OpenClawChatComposerSkill(
+                CarapaceChatComposerSkill(
                     key: "autoreview",
                     name: "Auto Review",
                     baseEnabled: true,
                     missingDependencies: false,
                     blocked: false),
-                OpenClawChatComposerSkill(
+                CarapaceChatComposerSkill(
                     key: "release",
-                    name: "Release OpenClaw",
+                    name: "Release Carapace",
                     baseEnabled: true,
                     missingDependencies: false,
                     blocked: false),
-                OpenClawChatComposerSkill(
+                CarapaceChatComposerSkill(
                     key: "disabled-fixture",
                     name: "Disabled Skill",
                     baseEnabled: false,
@@ -161,18 +161,18 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
                     blocked: false),
             ],
             connectors: [
-                OpenClawChatComposerConnector(
+                CarapaceChatComposerConnector(
                     name: "GitHub",
                     baseEnabled: true,
                     tools: [
-                        OpenClawChatComposerTool(name: "search_code", label: "Search code"),
-                        OpenClawChatComposerTool(name: "create_issue", label: "Create issue"),
+                        CarapaceChatComposerTool(name: "search_code", label: "Search code"),
+                        CarapaceChatComposerTool(name: "create_issue", label: "Create issue"),
                     ]),
-                OpenClawChatComposerConnector(
+                CarapaceChatComposerConnector(
                     name: "Linear",
                     baseEnabled: true,
                     tools: [
-                        OpenClawChatComposerTool(name: "search_issues", label: "Search issues"),
+                        CarapaceChatComposerTool(name: "search_issues", label: "Search issues"),
                     ]),
             ],
             skillsAvailable: true,
@@ -195,7 +195,7 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
         key: String,
         label _: String?,
         parentSessionKey _: String?,
-        worktree _: Bool?) async throws -> OpenClawChatCreateSessionResponse
+        worktree _: Bool?) async throws -> CarapaceChatCreateSessionResponse
     {
         try await self.store.createSession(key: key)
     }
@@ -206,7 +206,7 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
         agentID: String?,
         parentSessionKey _: String?,
         worktree: Bool?,
-        worktreeBaseRef: String?) async throws -> OpenClawChatCreateSessionResponse
+        worktreeBaseRef: String?) async throws -> CarapaceChatCreateSessionResponse
     {
         let normalizedAgentID = agentID?
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -225,13 +225,13 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
         return try await self.store.createSession(key: key)
     }
 
-    func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
+    func requestHistory(sessionKey: String) async throws -> CarapaceChatHistoryPayload {
         try await self.store.history(sessionKey: sessionKey)
     }
 
-    func listModels(agentID _: String?) async throws -> [OpenClawChatModelChoice] {
-        if ProcessInfo.processInfo.arguments.contains("--openclaw-unavailable-model-fixture") {
-            return try OpenClawChatGatewayPayloadCodec.decodeModelChoices(Data(#"""
+    func listModels(agentID _: String?) async throws -> [CarapaceChatModelChoice] {
+        if ProcessInfo.processInfo.arguments.contains("--carapace-unavailable-model-fixture") {
+            return try CarapaceChatGatewayPayloadCodec.decodeModelChoices(Data(#"""
             {"models":[
               {"id":"gpt-5.6-sol","name":"GPT-5.6 Sol","provider":"openai",
                "available":true,"contextWindow":128000},
@@ -240,8 +240,8 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
             ]}
             """#.utf8))
         }
-        if ProcessInfo.processInfo.arguments.contains("--openclaw-selected-model-auth-failure-fixture") {
-            return try OpenClawChatGatewayPayloadCodec.decodeModelChoices(Data(#"""
+        if ProcessInfo.processInfo.arguments.contains("--carapace-selected-model-auth-failure-fixture") {
+            return try CarapaceChatGatewayPayloadCodec.decodeModelChoices(Data(#"""
             {"models":[
               {"id":"gpt-5.6-sol","name":"GPT-5.6 Sol","provider":"openai",
                "available":false,"unavailableReason":"auth-failed","contextWindow":128000},
@@ -251,7 +251,7 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
             """#.utf8))
         }
         return [
-            OpenClawChatModelChoice(
+            CarapaceChatModelChoice(
                 modelID: self.fixture.modelID,
                 name: self.fixture.modelName,
                 provider: self.fixture.modelProvider,
@@ -261,16 +261,16 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
 
     func loadModelCatalog(
         sessionKey _: String,
-        agentID: String?) async throws -> OpenClawChatModelCatalogSnapshot
+        agentID: String?) async throws -> CarapaceChatModelCatalogSnapshot
     {
         let choices = try await self.listModels(agentID: agentID)
-        return OpenClawChatModelCatalogSnapshot(
+        return CarapaceChatModelCatalogSnapshot(
             choices: choices,
             availabilityIsSessionScoped: true)
     }
 
     func isSwarmEnabled(sessionKey _: String) async throws -> Bool {
-        ProcessInfo.processInfo.arguments.contains("--openclaw-swarm-chat-fixture")
+        ProcessInfo.processInfo.arguments.contains("--carapace-swarm-chat-fixture")
     }
 
     func sendMessage(
@@ -278,7 +278,7 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
         message: String,
         thinking _: String,
         idempotencyKey: String,
-        attachments _: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments _: [CarapaceChatAttachmentPayload]) async throws -> CarapaceChatSendResponse
     {
         try await self.store.sendMessage(
             sessionKey: sessionKey,
@@ -293,7 +293,7 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
     func listSessions(
         limit _: Int?,
         search: String?,
-        archived: Bool) async throws -> OpenClawChatSessionsListResponse
+        archived: Bool) async throws -> CarapaceChatSessionsListResponse
     {
         let response = try await store.sessions()
         var sessions = response.sessions
@@ -301,9 +301,9 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
             sessions = []
         }
         if let search {
-            sessions = OpenClawChatSessionListOrganizer.filter(sessions, search: search)
+            sessions = CarapaceChatSessionListOrganizer.filter(sessions, search: search)
         }
-        return OpenClawChatSessionsListResponse(
+        return CarapaceChatSessionsListResponse(
             ts: response.ts,
             path: response.path,
             count: sessions.count,
@@ -311,19 +311,19 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
             sessions: sessions)
     }
 
-    func listAgents() async throws -> OpenClawChatAgentsListResponse? {
-        OpenClawChatAgentsListResponse(
+    func listAgents() async throws -> CarapaceChatAgentsListResponse? {
+        CarapaceChatAgentsListResponse(
             defaultId: self.fixture.defaultAgentID,
             agents: self.fixture.agents.map {
-                OpenClawChatAgentChoice(
+                CarapaceChatAgentChoice(
                     id: $0.id,
                     name: $0.name,
                     workspaceGit: $0.workspacegit)
             })
     }
 
-    func listChildSessions(parentKey: String) async throws -> [OpenClawChatSessionEntry] {
-        guard ProcessInfo.processInfo.arguments.contains("--openclaw-swarm-chat-fixture") else { return [] }
+    func listChildSessions(parentKey: String) async throws -> [CarapaceChatSessionEntry] {
+        guard ProcessInfo.processInfo.arguments.contains("--carapace-swarm-chat-fixture") else { return [] }
         let groupID = "swarm:\(parentKey):research"
         return [
             self.swarmChild("polling", "National polling", status: "done", groupID: groupID, parentKey: parentKey),
@@ -346,9 +346,9 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
         status: String?,
         groupID: String,
         parentKey: String,
-        queued: Bool = false) -> OpenClawChatSessionEntry
+        queued: Bool = false) -> CarapaceChatSessionEntry
     {
-        OpenClawChatSessionEntry(
+        CarapaceChatSessionEntry(
             key: "agent:main:subagent:\(key)",
             kind: "direct",
             displayName: label,
@@ -382,19 +382,19 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
     func setSessionModel(sessionKey: String, model: String?) async throws {
         _ = try await self.store.patchSessionSettings(
             sessionKey: sessionKey,
-            patch: OpenClawChatSessionSettingsPatch(model: .some(model)))
+            patch: CarapaceChatSessionSettingsPatch(model: .some(model)))
     }
 
     func setSessionThinking(sessionKey: String, thinkingLevel: String) async throws {
         _ = try await self.store.patchSessionSettings(
             sessionKey: sessionKey,
-            patch: OpenClawChatSessionSettingsPatch(thinkingLevel: .some(thinkingLevel)))
+            patch: CarapaceChatSessionSettingsPatch(thinkingLevel: .some(thinkingLevel)))
     }
 
     func patchSessionSettings(
         sessionKey: String,
         agentID _: String?,
-        patch: OpenClawChatSessionSettingsPatch) async throws -> OpenClawChatModelPatchResult?
+        patch: CarapaceChatSessionSettingsPatch) async throws -> CarapaceChatModelPatchResult?
     {
         try await self.store.patchSessionSettings(sessionKey: sessionKey, patch: patch)
     }
@@ -404,11 +404,11 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
     }
 
     /// The held screenshot run resolves only when the real composer aborts it.
-    func waitForRunCompletion(runId: String, timeoutMs _: Int) async -> OpenClawChatRunObservation {
+    func waitForRunCompletion(runId: String, timeoutMs _: Int) async -> CarapaceChatRunObservation {
         await self.store.runObservation(runId: runId)
     }
 
-    func events() -> AsyncStream<OpenClawChatTransportEvent> {
+    func events() -> AsyncStream<CarapaceChatTransportEvent> {
         AsyncStream { continuation in
             continuation.yield(.health(ok: true))
             self.registerFixtureEventContinuation(continuation)
@@ -433,13 +433,13 @@ struct LocalFixtureChatTransport: OpenClawChatTransport {
 
 private actor LocalFixtureChatStore {
     private let fixture: LocalChatFixture
-    private var messages: [OpenClawChatMessage]
+    private var messages: [CarapaceChatMessage]
     private var modelID: String
     private var thinkingLevel = "auto"
-    private var fastMode: OpenClawChatFastMode?
+    private var fastMode: CarapaceChatFastMode?
     private var verboseLevel: String?
-    private var permissionMode: OpenClawChatPermissionMode? = .guarded
-    private var toolOverrides: OpenClawChatSessionToolOverrides?
+    private var permissionMode: CarapaceChatPermissionMode? = .guarded
+    private var toolOverrides: CarapaceChatSessionToolOverrides?
 
     init(fixture: LocalChatFixture) {
         self.fixture = fixture
@@ -447,13 +447,13 @@ private actor LocalFixtureChatStore {
         self.modelID = fixture.modelID
     }
 
-    func createSession(key: String) throws -> OpenClawChatCreateSessionResponse {
+    func createSession(key: String) throws -> CarapaceChatCreateSessionResponse {
         try Self.decode(
             CreateSessionPayload(ok: true, key: key, sessionId: "\(self.fixture.sessionIDPrefix)-\(key)"),
-            as: OpenClawChatCreateSessionResponse.self)
+            as: CarapaceChatCreateSessionResponse.self)
     }
 
-    func history(sessionKey: String) throws -> OpenClawChatHistoryPayload {
+    func history(sessionKey: String) throws -> CarapaceChatHistoryPayload {
         let normalizedSessionKey = Self.normalizedSessionKey(sessionKey, fallback: self.fixture.sessionKey)
         return try Self.decode(
             HistoryPayload(
@@ -461,16 +461,16 @@ private actor LocalFixtureChatStore {
                 sessionId: "\(self.fixture.sessionIDPrefix)-\(normalizedSessionKey)",
                 messages: self.messages,
                 thinkingLevel: self.thinkingLevel,
-                sessionInfo: OpenClawChatSessionInfo(
+                sessionInfo: CarapaceChatSessionInfo(
                     hasActiveRun: self.activeRunID != nil,
                     activeRunIds: self.activeRunID.map { [$0] })),
-            as: OpenClawChatHistoryPayload.self)
+            as: CarapaceChatHistoryPayload.self)
     }
 
     func sendMessage(
         sessionKey _: String,
         message: String,
-        runId: String) throws -> OpenClawChatSendResponse
+        runId: String) throws -> CarapaceChatSendResponse
     {
         let now = Date().timeIntervalSince1970 * 1000
         self.messages.append(
@@ -489,7 +489,7 @@ private actor LocalFixtureChatStore {
             self.activeRunID = runId
             return try Self.decode(
                 SendPayload(runId: runId, status: "started"),
-                as: OpenClawChatSendResponse.self)
+                as: CarapaceChatSendResponse.self)
         }
         self.messages.append(
             Self.message(
@@ -501,25 +501,25 @@ private actor LocalFixtureChatStore {
                 timestamp: now + 1))
         return try Self.decode(
             SendPayload(runId: runId, status: "ok"),
-            as: OpenClawChatSendResponse.self)
+            as: CarapaceChatSendResponse.self)
     }
 
     private var heldInitialRun = false
     private var activeRunID: String?
-    private var eventContinuation: AsyncStream<OpenClawChatTransportEvent>.Continuation?
+    private var eventContinuation: AsyncStream<CarapaceChatTransportEvent>.Continuation?
 
-    func setEventContinuation(_ continuation: AsyncStream<OpenClawChatTransportEvent>.Continuation) {
+    func setEventContinuation(_ continuation: AsyncStream<CarapaceChatTransportEvent>.Continuation) {
         self.eventContinuation = continuation
     }
 
-    func runObservation(runId: String) -> OpenClawChatRunObservation {
+    func runObservation(runId: String) -> CarapaceChatRunObservation {
         self.activeRunID == runId ? .checkAgain : .terminal(.completed)
     }
 
     func abortRun(sessionKey: String, runId: String) {
         guard self.activeRunID == runId else { return }
         self.activeRunID = nil
-        self.eventContinuation?.yield(.chat(OpenClawChatEventPayload(
+        self.eventContinuation?.yield(.chat(CarapaceChatEventPayload(
             runId: runId,
             sessionKey: sessionKey,
             state: "aborted",
@@ -527,8 +527,8 @@ private actor LocalFixtureChatStore {
             errorMessage: nil)))
     }
 
-    func sessions() throws -> OpenClawChatSessionsListResponse {
-        let entry = OpenClawChatSessionEntry(
+    func sessions() throws -> CarapaceChatSessionsListResponse {
+        let entry = CarapaceChatSessionEntry(
             key: fixture.sessionKey,
             kind: "chat",
             displayName: self.fixture.displayName,
@@ -556,11 +556,11 @@ private actor LocalFixtureChatStore {
             effectiveFastMode: self.fastMode,
             permissionMode: self.permissionMode,
             toolOverrides: self.toolOverrides)
-        return OpenClawChatSessionsListResponse(
+        return CarapaceChatSessionsListResponse(
             ts: Date().timeIntervalSince1970 * 1000,
             path: nil,
             count: 1,
-            defaults: OpenClawChatSessionsDefaults(
+            defaults: CarapaceChatSessionsDefaults(
                 modelProvider: self.fixture.modelProvider,
                 model: self.fixture.modelID,
                 contextTokens: 128_000,
@@ -574,7 +574,7 @@ private actor LocalFixtureChatStore {
 
     private var fixtureModelSelectionTarget: String {
         let arguments = ProcessInfo.processInfo.arguments
-        guard let index = arguments.firstIndex(of: "--openclaw-model-selection-target"),
+        guard let index = arguments.firstIndex(of: "--carapace-model-selection-target"),
               arguments.indices.contains(index + 1)
         else {
             return self.fixture.modelSelectionTarget
@@ -597,7 +597,7 @@ private actor LocalFixtureChatStore {
 
     func patchSessionSettings(
         sessionKey: String,
-        patch: OpenClawChatSessionSettingsPatch) throws -> OpenClawChatModelPatchResult
+        patch: CarapaceChatSessionSettingsPatch) throws -> CarapaceChatModelPatchResult
     {
         let key = Self.normalizedSessionKey(sessionKey, fallback: self.fixture.sessionKey)
         let sessionID = "\(self.fixture.sessionIDPrefix)-\(key)"
@@ -625,7 +625,7 @@ private actor LocalFixtureChatStore {
         if let toolOverrides = patch.toolOverrides {
             self.toolOverrides = toolOverrides
         }
-        return OpenClawChatModelPatchResult(
+        return CarapaceChatModelPatchResult(
             key: key,
             modelProvider: self.fixture.modelProvider,
             model: self.modelID,
@@ -642,25 +642,25 @@ private actor LocalFixtureChatStore {
         ["auto", "low", "medium", "high"]
     }
 
-    private static var thinkingLevels: [OpenClawChatThinkingLevelOption] {
+    private static var thinkingLevels: [CarapaceChatThinkingLevelOption] {
         [
-            OpenClawChatThinkingLevelOption(id: "auto", label: "Auto"),
-            OpenClawChatThinkingLevelOption(id: "low", label: "Low"),
-            OpenClawChatThinkingLevelOption(id: "medium", label: "Medium"),
-            OpenClawChatThinkingLevelOption(id: "high", label: "High"),
+            CarapaceChatThinkingLevelOption(id: "auto", label: "Auto"),
+            CarapaceChatThinkingLevelOption(id: "low", label: "Low"),
+            CarapaceChatThinkingLevelOption(id: "medium", label: "Medium"),
+            CarapaceChatThinkingLevelOption(id: "high", label: "High"),
         ]
     }
 
-    private static func seedMessages(fixture: LocalChatFixture) -> [OpenClawChatMessage] {
+    private static func seedMessages(fixture: LocalChatFixture) -> [CarapaceChatMessage] {
         let now = Date().timeIntervalSince1970 * 1000
-        if ProcessInfo.processInfo.arguments.contains("--openclaw-long-chat-fixture") {
+        if ProcessInfo.processInfo.arguments.contains("--carapace-long-chat-fixture") {
             return [
                 self.message(role: "user", text: "Prepare a detailed project review.", timestamp: now),
                 self.message(
                     role: "assistant",
                     text: String(repeating: "Earlier response context. ", count: 120),
                     timestamp: now + 1),
-                self.message(role: "assistant", text: "OPENCLAW_LONG_CHAT_LATEST", timestamp: now + 2),
+                self.message(role: "assistant", text: "CARAPACE_LONG_CHAT_LATEST", timestamp: now + 2),
             ]
         }
         return fixture.seedMessages.enumerated().map { index, text in
@@ -673,12 +673,12 @@ private actor LocalFixtureChatStore {
         text: String,
         timestamp: Double,
         idempotencyKey: String? = nil,
-        details: AnyCodable? = nil) -> OpenClawChatMessage
+        details: AnyCodable? = nil) -> CarapaceChatMessage
     {
-        OpenClawChatMessage(
+        CarapaceChatMessage(
             role: role,
             content: [
-                OpenClawChatMessageContent(
+                CarapaceChatMessageContent(
                     type: "text",
                     text: text,
                     mimeType: nil,
@@ -704,9 +704,9 @@ private actor LocalFixtureChatStore {
     private struct HistoryPayload: Encodable {
         var sessionKey: String
         var sessionId: String?
-        var messages: [OpenClawChatMessage]?
+        var messages: [CarapaceChatMessage]?
         var thinkingLevel: String?
-        var sessionInfo: OpenClawChatSessionInfo?
+        var sessionInfo: CarapaceChatSessionInfo?
     }
 
     private struct SendPayload: Encodable {
@@ -723,13 +723,13 @@ private actor LocalFixtureChatStore {
 
 extension ScreenshotFixtureMode {
     static var holdsInitialChatRun: Bool {
-        ProcessInfo.processInfo.arguments.contains("--openclaw-hold-initial-chat-run")
+        ProcessInfo.processInfo.arguments.contains("--carapace-hold-initial-chat-run")
     }
 }
 
 extension LocalFixtureChatTransport {
     private func registerFixtureEventContinuation(
-        _ continuation: AsyncStream<OpenClawChatTransportEvent>.Continuation)
+        _ continuation: AsyncStream<CarapaceChatTransportEvent>.Continuation)
     {
         guard ScreenshotFixtureMode.holdsInitialChatRun else {
             continuation.finish()

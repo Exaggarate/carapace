@@ -1,5 +1,5 @@
 ---
-summary: "Authenticated inbound webhooks that bind external automation to OpenClaw TaskFlows."
+summary: "Authenticated inbound webhooks that bind external automation to Carapace TaskFlows."
 read_when:
   - You are installing, configuring, or auditing the webhooks plugin
 title: "Webhooks plugin reference"
@@ -7,15 +7,15 @@ title: "Webhooks plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Authenticated inbound webhooks that bind external automation to OpenClaw TaskFlows.
+Authenticated inbound webhooks that bind external automation to Carapace TaskFlows.
 
 ## Distribution
 
-- Package: `@openclaw/webhooks`
-- Install route: included in OpenClaw
+- Package: `@carapace/webhooks`
+- Install route: included in Carapace
 
 ## Surface
 

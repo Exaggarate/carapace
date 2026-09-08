@@ -2,7 +2,7 @@
  * Shared command execution utilities for extensions and custom tools.
  */
 
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { createWindowsOutputDecoder } from "../../infra/windows-encoding.js";
 import { releaseChildProcessOutputAfterExit } from "../../process/child-process.js";
 import { createCommandTerminationController } from "../../process/exec-termination.js";

@@ -14,7 +14,7 @@ export function fingerprintSessionGoalRequest(
       : item,
   );
   return createHmac("sha256", identity.privateKeyPem)
-    .update("openclaw.session-goal.v1\0")
+    .update("carapace.session-goal.v1\0")
     .update(canonical)
     .digest("hex");
 }

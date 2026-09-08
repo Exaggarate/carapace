@@ -1,15 +1,15 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   registerSessionBindingAdapter,
   type SessionBindingAdapter,
   testing,
   unregisterSessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { inspectTelegramConversationRouteOwner } from "./conversation-route-owner.js";
 
@@ -50,7 +50,7 @@ describe("inspectTelegramConversationRouteOwner", () => {
   });
 
   it("replays topic config and runtime precedence without touching liveness", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           groups: { "-100123": { topics: { "42": { agentId: "configured" } } } },

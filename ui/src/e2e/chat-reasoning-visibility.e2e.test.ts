@@ -61,7 +61,7 @@ suite.define(() => {
         ],
       });
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const answer = pane.getByText(finalText, { exact: true });
       const reasoning = pane.locator(".chat-thinking", { hasText: reasoningText });
       const worked = pane.locator(".chat-work-group > .chat-activity-group__summary");

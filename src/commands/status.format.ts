@@ -1,7 +1,7 @@
 // Formatting helpers for status tokens, prompt-cache stats, and daemon runtime snippets.
 // These helpers are shared by report rows and command output surfaces.
 
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import type { BestEffortConfigSnapshot } from "../config/io.js";
@@ -21,7 +21,7 @@ export const formatStatusConfigDiagnosticEntries = (
 ): string[] => [
   `- Config file is invalid: ${sanitizeTerminalText(diagnostics.path)}`,
   ...formatConfigIssueLines(diagnostics.issues, "-", { normalizeRoot: true }),
-  `- Fix: ${formatCliCommand("openclaw doctor --fix")}`,
+  `- Fix: ${formatCliCommand("carapace doctor --fix")}`,
 ];
 
 /** Formats session token usage and prompt-cache hit rate for the sessions table. */

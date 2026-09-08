@@ -3,12 +3,12 @@ import type { SessionConfigOption, SessionModeState } from "@agentclientprotocol
 import {
   toAcpSessionLineageMeta,
   type AcpSessionLineageMeta,
-} from "@openclaw/acp-core/session-lineage-meta";
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/acp-core/session-lineage-meta";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeFastMode,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { BASE_THINKING_LEVELS } from "../auto-reply/thinking.shared.js";
 import type { GatewaySessionRow } from "../gateway/session-utils.js";
 
@@ -162,7 +162,7 @@ export function buildSessionPresentation(params: {
       name: "Thought level",
       category: "thought_level",
       description:
-        "Controls how much deliberate reasoning OpenClaw requests from the Gateway model.",
+        "Controls how much deliberate reasoning Carapace requests from the Gateway model.",
       currentValue: currentModeId,
       values: availableLevelIds,
     }),
@@ -177,7 +177,7 @@ export function buildSessionPresentation(params: {
       id: ACP_VERBOSE_LEVEL_CONFIG_ID,
       name: "Tool verbosity",
       description:
-        "Controls how much tool progress and output detail OpenClaw keeps enabled for the session.",
+        "Controls how much tool progress and output detail Carapace keeps enabled for the session.",
       currentValue: normalizeOptionalString(row.verboseLevel) || "off",
       values: ["off", "on", "full"],
     }),
@@ -199,7 +199,7 @@ export function buildSessionPresentation(params: {
       id: ACP_RESPONSE_USAGE_CONFIG_ID,
       name: "Usage detail",
       description:
-        "Controls how much usage information OpenClaw attaches to responses for the session. 'inherit' follows the configured default; 'off' explicitly disables it for this session.",
+        "Controls how much usage information Carapace attaches to responses for the session. 'inherit' follows the configured default; 'off' explicitly disables it for this session.",
       currentValue: normalizeOptionalString(row.responseUsage) || "inherit",
       values: ["inherit", "off", "tokens", "full"],
     }),

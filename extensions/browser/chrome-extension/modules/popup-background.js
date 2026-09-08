@@ -39,8 +39,8 @@ export function createPopupMessageHandler({
   connectRelay,
   setBadge,
   detachDebugger,
-  removeTabFromOpenClawGroup,
-  addTabToOpenClawGroup,
+  removeTabFromCarapaceGroup,
+  addTabToCarapaceGroup,
   scheduleTabsSync,
   pauseTab,
 }) {
@@ -248,10 +248,10 @@ export function createPopupMessageHandler({
                   if (!msg.grant && selected) {
                     policy.invalidateTab(tabId);
                     await detachDebugger(tabId);
-                    await removeTabFromOpenClawGroup(tabId);
+                    await removeTabFromCarapaceGroup(tabId);
                   } else if (msg.grant && !selected) {
                     policy.invalidateTab(tabId);
-                    await addTabToOpenClawGroup(tabId);
+                    await addTabToCarapaceGroup(tabId);
                   }
                 }
                 scheduleTabsSync();

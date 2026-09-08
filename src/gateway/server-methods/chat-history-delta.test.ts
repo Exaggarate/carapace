@@ -27,7 +27,7 @@ async function createTranscript() {
     agentId: "main",
     sessionKey,
     sessionId,
-    storePath: path.join(tempDirs.make("openclaw-delta-budget-"), "sessions.json"),
+    storePath: path.join(tempDirs.make("carapace-delta-budget-"), "sessions.json"),
   };
   await replaceSessionEntry(scope, { sessionId, updatedAt: 42 });
   await replaceTranscriptEvents(scope, [{ type: "session", version: 3, id: sessionId }]);
@@ -51,7 +51,7 @@ async function readContents(contents: string[], requestedMaxBytes?: number) {
         toolCallId: `call-${index}`,
         content,
         providerReplay: { private: "PRIVATE_REPLAY" },
-        __openclaw: { upstreamUserText: "PRIVATE_UPSTREAM" },
+        __carapace: { upstreamUserText: "PRIVATE_UPSTREAM" },
       },
     });
   }
@@ -137,7 +137,7 @@ const failedAssistant = {
   content: [],
   stopReason: "error",
   errorMessage: "model unavailable",
-  __openclaw: { runId: "run-recovery" },
+  __carapace: { runId: "run-recovery" },
 };
 const recoveredAssistant = {
   role: "assistant",
@@ -145,7 +145,7 @@ const recoveredAssistant = {
   model: "backup",
   content: [{ type: "text", text: "Recovered answer" }],
   stopReason: "stop",
-  __openclaw: { runId: "run-recovery" },
+  __carapace: { runId: "run-recovery" },
 };
 
 type TranscriptScope = Awaited<ReturnType<typeof createTranscript>>["scope"];
@@ -184,7 +184,7 @@ describe("chat history recovery cursor eligibility", () => {
 
       const pending = await readTail(scope, offset);
       expect(pending.messages).toContainEqual(
-        expect.objectContaining({ __openclaw: expect.objectContaining({ id: "failed-attempt" }) }),
+        expect.objectContaining({ __carapace: expect.objectContaining({ id: "failed-attempt" }) }),
       );
       expect(pending).not.toHaveProperty("deltaCursor");
 
@@ -195,7 +195,7 @@ describe("chat history recovery cursor eligibility", () => {
       const recovered = await readTail(scope, offset);
       expect(recovered.messages).toEqual([
         expect.objectContaining({
-          __openclaw: expect.objectContaining({ id: "recovered-answer" }),
+          __carapace: expect.objectContaining({ id: "recovered-answer" }),
         }),
       ]);
       expect(recovered.deltaCursor).toEqual(expect.any(String));
@@ -209,7 +209,7 @@ describe("chat history recovery cursor eligibility", () => {
       });
       await appendTranscriptMessage(scope, {
         eventId: "next-answer",
-        message: { ...recoveredAssistant, __openclaw: { runId: "run-next" } },
+        message: { ...recoveredAssistant, __carapace: { runId: "run-next" } },
       });
       expect(readDelta(scope, recovered.deltaCursor)).toMatchObject({
         kind: "delta",
@@ -239,7 +239,7 @@ describe("chat history recovery cursor eligibility", () => {
     expect(readDelta(scope, cursor)).toEqual({ kind: "reset" });
     const recovered = await readTail(scope);
     expect(recovered.messages).toEqual([
-      expect.objectContaining({ __openclaw: expect.objectContaining({ id: "recovered-answer" }) }),
+      expect.objectContaining({ __carapace: expect.objectContaining({ id: "recovered-answer" }) }),
     ]);
     expect(recovered.deltaCursor).toEqual(expect.any(String));
   });

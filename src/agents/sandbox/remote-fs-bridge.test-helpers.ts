@@ -40,7 +40,7 @@ export function createLocalRemoteShellScriptRunner(params?: {
     // stdin so mutation payload bytes reach the Python process intact.
     const result = spawn(
       "/bin/sh",
-      ["-c", command.script, params?.shellArg0 ?? "openclaw-sandbox-fs", ...(command.args ?? [])],
+      ["-c", command.script, params?.shellArg0 ?? "carapace-sandbox-fs", ...(command.args ?? [])],
       command.stdin,
     );
     const stdout = Buffer.isBuffer(result.stdout)

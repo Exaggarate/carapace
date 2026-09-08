@@ -30,7 +30,7 @@ it("creates, restores, and verifies a 256 MiB Git backup with a 256 MiB heap", a
           TMPDIR: tmp,
           TEMP: tmp,
           TMP: tmp,
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
+          CARAPACE_STATE_DIR: path.join(root, "state"),
           GIT_CONFIG_GLOBAL: os.devNull,
           GIT_CONFIG_NOSYSTEM: "1",
           GIT_TERMINAL_PROMPT: "0",
@@ -49,7 +49,7 @@ it("creates, restores, and verifies a 256 MiB Git backup with a 256 MiB heap", a
       verified: true,
       gitFailureCleaned: true,
     });
-    expect((await fs.readdir(tmp)).filter((name) => name.startsWith("openclaw-git-"))).toEqual([]);
+    expect((await fs.readdir(tmp)).filter((name) => name.startsWith("carapace-git-"))).toEqual([]);
   } finally {
     await fs.rm(root, { recursive: true, force: true });
   }

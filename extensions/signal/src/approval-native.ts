@@ -1,20 +1,20 @@
 // Signal plugin module implements approval native behavior.
-import { createApproverRestrictedNativeApprovalCapabilityFromForwardingRoutes } from "openclaw/plugin-sdk/approval-delivery-runtime";
-import { createLazyChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
-import type { ChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { shouldSuppressLocalNativeExecApprovalPrompt } from "openclaw/plugin-sdk/approval-native-runtime";
-import { buildApprovalReactionPendingContentForRequest } from "openclaw/plugin-sdk/approval-reaction-runtime";
+import { createApproverRestrictedNativeApprovalCapabilityFromForwardingRoutes } from "carapace/plugin-sdk/approval-delivery-runtime";
+import { createLazyChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-adapter-runtime";
+import type { ChannelApprovalNativeRuntimeAdapter } from "carapace/plugin-sdk/approval-handler-runtime";
+import { shouldSuppressLocalNativeExecApprovalPrompt } from "carapace/plugin-sdk/approval-native-runtime";
+import { buildApprovalReactionPendingContentForRequest } from "carapace/plugin-sdk/approval-reaction-runtime";
 import type {
   ChannelApprovalCapability,
   ChannelOutboundPayloadHint,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { parseAgentSessionKey } from "carapace/plugin-sdk/routing";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   listSignalAccountIds,
   resolveDefaultSignalAccountId,
@@ -24,7 +24,7 @@ import { getSignalApprovalApprovers, signalApprovalAuth } from "./approval-auth.
 import { normalizeSignalMessagingTarget } from "./normalize.js";
 
 function isSignalApprovalTransportEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   return resolveSignalAccount({ cfg: params.cfg, accountId: params.accountId }).enabled;
@@ -80,7 +80,7 @@ const signalApproval = createApproverRestrictedNativeApprovalCapabilityFromForwa
 const signalApprovalRouting = signalApproval.routing;
 
 export function isSignalNativeApprovalHandlerConfigured(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   return signalApprovalRouting.isNativeApprovalHandlerConfigured(params);
@@ -96,7 +96,7 @@ function resolveSignalSessionTargetFromSessionKey(sessionKey?: string | null): s
 }
 
 export function shouldSuppressLocalSignalExecApprovalPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   payload: ReplyPayload;
   hint?: ChannelOutboundPayloadHint;

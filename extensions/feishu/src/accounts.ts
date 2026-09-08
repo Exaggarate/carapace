@@ -1,15 +1,15 @@
 // Feishu plugin module implements accounts behavior.
 import {
   DEFAULT_ACCOUNT_ID,
-  type OpenClawConfig as ClawdbotConfig,
+  type CarapaceConfig as ClawdbotConfig,
   createAccountListHelpers,
   hasConfiguredAccountValue,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/account-resolution";
-import { coerceSecretRef } from "openclaw/plugin-sdk/provider-auth";
-import { canResolveEnvSecretRefInReadOnlyPath } from "openclaw/plugin-sdk/secret-ref-readonly";
-import { normalizeOptionalString as normalizeString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/account-resolution";
+import { coerceSecretRef } from "carapace/plugin-sdk/provider-auth";
+import { canResolveEnvSecretRefInReadOnlyPath } from "carapace/plugin-sdk/secret-ref-readonly";
+import { normalizeOptionalString as normalizeString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type {
   FeishuConfig,
   FeishuAccountConfig,

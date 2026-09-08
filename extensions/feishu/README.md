@@ -1,11 +1,11 @@
-# OpenClaw Feishu/Lark
+# Carapace Feishu/Lark
 
-Official OpenClaw channel plugin for Feishu and Lark workplace chats. Community maintained by @m1heng.
+Official Carapace channel plugin for Feishu and Lark workplace chats. Community maintained by @m1heng.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/feishu
+carapace plugins install @carapace/feishu
 ```
 
-Configure the Feishu/Lark app credentials in OpenClaw, then connect the plugin to the chats where agents should receive and send messages.
+Configure the Feishu/Lark app credentials in Carapace, then connect the plugin to the chats where agents should receive and send messages.

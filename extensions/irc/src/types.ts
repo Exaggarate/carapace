@@ -1,6 +1,6 @@
 // Irc type declarations define plugin contracts.
-import type { BaseProbeResult } from "openclaw/plugin-sdk/channel-contract";
-import type { ChannelDeliveryStreamingConfig } from "openclaw/plugin-sdk/channel-outbound";
+import type { BaseProbeResult } from "carapace/plugin-sdk/channel-contract";
+import type { ChannelDeliveryStreamingConfig } from "carapace/plugin-sdk/channel-outbound";
 import type {
   DmConfig,
   DmPolicy,
@@ -8,9 +8,9 @@ import type {
   GroupToolPolicyBySenderConfig,
   GroupToolPolicyConfig,
   MarkdownConfig,
-  OpenClawConfig,
+  CarapaceConfig,
   ReplyToMode,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 
 export type IrcChannelConfig = {
   requireMention?: boolean;
@@ -75,8 +75,8 @@ type IrcConfig = IrcAccountConfig & {
   defaultAccount?: string;
 };
 
-export type CoreConfig = OpenClawConfig & {
-  channels?: OpenClawConfig["channels"] & {
+export type CoreConfig = CarapaceConfig & {
+  channels?: CarapaceConfig["channels"] & {
     irc?: IrcConfig;
   };
 };

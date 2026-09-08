@@ -10,7 +10,7 @@ import {
   PlatformMessageNotDispatchedError,
 } from "../../infra/outbound/deliver-types.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import {
   createChannelTestPluginBase,
   createTestRegistry,
@@ -229,14 +229,14 @@ describe("routeReply delivery result", () => {
         expect(mocks.deliverOutboundPayloads).toHaveBeenCalledTimes(calls);
         if (custody) {
           expect(deliveryError).toContain("later payload failed");
-          closeOpenClawAgentDatabasesForTest();
+          closeCarapaceAgentDatabasesForTest();
           expect(
             (loadSessionEntry(custody) as InternalSessionEntry)?.pendingFinalDelivery?.deliveries,
           ).toEqual([{ id: custody.deliveryId, state: "delivered" }]);
         }
       } finally {
         if (custody) {
-          closeOpenClawAgentDatabasesForTest();
+          closeCarapaceAgentDatabasesForTest();
         }
       }
     },

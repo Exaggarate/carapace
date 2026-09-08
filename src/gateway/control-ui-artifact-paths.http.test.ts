@@ -20,7 +20,7 @@ describe.each(["", "/dashboard"])("Control UI artifact names under %j", (basePat
   let origin: string;
 
   beforeAll(async () => {
-    const root = tempDirs.make("openclaw-ui-artifact-paths-");
+    const root = tempDirs.make("carapace-ui-artifact-paths-");
     await fs.mkdir(path.join(root, "assets"));
     for (const [name, body] of Object.entries(files)) {
       await fs.writeFile(path.join(root, "assets", name), body);
@@ -121,7 +121,7 @@ describe.each(["", "/dashboard"])("Control UI artifact names under %j", (basePat
       const get = await read(route);
       expect(get.status).toBe(200);
       expect(get.headers["content-type"]).toBe("text/html; charset=utf-8");
-      expect(get.body.toString()).toContain(`data-openclaw-control-ui-base-path="${basePath}"`);
+      expect(get.body.toString()).toContain(`data-carapace-control-ui-base-path="${basePath}"`);
       expect(get.body.toString()).toContain(`src="${basePath}/assets/app.js"`);
       const head = await read(route, "HEAD");
       expect(head.status).toBe(200);

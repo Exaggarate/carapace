@@ -16,7 +16,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { isSupportedOpenClawNodeVersion } from "../../node-version.mjs";
+import { isSupportedCarapaceNodeVersion } from "../../node-version.mjs";
 import { requireNodeTool } from "../helpers/node-toolchain.js";
 import { NODE_RELEASE_VERSION_CASES } from "../helpers/node-version-cases.js";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
@@ -38,7 +38,7 @@ function runInstallCliShell(script: string, env: NodeJS.ProcessEnv = {}) {
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_INSTALL_CLI_SH_NO_RUN: "1",
+      CARAPACE_INSTALL_CLI_SH_NO_RUN: "1",
       ...env,
     },
   });
@@ -56,9 +56,9 @@ function linkNodeExecutable(nodeDir: string) {
   symlinkSync(nodeExecutable, join(bin, "node"));
 }
 
-function writeInstalledOpenClawEntry(nodeDir: string) {
+function writeInstalledCarapaceEntry(nodeDir: string) {
   linkNodeExecutable(nodeDir);
-  const entry = join(nodeDir, "lib", "node_modules", "openclaw", "dist", "entry.js");
+  const entry = join(nodeDir, "lib", "node_modules", "carapace", "dist", "entry.js");
   mkdirSync(join(entry, ".."), { recursive: true });
   writeFileSync(entry, "");
 }
@@ -67,9 +67,9 @@ describe("install-cli.sh", () => {
   const script = readFileSync(SCRIPT_PATH, "utf8");
 
   it("fails a low-space fresh Git install before Node or checkout work", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-disk-low-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-disk-low-"));
     const commandLog = join(tmp, "commands.log");
-    const repo = join(tmp, "new", "openclaw");
+    const repo = join(tmp, "new", "carapace");
 
     try {
       const result = runInstallCliShell(
@@ -79,7 +79,7 @@ describe("install-cli.sh", () => {
           `source ${JSON.stringify(SCRIPT_PATH)}`,
           "available_disk_kib() { printf '2097152\\n'; }",
           `install_node() { printf 'node\\n' >> ${JSON.stringify(commandLog)}; }`,
-          `install_openclaw_from_git() { printf 'git\\n' >> ${JSON.stringify(commandLog)}; }`,
+          `install_carapace_from_git() { printf 'git\\n' >> ${JSON.stringify(commandLog)}; }`,
           `main --json --git --git-dir ${JSON.stringify(repo)}`,
         ].join("\n"),
       );
@@ -104,8 +104,8 @@ describe("install-cli.sh", () => {
   });
 
   it("allows a fresh Git install with enough free space", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-disk-ok-"));
-    const repo = join(tmp, "new", "openclaw");
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-disk-ok-"));
+    const repo = join(tmp, "new", "carapace");
 
     try {
       const result = runInstallCliShell(
@@ -130,8 +130,8 @@ describe("install-cli.sh", () => {
   });
 
   it("does not apply the fresh-install disk threshold to an existing checkout", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-disk-existing-"));
-    const repo = join(tmp, "openclaw");
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-disk-existing-"));
+    const repo = join(tmp, "carapace");
     mkdirSync(join(repo, ".git"), { recursive: true });
 
     try {
@@ -155,8 +155,8 @@ describe("install-cli.sh", () => {
   });
 
   it("emits ordered stages for an existing Git checkout build", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-events-"));
-    const repo = join(tmp, "openclaw");
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-events-"));
+    const repo = join(tmp, "carapace");
     mkdirSync(join(repo, ".git"), { recursive: true });
 
     try {
@@ -171,15 +171,15 @@ describe("install-cli.sh", () => {
           "ensure_pnpm() { :; }",
           "ensure_pnpm_git_prepare_allowlist() { :; }",
           "cleanup_legacy_submodules() { :; }",
-          "resolve_git_openclaw_ref() { printf 'main\\n'; }",
-          "checkout_git_openclaw_ref() { :; }",
+          "resolve_git_carapace_ref() { printf 'main\\n'; }",
+          "checkout_git_carapace_ref() { :; }",
           "run_pnpm() { :; }",
           "git() {",
           '  if [[ "$1" == --git-dir=* ]]; then return 0; fi',
           '  if [[ "$1" == "-C" && "$3" == "status" ]]; then return 0; fi',
           "  return 0",
           "}",
-          `install_openclaw_from_git ${JSON.stringify(repo)}`,
+          `install_carapace_from_git ${JSON.stringify(repo)}`,
         ].join("\n"),
       );
 
@@ -191,7 +191,7 @@ describe("install-cli.sh", () => {
         .filter((event) => event.event === "step")
         .map((event) => `${event.name}:${event.status}`);
       expect(stages).toEqual([
-        "openclaw:start",
+        "carapace:start",
         "git-tools:start",
         "git-tools:ok",
         "git-update:start",
@@ -202,7 +202,7 @@ describe("install-cli.sh", () => {
         "control-ui:ok",
         "cli-build:start",
         "cli-build:ok",
-        "openclaw:ok",
+        "carapace:ok",
       ]);
     } finally {
       rmSync(tmp, { force: true, recursive: true });
@@ -210,7 +210,7 @@ describe("install-cli.sh", () => {
   });
 
   it("round-trips dynamic installer values through independent NDJSON records", () => {
-    const root = tempDirs.make("openclaw-install-cli-json-events-");
+    const root = tempDirs.make("carapace-install-cli-json-events-");
     const dynamicValue = `quote"\\café项目lobster🦞${String.fromCharCode(
       ...Array.from({ length: 31 }, (_, index) => index + 1),
     )}end`;
@@ -286,7 +286,7 @@ describe("install-cli.sh", () => {
       }
 
       set +e
-      (install_openclaw_from_git "$repo")
+      (install_carapace_from_git "$repo")
       status="$?"
       set -e
       [[ "$status" -eq 1 ]]
@@ -297,8 +297,8 @@ describe("install-cli.sh", () => {
   });
 
   it("keeps a pre-existing empty Git install destination retryable after clone failure", () => {
-    const root = tempDirs.make("openclaw-install-cli-empty-retry-");
-    const repo = join(root, "openclaw");
+    const root = tempDirs.make("carapace-install-cli-empty-retry-");
+    const repo = join(root, "carapace");
     mkdirSync(repo);
     const runAttempt = (cloneMode: "failure" | "success") =>
       runInstallCliShell(
@@ -307,8 +307,8 @@ describe("install-cli.sh", () => {
         source "${SCRIPT_PATH}"
         ensure_git() { :; }
         ensure_pnpm() { :; }
-          resolve_git_openclaw_ref() { printf 'main\\n'; }
-        checkout_git_openclaw_ref() { :; }
+          resolve_git_carapace_ref() { printf 'main\\n'; }
+        checkout_git_carapace_ref() { :; }
         cleanup_legacy_submodules() { :; }
         ensure_pnpm_git_prepare_allowlist() { :; }
         git_install_lockfile_flag() { printf '%s\\n' '--frozen-lockfile'; }
@@ -324,7 +324,7 @@ describe("install-cli.sh", () => {
           fi
           return 0
         }
-        install_openclaw_from_git "$REPO"
+        install_carapace_from_git "$REPO"
       `,
         { CLONE_MODE: cloneMode, REPO: repo },
       );
@@ -340,7 +340,7 @@ describe("install-cli.sh", () => {
   });
 
   it("publishes fresh Git clones only after success and cleans failed staging directories", () => {
-    const root = tempDirs.make("openclaw-install-cli-transactional-clone-");
+    const root = tempDirs.make("carapace-install-cli-transactional-clone-");
     const result = runInstallCliShell(
       `
       set -euo pipefail
@@ -366,13 +366,13 @@ describe("install-cli.sh", () => {
 
       CLONE_MODE=success
       success_repo="$root/success"
-      clone_git_checkout_transactionally https://example.invalid/openclaw.git "$success_repo"
+      clone_git_checkout_transactionally https://example.invalid/carapace.git "$success_repo"
       [[ -f "$success_repo/checkout.marker" ]]
 
       CLONE_MODE=failure
       failed_repo="$root/failure"
       set +e
-      clone_git_checkout_transactionally https://example.invalid/openclaw.git "$failed_repo"
+      clone_git_checkout_transactionally https://example.invalid/carapace.git "$failed_repo"
       failure_status="$?"
       set -e
       [[ "$failure_status" -eq 42 ]]
@@ -384,14 +384,14 @@ describe("install-cli.sh", () => {
       ALIAS_PATH="$root/alias"
       mkdir -p "$ALIAS_TARGET" "$ALIAS_REPLACEMENT"
       ln -s "$ALIAS_TARGET" "$ALIAS_PATH"
-      clone_git_checkout_transactionally https://example.invalid/openclaw.git "$ALIAS_PATH"
+      clone_git_checkout_transactionally https://example.invalid/carapace.git "$ALIAS_PATH"
       [[ -f "$ALIAS_TARGET/checkout.marker" ]]
       [[ -z "$(ls -A "$ALIAS_REPLACEMENT")" ]]
-      [[ -z "$(find "$ALIAS_TARGET" -maxdepth 1 -name '.openclaw-clone.*' -print -quit)" ]]
+      [[ -z "$(find "$ALIAS_TARGET" -maxdepth 1 -name '.carapace-clone.*' -print -quit)" ]]
 
       CLONE_MODE=concurrent
       CONCURRENT_REPO="$root/concurrent"
-      clone_git_checkout_transactionally https://example.invalid/openclaw.git "$CONCURRENT_REPO"
+      clone_git_checkout_transactionally https://example.invalid/carapace.git "$CONCURRENT_REPO"
     `,
       { ROOT: root },
     );
@@ -400,11 +400,11 @@ describe("install-cli.sh", () => {
     expect(result.stdout + result.stderr).toContain("Git install dir appeared while cloning");
     expect(readFileSync(join(root, "concurrent", "user.marker"), "utf8")).toBe("keep\n");
     expect(existsSync(join(root, "concurrent", "checkout.marker"))).toBe(false);
-    expect(readdirSync(root).filter((entry) => entry.startsWith(".openclaw-clone."))).toEqual([]);
+    expect(readdirSync(root).filter((entry) => entry.startsWith(".carapace-clone."))).toEqual([]);
   });
 
   it("keeps the full Git install on the canonical checkout after an alias is retargeted", () => {
-    const root = tempDirs.make("openclaw-install-cli-retargeted-alias-");
+    const root = tempDirs.make("carapace-install-cli-retargeted-alias-");
     const result = runInstallCliShell(
       `
       set -euo pipefail
@@ -417,8 +417,8 @@ describe("install-cli.sh", () => {
       PREFIX="$ROOT/prefix"
 
       ensure_git() { :; }
-      resolve_git_openclaw_ref() { printf 'main\\n'; }
-      checkout_git_openclaw_ref() {
+      resolve_git_carapace_ref() { printf 'main\\n'; }
+      checkout_git_carapace_ref() {
         [[ "$1" == "$target" && "$2" == "main" ]] || return 1
         GIT_REF_KIND=moving
       }
@@ -443,10 +443,10 @@ describe("install-cli.sh", () => {
         [[ "$1" == "-C" && "$2" == "$target" ]]
       }
 
-      install_openclaw_from_git "$alias_path"
-      grep -F "$target/dist/entry.js" "$PREFIX/bin/openclaw"
+      install_carapace_from_git "$alias_path"
+      grep -F "$target/dist/entry.js" "$PREFIX/bin/carapace"
       [[ -z "$(ls -A "$replacement")" ]]
-      [[ -z "$(find "$target" -maxdepth 1 -name '.openclaw-clone.*' -print -quit)" ]]
+      [[ -z "$(find "$target" -maxdepth 1 -name '.carapace-clone.*' -print -quit)" ]]
     `,
       { ROOT: root },
     );
@@ -497,7 +497,7 @@ describe("install-cli.sh", () => {
 
     expect(result.status).toBe(0);
     for (const [index, version] of NODE_RELEASE_VERSION_CASES.entries()) {
-      const expectedStatus = isSupportedOpenClawNodeVersion(version) ? 0 : 1;
+      const expectedStatus = isSupportedCarapaceNodeVersion(version) ? 0 : 1;
       expect(result.stdout, version).toContain(`${index}=${expectedStatus}`);
     }
   });
@@ -578,7 +578,7 @@ describe("install-cli.sh", () => {
         2026.7.3-beta.1:2026.7.2; do
         candidate="\${pair%%:*}"
         writer="\${pair#*:}"
-        openclaw_version_is_compatible_with "$candidate" "$writer"
+        carapace_version_is_compatible_with "$candidate" "$writer"
         printf '%s=%s\\n' "$pair" "$?"
       done
     `);
@@ -593,19 +593,19 @@ describe("install-cli.sh", () => {
   });
 
   it("rejects an incompatible channel before replacing an existing managed CLI", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-compatible-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-compatible-"));
     const prefix = join(tmp, "prefix");
     const bin = join(prefix, "bin");
-    const openclaw = join(bin, "openclaw");
+    const carapace = join(bin, "carapace");
     mkdirSync(bin, { recursive: true });
-    writeFileSync(openclaw, "existing-managed-cli\n");
+    writeFileSync(carapace, "existing-managed-cli\n");
 
     try {
       const result = runInstallCliShell(`
         set -euo pipefail
         source "${SCRIPT_PATH}"
         PREFIX=${JSON.stringify(prefix)}
-        OPENCLAW_VERSION=latest
+        CARAPACE_VERSION=latest
         REQUIRED_COMPATIBLE_VERSION=2026.7.2
         node_bin() { command -v node; }
         npm_bin() { printf 'npm\\n'; }
@@ -616,28 +616,28 @@ describe("install-cli.sh", () => {
           printf 'unexpected mutation: %s\\n' "$*" >&2
           return 99
         }
-        install_openclaw
+        install_carapace
       `);
 
       expect(result.status).toBe(1);
-      expect(result.stdout).toContain("OpenClaw 2026.7.1-2 is older than config writer 2026.7.2");
+      expect(result.stdout).toContain("Carapace 2026.7.1-2 is older than config writer 2026.7.2");
       expect(result.stderr).not.toContain("unexpected mutation");
-      expect(readFileSync(openclaw, "utf8")).toBe("existing-managed-cli\n");
+      expect(readFileSync(carapace, "utf8")).toBe("existing-managed-cli\n");
     } finally {
       rmSync(tmp, { force: true, recursive: true });
     }
   });
 
   it("checks a git checkout version before dependency install or wrapper replacement", () => {
-    const checkoutIndex = script.indexOf('checkout_git_openclaw_ref "$repo_dir" "$git_ref"');
+    const checkoutIndex = script.indexOf('checkout_git_carapace_ref "$repo_dir" "$git_ref"');
     const compatibilityIndex = script.indexOf(
-      'require_openclaw_version_compatible "$resolved_version"',
+      'require_carapace_version_compatible "$resolved_version"',
     );
     const dependencyInstallIndex = script.indexOf(
       'CI="${CI:-true}" run_pnpm -C "$repo_dir" install "${pnpm_prefer_offline_args[@]}" "$install_lockfile_flag"',
     );
     const wrapperIndex = script.indexOf(
-      'publish_executable_wrapper "${PREFIX}/bin/openclaw"',
+      'publish_executable_wrapper "${PREFIX}/bin/carapace"',
       compatibilityIndex,
     );
 
@@ -648,14 +648,14 @@ describe("install-cli.sh", () => {
   });
 
   it("does not restart a gateway again after force-install activates it", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-gateway-refresh-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-gateway-refresh-"));
     const prefix = join(tmp, "prefix");
     const bin = join(prefix, "bin");
     const commandLog = join(tmp, "commands.log");
-    const openclaw = join(bin, "openclaw");
+    const carapace = join(bin, "carapace");
     mkdirSync(bin, { recursive: true });
-    writeFileSync(openclaw, '#!/bin/bash\nprintf "%s\\n" "$*" >> "$COMMAND_LOG"\n');
-    chmodSync(openclaw, 0o755);
+    writeFileSync(carapace, '#!/bin/bash\nprintf "%s\\n" "$*" >> "$COMMAND_LOG"\n');
+    chmodSync(carapace, 0o755);
 
     try {
       const result = runInstallCliShell(
@@ -686,31 +686,31 @@ describe("install-cli.sh", () => {
     { error: "SERVICE_DEFINITION_UNKNOWN: inaccessible", args: "--json", stream: "stderr" },
     { error: "service manager unavailable", args: "--json", stream: "stderr" },
   ])("handles a traced $error refresh in $stream", ({ args, error, stream }) => {
-    const root = tempDirs.make("openclaw-install-cli-definition-");
+    const root = tempDirs.make("carapace-install-cli-definition-");
     const prefix = join(root, "prefix");
-    const openclaw = join(prefix, "bin", "openclaw");
+    const carapace = join(prefix, "bin", "carapace");
     const secretCanary = "installer-cli-secret-canary-never-render";
     const commandLog = join(root, "commands.log");
     mkdirSync(join(prefix, "bin"), { recursive: true });
     writeFileSync(
-      openclaw,
+      carapace,
       [
         "#!/bin/bash",
         'printf "%s\\n" "$*" >> "$COMMAND_LOG"',
-        'if [[ "$1" == "--version" ]]; then printf "OpenClaw 2026.8.25\\n"; exit 0; fi',
+        'if [[ "$1" == "--version" ]]; then printf "Carapace 2026.8.25\\n"; exit 0; fi',
         'if [[ "$*" == "gateway install --force" ]]; then',
         '  if [[ "$SERVICE_STREAM" == stdout ]]; then printf "%s\\n" "$SERVICE_ERROR"; else printf "%s\\n" "$SERVICE_ERROR" >&2; fi',
         '  printf "%s\\n" "$SECRET_CANARY" >&2; exit 1',
         "fi",
       ].join("\n"),
     );
-    chmodSync(openclaw, 0o755);
+    chmodSync(carapace, 0o755);
 
     const result = runInstallCliShell(
       [
         "set -euo pipefail",
         `source ${JSON.stringify(SCRIPT_PATH)}`,
-        "install_node() { :; }; ensure_git() { :; }; install_openclaw() { :; }",
+        "install_node() { :; }; ensure_git() { :; }; install_carapace() { :; }",
         "is_gateway_daemon_loaded() { return 0; }",
         "set -x",
         `main ${args} --prefix ${JSON.stringify(prefix)}`,
@@ -739,7 +739,7 @@ describe("install-cli.sh", () => {
         expect(result.stdout).toContain('"event":"done"');
         expect(result.stdout).toContain('"reason":"definition-mutation-denied"');
       } else {
-        expect(result.stdout).toContain("OpenClaw installed (OpenClaw 2026.8.25).");
+        expect(result.stdout).toContain("Carapace installed (Carapace 2026.8.25).");
       }
     } else {
       expect(result.stdout).toContain('"reason":"install-failed"');
@@ -753,7 +753,7 @@ describe("install-cli.sh", () => {
   ])(
     "rejects a package without a runnable CLI in $mode mode before service refresh",
     ({ args }) => {
-      const tmp = tempDirs.make("openclaw-install-cli-invalid-package-");
+      const tmp = tempDirs.make("carapace-install-cli-invalid-package-");
       const prefix = join(tmp, "prefix");
       const refreshLog = join(tmp, "gateway-refresh.log");
 
@@ -763,7 +763,7 @@ describe("install-cli.sh", () => {
           `cd ${JSON.stringify(process.cwd())}`,
           `source ${JSON.stringify(SCRIPT_PATH)}`,
           "npm_lifecycle_allow_arg() { :; }",
-          'install_node() { mkdir -p "$(node_dir)/lib/node_modules/openclaw/dist"; : > "$(node_dir)/lib/node_modules/openclaw/dist/entry.js"; }',
+          'install_node() { mkdir -p "$(node_dir)/lib/node_modules/carapace/dist"; : > "$(node_dir)/lib/node_modules/carapace/dist/entry.js"; }',
           "ensure_git() { :; }",
           'npm_bin() { printf "/usr/bin/true\\n"; }',
           `refresh_gateway_service_if_loaded() { touch ${JSON.stringify(refreshLog)}; }`,
@@ -772,9 +772,9 @@ describe("install-cli.sh", () => {
       );
 
       expect(result.status).toBe(1);
-      expect(result.stdout).toContain("Installed OpenClaw CLI did not return a version");
+      expect(result.stdout).toContain("Installed Carapace CLI did not return a version");
       expect(result.stdout).not.toContain('"event":"done"');
-      expect(result.stdout).not.toContain("OpenClaw installed.");
+      expect(result.stdout).not.toContain("Carapace installed.");
       expect(existsSync(refreshLog)).toBe(false);
     },
   );
@@ -785,14 +785,14 @@ describe("install-cli.sh", () => {
   ])(
     "rejects a version command that prints output and fails in $mode mode before service refresh",
     ({ args }) => {
-      const tmp = tempDirs.make("openclaw-install-cli-failed-version-");
+      const tmp = tempDirs.make("carapace-install-cli-failed-version-");
       const prefix = join(tmp, "prefix");
       const bin = join(prefix, "bin");
-      const openclaw = join(bin, "openclaw");
+      const carapace = join(bin, "carapace");
       const refreshLog = join(tmp, "gateway-refresh.log");
       mkdirSync(bin, { recursive: true });
-      writeFileSync(openclaw, '#!/bin/bash\nprintf "OpenClaw 2026.8.1\\n"\nexit 1\n');
-      chmodSync(openclaw, 0o755);
+      writeFileSync(carapace, '#!/bin/bash\nprintf "Carapace 2026.8.1\\n"\nexit 1\n');
+      chmodSync(carapace, 0o755);
 
       const result = runInstallCliShell(
         [
@@ -801,26 +801,26 @@ describe("install-cli.sh", () => {
           `source ${JSON.stringify(SCRIPT_PATH)}`,
           "install_node() { :; }",
           "ensure_git() { :; }",
-          "install_openclaw() { :; }",
+          "install_carapace() { :; }",
           `refresh_gateway_service_if_loaded() { touch ${JSON.stringify(refreshLog)}; }`,
           `main ${args} --prefix ${JSON.stringify(prefix)} --version 0.0.0`,
         ].join("\n"),
       );
 
       expect(result.status).toBe(1);
-      expect(result.stdout).toContain("Installed OpenClaw CLI did not return a version");
+      expect(result.stdout).toContain("Installed Carapace CLI did not return a version");
       expect(result.stdout).not.toContain('"event":"done"');
-      expect(result.stdout).not.toContain("OpenClaw installed.");
+      expect(result.stdout).not.toContain("Carapace installed.");
       expect(existsSync(refreshLog)).toBe(false);
     },
   );
 
-  it("keeps HOME for default prefix while OPENCLAW_HOME controls git checkout paths", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-home-"));
+  it("keeps HOME for default prefix while CARAPACE_HOME controls git checkout paths", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-home-"));
     const osHome = join(tmp, "os-home");
-    const openclawHome = join(tmp, "openclaw-home");
+    const carapaceHome = join(tmp, "carapace-home");
     mkdirSync(osHome, { recursive: true });
-    mkdirSync(openclawHome, { recursive: true });
+    mkdirSync(carapaceHome, { recursive: true });
 
     let result: ReturnType<typeof runInstallCliShell> | undefined;
     try {
@@ -832,9 +832,9 @@ describe("install-cli.sh", () => {
         ].join("\n"),
         {
           HOME: osHome,
-          OPENCLAW_HOME: openclawHome,
-          OPENCLAW_GIT_DIR: undefined,
-          OPENCLAW_PREFIX: undefined,
+          CARAPACE_HOME: carapaceHome,
+          CARAPACE_GIT_DIR: undefined,
+          CARAPACE_PREFIX: undefined,
         },
       );
     } finally {
@@ -843,8 +843,8 @@ describe("install-cli.sh", () => {
 
     expect(result?.status).toBe(0);
     const output = result?.stdout ?? "";
-    expect(output).toContain(`prefix=${join(osHome, ".openclaw")}`);
-    expect(output).toContain(`git=${join(openclawHome, "openclaw")}`);
+    expect(output).toContain(`prefix=${join(osHome, ".carapace")}`);
+    expect(output).toContain(`git=${join(carapaceHome, "carapace")}`);
   });
 
   it.each([
@@ -857,18 +857,18 @@ describe("install-cli.sh", () => {
   ] as const)(
     "keeps a generated $method launcher working after $input supplied paths change cwd",
     ({ input, method }) => {
-      const tmp = mkdtempSync(join(tmpdir(), `openclaw-install-cli-relative-${method}-`));
+      const tmp = mkdtempSync(join(tmpdir(), `carapace-install-cli-relative-${method}-`));
       const installRoot = join(tmp, "install-root");
       const otherRoot = join(tmp, "other-root");
       const home = join(tmp, "home");
-      const prefixInput = input === "literal tilde" ? "~/openclaw-local" : "openclaw-local";
-      const prefix = join(input === "literal tilde" ? home : installRoot, "openclaw-local");
+      const prefixInput = input === "literal tilde" ? "~/carapace-local" : "carapace-local";
+      const prefix = join(input === "literal tilde" ? home : installRoot, "carapace-local");
       const nodeDir = join(prefix, "tools", "node-v24.19.0");
-      const repoInput = input === "literal tilde" ? "~/openclaw-source" : "openclaw-source";
-      const repo = join(input === "literal tilde" ? home : installRoot, "openclaw-source");
+      const repoInput = input === "literal tilde" ? "~/carapace-source" : "carapace-source";
+      const repo = join(input === "literal tilde" ? home : installRoot, "carapace-source");
       mkdirSync(installRoot, { recursive: true });
       mkdirSync(join(nodeDir, "bin"), { recursive: true });
-      mkdirSync(join(nodeDir, "lib", "node_modules", "openclaw", "dist"), { recursive: true });
+      mkdirSync(join(nodeDir, "lib", "node_modules", "carapace", "dist"), { recursive: true });
       mkdirSync(join(repo, ".git"), { recursive: true });
       mkdirSync(join(repo, "dist"), { recursive: true });
       mkdirSync(otherRoot, { recursive: true });
@@ -880,7 +880,7 @@ describe("install-cli.sh", () => {
       );
       chmodSync(join(nodeDir, "bin", "npm"), 0o755);
       for (const entry of [
-        join(nodeDir, "lib", "node_modules", "openclaw", "dist", "entry.js"),
+        join(nodeDir, "lib", "node_modules", "carapace", "dist", "entry.js"),
         join(repo, "dist", "entry.js"),
       ]) {
         writeFileSync(entry, 'console.log("fixture cli");\n');
@@ -907,8 +907,8 @@ describe("install-cli.sh", () => {
                   "ensure_pnpm() { :; }",
                   "ensure_pnpm_git_prepare_allowlist() { :; }",
                   "cleanup_legacy_submodules() { :; }",
-                  "resolve_git_openclaw_ref() { printf 'main\\n'; }",
-                  "checkout_git_openclaw_ref() { :; }",
+                  "resolve_git_carapace_ref() { printf 'main\\n'; }",
+                  "checkout_git_carapace_ref() { :; }",
                   "git_install_lockfile_flag() { printf '%s\\n' '--no-frozen-lockfile'; }",
                   "run_pnpm() { :; }",
                   "git() { return 0; }",
@@ -916,12 +916,12 @@ describe("install-cli.sh", () => {
               : []),
             `main --${method} ${args}`,
             `cd ${JSON.stringify(otherRoot)}`,
-            `${JSON.stringify(join(prefix, "bin", "openclaw"))} --version`,
+            `${JSON.stringify(join(prefix, "bin", "carapace"))} --version`,
           ].join("\n"),
           {
             HOME: home,
-            OPENCLAW_GIT_DIR: input === "environment" && method === "git" ? repoInput : undefined,
-            OPENCLAW_PREFIX: input === "environment" ? prefixInput : undefined,
+            CARAPACE_GIT_DIR: input === "environment" && method === "git" ? repoInput : undefined,
+            CARAPACE_PREFIX: input === "environment" ? prefixInput : undefined,
           },
         );
 
@@ -939,20 +939,20 @@ describe("install-cli.sh", () => {
       source "${SCRIPT_PATH}"
       npm_bin() { echo npm; }
       npm() {
-        if [[ "$1" == "view" && "$2" == "openclaw" && "$3" == "dist-tags.beta" ]]; then
+        if [[ "$1" == "view" && "$2" == "carapace" && "$3" == "dist-tags.beta" ]]; then
           printf '2026.5.12-beta.3\\n'
           return 0
         fi
         return 1
       }
-      OPENCLAW_VERSION=v2026.5.12-beta.3
-      printf 'tag=%s\\n' "$(resolve_git_openclaw_ref)"
-      OPENCLAW_VERSION=2026.5.12-beta.3
-      printf 'semver=%s\\n' "$(resolve_git_openclaw_ref)"
-      OPENCLAW_VERSION=beta
-      printf 'beta=%s\\n' "$(resolve_git_openclaw_ref)"
-      OPENCLAW_VERSION=main
-      printf 'main=%s\\n' "$(resolve_git_openclaw_ref)"
+      CARAPACE_VERSION=v2026.5.12-beta.3
+      printf 'tag=%s\\n' "$(resolve_git_carapace_ref)"
+      CARAPACE_VERSION=2026.5.12-beta.3
+      printf 'semver=%s\\n' "$(resolve_git_carapace_ref)"
+      CARAPACE_VERSION=beta
+      printf 'beta=%s\\n' "$(resolve_git_carapace_ref)"
+      CARAPACE_VERSION=main
+      printf 'main=%s\\n' "$(resolve_git_carapace_ref)"
     `);
 
     expect(result.status).toBe(0);
@@ -977,7 +977,7 @@ describe("install-cli.sh", () => {
 
   it.each(["bundle", "remote"] as const)("pins a full commit from a %s", (source) => {
     const result = runInstallCliShell(createInstallGitCommitFixtureScript(source), {
-      OPENCLAW_INSTALLER_SCRIPT: SCRIPT_PATH,
+      CARAPACE_INSTALLER_SCRIPT: SCRIPT_PATH,
     });
 
     expect(result.status, result.stdout + result.stderr).toBe(0);
@@ -1013,7 +1013,7 @@ describe("install-cli.sh", () => {
       branch_head="$(git -C "$seed" rev-parse HEAD)"
       git -C "$seed" push -q origin "refs/heads/$ref"
       git clone -q "$remote" "$repo"
-      checkout_git_openclaw_ref "$repo" "$ref"
+      checkout_git_carapace_ref "$repo" "$ref"
       selected="$(git -C "$repo" rev-parse HEAD)"
       printf 'selected=%s tag=%s branch=%s kind=%s\n' "$selected" "$tag_head" "$branch_head" "$GIT_REF_KIND"
       [[ "$selected" == "$tag_head" && "$selected" != "$branch_head" && "$GIT_REF_KIND" == "immutable" ]]
@@ -1049,7 +1049,7 @@ describe("install-cli.sh", () => {
       branch_head="$(git -C "$seed" rev-parse HEAD)"
       git -C "$seed" push -q origin "refs/heads/$ref"
       git clone -q "$remote" "$repo"
-      checkout_git_openclaw_ref "$repo" "$ref"
+      checkout_git_carapace_ref "$repo" "$ref"
       selected="$(git -C "$repo" rev-parse HEAD)"
       printf 'selected=%s branch=%s kind=%s\\n' "$selected" "$branch_head" "$GIT_REF_KIND"
       [[ "$selected" == "$branch_head" && "$GIT_REF_KIND" == "moving" ]]
@@ -1089,7 +1089,7 @@ describe("install-cli.sh", () => {
       stale_tracking="$(git -C "$repo" rev-parse refs/remotes/origin/main)"
       [[ "$base" == "$stale_tracking" ]]
       GIT_UPDATE=1
-      checkout_git_openclaw_ref "$repo" main
+      checkout_git_carapace_ref "$repo" main
       head="$(git -C "$repo" rev-parse HEAD)"
       tracking="$(git -C "$repo" rev-parse refs/remotes/origin/main)"
       remote_head="$(git --git-dir="$remote" rev-parse refs/heads/main)"
@@ -1134,7 +1134,7 @@ describe("install-cli.sh", () => {
       expected_head="$(git -C "$repo" rev-parse HEAD)"
       expected_status="$(git -C "$repo" status --porcelain=v1 --untracked-files=all)"
       set +e
-      output="$(checkout_git_openclaw_ref "$repo" main 2>&1)"
+      output="$(checkout_git_carapace_ref "$repo" main 2>&1)"
       status=$?
       set -e
       [[ "$status" -ne 0 ]]
@@ -1191,7 +1191,7 @@ HOOK
       expected_head="$(git -C "$repo" rev-parse HEAD)"
       expected_status="$(git -C "$repo" status --porcelain=v1 --untracked-files=all)"
       set +e
-      output="$(GIT_UPDATE=1 checkout_git_openclaw_ref "$repo" main 2>&1)"
+      output="$(GIT_UPDATE=1 checkout_git_carapace_ref "$repo" main 2>&1)"
       status=$?
       set -e
       actual_head="$(git -C "$repo" rev-parse HEAD)"
@@ -1286,7 +1286,7 @@ HOOK
   ])(
     "keeps selected pnpm through install and nested build (%s, %s, failure=%s)",
     (mode, version, failure) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-pnpm-boundary-"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-pnpm-boundary-"));
       const bin = join(tmp, "bin");
       const repo = join(tmp, "repo");
       const outer = join(tmp, "outer");
@@ -1411,7 +1411,7 @@ HOOK
   );
 
   it("links an existing usable Alpine/musl Node runtime without sudo", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-alpine-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-alpine-"));
     const bin = join(tmp, "bin");
     const prefix = join(tmp, "prefix");
     const apkLog = join(tmp, "apk.log");
@@ -1479,7 +1479,7 @@ HOOK
   });
 
   it("replaces a stale Alpine/musl prefix Node before the generic skip", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-alpine-stale-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-alpine-stale-"));
     const bin = join(tmp, "bin");
     const oldBin = join(tmp, "old-bin");
     const prefix = join(tmp, "prefix");
@@ -1587,7 +1587,7 @@ HOOK
   });
 
   it("uses apk-managed Node and Git on Alpine/musl when the existing Node is unusable", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-alpine-apk-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-alpine-apk-"));
     const bin = join(tmp, "bin");
     const prefix = join(tmp, "prefix");
     const apkLog = join(tmp, "apk.log");
@@ -1669,7 +1669,7 @@ HOOK
   });
 
   it("skips PATH Node runtimes whose npm command cannot start", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-broken-npm-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-broken-npm-"));
     const badBin = join(tmp, "bad-bin");
     const goodBin = join(tmp, "good-bin");
     const prefix = join(tmp, "prefix");
@@ -1744,7 +1744,7 @@ HOOK
   });
 
   it("rejects Alpine/musl Node packages below the requested runtime floor", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-alpine-old-node-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-alpine-old-node-"));
     const bin = join(tmp, "bin");
     const prefix = join(tmp, "prefix");
     const apkLog = join(tmp, "apk.log");
@@ -1810,7 +1810,7 @@ HOOK
   });
 
   it("replaces cached generic Node runtimes below the runtime floor", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-generic-stale-node-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-generic-stale-node-"));
     const prefix = join(tmp, "prefix");
     const nodePrefixBin = join(prefix, "tools", "node-v24.16.0", "bin");
     const staleNode = join(nodePrefixBin, "node");
@@ -1908,19 +1908,19 @@ HOOK
   ])(
     "keeps the active runtime until a downloaded replacement is usable ($existing, $starts)",
     ({ existing, starts }) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-generic-old-node-"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-generic-old-node-"));
       const prefix = join(tmp, "prefix");
       const newNode = join(tmp, "new-node");
       const newNpm = join(tmp, "new-npm");
       const activeNode = join(prefix, "tools", "node");
       const oldNodeDir = join(prefix, "tools", "node-v22.23.2");
-      const oldPackage = join(oldNodeDir, "lib", "node_modules", "openclaw", "package.json");
+      const oldPackage = join(oldNodeDir, "lib", "node_modules", "carapace", "package.json");
       if (existing) {
         mkdirSync(join(oldNodeDir, "bin"), { recursive: true });
         writeFileSync(join(oldNodeDir, "bin", "node"), "#!/bin/bash\nprintf 'v22.23.2\\n'\n");
         chmodSync(join(oldNodeDir, "bin", "node"), 0o755);
         mkdirSync(join(oldPackage, ".."), { recursive: true });
-        writeFileSync(oldPackage, '{"name":"openclaw","version":"2026.9.2"}\n');
+        writeFileSync(oldPackage, '{"name":"carapace","version":"2026.9.2"}\n');
         symlinkSync(oldNodeDir, activeNode);
       }
 
@@ -1995,7 +1995,7 @@ HOOK
             spawnSync(join(activeNode, "bin", "node"), ["-v"], { encoding: "utf8" }).stdout,
           ).toBe("v22.23.2\n");
           expect(readFileSync(oldPackage, "utf8")).toBe(
-            '{"name":"openclaw","version":"2026.9.2"}\n',
+            '{"name":"carapace","version":"2026.9.2"}\n',
           );
         } else {
           expect(existsSync(activeNode)).toBe(false);
@@ -2013,7 +2013,7 @@ HOOK
         ).toBe("v24.16.0\n");
         if (existing) {
           expect(readFileSync(oldPackage, "utf8")).toBe(
-            '{"name":"openclaw","version":"2026.9.2"}\n',
+            '{"name":"carapace","version":"2026.9.2"}\n',
           );
         }
       } finally {
@@ -2023,7 +2023,7 @@ HOOK
   );
 
   it("removes the Node staging directory when download fails", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-node-cleanup-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-node-cleanup-"));
     const prefix = join(tmp, "prefix");
     const stagingDir = join(tmp, "node-staging");
 
@@ -2053,7 +2053,7 @@ HOOK
   });
 
   it("removes the workspace rewrite temp file when rewriting fails", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-workspace-cleanup-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-workspace-cleanup-"));
     const repo = join(tmp, "repo");
     const workspaceFile = join(repo, "pnpm-workspace.yaml");
     const rewriteTemp = join(tmp, "workspace-rewrite");
@@ -2090,10 +2090,10 @@ HOOK
 
   it.each([
     { expected: "", version: "11.15.0" },
-    { expected: "--allow-scripts=openclaw", version: "11.16.0" },
-    { expected: "--allow-scripts=openclaw", version: "12.0.0" },
+    { expected: "--allow-scripts=carapace", version: "11.16.0" },
+    { expected: "--allow-scripts=carapace", version: "12.0.0" },
   ])("resolves canonical npm lifecycle policy for npm $version", ({ expected, version }) => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-lifecycle-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-lifecycle-"));
     const npm = join(tmp, "npm");
     writeNpmLifecycleFixture(npm);
     try {
@@ -2101,7 +2101,7 @@ HOOK
         [
           `source ${JSON.stringify(SCRIPT_PATH)}`,
           `node_bin() { printf '%s\n' ${JSON.stringify(nodeExecutable)}; }`,
-          `result="$(npm_lifecycle_allow_arg ${JSON.stringify(npm)} openclaw@latest)"`,
+          `result="$(npm_lifecycle_allow_arg ${JSON.stringify(npm)} carapace@latest)"`,
           `printf '%s' "$result"`,
         ].join("\n"),
         { NPM_FAKE_VERSION: version },
@@ -2126,7 +2126,7 @@ HOOK
   it.each(["invalid", "npm 12.0.0 warning"])(
     "rejects npm version %s before mutation",
     (version) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-lifecycle-invalid-"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-lifecycle-invalid-"));
       const npm = join(tmp, "npm");
       const args = join(tmp, "args");
       writeNpmLifecycleFixture(npm);
@@ -2135,7 +2135,7 @@ HOOK
           [
             `source ${JSON.stringify(SCRIPT_PATH)}`,
             `node_bin() { printf '%s\n' ${JSON.stringify(nodeExecutable)}; }`,
-            `npm_lifecycle_allow_arg ${JSON.stringify(npm)} openclaw@latest`,
+            `npm_lifecycle_allow_arg ${JSON.stringify(npm)} carapace@latest`,
           ].join("\n"),
           { NPM_FAKE_ARGS: args, NPM_FAKE_VERSION: version },
         );
@@ -2148,17 +2148,17 @@ HOOK
   );
 
   it.each([
-    ["openclaw@npm:@scope/candidate@1.0.0", "--allow-scripts=@scope/candidate"],
-    ["openclaw@npm:@scope/candidate.tgz@1.0.0", "--allow-scripts=@scope/candidate.tgz"],
-    ["file:/tmp/openclaw.tgz", "--allow-scripts=file:/tmp/openclaw.tgz"],
+    ["carapace@npm:@scope/candidate@1.0.0", "--allow-scripts=@scope/candidate"],
+    ["carapace@npm:@scope/candidate.tgz@1.0.0", "--allow-scripts=@scope/candidate.tgz"],
+    ["file:/tmp/carapace.tgz", "--allow-scripts=file:/tmp/carapace.tgz"],
     ["vendor/repo.tgz", "--allow-scripts=vendor/repo.tgz"],
     ["vendor/repo#release.tgz", "--allow-scripts=vendor/repo#release.tgz"],
     [
-      "https://example.invalid/openclaw.tgz",
-      "--allow-scripts=https://example.invalid/openclaw.tgz",
+      "https://example.invalid/carapace.tgz",
+      "--allow-scripts=https://example.invalid/carapace.tgz",
     ],
   ])("uses npm-resolved lifecycle identity for %s", (spec, expected) => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-identity-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-identity-"));
     const npm = join(tmp, "npm");
     writeNpmLifecycleFixture(npm);
     try {
@@ -2180,7 +2180,7 @@ HOOK
   it.each(["absolute", "relative", "file:absolute", "file:relative"])(
     "uses the absolute npm tarball identity for %s input",
     (form) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-archive-identity-"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-archive-identity-"));
       const npm = join(tmp, "npm");
       const commandCwd = join(tmp, "work");
       const candidate = join(tmp, "candidate.tgz");
@@ -2212,7 +2212,7 @@ HOOK
   ])(
     "handles comma tarball identity under npm $version before mutation",
     ({ version, advisory }) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-archive-comma,"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-archive-comma,"));
       const npm = join(tmp, "npm");
       const args = join(tmp, "args");
       writeNpmLifecycleFixture(npm);
@@ -2240,7 +2240,7 @@ HOOK
   );
 
   it("retains relative directory identities under comma ancestors", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-identity-comma,"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-identity-comma,"));
     const npm = join(tmp, "npm");
     const commandCwd = join(tmp, "safe");
     const candidate = join(tmp, "candidate");
@@ -2264,7 +2264,7 @@ HOOK
   });
 
   it("does not emit --before when raw user npmrc config contains min-release-age", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-npmrc-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-npmrc-"));
     const bin = join(tmp, "bin");
     const npmrc = join(tmp, "user.npmrc");
     const installArgs = join(tmp, "npm-install-args.txt");
@@ -2272,7 +2272,7 @@ HOOK
     const nodeDir = join(tmp, "node");
     mkdirSync(bin, { recursive: true });
     mkdirSync(nodeDir, { recursive: true });
-    writeInstalledOpenClawEntry(nodeDir);
+    writeInstalledCarapaceEntry(nodeDir);
     writeFileSync(npmrc, "min-release-age=7\n");
     const fakeNpm = join(bin, "npm");
     writeFileSync(
@@ -2309,8 +2309,8 @@ HOOK
           "log() { :; }",
           `PREFIX=${JSON.stringify(prefix)}`,
           "SET_NPM_PREFIX=0",
-          "OPENCLAW_VERSION=1.2.3",
-          "install_openclaw",
+          "CARAPACE_VERSION=1.2.3",
+          "install_carapace",
         ].join("\n"),
         {
           NPM_CONFIG_USERCONFIG: npmrc,
@@ -2337,7 +2337,7 @@ HOOK
       source: "builtin" as const,
     },
   ])("$name", ({ source }) => {
-    const tmp = mkdtempSync(join(tmpdir(), `openclaw-install-cli-${source}-npmrc-`));
+    const tmp = mkdtempSync(join(tmpdir(), `carapace-install-cli-${source}-npmrc-`));
     const bin = join(tmp, "bin");
     const home = join(tmp, "home");
     const prefix = join(tmp, "prefix");
@@ -2349,7 +2349,7 @@ HOOK
     mkdirSync(bin, { recursive: true });
     mkdirSync(home, { recursive: true });
     mkdirSync(nodeDir, { recursive: true });
-    writeInstalledOpenClawEntry(nodeDir);
+    writeInstalledCarapaceEntry(nodeDir);
     if (source === "global") {
       mkdirSync(join(prefix, "etc"), { recursive: true });
     }
@@ -2394,8 +2394,8 @@ HOOK
           "log() { :; }",
           `PREFIX=${JSON.stringify(installPrefix)}`,
           "SET_NPM_PREFIX=0",
-          "OPENCLAW_VERSION=1.2.3",
-          "install_openclaw",
+          "CARAPACE_VERSION=1.2.3",
+          "install_carapace",
         ].join("\n"),
         {
           HOME: home,
@@ -2419,16 +2419,16 @@ HOOK
     }
   });
 
-  it("rejects OpenClaw GitHub source targets for npm installs", () => {
+  it("rejects Carapace GitHub source targets for npm installs", () => {
     const result = runInstallCliShell(`
       set -euo pipefail
       source "${SCRIPT_PATH}"
-      OPENCLAW_VERSION=main
-      install_openclaw
+      CARAPACE_VERSION=main
+      install_carapace
     `);
 
     expect(result.status).toBe(1);
-    expect(result.stdout).toContain("npm installs do not support OpenClaw GitHub source targets");
+    expect(result.stdout).toContain("npm installs do not support Carapace GitHub source targets");
     expect(result.stdout).toContain("--install-method git --version main");
   });
 
@@ -2470,9 +2470,9 @@ HOOK
       status: 1,
     },
   ])(
-    "keeps openclaw@$requested immutable across $outcome npm installs",
+    "keeps carapace@$requested immutable across $outcome npm installs",
     ({ requested, outcome, error, calls: expectedCalls, status }) => {
-      const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-npm-retry-"));
+      const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-npm-retry-"));
       const fakeNpm = join(tmp, "npm");
       const calls = join(tmp, "calls");
       const nodeDir = join(tmp, "node");
@@ -2489,10 +2489,10 @@ HOOK
             `node_dir() { printf '%s\\n' ${JSON.stringify(nodeDir)}; }`,
             "npm_config_has_raw_key() { return 1; }",
             `PREFIX=${JSON.stringify(prefix)}`,
-            `OPENCLAW_VERSION=${requested}`,
+            `CARAPACE_VERSION=${requested}`,
             "JSON=1",
             "set +e",
-            "install_openclaw",
+            "install_carapace",
             "status=$?",
             'exit "$status"',
           ].join("\n"),
@@ -2500,21 +2500,21 @@ HOOK
             NPM_FAKE_CALLS: calls,
             NPM_FAKE_ERROR: error,
             NPM_FAKE_OUTCOME: outcome,
-            NPM_FAKE_PACKAGE_DIR: join(nodeDir, "lib", "node_modules", "openclaw"),
+            NPM_FAKE_PACKAGE_DIR: join(nodeDir, "lib", "node_modules", "carapace"),
           },
         );
 
         expect(result.status).toBe(status);
         expect(readFileSync(calls, "utf8").trim().split("\n")).toEqual(
-          Array.from({ length: expectedCalls }, () => `openclaw@${requested}`),
+          Array.from({ length: expectedCalls }, () => `carapace@${requested}`),
         );
         if (status !== 0) {
           expect(result.stderr).toContain(`${error} (attempt 2)`);
           expect(result.stdout).not.toContain('"status":"ok"');
-          expect(existsSync(join(prefix, "bin", "openclaw"))).toBe(false);
+          expect(existsSync(join(prefix, "bin", "carapace"))).toBe(false);
         }
         if (requested !== "next") {
-          expect(`${result.stdout}\n${result.stderr}`).not.toContain("openclaw@next");
+          expect(`${result.stdout}\n${result.stderr}`).not.toContain("carapace@next");
         }
       } finally {
         rmSync(tmp, { force: true, recursive: true });
@@ -2522,8 +2522,8 @@ HOOK
     },
   );
 
-  it("fails after retrying the exact npm spec when npm exits zero without installing OpenClaw", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-empty-success-"));
+  it("fails after retrying the exact npm spec when npm exits zero without installing Carapace", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-empty-success-"));
     const fakeNpm = join(tmp, "npm");
     const calls = join(tmp, "calls");
     const nodeDir = join(tmp, "node");
@@ -2540,9 +2540,9 @@ HOOK
           `node_dir() { printf '%s\\n' ${JSON.stringify(nodeDir)}; }`,
           "npm_config_has_raw_key() { return 1; }",
           `PREFIX=${JSON.stringify(prefix)}`,
-          "OPENCLAW_VERSION=latest",
+          "CARAPACE_VERSION=latest",
           "JSON=1",
-          "install_openclaw",
+          "install_carapace",
         ].join("\n"),
         {
           NPM_FAKE_CALLS: calls,
@@ -2553,27 +2553,27 @@ HOOK
 
       expect(result.status).toBe(1);
       expect(readFileSync(calls, "utf8").trim().split("\n")).toEqual([
-        "openclaw@latest",
-        "openclaw@latest",
+        "carapace@latest",
+        "carapace@latest",
       ]);
-      expect(result.stdout).toContain("npm install did not produce a usable OpenClaw package");
+      expect(result.stdout).toContain("npm install did not produce a usable Carapace package");
       expect(result.stdout).not.toContain('"status":"ok"');
-      expect(result.stdout).not.toContain("openclaw@next");
-      expect(existsSync(join(prefix, "bin", "openclaw"))).toBe(false);
+      expect(result.stdout).not.toContain("carapace@next");
+      expect(existsSync(join(prefix, "bin", "carapace"))).toBe(false);
     } finally {
       rmSync(tmp, { force: true, recursive: true });
     }
   });
 
   it("does not emit before args when npmrc min-release-age computes a before cutoff", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-freshness-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-freshness-"));
     const prefix = join(tmp, "prefix");
     const home = join(tmp, "home");
     const nodeBin = join(prefix, "tools/node-v24.19.0/bin");
     const argsLog = join(tmp, "npm-args.log");
     mkdirSync(nodeBin, { recursive: true });
     mkdirSync(home, { recursive: true });
-    writeInstalledOpenClawEntry(join(prefix, "tools", "node-v24.19.0"));
+    writeInstalledCarapaceEntry(join(prefix, "tools", "node-v24.19.0"));
     writeFileSync(join(home, ".npmrc"), "min-release-age=7\n");
     writeNpmFreshnessConflictFixture(join(nodeBin, "npm"), argsLog);
 
@@ -2584,11 +2584,11 @@ HOOK
         [
           "set -euo pipefail",
           `HOME=${JSON.stringify(home)}`,
-          `OPENCLAW_PREFIX=${JSON.stringify(prefix)}`,
-          "OPENCLAW_VERSION=2026.5.19",
+          `CARAPACE_PREFIX=${JSON.stringify(prefix)}`,
+          "CARAPACE_VERSION=2026.5.19",
           `source ${JSON.stringify(SCRIPT_PATH)}`,
           "ensure_git() { return 0; }",
-          "install_openclaw",
+          "install_carapace",
         ].join("\n"),
       );
       argsOutput = readFileSync(argsLog, "utf8");
@@ -2602,7 +2602,7 @@ HOOK
   });
 
   it("ignores project npmrc when choosing global install freshness args", () => {
-    const tmp = mkdtempSync(join(tmpdir(), "openclaw-install-cli-global-freshness-"));
+    const tmp = mkdtempSync(join(tmpdir(), "carapace-install-cli-global-freshness-"));
     const prefix = join(tmp, "prefix");
     const home = join(tmp, "home");
     const project = join(tmp, "project");
@@ -2611,7 +2611,7 @@ HOOK
     mkdirSync(nodeBin, { recursive: true });
     mkdirSync(home, { recursive: true });
     mkdirSync(project, { recursive: true });
-    writeInstalledOpenClawEntry(join(prefix, "tools", "node-v24.19.0"));
+    writeInstalledCarapaceEntry(join(prefix, "tools", "node-v24.19.0"));
     writeFileSync(join(home, ".npmrc"), "before=2026-01-01T00:00:00.000Z\n");
     writeFileSync(join(project, ".npmrc"), "min-release-age=7\n");
     writeNpmBeforePolicyFixture(join(nodeBin, "npm"), argsLog);
@@ -2624,11 +2624,11 @@ HOOK
           "set -euo pipefail",
           `cd ${JSON.stringify(project)}`,
           `HOME=${JSON.stringify(home)}`,
-          `OPENCLAW_PREFIX=${JSON.stringify(prefix)}`,
-          "OPENCLAW_VERSION=2026.5.19",
+          `CARAPACE_PREFIX=${JSON.stringify(prefix)}`,
+          "CARAPACE_VERSION=2026.5.19",
           `source ${JSON.stringify(process.cwd() + "/" + SCRIPT_PATH)}`,
           "ensure_git() { return 0; }",
-          "install_openclaw",
+          "install_carapace",
         ].join("\n"),
       );
       argsOutput = readFileSync(argsLog, "utf8");

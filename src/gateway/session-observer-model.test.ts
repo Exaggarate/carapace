@@ -7,7 +7,7 @@ import {
   loadSessionEntryReadOnly,
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   defaultPersistDigest,
   readSessionObserverDigestVersion,
@@ -50,7 +50,7 @@ function state(overrides: Partial<SessionObserverState> = {}): SessionObserverSt
 
 describe("defaultPersistDigest tri-state contract", () => {
   it("returns null when the session row is gone", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:persist-digest-missing";
       const before = readSessionObserverDigestVersion();
       const accepted = await defaultPersistDigest({
@@ -64,7 +64,7 @@ describe("defaultPersistDigest tri-state contract", () => {
   });
 
   it("returns true and advances the fence when the digest is applied", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:persist-digest-accept";
       await upsertSessionEntryCore(
         { sessionKey, agentId, env: process.env },
@@ -89,7 +89,7 @@ describe("defaultPersistDigest tri-state contract", () => {
   ] as const)(
     "returns false without advancing the fence on rejected write (%s)",
     async (_label, { seedRevision, digestRevision, sessionId }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const sessionKey = "agent:main:persist-digest-reject";
         await upsertSessionEntryCore(
           { sessionKey, agentId, env: process.env },
@@ -116,7 +116,7 @@ describe("defaultPersistDigest tri-state contract", () => {
   );
 
   it("returns false without advancing the fence for a superseded run", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:persist-digest-stale-run";
       await upsertSessionEntryCore(
         { sessionKey, agentId, env: process.env },
@@ -148,7 +148,7 @@ describe("defaultPersistDigest tri-state contract", () => {
   ] as const)(
     "%s store rejects lifecycle %s after reset keeps the session id",
     async (store, lifecycleRevision) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (fixture) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (fixture) => {
         const sessionKey = "agent:main:persist-digest-reset";
         const sessionId = "sess-1";
         const scope = {
@@ -196,7 +196,7 @@ describe("defaultPersistDigest tri-state contract", () => {
 
 describe("session observer digest fence", () => {
   it("advances on a live/preamble persist", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId, sessionKey: "agent:main:session-1" },
         { sessionId: "session-1", updatedAt: 0 },
@@ -228,7 +228,7 @@ describe("session observer digest fence", () => {
   });
 
   it("advances on terminal-digest synthesis through the same seam", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:session-2";
       await upsertSessionEntryCore(
         { agentId, sessionKey },

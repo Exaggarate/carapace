@@ -30,13 +30,13 @@ vi.mock("./index.js", () => ({
 
 let runExecProcess: typeof import("../../agents/bash-tools.exec-runtime.js").runExecProcess;
 let createProcessSupervisor: typeof import("./supervisor.js").createProcessSupervisor;
-let createOpenClawCodingTools: typeof import("../../agents/agent-tools.js").createOpenClawCodingTools;
+let createCarapaceCodingTools: typeof import("../../agents/agent-tools.js").createCarapaceCodingTools;
 
 function prepareOneShotTools(
   scopeKey: string,
   generationCleanups: Array<(reason: string) => Promise<void>>,
 ) {
-  createOpenClawCodingTools({
+  createCarapaceCodingTools({
     config: { plugins: { enabled: false } },
     sessionKey: scopeKey,
     workspaceDir: "/workspace",
@@ -50,7 +50,7 @@ function prepareOneShotTools(
       includeBaseCodingTools: false,
       includeShellTools: false,
       includeChannelTools: false,
-      includeOpenClawTools: false,
+      includeCarapaceTools: false,
       includePluginTools: false,
     },
   });
@@ -62,7 +62,7 @@ describe("one-shot tool-generation process cleanup", () => {
   beforeAll(async () => {
     vi.resetModules();
     ({ createProcessSupervisor } = await import("./supervisor.js"));
-    ({ createOpenClawCodingTools } = await import("../../agents/agent-tools.js"));
+    ({ createCarapaceCodingTools } = await import("../../agents/agent-tools.js"));
     ({ runExecProcess } = await import("../../agents/bash-tools.exec-runtime.js"));
   });
 

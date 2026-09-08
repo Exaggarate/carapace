@@ -34,7 +34,7 @@ function readGitCommitInChild(cwd: string, env: NodeJS.ProcessEnv = process.env)
 
 describe("readCurrentGitCommit", () => {
   it("reads HEAD from the inherited cwd and returns null when Git cannot resolve it", () => {
-    const root = tempDirs.make("openclaw-build-identity-");
+    const root = tempDirs.make("carapace-build-identity-");
     const repo = join(root, "repo");
     const outsideRepo = join(root, "outside");
     mkdirSync(repo);
@@ -47,9 +47,9 @@ describe("readCurrentGitCommit", () => {
       "git",
       [
         "-c",
-        "user.name=OpenClaw Tests",
+        "user.name=Carapace Tests",
         "-c",
-        "user.email=openclaw-tests@example.invalid",
+        "user.email=carapace-tests@example.invalid",
         "commit",
         "-qm",
         "fixture",
@@ -111,14 +111,14 @@ describe("resolveBuildIdentityEnvironment", () => {
         commitLabel: "runtime pack commit",
         env: {
           GITHUB_SHA: "e".repeat(40),
-          OPENCLAW_BUILD_TIMESTAMP: " 2026-07-10T01:02:03.000Z ",
+          CARAPACE_BUILD_TIMESTAMP: " 2026-07-10T01:02:03.000Z ",
         },
         now: () => new Date("2026-07-11T12:34:56.000Z"),
         readGitCommit: () => null,
       }),
     ).toMatchObject({
       GIT_COMMIT: "e".repeat(40),
-      OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T01:02:03.000Z",
+      CARAPACE_BUILD_TIMESTAMP: "2026-07-10T01:02:03.000Z",
     });
   });
 

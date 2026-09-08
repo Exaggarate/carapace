@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import { prepareSessionsPatchEntry, projectSessionsPatchEntry } from "../sessions-patch.js";
 import type { SessionPatchDiagnostics } from "./sessions-patch-diagnostics.js";

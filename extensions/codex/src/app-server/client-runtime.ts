@@ -1,7 +1,7 @@
 /** Client-scoped Codex auth and account observers. */
 import { createHash } from "node:crypto";
-import { embeddedAgentLog, formatErrorMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { embeddedAgentLog, formatErrorMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
 import { readCodexSessionMeta } from "../session-catalog-provenance.js";
 import { refreshCodexAppServerAuthTokens } from "./auth-bridge.js";
 import type { CodexAppServerAuthProfileLookup } from "./auth-profile.js";
@@ -209,7 +209,7 @@ export function ensureCodexAppServerClientRuntime(
           config: runtime.context.config,
         }),
         CODEX_EXTERNAL_AUTH_REFRESH_TIMEOUT_MS,
-        "Codex app-server ChatGPT token refresh timed out before its external-auth deadline. Retry the request; if it persists, sign in again with OpenClaw.",
+        "Codex app-server ChatGPT token refresh timed out before its external-auth deadline. Retry the request; if it persists, sign in again with Carapace.",
       );
       if (previousAccountId && tokens.chatgptAccountId !== previousAccountId) {
         throw new Error(

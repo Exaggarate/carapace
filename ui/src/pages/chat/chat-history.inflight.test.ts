@@ -69,7 +69,7 @@ function failedHistory(): ChatHistoryResult {
         role: "user",
         content: [{ type: "text", text: "Inspect the unavailable project" }],
         timestamp: 1,
-        __openclaw: { id: "first-user", idempotencyKey: "run-first:user", seq: 1 },
+        __carapace: { id: "first-user", idempotencyKey: "run-first:user", seq: 1 },
       },
     ],
     sessionInfo: {
@@ -399,13 +399,13 @@ describe("chat history in-flight assistant recovery", () => {
         role: "user",
         content: "Original prompt",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "active-run:user", seq: 1 },
+        __carapace: { idempotencyKey: "active-run:user", seq: 1 },
       };
       const steer = {
         role: "user",
         content: "Steer prompt",
         timestamp: 5,
-        __openclaw: {
+        __carapace: {
           id: "steer",
           idempotencyKey: "steer-run:user",
           seq: 5,
@@ -421,7 +421,7 @@ describe("chat history in-flight assistant recovery", () => {
                 role: "assistant",
                 content: "Before tool.",
                 timestamp: 2,
-                __openclaw: assistantIdentity(2),
+                __carapace: assistantIdentity(2),
               },
             ]),
         ...(rows === "split rows with commentary"
@@ -430,8 +430,8 @@ describe("chat history in-flight assistant recovery", () => {
                 role: "assistant",
                 content: "Checking the result.",
                 timestamp: 3,
-                __openclaw: { idempotencyKey: "active-run", seq: 3 },
-                openclawStreamFallback: {
+                __carapace: { idempotencyKey: "active-run", seq: 3 },
+                carapaceStreamFallback: {
                   itemId: "commentary-item",
                   source: "segment",
                   replacementText: "Checking the result.",
@@ -444,7 +444,7 @@ describe("chat history in-flight assistant recovery", () => {
           role: "assistant",
           content: "Before steer.",
           timestamp: 4,
-          __openclaw: assistantIdentity(4),
+          __carapace: assistantIdentity(4),
         },
         steer,
       ];
@@ -499,13 +499,13 @@ describe("chat history in-flight assistant recovery", () => {
         role: "user",
         content: "Original prompt",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "active-run:user", seq: 1 },
+        __carapace: { idempotencyKey: "active-run:user", seq: 1 },
       };
       const steer = {
         role: "user",
         content: "Steer prompt",
         timestamp: 3,
-        __openclaw: {
+        __carapace: {
           id: "steer",
           idempotencyKey: "steer-run:user",
           seq: 2,
@@ -551,7 +551,7 @@ describe("chat history in-flight assistant recovery", () => {
       {
         role: "user",
         content: "Original prompt",
-        __openclaw: { idempotencyKey: "active-run:user", seq: 1 },
+        __carapace: { idempotencyKey: "active-run:user", seq: 1 },
       },
     ];
     handleChatGatewayEvent(state, {
@@ -569,7 +569,7 @@ describe("chat history in-flight assistant recovery", () => {
         message: {
           role: "assistant",
           content: "Saved opening.",
-          __openclaw: { id: "saved", idempotencyKey: "active-run", seq: 2 },
+          __carapace: { id: "saved", idempotencyKey: "active-run", seq: 2 },
         },
       },
       true,
@@ -591,17 +591,17 @@ describe("chat history in-flight assistant recovery", () => {
       {
         role: "user",
         content: "Start working.",
-        __openclaw: { idempotencyKey: "run-reconnected:user", seq: 1 },
+        __carapace: { idempotencyKey: "run-reconnected:user", seq: 1 },
       },
       {
         role: "assistant",
         content: "Saved opening.",
-        __openclaw: { id: "saved-opening", idempotencyKey: "run-reconnected", seq: 2 },
+        __carapace: { id: "saved-opening", idempotencyKey: "run-reconnected", seq: 2 },
       },
       {
         role: "user",
         content: "Also check the result.",
-        __openclaw: {
+        __carapace: {
           idempotencyKey: "run-steer:user",
           seq: 3,
           steerTargetRunId: "run-reconnected",
@@ -610,7 +610,7 @@ describe("chat history in-flight assistant recovery", () => {
       {
         role: "user",
         content: "Queued follow-up.",
-        __openclaw: { idempotencyKey: "queued-run:user", seq: 4 },
+        __carapace: { idempotencyKey: "queued-run:user", seq: 4 },
       },
     ];
     history.inFlightRun!.text = "Saved opening. Trimmed live tail.";
@@ -663,7 +663,7 @@ describe("chat history in-flight assistant recovery", () => {
         message: {
           role: "user",
           content: "Later authoritative user.",
-          __openclaw: {
+          __carapace: {
             id: "later-authoritative-user",
             idempotencyKey: "later-run:user",
             seq: 6,
@@ -695,7 +695,7 @@ describe("chat history in-flight assistant recovery", () => {
       {
         role: "assistant",
         content: "Saved opening.",
-        __openclaw: { idempotencyKey: "run-earlier" },
+        __carapace: { idempotencyKey: "run-earlier" },
       },
       { role: "user", content: "Start the next request." },
     ];
@@ -717,7 +717,7 @@ describe("chat history in-flight assistant recovery", () => {
       {
         role: "assistant",
         content: "OK.",
-        __openclaw: { idempotencyKey: "run-reconnected" },
+        __carapace: { idempotencyKey: "run-reconnected" },
       },
     ];
     history.inFlightRun!.text = "OK. Finished. New details";
@@ -972,12 +972,12 @@ describe("chat history in-flight assistant recovery", () => {
         {
           role: "assistant",
           content: "Saved opening. Buffered",
-          __openclaw: { idempotencyKey: "run-reconnected" },
+          __carapace: { idempotencyKey: "run-reconnected" },
         },
         {
           role: "user",
           content: "Also check the result.",
-          __openclaw: { idempotencyKey: "run-steer:user" },
+          __carapace: { idempotencyKey: "run-steer:user" },
         },
       ],
     },

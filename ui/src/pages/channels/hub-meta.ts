@@ -1,3 +1,3 @@
 export function channelDocsUrl(channelId: string): string {
-  return `https://docs.openclaw.ai/channels/${encodeURIComponent(channelId)}`;
+  return `https://github.com/Exaggarate/carapace/channels/${encodeURIComponent(channelId)}`;
 }

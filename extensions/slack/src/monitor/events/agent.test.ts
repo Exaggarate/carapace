@@ -1,23 +1,23 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { WebClient } from "@slack/web-api";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { PLUGIN_COMMAND_DISPATCH } from "openclaw/plugin-sdk/plugin-command-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { PLUGIN_COMMAND_DISPATCH } from "carapace/plugin-sdk/plugin-command-runtime";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   getSessionEntry,
   normalizeSessionDeliveryState,
   patchSessionEntry as patchStoredSessionEntry,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import * as sessionStoreRuntime from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import * as sessionStoreRuntime from "carapace/plugin-sdk/session-store-runtime";
 // Slack tests cover Agent View lifecycle handling.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSlackListenerWriteClient } from "../../client.js";

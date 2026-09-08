@@ -1,4 +1,4 @@
-import type { ControlUiHost, ControlUiViewContext } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiHost, ControlUiViewContext } from "carapace/plugin-sdk/control-ui";
 import { vi } from "vitest";
 
 export function createWorkboardTestHost() {

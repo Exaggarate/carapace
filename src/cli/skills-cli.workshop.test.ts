@@ -6,14 +6,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayTransportError } from "../gateway/transport-error.js";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { registerSkillsCli } from "./skills-cli.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let stateDir = "";
 
 const mocks = vi.hoisted(() => {
@@ -68,7 +68,7 @@ vi.mock("../gateway/call.js", () => ({
   }),
   isGatewayCredentialsRequiredError: (error: unknown) =>
     error instanceof Error && error.name === "GatewayCredentialsRequiredError",
-  isImplicitLocalGatewayTarget: async () => !process.env.OPENCLAW_GATEWAY_URL,
+  isImplicitLocalGatewayTarget: async () => !process.env.CARAPACE_GATEWAY_URL,
 }));
 
 vi.mock("../infra/gateway-lock.js", () => ({
@@ -78,7 +78,7 @@ vi.mock("../infra/gateway-lock.js", () => ({
 }));
 
 vi.mock("../terminal/links.js", () => ({
-  formatDocsLink: () => "docs.openclaw.ai/cli/skills",
+  formatDocsLink: () => "github.com/Exaggarate/carapace",
 }));
 
 vi.mock("../terminal/theme.js", () => ({
@@ -127,11 +127,11 @@ describe("skills workshop cli", () => {
   };
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-skills-cli-workshop-state-",
+      prefix: "carapace-skills-cli-workshop-state-",
     });
-    mocks.workspaceDir = await tempDirs.make("openclaw-skills-cli-workshop-");
+    mocks.workspaceDir = await tempDirs.make("carapace-skills-cli-workshop-");
     mocks.config = {};
     mocks.resolvedAgentIds.length = 0;
     stateDir = testState.stateDir;
@@ -290,7 +290,7 @@ describe("skills workshop cli", () => {
   });
 
   it("uses the configured agent directory for inspect, apply, and reject", async () => {
-    const agentDir = await tempDirs.make("openclaw-skills-cli-workshop-agent-dir-");
+    const agentDir = await tempDirs.make("carapace-skills-cli-workshop-agent-dir-");
     mocks.config = { agents: { entries: { main: { default: true, agentDir } } } };
     const draftPath = path.join(mocks.workspaceDir, "configured-proposal.md");
     await fs.writeFile(
@@ -369,7 +369,7 @@ describe("skills workshop cli", () => {
     const proposalId = mocks.runtimeStdout.at(-1);
     expect(proposalId).toMatch(/^first-cli-skill-/);
 
-    mocks.workspaceDir = await tempDirs.make("openclaw-skills-cli-workshop-second-");
+    mocks.workspaceDir = await tempDirs.make("carapace-skills-cli-workshop-second-");
     await runCommand(["skills", "workshop", "list"]);
     expect(mocks.runtimeStdout.at(-1)).toContain(`${proposalId}  pending  create`);
     expect(mocks.runtimeStdout.at(-1)).toContain("first-cli-skill");

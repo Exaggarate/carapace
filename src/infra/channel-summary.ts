@@ -1,5 +1,5 @@
 // Formats channel account summaries for CLI status surfaces.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import {
@@ -10,7 +10,7 @@ import { hasConfiguredUnavailableCredentialStatus } from "../channels/account-sn
 import { formatChannelAllowFrom } from "../channels/account-summary.js";
 import { formatChannelStatusState } from "../channels/plugins/status-state.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
 import { formatTimeAgo } from "./format-time/format-relative.ts";
 
@@ -18,7 +18,7 @@ type ChannelSummaryOptions = {
   colorize?: boolean;
   includeAllowFrom?: boolean;
   plugins?: readonly ChannelPlugin[];
-  sourceConfig?: OpenClawConfig;
+  sourceConfig?: CarapaceConfig;
 };
 
 const DEFAULT_OPTIONS: Omit<Required<ChannelSummaryOptions>, "plugins" | "sourceConfig"> = {
@@ -41,14 +41,14 @@ const formatAccountLabel = (params: { accountId: string; name?: string }) => {
 const accountLine = (label: string, details: string[]) =>
   `  - ${label}${details.length ? ` (${details.join(", ")})` : ""}`;
 
-async function loadChannelSummaryConfig(): Promise<OpenClawConfig> {
+async function loadChannelSummaryConfig(): Promise<CarapaceConfig> {
   const { getRuntimeConfig } = await import("../config/config.js");
   return getRuntimeConfig();
 }
 
 async function listChannelSummaryPlugins(params: {
-  cfg: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
 }): Promise<ChannelPlugin[]> {
   const { listReadOnlyChannelPluginsForConfig } = await import("../channels/plugins/read-only.js");
   return listReadOnlyChannelPluginsForConfig(params.cfg, {
@@ -60,7 +60,7 @@ async function listChannelSummaryPlugins(params: {
 const buildAccountDetails = (params: {
   entry: ChannelAccountEntry;
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   includeAllowFrom: boolean;
 }): string[] => {
   const details: string[] = [];
@@ -120,7 +120,7 @@ const buildAccountDetails = (params: {
 };
 
 export async function buildChannelSummary(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   options?: ChannelSummaryOptions,
 ): Promise<string[]> {
   const effective = cfg ?? (await loadChannelSummaryConfig());

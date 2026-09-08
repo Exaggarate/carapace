@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
-import { withServer, withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withServer, withTempDir } from "carapace/plugin-sdk/test-env";
 import { expect, test } from "vitest";
 import { createQaGatewayChild, writeJson } from "../../../../extensions/qa-lab/api.js";
 import { stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
@@ -109,7 +109,7 @@ test("visibly settles a message-tool-only Telegram turn after a provider failure
       });
     },
     async (apiRoot) =>
-      await withTempDir("openclaw-telegram-failure-settlement-", async (workspace) => {
+      await withTempDir("carapace-telegram-failure-settlement-", async (workspace) => {
         const gatewayOwner = createQaGatewayChild();
         try {
           const repoRoot = path.resolve(import.meta.dirname, "../../../..");
@@ -147,9 +147,9 @@ test("visibly settles a message-tool-only Telegram turn after a provider failure
             },
             controlUiEnabled: false,
             runtimeEnvPatch: {
-              OPENCLAW_SKIP_CHANNELS: undefined,
-              OPENCLAW_SKIP_PROVIDERS: undefined,
-              OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+              CARAPACE_SKIP_CHANNELS: undefined,
+              CARAPACE_SKIP_PROVIDERS: undefined,
+              CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
               TELEGRAM_BOT_TOKEN: undefined,
             },
             mutateConfig: (cfg) => {

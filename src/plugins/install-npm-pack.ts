@@ -27,7 +27,7 @@ import {
   type PluginNpmIntegrityDriftParams,
 } from "./install-types.js";
 
-const MANAGED_NPM_PACK_ARCHIVE_DIR = "_openclaw-pack-archives";
+const MANAGED_NPM_PACK_ARCHIVE_DIR = "_carapace-pack-archives";
 
 function resolveTrustedNpmPackPackageName(packageName: string | undefined):
   | {

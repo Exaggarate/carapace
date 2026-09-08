@@ -2,10 +2,10 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { normalizeChatType } from "../channels/chat-type.js";
 import type { SessionChatType, SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { sessionDeliveryChannel } from "../utils/delivery-context.shared.js";
 import {
   hasAmbiguousCanonicalSessionPeerShape,
@@ -75,7 +75,7 @@ function hasAmbiguousPeerShape(key?: string): boolean {
 
 /** Resolves whether a session send is allowed by entry override and config rules. */
 export function resolveSendPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry?: SessionEntry;
   sessionKey?: string;
   channel?: string;

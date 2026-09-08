@@ -1,25 +1,25 @@
-# OpenClaw 🦞 — Your assistant, on your devices, in your chats
+# Carapace 🦞 — Your assistant, on your devices, in your chats
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-banner-light.png">
-    <img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-banner-dark.png" alt="OpenClaw — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.">
+    <source media="(prefers-color-scheme: light)" srcset="docs/assets/carapace-banner-light.png">
+    <img src="docs/assets/carapace-banner-dark.png" alt="Carapace — EXFOLIATE! EXFOLIATE! Your AI assistant, running on your own devices.">
   </picture>
 </p>
 
 <p align="center">
-  <a href="https://github.com/openclaw/openclaw/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/openclaw/openclaw/ci.yml?branch=main&style=flat-square&label=ci" alt="CI status"></a>
-  <a href="https://www.npmjs.com/package/openclaw"><img src="https://img.shields.io/npm/v/openclaw?style=flat-square&label=npm" alt="npm version"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/openclaw?style=flat-square" alt="Node.js version"></a>
+  <a href="https://github.com/Exaggarate/carapace/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/Exaggarate/carapace/ci.yml?branch=main&style=flat-square&label=ci" alt="CI status"></a>
+  <a href="https://www.npmjs.com/package/carapace"><img src="https://img.shields.io/npm/v/carapace?style=flat-square&label=npm" alt="npm version"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/carapace?style=flat-square" alt="Node.js version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT"></a>
   <a href="https://discord.gg/clawd"><img src="https://img.shields.io/discord/1456350064065904867?label=discord&logo=discord&logoColor=white&color=5865F2&style=flat-square" alt="Discord"></a>
 </p>
 
-OpenClaw is an open-source AI assistant that runs on your own computer and meets you in the channels you already use: Discord, iMessage, Slack, Teams, Telegram, WhatsApp, and 20+ more, plus native apps for macOS, iOS, Android, Windows, and Linux. One Gateway runs it as a personal assistant on a laptop or as a shared [team deployment](https://docs.openclaw.ai/start/teams); configuration is the only difference.
+Carapace is an open-source AI assistant that runs on your own computer and meets you in the channels you already use: Discord, iMessage, Slack, Teams, Telegram, WhatsApp, and 20+ more, plus native apps for macOS, iOS, Android, Windows, and Linux. One Gateway runs it as a personal assistant on a laptop or as a shared [team deployment](docs/start/teams.md); configuration is the only difference.
 
-**Yours, with no catch.** State, memory, and credentials live on your hardware. Models and agent harnesses (Claude, Codex, local models) are plugins you can swap without changing anything else. Your prompts go to the model provider and chat platforms you configure, plus any diagnostics export you enable yourself; by default OpenClaw itself phones home for nothing but a daily version check, anonymous feature statistics are opt-in, and `update.checkOnStart: false` disables both ([what OpenClaw sends](https://docs.openclaw.ai/gateway/telemetry)). OpenClaw is stewarded by the [OpenClaw Foundation](https://openclaw.org), an independent 501(c)(3), and has no paid tier, hosted service, or token. The architecture case — trusted gateway, untrusted execution, deterministic policy — is in [Why OpenClaw](https://docs.openclaw.ai/start/why-openclaw).
+**Yours, with no catch.** State, memory, and credentials live on your hardware. Models and agent harnesses (Claude, Codex, local models) are plugins you can swap without changing anything else. Your prompts go to the model provider and chat platforms you configure, plus any diagnostics export you enable yourself; by default Carapace itself phones home for nothing but a daily version check, anonymous feature statistics are opt-in, and `update.checkOnStart: false` disables both ([what Carapace sends](docs/gateway/telemetry.md)). Carapace is stewarded by the [Carapace Foundation](https://github.com/Exaggarate/carapace), an independent 501(c)(3), and has no paid tier, hosted service, or token. The architecture case — trusted gateway, untrusted execution, deterministic policy — is in [Why Carapace](docs/start/why-carapace.md).
 
-[Website](https://openclaw.ai) · [Docs](https://docs.openclaw.ai) · [Getting started](https://docs.openclaw.ai/start/getting-started) · [Why OpenClaw](https://docs.openclaw.ai/start/why-openclaw) · [Showcase](https://docs.openclaw.ai/start/showcase) · [FAQ](https://docs.openclaw.ai/help/faq) · [Vision](VISION.md) · [DeepWiki](https://deepwiki.com/openclaw/openclaw)
+[Website](https://github.com/Exaggarate/carapace) · [Docs](https://github.com/Exaggarate/carapace) · [Getting started](docs/start/getting-started.md) · [Why Carapace](docs/start/why-carapace.md) · [Showcase](docs/start/showcase.md) · [FAQ](docs/help/faq.md) · [Vision](VISION.md) · [DeepWiki](https://deepwiki.com/carapace/carapace)
 
 ## Install
 
@@ -27,23 +27,23 @@ The installer supports macOS, Linux, and Windows. It provisions a supported Node
 
 ```bash
 # macOS / Linux / WSL2
-curl -fsSL https://openclaw.ai/install.sh | bash
+curl -fsSL https://github.com/Exaggarate/carapace | bash
 ```
 
 ```powershell
 # Windows PowerShell
-iwr -useb https://openclaw.ai/install.ps1 | iex
+iwr -useb https://github.com/Exaggarate/carapace | iex
 ```
 
 Already manage Node.js? Install the published package instead (Node 24.16+ or 26.1+):
 
 ```bash
-npm install -g openclaw@latest --allow-scripts=openclaw
+npm install -g carapace@latest --allow-scripts=carapace
 ```
 
 That command is for npm 12 or npm 11.16+. On npm 11.15 and earlier, omit
-`--allow-scripts=openclaw`. See the
-[installation guide](https://docs.openclaw.ai/install) for the lifecycle script
+`--allow-scripts=carapace`. See the
+[installation guide](docs/install/index.md) for the lifecycle script
 contract, Docker, Nix, and other deployment paths.
 
 ## Quick start
@@ -53,69 +53,69 @@ Complete the wizard they open. If you installed the package directly with npm,
 pnpm, or Bun, run:
 
 ```bash
-openclaw onboard --install-daemon
+carapace onboard --install-daemon
 ```
 
 After onboarding:
 
 ```bash
-openclaw gateway status
-openclaw dashboard
+carapace gateway status
+carapace dashboard
 ```
 
-Onboarding verifies model access, creates the workspace, and configures the Gateway. The last command opens the Control UI; send a message there to confirm the assistant is working. See the [getting started guide](https://docs.openclaw.ai/start/getting-started) for channel setup and troubleshooting.
+Onboarding verifies model access, creates the workspace, and configures the Gateway. The last command opens the Control UI; send a message there to confirm the assistant is working. See the [getting started guide](docs/start/getting-started.md) for channel setup and troubleshooting.
 
 ## How it fits together
 
-- The [Gateway](https://docs.openclaw.ai/gateway) is the local control plane for sessions, tools, events, and channel connections.
-- The [Control UI](https://docs.openclaw.ai/web/control-ui), CLI, and [TUI](https://docs.openclaw.ai/web/tui) connect to the Gateway.
-- [Channels](https://docs.openclaw.ai/channels) bring the assistant to WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, and other messaging services.
-- [Companion apps and nodes](https://docs.openclaw.ai/platforms) add voice, Canvas, camera, screen, and device-local actions on supported platforms.
+- The [Gateway](docs/gateway/index.md) is the local control plane for sessions, tools, events, and channel connections.
+- The [Control UI](docs/web/control-ui.md), CLI, and [TUI](docs/web/tui.md) connect to the Gateway.
+- [Channels](docs/channels/index.md) bring the assistant to WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, iMessage, and other messaging services.
+- [Companion apps and nodes](docs/platforms/index.md) add voice, Canvas, camera, screen, and device-local actions on supported platforms.
 
-OpenClaw works with hosted and local [model providers](https://docs.openclaw.ai/concepts/model-providers). Its [tools](https://docs.openclaw.ai/tools), [skills](https://docs.openclaw.ai/tools/skills), and [plugins](https://docs.openclaw.ai/plugins) extend what an assistant can do.
+Carapace works with hosted and local [model providers](docs/concepts/model-providers.md). Its [tools](docs/tools/index.md), [skills](docs/tools/skills.md), and [plugins](https://github.com/Exaggarate/carapace) extend what an assistant can do.
 
 ## Security
 
-Treat inbound messages as untrusted input. DM-capable channels pair unknown senders by default; approve a pairing request with `openclaw pairing approve <channel> <code>`.
+Treat inbound messages as untrusted input. DM-capable channels pair unknown senders by default; approve a pairing request with `carapace pairing approve <channel> <code>`.
 
-Tools run on the host for the main session unless you configure sandboxing. Read the [security guide](https://docs.openclaw.ai/gateway/security), [exposure runbook](https://docs.openclaw.ai/gateway/security/exposure-runbook), and [sandboxing guide](https://docs.openclaw.ai/gateway/sandboxing) before connecting other users or exposing the Gateway remotely.
+Tools run on the host for the main session unless you configure sandboxing. Read the [security guide](docs/gateway/security/index.md), [exposure runbook](docs/gateway/security/exposure-runbook.md), and [sandboxing guide](docs/gateway/sandboxing.md) before connecting other users or exposing the Gateway remotely.
 
 ## Documentation
 
 | Goal                             | Start here                                                                                                                                                                                                                                                           |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Configure models and auth        | [Models](https://docs.openclaw.ai/concepts/models) · [Model providers](https://docs.openclaw.ai/concepts/model-providers)                                                                                                                                            |
-| Connect a messaging service      | [Channels](https://docs.openclaw.ai/channels)                                                                                                                                                                                                                        |
-| Add tools, skills, and plugins   | [Tools](https://docs.openclaw.ai/tools) · [Skills](https://docs.openclaw.ai/tools/skills) · [Plugins](https://docs.openclaw.ai/plugins) · [ClawHub](https://clawhub.ai)                                                                                              |
-| Run apps and device nodes        | [Platforms](https://docs.openclaw.ai/platforms) · [Nodes](https://docs.openclaw.ai/nodes)                                                                                                                                                                            |
-| Use the CLI and chat commands    | [CLI reference](https://docs.openclaw.ai/cli) · [Slash commands](https://docs.openclaw.ai/tools/slash-commands)                                                                                                                                                      |
-| Configure or operate the Gateway | [Configuration](https://docs.openclaw.ai/gateway/configuration) · [Architecture](https://docs.openclaw.ai/concepts/architecture) · [Updating](https://docs.openclaw.ai/install/updating) · [Release channels](https://docs.openclaw.ai/install/development-channels) |
+| Configure models and auth        | [Models](docs/concepts/models.md) · [Model providers](docs/concepts/model-providers.md)                                                                                                                                            |
+| Connect a messaging service      | [Channels](docs/channels/index.md)                                                                                                                                                                                                                        |
+| Add tools, skills, and plugins   | [Tools](docs/tools/index.md) · [Skills](docs/tools/skills.md) · [Plugins](https://github.com/Exaggarate/carapace) · [ClawHub](https://clawhub.ai)                                                                                              |
+| Run apps and device nodes        | [Platforms](docs/platforms/index.md) · [Nodes](docs/nodes/index.md)                                                                                                                                                                            |
+| Use the CLI and chat commands    | [CLI reference](docs/cli/index.md) · [Slash commands](docs/tools/slash-commands.md)                                                                                                                                                      |
+| Configure or operate the Gateway | [Configuration](docs/gateway/configuration.md) · [Architecture](docs/concepts/architecture.md) · [Updating](docs/install/updating.md) · [Release channels](docs/install/development-channels.md) |
 
 ## Development
 
 The repository is a pnpm workspace. Plain `npm install` at the repository root is not supported.
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
-cd openclaw
+git clone https://github.com/Exaggarate/carapace.git
+cd carapace
 pnpm install
 pnpm build
 pnpm ui:build
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and the [source setup guide](https://docs.openclaw.ai/start/setup) for the development loop.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and the [source setup guide](docs/start/setup.md) for the development loop.
 
 ## Governance
 
-OpenClaw is developed in the open by the [OpenClaw Foundation](https://openclaw.org), an independent 501(c)(3). The Foundation employs the core team and signs releases. Donors and infrastructure sponsors support the Foundation; none of them own or direct the project. OpenAI is a donor, not an owner.
+Carapace is developed in the open by the [Carapace Foundation](https://github.com/Exaggarate/carapace), an independent 501(c)(3). The Foundation employs the core team and signs releases. Donors and infrastructure sponsors support the Foundation; none of them own or direct the project. OpenAI is a donor, not an owner.
 
 ## Community
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for maintainers and contribution guidelines; AI-assisted PRs are welcome.
 
-Use the [issue chooser](https://github.com/openclaw/openclaw/issues/new/choose) for bugs and feature requests, ask setup questions in [Discord](https://discord.gg/clawd), and report vulnerabilities through [SECURITY.md](SECURITY.md). New capabilities usually belong in plugins built on the [plugin SDK](https://docs.openclaw.ai/plugins/building-plugins) and shared through [ClawHub](https://clawhub.ai).
+Use the [issue chooser](https://github.com/Exaggarate/carapace/issues/new/choose) for bugs and feature requests, ask setup questions in [Discord](https://discord.gg/clawd), and report vulnerabilities through [SECURITY.md](SECURITY.md). New capabilities usually belong in plugins built on the [plugin SDK](docs/plugins/building-plugins.md) and shared through [ClawHub](https://clawhub.ai).
 
-OpenClaw was built for **Molty**, a space lobster AI assistant, by Peter Steinberger and the community. Explore the [project lore](https://docs.openclaw.ai/start/lore), [soul.md](https://soul.md), [Peter's site](https://steipete.me), [Star History](https://www.star-history.com/#openclaw/openclaw&type=date&legend=top-left), and [@openclaw](https://x.com/openclaw).
+Carapace was built for **Molty**, a space lobster AI assistant, by Peter Steinberger and the community. Explore the [project lore](docs/start/lore.md), [soul.md](https://soul.md), [Peter's site](https://steipete.me), [Star History](https://www.star-history.com/#carapace/carapace&type=date&legend=top-left), and [@carapace](https://x.com/carapace).
 
 Special thanks to [Mario Zechner](https://mariozechner.at/) for his support and for [pi](https://github.com/earendil-works/pi), and to Adam Doppelt for the lobster.bot domain.
 
@@ -125,12 +125,12 @@ The Foundation is funded by donors including the University of Michigan, OpenAI,
 
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/openai"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/openai-light.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/openai.svg" alt="OpenAI" height="28"></picture></a></td>
-    <td align="center"><a href="https://github.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/github-light.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/github.svg" alt="GitHub" height="28"></picture></a></td>
-    <td align="center"><a href="https://www.nvidia.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/nvidia.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/nvidia-dark.svg" alt="NVIDIA" height="28"></picture></a></td>
-    <td align="center"><a href="https://vercel.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/vercel-light.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/vercel.svg" alt="Vercel" height="24"></picture></a></td>
-    <td align="center"><a href="https://blacksmith.sh/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/blacksmith-light.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/blacksmith.svg" alt="Blacksmith" height="28"></picture></a></td>
-    <td align="center"><a href="https://www.convex.dev/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/convex-light.svg"><img src="https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/sponsors/convex.svg" alt="Convex" height="24"></picture></a></td>
+    <td align="center"><a href="https://github.com/openai"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/openai-light.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/openai.svg" alt="OpenAI" height="28"></picture></a></td>
+    <td align="center"><a href="https://github.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/github-light.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/github.svg" alt="GitHub" height="28"></picture></a></td>
+    <td align="center"><a href="https://www.nvidia.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/nvidia.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/nvidia-dark.svg" alt="NVIDIA" height="28"></picture></a></td>
+    <td align="center"><a href="https://vercel.com/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/vercel-light.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/vercel.svg" alt="Vercel" height="24"></picture></a></td>
+    <td align="center"><a href="https://blacksmith.sh/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/blacksmith-light.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/blacksmith.svg" alt="Blacksmith" height="28"></picture></a></td>
+    <td align="center"><a href="https://www.convex.dev/"><picture><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/convex-light.svg"><img src="https://raw.githubusercontent.com/Exaggarate/carapace/main/docs/assets/sponsors/convex.svg" alt="Convex" height="24"></picture></a></td>
   </tr>
 </table>
 
@@ -195,7 +195,7 @@ Thanks to all clawtributors:
 <a href="https://github.com/scald"><img src="https://avatars.githubusercontent.com/u/1215913?v=4&s=48" width="48" height="48" alt="scald"></a> <a href="https://github.com/kashevk0"><img src="https://avatars.githubusercontent.com/u/151471784?v=4&s=48" width="48" height="48" alt="Serhii"></a> <a href="https://github.com/Yuandiaodiaodiao"><img src="https://avatars.githubusercontent.com/u/33371662?v=4&s=48" width="48" height="48" alt="a"></a> <a href="https://github.com/doguabaris"><img src="https://avatars.githubusercontent.com/u/135986694?v=4&s=48" width="48" height="48" alt="Doğu Abaris"></a> <a href="https://github.com/ysqander"><img src="https://avatars.githubusercontent.com/u/80843820?v=4&s=48" width="48" height="48" alt="ysqander"></a> <a href="https://github.com/andranik-sahakyan"><img src="https://avatars.githubusercontent.com/u/8908029?v=4&s=48" width="48" height="48" alt="andranik-sahakyan"></a> <a href="https://github.com/Wangnov"><img src="https://avatars.githubusercontent.com/u/48670012?v=4&s=48" width="48" height="48" alt="Wangnov"></a> <a href="https://github.com/rixau"><img src="https://avatars.githubusercontent.com/u/112558420?v=4&s=48" width="48" height="48" alt="Austin"></a> <a href="https://github.com/lisitan"><img src="https://avatars.githubusercontent.com/u/50470712?v=4&s=48" width="48" height="48" alt="lisitan"></a> <a href="https://github.com/kaizen403"><img src="https://avatars.githubusercontent.com/u/134706404?v=4&s=48" width="48" height="48" alt="Rishi Vhavle"></a>
 <a href="https://github.com/hirefrank"><img src="https://avatars.githubusercontent.com/u/183158?v=4&s=48" width="48" height="48" alt="Frank Harris"></a> <a href="https://github.com/kennyklee"><img src="https://avatars.githubusercontent.com/u/1432489?v=4&s=48" width="48" height="48" alt="Kenny Lee"></a> <a href="https://github.com/dddabtc"><img src="https://avatars.githubusercontent.com/u/104875499?v=4&s=48" width="48" height="48" alt="Alice Losasso"></a> <a href="https://github.com/edincampara"><img src="https://avatars.githubusercontent.com/u/142477787?v=4&s=48" width="48" height="48" alt="edincampara"></a> <a href="https://github.com/fellanH"><img src="https://avatars.githubusercontent.com/u/30758862?v=4&s=48" width="48" height="48" alt="Felix Hellström"></a> <a href="https://github.com/VarunChopra11"><img src="https://avatars.githubusercontent.com/u/113368492?v=4&s=48" width="48" height="48" alt="Varun Chopra"></a> <a href="https://github.com/wangai-studio"><img src="https://avatars.githubusercontent.com/u/256938352?v=4&s=48" width="48" height="48" alt="wangai-studio"></a> <a href="https://github.com/sleontenko"><img src="https://avatars.githubusercontent.com/u/7135949?v=4&s=48" width="48" height="48" alt="sleontenko"></a> <a href="https://github.com/yassine20011"><img src="https://avatars.githubusercontent.com/u/59234686?v=4&s=48" width="48" height="48" alt="Yassine Amjad"></a> <a href="https://github.com/ant1eicher"><img src="https://avatars.githubusercontent.com/u/54324760?v=4&s=48" width="48" height="48" alt="Anton Eicher"></a>
 <a href="https://github.com/ThomsenDrake"><img src="https://avatars.githubusercontent.com/u/120344051?v=4&s=48" width="48" height="48" alt="Drake Thomsen"></a> <a href="https://github.com/kakuteki"><img src="https://avatars.githubusercontent.com/u/61647657?v=4&s=48" width="48" height="48" alt="Hinata Kaga (samon)"></a> <a href="https://github.com/andreabadesso"><img src="https://avatars.githubusercontent.com/u/3586068?v=4&s=48" width="48" height="48" alt="andreabadesso"></a> <a href="https://github.com/chenxin-yan"><img src="https://avatars.githubusercontent.com/u/71162231?v=4&s=48" width="48" height="48" alt="chenxin-yan"></a> <a href="https://github.com/cordx56"><img src="https://avatars.githubusercontent.com/u/23298744?v=4&s=48" width="48" height="48" alt="cordx56"></a> <a href="https://github.com/dvrshil"><img src="https://avatars.githubusercontent.com/u/81693876?v=4&s=48" width="48" height="48" alt="dvrshil"></a> <a href="https://github.com/MarvinCui"><img src="https://avatars.githubusercontent.com/u/130876763?v=4&s=48" width="48" height="48" alt="MarvinCui"></a> <a href="https://github.com/Yeom-JinHo"><img src="https://avatars.githubusercontent.com/u/81306489?v=4&s=48" width="48" height="48" alt="Yeom-JinHo"></a> <a href="https://github.com/17jmumford"><img src="https://avatars.githubusercontent.com/u/36290330?v=4&s=48" width="48" height="48" alt="Jeremy Mumford"></a> <a href="https://github.com/KnHack"><img src="https://avatars.githubusercontent.com/u/2346724?v=4&s=48" width="48" height="48" alt="Charlie Niño"></a>
-<a href="https://github.com/SharoonSharif"><img src="https://avatars.githubusercontent.com/u/150296639?v=4&s=48" width="48" height="48" alt="Sharoon Sharif"></a> <a href="https://github.com/orenyomtov"><img src="https://avatars.githubusercontent.com/u/168856?v=4&s=48" width="48" height="48" alt="Oren"></a> <a href="https://github.com/mattqdev"><img src="https://avatars.githubusercontent.com/u/115874885?v=4&s=48" width="48" height="48" alt="MattQ"></a> <a href="https://github.com/parkertoddbrooks"><img src="https://avatars.githubusercontent.com/u/585456?v=4&s=48" width="48" height="48" alt="Parker Todd Brooks"></a> <a href="https://github.com/he-yufeng"><img src="https://avatars.githubusercontent.com/u/40085740?v=4&s=48" width="48" height="48" alt="Yufeng He"></a> <a href="https://github.com/Milofax"><img src="https://avatars.githubusercontent.com/u/2537423?v=4&s=48" width="48" height="48" alt="Milofax"></a> <a href="https://github.com/stevebot-alive"><img src="https://avatars.githubusercontent.com/u/261149299?v=4&s=48" width="48" height="48" alt="Steve (OpenClaw)"></a> <a href="https://github.com/zhoulf1006"><img src="https://avatars.githubusercontent.com/u/35586967?v=4&s=48" width="48" height="48" alt="zhoulf1006"></a> <a href="https://github.com/jrrcdev"><img src="https://avatars.githubusercontent.com/u/19454127?v=4&s=48" width="48" height="48" alt="Jonatan"></a> <a href="https://github.com/feniix"><img src="https://avatars.githubusercontent.com/u/91633?v=4&s=48" width="48" height="48" alt="Sebastian B Otaegui"></a>
+<a href="https://github.com/SharoonSharif"><img src="https://avatars.githubusercontent.com/u/150296639?v=4&s=48" width="48" height="48" alt="Sharoon Sharif"></a> <a href="https://github.com/orenyomtov"><img src="https://avatars.githubusercontent.com/u/168856?v=4&s=48" width="48" height="48" alt="Oren"></a> <a href="https://github.com/mattqdev"><img src="https://avatars.githubusercontent.com/u/115874885?v=4&s=48" width="48" height="48" alt="MattQ"></a> <a href="https://github.com/parkertoddbrooks"><img src="https://avatars.githubusercontent.com/u/585456?v=4&s=48" width="48" height="48" alt="Parker Todd Brooks"></a> <a href="https://github.com/he-yufeng"><img src="https://avatars.githubusercontent.com/u/40085740?v=4&s=48" width="48" height="48" alt="Yufeng He"></a> <a href="https://github.com/Milofax"><img src="https://avatars.githubusercontent.com/u/2537423?v=4&s=48" width="48" height="48" alt="Milofax"></a> <a href="https://github.com/stevebot-alive"><img src="https://avatars.githubusercontent.com/u/261149299?v=4&s=48" width="48" height="48" alt="Steve (Carapace)"></a> <a href="https://github.com/zhoulf1006"><img src="https://avatars.githubusercontent.com/u/35586967?v=4&s=48" width="48" height="48" alt="zhoulf1006"></a> <a href="https://github.com/jrrcdev"><img src="https://avatars.githubusercontent.com/u/19454127?v=4&s=48" width="48" height="48" alt="Jonatan"></a> <a href="https://github.com/feniix"><img src="https://avatars.githubusercontent.com/u/91633?v=4&s=48" width="48" height="48" alt="Sebastian B Otaegui"></a>
 <a href="https://github.com/ZetiMente"><img src="https://avatars.githubusercontent.com/u/76985631?v=4&s=48" width="48" height="48" alt="Matthew"></a> <a href="https://github.com/robertoeisenlohr"><img src="https://avatars.githubusercontent.com/u/82096803?v=4&s=48" width="48" height="48" alt="ABFS Tech"></a> <a href="https://github.com/alexstyl"><img src="https://avatars.githubusercontent.com/u/1665273?v=4&s=48" width="48" height="48" alt="alexstyl"></a> <a href="https://github.com/ethanpalm"><img src="https://avatars.githubusercontent.com/u/56270045?v=4&s=48" width="48" height="48" alt="Ethan Palm"></a> <a href="https://github.com/qkal"><img src="https://avatars.githubusercontent.com/u/77361240?v=4&s=48" width="48" height="48" alt="Qkal"></a> <a href="https://github.com/cygaar"><img src="https://avatars.githubusercontent.com/u/97691933?v=4&s=48" width="48" height="48" alt="cygaar"></a> <a href="https://github.com/U-C4N"><img src="https://avatars.githubusercontent.com/u/78921017?v=4&s=48" width="48" height="48" alt="Umut CAN"></a> <a href="https://github.com/jakobdylanc"><img src="https://avatars.githubusercontent.com/u/38699060?v=4&s=48" width="48" height="48" alt="Jakob"></a> <a href="https://github.com/antons"><img src="https://avatars.githubusercontent.com/u/129705?v=4&s=48" width="48" height="48" alt="antons"></a> <a href="https://github.com/austinm911"><img src="https://avatars.githubusercontent.com/u/31991302?v=4&s=48" width="48" height="48" alt="austinm911"></a>
 <a href="https://github.com/mahmoudashraf93"><img src="https://avatars.githubusercontent.com/u/9130129?v=4&s=48" width="48" height="48" alt="mahmoudashraf93"></a> <a href="https://github.com/philipp-spiess"><img src="https://avatars.githubusercontent.com/u/458591?v=4&s=48" width="48" height="48" alt="philipp-spiess"></a> <a href="https://github.com/pkrmf"><img src="https://avatars.githubusercontent.com/u/1714267?v=4&s=48" width="48" height="48" alt="pkrmf"></a> <a href="https://github.com/joshrad-dev"><img src="https://avatars.githubusercontent.com/u/62785552?v=4&s=48" width="48" height="48" alt="joshrad-dev"></a> <a href="https://github.com/factnest365-ops"><img src="https://avatars.githubusercontent.com/u/236534360?v=4&s=48" width="48" height="48" alt="factnest365-ops"></a> <a href="https://github.com/yingchunbai"><img src="https://avatars.githubusercontent.com/u/33477283?v=4&s=48" width="48" height="48" alt="yingchunbai"></a> <a href="https://github.com/aj47"><img src="https://avatars.githubusercontent.com/u/8023513?v=4&s=48" width="48" height="48" alt="AJ (@techfren)"></a> <a href="https://github.com/Alg0rix"><img src="https://avatars.githubusercontent.com/u/53804949?v=4&s=48" width="48" height="48" alt="Marchel Fahrezi"></a> <a href="https://github.com/futhgar"><img src="https://avatars.githubusercontent.com/u/51002668?v=4&s=48" width="48" height="48" alt="futhgar"></a> <a href="https://github.com/YonganZhang"><img src="https://avatars.githubusercontent.com/u/56248212?v=4&s=48" width="48" height="48" alt="Zhang"></a>
 <a href="https://github.com/remusao"><img src="https://avatars.githubusercontent.com/u/1299873?v=4&s=48" width="48" height="48" alt="Rémi"></a> <a href="https://github.com/danballance"><img src="https://avatars.githubusercontent.com/u/13839912?v=4&s=48" width="48" height="48" alt="Dan Ballance"></a> <a href="https://github.com/GHesericsu"><img src="https://avatars.githubusercontent.com/u/60202455?v=4&s=48" width="48" height="48" alt="Eric Su"></a> <a href="https://github.com/kimitaka"><img src="https://avatars.githubusercontent.com/u/167225?v=4&s=48" width="48" height="48" alt="Kimitaka Watanabe"></a> <a href="https://github.com/itsjling"><img src="https://avatars.githubusercontent.com/u/2521993?v=4&s=48" width="48" height="48" alt="Justin Ling"></a> <a href="https://github.com/RayBB"><img src="https://avatars.githubusercontent.com/u/921217?v=4&s=48" width="48" height="48" alt="Raymond Berger"></a> <a href="https://github.com/lutr0"><img src="https://avatars.githubusercontent.com/u/76906369?v=4&s=48" width="48" height="48" alt="lutr0"></a> <a href="https://github.com/claude"><img src="https://avatars.githubusercontent.com/u/81847?v=4&s=48" width="48" height="48" alt="claude"></a> <a href="https://github.com/angrybirddd"><img src="https://avatars.githubusercontent.com/u/48046333?v=4&s=48" width="48" height="48" alt="AngryBird"></a> <a href="https://github.com/fabianwilliams"><img src="https://avatars.githubusercontent.com/u/92543063?v=4&s=48" width="48" height="48" alt="Fabian Williams"></a>
@@ -283,7 +283,7 @@ nico-hoff
 nikus-pan
 nonggialiang
 oliviareid-svg
-openclaw-bot
+carapace-bot
 pablohrcarvalho
 patrick-barletta
 pinghuachiu
@@ -327,4 +327,4 @@ clawtributors:hidden:end -->
 
 ## License
 
-[MIT](LICENSE) © OpenClaw Foundation. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for incorporated or adapted code.
+[MIT](LICENSE) © Carapace Foundation. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for incorporated or adapted code.

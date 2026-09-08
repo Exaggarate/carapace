@@ -1,15 +1,15 @@
 /** Doctor warning for missing command owners on privileged channel commands. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { normalizeChatChannelId } from "../channels/ids.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PairingChannel } from "../pairing/pairing-store.types.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel-constants.js";
 
 /** Persist legacy channel-qualified owners before runtime compares native sender IDs. */
-export function migrateLegacyCommandOwners(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+export function migrateLegacyCommandOwners(cfg: CarapaceConfig, changes: string[]): CarapaceConfig {
   const owners = cfg.commands?.ownerAllowFrom;
   if (!Array.isArray(owners)) {
     return cfg;
@@ -33,7 +33,7 @@ export function migrateLegacyCommandOwners(cfg: OpenClawConfig, changes: string[
   return changed ? { ...cfg, commands: { ...cfg.commands, ownerAllowFrom } } : cfg;
 }
 
-function resolveConfiguredCommandOwners(cfg: OpenClawConfig): string[] {
+function resolveConfiguredCommandOwners(cfg: CarapaceConfig): string[] {
   const owners = cfg.commands?.ownerAllowFrom;
   if (!Array.isArray(owners)) {
     return [];
@@ -44,7 +44,7 @@ function resolveConfiguredCommandOwners(cfg: OpenClawConfig): string[] {
 }
 
 /** Returns true when at least one owner sender id is configured. */
-export function hasConfiguredCommandOwners(cfg: OpenClawConfig): boolean {
+export function hasConfiguredCommandOwners(cfg: CarapaceConfig): boolean {
   return resolveConfiguredCommandOwners(cfg).length > 0;
 }
 
@@ -69,7 +69,7 @@ export function formatCommandOwnerFromChannelSender(params: {
 
 /** Gives admitted senders an operator-run command without granting owner authority. */
 export function formatCommandOwnerHint(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   channel?: string | null;
   id?: string | null;
 }): string {
@@ -89,12 +89,12 @@ export function formatCommandOwnerHint(params: {
   const owners = JSON.stringify([
     ...new Set([...resolveConfiguredCommandOwners(params.cfg), owner]),
   ]).replaceAll("'", process.platform === "win32" ? "''" : "'\\''");
-  const command = formatCliCommand("openclaw config set commands.ownerAllowFrom");
+  const command = formatCliCommand("carapace config set commands.ownerAllowFrom");
   return `Ask the operator to run \`${command} '${owners}'\` in a terminal to make this sender a command owner.`;
 }
 
 /** Emits setup guidance when privileged command ownership is not configured. */
-export function noteCommandOwnerHealth(cfg: OpenClawConfig): void {
+export function noteCommandOwnerHealth(cfg: CarapaceConfig): void {
   if (hasConfiguredCommandOwners(cfg)) {
     return;
   }
@@ -103,7 +103,7 @@ export function noteCommandOwnerHealth(cfg: OpenClawConfig): void {
       "No command owner is configured.",
       "A command owner is the human operator account allowed to run owner-only commands and approve dangerous actions, including /diagnostics, /export-session, /export-trajectory, /config, and exec approvals.",
       "CLI pairing approval records the first command owner. Control UI approval has an owner checkbox; otherwise set commands.ownerAllowFrom.",
-      `Fix: set commands.ownerAllowFrom to your channel user id, for example ${formatCliCommand("openclaw config set commands.ownerAllowFrom '[\"telegram:123456789\"]'")}`,
+      `Fix: set commands.ownerAllowFrom to your channel user id, for example ${formatCliCommand("carapace config set commands.ownerAllowFrom '[\"telegram:123456789\"]'")}`,
       "Restart the gateway after changing this if it is already running.",
     ].join("\n"),
     "Command owner",

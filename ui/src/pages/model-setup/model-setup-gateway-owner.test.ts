@@ -19,7 +19,7 @@ describe("first-run wizard ownership through the real Gateway store", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal("sessionStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "synthetic-gateway-owner-device-key" }),
     );
     await i18n.setLocale("en");
@@ -65,9 +65,9 @@ describe("first-run wizard ownership through the real Gateway store", () => {
           methods: [
             "config.get",
             "config.set",
-            "openclaw.setup.detect",
-            "openclaw.setup.auth.start",
-            "openclaw.setup.verify",
+            "carapace.setup.detect",
+            "carapace.setup.auth.start",
+            "carapace.setup.verify",
             "wizard.next",
             "wizard.cancel",
           ],
@@ -89,7 +89,7 @@ describe("first-run wizard ownership through the real Gateway store", () => {
       gateway.start();
       const original = current();
       const sharedResponse = (method: string) => {
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return inventory;
         }
         if (method === "config.get") {
@@ -108,7 +108,7 @@ describe("first-run wizard ownership through the real Gateway store", () => {
         throw new Error(`Unexpected fixture request: ${method}`);
       };
       original.request.mockImplementation(async (method, params) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         if (method === "wizard.next") {
@@ -159,14 +159,14 @@ describe("first-run wizard ownership through the real Gateway store", () => {
         input.dispatchEvent(new Event("input", { bubbles: true }));
         await page.updateComplete;
         page
-          .querySelector<HTMLFormElement>("openclaw-modal-dialog form")!
+          .querySelector<HTMLFormElement>("carapace-modal-dialog form")!
           .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
         await answerStarted.promise;
-        const receipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+        const receipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
         expect(receipt).not.toBeNull();
         const originalRevision = gateway.connectionRevision;
         const originalStart = original.request.mock.calls.find(
-          ([method]) => method === "openclaw.setup.auth.start",
+          ([method]) => method === "carapace.setup.auth.start",
         )!;
         const sessionId = (originalStart[1] as { sessionId: string }).sessionId;
 
@@ -176,7 +176,7 @@ describe("first-run wizard ownership through the real Gateway store", () => {
             kind: "provider-auth",
             modelRef: "provider/another-choice",
           });
-          replacementReceipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+          replacementReceipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
           expect(replacementReceipt).not.toBe(receipt);
         }
         // Exercise both actual client replacement and the store's socket-close
@@ -219,7 +219,7 @@ describe("first-run wizard ownership through the real Gateway store", () => {
 
         if (change === "same target") {
           await waitForFast(() => expect(page.textContent).toContain("Review selected provider"));
-          expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(receipt);
+          expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(receipt);
           expect(
             replacementRequests()
               .filter(([method]) => method === "wizard.next")
@@ -229,17 +229,17 @@ describe("first-run wizard ownership through the real Gateway store", () => {
             original.request.mock.calls.filter(([method]) => method === "wizard.cancel"),
           ).toHaveLength(0);
         } else {
-          await waitForFast(() => expect(page.querySelector("openclaw-modal-dialog")).toBeNull());
+          await waitForFast(() => expect(page.querySelector("carapace-modal-dialog")).toBeNull());
           expect(
             replacementRequests().filter(([method]) => method.startsWith("wizard.")),
           ).toHaveLength(0);
-          expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(
+          expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(
             replacementReceipt,
           );
           if (authorityLost) {
             expect(page.textContent).toContain("operator.admin");
             expect(
-              replacementRequests().filter(([method]) => method.startsWith("openclaw.setup.")),
+              replacementRequests().filter(([method]) => method.startsWith("carapace.setup.")),
             ).toHaveLength(0);
           }
         }
@@ -260,22 +260,22 @@ describe("first-run wizard ownership through the real Gateway store", () => {
           await waitForFast(() =>
             expect(page.querySelector(".model-setup__recovery")).not.toBeNull(),
           );
-          expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+          expect(page.querySelector("carapace-modal-dialog")).toBeNull();
           expect(
             replacementRequests().filter(([method]) => method.startsWith("wizard.")),
           ).toHaveLength(0);
         }
         if (change !== "same target") {
-          expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(
+          expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(
             replacementReceipt,
           );
         }
         expect(context.navigate).not.toHaveBeenCalled();
         expect(
-          original.request.mock.calls.filter(([method]) => method === "openclaw.setup.auth.start"),
+          original.request.mock.calls.filter(([method]) => method === "carapace.setup.auth.start"),
         ).toHaveLength(1);
         expect(
-          replacementRequests().filter(([method]) => method === "openclaw.setup.auth.start"),
+          replacementRequests().filter(([method]) => method === "carapace.setup.auth.start"),
         ).toHaveLength(0);
         expect(
           original.request.mock.calls.filter(

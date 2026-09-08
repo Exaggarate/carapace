@@ -7,7 +7,7 @@ import {
   setRuntimeConfigSnapshot,
 } from "./io.js";
 import { createProviderConfigFixture } from "./runtime-snapshot.test-fixtures.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 function resetRuntimeConfigState(): void {
   setRuntimeConfigSnapshotRefreshHandler(null);
@@ -24,7 +24,7 @@ describe("runtime config snapshot writes", () => {
   });
 
   it("skips source projection for non-runtime-derived configs", () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       ...createProviderConfigFixture(),
       gateway: {
         auth: {
@@ -32,7 +32,7 @@ describe("runtime config snapshot writes", () => {
         },
       },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...createProviderConfigFixture("sk-runtime-resolved"), // pragma: allowlist secret
       gateway: {
         auth: {
@@ -48,12 +48,12 @@ describe("runtime config snapshot writes", () => {
   });
 
   it("isolates untouched source descendants when projecting runtime edits", () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       ...createProviderConfigFixture(),
       gateway: { mode: "local", port: 19001 },
       tools: { exec: { safeBins: ["jq"] } },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...sourceConfig,
       ...createProviderConfigFixture("synthetic-runtime-value"),
     };
@@ -73,8 +73,8 @@ describe("runtime config snapshot writes", () => {
   });
 
   it("retains an empty object for a changed runtime subtree", () => {
-    const sourceConfig: OpenClawConfig = { gateway: { port: 18789 } };
-    const runtimeConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = { gateway: { port: 18789 } };
+    const runtimeConfig: CarapaceConfig = {
       gateway: { port: 18789, auth: { mode: "token", allowTailscale: true } },
     };
     setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
@@ -87,11 +87,11 @@ describe("runtime config snapshot writes", () => {
   });
 
   it("preserves literal nulls and omissions when projecting a runtime edit", () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       ...createProviderConfigFixture(),
       agents: { defaults: { params: { temperature: 0.2, topP: 0.8 } } },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...createProviderConfigFixture("synthetic-runtime-value"),
       agents: { defaults: { ...sourceConfig.agents?.defaults, maxConcurrent: 4 } },
     };

@@ -51,7 +51,7 @@ function buildOversizedHistoryPlaceholder(message?: unknown): Record<string, unk
       : Date.now();
   const rawMetadata =
     message && typeof message === "object"
-      ? (message as Record<string, unknown>)["__openclaw"]
+      ? (message as Record<string, unknown>)["__carapace"]
       : undefined;
   const metadata =
     rawMetadata && typeof rawMetadata === "object" && !Array.isArray(rawMetadata)
@@ -67,7 +67,7 @@ function buildOversizedHistoryPlaceholder(message?: unknown): Record<string, unk
     role,
     timestamp,
     content: [{ type: "text", text: CHAT_HISTORY_OVERSIZED_PLACEHOLDER }],
-    __openclaw: {
+    __carapace: {
       ...(metadataId ? { id: metadataId } : {}),
       ...(metadataSeq !== undefined ? { seq: metadataSeq } : {}),
       ...(metadataIdempotencyKey ? { idempotencyKey: metadataIdempotencyKey } : {}),

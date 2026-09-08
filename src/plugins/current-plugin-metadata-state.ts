@@ -1,18 +1,18 @@
 // Holds current plugin metadata snapshots for process-scoped consumers.
-import { setCurrentManifestModelIdNormalizationPolicies } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { setCurrentManifestModelIdNormalizationPolicies } from "@carapace/model-catalog-core/provider-model-id-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getPluginCache, getProcessPluginCache } from "./plugin-cache.js";
 import type { PluginMetadataSnapshot } from "./plugin-metadata-snapshot.types.js";
 
 /** Owns config identity reuse for the current immutable metadata snapshot. */
 export const currentPluginMetadataConfigIdentityCache = {
-  add(config: OpenClawConfig): void {
+  add(config: CarapaceConfig): void {
     getProcessPluginCache().metadata.current.configIdentities.add(config);
   },
   clear(): void {
     getProcessPluginCache().metadata.current.configIdentities = new WeakSet();
   },
-  has(config: OpenClawConfig): boolean {
+  has(config: CarapaceConfig): boolean {
     return getProcessPluginCache().metadata.current.configIdentities.has(config);
   },
 };

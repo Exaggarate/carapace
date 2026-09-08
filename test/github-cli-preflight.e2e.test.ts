@@ -3,12 +3,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveExecutablePath } from "../src/infra/executable-path.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const TEST_TIMEOUT_MS = 180_000;
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 
 afterEach(async () => {
   await Promise.allSettled(instances.splice(0).map((instance) => instance.cleanup()));
@@ -22,9 +22,9 @@ describe("GitHub CLI authorization preflight", () => {
       const gatewayPath = path.dirname(process.execPath);
       expect(resolveExecutablePath("gh", { env: { PATH: gatewayPath } })).toBeUndefined();
 
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "github-cli-preflight",
-        env: { PATH: gatewayPath, OPENCLAW_PATH_BOOTSTRAPPED: "1" },
+        env: { PATH: gatewayPath, CARAPACE_PATH_BOOTSTRAPPED: "1" },
       });
       instances.push(instance);
       await instance.startGateway();

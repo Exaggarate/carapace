@@ -15,7 +15,7 @@ describe("Claude CLI context-window selection", () => {
       expect(resolveModelId?.({ modelId, contextWindow: "200k" })).toBe(modelId);
       expect(
         prepareExecution?.({
-          workspaceDir: "/tmp/openclaw-claude-cli",
+          workspaceDir: "/tmp/carapace-claude-cli",
           provider: "claude-cli",
           modelId,
           contextWindow: "200k",
@@ -31,7 +31,7 @@ describe("Claude CLI context-window selection", () => {
       expect(resolveModelId?.({ modelId, contextWindow: "1m" })).toBe(`${modelId}[1m]`);
       expect(
         prepareExecution?.({
-          workspaceDir: "/tmp/openclaw-claude-cli",
+          workspaceDir: "/tmp/carapace-claude-cli",
           provider: "claude-cli",
           modelId,
           contextWindow: "1m",

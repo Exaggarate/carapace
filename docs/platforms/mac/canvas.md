@@ -13,7 +13,7 @@ The Canvas plugin owns this presentation path; it is not a standalone visual
 workspace or an A2UI push target.
 
 The recommended agent path is [`show_widget`](/tools/show-widget) with
-`presentation.target: "node_panel"`. OpenClaw stores the widget as a hosted
+`presentation.target: "node_panel"`. Carapace stores the widget as a hosted
 document, selects a connected macOS node, opens the panel, and navigates it to
 that document. If no eligible Mac is connected or presentation fails, the
 widget still appears inline in chat and the tool result explains how to retry.
@@ -46,7 +46,7 @@ Ask the agent to use `show_widget` and target the node panel. The tool exposes
 }
 ```
 
-The result identifies the selected Mac when presentation succeeds. OpenClaw
+The result identifies the selected Mac when presentation succeeds. Carapace
 currently selects only a connected macOS node that declares `canvas.present`.
 
 ## Node commands
@@ -54,9 +54,9 @@ currently selects only a connected macOS node that declares `canvas.present`.
 The paired-node command surface contains three commands:
 
 ```bash
-openclaw nodes canvas present --node <id>
-openclaw nodes canvas navigate --node <id> "/__openclaw__/canvas/documents/<document-id>/index.html"
-openclaw nodes canvas hide --node <id>
+carapace nodes canvas present --node <id>
+carapace nodes canvas navigate --node <id> "/__carapace__/canvas/documents/<document-id>/index.html"
+carapace nodes canvas hide --node <id>
 ```
 
 - `canvas.present` shows the panel. It also accepts the existing optional
@@ -65,7 +65,7 @@ openclaw nodes canvas hide --node <id>
   URL.
 - `canvas.hide` hides the panel without changing its current document.
 
-Hosted paths under `/__openclaw__/canvas/` are resolved through the node
+Hosted paths under `/__carapace__/canvas/` are resolved through the node
 session's current scoped `pluginSurfaceUrls.canvas` URL. The app refreshes that
 short-lived capability before navigation; callers should pass the document
 path, not construct or copy a capability URL.
@@ -73,7 +73,7 @@ path, not construct or copy a capability URL.
 The app-local scheme remains available for app-owned content:
 
 ```text
-openclaw-canvas://<session>/<path>
+carapace-canvas://<session>/<path>
 ```
 
 Files addressed by that scheme must remain inside the session's Canvas root in
@@ -84,14 +84,14 @@ Application Support. Directory traversal is blocked.
 A2UI widgets render on [session dashboards](/web/dashboards), where they share
 the same pinning, layout, approval, and interaction model as other dashboard
 widgets. Their renderer bundles continue to load from the Gateway's
-`/__openclaw__/a2ui/` asset route.
+`/__carapace__/a2ui/` asset route.
 
 The macOS panel does not accept A2UI push/reset commands and does not
 automatically navigate to an A2UI page.
 
 ## Migrating documents from a custom root
 
-Run `openclaw doctor --fix` to move documents from the retired
+Run `carapace doctor --fix` to move documents from the retired
 `plugins.entries.canvas.config.host.root` (or the older `canvasHost.root`) into
 the state directory's `canvas/documents` folder. An explicit plugin root takes
 precedence over the older setting. Doctor removes the root setting only after no

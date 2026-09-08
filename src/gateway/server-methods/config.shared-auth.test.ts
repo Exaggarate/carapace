@@ -2,10 +2,10 @@
  * Tests shared gateway auth behavior across config method updates.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getRuntimeConfigWriteApplication } from "../../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RestartSentinelPayload } from "../../infra/restart-sentinel.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
@@ -17,7 +17,7 @@ import {
 
 const readConfigFileSnapshotForWriteMock = vi.fn();
 const writeConfigFileMock = vi.fn();
-const persistedConfigResultMock = vi.fn((config: OpenClawConfig) => config);
+const persistedConfigResultMock = vi.fn((config: CarapaceConfig) => config);
 const runtimeApplication = { claimed: true };
 const validateConfigObjectWithPluginsMock = vi.fn();
 const prepareSecretsRuntimeSnapshotMock = vi.fn();
@@ -35,16 +35,16 @@ vi.mock("../../config/config.js", async () => {
     await vi.importActual<typeof import("../../config/config.js")>("../../config/config.js");
   return {
     ...actual,
-    createConfigIO: () => ({ configPath: "/tmp/openclaw.json" }),
+    createConfigIO: () => ({ configPath: "/tmp/carapace.json" }),
     writeConfigFile: writeConfigFileMock,
-    replaceConfigFile: async (params: { sourceConfig: OpenClawConfig; writeOptions?: object }) => {
+    replaceConfigFile: async (params: { sourceConfig: CarapaceConfig; writeOptions?: object }) => {
       await writeConfigFileMock(params.sourceConfig, params.writeOptions);
       if (params.writeOptions && runtimeApplication.claimed) {
         getRuntimeConfigWriteApplication(params.writeOptions)?.claim()?.settle("applied");
       }
       const persistedConfig = persistedConfigResultMock(params.sourceConfig);
       return {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         previousHash: "base-hash",
         snapshot: createConfigWriteSnapshot(params.sourceConfig),
         nextConfig: persistedConfig,
@@ -60,7 +60,7 @@ vi.mock("../../config/io.js", async () => {
   const actual = await vi.importActual<typeof import("../../config/io.js")>("../../config/io.js");
   return {
     ...actual,
-    createConfigIO: () => ({ configPath: "/tmp/openclaw.json" }),
+    createConfigIO: () => ({ configPath: "/tmp/carapace.json" }),
     readConfigFileSnapshotForWrite: readConfigFileSnapshotForWriteMock,
   };
 });
@@ -110,7 +110,7 @@ const GATEWAY_CONFIG_WRITE_OPTIONS = {
   },
 };
 
-function tokenAuthConfig(token: string): OpenClawConfig {
+function tokenAuthConfig(token: string): CarapaceConfig {
   return {
     gateway: {
       auth: {
@@ -125,7 +125,7 @@ function trustedProxyConfig(params: {
   trustedProxies?: string[];
   requiredHeaders?: string[];
   allowUsers?: string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     gateway: {
       auth: {
@@ -141,7 +141,7 @@ function trustedProxyConfig(params: {
   };
 }
 
-function hotReloadConfig(): OpenClawConfig {
+function hotReloadConfig(): CarapaceConfig {
   return {
     gateway: {
       reload: {
@@ -164,7 +164,7 @@ function installBrowserReloadRegistry(): void {
   setActivePluginRegistry(registry);
 }
 
-function mockPreviousConfig(config: OpenClawConfig): void {
+function mockPreviousConfig(config: CarapaceConfig): void {
   readConfigFileSnapshotForWriteMock.mockResolvedValue(createConfigWriteSnapshot(config));
 }
 
@@ -202,17 +202,17 @@ afterEach(() => {
 
 beforeEach(() => {
   runtimeApplication.claimed = true;
-  validateConfigObjectWithPluginsMock.mockImplementation((config: OpenClawConfig) => ({
+  validateConfigObjectWithPluginsMock.mockImplementation((config: CarapaceConfig) => ({
     ok: true,
     config,
   }));
   prepareSecretsRuntimeSnapshotMock.mockImplementation(
-    async ({ config }: { config: OpenClawConfig }) => ({
+    async ({ config }: { config: CarapaceConfig }) => ({
       config,
     }),
   );
   restartSentinelMocks.writeRestartSentinel.mockClear();
-  persistedConfigResultMock.mockImplementation((config: OpenClawConfig) => config);
+  persistedConfigResultMock.mockImplementation((config: CarapaceConfig) => config);
 });
 
 describe("config shared auth disconnects", () => {
@@ -258,17 +258,17 @@ describe("config shared auth disconnects", () => {
   );
 
   it("returns the persisted config from config.set write results", async () => {
-    const prevConfig: OpenClawConfig = {
+    const prevConfig: CarapaceConfig = {
       gateway: {
         port: 19000,
       },
     };
-    const submittedConfig: OpenClawConfig = {
+    const submittedConfig: CarapaceConfig = {
       gateway: {
         port: 19001,
       },
     };
-    const persistedConfig: OpenClawConfig = {
+    const persistedConfig: CarapaceConfig = {
       gateway: {
         port: 19001,
       },
@@ -298,7 +298,7 @@ describe("config shared auth disconnects", () => {
       true,
       {
         ok: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         // Ack hash from the persisted write; equals what config.get reports.
         hash: "next-hash",
         config: persistedConfig,
@@ -333,7 +333,7 @@ describe("config shared auth disconnects", () => {
   });
 
   it("accepts an unresolved isolatable TTS SecretRef and reports the cold owner", async () => {
-    const submittedConfig: OpenClawConfig = {
+    const submittedConfig: CarapaceConfig = {
       tts: {
         providers: {
           elevenlabs: {
@@ -399,7 +399,7 @@ describe("config shared auth disconnects", () => {
     "resolved secret value was invalid",
     "secret reference is not allowed for this provider",
   ])("rejects non-retryable SecretRef degradation before config writes: %s", async (reason) => {
-    const submittedConfig: OpenClawConfig = {
+    const submittedConfig: CarapaceConfig = {
       tts: {
         providers: {
           elevenlabs: {

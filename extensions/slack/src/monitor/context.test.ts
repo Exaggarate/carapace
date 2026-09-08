@@ -1,7 +1,7 @@
 // Slack tests cover context plugin behavior.
 import type { App } from "@slack/bolt";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setSlackRuntime } from "../runtime.js";
 import { createSlackMonitorContext } from "./context.js";
@@ -9,8 +9,8 @@ import type { SlackEventScope } from "./event-scope.js";
 
 const saveRemoteMediaMock = vi.hoisted(() => vi.fn());
 const logVerboseMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>()),
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>()),
   logVerbose: logVerboseMock,
 }));
 
@@ -40,7 +40,7 @@ function createTestContext(params?: {
     cfg: {
       channels: { slack: { enabled: true } },
       session: { dmScope: params?.dmScope ?? "main" },
-    } as OpenClawConfig,
+    } as CarapaceConfig,
     accountId: "default",
     botToken: "xoxb-test",
     app: { client: params?.appClient ?? {} } as App,
@@ -70,7 +70,7 @@ function createTestContext(params?: {
     threadInheritParent: false,
     slashCommand: {
       enabled: true,
-      name: "openclaw",
+      name: "carapace",
       ephemeral: true,
       sessionPrefix: "slack:slash",
     },
@@ -716,7 +716,7 @@ describe("Slack session status and titles", () => {
     expect(log).toHaveBeenCalledOnce();
     expect(log).toHaveBeenCalledWith(
       expect.stringContaining(
-        "https://docs.openclaw.ai/channels/slack#additional-manifest-settings",
+        "https://github.com/Exaggarate/carapace#additional-manifest-settings",
       ),
     );
   });

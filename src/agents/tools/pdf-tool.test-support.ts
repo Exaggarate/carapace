@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { type Mock, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import * as webMedia from "../../media/web-media.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
 import * as modelAuth from "../model-auth.js";
@@ -18,7 +18,7 @@ import { createEmptyPluginMetadataSnapshot } from "../test-helpers/embedded-agen
 
 type StubPreparedRuntimeSnapshot = {
   agentDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   pluginRegistry?: PluginRegistry;
   createStores: () => { authStorage: unknown; modelRegistry: unknown };
@@ -36,7 +36,7 @@ export function withPreparedRuntimeFacts(snapshot: StubPreparedRuntimeSnapshot) 
 }
 
 export async function withTempPdfAgentDir<T>(run: (agentDir: string) => Promise<T>): Promise<T> {
-  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pdf-"));
+  const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pdf-"));
   try {
     return await run(agentDir);
   } finally {
@@ -129,7 +129,7 @@ export function createPdfToolInfraStub(completeMock: Mock) {
         }) as never,
     );
 
-    vi.spyOn(modelsConfig, "ensureOpenClawModelsJson").mockResolvedValue({
+    vi.spyOn(modelsConfig, "ensureCarapaceModelsJson").mockResolvedValue({
       agentDir,
       wrote: false,
     });

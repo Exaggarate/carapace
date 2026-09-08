@@ -2,8 +2,8 @@ import { WebClient, type WebClientOptions } from "@slack/web-api";
 import type {
   ChannelMessageActionContext,
   ChannelMessageActionName,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSlackActions } from "./channel-actions.js";
 import * as slackClient from "./client.js";
@@ -20,7 +20,7 @@ function createConversationFixture(
   openResponse?: Record<string, unknown>,
 ) {
   const requests: SlackRequest[] = [];
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     channels: {
       slack: {
         botToken: "xoxb-test",

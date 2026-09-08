@@ -18,8 +18,8 @@ type FrameSample = {
 };
 
 type SamplerWindow = Window & {
-  openclawSendFrameSamples?: FrameSample[];
-  openclawSendFrameSamplerStop?: () => void;
+  carapaceSendFrameSamples?: FrameSample[];
+  carapaceSendFrameSamplerStop?: () => void;
 };
 
 const PROBE_TEXT = "Flicker probe message 4242";
@@ -33,9 +33,9 @@ async function startFrameSampler(currentPage: Page, probeText = PROBE_TEXT): Pro
   await currentPage.evaluate((text) => {
     const win = window as SamplerWindow;
     const frames: FrameSample[] = [];
-    win.openclawSendFrameSamples = frames;
+    win.carapaceSendFrameSamples = frames;
     let running = true;
-    win.openclawSendFrameSamplerStop = () => {
+    win.carapaceSendFrameSamplerStop = () => {
       running = false;
     };
     const sample = () => {
@@ -66,8 +66,8 @@ async function startFrameSampler(currentPage: Page, probeText = PROBE_TEXT): Pro
 async function stopFrameSampler(currentPage: Page): Promise<FrameSample[]> {
   return currentPage.evaluate(() => {
     const win = window as SamplerWindow;
-    win.openclawSendFrameSamplerStop?.();
-    return win.openclawSendFrameSamples ?? [];
+    win.carapaceSendFrameSamplerStop?.();
+    return win.carapaceSendFrameSamples ?? [];
   });
 }
 
@@ -105,7 +105,7 @@ const BASE_HISTORY = [
     content: [{ text: "Ready.", type: "text" }],
     role: "assistant",
     timestamp: Date.now() - 5_000,
-    __openclaw: { seq: 1 },
+    __carapace: { seq: 1 },
   },
 ];
 
@@ -161,7 +161,7 @@ async function finishRunAndSettle(
       content: [{ text: "Run complete.", type: "text" }],
       role: "assistant",
       timestamp: Date.now() + 1,
-      __openclaw: { seq: 3 },
+      __carapace: { seq: 3 },
     },
   ]);
   // The terminal reconciliation must re-read history; baseline before the
@@ -171,7 +171,7 @@ async function finishRunAndSettle(
     content: [{ text: "Run complete.", type: "text" }],
     role: "assistant",
     timestamp: Date.now() + 1,
-    __openclaw: { seq: 3 },
+    __carapace: { seq: 3 },
   };
   await gateway.emitChatFinal({ runId, text: "Run complete." });
   await currentPage
@@ -222,7 +222,7 @@ function isHealthyImageFrame(frame: FrameSample): boolean {
 
 suite.define(() => {
   it("does not replay a retired user bubble after a later history page omits it", async () => {
-    const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+    const proofDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
       ? suite.artifactDir
       : undefined;
     await suite.withPage(
@@ -240,7 +240,7 @@ suite.define(() => {
           role: "user",
           content: [{ type: "text", text: PROBE_TEXT }],
           timestamp: Date.now(),
-          __openclaw: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
+          __carapace: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
         });
         await captureProof("02-canonical.png");
 
@@ -248,7 +248,7 @@ suite.define(() => {
           role: "assistant",
           content: [{ type: "text", text: "Later history window." }],
           timestamp: Date.now() + 2,
-          __openclaw: { id: "later-window", seq: 4 },
+          __carapace: { id: "later-window", seq: 4 },
         };
         await gateway.setHistoryMessages([laterMessage]);
         const historyRequestsBefore = (await gateway.getRequests("chat.history")).length;
@@ -311,7 +311,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             currentPage.evaluate(() =>
-              ((window as SamplerWindow).openclawSendFrameSamples ?? []).some(
+              ((window as SamplerWindow).carapaceSendFrameSamples ?? []).some(
                 (frame) =>
                   frame.rowKeys.length === 1 &&
                   frame.imageCount === 1 &&
@@ -333,7 +333,7 @@ suite.define(() => {
           ],
           role: "user",
           timestamp: Date.now(),
-          __openclaw: {
+          __carapace: {
             id: USER_ECHO_ENTRY_ID,
             idempotencyKey: runId,
             runId: "queued-execution",
@@ -365,7 +365,7 @@ suite.define(() => {
           content: [{ text: PROBE_TEXT, type: "text" }],
           role: "user",
           timestamp: Date.now(),
-          __openclaw: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
+          __carapace: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
         };
         await gateway.setHistoryMessages([...BASE_HISTORY, userEcho]);
         const historyRequestsBefore = (await gateway.getRequests("chat.history")).length;

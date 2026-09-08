@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Test Env Mutation Report script supports OpenClaw repository automation.
+// Test Env Mutation Report script supports Carapace repository automation.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -40,11 +40,11 @@ const TRACKED_ENV_KEYS = new Set([
   "HOME",
   "HOMEDRIVE",
   "HOMEPATH",
-  "OPENCLAW_AGENT_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_WORKSPACE_DIR",
+  "CARAPACE_AGENT_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_HOME",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_WORKSPACE_DIR",
   "USERPROFILE",
   "XDG_CACHE_HOME",
   "XDG_CONFIG_HOME",
@@ -52,12 +52,12 @@ const TRACKED_ENV_KEYS = new Set([
   "XDG_STATE_HOME",
 ]);
 const DEFAULT_ALLOWED_FILES = new Map([
-  ["src/test-utils/openclaw-test-state.ts", "canonical OpenClaw test state helper"],
+  ["src/test-utils/carapace-test-state.ts", "canonical Carapace test state helper"],
   ["test/non-isolated-runner.ts", "shared Vitest runner restores global env between files"],
   ["test/setup.extensions.ts", "global extension-test setup owns process env isolation"],
   ["test/setup.shared.ts", "global shared-test setup owns process env isolation"],
   ["test/setup.ts", "global test setup owns process env isolation"],
-  ["test/setup-openclaw-runtime.ts", "global runtime-test setup owns process env isolation"],
+  ["test/setup-carapace-runtime.ts", "global runtime-test setup owns process env isolation"],
   [
     "test/helpers/auto-reply/trigger-handling-test-harness.ts",
     "auto-reply harness owns a suite-scoped temporary home",
@@ -297,7 +297,7 @@ export function renderTestEnvMutationReport(
 ): string {
   const limit = options.limit === 0 ? Number.POSITIVE_INFINITY : (options.limit ?? 120);
   const lines = [
-    "OpenClaw test env mutation report",
+    "Carapace test env mutation report",
     `Scanned files: ${report.summary.scannedFileCount}`,
     `Findings: ${report.summary.activeFindingCount} active in ${report.summary.activeFileCount} file(s), ${report.summary.allowedFindingCount} allowed in ${report.summary.allowedFileCount} file(s)`,
     "",
@@ -380,7 +380,7 @@ function readNonNegativeIntArg(raw: string | undefined): number {
 }
 
 function printHelp(): void {
-  process.stdout.write(`OpenClaw test env mutation report
+  process.stdout.write(`Carapace test env mutation report
 
 Usage:
   pnpm test:env-mutations:report [options]

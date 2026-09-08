@@ -1,11 +1,11 @@
 /** Resolves preferred provider auth choices from config and plugin metadata. */
 import { resolveLegacyOnboardAuthChoice } from "../commands/auth-choice-legacy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveManifestProviderAuthChoice } from "./provider-auth-choices.js";
 
 export async function resolvePreferredProviderForAuthChoice(params: {
   choice: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   includeUntrustedWorkspacePlugins?: boolean;

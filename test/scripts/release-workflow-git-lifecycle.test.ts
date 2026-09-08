@@ -128,7 +128,7 @@ posixIt.each([
     expect(report.readyAttempts).toHaveLength(commands.length);
     if (mode === "macos") {
       expect(report.commands.filter(({ tool }) => tool === "pnpm").map(({ args }) => args)).toEqual(
-        [["release:openclaw:npm:check"]],
+        [["release:carapace:npm:check"]],
       );
       expect(report.boundaries.some(({ name }) => name === "consumer:pnpm")).toBe(true);
     } else {

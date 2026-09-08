@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/onepassword",
+  "name": "@carapace/onepassword",
   "version": "2026.9.2",
   "private": true,
-  "description": "1Password SecretRef resolver and audited agent secrets broker for OpenClaw",
+  "description": "1Password SecretRef resolver and audited agent secrets broker for Carapace",
   "type": "module",
   "dependencies": {
     "@openclaw/fs-safe": "0.8.5"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],

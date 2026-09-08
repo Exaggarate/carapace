@@ -2,7 +2,7 @@
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import type { ContextEngine } from "./types.js";
 
-const RUNTIME_COMPACTION_DELEGATES = Symbol.for("openclaw.runtimeCompactionDelegates");
+const RUNTIME_COMPACTION_DELEGATES = Symbol.for("carapace.runtimeCompactionDelegates");
 const runtimeCompactionDelegates = resolveGlobalSingleton<WeakSet<ContextEngine["compact"]>>(
   RUNTIME_COMPACTION_DELEGATES,
   () => new WeakSet(),

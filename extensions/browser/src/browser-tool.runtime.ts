@@ -1,4 +1,4 @@
-import { resolveOptionalIntegerOption } from "openclaw/plugin-sdk/number-runtime";
+import { resolveOptionalIntegerOption } from "carapace/plugin-sdk/number-runtime";
 /**
  * Runtime dependency barrel for the Browser agent tool.
  *
@@ -35,7 +35,7 @@ export { wrapExternalContent } from "./sdk-security-runtime.js";
 export {
   normalizeOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 export {
   BrowserToolOutputSchema,
   createBrowserToolSchema,

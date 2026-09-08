@@ -1,5 +1,5 @@
 // Copilot tests cover usage bridge plugin behavior.
-import type { NormalizedUsage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { NormalizedUsage } from "carapace/plugin-sdk/agent-harness-runtime";
 import { describe, expect, it } from "vitest";
 import { buildCopilotAssistantUsage, normalizeCopilotUsage } from "./usage-bridge.js";
 

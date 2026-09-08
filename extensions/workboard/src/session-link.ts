@@ -1,4 +1,4 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 import { cardBoardId, cardRunId, cardSessionKey } from "./store-card-helpers.js";
 
 function sanitizeSessionSegment(value: string | undefined, fallback: string): string {

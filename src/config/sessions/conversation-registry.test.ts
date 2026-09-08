@@ -4,9 +4,9 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { normalizeLegacySessionEntryDelivery } from "../../infra/state-migrations.legacy-session-store.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { DeliveryContext } from "../../utils/delivery-context.types.js";
 import { buildConversationIdentity } from "./conversation-identity.js";
 import {
@@ -43,12 +43,12 @@ describe("conversation registry", () => {
   let storePath: string;
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-conversations-");
+    tempDir = tempDirs.make("carapace-conversations-");
     storePath = path.join(tempDir, "sessions.json");
   });
 
@@ -185,7 +185,7 @@ describe("conversation registry", () => {
     });
 
     const resolved = resolveSqliteReadScope(scope);
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     database.db
       .prepare(
         `INSERT INTO session_conversations (
@@ -201,7 +201,7 @@ describe("conversation registry", () => {
         afterCurrentWrite!.firstSeenAt,
         afterCurrentWrite!.lastSeenAt,
       );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     expect(resolveConversation({ agentId: "main", storePath }, conversationRef)).not.toMatchObject({
       routeContextObserved: true,
@@ -255,7 +255,7 @@ describe("conversation registry", () => {
       { target: "channel:beta", routeContext: { guildId: "guild-beta" } },
     ]);
     const resolved = resolveSqliteReadScope(scope);
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     executeSqliteQuerySync(
       database.db,
       getSessionKysely(database.db)
@@ -347,7 +347,7 @@ describe("conversation registry", () => {
       deliveryContext: { channel: "reef", accountId: "default", to: "reef:peer-a" },
     });
     const resolved = resolveSqliteReadScope(scope);
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     executeSqliteQuerySync(
       database.db,
       getSessionKysely(database.db)
@@ -410,7 +410,7 @@ describe("conversation registry", () => {
       );
     }
     const resolved = resolveSqliteReadScope({ agentId: "main", storePath });
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const db = getSessionKysely(database.db);
     executeSqliteQuerySync(
       database.db,

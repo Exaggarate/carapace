@@ -4,8 +4,8 @@ import {
   parseStrictFiniteNumber,
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { GatewayClientRequestError } from "../../../packages/gateway-client/src/request-error.js";
 import {

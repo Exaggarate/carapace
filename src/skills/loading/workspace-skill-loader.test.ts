@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetLogger, setLoggerOverride } from "../../logging/logger.js";
 import { loggingState } from "../../logging/state.js";
 import { resolveInstalledPluginIndexPolicyHash } from "../../plugins/installed-plugin-index-policy.js";
@@ -34,11 +34,11 @@ vi.mock("../../plugins/manifest-registry.js", async () => {
   const pathLocal = await import("node:path");
   return {
     loadPluginManifestRegistryCore: (params: { workspaceDir?: string }) => {
-      const extensionsRoot = pathLocal.join(params.workspaceDir ?? "", ".openclaw", "extensions");
+      const extensionsRoot = pathLocal.join(params.workspaceDir ?? "", ".carapace", "extensions");
       const plugins = [];
       for (const id of ["workspace-skills", "browser"]) {
         const rootDir = pathLocal.join(extensionsRoot, id);
-        const manifestPath = pathLocal.join(rootDir, "openclaw.plugin.json");
+        const manifestPath = pathLocal.join(rootDir, "carapace.plugin.json");
         if (!fsLocal.existsSync(manifestPath)) {
           continue;
         }
@@ -68,11 +68,11 @@ let tempRoot = "";
 let workspaceCaseIndex = 0;
 
 function createWorkspacePluginRegistry(workspaceDir: string): PluginManifestRegistry {
-  const extensionsRoot = path.join(workspaceDir, ".openclaw", "extensions");
+  const extensionsRoot = path.join(workspaceDir, ".carapace", "extensions");
   const plugins: PluginManifestRecord[] = [];
   for (const id of ["workspace-skills", "browser"]) {
     const rootDir = path.join(extensionsRoot, id);
-    const manifestPath = path.join(rootDir, "openclaw.plugin.json");
+    const manifestPath = path.join(rootDir, "carapace.plugin.json");
     if (!fsSync.existsSync(manifestPath)) {
       continue;
     }
@@ -104,7 +104,7 @@ function createWorkspacePluginRegistry(workspaceDir: string): PluginManifestRegi
 
 function createWorkspacePluginMetadataSnapshot(params: {
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   manifestRegistry: PluginManifestRegistry;
 }): PluginMetadataSnapshot {
   const policyHash = resolveInstalledPluginIndexPolicyHash(params.config);
@@ -201,7 +201,7 @@ function loadTestWorkspaceSkills(
 }
 
 beforeAll(async () => {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skills-workspace-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skills-workspace-"));
   fakeHome = path.join(tempRoot, "home");
   await fs.mkdir(fakeHome, { recursive: true });
   envSnapshot = setMockSkillsHomeEnv(fakeHome);
@@ -224,7 +224,7 @@ afterAll(async () => {
 async function setupWorkspaceSkillPlugin() {
   const workspaceDir = await createTempWorkspaceDir();
   const managedDir = path.join(workspaceDir, ".managed");
-  const pluginRoot = path.join(workspaceDir, ".openclaw", "extensions", "workspace-skills");
+  const pluginRoot = path.join(workspaceDir, ".carapace", "extensions", "workspace-skills");
 
   await writePluginWithSkill({
     pluginRoot,
@@ -262,15 +262,15 @@ describe("loadWorkspaceSkills", () => {
       bundledSkillsDir,
     });
 
-    expect(mergedControlUi?.skill.source).toBe("openclaw-workspace");
-    expect(bundledControlUi?.skill.source).toBe("openclaw-bundled");
+    expect(mergedControlUi?.skill.source).toBe("carapace-workspace");
+    expect(bundledControlUi?.skill.source).toBe("carapace-bundled");
     expect(bundledControlUi?.skill.filePath).toBe(
       path.join(bundledSkillsDir, "control-ui", "SKILL.md"),
     );
   });
 
   it("loads each agent's Workshop directory without leaking the other agent's skill", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-workshop-isolation-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-workshop-isolation-"));
     const alphaDir = path.join(root, "alpha");
     const betaDir = path.join(root, "beta");
     const workspaceDir = path.join(root, "workspace");
@@ -281,7 +281,7 @@ describe("loadWorkspaceSkills", () => {
           beta: { agentDir: betaDir, workspace: workspaceDir },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     try {
       const agentSkills: ReadonlyArray<readonly [string, string]> = [
         ["alpha", "alpha-only"],
@@ -317,7 +317,7 @@ describe("loadWorkspaceSkills", () => {
       name: "cached-skill",
       description: "Cached skill",
     });
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const options = {
       config,
       managedSkillsDir: path.join(workspaceDir, ".managed"),
@@ -393,7 +393,7 @@ describe("loadWorkspaceSkills", () => {
   it("loads the browser plugin automation skill when the bundled plugin is enabled", async () => {
     const workspaceDir = await createTempWorkspaceDir();
     const managedDir = path.join(workspaceDir, ".managed");
-    const pluginRoot = path.join(workspaceDir, ".openclaw", "extensions", "browser");
+    const pluginRoot = path.join(workspaceDir, ".carapace", "extensions", "browser");
 
     await writePluginWithSkill({
       pluginRoot,
@@ -402,7 +402,7 @@ describe("loadWorkspaceSkills", () => {
       skillDescription: "Browser automation",
     });
     await fs.writeFile(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "carapace.plugin.json"),
       JSON.stringify(
         {
           id: "browser",
@@ -455,7 +455,7 @@ describe("loadWorkspaceSkills", () => {
       { id: "browser", skill: "bundled-hardlinked-skill" },
       { id: "workspace-skills", skill: "workspace-hardlinked-skill" },
     ]) {
-      const pluginRoot = path.join(workspaceDir, ".openclaw", "extensions", plugin.id);
+      const pluginRoot = path.join(workspaceDir, ".carapace", "extensions", plugin.id);
       await writePluginWithSkill({
         pluginRoot,
         pluginId: plugin.id,
@@ -527,7 +527,7 @@ name: json5-metadata
 description: JSON5-style metadata
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "requires":
           {
@@ -665,7 +665,7 @@ description: Broken skill
       dir: path.join(workspaceDir, "skills", "remote-only"),
       name: "remote-only",
       description: "Needs a remote bin",
-      metadata: '{"openclaw":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
+      metadata: '{"carapace":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
     });
 
     const entries = loadTestWorkspaceSkills(workspaceDir, {
@@ -702,7 +702,7 @@ description: Broken skill
       dir: path.join(workspaceDir, "skills", "remote-only"),
       name: "remote-only",
       description: "Needs a remote bin",
-      metadata: '{"openclaw":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
+      metadata: '{"carapace":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
     });
 
     const entries = loadTestWorkspaceSkills(workspaceDir, {

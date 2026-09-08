@@ -10,7 +10,7 @@ import {
   supportsAutomaticThreadBindingSpawn,
 } from "../../channels/thread-bindings-policy.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSnakeCaseParamKey } from "../../param-key.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
@@ -71,7 +71,7 @@ import {
 
 const SESSIONS_SPAWN_RUNTIMES = ["subagent", "acp"] as const;
 const SESSIONS_SPAWN_SANDBOX_MODES = ["inherit", "require"] as const;
-// Keep the schema local to avoid a circular import through acp-spawn/openclaw-tools.
+// Keep the schema local to avoid a circular import through acp-spawn/carapace-tools.
 const SESSIONS_SPAWN_ACP_STREAM_TARGETS = ["parent"] as const;
 const UNSUPPORTED_SESSIONS_SPAWN_PARAM_KEYS = [
   "target",
@@ -133,7 +133,7 @@ function hasAnyThreadAvailability(availability: SessionsSpawnThreadAvailability)
 }
 
 function resolveSessionsSpawnThreadAvailability(opts?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentChannel?: string;
   agentAccountId?: string;
 }): SessionsSpawnThreadAvailability {
@@ -301,7 +301,7 @@ function createSessionsSpawnToolSchema(params: {
   return Type.Object(schema);
 }
 
-function resolveAcpUnavailableMessage(opts?: { sandboxed?: boolean; config?: OpenClawConfig }) {
+function resolveAcpUnavailableMessage(opts?: { sandboxed?: boolean; config?: CarapaceConfig }) {
   if (opts?.sandboxed === true) {
     return 'runtime="acp" is unavailable from sandboxed sessions because ACP sessions run on the host. Use runtime="subagent".';
   }
@@ -326,7 +326,7 @@ export function createSessionsSpawnTool(
     currentThreadTs?: string;
     currentMessageId?: string | number;
     sandboxed?: boolean;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     /** Explicit agent ID override for cron/hook sessions where session key parsing may not work. */
     requesterAgentIdOverride?: string;
     requesterRunId?: string;
@@ -469,7 +469,7 @@ export function createSessionsSpawnTool(
         if (deliveryPressure.blocked) {
           return jsonResult({
             status: "forbidden",
-            error: `sessions_spawn is paused because ${deliveryPressure.suspended} completed tasks have blocked delivery. Run openclaw tasks list, then retry or dismiss blocked deliveries.`,
+            error: `sessions_spawn is paused because ${deliveryPressure.suspended} completed tasks have blocked delivery. Run carapace tasks list, then retry or dismiss blocked deliveries.`,
             ...roleContext,
           });
         }

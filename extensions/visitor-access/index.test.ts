@@ -1,19 +1,19 @@
 import { mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+  CarapacePluginApi,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import type { VisitorGrant } from "./src/visitors.js";
@@ -38,7 +38,7 @@ function createPolicyFetch() {
     }
     const policy = {
       id: "visitor-policy",
-      name: "Visitors (openclaw-managed)",
+      name: "Visitors (carapace-managed)",
       decision: "allow",
       include: emails.map((email) => ({ email: { email } })),
     };
@@ -70,7 +70,7 @@ describe("visitor-access plugin lifecycle", () => {
   beforeEach(() => {
     resetPluginStateStoreForTests();
     stateDir = realpathSync(mkdtempSync(path.join(tmpdir(), "visitor-access-test-")));
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval"] });
     vi.setSystemTime(START_MS);
   });
@@ -87,8 +87,8 @@ describe("visitor-access plugin lifecycle", () => {
 
   function registerPlugin() {
     const tools = new Map<string, AnyAgentTool>();
-    const services: OpenClawPluginService[] = [];
-    const on = vi.fn<OpenClawPluginApi["on"]>();
+    const services: CarapacePluginService[] = [];
+    const on = vi.fn<CarapacePluginApi["on"]>();
     const logger = { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() };
     const api = createTestPluginApi({
       id: "visitor-access",
@@ -116,7 +116,7 @@ describe("visitor-access plugin lifecycle", () => {
     if (!service) {
       throw new Error("Plugin did not register its expiry service");
     }
-    const context: OpenClawPluginServiceContext = { config: {}, stateDir, logger };
+    const context: CarapacePluginServiceContext = { config: {}, stateDir, logger };
     cleanups.push(() => service.stop?.(context));
     const store = createPluginStateKeyedStoreForTests<VisitorGrant>("visitor-access", {
       namespace: "visitor-grants",

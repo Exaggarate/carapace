@@ -1,5 +1,5 @@
-/** Human-readable formatter for `openclaw message` action results. */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+/** Human-readable formatter for `carapace message` action results. */
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
   getTerminalTableWidth,
   renderTable,

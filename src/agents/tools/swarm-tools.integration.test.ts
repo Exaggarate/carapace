@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import os from "node:os";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { finalizeAgentToolAvailability } from "../agent-tool-availability.js";
-import { createOpenClawTools } from "../openclaw-tools.js";
+import { createCarapaceTools } from "../carapace-tools.js";
 import {
   resetSubagentRegistryForTests,
   testing as registryTesting,
@@ -20,7 +20,7 @@ import {
 } from "./structured-output-tool.js";
 
 const requesterSessionKey = "agent:main:main";
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   session: { mainKey: "main", scope: "per-sender" },
   tools: { swarm: true },
   agents: {
@@ -63,8 +63,8 @@ describe("swarm tools integration", () => {
   });
 
   it("spawns text and structured collectors with explicit collection guidance and drains them in completion order", async () => {
-    await withTestDir({ prefix: "openclaw-swarm-tools-" }, async (stateDir) => {
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    await withTestDir({ prefix: "carapace-swarm-tools-" }, async (stateDir) => {
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       const publicToGateway = new Map<string, string>();
       const resultTextBySession = new Map<string, string>();
       const modelStructuredCalls: number[] = [];
@@ -90,7 +90,7 @@ describe("swarm tools integration", () => {
         const gatewayRunId = `gateway-${index}`;
         collectorRunIds.add(publicRunId);
         collectorRunIds.add(gatewayRunId);
-        const structuredOutput = createOpenClawTools({
+        const structuredOutput = createCarapaceTools({
           agentSessionKey: childSessionKey,
           runId: publicRunId,
           config,

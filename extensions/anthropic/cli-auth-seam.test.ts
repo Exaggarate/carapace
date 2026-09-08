@@ -1,15 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createWindowsCmdShimFixture, withTempDir } from "openclaw/plugin-sdk/test-env";
-import { withMockedWindowsPlatform, withRestoredMocks } from "openclaw/plugin-sdk/test-node-mocks";
-import * as windowsSpawn from "openclaw/plugin-sdk/windows-spawn";
+import { createWindowsCmdShimFixture, withTempDir } from "carapace/plugin-sdk/test-env";
+import { withMockedWindowsPlatform, withRestoredMocks } from "carapace/plugin-sdk/test-node-mocks";
+import * as windowsSpawn from "carapace/plugin-sdk/windows-spawn";
 import { beforeEach, expect, it, vi } from "vitest";
 
 const { runUtf8CommandWithTimeout } = vi.hoisted(() => ({
   runUtf8CommandWithTimeout: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", () => ({ runUtf8CommandWithTimeout }));
+vi.mock("carapace/plugin-sdk/process-runtime", () => ({ runUtf8CommandWithTimeout }));
 
 const { probeClaudeCliAuthStatus } = await import("./cli-auth-api.js");
 
@@ -74,8 +74,8 @@ it.each(["PATH", "explicit"])("runs a Windows Claude npm shim selected by %s", a
         }));
       `,
     );
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/process-runtime")>(
-      "openclaw/plugin-sdk/process-runtime",
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/process-runtime")>(
+      "carapace/plugin-sdk/process-runtime",
     );
     runUtf8CommandWithTimeout.mockImplementation(actual.runUtf8CommandWithTimeout);
     const resolveProgram = windowsSpawn.resolveWindowsSpawnProgram;

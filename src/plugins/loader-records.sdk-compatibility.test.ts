@@ -30,12 +30,12 @@ it.each([
     pluginId: "custom plugin",
   },
 ])("diagnoses $name", ({ nestedSdk, wrapped, diagnosticCode, pluginId }) => {
-  const project = tempDirs.make("openclaw-sdk-skew-");
+  const project = tempDirs.make("carapace-sdk-skew-");
   const id = pluginId ?? (nestedSdk ? "third-party-fixture" : "whatsapp");
-  const packageName = nestedSdk ? "@fixture/third-party" : "@openclaw/whatsapp";
+  const packageName = nestedSdk ? "@fixture/third-party" : "@carapace/whatsapp";
   const rootDir = path.join(project, "node_modules", packageName);
-  const sdkRoot = path.join(nestedSdk ? rootDir : project, "node_modules", "openclaw");
-  const seam = `openclaw/plugin-sdk/${nestedSdk ? "channel-runtime" : "agent-harness-runtime"}`;
+  const sdkRoot = path.join(nestedSdk ? rootDir : project, "node_modules", "carapace");
+  const seam = `carapace/plugin-sdk/${nestedSdk ? "channel-runtime" : "agent-harness-runtime"}`;
   const write = (target: string, content: string) => {
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.writeFileSync(target, content);
@@ -51,7 +51,7 @@ it.each([
   write(
     path.join(sdkRoot, "package.json"),
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version: nestedSdk ? "2026.7.1" : VERSION,
       type: "module",
       exports: nestedSdk ? {} : { "./plugin-sdk/agent-harness-runtime": "./runtime.mjs" },
@@ -92,7 +92,7 @@ it.each([
     source,
     rootDir,
     packageVersion: "2026.7.1",
-    builtWithOpenClawVersion: "2026.7.1",
+    builtWithCarapaceVersion: "2026.7.1",
     origin: "global",
     enabled: true,
     configSchema: false,
@@ -118,15 +118,15 @@ it.each([
     sdkCompatibility: {
       seam,
       coreVersion: VERSION,
-      builtWithOpenClawVersion: "2026.7.1",
+      builtWithCarapaceVersion: "2026.7.1",
       nestedSdk,
     },
   });
   const action = nestedSdk
-    ? "this plugin bundles an incompatible OpenClaw SDK; update it or contact its author"
+    ? "this plugin bundles an incompatible Carapace SDK; update it or contact its author"
     : pluginId
       ? "update this plugin or contact its author"
-      : "run `openclaw plugins update whatsapp`";
+      : "run `carapace plugins update whatsapp`";
   for (const text of [
     record.error,
     formatPluginLine(record),

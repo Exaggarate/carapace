@@ -5,12 +5,12 @@ import {
   resolveAgentDir,
   runAgentCleanupStep,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   captureFinalCodexCronCreatorToolAllowlist,
   formatMcpCodexApprovalRemedy,
   materializeStaticMcpToolsForHarnessRun,
-} from "openclaw/plugin-sdk/codex-mcp-projection";
+} from "carapace/plugin-sdk/codex-mcp-projection";
 import { resolveCodexPluginsPolicy, shouldAutoApproveCodexAppServerApprovals } from "./config.js";
 import {
   buildDynamicTools,
@@ -522,7 +522,7 @@ export async function prepareCodexAttemptTools(runtime: CodexAttemptRuntime) {
       directToolNames: resolveCodexDynamicToolDirectNames(
         params,
         registeredWithScopedMcp,
-        isHostScopedAgentToolActive("openclaw"),
+        isHostScopedAgentToolActive("carapace"),
       ),
       hookContext,
     });
@@ -543,7 +543,7 @@ export async function prepareCodexAttemptTools(runtime: CodexAttemptRuntime) {
         delete cronCreatorToolAllowlistCaptureRef.value;
       }
       if (requiresScheduledCodexAppAuthority) {
-        // Native apps are not represented in the OpenClaw dynamic-tool list.
+        // Native apps are not represented in the Carapace dynamic-tool list.
         // Require the exact-thread resolver before certifying a default cap.
         delete cronCreatorToolAllowlistCaptureRef.value;
       }

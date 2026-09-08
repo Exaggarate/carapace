@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CodeModeHeadlessResult } from "../agents/code-mode.js";
 import { parseDurationMs } from "../cli/parse-duration.js";
 import { formatErrorMessageWithCode } from "../infra/errors.js";

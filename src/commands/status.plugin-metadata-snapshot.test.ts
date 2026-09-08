@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { afterEach, expect, it, vi } from "vitest";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { createColdPluginFixture } from "../plugins/test-helpers/cold-plugin-fixtures.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 
 const registryLoads = vi.hoisted(() => ({ count: 0 }));
 
@@ -49,11 +49,11 @@ afterEach(() => {
 });
 
 it("builds plugin metadata once for a status scan", async () => {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
-      prefix: "openclaw-status-plugin-metadata-",
+      prefix: "carapace-status-plugin-metadata-",
       layout: "split",
-      env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" },
+      env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" },
     },
     async (state) => {
       const pluginDir = state.path("cold-plugin");
@@ -62,7 +62,7 @@ it("builds plugin metadata once for a status scan", async () => {
       await state.writeConfig({
         memory: {
           search: {
-            remote: { apiKey: "${OPENCLAW_STATUS_PLUGIN_METADATA_KEY}" },
+            remote: { apiKey: "${CARAPACE_STATUS_PLUGIN_METADATA_KEY}" },
           },
         },
         plugins: {

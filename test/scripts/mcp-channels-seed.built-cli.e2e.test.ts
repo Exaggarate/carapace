@@ -4,7 +4,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { runSessionStartupMigration } from "../../src/config/sessions/startup-migration.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import {
   getSessionEntry,
   projectSessionDeliveryFields,
@@ -13,13 +13,13 @@ import {
   readSessionTranscriptEvents,
   readVisibleSessionTranscriptMessageEntries,
 } from "../../src/plugin-sdk/session-transcript-runtime.js";
-import { withOpenClawTestState } from "../../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../src/test-utils/carapace-test-state.js";
 
 const execFileAsync = promisify(execFile);
 
 describe("MCP channels Docker seed", () => {
   it("seeds startup-ready SQLite history with the MCP conversation and attachment identity", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "mcp-channels-seed", scenario: "empty" },
       async (state) => {
         // Disable checkout aliases so the seed uses built public SDK entrypoints,
@@ -41,9 +41,9 @@ describe("MCP channels Docker seed", () => {
           },
         );
 
-        const cfg = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+        const cfg = JSON.parse(await fs.readFile(state.configPath, "utf8")) as CarapaceConfig;
         await runSessionStartupMigration({ cfg, env: state.env, log: { info() {}, warn() {} } });
-        const storePath = path.join(state.agentDir(), "openclaw-agent.sqlite");
+        const storePath = path.join(state.agentDir(), "carapace-agent.sqlite");
         await expect(fs.stat(storePath)).resolves.toMatchObject({ size: expect.any(Number) });
         const scope = {
           agentId: "main",
@@ -84,7 +84,7 @@ describe("MCP channels Docker seed", () => {
             message: {
               role: "user",
               content: "seeded image attachment",
-              __openclaw: {
+              __carapace: {
                 media: [
                   {
                     url: "media://inbound/seeded-image.png",
@@ -108,7 +108,7 @@ describe("MCP channels Docker seed", () => {
   });
 
   it("keeps the pre-SQLite session seed only for an authorized frozen target", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "mcp-channels-seed-frozen", scenario: "empty" },
       async (state) => {
         const tsconfigPath = state.path("tsconfig.json");
@@ -121,7 +121,7 @@ describe("MCP channels Docker seed", () => {
             env: {
               PATH: process.env.PATH,
               ...state.envVars,
-              OPENCLAW_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT: "legacy",
+              CARAPACE_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT: "legacy",
               TSX_TSCONFIG_PATH: tsconfigPath,
               TSX_DISABLE_CACHE: "1",
             },
@@ -139,7 +139,7 @@ describe("MCP channels Docker seed", () => {
           fs.readFile(path.join(state.sessionsDir(), "sess-main.jsonl"), "utf8"),
         ).resolves.toContain('"id":"msg-attachment"');
         await expect(
-          fs.stat(path.join(state.agentDir(), "openclaw-agent.sqlite")),
+          fs.stat(path.join(state.agentDir(), "carapace-agent.sqlite")),
         ).rejects.toMatchObject({
           code: "ENOENT",
         });

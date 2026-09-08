@@ -1,4 +1,4 @@
-# OpenClaw macOS app (dev + signing)
+# Carapace macOS app (dev + signing)
 
 ## Quick dev run
 
@@ -28,7 +28,7 @@ comes from the normal environment/config endpoint. Combine it with
 Launch a separately configured app instance with the same profile name used by the CLI:
 
 ```bash
-OPENCLAW_PROFILE=work /Applications/OpenClaw.app/Contents/MacOS/OpenClaw
+CARAPACE_PROFILE=work /Applications/Carapace.app/Contents/MacOS/Carapace
 ```
 
 Profile names use 1–64 lowercase letters, numbers, underscores, or hyphens and
@@ -39,12 +39,12 @@ must start with a letter or number. `default` selects the normal app; `gateway`,
 packaging cleanup is host-global. Build/package normally, then launch the named
 profile directly with the command above.
 
-A named profile keeps state in `~/.openclaw-<name>`, uses its own app defaults,
+A named profile keeps state in `~/.carapace-<name>`, uses its own app defaults,
 Keychain services, duplicate-instance lock, and the CLI-managed Gateway service
-`ai.openclaw.<name>`. Unless config or environment selects a port, each profile
+`ai.carapace.<name>`. Unless config or environment selects a port, each profile
 derives a stable port in the profile `20000...59999` range. The app does not
 install or modify the host-global Mac node
-service or OpenClaw login item while a profile is active. The runtime child node
+service or Carapace login item while a profile is active. The runtime child node
 still runs in process as usual. App relocation, Sparkle updates, and post-update
 service repair are disabled in profile mode; update the installed app through
 the normal default-profile workflow.
@@ -60,7 +60,7 @@ Run the full app suite only in disposable macOS CI or a VM without operator
 credentials or a live Gateway. A test filter or temporary `HOME` is not enough:
 preferences and Keychain use system services, and AppKit/WebKit tests can open
 windows and helper processes. Local subsets need a verified OS sandbox as well
-as test-owned resources. See [native test safety](https://docs.openclaw.ai/platforms/mac/dev-setup#run-native-tests-safely).
+as test-owned resources. See [native test safety](../../docs/platforms/mac/dev-setup.md#run-native-tests-safely).
 
 The `macos-swift` CI job builds tests once, then runs them through
 `scripts/test-macos-native.mts`. The full suite retains default-profile behavior;
@@ -88,7 +88,7 @@ Development bundle (signed but not notarized):
 scripts/package-mac-app.sh
 ```
 
-This creates `dist/OpenClaw.app` and signs it via `scripts/codesign-mac-app.sh`.
+This creates `dist/Carapace.app` and signs it via `scripts/codesign-mac-app.sh`.
 It is not a distribution artifact. For a notarized app ZIP and DMG, use:
 
 ```bash
@@ -97,14 +97,14 @@ scripts/package-mac-dist.sh
 
 For an unattended Peekaboo elevation host, use the closed Foundation signing
 profile and source-addressed ZIP workflow. `package` is an internal release
-operator command: it requires the OpenClaw Foundation signing identity and
+operator command: it requires the Carapace Foundation signing identity and
 notarization credentials, and its archive is not a general-download artifact.
 
 ```bash
 scripts/mac-elevation-host.sh package \
   --peekaboo-source-commit <full-peekaboo-sha>
 cd dist/elevation-host
-export PREFIX="OpenClaw-<full-openclaw-sha>-Peekaboo-<full-peekaboo-sha>-stable"
+export PREFIX="Carapace-<full-carapace-sha>-Peekaboo-<full-peekaboo-sha>-stable"
 export INSTALLER_SHA256="<authenticated-installer-sha256>"
 export RECEIPT_SHA256="<authenticated-receipt-sha256>"
 [[ "$(shasum -a 256 "$PREFIX-installer.sh" | awk '{print $1}')" == "$INSTALLER_SHA256" ]] || exit 1
@@ -115,17 +115,17 @@ shasum -a 256 -c "$PREFIX-installer.sh.sha256"
   --receipt "$PREFIX.json" \
   --receipt-sha256 "$RECEIPT_SHA256"
 ./"$PREFIX-installer.sh" migration-plan \
-  --migrate-launch-agent "$HOME/Library/LaunchAgents/ai.openclaw.node.plist"
+  --migrate-launch-agent "$HOME/Library/LaunchAgents/ai.carapace.node.plist"
 ./"$PREFIX-installer.sh" install \
   --archive "$PREFIX.zip" \
   --receipt "$PREFIX.json" \
   --receipt-sha256 "$RECEIPT_SHA256" \
-  --migrate-launch-agent "$HOME/Library/LaunchAgents/ai.openclaw.node.plist"
+  --migrate-launch-agent "$HOME/Library/LaunchAgents/ai.carapace.node.plist"
 ./"$PREFIX-installer.sh" status --state-dir "<existing-state-dir>"
 ```
 
 The elevation package is ZIP-only, notarized and stapled, contains exactly
-`OpenClaw.app`, omits Apple Events entitlements, records an immutable receipt,
+`Carapace.app`, omits Apple Events entitlements, records an immutable receipt,
 and verifies a freshly extracted copy. The same source-addressed artifact set
 includes a portable installer copied from that exact Git commit plus separate
 archive and installer checksum files. Transfer the archive, receipt, portable
@@ -143,10 +143,10 @@ paired macOS node identity in the selected state directory. Use
 running background app with no LaunchAgent, use the explicit
 `--adopt-running-app` plan/install option instead. The installer copies no token
 or password: it preserves only the state and config ownership paths, then
-requires the same node identity to reconnect as `openclaw-macos/node` with the
+requires the same node identity to reconnect as `carapace-macos/node` with the
 new app version and computer-use capabilities before committing. Installation owns the separate
-`ai.openclaw.mac.elevation-host` launchd job with `RunAtLoad` and `KeepAlive`.
-It refuses to replace or race the ordinary `ai.openclaw.mac` Launch at login
+`ai.carapace.mac.elevation-host` launchd job with `RunAtLoad` and `KeepAlive`.
+It refuses to replace or race the ordinary `ai.carapace.mac` Launch at login
 job. `recover` restores the recorded prior bundle after a failed cutover;
 `uninstall` removes only the elevation job and preserves the app, state,
 Keychain, TCC, and recovery receipt. Installation exits successfully once the

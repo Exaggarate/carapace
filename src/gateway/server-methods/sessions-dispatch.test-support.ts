@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { vi } from "vitest";
 import {
   GATEWAY_CLIENT_IDS,
@@ -116,7 +116,7 @@ export function makeSessionTarget(entry?: DispatchSessionEntry) {
     : undefined;
   return {
     agentId: "main",
-    storePath: "/tmp/openclaw-agent.sqlite",
+    storePath: "/tmp/carapace-agent.sqlite",
     canonicalKey: dispatchTestSessionKey,
     storeKeys: [dispatchTestSessionKey],
     store: pinnedEntry ? { [dispatchTestSessionKey]: pinnedEntry } : {},

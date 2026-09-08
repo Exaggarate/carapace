@@ -3,8 +3,8 @@ import {
   parseStrictPositiveInteger,
   resolvePositiveTimerTimeoutMs,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { resolveCronCompletionStatus } from "../../cron/completion-status.js";
 import type { CronRunLogEntry } from "../../cron/run-log-types.js";
@@ -115,7 +115,7 @@ function registerCronToggleCommand(params: {
           printCronJson(res);
           if (!params.enabled && process.stderr.isTTY) {
             process.stderr.write(
-              `Note: 'openclaw cron list' hides disabled jobs by default. Use 'openclaw cron list --all' to see this job, or 'openclaw cron enable <id>' to re-enable it.\n`,
+              `Note: 'carapace cron list' hides disabled jobs by default. Use 'carapace cron list --all' to see this job, or 'carapace cron enable <id>' to re-enable it.\n`,
             );
           }
           await warnIfCronSchedulerDisabled(opts);

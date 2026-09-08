@@ -13,19 +13,19 @@ vi.mock("../logging/subsystem.js", () => ({
   createSubsystemLogger: () => ({ warn: mockWarn }),
 }));
 
-vi.mock("../state/openclaw-state-db.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../state/openclaw-state-db.js")>();
+vi.mock("../state/carapace-state-db.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../state/carapace-state-db.js")>();
   return {
     ...actual,
-    openOpenClawStateDatabase: (...args: Parameters<typeof actual.openOpenClawStateDatabase>) => {
+    openCarapaceStateDatabase: (...args: Parameters<typeof actual.openCarapaceStateDatabase>) => {
       mockThrowOpen();
-      return actual.openOpenClawStateDatabase(...args);
+      return actual.openCarapaceStateDatabase(...args);
     },
-    runOpenClawStateWriteTransaction: (
-      ...args: Parameters<typeof actual.runOpenClawStateWriteTransaction>
+    runCarapaceStateWriteTransaction: (
+      ...args: Parameters<typeof actual.runCarapaceStateWriteTransaction>
     ) => {
       mockThrowWrite();
-      return actual.runOpenClawStateWriteTransaction(...args);
+      return actual.runCarapaceStateWriteTransaction(...args);
     },
   };
 });
@@ -35,11 +35,11 @@ vi.mock("../version.js", async (importOriginal) => {
   return { ...actual, resolveRuntimeServiceCommit: () => "aaaaaaa" };
 });
 
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -70,19 +70,19 @@ beforeEach(() => {
 });
 
 async function withRestartSentinelStateDir(run: () => Promise<void>): Promise<void> {
-  await withTestDir({ prefix: "openclaw-sentinel-" }, async (tempDir) => {
+  await withTestDir({ prefix: "carapace-sentinel-" }, async (tempDir) => {
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: tempDir }, run);
+      await withEnvAsync({ CARAPACE_STATE_DIR: tempDir }, run);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 }
 
-type GatewayRestartSentinelDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_sentinel">;
+type GatewayRestartSentinelDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_restart_sentinel">;
 
 function readSentinelRow() {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   return executeSqliteQueryTakeFirstSync(
     db,
@@ -94,7 +94,7 @@ function readSentinelRow() {
 }
 
 function readSentinelRevisionFloor() {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   return executeSqliteQueryTakeFirstSync(
     db,
@@ -106,7 +106,7 @@ function readSentinelRevisionFloor() {
 }
 
 function deleteSentinelRevisionFloor() {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   executeSqliteQuerySync(
     db,
@@ -125,7 +125,7 @@ function updateSentinelRow(
     updated_at_ms: number;
   }>,
 ) {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   executeSqliteQuerySync(
     db,
@@ -199,7 +199,7 @@ describe("restart sentinel", () => {
           reason: "restart-health-pending",
         },
       };
-      const legacyPath = path.join(process.env.OPENCLAW_STATE_DIR ?? "", "restart-sentinel.json");
+      const legacyPath = path.join(process.env.CARAPACE_STATE_DIR ?? "", "restart-sentinel.json");
       const legacyContents = `${JSON.stringify({ version: 1, payload })}\n`;
       await fs.writeFile(legacyPath, legacyContents, "utf-8");
 
@@ -413,7 +413,7 @@ describe("restart sentinel", () => {
       status: "ok" as const,
       ts: Date.now(),
       message: "Run restart-gateway.ps1 to apply config changes.",
-      doctorHint: "Run openclaw doctor --non-interactive",
+      doctorHint: "Run carapace doctor --non-interactive",
       stats: { mode: "config.patch", requiresRestart: true },
     };
 
@@ -421,7 +421,7 @@ describe("restart sentinel", () => {
       [
         "Gateway restart required (config.patch)",
         "Run restart-gateway.ps1 to apply config changes.",
-        "Run openclaw doctor --non-interactive",
+        "Run carapace doctor --non-interactive",
       ].join("\n"),
     );
     expect(summarizeRestartSentinel(payload)).toBe("Gateway restart required (config.patch)");
@@ -455,7 +455,7 @@ describe("restart sentinel", () => {
       status: "error" as const,
       ts: Date.now(),
       message: "Patch failed",
-      doctorHint: "Run openclaw doctor",
+      doctorHint: "Run carapace doctor",
       stats: { mode: "patch", reason: "validation failed" },
     };
 
@@ -464,7 +464,7 @@ describe("restart sentinel", () => {
         "Gateway restart config-patch error (patch)",
         "Patch failed",
         "Reason: validation failed",
-        "Run openclaw doctor",
+        "Run carapace doctor",
       ].join("\n"),
     );
   });
@@ -600,7 +600,7 @@ describe("restart sentinel", () => {
     },
   ] as const)("persists the verified Git install receipt after a $name", async (testCase) => {
     await withRestartSentinelStateDir(async () => {
-      await withTestDir({ prefix: "openclaw-install-root-" }, async (tempDir) => {
+      await withTestDir({ prefix: "carapace-install-root-" }, async (tempDir) => {
         const installRoot = path.join(tempDir, "checkout");
         const installAlias = path.join(tempDir, "checkout-alias");
         await fs.mkdir(installRoot);
@@ -715,7 +715,7 @@ describe("restart sentinel", () => {
 
   it("rejects the same Git revision when the restarted checkout root differs", async () => {
     await withRestartSentinelStateDir(async () => {
-      await withTestDir({ prefix: "openclaw-install-root-mismatch-" }, async (tempDir) => {
+      await withTestDir({ prefix: "carapace-install-root-mismatch-" }, async (tempDir) => {
         const expectedRoot = path.join(tempDir, "expected");
         const runningRoot = path.join(tempDir, "running");
         await fs.mkdir(expectedRoot);
@@ -875,18 +875,18 @@ describe("restart sentinel message dedup", () => {
 
   it("formats the non-interactive doctor command as actionability guidance", () => {
     expect(formatDoctorNonInteractiveHint({ PATH: "/usr/bin:/bin" })).toBe(
-      "Recommended follow-up: run openclaw doctor --non-interactive in a terminal or approvals-capable OpenClaw surface.",
+      "Recommended follow-up: run carapace doctor --non-interactive in a terminal or approvals-capable Carapace surface.",
     );
   });
 
   it("keeps profile-aware doctor guidance actionable outside constrained delivery surfaces", () => {
     expect(
       formatDoctorNonInteractiveHint({
-        OPENCLAW_PROFILE: "isolated",
+        CARAPACE_PROFILE: "isolated",
         PATH: "/usr/bin:/bin",
       }),
     ).toBe(
-      "Recommended follow-up: run openclaw --profile isolated doctor --non-interactive in a terminal or approvals-capable OpenClaw surface.",
+      "Recommended follow-up: run carapace --profile isolated doctor --non-interactive in a terminal or approvals-capable Carapace surface.",
     );
   });
 });

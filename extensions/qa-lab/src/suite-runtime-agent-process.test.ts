@@ -1,7 +1,7 @@
 // Qa Lab tests cover suite runtime agent process plugin behavior.
 import { EventEmitter } from "node:events";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const spawnMock = vi.hoisted(() => vi.fn());
@@ -228,7 +228,7 @@ describe("qa suite runtime agent process helpers", () => {
       const error = await errorPromise;
       expect(error).toMatchObject({ code: "qa_cli_timeout" });
       const message = error instanceof Error ? error.message : String(error);
-      expect(message).toContain("qa cli timed out: openclaw qa suite");
+      expect(message).toContain("qa cli timed out: carapace qa suite");
       expect(message).toContain("stdout:\n[qa cli stdout truncated to last");
       expect(message).toContain("stdout-tail-marker");
       expect(message).not.toContain("stdout-head-marker");
@@ -295,7 +295,7 @@ describe("qa suite runtime agent process helpers", () => {
           options: { timeoutMs: 1 },
         });
         const timeoutAssertion = expect(pending).rejects.toThrow(
-          "qa cli timed out: openclaw qa suite",
+          "qa cli timed out: carapace qa suite",
         );
 
         await waitForSpawnCount(1);
@@ -323,17 +323,17 @@ describe("qa suite runtime agent process helpers", () => {
         repoRoot: "/repo",
         gateway: {
           tempRoot: "/tmp/runtime",
-          runtimeEnv: { PATH: "/usr/bin", OPENCLAW_STATE_DIR: "/tmp/default-state" },
+          runtimeEnv: { PATH: "/usr/bin", CARAPACE_STATE_DIR: "/tmp/default-state" },
         },
         primaryModel: "openai/gpt-5.6-luna",
         alternateModel: "openai/gpt-5.6-luna-mini",
         providerMode: "mock-openai",
       } as never,
-      args: ["openclaw", "-m", "overview"],
+      args: ["carapace", "-m", "overview"],
       options: {
         env: {
-          OPENCLAW_STATE_DIR: "/tmp/isolated-state",
-          OPENCLAW_CONFIG_PATH: "/tmp/isolated-state/openclaw.json",
+          CARAPACE_STATE_DIR: "/tmp/isolated-state",
+          CARAPACE_CONFIG_PATH: "/tmp/isolated-state/carapace.json",
         },
       },
     });
@@ -347,14 +347,14 @@ describe("qa suite runtime agent process helpers", () => {
     expect(spawnCall?.[0]).toBe("/usr/bin/node");
     expect(spawnCall?.[1]).toEqual([
       path.join("/repo", "dist", "index.js"),
-      "openclaw",
+      "carapace",
       "-m",
       "overview",
     ]);
     const spawnEnv = (spawnCall?.[2] as { env?: Record<string, string> } | undefined)?.env;
     expect(spawnEnv?.PATH).toBe("/usr/bin");
-    expect(spawnEnv?.OPENCLAW_STATE_DIR).toBe("/tmp/isolated-state");
-    expect(spawnEnv?.OPENCLAW_CONFIG_PATH).toBe("/tmp/isolated-state/openclaw.json");
+    expect(spawnEnv?.CARAPACE_STATE_DIR).toBe("/tmp/isolated-state");
+    expect(spawnEnv?.CARAPACE_CONFIG_PATH).toBe("/tmp/isolated-state/carapace.json");
   });
 
   it("parses json qa cli output when requested", async () => {
@@ -553,7 +553,7 @@ describe("qa suite runtime agent process helpers", () => {
       name: "Memory Dreaming Promotion",
       payload: {
         kind: "systemEvent",
-        text: "__openclaw_memory_core_short_term_promotion_dream__",
+        text: "__carapace_memory_core_short_term_promotion_dream__",
       },
     };
     const current = {
@@ -561,7 +561,7 @@ describe("qa suite runtime agent process helpers", () => {
       name: "Memory Dreaming Promotion",
       payload: {
         kind: "agentTurn",
-        message: "__openclaw_memory_core_short_term_promotion_dream__",
+        message: "__carapace_memory_core_short_term_promotion_dream__",
         lightContext: true,
       },
       sessionTarget: "isolated",

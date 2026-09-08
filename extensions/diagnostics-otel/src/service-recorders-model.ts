@@ -1,5 +1,5 @@
 import { SpanStatusCode } from "@opentelemetry/api";
-import { normalizeDiagnosticValue } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { normalizeDiagnosticValue } from "carapace/plugin-sdk/diagnostic-runtime";
 import { redactSensitiveText } from "../api.js";
 import type { DiagnosticEventMetadata, DiagnosticEventPayload } from "../api.js";
 import {
@@ -37,11 +37,11 @@ export function createModelRecorders(runtime: DiagnosticsRecorderRuntime) {
   } = runtime;
 
   const modelCallMetricAttrs = (evt: ModelCallLifecycleDiagnosticEvent) => ({
-    "openclaw.provider": evt.provider,
-    "openclaw.model": evt.model,
-    "openclaw.api": normalizeDiagnosticValue(evt.api),
-    "openclaw.transport": normalizeDiagnosticValue(evt.transport),
-    "openclaw.model_call.observation_unit": modelCallObservationUnit(evt),
+    "carapace.provider": evt.provider,
+    "carapace.model": evt.model,
+    "carapace.api": normalizeDiagnosticValue(evt.api),
+    "carapace.transport": normalizeDiagnosticValue(evt.transport),
+    "carapace.model_call.observation_unit": modelCallObservationUnit(evt),
   });
   const recordModelCallSizeTimingMetrics = (
     evt: Extract<DiagnosticEventPayload, { type: "model.call.completed" | "model.call.error" }>,
@@ -73,15 +73,15 @@ export function createModelRecorders(runtime: DiagnosticsRecorderRuntime) {
       return trackedSpan.spanContext();
     }
     const spanAttrs: Record<string, string | number | boolean> = {
-      "openclaw.provider": evt.provider,
-      "openclaw.model": evt.model,
+      "carapace.provider": evt.provider,
+      "carapace.model": evt.model,
     };
     assignGenAiModelCallAttrs(spanAttrs, evt);
     if (evt.api) {
-      spanAttrs["openclaw.api"] = evt.api;
+      spanAttrs["carapace.api"] = evt.api;
     }
     if (evt.transport) {
-      spanAttrs["openclaw.transport"] = evt.transport;
+      spanAttrs["carapace.transport"] = evt.transport;
     }
     assignModelCallPromptStatsAttrs(spanAttrs, evt);
     return trackTrustedSpan(
@@ -106,9 +106,9 @@ export function createModelRecorders(runtime: DiagnosticsRecorderRuntime) {
         : undefined;
     const metricAttrs = {
       ...modelCallMetricAttrs(evt),
-      ...(errorType !== undefined ? { "openclaw.errorCategory": errorType } : {}),
+      ...(errorType !== undefined ? { "carapace.errorCategory": errorType } : {}),
       ...(evt.type === "model.call.error" && evt.failureKind
-        ? { "openclaw.failureKind": normalizeDiagnosticValue(evt.failureKind, "other") }
+        ? { "carapace.failureKind": normalizeDiagnosticValue(evt.failureKind, "other") }
         : {}),
     };
     modelCallDurationHistogram.record(evt.durationMs, metricAttrs);
@@ -123,21 +123,21 @@ export function createModelRecorders(runtime: DiagnosticsRecorderRuntime) {
       return;
     }
     const spanAttrs: Record<string, string | number | boolean> = {
-      "openclaw.provider": evt.provider,
-      "openclaw.model": evt.model,
+      "carapace.provider": evt.provider,
+      "carapace.model": evt.model,
       ...(errorType !== undefined
-        ? { "openclaw.errorCategory": errorType, "error.type": errorType }
+        ? { "carapace.errorCategory": errorType, "error.type": errorType }
         : {}),
     };
     if (evt.type === "model.call.error" && evt.failureKind) {
-      spanAttrs["openclaw.failureKind"] = normalizeDiagnosticValue(evt.failureKind, "other");
+      spanAttrs["carapace.failureKind"] = normalizeDiagnosticValue(evt.failureKind, "other");
     }
     assignGenAiModelCallAttrs(spanAttrs, evt);
     if (evt.api) {
-      spanAttrs["openclaw.api"] = evt.api;
+      spanAttrs["carapace.api"] = evt.api;
     }
     if (evt.transport) {
-      spanAttrs["openclaw.transport"] = evt.transport;
+      spanAttrs["carapace.transport"] = evt.transport;
     }
     assignModelCallSizeTimingAttrs(spanAttrs, evt);
     assignModelCallPromptStatsAttrs(spanAttrs, evt);

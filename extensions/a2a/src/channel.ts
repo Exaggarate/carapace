@@ -1,11 +1,11 @@
 import {
   buildChannelOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
+} from "carapace/plugin-sdk/channel-core";
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { DEFAULT_ACCOUNT_ID } from "./accounts.js";
 import { A2A_CHANNEL_ID, createA2aChannelPluginBase } from "./channel-base.js";
 import { startA2aGatewayAccount } from "./gateway.js";

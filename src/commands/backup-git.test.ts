@@ -78,7 +78,7 @@ describe("Git backup command agent selection", () => {
         databases: [
           {
             identity: { role: "agent", agentId: "ops-team" },
-            path: path.join(agentDir, "openclaw-agent.sqlite"),
+            path: path.join(agentDir, "carapace-agent.sqlite"),
           },
         ],
       }),
@@ -89,7 +89,7 @@ describe("Git backup command agent selection", () => {
     [
       "unknown",
       "nope-agent",
-      'Unknown agent id "nope-agent". Run openclaw agents list to see configured agents.',
+      'Unknown agent id "nope-agent". Run carapace agents list to see configured agents.',
     ],
     ["empty", "", "--agent must not be blank"],
     ["whitespace-only", "   ", "--agent must not be blank"],
@@ -154,11 +154,11 @@ describe("Git backup command agent selection", () => {
           expect.objectContaining({ identity: { role: "global" } }),
           {
             identity: { role: "agent", agentId: "main" },
-            path: path.join(mainAgentDir, "openclaw-agent.sqlite"),
+            path: path.join(mainAgentDir, "carapace-agent.sqlite"),
           },
           {
             identity: { role: "agent", agentId: "ops-team" },
-            path: path.join(opsAgentDir, "openclaw-agent.sqlite"),
+            path: path.join(opsAgentDir, "carapace-agent.sqlite"),
           },
         ],
       }),

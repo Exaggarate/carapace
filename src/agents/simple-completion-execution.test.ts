@@ -1,4 +1,4 @@
-import { reasoningTagTextPolicy } from "@openclaw/ai/internal/openai";
+import { reasoningTagTextPolicy } from "@carapace/ai/internal/openai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findSourceImportBackedges } from "../../test/helpers/source-import-closure.js";
 import type { Model } from "../llm/types.js";
@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("../llm/stream.js", () => ({ completeSimple: mocks.complete }));
-vi.mock("@openclaw/ai/transports", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@openclaw/ai/transports")>()),
+vi.mock("@carapace/ai/transports", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@carapace/ai/transports")>()),
   prepareModelForSimpleCompletion: mocks.prepareModel,
 }));
 
@@ -70,7 +70,7 @@ describe("completeWithPreparedSimpleCompletionModel", () => {
       contextWindow: 8192,
       maxTokens: 1024,
     } satisfies Model<"ollama">;
-    const preparedModel = { ...model, api: "openclaw-ollama-simple-test" };
+    const preparedModel = { ...model, api: "carapace-ollama-simple-test" };
     const cfg = {
       models: { providers: { ollama: { baseUrl: "http://remote-ollama:11434", models: [] } } },
     };
@@ -154,7 +154,7 @@ describe("completeWithPreparedSimpleCompletionModel", () => {
     } satisfies Model<"anthropic-messages">;
     const preparedModel = {
       ...model,
-      api: "openclaw-provider-simple:anthropic:production-sonnet",
+      api: "carapace-provider-simple:anthropic:production-sonnet",
     } satisfies Model;
     mocks.prepareModel.mockReturnValueOnce(preparedModel);
 

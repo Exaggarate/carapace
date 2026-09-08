@@ -9,10 +9,10 @@ import {
 } from "../config/sessions/archive-compression.js";
 import type { TranscriptEvent } from "../config/sessions/session-accessor.sqlite-contract.js";
 import { resolveSqliteTranscriptArchiveDirectory } from "../config/sessions/session-accessor.sqlite-scope.js";
-import { assertAgentDatabaseMaintenanceAuthority } from "../state/openclaw-agent-db-lease.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
-import { SESSION_TRANSCRIPT_ARCHIVES_TABLE } from "../state/openclaw-agent-session-transcript-archive-schema.js";
-import { OPENCLAW_SQLITE_BUSY_TIMEOUT_MS } from "../state/openclaw-state-db.js";
+import { assertAgentDatabaseMaintenanceAuthority } from "../state/carapace-agent-db-lease.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
+import { SESSION_TRANSCRIPT_ARCHIVES_TABLE } from "../state/carapace-agent-session-transcript-archive-schema.js";
+import { CARAPACE_SQLITE_BUSY_TIMEOUT_MS } from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -25,7 +25,7 @@ import { transformHistoricalTranscriptEvent } from "./state-migrations.transcrip
 export const TRANSCRIPT_DIRECTIVE_MIGRATION_BATCH_SIZE = 32;
 
 type TranscriptArchiveMigrationDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "session_transcript_archives"
 >;
 
@@ -357,7 +357,7 @@ export async function migrateTranscriptDirectiveArchives(params: {
           return currentRowPresent;
         },
         {
-          busyTimeoutMs: OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
+          busyTimeoutMs: CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
           databaseLabel: params.pathname,
           operationLabel: "historical-transcript-archive-directives",
         },
@@ -378,7 +378,7 @@ export async function migrateTranscriptDirectiveArchives(params: {
           assertAgentDatabaseMaintenanceAuthority();
         },
         {
-          busyTimeoutMs: OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
+          busyTimeoutMs: CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
           databaseLabel: params.pathname,
           operationLabel: "historical-transcript-archive-cursor",
         },

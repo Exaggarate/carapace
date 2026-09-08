@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { environmentsHandlers } from "./environments.js";
 import { nodeHandlers } from "./nodes.js";

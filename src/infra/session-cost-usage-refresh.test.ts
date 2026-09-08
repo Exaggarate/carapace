@@ -20,7 +20,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("session cost usage refresh", () => {
   it("doubles consecutive busy delays, caps them, and resets after success", async () => {
-    const root = tempDirs.make("openclaw-session-cost-backoff-");
+    const root = tempDirs.make("carapace-session-cost-backoff-");
     const sessionFile = path.join(root, "agents", "backoff-test", "sessions", "next-session.jsonl");
     await fs.mkdir(path.dirname(sessionFile), { recursive: true });
     await fs.writeFile(
@@ -28,7 +28,7 @@ describe("session cost usage refresh", () => {
       JSON.stringify({ message: { role: "user", content: "hello" } }),
     );
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => {
       const params = { agentId: "backoff-test", startMs: 0, endMs: Date.now() };
       const refresh = vi.mocked(refreshCostUsageCacheForAgent);
       let queuedSubset: ReturnType<typeof loadSessionCostSummariesFromCache> | undefined;
@@ -120,7 +120,7 @@ describe("session cost usage refresh", () => {
   async function withRefreshFixture(
     run: (params: { agentId: string; sessionFiles: [string, string] }) => Promise<void>,
   ): Promise<void> {
-    const root = tempDirs.make("openclaw-session-cost-lifetime-");
+    const root = tempDirs.make("carapace-session-cost-lifetime-");
     const agentId = "refresh-test";
     const sessionsDir = path.join(root, "agents", agentId, "sessions");
     const sessionFiles: [string, string] = [
@@ -133,7 +133,7 @@ describe("session cost usage refresh", () => {
         fs.writeFile(sessionFile, JSON.stringify({ message: { role: "user", content: "hello" } })),
       ),
     );
-    await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => {
       vi.useFakeTimers();
       try {
         await run({ agentId, sessionFiles });

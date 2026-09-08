@@ -1,8 +1,8 @@
 // Ollama plugin module implements wsl2 crash loop check behavior.
 import { access } from "node:fs/promises";
-import type { PluginLogger } from "openclaw/plugin-sdk/plugin-entry";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
-import { isWSL2Sync } from "openclaw/plugin-sdk/runtime-env";
+import type { PluginLogger } from "carapace/plugin-sdk/plugin-entry";
+import { runExec } from "carapace/plugin-sdk/process-runtime";
+import { isWSL2Sync } from "carapace/plugin-sdk/runtime-env";
 
 const SYSTEMCTL_TIMEOUT_MS = 5_000;
 const WSL_CUDA_MARKERS = [

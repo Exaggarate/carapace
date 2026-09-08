@@ -1,6 +1,6 @@
 /** Synthetic-auth provider ref selection and prepared-catalog resolution for model-runtime builds. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { prepareSyntheticAuthWithProvider } from "../plugins/provider-synthetic-auth.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 
@@ -32,7 +32,7 @@ export function listPreparedSyntheticAuthProviderRefs(
 }
 
 export async function prepareSyntheticAuth(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   signal?: AbortSignal;
   workspaceDir?: string;

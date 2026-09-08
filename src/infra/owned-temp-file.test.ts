@@ -9,7 +9,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 it.each(["parent", "workspace"] as const)(
   "preserves replacement content when the producer's %s directory changes",
   async (scope) => {
-    const dir = tempDirs.make("openclaw-owned-output-");
+    const dir = tempDirs.make("carapace-owned-output-");
     const parent = path.join(dir, "output");
     await fs.mkdir(parent);
     const stagedPath = path.join(parent, "staged.bin");
@@ -37,7 +37,7 @@ it.each(["parent", "workspace"] as const)(
 );
 
 it("rejects parent identities that collide when rounded to numbers", async () => {
-  const dir = tempDirs.make("openclaw-owned-output-identity-");
+  const dir = tempDirs.make("carapace-owned-output-identity-");
   const parentPath = path.join(dir, "output");
   await fs.mkdir(parentPath);
   const parent = await fs.realpath(parentPath);

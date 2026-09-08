@@ -22,8 +22,8 @@ import {
   releaseAgentRunContext,
 } from "../infra/agent-run-registry.js";
 import type { SubsystemLogger } from "../logging/subsystem.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { waitForChatAbortControllerRemoval } from "./chat-abort-lifecycle-internal.js";
 import { registerChatAbortController } from "./chat-abort.js";
 import {
@@ -66,7 +66,7 @@ it.each([
   async ({ stopReason, status, recovery, timeoutPhase }) => {
     const tempDirs = createTempDirTracker();
     const target = {
-      storePath: path.join(tempDirs.make("openclaw-restart-terminal-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-restart-terminal-"), "sessions.json"),
       sessionKey: "agent:main:restart-terminal",
     };
     const runId = "interrupted-run";
@@ -94,7 +94,7 @@ it.each([
           data: { phase: "error", aborted: true, stopReason, timeoutPhase, endedAt: 2_000 },
         },
       });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const restored = loadSessionEntry({ ...target, readConsistency: "latest" });
       expect(restored?.status).toBe(status);
       if (recovery === "recoverable") {
@@ -113,7 +113,7 @@ it.each([
       expect(observed).toMatchObject({ kind: "observed", view: { status: recovery } });
     } finally {
       routing.loadSessionEntry.mockReset();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       tempDirs.cleanup();
     }
   },
@@ -122,7 +122,7 @@ it.each([
 it("persists current-run timing after pre-start failure and clears it on the next run", async () => {
   const tempDirs = createTempDirTracker();
   const target = {
-    storePath: path.join(tempDirs.make("openclaw-lifecycle-timing-"), "sessions.json"),
+    storePath: path.join(tempDirs.make("carapace-lifecycle-timing-"), "sessions.json"),
     sessionKey: "agent:main:timing",
   };
   let now = 1_000_000;
@@ -194,7 +194,7 @@ it("persists current-run timing after pre-start failure and clears it on the nex
     now += 11_192;
     recovered.emit("end", { meta: {} });
     await persistence;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(loadSessionEntry(target)).toMatchObject({
       status: "done",
       startedAt: 3_600_000,
@@ -207,7 +207,7 @@ it("persists current-run timing after pre-start failure and clears it on the nex
     await persistence;
     clock.mockRestore();
     routing.loadSessionEntry.mockReset();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     tempDirs.cleanup();
   }
 });
@@ -215,7 +215,7 @@ it("persists current-run timing after pre-start failure and clears it on the nex
 it.each(["success", "failed-write"])(
   "settles native child cancellation through %s without retry grace",
   async (outcome) => {
-    const state = await createOpenClawTestState({ label: "native-cancel-lifecycle" });
+    const state = await createCarapaceTestState({ label: "native-cancel-lifecycle" });
     const cfg = { agents: { entries: { main: {} } } };
     setRuntimeConfigSnapshot(cfg, cfg);
     const target = {
@@ -395,7 +395,7 @@ it.each(["success", "failed-write"])(
         new Set(["session-observer"]),
         { dropIfSlow: true },
       );
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(loadSessionEntry({ ...target, readConsistency: "latest" })).toMatchObject({
         status: "killed",
         lastRunId: runId,
@@ -438,7 +438,7 @@ it.each([
   async ({ phase, data, status }) => {
     const tempDirs = createTempDirTracker();
     const target = {
-      storePath: path.join(tempDirs.make("openclaw-owner-terminal-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-owner-terminal-"), "sessions.json"),
       sessionKey: "agent:main:worker-terminal",
     };
     const runId = "worker-terminal-run";
@@ -537,7 +537,7 @@ it.each([
       await subscriptions?.taskUnsub();
       releaseAgentRunContext(runId, claimId);
       routing.loadSessionEntry.mockReset();
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       tempDirs.cleanup();
     }
   },

@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { withMockedWindowsAclVerificationUnavailable } from "../test-utils/vitest-spies.js";
 import {
   resolveConfiguredSecretInputWithFallback,
@@ -15,14 +15,14 @@ import {
 let fixtureRoot = "";
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-secret-input-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-secret-input-"));
 });
 
 afterAll(async () => {
   await fs.rm(fixtureRoot, { recursive: true, force: true });
 });
 
-function createConfig(value: unknown): OpenClawConfig {
+function createConfig(value: unknown): CarapaceConfig {
   return {
     gateway: {
       auth: {
@@ -34,7 +34,7 @@ function createConfig(value: unknown): OpenClawConfig {
         default: { source: "env" },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function createWindowsAclUnavailableConfig() {
@@ -53,7 +53,7 @@ async function createWindowsAclUnavailableConfig() {
           filemain: { source: "file", path: filePath, mode: "singleValue" },
         },
       },
-    } as OpenClawConfig,
+    } as CarapaceConfig,
   };
 }
 
@@ -196,7 +196,7 @@ describe("resolveConfiguredSecretInputWithFallback", () => {
         });
 
         expect(resolved.unresolvedRefReason).toBe(
-          "gateway.auth.token SecretRef is unresolved (file:filemain:value). Windows path security could not be verified. Restore Windows path security verification, or use an existing secret file whose owner and ACLs OpenClaw can verify.",
+          "gateway.auth.token SecretRef is unresolved (file:filemain:value). Windows path security could not be verified. Restore Windows path security verification, or use an existing secret file whose owner and ACLs Carapace can verify.",
         );
         expect(resolved.unresolvedRefReason).not.toContain(filePath);
       },

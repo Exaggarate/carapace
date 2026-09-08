@@ -1,9 +1,9 @@
 /** Secret-surface projection coverage loaded by the startup SecretRef suite. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayStartupSourceConfig } from "./server-startup-secret-surfaces.js";
 
-function channelConfig(): OpenClawConfig {
+function channelConfig(): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -19,7 +19,7 @@ describe("gateway startup secret surfaces", () => {
     expect(resolveGatewayStartupSourceConfig(config, {})).toBe(config);
   });
 
-  it.each(["OPENCLAW_SKIP_CHANNELS", "OPENCLAW_SKIP_PROVIDERS"] as const)(
+  it.each(["CARAPACE_SKIP_CHANNELS", "CARAPACE_SKIP_PROVIDERS"] as const)(
     "preserves explicit %s behavior",
     (key) => {
       expect(

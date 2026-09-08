@@ -33,12 +33,12 @@ describe("worker placement runtime capabilities", () => {
     {
       name: "ignores an unlocked historical runtime after selecting a different provider",
       entry: { agentHarnessId: "codex" },
-      expected: "openclaw",
+      expected: "carapace",
     },
     {
       name: "ignores an unlocked historical runtime behind the default override",
       entry: { agentHarnessId: "codex", agentRuntimeOverride: "default" },
-      expected: "openclaw",
+      expected: "carapace",
     },
     {
       name: "preserves locked transcript ownership",
@@ -48,7 +48,7 @@ describe("worker placement runtime capabilities", () => {
     {
       name: "does not let a historical embedded runtime override a Codex model",
       entry: {
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         providerOverride: "openai",
         modelOverride: "gpt-5.6-sol",
       },
@@ -83,7 +83,7 @@ describe("worker placement runtime capabilities", () => {
   it.each([
     {
       name: "embedded worker turns support paired devices",
-      runtimeId: "openclaw",
+      runtimeId: "carapace",
       executionMode: "worker-turn",
       devicePlacementSupported: true,
       devicePlacement: { requiredNodeCommands: [], consumesWorkerSlot: true },

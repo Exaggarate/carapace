@@ -1,6 +1,6 @@
 // Msteams tests cover graph messages.actions plugin behavior.
 import { beforeAll, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import {
   CHANNEL_TO,
   CHAT_ID,
@@ -31,7 +31,7 @@ const emptyReactionCases: Array<{
     name: "reactMessageMSTeams",
     invoke: () =>
       reactMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: CHAT_ID,
         messageId: "msg-1",
         reactionType: "   ",
@@ -41,7 +41,7 @@ const emptyReactionCases: Array<{
     name: "unreactMessageMSTeams",
     invoke: () =>
       unreactMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: CHAT_ID,
         messageId: "msg-1",
         reactionType: "",
@@ -60,7 +60,7 @@ describe("pinMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue({ id: "pinned-1" });
 
     const result = await pinMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       messageId: "msg-1",
     });
@@ -81,7 +81,7 @@ describe("pinMessageMSTeams", () => {
   it("rejects pinning a message in a channel on Graph v1.0", async () => {
     await expect(
       pinMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: CHANNEL_TO,
         messageId: "msg-2",
       }),
@@ -95,7 +95,7 @@ describe("unpinMessageMSTeams", () => {
     mockState.deleteGraphRequest.mockResolvedValue(undefined);
 
     const result = await unpinMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       pinnedMessageId: "pinned-1",
     });
@@ -110,7 +110,7 @@ describe("unpinMessageMSTeams", () => {
   it("rejects unpinning a message from a channel on Graph v1.0", async () => {
     await expect(
       unpinMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: CHANNEL_TO,
         pinnedMessageId: "pinned-2",
       }),
@@ -124,7 +124,7 @@ describe("reactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     const result = await reactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       messageId: "msg-1",
       reactionType: "like",
@@ -145,7 +145,7 @@ describe("reactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     const result = await reactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHANNEL_TO,
       messageId: "msg-2",
       reactionType: "heart",
@@ -165,7 +165,7 @@ describe("reactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     await reactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       messageId: "msg-1",
       reactionType: "LAUGH",
@@ -185,7 +185,7 @@ describe("reactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     await reactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       messageId: "msg-1",
       reactionType: "🎉",
@@ -208,7 +208,7 @@ describe("reactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     await reactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: "user:aad-user-1",
       messageId: "msg-1",
       reactionType: "like",
@@ -230,7 +230,7 @@ describe("unreactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     const result = await unreactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHAT_ID,
       messageId: "msg-1",
       reactionType: "sad",
@@ -251,7 +251,7 @@ describe("unreactMessageMSTeams", () => {
     mockState.mutateGraphJson.mockResolvedValue(undefined);
 
     const result = await unreactMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       to: CHANNEL_TO,
       messageId: "msg-2",
       reactionType: "angry",
@@ -276,7 +276,7 @@ describe("unreactMessageMSTeams", () => {
       mockState.mutateGraphJson.mockResolvedValue(undefined);
 
       await unreactMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         to: CHAT_ID,
         messageId: "msg-1",
         reactionType,

@@ -24,10 +24,10 @@ Optional sandboxing for the embedded agent. See [Sandboxing](/gateway/sandboxing
         backend: "docker", // docker (default) | openshell | podman | ssh
         scope: "agent", // session | agent (default) | shared
         workspaceAccess: "none", // none (default) | ro | rw
-        workspaceRoot: "~/.openclaw/sandboxes",
+        workspaceRoot: "~/.carapace/sandboxes",
         docker: {
-          image: "openclaw-sandbox:bookworm-slim",
-          containerPrefix: "openclaw-sbx-",
+          image: "carapace-sandbox:bookworm-slim",
+          containerPrefix: "carapace-sbx-",
           workdir: "/workspace",
           readOnlyRoot: true,
           tmpfs: ["/tmp", "/var/tmp", "/run"],
@@ -46,7 +46,7 @@ Optional sandboxing for the embedded agent. See [Sandboxing](/gateway/sandboxing
             nproc: 256,
           },
           seccompProfile: "/path/to/seccomp.json",
-          apparmorProfile: "openclaw-sandbox",
+          apparmorProfile: "carapace-sandbox",
           dns: ["1.1.1.1", "8.8.8.8"],
           extraHosts: ["internal.service:10.0.0.5"],
           binds: ["/home/user/source:/source:rw"],
@@ -54,7 +54,7 @@ Optional sandboxing for the embedded agent. See [Sandboxing](/gateway/sandboxing
         ssh: {
           target: "user@gateway-host:22",
           command: "ssh",
-          workspaceRoot: "/tmp/openclaw-sandboxes",
+          workspaceRoot: "/tmp/carapace-sandboxes",
           strictHostKeyChecking: true,
           updateHostKeys: true,
           identityFile: "~/.ssh/id_ed25519",
@@ -67,8 +67,8 @@ Optional sandboxing for the embedded agent. See [Sandboxing](/gateway/sandboxing
         },
         browser: {
           enabled: false,
-          image: "openclaw-sandbox-browser:bookworm-slim",
-          network: "openclaw-sandbox-browser",
+          image: "carapace-sandbox-browser:bookworm-slim",
+          network: "carapace-sandbox-browser",
           cdpPort: 9222,
           cdpSourceRange: "172.21.0.1/32",
           vncPort: 5900,
@@ -109,7 +109,7 @@ Optional sandboxing for the embedded agent. See [Sandboxing](/gateway/sandboxing
 }
 ```
 
-Defaults shown above (`off`/`docker`/`agent`/`none`/`bookworm-slim` image/`none` network/etc.) are the actual OpenClaw defaults, not just illustrative values.
+Defaults shown above (`off`/`docker`/`agent`/`none`/`bookworm-slim` image/`none` network/etc.) are the actual Carapace defaults, not just illustrative values.
 
 <Accordion title="Sandbox details">
 
@@ -128,9 +128,9 @@ Plugin-managed backends keep runtime-specific settings under their plugin entrie
 
 - `target`: SSH target in `user@host[:port]` form
 - `command`: SSH client command (default: `ssh`)
-- `workspaceRoot`: absolute remote root used for per-scope workspaces (default: `/tmp/openclaw-sandboxes`)
+- `workspaceRoot`: absolute remote root used for per-scope workspaces (default: `/tmp/carapace-sandboxes`)
 - `identityFile` / `certificateFile` / `knownHostsFile`: existing local files passed to OpenSSH
-- `identityData` / `certificateData` / `knownHostsData`: inline contents or SecretRefs that OpenClaw materializes into temp files at runtime
+- `identityData` / `certificateData` / `knownHostsData`: inline contents or SecretRefs that Carapace materializes into temp files at runtime
 - `strictHostKeyChecking` / `updateHostKeys`: OpenSSH host-key policy knobs (both default `true`)
 
 **SSH auth precedence:**
@@ -150,7 +150,7 @@ Plugin-managed backends keep runtime-specific settings under their plugin entrie
 
 **Workspace access:**
 
-- `none`: per-scope sandbox workspace under `~/.openclaw/sandboxes` (default)
+- `none`: per-scope sandbox workspace under `~/.carapace/sandboxes` (default)
 - `ro`: sandbox workspace at `/workspace`, agent workspace mounted read-only at `/agent`
 - `rw`: agent workspace mounted read/write at `/workspace`
 
@@ -171,13 +171,13 @@ Plugin-managed backends keep runtime-specific settings under their plugin entrie
         config: {
           mode: "mirror", // mirror (default) | remote
           command: "openshell",
-          from: "openclaw",
+          from: "carapace",
           remoteWorkspaceDir: "/sandbox",
           remoteAgentWorkspaceDir: "/agent",
           gateway: "lab", // optional
           gatewayEndpoint: "https://lab.example", // optional
           workspace: "research", // optional existing OpenShell workspace
-          policy: "/etc/openclaw/openshell-policy.yaml", // optional host-side YAML file
+          policy: "/etc/carapace/openshell-policy.yaml", // optional host-side YAML file
           providers: ["openai"], // optional
           gpu: false,
           autoProviders: true,
@@ -194,32 +194,32 @@ Plugin-managed backends keep runtime-specific settings under their plugin entrie
 - `mirror`: seed remote from local before exec, sync back after exec; local workspace stays canonical
 - `remote`: seed remote once when the sandbox is created, then keep the remote workspace canonical
 
-In `remote` mode, host-local edits made outside OpenClaw are not synced into the sandbox automatically after the seed step.
+In `remote` mode, host-local edits made outside Carapace are not synced into the sandbox automatically after the seed step.
 Transport is SSH into the OpenShell sandbox, but the plugin owns sandbox lifecycle and optional mirror sync.
-`workspace` selects an existing OpenShell control-plane workspace for the whole plugin; it is separate from the agent's filesystem workspace. `policy` must point to a YAML file readable by the OpenClaw Gateway, not a named policy ID. See [OpenShell](/gateway/openshell) for setup, prerequisites, and troubleshooting.
+`workspace` selects an existing OpenShell control-plane workspace for the whole plugin; it is separate from the agent's filesystem workspace. `policy` must point to a YAML file readable by the Carapace Gateway, not a named policy ID. See [OpenShell](/gateway/openshell) for setup, prerequisites, and troubleshooting.
 
 **`setupCommand`** runs once after container creation (via `sh -lc`). Needs network egress, writable root, root user.
 
 **Containers default to `network: "none"`** — set to `"bridge"` (or a custom bridge network) if the agent needs outbound access.
 `"host"` is blocked. `"container:<id>"` is blocked by default unless you explicitly set
 `sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true` (break-glass).
-Codex app-server turns in an active OpenClaw sandbox use this same egress setting for their native code-mode network access.
+Codex app-server turns in an active Carapace sandbox use this same egress setting for their native code-mode network access.
 
 **Inbound attachments** are staged into `media/inbound/*` in the active workspace.
 
 **`docker.binds`** mounts additional host directories; global and per-agent binds are merged.
 
-**Sandboxed browser** (`sandbox.browser.enabled`, default `false`): Chromium + CDP in a container. Does not require `browser.enabled` in `openclaw.json`.
+**Sandboxed browser** (`sandbox.browser.enabled`, default `false`): Chromium + CDP in a container. Does not require `browser.enabled` in `carapace.json`.
 noVNC observer access is password-protected and brokered through a one-time, authenticated bootstrap URL. The observer URL is deliberately omitted from model-visible system prompt context.
 
 - `allowHostControl: false` (default) blocks sandboxed sessions from targeting the host browser.
-- `network` defaults to `openclaw-sandbox-browser` (dedicated bridge network). Set to `bridge` only when you explicitly want global bridge connectivity. `"none"` is unsupported because CDP ports must be published to the host; `"host"` is blocked too. On upgrade, `openclaw doctor --fix` disables sidecars affected by a persisted `"none"` value and restores the dedicated network without silently enabling egress.
+- `network` defaults to `carapace-sandbox-browser` (dedicated bridge network). Set to `bridge` only when you explicitly want global bridge connectivity. `"none"` is unsupported because CDP ports must be published to the host; `"host"` is blocked too. On upgrade, `carapace doctor --fix` disables sidecars affected by a persisted `"none"` value and restores the dedicated network without silently enabling egress.
 - `cdpSourceRange` optionally restricts CDP ingress at the container edge to a CIDR range (for example `172.21.0.1/32`).
 - `sandbox.browser.binds` mounts additional host directories into the sandbox browser container only. When set (including `[]`), it replaces `docker.binds` for the browser container.
 - The sandbox browser container's Chromium always launches with `--no-sandbox --disable-setuid-sandbox` (containers do not have the kernel primitives Chrome's own sandbox needs); there is no config toggle for this.
 - Launch defaults are defined in `scripts/sandbox-browser-entrypoint.sh` and tuned for container hosts:
   - `--remote-debugging-address=127.0.0.1`
-  - `--remote-debugging-port=<derived from OPENCLAW_BROWSER_CDP_PORT>`
+  - `--remote-debugging-port=<derived from CARAPACE_BROWSER_CDP_PORT>`
   - `--user-data-dir=${HOME}/.chrome`
   - `--no-first-run`
   - `--no-default-browser-check`
@@ -233,11 +233,11 @@ noVNC observer access is password-protected and brokered through a one-time, aut
   - `--use-mock-keychain`
   - `--disable-3d-apis`, `--disable-gpu`, and `--disable-software-rasterizer` are
     enabled by default and can be disabled with
-    `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` if WebGL/3D usage requires it.
-  - `--disable-extensions` (default enabled); `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0`
+    `CARAPACE_BROWSER_DISABLE_GRAPHICS_FLAGS=0` if WebGL/3D usage requires it.
+  - `--disable-extensions` (default enabled); `CARAPACE_BROWSER_DISABLE_EXTENSIONS=0`
     re-enables extensions if your workflow depends on them.
   - `--renderer-process-limit=2` by default; change with
-    `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>`, set `0` to use Chromium's
+    `CARAPACE_BROWSER_RENDERER_PROCESS_LIMIT=<N>`, set `0` to use Chromium's
     default process limit.
   - `--headless=new` only when `headless` is enabled.
   - Defaults are the container image baseline; use a custom browser image with a custom

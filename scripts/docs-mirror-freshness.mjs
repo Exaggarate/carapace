@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Alerts when the openclaw/docs mirror is stale relative to docs-touching
+// Alerts when the carapace/docs mirror is stale relative to docs-touching
 // commits on main. Reads the watched paths from docs-sync-publish.yml itself so
 // the staleness definition can never drift from the sync trigger's path filters.
 // On staleness it dispatches one recovery sync, then exits nonzero so the
@@ -9,9 +9,9 @@ import fs from "node:fs";
 import process from "node:process";
 
 const TOOL = "docs-mirror-freshness";
-const SOURCE_REPO = process.env.GITHUB_REPOSITORY || "openclaw/openclaw";
-// Publish-repo contract: docs mirror to openclaw/docs (root AGENTS.md, Docs section).
-const MIRROR_REPO = "openclaw/docs";
+const SOURCE_REPO = process.env.GITHUB_REPOSITORY || "carapace/carapace";
+// Publish-repo contract: docs mirror to carapace/docs (root AGENTS.md, Docs section).
+const MIRROR_REPO = "carapace/docs";
 const SYNC_WORKFLOW = "docs-sync-publish.yml";
 const SYNC_WORKFLOW_FILE = `.github/workflows/${SYNC_WORKFLOW}`;
 const STALE_MINUTES = Number(process.env.DOCS_MIRROR_STALE_MINUTES ?? "60");
@@ -106,7 +106,7 @@ async function newestWatchedCommit(watchPaths) {
 
 async function readMirroredSourceSha() {
   const contents = await githubJson(
-    `/repos/${MIRROR_REPO}/contents/.openclaw-sync/source.json?ref=main`,
+    `/repos/${MIRROR_REPO}/contents/.carapace-sync/source.json?ref=main`,
   );
   const source = JSON.parse(Buffer.from(contents.content, "base64").toString("utf8"));
   if (typeof source.sha !== "string" || !/^[0-9a-f]{40}$/.test(source.sha)) {

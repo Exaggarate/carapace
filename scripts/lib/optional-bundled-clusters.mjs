@@ -21,7 +21,7 @@ const optionalBundledClusters = [
  */
 export const optionalBundledClusterSet = new Set(optionalBundledClusters);
 
-export const OPTIONAL_BUNDLED_BUILD_ENV = "OPENCLAW_INCLUDE_OPTIONAL_BUNDLED";
+export const OPTIONAL_BUNDLED_BUILD_ENV = "CARAPACE_INCLUDE_OPTIONAL_BUNDLED";
 
 function isOptionalBundledCluster(cluster) {
   return optionalBundledClusterSet.has(cluster);
@@ -35,8 +35,8 @@ function shouldIncludeOptionalBundledClusters(env = process.env) {
 
 function hasReleasedBundledInstall(packageJson) {
   return (
-    typeof packageJson?.openclaw?.install?.npmSpec === "string" &&
-    packageJson.openclaw.install.npmSpec.trim().length > 0
+    typeof packageJson?.carapace?.install?.npmSpec === "string" &&
+    packageJson.carapace.install.npmSpec.trim().length > 0
   );
 }
 

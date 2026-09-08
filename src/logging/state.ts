@@ -1,11 +1,11 @@
 // Process-local logging state shared by logger, console capture, and test reset helpers.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-const LOGGING_STATE_KEY = Symbol.for("openclaw.loggingState");
+const LOGGING_STATE_KEY = Symbol.for("carapace.loggingState");
 export const APPLIED_LOGGING_CONFIG_UNOWNED = "unowned" as const;
 
 function createUnownedAppliedLoggingConfig():
-  | OpenClawConfig["logging"]
+  | CarapaceConfig["logging"]
   | typeof APPLIED_LOGGING_CONFIG_UNOWNED {
   return APPLIED_LOGGING_CONFIG_UNOWNED;
 }

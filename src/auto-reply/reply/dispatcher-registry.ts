@@ -9,7 +9,7 @@ type TrackedDispatcher = {
 };
 
 const activeDispatchers = resolveGlobalSet<TrackedDispatcher>(
-  Symbol.for("openclaw.activeReplyDispatchers"),
+  Symbol.for("carapace.activeReplyDispatchers"),
   "close-only",
 );
 

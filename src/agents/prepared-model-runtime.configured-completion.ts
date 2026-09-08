@@ -1,5 +1,5 @@
-import { buildModelCatalogMergeKey } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
+import { buildModelCatalogMergeKey } from "@carapace/model-catalog-core/model-catalog-refs";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
 import { resolveLoadedProviderRuntimePlugin } from "../plugins/provider-hook-runtime.js";
 import { withPluginRuntimeGenerationScope } from "../plugins/runtime/generation-scope.js";
 import type { PreparedModelRuntimeAgentFacts } from "./prepared-model-runtime.catalog-contract.js";

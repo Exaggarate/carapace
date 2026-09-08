@@ -12,7 +12,7 @@ jobs:
   dispatch-translate:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.OPENCLAW_DOCS_SYNC_TOKEN }}
+      GH_TOKEN: ${{ secrets.CARAPACE_DOCS_SYNC_TOKEN }}
     steps:
       - name: Trigger translation coordinator in publish repo
         env:
@@ -20,7 +20,7 @@ jobs:
         if: env.GH_TOKEN != ''
         run: |
           set -euo pipefail
-          gh api repos/openclaw/docs/dispatches \
+          gh api repos/carapace/docs/dispatches \
             --method POST \
             -f event_type="translate-all-release" \
             -f client_payload[mode]="incremental" \

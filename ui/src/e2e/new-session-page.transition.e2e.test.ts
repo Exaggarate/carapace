@@ -29,7 +29,7 @@ const suite = createNewSessionPageE2eSuite();
 const rosterMatch = { includeGlobal: true };
 const SESSION_KEY = "agent:main:dashboard:0f403cb8-3920-4cf1-8eb7-79f2f00ce488";
 const RUN_ID = "transition-proof-run";
-const captureProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 type SessionTransitionFrames = {
   invalid: number;
@@ -137,7 +137,7 @@ suite.define(() => {
       await toast.getByRole("button", { name: "Open" }).click();
       await expect.poll(() => new URL(page.url()).pathname).toBe(controlUiSessionPath(sessionKey));
       await waitForCommittedChatRoute(page);
-      await page.locator("openclaw-chat-page").waitFor();
+      await page.locator("carapace-chat-page").waitFor();
       await captureProof(page, `background-${label}-opened.png`);
       if (captureProofEnabled) {
         await page.waitForTimeout(400);
@@ -360,9 +360,9 @@ suite.define(() => {
 
       await page.evaluate(() => {
         const frames: SessionTransitionFrames = { invalid: 0, running: true, transition: null };
-        Reflect.set(globalThis, "__openclawSessionTransitionFrames", frames);
+        Reflect.set(globalThis, "__carapaceSessionTransitionFrames", frames);
         const sample = () => {
-          const outlet = document.querySelector("openclaw-router-outlet");
+          const outlet = document.querySelector("carapace-router-outlet");
           const handoffCover = outlet?.classList.contains("session-route-handoff") === true;
           const newSessionVisible = Boolean(
             document.querySelector(".new-session-page__starting")?.getClientRects().length,
@@ -407,7 +407,7 @@ suite.define(() => {
           page.evaluate(() => {
             const frames = Reflect.get(
               globalThis,
-              "__openclawSessionTransitionFrames",
+              "__carapaceSessionTransitionFrames",
             ) as SessionTransitionFrames;
             return frames.transition;
           }),
@@ -431,7 +431,7 @@ suite.define(() => {
       const invalidFrames = await page.evaluate(() => {
         const frames = Reflect.get(
           globalThis,
-          "__openclawSessionTransitionFrames",
+          "__carapaceSessionTransitionFrames",
         ) as SessionTransitionFrames;
         frames.running = false;
         return frames.invalid;
@@ -441,7 +441,7 @@ suite.define(() => {
       await gateway.resolveDeferred("sessions.list", createdSessionList);
       await gateway.resolveDeferred("chat.startup");
       await waitForCommittedChatRoute(page);
-      await page.locator("openclaw-chat-page").waitFor();
+      await page.locator("carapace-chat-page").waitFor();
       await expect
         .poll(() =>
           page.evaluate(
@@ -545,7 +545,7 @@ suite.define(() => {
           await page.goto(`${suite.server.baseUrl}new`);
           await page.locator(".new-session-page__message").waitFor();
           await page.evaluate((nextMode) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime: { context: ApplicationContext };
             };
             app.runtime.context.theme.setMode(nextMode);
@@ -656,7 +656,7 @@ suite.define(() => {
           await page.keyboard.press("Control+Enter");
           expect(await gateway.getRequests("sessions.create")).toHaveLength(1);
           await submittedPrompt.locator(".chat-message-image-button").click();
-          const attachmentViewer = page.locator("openclaw-image-lightbox");
+          const attachmentViewer = page.locator("carapace-image-lightbox");
           await expectDecodedThumbnail(attachmentViewer.locator("img.image"));
           expect(await attachmentViewer.locator("img.image").getAttribute("src")).toBe(
             `data:image/png;base64,${imageContent}`,
@@ -709,7 +709,7 @@ suite.define(() => {
             await acceptedMarkdown
               .getByRole("button", { name: "Expand table", exact: true })
               .click();
-            const expandedTable = page.locator("openclaw-modal-dialog.markdown-table-modal");
+            const expandedTable = page.locator("carapace-modal-dialog.markdown-table-modal");
             await page.getByRole("dialog", { name: "Expanded table", exact: true }).waitFor();
             await expandedTable.getByRole("cell", { name: "Ready", exact: true }).waitFor();
             await expandedTable

@@ -3,13 +3,13 @@ import os from "node:os";
 import path from "node:path";
 // Covers message-action media hydration, sandbox path normalization,
 // attachments, and channel/plugin media source aliases.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { MEDIA_MAX_BYTES } from "../../media/store.js";
 import { createChannelTestPluginBase } from "../../test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   messageActionRunnerMocks as channelResolutionMocks,
   resetMessageActionMediaMocks,
@@ -24,7 +24,7 @@ const workspaceConfig = {
       appToken: "xapp-test",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function firstMockArg(
   mock: { mock: { calls: readonly unknown[][] } },
@@ -47,15 +47,15 @@ async function withSandbox(test: (sandboxDir: string) => Promise<void>) {
   }
 }
 
-async function withTempOpenClawStateDir<T>(test: (stateDir: string) => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
+async function withTempCarapaceStateDir<T>(test: (stateDir: string) => Promise<T>): Promise<T> {
+  return await withCarapaceTestState(
     { layout: "state-only", prefix: "msg-runner-state-" },
     (state) => test(state.stateDir),
   );
 }
 
 const runDrySend = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   actionParams: Record<string, unknown>;
   sandboxRoot?: string;
   sandboxContainerWorkdir?: string;
@@ -149,7 +149,7 @@ describe("runMessageAction media behavior", () => {
   it("materializes buffer-only send attachments into outbound media paths", async () => {
     setTestPlugin(workspacePlugin, "workspace");
 
-    await withTempOpenClawStateDir(async () => {
+    await withTempCarapaceStateDir(async () => {
       const result = await runMessageAction({
         cfg: workspaceConfig,
         action: "send",
@@ -183,7 +183,7 @@ describe("runMessageAction media behavior", () => {
   it("rejects oversized buffer-only send attachments before channel dispatch", async () => {
     setTestPlugin(workspacePlugin, "workspace");
 
-    await withTempOpenClawStateDir(async () => {
+    await withTempCarapaceStateDir(async () => {
       await expect(
         runMessageAction({
           cfg: workspaceConfig,
@@ -205,7 +205,7 @@ describe("runMessageAction media behavior", () => {
   it("previews dry-run buffer-only sends without writing outbound media files", async () => {
     setTestPlugin(workspacePlugin, "workspace");
 
-    await withTempOpenClawStateDir(async (stateDir) => {
+    await withTempCarapaceStateDir(async (stateDir) => {
       const result = await runDrySend({
         cfg: workspaceConfig,
         actionParams: {

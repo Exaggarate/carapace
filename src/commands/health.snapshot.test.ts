@@ -401,7 +401,7 @@ function createIMessageHealthPlugin(): HealthTestPlugin {
       probeAccount: async () => ({
         ok: false,
         error:
-          "imsg cannot access /Users/alice/Library/Messages/chat.db. Grant Full Disk Access to the Gateway/launcher process and restart Gateway. privateApi=/tmp/openclaw/private.sock",
+          "imsg cannot access /Users/alice/Library/Messages/chat.db. Grant Full Disk Access to the Gateway/launcher process and restart Gateway. privateApi=/tmp/carapace/private.sock",
         privateApi: {
           rpcCommand: "imsg rpc --json",
           diagnostics: "sensitive transport details",
@@ -431,7 +431,7 @@ describe("collectGatewayHealthSnapshot", () => {
   beforeEach(() => {
     // Session rows are mocked, but the collector still resolves their physical store.
     sessionStorePath = path.join(
-      tempDirs.make("openclaw-health-snapshot-sessions-"),
+      tempDirs.make("carapace-health-snapshot-sessions-"),
       "sessions.json",
     );
     setActiveDegradedPlugins([]);
@@ -579,7 +579,7 @@ describe("collectGatewayHealthSnapshot", () => {
     expect(calls.join("\n")).toContain("/getMe");
     expect(calls.join("\n")).toContain("/getWebhookInfo");
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-health-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-health-"));
     const tokenFile = path.join(tmpDir, "telegram-token");
     try {
       fs.writeFileSync(tokenFile, "t-file\n", "utf-8");
@@ -996,10 +996,10 @@ describe("collectGatewayHealthSnapshot", () => {
     const snap = await getHealthSnapshot({ timeoutMs: 10, probe: false });
 
     const storeDir = path.dirname(sessionStorePath);
-    expect(snap.sessions.path).toBe(path.join(storeDir, "openclaw-agent.sqlite"));
+    expect(snap.sessions.path).toBe(path.join(storeDir, "carapace-agent.sqlite"));
     expect(snap.agents.map(({ agentId, sessions }) => ({ agentId, path: sessions.path }))).toEqual([
-      { agentId: "main", path: path.join(storeDir, "openclaw-agent.sqlite") },
-      { agentId: "ops", path: path.join(storeDir, "openclaw-agent.ops.sqlite") },
+      { agentId: "main", path: path.join(storeDir, "carapace-agent.sqlite") },
+      { agentId: "ops", path: path.join(storeDir, "carapace-agent.ops.sqlite") },
     ]);
     expect(listHealthSessionEntriesCalls).toEqual([
       { agentId: "main", storePath: sessionStorePath },

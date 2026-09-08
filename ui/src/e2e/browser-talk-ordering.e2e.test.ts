@@ -49,9 +49,9 @@ suite.define(() => {
               Boolean(
                 (
                   window as Window & {
-                    openclawVideoTalkE2e?: { peer: { remoteDescription: unknown } };
+                    carapaceVideoTalkE2e?: { peer: { remoteDescription: unknown } };
                   }
-                ).openclawVideoTalkE2e?.peer.remoteDescription,
+                ).carapaceVideoTalkE2e?.peer.remoteDescription,
               ),
             ),
           )
@@ -59,9 +59,9 @@ suite.define(() => {
         await page.evaluate(() => {
           (
             window as Window & {
-              openclawVideoTalkE2e?: { peer: { channel: EventTarget } };
+              carapaceVideoTalkE2e?: { peer: { channel: EventTarget } };
             }
-          ).openclawVideoTalkE2e?.peer.channel.dispatchEvent(new Event("open"));
+          ).carapaceVideoTalkE2e?.peer.channel.dispatchEvent(new Event("open"));
         });
         const rows = page.locator(".agent-chat__voice-turn-text");
         const emit = async (event: unknown) => await dispatchOpenAiTalkEvent(page, event);

@@ -1,7 +1,7 @@
 // Config path diff helper used by gateway mutation diagnostics.
 import { isDeepStrictEqual } from "node:util";
 import * as talk from "../config/talk.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPlainObject } from "../utils.js";
 
 /** Return dotted config paths whose values differ between two config snapshots. */
@@ -51,7 +51,7 @@ export function diffConfigPaths(
   return [prefix || "<root>"];
 }
 
-function projectGatewayReloadBoundaries(config: OpenClawConfig) {
+function projectGatewayReloadBoundaries(config: CarapaceConfig) {
   return {
     talk: {
       provider: talk.resolveConfiguredTalkSpeechProviderId(config),
@@ -62,8 +62,8 @@ function projectGatewayReloadBoundaries(config: OpenClawConfig) {
 
 /** Preserve declared reload boundaries and derived capability-owner changes. */
 export function diffGatewayReloadPaths(
-  prevConfig: OpenClawConfig,
-  nextConfig: OpenClawConfig,
+  prevConfig: CarapaceConfig,
+  nextConfig: CarapaceConfig,
   reloadPrefixes: Iterable<string>,
 ): string[] {
   const changedPaths = diffConfigPaths(prevConfig, nextConfig, "", [...reloadPrefixes]);

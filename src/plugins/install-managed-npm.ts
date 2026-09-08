@@ -15,8 +15,8 @@ import {
 import {
   listMissingRequiredPlatformPackages,
   readManagedNpmRootInstalledDependency,
-  readOpenClawManagedNpmRootOverrides,
-  repairManagedNpmRootOpenClawPeer,
+  readCarapaceManagedNpmRootOverrides,
+  repairManagedNpmRootCarapacePeer,
   syncManagedNpmRootPeerDependencies,
   upsertManagedNpmRootDependency,
   type ManagedNpmRootInstalledDependency,
@@ -51,7 +51,7 @@ import {
 import {
   defaultLogger,
   ensureInstallTargetAvailableForMode,
-  formatUnresolvedOpenClawPeerLinkError,
+  formatUnresolvedCarapacePeerLinkError,
   loadPluginInstallRuntime,
   readOptionalPackageManifest,
   runInstallSourceScan,
@@ -69,8 +69,8 @@ import type {
 } from "./install-types.js";
 import { isOfficialCatalogLookupPluginIdReplacement } from "./official-external-install-records.js";
 import {
-  auditDeclaredOpenClawHostDependency,
-  relinkOpenClawPeerDependenciesInManagedNpmRoot,
+  auditDeclaredCarapaceHostDependency,
+  relinkCarapacePeerDependenciesInManagedNpmRoot,
 } from "./plugin-peer-link.js";
 
 export async function installPluginFromManagedNpmRoot(
@@ -182,18 +182,18 @@ export async function installPluginFromManagedNpmRoot(
       return prepared;
     }
     logger.info?.(`Installing ${params.displaySpec} into ${npmRoot}…`);
-    if (params.packageName !== "openclaw") {
-      const repairedOpenClawPeer = await repairManagedNpmRootOpenClawPeer({
+    if (params.packageName !== "carapace") {
+      const repairedCarapacePeer = await repairManagedNpmRootCarapacePeer({
         npmRoot,
         timeoutMs,
         signal: params.signal,
         logger,
       });
-      if (repairedOpenClawPeer) {
-        logger.info?.(`Repaired stale openclaw peer dependency in ${npmRoot}`);
+      if (repairedCarapacePeer) {
+        logger.info?.(`Repaired stale carapace peer dependency in ${npmRoot}`);
       }
     }
-    const managedOverrides = await readOpenClawManagedNpmRootOverrides();
+    const managedOverrides = await readCarapaceManagedNpmRootOverrides();
     const quarantineForRecovery = async (
       cause: NonNullable<typeof recovery>["cause"],
     ): Promise<Extract<InstallPluginResult, { ok: false }> | null> => {
@@ -203,7 +203,7 @@ export async function installPluginFromManagedNpmRoot(
       } catch (error) {
         return {
           ok: false,
-          error: `${cause.error}, but OpenClaw could not quarantine ${npmRoot} for rebuild: ${String(error)}`,
+          error: `${cause.error}, but Carapace could not quarantine ${npmRoot} for rebuild: ${String(error)}`,
         };
       }
       logger.warn?.(
@@ -384,7 +384,7 @@ export async function installPluginFromManagedNpmRoot(
             fs.rm(packagePath, { recursive: true, force: true }),
           ),
         );
-        freshCacheDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-npm-cache-"));
+        freshCacheDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-npm-cache-"));
         install = await runCommandWithTimeout(npmInstallArgs, {
           ...npmInstallOptions,
           env: {
@@ -434,32 +434,32 @@ export async function installPluginFromManagedNpmRoot(
         };
       }
     }
-    if (params.packageName !== "openclaw") {
-      const repairedOpenClawPeer = await repairManagedNpmRootOpenClawPeer({
+    if (params.packageName !== "carapace") {
+      const repairedCarapacePeer = await repairManagedNpmRootCarapacePeer({
         npmRoot,
         timeoutMs,
         signal: params.signal,
         logger,
       });
-      if (repairedOpenClawPeer) {
-        logger.info?.(`Repaired stale openclaw peer dependency in ${npmRoot} after npm install`);
+      if (repairedCarapacePeer) {
+        logger.info?.(`Repaired stale carapace peer dependency in ${npmRoot} after npm install`);
       }
     }
     try {
-      await relinkOpenClawPeerDependenciesInManagedNpmRoot({
+      await relinkCarapacePeerDependenciesInManagedNpmRoot({
         npmRoot,
         logger,
       });
     } catch (error) {
       return {
         ok: false,
-        error: `Failed to repair openclaw peer links after npm install: ${String(error)}`,
+        error: `Failed to repair carapace peer links after npm install: ${String(error)}`,
       };
     }
-    if (await auditDeclaredOpenClawHostDependency({ packageDir: installRoot })) {
+    if (await auditDeclaredCarapaceHostDependency({ packageDir: installRoot })) {
       return {
         ok: false,
-        error: formatUnresolvedOpenClawPeerLinkError(params.packageName),
+        error: formatUnresolvedCarapacePeerLinkError(params.packageName),
       };
     }
 

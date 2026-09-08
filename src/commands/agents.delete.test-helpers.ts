@@ -8,7 +8,7 @@ import {
 import { tryGetLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import { resolveSessionStorePathCore, type SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { GatewayTransportError } from "../gateway/transport-error.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 
@@ -24,7 +24,7 @@ export function gatewayTransportError(
   });
 }
 
-function resolveFixtureStoreAgentId(cfg: OpenClawConfig, deletedAgentId: string): string {
+function resolveFixtureStoreAgentId(cfg: CarapaceConfig, deletedAgentId: string): string {
   const storeConfig = cfg.session?.store;
   if (typeof storeConfig === "string" && !storeConfig.includes("{agentId}")) {
     return (
@@ -37,10 +37,10 @@ function resolveFixtureStoreAgentId(cfg: OpenClawConfig, deletedAgentId: string)
   return deletedAgentId;
 }
 
-export function createAgentsDeleteFixture(setConfig: (cfg: OpenClawConfig) => void) {
+export function createAgentsDeleteFixture(setConfig: (cfg: CarapaceConfig) => void) {
   return async (params: {
     stateDir: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     deletedAgentId?: string;
     sessions: Record<string, { sessionId: string; updatedAt: number }>;
   }) => {
@@ -56,7 +56,7 @@ export function createAgentsDeleteFixture(setConfig: (cfg: OpenClawConfig) => vo
       }
     }
     const { list: _legacyList, ...agents } = authored.agents ?? {};
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       ...authored,
       agents: { ...agents, entries: toAgentEntriesRecord(roster) },
     };

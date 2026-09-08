@@ -7,21 +7,21 @@ title: "Talk Voice plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 Manage Talk voice selection (list/set).
 
 ## Distribution
 
-- Package: `openclaw`
-- Install route: included in OpenClaw
+- Package: `carapace`
+- Install route: included in Carapace
 
 ## Surface
 
 - Slash commands: `/voice`
 
-<!-- openclaw-plugin-reference:manual-start -->
+<!-- carapace-plugin-reference:manual-start -->
 
 ## Configure a Talk voice from chat
 
@@ -35,4 +35,4 @@ Discord registers the native command as `/talkvoice`; its subcommands and argume
 
 Failures are returned visibly in chat. Missing Talk configuration identifies the required keys; provider lookup errors include the provider error; unknown voices suggest listing available voices; and unauthorized writes state the required permission.
 
-<!-- openclaw-plugin-reference:manual-end -->
+<!-- carapace-plugin-reference:manual-end -->

@@ -1,6 +1,6 @@
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { asNullableRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ChatPendingInputsPage } from "../../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import { composeTranscriptDisplay } from "../../../../src/chat/transcript-display-position.js";
 import type { QuestionPrompt } from "../../app/question-prompt.ts";
@@ -179,7 +179,7 @@ export function buildChatItems(props: BuildChatItemsProps): Array<ChatItem | Mes
     const msg = item.message;
     const itemKey = item.key;
     const raw = asRecord(msg) ?? {};
-    const marker = asRecord(raw["__openclaw"]);
+    const marker = asRecord(raw["__carapace"]);
     if (marker?.kind === "compaction" || isContextCompactionMessage(msg)) {
       const matchesLive = compaction != null && matchesCompactionOperation(msg, compaction);
       const divider = buildCompactionDividerItem(

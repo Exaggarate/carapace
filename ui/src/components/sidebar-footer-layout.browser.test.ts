@@ -80,7 +80,7 @@ describeBrowserLayout("sidebar footer layout", () => {
             <aside class="settings-sidebar">
               <div class="sidebar-shell__content"></div>
               <footer class="settings-sidebar__footer">
-                <openclaw-settings-save-indicator></openclaw-settings-save-indicator>
+                <carapace-settings-save-indicator></carapace-settings-save-indicator>
                 <span class="sidebar-footer-build">2026.8.1 · git@5328856</span>
               </footer>
             </aside>

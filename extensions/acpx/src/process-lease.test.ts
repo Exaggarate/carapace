@@ -5,13 +5,13 @@ import path from "node:path";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createAcpxProcessLeaseStore,
   openAcpxProcessLeaseStateStore,
-  OPENCLAW_ACPX_LEASE_ID_ARG,
-  OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+  CARAPACE_ACPX_LEASE_ID_ARG,
+  CARAPACE_GATEWAY_INSTANCE_ID_ARG,
   readAcpxProcessLeaseIdentity,
   withAcpxLeaseArgs,
   type AcpxProcessLease,
@@ -23,8 +23,8 @@ function makeLease(index: number): AcpxProcessLease {
     leaseId: `lease-${index}`,
     gatewayInstanceId: "gateway-test",
     sessionKey: `agent:codex:acp:${index}`,
-    wrapperRoot: "/tmp/openclaw/acpx",
-    wrapperPath: "/tmp/openclaw/acpx/codex-acp-wrapper.mjs",
+    wrapperRoot: "/tmp/carapace/acpx",
+    wrapperPath: "/tmp/carapace/acpx/codex-acp-wrapper.mjs",
     rootPid: 1000 + index,
     commandHash: `hash-${index}`,
     startedAt: index,
@@ -38,8 +38,8 @@ describe("createAcpxProcessLeaseStore", () => {
 
   beforeEach(async () => {
     resetPluginStateStoreForTests();
-    stateDir = await mkdtemp(path.join(tmpdir(), "openclaw-acpx-leases-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    stateDir = await mkdtemp(path.join(tmpdir(), "carapace-acpx-leases-"));
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   });
 
   afterEach(async () => {
@@ -98,35 +98,35 @@ describe("createAcpxProcessLeaseStore", () => {
 describe("withAcpxLeaseArgs", () => {
   it("adds portable lease wrapper args", () => {
     const command = withAcpxLeaseArgs({
-      command: "node /tmp/openclaw/acpx/codex-acp-wrapper.mjs",
+      command: "node /tmp/carapace/acpx/codex-acp-wrapper.mjs",
       leaseId: "lease-test",
       gatewayInstanceId: "gateway-test",
     });
 
     expect(command).toEqual([
       "node",
-      "/tmp/openclaw/acpx/codex-acp-wrapper.mjs",
-      OPENCLAW_ACPX_LEASE_ID_ARG,
+      "/tmp/carapace/acpx/codex-acp-wrapper.mjs",
+      CARAPACE_ACPX_LEASE_ID_ARG,
       "lease-test",
-      OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+      CARAPACE_GATEWAY_INSTANCE_ID_ARG,
       "gateway-test",
     ]);
   });
 
   it("preserves portable lease wrapper args", () => {
     const command = withAcpxLeaseArgs({
-      command: ["node", "C:/openclaw/acpx/codex-acp-wrapper.mjs", ""],
+      command: ["node", "C:/carapace/acpx/codex-acp-wrapper.mjs", ""],
       leaseId: "lease test",
       gatewayInstanceId: "gateway-test",
     });
 
     expect(command).toEqual([
       "node",
-      "C:/openclaw/acpx/codex-acp-wrapper.mjs",
+      "C:/carapace/acpx/codex-acp-wrapper.mjs",
       "",
-      OPENCLAW_ACPX_LEASE_ID_ARG,
+      CARAPACE_ACPX_LEASE_ID_ARG,
       "lease test",
-      OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+      CARAPACE_GATEWAY_INSTANCE_ID_ARG,
       "gateway-test",
     ]);
   });
@@ -137,10 +137,10 @@ describe("readAcpxProcessLeaseIdentity", () => {
     expect(
       readAcpxProcessLeaseIdentity(
         [
-          "node /tmp/openclaw/acpx/codex-acp-wrapper.mjs --label owner's-choice",
-          OPENCLAW_ACPX_LEASE_ID_ARG,
+          "node /tmp/carapace/acpx/codex-acp-wrapper.mjs --label owner's-choice",
+          CARAPACE_ACPX_LEASE_ID_ARG,
           "'lease test'",
-          OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+          CARAPACE_GATEWAY_INSTANCE_ID_ARG,
           '"gateway test"',
         ].join(" "),
       ),
@@ -152,7 +152,7 @@ describe("readAcpxProcessLeaseIdentity", () => {
 
   it("rejects incomplete lease identity", () => {
     expect(
-      readAcpxProcessLeaseIdentity(`node wrapper.mjs ${OPENCLAW_ACPX_LEASE_ID_ARG} lease-test`),
+      readAcpxProcessLeaseIdentity(`node wrapper.mjs ${CARAPACE_ACPX_LEASE_ID_ARG} lease-test`),
     ).toBeUndefined();
     expect(readAcpxProcessLeaseIdentity(undefined)).toBeUndefined();
   });

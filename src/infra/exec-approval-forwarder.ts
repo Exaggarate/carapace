@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { ReplyPayload } from "../auto-reply/types.js";
 import {
   getLoadedChannelPlugin,
@@ -9,7 +9,7 @@ import type {
   ExecApprovalForwardingConfig,
   ExecApprovalForwardTarget,
 } from "../config/types.approvals.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { channelRouteDedupeKey } from "../plugin-sdk/channel-route.js";
 import { runWithRetainedGatewayRootWork } from "../process/gateway-work-admission.js";
@@ -40,7 +40,7 @@ type DeliverApprovalPayloads =
   typeof import("../channels/message/runtime.js").sendDurableMessageBatchCore;
 type MaybePromise<T> = T | Promise<T>;
 type ResolveSessionTargetFn = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   request: ExecApprovalRequest;
 }) => MaybePromise<ExecApprovalForwardTarget | null>;
 
@@ -61,13 +61,13 @@ type PendingApproval = {
 };
 
 type ApprovalRenderContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: ForwardTarget;
 };
 
 type ApprovalStrategy<TRequest, TResolved> = {
   kind: ChannelApprovalKind;
-  config: (cfg: OpenClawConfig) => ExecApprovalForwardingConfig | undefined;
+  config: (cfg: CarapaceConfig) => ExecApprovalForwardingConfig | undefined;
   buildExpiredText: (request: TRequest) => string;
   buildPendingPayload: (
     params: ApprovalRenderContext & { request: TRequest; nowMs: number },
@@ -84,7 +84,7 @@ export type ExecApprovalForwarder = {
 };
 
 type ExecApprovalForwarderDeps = {
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => CarapaceConfig;
   deliver?: DeliverApprovalPayloads;
   nowMs?: () => number;
   resolveSessionTarget?: ResolveSessionTargetFn;
@@ -147,7 +147,7 @@ function buildSyntheticApprovalRequest(routeRequest: ApprovalRouteRequest): Exec
 function shouldSkipForwardingFallback(params: {
   approvalKind: ChannelApprovalKind;
   target: ExecApprovalForwardTarget;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   routeRequest: ApprovalRouteRequest;
 }): boolean {
   const channel = normalizeMessageChannel(params.target.channel) ?? params.target.channel;
@@ -206,7 +206,7 @@ function extractApprovalRouteRequest(
 }
 
 function defaultResolveSessionTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   request: ExecApprovalRequest;
 }): Promise<ExecApprovalForwardTarget | null> {
   return loadExecApprovalForwarderRuntime().then(({ resolveExecApprovalSessionTarget }) => {
@@ -235,7 +235,7 @@ function defaultResolveSessionTarget(params: {
 }
 
 async function deliverToTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targets: ForwardTarget[];
   buildPayload: (target: ForwardTarget) => ReplyPayload;
   deliver: DeliverApprovalPayloads;
@@ -272,7 +272,7 @@ async function deliverToTargets(params: {
 }
 
 async function resolveForwardTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   config?: ExecApprovalForwardingConfig;
   approvalKind: ChannelApprovalKind;
   routeRequest: ApprovalRouteRequest;
@@ -323,7 +323,7 @@ function createApprovalHandlers<
   TResolved extends { id: string; request?: ApprovalRouteRequest | null },
 >(params: {
   strategy: ApprovalStrategy<TRequest, TResolved>;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   deliver: DeliverApprovalPayloads;
   nowMs: () => number;
   resolveSessionTarget: ResolveSessionTargetFn;
@@ -336,7 +336,7 @@ function createApprovalHandlers<
     work.track(() => runWithRetainedGatewayRootWork(run));
 
   const resolveTargets = async (paramsForRoute: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     config?: ExecApprovalForwardingConfig;
     routeRequest: ApprovalRouteRequest;
   }): Promise<ForwardTarget[]> => {

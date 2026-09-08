@@ -14,7 +14,7 @@ function createDeclarations() {
       minProtocol: 1,
       maxProtocol: 1,
       role: "operator",
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
     },
     authenticatedUserId: "viewer@timing.test",
     personPresence: { onlineSince: Date.now() - 1_000 },

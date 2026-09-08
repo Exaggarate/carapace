@@ -109,10 +109,10 @@ describe("configureGatewayForSetup", () => {
 
   it("provisions a store ref when reference mode has no token to point at", async () => {
     const stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wizard-gateway-ref-")));
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    const previousToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    const previousToken = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    delete process.env.CARAPACE_GATEWAY_TOKEN;
 
     try {
       const result = await runGatewayConfig({ flow: "quickstart", secretInputMode: "ref" });
@@ -120,22 +120,22 @@ describe("configureGatewayForSetup", () => {
       expect(result.nextConfig.gateway?.auth?.token).toEqual({
         source: "store",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "CARAPACE_GATEWAY_TOKEN",
       });
       const { readSecretStoreValue } = await import("../secrets/store/secret-store.js");
       const stored = readSecretStoreValue({
         scope: { kind: "team" },
-        name: "OPENCLAW_GATEWAY_TOKEN",
+        name: "CARAPACE_GATEWAY_TOKEN",
       });
       expect(stored.ok && stored.value).toBe(result.settings.gatewayToken);
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
       if (previousToken !== undefined) {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previousToken;
+        process.env.CARAPACE_GATEWAY_TOKEN = previousToken;
       }
       fs.rmSync(stateDir, { recursive: true, force: true });
     }
@@ -146,7 +146,7 @@ describe("configureGatewayForSetup", () => {
     async (flow) => {
       mocks.randomToken.mockReturnValue("generated-token");
       const prompter = createPrompter({ selectQueue: [], textQueue: [] });
-      const result = await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: undefined }, () =>
+      const result = await withEnvAsync({ CARAPACE_GATEWAY_TOKEN: undefined }, () =>
         configureGatewayForSetup({
           flow,
           baseConfig: {},
@@ -250,9 +250,9 @@ describe("configureGatewayForSetup", () => {
     );
   });
 
-  it("prefers OPENCLAW_GATEWAY_TOKEN during quickstart token setup", async () => {
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "token-from-env";
+  it("prefers CARAPACE_GATEWAY_TOKEN during quickstart token setup", async () => {
+    const prevToken = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "token-from-env";
     mocks.randomToken.mockReturnValue("generated-token");
     mocks.randomToken.mockClear();
 
@@ -265,16 +265,16 @@ describe("configureGatewayForSetup", () => {
       expect(result.settings.gatewayToken).toBe("token-from-env");
     } finally {
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.CARAPACE_GATEWAY_TOKEN = prevToken;
       }
     }
   });
 
-  it("keeps OPENCLAW_GATEWAY_TOKEN in advanced flow without a credential prompt", async () => {
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "advanced-env-token";
+  it("keeps CARAPACE_GATEWAY_TOKEN in advanced flow without a credential prompt", async () => {
+    const prevToken = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "advanced-env-token";
     mocks.randomToken.mockReturnValue("should-not-be-used");
     mocks.randomToken.mockClear();
 
@@ -314,9 +314,9 @@ describe("configureGatewayForSetup", () => {
       expect(mocks.randomToken).not.toHaveBeenCalled();
     } finally {
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.CARAPACE_GATEWAY_TOKEN = prevToken;
       }
     }
   });
@@ -359,12 +359,12 @@ describe("configureGatewayForSetup", () => {
   it.each([false, true])(
     "honors secretInputMode=ref for gateway password prompts (existing: %s)",
     async (existing) => {
-      const previous = process.env.OPENCLAW_GATEWAY_PASSWORD;
-      process.env.OPENCLAW_GATEWAY_PASSWORD = "gateway-secret"; // pragma: allowlist secret
+      const previous = process.env.CARAPACE_GATEWAY_PASSWORD;
+      process.env.CARAPACE_GATEWAY_PASSWORD = "gateway-secret"; // pragma: allowlist secret
       try {
         const prompter = createPrompter({
           selectQueue: ["loopback", "off", "env"],
-          textQueue: ["18789", "OPENCLAW_GATEWAY_PASSWORD"],
+          textQueue: ["18789", "CARAPACE_GATEWAY_PASSWORD"],
         });
         const runtime = createRuntime();
 
@@ -388,13 +388,13 @@ describe("configureGatewayForSetup", () => {
         expect(result.nextConfig.gateway?.auth?.password).toEqual({
           source: "env",
           provider: "default",
-          id: "OPENCLAW_GATEWAY_PASSWORD",
+          id: "CARAPACE_GATEWAY_PASSWORD",
         });
       } finally {
         if (previous === undefined) {
-          delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+          delete process.env.CARAPACE_GATEWAY_PASSWORD;
         } else {
-          process.env.OPENCLAW_GATEWAY_PASSWORD = previous;
+          process.env.CARAPACE_GATEWAY_PASSWORD = previous;
         }
       }
     },
@@ -412,7 +412,7 @@ describe("configureGatewayForSetup", () => {
     });
 
     const result = await withSecureTestNodeCommand(async (command) =>
-      withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: undefined }, async () =>
+      withEnvAsync({ CARAPACE_GATEWAY_PASSWORD: undefined }, async () =>
         configureGatewayForSetup({
           flow: "quickstart",
           baseConfig: {},
@@ -450,12 +450,12 @@ describe("configureGatewayForSetup", () => {
   });
 
   it("stores gateway token as SecretRef when secretInputMode=ref", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "token-from-env";
+    const previous = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "token-from-env";
     try {
       const prompter = createPrompter({
         selectQueue: ["loopback", "off", "env"],
-        textQueue: ["18789", "OPENCLAW_GATEWAY_TOKEN"],
+        textQueue: ["18789", "CARAPACE_GATEWAY_TOKEN"],
       });
       const runtime = createRuntime();
 
@@ -474,14 +474,14 @@ describe("configureGatewayForSetup", () => {
       expect(result.nextConfig.gateway?.auth?.token).toEqual({
         source: "env",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "CARAPACE_GATEWAY_TOKEN",
       });
       expect(result.settings.gatewayToken).toBe("token-from-env");
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previous;
+        process.env.CARAPACE_GATEWAY_TOKEN = previous;
       }
     }
   });
@@ -531,12 +531,12 @@ describe("configureGatewayForSetup", () => {
   });
 
   it("persists an explicit classic quickstart env token ref", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "token-from-env-ref";
+    const previous = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "token-from-env-ref";
     try {
       const quickstartGateway = resolveQuickstartGatewayDefaults(
         {},
-        { gatewayTokenRefEnv: "OPENCLAW_GATEWAY_TOKEN" },
+        { gatewayTokenRefEnv: "CARAPACE_GATEWAY_TOKEN" },
       );
       const result = await configureGatewayForSetup({
         flow: "quickstart",
@@ -553,26 +553,26 @@ describe("configureGatewayForSetup", () => {
         token: {
           source: "env",
           provider: "default",
-          id: "OPENCLAW_GATEWAY_TOKEN",
+          id: "CARAPACE_GATEWAY_TOKEN",
         },
       });
       expect(result.settings.gatewayToken).toBe("token-from-env-ref");
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previous;
+        process.env.CARAPACE_GATEWAY_TOKEN = previous;
       }
     }
   });
 
   it("seeds an explicit env token ref into advanced gateway setup", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "token-from-env-ref";
+    const previous = process.env.CARAPACE_GATEWAY_TOKEN;
+    process.env.CARAPACE_GATEWAY_TOKEN = "token-from-env-ref";
     try {
       const gatewayDefaults = resolveQuickstartGatewayDefaults(
         {},
-        { gatewayPort: 19511, gatewayTokenRefEnv: "OPENCLAW_GATEWAY_TOKEN" },
+        { gatewayPort: 19511, gatewayTokenRefEnv: "CARAPACE_GATEWAY_TOKEN" },
       );
       const result = await configureGatewayForSetup({
         flow: "advanced",
@@ -589,15 +589,15 @@ describe("configureGatewayForSetup", () => {
         token: {
           source: "env",
           provider: "default",
-          id: "OPENCLAW_GATEWAY_TOKEN",
+          id: "CARAPACE_GATEWAY_TOKEN",
         },
       });
       expect(result.settings.gatewayToken).toBe("token-from-env-ref");
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.CARAPACE_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previous;
+        process.env.CARAPACE_GATEWAY_TOKEN = previous;
       }
     }
   });

@@ -20,9 +20,9 @@ afterEach(() => {
 test.each(["port", "server"] as const)(
   "restores its token snapshot when %s acquisition fails before publishing a close handle",
   async (stage) => {
-    const env = captureEnv(["OPENCLAW_GATEWAY_TOKEN"]);
+    const env = captureEnv(["CARAPACE_GATEWAY_TOKEN"]);
     const failure = new Error(`injected ${stage} acquisition failure`);
-    process.env.OPENCLAW_GATEWAY_TOKEN = "fixture-token";
+    process.env.CARAPACE_GATEWAY_TOKEN = "fixture-token";
     startup.port.mockResolvedValue(12345);
     startup.server.mockRejectedValue(failure);
     if (stage === "port") {
@@ -30,7 +30,7 @@ test.each(["port", "server"] as const)(
     }
     try {
       await expect(startGatewayServerHarness()).rejects.toBe(failure);
-      expect(process.env.OPENCLAW_GATEWAY_TOKEN).toBe("fixture-token");
+      expect(process.env.CARAPACE_GATEWAY_TOKEN).toBe("fixture-token");
     } finally {
       env.restore();
     }

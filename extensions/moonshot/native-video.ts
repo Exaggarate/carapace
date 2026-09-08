@@ -1,12 +1,12 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { resolveProviderContext, streamSimple } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { resolveProviderContext, streamSimple } from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   createMoonshotThinkingWrapper,
   resolveMoonshotThinkingKeep,
   resolveMoonshotThinkingType,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-stream-shared";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isMoonshotAlwaysThinkingModelId,
   isMoonshotK3NativeVideoRoute,

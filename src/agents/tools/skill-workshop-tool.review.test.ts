@@ -3,32 +3,32 @@
 import { writeFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { inspectSkillProposal } from "../../skills/workshop/service.js";
 import { resolveWorkshopSkillsDir } from "../../skills/workshop/skills-root.js";
 import type { SkillWorkshopProposalMutationBudget } from "../../skills/workshop/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool as createSkillWorkshopToolImpl } from "./skill-workshop-tool.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 const createSkillWorkshopTool = (
   options: Omit<Parameters<typeof createSkillWorkshopToolImpl>[0], "config" | "agentId"> & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
   },
 ) => createSkillWorkshopToolImpl({ config: {}, agentId: "main", ...options });
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-review-state-",
+    prefix: "carapace-skill-workshop-review-state-",
   });
 });
 
@@ -62,7 +62,7 @@ async function seedLiveSkill(
 
 describe("skill_workshop review mode", () => {
   it("restricts internal review runs to one pending proposal mutation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-");
     const proposalMutationBudget: SkillWorkshopProposalMutationBudget = { remaining: 1 };
     const tool = createSkillWorkshopTool({
       workspaceDir,
@@ -119,7 +119,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("lets internal review runs draft update proposals for existing skills", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-update-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-update-");
     await seedLiveSkill(
       workspaceDir,
       "weather-planner",
@@ -158,8 +158,8 @@ describe("skill_workshop review mode", () => {
   });
 
   it("selects a pending proposal for revision from a configured agent directory", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-agent-dir-");
-    const agentDir = await tempDirs.make("openclaw-skill-workshop-review-agent-state-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-agent-dir-");
+    const agentDir = await tempDirs.make("carapace-skill-workshop-review-agent-state-");
     const config = { agents: { entries: { main: { default: true, agentDir } } } };
     const foregroundTool = createSkillWorkshopTool({ workspaceDir, config });
     const created = await foregroundTool.execute("create-configured", {
@@ -191,7 +191,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("composes patch proposals by replacing the quoted span of the live body", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-extend-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-extend-");
     await seedLiveSkill(
       workspaceDir,
       "weather-planner",
@@ -264,7 +264,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("refuses a patch when the skill changed after the read", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-stale-patch-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-stale-patch-");
     await seedLiveSkill(
       workspaceDir,
       "weather-planner",
@@ -304,7 +304,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("refunds a stale update race so the reviewer can re-read and retry", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-stale-update-race-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-stale-update-race-");
     await seedLiveSkill(
       workspaceDir,
       "weather-planner",
@@ -368,7 +368,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("rejects oversized growth but permits shrink in review mode", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-read-cap-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-read-cap-");
     await seedLiveSkill(
       workspaceDir,
       "big-skill",
@@ -417,10 +417,10 @@ describe("skill_workshop review mode", () => {
   });
 
   it("prepares a bounded exact patch for a skill above the read budget", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-read-cap-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-read-cap-");
     const oldString = "Run the legacy deployment preflight.";
     const secondOldString = "Record the deployment outcome after the preflight.";
-    const newString = "Run openclaw doctor and resolve every reported blocker.";
+    const newString = "Run carapace doctor and resolve every reported blocker.";
     await seedLiveSkill(
       workspaceDir,
       "big-skill",
@@ -507,7 +507,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("invalidates prepared patch authority on substitution or target change", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-prepared-patch-stale-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-prepared-patch-stale-");
     const oldString = "Run the legacy deployment preflight.";
     await seedLiveSkill(
       workspaceDir,
@@ -568,7 +568,7 @@ describe("skill_workshop review mode", () => {
   });
 
   it("does not refund the review mutation budget after a failed mutation", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-skill-workshop-review-failure-");
+    const workspaceDir = await tempDirs.make("carapace-skill-workshop-review-failure-");
     const proposalMutationBudget: SkillWorkshopProposalMutationBudget = { remaining: 1 };
     const tool = createSkillWorkshopTool({
       workspaceDir,

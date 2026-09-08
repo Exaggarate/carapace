@@ -2,7 +2,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString as toText,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { z } from "zod";
 import type { ChannelApprovalKind } from "../infra/approval-types.js";
 import { isMeaningfulMediaFact, readPersistedMediaFacts } from "../media/media-facts.js";
@@ -166,12 +166,12 @@ export const ClaudePermissionRequestSchema = z.object({
 
 export { toText };
 
-/** Resolve the visible message id, including OpenClaw metadata attached to raw entries. */
+/** Resolve the visible message id, including Carapace metadata attached to raw entries. */
 export function resolveMessageId(entry: Record<string, unknown>): string | undefined {
   return (
     toText(entry.id) ??
-    (entry["__openclaw"] && typeof entry["__openclaw"] === "object"
-      ? toText((entry["__openclaw"] as { id?: unknown }).id)
+    (entry["__carapace"] && typeof entry["__carapace"] === "object"
+      ? toText((entry["__carapace"] as { id?: unknown }).id)
       : undefined)
   );
 }
@@ -258,7 +258,7 @@ export function extractAttachmentsFromMessage(message: unknown): unknown[] {
   const mediaAttachments = (readPersistedMediaFacts(message) ?? [])
     .filter(isMeaningfulMediaFact)
     .map((media) => ({
-      type: "openclaw_media" as const,
+      type: "carapace_media" as const,
       media: Object.fromEntries(Object.entries(media).filter(([, value]) => value !== undefined)),
     }));
   return [...contentAttachments, ...mediaAttachments];

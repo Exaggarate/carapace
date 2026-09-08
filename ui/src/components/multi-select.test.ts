@@ -2,7 +2,7 @@
 import { afterAll, afterEach, beforeAll, expect, it, vi } from "vitest";
 import { MultiSelect, type MultiSelectOption } from "./multi-select.ts";
 
-const MULTI_SELECT_TEST_TAG = `test-openclaw-multi-select-${crypto.randomUUID()}`;
+const MULTI_SELECT_TEST_TAG = `test-carapace-multi-select-${crypto.randomUUID()}`;
 
 type MultiSelectElement = HTMLElement & {
   options: readonly MultiSelectOption[];

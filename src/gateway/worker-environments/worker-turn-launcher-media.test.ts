@@ -427,7 +427,7 @@ describe("cloud turn media boundary", () => {
       { type: "text", text: expect.stringContaining("inspect the image") },
     ]);
     expect(firstUser?.content[0]).toMatchObject({
-      text: expect.stringContaining("/worker/workspace/media/inbound/openclaw-staged-"),
+      text: expect.stringContaining("/worker/workspace/media/inbound/carapace-staged-"),
     });
     expect(firstUser?.content[0]).toMatchObject({
       text: expect.stringContaining(`input-${path.basename(described.path)}`),

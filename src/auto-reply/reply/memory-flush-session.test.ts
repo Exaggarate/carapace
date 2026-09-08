@@ -18,7 +18,7 @@ import { createSessionTranscriptHeader } from "../../config/sessions/transcript-
 import type { ContextEngine } from "../../context-engine/types.js";
 import { readPendingUserTurnTranscriptAdmission } from "../../sessions/user-turn-transcript-admission.js";
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { prepareMemoryFlushSession } from "./memory-flush-session.js";
 
 async function withAdmittedInput(
@@ -32,12 +32,12 @@ async function withAdmittedInput(
     priorContext: ReturnType<SessionManager["buildSessionContext"]>;
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "memory-checkpoint" }, async (state) => {
+  await withCarapaceTestState({ label: "memory-checkpoint" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "foreground-session",
       sessionKey: "agent:main:foreground",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     const source = SessionManager.open(scope, state.workspaceDir);
@@ -68,7 +68,7 @@ async function withAdmittedInput(
         excludeFromContext: true as const,
       };
       source.appendMessage(excluded);
-      source.appendCustomEntry("openclaw:bootstrap-context:full", { revision: "fixture" });
+      source.appendCustomEntry("carapace:bootstrap-context:full", { revision: "fixture" });
     }
     await waitForSessionTranscriptProjection(scope);
     const priorContext = source.buildSessionContext();
@@ -150,12 +150,12 @@ it.each([false, true])(
 it.each(["compaction", "reset"] as const)(
   "detaches the forward %s cut across an opaque parent with retained tool pairs",
   async (boundaryType) => {
-    await withOpenClawTestState({ label: `memory-opaque-${boundaryType}` }, async (state) => {
+    await withCarapaceTestState({ label: `memory-opaque-${boundaryType}` }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "opaque-checkpoint",
         sessionKey: "agent:main:opaque-checkpoint",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       const source = SessionManager.open(scope, state.workspaceDir);
@@ -337,12 +337,12 @@ it("does not acquire a checkpoint after caller cancellation", async () => {
 it.each(["empty", "missing", "legacy"] as const)(
   "preserves %s transcript header handling during detached acquisition",
   async (headerState) => {
-    await withOpenClawTestState({ label: `memory-header-${headerState}` }, async (state) => {
+    await withCarapaceTestState({ label: `memory-header-${headerState}` }, async (state) => {
       const scope = {
         agentId: "main",
         sessionId: "header-checkpoint",
         sessionKey: "agent:main:header-checkpoint",
-        storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
       };
       await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
       if (headerState !== "empty") {
@@ -406,12 +406,12 @@ it("includes the completed foreground turn when optional memory has no admission
 });
 
 it("rejects a partial bounded checkpoint instead of silently starting with less history", async () => {
-  await withOpenClawTestState({ label: "bounded-memory-checkpoint" }, async (state) => {
+  await withCarapaceTestState({ label: "bounded-memory-checkpoint" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "bounded-checkpoint",
       sessionKey: "agent:main:bounded-checkpoint",
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
     const seed = SessionManager.fromEntries([

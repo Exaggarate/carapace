@@ -2,8 +2,8 @@ import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { extractToolPayload } from "openclaw/plugin-sdk/tool-payload";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { extractToolPayload } from "carapace/plugin-sdk/tool-payload";
 import { afterEach, describe, expect, it } from "vitest";
 import { createQaBusState, startQaBusServer } from "../../qa-lab/bus-api.js";
 import { qaChannelPlugin } from "../api.js";
@@ -23,8 +23,8 @@ function createQaChannelConfig(baseUrl: string) {
     channels: {
       "qa-channel": {
         baseUrl,
-        botUserId: "openclaw",
-        botDisplayName: "OpenClaw QA",
+        botUserId: "carapace",
+        botDisplayName: "Carapace QA",
       },
     },
   };

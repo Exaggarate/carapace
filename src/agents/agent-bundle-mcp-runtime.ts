@@ -10,7 +10,7 @@ import {
   type ServerCapabilities,
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { racePromiseWithAbortSignal } from "../infra/abort-signal.js";
 import { logWarn } from "../logger.js";
 import {
@@ -85,7 +85,7 @@ const BUNDLE_MCP_MAX_LIST_PAGES = 128;
 const BUNDLE_MCP_MAX_LIST_ITEMS = 16_384;
 const BUNDLE_MCP_MAX_LIST_BYTES = 10 * 1024 * 1024;
 let bundleMcpCatalogListTimeoutMs: number | undefined;
-const BUNDLE_MCP_TEST_STATE_KEY = Symbol.for("openclaw.bundleMcpTestState");
+const BUNDLE_MCP_TEST_STATE_KEY = Symbol.for("carapace.bundleMcpTestState");
 type BundleMcpTestState = { disposeTimeoutMs?: number };
 
 function getBundleMcpTestState(): BundleMcpTestState {
@@ -763,7 +763,7 @@ function createServerMcpRuntime(
       if (!session) {
         const client = new Client(
           {
-            name: "openclaw-bundle-mcp",
+            name: "carapace-bundle-mcp",
             version: "0.0.0",
           },
           {
@@ -886,7 +886,7 @@ function createServerMcpRuntime(
         };
         const toolEntries: McpCatalogTool[] = [];
         const policyToolEntries: McpCatalogTool[] = [];
-        for (const [tool, excludedFromOpenClawCatalog, deniedBySession] of [
+        for (const [tool, excludedFromCarapaceCatalog, deniedBySession] of [
           ...normalizedTools.tools.map((entry) => [entry, false, false] as const),
           ...normalizedTools.deniedTools.map((entry) => [entry, false, true] as const),
           ...normalizedTools.excludedTools.map(
@@ -915,12 +915,12 @@ function createServerMcpRuntime(
             fallbackDescription: `Provided by bundle MCP server "${serverName}" (${launchDescription}).`,
             ...(uiResourceUri ? { uiResourceUri } : {}),
             ...(uiVisibility ? { uiVisibility } : {}),
-            ...(excludedFromOpenClawCatalog ? { excludedFromOpenClawCatalog: true as const } : {}),
+            ...(excludedFromCarapaceCatalog ? { excludedFromCarapaceCatalog: true as const } : {}),
             ...(deniedBySession ? { deniedBySession: true } : {}),
             codexAnnotations: normalizeMcpCodexToolAnnotations(tool.annotations),
           };
           policyToolEntries.push(entry);
-          if (!entry.excludedFromOpenClawCatalog) {
+          if (!entry.excludedFromCarapaceCatalog) {
             toolEntries.push(entry);
           }
         }

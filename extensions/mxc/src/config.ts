@@ -1,10 +1,10 @@
 import { posix, win32 } from "node:path";
-import { buildPluginConfigSchema, type OpenClawPluginConfigSchema } from "openclaw/plugin-sdk/core";
+import { buildPluginConfigSchema, type CarapacePluginConfigSchema } from "carapace/plugin-sdk/core";
 import {
   formatPluginConfigIssue,
   mapPluginConfigIssues,
-} from "openclaw/plugin-sdk/extension-shared";
-import { MAX_TIMER_TIMEOUT_SECONDS } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/extension-shared";
+import { MAX_TIMER_TIMEOUT_SECONDS } from "carapace/plugin-sdk/number-runtime";
 import { z } from "zod";
 
 const MXC_CONTAINMENTS = ["process", "processcontainer"] as const;
@@ -80,7 +80,7 @@ const MxcPluginConfigSchema = z.strictObject({
     .optional(),
 });
 
-export function createMxcPluginConfigSchema(): OpenClawPluginConfigSchema {
+export function createMxcPluginConfigSchema(): CarapacePluginConfigSchema {
   return buildPluginConfigSchema(MxcPluginConfigSchema, {
     safeParse(value) {
       if (value === undefined) {

@@ -2,9 +2,9 @@ import os from "node:os";
 import { describe, expect, it, vi } from "vitest";
 import { readGitHubPublicationSessionLifecycle } from "../state/github-publication-session-lifecycles.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { resolveGitHubPublicationFailure } from "./github-publication-failure.js";
 import {
   BASE_HEAD,
@@ -38,7 +38,7 @@ describe("Gateway GitHub publication boundaries", () => {
     async (bindingState) => {
       const session = await persistPublicationTestSession(REQUEST.sessionKey);
       const placements = createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase(),
+        database: openCarapaceStateDatabase(),
       });
       const requested = placements.startDispatch(REQUEST);
       placements.fail({
@@ -58,7 +58,7 @@ describe("Gateway GitHub publication boundaries", () => {
       const originalLifecycle = readGitHubPublicationSessionLifecycle(binding);
       expect(originalLifecycle).toEqual({ lifecycle_revision: session.read().lifecycleRevision });
       if (bindingState === "missing") {
-        openOpenClawStateDatabase()
+        openCarapaceStateDatabase()
           .db.prepare(
             "DELETE FROM github_publication_session_lifecycles WHERE publication_kind = 'shared' AND request_id = ?",
           )
@@ -100,7 +100,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -130,7 +130,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -178,7 +178,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -207,7 +207,7 @@ describe("Gateway GitHub publication boundaries", () => {
     }));
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -231,7 +231,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -257,7 +257,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -274,7 +274,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("rejects a local turn that starts and finishes during snapshot capture", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const fallback = mocks.runCommand.getMockImplementation()!;
     let raced = false;
@@ -308,7 +308,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("requeues a publication when execution loses live session authority", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     let competingClaim: ReturnType<typeof placements.claimTurn> | undefined;
     mocks.resolveRepository.mockImplementationOnce(async () => {
@@ -323,7 +323,7 @@ describe("Gateway GitHub publication boundaries", () => {
       return {
         checkoutRoot: "/repo/worktree",
         repoRoot: "/repo",
-        originUrl: "git@github.com:openclaw/openclaw.git",
+        originUrl: "git@github.com:Exaggarate/carapace.git",
         fingerprint: "fingerprint-1",
       };
     });
@@ -357,7 +357,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -383,7 +383,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -409,7 +409,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -429,11 +429,11 @@ describe("Gateway GitHub publication boundaries", () => {
     const fallback = mocks.runCommand.getMockImplementation()!;
     mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
       const command = argv.join(" ");
-      if (command.includes(" repos/openclaw/openclaw/pulls ")) {
+      if (command.includes(" repos/carapace/carapace/pulls ")) {
         return commandResult(
           JSON.stringify([
             {
-              url: "https://github.com/openclaw/openclaw/pull/foreign",
+              url: "https://github.com/Exaggarate/carapace/pull/foreign",
               userId: 99,
               state: "open",
               body: "",
@@ -448,7 +448,7 @@ describe("Gateway GitHub publication boundaries", () => {
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -471,14 +471,14 @@ describe("Gateway GitHub publication boundaries", () => {
   ])("fails closed for $label in pull request ownership", async ({ label, response }) => {
     const fallback = mocks.runCommand.getMockImplementation()!;
     mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
-      if (argv.join(" ").includes(" repos/openclaw/openclaw/pulls ")) {
+      if (argv.join(" ").includes(" repos/carapace/carapace/pulls ")) {
         return commandResult(response);
       }
       return await fallback(argv, options);
     });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -497,7 +497,7 @@ describe("Gateway GitHub publication boundaries", () => {
   it("creates an attributed marker commit when all changes were already committed", async () => {
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -520,7 +520,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("keeps an incomplete Git transaction retryable until index recovery completes", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -550,7 +550,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("reports missing managed credentials as an identity failure after admission", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -575,7 +575,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("terminalizes local recovery when the managed worktree fingerprint changed", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const first = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -586,8 +586,8 @@ describe("Gateway GitHub publication boundaries", () => {
       status: "requested",
       repositoryFingerprint: "replaced-fingerprint",
     });
-    closeOpenClawStateDatabaseForTest();
-    const reopened = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeCarapaceStateDatabaseForTest();
+    const reopened = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const resumed = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database: reopened }),
     });
@@ -607,7 +607,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("validates the live session owner before recovery can touch Git state", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -645,7 +645,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("rejects unsafe Git configuration before starting recovery probes", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createTestGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -687,7 +687,7 @@ describe("Gateway GitHub publication boundaries", () => {
     { label: "a mismatched run identity", claimRunId: "run-active", expectedRunId: "run-other" },
     { label: "its own active turn", claimRunId: "run-active", expectedRunId: "run-active" },
   ])("queues a cloud session publication with $label", async ({ claimRunId, expectedRunId }) => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-deferred-request",
@@ -734,7 +734,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("publishes deferred session requests alongside an accepted turn claim", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-accepted-deferred",
@@ -771,7 +771,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("defers an orphaned turn request and publishes it when the workspace is quiescent", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-1",
@@ -809,7 +809,7 @@ describe("Gateway GitHub publication boundaries", () => {
   });
 
   it("defers snapshot preparation failures without blocking workspace acceptance", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-snapshot-failure",

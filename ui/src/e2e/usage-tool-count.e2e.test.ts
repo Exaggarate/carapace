@@ -45,7 +45,7 @@ suite.define(() => {
       cumulativeTokens: 120 * (index + 1),
       cumulativeCost: 0,
     }));
-    const artifactParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const proofDir = artifactParent
       ? createControlUiE2eArtifactDir("usage-tool-count", artifactParent)
       : undefined;

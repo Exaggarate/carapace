@@ -1,7 +1,7 @@
-import type { WorkerDesktopEndpoint } from "openclaw/plugin-sdk/plugin-entry";
+import type { WorkerDesktopEndpoint } from "carapace/plugin-sdk/plugin-entry";
 
-const CRABBOX_WORKER_BROWSER_PATH = "/usr/local/bin/openclaw-worker-browser";
-const CRABBOX_WORKER_TERMINAL_PATH = "/usr/local/bin/openclaw-worker-terminal";
+const CRABBOX_WORKER_BROWSER_PATH = "/usr/local/bin/carapace-worker-browser";
+const CRABBOX_WORKER_TERMINAL_PATH = "/usr/local/bin/carapace-worker-terminal";
 const CRABBOX_WORKER_BROWSER_CDP_PORT = 9222;
 
 function xfceDesktopEnvironment(): string[] {
@@ -52,16 +52,16 @@ function browserLauncher(leaseId: string): string[] {
   return [
     "#!/bin/bash",
     "set -euo pipefail",
-    '[ "$#" -eq 0 ] || { echo "openclaw-worker-browser does not accept arguments" >&2; exit 64; }',
+    '[ "$#" -eq 0 ] || { echo "carapace-worker-browser does not accept arguments" >&2; exit 64; }',
     ...xfceDesktopEnvironment(),
     '[ -x /usr/local/bin/crabbox-browser ] || { echo "Crabbox browser is unavailable" >&2; exit 1; }',
     'worker_home=$(getent passwd "$(id -u)" | cut -d: -f6)',
     'case "$worker_home" in /*) ;; *) echo "Crabbox worker home is invalid" >&2; exit 1 ;; esac',
     'export HOME="$worker_home"',
-    `export CRABBOX_BROWSER_PROFILE="$worker_home/.cache/openclaw/worker-browser/${leaseId}"`,
+    `export CRABBOX_BROWSER_PROFILE="$worker_home/.cache/carapace/worker-browser/${leaseId}"`,
     'mkdir -p "$CRABBOX_BROWSER_PROFILE"',
     'chmod 700 "$CRABBOX_BROWSER_PROFILE"',
-    'exec 9>"$CRABBOX_BROWSER_PROFILE/.openclaw-launch.lock"',
+    'exec 9>"$CRABBOX_BROWSER_PROFILE/.carapace-launch.lock"',
     "flock -x 9",
     `cdp_url=http://127.0.0.1:${CRABBOX_WORKER_BROWSER_CDP_PORT}/json/version`,
     'if curl --fail --silent --show-error --max-time 1 "$cdp_url" >/dev/null; then',
@@ -85,7 +85,7 @@ function terminalLauncher(): string[] {
   return [
     "#!/bin/bash",
     "set -euo pipefail",
-    '[ "$#" -eq 0 ] || { echo "openclaw-worker-terminal does not accept arguments" >&2; exit 64; }',
+    '[ "$#" -eq 0 ] || { echo "carapace-worker-terminal does not accept arguments" >&2; exit 64; }',
     ...xfceDesktopEnvironment(),
     "nohup /usr/bin/xfce4-terminal >/dev/null 2>&1 </dev/null &",
     "terminal_pid=$!",
@@ -127,16 +127,16 @@ export function createCrabboxWorkerDesktopSetup(leaseId: string, wallpaperBase64
     "WORKER_WALLPAPER_B64_EOF",
     `as_root install -o root -g root -m 0755 "$setup_dir/browser" ${CRABBOX_WORKER_BROWSER_PATH}`,
     `as_root install -o root -g root -m 0755 "$setup_dir/terminal" ${CRABBOX_WORKER_TERMINAL_PATH}`,
-    'as_root install -d -o "$worker_user" -g "$worker_group" -m 0755 "$worker_home/.cache" "$worker_home/.cache/openclaw" "$worker_home/.cache/openclaw/worker-browser"',
-    `as_root install -d -o "$worker_user" -g "$worker_group" -m 0700 "$worker_home/.cache/openclaw/worker-browser/${leaseId}"`,
+    'as_root install -d -o "$worker_user" -g "$worker_group" -m 0755 "$worker_home/.cache" "$worker_home/.cache/carapace" "$worker_home/.cache/carapace/worker-browser"',
+    `as_root install -d -o "$worker_user" -g "$worker_group" -m 0700 "$worker_home/.cache/carapace/worker-browser/${leaseId}"`,
     'as_root install -d -o "$worker_user" -g "$worker_group" -m 0755 "$worker_home/.local" "$worker_home/.local/share" "$worker_home/.local/share/backgrounds"',
-    'wallpaper_path="$worker_home/.local/share/backgrounds/openclaw-worker.png"',
+    'wallpaper_path="$worker_home/.local/share/backgrounds/carapace-worker.png"',
     'as_root install -o "$worker_user" -g "$worker_group" -m 0644 "$setup_dir/wallpaper.png" "$wallpaper_path"',
     "# Setup precedes node enrollment, so re-home only this worker's renderer before publishing it.",
     'pkill -TERM -u "$worker_uid" -x xfdesktop || true',
     'for _attempt in $(seq 1 20); do pgrep -u "$worker_uid" -x xfdesktop >/dev/null || break; sleep 0.1; done',
     'pkill -KILL -u "$worker_uid" -x xfdesktop || true',
-    'nohup xfdesktop >"$worker_home/.cache/openclaw/xfdesktop.log" 2>&1 </dev/null &',
+    'nohup xfdesktop >"$worker_home/.cache/carapace/xfdesktop.log" 2>&1 </dev/null &',
     "for _attempt in $(seq 1 40); do bind_xfdesktop_renderer && break; sleep 0.1; done",
     'bind_xfdesktop_renderer || { echo "XFCE desktop renderer did not converge on the worker session" >&2; exit 1; }',
     "mapfile -t backdrop_roots < <(",

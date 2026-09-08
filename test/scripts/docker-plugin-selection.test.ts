@@ -25,13 +25,13 @@ function writePlugin(
       name: dirName,
       ...(dependencies && { dependencies }),
       ...(requiredPlatformPackages && {
-        openclaw: { install: { requiredPlatformPackages } },
+        carapace: { install: { requiredPlatformPackages } },
       }),
     })}\n`,
   );
   if (manifestId) {
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       `${JSON.stringify({ id: manifestId })}\n`,
     );
   }
@@ -63,8 +63,8 @@ describe("Docker plugin selection", () => {
         encoding: "utf8",
         env: {
           PATH: process.env.PATH,
-          OPENCLAW_LIVE_PROVIDERS: "ollama",
-          OPENCLAW_LIVE_GATEWAY_MODELS: "mistral/mistral-large-latest",
+          CARAPACE_LIVE_PROVIDERS: "ollama",
+          CARAPACE_LIVE_GATEWAY_MODELS: "mistral/mistral-large-latest",
         },
       },
     );
@@ -75,11 +75,11 @@ describe("Docker plugin selection", () => {
   });
 
   it("selects provider owners by manifest capability without assuming matching plugin ids", () => {
-    const extensionsRoot = tempDirs.make("openclaw-docker-provider-selection-");
+    const extensionsRoot = tempDirs.make("carapace-docker-provider-selection-");
     writePlugin(extensionsRoot, "provider-source", "provider-plugin");
     writePlugin(extensionsRoot, "other-source", "other-plugin");
     fs.writeFileSync(
-      path.join(extensionsRoot, "provider-source", "openclaw.plugin.json"),
+      path.join(extensionsRoot, "provider-source", "carapace.plugin.json"),
       JSON.stringify({ id: "provider-plugin", providers: ["api-provider", "portal-provider"] }),
     );
 
@@ -96,7 +96,7 @@ describe("Docker plugin selection", () => {
   });
 
   it("includes required core-bundled dependencies without changing optional plugin selections", () => {
-    const fixtureRoot = tempDirs.make("openclaw-docker-required-bundled-plugins-");
+    const fixtureRoot = tempDirs.make("carapace-docker-required-bundled-plugins-");
     const extensionsRoot = path.join(fixtureRoot, "extensions");
     const rootPackagePath = path.join(fixtureRoot, "package.json");
     fs.mkdirSync(extensionsRoot);
@@ -134,7 +134,7 @@ describe("Docker plugin selection", () => {
   });
 
   it("resolves manifest ids and source directory names deterministically", () => {
-    const extensionsRoot = tempDirs.make("openclaw-docker-plugin-selection-");
+    const extensionsRoot = tempDirs.make("carapace-docker-plugin-selection-");
     writePlugin(extensionsRoot, "source-only");
     writePlugin(extensionsRoot, "provider-source", "provider-id");
 
@@ -149,14 +149,14 @@ describe("Docker plugin selection", () => {
   });
 
   it("fails closed for unknown, invalid, and ambiguous ids", () => {
-    const extensionsRoot = tempDirs.make("openclaw-docker-plugin-selection-errors-");
+    const extensionsRoot = tempDirs.make("carapace-docker-plugin-selection-errors-");
     writePlugin(extensionsRoot, "shared");
     writePlugin(extensionsRoot, "other-source", "shared");
 
     for (const [selection, message] of [
-      ["missing-plugin", "unknown OPENCLAW_EXTENSIONS plugin id: missing-plugin"],
-      ["../invalid", "invalid OPENCLAW_EXTENSIONS plugin id: ../invalid"],
-      ["shared", "ambiguous OPENCLAW_EXTENSIONS plugin id: shared"],
+      ["missing-plugin", "unknown CARAPACE_EXTENSIONS plugin id: missing-plugin"],
+      ["../invalid", "invalid CARAPACE_EXTENSIONS plugin id: ../invalid"],
+      ["shared", "ambiguous CARAPACE_EXTENSIONS plugin id: shared"],
     ] as const) {
       const result = runSelector(extensionsRoot, selection);
       expect(result.status).toBe(1);

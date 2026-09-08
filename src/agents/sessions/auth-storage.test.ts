@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   AuthStorage as PublicAuthStorage,
   ModelRegistry as PublicModelRegistry,
-} from "openclaw/plugin-sdk/agent-sessions";
+} from "carapace/plugin-sdk/agent-sessions";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const providerOAuthMocks = vi.hoisted(() => ({
@@ -23,7 +23,7 @@ vi.mock("../../plugins/provider-runtime.runtime.js", async () => {
     resolveProviderOAuthCredentialWithPlugin: providerOAuthMocks.resolveCredential,
   };
 });
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { clearAuthProfileMigrationDiagnostics } from "../auth-profiles/legacy-source-diagnostic.js";
 import { loadPersistedAuthProfileStore } from "../auth-profiles/persisted.js";
 import {
@@ -57,7 +57,7 @@ describe("SQLite auth storage", () => {
     clearAuthProfileMigrationDiagnostics();
     clearRuntimeAuthProfileStoreSnapshots();
     vi.unstubAllEnvs();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { recursive: true, force: true });
     }

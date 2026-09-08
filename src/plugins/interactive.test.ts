@@ -401,7 +401,7 @@ describe("plugin interactive handlers", () => {
 
   it("hydrates legacy interactive state shapes before clearing handlers", async () => {
     const globalStore = globalThis as Record<PropertyKey, unknown>;
-    const stateKey = Symbol.for("openclaw.pluginInteractiveState");
+    const stateKey = Symbol.for("carapace.pluginInteractiveState");
     const originalState = globalStore[stateKey];
 
     globalStore[stateKey] = {
@@ -563,31 +563,31 @@ describe("plugin interactive handlers", () => {
     const handler = vi.fn(async () => ({ handled: true }));
     const registry = createEmptyPluginRegistry();
     registry.plugins.push({
-      id: "openclaw-code-agent",
-      name: "OpenClaw Code Agent",
+      id: "carapace-code-agent",
+      name: "Carapace Code Agent",
       status: "loaded",
     } as never);
     registry.interactiveHandlers = [
       {
         channel: "telegram",
         namespace: "code-agent",
-        pluginId: "openclaw-code-agent",
-        pluginName: "OpenClaw Code Agent",
-        pluginRoot: "/plugins/openclaw-code-agent",
+        pluginId: "carapace-code-agent",
+        pluginName: "Carapace Code Agent",
+        pluginRoot: "/plugins/carapace-code-agent",
         handler: handler as never,
       },
     ];
     expect(
       registerPluginInteractiveHandler(
-        "openclaw-code-agent",
+        "carapace-code-agent",
         {
           channel: "telegram",
           namespace: "code-agent",
           handler: handler as never,
         },
         {
-          pluginName: "OpenClaw Code Agent",
-          pluginRoot: "/plugins/openclaw-code-agent",
+          pluginName: "Carapace Code Agent",
+          pluginRoot: "/plugins/carapace-code-agent",
         },
       ),
     ).toEqual({ ok: true });

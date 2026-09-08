@@ -110,11 +110,11 @@ describe("loadSqliteVecExtension", () => {
     await expect(
       loadSqliteVecExtension({
         db: db as never,
-        extensionPath: "/opt/openclaw/sqlite-vec.so",
+        extensionPath: "/opt/carapace/sqlite-vec.so",
       }),
-    ).resolves.toEqual({ ok: true, extensionPath: "/opt/openclaw/sqlite-vec.so" });
+    ).resolves.toEqual({ ok: true, extensionPath: "/opt/carapace/sqlite-vec.so" });
     expect(db.enableLoadExtension).toHaveBeenCalledWith(true);
-    expect(db.loadExtension).toHaveBeenCalledWith("/opt/openclaw/sqlite-vec.so");
+    expect(db.loadExtension).toHaveBeenCalledWith("/opt/carapace/sqlite-vec.so");
     expect(db.enableLoadExtension).toHaveBeenLastCalledWith(false);
     expect(prepare).toHaveBeenCalledWith("SELECT vec_version() AS version");
   });
@@ -126,15 +126,15 @@ describe("loadSqliteVecExtension", () => {
 
     const result = await loadSqliteVecExtension({
       db: db as never,
-      extensionPath: "/opt/openclaw/sqlite-vec.so",
+      extensionPath: "/opt/carapace/sqlite-vec.so",
     });
 
     expect(result).toEqual({
       ok: false,
       error:
-        "sqlite-vec health check failed after loading /opt/openclaw/sqlite-vec.so | no such function: vec_version",
+        "sqlite-vec health check failed after loading /opt/carapace/sqlite-vec.so | no such function: vec_version",
     });
-    expect(db.loadExtension).toHaveBeenCalledWith("/opt/openclaw/sqlite-vec.so");
+    expect(db.loadExtension).toHaveBeenCalledWith("/opt/carapace/sqlite-vec.so");
     expect(db.enableLoadExtension).toHaveBeenLastCalledWith(false);
   });
 

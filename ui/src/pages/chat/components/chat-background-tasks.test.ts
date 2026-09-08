@@ -134,7 +134,7 @@ function renderStatusRow(overrides: Partial<BackgroundTasksProps>) {
 
 it("uses the shared surface empty state when no background tasks exist", async () => {
   const container = renderTaskRail({ tasks: [] });
-  const empty = container.querySelector("openclaw-panel-empty-state");
+  const empty = container.querySelector("carapace-panel-empty-state");
   await empty?.updateComplete;
 
   expect(empty?.shadowRoot?.querySelector(".empty-state__title")?.textContent).toBe("Tasks");
@@ -145,7 +145,7 @@ it("uses the shared surface empty state when no background tasks exist", async (
 it("renders task-shaped placeholders while the initial task list loads", async () => {
   const container = renderTaskRail({ loading: true, tasks: null });
 
-  const skeleton = container.querySelector("openclaw-panel-loading-skeleton");
+  const skeleton = container.querySelector("carapace-panel-loading-skeleton");
   expect(skeleton).toBeInstanceOf(HTMLElement);
   await (skeleton as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
   expect(skeleton?.getAttribute("data-panel-skeleton")).toBe("tasks");
@@ -807,12 +807,12 @@ describe("background tasks rail rendering", () => {
     const running = container.querySelector('[data-task-id="task-1"]');
     expect(running?.textContent).toContain("12 tool uses");
     expect(running?.textContent).toContain("read");
-    expect(running?.querySelector("openclaw-elapsed-time")).not.toBeNull();
+    expect(running?.querySelector("carapace-elapsed-time")).not.toBeNull();
 
     const finished = container.querySelector('[data-task-id="task-2"]');
     expect(finished?.textContent).toContain("1 tool use");
     expect(finished?.textContent).toContain("1m 5s");
-    expect(finished?.querySelector("openclaw-elapsed-time")).toBeNull();
+    expect(finished?.querySelector("carapace-elapsed-time")).toBeNull();
   });
 
   it("collapses the finished section", () => {
@@ -847,7 +847,7 @@ describe("running-tasks status row", () => {
     });
 
     const elapsed = container.querySelector<HTMLElement & { startMs: number | null }>(
-      "openclaw-elapsed-time",
+      "carapace-elapsed-time",
     );
     expect(elapsed?.startMs).toBe(4_000);
     expect(
@@ -864,10 +864,10 @@ describe("running-tasks status row", () => {
 
     const row = container.querySelector(".chat-tasks-status");
     expect(row).not.toBeNull();
-    expect(row?.querySelector("openclaw-elapsed-time")).not.toBeNull();
+    expect(row?.querySelector("carapace-elapsed-time")).not.toBeNull();
     const liveStatus = row?.querySelector('[role="status"]');
     expect(liveStatus?.textContent?.trim()).toBe("1 running task");
-    expect(liveStatus?.querySelector("openclaw-elapsed-time")).toBeNull();
+    expect(liveStatus?.querySelector("carapace-elapsed-time")).toBeNull();
     const link = row?.querySelector<HTMLButtonElement>(".chat-tasks-status__link");
     expect(link?.textContent?.trim()).toBe("1 running task");
     link?.click();
@@ -925,7 +925,7 @@ describe("running-tasks status row", () => {
       ],
     });
 
-    const preview = container.querySelector("openclaw-tooltip.chat-tasks-status__preview");
+    const preview = container.querySelector("carapace-tooltip.chat-tasks-status__preview");
     expect(preview?.firstElementChild?.classList.contains("chat-tasks-status__link")).toBe(true);
     expect(container.querySelector(".chat-tasks-status")?.id).toBe("chat-tasks-status-test");
     expect(preview?.querySelector('.chat-tasks-preview[slot="content"]')).not.toBeNull();

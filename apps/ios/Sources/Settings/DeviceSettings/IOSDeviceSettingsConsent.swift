@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 
 enum IOSDeviceSettingsConsent: Equatable {
@@ -12,7 +12,7 @@ enum IOSDeviceSettingsConsent: Equatable {
     static func required(
         for key: DeviceSettingKey,
         value: DeviceSettingValue,
-        locationMode: OpenClawLocationMode) -> Self?
+        locationMode: CarapaceLocationMode) -> Self?
     {
         switch (key, value) {
         case (.wakeEnabled, .boolean(true)): .voiceWake
@@ -29,7 +29,7 @@ enum IOSDeviceSettingsConsent: Equatable {
         case .camera: String(localized: "Allow the Gateway to use this device's camera?")
         case .healthSummary: String(localized: "Share Apple Health summaries with the Gateway?")
         case .locationAlways: String(localized: "Allow location access at any time?")
-        case .notificationEnrollment: String(localized: "Enable OpenClaw Hosted Push Relay?")
+        case .notificationEnrollment: String(localized: "Enable Carapace Hosted Push Relay?")
         }
     }
 
@@ -44,14 +44,14 @@ enum IOSDeviceSettingsConsent: Equatable {
                 """)
         case .healthSummary:
             String(localized: """
-            OpenClaw reads steps, sleep, resting heart rate, and workouts from Apple Health only when a summary is \
+            Carapace reads steps, sleep, resting heart rate, and workouts from Apple Health only when a summary is \
             requested. Only the aggregate leaves this device through your Gateway to your configured AI provider; \
             raw samples stay on this device and results may remain in chat history.
             """)
         case .locationAlways:
-            String(localized: "The Gateway can request this device's location even when OpenClaw is not in use.")
+            String(localized: "The Gateway can request this device's location even when Carapace is not in use.")
         case .notificationEnrollment:
-            String(localized: "Enabling this sends delivery data through OpenClaw's hosted push relay.")
+            String(localized: "Enabling this sends delivery data through Carapace's hosted push relay.")
         }
     }
 }

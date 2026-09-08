@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { collectConfiguredAgentModelProviderIds } from "./gateway-startup-plugin-providers.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "./manifest-registry.js";
 
@@ -15,7 +15,7 @@ function createManifestRecord(
     origin: "bundled",
     rootDir: `/tmp/plugins/${plugin.id}`,
     source: `/tmp/plugins/${plugin.id}/index.ts`,
-    manifestPath: `/tmp/plugins/${plugin.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/plugins/${plugin.id}/carapace.plugin.json`,
     ...plugin,
   };
 }
@@ -81,7 +81,7 @@ describe("configured Gateway model provider ownership", () => {
     ]);
     const config = {
       agents: { defaults: { model: "selected/requested" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(collectConfiguredAgentModelProviderIds(config, registry)).toEqual(new Set(["selected"]));
     expect(unrelatedNormalizationReads).toBe(0);

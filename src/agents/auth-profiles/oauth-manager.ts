@@ -1,10 +1,10 @@
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 /**
  * OAuth credential manager.
  * Resolves usable access tokens, refreshes expired credentials under global
  * locks, adopts safer main-store credentials, and mirrors refreshed tokens.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeSecretInputString } from "../../config/types.secrets.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { withFileLock } from "../../infra/file-lock.js";
@@ -49,11 +49,11 @@ type OAuthManagerAdapter = {
   buildApiKey: (
     provider: string,
     credentials: OAuthCredential,
-    context: { cfg?: OpenClawConfig; agentDir?: string },
+    context: { cfg?: CarapaceConfig; agentDir?: string },
   ) => Promise<string>;
   refreshCredential: (
     credential: OAuthCredential,
-    context: { cfg?: OpenClawConfig; agentDir?: string },
+    context: { cfg?: CarapaceConfig; agentDir?: string },
   ) => Promise<OAuthCredentials | null>;
   readBootstrapCredential: (params: {
     store: AuthProfileStore;
@@ -519,7 +519,7 @@ export function createOAuthManager(adapter: OAuthManagerAdapter) {
     profileId: string;
     provider: string;
     agentDir?: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     forceRefresh?: boolean;
     attemptedCredentials?: OAuthCredential[];
   }): Promise<ResolvedOAuthAccess | null> {
@@ -733,7 +733,7 @@ export function createOAuthManager(adapter: OAuthManagerAdapter) {
     profileId: string;
     provider: string;
     agentDir?: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     forceRefresh?: boolean;
     attemptedCredentials?: OAuthCredential[];
   }): Promise<ResolvedOAuthAccess | null> {
@@ -746,7 +746,7 @@ export function createOAuthManager(adapter: OAuthManagerAdapter) {
     profileId: string;
     credential: OAuthCredential;
     agentDir?: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     forceRefresh?: boolean;
   }): Promise<ResolvedOAuthAccess | null> {
     const personalProfile = isUserModelAuthProfileId(params.profileId);

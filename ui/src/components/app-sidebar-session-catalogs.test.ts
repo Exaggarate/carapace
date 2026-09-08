@@ -64,7 +64,7 @@ describe("findCatalogSessionHovercardRow", () => {
             {
               ...catalogSession("project", "Renamed upstream"),
               sessionKey: "agent:main:adopted-project",
-              cwd: "/work/openclaw",
+              cwd: "/work/carapace",
               gitBranch: "feature/hovercard",
             },
             {
@@ -114,8 +114,8 @@ describe("findCatalogSessionHovercardRow", () => {
       hasActiveRun: true,
       workContext: {
         kind: "project",
-        name: "openclaw",
-        path: "/work/openclaw",
+        name: "carapace",
+        path: "/work/carapace",
         branch: "feature/hovercard",
       },
     });

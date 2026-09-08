@@ -97,7 +97,7 @@ describe("managed plugin install transactions", () => {
   it.each(requests)("settles $source payloads at the config commit boundary", async (request) => {
     for (const failure of ["authority-closed", "before-commit", "after-commit", "none"] as const) {
       mocks.persist.mockClear();
-      const home = await fs.realpath(tempDirs.make("openclaw-managed-upgrade-"));
+      const home = await fs.realpath(tempDirs.make("carapace-managed-upgrade-"));
       const sourceDir = path.join(home, "incoming");
       const targetDir = path.join(home, "extensions", "demo");
       await fs.mkdir(sourceDir, { recursive: true });
@@ -199,7 +199,7 @@ describe("managed plugin install transactions", () => {
       const installed = installManagedPluginSource({
         request,
         snapshot,
-        env: { HOME: home, OPENCLAW_STATE_DIR: path.join(home, "state") },
+        env: { HOME: home, CARAPACE_STATE_DIR: path.join(home, "state") },
         onCapabilityConsent,
         beforePersistentApply: () => {
           if (!active) {
@@ -219,14 +219,14 @@ describe("managed plugin install transactions", () => {
       expect(await fs.readFile(path.join(targetDir, "version"), "utf8"), failure).toBe(
         failure === "before-commit" || failure === "authority-closed" ? "1.0.0" : "2.0.0",
       );
-      expect(await fs.readdir(path.join(home, "extensions", ".openclaw-install-backups"))).toEqual(
+      expect(await fs.readdir(path.join(home, "extensions", ".carapace-install-backups"))).toEqual(
         [],
       );
     }
   });
 
   it("leaves linked operator source untouched when persistence fails", async () => {
-    const sourcePath = tempDirs.make("openclaw-managed-link-");
+    const sourcePath = tempDirs.make("carapace-managed-link-");
     createColdPluginFixture({ rootDir: sourcePath, pluginId: "demo" });
     await fs.writeFile(path.join(sourcePath, "version"), "operator-owned");
     const conflict = new Error("config changed during plugin link");

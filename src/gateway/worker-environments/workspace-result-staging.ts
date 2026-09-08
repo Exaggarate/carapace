@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { runBestEffortCleanup } from "../../infra/non-fatal-cleanup.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { runCommandBuffered, runCommandWithTimeout } from "../../process/exec.js";
 import type { WorkerLocalWorkspaceReconcileRequest } from "./tunnel-contract.js";
@@ -37,13 +37,13 @@ import {
   WORKSPACE_RESULT_GIT_TIMEOUT_MS as PATCH_TIMEOUT_MS,
 } from "./workspace-result-git.js";
 
-// Match managed-worktree refs/openclaw/snapshots: deleting the owning ref is
+// Match managed-worktree refs/carapace/snapshots: deleting the owning ref is
 // sufficient; unreachable objects may remain until normal Git GC.
-const WORKER_RESULT_REF_PREFIX = "refs/openclaw/worker-results";
-const WORKER_RESULT_CANDIDATE_REF_PREFIX = "refs/openclaw/worker-result-candidates";
-const WORKER_RESULT_CLEANUP_REF_PREFIX = "refs/openclaw/worker-result-cleanup";
+const WORKER_RESULT_REF_PREFIX = "refs/carapace/worker-results";
+const WORKER_RESULT_CANDIDATE_REF_PREFIX = "refs/carapace/worker-result-candidates";
+const WORKER_RESULT_CLEANUP_REF_PREFIX = "refs/carapace/worker-result-cleanup";
 const WORKER_RESULT_CLAIM_ID_PATTERN = /^[A-Za-z0-9-]+$/u;
-const STAGED_RESULT_MESSAGE = "OpenClaw worker workspace result";
+const STAGED_RESULT_MESSAGE = "Carapace worker workspace result";
 const STAGED_RESULT_METADATA_LIMIT = 128 * 1024 * 1024 + 4_096;
 const workspaceLog = createSubsystemLogger("gateway/worker-workspace");
 
@@ -303,7 +303,7 @@ async function stageWorkerWorkspaceResult(params: {
   }
   chunks.push(
     Buffer.from(
-      `commit ${stagedResultRef}\nauthor OpenClaw <openclaw@localhost> 0 +0000\ncommitter OpenClaw <openclaw@localhost> 0 +0000\ndata ${message.byteLength}\n`,
+      `commit ${stagedResultRef}\nauthor Carapace <carapace@localhost> 0 +0000\ncommitter Carapace <carapace@localhost> 0 +0000\ndata ${message.byteLength}\n`,
     ),
     message,
     Buffer.from("\ndeleteall\n"),
@@ -507,7 +507,7 @@ async function withMaterializedWorkerWorkspaceResult<T>(
   ) => Promise<T>,
 ): Promise<T> {
   const stagingRoot = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-checkpoint-payload-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-checkpoint-payload-"),
   );
   try {
     for (const entry of snapshot.changedEntries) {

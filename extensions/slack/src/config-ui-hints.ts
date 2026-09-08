@@ -1,5 +1,5 @@
-import { createChannelConfigUiHints } from "openclaw/plugin-sdk/channel-core";
-import type { ChannelConfigUiHint } from "openclaw/plugin-sdk/channel-core";
+import { createChannelConfigUiHints } from "carapace/plugin-sdk/channel-core";
+import type { ChannelConfigUiHint } from "carapace/plugin-sdk/channel-core";
 
 export const slackChannelConfigUiHints = {
   "": {
@@ -39,7 +39,7 @@ export const slackChannelConfigUiHints = {
       "progress.nativeTaskCards":
         'Slack native task-card progress updates when channels.slack.streaming.mode="progress", progress.style="card", and streaming.nativeTransport is enabled. Set false to fall back to the Block Kit progress card. Default: true.',
     },
-    progress: { labels: "openclaw" },
+    progress: { labels: "carapace" },
   }),
   joinIntro: {
     label: "Slack Channel Join Introduction",
@@ -71,19 +71,19 @@ export const slackChannelConfigUiHints = {
   },
   relay: {
     label: "Slack Relay Mode",
-    help: 'Relay-delivered Slack events. Use with mode="relay" when openclaw-slack-router owns the Slack Socket Mode connection.',
+    help: 'Relay-delivered Slack events. Use with mode="relay" when carapace-slack-router owns the Slack Socket Mode connection.',
   },
   "relay.url": {
     label: "Slack Relay URL",
-    help: "Full websocket URL for openclaw-slack-router. Include the route path, for example ws://127.0.0.1:8081/gateway/ws.",
+    help: "Full websocket URL for carapace-slack-router. Include the route path, for example ws://127.0.0.1:8081/gateway/ws.",
   },
   "relay.authToken": {
     label: "Slack Relay Auth Token",
-    help: "Bearer token used by this gateway to authenticate its reverse websocket connection to openclaw-slack-router.",
+    help: "Bearer token used by this gateway to authenticate its reverse websocket connection to carapace-slack-router.",
   },
   "relay.gatewayId": {
     label: "Slack Relay Gateway ID",
-    help: "Destination id that openclaw-slack-router uses when routing user-group mentions to this gateway.",
+    help: "Destination id that carapace-slack-router uses when routing user-group mentions to this gateway.",
   },
   botToken: {
     label: "Slack Bot Token",
@@ -131,7 +131,7 @@ export const slackChannelConfigUiHints = {
   },
   "execApprovals.approvers": {
     label: "Slack Exec Approval Approvers",
-    help: "Slack user IDs allowed to approve exec requests for this workspace account. Use Slack user IDs or user targets such as `U123`, `user:U123`, or `<@U123>`. If you leave this unset, OpenClaw falls back to commands.ownerAllowFrom when possible.",
+    help: "Slack user IDs allowed to approve exec requests for this workspace account. Use Slack user IDs or user targets such as `U123`, `user:U123`, or `<@U123>`. If you leave this unset, Carapace falls back to commands.ownerAllowFrom when possible.",
   },
   "execApprovals.agentFilter": {
     label: "Slack Exec Approval Agent Filter",

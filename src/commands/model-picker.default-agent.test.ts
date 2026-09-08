@@ -1,7 +1,7 @@
 // Model picker tests read the target agent without rewriting global defaults.
 import { describe, expect, it, vi } from "vitest";
 import type { AgentModelConfig } from "../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 
 vi.mock("./model-picker.runtime.js", () => ({
@@ -31,7 +31,7 @@ describe.each(cases)("promptDefaultModel: $name", ({ model, expected }) => {
         defaults: { model: "openai/global-model" },
         entries: { ops: { default: true, ...(model !== undefined ? { model } : {}) } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const before = structuredClone(config);
     const text = vi.fn(async (params: { initialValue?: string }) => {
       expect(params.initialValue).toBe(expected);

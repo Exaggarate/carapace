@@ -1,5 +1,5 @@
 import { EventEmitter, getEventListeners } from "node:events";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import {
   type BrowserMockBundle,

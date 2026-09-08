@@ -1,9 +1,9 @@
 // Feishu plugin module implements send behavior.
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { convertMarkdownTables } from "carapace/plugin-sdk/text-chunking";
 import type { ClawdbotConfig } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { assertFeishuApiSuccess } from "./api-response.js";

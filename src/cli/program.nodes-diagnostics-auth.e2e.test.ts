@@ -163,13 +163,13 @@ describe("cli program (nodes diagnostics auth)", () => {
         [
           "gateway node.list requires credentials before opening a websocket",
           "Fix: configure gateway.auth token/password, pair this device, or pass --token/--password.",
-          "Config: /tmp/openclaw.json",
+          "Config: /tmp/carapace.json",
         ].join("\n"),
       ),
       {
         name: "GatewayCredentialsRequiredError",
         method: "node.list",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       },
     );
     programGatewayCallMock.mockRejectedValue(error);

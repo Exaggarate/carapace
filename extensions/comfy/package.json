@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/comfy-provider",
+  "name": "@carapace/comfy-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw ComfyUI provider plugin.",
+  "description": "Carapace ComfyUI provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/comfy-provider",
-      "npmSpec": "@openclaw/comfy-provider",
+      "clawhubSpec": "clawhub:@carapace/comfy-provider",
+      "npmSpec": "@carapace/comfy-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

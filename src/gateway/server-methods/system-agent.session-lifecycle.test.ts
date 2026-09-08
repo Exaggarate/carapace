@@ -1,6 +1,6 @@
 // System-agent session lifecycle tests cover ownership, eviction, and reset boundaries.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildSystemAgentSessionInvalidatedErrorDetails } from "../../../packages/gateway-protocol/src/index.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
@@ -116,8 +116,8 @@ async function callChat(
   const calls: RespondCall[] = [];
   const respond: RespondFn = (ok, payload, error) => calls.push({ ok, payload, error });
   await expectDefined(
-    systemAgentHandlers["openclaw.chat"],
-    'systemAgentHandlers["openclaw.chat"] test invariant',
+    systemAgentHandlers["carapace.chat"],
+    'systemAgentHandlers["carapace.chat"] test invariant',
   )({ params, client: defaultClient, context, respond } as never);
   return expectDefined(calls[0], "system-agent response");
 }
@@ -143,7 +143,7 @@ afterEach(() => {
   resetCommandQueueStateForTest();
 });
 
-describe("openclaw.chat session lifecycle", () => {
+describe("carapace.chat session lifecycle", () => {
   it("rejects a foreign-owner session with structured invalidation details", async () => {
     const sessions = new Map<string, SystemAgentChatSession>([
       ["s1", seededSession({ ownerKey: "device:someone-else" })],
@@ -161,7 +161,7 @@ describe("openclaw.chat session lifecycle", () => {
       payload: undefined,
       error: {
         code: "INVALID_REQUEST",
-        message: "OpenClaw session belongs to another caller.",
+        message: "Carapace session belongs to another caller.",
         details: buildSystemAgentSessionInvalidatedErrorDetails(),
       },
     });

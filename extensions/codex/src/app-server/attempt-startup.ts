@@ -10,9 +10,9 @@ import {
   type CodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
   type resolveSandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,
   CodexAppServerUnsafeSubscriptionError,
@@ -45,7 +45,7 @@ import {
 } from "./config.js";
 import {
   resolveCodexAppServerExecutionCwd,
-  resolveCodexExternalSandboxPolicyForOpenClawSandbox,
+  resolveCodexExternalSandboxPolicyForCarapaceSandbox,
   resolveCodexSandboxEnvironmentSelection,
   shouldRequireCodexSandboxExecServerEnvironment,
 } from "./dynamic-tool-build.js";
@@ -172,7 +172,7 @@ export async function startCodexAttemptThread(params: {
   bundleMcpThreadConfig: CodexBundleMcpThreadConfig;
   /** Static configured MCP is present on the dynamic surface, so native MCP stays absent. */
   configuredMcpDynamicSurface?: boolean;
-  /** OpenClaw owns configured MCP dynamically for this scheduled turn. */
+  /** Carapace owns configured MCP dynamically for this scheduled turn. */
   configuredMcpOwnershipVersion?: 1;
   nativeToolSurfaceEnabled: boolean;
   nativeProviderWebSearchSupport: CodexNativeWebSearchSupport;
@@ -421,7 +421,7 @@ export async function startCodexAttemptThread(params: {
               }
               if (sandboxEnvironmentRequired && !startupSandboxEnvironment) {
                 throw new Error(
-                  "Codex app-server did not register an OpenClaw sandbox exec-server environment.",
+                  "Codex app-server did not register an Carapace sandbox exec-server environment.",
                 );
               }
             } catch (error) {
@@ -440,7 +440,7 @@ export async function startCodexAttemptThread(params: {
               remoteWorkspaceRoot: params.appServer.remoteWorkspaceRoot,
             });
             const startupSandboxPolicy = startupSandboxEnvironment
-              ? resolveCodexExternalSandboxPolicyForOpenClawSandbox(params.sandbox)
+              ? resolveCodexExternalSandboxPolicyForCarapaceSandbox(params.sandbox)
               : undefined;
             let startupReservation: CodexThreadRouteReservation | undefined;
             const releaseStartupReservation = () => {

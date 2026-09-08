@@ -10,10 +10,10 @@ import {
 import { SessionTranscriptProjectionUnavailableError } from "../config/sessions/session-transcript-projection-error.js";
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { readSessionMessagesAroundIdWithStatsAsync } from "./session-transcript-anchor-reader.js";
 import {
@@ -34,15 +34,15 @@ describe("session transcript reader facade", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    tempDir = tempDirs.make("openclaw-transcript-readers-");
+    envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    tempDir = tempDirs.make("carapace-transcript-readers-");
     storePath = path.join(tempDir, "sessions.json");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
   });
 
@@ -61,9 +61,9 @@ describe("session transcript reader facade", () => {
   }
 
   function markProjectionNeedsRebuild(sessionId: string): void {
-    openOpenClawAgentDatabase({
+    openCarapaceAgentDatabase({
       agentId: "main",
-      path: path.join(tempDir, "openclaw-agent.sqlite"),
+      path: path.join(tempDir, "carapace-agent.sqlite"),
     })
       .db.prepare(
         "UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?",
@@ -144,9 +144,9 @@ describe("session transcript reader facade", () => {
           message: { role: "assistant", content: "later answer" },
         },
       ]);
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "main",
-        path: path.join(tempDir, "openclaw-agent.sqlite"),
+        path: path.join(tempDir, "carapace-agent.sqlite"),
       });
       // Keep the ready projection, but poison a later payload: an early abort must never parse it.
       database.db
@@ -202,8 +202,8 @@ describe("session transcript reader facade", () => {
     await expect(
       readSessionMessagesAsync(scope, { mode: "full", reason: "timestamp contract test" }),
     ).resolves.toMatchObject([
-      { __openclaw: { recordTimestampMs: Date.parse("0") } },
-      { __openclaw: { recordTimestampMs: Date.parse("2026") } },
+      { __carapace: { recordTimestampMs: Date.parse("0") } },
+      { __carapace: { recordTimestampMs: Date.parse("2026") } },
     ]);
   });
 
@@ -331,7 +331,7 @@ describe("session transcript reader facade", () => {
     ]);
     await expect(
       readSessionMessagesAsync(scope, { mode: "recent", maxMessages: 1 }),
-    ).resolves.toMatchObject([{ content: "sqlite follow-up", __openclaw: { seq: 3 } }]);
+    ).resolves.toMatchObject([{ content: "sqlite follow-up", __carapace: { seq: 3 } }]);
     await expect(readSessionMessageCountAsync(scope)).resolves.toBe(3);
   });
 
@@ -429,7 +429,7 @@ describe("session transcript reader facade", () => {
     ).resolves.toMatchObject([
       {
         idempotencyKey: "initial-send:user",
-        __openclaw: {
+        __carapace: {
           id: "sqlite-user-message",
           idempotencyKey: "initial-send:user",
           seq: 1,
@@ -534,7 +534,7 @@ describe("session transcript reader facade", () => {
     });
     await waitForSessionTranscriptIndexReconcile({
       agentId: "main",
-      path: path.join(tempDir, "openclaw-agent.sqlite"),
+      path: path.join(tempDir, "carapace-agent.sqlite"),
     });
 
     const messages = await readSessionMessagesAsync(scope, {
@@ -544,10 +544,10 @@ describe("session transcript reader facade", () => {
 
     expect(messages).toMatchObject([{ content: "branch prompt" }, { content: "active branch" }]);
     expect(
-      messages.map((message) => (message as { __openclaw?: { id?: string } })["__openclaw"]?.id),
+      messages.map((message) => (message as { __carapace?: { id?: string } })["__carapace"]?.id),
     ).toEqual(["root", "active"]);
     expect(
-      messages.map((message) => (message as { __openclaw?: { seq?: number } })["__openclaw"]?.seq),
+      messages.map((message) => (message as { __carapace?: { seq?: number } })["__carapace"]?.seq),
     ).toEqual([1, 2]);
     await expect(readSessionMessageCountAsync(scope)).resolves.toBe(2);
   });
@@ -582,7 +582,7 @@ describe("session transcript reader facade", () => {
     ]);
     expect(
       page.messages.map(
-        (message) => (message as { __openclaw?: { seq?: number } })["__openclaw"]?.seq,
+        (message) => (message as { __carapace?: { seq?: number } })["__carapace"]?.seq,
       ),
     ).toEqual([2, 3]);
   });

@@ -1,5 +1,5 @@
 // Skill filter tests cover active skill selection for isolated cron runs.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import {
   runInitialModelFallbackAttempt,
@@ -454,7 +454,7 @@ describe("runCronIsolatedAgentTurn — skill filter", () => {
     it("prefers the harness-reported runtime window and provenance", async () => {
       const session = makeCronSession({
         sessionEntry: makeCronSessionEntry({
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 222_000,
           contextTokensSource: "resolved",
         }),
@@ -652,7 +652,7 @@ describe("runCronIsolatedAgentTurn — skill filter", () => {
         sessionEntry: makeCronSessionEntry({
           modelProvider: "openai",
           model: "gpt-5.4",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 222_000,
           contextTokensSource: "runtime",
           contextBudgetStatus: {} as NonNullable<

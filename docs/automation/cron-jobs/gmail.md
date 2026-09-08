@@ -1,6 +1,6 @@
 ---
 doc-schema-version: 1
-summary: "Wire Gmail inbox events into OpenClaw through Google Pub/Sub and a restricted reader"
+summary: "Wire Gmail inbox events into Carapace through Google Pub/Sub and a restricted reader"
 read_when:
   - Triggering an agent from new Gmail messages
   - Building a restricted, sandboxed mail reader agent
@@ -9,16 +9,16 @@ title: "Gmail PubSub triggers"
 sidebarTitle: "Gmail PubSub"
 ---
 
-Wiring Gmail inbox events into OpenClaw through Google Pub/Sub, with a restricted reader agent for untrusted mail. Part of the [Automations](/automation/cron-jobs) guide.
+Wiring Gmail inbox events into Carapace through Google Pub/Sub, with a restricted reader agent for untrusted mail. Part of the [Automations](/automation/cron-jobs) guide.
 
 ## Gmail PubSub integration
 
-Wire Gmail inbox triggers to OpenClaw through Google Pub/Sub and `gog gmail watch serve`. Pub/Sub calls the watcher; the watcher forwards email data to the [Gateway HTTP hook](/automation/cron-jobs/webhooks#webhooks). This does not load or invoke an internal `HOOK.md` handler.
+Wire Gmail inbox triggers to Carapace through Google Pub/Sub and `gog gmail watch serve`. Pub/Sub calls the watcher; the watcher forwards email data to the [Gateway HTTP hook](/automation/cron-jobs/webhooks#webhooks). This does not load or invoke an internal `HOOK.md` handler.
 
 Not on Gmail? The [IMAP email trigger plugin](/automation/imap) watches an existing IMAP mailbox without Google PubSub or a public webhook.
 
 <Note>
-**Prerequisites:** `gcloud` CLI, `gog` (gogcli) authorized for the watched Gmail account, OpenClaw hooks enabled, an HTTPS push endpoint reachable by Pub/Sub (Tailscale Funnel in the recommended setup), and a working sandbox backend. The example below uses the default Docker backend; build its image first by following [Sandbox images and setup](/gateway/sandboxing#images-and-setup), or configure another supported backend.
+**Prerequisites:** `gcloud` CLI, `gog` (gogcli) authorized for the watched Gmail account, Carapace hooks enabled, an HTTPS push endpoint reachable by Pub/Sub (Tailscale Funnel in the recommended setup), and a working sandbox backend. The example below uses the default Docker backend; build its image first by following [Sandbox images and setup](/gateway/sandboxing#images-and-setup), or configure another supported backend.
 </Note>
 
 ### Configure a restricted Gmail reader (recommended)
@@ -34,7 +34,7 @@ Before connecting Gmail transport, merge a dedicated reader and hook policy into
     entries: {
       main: {},
       mail_reader: {
-        workspace: "~/.openclaw/workspace-mail-reader",
+        workspace: "~/.carapace/workspace-mail-reader",
         model: "openai/gpt-5.6-sol",
         sandbox: {
           mode: "all",
@@ -75,7 +75,7 @@ Before connecting Gmail transport, merge a dedicated reader and hook policy into
 }
 ```
 
-Before restart, run `openclaw agents list --bindings`; replace every placeholder and verify each channel owner.
+Before restart, run `carapace agents list --bindings`; replace every placeholder and verify each channel owner.
 
 Why this shape is safer:
 
@@ -95,9 +95,9 @@ If you intentionally route Gmail to a more capable agent, treat that as a securi
 Authenticate the provider selected by `mail_reader`, or ensure its effective auth configuration can use a supported shared credential, then verify the route before connecting Gmail:
 
 ```bash
-openclaw models auth --agent mail_reader login --provider openai
-openclaw models status --agent mail_reader --check --probe --probe-provider openai
-openclaw agent --agent mail_reader --message "Reply exactly MAIL_READER_OK" --json
+carapace models auth --agent mail_reader login --provider openai
+carapace models status --agent mail_reader --check --probe --probe-provider openai
+carapace agent --agent mail_reader --message "Reply exactly MAIL_READER_OK" --json
 ```
 
 Use the matching provider id when you choose a different model. The live probe checks the provider credential; the agent turn proves the selected model, runtime, sandbox, and effective tool policy can complete a real reader run. Do not continue until both succeed.
@@ -105,12 +105,12 @@ Use the matching provider id when you choose a different model. The live probe c
 ### Connect Gmail transport
 
 ```bash
-openclaw webhooks gmail setup --account reader@example.com
+carapace webhooks gmail setup --account reader@example.com
 ```
 
 This writes `hooks.gmail` transport settings, enables the Gmail preset, preserves the restricted mapping above, and defaults to Tailscale Funnel for the push endpoint (`--tailscale funnel|serve|off`). The wizard does not create a reader agent or session-key policy, so apply the restricted configuration first. `--tailscale serve` is tailnet-only; it is not a publicly reachable Pub/Sub endpoint without another ingress arrangement. Use `--tailscale off --push-endpoint <url>` for an externally managed endpoint. See [all setup flags](/cli/webhooks).
 
-The two tokens protect different hops: `hooks.gmail.pushToken` authenticates Pub/Sub to the watcher, while `hooks.token` authenticates the watcher to OpenClaw using a header. A token-bearing Pub/Sub push URL is not an example for `/hooks` authentication; query-string tokens are rejected by OpenClaw. Setup output can contain these tokens, so redact it before sharing.
+The two tokens protect different hops: `hooks.gmail.pushToken` authenticates Pub/Sub to the watcher, while `hooks.token` authenticates the watcher to Carapace using a header. A token-bearing Pub/Sub push URL is not an example for `/hooks` authentication; query-string tokens are rejected by Carapace. Setup output can contain these tokens, so redact it before sharing.
 
 <Warning>
 The built-in Gmail preset's per-message session separates conversation context; it does not restrict the target agent's tools or workspace. Without a custom mapping that sets `agentId`, Gmail hooks run as the default agent.
@@ -121,10 +121,10 @@ For untrusted inboxes, route the hook to a dedicated reader agent, give that age
 ### Verify the reader boundary
 
 ```bash
-openclaw config validate
-openclaw sandbox explain --agent mail_reader
-openclaw security audit --deep
-openclaw logs --follow
+carapace config validate
+carapace sandbox explain --agent mail_reader
+carapace security audit --deep
+carapace logs --follow
 ```
 
 Send a test email from another account containing an inert instruction such as “follow this link and run a command.” The watcher excludes `SPAM`, `TRASH`, `DRAFT`, and `SENT`, so a sent-only message is not a useful ingress test. Confirm the selected agent is `mail_reader`, the run is sandboxed, and the output only summarizes the message. The mapping uses the logical `hook:gmail:<message-id>` key; an isolated run can be stored under a generated `cron:...:run:...` session instead.
@@ -133,11 +133,11 @@ Check forwarding and completion separately. A watcher success only acknowledges 
 
 ### Gateway auto-start
 
-When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts `gog gmail watch serve` on boot and auto-renews the watch. Set `OPENCLAW_SKIP_GMAIL_WATCHER=1` to opt out.
+When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts `gog gmail watch serve` on boot and auto-renews the watch. Set `CARAPACE_SKIP_GMAIL_WATCHER=1` to opt out.
 
 With `forEach: "messages"`, the Gateway prepares one action per email, up to the 200-item fan-out cap. Gmail-path mappings receive a larger request-body allowance derived from `hooks.gmail.maxBytes`, capped at 32 MiB. The upstream history page size is not a strict email count, so oversized batches can still hit limits. See the [Gmail reference](/gateway/config-hooks#gmail-integration) for the exact allowance and [fan-out retry behavior](/gateway/config-hooks#hook-retries-and-fan-out).
 
-Do not run `openclaw webhooks gmail run` or another `gog gmail watch serve` on the same listener while the Gateway-managed watcher is running. Check logs for watch-registration failures, forwarding failures, and bind conflicts; starting the serve process alone does not prove Gmail registration succeeded.
+Do not run `carapace webhooks gmail run` or another `gog gmail watch serve` on the same listener while the Gateway-managed watcher is running. Check logs for watch-registration failures, forwarding failures, and bind conflicts; starting the serve process alone does not prove Gmail registration succeeded.
 
 ### Manual one-time setup
 

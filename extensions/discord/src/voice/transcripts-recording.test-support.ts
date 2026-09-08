@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { PassThrough } from "node:stream";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { DiscordVoiceTestHarness } from "./voice-test-harness.test-support.js";
 
 export function createDiscordRecordingFixture({
@@ -18,7 +18,7 @@ export function createDiscordRecordingFixture({
   return async function fixture(
     mode: "agent-proxy" | "bidi" | "stt-tts" = "agent-proxy",
     occupied = false,
-    cfg: OpenClawConfig = {},
+    cfg: CarapaceConfig = {},
     roleGated = false,
   ) {
     const client = createClient();

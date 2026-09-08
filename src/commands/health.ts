@@ -1,12 +1,12 @@
 /** Collects and renders gateway health for channels, agents, plugins, and sessions. */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { styleHealthChannelLine } from "../../packages/terminal-core/src/health-style.js";
 import { isRich } from "../../packages/terminal-core/src/theme.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import { listReadOnlyChannelPluginsForConfig } from "../channels/plugins/read-only.js";
 import { probeGatewayStatus } from "../cli/daemon-cli/probe.js";
 import { withProgress } from "../cli/progress.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildGatewayConnectionDetails,
   buildGatewayProbeConnectionDetails,
@@ -48,7 +48,7 @@ const DEFAULT_TIMEOUT_MS = 10_000;
 const healthLog = createSubsystemLogger("health");
 
 const debugHealth = (
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   message: string,
   meta?: Record<string, unknown>,
 ) => {
@@ -63,7 +63,7 @@ function isGatewayHealthAuthUnavailableError(error: unknown): boolean {
 
 export async function emitReachableGatewayAuthDiagnostic(params: {
   error: unknown;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
   timeoutMs?: number;
   token?: string;
@@ -159,13 +159,13 @@ export function formatConfigReloadHealthLine(summary: HealthSummary): string | n
   return "Config hot reload: disabled (watcher retries exhausted; restart the gateway to restore it)";
 }
 
-/** Runs the `openclaw health` command against the gateway and renders JSON or text. */
+/** Runs the `carapace health` command against the gateway and renders JSON or text. */
 export async function healthCommand(
   opts: {
     json?: boolean;
     timeoutMs?: number;
     verbose?: boolean;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     token?: string;
     password?: string;
     ignoreEnvUrlOverride?: boolean;
@@ -458,7 +458,7 @@ export async function healthCommandNonExiting(
   });
 }
 
-export async function readNonObservingHealthConfig(): Promise<OpenClawConfig> {
+export async function readNonObservingHealthConfig(): Promise<CarapaceConfig> {
   const { readConfigFileSnapshot } = await loadConfigRuntime();
   const snapshot = await readConfigFileSnapshot({
     observe: false,

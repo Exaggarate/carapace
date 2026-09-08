@@ -30,7 +30,7 @@ import type { SessionEntry } from "./types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const fixtureSuite = createFixtureSuite("openclaw-pruning-suite-");
+const fixtureSuite = createFixtureSuite("carapace-pruning-suite-");
 
 beforeAll(async () => {
   await fixtureSuite.setup();
@@ -263,7 +263,7 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
     let trajectoryCleanupReferencedIds: Set<string> | undefined;
 
     const result = await applyFileBackedSessionStoreMaintenance({
-      storePath: "/tmp/openclaw-sessions/sessions.json",
+      storePath: "/tmp/carapace-sessions/sessions.json",
       store,
       activeSessionKey: "active",
       maintenanceConfig: {
@@ -319,7 +319,7 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
     const onMaintenanceApplied = vi.fn();
 
     const result = await applyFileBackedSessionStoreMaintenance({
-      storePath: "/tmp/openclaw-sessions/sessions.json",
+      storePath: "/tmp/carapace-sessions/sessions.json",
       store,
       maintenanceConfig: {
         mode: "enforce",
@@ -368,7 +368,7 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
       let report: { modelRunPruned: number; pruned: number; capped: number } | undefined;
 
       const result = await applyFileBackedSessionStoreMaintenance({
-        storePath: "/tmp/openclaw-sessions/sessions.json",
+        storePath: "/tmp/carapace-sessions/sessions.json",
         store,
         maintenanceConfig: {
           mode: "enforce",
@@ -417,7 +417,7 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
     let capped: number | undefined;
 
     await applyFileBackedSessionStoreMaintenance({
-      storePath: "/tmp/openclaw-sessions/protected-quota.json",
+      storePath: "/tmp/carapace-sessions/protected-quota.json",
       store,
       maintenanceConfig: {
         mode: "enforce",
@@ -483,7 +483,7 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
   ] as const)("$name", async (scenario) => {
     const { storeName, preserved, identities, activeSessionKey } = scenario;
     const now = Date.now();
-    const storePath = `/tmp/openclaw-sessions/${storeName}.json`;
+    const storePath = `/tmp/carapace-sessions/${storeName}.json`;
     const store = makeStore([
       ...preserved.map(([key, sessionId], index): [string, SessionEntry] => [
         key,
@@ -532,8 +532,8 @@ describe("applyFileBackedSessionStoreMaintenance", () => {
 
   it("scopes active preservation by store and releases rows back to maintenance", async () => {
     const now = Date.now();
-    const activeStorePath = "/tmp/openclaw-sessions/active-store.json";
-    const maintainedStorePath = "/tmp/openclaw-sessions/maintained-store.json";
+    const activeStorePath = "/tmp/carapace-sessions/active-store.json";
+    const maintainedStorePath = "/tmp/carapace-sessions/maintained-store.json";
     const activeSessionId = "shared-session-id";
     const admission = await beginSessionWorkAdmission({
       scope: activeStorePath,
@@ -992,7 +992,7 @@ describe("resolveMaintenanceConfigFromInput", () => {
   });
 
   it("retains session history when a zero maxDiskBytes disables the budget", async () => {
-    await withTestDir({ prefix: "openclaw-zero-disk-budget-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-zero-disk-budget-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const transcriptPath = path.join(dir, "old-session.jsonl");
       await fs.writeFile(transcriptPath, JSON.stringify({ role: "user", content: "hello" }));

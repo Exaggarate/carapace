@@ -1,6 +1,6 @@
 /** Builds dry-run cron delivery labels for CLI/UI list surfaces. */
 import { tryResolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   CRON_AGENT_SELECTION_REQUIRED_MESSAGE,
   tryResolveCronJobEffectiveAgentId,
@@ -47,7 +47,7 @@ function formatDeliveryDetail(params: {
 
 /** Builds the user-visible cron delivery preview for one job without sending anything. */
 export async function resolveCronDeliveryPreview(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   defaultAgentId?: string;
   job: CronDeliveryPreviewJob;
 }): Promise<CronDeliveryPreview> {
@@ -125,7 +125,7 @@ export async function resolveCronDeliveryPreview(params: {
 
 /** Builds cron delivery previews keyed by job id. */
 export async function resolveCronDeliveryPreviews(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   defaultAgentId?: string;
   jobs: CronJob[];
 }): Promise<Record<string, CronDeliveryPreview>> {

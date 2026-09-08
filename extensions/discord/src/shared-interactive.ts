@@ -4,7 +4,7 @@ import {
   resolveMessagePresentationActionValue,
   resolveMessagePresentationButtonAction,
   resolveMessagePresentationOptionAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import type {
   InteractiveButtonStyle,
   LegacyInteractiveReply,
@@ -12,11 +12,11 @@ import type {
   MessagePresentationButton,
   MessagePresentationOption,
   MessagePresentationSelectBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import {
   resolveAskUserQuestionOptionIndex,
   type AskUserQuestionOptionIndices,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import { buildDiscordApprovalCustomId } from "./approval-custom-id.js";
 import {
   buildDiscordActivityCustomId,

@@ -131,7 +131,7 @@
   }
 }
 
-openclaw-session-owner-chip {
+carapace-session-owner-chip {
   display: inline-flex;
   flex: none;
 }
@@ -1284,7 +1284,7 @@ openclaw-session-owner-chip {
 
   /* The unanchored chat toast shares the viewport with shell and pane chrome.
      Anchored permission toasts already carry a measured pane-header offset. */
-  openclaw-toast-host[data-toast-placement="shell"]
+  carapace-toast-host[data-toast-placement="shell"]
     .app-toast:not(.app-toast--anchored, .app-toast--bottom) {
     top: var(--app-toast-shell-top, calc(20px + var(--safe-area-top)));
   }
@@ -1435,11 +1435,11 @@ openclaw-session-owner-chip {
   stroke-linejoin: round;
 }
 
-openclaw-github-link-hovercard-provider {
+carapace-github-link-hovercard-provider {
   display: contents;
 }
 
-openclaw-session-progress-hovercard-provider {
+carapace-session-progress-hovercard-provider {
   display: contents;
 }
 
@@ -2252,7 +2252,7 @@ select.input {
   }
 }
 
-openclaw-chat-session-rail {
+carapace-chat-session-rail {
   display: contents;
 }
 
@@ -3750,7 +3750,7 @@ td.data-table-key-col {
   padding: 4px 8px 2px;
 }
 
-.agent-scope-control openclaw-agent-select {
+.agent-scope-control carapace-agent-select {
   min-width: 150px;
   max-width: min(240px, 40vw);
 }
@@ -3769,7 +3769,7 @@ td.data-table-key-col {
     display: none;
   }
 
-  .agent-scope-control openclaw-agent-select {
+  .agent-scope-control carapace-agent-select {
     min-width: 128px;
     max-width: 44vw;
   }

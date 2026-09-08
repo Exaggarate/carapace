@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord tests cover security audit plugin behavior.
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedDiscordAccount } from "./accounts.js";
@@ -10,7 +10,7 @@ const { readChannelAllowFromStoreMock } = vi.hoisted(() => ({
   readChannelAllowFromStoreMock: vi.fn(async () => [] as string[]),
 }));
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", () => ({
+vi.mock("carapace/plugin-sdk/conversation-runtime", () => ({
   readChannelAllowFromStore: readChannelAllowFromStoreMock,
 }));
 
@@ -87,7 +87,7 @@ const broadMemberCases: BroadMemberCase[] = [
 ];
 
 async function collectFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   config: DiscordAccountConfig;
   accountId?: string;
   orderedAccountIds?: string[];
@@ -159,7 +159,7 @@ describe("Discord security audit findings", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectFinding: true,
     },
     {
@@ -181,7 +181,7 @@ describe("Discord security audit findings", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       expectFinding: false,
     },
   ])("$name", async (testCase) => {

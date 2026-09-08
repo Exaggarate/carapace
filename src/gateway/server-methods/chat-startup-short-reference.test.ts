@@ -1,10 +1,10 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   appendTranscriptMessage,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createSessionEventSubscriberRegistry } from "../server-chat-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { createTranscriptUpdateBroadcastHandler } from "../server-session-events.js";
@@ -20,7 +20,7 @@ describe("chat.startup short references", () => {
   it.each([true, false])(
     "establishes observation before reading only for a live connection (%s)",
     async (live) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const key = "agent:main:dashboard:12345678-0aaa-4000-8000-000000000001";
         const scope = { agentId: "main", sessionKey: key, sessionId: "observation-startup" };
         await upsertSessionEntryCore(scope, {
@@ -100,7 +100,7 @@ describe("chat.startup short references", () => {
   it.each(["draft", "incognito", "foreign"] as const)(
     "does not disclose %s sessions through short references",
     async (visibility) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const cfg = rolePolicyConfig();
         await state.writeConfig(cfg);
         const client = roleClient(visibility === "foreign" ? "none" : "view");
@@ -133,7 +133,7 @@ describe("chat.startup short references", () => {
     },
   );
   it("returns canonical history and bounded ambiguity through the existing resolver", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const key = "agent:main:dashboard:12345678-0aaa-4000-8000-000000000001";
       const scope = { agentId: "main", sessionKey: key, sessionId: "short-startup" };
       await upsertSessionEntryCore(scope, {

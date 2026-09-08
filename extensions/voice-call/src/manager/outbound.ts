@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import {
   resolveVoiceCallEffectiveConfig,
   resolveVoiceCallNumberRouteKeyForCall,

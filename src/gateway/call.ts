@@ -1,9 +1,9 @@
 // Gateway RPC call helper.
 // Builds a GatewayClient, resolves auth/scopes, and performs one request.
 import { randomUUID } from "node:crypto";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -29,7 +29,7 @@ import {
   resolveStateDir as resolveStateDirFromPaths,
 } from "../config/paths.js";
 import { getRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import {
   loadDeviceAuthToken,
@@ -119,7 +119,7 @@ type CallGatewayBaseOptions = {
   password?: string;
   tlsFingerprint?: string;
   preauthHandshakeTimeoutMs?: number;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   method: string;
   params?: unknown;
   expectFinal?: boolean;
@@ -155,10 +155,10 @@ type CallGatewayBaseOptions = {
   configPath?: string;
   /**
    * Explicit local gateway port for command-line overrides such as `gateway health --port`.
-   * Bypasses OPENCLAW_GATEWAY_URL and OPENCLAW_GATEWAY_PORT for this call only.
+   * Bypasses CARAPACE_GATEWAY_URL and CARAPACE_GATEWAY_PORT for this call only.
    */
   localPortOverride?: number;
-  /** Keep a caller-supplied config target authoritative over OPENCLAW_GATEWAY_URL. */
+  /** Keep a caller-supplied config target authoritative over CARAPACE_GATEWAY_URL. */
   ignoreEnvUrlOverride?: boolean;
   /**
    * Service-derived probe target (e.g. custom bind host or Tailnet address).
@@ -392,7 +392,7 @@ export function isGatewayExplicitAuthRequiredError(
 
 // Gateway dispatch owns only connection, auth, TLS, and shell-env resolution.
 // Loading the full runtime config here makes every RPC pay unrelated plugin/state startup costs.
-const defaultGetRuntimeConfig = async (): Promise<OpenClawConfig> =>
+const defaultGetRuntimeConfig = async (): Promise<CarapaceConfig> =>
   getRuntimeConfigSnapshot() ?? (await readGatewayDispatchConfigWithShellEnvFallback());
 
 async function stopGatewayClient(client: GatewayClient): Promise<void> {
@@ -416,7 +416,7 @@ function resolveGatewayClientDisplayName(opts: CallGatewayBaseOptions): string |
   return method ? `gateway:${method}` : "gateway:request";
 }
 
-async function loadGatewayConfig(): Promise<OpenClawConfig> {
+async function loadGatewayConfig(): Promise<CarapaceConfig> {
   return await defaultGetRuntimeConfig();
 }
 
@@ -425,7 +425,7 @@ async function loadGatewayConfig(): Promise<OpenClawConfig> {
  * gateway.remote.edgeAuth here, so an unreadable or invalid config degrades to
  * empty rather than blocking a connection the flags already describe.
  */
-async function loadGatewayConfigForExplicitConnection(): Promise<OpenClawConfig> {
+async function loadGatewayConfigForExplicitConnection(): Promise<CarapaceConfig> {
   try {
     return await loadGatewayConfig();
   } catch {
@@ -433,7 +433,7 @@ async function loadGatewayConfigForExplicitConnection(): Promise<OpenClawConfig>
   }
 }
 
-function loadGatewayConfigForConnectionDetails(): OpenClawConfig {
+function loadGatewayConfigForConnectionDetails(): CarapaceConfig {
   return readGatewayDispatchConfig();
 }
 
@@ -445,13 +445,13 @@ function resolveGatewayConfigPath(env: NodeJS.ProcessEnv): string {
   return resolveConfigPathFromPaths(env, resolveGatewayStateDir(env));
 }
 
-function resolveGatewayPortValue(config?: OpenClawConfig, env?: NodeJS.ProcessEnv): number {
+function resolveGatewayPortValue(config?: CarapaceConfig, env?: NodeJS.ProcessEnv): number {
   return resolveGatewayPortFromPaths(config, env);
 }
 
 export function buildGatewayConnectionDetails(
   options: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     url?: string;
     configPath?: string;
     urlSource?: "cli" | "env";
@@ -541,7 +541,7 @@ function loadStoredOperatorDeviceAuthToken(
   }
 }
 
-function resolveGatewayCallAuth(config: OpenClawConfig) {
+function resolveGatewayCallAuth(config: CarapaceConfig) {
   return resolveGatewayAuth({
     authConfig: config.gateway?.auth,
     env: process.env,
@@ -593,7 +593,7 @@ export type { ExplicitGatewayAuth } from "./credentials.js";
 export { ensureExplicitGatewayAuth, resolveExplicitGatewayAuth };
 
 type ResolvedGatewayCallContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configPath: string;
   isRemoteMode: boolean;
   explicitAuth: ExplicitGatewayAuth;
@@ -610,8 +610,8 @@ function resolveGatewayCallTimeout(timeoutValue: unknown): {
   safeTimerTimeoutMs: number;
 } {
   const hasEnvHandshakeTimeout =
-    Boolean(process.env.OPENCLAW_HANDSHAKE_TIMEOUT_MS) ||
-    Boolean(isVitestRuntimeEnv() && process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS);
+    Boolean(process.env.CARAPACE_HANDSHAKE_TIMEOUT_MS) ||
+    Boolean(isVitestRuntimeEnv() && process.env.CARAPACE_TEST_HANDSHAKE_TIMEOUT_MS);
   const resolvedHandshakeTimeoutMs = hasEnvHandshakeTimeout
     ? resolvePreauthHandshakeTimeoutMs()
     : undefined;
@@ -650,7 +650,7 @@ async function resolveGatewayCallContext(
   const config =
     opts.config ??
     (canSkipConfigLoad
-      ? ({} as OpenClawConfig)
+      ? ({} as CarapaceConfig)
       : explicitConnection
         ? await loadGatewayConfigForExplicitConnection()
         : await loadGatewayConfig());
@@ -721,7 +721,7 @@ function formatGatewayCloseError(
       "\n- Gateway not yet ready to accept connections (retry after a moment)" +
       "\n- TLS mismatch (connecting with ws:// to a wss:// gateway, or vice versa)" +
       "\n- Gateway process stopped or became unreachable (confirm it is still running)" +
-      "\nRun `openclaw doctor` for diagnostics.";
+      "\nRun `carapace doctor` for diagnostics.";
   }
   return message;
 }
@@ -745,7 +745,7 @@ function createGatewayUnreachableTransportError(params: {
     connectionDetails: params.connectionDetails,
     message: [
       `Gateway not reachable at ${projectGatewayUrlForDiagnostics(params.connectionDetails.url)}${code ? ` (${code})` : ""}.`,
-      "Start it with `openclaw gateway run` or check `openclaw gateway status`.",
+      "Start it with `carapace gateway run` or check `carapace gateway status`.",
       params.connectionDetails.message,
     ].join("\n"),
   });
@@ -1195,7 +1195,7 @@ async function callGatewayWithScopes<T = Record<string, unknown>>(
       throw new GatewayStoredDeviceAuthUnavailableError(
         [
           "No stored device auth for this gateway origin.",
-          `Run \`openclaw tui --url ${deviceAuthScope}\` to send a pairing request, approve it in that gateway's Control UI (Settings -> Devices) or run \`openclaw devices approve --latest\` on the gateway host, then retry.`,
+          `Run \`carapace tui --url ${deviceAuthScope}\` to send a pairing request, approve it in that gateway's Control UI (Settings -> Devices) or run \`carapace devices approve --latest\` on the gateway host, then retry.`,
         ].join("\n"),
       );
     }

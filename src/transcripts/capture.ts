@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentRoute } from "../routing/resolve-route.js";
 import { truncateUtf16Safe } from "../utils.js";
 import { persistTranscriptSummary } from "./capture-summary.js";
@@ -33,7 +33,7 @@ export type TranscriptsRuntimeContext = {
   agentAccountId?: string;
   caller?: TranscriptToolCaller;
   assertCallerActive?: () => void;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   stateDir: string;
   logger: TranscriptsLogger;
 };

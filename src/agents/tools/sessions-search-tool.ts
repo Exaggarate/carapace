@@ -1,6 +1,6 @@
 /** Full-text search over visible session transcripts. */
 import { Type } from "typebox";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { jsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
 import { redactToolPayloadText } from "../../logging/redact.js";
 import {
@@ -341,7 +341,7 @@ export function createSessionsSearchTool(opts?: {
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   callGateway?: GatewayCaller;
   sessionLinkBase?: string;
 }): AnyAgentTool {

@@ -4,7 +4,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { DEFAULT_CRON_MAX_CONCURRENT_RUNS } from "../config/cron-limits.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createBackgroundWorkOwner,
   getBackgroundWorkSnapshot,
@@ -15,7 +15,7 @@ import { CommandLane } from "../process/lanes.js";
 import { applyGatewayLaneConcurrency, resolveGatewayLaneConcurrency } from "./server-lanes.js";
 
 function applyConfigLaneConcurrency(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   opts: { gatewayStart?: boolean } = {},
 ): void {
   applyGatewayLaneConcurrency(resolveGatewayLaneConcurrency(config), opts);
@@ -37,7 +37,7 @@ describe("applyGatewayLaneConcurrency", () => {
   });
 
   it("uses the built-in cron concurrency", async () => {
-    applyConfigLaneConcurrency({} as OpenClawConfig);
+    applyConfigLaneConcurrency({} as CarapaceConfig);
 
     let activeRuns = 0;
     let peakActiveRuns = 0;
@@ -75,7 +75,7 @@ describe("applyGatewayLaneConcurrency", () => {
   });
 
   it("keeps the shared nested lane at its default concurrency", async () => {
-    applyConfigLaneConcurrency({} as OpenClawConfig, { gatewayStart: true });
+    applyConfigLaneConcurrency({} as CarapaceConfig, { gatewayStart: true });
 
     let startedRuns = 0;
     const releaseRuns = createDeferred();
@@ -96,7 +96,7 @@ describe("applyGatewayLaneConcurrency", () => {
 
   it("restores a suspended shared nested lane on gateway startup", async () => {
     setCommandLaneConcurrency(CommandLane.Nested, 0);
-    applyConfigLaneConcurrency({} as OpenClawConfig, { gatewayStart: true });
+    applyConfigLaneConcurrency({} as CarapaceConfig, { gatewayStart: true });
 
     let started = false;
     await enqueueCommandInLane(
@@ -112,7 +112,7 @@ describe("applyGatewayLaneConcurrency", () => {
 
   it("does not resume a suspended shared nested lane during live config publication", async () => {
     setCommandLaneConcurrency(CommandLane.Nested, 0);
-    applyConfigLaneConcurrency({} as OpenClawConfig);
+    applyConfigLaneConcurrency({} as CarapaceConfig);
 
     let started = false;
     const nestedRun = enqueueCommandInLane(

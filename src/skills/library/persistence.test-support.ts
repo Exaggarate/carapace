@@ -12,7 +12,7 @@ import { createBoundedChildOutput } from "../../../test/helpers/bounded-child-ou
 import { resolveRuntimeWorkerUrl } from "../../infra/runtime-worker-url.js";
 import { persistenceRuntimeEntrypoint } from "./persistence-runtime.test-support.js";
 
-// Source-runtime startup uses the same bound as test/helpers/openclaw-test-instance.ts.
+// Source-runtime startup uses the same bound as test/helpers/carapace-test-instance.ts.
 // Publication and child close each retain their independent 10-second bound.
 const SOURCE_RUNTIME_STARTUP_MS = 60_000;
 const PERSISTENCE_OPERATION_MS = 10_000;
@@ -47,10 +47,10 @@ function persistenceEnvironment(root: string): NodeJS.ProcessEnv {
     WINDIR: process.env.WINDIR,
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_HOME: root,
-    OPENCLAW_STATE_DIR: root,
-    OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-    OPENCLAW_AGENT_DIR: path.join(root, "agents", "main", "agent"),
+    CARAPACE_HOME: root,
+    CARAPACE_STATE_DIR: root,
+    CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+    CARAPACE_AGENT_DIR: path.join(root, "agents", "main", "agent"),
     XDG_CONFIG_HOME: path.join(root, "config"),
     XDG_CACHE_HOME: path.join(root, "cache"),
     TMPDIR: root,
@@ -202,10 +202,10 @@ export async function runPersistenceChild(root: string, command: PersistenceComm
 }
 
 export function readPersistenceDisk(root: string) {
-  const state = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"), { readOnly: true });
+  const state = new DatabaseSync(path.join(root, "state", "carapace.sqlite"), { readOnly: true });
   try {
     const agent = new DatabaseSync(
-      path.join(root, "agents", "main", "agent", "openclaw-agent.sqlite"),
+      path.join(root, "agents", "main", "agent", "carapace-agent.sqlite"),
       { readOnly: true },
     );
     try {
@@ -265,7 +265,7 @@ export async function assertPersistenceBundle(
     .toSorted((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   assert.equal(
     createHash("sha256")
-      .update(JSON.stringify(["openclaw.skill-library.tree.v1", manifest]))
+      .update(JSON.stringify(["carapace.skill-library.tree.v1", manifest]))
       .digest("hex"),
     pin.revision,
   );

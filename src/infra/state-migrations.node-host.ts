@@ -1,7 +1,7 @@
 // Doctor-only import for the retired node-host JSON config.
 import path from "node:path";
 import { root, type Root } from "@openclaw/fs-safe";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   LEGACY_NODE_HOST_CONFIG_CLAIM_SUFFIX,
   LEGACY_NODE_HOST_CONFIG_FILE,
@@ -10,8 +10,8 @@ import {
   type NodeHostGatewayConfig,
 } from "../node-host/config.js";
 import { normalizeNodeHostCloudflareAccessConfig } from "../node-host/gateway-cloudflare-access.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -32,7 +32,7 @@ const LEGACY_NODE_HOST_MAX_BYTES = 64 * 1024;
 const CONFIG_KEYS = new Set(["version", "nodeId", "token", "displayName", "gateway"]);
 const GATEWAY_KEYS = new Set(["host", "port", "tls", "tlsFingerprint", "contextPath"]);
 
-type NodeHostConfigDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type NodeHostConfigDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 
 type CanonicalNodeHostState = {
   config: NodeHostConfig;
@@ -244,7 +244,7 @@ function migrateIntoDatabase(params: { env: NodeJS.ProcessEnv; legacy: Canonical
 } {
   let imported = false;
   let preservedCanonical = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<NodeHostConfigDatabase>(db);
       const row = executeSqliteQueryTakeFirstSync(
@@ -424,7 +424,7 @@ export async function migrateLegacyNodeHostConfig(params: {
     label: "legacy node-host state",
     releaseLabel: "Node-host",
     errorLabel: "Failed reading legacy node-host state",
-    retryGuidance: "Stop the Gateway and node host, then run `openclaw doctor --fix` again.",
+    retryGuidance: "Stop the Gateway and node host, then run `carapace doctor --fix` again.",
     run: async (env) => {
       const stateRoot = await root(params.stateDir, {
         hardlinks: "reject",

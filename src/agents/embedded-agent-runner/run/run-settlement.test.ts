@@ -2,15 +2,15 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import type {
   CompactionAccountingFact,
   RunEmbeddedAgentParamsWithSessionFile,
 } from "./internal-params.js";
 
-async function createSettlementFixture(state: OpenClawTestState) {
+async function createSettlementFixture(state: CarapaceTestState) {
   const { loadSessionEntry, replaceSessionEntry } =
     await import("../../../config/sessions/session-accessor.js");
   const {
@@ -29,7 +29,7 @@ async function createSettlementFixture(state: OpenClawTestState) {
     agentId: "main",
     sessionId: randomUUID(),
     sessionKey: `agent:main:${randomUUID()}`,
-    storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+    storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
   };
   await replaceSessionEntry(target, {
     sessionId: target.sessionId,
@@ -164,7 +164,7 @@ async function createSettlementFixture(state: OpenClawTestState) {
 async function withSettlementFixture(
   body: (fixture: Awaited<ReturnType<typeof createSettlementFixture>>) => Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "run-settlement", scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ label: "run-settlement", scenario: "minimal" }, async (state) => {
     const fixture = await createSettlementFixture(state);
     try {
       await body(fixture);

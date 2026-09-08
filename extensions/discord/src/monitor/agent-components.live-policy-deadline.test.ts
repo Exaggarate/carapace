@@ -1,5 +1,5 @@
 import { InteractionResponseType, MessageFlags } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildDiscordComponentCustomId } from "../component-custom-id.js";
 import {
@@ -22,7 +22,7 @@ import {
 import { createDiscordComponentControls } from "./agent-components.js";
 import type { DiscordLivePolicy, DiscordLivePolicyReader } from "./live-policy.js";
 
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: { discord: { dmPolicy: "allowlist", allowFrom: ["123456789"] } },
 };
 const policy: DiscordLivePolicy = {

@@ -19,14 +19,14 @@ function makeRepoRoot(prefix: string): string {
 function writeDistPluginFile(repoRoot: string, root: "dist" | "dist-runtime", pluginId: string) {
   const pluginDir = path.join(repoRoot, root, "extensions", pluginId);
   fs.mkdirSync(pluginDir, { recursive: true });
-  fs.writeFileSync(path.join(pluginDir, "openclaw.plugin.json"), "{}\n", "utf8");
+  fs.writeFileSync(path.join(pluginDir, "carapace.plugin.json"), "{}\n", "utf8");
 }
 
 function writePluginSourcePackage(repoRoot: string, pluginId: string) {
   const pluginDir = path.join(repoRoot, "extensions", pluginId);
   fs.mkdirSync(pluginDir, { recursive: true });
   writeJsonFile(path.join(pluginDir, "package.json"), {
-    name: `@openclaw/${pluginId}`,
+    name: `@carapace/${pluginId}`,
     version: "0.0.0",
   });
 }
@@ -60,7 +60,7 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("removes package-excluded plugin runtime artifacts unless Docker explicitly opts it in", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-dist-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-dist-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/diagnostics-otel/**", "!dist/extensions/feishu/**"],
     });
@@ -74,7 +74,7 @@ describe("pruneDockerPluginDist", () => {
 
     const removed = pruneDockerPluginDist({
       repoRoot,
-      env: { OPENCLAW_EXTENSIONS: "diagnostics-otel" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_EXTENSIONS: "diagnostics-otel" } as NodeJS.ProcessEnv,
     });
 
     expect(removed).toEqual([
@@ -92,21 +92,21 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("honors custom bundled plugin source roots when pruning Docker runtime importers", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-source-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-source-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/acpx/**"],
     });
     const pluginDir = path.join(repoRoot, "plugins", "acpx");
     fs.mkdirSync(pluginDir, { recursive: true });
     writeJsonFile(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/acpx",
+      name: "@carapace/acpx",
       version: "0.0.0",
     });
 
     const removed = pruneDockerPluginDist({
       repoRoot,
       env: {
-        OPENCLAW_BUNDLED_PLUGIN_DIR: "plugins",
+        CARAPACE_BUNDLED_PLUGIN_DIR: "plugins",
       } as NodeJS.ProcessEnv,
     });
 
@@ -115,7 +115,7 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("removes node_modules dependency closure that only omitted Docker plugins need", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-node-modules-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-node-modules-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/acpx/**", "!dist/extensions/codex/**"],
       dependencies: {
@@ -123,7 +123,7 @@ describe("pruneDockerPluginDist", () => {
       },
     });
     writeJsonFile(path.join(repoRoot, "extensions", "acpx", "package.json"), {
-      name: "@openclaw/acpx",
+      name: "@carapace/acpx",
       version: "0.0.0",
       dependencies: {
         "@zed-industries/codex-acp": "0.0.0",
@@ -131,15 +131,15 @@ describe("pruneDockerPluginDist", () => {
       },
     });
     writeJsonFile(path.join(repoRoot, "extensions", "codex", "package.json"), {
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "0.0.0",
       dependencies: {
         "@openai/codex": "0.0.0",
         zod: "0.0.0",
       },
     });
-    writeNodePackage(repoRoot, "@openclaw/acpx");
-    writeNodePackage(repoRoot, "@openclaw/codex");
+    writeNodePackage(repoRoot, "@carapace/acpx");
+    writeNodePackage(repoRoot, "@carapace/codex");
     writeNodePackage(repoRoot, "zod");
     writeNodePackage(repoRoot, "@openai/codex", {
       optionalDependencies: {
@@ -173,11 +173,11 @@ describe("pruneDockerPluginDist", () => {
 
     const removed = pruneDockerPluginDist({
       repoRoot,
-      env: { OPENCLAW_EXTENSIONS: "codex" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_EXTENSIONS: "codex" } as NodeJS.ProcessEnv,
     });
 
     expect(removed).toEqual([
-      "node_modules/@openclaw/acpx",
+      "node_modules/@carapace/acpx",
       "node_modules/@zed-industries/codex-acp",
       "node_modules/@zed-industries/codex-acp-linux-x64",
       "node_modules/postcss",
@@ -196,7 +196,7 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("links retained externally distributed plugin dependencies under their packaged roots", () => {
-    const repoRoot = fs.realpathSync(makeRepoRoot("openclaw-docker-plugin-dist-links-"));
+    const repoRoot = fs.realpathSync(makeRepoRoot("carapace-docker-plugin-dist-links-"));
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: [
         "dist/**",
@@ -209,7 +209,7 @@ describe("pruneDockerPluginDist", () => {
     for (const pluginId of ["kept-external", "omitted-external", "internal"]) {
       writeDistPluginFile(repoRoot, "dist", pluginId);
       writeJsonFile(path.join(repoRoot, "extensions", pluginId, "package.json"), {
-        name: `@openclaw/${pluginId}`,
+        name: `@carapace/${pluginId}`,
         version: "0.0.0",
         dependencies:
           pluginId === "internal"
@@ -238,7 +238,7 @@ describe("pruneDockerPluginDist", () => {
 
     const removed = pruneDockerPluginDist({
       repoRoot,
-      env: { OPENCLAW_EXTENSIONS: "kept-external" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_EXTENSIONS: "kept-external" } as NodeJS.ProcessEnv,
     });
 
     expect(removed).toEqual(["extensions/omitted-external", "dist/extensions/omitted-external"]);
@@ -279,13 +279,13 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("fails closed when a retained plugin dependency stays unreachable from its packaged root", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-dist-unreachable-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-dist-unreachable-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/kept-external/**"],
     });
     writeDistPluginFile(repoRoot, "dist", "kept-external");
     writeJsonFile(path.join(repoRoot, "extensions", "kept-external", "package.json"), {
-      name: "@openclaw/kept-external",
+      name: "@carapace/kept-external",
       version: "0.0.0",
       dependencies: { "absent-dep": "1.0.0" },
       optionalDependencies: { "absent-optional": "1.0.0" },
@@ -294,7 +294,7 @@ describe("pruneDockerPluginDist", () => {
     expect(() =>
       pruneDockerPluginDist({
         repoRoot,
-        env: { OPENCLAW_EXTENSIONS: "kept-external" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_EXTENSIONS: "kept-external" } as NodeJS.ProcessEnv,
       }),
     ).toThrow(
       /^plugin dependencies are not reachable from their packaged dist roots:\nkept-external: absent-dep$/u,
@@ -302,7 +302,7 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("keeps root-hoisted transitives used through a kept plugin's nested dependency", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-workspace-importer-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-workspace-importer-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/omitted-client/**"],
       dependencies: {
@@ -311,14 +311,14 @@ describe("pruneDockerPluginDist", () => {
     });
     const keptPluginDir = path.join(repoRoot, "extensions", "kept-client");
     writeJsonFile(path.join(keptPluginDir, "package.json"), {
-      name: "@openclaw/kept-client",
+      name: "@carapace/kept-client",
       version: "0.0.0",
       dependencies: {
         "shared-client": "2.0.0",
       },
     });
     writeJsonFile(path.join(repoRoot, "extensions", "omitted-client", "package.json"), {
-      name: "@openclaw/omitted-client",
+      name: "@carapace/omitted-client",
       version: "0.0.0",
       dependencies: {
         "kept-transitive": "1.0.0",
@@ -357,7 +357,7 @@ describe("pruneDockerPluginDist", () => {
   });
 
   it("keeps transitive dependencies resolved through nested package versions", () => {
-    const repoRoot = makeRepoRoot("openclaw-docker-plugin-nested-dependencies-");
+    const repoRoot = makeRepoRoot("carapace-docker-plugin-nested-dependencies-");
     writeJsonFile(path.join(repoRoot, "package.json"), {
       files: ["dist/**", "!dist/extensions/optional-client/**"],
       dependencies: {
@@ -366,7 +366,7 @@ describe("pruneDockerPluginDist", () => {
       },
     });
     writeJsonFile(path.join(repoRoot, "extensions", "optional-client", "package.json"), {
-      name: "@openclaw/optional-client",
+      name: "@carapace/optional-client",
       version: "0.0.0",
       dependencies: {
         "whatwg-url": "16.0.1",

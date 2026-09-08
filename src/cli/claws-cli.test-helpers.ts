@@ -27,8 +27,8 @@ export async function writeManifestFile(
   tempDirs: { make(prefix: string): string },
   value: unknown = minimalManifest,
 ): Promise<string> {
-  const dir = tempDirs.make("openclaw-claws-cli-");
-  const path = join(dir, "openclaw.claw.json");
+  const dir = tempDirs.make("carapace-claws-cli-");
+  const path = join(dir, "carapace.claw.json");
   await writeFile(path, JSON.stringify(value), "utf8");
   return path;
 }
@@ -36,7 +36,7 @@ export async function writeManifestFile(
 export async function writePackageFixture(tempDirs: {
   make(prefix: string): string;
 }): Promise<{ root: string; workspace: string }> {
-  const root = tempDirs.make("openclaw-claws-cli-package-");
+  const root = tempDirs.make("carapace-claws-cli-package-");
   await mkdir(join(root, "workspace"));
   await writeFile(join(root, "workspace", "AGENTS.md"), "# Demo\n", "utf8");
   await writeFile(
@@ -44,12 +44,12 @@ export async function writePackageFixture(tempDirs: {
     JSON.stringify({
       name: "@acme/demo-agent",
       version: "1.2.3",
-      openclaw: { claw: "openclaw.claw.json" },
+      carapace: { claw: "carapace.claw.json" },
     }),
     "utf8",
   );
   await writeFile(
-    join(root, "openclaw.claw.json"),
+    join(root, "carapace.claw.json"),
     JSON.stringify({
       schemaVersion: 1,
       agent: { id: "demo-agent", name: "Demo Agent" },

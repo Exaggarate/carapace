@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -91,7 +91,7 @@ describe("cli json stdout contract", () => {
   ])("renders cron edit failures through the shared owner for $name", async (testCase) => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "missing-openclaw.json");
+        const configPath = path.join(tempHome, "missing-carapace.json");
         const stateDir = path.join(tempHome, "isolated-state");
         const gatewayError = "AUTOQA_INJECTED_GATEWAY_FAILURE";
         const preload = Buffer.from(
@@ -108,10 +108,10 @@ describe("cli json stdout contract", () => {
         ).toString("base64");
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { FORCE_COLOR: "1" } : {}),
         });
         const message =
@@ -122,7 +122,7 @@ describe("cli json stdout contract", () => {
         expect(result.status, result.stderr).toBe(1);
         if ("human" in testCase) {
           if ("tty" in testCase) {
-            expect(result.stdout).toContain("OpenClaw");
+            expect(result.stdout).toContain("Carapace");
           } else {
             expect(result.stdout).toBe("");
           }
@@ -145,7 +145,7 @@ describe("cli json stdout contract", () => {
         }
         await expect(fs.stat(configPath)).rejects.toMatchObject({ code: "ENOENT" });
       },
-      { prefix: "openclaw-cron-edit-json-failure-e2e-" },
+      { prefix: "carapace-cron-edit-json-failure-e2e-" },
     );
   });
 
@@ -161,12 +161,12 @@ describe("cli json stdout contract", () => {
           error: {
             type: "cli_error",
             message:
-              "TaskFlow not found: missing-flow. Run openclaw tasks flow list to see recent flow ids.",
+              "TaskFlow not found: missing-flow. Run carapace tasks flow list to see recent flow ids.",
           },
         });
         expect(result.stderr).toBe("");
       },
-      { prefix: "openclaw-task-flow-json-failure-e2e-" },
+      { prefix: "carapace-task-flow-json-failure-e2e-" },
     );
   });
 
@@ -245,9 +245,9 @@ describe("cli json stdout contract", () => {
           'Object.defineProperty(process.stdout, "isTTY", { value: true, configurable: true }); Object.defineProperty(process.stderr, "isTTY", { value: true, configurable: true });',
         )}`;
         const result = runBuiltCli(tempHome, testCase.args, {
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { NODE_OPTIONS: `--import=${preload}`, FORCE_COLOR: "1" } : {}),
         });
 
@@ -267,7 +267,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).toContain("\u001B[?25h");
         }
       },
-      { prefix: "openclaw-task-registration-json-failure-e2e-" },
+      { prefix: "carapace-task-registration-json-failure-e2e-" },
     );
   });
 });

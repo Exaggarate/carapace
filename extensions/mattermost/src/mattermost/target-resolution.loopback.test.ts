@@ -1,8 +1,8 @@
 // Prove authoritative Mattermost channel kinds over the real Bot API transport.
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { resolveMattermostOutboundSessionRoute } from "../session-route.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { CarapaceConfig } from "./runtime-api.js";
 import { resolveMattermostOpaqueTarget } from "./target-resolution.js";
 
 const PUBLIC_CHANNEL_ID = "abcdefghijklmnopqrstuvwxyz";
@@ -52,7 +52,7 @@ describe("Mattermost opaque channel resolution over real HTTP", () => {
               network: { dangerouslyAllowPrivateNetwork: true },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const cases = [
           { id: PUBLIC_CHANNEL_ID, kind: "channel" },

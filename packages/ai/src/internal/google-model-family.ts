@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 export function isGoogleGemini3ProModel(modelId: string): boolean {
   const normalized = normalizeLowercaseStringOrEmpty(modelId);

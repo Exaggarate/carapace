@@ -1,6 +1,6 @@
 // Gateway chat display sanitizer.
-// Removes OpenClaw-only envelopes before messages are shown in UI/RPC results.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+// Removes Carapace-only envelopes before messages are shown in UI/RPC results.
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import {
   stripInternalMetadataForDisplay,
   stripUserEnvelopeForDisplay,
@@ -76,7 +76,7 @@ function stripEnvelopeFromContentWithRole(content: unknown[], role: string): unk
   return next ?? content;
 }
 
-/** Strips OpenClaw envelope metadata from one display message without mutating it. */
+/** Strips Carapace envelope metadata from one display message without mutating it. */
 export function stripEnvelopeFromMessage(message: unknown): unknown {
   if (!message || typeof message !== "object") {
     return message;

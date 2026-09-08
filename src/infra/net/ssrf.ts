@@ -17,9 +17,9 @@ import {
   parseCanonicalIpAddress,
   parseLooseIpAddress,
   isUnspecifiedIpAddress,
-} from "@openclaw/net-policy/ip";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/net-policy/ip";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import type { Dispatcher } from "undici";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { normalizeHostname } from "./hostname.js";

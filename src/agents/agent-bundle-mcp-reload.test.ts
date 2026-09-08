@@ -2,11 +2,11 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { setImmediate } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { cleanupTempDirs } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginManifestRecordFixture } from "../plugins/plugin-metadata.test-support.js";
 import { withPluginRuntimeRegistryScope } from "../plugins/runtime/gateway-request-scope.js";
 import { createCombinedSessionMcpRuntime } from "./agent-bundle-mcp-combined.js";
@@ -386,7 +386,7 @@ it("rotates one requester's changed server while retaining sibling connections a
     }
     let nowMs = 100_000;
     const { manager, params } = await fixture(() => nowMs);
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: {
         servers: {
@@ -446,7 +446,7 @@ it.each(["removal", "public origin change", "plugin replacement with explicit sh
   "revokes a retained connect callback on %s",
   async (change) => {
     const { manager, params } = await fixture();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { enabled: false },
       gateway: { publicOrigin: "https://gateway.example.test" },
       mcp: {
@@ -535,7 +535,7 @@ it("retains plugin retirement across a later config-only publication during crea
   await withPluginRuntimeRegistryScope(resolverRegistry.registry, async () => {
     const url = await httpProbe();
     const { params } = await fixture();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { scoped: { transport: "streamable-http" } } },
     };
@@ -604,7 +604,7 @@ it.each(["no shadow", "shadow at publication", "shadow before transfer"])(
         }),
       ],
     };
-    const cfg = (label: string): OpenClawConfig => {
+    const cfg = (label: string): CarapaceConfig => {
       const next = {
         ...config(label),
         plugins: { entries: { "reload-probe": { enabled: true } } },
@@ -657,7 +657,7 @@ it("reconciles a second publication arriving while a pending owner is retiring a
   });
   const { params } = await fixture();
   const server = { transport: "streamable-http" as const, url };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     plugins: { enabled: false },
     mcp: { servers: { first: server, second: server } },
   };
@@ -714,7 +714,7 @@ it.each([false, true])(
     });
     const { manager, params } = await fixture();
     const server = { transport: "streamable-http" as const, url };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { first: server, second: server } },
     };
@@ -762,7 +762,7 @@ it("joins config retirement cleanup before installing a replacement transport", 
   });
   const { manager, params } = await fixture();
   const server = { transport: "streamable-http" as const, url };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     plugins: { enabled: false },
     mcp: { servers: { first: server, second: server } },
   };

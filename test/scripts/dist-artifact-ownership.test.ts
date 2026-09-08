@@ -35,7 +35,7 @@ function write(root: string, relative: string, content: string) {
 }
 
 function createCheckout() {
-  const root = fs.realpathSync(fixture.createTempDir("openclaw-dist-owner-"));
+  const root = fs.realpathSync(fixture.createTempDir("carapace-dist-owner-"));
   write(root, "package.json", '{"type":"module"}');
   write(root, "pnpm-workspace.yaml", "packages: []\n");
   write(root, "src/plugin-sdk/qa-channel-protocol.ts", "export interface Channel { id: string }\n");
@@ -360,7 +360,7 @@ describe.skipIf(process.platform === "win32")("dist artifact ownership", () => {
         const root = groups
           ? createDeclarationFixture(
               groups,
-              path.join(fs.realpathSync(fixture.createTempDir("openclaw-dist-owner-")), "Project"),
+              path.join(fs.realpathSync(fixture.createTempDir("carapace-dist-owner-")), "Project"),
             ).root
           : createCheckout();
         if (!groups) {

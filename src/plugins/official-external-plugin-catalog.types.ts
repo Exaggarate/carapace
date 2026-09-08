@@ -7,7 +7,7 @@ import type {
   PluginManifestNativeSessionCatalogSetup,
 } from "./manifest-types.js";
 import type {
-  OpenClawPackageManifest,
+  CarapacePackageManifest,
   PluginPackageChannel,
   PluginPackageInstall,
 } from "./package-manifest.types.js";
@@ -77,7 +77,7 @@ type OfficialExternalCatalogChannel = PluginPackageChannel & {
 export type OfficialExternalPluginCatalogManifest = {
   legacyPluginIds?: readonly string[];
   legacyNpmPackageNames?: readonly string[];
-  setupFeatures?: OpenClawPackageManifest["setupFeatures"];
+  setupFeatures?: CarapacePackageManifest["setupFeatures"];
   setup?: { nativeSessionCatalog?: PluginManifestNativeSessionCatalogSetup };
   plugin?: {
     id?: string;

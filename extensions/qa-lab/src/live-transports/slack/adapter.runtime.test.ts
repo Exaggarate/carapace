@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   prepareFlow: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/proxy-capture", () => ({
+vi.mock("carapace/plugin-sdk/proxy-capture", () => ({
   acquireDebugProxyCaptureStore: mocks.acquireCaptureStore,
   createDebugProxyCaptureReader: mocks.createCaptureReader,
 }));
@@ -97,7 +97,7 @@ describe("Slack live adapter reconciliation", () => {
         editMessage: vi.fn(),
       },
     } as never);
-    const runtimeEnv = { OPENCLAW_STATE_DIR: "/candidate/state" };
+    const runtimeEnv = { CARAPACE_STATE_DIR: "/candidate/state" };
     const input = {
       config: {},
       gateway: { runtimeEnv },

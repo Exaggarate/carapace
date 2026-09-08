@@ -124,7 +124,7 @@ describe("check-deadcode-unused-files", () => {
   it("parses the compact Knip unused-file section", () => {
     expect(
       parseKnipCompactUnusedFiles(`
-> openclaw@2026.4.27 deadcode:knip /repo
+> carapace@2026.4.27 deadcode:knip /repo
 > pnpm dlx knip --reporter compact --files
 
 Unused files (2)
@@ -204,7 +204,7 @@ Delete the files or model their real entrypoints in Knip.`,
 
   it("runs Knip through a process-group-aware subprocess", async () => {
     const calls: unknown[] = [];
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-knip-runner-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-knip-runner-"));
     const pnpmExecPath = path.join(root, "pnpm.cjs");
     writeFileSync(pnpmExecPath, "console.log('pnpm');\n", "utf8");
 
@@ -336,7 +336,7 @@ Delete the files or model their real entrypoints in Knip.`,
   it.skipIf(process.platform === "win32")(
     "waits for timed-out Knip process groups after the wrapper exits",
     async () => {
-      const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-knip-timeout-"));
+      const root = mkdtempSync(path.join(os.tmpdir(), "carapace-knip-timeout-"));
       const childPidPath = path.join(root, "child.pid");
       let childPid = 0;
 
@@ -349,18 +349,18 @@ Delete the files or model their real entrypoints in Knip.`,
           "const { spawn } = require('node:child_process');",
           "const fs = require('node:fs');",
           `const child = spawn(process.execPath, ['-e', ${JSON.stringify(childScript)}], { stdio: 'ignore' });`,
-          "fs.writeFileSync(process.env.OPENCLAW_TEST_CHILD_PID, String(child.pid));",
+          "fs.writeFileSync(process.env.CARAPACE_TEST_CHILD_PID, String(child.pid));",
           "process.on('SIGTERM', () => process.exit(0));",
           "setInterval(() => {}, 1000);",
         ].join("");
 
         const resultPromise = runKnip(KNIP_UNUSED_FILE_ARGS, {
-          env: { ...process.env, OPENCLAW_TEST_CHILD_PID: childPidPath },
+          env: { ...process.env, CARAPACE_TEST_CHILD_PID: childPidPath },
           killGraceMs: 50,
           spawnCommand(_command: string, _args: string[], options: unknown) {
             const parent = spawn(process.execPath, ["-e", parentScript], {
               ...(options as Parameters<typeof spawn>[2]),
-              env: { ...process.env, OPENCLAW_TEST_CHILD_PID: childPidPath },
+              env: { ...process.env, CARAPACE_TEST_CHILD_PID: childPidPath },
             });
             childPid = waitForPidFileSync(childPidPath, 2_000);
             return parent;
@@ -385,7 +385,7 @@ Delete the files or model their real entrypoints in Knip.`,
   it.skipIf(process.platform === "win32")(
     "cleans active Knip descendants before forwarding parent SIGTERM",
     async () => {
-      const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-knip-parent-signal-"));
+      const root = mkdtempSync(path.join(os.tmpdir(), "carapace-knip-parent-signal-"));
       const childPidPath = path.join(root, "child.pid");
       const readyPath = path.join(root, "child.ready");
       const scriptUrl = pathToFileURL(path.resolve("scripts/deadcode-knip-runner.mts")).href;

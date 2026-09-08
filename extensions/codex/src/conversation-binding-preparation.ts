@@ -2,16 +2,16 @@
 import {
   resolveActiveEmbeddedRunSessionId,
   resolveSandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import { loadExecApprovals } from "carapace/plugin-sdk/exec-approvals-runtime";
 import {
   getSessionEntry,
   resolveStorePath,
   resolveTranscriptSessionKeyBySessionId,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server/app-server-policy.js";
 import { closeCodexStartupClientBestEffort } from "./app-server/attempt-client-cleanup.js";
 import {
@@ -31,7 +31,7 @@ import {
   canUseCodexModelBackedApprovalsReviewerForModel,
   readCodexPluginConfig,
   readCodexRequirementsToml,
-  resolveOpenClawExecPolicyForCodexAppServer,
+  resolveCarapaceExecPolicyForCodexAppServer,
   resolveCodexAppServerRuntimeOptions,
 } from "./app-server/config.js";
 import {
@@ -86,7 +86,7 @@ import {
 } from "./conversation-binding-data.js";
 
 const NATIVE_CONVERSATION_INTERACTIVE_APPROVALS_UNAVAILABLE =
-  "OpenClaw native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.";
+  "Carapace native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.";
 
 export type CodexConversationConfig = Parameters<
   typeof resolveCodexAppServerAuthProfileIdForAgent
@@ -145,7 +145,7 @@ export async function resolveConversationAppServerRuntime(params: {
     params.config && agentId
       ? resolveAgentWorkspaceDir(params.config, agentId)
       : resolveCodexDefaultWorkspaceDir(params.pluginConfig);
-  const execPolicy = resolveOpenClawExecPolicyForCodexAppServer({
+  const execPolicy = resolveCarapaceExecPolicyForCodexAppServer({
     config: params.config,
     agentId,
     permissionMode,
@@ -169,7 +169,7 @@ export async function resolveConversationAppServerRuntime(params: {
     model: params.model,
     config: params.config,
     agentDir: params.agentDir,
-    openClawSandboxActive: Boolean(sandboxForPolicy?.enabled),
+    carapaceSandboxActive: Boolean(sandboxForPolicy?.enabled),
   });
   const canUseAutoReview = canUseCodexModelBackedApprovalsReviewerForModel({
     modelProvider: params.modelProvider,
@@ -201,7 +201,7 @@ export async function resolveConversationAppServerRuntime(params: {
 }
 
 export const CODEX_CONVERSATION_THREAD_DEVELOPER_INSTRUCTIONS =
-  "This Codex thread is bound to an OpenClaw conversation. Answer normally; OpenClaw will deliver your final response back to the conversation.";
+  "This Codex thread is bound to an Carapace conversation. Answer normally; Carapace will deliver your final response back to the conversation.";
 
 type CodexThreadBindingParams = {
   pluginConfig?: unknown;

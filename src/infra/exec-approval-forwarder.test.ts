@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Covers exec approval forwarding to channel plugins.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { ReplyPayload } from "../auto-reply/types.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { createExecApprovalForwarder } from "./exec-approval-forwarder.js";
@@ -55,7 +55,7 @@ async function flushPendingDelivery(): Promise<void> {
 }
 
 function isDiscordExecApprovalClientEnabledForTest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   const accountId = params.accountId?.trim();
@@ -73,7 +73,7 @@ function isDiscordExecApprovalClientEnabledForTest(params: {
 }
 
 function isTelegramExecApprovalClientEnabledForTest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   const accountId = params.accountId?.trim();
@@ -91,7 +91,7 @@ function isTelegramExecApprovalClientEnabledForTest(params: {
 }
 
 function shouldSuppressTelegramExecApprovalForwardingFallbackForTest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: { channel: string; accountId?: string | null };
   request: { request: { turnSourceChannel?: string | null; turnSourceAccountId?: string | null } };
 }): boolean {
@@ -160,7 +160,7 @@ const telegramApprovalPlugin: Pick<
   approvalCapability: {
     delivery: {
       shouldSuppressForwardingFallback: (params: {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         target: { channel: string; accountId?: string | null };
         request: {
           request: { turnSourceChannel?: string | null; turnSourceAccountId?: string | null };
@@ -186,7 +186,7 @@ const discordApprovalPlugin: Pick<
         cfg,
         target,
       }: {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         target: { channel: string; accountId?: string | null };
       }) =>
         target.channel === "discord" &&
@@ -238,7 +238,7 @@ function requireFirstPayload(deliver: ReturnType<typeof vi.fn>): ReplyPayload {
   return payload;
 }
 
-function makeTargetsCfg(targets: Array<{ channel: string; to: string }>): OpenClawConfig {
+function makeTargetsCfg(targets: Array<{ channel: string; to: string }>): CarapaceConfig {
   return {
     approvals: {
       exec: {
@@ -247,13 +247,13 @@ function makeTargetsCfg(targets: Array<{ channel: string; to: string }>): OpenCl
         targets,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 const TARGETS_CFG = makeTargetsCfg([{ channel: "slack", to: "U123" }]);
 
 function createForwarder(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deliver?: ReturnType<typeof vi.fn>;
   resolveSessionTarget?: NonNullable<
     NonNullable<Parameters<typeof createExecApprovalForwarder>[0]>["resolveSessionTarget"]
@@ -275,7 +275,7 @@ function createForwarder(params: {
   return { deliver, forwarder };
 }
 
-function makeSessionCfg(options: { discordExecApprovalsEnabled?: boolean } = {}): OpenClawConfig {
+function makeSessionCfg(options: { discordExecApprovalsEnabled?: boolean } = {}): CarapaceConfig {
   return {
     ...(options.discordExecApprovalsEnabled
       ? {
@@ -290,11 +290,11 @@ function makeSessionCfg(options: { discordExecApprovalsEnabled?: boolean } = {})
         }
       : {}),
     approvals: { exec: { enabled: true, mode: "session" } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function expectDiscordSessionTargetRequest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   expectedAccepted: boolean;
   expectedDeliveryCount: number;
 }) {
@@ -326,7 +326,7 @@ async function expectSessionFilterRequestResult(params: {
         sessionFilter: params.sessionFilter,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   const { deliver, forwarder } = createForwarder({
     cfg,
@@ -379,7 +379,7 @@ describe("exec approval forwarder", () => {
     vi.useFakeTimers();
     const cfg = {
       approvals: { exec: { enabled: true, mode: "session" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const { deliver, forwarder } = createForwarder({
       cfg,
@@ -594,7 +594,7 @@ describe("exec approval forwarder", () => {
           targets: [{ channel: "telegram", to: "-100999", accountId: "bot", threadId: "77" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const { deliver, forwarder } = createForwarder({
       cfg,
@@ -667,7 +667,7 @@ describe("exec approval forwarder", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const { deliver, forwarder } = createForwarder({
       cfg,
@@ -700,7 +700,7 @@ describe("exec approval forwarder", () => {
       );
       const cfg = {
         approvals: { exec: { enabled: true, mode: "session" } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const { deliver, forwarder } = createForwarder({ cfg, resolveSessionTarget });
 
       await expect(
@@ -838,7 +838,7 @@ describe("exec approval forwarder", () => {
 
   it("returns false when forwarding is disabled", async () => {
     const { deliver, forwarder } = createForwarder({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
     });
     await expect(forwarder.handleRequested(baseRequest)).resolves.toBe(false);
     expect(deliver).not.toHaveBeenCalled();

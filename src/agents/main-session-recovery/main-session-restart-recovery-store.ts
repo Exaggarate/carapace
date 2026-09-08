@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   type InternalSessionEntry as SessionEntry,
   resolveSessionWorkStartError,
@@ -10,7 +10,7 @@ import {
   loadExactSessionEntry,
   updateSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayRecoveryRuntime } from "../../gateway/server-instance-runtime.types.js";
 import { readSessionMessagesAsync } from "../../gateway/session-transcript-readers.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
@@ -188,7 +188,7 @@ export function loadExpectedRestartRecoveryTarget(params: {
 
 export async function recoverStore(params: {
   storeAgentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   observationOnly?: boolean;
   onExhaustedTarget?: (target: ExhaustedRestartRecoveryTarget) => void;
   storePath: string;

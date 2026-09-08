@@ -14,10 +14,10 @@ import { loadBrowserTabThumbnail } from "../../../lib/chat/browser-tab-preview.t
 import type { ToolPreview } from "../../../lib/chat/tool-cards.ts";
 import { copyToClipboard } from "../../../lib/clipboard.ts";
 import { openExternalUrlSafe } from "../../../lib/open-external-url.ts";
-import { OpenClawLitElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../../lit/subscriptions-controller.ts";
 
-class OpenClawBrowserTabCard extends OpenClawLitElement {
+class CarapaceBrowserTabCard extends CarapaceLitElement {
   @consume({ context: applicationContext, subscribe: true })
   @property({ attribute: false })
   context?: ApplicationContext<RouteId>;
@@ -283,12 +283,12 @@ class OpenClawBrowserTabCard extends OpenClawLitElement {
   }
 }
 
-if (!customElements.get("openclaw-browser-tab-card")) {
-  customElements.define("openclaw-browser-tab-card", OpenClawBrowserTabCard);
+if (!customElements.get("carapace-browser-tab-card")) {
+  customElements.define("carapace-browser-tab-card", CarapaceBrowserTabCard);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-browser-tab-card": OpenClawBrowserTabCard;
+    "carapace-browser-tab-card": CarapaceBrowserTabCard;
   }
 }

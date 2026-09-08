@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { runCommandBufferedMock } = vi.hoisted(() => ({ runCommandBufferedMock: vi.fn() }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", () => ({
+vi.mock("carapace/plugin-sdk/process-runtime", () => ({
   runCommandBuffered: runCommandBufferedMock,
 }));
 

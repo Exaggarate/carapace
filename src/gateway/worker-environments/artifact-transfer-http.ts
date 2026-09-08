@@ -2,7 +2,7 @@ import type { FileHandle } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { AUTH_RATE_LIMIT_SCOPE_WORKER_TRANSFER, type AuthRateLimiter } from "../auth-rate-limit.js";
 import { sendJson, watchClientDisconnect } from "../http-common.js";
 import { withSerializedRateLimitAttempt } from "../rate-limit-attempt-serialization.js";
@@ -138,7 +138,7 @@ export function createArtifactTransferHttpCallback(
           res.writeHead(200, {
             "content-type": "application/octet-stream",
             "content-length": String(file.bytes),
-            "x-openclaw-content-sha256": file.sha256,
+            "x-carapace-content-sha256": file.sha256,
           });
           // An extra EOF read can outlive the client's Content-Length-complete response
           // and let owner revocation destroy its reused keep-alive socket.

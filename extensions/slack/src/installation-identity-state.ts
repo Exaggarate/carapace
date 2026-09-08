@@ -1,6 +1,6 @@
 // Slack plugin module owns authenticated installation identity state.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import { resolveGlobalMap } from "openclaw/plugin-sdk/global-singleton";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import { resolveGlobalMap } from "carapace/plugin-sdk/global-singleton";
 
 type SlackInstallationKind = "workspace" | "enterprise" | "degraded";
 
@@ -15,7 +15,7 @@ type SlackInstallationStateRegistration = {
 };
 
 const slackInstallationStates = resolveGlobalMap<string, SlackInstallationStateEntry>(
-  Symbol.for("openclaw.slack.installation-identities"),
+  Symbol.for("carapace.slack.installation-identities"),
   "close-and-restart",
 );
 

@@ -1,15 +1,15 @@
 // Persists the root ownership record for one Claw-created agent and workspace.
 
 import type { DatabaseSync } from "node:sqlite";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { digestClawAgentConfig } from "./agent-config-digest.js";
 import {
   CLAW_PACKAGE_REF_SCHEMA_VERSION,
@@ -173,15 +173,15 @@ export function readClawInstallRecordFromDatabase(
 
 export function readClawInstallRecord(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawInstall | undefined {
-  const row = selectClawInstallRow(openOpenClawStateDatabase(options).db, agentId);
+  const row = selectClawInstallRow(openCarapaceStateDatabase(options).db, agentId);
   return row ? rowToRecord(row) : undefined;
 }
 
 export function persistClawInstallRecord(
   plan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     status?: ClawInstallStatus;
     nowMs?: number;
     expectedExistingRecord?: PersistedClawInstall;
@@ -194,7 +194,7 @@ export function persistClawInstallRecord(
   const agentConfigDigest = digestClawAgentConfig(plan.agent.config);
   const ownedPaths = agentOwnedPaths(plan);
   const bootstrap = bootstrapProvenance(plan);
-  const persistedRecord = runOpenClawStateWriteTransaction(({ db }) => {
+  const persistedRecord = runCarapaceStateWriteTransaction(({ db }) => {
     const existing = selectClawInstallRow(db, plan.agent.finalId);
     if (existing) {
       const record = rowToRecord(existing);
@@ -277,12 +277,12 @@ export function persistClawInstallRecord(
 export function updateClawInstallRecordStatus(
   agentId: string,
   status: ClawInstallStatus,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     nowMs?: number;
     expectedStatuses?: ClawInstallStatus[];
   } = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const expectedStatuses = options.expectedStatuses ?? [];
     let query = getNodeSqliteKysely<ClawProvenanceDatabase>(db)
       .updateTable("claw_installs")
@@ -301,9 +301,9 @@ export function updateClawInstallRecordStatus(
 
 export function deleteClawInstallRecord(
   agentId: string,
-  options: OpenClawStateDatabaseOptions & { expectedStatuses?: ClawInstallStatus[] } = {},
+  options: CarapaceStateDatabaseOptions & { expectedStatuses?: ClawInstallStatus[] } = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const expectedStatuses = options.expectedStatuses ?? [];
     let query = getNodeSqliteKysely<ClawProvenanceDatabase>(db)
       .deleteFrom("claw_installs")
@@ -321,9 +321,9 @@ export function deleteClawInstallRecord(
 }
 
 export function readClawInstallRecords(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawInstall[] {
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const bootstrapColumns = selectClawBootstrapProvenanceColumns(database.db);
   const rows =
     database.db /* sqlite-allow-raw: read-only Claw install inventory ordered by stable agent id. */
@@ -343,7 +343,7 @@ export function readClawInstallRecords(
 
 export function updateClawInstallRecord(
   plan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     nowMs?: number;
     expectedClaw?: { version: string; integrity: string };
     status?: ClawInstallStatus;
@@ -362,7 +362,7 @@ export function updateClawInstallRecord(
     .filter((action) => action.kind === "agent")
     .map((action) => action.target);
   const bootstrap = bootstrapProvenance(plan) ?? current.bootstrap;
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const result = executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<ClawProvenanceDatabase>(db)
@@ -423,7 +423,7 @@ export function updateClawInstallRecord(
 export function persistClawPackageRef(
   plan: ClawAddPlan,
   pkg: ResolvedClawPackage,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     nowMs?: number;
     status?: ClawPackageRefStatus;
     relationship?: ClawPackageRelationship;
@@ -449,7 +449,7 @@ export function persistClawPackageRef(
     installedAtMs: nowMs,
     updatedAtMs: nowMs,
   };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const existing = db /* sqlite-allow-raw: exact owned package-ref replay lookup. */
       .prepare(
         `SELECT schema_version, agent_id, claw_name, package_kind, package_source,
@@ -537,10 +537,10 @@ export function persistClawPackageRef(
 export function updateClawPackageRefStatus(
   ref: PersistedClawPackageRef,
   status: ClawPackageRefStatus,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: CarapaceStateDatabaseOptions & { nowMs?: number } = {},
 ): PersistedClawPackageRef {
   const nowMs = options.nowMs ?? Date.now();
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<ClawProvenanceDatabase>(db)
@@ -558,7 +558,7 @@ export function updateClawPackageRefStatus(
 }
 
 export function readClawPackageRefs(
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     agentId?: string;
     kind?: ClawPackage["kind"];
     source?: ClawPackage["source"];
@@ -568,7 +568,7 @@ export function readClawPackageRefs(
     status?: ClawPackageRefStatus;
   } = {},
 ): PersistedClawPackageRef[] {
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   if (
     options.readOnly &&
     !database.db /* sqlite-allow-raw: read-only Claw package-ref table-existence probe. */

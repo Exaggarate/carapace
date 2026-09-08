@@ -2,8 +2,8 @@
 import type {
   MemoryReadResult,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import type { MemorySearchRuntimeDebug } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySearchRuntimeDebug } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import { vi } from "vitest";
 import type { getMemorySearchManager } from "./tools.runtime.js";
 

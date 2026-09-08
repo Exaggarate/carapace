@@ -2,11 +2,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { parseBooleanValue } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceCrablineChannelDriverSelection } from "@openclaw/crabline";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { parseBooleanValue } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { QaGatewayChild, QaGatewayStopResult } from "./gateway-child.js";
 import { discardIgnoredResponseBody } from "./ignored-response-body.js";
 import type { QaLabServerHandle } from "./lab-server.types.js";
@@ -39,7 +39,7 @@ export async function createQaSuiteTransportAdapter(params: {
   adapterFactories?: readonly QaTransportAdapterFactory[];
   channelDriver?: QaScorecardChannelDriver | null;
   channelId?: string;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
   cleanupOnFailure?: () => Promise<void>;
   outputDir: string;
   transportPolicy?: NonNullable<QaSuiteRunParams["adapterOptions"]>["transportPolicy"];
@@ -87,7 +87,7 @@ export type QaSuiteRunParams = QaSuiteBaseRunParams & {
 };
 
 export function shouldLogQaSuiteProgress(env: NodeJS.ProcessEnv = process.env) {
-  const override = parseBooleanValue(env.OPENCLAW_QA_SUITE_PROGRESS);
+  const override = parseBooleanValue(env.CARAPACE_QA_SUITE_PROGRESS);
   if (override !== undefined) {
     return override;
   }
@@ -105,7 +105,7 @@ export function resolveQaSuiteTransportReadyTimeoutMs(
   ) {
     return Math.floor(explicitTimeoutMs);
   }
-  const raw = env.OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS;
+  const raw = env.CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS;
   if (!raw) {
     return 120_000;
   }
@@ -138,7 +138,7 @@ export function formatQaSuiteRunStartProgress(params: {
   concurrency: number;
   transportId: QaTransportId;
   channelDriver?: QaScorecardChannelDriver | null;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
 }) {
   const channelDriver = params.channelDriver ?? params.channelDriverSelection?.channelDriver;
   const channel = params.channelDriverSelection?.channel;

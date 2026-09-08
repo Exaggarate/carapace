@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { shouldRejectHardlinkedPluginFiles } from "../../plugins/hardlink-policy.js";
 import {
@@ -108,7 +108,7 @@ function setSyncSourceForPluginSkill(
 export function loadSkillRootRecords(params: {
   dir: string;
   source: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   rejectHardlinks?: boolean;
   mode?: "audit";
   onDiagnostic?: (diagnostic: LocalSkillLoadDiagnostic) => void;

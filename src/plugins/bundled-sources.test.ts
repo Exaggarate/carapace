@@ -1,6 +1,6 @@
 /** Covers bundled plugin source overlays and packaged load-path decisions. */
-import { expectDefined } from "@openclaw/normalization-core";
-import { bundledPluginRootAt } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { bundledPluginRootAt } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   findBundledPluginSource,
@@ -18,11 +18,11 @@ function appBundledPluginRoot(pluginId: string): string {
   return bundledPluginRootAt(APP_ROOT, pluginId);
 }
 
-const discoverOpenClawPluginsMock = vi.fn();
+const discoverCarapacePluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
 
 vi.mock("./discovery.js", () => ({
-  discoverOpenClawPlugins: (...args: unknown[]) => discoverOpenClawPluginsMock(...args),
+  discoverCarapacePlugins: (...args: unknown[]) => discoverCarapacePluginsMock(...args),
 }));
 
 vi.mock("./manifest.js", async (importOriginal) => ({
@@ -49,7 +49,7 @@ function createBundledCandidate(params: {
 }
 
 function setBundledDiscoveryCandidates(candidates: unknown[]) {
-  discoverOpenClawPluginsMock.mockReturnValue({
+  discoverCarapacePluginsMock.mockReturnValue({
     candidates,
     diagnostics: [],
   });
@@ -79,7 +79,7 @@ function setBundledManifestIdsByRoot(
       : {
           ok: false,
           error: "invalid manifest",
-          manifestPath: `${rootDir}/openclaw.plugin.json`,
+          manifestPath: `${rootDir}/carapace.plugin.json`,
         },
   );
 }
@@ -88,11 +88,11 @@ function setBundledLookupFixture() {
   setBundledDiscoveryCandidates([
     createBundledCandidate({
       rootDir: appBundledPluginRoot("feishu"),
-      packageName: "@openclaw/feishu",
+      packageName: "@carapace/feishu",
     }),
     createBundledCandidate({
       rootDir: appBundledPluginRoot("diffs"),
-      packageName: "@openclaw/diffs",
+      packageName: "@carapace/diffs",
     }),
   ]);
   setBundledManifestIdsByRoot({
@@ -111,7 +111,7 @@ function createResolvedBundledSource(params: {
   return {
     pluginId: params.pluginId,
     localPath: params.localPath,
-    npmSpec: params.npmSpec ?? `@openclaw/${params.pluginId}`,
+    npmSpec: params.npmSpec ?? `@carapace/${params.pluginId}`,
     ...(params.configSchema ? { configSchema: params.configSchema } : {}),
     requiresConfig: params.requiresConfig ?? false,
   };
@@ -151,7 +151,7 @@ function expectBundledSourceLookupCase(params: {
 describe("bundled plugin sources", () => {
   beforeEach(() => {
     resetPluginCache();
-    discoverOpenClawPluginsMock.mockReset();
+    discoverCarapacePluginsMock.mockReset();
     loadPluginManifestMock.mockReset();
   });
   afterEach(() => resetPluginCache());
@@ -177,7 +177,7 @@ describe("bundled plugin sources", () => {
       { pluginId: "feishu", localPath: appBundledPluginRoot("feishu"), requiresConfig: false },
     ]);
     expect(second).toEqual(first);
-    expect(discoverOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(discoverCarapacePluginsMock).not.toHaveBeenCalled();
     expect(loadPluginManifestMock).not.toHaveBeenCalled();
   });
 
@@ -186,19 +186,19 @@ describe("bundled plugin sources", () => {
       createBundledCandidate({
         origin: "global",
         rootDir: "/global/feishu",
-        packageName: "@openclaw/feishu",
+        packageName: "@carapace/feishu",
       }),
       createBundledCandidate({
         rootDir: appBundledPluginRoot("feishu"),
-        packageName: "@openclaw/feishu",
+        packageName: "@carapace/feishu",
       }),
       createBundledCandidate({
         rootDir: appBundledPluginRoot("feishu-dup"),
-        packageName: "@openclaw/feishu",
+        packageName: "@carapace/feishu",
       }),
       createBundledCandidate({
         rootDir: appBundledPluginRoot("msteams"),
-        packageName: "@openclaw/msteams",
+        packageName: "@carapace/msteams",
       }),
     ]);
     setBundledManifestIdsByRoot({
@@ -220,12 +220,12 @@ describe("bundled plugin sources", () => {
   it.each([
     [
       "finds bundled source by npm spec",
-      { kind: "npmSpec", value: "@openclaw/feishu" } as const,
+      { kind: "npmSpec", value: "@carapace/feishu" } as const,
       { pluginId: "feishu", localPath: appBundledPluginRoot("feishu") },
     ],
     [
       "returns undefined for missing npm spec",
-      { kind: "npmSpec", value: "@openclaw/not-found" } as const,
+      { kind: "npmSpec", value: "@carapace/not-found" } as const,
       undefined,
     ],
     [
@@ -250,7 +250,7 @@ describe("bundled plugin sources", () => {
   it("forwards an explicit env to bundled discovery helpers", () => {
     setBundledDiscoveryCandidates([]);
 
-    const env = { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { HOME: "/tmp/carapace-home" } as NodeJS.ProcessEnv;
 
     resolveBundledPluginSources({
       workspaceDir: "/workspace",
@@ -262,11 +262,11 @@ describe("bundled plugin sources", () => {
       env,
     });
 
-    expect(discoverOpenClawPluginsMock).toHaveBeenNthCalledWith(1, {
+    expect(discoverCarapacePluginsMock).toHaveBeenNthCalledWith(1, {
       workspaceDir: "/workspace",
       env,
     });
-    expect(discoverOpenClawPluginsMock).toHaveBeenNthCalledWith(2, {
+    expect(discoverCarapacePluginsMock).toHaveBeenNthCalledWith(2, {
       workspaceDir: "/workspace",
       env,
     });
@@ -276,7 +276,7 @@ describe("bundled plugin sources", () => {
     setBundledDiscoveryCandidates([
       createBundledCandidate({
         rootDir: appBundledPluginRoot("memory-lancedb"),
-        packageName: "@openclaw/memory-lancedb",
+        packageName: "@carapace/memory-lancedb",
       }),
     ]);
     setBundledManifestIdsByRoot({
@@ -324,7 +324,7 @@ describe("bundled plugin sources", () => {
     expect(
       findBundledPluginSourceInMap({
         bundled,
-        lookup: { kind: "npmSpec", value: "@openclaw/feishu" },
+        lookup: { kind: "npmSpec", value: "@carapace/feishu" },
       })?.pluginId,
     ).toBe("feishu");
   });

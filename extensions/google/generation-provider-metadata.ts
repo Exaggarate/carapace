@@ -1,11 +1,11 @@
 // Google provider module implements model/runtime integration.
-import type { MusicGenerationProvider } from "openclaw/plugin-sdk/music-generation";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+import type { MusicGenerationProvider } from "carapace/plugin-sdk/music-generation";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
 import type {
   VideoGenerationModeCapabilities,
   VideoGenerationProvider,
   VideoGenerationProviderConfiguredContext,
-} from "openclaw/plugin-sdk/video-generation";
+} from "carapace/plugin-sdk/video-generation";
 
 export const DEFAULT_GOOGLE_MUSIC_MODEL = "lyria-3-clip-preview";
 export const GOOGLE_PRO_MUSIC_MODEL = "lyria-3-pro-preview";

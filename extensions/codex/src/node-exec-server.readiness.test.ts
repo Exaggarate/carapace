@@ -2,7 +2,7 @@ import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { once } from "node:events";
 import { access } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import type { OpenClawPluginNodeHostCommandIo } from "openclaw/plugin-sdk/node-host";
+import type { CarapacePluginNodeHostCommandIo } from "carapace/plugin-sdk/node-host";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setManagedCodexPluginRoot } from "./app-server/managed-binary.js";
 import * as transport from "./app-server/transport-stdio.js";
@@ -37,7 +37,7 @@ async function startFixture(readyBeforeRegistrationReturns = false) {
     emitChunk: async () => {},
     onInput: () => {},
     frames: { send, onMessage: () => () => {} },
-  } satisfies OpenClawPluginNodeHostCommandIo;
+  } satisfies CarapacePluginNodeHostCommandIo;
   let resolveChild!: (child: ChildProcessWithoutNullStreams) => void;
   const childCreated = new Promise<ChildProcessWithoutNullStreams>((resolve) => {
     resolveChild = resolve;

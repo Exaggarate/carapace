@@ -1,5 +1,5 @@
-import { readSessionMessageIdentity } from "@openclaw/gateway-client/browser";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { readSessionMessageIdentity } from "@carapace/gateway-client/browser";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import { createNestedToolActivity } from "../sessions/nested-tool-activity.js";
 import { projectChatDisplayMessage } from "./chat-display-projection.js";
@@ -12,7 +12,7 @@ const position = { source: "selected-snapshot", rawSeq: 4 };
 const message = {
   role: "assistant",
   content: "done",
-  __openclaw: { transcriptPosition: { source: "untrusted", rawSeq: 0 } },
+  __carapace: { transcriptPosition: { source: "untrusted", rawSeq: 0 } },
 };
 
 describe("trusted transcript display metadata", () => {
@@ -57,10 +57,10 @@ describe("trusted transcript display metadata", () => {
         sendId: null,
       });
       expect(
-        asOptionalRecord(asOptionalRecord(projected)?.["__openclaw"])?.transcriptPosition,
+        asOptionalRecord(asOptionalRecord(projected)?.["__carapace"])?.transcriptPosition,
       ).toEqual(position);
     }
-    expect(activity).not.toHaveProperty("__openclaw");
+    expect(activity).not.toHaveProperty("__carapace");
   });
 
   it.each([undefined, position])(
@@ -79,11 +79,11 @@ describe("trusted transcript display metadata", () => {
         sessionKey: "agent:main:main",
       }).payload?.message;
       for (const projected of [history, live]) {
-        const metadata = asOptionalRecord(asOptionalRecord(projected)?.["__openclaw"]);
+        const metadata = asOptionalRecord(asOptionalRecord(projected)?.["__carapace"]);
         expect(metadata?.transcriptPosition).toEqual(transcriptPosition);
         expect(metadata).toMatchObject({ id: "entry", seq: 2 });
       }
-      expect(message["__openclaw"].transcriptPosition.source).toBe("untrusted");
+      expect(message["__carapace"].transcriptPosition.source).toBe("untrusted");
     },
   );
 
@@ -92,10 +92,10 @@ describe("trusted transcript display metadata", () => {
     (type) => {
       const identity = { runId: "run-compaction", itemId: "item-compaction" };
       const projected = asOptionalRecord(
-        projectTranscriptEntryMessage({ type, id: "boundary", __openclaw: identity }, 3, position),
+        projectTranscriptEntryMessage({ type, id: "boundary", __carapace: identity }, 3, position),
       );
       expect(projected?.role).toBe("system");
-      expect(projected?.["__openclaw"]).toEqual({
+      expect(projected?.["__carapace"]).toEqual({
         kind: type,
         id: "boundary",
         seq: 3,

@@ -2,7 +2,7 @@ import type { RetiredAuthProfileCleanupPlan } from "../commands/doctor-auth-lega
 import type { probeGatewayMemoryStatus } from "../commands/doctor-gateway-health.js";
 import type { DoctorOptions, DoctorPrompter } from "../commands/doctor-prompter.js";
 import type { ShippedPluginInstallConfigImport } from "../commands/doctor/shared/plugin-registry-migration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { buildGatewayConnectionDetails } from "../gateway/call.js";
 import type {
   LegacyStateMigrationStepReceipt,
@@ -16,7 +16,7 @@ import type { HealthCheck, HealthCheckContext } from "./health-checks.js";
 import type { FlowContribution } from "./types.js";
 
 type DoctorConfigResult = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginInstallConfigImport?: ShippedPluginInstallConfigImport;
   path?: string;
   shouldWriteConfig?: boolean;
@@ -37,7 +37,7 @@ type DoctorConfigResult = {
   /** Ephemeral doctor-only auth rename plan; never part of persisted config. */
   openAICodexAuthProfileIdMap?: ReadonlyMap<string, string>;
   /** Transient pre-retirement alias/default interpretation; current config owns auth and routes. */
-  retiredModelRefConfig?: Pick<OpenClawConfig, "agents" | "models">;
+  retiredModelRefConfig?: Pick<CarapaceConfig, "agents" | "models">;
   runWithPluginMetadataSnapshot?: PluginMetadataSnapshotScopeRunner;
   invalidatePluginMetadataSnapshot?: () => void;
   stateMigrationStepReceipts?: LegacyStateMigrationStepReceipt[];
@@ -50,8 +50,8 @@ export type DoctorHealthFlowContext = {
   options: DoctorOptions;
   prompter: DoctorPrompter;
   configResult: DoctorConfigResult;
-  cfg: OpenClawConfig;
-  cfgForPersistence: OpenClawConfig;
+  cfg: CarapaceConfig;
+  cfgForPersistence: CarapaceConfig;
   /** The finalized config-flow candidate crossed the atomic writer boundary. */
   configResultWriteCommitted?: boolean;
   /** The requested config write was refused; later repairs must not consume its candidate. */

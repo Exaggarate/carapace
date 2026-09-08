@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createModelFallbackConfig } from "./test-helpers/model-fallback-config-fixture.js";
 
 const mocks = vi.hoisted(() => ({
-  cfg: {} as OpenClawConfig,
+  cfg: {} as CarapaceConfig,
   info: vi.fn(),
   isNixMode: false,
   mutateConfigFileWithRetry: vi.fn(),
@@ -49,7 +49,7 @@ describe("resolveStickyModelSelectionPolicy", () => {
         { id: "inheriting" },
       ],
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 
   it.each([
     { scope: undefined, target: "session" },
@@ -87,7 +87,7 @@ describe("persistStickyModelSelection", () => {
       agentId: "main",
       cfg: createModelFallbackConfig("anthropic/claude-opus-4-6", [
         "openai/gpt-5.6-luna",
-      ]) satisfies OpenClawConfig,
+      ]) satisfies CarapaceConfig,
       target: "defaults" as const,
     },
     {
@@ -107,7 +107,7 @@ describe("persistStickyModelSelection", () => {
             },
           ],
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       target: "agent" as const,
     },
     {
@@ -123,7 +123,7 @@ describe("persistStickyModelSelection", () => {
           },
           entries: { main: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       target: "agent" as const,
     },
     {
@@ -147,7 +147,7 @@ describe("persistStickyModelSelection", () => {
             },
           ],
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       target: "defaults" as const,
     },
   ])("writes the $name", async ({ agentId, cfg, target }) => {
@@ -233,7 +233,7 @@ describe("persistStickyModelSelection", () => {
     expect(mocks.mutateConfigFileWithRetry).not.toHaveBeenCalled();
     expect(mocks.warn).toHaveBeenCalledOnce();
     expect(mocks.warn).toHaveBeenCalledWith(
-      "skipped sticky model persistence agentId=main model=openai/gpt-5.6-sol reason=config is immutable in OPENCLAW_NIX_MODE",
+      "skipped sticky model persistence agentId=main model=openai/gpt-5.6-sol reason=config is immutable in CARAPACE_NIX_MODE",
     );
   });
 });

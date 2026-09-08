@@ -76,7 +76,7 @@ export async function buildClawRemovalFixture(
     name: params.name ?? "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -96,5 +96,5 @@ export async function buildClawRemovalFixture(
     source,
     context: { workspace: join(root, `workspace-${params.id ?? "worker"}`) },
   });
-  return { root, plan, env: { OPENCLAW_STATE_DIR: join(root, "state") } };
+  return { root, plan, env: { CARAPACE_STATE_DIR: join(root, "state") } };
 }

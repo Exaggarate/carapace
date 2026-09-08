@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGeneratedMediaMaxBytes } from "../plugin-sdk/media-generation-runtime.js";
 import { resolveOutboundMediaMaxBytes } from "./configured-max-bytes.js";
 
@@ -18,7 +18,7 @@ describe("outbound routed account media limits", () => {
   ])(
     "uses the selected $accountId account cap with exact-key precedence",
     ({ accountId, accounts, expected }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { mediaMaxMb: 4 } },
         channels: { "qa-channel": { mediaMaxMb: 1, accounts } },
       };
@@ -29,8 +29,8 @@ describe("outbound routed account media limits", () => {
   );
 });
 
-function configWithMediaMaxMb(mediaMaxMb: number): OpenClawConfig {
-  return { agents: { defaults: { mediaMaxMb } } } as OpenClawConfig;
+function configWithMediaMaxMb(mediaMaxMb: number): CarapaceConfig {
+  return { agents: { defaults: { mediaMaxMb } } } as CarapaceConfig;
 }
 
 describe("resolveGeneratedMediaMaxBytes", () => {

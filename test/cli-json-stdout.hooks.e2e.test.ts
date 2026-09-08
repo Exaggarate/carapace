@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -104,7 +104,7 @@ describe("cli json stdout contract", () => {
     {
       name: "missing hook in human mode",
       args: ["hooks", "info", "missing-hook"],
-      message: 'Hook "missing-hook" not found. Run `openclaw hooks list` to see available hooks.',
+      message: 'Hook "missing-hook" not found. Run `carapace hooks list` to see available hooks.',
       missingHook: true,
       human: true,
     },
@@ -112,7 +112,7 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "isolated-state");
-        const configPath = path.join(tempHome, "missing-openclaw.json");
+        const configPath = path.join(tempHome, "missing-carapace.json");
         const workspaceHooksDir = path.join(stateDir, "workspace", "hooks");
         if ("remoteMissing" in testCase) {
           await fs.writeFile(configPath, JSON.stringify({ gateway: { mode: "remote" } }));
@@ -148,17 +148,17 @@ describe("cli json stdout contract", () => {
         ).toString("base64");
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_GATEWAY_PORT: "29791",
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_GATEWAY_PORT: "29791",
+          CARAPACE_STATE_DIR: stateDir,
           ...("explicitGateway" in testCase
             ? {
-                OPENCLAW_GATEWAY_URL: "ws://127.0.0.1:9",
-                OPENCLAW_GATEWAY_TOKEN: "fixture-token",
+                CARAPACE_GATEWAY_URL: "ws://127.0.0.1:9",
+                CARAPACE_GATEWAY_TOKEN: "fixture-token",
               }
             : {}),
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { FORCE_COLOR: "1" } : {}),
         });
         const message =
@@ -169,7 +169,7 @@ describe("cli json stdout contract", () => {
                 "Fix: set gateway.remote.url, or set gateway.mode=local.",
               ].join("\n")
             : (testCase.message ??
-              'Unknown agent id "retired". Run openclaw agents list to see configured agents.');
+              'Unknown agent id "retired". Run carapace agents list to see configured agents.');
 
         expect(result.status, result.stderr).toBe(1);
         expect(result.stdout, result.stderr).not.toMatch(/[\u001B\u0007]/u);
@@ -202,7 +202,7 @@ describe("cli json stdout contract", () => {
           await expect(fs.stat(configPath)).rejects.toMatchObject({ code: "ENOENT" });
         }
       },
-      { prefix: "openclaw-hooks-json-failure-e2e-" },
+      { prefix: "carapace-hooks-json-failure-e2e-" },
     );
   });
 
@@ -210,10 +210,10 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const result = runBuiltCli(tempHome, ["hooks", "--json", "list"], {
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_GATEWAY_PORT: "1",
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_GATEWAY_PORT: "1",
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
         });
 
         expect(result.status, result.stderr).toBe(0);
@@ -222,7 +222,7 @@ describe("cli json stdout contract", () => {
         );
         expect(result.stderr).toBe("");
       },
-      { prefix: "openclaw-hooks-json-success-e2e-" },
+      { prefix: "carapace-hooks-json-success-e2e-" },
     );
   });
 });

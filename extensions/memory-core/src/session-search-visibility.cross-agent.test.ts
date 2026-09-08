@@ -1,6 +1,6 @@
 // Memory Core tests cover cross-agent session search visibility behavior.
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import * as sessionTranscriptHit from "openclaw/plugin-sdk/session-transcript-hit";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import * as sessionTranscriptHit from "carapace/plugin-sdk/session-transcript-hit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { filterMemorySearchHitsBySessionVisibility } from "./session-search-visibility.js";
 import {
@@ -8,16 +8,16 @@ import {
   sessionEntry,
   type TestSessionEntry,
 } from "./session-search-visibility.test-support.js";
-import { asOpenClawConfig } from "./tools.test-helpers.js";
+import { asCarapaceConfig } from "./tools.test-helpers.js";
 
 const crossAgentStore: Record<string, TestSessionEntry> = {
   "agent:peer:only": sessionEntry("w1", 1, "/tmp/sessions/w1.jsonl"),
 };
 let combinedSessionStore: Record<string, TestSessionEntry> = crossAgentStore;
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: vi.fn(() => ({
@@ -38,7 +38,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "agent:main:only": sessionEntry("w1", 1, "/tmp/sessions/w1.jsonl"),
     };
     const hit: MemorySearchResult = searchHit("sessions/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -58,7 +58,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "agent:main:only": sessionEntry("w1", 1, "sqlite-session://main/w1"),
     };
     const hit: MemorySearchResult = searchHit("sessions/main/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -78,7 +78,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       global: sessionEntry("w1", 1, "/tmp/sessions/w1.jsonl"),
     };
     const hit: MemorySearchResult = searchHit("sessions/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       session: { scope: "global" },
       tools: {
         sessions: { visibility: "all" },
@@ -98,7 +98,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
   it("does not keep cross-agent session hits outside the scoped store", async () => {
     combinedSessionStore = {};
     const hit: MemorySearchResult = searchHit("sessions/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -116,7 +116,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
   it("does not keep cross-agent session hits when a shared store returns out-of-scope keys", async () => {
     combinedSessionStore = crossAgentStore;
     const hit: MemorySearchResult = searchHit("sessions/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -136,7 +136,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "agent:main:main": sessionEntry("main", 1, "/tmp/sessions/main.jsonl"),
     };
     const hit: MemorySearchResult = searchHit("sessions/peer/main.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -153,7 +153,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
 
   it("denies cross-agent session hits when agent-to-agent is disabled", async () => {
     const hit: MemorySearchResult = searchHit("sessions/w1.jsonl", "sessions", "x");
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: false },
@@ -175,7 +175,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "sessions",
       "x",
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "agent" },
       },
@@ -198,7 +198,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "sessions",
       "x",
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: false },
@@ -222,7 +222,7 @@ describe("filterMemorySearchHitsBySessionVisibility across agents", () => {
       "sessions",
       "x",
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asCarapaceConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },

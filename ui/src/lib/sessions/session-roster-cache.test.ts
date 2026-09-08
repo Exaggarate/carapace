@@ -16,7 +16,7 @@ import {
   type SessionRosterRecord,
 } from "./session-roster-cache.ts";
 
-const BOOT_RECORD_PREFIX = "openclaw.control.bootRecord.v1:";
+const BOOT_RECORD_PREFIX = "carapace.control.bootRecord.v1:";
 
 const expected = { agentId: "main", profileId: "profile-one", query: {} };
 function record(

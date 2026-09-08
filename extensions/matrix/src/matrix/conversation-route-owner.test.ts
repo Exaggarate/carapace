@@ -3,12 +3,12 @@ import {
   type SessionBindingAdapter,
   testing as sessionBindingTesting,
   unregisterSessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resolveMatrixConversationRouteOwner } from "./conversation-route-owner.js";
 

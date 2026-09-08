@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { resolveRequiredHomeDir, resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
+import { resolveRequiredHomeDir, resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import type { CodexAppServerClient } from "./client.js";
 import type { JsonObject, JsonValue } from "./protocol.js";
 
@@ -37,13 +37,13 @@ async function canonicalizeExistingPath(candidate: string): Promise<string> {
 }
 
 async function usesDefaultStateDir(): Promise<boolean> {
-  if (!process.env.OPENCLAW_STATE_DIR?.trim()) {
+  if (!process.env.CARAPACE_STATE_DIR?.trim()) {
     return true;
   }
   const home = resolveRequiredHomeDir();
   const [stateDir, defaultStateDir] = await Promise.all([
     canonicalizeExistingPath(resolveStateDir()),
-    canonicalizeExistingPath(path.join(home, ".openclaw")),
+    canonicalizeExistingPath(path.join(home, ".carapace")),
   ]);
   return stateDir === defaultStateDir;
 }
@@ -191,7 +191,7 @@ async function collectPersonalSkillRealPaths(
   return { complete, skillPaths };
 }
 
-/** Resolves the native user-scope skills that an isolated OpenClaw thread must disable. */
+/** Resolves the native user-scope skills that an isolated Carapace thread must disable. */
 export async function resolveCodexNativeSkillIsolation(params: {
   client: CodexAppServerClient;
   codexHome?: string;
@@ -201,7 +201,7 @@ export async function resolveCodexNativeSkillIsolation(params: {
   signal?: AbortSignal;
 }): Promise<CodexNativeSkillIsolation | undefined> {
   params.signal?.throwIfAborted();
-  if (!process.env.OPENCLAW_STATE_DIR?.trim()) {
+  if (!process.env.CARAPACE_STATE_DIR?.trim()) {
     return undefined;
   }
   const key = JSON.stringify([

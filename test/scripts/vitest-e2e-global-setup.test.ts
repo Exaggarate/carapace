@@ -40,8 +40,8 @@ describe("vitest E2E global setup", () => {
         ["scripts/run-node.mjs", "--version"],
         {
           ...process.env,
-          OPENCLAW_BUILD_PRIVATE_QA: "1",
-          OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "0",
+          CARAPACE_BUILD_PRIVATE_QA: "1",
+          CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "0",
         },
       ],
       [
@@ -61,7 +61,7 @@ describe("vitest E2E global setup", () => {
     );
   });
 
-  it.each(["OPENCLAW_E2E_SKIP_BUILD", "OPENCLAW_E2E_USE_PREBUILT_DIST"] as const)(
+  it.each(["CARAPACE_E2E_SKIP_BUILD", "CARAPACE_E2E_USE_PREBUILT_DIST"] as const)(
     "skips rebuilding when %s is set",
     async (envName) => {
       const runCommand = vi.fn<SetupCommandRunner>();
@@ -73,7 +73,7 @@ describe("vitest E2E global setup", () => {
   );
 
   posixIt("forwards output and SIGTERM through the runner process group", async () => {
-    const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-e2e-setup-group-"));
+    const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-e2e-setup-group-"));
     const fixturePath = path.join(fixtureDir, "scripts", "run-node.mjs");
     const pidPaths = ["child.pid", "descendant.pid"].map((name) => path.join(fixtureDir, name));
     let cleanup = async () => fs.rmSync(fixtureDir, { force: true, recursive: true });

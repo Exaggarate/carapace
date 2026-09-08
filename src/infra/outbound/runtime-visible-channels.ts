@@ -1,7 +1,7 @@
 // Channel plugin reads that include registry handles carried in the runtime
 // scope. Kept import-light so leaf modules (target prefixes, selection) can use
 // them without pulling the plugin bootstrap/loader graph into their consumers.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   getChannelPlugin,
   getLoadedChannelPlugin,

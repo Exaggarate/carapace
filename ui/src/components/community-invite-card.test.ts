@@ -38,7 +38,7 @@ describe("community invite card", () => {
     expect(region.getAttribute("role")).toBe("complementary");
     // A focus trap or an aria-modal here would make it interrupt the operator.
     expect(region.getAttribute("aria-modal")).toBeNull();
-    expect(container.querySelector("openclaw-modal-dialog")).toBeNull();
+    expect(container.querySelector("carapace-modal-dialog")).toBeNull();
     expect(container.querySelector("[autofocus]")).toBeNull();
   });
 

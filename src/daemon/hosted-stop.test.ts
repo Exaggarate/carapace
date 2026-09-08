@@ -16,7 +16,7 @@ vi.mock("./launchd-runtime.js", () => ({
 }));
 
 const platform = Object.getOwnPropertyDescriptor(process, "platform")!;
-let cgroup = "/system.slice/openclaw-test.service";
+let cgroup = "/system.slice/carapace-test.service";
 const executorPid = 4321;
 const execute = vi.fn<Awaited<ReturnType<typeof prepareHostedStopExecutor>>["execute"]>();
 const dispose = vi.fn<() => Promise<void>>();
@@ -28,7 +28,7 @@ const commandResult = (stdout: string) => ({
   stderr: "",
 });
 const systemdFields = () => ({
-  Id: "openclaw-test.service",
+  Id: "carapace-test.service",
   LoadState: "loaded",
   ActiveState: "active",
   SubState: "running",
@@ -49,9 +49,9 @@ beforeEach(() => {
   vi.resetAllMocks();
   dispose.mockResolvedValue(undefined);
   processOwner.supervisor = "systemd";
-  cgroup = "/system.slice/openclaw-test.service";
-  vi.stubEnv("OPENCLAW_SUPERVISOR_MODE", undefined);
-  vi.stubEnv("OPENCLAW_LAUNCHD_LABEL", "ai.openclaw.test");
+  cgroup = "/system.slice/carapace-test.service";
+  vi.stubEnv("CARAPACE_SUPERVISOR_MODE", undefined);
+  vi.stubEnv("CARAPACE_LAUNCHD_LABEL", "ai.carapace.test");
   Object.defineProperty(process, "platform", { ...platform, value: "linux" });
   vi.mocked(getFileLockProcessStartTime).mockReturnValue(10);
   vi.mocked(execSystemctl).mockImplementation(async () =>
@@ -114,7 +114,7 @@ describe("hosted native stop", () => {
   it.skipIf(typeof process.getuid !== "function")(
     "keeps a user service on its exact user manager",
     async () => {
-      cgroup = `/user.slice/user-${process.getuid!()}.slice/user@${process.getuid!()}.service/app.slice/openclaw-test.service`;
+      cgroup = `/user.slice/user-${process.getuid!()}.slice/user@${process.getuid!()}.service/app.slice/carapace-test.service`;
       const stop = await prepareHostedGatewayStop(
         processOwner,
         () => {},
@@ -174,7 +174,7 @@ describe("hosted native stop", () => {
           "--no-ask-password",
           "--no-block",
           "stop",
-          "openclaw-test.service",
+          "carapace-test.service",
         ],
         scopeArgs: expect.arrayContaining(["--system", "--scope"]),
       }),
@@ -320,7 +320,7 @@ describe("hosted native stop", () => {
     );
     expect(prepareHostedStopExecutor).toHaveBeenCalledWith(
       expect.objectContaining({
-        command: ["/bin/launchctl", "bootout", "gui/501/ai.openclaw.test"],
+        command: ["/bin/launchctl", "bootout", "gui/501/ai.carapace.test"],
       }),
     );
     expect(execute).not.toHaveBeenCalled();

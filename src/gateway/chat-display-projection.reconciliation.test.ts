@@ -13,20 +13,20 @@ const scope = { sessionKey: "agent:main:fallback-reconciliation" };
 const user = {
   role: "user",
   content: [{ type: "text", text: "Reply with exactly: RECOVERY_OK" }],
-  __openclaw: { id: "user", seq: 1, idempotencyKey: `${runId}:user` },
+  __carapace: { id: "user", seq: 1, idempotencyKey: `${runId}:user` },
 };
 const failed = {
   role: "assistant",
   content: [],
   stopReason: "error",
   errorMessage: "The selected model is not supported by this account.",
-  __openclaw: { id: "failed-attempt", seq: 2, runId },
+  __carapace: { id: "failed-attempt", seq: 2, runId },
 };
 const answer = {
   role: "assistant",
   content: [{ type: "text", text: "RECOVERY_OK" }],
   stopReason: "stop",
-  __openclaw: { id: "successful-attempt", seq: 3, runId },
+  __carapace: { id: "successful-attempt", seq: 3, runId },
 };
 
 describe("recovered fallback history reconciliation", () => {
@@ -70,7 +70,7 @@ describe("recovered fallback history reconciliation", () => {
   it("preserves distinct durable answers even when one run produced identical text", () => {
     const secondAnswer = {
       ...answer,
-      __openclaw: { id: "second-answer", seq: 4, runId },
+      __carapace: { id: "second-answer", seq: 4, runId },
     };
     const rawHistory = [user, failed, answer, secondAnswer];
     const history = projectChatDisplayMessages(rawHistory);

@@ -1,5 +1,5 @@
 // Codex tests cover sandbox exec server plugin behavior.
-import { useIsolatedStateGuard, withEnvAsync } from "openclaw/plugin-sdk/test-env";
+import { useIsolatedStateGuard, withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sandboxExecServerRegistry } from "./sandbox-exec-server-registry.js";
 import {
@@ -68,7 +68,7 @@ async function readStartedPid(
   throw new Error(`process ${processId} did not report its PID`);
 }
 
-describe("OpenClaw Codex sandbox exec-server", () => {
+describe("Carapace Codex sandbox exec-server", () => {
   it("rejects an incomplete sandbox environment before publishing an exec-server", async () => {
     const sandbox = createSandboxContext({});
     sandbox.fsBridge = undefined;
@@ -180,7 +180,7 @@ describe("OpenClaw Codex sandbox exec-server", () => {
     const addRequest = requests[0];
     expect(addRequest?.method).toBe("environment/add");
     expect(environment).toEqual({
-      environmentId: expect.stringMatching(/^openclaw-sandbox-/),
+      environmentId: expect.stringMatching(/^carapace-sandbox-/),
       cwd: "/workspace",
     });
     const execServerUrl =
@@ -643,9 +643,9 @@ describe("OpenClaw Codex sandbox exec-server", () => {
   it("does not let Codex env policy inherit host secret variables", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_TEST_SECRET_TOKEN: "host-secret",
-        OPENCLAW_TEST_DATABASE_PASSWORD: "host-password",
-        OPENCLAW_TEST_PRIVATE_KEY: "host-private-key",
+        CARAPACE_TEST_SECRET_TOKEN: "host-secret",
+        CARAPACE_TEST_DATABASE_PASSWORD: "host-password",
+        CARAPACE_TEST_PRIVATE_KEY: "host-private-key",
       },
       async () => {
         const buildExecSpec = vi.fn(async () => ({
@@ -779,7 +779,7 @@ describe("OpenClaw Codex sandbox exec-server", () => {
     for (const method of ["fs/walk", "process/signal", "unsupported/method"]) {
       await expect(rpc(socket, method, {})).rejects.toMatchObject({
         code: -32601,
-        message: `Unsupported OpenClaw sandbox exec-server method: ${method}`,
+        message: `Unsupported Carapace sandbox exec-server method: ${method}`,
       });
     }
     await expect(
@@ -803,7 +803,7 @@ describe("OpenClaw Codex sandbox exec-server", () => {
       sandbox,
     });
     const unauthorizedUrl = execServerUrlFromClient(client).replace(
-      /\/openclaw-[^/?#]+/u,
+      /\/carapace-[^/?#]+/u,
       "/wrong",
     );
     const socket = await openSocket(unauthorizedUrl);
@@ -819,7 +819,7 @@ describe("OpenClaw Codex sandbox exec-server", () => {
       sandbox,
     });
     const unauthorizedUrl = execServerUrlFromClient(client).replace(
-      /\/openclaw-[^/?#]+/u,
+      /\/carapace-[^/?#]+/u,
       "/wrong",
     );
     const socket = await openSocket(unauthorizedUrl);
@@ -862,7 +862,7 @@ describe("OpenClaw Codex sandbox exec-server", () => {
           }),
           finalizeExec,
         });
-        sandbox.runtimeId = `openclaw-test-runtime-${cleanup}`;
+        sandbox.runtimeId = `carapace-test-runtime-${cleanup}`;
         const client = createClient();
         await ensureCodexSandboxExecServerEnvironment({
           client: client as never,

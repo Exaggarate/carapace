@@ -7,14 +7,14 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import {
   parseStrictPositiveInteger,
   resolveOptionalIntegerOption,
-} from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
 // Cleanup failures follow the originating run across nested async cleanup.
 const oneShotCleanup = resolveGlobalSingleton(
-  Symbol.for("openclaw.oneShotCleanupOutcome"),
+  Symbol.for("carapace.oneShotCleanupOutcome"),
   () => new AsyncLocalStorage<{ uncertain: boolean }>(),
 );
 
@@ -47,8 +47,8 @@ export function createAgentCleanupScope() {
 
 // The budget bounds reporting, not resource closure; automatic timeout stays uncertain.
 const AGENT_CLEANUP_STEP_TIMEOUT_MS = 10_000;
-const AGENT_CLEANUP_STEP_TIMEOUT_ENV = "OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS";
-const TRAJECTORY_FLUSH_TIMEOUT_ENV = "OPENCLAW_TRAJECTORY_FLUSH_TIMEOUT_MS";
+const AGENT_CLEANUP_STEP_TIMEOUT_ENV = "CARAPACE_AGENT_CLEANUP_TIMEOUT_MS";
+const TRAJECTORY_FLUSH_TIMEOUT_ENV = "CARAPACE_TRAJECTORY_FLUSH_TIMEOUT_MS";
 const CLEANUP_TIMEOUT_DETAILS_MAX_CHARS = 512;
 
 const CLEANUP_TIMEOUT_DETAILS_TRUNCATED_SUFFIX = "...[truncated]";
@@ -90,7 +90,7 @@ function resolveAgentCleanupStepTimeoutMs(params: {
   }
 
   const env = params.env ?? process.env;
-  if (params.step === "openclaw-trajectory-flush") {
+  if (params.step === "carapace-trajectory-flush") {
     const trajectoryTimeoutMs = parseStrictPositiveInteger(env[TRAJECTORY_FLUSH_TIMEOUT_ENV]);
     if (trajectoryTimeoutMs !== undefined) {
       return trajectoryTimeoutMs;

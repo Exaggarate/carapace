@@ -14,12 +14,12 @@ import {
 import { NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE } from "../../infra/node-runner-inventory.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { NodeWorkerSupervisorNodeProof } from "../node-registry-private.js";
 import {
   identifiedClient,
@@ -37,20 +37,20 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("worker placement cancellation and reclaim authority", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let placementStore: PlacementStore;
 
   const createTestHarness = (options: Parameters<typeof createHarness>[1] = {}) =>
     createHarness(placementStore, { workspacePath: path.join(root, "workspace"), ...options });
 
   beforeEach(async () => {
-    root = tempDirs.make("openclaw-reclaim-auth-");
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = tempDirs.make("carapace-reclaim-auth-");
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -362,8 +362,8 @@ describe("worker placement dispatch authority", () => {
   ])(
     "stops after membership revocation during $boundary",
     async ({ boundary, completedEffects }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const database = openOpenClawStateDatabase({ env: state.env });
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const database = openCarapaceStateDatabase({ env: state.env });
         const store = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
         const harness = createHarness(store, { workspacePath: state.workspaceDir });
         const scope = { agentId: REQUEST.agentId, sessionKey: REQUEST.sessionKey };

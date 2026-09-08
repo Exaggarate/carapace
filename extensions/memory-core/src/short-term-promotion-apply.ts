@@ -1,15 +1,15 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withFileLock } from "openclaw/plugin-sdk/file-lock";
-import { listMemoryArtifactProvenance } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import { withFileLock } from "carapace/plugin-sdk/file-lock";
+import { listMemoryArtifactProvenance } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   DEFAULT_MEMORY_DEEP_DREAMING_MAX_PROMOTED_SNIPPET_TOKENS,
   formatMemoryDreamingDay,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import { appendMemoryHostEvent } from "openclaw/plugin-sdk/memory-host-events";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import { appendMemoryHostEvent } from "carapace/plugin-sdk/memory-host-events";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   appendConsolidationSkippedSummary,
   appendConsolidationSummary,
@@ -588,7 +588,7 @@ export async function applyShortTermPromotions(
           const header = baseMemory.trim().length > 0 ? "" : "# Long-Term Memory\n\n";
           const content = `${header}${withTrailingNewline(baseMemory)}${section}`;
           // Append fallback keeps the historical read-modify-replace contract. Policy accepts
-          // its external-editor race because OpenClaw writers remain serialized by this sweep lock.
+          // its external-editor race because Carapace writers remain serialized by this sweep lock.
           await commitMemoryContent({
             filePath: memoryWritePath,
             tempPrefix: `${path.basename(memoryPath)}.promotion`,

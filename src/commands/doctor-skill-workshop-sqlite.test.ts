@@ -22,9 +22,9 @@ import {
   type SkillProposalRollback,
 } from "../skills/workshop/types.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   inspectLegacySkillWorkshopMigration,
@@ -32,12 +32,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-doctor-workshop-sqlite-",
+    prefix: "carapace-doctor-workshop-sqlite-",
   });
 });
 
@@ -49,7 +49,7 @@ afterEach(async () => {
 describe("doctor Skill Workshop SQLite migration", () => {
   it("stales an outside pending update once and converges", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-stale-update-workspace-"),
+      await tempDirs.make("carapace-workshop-stale-update-workspace-"),
     );
     const proposalId = "stale-workshop-20260901-1234567890";
     const skillDir = path.join(workspaceDir, "skills", "stale-workshop");
@@ -75,7 +75,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
         skillKey: "stale-workshop",
         skillDir,
         skillFile,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
         currentContentHash: hashSkillProposalContent(skillContent),
       },
       scan: {
@@ -129,7 +129,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
   });
 
   it.each([
-    { relativeRoot: "skills", source: "openclaw-workspace" },
+    { relativeRoot: "skills", source: "carapace-workspace" },
     { relativeRoot: ".agents/skills", source: "agents-skills-project" },
     { relativeRoot: ".agents/skills/team", source: "agents-skills-project" },
   ])(
@@ -232,7 +232,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
   );
 
   it("preserves shipped v1 proposals through migration, revision, and apply", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-shipped-upgrade-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-shipped-upgrade-");
     const proposalId = "shipped-workshop-20260729-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     const targetDir = path.join(workspaceDir, "skills", "shipped-workshop");
@@ -276,7 +276,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
         skillKey: "shipped-workshop",
         skillDir: targetDir,
         skillFile: path.join(targetDir, "SKILL.md"),
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
       scan: {
         state: "clean",
@@ -332,7 +332,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
   });
 
   it("restores a shipped partial apply after migration and allows retry", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-partial-upgrade-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-partial-upgrade-");
     const proposalId = "partial-workshop-20260729-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     const targetDir = path.join(workspaceDir, "skills", "partial-workshop");
@@ -373,7 +373,7 @@ describe("doctor Skill Workshop SQLite migration", () => {
         skillKey: "partial-workshop",
         skillDir: targetDir,
         skillFile: path.join(targetDir, "SKILL.md"),
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
       scan: {
         state: "clean",

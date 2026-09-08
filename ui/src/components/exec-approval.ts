@@ -7,7 +7,7 @@ import {
   KEYBOARD_SHORTCUT_COMBOS,
   matchesShortcutCombo,
 } from "../lib/keyboard-shortcut-catalog.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import {
   approvalRemainingLabel,
   approvalTitle,
@@ -15,7 +15,7 @@ import {
   renderExecApprovalCard,
   resolveApprovalDecisions,
 } from "./exec-approval-card.ts";
-import type { OpenClawModalDialog } from "./modal-dialog.ts";
+import type { CarapaceModalDialog } from "./modal-dialog.ts";
 import "./modal-dialog.ts";
 
 type ExecApprovalProps = {
@@ -50,12 +50,12 @@ function renderApprovalQueueList(params: {
           >
             <span class="exec-approval-list__agent">${agent}</span>
             <span class="exec-approval-list__command mono">${command}</span>
-            <openclaw-approval-countdown
+            <carapace-approval-countdown
               class="exec-approval-list__expiry"
               aria-hidden="true"
               .expiresAtMs=${entry.expiresAtMs}
               .compact=${true}
-            ></openclaw-approval-countdown>
+            ></carapace-approval-countdown>
           </button>
         `;
       })}
@@ -90,9 +90,9 @@ function shortcutDecision(event: KeyboardEvent): ExecApprovalDecision | null {
   return matchesShortcutCombo(KEYBOARD_SHORTCUT_COMBOS.denyApproval, event) ? "deny" : null;
 }
 
-class ExecApproval extends OpenClawLightDomContentsElement {
+class ExecApproval extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) props?: ExecApprovalProps;
-  @query("openclaw-modal-dialog") private dialog?: OpenClawModalDialog;
+  @query("carapace-modal-dialog") private dialog?: CarapaceModalDialog;
   @state() private selectedApprovalId: string | null = null;
   @state() private explicitlyOpen = false;
 
@@ -160,7 +160,7 @@ class ExecApproval extends OpenClawLightDomContentsElement {
       this.explicitlyOpen = false;
     };
     return html`
-      <openclaw-modal-dialog
+      <carapace-modal-dialog
         label=${approvalTitle(active)}
         description=${approvalRemainingLabel(active.expiresAtMs, Date.now())}
         @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, active)}
@@ -184,11 +184,11 @@ class ExecApproval extends OpenClawLightDomContentsElement {
             },
           })}
         </div>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `;
   }
 }
 
-if (!customElements.get("openclaw-exec-approval")) {
-  customElements.define("openclaw-exec-approval", ExecApproval);
+if (!customElements.get("carapace-exec-approval")) {
+  customElements.define("carapace-exec-approval", ExecApproval);
 }

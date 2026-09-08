@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import {
   createAssistant,
@@ -18,7 +18,7 @@ describe("sessions_yield transcript handoff", () => {
   it.each([null, "Continue after the child completes"])(
     "leaves yielded history ready for the next queued turn (context=%s)",
     async (yieldMessage) => {
-      await withOpenClawTestState({ label: "yield-projection-handoff" }, async (state) => {
+      await withCarapaceTestState({ label: "yield-projection-handoff" }, async (state) => {
         const target = {
           agentId: "main",
           sessionId: "yielded-session",

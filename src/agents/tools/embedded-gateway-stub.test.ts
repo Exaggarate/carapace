@@ -1,11 +1,11 @@
 // Embedded gateway stub tests cover in-process gateway methods used by agent
 // tools when no external gateway transport is available.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmbeddedCallGateway } from "./embedded-gateway-stub.js";
 
 const runtime = vi.hoisted(() => ({
-  getRuntimeConfig: vi.fn((): OpenClawConfig => ({
+  getRuntimeConfig: vi.fn((): CarapaceConfig => ({
     agents: { list: [{ id: "main", default: true }] },
   })),
   resolveSessionStoreKey: vi.fn(({ sessionKey }: { sessionKey: string }) =>
@@ -20,12 +20,12 @@ const runtime = vi.hoisted(() => ({
           : `agent:${agentId}:${sessionKey}`,
   ),
   searchSessionTranscripts: vi.fn(() => ({ hits: [], indexing: false, truncated: false })),
-  resolveSessionStorePathCore: vi.fn(() => "/tmp/openclaw-sessions.json"),
+  resolveSessionStorePathCore: vi.fn(() => "/tmp/carapace-sessions.json"),
   resolveSessionKeyFromResolveParams: vi.fn(),
   resolveSessionAgentId: vi.fn(() => "main"),
   loadSessionEntry: vi.fn(() => ({
     cfg: {},
-    storePath: "/tmp/openclaw-sessions.json",
+    storePath: "/tmp/carapace-sessions.json",
     entry: { sessionId: "sess-main" },
     canonicalKey: "agent:main:main",
   })),
@@ -47,7 +47,7 @@ const runtime = vi.hoisted(() => ({
   })),
   capArrayByJsonBytes: vi.fn((items: unknown[]) => ({ items })),
   loadCombinedSessionStoreForGatewayCore: vi.fn(() => ({
-    storePath: "/tmp/openclaw-sessions.json",
+    storePath: "/tmp/carapace-sessions.json",
     store: {},
   })),
   listSessionsFromStoreAsync: vi.fn(async () => ({ sessions: [] })),
@@ -85,7 +85,7 @@ describe("embedded gateway stub", () => {
     );
     expect(runtime.listSessionsFromStoreAsync).toHaveBeenCalledWith({
       cfg: { agents: { list: [{ id: "main", default: true }] } },
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       store: {},
       opts: { agentId: "work", includeGlobal: true, search: "global" },
     });
@@ -147,11 +147,11 @@ describe("embedded gateway stub", () => {
   it.each([undefined, "/stores/{agentId}.sqlite"])(
     "canonicalizes embedded session search filters with store %s",
     async (store) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { list: [{ id: "main", default: true }] },
         ...(store ? { session: { store } } : {}),
       };
-      const storePath = store ? "/stores/main.sqlite" : "/tmp/openclaw-sessions.json";
+      const storePath = store ? "/stores/main.sqlite" : "/tmp/carapace-sessions.json";
       runtime.getRuntimeConfig.mockReturnValueOnce(cfg);
       runtime.resolveSessionStorePathCore.mockReturnValueOnce(storePath);
       const callGateway = createEmbeddedCallGateway();
@@ -189,7 +189,7 @@ describe("embedded gateway stub", () => {
   it.each(["main", "ops"])(
     "resolves omitted search filters through the fixed-store owner %s",
     async (agentId) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [{ id: "main", default: true }, { id: "ops" }],
           defaults: { sessionStore: { agentId } },
@@ -292,7 +292,7 @@ describe("embedded gateway stub", () => {
   });
 
   it("preserves bounded offset metadata from the shared visible-history scanner", async () => {
-    const messages = [{ role: "assistant", content: "older visible", __openclaw: { seq: 2 } }];
+    const messages = [{ role: "assistant", content: "older visible", __carapace: { seq: 2 } }];
     runtime.readChatHistoryPage.mockResolvedValueOnce({
       messages,
       pagination: { offset: 1, totalMessages: 82, rawPageMessages: 80 },
@@ -323,8 +323,8 @@ describe("embedded gateway stub", () => {
 
   it("computes continuation from the final byte-budgeted visible page", async () => {
     const messages = [
-      { role: "assistant", content: "older", __openclaw: { seq: 6 } },
-      { role: "assistant", content: "latest", __openclaw: { seq: 7 } },
+      { role: "assistant", content: "older", __carapace: { seq: 6 } },
+      { role: "assistant", content: "latest", __carapace: { seq: 7 } },
     ];
     const bounded = [messages[1]];
     runtime.readChatHistoryPage.mockResolvedValueOnce({

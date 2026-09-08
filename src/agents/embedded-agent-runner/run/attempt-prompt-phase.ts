@@ -16,7 +16,7 @@ import { prepareGooglePromptCacheStreamFn } from "../google-prompt-cache.js";
 import { log } from "../logger.js";
 import { persistToolResultProjections } from "../session-prompt-state.js";
 import { resolveEmbeddedAgentApiKey } from "../stream-resolution.js";
-import { isOpenClawAbortableWrapper } from "./abortable.js";
+import { isCarapaceAbortableWrapper } from "./abortable.js";
 import { runEmbeddedAttemptBeforeAgentRun } from "./attempt-before-agent-run.js";
 import type { EmbeddedAttemptExecutionPhaseInput } from "./attempt-execution-types.js";
 import {
@@ -452,7 +452,7 @@ export async function runEmbeddedAttemptPromptPhase(
       promptErrorOutcome.promptFailure &&
       !(
         projectAgentRunAttemptTerminal(input.state.terminal).timedOutByRunBudget &&
-        isOpenClawAbortableWrapper(promptErrorOutcome.promptFailure.error) &&
+        isCarapaceAbortableWrapper(promptErrorOutcome.promptFailure.error) &&
         promptErrorOutcome.promptFailure.error instanceof Error &&
         promptErrorOutcome.promptFailure.error.cause === runAbortController.signal.reason
       )

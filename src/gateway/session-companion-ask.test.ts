@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { RunEmbeddedAgentParams } from "../agents/embedded-agent-runner/run/params.js";
 import { createAgentHarnessToolSurfaceRuntimeCore } from "../agents/harness/tool-surface-bridge.js";
 import { createStubTool } from "../agents/test-helpers/agent-tool-stubs.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSessionCompanion } from "./session-companion.js";
 
 const runEmbeddedAgent = vi.hoisted(() =>
@@ -30,7 +30,7 @@ vi.mock("../agents/simple-completion-runtime.js", () => ({
 
 describe("session companion embedded invocation", () => {
   it("keeps read-only tools direct when the selected agent model opts into Code Mode", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           workspace: "/tmp/companion-test",

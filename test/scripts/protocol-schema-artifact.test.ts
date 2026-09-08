@@ -105,7 +105,7 @@ describe("published protocol schema document", () => {
 
 describe("protocol-gen artifact", () => {
   it("writes the canonical document the contract check guards", () => {
-    const outputPath = path.join(tempDirs.make("openclaw-protocol-gen-"), "protocol.schema.json");
+    const outputPath = path.join(tempDirs.make("carapace-protocol-gen-"), "protocol.schema.json");
     execFileSync(
       process.execPath,
       ["--import", "./scripts/tsx.mjs", "scripts/protocol-gen.ts", "--out", outputPath],

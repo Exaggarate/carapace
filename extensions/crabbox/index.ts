@@ -1,9 +1,9 @@
 import { fileURLToPath } from "node:url";
-import { definePluginEntry, type OpenClawPluginService } from "openclaw/plugin-sdk/plugin-entry";
-import { createCrabboxWorkerProvider, resolveOpenClawRoot } from "./src/crabbox-worker-provider.js";
+import { definePluginEntry, type CarapacePluginService } from "carapace/plugin-sdk/plugin-entry";
+import { createCrabboxWorkerProvider, resolveCarapaceRoot } from "./src/crabbox-worker-provider.js";
 
 const workerWallpaperPath = fileURLToPath(
-  new URL("./assets/openclaw-worker-wallpaper.png", import.meta.url),
+  new URL("./assets/carapace-worker-wallpaper.png", import.meta.url),
 );
 
 export default definePluginEntry({
@@ -28,7 +28,7 @@ export default definePluginEntry({
       },
     );
     const provider = createCrabboxWorkerProvider({
-      openclawRoot: resolveOpenClawRoot(api.rootDir),
+      carapaceRoot: resolveCarapaceRoot(api.rootDir),
       wallpaperPath: workerWallpaperPath,
       warn: (message) => api.logger.warn(message),
     });
@@ -40,6 +40,6 @@ export default definePluginEntry({
       stop() {
         return provider.dispose();
       },
-    } satisfies OpenClawPluginService);
+    } satisfies CarapacePluginService);
   },
 });

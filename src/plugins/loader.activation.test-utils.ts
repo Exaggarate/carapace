@@ -6,7 +6,7 @@ import { getContextEngineRegistration } from "../context-engine/registry.js";
 import { withEnv } from "../test-utils/env.js";
 import { getCompactionProvider } from "./compaction-provider.js";
 import { writePersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import {
   EMPTY_PLUGIN_SCHEMA,
   makePluginLoaderTempDir,
@@ -47,16 +47,16 @@ import type { PluginSdkResolutionPreference } from "./sdk-alias.js";
 afterEach(globalAfterEach0);
 afterAll(globalAfterAll1);
 
-describe("loadOpenClawPlugins", () => {
+describe("loadCarapacePlugins", () => {
   it.each([
     {
       name: "does not reuse cached registries when env-resolved install paths change",
       setup: () => {
         useNoBundledPlugins();
-        const openclawHome = makePluginLoaderTempDir();
+        const carapaceHome = makePluginLoaderTempDir();
         const ignoredHome = makePluginLoaderTempDir();
         const stateDir = makePluginLoaderTempDir();
-        const pluginDir = path.join(openclawHome, "plugins", "tracked-install-cache");
+        const pluginDir = path.join(carapaceHome, "plugins", "tracked-install-cache");
         mkdirSafe(pluginDir);
         const plugin = writePlugin({
           id: "tracked-install-cache",
@@ -88,25 +88,25 @@ describe("loadOpenClawPlugins", () => {
         const secondHome = makePluginLoaderTempDir();
         return {
           loadFirst: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_HOME: openclawHome,
+                CARAPACE_HOME: carapaceHome,
                 HOME: ignoredHome,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+                CARAPACE_STATE_DIR: stateDir,
+                CARAPACE_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
               },
             }),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_HOME: secondHome,
+                CARAPACE_HOME: secondHome,
                 HOME: ignoredHome,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+                CARAPACE_STATE_DIR: stateDir,
+                CARAPACE_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
               },
             }),
         };
@@ -135,9 +135,9 @@ describe("loadOpenClawPlugins", () => {
         };
 
         return {
-          loadFirst: () => loadOpenClawPlugins(options),
+          loadFirst: () => loadCarapacePlugins(options),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               pluginSdkResolution: "workspace" as PluginSdkResolutionPreference,
             }),
@@ -167,9 +167,9 @@ describe("loadOpenClawPlugins", () => {
         };
 
         return {
-          loadFirst: () => loadOpenClawPlugins(options),
+          loadFirst: () => loadCarapacePlugins(options),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               runtimeOptions: {
                 allowGatewaySubagentBinding: true,
@@ -193,12 +193,12 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "tilde-bundled", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       env: {
         ...process.env,
         HOME: homeDir,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: override,
+        CARAPACE_HOME: undefined,
+        CARAPACE_BUNDLED_PLUGINS_DIR: override,
       },
       config: {
         plugins: {
@@ -215,34 +215,34 @@ describe("loadOpenClawPlugins", () => {
     ).toBe(fs.realpathSync(plugin.file));
   });
 
-  it("prefers OPENCLAW_HOME over HOME for env-expanded load paths", () => {
+  it("prefers CARAPACE_HOME over HOME for env-expanded load paths", () => {
     const ignoredHome = makePluginLoaderTempDir();
-    const openclawHome = makePluginLoaderTempDir();
+    const carapaceHome = makePluginLoaderTempDir();
     const stateDir = makePluginLoaderTempDir();
     const bundledDir = makePluginLoaderTempDir();
     const plugin = writePlugin({
-      id: "openclaw-home-demo",
-      dir: path.join(openclawHome, "plugins", "openclaw-home-demo"),
+      id: "carapace-home-demo",
+      dir: path.join(carapaceHome, "plugins", "carapace-home-demo"),
       filename: "index.cjs",
-      body: `module.exports = { id: "openclaw-home-demo", register() {} };`,
+      body: `module.exports = { id: "carapace-home-demo", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       env: {
         ...process.env,
         HOME: ignoredHome,
-        OPENCLAW_HOME: openclawHome,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        CARAPACE_HOME: carapaceHome,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
       },
       config: {
         plugins: {
-          allow: ["openclaw-home-demo"],
+          allow: ["carapace-home-demo"],
           entries: {
-            "openclaw-home-demo": { enabled: true },
+            "carapace-home-demo": { enabled: true },
           },
           load: {
-            paths: ["~/plugins/openclaw-home-demo"],
+            paths: ["~/plugins/carapace-home-demo"],
           },
         },
       },
@@ -250,7 +250,7 @@ describe("loadOpenClawPlugins", () => {
 
     expect(
       fs.realpathSync(
-        registry.plugins.find((entry) => entry.id === "openclaw-home-demo")?.source ?? "",
+        registry.plugins.find((entry) => entry.id === "carapace-home-demo")?.source ?? "",
       ),
     ).toBe(fs.realpathSync(plugin.file));
   });
@@ -377,7 +377,7 @@ describe("loadOpenClawPlugins", () => {
     });
 
     expect(() =>
-      loadOpenClawPlugins({
+      loadCarapacePlugins({
         cache: false,
         throwOnLoadError: true,
         config: {
@@ -445,7 +445,7 @@ describe("loadOpenClawPlugins", () => {
       };`,
     });
 
-    const registry = withEnv({ OPENCLAW_PLUGIN_LOAD_DEBUG: "1" }, () =>
+    const registry = withEnv({ CARAPACE_PLUGIN_LOAD_DEBUG: "1" }, () =>
       loadRegistryFromSinglePlugin({
         plugin,
         pluginConfig: {
@@ -536,7 +536,7 @@ describe("loadOpenClawPlugins", () => {
       }
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const channel = registry.channels.find((entry) => entry.plugin.id === "demo");
           expect(channel?.plugin.id).toBe("demo");
         },
@@ -582,7 +582,7 @@ describe("loadOpenClawPlugins", () => {
       }
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(countMatching(registry.channels, (entry) => entry.plugin.id === "demo")).toBe(1);
           expect(
             registry.channels.find((entry) => entry.plugin.id === "demo")?.plugin.meta?.label,
@@ -595,7 +595,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "context-engine-malformed", register(api) {
     api.registerContextEngine({ id: "broken-context" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "context-engine-malformed",
@@ -610,7 +610,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "context-engine-core-collision", register(api) {
     api.registerContextEngine("legacy", () => ({}));
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "context-engine-core-collision",
@@ -624,7 +624,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "compaction-provider-malformed", register(api) {
     api.registerCompactionProvider({ id: "broken-compaction", label: "Broken" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "compaction-provider-malformed",
@@ -639,7 +639,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "memory-prompt-supplement-malformed", register(api) {
     api.registerMemoryPromptSupplement({ id: "broken-memory-prompt" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "memory-prompt-supplement-malformed",
@@ -654,7 +654,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "memory-prompt-preparation-malformed", register(api) {
     api.registerMemoryPromptPreparation({ id: "broken-memory-prompt" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "memory-prompt-preparation-malformed",
@@ -669,7 +669,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "cli-missing-metadata", register(api) {
     api.registerCli(() => {});
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(registry.cliRegistrars).toHaveLength(0);
           expectRegistryErrorDiagnostic({
             registry,
@@ -692,7 +692,7 @@ describe("loadOpenClawPlugins", () => {
       ],
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(registry.cliRegistrars).toHaveLength(1);
           expect(registry.cliRegistrars[0]?.parentPath).toEqual(["nodes"]);
           expect(registry.cliRegistrars[0]?.commands).toEqual(["demo-node"]);
@@ -756,7 +756,7 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerHook("gateway:startup", () => {}, { name: "shared-hook" });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadCarapacePlugins>) =>
           countMatching(registry.hooks, (entry) => entry.entry.hook.name === "shared-hook"),
         duplicateMessage: "hook already registered: shared-hook (hook-owner-a)",
         assert: expectDuplicateRegistrationResult,
@@ -768,7 +768,7 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerService({ id: "shared-service", start() {} });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadCarapacePlugins>) =>
           countMatching(registry.services, (entry) => entry.service.id === "shared-service"),
         duplicateMessage: "service already registered: shared-service (service-owner-a)",
         assert: expectDuplicateRegistrationResult,
@@ -780,13 +780,13 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerGatewayDiscoveryService({ id: "shared-discovery", advertise() {} });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadCarapacePlugins>) =>
           registry.gatewayDiscoveryServices.filter(
             (entry) => entry.service.id === "shared-discovery",
           ).length,
         duplicateMessage:
           "gateway discovery service already registered: shared-discovery (discovery-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(
             registry.plugins.find((entry) => entry.id === "discovery-owner-a")
               ?.gatewayDiscoveryServiceIds,
@@ -804,7 +804,7 @@ describe("loadOpenClawPlugins", () => {
         selectCount: () => 1,
         duplicateMessage:
           "context engine already registered: shared-context-engine-loader-test (plugin:context-engine-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(
             registry.plugins.find((entry) => entry.id === "context-engine-owner-a")
               ?.contextEngineIds,
@@ -819,10 +819,10 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerCli(() => {}, { commands: ["shared-cli"] });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadCarapacePlugins>) =>
           registry.cliRegistrars.length,
         duplicateMessage: "cli command already registered: shared-cli (cli-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(registry.cliRegistrars[0]?.pluginId).toBe("cli-owner-a");
         },
         assert: expectDuplicateRegistrationResult,
@@ -969,7 +969,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           expect(
             registry.httpRoutes.find((entry) => entry.pluginId === "http-route-missing-auth"),
           ).toBeUndefined();
@@ -991,7 +991,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-replace-self",
           );
@@ -1012,7 +1012,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-replace-prefix",
           );
@@ -1042,7 +1042,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const route = registry.httpRoutes.find(
             (entry) => entry.pluginId === "http-route-owner-a",
           );
@@ -1066,7 +1066,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap",
           );
@@ -1090,7 +1090,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadCarapacePlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap-same-auth",
           );
@@ -1112,7 +1112,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "config-disable", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1137,8 +1137,8 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/nested-default-channel",
-          openclaw: {
+          name: "@carapace/nested-default-channel",
+          carapace: {
             extensions: ["./index.cjs"],
           },
         },
@@ -1148,7 +1148,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify(
         {
           id: "nested-default-channel",
@@ -1196,7 +1196,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       config: {
         channels: {
@@ -1233,7 +1233,7 @@ describe("loadOpenClawPlugins", () => {
     });
     updatePluginManifest(unrelated, { channels: ["target-plugin"] });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1277,7 +1277,7 @@ ${channelPluginSource({
       },
     };
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       config,
     });
@@ -1288,7 +1288,7 @@ ${channelPluginSource({
       "disabled",
     );
 
-    const broadSetupRegistry = loadOpenClawPlugins({
+    const broadSetupRegistry = loadCarapacePlugins({
       cache: false,
       config,
       includeSetupOnlyChannelPlugins: true,
@@ -1301,7 +1301,7 @@ ${channelPluginSource({
       broadSetupRegistry.plugins.find((entry) => entry.id === "lazy-channel-plugin")?.status,
     ).toBe("disabled");
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadCarapacePlugins({
       cache: false,
       config,
       includeSetupOnlyChannelPlugins: true,
@@ -1332,7 +1332,7 @@ ${channelPluginSource({
     });
     updatePluginManifest({ dir: workspacePluginDir }, { channels: ["workspace-shadow"] });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       workspaceDir,
       includeSetupOnlyChannelPlugins: true,
@@ -1370,7 +1370,7 @@ ${channelPluginSource({
     });
     updatePluginManifest({ dir: workspacePluginDir }, { channels: ["telegram"] });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       workspaceDir,
       includeSetupOnlyChannelPlugins: true,
@@ -1410,7 +1410,7 @@ ${channelPluginSource({
     });
     updatePluginManifest(plugin, { channels: ["untrusted-load-path-channel"] });
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1449,7 +1449,7 @@ ${channelPluginSource({
     });
     updatePluginManifest(plugin, { channels: ["denylisted-load-path-channel"] });
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1490,17 +1490,17 @@ ${channelPluginSource({
       );
       writeFixtureJson(
         globalDir,
-        "openclaw.plugin.json",
+        "carapace.plugin.json",
         pluginManifest("untrusted-global-channel", ["untrusted-global-channel"]),
       );
       writeFixtureJson(globalDir, "package.json", {
-        name: "@openclaw/untrusted-global-channel",
+        name: "@carapace/untrusted-global-channel",
         version: "0.0.0-test",
         main: "./index.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        carapace: { extensions: ["./index.cjs"] },
       });
 
-      const scopedSetupRegistry = loadOpenClawPlugins({
+      const scopedSetupRegistry = loadCarapacePlugins({
         cache: false,
         config: {
           plugins: {

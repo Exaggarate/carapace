@@ -1,6 +1,6 @@
 import { createServer, request as requestHttp } from "node:http";
 import { HttpStream } from "@microsoft/teams.apps/dist/http/http-stream.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createTeamsReplyStreamController } from "./reply-stream-controller.js";
 
@@ -156,7 +156,7 @@ function createLoopbackController(
       },
     } as never,
     {
-      bot: { id: "28:loopback-bot", name: "OpenClaw" },
+      bot: { id: "28:loopback-bot", name: "Carapace" },
       conversation: { id: "loopback-conversation", conversationType: "personal" },
       activityId: "loopback-inbound",
     } as never,

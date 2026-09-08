@@ -1,9 +1,9 @@
 import { App } from "@slack/bolt";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { expect, it, vi } from "vitest";
 import { resolveSlackAccount } from "../accounts.js";
 import type { SlackMessageEvent } from "../types.js";
@@ -17,7 +17,7 @@ vi.mock("./message-handler/pipeline.runtime.js", () => ({
 }));
 
 it("updates Slack delay and flushes newly buffered top-level keys before immediate work", async () => {
-  const cfg: OpenClawConfig = { messages: { inbound: { debounceMs: 0 } } };
+  const cfg: CarapaceConfig = { messages: { inbound: { debounceMs: 0 } } };
   setRuntimeConfigSnapshot(cfg, cfg);
   prepare.mockClear();
   const app = new App({
@@ -55,7 +55,7 @@ it("updates Slack delay and flushes newly buffered top-level keys before immedia
       threadInheritParent: false,
       slashCommand: {
         enabled: false,
-        name: "openclaw",
+        name: "carapace",
         ephemeral: true,
         sessionPrefix: "slack:slash",
       },

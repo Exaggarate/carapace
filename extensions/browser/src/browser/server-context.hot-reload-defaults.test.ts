@@ -1,12 +1,12 @@
 import "./server-context.chrome-test-harness.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
-import { isChromeReachable, launchOpenClawChrome, stopOpenClawChrome } from "./chrome.js";
+import type { CarapaceConfig } from "../config/config.js";
+import { isChromeReachable, launchCarapaceChrome, stopCarapaceChrome } from "./chrome.js";
 import { resolveBrowserConfig } from "./config.js";
 import { createBrowserRouteContext, type BrowserServerState } from "./server-context.js";
 import { mockLaunchedChrome } from "./server-context.test-harness.js";
 
-const config = vi.hoisted(() => ({ current: {} as OpenClawConfig }));
+const config = vi.hoisted(() => ({ current: {} as CarapaceConfig }));
 
 vi.mock("./config-refresh-source.js", () => ({
   loadBrowserConfigForRuntimeRefresh: () => config.current,
@@ -28,13 +28,13 @@ function deferred() {
 describe("browser inherited launch settings reload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(launchOpenClawChrome).mockReset();
+    vi.mocked(launchCarapaceChrome).mockReset();
     config.current = {
       browser: {
         headless: true,
-        defaultProfile: "openclaw",
+        defaultProfile: "carapace",
         profiles: {
-          openclaw: { cdpPort: 18800, color: "#FF4500" },
+          carapace: { cdpPort: 18800, color: "#FF4500" },
           attached: { cdpPort: 18801, color: "#0066CC", attachOnly: true },
           remote: { cdpUrl: "http://192.0.2.10:9222", color: "#00CC66" },
         },
@@ -96,12 +96,12 @@ describe("browser inherited launch settings reload", () => {
     vi.mocked(isChromeReachable).mockImplementation(async (url) =>
       url.includes(":18800") ? managedReachable : true,
     );
-    vi.mocked(stopOpenClawChrome).mockImplementation(async () => {
+    vi.mocked(stopCarapaceChrome).mockImplementation(async () => {
       managedReachable = false;
     });
-    const original = mockLaunchedChrome(vi.mocked(launchOpenClawChrome), 101);
-    const replacement = mockLaunchedChrome(vi.mocked(launchOpenClawChrome), 102);
-    vi.mocked(launchOpenClawChrome)
+    const original = mockLaunchedChrome(vi.mocked(launchCarapaceChrome), 101);
+    const replacement = mockLaunchedChrome(vi.mocked(launchCarapaceChrome), 102);
+    vi.mocked(launchCarapaceChrome)
       .mockImplementationOnce(async () => {
         managedReachable = true;
         return original;
@@ -119,10 +119,10 @@ describe("browser inherited launch settings reload", () => {
     config.current = { ...config.current, browser: { ...config.current.browser, ...change } };
     await ctx.forProfile().ensureBrowserAvailable();
 
-    expect(stopOpenClawChrome).toHaveBeenCalledExactlyOnceWith(original);
-    expect(launchOpenClawChrome).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(launchOpenClawChrome).mock.calls[1]?.[0]).toMatchObject(change);
-    expect(state.profiles.get("openclaw")?.running).toBe(replacement);
+    expect(stopCarapaceChrome).toHaveBeenCalledExactlyOnceWith(original);
+    expect(launchCarapaceChrome).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(launchCarapaceChrome).mock.calls[1]?.[0]).toMatchObject(change);
+    expect(state.profiles.get("carapace")?.running).toBe(replacement);
     await expect(attached.isReachable()).resolves.toBe(true);
     await expect(remote.isReachable()).resolves.toBe(true);
   });
@@ -140,14 +140,14 @@ describe("browser inherited launch settings reload", () => {
     const ctx = createBrowserRouteContext({ getState: () => state, refreshConfigFromDisk: true });
     let managedReachable = false;
     vi.mocked(isChromeReachable).mockImplementation(async () => managedReachable);
-    vi.mocked(stopOpenClawChrome).mockImplementation(async () => {
+    vi.mocked(stopCarapaceChrome).mockImplementation(async () => {
       managedReachable = false;
     });
     const started = deferred();
     const release = deferred();
-    const stale = mockLaunchedChrome(vi.mocked(launchOpenClawChrome), 201);
-    const replacement = mockLaunchedChrome(vi.mocked(launchOpenClawChrome), 202);
-    vi.mocked(launchOpenClawChrome)
+    const stale = mockLaunchedChrome(vi.mocked(launchCarapaceChrome), 201);
+    const replacement = mockLaunchedChrome(vi.mocked(launchCarapaceChrome), 202);
+    vi.mocked(launchCarapaceChrome)
       .mockImplementationOnce(async () => {
         started.resolve();
         await release.promise;
@@ -169,10 +169,10 @@ describe("browser inherited launch settings reload", () => {
     release.resolve();
 
     expect(await outcome).toBeInstanceOf(Error);
-    expect(state.profiles.get("openclaw")?.running).not.toBe(stale);
+    expect(state.profiles.get("carapace")?.running).not.toBe(stale);
     await nextProfile.ensureBrowserAvailable();
-    expect(stopOpenClawChrome).toHaveBeenCalledExactlyOnceWith(stale);
-    expect(vi.mocked(launchOpenClawChrome).mock.calls[1]?.[0]).toMatchObject(change);
-    expect(state.profiles.get("openclaw")?.running).toBe(replacement);
+    expect(stopCarapaceChrome).toHaveBeenCalledExactlyOnceWith(stale);
+    expect(vi.mocked(launchCarapaceChrome).mock.calls[1]?.[0]).toMatchObject(change);
+    expect(state.profiles.get("carapace")?.running).toBe(replacement);
   });
 });

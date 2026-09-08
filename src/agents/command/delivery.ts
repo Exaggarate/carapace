@@ -33,7 +33,7 @@ import { createReplyPrefixContext } from "../../channels/reply-prefix.js";
 import { formatUnknownChannelMessage } from "../../cli/error-format.js";
 import { createOutboundSendDeps, type CliDeps } from "../../cli/outbound-send-deps.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage, toErrorObject } from "../../infra/errors.js";
 import {
   resolveAgentDeliveryPlanWithSessionRoute,
@@ -134,7 +134,7 @@ type FreshSessionDeliveryRefreshParams =
     };
 
 type DeliverAgentCommandResultParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deps: CliDeps;
   runtime: RuntimeEnv;
   opts: AgentCommandOpts;
@@ -319,7 +319,7 @@ function noVisiblePayloadStatus(reason?: NormalizeReplySkipReason): AgentCommand
 }
 
 async function normalizeReplyMediaPathsForDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   payloads: ReplyPayload[];
   sessionKey?: string;
   outboundSession: OutboundSessionContext | undefined;
@@ -395,7 +395,7 @@ async function normalizeSentMediaUrlsForDelivery(params: {
 const UNRESOLVED_RESPONSE_PREFIX_VAR_PATTERN = /\{[a-zA-Z][a-zA-Z0-9.]*\}/;
 
 async function filterAlreadyDeliveredReplyPayloads(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   payloads: ReplyPayload[];
   result: RunResult;
   deliveryChannel: string;
@@ -480,7 +480,7 @@ async function filterAlreadyDeliveredReplyPayloads(params: {
 
 /** Normalizes reply payloads and media paths before delivery. */
 function normalizeAgentCommandReplyPayloads(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   opts: AgentCommandOpts;
   outboundSession: OutboundSessionContext | undefined;
   payloads: ReplyPayload[] | undefined;

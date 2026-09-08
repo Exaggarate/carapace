@@ -17,32 +17,32 @@ describe("syncPluginVersions", () => {
     cleanupTempDirs(tempDirs);
   });
 
-  it("preserves workspace openclaw devDependencies and plugin host floors", () => {
-    const rootDir = makeTempDir(tempDirs, "openclaw-sync-plugin-versions-");
+  it("preserves workspace carapace devDependencies and plugin host floors", () => {
+    const rootDir = makeTempDir(tempDirs, "carapace-sync-plugin-versions-");
 
     writeJson(path.join(rootDir, "package.json"), {
-      name: "openclaw",
+      name: "carapace",
       version: "2026.4.1",
     });
     writeJson(path.join(rootDir, "packages/ai/package.json"), {
-      name: "@openclaw/ai",
+      name: "@carapace/ai",
       version: "2026.3.30",
     });
     writeJson(path.join(rootDir, "packages/llm-core/package.json"), {
-      name: "@openclaw/llm-core",
+      name: "@carapace/llm-core",
       version: "0.0.0-private",
       private: true,
     });
     writeJson(path.join(rootDir, "extensions/imessage/package.json"), {
-      name: "@openclaw/imessage",
+      name: "@carapace/imessage",
       version: "2026.3.30",
       devDependencies: {
-        openclaw: "workspace:*",
+        carapace: "workspace:*",
       },
       peerDependencies: {
-        openclaw: ">=2026.3.30",
+        carapace: ">=2026.3.30",
       },
-      openclaw: {
+      carapace: {
         install: {
           minHostVersion: ">=2026.3.30",
         },
@@ -50,7 +50,7 @@ describe("syncPluginVersions", () => {
           pluginApi: ">=2026.3.30",
         },
         build: {
-          openclawVersion: "2026.3.30",
+          carapaceVersion: "2026.3.30",
         },
       },
     });
@@ -62,7 +62,7 @@ describe("syncPluginVersions", () => {
       version?: string;
       devDependencies?: Record<string, string>;
       peerDependencies?: Record<string, string>;
-      openclaw?: {
+      carapace?: {
         install?: {
           minHostVersion?: string;
         };
@@ -70,14 +70,14 @@ describe("syncPluginVersions", () => {
           pluginApi?: string;
         };
         build?: {
-          openclawVersion?: string;
+          carapaceVersion?: string;
         };
       };
     };
 
-    expect(summary.updated).toContain("@openclaw/imessage");
-    expect(summary.updated).toContain("@openclaw/ai");
-    expect(summary.updated).not.toContain("@openclaw/llm-core");
+    expect(summary.updated).toContain("@carapace/imessage");
+    expect(summary.updated).toContain("@carapace/ai");
+    expect(summary.updated).not.toContain("@carapace/llm-core");
     expect(
       JSON.parse(fs.readFileSync(path.join(rootDir, "packages/ai/package.json"), "utf8")),
     ).toMatchObject({ version: "2026.4.1" });
@@ -85,27 +85,27 @@ describe("syncPluginVersions", () => {
       JSON.parse(fs.readFileSync(path.join(rootDir, "packages/llm-core/package.json"), "utf8")),
     ).toMatchObject({ private: true, version: "0.0.0-private" });
     expect(updatedPackage.version).toBe("2026.4.1");
-    expect(updatedPackage.devDependencies?.openclaw).toBe("workspace:*");
-    expect(updatedPackage.peerDependencies?.openclaw).toBe(">=2026.4.1");
-    expect(updatedPackage.openclaw?.install?.minHostVersion).toBe(">=2026.3.30");
-    expect(updatedPackage.openclaw?.compat?.pluginApi).toBe(">=2026.4.1");
-    expect(updatedPackage.openclaw?.build?.openclawVersion).toBe("2026.4.1");
+    expect(updatedPackage.devDependencies?.carapace).toBe("workspace:*");
+    expect(updatedPackage.peerDependencies?.carapace).toBe(">=2026.4.1");
+    expect(updatedPackage.carapace?.install?.minHostVersion).toBe(">=2026.3.30");
+    expect(updatedPackage.carapace?.compat?.pluginApi).toBe(">=2026.4.1");
+    expect(updatedPackage.carapace?.build?.carapaceVersion).toBe("2026.4.1");
   });
 
   it("reports pending version sync without writing in check mode", () => {
-    const rootDir = makeTempDir(tempDirs, "openclaw-sync-plugin-versions-check-");
+    const rootDir = makeTempDir(tempDirs, "carapace-sync-plugin-versions-check-");
 
     writeJson(path.join(rootDir, "package.json"), {
-      name: "openclaw",
+      name: "carapace",
       version: "2026.4.2",
     });
     writeJson(path.join(rootDir, "extensions/discord/package.json"), {
-      name: "@openclaw/discord",
+      name: "@carapace/discord",
       version: "2026.4.1",
       peerDependencies: {
-        openclaw: ">=2026.4.1",
+        carapace: ">=2026.4.1",
       },
-      openclaw: {
+      carapace: {
         compat: {
           pluginApi: ">=2026.4.1",
         },
@@ -118,28 +118,28 @@ describe("syncPluginVersions", () => {
     ) as {
       version?: string;
       peerDependencies?: Record<string, string>;
-      openclaw?: {
+      carapace?: {
         compat?: {
           pluginApi?: string;
         };
       };
     };
 
-    expect(summary.updated).toEqual(["@openclaw/discord"]);
+    expect(summary.updated).toEqual(["@carapace/discord"]);
     expect(unchangedPackage.version).toBe("2026.4.1");
-    expect(unchangedPackage.peerDependencies?.openclaw).toBe(">=2026.4.1");
-    expect(unchangedPackage.openclaw?.compat?.pluginApi).toBe(">=2026.4.1");
+    expect(unchangedPackage.peerDependencies?.carapace).toBe(">=2026.4.1");
+    expect(unchangedPackage.carapace?.compat?.pluginApi).toBe(">=2026.4.1");
   });
 
   it("uses the base release version for beta changelog entries", () => {
-    const rootDir = makeTempDir(tempDirs, "openclaw-sync-plugin-versions-beta-changelog-");
+    const rootDir = makeTempDir(tempDirs, "carapace-sync-plugin-versions-beta-changelog-");
 
     writeJson(path.join(rootDir, "package.json"), {
-      name: "openclaw",
+      name: "carapace",
       version: "2026.5.3-beta.1",
     });
     writeJson(path.join(rootDir, "extensions/matrix/package.json"), {
-      name: "@openclaw/matrix",
+      name: "@carapace/matrix",
       version: "2026.5.3-beta.1",
     });
     fs.mkdirSync(path.join(rootDir, "extensions/matrix"), { recursive: true });
@@ -152,7 +152,7 @@ describe("syncPluginVersions", () => {
     const summary = syncPluginVersions(rootDir);
     const changelog = fs.readFileSync(path.join(rootDir, "extensions/matrix/CHANGELOG.md"), "utf8");
 
-    expect(summary.changelogged).toEqual(["@openclaw/matrix"]);
+    expect(summary.changelogged).toEqual(["@carapace/matrix"]);
     expect(changelog).toContain("## 2026.5.3\n\n### Changes\n- Version alignment");
     expect(changelog).not.toContain("## 2026.5.3-beta.1");
 

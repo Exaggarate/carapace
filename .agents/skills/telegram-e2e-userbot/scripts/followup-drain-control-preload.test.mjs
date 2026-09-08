@@ -31,8 +31,8 @@ test("holds one real callback invocation and releases it once", () => {
       let calls = 0;
       const callbacks = new Map([[key, async () => { calls += 1; }]]);
       const run = { run: { sessionId: "session" } };
-      globalThis[Symbol.for("openclaw.followupDrainCallbacks")] = callbacks;
-      globalThis[Symbol.for("openclaw.followupQueues")] = new Map([[key, {
+      globalThis[Symbol.for("carapace.followupDrainCallbacks")] = callbacks;
+      globalThis[Symbol.for("carapace.followupQueues")] = new Map([[key, {
         draining: true, items: [run], inFlight: new Set([run]),
       }]]);
       write({ seq: 1, command: "arm", sessionKey: key });

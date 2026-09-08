@@ -1,5 +1,5 @@
 // Google plugin module implements transport stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   getEnvApiKey,
   resolveProviderContext,
@@ -12,17 +12,17 @@ import {
   type SimpleStreamOptions,
   type ThinkingLevel,
   type VideoContent,
-} from "openclaw/plugin-sdk/llm";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/llm";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 import {
   collectProviderApiKeysForExecution,
   executeWithApiKeyRotation,
-} from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   createProviderHttpError,
   providerOperationRetryConfig,
   resolveProviderRequestHeaders,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   buildGuardedModelFetch,
   consumeGoogleGenerateContentStream,
@@ -38,12 +38,12 @@ import {
   sanitizeTransportPayloadText,
   stripSystemPromptCacheBoundary,
   transformTransportMessages,
-} from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/provider-transport-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { parseGeminiAuth } from "./gemini-auth.js";
 import { stripGoogleProviderPrefix } from "./model-id.js";
 import { isGoogleNativeVideoModelId } from "./provider-models.js";
@@ -63,7 +63,7 @@ import {
 } from "./vertex-adc.js";
 
 type CanonicalGoogleTransportApi = "google-generative-ai" | "google-vertex";
-type GoogleTransportApi = CanonicalGoogleTransportApi | "openclaw-google-generative-ai-transport";
+type GoogleTransportApi = CanonicalGoogleTransportApi | "carapace-google-generative-ai-transport";
 
 type GoogleTransportModel = ProviderModel<GoogleTransportApi> & {
   headers?: Record<string, string>;
@@ -117,7 +117,7 @@ const GOOGLE_REQUEST_BYTES_EXCLUSIVE = 20_000_000;
 type GoogleVideoSlots = Map<Record<string, unknown>, VideoContent>;
 
 const GOOGLE_GEMINI3_FIRST_RESPONSE_RETRY_DEFAULT_MS = 45_000;
-const GOOGLE_GEMINI3_FIRST_RESPONSE_RETRY_ENV = "OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS";
+const GOOGLE_GEMINI3_FIRST_RESPONSE_RETRY_ENV = "CARAPACE_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS";
 const GOOGLE_SSE_EVENT_BOUNDARY_RE = /(?:\r\n|\r(?!\n)|\n){2}/u;
 // Compare Google-owned publisher resources without changing outbound request paths.
 const GOOGLE_VERTEX_MODEL_RESOURCE_PREFIX =
@@ -137,7 +137,7 @@ function normalizeGoogleTransportRouteApi(
 ): CanonicalGoogleTransportApi | undefined {
   switch (api) {
     case "google-generative-ai":
-    case "openclaw-google-generative-ai-transport":
+    case "carapace-google-generative-ai-transport":
       return "google-generative-ai";
     case "google-vertex":
       return "google-vertex";

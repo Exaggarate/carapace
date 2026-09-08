@@ -5,8 +5,8 @@
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import * as querystring from "node:querystring";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   beginWebhookRequestPipelineOrReject,
   createWebhookInFlightLimiter,
@@ -14,8 +14,8 @@ import {
   readRequestBodyWithLimit,
   resolveRequestClientIp,
   requestBodyErrorToText,
-} from "openclaw/plugin-sdk/webhook-ingress";
-import { sendHttpRequestRejection } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-ingress";
+import { sendHttpRequestRejection } from "carapace/plugin-sdk/webhook-request-guards";
 import * as synologyClient from "./client.js";
 import {
   validateToken,
@@ -258,7 +258,7 @@ function extractTokenFromHeaders(req: IncomingMessage): string | undefined {
   const explicit =
     headerValue(req.headers["x-synology-token"]) ??
     headerValue(req.headers["x-webhook-token"]) ??
-    headerValue(req.headers["x-openclaw-token"]);
+    headerValue(req.headers["x-carapace-token"]);
   if (explicit) {
     return explicit;
   }
@@ -361,7 +361,7 @@ function parsePayload(
   };
 }
 
-const SYNOLOGY_WEBHOOK_ACCEPTED_HEADER = "x-openclaw-delivery-accepted";
+const SYNOLOGY_WEBHOOK_ACCEPTED_HEADER = "x-carapace-delivery-accepted";
 const SYNOLOGY_WEBHOOK_ACCEPTED_VALUE = "durable";
 
 /** Send a JSON response. */
@@ -585,7 +585,7 @@ async function resolveSynologyReplyDeliveryUserId(params: {
 async function authorizeClaimedSynologyWebhook(params: {
   account: ResolvedSynologyChatAccount;
   payload: SynologyWebhookPayload;
-  contextBinding?: import("openclaw/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding;
+  contextBinding?: import("carapace/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding;
 }) {
   const auth = await authorizeUserForDmWithIngress({
     accountId: params.account.accountId,
@@ -621,7 +621,7 @@ export async function processSynologyWebhookIngressEvent(params: {
     );
   }
   const resolveChannelIngress = async (
-    contextBinding?: import("openclaw/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding,
+    contextBinding?: import("carapace/plugin-sdk/channel-ingress-runtime").ChannelIngressContextBinding,
   ) =>
     await authorizeClaimedSynologyWebhook({
       account: params.account,

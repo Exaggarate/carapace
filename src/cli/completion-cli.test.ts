@@ -25,7 +25,7 @@ afterAll(async () => {
 });
 
 function createOptionalChoiceCompletionProgram(): Command {
-  const program = new Command().name("openclaw");
+  const program = new Command().name("carapace");
   program.addOption(new Option("--mode [mode]", "Mode").choices(["auto", "manual", "-legacy"]));
   program.option("--json", "JSON output");
   return program;
@@ -35,23 +35,23 @@ describe("completion-cli", () => {
   it("generates zsh functions for nested subcommands", () => {
     const script = getCompletionScript("zsh", createCompletionProgram());
 
-    expect(script).toContain("_openclaw_gateway()");
-    expect(script).toContain("(status) _openclaw_gateway_status ;;");
-    expect(script).toContain("(restart) _openclaw_gateway_restart ;;");
+    expect(script).toContain("_carapace_gateway()");
+    expect(script).toContain("(status) _carapace_gateway_status ;;");
+    expect(script).toContain("(restart) _carapace_gateway_restart ;;");
     expect(script).toContain("--force[Force the action]");
     expect(script).toContain("\\`models status --json\\`");
-    expect(script).toContain("\\$OPENCLAW_STATE_DIR");
+    expect(script).toContain("\\$CARAPACE_STATE_DIR");
   });
 
   it("escapes zsh option descriptions for double-quoted arguments specs", () => {
     const program = new Command()
-      .name("openclaw")
-      .option("--literal", "Use $OPENCLAW_STATE_DIR with `model/list` and John's profile");
+      .name("carapace")
+      .option("--literal", "Use $CARAPACE_STATE_DIR with `model/list` and John's profile");
 
     const script = getCompletionScript("zsh", program);
 
     expect(script).toContain(
-      "--literal[Use \\$OPENCLAW_STATE_DIR with \\`model/list\\` and John's profile]",
+      "--literal[Use \\$CARAPACE_STATE_DIR with \\`model/list\\` and John's profile]",
     );
     expect(script).not.toContain("John'\\''s");
   });
@@ -59,7 +59,7 @@ describe("completion-cli", () => {
   it.skipIf(process.platform === "win32").each(["built-in", "root", "nested"] as const)(
     "keeps %s command descriptions literal through real zsh parsing",
     (scope) => {
-      const program = new Command().name("openclaw");
+      const program = new Command().name("carapace");
       let describedCommand: Command;
       let completionFunction: string;
       if (scope === "built-in") {
@@ -72,16 +72,16 @@ describe("completion-cli", () => {
           throw new Error("Models auth logout command is unavailable");
         }
         describedCommand = logout;
-        completionFunction = "_openclaw_models_auth";
+        completionFunction = "_carapace_models_auth";
       } else {
         const parent = scope === "nested" ? program.command("parent") : program;
         describedCommand = parent
           .command("inspect")
           .alias("review")
           .description(
-            'Show John\'s "literal" $OPENCLAW_COMPLETION_LITERAL with `models auth list`',
+            'Show John\'s "literal" $CARAPACE_COMPLETION_LITERAL with `models auth list`',
           );
-        completionFunction = scope === "nested" ? "_openclaw_parent" : "_openclaw_root_completion";
+        completionFunction = scope === "nested" ? "_carapace_parent" : "_carapace_root_completion";
       }
 
       const result = spawnSync(
@@ -89,8 +89,8 @@ describe("completion-cli", () => {
         [
           "-fc",
           `${getCompletionScript("zsh", program)}
-OPENCLAW_COMPLETION_LITERAL=expanded-value
-models() { printf '%s\\n' "OPENCLAW_COMPLETION_DESCRIPTION_EVALUATED:$*" >&2; }
+CARAPACE_COMPLETION_LITERAL=expanded-value
+models() { printf '%s\\n' "CARAPACE_COMPLETION_DESCRIPTION_EVALUATED:$*" >&2; }
 _arguments() {
   local spec
   for spec in "$@"; do
@@ -135,14 +135,14 @@ ${completionFunction}
   it.skipIf(process.platform === "win32")(
     "keeps zsh completion choices literal and preserves candidate boundaries",
     () => {
-      const program = new Command().name("openclaw");
+      const program = new Command().name("carapace");
       program.addOption(
         new Option("--value <value>", "Value").choices([
           "two words",
           'say "hello"',
           "it's literal",
-          "literal $(printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2)",
-          "literal `printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2`",
+          "literal $(printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2)",
+          "literal `printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2`",
         ]),
       );
 
@@ -152,7 +152,7 @@ ${completionFunction}
           "-fc",
           `${getCompletionScript("zsh", program)}
 _arguments() { printf '%s\\n' "$@"; }
-_openclaw_root_completion
+_carapace_root_completion
 `,
         ],
         { encoding: "utf8" },
@@ -168,7 +168,7 @@ _openclaw_root_completion
       expect(result.status).toBe(0);
       expect(result.stdout).toContain("two\\ words");
       expect(result.stdout).toContain('say\\ \\"hello\\"');
-      expect(result.stdout).toContain("OPENCLAW_COMPLETION_VALUE_EXECUTED");
+      expect(result.stdout).toContain("CARAPACE_COMPLETION_VALUE_EXECUTED");
     },
   );
 
@@ -188,9 +188,9 @@ _openclaw_root_completion
       throw probe.error;
     }
 
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-zsh-completion-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-zsh-completion-"));
     try {
-      const scriptPath = path.join(tempDir, "openclaw.zsh");
+      const scriptPath = path.join(tempDir, "carapace.zsh");
       await fs.writeFile(scriptPath, getCompletionScript("zsh", createCompletionProgram()), "utf8");
 
       const result = spawnSync(
@@ -199,13 +199,13 @@ _openclaw_root_completion
           "-fc",
           `
             source ${JSON.stringify(scriptPath)}
-            [[ -z "\${_comps[openclaw]-}" ]] || exit 10
-            [[ "\${precmd_functions[(r)_openclaw_register_completion]}" = "_openclaw_register_completion" ]] || exit 11
+            [[ -z "\${_comps[carapace]-}" ]] || exit 10
+            [[ "\${precmd_functions[(r)_carapace_register_completion]}" = "_carapace_register_completion" ]] || exit 11
             autoload -Uz compinit
             compinit -C
-            _openclaw_register_completion
-            [[ -z "\${precmd_functions[(r)_openclaw_register_completion]}" ]] || exit 12
-            [[ "\${_comps[openclaw]-}" = "_openclaw_root_completion" ]]
+            _carapace_register_completion
+            [[ -z "\${precmd_functions[(r)_carapace_register_completion]}" ]] || exit 12
+            [[ "\${_comps[carapace]-}" = "_carapace_root_completion" ]]
           `,
         ],
         {
@@ -230,16 +230,16 @@ _openclaw_root_completion
 
     expect(script).toContain("if ($commandPath -eq 'gateway') {");
     expect(script).toContain("if ($commandPath -eq 'gateway status') {");
-    expect(script).not.toContain("if ($commandPath -eq 'openclaw gateway') {");
+    expect(script).not.toContain("if ($commandPath -eq 'carapace gateway') {");
     expect(script).toContain("$completions = @('status','restart','--force','-t','--token')");
     expect(script).not.toContain("'-t,'");
   });
 
   it("generates valid PowerShell root arrays when commands or options are empty", () => {
-    const commandsOnly = new Command().name("openclaw");
+    const commandsOnly = new Command().name("carapace");
     commandsOnly.command("status");
-    const optionsOnly = new Command().name("openclaw").option("--json", "JSON output");
-    const empty = new Command().name("openclaw");
+    const optionsOnly = new Command().name("carapace").option("--json", "JSON output");
+    const empty = new Command().name("carapace");
 
     expect(getCompletionScript("powershell", commandsOnly)).toContain("$completions = @('status')");
     expect(getCompletionScript("powershell", optionsOnly)).toContain("$completions = @('--json')");
@@ -263,14 +263,14 @@ _openclaw_root_completion
   });
 
   it("escapes apostrophes in PowerShell completion choices", () => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--profile <name>", "Profile").choices(["Jane's", "work"]));
 
     expect(getCompletionScript("powershell", program)).toContain("@('Jane''s','work')");
   });
 
   it("matches PowerShell value prefixes literally and case-insensitively", () => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--value <value>", "Value").choices(["alpha", "a*literal"]));
 
     expect(getCompletionScript("powershell", program)).toContain(
@@ -279,8 +279,8 @@ _openclaw_root_completion
   });
 
   itWithPowerShell.each([
-    ["a long shell flag", "openclaw completion --shell f"],
-    ["a short shell flag", "openclaw completion -s f"],
+    ["a long shell flag", "carapace completion --shell f"],
+    ["a short shell flag", "carapace completion -s f"],
   ])("completes validated values in real PowerShell after %s", async (_name, commandLine) => {
     expect(
       await powerShellCompletion.complete(createDocumentedCompletionProgram(), commandLine),
@@ -290,17 +290,17 @@ _openclaw_root_completion
   itWithPowerShell.each([
     {
       name: "an omitted optional value",
-      commandLine: "openclaw --mode --j",
+      commandLine: "carapace --mode --j",
       expected: ["--json"],
     },
     {
       name: "an inline optional value",
-      commandLine: "openclaw --mode=a",
+      commandLine: "carapace --mode=a",
       expected: ["--mode=auto"],
     },
     {
       name: "a hyphen-prefixed optional choice",
-      commandLine: "openclaw --mode -l",
+      commandLine: "carapace --mode -l",
       expected: ["-legacy"],
     },
   ])("preserves real PowerShell completion after $name", async ({ commandLine, expected }) => {
@@ -312,31 +312,31 @@ _openclaw_root_completion
   itWithPowerShell.each([
     {
       name: "an ordinary prefix",
-      commandLine: "openclaw --value al",
+      commandLine: "carapace --value al",
       expected: ["alpha"],
     },
     {
       name: "a literal asterisk",
-      commandLine: "openclaw --value a*",
+      commandLine: "carapace --value a*",
       expected: ["'a*literal'"],
     },
     {
       name: "a literal opening bracket",
-      commandLine: "openclaw --value a[",
+      commandLine: "carapace --value a[",
       expected: ["'a[bracket]'"],
     },
     {
       name: "a case-insensitive literal asterisk",
-      commandLine: "openclaw --value A*",
+      commandLine: "carapace --value A*",
       expected: ["'a*literal'"],
     },
     {
       name: "an inline literal asterisk",
-      commandLine: "openclaw --value=a*",
+      commandLine: "carapace --value=a*",
       expected: ["--value='a*literal'"],
     },
   ])("matches real PowerShell choices with $name", async ({ commandLine, expected }) => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(
       new Option("--value <value>", "Value").choices(["alpha", "a*literal", "a[bracket]"]),
     );
@@ -350,30 +350,30 @@ _openclaw_root_completion
     { name: "apostrophes", value: "Jane's", prefix: "Ja" },
     {
       name: "literal command substitution",
-      value: "literal $(Write-Error OPENCLAW_COMPLETION_VALUE_EXECUTED)",
+      value: "literal $(Write-Error CARAPACE_COMPLETION_VALUE_EXECUTED)",
       prefix: "literal",
     },
     {
       name: "literal backtick metacharacters",
-      value: "literal `$(Write-Error OPENCLAW_COMPLETION_VALUE_EXECUTED)",
+      value: "literal `$(Write-Error CARAPACE_COMPLETION_VALUE_EXECUTED)",
       prefix: "literal",
     },
     {
       name: "literal statement separators",
-      value: "literal; Write-Error OPENCLAW_COMPLETION_VALUE_EXECUTED",
+      value: "literal; Write-Error CARAPACE_COMPLETION_VALUE_EXECUTED",
       prefix: "literal",
     },
   ])("inserts PowerShell $name as one safe argument", async ({ value, prefix }) => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--value <value>", "Value").choices([value]));
     const safeValue = /^[A-Za-z0-9_./:+-]+$/.test(value)
       ? value
       : `'${value.replaceAll("'", "''")}'`;
 
-    expect(await powerShellCompletion.complete(program, `openclaw --value ${prefix}`)).toEqual([
+    expect(await powerShellCompletion.complete(program, `carapace --value ${prefix}`)).toEqual([
       safeValue,
     ]);
-    expect(await powerShellCompletion.complete(program, `openclaw --value=${prefix}`)).toEqual([
+    expect(await powerShellCompletion.complete(program, `carapace --value=${prefix}`)).toEqual([
       `--value=${safeValue}`,
     ]);
   });
@@ -381,7 +381,7 @@ _openclaw_root_completion
   itWithPowerShell("completes root short and long flags in real PowerShell", async () => {
     const completions = await powerShellCompletion.complete(
       createDocumentedCompletionProgram(),
-      "openclaw -",
+      "carapace -",
     );
 
     expect(completions).toEqual(expect.arrayContaining(["-v", "--verbose", "--status-json"]));
@@ -392,7 +392,7 @@ _openclaw_root_completion
     async () => {
       const completions = await powerShellCompletion.complete(
         createDocumentedCompletionProgram(),
-        "openclaw completion -",
+        "carapace completion -",
       );
 
       expect(completions).toEqual(
@@ -410,11 +410,11 @@ _openclaw_root_completion
   );
 
   itWithPowerShell.each([
-    ["a long flag", "openclaw gateway --token secret st"],
-    ["a short flag", "openclaw gateway -t secret st"],
-    ["an inline long value", "openclaw gateway --token=secret st"],
-    ["an inline short value", "openclaw gateway -t=secret st"],
-    ["a preceding boolean flag", "openclaw gateway --force --token secret st"],
+    ["a long flag", "carapace gateway --token secret st"],
+    ["a short flag", "carapace gateway -t secret st"],
+    ["an inline long value", "carapace gateway --token=secret st"],
+    ["an inline short value", "carapace gateway -t=secret st"],
+    ["a preceding boolean flag", "carapace gateway --force --token secret st"],
   ])("keeps real PowerShell nested completions after %s", async (_name, commandLine) => {
     expect(await powerShellCompletion.complete(createCompletionProgram(), commandLine)).toEqual([
       "status",
@@ -428,7 +428,7 @@ _openclaw_root_completion
     expect(
       await powerShellCompletion.complete(
         createDocumentedCompletionProgram(),
-        `openclaw ${prefix}`,
+        `carapace ${prefix}`,
       ),
     ).toEqual(expected);
   });
@@ -437,18 +437,18 @@ _openclaw_root_completion
     const script = getCompletionScript("fish", createCompletionProgram());
 
     expect(script).toContain(
-      'complete -c openclaw -n "__openclaw_command_path_matches --" -a "gateway" -d \'Gateway commands\'',
+      'complete -c carapace -n "__carapace_command_path_matches --" -a "gateway" -d \'Gateway commands\'',
     );
     expect(script).toContain(
-      'complete -c openclaw -n "__openclaw_command_path_matches gateway -- -t --token" -a "status" -d \'Show gateway status\'',
+      'complete -c carapace -n "__carapace_command_path_matches gateway -- -t --token" -a "status" -d \'Show gateway status\'',
     );
     expect(script).toContain(
-      "complete -c openclaw -n \"__openclaw_command_path_matches gateway -- -t --token\" -l force -d 'Force the action'",
+      "complete -c carapace -n \"__carapace_command_path_matches gateway -- -t --token\" -l force -d 'Force the action'",
     );
     expect(script).toContain(
-      "complete -c openclaw -n \"__openclaw_command_path_matches gateway status -- -t --token\" -l json -d 'JSON output'",
+      "complete -c carapace -n \"__carapace_command_path_matches gateway status -- -t --token\" -l json -d 'JSON output'",
     );
-    expect(script).toContain("__openclaw_command_path_matches gateway -- -t --token");
+    expect(script).toContain("__carapace_command_path_matches gateway -- -t --token");
     expect(script).toContain("if contains -- $flag $value_options");
   });
 
@@ -460,22 +460,22 @@ _openclaw_root_completion
   });
 
   itWithFish.each([
-    ["a separate long root option", "openclaw --profile work g"],
-    ["an inline long root option", "openclaw --profile=work g"],
-    ["a separate short root option", "openclaw -p work g"],
-    ["an inline short root option", "openclaw -p=work g"],
-    ["an attached short root option", "openclaw -pwork g"],
-    ["a separate log-level root option", "openclaw --log-level debug g"],
-    ["an inline log-level root option", "openclaw --log-level=debug g"],
-    ["a separate container root option", "openclaw --container local g"],
-    ["an inline container root option", "openclaw --container=local g"],
-    ["repeated root options", "openclaw --profile first --profile second g"],
+    ["a separate long root option", "carapace --profile work g"],
+    ["an inline long root option", "carapace --profile=work g"],
+    ["a separate short root option", "carapace -p work g"],
+    ["an inline short root option", "carapace -p=work g"],
+    ["an attached short root option", "carapace -pwork g"],
+    ["a separate log-level root option", "carapace --log-level debug g"],
+    ["an inline log-level root option", "carapace --log-level=debug g"],
+    ["a separate container root option", "carapace --container local g"],
+    ["an inline container root option", "carapace --container=local g"],
+    ["repeated root options", "carapace --profile first --profile second g"],
     [
       "mixed value-taking root options",
-      "openclaw --profile work --log-level debug --container local g",
+      "carapace --profile work --log-level debug --container local g",
     ],
-    ["a preceding boolean root option", "openclaw -v --profile work g"],
-    ["a root option value named like a command", "openclaw --profile gateway g"],
+    ["a preceding boolean root option", "carapace -v --profile work g"],
+    ["a root option value named like a command", "carapace --profile gateway g"],
   ])("completes root commands in real Fish after %s", (_name, commandLine) => {
     const program = createCompletionProgram()
       .option("-p, --profile <name>", "Profile")
@@ -486,10 +486,10 @@ _openclaw_root_completion
   });
 
   itWithFish.each([
-    ["a separate long root option", "openclaw --profile work --p"],
-    ["an inline long root option", "openclaw --profile=work --p"],
-    ["a separate short root option", "openclaw -p work --p"],
-    ["repeated root options", "openclaw --profile first --profile second --p"],
+    ["a separate long root option", "carapace --profile work --p"],
+    ["an inline long root option", "carapace --profile=work --p"],
+    ["a separate short root option", "carapace -p work --p"],
+    ["repeated root options", "carapace --profile first --profile second --p"],
   ])("completes root options in real Fish after %s", (_name, commandLine) => {
     const program = createCompletionProgram().option("-p, --profile <name>", "Profile");
 
@@ -497,22 +497,22 @@ _openclaw_root_completion
   });
 
   itWithFish.each([
-    ["the exact nested command", "openclaw gateway status -"],
-    ["a separate long option value", "openclaw gateway --token secret status -"],
-    ["a separate short option value", "openclaw gateway -t secret status -"],
-    ["an inline long option value", "openclaw gateway --token=secret status -"],
-    ["an inline short option value", "openclaw gateway -t=secret status -"],
-    ["a parent boolean option", "openclaw gateway --force status -"],
+    ["the exact nested command", "carapace gateway status -"],
+    ["a separate long option value", "carapace gateway --token secret status -"],
+    ["a separate short option value", "carapace gateway -t secret status -"],
+    ["an inline long option value", "carapace gateway --token=secret status -"],
+    ["an inline short option value", "carapace gateway -t=secret status -"],
+    ["a parent boolean option", "carapace gateway --force status -"],
   ])("keeps real Fish completions scoped after %s", (_name, commandLine) => {
     expect(runGeneratedFishCompletion(createCompletionProgram(), commandLine)).toEqual(["--json"]);
   });
 
   itWithFish.each([
-    ["a positional argument", "openclaw gateway status query -"],
-    ["multiple positional arguments", "openclaw gateway status first second -"],
-    ["a positional argument named like a sibling", "openclaw gateway status restart -"],
-    ["a long option and positional argument", "openclaw gateway --token secret status query -"],
-    ["an inline option and positional argument", "openclaw gateway --token=secret status query -"],
+    ["a positional argument", "carapace gateway status query -"],
+    ["multiple positional arguments", "carapace gateway status first second -"],
+    ["a positional argument named like a sibling", "carapace gateway status restart -"],
+    ["a long option and positional argument", "carapace gateway --token secret status query -"],
+    ["an inline option and positional argument", "carapace gateway --token=secret status query -"],
   ])("keeps real Fish leaf options after %s", (_name, commandLine) => {
     const program = createCompletionProgram();
     const gateway = program.commands.find((command) => command.name() === "gateway");
@@ -527,27 +527,27 @@ _openclaw_root_completion
 
   itWithFish("preserves documented short and long completion flags in real Fish", () => {
     expect(
-      runGeneratedFishCompletion(createDocumentedCompletionProgram(), "openclaw completion -"),
+      runGeneratedFishCompletion(createDocumentedCompletionProgram(), "carapace completion -"),
     ).toEqual(
       expect.arrayContaining(["-s", "--shell", "-i", "--install", "-y", "--yes", "--write-state"]),
     );
   });
 
   itWithFish.each([
-    ["a separated long optional value", "openclaw --color a", "always"],
-    ["a separated short optional value", "openclaw -c n", "never"],
-    ["an attached long optional value", "openclaw --color=a", "--color=always"],
+    ["a separated long optional value", "carapace --color a", "always"],
+    ["a separated short optional value", "carapace -c n", "never"],
+    ["an attached long optional value", "carapace --color=a", "--color=always"],
   ])("completes real Fish Commander choices after %s", (_name, commandLine, expected) => {
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .addOption(new Option("-c, --color [when]").choices(["always", "never"]));
 
     expect(runGeneratedFishCompletion(program, commandLine)).toContain(expected);
   });
 
   itWithFish.each([
-    ["a long shell flag", "openclaw completion --shell f"],
-    ["a short shell flag", "openclaw completion -s f"],
+    ["a long shell flag", "carapace completion --shell f"],
+    ["a short shell flag", "carapace completion -s f"],
   ])("completes validated values in real Fish after %s", (_name, commandLine) => {
     expect(runGeneratedFishCompletion(createDocumentedCompletionProgram(), commandLine)).toEqual([
       "fish",
@@ -567,23 +567,23 @@ _openclaw_root_completion
     { name: "apostrophes", value: "it's literal", prefix: "it" },
     {
       name: "literal command substitution",
-      value: "literal $(printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2)",
+      value: "literal $(printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2)",
       prefix: "literal",
     },
     {
       name: "literal backtick substitution",
-      value: "literal `printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2`",
+      value: "literal `printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2`",
       prefix: "literal",
     },
   ])("preserves Fish choice $name as one inert candidate", ({ value, prefix }) => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--value <value>", "Value").choices([value]));
 
-    expect(runGeneratedFishCompletion(program, `openclaw --value ${prefix}`)).toEqual([value]);
+    expect(runGeneratedFishCompletion(program, `carapace --value ${prefix}`)).toEqual([value]);
   });
 
   it("does not require optional Fish option choices", () => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--mode [mode]", "Mode").choices(["auto", "manual"]));
 
     const optionLine = getCompletionScript("fish", program)
@@ -598,24 +598,24 @@ _openclaw_root_completion
   it("scopes fish value-taking option skips to the active command path", () => {
     const script = getCompletionScript("fish", createCompletionProgram());
 
-    expect(script).toContain("__openclaw_command_path_matches agent -- --verbose");
-    expect(script).toContain("__openclaw_command_path_matches sessions cleanup --");
-    expect(script).not.toContain("__openclaw_command_path_matches sessions cleanup -- --verbose");
+    expect(script).toContain("__carapace_command_path_matches agent -- --verbose");
+    expect(script).toContain("__carapace_command_path_matches sessions cleanup --");
+    expect(script).not.toContain("__carapace_command_path_matches sessions cleanup -- --verbose");
     expect(script).toContain(
-      "complete -c openclaw -n \"__openclaw_command_path_matches sessions cleanup --\" -l dry-run -d 'Preview cleanup'",
+      "complete -c carapace -n \"__carapace_command_path_matches sessions cleanup --\" -l dry-run -d 'Preview cleanup'",
     );
   });
 
   it("uses Commander's parsed flags instead of value placeholder syntax", () => {
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .option("--trigger-script <path|->", "Condition script file, or - for stdin")
       .option("--ws, --workspace <name>", "Workspace");
 
     const fishScript = getCompletionScript("fish", program);
 
     expect(fishScript).toContain(
-      "complete -c openclaw -n \"__openclaw_command_path_matches -- --trigger-script --ws --workspace\" -l trigger-script -r -d 'Condition script file, or - for stdin'",
+      "complete -c carapace -n \"__carapace_command_path_matches -- --trigger-script --ws --workspace\" -l trigger-script -r -d 'Condition script file, or - for stdin'",
     );
     expect(fishScript).not.toContain(" -s > ");
     expect(fishScript).toContain(" -l ws -l workspace -r -d 'Workspace'");
@@ -634,7 +634,7 @@ _openclaw_root_completion
     "completes both root short flags and their long aliases in real Bash",
     () => {
       const completions = runGeneratedBashCompletion(createDocumentedCompletionProgram(), [
-        "openclaw",
+        "carapace",
         "-",
       ]);
 
@@ -647,7 +647,7 @@ _openclaw_root_completion
     "completes every documented completion short flag in real Bash",
     () => {
       const completions = runGeneratedBashCompletion(createDocumentedCompletionProgram(), [
-        "openclaw",
+        "carapace",
         "completion",
         "-",
       ]);
@@ -671,7 +671,7 @@ _openclaw_root_completion
     "completes both nested value-taking flag aliases in real Bash",
     () => {
       const completions = runGeneratedBashCompletion(createDocumentedCompletionProgram(), [
-        "openclaw",
+        "carapace",
         "gateway",
         "-",
       ]);
@@ -686,8 +686,8 @@ _openclaw_root_completion
     () => {
       const program = createDocumentedCompletionProgram();
 
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-s"])).toEqual(["-s"]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "--s"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-s"])).toEqual(["-s"]);
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "--s"])).toEqual([
         "--shell",
       ]);
     },
@@ -696,22 +696,22 @@ _openclaw_root_completion
   it.skipIf(process.platform === "win32").each([
     {
       name: "a long shell flag",
-      words: ["openclaw", "completion", "--shell", "f"],
+      words: ["carapace", "completion", "--shell", "f"],
       expected: ["fish"],
     },
     {
       name: "a short shell flag",
-      words: ["openclaw", "completion", "-s", "f"],
+      words: ["carapace", "completion", "-s", "f"],
       expected: ["fish"],
     },
     {
       name: "an inline long shell flag",
-      words: ["openclaw", "completion", "--shell=f"],
+      words: ["carapace", "completion", "--shell=f"],
       expected: ["--shell=fish"],
     },
     {
       name: "an unsupported equals prefix in a short option value",
-      words: ["openclaw", "completion", "-s=f"],
+      words: ["carapace", "completion", "-s=f"],
       expected: [],
     },
   ])("completes validated values in real Bash after $name", ({ words, expected }) => {
@@ -723,22 +723,22 @@ _openclaw_root_completion
   it.skipIf(process.platform === "win32").each([
     {
       name: "an omitted optional value",
-      words: ["openclaw", "--mode", "--j"],
+      words: ["carapace", "--mode", "--j"],
       expected: ["--json"],
     },
     {
       name: "a separate optional value",
-      words: ["openclaw", "--mode", "a"],
+      words: ["carapace", "--mode", "a"],
       expected: ["auto"],
     },
     {
       name: "an inline optional value",
-      words: ["openclaw", "--mode=a"],
+      words: ["carapace", "--mode=a"],
       expected: ["--mode=auto"],
     },
     {
       name: "a hyphen-prefixed optional choice",
-      words: ["openclaw", "--mode", "-l"],
+      words: ["carapace", "--mode", "-l"],
       expected: ["-legacy"],
     },
   ])("preserves real Bash completion after $name", ({ words, expected }) => {
@@ -765,20 +765,20 @@ _openclaw_root_completion
     },
     {
       name: "literal command substitution",
-      value: "$(printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2)",
+      value: "$(printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2)",
       prefix: "$(",
     },
     {
       name: "literal backtick substitution",
-      value: "`printf OPENCLAW_COMPLETION_VALUE_EXECUTED >&2`",
+      value: "`printf CARAPACE_COMPLETION_VALUE_EXECUTED >&2`",
       prefix: "`",
     },
   ])("keeps Bash choice $name literal without executing it", ({ value, prefix }) => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("carapace");
     program.addOption(new Option("--value <value>", "Value").choices([value]));
 
-    expect(runGeneratedBashCompletion(program, ["openclaw", "--value", prefix])).toEqual([value]);
-    expect(runGeneratedBashCompletion(program, ["openclaw", `--value=${prefix}`])).toEqual([
+    expect(runGeneratedBashCompletion(program, ["carapace", "--value", prefix])).toEqual([value]);
+    expect(runGeneratedBashCompletion(program, ["carapace", `--value=${prefix}`])).toEqual([
       `--value=${value}`,
     ]);
   });
@@ -786,22 +786,22 @@ _openclaw_root_completion
   it.skipIf(process.platform === "win32").each([
     {
       name: "a root option",
-      words: ["openclaw", "--channel", "b"],
+      words: ["carapace", "--channel", "b"],
       expected: ["beta"],
     },
     {
       name: "an inherited parent option",
-      words: ["openclaw", "cron", "create", "--channel", "pre"],
+      words: ["carapace", "cron", "create", "--channel", "pre"],
       expected: ["preview"],
     },
     {
       name: "an inline inherited parent option",
-      words: ["openclaw", "cron", "create", "--channel=pre"],
+      words: ["carapace", "cron", "create", "--channel=pre"],
       expected: ["--channel=preview"],
     },
     {
       name: "a differently prefixed inherited parent choice",
-      words: ["openclaw", "cron", "create", "--channel", "pro"],
+      words: ["carapace", "cron", "create", "--channel", "pro"],
       expected: ["production"],
     },
   ])("uses the nearest validated Bash choices for $name", ({ words, expected }) => {
@@ -852,29 +852,29 @@ _openclaw_root_completion
       const program = createDocumentedCompletionProgram();
 
       expect(
-        runGeneratedBashCompletion(program, ["openclaw", "completion", "--shell", ""]),
+        runGeneratedBashCompletion(program, ["carapace", "completion", "--shell", ""]),
       ).toEqual(["zsh", "bash", "powershell", "fish"]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-s", "f"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-s", "f"])).toEqual([
         "fish",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "--shell=f"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "--shell=f"])).toEqual([
         "--shell=fish",
       ]);
       expect(
-        runGeneratedBashCompletion(program, ["openclaw", "completion", "--shell", "=", "f"], {
-          line: "openclaw completion --shell=f",
+        runGeneratedBashCompletion(program, ["carapace", "completion", "--shell", "=", "f"], {
+          line: "carapace completion --shell=f",
         }),
       ).toEqual(["fish"]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-sf"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-sf"])).toEqual([
         "-sfish",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-ysf"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-ysf"])).toEqual([
         "-ysfish",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-ys", "f"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-ys", "f"])).toEqual([
         "fish",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "completion", "-ys"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "completion", "-ys"])).toEqual([
         "-yszsh",
         "-ysbash",
         "-yspowershell",
@@ -887,14 +887,14 @@ _openclaw_root_completion
     "preserves pending short-cluster choices that start with a hyphen in real Bash",
     () => {
       const program = new Command()
-        .name("openclaw")
+        .name("carapace")
         .option("-v, --verbose", "Verbose output")
         .addOption(new Option("-m, --mode <mode>").choices(["-legacy"]))
         .exitOverride();
 
       program.parse(["-vm", "-legacy"], { from: "user" });
       expect(program.opts()).toEqual({ verbose: true, mode: "-legacy" });
-      expect(runGeneratedBashCompletion(program, ["openclaw", "-vm", "-le"])).toEqual(["-legacy"]);
+      expect(runGeneratedBashCompletion(program, ["carapace", "-vm", "-le"])).toEqual(["-legacy"]);
     },
   );
 
@@ -902,16 +902,16 @@ _openclaw_root_completion
     "keeps optional choice values from consuming the following option in real Bash",
     () => {
       const program = new Command()
-        .name("openclaw")
+        .name("carapace")
         .addOption(new Option("-c, --color [when]").choices(["always", "never"]))
         .option("-v, --verbose", "Verbose output");
 
-      expect(runGeneratedBashCompletion(program, ["openclaw", "--color", "a"])).toEqual(["always"]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "--color", "--v"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "--color", "a"])).toEqual(["always"]);
+      expect(runGeneratedBashCompletion(program, ["carapace", "--color", "--v"])).toEqual([
         "--verbose",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "-ca"])).toEqual(["-calways"]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "-vca"])).toEqual(["-vcalways"]);
+      expect(runGeneratedBashCompletion(program, ["carapace", "-ca"])).toEqual(["-calways"]);
+      expect(runGeneratedBashCompletion(program, ["carapace", "-vca"])).toEqual(["-vcalways"]);
     },
   );
 
@@ -928,7 +928,7 @@ _openclaw_root_completion
 
   it("omits empty PowerShell command-path switches for root-only programs", () => {
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .addOption(new Option("--theme <theme>").choices(["light", "dark"]));
 
     expect(getCompletionScript("powershell", program)).not.toContain("switch ($candidatePath)");
@@ -936,7 +936,7 @@ _openclaw_root_completion
 
   it("quotes PowerShell choice completion text while preserving its display value", () => {
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .addOption(new Option("--theme <theme>").choices(["light blue", "Bob's green", "path`name"]));
 
     const script = getCompletionScript("powershell", program);
@@ -949,11 +949,11 @@ _openclaw_root_completion
   });
 
   itWithPowerShell.each([
-    ["a separate option value", "openclaw completion --shell f", "fish"],
-    ["an attached option value", "openclaw completion --shell=f", "--shell=fish"],
-    ["an attached short option value", "openclaw completion -sf", "-sfish"],
-    ["a short-option cluster value", "openclaw completion -ysf", "-ysfish"],
-    ["a separated short-option cluster value", "openclaw completion -ys f", "fish"],
+    ["a separate option value", "carapace completion --shell f", "fish"],
+    ["an attached option value", "carapace completion --shell=f", "--shell=fish"],
+    ["an attached short option value", "carapace completion -sf", "-sfish"],
+    ["a short-option cluster value", "carapace completion -ysf", "-ysfish"],
+    ["a separated short-option cluster value", "carapace completion -ys f", "fish"],
   ])("completes PowerShell Commander choices after %s", async (_name, commandLine, expected) => {
     expect(
       await powerShellCompletion.complete(createDocumentedCompletionProgram(), commandLine),
@@ -964,19 +964,19 @@ _openclaw_root_completion
     expect(
       await powerShellCompletion.complete(
         createDocumentedCompletionProgram(),
-        "openclaw completion -ys",
+        "carapace completion -ys",
       ),
     ).toEqual(["-yszsh", "-ysbash", "-yspowershell", "-ysfish"]);
   });
 
   itWithPowerShell.each([
-    ["a spaced choice", "openclaw --theme l", "'light blue'"],
-    ["an attached spaced choice", "openclaw --theme=l", "--theme='light blue'"],
-    ["an apostrophe", "openclaw --theme Bob", "'Bob''s green'"],
-    ["a backtick", "openclaw --theme p", "'path`name'"],
+    ["a spaced choice", "carapace --theme l", "'light blue'"],
+    ["an attached spaced choice", "carapace --theme=l", "--theme='light blue'"],
+    ["an apostrophe", "carapace --theme Bob", "'Bob''s green'"],
+    ["a backtick", "carapace --theme p", "'path`name'"],
   ])("quotes %s in real PowerShell completion text", async (_name, commandLine, expected) => {
     const program = new Command()
-      .name("openclaw")
+      .name("carapace")
       .addOption(new Option("--theme <theme>").choices(["light blue", "Bob's green", "path`name"]));
 
     expect(await powerShellCompletion.complete(program, commandLine)).toEqual([expected]);
@@ -986,14 +986,14 @@ _openclaw_root_completion
     "keeps optional choice values from consuming the following PowerShell option",
     async () => {
       const program = new Command()
-        .name("openclaw")
+        .name("carapace")
         .addOption(new Option("-c, --color [when]").choices(["always", "never"]))
         .option("-v, --verbose", "Verbose output");
 
-      expect(await powerShellCompletion.complete(program, "openclaw --color a")).toEqual([
+      expect(await powerShellCompletion.complete(program, "carapace --color a")).toEqual([
         "always",
       ]);
-      expect(await powerShellCompletion.complete(program, "openclaw --color --v")).toEqual([
+      expect(await powerShellCompletion.complete(program, "carapace --color --v")).toEqual([
         "--verbose",
       ]);
     },
@@ -1003,7 +1003,7 @@ _openclaw_root_completion
     "preserves spaces and apostrophes inside individual Commander choices",
     () => {
       const program = new Command()
-        .name("openclaw")
+        .name("carapace")
         .addOption(
           new Option("--theme <theme>", "Color theme").choices([
             "light blue",
@@ -1012,10 +1012,10 @@ _openclaw_root_completion
           ]),
         );
 
-      expect(runGeneratedBashCompletion(program, ["openclaw", "--theme", "l"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "--theme", "l"])).toEqual([
         "light blue",
       ]);
-      expect(runGeneratedBashCompletion(program, ["openclaw", "--theme", "Bob"])).toEqual([
+      expect(runGeneratedBashCompletion(program, ["carapace", "--theme", "Bob"])).toEqual([
         "Bob's green",
       ]);
       expect(getCompletionScript("fish", program)).toContain(`"'light blue' 'dark'`);
@@ -1028,7 +1028,7 @@ _openclaw_root_completion
       return;
     }
 
-    const script = getCompletionScript("bash", new Command().name("openclaw"));
+    const script = getCompletionScript("bash", new Command().name("carapace"));
     const result = spawnSync("bash", ["--noprofile", "--norc", "-n"], {
       encoding: "utf8",
       input: script,

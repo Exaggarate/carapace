@@ -1,7 +1,7 @@
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { loadDeliveryQueueEntryInDatabase } from "./delivery-queue-sqlite-bound.js";
 import {
   upsertDeliveryQueueEntryInDatabase,
@@ -39,13 +39,13 @@ export function transitionOwnedDeliveryQueueEntry(
     queueName: string;
     id: string;
     stateDir?: string;
-    database?: OpenClawStateDatabase;
+    database?: CarapaceStateDatabase;
     platformSendAttemptId: string | null;
   },
   // Unlike void, undefined rejects async callbacks before they can escape the transaction.
-  transition: (entry: DeliveryQueueEntryState, database: OpenClawStateDatabase) => undefined,
+  transition: (entry: DeliveryQueueEntryState, database: CarapaceStateDatabase) => undefined,
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const entry = loadDeliveryQueueEntryInDatabase(
         database,
@@ -69,7 +69,7 @@ export function transitionOwnedDeliveryQueueEntry(
     },
     {
       database: params.database,
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: `mutate owned ${params.queueName} delivery platform send`,
@@ -82,7 +82,7 @@ function transitionDeliveryQueueEntryPlatformSend(
   operation: "claim" | "promote" | "dispatch",
   transition: (entry: DeliveryQueueEntryState, now: number) => DeliveryQueueEntryState | undefined,
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const current = loadDeliveryQueueEntryInDatabase(
         database,
@@ -116,7 +116,7 @@ function transitionDeliveryQueueEntryPlatformSend(
         : false;
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: `${operation} ${params.queueName} delivery platform send`,
@@ -165,7 +165,7 @@ export function renewDeliveryQueueEntryPlatformSendLease(
     claimId: string;
   },
 ): number | undefined {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const entry = loadDeliveryQueueEntryInDatabase(
         database,
@@ -194,7 +194,7 @@ export function renewDeliveryQueueEntryPlatformSendLease(
         : undefined;
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: `renew ${params.queueName} delivery platform send`,

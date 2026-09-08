@@ -21,8 +21,8 @@ import {
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { z } from "zod";
 
-const bundleFile = ".openclaw-crabbox-changed-gate.bundle";
-const capsuleRef = "refs/openclaw/source-capsule";
+const bundleFile = ".carapace-crabbox-changed-gate.bundle";
+const capsuleRef = "refs/carapace/source-capsule";
 const syncPlanSchema = z.object({
   candidate: z.object({ files: z.number().int().nonnegative() }),
   topFiles: z.array(z.object({ path: z.string().min(1) })),
@@ -160,7 +160,7 @@ export function prepareCrabboxSourceCapsule(options: {
       .map(capsulePath),
   );
   mkdirSync(options.syncRoot, { recursive: true });
-  const temporary = mkdtempSync(resolve(options.syncRoot, "openclaw-crabbox-sync-"));
+  const temporary = mkdtempSync(resolve(options.syncRoot, "carapace-crabbox-sync-"));
   const directory = join(temporary, "source");
   const cleanup = () => rmSync(temporary, { recursive: true, force: true });
   try {
@@ -170,10 +170,10 @@ export function prepareCrabboxSourceCapsule(options: {
       GIT_CONFIG_GLOBAL: "/dev/null",
       GIT_CONFIG_NOSYSTEM: "1",
       GIT_CONFIG_COUNT: "0",
-      GIT_AUTHOR_NAME: "OpenClaw",
-      GIT_AUTHOR_EMAIL: "ci@openclaw.local",
-      GIT_COMMITTER_NAME: "OpenClaw",
-      GIT_COMMITTER_EMAIL: "ci@openclaw.local",
+      GIT_AUTHOR_NAME: "Carapace",
+      GIT_AUTHOR_EMAIL: "ci@carapace.local",
+      GIT_COMMITTER_NAME: "Carapace",
+      GIT_COMMITTER_EMAIL: "ci@carapace.local",
     };
     delete privateEnv.GIT_CONFIG_PARAMETERS;
     git(directory, ["init", "--quiet", "--template="], privateEnv);

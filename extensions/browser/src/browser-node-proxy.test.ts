@@ -1,5 +1,5 @@
 // Browser tests cover independently bounded delegated node-proxy requests.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type BrowserNodeRequest = {
@@ -214,7 +214,7 @@ describe("Browser node proxy nested watchdogs", () => {
               method: "POST",
               path: "/hooks/file-chooser",
               profile: "work",
-              body: { paths: ["/tmp/openclaw/uploads/report.txt"] },
+              body: { paths: ["/tmp/carapace/uploads/report.txt"] },
             };
 
       await expect(proxy(request)).rejects.toThrow(
@@ -268,7 +268,7 @@ describe("Browser node proxy nested watchdogs", () => {
 
   it("sends Gateway-owned upload bytes without node-facing source paths", async () => {
     const originalBody = {
-      paths: ["/tmp/openclaw/uploads/report.txt"],
+      paths: ["/tmp/carapace/uploads/report.txt"],
       ref: "e12",
     };
     const upload = {
@@ -296,7 +296,7 @@ describe("Browser node proxy nested watchdogs", () => {
 
   it("uses the original Gateway paths when an auto-selected old node lacks upload support", async () => {
     const originalBody = {
-      paths: ["/tmp/openclaw/uploads/report.txt"],
+      paths: ["/tmp/carapace/uploads/report.txt"],
       ref: "e12",
     };
     uploadMocks.prepareBrowserProxyUploadRequest.mockResolvedValueOnce({
@@ -346,7 +346,7 @@ describe("Browser node proxy nested watchdogs", () => {
       proxy({
         method: "POST",
         path: "/hooks/file-chooser",
-        body: { paths: ["/tmp/openclaw/uploads/report.txt"], ref: "e12" },
+        body: { paths: ["/tmp/carapace/uploads/report.txt"], ref: "e12" },
       }),
     ).rejects.toThrow("browser node does not support remote upload transfer");
     expect(runtimeMocks.callGatewayTool).not.toHaveBeenCalled();
@@ -367,7 +367,7 @@ describe("Browser node proxy nested watchdogs", () => {
       proxy({
         method: "POST",
         path: "/hooks/file-chooser",
-        body: { paths: ["/tmp/openclaw/uploads/report.txt"], ref: "e12" },
+        body: { paths: ["/tmp/carapace/uploads/report.txt"], ref: "e12" },
       }),
     ).rejects.toThrow("remote upload transfer is pending approval");
     expect(runtimeMocks.callGatewayTool).not.toHaveBeenCalled();

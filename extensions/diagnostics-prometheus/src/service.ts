@@ -4,15 +4,15 @@ import {
   isDiagnosticsEnabled,
   normalizeDiagnosticValue,
   normalizeDiagnosticLane,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { asNonNegativeFiniteNumber as numericValue } from "openclaw/plugin-sdk/number-runtime";
-import { getPluginRuntimeGatewayRequestScope } from "openclaw/plugin-sdk/plugin-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+import { asNonNegativeFiniteNumber as numericValue } from "carapace/plugin-sdk/number-runtime";
+import { getPluginRuntimeGatewayRequestScope } from "carapace/plugin-sdk/plugin-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type {
   DiagnosticEventMetadata,
   DiagnosticEventPayload,
-  OpenClawPluginHttpRouteHandler,
-  OpenClawPluginService,
+  CarapacePluginHttpRouteHandler,
+  CarapacePluginService,
 } from "../api.js";
 import { isInternalDiagnosticEventMetadata, redactSensitiveText } from "../api.js";
 
@@ -45,7 +45,7 @@ const BYTE_BUCKETS = [
 ];
 const RATIO_BUCKETS = [0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 2, 4, 8, 16];
 const MAX_PROMETHEUS_SERIES = 2048;
-const DROPPED_SERIES_COUNTER_NAME = "openclaw_prometheus_series_dropped_total";
+const DROPPED_SERIES_COUNTER_NAME = "carapace_prometheus_series_dropped_total";
 
 function seconds(ms: number | undefined): number | undefined {
   const value = numericValue(ms);
@@ -484,7 +484,7 @@ function recordModelUsage(
       return;
     }
     store.counter(
-      "openclaw_model_tokens_total",
+      "carapace_model_tokens_total",
       "Model tokens reported by diagnostic usage events.",
       {
         ...labels,
@@ -494,7 +494,7 @@ function recordModelUsage(
     );
     if (tokenType === "input" || tokenType === "output") {
       store.histogram(
-        "openclaw_gen_ai_client_token_usage",
+        "carapace_gen_ai_client_token_usage",
         "GenAI token usage distribution for input and output tokens.",
         {
           model: labels.model,
@@ -515,13 +515,13 @@ function recordModelUsage(
   recordTokens("total", usage.total);
 
   store.counter(
-    "openclaw_model_cost_usd_total",
+    "carapace_model_cost_usd_total",
     "Estimated model cost in USD reported by diagnostic usage events.",
     labels,
     numericValue(evt.costUsd) ?? 0,
   );
   store.histogram(
-    "openclaw_model_usage_duration_seconds",
+    "carapace_model_usage_duration_seconds",
     "Model usage event duration in seconds.",
     labels,
     seconds(evt.durationMs),
@@ -540,7 +540,7 @@ function recordDiagnosticEvent(
   switch (evt.type) {
     case "diagnostic.gc":
       store.histogram(
-        "openclaw_gc_duration_seconds",
+        "carapace_gc_duration_seconds",
         "Elapsed garbage collection duration in seconds for the hosting JavaScript isolate.",
         {},
         seconds(evt.durationMs),
@@ -548,13 +548,13 @@ function recordDiagnosticEvent(
       return;
     case "gateway.event_loop.sample":
       store.histogram(
-        "openclaw_gateway_event_loop_delay_max_seconds",
+        "carapace_gateway_event_loop_delay_max_seconds",
         "Maximum event-loop delay per completed Gateway observation window in seconds.",
         {},
         seconds(evt.delayMaxMs),
       );
       store.counter(
-        "openclaw_gateway_event_loop_observed_seconds_total",
+        "carapace_gateway_event_loop_observed_seconds_total",
         "Elapsed seconds covered by completed Gateway event-loop observation windows.",
         {},
         evt.intervalMs / 1000,
@@ -564,40 +564,40 @@ function recordDiagnosticEvent(
       const labels = { method: evt.method };
       if (evt.phase === "received") {
         store.counter(
-          "openclaw_gateway_rpc_requests_total",
+          "carapace_gateway_rpc_requests_total",
           "Authenticated Gateway WebSocket requests received.",
           labels,
         );
         return;
       }
       store.counter(
-        "openclaw_gateway_rpc_outcomes_total",
+        "carapace_gateway_rpc_outcomes_total",
         "Gateway RPC observations by phase and outcome.",
         { phase: evt.phase, outcome: evt.outcome },
       );
       if (evt.phase === "response" && (evt.outcome === "ok" || evt.outcome === "error")) {
         store.histogram(
-          "openclaw_gateway_rpc_first_response_seconds",
+          "carapace_gateway_rpc_first_response_seconds",
           "Elapsed time until the first Gateway RPC response is sent.",
           labels,
           seconds(evt.durationMs),
         );
       } else if (evt.phase === "handler") {
         store.histogram(
-          "openclaw_gateway_rpc_handler_seconds",
+          "carapace_gateway_rpc_handler_seconds",
           "Gateway RPC handler duration until return or throw.",
           labels,
           seconds(evt.durationMs),
         );
         store.histogram(
-          "openclaw_gateway_rpc_admission_seconds",
+          "carapace_gateway_rpc_admission_seconds",
           "Elapsed time from Gateway RPC receipt until handler invocation.",
           labels,
           seconds(evt.admissionMs),
         );
       } else if (evt.phase === "dispatch") {
         store.histogram(
-          "openclaw_gateway_rpc_queue_wait_seconds",
+          "carapace_gateway_rpc_queue_wait_seconds",
           "Gateway operator request start queue wait.",
           labels,
           seconds(evt.queueWaitMs),
@@ -610,13 +610,13 @@ function recordDiagnosticEvent(
       return;
     case "run.completed":
       store.histogram(
-        "openclaw_run_duration_seconds",
+        "carapace_run_duration_seconds",
         "Agent run duration in seconds.",
         runLabels(evt),
         seconds(evt.durationMs),
       );
       store.counter(
-        "openclaw_run_completed_total",
+        "carapace_run_completed_total",
         "Agent runs completed by outcome.",
         runLabels(evt),
       );
@@ -624,20 +624,20 @@ function recordDiagnosticEvent(
     case "model.call.completed":
     case "model.call.error":
       store.histogram(
-        "openclaw_model_call_duration_seconds",
+        "carapace_model_call_duration_seconds",
         "Model request or synthetic agent-turn duration in seconds.",
         modelCallLabels(evt),
         seconds(evt.durationMs),
       );
       store.counter(
-        "openclaw_model_call_total",
+        "carapace_model_call_total",
         "Model requests or synthetic agent turns completed by outcome.",
         modelCallLabels(evt),
       );
       return;
     case "model.failover":
       store.counter(
-        "openclaw_model_failover_total",
+        "carapace_model_failover_total",
         "Model failovers by source, destination, lane, and reason.",
         modelFailoverLabels(evt),
       );
@@ -645,37 +645,37 @@ function recordDiagnosticEvent(
     case "tool.execution.completed":
     case "tool.execution.error":
       store.histogram(
-        "openclaw_tool_execution_duration_seconds",
+        "carapace_tool_execution_duration_seconds",
         "Tool execution duration in seconds.",
         toolExecutionLabels(evt),
         seconds(evt.durationMs),
       );
       store.counter(
-        "openclaw_tool_execution_total",
+        "carapace_tool_execution_total",
         "Tool executions completed by outcome.",
         toolExecutionLabels(evt),
       );
       return;
     case "tool.execution.blocked":
       store.counter(
-        "openclaw_tool_execution_blocked_total",
+        "carapace_tool_execution_blocked_total",
         "Tool executions blocked by policy or sandbox diagnostics.",
         toolExecutionBlockedLabels(evt),
       );
       return;
     case "skill.used":
-      store.counter("openclaw_skill_used_total", "Skills used by agent runs.", skillLabels(evt));
+      store.counter("carapace_skill_used_total", "Skills used by agent runs.", skillLabels(evt));
       return;
     case "harness.run.completed":
     case "harness.run.error":
       store.histogram(
-        "openclaw_harness_run_duration_seconds",
+        "carapace_harness_run_duration_seconds",
         "Agent harness run duration in seconds.",
         harnessLabels(evt),
         seconds(evt.durationMs),
       );
       store.counter(
-        "openclaw_harness_run_total",
+        "carapace_harness_run_total",
         "Agent harness runs completed by outcome.",
         harnessLabels(evt),
       );
@@ -687,12 +687,12 @@ function recordDiagnosticEvent(
         reason: normalizeDiagnosticValue(evt.reason, "none"),
       };
       store.counter(
-        "openclaw_message_processed_total",
+        "carapace_message_processed_total",
         "Inbound messages processed by outcome.",
         labels,
       );
       store.histogram(
-        "openclaw_message_processed_duration_seconds",
+        "carapace_message_processed_duration_seconds",
         "Inbound message processing duration in seconds.",
         labels,
         seconds(evt.durationMs),
@@ -701,14 +701,14 @@ function recordDiagnosticEvent(
     }
     case "webhook.received":
       store.counter(
-        "openclaw_webhook_received_total",
+        "carapace_webhook_received_total",
         "Webhook requests received by channel and update type.",
         webhookLabels(evt),
       );
       return;
     case "webhook.processed":
       store.histogram(
-        "openclaw_webhook_duration_seconds",
+        "carapace_webhook_duration_seconds",
         "Webhook processing duration in seconds.",
         webhookLabels(evt),
         seconds(evt.durationMs),
@@ -716,14 +716,14 @@ function recordDiagnosticEvent(
       return;
     case "webhook.error":
       store.counter(
-        "openclaw_webhook_error_total",
+        "carapace_webhook_error_total",
         "Webhook processing errors by channel and update type.",
         webhookLabels(evt),
       );
       return;
     case "message.delivery.started":
       store.counter(
-        "openclaw_message_delivery_started_total",
+        "carapace_message_delivery_started_total",
         "Outbound message delivery attempts started.",
         {
           channel: normalizeDiagnosticValue(evt.channel),
@@ -732,14 +732,14 @@ function recordDiagnosticEvent(
       );
       return;
     case "message.received":
-      store.counter("openclaw_message_received_total", "Inbound messages received by channel.", {
+      store.counter("carapace_message_received_total", "Inbound messages received by channel.", {
         channel: normalizeDiagnosticValue(evt.channel),
         source: normalizeDiagnosticValue(evt.source),
       });
       return;
     case "message.dispatch.started":
       store.counter(
-        "openclaw_message_dispatch_started_total",
+        "carapace_message_dispatch_started_total",
         "Inbound message dispatch attempts started by channel.",
         {
           channel: normalizeDiagnosticValue(evt.channel),
@@ -755,12 +755,12 @@ function recordDiagnosticEvent(
         source: normalizeDiagnosticValue(evt.source),
       };
       store.counter(
-        "openclaw_message_dispatch_completed_total",
+        "carapace_message_dispatch_completed_total",
         "Inbound message dispatch attempts completed by outcome.",
         labels,
       );
       store.histogram(
-        "openclaw_message_dispatch_duration_seconds",
+        "carapace_message_dispatch_duration_seconds",
         "Inbound message dispatch duration in seconds.",
         labels,
         seconds(evt.durationMs),
@@ -779,12 +779,12 @@ function recordDiagnosticEvent(
         outcome: evt.type === "message.delivery.error" ? "error" : "completed",
       };
       store.counter(
-        "openclaw_message_delivery_total",
+        "carapace_message_delivery_total",
         "Outbound message delivery attempts by outcome.",
         labels,
       );
       store.histogram(
-        "openclaw_message_delivery_duration_seconds",
+        "carapace_message_delivery_duration_seconds",
         "Outbound message delivery duration in seconds.",
         labels,
         seconds(evt.durationMs),
@@ -792,15 +792,15 @@ function recordDiagnosticEvent(
       return;
     }
     case "talk.event":
-      store.counter("openclaw_talk_event_total", "Talk events emitted by type.", talkLabels(evt));
+      store.counter("carapace_talk_event_total", "Talk events emitted by type.", talkLabels(evt));
       store.histogram(
-        "openclaw_talk_event_duration_seconds",
+        "carapace_talk_event_duration_seconds",
         "Talk event duration in seconds when reported.",
         talkLabels(evt),
         seconds(evt.durationMs),
       );
       store.histogram(
-        "openclaw_talk_audio_bytes",
+        "carapace_talk_audio_bytes",
         "Talk audio frame byte lengths.",
         talkLabels(evt),
         numericValue(evt.byteLength),
@@ -810,12 +810,12 @@ function recordDiagnosticEvent(
     case "session.recovery.requested":
     case "session.recovery.completed":
       store.counter(
-        "openclaw_session_recovery_total",
+        "carapace_session_recovery_total",
         "Session recovery observations by status and action.",
         sessionRecoveryLabels(evt),
       );
       store.histogram(
-        "openclaw_session_recovery_age_seconds",
+        "carapace_session_recovery_age_seconds",
         "Age of sessions selected for recovery in seconds.",
         sessionRecoveryLabels(evt),
         seconds(evt.ageMs),
@@ -824,7 +824,7 @@ function recordDiagnosticEvent(
     case "queue.lane.enqueue":
     case "queue.lane.dequeue":
       store.gauge(
-        "openclaw_queue_lane_size",
+        "carapace_queue_lane_size",
         "Current diagnostic queue lane size.",
         {
           lane: normalizeDiagnosticLane(evt.lane),
@@ -833,7 +833,7 @@ function recordDiagnosticEvent(
       );
       if (evt.type === "queue.lane.dequeue") {
         store.histogram(
-          "openclaw_queue_lane_wait_seconds",
+          "carapace_queue_lane_wait_seconds",
           "Queue lane wait time in seconds.",
           { lane: normalizeDiagnosticLane(evt.lane) },
           seconds(evt.waitMs),
@@ -841,13 +841,13 @@ function recordDiagnosticEvent(
       }
       return;
     case "session.state":
-      store.counter("openclaw_session_state_total", "Session state observations.", {
+      store.counter("carapace_session_state_total", "Session state observations.", {
         reason: normalizeDiagnosticValue(evt.reason, "none"),
         state: evt.state,
       });
       if (evt.queueDepth !== undefined) {
         store.gauge(
-          "openclaw_session_queue_depth",
+          "carapace_session_queue_depth",
           "Latest observed session queue depth.",
           {
             state: evt.state,
@@ -858,19 +858,19 @@ function recordDiagnosticEvent(
       return;
     case "session.stuck":
       store.counter(
-        "openclaw_session_stuck_total",
+        "carapace_session_stuck_total",
         "Stale session bookkeeping observations with no active work.",
         sessionStuckLabels(evt),
       );
       store.histogram(
-        "openclaw_session_stuck_age_seconds",
+        "carapace_session_stuck_age_seconds",
         "Age of stale session bookkeeping observations in seconds.",
         sessionStuckLabels(evt),
         seconds(evt.ageMs),
       );
       return;
     case "session.turn.created":
-      store.counter("openclaw_session_turn_created_total", "Agent session turns created.", {
+      store.counter("carapace_session_turn_created_total", "Agent session turns created.", {
         agent: normalizeDiagnosticValue(evt.agentId),
         channel: normalizeDiagnosticValue(evt.channel),
         trigger: evt.trigger,
@@ -883,14 +883,14 @@ function recordDiagnosticEvent(
         ["heap_used", "heapUsedBytes"],
       ] as const) {
         store.gauge(
-          "openclaw_memory_bytes",
+          "carapace_memory_bytes",
           "Latest process memory usage by memory kind.",
           { kind },
           evt.memory[field],
         );
       }
       store.histogram(
-        "openclaw_memory_rss_bytes",
+        "carapace_memory_rss_bytes",
         "RSS memory sample distribution in bytes.",
         {},
         numericValue(evt.memory.rssBytes),
@@ -899,7 +899,7 @@ function recordDiagnosticEvent(
       return;
     case "diagnostic.memory.pressure":
       store.counter(
-        "openclaw_memory_pressure_total",
+        "carapace_memory_pressure_total",
         "Memory pressure events by level and reason.",
         {
           level: evt.level,
@@ -909,39 +909,39 @@ function recordDiagnosticEvent(
       return;
     case "diagnostic.liveness.warning":
       store.counter(
-        "openclaw_liveness_warning_total",
+        "carapace_liveness_warning_total",
         "Diagnostic liveness warning events.",
         livenessLabels(evt),
       );
       for (const state of ["active", "waiting", "queued"] as const) {
         store.gauge(
-          "openclaw_liveness_sessions",
+          "carapace_liveness_sessions",
           "Latest session counts reported with diagnostic liveness warnings.",
           { state },
           numericValue(evt[state]),
         );
       }
       store.histogram(
-        "openclaw_liveness_event_loop_delay_p99_seconds",
+        "carapace_liveness_event_loop_delay_p99_seconds",
         "P99 event-loop delay reported by diagnostic liveness warnings in seconds.",
         livenessLabels(evt),
         seconds(evt.eventLoopDelayP99Ms),
       );
       store.histogram(
-        "openclaw_liveness_event_loop_delay_max_seconds",
+        "carapace_liveness_event_loop_delay_max_seconds",
         "Maximum event-loop delay reported by diagnostic liveness warnings in seconds.",
         livenessLabels(evt),
         seconds(evt.eventLoopDelayMaxMs),
       );
       store.histogram(
-        "openclaw_liveness_event_loop_utilization_ratio",
+        "carapace_liveness_event_loop_utilization_ratio",
         "Event-loop utilization reported by diagnostic liveness warnings.",
         livenessLabels(evt),
         numericValue(evt.eventLoopUtilization),
         RATIO_BUCKETS,
       );
       store.histogram(
-        "openclaw_liveness_cpu_core_ratio",
+        "carapace_liveness_cpu_core_ratio",
         "Whole-process CPU usage in core equivalents, including worker and native threads; can exceed 1.",
         livenessLabels(evt),
         numericValue(evt.cpuCoreRatio),
@@ -959,14 +959,14 @@ function recordDiagnosticEvent(
           continue;
         }
         store.counter(
-          "openclaw_diagnostic_async_queue_dropped_total",
+          "carapace_diagnostic_async_queue_dropped_total",
           "Async diagnostic queue drops by dropped event class.",
           { drop_class: dropClass },
           numericValue(evt[field]),
         );
       }
       store.gauge(
-        "openclaw_diagnostic_async_queue_length",
+        "carapace_diagnostic_async_queue_length",
         "Latest async diagnostic queue length after a drop summary.",
         {},
         numericValue(evt.queueLength),
@@ -975,7 +975,7 @@ function recordDiagnosticEvent(
     case "diagnostic.heartbeat":
       break;
     case "telemetry.exporter":
-      store.counter("openclaw_telemetry_exporter_total", "Telemetry exporter lifecycle events.", {
+      store.counter("carapace_telemetry_exporter_total", "Telemetry exporter lifecycle events.", {
         exporter: normalizeDiagnosticValue(evt.exporter),
         reason: normalizeDiagnosticValue(evt.reason, "none"),
         signal: evt.signal,
@@ -984,12 +984,12 @@ function recordDiagnosticEvent(
       return;
     case "payload.large":
       store.counter(
-        "openclaw_payload_large_total",
+        "carapace_payload_large_total",
         "Oversized payload diagnostics by surface and action.",
         payloadLargeLabels(evt),
       );
       store.histogram(
-        "openclaw_payload_large_bytes",
+        "carapace_payload_large_bytes",
         "Oversized payload byte sizes by surface and action.",
         payloadLargeLabels(evt),
         numericValue(evt.bytes),
@@ -1015,7 +1015,7 @@ function hasMetricsReadScope(): boolean {
   return METRICS_READ_IMPLYING_SCOPES.some((scope) => scopes.includes(scope));
 }
 
-function createMetricsHandler(store: PrometheusMetricStore): OpenClawPluginHttpRouteHandler {
+function createMetricsHandler(store: PrometheusMetricStore): CarapacePluginHttpRouteHandler {
   return (req: IncomingMessage, res: ServerResponse) => {
     // Fail closed before any metric rendering, including for HEAD probes that would
     // otherwise disclose the document size to an unauthorized caller.
@@ -1091,7 +1091,7 @@ export function createDiagnosticsPrometheusExporter() {
       if (identity) {
         // Reserve one sample before event traffic; runtime identity must survive saturation.
         store.gauge(
-          "openclaw_gateway_build_info",
+          "carapace_gateway_build_info",
           "Identity of the hosting process and its loaded build; not a health or exporter epoch.",
           {
             process_instance_id: identity.processInstanceId,
@@ -1141,7 +1141,7 @@ export function createDiagnosticsPrometheusExporter() {
       internalDiagnostics = undefined;
       store.reset();
     },
-  } satisfies OpenClawPluginService;
+  } satisfies CarapacePluginService;
 
   return {
     handler: createMetricsHandler(store),

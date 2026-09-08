@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import type { AssistantMessage } from "@openclaw/ai";
+import type { AssistantMessage } from "@carapace/ai";
 import * as ts from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -34,8 +34,8 @@ import { createTempDirTracker } from "../helpers/temp-dir.js";
 
 vi.mock("../../scripts/lib/sleep.mjs", () => ({ sleep: async () => {} }));
 const llm = vi.hoisted(() => ({ completeSimple: vi.fn() }));
-vi.mock("@openclaw/ai", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openclaw/ai")>();
+vi.mock("@carapace/ai", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@carapace/ai")>();
   return {
     ...actual,
     createLlmRuntime: () => ({ ...actual.createLlmRuntime(), completeSimple: llm.completeSimple }),
@@ -76,9 +76,9 @@ describe("translation provider privacy and fallback", () => {
   beforeEach(() => {
     llm.completeSimple.mockReset();
     vi.stubEnv("OPENAI_API_KEY", "test-key");
-    vi.stubEnv("OPENCLAW_CONTROL_UI_I18N_PROVIDER", "openai");
-    vi.stubEnv("OPENCLAW_CONTROL_UI_I18N_MODEL", primary);
-    vi.stubEnv("OPENCLAW_I18N_FALLBACK_MODEL", fallback);
+    vi.stubEnv("CARAPACE_CONTROL_UI_I18N_PROVIDER", "openai");
+    vi.stubEnv("CARAPACE_CONTROL_UI_I18N_MODEL", primary);
+    vi.stubEnv("CARAPACE_I18N_FALLBACK_MODEL", fallback);
     vi.spyOn(process.stdout, "write").mockReturnValue(true);
   });
   afterEach(() => {
@@ -101,8 +101,8 @@ describe("translation provider privacy and fallback", () => {
 
   it("translates outside the Gateway runtime without state access or model diagnostics", async () => {
     const temp = createTempDirTracker();
-    const stateDir = path.join(temp.make("openclaw-translation-runtime-"), "state");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = path.join(temp.make("carapace-translation-runtime-"), "state");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     try {
       const scriptUrl = pathToFileURL(path.resolve("scripts/control-ui-i18n.ts")).href;
       const code = `
@@ -333,7 +333,7 @@ describe("control-ui-i18n generated ownership", () => {
   it("allows generated release output on trusted release and main runs only", () => {
     const trustedActions = {
       GITHUB_ACTIONS: "true",
-      OPENCLAW_ALLOW_RELEASE_GENERATED_MIX: "true",
+      CARAPACE_ALLOW_RELEASE_GENERATED_MIX: "true",
     };
 
     expect(
@@ -678,7 +678,7 @@ describe("control-ui-i18n process runner", () => {
     "kills descendant processes after the process timeout",
     async () => {
       const tempDirs = createTempDirTracker();
-      const tempDir = tempDirs.make("openclaw-control-ui-i18n-timeout-");
+      const tempDir = tempDirs.make("carapace-control-ui-i18n-timeout-");
       try {
         const markerPath = path.join(tempDir, "grandchild.pid");
         const grandchildScript = [
@@ -714,7 +714,7 @@ describe("control-ui-i18n process runner", () => {
     "waits for all process groups before re-raising parent signals",
     async () => {
       const tempDirs = createTempDirTracker();
-      const tempDir = tempDirs.make("openclaw-control-ui-i18n-signal-");
+      const tempDir = tempDirs.make("carapace-control-ui-i18n-signal-");
       const fastReadyPath = path.join(tempDir, "fast-ready");
       const fastCommandPath = path.join(tempDir, "fast-command.mjs");
       const commandPath = path.join(tempDir, "command.mjs");

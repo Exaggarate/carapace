@@ -11,12 +11,12 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
 
-const expectUploadSurface = process.env.OPENCLAW_TERMINAL_UPLOAD_EXPECT_PRESENT !== "0";
-const requestedScreenshotPath = process.env.OPENCLAW_TERMINAL_UPLOAD_SCREENSHOT?.trim();
+const expectUploadSurface = process.env.CARAPACE_TERMINAL_UPLOAD_EXPECT_PRESENT !== "0";
+const requestedScreenshotPath = process.env.CARAPACE_TERMINAL_UPLOAD_SCREENSHOT?.trim();
 const requestedProgressScreenshotPath =
-  process.env.OPENCLAW_TERMINAL_UPLOAD_PROGRESS_SCREENSHOT?.trim();
-const requestedErrorScreenshotPath = process.env.OPENCLAW_TERMINAL_UPLOAD_ERROR_SCREENSHOT?.trim();
-const requestedVideoDir = process.env.OPENCLAW_TERMINAL_UPLOAD_VIDEO_DIR?.trim();
+  process.env.CARAPACE_TERMINAL_UPLOAD_PROGRESS_SCREENSHOT?.trim();
+const requestedErrorScreenshotPath = process.env.CARAPACE_TERMINAL_UPLOAD_ERROR_SCREENSHOT?.trim();
+const requestedVideoDir = process.env.CARAPACE_TERMINAL_UPLOAD_VIDEO_DIR?.trim();
 
 suite.define(() => {
   it("uploads picked and dropped files, then pastes staged paths without Enter", async () => {
@@ -57,16 +57,16 @@ suite.define(() => {
         await page.addInitScript(() => {
           (
             window as Window & {
-              ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+              ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
             }
-          )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+          )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
             gatewayUrl: "ws://gateway.example.test",
             token: "test",
           };
         });
-        const stagedPath = "/tmp/openclaw-terminal-upload/sample file.pdf";
-        const stagedNotesPath = "/tmp/openclaw-terminal-upload/notes.txt";
-        const stagedDropPath = "/tmp/openclaw-terminal-upload/dropped.png";
+        const stagedPath = "/tmp/carapace-terminal-upload/sample file.pdf";
+        const stagedNotesPath = "/tmp/carapace-terminal-upload/notes.txt";
+        const stagedDropPath = "/tmp/carapace-terminal-upload/dropped.png";
         const gateway = await installMockGateway(page, {
           deferredMethods: ["connect"],
           featureMethods: ["terminal.open", "terminal.upload"],
@@ -176,8 +176,8 @@ suite.define(() => {
         const pickedInput = (await gateway.getRequests("terminal.input"))[0]?.params as {
           data?: string;
         };
-        expect(pickedInput.data).toContain("'/tmp/openclaw-terminal-upload/sample file.pdf'");
-        expect(pickedInput.data).toContain("/tmp/openclaw-terminal-upload/notes.txt");
+        expect(pickedInput.data).toContain("'/tmp/carapace-terminal-upload/sample file.pdf'");
+        expect(pickedInput.data).toContain("/tmp/carapace-terminal-upload/notes.txt");
         expect(pickedInput.data).not.toMatch(/[\r\n]/);
 
         await gateway.setMethodResponse("terminal.upload", { path: stagedDropPath, size: 3 });
@@ -210,7 +210,7 @@ suite.define(() => {
         const droppedInput = (await gateway.getRequests("terminal.input")).at(-1)?.params as {
           data?: string;
         };
-        expect(droppedInput.data).toContain("/tmp/openclaw-terminal-upload/dropped.png");
+        expect(droppedInput.data).toContain("/tmp/carapace-terminal-upload/dropped.png");
         expect(droppedInput.data).not.toMatch(/[\r\n]/);
 
         await gateway.setMethodResponse("terminal.upload", { path: stagedPath, size: 4 });
@@ -235,7 +235,7 @@ suite.define(() => {
         const recoveredInput = (await gateway.getRequests("terminal.input")).at(-1)?.params as {
           data?: string;
         };
-        expect(recoveredInput.data).toContain("'/tmp/openclaw-terminal-upload/sample file.pdf'");
+        expect(recoveredInput.data).toContain("'/tmp/carapace-terminal-upload/sample file.pdf'");
         expect(recoveredInput.data).not.toContain("blocked.zip");
         expect(recoveredInput.data).not.toMatch(/[\r\n]/);
         expect((await gateway.getRequests("terminal.upload")).length).toBe(6);
@@ -256,7 +256,7 @@ suite.define(() => {
         await page.getByRole("button", { name: "Cancel" }).click();
         await expect.poll(async () => await page.locator(".tp-upload-card").count()).toBe(0);
         await gateway.resolveDeferred("terminal.upload", {
-          path: "/tmp/openclaw-terminal-upload/cancelled.zip",
+          path: "/tmp/carapace-terminal-upload/cancelled.zip",
           size: 3,
         });
         await page.waitForTimeout(100);

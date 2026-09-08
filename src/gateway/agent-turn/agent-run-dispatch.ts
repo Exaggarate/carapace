@@ -1,5 +1,5 @@
-import { normalizeAgentRunTimeoutPhase } from "@openclaw/normalization-core/agent-run-terminal-outcome";
-import { err, ok } from "@openclaw/normalization-core/result";
+import { normalizeAgentRunTimeoutPhase } from "@carapace/normalization-core/agent-run-terminal-outcome";
+import { err, ok } from "@carapace/normalization-core/result";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { withAgentCommandExecutionIdentitySpawnFacts } from "../../agents/agent-command-execution-identity-spawn.js";
 import {

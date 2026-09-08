@@ -1,5 +1,5 @@
 // Whatsapp plugin module implements inbound dispatch behavior.
-import type { StatusReactionController } from "openclaw/plugin-sdk/channel-feedback";
+import type { StatusReactionController } from "carapace/plugin-sdk/channel-feedback";
 import {
   buildChannelInboundEventContext,
   createChannelPartialDeliveryError,
@@ -8,14 +8,14 @@ import {
   type ChannelInboundTurnPlan,
   toInboundMediaFactsWithMetadata,
   hasVisibleInboundReplyDispatch,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   listMessageReceiptPlatformIds,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { buildInboundHistoryFromEntries } from "openclaw/plugin-sdk/reply-history";
-import type { FinalizedMsgContext, ReplyDispatchKind } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { buildInboundHistoryFromEntries } from "carapace/plugin-sdk/reply-history";
+import type { FinalizedMsgContext, ReplyDispatchKind } from "carapace/plugin-sdk/reply-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   requireWhatsAppInboundAdmission,
   resolveWhatsAppAdmissionChannelIngress,

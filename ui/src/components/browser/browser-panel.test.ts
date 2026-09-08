@@ -69,8 +69,8 @@ describe("normalizeBrowserUrlDraft", () => {
   });
   it("prefixes bare hosts with https", () => {
     expect(normalizeBrowserUrlDraft("example.com")).toBe("https://example.com/");
-    expect(normalizeBrowserUrlDraft("  github.com/openclaw/openclaw ")).toBe(
-      "https://github.com/openclaw/openclaw",
+    expect(normalizeBrowserUrlDraft("  github.com/Exaggarate/carapace ")).toBe(
+      "https://github.com/Exaggarate/carapace",
     );
   });
 
@@ -92,7 +92,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("restores persisted open state when a mounted tag upgrades lazily", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "carapace.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
     const tagName = `test-lazy-browser-panel-${crypto.randomUUID()}`;
@@ -100,7 +100,7 @@ describe("normalizeBrowserUrlDraft", () => {
     element.available = true;
     document.body.append(element);
 
-    const BrowserPanel = customElements.get("openclaw-browser-panel");
+    const BrowserPanel = customElements.get("carapace-browser-panel");
     if (!BrowserPanel) {
       throw new Error("expected browser panel registration");
     }
@@ -116,7 +116,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("mounts when ResizeObserver is unavailable", async () => {
     vi.stubGlobal("ResizeObserver", undefined);
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       embedded: boolean;
       renderRoot: ShadowRoot;
@@ -131,7 +131,7 @@ describe("normalizeBrowserUrlDraft", () => {
   });
 
   it("uses the shared surface empty state when the embedded browser has no tabs", async () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       embedded: boolean;
       renderRoot: ShadowRoot;
@@ -142,14 +142,14 @@ describe("normalizeBrowserUrlDraft", () => {
     document.body.append(panel);
     await panel.updateComplete;
 
-    const empty = panel.renderRoot.querySelector("openclaw-panel-empty-state");
+    const empty = panel.renderRoot.querySelector("carapace-panel-empty-state");
     await empty?.updateComplete;
     expect(empty?.shadowRoot?.querySelector(".empty-state__title")?.textContent).toBe("Browser");
     expect(empty?.querySelector("svg")).not.toBeNull();
   });
 
   it("overlays a retained browser view only while its refresh is pending", async () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       embedded: boolean;
       browserPanelController: BrowserPanelController;
@@ -171,7 +171,7 @@ describe("normalizeBrowserUrlDraft", () => {
     expect(panel.renderRoot.querySelector(".bp-shot")).not.toBeNull();
     expect(
       panel.renderRoot.querySelector(
-        'openclaw-panel-loading-skeleton[data-panel-skeleton="browser"][overlay]',
+        'carapace-panel-loading-skeleton[data-panel-skeleton="browser"][overlay]',
       ),
     ).not.toBeNull();
 
@@ -179,16 +179,16 @@ describe("normalizeBrowserUrlDraft", () => {
     panel.requestUpdate();
     await panel.updateComplete;
 
-    expect(panel.renderRoot.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+    expect(panel.renderRoot.querySelector("carapace-panel-loading-skeleton")).toBeNull();
     expect(panel.renderRoot.querySelector(".bp-shot")).not.toBeNull();
   });
 
   it("suppresses an open dock without overwriting its persisted preference", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "carapace.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       suppressed: boolean;
       renderRoot: ShadowRoot;
@@ -205,7 +205,7 @@ describe("normalizeBrowserUrlDraft", () => {
     expect(document.documentElement.style.getPropertyValue("--oc-browser-reserve-right")).toBe(
       "0px",
     );
-    expect(JSON.parse(localStorage.getItem("openclaw.browser.panel.v1") ?? "{}")).toMatchObject({
+    expect(JSON.parse(localStorage.getItem("carapace.browser.panel.v1") ?? "{}")).toMatchObject({
       open: true,
     });
 
@@ -217,10 +217,10 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("waits for availability before restoring after suppression", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "carapace.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       suppressed: boolean;
       browserPanelIsOpen(): boolean;
@@ -240,7 +240,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("mounts closed inside a takeover instead of refreshing a hidden dock", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "carapace.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
     const requests: string[] = [];
@@ -250,7 +250,7 @@ describe("normalizeBrowserUrlDraft", () => {
         return {} as T;
       },
     } as GatewayBrowserClient;
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       client: GatewayBrowserClient | null;
       available: boolean;
       suppressed: boolean;
@@ -272,7 +272,7 @@ describe("normalizeBrowserUrlDraft", () => {
   });
 
   it("keeps an already closed panel closed for an explicit close request", () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       browserPanelIsOpen: () => boolean;
       handleToggleRequest: (event: Event) => void;
@@ -281,7 +281,7 @@ describe("normalizeBrowserUrlDraft", () => {
     document.body.append(panel);
 
     panel.handleToggleRequest(
-      new CustomEvent("openclaw:browser-toggle", { detail: { open: false } }),
+      new CustomEvent("carapace:browser-toggle", { detail: { open: false } }),
     );
 
     expect(panel.browserPanelIsOpen()).toBe(false);
@@ -291,10 +291,10 @@ describe("normalizeBrowserUrlDraft", () => {
     "ends an active annotation gesture on panel %s",
     async (transition) => {
       localStorage.setItem(
-        "openclaw.browser.panel.v1",
+        "carapace.browser.panel.v1",
         JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
       );
-      const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+      const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
         available: boolean;
         suppressed: boolean;
         browserPanelController: BrowserPanelController;
@@ -313,7 +313,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
       if (transition === "close") {
         panel.handleToggleRequest(
-          new CustomEvent("openclaw:browser-toggle", { detail: { open: false } }),
+          new CustomEvent("carapace:browser-toggle", { detail: { open: false } }),
         );
       } else {
         panel.suppressed = true;
@@ -327,7 +327,7 @@ describe("normalizeBrowserUrlDraft", () => {
   );
 
   it("treats an embedded panel as open only while it is presented", async () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       embedded: boolean;
       presented: boolean;
       browserPanelIsOpen: () => boolean;
@@ -347,7 +347,7 @@ describe("normalizeBrowserUrlDraft", () => {
   });
 
   it("starts a fresh browser tab draft when an embedded panel receives a new-tab request", async () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("carapace-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       embedded: boolean;
       presented: boolean;
@@ -362,7 +362,7 @@ describe("normalizeBrowserUrlDraft", () => {
     await panel.updateComplete;
 
     panel.handleToggleRequest(
-      new CustomEvent("openclaw:browser-toggle", { detail: { open: true, newTab: true } }),
+      new CustomEvent("carapace:browser-toggle", { detail: { open: true, newTab: true } }),
     );
     await panel.updateComplete;
     await Promise.resolve();

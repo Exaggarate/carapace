@@ -1,6 +1,6 @@
 /** Verifies plugin HTTP route registration, collision detection, and metadata capture. */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   adoptPluginHttpRouteHandoffs,
   createPluginHttpRouteHandoff,
@@ -294,7 +294,7 @@ describe("registerPluginHttpRoute", () => {
       runtime: {} as PluginRuntime,
       activateGlobalSideEffects: false,
     });
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const plainRecord = createPluginRecord({
       id: "plain-http",
       source: "/plugins/plain-http/index.ts",
@@ -475,7 +475,7 @@ describe("registerPluginHttpRoute", () => {
       const record = createPluginRecord({ id: "demo", source: "/plugins/demo/index.js" });
       const handler = vi.fn();
       pluginRegistry.registry.plugins.push(record);
-      pluginRegistry.createApi(record, { config: {} as OpenClawConfig }).registerHttpRoute({
+      pluginRegistry.createApi(record, { config: {} as CarapaceConfig }).registerHttpRoute({
         path: "/plugins/shared",
         auth: "plugin",
         handler,
@@ -605,7 +605,7 @@ describe("registerPluginHttpRoute", () => {
     });
     const slashHandler = vi.fn();
     pluginRegistry.registry.plugins.push(record);
-    pluginRegistry.createApi(record, { config: {} as OpenClawConfig }).registerHttpRoute({
+    pluginRegistry.createApi(record, { config: {} as CarapaceConfig }).registerHttpRoute({
       path: "/Mattermost//Interactions/default/",
       auth: "plugin",
       handler: slashHandler,

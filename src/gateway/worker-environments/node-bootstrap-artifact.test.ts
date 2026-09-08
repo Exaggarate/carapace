@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 import * as tar from "tar";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { collectPackageDistInventory } from "../../infra/package-dist-inventory.js";
-import * as tmpDirs from "../../infra/tmp-openclaw-dir.js";
+import * as tmpDirs from "../../infra/tmp-carapace-dir.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { createNodeBootstrapArtifactProvider } from "./node-bootstrap-artifact.js";
 
@@ -33,10 +33,10 @@ async function fixture(mode: "source" | "package" | "external-plugin" = "source"
     version,
     type: "module",
     dependencies: { "native-runtime": "1.2.3" },
-    openclaw: { extensions: ["./index.ts"] },
+    carapace: { extensions: ["./index.ts"] },
   };
   const sourcePackage = {
-    name: "openclaw",
+    name: "carapace",
     version,
     type: "module",
     files: [
@@ -56,7 +56,7 @@ async function fixture(mode: "source" | "package" | "external-plugin" = "source"
     },
   };
   await write(packageRoot, "package.json", sourcePackage);
-  await fs.writeFile(path.join(packageRoot, "openclaw.mjs"), 'import "./dist/entry.js";', {
+  await fs.writeFile(path.join(packageRoot, "carapace.mjs"), 'import "./dist/entry.js";', {
     mode: 0o755,
   });
   await write(packageRoot, "node-version.mjs", "export const supported = true;");
@@ -64,7 +64,7 @@ async function fixture(mode: "source" | "package" | "external-plugin" = "source"
   await write(
     packageRoot,
     "scripts/postinstall.mjs",
-    'import { rmSync } from "node:fs"; rmSync(new URL("../.openclaw-lifecycle-pending", import.meta.url));',
+    'import { rmSync } from "node:fs"; rmSync(new URL("../.carapace-lifecycle-pending", import.meta.url));',
   );
   await write(
     packageRoot,
@@ -81,7 +81,7 @@ async function fixture(mode: "source" | "package" | "external-plugin" = "source"
   await write(packageRoot, "dist/worker/github-exec-launcher.mjs", "export {};");
   await write(packageRoot, "dist/build-info.json", { version, buildId });
   await write(packageRoot, "dist/extensions/remote-runtime/package.json", pluginPackage);
-  await write(packageRoot, "dist/extensions/remote-runtime/openclaw.plugin.json", {
+  await write(packageRoot, "dist/extensions/remote-runtime/carapace.plugin.json", {
     id: "remote-runtime",
   });
   await write(
@@ -123,9 +123,9 @@ async function fixture(mode: "source" | "package" | "external-plugin" = "source"
     pluginRoot = path.join(root, "installed-plugin");
     await write(pluginRoot, "package.json", {
       ...pluginPackage,
-      openclaw: { extensions: ["./index.ts"], runtimeExtensions: ["./dist/index.js"] },
+      carapace: { extensions: ["./index.ts"], runtimeExtensions: ["./dist/index.js"] },
     });
-    await write(pluginRoot, "openclaw.plugin.json", { id: "remote-runtime" });
+    await write(pluginRoot, "carapace.plugin.json", { id: "remote-runtime" });
     await write(pluginRoot, "dist/index.js", 'export const answer = "cloud-ready";');
     await write(pluginRoot, ".env", "FAKE_PRIVATE_VALUE=do-not-transfer");
     await write(
@@ -169,7 +169,7 @@ describe("node bootstrap distribution", () => {
       expect(concurrent).toBe(artifact);
       expect(artifact).toMatchObject({
         buildId,
-        openclawVersion: version,
+        carapaceVersion: version,
         enabledPluginIds: ["remote-runtime"],
       });
       const bytes = await fs.readFile(artifact.tarballPath);
@@ -199,7 +199,7 @@ describe("node bootstrap distribution", () => {
       );
       if (process.platform !== "win32") {
         for (const [relative, requestedMode] of [
-          ["openclaw.mjs", 0o755],
+          ["carapace.mjs", 0o755],
           ["dist/shared.js", 0o644],
         ] as const) {
           const sourceMode = (await fs.stat(path.join(packageRoot, relative))).mode;
@@ -222,14 +222,14 @@ describe("node bootstrap distribution", () => {
         postinstall: "node scripts/postinstall.mjs",
       });
       expect(manifest.devDependencies).toBeUndefined();
-      const lifecycleMarker = path.join(target, ".openclaw-lifecycle-pending");
+      const lifecycleMarker = path.join(target, ".carapace-lifecycle-pending");
       await expect(fs.readFile(lifecycleMarker, "utf8")).resolves.toBe("pending\n");
       await promisify(execFile)(process.execPath, [path.join(target, "scripts/preinstall.mjs")]);
       await expect(fs.readFile(lifecycleMarker, "utf8")).resolves.toBe("pending\n");
       await promisify(execFile)(process.execPath, [path.join(target, "scripts/postinstall.mjs")]);
       await expect(fs.access(lifecycleMarker)).rejects.toHaveProperty("code", "ENOENT");
       const { stdout } = await promisify(execFile)(process.execPath, [
-        path.join(target, "openclaw.mjs"),
+        path.join(target, "carapace.mjs"),
       ]);
       expect(stdout.trim()).toBe("local-ai:cloud-ready");
       expect(JSON.parse(await fs.readFile(path.join(packageRoot, "package.json"), "utf8"))).toEqual(
@@ -265,7 +265,7 @@ describe("node bootstrap distribution", () => {
       const failure = new Error("temporary storage unavailable");
       const makeTemp =
         stage === "root resolution"
-          ? vi.spyOn(tmpDirs, "resolvePreferredOpenClawTmpDir").mockImplementationOnce(() => {
+          ? vi.spyOn(tmpDirs, "resolvePreferredCarapaceTmpDir").mockImplementationOnce(() => {
               throw failure;
             })
           : vi.spyOn(fs, "mkdtemp").mockRejectedValueOnce(failure);
@@ -398,7 +398,7 @@ describe("node bootstrap distribution", () => {
       'export const answer = "dirty-source-build";',
     );
     const [left, right] = await Promise.all([first.provider.prepare(), second.provider.prepare()]);
-    expect(left.openclawVersion).toBe(right.openclawVersion);
+    expect(left.carapaceVersion).toBe(right.carapaceVersion);
     expect(left.tarballSha256).not.toBe(right.tarballSha256);
   });
 

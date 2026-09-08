@@ -2,9 +2,9 @@
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { PollInput } from "openclaw/plugin-sdk/poll-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import type { PollInput } from "carapace/plugin-sdk/poll-runtime";
 import type { CoreConfig } from "../types.js";
 import {
   createMatrixPlannedEvents,

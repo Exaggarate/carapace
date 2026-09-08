@@ -1,8 +1,8 @@
 // QA Lab Slack approval checkpoint and gateway decision RPC.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
 import {
   formatApprovalResultValue,
   readAcceptedApprovalRequestId,

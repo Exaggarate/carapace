@@ -1,12 +1,12 @@
 // Tests node-role capability approvals stored on canonical paired-device records.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { NodeHostStats } from "../shared/node-host-stats.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { approveDevicePairing } from "./device-pairing-approval.js";
 import { updatePairedNodeBins, updatePairedNodeSessionHost } from "./device-pairing-node-facts.js";
@@ -39,7 +39,7 @@ import {
   NODE_TERMINAL_UPLOAD_COMMAND,
 } from "./node-commands.js";
 
-const tempDirs = createSuiteTempRootTracker({ prefix: "openclaw-node-pairing-" });
+const tempDirs = createSuiteTempRootTracker({ prefix: "carapace-node-pairing-" });
 const hostStats: NodeHostStats = {
   cpuCount: 4,
   loadAverage: [1.5, 1, 0.5],
@@ -589,8 +589,8 @@ describe("node surface approvals", () => {
       if (!generation) {
         throw new Error("expected node pairing generation");
       }
-      const database = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+      const database = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
       });
       const initialVersion = database.db.prepare("PRAGMA user_version").get();
 
@@ -610,10 +610,10 @@ describe("node surface approvals", () => {
         )?.nodeSurface?.sessionHost,
       ).toBe(true);
 
-      expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+      expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
       expect((await findPairedNode("node-1", baseDir))?.sessionHost).toBe(true);
       expect(
-        openOpenClawStateDatabase({ env: { ...process.env, OPENCLAW_STATE_DIR: baseDir } })
+        openCarapaceStateDatabase({ env: { ...process.env, CARAPACE_STATE_DIR: baseDir } })
           .db.prepare("PRAGMA user_version")
           .get(),
       ).toEqual(initialVersion);
@@ -802,8 +802,8 @@ describe("node surface approvals", () => {
   test("persists received host stats across connections and reopened readers", async () => {
     await withNodePairingDir(async (baseDir) => {
       const generation = await setupPairedNode(baseDir);
-      const database = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+      const database = openCarapaceStateDatabase({
+        env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
       });
       await expect(
         recordPairedNodeHostStats({
@@ -813,7 +813,7 @@ describe("node surface approvals", () => {
           baseDir,
         }),
       ).resolves.toBe(true);
-      expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+      expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
       expect((await getPairedDevice("node-1", baseDir))?.nodeSurface?.lastHostStats).toEqual(
         hostStats,
       );

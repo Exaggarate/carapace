@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Zalo Personal Account plugin via native zca-js integration."
+summary: "Carapace Zalo Personal Account plugin via native zca-js integration."
 read_when:
   - You are installing, configuring, or auditing the zalouser plugin
 title: "Zalo Personal plugin reference"
@@ -7,14 +7,14 @@ title: "Zalo Personal plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Zalo Personal Account plugin via native zca-js integration.
+Carapace Zalo Personal Account plugin via native zca-js integration.
 
 ## Distribution
 
-- Package: `@openclaw/zalouser`
+- Package: `@carapace/zalouser`
 - Install route: npm or ClawHub
 
 ## Surface

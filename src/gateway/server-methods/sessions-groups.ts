@@ -1,6 +1,6 @@
 // Session group catalog mutations.
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,

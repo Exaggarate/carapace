@@ -1,10 +1,10 @@
 import path from "node:path";
 // Vision skip tests cover auto image-model selection and text-only model
 // rejection across bundled provider metadata.
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolvePluginRegistryLoadCacheKey } from "../plugins/loader.js";
 import { loadPluginManifestRegistryCore } from "../plugins/manifest-registry.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
@@ -72,7 +72,7 @@ let runCapability: typeof import("./runner.js").runCapability;
 
 function setCompatibleActiveMediaUnderstandingRegistry(
   pluginRegistry: ReturnType<typeof createEmptyPluginRegistry>,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ) {
   const pluginIds = loadPluginManifestRegistryCore({
     config: cfg,
@@ -124,7 +124,7 @@ describe("runCapability image skip", () => {
     const cache = createMediaAttachmentCache(media);
     const cfg = {
       tools: { media: { image: { preferredModel: "missing/model" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     try {
       const result = await runCapability({
@@ -164,7 +164,7 @@ describe("runCapability image skip", () => {
   it("skips agents.defaults.imageModel fallback when the active model supports vision", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-default-model-native-skip",
+        filePrefix: "carapace-image-default-model-native-skip",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -183,7 +183,7 @@ describe("runCapability image skip", () => {
               imageModel: { primary: "minimax/MiniMax-M3" },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await applyMediaUnderstanding({
           ctx: msgCtx,
@@ -234,7 +234,7 @@ describe("runCapability image skip", () => {
     async ({ policy, selectedIndexes }) => {
       await withMediaFixture(
         {
-          filePrefix: "openclaw-image-url-only-no-handoff",
+          filePrefix: "carapace-image-url-only-no-handoff",
           extension: "png",
           mediaType: "image/png",
           fileContents: Buffer.from("image"),
@@ -293,7 +293,7 @@ describe("runCapability image skip", () => {
   it("runs explicit image models untouched by native-vision probe failure", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-explicit-model-probe-immune",
+        filePrefix: "carapace-image-explicit-model-probe-immune",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -314,7 +314,7 @@ describe("runCapability image skip", () => {
               ],
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         await loadModelCatalog.withImplementation(
           async () => {
@@ -418,7 +418,7 @@ describe("runCapability image skip", () => {
 
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-default-model-minimax-m3-native-skip",
+        filePrefix: "carapace-image-default-model-minimax-m3-native-skip",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -433,7 +433,7 @@ describe("runCapability image skip", () => {
               imageModel: { primary: "minimax/MiniMax-M3" },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await applyMediaUnderstanding({
           ctx: msgCtx,
@@ -468,7 +468,7 @@ describe("runCapability image skip", () => {
   it("uses explicit media image models even when the active model supports vision", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-explicit-model-no-native-skip",
+        filePrefix: "carapace-image-explicit-model-no-native-skip",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -493,7 +493,7 @@ describe("runCapability image skip", () => {
               ],
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await applyMediaUnderstanding({
           ctx: msgCtx,
@@ -534,7 +534,7 @@ describe("runCapability image skip", () => {
   it("uses explicit media image models instead of native vision skip", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-explicit-vision",
+        filePrefix: "carapace-image-explicit-vision",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -552,7 +552,7 @@ describe("runCapability image skip", () => {
               ],
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",
@@ -589,7 +589,7 @@ describe("runCapability image skip", () => {
   it("lets per-request image prompts override entry prompts", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-request-prompt",
+        filePrefix: "carapace-image-request-prompt",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -609,7 +609,7 @@ describe("runCapability image skip", () => {
               ],
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",
@@ -650,7 +650,7 @@ describe("runCapability image skip", () => {
           imageModel: { primary: "openrouter/google/gemini-2.5-flash" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await expect(
       resolveAutoImageModel({
@@ -673,7 +673,7 @@ describe("runCapability image skip", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await expect(resolveAutoImageModel({ cfg })).resolves.toEqual({
       provider: "openrouter",
@@ -695,7 +695,7 @@ describe("runCapability image skip", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await expect(resolveAutoImageModel({ cfg })).resolves.toEqual({
       provider: "ollama",
@@ -706,7 +706,7 @@ describe("runCapability image skip", () => {
   it("runs providerless configured imageModel fallbacks on the unique configured provider", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-providerless-fallbacks",
+        filePrefix: "carapace-image-providerless-fallbacks",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -737,7 +737,7 @@ describe("runCapability image skip", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",
@@ -822,7 +822,7 @@ describe("runCapability image skip", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.mediaUnderstandingProviders.push({
       pluginId: "minimax",
@@ -876,7 +876,7 @@ describe("runCapability image skip", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.mediaUnderstandingProviders.push({
       pluginId: "minimax",
@@ -894,7 +894,7 @@ describe("runCapability image skip", () => {
     try {
       await withMediaFixture(
         {
-          filePrefix: "openclaw-minimax-vlm-no-native-skip",
+          filePrefix: "carapace-minimax-vlm-no-native-skip",
           extension: "png",
           mediaType: "image/png",
           fileContents: Buffer.from("image"),
@@ -939,7 +939,7 @@ describe("runCapability image skip", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.mediaUnderstandingProviders.push({
       pluginId: "minimax",
@@ -960,7 +960,7 @@ describe("runCapability image skip", () => {
     try {
       await withMediaFixture(
         {
-          filePrefix: "openclaw-minimax-cn-provider",
+          filePrefix: "carapace-minimax-cn-provider",
           extension: "png",
           mediaType: "image/png",
           fileContents: Buffer.from("image"),
@@ -997,7 +997,7 @@ describe("runCapability image skip", () => {
     let seenModel: string | undefined;
     await withMediaFixture(
       {
-        filePrefix: "openclaw-minimax-vlm-default",
+        filePrefix: "carapace-minimax-vlm-default",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -1023,7 +1023,7 @@ describe("runCapability image skip", () => {
               },
             },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",
@@ -1072,7 +1072,7 @@ describe("runCapability image skip", () => {
           ],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const providerRegistry = new Map<string, MediaUnderstandingProvider>([
       [
         "google",
@@ -1089,7 +1089,7 @@ describe("runCapability image skip", () => {
 
     await withMediaFixture(
       {
-        filePrefix: "openclaw-gemini-media-alias",
+        filePrefix: "carapace-gemini-media-alias",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -1120,7 +1120,7 @@ describe("runCapability image skip", () => {
 
   it("canonicalizes non-MiniMax active media aliases for auto image resolution", async () => {
     vi.stubEnv("GEMINI_API_KEY", "test-gemini-key");
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.mediaUnderstandingProviders.push({
       pluginId: "google",
@@ -1153,7 +1153,7 @@ describe("runCapability image skip", () => {
 
   it("uses active OpenRouter image models for auto image resolution", async () => {
     vi.stubEnv("OPENROUTER_API_KEY", "test-openrouter-key");
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const pluginRegistry = createEmptyPluginRegistry();
     pluginRegistry.mediaUnderstandingProviders.push({
       pluginId: "openrouter",
@@ -1171,8 +1171,8 @@ describe("runCapability image skip", () => {
         resolveAutoImageModel({
           cfg,
           agentId: "image-agent",
-          agentDir: "/tmp/openclaw-agent",
-          workspaceDir: "/tmp/openclaw-workspace",
+          agentDir: "/tmp/carapace-agent",
+          workspaceDir: "/tmp/carapace-workspace",
           activeModel: { provider: "openrouter", model: "google/gemini-2.5-flash" },
         }),
       ).resolves.toEqual({
@@ -1182,8 +1182,8 @@ describe("runCapability image skip", () => {
       expect(loadModelCatalog).toHaveBeenCalledWith({
         config: cfg,
         agentId: "image-agent",
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
       });
     } finally {
       setActivePluginRegistry(createEmptyPluginRegistry());
@@ -1196,13 +1196,13 @@ describe("runCapability image skip", () => {
     const hasAvailableAuthForProvider = vi.mocked(modelAuth.hasAvailableAuthForProvider);
     hasAvailableAuthForProvider.mockClear();
     hasAvailableAuthForProvider.mockImplementation(
-      async (params) => params.workspaceDir === "/tmp/openclaw-workspace",
+      async (params) => params.workspaceDir === "/tmp/carapace-workspace",
     );
 
     try {
       await withMediaFixture(
         {
-          filePrefix: "openclaw-image-workspace-auth",
+          filePrefix: "carapace-image-workspace-auth",
           extension: "png",
           mediaType: "image/png",
           fileContents: Buffer.from("image"),
@@ -1210,12 +1210,12 @@ describe("runCapability image skip", () => {
         async ({ ctx, media, cache }) => {
           const result = await runCapability({
             capability: "image",
-            cfg: {} as OpenClawConfig,
+            cfg: {} as CarapaceConfig,
             ctx,
             attachments: cache,
             media,
-            agentDir: "/tmp/openclaw-agent",
-            workspaceDir: "/tmp/openclaw-workspace",
+            agentDir: "/tmp/carapace-agent",
+            workspaceDir: "/tmp/carapace-workspace",
             providerRegistry: new Map([
               [
                 "workspace-vision",
@@ -1241,8 +1241,8 @@ describe("runCapability image skip", () => {
           expect(hasAvailableAuthForProvider).toHaveBeenCalledWith(
             expect.objectContaining({
               provider: "workspace-vision",
-              agentDir: "/tmp/openclaw-agent",
-              workspaceDir: "/tmp/openclaw-workspace",
+              agentDir: "/tmp/carapace-agent",
+              workspaceDir: "/tmp/carapace-workspace",
             }),
           );
         },
@@ -1256,7 +1256,7 @@ describe("runCapability image skip", () => {
     let seenModel: string | undefined;
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-openrouter",
+        filePrefix: "carapace-image-openrouter",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -1271,7 +1271,7 @@ describe("runCapability image skip", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",
@@ -1308,7 +1308,7 @@ describe("runCapability image skip", () => {
   it("skips configured image providers without an auto-resolvable model", async () => {
     await withMediaFixture(
       {
-        filePrefix: "openclaw-image-custom-skip",
+        filePrefix: "carapace-image-custom-skip",
         extension: "png",
         mediaType: "image/png",
         fileContents: Buffer.from("image"),
@@ -1323,7 +1323,7 @@ describe("runCapability image skip", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "image",

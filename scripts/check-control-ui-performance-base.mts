@@ -14,9 +14,9 @@ const require = createRequire(path.join(repoRoot, "ui/package.json"));
 const COMPARISON_BUILD_ENV = {
   GIT_BRANCH: "ci/control-ui-performance",
   GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
-  OPENCLAW_BUILD_TIMESTAMP: "2026-09-01T00:00:00.000Z",
-  OPENCLAW_CONTROL_UI_BUILD_ID: "control-ui-performance-comparison",
-  OPENCLAW_CONTROL_UI_RELEASE_BUILD: "1",
+  CARAPACE_BUILD_TIMESTAMP: "2026-09-01T00:00:00.000Z",
+  CARAPACE_CONTROL_UI_BUILD_ID: "control-ui-performance-comparison",
+  CARAPACE_CONTROL_UI_RELEASE_BUILD: "1",
 } satisfies NodeJS.ProcessEnv;
 
 function run(command: string, args: string[], cwd = repoRoot, env = process.env): void {
@@ -80,7 +80,7 @@ function main(): void {
     `Control UI comparison: working-tree head ${head}; base ${base}; Node ${process.version}; Vite ${viteVersion}; Pako ${pakoVersion}`,
   );
 
-  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-ui-performance-base-"));
+  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-ui-performance-base-"));
   try {
     const baseRoot = path.join(temporaryRoot, "source");
     const archive = path.join(temporaryRoot, "source.tar");

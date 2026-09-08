@@ -1,7 +1,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { readToolStringParam } from "../../agents/tools/common.js";
 import { normalizeChatType, type ChatType } from "../../channels/chat-type.js";
 import { normalizeConversationReadInvocationOrigin } from "../../channels/plugins/conversation-read-origin.js";
@@ -16,7 +16,7 @@ import type {
   ChannelPlugin,
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { readBooleanParam } from "../../plugin-sdk/boolean-param.js";
 import { resolveFirstBoundAccountId } from "../../routing/bound-account-read.js";
 import { readTrimmedStringAlias } from "../../utils/string-readers.js";
@@ -38,7 +38,7 @@ import { normalizeTargetForProvider } from "./target-normalization.js";
 import { resolveChannelTarget, type ResolvedMessagingTarget } from "./target-resolver.js";
 
 async function resolveChannel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: Record<string, unknown>,
   toolContext?: { currentChannelProvider?: string },
   action?: ChannelMessageActionName,
@@ -66,7 +66,7 @@ function enforceCrossProviderEgressPolicyBeforeTargetResolution(params: {
   action: ChannelMessageActionName;
   args: Record<string, unknown>;
   toolContext?: ChannelThreadingToolContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string | null;
 }): void {
   const currentProvider = params.toolContext?.currentChannelProvider;
@@ -124,7 +124,7 @@ function inferPeerKindForAccountBinding(
 }
 
 function resolveTargetBoundAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   channelPlugin?: ChannelPlugin;
   args: Record<string, unknown>;
@@ -161,7 +161,7 @@ function resolveTargetBoundAccountId(params: {
 }
 
 async function resolveActionTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   action: ChannelMessageActionName;
   args: Record<string, unknown>;
@@ -205,7 +205,7 @@ function sanitizeGroupTargetId(target: string): string {
 }
 
 async function resolveResolvedTargetOrThrow(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   input: string;
   accountId?: string;
@@ -465,7 +465,7 @@ export async function prepareMessageRoute(params: {
 }
 
 export async function resolveMessageTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   action: ChannelMessageActionName;
   args: Record<string, unknown>;

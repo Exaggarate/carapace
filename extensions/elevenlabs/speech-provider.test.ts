@@ -1,5 +1,5 @@
 // Elevenlabs tests cover speech provider plugin behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { isValidElevenLabsVoiceId } from "./shared.js";
 import { buildElevenLabsSpeechProvider } from "./speech-provider-factory.js";
@@ -10,7 +10,7 @@ vi.mock("./config-api.js", () => ({
   resolveElevenLabsApiKeyWithProfileFallback: () => null,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: async (params: {
     url: string;
     init?: RequestInit;
@@ -61,7 +61,7 @@ describe("elevenlabs speech provider", () => {
   const originalFetch = globalThis.fetch;
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 

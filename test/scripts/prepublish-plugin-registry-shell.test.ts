@@ -78,7 +78,7 @@ function registryFixture(root: string, names: string[], version = VERSION) {
         name,
         tarball,
         version,
-        name === "openclaw" ? { dependencies: { "@openclaw/ai": version } } : {},
+        name === "carapace" ? { dependencies: { "@carapace/ai": version } } : {},
       );
       return { name, version, tarball, sha256: sha256(file) };
     });
@@ -86,7 +86,7 @@ function registryFixture(root: string, names: string[], version = VERSION) {
   writeFileSync(
     manifestPath,
     JSON.stringify({
-      schema: "openclaw.prepublish-plugin-registry/v1",
+      schema: "carapace.prepublish-plugin-registry/v1",
       schemaVersion: 1,
       sourceSha: SOURCE_SHA,
       candidateVersion: version,
@@ -97,17 +97,17 @@ function registryFixture(root: string, names: string[], version = VERSION) {
     artifactDir,
     manifestPath,
     env: {
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: artifactDir,
-      OPENCLAW_DOCKER_E2E_SELECTED_SHA: SOURCE_SHA,
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: version,
-      OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifestPath),
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: artifactDir,
+      CARAPACE_DOCKER_E2E_SELECTED_SHA: SOURCE_SHA,
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: version,
+      CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifestPath),
     },
   };
 }
 
 async function withPublishedRegistry(root: string, run: (url: string) => void | Promise<void>) {
   const portFile = join(root, "upstream-port");
-  const args = ["openclaw", "@openclaw/ai", "@openclaw/discord"].flatMap((name, index) => [
+  const args = ["carapace", "@carapace/ai", "@carapace/discord"].flatMap((name, index) => [
     name,
     BASELINE_VERSION,
     createTarball(
@@ -116,7 +116,7 @@ async function withPublishedRegistry(root: string, run: (url: string) => void | 
       name,
       `baseline-${index}.tgz`,
       BASELINE_VERSION,
-      name === "openclaw" ? { dependencies: { "@openclaw/ai": BASELINE_VERSION } } : {},
+      name === "carapace" ? { dependencies: { "@carapace/ai": BASELINE_VERSION } } : {},
     ),
   ]);
   const server = spawn(
@@ -126,12 +126,12 @@ async function withPublishedRegistry(root: string, run: (url: string) => void | 
       stdio: "ignore",
       env: {
         ...process.env,
-        OPENCLAW_NPM_REGISTRY_PORT: "0",
-        OPENCLAW_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
-        OPENCLAW_NPM_REGISTRY_UPSTREAM: "",
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_URL: "",
-        OPENCLAW_NPM_REGISTRY_MERGE_UPSTREAM: "",
-        OPENCLAW_NPM_REGISTRY_DIST_TAGS: "",
+        CARAPACE_NPM_REGISTRY_PORT: "0",
+        CARAPACE_NPM_REGISTRY_BIND_HOST: "127.0.0.1",
+        CARAPACE_NPM_REGISTRY_UPSTREAM: "",
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_URL: "",
+        CARAPACE_NPM_REGISTRY_MERGE_UPSTREAM: "",
+        CARAPACE_NPM_REGISTRY_DIST_TAGS: "",
       },
     },
   );
@@ -147,17 +147,17 @@ async function withPublishedRegistry(root: string, run: (url: string) => void | 
 
 describe("prepublish plugin registry shell helper", () => {
   it("retries failed upstream metadata while preserving published and candidate versions", async () => {
-    const root = tempDirs.make("openclaw-prepublish-registry-retry-");
-    const fixture = registryFixture(root, ["@openclaw/ai"]);
+    const root = tempDirs.make("carapace-prepublish-registry-retry-");
+    const fixture = registryFixture(root, ["@carapace/ai"]);
     let requests = 0;
     const upstream = createServer((_request, response) => {
       requests += 1;
       response.writeHead(requests === 1 ? 503 : 200, { "content-type": "application/json" });
       response.end(
         JSON.stringify({
-          name: "@openclaw/ai",
+          name: "@carapace/ai",
           "dist-tags": { latest: BASELINE_VERSION },
-          versions: { [BASELINE_VERSION]: { name: "@openclaw/ai", version: BASELINE_VERSION } },
+          versions: { [BASELINE_VERSION]: { name: "@carapace/ai", version: BASELINE_VERSION } },
         }),
       );
     });
@@ -175,7 +175,7 @@ describe("prepublish plugin registry shell helper", () => {
         "--input-type=module",
         "-e",
         `
-const url = process.env.NPM_CONFIG_REGISTRY + "/@openclaw%2Fai";
+const url = process.env.NPM_CONFIG_REGISTRY + "/@carapace%2Fai";
 const first = await fetch(url);
 await first.text();
 const second = await fetch(url);
@@ -187,7 +187,7 @@ console.log(JSON.stringify({ url, first: first.status, second: second.status, bo
         env: {
           ...process.env,
           ...fixture.env,
-          OPENCLAW_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${address.port}`,
+          CARAPACE_NPM_REGISTRY_UPSTREAM: `http://127.0.0.1:${address.port}`,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -224,8 +224,8 @@ console.log(JSON.stringify({ url, first: first.status, second: second.status, bo
   it.each([VERSION, "2026.8.1", "2026.8.1-2"])(
     "installs a published baseline before candidate %s and reaps its registry on failure",
     async (version) => {
-      const root = tempDirs.make("openclaw-prepublish-command-");
-      const fixture = registryFixture(root, ["openclaw", "@openclaw/ai"], version);
+      const root = tempDirs.make("carapace-prepublish-command-");
+      const fixture = registryFixture(root, ["carapace", "@carapace/ai"], version);
       const registryUrl = join(root, "registry-url");
       await withPublishedRegistry(root, async (upstream) => {
         const result = spawnSync(
@@ -237,10 +237,10 @@ console.log(JSON.stringify({ url, first: first.status, second: second.status, bo
             `
 set -euo pipefail
 test "$BUN_CONFIG_REGISTRY" = "$NPM_CONFIG_REGISTRY"
-npm install --prefix "$INSTALL_DIR" openclaw@latest --ignore-scripts --no-fund --no-audit --package-lock=false --userconfig=/dev/null --cache "$INSTALL_DIR/cache"
-node -e 'const assert=require("node:assert/strict"); for(const name of ["openclaw", "@openclaw/ai"]) assert.equal(require(process.env.INSTALL_DIR+"/node_modules/"+name+"/package.json").version, process.env.BASELINE_VERSION);'
+npm install --prefix "$INSTALL_DIR" carapace@latest --ignore-scripts --no-fund --no-audit --package-lock=false --userconfig=/dev/null --cache "$INSTALL_DIR/cache"
+node -e 'const assert=require("node:assert/strict"); for(const name of ["carapace", "@carapace/ai"]) assert.equal(require(process.env.INSTALL_DIR+"/node_modules/"+name+"/package.json").version, process.env.BASELINE_VERSION);'
 npm install --prefix "$INSTALL_DIR" "$ROOT_TARBALL" --ignore-scripts --no-fund --no-audit --package-lock=false --userconfig=/dev/null --cache "$INSTALL_DIR/cache"
-node -e 'const fs=require("node:fs"); const root=require(process.env.INSTALL_DIR+"/node_modules/openclaw/package.json"); const ai=require(process.env.INSTALL_DIR+"/node_modules/@openclaw/ai/package.json"); if(root.dependencies["@openclaw/ai"] !== ai.version) process.exit(1); fs.writeFileSync(process.env.REGISTRY_URL_FILE, process.env.NPM_CONFIG_REGISTRY);'
+node -e 'const fs=require("node:fs"); const root=require(process.env.INSTALL_DIR+"/node_modules/carapace/package.json"); const ai=require(process.env.INSTALL_DIR+"/node_modules/@carapace/ai/package.json"); if(root.dependencies["@carapace/ai"] !== ai.version) process.exit(1); fs.writeFileSync(process.env.REGISTRY_URL_FILE, process.env.NPM_CONFIG_REGISTRY);'
 exit 17
 `,
           ],
@@ -251,10 +251,10 @@ exit 17
             env: {
               ...process.env,
               ...fixture.env,
-              OPENCLAW_NPM_REGISTRY_UPSTREAM: upstream,
+              CARAPACE_NPM_REGISTRY_UPSTREAM: upstream,
               BASELINE_VERSION,
               INSTALL_DIR: join(root, "install"),
-              ROOT_TARBALL: join(fixture.artifactDir, "openclaw.tgz"),
+              ROOT_TARBALL: join(fixture.artifactDir, "carapace.tgz"),
               REGISTRY_URL_FILE: registryUrl,
             },
           },
@@ -269,8 +269,8 @@ exit 17
   );
 
   it("carries verified registry bytes and their expected identity into the Docker context", () => {
-    const root = tempDirs.make("openclaw-prepublish-build-context-");
-    const fixture = registryFixture(root, ["openclaw", "@openclaw/ai"]);
+    const root = tempDirs.make("carapace-prepublish-build-context-");
+    const fixture = registryFixture(root, ["carapace", "@carapace/ai"]);
     const result = spawnSync(
       "bash",
       [
@@ -288,7 +288,7 @@ docker_e2e_prepare_package_context "$ROOT_TARBALL"
           ...fixture.env,
           TMPDIR: root,
           PACKAGE_HELPER: resolve("scripts/lib/docker-e2e-package.sh"),
-          ROOT_TARBALL: join(fixture.artifactDir, "openclaw.tgz"),
+          ROOT_TARBALL: join(fixture.artifactDir, "carapace.tgz"),
         },
       },
     );
@@ -299,11 +299,11 @@ docker_e2e_prepare_package_context "$ROOT_TARBALL"
       candidateVersion: VERSION,
       manifestSha256: sha256(fixture.manifestPath),
     });
-    expect(readFileSync(join(context, "prepublish-plugin-registry", "openclaw-ai.tgz"))).toEqual(
-      readFileSync(join(fixture.artifactDir, "openclaw-ai.tgz")),
+    expect(readFileSync(join(context, "prepublish-plugin-registry", "carapace-ai.tgz"))).toEqual(
+      readFileSync(join(fixture.artifactDir, "carapace-ai.tgz")),
     );
-    expect(readFileSync(join(context, "openclaw-current.tgz"))).toEqual(
-      readFileSync(join(fixture.artifactDir, "openclaw.tgz")),
+    expect(readFileSync(join(context, "carapace-current.tgz"))).toEqual(
+      readFileSync(join(fixture.artifactDir, "carapace.tgz")),
     );
   });
 
@@ -315,14 +315,14 @@ docker_e2e_prepare_package_context "$ROOT_TARBALL"
     { name: "mismatched root package digest", registry: true, fault: "package" },
   ])("runs the native npm 12 workflow with $name", async ({ registry, fault }) => {
     const bash = resolveWorkflowBash();
-    const root = tempDirs.make("openclaw-npm12-workflow-registry-");
-    const fixture = registryFixture(root, ["@openclaw/ai"]);
+    const root = tempDirs.make("carapace-npm12-workflow-registry-");
+    const fixture = registryFixture(root, ["@carapace/ai"]);
     const packageDir = join(root, ".artifacts/docker-e2e-package");
     const bin = join(root, "bin");
     mkdirSync(packageDir, { recursive: true });
     mkdirSync(bin);
     symlinkSync(bash, join(bin, "bash"));
-    const packageTgz = createTarball(root, packageDir, "openclaw", "openclaw-current.tgz");
+    const packageTgz = createTarball(root, packageDir, "carapace", "carapace-current.tgz");
     const installed = join(root, "installed");
     for (const file of [
       SCRIPT,
@@ -348,7 +348,7 @@ node --input-type=module <<'NODE'
 import fs from "node:fs";
 import path from "node:path";
 const registry = process.env.NPM_CONFIG_REGISTRY;
-const response = await fetch(registry + "/@openclaw%2Fai");
+const response = await fetch(registry + "/@carapace%2Fai");
 const metadata = await response.json();
 if (!metadata.versions[process.env.EXPECTED_DEPENDENCY_VERSION]) {
   throw new Error("Installer cannot resolve its exact dependency");
@@ -356,7 +356,7 @@ if (!metadata.versions[process.env.EXPECTED_DEPENDENCY_VERSION]) {
 fs.writeFileSync(process.env.INSTALL_MARKER, registry);
 const bin = path.join(process.env.NPM_CONFIG_PREFIX, "bin");
 fs.mkdirSync(bin, { recursive: true });
-fs.writeFileSync(path.join(bin, "openclaw"), "#!/bin/sh\\nprintf '%s\\\\n' \\"$EXPECTED_PACKAGE_VERSION\\"\\n", { mode: 0o755 });
+fs.writeFileSync(path.join(bin, "carapace"), "#!/bin/sh\\nprintf '%s\\\\n' \\"$EXPECTED_PACKAGE_VERSION\\"\\n", { mode: 0o755 });
 NODE
 `,
     );
@@ -387,10 +387,10 @@ NODE
             RUNNER_TEMP: join(root, "runner-temp"),
             NPM_CONFIG_REGISTRY: upstream,
             npm_config_registry: upstream,
-            OPENCLAW_NPM_REGISTRY_UPSTREAM: upstream,
-            OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry ? fixture.artifactDir : "",
-            OPENCLAW_DOCKER_E2E_SELECTED_SHA: fault === "source" ? "b".repeat(40) : SOURCE_SHA,
-            OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:
+            CARAPACE_NPM_REGISTRY_UPSTREAM: upstream,
+            CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registry ? fixture.artifactDir : "",
+            CARAPACE_DOCKER_E2E_SELECTED_SHA: fault === "source" ? "b".repeat(40) : SOURCE_SHA,
+            CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:
               fault === "manifest" ? "b".repeat(64) : sha256(fixture.manifestPath),
             EXPECTED_PACKAGE_SHA256: fault === "package" ? "b".repeat(64) : sha256(packageTgz),
             EXPECTED_PACKAGE_VERSION: VERSION,
@@ -421,7 +421,7 @@ NODE
   });
 
   it("derives the immutable Docker mount contract from the registry artifact", () => {
-    const root = tempDirs.make("openclaw-prepublish-registry-mount-");
+    const root = tempDirs.make("carapace-prepublish-registry-mount-");
     const manifestPath = join(root, "prepublish-plugin-registry.json");
     writeFileSync(
       manifestPath,
@@ -435,32 +435,32 @@ NODE
         `
 set -euo pipefail
 source "$HELPER"
-openclaw_prepublish_plugin_registry_configure_docker_args "$ARTIFACT_DIR"
-printf '%s\n' "\${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}"
+carapace_prepublish_plugin_registry_configure_docker_args "$ARTIFACT_DIR"
+printf '%s\n' "\${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}"
 `,
       ],
       { encoding: "utf8", env: { ...process.env, ARTIFACT_DIR: root, HELPER: SCRIPT } },
     );
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain(`OPENCLAW_DOCKER_E2E_SELECTED_SHA=${SOURCE_SHA}`);
+    expect(result.stdout).toContain(`CARAPACE_DOCKER_E2E_SELECTED_SHA=${SOURCE_SHA}`);
     expect(result.stdout).toContain(
-      `OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION=${VERSION}`,
+      `CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION=${VERSION}`,
     );
-    expect(result.stdout).toContain(`${root}:/tmp/openclaw-prepublish-plugin-registry:ro`);
+    expect(result.stdout).toContain(`${root}:/tmp/carapace-prepublish-plugin-registry:ro`);
     expect(result.stdout).toContain(
-      `OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256=${sha256(manifestPath)}`,
+      `CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256=${sha256(manifestPath)}`,
     );
   });
 
   it("verifies and serves every artifact package plus caller-owned fixtures", async () => {
-    const root = tempDirs.make("openclaw-prepublish-registry-shell-");
+    const root = tempDirs.make("carapace-prepublish-registry-shell-");
     const { artifactDir, manifestPath } = registryFixture(root, [
-      "@openclaw/codex",
-      "@openclaw/telegram",
+      "@carapace/codex",
+      "@carapace/telegram",
     ]);
     const registryRoot = join(root, "registry");
-    const extraTarball = createTarball(root, root, "@openclaw/brave-plugin", "brave-fixture.tgz");
+    const extraTarball = createTarball(root, root, "@carapace/brave-plugin", "brave-fixture.tgz");
 
     await withPublishedRegistry(root, (upstream) => {
       const result = spawnSync(
@@ -478,15 +478,15 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
-export OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR="$ARTIFACT_DIR"
-export OPENCLAW_DOCKER_E2E_SELECTED_SHA="$SOURCE_SHA"
-export OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION="$VERSION"
-export OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256="$MANIFEST_SHA256"
-openclaw_prepublish_plugin_registry_start_mounted \
-  "$REGISTRY_ROOT" registry_pid '["@openclaw/codex"]' \
-  "@openclaw/brave-plugin" "$VERSION" "$EXTRA_TARBALL"
+export CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR="$ARTIFACT_DIR"
+export CARAPACE_DOCKER_E2E_SELECTED_SHA="$SOURCE_SHA"
+export CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION="$VERSION"
+export CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256="$MANIFEST_SHA256"
+carapace_prepublish_plugin_registry_start_mounted \
+  "$REGISTRY_ROOT" registry_pid '["@carapace/codex"]' \
+  "@carapace/brave-plugin" "$VERSION" "$EXTRA_TARBALL"
 node <<'NODE'
-const packages = ["@openclaw/codex", "@openclaw/telegram", "@openclaw/brave-plugin"];
+const packages = ["@carapace/codex", "@carapace/telegram", "@carapace/brave-plugin"];
 for (const name of packages) {
   const response = await fetch(\`\${process.env.NPM_CONFIG_REGISTRY}/\${encodeURIComponent(name)}\`);
   if (!response.ok) throw new Error(\`\${name}: \${response.status}\`);
@@ -505,7 +505,7 @@ NODE
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_NPM_REGISTRY_UPSTREAM: upstream,
+            CARAPACE_NPM_REGISTRY_UPSTREAM: upstream,
             ARTIFACT_DIR: artifactDir,
             EXTRA_TARBALL: extraTarball,
             HELPER: SCRIPT,
@@ -524,15 +524,15 @@ NODE
   it.each(["2026.8.1", "2026.8.1-2"])(
     "resolves stable candidate %s from an unversioned npm spec",
     async (version) => {
-      const root = tempDirs.make("openclaw-stable-prepublish-registry-shell-");
+      const root = tempDirs.make("carapace-stable-prepublish-registry-shell-");
       const registryRoot = join(root, "registry");
-      const fixture = registryFixture(root, ["@openclaw/discord"], version);
+      const fixture = registryFixture(root, ["@carapace/discord"], version);
       const fixtureVersion = "2026.5.2";
       const braveTarball = createTarball(
         root,
         root,
-        "@openclaw/brave-plugin",
-        `openclaw-brave-${fixtureVersion}.tgz`,
+        "@carapace/brave-plugin",
+        `carapace-brave-${fixtureVersion}.tgz`,
         fixtureVersion,
       );
       await withPublishedRegistry(root, (upstream) => {
@@ -551,12 +551,12 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
-openclaw_prepublish_plugin_registry_start_mounted \
+carapace_prepublish_plugin_registry_start_mounted \
   "$REGISTRY_ROOT" registry_pid '[]' \
-  "@openclaw/brave-plugin" "$FIXTURE_VERSION" "$BRAVE_TARBALL"
-test "$(npm view @openclaw/discord version)" = "$VERSION"
-test "$(npm view @openclaw/discord@$BASELINE_VERSION version)" = "$BASELINE_VERSION"
-test "$(npm view @openclaw/brave-plugin version)" = "$FIXTURE_VERSION"
+  "@carapace/brave-plugin" "$FIXTURE_VERSION" "$BRAVE_TARBALL"
+test "$(npm view @carapace/discord version)" = "$VERSION"
+test "$(npm view @carapace/discord@$BASELINE_VERSION version)" = "$BASELINE_VERSION"
+test "$(npm view @carapace/brave-plugin version)" = "$FIXTURE_VERSION"
 `,
           ],
           {
@@ -564,7 +564,7 @@ test "$(npm view @openclaw/brave-plugin version)" = "$FIXTURE_VERSION"
             env: {
               ...process.env,
               ...fixture.env,
-              OPENCLAW_NPM_REGISTRY_UPSTREAM: upstream,
+              CARAPACE_NPM_REGISTRY_UPSTREAM: upstream,
               BASELINE_VERSION,
               BRAVE_TARBALL: braveTarball,
               FIXTURE_VERSION: fixtureVersion,

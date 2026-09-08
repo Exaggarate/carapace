@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { constants, promises as fs, type Stats } from "node:fs";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { decodeMountInfoPath } from "@openclaw/normalization-core/mountinfo-path";
+import { decodeMountInfoPath } from "@carapace/normalization-core/mountinfo-path";
 import { resolveStateDir } from "../config/paths.js";
 import { sha256Hex } from "../infra/crypto-digest.js";
 import { hasErrnoCode } from "../infra/errno.js";
@@ -178,7 +178,7 @@ export async function readSystemdDefinitionMutationCapability(
 ): Promise<ServiceDefinitionMutationCapability> {
   const selected = path.basename(resolveSystemdUnitPath(env));
   const names =
-    selected === "openclaw-gateway.service" ? [selected, "openclaw.service"] : [selected];
+    selected === "carapace-gateway.service" ? [selected, "carapace.service"] : [selected];
   const deadlineAt = options?.timeoutMs ? performance.now() + options.timeoutMs : undefined;
   for (const name of names) {
     try {
@@ -217,7 +217,7 @@ export async function withSystemdDefinitionMutation<T>(
     Promise.all([unit, generated].map(canonicalPathFromExistingAncestor));
   const lockedTargets = await canonicalTargets();
   const targets = lockedTargets
-    .map((target) => path.join(path.dirname(target), `.openclaw-${sha256Hex(target)}`))
+    .map((target) => path.join(path.dirname(target), `.carapace-${sha256Hex(target)}`))
     .toSorted();
   const execute = async (): Promise<T> => {
     const refresh = async (unchanged = false, firstUnitPublication = false) => {
@@ -272,7 +272,7 @@ export async function withSystemdDefinitionMutation<T>(
         }
         const written = await fs.lstat(temporary);
         await refresh(true);
-        // Locks coordinate OpenClaw writers, not external editors: POSIX rename
+        // Locks coordinate Carapace writers, not external editors: POSIX rename
         // has no expected-inode check. Quiesce administrative edits during installation.
         await fs.rename(temporary, file);
         // Re-read every artifact against this inode/payload. Canonical temp paths

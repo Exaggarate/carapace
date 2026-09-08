@@ -1,5 +1,5 @@
 // Stable public surface for short-term promotion behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { isPromotionOriginBlocked } from "./dreaming-consolidation-candidates.js";
 import { readPhaseSignalStore, readStore } from "./short-term-promotion-store.js";
 import {

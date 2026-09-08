@@ -1,10 +1,10 @@
 // Imessage plugin module implements client behavior.
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolveUserPath } from "carapace/plugin-sdk/text-utility-runtime";
 import { recoverIMessageBridge } from "./bridge-recovery.js";
 import { expandIMessageUserPath } from "./cli-path.js";
 import { DEFAULT_IMESSAGE_PROBE_TIMEOUT_MS } from "./constants.js";
@@ -74,7 +74,7 @@ function isIMessageBridgeStall(error: unknown): boolean {
 
 const BRIDGE_STALL_GUIDANCE =
   "The imsg private API bridge stopped responding. Run `imsg launch` to re-inject the dylib, " +
-  "then `openclaw channels status --probe` to refresh capability detection.";
+  "then `carapace channels status --probe` to refresh capability detection.";
 
 // Append the actionable cause without rewriting the error.
 //

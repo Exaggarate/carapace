@@ -1,5 +1,5 @@
-import { createApiRegistry, createLlmRuntime } from "@openclaw/ai";
-import type { AssistantMessage, Model } from "@openclaw/llm-core";
+import { createApiRegistry, createLlmRuntime } from "@carapace/ai";
+import type { AssistantMessage, Model } from "@carapace/llm-core";
 import { describe, expect, it, vi } from "vitest";
 import { createZeroUsageFixture } from "../agents/test-helpers/usage-fixtures.js";
 import { bindModelLlmRuntime } from "./model-runtime-binding.js";

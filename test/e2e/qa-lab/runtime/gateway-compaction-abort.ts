@@ -40,10 +40,10 @@ async function requireOwnedEnvironment() {
   const root = await fs.realpath(tmp);
   for (const name of [
     "HOME",
-    "OPENCLAW_HOME",
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_OAUTH_DIR",
+    "CARAPACE_HOME",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_OAUTH_DIR",
     "XDG_CONFIG_HOME",
     "XDG_DATA_HOME",
     "XDG_CACHE_HOME",
@@ -56,7 +56,7 @@ async function requireOwnedEnvironment() {
       `${name} must be inside the owned TMPDIR`,
     );
   }
-  assert.equal(process.env.OPENCLAW_HOME, process.env.HOME);
+  assert.equal(process.env.CARAPACE_HOME, process.env.HOME);
   assert.equal(process.env.TMP, tmp);
   assert.equal(process.env.TEMP, tmp);
   return root;
@@ -65,10 +65,10 @@ async function requireOwnedEnvironment() {
 async function loadRuntime() {
   const [qa, sessions, store, transcript, guards, evidence, writer, hostStore] = await Promise.all([
     import("../../../../extensions/qa-lab/api.js"),
-    import("openclaw/plugin-sdk/agent-sessions"),
-    import("openclaw/plugin-sdk/session-store-runtime"),
-    import("openclaw/plugin-sdk/session-transcript-runtime"),
-    import("openclaw/plugin-sdk/string-coerce-runtime"),
+    import("carapace/plugin-sdk/agent-sessions"),
+    import("carapace/plugin-sdk/session-store-runtime"),
+    import("carapace/plugin-sdk/session-transcript-runtime"),
+    import("carapace/plugin-sdk/string-coerce-runtime"),
     import("./script-evidence.js"),
     import("../../../../src/agents/embedded-agent-runner/run/session-bootstrap.js"),
     import("../../../../src/config/sessions/session-accessor.js"),
@@ -168,7 +168,7 @@ async function runCases(runtime: Runtime, repoRoot: string, artifactBase: string
       providerMode: "mock-openai",
       primaryModel: MODEL_REF,
       alternateModel: MODEL_REF,
-      forcedRuntime: "openclaw",
+      forcedRuntime: "carapace",
       controlUiEnabled: false,
       thinkingDefault: "off",
       mutateConfig: (config) => {
@@ -197,7 +197,7 @@ async function runCases(runtime: Runtime, repoRoot: string, artifactBase: string
     });
     retainedGateway = gateway;
     assert.equal(
-      gateway.runtimeEnv.OPENCLAW_QA_STAGED_RUNTIME_ROOT,
+      gateway.runtimeEnv.CARAPACE_QA_STAGED_RUNTIME_ROOT,
       path.join(repoRoot, ".artifacts", "qa-runtime", path.basename(gateway.tempRoot)),
       "Gateway staging root did not match its owned runtime",
     );
@@ -527,7 +527,7 @@ async function runCases(runtime: Runtime, repoRoot: string, artifactBase: string
         }
         // Database paths stay in namespace-owned state until the producer exits.
         // Only separately staged code is removed here, after the Gateway joins.
-        const stagedRoot = retainedGateway.runtimeEnv.OPENCLAW_QA_STAGED_RUNTIME_ROOT;
+        const stagedRoot = retainedGateway.runtimeEnv.CARAPACE_QA_STAGED_RUNTIME_ROOT;
         assert.ok(stagedRoot, "Retained Gateway omitted its owned staging root");
         assert.equal(
           stagedRoot,
@@ -631,20 +631,20 @@ async function launch(argv: string[]) {
   // only process tooling and owns the child's namespace until verified shutdown.
   const { runManagedCommand } = await import("../../../../scripts/lib/managed-child-process.mts");
   const root = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compaction-proof-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-compaction-proof-")),
   );
   const home = path.join(root, "home");
   const state = path.join(root, "state");
-  const config = path.join(root, "openclaw.json");
+  const config = path.join(root, "carapace.json");
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
     CI: "1",
     HOME: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: state,
-    OPENCLAW_CONFIG_PATH: config,
-    OPENCLAW_OAUTH_DIR: path.join(state, "credentials"),
-    OPENCLAW_BUILD_PRIVATE_QA: "1",
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: state,
+    CARAPACE_CONFIG_PATH: config,
+    CARAPACE_OAUTH_DIR: path.join(state, "credentials"),
+    CARAPACE_BUILD_PRIVATE_QA: "1",
     TMPDIR: root,
     TMP: root,
     TEMP: root,
@@ -655,7 +655,7 @@ async function launch(argv: string[]) {
   for (const directory of [
     home,
     state,
-    env.OPENCLAW_OAUTH_DIR,
+    env.CARAPACE_OAUTH_DIR,
     env.XDG_CONFIG_HOME,
     env.XDG_DATA_HOME,
     env.XDG_CACHE_HOME,

@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "./carapace-state-db.js";
 import { readUserProfileAliasRevision } from "./user-profile-events.js";
 import { repairMergedGatewayOwnerProfile } from "./user-profiles-owner-migration.js";
 import { mergeOwnerIntoPerson, profileState } from "./user-profiles-owner.test-support.js";
@@ -20,13 +20,13 @@ import {
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanup();
   });
 });
 
 function stateOptions() {
-  return { path: join(tempDirs.make("openclaw-owner-migration-"), "openclaw.sqlite") };
+  return { path: join(tempDirs.make("carapace-owner-migration-"), "carapace.sqlite") };
 }
 
 describe("Doctor gateway owner repair", () => {
@@ -43,7 +43,7 @@ describe("Doctor gateway owner repair", () => {
         },
         options,
       );
-      const db = openOpenClawStateDatabase(options).db;
+      const db = openCarapaceStateDatabase(options).db;
       if (identityTarget === "person") {
         db.prepare(
           "UPDATE user_profile_identities SET profile_id = ? WHERE provider = 'gateway.local'",
@@ -60,12 +60,12 @@ describe("Doctor gateway owner repair", () => {
       expect(repairMergedGatewayOwnerProfile({ ...options, shouldRepair: false })).toMatchObject({
         repaired: false,
         changes: [],
-        warnings: [expect.stringContaining("openclaw doctor --fix")],
+        warnings: [expect.stringContaining("carapace doctor --fix")],
       });
       expect(profileState(options)).toEqual(before);
       expect(readUserProfileAliasRevision()).toBe(aliasRevision);
       expect(() =>
-        runOpenClawStateWriteTransaction(() => {
+        runCarapaceStateWriteTransaction(() => {
           expect(repairMergedGatewayOwnerProfile({ ...options, shouldRepair: true }).repaired).toBe(
             true,
           );
@@ -107,7 +107,7 @@ describe("Doctor gateway owner repair", () => {
         warnings: [],
       });
       expect(readUserProfileAliasRevision()).toBe(aliasRevision + 1);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(profileState(options)).toEqual(repairedState);
     },
   );
@@ -120,7 +120,7 @@ describe("Doctor gateway owner repair", () => {
       if (merged) {
         mergeOwnerIntoPerson(legacy.id, options);
       }
-      const db = openOpenClawStateDatabase(options).db;
+      const db = openCarapaceStateDatabase(options).db;
       db.prepare(
         "INSERT INTO user_profile_identities (provider, subject, profile_id, created_at) VALUES ('gateway.local', 'owner', ?, 1)",
       ).run(legacy.id);

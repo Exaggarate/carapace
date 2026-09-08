@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineStateWithMetadata } from "../state/config-machine-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   buildTuiLastSessionScopeKey,
   clearTuiLastSessionPointers,
@@ -18,13 +18,13 @@ import {
 const tempDirs: string[] = [];
 
 async function makeTempStateDir() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-last-session-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-tui-last-session-"));
   tempDirs.push(dir);
   return dir;
 }
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
 
@@ -33,7 +33,7 @@ describe("tui last session state", () => {
     const stateDir = await makeTempStateDir();
 
     await expect(readTuiLastSessionKey({ scopeKey: "missing", stateDir })).resolves.toBeNull();
-    await expect(fs.stat(path.join(stateDir, "state", "openclaw.sqlite"))).rejects.toMatchObject({
+    await expect(fs.stat(path.join(stateDir, "state", "carapace.sqlite"))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
@@ -55,14 +55,14 @@ describe("tui last session state", () => {
     await expect(readTuiLastSessionKey({ scopeKey, stateDir })).resolves.toBe("agent:main:tui-123");
     expect(
       readConfigMachineStateWithMetadata<string>(`tui.lastSession.${scopeKey}`, {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       }),
     ).toEqual({ value: "agent:main:tui-123", updatedAtMs: expect.any(Number) });
     await expect(fs.stat(path.join(stateDir, "tui", "last-session.json"))).rejects.toMatchObject({
       code: "ENOENT",
     });
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await expect(readTuiLastSessionKey({ scopeKey, stateDir })).resolves.toBe("agent:main:tui-123");
   });
 
@@ -176,7 +176,7 @@ describe("tui last session state", () => {
       stateDir,
     });
     writeConfigMachineState("unrelated.sessionReference", "agent:main:main", {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
 
     expect(
@@ -194,7 +194,7 @@ describe("tui last session state", () => {
     );
     expect(
       readConfigMachineStateWithMetadata<string>("unrelated.sessionReference", {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       })?.value,
     ).toBe("agent:main:main");
   });

@@ -7,8 +7,8 @@ export function createManagedServiceIdentityFixture(home: string) {
   const keys = [
     "HOME",
     "USERPROFILE",
-    "OPENCLAW_HOME",
-    "OPENCLAW_SUPERVISOR_MODE",
+    "CARAPACE_HOME",
+    "CARAPACE_SUPERVISOR_MODE",
     ...GATEWAY_SERVICE_SELECTOR_ENV_KEYS,
   ];
   const env = captureEnv(keys);

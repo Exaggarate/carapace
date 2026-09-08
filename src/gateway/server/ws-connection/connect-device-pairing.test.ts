@@ -18,7 +18,7 @@ import {
 } from "../../../config/runtime-snapshot.js";
 import { upsertSessionEntryCore } from "../../../config/sessions/session-accessor.js";
 import type { GatewayAuthConfig } from "../../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { loadDeviceAuthToken } from "../../../infra/device-auth-store.js";
 import { issueDeviceBootstrapToken } from "../../../infra/device-bootstrap.js";
 import * as pairingApprovals from "../../../infra/device-pairing-approval.js";
@@ -30,7 +30,7 @@ import {
   CONTROL_UI_OWNER_BOOTSTRAP_OPERATOR_SCOPES,
   CONTROL_UI_OWNER_BOOTSTRAP_PROFILE,
 } from "../../../shared/device-bootstrap-profile.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
 import {
   disconnectedUserGitHubConnection,
   readUserGitHubConnection,
@@ -98,7 +98,7 @@ describe("gateway connect pairing exemptions", () => {
   test("keeps a merged owner unidentified until Doctor repairs it before reconnect", async () => {
     const origin = "https://localhost";
     const auth = { mode: "token", token: "merged-owner-secret" } as const;
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: {
         auth,
         controlUi: { allowedOrigins: [origin] },
@@ -160,7 +160,7 @@ describe("gateway connect pairing exemptions", () => {
         }),
         () => {},
       );
-      const stateDb = openOpenClawStateDatabase();
+      const stateDb = openCarapaceStateDatabase();
       const db = stateDb.db;
       // The old merge writer moved identities to the person and left the owner tombstone.
       db.prepare(
@@ -270,7 +270,7 @@ describe("gateway connect pairing exemptions", () => {
       await loggerTest.flushFileLogQueueForTests();
       const log = await fs.readFile(logPath, "utf8");
       expect(log).toContain("user profile resolution failed");
-      expect(log).toContain("openclaw doctor --fix");
+      expect(log).toContain("carapace doctor --fix");
       expect(
         db
           .prepare("SELECT merged_into, updated_at FROM user_profiles WHERE id = 'gateway-owner'")

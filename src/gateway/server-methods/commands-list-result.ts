@@ -1,7 +1,7 @@
 // Command list serialization gathers chat, skill, and plugin commands into the
 // gateway protocol result while clamping names, descriptions, aliases, and args.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type {
   CommandEntry,
   CommandsListResult,
@@ -26,7 +26,7 @@ import type {
 } from "../../auto-reply/commands-registry.types.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   getPluginCommandEntrySpecs,
   getPluginCommandEntrySpecsFromRegistrations,
@@ -173,7 +173,7 @@ function mapCommand(
 function buildPluginCommandEntries(params: {
   provider?: string;
   nameSurface: CommandNameSurface;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): CommandEntry[] {
   const gatewayRegistry = getActivePluginGatewayCommandRegistry();
   const pluginSpecs = gatewayRegistry
@@ -211,7 +211,7 @@ function buildPluginCommandEntries(params: {
 export function buildCommandsListResult(params: {
   sessionEntry?: SessionEntry;
   sessionKey?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   provider?: string;
   scope?: "native" | "text" | "both";

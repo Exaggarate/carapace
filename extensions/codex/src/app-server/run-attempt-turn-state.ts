@@ -1,6 +1,6 @@
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { emitTrustedDiagnosticEvent } from "carapace/plugin-sdk/diagnostic-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   closeCodexStartupClientBestEffort,
   interruptCodexTurnAndWaitBestEffort,
@@ -75,10 +75,10 @@ export function createCodexAttemptTurnState(resources: CodexAttemptResources) {
   };
   const { promise: completion, resolve: resolveCompletion } = createDeferred<void>();
   const settlementExpired = createDeferred<void>();
-  const pendingOpenClawDynamicToolCompletionIds = new Set<string>();
+  const pendingCarapaceDynamicToolCompletionIds = new Set<string>();
   // One execution promise per call id prevents duplicate delivery from
   // repeating non-idempotent computer input while the attempt remains active.
-  const openClawDynamicToolExecutions = createCodexDynamicToolExecutionRegistry();
+  const carapaceDynamicToolExecutions = createCodexDynamicToolExecutionRegistry();
   const activeTurnItemIds = new Set<string>();
   const turnIdRef: { current?: string } = {};
   const userInputBridgeRef: { current?: ReturnType<typeof createCodexUserInputBridge> } = {};
@@ -203,8 +203,8 @@ export function createCodexAttemptTurnState(resources: CodexAttemptResources) {
     state,
     completion,
     settlementExpired: settlementExpired.promise,
-    pendingOpenClawDynamicToolCompletionIds,
-    openClawDynamicToolExecutions,
+    pendingCarapaceDynamicToolCompletionIds,
+    carapaceDynamicToolExecutions,
     activeTurnItemIds,
     turnIdRef,
     userInputBridgeRef,

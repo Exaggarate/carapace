@@ -9,10 +9,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI plugin config mutation mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -96,7 +96,7 @@ suite.define(() => {
         const response = await page.goto(`${suite.server.baseUrl}settings/agents/main/overview`);
         expect(response?.status()).toBe(200);
 
-        const fallbackInput = page.locator("openclaw-multi-select.agent-fallbacks input");
+        const fallbackInput = page.locator("carapace-multi-select.agent-fallbacks input");
         await fallbackInput.waitFor();
         await gateway.deferNext("config.set");
         await fallbackInput.fill("anthropic/claude-sonnet-4-6");

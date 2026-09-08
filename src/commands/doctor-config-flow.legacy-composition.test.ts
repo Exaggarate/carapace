@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readConfigFileSnapshot } from "../config/config.js";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runInitialConfigWriteHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 
 async function repairConfig(configPath: string) {
@@ -15,7 +15,7 @@ async function repairConfig(configPath: string) {
 }
 
 describe("Doctor legacy config composition", () => {
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeCarapaceStateDatabaseForTest());
 
   it.each([
     "list",
@@ -30,7 +30,7 @@ describe("Doctor legacy config composition", () => {
     await withTempHome(async (home) => {
       await withEnvOverride(
         {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
           DOCTOR_AGENT_ID: "research",
           DOCTOR_TOOL: "read",
           DOCTOR_AGENT_WORKSPACE: path.join(home, "agent-workspace"),
@@ -83,7 +83,7 @@ describe("Doctor legacy config composition", () => {
                 }),
           };
           const included = shape.startsWith("included");
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             agents: included ? { $include: "agents.json" } : agents,
             gateway: normalizedId ? { $include: "gateway.json" } : { mode: "local" },
             plugins: { enabled: false },
@@ -196,7 +196,7 @@ describe("Doctor legacy config composition", () => {
         const workspace = path.join(home, "shared-agent-workspace");
         await withEnvOverride(
           {
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
             DOCTOR_TRUSTED_PROXY: "127.0.0.2",
             FIRST_WORKSPACE: workspace,
             SECOND_WORKSPACE: workspace,
@@ -218,7 +218,7 @@ describe("Doctor legacy config composition", () => {
                 : shape === "duplicate"
                   ? { research: first, "research-2": second }
                   : { research: first };
-            const configPath = await writeOpenClawConfig(home, {
+            const configPath = await writeCarapaceConfig(home, {
               agents: {
                 list:
                   shape === "unnamed"
@@ -277,14 +277,14 @@ describe("Doctor legacy config composition", () => {
     "refuses ambiguous legacy roster persistence for %s",
     async (shape) => {
       await withTempHome(async (home) => {
-        await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
           const identity = { name: "Second agent" };
           const includeRaw = `${JSON.stringify(
             shape === "duplicate ids" ? identity : { identity, memorySearch: { enabled: false } },
             null,
             3,
           )}\n`;
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             agents: {
               list:
                 shape === "duplicate ids"
@@ -326,10 +326,10 @@ describe("Doctor legacy config composition", () => {
 
   it.each(["root", "list", "entries"])("preserves message policy from %s", async (scope) => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         const message = { allowCrossContextSend: true, broadcast: { enabled: false } };
         const agent = scope === "root" ? {} : { tools: { message } };
-        const configPath = await writeOpenClawConfig(home, {
+        const configPath = await writeCarapaceConfig(home, {
           agents:
             scope === "list" ? { list: [{ id: "ops", ...agent }] } : { entries: { ops: agent } },
           ...(scope === "root" ? { tools: { message } } : {}),
@@ -351,8 +351,8 @@ describe("Doctor legacy config composition", () => {
   });
   it("preserves inherited message policy when an agent opts out of the legacy bypass", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
-        const configPath = await writeOpenClawConfig(home, {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        const configPath = await writeCarapaceConfig(home, {
           tools: { message: { allowCrossContextSend: true } },
           agents: {
             ownership: "explicit",
@@ -382,9 +382,9 @@ describe("Doctor legacy config composition", () => {
     async (apiKey) => {
       await withTempHome(async (home) => {
         await withEnvOverride(
-          { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", DOCTOR_MEMORY_KEY: "memory-secret-canary" },
+          { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", DOCTOR_MEMORY_KEY: "memory-secret-canary" },
           async () => {
-            const configPath = await writeOpenClawConfig(home, {
+            const configPath = await writeCarapaceConfig(home, {
               memory: { search: { enabled: false, query: { maxResults: 9 } } },
               agents: {
                 defaults: {
@@ -435,9 +435,9 @@ describe("Doctor legacy config composition", () => {
     "preserves the shipped message bypass precedence for root %s",
     async (globalBypass) => {
       await withTempHome(async (home) => {
-        await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
           const denied = { allowWithinProvider: false, allowAcrossProviders: false };
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             tools: { message: { allowCrossContextSend: globalBypass, crossContext: denied } },
             agents: {
               ownership: "explicit",

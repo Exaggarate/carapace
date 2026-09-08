@@ -3,10 +3,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIrcIngressMonitor } from "./irc-ingress.js";
 
@@ -25,12 +25,12 @@ function createQueue(stateDir: string): IrcIngressQueue {
 }
 
 async function withQueue<T>(fn: (queue: IrcIngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-irc-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-irc-ingress-"));
   const stateDir = await fs.realpath(created);
   try {
     return await fn(createQueue(stateDir));
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -49,7 +49,7 @@ function startIngress(queue: IrcIngressQueue, dispatch: IrcIngressDispatch) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
@@ -174,7 +174,7 @@ describe("IRC durable ingress", () => {
       try {
         await ingress
           .openConnection("connection-dm")
-          .accept(":Alice!ident@example.org PRIVMSG openclaw-bot :hello", "bot");
+          .accept(":Alice!ident@example.org PRIVMSG carapace-bot :hello", "bot");
         expect(await queue.listPending({ limit: "all" })).toEqual([
           expect.objectContaining({ laneKey: "direct:alice" }),
         ]);

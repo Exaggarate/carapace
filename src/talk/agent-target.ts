@@ -1,12 +1,12 @@
 import { resolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
 import { resolveSessionAgentId } from "../agents/agent-scope.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 
 /** Agent-scoped keys own their Talk session; legacy/unscoped aliases use the Talk target. */
 export function resolveTalkSessionAgentId(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   sessionKey?: string | null,
 ): string {
   const normalizedSessionKey = sessionKey ?? undefined;

@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createRuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveNextcloudTalkAccount } from "./accounts.js";
 import { nextcloudTalkGatewayAdapter } from "./gateway.js";
@@ -14,7 +14,7 @@ let tempDir: string;
 
 beforeEach(async () => {
   vi.stubEnv("NEXTCLOUD_TALK_BOT_SECRET", "");
-  tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-nextcloud-logout-"));
+  tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-nextcloud-logout-"));
 });
 
 afterEach(async () => {
@@ -22,7 +22,7 @@ afterEach(async () => {
   await fs.rm(tempDir, { recursive: true, force: true });
 });
 
-async function logout(cfg: OpenClawConfig & CoreConfig, accountId: string) {
+async function logout(cfg: CarapaceConfig & CoreConfig, accountId: string) {
   const original = structuredClone(cfg);
   const runtime = createPluginRuntimeMock();
   setNextcloudTalkRuntime(runtime);
@@ -50,7 +50,7 @@ describe("Nextcloud Talk logout", () => {
       };
       const account = { ...remaining, botSecret: "remove" };
       const other = { botSecret: "keep", name: "Other" };
-      const cfg: OpenClawConfig & CoreConfig = {
+      const cfg: CarapaceConfig & CoreConfig = {
         channels: {
           "nextcloud-talk":
             accountId === "default"

@@ -1,6 +1,6 @@
 // Manifest tool-availability tests cover config, auth, environment, and base-URL gates.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretRef } from "../config/types.secrets.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 import {
@@ -22,13 +22,13 @@ function makePlugin(overrides: Partial<PluginManifestRecord>): PluginManifestRec
     origin: "bundled",
     rootDir: "/tmp/demo",
     source: "/tmp/demo/index.js",
-    manifestPath: "/tmp/demo/openclaw.plugin.json",
+    manifestPath: "/tmp/demo/carapace.plugin.json",
     ...overrides,
   };
 }
 
-function makeConfig(value: Record<string, unknown>): OpenClawConfig {
-  return value as OpenClawConfig;
+function makeConfig(value: Record<string, unknown>): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
 const webSearchSignal = {
@@ -37,7 +37,7 @@ const webSearchSignal = {
   required: ["apiKey"],
 };
 
-function xaiConfig(config: Record<string, unknown>): OpenClawConfig {
+function xaiConfig(config: Record<string, unknown>): CarapaceConfig {
   return makeConfig({ plugins: { entries: { xai: { config } } } });
 }
 
@@ -191,7 +191,7 @@ describe("manifestConfigSignalPasses", () => {
     { allowlist: ["XAI_API_KEY"], expected: true },
     { allowlist: ["OTHER_API_KEY"], expected: false },
   ])("honors the explicit env provider allowlist $allowlist", ({ allowlist, expected }) => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...xaiConfig({
         webSearch: { apiKey: { source: "env", provider: "shared", id: "XAI_API_KEY" } },
       }),
@@ -273,7 +273,7 @@ describe("hasManifestToolAvailability", () => {
   it.each<{
     name: string;
     ref: SecretRef;
-    secrets?: OpenClawConfig["secrets"];
+    secrets?: CarapaceConfig["secrets"];
     expected: boolean;
   }>([
     {
@@ -341,7 +341,7 @@ describe("hasManifestToolAvailability", () => {
     const plugin = makePlugin({
       toolMetadata: { x_search: { configSignals: [webSearchSignal] } },
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...xaiConfig({ webSearch: { apiKey: ref } }),
       secrets,
     };

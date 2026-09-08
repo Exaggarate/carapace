@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
+import CarapaceChatUI
+import CarapaceKit
 import SwiftUI
 
 extension RootTabs {
@@ -151,11 +151,11 @@ extension RootTabs {
         let agentId: String?
     }
 
-    static func sidebarPresentation(for session: OpenClawChatSessionEntry) -> SidebarSessionPresentation {
+    static func sidebarPresentation(for session: CarapaceChatSessionEntry) -> SidebarSessionPresentation {
         session.boardFace == "dashboard" ? .dashboard : .chat
     }
 
-    static func sidebarDashboardTarget(for session: OpenClawChatSessionEntry) -> SidebarDashboardTarget {
+    static func sidebarDashboardTarget(for session: CarapaceChatSessionEntry) -> SidebarDashboardTarget {
         SidebarDashboardTarget(sessionKey: session.key, agentId: session.agentId)
     }
 
@@ -218,7 +218,7 @@ extension RootTabs {
     }
 
     static func requestedInitialSidebarVisibility(arguments: [String]) -> Bool? {
-        guard let flagIndex = arguments.firstIndex(of: "--openclaw-sidebar-visibility") else {
+        guard let flagIndex = arguments.firstIndex(of: "--carapace-sidebar-visibility") else {
             return nil
         }
         let valueIndex = arguments.index(after: flagIndex)

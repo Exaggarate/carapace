@@ -4,7 +4,7 @@ import {
 } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import { isInternalSessionEffectsKey } from "./internal-session-key.js";
 import type {
   SessionAccessScope,
@@ -41,7 +41,7 @@ export function readSessionStoreSummaryReadOnly(
       options.agentIds.map((agentId) => [agentId, { count: 0, recent: [] }]),
     ),
   };
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) =>
       runSqliteDeferredTransactionSync(database.db, () => {
         assertCanonicalSqliteSessionKeysCurrent(database);

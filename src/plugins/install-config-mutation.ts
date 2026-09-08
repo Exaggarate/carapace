@@ -1,7 +1,7 @@
 // Config admission shared by plugin policy changes and source installs.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   hashConfigIncludeRaw,
   readConfigIncludeFileWithGuards,
@@ -9,11 +9,11 @@ import {
 } from "../config/includes.js";
 import type { ConfigWriteOptions } from "../config/io.js";
 import { containsConfigIncludeDirective } from "../config/io.read-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseJsonWithJson5Fallback } from "../utils/parse-json-compat.js";
 
 export type ConfigSnapshotForInstallPersist = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   baseHash: string | undefined;
   writeOptions: Pick<
     ConfigWriteOptions,

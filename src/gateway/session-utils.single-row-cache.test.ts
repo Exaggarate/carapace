@@ -4,7 +4,7 @@
 import { existsSync } from "node:fs";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionStorePathCore, type SessionEntry } from "../config/sessions.js";
 import { resolveInternalSessionEffectsIdentity } from "../config/sessions/internal-session-key.js";
 import {
@@ -13,7 +13,7 @@ import {
   updateSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import { resetPluginRuntimeStateForTest } from "../plugins/runtime.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 
 const subagentRegistryReadMock = vi.hoisted(() => {
@@ -107,7 +107,7 @@ async function withSingleRowCacheStore(
   run: (context: SingleRowCacheContext) => Promise<void>,
 ): Promise<void> {
   await withStateDirEnv(statePrefix, async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         list: [
           {
@@ -118,7 +118,7 @@ async function withSingleRowCacheStore(
         ],
         defaults: { model: { primary: TEST_MODEL } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setRuntimeConfigSnapshot(cfg, cfg);
     await run({
       now: Math.floor(Date.now() / 1_000) * 1_000 + 100,
@@ -222,8 +222,8 @@ describe("single gateway session row child projections", () => {
   });
 
   test("retains the loaded owner after a qualified main alias becomes global", async () => {
-    await withStateDirEnv("openclaw-single-row-global-owner-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("carapace-single-row-global-owner-", async () => {
+      const cfg: CarapaceConfig = {
         session: { scope: "global" },
         agents: {
           entries: {
@@ -261,8 +261,8 @@ describe("single gateway session row child projections", () => {
     "reads only the selected session while preserving projections and hidden effects (clone: %s)",
     async (clone) => {
       await withSingleRowCacheStore(
-        "openclaw-single-row-hidden-effects-",
-        "/tmp/openclaw-single-row-hidden-effects",
+        "carapace-single-row-hidden-effects-",
+        "/tmp/carapace-single-row-hidden-effects",
         async ({ now, storePath }) => {
           const hidden = resolveInternalSessionEffectsIdentity({
             agentId: MAIN_AGENT_ID,
@@ -346,10 +346,10 @@ describe("single gateway session row child projections", () => {
 
   test("preserves missing-store behavior for borrowed and owned entry lookups", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-missing-store-",
-      "/tmp/openclaw-single-row-missing-store",
+      "carapace-single-row-missing-store-",
+      "/tmp/carapace-single-row-missing-store",
       async ({ now }) => {
-        const databasePath = resolveOpenClawAgentSqlitePath({ agentId: MAIN_AGENT_ID });
+        const databasePath = resolveCarapaceAgentSqlitePath({ agentId: MAIN_AGENT_ID });
         const missing = loadSessionEntry("main", { clone: false });
         expect(missing.entry).toBeUndefined();
         expect(existsSync(databasePath)).toBe(false);
@@ -367,8 +367,8 @@ describe("single gateway session row child projections", () => {
 
   test("keeps direct children visible with at most one candidate scan per exact snapshot", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-cache-",
-      "/tmp/openclaw-single-row-cache",
+      "carapace-single-row-cache-",
+      "/tmp/carapace-single-row-cache",
       async ({ now, storePath }) => {
         const store: Record<string, SessionEntry> = {
           "agent:main:subagent:parent-a": parentSession("parent-a", now),
@@ -419,8 +419,8 @@ describe("single gateway session row child projections", () => {
 
   test("refreshes subagent registry control on each projection", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-cache-fresh-registry-",
-      "/tmp/openclaw-single-row-cache-fresh-registry",
+      "carapace-single-row-cache-fresh-registry-",
+      "/tmp/carapace-single-row-cache-fresh-registry",
       async ({ now, storePath }) => {
         const fixture = createMovingChildFixture(now);
         // This fixture moves runtime control only; an explicit parent would
@@ -445,8 +445,8 @@ describe("single gateway session row child projections", () => {
 
   test("keeps independent navigation lineage while runtime control moves", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-cache-navigation-owner-",
-      "/tmp/openclaw-single-row-cache-navigation-owner",
+      "carapace-single-row-cache-navigation-owner-",
+      "/tmp/carapace-single-row-cache-navigation-owner",
       async ({ now, storePath }) => {
         const fixture = createMovingChildFixture(now);
         const navigationParent = "agent:main:dashboard:navigation-parent";
@@ -475,24 +475,24 @@ describe("single gateway session row child projections", () => {
 
   test("builds shared subagent metadata context for single-row session lists", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-list-context-",
-      "/tmp/openclaw-single-row-list-context",
+      "carapace-single-row-list-context-",
+      "/tmp/carapace-single-row-list-context",
       async ({ now, storePath }) => {
         const store: Record<string, SessionEntry> = {
           "agent:main:discord:channel:parent": parentSession("parent", now),
         };
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             list: [
               {
                 id: MAIN_AGENT_ID,
                 default: true,
-                workspace: "/tmp/openclaw-single-row-list-context",
+                workspace: "/tmp/carapace-single-row-list-context",
               },
             ],
             defaults: { model: { primary: TEST_MODEL } },
           },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
 
         const asyncListed = await listSessionFixture({
           cfg,
@@ -512,8 +512,8 @@ describe("single gateway session row child projections", () => {
 
   test("refreshes store child candidates after session writes", async () => {
     await withSingleRowCacheStore(
-      "openclaw-single-row-cache-write-version-",
-      "/tmp/openclaw-single-row-cache-write-version",
+      "carapace-single-row-cache-write-version-",
+      "/tmp/carapace-single-row-cache-write-version",
       async ({ now, storePath }) => {
         const fixture = createMovingChildFixture(now);
         await seedSessionEntries(storePath, fixture.store);

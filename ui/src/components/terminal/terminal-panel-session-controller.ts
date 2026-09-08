@@ -1,4 +1,4 @@
-import type { SessionsCatalogStartTerminalParams } from "@openclaw/gateway-protocol";
+import type { SessionsCatalogStartTerminalParams } from "@carapace/gateway-protocol";
 import type { ReactiveController } from "lit";
 import { t } from "../../i18n/index.ts";
 import { formatUiError, formatUiExternalText } from "../../lib/format-error.ts";

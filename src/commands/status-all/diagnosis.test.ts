@@ -164,7 +164,7 @@ describe("status-all diagnosis port checks", () => {
     { state: "always", eligible: 1, missing: 0 },
     { state: "unsupported-os", eligible: 0, missing: 1 },
   ] as const)("reports skill readiness for $state", async ({ state, eligible, missing }) => {
-    const workspaceDir = tempDirs.make("openclaw-status-skills-");
+    const workspaceDir = tempDirs.make("carapace-status-skills-");
     const baseDir = path.join(workspaceDir, "skills", "fixture");
     const params = createBaseParams([]);
     params.skillStatus = buildWorkspaceSkillStatus(workspaceDir, {
@@ -185,7 +185,7 @@ describe("status-all diagnosis port checks", () => {
             description: "Synthetic status readiness fixture",
             filePath: path.join(baseDir, "SKILL.md"),
             baseDir,
-            source: state === "blocked" ? "openclaw-bundled" : "openclaw-workspace",
+            source: state === "blocked" ? "carapace-bundled" : "carapace-workspace",
           }),
           frontmatter: {},
           metadata: {
@@ -194,9 +194,9 @@ describe("status-all diagnosis port checks", () => {
               bins:
                 state === "ready" || state === "unsupported-os"
                   ? []
-                  : ["openclaw-qa-readiness-absent-binary"],
+                  : ["carapace-qa-readiness-absent-binary"],
             },
-            ...(state === "unsupported-os" ? { os: ["openclaw-qa-unsupported-os"] } : {}),
+            ...(state === "unsupported-os" ? { os: ["carapace-qa-unsupported-os"] } : {}),
           },
         },
       ],
@@ -259,7 +259,7 @@ describe("status-all diagnosis port checks", () => {
     expect(output).toContain("Pasteable debug report. Auth tokens redacted.");
   });
 
-  it("labels OpenClaw Tailscale exposure separately from daemon state", async () => {
+  it("labels Carapace Tailscale exposure separately from daemon state", async () => {
     const params = createBaseParams([]);
     params.tailscale.backendState = "Running";
     params.tailscale.dnsName = "box.tail.ts.net";
@@ -281,8 +281,8 @@ describe("status-all diagnosis port checks", () => {
 
   it("treats same-process dual-stack loopback listeners as healthy", async () => {
     const params = createBaseParams([
-      { pid: 5001, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
-      { pid: 5001, commandLine: "openclaw-gateway", address: "[::1]:18789" },
+      { pid: 5001, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
+      { pid: 5001, commandLine: "carapace-gateway", address: "[::1]:18789" },
     ]);
 
     await appendStatusAllDiagnosis(params);
@@ -295,28 +295,28 @@ describe("status-all diagnosis port checks", () => {
 
   it("treats a single wildcard Gateway listener as healthy", async () => {
     const params = createBaseParams([
-      { pid: 5001, commandLine: "openclaw-gateway", address: "0.0.0.0:18789" },
+      { pid: 5001, commandLine: "carapace-gateway", address: "0.0.0.0:18789" },
     ]);
 
     await appendStatusAllDiagnosis(params);
 
     const output = params.lines.join("\n");
     expect(output).toContain("✓ Port 18789");
-    expect(output).toContain("Detected OpenClaw Gateway listener on the configured port.");
+    expect(output).toContain("Detected Carapace Gateway listener on the configured port.");
     expect(output).not.toContain("Port 18789 is already in use.");
   });
 
   it("keeps warning for multi-process listener conflicts", async () => {
     const params = createBaseParams([
-      { pid: 5001, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
-      { pid: 5002, commandLine: "openclaw-gateway", address: "[::1]:18789" },
+      { pid: 5001, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
+      { pid: 5002, commandLine: "carapace-gateway", address: "[::1]:18789" },
     ]);
 
     await appendStatusAllDiagnosis(params);
 
     const output = params.lines.join("\n");
     expect(output).toContain("! Port 18789");
-    expect(output).toContain("2 OpenClaw gateway processes appear to be listening on port 18789");
+    expect(output).toContain("2 Carapace gateway processes appear to be listening on port 18789");
     expect(output).toContain("Port 18789 is already in use.");
   });
 
@@ -334,7 +334,7 @@ describe("status-all diagnosis port checks", () => {
 
   it("does not let attributed listeners override indeterminate availability", async () => {
     const params = createBaseParams([
-      { pid: 5001, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+      { pid: 5001, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
     ]);
     params.portUsage!.status = "unknown";
 
@@ -343,21 +343,21 @@ describe("status-all diagnosis port checks", () => {
     const output = params.lines.join("\n");
     expect(output).toContain("! Port 18789");
     expect(output).toContain("Port 18789 availability could not be determined.");
-    expect(output).not.toContain("Detected OpenClaw Gateway listener");
+    expect(output).not.toContain("Detected Carapace Gateway listener");
   });
 
   it.each([
     {
       status: "error",
       reason: "managed-service-handoff-failed",
-      headline: "⚠️ OpenClaw update failed: managed-service-handoff-failed.",
-      hint: "Run openclaw triage to diagnose and repair the failed update.",
+      headline: "⚠️ Carapace update failed: managed-service-handoff-failed.",
+      hint: "Run carapace triage to diagnose and repair the failed update.",
     },
     {
       status: "skipped",
       reason: "restart-health-pending",
-      headline: "⬆️ OpenClaw update in progress: restarting.",
-      hint: "Check progress with openclaw update status.",
+      headline: "⬆️ Carapace update in progress: restarting.",
+      hint: "Check progress with carapace update status.",
     },
   ] as const)(
     "includes the shared update report for $status sentinels",
@@ -375,7 +375,7 @@ describe("status-all diagnosis port checks", () => {
       const output = params.lines.join("\n");
       expect(output).toContain(`Update restart: ${headline}`);
       expect(output).toContain(hint);
-      expect(output).not.toContain("run openclaw gateway restart");
+      expect(output).not.toContain("run carapace gateway restart");
     },
   );
 
@@ -488,12 +488,12 @@ describe("status-all diagnosis port checks", () => {
     expect(output).toContain(
       "Exporter diagnostics failed: Error: diagnostics probe timed out at wss://***:***@gateway.example/socket?token=***",
     );
-    expect(output).toContain("Retry: openclaw gateway stability --type telemetry.exporter");
+    expect(output).toContain("Retry: carapace gateway stability --type telemetry.exporter");
     expect(output).toContain("! Inbound delivery telemetry: unavailable");
     expect(output).toContain(
       "Delivery diagnostics failed: Error: diagnostics probe timed out at wss://***:***@gateway.example/socket?token=***",
     );
-    expect(output).toContain("Retry: openclaw gateway stability");
+    expect(output).toContain("Retry: carapace gateway stability");
     expect(output).not.toContain("received 0 · dispatch 0/0 · turns 0 · processed 0");
     expect(output).not.toContain("probe-user");
     expect(output).not.toContain("probe-pass");
@@ -614,7 +614,7 @@ describe("status-all diagnosis port checks", () => {
     expect(output).not.toContain("Gateway health:");
     expect(output).not.toContain("Inbound delivery telemetry: unavailable");
     expect(output).not.toContain("Telemetry exporters: unavailable");
-    expect(output).not.toContain("Retry: openclaw gateway stability");
+    expect(output).not.toContain("Retry: carapace gateway stability");
   });
 
   it("does not read or display stale stderr tails on Darwin", async () => {
@@ -622,12 +622,12 @@ describe("status-all diagnosis port checks", () => {
     Object.defineProperty(process, "platform", { value: "darwin" });
     try {
       restartLogMocks.resolveGatewaySupervisorLogPaths.mockReturnValue({
-        logDir: "/Users/test/Library/Logs/openclaw",
-        stdoutPath: "/Users/test/Library/Logs/openclaw/gateway.log",
-        stderrPath: "/Users/test/Library/Logs/openclaw/gateway.err.log",
+        logDir: "/Users/test/Library/Logs/carapace",
+        stdoutPath: "/Users/test/Library/Logs/carapace/gateway.log",
+        stderrPath: "/Users/test/Library/Logs/carapace/gateway.err.log",
       });
       restartLogMocks.resolveGatewayRestartLogPath.mockReturnValue(
-        "/tmp/openclaw/logs/gateway-restart.log",
+        "/tmp/carapace/logs/gateway-restart.log",
       );
       gatewayMocks.readFileTailLines.mockImplementation(async (filePath: string) => {
         if (filePath.endsWith("gateway.log")) {
@@ -644,10 +644,10 @@ describe("status-all diagnosis port checks", () => {
 
       const output = params.lines.join("\n");
       expect(gatewayMocks.readFileTailLines).not.toHaveBeenCalledWith(
-        "/Users/test/Library/Logs/openclaw/gateway.err.log",
+        "/Users/test/Library/Logs/carapace/gateway.err.log",
         40,
       );
-      expect(output).toContain("# stdout: /Users/test/Library/Logs/openclaw/gateway.log");
+      expect(output).toContain("# stdout: /Users/test/Library/Logs/carapace/gateway.log");
       expect(output).toContain("gateway stdout current");
       expect(output).not.toContain("# stderr:");
       expect(output).not.toContain("failed to bind gateway socket stale");

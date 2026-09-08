@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import { resolveAgentDir } from "../../agents/agent-scope.js";
 import { resolveMemorySearchConfig } from "../../agents/memory-search.js";

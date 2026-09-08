@@ -1,5 +1,5 @@
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 const STORAGE_ERRORS = [
   ["SQLITE_BUSY", "database is locked", 5],

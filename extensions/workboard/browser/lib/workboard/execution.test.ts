@@ -1,6 +1,6 @@
 // @vitest-environment node
 import "../../test/host.setup.ts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it } from "vitest";
 import { waitForFast } from "../../test/wait-for.ts";
 import { startWorkboardCard, stopWorkboardCard } from "./execution.ts";

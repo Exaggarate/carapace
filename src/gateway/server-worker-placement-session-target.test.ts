@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveSessionStorePathCore } from "../config/sessions.js";
 import {
   loadExactSessionEntryReadOnly,
@@ -15,7 +15,7 @@ afterEach(() => resetConfigRuntimeState());
 
 test("resolves consecutive placement workspaces without decoding unrelated session payloads", async () => {
   await withStateDirEnv("worker-exact-target-", async () => {
-    const config: OpenClawConfig = { agents: { list: [{ id: "main", default: true }] } };
+    const config: CarapaceConfig = { agents: { list: [{ id: "main", default: true }] } };
     setRuntimeConfigSnapshot(config, config);
     const storePath = resolveSessionStorePathCore(undefined, { agentId: "main" });
     const keys = ["agent:main:placement-a", "agent:main:placement-b"] as const;

@@ -78,17 +78,17 @@ describe("AppSidebar session ownership filtering", () => {
     expect(menu?.textContent).toContain("Channel Keeper");
     expect(
       sidebar.querySelector(
-        '[data-session-key="agent:main:opaque-profile"] openclaw-session-owner-chip',
+        '[data-session-key="agent:main:opaque-profile"] carapace-session-owner-chip',
       ),
     ).not.toBeNull();
     expect(
       sidebar.querySelector(
-        '[data-session-key="agent:main:discord-channel"] openclaw-session-owner-chip',
+        '[data-session-key="agent:main:discord-channel"] carapace-session-owner-chip',
       ),
     ).toBeNull();
     expect(
       sidebar.querySelector(
-        '[data-session-key="agent:main:session-principal"] openclaw-session-owner-chip',
+        '[data-session-key="agent:main:session-principal"] carapace-session-owner-chip',
       ),
     ).toBeNull();
     expect(menu?.querySelector('[value="owner:discord:channel:123"]')).toBeNull();
@@ -142,7 +142,7 @@ describe("AppSidebar session ownership filtering", () => {
     harness.publishList({ result, agentId: "main" });
     await sidebar.updateComplete;
 
-    expect(sidebar.querySelectorAll("openclaw-session-owner-chip")).toHaveLength(2);
+    expect(sidebar.querySelectorAll("carapace-session-owner-chip")).toHaveLength(2);
     await selectOwner(sidebar, "profile-ada");
 
     expect(sidebar.querySelector('[data-session-key="agent:main:ada"]')).not.toBeNull();
@@ -330,7 +330,7 @@ describe("AppSidebar session ownership filtering", () => {
     await sidebar.updateComplete;
 
     const row = sidebar.querySelector(`[data-session-key="${key}"]`);
-    expect(row?.querySelector(".session-glyph openclaw-session-owner-chip")).not.toBeNull();
+    expect(row?.querySelector(".session-glyph carapace-session-owner-chip")).not.toBeNull();
     const badge = row?.querySelector(".sidebar-session-indicator .session-glyph__badge--unread");
     expect(badge).not.toBeNull();
     expect(badge?.getAttribute("role")).toBe("img");
@@ -401,10 +401,10 @@ describe("AppSidebar session ownership filtering", () => {
     );
 
     expect(
-      sidebar.querySelector(`[data-session-key="${parentKey}"] openclaw-session-owner-chip`),
+      sidebar.querySelector(`[data-session-key="${parentKey}"] carapace-session-owner-chip`),
     ).not.toBeNull();
     expect(
-      sidebar.querySelector(`[data-session-key="${childKey}"] openclaw-session-owner-chip`),
+      sidebar.querySelector(`[data-session-key="${childKey}"] carapace-session-owner-chip`),
     ).toBeNull();
     expect(
       sidebar.querySelector(`[data-session-key="${childKey}"] [aria-label="Done"]`),

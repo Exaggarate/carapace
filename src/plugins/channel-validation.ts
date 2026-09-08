@@ -2,7 +2,7 @@
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { listChatChannels } from "../channels/chat-meta.js";
 import { normalizeChannelMeta } from "../channels/plugins/meta-normalization.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";

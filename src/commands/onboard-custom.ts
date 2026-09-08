@@ -4,7 +4,7 @@
  * The pure config helpers are re-exported from here because setup and configure
  * flows import this command module as their custom API entrypoint.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { loadManifestMetadataSnapshot } from "../plugins/manifest-contract-eligibility.js";
 import { ensureApiKeyFromEnvOrPrompt } from "../plugins/provider-auth-input.js";
@@ -149,7 +149,7 @@ async function requestAnthropicVerification(params: {
 
 async function promptBaseUrlAndKey(params: {
   prompter: WizardPrompter;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   secretInputMode?: SecretInputMode;
   initialBaseUrl?: string;
 }): Promise<{ baseUrl: string; apiKey?: SecretInput; resolvedApiKey: string }> {
@@ -211,7 +211,7 @@ async function promptCustomApiModelId(prompter: WizardPrompter): Promise<string>
 
 async function applyCustomApiRetryChoice(params: {
   prompter: WizardPrompter;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   secretInputMode?: SecretInputMode;
   retryChoice: CustomApiRetryChoice;
   current: { baseUrl: string; apiKey?: SecretInput; resolvedApiKey: string; modelId: string };
@@ -238,7 +238,7 @@ async function applyCustomApiRetryChoice(params: {
 export async function promptCustomApiConfig(params: {
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   target?: OnboardingAgentTarget;
   secretInputMode?: SecretInputMode;
   setAsPrimary?: boolean;

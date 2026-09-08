@@ -1,11 +1,11 @@
 // Migrate Hermes tests cover model.apply plugin behavior.
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   HERMES_REASON_DEFAULT_MODEL_CONFIGURED,
@@ -31,8 +31,8 @@ function defaultModelItem(status: "migrated" | "conflict") {
 describe("Hermes migration model apply", () => {
   beforeEach(async () => {
     testWorkspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-migrate-hermes-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-migrate-hermes-",
     });
   });
 
@@ -61,8 +61,8 @@ describe("Hermes migration model apply", () => {
           },
         },
       },
-    } as OpenClawConfig;
-    let writtenConfig: OpenClawConfig | undefined;
+    } as CarapaceConfig;
+    let writtenConfig: CarapaceConfig | undefined;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(existingConfig, (next) => {
         writtenConfig = next;
@@ -118,8 +118,8 @@ describe("Hermes migration model apply", () => {
           },
         ],
       },
-    } as OpenClawConfig;
-    let writtenConfig: OpenClawConfig | undefined;
+    } as CarapaceConfig;
+    let writtenConfig: CarapaceConfig | undefined;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(existingConfig, (next) => {
         writtenConfig = next;
@@ -162,7 +162,7 @@ describe("Hermes migration model apply", () => {
           model: "anthropic/claude-sonnet-4.6",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(lateConfig),
     });
@@ -183,7 +183,7 @@ describe("Hermes migration model apply", () => {
       const source = path.join(root, "hermes");
       const workspaceDir = path.join(root, "workspace");
       await writeFile(path.join(source, "config.yaml"), "model: imported/model\n");
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           defaults: { workspace: workspaceDir, model: "shared/model" },
           entries: {
@@ -245,7 +245,7 @@ describe("Hermes migration model apply", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const provider = buildHermesMigrationProvider({ runtime: makeConfigRuntime(lateConfig) });
     const ctx = makeContext({ source, stateDir, workspaceDir, reportDir });
     const plan = await provider.plan(ctx);

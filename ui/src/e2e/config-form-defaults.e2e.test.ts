@@ -10,10 +10,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI config form defaults mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -179,7 +179,7 @@ suite.define(() => {
           },
         });
         await expect
-          .poll(() => page.locator("openclaw-settings-save-indicator").textContent())
+          .poll(() => page.locator("carapace-settings-save-indicator").textContent())
           .toContain("Saving");
 
         await expect.poll(() => modeRow.locator("select").inputValue()).toBe("__unset__");
@@ -191,7 +191,7 @@ suite.define(() => {
         const configGetsBeforeReload = (await gateway.getRequests("config.get")).length;
         await gateway.resolveDeferred("config.set");
         await expect
-          .poll(() => page.locator("openclaw-settings-save-indicator").textContent())
+          .poll(() => page.locator("carapace-settings-save-indicator").textContent())
           .toContain("Saved");
         expect((await page.reload())?.status()).toBe(200);
         await expect

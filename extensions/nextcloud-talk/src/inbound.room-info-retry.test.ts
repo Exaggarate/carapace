@@ -1,10 +1,10 @@
 // Nextcloud Talk tests cover room-kind lookup retry behavior at the inbound boundary.
 import http from "node:http";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 import type { RuntimeEnv } from "../runtime-api.js";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
@@ -164,7 +164,7 @@ function startSpool(params: {
 afterEach(async () => {
   const pending = servers.splice(0);
   await Promise.all(pending.map((server) => server.stop()));
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("nextcloud-talk inbound room-kind lookup retry", () => {
@@ -179,7 +179,7 @@ describe("nextcloud-talk inbound room-kind lookup retry", () => {
       log: (messageValue: unknown) => logs.push(String(messageValue)),
     };
 
-    await withTempDir("openclaw-nextcloud-talk-room-info-retry-", async (stateDir) => {
+    await withTempDir("carapace-nextcloud-talk-room-info-retry-", async (stateDir) => {
       const queue = createChannelIngressQueueForTests<NextcloudTalkIngressPayload>({
         channelId: "nextcloud-talk",
         accountId: "proof",
@@ -216,7 +216,7 @@ describe("nextcloud-talk inbound room-kind lookup retry", () => {
       log: (messageValue: unknown) => logs.push(String(messageValue)),
     };
 
-    await withTempDir("openclaw-nextcloud-talk-room-info-policy-", async (stateDir) => {
+    await withTempDir("carapace-nextcloud-talk-room-info-policy-", async (stateDir) => {
       const queue = createChannelIngressQueueForTests<NextcloudTalkIngressPayload>({
         channelId: "nextcloud-talk",
         accountId: "proof",
@@ -253,7 +253,7 @@ describe("nextcloud-talk inbound room-kind lookup retry", () => {
       log: (messageValue: unknown) => logs.push(String(messageValue)),
     };
 
-    await withTempDir("openclaw-nextcloud-talk-room-info-invalid-url-", async (stateDir) => {
+    await withTempDir("carapace-nextcloud-talk-room-info-invalid-url-", async (stateDir) => {
       const queue = createChannelIngressQueueForTests<NextcloudTalkIngressPayload>({
         channelId: "nextcloud-talk",
         accountId: "proof",

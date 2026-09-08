@@ -1,5 +1,5 @@
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { createPayloadPatchStreamWrapper } from "carapace/plugin-sdk/provider-stream-shared";
 
 export function wrapCohereProviderStream(ctx: ProviderWrapStreamFnContext) {
   return createPayloadPatchStreamWrapper(ctx.streamFn, ({ payload }) => {

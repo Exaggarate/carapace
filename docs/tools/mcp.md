@@ -1,16 +1,16 @@
 ---
-summary: "Connect MCP servers to OpenClaw from the Control UI, CLI, or config"
+summary: "Connect MCP servers to Carapace from the Control UI, CLI, or config"
 title: "Connect MCP servers"
 read_when:
-  - Adding an MCP server for OpenClaw agents
-  - Choosing between Settings and `openclaw mcp`
+  - Adding an MCP server for Carapace agents
+  - Choosing between Settings and `carapace mcp`
   - Troubleshooting MCP transport, OAuth, or tool discovery
 ---
 
-The Model Context Protocol (MCP) is how an agent borrows tools from another program: an MCP server exposes tools, resources, and prompts, and OpenClaw connects to it and makes those tools available to your agents. Server definitions live under `mcp.servers` in config, and the tools they expose go through the same tool-profile and tool-policy controls as everything else — connecting a server does not bypass your policy.
+The Model Context Protocol (MCP) is how an agent borrows tools from another program: an MCP server exposes tools, resources, and prompts, and Carapace connects to it and makes those tools available to your agents. Server definitions live under `mcp.servers` in config, and the tools they expose go through the same tool-profile and tool-policy controls as everything else — connecting a server does not bypass your policy.
 
 <Note>
-This guide is about connecting third-party MCP servers **to OpenClaw**. For the reverse — exposing OpenClaw channel conversations to another MCP client — use [`openclaw mcp serve`](/cli/mcp#openclaw-as-an-mcp-server).
+This guide is about connecting third-party MCP servers **to Carapace**. For the reverse — exposing Carapace channel conversations to another MCP client — use [`carapace mcp serve`](/cli/mcp#carapace-as-an-mcp-server).
 </Note>
 
 ## Add a server from Settings
@@ -26,7 +26,7 @@ That writes the new `mcp.servers` entry through the Gateway. For anything beyond
 Once the server is saved, verify it actually answers:
 
 ```bash
-openclaw mcp doctor <name> --probe
+carapace mcp doctor <name> --probe
 ```
 
 Saving a definition proves nothing about reachability — the probe does. With Gateway hot reload enabled, changed or removed servers retire immediately and the next turn's discovery uses the new definition. Unchanged servers keep their connections and cached tools, including for runs already in progress. Requester sign-in tools refresh on the next message after runtime replacement.
@@ -39,7 +39,7 @@ Choose **This session** for session-only enablement or **Everywhere** for global
 
 From an active conversation, open **+ → Connectors → Tool access** to inspect
 or deny individual tools for that session. The view follows the session's
-actual runtime owner: built-in OpenClaw sessions read the in-process MCP
+actual runtime owner: built-in Carapace sessions read the in-process MCP
 catalog, while native agent harnesses can contribute their thread-owned
 catalog. Session server and tool denials are enforced by either runtime before
 the next turn starts.
@@ -49,24 +49,24 @@ the next turn starts.
 A local stdio server:
 
 ```bash
-openclaw mcp add local-tools \
+carapace mcp add local-tools \
   --command node \
   --arg ./dist/mcp-server.js \
-  --cwd /srv/openclaw-tools
-openclaw mcp doctor local-tools --probe
+  --cwd /srv/carapace-tools
+carapace mcp doctor local-tools --probe
 ```
 
 A remote Streamable HTTP server, exposing only some of its tools:
 
 ```bash
-openclaw mcp add docs \
+carapace mcp add docs \
   --url https://mcp.example.com/mcp \
   --transport streamable-http \
   --include 'search,read_*'
-openclaw mcp doctor docs --probe
+carapace mcp doctor docs --probe
 ```
 
-Useful companions: `openclaw mcp status --verbose` for a config-only summary, `openclaw mcp probe <name>` for live capabilities, and `openclaw mcp login <name>` when an HTTP server uses OAuth. The [MCP CLI reference](/cli/mcp) documents every command, flag, and output shape, plus the separate `mcp serve` bridge.
+Useful companions: `carapace mcp status --verbose` for a config-only summary, `carapace mcp probe <name>` for live capabilities, and `carapace mcp login <name>` when an HTTP server uses OAuth. The [MCP CLI reference](/cli/mcp) documents every command, flag, and output shape, plus the separate `mcp serve` bridge.
 
 ## Configure a server directly
 
@@ -99,40 +99,40 @@ Codex MCP tool approvals follow the session permission posture: the default full
 
 When durable persistence is offered, **Allow Always** saves a per-agent grant
 for the exact configured server and tool, even when its arguments change.
-This applies to Gateway-hosted Codex runs when OpenClaw can unambiguously match
+This applies to Gateway-hosted Codex runs when Carapace can unambiguously match
 the approval to a live Gateway-owned tool call; missing or ambiguous matches retain
 Codex's native/session behavior. Codex apps, native plugin servers, and
 computer-use servers are excluded. Grants survive restarts and apply at the
 next thread configuration and hook registration, such as a new session or
 restart; the current session uses Codex's remembered decision.
 
-Override a server with `openclaw mcp configure <server> --approval approve|prompt|auto`; an explicit mode takes precedence over the posture-derived default. Stored grants apply only under `auto` or an unspecified server mode; explicit `prompt` keeps asking. Inspect or revoke grants through [MCP tool grants](/tools/exec-approvals#mcp-tool-grants). See [Codex tool approvals](/cli/mcp#codex-tool-approvals) for details and [Native approvals in Slack](/channels/slack/rich-messages#native-approvals-in-slack) for Slack button delivery.
+Override a server with `carapace mcp configure <server> --approval approve|prompt|auto`; an explicit mode takes precedence over the posture-derived default. Stored grants apply only under `auto` or an unspecified server mode; explicit `prompt` keeps asking. Inspect or revoke grants through [MCP tool grants](/tools/exec-approvals#mcp-tool-grants). See [Codex tool approvals](/cli/mcp#codex-tool-approvals) for details and [Native approvals in Slack](/channels/slack/rich-messages#native-approvals-in-slack) for Slack button delivery.
 
 ## Troubleshooting
 
 ### The server appears in Settings but exposes no tools
 
-Run `openclaw mcp doctor <name> --probe`. Doctor validates the saved definition first, then opens a live connection and reports the tools and other capabilities the server advertises. If it connects but expected tools are missing, check `toolFilter.include` and `toolFilter.exclude`.
+Run `carapace mcp doctor <name> --probe`. Doctor validates the saved definition first, then opens a live connection and reports the tools and other capabilities the server advertises. If it connects but expected tools are missing, check `toolFilter.include` and `toolFilter.exclude`.
 
 ### A stdio server does not start
 
 Confirm the `command` resolves in the Gateway process environment and that `cwd` exists. Arguments belong in `args`, and an explicit `transport: "stdio"` requires a non-empty command.
 
-For servers launched by OpenClaw's built-in MCP client, debug logs prefix stderr diagnostics with `bundle-mcp:<name>:`. Unicode characters survive split writes, and shutdown diagnostics are retained. Output without a newline is briefly buffered for up to 250 ms before being logged as progress fragments; this does not wait for the server to stop writing. A diagnostic exceeding the 8 KiB buffer retains its Unicode-safe tail with a `[stderr line truncated]` marker.
+For servers launched by Carapace's built-in MCP client, debug logs prefix stderr diagnostics with `bundle-mcp:<name>:`. Unicode characters survive split writes, and shutdown diagnostics are retained. Output without a newline is briefly buffered for up to 250 ms before being logged as progress fragments; this does not wait for the server to stop writing. A diagnostic exceeding the 8 KiB buffer retains its Unicode-safe tail with a `[stderr line truncated]` marker.
 
 ### An HTTP server needs authorization
 
 Set `auth: "oauth"` plus any required `oauth` metadata, then:
 
 ```bash
-openclaw mcp login <name>
+carapace mcp login <name>
 ```
 
-Follow the printed authorization URL. OpenClaw normally captures the loopback redirect and saves the credentials automatically; use the printed `--code` command when the browser cannot reach the callback listener.
+Follow the printed authorization URL. Carapace normally captures the loopback redirect and saves the credentials automatically; use the printed `--code` command when the browser cannot reach the callback listener.
 
 ### Changes do not reach an active agent
 
-`openclaw mcp reload` refreshes runtimes owned by the current CLI process. A Gateway or agent running elsewhere needs its own reload, config publish, or restart.
+`carapace mcp reload` refreshes runtimes owned by the current CLI process. A Gateway or agent running elsewhere needs its own reload, config publish, or restart.
 
 ## Related
 

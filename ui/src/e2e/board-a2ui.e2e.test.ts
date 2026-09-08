@@ -24,10 +24,10 @@ import { installA2uiFailureDiagnostics } from "./board-a2ui.test-support.ts";
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const sessionKey = "agent:main:board-a2ui";
-const scrollbarProofLabel = process.env.OPENCLAW_WIDGET_SCROLLBAR_PROOF_LABEL;
+const scrollbarProofLabel = process.env.CARAPACE_WIDGET_SCROLLBAR_PROOF_LABEL;
 const basicCatalog = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
 
 let browser: Browser;
@@ -155,7 +155,7 @@ describeControlUiE2e("Control UI dashboard A2UI", () => {
         );
       });
       const origin = new URL(controlUi.baseUrl).origin;
-      const rendererUrl = `${rendererOrigin}/__openclaw__/cap/canvas-proof/__openclaw__/a2ui/a2ui-v0.9.bundle.js`;
+      const rendererUrl = `${rendererOrigin}/__carapace__/cap/canvas-proof/__carapace__/a2ui/a2ui-v0.9.bundle.js`;
       const messages = [
         {
           version: "v0.9",
@@ -183,11 +183,11 @@ describeControlUiE2e("Control UI dashboard A2UI", () => {
       const boot = JSON.stringify({ messages, actionTier: "state" }).replaceAll("<", "\\u003c");
       const documentHtml = buildWidgetDocument(
         "A2UI controls",
-        `<script>globalThis.openclawA2UIBoot=${boot};</script><style>html,body{height:100%;background:var(--surface)}body{min-height:2400px}openclaw-a2ui-host{display:block;height:100%}</style><openclaw-a2ui-host></openclaw-a2ui-host><script src="${rendererUrl}"></script>`,
+        `<script>globalThis.carapaceA2UIBoot=${boot};</script><style>html,body{height:100%;background:var(--surface)}body{min-height:2400px}carapace-a2ui-host{display:block;height:100%}</style><carapace-a2ui-host></carapace-a2ui-host><script src="${rendererUrl}"></script>`,
         { scriptOrigins: [rendererOrigin] },
       );
-      const frameUrl = `${origin}/__openclaw__/board/${encodeURIComponent(sessionKey)}/a2ui-controls/index.html?bt=ticket`;
-      await page.route("**/__openclaw__/board/**", (route) =>
+      const frameUrl = `${origin}/__carapace__/board/${encodeURIComponent(sessionKey)}/a2ui-controls/index.html?bt=ticket`;
+      await page.route("**/__carapace__/board/**", (route) =>
         route.fulfill({ status: 200, contentType: "text/html", body: documentHtml }),
       );
       const gateway = await installMockGateway(page, {
@@ -243,8 +243,8 @@ describeControlUiE2e("Control UI dashboard A2UI", () => {
             try {
               return await child.evaluate(() =>
                 Boolean(
-                  customElements.get("openclaw-a2ui-host") &&
-                  Reflect.get(globalThis, "openclawA2UI"),
+                  customElements.get("carapace-a2ui-host") &&
+                  Reflect.get(globalThis, "carapaceA2UI"),
                 ),
               );
             } catch {
@@ -264,7 +264,7 @@ describeControlUiE2e("Control UI dashboard A2UI", () => {
       if (rejectsAction) {
         actionStage = "installing oversized action";
         await widgetFrame.evaluate(() => {
-          Reflect.get(globalThis, "openclawA2UI").applyMessages([
+          Reflect.get(globalThis, "carapaceA2UI").applyMessages([
             {
               version: "v0.9",
               updateComponents: {
@@ -295,12 +295,12 @@ describeControlUiE2e("Control UI dashboard A2UI", () => {
         expect(pageErrors).toEqual([]);
 
         actionStage = "resetting renderer after rejection";
-        await widgetFrame.evaluate(() => Reflect.get(globalThis, "openclawA2UI").reset());
+        await widgetFrame.evaluate(() => Reflect.get(globalThis, "carapaceA2UI").reset());
         await expect.poll(() => widgetFrame.getByRole("alert").count()).toBe(0);
         await expect.poll(() => widgetFrame.locator("a2ui-surface").count()).toBe(0);
         await widgetFrame.evaluate(
           (initialMessages) =>
-            Reflect.get(globalThis, "openclawA2UI").applyMessages(initialMessages),
+            Reflect.get(globalThis, "carapaceA2UI").applyMessages(initialMessages),
           messages,
         );
         await widgetFrame.getByText("A2UI board widget").waitFor();

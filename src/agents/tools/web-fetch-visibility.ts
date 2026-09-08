@@ -6,7 +6,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { readTagToken } from "./web-fetch-html-tag.js";
 
 // Compile property matchers once: this list is checked for every styled element.

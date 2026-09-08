@@ -1,6 +1,6 @@
-import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@openclaw/net-policy/ip";
+import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@carapace/net-policy/ip";
 import type { ModelProviderLocalServiceConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderLocalServiceReconciler } from "./provider-local-service-reconcile.js";
 
 /** Exact provider endpoint whose optional local process should be leased. */
@@ -25,7 +25,7 @@ export type AcquireConfiguredProviderLocalService = (
 ) => Promise<ProviderLocalServiceLease | undefined>;
 
 export function resolveConfiguredProviderLocalServiceTarget(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   target: ConfiguredProviderLocalServiceTarget,
 ): ProviderLocalServiceTarget | undefined {
   const provider = config.models?.providers?.[target.providerId];

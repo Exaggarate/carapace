@@ -1,9 +1,9 @@
 // Qa Lab plugin module implements gateway rpc client behavior.
-import { formatErrorMessage, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage, toErrorObject } from "carapace/plugin-sdk/error-runtime";
 import {
   GatewayClient,
   startGatewayClientWhenEventLoopReady,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "carapace/plugin-sdk/gateway-runtime";
 import { formatQaGatewayLogsForError } from "./gateway-log-redaction.js";
 
 type QaGatewayClientOptions = ConstructorParameters<typeof GatewayClient>[0];

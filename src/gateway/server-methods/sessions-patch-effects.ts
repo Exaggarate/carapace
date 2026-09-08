@@ -1,6 +1,6 @@
 import type { SessionsPatchParams } from "../../../packages/gateway-protocol/src/index.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { disableCronJobsBoundToSessions } from "../../cron/job-session-bindings.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { ensureSessionGroupRegistered } from "../session-groups.js";
@@ -12,7 +12,7 @@ import type { GatewayRequestContext } from "./types.js";
 
 /** Publish committed patch effects even when active-runtime application later reports an error. */
 export async function publishSessionPatchEffects(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   context: GatewayRequestContext;
   callerScopes: readonly string[];
   callerCanManageCron: boolean;

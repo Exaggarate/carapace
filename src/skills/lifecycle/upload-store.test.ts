@@ -3,14 +3,14 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { SkillUploadRequestError } from "./upload-store.js";
 import {
   deleteExpiredSkillUploadUnlessLeased,
@@ -48,8 +48,8 @@ async function makeStore(options?: {
   now?: () => number;
   ttlMs?: number;
 }) {
-  const root = tempDirs.make("openclaw-skill-upload-store-");
-  const databasePath = path.join(root, "openclaw.sqlite");
+  const root = tempDirs.make("carapace-skill-upload-store-");
+  const databasePath = path.join(root, "carapace.sqlite");
   return {
     root,
     databasePath,
@@ -62,7 +62,7 @@ async function makeStore(options?: {
 }
 
 function stateDatabase(databasePath: string) {
-  return openOpenClawStateDatabase({ path: databasePath }).db;
+  return openCarapaceStateDatabase({ path: databasePath }).db;
 }
 
 function uploadCount(databasePath: string): number {
@@ -142,9 +142,9 @@ describe("skill upload store", () => {
   let activeLimitRoot: string | undefined;
 
   beforeAll(async () => {
-    activeLimitRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-upload-limit-"));
+    activeLimitRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-upload-limit-"));
     const store = createSkillUploadStore({
-      path: path.join(activeLimitRoot, "openclaw.sqlite"),
+      path: path.join(activeLimitRoot, "carapace.sqlite"),
       tempRootDir: activeLimitRoot,
     });
     for (let i = 0; i < ACTIVE_UPLOAD_LIMIT; i += 1) {
@@ -158,7 +158,7 @@ describe("skill upload store", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     if (activeLimitRoot) {
       await fs.rm(activeLimitRoot, { recursive: true, force: true });
     }
@@ -169,7 +169,7 @@ describe("skill upload store", () => {
     uploadSqliteMocks.readSkillUploadArchiveChunks.mockImplementation(
       uploadSqliteMocks.defaultReadSkillUploadArchiveChunks!,
     );
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     tempDirs.cleanup();
   });
 

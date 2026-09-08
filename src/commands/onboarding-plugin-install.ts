@@ -6,14 +6,14 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { resolveBundledInstallPlanForCatalogEntry } from "../cli/plugin-install-plan.js";
 import { assertConfigWriteAllowedInCurrentMode } from "../config/nix-mode-write-guard.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
 import { isPathInside } from "../infra/path-guards.js";
@@ -93,8 +93,8 @@ export type OnboardingPluginInstallEntry = {
   label: string;
   install: PluginPackageInstall;
   trustedSourceLinkedOfficialInstall?: boolean;
-  /** Keep this official runtime package on the same release cohort as OpenClaw. */
-  versionBoundToOpenClaw?: boolean;
+  /** Keep this official runtime package on the same release cohort as Carapace. */
+  versionBoundToCarapace?: boolean;
   preferRemoteInstall?: boolean;
 };
 
@@ -103,7 +103,7 @@ export type OnboardingPluginInstallStatus = "installed" | "skipped" | "failed" |
 
 /** Config and status returned after attempting an onboarding plugin install. */
 type OnboardingPluginInstallResult = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   installed: boolean;
   pluginId: string;
   status: OnboardingPluginInstallStatus;
@@ -112,7 +112,7 @@ type OnboardingPluginInstallResult = {
 };
 
 function incompletePluginInstall(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   pluginId: string,
   status: Exclude<OnboardingPluginInstallStatus, "installed">,
   error?: string,
@@ -121,7 +121,7 @@ function incompletePluginInstall(
 }
 
 async function markOnboardingPluginInstalled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
   runtime: RuntimeEnv;
 }): Promise<OnboardingPluginInstallResult & { installed: true }> {
@@ -205,7 +205,7 @@ function hasGitWorkspace(workspaceDir?: string): boolean {
   return roots.some((root) => hasTrustedGitWorkspace(root));
 }
 
-function addPluginLoadPath(cfg: OpenClawConfig, pluginPath: string): OpenClawConfig {
+function addPluginLoadPath(cfg: CarapaceConfig, pluginPath: string): CarapaceConfig {
   const existing = cfg.plugins?.load?.paths ?? [];
   const merged = uniqueStrings([...existing, pluginPath]);
   return {
@@ -344,7 +344,7 @@ function resolveClawHubSpecForOnboarding(install: PluginPackageInstall): string 
 }
 
 function resolveInstallDefaultChoice(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   localPath?: string | null;
   bundledLocalPath?: string | null;
@@ -557,7 +557,7 @@ function isTimeoutError(error: unknown): boolean {
 }
 
 async function applyPluginEnablement(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
   label: string;
   prompter: WizardPrompter;
@@ -580,13 +580,13 @@ async function applyPluginEnablement(params: {
 }
 
 async function finishOnboardingPluginInstall(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   pluginId: string;
   label: string;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
   install?: Parameters<typeof recordPluginInstall>[1];
-  prepareConfig?: (cfg: OpenClawConfig) => OpenClawConfig | Promise<OpenClawConfig>;
+  prepareConfig?: (cfg: CarapaceConfig) => CarapaceConfig | Promise<CarapaceConfig>;
 }): Promise<OnboardingPluginInstallResult> {
   const enableResult = await applyPluginEnablement(params);
   if (!enableResult.enabled) {
@@ -602,7 +602,7 @@ async function finishOnboardingPluginInstall(params: {
 }
 
 async function installLocalOnboardingPlugin(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   localPath: string;
   bundledLocalPath: string | null;
@@ -713,7 +713,7 @@ async function runInstallWatchdog<T>(install: (signal: AbortSignal) => Promise<T
 }
 
 async function runOnboardingPluginInstallWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -796,7 +796,7 @@ async function runOnboardingPluginInstallWithProgress(params: {
 }
 
 async function installPluginFromNpmSpecWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   npmSpec: string;
   prompter: WizardPrompter;
@@ -830,7 +830,7 @@ async function installPluginFromNpmSpecWithProgress(params: {
 }
 
 async function installPluginFromNpmPackArchiveWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   archivePath: string;
   prompter: WizardPrompter;
@@ -860,7 +860,7 @@ async function installPluginFromNpmPackArchiveWithProgress(params: {
 }
 
 async function installPluginFromOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   override: PluginInstallOverride;
   prompter: WizardPrompter;
@@ -963,7 +963,7 @@ async function installPluginFromOverride(params: {
 }
 
 async function installPluginFromClawHubSpecWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   clawhubSpec: string;
   prompter: WizardPrompter;
@@ -1055,7 +1055,7 @@ async function installPluginFromClawHubSpecWithProgress(params: {
 
 /** Ensures an onboarding plugin is installed, enabled, and recorded in config. */
 export async function ensureOnboardingPluginInstalled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: OnboardingPluginInstallEntry;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -1115,7 +1115,7 @@ export async function ensureOnboardingPluginInstalled(params: {
           ? parseClawHubPluginSpec(clawhubSpec)?.name
           : undefined,
         coreVersion: VERSION,
-        versionBoundToCore: entry.versionBoundToOpenClaw,
+        versionBoundToCore: entry.versionBoundToCarapace,
       })
     : null;
   let npmSpecs: Awaited<ReturnType<typeof resolveNpmInstallSpecsForUpdateChannel>> | undefined;
@@ -1188,7 +1188,7 @@ export async function ensureOnboardingPluginInstalled(params: {
             ? parseRegistryNpmSpec(npmSpec)?.name
             : undefined,
           coreVersion: VERSION,
-          versionBoundToCore: entry.versionBoundToOpenClaw,
+          versionBoundToCore: entry.versionBoundToCarapace,
         });
       } catch (error) {
         if (!(error instanceof NpmChannelResolutionError)) {

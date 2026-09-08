@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
   placementTurnOwner,
   type WorkerSessionPlacementIdentity,
@@ -27,19 +27,19 @@ const SESSION: WorkerSessionPlacementIdentity = {
 
 describe("worker placement terminal persistence", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let store: WorkerSessionPlacementStore;
   let nowMs: number;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-terminal-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-terminal-"));
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     nowMs = 1_000;
     store = createWorkerSessionPlacementStore({ database, now: () => nowMs });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -188,8 +188,8 @@ describe("worker placement terminal persistence", () => {
     expect(closedClaims).toEqual([claim]);
     unregister();
 
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeCarapaceStateDatabaseForTest();
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     store = createWorkerSessionPlacementStore({ database, now: () => nowMs });
     const reopened = store.get(SESSION.sessionId);
     expect(reopened).toMatchObject({ state: "failed", terminalAtMs: 2_000 });
@@ -249,7 +249,7 @@ describe("worker placement terminal persistence", () => {
     if (resultState === "accepted") {
       store.acceptWorkspaceResult(claim);
     } else if (resultState === "staged") {
-      store.recordStagedWorkspaceResult(claim, "refs/openclaw/worker-results/preserved-result");
+      store.recordStagedWorkspaceResult(claim, "refs/carapace/worker-results/preserved-result");
     } else if (resultState === "journaled") {
       const basePack = Buffer.from("pending remote workspace snapshot");
       store.beginWorkspaceReconciliation(

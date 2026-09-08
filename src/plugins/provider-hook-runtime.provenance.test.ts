@@ -14,7 +14,7 @@ import {
   cleanupPluginLoaderFixturesForTest,
   clearPluginLoaderCache,
   EMPTY_PLUGIN_SCHEMA,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   makePluginLoaderTempDir,
   writePlugin,
 } from "./loader.test-fixtures.js";
@@ -59,7 +59,7 @@ function metadata(
 }
 
 function registry(snapshot: ReturnType<typeof metadata>, workspaceDir?: string) {
-  return loadOpenClawPlugins({
+  return loadCarapacePlugins({
     config,
     env: {},
     workspaceDir,
@@ -84,7 +84,7 @@ function loadFixture(label: string, dir?: string, hookAliases?: readonly string[
     }};`,
   });
   writeFileSync(
-    path.join(plugin.dir, "openclaw.plugin.json"),
+    path.join(plugin.dir, "carapace.plugin.json"),
     JSON.stringify({
       id: "same-id",
       providers: ["same-provider"],
@@ -134,7 +134,7 @@ describe("provider runtime physical ownership", () => {
         }};`,
       });
       writeFileSync(
-        path.join(plugin.dir, "openclaw.plugin.json"),
+        path.join(plugin.dir, "carapace.plugin.json"),
         JSON.stringify({
           id: "same-id",
           providers: ["same-provider"],
@@ -184,7 +184,7 @@ describe("provider runtime physical ownership", () => {
         },
       });
       const sourceConfig = sourceFor("KEY");
-      const env = { OPENCLAW_STATE_DIR: makePluginLoaderTempDir() };
+      const env = { CARAPACE_STATE_DIR: makePluginLoaderTempDir() };
       try {
         setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
         const firstSnapshot = loadPluginMetadataSnapshot({ config: runtimeConfig, env });
@@ -197,7 +197,7 @@ describe("provider runtime physical ownership", () => {
           onlyPluginIds: ["same-id"],
           activate: false,
         };
-        const loadedRegistry = loadOpenClawPlugins(loadOptions);
+        const loadedRegistry = loadCarapacePlugins(loadOptions);
         setActivePluginRegistry(
           loadedRegistry,
           resolvePluginLoadCacheContext(loadOptions).cacheKey,
@@ -266,7 +266,7 @@ describe("provider runtime physical ownership", () => {
         }};`,
       });
       writeFileSync(
-        path.join(plugin.dir, "openclaw.plugin.json"),
+        path.join(plugin.dir, "carapace.plugin.json"),
         JSON.stringify({
           id: "same-id",
           providers: ["same-provider"],
@@ -285,7 +285,7 @@ describe("provider runtime physical ownership", () => {
         },
       });
       const firstConfig = configFor("A");
-      const env = { OPENCLAW_STATE_DIR: makePluginLoaderTempDir() };
+      const env = { CARAPACE_STATE_DIR: makePluginLoaderTempDir() };
       const firstSnapshot = loadPluginMetadataSnapshot({ config: firstConfig, env });
       const loadOptions = {
         config: firstConfig,
@@ -295,7 +295,7 @@ describe("provider runtime physical ownership", () => {
         manifestRegistry: firstSnapshot.manifestRegistry,
         activate: false,
       };
-      const loadedRegistry = loadOpenClawPlugins(loadOptions);
+      const loadedRegistry = loadCarapacePlugins(loadOptions);
       setActivePluginRegistry(loadedRegistry, resolvePluginLoadCacheContext(loadOptions).cacheKey);
       const lookup = { provider: receiver === "declared" ? "same-provider" : "runtime-alias", env };
       const modelOnlyConfig = { ...firstConfig, agents: { defaults: { model: "other/model" } } };
@@ -345,7 +345,7 @@ describe("provider runtime physical ownership", () => {
     const old = loadFixture("old");
     const next = loadFixture("next");
     const stateDir = makePluginLoaderTempDir();
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const configFor = (snapshot: typeof old) => ({
       ...config,
       plugins: {
@@ -355,7 +355,7 @@ describe("provider runtime physical ownership", () => {
     });
     const originalConfig = configFor(old);
     const originalSnapshot = loadPluginMetadataSnapshot({ config: originalConfig, env });
-    const loaded = loadOpenClawPlugins({
+    const loaded = loadCarapacePlugins({
       config: originalConfig,
       env,
       installRecords: {},
@@ -410,7 +410,7 @@ describe("provider runtime physical ownership", () => {
         }};`,
       });
       writeFileSync(
-        path.join(alias.dir, "openclaw.plugin.json"),
+        path.join(alias.dir, "carapace.plugin.json"),
         JSON.stringify({
           id: "alias-owner",
           providers: ["other-provider"],
@@ -443,7 +443,7 @@ describe("provider runtime physical ownership", () => {
       const snapshot = createPluginMetadataSnapshotFixture({
         plugins: [...selected.plugins, ...aliasMetadata.plugins],
       });
-      const loaded = loadOpenClawPlugins({
+      const loaded = loadCarapacePlugins({
         config: pluginConfig,
         env: {},
         installRecords: {},
@@ -493,7 +493,7 @@ describe("provider runtime physical ownership", () => {
           provider: "same-provider",
         })?.label,
       ).toBe("alias");
-      const complete = loadOpenClawPlugins({
+      const complete = loadCarapacePlugins({
         config: pluginConfig,
         env: {},
         installRecords: {},
@@ -647,7 +647,7 @@ describe("provider runtime physical ownership", () => {
   it("uses the loaded owner rather than a later disabled duplicate record", () => {
     const old = loadFixture("old");
     const next = loadFixture("new");
-    const loaded = loadOpenClawPlugins({
+    const loaded = loadCarapacePlugins({
       config,
       env: {},
       installRecords: {},
@@ -716,7 +716,7 @@ describe("provider runtime physical ownership", () => {
         activate: false,
         preferBuiltPluginArtifacts: true,
       };
-      const loaded = loadOpenClawPlugins({
+      const loaded = loadCarapacePlugins({
         ...options,
         manifestRegistry: original.manifestRegistry,
       });
@@ -732,7 +732,7 @@ describe("provider runtime physical ownership", () => {
         getLoadedRuntimePluginRegistry({ loadOptions: selectedOptions }) ===
           (selection === "omitted load preference" ? loaded : undefined),
       ).toBe(true);
-      expect(loadOpenClawPlugins(selectedOptions).providers[0]?.provider.label).toBe("source");
+      expect(loadCarapacePlugins(selectedOptions).providers[0]?.provider.label).toBe("source");
       if (selection === "source preference") {
         withPluginRuntimeRegistryScope(loaded, () => {
           expect(
@@ -768,7 +768,7 @@ describe("provider runtime physical ownership", () => {
     const old = memoryPlugin("memory-core", "old");
     const next = memoryPlugin("memory-core", "new");
     const load = (sidecar: ReturnType<typeof memoryPlugin>) =>
-      loadOpenClawPlugins({
+      loadCarapacePlugins({
         config: {
           plugins: {
             allow: ["selected-memory", "memory-core"],
@@ -847,7 +847,7 @@ describe("provider runtime physical ownership", () => {
     (scope) => {
       const fixture = loadFixture("shared");
       const stateDir = makePluginLoaderTempDir();
-      withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+      withEnv({ CARAPACE_STATE_DIR: stateDir }, () => {
         const snapshot = loadPluginMetadataSnapshot({
           config,
           env: process.env,
@@ -866,7 +866,7 @@ describe("provider runtime physical ownership", () => {
         const other =
           scope === "empty active"
             ? createEmptyPluginRegistry()
-            : loadOpenClawPlugins({
+            : loadCarapacePlugins({
                 config,
                 env: process.env,
                 installRecords: {},
@@ -908,7 +908,7 @@ describe("provider runtime physical ownership", () => {
     (selection) => {
       const snapshot = loadFixture("shared");
       const load = (workspaceDir: string) =>
-        loadOpenClawPlugins({
+        loadCarapacePlugins({
           config,
           env: {},
           installRecords: {},
@@ -958,7 +958,7 @@ describe("provider runtime physical ownership", () => {
     const stateDir = makePluginLoaderTempDir();
     const load = (snapshot: typeof old) =>
       surface !== "provider"
-        ? loadOpenClawPlugins({
+        ? loadCarapacePlugins({
             config,
             env: process.env,
             installRecords: {},
@@ -981,7 +981,7 @@ describe("provider runtime physical ownership", () => {
             env: process.env,
             pluginMetadataSnapshot: snapshot,
           });
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+    withEnv({ CARAPACE_STATE_DIR: stateDir }, () => {
       expect(load(old)?.label).toBe("old");
       expect(load(next)?.label).toBe("new");
       const reused = load(old);

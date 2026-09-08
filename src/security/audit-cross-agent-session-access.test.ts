@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { collectCrossAgentSessionAccessFindings } from "./audit-extra.summary.js";
 import { collectSecurityAuditFindings } from "./audit.test-support.js";
 
@@ -14,7 +14,7 @@ const sessionTools = [
 ];
 
 describe("security audit cross-agent session access", () => {
-  it.each<{ name: string; cfg: OpenClawConfig }>([
+  it.each<{ name: string; cfg: CarapaceConfig }>([
     { name: "one implicit agent", cfg: {} },
     { name: "one explicit agent", cfg: { agents: { entries: { home: {} } } } },
     ...(["agent", "tree", "self"] as const).map((visibility) => ({
@@ -60,9 +60,9 @@ describe("security audit cross-agent session access", () => {
     },
     {
       name: "invalid visibility resolving to all",
-      cfg: { agents, tools: { sessions: { visibility: "invalid" } } } as unknown as OpenClawConfig,
+      cfg: { agents, tools: { sessions: { visibility: "invalid" } } } as unknown as CarapaceConfig,
     },
-  ] satisfies Array<{ name: string; cfg: OpenClawConfig }>)(
+  ] satisfies Array<{ name: string; cfg: CarapaceConfig }>)(
     "reports one informational finding for $name",
     ({ cfg }) => {
       const findings = collectCrossAgentSessionAccessFindings(cfg);
@@ -92,8 +92,8 @@ describe("security audit cross-agent session access", () => {
         "tools.agentToAgent.allow",
         "requester and target ids",
         "tools.agentToAgent.enabled: false",
-        "https://docs.openclaw.ai/gateway/config-tools#tools-agenttoagent",
-        "https://docs.openclaw.ai/gateway/security#scope-one-trust-boundary-per-gateway",
+        "https://github.com/Exaggarate/carapace#tools-agenttoagent",
+        "https://github.com/Exaggarate/carapace#scope-one-trust-boundary-per-gateway",
       ]) {
         expect(finding.remediation).toContain(remediation);
       }
@@ -139,7 +139,7 @@ describe("security audit cross-agent session access", () => {
         'channels.slack.dmPolicy="open"',
       ],
     },
-  ] satisfies Array<{ name: string; cfg: OpenClawConfig; signals: string[] }>)(
+  ] satisfies Array<{ name: string; cfg: CarapaceConfig; signals: string[] }>)(
     "warns for $name",
     ({ cfg, signals }) => {
       const findings = collectCrossAgentSessionAccessFindings(cfg);
@@ -212,7 +212,7 @@ describe("security audit cross-agent session access", () => {
           "- home: session tools removed by agent tool policy; its transcripts remain readable by the agents above.",
       ],
     },
-  ] satisfies Array<{ name: string; cfg: OpenClawConfig; detail: string[]; absent?: string }>)(
+  ] satisfies Array<{ name: string; cfg: CarapaceConfig; detail: string[]; absent?: string }>)(
     "renders session reach for $name",
     ({ cfg, detail, absent }) => {
       const findings = collectCrossAgentSessionAccessFindings(cfg);

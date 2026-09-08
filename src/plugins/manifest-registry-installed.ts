@@ -1,16 +1,16 @@
 /** Builds manifest registry records from installed plugin index snapshots. */
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeOptionalTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeOptionalTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import {
   resolveChannelSetupFieldCliAttributeName,
   type ChannelSetupFieldMetadata,
 } from "../channels/plugins/setup-contract.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
 import { listBundledSourceOverlayDirs } from "./bundled-source-overlays.js";
 import { recordPluginCandidateInstallOwner } from "./candidate-install-owner.js";
@@ -34,7 +34,7 @@ import {
   DEFAULT_PLUGIN_ENTRY_CANDIDATES,
   getPackageManifestMetadata,
   normalizeManifestChannelCommandDefaults,
-  type OpenClawPackageManifest,
+  type CarapacePackageManifest,
   type PluginPackageChannel,
   type PluginPackageChannelCliOption,
 } from "./manifest.js";
@@ -51,7 +51,7 @@ import {
 } from "./status-dependencies-core.js";
 
 type InstalledPackageMetadata = {
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   packageDependencies?: PluginDependencySpecMap;
   packageOptionalDependencies?: PluginDependencySpecMap;
 };
@@ -501,7 +501,7 @@ export function loadPluginManifestRegistryForInstalledIndex(params: {
   registryPath?: string;
   index: InstalledPluginIndex;
   manifestRegistry?: PluginManifestRegistry;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];

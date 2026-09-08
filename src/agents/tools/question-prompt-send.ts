@@ -15,7 +15,7 @@ import {
   type DurableMessageBatchSendResult,
 } from "../../channels/message/runtime.js";
 import { resolveControlUiSessionLinkBase } from "../../config/control-ui-link-base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { runWithQuestionChannelDeliveries } from "../../infra/question-channel-runtime.js";
 import {
   isDeliverableMessageChannel,
@@ -40,7 +40,7 @@ export type QuestionPromptDelivery = {
 
 /** Builds a portable prompt sender for Gateway-scoped / loopback tool construction. */
 export function createChannelQuestionPromptDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string | null;
   to?: string | number | null;
   accountId?: string;
@@ -98,7 +98,7 @@ export async function sendQuestionToolPrompt(params: {
   toolName: QuestionPromptToolName;
   questionId: string;
   questions: readonly QuestionRequestQuestion[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   send: QuestionPromptSend;
   signal?: AbortSignal;
 }): Promise<void> {

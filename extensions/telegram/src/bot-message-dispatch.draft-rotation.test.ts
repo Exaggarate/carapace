@@ -1,12 +1,12 @@
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { setReplyPayloadMetadata } from "openclaw/plugin-sdk/reply-payload-testing";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { setReplyPayloadMetadata } from "carapace/plugin-sdk/reply-payload-testing";
 import { beforeEach, expect, it, vi } from "vitest";
 
 const registerChannelDelivery = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/question-gateway-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/question-gateway-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/question-gateway-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/question-gateway-runtime")>();
   return {
     ...actual,
     questionGatewayRuntime: { ...actual.questionGatewayRuntime, registerChannelDelivery },

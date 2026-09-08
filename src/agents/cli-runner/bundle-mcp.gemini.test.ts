@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { prepareCliBundleMcpCaptureAttempt, prepareCliBundleMcpConfig } from "./bundle-mcp.js";
 import {
   cliBundleMcpHarness,
@@ -20,7 +20,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
       enabled: false,
       mode: "gemini-system-settings",
       backend: { command: "gemini" },
-      workspaceDir: "/tmp/openclaw-cli-gemini-web-search-disabled",
+      workspaceDir: "/tmp/carapace-cli-gemini-web-search-disabled",
       toolOverrides: { webSearch: false },
     });
     const raw = JSON.parse(
@@ -40,30 +40,30 @@ describe("prepareCliBundleMcpConfig gemini", () => {
         command: "gemini",
         args: ["--prompt", "{prompt}"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-gemini",
+      workspaceDir: "/tmp/carapace-bundle-mcp-gemini",
       config: { plugins: { enabled: false } },
       additionalConfig: {
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
             excludeTools: ["global_delete"],
             headers: {
-              Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-              "x-openclaw-client-caps": "${OPENCLAW_MCP_CLIENT_CAPS}",
+              Authorization: "Bearer ${CARAPACE_MCP_TOKEN}",
+              "x-carapace-client-caps": "${CARAPACE_MCP_CLIENT_CAPS}",
             },
           },
         },
       },
       env: {
-        OPENCLAW_MCP_TOKEN: "lb-tk-123",
-        OPENCLAW_MCP_CLIENT_CAPS: "tool-events,inline-widgets",
+        CARAPACE_MCP_TOKEN: "lb-tk-123",
+        CARAPACE_MCP_CLIENT_CAPS: "tool-events,inline-widgets",
       },
-      toolOverrides: { mcpToolsDeny: { openclaw: ["delete_docs"] }, webSearch: false },
+      toolOverrides: { mcpToolsDeny: { carapace: ["delete_docs"] }, webSearch: false },
     });
 
     expect(prepared.backend.args).toEqual(["--prompt", "{prompt}"]);
-    expect(prepared.env?.OPENCLAW_MCP_TOKEN).toBe("lb-tk-123");
+    expect(prepared.env?.CARAPACE_MCP_TOKEN).toBe("lb-tk-123");
     expect(typeof prepared.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe("string");
     // Gemini reads MCP servers from a generated system settings JSON file.
     const raw = JSON.parse(
@@ -76,13 +76,13 @@ describe("prepareCliBundleMcpConfig gemini", () => {
         { url?: string; headers?: Record<string, string>; excludeTools?: string[] }
       >;
     };
-    expect(raw.mcp?.allowed).toEqual(["openclaw"]);
-    expect(raw.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:23119/mcp");
-    expect(raw.mcpServers?.openclaw?.headers?.Authorization).toBe("Bearer lb-tk-123");
-    expect(raw.mcpServers?.openclaw?.headers?.["x-openclaw-client-caps"]).toBe(
+    expect(raw.mcp?.allowed).toEqual(["carapace"]);
+    expect(raw.mcpServers?.carapace?.url).toBe("http://127.0.0.1:23119/mcp");
+    expect(raw.mcpServers?.carapace?.headers?.Authorization).toBe("Bearer lb-tk-123");
+    expect(raw.mcpServers?.carapace?.headers?.["x-carapace-client-caps"]).toBe(
       "tool-events,inline-widgets",
     );
-    expect(raw.mcpServers?.openclaw?.excludeTools).toEqual(["delete_docs", "global_delete"]);
+    expect(raw.mcpServers?.carapace?.excludeTools).toEqual(["delete_docs", "global_delete"]);
     expect(raw.tools?.exclude).toEqual(["google_web_search"]);
 
     await prepared.cleanup?.();
@@ -90,7 +90,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
 
   it("projects canonical allow and deny sets into Gemini settings", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       tools: { allow: ["docs__read_docs"], deny: ["docs__delete_docs"] },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
@@ -115,7 +115,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
 
   it("hides non-model MCP tools from Gemini without an explicit policy", async () => {
     const serverPath = await writeCliMcpPolicyProbeServer();
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: false },
       mcp: { servers: { docs: { command: process.execPath, args: [serverPath] } } },
     };
@@ -171,7 +171,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
         command: "gemini",
         args: ["--prompt", "{prompt}"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-gemini",
+      workspaceDir: "/tmp/carapace-bundle-mcp-gemini",
       config: {
         plugins: { enabled: false },
         mcp: {
@@ -193,7 +193,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
 
     expect(prepared.env?.CONTEXT7_API_KEY).toBe("ctx7-test");
     expect(typeof prepared.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe("string");
-    // User OpenClaw transport names are normalized to Gemini's expected schema.
+    // User Carapace transport names are normalized to Gemini's expected schema.
     const raw = JSON.parse(
       await fs.readFile(prepared.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH as string, "utf-8"),
     ) as {
@@ -220,21 +220,21 @@ describe("prepareCliBundleMcpConfig gemini", () => {
         command: "gemini",
         args: ["--prompt", "{prompt}"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-gemini",
+      workspaceDir: "/tmp/carapace-bundle-mcp-gemini",
       config: { plugins: { enabled: false } },
       additionalConfig: {
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
             headers: {
-              "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+              "x-carapace-cli-capture-key": "${CARAPACE_MCP_CLI_CAPTURE_KEY}",
             },
           },
         },
       },
       env: {
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        CARAPACE_MCP_CLI_CAPTURE_KEY: "",
       },
     });
     const attempt = await prepareCliBundleMcpCaptureAttempt({
@@ -249,7 +249,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
       ) as {
         mcpServers?: Record<string, { headers?: Record<string, string> }>;
       };
-      expect(raw.mcpServers?.openclaw?.headers?.["x-openclaw-cli-capture-key"]).toBe("attempt-123");
+      expect(raw.mcpServers?.carapace?.headers?.["x-carapace-cli-capture-key"]).toBe("attempt-123");
       expect(attempt.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).not.toBe(
         prepared.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH,
       );
@@ -260,7 +260,7 @@ describe("prepareCliBundleMcpConfig gemini", () => {
   });
 
   it("preserves inherited Gemini auth selection in generated system settings", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gemini-settings-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gemini-settings-"));
     const inheritedSettingsPath = path.join(dir, "settings.json");
     await fs.writeFile(
       inheritedSettingsPath,
@@ -287,11 +287,11 @@ describe("prepareCliBundleMcpConfig gemini", () => {
         command: "gemini",
         args: ["--prompt", "{prompt}"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-gemini",
+      workspaceDir: "/tmp/carapace-bundle-mcp-gemini",
       config: { plugins: { enabled: false } },
       additionalConfig: {
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
           },

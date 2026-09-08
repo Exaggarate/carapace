@@ -1,5 +1,5 @@
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../packages/gateway-protocol/src/capability-consent-error-details.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { readInstalledPackageVersion } from "../infra/package-update-utils.js";
@@ -62,13 +62,13 @@ type PluginChannelSyncSummary = {
 };
 
 export type PluginChannelSyncResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changed: boolean;
   summary: PluginChannelSyncSummary;
 };
 
 export async function syncPluginsForUpdateChannel(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   channel: UpdateChannel;
   coreVersion?: string;
   workspaceDir?: string;
@@ -310,7 +310,7 @@ export async function syncPluginsForUpdateChannel(params: {
                 phase: "update",
                 result,
               });
-        const message = `${failure}\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "openclaw update repair".`;
+        const message = `${failure}\nBundled relocation did not install the replacement plugin payload; resolve the error above, then run "carapace update repair".`;
         summary.errors.push({ pluginId: targetPluginId, message, code: result.code });
         logger.error?.(message);
         continue;

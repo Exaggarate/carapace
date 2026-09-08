@@ -266,7 +266,7 @@ export function renderCardDetailsPanel(props: WorkboardProps) {
         task && taskIsAuthoritative
           ? taskDetail(task)
           : (lifecycle.session?.displayName ?? formatted.detail),
-      style: "--openclaw-modal-width: min(460px, 100vw); --openclaw-modal-max-height: 100dvh;",
+      style: "--carapace-modal-width: min(460px, 100vw); --carapace-modal-max-height: 100dvh;",
       onCancel: () => {
         closeCardDetails(state);
         props.onRequestUpdate?.();

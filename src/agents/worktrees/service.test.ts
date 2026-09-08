@@ -16,7 +16,7 @@ import {
   type MockInstance,
 } from "vitest";
 import * as commandRunner from "../../process/exec-runner.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   deleteRegistryWorktree,
   finalizeWorktreeRemovalRows,
@@ -78,8 +78,8 @@ async function initializeRepository(
   const repo = path.join(root, name);
   await fs.mkdir(repo, { recursive: true });
   await git(repo, "init", "-b", "main", `--template=${gitTemplate}`);
-  await git(repo, "config", "user.name", "OpenClaw Test");
-  await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+  await git(repo, "config", "user.name", "Carapace Test");
+  await git(repo, "config", "user.email", "carapace-test@example.invalid");
   await fs.writeFile(path.join(repo, "README.md"), "base\n");
   await git(repo, "add", "README.md");
   await git(repo, "commit", "-m", "initial");
@@ -130,7 +130,7 @@ describe("ManagedWorktreeService", () => {
 
   beforeAll(async () => {
     const tempRoot = await fs.realpath(os.tmpdir());
-    templateRoot = await fs.mkdtemp(path.join(tempRoot, "openclaw-managed-worktrees-template-"));
+    templateRoot = await fs.mkdtemp(path.join(tempRoot, "carapace-managed-worktrees-template-"));
     gitTemplate = path.join(templateRoot, "git-template");
     stateDir = path.join(templateRoot, "state");
     // Keep the hooks directory expected by hook-safety coverage without copying
@@ -140,7 +140,7 @@ describe("ManagedWorktreeService", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(templateRoot, { recursive: true, force: true });
   });
 
@@ -153,7 +153,7 @@ describe("ManagedWorktreeService", () => {
       recursive: true,
     });
     repo = await fs.realpath(repo);
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     now = 1_700_000_000_000;
     service = new ManagedWorktreeService({ env, now: () => now });
   });
@@ -174,7 +174,7 @@ describe("ManagedWorktreeService", () => {
     const repeated = await service.create({ repoRoot: repo, name: "remote-task" });
 
     expect(created.baseRef).toBe("origin/main");
-    expect(created.branch).toBe("openclaw/remote-task");
+    expect(created.branch).toBe("carapace/remote-task");
     expect(created.path).toContain(path.join("worktrees", created.repoFingerprint, "remote-task"));
     expect(await git(created.path, "branch", "--show-current")).toBe(created.branch);
     expect(repeated).toEqual(created);
@@ -361,7 +361,7 @@ describe("ManagedWorktreeService", () => {
       }),
     ).rejects.toThrow(/git rev-parse --symbolic-full-name --verify failed/);
 
-    expect(await git(repo, "branch", "--list", "openclaw/ambiguous-ref")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/ambiguous-ref")).toBe("");
     expect(await service.list()).toEqual([]);
   });
 
@@ -376,9 +376,9 @@ describe("ManagedWorktreeService", () => {
       );
 
       expect(await git(repo, "worktree", "list", "--porcelain")).toBe(before);
-      expect(await git(repo, "branch", "--list", `openclaw/${name}`)).toBe("");
+      expect(await git(repo, "branch", "--list", `carapace/${name}`)).toBe("");
       expect(await service.list()).toEqual([]);
-      await expect(fs.readdir(path.join(env.OPENCLAW_STATE_DIR!, "worktrees"))).resolves.toEqual(
+      await expect(fs.readdir(path.join(env.CARAPACE_STATE_DIR!, "worktrees"))).resolves.toEqual(
         [],
       );
     },
@@ -432,7 +432,7 @@ describe("ManagedWorktreeService", () => {
       throw new Error("expected one concurrent create to succeed");
     }
     expect(await git(repo, "worktree", "list", "--porcelain")).toContain(created.path);
-    expect(await git(created.path, "branch", "--show-current")).toBe("openclaw/concurrent");
+    expect(await git(created.path, "branch", "--show-current")).toBe("carapace/concurrent");
   });
 
   it("falls back to local HEAD when fetch fails", async () => {
@@ -482,11 +482,11 @@ describe("ManagedWorktreeService", () => {
       });
       if (admission !== "active") {
         await expect(creation).rejects.toMatchObject(
-          admission === "aborted" ? { code: "OPENCLAW_STATE_LEASE_ABORTED" } : closed,
+          admission === "aborted" ? { code: "CARAPACE_STATE_LEASE_ABORTED" } : closed,
         );
         expectCheckoutTimeouts(commandSpy, ["origin/main"]);
         expect(await git(repo, "worktree", "list", "--porcelain")).not.toContain("stale-remote");
-        expect(await git(repo, "branch", "--list", "openclaw/stale-remote")).toBe("");
+        expect(await git(repo, "branch", "--list", "carapace/stale-remote")).toBe("");
         return;
       }
       const created = await creation;
@@ -500,14 +500,14 @@ describe("ManagedWorktreeService", () => {
 
   it("preserves a pre-existing branch when a managed name collides", async () => {
     await addRemote(root, repo);
-    await git(repo, "branch", "openclaw/existing-name", "HEAD");
-    const branchTip = await git(repo, "rev-parse", "openclaw/existing-name");
+    await git(repo, "branch", "carapace/existing-name", "HEAD");
+    const branchTip = await git(repo, "rev-parse", "carapace/existing-name");
 
     await expect(service.create({ repoRoot: repo, name: "existing-name" })).rejects.toThrow(
       "branch already exists",
     );
 
-    expect(await git(repo, "rev-parse", "openclaw/existing-name")).toBe(branchTip);
+    expect(await git(repo, "rev-parse", "carapace/existing-name")).toBe(branchTip);
   });
 
   it("copies only included ignored regular files without following symlinks", async () => {
@@ -565,11 +565,11 @@ describe("ManagedWorktreeService", () => {
   });
 
   it("runs an executable setup script with source and worktree paths", async () => {
-    await fs.mkdir(path.join(repo, ".openclaw"));
-    const script = path.join(repo, ".openclaw", "worktree-setup.sh");
+    await fs.mkdir(path.join(repo, ".carapace"));
+    const script = path.join(repo, ".carapace", "worktree-setup.sh");
     await fs.writeFile(
       script,
-      '#!/bin/sh\nprintf "%s\\n%s\\n" "$OPENCLAW_SOURCE_TREE_PATH" "$OPENCLAW_WORKTREE_PATH" > setup-paths.txt\n',
+      '#!/bin/sh\nprintf "%s\\n%s\\n" "$CARAPACE_SOURCE_TREE_PATH" "$CARAPACE_WORKTREE_PATH" > setup-paths.txt\n',
       { mode: 0o755 },
     );
     const commandSpy = vi.spyOn(commandRunner, "runCommandWithTimeout");
@@ -592,9 +592,9 @@ describe("ManagedWorktreeService", () => {
       `#!/bin/sh\nprintf ran > "${hookMarker}"\n`,
       { mode: 0o755 },
     );
-    await fs.mkdir(path.join(repo, ".openclaw"));
+    await fs.mkdir(path.join(repo, ".carapace"));
     await fs.writeFile(
-      path.join(repo, ".openclaw", "worktree-setup.sh"),
+      path.join(repo, ".carapace", "worktree-setup.sh"),
       `#!/bin/sh\nprintf ran > "${setupMarker}"\n`,
       { mode: 0o755 },
     );
@@ -611,8 +611,8 @@ describe("ManagedWorktreeService", () => {
   });
 
   it("bounds failed setup diagnostics without losing the fatal detail or cleanup", async () => {
-    await fs.mkdir(path.join(repo, ".openclaw"));
-    const script = path.join(repo, ".openclaw", "worktree-setup.sh");
+    await fs.mkdir(path.join(repo, ".carapace"));
+    const script = path.join(repo, ".carapace", "worktree-setup.sh");
     const fatal = "fatal: setup dependency could not be resolved";
     const progress = Array.from(
       { length: 2_000 },
@@ -620,7 +620,7 @@ describe("ManagedWorktreeService", () => {
     ).join("");
     await fs.writeFile(
       script,
-      `#!/bin/sh\nprintf '%s\\n' "$OPENCLAW_WORKTREE_PATH" > "$OPENCLAW_SOURCE_TREE_PATH/setup-path.txt"\nprintf '%s' '${progress}\n${"x".repeat(65_536)}${fatal}\n' >&2\nexit 23\n`,
+      `#!/bin/sh\nprintf '%s\\n' "$CARAPACE_WORKTREE_PATH" > "$CARAPACE_SOURCE_TREE_PATH/setup-path.txt"\nprintf '%s' '${progress}\n${"x".repeat(65_536)}${fatal}\n' >&2\nexit 23\n`,
       { mode: 0o755 },
     );
     const failure: unknown = await service
@@ -633,7 +633,7 @@ describe("ManagedWorktreeService", () => {
     const worktreePath = (await fs.readFile(path.join(repo, "setup-path.txt"), "utf8")).trim();
     await expect(fs.stat(worktreePath)).rejects.toMatchObject({ code: "ENOENT" });
     expect(await git(repo, "worktree", "list", "--porcelain")).not.toContain("broken-setup");
-    expect(await git(repo, "branch", "--list", "openclaw/broken-setup")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/broken-setup")).toBe("");
     expect(service.listRegistryRecords()).toEqual([]);
     expect.soft(failure.message).toContain(fatal);
     expect.soft(failure.message.length).toBeLessThanOrEqual(2_300);
@@ -676,7 +676,7 @@ describe("ManagedWorktreeService", () => {
     expect(await git(restored.path, "branch", "--show-current")).toBe(created.branch);
     expect(await git(restored.path, "rev-parse", "HEAD")).toBe(originalHead);
     expect(await git(restored.path, "log", "--format=%s", created.branch)).not.toContain(
-      "OpenClaw worktree snapshot",
+      "Carapace worktree snapshot",
     );
     expect(await fs.readFile(path.join(restored.path, "README.md"), "utf8")).toBe("changed\n");
     expect(await fs.readFile(path.join(restored.path, "untracked.txt"), "utf8")).toBe(

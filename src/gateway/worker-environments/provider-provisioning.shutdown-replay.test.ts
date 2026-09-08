@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   GATEWAY_CLIENT_IDS,
@@ -8,9 +8,9 @@ import { WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE } from "../../../packages/gat
 import { NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE } from "../../infra/node-runner-inventory.js";
 import type { WorkerNodeEnrollment } from "../../plugins/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { bindDeviceWorkerAvailability } from "./device-provider.js";
 import { createWorkerNodeEnrollmentManager } from "./node-enrollment.js";
 import { REQUEST } from "./placement-dispatch-test-fixtures.js";
@@ -37,7 +37,7 @@ describe("worker node provisioning shutdown replay", () => {
       tarballPath: "/gateway/cache/node-runtime.tgz",
       tarballSha256: support.NODE_BOOTSTRAP.sha256,
       tarballBytes: support.NODE_BOOTSTRAP.bytes,
-      openclawVersion: support.NODE_BOOTSTRAP.openclawVersion,
+      carapaceVersion: support.NODE_BOOTSTRAP.carapaceVersion,
       enabledPluginIds: support.NODE_BOOTSTRAP.enabledPluginIds,
       buildId: "gateway-source-build",
     });
@@ -188,9 +188,9 @@ describe("worker node provisioning shutdown replay", () => {
     expect(destroy).not.toHaveBeenCalled();
 
     support.testState.service = undefined;
-    closeOpenClawStateDatabaseForTest();
-    support.testState.stateDb = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: support.testState.root },
+    closeCarapaceStateDatabaseForTest();
+    support.testState.stateDb = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: support.testState.root },
     });
     support.testState.store = createWorkerEnvironmentStore({
       database: support.testState.stateDb,

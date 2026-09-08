@@ -1,6 +1,6 @@
 /** Builds bounded transcript projections for compaction worker planning. */
-import { estimateStringChars } from "@openclaw/normalization-core/cjk-chars";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { estimateStringChars } from "@carapace/normalization-core/cjk-chars";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { AgentMessage } from "./runtime/index.js";
 
 const TEXT_TRUNCATE_THRESHOLD_CHARS = 32_768;
@@ -9,7 +9,7 @@ const PLANNING_MAX_CHARS = 256 * 1024;
 const MAX_ARGUMENT_ESTIMATE_CHARS = 1_000_000;
 const UNMEASURABLE_ARGUMENT_OMITTED_CHARS = Number.MAX_SAFE_INTEGER;
 // Omitted chars use token-estimate weights; payload limits remain raw serialized lengths.
-const OMITTED_CHARS_FIELD = "__openclawCompactionPlanningOmittedChars";
+const OMITTED_CHARS_FIELD = "__carapaceCompactionPlanningOmittedChars";
 
 type ProjectionBudget = {
   remainingChars: number;

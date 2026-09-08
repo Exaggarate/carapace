@@ -9,7 +9,7 @@ import { parse } from "yaml";
 import { parseArgs, resolveBaselines } from "../../scripts/resolve-upgrade-survivor-baselines.mts";
 
 function withReleaseFixture<T>(releases: unknown[], fn: (file: string) => T): T {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-upgrade-baselines-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-upgrade-baselines-"));
   try {
     const file = path.join(dir, "releases.json");
     writeFileSync(file, `${JSON.stringify(releases)}\n`);
@@ -20,7 +20,7 @@ function withReleaseFixture<T>(releases: unknown[], fn: (file: string) => T): T 
 }
 
 function withJsonFixture<T>(name: string, contents: unknown, fn: (file: string) => T): T {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-upgrade-baselines-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-upgrade-baselines-"));
   try {
     const file = path.join(dir, name);
     writeFileSync(file, `${JSON.stringify(contents)}\n`);
@@ -37,7 +37,7 @@ describe("scripts/resolve-upgrade-survivor-baselines", () => {
   });
 
   it("keeps the single fallback baseline when no expanded request is provided", () => {
-    expect(resolveBaselines(new Map([["fallback", "2026.4.23"]]))).toEqual(["openclaw@2026.4.23"]);
+    expect(resolveBaselines(new Map([["fallback", "2026.4.23"]]))).toEqual(["carapace@2026.4.23"]);
   });
 
   it.each([
@@ -65,7 +65,7 @@ describe("scripts/resolve-upgrade-survivor-baselines", () => {
     };
     const inputs = workflow.on.workflow_call.inputs;
     const release = parse(
-      readFileSync(".github/workflows/openclaw-release-checks.yml", "utf8"),
+      readFileSync(".github/workflows/carapace-release-checks.yml", "utf8"),
     ) as {
       jobs: {
         package_acceptance_release_checks: {
@@ -145,7 +145,7 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
             RUN_RELEASE_SOAK: "false",
             TARGET_CONTEXT_REF: "",
             GITHUB_OUTPUT: profileOutput,
-            GITHUB_REPOSITORY: "openclaw/openclaw",
+            GITHUB_REPOSITORY: "carapace/carapace",
             PATH: `${bin}${path.delimiter}${process.env.PATH ?? ""}`,
             FIXTURE_NPM_CALLS: calls,
           },
@@ -181,10 +181,10 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
       });
       const expanded = entrypoint === "update-migration" || standaloneSelectors.has(entrypoint);
       const expectedBaselines = expanded
-        ? "openclaw@2026.8.1 openclaw@2026.7.1-2 openclaw@2026.6.35 openclaw@2026.6.34"
-        : `openclaw@${entrypoint === "historical" ? "2026.4.23" : "2026.7.1-2"}`;
+        ? "carapace@2026.8.1 carapace@2026.7.1-2 carapace@2026.6.35 carapace@2026.6.34"
+        : `carapace@${entrypoint === "historical" ? "2026.4.23" : "2026.7.1-2"}`;
       expect(readFileSync(output, "utf8")).toBe(
-        `baselines=${expectedBaselines}\nbaseline_scope=${expanded ? "legacy-operator-state" : "all-scenarios"}\nbaseline=openclaw@2026.7.1-2\n`,
+        `baselines=${expectedBaselines}\nbaseline_scope=${expanded ? "legacy-operator-state" : "all-scenarios"}\nbaseline=carapace@2026.7.1-2\n`,
       );
       if (expanded) {
         const selected = Object.fromEntries(
@@ -203,10 +203,10 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
               ...process.env,
               LANES: "update-migration",
               GROUP_SIZE: "1",
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: selected.baseline,
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: selected.baselines,
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SCOPE: selected.baseline_scope,
-              OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "plugin-deps-cleanup legacy-operator-state",
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: selected.baseline,
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS: selected.baselines,
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE_SCOPE: selected.baseline_scope,
+              CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: "plugin-deps-cleanup legacy-operator-state",
             },
           }),
         ) as Array<{
@@ -219,10 +219,10 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
             group.published_upgrade_survivor_scenarios,
           ]),
         ).toEqual([
-          ["openclaw@2026.8.1", "legacy-operator-state"],
-          ["openclaw@2026.7.1-2", "plugin-deps-cleanup legacy-operator-state"],
-          ["openclaw@2026.6.35", "legacy-operator-state"],
-          ["openclaw@2026.6.34", "legacy-operator-state"],
+          ["carapace@2026.8.1", "legacy-operator-state"],
+          ["carapace@2026.7.1-2", "plugin-deps-cleanup legacy-operator-state"],
+          ["carapace@2026.6.35", "legacy-operator-state"],
+          ["carapace@2026.6.34", "legacy-operator-state"],
         ]);
       }
       expect(
@@ -231,9 +231,9 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
           .split("\n")
           .map((line) => JSON.parse(line)),
       ).toEqual([
-        ["view", "openclaw", "versions", "--json", "--silent", "--prefer-online"],
+        ["view", "carapace", "versions", "--json", "--silent", "--prefer-online"],
         ...(expanded
-          ? [["view", "openclaw", "dist-tags", "--json", "--silent", "--prefer-online"]]
+          ? [["view", "carapace", "dist-tags", "--json", "--silent", "--prefer-online"]]
           : []),
       ]);
     });
@@ -262,7 +262,7 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
                     ["npm-versions-json", versionsFile],
                   ]),
                 ),
-              ).toEqual(expected.map((version) => `openclaw@${version}`));
+              ).toEqual(expected.map((version) => `carapace@${version}`));
             },
           );
         },
@@ -334,14 +334,14 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
           ]),
         ),
       ).toEqual([
-        "openclaw@2026.4.29",
-        "openclaw@2026.4.27",
-        "openclaw@2026.4.26",
-        "openclaw@2026.4.25",
-        "openclaw@2026.4.24",
-        "openclaw@2026.4.22",
-        "openclaw@2026.4.23",
-        "openclaw@2026.3.13-1",
+        "carapace@2026.4.29",
+        "carapace@2026.4.27",
+        "carapace@2026.4.26",
+        "carapace@2026.4.25",
+        "carapace@2026.4.24",
+        "carapace@2026.4.22",
+        "carapace@2026.4.23",
+        "carapace@2026.3.13-1",
       ]);
     });
   });
@@ -376,10 +376,10 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
               ]),
             ),
           ).toEqual([
-            "openclaw@2026.5.2",
-            "openclaw@2026.4.30",
-            "openclaw@2026.4.29",
-            "openclaw@2026.4.23",
+            "carapace@2026.5.2",
+            "carapace@2026.4.30",
+            "carapace@2026.4.29",
+            "carapace@2026.4.23",
           ]);
         },
       );
@@ -417,12 +417,12 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
               ]),
             ),
           ).toEqual([
-            "openclaw@2026.5.3-1",
-            "openclaw@2026.5.3",
-            "openclaw@2026.5.2",
-            "openclaw@2026.4.29",
-            "openclaw@2026.4.23",
-            "openclaw@2026.4.15",
+            "carapace@2026.5.3-1",
+            "carapace@2026.5.3",
+            "carapace@2026.5.2",
+            "carapace@2026.4.29",
+            "carapace@2026.4.23",
+            "carapace@2026.4.15",
           ]);
         },
       );
@@ -488,7 +488,7 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
             ["history-count", "2"],
           ]),
         ),
-      ).toEqual(["openclaw@2026.4.29"]);
+      ).toEqual(["carapace@2026.4.29"]);
     });
   });
 
@@ -526,13 +526,13 @@ console.log(JSON.stringify(process.argv[4] === "dist-tags"
               ]),
             ),
           ).toEqual([
-            "openclaw@2026.4.29",
-            "openclaw@2026.4.27",
-            "openclaw@2026.4.26",
-            "openclaw@2026.4.25",
-            "openclaw@2026.4.24",
-            "openclaw@2026.4.23",
-            "openclaw@2026.3.13",
+            "carapace@2026.4.29",
+            "carapace@2026.4.27",
+            "carapace@2026.4.26",
+            "carapace@2026.4.25",
+            "carapace@2026.4.24",
+            "carapace@2026.4.23",
+            "carapace@2026.3.13",
           ]);
         },
       );

@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 // Image runtime tests cover model-backed image routing, auth/profile handling,
 // provider payload transforms, and MiniMax/Copilot special paths.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { attachModelProviderRequestTransport } from "../agents/provider-request-config.js";
 import { mintSecretSentinel } from "../secrets/sentinel.js";
@@ -17,7 +17,7 @@ import {
 
 const {
   completeMock,
-  ensureOpenClawModelsJsonMock,
+  ensureCarapaceModelsJsonMock,
   getApiKeyForModelMock,
   resolveApiKeyForProviderCoreMock,
   requireApiKeyMock,
@@ -58,7 +58,7 @@ describe("describeImageWithModelCore", () => {
     const authStore = { version: 1, profiles: {} };
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "minimax-portal",
       model: "MiniMax-VL-01",
       buffer: Buffer.from("png-bytes"),
@@ -73,7 +73,7 @@ describe("describeImageWithModelCore", () => {
       text: "portal ok",
       model: "MiniMax-VL-01",
     });
-    expect(ensureOpenClawModelsJsonMock).not.toHaveBeenCalled();
+    expect(ensureCarapaceModelsJsonMock).not.toHaveBeenCalled();
     const authRequest = getApiKeyForModelCall();
     expect(authRequest?.store).toBe(authStore);
     expect(requireApiKeyMock).toHaveBeenCalled();
@@ -93,7 +93,7 @@ describe("describeImageWithModelCore", () => {
     expect(Object.fromEntries(new Headers(fetchOptions.headers as HeadersInit))).toEqual({
       authorization: ["Bearer", "test-api-key"].join(" "),
       "content-type": "application/json",
-      "mm-api-source": "OpenClaw",
+      "mm-api-source": "Carapace",
     });
     expect(fetchOptions.signal).toBeInstanceOf(AbortSignal);
     expect(timeoutSpy).toHaveBeenCalledWith(1000);
@@ -113,7 +113,7 @@ describe("describeImageWithModelCore", () => {
     await expect(
       describeImagesWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "minimax-portal",
         model: "MiniMax-VL-01",
         images: [
@@ -148,7 +148,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "minimax-portal",
       model: "MiniMax-VL-01",
       buffer: Buffer.from("png-bytes"),
@@ -178,7 +178,7 @@ describe("describeImageWithModelCore", () => {
 
     await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "minimax-portal",
       model: "MiniMax-VL-01",
       buffer: Buffer.from("png-bytes"),
@@ -219,7 +219,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "minimax-portal",
       model: "custom-vision",
       buffer: Buffer.from("png-bytes"),
@@ -245,7 +245,7 @@ describe("describeImageWithModelCore", () => {
         baseUrl: "https://api.minimax.io/anthropic",
       }),
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       wrapProviderStream: true,
     });
     expect(completeMock).toHaveBeenCalledOnce();
@@ -290,7 +290,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "amazon-bedrock",
       model: "us.anthropic.claude-sonnet-4-6-v1",
       buffer: Buffer.from("png-bytes"),
@@ -326,8 +326,8 @@ describe("describeImageWithModelCore", () => {
     await expect(
       describeImageWithModelCore({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
         provider: "minimax-portal",
         model: "MiniMax-VL-01",
         buffer: Buffer.from("png-bytes"),
@@ -344,8 +344,8 @@ describe("describeImageWithModelCore", () => {
     expect(resolveApiKeyForProviderCoreMock).toHaveBeenCalledWith(
       expect.objectContaining({
         provider: "minimax-portal",
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
       }),
     );
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -374,7 +374,7 @@ describe("describeImageWithModelCore", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "minimax-cn",
         model: "MiniMax-VL-01",
         buffer: Buffer.from("png-bytes"),
@@ -424,7 +424,7 @@ describe("describeImageWithModelCore", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "minimax-cn",
         model: "MiniMax-VL-01",
         buffer: Buffer.from("png-bytes"),
@@ -466,7 +466,7 @@ describe("describeImageWithModelCore", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/carapace-agent",
         provider: "minimax-cn",
         model: "MiniMax-VL-01",
         buffer: Buffer.from("png-bytes"),
@@ -506,8 +506,8 @@ describe("describeImageWithModelCore", () => {
     const result = await describeImageWithModelCore({
       cfg: {},
       agentId: "vision-agent",
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      workspaceDir: "/tmp/carapace-workspace",
       provider: "google",
       model: "gemini-2.5-flash",
       buffer: Buffer.from("png-bytes"),
@@ -518,12 +518,12 @@ describe("describeImageWithModelCore", () => {
     });
 
     expect(result.text).toBe("workspace ok");
-    expect(ensureOpenClawModelsJsonMock).not.toHaveBeenCalled();
+    expect(ensureCarapaceModelsJsonMock).not.toHaveBeenCalled();
     expect(acquireAgentRunPreparedModelRuntimeMock).toHaveBeenCalledWith(
       expect.objectContaining({
         agentId: "vision-agent",
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/carapace-agent",
+        workspaceDir: "/tmp/carapace-workspace",
       }),
       { catalogMode: "static", abortSignal: expect.any(AbortSignal) },
     );
@@ -531,18 +531,18 @@ describe("describeImageWithModelCore", () => {
     expect(resolveModelAsyncMock).toHaveBeenCalledWith(
       "google",
       "gemini-2.5-flash",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       {},
       {
         allowBundledStaticCatalogFallback: true,
         authStorage: preparedAuthStorage,
         modelRegistry: {},
         preparedModelRuntime: expect.objectContaining({
-          agentDir: "/tmp/openclaw-agent",
-          workspaceDir: "/tmp/openclaw-workspace",
+          agentDir: "/tmp/carapace-agent",
+          workspaceDir: "/tmp/carapace-workspace",
         }),
         skipAgentDiscovery: true,
-        workspaceDir: "/tmp/openclaw-workspace",
+        workspaceDir: "/tmp/carapace-workspace",
       },
     );
     expect(registerProviderStreamForModelMock).toHaveBeenCalledWith({
@@ -553,8 +553,8 @@ describe("describeImageWithModelCore", () => {
         input: ["text", "image"],
       }),
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/carapace-agent",
+      workspaceDir: "/tmp/carapace-workspace",
       wrapProviderStream: true,
     });
   });
@@ -586,7 +586,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "openai",
       model: "gpt-5.4",
       buffer: Buffer.from("png-bytes"),
@@ -600,17 +600,17 @@ describe("describeImageWithModelCore", () => {
       text: "normalized ok",
       model: "gpt-5.4",
     });
-    expect(ensureOpenClawModelsJsonMock).not.toHaveBeenCalled();
+    expect(ensureCarapaceModelsJsonMock).not.toHaveBeenCalled();
     expect(resolveModelAsyncMock).toHaveBeenCalledExactlyOnceWith(
       "openai",
       "gpt-5.4",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       {},
       {
         allowBundledStaticCatalogFallback: true,
         authStorage: preparedAuthStorage,
         modelRegistry: {},
-        preparedModelRuntime: expect.objectContaining({ agentDir: "/tmp/openclaw-agent" }),
+        preparedModelRuntime: expect.objectContaining({ agentDir: "/tmp/carapace-agent" }),
         skipAgentDiscovery: true,
       },
     );
@@ -643,7 +643,7 @@ describe("describeImageWithModelCore", () => {
 
     const result = await describeImageWithModelCore({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "ollama",
       model: "llava:latest",
       buffer: Buffer.from("png-bytes"),
@@ -665,7 +665,7 @@ describe("describeImageWithModelCore", () => {
         input: ["text", "image"],
       }),
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       wrapProviderStream: true,
     });
     expect(streamFn).toHaveBeenCalledOnce();
@@ -716,7 +716,7 @@ describe("describeImageWithModelCore", () => {
           },
         },
       },
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       provider: "lmstudio",
       model: "google/gemma-4-e2b",
       buffer: Buffer.from("png-bytes"),
@@ -738,7 +738,7 @@ describe("describeImageWithModelCore", () => {
     const resolveRequest = requireRecord(resolveRequestValue, "model registry request");
     expect(resolveRequest.provider).toBe("lmstudio");
     expect(resolveRequest.modelId).toBe("google/gemma-4-e2b");
-    expect(resolveRequest.agentDir).toBe("/tmp/openclaw-agent");
+    expect(resolveRequest.agentDir).toBe("/tmp/carapace-agent");
     expect(
       requireRecord(
         requireRecord(

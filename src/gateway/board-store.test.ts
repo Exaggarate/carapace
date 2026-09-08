@@ -5,10 +5,10 @@ import { buildWidgetDocument } from "../canvas/wrap.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/io.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.entry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { boardStore } from "./board-store.js";
 import { progressCardStore } from "./progress-card-store.js";
 import { createBoardHarness } from "./server-methods/board.test-support.js";
@@ -17,15 +17,15 @@ import { createProgressCardHandlers } from "./server-methods/progress-card.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   clearRuntimeConfigSnapshot();
   vi.unstubAllEnvs();
 });
 
 it("keeps global boards and progress under each owner's canonical row across reopen", async () => {
-  const stateDir = tempDirs.make("openclaw-gateway-global-boards-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  const stateDir = tempDirs.make("carapace-gateway-global-boards-");
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   const cfg = {
     agents: { ownership: "explicit" as const, entries: { main: {}, work: {} } },
     session: { scope: "global" as const },
@@ -37,7 +37,7 @@ it("keeps global boards and progress under each owner's canonical row across reo
   Object.assign(handlers, createProgressCardHandlers());
 
   for (const agentId of ["main", "work"]) {
-    const database = openOpenClawAgentDatabase({ agentId });
+    const database = openCarapaceAgentDatabase({ agentId });
     replaceSessionEntrySync(
       { agentId, sessionKey: "global", storePath: database.path },
       { sessionId: `session-${agentId}`, updatedAt: 1 },
@@ -75,8 +75,8 @@ it("keeps global boards and progress under each owner's canonical row across reo
       expect.objectContaining({ session_key: "global" }),
     ]);
   }
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   for (const agentId of ["main", "work"]) {
     const target = { sessionKey: "global", agentId };
@@ -130,8 +130,8 @@ it("keeps global boards and progress under each owner's canonical row across reo
 });
 
 it("keeps retained global progress separate from an ordinary qualified global row in per-sender mode", async () => {
-  const stateDir = tempDirs.make("openclaw-gateway-retained-global-progress-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  const stateDir = tempDirs.make("carapace-gateway-retained-global-progress-");
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   const cfg = {
     agents: { list: [{ id: "main", default: true }, { id: "work" }] },
     session: { scope: "per-sender" as const },
@@ -147,7 +147,7 @@ it("keeps retained global progress separate from an ordinary qualified global ro
     { sessionKey: "agent:work:global", agentId: "work" },
   ];
   for (const target of targets) {
-    const database = openOpenClawAgentDatabase({ agentId: target.agentId });
+    const database = openCarapaceAgentDatabase({ agentId: target.agentId });
     replaceSessionEntrySync(
       { ...target, storePath: database.path },
       { sessionId: `${target.agentId}-${target.sessionKey}`, updatedAt: 1 },
@@ -163,8 +163,8 @@ it("keeps retained global progress separate from an ordinary qualified global ro
       undefined,
     );
   }
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   for (const target of targets) {
     const read = await invoke("progressCard.get", target);
@@ -210,17 +210,17 @@ it("keeps retained global progress separate from an ordinary qualified global ro
 });
 
 it("reopens separate boards and progress cards in a shared database owned by another agent", () => {
-  const stateDir = tempDirs.make("openclaw-gateway-shared-boards-");
+  const stateDir = tempDirs.make("carapace-gateway-shared-boards-");
   const storePath = path.join(stateDir, "shared.sqlite");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   const cfg = {
     agents: { entries: { alpha: { default: true }, beta: {} } },
     session: { store: storePath },
   };
   setRuntimeConfigSnapshot(cfg, cfg);
-  openOpenClawAgentDatabase({ agentId: "alpha", path: storePath });
+  openCarapaceAgentDatabase({ agentId: "alpha", path: storePath });
   // An older canonical registration must not replace the configured store's physical owner.
-  openOpenClawAgentDatabase({ agentId: "beta" });
+  openCarapaceAgentDatabase({ agentId: "beta" });
 
   for (const agentId of ["alpha", "beta"]) {
     const sessionKey = `agent:${agentId}:main`;
@@ -235,8 +235,8 @@ it("reopens separate boards and progress cards in a shared database owned by ano
     });
     progressCardStore.put(sessionKey, { markdown: `${agentId} progress` });
   }
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   for (const agentId of ["alpha", "beta"]) {
     const sessionKey = `agent:${agentId}:main`;

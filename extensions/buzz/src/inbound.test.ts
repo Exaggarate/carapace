@@ -1,13 +1,13 @@
 import {
   buildChannelInboundEventContext,
   runPreparedInboundReply,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStableChannelMessageIngress } from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveStableChannelMessageIngress } from "carapace/plugin-sdk/channel-ingress-runtime";
 // Buzz tests cover inbound room admission, mention gating, and reply delivery.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BuzzBus } from "./buzz-bus.js";
 import { BuzzDirectoryState } from "./directory-state.js";
@@ -21,8 +21,8 @@ import { setBuzzRuntime } from "./runtime.js";
 import type { ResolvedBuzzAccount } from "./types.js";
 
 const logInfo = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/logging-core", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/logging-core")>();
+vi.mock("carapace/plugin-sdk/logging-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/logging-core")>();
   return {
     ...actual,
     createSubsystemLogger: (...args: Parameters<typeof actual.createSubsystemLogger>) => ({
@@ -32,16 +32,16 @@ vi.mock("openclaw/plugin-sdk/logging-core", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   return {
     ...actual,
     buildChannelInboundEventContext: vi.fn(actual.buildChannelInboundEventContext),
   };
 });
-vi.mock("openclaw/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/channel-ingress-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/channel-ingress-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/channel-ingress-runtime")>();
   return {
     ...actual,
     resolveStableChannelMessageIngress: vi.fn(actual.resolveStableChannelMessageIngress),
@@ -66,7 +66,7 @@ function createAccount(
 ): ResolvedBuzzAccount {
   return {
     accountId: "default",
-    name: "OpenClaw",
+    name: "Carapace",
     enabled: true,
     configured: true,
     relayUrl: "ws://127.0.0.1:3000",
@@ -108,7 +108,7 @@ function createBus(): BuzzBus {
     publicKey: BOT_PUBLIC_KEY,
     directory: new BuzzDirectoryState({
       publicKey: BOT_PUBLIC_KEY,
-      fallbackProfileName: "OpenClaw",
+      fallbackProfileName: "Carapace",
       channelIds: [ROOM_ID],
     }),
     refreshDirectory: vi.fn(async () => {}),
@@ -166,7 +166,7 @@ function createHistoryParams(historyLimit = 2, roles = new Map<string, string>()
   );
   return {
     account: createAccount({ historyLimit }),
-    cfg: {} satisfies OpenClawConfig,
+    cfg: {} satisfies CarapaceConfig,
     bus,
     ...createLifecycle(),
     historyMap: new Map<string, HistoryEntry[]>(),
@@ -336,7 +336,7 @@ describe("handleBuzzInbound", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await handleBuzzInbound({
       ...params,
       cfg,
@@ -418,7 +418,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
       ...lifecycle,
@@ -491,7 +491,7 @@ describe("handleBuzzInbound", () => {
         groupAllowFrom: [SENDER_PUBLIC_KEY],
         groups: { [ROOM_ID]: { requireMention: false } },
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus,
       message: createMessage(),
       ...createLifecycle(),
@@ -509,14 +509,14 @@ describe("handleBuzzInbound", () => {
 
   it("accepts a configured text mention when no native p tag is present", async () => {
     const runtime = createPluginRuntimeMock();
-    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/@openclaw/i]);
+    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/@carapace/i]);
     setBuzzRuntime(runtime);
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
-      message: createMessage({ text: "@openclaw status" }),
+      message: createMessage({ text: "@carapace status" }),
       ...createLifecycle(),
     });
 
@@ -559,8 +559,8 @@ describe("handleBuzzInbound", () => {
       const runtime = createPluginRuntimeMock();
       setBuzzRuntime(runtime);
       const actual = await vi.importActual<
-        typeof import("openclaw/plugin-sdk/channel-ingress-runtime")
-      >("openclaw/plugin-sdk/channel-ingress-runtime");
+        typeof import("carapace/plugin-sdk/channel-ingress-runtime")
+      >("carapace/plugin-sdk/channel-ingress-runtime");
       const abort = new AbortController();
       let currentMember = true;
       let releaseAdmission: () => void = () => {};
@@ -574,7 +574,7 @@ describe("handleBuzzInbound", () => {
       });
       const params = {
         account: createAccount(),
-        cfg: {} satisfies OpenClawConfig,
+        cfg: {} satisfies CarapaceConfig,
         bus: createBus(),
         message: createMessage({ mentionedPubkeys: mentioned ? [BOT_PUBLIC_KEY] : [] }),
         signal: abort.signal,
@@ -610,7 +610,7 @@ describe("handleBuzzInbound", () => {
         groupPolicy: "allowlist",
         groupAllowFrom: [OTHER_PUBLIC_KEY],
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
       ...createLifecycle(),
@@ -659,7 +659,7 @@ describe("handleBuzzInbound", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       for (const [index, id] of ["loop-first", "loop-second"].entries()) {
         if (index === 1) {
           account.relayUrl = `wss://${relayHost.toUpperCase()}:443/`;
@@ -737,7 +737,7 @@ describe("handleBuzzInbound", () => {
           },
         },
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage(),
       ...createLifecycle(),
@@ -758,7 +758,7 @@ describe("handleBuzzInbound", () => {
         groupAllowFrom: [OTHER_PUBLIC_KEY],
         groups: { [ROOM_ID]: { requireMention: true, groupAllowFrom: [SENDER_PUBLIC_KEY] } },
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({
         text: "/status",
@@ -781,7 +781,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({ text: "/status" }),
       ...createLifecycle(),
@@ -797,7 +797,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus,
       message: createMessage({
         id: "event-reply",
@@ -850,13 +850,13 @@ describe("handleBuzzInbound", () => {
           },
         },
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({
         kind: BUZZ_DIFF_MESSAGE_KIND,
         text: diffText,
         diff: {
-          repoUrl: "https://github.com/openclaw/openclaw",
+          repoUrl: "https://github.com/Exaggarate/carapace",
           commitSha: "abcdef1",
           description: `line one\n${"x".repeat(1_100)}`,
           truncated: true,
@@ -875,7 +875,7 @@ describe("handleBuzzInbound", () => {
     });
     const bodyForAgent = context.BodyForAgent ?? "";
     expect(bodyForAgent).toContain("[Buzz structured diff]");
-    expect(bodyForAgent).toContain("Repository: https://github.com/openclaw/openclaw");
+    expect(bodyForAgent).toContain("Repository: https://github.com/Exaggarate/carapace");
     expect(bodyForAgent).toContain("Description: line one ");
     expect(bodyForAgent).toContain("Truncated: yes");
     expect(bodyForAgent).toContain("Unified diff:\n/status\n@@ -1 +1 @@\n-old\n+new");
@@ -890,13 +890,13 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({
         kind: BUZZ_DIFF_MESSAGE_KIND,
-        text: "+const owner = '@OpenClaw';",
+        text: "+const owner = '@Carapace';",
         diff: {
-          repoUrl: "https://github.com/openclaw/openclaw",
+          repoUrl: "https://github.com/Exaggarate/carapace",
           commitSha: "abcdef1",
           truncated: false,
         },
@@ -914,7 +914,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies CarapaceConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
       ...createLifecycle(),

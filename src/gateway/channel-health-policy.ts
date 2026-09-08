@@ -1,6 +1,6 @@
 // Gateway channel health policy.
 // Evaluates channel lifecycle snapshots for restart/readiness decisions.
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import type { ChannelAccountSnapshot, ChannelId } from "../channels/plugins/types.public.js";
 
 type ChannelHealthSnapshot = {

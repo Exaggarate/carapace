@@ -19,7 +19,7 @@ Maintainer GitHub helpers use the external `gh` on the caller's unchanged
 `PATH`, so that route owns credentials, filtering, and any native delegation.
 “Plain” means normalized terminal output: helpers do not discover native
 installations, extract default-route tokens, or retry a refusal through another
-binary. `OPENCLAW_GH_BIN` is an explicit operator-owned override for supporting
+binary. `CARAPACE_GH_BIN` is an explicit operator-owned override for supporting
 callers; choose it only when its authentication and protections are appropriate.
 PATH-based read helpers, including this watcher, ignore that override.
 Authoritative REST reads request revalidation with `Cache-Control: max-age=0`
@@ -81,7 +81,7 @@ waits only for that attached workflow. Callers must separately verify required
 checks; CI success does not override another required check.
 
 The native `scripts/pr` merge flow reloads the saved prepare gate mode. Hosted
-mode (`OPENCLAW_TESTBOX=1` during prepare) revalidates the prepared head through
+mode (`CARAPACE_TESTBOX=1` during prepare) revalidates the prepared head through
 the same hosted verifier used by prepare, including its 24-hour freshness,
 workflow identity, attempt binding, and existing patch-identical reuse rules.
 Accepted hosted proof proceeds directly
@@ -115,7 +115,7 @@ For an existing terminal PR run with a diagnosed infrastructure failure or
 cancellation, prefer one failed-job retry over a new full-CI dispatch:
 
 ```bash
-gh run rerun <original-run-id> --failed --repo openclaw/openclaw
+gh run rerun <original-run-id> --failed --repo carapace/carapace
 ```
 
 Before cancelling a run stuck solely on unassigned jobs, verify that it is the

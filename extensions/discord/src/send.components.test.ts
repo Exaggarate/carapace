@@ -16,9 +16,9 @@ const DISCORD_TEST_CFG = {
   session: { dmScope: "main" },
 } as const;
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/plugin-config-runtime")>(
-    "openclaw/plugin-sdk/plugin-config-runtime",
+vi.mock("carapace/plugin-sdk/plugin-config-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/plugin-config-runtime")>(
+    "carapace/plugin-sdk/plugin-config-runtime",
   );
   return {
     ...actual,
@@ -36,9 +36,9 @@ vi.mock("./send.outbound.js", () => ({
 }));
 
 const loadOutboundMediaFromUrlMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-    "openclaw/plugin-sdk/outbound-media",
+vi.mock("carapace/plugin-sdk/outbound-media", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+    "carapace/plugin-sdk/outbound-media",
   );
   return { ...actual, loadOutboundMediaFromUrl: loadOutboundMediaFromUrlMock };
 });

@@ -1,16 +1,16 @@
-# OpenClaw Mistral Provider
+# Carapace Mistral Provider
 
-Official OpenClaw provider plugin for Mistral models, Voxtral transcription, and
+Official Carapace provider plugin for Mistral models, Voxtral transcription, and
 Mistral memory embeddings.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/mistral-provider
-openclaw gateway restart
+carapace plugins install @carapace/mistral-provider
+carapace gateway restart
 ```
 
 Set `MISTRAL_API_KEY`, then select a `mistral/*` model or configure Mistral for
 media transcription, realtime transcription, or memory embeddings.
 
-See <https://docs.openclaw.ai/providers/mistral> for setup and configuration.
+See <../../docs/providers/mistral.md> for setup and configuration.

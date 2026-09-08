@@ -1,6 +1,6 @@
 /** Command handlers for changing ACP runtime mode and config options on live sessions. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { AcpRuntimeError, withAcpRuntimeErrorBoundary } from "../runtime/errors.js";
 import { resolveManagerRuntimeCapabilities } from "./manager.runtime-controls.js";
 import type { ManagerRuntimeHandleCache } from "./manager.runtime-handle-cache.js";
@@ -29,7 +29,7 @@ export type RuntimeOptionCommandServices = {
 };
 
 type RuntimeOptionCommandContext = RuntimeOptionCommandServices & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
 };

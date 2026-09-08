@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { shortenHomePath } from "../../utils.js";
 import {
@@ -23,7 +23,7 @@ export {
 } from "./legacy-source-files.js";
 
 const AUTH_PROFILE_MIGRATION_REQUIRED_CODE = "AUTH_PROFILE_MIGRATION_REQUIRED" as const;
-const AUTH_PROFILE_MIGRATION_COMMAND = "openclaw doctor --fix" as const;
+const AUTH_PROFILE_MIGRATION_COMMAND = "carapace doctor --fix" as const;
 const log = createSubsystemLogger("auth-profiles/persistence");
 
 function isCredentialSource(source: LegacyAuthProfileSource): boolean {

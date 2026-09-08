@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngine, ContextEngineRuntimeContext } from "../../context-engine/types.js";
 import {
   acquireAgentRunPreparedModelRuntimeMock,
@@ -31,7 +31,7 @@ const [
     replaceSessionEntrySync,
     upsertSessionEntryCore,
   },
-  { closeOpenClawAgentDatabasesForTest },
+  { closeCarapaceAgentDatabasesForTest },
   { SessionManager: PersistentSessionManager },
   safetyTimeout,
   realSafetyTimeout,
@@ -41,7 +41,7 @@ const [
 ] = await Promise.all([
   import("../../auto-reply/reply/session-updates.js"),
   import("../../config/sessions/session-accessor.js"),
-  import("../../state/openclaw-agent-db.js"),
+  import("../../state/carapace-agent-db.js"),
   import("../sessions/session-manager.js"),
   import("./compaction-safety-timeout.js"),
   vi.importActual<typeof import("./compaction-safety-timeout.js")>(
@@ -54,7 +54,7 @@ const [
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     cleanup();
   }),
 );
@@ -94,7 +94,7 @@ const completed = (resultSessionId = "successor") => ({
 const backendCompactParams = (abortSignal?: AbortSignal) => ({
   ...compactParams(abortSignal),
   provider: "openai",
-  agentHarnessId: "openclaw",
+  agentHarnessId: "carapace",
 });
 
 function createBackendAppend(firstKeptEntryId: string) {
@@ -158,7 +158,7 @@ async function withPersistentTranscriptFixture(
 }
 
 beforeEach(async () => {
-  workspaceDir = await realpath(tempDirs.make("openclaw-queued-successor-"));
+  workspaceDir = await realpath(tempDirs.make("carapace-queued-successor-"));
   resetCompactHooksHarnessMocks(workspaceDir);
   maintain.mockClear();
   hookRunner.hasHooks.mockReturnValue(true);
@@ -173,7 +173,7 @@ beforeEach(async () => {
 
 describe("queued compaction successor ownership", () => {
   it.each([
-    { nativePinned: false, observedHarness: "openclaw" },
+    { nativePinned: false, observedHarness: "carapace" },
     { nativePinned: false, observedHarness: "codex" },
     { nativePinned: true, observedHarness: "codex" },
   ])(
@@ -209,7 +209,7 @@ describe("queued compaction successor ownership", () => {
             ? {
                 supported: false,
                 reason: "authored request requires host transport",
-                fallbackRuntime: "openclaw",
+                fallbackRuntime: "carapace",
               }
             : { supported: true },
         runAttempt: vi.fn(),
@@ -221,7 +221,7 @@ describe("queued compaction successor ownership", () => {
         const lease = await previousAcquire(input);
         return { ...lease, snapshot: { ...lease.snapshot, pluginRegistry } };
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -250,7 +250,7 @@ describe("queued compaction successor ownership", () => {
         modelSelectionLocked: true,
         modelProvider: "openai",
         model: "gpt-5.6-luna",
-        agentRuntimeOverride: nativePinned ? "openclaw" : "codex",
+        agentRuntimeOverride: nativePinned ? "carapace" : "codex",
         agentHarnessId: observedHarness,
         ...(!nativePinned ? { pluginOwnerId: "model-owner" } : {}),
       };
@@ -271,7 +271,7 @@ describe("queued compaction successor ownership", () => {
           authProfileIdSource: "user",
           // A stale caller cannot add or remove the durable native owner.
           sessionEntry: { ...entry, pluginOwnerId: nativePinned ? "stale-owner" : undefined },
-          agentHarnessId: nativePinned ? "openclaw" : manualTarget.agentHarnessId,
+          agentHarnessId: nativePinned ? "carapace" : manualTarget.agentHarnessId,
           modelSelectionLocked: true,
           config,
           trigger: "manual",
@@ -289,7 +289,7 @@ describe("queued compaction successor ownership", () => {
             config,
             provider: "openai",
             model: "gpt-5.6-luna",
-            agentHarnessId: "openclaw",
+            agentHarnessId: "carapace",
             modelSelectionLocked: true,
           });
         }
@@ -658,7 +658,7 @@ describe("queued compaction successor ownership", () => {
           progressReset = backendParams.runtimeContext?.compactionTimeoutReset;
           const append = createBackendAppend(entryId);
           // Timer dispatch owns a different async context. Retain the backend's
-          // actual context without constructing any OpenClaw authority in the fixture.
+          // actual context without constructing any Carapace authority in the fixture.
           const onAbort = AsyncLocalStorage.bind(() => {
             observed.resolve({
               callerAborted: caller.signal.aborted,

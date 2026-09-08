@@ -3,11 +3,11 @@ import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
 // One connection can cross native and transformed SDK module graphs mid-transaction.
 const pendingPublications = resolveGlobalSingleton(
-  Symbol.for("openclaw.sqlitePostCommitPublications"),
+  Symbol.for("carapace.sqlitePostCommitPublications"),
   () => new WeakMap<DatabaseSync, Array<() => void>>(),
 );
 const pendingTransactionState = resolveGlobalSingleton(
-  Symbol.for("openclaw.sqliteTransactionState"),
+  Symbol.for("carapace.sqliteTransactionState"),
   () => new WeakMap<DatabaseSync, Array<{ commit: () => void; rollback: () => void }>>(),
 );
 

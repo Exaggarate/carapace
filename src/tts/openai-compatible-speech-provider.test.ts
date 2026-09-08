@@ -1,5 +1,5 @@
 // OpenAI-compatible speech provider tests cover speech request and file output.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SpeechProviderPlugin } from "../plugins/types.js";
 import { mockFirstObjectArg } from "../test-utils/mock-call-assertions.js";
@@ -36,7 +36,7 @@ const { assertOkOrThrowHttpErrorMock, postJsonRequestMock, resolveProviderHttpRe
     })),
   }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async () => {
+vi.mock("carapace/plugin-sdk/provider-http", async () => {
   const { readProviderBinaryResponse } = await import("../agents/provider-http-errors.js");
   return {
     assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,

@@ -1,13 +1,13 @@
 // Webhooks TaskFlow E2E covers route-bound child cancellation on a real Gateway listener.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawPluginService } from "openclaw/plugin-sdk/core";
+import type { CarapacePluginService } from "carapace/plugin-sdk/core";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import acpxPlugin from "../../../../extensions/acpx/index.js";
 import webhooksPlugin from "../../../../extensions/webhooks/index.js";
@@ -27,7 +27,7 @@ import {
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../../../../src/config/config.js";
 import { resolveSessionStorePathCore } from "../../../../src/config/sessions/paths.js";
 import { replaceSessionEntrySync } from "../../../../src/config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { cancelActiveCronTaskRun } from "../../../../src/cron/service/active-run-cancellation.js";
 import { startGatewayServer } from "../../../../src/gateway/server.js";
 import { getGatewayE2ePortBlock } from "../../../../src/gateway/test-helpers.e2e.js";
@@ -135,7 +135,7 @@ async function postWebhook(
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-openclaw-webhook-secret": SECRET,
+      "x-carapace-webhook-secret": SECRET,
     },
     body: JSON.stringify(body),
   });
@@ -183,14 +183,14 @@ async function readAcpTraceMethods(tracePath: string): Promise<string[]> {
 
 describe("webhooks TaskFlow child cancellation authority", () => {
   it("allows the owner and rejects foreign or replaced backing runs before termination", async () => {
-    const root = tempDirs.make("openclaw-webhooks-taskflow-authz-");
+    const root = tempDirs.make("carapace-webhooks-taskflow-authz-");
     const stateDir = path.join(root, "state");
     const acpxStateDir = path.join(root, "acpx-state");
     const acpxTracePath = path.join(root, "acpx-process-trace.jsonl");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     await fs.mkdir(stateDir, { recursive: true });
 
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       gateway: {
         mode: "local",
         bind: "loopback",
@@ -210,19 +210,19 @@ describe("webhooks TaskFlow child cancellation authority", () => {
         ...snapshotGatewayStartupEnv(),
         HOME: root,
         CODEX_PATH: path.resolve("extensions/acpx/test/fixtures/codex-app-server.mjs"),
-        OPENCLAW_ACPX_PROCESS_FIXTURE_TRACE: acpxTracePath,
-        OPENCLAW_ACPX_RUNTIME_STARTUP_PROBE: "0",
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_HOME: root,
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_SKIP_ACPX_RUNTIME: undefined,
-        OPENCLAW_SKIP_ACPX_RUNTIME_PROBE: "1",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_ACPX_PROCESS_FIXTURE_TRACE: acpxTracePath,
+        CARAPACE_ACPX_RUNTIME_STARTUP_PROBE: "0",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_HOME: root,
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_SKIP_ACPX_RUNTIME: undefined,
+        CARAPACE_SKIP_ACPX_RUNTIME_PROBE: "1",
+        CARAPACE_STATE_DIR: stateDir,
       },
       async () => {
         clearConfigCache();
@@ -246,7 +246,7 @@ describe("webhooks TaskFlow child cancellation authority", () => {
           killSubagentRunAdmin,
         });
         const routeCleanups: Array<() => void> = [];
-        const acpxServices: OpenClawPluginService[] = [];
+        const acpxServices: CarapacePluginService[] = [];
         const acpxRuntime = createPluginRuntimeMock({
           state: {
             openKeyedStore: (options) => createPluginStateKeyedStoreForTests("acpx", options),

@@ -1,14 +1,14 @@
 ---
 summary: "Place outbound and accept inbound voice calls via Twilio, Telnyx, or Plivo, with optional realtime voice and streaming transcription"
 read_when:
-  - You want to place an outbound voice call from OpenClaw
+  - You want to place an outbound voice call from Carapace
   - You are configuring or developing the voice-call plugin
   - You need realtime voice or streaming transcription on telephony
 title: "Voice call plugin"
 sidebarTitle: "Voice call"
 ---
 
-Voice calls for OpenClaw via a plugin: outbound notifications, multi-turn
+Voice calls for Carapace via a plugin: outbound notifications, multi-turn
 conversations, full-duplex realtime voice, streaming transcription, and
 inbound calls with allowlist policies.
 
@@ -29,13 +29,13 @@ Gateway, then restart the Gateway to load it.
     <Tabs>
       <Tab title="From npm">
         ```bash
-        openclaw plugins install @openclaw/voice-call
+        carapace plugins install @carapace/voice-call
         ```
       </Tab>
       <Tab title="From a local folder (dev)">
         ```bash
         PLUGIN_SRC=./path/to/local/voice-call-plugin
-        openclaw plugins install "$PLUGIN_SRC"
+        carapace plugins install "$PLUGIN_SRC"
         cd "$PLUGIN_SRC" && pnpm install
         ```
       </Tab>
@@ -60,8 +60,8 @@ Gateway, then restart the Gateway to load it.
   </Step>
   <Step title="Verify setup">
     ```bash
-    openclaw voicecall setup
-    openclaw voicecall setup --json
+    carapace voicecall setup
+    carapace voicecall setup --json
     ```
 
     Checks plugin enablement, provider credentials, webhook exposure, agent
@@ -70,15 +70,15 @@ Gateway, then restart the Gateway to load it.
   </Step>
   <Step title="Smoke test">
     ```bash
-    openclaw voicecall smoke
-    openclaw voicecall smoke --to "+15555550123"
+    carapace voicecall smoke
+    carapace voicecall smoke --to "+15555550123"
     ```
 
     Both are dry runs by default. Add `--yes` to place a short outbound
     notify call:
 
     ```bash
-    openclaw voicecall smoke --to "+15555550123" --yes
+    carapace voicecall smoke --to "+15555550123" --yes
     ```
 
   </Step>
@@ -181,8 +181,8 @@ a multi-agent fleet. Per-number routes may choose different agents for inbound
 calls, but do not replace the plugin's startup owner.
 
 If startup reports that Voice Call has no explicit owner, list your agents with
-`openclaw agents list`, set the existing `agentId` field, and rerun
-`openclaw voicecall setup`. Restart the Gateway after updating its configuration.
+`carapace agents list`, set the existing `agentId` field, and rerun
+`carapace voicecall setup`. Restart the Gateway after updating its configuration.
 Existing legacy default-agent selection is preserved; new multi-agent setups
 should use an explicit owner. See [Agent configuration](/gateway/config-agents).
 
@@ -203,7 +203,7 @@ Top-level keys under `plugins.entries.voice-call.config` not shown above:
 | `maxConcurrentCalls`            | `1`          | Outbound calls beyond this limit are rejected.                                                     |
 | `outbound.notifyHangupDelaySec` | `3`          | Seconds to wait after TTS before auto-hangup in notify mode.                                       |
 | `skipSignatureVerification`     | `false`      | Local testing only; never enable in production.                                                    |
-| `store`                         | unset        | Overrides the default `$OPENCLAW_STATE_DIR/voice-calls` path (normally `~/.openclaw/voice-calls`). |
+| `store`                         | unset        | Overrides the default `$CARAPACE_STATE_DIR/voice-calls` path (normally `~/.carapace/voice-calls`). |
 | `agentId`                       | sole agent   | Agent used for response generation and session storage. Set explicitly with multiple agents.       |
 | `responseModel`                 | unset        | Overrides the default model for classic (non-realtime) responses.                                  |
 | `responseSystemPrompt`          | generated    | Custom system prompt for classic responses.                                                        |
@@ -235,7 +235,7 @@ that Region. See
 
   </Accordion>
   <Accordion title="Legacy config migrations">
-    Run `openclaw doctor --fix` to rewrite these legacy keys to the canonical
+    Run `carapace doctor --fix` to rewrite these legacy keys to the canonical
     shape. The Voice Call plugin owns the migration; runtime config parsing
     accepts only the current keys. When both old and current settings exist,
     Doctor keeps the current setting, removes the legacy key, and reports which
@@ -292,9 +292,9 @@ Current runtime behavior:
 - `realtime.provider` is optional. If unset, Voice Call selects the first configured realtime voice provider in provider priority order. Providers named in `realtime.providers` are discovered even when another provider is already active; plugin disablement and allow/deny rules still apply.
 - Bundled realtime voice providers: Google Gemini Live (`google`) and OpenAI (`openai`), registered by their provider plugins.
 - Provider-owned raw config lives under `realtime.providers.<providerId>`.
-- Voice Call exposes the built-in `openclaw_end_call` realtime tool on every call. It takes no arguments or call ID; the active voice bridge binds it to the current call.
-- Voice Call exposes the shared `openclaw_agent_consult` realtime tool by default. The realtime model can call it when the caller asks for deeper reasoning, current information, or normal OpenClaw tools.
-- `realtime.consultPolicy` optionally adds guidance for when the realtime model should call `openclaw_agent_consult`.
+- Voice Call exposes the built-in `carapace_end_call` realtime tool on every call. It takes no arguments or call ID; the active voice bridge binds it to the current call.
+- Voice Call exposes the shared `carapace_agent_consult` realtime tool by default. The realtime model can call it when the caller asks for deeper reasoning, current information, or normal Carapace tools.
+- `realtime.consultPolicy` optionally adds guidance for when the realtime model should call `carapace_agent_consult`.
 - `realtime.agentContext.enabled` is default-off. When enabled, Voice Call injects a bounded agent identity and selected workspace-file capsule into the realtime provider instructions at session setup.
 - `realtime.fastContext.enabled` is default-off. When enabled, Voice Call first searches indexed memory/session context for the consult question and returns authorized snippets to the realtime model within `realtime.fastContext.timeoutMs` before falling back to the full consult agent only if `realtime.fastContext.fallbackToConsult` is true. The active memory plugin authorizes session-transcript hits; plugins without that capability fail closed for session hits while ordinary memory hits remain available.
 - If `realtime.provider` points at an unregistered provider, or no realtime voice provider is registered at all, Voice Call logs a warning and skips realtime media instead of failing the whole plugin.
@@ -303,7 +303,7 @@ Current runtime behavior:
 
 <Warning>
 GPT-Live uses agent delegation instead of native function tools. Its current
-Voice Call bridge cannot invoke `openclaw_end_call` or custom `realtime.tools`.
+Voice Call bridge cannot invoke `carapace_end_call` or custom `realtime.tools`.
 Use an OpenAI GA realtime model or Google Gemini Live when the call needs those
 controls; selecting GPT-Live does not make them available through delegation.
 </Warning>
@@ -312,14 +312,14 @@ controls; selecting GPT-Live does not make them available through delegation.
 
 Realtime calls normally end when the carrier sends a stream stop event or closes
 the media WebSocket. If an intermediary does not promptly forward that close,
-OpenClaw treats 30 seconds without inbound media as a disconnect, waits a
+Carapace treats 30 seconds without inbound media as a disconnect, waits a
 2-second grace period for media to resume, and then ends the call.
 
-If the realtime provider ends its session first, OpenClaw also ends the carrier
+If the realtime provider ends its session first, Carapace also ends the carrier
 call, including when the provider reports a normal close. This prevents a silent
 phone connection from remaining open after its voice session has finished.
 
-The realtime model can also call `openclaw_end_call` when the caller asks to
+The realtime model can also call `carapace_end_call` when the caller asks to
 hang up. The model must speak any final words before calling the tool: a
 successful call ends the current provider session and phone connection
 immediately, so no later reply is spoken. If the carrier cannot end the call,
@@ -329,14 +329,14 @@ the caller. Configured `realtime.tools` cannot replace this built-in by name.
 For inbound Twilio numbers, also configure a Status Callback using `POST` to
 your public webhook URL with `?type=status` appended, for example
 `https://voice.example.com/voice/webhook?type=status`. Include the `completed`
-call event. OpenClaw-created outbound calls configure their callback
+call event. Carapace-created outbound calls configure their callback
 automatically. The callback provides the fastest teardown signal, while stream
 close and the inactivity backstop remain independent of it.
 
 ### Tool policy
 
 `realtime.toolPolicy` controls only the consult run. It never disables
-`openclaw_end_call`:
+`carapace_end_call`:
 
 | Policy           | Behavior                                                                                                                                 |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -359,10 +359,10 @@ remain errors; ending the phone session suppresses pending consult results.
 ### Agent voice context
 
 Enable `realtime.agentContext` when the voice bridge should sound like the
-configured OpenClaw agent without paying a full agent-consult round trip on
+configured Carapace agent without paying a full agent-consult round trip on
 ordinary turns. The context capsule is added once when the realtime session
 is created, so it does not add per-turn latency. Calls to
-`openclaw_agent_consult` still run the full OpenClaw agent and should be used
+`carapace_agent_consult` still run the full Carapace agent and should be used
 for tool work, current information, memory lookups, or workspace state.
 
 ```json5
@@ -415,7 +415,7 @@ for tool work, current information, memory lookups, or workspace state.
               realtime: {
                 enabled: true,
                 provider: "google",
-                instructions: "Speak briefly. Call openclaw_agent_consult before using deeper tools.",
+                instructions: "Speak briefly. Call carapace_agent_consult before using deeper tools.",
                 toolPolicy: "safe-read-only",
                 consultPolicy: "substantive",
                 consultThinkingLevel: "low",
@@ -579,7 +579,7 @@ fallback chain are tried instead.
 
 Behavior notes:
 
-- Legacy `tts.<provider>` keys inside plugin config (`openai`, `elevenlabs`, `microsoft`, `edge`) are repaired by `openclaw doctor --fix`; committed config should use `tts.providers.<provider>`.
+- Legacy `tts.<provider>` keys inside plugin config (`openai`, `elevenlabs`, `microsoft`, `edge`) are repaired by `carapace doctor --fix`; committed config should use `tts.providers.<provider>`.
 - Core TTS is used when Twilio media streaming is enabled; otherwise calls fall back to provider-native voices.
 - If a Twilio media stream is already active, Voice Call does not fall back to TwiML `<Say>`. If telephony TTS is unavailable in that state, the playback request fails instead of mixing two playback paths.
 - When telephony TTS falls back to a secondary provider, Voice Call logs a warning with the provider chain (`from`, `to`, `attempts`) for debugging.
@@ -834,16 +834,16 @@ Example with a stable public host:
 ## CLI
 
 ```bash
-openclaw voicecall call --to "+15555550123" --message "Hello from OpenClaw"
-openclaw voicecall start --to "+15555550123"   # alias for call
-openclaw voicecall continue --call-id <id> --message "Any questions?"
-openclaw voicecall speak --call-id <id> --message "One moment"
-openclaw voicecall dtmf --call-id <id> --digits "ww123456#"
-openclaw voicecall end --call-id <id>
-openclaw voicecall status --call-id <id>
-openclaw voicecall tail
-openclaw voicecall latency                      # summarize turn latency from logs
-openclaw voicecall expose --mode funnel
+carapace voicecall call --to "+15555550123" --message "Hello from Carapace"
+carapace voicecall start --to "+15555550123"   # alias for call
+carapace voicecall continue --call-id <id> --message "Any questions?"
+carapace voicecall speak --call-id <id> --message "One moment"
+carapace voicecall dtmf --call-id <id> --digits "ww123456#"
+carapace voicecall end --call-id <id>
+carapace voicecall status --call-id <id>
+carapace voicecall tail
+carapace voicecall latency                      # summarize turn latency from logs
+carapace voicecall expose --mode funnel
 ```
 
 When the Gateway is already running, operational `voicecall` commands
@@ -904,8 +904,8 @@ failed placement does not consume `maxConcurrentCalls` capacity.
 Run setup from the same environment that runs the Gateway:
 
 ```bash
-openclaw voicecall setup
-openclaw voicecall setup --json
+carapace voicecall setup
+carapace voicecall setup --json
 ```
 
 For `twilio`, `telnyx`, and `plivo`, `webhook-exposure` must be green. A
@@ -944,8 +944,8 @@ Use one public exposure path:
 After changing config, restart or reload the Gateway, then run:
 
 ```bash
-openclaw voicecall setup
-openclaw voicecall smoke
+carapace voicecall setup
+carapace voicecall smoke
 ```
 
 `voicecall smoke` is a dry run unless you pass `--yes`.
@@ -983,15 +983,15 @@ Twilio Console:
 Media Streams `stop`/WebSocket close handling is the primary auto-end path and
 does not depend on the HTTP status callback. Twilio's optional `<Stream
 statusCallback>` is a separate stream-diagnostic signal and is not required for
-teardown. `openclaw voicecall setup` validates local configuration and webhook
+teardown. `carapace voicecall setup` validates local configuration and webhook
 exposure; it cannot inspect or change Twilio Console settings.
 
 Then inspect runtime state:
 
 ```bash
-openclaw voicecall status --call-id <id>
-openclaw voicecall tail
-openclaw logs --follow
+carapace voicecall status --call-id <id>
+carapace voicecall tail
+carapace logs --follow
 ```
 
 Common causes:
@@ -1012,7 +1012,7 @@ under your control.
 
 Twilio and Plivo URL signatures use `publicUrl` when it is configured: its
 scheme, host, and path are preserved, while the request query is applied.
-Without `publicUrl`, OpenClaw reconstructs the URL from the request. Telnyx
+Without `publicUrl`, Carapace reconstructs the URL from the request. Telnyx
 signatures do not include the request URL. If signatures fail:
 
 - Confirm the provider webhook URL exactly matches `publicUrl`, including scheme, host, and path.
@@ -1026,14 +1026,14 @@ Google Meet uses this plugin for Twilio dial-in joins. First verify Voice
 Call:
 
 ```bash
-openclaw voicecall setup
-openclaw voicecall smoke --to "+15555550123"
+carapace voicecall setup
+carapace voicecall smoke --to "+15555550123"
 ```
 
 Then verify the Google Meet transport explicitly:
 
 ```bash
-openclaw googlemeet setup --transport twilio
+carapace googlemeet setup --transport twilio
 ```
 
 If Voice Call is green but the Meet participant never joins, check the Meet
@@ -1046,7 +1046,7 @@ plugin's `voiceCall.dtmfDelayMs` (default **12000 ms**) as leading Twilio
 wait digits, because Meet dial-in prompts can arrive late. Voice Call then
 redirects back to realtime handling before the intro greeting is requested.
 
-Use `openclaw logs --follow` for the live phase trace. A healthy Twilio Meet
+Use `carapace logs --follow` for the live phase trace. A healthy Twilio Meet
 join logs this order:
 
 - Google Meet delegates the Twilio join to Voice Call.
@@ -1055,7 +1055,7 @@ join logs this order:
 - Voice Call serves realtime TwiML for the Twilio call.
 - Google Meet requests intro speech with `voicecall.speak` after the post-DTMF delay.
 
-`openclaw voicecall tail` still shows persisted call records; useful for
+`carapace voicecall tail` still shows persisted call records; useful for
 call state and transcripts, but not every webhook/realtime transition
 appears there.
 
@@ -1069,7 +1069,7 @@ For realtime Twilio/Telnyx calls, also verify:
 - A realtime provider plugin is loaded and registered.
 - `realtime.provider` is unset or names a registered provider.
 - The provider API key is available to the Gateway process.
-- `openclaw logs --follow` shows realtime TwiML served, the realtime bridge started, and the initial greeting queued.
+- `carapace logs --follow` shows realtime TwiML served, the realtime bridge started, and the initial greeting queued.
 
 ## Related
 

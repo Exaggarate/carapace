@@ -2,11 +2,11 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { finalizeEvent, getPublicKey, type Event, type Filter } from "nostr-tools";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelGatewayContext } from "../runtime-api.js";
 import type { BuzzInboundMessage } from "./message-event.js";
@@ -197,7 +197,7 @@ function publishRoomMembership(channelId: string): void {
   });
 }
 
-function buildConfig(channelIds: string[]): OpenClawConfig {
+function buildConfig(channelIds: string[]): CarapaceConfig {
   return {
     channels: {
       buzz: {
@@ -206,7 +206,7 @@ function buildConfig(channelIds: string[]): OpenClawConfig {
         groups: Object.fromEntries(channelIds.map((channelId) => [channelId, {}])),
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function startGatewayProcess(channelIds: string[] = [CHANNEL_ID]): {
@@ -280,10 +280,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   currentNowMs = START_SECONDS * 1_000;
   vi.spyOn(Date, "now").mockImplementation(() => currentNowMs);
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  // openclaw-temp-dir: allow extension tests cannot import root test helpers.
-  tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-buzz-coldstart-"));
-  process.env.OPENCLAW_STATE_DIR = tempDir;
+  previousStateDir = process.env.CARAPACE_STATE_DIR;
+  // carapace-temp-dir: allow extension tests cannot import root test helpers.
+  tempDir = mkdtempSync(path.join(tmpdir(), "carapace-buzz-coldstart-"));
+  process.env.CARAPACE_STATE_DIR = tempDir;
   handled = [];
   gates = new Map();
   relayMocks.messageFilters.length = 0;
@@ -329,9 +329,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
   resetPluginStateStoreForTests();
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.CARAPACE_STATE_DIR = previousStateDir;
   }
   if (tempDir) {
     rmSync(tempDir, { recursive: true, force: true });

@@ -2,10 +2,10 @@
 import {
   filterChannelInboundQuoteContext,
   resolveInboundSupplementalSenderAllowed,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import type { ContextVisibilityDecision } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveChannelContextVisibilityMode } from "carapace/plugin-sdk/context-visibility-runtime";
+import type { ContextVisibilityDecision } from "carapace/plugin-sdk/security-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   formatSignalSenderDisplay,
   isSignalSenderAllowed,

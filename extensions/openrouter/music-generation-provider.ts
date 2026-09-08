@@ -1,22 +1,22 @@
 // Openrouter provider module implements model/runtime integration.
-import { toImageDataUrl } from "openclaw/plugin-sdk/image-generation";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { canonicalizeBase64, estimateBase64DecodedBytes } from "openclaw/plugin-sdk/media-runtime";
+import { toImageDataUrl } from "carapace/plugin-sdk/image-generation";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { canonicalizeBase64, estimateBase64DecodedBytes } from "carapace/plugin-sdk/media-runtime";
 import type {
   MusicGenerationProvider,
   MusicGenerationRequest,
   MusicGenerationSourceImage,
-} from "openclaw/plugin-sdk/music-generation";
-import { resolvePositiveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/music-generation";
+import { resolvePositiveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
 import {
   assertOkOrThrowHttpError,
   createProviderOperationDeadline,
   postJsonRequest,
   resolveProviderOperationTimeoutMs,
   type ProviderOperationDeadline,
-} from "openclaw/plugin-sdk/provider-http";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveOpenRouterGenerationRequestContext } from "./generation-request-context.js";
 
 const DEFAULT_OPENROUTER_MUSIC_MODEL = "google/lyria-3-pro-preview";

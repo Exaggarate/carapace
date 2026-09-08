@@ -2,9 +2,9 @@
 import {
   DEFAULT_CHANNEL_FEEDBACK_REFLECTION_COOLDOWN_MS,
   runChannelFeedbackReflection,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawConfig } from "../runtime-api.js";
+} from "carapace/plugin-sdk/channel-inbound";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "../runtime-api.js";
 import { resolveMSTeamsSdkCloudOptions } from "./cloud.js";
 import type { StoredConversationReference } from "./conversation-store.js";
 import { formatUnknownError } from "./errors.js";
@@ -48,7 +48,7 @@ export function buildFeedbackEvent(params: {
 }
 
 type RunFeedbackReflectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   app: MSTeamsApp;
   conversationRef: StoredConversationReference;
   sessionKey: string;

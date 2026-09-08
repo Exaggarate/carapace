@@ -5,7 +5,7 @@ export {
   createCliRuntimeCapture,
   expectGeneratedTokenPersistedToGatewayAuth,
   type CliRuntimeCapture,
-} from "openclaw/plugin-sdk/test-fixtures";
-export { createTempHomeEnv, useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
-export { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/test-fixtures";
+export { createTempHomeEnv, useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
+export { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
+export type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";

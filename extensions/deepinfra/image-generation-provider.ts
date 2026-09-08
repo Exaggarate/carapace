@@ -1,11 +1,11 @@
 // Deepinfra provider module implements model/runtime integration.
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
 import {
   createOpenAiCompatibleImageGenerationProvider,
   imageSourceUploadFileName,
   type ImageGenerationProvider,
-} from "openclaw/plugin-sdk/image-generation";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/image-generation";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEEPINFRA_BASE_URL,
   DEEPINFRA_IMAGE_FALLBACK_MODELS,

@@ -1,7 +1,7 @@
 /** macOS Chrome-family cookie database decryption and Playwright mapping. */
 import crypto from "node:crypto";
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import { runCommandBuffered } from "carapace/plugin-sdk/process-runtime";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 
 export type SystemBrowser = "chrome" | "brave" | "edge" | "chromium";
 

@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import type { EmbeddingProvider } from "./embeddings.js";
 import { createManagerIndexFixture } from "./manager-index.test-support.js";

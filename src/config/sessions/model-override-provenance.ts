@@ -1,5 +1,5 @@
 // Model override provenance detects fallback-generated selections that resets should drop.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionEntry } from "./types.js";
 
 type ModelOverrideProvenanceEntry = Pick<

@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
+import { expectDefined } from "@carapace/normalization-core";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../../test/helpers/promise.js";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
@@ -17,23 +17,23 @@ import {
   onSessionTranscriptUpdate,
 } from "../../sessions/transcript-events.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  isOpenClawAgentDatabaseOpen,
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  isCarapaceAgentDatabaseOpen,
+  listCarapaceRegisteredAgentDatabases,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  isOpenClawStateDatabaseOpen,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  isCarapaceStateDatabaseOpen,
+} from "../../state/carapace-state-db.js";
 import { appendSqliteTrajectoryRuntimeEvents } from "../../trajectory/runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "../../trajectory/types.js";
 import {
   deliveryContextFromSession,
   sessionDeliveryRoute,
 } from "../../utils/delivery-context.shared.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import {
   applySessionEntryReplacements,
   applySessionPatchProjections,
@@ -115,7 +115,7 @@ vi.mock("../../gateway/session-archive.runtime.js", async (importOriginal) => {
 
 function createTestTrajectoryEvent(sessionId: string): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "carapace-trajectory",
     schemaVersion: 1,
     traceId: sessionId,
     source: "runtime",
@@ -152,14 +152,14 @@ describe("session accessor seam", () => {
 
   beforeEach(() => {
     cleanupArchivedSessionTranscriptsMock.mockReset();
-    tempDir = makeTempDir(tempDirs, "openclaw-session-accessor-");
+    tempDir = makeTempDir(tempDirs, "carapace-session-accessor-");
     storePath = path.join(tempDir, "sessions.json");
     transcriptPath = path.join(tempDir, "session.jsonl");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanupTempDirs(tempDirs);
   });
 
@@ -175,13 +175,13 @@ describe("session accessor seam", () => {
       );
       cleanupProbeRoot = tempDir;
 
-      expect(isOpenClawAgentDatabaseOpen(cleanupProbeDatabasePath)).toBe(true);
-      expect(isOpenClawStateDatabaseOpen()).toBe(true);
+      expect(isCarapaceAgentDatabaseOpen(cleanupProbeDatabasePath)).toBe(true);
+      expect(isCarapaceStateDatabaseOpen()).toBe(true);
     });
 
     it("releases both cache owners before the next test", () => {
-      expect(isOpenClawAgentDatabaseOpen(cleanupProbeDatabasePath)).toBe(false);
-      expect(isOpenClawStateDatabaseOpen()).toBe(false);
+      expect(isCarapaceAgentDatabaseOpen(cleanupProbeDatabasePath)).toBe(false);
+      expect(isCarapaceStateDatabaseOpen()).toBe(false);
       expect(fs.existsSync(cleanupProbeRoot)).toBe(false);
     });
   });
@@ -320,7 +320,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "entry count database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
 
     expect(readSessionEntryCount(database)).toBe(1);
     expect([...iterateSessionEntryKeys(database)]).toEqual(["agent:main:logical-entry"]);
@@ -336,7 +336,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "cold count database path",
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const database = new DatabaseSync(databasePath);
     database.prepare("UPDATE session_nodes SET entry_valid = 0").run();
     database.close();
@@ -356,7 +356,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "createdBy database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
 
     expect(
       database.db
@@ -472,7 +472,7 @@ describe("session accessor seam", () => {
       agentId: "main",
     }).path;
     expect(databasePath).toBeDefined();
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "main",
       path: databasePath,
     });
@@ -549,7 +549,7 @@ describe("session accessor seam", () => {
       agentId: "main",
     }).path;
     expect(databasePath).toBeDefined();
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "main",
       path: databasePath,
     });
@@ -648,7 +648,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "transcript find database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     const originalPrepare = database.db.prepare.bind(database.db);
     let transcriptRowsRead = 0;
     // Count SQLite rows rather than matcher calls: eager materialization happens before matching.
@@ -1002,7 +1002,7 @@ describe("session accessor seam", () => {
         },
         () => ({ label: "patched" }),
       ),
-    ).rejects.toThrow("openclaw doctor --fix");
+    ).rejects.toThrow("carapace doctor --fix");
     await expect(
       patchSessionEntryTarget(
         {
@@ -1014,7 +1014,7 @@ describe("session accessor seam", () => {
         },
         () => ({ label: "patched alias" }),
       ),
-    ).rejects.toThrow("openclaw doctor --fix");
+    ).rejects.toThrow("carapace doctor --fix");
     await deleteSessionEntryLifecycle({
       archiveTranscript: false,
       storePath,
@@ -1064,7 +1064,7 @@ describe("session accessor seam", () => {
           { agentId: "main", sessionKey, storePath },
           { ...entry, sessionId: "child", updatedAt: 10 },
         ),
-      ).rejects.toThrow("openclaw doctor --fix");
+      ).rejects.toThrow("carapace doctor --fix");
     }
     expect(loadSessionEntry({ agentId: "main", sessionKey, storePath })).toBeUndefined();
 
@@ -1145,7 +1145,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "focused session database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     const unrelatedEntryJson = "{ unrelated, intentionally invalid JSON";
     database.db
       .prepare(
@@ -1267,7 +1267,7 @@ describe("session accessor seam", () => {
   ])(
     "keeps logical owner reads and updates isolated for $sessionKey with owner $agentId",
     async ({ sessionKey, agentId: requestedAgentId, global }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
           store: path.join(tempDir, "{agentId}.json"),
           scope: global ? "global" : undefined,
@@ -1316,7 +1316,7 @@ describe("session accessor seam", () => {
   ])(
     "rejects conflicting logical owner for $sessionKey and $storeOwner",
     ({ sessionKey, storeOwner, message }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath, scope: "global" },
         agents: {
           entries: { research: {}, ops: {} },
@@ -1348,7 +1348,7 @@ describe("session accessor seam", () => {
         updatedAt: 1,
         label: "original owner label",
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: sharedStorePath, scope: "global" },
         agents: {
           entries: { research: {}, ops: {} },
@@ -1431,7 +1431,7 @@ describe("session accessor seam", () => {
       agentId: "main",
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_STATE_DIR: stateDir,
       },
       sessionId: "default-store-turn-session",
       sessionKey: "agent:main:default-store-turn",
@@ -1514,7 +1514,7 @@ describe("session accessor seam", () => {
     const expectedStorePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
     const scope = {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       sessionId: "old-default-rotate",
       sessionKey: "agent:main:default-rotate",
     };
@@ -1595,12 +1595,12 @@ describe("session accessor seam", () => {
   it("does not create database state for rejected memory-only transcript turns", async () => {
     for (const source of ["sessionStore", "sessionEntry"] as const) {
       const stateDir = path.join(tempDir, `rejected-memory-only-${source}`);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const agentId = "main";
       const sessionKey = `agent:main:rejected-memory-only-${source}`;
       const sessionId = `rejected-memory-only-${source}`;
       const memoryStorePath = path.join(stateDir, "agents", agentId, "sessions", "sessions.json");
-      const databasePath = resolveOpenClawAgentSqlitePath({ agentId, env });
+      const databasePath = resolveCarapaceAgentSqlitePath({ agentId, env });
       const sessionEntry: SessionEntry = { sessionId, updatedAt: Date.now() };
       const memorySource =
         source === "sessionStore"
@@ -1627,8 +1627,8 @@ describe("session accessor seam", () => {
 
       expect(result).toMatchObject({ appendedCount: 0, messages: [] });
       expect(fs.existsSync(databasePath)).toBe(false);
-      expect(isOpenClawAgentDatabaseOpen(databasePath)).toBe(false);
-      expect(listOpenClawRegisteredAgentDatabases({ env })).toEqual([]);
+      expect(isCarapaceAgentDatabaseOpen(databasePath)).toBe(false);
+      expect(listCarapaceRegisteredAgentDatabases({ env })).toEqual([]);
     }
   });
 
@@ -1776,7 +1776,7 @@ describe("session accessor seam", () => {
       updatedAt: 10,
       initializationPending: true,
     });
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(tempDir, "carapace-agent.sqlite");
     const fixedTime = new Date("2020-01-01T00:00:00.000Z");
     fs.utimesSync(databasePath, fixedTime, fixedTime);
 
@@ -2020,7 +2020,7 @@ describe("session accessor seam", () => {
       }),
     ).rejects.toMatchObject({
       code: "SESSION_CANONICAL_KEY_MIGRATION_REQUIRED",
-      message: expect.stringContaining("openclaw doctor --fix"),
+      message: expect.stringContaining("carapace doctor --fix"),
     });
   });
 
@@ -2064,7 +2064,7 @@ describe("session accessor seam", () => {
       ),
     ).rejects.toMatchObject({ code: "SESSION_CANONICAL_KEY_MIGRATION_REQUIRED" });
     const insertRawEntry = (sessionKey: string, sessionId: string, updatedAt: number) => {
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "ops",
         path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "ops" }).path,
       });
@@ -2073,7 +2073,7 @@ describe("session accessor seam", () => {
           "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, ?)",
         )
         .run(sessionKey, sessionId, JSON.stringify({ sessionId, updatedAt }), updatedAt);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     };
     for (const [storedKey, canonicalKey] of [
       ["agent:ops:padded ", "agent:ops:padded"],
@@ -2088,13 +2088,13 @@ describe("session accessor seam", () => {
           { sessionId: "new-session", updatedAt: 10 },
         ),
       ).rejects.toMatchObject({ code: "SESSION_CANONICAL_KEY_MIGRATION_REQUIRED" });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const canonicalSessionId = `${canonicalKey}-canonical-session`;
       insertRawEntry(canonicalKey, canonicalSessionId, 6);
       expect(() =>
         loadSessionEntry({ agentId: "ops", sessionKey: canonicalKey, storePath }),
-      ).toThrow("openclaw doctor --fix");
-      closeOpenClawAgentDatabasesForTest();
+      ).toThrow("carapace doctor --fix");
+      closeCarapaceAgentDatabasesForTest();
     }
   });
 
@@ -2605,7 +2605,7 @@ describe("session accessor seam", () => {
     const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
       agentId: "main",
     }).path;
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     database.db
       .prepare(
         "INSERT INTO session_members (session_key, identity_id, added_by, added_at) VALUES (?, ?, ?, ?)",
@@ -2747,7 +2747,7 @@ describe("session accessor seam", () => {
     const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
       agentId: "main",
     }).path;
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     database.db.exec(`
       CREATE TRIGGER fail_mixed_replacement_after_exact_write
       BEFORE UPDATE OF entry_json ON session_nodes
@@ -3242,7 +3242,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: scope.agentId }).path,
       "progress delete database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: scope.agentId, path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: scope.agentId, path: databasePath });
     writeSessionProgressCard(database.db, sessionKey, { markdown: "Working" });
 
     const result = await deleteSessionEntryLifecycle({
@@ -3390,7 +3390,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "manual compact database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
     database.db.exec(`
       CREATE TRIGGER reject_manual_compact_metadata_update
       BEFORE UPDATE OF entry_json ON session_nodes
@@ -3740,7 +3740,7 @@ describe("session accessor seam", () => {
             content: "second committed message",
             idempotencyKey: "ordered-turn-second",
             timestamp: 3,
-            __openclaw: { runId: "run-ordered-turn" },
+            __carapace: { runId: "run-ordered-turn" },
           },
           messageId: result.messages[1]?.messageId,
           messageSeq: 3,
@@ -4820,7 +4820,7 @@ describe("session accessor seam", () => {
       type: "metadata",
     });
 
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: "main",
       path: expectDefined(
         resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
@@ -4866,7 +4866,7 @@ describe("session accessor seam", () => {
   it("reads imported transcripts before opening the SQLite transaction", async () => {
     const agentId = "main";
     const sessionId = "session-1";
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId,
       path: expectDefined(
         resolveSqliteTargetFromSessionStorePath(storePath, { agentId }).path,
@@ -4954,7 +4954,7 @@ describe("session accessor seam", () => {
     }).path;
     expect(databasePath).toBeDefined();
     const readGeneration = () =>
-      openOpenClawAgentDatabase({ agentId: scope.agentId, path: databasePath })
+      openCarapaceAgentDatabase({ agentId: scope.agentId, path: databasePath })
         .db.prepare("SELECT generation FROM transcript_rewrite_watermarks WHERE session_id = ?")
         .get(scope.sessionId) as { generation: string } | undefined;
 

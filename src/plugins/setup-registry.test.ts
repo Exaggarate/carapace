@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 // Verifies plugin setup registry discovery and lookup behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { withMockedWindowsPlatform } from "../test-utils/vitest-spies.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
@@ -40,7 +40,7 @@ const tempDirs: string[] = [];
 const mocks = getRegistryJitiMocks();
 
 type SetupRegistryApi = Pick<
-  import("./types.js").OpenClawPluginApi,
+  import("./types.js").CarapacePluginApi,
   "registerProvider" | "registerCliBackend" | "registerConfigMigration" | "registerAutoEnableProbe"
 >;
 
@@ -70,7 +70,7 @@ function forceNodeRuntimeVersionsForTest(): () => void {
 }
 
 function makeTempDir(): string {
-  return makeTrackedTempDir("openclaw-setup-registry", tempDirs);
+  return makeTrackedTempDir("carapace-setup-registry", tempDirs);
 }
 
 function writeSetupApiStub(pluginRoot: string): void {
@@ -329,7 +329,7 @@ describe("setup-registry module loader", () => {
     fs.writeFileSync(artifactSetup, "export default {};\n", "utf-8");
     fs.writeFileSync(
       path.join(path.dirname(artifactSetup), "package.json"),
-      JSON.stringify({ openclaw: { extensions: ["./index.js"] } }),
+      JSON.stringify({ carapace: { extensions: ["./index.js"] } }),
     );
     mocks.loadPluginManifestRegistry.mockReturnValue({
       plugins: [
@@ -994,7 +994,7 @@ describe("setup-registry module loader", () => {
     mockSinglePlugin({ id: "runtime-dependent-setup", rootDir: pluginRoot });
     mocks.createJiti.mockImplementation(() => () => ({
       default: {
-        register(api: import("./types.js").OpenClawPluginApi) {
+        register(api: import("./types.js").CarapacePluginApi) {
           api.runtime.state.openSyncKeyedStore({ namespace: "example", maxEntries: 1 });
         },
       },
@@ -1431,7 +1431,7 @@ describe("setup-registry module loader", () => {
       writeSetupApiStub(secondRoot);
       mocks.loadPluginManifestRegistry.mockImplementation(
         (params?: { env?: NodeJS.ProcessEnv }) => {
-          const id = params?.env?.OPENCLAW_BUNDLED_PLUGINS_DIR === secondRoot ? "second" : "first";
+          const id = params?.env?.CARAPACE_BUNDLED_PLUGINS_DIR === secondRoot ? "second" : "first";
           return {
             plugins: [
               {
@@ -1457,22 +1457,22 @@ describe("setup-registry module loader", () => {
           },
         });
       });
-      const previousBundledDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+      const previousBundledDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
 
       try {
-        process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = firstRoot;
+        process.env.CARAPACE_BUNDLED_PLUGINS_DIR = firstRoot;
         expect(resolvePluginSetupRegistry().providers.map((entry) => entry.provider.id)).toEqual([
           "first",
         ]);
-        process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = secondRoot;
+        process.env.CARAPACE_BUNDLED_PLUGINS_DIR = secondRoot;
         expect(resolvePluginSetupRegistry().providers.map((entry) => entry.provider.id)).toEqual([
           "second",
         ]);
       } finally {
         if (previousBundledDir === undefined) {
-          delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+          delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
         } else {
-          process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = previousBundledDir;
+          process.env.CARAPACE_BUNDLED_PLUGINS_DIR = previousBundledDir;
         }
       }
       expect(mocks.loadPluginManifestRegistry).toHaveBeenCalledTimes(2);

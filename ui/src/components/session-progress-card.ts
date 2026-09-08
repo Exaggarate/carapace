@@ -1,5 +1,5 @@
-import type { ProgressCard, ProgressCardStep, SessionRunStatus } from "@openclaw/gateway-protocol";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import type { ProgressCard, ProgressCardStep, SessionRunStatus } from "@carapace/gateway-protocol";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { html, nothing } from "lit";
 import { AsyncDirective } from "lit/async-directive.js";
 import { directive } from "lit/directive.js";

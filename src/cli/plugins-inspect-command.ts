@@ -1,4 +1,4 @@
-// `openclaw plugins inspect`: renders plugin registry shape, capabilities, policy, diagnostics, and install records.
+// `carapace plugins inspect`: renders plugin registry shape, capabilities, policy, diagnostics, and install records.
 import { getTerminalTableWidth, renderTable } from "../../packages/terminal-core/src/table.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import { listAgentIds } from "../agents/agent-scope-config.js";
@@ -25,7 +25,7 @@ import { formatCliJsonFailure } from "./failure-output.js";
 import { quietPluginJsonLogger } from "./plugins-json-logger.js";
 import { formatPluginBundleFormat, formatPluginStatus } from "./plugins-list-format.js";
 
-/** Options accepted by `openclaw plugins inspect`. */
+/** Options accepted by `carapace plugins inspect`. */
 export type PluginInspectOptions = {
   json?: boolean;
   all?: boolean;
@@ -272,7 +272,7 @@ export async function runPluginsInspectCommand(
       // An explicit multi-agent roster has no single default diagnostic owner.
       const agentIds = listAgentIds(cfg);
       const lines = [
-        "Skill Workshop is built into OpenClaw, not a plugin; configure it under skills.workshop.",
+        "Skill Workshop is built into Carapace, not a plugin; configure it under skills.workshop.",
       ];
       for (const agentId of agentIds.length > 0 ? agentIds : [undefined]) {
         const diagnostic = detectSkillWorkshopToolPolicyDiagnostic({
@@ -323,7 +323,7 @@ export async function runPluginsInspectCommand(
     : formatReport(snapshotReport);
   if (output === undefined) {
     failPluginInspect(
-      formatMissingPluginMessage({ id, listCommand: "openclaw plugins list --json" }),
+      formatMissingPluginMessage({ id, listCommand: "carapace plugins list --json" }),
       opts.json,
     );
   } else if (opts.json) {
@@ -361,7 +361,7 @@ function formatPluginInspection(
   if (inspect.plugin.failedAt) {
     lines.push(`${theme.muted("Failed at:")} ${inspect.plugin.failedAt.toISOString()}`);
   }
-  lines.push(`${theme.muted("Format:")} ${inspect.plugin.format ?? "openclaw"}`);
+  lines.push(`${theme.muted("Format:")} ${inspect.plugin.format ?? "carapace"}`);
   if (inspect.plugin.bundleFormat) {
     lines.push(
       `${theme.muted("Bundle format:")} ${formatPluginBundleFormat(inspect.plugin.bundleFormat)}`,

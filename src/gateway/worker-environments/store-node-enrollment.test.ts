@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   consumeDeviceBootstrapTokenWithSetupCompletion,
@@ -10,27 +10,27 @@ import {
 } from "../../infra/device-bootstrap.js";
 import { CLOUD_WORKER_PAIRING_SETUP_BOOTSTRAP_PROFILE } from "../../shared/device-bootstrap-profile.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { hashWorkerCredential } from "./credential.js";
 import { createWorkerEnvironmentStore, type WorkerEnvironmentStore } from "./store.js";
 
 const BOOTSTRAP_RECEIPT = {
   bundleHash: "a".repeat(64),
-  openclawVersion: "2026.7.1",
+  carapaceVersion: "2026.7.1",
   protocolFeatures: ["workspace-sync-v1", "model-proxy-v1"],
 };
 
 describe("worker environment node enrollment store", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let store: WorkerEnvironmentStore;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-node-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worker-node-"));
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => 1_000 });
     store.createIntent({
       environmentId: "worker-enrollment",
@@ -42,7 +42,7 @@ describe("worker environment node enrollment store", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 

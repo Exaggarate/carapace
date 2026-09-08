@@ -1,5 +1,5 @@
 import { resolveChannelTtsVoiceDelivery } from "../channels/plugins/tts-capabilities.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { logVerbose } from "../globals.js";
 import { transcodeAudioBuffer } from "../media/media-services.js";
 import { assertSecretOwnerAvailable } from "../secrets/runtime-degraded-state.js";
@@ -15,7 +15,7 @@ import {
 
 export type TtsAudioPersistence = (params: {
   audioBuffer: Buffer;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   fileExtension: string;
   outputFormat?: string;
 }) => Promise<string>;
@@ -82,7 +82,7 @@ export function shouldDeliverTtsAsVoice(params: {
 export async function textToSpeechCore(
   params: {
     text: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     prefsPath?: string;
     channel?: string;
     overrides?: TtsDirectiveOverrides;
@@ -207,7 +207,7 @@ async function maybePreTranscodeForVoiceDelivery(params: {
 
 type SpeechSynthesisParams = {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;

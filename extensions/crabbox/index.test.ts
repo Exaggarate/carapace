@@ -1,20 +1,20 @@
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  CarapacePluginApi,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
   WorkerProvider,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import * as processRuntime from "carapace/plugin-sdk/process-runtime";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { createNodeBootstrapFixture } from "./src/crabbox-worker-node-enrollment.test-support.js";
@@ -52,7 +52,7 @@ function inspectResult(leaseId: string): SpawnResult {
       sshHost: "worker.example.test",
       sshKey: "/mock/worker-key",
       sshPort: 2222,
-      sshUser: "openclaw",
+      sshUser: "carapace",
       state: "running",
     }),
   });
@@ -60,7 +60,7 @@ function inspectResult(leaseId: string): SpawnResult {
 
 function registerCrabboxGeneration() {
   const providers: WorkerProvider[] = [];
-  const services: OpenClawPluginService[] = [];
+  const services: CarapacePluginService[] = [];
   plugin.register(
     createTestPluginApi({
       id: "crabbox",
@@ -72,8 +72,8 @@ function registerCrabboxGeneration() {
   return { provider: providers[0]!, services };
 }
 
-function stopGeneration(services: OpenClawPluginService[]): void | Promise<void> {
-  return services[0]?.stop?.({} as OpenClawPluginServiceContext);
+function stopGeneration(services: CarapacePluginService[]): void | Promise<void> {
+  return services[0]?.stop?.({} as CarapacePluginServiceContext);
 }
 
 describe("Crabbox plugin generation lifecycle", () => {
@@ -85,7 +85,7 @@ describe("Crabbox plugin generation lifecycle", () => {
   });
 
   it("lazily exposes warm-image inspection and acknowledged recovery through the plugin CLI", async () => {
-    const registrars: Parameters<OpenClawPluginApi["registerCli"]>[0][] = [];
+    const registrars: Parameters<CarapacePluginApi["registerCli"]>[0][] = [];
     const api = createTestPluginApi({
       id: "crabbox",
       rootDir: fileURLToPath(new URL(".", import.meta.url)),
@@ -160,7 +160,7 @@ describe("Crabbox plugin generation lifecycle", () => {
                   setupId: "fixture-setup-id",
                 }
               : { mode: "resume" as const, deviceId: "device-classless" }),
-            openclawVersion: "2026.8.1",
+            carapaceVersion: "2026.8.1",
             nodeBootstrap: createNodeBootstrapFixture(),
             displayName: "Classless worker",
             waitForDeviceId,
@@ -298,7 +298,7 @@ describe("Crabbox plugin generation lifecycle", () => {
   });
 
   it("holds plugin service stop until an aborted image deletion settles", async () => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-crabbox-maintenance-generation-"));
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-crabbox-maintenance-generation-"));
     const store = createPluginStateSyncKeyedStoreForTests<WarmProfileRecord>("crabbox", {
       namespace: "warm-images",
       maxEntries: 128,

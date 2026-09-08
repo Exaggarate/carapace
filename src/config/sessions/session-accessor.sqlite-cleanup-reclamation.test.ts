@@ -5,9 +5,9 @@ import { performance } from "node:perf_hooks";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
   cleanupSessionLifecycleArtifactsCore,
   loadSessionEntry,
@@ -43,7 +43,7 @@ describe("SQLite lifecycle cleanup reclamation", () => {
 
   beforeEach(() => {
     storePath = path.join(
-      tempDirs.make("openclaw-session-cleanup-reclamation-"),
+      tempDirs.make("carapace-session-cleanup-reclamation-"),
       "agents",
       "main",
       "sessions",
@@ -53,7 +53,7 @@ describe("SQLite lifecycle cleanup reclamation", () => {
 
   afterEach(() => {
     archiveMaterializationHook.afterMaterialize = undefined;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("does not start a worker when startup cleanup has nothing to reclaim", async () => {
@@ -277,7 +277,7 @@ describe("SQLite lifecycle cleanup reclamation", () => {
     }
 
     const maxGapMs = Math.max(...samples);
-    if (process.env.OPENCLAW_TEST_RECLAMATION_LOG === "1") {
+    if (process.env.CARAPACE_TEST_RECLAMATION_LOG === "1") {
       process.stdout.write(
         `${JSON.stringify({ owner: "lifecycle-cleanup", rows, maxGapMs, result })}\n`,
       );
@@ -314,5 +314,5 @@ function openDatabase(storePath: string) {
   if (!databasePath) {
     throw new Error("expected lifecycle-cleanup reclamation database path");
   }
-  return openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+  return openCarapaceAgentDatabase({ agentId: "main", path: databasePath });
 }

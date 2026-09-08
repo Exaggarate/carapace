@@ -1,8 +1,8 @@
 import type { ChatMember, ReactionTypeEmoji } from "grammy/types";
-import { resolveChannelConfigWrites } from "openclaw/plugin-sdk/channel-config-helpers";
-import { reportChannelRoomJoin } from "openclaw/plugin-sdk/channel-join-intro-runtime";
-import { mutateConfigFile } from "openclaw/plugin-sdk/config-mutation";
-import { danger, logVerbose, warn } from "openclaw/plugin-sdk/runtime-env";
+import { resolveChannelConfigWrites } from "carapace/plugin-sdk/channel-config-helpers";
+import { reportChannelRoomJoin } from "carapace/plugin-sdk/channel-join-intro-runtime";
+import { mutateConfigFile } from "carapace/plugin-sdk/config-mutation";
+import { danger, logVerbose, warn } from "carapace/plugin-sdk/runtime-env";
 import { resolveTelegramAccount } from "./accounts.js";
 import { normalizeAllowFrom } from "./bot-access.js";
 import type { TelegramHandlerAuthorization } from "./bot-handlers.inbound-authorization.js";

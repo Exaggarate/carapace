@@ -29,7 +29,7 @@ function fixture(params?: {
   androidVersionCode?: number;
   mobileVersion?: string;
 }): string {
-  const rootDir = tempDirs.make("openclaw-mobile-release-");
+  const rootDir = tempDirs.make("carapace-mobile-release-");
   const mobileVersion = params?.mobileVersion ?? "2026.8.1";
   const androidVersion = params?.androidVersion ?? "2026.7.4";
   const androidVersionCode = params?.androidVersionCode ?? 2026070401;
@@ -47,9 +47,9 @@ function fixture(params?: {
     "apps/android/CHANGELOG.md": "# Android changelog\n\nuntouched\n",
     "apps/android/fastlane/Fastfile": "# untouched android fastfile\n",
     "apps/ios/CHANGELOG.md":
-      "# OpenClaw iOS Changelog\n\n## Unreleased\n\n- Shared mobile release notes.\n\n## 2026.8.10\n\n- Previous notes.\n",
+      "# Carapace iOS Changelog\n\n## Unreleased\n\n- Shared mobile release notes.\n\n## 2026.8.10\n\n- Previous notes.\n",
     "apps/ios/fastlane/Fastfile": "# untouched ios fastfile\n",
-    "apps/macos/Sources/OpenClaw/Resources/Info.plist": "<plist>untouched</plist>\n",
+    "apps/macos/Sources/Carapace/Resources/Info.plist": "<plist>untouched</plist>\n",
     ".github/workflows/release.yml": "name: untouched\n",
   };
   for (const [relativePath, content] of Object.entries(files)) {
@@ -157,7 +157,7 @@ describe("mobile release cutter", () => {
       '{\n  "version": "2026.8.2",\n  "versionCode": 2026080201\n}\n',
     );
     expect(after.get("apps/android/Config/Version.properties")).toContain(
-      "OPENCLAW_ANDROID_VERSION_CODE=2026080201",
+      "CARAPACE_ANDROID_VERSION_CODE=2026080201",
     );
     expect(after.get("apps/android/fastlane/metadata/android/en-US/release_notes.txt")).toBe(
       "- Shared mobile release notes.\n",
@@ -257,7 +257,7 @@ describe("mobile release cutter", () => {
     const forbiddenPaths = [
       "package.json",
       "CHANGELOG.md",
-      "apps/macos/Sources/OpenClaw/Resources/Info.plist",
+      "apps/macos/Sources/Carapace/Resources/Info.plist",
       "apps/android/CHANGELOG.md",
       "apps/android/fastlane/Fastfile",
       "apps/ios/fastlane/Fastfile",
@@ -294,7 +294,7 @@ describe("mobile release cutter", () => {
     writeFile(
       rootDir,
       "apps/ios/CHANGELOG.md",
-      "# OpenClaw iOS Changelog\n\n## Unreleased\n\n- Retry fix.\n\n## 2026.8.20\n\n- Existing release note.\n",
+      "# Carapace iOS Changelog\n\n## Unreleased\n\n- Retry fix.\n\n## 2026.8.20\n\n- Existing release note.\n",
     );
     applyMobileReleasePlan(
       planMobileRelease({ gatewayVersion: "2026.8.2", phase: "prepare", rootDir }),

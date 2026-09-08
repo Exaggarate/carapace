@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { loadOpenClawPluginCliRegistry, loadOpenClawPlugins } from "./loader.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { loadCarapacePluginCliRegistry, loadCarapacePlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   EMPTY_PLUGIN_SCHEMA,
@@ -26,7 +26,7 @@ it.each(["runtime", "cli"] as const)(
       body: `require("node:fs").writeFileSync(${JSON.stringify(imported)}, "imported");
 module.exports = { id: "admission-contract", register() {} };`,
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: { enabled: true, slots: { memory: "none" } },
     };
     const options = {
@@ -38,7 +38,7 @@ module.exports = { id: "admission-contract", register() {} };`,
             origin: "bundled" as const,
             rootDir: plugin.dir,
             source: plugin.file,
-            manifestPath: path.join(plugin.dir, "openclaw.plugin.json"),
+            manifestPath: path.join(plugin.dir, "carapace.plugin.json"),
             channels: [],
             providers: [],
             cliBackends: [],
@@ -57,8 +57,8 @@ module.exports = { id: "admission-contract", register() {} };`,
     };
     const registry =
       surface === "runtime"
-        ? loadOpenClawPlugins(options)
-        : await loadOpenClawPluginCliRegistry(options);
+        ? loadCarapacePlugins(options)
+        : await loadCarapacePluginCliRegistry(options);
     expect(registry.plugins).toHaveLength(1);
     expect(registry.plugins[0]).toMatchObject({
       id: plugin.id,
@@ -109,13 +109,13 @@ module.exports = { plugin: channel };`,
     packageJson: {
       name: "@example/admission-setup",
       version: "1.0.0",
-      openclaw: {
+      carapace: {
         extensions: ["./index.cjs"],
         ...(setupEntry ? { setupEntry: "./setup.cjs" } : {}),
       },
     },
   });
-  const registry = loadOpenClawPlugins({
+  const registry = loadCarapacePlugins({
     config: { plugins: { allow: [plugin.id], load: { paths: [plugin.dir] } } },
     onlyPluginIds: [plugin.id],
     includeSetupOnlyChannelPlugins: true,

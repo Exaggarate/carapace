@@ -17,7 +17,7 @@ import { applyPatch, createMemoryPatchSandbox } from "./apply-patch.test-support
 async function withTempDir<T>(fn: (dir: string) => Promise<T>) {
   // realpath: production sandbox checks compare against canonical paths; on macOS
   // os.tmpdir() is a /var -> /private/var symlink, which otherwise trips the guard.
-  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-patch-")));
+  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-patch-")));
   try {
     return await fn(dir);
   } finally {
@@ -26,7 +26,7 @@ async function withTempDir<T>(fn: (dir: string) => Promise<T>) {
 }
 
 async function withWorkspaceTempDir<T>(fn: (dir: string) => Promise<T>) {
-  const dir = await fs.mkdtemp(path.join(process.cwd(), "openclaw-patch-workspace-"));
+  const dir = await fs.mkdtemp(path.join(process.cwd(), "carapace-patch-workspace-"));
   try {
     return await fn(dir);
   } finally {
@@ -477,7 +477,7 @@ describe("applyPatch", () => {
 
   it("rejects absolute paths outside cwd by default", async () => {
     await withTempDir(async (dir) => {
-      const escapedPath = path.join(os.tmpdir(), `openclaw-apply-patch-${Date.now()}.txt`);
+      const escapedPath = path.join(os.tmpdir(), `carapace-apply-patch-${Date.now()}.txt`);
 
       try {
         await expectOutsideWriteRejected({
@@ -690,7 +690,7 @@ describe("applyPatch", () => {
 
   it("allows deleting a symlink itself even if it points outside cwd", async () => {
     await withTempDir(async (dir) => {
-      const outsideDir = await fs.mkdtemp(path.join(path.dirname(dir), "openclaw-patch-outside-"));
+      const outsideDir = await fs.mkdtemp(path.join(path.dirname(dir), "carapace-patch-outside-"));
       try {
         const outsideTarget = path.join(outsideDir, "target.txt");
         await fs.writeFile(outsideTarget, "keep\n", "utf8");
@@ -724,7 +724,7 @@ describe("applyPatch", () => {
       return;
     }
     await withTempDir(async (dir) => {
-      const outsideDir = await fs.mkdtemp(path.join(path.dirname(dir), "openclaw-patch-outside-"));
+      const outsideDir = await fs.mkdtemp(path.join(path.dirname(dir), "carapace-patch-outside-"));
       try {
         const sourcePath = path.join(dir, "source.txt");
         const outsideTarget = path.join(outsideDir, "moved.txt");
@@ -756,7 +756,7 @@ describe("applyPatch", () => {
     async () => {
       await withTempDir(async (dir) => {
         const inside = path.join(dir, "inside");
-        const outside = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-patch-outside-"));
+        const outside = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-patch-outside-"));
         const slot = path.join(dir, "slot");
         await fs.mkdir(inside, { recursive: true });
         await fs.writeFile(path.join(inside, "target.txt"), "inside\n", "utf8");
@@ -797,7 +797,7 @@ describe("applyPatch", () => {
     async () => {
       await withTempDir(async (dir) => {
         const inside = path.join(dir, "inside");
-        const outside = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-patch-outside-"));
+        const outside = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-patch-outside-"));
         const slot = path.join(dir, "slot");
         await fs.mkdir(inside, { recursive: true });
         await createRebindableDirectoryAlias({

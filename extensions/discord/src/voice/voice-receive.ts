@@ -1,8 +1,8 @@
 import { PassThrough } from "node:stream";
-import type { OpenClawConfig, DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { CarapaceConfig, DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import type { Client } from "../internal/discord.js";
 import type { DiscordLivePolicyReader } from "../monitor/live-policy.js";
 import { decodeOpusStreamChunks } from "./audio.js";
@@ -61,7 +61,7 @@ export class DiscordVoiceReceive {
       accountId: string;
       admissionAllowFrom?: string[];
       botUserId: () => string | undefined;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       client: Client;
       discordConfig: DiscordAccountConfig;
       getSession: (guildId: string) => VoiceSessionEntry | undefined;

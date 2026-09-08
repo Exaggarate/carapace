@@ -5,7 +5,7 @@ import type { ConfigWriteOptions } from "../config/io.js";
 import { inheritLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import { applyMergePatch, createMergePatch } from "../config/merge-patch.js";
 import type { ConfigWriteAfterWrite } from "../config/runtime-snapshot.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { transformConfigWithPendingPluginInstalls } from "../plugins/install-record-commit.js";
 import { resolveDefaultSecretProviderAlias } from "../secrets/ref-contract.js";
 import { t } from "./i18n/index.js";
@@ -82,7 +82,7 @@ export function formatQuickstartGatewaySummary(
  * flows never drop install records that a concurrent migration already staged.
  */
 export async function writeWizardConfigFile(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   opts: {
     allowConfigSizeDrop?: boolean;
     /** Reject the write if config changed after the caller's verified snapshot. */
@@ -90,12 +90,12 @@ export async function writeWizardConfigFile(
     /** Preserve an absent-file precondition that cannot be represented by baseHash. */
     baseSnapshot?: ConfigFileSnapshot;
     /** Apply only the wizard's delta to the latest authored config. */
-    mergeBase?: OpenClawConfig;
+    mergeBase?: CarapaceConfig;
     writeOptions?: ConfigWriteOptions;
     /** Runtime follow-up intent for the Gateway config watcher. */
     afterWrite?: ConfigWriteAfterWrite;
   } = {},
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const committed = await transformConfigWithPendingPluginInstalls({
     ...(opts.baseHash !== undefined ? { baseHash: opts.baseHash } : {}),
     // Caller-owned snapshots are one-shot CAS preconditions, not retry baselines.
@@ -110,7 +110,7 @@ export async function writeWizardConfigFile(
     },
     transform: (current) => ({
       nextConfig: opts.mergeBase
-        ? (applyMergePatch(current, createMergePatch(opts.mergeBase, config)) as OpenClawConfig)
+        ? (applyMergePatch(current, createMergePatch(opts.mergeBase, config)) as CarapaceConfig)
         : config,
     }),
   });
@@ -121,10 +121,10 @@ export async function readSetupConfigFileSnapshot() {
   return await createConfigIO({ pluginValidation: "skip" }).readConfigFileSnapshot();
 }
 
-export async function readValidSetupConfigFile(): Promise<OpenClawConfig> {
+export async function readValidSetupConfigFile(): Promise<CarapaceConfig> {
   const snapshot = await readSetupConfigFileSnapshot();
   if (!snapshot.valid) {
-    throw new Error("Migration target config became invalid. Run `openclaw doctor`.");
+    throw new Error("Migration target config became invalid. Run `carapace doctor`.");
   }
   return snapshot.exists ? (snapshot.sourceConfig ?? snapshot.config) : {};
 }
@@ -133,8 +133,8 @@ export async function readValidSetupConfigFile(): Promise<OpenClawConfig> {
 export async function requireRiskAcknowledgement(params: {
   opts: OnboardOptions;
   prompter: WizardPrompter;
-  config: OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  config: CarapaceConfig;
+}): Promise<CarapaceConfig> {
   if (params.config.wizard?.securityAcknowledgedAt) {
     return params.config;
   }
@@ -155,7 +155,7 @@ export async function requireRiskAcknowledgement(params: {
   return applySecurityAcknowledgement(params.config);
 }
 
-function applySecurityAcknowledgement(config: OpenClawConfig): OpenClawConfig {
+function applySecurityAcknowledgement(config: CarapaceConfig): CarapaceConfig {
   if (config.wizard?.securityAcknowledgedAt) {
     return config;
   }
@@ -172,8 +172,8 @@ function applySecurityAcknowledgement(config: OpenClawConfig): OpenClawConfig {
 export async function requestTelemetryConsent(params: {
   opts: OnboardOptions;
   prompter: WizardPrompter;
-  config: OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  config: CarapaceConfig;
+}): Promise<CarapaceConfig> {
   if (params.opts.nonInteractive === true || params.config.telemetry?.consentedAt) {
     return params.config;
   }
@@ -200,7 +200,7 @@ export async function requestTelemetryConsent(params: {
 
 /** Derive quickstart gateway defaults, preserving any existing gateway settings. */
 export function resolveQuickstartGatewayDefaults(
-  baseConfig: OpenClawConfig,
+  baseConfig: CarapaceConfig,
   overrides: QuickstartGatewayOptionOverrides = {},
 ): QuickstartGatewayDefaults {
   const hasExisting =

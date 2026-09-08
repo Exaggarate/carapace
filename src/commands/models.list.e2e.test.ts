@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
 
@@ -146,7 +146,7 @@ vi.mock("../agents/prepared-model-catalog.js", () => ({
   loadPreparedModelCatalogOwnerSnapshot: async (params: { agentDir?: string; config?: object }) => {
     const entries = await loadModelCatalog(params);
     return {
-      agentDir: params.agentDir ?? "/tmp/openclaw-agent",
+      agentDir: params.agentDir ?? "/tmp/carapace-agent",
       config: params.config ?? {},
       metadataSnapshot: { manifestRegistry: { plugins: [] } },
       modelCatalog: { entries, routeVariants: entries, staticEntries: entries },
@@ -169,7 +169,7 @@ vi.mock("./models/list.scoped-catalog.js", () => ({
 
 vi.mock("../agents/prepared-model-registry.js", () => ({
   loadPreparedAgentModelRegistry: async (config: object, options?: { agentDir?: string }) => ({
-    agentDir: options?.agentDir ?? "/tmp/openclaw-agent",
+    agentDir: options?.agentDir ?? "/tmp/carapace-agent",
     config,
     registry: createMockModelRegistry(),
   }),
@@ -399,11 +399,11 @@ describe("models list/status", () => {
   }
 
   async function writeWorkspaceAuthEvidencePlugin(workspaceDir: string) {
-    const pluginDir = path.join(workspaceDir, ".openclaw", "extensions", "workspace-cloud");
+    const pluginDir = path.join(workspaceDir, ".carapace", "extensions", "workspace-cloud");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(path.join(pluginDir, "index.ts"), "export default {}\n", "utf8");
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "workspace-cloud",
         configSchema: { type: "object" },
@@ -601,7 +601,7 @@ describe("models list/status", () => {
   });
 
   it("models list uses trusted workspace plugin auth evidence for configured rows", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-models-list-auth-"));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-models-list-auth-"));
     const workspaceDir = path.join(tempRoot, "workspace");
     const bundledDir = path.join(tempRoot, "bundled");
     const stateDir = path.join(tempRoot, "state");
@@ -641,8 +641,8 @@ describe("models list/status", () => {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+          CARAPACE_STATE_DIR: stateDir,
           WORKSPACE_CLOUD_CREDENTIALS: credentialsPath,
         },
         () => modelsListCommand({ all: true, provider: "workspace-cloud", json: true }, runtime),

@@ -16,8 +16,8 @@ import { CUSTODIAN_PANEL_TOGGLE_EVENT, HOME_PANEL_TOGGLE_EVENT } from "./panel-t
 import "./assistant-panel.ts";
 
 vi.mock("./home-session.runtime.ts", () => {
-  if (!customElements.get("openclaw-home-session")) {
-    customElements.define("openclaw-home-session", class extends HTMLElement {});
+  if (!customElements.get("carapace-home-session")) {
+    customElements.define("carapace-home-session", class extends HTMLElement {});
   }
   return {};
 });
@@ -44,7 +44,7 @@ async function mountPanel(options: { global?: boolean } = {}) {
   });
   const { context: baseContext, setGatewaySnapshot } = createContext(
     request,
-    ["openclaw.chat", "chat.history", "chat.send"],
+    ["carapace.chat", "chat.history", "chat.send"],
     {
       agentsList: {
         defaultId: "main",
@@ -66,7 +66,7 @@ async function mountPanel(options: { global?: boolean } = {}) {
   onTestFinished(() => context.sessions.dispose());
   const provider = createApplicationContextProvider(context);
   const store = new CustodianSessionStore();
-  const panel = document.createElement("openclaw-assistant-panel") as TestAssistantPanel;
+  const panel = document.createElement("carapace-assistant-panel") as TestAssistantPanel;
   panel.store = store;
   panel.custodianAvailable = true;
   panel.custodianSuppressed = true;
@@ -128,7 +128,7 @@ describe("assistant panel", () => {
       await panel.updateComplete;
       const home = () =>
         panel.querySelector<HTMLElement & { sessionKey: string; agentId: string }>(
-          "openclaw-home-session",
+          "carapace-home-session",
         );
       expect(home()?.sessionKey).toBe(global ? "global" : "agent:main:home");
       expect(home()?.agentId).toBe("main");
@@ -212,7 +212,7 @@ describe("assistant panel", () => {
     await vi.dynamicImportSettled();
     await panel.updateComplete;
     const workContext = () =>
-      panel.querySelector<HTMLElement & { workContext: ChatWorkContext }>("openclaw-home-session")
+      panel.querySelector<HTMLElement & { workContext: ChatWorkContext }>("carapace-home-session")
         ?.workContext;
     const expected = {
       page: "chat",
@@ -328,7 +328,7 @@ describe("assistant panel", () => {
     window.dispatchEvent(new CustomEvent(HOME_PANEL_TOGGLE_EVENT));
     await vi.dynamicImportSettled();
     await panel.updateComplete;
-    expect(panel.querySelector("openclaw-home-session")).not.toBeNull();
+    expect(panel.querySelector("carapace-home-session")).not.toBeNull();
     panel.remove();
 
     const { panel: replacement } = await mountPanel();
@@ -337,20 +337,20 @@ describe("assistant panel", () => {
     replacement.custodianSuppressed = false;
     await replacement.updateComplete;
     const home = replacement.querySelector<HTMLElement & { agentId: string }>(
-      "openclaw-home-session",
+      "carapace-home-session",
     );
     expect(home?.agentId).toBe("main");
     expect(replacement.assistantPanelOpen).toBe(true);
     window.dispatchEvent(new CustomEvent(CUSTODIAN_PANEL_TOGGLE_EVENT));
     await replacement.updateComplete;
-    expect(replacement.querySelector("openclaw-home-session")).toBeNull();
-    expect(replacement.querySelector("openclaw-custodian-surface")).not.toBeNull();
+    expect(replacement.querySelector("carapace-home-session")).toBeNull();
+    expect(replacement.querySelector("carapace-custodian-surface")).not.toBeNull();
     expect(replacement.querySelectorAll(".assistant-panel")).toHaveLength(1);
   });
 
   it("restores Home only after the selected transcript has rendered, preserving dock geometry", async () => {
     const { panel: replacement, provider } = await restoreHomePanel();
-    const home = () => replacement.querySelector("openclaw-home-session");
+    const home = () => replacement.querySelector("carapace-home-session");
     expect(replacement.assistantPanelOpen).toBe(true);
     expect(document.documentElement.style.getPropertyValue("--oc-assistant-reserve-right")).toBe(
       "440px",
@@ -358,7 +358,7 @@ describe("assistant panel", () => {
     expect(home()).toBeNull();
 
     let finishRender!: () => void;
-    const pane = Object.assign(document.createElement("openclaw-chat-pane"), {
+    const pane = Object.assign(document.createElement("carapace-chat-pane"), {
       sessionKey: "agent:main:task",
       presented: true,
       transcriptReady: false,
@@ -398,7 +398,7 @@ describe("assistant panel", () => {
     "releases restored Home without a primary transcript for %s navigation",
     async (release) => {
       const { panel: replacement } = await restoreHomePanel();
-      expect(replacement.querySelector("openclaw-home-session")).toBeNull();
+      expect(replacement.querySelector("carapace-home-session")).toBeNull();
       if (release === "explicit") {
         window.dispatchEvent(new CustomEvent(HOME_PANEL_TOGGLE_EVENT, { detail: { open: true } }));
       } else if (release === "non-chat") {
@@ -407,7 +407,7 @@ describe("assistant panel", () => {
         replacement.pageRouteFailed = true;
       }
       await replacement.updateComplete;
-      expect(replacement.querySelector("openclaw-home-session")).not.toBeNull();
+      expect(replacement.querySelector("carapace-home-session")).not.toBeNull();
     },
   );
 
@@ -496,7 +496,7 @@ describe("assistant panel", () => {
     await panel.updateComplete;
 
     const postMessage = vi.fn();
-    vi.stubGlobal("webkit", { messageHandlers: { openclawWindowDrag: { postMessage } } });
+    vi.stubGlobal("webkit", { messageHandlers: { carapaceWindowDrag: { postMessage } } });
     const cases = [
       [".assistant-panel-header", true],
       [".assistant-panel-title", true],
@@ -505,7 +505,7 @@ describe("assistant panel", () => {
       [".assistant-panel-actions button:first-child svg", false],
       [".assistant-panel-actions button:last-child", false],
       [".assistant-panel-actions button:last-child svg", false],
-      ["openclaw-custodian-surface", false],
+      ["carapace-custodian-surface", false],
     ] as const;
     for (const [selector, draggable] of cases) {
       postMessage.mockClear();
@@ -585,7 +585,7 @@ describe("assistant panel", () => {
     panel.minimizeRequestId = 1;
     await panel.updateComplete;
     const surface = panel.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-custodian-surface",
+      "carapace-custodian-surface",
     );
     await surface?.updateComplete;
 
@@ -609,7 +609,7 @@ describe("assistant panel", () => {
 
     expect(
       (
-        panel.querySelector(".assistant-panel-title openclaw-mascot") as HTMLElement & {
+        panel.querySelector(".assistant-panel-title carapace-mascot") as HTMLElement & {
           mood: string;
         }
       ).mood,

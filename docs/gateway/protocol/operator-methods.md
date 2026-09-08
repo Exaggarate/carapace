@@ -88,7 +88,7 @@ Methods an operator client calls on behalf of a person: helper reads, exec appro
     `skills.install.allowUploadedArchives` is enabled; the setting does not
     affect ClawHub installs.
   - Gateway installer mode: `{ name, installId, timeoutMs? }` runs a declared
-    `metadata.openclaw.install` action on the gateway host. Older clients may
+    `metadata.carapace.install` action on the gateway host. Older clients may
     still send `dangerouslyForceUnsafeInstall`; this field is deprecated,
     accepted only for protocol compatibility, and ignored. Use
     `security.installPolicy` for operator-owned install decisions.
@@ -161,4 +161,4 @@ while the other requests it.
 - Final `agent` results may include `result.deliveryStatus` when delivery was
   requested, using the same `sent`, `suppressed`, `partial_failed`, and
   `failed` statuses documented for
-  [`openclaw agent --json --deliver`](/cli/agent#json-delivery-status).
+  [`carapace agent --json --deliver`](/cli/agent#json-delivery-status).

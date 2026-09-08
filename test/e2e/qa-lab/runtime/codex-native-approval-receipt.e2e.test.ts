@@ -11,12 +11,12 @@ import {
   GatewayClient,
   startGatewayClientWhenEventLoopReady,
 } from "../../../../src/plugin-sdk/gateway-runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
 import { loadBundledPluginFacade } from "../../../../src/test-utils/bundled-plugin-public-surface.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../helpers/carapace-test-instance.js";
 
 const MODEL = "openai/gpt-5.6-luna";
 const REQUEST_TIMEOUT_MS = 60_000;
@@ -24,7 +24,7 @@ const PRIVATE_COMMAND = "printf PRIVATE_CODEX_NATIVE_APPROVAL_COMMAND";
 const PRIVATE_THREAD_ID = "thread-private-native-approval";
 const PRIVATE_ITEM_ID = "item-private-native-approval";
 
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 
 type AppServerLogEntry = {
   id?: number | string;
@@ -53,7 +53,7 @@ type ApprovalIdentityRow = {
 };
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   await instance?.cleanup();
   instance = undefined;
 });
@@ -72,8 +72,8 @@ function readJsonLines(filePath: string): AppServerLogEntry[] {
   }
 }
 
-function readApprovalIdentity(testInstance: OpenClawTestInstance, approvalId: string) {
-  const database = new DatabaseSync(path.join(testInstance.stateDir, "state", "openclaw.sqlite"), {
+function readApprovalIdentity(testInstance: CarapaceTestInstance, approvalId: string) {
+  const database = new DatabaseSync(path.join(testInstance.stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {
@@ -97,8 +97,8 @@ function readApprovalIdentity(testInstance: OpenClawTestInstance, approvalId: st
   }
 }
 
-function assertNoGenericDuplicate(testInstance: OpenClawTestInstance, approvalId: string) {
-  const database = new DatabaseSync(path.join(testInstance.stateDir, "state", "openclaw.sqlite"), {
+function assertNoGenericDuplicate(testInstance: CarapaceTestInstance, approvalId: string) {
+  const database = new DatabaseSync(path.join(testInstance.stateDir, "state", "carapace.sqlite"), {
     readOnly: true,
   });
   try {
@@ -156,7 +156,7 @@ function summarizeAppServerLog(filePath: string) {
   );
 }
 
-async function connectApprovalReviewer(testInstance: OpenClawTestInstance) {
+async function connectApprovalReviewer(testInstance: CarapaceTestInstance) {
   let resolveConnected!: () => void;
   let rejectConnected!: (error: Error) => void;
   const connected = new Promise<void>((resolve, reject) => {
@@ -197,12 +197,12 @@ describe("Codex native approval receipt", () => {
       const fixture = fileURLToPath(
         new URL("./codex-native-approval-app-server.fixture.mjs", import.meta.url),
       );
-      instance = await createOpenClawTestInstance({
+      instance = await createCarapaceTestInstance({
         name: "qa-codex-native-approval-receipt",
         env: {
-          OPENCLAW_AGENT_HARNESS_FALLBACK: "none",
-          OPENCLAW_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
+          CARAPACE_AGENT_HARNESS_FALLBACK: "none",
+          CARAPACE_QA_CODEX_APP_SERVER_VERSION: CODEX_APP_SERVER_VERSION,
+          CARAPACE_SKIP_PROVIDERS: undefined,
         },
         config: {
           logging: { audit: { enabled: true, executionIdentity: true } },
@@ -238,7 +238,7 @@ describe("Codex native approval receipt", () => {
       });
 
       const appServerLogPath = instance.state.path("codex-native-approval-app-server.jsonl");
-      instance.env.OPENCLAW_QA_CODEX_NATIVE_APPROVAL_LOG = appServerLogPath;
+      instance.env.CARAPACE_QA_CODEX_NATIVE_APPROVAL_LOG = appServerLogPath;
       writePersistedAuthProfileStoreRaw(
         {
           version: 1,

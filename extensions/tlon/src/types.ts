@@ -1,15 +1,15 @@
 import {
   createAccountListHelpers,
   resolveChannelMediaMaxBytes,
-} from "openclaw/plugin-sdk/account-helpers";
+} from "carapace/plugin-sdk/account-helpers";
 // Tlon type declarations define plugin contracts.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { ResolvedChannelImplicitMentions } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import type { ResolvedChannelImplicitMentions } from "carapace/plugin-sdk/channel-ingress-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   hasLegacyFlatAllowPrivateNetworkAlias,
   isPrivateNetworkOptInEnabled,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 
 type TlonAccountConfig = {
   /** Megabyte cap for media this channel accepts and delivers. */
@@ -58,7 +58,7 @@ export type TlonResolvedAccount = {
   ownerShip: string | null;
 };
 
-function resolveTlonChannelConfig(cfg: OpenClawConfig): TlonAccountConfig | undefined {
+function resolveTlonChannelConfig(cfg: CarapaceConfig): TlonAccountConfig | undefined {
   return cfg.channels?.tlon as TlonAccountConfig | undefined;
 }
 
@@ -74,7 +74,7 @@ const {
 export { listTlonAccountIds };
 
 function resolveMergedTlonAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
 ): Record<string, unknown> & TlonAccountConfig {
   const channel = resolveTlonChannelConfig(cfg);
@@ -86,7 +86,7 @@ function resolveMergedTlonAccountConfig(
 }
 
 export function resolveTlonAccount(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId?: string | null,
 ): TlonResolvedAccount {
   const resolvedAccountId = normalizeAccountId(accountId);

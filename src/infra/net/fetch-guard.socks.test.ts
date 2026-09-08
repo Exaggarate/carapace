@@ -469,7 +469,7 @@ describe("SOCKS proxy protocol boundaries", () => {
     { source: "active", managedHop: "http" },
   ])("keeps $source managed TLS on the $managedHop proxy hop", async ({ source, managedHop }) => {
     await withProxyFixture(async ({ socksProxy, httpsProxy, connections, certificate }) => {
-      const dir = await mkdtemp(path.join(os.tmpdir(), "openclaw-socks-ca-"));
+      const dir = await mkdtemp(path.join(os.tmpdir(), "carapace-socks-ca-"));
       const caFile = path.join(dir, "ca.pem");
       await writeFile(caFile, certificate);
       const registration =
@@ -488,8 +488,8 @@ describe("SOCKS proxy protocol boundaries", () => {
         undefined,
         {
           HTTPS_PROXY: httpsProxy,
-          OPENCLAW_PROXY_ACTIVE: "1",
-          OPENCLAW_PROXY_CA_FILE: caFile,
+          CARAPACE_PROXY_ACTIVE: "1",
+          CARAPACE_PROXY_CA_FILE: caFile,
         },
       );
       try {

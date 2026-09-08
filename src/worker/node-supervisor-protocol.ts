@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { parseWorkerLaunchPlan, type WorkerLaunchPlan } from "./launch-descriptor.js";
 import { hasExactOwnKeys } from "./protocol-record.js";
 
@@ -10,7 +10,7 @@ const NODE_WORKER_SUPERVISOR_CONTROL_REQUEST_MAX_BYTES = 4 * 1024;
 const NODE_WORKER_RESULT_JSON_MAX_BYTES = 64 * 1024;
 const NODE_WORKER_ERROR_TEXT_MAX_BYTES = 4 * 1024;
 const NODE_WORKER_CONNECTION_FAILURE_CAUSE_MAX_BYTES = 64 * 1024;
-export const NODE_WORKER_CONNECTION_FAILURE_MESSAGE_TYPE = "openclaw-worker-connection-failure-v1";
+export const NODE_WORKER_CONNECTION_FAILURE_MESSAGE_TYPE = "carapace-worker-connection-failure-v1";
 
 export type NodeWorkerLaunchInput = {
   environmentSession: 1;

@@ -24,13 +24,13 @@ vi.mock("../logging/subsystem.js", async (importOriginal) => {
 });
 
 describe("prepareWorkerGitHubEnvironment", () => {
-  const remoteUrl = "https://github.com/openclaw/worker-fixture.git";
+  const remoteUrl = "https://github.com/Exaggarate/carapace/worker-fixture.git";
   const binding = {
     token: "worker-checkout-synthetic-token",
     login: "worker-fixture",
-    branch: "openclaw/session-fixture",
+    branch: "carapace/session-fixture",
     remoteUrl,
-    gitAuthor: { name: "Worker Fixture", email: "worker@openclaw.invalid" },
+    gitAuthor: { name: "Worker Fixture", email: "worker@carapace.invalid" },
   };
   const filename = " reconciled file.txt";
   const pushedContent = "earlier worker content\n";
@@ -54,7 +54,7 @@ describe("prepareWorkerGitHubEnvironment", () => {
       "-c",
       "user.name=Worker Fixture",
       "-c",
-      "user.email=worker@openclaw.invalid",
+      "user.email=worker@carapace.invalid",
       "commit",
       "--quiet",
       "--no-gpg-sign",

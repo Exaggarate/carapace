@@ -323,7 +323,7 @@ const server = http.createServer((request, response) => {
         data: ["gpt-5.5", "primary", "fallback"].map((id) => ({
           id,
           object: "model",
-          owned_by: "openclaw-e2e",
+          owned_by: "carapace-e2e",
         })),
       });
       return;

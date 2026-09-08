@@ -25,7 +25,7 @@ function titleNamesElement(element: Element) {
 
 /** `title` remains a declarative hint source; only the shared Tooltip renders it. */
 export function installTitleTooltips(ownerDocument: Document) {
-  let tooltip: HTMLElementTagNameMap["openclaw-tooltip"] | null = null;
+  let tooltip: HTMLElementTagNameMap["carapace-tooltip"] | null = null;
   let active: {
     anchor: HTMLElement | SVGElement;
     title: string | null;
@@ -128,7 +128,7 @@ export function installTitleTooltips(ownerDocument: Document) {
     const elements = event.composedPath().filter(isTooltipTriggerElement);
     // Iframe titles name browsing contexts, not hints. Explicit wrappers already
     // own their trigger; adapting those again would create competing popups.
-    const explicit = elements.some((element) => element.localName === "openclaw-tooltip");
+    const explicit = elements.some((element) => element.localName === "carapace-tooltip");
     let anchor: HTMLElement | SVGElement | undefined;
     for (const element of elements) {
       if (element.localName === "iframe") {
@@ -179,9 +179,9 @@ export function installTitleTooltips(ownerDocument: Document) {
       observer.observe(root, { childList: true, subtree: true });
     }
     if (!explicit) {
-      tooltip ??= ownerDocument.createElement("openclaw-tooltip");
+      tooltip ??= ownerDocument.createElement("carapace-tooltip");
       const mount =
-        elements.find((element) => element.localName === "openclaw-modal-dialog") ??
+        elements.find((element) => element.localName === "carapace-modal-dialog") ??
         ownerDocument.body;
       mount.append(tooltip);
       tooltip.previewForAnchor(anchor, content(), input);

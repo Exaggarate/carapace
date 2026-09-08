@@ -8,7 +8,7 @@ import {
 import { patchSessionEntryCore } from "../../config/sessions/session-accessor.js";
 import { isRecoverableTerminalSessionStatus } from "../../config/sessions/terminal-status.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   prepareSessionWorkerPlacementMutationCheck,
   resolveWorkerPlacementArchiveRestoreError,
@@ -162,7 +162,7 @@ async function restoreArchivedDispatchSession(params: {
 export function createDispatchReplyOperationCoordinator(params: {
   allowActiveQueueResolution?: boolean;
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: FinalizedMsgContext;
   dispatcher: ReplyDispatcher;
   dispatchOperationSessionKey?: string;

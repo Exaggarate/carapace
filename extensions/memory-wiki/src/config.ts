@@ -5,10 +5,10 @@ import path from "node:path";
 import {
   resolveDefaultAgentId,
   resolveSessionAgentIdStrict,
-} from "openclaw/plugin-sdk/agent-scope-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+} from "carapace/plugin-sdk/agent-scope-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import { z } from "zod";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 
 const WIKI_VAULT_MODES = ["isolated", "bridge", "unsafe-local"] as const;
 const WIKI_VAULT_SCOPES = ["global", "agent"] as const;
@@ -30,7 +30,7 @@ export type ResolvedMemoryWikiConfig = ReturnType<typeof resolveMemoryWikiConfig
 
 export type MemoryWikiConfigResolver = (
   agentId?: string,
-  appConfig?: OpenClawConfig,
+  appConfig?: CarapaceConfig,
 ) => ResolvedMemoryWikiConfig;
 
 const DEFAULT_WIKI_VAULT_MODE: WikiVaultMode = "isolated";
@@ -188,7 +188,7 @@ export function resolveMemoryWikiConfig(
 }
 
 export function resolveMemoryWikiConfiguredAgentIds(
-  appConfig: OpenClawConfig | undefined,
+  appConfig: CarapaceConfig | undefined,
 ): string[] {
   const configuredIds = appConfig?.agents?.entries
     ? Object.keys(appConfig.agents.entries)
@@ -206,7 +206,7 @@ export function resolveMemoryWikiConfiguredAgentIds(
 /** Resolve the exact vault for one trusted runtime agent context. */
 export function resolveMemoryWikiAgentConfig(params: {
   config: ResolvedMemoryWikiConfig;
-  appConfig?: OpenClawConfig;
+  appConfig?: CarapaceConfig;
   agentId?: string;
 }): ResolvedMemoryWikiConfig {
   if (params.config.vault.scope === "global") {

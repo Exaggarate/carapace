@@ -2,7 +2,7 @@ import {
   formatLocationText,
   normalizeOutboundLocation,
   type OutboundLocation,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import { buildInlineKeyboard } from "./inline-keyboard.js";
 import {
   logTelegramOutboundSendOk,

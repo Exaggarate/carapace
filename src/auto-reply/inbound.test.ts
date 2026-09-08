@@ -1,7 +1,7 @@
 /** Tests inbound auto-reply handling across channel message contexts. */
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { GroupKeyResolution } from "../config/sessions.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
@@ -22,7 +22,7 @@ import { initSessionState } from "./reply/session.js";
 import { applyTemplate, type MsgContext, type TemplateContext } from "./templating.js";
 
 type TestChannelGroupContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   groupId?: string | null;
   groupChannel?: string | null;
   groupSpace?: string | null;
@@ -1226,7 +1226,7 @@ describe("createInboundDebouncer", () => {
 });
 
 const senderMetaTempDirs = createSuiteTempRootTracker({
-  prefix: "openclaw-sender-meta-",
+  prefix: "carapace-sender-meta-",
 });
 
 describe("initSessionState BodyStripped", () => {
@@ -1241,7 +1241,7 @@ describe("initSessionState BodyStripped", () => {
   it("prefers BodyForAgent over Body for group chats", async () => {
     const root = await senderMetaTempDirs.make("group");
     const storePath = path.join(root, "sessions.json");
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
 
     const result = await initSessionState({
       ctx: finalizeInboundContext({
@@ -1263,7 +1263,7 @@ describe("initSessionState BodyStripped", () => {
   it("prefers BodyForAgent over Body for direct chats", async () => {
     const root = await senderMetaTempDirs.make("direct");
     const storePath = path.join(root, "sessions.json");
-    const cfg = { session: { store: storePath } } as OpenClawConfig;
+    const cfg = { session: { store: storePath } } as CarapaceConfig;
 
     const result = await initSessionState({
       ctx: finalizeInboundContext({
@@ -1286,22 +1286,22 @@ describe("mention helpers", () => {
   it("builds regexes and skips invalid or unsafe patterns", () => {
     const regexes = buildMentionRegexes({
       messages: {
-        groupChat: { mentionPatterns: ["\\bopenclaw\\b", "(invalid", "(a+)+$"] },
+        groupChat: { mentionPatterns: ["\\bcarapace\\b", "(invalid", "(a+)+$"] },
       },
     });
     expect(regexes).toHaveLength(1);
-    expect(regexes[0]?.test("openclaw")).toBe(true);
+    expect(regexes[0]?.test("carapace")).toBe(true);
   });
 
   it("normalizes zero-width characters", () => {
-    expect(normalizeMentionText("open\u200bclaw")).toBe("openclaw");
+    expect(normalizeMentionText("open\u200bclaw")).toBe("carapace");
   });
 
   it("matches patterns case-insensitively", () => {
     const regexes = buildMentionRegexes({
-      messages: { groupChat: { mentionPatterns: ["\\bopenclaw\\b"] } },
+      messages: { groupChat: { mentionPatterns: ["\\bcarapace\\b"] } },
     });
-    expect(matchesMentionPatterns("OPENCLAW: hi", regexes)).toBe(true);
+    expect(matchesMentionPatterns("CARAPACE: hi", regexes)).toBe(true);
   });
 
   it("lets catch-all mention patterns match empty text", () => {
@@ -1309,7 +1309,7 @@ describe("mention helpers", () => {
       messages: { groupChat: { mentionPatterns: [".*"] } },
     });
     const specificRegexes = buildMentionRegexes({
-      messages: { groupChat: { mentionPatterns: ["\\bopenclaw\\b"] } },
+      messages: { groupChat: { mentionPatterns: ["\\bcarapace\\b"] } },
     });
 
     expect(matchesMentionPatterns("", catchAllRegexes)).toBe(true);
@@ -1341,7 +1341,7 @@ describe("mention helpers", () => {
     const cfg = {
       messages: {
         groupChat: {
-          mentionPatterns: ["\\bopenclaw\\b"],
+          mentionPatterns: ["\\bcarapace\\b"],
         },
       },
       channels: {
@@ -1352,7 +1352,7 @@ describe("mention helpers", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const allowed = buildMentionRegexes(cfg, undefined, {
       provider: "slack",
@@ -1363,27 +1363,27 @@ describe("mention helpers", () => {
       conversationId: "C999",
     });
 
-    expect(matchesMentionPatterns("openclaw: hi", allowed)).toBe(true);
-    expect(matchesMentionPatterns("openclaw: hi", denied)).toBe(false);
+    expect(matchesMentionPatterns("carapace: hi", allowed)).toBe(true);
+    expect(matchesMentionPatterns("carapace: hi", denied)).toBe(false);
   });
 
   it("preserves mention patterns for callers without scoped policy facts", () => {
     const regexes = buildMentionRegexes({
       messages: {
         groupChat: {
-          mentionPatterns: ["\\bopenclaw\\b"],
+          mentionPatterns: ["\\bcarapace\\b"],
         },
       },
     });
 
-    expect(matchesMentionPatterns("openclaw", regexes)).toBe(true);
+    expect(matchesMentionPatterns("carapace", regexes)).toBe(true);
   });
 
   it("lets provider deny lists override globally allowed mention patterns", () => {
     const cfg = {
       messages: {
         groupChat: {
-          mentionPatterns: ["\\bopenclaw\\b"],
+          mentionPatterns: ["\\bcarapace\\b"],
         },
       },
       channels: {
@@ -1393,7 +1393,7 @@ describe("mention helpers", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(
       buildMentionRegexes(cfg, undefined, {
@@ -1403,7 +1403,7 @@ describe("mention helpers", () => {
     ).toEqual([]);
     expect(
       matchesMentionPatterns(
-        "openclaw",
+        "carapace",
         buildMentionRegexes(cfg, undefined, {
           provider: "telegram",
           conversationId: "-100:topic:8",
@@ -1413,9 +1413,9 @@ describe("mention helpers", () => {
   });
 
   it("strips safe mention patterns and ignores unsafe ones", () => {
-    const stripped = stripMentions("openclaw " + "a".repeat(28) + "!", {} as MsgContext, {
+    const stripped = stripMentions("carapace " + "a".repeat(28) + "!", {} as MsgContext, {
       messages: {
-        groupChat: { mentionPatterns: ["\\bopenclaw\\b", "(a+)+$"] },
+        groupChat: { mentionPatterns: ["\\bcarapace\\b", "(a+)+$"] },
       },
     });
     expect(stripped).toBe(`${"a".repeat(28)}!`);
@@ -1434,7 +1434,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("respects Discord guild/channel requireMention settings", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           guilds: {
@@ -1465,7 +1465,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("respects Slack channel requireMention settings", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           channels: {
@@ -1491,7 +1491,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("uses Slack fallback resolver semantics for default-account wildcard channels", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         slack: {
           defaultAccount: "work",
@@ -1522,7 +1522,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("uses Discord fallback resolver semantics for guild slug matches", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           guilds: {
@@ -1552,7 +1552,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("keeps core reply-stage resolution aligned for Discord slug + wildcard guild fallbacks", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         discord: {
           guilds: {
@@ -1584,7 +1584,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("respects LINE prefixed group keys in reply-stage requireMention resolution", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         line: {
           groups: {
@@ -1609,7 +1609,7 @@ describe("resolveGroupRequireMention", () => {
   });
 
   it("preserves plugin-backed channel requireMention resolution", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         imessage: {
           groups: {

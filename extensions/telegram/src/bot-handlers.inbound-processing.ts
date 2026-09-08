@@ -1,11 +1,11 @@
 import type { Message } from "grammy/types";
-import { isAbortRequestText } from "openclaw/plugin-sdk/command-primitives-runtime";
+import { isAbortRequestText } from "carapace/plugin-sdk/command-primitives-runtime";
 import type {
   DmPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/config-contracts";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import type { NormalizedAllowFrom } from "./bot-access.js";
 import {
@@ -52,7 +52,7 @@ export interface TelegramInboundProcessing {
 }
 
 type TelegramInboundMessage = {
-  authorizationCfg: OpenClawConfig;
+  authorizationCfg: CarapaceConfig;
   ctx: TelegramContext;
   msg: Message;
   chatId: number;

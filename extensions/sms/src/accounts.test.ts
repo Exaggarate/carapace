@@ -94,7 +94,7 @@ describe("SMS account config", () => {
     const unresolvedToken = {
       source: "env",
       provider: "default",
-      id: "OPENCLAW_TEST_UNAVAILABLE_SMS_TOKEN",
+      id: "CARAPACE_TEST_UNAVAILABLE_SMS_TOKEN",
     } as const;
     const cfg = {
       channels: {

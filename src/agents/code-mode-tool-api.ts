@@ -8,7 +8,7 @@ export async function createCodeModeToolApiFile(
   callableName: string,
   entry: Pick<ToolSearchCatalogEntry, "source" | "parameters" | "outputSchema">,
 ): Promise<CodeModeApiVirtualFile> {
-  const trusted = entry.source === "openclaw";
+  const trusted = entry.source === "carapace";
   const input = trusted ? toolSchemaDeclaration(entry.parameters) : "unknown";
   const output = trusted ? toolSchemaDeclaration(entry.outputSchema) : "unknown";
   let optional = false;

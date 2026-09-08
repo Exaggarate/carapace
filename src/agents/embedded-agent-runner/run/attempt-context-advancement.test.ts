@@ -3,7 +3,7 @@ import {
   type AssistantMessage,
   type Model,
   type Message,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import type { ContextEngine } from "../../../context-engine/types.js";
 import { Agent, type AgentMessage } from "../../runtime/index.js";

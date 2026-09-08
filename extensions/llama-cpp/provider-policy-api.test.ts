@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { inspectEmbeddingProviderSetup } from "./provider-policy-api.js";
 import { buildLlamaCppProviderConfig } from "./src/defaults.js";
@@ -12,7 +12,7 @@ describe("llama.cpp embedding setup policy", () => {
       reason: expect.stringContaining("Local embeddings need the managed llama.cpp server config"),
       requirement: "managed-llama-cpp-setup",
       fixHint:
-        "Run `openclaw models --agent main auth login --provider llama-cpp --method local` in an interactive terminal, then rerun this check.",
+        "Run `carapace models --agent main auth login --provider llama-cpp --method local` in an interactive terminal, then rerun this check.",
     });
   });
 
@@ -25,7 +25,7 @@ describe("llama.cpp embedding setup policy", () => {
         args: ["--models-preset", "/managed/models.ini"],
       },
     });
-    const config: OpenClawConfig = { models: { providers: { "llama-cpp": provider } } };
+    const config: CarapaceConfig = { models: { providers: { "llama-cpp": provider } } };
     const configBefore = JSON.stringify(config);
 
     expect(

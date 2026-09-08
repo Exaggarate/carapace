@@ -18,10 +18,10 @@ export type ProfileHeroProps = {
 
 function renderHeroAvatar(props: ProfileHeroProps, name: string) {
   if (props.user) {
-    return html`<openclaw-viewer-avatar
+    return html`<carapace-viewer-avatar
       .user=${{ ...props.user, name, watchedSessions: [] }}
       variant="profile"
-    ></openclaw-viewer-avatar>`;
+    ></carapace-viewer-avatar>`;
   }
   const avatarUrl = resolveAgentAvatarUrl(props.row, props.identity);
   const textAvatar =
@@ -58,7 +58,7 @@ export function renderProfileHero(props: ProfileHeroProps) {
       <div class="profile-hero__name">${name}</div>
       <div class="profile-hero__handle">
         ${handle ? html`<span class="profile-hero__email">${handle}</span>` : nothing}
-        <span class="profile-hero__badge">OpenClaw</span>
+        <span class="profile-hero__badge">Carapace</span>
       </div>
     </section>
   `);

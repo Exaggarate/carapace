@@ -82,7 +82,7 @@ vi.mock("../infra/executable-path.js", () => ({
 }));
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureOpenClawCliOnPath: vi.fn(),
+  ensureCarapaceCliOnPath: vi.fn(),
 }));
 
 vi.mock("./config.js", () => ({

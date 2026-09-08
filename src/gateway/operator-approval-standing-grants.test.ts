@@ -11,13 +11,13 @@ import {
 } from "../cron/store/row-codec.js";
 import type { CronStoredJob } from "../cron/types.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import {
   buildCronExecOperationBinding,
@@ -33,27 +33,27 @@ import {
 } from "./operator-approval-store.js";
 
 type StandingGrantDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "operator_approval_standing_grants" | "operator_approvals" | "cron_jobs"
 >;
 type NewOperatorApproval = Parameters<typeof insertOperatorApproval>[0]["approval"];
 
-const CRON_STORE_KEY = "/tmp/openclaw-standing-grant-test-store";
+const CRON_STORE_KEY = "/tmp/carapace-standing-grant-test-store";
 const NOW_MS = 1_756_000_000_000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60_000;
 
 const tempDirs: string[] = [];
 
-function createDatabaseOptions(): OpenClawStateDatabaseOptions {
+function createDatabaseOptions(): CarapaceStateDatabaseOptions {
   const stateDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-standing-grant-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-standing-grant-")),
   );
   tempDirs.push(stateDir);
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -109,10 +109,10 @@ function cronJob(overrides: Partial<CronStoredJob> = {}): CronStoredJob {
 
 /** Persists the job and returns the revision the loader observes for it. */
 function seedCronJob(
-  databaseOptions: OpenClawStateDatabaseOptions,
+  databaseOptions: CarapaceStateDatabaseOptions,
   job: CronStoredJob = cronJob(),
 ): string {
-  const database = openOpenClawStateDatabase(databaseOptions);
+  const database = openCarapaceStateDatabase(databaseOptions);
   upsertCronJobRow(database.db, CRON_STORE_KEY, job, 0);
   const loaded = loadedCronStoreFromRows(loadCronRows(database.db, CRON_STORE_KEY));
   const loadedJob = loaded.store.jobs.find((entry) => entry.id === job.id);
@@ -129,7 +129,7 @@ const OPERATION_BINDING = buildCronExecOperationBinding({
 });
 
 function mintGrant(params: {
-  databaseOptions: OpenClawStateDatabaseOptions;
+  databaseOptions: CarapaceStateDatabaseOptions;
   approvalId?: string;
   jobConfigRevision: string;
   operationBinding?: string;
@@ -159,8 +159,8 @@ function mintGrant(params: {
   expect(resolved.outcome).toBe("resolved");
 }
 
-function readGrantRows(databaseOptions: OpenClawStateDatabaseOptions) {
-  const database = openOpenClawStateDatabase(databaseOptions);
+function readGrantRows(databaseOptions: CarapaceStateDatabaseOptions) {
+  const database = openCarapaceStateDatabase(databaseOptions);
   if (!tableExists(database.db, "operator_approval_standing_grants")) {
     return null;
   }
@@ -370,7 +370,7 @@ describe("cron standing grant consumption", () => {
   }
 
   function consume(params: {
-    databaseOptions: OpenClawStateDatabaseOptions;
+    databaseOptions: CarapaceStateDatabaseOptions;
     revision: string;
     operationBinding?: string;
     nowMs?: number;
@@ -441,7 +441,7 @@ describe("cron standing grant consumption", () => {
 
   it("fails closed after revocation", () => {
     const { databaseOptions, revision } = seedMintedGrant();
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const stateDb = getNodeSqliteKysely<StandingGrantDatabase>(database.db);
     executeSqliteQuerySync(
       database.db,
@@ -454,7 +454,7 @@ describe("cron standing grant consumption", () => {
 
   it("fails closed when the cron job was deleted", () => {
     const { databaseOptions, revision } = seedMintedGrant();
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const stateDb = getNodeSqliteKysely<StandingGrantDatabase>(database.db);
     executeSqliteQuerySync(database.db, stateDb.deleteFrom("cron_jobs"));
     expect(consume({ databaseOptions, revision }).outcome).toBe("job-missing");
@@ -481,7 +481,7 @@ describe("cron standing grant consumption", () => {
 
   it("fails closed when the minting approval row is gone or reversed", () => {
     const { databaseOptions, revision } = seedMintedGrant();
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const stateDb = getNodeSqliteKysely<StandingGrantDatabase>(database.db);
     executeSqliteQuerySync(
       database.db,
@@ -495,7 +495,7 @@ describe("cron standing grant consumption", () => {
 
   it("survives a gateway restart and orphan cleanup of pending approvals", () => {
     const { databaseOptions, revision } = seedMintedGrant();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     // New runtime epoch: startup cancels orphaned pending approvals only; the
     // resolved allow-always parent and its grant remain valid durable truth.
     closeOrphanedOperatorApprovals({
@@ -577,7 +577,7 @@ describe("standing grant operator surfaces", () => {
   it("rebuilds the unshipped mandatory-expiry table shape on first use", () => {
     const databaseOptions = createDatabaseOptions();
     const revision = seedCronJob(databaseOptions);
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     database.db.exec(`
       CREATE TABLE operator_approval_standing_grants (
         grant_id TEXT NOT NULL PRIMARY KEY CHECK (length(grant_id) > 0),

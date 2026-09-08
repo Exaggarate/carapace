@@ -1,10 +1,10 @@
 // Codex tests cover index plugin behavior.
 import fs from "node:fs";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { ensureAuthProfileStore, resolveAuthProfileOrder } from "openclaw/plugin-sdk/provider-auth";
-import { resolveProviderIdForAuth } from "openclaw/plugin-sdk/provider-auth-aliases";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createCapturedPluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { ensureAuthProfileStore, resolveAuthProfileOrder } from "carapace/plugin-sdk/provider-auth";
+import { resolveProviderIdForAuth } from "carapace/plugin-sdk/provider-auth-aliases";
 import { describe, expect, it, vi } from "vitest";
 import openAIPlugin from "../openai/index.js";
 import { createCodexAppServerAgentHarness } from "./harness.js";
@@ -26,7 +26,7 @@ const explicitAgentConfig = {
     ownership: "explicit",
     entries: { main: {}, clawblocker: {}, blockdigest: {} },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const modelAuth = { ensureAuthProfileStore, resolveAuthProfileOrder, resolveProviderIdForAuth };
 
@@ -61,7 +61,7 @@ function mockCallArg(mock: { mock: { calls: unknown[][] } }, index = 0, argIndex
 describe("codex plugin", () => {
   it("is opt-in and does not advertise a text provider", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+      fs.readFileSync(new URL("./carapace.plugin.json", import.meta.url), "utf8"),
     ) as { enabledByDefault?: unknown; providers?: unknown };
 
     expect(manifest.enabledByDefault).toBeUndefined();

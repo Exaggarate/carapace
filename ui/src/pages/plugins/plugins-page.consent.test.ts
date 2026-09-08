@@ -522,14 +522,14 @@ describe("PluginsPage consent", () => {
           ?.click();
       }
       await waitForFast(() =>
-        expect(page.querySelector("openclaw-modal-dialog .plugins-consent__hint")).not.toBeNull(),
+        expect(page.querySelector("carapace-modal-dialog .plugins-consent__hint")).not.toBeNull(),
       );
       harness.emit(client, false);
       harness.emit(client, true);
       pendingInspection.resolve(createInspectResult({ reviewToken: "stale-review" }));
       await page.updateComplete;
 
-      expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).toBeNull();
       expect(
         request.mock.calls
           .filter(([method]) => method === "plugins.setEnabled")

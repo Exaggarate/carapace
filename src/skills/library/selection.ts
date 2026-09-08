@@ -7,7 +7,7 @@ import {
 } from "../../../packages/gateway-protocol/src/schema/skill-library.js";
 import { resolveStateDir } from "../../config/paths.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import type { OpenClawStateDatabaseOptions } from "../../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../../state/carapace-state-db.js";
 import {
   parseSkillFrontmatter,
   resolveSkillInvocationPolicy,
@@ -43,7 +43,7 @@ const selectedEntryCache = new Map<string, SkillEntry[]>();
 /** The session owner has already authorized this exact immutable pin. */
 export async function readSelectedSkillLibraryFiles(
   selection: SkillLibrarySelection,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ) {
   const metadata = readSkillLibraryStore(
     (db) => selectSkillLibraryRevision(db, selection.skillId, selection.revision),
@@ -62,7 +62,7 @@ export async function readSelectedSkillLibraryFiles(
 /** Called only by a fresh human-session admission, never from creator/assignee attribution. */
 export function seedSkillLibrarySelection(
   authority: SkillLibraryAuthority,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SkillLibrarySelection[] {
   if (!authority.profileId) {
     return [];
@@ -145,7 +145,7 @@ export function changeSkillLibrarySelection(
   authority: SkillLibraryAuthority,
   current: readonly SkillLibrarySelection[],
   params: SkillsLibraryActivateParams,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SkillLibrarySelection[] {
   if (params.action !== "refresh" && !params.skillId) {
     throw new SkillLibraryError("INVALID_BUNDLE", "attach/detach requires skillId.");
@@ -192,7 +192,7 @@ export function changeSkillLibrarySelection(
 /** Resolve already-authorized pins only when rebuilding a snapshot, independent of current sharing. */
 export function loadSkillLibrarySelection(
   selections: readonly SkillLibrarySelection[],
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SkillEntry[] {
   if (!selections.length) {
     return [];
@@ -233,9 +233,9 @@ export function loadSkillLibrarySelection(
             description: revision.description,
             baseDir,
             filePath,
-            source: "openclaw-library",
+            source: "carapace-library",
             sourceInfo: createSyntheticSourceInfo(filePath, {
-              source: "openclaw-library",
+              source: "carapace-library",
               baseDir,
             }),
             disableModelInvocation: invocation.disableModelInvocation,

@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 import UserNotifications
 import WebKit
@@ -8,7 +8,7 @@ import WebKit
 @MainActor
 final class IOSDeviceSettingsBridge: NSObject, WKScriptMessageHandlerWithReply {
     private typealias RequestIdentity = IOSDeviceSettingsDocument.RequestIdentity
-    static let messageHandlerName = "openclawDeviceSettings"
+    static let messageHandlerName = "carapaceDeviceSettings"
 
     private let appModel: NodeAppModel
     private let appearanceModel: AppAppearanceModel
@@ -294,9 +294,9 @@ final class IOSDeviceSettingsBridge: NSObject, WKScriptMessageHandlerWithReply {
         return false
     }
 
-    private var locationMode: OpenClawLocationMode {
+    private var locationMode: CarapaceLocationMode {
         UserDefaults.standard.string(forKey: "location.enabledMode")
-            .flatMap(OpenClawLocationMode.init(rawValue:)) ?? .off
+            .flatMap(CarapaceLocationMode.init(rawValue:)) ?? .off
     }
 
     private func set(

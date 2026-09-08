@@ -1,7 +1,7 @@
 /** Tests primitive cache-key helpers used by plugin descriptor and metadata caches. */
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { PluginLruCache, createConfigScopedPromiseLoader } from "./plugin-cache-primitives.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
 
@@ -45,9 +45,9 @@ describe("createConfigScopedPromiseLoader", () => {
   });
 
   it("caches loads by config object", async () => {
-    const firstConfig = { plugins: { load: { disabled: true } } } as OpenClawConfig;
-    const secondConfig = { plugins: { load: { disabled: false } } } as OpenClawConfig;
-    const load = vi.fn(async (config?: OpenClawConfig) =>
+    const firstConfig = { plugins: { load: { disabled: true } } } as CarapaceConfig;
+    const secondConfig = { plugins: { load: { disabled: false } } } as CarapaceConfig;
+    const load = vi.fn(async (config?: CarapaceConfig) =>
       config === firstConfig ? "first" : "second",
     );
     const loader = createConfigScopedPromiseLoader(load);
@@ -60,7 +60,7 @@ describe("createConfigScopedPromiseLoader", () => {
   });
 
   it("evicts rejected loads so retries can recover", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     let calls = 0;
     const loader = createConfigScopedPromiseLoader(async () => {
       calls += 1;
@@ -76,7 +76,7 @@ describe("createConfigScopedPromiseLoader", () => {
   });
 
   it.each([
-    { name: "config-scoped", config: {} as OpenClawConfig },
+    { name: "config-scoped", config: {} as CarapaceConfig },
     { name: "default", config: undefined },
   ])("keeps the refreshed $name promise when a retired generation rejects", async ({ config }) => {
     const retired = createDeferred<string>();
@@ -101,10 +101,10 @@ describe("createConfigScopedPromiseLoader", () => {
   });
 
   it("clears default and config-scoped entries", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     let calls = 0;
     const loader = createConfigScopedPromiseLoader(
-      async (owner?: OpenClawConfig) => `${owner ? "config" : "default"}-${++calls}`,
+      async (owner?: CarapaceConfig) => `${owner ? "config" : "default"}-${++calls}`,
     );
 
     await expect(loader.load()).resolves.toBe("default-1");
@@ -117,10 +117,10 @@ describe("createConfigScopedPromiseLoader", () => {
   });
 
   it("drops default and config-scoped executable promises when plugin metadata changes", async () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     let calls = 0;
     const loader = createConfigScopedPromiseLoader(
-      async (owner?: OpenClawConfig) => `${owner ? "config" : "default"}-${++calls}`,
+      async (owner?: CarapaceConfig) => `${owner ? "config" : "default"}-${++calls}`,
     );
 
     await expect(loader.load()).resolves.toBe("default-1");

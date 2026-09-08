@@ -4,8 +4,8 @@ import type { Page } from "playwright";
 export async function dispatchOpenAiTalkEvent(page: Page, event: unknown) {
   await page.evaluate((payload) => {
     const channel = (
-      window as Window & { openclawVideoTalkE2e?: { peer: { channel: EventTarget } } }
-    ).openclawVideoTalkE2e?.peer.channel;
+      window as Window & { carapaceVideoTalkE2e?: { peer: { channel: EventTarget } } }
+    ).carapaceVideoTalkE2e?.peer.channel;
     if (!channel) {
       throw new Error("Expected the browser Talk data channel");
     }
@@ -29,10 +29,10 @@ function installTalkMediaBrowserFixture(profile: TalkMediaFixtureProfile) {
     meterLevel: 0,
   };
   const nativeGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-  const trackWindow = window as Window & { openclawVideoTalkTracks?: MediaStreamTrack[] };
+  const trackWindow = window as Window & { carapaceVideoTalkTracks?: MediaStreamTrack[] };
   const recordTracks = (stream: MediaStream) => {
-    trackWindow.openclawVideoTalkTracks = [
-      ...(trackWindow.openclawVideoTalkTracks ?? []),
+    trackWindow.carapaceVideoTalkTracks = [
+      ...(trackWindow.carapaceVideoTalkTracks ?? []),
       ...stream.getTracks(),
     ];
   };
@@ -135,7 +135,7 @@ function installTalkMediaBrowserFixture(profile: TalkMediaFixtureProfile) {
     configurable: true,
     value: MockAudioContext,
   });
-  Object.defineProperty(window, "openclawTalkE2eState", {
+  Object.defineProperty(window, "carapaceTalkE2eState", {
     configurable: true,
     value: state,
   });
@@ -177,12 +177,12 @@ export async function installOpenAiTalkFixture(page: Page) {
         super();
         (
           window as Window & {
-            openclawVideoTalkE2e?: {
+            carapaceVideoTalkE2e?: {
               dataChannelCreated: boolean;
               peer: FakePeerConnection;
             };
           }
-        ).openclawVideoTalkE2e = { dataChannelCreated: false, peer: this };
+        ).carapaceVideoTalkE2e = { dataChannelCreated: false, peer: this };
       }
 
       addTrack() {}
@@ -190,9 +190,9 @@ export async function installOpenAiTalkFixture(page: Page) {
       createDataChannel() {
         const harness = (
           window as Window & {
-            openclawVideoTalkE2e?: { dataChannelCreated: boolean };
+            carapaceVideoTalkE2e?: { dataChannelCreated: boolean };
           }
-        ).openclawVideoTalkE2e;
+        ).carapaceVideoTalkE2e;
         if (harness) {
           harness.dataChannelCreated = true;
         }
@@ -281,7 +281,7 @@ export async function installMicrophoneLossWebRtcFixture(page: Page) {
       // without claiming a physical microphone removal or permission revocation.
       endMicrophone: () => microphone?.dispatchEvent(new Event("ended")),
     };
-    Object.defineProperty(window, "openclawMicrophoneLossE2e", { value: proof });
+    Object.defineProperty(window, "carapaceMicrophoneLossE2e", { value: proof });
     const getUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
     navigator.mediaDevices.getUserMedia = async (constraints) => {
       proof.stage = "microphone-requested";
@@ -359,7 +359,7 @@ export async function installTalkBrowserFixtures(page: Page) {
 
 async function installWebRtcSdpResponseFixture(page: Page, fixture: WebRtcSdpResponseFixture) {
   await page.addInitScript(() => {
-    const proofWindow = window as Window & { openclawWebRtcSdpE2e?: WebRtcSdpE2eProof };
+    const proofWindow = window as Window & { carapaceWebRtcSdpE2e?: WebRtcSdpE2eProof };
     const microphoneTrack = Object.assign(new EventTarget(), { stop() {} });
     Object.defineProperty(navigator, "mediaDevices", {
       configurable: true,
@@ -370,7 +370,7 @@ async function installWebRtcSdpResponseFixture(page: Page, fixture: WebRtcSdpRes
         }),
       },
     });
-    proofWindow.openclawWebRtcSdpE2e = {
+    proofWindow.carapaceWebRtcSdpE2e = {
       bodyCancelCount: 0,
       bodyCancelResolvedCount: 0,
       fetchCount: 0,
@@ -384,7 +384,7 @@ async function installWebRtcSdpResponseFixture(page: Page, fixture: WebRtcSdpRes
       if (!url.includes("api.openai.com/v1/realtime/calls")) {
         return response;
       }
-      const proof = proofWindow.openclawWebRtcSdpE2e;
+      const proof = proofWindow.carapaceWebRtcSdpE2e;
       if (!proof || !response.body) {
         return response;
       }
@@ -423,7 +423,7 @@ async function installWebRtcSdpResponseFixture(page: Page, fixture: WebRtcSdpRes
       }
       async setLocalDescription() {}
       async setRemoteDescription() {
-        const proof = proofWindow.openclawWebRtcSdpE2e;
+        const proof = proofWindow.carapaceWebRtcSdpE2e;
         if (proof) {
           proof.remoteDescriptionCount += 1;
         }

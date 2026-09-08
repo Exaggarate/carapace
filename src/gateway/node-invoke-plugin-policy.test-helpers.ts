@@ -5,7 +5,7 @@ import { createPluginRecord } from "../plugins/loader-records.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import type { OpenClawPluginNodeInvokePolicyContext } from "../plugins/types.js";
+import type { CarapacePluginNodeInvokePolicyContext } from "../plugins/types.js";
 import { trackAsyncWork } from "../shared/async-work-scope.js";
 import type { ExecApprovalManager } from "./exec-approval-manager.js";
 import { applyPluginNodeInvokePolicy } from "./node-invoke-plugin-policy.js";
@@ -151,7 +151,7 @@ export function createApprovalRequestPolicy(params?: {
   agentId?: string;
   allowedDecisions?: readonly ("allow-once" | "allow-always" | "deny")[];
 }): NodeInvokePolicyRegistration {
-  return createDemoPolicy(async (ctx: OpenClawPluginNodeInvokePolicyContext) => {
+  return createDemoPolicy(async (ctx: CarapacePluginNodeInvokePolicyContext) => {
     const approval = await ctx.approvals?.request({
       title: params?.title ?? "Sensitive action",
       description: params?.description ?? "Needs approval",

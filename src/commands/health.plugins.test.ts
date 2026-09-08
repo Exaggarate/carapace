@@ -5,12 +5,12 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { SnapshotSchema } from "../../packages/gateway-protocol/src/schema/snapshot.js";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginServicesHandle } from "../plugins/services.js";
 import { createPluginRecord } from "../plugins/status.test-fixtures.js";
 import { createChannelTestPluginBase } from "../test-utils/channel-plugins.js";
 
-const testConfig: OpenClawConfig = { session: { store: "/tmp/x" } };
+const testConfig: CarapaceConfig = { session: { store: "/tmp/x" } };
 const tempDirs = createTempDirTracker();
 let sessionStorePath: string;
 
@@ -55,7 +55,7 @@ describe("collectGatewayHealthSnapshot plugin state", () => {
 
   beforeEach(() => {
     sessionStorePath = path.join(
-      tempDirs.make("openclaw-health-plugin-sessions-"),
+      tempDirs.make("carapace-health-plugin-sessions-"),
       "sessions.json",
     );
   });
@@ -71,7 +71,7 @@ describe("collectGatewayHealthSnapshot plugin state", () => {
   });
 
   it("deduplicates canonical-root quarantine while retaining unrelated same-id errors", async () => {
-    const fixtureDir = tempDirs.make("openclaw-health-plugin-");
+    const fixtureDir = tempDirs.make("carapace-health-plugin-");
     const pluginRoot = path.join(fixtureDir, "plugin");
     const pluginRootAlias = path.join(fixtureDir, "alias");
     fs.mkdirSync(pluginRoot);
@@ -121,7 +121,7 @@ describe("collectGatewayHealthSnapshot plugin state", () => {
 
     expect(Value.Check(SnapshotSchema.properties.health, snap)).toBe(true);
     expect(snap.sessions.path).toBe(
-      path.join(path.dirname(sessionStorePath), "openclaw-agent.sqlite"),
+      path.join(path.dirname(sessionStorePath), "carapace-agent.sqlite"),
     );
     expect(snap.plugins?.unavailable).toEqual([
       {

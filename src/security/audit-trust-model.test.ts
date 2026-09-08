@@ -1,12 +1,12 @@
 // Verifies trust-model audit findings and severity mapping.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   collectExposureMatrixFindings,
   collectLikelyMultiUserSetupFindings,
 } from "./audit-extra.sync.js";
 
-function audit(cfg: OpenClawConfig) {
+function audit(cfg: CarapaceConfig) {
   return [...collectExposureMatrixFindings(cfg), ...collectLikelyMultiUserSetupFindings(cfg)];
 }
 
@@ -63,7 +63,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           tools: { elevated: { enabled: true, allowFrom: { whatsapp: ["+1"] } } },
           channels: { whatsapp: { groupPolicy: "open" } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -79,7 +79,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { whatsapp: { groupPolicy: "open" } },
           tools: { elevated: { enabled: false } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -103,7 +103,7 @@ describe("security audit trust model findings", () => {
               sandbox: { mode: "all" },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -122,7 +122,7 @@ describe("security audit trust model findings", () => {
             deny: ["group:runtime"],
             fs: { workspaceOnly: true },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -147,7 +147,7 @@ describe("security audit trust model findings", () => {
             },
           },
           tools: { elevated: { enabled: false } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = requireMultiUserHeuristicFinding(findings);
           expect(finding.severity).toBe("warn");
@@ -155,7 +155,7 @@ describe("security audit trust model findings", () => {
             'channels.discord.groupPolicy="allowlist" with configured group targets',
           );
           expect(finding.detail).toContain("personal-assistant");
-          expect(finding.detail).toContain("https://docs.openclaw.ai/gateway/multi-tenant-hosting");
+          expect(finding.detail).toContain("https://github.com/Exaggarate/carapace");
           expect(finding.remediation).toContain('agents.defaults.sandbox.mode="all"');
         },
       },
@@ -168,7 +168,7 @@ describe("security audit trust model findings", () => {
             },
           },
           tools: { elevated: { enabled: false } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -184,7 +184,7 @@ describe("security audit trust model findings", () => {
         name: "warns when global group scope shares all rooms with the main session",
         cfg: {
           session: { groupScope: "main" },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = requireGroupScopeMainFinding(findings);
           expect(finding).toMatchObject({
@@ -194,7 +194,7 @@ describe("security audit trust model findings", () => {
           expect(finding.detail).toContain('session.groupScope="main"');
           expect(finding.detail).toContain("all group/channel rooms");
           expect(finding.remediation).toContain(
-            "https://docs.openclaw.ai/channels/groups#session-keys",
+            "https://github.com/Exaggarate/carapace#session-keys",
           );
         },
       },
@@ -215,7 +215,7 @@ describe("security audit trust model findings", () => {
               session: { groupScope: "main" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = requireGroupScopeMainFinding(findings);
           expect(finding.severity).toBe("warn");
@@ -238,7 +238,7 @@ describe("security audit trust model findings", () => {
               session: { groupScope: "main" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some((finding) => finding.checkId === "security.trust_model.group_scope_main"),
@@ -268,7 +268,7 @@ describe("security audit trust model findings", () => {
               session: { groupScope: "main" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some((finding) => finding.checkId === "security.trust_model.group_scope_main"),
@@ -298,7 +298,7 @@ describe("security audit trust model findings", () => {
               session: { groupScope: "per-group" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = requireGroupScopeMainFinding(findings);
           expect(finding.detail).toContain("discord accountId=work peer=channel:room-1");
@@ -323,7 +323,7 @@ describe("security audit trust model findings", () => {
               session: { groupScope: "main" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = requireGroupScopeMainFinding(findings);
           expect(finding.detail).toContain("discord accountId=work peer=group:room-1");
@@ -334,7 +334,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           tools: { elevated: { enabled: true, allowFrom: { feishu: ["ou_123"] } } },
           channels: { feishu: { groupPolicy: "disabled", dmPolicy: "open" } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_elevated",
@@ -348,7 +348,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { feishu: { groupPolicy: "disabled", dmPolicy: "open" } },
           tools: { elevated: { enabled: false }, profile: "coding" },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_runtime_or_fs",
@@ -366,7 +366,7 @@ describe("security audit trust model findings", () => {
               accounts: { work: { dmPolicy: "open" } },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_elevated",
@@ -379,7 +379,7 @@ describe("security audit trust model findings", () => {
         name: "flags supported legacy open dm.policy",
         cfg: {
           channels: { discord: { dm: { policy: "open" } } },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_elevated",
@@ -391,7 +391,7 @@ describe("security audit trust model findings", () => {
         name: "preserves the detected nested-only DM policy path in remediation",
         cfg: {
           channels: { matrix: { dm: { policy: "open" } } },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_elevated",
@@ -410,7 +410,7 @@ describe("security audit trust model findings", () => {
               dm: { policy: "open" },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some((finding) =>
@@ -424,7 +424,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { whatsapp: { groupPolicy: "open" } },
           tools: { elevated: { enabled: false }, profile: "coding" },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_control_plane_tools",
@@ -440,7 +440,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { slack: { dmPolicy: "open" } },
           tools: { elevated: { enabled: false }, allow: ["gateway"] },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_control_plane_tools",
@@ -459,7 +459,7 @@ describe("security audit trust model findings", () => {
             profile: "messaging",
             alsoAllow: ["cron"],
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_control_plane_tools",
@@ -477,7 +477,7 @@ describe("security audit trust model findings", () => {
           agents: {
             entries: { ops: { tools: { profile: "messaging", alsoAllow: ["gateway"] } } },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           const finding = findings.find(
             (entry) => entry.checkId === "security.exposure.open_groups_with_control_plane_tools",
@@ -497,7 +497,7 @@ describe("security audit trust model findings", () => {
             profile: "coding",
             deny: ["gateway", "cron"],
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -512,7 +512,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { whatsapp: { groupPolicy: "open" } },
           tools: { elevated: { enabled: false }, allow: ["nodes", "computer"] },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(
@@ -527,7 +527,7 @@ describe("security audit trust model findings", () => {
         cfg: {
           channels: { whatsapp: { groupPolicy: "allowlist" } },
           tools: { elevated: { enabled: false }, profile: "coding" },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         assert: (findings: ReturnType<typeof audit>) => {
           expect(
             findings.some(

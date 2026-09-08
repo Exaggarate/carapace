@@ -1,16 +1,16 @@
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
 import {
   createChannelInboundEnvelopeBuilder,
   hasFinalInboundReplyDispatch,
   resolveInboundReplyDispatchCounts,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/security-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveChannelContextVisibilityMode } from "carapace/plugin-sdk/context-visibility-runtime";
+import { extractErrorCode } from "carapace/plugin-sdk/error-runtime";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
+import { getGlobalHookRunner } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveInboundLastRouteSessionKey } from "carapace/plugin-sdk/routing";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "carapace/plugin-sdk/security-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { prepareMatrixReplyPayload } from "../../outbound.js";
 import { isPollEventType } from "../poll-types.js";
 import type { LocationMessageEventContent } from "../sdk.js";
@@ -120,7 +120,7 @@ export function createMatrixRoomMessageHandler(params: MatrixMonitorHandlerParam
   return async (roomId: string, event: MatrixRawEvent) => {
     const eventId = typeof event.event_id === "string" ? event.event_id.trim() : "";
     let inboundReplayClaim:
-      | import("openclaw/plugin-sdk/persistent-dedupe").ChannelReplayClaimHandle
+      | import("carapace/plugin-sdk/persistent-dedupe").ChannelReplayClaimHandle
       | undefined;
     let draftControllerRef: Awaited<ReturnType<typeof createMatrixDraftController>> | undefined;
     try {

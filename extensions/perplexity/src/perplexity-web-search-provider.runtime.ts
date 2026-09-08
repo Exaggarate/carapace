@@ -1,4 +1,4 @@
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 // Perplexity provider module implements model/runtime integration.
 import {
   buildSearchCacheKey,
@@ -22,8 +22,8 @@ import {
   withTrustedWebSearchEndpoint,
   wrapWebContent,
   writeCachedSearchPayload,
-} from "openclaw/plugin-sdk/provider-web-search";
-import { normalizeOptionalString, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-web-search";
+import { normalizeOptionalString, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   isDirectPerplexityBaseUrl,
   resolvePerplexityConfig,
@@ -90,8 +90,8 @@ function buildPerplexityRequestHeaders(apiKey: string, acceptJson = false): Reco
     "Content-Type": "application/json",
     ...(acceptJson ? { Accept: "application/json" } : {}),
     Authorization: `Bearer ${apiKey}`,
-    "HTTP-Referer": "https://openclaw.ai",
-    "X-Title": "OpenClaw Web Search",
+    "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+    "X-Title": "Carapace Web Search",
   };
 }
 
@@ -265,7 +265,7 @@ export async function executePerplexitySearch(
       error: "missing_perplexity_api_key",
       message:
         "web_search (perplexity) needs an API key. Set PERPLEXITY_API_KEY or OPENROUTER_API_KEY in the Gateway environment, or configure plugins.entries.perplexity.config.webSearch.apiKey. If you do not want to configure a search API key, use web_fetch for a specific URL or the browser tool for interactive pages.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://github.com/Exaggarate/carapace",
     };
   }
 
@@ -283,7 +283,7 @@ export async function executePerplexitySearch(
     return {
       error: "invalid_freshness",
       message: "freshness must be day, week, month, or year.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://github.com/Exaggarate/carapace",
     };
   }
 
@@ -319,7 +319,7 @@ export async function executePerplexitySearch(
         return {
           error,
           message: `${option} ${pronoun === "them" ? "are" : "is"} only supported by the native Perplexity Search API path. Remove Perplexity baseUrl/model overrides or use a direct PERPLEXITY_API_KEY to enable ${pronoun}.`,
-          docs: "https://docs.openclaw.ai/tools/web",
+          docs: "https://github.com/Exaggarate/carapace",
         };
       }
     }
@@ -329,7 +329,7 @@ export async function executePerplexitySearch(
     return {
       error: "invalid_language",
       message: "language must be a 2-letter ISO 639-1 code like 'en', 'de', or 'fr'.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://github.com/Exaggarate/carapace",
     };
   }
   const parsedTimeFilters = parseWebSearchTimeFilters({
@@ -354,14 +354,14 @@ export async function executePerplexitySearch(
         error: "invalid_domain_filter",
         message:
           "domain_filter cannot mix allowlist and denylist entries. Use either all positive entries (allowlist) or all entries prefixed with '-' (denylist).",
-        docs: "https://docs.openclaw.ai/tools/web",
+        docs: "https://github.com/Exaggarate/carapace",
       };
     }
     if (domainFilter.length > 20) {
       return {
         error: "invalid_domain_filter",
         message: "domain_filter supports a maximum of 20 domains.",
-        docs: "https://docs.openclaw.ai/tools/web",
+        docs: "https://github.com/Exaggarate/carapace",
       };
     }
   }

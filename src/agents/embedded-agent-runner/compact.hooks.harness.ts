@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { vi, type Mock } from "vitest";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.js";
-import type { createOpenClawCodingTools } from "../agent-tools.js";
+import type { createCarapaceCodingTools } from "../agent-tools.js";
 import type { AuthProfileStore } from "../auth-profiles/types.js";
 import { clearAgentHarnesses } from "../harness/registry.js";
 import type { AgentHarness } from "../harness/types.js";
@@ -133,14 +133,14 @@ export const resolveAgentConfigMock = vi.fn(
 let fixtureWorkspaceDir: string;
 export const resolveDefaultAgentDirMock = vi.fn<() => string>();
 export const estimateTokensMock = vi.fn((_message?: unknown) => 10);
-export const resolveAgentHarnessPolicyMock = vi.fn(() => ({ runtime: "openclaw" }));
+export const resolveAgentHarnessPolicyMock = vi.fn(() => ({ runtime: "carapace" }));
 function createSelectedAgentHarnessMock(params: {
   agentHarnessId?: string;
   agentHarnessRuntimeOverride?: string;
 }): AgentHarness {
   const configured = resolveAgentHarnessPolicyMock() as { runtime?: string };
   const id =
-    params.agentHarnessId ?? params.agentHarnessRuntimeOverride ?? configured.runtime ?? "openclaw";
+    params.agentHarnessId ?? params.agentHarnessRuntimeOverride ?? configured.runtime ?? "carapace";
   return {
     id,
     label: `${id} test harness`,
@@ -245,7 +245,7 @@ function createMockToolDefinitions(tools: unknown[] = []) {
     };
   });
 }
-export const createOpenClawCodingToolsMock = vi.fn<typeof createOpenClawCodingTools>(() => []);
+export const createCarapaceCodingToolsMock = vi.fn<typeof createCarapaceCodingTools>(() => []);
 export const buildEmbeddedExtensionFactoriesMock = vi.fn(() => []);
 export const resolveEffectiveCompactionModeMock = vi.fn(() => "default");
 export const guardSessionManagerMock = vi.fn((sessionManager: Record<string, unknown>) => ({
@@ -562,7 +562,7 @@ export function resetCompactSessionStateMocks(): void {
   maybeCompactAgentHarnessSessionMock.mockReset();
   maybeCompactAgentHarnessSessionMock.mockResolvedValue(undefined);
   resolveAgentHarnessPolicyMock.mockReset();
-  resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+  resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "carapace" });
   selectAgentHarnessMock.mockReset();
   selectAgentHarnessMock.mockImplementation(createSelectedAgentHarnessMock);
   selectAgentHarnessForPreparedModelProvidersMock.mockReset();
@@ -649,7 +649,7 @@ export function resetCompactHooksHarnessMocks(workspaceDir: string): void {
     ) => resolveModelMock(provider, modelId, agentDir, cfg),
   );
   resolveAgentHarnessPolicyMock.mockReset();
-  resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+  resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "carapace" });
   resolveContextWindowInfoMock.mockReset();
   resolveContextWindowInfoMock.mockReturnValue({ tokens: 128_000 });
 
@@ -663,8 +663,8 @@ export function resetCompactHooksHarnessMocks(workspaceDir: string): void {
 
   triggerInternalHookMock.mockReset();
   resetCompactSessionStateMocks();
-  createOpenClawCodingToolsMock.mockReset();
-  createOpenClawCodingToolsMock.mockReturnValue([]);
+  createCarapaceCodingToolsMock.mockReset();
+  createCarapaceCodingToolsMock.mockReturnValue([]);
   guardSessionManagerMock.mockReset();
   guardSessionManagerMock.mockImplementation((sessionManager) => ({
     ...sessionManager,
@@ -824,7 +824,7 @@ export async function loadCompactHooksHarness(options: { durableSession?: boolea
   }
 
   vi.doMock("../models-config.js", () => ({
-    ensureOpenClawModelsJson: vi.fn(async () => {}),
+    ensureCarapaceModelsJson: vi.fn(async () => {}),
   }));
 
   vi.doMock("../prepared-model-runtime.js", () => ({
@@ -930,7 +930,7 @@ export async function loadCompactHooksHarness(options: { durableSession?: boolea
   }));
 
   vi.doMock("../docs-path.js", () => ({
-    resolveOpenClawReferencePaths: vi.fn(async () => ({
+    resolveCarapaceReferencePaths: vi.fn(async () => ({
       docsPath: undefined,
       sourcePath: undefined,
     })),
@@ -942,7 +942,7 @@ export async function loadCompactHooksHarness(options: { durableSession?: boolea
   }));
 
   vi.doMock("../agent-tools.js", () => ({
-    createOpenClawCodingTools: createOpenClawCodingToolsMock,
+    createCarapaceCodingTools: createCarapaceCodingToolsMock,
   }));
 
   vi.doMock("./replay-history.js", () => ({

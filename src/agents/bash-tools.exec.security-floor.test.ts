@@ -8,11 +8,11 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { onAgentEvent } from "../infra/agent-events.js";
 import { saveExecApprovals, type ExecApprovalsFile } from "../infra/exec-approvals.js";
 import type { ExecAutoReviewer } from "../infra/exec-auto-review.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { resetProcessRegistryForTests } from "./bash-process-registry.test-support.js";
 import { createExecTool as createExecToolImpl } from "./bash-tools.exec-run.js";
@@ -119,15 +119,15 @@ describe("exec security floor", () => {
       "USERPROFILE",
       "HOMEDRIVE",
       "HOMEPATH",
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
+      "CARAPACE_HOME",
+      "CARAPACE_STATE_DIR",
       "SHELL",
     ]);
-    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-security-floor-"));
+    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-exec-security-floor-"));
     setTestEnvValue("HOME", tempRoot);
     setTestEnvValue("USERPROFILE", tempRoot);
-    setTestEnvValue("OPENCLAW_HOME", tempRoot);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempRoot, "state"));
+    setTestEnvValue("CARAPACE_HOME", tempRoot);
+    setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempRoot, "state"));
     if (process.platform === "win32") {
       const parsed = path.parse(tempRoot);
       setTestEnvValue("HOMEDRIVE", parsed.root.slice(0, 2));
@@ -145,7 +145,7 @@ describe("exec security floor", () => {
   afterEach(() => {
     const dir = tempRoot;
     tempRoot = undefined;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     if (dir) {
       fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 20 });
@@ -612,7 +612,7 @@ describe("exec security floor", () => {
 
   it("keeps default reviewer settings and cancellation scoped to each execution", async () => {
     const reviewer = { model: "synthetic/reviewer-first" };
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { exec: { reviewer: { model: "synthetic/reviewer-global" } } },
       agents: { entries: { main: { tools: { exec: { reviewer } } } } },
     };

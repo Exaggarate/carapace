@@ -1,6 +1,6 @@
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { asOptionalRecord as asMutableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { listMutableCodexRouteAgentEntries } from "./codex-route-agent-entries.js";
 import {
   agentUsesCodexRuntimeForCompaction,
@@ -23,7 +23,7 @@ export const COMPACTION_OVERRIDE_KEYS: readonly CompactionOverrideKey[] = ["mode
 export const LOSSLESS_CONTEXT_ENGINE_ID = "lossless-claw";
 
 type AgentCompactionScanParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agent: unknown;
   path: string;
   agentId?: string;
@@ -35,7 +35,7 @@ type AgentCompactionScanParams = {
 };
 
 type CompactionScanParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ignoreLegacyAgentRuntimePins?: boolean;
   env?: NodeJS.ProcessEnv;
 };

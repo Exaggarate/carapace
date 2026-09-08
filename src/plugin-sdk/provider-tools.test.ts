@@ -230,7 +230,7 @@ describe("buildProviderToolCompatFamilyHooks", () => {
   });
 
   it("preserves string-const unions as a flat enum for the deepseek family", () => {
-    // Regression for https://github.com/openclaw/openclaw/issues/86468 —
+    // Regression for https://github.com/Exaggarate/carapace/issues/86468 —
     // Typebox `Type.Union([Type.Literal(...)])` collapses to anyOf of consts;
     // the previous normalizer kept only the first const, hiding every other
     // literal from the model.

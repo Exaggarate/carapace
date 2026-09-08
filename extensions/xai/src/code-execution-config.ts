@@ -1,5 +1,5 @@
 // Xai helper module supports code execution config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { isXaiToolEnabled, type XaiToolAuthContext } from "./tool-auth-shared.js";
 
 type CodeExecutionConfig = {
@@ -19,7 +19,7 @@ export function readPluginCodeExecutionConfig(cfg?: unknown): CodeExecutionConfi
   if (!cfg || typeof cfg !== "object") {
     return undefined;
   }
-  const plugins = (cfg as OpenClawConfig).plugins;
+  const plugins = (cfg as CarapaceConfig).plugins;
   const entries = plugins && typeof plugins === "object" ? plugins.entries : undefined;
   const entry = entries && entries.xai;
   const config = entry && typeof entry === "object" ? entry.config : undefined;

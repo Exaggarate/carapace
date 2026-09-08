@@ -1,6 +1,6 @@
 /** Receipt-grade facts for one model route that reached exact run admission. */
 import { randomUUID } from "node:crypto";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { recordExecutionDecisionWork } from "../audit/execution-decision-work.js";
 import { redactSensitiveText } from "../logging/redact.js";
 import {

@@ -3,22 +3,22 @@ import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { readConfigFileSnapshotWithPluginMetadata } from "../config/config.js";
 import { resolveConfigWidePluginMetadataSnapshot } from "../config/io.plugin-metadata.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writePersistedInstalledPluginIndexInstallRecords } from "../plugins/installed-plugin-index-records.js";
 import { createPluginCache, withPluginCache } from "../plugins/plugin-cache.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import { invalidatePluginRuntimeDiscoveryAfterConfigMutation } from "../plugins/registry-refresh.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runQuickstartForegroundGateway } from "./onboard-quickstart-host.js";
 
 afterEach(() => clearPluginMetadataLifecycleCaches());
 
 it("carries a plugin installed during onboarding into the first foreground Gateway inventory", async () => {
-  await withOpenClawTestState(
-    { label: "onboarding-plugin-generation", env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" } },
+  await withCarapaceTestState(
+    { label: "onboarding-plugin-generation", env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" } },
     async (state) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         gateway: { mode: "local", auth: { mode: "none" } },
         agents: { defaults: { workspace: state.workspaceDir } },
         plugins: { entries: { codex: { enabled: true } } },
@@ -47,11 +47,11 @@ it("carries a plugin installed during onboarding into the first foreground Gatew
           JSON.stringify({
             name: "@fixture/codex",
             version: "1.0.0",
-            openclaw: { extensions: ["./index.cjs"] },
+            carapace: { extensions: ["./index.cjs"] },
           }),
         );
         await fs.writeFile(
-          path.join(pluginRoot, "openclaw.plugin.json"),
+          path.join(pluginRoot, "carapace.plugin.json"),
           JSON.stringify({
             id: "codex",
             activation: { onAgentHarnesses: ["codex"] },

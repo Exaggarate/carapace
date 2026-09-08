@@ -12,10 +12,10 @@ import {
 import { deferSqlitePostCommitPublication } from "../../../infra/sqlite-post-commit.js";
 import { resolveEventSessionKey } from "../../../routing/session-key.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../../../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../../../state/carapace-state-db.js";
 import { publishTaskRecordAfterAtomicStore } from "../../../tasks/runtime-internal.js";
 import { resolveRequiredCompletionDeliveryFailureTerminalResult } from "../../../tasks/task-completion-contract.js";
 import { formatTaskBlockedFollowupMessage } from "../../../tasks/task-executor-policy.js";
@@ -45,7 +45,7 @@ type AdmissionTestHooks = {
   afterBind?: () => unknown;
   afterMutation?: (
     phase: "queue" | "subagent" | "task",
-    database: OpenClawStateDatabase,
+    database: CarapaceStateDatabase,
   ) => unknown;
 };
 
@@ -98,7 +98,7 @@ export function admitSubagentCompletionDelivery(params: {
   queueEntry: QueuedSessionDelivery;
   subagent: SubagentRunRecord;
   task: TaskRecord;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   /** Transaction cut points used by the real-store crash-consistency tests. */
   testHooks?: AdmissionTestHooks;
 }): { claimed: boolean } {
@@ -112,7 +112,7 @@ export function admitSubagentCompletionDelivery(params: {
   const boundTask = bindTaskRecord(params.task);
   invokeSynchronousHook(params.testHooks?.afterBind);
 
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const claimed = upsertBoundDeliveryQueueEntryInDatabase(boundQueue, database);
       invokeSynchronousHook(() => params.testHooks?.afterMutation?.("queue", database));
@@ -152,11 +152,11 @@ export function admitSubagentCompletionDelivery(params: {
 export function settleSubagentCompletionDelivery(params: {
   subagent: SubagentRunRecord;
   task: TaskRecord;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
   mutateSubagent?: (entry: SubagentRunRecord) => unknown;
 }): void {
   const boundTask = bindTaskRecord(params.task);
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     (database) => {
       invokeSynchronousHook(() => params.mutateSubagent?.(params.subagent));
       upsertSubagentRunRowInDatabase(database, bindSubagentRunRecord(params.subagent));
@@ -173,11 +173,11 @@ export function blockSubagentCompletionDelivery(params: {
   reason: string;
   suspendedReason?: "expiry" | "permanent_failure";
   disposition?: NonNullable<SubagentRunRecord["delivery"]>["disposition"];
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): boolean {
   const generation = params.subagent.delivery?.generation ?? 1;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction((database) => {
+  return runCarapaceStateWriteTransaction((database) => {
     const subagent = readSubagentRun(database, params.subagent.runId);
     const task = readTaskRecord(database.db, params.taskId);
     if (

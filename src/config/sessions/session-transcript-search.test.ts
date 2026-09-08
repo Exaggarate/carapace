@@ -4,14 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  isOpenClawAgentDatabaseOpen,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  isCarapaceAgentDatabaseOpen,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { TranscriptEvent } from "./session-accessor.js";
 import {
   appendTranscriptEvent,
@@ -38,7 +38,7 @@ type TestPaths = { stateDir: string; tempDir: string };
 let paths: TestPaths;
 
 beforeEach(() => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-session-search-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-session-search-"));
   paths = {
     stateDir: path.join(tempDir, "state"),
     tempDir,
@@ -46,7 +46,7 @@ beforeEach(() => {
 });
 
 function env(): NodeJS.ProcessEnv {
-  return { ...process.env, OPENCLAW_STATE_DIR: paths.stateDir };
+  return { ...process.env, CARAPACE_STATE_DIR: paths.stateDir };
 }
 
 function transcriptScope(sessionId: string, sessionKey: string) {
@@ -90,18 +90,18 @@ async function waitForSearchReconcile(query: string): Promise<void> {
 
 afterEach(async () => {
   await waitForSearchReconcile("cleanup-probe");
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   fs.rmSync(paths.tempDir, { recursive: true, force: true });
 });
 
 function agentKysely() {
-  const database = openOpenClawAgentDatabase({ agentId: "main", env: env() });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env: env() });
   return {
     db: database.db,
     kysely: getNodeSqliteKysely<
       Pick<
-        OpenClawAgentKyselyDatabase,
+        CarapaceAgentKyselyDatabase,
         "session_transcript_fts" | "session_transcript_index_state" | "transcript_events"
       >
     >(database.db),
@@ -116,25 +116,25 @@ describe("searchSessionTranscripts", () => {
       const sessionKey = `agent:${agentId}:main`;
       const storePath = shared ? path.join(paths.tempDir, "shared.sqlite") : undefined;
       if (shared) {
-        openOpenClawAgentDatabase({ agentId: "alpha", env: env(), path: storePath });
+        openCarapaceAgentDatabase({ agentId: "alpha", env: env(), path: storePath });
       }
       await appendTranscriptMessage(
         { agentId, env: env(), sessionId: "session-1", sessionKey, storePath },
         { message: { role: "user", content: [{ type: "text", text: "readonly search needle" }] } },
       );
-      const databasePath = storePath ?? resolveOpenClawAgentSqlitePath({ agentId, env: env() });
-      closeOpenClawAgentDatabasesForTest();
+      const databasePath = storePath ?? resolveCarapaceAgentSqlitePath({ agentId, env: env() });
+      closeCarapaceAgentDatabasesForTest();
 
       expect(
         searchSessionTranscripts({ agentId, env: env(), query: "needle", storePath }).hits,
       ).toEqual([expect.objectContaining({ sessionKey, sessionId: "session-1" })]);
-      expect(isOpenClawAgentDatabaseOpen(databasePath)).toBe(false);
+      expect(isCarapaceAgentDatabaseOpen(databasePath)).toBe(false);
     },
   );
 
   it("scopes omitted filters to a logical namespace in a shared database", async () => {
     const storePath = path.join(paths.tempDir, "shared.sqlite");
-    openOpenClawAgentDatabase({ agentId: "owner", env: env(), path: storePath });
+    openCarapaceAgentDatabase({ agentId: "owner", env: env(), path: storePath });
     const sessions = [
       ["work_team", "agent:work_team:main"],
       ["workxteam", "agent:workxteam:main"],
@@ -176,11 +176,11 @@ describe("searchSessionTranscripts", () => {
   });
 
   it("returns empty results without creating a missing database", () => {
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env: env() });
+    const databasePath = resolveCarapaceAgentSqlitePath({ agentId: "main", env: env() });
 
     expect(search("missing")).toEqual({ hits: [], indexing: false, truncated: false });
     expect(fs.existsSync(databasePath)).toBe(false);
-    expect(isOpenClawAgentDatabaseOpen(databasePath)).toBe(false);
+    expect(isCarapaceAgentDatabaseOpen(databasePath)).toBe(false);
   });
 
   it("indexes appended messages synchronously and returns bounded hits", async () => {

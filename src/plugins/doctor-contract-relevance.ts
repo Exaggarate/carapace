@@ -1,7 +1,7 @@
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { parseProviderModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
+import { parseProviderModelRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { isChannelConfigMetadataKey } from "../channels/config-metadata.js";
 
 function hasLegacyElevenLabsTalkFields(raw: unknown): boolean {

@@ -1,5 +1,5 @@
 import {
-  discoverOpenClawPlugins,
+  discoverCarapacePlugins,
   type PluginCandidate,
   type PluginDiscoveryResult,
 } from "./discovery.js";
@@ -45,7 +45,7 @@ export function resolvePluginLoadDiscovery(params: {
         diagnostics: [] as PluginDiagnostic[],
       }
     : (options.discovery ??
-      discoverOpenClawPlugins({
+      discoverCarapacePlugins({
         workspaceDir: options.workspaceDir,
         extraPaths: context.normalized.loadPaths,
         env: context.env,

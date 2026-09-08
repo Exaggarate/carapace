@@ -13,7 +13,7 @@ import {
 } from "../../../../src/config/runtime-snapshot.js";
 import { GatewayClient } from "../../../../src/gateway/client.js";
 import { loadOrCreateDeviceIdentity } from "../../../../src/infra/device-identity.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../src/state/carapace-state-db.js";
 import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 import {
@@ -40,7 +40,7 @@ it(
   { timeout: TEST_TIMEOUT_MS },
   async () => {
     const repoRoot = process.cwd();
-    const root = tempDirs.make("openclaw-node-exec-routing-");
+    const root = tempDirs.make("carapace-node-exec-routing-");
     const owner = createQaGatewayChild();
     const children: CapturedChild[] = [];
     const canvasClients: GatewayClient[] = [];
@@ -51,8 +51,8 @@ it(
       [
         'import fs from "node:fs";',
         'import path from "node:path";',
-        "const home = process.env.OPENCLAW_HOME;",
-        'if (!home) throw new Error("Node fixture omitted OPENCLAW_HOME");',
+        "const home = process.env.CARAPACE_HOME;",
+        'if (!home) throw new Error("Node fixture omitted CARAPACE_HOME");',
         "const marker = process.argv[2];",
         'fs.appendFileSync(path.join(home, "exec-proof.txt"), `${marker}\\n`);',
         "console.log(JSON.stringify({ home, marker }));",
@@ -69,7 +69,7 @@ it(
       const home = path.join(nodeRoot, "home");
       const state = path.join(nodeRoot, "state");
       const tmp = path.join(nodeRoot, "tmp");
-      const config = path.join(nodeRoot, "openclaw.json");
+      const config = path.join(nodeRoot, "carapace.json");
       await Promise.all([home, state, tmp].map((dir) => fs.mkdir(dir, { recursive: true })));
       await fs.writeFile(
         config,
@@ -83,12 +83,12 @@ it(
         home,
         tempDir: tmp,
         extra: {
-          OPENCLAW_HOME: home,
-          OPENCLAW_STATE_DIR: state,
-          OPENCLAW_CONFIG_PATH: config,
-          OPENCLAW_GATEWAY_TOKEN: gateway.token,
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
+          CARAPACE_HOME: home,
+          CARAPACE_STATE_DIR: state,
+          CARAPACE_CONFIG_PATH: config,
+          CARAPACE_GATEWAY_TOKEN: gateway.token,
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
         },
       });
       const port = Number(new URL(gateway.baseUrl).port);
@@ -119,9 +119,9 @@ it(
           transportBaseUrl: "http://127.0.0.1",
           controlUiEnabled: false,
           runtimeEnvPatch: {
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
           },
           mutateConfig: (cfg) => ({
             ...cfg,
@@ -138,16 +138,16 @@ it(
         });
         const callerHome = path.join(root, "caller");
         const callerState = path.join(callerHome, "state");
-        const callerConfig = path.join(callerHome, "openclaw.json");
+        const callerConfig = path.join(callerHome, "carapace.json");
         await fs.mkdir(callerState, { recursive: true });
         await fs.writeFile(callerConfig, JSON.stringify(gateway.cfg));
         vi.stubEnv("HOME", callerHome);
-        vi.stubEnv("OPENCLAW_HOME", callerHome);
-        vi.stubEnv("OPENCLAW_STATE_DIR", callerState);
-        vi.stubEnv("OPENCLAW_CONFIG_PATH", callerConfig);
-        vi.stubEnv("OPENCLAW_GATEWAY_URL", undefined);
-        vi.stubEnv("OPENCLAW_GATEWAY_PORT", new URL(gateway.baseUrl).port);
-        vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", gateway.token);
+        vi.stubEnv("CARAPACE_HOME", callerHome);
+        vi.stubEnv("CARAPACE_STATE_DIR", callerState);
+        vi.stubEnv("CARAPACE_CONFIG_PATH", callerConfig);
+        vi.stubEnv("CARAPACE_GATEWAY_URL", undefined);
+        vi.stubEnv("CARAPACE_GATEWAY_PORT", new URL(gateway.baseUrl).port);
+        vi.stubEnv("CARAPACE_GATEWAY_TOKEN", gateway.token);
         setRuntimeConfigSnapshot(gateway.cfg);
         const makeExec = (node?: string) =>
           createExecTool({
@@ -274,7 +274,7 @@ it(
       },
       () => stopQaGatewayFixture(owner),
       () => requests.mockRestore(),
-      () => closeOpenClawStateDatabaseForTest(),
+      () => closeCarapaceStateDatabaseForTest(),
       () => clearRuntimeConfigSnapshot(),
       () => vi.unstubAllEnvs(),
     );

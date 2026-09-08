@@ -1,12 +1,12 @@
-# OpenClaw Qwen Cloud Provider
+# Carapace Qwen Cloud Provider
 
-Official OpenClaw provider plugin for Qwen Cloud.
+Official Carapace provider plugin for Qwen Cloud.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/qwen-provider
-openclaw gateway restart
+carapace plugins install @carapace/qwen-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/qwen> for setup and configuration.
+See <../../docs/providers/qwen.md> for setup and configuration.

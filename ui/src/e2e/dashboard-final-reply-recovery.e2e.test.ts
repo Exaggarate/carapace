@@ -18,7 +18,7 @@ function dashboardPath(): string {
 
 suite.define(() => {
   it("projects a distinct durable reply after interim text and a message-less terminal", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     if (recordProof) {
       await mkdir(path.join(suite.artifactDir, "dashboard-final-reply-recovery"), {
         recursive: true,
@@ -117,7 +117,7 @@ suite.define(() => {
           role: "user",
           content: [{ type: "text", text: prompt }],
           timestamp: 1,
-          __openclaw: { id: "dashboard-prompt", idempotencyKey: `${runId}:user`, seq: 1 },
+          __carapace: { id: "dashboard-prompt", idempotencyKey: `${runId}:user`, seq: 1 },
         },
         {
           role: "assistant",
@@ -128,7 +128,7 @@ suite.define(() => {
             { text: updatedInterimText, type: "text", cache_control: { type: "ephemeral" } },
           ],
           timestamp: 2,
-          __openclaw: { id: "dashboard-interim", runId, seq: 2 },
+          __carapace: { id: "dashboard-interim", runId, seq: 2 },
         },
         {
           role: "assistant",
@@ -141,7 +141,7 @@ suite.define(() => {
             },
           ],
           timestamp: 3,
-          __openclaw: { id: "dashboard-partial-final", runId, seq: 3 },
+          __carapace: { id: "dashboard-partial-final", runId, seq: 3 },
         },
       ];
       const persistedHistory = [
@@ -151,7 +151,7 @@ suite.define(() => {
           content: [{ type: "text", text: finalText }],
           stopReason: "stop",
           timestamp: 4,
-          __openclaw: { id: "dashboard-final", runId, seq: 4 },
+          __carapace: { id: "dashboard-final", runId, seq: 4 },
         },
       ];
       const historyCount = (await gateway.getRequests("chat.history")).length;

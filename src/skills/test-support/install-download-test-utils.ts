@@ -1,13 +1,13 @@
 // Install download test utilities provide isolated state and workspace paths.
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 
-/** Creates isolated OpenClaw state for install download tests. */
-export async function createInstallDownloadTestState(): Promise<OpenClawTestState> {
-  return await createOpenClawTestState({
+/** Creates isolated Carapace state for install download tests. */
+export async function createInstallDownloadTestState(): Promise<CarapaceTestState> {
+  return await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skills-install-",
+    prefix: "carapace-skills-install-",
   });
 }

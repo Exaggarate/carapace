@@ -55,7 +55,7 @@ describe("agent defaults schema", () => {
         `models.${key}.codeMode`,
       );
     }
-    const models = { "openai/*": { agentRuntime: { id: "openclaw" } } };
+    const models = { "openai/*": { agentRuntime: { id: "carapace" } } };
     expect(AgentDefaultsSchema.parse({ models })?.models).toEqual(models);
     expect(AgentEntrySchema.parse({ id: "ops", models }).models).toEqual(models);
   });
@@ -66,7 +66,7 @@ describe("agent defaults schema", () => {
       const entry = {
         alias: "test",
         params: { temperature: 0.5 },
-        agentRuntime: { id: "openclaw" },
+        agentRuntime: { id: "carapace" },
         streaming: false,
         ...(codeMode === undefined ? {} : { codeMode }),
       };

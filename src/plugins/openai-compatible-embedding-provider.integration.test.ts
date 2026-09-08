@@ -19,8 +19,8 @@ import {
   resolveScopedAuthProfileStore,
 } from "../agents/model-auth-provider.js";
 import { UnresolvedSecretInputError } from "../config/types.secrets.js";
-import { closeOpenClawAgentDatabases } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabases } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getEmbeddingProvider } from "./embedding-provider-runtime.js";
 import type { EmbeddingProviderCreateOptions } from "./embedding-provider-types.js";
 import { openAICompatibleEmbeddingProviderAdapter } from "./openai-compatible-embedding-provider.js";
@@ -34,8 +34,8 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
   beforeEach(async () => {
     vi.stubEnv("NO_PROXY", "127.0.0.1");
     vi.stubEnv("no_proxy", "127.0.0.1");
-    vi.stubEnv("OPENCLAW_TEST_EMBEDDING_LITERAL_KEY", "ambient-key-bait");
-    vi.stubEnv("OPENCLAW_TEST_EMBEDDING_LITERAL_HEADER", "ambient-header-bait");
+    vi.stubEnv("CARAPACE_TEST_EMBEDDING_LITERAL_KEY", "ambient-key-bait");
+    vi.stubEnv("CARAPACE_TEST_EMBEDDING_LITERAL_HEADER", "ambient-header-bait");
     requests = [];
     server = createServer((request, response) => {
       request.resume();
@@ -155,11 +155,11 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
     {
       name: "resolved template-looking remote credentials reach HTTP literally",
       remote: {
-        apiKey: "${OPENCLAW_TEST_EMBEDDING_LITERAL_KEY}",
-        headers: { "X-Literal": "$OPENCLAW_TEST_EMBEDDING_LITERAL_HEADER" },
+        apiKey: "${CARAPACE_TEST_EMBEDDING_LITERAL_KEY}",
+        headers: { "X-Literal": "$CARAPACE_TEST_EMBEDDING_LITERAL_HEADER" },
       },
-      authorization: "Bearer ${OPENCLAW_TEST_EMBEDDING_LITERAL_KEY}",
-      expectedHeaders: { "x-literal": "$OPENCLAW_TEST_EMBEDDING_LITERAL_HEADER" },
+      authorization: "Bearer ${CARAPACE_TEST_EMBEDDING_LITERAL_KEY}",
+      expectedHeaders: { "x-literal": "$CARAPACE_TEST_EMBEDDING_LITERAL_HEADER" },
     },
   ])(
     "$name",
@@ -209,7 +209,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
   it.each([false, true])(
     "keeps metadata-only profile names literal with owned store = %s",
     async (ownedStore) => {
-      const agentDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-embedding-metadata-"));
+      const agentDir = await mkdtemp(path.join(os.tmpdir(), "carapace-embedding-metadata-"));
       const profileId = "tenant-embeddings:metadata-only";
       try {
         const options = createOptions({
@@ -241,7 +241,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
         expect(requests[0]?.headers.authorization).toBe(`Bearer ${profileId}`);
       } finally {
         closeAuthProfileReadPool({ kind: "root", rootPath: agentDir });
-        closeOpenClawAgentDatabases(agentDir);
+        closeCarapaceAgentDatabases(agentDir);
         await rm(agentDir, { force: true, recursive: true });
       }
     },
@@ -254,7 +254,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
   ])(
     "honors recreated legacy auth with $cache cache and populated SQLite = $populated",
     async ({ cache, populated }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "state-only", label: "embedding-auth-migration" },
         async (state) => {
           const agentDir = state.agentDir("worker");
@@ -299,14 +299,14 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
             } else {
               await expect.soft(embed()).rejects.toMatchObject({
                 code: "AUTH_PROFILE_MIGRATION_REQUIRED",
-                action: "openclaw doctor --fix",
+                action: "carapace doctor --fix",
               });
               expect(requests).toEqual([]);
             }
           } finally {
             clearAuthProfileMigrationRequired(agentDir);
             clearRuntimeAuthProfileStoreSnapshots();
-            closeOpenClawAgentDatabases(agentDir);
+            closeCarapaceAgentDatabases(agentDir);
           }
         },
       );
@@ -326,7 +326,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
   )(
     "enforces $provider/$api $credentialType profile auth with plugins disabled",
     async ({ provider, api, credentialType }) => {
-      const agentDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-embedding-auth-mode-"));
+      const agentDir = await mkdtemp(path.join(os.tmpdir(), "carapace-embedding-auth-mode-"));
       const profileId = `${provider}:bound`;
       const credential: AuthProfileCredential =
         credentialType === "api_key"
@@ -364,7 +364,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
         }
       } finally {
         closeAuthProfileReadPool({ kind: "root", rootPath: agentDir });
-        closeOpenClawAgentDatabases(agentDir);
+        closeCarapaceAgentDatabases(agentDir);
         await rm(agentDir, { force: true, recursive: true });
       }
     },
@@ -378,7 +378,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
       })),
     ),
   )("keeps $binding profile bindings terminal with $route", async ({ route, binding }) => {
-    const agentDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-embedding-binding-"));
+    const agentDir = await mkdtemp(path.join(os.tmpdir(), "carapace-embedding-binding-"));
     const profileId = "tenant-embeddings:bound";
     const credential: AuthProfileCredential = {
       type: "api_key",
@@ -424,7 +424,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
       }
     } finally {
       closeAuthProfileReadPool({ kind: "root", rootPath: agentDir });
-      closeOpenClawAgentDatabases(agentDir);
+      closeCarapaceAgentDatabases(agentDir);
       await rm(agentDir, { force: true, recursive: true });
     }
   });
@@ -444,7 +444,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
     { name: "whitespace key", apiKey: "   ", authorization: undefined },
     { name: "omitted key", apiKey: undefined, authorization: undefined },
   ])("preserves configured $name authentication at HTTP", async ({ apiKey, authorization }) => {
-    const agentDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-embedding-profile-"));
+    const agentDir = await mkdtemp(path.join(os.tmpdir(), "carapace-embedding-profile-"));
     const profileId = "tenant-embeddings:default";
     try {
       writePersistedAuthProfileStoreRaw(
@@ -488,7 +488,7 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
       expect(requests[0]?.headers.authorization).toBe(authorization);
     } finally {
       closeAuthProfileReadPool({ kind: "root", rootPath: agentDir });
-      closeOpenClawAgentDatabases(agentDir);
+      closeCarapaceAgentDatabases(agentDir);
       await rm(agentDir, { force: true, recursive: true });
     }
   });
@@ -496,11 +496,11 @@ describe("OpenAI-compatible embedding destination credential ownership", () => {
   it.each(["apiKey", "header", "providerApiKey"])(
     "rejects an unresolved %s before egress",
     async (field) => {
-      vi.stubEnv("OPENCLAW_TEST_EMBEDDING_UNRESOLVED_SECRET", "ambient-secret-bait");
+      vi.stubEnv("CARAPACE_TEST_EMBEDDING_UNRESOLVED_SECRET", "ambient-secret-bait");
       const ref = {
         source: "env" as const,
         provider: "default",
-        id: "OPENCLAW_TEST_EMBEDDING_UNRESOLVED_SECRET",
+        id: "CARAPACE_TEST_EMBEDDING_UNRESOLVED_SECRET",
       };
       const remote: NonNullable<EmbeddingProviderCreateOptions["remote"]> =
         field === "apiKey"

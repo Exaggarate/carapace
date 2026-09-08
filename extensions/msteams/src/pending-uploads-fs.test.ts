@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prepareFileConsentActivityFs } from "./file-consent-helpers.js";
 import {
@@ -23,13 +23,13 @@ import { msteamsRuntimeStub } from "./test-support/runtime.js";
 const createdTempDirs: string[] = [];
 
 async function makeTempStateDir(): Promise<string> {
-  const dir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "openclaw-msteams-pending-"));
+  const dir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "carapace-msteams-pending-"));
   createdTempDirs.push(dir);
   return dir;
 }
 
 function makeEnv(stateDir: string): NodeJS.ProcessEnv {
-  return { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  return { ...process.env, CARAPACE_STATE_DIR: stateDir };
 }
 
 async function requirePendingUpload(id: string, env: NodeJS.ProcessEnv) {
@@ -114,7 +114,7 @@ describe("msteams pending uploads (fs-backed)", () => {
     // Confirm SQLite-backed plugin state was created instead of a new JSON store.
     const storePath = path.join(stateDir, "msteams-pending-uploads.json");
     await expect(fs.promises.access(storePath)).rejects.toThrow();
-    await fs.promises.access(path.join(stateDir, "state", "openclaw.sqlite"));
+    await fs.promises.access(path.join(stateDir, "state", "carapace.sqlite"));
 
     // Second "process": reader using the same state dir
     const reader = await getPendingUploadFs("upload-x", { env });
@@ -166,7 +166,7 @@ describe("msteams pending uploads (fs-backed)", () => {
     if (!first || !later) {
       throw new Error("expected upload chunks");
     }
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openCarapaceStateDatabase({ env });
     db.prepare("UPDATE plugin_state_entries SET value_json = ? WHERE entry_key = ?").run(
       "invalid JSON",
       later.key,
@@ -293,8 +293,8 @@ describe("prepareFileConsentActivityFs end-to-end", () => {
     const stateDir = await makeTempStateDir();
     const env = makeEnv(stateDir);
     // Redirect state dir via env so the helper's FS writes land under our tmp
-    const originalEnv = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    const originalEnv = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = stateDir;
 
     try {
       const result = await prepareFileConsentActivityFs({
@@ -321,9 +321,9 @@ describe("prepareFileConsentActivityFs end-to-end", () => {
       expect(loaded.buffer.toString("utf8")).toBe("cli file");
     } finally {
       if (originalEnv === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = originalEnv;
+        process.env.CARAPACE_STATE_DIR = originalEnv;
       }
     }
   });

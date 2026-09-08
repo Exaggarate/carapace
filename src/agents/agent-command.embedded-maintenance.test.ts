@@ -1,6 +1,6 @@
 /** Tests proactive embedded maintenance and final-reply lifecycle safety. */
 import { randomUUID } from "node:crypto";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
 import { createAbortError } from "../infra/abort-signal.js";
@@ -55,7 +55,7 @@ describe("agentCommand embedded maintenance", () => {
         sessionId,
         text: "done",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
@@ -90,7 +90,7 @@ describe("agentCommand embedded maintenance", () => {
       state.runAgentAttemptMock.mockImplementationOnce(async (params) => {
         params.onSuccessfulAuthProfile?.({});
         now += foregroundMs;
-        return makeResult({ sessionId, text, runner: "embedded", agentHarnessId: "openclaw" });
+        return makeResult({ sessionId, text, runner: "embedded", agentHarnessId: "carapace" });
       });
       state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
         flushTimeout = params.followupRun.run.timeoutMs;
@@ -133,7 +133,7 @@ describe("agentCommand embedded maintenance", () => {
     state.runAgentAttemptMock.mockImplementationOnce(async (params) => {
       params.onSuccessfulAuthProfile?.({});
       await vi.advanceTimersByTimeAsync(400);
-      return makeResult({ sessionId, text, runner: "embedded", agentHarnessId: "openclaw" });
+      return makeResult({ sessionId, text, runner: "embedded", agentHarnessId: "carapace" });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
       flushTimeout = params.followupRun.run.timeoutMs;
@@ -224,7 +224,7 @@ describe("agentCommand embedded maintenance", () => {
         sessionId,
         text: "cancelled foreground answer",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
@@ -266,7 +266,7 @@ describe("agentCommand embedded maintenance", () => {
         sessionId,
         text: "unlimited answer",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
@@ -347,7 +347,7 @@ describe("agentCommand embedded maintenance", () => {
       sessionId,
       provider: "openai",
       model,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       contextTokens: 922_000,
       promptTokens: 904_869,
       usage: lastCallUsage,
@@ -425,7 +425,7 @@ describe("agentCommand embedded maintenance", () => {
     });
     expect(storedBeforeMaintenance?.pendingFinalDelivery).toBeUndefined();
     expect(maintenanceParams).toMatchObject({
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       promptForEstimate: "",
       followupRun: {
         run: {
@@ -615,7 +615,7 @@ describe("agentCommand embedded maintenance", () => {
       sessionId,
       text: "completed answer",
       runner: "embedded",
-      agentHarnessId: testCase.agentHarnessId ?? "openclaw",
+      agentHarnessId: testCase.agentHarnessId ?? "carapace",
       compactionCount: testCase.compactionCount,
     });
     completed.meta = { ...completed.meta, ...testCase.meta };
@@ -663,7 +663,7 @@ describe("agentCommand embedded maintenance", () => {
         sessionId,
         text: "answer",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
@@ -726,7 +726,7 @@ describe("agentCommand embedded maintenance", () => {
         { agentId: "main", sessionId, sessionKey, storePath },
         {
           type: "custom",
-          customType: "openclaw:bootstrap-context:full",
+          customType: "carapace:bootstrap-context:full",
           data: { runId: "embedded-run" },
         },
       );
@@ -735,7 +735,7 @@ describe("agentCommand embedded maintenance", () => {
         sessionId,
         text: "OVERRIDE-OK",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
 
@@ -768,7 +768,7 @@ describe("agentCommand embedded maintenance", () => {
     expect(
       events.filter(
         (event) =>
-          event.type === "custom" && event.customType === "openclaw:bootstrap-context:full",
+          event.type === "custom" && event.customType === "carapace:bootstrap-context:full",
       ),
     ).toHaveLength(1);
     expect(state.runMemoryFlushIfNeededMock).toHaveBeenCalledOnce();
@@ -792,7 +792,7 @@ describe("agentCommand embedded maintenance", () => {
     const sessionKey = `agent:main:explicit:${sessionId}`;
     const abortController = new AbortController();
     state.runAgentAttemptMock.mockImplementationOnce(async () => {
-      return makeResult({ sessionId, text, runner, agentHarnessId: "openclaw" });
+      return makeResult({ sessionId, text, runner, agentHarnessId: "carapace" });
     });
     const compact = async (params: { sessionEntry?: SessionEntry }) => {
       expect(params.sessionEntry).toMatchObject({
@@ -841,7 +841,7 @@ describe("agentCommand embedded maintenance", () => {
     let maintenanceSignal: AbortSignal | undefined;
     state.runAgentAttemptMock.mockImplementationOnce(async (params) => {
       params.onSuccessfulAuthProfile?.({});
-      return makeResult({ sessionId, text, runner, agentHarnessId: "openclaw" });
+      return makeResult({ sessionId, text, runner, agentHarnessId: "carapace" });
     });
     const compact = async (params: { sessionEntry?: SessionEntry; abortSignal?: AbortSignal }) => {
       entryBeforeRotation = params.sessionEntry;
@@ -889,7 +889,7 @@ describe("agentCommand embedded maintenance", () => {
       try {
         state.runAgentAttemptMock.mockImplementationOnce(async (params) => {
           params.onSuccessfulAuthProfile?.({});
-          return makeResult({ sessionId, text: "local final", runner, agentHarnessId: "openclaw" });
+          return makeResult({ sessionId, text: "local final", runner, agentHarnessId: "carapace" });
         });
         const compact =
           runner === "embedded"
@@ -952,7 +952,7 @@ describe("agentCommand embedded maintenance", () => {
           sessionId,
           text: "local final",
           runner: "embedded",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
         });
       });
       state.runSessionCompactionIfNeededMock.mockImplementationOnce(async ({ sessionEntry }) => {

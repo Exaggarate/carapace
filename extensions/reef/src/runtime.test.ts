@@ -1,6 +1,6 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 
 const reefRuntimeSlot = createPluginRuntimeStore<PluginRuntime>({

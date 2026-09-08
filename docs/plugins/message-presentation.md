@@ -8,7 +8,7 @@ read_when:
   - Debugging provider-specific card/block/component rendering regressions
 ---
 
-Message presentation is OpenClaw's shared contract for rich outbound chat UI.
+Message presentation is Carapace's shared contract for rich outbound chat UI.
 It lets agents, CLI commands, approval flows, and plugins describe the message
 intent once, while each channel plugin renders the best native shape it can.
 
@@ -30,7 +30,7 @@ Plugin authors import the public contract from:
 import type {
   MessagePresentation,
   ReplyPayloadDelivery,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 ```
 
 Shape:
@@ -150,7 +150,7 @@ Button semantics:
   the approval service; they must not parse `/approve` command text or infer
   kind from the ID.
 - `action.type: "question"` identifies one choice for a live, runtime-authored
-  `ask_user` question. Like `approval`, this is an OpenClaw runtime action;
+  `ask_user` question. Like `approval`, this is an Carapace runtime action;
   agents and plugins must not synthesize question IDs. Telegram, Discord, and
   Slack map it to transport-private native callbacks and resolve the choice
   through the Gateway. When the question becomes answered, expired, or
@@ -167,7 +167,7 @@ Button semantics:
   visible text route.
 - `action.type: "url"` opens a normal link.
 - `action.type: "web-app"` launches a channel-native web app. Set `url` for a
-  URL-backed app or `widgetId` for an OpenClaw-hosted widget whose launch
+  URL-backed app or `widgetId` for an Carapace-hosted widget whose launch
   mechanics are owned by the channel; at least one is required. When both are
   present, a channel can prefer its native hosted-widget launch and use the URL
   where that mechanism is unavailable.
@@ -369,7 +369,7 @@ Table report:
 CLI send:
 
 ```bash
-openclaw message send --channel slack \
+carapace message send --channel slack \
   --target channel:C123 \
   --message "Deploy approval" \
   --presentation '{"title":"Deploy approval","tone":"warning","blocks":[{"type":"text","text":"Canary is ready."},{"type":"buttons","buttons":[{"label":"Approve","value":"deploy:approve","style":"success"},{"label":"Decline","value":"deploy:decline","style":"danger"}]}]}'
@@ -378,7 +378,7 @@ openclaw message send --channel slack \
 Pinned delivery:
 
 ```bash
-openclaw message send --channel telegram \
+carapace message send --channel telegram \
   --target -1001234567890 \
   --message "Topic opened" \
   --pin
@@ -606,7 +606,7 @@ Current bundled renderers:
 | --------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Discord         | Components and component containers       | Supports the documented Discord-specific `components` extension for native layouts that `presentation` cannot express. Portable shared sends should use `presentation`.                                           |
 | Feishu          | Interactive cards                         | Card header uses `title` once. Within native cards, disabled or unsupported buttons retain label-only text; rejected URL targets and opaque callback values are omitted.                                          |
-| Matrix          | Text fallback plus structured event field | Buttons/selects advertise as supported, but every block currently renders as `renderMessagePresentationFallbackText` output carried in a `com.openclaw.presentation` event field, not native interactive widgets. |
+| Matrix          | Text fallback plus structured event field | Buttons/selects advertise as supported, but every block currently renders as `renderMessagePresentationFallbackText` output carried in a `com.carapace.presentation` event field, not native interactive widgets. |
 | Mattermost      | Text plus interactive props               | Selects and dividers are not supported; those blocks degrade to text.                                                                                                                                             |
 | Microsoft Teams | Adaptive Cards                            | Plain `message` text is included with the card when both are provided. Selects, styles, and disabled state are not supported.                                                                                     |
 | Slack           | Block Kit                                 | Renders `chart` as native `data_visualization` and `table` as native `data_table`; preserves legacy `channelData.slack.blocks`, but new shared sends should use `presentation`.                                   |
@@ -636,7 +636,7 @@ helpers. It supports:
 - URL-only buttons
 - generic delivery metadata through `ReplyPayload.delivery`
 
-Use helpers from `openclaw/plugin-sdk/interactive-runtime` when bridging older
+Use helpers from `carapace/plugin-sdk/interactive-runtime` when bridging older
 code:
 
 ```ts
@@ -657,7 +657,7 @@ import {
   resolveMessagePresentationButtonAction,
   resolveMessagePresentationControlValue,
   resolveMessagePresentationOptionAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 ```
 
 New code should accept or produce `MessagePresentation` directly. Existing

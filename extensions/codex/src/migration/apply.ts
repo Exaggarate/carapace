@@ -1,6 +1,6 @@
 // Codex plugin module implements apply behavior.
 import path from "node:path";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   applyMigrationManualItem,
   markMigrationItemConflict,
@@ -10,23 +10,23 @@ import {
   resolveMigrationConfigRuntime,
   summarizeMigrationItems,
   writeMigrationConfigPath,
-} from "openclaw/plugin-sdk/migration";
+} from "carapace/plugin-sdk/migration";
 import {
   archiveMigrationItem,
   copyMemoryMigrationFileItem,
   copyMigrationFileItem,
   withCachedMigrationConfigRuntime,
   writeMigrationReport,
-} from "openclaw/plugin-sdk/migration-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/migration-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 import type {
   MigrationApplyResult,
   MigrationItem,
   MigrationPlan,
   MigrationProviderContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { sleep } from "carapace/plugin-sdk/runtime-env";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { defaultCodexAppInventoryCache } from "../app-server/app-inventory-cache.js";
 import { resolveCodexAppServerAuthAccountCacheKey } from "../app-server/auth-bridge.js";
 import { resolveCodexAppServerFallbackApiKeyCacheKey } from "../app-server/auth-cache-key.js";
@@ -62,11 +62,11 @@ const CODEX_PLUGIN_AUTH_REQUIRED_REASON = "auth_required";
 const CODEX_PLUGIN_NOT_SELECTED_REASON = "not selected for migration";
 const CODEX_CONFIG_PATCH_MODE_RETURN = "return";
 const CODEX_PLUGIN_LOAD_WARNING =
-  "Some Codex plugins could not be migrated. Run `openclaw migrate codex` after onboarding.";
+  "Some Codex plugins could not be migrated. Run `carapace migrate codex` after onboarding.";
 const TARGET_CODEX_MARKETPLACE_DISCOVERY_POLL_MS = 250;
 const TARGET_CODEX_MARKETPLACE_DISCOVERY_TIMEOUT_MS = 30_000;
 const TARGET_CODEX_MARKETPLACE_DISCOVERY_TIMEOUT_ENV =
-  "OPENCLAW_CODEX_MIGRATION_PLUGIN_LIST_TIMEOUT_MS";
+  "CARAPACE_CODEX_MIGRATION_PLUGIN_LIST_TIMEOUT_MS";
 
 type CodexMigrationTargetAppServerPreparation = {
   dispose: () => Promise<void>;

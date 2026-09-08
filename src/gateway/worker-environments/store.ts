@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { isAbsolute } from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeSortedUniqueTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeSortedUniqueTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import type { Insertable, Selectable, Updateable } from "kysely";
 import {
   type WorkerAdmissionHandshake,
@@ -22,18 +22,18 @@ import type {
   WorkerSshEndpoint,
 } from "../../plugins/types.js";
 import { isValidSecretRef } from "../../secrets/ref-contract.js";
-import { ensureWorkerEnvironmentNodeEnrollmentSchema } from "../../state/openclaw-state-db-schema-additive.js";
+import { ensureWorkerEnvironmentNodeEnrollmentSchema } from "../../state/carapace-state-db-schema-additive.js";
 import type {
   DB as StateDatabase,
   WorkerEnvironmentCredentials,
   WorkerEnvironmentSshFallbackPorts,
   WorkerEnvironments,
-} from "../../state/openclaw-state-db.generated.js";
+} from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import type { WorkerCredentialRecord } from "./credential.js";
 import {
   canTransitionWorkerEnvironment,
@@ -191,7 +191,7 @@ function teardownTerminalStateFrom(
 }
 function normalizeBootstrapReceipt(value: {
   bundleHash: unknown;
-  openclawVersion: unknown;
+  carapaceVersion: unknown;
   protocolFeatures: unknown;
   installKind?: unknown;
 }): WorkerEnvironmentBootstrapReceipt {
@@ -220,7 +220,7 @@ function normalizeBootstrapReceipt(value: {
   }
   return {
     bundleHash,
-    openclawVersion: required(value.openclawVersion, "bootstrap OpenClaw version"),
+    carapaceVersion: required(value.carapaceVersion, "bootstrap Carapace version"),
     protocolFeatures: normalizeSortedUniqueTrimmedStringList(value.protocolFeatures),
     ...(value.installKind ? { installKind: value.installKind } : {}),
   };
@@ -407,19 +407,19 @@ function desktopFrom(row: Row): WorkerDesktopEndpoint | null {
 function bootstrapReceiptFrom(row: Row): WorkerEnvironmentBootstrapReceipt | null {
   const {
     bootstrap_bundle_hash: bundleHash,
-    bootstrap_openclaw_version: openclawVersion,
+    bootstrap_carapace_version: carapaceVersion,
     bootstrap_protocol_features_json: encodedFeatures,
     bootstrap_install_kind: installKind,
   } = row;
-  if (bundleHash === null && openclawVersion === null && encodedFeatures === null) {
+  if (bundleHash === null && carapaceVersion === null && encodedFeatures === null) {
     return null;
   }
-  if (bundleHash === null || openclawVersion === null || encodedFeatures === null) {
+  if (bundleHash === null || carapaceVersion === null || encodedFeatures === null) {
     throw new Error("Worker environment bootstrap receipt is incomplete");
   }
   return normalizeBootstrapReceipt({
     bundleHash,
-    openclawVersion,
+    carapaceVersion,
     protocolFeatures: JSON.parse(encodedFeatures) as unknown,
     ...(installKind === null ? {} : { installKind }),
   });
@@ -805,11 +805,11 @@ function reconcileAttachedSessionOwners(db: DatabaseSync, nowMs: number): void {
 }
 
 export function createWorkerEnvironmentStore(
-  options: { database?: OpenClawStateDatabase; now?: () => number } = {},
+  options: { database?: CarapaceStateDatabase; now?: () => number } = {},
 ) {
-  const database = options.database ?? openOpenClawStateDatabase();
+  const database = options.database ?? openCarapaceStateDatabase();
   if (!ensuredWorkerEnvironmentDatabases.has(database.db)) {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         // sqlite-allow-raw -- feature-local additive schema DDL; rows use Kysely below.
         db.exec(WORKER_ENVIRONMENT_SSH_FALLBACK_PORTS_SCHEMA_SQL);
@@ -821,10 +821,10 @@ export function createWorkerEnvironmentStore(
   }
   const path = database.path;
   const now = options.now ?? Date.now;
-  const read = () => openOpenClawStateDatabase({ path }).db;
+  const read = () => openCarapaceStateDatabase({ path }).db;
   let inventoryVersion = 0;
   const write = <T>(operation: (db: DatabaseSync) => T): T => {
-    const result = runOpenClawStateWriteTransaction(({ db }) => operation(db), { path });
+    const result = runCarapaceStateWriteTransaction(({ db }) => operation(db), { path });
     // Device pairing's nodeDeviceId patch deliberately stays outside this version:
     // it changes no identity/epoch/state input. Runner availability owns its own fence.
     inventoryVersion += 1;
@@ -907,7 +907,7 @@ export function createWorkerEnvironmentStore(
               ssh_key_ref_json: null,
               desktop_json: null,
               bootstrap_bundle_hash: null,
-              bootstrap_openclaw_version: null,
+              bootstrap_carapace_version: null,
               bootstrap_protocol_features_json: null,
               bootstrap_install_kind: null,
               owner_epoch: 0,
@@ -1280,7 +1280,7 @@ export function createWorkerEnvironmentStore(
           ssh_key_ref_json: sshEndpoint ? json(sshEndpoint.keyRef) : null,
           desktop_json: desktop ? json(desktop) : null,
           bootstrap_bundle_hash: bootstrapReceipt?.bundleHash ?? null,
-          bootstrap_openclaw_version: bootstrapReceipt?.openclawVersion ?? null,
+          bootstrap_carapace_version: bootstrapReceipt?.carapaceVersion ?? null,
           bootstrap_protocol_features_json: bootstrapReceipt
             ? json(bootstrapReceipt.protocolFeatures)
             : null,

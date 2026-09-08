@@ -9,7 +9,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const workflow = parse(
-  readFileSync(".github/workflows/openclaw-live-and-e2e-checks-reusable.yml", "utf8"),
+  readFileSync(".github/workflows/carapace-live-and-e2e-checks-reusable.yml", "utf8"),
 ) as { jobs: Record<string, { steps: { name?: string; run?: string }[] }> };
 const step = workflow.jobs.prepare_docker_e2e_image?.steps.find(
   (entry) => entry.name === "Plan Docker E2E images",
@@ -25,7 +25,7 @@ function runPlanningStep(
   releaseProfile: "beta" | "stable" | "full",
   mode: "prepare" | "release" | "targeted",
 ) {
-  const root = tempDirs.make("openclaw-candidate-plan-");
+  const root = tempDirs.make("carapace-candidate-plan-");
   const output = join(root, "github-output");
   symlinkSync(resolve("."), join(root, ".release-harness"), "dir");
   execFileSync("bash", ["--noprofile", "--norc", "-c", planningScript], {
@@ -41,10 +41,10 @@ function runPlanningStep(
       LANES: mode === "targeted" ? "npm-onboard-channel-agent" : "",
       PREPARE_ONLY: String(mode === "prepare"),
       RELEASE_TEST_PROFILE: releaseProfile,
-      OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: "",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: mode === "targeted" ? "" : "reported-issues",
+      CARAPACE_DOCKER_ALL_TIMINGS: "0",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS: "",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIOS: mode === "targeted" ? "" : "reported-issues",
     },
   });
   return {
@@ -89,6 +89,6 @@ describe("shared release candidate preparation", () => {
   it("keeps targeted execution limited to the selected lane and its packages", () => {
     const { plan } = runPlanningStep("full", "targeted");
     expect(plan.lanes.map((lane) => lane.name)).toEqual(["npm-onboard-channel-agent"]);
-    expect(plan.requiredPrepublishPluginPackages).toEqual(["@openclaw/codex"]);
+    expect(plan.requiredPrepublishPluginPackages).toEqual(["@carapace/codex"]);
   });
 });

@@ -77,12 +77,12 @@ charts, or links. Reports render directly on the dashboard without an iframe or
 inline preview. The agent updates the report's data when you ask; use an HTML
 widget when you need custom interactivity. See [Native dashboard reports](/tools/show-widget#native-dashboard-reports).
 
-Watch Patrick Erichsen build an OpenClaw 2.0 release dashboard from one prompt:
+Watch Patrick Erichsen build an Carapace 2.0 release dashboard from one prompt:
 
 <iframe
   style={{ width: "100%", height: "auto", aspectRatio: "16 / 9", border: 0, borderRadius: "8px" }}
   src="https://www.youtube-nocookie.com/embed/gHyBueWideg"
-  title="Build an OpenClaw Dashboard with One Prompt"
+  title="Build an Carapace Dashboard with One Prompt"
   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   referrerPolicy="strict-origin-when-cross-origin"
   allowFullScreen
@@ -191,7 +191,7 @@ enables both bridges while that revision-bound grant remains active.
 When the Canvas plugin is enabled, agents can render A2UI JSONL as a dashboard
 widget. A2UI widgets use the same stable name, tab, size, pinning, sandbox, and
 update-in-place behavior as HTML widgets. The renderer is loaded from the
-Gateway's `/__openclaw__/a2ui/` asset route, so the renderer bundle is not
+Gateway's `/__carapace__/a2ui/` asset route, so the renderer bundle is not
 copied into each widget. The Canvas plugin and its hosted routes must be
 enabled; both are enabled by default.
 
@@ -203,14 +203,14 @@ stored widgets visibly unavailable until the plugin is enabled again.
 
 ## Retired Workspaces
 
-The experimental Workspaces plugin, its Control UI tab, `openclaw workspaces`
+The experimental Workspaces plugin, its Control UI tab, `carapace workspaces`
 CLI, and `workspace_*` tools have been removed. Session dashboards use a
 different storage model: each board belongs to a session and lives in the
 owning agent's database. Legacy Workspaces documents and databases are not
 automatically converted.
 
 Preserve any legacy documents, data, and widget assets before running
-`openclaw doctor --fix`: its Workspaces repair deletes identified legacy state
+`carapace doctor --fix`: its Workspaces repair deletes identified legacy state
 under `<stateDir>/workspaces`, without importing that content into a dashboard.
 
 ## Good to know

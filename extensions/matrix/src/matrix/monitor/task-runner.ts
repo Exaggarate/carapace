@@ -1,6 +1,6 @@
 // Matrix plugin module implements task runner behavior.
 import { AsyncLocalStorage } from "node:async_hooks";
-import type { RuntimeLogger } from "openclaw/plugin-sdk/plugin-runtime";
+import type { RuntimeLogger } from "carapace/plugin-sdk/plugin-runtime";
 
 const monitorTaskSignal = new AsyncLocalStorage<AbortSignal>();
 

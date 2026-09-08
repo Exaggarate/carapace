@@ -15,7 +15,7 @@ Findings are advice to verify, not instructions to apply blindly.
 Use `scripts/autoreview` beside this skill. Keep its custom `codex exec` path:
 native `codex review` cannot combine explicit Git target flags with custom instructions.
 The helper combines those with evidence, severity filtering, and validated JSON;
-it leaves review judgment to Codex. For an OpenClaw checkout:
+it leaves review judgment to Codex. For an Carapace checkout:
 
 ```bash
 AUTOREVIEW=".agents/skills/autoreview/scripts/autoreview"

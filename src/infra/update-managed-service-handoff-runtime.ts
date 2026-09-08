@@ -11,7 +11,7 @@ export function stageManagedHandoffRuntime(directory: string): string[] {
   const source = resolveRuntimeWorkerUrl(managedHandoffRuntimeEntrypoint);
   if (!source.pathname.endsWith(".mjs")) {
     throw new Error(
-      "Managed handoff requires its sealed runtime; use the repository test runner or the dist-backed pnpm openclaw CLI.",
+      "Managed handoff requires its sealed runtime; use the repository test runner or the dist-backed pnpm carapace CLI.",
     );
   }
   const destination = path.join(directory, "runtime", MANAGED_HANDOFF_RUNTIME_ENTRY);

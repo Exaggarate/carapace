@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { UpdateChannel } from "../infra/update-channels.js";
 import type { PluginCapabilityConsentHandler } from "./capability-consent.js";
 import type { ExternalizedBundledPluginBridge } from "./externalized-bundled-plugins.js";
@@ -22,7 +22,7 @@ import type {
 import { syncPluginsForUpdateChannel, updateNpmInstalledPlugins } from "./update.js";
 
 export type PluginCohortConvergenceResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changed: boolean;
   npmChanged: boolean;
   sync: PluginChannelSyncResult;
@@ -35,7 +35,7 @@ export type PluginCohortConvergenceResult = {
 
 /** Aligns managed plugin install sources and official packages with one core release cohort. */
 export async function convergePluginReleaseCohort(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   channel: UpdateChannel;
   coreVersion?: string;
   versionBoundPluginIds?: ReadonlySet<string>;

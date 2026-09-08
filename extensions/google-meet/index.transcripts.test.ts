@@ -1,6 +1,6 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import type { TranscriptSourceProvider } from "openclaw/plugin-sdk/transcripts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import type { TranscriptSourceProvider } from "carapace/plugin-sdk/transcripts";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 
@@ -15,7 +15,7 @@ describe("Google Meet transcript source registration", () => {
       source: "test",
       config: {},
       pluginConfig: {},
-      runtime: {} as OpenClawPluginApi["runtime"],
+      runtime: {} as CarapacePluginApi["runtime"],
       registerTranscriptSourceProvider: (provider) => providers.push(provider),
     });
 

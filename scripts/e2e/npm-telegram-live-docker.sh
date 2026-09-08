@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs an OpenClaw package candidate in Docker, performs Telegram
+# Installs an Carapace package candidate in Docker, performs Telegram
 # onboarding/doctor recovery, then runs the Telegram QA live harness.
 set -euo pipefail
 
@@ -7,15 +7,15 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/e2e/lib/prepublish-plugin-registry.sh"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-npm-telegram-live-e2e" OPENCLAW_NPM_TELEGRAM_LIVE_E2E_IMAGE)"
-DOCKER_TARGET="${OPENCLAW_NPM_TELEGRAM_DOCKER_TARGET:-build}"
-PACKAGE_SPEC="${OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC:-openclaw@beta}"
-PACKAGE_TGZ="${OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ:-${OPENCLAW_CURRENT_PACKAGE_TGZ:-}}"
-PACKAGE_DIR="${OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR:-}"
-PREPUBLISH_PLUGIN_REGISTRY_DIR="${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}"
-PACKAGE_LABEL="${OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL:-}"
-RUN_ID="${OPENCLAW_NPM_TELEGRAM_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
-OUTPUT_DIR="${OPENCLAW_NPM_TELEGRAM_OUTPUT_DIR:-.artifacts/qa-e2e/npm-telegram-live/$RUN_ID}"
+IMAGE_NAME="$(docker_e2e_resolve_image "carapace-npm-telegram-live-e2e" CARAPACE_NPM_TELEGRAM_LIVE_E2E_IMAGE)"
+DOCKER_TARGET="${CARAPACE_NPM_TELEGRAM_DOCKER_TARGET:-build}"
+PACKAGE_SPEC="${CARAPACE_NPM_TELEGRAM_PACKAGE_SPEC:-carapace@beta}"
+PACKAGE_TGZ="${CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ:-${CARAPACE_CURRENT_PACKAGE_TGZ:-}}"
+PACKAGE_DIR="${CARAPACE_NPM_TELEGRAM_PACKAGE_DIR:-}"
+PREPUBLISH_PLUGIN_REGISTRY_DIR="${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}"
+PACKAGE_LABEL="${CARAPACE_NPM_TELEGRAM_PACKAGE_LABEL:-}"
+RUN_ID="${CARAPACE_NPM_TELEGRAM_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
+OUTPUT_DIR="${CARAPACE_NPM_TELEGRAM_OUTPUT_DIR:-.artifacts/qa-e2e/npm-telegram-live/$RUN_ID}"
 case "$OUTPUT_DIR" in
   /*) OUTPUT_DIR_HOST="$OUTPUT_DIR" ;;
   *) OUTPUT_DIR_HOST="$ROOT_DIR/$OUTPUT_DIR" ;;
@@ -24,16 +24,16 @@ OUTPUT_DIR_CONTAINER_RELATIVE=".artifacts/qa-e2e/npm-telegram-live-output"
 OUTPUT_DIR_CONTAINER="/app/$OUTPUT_DIR_CONTAINER_RELATIVE"
 
 resolve_credential_source() {
-  if [ -n "${OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE:-}" ]; then
-    printf "%s" "$OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE"
+  if [ -n "${CARAPACE_NPM_TELEGRAM_CREDENTIAL_SOURCE:-}" ]; then
+    printf "%s" "$CARAPACE_NPM_TELEGRAM_CREDENTIAL_SOURCE"
     return 0
   fi
-  if [ -n "${OPENCLAW_QA_CREDENTIAL_SOURCE:-}" ]; then
-    printf "%s" "$OPENCLAW_QA_CREDENTIAL_SOURCE"
+  if [ -n "${CARAPACE_QA_CREDENTIAL_SOURCE:-}" ]; then
+    printf "%s" "$CARAPACE_QA_CREDENTIAL_SOURCE"
     return 0
   fi
-  if [ -n "${CI:-}" ] && [ -n "${OPENCLAW_QA_CONVEX_SITE_URL:-}" ]; then
-    if [ -n "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ] || [ -n "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+  if [ -n "${CI:-}" ] && [ -n "${CARAPACE_QA_CONVEX_SITE_URL:-}" ]; then
+    if [ -n "${CARAPACE_QA_CONVEX_SECRET_CI:-}" ] || [ -n "${CARAPACE_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
       printf "convex"
       return 0
     fi
@@ -42,21 +42,21 @@ resolve_credential_source() {
 }
 
 resolve_credential_role() {
-  if [ -n "${OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE:-}" ]; then
-    printf "%s" "$OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE"
+  if [ -n "${CARAPACE_NPM_TELEGRAM_CREDENTIAL_ROLE:-}" ]; then
+    printf "%s" "$CARAPACE_NPM_TELEGRAM_CREDENTIAL_ROLE"
     return 0
   fi
-  if [ -n "${OPENCLAW_QA_CREDENTIAL_ROLE:-}" ]; then
-    printf "%s" "$OPENCLAW_QA_CREDENTIAL_ROLE"
+  if [ -n "${CARAPACE_QA_CREDENTIAL_ROLE:-}" ]; then
+    printf "%s" "$CARAPACE_QA_CREDENTIAL_ROLE"
   fi
 }
 
-validate_openclaw_package_spec() {
+validate_carapace_package_spec() {
   local spec="$1"
-  if [[ "$spec" =~ ^openclaw@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
+  if [[ "$spec" =~ ^carapace@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
     return 0
   fi
-  echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC must be openclaw@alpha, openclaw@beta, openclaw@latest, or an exact OpenClaw release version; got: $spec" >&2
+  echo "CARAPACE_NPM_TELEGRAM_PACKAGE_SPEC must be carapace@alpha, carapace@beta, carapace@latest, or an exact Carapace release version; got: $spec" >&2
   exit 1
 }
 
@@ -66,13 +66,13 @@ resolve_package_tgz() {
     return 0
   fi
   if [ ! -f "$candidate" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must point to an existing .tgz file; got: $candidate" >&2
+    echo "CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ must point to an existing .tgz file; got: $candidate" >&2
     exit 1
   fi
   case "$candidate" in
     *.tgz) ;;
     *)
-      echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must point to a .tgz file; got: $candidate" >&2
+      echo "CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ must point to a .tgz file; got: $candidate" >&2
       exit 1
       ;;
   esac
@@ -89,7 +89,7 @@ resolve_package_dir() {
     return 0
   fi
   if [ ! -d "$candidate" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR must point to an existing directory; got: $candidate" >&2
+    echo "CARAPACE_NPM_TELEGRAM_PACKAGE_DIR must point to an existing directory; got: $candidate" >&2
     exit 1
   fi
   (cd "$candidate" && pwd)
@@ -101,7 +101,7 @@ resolve_prepublish_plugin_registry_dir() {
     return 0
   fi
   if [ ! -d "$candidate" ]; then
-    echo "OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR must point to an existing directory; got: $candidate" >&2
+    echo "CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR must point to an existing directory; got: $candidate" >&2
     exit 1
   fi
   (cd "$candidate" && pwd)
@@ -134,33 +134,33 @@ resolved_prepublish_plugin_registry_dir="$(
 )"
 if [ -n "$resolved_package_dir" ]; then
   if [ -z "$resolved_package_tgz" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR requires OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ" >&2
+    echo "CARAPACE_NPM_TELEGRAM_PACKAGE_DIR requires CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ" >&2
     exit 1
   fi
   case "$resolved_package_tgz" in
     "$resolved_package_dir"/*) ;;
     *)
-      echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must be inside OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR" >&2
+      echo "CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ must be inside CARAPACE_NPM_TELEGRAM_PACKAGE_DIR" >&2
       exit 1
       ;;
   esac
-  package_install_source="openclaw@$(read_package_version "$resolved_package_tgz")"
+  package_install_source="carapace@$(read_package_version "$resolved_package_tgz")"
   package_source_kind="prepared-package-set"
   package_mount_args=(-v "$resolved_package_dir:/package-under-test:ro")
   registry_helper_mount_args=(
     -v "$ROOT_DIR/scripts/lib/bounded-response.mjs:/tmp/lib/bounded-response.mjs:ro"
-    -v "$ROOT_DIR/scripts/e2e/lib/plugins/npm-registry-server.mjs:/tmp/openclaw-e2e/lib/plugins/npm-registry-server.mjs:ro"
+    -v "$ROOT_DIR/scripts/e2e/lib/plugins/npm-registry-server.mjs:/tmp/carapace-e2e/lib/plugins/npm-registry-server.mjs:ro"
   )
 elif [ -n "$resolved_package_tgz" ]; then
   package_install_source="/package-under-test/$(basename "$resolved_package_tgz")"
   package_source_kind="packed-tarball"
   package_mount_args=(-v "$resolved_package_tgz:$package_install_source:ro")
 else
-  validate_openclaw_package_spec "$PACKAGE_SPEC"
+  validate_carapace_package_spec "$PACKAGE_SPEC"
 fi
 if [ -n "$resolved_prepublish_plugin_registry_dir" ]; then
-  openclaw_prepublish_plugin_registry_configure_docker_args "$resolved_prepublish_plugin_registry_dir"
-  prepublish_registry_mount_args=("${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}")
+  carapace_prepublish_plugin_registry_configure_docker_args "$resolved_prepublish_plugin_registry_dir"
+  prepublish_registry_mount_args=("${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DOCKER_ARGS[@]}")
 fi
 if [ -z "$PACKAGE_LABEL" ]; then
   if [ -n "$resolved_package_tgz" ]; then
@@ -181,30 +181,30 @@ if [ -z "$credential_role" ] && [ "$credential_source" = "convex" ]; then
 fi
 
 validate_credential_preflight() {
-  if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT:-0}" = "1" ]; then
+  if [ "${CARAPACE_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT:-0}" = "1" ]; then
     return 0
   fi
   if [ "$credential_source" = "convex" ]; then
-    if [ -z "${OPENCLAW_QA_CONVEX_SITE_URL:-}" ]; then
-      echo "Missing required env for Convex credential mode: OPENCLAW_QA_CONVEX_SITE_URL" >&2
+    if [ -z "${CARAPACE_QA_CONVEX_SITE_URL:-}" ]; then
+      echo "Missing required env for Convex credential mode: CARAPACE_QA_CONVEX_SITE_URL" >&2
       exit 1
     fi
     if [ "$credential_role" = "ci" ]; then
-      if [ -z "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ]; then
-        echo "Missing required env for Convex ci credential mode: OPENCLAW_QA_CONVEX_SECRET_CI" >&2
+      if [ -z "${CARAPACE_QA_CONVEX_SECRET_CI:-}" ]; then
+        echo "Missing required env for Convex ci credential mode: CARAPACE_QA_CONVEX_SECRET_CI" >&2
         exit 1
       fi
       return 0
     fi
     if [ "$credential_role" = "maintainer" ]; then
-      if [ -z "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
-        echo "Missing required env for Convex maintainer credential mode: OPENCLAW_QA_CONVEX_SECRET_MAINTAINER" >&2
+      if [ -z "${CARAPACE_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+        echo "Missing required env for Convex maintainer credential mode: CARAPACE_QA_CONVEX_SECRET_MAINTAINER" >&2
         exit 1
       fi
       return 0
     fi
-    if [ -z "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ] && [ -z "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
-      echo "Missing required env for Convex credential mode: OPENCLAW_QA_CONVEX_SECRET_CI or OPENCLAW_QA_CONVEX_SECRET_MAINTAINER" >&2
+    if [ -z "${CARAPACE_QA_CONVEX_SECRET_CI:-}" ] && [ -z "${CARAPACE_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+      echo "Missing required env for Convex credential mode: CARAPACE_QA_CONVEX_SECRET_CI or CARAPACE_QA_CONVEX_SECRET_MAINTAINER" >&2
       exit 1
     fi
     return 0
@@ -237,15 +237,15 @@ trap cleanup EXIT
 
 docker_env=(
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-  -e OPENCLAW_E2E_COMMAND_TIMEOUT="${OPENCLAW_E2E_COMMAND_TIMEOUT:-300s}"
+  -e CARAPACE_E2E_COMMAND_TIMEOUT="${CARAPACE_E2E_COMMAND_TIMEOUT:-300s}"
   -e TMPDIR=/tmp
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC="$PACKAGE_SPEC"
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL"
-  -e OPENCLAW_NPM_TELEGRAM_OUTPUT_DIR="$OUTPUT_DIR_CONTAINER_RELATIVE"
-  -e OPENCLAW_QA_PACKAGE_SOURCE="$package_install_source"
-  -e OPENCLAW_QA_PACKAGE_SOURCE_KIND="$package_source_kind"
-  -e OPENCLAW_QA_RUNNER="${OPENCLAW_QA_RUNNER:-docker}"
-  -e OPENCLAW_NPM_TELEGRAM_FAST="${OPENCLAW_NPM_TELEGRAM_FAST:-1}"
+  -e CARAPACE_NPM_TELEGRAM_PACKAGE_SPEC="$PACKAGE_SPEC"
+  -e CARAPACE_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL"
+  -e CARAPACE_NPM_TELEGRAM_OUTPUT_DIR="$OUTPUT_DIR_CONTAINER_RELATIVE"
+  -e CARAPACE_QA_PACKAGE_SOURCE="$package_install_source"
+  -e CARAPACE_QA_PACKAGE_SOURCE_KIND="$package_source_kind"
+  -e CARAPACE_QA_RUNNER="${CARAPACE_QA_RUNNER:-docker}"
+  -e CARAPACE_NPM_TELEGRAM_FAST="${CARAPACE_NPM_TELEGRAM_FAST:-1}"
 )
 
 forward_env_if_set() {
@@ -256,56 +256,56 @@ forward_env_if_set() {
 }
 
 if [ -n "$credential_source" ]; then
-  docker_env+=(-e OPENCLAW_QA_CREDENTIAL_SOURCE="$credential_source")
+  docker_env+=(-e CARAPACE_QA_CREDENTIAL_SOURCE="$credential_source")
 fi
 if [ -n "$credential_role" ]; then
-  docker_env+=(-e OPENCLAW_QA_CREDENTIAL_ROLE="$credential_role")
+  docker_env+=(-e CARAPACE_QA_CREDENTIAL_ROLE="$credential_role")
 fi
 for key in \
   OPENAI_API_KEY \
   ANTHROPIC_API_KEY \
   GEMINI_API_KEY \
   GOOGLE_API_KEY \
-  OPENCLAW_LIVE_OPENAI_KEY \
-  OPENCLAW_LIVE_ANTHROPIC_KEY \
-  OPENCLAW_LIVE_GEMINI_KEY \
-  OPENCLAW_QA_CONVEX_SITE_URL \
-  OPENCLAW_QA_CONVEX_SECRET_CI \
-  OPENCLAW_QA_CONVEX_SECRET_MAINTAINER \
-  OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS \
-  OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS \
-  OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS \
-  OPENCLAW_QA_CREDENTIAL_HTTP_TIMEOUT_MS \
-  OPENCLAW_QA_CONVEX_ENDPOINT_PREFIX \
-  OPENCLAW_QA_CREDENTIAL_OWNER_ID \
-  OPENCLAW_QA_ALLOW_INSECURE_HTTP \
-  OPENCLAW_QA_REDACT_PUBLIC_METADATA \
-  OPENCLAW_QA_PACKAGE_SOURCE_SHA \
-  OPENCLAW_QA_TELEGRAM_CANARY_TIMEOUT_MS \
-  OPENCLAW_QA_TELEGRAM_SCENARIO_TIMEOUT_MS \
-  OPENCLAW_QA_SUITE_PROGRESS \
-  OPENCLAW_NPM_TELEGRAM_PROVIDER_MODE \
-  OPENCLAW_NPM_TELEGRAM_MODEL \
-  OPENCLAW_NPM_TELEGRAM_ALT_MODEL \
-  OPENCLAW_NPM_TELEGRAM_SCENARIOS \
-  OPENCLAW_NPM_TELEGRAM_RTT_SAMPLES \
-  OPENCLAW_NPM_TELEGRAM_RTT_CHECKS \
-  OPENCLAW_NPM_TELEGRAM_RTT_TIMEOUT_MS \
-  OPENCLAW_NPM_TELEGRAM_RTT_MAX_FAILURES \
-  OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH \
-  OPENCLAW_NPM_TELEGRAM_SUT_ACCOUNT \
-  OPENCLAW_NPM_TELEGRAM_ALLOW_FAILURES \
-  OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS; do
+  CARAPACE_LIVE_OPENAI_KEY \
+  CARAPACE_LIVE_ANTHROPIC_KEY \
+  CARAPACE_LIVE_GEMINI_KEY \
+  CARAPACE_QA_CONVEX_SITE_URL \
+  CARAPACE_QA_CONVEX_SECRET_CI \
+  CARAPACE_QA_CONVEX_SECRET_MAINTAINER \
+  CARAPACE_QA_CREDENTIAL_LEASE_TTL_MS \
+  CARAPACE_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS \
+  CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS \
+  CARAPACE_QA_CREDENTIAL_HTTP_TIMEOUT_MS \
+  CARAPACE_QA_CONVEX_ENDPOINT_PREFIX \
+  CARAPACE_QA_CREDENTIAL_OWNER_ID \
+  CARAPACE_QA_ALLOW_INSECURE_HTTP \
+  CARAPACE_QA_REDACT_PUBLIC_METADATA \
+  CARAPACE_QA_PACKAGE_SOURCE_SHA \
+  CARAPACE_QA_TELEGRAM_CANARY_TIMEOUT_MS \
+  CARAPACE_QA_TELEGRAM_SCENARIO_TIMEOUT_MS \
+  CARAPACE_QA_SUITE_PROGRESS \
+  CARAPACE_NPM_TELEGRAM_PROVIDER_MODE \
+  CARAPACE_NPM_TELEGRAM_MODEL \
+  CARAPACE_NPM_TELEGRAM_ALT_MODEL \
+  CARAPACE_NPM_TELEGRAM_SCENARIOS \
+  CARAPACE_NPM_TELEGRAM_RTT_SAMPLES \
+  CARAPACE_NPM_TELEGRAM_RTT_CHECKS \
+  CARAPACE_NPM_TELEGRAM_RTT_TIMEOUT_MS \
+  CARAPACE_NPM_TELEGRAM_RTT_MAX_FAILURES \
+  CARAPACE_NPM_TELEGRAM_SKIP_HOTPATH \
+  CARAPACE_NPM_TELEGRAM_SUT_ACCOUNT \
+  CARAPACE_NPM_TELEGRAM_ALLOW_FAILURES \
+  CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS; do
   forward_env_if_set "$key"
 done
 
 echo "Running package Telegram live Docker E2E ($PACKAGE_LABEL)..."
 run_logged_print_heartbeat "npm-telegram-package-install" 60 docker_e2e_docker_run_cmd run --rm \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_E2E_NPM_INSTALL_TIMEOUT="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
-  -e OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE="$package_install_source" \
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL" \
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_SET="$([ -n "$resolved_package_dir" ] && printf 1 || printf 0)" \
+  -e CARAPACE_E2E_NPM_INSTALL_TIMEOUT="${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
+  -e CARAPACE_NPM_TELEGRAM_INSTALL_SOURCE="$package_install_source" \
+  -e CARAPACE_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL" \
+  -e CARAPACE_NPM_TELEGRAM_PACKAGE_SET="$([ -n "$resolved_package_dir" ] && printf 1 || printf 0)" \
   ${package_mount_args[@]+"${package_mount_args[@]}"} \
   ${registry_helper_mount_args[@]+"${registry_helper_mount_args[@]}"} \
   ${prepublish_registry_mount_args[@]+"${prepublish_registry_mount_args[@]}"} \
@@ -313,12 +313,12 @@ run_logged_print_heartbeat "npm-telegram-package-install" 60 docker_e2e_docker_r
   -i "$IMAGE_NAME" bash -s <<'EOF'
 set -euo pipefail
 
-export HOME="$(mktemp -d "/tmp/openclaw-npm-telegram-install.XXXXXX")"
+export HOME="$(mktemp -d "/tmp/carapace-npm-telegram-install.XXXXXX")"
 export NPM_CONFIG_PREFIX="/npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 
-install_source="${OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE:?missing OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE}"
-package_label="${OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL:-$install_source}"
+install_source="${CARAPACE_NPM_TELEGRAM_INSTALL_SOURCE:?missing CARAPACE_NPM_TELEGRAM_INSTALL_SOURCE}"
+package_label="${CARAPACE_NPM_TELEGRAM_PACKAGE_LABEL:-$install_source}"
 echo "Installing ${package_label} from ${install_source}..."
 
 registry_pid=""
@@ -334,7 +334,7 @@ cleanup_registry() {
 }
 trap cleanup_registry EXIT
 
-if [ "${OPENCLAW_NPM_TELEGRAM_PACKAGE_SET:-0}" = "1" ]; then
+if [ "${CARAPACE_NPM_TELEGRAM_PACKAGE_SET:-0}" = "1" ]; then
   shopt -s nullglob
   package_tgzs=(/package-under-test/*.tgz)
   shopt -u nullglob
@@ -363,8 +363,8 @@ process.stdin.on("end", () => {
   done
   registry_port_file="$(mktemp)"
   registry_log="$(mktemp)"
-  OPENCLAW_NPM_REGISTRY_UPSTREAM="${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_URL:-https://registry.npmjs.org}" \
-    node /tmp/openclaw-e2e/lib/plugins/npm-registry-server.mjs \
+  CARAPACE_NPM_REGISTRY_UPSTREAM="${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_URL:-https://registry.npmjs.org}" \
+    node /tmp/carapace-e2e/lib/plugins/npm-registry-server.mjs \
     "$registry_port_file" \
     "${registry_args[@]}" >"$registry_log" 2>&1 &
   registry_pid=$!
@@ -389,7 +389,7 @@ process.stdin.on("end", () => {
   export npm_config_registry="$registry_url"
 fi
 
-npm_install_timeout="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}"
+npm_install_timeout="${CARAPACE_E2E_NPM_INSTALL_TIMEOUT:-600s}"
 run_npm_install() {
   if [ -z "$npm_install_timeout" ] || [ "$npm_install_timeout" = "0" ]; then
     npm install -g "$install_source" --no-fund --no-audit
@@ -403,7 +403,7 @@ run_npm_install() {
     timeout_bin="gtimeout"
   fi
   if [ -z "$timeout_bin" ]; then
-    echo "timeout or gtimeout is required for OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=$npm_install_timeout" >&2
+    echo "timeout or gtimeout is required for CARAPACE_E2E_NPM_INSTALL_TIMEOUT=$npm_install_timeout" >&2
     return 127
   fi
 
@@ -415,8 +415,8 @@ run_npm_install() {
 }
 run_npm_install
 
-command -v openclaw
-openclaw --version
+command -v carapace
+carapace --version
 EOF
 
 # Mount the trusted current-source QA harness separately from the installed
@@ -437,20 +437,20 @@ run_logged_print_heartbeat "npm-telegram-live-suite" 60 docker_e2e_run_with_harn
   -v "$npm_prefix_host:/npm-global" \
   -i "$IMAGE_NAME" bash -s <<'EOF'
 set -Eeuo pipefail
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 source scripts/e2e/lib/prepublish-plugin-registry.sh
 
-runtime_home="$(mktemp -d "/tmp/openclaw-npm-telegram-runtime.XXXXXX")"
+runtime_home="$(mktemp -d "/tmp/carapace-npm-telegram-runtime.XXXXXX")"
 export HOME="$runtime_home"
 export NPM_CONFIG_PREFIX="/npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
-export OPENCLAW_NPM_TELEGRAM_REPO_ROOT="/app"
-export OPENCLAW_NPM_TELEGRAM_PACKAGE_VERSION="$(node -e 'const pkg = require("/npm-global/lib/node_modules/openclaw/package.json"); process.stdout.write(pkg.version)')"
-sut_command="/npm-global/bin/openclaw"
+export CARAPACE_NPM_TELEGRAM_REPO_ROOT="/app"
+export CARAPACE_NPM_TELEGRAM_PACKAGE_VERSION="$(node -e 'const pkg = require("/npm-global/lib/node_modules/carapace/package.json"); process.stdout.write(pkg.version)')"
+sut_command="/npm-global/bin/carapace"
 plugin_registry_pid=""
 
 cleanup_recovery() {
-  openclaw_e2e_stop_process "${plugin_registry_pid:-}"
+  carapace_e2e_stop_process "${plugin_registry_pid:-}"
 }
 trap cleanup_recovery EXIT
 
@@ -458,22 +458,22 @@ dump_hotpath_logs() {
   local status="$1"
   echo "installed-package onboarding recovery hot path failed with exit code $status" >&2
   for file in \
-    /tmp/openclaw-npm-telegram-onboard.json \
-    /tmp/openclaw-npm-telegram-codex-install.log \
-    /tmp/openclaw-npm-telegram-channel-add.log \
-    /tmp/openclaw-npm-telegram-doctor-fix.log \
-    /tmp/openclaw-npm-telegram-doctor-check.log \
-    /tmp/openclaw-npm-telegram-plugin-registry/server.log; do
+    /tmp/carapace-npm-telegram-onboard.json \
+    /tmp/carapace-npm-telegram-codex-install.log \
+    /tmp/carapace-npm-telegram-channel-add.log \
+    /tmp/carapace-npm-telegram-doctor-fix.log \
+    /tmp/carapace-npm-telegram-doctor-check.log \
+    /tmp/carapace-npm-telegram-plugin-registry/server.log; do
     if [ -f "$file" ]; then
       echo "--- $file ---" >&2
-      openclaw_e2e_print_log "$file" >&2
+      carapace_e2e_print_log "$file" >&2
     fi
   done
 }
 trap 'status=$?; dump_hotpath_logs "$status"; exit "$status"' ERR
 
 test -x "$sut_command"
-openclaw_e2e_run_command "$sut_command" --version
+carapace_e2e_run_command "$sut_command" --version
 mkdir -p /app/node_modules
 link_harness_dependency() {
   local source="$1"
@@ -488,7 +488,7 @@ for dependency_dir in /trusted-harness/node_modules/* /trusted-harness/node_modu
   [ -e "$dependency_dir" ] || continue
   dependency_name="$(basename "$dependency_dir")"
   case "$dependency_name" in
-    .bin | openclaw)
+    .bin | carapace)
       continue
       ;;
     @*)
@@ -517,24 +517,24 @@ for workspace_dir in /app/packages/* /app/extensions/*; do
   [ -n "$workspace_name" ] || continue
   link_harness_dependency "$workspace_dir" "$workspace_name"
 done
-link_harness_dependency /app openclaw
+link_harness_dependency /app carapace
 
-if [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
-  OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_REQUIRED_PACKAGES_JSON='["@openclaw/codex"]' \
-    openclaw_prepublish_plugin_registry_start \
-    "$OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR" \
-    "${OPENCLAW_DOCKER_E2E_SELECTED_SHA:?missing selected SHA}" \
-    "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:?missing candidate version}" \
-    "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:?missing manifest SHA-256}" \
-    /tmp/openclaw-npm-telegram-plugin-registry \
+if [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
+  CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_REQUIRED_PACKAGES_JSON='["@carapace/codex"]' \
+    carapace_prepublish_plugin_registry_start \
+    "$CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR" \
+    "${CARAPACE_DOCKER_E2E_SELECTED_SHA:?missing selected SHA}" \
+    "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:?missing candidate version}" \
+    "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256:?missing manifest SHA-256}" \
+    /tmp/carapace-npm-telegram-plugin-registry \
     plugin_registry_pid
 fi
 
-if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
-  hotpath_home="$(mktemp -d "/tmp/openclaw-npm-telegram-hotpath.XXXXXX")"
+if [ "${CARAPACE_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
+  hotpath_home="$(mktemp -d "/tmp/carapace-npm-telegram-hotpath.XXXXXX")"
   export HOME="$hotpath_home"
   echo "Running installed-package onboarding recovery hot path..."
-  hotpath_placeholder="openclaw-npm-telegram-hotpath"
+  hotpath_placeholder="carapace-npm-telegram-hotpath"
   hotpath_model_value="$(printf '%s%s' s "k-$hotpath_placeholder")"
   if [ -n "${OPENAI_API_KEY:-}" ]; then
     hotpath_model_value="$OPENAI_API_KEY"
@@ -542,13 +542,13 @@ if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
   hotpath_channel_value="$(printf '%s:%s' 123456 "$hotpath_placeholder")"
   # Older packages own their automatic setup. Successful candidate help, not a
   # version guess, establishes whether this harness must preinstall Codex.
-  plugin_install_help="$(openclaw_e2e_run_command "$sut_command" plugins install --help)"
+  plugin_install_help="$(carapace_e2e_run_command "$sut_command" plugins install --help)"
   fixture_consent="$(printf '%s' "$plugin_install_help" | node scripts/e2e/lib/package-compat.mjs fixture-consent)"
   if [ -n "$fixture_consent" ]; then
-    openclaw_e2e_fixture_plugin_command "$sut_command" -- plugins install @openclaw/codex \
-      >/tmp/openclaw-npm-telegram-codex-install.log 2>&1 </dev/null
+    carapace_e2e_fixture_plugin_command "$sut_command" -- plugins install @carapace/codex \
+      >/tmp/carapace-npm-telegram-codex-install.log 2>&1 </dev/null
   fi
-  OPENAI_API_KEY="$hotpath_model_value" openclaw_e2e_run_command "$sut_command" onboard \
+  OPENAI_API_KEY="$hotpath_model_value" carapace_e2e_run_command "$sut_command" onboard \
     --non-interactive --accept-risk \
     --mode local \
     --auth-choice openai-api-key \
@@ -559,15 +559,15 @@ if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
     --skip-ui \
     --skip-skills \
     --skip-health \
-    --json >/tmp/openclaw-npm-telegram-onboard.json </dev/null
+    --json >/tmp/carapace-npm-telegram-onboard.json </dev/null
 
-  openclaw_e2e_run_command "$sut_command" channels add --channel telegram --token "$hotpath_channel_value" >/tmp/openclaw-npm-telegram-channel-add.log 2>&1 </dev/null
-  openclaw_e2e_run_command "$sut_command" doctor --fix --non-interactive >/tmp/openclaw-npm-telegram-doctor-fix.log 2>&1 </dev/null
-  openclaw_e2e_run_command "$sut_command" doctor --non-interactive >/tmp/openclaw-npm-telegram-doctor-check.log 2>&1 </dev/null
+  carapace_e2e_run_command "$sut_command" channels add --channel telegram --token "$hotpath_channel_value" >/tmp/carapace-npm-telegram-channel-add.log 2>&1 </dev/null
+  carapace_e2e_run_command "$sut_command" doctor --fix --non-interactive >/tmp/carapace-npm-telegram-doctor-fix.log 2>&1 </dev/null
+  carapace_e2e_run_command "$sut_command" doctor --non-interactive >/tmp/carapace-npm-telegram-doctor-check.log 2>&1 </dev/null
   export HOME="$runtime_home"
 fi
 
-export OPENCLAW_NPM_TELEGRAM_SUT_COMMAND="$sut_command"
+export CARAPACE_NPM_TELEGRAM_SUT_COMMAND="$sut_command"
 trap - ERR
 tsx scripts/e2e/npm-telegram-live-runner.ts
 EOF

@@ -1,18 +1,18 @@
 // Matrix tests cover credential-state migrations owned by the doctor contract.
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   getPluginStateCapacityForTests,
   importPluginStateEntriesForDoctorForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { PluginDoctorStateMigrationContext } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import {
@@ -39,9 +39,9 @@ function createContext(env?: NodeJS.ProcessEnv): PluginDoctorStateMigrationConte
 }
 
 function createMigrationParams(stateDir: string) {
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+  const env = { CARAPACE_STATE_DIR: stateDir };
   return {
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     env,
     stateDir,
     oauthDir: path.join(stateDir, "oauth"),
@@ -76,7 +76,7 @@ describe("matrix doctor credential state migrations", () => {
   ] as const)(
     "preserves credential migration for %s with accounts %j",
     async (filename, accountIds, accountId) => {
-      const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+      const stateDir = tempDirs.make("carapace-matrix-doctor-");
       const credentialsDir = path.join(stateDir, "credentials", "matrix");
       const filePath = path.join(credentialsDir, filename);
       const credentials = {
@@ -133,7 +133,7 @@ describe("matrix doctor credential state migrations", () => {
   );
 
   it("archives legacy credentials without restoring an explicitly cleared account", async () => {
-    const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+    const stateDir = tempDirs.make("carapace-matrix-doctor-");
     const credentialsDir = path.join(stateDir, "credentials", "matrix");
     const filePath = path.join(credentialsDir, "credentials-ops.json");
     fs.mkdirSync(credentialsDir, { recursive: true });
@@ -171,7 +171,7 @@ describe("matrix doctor credential state migrations", () => {
   });
 
   it("keeps canonical SQLite credentials and archives a differing legacy source", async () => {
-    const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+    const stateDir = tempDirs.make("carapace-matrix-doctor-");
     const credentialsDir = path.join(stateDir, "credentials", "matrix");
     const filePath = path.join(credentialsDir, "credentials-agent1.json");
     fs.mkdirSync(credentialsDir, { recursive: true });

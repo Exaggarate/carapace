@@ -1,4 +1,4 @@
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("./src/store.js", () => ({

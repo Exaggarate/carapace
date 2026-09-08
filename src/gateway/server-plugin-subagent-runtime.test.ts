@@ -4,7 +4,7 @@ import type { runIsolatedCompletion } from "../agents/isolated-completion.js";
 import {
   resetConfigRuntimeState,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../config/config.js";
 import {
   onTrustedInternalDiagnosticEvent,
@@ -23,7 +23,7 @@ import {
 } from "../process/background-work.js";
 import { resetCommandQueueStateForTest } from "../process/command-queue.test-support.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { GatewayRequestContext, GatewayRequestOptions } from "./server-methods/types.js";
 import * as inProcessDispatch from "./server-plugin-in-process-dispatch.js";
 import { createSyntheticPluginRuntimeClient } from "./server-plugin-runtime-client.js";
@@ -40,7 +40,7 @@ vi.mock("../agents/provider-model-normalization.runtime.js", () => ({
 
 const PLUGIN_ID = "test-completion";
 type CompleteParams = Parameters<PluginRuntime["subagent"]["complete"]>[0];
-let config: OpenClawConfig;
+let config: CarapaceConfig;
 let context: GatewayRequestContext | undefined;
 let lifetime: AbortController;
 
@@ -293,7 +293,7 @@ describe("plugin background completions", () => {
   );
 
   it("keeps operator agent ceilings while admitting genuine background work", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       restrictOperatorAgents();
       const profile = ensureProfileForEmail("completion-ceiling@example.com");
       const client = createSyntheticPluginRuntimeClient({
@@ -314,7 +314,7 @@ describe("plugin background completions", () => {
   });
 
   it("snapshots the authorized agent and credentials before queued request mutation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       restrictOperatorAgents();
       const profile = ensureProfileForEmail("completion-mutation@example.com");
       config.agents!.entries!.main!.model = "test-provider/main-model@main-profile";

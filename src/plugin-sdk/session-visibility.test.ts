@@ -331,7 +331,7 @@ describe("classifyLookupFailure", () => {
   it("classifies an explicit pre-connect auth failure as credentials", () => {
     const error = new GatewayCredentialsRequiredError({
       method: "sessions.list",
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
     expect(classifyLookupFailure(error)).toBe("credentials");
   });
@@ -353,7 +353,7 @@ describe("classifyLookupFailure", () => {
     expect(lookupFailedDenialSuffix("credentials")).toMatch(
       /check gateway configuration and credentials/i,
     );
-    expect(lookupFailedDenialSuffix("unknown")).toMatch(/inspect OpenClaw logs/i);
+    expect(lookupFailedDenialSuffix("unknown")).toMatch(/inspect Carapace logs/i);
     expect(lookupFailedDenialSuffix("unknown")).not.toMatch(/credentials|retry/i);
   });
 });

@@ -1,7 +1,7 @@
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import { resolveAgentMainSessionKey } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { HeartbeatRunOptions } from "../../infra/heartbeat-runner-execution.js";
 import {
   resolveHeartbeatPreflight,
@@ -106,7 +106,7 @@ describe("startup run repair auto-disable", () => {
     vi.useFakeTimers();
     const nowMs = Date.parse("2026-08-01T16:00:00.000Z");
     vi.setSystemTime(nowMs);
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { heartbeat: { every: "0m" } },
         list: [{ id: "main" }, { id: "other" }],
@@ -201,7 +201,7 @@ describe("startup run repair auto-disable", () => {
       );
       expect(prompts[0]).toContain('Automation "Important report" was auto-disabled');
       expect(prompts[0]).toContain("10 consecutive run failures");
-      expect(prompts[0]).toContain("openclaw automations enable restart-auto-disable-notification");
+      expect(prompts[0]).toContain("carapace automations enable restart-auto-disable-notification");
       expect(prompts[0]).toContain("Please relay this reminder to the user");
     } finally {
       runner.stop();

@@ -1,5 +1,5 @@
 // Slack tests cover outbound delivery plugin behavior.
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "carapace/plugin-sdk/channel-outbound";
 import {
   addTestHook,
   createEmptyPluginRegistry,
@@ -10,9 +10,9 @@ import {
   resetGlobalHookRunner,
   setActivePluginRegistry,
   type PluginHookRegistration,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSlackSendTestClient } from "./blocks.test-helpers.js";
 import * as clientDelivery from "./client-delivery.js";
@@ -26,7 +26,7 @@ vi.mock("./send.runtime.js", () => ({
   sendMessageSlack: sendMessageSlackMock,
 }));
 
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: {
     slack: {
       botToken: "xoxb-test",

@@ -1,11 +1,11 @@
 /** Sanitizes, extracts, and classifies embedded-agent tool execution results. */
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   redactModelVisibleSecrets,
   redactModelVisibleSensitiveFieldValueWithConfig,

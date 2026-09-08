@@ -5,8 +5,8 @@
  */
 
 import fs from "node:fs/promises";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createExecutionIdentityAdmissionToken } from "../audit/execution-identity-admission.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
@@ -23,7 +23,7 @@ import { PluginApprovalResolutions } from "../plugins/types.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { proposeUpdateSkill } from "../skills/workshop/service.js";
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   resolveBeforeToolCallApprovalOutcome,
   resolveSkillWorkshopApprovalForFinalParams,
@@ -706,9 +706,9 @@ describe("runBeforeToolCallHook — embedded mode approvals", () => {
   });
 
   it("does not expose another agent's proposal metadata in final approval", async () => {
-    const testState = await createOpenClawTestState({
+    const testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-agent-approval-scope-",
+      prefix: "carapace-agent-approval-scope-",
     });
     try {
       const config = {
@@ -835,7 +835,7 @@ describe("runBeforeToolCallHook — embedded mode approvals", () => {
       kind: "veto",
       deniedReason: "plugin-approval",
       reason:
-        "The Skill Workshop approval request expired without a decision. This lifecycle call left the proposal unchanged and pending; check its current status in case another operator acted on it. Decide in the Skill Workshop UI or run `openclaw skills workshop apply|reject|quarantine <id>`. Do not retry this tool call in a loop.",
+        "The Skill Workshop approval request expired without a decision. This lifecycle call left the proposal unchanged and pending; check its current status in case another operator acted on it. Decide in the Skill Workshop UI or run `carapace skills workshop apply|reject|quarantine <id>`. Do not retry this tool call in a loop.",
     });
   });
 

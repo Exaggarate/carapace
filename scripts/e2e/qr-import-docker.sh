@@ -2,17 +2,17 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-SOURCE_ROOT="${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}"
+SOURCE_ROOT="${CARAPACE_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}"
 source "$ROOT_DIR/scripts/lib/docker-build.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-container.sh"
-IMAGE_NAME="${OPENCLAW_QR_SMOKE_IMAGE:-openclaw-qr-smoke}"
+IMAGE_NAME="${CARAPACE_QR_SMOKE_IMAGE:-carapace-qr-smoke}"
 DOCKER_BUILD_ARGS=()
 
-if [[ "${OPENCLAW_QR_SMOKE_FORCE_INSTALL:-0}" == "1" ]]; then
+if [[ "${CARAPACE_QR_SMOKE_FORCE_INSTALL:-0}" == "1" ]]; then
   INSTALL_CACHE_BUSTER="${GITHUB_SHA:-manual}-${GITHUB_RUN_ID:-$(date +%s)}-${GITHUB_RUN_ATTEMPT:-0}"
   DOCKER_BUILD_ARGS+=(
     --build-arg
-    "OPENCLAW_QR_INSTALL_CACHE_BUSTER=${INSTALL_CACHE_BUSTER}"
+    "CARAPACE_QR_INSTALL_CACHE_BUSTER=${INSTALL_CACHE_BUSTER}"
   )
 fi
 

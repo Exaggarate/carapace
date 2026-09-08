@@ -1,5 +1,5 @@
-import { createChannelConfigUiHints } from "openclaw/plugin-sdk/channel-core";
-import type { ChannelConfigUiHint } from "openclaw/plugin-sdk/channel-core";
+import { createChannelConfigUiHints } from "carapace/plugin-sdk/channel-core";
+import type { ChannelConfigUiHint } from "carapace/plugin-sdk/channel-core";
 
 export const msTeamsChannelConfigUiHints = {
   "": {
@@ -31,7 +31,7 @@ export const msTeamsChannelConfigUiHints = {
       },
     },
     progress: {
-      labels: "openclaw",
+      labels: "carapace",
       titleWording: true,
     },
   }),

@@ -24,11 +24,11 @@ declare module "vitest" {
 export function assertPrebuiltUiE2eRuntime(repoRoot: string): string {
   const fail = (reason: string): never => {
     throw new Error(
-      `Prebuilt UI E2E requires a completed OPENCLAW_BUILD_PRIVATE_QA=1 pnpm build:ci-artifacts on a clean checkout (${reason}). Use vitest.ui-e2e.config.ts for ordinary local tests.`,
+      `Prebuilt UI E2E requires a completed CARAPACE_BUILD_PRIVATE_QA=1 pnpm build:ci-artifacts on a clean checkout (${reason}). Use vitest.ui-e2e.config.ts for ordinary local tests.`,
     );
   };
-  const env: NodeJS.ProcessEnv = { ...process.env, OPENCLAW_BUILD_PRIVATE_QA: "1" };
-  env.OPENCLAW_DEV_SOURCE_ROOT ??= repoRoot;
+  const env: NodeJS.ProcessEnv = { ...process.env, CARAPACE_BUILD_PRIVATE_QA: "1" };
+  env.CARAPACE_DEV_SOURCE_ROOT ??= repoRoot;
   const readGitEnv = {
     ...env,
     GIT_OPTIONAL_LOCKS: "0",

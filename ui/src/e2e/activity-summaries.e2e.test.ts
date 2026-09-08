@@ -17,7 +17,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 type ActivityApp = HTMLElement & { runtime: { context: ApplicationContext } };
 let proofDir: string;
 beforeEach(() => {
@@ -70,7 +70,7 @@ suite.define(() => {
         await fillDiagnosticLog();
         if (visit === "return") {
           await expect.poll(() => page.locator(".activity-entry").count()).toBe(1);
-          const sidebar = page.locator("openclaw-app-sidebar");
+          const sidebar = page.locator("carapace-app-sidebar");
           await sidebar.locator(".sidebar-identity-card").click();
           await sidebar
             .locator("wa-dropdown.sidebar-identity-menu")
@@ -78,11 +78,11 @@ suite.define(() => {
             .click();
           await waitForControlUiSettingsTakeover(page);
         }
-        await page.locator("openclaw-activity-page").waitFor({ state: "detached" });
+        await page.locator("carapace-activity-page").waitFor({ state: "detached" });
         await emitTool("while-away", otherSessionKey);
         await fillDiagnosticLog();
         const loggedEvents = await page.evaluate(() => {
-          const app = document.querySelector<ActivityApp>("openclaw-app");
+          const app = document.querySelector<ActivityApp>("carapace-app");
           if (!app) {
             throw new Error("Control UI app is unavailable");
           }
@@ -92,7 +92,7 @@ suite.define(() => {
         expect(loggedEvents).not.toContain("session.tool");
 
         await page.evaluate(() => {
-          const app = document.querySelector<ActivityApp>("openclaw-app");
+          const app = document.querySelector<ActivityApp>("carapace-app");
           if (!app) {
             throw new Error("Control UI app is unavailable");
           }
@@ -119,7 +119,7 @@ suite.define(() => {
           .poll(() =>
             page.evaluate(
               () =>
-                document.querySelector<ActivityApp>("openclaw-app")?.runtime.context.gateway
+                document.querySelector<ActivityApp>("carapace-app")?.runtime.context.gateway
                   .snapshot.sessionKey,
             ),
           )

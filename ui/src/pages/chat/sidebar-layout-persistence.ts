@@ -1,4 +1,4 @@
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import { normalizeSidebarLayout } from "./sidebar-layout-normalize.ts";
 import type { SidebarLayout } from "./sidebar-layout.ts";
 

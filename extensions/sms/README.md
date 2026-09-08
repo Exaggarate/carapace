@@ -1,13 +1,13 @@
-# SMS/MMS OpenClaw channel
+# SMS/MMS Carapace channel
 
-Official OpenClaw channel plugin for Twilio SMS and MMS.
+Official Carapace channel plugin for Twilio SMS and MMS.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/sms
+carapace plugins install @carapace/sms
 ```
 
 ## Docs
 
-See `docs/channels/sms.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/sms`.
+See `docs/channels/sms.md` in the Carapace repository, or the published docs at `../../docs/channels/sms.md`.

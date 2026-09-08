@@ -1,8 +1,8 @@
 import path from "node:path";
-import type { HealthCheck, HealthRepairContext } from "openclaw/plugin-sdk/health";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import type { HealthCheck, HealthRepairContext } from "carapace/plugin-sdk/health";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import * as processRuntime from "carapace/plugin-sdk/process-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as doctorRuntime from "./crabbox-worker-doctor-runtime.js";
 import {
@@ -14,13 +14,13 @@ import {
   registerCrabboxWorkerProviderDoctorChecks,
 } from "./doctor.js";
 
-const OPENCLAW_ROOT = path.resolve(path.sep, "workspace", "openclaw");
+const CARAPACE_ROOT = path.resolve(path.sep, "workspace", "carapace");
 const CRABBOX_WARM_IMAGES_CHECK_ID = "crabbox/warm-images";
 
 function captureCrabboxDoctorCheck(id = CRABBOX_CLOUD_WORKER_PROFILE_CHECK_ID): HealthCheck {
   const checks = new Map<string, HealthCheck>();
   registerCrabboxWorkerProviderDoctorChecks({
-    openclawRoot: OPENCLAW_ROOT,
+    carapaceRoot: CARAPACE_ROOT,
     getHealthCheck: (key) => checks.get(key),
     registerHealthCheck(value) {
       checks.set(value.id, value);
@@ -176,7 +176,7 @@ describe("Crabbox warm-image doctor", () => {
   ] as const)(
     "reports $name without repairing state or probing providers",
     async ({ operation, severity }) => {
-      const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-crabbox-warm-doctor-") };
+      const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-crabbox-warm-doctor-") };
       const store = openCrabboxWarmImageStore(env);
       const now = Date.now();
       const record: WarmProfileRecord = {
@@ -228,7 +228,7 @@ describe("Crabbox warm-image doctor", () => {
                 checkId: CRABBOX_WARM_IMAGES_CHECK_ID,
                 target: "profile",
                 severity,
-                fixHint: expect.stringContaining("openclaw crabbox warm-images"),
+                fixHint: expect.stringContaining("carapace crabbox warm-images"),
               }),
             ]
           : [],
@@ -251,7 +251,7 @@ describe("Crabbox warm-image doctor", () => {
       const checks = new Map([[existingId, captureCrabboxDoctorCheck(existingId)]]);
       const registerHealthCheck = vi.fn((check: HealthCheck) => checks.set(check.id, check));
       const host = {
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         getHealthCheck: (id: string) => checks.get(id),
         registerHealthCheck,
       };

@@ -1,15 +1,15 @@
 import path from "node:path";
-import { onAgentEvent, type AgentEventPayload } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createProcessPollDeliveryContract } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
+import { onAgentEvent, type AgentEventPayload } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createProcessPollDeliveryContract } from "carapace/plugin-sdk/agent-runtime-test-contracts";
 import {
   emitTrustedDiagnosticEvent,
   hasPendingInternalDiagnosticEvent,
   onInternalDiagnosticEvent,
   waitForDiagnosticEventsDrained,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import { dynamicToolBuildState } from "./dynamic-tool-build-state.js";
@@ -63,7 +63,7 @@ setupRunAttemptTestHooks();
 describe("runCodexAppServerAttempt dynamic tools", () => {
   it("acknowledges a terminal sandbox process poll only after Codex accepts its exact result", async () => {
     const process = createProcessPollDeliveryContract("codex-result-delivery");
-    dynamicToolBuildState.openClawCodingToolsFactory = () => [
+    dynamicToolBuildState.carapaceCodingToolsFactory = () => [
       { ...process.tool, name: "sandbox_process" },
     ];
     const harness = createStartedThreadHarness();
@@ -150,7 +150,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
           details: { status: "no_answer" },
         };
       });
-      dynamicToolBuildState.openClawCodingToolsFactory = () => [tool];
+      dynamicToolBuildState.carapaceCodingToolsFactory = () => [tool];
       const harness = createStartedThreadHarness();
       const params = createParams(
         path.join(tempDir, "session.jsonl"),
@@ -226,7 +226,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
       };
     });
     tool.execute = execute;
-    dynamicToolBuildState.openClawCodingToolsFactory = () => [tool];
+    dynamicToolBuildState.carapaceCodingToolsFactory = () => [tool];
     const harness = createStartedThreadHarness();
     let closeHostCapabilities: (() => void) | undefined;
     const unsubscribeDiagnostics = onInternalDiagnosticEvent((event) => {
@@ -372,7 +372,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
       };
       expect(toolResult.success).toBe(false);
       expect(toolResult.contentItems?.[0]?.type).toBe("inputText");
-      expect(toolResult.contentItems?.[0]?.text).toMatch(/^Unknown OpenClaw tool: lookup$/u);
+      expect(toolResult.contentItems?.[0]?.text).toMatch(/^Unknown Carapace tool: lookup$/u);
 
       await harness.completeTurn({ threadId: "thread-1", turnId: "turn-1" });
       await run;
@@ -419,7 +419,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
     expect(resultEvent?.data?.result).not.toHaveProperty("success");
     expect(resultEvent?.data?.result).not.toHaveProperty("contentItems");
     expect(resultEvent?.data?.result?.content?.[0]?.type).toBe("text");
-    expect(resultEvent?.data?.result?.content?.[0]?.text).toBe("Unknown OpenClaw tool: lookup");
+    expect(resultEvent?.data?.result?.content?.[0]?.text).toBe("Unknown Carapace tool: lookup");
     expect(JSON.stringify(agentEvents)).not.toContain("plain-secret-value-12345");
     const globalStartEvent = globalAgentEvents.find(
       (event) => event.stream === "tool" && event.data.phase === "start",
@@ -816,7 +816,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
           contentItems: [
             {
               type: "inputText",
-              text: "OpenClaw dynamic tool call timed out after 1ms while running tool echo.",
+              text: "Carapace dynamic tool call timed out after 1ms while running tool echo.",
             },
           ],
         },
@@ -879,7 +879,7 @@ describe("runCodexAppServerAttempt dynamic tools", () => {
     params.sandboxSessionKey = "agent:main:policy";
     params.runtimePlan = createCodexRuntimePlanFixture();
     setCodexTestModelSupportsTools(params, true);
-    dynamicToolBuildState.openClawCodingToolsFactory = () => [createRuntimeDynamicTool("echo")];
+    dynamicToolBuildState.carapaceCodingToolsFactory = () => [createRuntimeDynamicTool("echo")];
     const harness = createStartedThreadHarness();
     const closeHostCapabilities = await bindProductionHarnessHostCapabilitiesForTest(params);
     const run = runCodexAppServerAttempt(params);

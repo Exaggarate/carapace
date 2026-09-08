@@ -6,13 +6,13 @@ import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../../infr
 import { openNodeSqliteDatabase } from "../../infra/node-sqlite.js";
 import { prepareSqliteReadOnlyLocationSync } from "../../infra/sqlite-readonly-location.js";
 import { writeConfigMachineState } from "../../state/config-machine-state-write.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  withExistingOpenClawStateDatabaseArtifactPreservingReadOnly,
-  withExistingOpenClawStateDatabaseReadOnly,
-} from "../../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+  withExistingCarapaceStateDatabaseArtifactPreservingReadOnly,
+  withExistingCarapaceStateDatabaseReadOnly,
+} from "../../state/carapace-state-db-readonly.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import { resolveUserPath } from "../../utils.js";
 import { listLegacyAuthProfileSources } from "./legacy-source-files.js";
 import {
@@ -31,10 +31,10 @@ const SHARED_AUTH_STORE_MIGRATION_KIND = "shared-auth-store-state-db";
 const inspectedLegacySharedAuthOwnerships = new WeakSet<SharedAuthStoreOwnership>();
 
 type SourceAuthDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "auth_profile_store" | "auth_profile_state"
 >;
-type SharedAuthMigrationDatabase = Pick<OpenClawStateKyselyDatabase, "migration_sources">;
+type SharedAuthMigrationDatabase = Pick<CarapaceStateKyselyDatabase, "migration_sources">;
 
 export type SharedAuthLegacyStoreRow = { store_json: string; updated_at: number };
 export type SharedAuthLegacyStateRow = { state_json: string; updated_at: number };
@@ -45,7 +45,7 @@ export type SharedAuthLegacyRows = {
 
 export class SharedAuthStoreSourceInspectionError extends Error {
   readonly code = "SHARED_AUTH_STORE_SOURCE_UNREADABLE" as const;
-  readonly action = "openclaw doctor --fix" as const;
+  readonly action = "carapace doctor --fix" as const;
   readonly sourcePath: string;
 
   constructor(sourcePath: string, operation: string, cause: unknown) {
@@ -151,8 +151,8 @@ export function hasPendingSharedAuthCleanup(
   behavior: { artifactPreservingReadOnly?: boolean } = {},
 ): boolean {
   const read = behavior.artifactPreservingReadOnly
-    ? withExistingOpenClawStateDatabaseArtifactPreservingReadOnly
-    : withExistingOpenClawStateDatabaseReadOnly;
+    ? withExistingCarapaceStateDatabaseArtifactPreservingReadOnly
+    : withExistingCarapaceStateDatabaseReadOnly;
   return (
     read(
       ({ db: database }) => {
@@ -182,7 +182,7 @@ function initializeFreshSharedAuthStore(env: NodeJS.ProcessEnv): void {
   if (ownership.location === "state-db" || inspectedLegacySharedAuthOwnerships.has(ownership)) {
     return;
   }
-  const sourcePath = path.join(resolveSharedMainAuthAgentDir(env), "openclaw-agent.sqlite");
+  const sourcePath = path.join(resolveSharedMainAuthAgentDir(env), "carapace-agent.sqlite");
   try {
     if (listLegacyAuthProfileSources({ env }).length > 0) {
       inspectedLegacySharedAuthOwnerships.add(ownership);

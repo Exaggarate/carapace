@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DecisionReceiptV1 } from "../../../packages/gateway-protocol/src/index.js";
 import type { AdmittedRunContext } from "../../agents/admitted-run-context.js";
 import { configureRuntimeActionDecisionSink } from "../../audit/runtime-action-decision.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withPluginRuntimePluginIdScope } from "./gateway-request-scope.js";
 import type { PluginRuntime } from "./types.js";
 
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
     instanceId: `instance:${runId}`,
     runId,
   })),
-  getRuntimeConfig: vi.fn(() => ({}) as OpenClawConfig),
+  getRuntimeConfig: vi.fn(() => ({}) as CarapaceConfig),
   prepareAgentRunAdmission: vi.fn(),
   runEmbeddedAgentCore: vi.fn(),
 }));
@@ -40,7 +40,7 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-const config = {} as OpenClawConfig;
+const config = {} as CarapaceConfig;
 const params = {
   config,
   prompt: "check",

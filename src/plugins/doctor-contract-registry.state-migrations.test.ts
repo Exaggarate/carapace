@@ -31,7 +31,7 @@ let setPluginDoctorContractRegistryModuleLoaderFactoryForTest:
   | undefined;
 
 function makeTempDir(): string {
-  return makeTrackedTempDir("openclaw-doctor-contract-state-migrations", tempDirs);
+  return makeTrackedTempDir("carapace-doctor-contract-state-migrations", tempDirs);
 }
 
 afterEach(() => {

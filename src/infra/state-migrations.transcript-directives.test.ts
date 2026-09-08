@@ -9,19 +9,19 @@ import { reconcileSessionTranscriptIndexInTransaction } from "../config/sessions
 import {
   AGENT_DATABASE_MAINTENANCE_LEASE,
   assertAgentDatabaseMaintenanceAuthority,
-  claimOpenClawAgentDatabaseLease,
-  releaseOpenClawAgentDatabaseLease,
-} from "../state/openclaw-agent-db-lease.js";
+  claimCarapaceAgentDatabaseLease,
+  releaseCarapaceAgentDatabaseLease,
+} from "../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { withLegacySessionParticipantsSchema } from "../state/openclaw-agent-participants-migration.js";
-import { sessionParticipantsSchemaSql } from "../state/openclaw-agent-session-participants-schema.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { withLegacySessionParticipantsSchema } from "../state/carapace-agent-participants-migration.js";
+import { sessionParticipantsSchemaSql } from "../state/carapace-agent-session-participants-schema.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { openNodeSqliteDatabase, requireNodeSqlite } from "./node-sqlite.js";
 import { TRANSCRIPT_DIRECTIVE_MIGRATION_BATCH_SIZE } from "./state-migrations.transcript-directives-archives.js";
 import { migrateHistoricalTranscriptDirectives } from "./state-migrations.transcript-directives.js";
@@ -164,16 +164,16 @@ function parseArchive(content: string): FixtureEvent[] {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
 describe("historical transcript directive migration", () => {
   it("migrates assistant rows and archives while preserving code and derived indexes", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-migration-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     const tagged = messageEvent({
       id: "tagged-assistant",
@@ -290,7 +290,7 @@ describe("historical transcript directive migration", () => {
     const toolEventJson = JSON.stringify(tool);
     const archivedCodeJson = JSON.stringify(archivedCode);
     const archivedUserJson = JSON.stringify(archivedUser);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const result = await migrateHistoricalTranscriptDirectives({ env });
     expect(result.warnings).toEqual([]);
@@ -301,7 +301,7 @@ describe("historical transcript directive migration", () => {
     };
     expect(migratedTagged.message).toMatchObject({
       content: [{ type: "text", text: "Final answer" }],
-      openclawDelivery: {
+      carapaceDelivery: {
         audioAsVoice: true,
         replyToId: "message-7",
       },
@@ -315,7 +315,7 @@ describe("historical transcript directive migration", () => {
     expect(migratedReaction.message).toMatchObject({
       content: [{ type: "text", text: "Reacted  without a fact" }],
     });
-    expect(migratedReaction.message).not.toHaveProperty("openclawDelivery");
+    expect(migratedReaction.message).not.toHaveProperty("carapaceDelivery");
 
     expect(readGeneration(databasePath, "tagged-session")).not.toBe("tagged-before");
     expect(readGeneration(databasePath, "reaction-session")).not.toBe("reaction-before");
@@ -348,7 +348,7 @@ describe("historical transcript directive migration", () => {
     expect(migratedArchive[0]).toMatchObject({
       message: {
         content: [{ type: "text", text: "Archived answer" }],
-        openclawDelivery: { replyToId: "archive-2" },
+        carapaceDelivery: { replyToId: "archive-2" },
       },
     });
     expect(migratedArchiveContent).toContain(archivedCodeJson);
@@ -373,8 +373,8 @@ describe("historical transcript directive migration", () => {
 
   it("resumes after the committed transcript cursor", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-resume-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     insertSession(opened.db, {
       events: [
@@ -414,7 +414,7 @@ describe("historical transcript directive migration", () => {
         1,
         1,
       );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     expect((await migrateHistoricalTranscriptDirectives({ env })).warnings).toEqual([]);
     expect(readGeneration(databasePath, "resume-a")).toBe("already-bumped");
@@ -422,15 +422,15 @@ describe("historical transcript directive migration", () => {
     expect(JSON.parse(readEventJson(databasePath, "resume-b", 0))).toMatchObject({
       message: {
         content: [{ type: "text", text: "Pending" }],
-        openclawDelivery: { audioAsVoice: true },
+        carapaceDelivery: { audioAsVoice: true },
       },
     });
   });
 
   it("completes an old-schema database without the optional archives table", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-old-schema-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     insertSession(opened.db, {
       events: [
@@ -445,7 +445,7 @@ describe("historical transcript directive migration", () => {
       sessionId: "old-schema-session",
     });
     opened.db.exec("DROP TABLE session_transcript_archives");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     await expect(migrateHistoricalTranscriptDirectives({ env })).resolves.toEqual({
       changes: [expect.stringContaining("1 active session(s), 0 archived transcript(s)")],
@@ -456,7 +456,7 @@ describe("historical transcript directive migration", () => {
     expect(JSON.parse(readEventJson(databasePath, "old-schema-session", 0))).toMatchObject({
       message: {
         content: [{ type: "text", text: "Pending" }],
-        openclawDelivery: { audioAsVoice: true },
+        carapaceDelivery: { audioAsVoice: true },
       },
     });
     await expect(migrateHistoricalTranscriptDirectives({ env })).resolves.toEqual({
@@ -467,8 +467,8 @@ describe("historical transcript directive migration", () => {
 
   it("completes a pre-stuck archives cursor when the optional table is absent", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-stuck-archives-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     opened.db.exec("DROP TABLE session_transcript_archives");
     opened.db
@@ -485,7 +485,7 @@ describe("historical transcript directive migration", () => {
         1,
         1,
       );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     await expect(migrateHistoricalTranscriptDirectives({ env })).resolves.toEqual({
       changes: [],
@@ -497,8 +497,8 @@ describe("historical transcript directive migration", () => {
 
   it("acquires stopped-writer maintenance before upgrading an older agent database", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-old-agent-schema-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     opened.db.exec(`
       DROP TABLE session_participants;
@@ -506,7 +506,7 @@ describe("historical transcript directive migration", () => {
       PRAGMA user_version = 17;
       UPDATE schema_meta SET schema_version = 17 WHERE meta_key = 'primary';
     `);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const result = await migrateHistoricalTranscriptDirectives({ env });
 
@@ -521,8 +521,8 @@ describe("historical transcript directive migration", () => {
 
   it("rolls back same-version convergence when maintenance expires before commit", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-same-version-expiry-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
     opened.db.exec(`
       DROP TRIGGER session_nodes_entry_valid_after_insert;
@@ -531,22 +531,22 @@ describe("historical transcript directive migration", () => {
       DROP INDEX idx_agent_session_nodes_entry_valid_pending;
       ALTER TABLE session_nodes DROP COLUMN entry_valid;
     `);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     let competingLeaseId: string | undefined;
-    const agentDatabaseLease = await import("../state/openclaw-agent-db-lease.js");
+    const agentDatabaseLease = await import("../state/carapace-agent-db-lease.js");
     const originalAssert = agentDatabaseLease.assertAgentDatabaseMaintenanceAuthorityIfPresent;
     const authority = vi
       .spyOn(agentDatabaseLease, "assertAgentDatabaseMaintenanceAuthorityIfPresent")
       .mockImplementation(() => {
-        openOpenClawStateDatabase({ env })
+        openCarapaceStateDatabase({ env })
           .db.prepare("UPDATE state_leases SET expires_at = ? WHERE scope = ? AND lease_key = ?")
           .run(
             Date.now() - 1,
             AGENT_DATABASE_MAINTENANCE_LEASE.scope,
             AGENT_DATABASE_MAINTENANCE_LEASE.key,
           );
-        competingLeaseId = claimOpenClawAgentDatabaseLease({
+        competingLeaseId = claimCarapaceAgentDatabaseLease({
           agentId: "competitor",
           path: path.join(stateDir, "competitor.sqlite"),
           env,
@@ -570,13 +570,13 @@ describe("historical transcript directive migration", () => {
     } finally {
       rolledBack.close();
     }
-    releaseOpenClawAgentDatabaseLease(competingLeaseId as string, { env });
+    releaseCarapaceAgentDatabaseLease(competingLeaseId as string, { env });
   });
 
   it("leaves a current empty database and its active writer untouched", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-current-empty-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
 
     await expect(migrateHistoricalTranscriptDirectives({ env })).resolves.toEqual({
       changes: [],
@@ -588,12 +588,12 @@ describe("historical transcript directive migration", () => {
 
   it("surfaces lease inspection failures from preflight", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-lease-inspection-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
-    closeOpenClawAgentDatabasesForTest();
-    const agentDatabaseLease = await import("../state/openclaw-agent-db-lease.js");
-    vi.spyOn(agentDatabaseLease, "assertNoOpenClawAgentDatabaseLeases").mockImplementation(() => {
+    closeCarapaceAgentDatabasesForTest();
+    const agentDatabaseLease = await import("../state/carapace-agent-db-lease.js");
+    vi.spyOn(agentDatabaseLease, "assertNoCarapaceAgentDatabaseLeases").mockImplementation(() => {
       throw new Error("shared-state lease inspection failed");
     });
 
@@ -619,8 +619,8 @@ describe("historical transcript directive migration", () => {
 
   it("leaves canonical archives and their active writer untouched", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-current-archive-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const archived = messageEvent({
       content: [{ type: "text", text: "Already canonical" }],
       id: "archived-canonical",
@@ -663,8 +663,8 @@ describe("historical transcript directive migration", () => {
 
   it("continues preflight after an unreadable target", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-preflight-targets-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "second", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "second", env });
     const databasePath = opened.path;
     const unreadablePath = path.join(stateDir, "unreadable", "agent.sqlite");
     fs.mkdirSync(path.dirname(unreadablePath), { recursive: true });
@@ -675,7 +675,7 @@ describe("historical transcript directive migration", () => {
       PRAGMA user_version = 17;
       UPDATE schema_meta SET schema_version = 17 WHERE meta_key = 'primary';
     `);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const result = await migrateHistoricalTranscriptDirectives({
       env,
@@ -696,16 +696,16 @@ describe("historical transcript directive migration", () => {
 
   it("prunes a stale writer lease before completing an empty database", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-stale-writer-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const databasePath = opened.path;
-    closeOpenClawAgentDatabasesForTest();
-    const leaseId = claimOpenClawAgentDatabaseLease({
+    closeCarapaceAgentDatabasesForTest();
+    const leaseId = claimCarapaceAgentDatabaseLease({
       agentId: "main",
       path: databasePath,
       env,
     });
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db.prepare("UPDATE agent_database_leases SET owner_pid = ? WHERE lease_id = ?")
       .run(2_147_483_647, leaseId);
 
@@ -718,8 +718,8 @@ describe("historical transcript directive migration", () => {
 
   it("rolls back a transcript transaction when maintenance expires before commit", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-expired-commit-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     insertSession(opened.db, {
       events: [
         messageEvent({
@@ -733,11 +733,11 @@ describe("historical transcript directive migration", () => {
       sessionId: "session-expired",
     });
     const originalEventJson = readEventJson(opened.path, "session-expired", 0);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     let competingLeaseId: string | undefined;
     const originalAssert = assertAgentDatabaseMaintenanceAuthority;
-    const agentDatabaseLease = await import("../state/openclaw-agent-db-lease.js");
+    const agentDatabaseLease = await import("../state/carapace-agent-db-lease.js");
     const authority = vi
       .spyOn(agentDatabaseLease, "assertAgentDatabaseMaintenanceAuthority")
       .mockImplementation(() => {
@@ -745,14 +745,14 @@ describe("historical transcript directive migration", () => {
         if (authority.mock.calls.length !== 1) {
           return;
         }
-        openOpenClawStateDatabase({ env })
+        openCarapaceStateDatabase({ env })
           .db.prepare("UPDATE state_leases SET expires_at = ? WHERE scope = ? AND lease_key = ?")
           .run(
             Date.now() - 1,
             AGENT_DATABASE_MAINTENANCE_LEASE.scope,
             AGENT_DATABASE_MAINTENANCE_LEASE.key,
           );
-        competingLeaseId = claimOpenClawAgentDatabaseLease({
+        competingLeaseId = claimCarapaceAgentDatabaseLease({
           agentId: "competitor",
           path: path.join(stateDir, "competitor.sqlite"),
           env,
@@ -781,13 +781,13 @@ describe("historical transcript directive migration", () => {
     } finally {
       migrated.close();
     }
-    releaseOpenClawAgentDatabaseLease(competingLeaseId as string, { env });
+    releaseCarapaceAgentDatabaseLease(competingLeaseId as string, { env });
   });
 
   it("preserves a published archive when maintenance expires before rename", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-expired-archive-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const archived = messageEvent({
       content: [{ type: "text", text: "[[reply_to_current]] Archived" }],
       id: "archived-expired",
@@ -837,23 +837,23 @@ describe("historical transcript directive migration", () => {
     fs.mkdirSync(archiveDirectory, { recursive: true });
     const archivePath = path.join(archiveDirectory, archiveName);
     fs.writeFileSync(archivePath, archiveBytes);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     let competingLeaseId: string | undefined;
     const originalAssert = assertAgentDatabaseMaintenanceAuthority;
-    const agentDatabaseLease = await import("../state/openclaw-agent-db-lease.js");
+    const agentDatabaseLease = await import("../state/carapace-agent-db-lease.js");
     const authority = vi
       .spyOn(agentDatabaseLease, "assertAgentDatabaseMaintenanceAuthority")
       .mockImplementation(() => {
         if (!competingLeaseId && new Error().stack?.includes("beforeRename")) {
-          openOpenClawStateDatabase({ env })
+          openCarapaceStateDatabase({ env })
             .db.prepare("UPDATE state_leases SET expires_at = ? WHERE scope = ? AND lease_key = ?")
             .run(
               Date.now() - 1,
               AGENT_DATABASE_MAINTENANCE_LEASE.scope,
               AGENT_DATABASE_MAINTENANCE_LEASE.key,
             );
-          competingLeaseId = claimOpenClawAgentDatabaseLease({
+          competingLeaseId = claimCarapaceAgentDatabaseLease({
             agentId: "competitor",
             path: path.join(stateDir, "competitor.sqlite"),
             env,
@@ -879,13 +879,13 @@ describe("historical transcript directive migration", () => {
       phase: "archives",
       sessionId: "",
     });
-    releaseOpenClawAgentDatabaseLease(competingLeaseId as string, { env });
+    releaseCarapaceAgentDatabaseLease(competingLeaseId as string, { env });
   });
 
   it("renews maintenance through a blocked schema upgrade and fences the final transcript batch", async () => {
     const stateDir = makeTempDir(tempDirs, "transcript-directive-lease-renewal-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     const batchSize = TRANSCRIPT_DIRECTIVE_MIGRATION_BATCH_SIZE;
     const sessionIdAt = (index: number) =>
       `session-${String(index).padStart(String(batchSize).length, "0")}`;
@@ -909,14 +909,14 @@ describe("historical transcript directive migration", () => {
       PRAGMA user_version = 17;
       UPDATE schema_meta SET schema_version = 17 WHERE meta_key = 'primary';
     `);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
-    const stateLease = await import("../state/openclaw-state-lease.js");
-    const withLease = stateLease.withOpenClawStateLease;
-    vi.spyOn(stateLease, "withOpenClawStateLease").mockImplementationOnce((options, operation) =>
+    const stateLease = await import("../state/carapace-state-lease.js");
+    const withLease = stateLease.withCarapaceStateLease;
+    vi.spyOn(stateLease, "withCarapaceStateLease").mockImplementationOnce((options, operation) =>
       withLease({ ...options, leaseMs: 1_000 }, operation),
     );
-    const agentDatabaseLease = await import("../state/openclaw-agent-db-lease.js");
+    const agentDatabaseLease = await import("../state/carapace-agent-db-lease.js");
     const originalRenew = agentDatabaseLease.renewAgentDatabaseMaintenanceAuthorityIfPresent;
     let originalExpiresAt = 0;
     vi.spyOn(
@@ -924,7 +924,7 @@ describe("historical transcript directive migration", () => {
       "renewAgentDatabaseMaintenanceAuthorityIfPresent",
     ).mockImplementationOnce(() => {
       originalExpiresAt = Number(
-        openOpenClawStateDatabase({ env })
+        openCarapaceStateDatabase({ env })
           .db.prepare("SELECT expires_at FROM state_leases WHERE scope = ? AND lease_key = ?")
           .get(AGENT_DATABASE_MAINTENANCE_LEASE.scope, AGENT_DATABASE_MAINTENANCE_LEASE.key)
           ?.expires_at,
@@ -944,7 +944,7 @@ describe("historical transcript directive migration", () => {
         cursorAtCompetition = readMigrationCursor(opened.path);
         competedAt = Date.now();
         try {
-          competingLeaseId = claimOpenClawAgentDatabaseLease({
+          competingLeaseId = claimCarapaceAgentDatabaseLease({
             agentId: "competitor",
             path: path.join(stateDir, "competitor.sqlite"),
             env,
@@ -980,11 +980,11 @@ describe("historical transcript directive migration", () => {
     } finally {
       migrated.close();
     }
-    const leaseId = claimOpenClawAgentDatabaseLease({
+    const leaseId = claimCarapaceAgentDatabaseLease({
       agentId: "competitor",
       path: path.join(stateDir, "competitor.sqlite"),
       env,
     });
-    releaseOpenClawAgentDatabaseLease(leaseId, { env });
+    releaseCarapaceAgentDatabaseLease(leaseId, { env });
   });
 });

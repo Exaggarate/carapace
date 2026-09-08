@@ -5,8 +5,8 @@ import { expect, vi } from "vitest";
 import { stringify as stringifyYaml } from "yaml";
 import { resolveManagedGitHubProfileDir } from "../agents/github-tool-identity.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { updateUserGitHubConnection } from "../state/user-github-connections.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
 import { personalGitHubStatus } from "./github-personal-oauth.js";
@@ -143,7 +143,7 @@ export async function createPersonalPublicationFixture() {
     },
   };
   const runtime = { live: true, verifiedAccount: account, client };
-  const config: OpenClawConfig = {};
+  const config: CarapaceConfig = {};
   const context = {
     getRuntimeConfig: () => config,
     getClientConnIds: (filter?: (candidate: GatewayClient) => boolean) =>
@@ -153,7 +153,7 @@ export async function createPersonalPublicationFixture() {
     { client, context },
     { sessionKey: SESSION_KEY },
   );
-  const placements = createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() });
+  const placements = createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() });
   const coordinator = createTestGitHubPublicationCoordinator({ placements });
   return {
     owner,

@@ -1,7 +1,7 @@
 /** Tracks plugin API lifecycle callbacks registered during runtime activation. */
-import type { OpenClawPluginApi } from "./types.js";
+import type { CarapacePluginApi } from "./types.js";
 
-const LATE_CALLABLE_PLUGIN_API_METHODS: ReadonlySet<string> = new Set<keyof OpenClawPluginApi>([
+const LATE_CALLABLE_PLUGIN_API_METHODS: ReadonlySet<string> = new Set<keyof CarapacePluginApi>([
   "clearRunContext",
   "emitAgentEvent",
   "enqueueNextTurnInjection",

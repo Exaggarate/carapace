@@ -57,7 +57,7 @@ describe("printWizardHeader", () => {
     const log = vi.fn();
     await withColumns(50, () => printWizardHeader({ log } as unknown as RuntimeEnv));
     const output = String(log.mock.calls[0]?.[0]);
-    expect(output).toContain("OPENCLAW");
+    expect(output).toContain("CARAPACE");
     expect(output).not.toContain("█");
   });
 });
@@ -155,13 +155,13 @@ function expectedTrashSourcePath(targetPath: string): string {
 
 describe("handleReset", () => {
   it("rejects full-reset workspaces that contain the active onboarding lock", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-lock-overlap-");
+    const homeDir = tempDirs.make("carapace-reset-lock-overlap-");
     const stateDir = path.join(homeDir, "state");
     const migrationDir = path.join(stateDir, "migration");
     const migrationAlias = path.join(homeDir, "migration-alias");
     const lockSidecar = path.join(migrationDir, "onboarding.lock-target.lock");
     const lockSidecarViaAlias = path.join(migrationAlias, "onboarding.lock-target.lock");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     fs.mkdirSync(migrationDir, { recursive: true });
     fs.writeFileSync(configPath, "{}\n");
     fs.symlinkSync(migrationDir, migrationAlias, process.platform === "win32" ? "junction" : "dir");
@@ -179,9 +179,9 @@ describe("handleReset", () => {
         withEnvAsync(
           {
             HOME: homeDir,
-            OPENCLAW_HOME: homeDir,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_CONFIG_PATH: configPath,
+            CARAPACE_HOME: homeDir,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
           },
           async () => await handleReset("full", workspaceDir, runtime),
         ),
@@ -193,10 +193,10 @@ describe("handleReset", () => {
   });
 
   it("uses active profile paths for destructive reset targets", async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-profile-"));
-    const profileStateDir = path.join(homeDir, ".openclaw-work");
-    const defaultStateDir = path.join(homeDir, ".openclaw");
-    const profileConfigPath = path.join(profileStateDir, "openclaw.json");
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reset-profile-"));
+    const profileStateDir = path.join(homeDir, ".carapace-work");
+    const defaultStateDir = path.join(homeDir, ".carapace");
+    const profileConfigPath = path.join(profileStateDir, "carapace.json");
     const profileCredentialsDir = path.join(profileStateDir, "credentials");
     const profileSessionsDir = path.join(profileStateDir, "agents", "main", "sessions");
     const secondarySessionsDir = path.join(profileStateDir, "agents", "ops", "sessions");
@@ -224,10 +224,10 @@ describe("handleReset", () => {
       await withEnvAsync(
         {
           HOME: homeDir,
-          OPENCLAW_HOME: homeDir,
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: profileStateDir,
-          OPENCLAW_CONFIG_PATH: profileConfigPath,
+          CARAPACE_HOME: homeDir,
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: profileStateDir,
+          CARAPACE_CONFIG_PATH: profileConfigPath,
         },
         async () => await handleReset("full", workspaceDir, runtime),
       );
@@ -242,28 +242,28 @@ describe("handleReset", () => {
   });
 
   it("rejects a config-only reset when the existing config cannot be trashed", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-config-failure-");
-    const configPath = path.join(homeDir, "openclaw.json");
+    const homeDir = tempDirs.make("carapace-reset-config-failure-");
+    const configPath = path.join(homeDir, "carapace.json");
     fs.writeFileSync(configPath, "{}\n");
     mocks.movePathToTrash.mockRejectedValueOnce(new Error("trash unavailable"));
     const runtime = { log: vi.fn() } as unknown as RuntimeEnv;
 
     await withEnvAsync(
-      { HOME: homeDir, OPENCLAW_HOME: homeDir, OPENCLAW_CONFIG_PATH: configPath },
+      { HOME: homeDir, CARAPACE_HOME: homeDir, CARAPACE_CONFIG_PATH: configPath },
       async () => {
         await expect(handleReset("config", "unused", runtime)).rejects.toThrow(configPath);
       },
     );
 
     expect(runtime.log).toHaveBeenCalledWith(
-      expect.stringMatching(/Failed to move to Trash \(manual delete\): .*openclaw\.json$/),
+      expect.stringMatching(/Failed to move to Trash \(manual delete\): .*carapace\.json$/),
     );
   });
 
   it("reports config, credentials, and session failures together", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-state-failures-");
-    const stateDir = path.join(homeDir, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const homeDir = tempDirs.make("carapace-reset-state-failures-");
+    const stateDir = path.join(homeDir, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
     const credentialsDir = path.join(stateDir, "credentials");
     const sessionsDir = path.join(stateDir, "agents", "main", "sessions");
     fs.mkdirSync(credentialsDir, { recursive: true });
@@ -275,9 +275,9 @@ describe("handleReset", () => {
     await withEnvAsync(
       {
         HOME: homeDir,
-        OPENCLAW_HOME: homeDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_HOME: homeDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
       },
       async () => {
         await expect(handleReset("config+creds+sessions", "unused", runtime)).rejects.toThrow(
@@ -292,8 +292,8 @@ describe("handleReset", () => {
   });
 
   it("deduplicates unreadable session state while still attempting workspace removal", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-session-enumeration-");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const homeDir = tempDirs.make("carapace-reset-session-enumeration-");
+    const stateDir = path.join(homeDir, ".carapace");
     const workspaceDir = path.join(stateDir, "agents");
     fs.mkdirSync(workspaceDir, { recursive: true });
     const inspectError = Object.assign(new Error("permission denied"), { code: "EACCES" });
@@ -305,9 +305,9 @@ describe("handleReset", () => {
       await withEnvAsync(
         {
           HOME: homeDir,
-          OPENCLAW_HOME: homeDir,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+          CARAPACE_HOME: homeDir,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
         },
         async () => {
           const failure = await handleReset("full", workspaceDir, runtime).catch(
@@ -329,8 +329,8 @@ describe("handleReset", () => {
   });
 
   it("attempts workspace removal even when state deletion planning fails", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-workspace-plan-");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const homeDir = tempDirs.make("carapace-reset-workspace-plan-");
+    const stateDir = path.join(homeDir, ".carapace");
     const workspaceDir = path.join(stateDir, "workspace");
     fs.mkdirSync(workspaceDir, { recursive: true });
     mocks.prepareWorkspaceStateDeletion.mockImplementationOnce(() => {
@@ -340,9 +340,9 @@ describe("handleReset", () => {
     await withEnvAsync(
       {
         HOME: homeDir,
-        OPENCLAW_HOME: homeDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+        CARAPACE_HOME: homeDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
       },
       async () => {
         await expect(
@@ -358,8 +358,8 @@ describe("handleReset", () => {
   });
 
   it("fails closed after attempting workspace state cleanup when retired state remains", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-retired-state-");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const homeDir = tempDirs.make("carapace-reset-retired-state-");
+    const stateDir = path.join(homeDir, ".carapace");
     const workspaceDir = path.join(stateDir, "workspace");
     const warning = `Could not remove retired workspace state at ${workspaceDir}.attested`;
     fs.mkdirSync(workspaceDir, { recursive: true });
@@ -372,9 +372,9 @@ describe("handleReset", () => {
     await withEnvAsync(
       {
         HOME: homeDir,
-        OPENCLAW_HOME: homeDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+        CARAPACE_HOME: homeDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
       },
       async () => {
         await expect(handleReset("full", workspaceDir, runtime)).rejects.toThrow(warning);
@@ -386,8 +386,8 @@ describe("handleReset", () => {
   });
 
   it("reports rejected retired and workspace state cleanup after attempting both", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-state-cleanup-rejections-");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const homeDir = tempDirs.make("carapace-reset-state-cleanup-rejections-");
+    const stateDir = path.join(homeDir, ".carapace");
     const workspaceDir = path.join(stateDir, "workspace");
     fs.mkdirSync(workspaceDir, { recursive: true });
     mocks.removeLegacyWorkspaceStateForReset.mockRejectedValueOnce(
@@ -400,9 +400,9 @@ describe("handleReset", () => {
     const reset = withEnvAsync(
       {
         HOME: homeDir,
-        OPENCLAW_HOME: homeDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+        CARAPACE_HOME: homeDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
       },
       async () =>
         await handleReset("full", workspaceDir, {
@@ -416,8 +416,8 @@ describe("handleReset", () => {
   });
 
   it("reports a workspace state deletion failure after trash succeeds", async () => {
-    const homeDir = tempDirs.make("openclaw-reset-state-delete-");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const homeDir = tempDirs.make("carapace-reset-state-delete-");
+    const stateDir = path.join(homeDir, ".carapace");
     const workspaceDir = path.join(stateDir, "workspace");
     fs.mkdirSync(workspaceDir, { recursive: true });
     mocks.deleteWorkspaceState.mockImplementationOnce(() => {
@@ -427,9 +427,9 @@ describe("handleReset", () => {
     await withEnvAsync(
       {
         HOME: homeDir,
-        OPENCLAW_HOME: homeDir,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+        CARAPACE_HOME: homeDir,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
       },
       async () => {
         await expect(
@@ -440,9 +440,9 @@ describe("handleReset", () => {
   });
 
   it("retains workspace state when workspace removal fails", async () => {
-    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-profile-"));
-    const profileStateDir = path.join(homeDir, ".openclaw-work");
-    const profileConfigPath = path.join(profileStateDir, "openclaw.json");
+    const homeDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reset-profile-"));
+    const profileStateDir = path.join(homeDir, ".carapace-work");
+    const profileConfigPath = path.join(profileStateDir, "carapace.json");
     const profileCredentialsDir = path.join(profileStateDir, "credentials");
     const profileSessionsDir = path.join(profileStateDir, "agents", "main", "sessions");
     const workspaceDir = path.join(profileStateDir, "workspace");
@@ -463,10 +463,10 @@ describe("handleReset", () => {
       await withEnvAsync(
         {
           HOME: homeDir,
-          OPENCLAW_HOME: homeDir,
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: profileStateDir,
-          OPENCLAW_CONFIG_PATH: profileConfigPath,
+          CARAPACE_HOME: homeDir,
+          CARAPACE_PROFILE: "work",
+          CARAPACE_STATE_DIR: profileStateDir,
+          CARAPACE_CONFIG_PATH: profileConfigPath,
         },
         async () => {
           await expect(handleReset("full", workspaceDir, runtime)).rejects.toThrow(workspaceDir);

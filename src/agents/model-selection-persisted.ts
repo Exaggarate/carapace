@@ -1,5 +1,5 @@
 // Persisted model metadata normalization without loading the broader selection runtime.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { DEFAULT_PROVIDER } from "./defaults.js";
 import type { ModelRef } from "./model-ref-shared.js";
 import { parseModelRef } from "./model-selection-normalize.js";

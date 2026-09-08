@@ -1,6 +1,6 @@
 // Exercises model fallback through the embedded runner integration surface.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { wrapRunWithTestPreparedAdmission } from "./admitted-run-context.test-support.js";
 import type { ModelFallbackAvailability } from "./agent-scope.js";
 import { classifyEmbeddedAgentRunResultForModelFallback } from "./embedded-agent-runner/result-fallback-classifier.js";
@@ -44,7 +44,7 @@ const { computeBackoffMock, sleepWithAbortMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: vi.fn(async () => ({ wrote: false })),
+  ensureCarapaceModelsJson: vi.fn(async () => ({ wrote: false })),
 }));
 
 const installRunEmbeddedMocks = () => {
@@ -130,7 +130,7 @@ async function runEmbeddedFallback(params: {
   sessionId?: string;
   lane?: string;
   abortSignal?: AbortSignal;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }) {
   // Runs the same embedded-agent entrypoint that production fallback uses while
   // keeping provider/model attempts deterministic through mocks.
@@ -172,7 +172,7 @@ async function runEmbeddedEntryFallback(params: {
   workspaceDir: string;
   sessionKey: string;
   runId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   fallbacksOverride?: string[];
   modelFallbackAvailability?: ModelFallbackAvailability;
   onFallbackStep?: (step: ModelFallbackStepFields) => void;

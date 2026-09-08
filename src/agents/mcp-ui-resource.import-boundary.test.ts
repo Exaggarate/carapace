@@ -6,10 +6,10 @@ import {
   formatCliProcessFailure,
   runCliProcessChild,
 } from "../cli/cli-process-child.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 
 it("projects MCP App metadata without loading session runtime management", async () => {
-  await withOpenClawTestState({ label: "mcp-app-import", applyEnv: false }, async (state) => {
+  await withCarapaceTestState({ label: "mcp-app-import", applyEnv: false }, async (state) => {
     const entry = state.path("app-import.mjs");
     const temporaryDir = state.path("tmp");
     await fs.mkdir(temporaryDir);

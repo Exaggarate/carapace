@@ -1,12 +1,12 @@
 // Signal transport binding for numbered ask_user reactions.
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { OutboundDeliveryResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createQuestionReactionTargetStore,
   questionGatewayRuntime,
-} from "openclaw/plugin-sdk/question-gateway-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/question-gateway-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
 import { resolveSignalDeliveredConversationKey } from "./aliases.js";
 import { resolveSignalApprovalTargetAuthorKeys } from "./approval-reactions.js";
 
@@ -37,7 +37,7 @@ const questionReactionTargets = createQuestionReactionTargetStore<
 });
 
 export function registerSignalQuestionReactionTargetForDeliveredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: { channel: string; to: string; accountId?: string | null };
   payload: ReplyPayload;
   results: readonly OutboundDeliveryResult[];
@@ -74,7 +74,7 @@ export function registerSignalQuestionReactionTargetForDeliveredPayload(params: 
 }
 
 export async function maybeResolveSignalQuestionReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   conversationKey: string;
   messageId: string;

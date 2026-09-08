@@ -7,10 +7,10 @@ import { WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE } from "../../packages/gatewa
 import type { WorkerProvider, WorkerSshEndpoint } from "../plugins/types.js";
 import { runCommandWithTimeout, type CommandOptions, type SpawnResult } from "../process/exec.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { loadSessionEntry } from "./session-utils.js";
 import { writeSessionStore } from "./test-helpers.js";
 import {
@@ -45,7 +45,7 @@ const ENVIRONMENT_ID = deriveEnvironmentIntent(`session-dispatch:${SESSION_ID}:1
 const BUNDLE_HASH = "a".repeat(64);
 const RECEIPT = {
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.8.1",
+  carapaceVersion: "2026.8.1",
   protocolFeatures: [WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE],
 };
 const INSTALLATION: WorkerInstallationArtifact = {
@@ -59,7 +59,7 @@ const SSH_ENDPOINT: WorkerSshEndpoint = {
   host: "worker.example.test",
   port: PRIMARY_PORT,
   fallbackPorts: [FALLBACK_PORT],
-  user: "openclaw",
+  user: "carapace",
   hostKey: "ssh-ed25519 AAAA",
   keyRef: { source: "file", provider: "worker-fixture", id: "/identity" },
 };
@@ -123,14 +123,14 @@ class OriginalOrderSshRunner implements WorkerSshRunner {
     }
     return path.join(
       this.remoteHome,
-      ".openclaw-worker",
+      ".carapace-worker",
       ".incoming",
-      `openclaw-upload-${BUNDLE_HASH}.tgz.${this.bootstrapOperationToken}`,
+      `carapace-upload-${BUNDLE_HASH}.tgz.${this.bootstrapOperationToken}`,
     );
   }
 
   get bootstrapReceiptPath(): string {
-    return path.join(this.remoteHome, ".openclaw-worker", BUNDLE_HASH, "bootstrap-receipt.json");
+    return path.join(this.remoteHome, ".carapace-worker", BUNDLE_HASH, "bootstrap-receipt.json");
   }
 
   start(): never {
@@ -150,7 +150,7 @@ class OriginalOrderSshRunner implements WorkerSshRunner {
       }
       await fs.mkdir(path.dirname(this.bootstrapUploadPath), { recursive: true });
       await fs.writeFile(this.bootstrapUploadPath, "");
-      return success(`OPENCLAW_WORKER_BOOTSTRAP_V1\tinstall\t${this.bootstrapUploadPath}\n`);
+      return success(`CARAPACE_WORKER_BOOTSTRAP_V1\tinstall\t${this.bootstrapUploadPath}\n`);
     }
     if (argv[0] === "scp") {
       this.events.push(`bootstrap:transfer:${port}`);
@@ -162,7 +162,7 @@ class OriginalOrderSshRunner implements WorkerSshRunner {
       await fs.mkdir(path.dirname(this.bootstrapReceiptPath), { recursive: true });
       await fs.writeFile(this.bootstrapReceiptPath, `${JSON.stringify(RECEIPT)}\n`);
       await fs.rm(this.bootstrapUploadPath, { force: true });
-      return success(`OPENCLAW_WORKER_BOOTSTRAP_V1\treceipt\t${JSON.stringify(RECEIPT)}\n`);
+      return success(`CARAPACE_WORKER_BOOTSTRAP_V1\treceipt\t${JSON.stringify(RECEIPT)}\n`);
     }
     if (argv[0] === "ssh" && input.includes("operation_token=$2")) {
       this.events.push(`bootstrap:cleanup:${port}`);
@@ -243,7 +243,7 @@ if (args.includes("-axo")) {
 }
 
 async function destroyRemoteProcessFixture(remoteHome: string): Promise<void> {
-  const leaseDirectory = path.join(remoteHome, ".openclaw-worker", "quiescence");
+  const leaseDirectory = path.join(remoteHome, ".carapace-worker", "quiescence");
   const leases = await fs.readdir(leaseDirectory).catch(() => []);
   for (const name of leases) {
     const leasePath = path.join(leaseDirectory, name);
@@ -273,7 +273,7 @@ async function runGit(workspace: string, ...args: string[]): Promise<void> {
   }
 }
 
-let database: OpenClawStateDatabase | undefined;
+let database: CarapaceStateDatabase | undefined;
 let root: string | undefined;
 let tunnelManager: ReturnType<typeof createWorkerTunnelManager> | undefined;
 let workerService: WorkerEnvironmentService | undefined;
@@ -283,7 +283,7 @@ afterEach(async () => {
   workerService = undefined;
   await tunnelManager?.stopAll();
   tunnelManager = undefined;
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   database = undefined;
   if (root) {
     await fs.rm(root, { recursive: true, force: true });
@@ -292,7 +292,7 @@ afterEach(async () => {
 });
 
 test("preserves ordered fallback through restart, workspace sync, and safe session retirement", async () => {
-  root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-order-"));
+  root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worker-order-"));
   const stateDir = path.join(root, "state");
   const remoteHome = path.join(root, "remote-home");
   const localWorkspace = path.join(root, "workspace");
@@ -324,7 +324,7 @@ test("preserves ordered fallback through restart, workspace sync, and safe sessi
     },
   };
 
-  database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: stateDir } });
+  database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: stateDir } });
   const environmentStore = createWorkerEnvironmentStore({ database, now: () => 2_000 });
   const placements = createWorkerSessionPlacementStore({ database, now: () => 3_000 });
   tunnelManager = createWorkerTunnelManager({ runner });
@@ -351,9 +351,9 @@ test("preserves ordered fallback through restart, workspace sync, and safe sessi
         state: "bootstrapping",
         sshEndpoint: SSH_ENDPOINT,
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       events.push("gateway:reopen");
-      database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: stateDir } });
+      database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: stateDir } });
       expect(
         createWorkerEnvironmentStore({ database, now: () => 2_000 }).get(ENVIRONMENT_ID),
       ).toMatchObject({ state: "bootstrapping", sshEndpoint: SSH_ENDPOINT });

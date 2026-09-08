@@ -1,6 +1,6 @@
-import { clampPositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { clampPositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /**
  * Emits diagnostic model-call events around embedded-agent stream functions.
  */

@@ -1,7 +1,7 @@
 // Runtime dependency contracts for music generation provider execution.
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import type { FallbackAttempt } from "../agents/model-fallback.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   GeneratedMusicAsset,
   MusicGenerationIgnoredOverride,
@@ -18,7 +18,7 @@ import type {
  */
 /** Parameters accepted by the core music generation runtime. */
 export type GenerateMusicParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompt: string;
   agentDir?: string;
   authStore?: AuthProfileStore;

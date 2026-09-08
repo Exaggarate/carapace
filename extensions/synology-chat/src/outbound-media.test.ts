@@ -1,18 +1,18 @@
 // Synology Chat tests cover guarded outbound attachment staging and same-route capability serving.
 import fs from "node:fs";
-import type { HostedOutboundMediaChunkRecord } from "openclaw/plugin-sdk/outbound-media";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { HostedOutboundMediaChunkRecord } from "carapace/plugin-sdk/outbound-media";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
-import type { loadWebMedia as loadWebMediaType } from "openclaw/plugin-sdk/web-media";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
+import type { loadWebMedia as loadWebMediaType } from "carapace/plugin-sdk/web-media";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveSynologyHostedMediaRoute } from "./hosted-media-route.js";
 import {
@@ -43,7 +43,7 @@ function makeRes(options: { finishOnEnd?: boolean } = {}) {
   return res;
 }
 
-vi.mock("openclaw/plugin-sdk/web-media", () => ({
+vi.mock("carapace/plugin-sdk/web-media", () => ({
   loadWebMedia: loadWebMediaMock,
 }));
 
@@ -55,12 +55,12 @@ const testStateDirs = useAutoCleanupTempDirTracker((cleanup) => {
 });
 // Each test gets clean SQLite state; reopen cases retain it within that test.
 const testStateDir = testStateDirs.make(
-  "openclaw-synology-media-",
-  resolvePreferredOpenClawTmpDir(),
+  "carapace-synology-media-",
+  resolvePreferredCarapaceTmpDir(),
 );
 const testStateEnv: NodeJS.ProcessEnv = {
   ...process.env,
-  OPENCLAW_STATE_DIR: testStateDir,
+  CARAPACE_STATE_DIR: testStateDir,
 };
 
 function createAccount(overrides: Partial<ResolvedSynologyChatAccount> = {}) {
@@ -78,7 +78,7 @@ function createAccount(overrides: Partial<ResolvedSynologyChatAccount> = {}) {
     dmPolicy: "allowlist" as const,
     allowedUserIds: ["42"],
     rateLimitPerMinute: 30,
-    botName: "OpenClaw",
+    botName: "Carapace",
     allowInsecureSsl: false,
     ...overrides,
   } satisfies ResolvedSynologyChatAccount;
@@ -177,7 +177,7 @@ describe("Synology Chat hosted outbound media", () => {
       resolveSynologyHostedMediaRoute(
         createAccount({
           webhookUrl:
-            "https://gateway.example.com/webhook?__openclaw_synology_media_token_existing=value",
+            "https://gateway.example.com/webhook?__carapace_synology_media_token_existing=value",
         }),
       ),
     ).toThrow("must not contain query parameters starting with");
@@ -201,7 +201,7 @@ describe("Synology Chat hosted outbound media", () => {
       mediaUrl: "https://files.example.com/floor-plan.png",
     });
     expect(prepared.url).toMatch(
-      /^https:\/\/gateway\.example\.com\/public\/synology\?proxy-token=keep&__openclaw_synology_media_token_[a-f0-9]{24}=/u,
+      /^https:\/\/gateway\.example\.com\/public\/synology\?proxy-token=keep&__carapace_synology_media_token_[a-f0-9]{24}=/u,
     );
     expect(prepared.url).not.toContain("files.example.com");
     expect(loadWebMediaMock).toHaveBeenCalledTimes(1);
@@ -424,7 +424,7 @@ describe("Synology Chat hosted outbound media", () => {
     });
     const capability = new URL(prepared.url);
     const tokenKey = [...capability.searchParams.keys()].find((key) =>
-      key.startsWith("__openclaw_synology_media_token_"),
+      key.startsWith("__carapace_synology_media_token_"),
     );
     if (!tokenKey) {
       throw new Error("expected Synology hosted media token");
@@ -487,7 +487,7 @@ describe("Synology Chat hosted outbound media", () => {
     });
     const capability = new URL(internalCapabilityUrl(prepared.url), "http://localhost");
     const tokenKey = [...capability.searchParams.keys()].find((key) =>
-      key.startsWith("__openclaw_synology_media_token_"),
+      key.startsWith("__carapace_synology_media_token_"),
     );
     if (!tokenKey) {
       throw new Error("expected Synology hosted media token");

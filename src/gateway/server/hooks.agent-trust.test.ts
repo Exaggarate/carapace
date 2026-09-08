@@ -3,7 +3,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSystemEventOwnerAgentId } from "../../infra/system-event-ownership.js";
 import {
   getActiveGatewayRootWorkCount,
@@ -20,7 +20,7 @@ const resolveAgentMainSessionKeyMock = vi.fn(
   (params: { cfg?: { session?: { mainKey?: string } }; agentId: string }) =>
     `agent:${params.agentId}:${params.cfg?.session?.mainKey ?? "main"}`,
 );
-const mainRosterConfig = (): OpenClawConfig => ({
+const mainRosterConfig = (): CarapaceConfig => ({
   agents: { entries: { main: {} } },
 });
 const loadConfigMock = vi.fn(mainRosterConfig);

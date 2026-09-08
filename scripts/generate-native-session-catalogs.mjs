@@ -8,7 +8,7 @@ const root = process.cwd();
 const catalogs = [];
 const localOwners = new Set();
 for (const dir of fs.readdirSync(path.join(root, "extensions")).toSorted()) {
-  const file = path.join(root, "extensions", dir, "openclaw.plugin.json");
+  const file = path.join(root, "extensions", dir, "carapace.plugin.json");
   if (!fs.existsSync(file)) {
     continue;
   }
@@ -34,24 +34,24 @@ for (const name of ["plugin", "provider", "channel"]) {
   const feed = JSON.parse(original);
   let changed = false;
   for (const entry of feed.entries) {
-    const pluginId = entry.openclaw?.plugin?.id;
+    const pluginId = entry.carapace?.plugin?.id;
     if (!localOwners.has(pluginId)) {
       continue;
     }
     const catalog = byId.get(pluginId);
-    const previous = entry.openclaw.setup?.nativeSessionCatalog;
+    const previous = entry.carapace.setup?.nativeSessionCatalog;
     if (JSON.stringify(previous) === JSON.stringify(catalog)) {
       continue;
     }
     if (catalog) {
-      entry.openclaw.setup = { ...entry.openclaw.setup, nativeSessionCatalog: catalog };
+      entry.carapace.setup = { ...entry.carapace.setup, nativeSessionCatalog: catalog };
     } else {
-      const setup = { ...entry.openclaw.setup };
+      const setup = { ...entry.carapace.setup };
       delete setup.nativeSessionCatalog;
       if (Object.keys(setup).length > 0) {
-        entry.openclaw.setup = setup;
+        entry.carapace.setup = setup;
       } else {
-        delete entry.openclaw.setup;
+        delete entry.carapace.setup;
       }
     }
     changed = true;
@@ -60,7 +60,7 @@ for (const name of ["plugin", "provider", "channel"]) {
 }
 const rendered = `${JSON.stringify(catalogs, null, 2)}\n`;
 outputs.set("scripts/lib/native-session-catalogs.json", rendered);
-outputs.set("apps/macos/Sources/OpenClaw/Resources/NativeSessionCatalogs.json", rendered);
+outputs.set("apps/macos/Sources/Carapace/Resources/NativeSessionCatalogs.json", rendered);
 for (const [relative, text] of outputs) {
   const file = path.join(root, relative);
   const current = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : undefined;

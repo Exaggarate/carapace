@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { Context } from "grammy";
-import { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
-import { buildCommandsMessagePaginated } from "openclaw/plugin-sdk/command-status";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { applySessionModelSelection } from "openclaw/plugin-sdk/model-session-runtime";
-import { formatModelsAvailableHeader } from "openclaw/plugin-sdk/models-provider-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
+import { buildCommandsMessagePaginated } from "carapace/plugin-sdk/command-status";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { applySessionModelSelection } from "carapace/plugin-sdk/model-session-runtime";
+import { formatModelsAvailableHeader } from "carapace/plugin-sdk/models-provider-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { getSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import {
   hasTelegramApprovalCallbackPrefix,
@@ -429,7 +429,7 @@ async function handleTelegramModelCallback(params: {
   isGroup: boolean;
   threadSpec: ReturnType<typeof resolveTelegramMessageThreadSpec>;
   senderId: string;
-  runtimeCfg: OpenClawConfig;
+  runtimeCfg: CarapaceConfig;
   telegramDeps: RegisterTelegramHandlerParams["telegramDeps"];
   actions: TelegramCallbackMessageActions;
   messageRuntime: TelegramCallbackMessageRuntime;
@@ -690,7 +690,7 @@ async function handleTelegramModelCallback(params: {
     const runtimeText = `Runtime set to <b>${escapeHtml(applied.agentRuntime)}</b> from configured policy.`;
     const scopeText = isDefaultSelection
       ? `Session model selection cleared.${defaultAuthProfileNotice ? ` ${defaultAuthProfileNotice}` : ""} ${runtimeText} New replies use the agent's configured default.`
-      : `Session-only model selection. ${runtimeText} The agent default in openclaw.json is unchanged. This chat keeps the model selection across /new and /reset; use /model default -s to clear the session model selection.`;
+      : `Session-only model selection. ${runtimeText} The agent default in carapace.json is unchanged. This chat keeps the model selection across /new and /reset; use /model default -s to clear the session model selection.`;
     await editMessageWithButtons(`✅ Model ${actionText}\n\n${scopeText}`, [], {
       parse_mode: "HTML",
     });

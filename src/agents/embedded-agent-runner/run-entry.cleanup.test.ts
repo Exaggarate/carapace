@@ -24,7 +24,7 @@ it.each(cleanupCases)(
     });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.useFakeTimers();
-    vi.stubEnv("OPENCLAW_AGENT_CLEANUP_TIMEOUT_MS", "25");
+    vi.stubEnv("CARAPACE_AGENT_CLEANUP_TIMEOUT_MS", "25");
     registerContextEngineForOwner(
       "cleanup-probe",
       () => ({
@@ -51,7 +51,7 @@ it.each(cleanupCases)(
           harness: {
             workspaceDir: process.cwd(),
             preparation: { kind: "direct" },
-            resolveRuntimeOverride: () => "openclaw",
+            resolveRuntimeOverride: () => "carapace",
           },
           behavior:
             kind === "command-rpc"

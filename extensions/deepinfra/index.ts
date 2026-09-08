@@ -1,11 +1,11 @@
-// Deepinfra plugin entrypoint registers its OpenClaw integration.
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
+// Deepinfra plugin entrypoint registers its Carapace integration.
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "carapace/plugin-sdk/provider-model-shared";
 import {
   createOpenRouterWrapper,
   isProxyReasoningUnsupported,
-} from "openclaw/plugin-sdk/provider-stream";
+} from "carapace/plugin-sdk/provider-stream";
 import { createDeepInfraAnthropicCacheWrapper } from "./cache-wrapper.js";
 import { buildDeepInfraEmbeddingAdapter } from "./embedding-adapter.js";
 import { buildDeepInfraImageGenerationProvider } from "./image-generation-provider.js";

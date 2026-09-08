@@ -1,13 +1,13 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
   missingScopeErrorShape,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { assertAgentRunLifecycleGenerationCurrent } from "../../infra/agent-events.js";
 import { assertPreparedSkillLibrarySelection } from "../../skills/library/selection.js";
 import { AGENT_SESSION_RESET_COMMAND_RE } from "../agent-command-policy.js";
@@ -47,7 +47,7 @@ type AgentResetPhaseResult = {
 export async function runAgentResetPhase(params: {
   assertAdmissionCurrent?: () => void;
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requestedSessionKey?: string;
   resolvedSessionId?: string;
   effectiveTranscriptInputText: string;

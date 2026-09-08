@@ -12,11 +12,11 @@ import {
   parseAgentSessionKey,
 } from "../../routing/session-key.js";
 import {
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db-contract.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+  CARAPACE_AGENT_SCHEMA_VERSION,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db-contract.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
   hasSqliteSessionOwnerColumns,
   projectSqliteSessionOwner,
@@ -30,9 +30,9 @@ import {
 } from "./store-entry.js";
 import type { SessionEntry } from "./types.js";
 
-const SESSION_CANONICAL_KEY_REPAIR_COMMAND = "openclaw doctor --fix";
+const SESSION_CANONICAL_KEY_REPAIR_COMMAND = "carapace doctor --fix";
 type CanonicalSessionDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "schema_meta" | "session_key_contract" | "session_nodes" | "session_windows"
 >;
 const validatedDatabases = new WeakSet<DatabaseSync>();
@@ -309,17 +309,17 @@ export function setCanonicalSqliteSessionMainKey(
 
 /** Checks the startup contract without joining the writable database lifecycle. */
 export function isCanonicalSqliteSessionMainKeyCurrent(
-  options: OpenClawAgentDatabaseOptions,
+  options: CarapaceAgentDatabaseOptions,
   mainKey: string | undefined,
 ): boolean {
   const canonicalMainKey = normalizeMainKey(mainKey);
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getNodeSqliteKysely<CanonicalSessionDatabase>(database.db);
     const schema = executeSqliteQueryTakeFirstSync(
       database.db,
       db.selectFrom("schema_meta").select("schema_version").where("meta_key", "=", "primary"),
     );
-    if (schema?.schema_version !== OPENCLAW_AGENT_SCHEMA_VERSION) {
+    if (schema?.schema_version !== CARAPACE_AGENT_SCHEMA_VERSION) {
       return false;
     }
     return (

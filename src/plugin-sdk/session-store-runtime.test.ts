@@ -47,7 +47,7 @@ describe("session-store-runtime compatibility surface", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-session-store-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sdk-session-store-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 
@@ -115,7 +115,7 @@ describe("session-store-runtime compatibility surface", () => {
     expect(compatibilityStore).toEqual({
       [sessionKey]: expect.objectContaining({
         model: "gpt-5.5",
-        sessionFile: `sqlite:main:session-1:${path.join(tempDir, "openclaw-agent.sqlite")}`,
+        sessionFile: `sqlite:main:session-1:${path.join(tempDir, "carapace-agent.sqlite")}`,
         sessionId: "session-1",
         updatedAt: 10,
       }),
@@ -996,7 +996,7 @@ describe("session-store-runtime compatibility surface", () => {
         agentId: "support",
         storePath: customStorePath,
       }),
-    ).toContain(path.join(tempDir, "custom", "openclaw-agent.support.sqlite"));
+    ).toContain(path.join(tempDir, "custom", "carapace-agent.support.sqlite"));
   });
 
   it("cleans lifecycle artifacts through the accessor-backed SDK wrapper", async () => {

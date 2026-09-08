@@ -89,7 +89,7 @@ function createSkillIndexEntry(
     normalizedSkillKey: normalizeSkillIndexName(skillKey),
     source,
     // Loader provenance owns bundled status; a matching name cannot establish source.
-    bundled: source === "openclaw-bundled" || source === "openclaw-custodian",
+    bundled: source === "carapace-bundled" || source === "carapace-custodian",
     agentAllowed: agentSkillSet === undefined || agentSkillSet.has(name),
     runtimeVisible: isSkillRuntimeVisible(entry),
     promptVisible: isSkillPromptVisible(entry),

@@ -1,5 +1,5 @@
 ---
-summary: "Adds Cerebras model provider support to OpenClaw."
+summary: "Adds Cerebras model provider support to Carapace."
 read_when:
   - You are installing, configuring, or auditing the cerebras plugin
 title: "Cerebras plugin reference"
@@ -7,15 +7,15 @@ title: "Cerebras plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds Cerebras model provider support to OpenClaw.
+Adds Cerebras model provider support to Carapace.
 
 ## Distribution
 
-- Package: `@openclaw/cerebras-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/cerebras-provider`
+- Package: `@carapace/cerebras-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/cerebras-provider`
 
 ## Surface
 

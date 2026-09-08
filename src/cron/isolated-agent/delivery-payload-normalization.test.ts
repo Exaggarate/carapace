@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildPayloads } from "../../agents/embedded-agent-runner/run/payloads.test-helpers.js";
 import {
@@ -83,7 +83,7 @@ describe("cron canonical speech payload delivery", () => {
         role: "assistant",
         stopReason: "stop",
         content: [{ type: "text", text: visibleText }],
-        openclawDelivery: { tts: { tagged: true, text: spokenText } },
+        carapaceDelivery: { tts: { tagged: true, text: spokenText } },
       } as AssistantMessage,
     });
     const outcome = resolveCronPayloadOutcome({
@@ -98,7 +98,7 @@ describe("cron canonical speech payload delivery", () => {
     }
 
     const result = await maybeApplyTtsToCronPayloads({
-      cfg: createTtsConfig(`openclaw-cron-speech-${randomUUID()}`),
+      cfg: createTtsConfig(`carapace-cron-speech-${randomUUID()}`),
       payloads: normalized.payload,
       delivery: { ok: true, channel, to: "test-recipient", mode: "explicit" },
       agentId: "main",

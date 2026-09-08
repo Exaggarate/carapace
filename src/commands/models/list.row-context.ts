@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import type { ModelListAuthIndex } from "./list.auth-index.js";
 import type { ConfiguredEntry } from "./list.types.js";
@@ -10,7 +10,7 @@ type RowFilter = {
 
 /** Context shared by every model-list row source builder. */
 export type RowBuilderContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir: string;
   inheritedAuthDir?: string;

@@ -10,7 +10,7 @@ import {
 } from "./new-session-page.test-support.ts";
 
 const suite = createControlUiE2eSuite({ name: "Placement error Unicode boundary" });
-const storagePrefix = "openclaw.new-session.session-placement-recovery.v1:";
+const storagePrefix = "carapace.new-session.session-placement-recovery.v1:";
 const storageWarning = "Recovery could not be saved in this tab. Keep this page open.\n";
 
 suite.define(() => {

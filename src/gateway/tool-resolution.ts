@@ -1,7 +1,7 @@
 // Gateway-scoped tool resolution for HTTP and loopback tool surfaces.
 import { resolveAgentWorkspaceDir, resolveSessionAgentIds } from "../agents/agent-scope.js";
 import { applyToolAvailabilityDescriptions } from "../agents/agent-tools.deferred-followup.js";
-import { createOpenClawCodingTools } from "../agents/agent-tools.js";
+import { createCarapaceCodingTools } from "../agents/agent-tools.js";
 import { filterToolsByMessageProvider } from "../agents/agent-tools.message-provider-policy.js";
 import { resolveEffectiveToolPolicy } from "../agents/agent-tools.policy.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
@@ -10,7 +10,7 @@ import { resolveCoreToolFactoryFamily } from "../agents/core-tool-factory-descri
 import { applyDelegationCapability } from "../agents/delegation-capability.js";
 import { resolveExecDefaults } from "../agents/exec-defaults.js";
 import { createLazyExecTool, resolveExecToolConfig } from "../agents/lazy-exec-tool.js";
-import { createOpenClawTools } from "../agents/openclaw-tools.js";
+import { createCarapaceTools } from "../agents/carapace-tools.js";
 import { resolveRequesterToolPolicies } from "../agents/requester-tool-policy.js";
 import type { PreparedRootedExecutionCapability } from "../agents/rooted-run-params.js";
 import { resolveSandboxRuntimeStatus } from "../agents/sandbox/runtime-status.js";
@@ -37,7 +37,7 @@ import {
 import { createChannelQuestionPromptDelivery } from "../agents/tools/question-prompt-send.js";
 import type { SourceReplyDeliveryMode } from "../auto-reply/get-reply-options.types.js";
 import type { ConversationReadInvocationOrigin } from "../channels/plugins/conversation-read-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveEventSessionRoutingPolicy } from "../infra/event-session-routing.js";
 import { resolveExactExecModeFromPolicy } from "../infra/exec-approvals.js";
 import { logWarn } from "../logger.js";
@@ -65,7 +65,7 @@ export function resolveGatewayScopedTools(
     | "nodeExecAllowed"
     | "cronCreatorCallerOrigin"
   > & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     rootedExecution?: PreparedRootedExecutionCapability;
     authProfileStore?: AuthProfileStore;
     agentDir?: string;
@@ -263,7 +263,7 @@ export function resolveGatewayScopedTools(
     gatewayRequestedTools.length > 0 ? { allow: gatewayRequestedTools } : undefined,
   ].some(hasRestrictiveAllowPolicy);
 
-  const openClawTools = createOpenClawTools({
+  const carapaceTools = createCarapaceTools({
     agentSessionKey: params.sessionKey,
     runId: params.runId,
     execSession: params.execSession,
@@ -375,7 +375,7 @@ export function resolveGatewayScopedTools(
   const includeMediatedShellTools = mediatedToolFamilies.has("shell");
   const mediatedCodingTools =
     surface === "loopback" && (includeMediatedBaseCodingTools || includeMediatedShellTools)
-      ? createOpenClawCodingTools({
+      ? createCarapaceCodingTools({
           config: params.cfg,
           sessionConfigSource: "runtime",
           agentId: policyAgentId,
@@ -434,7 +434,7 @@ export function resolveGatewayScopedTools(
             includeBaseCodingTools: includeMediatedBaseCodingTools,
             includeShellTools: includeMediatedShellTools,
             includeChannelTools: false,
-            includeOpenClawTools: false,
+            includeCarapaceTools: false,
             includePluginTools: false,
           },
           // The MCP dispatcher is the shared hook and abort boundary for these tools.
@@ -444,8 +444,8 @@ export function resolveGatewayScopedTools(
   // CLI backends already own their local shell. This extra surface is deliberately
   // fixed to node so it cannot become a second path to Gateway-local execution.
   const baseTools = nodeExecSurface
-    ? openClawTools.filter((tool) => tool.name.trim().toLowerCase() !== "exec")
-    : openClawTools;
+    ? carapaceTools.filter((tool) => tool.name.trim().toLowerCase() !== "exec")
+    : carapaceTools;
   const toolsWithMediatedCoding = [
     // Once a name is server-minted as mediated, only the canonical coding
     // factory may supply it. A policy-filtered tool must not fall back to a
@@ -500,7 +500,7 @@ export function resolveGatewayScopedTools(
           },
           {
             description:
-              "Execute a shell command on a connected OpenClaw node. This tool is node-only; use the CLI native shell for Gateway-local commands when it is available. Commands run synchronously. The sole connected node that can execute commands is selected automatically; set node when several can.",
+              "Execute a shell command on a connected Carapace node. This tool is node-only; use the CLI native shell for Gateway-local commands when it is available. Commands run synchronously. The sole connected node that can execute commands is selected automatically; set node when several can.",
             displaySummary: "Run commands on a connected node",
             parameters: nodeExecSchema,
           },

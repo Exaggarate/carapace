@@ -2,8 +2,8 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import {
   getLoadedChannelPluginById,
   getLoadedChannelPluginForRead,
@@ -12,7 +12,7 @@ import {
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import { normalizeAnyChannelId, normalizeChatChannelId } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import {
   INTERNAL_MESSAGE_CHANNEL,
@@ -34,7 +34,7 @@ export type CommandAuthorization = {
 
 type CommandAuthorizationParams = {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commandAuthorized: boolean;
 };
 
@@ -47,7 +47,7 @@ type ProviderResolution = {
 
 type AllowFromParams = {
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 };
 
@@ -74,7 +74,7 @@ type OwnerAuthorizationState = {
 
 function resolveProviderFromContext(
   ctx: MsgContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): { providerId: ChannelId | undefined; hadResolutionError: boolean } {
   const explicitMessageChannels = [ctx.Surface, ctx.OriginatingChannel, ctx.Provider]
     .map((value) => normalizeMessageChannel(value))
@@ -123,7 +123,7 @@ function resolveProviderFromContext(
   };
 }
 
-function probeInferredProviders(ctx: MsgContext, cfg: OpenClawConfig) {
+function probeInferredProviders(ctx: MsgContext, cfg: CarapaceConfig) {
   let droppedResolutionError = false;
   const candidates: ProviderResolution[] = [];
   for (const plugin of listLoadedChannelPlugins()) {
@@ -416,7 +416,7 @@ function resolveSenderCandidates(
 }
 
 function resolveFallbackAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId?: ChannelId;
   accountId?: string | null;
 }): Array<string | number> {
@@ -577,7 +577,7 @@ export function resolveCommandAuthorization(
 
 /** Recheck admitted sender identity against the current global owner list. */
 export function isConfiguredCommandOwner(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requester: { channel?: string; accountId?: string; senderId?: string },
 ): boolean {
   const providerId = normalizeAnyChannelId(requester.channel) ?? requester.channel;

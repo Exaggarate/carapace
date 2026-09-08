@@ -1,9 +1,9 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeArrayBackedTrimmedStringList,
   normalizeSortedUniqueTrimmedStringList,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import type {
   EnvironmentStatus,
   RequiredNodeCommand,
@@ -83,8 +83,8 @@ function readRuntimeTargetIssues(value: unknown): RuntimeTargetIssue[] | undefin
     }
     return raw.code === "update-required" &&
       raw.action === "update-and-reconnect" &&
-      raw.updateCommand === "openclaw update" &&
-      raw.headlessReconnectCommand === "openclaw node restart"
+      raw.updateCommand === "carapace update" &&
+      raw.headlessReconnectCommand === "carapace node restart"
       ? [raw as RuntimeTargetIssue]
       : [];
   });

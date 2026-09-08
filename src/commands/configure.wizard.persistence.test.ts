@@ -1,6 +1,6 @@
 // Configure wizard persistence tests protect config writes before local side effects.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const mocks = vi.hoisted(() => ({
   intro: vi.fn(),
@@ -44,8 +44,8 @@ vi.mock("../wizard/setup.secret-input.js", () => ({
 }));
 
 vi.mock("./onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
-  applyWizardMetadata: (config: OpenClawConfig) => config,
+  DEFAULT_WORKSPACE: "/tmp/carapace-workspace",
+  applyWizardMetadata: (config: CarapaceConfig) => config,
   guardCancel: (value: unknown) => value,
   probeGatewayReachable: mocks.probeGatewayReachable,
   resolveAdvertisedControlUiLinks: vi.fn(async () => ({
@@ -64,8 +64,8 @@ vi.mock("./onboard-agent-target.js", () => ({
   ensureOnboardingAgentWorkspace: vi.fn(),
   resolveOnboardingAgentTarget: () => ({
     agentId: "main",
-    agentDir: "/tmp/openclaw-agent",
-    workspaceDir: "/tmp/openclaw-workspace",
+    agentDir: "/tmp/carapace-agent",
+    workspaceDir: "/tmp/carapace-workspace",
   }),
 }));
 
@@ -101,8 +101,8 @@ describe("configure wizard persistence before local side effects", () => {
         issues: [],
       },
       writeOptions: {
-        expectedConfigPath: "/tmp/openclaw.json",
-        ownedConfigPathForWrite: "/tmp/openclaw.json",
+        expectedConfigPath: "/tmp/carapace.json",
+        ownedConfigPathForWrite: "/tmp/carapace.json",
       },
     });
     mocks.probeGatewayReachable.mockResolvedValue({ ok: false });
@@ -118,9 +118,9 @@ describe("configure wizard persistence before local side effects", () => {
   ] as const)("persists Local before %s reports %s", async (section, outcome) => {
     const choices = ["local", section, "__continue"];
     const events: string[] = [];
-    const writes: OpenClawConfig[] = [];
+    const writes: CarapaceConfig[] = [];
     mocks.select.mockImplementation(async () => choices.shift());
-    mocks.writeWizardConfigFile.mockImplementation(async (config: OpenClawConfig) => {
+    mocks.writeWizardConfigFile.mockImplementation(async (config: CarapaceConfig) => {
       events.push("commit");
       writes.push(config);
       return config;

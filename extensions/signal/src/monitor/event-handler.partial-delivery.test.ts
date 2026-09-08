@@ -1,17 +1,17 @@
 // Signal integration coverage for durable ingress after a partially visible final reply.
-import { buildExecApprovalPendingReplyPayload } from "openclaw/plugin-sdk/approval-reply-runtime";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { drainPendingDeliveries } from "openclaw/plugin-sdk/delivery-queue-runtime";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+import { buildExecApprovalPendingReplyPayload } from "carapace/plugin-sdk/approval-reply-runtime";
+import { createChannelIngressQueueForTests } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { drainPendingDeliveries } from "carapace/plugin-sdk/delivery-queue-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import {
   createTestRegistry,
   readQueuedDeliveryEntriesForTest,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { GetReplyOptions } from "openclaw/plugin-sdk/reply-runtime";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { GetReplyOptions } from "carapace/plugin-sdk/reply-runtime";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearSignalApprovalReactionTargetsForTest,
@@ -30,15 +30,15 @@ const {
   getReplyFromConfigMock: vi.fn(),
   registerQuestionDeliveryMock:
     vi.fn<
-      typeof import("openclaw/plugin-sdk/question-gateway-runtime").questionGatewayRuntime.registerChannelDelivery
+      typeof import("carapace/plugin-sdk/question-gateway-runtime").questionGatewayRuntime.registerChannelDelivery
     >(),
   resolveQuestionReactionMock: vi.fn(),
   sendMessageSignalMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/question-gateway-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/question-gateway-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/question-gateway-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/question-gateway-runtime")>();
   return {
     ...actual,
     questionGatewayRuntime: {
@@ -50,9 +50,9 @@ vi.mock("openclaw/plugin-sdk/question-gateway-runtime", async (importOriginal) =
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("carapace/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/channel-inbound")>(
+    "carapace/plugin-sdk/channel-inbound",
   );
   return {
     ...actual,
@@ -92,19 +92,19 @@ const [{ deliverReplies }, { startSignalIngressMonitor }, eventHandlerModule, ha
     import("./event-handler.js"),
     import("./event-handler.test-harness.js"),
   ]);
-const { questionGatewayRuntime } = await import("openclaw/plugin-sdk/question-gateway-runtime");
+const { questionGatewayRuntime } = await import("carapace/plugin-sdk/question-gateway-runtime");
 
 type SignalIngressQueue = ReturnType<typeof createChannelIngressQueueForTests<unknown>>;
 type SignalIngressPayload = Parameters<SignalIngressQueue["enqueue"]>[1];
 
 describe("Signal partial final delivery ingress boundary", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let queue: ReturnType<typeof createChannelIngressQueueForTests<SignalIngressPayload>>;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-signal-partial-delivery-",
+      prefix: "carapace-signal-partial-delivery-",
     });
     queue = createChannelIngressQueueForTests({
       channelId: "signal",
@@ -152,7 +152,7 @@ describe("Signal partial final delivery ingress boundary", () => {
           targets: [{ channel: "signal", to: "+15550001111" }],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const payload = {
       ...buildExecApprovalPendingReplyPayload({
         approvalId: "exec-partial",
@@ -273,7 +273,7 @@ describe("Signal partial final delivery ingress boundary", () => {
           allowFrom: ["+15550001111"],
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const handler = eventHandlerModule.createSignalEventHandler(
       harnessModule.createBaseSignalEventHandlerDeps({
         cfg,
@@ -343,7 +343,7 @@ describe("Signal partial final delivery ingress boundary", () => {
       const cfg = {
         session: { store: state.statePath("sessions") },
         channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       getReplyFromConfigMock.mockImplementation(async (_ctx, options: GetReplyOptions) => {
         if (sendBlock) {
           await options.onBlockReply?.({ text: "Delivered block" });
@@ -444,7 +444,7 @@ describe("Signal partial final delivery ingress boundary", () => {
     const cfg = {
       session: { store: state.statePath("sessions") },
       channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     setActivePluginRegistry(
       createTestRegistry([
         {
@@ -516,8 +516,8 @@ describe("Signal partial final delivery ingress boundary", () => {
       import("./event-handler.js"),
       import("./event-handler.test-harness.js"),
       import("../signal-ingress.js"),
-      import("openclaw/plugin-sdk/plugin-test-runtime"),
-      import("openclaw/plugin-sdk/reply-runtime"),
+      import("carapace/plugin-sdk/plugin-test-runtime"),
+      import("carapace/plugin-sdk/reply-runtime"),
     ]);
     freshReplyRuntime.resetInboundDedupe();
     freshPluginRuntime.setActivePluginRegistry(

@@ -2,7 +2,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
@@ -60,8 +60,8 @@ printf 'start\nready\n' >"$SYSTEMCTL_SHIM_LOG"
 : >"$ARTIFACT_ROOT/events"
 candidate_update_spec() { printf 'file:/fixture/candidate.tgz'; }
 read_installed_version() { printf '%s' "$EXPECTED_VERSION"; }
-openclaw_e2e_print_log() { :; }
-openclaw_e2e_maybe_timeout() {
+carapace_e2e_print_log() { :; }
+carapace_e2e_maybe_timeout() {
   printf '%s\n' "$@" >"$ARTIFACT_ROOT/argv"
   printf 'update\n' >>"$ARTIFACT_ROOT/events"
   if [ "$REPLACEMENT" = 1 ]; then
@@ -106,7 +106,7 @@ exit "$result_status"
       );
       expect(result.status, result.stderr).toBe(replacement ? 0 : 1);
       const args = readFileSync(join(root, "argv"), "utf8").trim().split("\n");
-      expect(args.slice(args.indexOf("openclaw") + 1)).toEqual([
+      expect(args.slice(args.indexOf("carapace") + 1)).toEqual([
         "update",
         "--tag",
         expectedSpec,
@@ -153,7 +153,7 @@ function deniedUpdate() {
         npm: { outcomes: [] as { status: string }[] },
         integrityDrifts: [] as string[],
         warnings: ["codex", "discord", "whatsapp"].map((id) => {
-          const message = `Plugin "${id}" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.`;
+          const message = `Plugin "${id}" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.`;
           return { reason: message, message };
         }),
       },
@@ -168,7 +168,7 @@ function deferredUpdate() {
     "Codex consent warning",
   );
   const reason = 'Plugin "codex" requires capability consent; rerun with --accept-capabilities.';
-  const message = `Plugin "codex" could not be processed after the core update: ${reason} Run openclaw update repair to retry post-update plugin repair. Run openclaw plugins inspect codex --runtime --json for details.`;
+  const message = `Plugin "codex" could not be processed after the core update: ${reason} Run carapace update repair to retry post-update plugin repair. Run carapace plugins inspect codex --runtime --json for details.`;
   const retained = `Kept installed plugin "codex"; replacement deferred. ${codexWarning.reason}`;
   return {
     ...update,
@@ -220,7 +220,7 @@ describe("published upgrade survivor consent recovery", () => {
     ),
   )("admits $pluginId fixture consent after a $status update", ({ pluginId, status }) => {
     const update = deniedUpdate();
-    const reason = `Plugin "${pluginId}" requires capability consent. Use openclaw plugins install or openclaw plugins enable with --accept-capabilities, then retry.`;
+    const reason = `Plugin "${pluginId}" requires capability consent. Use carapace plugins install or carapace plugins enable with --accept-capabilities, then retry.`;
     update.postUpdate.plugins.warnings.push({ reason, message: reason });
     const result = check({
       ...update,
@@ -350,8 +350,8 @@ function schemaFixture(
 ) {
   const root = tempDirs.make("survivor-schema-expectation-");
   const stateDir = join(root, "state");
-  const stateDatabase = join(stateDir, "state", "openclaw.sqlite");
-  const agentDatabase = join(stateDir, "agents", "ops", "agent", "openclaw-agent.sqlite");
+  const stateDatabase = join(stateDir, "state", "carapace.sqlite");
+  const agentDatabase = join(stateDir, "agents", "ops", "agent", "carapace-agent.sqlite");
   if (stateVersion !== null) {
     writeSchema(stateDatabase, stateVersion);
   }
@@ -359,7 +359,7 @@ function schemaFixture(
     writeSchema(agentDatabase, agentVersion);
   }
   seedState?.(stateDir);
-  const configFile = join(root, "openclaw.json");
+  const configFile = join(root, "carapace.json");
   writeFileSync(configFile, JSON.stringify({ agents: { entries: { main: {}, ops: {} } } }));
   const candidateDir = join(root, "package");
   mkdirSync(candidateDir);
@@ -368,9 +368,9 @@ function schemaFixture(
   writeFileSync(
     join(candidateDir, "package.json"),
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version: candidateVersion,
-      openclaw: { schemaVersions: { state: 16, agent: 19 } },
+      carapace: { schemaVersions: { state: 16, agent: 19 } },
     }),
   );
   const tarball = join(root, "candidate.tgz");
@@ -450,7 +450,7 @@ function legacyAgentFixture(agentId = "main") {
     writeFileSync(prompt, "Retained prompt");
   });
   const sessions = join(lane.stateDir, "agents", agentId, "sessions");
-  const databasePath = join(lane.stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+  const databasePath = join(lane.stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
   const archiveDir = join(lane.stateDir, "agents", agentId, "session-sqlite-import-archive");
   const promptPath = join(sessions, "skills-prompts", "sha256", "aa", `${"a".repeat(64)}.txt`);
   const manifestPath = join(lane.stateDir, "session-sqlite-migration-runs", "import.json");
@@ -559,13 +559,13 @@ describe("published survivor schema outcome", () => {
     expect(snapshot.agents).toEqual([
       {
         agentId: "main",
-        databaseRelative: "agents/main/agent/openclaw-agent.sqlite",
+        databaseRelative: "agents/main/agent/carapace-agent.sqlite",
         requiresDatabase: false,
         files: [],
       },
       {
         agentId: "ops",
-        databaseRelative: "agents/ops/agent/openclaw-agent.sqlite",
+        databaseRelative: "agents/ops/agent/carapace-agent.sqlite",
         requiresDatabase: false,
         files: [],
       },
@@ -620,7 +620,7 @@ describe("published survivor schema outcome", () => {
     const result = lane.check();
     expect(result.status, result.stderr).toBe(0);
     expect(preserved.map((file) => readFileSync(file))).toEqual(before);
-    expect(existsSync(join(lane.stateDir, "agents", "ops", "agent", "openclaw-agent.sqlite"))).toBe(
+    expect(existsSync(join(lane.stateDir, "agents", "ops", "agent", "carapace-agent.sqlite"))).toBe(
       false,
     );
   });
@@ -748,7 +748,7 @@ describe("published survivor schema outcome", () => {
       if (accepted) {
         expect(JSON.parse(readFileSync(lane.afterFile, "utf8")).databases).toContainEqual({
           kind: "state",
-          relative: "state/openclaw.sqlite",
+          relative: "state/carapace.sqlite",
           userVersion: published,
           contentVersion: 16,
         });
@@ -760,7 +760,7 @@ describe("published survivor schema outcome", () => {
     const lane = schemaFixture("2026.6.34", null, null);
     expect(lane.prepared.stdout.trim()).toBe("success");
     expect(JSON.parse(readFileSync(lane.snapshotFile, "utf8")).databases).toEqual([
-      { kind: "state", relative: "state/openclaw.sqlite", userVersion: null, contentVersion: null },
+      { kind: "state", relative: "state/carapace.sqlite", userVersion: null, contentVersion: null },
     ]);
     expect(existsSync(lane.stateDatabase)).toBe(false);
     expect(existsSync(lane.agentDatabase)).toBe(false);
@@ -836,7 +836,7 @@ describe("published survivor schema outcome", () => {
           { name: "global update", exitCode: 0 },
           { name: "global install swap", exitCode: 0 },
           {
-            name: "openclaw doctor",
+            name: "carapace doctor",
             exitCode: 1,
             stdoutTail: JSON.stringify({
               ok: false,

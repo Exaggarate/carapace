@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { projectPairedDeviceNodeBindings } from "../../infra/device-pairing-node-state.js";
@@ -390,7 +390,7 @@ describe("node read projections", () => {
       false,
       undefined,
       expect.objectContaining({
-        message: expect.stringContaining("openclaw nodes approve surface-request-1"),
+        message: expect.stringContaining("carapace nodes approve surface-request-1"),
       }),
     );
   });

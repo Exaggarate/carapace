@@ -1,15 +1,15 @@
-import { IMAGE_BLOCK_TOKENS } from "openclaw/plugin-sdk/agent-core";
+import { IMAGE_BLOCK_TOKENS } from "carapace/plugin-sdk/agent-core";
 /**
- * Projects OpenClaw context-engine assemblies into Codex prompt text while
+ * Projects Carapace context-engine assemblies into Codex prompt text while
  * preserving safety boundaries and redacting tool payloads.
  */
 import {
-  isOpenClawRuntimeContextCustomMessage,
+  isCarapaceRuntimeContextCustomMessage,
   type AgentMessage,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { ImageContent } from "openclaw/plugin-sdk/llm";
-import { redactSensitiveFieldValue, redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { sliceUtf16Safe, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { ImageContent } from "carapace/plugin-sdk/llm";
+import { redactSensitiveFieldValue, redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { sliceUtf16Safe, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 type CodexContextProjection = {
   developerInstructionAddition?: string;
@@ -33,7 +33,7 @@ export type CodexProjectedContextRange = {
   end: number;
 };
 
-const CONTEXT_HEADER = "OpenClaw assembled context for this turn:";
+const CONTEXT_HEADER = "Carapace assembled context for this turn:";
 const CONTEXT_OPEN = "<conversation_context>";
 const CONTEXT_CLOSE = "</conversation_context>";
 const REQUEST_HEADER = "Current user request:";
@@ -68,11 +68,11 @@ export function isCodexDurableCustomMessage(message: AgentMessage): boolean {
   return (
     message.role === "custom" &&
     message.excludeFromContext !== true &&
-    !isOpenClawRuntimeContextCustomMessage(message)
+    !isCarapaceRuntimeContextCustomMessage(message)
   );
 }
 
-/** Projects assembled OpenClaw context-engine messages into Codex prompt inputs. */
+/** Projects assembled Carapace context-engine messages into Codex prompt inputs. */
 export async function projectContextEngineAssemblyForCodex(params: {
   assembledMessages: AgentMessage[];
   originalHistoryMessages: AgentMessage[];

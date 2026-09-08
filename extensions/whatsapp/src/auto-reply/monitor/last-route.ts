@@ -1,6 +1,6 @@
 // Whatsapp plugin module implements last route behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { MsgContext } from "carapace/plugin-sdk/reply-runtime";
 import { formatError } from "../../session.js";
 import { resolveStorePath, updateLastRoute } from "../config.runtime.js";
 
@@ -16,7 +16,7 @@ export function trackBackgroundTask(
 }
 
 export function updateLastRouteInBackground(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   backgroundTasks: Set<Promise<unknown>>;
   storeAgentId: string;
   sessionKey: string;

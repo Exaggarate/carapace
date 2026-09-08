@@ -12,9 +12,9 @@ const tempDirs = useAutoCleanupTempDirTracker(afterAll);
 
 describe("Doctor preflight refusal receipts", () => {
   it("propagates the settled preflight receipts without truncating the blocked tail", async () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-doctor-refusal-receipts-"));
+    const root = fs.realpathSync(tempDirs.make("carapace-doctor-refusal-receipts-"));
     const stateDir = path.join(root, "state");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const configRaw = '{"meta":{"lastTouchedAt":"2026-09-03T00:00:00.000Z"}}\n';
     fs.mkdirSync(path.join(stateDir, "tui"), { recursive: true });
     fs.writeFileSync(configPath, configRaw);
@@ -25,9 +25,9 @@ describe("Doctor preflight refusal receipts", () => {
         PATH: process.env.PATH,
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_SERVICE_REPAIR_POLICY: "external",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_SERVICE_REPAIR_POLICY: "external",
         NO_COLOR: "1",
       },
       `
@@ -87,7 +87,7 @@ describe("Doctor preflight refusal receipts", () => {
     }
     expect(new Set(receipts.map((receipt) => receipt.id)).size).toBe(receipts.length);
     expect(fs.readFileSync(configPath, "utf8")).toBe(configRaw);
-    const db = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+    const db = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
       readOnly: true,
     });
     try {

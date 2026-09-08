@@ -58,7 +58,7 @@ describe("media understanding attachment cache", () => {
       expected: { mime: "text/plain", class: "text" },
     },
   ])("$name", async (testCase) => {
-    await withTestDir({ prefix: "openclaw-media-cache-mime-local-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-media-cache-mime-local-" }, async (base) => {
       const attachmentPath = path.join(base, testCase.fileName);
       await fs.writeFile(attachmentPath, testCase.buffer);
       const cache = new MediaAttachmentCache(
@@ -99,7 +99,7 @@ describe("media understanding attachment cache", () => {
   it.each(["unchanged", "growing", "read-failure"] as const)(
     "closes one bounded local read when the file is %s",
     async (behavior) => {
-      await withTestDir({ prefix: "openclaw-media-cache-growth-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-media-cache-growth-" }, async (base) => {
         const attachmentPath = path.join(base, "growing.png");
         await fs.writeFile(attachmentPath, PNG_1X1);
         const maxBytes = PNG_1X1.length;
@@ -170,7 +170,7 @@ describe("media understanding attachment cache", () => {
         maxBytes: number;
         timeoutMs: number;
       }>();
-      await withTestDir({ prefix: "openclaw-media-cache-path-limit-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-media-cache-path-limit-" }, async (base) => {
         const attachmentPath = path.join(base, "photo.png");
         await fs.writeFile(attachmentPath, PNG_1X1);
         buildRandomTempFilePathMock.mockReturnValue(path.join(base, "staged.png"));
@@ -196,7 +196,7 @@ describe("media understanding attachment cache", () => {
   it.each(["cache", "returned"] as const)(
     "restages files after %s cleanup",
     async (cleanupOwner) => {
-      await withTestDir({ prefix: "openclaw-media-cache-restage-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-media-cache-restage-" }, async (base) => {
         buildRandomTempFilePathMock
           .mockReturnValueOnce(path.join(base, "first.png"))
           .mockReturnValueOnce(path.join(base, "second.png"));
@@ -263,7 +263,7 @@ describe("media understanding attachment cache", () => {
   });
 
   it("removes a partially staged attachment and preserves its write failure", async () => {
-    await withTestDir({ prefix: "openclaw-media-cache-write-failure-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-media-cache-write-failure-" }, async (base) => {
       const stagedPath = path.join(base, "failed.png");
       const writeError = Object.assign(new Error("disk full"), { code: "ENOSPC" });
       const writeFile = fs.writeFile.bind(fs);
@@ -285,7 +285,7 @@ describe("media understanding attachment cache", () => {
   });
 
   it("retries failed cleanup without losing earlier staging when a later attempt succeeds", async () => {
-    await withTestDir({ prefix: "openclaw-media-cache-cleanup-retry-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-media-cache-cleanup-retry-" }, async (base) => {
       const firstPath = path.join(base, "failed.png");
       const secondPath = path.join(base, "success.png");
       const writeError = Object.assign(new Error("disk full"), { code: "ENOSPC" });

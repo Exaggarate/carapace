@@ -46,7 +46,7 @@ function main() {
     policy === null ||
     typeof policy !== "object" ||
     Array.isArray(policy) ||
-    policy.schema !== "openclaw.authorized-beta-focused-policy.v1" ||
+    policy.schema !== "carapace.authorized-beta-focused-policy.v1" ||
     policy.mode !== "authorized-beta-focused-v1" ||
     typeof policy.candidateSha !== "string" ||
     !/^[a-f0-9]{40}$/u.test(policy.candidateSha)

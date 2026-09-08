@@ -1,9 +1,9 @@
 // Resolves plugin root directories for bundled and installed plugins.
 import path from "node:path";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveUserPath } from "../utils.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
-import { resolveOpenClawDevSourceRoot } from "./dev-source-root.js";
+import { resolveCarapaceDevSourceRoot } from "./dev-source-root.js";
 import { resolveDefaultPluginExtensionsDir } from "./install-paths.js";
 
 export type PluginSourceRoots = {
@@ -26,7 +26,7 @@ export function resolvePluginSourceRoots(params: {
   const workspaceRoot = params.workspaceDir ? resolveUserPath(params.workspaceDir, env) : undefined;
   const stock = resolveBundledPluginsDir(env);
   const global = resolveDefaultPluginExtensionsDir(env);
-  const workspace = workspaceRoot ? path.join(workspaceRoot, ".openclaw", "extensions") : undefined;
+  const workspace = workspaceRoot ? path.join(workspaceRoot, ".carapace", "extensions") : undefined;
   return { stock, global, workspace };
 }
 
@@ -45,5 +45,5 @@ export function resolvePluginCacheInputs(params: {
   const loadPaths = normalizeStringEntries(
     (params.loadPaths ?? []).filter((entry): entry is string => typeof entry === "string"),
   ).map((entry) => resolveUserPath(entry, env));
-  return { roots, loadPaths, devSourceRoot: resolveOpenClawDevSourceRoot(env) };
+  return { roots, loadPaths, devSourceRoot: resolveCarapaceDevSourceRoot(env) };
 }

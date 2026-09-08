@@ -86,7 +86,7 @@ async function mountCopy(surface: "code" | "table" | "mermaid" | "message") {
     owner.addEventListener("click", handleMarkdownTableInteraction);
     button = owner.querySelector(".markdown-table__copy");
   } else if (surface === "mermaid") {
-    const diagram = document.createElement("openclaw-mermaid");
+    const diagram = document.createElement("carapace-mermaid");
     diagram.source = "flowchart LR\nA --> B";
     owner.append(diagram);
     await diagram.updateComplete;
@@ -109,7 +109,7 @@ function delayFirstWrite() {
 }
 
 async function mountBrowserCard() {
-  const card = document.createElement("openclaw-browser-tab-card");
+  const card = document.createElement("carapace-browser-tab-card");
   card.preview = {
     kind: "browser-tab",
     target: "host",
@@ -322,7 +322,7 @@ describe("Markdown clipboard operation lifetime", () => {
   it("retires a Mermaid copy when its source changes on the connected element", async () => {
     const pending = delayFirstWrite();
     const { owner, button } = await mountCopy("mermaid");
-    const diagram = owner.querySelector("openclaw-mermaid")!;
+    const diagram = owner.querySelector("carapace-mermaid")!;
     button.click();
     diagram.source = "flowchart LR\nC --> D";
     await diagram.updateComplete;

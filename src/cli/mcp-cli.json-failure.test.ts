@@ -23,7 +23,7 @@ describe("mcp cli JSON failures", () => {
   it.each(["show", "probe", "doctor"])(
     "emits one JSON failure for an unknown server in %s",
     async (command) => {
-      await withTempHome("openclaw-cli-mcp-json-", async () => {
+      await withTempHome("carapace-cli-mcp-json-", async () => {
         await expect(runMcpCommand(["mcp", command, "missing", "--json"])).rejects.toThrow(
           "__exit__:1",
         );
@@ -44,8 +44,8 @@ describe("mcp cli JSON failures", () => {
   it.each(["list", "show", "status", "probe", "doctor"])(
     "emits one JSON failure for invalid config in %s",
     async (command) => {
-      await withTempHome("openclaw-cli-mcp-invalid-json-", async (home) => {
-        await fs.writeFile(path.join(home, ".openclaw", "openclaw.json"), "{ invalid");
+      await withTempHome("carapace-cli-mcp-invalid-json-", async (home) => {
+        await fs.writeFile(path.join(home, ".carapace", "carapace.json"), "{ invalid");
         await expect(runMcpCommand(["mcp", command, "--json"])).rejects.toThrow("__exit__:1");
 
         expect(mockLog).toHaveBeenCalledTimes(1);

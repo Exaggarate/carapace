@@ -1,6 +1,6 @@
 import os from "node:os";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import type { SessionGitHubPublicationResult } from "../../packages/gateway-protocol/src/schema/session-github-publication.js";
 import { resolveGitCoauthorAttribution } from "../agents/git-coauthor-attribution.js";
 import type { PreparedGitHubPublicationIdentity } from "../agents/github-tool-identity.js";
@@ -51,7 +51,7 @@ import type { GitHubPublicationExecutionRow } from "./github-publication-store.j
 import { prepareGitHubPublicationTarget } from "./github-publication-target.js";
 import { SessionMutationAuthorizationChangedError } from "./session-sharing.js";
 
-const PUBLICATION_MARKER = "OpenClaw-Publication";
+const PUBLICATION_MARKER = "Carapace-Publication";
 
 type PublicationRow = GitHubPublicationExecutionRow;
 
@@ -226,7 +226,7 @@ export async function executeGitHubPublication<Row extends PublicationRow>(param
       });
     }
     const marker = `${PUBLICATION_MARKER}: ${row.request_id}`;
-    const pullRequestMarker = `<!-- openclaw-publication:${row.request_id} -->`;
+    const pullRequestMarker = `<!-- carapace-publication:${row.request_id} -->`;
     const findPullRequest = () =>
       findGitHubPublicationPullRequest({
         repository,
@@ -395,7 +395,7 @@ export async function executeGitHubPublication<Row extends PublicationRow>(param
       const description = (
         row.body?.trim() || "Published by the Gateway after authoritative workspace reconciliation."
       )
-        .replace(/(?:\s*---\s*\n\[View the OpenClaw team session\]\([^\r\n)]*\)\s*)+$/u, "")
+        .replace(/(?:\s*---\s*\n\[View the Carapace team session\]\([^\r\n)]*\)\s*)+$/u, "")
         .replace(
           /(?:^|\n\n)## Worked on by\n\n(?:- @[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\n)*- @[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})(?=\n\n|$)/gu,
           "",
@@ -405,7 +405,7 @@ export async function executeGitHubPublication<Row extends PublicationRow>(param
         ? `\n\n## Worked on by\n\n${contributorCredit}`
         : "";
       const footer = sessionUrl?.startsWith("https://")
-        ? `\n\n---\n[View the OpenClaw team session](${sessionUrl})`
+        ? `\n\n---\n[View the Carapace team session](${sessionUrl})`
         : "";
       const body = `${description}${participantCredit}\n\n${pullRequestMarker}${footer}`;
       identity = await refreshIdentity();

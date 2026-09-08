@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createAbortError, racePromiseWithAbortSignal } from "../infra/abort-signal.js";
 import { resolvePublishedModelCatalogOwner } from "./prepared-model-catalog-owner.js";
 import { PreparedModelRuntimeOwnerNotPublishedError } from "./prepared-model-runtime.errors.js";
@@ -105,7 +105,7 @@ export class PreparedReplyDispatchPublicationOwner {
     this.#publication = EMPTY_REPLY_DISPATCH_PUBLICATION;
   }
 
-  advanceConfig(config: OpenClawConfig): void {
+  advanceConfig(config: CarapaceConfig): void {
     this.#publication = Object.freeze({
       runtimes: Object.freeze(
         this.#publication.runtimes.map((runtime) => Object.freeze({ ...runtime, config })),

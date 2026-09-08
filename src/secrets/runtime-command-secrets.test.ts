@@ -7,7 +7,7 @@ import {
   getRuntimeAuthProfileStoreCredentialsRevision,
   getRuntimeAuthProfileStoreSnapshotsRevision,
 } from "../agents/auth-profiles/runtime-snapshots.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCommandSecretsFromActiveRuntimeSnapshot } from "./runtime-command-secrets.js";
 import { createEmptyRuntimeWebToolsMetadata } from "./runtime-fast-path.js";
 import { activateSecretsRuntimeSnapshotState } from "./runtime-state.js";
@@ -39,7 +39,7 @@ const forcedFallbackConfig = {
       },
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 const forcedWebProviderConfig = {
   tools: {
     web: {
@@ -62,13 +62,13 @@ const forcedWebProviderConfig = {
       },
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 discoverConfigSecretTargetsByIds(forcedFallbackConfig, new Set([firecrawlPath]));
 
 function activateMinimalSecretsRuntimeSnapshot(params: {
-  config: OpenClawConfig;
-  resolvedConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  resolvedConfig?: CarapaceConfig;
   env: Record<string, string | undefined>;
 }) {
   const snapshot = {
@@ -95,33 +95,33 @@ function activateMinimalSecretsRuntimeSnapshot(params: {
 const { prepareSecretsRuntimeSnapshot } = setupSecretsRuntimeSnapshotTestHooks();
 
 describe("runtime command secrets", () => {
-  const previousBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  const previousTrustBundledPluginsDir = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+  const previousBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+  const previousTrustBundledPluginsDir = process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
   afterEach(() => {
     clearSecretsRuntimeSnapshot();
     if (previousBundledPluginsDir === undefined) {
-      delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+      delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
     } else {
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
+      process.env.CARAPACE_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
     }
     if (previousTrustBundledPluginsDir === undefined) {
-      delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+      delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
     } else {
-      process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = previousTrustBundledPluginsDir;
+      process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = previousTrustBundledPluginsDir;
     }
   });
 
   it("returns forced fallback assignments from the active gateway snapshot", async () => {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = "extensions";
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = "extensions";
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
     activateMinimalSecretsRuntimeSnapshot({
       config: forcedFallbackConfig,
       env: {
         FIRECRAWL_API_KEY: "gateway-only-firecrawl-key",
         HOME: process.env.HOME,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: "extensions",
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: "extensions",
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       },
     });
 
@@ -142,15 +142,15 @@ describe("runtime command secrets", () => {
   });
 
   it("re-resolves forced command-selected web provider paths with gateway env", async () => {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = "extensions";
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = "extensions";
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
     activateMinimalSecretsRuntimeSnapshot({
       config: forcedWebProviderConfig,
       env: {
         FIRECRAWL_API_KEY: "gateway-selected-firecrawl-key",
         HOME: process.env.HOME,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: "extensions",
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: "extensions",
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       },
     });
 
@@ -209,7 +209,7 @@ describe("runtime command secrets", () => {
   it.skipIf(process.platform === "win32")(
     "serves an exec SecretRef materialized during runtime preparation",
     async () => {
-      const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-command-secret-exec-"));
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-command-secret-exec-"));
       try {
         const resolverPath = path.join(root, "resolver.sh");
         await fs.writeFile(

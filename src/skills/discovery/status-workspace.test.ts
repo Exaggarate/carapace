@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 async function createTempWorkspaceDir() {
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-status-"));
+  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-status-"));
   tempDirs.push(workspaceDir);
   return workspaceDir;
 }
@@ -37,7 +37,7 @@ function makeEntry(params: {
       description: `desc:${params.name}`,
       filePath,
       baseDir,
-      source: params.source ?? "openclaw-workspace",
+      source: params.source ?? "carapace-workspace",
     }),
     frontmatter: {},
     metadata: {
@@ -201,7 +201,7 @@ describe("buildWorkspaceSkillStatus", () => {
   it("marks bundled skills blocked by allowlist", () => {
     const entry = makeEntry({
       name: "peekaboo",
-      source: "openclaw-bundled",
+      source: "carapace-bundled",
     });
 
     const report = buildWorkspaceSkillStatus("/tmp/ws", {
@@ -274,10 +274,10 @@ describe("buildWorkspaceSkillStatus", () => {
     expect(enabledStatus?.missing.config).toStrictEqual([]);
   });
 
-  it.each(["openclaw-workspace", "unknown"])(
+  it.each(["carapace-workspace", "unknown"])(
     "does not mark a %s skill as bundled by bundled name alone",
     async (source) => {
-      const bundledDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bundled-"));
+      const bundledDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bundled-"));
       tempDirs.push(bundledDir);
       await writeSkill({
         dir: path.join(bundledDir, "peekaboo"),
@@ -285,7 +285,7 @@ describe("buildWorkspaceSkillStatus", () => {
         description: "Bundled peekaboo",
       });
 
-      await withEnvAsync({ OPENCLAW_BUNDLED_SKILLS_DIR: bundledDir }, async () => {
+      await withEnvAsync({ CARAPACE_BUNDLED_SKILLS_DIR: bundledDir }, async () => {
         const report = buildWorkspaceSkillStatus("/tmp/ws", {
           entries: [
             makeEntry({

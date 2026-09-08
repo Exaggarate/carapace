@@ -1,12 +1,12 @@
-# OpenClaw Perplexity Plugin
+# Carapace Perplexity Plugin
 
-Official OpenClaw plugin for Perplexity.
+Official Carapace plugin for Perplexity.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/perplexity-plugin
-openclaw gateway restart
+carapace plugins install @carapace/perplexity-plugin
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/perplexity-search> for setup and configuration.
+See <../../docs/tools/perplexity-search.md> for setup and configuration.

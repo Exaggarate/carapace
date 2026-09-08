@@ -24,19 +24,19 @@ describe("native route memory", () => {
       JSON.stringify({ routeId, pathname: `/${routeId}`, search: "" }),
     ),
   ])("drops corrupt or invalid entry %s", (raw) => {
-    storage.setItem("openclaw.native.lastRoute", raw);
+    storage.setItem("carapace.native.lastRoute", raw);
     expect(considerRouteRestore("chat", "/chat", "", storage, true)).toBeNull();
-    expect(storage.getItem("openclaw.native.lastRoute")).toBeNull();
+    expect(storage.getItem("carapace.native.lastRoute")).toBeNull();
   });
 
   it("does nothing outside the native host", () => {
     storage.setItem(
-      "openclaw.native.lastRoute",
+      "carapace.native.lastRoute",
       JSON.stringify({ routeId: "usage", pathname: "/usage", search: "" }),
     );
     persistRoute("chat", "/chat/main", "", storage, false);
     expect(considerRouteRestore("chat", "/chat", "", storage, false)).toBeNull();
-    expect(JSON.parse(storage.getItem("openclaw.native.lastRoute") ?? "{}")).toEqual({
+    expect(JSON.parse(storage.getItem("carapace.native.lastRoute") ?? "{}")).toEqual({
       routeId: "usage",
       pathname: "/usage",
       search: "",

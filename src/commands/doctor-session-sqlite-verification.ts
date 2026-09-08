@@ -1,6 +1,6 @@
 /** Offline destination ownership and conservative adoption of historical import evidence. */
 import fs from "node:fs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { withSqliteSessionImportStage } from "../config/sessions/session-accessor.sqlite-import-stage.js";
 import { getSessionKysely } from "../config/sessions/session-accessor.sqlite-scope.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
@@ -8,8 +8,8 @@ import { executeSqliteQueryTakeFirstSync, iterateSqliteQuerySync } from "../infr
 import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
 import { normalizeLegacySessionEntryDelivery } from "../infra/state-migrations.legacy-session-store.js";
 import { migrateLegacySessionCreator } from "../state/creator-namespace-migration.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import { inspectOpenClawAgentDatabaseOwner } from "../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import { inspectCarapaceAgentDatabaseOwner } from "../state/carapace-agent-db.js";
 import {
   readMigrationArtifactIdentity,
   type MigrationArtifact,
@@ -39,7 +39,7 @@ export function createRecoveryDestinationVerifier(stateDir: string) {
       assertDoctorSqliteMaintenancePathsNotAliased("update recovery cleanup", paths, [stateDir]);
       const expected = destinations.get(target.sqlitePath);
       if (!expected) {
-        const owner = inspectOpenClawAgentDatabaseOwner(target.sqlitePath);
+        const owner = inspectCarapaceAgentDatabaseOwner(target.sqlitePath);
         if (owner.status !== "owned" || owner.agentId !== target.agentId) {
           throw new Error("destination database ownership cannot be verified");
         }
@@ -116,7 +116,7 @@ export function verifyHistoricalMigrationArtifact(params: {
           .map((item) => item.sourcePath)
       : [],
   );
-  const verified = withOpenClawAgentDatabaseReadOnly(
+  const verified = withCarapaceAgentDatabaseReadOnly(
     (database) => {
       const db = getSessionKysely(database.db);
       for (const [key, raw] of entries) {

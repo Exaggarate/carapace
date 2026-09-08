@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
 import { ExpectedCliError } from "../../cli/failure-output.js";
-import type { OpenClawConfig, replaceConfigFile } from "../../config/config.js";
+import type { CarapaceConfig, replaceConfigFile } from "../../config/config.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import { createTestConfigSnapshot } from "../test-runtime-config-helpers.js";
 import { channelsCapabilitiesCommand } from "./capabilities.js";
@@ -154,11 +154,11 @@ describe("channelsCapabilitiesCommand", () => {
         userToken: "xoxp-user",
         config: { userToken: "xoxp-user" },
       },
-      probe: { ok: true, bot: { name: "openclaw" }, team: { name: "team" } },
+      probe: { ok: true, bot: { name: "carapace" }, team: { name: "team" } },
     });
     plugin.status = {
       ...plugin.status,
-      formatCapabilitiesProbe: () => [{ text: "Bot: @openclaw" }, { text: "Team: team" }],
+      formatCapabilitiesProbe: () => [{ text: "Bot: @carapace" }, { text: "Team: team" }],
       buildCapabilitiesDiagnostics: async () => ({
         lines: [
           { text: "Bot scopes (auth.scopes): chat:write" },
@@ -184,7 +184,7 @@ describe("channelsCapabilitiesCommand", () => {
         "slack:default",
         "Support: chatTypes=direct",
         "Actions: send, broadcast, poll",
-        "Bot: @openclaw",
+        "Bot: @carapace",
         "Team: team",
         "Bot scopes (auth.scopes): chat:write",
         "User scopes (auth.scopes): users:read",
@@ -203,38 +203,38 @@ describe("channelsCapabilitiesCommand", () => {
     {
       name: "account without a channel",
       options: { account: "ghost", json: true },
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
       discoversChannels: false,
     },
     {
       name: "account with all channels",
       options: { channel: "all", account: "ghost" },
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
       discoversChannels: false,
     },
     {
       name: "target without a channel",
       options: { target: "channel:1", json: true },
-      message: "--target requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--target requires a specific --channel. Run carapace channels list to choose one.",
       discoversChannels: false,
     },
     {
       name: "target with all channels",
       options: { channel: "all", target: "channel:1" },
-      message: "--target requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--target requires a specific --channel. Run carapace channels list to choose one.",
       discoversChannels: false,
     },
     {
       name: "account before target when both lack a channel",
       options: { account: "ghost", target: "channel:1" },
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
       discoversChannels: false,
     },
     {
       name: "unknown channel after installable plugin lookup",
       options: { channel: "definitely-not-a-channel", json: true },
       message:
-        'Unknown channel "definitely-not-a-channel". Run `openclaw channels list --all` to see configured and installable channels.',
+        'Unknown channel "definitely-not-a-channel". Run `carapace channels list --all` to see configured and installable channels.',
       discoversChannels: true,
     },
   ])("rejects $name before resolving or probing an account", async (testCase) => {
@@ -474,7 +474,7 @@ describe("channelsCapabilitiesCommand", () => {
       id: "CAPABILITIES_TEST_SLACK_TOKEN",
     } as const;
     const sourceConfig = { channels: { slack: { botToken: tokenRef } } };
-    let runtimeConfig: OpenClawConfig = {
+    let runtimeConfig: CarapaceConfig = {
       ...sourceConfig,
       messages: { responsePrefix: "runtime-default" },
     };

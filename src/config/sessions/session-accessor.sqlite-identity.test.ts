@@ -6,18 +6,18 @@ import {
   type SessionIdentityMutation,
 } from "../../sessions/session-lifecycle-events.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { readExactSessionEntryRowValidated } from "./session-accessor.sqlite-entry-store.js";
 import { replaceSessionEntrySync } from "./session-accessor.sqlite-entry.js";
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     cleanup();
   }),
@@ -25,11 +25,11 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
 
 it.each([false, true])("publishes identity only on outer commit (rollback: %s)", (rollback) => {
   const directory = tempDirs.make("session-identity-publication-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", directory);
+  vi.stubEnv("CARAPACE_STATE_DIR", directory);
   const sessionKey = "agent:main:main";
   const scope = { agentId: "main", sessionKey, storePath: path.join(directory, "agent.sqlite") };
   replaceSessionEntrySync(scope, { sessionId: "original", updatedAt: 1 });
-  const database = openOpenClawAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
+  const database = openCarapaceAgentDatabase({ agentId: scope.agentId, path: scope.storePath });
   const observed: Array<{
     mutation: SessionIdentityMutation;
     inTransaction: boolean;
@@ -44,7 +44,7 @@ it.each([false, true])("publishes identity only on outer commit (rollback: %s)",
   });
   try {
     const replace = () =>
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         () => {
           replaceSessionEntrySync(scope, { sessionId: "replacement", updatedAt: 2 });
           expect(observed).toEqual([]);

@@ -5,7 +5,7 @@ import {
   isExactSemverVersion,
   parseRegistryNpmSpec,
   type ParsedRegistryNpmSpec,
-  resolveOpenClawReleaseCohortVersion,
+  resolveCarapaceReleaseCohortVersion,
 } from "../infra/npm-registry-spec.js";
 import { selectNpmChannelVersion, type UpdateChannel } from "../infra/update-channels.js";
 import { CLAWHUB_INSTALL_ERROR_CODE, isUnavailableClawHubTarget } from "./clawhub-error-codes.js";
@@ -130,7 +130,7 @@ function resolveCoreBoundNpmSpec(params: ChannelInstallParams): string | undefin
         );
       }
       const installVersion = params.versionBoundToCore
-        ? resolveOpenClawReleaseCohortVersion(coreVersion)
+        ? resolveCarapaceReleaseCohortVersion(coreVersion)
         : coreVersion;
       return `${target.name}@${installVersion}`;
     }

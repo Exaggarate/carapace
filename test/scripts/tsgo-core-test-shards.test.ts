@@ -90,7 +90,7 @@ describe("tsgo core test shards", () => {
   });
 
   it("keeps plugin browser source and tests in the extension type graphs", () => {
-    const root = lifetime.createTempDir("openclaw-browser-type-graphs-");
+    const root = lifetime.createTempDir("carapace-browser-type-graphs-");
     const coreConfigs = [
       "tsconfig.ui.json",
       "test/tsconfig/tsconfig.core.test.json",
@@ -236,7 +236,7 @@ it.runIf(process.platform !== "win32")(
   ({ signal }) =>
     lifetime.run(async () => {
       const sourceRoot = process.cwd();
-      const root = fs.realpathSync(lifetime.createTempDir("openclaw-changed-types-"));
+      const root = fs.realpathSync(lifetime.createTempDir("carapace-changed-types-"));
       const native = materializeNativeCompiler(root);
       const write = (name: string, content: string) => {
         const file = path.join(root, name);
@@ -312,7 +312,7 @@ process.exit(result.status??1);
               driver,
               ...changedArgs(paths),
             ],
-            { ...process.env, OPENCLAW_LOCAL_CHECK: "0" },
+            { ...process.env, CARAPACE_LOCAL_CHECK: "0" },
             undefined,
             { cwd: root, signal, requireProcessTreeExit: true },
           ),
@@ -378,7 +378,7 @@ setInterval(()=>{},1000);
             driver,
             ...changedArgs([leaf]),
           ],
-          { ...process.env, OPENCLAW_LOCAL_CHECK: "0" },
+          { ...process.env, CARAPACE_LOCAL_CHECK: "0" },
           undefined,
           {
             cwd: root,

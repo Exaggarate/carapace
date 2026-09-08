@@ -3,10 +3,10 @@ import { performance } from "node:perf_hooks";
 import { afterEach, expect, test } from "vitest";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { rpcReq, writeSessionStore } from "./test-helpers.js";
 import {
   sessionStoreEntry,
@@ -24,12 +24,12 @@ const ROWS = 200_000;
 const { createSessionStoreDir, openClient } = setupGatewaySessionsTestHarness();
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function countRows(
-  database: ReturnType<typeof openOpenClawAgentDatabase>,
+  database: ReturnType<typeof openCarapaceAgentDatabase>,
   table: string,
   sessionId: string,
 ): number {
@@ -44,7 +44,7 @@ function seedTranscriptState(storePath: string): void {
   if (!target.path) {
     throw new Error("expected SQLite database path");
   }
-  const database = openOpenClawAgentDatabase({ agentId: "main", path: target.path });
+  const database = openCarapaceAgentDatabase({ agentId: "main", path: target.path });
   const now = Date.now();
   const eventJson = JSON.stringify({
     type: "message",
@@ -202,7 +202,7 @@ test("sessions.delete keeps the Gateway responsive while reclaiming a large sess
   if (!target.path) {
     throw new Error("expected SQLite database path after deletion");
   }
-  const database = openOpenClawAgentDatabase({ agentId: "main", path: target.path });
+  const database = openCarapaceAgentDatabase({ agentId: "main", path: target.path });
   const targetCounts = {
     active: countRows(database, "session_transcript_active_events", SESSION_ID),
     fts: countRows(database, "session_transcript_fts", SESSION_ID),
@@ -255,7 +255,7 @@ test("sessions.delete keeps the Gateway responsive while reclaiming a large sess
     session_id: string;
   }>;
 
-  if (process.env.OPENCLAW_TEST_RECLAMATION_LOG === "1") {
+  if (process.env.CARAPACE_TEST_RECLAMATION_LOG === "1") {
     process.stdout.write(
       `${JSON.stringify({
         deleteMs,

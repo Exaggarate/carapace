@@ -3,9 +3,9 @@ import {
   installChannelActionsContractSuite,
   installChannelSetupContractSuite,
   installChannelStatusContractSuite,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { moveSingleAccountChannelSectionToDefaultAccount } from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { moveSingleAccountChannelSectionToDefaultAccount } from "carapace/plugin-sdk/setup";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { slackPlugin } from "../api.js";
 import { SlackConfigSchema } from "../config-api.js";
@@ -47,7 +47,7 @@ describe("slack actions contract", () => {
               appToken: "xapp-test",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         expectedActions: slackDefaultActions,
         expectedCapabilities: ["presentation"],
       },
@@ -59,7 +59,7 @@ describe("slack actions contract", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         expectedActions: [],
         expectedCapabilities: [],
       },
@@ -78,7 +78,7 @@ describe("slack setup contract", () => {
           signingSecret: "shared-signing-secret",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const next = moveSingleAccountChannelSectionToDefaultAccount({
       cfg,
@@ -137,7 +137,7 @@ describe("slack setup contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const next = moveSingleAccountChannelSectionToDefaultAccount({
       cfg,
@@ -166,7 +166,7 @@ describe("slack setup contract", () => {
           signingSecret: "test-signing-secret",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const account = slackSetupPlugin.config.resolveAccount(cfg, "default");
 
     expect(slackSetupPlugin.config.isConfigured?.(account, cfg)).toBe(true);
@@ -180,7 +180,7 @@ describe("slack setup contract", () => {
     cases: [
       {
         name: "default account stores tokens and enables the channel",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           botToken: "xoxb-test",
           appToken: "xapp-test",
@@ -194,7 +194,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "non-default env setup is rejected",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         accountId: "ops",
         input: {
           useEnv: true,
@@ -211,7 +211,7 @@ describe("slack setup contract", () => {
               signingSecret: "test-signing-secret",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         input: {
           useEnv: true,
         },
@@ -233,7 +233,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "Socket Mode env setup rejects a missing app token",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           useEnv: true,
         },
@@ -245,7 +245,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "Socket Mode env setup accepts bot and app tokens",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           useEnv: true,
         },
@@ -259,7 +259,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "user identity stores the user and Socket Mode transport tokens",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           identity: "user",
           userToken: "test-user-token",
@@ -278,7 +278,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "HTTP user identity stores the user token and signing secret",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           identity: "user",
           mode: "http",
@@ -308,7 +308,7 @@ describe("slack setup contract", () => {
               appToken: "test-old-app-token",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         input: {
           mode: "http",
           userToken: "test-user-token",
@@ -333,7 +333,7 @@ describe("slack setup contract", () => {
               mode: "relay",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         input: {
           identity: "user",
           userToken: "test-user-token",
@@ -345,7 +345,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "user identity rejects the bot-only env shortcut",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           identity: "user",
           useEnv: true,
@@ -356,7 +356,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "HTTP bot identity stores the bot token and signing secret",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           identity: "bot",
           mode: "http",
@@ -377,7 +377,7 @@ describe("slack setup contract", () => {
       },
       {
         name: "HTTP bot identity rejects an app token without a signing secret",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         input: {
           identity: "bot",
           mode: "http",
@@ -405,7 +405,7 @@ describe("slack status contract", () => {
               appToken: "xapp-test",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         runtime: {
           accountId: "default",
           connected: true,

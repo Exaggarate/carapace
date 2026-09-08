@@ -1,5 +1,5 @@
 // Telegram tests cover network errors plugin behavior.
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
 import { describe, expect, it } from "vitest";
 import {
   isRecoverableTelegramNetworkError,

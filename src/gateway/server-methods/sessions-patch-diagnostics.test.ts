@@ -1,5 +1,5 @@
 import { performance } from "node:perf_hooks";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import {
   areDiagnosticsEnabledForProcess,

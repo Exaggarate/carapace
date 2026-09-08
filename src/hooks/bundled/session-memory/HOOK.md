@@ -1,15 +1,15 @@
 ---
 name: session-memory
 description: "Save session context to memory on manual or automatic reset"
-homepage: https://docs.openclaw.ai/automation/hooks#session-memory
+homepage: ../../../../docs/automation/hooks.md#session-memory
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "emoji": "💾",
         "events": ["command:new", "command:reset", "session:auto-reset"],
         "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with OpenClaw" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Carapace" }],
       },
   }
 ---
@@ -58,7 +58,7 @@ With `llmSlug: true`, the configured model can generate descriptive slugs based 
 - A resolved agent workspace. Configure it with `agents.defaults.workspace` or
   `agents.entries.<id>.workspace` when the default is unsuitable. The descriptor's
   `workspace.dir` requirement is an internal eligibility marker, not an
-  `openclaw.json` key to add.
+  `carapace.json` key to add.
 
 When `llmSlug` is enabled, the hook uses your configured LLM provider to generate slugs, so it works with any provider (Anthropic, OpenAI, etc.).
 
@@ -93,7 +93,7 @@ Example configuration:
 
 The hook automatically:
 
-- Uses your workspace directory (`~/.openclaw/workspace` by default)
+- Uses your workspace directory (`~/.carapace/workspace` by default)
 - Uses timestamp slugs by default so reset handling stays fast
 - Uses `agents.defaults.userTimezone` for artifact dates and timestamps, with the host timezone as fallback
 - Runs memory capture in the background so replacement sessions are not delayed
@@ -106,7 +106,7 @@ The hook automatically:
 To disable this hook:
 
 ```bash
-openclaw hooks disable session-memory
+carapace hooks disable session-memory
 ```
 
 Or explicitly disable its config entry, then restart the Gateway:

@@ -3,12 +3,12 @@ import type { DatabaseSync } from "node:sqlite";
 import {
   parseEmbedding,
   type MemoryChunk,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   compileSqliteQueryBindings,
   getNodeSqliteKysely,
   iterateSqliteQuerySync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 import type { MemoryIndexProviderIdentity } from "./manager-reindex-state.js";
 
 export type MemoryEmbeddingCacheRow = {

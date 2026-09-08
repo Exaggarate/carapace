@@ -5,11 +5,11 @@ import { writeSkill } from "../../skills/test-support/e2e-test-helpers.js";
 import { readProposalFrontmatter } from "../../skills/workshop/frontmatter.js";
 import { inspectSkillProposal } from "../../skills/workshop/service.js";
 import { resolveWorkshopSkillsDir } from "../../skills/workshop/skills-root.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createSkillWorkshopTool } from "./skill-workshop-tool.js";
 
 it("resolves a Workshop skill by display name or canonical key", async () => {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "workshop-selector-key", scenario: "minimal" },
     async (state) => {
       const workshopDir = resolveWorkshopSkillsDir({}, "main", state.env);
@@ -18,14 +18,14 @@ it("resolves a Workshop skill by display name or canonical key", async () => {
           dir: path.join(workshopDir, "alpha-guide"),
           name: "Alpha Guide",
           description: "A named procedure",
-          metadata: '{"openclaw":{"skillKey":"alpha-guide"}}',
+          metadata: '{"carapace":{"skillKey":"alpha-guide"}}',
           body: "# Alpha Guide\n\nFollow the procedure.\n",
         }),
         writeSkill({
           dir: path.join(workshopDir, "alpha-guide-alias"),
           name: "Alpha_Guide",
           description: "A different procedure",
-          metadata: '{"openclaw":{"skillKey":"other-guide"}}',
+          metadata: '{"carapace":{"skillKey":"other-guide"}}',
           body: "# Alpha Guide Alias\n\nDo something else.\n",
         }),
       ]);
@@ -65,7 +65,7 @@ it.each([
 ] as const)(
   "keeps the $action target when following $preparation guidance",
   async ({ action, preparation }) => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "workshop-guided-target", scenario: "minimal" },
       async (state) => {
         const oldString = "Check the starting conditions.";
@@ -76,14 +76,14 @@ it.each([
             dir: path.join(workshopDir, "alpha-guide"),
             name: "alpha-guide",
             description: "Intended procedure",
-            metadata: '{"openclaw":{"skillKey":"beta-guide"}}',
+            metadata: '{"carapace":{"skillKey":"beta-guide"}}',
             body: `# Alpha\n\n${oldString}\n`,
           }),
           writeSkill({
             dir: path.join(workshopDir, "beta-guide"),
             name: "beta-guide",
             description: "Other procedure",
-            metadata: '{"openclaw":{"skillKey":"beta-key"}}',
+            metadata: '{"carapace":{"skillKey":"beta-key"}}',
             body: `# Beta\n\n${oldString}\n`,
           }),
         ]);
@@ -180,7 +180,7 @@ it.each([
 );
 
 it("keeps an existing skill name through proposal revision and apply", async () => {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { label: "workshop-proposal-name", scenario: "minimal" },
     async (state) => {
       const tool = createSkillWorkshopTool({
@@ -195,7 +195,7 @@ it("keeps an existing skill name through proposal revision and apply", async () 
         name: "alpha-guide",
         description: "Intended procedure",
         proposal_content:
-          '---\nmetadata: {"openclaw":{"skillKey":"beta-guide"}}\n---\n\n# Alpha\n\nCheck the starting conditions.\n',
+          '---\nmetadata: {"carapace":{"skillKey":"beta-guide"}}\n---\n\n# Alpha\n\nCheck the starting conditions.\n',
       });
       await tool.execute("seed-apply", {
         action: "apply",

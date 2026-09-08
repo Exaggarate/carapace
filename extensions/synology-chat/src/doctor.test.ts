@@ -1,12 +1,12 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { synologyChatDoctor } from "./doctor.js";
 
-async function collectWarnings(cfg: OpenClawConfig): Promise<string[]> {
+async function collectWarnings(cfg: CarapaceConfig): Promise<string[]> {
   return (
     (await synologyChatDoctor.collectPreviewWarnings?.({
       cfg,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "carapace doctor --fix",
     })) ?? []
   );
 }

@@ -1,5 +1,5 @@
 // Tracks queue state for active, pending, and recently deduped reply runs.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { QueueMode } from "../../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import { resolveAgentConfig } from "../../../agents/agent-scope-config.js";
 import type { ModelCatalogEntry } from "../../../agents/model-catalog.types.js";
@@ -56,7 +56,7 @@ export const DEFAULT_QUEUE_DROP: QueueDropPolicy = "summarize";
  * Share followup queues across bundled chunks so busy-session enqueue/drain
  * logic observes one queue registry per process.
  */
-const FOLLOWUP_QUEUES_KEY = Symbol.for("openclaw.followupQueues");
+const FOLLOWUP_QUEUES_KEY = Symbol.for("carapace.followupQueues");
 
 export const FOLLOWUP_QUEUES = resolveGlobalMap<string, FollowupQueueState>(FOLLOWUP_QUEUES_KEY);
 

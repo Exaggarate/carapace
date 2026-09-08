@@ -18,18 +18,18 @@ describe("state-dir guard with a real token Gateway", () => {
   let hello: GatewayHello | undefined;
 
   const setCliStateDir = (stateDir: string) => {
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
   };
 
   beforeAll(async () => {
-    root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-state-dir-server-"));
+    root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-state-dir-server-"));
     gatewayStateDir = path.join(root, "gateway");
     cliStateDir = path.join(root, "cli");
     await fs.mkdir(gatewayStateDir, { recursive: true });
     await fs.mkdir(cliStateDir, { recursive: true });
     port = await getFreePort();
-    const gatewayConfigPath = path.join(gatewayStateDir, "openclaw.json");
+    const gatewayConfigPath = path.join(gatewayStateDir, "carapace.json");
     await fs.writeFile(
       gatewayConfigPath,
       `${JSON.stringify({ gateway: { mode: "local", port, auth: { mode: "token", token } } })}\n`,
@@ -43,17 +43,17 @@ describe("state-dir guard with a real token Gateway", () => {
         env: {
           ...process.env,
           HOME: path.join(root, "gateway-home"),
-          OPENCLAW_STATE_DIR: gatewayStateDir,
-          OPENCLAW_CONFIG_PATH: gatewayConfigPath,
-          OPENCLAW_GATEWAY_PORT: String(port),
-          OPENCLAW_TEST_GATEWAY_TOKEN: token,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
+          CARAPACE_STATE_DIR: gatewayStateDir,
+          CARAPACE_CONFIG_PATH: gatewayConfigPath,
+          CARAPACE_GATEWAY_PORT: String(port),
+          CARAPACE_TEST_GATEWAY_TOKEN: token,
+          CARAPACE_TEST_MINIMAL_GATEWAY: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
         },
         execArgv: ["--import", path.resolve("scripts/tsx.mjs")],
         stdio: ["ignore", "ignore", "pipe", "ipc"],
@@ -76,8 +76,8 @@ describe("state-dir guard with a real token Gateway", () => {
   beforeEach(() => {
     vi.stubEnv("HOME", path.join(root, "cli-home"));
     setCliStateDir(cliStateDir);
-    vi.stubEnv("OPENCLAW_GATEWAY_PORT", String(port));
-    vi.stubEnv("OPENCLAW_SYSTEMD_UNIT", `openclaw-state-dir-server-${process.pid}`);
+    vi.stubEnv("CARAPACE_GATEWAY_PORT", String(port));
+    vi.stubEnv("CARAPACE_SYSTEMD_UNIT", `carapace-state-dir-server-${process.pid}`);
     hello = undefined;
     const callGateway = gatewayCall.callGateway;
     vi.spyOn(gatewayCall, "callGateway").mockImplementation((options) =>
@@ -111,14 +111,14 @@ describe("state-dir guard with a real token Gateway", () => {
     setCliStateDir(gatewayStateDir);
     await expect(
       checkCliGatewayStateDir({
-        command: "openclaw channels add",
+        command: "carapace channels add",
         config: { gateway: { mode: "local", port, auth: { mode: "token", token } } },
       }),
     ).resolves.toEqual({ kind: "allow" });
     expect(hello).toMatchObject({
       snapshot: {
         stateDir: gatewayStateDir,
-        configPath: path.join(gatewayStateDir, "openclaw.json"),
+        configPath: path.join(gatewayStateDir, "carapace.json"),
       },
       auth: { scopes: expect.arrayContaining(["operator.admin"]) },
     });
@@ -126,7 +126,7 @@ describe("state-dir guard with a real token Gateway", () => {
 
   it("refuses mismatched authenticated hello paths", async () => {
     const outcome = await checkCliGatewayStateDir({
-      command: "openclaw channels add",
+      command: "carapace channels add",
       config: { gateway: { mode: "local", port, auth: { mode: "token", token } } },
     });
 
@@ -141,7 +141,7 @@ describe("state-dir guard with a real token Gateway", () => {
   it("warns when a tokenless CLI can prove only the Gateway protocol", async () => {
     await expect(
       checkCliGatewayStateDir({
-        command: "openclaw channels add",
+        command: "carapace channels add",
         config: { gateway: { mode: "local", port, auth: { mode: "token" } } },
       }),
     ).resolves.toMatchObject({ kind: "warn" });

@@ -1,6 +1,6 @@
 // Whatsapp plugin module normalizes inbound identity and access facts.
 import type { AnyMessageContent, WAMessage } from "baileys";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   checkInboundAccessControl,
   type AcceptedInboundAccessControlResult,
@@ -25,8 +25,8 @@ export type WhatsAppNormalizedInboundMessage = {
 };
 
 export function createWhatsAppInboundMessageNormalizer(options: {
-  cfg: OpenClawConfig;
-  loadConfig?: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  loadConfig?: () => CarapaceConfig;
   accountId: string;
   verbose: boolean;
   socketSession: WhatsAppAttachedSocketSession;

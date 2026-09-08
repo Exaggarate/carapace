@@ -12,13 +12,13 @@ import { getOrCreateSessionMcpRuntime } from "../../../src/agents/agent-bundle-m
 import { materializeBundleMcpToolsForRun } from "../../../src/agents/agent-bundle-mcp-materialize.js";
 import { getMcpAppViewLease } from "../../../src/agents/mcp-ui-resource.js";
 import { readConfigFileSnapshotWithPluginMetadata } from "../../../src/config/config.js";
-import type { OpenClawConfig } from "../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../src/config/types.carapace.js";
 import { startGatewayServer } from "../../../src/gateway/server.js";
 import { getGatewayE2ePortBlock } from "../../../src/gateway/test-helpers.e2e.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../src/test-utils/openclaw-test-state.ts";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../src/test-utils/carapace-test-state.ts";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
 import { startControlUiE2eServer } from "../test-helpers/control-ui-e2e.ts";
 import {
@@ -47,10 +47,10 @@ const require = createRequire(import.meta.url);
 const { executablePath: chromiumExecutablePath } = inject("controlUiE2eChromium");
 const authValue = "test";
 const sessionKey = "agent:main:mcp-app-conformance";
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 
-let state: OpenClawTestState | undefined;
+let state: CarapaceTestState | undefined;
 let gatewayStartup: ReturnType<typeof startGatewayServer> | undefined;
 let runtimeStartup: ReturnType<typeof getOrCreateSessionMcpRuntime> | undefined;
 let gatewayPort: number;
@@ -96,16 +96,16 @@ const suite = createControlUiE2eSuite({
       // Both tests share retained reports even when screenshots and video are disabled.
       proofDir = createControlUiE2eArtifactDir("mcp-app-request-lifetime");
       signal.throwIfAborted();
-      state = await createOpenClawTestState({
-        prefix: "openclaw-mcp-app-conformance-",
+      state = await createCarapaceTestState({
+        prefix: "carapace-mcp-app-conformance-",
         applyEnv: false,
         env: {
-          OPENCLAW_GATEWAY_TOKEN: authValue,
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+          CARAPACE_GATEWAY_TOKEN: authValue,
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
         },
       });
       signal.throwIfAborted();
@@ -119,7 +119,7 @@ const suite = createControlUiE2eSuite({
       const bundledPluginsDir = state.path("empty-plugins");
       await fs.mkdir(bundledPluginsDir, { recursive: true });
       // The state owner already captured this key; its value needs the allocated root.
-      state.envVars.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+      state.envVars.CARAPACE_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
       const appEntryPath = require.resolve("@modelcontextprotocol/ext-apps/app-with-deps");
       const appModuleSource = await fs.readFile(appEntryPath, "utf8");
       const appAssetPort = await getGatewayE2ePortBlock();
@@ -167,7 +167,7 @@ const suite = createControlUiE2eSuite({
         signal.throwIfAborted();
         sandboxPort = await getGatewayE2ePortBlock();
       } while (sandboxPort === gatewayPort);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           auth: { mode: "token", token: authValue },
           controlUi: { allowedOrigins: [controlUiOrigin] },
@@ -783,7 +783,7 @@ suite.define(() => {
                 expect(response?.status()).toBe(200);
                 expect(timeOrigin).not.toBe(previousTimeOrigin);
                 app = await findAppFrame(standalonePage);
-                for (const pathname of ["/__openclaw__/mcp-app", "/__openclaw__/mcp-app/view"]) {
+                for (const pathname of ["/__carapace__/mcp-app", "/__carapace__/mcp-app/view"]) {
                   expect(
                     diagnostics
                       .slice(reopenNetworkStart)
@@ -918,8 +918,8 @@ suite.define(() => {
                 historyEvents.filter((event) => event.event === "response-written"),
               ).toMatchObject([{ id: historyCallId, isError: false }]);
               for (const pathname of [
-                "/__openclaw__/mcp-app",
-                "/__openclaw__/mcp-app/view",
+                "/__carapace__/mcp-app",
+                "/__carapace__/mcp-app/view",
                 "/mcp-app-sandbox",
               ]) {
                 expect(responses.filter((response) => response.pathname === pathname)).toEqual(

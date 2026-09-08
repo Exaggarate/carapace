@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { waitForDead } from "../../test/helpers/process-wait.js";
 import { runNodeScript } from "../../test/helpers/run-node-script.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writePersistedInstalledPluginIndexInstallRecords } from "../plugins/installed-plugin-index-records.js";
 
 const execFileAsync = promisify(execFile);
@@ -16,7 +16,7 @@ async function writeHarnessPlugin(stateDir: string): Promise<void> {
   const pluginDir = path.join(stateDir, "extensions", "exec-proof");
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "exec-proof",
       name: "Agent exec proof harness",
@@ -31,7 +31,7 @@ async function writeHarnessPlugin(stateDir: string): Promise<void> {
       name: "exec-proof",
       version: "1.0.0",
       type: "module",
-      openclaw: { extensions: ["./index.js"] },
+      carapace: { extensions: ["./index.js"] },
     }),
     "utf8",
   );
@@ -110,7 +110,7 @@ async function writeHarnessPlugin(stateDir: string): Promise<void> {
   );
 }
 
-function buildExecProofConfig(): OpenClawConfig {
+function buildExecProofConfig(): CarapaceConfig {
   return {
     plugins: {
       allow: ["exec-proof"],
@@ -142,19 +142,19 @@ function buildExecProofConfig(): OpenClawConfig {
 
 async function writeConfig(
   stateDir: string,
-  config: OpenClawConfig = buildExecProofConfig(),
+  config: CarapaceConfig = buildExecProofConfig(),
 ): Promise<void> {
-  await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify(config), "utf8");
+  await fs.writeFile(path.join(stateDir, "carapace.json"), JSON.stringify(config), "utf8");
 }
 
 function buildChildEnv(stateDir: string): NodeJS.ProcessEnv {
   const childEnv: NodeJS.ProcessEnv = {
     ...process.env,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
   };
   delete childEnv.NODE_ENV;
-  delete childEnv.OPENCLAW_RUN_NODE_OUTPUT_LOG;
+  delete childEnv.CARAPACE_RUN_NODE_OUTPUT_LOG;
   delete childEnv.VITEST;
   delete childEnv.VITEST_POOL_ID;
   delete childEnv.VITEST_WORKER_ID;
@@ -164,7 +164,7 @@ function buildChildEnv(stateDir: string): NodeJS.ProcessEnv {
 function buildCliSource(args: string[]): string {
   return `
     import { runMainOrRootHelp } from "./dist/entry.js";
-    await runMainOrRootHelp(${JSON.stringify(["node", "openclaw", ...args])});
+    await runMainOrRootHelp(${JSON.stringify(["node", "carapace", ...args])});
   `;
 }
 
@@ -172,7 +172,7 @@ describe("agent exec built runtime", () => {
   it.skipIf(process.platform === "win32")(
     "reclaims authentication-probe descendants when the CLI run times out",
     async () => {
-      const root = tempDirs.make("openclaw-agent-exec-auth-timeout-");
+      const root = tempDirs.make("carapace-agent-exec-auth-timeout-");
       const binDir = path.join(root, "bin");
       const processPath = path.join(root, "processes.jsonl");
       const stopPath = path.join(root, "stop");
@@ -226,12 +226,12 @@ if (process.argv[2] === "--version") {
       try {
         const result = await runNodeScript(
           [
-            path.join(repoRoot, "openclaw.mjs"),
+            path.join(repoRoot, "carapace.mjs"),
             "agent",
             "exec",
             "probe",
             "--config",
-            path.join(root, "openclaw.json"),
+            path.join(root, "carapace.json"),
             "--cwd",
             root,
             "--timeout",
@@ -242,10 +242,10 @@ if (process.argv[2] === "--version") {
             PATH: `${binDir}${path.delimiter}${process.env.PATH ?? ""}`,
             HOME: root,
             USERPROFILE: root,
-            OPENCLAW_STATE_DIR: root,
+            CARAPACE_STATE_DIR: root,
             CLAUDE_CONFIG_DIR: path.join(root, ".claude"),
             ANTHROPIC_API_KEY: "synthetic-proof-key",
-            OPENCLAW_SERVICE_MARKER: "openclaw",
+            CARAPACE_SERVICE_MARKER: "carapace",
           },
           30_000,
           { cwd: root },
@@ -269,7 +269,7 @@ if (process.argv[2] === "--version") {
   );
 
   it("runs an operator-installed harness without retaining run state", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-plugin-e2e-");
+    const stateDir = tempDirs.make("carapace-agent-exec-plugin-e2e-");
     await writeHarnessPlugin(stateDir);
     await writeConfig(stateDir);
     const source = buildCliSource(["agent", "exec", "prove plugin discovery", "--json"]);
@@ -326,15 +326,15 @@ if (process.argv[2] === "--version") {
     }
     expect(isolatedExitCode).toBe(1);
     expect(isolatedStdout).not.toContain("PLUGIN_HARNESS_OK");
-    await expect(fs.readdir(stateDir)).resolves.toEqual(["extensions", "openclaw.json", "state"]);
+    await expect(fs.readdir(stateDir)).resolves.toEqual(["extensions", "carapace.json", "state"]);
     const registryFiles = await fs.readdir(path.join(stateDir, "state"));
-    expect(registryFiles).toContain("openclaw.sqlite");
-    expect(registryFiles.every((file) => file.startsWith("openclaw.sqlite"))).toBe(true);
+    expect(registryFiles).toContain("carapace.sqlite");
+    expect(registryFiles.every((file) => file.startsWith("carapace.sqlite"))).toBe(true);
     await expect(fs.stat(path.join(stateDir, "agents"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("exits naturally after a one-shot ingress turn with workspace skills", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-ingress-one-shot-");
+    const stateDir = tempDirs.make("carapace-agent-ingress-one-shot-");
     const workspace = path.join(stateDir, "workspace");
     const skillDir = path.join(workspace, "skills", "exit-proof");
     const outputPath = path.join(stateDir, "ingress-result.json");
@@ -352,7 +352,7 @@ if (process.argv[2] === "--version") {
     await writeConfig(stateDir, config);
     const source = `
       import fs from "node:fs";
-      import { agentCommandFromIngress } from "openclaw/plugin-sdk/agent-runtime";
+      import { agentCommandFromIngress } from "carapace/plugin-sdk/agent-runtime";
       const result = await agentCommandFromIngress({
         agentId: "main",
         sessionId: "ingress-one-shot-session",

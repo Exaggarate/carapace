@@ -1,10 +1,10 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   iterateSqliteQuerySync,
   sqliteStringSet,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import {
   parseSessionEntryJson,
@@ -40,7 +40,7 @@ export function collectSessionStateIdsForEntry(entry: SessionEntry): string[] {
 
 /** Retained logical owners protect generations absent from their entry references. */
 export function addRetainedWindowSessionReferences(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionIds: Set<string>,
   excludedSessionKeys: ReadonlySet<string>,
   candidateSessionIds?: readonly string[],
@@ -92,7 +92,7 @@ export function addRetainedWindowSessionReferences(
 }
 
 export function isRecentHistoricalSessionId(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   preserveRecentMs?: number | null;
   sessionId: string;
 }): boolean {

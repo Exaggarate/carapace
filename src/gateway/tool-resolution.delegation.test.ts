@@ -6,7 +6,7 @@
  * does on the embedded attempt path.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const hoisted = vi.hoisted(() => {
   function makeTool(name: string, execute = vi.fn(async () => ({ content: [], details: {} }))) {
@@ -21,7 +21,7 @@ const hoisted = vi.hoisted(() => {
   return {
     makeTool,
     cronExecute,
-    createOpenClawToolsMock: vi.fn(
+    createCarapaceToolsMock: vi.fn(
       (_options?: {
         inheritedToolAllowlist?: string[];
         cronCreatorToolAllowlist?: Array<{ name: string }>;
@@ -37,13 +37,13 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
-vi.mock("../agents/openclaw-tools.js", () => ({
-  createOpenClawTools: (options: Parameters<typeof hoisted.createOpenClawToolsMock>[0]) =>
-    hoisted.createOpenClawToolsMock(options),
+vi.mock("../agents/carapace-tools.js", () => ({
+  createCarapaceTools: (options: Parameters<typeof hoisted.createCarapaceToolsMock>[0]) =>
+    hoisted.createCarapaceToolsMock(options),
 }));
 
 vi.mock("../agents/agent-tools.js", () => ({
-  createOpenClawCodingTools: () => [],
+  createCarapaceCodingTools: () => [],
 }));
 
 vi.mock("../agents/lazy-exec-tool.js", () => ({
@@ -55,7 +55,7 @@ import { resolveGatewayScopedTools } from "./tool-resolution.js";
 
 function resolveLoopbackTools(delegationCapability?: "full" | "report_only") {
   return resolveGatewayScopedTools({
-    cfg: {} as OpenClawConfig,
+    cfg: {} as CarapaceConfig,
     sessionKey: "agent:main:direct:test",
     surface: "loopback",
     senderIsOwner: true,
@@ -81,20 +81,20 @@ describe("resolveGatewayScopedTools delegationCapability", () => {
   });
 
   it("captures report-only derived authority from the gated loopback surface", () => {
-    hoisted.createOpenClawToolsMock.mockClear();
+    hoisted.createCarapaceToolsMock.mockClear();
     resolveGatewayScopedTools({
       cfg: {
         tools: {
           allow: ["read", "sessions_spawn", "sessions_send", "cron", "gateway", "nodes"],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       sessionKey: "agent:main:direct:test",
       surface: "loopback",
       senderIsOwner: true,
       delegationCapability: "report_only",
     });
 
-    const options = hoisted.createOpenClawToolsMock.mock.calls.at(-1)?.[0];
+    const options = hoisted.createCarapaceToolsMock.mock.calls.at(-1)?.[0];
     expect(options?.inheritedToolAllowlist).toEqual(["read", "automations", "gateway", "nodes"]);
     expect(options?.cronCreatorToolAllowlist).toEqual([
       { name: "read" },

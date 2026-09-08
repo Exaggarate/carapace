@@ -1,12 +1,12 @@
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { measureEmbeddedAgentPreparation } from "./preparation-timing.js";
 
 let nextPreparationStart = Promise.resolve();
 
 /** Dispatches attempt stages without letting concurrent starts monopolize the event loop. */
 export function createEmbeddedAttemptPreparation(options: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   assertCurrent: () => void;
 }) {
   return async <T>(stage: string, run: () => Promise<T> | T): Promise<T> => {

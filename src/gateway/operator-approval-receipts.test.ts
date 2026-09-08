@@ -4,11 +4,11 @@ import { trackSqliteStatementExecutions } from "../../test/helpers/sqlite-statem
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { activityRunInspectorSearch } from "../../ui/src/pages/activity/run-inspector-model.js";
 import { presentExecutionDecisionReceipts } from "../audit/execution-decision-receipts.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   forceDenyOperatorApproval,
   insertOperatorApproval,
@@ -20,13 +20,13 @@ import {
 const RETENTION_MS = 30 * 24 * 60 * 60_000;
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function databaseOptions() {
-  return { env: { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-approval-receipts-") } };
+  return { env: { CARAPACE_STATE_DIR: tempDirs.make("carapace-approval-receipts-") } };
 }
 
 function approval(
@@ -192,7 +192,7 @@ describe("operator approval decision receipts", () => {
       nowMs: 2_006,
       databaseOptions: database,
     });
-    openOpenClawStateDatabase(database)
+    openCarapaceStateDatabase(database)
       .db.prepare("UPDATE operator_approvals SET presentation_json = ? WHERE approval_id = ?")
       .run("{", "payload-corrupt");
 
@@ -357,7 +357,7 @@ describe("operator approval decision receipts", () => {
         databaseOptions: database,
       });
     }
-    const db = openOpenClawStateDatabase(database).db;
+    const db = openCarapaceStateDatabase(database).db;
     db.prepare("UPDATE operator_approvals SET presentation_json = ? WHERE approval_id = ?").run(
       JSON.stringify({ kind: "exec", commandText: "x".repeat(70_000) }),
       "page-b",
@@ -426,7 +426,7 @@ describe("operator approval decision receipts", () => {
         databaseOptions: database,
       });
     }
-    const db = openOpenClawStateDatabase(database).db;
+    const db = openCarapaceStateDatabase(database).db;
     db.prepare("UPDATE operator_approvals SET presentation_json = ? WHERE approval_id = ?").run(
       "{",
       "snapshot-corrupt",
@@ -532,7 +532,7 @@ describe("operator approval decision receipts", () => {
         approval: approval(`binding-${bindingState}`),
         databaseOptions: database,
       });
-      const db = openOpenClawStateDatabase(database).db;
+      const db = openCarapaceStateDatabase(database).db;
       if (bindingState === "missing") {
         db.prepare("DELETE FROM operator_approval_execution_identities").run();
       } else if (bindingState === "malformed") {
@@ -567,7 +567,7 @@ describe("operator approval decision receipts", () => {
           missingEvidence: ["decision.execution_link"],
         }),
       ]);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
@@ -592,7 +592,7 @@ describe("operator approval decision receipts", () => {
         databaseOptions: database,
       }).entries.map((entry) => entry.receipt),
     ).toEqual([]);
-    expect(tableExists(openOpenClawStateDatabase(database).db, "execution_decision_facts")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(database).db, "execution_decision_facts")).toBe(
       false,
     );
   });

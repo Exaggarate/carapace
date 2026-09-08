@@ -1,8 +1,8 @@
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
 import type {
   ExecApprovalPendingView,
   PluginApprovalPendingView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import { describe, expect, it } from "vitest";
 import {
   buildMSTeamsCanonicalApprovalTerminalCard,
@@ -95,12 +95,12 @@ describe("Microsoft Teams approval Adaptive Cards", () => {
         {
           type: "Action.Submit",
           title: "Approve once",
-          data: { openclawAction: "approval", token: expect.any(String) },
+          data: { carapaceAction: "approval", token: expect.any(String) },
         },
         {
           type: "Action.Submit",
           title: "Deny",
-          data: { openclawAction: "approval", token: expect.any(String) },
+          data: { carapaceAction: "approval", token: expect.any(String) },
         },
       ],
     });
@@ -134,7 +134,7 @@ describe("Microsoft Teams approval Adaptive Cards", () => {
       actions: [
         {
           title: "Deny",
-          data: { openclawAction: "approval", token: expect.any(String) },
+          data: { carapaceAction: "approval", token: expect.any(String) },
         },
       ],
     });
@@ -179,7 +179,7 @@ describe("Microsoft Teams approval Adaptive Cards", () => {
         approvalKind: "system-agent",
         approvalId: "system-agent:change-1",
         phase: "resolved",
-        title: "OpenClaw change",
+        title: "Carapace change",
         metadata: [],
         commandText: "restart the Gateway",
         operationSummary: "restart the Gateway",
@@ -190,7 +190,7 @@ describe("Microsoft Teams approval Adaptive Cards", () => {
 
       expect(card.body).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ text: `OpenClaw Change Approval: ${label}` }),
+          expect.objectContaining({ text: `Carapace Change Approval: ${label}` }),
         ]),
       );
     },

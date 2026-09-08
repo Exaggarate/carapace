@@ -12,8 +12,8 @@ const mocks = vi.hoisted(() => ({
     (typeof import("../daemon/systemd.js"))["findInstalledSystemdGatewayScope"]
   >(async () => ({
     scope: "user",
-    unitName: "openclaw-gateway.service",
-    unitPath: "/home/alice/.config/systemd/user/openclaw-gateway.service",
+    unitName: "carapace-gateway.service",
+    unitPath: "/home/alice/.config/systemd/user/carapace-gateway.service",
   })),
   isContainerEnvironment: vi.fn(() => false),
   isLoaded: vi.fn(async () => false),
@@ -36,8 +36,8 @@ describe("doctor gateway service repair policy", () => {
   beforeEach(() => {
     mocks.findInstalledSystemdGatewayScope.mockReset().mockResolvedValue({
       scope: "user",
-      unitName: "openclaw-gateway.service",
-      unitPath: "/home/alice/.config/systemd/user/openclaw-gateway.service",
+      unitName: "carapace-gateway.service",
+      unitPath: "/home/alice/.config/systemd/user/carapace-gateway.service",
     });
     mocks.isContainerEnvironment.mockReset().mockReturnValue(false);
     mocks.isLoaded.mockReset().mockResolvedValue(false);
@@ -55,13 +55,13 @@ describe("doctor gateway service repair policy", () => {
     { name: "native host", env: {}, expected: true, probes: "none" },
     {
       name: "Doctor-only external repair policy on a native host",
-      env: { OPENCLAW_SERVICE_REPAIR_POLICY: "external" },
+      env: { CARAPACE_SERVICE_REPAIR_POLICY: "external" },
       expected: true,
       probes: "none",
     },
     {
       name: "globally external supervision",
-      env: { OPENCLAW_SUPERVISOR_MODE: "external" },
+      env: { CARAPACE_SUPERVISOR_MODE: "external" },
       container: true,
       expected: false,
       probes: "none",
@@ -74,7 +74,7 @@ describe("doctor gateway service repair policy", () => {
       probes: "none",
     },
     {
-      name: "Docker without an installed OpenClaw service",
+      name: "Docker without an installed Carapace service",
       env: {},
       container: true,
       installed: false,
@@ -89,7 +89,7 @@ describe("doctor gateway service repair policy", () => {
       probes: "manager",
     },
     {
-      name: "Docker with an installed system-scoped OpenClaw service",
+      name: "Docker with an installed system-scoped Carapace service",
       env: {},
       container: true,
       scope: "system" as const,
@@ -128,8 +128,8 @@ describe("doctor gateway service repair policy", () => {
     if (scenario.scope === "system") {
       mocks.findInstalledSystemdGatewayScope.mockResolvedValue({
         scope: "system",
-        unitName: "openclaw-gateway.service",
-        unitPath: "/etc/systemd/system/openclaw-gateway.service",
+        unitName: "carapace-gateway.service",
+        unitPath: "/etc/systemd/system/carapace-gateway.service",
       });
     }
     if (scenario.installed === false) {
@@ -161,7 +161,7 @@ describe("doctor gateway service repair policy", () => {
     }
   });
 
-  it.each(["OPENCLAW_SERVICE_REPAIR_POLICY", "OPENCLAW_SUPERVISOR_MODE"])(
+  it.each(["CARAPACE_SERVICE_REPAIR_POLICY", "CARAPACE_SUPERVISOR_MODE"])(
     "never confirms a Doctor repair when %s is external",
     async (envKey) => {
       const prompter = createDoctorPrompter({

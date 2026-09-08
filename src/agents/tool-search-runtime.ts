@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { getPluginToolMeta } from "../plugins/tool-metadata.js";
 import { resolveAgentToolExecutionSchema } from "./agent-tool-availability.js";
 import {
@@ -77,7 +77,7 @@ function toolSearchEntryText(entry: ToolSearchCatalogEntry, parameterText?: stri
   // as "unknown" for the same reason, and a client may hand us a lazy object that
   // throws on property access.
   const parameters =
-    parameterText ?? (entry.source === "openclaw" ? readParameterText(entry.parameters) : "");
+    parameterText ?? (entry.source === "carapace" ? readParameterText(entry.parameters) : "");
   return [entry.name, entry.id, entry.label ?? "", entry.description, parameters]
     .filter(Boolean)
     .join(" ");
@@ -247,7 +247,7 @@ function matchesCachedToolSearchIndex(
         snapshot.description === entry.description &&
         snapshot.parameters === entry.parameters &&
         snapshot.parameterText ===
-          (entry.source === "openclaw" ? readParameterText(entry.parameters) : "")
+          (entry.source === "carapace" ? readParameterText(entry.parameters) : "")
       );
     })
   );
@@ -276,7 +276,7 @@ async function validateCatalogSchemaValue(
     schemaName === "inputSchema"
       ? resolveAgentToolExecutionSchema(entry.tool, entry.parameters)
       : entry.outputSchema;
-  if (entry.source !== "openclaw" || !schema) {
+  if (entry.source !== "carapace" || !schema) {
     return undefined;
   }
   try {
@@ -392,7 +392,7 @@ export class ToolSearchRuntime {
         label: entry.label,
         description: entry.description,
         parameters: entry.parameters,
-        parameterText: entry.source === "openclaw" ? readParameterText(entry.parameters) : "",
+        parameterText: entry.source === "carapace" ? readParameterText(entry.parameters) : "",
       }));
       cachedIndex = {
         entries: indexedEntries,
@@ -498,7 +498,7 @@ export class ToolSearchRuntime {
     } catch {
       return false;
     }
-    if (entry.source !== "openclaw") {
+    if (entry.source !== "carapace") {
       return false;
     }
     const pluginMeta = getPluginToolMeta(entry.tool as Parameters<typeof getPluginToolMeta>[0]);
@@ -571,7 +571,7 @@ export class ToolSearchRuntime {
       acceptedSnapshot = snapshot;
       return snapshot;
     };
-    const validateInput = this.options.validateInput && entry.source === "openclaw";
+    const validateInput = this.options.validateInput && entry.source === "carapace";
     const executionTool = prepareToolSearchCatalogExecutionTool(entry, this.options);
     const runExecution = async () => {
       const parentToolCallId = options?.parentToolCallId ?? toolCallId;

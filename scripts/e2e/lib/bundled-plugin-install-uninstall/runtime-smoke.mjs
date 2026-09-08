@@ -16,36 +16,36 @@ import { isRecord } from "../../../lib/record-shared.mjs";
 import { resolveWindowsTaskkillPath } from "../../../lib/windows-taskkill.mjs";
 
 const TOKEN = "bundled-plugin-runtime-smoke-token";
-const RUNTIME_PORT_BASE_ENV = "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE";
+const RUNTIME_PORT_BASE_ENV = "CARAPACE_BUNDLED_PLUGIN_RUNTIME_PORT_BASE";
 const TCP_PORT_MAX = 65535;
 const OUTPUT_CAPTURE_CHARS = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS",
   1024 * 1024,
 );
 const LOG_SCAN_BYTES = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES",
   256 * 1024,
 );
 const GATEWAY_LOG_CAPTURE_BYTES = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES",
   16 * 1024 * 1024,
 );
-const WATCHDOG_MS = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS", 1000);
-const READY_TIMEOUT_MS = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS", 900000);
-const RPC_TIMEOUT_MS = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_MS", 60000);
+const WATCHDOG_MS = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_WATCHDOG_MS", 1000);
+const READY_TIMEOUT_MS = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_READY_MS", 900000);
+const RPC_TIMEOUT_MS = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_MS", 60000);
 const RPC_READY_TIMEOUT_MS = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS",
   210000,
 );
-const COMMAND_TIMEOUT_MS = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", 120000);
-const HTTP_PROBE_TIMEOUT_MS = readPositiveIntEnv("OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS", 5000);
+const COMMAND_TIMEOUT_MS = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_COMMAND_MS", 120000);
+const HTTP_PROBE_TIMEOUT_MS = readPositiveIntEnv("CARAPACE_BUNDLED_PLUGIN_RUNTIME_HTTP_MS", 5000);
 const HTTP_PROBE_BODY_MAX_BYTES = 1024 * 1024;
 const GATEWAY_TEARDOWN_GRACE_MS = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS",
   10000,
 );
 const GATEWAY_TEARDOWN_KILL_GRACE_MS = readPositiveIntEnv(
-  "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS",
+  "CARAPACE_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS",
   1000,
 );
 const GATEWAY_READY_LOG_NEEDLE = Buffer.from("[gateway] ready");
@@ -246,9 +246,9 @@ export function createReadyLogScanner(file) {
 
 function manifestPath(pluginDir, pluginRoot) {
   const candidates = [
-    ...(isNonEmptyString(pluginRoot) ? [path.join(pluginRoot, "openclaw.plugin.json")] : []),
-    path.join(process.cwd(), "dist", "extensions", pluginDir, "openclaw.plugin.json"),
-    path.join(process.cwd(), "dist-runtime", "extensions", pluginDir, "openclaw.plugin.json"),
+    ...(isNonEmptyString(pluginRoot) ? [path.join(pluginRoot, "carapace.plugin.json")] : []),
+    path.join(process.cwd(), "dist", "extensions", pluginDir, "carapace.plugin.json"),
+    path.join(process.cwd(), "dist-runtime", "extensions", pluginDir, "carapace.plugin.json"),
   ];
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
 }
@@ -263,7 +263,7 @@ function loadManifest(pluginDir, pluginRoot) {
 
 function configPathFromEnv(env = process.env) {
   return (
-    env.OPENCLAW_CONFIG_PATH || path.join(env.HOME || os.homedir(), ".openclaw", "openclaw.json")
+    env.CARAPACE_CONFIG_PATH || path.join(env.HOME || os.homedir(), ".carapace", "carapace.json")
   );
 }
 
@@ -327,7 +327,7 @@ export function activateSmokePlugin(config, pluginId, channels = []) {
 }
 
 export function withSmokeTtsConfig(config, tts) {
-  if (process.env.OPENCLAW_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy") {
+  if (process.env.CARAPACE_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy") {
     return {
       ...config,
       messages: { ...config.messages, tts: { ...config.messages?.tts, ...tts } },
@@ -337,7 +337,7 @@ export function withSmokeTtsConfig(config, tts) {
 }
 
 export function readSmokeTtsConfig(config) {
-  return process.env.OPENCLAW_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy"
+  return process.env.CARAPACE_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy"
     ? config.messages?.tts
     : config.tts;
 }
@@ -531,9 +531,9 @@ export function startGateway(params) {
       env: {
         ...process.env,
         ...params.env,
-        OPENCLAW_NO_ONBOARD: "1",
-        OPENCLAW_SKIP_CHANNELS: params.skipChannels ? "1" : "0",
-        OPENCLAW_SKIP_PROVIDERS: "0",
+        CARAPACE_NO_ONBOARD: "1",
+        CARAPACE_SKIP_CHANNELS: params.skipChannels ? "1" : "0",
+        CARAPACE_SKIP_PROVIDERS: "0",
       },
       stdio: ["ignore", "pipe", "pipe"],
       detached: process.platform !== "win32",
@@ -883,7 +883,7 @@ export async function assertReadyzProbe(options) {
 }
 
 export async function rpcCall(method, params, options) {
-  const rpcStateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-runtime-rpc-"));
+  const rpcStateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-plugin-runtime-rpc-"));
   const args = [
     options.entrypoint,
     "gateway",
@@ -904,8 +904,8 @@ export async function rpcCall(method, params, options) {
       env: {
         ...process.env,
         ...options.env,
-        OPENCLAW_NO_ONBOARD: "1",
-        OPENCLAW_STATE_DIR: rpcStateDir,
+        CARAPACE_NO_ONBOARD: "1",
+        CARAPACE_STATE_DIR: rpcStateDir,
       },
     });
     return unwrapRpcPayload(parseJsonOutput(stdout));
@@ -1057,9 +1057,9 @@ async function smokePlugin(pluginId, pluginDir, requiresConfig, pluginIndex, plu
     console.log(`Runtime smoke skipped for ${pluginId}: plugin requires config`);
     return;
   }
-  const entrypoint = process.env.OPENCLAW_ENTRY;
+  const entrypoint = process.env.CARAPACE_ENTRY;
   if (!entrypoint) {
-    throw new Error("missing OPENCLAW_ENTRY");
+    throw new Error("missing CARAPACE_ENTRY");
   }
   const manifest = loadManifest(pluginDir, pluginRoot);
   const plan = buildPluginPlan(manifest);
@@ -1084,7 +1084,7 @@ async function smokePlugin(pluginId, pluginDir, requiresConfig, pluginIndex, plu
   }
   writeConfig(config);
 
-  const logPath = `/tmp/openclaw-plugin-runtime-${pluginIndex}-${pluginId}.log`;
+  const logPath = `/tmp/carapace-plugin-runtime-${pluginIndex}-${pluginId}.log`;
   const child = startGateway({
     entrypoint,
     port,
@@ -1395,9 +1395,9 @@ export async function assertNoPackageManagerChildren(pid) {
 }
 
 async function smokeTtsGlobalDisable(pluginId, pluginDir, provider, pluginIndex, pluginRoot) {
-  const entrypoint = process.env.OPENCLAW_ENTRY;
+  const entrypoint = process.env.CARAPACE_ENTRY;
   if (!entrypoint) {
-    throw new Error("missing OPENCLAW_ENTRY");
+    throw new Error("missing CARAPACE_ENTRY");
   }
   const manifest = loadManifest(pluginDir, pluginRoot);
   const plan = buildPluginPlan(manifest);
@@ -1424,7 +1424,7 @@ async function smokeTtsGlobalDisable(pluginId, pluginDir, provider, pluginIndex,
     ),
     env,
   );
-  const logPath = `/tmp/openclaw-plugin-runtime-${pluginIndex}-${pluginId}-tts-disabled.log`;
+  const logPath = `/tmp/carapace-plugin-runtime-${pluginIndex}-${pluginId}-tts-disabled.log`;
   const child = startGateway({ entrypoint, port, logPath, env, skipChannels: true });
   try {
     await waitForReady({ child, port, logPath });
@@ -1450,9 +1450,9 @@ async function smokeTtsGlobalDisable(pluginId, pluginDir, provider, pluginIndex,
 }
 
 async function smokeOpenAiTts(pluginIndex) {
-  const entrypoint = process.env.OPENCLAW_ENTRY;
+  const entrypoint = process.env.CARAPACE_ENTRY;
   if (!entrypoint) {
-    throw new Error("missing OPENCLAW_ENTRY");
+    throw new Error("missing CARAPACE_ENTRY");
   }
   if (!process.env.OPENAI_API_KEY) {
     console.log("OpenAI key-backed TTS smoke skipped: OPENAI_API_KEY is not set");
@@ -1485,7 +1485,7 @@ async function smokeOpenAiTts(pluginIndex) {
     ),
     env,
   );
-  const logPath = `/tmp/openclaw-plugin-runtime-${pluginIndex}-openai-tts-live.log`;
+  const logPath = `/tmp/carapace-plugin-runtime-${pluginIndex}-openai-tts-live.log`;
   const child = startGateway({ entrypoint, port, logPath, env, skipChannels: true });
   try {
     await waitForReady({ child, port, logPath });
@@ -1510,18 +1510,18 @@ async function smokeOpenAiTts(pluginIndex) {
 }
 
 export function createIsolatedStateEnv(label) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), `openclaw-${label}-`));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), `carapace-${label}-`));
   const home = path.join(root, "home");
-  const stateDir = path.join(home, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const stateDir = path.join(home, ".carapace");
+  const configPath = path.join(stateDir, "carapace.json");
   fs.mkdirSync(stateDir, { recursive: true });
   const env = {
     ...process.env,
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
   };
   isolatedStateRoots.set(env, root);
   return env;

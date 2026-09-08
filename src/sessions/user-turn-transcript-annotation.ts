@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { redactTranscriptMessage } from "../agents/transcript-redact.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   loadSessionEntry,
   publishTranscriptUpdate,
@@ -14,7 +14,7 @@ import { waitForSessionTranscriptProjection } from "../config/sessions/session-t
 import { sessionMatchesExpectedTranscriptTurn } from "../config/sessions/session-transcript-turn-state.js";
 import { getOwnedSessionTranscriptWriterFence } from "../config/sessions/transcript-write-context.js";
 import { sha256HexPrefixCore } from "../infra/crypto-digest.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
 import { getUserTurnTranscriptAdmissionOwner } from "./user-turn-transcript-admission.js";
 import type {
   UserTurnTranscriptAnnotation,
@@ -29,7 +29,7 @@ export function bindUserTurnTranscriptAnnotation(params: {
     expectedWriterRunId?: string;
   };
   runId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   abortSignal?: AbortSignal;
   assertCurrent: () => void;
 }): ((annotation: UserTurnTranscriptAnnotation) => Promise<void>) | undefined {
@@ -70,7 +70,7 @@ export function bindUserTurnTranscriptAnnotation(params: {
       owner.blocked() ||
       !isDeepStrictEqual(owner.receipt(), admission) ||
       !isDeepStrictEqual(owner.message(), admittedMessage) ||
-      admittedMessage["__openclaw"]?.steerTargetRunId !== undefined ||
+      admittedMessage["__carapace"]?.steerTargetRunId !== undefined ||
       !sessionMatchesExpectedTranscriptTurn(current ? { entry: current } : undefined, {
         expectedSessionId: admission.sessionId,
         expectedLifecycleRevision,
@@ -82,7 +82,7 @@ export function bindUserTurnTranscriptAnnotation(params: {
         current?.lifecycleRevision !== fence.expectedLifecycleRevision) ||
       current?.activeWriterRunId !== selected.activeWriterRunId ||
       sessionTranscriptIndexNeedsReconcile(
-        openOpenClawAgentDatabase({ agentId: admission.agentId, path: admission.storePath }).db,
+        openCarapaceAgentDatabase({ agentId: admission.agentId, path: admission.storePath }).db,
         admission.sessionId,
       ) ||
       !isDeepStrictEqual(readActiveTranscriptEntryAnchor(admission), anchor)
@@ -127,7 +127,7 @@ export function bindUserTurnTranscriptAnnotation(params: {
       if (!isDeepStrictEqual(current, admittedMessage)) {
         throw new Error("native prompt annotation cannot replace an edited admission");
       }
-      const metadata = admittedMessage["__openclaw"] ?? {};
+      const metadata = admittedMessage["__carapace"] ?? {};
       if (
         metadata.runTerminal !== undefined ||
         Object.entries(fields).some(
@@ -136,7 +136,7 @@ export function bindUserTurnTranscriptAnnotation(params: {
       ) {
         throw new Error("native prompt annotation conflicts with recorded provenance");
       }
-      const next = { ...admittedMessage, __openclaw: { ...metadata, ...fields } };
+      const next = { ...admittedMessage, __carapace: { ...metadata, ...fields } };
       if (!isDeepStrictEqual(redactTranscriptMessage(next, params.config), next)) {
         throw new Error("native prompt annotation would restore redacted evidence");
       }

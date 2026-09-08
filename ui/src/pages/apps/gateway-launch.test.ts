@@ -5,9 +5,9 @@ describe("buildMacGatewayLaunchUrl", () => {
   it.each([
     ["wss://gateway.example", undefined, "https://gateway.example/"],
     [
-      "wss://other.example:8443/openclaw%20gateway",
+      "wss://other.example:8443/carapace%20gateway",
       undefined,
-      "https://other.example:8443/openclaw%20gateway",
+      "https://other.example:8443/carapace%20gateway",
     ],
     [
       "ws://127.0.0.1:18789",
@@ -17,7 +17,7 @@ describe("buildMacGatewayLaunchUrl", () => {
     ["wss://gateway.example/operator%2Fteam", undefined, "https://gateway.example/operator%2Fteam"],
   ])("preserves the current gateway address %s", (gateway, identity, expected) => {
     const result = new URL(buildMacGatewayLaunchUrl(gateway, identity)!);
-    expect(result.protocol).toBe("openclaw:");
+    expect(result.protocol).toBe("carapace:");
     expect(result.host).toBe("gateway");
     expect(result.pathname).toBe("/add");
     expect([...result.searchParams]).toEqual([["url", expected]]);

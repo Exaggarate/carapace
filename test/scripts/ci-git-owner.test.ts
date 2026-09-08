@@ -72,7 +72,7 @@ function createAncestryFixture(options: {
   targetDistance: number;
   related: boolean;
 }): AncestryFixture {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-release-ancestry-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-release-ancestry-"));
   const origin = join(root, "origin.git");
   fixtureGit(root, ["init", "--quiet", "--bare", origin]);
   const commits: string[] = [];
@@ -113,7 +113,7 @@ ${message}${parent ? `from :${parent}\n` : ""}
 }
 
 function createProvisionalMergeBaseFixture(): AncestryFixture & { base: string } {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-release-ancestry-provisional-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-release-ancestry-provisional-"));
   const origin = join(root, "origin.git");
   fixtureGit(root, ["init", "--quiet", "--bare", origin]);
   const commits = Array.from({ length: 341 }, (_, index) => {

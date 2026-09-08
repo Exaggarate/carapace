@@ -9,7 +9,7 @@ const WORKFLOW_PATH = ".github/workflows/website-installer-sync.yml";
 describe("website installer sync workflow", () => {
   const workflow = readFileSync(WORKFLOW_PATH, "utf8");
 
-  it("treats all website installer scripts as OpenClaw-owned inputs", () => {
+  it("treats all website installer scripts as Carapace-owned inputs", () => {
     for (const path of ["scripts/install.sh", "scripts/install-cli.sh", "scripts/install.ps1"]) {
       expect(workflow).toContain(path);
       expect(detectInstallSmokeScope([path]).runFullInstallSmoke).toBe(true);
@@ -38,16 +38,16 @@ describe("website installer sync workflow", () => {
     expect(workflow.match(/fedora:44/g)?.length).toBe(2);
     expect(workflow).not.toContain("timeout 20m docker run --rm");
     expect(workflow).not.toMatch(/(^|\n)\s+docker run --rm/u);
-    expect(workflow).toContain("bash /tmp/install.sh --version latest && openclaw --version");
+    expect(workflow).toContain("bash /tmp/install.sh --version latest && carapace --version");
     expect(workflow).not.toContain("bash /tmp/install.sh --no-prompt --no-onboard");
-    expect(workflow).toContain("bash /tmp/install-cli.sh --prefix /tmp/openclaw");
+    expect(workflow).toContain("bash /tmp/install-cli.sh --prefix /tmp/carapace");
     expect(workflow).toContain("macos-installer:");
     expect(workflow).toContain("runs-on: macos-15");
     expect(workflow).toContain("node-version: 24");
-    expect(workflow).toContain('OPENCLAW_NO_ONBOARD: "1"');
-    expect(workflow).toContain('OPENCLAW_NO_PROMPT: "1"');
+    expect(workflow).toContain('CARAPACE_NO_ONBOARD: "1"');
+    expect(workflow).toContain('CARAPACE_NO_PROMPT: "1"');
     expect(workflow).toContain("bash scripts/install.sh --no-onboard --no-prompt --version latest");
-    expect(workflow).toContain("openclaw --version");
+    expect(workflow).toContain("carapace --version");
     expect(workflow).toContain("windows-installer:");
     expect(workflow).toContain("runs-on: windows-latest");
     expect(workflow).toContain(".\\scripts\\install.ps1 -DryRun");
@@ -55,7 +55,7 @@ describe("website installer sync workflow", () => {
     expect(workflow).not.toContain(".\\scripts\\install.cmd");
   });
 
-  it("syncs verified scripts to openclaw.ai only after all installer checks pass", () => {
+  it("syncs verified scripts to github.com/Exaggarate/carapace only after all installer checks pass", () => {
     const syncNeeds = workflow.match(/  sync-website:\n    needs:\n((?:      - [^\n]+\n)+)/u);
     expect(syncNeeds?.[1]).toBe(
       [
@@ -71,16 +71,16 @@ describe("website installer sync workflow", () => {
         .map((job) => `      - ${job}\n`)
         .join(""),
     );
-    expect(workflow).toContain("repository: openclaw/openclaw.ai");
-    expect(workflow).toContain("OPENCLAW_GH_TOKEN: ${{ secrets.OPENCLAW_GH_TOKEN }}");
-    expect(workflow).toContain("OPENCLAW_GH_TOKEN is not configured");
-    expect(workflow).toContain("token: ${{ env.OPENCLAW_GH_TOKEN }}");
-    expect(workflow).toContain("cp openclaw/scripts/install.sh openclaw.ai/public/install.sh");
+    expect(workflow).toContain("repository: carapace/github.com/Exaggarate/carapace");
+    expect(workflow).toContain("CARAPACE_GH_TOKEN: ${{ secrets.CARAPACE_GH_TOKEN }}");
+    expect(workflow).toContain("CARAPACE_GH_TOKEN is not configured");
+    expect(workflow).toContain("token: ${{ env.CARAPACE_GH_TOKEN }}");
+    expect(workflow).toContain("cp carapace/scripts/install.sh github.com/Exaggarate/carapace/public/install.sh");
     expect(workflow).toContain(
-      "cp openclaw/scripts/install-cli.sh openclaw.ai/public/install-cli.sh",
+      "cp carapace/scripts/install-cli.sh github.com/Exaggarate/carapace/public/install-cli.sh",
     );
-    expect(workflow).toContain("cp openclaw/scripts/install.ps1 openclaw.ai/public/install.ps1");
-    expect(workflow).toContain("rm -f openclaw.ai/public/install.cmd");
+    expect(workflow).toContain("cp carapace/scripts/install.ps1 github.com/Exaggarate/carapace/public/install.ps1");
+    expect(workflow).toContain("rm -f github.com/Exaggarate/carapace/public/install.cmd");
     expect(workflow).toContain("bun run build");
     expect(workflow).toContain("git push origin HEAD:main");
   });

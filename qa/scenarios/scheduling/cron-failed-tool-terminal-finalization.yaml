@@ -9,7 +9,7 @@ scenario:
       - agent-runtime.failure-recovery-retry-policy
       - channels.qa-channel-final-reply
   regressionRefs:
-    - openclaw/openclaw#118274
+    - carapace/carapace#118274
   gatewayConfigPatch:
     tools:
       codeMode:

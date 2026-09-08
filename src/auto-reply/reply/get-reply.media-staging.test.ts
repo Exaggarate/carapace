@@ -1,7 +1,7 @@
 import { beforeAll, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { waitForAbortSignal } from "../../infra/abort-signal.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { withFastReplyConfig } from "./get-reply-fast-path.test-support.js";
 import {
   buildGetReplyGroupCtx,
@@ -51,8 +51,8 @@ beforeAll(async () => {
 it.each(["remote preprocessing", "local staging"] as const)(
   "cancels %s before downstream work and waits for staging cleanup",
   async (phase) => {
-    await withOpenClawTestState(
-      { label: "reply-media-staging", env: { OPENCLAW_TEST_FAST: undefined } },
+    await withCarapaceTestState(
+      { label: "reply-media-staging", env: { CARAPACE_TEST_FAST: undefined } },
       async (state) => {
         const controller = new AbortController();
         const reason = new Error("attachment request cancelled");

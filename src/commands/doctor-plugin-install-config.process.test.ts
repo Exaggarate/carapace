@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import {
   clearLoadInstalledPluginIndexInstallRecordsCache,
@@ -27,7 +27,7 @@ beforeAll(() => {
 async function createDoctorFixture() {
   const root = fs.realpathSync(tempDirs.make("doctor-plugin-config-"));
   const stateDir = path.join(root, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   fs.mkdirSync(stateDir, { recursive: true });
   const env: NodeJS.ProcessEnv = {
     PATH: process.env.PATH,
@@ -37,12 +37,12 @@ async function createDoctorFixture() {
     HOME: root,
     USERPROFILE: root,
     TMPDIR: root,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     NO_COLOR: "1",
   };
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     gateway: { mode: "local", auth: { mode: "none" } },
     plugins: { enabled: false },
     agents: { entries: { main: {} } },
@@ -86,7 +86,7 @@ describe("Doctor retired plugin install config", () => {
         const output = `${pass}: ${result.stdout}\n${result.stderr}`;
         expect(result.error, output).toBeUndefined();
         expect(result.status, output).toBe(0);
-        const repaired = JSON.parse(fs.readFileSync(configPath, "utf8")) as OpenClawConfig;
+        const repaired = JSON.parse(fs.readFileSync(configPath, "utf8")) as CarapaceConfig;
         expect(repaired.plugins, output).not.toHaveProperty("installs");
         if (included) {
           expect(repaired.plugins).toEqual({ $include: "./plugins.json" });
@@ -219,11 +219,11 @@ describe("Doctor retired plugin install config", () => {
         name: "migration-proof-plugin",
         version: "1.0.0",
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "migration-proof-plugin",
         configSchema: {
@@ -253,7 +253,7 @@ describe("Doctor retired plugin install config", () => {
     const result = runBuiltRuntime(runtimeRoot, env, doctorArgs, 60_000);
     const output = `${result.stdout}\n${result.stderr}`;
     expect(result.status, output).toBe(0);
-    const repaired = JSON.parse(fs.readFileSync(configPath, "utf8")) as OpenClawConfig;
+    const repaired = JSON.parse(fs.readFileSync(configPath, "utf8")) as CarapaceConfig;
     expect(repaired.plugins, output).not.toHaveProperty("installs");
     expect(repaired.plugins?.entries?.["migration-proof-plugin"], output).toEqual(entry);
     clearLoadInstalledPluginIndexInstallRecordsCache();

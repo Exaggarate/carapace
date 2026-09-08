@@ -8,7 +8,7 @@ import { AcpRuntimeError } from "../../acp/runtime/errors.js";
 import { resolveSessionStorePathForAcp } from "../../acp/runtime/session-meta-store.js";
 import { configureExecutionIdentityAdmissionSink } from "../../audit/execution-identity-admission.js";
 import { configureChannelAdmissionEvidenceCollection } from "../../channels/message-access/admission-evidence.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -509,9 +509,9 @@ const baseCfg = {
       spawnSessions: true,
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
-function createDiscordParams(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+function createDiscordParams(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "discord",
     Surface: "discord",
@@ -718,7 +718,7 @@ function mockBoundThreadSession(options?: {
   );
 }
 
-function createThreadParams(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+function createThreadParams(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   const params = createDiscordParams(commandBody, cfg);
   params.ctx.MessageThreadId = defaultThreadId;
   return params;
@@ -737,7 +737,7 @@ type ConversationCommandFixture = {
 function createConversationParams(
   commandBody: string,
   fixture: ConversationCommandFixture,
-  cfg: OpenClawConfig = baseCfg,
+  cfg: CarapaceConfig = baseCfg,
 ) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: fixture.channel,
@@ -755,15 +755,15 @@ function createConversationParams(
   return params;
 }
 
-async function runDiscordAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runDiscordAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(createDiscordParams(commandBody, cfg), true);
 }
 
-async function runThreadAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runThreadAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(createThreadParams(commandBody, cfg), true);
 }
 
-async function runTelegramAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runTelegramAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -778,7 +778,7 @@ async function runTelegramAcpCommand(commandBody: string, cfg: OpenClawConfig = 
   );
 }
 
-async function runTelegramDmAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runTelegramDmAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -792,7 +792,7 @@ async function runTelegramDmAcpCommand(commandBody: string, cfg: OpenClawConfig 
   );
 }
 
-async function runSlackDmAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runSlackDmAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -807,7 +807,7 @@ async function runSlackDmAcpCommand(commandBody: string, cfg: OpenClawConfig = b
   );
 }
 
-function createMatrixThreadParams(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+function createMatrixThreadParams(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   const params = createConversationParams(
     commandBody,
     {
@@ -820,7 +820,7 @@ function createMatrixThreadParams(commandBody: string, cfg: OpenClawConfig = bas
   return params;
 }
 
-async function runMatrixAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runMatrixAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -834,11 +834,11 @@ async function runMatrixAcpCommand(commandBody: string, cfg: OpenClawConfig = ba
   );
 }
 
-async function runMatrixThreadAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runMatrixThreadAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(createMatrixThreadParams(commandBody, cfg), true);
 }
 
-async function runFeishuDmAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runFeishuDmAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -853,7 +853,7 @@ async function runFeishuDmAcpCommand(commandBody: string, cfg: OpenClawConfig = 
   );
 }
 
-async function runLineDmAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runLineDmAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -868,7 +868,7 @@ async function runLineDmAcpCommand(commandBody: string, cfg: OpenClawConfig = ba
   );
 }
 
-async function runIMessageDmAcpCommand(commandBody: string, cfg: OpenClawConfig = baseCfg) {
+async function runIMessageDmAcpCommand(commandBody: string, cfg: CarapaceConfig = baseCfg) {
   return handleAcpCommand(
     createConversationParams(
       commandBody,
@@ -885,7 +885,7 @@ async function runIMessageDmAcpCommand(commandBody: string, cfg: OpenClawConfig 
 async function runInternalAcpCommand(params: {
   commandBody: string;
   scopes: string[];
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
 }) {
   const commandParams = buildCommandTestParams(params.commandBody, params.cfg ?? baseCfg, {
     Provider: INTERNAL_MESSAGE_CHANNEL,
@@ -1237,7 +1237,7 @@ describe("/acp command", () => {
       backendSessionId: "acpx-2",
     });
 
-    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-"));
+    const workspace = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-"));
     try {
       const cfg = {
         ...baseCfg,
@@ -1249,7 +1249,7 @@ describe("/acp command", () => {
             },
           ],
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -1283,7 +1283,7 @@ describe("/acp command", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -1354,7 +1354,7 @@ describe("/acp command", () => {
           spawnSessions: false,
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex --bind here", cfg);
 
@@ -1398,18 +1398,18 @@ describe("/acp command", () => {
   });
 
   it("keeps freshly spawned Slack-bound ACP metadata readable for the immediate follow-up", async () => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-acp-bound-followup-"));
-    const databasePath = path.join(directory, "state", "openclaw.sqlite");
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-acp-bound-followup-"));
+    const databasePath = path.join(directory, "state", "carapace.sqlite");
     const cfg = {
       ...baseCfg,
       session: { ...baseCfg.session, store: path.join(directory, "sessions.json") },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const sessionMeta = await vi.importActual<typeof import("../../acp/runtime/session-meta.js")>(
       "../../acp/runtime/session-meta.js",
     );
     const { createTestAdmittedRunContext } =
       await import("../../agents/admitted-run-context.test-support.js");
-    const { closeOpenClawStateDatabaseByPath } = await import("../../state/openclaw-state-db.js");
+    const { closeCarapaceStateDatabaseByPath } = await import("../../state/carapace-state-db.js");
 
     hoisted.upsertAcpSessionMetaMock.mockImplementation((input) =>
       sessionMeta.upsertAcpSessionMeta({ ...input, cfg, databasePath, now: () => 1 }),
@@ -1451,7 +1451,7 @@ describe("/acp command", () => {
       expect(hoisted.runTurnMock).toHaveBeenCalledTimes(1);
     } finally {
       acpManagerTesting.resetAcpSessionManagerForTests();
-      expect(closeOpenClawStateDatabaseByPath(databasePath)).toBe(true);
+      expect(closeCarapaceStateDatabaseByPath(databasePath)).toBe(true);
       await fs.rm(directory, { recursive: true, force: true });
     }
   });
@@ -1499,7 +1499,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runMatrixAcpCommand("/acp spawn codex --bind here", cfg);
 
@@ -1525,7 +1525,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runMatrixAcpCommand("/acp spawn codex", cfg);
 
@@ -1551,7 +1551,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runMatrixThreadAcpCommand("/acp spawn codex --thread here", cfg);
 
@@ -1621,7 +1621,7 @@ describe("/acp command", () => {
           spawnSessions: false,
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -1648,7 +1648,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runMatrixAcpCommand("/acp spawn codex", cfg);
 
@@ -1666,7 +1666,7 @@ describe("/acp command", () => {
           ownership: "explicit",
           entries: { research: { sandbox: { mode: sandboxMode } }, ops: {} },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const params = createDiscordParams("/acp spawn codex --thread off", cfg);
       params.sessionKey = "global";
       params.agentId = "research";
@@ -1691,7 +1691,7 @@ describe("/acp command", () => {
           sandbox: { mode: "all" },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -1761,7 +1761,7 @@ describe("/acp command", () => {
       const cfg = {
         ...baseCfg,
         logging: { audit: { executionIdentity: true } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const params = createDiscordParams(
         `/acp steer --session ${defaultAcpSessionKey} tighten logging`,
         cfg,
@@ -1853,7 +1853,7 @@ describe("/acp command", () => {
           defaultAccount: "work",
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     hoisted.sessionBindingResolveByConversationMock.mockImplementation(
       (ref: {
         channel?: string;
@@ -1900,7 +1900,7 @@ describe("/acp command", () => {
         ...baseCfg.acp,
         dispatch: { enabled: false },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const result = await runDiscordAcpCommand("/acp steer tighten logging", cfg);
     expect(result?.reply?.text).toContain("ACP dispatch is disabled by policy");
     expect(hoisted.runTurnMock).not.toHaveBeenCalled();
@@ -2230,7 +2230,7 @@ describe("/acp command", () => {
           lastUpdatedAt: Date.now(),
         },
         lastError: [
-          "OpenClaw runtime context (internal):",
+          "Carapace runtime context (internal):",
           "This context is runtime-generated, not user-authored. Keep internal details private.",
           "",
           "[Internal task completion event]",
@@ -2240,7 +2240,7 @@ describe("/acp command", () => {
     });
     hoisted.getStatusMock.mockResolvedValue({
       summary: [
-        "OpenClaw runtime context (internal):",
+        "Carapace runtime context (internal):",
         "This context is runtime-generated, not user-authored. Keep internal details private.",
         "",
         "[Internal task completion event]",
@@ -2248,7 +2248,7 @@ describe("/acp command", () => {
       ].join("\n"),
       details: {
         payload: [
-          "OpenClaw runtime context (internal):",
+          "Carapace runtime context (internal):",
           "This context is runtime-generated, not user-authored. Keep internal details private.",
           "",
           "[Internal task completion event]",
@@ -2269,7 +2269,7 @@ describe("/acp command", () => {
       runId: "acp-run-1",
       endedAt: Date.now(),
       error: [
-        "OpenClaw runtime context (internal):",
+        "Carapace runtime context (internal):",
         "This context is runtime-generated, not user-authored. Keep internal details private.",
         "",
         "[Internal task completion event]",
@@ -2282,7 +2282,7 @@ describe("/acp command", () => {
 
     expect(result?.reply?.text).toContain("ACP status:");
     expect(result?.reply?.text).toContain("taskSummary: Needs approval to continue.");
-    expect(result?.reply?.text).not.toContain("OpenClaw runtime context (internal):");
+    expect(result?.reply?.text).not.toContain("Carapace runtime context (internal):");
     expect(result?.reply?.text).not.toContain("Internal task completion event");
   });
 

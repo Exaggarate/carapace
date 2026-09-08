@@ -171,7 +171,7 @@ async function preparePackage(args: ParsedArgs): Promise<void> {
       NPM_CONFIG_GLOBALCONFIG: "/dev/null",
       NPM_CONFIG_IGNORE_SCRIPTS: "true",
       NPM_CONFIG_PROVENANCE: "false",
-      NPM_CONFIG_USERCONFIG: join(tmpdir(), "openclaw-plugin-security-empty-npmrc"),
+      NPM_CONFIG_USERCONFIG: join(tmpdir(), "carapace-plugin-security-empty-npmrc"),
       NPM_CONFIG_WORKSPACES: "false",
       PATH: process.env.PATH,
       TMPDIR: tmpdir(),

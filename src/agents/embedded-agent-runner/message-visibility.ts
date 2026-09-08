@@ -1,4 +1,4 @@
-import { hasNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+import { hasNonEmptyString } from "@carapace/normalization-core/string-coerce";
 import {
   isReplyPayloadTerminalContent,
   type ReplyPayload,
@@ -183,7 +183,7 @@ export function readTerminalSourceReplyDeliveryMirror(
   if (!message || typeof message !== "object") {
     return undefined;
   }
-  const marker = (message as { openclawDeliveryMirror?: unknown }).openclawDeliveryMirror;
+  const marker = (message as { carapaceDeliveryMirror?: unknown }).carapaceDeliveryMirror;
   if (!marker || typeof marker !== "object") {
     return undefined;
   }
@@ -216,7 +216,7 @@ export function isIntermediateAssistantTranscriptMessage(message: unknown): bool
   if (record.stopReason !== undefined && record.stopReason !== "stop") {
     return false;
   }
-  const asyncDelivery = record.openclawAsyncDelivery;
+  const asyncDelivery = record.carapaceAsyncDelivery;
   if (asyncDelivery && typeof asyncDelivery === "object" && !Array.isArray(asyncDelivery)) {
     // SAFETY: the object/non-array guard permits reading an optional itemId as unknown.
     const itemId = (asyncDelivery as { itemId?: unknown }).itemId;
@@ -228,7 +228,7 @@ export function isIntermediateAssistantTranscriptMessage(message: unknown): bool
   if (phase !== undefined) {
     return phase === "commentary";
   }
-  const fallback = record.openclawStreamFallback;
+  const fallback = record.carapaceStreamFallback;
   if (!fallback || typeof fallback !== "object" || Array.isArray(fallback)) {
     return false;
   }

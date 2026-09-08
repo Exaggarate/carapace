@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { AgentToolResult } from "../../agents/runtime/index.js";
 import type { ExecutionIdentityAdmissionToken } from "../../audit/execution-identity-admission.js";
 import type { SourceReplyDeliveryMode } from "../../auto-reply/get-reply-options.types.js";
@@ -13,7 +13,7 @@ import type {
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
 import type { InternalChannelThreadingToolContext } from "../../channels/threading-tool-context-internal.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { OutboundMediaAccess } from "../../media/load-options.js";
 import type { GatewayClientMode, GatewayClientName } from "../../utils/message-channel.js";
 import type { OutboundDeliveryResult } from "./deliver-types.js";
@@ -40,7 +40,7 @@ export type MessageActionGateway = {
 };
 
 export type MessageActionInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   action: ChannelMessageActionName;
   params: Record<string, unknown>;
   /** @internal Identifies model-authored calls for lossy input normalization. */
@@ -257,7 +257,7 @@ export function resolveMessageActionMessageId(payload: unknown): string | undefi
 }
 
 export type ResolvedActionContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   params: Record<string, unknown>;
   idempotencyKey?: string;
   channel: ChannelId;

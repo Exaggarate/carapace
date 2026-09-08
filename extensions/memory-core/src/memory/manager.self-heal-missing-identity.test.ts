@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeAllMemorySearchManagers, getMemorySearchManager } from "./index.js";
 import type { MemoryIndexManager } from "./manager.js";
@@ -20,17 +20,17 @@ const createEmbeddingProviderMock = vi.hoisted(() =>
     providerUnavailableReason: "No embeddings provider available.",
   })),
 );
-const originalSelfHealStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalSelfHealStateDir = process.env.CARAPACE_STATE_DIR;
 
 function setSelfHealStateDir(stateDir: string): void {
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", stateDir);
 }
 
 function restoreSelfHealStateDir(): void {
   if (originalSelfHealStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalSelfHealStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", originalSelfHealStateDir);
   }
 }
 
@@ -56,7 +56,7 @@ describe("memory manager self-heal missing identity with FTS-only chunks", () =>
   }
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-self-heal-91167-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-mem-self-heal-91167-"));
   });
 
   beforeEach(async () => {
@@ -80,7 +80,7 @@ describe("memory manager self-heal missing identity with FTS-only chunks", () =>
     await closeAllMemorySearchManagers();
     // The agent close releases its leases through shared state and reopens it, so the
     // shared handle is released second; otherwise Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     if (fixtureRoot) {
       await fs.rm(fixtureRoot, { recursive: true, force: true });
@@ -114,7 +114,7 @@ describe("memory manager self-heal missing identity with FTS-only chunks", () =>
         },
         list: [{ id: "main", default: true }],
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     const result = await getMemorySearchManager({
       cfg,
       agentId: "main",
@@ -129,7 +129,7 @@ describe("memory manager self-heal missing identity with FTS-only chunks", () =>
   }
 
   function seedChunksWithNoMeta(model = "fts-only"): void {
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     db.exec(`
       INSERT INTO memory_index_chunks (id, path, source, start_line, end_line, hash, model, text, embedding, updated_at)
         VALUES ('chunk-1', 'MEMORY.md', 'memory', 1, 3, 'hash-1', '${model}', 'Alpha topic keep note', '[]', ${Date.now()});

@@ -11,7 +11,7 @@ import {
 } from "../../sessions/transcript-events.js";
 import { getRuntimeConfig } from "../io.js";
 import { tryResolveLegacyCompatibilityAgentId } from "../legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import { updateSessionEntry } from "./session-accessor.entry-mutation.js";
 import {
@@ -44,7 +44,7 @@ import {
 import type { SessionEntry } from "./types.js";
 
 function resolveTranscriptTurnAgentId(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   scopeAgentId?: string;
   sessionKey: string;
   storePath?: string;
@@ -399,7 +399,7 @@ async function prepareTranscriptTurnTarget(
   scope: SessionTranscriptWriteScope & {
     sessionStore?: Record<string, SessionEntry>;
   },
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const sessionKey = scope.sessionKey?.trim();
   if (!sessionKey || !scope.sessionId) {
@@ -440,7 +440,7 @@ async function resolveTranscriptTurnTarget(
     sessionEntry?: SessionEntry;
     sessionStore?: Record<string, SessionEntry>;
   },
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const target = await prepareTranscriptTurnTarget(scope, config);
   const resolved = scope.sessionStore

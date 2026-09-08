@@ -55,7 +55,7 @@ describe("dispatchInteraction", () => {
   it("reports a visible failure when a deferred command handler throws", async () => {
     // Regression: a throwing handler used to leave the deferred interaction
     // pending forever, so Discord showed a spinner that never resolved and the
-    // only trace was a Gateway log line. See openclaw#77716.
+    // only trace was a Gateway log line. See carapace#77716.
     const run = vi.fn(async () => {
       throw new Error("prepared model catalog owner config was replaced during the read");
     });
@@ -108,7 +108,7 @@ describe("dispatchInteraction", () => {
     // used to interpolate the exception message. That both disclosed internal
     // detail and let Discord mention-parse whatever the handler threw.
     const run = vi.fn(async () => {
-      throw new Error("@everyone broke the catalog at /Users/someone/.openclaw");
+      throw new Error("@everyone broke the catalog at /Users/someone/.carapace");
     });
     class MentionThrowingCommand extends Command {
       override name = "boom";
@@ -131,7 +131,7 @@ describe("dispatchInteraction", () => {
       ),
     ).rejects.toThrow("@everyone broke the catalog");
 
-    for (const leak of ["@everyone", "/Users/someone/.openclaw"]) {
+    for (const leak of ["@everyone", "/Users/someone/.carapace"]) {
       expect(patch).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({

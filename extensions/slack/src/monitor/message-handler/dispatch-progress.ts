@@ -7,10 +7,10 @@ import {
   resolveChannelStreamingPreviewToolProgress,
   resolveChannelStreamingSuppressDefaultToolProgressMessages,
   type ChannelProgressDraftCompositorSnapshot,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { ReplyDispatchKind, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { ReplyDispatchKind, ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import { createSlackDraftStream } from "../../draft-stream.js";
 import { formatSlackError } from "../../errors.js";
 import { SLACK_EDIT_TEXT_MAX_BYTES, SLACK_TEXT_LIMIT } from "../../limits.js";

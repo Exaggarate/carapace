@@ -1,4 +1,4 @@
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
 import { getFileLockProcessStartTime, isPidDefinitelyDead } from "../shared/pid-alive.js";
 import { isLockOwnerDefinitelyStale } from "./stale-lock-file.js";
 

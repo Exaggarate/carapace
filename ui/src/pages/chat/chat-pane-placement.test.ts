@@ -181,7 +181,7 @@ describe("chat pane placement", () => {
 
   it.each([
     {
-      runtimeId: "openclaw",
+      runtimeId: "carapace",
       executionMode: "worker-turn",
       compatibleSingleMode: "worker-only",
       incompatibleSingleMode: "remote-only",
@@ -430,7 +430,7 @@ describe("chat pane placement", () => {
   });
 
   it.each([
-    { runtimeId: "openclaw", executionMode: "worker-turn" },
+    { runtimeId: "carapace", executionMode: "worker-turn" },
     { runtimeId: "codex", executionMode: "remote-exec" },
   ] as const)(
     "moves a $runtimeId session to a supported paired device",
@@ -530,7 +530,7 @@ describe("chat pane placement", () => {
     },
     {
       name: "worker execution remains disabled at capacity",
-      runtimeId: "openclaw",
+      runtimeId: "carapace",
       executionMode: "worker-turn",
       devicePlacement: { requiredNodeCommands: [], consumesWorkerSlot: true },
       availableSlots: 0,

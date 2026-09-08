@@ -3,14 +3,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   resolveSessionStorePathCore,
   resolveSessionTranscriptsDirForAgent,
 } from "../config/sessions/paths.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import {
   captureEnv,
@@ -39,11 +39,11 @@ import {
 } from "./doctor-state-integrity.test-support.js";
 
 const WORKSPACE_BACKUP_TIP =
-  "- Tip: back up the agent workspace in a private git repo; keep ~/.openclaw out of git (credentials, sessions). Details: /concepts/agent-workspace#git-backup-recommended";
+  "- Tip: back up the agent workspace in a private git repo; keep ~/.carapace out of git (credentials, sessions). Details: /concepts/agent-workspace#git-backup-recommended";
 
 describe("workspace backup tip", () => {
   it("recognizes direct, deeply nested, and symlinked Git workspaces without duplicate tips", async () => {
-    await withTestDir({ prefix: "openclaw-doctor-workspace-git-" }, async (tempDir) => {
+    await withTestDir({ prefix: "carapace-doctor-workspace-git-" }, async (tempDir) => {
       const repoRoot = path.join(tempDir, "repo");
       const nestedWorkspace = path.join(repoRoot, "agents", "direct");
       const deeplyNestedWorkspace = path.join(
@@ -85,9 +85,9 @@ vi.mock("../channels/plugins/persisted-auth-state.js", () => ({
 }));
 
 function createAgentDir(agentId: string, includeNestedAgentDir = true) {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is not set");
+    throw new Error("CARAPACE_STATE_DIR is not set");
   }
   const targetDir = includeNestedAgentDir
     ? path.join(stateDir, "agents", agentId, "agent")
@@ -95,7 +95,7 @@ function createAgentDir(agentId: string, includeNestedAgentDir = true) {
   fs.mkdirSync(targetDir, { recursive: true });
 }
 
-async function runStateIntegrity(cfg: OpenClawConfig) {
+async function runStateIntegrity(cfg: CarapaceConfig) {
   const effectiveConfig = withMainAgentRoster(cfg);
   setupSessionState(effectiveConfig, process.env, process.env.HOME ?? "");
   const confirmRuntimeRepair = vi.fn(async () => false);
@@ -108,17 +108,17 @@ describe("structured state integrity findings", () => {
   let tempHome = "";
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["HOME", "OPENCLAW_HOME", "OPENCLAW_STATE_DIR"]);
-    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-state-integrity-"));
+    envSnapshot = captureEnv(["HOME", "CARAPACE_HOME", "CARAPACE_STATE_DIR"]);
+    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-state-integrity-"));
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempHome, ".openclaw"));
+    setTestEnvValue("CARAPACE_HOME", tempHome);
+    setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempHome, ".carapace"));
     noteMock.mockClear();
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     fs.rmSync(tempHome, { recursive: true, force: true });
   });
@@ -133,18 +133,18 @@ describe("structured state integrity findings", () => {
 
     expect(issue).toEqual({
       kind: "missing-state-dir",
-      path: path.join(tempHome, ".openclaw"),
+      path: path.join(tempHome, ".carapace"),
     });
     expect(stateIntegrityIssueToHealthFinding(issue)).toMatchObject({
       checkId: "core/doctor/state-integrity",
       severity: "error",
-      path: path.join(tempHome, ".openclaw"),
-      fixHint: "Run `openclaw doctor --fix` to create the state directory.",
+      path: path.join(tempHome, ".carapace"),
+      fixHint: "Run `carapace doctor --fix` to create the state directory.",
     });
     expect(stateIntegrityIssueToRepairEffect(issue)).toEqual({
       kind: "state",
       action: "would-create-state-dir",
-      target: path.join(tempHome, ".openclaw"),
+      target: path.join(tempHome, ".carapace"),
       dryRunSafe: false,
     });
   });
@@ -153,8 +153,8 @@ describe("structured state integrity findings", () => {
     if (process.platform === "win32") {
       return;
     }
-    const stateDir = path.join(tempHome, ".openclaw");
-    const configPath = path.join(tempHome, "openclaw.json");
+    const stateDir = path.join(tempHome, ".carapace");
+    const configPath = path.join(tempHome, "carapace.json");
     fs.mkdirSync(stateDir, { recursive: true, mode: 0o755 });
     fs.chmodSync(stateDir, 0o755);
     fs.writeFileSync(configPath, "{}\n", { mode: 0o644 });
@@ -186,8 +186,8 @@ describe("structured state integrity findings", () => {
     if (process.platform === "win32") {
       return;
     }
-    const stateDir = path.join(tempHome, ".openclaw");
-    const configPath = path.join(tempHome, "openclaw.json");
+    const stateDir = path.join(tempHome, ".carapace");
+    const configPath = path.join(tempHome, "carapace.json");
     fs.writeFileSync(configPath, "{}\n", { mode: 0o644 });
     fs.chmodSync(configPath, 0o644);
 
@@ -223,7 +223,7 @@ describe("structured state integrity findings", () => {
   });
 
   it("accepts missing session directories on a fresh RPC-onboarded profile", () => {
-    const stateDir = path.join(tempHome, ".openclaw");
+    const stateDir = path.join(tempHome, ".carapace");
     fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
     const cfg = withMainAgentRoster({});
 
@@ -236,7 +236,7 @@ describe("structured state integrity findings", () => {
   });
 
   it("does not warn or prompt for missing session directories", async () => {
-    const stateDir = path.join(tempHome, ".openclaw");
+    const stateDir = path.join(tempHome, ".carapace");
     fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
     const confirmRuntimeRepair = vi.fn(async () => false);
 
@@ -258,7 +258,7 @@ describe("structured state integrity findings", () => {
   });
 
   it("reports an existing session directory that is not writable", () => {
-    const stateDir = path.join(tempHome, ".openclaw");
+    const stateDir = path.join(tempHome, ".carapace");
     const sessionsDir = resolveSessionTranscriptsDirForAgent("main", process.env, () => tempHome);
     const storePath = path.join(stateDir, "custom-store", "sessions.json");
     fs.mkdirSync(sessionsDir, { recursive: true, mode: 0o700 });
@@ -299,31 +299,31 @@ describe("doctor state integrity oauth dir checks", () => {
   beforeEach(() => {
     envSnapshot = captureEnv([
       "HOME",
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_OAUTH_DIR",
-      "OPENCLAW_AGENT_DIR",
+      "CARAPACE_HOME",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_OAUTH_DIR",
+      "CARAPACE_AGENT_DIR",
     ]);
-    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-state-integrity-"));
-    const stateDir = path.join(tempHome, ".openclaw");
+    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-state-integrity-"));
+    const stateDir = path.join(tempHome, ".carapace");
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    deleteTestEnvValue("OPENCLAW_OAUTH_DIR");
-    deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+    setTestEnvValue("CARAPACE_HOME", tempHome);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    deleteTestEnvValue("CARAPACE_OAUTH_DIR");
+    deleteTestEnvValue("CARAPACE_AGENT_DIR");
     fs.mkdirSync(stateDir, { recursive: true, mode: 0o700 });
     noteMock.mockClear();
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     fs.rmSync(tempHome, { recursive: true, force: true });
   });
 
   it("does not prompt for oauth dir when no whatsapp/pairing config is active", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const confirmRuntimeRepair = await runStateIntegrity(cfg);
     expect(hasRepairPromptMessage(confirmRuntimeRepair, "Create OAuth dir at")).toBe(false);
     const text = stateIntegrityText();
@@ -332,7 +332,7 @@ describe("doctor state integrity oauth dir checks", () => {
   });
 
   it("does not prompt for oauth dir when whatsapp is configured without persisted auth state", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         whatsapp: {},
       },
@@ -344,7 +344,7 @@ describe("doctor state integrity oauth dir checks", () => {
   });
 
   it("prompts for oauth dir when a channel dmPolicy is pairing", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         telegram: {
           dmPolicy: "pairing",
@@ -355,9 +355,9 @@ describe("doctor state integrity oauth dir checks", () => {
     expect(hasRepairPromptMessage(confirmRuntimeRepair, "Create OAuth dir at")).toBe(true);
   });
 
-  it("prompts for oauth dir when OPENCLAW_OAUTH_DIR is explicitly configured", async () => {
-    process.env.OPENCLAW_OAUTH_DIR = path.join(tempHome, ".oauth");
-    const cfg: OpenClawConfig = {};
+  it("prompts for oauth dir when CARAPACE_OAUTH_DIR is explicitly configured", async () => {
+    process.env.CARAPACE_OAUTH_DIR = path.join(tempHome, ".oauth");
+    const cfg: CarapaceConfig = {};
     const confirmRuntimeRepair = await runStateIntegrity(cfg);
     expect(hasRepairPromptMessage(confirmRuntimeRepair, "Create OAuth dir at")).toBe(true);
     expect(stateIntegrityText()).toContain("CRITICAL: OAuth dir missing");
@@ -433,16 +433,16 @@ describe("doctor state integrity oauth dir checks", () => {
     expect(text).toContain("Examples: main");
   });
 
-  it("does not let OPENCLAW_AGENT_DIR hide an unconfigured agent dir", async () => {
+  it("does not let CARAPACE_AGENT_DIR hide an unconfigured agent dir", async () => {
     createAgentDir("legacy");
     writeConfigMachineState("auth.sharedStore", { location: "state-db" });
     const legacyAgentDir = path.join(
-      process.env.OPENCLAW_STATE_DIR ?? "",
+      process.env.CARAPACE_STATE_DIR ?? "",
       "agents",
       "legacy",
       "agent",
     );
-    setTestEnvValue("OPENCLAW_AGENT_DIR", legacyAgentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", legacyAgentDir);
 
     const text = await runStateIntegrityText({
       agents: {
@@ -455,7 +455,7 @@ describe("doctor state integrity oauth dir checks", () => {
   });
 
   it("warns about tombstoned subagent restart recovery sessions", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     writeSessionStore(cfg, {
       "agent:main:subagent:wedged-child": {
         sessionId: "session-wedged-child",
@@ -477,14 +477,14 @@ describe("doctor state integrity oauth dir checks", () => {
     const text = stateIntegrityText();
     expect(text).toContain("automatic restart recovery tombstoned");
     expect(text).toContain("agent:main:subagent:wedged-child");
-    expect(text).toContain("openclaw tasks maintenance --apply");
+    expect(text).toContain("carapace tasks maintenance --apply");
     expect(hasRepairPromptMessage(confirmRuntimeRepair, "Clear stale aborted recovery flags")).toBe(
       true,
     );
   });
 
   it("clears stale aborted recovery flags for tombstoned subagent sessions when approved", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const sessionKey = "agent:main:subagent:wedged-child";
     writeSessionStore(cfg, {
       [sessionKey]: {
@@ -519,7 +519,7 @@ describe("doctor state integrity oauth dir checks", () => {
   it("checks case-mismatched agent dirs using native filesystem reachability", async () => {
     createAgentDir("Research");
     const configuredAgentDirExists = fs.existsSync(
-      path.join(process.env.OPENCLAW_STATE_DIR ?? "", "agents", "research", "agent"),
+      path.join(process.env.CARAPACE_STATE_DIR ?? "", "agents", "research", "agent"),
     );
 
     const text = await runStateIntegrityText({
@@ -539,32 +539,32 @@ describe("doctor state directory discovery", () => {
     { homeSource: "HOME", activeDefault: true, defaultExists: true, warns: false },
     { homeSource: "HOME", activeDefault: false, defaultExists: false, warns: false },
     { homeSource: "USERPROFILE", activeDefault: false, defaultExists: true, warns: true },
-    { homeSource: "OPENCLAW_HOME", activeDefault: false, defaultExists: true, warns: true },
-    { homeSource: "OPENCLAW_HOME", activeDefault: false, defaultExists: false, warns: false },
+    { homeSource: "CARAPACE_HOME", activeDefault: false, defaultExists: true, warns: true },
+    { homeSource: "CARAPACE_HOME", activeDefault: false, defaultExists: false, warns: false },
   ])(
     "compares only the effective home ($homeSource, activeDefault=$activeDefault, defaultExists=$defaultExists)",
     async ({ homeSource, activeDefault, defaultExists, warns }) => {
-      await withTestDir({ prefix: "openclaw-doctor-discovery-" }, async (root) => {
+      await withTestDir({ prefix: "carapace-doctor-discovery-" }, async (root) => {
         const osHome = path.join(root, "os-home");
         const effectiveHome =
-          homeSource === "OPENCLAW_HOME" ? path.join(root, "relocated") : osHome;
-        const defaultState = path.join(effectiveHome, ".openclaw");
+          homeSource === "CARAPACE_HOME" ? path.join(root, "relocated") : osHome;
+        const defaultState = path.join(effectiveHome, ".carapace");
         const activeState = activeDefault ? defaultState : path.join(root, "selected-state");
         fs.mkdirSync(activeState, { recursive: true, mode: 0o700 });
         if (defaultExists) {
           fs.mkdirSync(defaultState, { recursive: true, mode: 0o700 });
         }
-        if (homeSource === "OPENCLAW_HOME") {
-          fs.mkdirSync(path.join(osHome, ".openclaw"), { recursive: true, mode: 0o700 });
+        if (homeSource === "CARAPACE_HOME") {
+          fs.mkdirSync(path.join(osHome, ".carapace"), { recursive: true, mode: 0o700 });
         }
         await withEnvAsync(
           {
             HOME: homeSource === "USERPROFILE" ? undefined : osHome,
             USERPROFILE: osHome,
-            OPENCLAW_HOME: homeSource === "OPENCLAW_HOME" ? effectiveHome : undefined,
-            OPENCLAW_STATE_DIR: activeState,
-            OPENCLAW_AGENT_DIR: undefined,
-            OPENCLAW_OAUTH_DIR: undefined,
+            CARAPACE_HOME: homeSource === "CARAPACE_HOME" ? effectiveHome : undefined,
+            CARAPACE_STATE_DIR: activeState,
+            CARAPACE_AGENT_DIR: undefined,
+            CARAPACE_OAUTH_DIR: undefined,
           },
           async () => {
             const attemptedProbes: string[] = [];
@@ -612,9 +612,9 @@ describe("doctor state directory discovery", () => {
               expect(text.includes("Multiple state directories detected")).toBe(warns);
               if (warns) {
                 expect(text).toContain(
-                  homeSource === "OPENCLAW_HOME"
-                    ? "  - $OPENCLAW_HOME/.openclaw"
-                    : "  - ~/.openclaw",
+                  homeSource === "CARAPACE_HOME"
+                    ? "  - $CARAPACE_HOME/.carapace"
+                    : "  - ~/.carapace",
                 );
                 expect(text).toContain(`Active state dir: ${activeState}`);
               }
@@ -623,8 +623,8 @@ describe("doctor state directory discovery", () => {
               readdirSpy.mockRestore();
               existsSpy.mockRestore();
               statSpy.mockRestore();
-              closeOpenClawAgentDatabasesForTest();
-              closeOpenClawStateDatabaseForTest();
+              closeCarapaceAgentDatabasesForTest();
+              closeCarapaceStateDatabaseForTest();
             }
           },
         );

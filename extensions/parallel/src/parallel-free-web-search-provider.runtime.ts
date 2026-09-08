@@ -2,7 +2,7 @@ import {
   mergeScopedSearchConfig,
   resolveProviderWebSearchPluginConfig,
   type SearchConfigRecord,
-} from "openclaw/plugin-sdk/provider-web-search";
+} from "carapace/plugin-sdk/provider-web-search";
 import { PARALLEL_MCP_SEARCH_URL, runParallelMcpSearch } from "./parallel-mcp-search.runtime.js";
 import { executeParallelSearchRequest } from "./parallel-search-normalize.js";
 

@@ -68,7 +68,7 @@ export function renderDocsLink(url: string, label: unknown): TemplateResult {
 export function renderSettingsHelpTrigger(props: SettingsHelpTriggerProps): TemplateResult {
   const helpIcon = props.icon === "info" ? icons.info : icons.circleQuestionMark;
   return html`
-    <openclaw-tooltip .content=${props.tooltip}>
+    <carapace-tooltip .content=${props.tooltip}>
       <button
         id=${props.id}
         type="button"
@@ -79,7 +79,7 @@ export function renderSettingsHelpTrigger(props: SettingsHelpTriggerProps): Temp
       >
         <span aria-hidden="true">${helpIcon}</span>
       </button>
-    </openclaw-tooltip>
+    </carapace-tooltip>
   `;
 }
 
@@ -514,7 +514,7 @@ export function renderSettingsSecretInput(props: {
         ?disabled=${props.disabled ?? false}
         @input=${(e: Event) => props.onInput((e.target as HTMLInputElement).value)}
       />
-      <openclaw-tooltip .content=${props.visible ? props.hideLabel : props.showLabel}>
+      <carapace-tooltip .content=${props.visible ? props.hideLabel : props.showLabel}>
         <button
           type="button"
           class="settings-secret__toggle"
@@ -525,7 +525,7 @@ export function renderSettingsSecretInput(props: {
         >
           ${props.visible ? icons.eye : icons.eyeOff}
         </button>
-      </openclaw-tooltip>
+      </carapace-tooltip>
     </span>
   `;
 }

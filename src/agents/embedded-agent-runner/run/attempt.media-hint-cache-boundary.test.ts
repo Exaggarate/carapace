@@ -2,7 +2,7 @@
 import {
   SYSTEM_PROMPT_CACHE_BOUNDARY,
   splitSystemPromptCacheBoundary,
-} from "@openclaw/ai/internal/shared";
+} from "@carapace/ai/internal/shared";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createHookRunner } from "../../../plugins/hooks.js";
 import { prepareSystemAgentRunAdmission } from "../../admitted-run-context.js";

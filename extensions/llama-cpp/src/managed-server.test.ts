@@ -15,7 +15,7 @@ vi.mock("./llama-server-install.js", async (importOriginal) => ({
   resolveManagedLlamaServerPaths: installMocks.resolveManagedLlamaServerPaths,
 }));
 
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { selectLlamaServerAsset } from "./llama-server-install.js";
 import {
   ensureLlamaCppModel,
@@ -815,7 +815,7 @@ describe("managed llama-server", () => {
   it("reports a missing local GGUF with the setup repair path", async () => {
     await expect(
       ensureLlamaCppModel({
-        source: path.join(os.tmpdir(), "missing-openclaw-model.gguf"),
+        source: path.join(os.tmpdir(), "missing-carapace-model.gguf"),
         cacheDir: os.tmpdir(),
         download: false,
       }),

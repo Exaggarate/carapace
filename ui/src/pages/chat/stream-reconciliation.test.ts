@@ -93,14 +93,14 @@ describe("stream reconciliation", () => {
     { name: "blank item id", fallback: { itemId: " " }, text: "Other answer", tail: "BC" },
   ])("subtracts the cumulative prefix across an interleaved $name", ({ fallback, text, tail }) => {
     const messages = [
-      { role: "assistant", content: "A", __openclaw: { idempotencyKey: "active-run" } },
+      { role: "assistant", content: "A", __carapace: { idempotencyKey: "active-run" } },
       {
         role: "assistant",
         content: text,
-        __openclaw: { idempotencyKey: "active-run" },
-        ...(fallback ? { openclawStreamFallback: { source: "segment", ...fallback } } : {}),
+        __carapace: { idempotencyKey: "active-run" },
+        ...(fallback ? { carapaceStreamFallback: { source: "segment", ...fallback } } : {}),
       },
-      { role: "assistant", content: "B", __openclaw: { idempotencyKey: "active-run" } },
+      { role: "assistant", content: "B", __carapace: { idempotencyKey: "active-run" } },
     ];
 
     expect(resolveCumulativeAssistantTail(messages, "ABC", "active-run")).toBe(tail);
@@ -111,13 +111,13 @@ describe("stream reconciliation", () => {
       {
         role: "assistant",
         content: "ABC",
-        __openclaw: { idempotencyKey: "active-run" },
-        openclawStreamFallback: { source: "segment", itemId: "commentary" },
+        __carapace: { idempotencyKey: "active-run" },
+        carapaceStreamFallback: { source: "segment", itemId: "commentary" },
       },
       { role: "assistant", content: "ABC" },
       { role: "user", content: "Current request" },
-      { role: "assistant", content: "A", __openclaw: { idempotencyKey: "active-run" } },
-      { role: "assistant", content: "B", __openclaw: { idempotencyKey: "active-run" } },
+      { role: "assistant", content: "A", __carapace: { idempotencyKey: "active-run" } },
+      { role: "assistant", content: "B", __carapace: { idempotencyKey: "active-run" } },
     ];
 
     expect(resolveCumulativeAssistantTail(messages, "ABC", "active-run")).toBe("C");
@@ -175,8 +175,8 @@ describe("stream reconciliation", () => {
         role: "assistant",
         content: [{ type: "text", text: "Saved commentary" }],
         timestamp: 1,
-        __openclaw: { id: "saved", seq: 1, runId: persistedRunId },
-        openclawStreamFallback: { itemId: "shared-item", source: "segment" },
+        __carapace: { id: "saved", seq: 1, runId: persistedRunId },
+        carapaceStreamFallback: { itemId: "shared-item", source: "segment" },
       };
       const segment = {
         text: "Current commentary",
@@ -216,7 +216,7 @@ describe("stream reconciliation", () => {
         role: "assistant",
         content: [{ type: "text", text: "already visible" }],
         timestamp: 2,
-        openclawStreamFallback: {
+        carapaceStreamFallback: {
           itemId: "preamble-1",
           replacementText: "already visible",
           source: "segment",
@@ -226,7 +226,7 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "steer this run",
         timestamp: 3,
-        __openclaw: { idempotencyKey: "steer-run:user" },
+        __carapace: { idempotencyKey: "steer-run:user" },
       },
     ];
 
@@ -265,7 +265,7 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "steer this run",
         timestamp: 4,
-        __openclaw: { idempotencyKey: "steer-run:user" },
+        __carapace: { idempotencyKey: "steer-run:user" },
       },
     ];
 
@@ -518,7 +518,7 @@ describe("stream reconciliation", () => {
       role: "user",
       content: "Run A",
       timestamp: 1,
-      __openclaw: { idempotencyKey: "run-a:user" },
+      __carapace: { idempotencyKey: "run-a:user" },
     };
     const fallbackA = materializeVisibleStreamState(
       [userA],
@@ -534,7 +534,7 @@ describe("stream reconciliation", () => {
       role: "user",
       content: "Run B",
       timestamp: 3,
-      __openclaw: { idempotencyKey: "run-b:user" },
+      __carapace: { idempotencyKey: "run-b:user" },
     };
     const terminalB = rememberLiveTerminalRun(
       {
@@ -565,13 +565,13 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "Original",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "active-run:user" },
+        __carapace: { idempotencyKey: "active-run:user" },
       },
       {
         role: "user",
         content: "Steer",
         timestamp: 2,
-        __openclaw: { idempotencyKey: "steer-run:user", steerTargetRunId: "active-run" },
+        __carapace: { idempotencyKey: "steer-run:user", steerTargetRunId: "active-run" },
       },
     ];
 
@@ -619,19 +619,19 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "Original prompt",
         timestamp: 2,
-        __openclaw: { idempotencyKey: "active-run:user" },
+        __carapace: { idempotencyKey: "active-run:user" },
       },
       {
         role: "assistant",
         content: "Before steer.",
         timestamp: 100,
-        __openclaw: { idempotencyKey: "active-run" },
+        __carapace: { idempotencyKey: "active-run" },
       },
       {
         role: "user",
         content: "Steer prompt",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "steer-run:user" },
+        __carapace: { idempotencyKey: "steer-run:user" },
       },
     ];
 
@@ -687,19 +687,19 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "Original prompt",
         timestamp: 3,
-        __openclaw: { idempotencyKey: "active-run:user" },
+        __carapace: { idempotencyKey: "active-run:user" },
       },
       {
         role: "user",
         content: "First steer",
         timestamp: 2,
-        __openclaw: { idempotencyKey: "steer-one:user" },
+        __carapace: { idempotencyKey: "steer-one:user" },
       },
       {
         role: "user",
         content: "Second steer",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "steer-two:user" },
+        __carapace: { idempotencyKey: "steer-two:user" },
       },
     ];
 
@@ -870,7 +870,7 @@ describe("stream reconciliation", () => {
         role: "user",
         content: "latest ask",
         timestamp: 1,
-        __openclaw: { idempotencyKey: "active-run:user" },
+        __carapace: { idempotencyKey: "active-run:user" },
       },
     ];
     const materialized = materializeVisibleStreamState(messages, state, visibleStreamOptions);

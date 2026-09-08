@@ -6,7 +6,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as commandExec from "../../process/exec.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { getRegistryWorktree } from "./registry.js";
 import { ManagedWorktreeService } from "./service.js";
 import {
@@ -45,11 +45,11 @@ describe("ManagedWorktreeService capacity", () => {
 
   beforeEach(async () => {
     root = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worktree-capacity-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worktree-capacity-")),
     );
     repo = await initializeRepository(root);
     stateDir = path.join(root, "state");
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     service = new ManagedWorktreeService({ env });
     const stats = fsSync.statfsSync(root);
     availableBytes = 100 * GiB;
@@ -68,7 +68,7 @@ describe("ManagedWorktreeService capacity", () => {
 
   afterEach(async () => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -83,7 +83,7 @@ describe("ManagedWorktreeService capacity", () => {
       service.create({ repoRoot: repo, name: "no-space", baseRef: "HEAD" }),
     ).rejects.toThrow(/disk space/i);
     expect(service.listRegistryRecords()).toEqual([]);
-    expect(await git(repo, "branch", "--list", "openclaw/no-space")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/no-space")).toBe("");
     expect(await git(repo, "worktree", "list", "--porcelain")).not.toContain("no-space");
   });
 
@@ -98,13 +98,13 @@ describe("ManagedWorktreeService capacity", () => {
       service.create({ repoRoot: repo, name: "provision-space", baseRef: "HEAD" }),
     ).rejects.toThrow(/disk space/i);
     expect(service.listRegistryRecords()).toEqual([]);
-    expect(await git(repo, "branch", "--list", "openclaw/provision-space")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/provision-space")).toBe("");
   });
 
   it("budgets repository setup separately from a small Git checkout", async () => {
-    const script = path.join(repo, ".openclaw", "worktree-setup.sh");
+    const script = path.join(repo, ".carapace", "worktree-setup.sh");
     await fs.mkdir(path.dirname(script));
-    await fs.writeFile(script, '#!/bin/sh\nprintf ran > "$OPENCLAW_SOURCE_TREE_PATH/setup-ran"\n', {
+    await fs.writeFile(script, '#!/bin/sh\nprintf ran > "$CARAPACE_SOURCE_TREE_PATH/setup-ran"\n', {
       mode: 0o755,
     });
     availableBytes = 18 * GiB;
@@ -123,7 +123,7 @@ describe("ManagedWorktreeService capacity", () => {
       service.create({ repoRoot: repo, name: "unknown-space", baseRef: "HEAD" }),
     ).rejects.toThrow(/determine.*disk space|disk space.*unavailable/i);
     expect(service.listRegistryRecords()).toEqual([]);
-    expect(await git(repo, "branch", "--list", "openclaw/unknown-space")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/unknown-space")).toBe("");
   });
 
   it("creates beyond 100 live checkouts without removing prior worktrees", async () => {
@@ -173,7 +173,7 @@ describe("ManagedWorktreeService capacity", () => {
     const created = service.listRegistryRecords()[0]!;
     expect(await fs.readFile(path.join(created.path, "README.md"), "utf8")).toBe("base\n");
     const rejectedRepo = created.repoRoot === repo ? otherRepo : repo;
-    expect(await git(rejectedRepo, "branch", "--list", "openclaw/*")).toBe("");
+    expect(await git(rejectedRepo, "branch", "--list", "carapace/*")).toBe("");
   });
 
   it("reuses a valid owned checkout at the cleanup target and below the reserve", async () => {
@@ -234,10 +234,10 @@ describe("ManagedWorktreeService capacity", () => {
   );
 
   it("checks space again before repository setup and rolls back its unbound checkout", async () => {
-    const script = path.join(repo, ".openclaw", "worktree-setup.sh");
+    const script = path.join(repo, ".carapace", "worktree-setup.sh");
     const marker = path.join(repo, "setup-ran");
     await fs.mkdir(path.dirname(script));
-    await fs.writeFile(script, '#!/bin/sh\nprintf ran > "$OPENCLAW_SOURCE_TREE_PATH/setup-ran"\n', {
+    await fs.writeFile(script, '#!/bin/sh\nprintf ran > "$CARAPACE_SOURCE_TREE_PATH/setup-ran"\n', {
       mode: 0o755,
     });
     const realRun = commandExec.runCommandWithTimeout;
@@ -253,7 +253,7 @@ describe("ManagedWorktreeService capacity", () => {
     ).rejects.toThrow(/disk space/i);
     await expect(fs.stat(marker)).rejects.toMatchObject({ code: "ENOENT" });
     expect(service.listRegistryRecords()).toEqual([]);
-    expect(await git(repo, "branch", "--list", "openclaw/setup-space")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/setup-space")).toBe("");
   });
 
   it("archives a large unchanged checkout with space for only its snapshot writes", async () => {

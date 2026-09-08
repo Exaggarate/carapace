@@ -14,7 +14,7 @@ import {
 import { prepareUpdateFailureReport, submitUpdateFailureReport } from "./update-failure-report.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const issueUrl = "https://github.com/openclaw/openclaw/issues/123";
+const issueUrl = "https://github.com/Exaggarate/carapace/issues/123";
 const authSuccess: Awaited<ReturnType<RunGithubCli>> = {
   started: true,
   status: 0,
@@ -24,7 +24,7 @@ const authSuccess: Awaited<ReturnType<RunGithubCli>> = {
 afterEach(() => vi.restoreAllMocks());
 
 async function setup() {
-  const stateDir = tempDirs.make("openclaw-report-transport-");
+  const stateDir = tempDirs.make("carapace-report-transport-");
   const prepared = await prepareUpdateFailureReport(
     {
       attemptId: "transport-guard",
@@ -40,7 +40,7 @@ async function setup() {
     { stateDir },
   );
   const receipt = () =>
-    readUpdateFailureReportReceipt(prepared.attemptId, { OPENCLAW_STATE_DIR: stateDir });
+    readUpdateFailureReportReceipt(prepared.attemptId, { CARAPACE_STATE_DIR: stateDir });
   const createCalls: string[] = [];
   const runGh = vi.fn<RunGithubCli>(async (args, options) => {
     if (args[0] === "auth") {
@@ -67,7 +67,7 @@ async function setup() {
 describe("update report shared transport boundary", () => {
   it("permits saved-only finalization from prepared without widening created or stale ownership", async () => {
     const { prepared, stateDir, receipt } = await setup();
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     reserveUpdateFailureReportReceipt(prepared.attemptId, "owner", prepared.previewDigest, env);
     expect(
       markUpdateFailureReportReceiptPrepared(
@@ -109,7 +109,7 @@ describe("update report shared transport boundary", () => {
   });
 
   it("binds saved-only Unicode reports to the exact shared body and distinct update attempts", async () => {
-    const stateDir = tempDirs.make("openclaw-report-long-body-");
+    const stateDir = tempDirs.make("carapace-report-long-body-");
     const input = {
       attemptId: "long-report-A",
       result: {

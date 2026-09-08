@@ -7,7 +7,7 @@ import {
   type HeartbeatToolResponse,
 } from "../auto-reply/heartbeat-tool-response.js";
 import { setReplyPayloadMetadata } from "../auto-reply/reply-payload.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { patchSessionEntryCore } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
@@ -43,7 +43,7 @@ describe("runHeartbeatOnce failure delivery", () => {
     tmpDir: string;
     storePath: string;
     target?: "telegram" | "none";
-  }): OpenClawConfig {
+  }): CarapaceConfig {
     return {
       agents: {
         defaults: {
@@ -55,7 +55,7 @@ describe("runHeartbeatOnce failure delivery", () => {
         telegram: { token: "test-token", allowFrom: ["*"], heartbeat: { showOk: false } },
       },
       session: { store: params.storePath },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   function createDeps(params: {
@@ -70,7 +70,7 @@ describe("runHeartbeatOnce failure delivery", () => {
     };
   }
 
-  function seedTelegramSession(storePath: string, cfg: OpenClawConfig) {
+  function seedTelegramSession(storePath: string, cfg: CarapaceConfig) {
     return seedMainSessionStore(storePath, cfg, {
       lastChannel: "telegram",
       lastProvider: "telegram",
@@ -79,7 +79,7 @@ describe("runHeartbeatOnce failure delivery", () => {
   }
 
   function runHeartbeat(
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     replySpy: HeartbeatDeps["getReplyFromConfig"],
     sendTelegram: ReturnType<typeof vi.fn>,
   ) {
@@ -91,7 +91,7 @@ describe("runHeartbeatOnce failure delivery", () => {
 
   function expectTelegramSend(
     sendTelegram: ReturnType<typeof vi.fn>,
-    params: { text: string; cfg: OpenClawConfig },
+    params: { text: string; cfg: CarapaceConfig },
   ) {
     expect(sendTelegram).toHaveBeenCalledTimes(1);
     expect(sendTelegram.mock.calls).toEqual([

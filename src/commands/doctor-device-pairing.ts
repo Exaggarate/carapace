@@ -1,11 +1,11 @@
 /** Doctor diagnostics for pending, paired, and locally cached device auth state. */
-import { normalizeUniqueSingleOrTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueSingleOrTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { quoteCliArg } from "../cli/quote-cli-arg.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HealthFinding } from "../flows/health-checks.js";
 import { callGateway } from "../gateway/call.js";
 import { loadDeviceAuthTokens } from "../infra/device-auth-store.js";
@@ -121,7 +121,7 @@ function normalizeLocalPairedDevice(device: PairedDevice): DoctorPairedDevice {
 }
 
 async function loadDoctorPairingSnapshot(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   healthOk: boolean;
 }): Promise<DoctorPairingSnapshot | null> {
   if (params.healthOk) {
@@ -225,8 +225,8 @@ function resolvePendingPairingIssue(
     displayName: pending.displayName,
     clientId: pending.clientId,
   });
-  const approveCommand = formatCliArgs(["openclaw", "devices", "approve", pending.requestId]);
-  const inspectCommand = formatCliArgs(["openclaw", "devices", "list"]);
+  const approveCommand = formatCliArgs(["carapace", "devices", "approve", pending.requestId]);
+  const inspectCommand = formatCliArgs(["carapace", "devices", "list"]);
   if (!paired) {
     return {
       kind: "first-time",
@@ -243,7 +243,7 @@ function resolvePendingPairingIssue(
       deviceLabel,
       approveCommand,
       inspectCommand,
-      removeCommand: formatCliArgs(["openclaw", "devices", "remove", pending.deviceId]),
+      removeCommand: formatCliArgs(["carapace", "devices", "remove", pending.deviceId]),
     };
   }
   const requestedRoles = normalizeUniqueSingleOrTrimmedStringList(
@@ -334,7 +334,7 @@ function collectPairedRecordIssues(snapshot: DoctorPairingSnapshot): PairedRecor
     for (const role of approvedRoles) {
       const token = findTokenSummary(device, role);
       const rotateCommand = formatCliArgs([
-        "openclaw",
+        "carapace",
         "devices",
         "rotate",
         "--device",
@@ -429,7 +429,7 @@ function collectLocalDeviceAuthIssues(snapshot: DoctorPairingSnapshot): LocalDev
       continue;
     }
     const rotateCommand = formatCliArgs([
-      "openclaw",
+      "carapace",
       "devices",
       "rotate",
       "--device",
@@ -467,7 +467,7 @@ function collectLocalDeviceAuthIssues(snapshot: DoctorPairingSnapshot): LocalDev
 }
 
 /** Warn about legacy devices/*.json files the startup SQLite import has not archived. */
-async function collectLegacyPairingStoreFindings(cfg: OpenClawConfig): Promise<HealthFinding[]> {
+async function collectLegacyPairingStoreFindings(cfg: CarapaceConfig): Promise<HealthFinding[]> {
   if (cfg.gateway?.mode === "remote") {
     return [];
   }
@@ -477,7 +477,7 @@ async function collectLegacyPairingStoreFindings(cfg: OpenClawConfig): Promise<H
   return (await listLegacyDevicePairingStoreFiles()).map((filePath): HealthFinding => ({
     checkId: DEVICE_PAIRING_CHECK_ID,
     severity: "warning",
-    message: `Legacy device pairing store ${filePath} has not been imported into the SQLite state store yet. The gateway imports and archives it at startup, so restart the gateway. If the file persists across restarts it is likely unreadable; OpenClaw refused to treat it as empty to avoid dropping approved pairings, so fix or move it aside, then restart.`,
+    message: `Legacy device pairing store ${filePath} has not been imported into the SQLite state store yet. The gateway imports and archives it at startup, so restart the gateway. If the file persists across restarts it is likely unreadable; Carapace refused to treat it as empty to avoid dropping approved pairings, so fix or move it aside, then restart.`,
     path: "devices.legacy-store",
     requirement: "pairing-store-legacy-file",
     fixHint:
@@ -530,7 +530,7 @@ function localDeviceAuthIssueToHealthFinding(issue: LocalDeviceAuthIssue): Healt
 }
 
 export async function collectDevicePairingHealthFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   healthOk?: boolean;
   env?: NodeJS.ProcessEnv;
 }): Promise<HealthFinding[]> {
@@ -540,7 +540,7 @@ export async function collectDevicePairingHealthFindings(params: {
   // Report this debt even without a reachable remote Gateway or local identity.
   const deviceAuth = detectLegacyDeviceAuth({ stateDir: resolveStateDir(params.env) });
   if (deviceAuth.sourcePresent) {
-    const fixCommand = formatCliCommand("openclaw doctor --fix", params.env);
+    const fixCommand = formatCliCommand("carapace doctor --fix", params.env);
     const fixHint = `Stop the Gateway and run ${fixCommand} to finish migration or cleanup.`;
     legacyStoreFindings.push({
       checkId: DEVICE_PAIRING_CHECK_ID,
@@ -568,7 +568,7 @@ export async function collectDevicePairingHealthFindings(params: {
 
 /** Render the same local migration and pairing findings as structured Doctor output. */
 export async function noteDevicePairingHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   healthOk: boolean;
   env?: NodeJS.ProcessEnv;
 }): Promise<void> {

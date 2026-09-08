@@ -4,12 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { normalizeSessionDeliveryState } from "../../utils/delivery-context.shared.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveSessionWorkStartError } from "./lifecycle.js";
 
 const cleanupRace = vi.hoisted(() => ({
@@ -56,13 +56,13 @@ describe("sessions cleanup applied summary", () => {
   afterEach(() => {
     cleanupRace.afterPreview = undefined;
     cleanupRace.postCommitFailureStorePath = undefined;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.each(["age", "count"] as const)(
     "archives durable conversations under %s pressure and agrees with its preview after reopening",
     async (pressure) => {
-      await withOpenClawTestState({}, async (state) => {
+      await withCarapaceTestState({}, async (state) => {
         const storePath = path.join(state.sessionsDir(), "sessions.json");
         const cfg = {
           session: {
@@ -74,7 +74,7 @@ describe("sessions cleanup applied summary", () => {
               pruneAfter: pressure === "age" ? "30d" : "365d",
             },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await state.writeConfig(cfg);
         const now = Date.now();
         const old = now - 31 * 24 * 60 * 60_000;
@@ -121,7 +121,7 @@ describe("sessions cleanup applied summary", () => {
         expect(result.previewResults[0]?.summary).toMatchObject(expected);
         expect(result.appliedSummaries[0]).toMatchObject(expected);
         expect(loadSessionEntry(scope("hook:disposable"))).toBeUndefined();
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         expect(loadSessionEntry(scope("conversation"))).toMatchObject({
           sessionId: "conversation",
           archivedAt: expect.any(Number),
@@ -145,7 +145,7 @@ describe("sessions cleanup applied summary", () => {
   );
 
   it("skips protected conversations and restores usable history under continuing cap pressure", async () => {
-    await withOpenClawTestState({}, async (state) => {
+    await withCarapaceTestState({}, async (state) => {
       const storePath = path.join(state.sessionsDir(), "sessions.json");
       const old = Date.now() - 31 * 24 * 60 * 60_000;
       const protectedEntries: Record<string, Partial<SessionEntry>> = {
@@ -244,11 +244,11 @@ describe("sessions cleanup applied summary", () => {
   it.each([true, false])(
     "reports a sole empty orphan as a mutation (dryRun=%s)",
     async (dryRun) => {
-      await withOpenClawTestState({}, async (state) => {
+      await withCarapaceTestState({}, async (state) => {
         const storePath = path.join(state.sessionsDir(), "sessions.json");
         const cfg = {
           session: { maintenance: { mode: "enforce", maxDiskBytes: false, pruneAfter: "1s" } },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await state.writeConfig(cfg);
         await fs.mkdir(state.sessionsDir(), { recursive: true });
         const orphan = path.join(state.sessionsDir(), "orphan.jsonl");
@@ -284,12 +284,12 @@ describe("sessions cleanup applied summary", () => {
   );
 
   it("applies the selected agent's preview without pruning a sibling behind the same selector", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const storePath = state.statePath("shared.json");
       const cfg = {
         agents: { ownership: "explicit", entries: { main: {}, beta: {} } },
         session: { store: storePath, maintenance: { mode: "warn", pruneAfter: "1d" } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await state.writeConfig(cfg);
       const scopes = ["main", "beta"].map((agentId) => ({
         agentId,
@@ -327,7 +327,7 @@ describe("sessions cleanup applied summary", () => {
 
   it("reports authoritative counts when a preview removal becomes stale before apply", async () => {
     const storePath = path.join(
-      tempDirs.make("openclaw-cleanup-applied-summary-"),
+      tempDirs.make("carapace-cleanup-applied-summary-"),
       "agents",
       "main",
       "sessions",
@@ -367,7 +367,7 @@ describe("sessions cleanup applied summary", () => {
   ])(
     "returns earlier committed summaries when a later store fails $fault",
     async ({ lifecycleCommitted }) => {
-      const rootDir = tempDirs.make("openclaw-cleanup-partial-");
+      const rootDir = tempDirs.make("carapace-cleanup-partial-");
       const main = {
         agentId: "main",
         sessionId: "main-message-free",
@@ -394,7 +394,7 @@ describe("sessions cleanup applied summary", () => {
       if (lifecycleCommitted) {
         cleanupRace.postCommitFailureStorePath = failing.storePath;
       } else {
-        openOpenClawAgentDatabase({ agentId: failing.agentId, path: failingSqlitePath }).db.exec(`
+        openCarapaceAgentDatabase({ agentId: failing.agentId, path: failingSqlitePath }).db.exec(`
           CREATE TRIGGER fail_second_store_delete
           BEFORE DELETE ON session_windows
           WHEN OLD.session_id = '${failing.sessionId}'

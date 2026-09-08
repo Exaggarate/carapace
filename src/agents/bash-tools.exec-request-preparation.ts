@@ -1,6 +1,6 @@
 /** Prepares exec workdir and environment facts before policy and host dispatch. */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeChatChannelId } from "../channels/ids.js";
 import type { ExecHost } from "../infra/exec-approvals.js";
 import {
@@ -14,7 +14,7 @@ import {
   installationTargetEnv,
   LOCAL_INSTALLATION_TARGET_UNSUPPORTED,
 } from "../infra/installation-target-context.js";
-import { OPENCLAW_CLI_ENV_VAR } from "../infra/openclaw-exec-env.js";
+import { CARAPACE_CLI_ENV_VAR } from "../infra/carapace-exec-env.js";
 import {
   getShellPathFromLoginShell,
   resolveShellEnvFallbackTimeoutMs,
@@ -57,7 +57,7 @@ type ResolvedExecWorkdirPreparedState = {
   resolution: ExecWorkdirResolution;
 };
 
-const CHANNEL_CONTEXT_ENV_KEY = "OPENCLAW_CHANNEL_CONTEXT";
+const CHANNEL_CONTEXT_ENV_KEY = "CARAPACE_CHANNEL_CONTEXT";
 const resolvedExecEnvPreparedStates = new WeakMap<ExecToolArgs, ResolvedExecEnvPreparedState>();
 const execHookContexts = new WeakMap<ExecToolArgs, HookContext | undefined>();
 const resolvedExecWorkdirPreparedStates = new WeakMap<
@@ -111,7 +111,7 @@ function filterPluginExecEnv(rawEnv: Record<string, string>): Record<string, str
     const upperKey = key.toUpperCase();
     if (
       upperKey === "PATH" ||
-      upperKey === OPENCLAW_CLI_ENV_VAR ||
+      upperKey === CARAPACE_CLI_ENV_VAR ||
       isDangerousHostEnvVarName(upperKey) ||
       isDangerousHostEnvOverrideVarName(upperKey)
     ) {
@@ -398,14 +398,14 @@ export function resolvePreparedExecEnvironment(params: {
         blockPathOverrides: true,
       })
     : undefined;
-  const { [OPENCLAW_CLI_ENV_VAR]: _storeMarker, ...acceptedStoreEnv } = storeEnvResult?.env ?? {};
+  const { [CARAPACE_CLI_ENV_VAR]: _storeMarker, ...acceptedStoreEnv } = storeEnvResult?.env ?? {};
   let storeEnv = Object.keys(acceptedStoreEnv).length > 0 ? acceptedStoreEnv : undefined;
   const rejectedStoreKeys = new Set([
     ...(storeEnvResult?.rejectedOverrideBlockedKeys ?? []),
     ...(storeEnvResult?.rejectedOverrideInvalidKeys ?? []),
   ]);
-  if (params.storeEnv && Object.hasOwn(params.storeEnv, OPENCLAW_CLI_ENV_VAR)) {
-    rejectedStoreKeys.add(OPENCLAW_CLI_ENV_VAR);
+  if (params.storeEnv && Object.hasOwn(params.storeEnv, CARAPACE_CLI_ENV_VAR)) {
+    rejectedStoreKeys.add(CARAPACE_CLI_ENV_VAR);
   }
   if (params.host === "sandbox" && storeEnv) {
     const sandboxStoreEnvResult = sanitizeEnvVars(storeEnv);

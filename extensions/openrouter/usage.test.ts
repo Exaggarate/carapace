@@ -1,4 +1,4 @@
-import * as ssrfRuntime from "openclaw/plugin-sdk/ssrf-runtime";
+import * as ssrfRuntime from "carapace/plugin-sdk/ssrf-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { fetchOpenRouterUsage } from "./usage.js";
 

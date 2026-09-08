@@ -17,10 +17,10 @@ describe("skills-cli (e2e)", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeAll(() => {
-    envSnapshot = captureEnv(["OPENCLAW_BUNDLED_SKILLS_DIR"]);
-    tempWorkspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-skills-test-"));
-    tempBundledDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bundled-skills-test-"));
-    process.env.OPENCLAW_BUNDLED_SKILLS_DIR = tempBundledDir;
+    envSnapshot = captureEnv(["CARAPACE_BUNDLED_SKILLS_DIR"]);
+    tempWorkspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-skills-test-"));
+    tempBundledDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-bundled-skills-test-"));
+    process.env.CARAPACE_BUNDLED_SKILLS_DIR = tempBundledDir;
   });
 
   afterAll(() => {
@@ -43,7 +43,7 @@ describe("skills-cli (e2e)", () => {
           description: "Capture UI screenshots",
           filePath,
           baseDir,
-          source: "openclaw-bundled",
+          source: "carapace-bundled",
         }),
         frontmatter: {},
         metadata: { emoji: "📸" },
@@ -83,7 +83,7 @@ describe("skills-cli (e2e)", () => {
           modelVisible: true,
           userInvocable: true,
           commandVisible: true,
-          source: "openclaw-bundled",
+          source: "carapace-bundled",
           bundled: true,
           missing: {
             bins: [],
@@ -173,7 +173,7 @@ describe("skills-cli (e2e)", () => {
       ...["missing", "excluded-missing"].map((name) => ({
         name,
         description: "Missing prerequisite fixture",
-        metadata: JSON.stringify({ openclaw: { requires: { bins: [missingBin] } } }),
+        metadata: JSON.stringify({ carapace: { requires: { bins: [missingBin] } } }),
       })),
     ]);
     const report = buildWorkspaceSkillStatus(tempWorkspaceDir, {

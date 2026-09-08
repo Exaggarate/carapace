@@ -5,15 +5,15 @@ import os from "node:os";
 import path from "node:path";
 import { Agent, fetch as fetchWithDispatcher } from "undici";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { ensureDevicePairSetupBootstrapToken } from "../../infra/device-bootstrap.js";
 import { decodePairingSetupCode } from "../../pairing/setup-code.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createNodeBootstrapArtifactProvider } from "./node-bootstrap-artifact.js";
 import { createWorkerNodeEnrollmentManager } from "./node-enrollment.js";
 import { createWorkerEnvironmentStore, type WorkerEnvironmentStore } from "./store.js";
@@ -37,7 +37,7 @@ const PLUGIN_PUBLIC_URL = "wss://pairing.example.test";
 const LOCAL_TLS_FINGERPRINT = "c".repeat(64);
 const REMOTE_TLS_FINGERPRINT = "d".repeat(64);
 
-function createConfig(pluginPublicUrl?: string): OpenClawConfig {
+function createConfig(pluginPublicUrl?: string): CarapaceConfig {
   return {
     gateway: {
       bind: "loopback",
@@ -56,7 +56,7 @@ function createConfig(pluginPublicUrl?: string): OpenClawConfig {
 
 describe("worker node enrollment", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
   let store: WorkerEnvironmentStore;
   let transfer: ReturnType<typeof createWorkerBootstrapArtifactTransferService>;
   let managers: ReturnType<typeof createWorkerNodeEnrollmentManager>[];
@@ -66,7 +66,7 @@ describe("worker node enrollment", () => {
     tarballPath: path.join(root, "node-runtime.tgz"),
     tarballSha256: "a".repeat(64),
     tarballBytes: 1,
-    openclawVersion: "2026.8.1",
+    carapaceVersion: "2026.8.1",
     buildId: "gateway-source-build",
     enabledPluginIds: ["runtime-plugin"],
   });
@@ -113,9 +113,9 @@ describe("worker node enrollment", () => {
     await Promise.all([
       fs.writeFile(
         path.join(packageRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", version: "2026.8.1", type: "module" }),
+        JSON.stringify({ name: "carapace", version: "2026.8.1", type: "module" }),
       ),
-      fs.writeFile(path.join(packageRoot, "openclaw.mjs"), 'import "./dist/entry.js";'),
+      fs.writeFile(path.join(packageRoot, "carapace.mjs"), 'import "./dist/entry.js";'),
       fs.writeFile(path.join(packageRoot, "node-version.mjs"), "export const supported = true;"),
       fs.writeFile(path.join(packageRoot, "dist/entry.js"), "export const ready = true;"),
       fs.writeFile(
@@ -133,8 +133,8 @@ describe("worker node enrollment", () => {
   };
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-node-enrollment-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-node-enrollment-"));
+    database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => 1_000 });
     transfer = createWorkerBootstrapArtifactTransferService();
     managers = [];
@@ -149,7 +149,7 @@ describe("worker node enrollment", () => {
     }
     await Promise.all(artifactProviders.map((provider) => provider.close()));
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -522,7 +522,7 @@ describe("worker node enrollment", () => {
             tls: { enabled: true },
             auth: { mode: "token", token: "gateway-token" },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedUrl: "wss://192.168.50.20:19443",
         expectedFingerprint: LOCAL_TLS_FINGERPRINT,
       },
@@ -533,7 +533,7 @@ describe("worker node enrollment", () => {
             remote: { url: "wss://remote.example.test", tlsFingerprint: REMOTE_TLS_FINGERPRINT },
             auth: { mode: "token", token: "gateway-token" },
           },
-        } satisfies OpenClawConfig,
+        } satisfies CarapaceConfig,
         expectedUrl: "wss://remote.example.test",
         expectedFingerprint: REMOTE_TLS_FINGERPRINT,
       },
@@ -556,10 +556,10 @@ describe("worker node enrollment", () => {
       expect(enrollment.deviceId).toBe("existing-node");
     }
     expect(enrollment.nodeBootstrap).toMatchObject({
-      url: `${expectedUrl.replace(/^wss:/u, "https:")}/__openclaw__/worker-bootstrap/artifacts/${artifact().tarballSha256}`,
+      url: `${expectedUrl.replace(/^wss:/u, "https:")}/__carapace__/worker-bootstrap/artifacts/${artifact().tarballSha256}`,
       sha256: artifact().tarballSha256,
       bytes: 1,
-      openclawVersion: "2026.8.1",
+      carapaceVersion: "2026.8.1",
       enabledPluginIds: ["runtime-plugin"],
     });
     expect(enrollment.nodeBootstrap.tlsFingerprint).toBe(expectedFingerprint);

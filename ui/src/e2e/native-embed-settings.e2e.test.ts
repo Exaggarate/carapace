@@ -89,7 +89,7 @@ suite.define(() => {
           await waitForControlUiRoute(page, { routeId: destination.route });
           const header = page.locator(".native-embed-header");
           await header.getByRole("heading", { name: destination.title, exact: true }).waitFor();
-          expect(await page.locator(".shell-nav, openclaw-app-topbar").count()).toBe(0);
+          expect(await page.locator(".shell-nav, carapace-app-topbar").count()).toBe(0);
           await header.getByRole("button", { name: "Back", exact: true }).click();
           // Memory's document link uses the parent fallback; hub tabs use app history.
           await waitForControlUiRoute(page, {
@@ -126,7 +126,7 @@ suite.define(() => {
         await waitForControlUiRoute(page, { routeId: "talk" });
         await page.locator(".native-embed-header__back").waitFor();
         await gateway.setOnline(false);
-        await page.locator("openclaw-router-outlet[inert]").waitFor({ state: "attached" });
+        await page.locator("carapace-router-outlet[inert]").waitFor({ state: "attached" });
         await page.locator(".native-embed-header__back").click();
         await waitForControlUiRoute(page, { routeId: "settings", pathname: "/settings" });
         await page
@@ -159,7 +159,7 @@ suite.define(() => {
           await waitForControlUiRoute(page, { routeId: route });
           expect(
             await page
-              .locator(".shell-nav, openclaw-app-topbar, openclaw-macos-titlebar-controls")
+              .locator(".shell-nav, carapace-app-topbar, carapace-macos-titlebar-controls")
               .count(),
           ).toBe(0);
           expect(
@@ -190,7 +190,7 @@ suite.define(() => {
         { viewport: { width: 1440, height: 900 }, serviceWorkers: "block" },
         async ({ page }) => {
           await page.addInitScript(
-            (host) => Object.assign(window, { __OPENCLAW_NATIVE_EMBED__: host }),
+            (host) => Object.assign(window, { __CARAPACE_NATIVE_EMBED__: host }),
             flag,
           );
           await installMockGateway(page, { operatorScopes: ["operator.admin", "operator.read"] });
@@ -198,10 +198,10 @@ suite.define(() => {
           await waitForControlUiRoute(page, { routeId: "appearance" });
           await page.locator(".shell--settings .settings-sidebar").waitFor();
           expect(await page.locator(".shell-nav").isVisible()).toBe(true);
-          expect(await page.locator("openclaw-app-topbar").count()).toBe(1);
+          expect(await page.locator("carapace-app-topbar").count()).toBe(1);
           expect(
             await page
-              .locator(".shell--embed, .native-embed-header, html.openclaw-native-embed")
+              .locator(".shell--embed, .native-embed-header, html.carapace-native-embed")
               .count(),
           ).toBe(0);
         },
@@ -245,14 +245,14 @@ suite.define(() => {
                 (await page.goto(new URL(pathname, suite.server.baseUrl).toString()))?.status(),
               ).toBe(200);
               await waitForControlUiRoute(page, { routeId: route });
-              await page.locator("html.openclaw-native-embed .shell--embed").waitFor();
+              await page.locator("html.carapace-native-embed .shell--embed").waitFor();
               await page
-                .locator(".native-embed-header openclaw-settings-save-indicator")
+                .locator(".native-embed-header carapace-settings-save-indicator")
                 .waitFor({ state: "attached" });
               expect(
                 await page
                   .locator(
-                    ".shell-nav, openclaw-app-topbar, .shell-chrome-controls, resizable-divider, .settings-sidebar__footer, openclaw-macos-titlebar-controls, openclaw-keyboard-shortcuts-dialog",
+                    ".shell-nav, carapace-app-topbar, .shell-chrome-controls, resizable-divider, .settings-sidebar__footer, carapace-macos-titlebar-controls, carapace-keyboard-shortcuts-dialog",
                   )
                   .count(),
               ).toBe(0);
@@ -277,7 +277,7 @@ suite.define(() => {
                 ).toBe(true);
               } else {
                 await page.locator(".native-embed-header .page-title").waitFor();
-                await page.locator("openclaw-router-outlet > *").first().waitFor();
+                await page.locator("carapace-router-outlet > *").first().waitFor();
               }
               if (route === "devices") {
                 await page.locator(".device-entry__details summary").first().click();
@@ -314,7 +314,7 @@ suite.define(() => {
                   .evaluate((main) => main.scrollWidth <= main.clientWidth),
                 route,
               ).toBe(true);
-              if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+              if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
                 await page.screenshot({
                   animations: "disabled",
                   fullPage: true,

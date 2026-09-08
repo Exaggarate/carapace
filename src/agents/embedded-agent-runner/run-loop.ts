@@ -1,5 +1,5 @@
 /** Prepared embedded-agent loop. */
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import { CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import { resolveContextEngineOwnerPluginId } from "../../context-engine/registry.js";
 import { buildContextEngineRuntimeSettings } from "../../context-engine/runtime-settings.js";
 import {
@@ -159,7 +159,7 @@ export async function runPreparedEmbeddedLoop(
     degradedReason?: string | null;
   }) => {
     return buildContextEngineRuntimeSettings({
-      contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+      contextEngineHost: CARAPACE_EMBEDDED_CONTEXT_ENGINE_HOST,
       provider,
       requestedModel: preparedRuntime.requestedModelId,
       resolvedModel: modelId,

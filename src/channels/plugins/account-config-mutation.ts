@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { err as resultError, ok, type Result } from "@carapace/normalization-core/result";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import {
@@ -59,7 +59,7 @@ function resolveMissingSetupEnvMessage(
 }
 
 export async function prepareChannelAccountConfiguration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   plugin: ChannelAccountMutationPlugin;
   requestedAccountId?: string;
   resolveInput: () => unknown;
@@ -124,13 +124,13 @@ export async function prepareChannelAccountConfiguration(params: {
 }
 
 export async function applyPreparedChannelAccountConfiguration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   prepared: PreparedChannelAccountConfiguration;
   runtime: RuntimeEnv;
   beforePersistentEffect?: () => Promise<void>;
 }): Promise<{
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   accountId: string;
   input: unknown;
   afterAccountConfigWritten?: ChannelSetupExecutionAdapter["afterAccountConfigWritten"];
@@ -208,10 +208,10 @@ export function prepareChannelAccountRemoval(params: {
 }
 
 export async function applyPreparedChannelAccountRemoval(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prepared: PreparedChannelAccountRemoval;
   runtime: RuntimeEnv;
-}): Promise<Result<{ nextConfig: OpenClawConfig }, ChannelAccountRemovalError>> {
+}): Promise<Result<{ nextConfig: CarapaceConfig }, ChannelAccountRemovalError>> {
   const { accountId, action, plugin } = params.prepared;
   // Capability validation stays in apply: callers must preserve the historical
   // runtime-stop ordering before reporting an unsupported mutation.

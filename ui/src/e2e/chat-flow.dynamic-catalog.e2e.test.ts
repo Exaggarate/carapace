@@ -12,7 +12,7 @@ const rosterMatch = { includeGlobal: true };
 let dynamicCatalogProofDir: string | null;
 beforeEach(() => {
   dynamicCatalogProofDir =
-    process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+    process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
       ? createControlUiE2eArtifactDir("dynamic-catalog-convergence")
       : null;
 });
@@ -156,9 +156,9 @@ suite.define(() => {
       }
 
       await page.keyboard.press("Escape");
-      await page.locator("openclaw-app-sidebar .sidebar-brand__new-thread").click();
+      await page.locator("carapace-app-sidebar .sidebar-brand__new-thread").click();
       await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
-      const newSessionPage = page.locator("openclaw-new-session-page");
+      const newSessionPage = page.locator("carapace-new-session-page");
       await newSessionPage.waitFor();
       const newSessionModelSelect = newSessionPage.locator(
         '.new-session-page__composer [data-chat-model-select="true"]',

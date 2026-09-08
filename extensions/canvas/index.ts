@@ -2,8 +2,8 @@
  * Canvas plugin entrypoint for node canvas control, hosted A2UI routes, and
  * node CLI registration.
  */
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { definePluginEntry, type AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { definePluginEntry, type AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
 import { canvasA2UIBoardWidgetKind } from "./src/board-widget.js";
 import { canvasConfigSchema, isCanvasHostEnabled } from "./src/config.js";
 import { A2UI_PATH } from "./src/host/a2ui-shared.js";

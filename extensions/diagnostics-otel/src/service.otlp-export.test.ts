@@ -5,7 +5,7 @@
 // test feeds in, collapsing the diagnostic and OTel id spaces into one value. That hides
 // a parent lookup keyed by one id space and queried with the other.
 //
-// Trace cases use the OPENCLAW_OTEL_PRELOADED seam to retain this file's tracer provider.
+// Trace cases use the CARAPACE_OTEL_PRELOADED seam to retain this file's tracer provider.
 // Collector-boundary cases run owned mode, which now composes private providers and never
 // registers global SDK state; teardown still restores the preloaded globals for trace cases.
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -24,7 +24,7 @@ import {
   emitTrustedDiagnosticEventWithPrivateData,
   parseDiagnosticTraceparent,
   waitForDiagnosticEventsDrained,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
 import { expect, test, vi } from "vitest";
 import { runModelCallAndCaptureTraceparent } from "../../../test/e2e/qa-lab/runtime/otel-model-call.test-support.js";
 import { startLocalOtlpReceiver } from "../../../test/e2e/qa-lab/runtime/otel-test-support.js";
@@ -323,7 +323,7 @@ test("propagates the exported model span across two OTLP services with one roote
   releasePreloadedOtelGlobals();
 
   const peerProvider = new BasicTracerProvider({
-    resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: "openclaw-otel-peer" }),
+    resource: resourceFromAttributes({ [ATTR_SERVICE_NAME]: "carapace-otel-peer" }),
     spanProcessors: [
       new SimpleSpanProcessor(
         new OTLPTraceExporter({
@@ -332,7 +332,7 @@ test("propagates the exported model span across two OTLP services with one roote
       ),
     ],
   });
-  const peerTracer = peerProvider.getTracer("openclaw-otel-peer");
+  const peerTracer = peerProvider.getTracer("carapace-otel-peer");
   const peerRoot = peerTracer.startSpan("peer.request");
   const peerRootContext = peerRoot.spanContext();
   const inboundParent = createDiagnosticTraceContext({
@@ -347,7 +347,7 @@ test("propagates the exported model span across two OTLP services with one roote
     metrics: false,
     logs: false,
     configure: (serviceContext) => {
-      serviceContext.config.diagnostics!.otel!.serviceName = "openclaw-otel-gateway";
+      serviceContext.config.diagnostics!.otel!.serviceName = "carapace-otel-gateway";
     },
   });
 
@@ -357,7 +357,7 @@ test("propagates the exported model span across two OTLP services with one roote
     const runTrace = createChildDiagnosticTraceContext(harnessTrace);
     const toolTrace = createChildDiagnosticTraceContext(runTrace);
     const base = { runId: "run-live-bridge", provider: "openai", model: "gpt-5.6-luna" };
-    const harnessBase = { ...base, harnessId: "openclaw" };
+    const harnessBase = { ...base, harnessId: "carapace" };
 
     emit({
       type: "message.dispatch.started",
@@ -429,16 +429,16 @@ test("propagates the exported model span across two OTLP services with one roote
       [
         "peer.request",
         "peer.callback",
-        "openclaw.message.processed",
-        "openclaw.harness.run",
-        "openclaw.run",
-        "openclaw.model.call",
-        "openclaw.tool.execution",
+        "carapace.message.processed",
+        "carapace.harness.run",
+        "carapace.run",
+        "carapace.model.call",
+        "carapace.tool.execution",
       ].includes(span.name),
     );
     const spanIds = new Set(spans.map((span) => span.spanId));
     const roots = spans.filter((span) => !span.parentSpanId);
-    const modelSpan = spans.find((span) => span.name === "openclaw.model.call");
+    const modelSpan = spans.find((span) => span.name === "carapace.model.call");
 
     expect(spans).toHaveLength(7);
     expect(new Set(spans.map((span) => span.traceId)).size).toBe(1);
@@ -480,11 +480,11 @@ test("preserves explicit zero model-call usage through OTLP protobuf export", as
     await service.stop?.(ctx);
 
     expect(
-      receiver.capturedSpans.find((span) => span.name === "openclaw.model.call")?.attributes,
+      receiver.capturedSpans.find((span) => span.name === "carapace.model.call")?.attributes,
     ).toMatchObject({
-      "openclaw.model_call.usage.input_tokens": 0,
-      "openclaw.model_call.usage.output_tokens": 0,
-      "openclaw.model_call.usage.prompt_tokens": 0,
+      "carapace.model_call.usage.input_tokens": 0,
+      "carapace.model_call.usage.output_tokens": 0,
+      "carapace.model_call.usage.prompt_tokens": 0,
       "gen_ai.usage.input_tokens": 0,
     });
   } finally {
@@ -505,7 +505,7 @@ test("uses the real preloaded model span as the mid-turn propagation root", asyn
   await waitForDiagnosticEventsDrained();
   await service.stop?.(ctx);
 
-  const modelSpan = spanNamed(sdk.exporter.getFinishedSpans(), "openclaw.model.call");
+  const modelSpan = spanNamed(sdk.exporter.getFinishedSpans(), "carapace.model.call");
   expect(modelSpan?.parentSpanContext).toBeUndefined();
   expect(outboundTraceparent).toBe(
     `00-${modelSpan?.spanContext().traceId}-${modelSpan?.spanContext().spanId}-01`,
@@ -597,9 +597,9 @@ test("keeps a whole turn on one trace when children arrive after their parent en
   await service.stop?.(ctx);
 
   const spans = sdk.exporter.getFinishedSpans();
-  const messageSpan = spanNamed(spans, "openclaw.message.processed");
-  const harnessSpan = spanNamed(spans, "openclaw.harness.run");
-  const runSpan = spanNamed(spans, "openclaw.run");
+  const messageSpan = spanNamed(spans, "carapace.message.processed");
+  const harnessSpan = spanNamed(spans, "carapace.harness.run");
+  const runSpan = spanNamed(spans, "carapace.run");
 
   expect(spans).toHaveLength(7);
   expect(new Set(spans.map((span) => span.spanContext().traceId)).size).toBe(1);
@@ -610,13 +610,13 @@ test("keeps a whole turn on one trace when children arrive after their parent en
   expect(harnessSpan?.parentSpanContext?.spanId).toBe(messageSpan?.spanContext().spanId);
   expect(runSpan?.parentSpanContext?.spanId).toBe(harnessSpan?.spanContext().spanId);
   // Stragglers land on the lifecycle span that owned them, not on a new root.
-  expect(spanNamed(spans, "openclaw.tool.execution")?.parentSpanContext?.spanId).toBe(
+  expect(spanNamed(spans, "carapace.tool.execution")?.parentSpanContext?.spanId).toBe(
     runSpan?.spanContext().spanId,
   );
-  expect(spanNamed(spans, "openclaw.context.assembled")?.parentSpanContext?.spanId).toBe(
+  expect(spanNamed(spans, "carapace.context.assembled")?.parentSpanContext?.spanId).toBe(
     harnessSpan?.spanContext().spanId,
   );
-  expect(spanNamed(spans, "openclaw.model.usage")?.parentSpanContext?.spanId).toBe(
+  expect(spanNamed(spans, "carapace.model.usage")?.parentSpanContext?.spanId).toBe(
     messageSpan?.spanContext().spanId,
   );
 }, 30_000);
@@ -628,7 +628,7 @@ test("keeps a late child on the trace when the turn ended in harness.run.error",
 
   const harnessTrace = createDiagnosticTraceContext();
   const base = { runId: "run-err-1", provider: "openai", model: "gpt-5.6-luna" };
-  const harnessBase = { ...base, harnessId: "openclaw" };
+  const harnessBase = { ...base, harnessId: "carapace" };
 
   emit({ type: "harness.run.started", ...harnessBase, trace: harnessTrace });
   await waitForDiagnosticEventsDrained();
@@ -653,8 +653,8 @@ test("keeps a late child on the trace when the turn ended in harness.run.error",
   await service.stop?.(ctx);
 
   const spans = sdk.exporter.getFinishedSpans();
-  const harnessSpan = spanNamed(spans, "openclaw.harness.run");
-  const toolSpan = spanNamed(spans, "openclaw.tool.execution");
+  const harnessSpan = spanNamed(spans, "carapace.harness.run");
+  const toolSpan = spanNamed(spans, "carapace.tool.execution");
 
   expect(harnessSpan).toBeDefined();
   expect(toolSpan).toBeDefined();
@@ -672,7 +672,7 @@ test("leaves exec spans parentless rather than naming a span nobody exported", a
   // operator lands in when traces are enabled mid-turn.
   const requestScope = createDiagnosticTraceContext();
   const { emitDiagnosticEventWithTrustedTraceContext } =
-    await import("openclaw/plugin-sdk/plugin-test-runtime");
+    await import("carapace/plugin-sdk/plugin-test-runtime");
   emitDiagnosticEventWithTrustedTraceContext({
     type: "exec.process.completed",
     target: "host",
@@ -685,7 +685,7 @@ test("leaves exec spans parentless rather than naming a span nobody exported", a
   await waitForDiagnosticEventsDrained();
   await service.stop?.(ctx);
 
-  const execSpan = spanNamed(sdk.exporter.getFinishedSpans(), "openclaw.exec");
+  const execSpan = spanNamed(sdk.exporter.getFinishedSpans(), "carapace.exec");
   expect(execSpan).toBeDefined();
   expect(execSpan?.parentSpanContext).toBeUndefined();
 }, 30_000);
@@ -898,7 +898,7 @@ test.each(
   "rejects an empty $signal $label file before the SDK can silently downgrade trust",
   async ({ signal, suffix, label, flags }) => {
     process.env[PRELOAD_ENV] = "0";
-    const certDir = mkdtempSync(path.join(tmpdir(), "openclaw-otel-empty-tls-"));
+    const certDir = mkdtempSync(path.join(tmpdir(), "carapace-otel-empty-tls-"));
     const emptyMaterialPath = path.join(certDir, "empty.pem");
     writeFileSync(emptyMaterialPath, "");
     process.env[`OTEL_EXPORTER_OTLP_${signal.toUpperCase()}_${suffix}`] = emptyMaterialPath;

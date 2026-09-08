@@ -5,15 +5,15 @@ import {
   type ApprovalViewModel,
   type ChannelApprovalCapabilityHandlerContext,
   type PendingApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { ExecApprovalActionDescriptor } from "openclaw/plugin-sdk/approval-reply-runtime";
-import { formatChannelApprovalResolvedLabel } from "openclaw/plugin-sdk/approval-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import type { ExecApprovalActionDescriptor } from "carapace/plugin-sdk/approval-reply-runtime";
+import { formatChannelApprovalResolvedLabel } from "carapace/plugin-sdk/approval-runtime";
 import type {
   DiscordExecApprovalConfig,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { logDebug, logError } from "openclaw/plugin-sdk/logging-core";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/config-contracts";
+import { logDebug, logError } from "carapace/plugin-sdk/logging-core";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildExecApprovalCustomId } from "./approval-custom-id.js";
 import {
   DISCORD_APPROVAL_ALLOWED_MENTIONS,
@@ -74,7 +74,7 @@ function resolveHandlerContext(params: ChannelApprovalCapabilityHandlerContext):
 
 class ExecApprovalContainer extends DiscordUiContainer {
   constructor(params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId: string;
     title: string;
     description?: string;
@@ -246,7 +246,7 @@ function resolveCommandPreviews(
 
 function createApprovalContainer(params: {
   view: ApprovalViewModel;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   actionRow?: Row<Button>;
 }): ExecApprovalContainer {
@@ -254,7 +254,7 @@ function createApprovalContainer(params: {
   const plugin = view.approvalKind === "plugin";
   const systemAgent = view.approvalKind === "system-agent";
   const pending = view.phase === "pending";
-  const approvalLabel = plugin ? "Plugin" : systemAgent ? "OpenClaw Change" : "Exec";
+  const approvalLabel = plugin ? "Plugin" : systemAgent ? "Carapace Change" : "Exec";
   const { commandPreview, commandSecondaryPreview } = plugin
     ? {
         commandPreview: formatCommandPreview(view.title, 700),
@@ -283,7 +283,7 @@ function createApprovalContainer(params: {
     ? plugin
       ? "A plugin action needs your approval."
       : systemAgent
-        ? "An OpenClaw change needs your approval."
+        ? "An Carapace change needs your approval."
         : "A command needs your approval."
     : view.phase === "expired"
       ? "This approval request has expired."
@@ -327,7 +327,7 @@ function createApprovalContainer(params: {
 }
 
 async function updateMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   token: string;
   channelId: string;
@@ -354,7 +354,7 @@ async function updateMessage(params: {
 }
 
 async function finalizeMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   token: string;
   cleanupAfterResolve?: boolean;

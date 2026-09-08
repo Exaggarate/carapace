@@ -78,7 +78,7 @@ afterEach(() => {
 
 describe("context engine quarantine health", () => {
   it("lists persisted runtime quarantines when local process state is empty", async () => {
-    await withStateDirEnv("openclaw-context-engine-quarantine-", async () => {
+    await withStateDirEnv("carapace-context-engine-quarantine-", async () => {
       resetContextEngineRuntimeQuarantineForTests();
       recordPersistedContextEngineQuarantine({
         engineId: "lossless-claw",
@@ -103,7 +103,7 @@ describe("context engine quarantine health", () => {
   it.runIf(hasProcessStartTimes)(
     "clears only the current process record while preserving live sibling quarantines",
     async () => {
-      await withStateDirEnv("openclaw-context-engine-quarantine-", async () => {
+      await withStateDirEnv("carapace-context-engine-quarantine-", async () => {
         await withLiveSiblingProcess(async (siblingProcessId) => {
           seedPersistedContextEngineQuarantineForTest({
             engineId: "lossless-claw",
@@ -141,7 +141,7 @@ describe("context engine quarantine health", () => {
   it.runIf(hasProcessStartTimes)(
     "clears all current process records while preserving live sibling quarantines",
     async () => {
-      await withStateDirEnv("openclaw-context-engine-quarantine-", async () => {
+      await withStateDirEnv("carapace-context-engine-quarantine-", async () => {
         await withLiveSiblingProcess(async (siblingProcessId) => {
           seedPersistedContextEngineQuarantineForTest({
             engineId: "local-a",
@@ -182,7 +182,7 @@ describe("context engine quarantine health", () => {
   );
 
   it("drops records from a previous incarnation of this PID", async () => {
-    await withStateDirEnv("openclaw-context-engine-quarantine-incarnation-", async () => {
+    await withStateDirEnv("carapace-context-engine-quarantine-incarnation-", async () => {
       resetContextEngineRuntimeQuarantineForTests();
       seedPersistedContextEngineQuarantineForTest({
         engineId: "lossless-claw",
@@ -200,7 +200,7 @@ describe("context engine quarantine health", () => {
   it.runIf(hasProcessStartTimes)(
     "drops persisted quarantine records when a sibling PID has been reused",
     async () => {
-      await withStateDirEnv("openclaw-context-engine-quarantine-pid-reuse-", async () => {
+      await withStateDirEnv("carapace-context-engine-quarantine-pid-reuse-", async () => {
         await withLiveSiblingProcess(async (siblingProcessId) => {
           resetContextEngineRuntimeQuarantineForTests();
           const siblingStartTime = getProcessStartTime(siblingProcessId);
@@ -221,7 +221,7 @@ describe("context engine quarantine health", () => {
   );
 
   it("drops sibling records whose process identity cannot be verified", async () => {
-    await withStateDirEnv("openclaw-context-engine-quarantine-unverified-", async () => {
+    await withStateDirEnv("carapace-context-engine-quarantine-unverified-", async () => {
       await withLiveSiblingProcess(async (siblingProcessId) => {
         resetContextEngineRuntimeQuarantineForTests();
         // A null recorded start time (non-Linux recorder or /proc read failure)

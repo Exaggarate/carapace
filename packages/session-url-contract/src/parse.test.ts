@@ -304,13 +304,13 @@ describe("matchControlUiCatalogSharePath", () => {
     ["/beam/fix-upload-flow-0123456789ab", undefined, "0123456789ab"],
     ["/beam/old-title-0123456789ab", undefined, "0123456789ab"],
     [
-      "/openclaw/beam/fix-upload-flow-0123456789abcdef0123456789abcdef",
-      "/openclaw",
+      "/carapace/beam/fix-upload-flow-0123456789abcdef0123456789abcdef",
+      "/carapace",
       "0123456789abcdef0123456789abcdef",
     ],
     [
-      "/openclaw/beam/0123456789abcdef0123456789abcdef",
-      "/openclaw",
+      "/carapace/beam/0123456789abcdef0123456789abcdef",
+      "/carapace",
       "0123456789abcdef0123456789abcdef",
     ],
   ] as const)("parses %s", (pathname, basePath, shortId) => {
@@ -346,10 +346,10 @@ describe("matchControlUiCatalogSharePath", () => {
     expect(matchControlUiCatalogSharePath({ pathname })).toBeNull();
   });
 
-  it.each(["/other/0123456789ab", "/beam/0123456789ab", "/wrong/openclaw/beam/0123456789ab"])(
+  it.each(["/other/0123456789ab", "/beam/0123456789ab", "/wrong/carapace/beam/0123456789ab"])(
     "ignores unrelated or outside-base path %s",
     (pathname) => {
-      expect(matchControlUiCatalogSharePath({ pathname, basePath: "/openclaw" })).toBeNull();
+      expect(matchControlUiCatalogSharePath({ pathname, basePath: "/carapace" })).toBeNull();
     },
   );
 });

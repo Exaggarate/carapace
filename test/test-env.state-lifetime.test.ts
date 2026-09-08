@@ -7,29 +7,29 @@ import { DatabaseSync } from "node:sqlite";
 import { pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { listOpenClawRegisteredAgentDatabases } from "../src/state/openclaw-agent-db-registry-listing.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../src/state/openclaw-state-db-contract.js";
+import { listCarapaceRegisteredAgentDatabases } from "../src/state/carapace-agent-db-registry-listing.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../src/state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../src/state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../src/state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../src/state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../src/state/carapace-state-db.paths.js";
 import { captureFullEnv, setTestEnvValue, withPathResolutionEnv } from "../src/test-utils/env.js";
 import { cleanupTempDirs, makeTempDir } from "./helpers/temp-dir.js";
 import { installTestEnv } from "./test-env.js";
 
 const require = createRequire(import.meta.url);
-const pathsModule = path.resolve(import.meta.dirname, "../src/state/openclaw-state-db.paths.ts");
+const pathsModule = path.resolve(import.meta.dirname, "../src/state/carapace-state-db.paths.ts");
 const tempDirs = new Set<string>();
 const cleanups: Array<() => void> = [];
 let sandbox: string;
 
 function installOwnedEnv() {
   const testEnv = installTestEnv({ mode: "hermetic" });
-  const databasePath = resolveOpenClawStateSqlitePath();
+  const databasePath = resolveCarapaceStateSqlitePath();
   cleanups.push(() => {
     // Callers close their handles before the environment removes its filesystem tree.
-    closeOpenClawStateDatabaseByPath(databasePath);
+    closeCarapaceStateDatabaseByPath(databasePath);
     testEnv.cleanup();
   });
   return { ...testEnv, databasePath };
@@ -38,7 +38,7 @@ function installOwnedEnv() {
 beforeEach(() => {
   const snapshot = captureFullEnv();
   cleanups.push(snapshot.restore);
-  sandbox = makeTempDir(tempDirs, "openclaw-test-state-lifetime-");
+  sandbox = makeTempDir(tempDirs, "carapace-test-state-lifetime-");
   vi.spyOn(os, "tmpdir").mockReturnValue(sandbox);
   setTestEnvValue("VITEST_WORKER_ID", "7");
 });
@@ -56,10 +56,10 @@ describe("test environment SQLite lifetime", () => {
     // Reproduce the old namespace only beneath a directory this test created.
     const legacyPath = path.join(
       sandbox,
-      "openclaw-test-state",
+      "carapace-test-state",
       `${process.pid}-7`,
       "state",
-      "openclaw.sqlite",
+      "carapace.sqlite",
     );
     fs.mkdirSync(path.dirname(legacyPath), { recursive: true });
     const legacy = new DatabaseSync(legacyPath);
@@ -73,18 +73,18 @@ describe("test environment SQLite lifetime", () => {
     `);
     legacy.close();
     const legacyBytes = fs.readFileSync(legacyPath);
-    expect(() => listOpenClawRegisteredAgentDatabases({ path: legacyPath })).toThrow(
+    expect(() => listCarapaceRegisteredAgentDatabases({ path: legacyPath })).toThrow(
       "has a legacy agent database registry schema",
     );
 
     const testEnv = installOwnedEnv();
-    expect(listOpenClawRegisteredAgentDatabases()).toEqual([]);
-    const database = openOpenClawStateDatabase();
+    expect(listCarapaceRegisteredAgentDatabases()).toEqual([]);
+    const database = openCarapaceStateDatabase();
     expect(database.path).toBe(
-      path.join(testEnv.tempHome, ".openclaw", "state", "openclaw.sqlite"),
+      path.join(testEnv.tempHome, ".carapace", "state", "carapace.sqlite"),
     );
     expect(database.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
 
     cleanups.pop()?.();
@@ -97,29 +97,29 @@ describe("test environment SQLite lifetime", () => {
     const callerState = path.join(sandbox, "caller-state");
     fs.mkdirSync(callerState);
     fs.writeFileSync(path.join(callerState, "keep"), "caller-owned");
-    setTestEnvValue("OPENCLAW_STATE_DIR", callerState);
+    setTestEnvValue("CARAPACE_STATE_DIR", callerState);
     const callerHome = process.env.HOME;
-    const callerTestHome = process.env.OPENCLAW_TEST_HOME;
+    const callerTestHome = process.env.CARAPACE_TEST_HOME;
     const outer = installOwnedEnv();
-    const outerDatabase = openOpenClawStateDatabase();
-    expect(resolveOpenClawStateSqlitePath()).toBe(outer.databasePath);
-    expect(openOpenClawStateDatabase()).toBe(outerDatabase);
+    const outerDatabase = openCarapaceStateDatabase();
+    expect(resolveCarapaceStateSqlitePath()).toBe(outer.databasePath);
+    expect(openCarapaceStateDatabase()).toBe(outerDatabase);
 
     const inner = installOwnedEnv();
     expect(inner.databasePath).not.toBe(outer.databasePath);
-    expect(openOpenClawStateDatabase().path).toBe(inner.databasePath);
+    expect(openCarapaceStateDatabase().path).toBe(inner.databasePath);
     cleanups.pop()?.();
     expect(fs.existsSync(inner.tempHome)).toBe(false);
     expect(fs.existsSync(inner.databasePath)).toBe(false);
     expect(process.env.HOME).toBe(outer.tempHome);
-    expect(process.env.OPENCLAW_TEST_HOME).toBe(outer.tempHome);
-    expect(openOpenClawStateDatabase()).toBe(outerDatabase);
+    expect(process.env.CARAPACE_TEST_HOME).toBe(outer.tempHome);
+    expect(openCarapaceStateDatabase()).toBe(outerDatabase);
 
     cleanups.pop()?.();
     expect(fs.existsSync(outer.databasePath)).toBe(false);
     expect(process.env.HOME).toBe(callerHome);
-    expect(process.env.OPENCLAW_TEST_HOME).toBe(callerTestHome);
-    expect(process.env.OPENCLAW_STATE_DIR).toBe(callerState);
+    expect(process.env.CARAPACE_TEST_HOME).toBe(callerTestHome);
+    expect(process.env.CARAPACE_STATE_DIR).toBe(callerState);
     const next = installOwnedEnv();
     expect(next.databasePath).not.toBe(outer.databasePath);
     expect(next.databasePath).not.toBe(inner.databasePath);
@@ -130,22 +130,22 @@ describe("test environment SQLite lifetime", () => {
     const outer = installOwnedEnv();
     const nestedHome = makeTempDir(tempDirs, "nested-home-", sandbox);
     withPathResolutionEnv(nestedHome, {}, () => {
-      expect(resolveOpenClawStateSqlitePath()).toBe(
-        path.join(nestedHome, ".openclaw", "state", "openclaw.sqlite"),
+      expect(resolveCarapaceStateSqlitePath()).toBe(
+        path.join(nestedHome, ".carapace", "state", "carapace.sqlite"),
       );
     });
-    expect(resolveOpenClawStateSqlitePath()).toBe(outer.databasePath);
+    expect(resolveCarapaceStateSqlitePath()).toBe(outer.databasePath);
   });
 
   it("shares the owned path across module reloads, inherited workers, and subprocesses", async () => {
     const testEnv = installOwnedEnv();
     const freshPaths = await vi.importActual<
-      typeof import("../src/state/openclaw-state-db.paths.js")
-    >("../src/state/openclaw-state-db.paths.js?lifetime");
-    expect(freshPaths.resolveOpenClawStateSqlitePath()).toBe(testEnv.databasePath);
+      typeof import("../src/state/carapace-state-db.paths.js")
+    >("../src/state/carapace-state-db.paths.js?lifetime");
+    expect(freshPaths.resolveCarapaceStateSqlitePath()).toBe(testEnv.databasePath);
     const source = `
-      import { resolveOpenClawStateSqlitePath } from ${JSON.stringify(pathToFileURL(pathsModule).href)};
-      process.stdout.write(resolveOpenClawStateSqlitePath());
+      import { resolveCarapaceStateSqlitePath } from ${JSON.stringify(pathToFileURL(pathsModule).href)};
+      process.stdout.write(resolveCarapaceStateSqlitePath());
     `;
     const childPath = execFileSync(
       process.execPath,
@@ -157,8 +157,8 @@ describe("test environment SQLite lifetime", () => {
     const worker = new Worker(
       `require(${JSON.stringify(require.resolve("tsx/cjs"))});
        const { parentPort } = require("node:worker_threads");
-       const { resolveOpenClawStateSqlitePath } = require(${JSON.stringify(pathsModule)});
-       parentPort.postMessage(resolveOpenClawStateSqlitePath());`,
+       const { resolveCarapaceStateSqlitePath } = require(${JSON.stringify(pathsModule)});
+       parentPort.postMessage(resolveCarapaceStateSqlitePath());`,
       { eval: true, execArgv: [], env: { ...process.env, VITEST_WORKER_ID: "8" } },
     );
     try {

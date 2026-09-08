@@ -1,7 +1,7 @@
 import {
   defineStableChannelIngressIdentity,
   type ChannelIngressIdentifierKind,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import { normalizeDiscordAllowList } from "./allow-list.js";
 
 const DISCORD_ALLOW_LIST_PREFIXES = ["discord:", "user:", "pk:"];

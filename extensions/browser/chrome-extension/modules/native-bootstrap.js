@@ -1,7 +1,7 @@
 import { randomRelayBase64Url } from "./relay-auth-v2-crypto.js";
 import { ACCESS_MODE_ALL, parsePairingString } from "./relay-core.js";
 
-const NATIVE_HOST_NAME = "ai.openclaw.browser_bootstrap";
+const NATIVE_HOST_NAME = "ai.carapace.browser_bootstrap";
 const DISABLED_KEY = "nativeBootstrapDisabled";
 const STATE_KEY = "nativeBootstrapState";
 const FAILURE_KEY = "nativeBootstrapFailureCode";

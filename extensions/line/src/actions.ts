@@ -1,6 +1,6 @@
 import type { messagingApi } from "@line/bot-sdk";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   LINE_FLEX_BUBBLE_MAX_BYTES,
   LINE_FLEX_CAROUSEL_MAX_BYTES,

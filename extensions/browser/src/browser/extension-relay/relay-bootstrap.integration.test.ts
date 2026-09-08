@@ -1,6 +1,6 @@
 import vm from "node:vm";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { clearRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { clearRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, expect, it, vi } from "vitest";
 import { createRelayCommandHandler } from "../../../chrome-extension/modules/relay-command-handler.js";
 import {

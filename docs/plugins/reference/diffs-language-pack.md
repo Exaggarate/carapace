@@ -7,21 +7,21 @@ title: "Diffs Language Pack plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 Adds syntax highlighting for languages outside the default diffs viewer set.
 
 ## Distribution
 
-- Package: `@openclaw/diffs-language-pack`
-- Install route: npm or ClawHub: `clawhub:@openclaw/diffs-language-pack`
+- Package: `@carapace/diffs-language-pack`
+- Install route: npm or ClawHub: `clawhub:@carapace/diffs-language-pack`
 
 ## Surface
 
 This plugin declares no channels, providers, commands, or contracts.
 
-<!-- openclaw-plugin-reference:manual-start -->
+<!-- carapace-plugin-reference:manual-start -->
 
 ## Added languages
 
@@ -31,4 +31,4 @@ Examples include Astro, Vue, Svelte, MDX, GraphQL, Terraform/HCL, Nix, Clojure, 
 
 See [Shiki languages](https://shiki.style/languages) for Shiki's upstream language and alias catalog.
 
-<!-- openclaw-plugin-reference:manual-end -->
+<!-- carapace-plugin-reference:manual-end -->

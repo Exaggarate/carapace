@@ -3,9 +3,9 @@ import { access, mkdir, rmdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readAgentProvenance } from "../state/agent-provenance.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { applyClawAddPlan, ClawAddMutationError } from "./add.js";
 import { ClawCronInstallError } from "./cron.js";
 import { replaceClawPackageRefExpected } from "./package-update-provenance.js";
@@ -25,24 +25,24 @@ import { makeProvenancePlan, readInstallRow, stateEnv } from "./provenance.test-
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 async function makePlan(
   manifestValue: unknown = { schemaVersion: 1, agent: { id: "worker" } },
   options: Parameters<typeof makeProvenancePlan>[2] = {},
 ) {
-  const root = tempDirs.make("openclaw-claw-add-");
+  const root = tempDirs.make("carapace-claw-add-");
   return await makeProvenancePlan(root, manifestValue, options);
 }
 
 const extensionFixture = Object.freeze({
   id: "coding-tools",
-  format: "openclaw" as const,
+  format: "carapace" as const,
   detectedFormat: "claude" as const,
   mapped: ["commands", "skills"],
   unavailable: ["agents"],
-  adapterIdentity: "openclaw/test",
+  adapterIdentity: "carapace/test",
 });
 
 describe("Claw root install provenance", () => {
@@ -123,7 +123,7 @@ describe("Claw root install provenance", () => {
     const record = persistClawInstallRecord(plan, { env: stateEnv(root), nowMs: 42 });
 
     expect(record).toMatchObject({
-      schemaVersion: "openclaw.clawInstallRecord.v2",
+      schemaVersion: "carapace.clawInstallRecord.v2",
       claw: { name: "@acme/worker", version: "1.0.0", integrity: "sha256:manifest" },
       manifestSchemaVersion: 1,
       planIntegrity: plan.planIntegrity,
@@ -267,7 +267,7 @@ describe("Claw root install provenance", () => {
     const record = persistClawPackageRef(plan, pkg, { env: stateEnv(root), nowMs: 43 });
 
     expect(record).toMatchObject({
-      schemaVersion: "openclaw.clawPackageRef.v1",
+      schemaVersion: "carapace.clawPackageRef.v1",
       agentId: "worker",
       clawName: "@acme/worker",
       ...pkg,
@@ -412,7 +412,7 @@ describe("applyClawAddPlan", () => {
       },
     );
     const requirement = {
-      schemaVersion: "openclaw.clawPackageRef.v1" as const,
+      schemaVersion: "carapace.clawPackageRef.v1" as const,
       agentId: "worker",
       clawName: "@acme/worker",
       kind: "plugin" as const,
@@ -478,7 +478,7 @@ describe("applyClawAddPlan", () => {
       },
     );
     const requirement = {
-      schemaVersion: "openclaw.clawPackageRef.v1" as const,
+      schemaVersion: "carapace.clawPackageRef.v1" as const,
       agentId: "worker",
       clawName: "@acme/worker",
       kind: "plugin" as const,
@@ -633,13 +633,13 @@ describe("applyClawAddPlan", () => {
         },
       },
       {
-        openClawProfile: {
+        carapaceProfile: {
           schemaVersion: 1,
           agent: { tools: { deny: ["exec"] } },
         },
       },
     );
-    let config: OpenClawConfig = {
+    let config: CarapaceConfig = {
       agents: {
         defaults: { workspace: "/operator/default" },
         entries: { main: { default: true } },
@@ -656,7 +656,7 @@ describe("applyClawAddPlan", () => {
     });
 
     expect(result).toMatchObject({
-      schemaVersion: "openclaw.clawAddResult.v1",
+      schemaVersion: "carapace.clawAddResult.v1",
       stability: "experimental",
       status: "complete",
       workspaceCreated: true,
@@ -678,7 +678,7 @@ describe("applyClawAddPlan", () => {
 
   it("materializes the implicit main agent before appending the first configured agent", async () => {
     const { root, plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     await applyClawAddPlan(plan, {
       consentPlanIntegrity: plan.planIntegrity,
@@ -695,7 +695,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rejects overlap with the implicit main workspace before materializing it", async () => {
-    const root = tempDirs.make("openclaw-claw-implicit-main-");
+    const root = tempDirs.make("carapace-claw-implicit-main-");
     const mainWorkspace = join(root, "main-workspace");
     const { root: planRoot, plan } = await makePlan(undefined, {
       workspace: join(mainWorkspace, "nested-claw"),
@@ -759,7 +759,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rechecks aliased workspace collisions during the config commit", async () => {
-    const root = tempDirs.make("openclaw-claw-workspace-alias-");
+    const root = tempDirs.make("carapace-claw-workspace-alias-");
     const canonicalParent = join(root, "canonical");
     const aliasParent = join(root, "alias");
     await mkdir(canonicalParent);
@@ -790,7 +790,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rejects workspace ancestry changes after planning", async () => {
-    const root = tempDirs.make("openclaw-claw-workspace-swap-");
+    const root = tempDirs.make("carapace-claw-workspace-swap-");
     const canonicalParent = join(root, "canonical");
     const alternateParent = join(root, "alternate");
     await mkdir(canonicalParent);
@@ -858,7 +858,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("records parent-directory creation failures before workspace mutation", async () => {
-    const root = tempDirs.make("openclaw-claw-add-");
+    const root = tempDirs.make("carapace-claw-add-");
     const blockedParent = join(root, "blocked-parent");
     await writeFile(blockedParent, "not a directory", "utf8");
     const { plan } = await makePlan(undefined, {
@@ -898,7 +898,7 @@ describe("applyClawAddPlan", () => {
 
   it("resumes a matching partial add with an existing non-empty workspace", async () => {
     const { root, plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
     let attempts = 0;
 
     const first = await applyClawAddPlan(plan, {
@@ -950,7 +950,7 @@ describe("applyClawAddPlan", () => {
       status: "workspace_ready",
       nowMs: 1,
     });
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     const result = await applyClawAddPlan(plan, {
       consentPlanIntegrity: plan.planIntegrity,
@@ -973,7 +973,7 @@ describe("applyClawAddPlan", () => {
       nowMs: 1,
     });
     await writeFile(plan.agent.workspace, "not a directory", "utf8");
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     await expect(
       applyClawAddPlan(plan, {
@@ -1015,7 +1015,7 @@ describe("applyClawAddPlan", () => {
 
   it("fails before mutation when the pending provenance record cannot be persisted", async () => {
     const { plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: CarapaceConfig = {};
 
     await expect(
       applyClawAddPlan(plan, {
@@ -1054,7 +1054,7 @@ describe("applyClawAddPlan", () => {
       ],
     });
     const failedRef = {
-      schemaVersion: "openclaw.clawCronRef.v1" as const,
+      schemaVersion: "carapace.clawCronRef.v1" as const,
       agentId: "worker",
       manifestId: "daily-report",
       declarationKey: "claw:worker:daily-report",

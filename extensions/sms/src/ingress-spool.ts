@@ -3,9 +3,9 @@ import {
   bindIngressLifecycleToReplyOptions,
   createChannelIngressMonitor,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { runDetachedWebhookWork } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { runDetachedWebhookWork } from "carapace/plugin-sdk/webhook-request-guards";
 import { dispatchSmsInboundEvent, type SmsChannelRuntime } from "./inbound.js";
 import { looksLikeSmsPhoneNumber, normalizeSmsPhoneNumber } from "./phone.js";
 import { getSmsRuntime } from "./runtime.js";
@@ -80,7 +80,7 @@ function parseSmsIngressForm(
 }
 
 export function createSmsIngressSpool(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedSmsAccount;
   channelRuntime: SmsChannelRuntime;
   queue?: ChannelIngressQueue<SmsIngressPayload>;

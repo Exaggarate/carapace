@@ -1,7 +1,7 @@
-// Qianfan plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Qianfan plugin entrypoint registers its Carapace integration.
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import { applyQianfanConfig, QIANFAN_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const PROVIDER_ID = "qianfan";
 

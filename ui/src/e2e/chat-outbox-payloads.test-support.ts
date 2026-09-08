@@ -12,14 +12,14 @@ export const outboxPayloadHistory = [
   { role: "assistant", content: "Mock Gateway: payload lifecycle proof." },
 ];
 export const outboxPaneFor = (page: Page) =>
-  page.locator('openclaw-chat-pane[aria-hidden="false"]');
+  page.locator('carapace-chat-pane[aria-hidden="false"]');
 export const outboxComposerFor = (page: Page) =>
   outboxPaneFor(page).locator(".agent-chat__composer-combobox textarea");
 
 export async function readOutboxQueue(page: Page): Promise<ChatQueueItem[]> {
   return page.evaluate(() =>
     Object.keys(sessionStorage)
-      .filter((key) => key.startsWith("openclaw.control.chatComposer.v4:"))
+      .filter((key) => key.startsWith("carapace.control.chatComposer.v4:"))
       .flatMap((key) => {
         const store = JSON.parse(sessionStorage.getItem(key)!) as {
           sessions: Record<string, { queue?: ChatQueueItem[] }>;
@@ -32,7 +32,7 @@ export async function readOutboxQueue(page: Page): Promise<ChatQueueItem[]> {
 export async function countOutboxPayloads(page: Page): Promise<number> {
   return page.evaluate(async () => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open("openclaw-control-ui");
+      const request = indexedDB.open("carapace-control-ui");
       request.onsuccess = () => resolve(request.result);
       request.addEventListener("error", () =>
         reject(request.error ?? new Error("IndexedDB request failed")),

@@ -11,7 +11,7 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
 const suite = createControlUiE2eSuite({
   name: "Control UI session-list event scope",
 });
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 async function openSessionFilters(page: Page) {
   await page.getByRole("button", { name: "Filters" }).click();
@@ -66,7 +66,7 @@ suite.define(() => {
     await visibleRow.waitFor({ timeout: 10_000 });
     // An agent-scoped list can ignore another agent; this query must exercise
     // the Gateway's configured-agent membership filter across all agents.
-    const pageScope = currentPage.locator(".agent-scope-control openclaw-agent-select");
+    const pageScope = currentPage.locator(".agent-scope-control carapace-agent-select");
     await pageScope.locator(".agent-select__trigger").click();
     await pageScope
       .locator("wa-dropdown-item[data-agent-option]")
@@ -284,7 +284,7 @@ suite.define(() => {
     expect(sidebarParams).not.toHaveProperty("activeMinutes");
 
     await currentPage.goto(`${suite.server?.baseUrl ?? ""}sessions`);
-    const sessionsPage = currentPage.locator("openclaw-sessions-page");
+    const sessionsPage = currentPage.locator("carapace-sessions-page");
     await sessionsPage.getByText(sessionLabel, { exact: true }).waitFor({ timeout: 10_000 });
     const initialPageRequests = await gateway.getRequests("sessions.list");
     const initialPageParams = initialPageRequests.find(

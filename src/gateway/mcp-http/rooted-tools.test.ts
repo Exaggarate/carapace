@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import "../../agents/test-helpers/fast-coding-tools.js";
-import "../../agents/test-helpers/fast-openclaw-tools.js";
+import "../../agents/test-helpers/fast-carapace-tools.js";
 import { prepareRootedExecutionCapability } from "../../agents/rooted-run-params.js";
 import { createAgentToolsSandboxContext } from "../../agents/test-helpers/agent-tools-sandbox-context.js";
 import { createHostSandboxFsBridge } from "../../agents/test-helpers/host-sandbox-fs-bridge.js";
@@ -23,7 +23,7 @@ describe("rooted CLI mediated tools", () => {
     callGatewayTool.mockClear();
   });
   it("enforces the host root and exact file-tool cap through MCP projection", async () => {
-    const parent = tempDirs.make("openclaw-rooted-mcp-");
+    const parent = tempDirs.make("carapace-rooted-mcp-");
     const root = path.join(parent, "workshop");
     const cfg = { plugins: { enabled: false }, tools: { fs: { workspaceOnly: false } } };
     const rootedExecution = await prepareRootedExecutionCapability({
@@ -74,7 +74,7 @@ describe("rooted CLI mediated tools", () => {
   });
 
   it("edits the Workshop through the sandbox retained by the MCP grant", async () => {
-    const root = tempDirs.make("openclaw-rooted-mcp-sandbox-");
+    const root = tempDirs.make("carapace-rooted-mcp-sandbox-");
     await fs.writeFile(path.join(root, "SKILL.md"), "Original guidance\n");
     const bridge = createHostSandboxFsBridge(root);
     const writeFile = vi.spyOn(bridge, "writeFile");
@@ -108,7 +108,7 @@ describe("rooted CLI mediated tools", () => {
   )(
     "keeps cron exec policy $security/$ask with rooted execution $rooted",
     async ({ rooted, security, ask }) => {
-      const root = tempDirs.make("openclaw-rooted-exec-policy-");
+      const root = tempDirs.make("carapace-rooted-exec-policy-");
       const cfg = {
         plugins: { enabled: false },
         tools: {

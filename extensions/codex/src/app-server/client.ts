@@ -4,10 +4,10 @@
  */
 import { randomUUID } from "node:crypto";
 import { createInterface, type Interface as ReadlineInterface } from "node:readline";
-import { embeddedAgentLog, OPENCLAW_VERSION } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { coerceErrorMessage, toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { embeddedAgentLog, CARAPACE_VERSION } from "carapace/plugin-sdk/agent-harness-runtime";
+import { coerceErrorMessage, toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { parse as parseSemver } from "semver";
 import type { CodexAppServerStartOptions } from "./config-contracts.js";
 import { resolveCodexAppServerRuntimeOptions } from "./config-runtime.js";
@@ -335,9 +335,9 @@ export class CodexAppServerClient {
     // which matters when callers override the binary or app-server args.
     const response = await this.request("initialize", {
       clientInfo: {
-        name: "openclaw",
-        title: "OpenClaw",
-        version: OPENCLAW_VERSION,
+        name: "carapace",
+        title: "Carapace",
+        version: CARAPACE_VERSION,
       },
       capabilities: {
         experimentalApi: true,
@@ -713,7 +713,7 @@ export class CodexAppServerClient {
     this.writeMessage({ method, params });
   }
 
-  /** Registers a handler for app-server requests sent back to OpenClaw. */
+  /** Registers a handler for app-server requests sent back to Carapace. */
   addRequestHandler(handler: CodexServerRequestHandler): () => void {
     this.requestHandlers.add(handler);
     return () => this.requestHandlers.delete(handler);
@@ -723,7 +723,7 @@ export class CodexAppServerClient {
   addNotificationHandler(handler: CodexServerNotificationHandler): () => void {
     this.notificationHandlers.add(handler);
     // Codex sends configuration warnings immediately after initialize, before
-    // OpenClaw can reserve the first thread or install its shared turn router.
+    // Carapace can reserve the first thread or install its shared turn router.
     for (const notification of this.pendingStartupWarnings.splice(0)) {
       this.handleNotification(notification);
     }
@@ -1076,7 +1076,7 @@ function defaultServerRequestResponse(
       contentItems: [
         {
           type: "inputText",
-          text: "OpenClaw did not register a handler for this app-server tool call.",
+          text: "Carapace did not register a handler for this app-server tool call.",
         },
       ],
       success: false,
@@ -1098,7 +1098,7 @@ function defaultServerRequestResponse(
   }
   if (request.method === "mcpServer/elicitation/request") {
     return createCodexElicitationResponse("decline", null, {
-      message: "OpenClaw has no interactive handler for this elicitation.",
+      message: "Carapace has no interactive handler for this elicitation.",
     });
   }
   return {};
@@ -1117,7 +1117,7 @@ function timeoutServerRequestResponse(timeoutMs: number): JsonValue {
     contentItems: [
       {
         type: "inputText",
-        text: `OpenClaw dynamic tool call timed out after ${timeoutMs}ms before sending a response to Codex.`,
+        text: `Carapace dynamic tool call timed out after ${timeoutMs}ms before sending a response to Codex.`,
       },
     ],
     success: false,
@@ -1131,7 +1131,7 @@ class CodexAppServerVersionError extends Error {
   constructor(detectedVersion: string | undefined) {
     const detected = detectedVersion
       ? `detected ${detectedVersion}`
-      : "OpenClaw could not determine the running Codex version";
+      : "Carapace could not determine the running Codex version";
     super(
       `Codex app-server ${MIN_SUPPORTED_CODEX_APP_SERVER_VERSION} or newer is required, but ${detected}. Update the configured Codex app-server binary, or remove custom command overrides to use the managed binary.`,
     );
@@ -1151,7 +1151,7 @@ function assertSupportedCodexAppServerVersion(response: CodexInitializeResponse)
   }
   if (detected.compare(CODEX_APP_SERVER_VERSION) > 0) {
     embeddedAgentLog.warn(
-      "codex app-server is newer than OpenClaw's managed runtime; continuing with normal startup validation",
+      "codex app-server is newer than Carapace's managed runtime; continuing with normal startup validation",
       {
         detectedVersion,
         validatedVersion: CODEX_APP_SERVER_VERSION,
@@ -1185,7 +1185,7 @@ function buildCodexAppServerRuntimeIdentity(
 /** Extracts the Codex version from the app-server initialize user-agent field. */
 function readCodexVersionFromUserAgent(userAgent: string | undefined): string | undefined {
   // Codex returns `<originator>/<codex-version> ...`; the originator can be
-  // OpenClaw, Codex Desktop, or an env override, so only the slash-delimited
+  // Carapace, Codex Desktop, or an env override, so only the slash-delimited
   // version in the leading product field is stable.
   const match = userAgent?.match(
     /^[^/]+\/(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)(?:[\s(]|$)/,
@@ -1258,7 +1258,7 @@ const CODEX_APP_SERVER_APPROVAL_REQUEST_METHODS = new Set([
   "item/permissions/requestApproval",
 ]);
 
-/** Returns true for app-server approval request methods OpenClaw can answer. */
+/** Returns true for app-server approval request methods Carapace can answer. */
 export function isCodexAppServerApprovalRequest(method: string): boolean {
   return CODEX_APP_SERVER_APPROVAL_REQUEST_METHODS.has(method);
 }

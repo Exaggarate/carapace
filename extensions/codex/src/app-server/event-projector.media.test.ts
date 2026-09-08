@@ -1,5 +1,5 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach } from "vitest";
 import {
   describe,
@@ -22,15 +22,15 @@ import type { CodexRemoteWorkspaceFileReader } from "./remote-workspace-media.js
 
 registerCodexEventProjectorTestLifecycle();
 
-let openClawState: OpenClawTestState;
+let carapaceState: CarapaceTestState;
 beforeEach(async () => {
-  openClawState = await createOpenClawTestState({
+  carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-codex-media-state-",
+    prefix: "carapace-codex-media-state-",
   });
 });
 afterEach(async () => {
-  await openClawState.cleanup();
+  await carapaceState.cleanup();
 });
 
 describe("CodexAppServerEventProjector media projection", () => {

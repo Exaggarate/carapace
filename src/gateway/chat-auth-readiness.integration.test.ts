@@ -15,12 +15,12 @@ import { resolveSessionStorePathCore } from "../config/sessions.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { applySessionModelSelection } from "../model-picker/apply-session-model-selection.js";
 import { onSessionLifecycleEvent } from "../sessions/session-lifecycle-events.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createLifecycleEventBroadcastHandler } from "./server-session-events.js";
 import { loadGatewaySessionEntryReadOnly } from "./session-utils.js";
 
 it("refreshes a retained pane from a persisted profile-only selection through the Gateway lifecycle broadcaster", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     // The picker supplies prepared capabilities; omission would start unrelated catalog discovery.
     const model = {
       provider: "anthropic",

@@ -91,7 +91,7 @@ function createLaunchAgentRemovalError(error: unknown): Error {
 async function currentGatewayLaunchAgentLabel(
   targetEnv: Record<string, string | undefined>,
 ): Promise<string | undefined> {
-  const configuredCurrentLabel = process.env.OPENCLAW_LAUNCHD_LABEL?.trim();
+  const configuredCurrentLabel = process.env.CARAPACE_LAUNCHD_LABEL?.trim();
   const candidates = new Set([
     resolveLaunchAgentLabel(targetEnv),
     ...(configuredCurrentLabel ? [assertValidLaunchAgentLabel(configuredCurrentLabel)] : []),
@@ -174,7 +174,7 @@ async function restoreLaunchAgentOwnedFile(params: {
     });
     return;
   }
-  const temporaryPath = `${params.path}.openclaw-${randomUUID()}.rollback`;
+  const temporaryPath = `${params.path}.carapace-${randomUUID()}.rollback`;
   try {
     await fs.writeFile(temporaryPath, params.contents.toString("utf8"), {
       flag: "wx",
@@ -251,7 +251,7 @@ async function restoreLaunchAgentInstall(params: {
       domain: params.domain,
       serviceTarget,
       plistPath: params.plistPath,
-      actionHint: "openclaw gateway start",
+      actionHint: "carapace gateway start",
       retryPendingTeardown: true,
     });
   }
@@ -292,7 +292,7 @@ async function activateLaunchAgent(params: {
       domain,
       serviceTarget: `${domain}/${label}`,
       plistPath: params.plistPath,
-      actionHint: "openclaw gateway install --force",
+      actionHint: "carapace gateway install --force",
       retryPendingTeardown: true,
     });
   } catch (error) {

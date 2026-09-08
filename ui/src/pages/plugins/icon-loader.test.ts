@@ -86,7 +86,7 @@ describe("catalog icon loader", () => {
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
     const common = {
       auth,
-      resourceBasePath: "/openclaw",
+      resourceBasePath: "/carapace",
       gatewayUrl: window.location.origin.replace(/^http/u, "ws"),
       signal: new AbortController().signal,
     };
@@ -103,9 +103,9 @@ describe("catalog icon loader", () => {
     ).resolves.toBe("blob:link-favicon");
 
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
-      "/openclaw/__openclaw__/plugin-icon/firecrawl",
-      `/openclaw/__openclaw__/catalog-icon/${encodeURIComponent(iconUrl)}`,
-      "/openclaw/__openclaw__/link-favicon/docs.example.com",
+      "/carapace/__carapace__/plugin-icon/firecrawl",
+      `/carapace/__carapace__/catalog-icon/${encodeURIComponent(iconUrl)}`,
+      "/carapace/__carapace__/link-favicon/docs.example.com",
     ]);
     expect(
       fetchMock.mock.calls.map(([, init]) => new Headers(init?.headers).get("Authorization")),

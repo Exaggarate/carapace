@@ -1,8 +1,8 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   hasOutboundReplyContent,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import { replaceGenericExternalRunFailureText } from "../agents/failover/user-copy.js";
 import {
   resolveHeartbeatReplyPayload,

@@ -62,7 +62,7 @@ describe("bench-cli-startup", () => {
     "cleans timed-out benchmark process groups when the leader exits first",
     async () => {
       const tempDirs = createTempDirTracker();
-      const tmpDir = tempDirs.make("openclaw-cli-startup-timeout-group-");
+      const tmpDir = tempDirs.make("carapace-cli-startup-timeout-group-");
       const entryPath = join(tmpDir, "entry.mjs");
       const leaderPidPath = join(tmpDir, "leader.pid");
       const childPidPath = join(tmpDir, "child.pid");
@@ -144,8 +144,8 @@ try {
             env: {
               ...process.env,
               HOME: tmpDir,
-              OPENCLAW_STATE_DIR: join(tmpDir, ".openclaw"),
-              OPENCLAW_TEST_CLI_STARTUP_TIMEOUT_KILL_GRACE_MS: "50",
+              CARAPACE_STATE_DIR: join(tmpDir, ".carapace"),
+              CARAPACE_TEST_CLI_STARTUP_TIMEOUT_KILL_GRACE_MS: "50",
               VITEST: "1",
             },
             timeout: 8_000,
@@ -179,14 +179,14 @@ try {
 
   it("writes compare-mode JSON output and creates parent directories", () => {
     const tempDirs = createTempDirTracker();
-    const tmpDir = tempDirs.make("openclaw-cli-startup-compare-output-");
+    const tmpDir = tempDirs.make("carapace-cli-startup-compare-output-");
     try {
       const baselinePath = join(tmpDir, "baseline.json");
       const candidatePath = join(tmpDir, "candidate.json");
       const outputPath = join(tmpDir, "nested", "comparison.json");
       const makeReport = (durationAvg: number, maxRssAvg: number) => ({
         primary: {
-          entry: "openclaw.mjs",
+          entry: "carapace.mjs",
           cases: [
             {
               id: "version",
@@ -252,7 +252,7 @@ try {
   it("fails reports with no measured samples", () => {
     expect(
       testing.collectFailedSamples({
-        entry: "openclaw.mjs",
+        entry: "carapace.mjs",
         cases: [
           {
             id: "version",
@@ -270,7 +270,7 @@ try {
           },
         ],
       }),
-    ).toEqual(["openclaw.mjs version: no measured samples"]);
+    ).toEqual(["carapace.mjs version: no measured samples"]);
   });
 
   it("fails reports with nonzero or signaled CLI samples", () => {
@@ -352,7 +352,7 @@ try {
   it("fails reports with samples that did not report RSS", () => {
     expect(
       testing.collectFailedSamples({
-        entry: "openclaw.mjs",
+        entry: "carapace.mjs",
         cases: [
           {
             id: "version",
@@ -378,7 +378,7 @@ try {
           },
         ],
       }),
-    ).toEqual(["openclaw.mjs version sample 1: did not report max RSS"]);
+    ).toEqual(["carapace.mjs version sample 1: did not report max RSS"]);
   });
 
   it("allows declared nonzero exit codes for clean-state probes", () => {
@@ -393,7 +393,7 @@ try {
 
     expect(
       testing.collectFailedSamples({
-        entry: "openclaw.mjs",
+        entry: "carapace.mjs",
         cases: [
           {
             id: "health",
@@ -428,7 +428,7 @@ try {
 
     expect(
       testing.collectFailedSamples({
-        entry: "openclaw.mjs",
+        entry: "carapace.mjs",
         cases: [
           {
             id: "health",
@@ -449,7 +449,7 @@ try {
         ],
       }),
     ).toEqual([
-      "openclaw.mjs health sample 1: exited with expected code 1 but output did not match expected clean-state markers (Gateway target:)",
+      "carapace.mjs health sample 1: exited with expected code 1 but output did not match expected clean-state markers (Gateway target:)",
     ]);
   });
 
@@ -510,7 +510,7 @@ try {
       },
     ]) {
       expect(
-        withEnv({ OPENCLAW_GATEWAY_PORT: undefined }, () =>
+        withEnv({ CARAPACE_GATEWAY_PORT: undefined }, () =>
           testing.buildConfigFixture(commandCase),
         ),
       ).toEqual(unauthenticatedFixture);
@@ -531,7 +531,7 @@ try {
       },
     ]) {
       expect(
-        withEnv({ OPENCLAW_GATEWAY_PORT: undefined }, () =>
+        withEnv({ CARAPACE_GATEWAY_PORT: undefined }, () =>
           testing.buildConfigFixture(commandCase),
         ),
       ).toEqual({
@@ -558,7 +558,7 @@ try {
       "gatewayHealthJsonFreshState",
     ]) {
       expect(
-        withEnv({ OPENCLAW_GATEWAY_PORT: "45678" }, () =>
+        withEnv({ CARAPACE_GATEWAY_PORT: "45678" }, () =>
           testing.buildConfigFixture({
             id,
             name: "gateway health --json",
@@ -571,7 +571,7 @@ try {
 
     for (const invalid of ["45678abc", "127.0.0.1:45678abc"]) {
       expect(() =>
-        withEnv({ OPENCLAW_GATEWAY_PORT: invalid }, () =>
+        withEnv({ CARAPACE_GATEWAY_PORT: invalid }, () =>
           testing.buildConfigFixture({
             id: "gatewayHealthJson",
             name: "gateway health --json",
@@ -579,7 +579,7 @@ try {
             presets: ["real"],
           }),
         ),
-      ).toThrow("OPENCLAW_GATEWAY_PORT must be an integer >= 1");
+      ).toThrow("CARAPACE_GATEWAY_PORT must be an integer >= 1");
     }
   });
 });

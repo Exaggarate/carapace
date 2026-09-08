@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server as HttpServer } from "node:http";
 import { createServer as createTcpServer, type Server as TcpServer, type Socket } from "node:net";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it } from "vitest";
 import { runNodeScript } from "../../../helpers/run-node-script.js";
 
@@ -316,13 +316,13 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
 
       expect(result.error).toBeUndefined();
       expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain("openclaw model missing from Open WebUI model list");
+      expect(result.stderr).toContain("carapace model missing from Open WebUI model list");
     } finally {
       server.close();
     }
   });
 
-  it("passes in models mode when Open WebUI exposes the OpenClaw model", async () => {
+  it("passes in models mode when Open WebUI exposes the Carapace model", async () => {
     const server = createServer((request, response) => {
       if (request.url === "/api/v1/auths/signin") {
         setTimeout(() => {
@@ -338,7 +338,7 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
         expect(request.headers.authorization).toBe("Bearer test-token");
         expect(request.headers.cookie).toContain("openwebui-session=test");
         response.writeHead(200, { "content-type": "application/json" });
-        response.end(JSON.stringify({ data: [{ id: "openclaw/default" }] }));
+        response.end(JSON.stringify({ data: [{ id: "carapace/default" }] }));
         return;
       }
       response.writeHead(404).end();
@@ -353,7 +353,7 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
       expect(result.status).toBe(0);
       expect(JSON.parse(result.stdout)).toMatchObject({
         mode: "models",
-        model: "openclaw/default",
+        model: "carapace/default",
         ok: true,
       });
     } finally {
@@ -375,7 +375,7 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
         }
         if (request.url === "/api/models") {
           response.writeHead(200, { "content-type": "application/json" });
-          response.end(JSON.stringify({ data: [{ id: "openclaw/default" }] }));
+          response.end(JSON.stringify({ data: [{ id: "carapace/default" }] }));
           return;
         }
         if (request.url === "/api/chat/completions") {
@@ -385,7 +385,7 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
           response.writeHead(200, { "content-type": "application/json" });
           response.end(
             JSON.stringify({
-              choices: [{ message: { content: "OpenClaw replied with nonce-123" } }],
+              choices: [{ message: { content: "Carapace replied with nonce-123" } }],
             }),
           );
           return;
@@ -399,14 +399,14 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
 
       expect(result.status).toBe(0);
       expect(JSON.parse(result.stdout)).toMatchObject({
-        model: "openclaw/default",
+        model: "carapace/default",
         ok: true,
-        reply: "OpenClaw replied with nonce-123",
+        reply: "Carapace replied with nonce-123",
       });
       expect(chatRequests).toEqual([
         {
           messages: [{ content: "reply with nonce-123", role: "user" }],
-          model: "openclaw/default",
+          model: "carapace/default",
         },
       ]);
     } finally {
@@ -426,7 +426,7 @@ describe("scripts/e2e/openwebui-probe.mjs", () => {
       }
       if (request.url === "/api/models") {
         response.writeHead(200, { "content-type": "application/json" });
-        response.end(JSON.stringify({ data: [{ id: "openclaw/default" }] }));
+        response.end(JSON.stringify({ data: [{ id: "carapace/default" }] }));
         return;
       }
       if (request.url === "/api/chat/completions") {

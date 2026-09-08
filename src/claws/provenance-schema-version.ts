@@ -1,8 +1,8 @@
 import type { DatabaseSync } from "node:sqlite";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 
-const LEGACY_CLAW_INSTALL_RECORD_SCHEMA_VERSION = "openclaw.clawInstallRecord.v1" as const;
-export const CLAW_INSTALL_RECORD_SCHEMA_VERSION = "openclaw.clawInstallRecord.v2" as const;
+const LEGACY_CLAW_INSTALL_RECORD_SCHEMA_VERSION = "carapace.clawInstallRecord.v1" as const;
+export const CLAW_INSTALL_RECORD_SCHEMA_VERSION = "carapace.clawInstallRecord.v2" as const;
 type ClawInstallRecordSchemaVersion =
   | typeof LEGACY_CLAW_INSTALL_RECORD_SCHEMA_VERSION
   | typeof CLAW_INSTALL_RECORD_SCHEMA_VERSION;

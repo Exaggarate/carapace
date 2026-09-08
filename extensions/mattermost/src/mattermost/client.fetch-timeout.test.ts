@@ -1,6 +1,6 @@
 // Mattermost tests cover real REST client timeout behavior.
 import { createRequire } from "node:module";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import {
   createMattermostClient,

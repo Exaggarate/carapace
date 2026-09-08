@@ -29,10 +29,10 @@ describe("core/doctor/bootstrap-size", () => {
   });
 
   it("does not create shared state while inspecting bootstrap files", async () => {
-    tmp = await fs.mkdtemp(join(tmpdir(), "openclaw-health-bootstrap-readonly-"));
+    tmp = await fs.mkdtemp(join(tmpdir(), "carapace-health-bootstrap-readonly-"));
     await fs.writeFile(join(tmp, "AGENTS.md"), "bootstrap", "utf-8");
     const stateDir = join(tmp, "state-root");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
 
     await expect(
       getBootstrapSizeCheck().detect({
@@ -42,13 +42,13 @@ describe("core/doctor/bootstrap-size", () => {
         cwd: tmp,
       }),
     ).resolves.toEqual([]);
-    await expect(fs.stat(join(stateDir, "state", "openclaw.sqlite"))).rejects.toMatchObject({
+    await expect(fs.stat(join(stateDir, "state", "carapace.sqlite"))).rejects.toMatchObject({
       code: "ENOENT",
     });
   });
 
   it("counts files added by the bundled bootstrap-extra-files hook without the hook runtime", async () => {
-    tmp = await fs.realpath(await fs.mkdtemp(join(tmpdir(), "openclaw-health-bootstrap-extra-")));
+    tmp = await fs.realpath(await fs.mkdtemp(join(tmpdir(), "carapace-health-bootstrap-extra-")));
     await fs.writeFile(join(tmp, "AGENTS.md"), "bootstrap", "utf-8");
     await fs.mkdir(join(tmp, "packages", "core"), { recursive: true });
     await fs.writeFile(join(tmp, "packages", "core", "SOUL.md"), "a".repeat(15_000), "utf-8");
@@ -82,7 +82,7 @@ describe("core/doctor/bootstrap-size", () => {
   it("reports a hook-added extra file the total bootstrap budget dropped", async () => {
     // The extra repeats the root basename, so only source-path identity can tell
     // the doctor that this file received no injected bytes at all.
-    tmp = await fs.realpath(await fs.mkdtemp(join(tmpdir(), "openclaw-health-bootstrap-drop-")));
+    tmp = await fs.realpath(await fs.mkdtemp(join(tmpdir(), "carapace-health-bootstrap-drop-")));
     await fs.writeFile(join(tmp, "AGENTS.md"), "a".repeat(1_000), "utf-8");
     await fs.mkdir(join(tmp, "packages", "core"), { recursive: true });
     await fs.writeFile(join(tmp, "packages", "core", "AGENTS.md"), "b".repeat(500), "utf-8");
@@ -114,7 +114,7 @@ describe("core/doctor/bootstrap-size", () => {
   });
 
   it("honors the per-agent bootstrapMaxChars override in health findings", async () => {
-    tmp = await fs.mkdtemp(join(tmpdir(), "openclaw-health-bootstrap-"));
+    tmp = await fs.mkdtemp(join(tmpdir(), "carapace-health-bootstrap-"));
     await fs.writeFile(join(tmp, "AGENTS.md"), "a".repeat(15_000), "utf-8");
 
     const check = getBootstrapSizeCheck();

@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { z } from "zod";
 import { resolveStateDir } from "../config/paths.js";
 import { requireDirectorySync, syncDirectorySync } from "../infra/directory-durability.js";
@@ -60,7 +60,7 @@ export type SessionSqliteMigrationManifest = {
     markdownPath: string;
   };
   manifestVersion: 1 | 2 | 3 | 4;
-  openClawVersion: string;
+  carapaceVersion: string;
   restore?: {
     attemptedAt: string;
     consumedArchives?: string[];
@@ -117,7 +117,7 @@ const RestoreConflictSchema = z.object({
   reason: z.string(),
   sourcePath: AbsolutePathSchema,
 });
-const GithubIssueMarkerSchema = z.string().regex(/^openclaw-report:[a-f0-9]{64}$/u);
+const GithubIssueMarkerSchema = z.string().regex(/^carapace-report:[a-f0-9]{64}$/u);
 const MigrationGithubIssueSchema = z.object({
   marker: GithubIssueMarkerSchema,
   status: z.literal("attempted"),
@@ -180,7 +180,7 @@ const MigrationManifestSchema = z
       })
       .optional(),
     manifestVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
-    openClawVersion: z.string().min(1),
+    carapaceVersion: z.string().min(1),
     restore: z
       .object({
         attemptedAt: z.string().min(1),
@@ -224,7 +224,7 @@ export function createSessionSqliteMigrationRun(
   const manifestPath = path.join(resolveSessionSqliteMigrationRunsDir(env), `${runId}.json`);
   const manifest: SessionSqliteMigrationManifest = {
     manifestVersion: 3,
-    openClawVersion: VERSION,
+    carapaceVersion: VERSION,
     runId,
     startedAt: new Date().toISOString(),
     targets: targets.map((target) => ({

@@ -76,7 +76,7 @@ describe("chat pane board loading states", () => {
     const provider = pane.resolveBoardProvider();
     try {
       draw();
-      const skeleton = container.querySelector("openclaw-panel-loading-skeleton");
+      const skeleton = container.querySelector("carapace-panel-loading-skeleton");
       await skeleton?.updateComplete;
       expect(skeleton?.getAttribute("data-panel-skeleton")).toBe("board");
       expect(skeleton?.getAttribute("role")).toBe("status");
@@ -84,8 +84,8 @@ describe("chat pane board loading states", () => {
       complete(snapshot);
       await vi.waitFor(() => expect(provider.hasLoadedSnapshot).toBe(true));
       draw();
-      expect(container.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
-      expect(container.querySelector("openclaw-board-view")).not.toBeNull();
+      expect(container.querySelector("carapace-panel-loading-skeleton")).toBeNull();
+      expect(container.querySelector("carapace-board-view")).not.toBeNull();
     } finally {
       cleanup();
     }
@@ -101,7 +101,7 @@ describe("chat pane board loading states", () => {
       await vi.waitFor(() => expect(provider.loadError$.value).toBeTruthy());
       draw();
       const alert = container.querySelector('[role="alert"]');
-      expect(container.querySelector("openclaw-panel-loading-skeleton")).toBeNull();
+      expect(container.querySelector("carapace-panel-loading-skeleton")).toBeNull();
       expect(alert?.classList.contains("board-session-surface__state--error")).toBe(true);
       expect(alert?.textContent).toContain("gateway offline");
     } finally {

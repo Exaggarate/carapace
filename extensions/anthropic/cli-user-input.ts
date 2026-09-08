@@ -2,8 +2,8 @@ import type {
   CliBackendExecuteContext,
   CliBackendToolPermissionResult,
   CliBackendUserInputQuestion,
-} from "openclaw/plugin-sdk/cli-backend";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/cli-backend";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function createClaudeCliUserInputAuthorizer(context: CliBackendExecuteContext) {
   const requests = new Map<string, Promise<CliBackendToolPermissionResult>>();
@@ -38,7 +38,7 @@ async function runClaudeUserInput(
   if (!parsed.ok) {
     return {
       behavior: "deny",
-      message: `OpenClaw rejected malformed Claude user questions: ${parsed.failure}. Correct the invalid field and retry AskUserQuestion.`,
+      message: `Carapace rejected malformed Claude user questions: ${parsed.failure}. Correct the invalid field and retry AskUserQuestion.`,
     };
   }
   const questions = parsed.questions;

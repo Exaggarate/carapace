@@ -1,22 +1,22 @@
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { KeyedAsyncQueue } from "../../plugin-sdk/keyed-async-queue.js";
-import { readOpenClawAgentDatabaseIdentity } from "../../state/openclaw-agent-db-identity.js";
-import { retainOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import { readCarapaceAgentDatabaseIdentity } from "../../state/carapace-agent-db-identity.js";
+import { retainCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  isIncognitoOpenClawAgentSqlitePath,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  isIncognitoCarapaceAgentSqlitePath,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import {
-  resolveOpenClawStateDirForDatabasePath,
-  resolveOpenClawStateSqlitePath,
-} from "../../state/openclaw-state-db.paths.js";
+  resolveCarapaceStateDirForDatabasePath,
+  resolveCarapaceStateSqlitePath,
+} from "../../state/carapace-state-db.paths.js";
 import {
   runSqliteTranscriptArchiveWorkerOperation,
   type MaterializedSessionStateDeletePlan,
@@ -55,13 +55,13 @@ import {
 import type { InternalSessionEntry as SessionEntry } from "./types.js";
 
 type SessionBoardCleanupDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "board_tabs" | "board_widgets"
 > & {
   sqlite_schema: { name: string | null; type: string };
 };
 
-type ReclamationDatabaseOptions = OpenClawAgentDatabaseOptions & {
+type ReclamationDatabaseOptions = CarapaceAgentDatabaseOptions & {
   env: NodeJS.ProcessEnv;
   path: string;
 };
@@ -142,19 +142,19 @@ export function runExclusiveSqliteSessionReclamation<T>(run: () => Promise<T>): 
 }
 
 function toWorkerDatabaseOptions(
-  options: OpenClawAgentDatabaseOptions,
+  options: CarapaceAgentDatabaseOptions,
 ): ReclamationDatabaseOptions {
   const sourceEnv = options.env ?? process.env;
-  const sharedStatePath = options.database?.path ?? resolveOpenClawStateSqlitePath(sourceEnv);
+  const sharedStatePath = options.database?.path ?? resolveCarapaceStateSqlitePath(sourceEnv);
   return {
     agentId: options.agentId,
-    env: { OPENCLAW_STATE_DIR: resolveOpenClawStateDirForDatabasePath(sharedStatePath) },
-    path: resolveOpenClawAgentSqlitePath(options),
+    env: { CARAPACE_STATE_DIR: resolveCarapaceStateDirForDatabasePath(sharedStatePath) },
+    path: resolveCarapaceAgentSqlitePath(options),
   };
 }
 
 function deleteSessionBoardRows(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionKeys: readonly string[],
 ): void {
   const keys = [...new Set(sessionKeys)];
@@ -183,7 +183,7 @@ function deleteSessionBoardRows(
 }
 
 export function shouldDeleteSqliteSessionEntryLifecycle(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   entry: SessionEntry | undefined,
   params: DeleteSessionEntryLifecycleParams,
 ): entry is SessionEntry {
@@ -232,7 +232,7 @@ export function reclaimSqliteSessionInTransaction(
   plan: SqliteSessionReclamationPlan,
   callbacks: {
     beforeMutation?: () => void;
-    onCommit?: (database: OpenClawAgentDatabase) => void;
+    onCommit?: (database: CarapaceAgentDatabase) => void;
   } = {},
 ): SqliteSessionReclamationResult {
   if (plan.kind === "entry") {
@@ -300,7 +300,7 @@ export function reclaimSqliteSessionInTransaction(
     return { kind: plan.kind, value };
   }
 
-  const value = runOpenClawAgentWriteTransaction((transactionDb) => {
+  const value = runCarapaceAgentWriteTransaction((transactionDb) => {
     callbacks.beforeMutation?.();
     const protectedSessionIds = new Set(plan.protectedSessionIds);
     const diskBudget = plan.kind === "history-eviction" ? plan.diskBudget : undefined;
@@ -363,7 +363,7 @@ export function reclaimSqliteSessionInTransaction(
 
 function reclaimSqliteFreePagesBestEffort(databaseOptions: ReclamationDatabaseOptions): void {
   try {
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     // sqlite-allow-raw -- PASSIVE never waits for readers; cap page release per pass.
     database.db.exec("PRAGMA wal_checkpoint(PASSIVE); PRAGMA incremental_vacuum(512);");
   } catch {
@@ -411,7 +411,7 @@ export async function runSqliteSessionReclamation(params: {
   diagnostics?: SqliteSessionReclamationDiagnostics;
   assertCommitAllowed?: () => void;
   forceInProcess: boolean;
-  onInProcessCommit?: (database: OpenClawAgentDatabase) => void;
+  onInProcessCommit?: (database: CarapaceAgentDatabase) => void;
   plan: SqliteSessionReclamationPlan;
 }): Promise<SqliteSessionReclamationResult> {
   if (params.diagnostics) {
@@ -419,7 +419,7 @@ export async function runSqliteSessionReclamation(params: {
   }
   if (
     params.forceInProcess ||
-    isIncognitoOpenClawAgentSqlitePath(params.plan.databaseOptions.path, {
+    isIncognitoCarapaceAgentSqlitePath(params.plan.databaseOptions.path, {
       agentId: params.plan.databaseOptions.agentId,
       env: params.plan.databaseOptions.env,
     })
@@ -433,7 +433,7 @@ export async function runSqliteSessionReclamation(params: {
           onCommit: (database) => {
             const publish = prepareReclamationPublication(params.plan);
             if (publish) {
-              deferOpenClawAgentPostCommitPublication(database, publish);
+              deferCarapaceAgentPostCommitPublication(database, publish);
             }
             params.onInProcessCommit?.(database);
           },
@@ -444,7 +444,7 @@ export async function runSqliteSessionReclamation(params: {
   }
   const retained = await runExclusiveSqliteSessionWrite(params.plan.databaseOptions, async () => {
     params.assertCommitAllowed?.();
-    return retainOpenClawAgentDatabaseReadOnly(params.plan.databaseOptions);
+    return retainCarapaceAgentDatabaseReadOnly(params.plan.databaseOptions);
   });
   if (!retained.found) {
     throw new Error("SQLite session reclamation lost its prepared database");
@@ -461,7 +461,7 @@ export async function runSqliteSessionReclamation(params: {
       ...params.plan,
       databaseOptions: {
         ...params.plan.databaseOptions,
-        path: readOpenClawAgentDatabaseIdentity(claim.database).filename,
+        path: readCarapaceAgentDatabaseIdentity(claim.database).filename,
       },
     };
     const commitGate = new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT);
@@ -522,7 +522,7 @@ export async function runSqliteSessionReclamation(params: {
         {
           errors: workerResult.cleanupWarnings ?? [],
           path: params.plan.databaseOptions.path,
-          recovery: "restart OpenClaw before deleting the owning agent",
+          recovery: "restart Carapace before deleting the owning agent",
         },
       );
     } else if (workerResult.cleanupWarnings?.length) {
@@ -546,7 +546,7 @@ function prepareReclamationDeleteParams({
 }
 
 export function createSessionEntryReclamationPlan(params: {
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   deleteParams: DeleteSessionEntryLifecycleParams;
   materializedPlans: MaterializedSessionStateDeletePlan[];
   preparedTargetSnapshot: SqliteLifecycleTargetSnapshot;
@@ -562,7 +562,7 @@ export function createSessionEntryReclamationPlan(params: {
 
 export function createLifecycleArtifactReclamationPlan(params: {
   agentId: string;
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   entries: SessionEntryRemovalPlan[];
   materializedPlans: MaterializedSessionStateDeletePlan[];
 }): Extract<SqliteSessionReclamationPlan, { kind: "lifecycle-artifacts" }> {
@@ -576,7 +576,7 @@ export function createLifecycleArtifactReclamationPlan(params: {
 }
 
 export function createHistoryEvictionReclamationPlan(params: {
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   diskBudget: { preserveRecentMs?: number | null };
   materializedPlans: MaterializedSessionStateDeletePlan[];
   protectedSessionIds: ReadonlySet<string>;
@@ -593,7 +593,7 @@ export function createHistoryEvictionReclamationPlan(params: {
 }
 
 export function createHistoricalGenerationReclamationPlan(params: {
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   deleteParams: DeleteSessionEntryLifecycleParams;
   materializedPlans: MaterializedSessionStateDeletePlan[];
   preparedTargetSnapshot: SqliteLifecycleTargetSnapshot;

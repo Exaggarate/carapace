@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { loadOrCreateDeviceIdentity } from "../../../../src/infra/device-identity.js";
 import {
   connectHotReloadClient,
@@ -16,7 +16,7 @@ type ToolResult = {
   details: { targetId?: string; viewerUrl?: string; ok?: boolean };
 };
 type BrowserStatus = { pid: number | null; cdpUrl: string; running: boolean; attachOnly: boolean };
-const CANVAS_ASSET = "/__openclaw__/a2ui/a2ui.bundle.js";
+const CANVAS_ASSET = "/__carapace__/a2ui/a2ui.bundle.js";
 const SESSION_KEY = "agent:qa:hot-reload-plugin";
 
 export async function proveHotReloadPluginPolicy({
@@ -42,7 +42,7 @@ export async function proveHotReloadPluginPolicy({
   proveGroup: (prefix: string, run: () => Promise<void>) => Promise<void>;
   verifyContinuity: (prefix: string, observation: string) => Promise<void>;
 }) {
-  const initial = (await rpc<{ config: OpenClawConfig }>("config.get")).config;
+  const initial = (await rpc<{ config: CarapaceConfig }>("config.get")).config;
   const observations: Array<Record<string, unknown>> = [];
   const tool = async (name: string, args: unknown, sessionKey = SESSION_KEY) => {
     const response = await http("/tools/invoke", { tool: name, sessionKey, args });
@@ -53,8 +53,8 @@ export async function proveHotReloadPluginPolicy({
     return result;
   };
   const browser = (args: Record<string, unknown>, sessionKey?: string) =>
-    tool("browser", { target: "host", profile: "openclaw", ...args }, sessionKey);
-  const browserRequest = <T>(route: string, profile = "openclaw") =>
+    tool("browser", { target: "host", profile: "carapace", ...args }, sessionKey);
+  const browserRequest = <T>(route: string, profile = "carapace") =>
     rpc<T>("browser.request", {
       target: "host",
       method: "GET",
@@ -98,7 +98,7 @@ export async function proveHotReloadPluginPolicy({
         await setEnabled(false);
         await routeState(false);
         const identity = loadOrCreateDeviceIdentity({
-          path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+          path: path.join(temporaryRoot, "state/carapace.sqlite"),
           identityKey: "canvas-hot-reload-node",
         });
         const connected = await connectHotReloadClient(gateway, {

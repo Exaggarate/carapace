@@ -5,7 +5,7 @@ import type {
   ChannelMessageSendCommitContext,
   ChannelMessageUnknownSendReconciliationResult,
 } from "../../channels/message/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getGlobalHookRunner } from "../../plugins/hook-runner-global.js";
 import {
   createDeliveryRecoveryCoordinator,
@@ -254,7 +254,7 @@ export async function withActiveDeliveryClaim<T>(
 
 function buildRecoveryDeliverParams(
   entry: QueuedDelivery,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   stateDir?: string,
   producerClaimId?: string,
 ) {
@@ -332,7 +332,7 @@ function buildRecoveryDeliverParams(
 
 async function settleQueuedFailure(params: {
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
   error: string;
@@ -446,7 +446,7 @@ function buildReconciledSentResult(
 
 function buildReconciledCommitContext(params: {
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   result: OutboundDeliveryResult;
 }): ChannelMessageSendCommitContext {
   const payload = queuedDeliveryPayloads(params.entry)[0] ?? {};
@@ -507,7 +507,7 @@ function buildReconciledCommitContext(params: {
 
 async function runReconciledSentCommitHooks(params: {
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   reconciliation: Extract<ChannelMessageUnknownSendReconciliationResult, { status: "sent" }>;
   log: RecoveryLogger;
 }): Promise<void> {
@@ -556,7 +556,7 @@ function recoveryPlatformAttemptId(
 async function resolveCompletedOwnerBeforeRecovery(opts: {
   owner: QueuedDeliveryOwner;
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
   onRecovered?: (entry: QueuedDelivery) => void;
@@ -665,7 +665,7 @@ async function persistRecoveredPostSendState(opts: {
 
 async function drainQueuedEntry(opts: {
   entry: QueuedDelivery;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   deliver: DeliverFn;
   log: RecoveryLogger;
   stateDir?: string;
@@ -1263,7 +1263,7 @@ async function processQueuedRecovery(
 export async function drainPendingDeliveriesCore(opts: {
   drainKey: string;
   logLabel: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: RecoveryLogger;
   stateDir?: string;
   deliver: DeliverFn;
@@ -1308,7 +1308,7 @@ export async function drainPendingDeliveriesCore(opts: {
 export async function recoverPendingDeliveries(opts: {
   deliver: DeliverFn;
   log: RecoveryLogger;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   stateDir?: string;
   /** Maximum wall-clock time for recovery in ms. Remaining entries are deferred to next startup. Default: 60 000. */
   maxRecoveryMs?: number;

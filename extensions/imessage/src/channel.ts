@@ -1,28 +1,28 @@
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
 // Imessage plugin module implements channel behavior.
-import { buildDmGroupAccountAllowlistAdapter } from "openclaw/plugin-sdk/allowlist-config-edit";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { formatTrimmedAllowFromEntries } from "openclaw/plugin-sdk/channel-config-helpers";
-import { createChatChannelPlugin, type ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+import { buildDmGroupAccountAllowlistAdapter } from "carapace/plugin-sdk/allowlist-config-edit";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { formatTrimmedAllowFromEntries } from "carapace/plugin-sdk/channel-config-helpers";
+import { createChatChannelPlugin, type ChannelPlugin } from "carapace/plugin-sdk/channel-core";
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
   sanitizeForPlainText,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
-import { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
-import { buildPassiveProbedChannelStatusSummary } from "openclaw/plugin-sdk/extension-shared";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import { chunkMarkdownText } from "openclaw/plugin-sdk/reply-runtime";
-import { buildOutboundBaseSessionKey, type RoutePeer } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-send-result";
+import { PAIRING_APPROVED_MESSAGE } from "carapace/plugin-sdk/channel-status";
+import { buildPassiveProbedChannelStatusSummary } from "carapace/plugin-sdk/extension-shared";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { questionGatewayRuntime } from "carapace/plugin-sdk/question-gateway-runtime";
+import { chunkMarkdownText } from "carapace/plugin-sdk/reply-runtime";
+import { buildOutboundBaseSessionKey, type RoutePeer } from "carapace/plugin-sdk/routing";
 import {
   collectStatusIssuesFromLastError,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import { resolveIMessageAccount, type ResolvedIMessageAccount } from "./accounts.js";
 import { imessageMessageActions } from "./actions.js";
 import {
@@ -315,7 +315,7 @@ export const imessagePlugin: ChannelPlugin<ResolvedIMessageAccount, IMessageProb
       },
       agentPrompt: {
         messageToolHints: () => [
-          "- iMessage current conversation: omit target, to, chatId, chatGuid, and chatIdentifier. OpenClaw resolves the trusted current chat server-side; never copy a redacted display value such as `***` into message actions.",
+          "- iMessage current conversation: omit target, to, chatId, chatGuid, and chatIdentifier. Carapace resolves the trusted current chat server-side; never copy a redacted display value such as `***` into message actions.",
         ],
       },
       doctor: imessageDoctor,

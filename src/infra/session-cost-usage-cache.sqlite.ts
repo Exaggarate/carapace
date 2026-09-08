@@ -1,9 +1,9 @@
 import type { DatabaseSync } from "node:sqlite";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { isPidAlive } from "../shared/pid-alive.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
+import { runCarapaceAgentWriteTransaction } from "../state/carapace-agent-db.js";
 import { chunkItems } from "../utils/chunk-items.js";
 // Per-agent SQLite storage for rebuildable per-session usage rollups.
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
@@ -15,7 +15,7 @@ const REFRESH_LOCK_KEY = "refresh-lock";
 const RETIRED_ROLLUP_SCOPE = "session-cost-usage-rollup-v1";
 const ROLLUP_SCOPE = "session-cost-usage-rollup-v2";
 
-type AgentCacheDatabase = Pick<OpenClawAgentKyselyDatabase, "cache_entries">;
+type AgentCacheDatabase = Pick<CarapaceAgentKyselyDatabase, "cache_entries">;
 
 type SessionCostUsageRefreshLock = {
   pid: number;
@@ -35,7 +35,7 @@ function readCacheDatabase<T>(
   operation: (database: { db: DatabaseSync }) => T,
 ): T | undefined {
   try {
-    const result = withOpenClawAgentDatabaseReadOnly(operation, {
+    const result = withCarapaceAgentDatabaseReadOnly(operation, {
       agentId: normalizeAgentId(agentId),
       ...(databasePath ? { path: databasePath } : {}),
     });
@@ -79,7 +79,7 @@ function deleteCacheValueIfUnchanged(params: {
   key: string;
   valueJson: string;
 }): void {
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       executeSqliteQuerySync(
@@ -135,7 +135,7 @@ export function writeSessionCostUsageRollup(params: {
   valueJson: string;
   updatedAt: number;
 }): boolean {
-  return runOpenClawAgentWriteTransaction(
+  return runCarapaceAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       const currentValueJson =
@@ -189,7 +189,7 @@ export function deleteSessionCostUsageRollupsExcept(params: {
   rows: readonly SessionCostUsageRollupRow[];
 }): void {
   const existing = params.rows.filter((row) => !params.liveKeys.has(row.key));
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       for (const row of existing) {
@@ -282,7 +282,7 @@ export function acquireSessionCostUsageRefreshLock(
     ownerNonce: `${process.pid}:${Date.now()}:${process.hrtime.bigint()}`,
   };
   const lockJson = JSON.stringify(lock);
-  const acquired = runOpenClawAgentWriteTransaction(
+  const acquired = runCarapaceAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       const currentRaw =

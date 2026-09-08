@@ -152,42 +152,42 @@ describe("groupSidebarSessionRows", () => {
   });
 
   it("buckets rows by work checkout and leaves checkout-less rows in their smart zones", () => {
-    const openclaw = { name: "openclaw", path: "/repos/openclaw" };
+    const carapace = { name: "carapace", path: "/repos/carapace" };
     const sections = groupSidebarSessionRows(
       [
         { ...row({ key: "z-1" }), workContext: { name: "zulu", path: "/repos/zulu" } },
-        { ...row({ key: "oc-1" }), workContext: openclaw, workSession: true },
+        { ...row({ key: "oc-1" }), workContext: carapace, workSession: true },
         row({ key: "thread" }),
         // Same basename, different checkout: the path keeps the sections apart.
-        { ...row({ key: "fork-1" }), workContext: { name: "openclaw", path: "/forks/openclaw" } },
+        { ...row({ key: "fork-1" }), workContext: { name: "carapace", path: "/forks/carapace" } },
         row({ key: "grp", kind: "group" }),
         { ...row({ key: "no-repo" }), workSession: true },
-        { ...row({ key: "oc-2", category: "Ignored" }), workContext: openclaw },
+        { ...row({ key: "oc-2", category: "Ignored" }), workContext: carapace },
         // Worktree checkouts fold into their origin repo's section.
         {
           ...row({ key: "oc-wt" }),
-          workContext: { name: "c7c338", path: "/repos/openclaw/.claude/worktrees/c7c338" },
+          workContext: { name: "c7c338", path: "/repos/carapace/.claude/worktrees/c7c338" },
         },
         // A trailing separator must not mint a second identical section.
         {
           ...row({ key: "oc-slash" }),
-          workContext: { name: "openclaw", path: "/repos/openclaw/" },
+          workContext: { name: "carapace", path: "/repos/carapace/" },
         },
-        { ...row({ key: "pin", pinned: true }), workContext: openclaw },
+        { ...row({ key: "pin", pinned: true }), workContext: carapace },
       ],
       { grouping: "project", knownGroups: ["Ignored"] },
     );
 
     expect(sections.map((section) => section.id)).toEqual([
       "pinned",
-      "project:/forks/openclaw",
-      "project:/repos/openclaw",
+      "project:/forks/carapace",
+      "project:/repos/carapace",
       "project:/repos/zulu",
       "ungrouped",
       "groups",
       "work",
     ]);
-    expect(sections[2]?.project).toEqual(openclaw);
+    expect(sections[2]?.project).toEqual(carapace);
     expect(sections[2]?.rows.map((item) => item.key)).toEqual([
       "oc-1",
       "oc-2",
@@ -202,13 +202,13 @@ describe("groupSidebarSessionRows", () => {
   it("keeps project sections ahead of the stored zone order", () => {
     const sections = groupSidebarSessionRows(
       [
-        { ...row({ key: "oc" }), workContext: { name: "openclaw", path: "/repos/openclaw" } },
+        { ...row({ key: "oc" }), workContext: { name: "carapace", path: "/repos/carapace" } },
         row({ key: "thread" }),
       ],
       { grouping: "project", sectionOrder: ["work", "ungrouped"] },
     );
     expect(sections.map((section) => section.id)).toEqual([
-      "project:/repos/openclaw",
+      "project:/repos/carapace",
       "work",
       "ungrouped",
     ]);

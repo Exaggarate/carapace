@@ -4,19 +4,19 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import {
   connectGatewayClient,
   disconnectGatewayClient,
   getGatewayE2ePortBlock,
 } from "../src/gateway/test-helpers.e2e.js";
 import { upsertSessionEntry } from "../src/plugin-sdk/session-store-runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../src/plugin-sdk/sqlite-runtime-testing.js";
+import { closeCarapaceAgentDatabasesForTest } from "../src/plugin-sdk/sqlite-runtime-testing.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const PLUGIN_ID = "cron-registry-owner-proof";
 const SCHEDULE_METHOD = `${PLUGIN_ID}.schedule`;
@@ -71,7 +71,7 @@ type CronListPage = {
   jobs: CronJobView[];
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const cleanupDirs: string[] = [];
 const modelServers: MockModelServer[] = [];
 
@@ -189,7 +189,7 @@ async function writeBundledSchedulerPlugin(bundledRoot: string): Promise<void> {
   const pluginDir = path.join(bundledRoot, PLUGIN_ID);
   await mkdir(pluginDir, { recursive: true });
   await writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: PLUGIN_ID,
@@ -272,7 +272,7 @@ describe("plugin cron registry ownership e2e", () => {
   it.each(["cron", "subagent"] as const)(
     "prepares distinct selected and fallback providers for %s under per-agent defaults",
     async (route) => {
-      const fixtureDir = await mkdtemp(path.join(tmpdir(), "openclaw-cron-selection-e2e-"));
+      const fixtureDir = await mkdtemp(path.join(tmpdir(), "carapace-cron-selection-e2e-"));
       cleanupDirs.push(fixtureDir);
       const bundledRoot = path.join(fixtureDir, "bundled");
       const provider = "selected-cron";
@@ -282,7 +282,7 @@ describe("plugin cron registry ownership e2e", () => {
         const pluginDir = path.join(bundledRoot, pluginId);
         await mkdir(pluginDir, { recursive: true });
         await writeFile(
-          path.join(pluginDir, "openclaw.plugin.json"),
+          path.join(pluginDir, "carapace.plugin.json"),
           JSON.stringify({
             id: pluginId,
             providers: [pluginId],
@@ -315,7 +315,7 @@ describe("plugin cron registry ownership e2e", () => {
         contextWindow: 128_000,
         maxTokens: 4_096,
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           entries: Object.fromEntries(pluginIds.map((id) => [id, { enabled: true }])),
           slots: { memory: "none" },
@@ -364,16 +364,16 @@ describe("plugin cron registry ownership e2e", () => {
           },
         },
       };
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "cron-selected-provider",
         config,
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_SKIP_CRON: undefined,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_SKIP_CRON: undefined,
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
@@ -393,7 +393,7 @@ describe("plugin cron registry ownership e2e", () => {
             modelOverrideFallbackOriginModel: "unavailable",
           },
         });
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
       await instance.startGateway();
       const client = await connectGatewayClient({
@@ -475,7 +475,7 @@ describe("plugin cron registry ownership e2e", () => {
     "keeps recurring startup-plugin jobs through workspace registry churn",
     { timeout: E2E_TIMEOUT_MS },
     async () => {
-      const fixtureDir = await mkdtemp(path.join(tmpdir(), "openclaw-cron-owner-e2e-"));
+      const fixtureDir = await mkdtemp(path.join(tmpdir(), "carapace-cron-owner-e2e-"));
       cleanupDirs.push(fixtureDir);
       const bundledRoot = path.join(fixtureDir, "bundled");
       const mainWorkspace = path.join(fixtureDir, "workspace-main");
@@ -504,7 +504,7 @@ describe("plugin cron registry ownership e2e", () => {
           defaults: {
             workspace: mainWorkspace,
             model: { primary: modelRef },
-            models: { [modelRef]: { agentRuntime: { id: "openclaw" } } },
+            models: { [modelRef]: { agentRuntime: { id: "carapace" } } },
             skills: [],
           },
           list: [
@@ -547,19 +547,19 @@ describe("plugin cron registry ownership e2e", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const customPort = await getGatewayE2ePortBlock();
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "plugin-cron-registry-owner",
         port: customPort,
         config,
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_SKIP_CRON: undefined,
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_SKIP_CRON: undefined,
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
@@ -582,7 +582,7 @@ describe("plugin cron registry ownership e2e", () => {
         }>("cron.status", {});
         expect(cronStatus).toMatchObject({ enabled: true, storage: "sqlite" });
         expect(cronStatus.sqlitePath).toBe(
-          path.join(instance.stateDir, "state", "openclaw.sqlite"),
+          path.join(instance.stateDir, "state", "carapace.sqlite"),
         );
 
         const ownerResult = await client.request<ScheduleResult>(SCHEDULE_METHOD, {

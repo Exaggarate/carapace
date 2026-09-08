@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import type { Server } from "node:http";
 import { setImmediate } from "node:timers/promises";
-import { collectErrorGraphCandidates } from "@openclaw/normalization-core/error-coercion";
+import { collectErrorGraphCandidates } from "@carapace/normalization-core/error-coercion";
 import { expect, it, vi, type TestContext } from "vitest";
 import { createDeferred } from "./promise.js";
 

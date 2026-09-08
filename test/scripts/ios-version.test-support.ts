@@ -19,7 +19,7 @@ export function writeIosFixture(params: {
   packageVersion?: string;
   prefix?: string;
 }): string {
-  const rootDir = makeTempDir(tempDirs, params.prefix ?? "openclaw-ios-version-");
+  const rootDir = makeTempDir(tempDirs, params.prefix ?? "carapace-ios-version-");
   fs.mkdirSync(path.join(rootDir, "apps", "ios"), { recursive: true });
   fs.mkdirSync(path.join(rootDir, "apps", "mobile"), { recursive: true });
   fs.writeFileSync(

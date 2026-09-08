@@ -1,20 +1,20 @@
 /** Canvas config migration to the single surviving route-enable switch. */
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { extractErrorCode } from "carapace/plugin-sdk/error-runtime";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import {
   asBoolean,
   asOptionalRecord as readRecord,
   readStringValue as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolveUserPath } from "carapace/plugin-sdk/text-utility-runtime";
 
 const RETIRED_HOST_KEYS = ["root", "port", "liveReload"] as const;
 
-function readLegacyCanvasRoot(config: OpenClawConfig): unknown {
+function readLegacyCanvasRoot(config: CarapaceConfig): unknown {
   // Stable releases merged canvasHost into plugin host config; plugin keys won.
   const legacyHost = readRecord(readRecord(config)?.canvasHost);
   const pluginHost = readRecord(resolvePluginConfigObject(config, "canvas")?.host);
@@ -22,7 +22,7 @@ function readLegacyCanvasRoot(config: OpenClawConfig): unknown {
 }
 
 export function resolveLegacyCanvasDocumentsDir(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
 }): string | null {
@@ -61,15 +61,15 @@ export function listLegacyCanvasDocumentIds(documentsDir: string): string[] {
       return [];
     }
     throw new Error(
-      `Cannot read Canvas documents at ${documentsDir}: ${String(error)}. Keep plugins.entries.canvas.config.host.root, fix access, then rerun "openclaw doctor --fix".`,
+      `Cannot read Canvas documents at ${documentsDir}: ${String(error)}. Keep plugins.entries.canvas.config.host.root, fix access, then rerun "carapace doctor --fix".`,
       { cause: error },
     );
   }
 }
 
 /** Removes retired file-host settings while preserving the route enablement choice. */
-export function migrateCanvasHostConfig(config: OpenClawConfig): {
-  config: OpenClawConfig;
+export function migrateCanvasHostConfig(config: CarapaceConfig): {
+  config: CarapaceConfig;
   changes: string[];
 } | null {
   const legacyHost = readRecord((config as { canvasHost?: unknown }).canvasHost);
@@ -100,7 +100,7 @@ export function migrateCanvasHostConfig(config: OpenClawConfig): {
     return null;
   }
 
-  const next = structuredClone(config) as OpenClawConfig & { canvasHost?: unknown };
+  const next = structuredClone(config) as CarapaceConfig & { canvasHost?: unknown };
   delete next.canvasHost;
   const enabled = asBoolean(existingHost?.enabled) ?? asBoolean(legacyHost?.enabled);
   const nextPlugins = readRecord(next.plugins) ?? {};

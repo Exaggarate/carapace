@@ -2,10 +2,10 @@ import path from "node:path";
 import {
   runChannelInboundEvent,
   type ChannelInboundEventRunnerParams,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { FinalizedMsgContext, GetReplyOptions } from "openclaw/plugin-sdk/reply-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-inbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { FinalizedMsgContext, GetReplyOptions } from "carapace/plugin-sdk/reply-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { installMatrixMonitorTestRuntime } from "../../test-runtime.js";
 import type { MatrixMonitorHandlerParams } from "./handler-types.js";
@@ -77,7 +77,7 @@ describe("Matrix active-turn steering admission", () => {
     "lets $name reach queue policy while the prior Matrix turn is active",
     async ({ followupBody, explicitSteer }) => {
       installMatrixMonitorTestRuntime();
-      const tempDir = tempDirs.make("openclaw-matrix-steer-");
+      const tempDir = tempDirs.make("carapace-matrix-steer-");
       const storePath = path.join(tempDir, "sessions.json");
       const activeEventId = explicitSteer ? "$active-explicit-steer" : "$active-configured-steer";
       const followupEventId = explicitSteer ? "$explicit-steer" : "$configured-steer";
@@ -93,7 +93,7 @@ describe("Matrix active-turn steering admission", () => {
         session: { store: storePath },
         messages: { queue: { mode: "steer" } },
         channels: { matrix: { dm: { allowFrom: ["*"] } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const inboundDeduper: NonNullable<MatrixMonitorHandlerParams["inboundDeduper"]> = {
         claim: vi.fn(async ({ eventId }) => {
           const claim = createClaimSpies();

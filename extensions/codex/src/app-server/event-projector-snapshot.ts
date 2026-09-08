@@ -1,10 +1,10 @@
 import type {
   AgentMessage,
   EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { projectAgentHarnessTranscriptMessageForDisplay } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
-import { asDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { projectAgentHarnessTranscriptMessageForDisplay } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
+import { asDateTimestampMs } from "carapace/plugin-sdk/number-runtime";
 import { createAssistantReasoningMessage } from "./event-projector-assistant-message.js";
 import type { CodexAssistantProjection } from "./event-projector-assistant.js";
 import { applyCodexTranscriptTaint } from "./transcript-mirror-attestation.js";

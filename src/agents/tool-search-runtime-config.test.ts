@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentRuntimeToolConfig } from "./tool-runtime-config.js";
 import { resolveAgentToolSearchRuntimeConfig } from "./tool-search-runtime-config.js";
 import { resolveAgentToolSurfacePlan } from "./tool-surface-plan.js";
@@ -24,7 +24,7 @@ function createRuntimeConfigPair(localModelLean = true) {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const runtimeConfig = {
     ...sourceConfig,
     plugins: {
@@ -34,7 +34,7 @@ function createRuntimeConfigPair(localModelLean = true) {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   return { runtimeConfig, sourceConfig };
 }
 
@@ -103,7 +103,7 @@ describe("resolveAgentToolSearchRuntimeConfig", () => {
           "example-plugin": { config: { marker: "explicit" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveAgentRuntimeToolConfig(explicitConfig)).toBe(explicitConfig);
     expect(resolveAgentToolSearchRuntimeConfig({ config: explicitConfig })).toBe(explicitConfig);
@@ -113,7 +113,7 @@ describe("resolveAgentToolSearchRuntimeConfig", () => {
     const config = {
       agents: { entries: { main: { default: true } } },
       tools: { toolSearch: false },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveAgentRuntimeToolConfig(config)).toBe(config);
     expect(resolveAgentToolSearchRuntimeConfig({ config })).toBe(config);

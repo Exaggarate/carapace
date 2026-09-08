@@ -2,28 +2,28 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { upsertSessionEntry } from "../src/plugin-sdk/session-store-runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../src/plugin-sdk/sqlite-runtime-testing.js";
+import { closeCarapaceAgentDatabasesForTest } from "../src/plugin-sdk/sqlite-runtime-testing.js";
 import { writePersistedInstalledPluginIndexInstallRecords } from "../src/plugins/installed-plugin-index-records.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const PLUGIN_ID = "codex";
 const SESSION_KEY = "agent:main:copied-codex-session";
 const VISIBLE_REPLY = "COPIED_CODEX_SESSION_RESUMED";
 const TEST_TIMEOUT_MS = 120_000;
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 
 afterEach(async () => {
   await Promise.all(instances.splice(0).map(async (instance) => await instance.cleanup()));
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
-function buildCopiedStateConfig(enabled: boolean | undefined): OpenClawConfig {
+function buildCopiedStateConfig(enabled: boolean | undefined): CarapaceConfig {
   return {
     plugins: {
       enabled: true,
@@ -53,11 +53,11 @@ function buildCopiedStateConfig(enabled: boolean | undefined): OpenClawConfig {
   };
 }
 
-async function installCodexHarnessFixture(stateDir: string, config: OpenClawConfig): Promise<void> {
+async function installCodexHarnessFixture(stateDir: string, config: CarapaceConfig): Promise<void> {
   const pluginDir = path.join(stateDir, "extensions", PLUGIN_ID);
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: PLUGIN_ID,
       name: "Copied Codex session proof",
@@ -68,10 +68,10 @@ async function installCodexHarnessFixture(stateDir: string, config: OpenClawConf
   await fs.writeFile(
     path.join(pluginDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/codex",
+      name: "@carapace/codex",
       version: "2026.8.1",
       type: "module",
-      openclaw: { extensions: ["./index.js"] },
+      carapace: { extensions: ["./index.js"] },
     }),
   );
   await fs.writeFile(
@@ -191,14 +191,14 @@ describe("Gateway copied Codex session resume", () => {
           });
         }
       }
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "copied-codex-session-resume",
         config,
         env: {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-          ...(cron ? { OPENCLAW_SKIP_CRON: undefined } : {}),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+          ...(cron ? { CARAPACE_SKIP_CRON: undefined } : {}),
         },
       });
       instances.push(instance);
@@ -217,7 +217,7 @@ describe("Gateway copied Codex session resume", () => {
           agentHarnessId: "codex",
         },
       });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       await instance.startGateway();
       const client = await connectGatewayClient({
@@ -273,7 +273,7 @@ describe("Gateway copied Codex session resume", () => {
           await expect(request).rejects.toThrow(
             `Agent harness runtime "codex" is unavailable. (reason=${unavailableReason}, ownerPluginId=codex)`,
           );
-          await expect(request).rejects.toThrow('Run "openclaw doctor --fix"');
+          await expect(request).rejects.toThrow('Run "carapace doctor --fix"');
           return;
         }
         expect(await request).toMatchObject({

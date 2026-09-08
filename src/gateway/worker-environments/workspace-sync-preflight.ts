@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import {
   createWorkspaceGitTransferList,
   runWorkspaceInventoryCommandToFile,
@@ -25,7 +25,7 @@ export async function preflightWorkerWorkspace(params: {
   const timeoutSignal = AbortSignal.timeout(timeoutMs);
   const signal = params.signal ? AbortSignal.any([params.signal, timeoutSignal]) : timeoutSignal;
   const temporaryDirectory = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-worker-workspace-preflight-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-worker-workspace-preflight-"),
   );
   try {
     const canonicalRoot = await fs.realpath(params.localPath);

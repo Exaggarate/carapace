@@ -1,6 +1,6 @@
-// Bridges OpenClaw-managed proxy TLS trust into Undici EnvHttpProxyAgent and
+// Bridges Carapace-managed proxy TLS trust into Undici EnvHttpProxyAgent and
 // explicit ProxyAgent options without changing unrelated operator proxies.
-import { isRecord as isProxyTlsRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isProxyTlsRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveActiveManagedProxyTlsOptions } from "./active-managed-proxy-tls.js";
 import type { ManagedProxyTlsOptions } from "./proxy-tls.js";
 

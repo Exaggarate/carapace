@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { createServer } from "node:http";
 import { createServer as createTcpServer } from "node:net";
 import type { AddressInfo } from "node:net";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import { CHROME_STOP_PROBE_TIMEOUT_MS } from "./cdp-timeouts.js";
@@ -17,13 +17,13 @@ import {
   isChromeCdpReady,
   isChromeReachable,
   ManagedChromeCleanupError,
-  stopOpenClawChrome,
+  stopCarapaceChrome,
 } from "./chrome.js";
 import { BrowserCdpEndpointBlockedError } from "./errors.js";
 
 const CHROME_TEST_WS_MAX_PAYLOAD_BYTES = 1024 * 1024;
 
-type StopChromeTarget = Parameters<typeof stopOpenClawChrome>[0];
+type StopChromeTarget = Parameters<typeof stopCarapaceChrome>[0];
 type ChromeCdpDiagnostic = Awaited<ReturnType<typeof diagnoseChromeCdp>>;
 
 function expectFailedChromeCdpDiagnostic(
@@ -105,7 +105,7 @@ async function withMockChromeCdpServer(params: {
 }
 
 async function stopChromeWithProc(proc: ReturnType<typeof makeChromeTestProc>, timeoutMs: number) {
-  await stopOpenClawChrome(
+  await stopCarapaceChrome(
     {
       pid: proc.pid,
       proc,
@@ -725,14 +725,14 @@ describe("browser chrome helpers", () => {
     expect(proc.kill).not.toHaveBeenCalled();
   });
 
-  it("stopOpenClawChrome sends SIGTERM and returns once CDP is down", async () => {
+  it("stopCarapaceChrome sends SIGTERM and returns once CDP is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     const proc = makeChromeTestProc();
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).toHaveBeenCalledWith("SIGTERM");
   });
 
-  it("stopOpenClawChrome asks Chrome to close gracefully before sending a signal", async () => {
+  it("stopCarapaceChrome asks Chrome to close gracefully before sending a signal", async () => {
     let closeRequested = false;
     const proc = makeChromeTestProc({ exitOnSignal: false });
     await withMockChromeCdpServer({
@@ -777,7 +777,7 @@ describe("browser chrome helpers", () => {
     });
   });
 
-  it("stopOpenClawChrome escalates when graceful close leaves CDP reachable", async () => {
+  it("stopCarapaceChrome escalates when graceful close leaves CDP reachable", async () => {
     const proc = makeChromeTestProc({ exitOnSignal: "SIGKILL" });
     await withMockChromeCdpServer({
       wsPath: "/devtools/browser/stuck-stop",

@@ -1,7 +1,7 @@
 // Gateway Client tests cover client.watchdog behavior.
 import { createServer as createHttpsServer } from "node:https";
 import { createServer } from "node:net";
-import type { EventFrame } from "@openclaw/gateway-protocol";
+import type { EventFrame } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GatewayClient } from "./client.js";
 import {
@@ -633,7 +633,7 @@ describe("GatewayClient", () => {
       commands: ["canvas.present", "system.run"],
       workerRuns: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "2026.8.12",
+        carapaceVersion: "2026.8.12",
         protocolFeatures: ["worker-heartbeat-v1"],
       },
     });
@@ -644,7 +644,7 @@ describe("GatewayClient", () => {
       commands: ["canvas.present", "system.run"],
       workerRuns: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "2026.8.12",
+        carapaceVersion: "2026.8.12",
         protocolFeatures: ["worker-heartbeat-v1"],
       },
     });

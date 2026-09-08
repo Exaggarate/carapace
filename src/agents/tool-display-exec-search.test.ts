@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { formatToolDetail, resolveToolDisplay } from "./tool-display.js";
 
 const cases = [
-  ["rg --files autonomy .openclaw 2>/dev/null", "list files in .openclaw"],
+  ["rg --files autonomy .carapace 2>/dev/null", "list files in .carapace"],
   ["rg --files -g '*.ts'", "list files"],
   ["rg --files -t ts src", "list files in src"],
   ["rg --files --glob=*.ts src", "list files in src"],

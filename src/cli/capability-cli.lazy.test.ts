@@ -35,7 +35,7 @@ it("keeps metadata and selected-domain help behind the inference import boundary
     ["capability", "inspect", "--name", "image.generate", "--help"],
   ]) {
     const metadataProgram = new Command().enablePositionalOptions();
-    await registerCapabilityCli(metadataProgram, ["node", "openclaw", ...args]);
+    await registerCapabilityCli(metadataProgram, ["node", "carapace", ...args]);
     const capability = metadataProgram.commands.find((command) => command.name() === "infer");
     expect(capability?.commands.map((command) => command.name())).toEqual(["list", "inspect"]);
     expect(loaded.modules).toEqual(new Set());
@@ -43,7 +43,7 @@ it("keeps metadata and selected-domain help behind the inference import boundary
 
   await registerCapabilityCli(new Command(), [
     "node",
-    "openclaw",
+    "carapace",
     "infer",
     "--log-level",
     "debug",
@@ -80,7 +80,7 @@ it.each([
 ])("preserves the command inventory for $args", async ({ args, domains }) => {
   const { registerCapabilityCli } = await import("./capability-cli.js");
   const program = new Command().enablePositionalOptions();
-  await registerCapabilityCli(program, ["node", "openclaw", ...args]);
+  await registerCapabilityCli(program, ["node", "carapace", ...args]);
   const capability = program.commands.find((command) => command.name() === "infer");
   expect(capability?.commands.map((command) => command.name())).toEqual([
     "list",
@@ -98,11 +98,11 @@ it.each([
   const { registerCapabilityCli } = await import("./capability-cli.js");
   let output = "";
   const program = new Command()
-    .name("openclaw")
+    .name("carapace")
     .enablePositionalOptions()
     .exitOverride()
     .configureOutput({ writeOut: (value) => (output += value) });
-  await registerCapabilityCli(program, ["node", "openclaw", "infer", ...args]);
+  await registerCapabilityCli(program, ["node", "carapace", "infer", ...args]);
   await expect(program.parseAsync(["infer", ...args], { from: "user" })).rejects.toMatchObject({
     code: "commander.helpDisplayed",
     exitCode: 0,

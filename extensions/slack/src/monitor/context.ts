@@ -1,25 +1,25 @@
 // Slack plugin module implements context behavior.
 import type { App } from "@slack/bolt";
-import { formatAllowlistMatchMeta } from "openclaw/plugin-sdk/allow-from";
-import type { ChannelRuntimeSurface } from "openclaw/plugin-sdk/channel-contract";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
+import { formatAllowlistMatchMeta } from "carapace/plugin-sdk/allow-from";
+import type { ChannelRuntimeSurface } from "carapace/plugin-sdk/channel-contract";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import type { ChannelInboundTurnPlan } from "carapace/plugin-sdk/channel-inbound";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   SlackReactionNotificationMode,
   SessionScope,
   DmPolicy,
   GroupPolicy,
-} from "openclaw/plugin-sdk/config-contracts";
-import { createDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import { logVerbose, getChildLogger } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/config-contracts";
+import { createDedupeCache } from "carapace/plugin-sdk/dedupe-runtime";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import { logVerbose, getChildLogger } from "carapace/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { formatSlackError } from "../errors.js";
 import { buildSlackChannelIdCandidates } from "../group-policy.js";
 import { renameSlackSession, setSlackSessionStatus } from "../session-status.js";
@@ -65,7 +65,7 @@ type SlackChannelCacheEntry = {
 
 type SlackUserInfo = { name?: string; imageUrl?: string; error?: unknown };
 type BuildChannelInboundContext =
-  typeof import("openclaw/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
+  typeof import("carapace/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
 const SLACK_CHANNEL_CACHE_MAX_ENTRIES = 1024;
 const SLACK_USER_CACHE_MAX_ENTRIES = 2048;
 const SLACK_AVATAR_CACHE_MAX_ENTRIES = 128;
@@ -78,7 +78,7 @@ const SLACK_CHANNEL_DENIAL_WARNING_TTL_MS = 5 * 60_000;
 const SLACK_CHANNEL_DENIAL_WARNING_MAX_ENTRIES = 1024;
 
 export type SlackMonitorContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   botToken: string;
   app: App;
@@ -116,7 +116,7 @@ export type SlackMonitorContext = {
   replyToMode: "off" | "first" | "all" | "batched";
   threadHistoryScope: "thread" | "channel";
   threadInheritParent: boolean;
-  slashCommand: Required<import("openclaw/plugin-sdk/config-contracts").SlackSlashCommandConfig>;
+  slashCommand: Required<import("carapace/plugin-sdk/config-contracts").SlackSlashCommandConfig>;
   textLimit: number;
   typingReaction: string;
   mediaMaxBytes: number;
@@ -185,7 +185,7 @@ export type SlackMonitorContext = {
 };
 
 export function createSlackMonitorContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   botToken: string;
   app: App;

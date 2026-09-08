@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { writeTextAtomic } from "../../infra/json-files.js";
 import { saveLegacySessionStore } from "../../infra/state-migrations.legacy-session-store.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { runSessionsCleanup } from "./cleanup-service.js";
 import {
   enforceSessionDiskBudget,
@@ -37,7 +37,7 @@ describe("session artifact deletion failures", () => {
   ] as const)(
     "$boundary skips $code without counting failed deletions (promptBlob=$promptBlob)",
     async ({ boundary, promptBlob, code }) => {
-      await withTestDir({ prefix: "openclaw-removal-failure-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-removal-failure-" }, async (dir) => {
         const storePath = path.join(dir, "sessions.json");
         await fs.writeFile(storePath, "{}");
         const paths: string[] = [];
@@ -116,7 +116,7 @@ describe("session artifact deletion failures", () => {
   ] as const)(
     "continues eviction after $artifact deletion failure ($code, $mode)",
     async ({ artifact, code, mode }) => {
-      await withTestDir({ prefix: "openclaw-deferred-removal-failure-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-deferred-removal-failure-" }, async (dir) => {
         const storePath = path.join(dir, "sessions.json");
         const hash = "a".repeat(64);
         const oldKey = "agent:main:subagent:old";
@@ -285,7 +285,7 @@ describe("session artifact deletion failures", () => {
   );
 
   it("keeps newly persisted prompt bytes counted while continuing to the next victim", async () => {
-    await withTestDir({ prefix: "openclaw-budget-persisted-prompt-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-budget-persisted-prompt-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const oldKey = "agent:main:subagent:old";
       const laterKey = "agent:main:subagent:later";
@@ -352,7 +352,7 @@ describe("session artifact deletion failures", () => {
   });
 
   it("reports only successful orphan removals in the applied cleanup-service summary", async () => {
-    await withOpenClawTestState({ label: "cleanup-removal-failure" }, async (state) => {
+    await withCarapaceTestState({ label: "cleanup-removal-failure" }, async (state) => {
       const cfg = { session: { maintenance: { maxDiskBytes: false, pruneAfter: "1d" } } } as const;
       await state.writeConfig(cfg);
       const storePath = path.join(state.sessionsDir(), "sessions.json");

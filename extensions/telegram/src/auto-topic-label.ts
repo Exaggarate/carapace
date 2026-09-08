@@ -1,12 +1,12 @@
 // Telegram plugin module implements auto topic label behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { generateConversationLabel } from "openclaw/plugin-sdk/reply-dispatch-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { generateConversationLabel } from "carapace/plugin-sdk/reply-dispatch-runtime";
 export { resolveAutoTopicLabelConfig } from "./auto-topic-label-config.js";
 
 export async function generateTelegramTopicLabel(params: {
   userMessage: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
 }): Promise<string | null> {

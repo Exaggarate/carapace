@@ -4,11 +4,11 @@ import {
   resolveScopeRequireMention,
   resolveScopeToolsPolicy,
   type GroupToolPolicyConfig,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-policy";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 
 type WhatsAppGroupContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   groupId?: string | null;
   senderPolicyMode?: "always" | "never";

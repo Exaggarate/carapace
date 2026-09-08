@@ -13,7 +13,7 @@ import {
   selectActiveTranscriptEntries,
   type TranscriptEntry,
 } from "../config/sessions/legacy-transcript-repair.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HealthFinding, HealthRepairEffect } from "../flows/health-checks.js";
 import { replaceFileAtomic } from "../infra/replace-file.js";
 import { createLegacyStateMigrationStepReceipt } from "../infra/state-migrations.messages.js";
@@ -199,7 +199,7 @@ export function sessionTranscriptIssueToHealthFinding(
       : `Session transcript has legacy branch or provider metadata that can be cleaned up.${metadata}`,
     path: issue.filePath,
     fixHint:
-      "To clean up the advisory artifact, run `openclaw doctor --fix` to rewrite affected transcripts to their active branch.",
+      "To clean up the advisory artifact, run `carapace doctor --fix` to rewrite affected transcripts to their active branch.",
   };
 }
 
@@ -216,7 +216,7 @@ export function sessionTranscriptIssueToRepairEffect(
 
 /** Scans session transcript files and reports or repairs legacy/broken transcript state. */
 export async function noteSessionTranscriptHealth(params?: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   sessionSqlite?: boolean;
   shouldRepair?: boolean;
@@ -282,7 +282,7 @@ export async function noteSessionTranscriptHealth(params?: {
       lines.push(`- ...and ${broken.length - 20} more.`);
     }
     if (!shouldRepair) {
-      lines.push('- Run "openclaw doctor --fix" to rewrite affected files to their active branch.');
+      lines.push('- Run "carapace doctor --fix" to rewrite affected files to their active branch.');
     } else if (repairedCount > 0) {
       lines.push(`- Repaired ${repairedCount} transcript file${repairedCount === 1 ? "" : "s"}.`);
     }
@@ -292,7 +292,7 @@ export async function noteSessionTranscriptHealth(params?: {
 }
 
 async function noteSessionSqliteMigrationHealth(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   shouldRepair: boolean;
   postSessionPluginMigration?: PreparedPostSessionPluginMigration;
@@ -430,7 +430,7 @@ async function noteSessionSqliteMigrationHealth(params: {
       throw error;
     }
     note(
-      `- Skipped: Gateway or another SQLite maintenance command owns the state directory. Stop the Gateway, then run "${formatCliCommand("openclaw doctor --fix", params.env)}" for session-store maintenance.`,
+      `- Skipped: Gateway or another SQLite maintenance command owns the state directory. Stop the Gateway, then run "${formatCliCommand("carapace doctor --fix", params.env)}" for session-store maintenance.`,
       "Session SQLite",
     );
     recordPostSessionRefusal({
@@ -443,7 +443,7 @@ async function noteSessionSqliteMigrationHealth(params: {
     note(
       params.shouldRepair
         ? `- Renamed ${reservedKeyReport.repaired} durable session key(s) that collided with the reserved incognito namespace.`
-        : `- Found ${reservedKeyReport.found} durable session key(s) that collide with the reserved incognito namespace. Run "openclaw doctor --fix" to rename them.`,
+        : `- Found ${reservedKeyReport.found} durable session key(s) that collide with the reserved incognito namespace. Run "carapace doctor --fix" to rename them.`,
       "Session SQLite",
     );
   }
@@ -451,7 +451,7 @@ async function noteSessionSqliteMigrationHealth(params: {
     note(
       params.shouldRepair
         ? `- Canonicalized ${canonicalKeyReport.repairedGroups} session-key group(s) in ${canonicalKeyReport.repairBatches} transaction batch(es), removed ${canonicalKeyReport.removedRows} duplicate or alias row(s), and preserved cross-store history in ${canonicalKeyReport.archivedTranscriptDirectories.length} archive director${canonicalKeyReport.archivedTranscriptDirectories.length === 1 ? "y" : "ies"}.`
-        : `- Found ${canonicalKeyReport.foundGroups} non-canonical or duplicate session-key group(s). Run "openclaw doctor --fix" to preserve their history and canonicalize the rows.`,
+        : `- Found ${canonicalKeyReport.foundGroups} non-canonical or duplicate session-key group(s). Run "carapace doctor --fix" to preserve their history and canonicalize the rows.`,
       "Session SQLite",
     );
   }
@@ -459,15 +459,15 @@ async function noteSessionSqliteMigrationHealth(params: {
     note(
       params.shouldRepair
         ? `- Canonicalized delivery state for ${deliveryReport.repaired} durable session row(s).`
-        : `- Found ${deliveryReport.found} durable session row(s) with legacy delivery fields. Run "openclaw doctor --fix" to canonicalize them.`,
+        : `- Found ${deliveryReport.found} durable session row(s) with legacy delivery fields. Run "carapace doctor --fix" to canonicalize them.`,
       "Session SQLite",
     );
   }
   if (resolvedSkillsReport.found > 0) {
     note(
       params.shouldRepair
-        ? `- Stripped the runtime-only skills catalog from ${resolvedSkillsReport.repaired} durable session row(s). Logical SQLite pages are freed; shrinking the on-disk database requires "openclaw doctor --session-sqlite compact --session-sqlite-all-agents".`
-        : `- Found ${resolvedSkillsReport.found} durable session row(s) carrying a runtime-only skills catalog. Run "openclaw doctor --fix" to strip it.`,
+        ? `- Stripped the runtime-only skills catalog from ${resolvedSkillsReport.repaired} durable session row(s). Logical SQLite pages are freed; shrinking the on-disk database requires "carapace doctor --session-sqlite compact --session-sqlite-all-agents".`
+        : `- Found ${resolvedSkillsReport.found} durable session row(s) carrying a runtime-only skills catalog. Run "carapace doctor --fix" to strip it.`,
       "Session SQLite",
     );
   }
@@ -506,17 +506,17 @@ async function noteSessionSqliteMigrationHealth(params: {
   }
   if (report.totals.issues > 0) {
     lines.push(
-      `- Found ${report.totals.issues} session SQLite issue(s). Inspect with "${formatCliCommand("openclaw doctor --session-sqlite dry-run --session-sqlite-all-agents", params.env)}".`,
+      `- Found ${report.totals.issues} session SQLite issue(s). Inspect with "${formatCliCommand("carapace doctor --session-sqlite dry-run --session-sqlite-all-agents", params.env)}".`,
     );
   }
   if (!params.shouldRepair) {
     lines.push(
-      '- Run "openclaw doctor --fix" to migrate legacy session metadata/transcripts to SQLite.',
+      '- Run "carapace doctor --fix" to migrate legacy session metadata/transcripts to SQLite.',
     );
   }
   if (params.shouldRepair && report.migrationRun && report.totals.archivedTranscriptFiles > 0) {
     lines.push(
-      `- After verifying the upgrade, preview rollback retirement with "${formatCliCommand("openclaw update cleanup --dry-run", params.env)}" for state ${resolveStateDir(params.env)}. Keep the same OPENCLAW_STATE_DIR and OPENCLAW_CONFIG_PATH overrides.`,
+      `- After verifying the upgrade, preview rollback retirement with "${formatCliCommand("carapace update cleanup --dry-run", params.env)}" for state ${resolveStateDir(params.env)}. Keep the same CARAPACE_STATE_DIR and CARAPACE_CONFIG_PATH overrides.`,
     );
   }
   note(lines.join("\n"), "Session SQLite");

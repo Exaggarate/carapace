@@ -1,5 +1,5 @@
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import type { CarapacePluginNodeInvokePolicyContext } from "carapace/plugin-sdk/plugin-entry";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { createFileTransferNodeInvokePolicy } from "./node-invoke-policy.js";
 
@@ -16,7 +16,7 @@ const WRITE_BINDING = {
 } as const;
 
 function invokeParams(
-  invokeNode: ReturnType<typeof vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>>,
+  invokeNode: ReturnType<typeof vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>>,
   index: number,
 ) {
   return requireRecord(requireRecord(invokeNode.mock.calls[index]?.[0], "invoke").params, "params");
@@ -24,11 +24,11 @@ function invokeParams(
 
 describe("file-transfer preflight identity", () => {
   it("fails closed when a node preflight omits filesystem identity", async () => {
-    const invokeNode = vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>(async () => ({
+    const invokeNode = vi.fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>(async () => ({
       ok: true,
       payload: { ok: true, path: "/tmp/file.txt", size: 1 },
     }));
-    const ctx: OpenClawPluginNodeInvokePolicyContext = {
+    const ctx: CarapacePluginNodeInvokePolicyContext = {
       nodeId: "node-1",
       command: "file.fetch",
       params: { path: "/tmp/file.txt" },
@@ -49,7 +49,7 @@ describe("file-transfer preflight identity", () => {
 
   it("forwards a write preflight binding only to the final effect", async () => {
     const invokeNode = vi
-      .fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>()
+      .fn<CarapacePluginNodeInvokePolicyContext["invokeNode"]>()
       .mockResolvedValueOnce({
         ok: true,
         payload: {
@@ -72,7 +72,7 @@ describe("file-transfer preflight identity", () => {
           overwritten: false,
         },
       });
-    const ctx: OpenClawPluginNodeInvokePolicyContext = {
+    const ctx: CarapacePluginNodeInvokePolicyContext = {
       nodeId: "node-1",
       command: "file.write",
       params: {

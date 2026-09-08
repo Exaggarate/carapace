@@ -79,20 +79,20 @@ describe("listManifestInstalledChannelIds", () => {
     const installedIds = listManifestInstalledChannelIds({
       cfg: {} as never,
       workspaceDir: "/tmp/workspace",
-      env: { OPENCLAW_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
       ...(provided ? { index } : {}),
     });
 
     expect(applyPluginAutoEnable).toHaveBeenCalledWith({
       config: {},
-      env: { OPENCLAW_HOME: "/tmp/home" },
+      env: { CARAPACE_HOME: "/tmp/home" },
     });
     expect(listPluginContributionIds).toHaveBeenCalledWith({
       contribution: "channels",
       ...(provided ? { index } : {}),
       config: autoEnabledConfig,
       workspaceDir: "/tmp/workspace",
-      env: { OPENCLAW_HOME: "/tmp/home" },
+      env: { CARAPACE_HOME: "/tmp/home" },
     });
     expect(installedIds).toEqual(new Set(["slack"]));
   });
@@ -124,7 +124,7 @@ describe("listManifestInstalledChannelIds", () => {
         } as never,
       ],
       workspaceDir: "/tmp/workspace",
-      env: { OPENCLAW_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
     });
 
     expect(resolved.entries.map((entry) => entry.id)).toEqual(["telegram"]);
@@ -152,7 +152,7 @@ describe("listManifestInstalledChannelIds", () => {
         } as never,
       ],
       workspaceDir: "/tmp/workspace",
-      env: { OPENCLAW_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_HOME: "/tmp/home" } as NodeJS.ProcessEnv,
     });
 
     expect(resolved).toStrictEqual({

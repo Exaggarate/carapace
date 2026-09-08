@@ -1,6 +1,6 @@
 /** Tests external CLI scoping during agent auth-profile credential discovery. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const storeMocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(() => ({ version: 1, profiles: {} })),
@@ -51,19 +51,19 @@ describe("resolveAgentDiscoveryAuthFacts external CLI scoping", () => {
   });
 
   it("threads scoped external CLI discovery into writable auth store loading", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const externalCli = externalCliDiscoveryForProviders({
       cfg,
       providers: ["fireworks"],
     });
 
-    resolveAgentDiscoveryAuthFacts("/tmp/openclaw-agent", {
+    resolveAgentDiscoveryAuthFacts("/tmp/carapace-agent", {
       config: cfg,
       env: {},
       externalCli,
     });
 
-    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-agent", {
+    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/carapace-agent", {
       allowKeychainPrompt: false,
       config: cfg,
       externalCli,
@@ -71,20 +71,20 @@ describe("resolveAgentDiscoveryAuthFacts external CLI scoping", () => {
   });
 
   it("reuses the active runtime generation for read-only auth discovery", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const externalCli = externalCliDiscoveryForProviders({
       cfg,
       providers: ["fireworks"],
     });
 
-    resolveAgentDiscoveryAuthFacts("/tmp/openclaw-agent", {
+    resolveAgentDiscoveryAuthFacts("/tmp/carapace-agent", {
       config: cfg,
       env: {},
       externalCli,
       readOnly: true,
     });
 
-    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-agent", {
+    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/carapace-agent", {
       allowKeychainPrompt: false,
       config: cfg,
       externalCli,
@@ -97,7 +97,7 @@ describe("resolveAgentDiscoveryAuthFacts external CLI scoping", () => {
       fireworks: { type: "api_key", key: "agent-key" },
     });
 
-    const { credentials } = resolveAgentDiscoveryAuthFacts("/tmp/openclaw-agent", {
+    const { credentials } = resolveAgentDiscoveryAuthFacts("/tmp/carapace-agent", {
       ambientCredentials: {
         fireworks: { type: "api_key", key: "ambient-key" },
         "claude-cli": { type: "api_key", key: "synthetic-key" },
@@ -116,14 +116,14 @@ describe("resolveAgentDiscoveryAuthFacts external CLI scoping", () => {
   });
 
   it("can skip runtime external auth overlays and scope synthetic auth discovery", () => {
-    resolveAgentDiscoveryAuthFacts("/tmp/openclaw-agent", {
+    resolveAgentDiscoveryAuthFacts("/tmp/carapace-agent", {
       env: {},
       skipExternalAuthProfiles: true,
       syntheticAuthProviderRefs: ["fireworks"],
     });
 
     expect(storeMocks.ensureAuthProfileStoreWithoutExternalProfiles).toHaveBeenCalledWith(
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       {
         allowKeychainPrompt: false,
       },
@@ -181,9 +181,9 @@ describe("resolveAgentDiscoveryAuthFacts external CLI scoping", () => {
             fireworks: { auth, baseUrl: "https://example.invalid", models: [] },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
-      const { credentials } = resolveAgentDiscoveryAuthFacts("/tmp/openclaw-agent", {
+      const { credentials } = resolveAgentDiscoveryAuthFacts("/tmp/carapace-agent", {
         config: cfg,
         env: {},
         syntheticAuthProviderRefs: ["fireworks"],

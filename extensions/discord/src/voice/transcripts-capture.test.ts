@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { setDiscordTranscriptsVoiceManager } from "./transcripts-source.js";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
@@ -432,7 +432,7 @@ defineDiscordVoiceTests(
       beginSpeakerTurn(entry);
       await emitFinalRealtimeUserTranscript(
         lastRealtimeBridgeParams(),
-        "OpenClaw, are you still listening?",
+        "Carapace, are you still listening?",
       );
       expect(agentCommandMock).toHaveBeenCalledOnce();
       expect(connection.destroy).not.toHaveBeenCalled();

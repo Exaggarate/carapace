@@ -1,12 +1,12 @@
 import { formatErrorMessage } from "../infra/errors.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { findStartupMaintenanceRequiredError } from "../infra/startup-maintenance-required.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
 // Stores config health fingerprints in shared SQLite state.
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { OpenClawStateOwnershipError } from "../state/openclaw-state-ownership.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { CarapaceStateOwnershipError } from "../state/carapace-state-ownership.js";
 import { setBoundedConfigIoWarningEntry } from "./io.state.js";
 
 // Fresh config snapshots share a database; retain failures until a write recovers.
@@ -38,7 +38,7 @@ export type ConfigHealthState = {
   entries?: Record<string, ConfigHealthEntry>;
 };
 
-type ConfigHealthDatabase = Pick<OpenClawStateKyselyDatabase, "config_health_entries">;
+type ConfigHealthDatabase = Pick<CarapaceStateKyselyDatabase, "config_health_entries">;
 
 type ConfigHealthStateDeps = {
   env: NodeJS.ProcessEnv;
@@ -47,7 +47,7 @@ type ConfigHealthStateDeps = {
 };
 
 function resolveConfigHealthStateEnv(deps: ConfigHealthStateDeps): NodeJS.ProcessEnv {
-  if (deps.env.OPENCLAW_HOME || deps.env.HOME || deps.env.USERPROFILE || deps.env.PREFIX) {
+  if (deps.env.CARAPACE_HOME || deps.env.HOME || deps.env.USERPROFILE || deps.env.PREFIX) {
     return deps.env;
   }
   return { ...deps.env, HOME: deps.homedir() };
@@ -74,7 +74,7 @@ function stringifyConfigHealthFingerprint(
 export function readConfigHealthStateFromStore(deps: ConfigHealthStateDeps): ConfigHealthState {
   try {
     return (
-      withExistingOpenClawStateDatabaseReadOnly(
+      withExistingCarapaceStateDatabaseReadOnly(
         (database) => {
           const healthDb = getNodeSqliteKysely<ConfigHealthDatabase>(database.db);
           const rows = executeSqliteQuerySync(
@@ -106,7 +106,7 @@ export function readConfigHealthStateFromStore(deps: ConfigHealthStateDeps): Con
       ) ?? {}
     );
   } catch (error) {
-    if (error instanceof OpenClawStateOwnershipError) {
+    if (error instanceof CarapaceStateOwnershipError) {
       throw error;
     }
     return {};
@@ -118,14 +118,14 @@ export function writeConfigHealthStateToStore(
   state: ConfigHealthState,
 ): void {
   const env = resolveConfigHealthStateEnv(deps);
-  const databasePath = resolveOpenClawStateSqlitePath(env);
+  const databasePath = resolveCarapaceStateSqlitePath(env);
   try {
     const entries = Object.entries(state.entries ?? {});
     if (entries.length === 0) {
       return;
     }
     const updatedAtMs = Date.now();
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const healthDb = getNodeSqliteKysely<ConfigHealthDatabase>(db);
         executeSqliteQuerySync(
@@ -157,7 +157,7 @@ export function writeConfigHealthStateToStore(
     loggedHealthWriteFailures.delete(databasePath);
   } catch (error) {
     if (
-      error instanceof OpenClawStateOwnershipError ||
+      error instanceof CarapaceStateOwnershipError ||
       findStartupMaintenanceRequiredError(error)
     ) {
       throw error;

@@ -1,6 +1,6 @@
 // Msteams tests cover send context plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { MSTeamsConfig, OpenClawConfig } from "../runtime-api.js";
+import type { MSTeamsConfig, CarapaceConfig } from "../runtime-api.js";
 import type { StoredConversationReference } from "./conversation-store.js";
 import { resolveMSTeamsSendContext } from "./send-context.js";
 import { sendMessageMSTeams } from "./send.js";
@@ -92,7 +92,7 @@ async function resolveMSTeamsProactiveReplyTarget(params: {
         ...params.cfg,
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const context = await resolveMSTeamsSendContext({
     cfg,
     to: `conversation:${params.conversationId}`,
@@ -121,7 +121,7 @@ beforeEach(() => {
 
 describe("resolveMSTeamsSendContext", () => {
   it("rejects an unavailable selected certificate before reading conversation state", async () => {
-    const certificatePath = "/private/openclaw-msteams-unavailable-send.pem";
+    const certificatePath = "/private/carapace-msteams-unavailable-send.pem";
     const cfg = {
       channels: {
         msteams: {
@@ -132,7 +132,7 @@ describe("resolveMSTeamsSendContext", () => {
           certificatePath,
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const error = await resolveMSTeamsSendContext({
       cfg,
@@ -165,7 +165,7 @@ describe("resolveMSTeamsSendContext", () => {
           tenantId: "tenant-id",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       resolveMSTeamsSendContext({
@@ -198,7 +198,7 @@ describe("resolveMSTeamsSendContext", () => {
               replyStyle: "top-level",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         to: "conversation:19:channel@thread.tacv2;messageid=explicit-root",
       }),
     ).resolves.toMatchObject({
@@ -240,7 +240,7 @@ describe("resolveMSTeamsSendContext", () => {
               replyStyle: "thread",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         to: `conversation:${conversationId};messageid=root-1`,
         text: "parity proof",
       });
@@ -280,7 +280,7 @@ describe("resolveMSTeamsSendContext", () => {
               replyStyle: "top-level",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         to: "graph-team/19:channel@thread.tacv2;messageid=graph-root",
       }),
     ).resolves.toMatchObject({
@@ -309,7 +309,7 @@ describe("resolveMSTeamsSendContext", () => {
           tenantId: "tenant-id",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       resolveMSTeamsSendContext({
@@ -342,7 +342,7 @@ describe("resolveMSTeamsSendContext", () => {
             sharePointSiteId: "site-id",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       to: "conversation:a:personal",
     });
 

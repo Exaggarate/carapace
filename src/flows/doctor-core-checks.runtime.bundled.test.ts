@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeModelCatalog } from "@carapace/model-catalog-core/model-catalog-normalize";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import { buildManifestModelProviderConfig } from "../plugin-sdk/provider-catalog-shared.js";
 
@@ -18,7 +18,7 @@ describe("doctor bundled provider catalog validation", () => {
       if (!extension.isDirectory()) {
         continue;
       }
-      const manifestPath = path.join(extensionsDir, extension.name, "openclaw.plugin.json");
+      const manifestPath = path.join(extensionsDir, extension.name, "carapace.plugin.json");
       if (!fs.existsSync(manifestPath)) {
         continue;
       }

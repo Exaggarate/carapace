@@ -1,7 +1,7 @@
 // Status scan test helpers provide shared mocks and config fixtures for scan suites.
 import type { Mock } from "vitest";
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { withEnvAsync } from "../test-utils/env.js";
 
 type UnknownMock = Mock<(...args: unknown[]) => unknown>;
@@ -9,7 +9,7 @@ type ResolveConfigPathMock = Mock<() => string>;
 
 type StatusScanSharedMocks = {
   resolveConfigPath: ResolveConfigPathMock;
-  resolveGatewayPort: Mock<(cfg?: OpenClawConfig) => number>;
+  resolveGatewayPort: Mock<(cfg?: CarapaceConfig) => number>;
   hasConfiguredChannels: UnknownMock;
   hasConfiguredChannelsForReadOnlyScope: UnknownMock;
   readBestEffortConfig: UnknownMock;
@@ -29,8 +29,8 @@ type StatusScanSharedMocks = {
 
 export function createStatusScanSharedMocks(configPathLabel: string): StatusScanSharedMocks {
   return {
-    resolveConfigPath: vi.fn(() => `/tmp/openclaw-${configPathLabel}-missing-${process.pid}.json`),
-    resolveGatewayPort: vi.fn((cfg?: OpenClawConfig) => cfg?.gateway?.port ?? 18789),
+    resolveConfigPath: vi.fn(() => `/tmp/carapace-${configPathLabel}-missing-${process.pid}.json`),
+    resolveGatewayPort: vi.fn((cfg?: CarapaceConfig) => cfg?.gateway?.port ?? 18789),
     hasConfiguredChannels: vi.fn(),
     hasConfiguredChannelsForReadOnlyScope: vi.fn(),
     readBestEffortConfig: vi.fn(),
@@ -188,12 +188,12 @@ export async function loadStatusScanModuleForTest(
 
   vi.doMock("../plugins/channel-plugin-ids.js", () => ({
     hasConfiguredChannelsForReadOnlyScope: (params: {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       env?: NodeJS.ProcessEnv;
       includePersistedAuthState?: boolean;
     }) => mocks.hasConfiguredChannelsForReadOnlyScope(params),
     listConfiguredChannelIdsForReadOnlyScope: (params: {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       env?: NodeJS.ProcessEnv;
       includePersistedAuthState?: boolean;
     }) =>
@@ -217,8 +217,8 @@ export async function loadStatusScanModuleForTest(
     readBestEffortConfigSnapshot: mocks.readBestEffortConfigSnapshot,
     readConfigFileSnapshotWithPluginMetadata: async (readOptions: unknown) => {
       const result = (await mocks.readBestEffortConfigSnapshot(readOptions)) as {
-        config: OpenClawConfig;
-        sourceConfig: OpenClawConfig;
+        config: CarapaceConfig;
+        sourceConfig: CarapaceConfig;
         configDiagnostics: { path: string; issues: unknown[] } | null;
       };
       return {
@@ -303,14 +303,14 @@ export async function loadStatusScanModuleForTest(
   return await import("./status.scan.js");
 }
 
-export function createStatusScanConfig<T extends object = OpenClawConfig>(
+export function createStatusScanConfig<T extends object = CarapaceConfig>(
   overrides: T = {} as T,
-): OpenClawConfig & T {
+): CarapaceConfig & T {
   return {
     session: {},
     gateway: {},
     ...overrides,
-  } as OpenClawConfig & T;
+  } as CarapaceConfig & T;
 }
 
 export function createStatusSummary(
@@ -388,7 +388,7 @@ function createStatusGatewayProbeFailure() {
   };
 }
 
-export function createStatusMemorySearchConfig(): OpenClawConfig {
+export function createStatusMemorySearchConfig(): CarapaceConfig {
   return createStatusScanConfig({
     memory: {
       search: {
@@ -414,8 +414,8 @@ export function applyStatusScanDefaults(
   mocks: StatusScanSharedMocks,
   options: {
     hasConfiguredChannels?: boolean;
-    sourceConfig?: OpenClawConfig;
-    resolvedConfig?: OpenClawConfig;
+    sourceConfig?: CarapaceConfig;
+    resolvedConfig?: CarapaceConfig;
     summary?: ReturnType<typeof createStatusSummary>;
     update?: ReturnType<typeof createStatusUpdateResult> | false;
     gatewayProbe?: ReturnType<typeof createStatusGatewayProbeFailure> | false;
@@ -428,7 +428,7 @@ export function applyStatusScanDefaults(
   mocks.hasConfiguredChannels.mockReturnValue(options.hasConfiguredChannels ?? false);
   mocks.hasConfiguredChannelsForReadOnlyScope.mockImplementation((rawParams: unknown) => {
     const params = rawParams as {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       env?: NodeJS.ProcessEnv;
       includePersistedAuthState?: boolean;
     };

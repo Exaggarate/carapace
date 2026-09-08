@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   inspectPersistedAuthProfileStateRaw,
@@ -14,9 +14,9 @@ import {
 } from "../src/agents/auth-profiles/sqlite.js";
 import { isCurrentProcessLaunchdServiceLabel } from "../src/daemon/launchd-current-service.js";
 import { detectGatewayRespawnSupervisor } from "../src/infra/supervisor-markers.js";
-import { closeOpenClawAgentDatabaseByPath } from "../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseByPath } from "../src/state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../src/state/openclaw-state-db.paths.js";
+import { closeCarapaceAgentDatabaseByPath } from "../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../src/state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../src/state/carapace-state-db.paths.js";
 import {
   captureFullEnv,
   deleteTestEnvValue,
@@ -59,7 +59,7 @@ function writeFile(targetPath: string, content: string): void {
 }
 
 function createTempHome(): string {
-  return makeTempDir(tempDirs, "openclaw-test-env-real-home-");
+  return makeTempDir(tempDirs, "carapace-test-env-real-home-");
 }
 
 function requireRecord(
@@ -99,20 +99,20 @@ afterEach(() => {
 });
 
 describe("installTestEnv", () => {
-  it.each([".openclaw", ".claude"])(
+  it.each([".carapace", ".claude"])(
     "rolls back live staging failure at %s before another installation",
     (failedDirectory) => {
-      const sandbox = makeTempDir(tempDirs, "openclaw-env-acquisition-");
+      const sandbox = makeTempDir(tempDirs, "carapace-env-acquisition-");
       const realHome = createTempHome();
       writeFile(
         path.join(realHome, ".profile"),
         [
           "export ACQUISITION_PROFILE_ADDED=from-profile",
           "export ACQUISITION_PROFILE_EMPTY=from-profile",
-          "export OPENCLAW_TEST_FAST=from-profile",
+          "export CARAPACE_TEST_FAST=from-profile",
         ].join("\n"),
       );
-      const configPath = path.join(realHome, ".openclaw", "openclaw.json");
+      const configPath = path.join(realHome, ".carapace", "carapace.json");
       writeFile(configPath, "{}\n");
       writeFile(path.join(realHome, ".claude", "settings.json"), "{}\n");
       vi.spyOn(os, "tmpdir").mockReturnValue(sandbox);
@@ -123,15 +123,15 @@ describe("installTestEnv", () => {
         {
           HOME: realHome,
           USERPROFILE: realHome,
-          OPENCLAW_HOME: realHome,
-          OPENCLAW_STATE_DIR: path.join(realHome, ".openclaw"),
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_AGENT_DIR: path.join(realHome, "caller-agent"),
+          CARAPACE_HOME: realHome,
+          CARAPACE_STATE_DIR: path.join(realHome, ".carapace"),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_AGENT_DIR: path.join(realHome, "caller-agent"),
           PI_CODING_AGENT_DIR: path.join(realHome, "caller-legacy-agent"),
-          OPENCLAW_LIVE_TEST: "1",
-          OPENCLAW_LIVE_USE_REAL_HOME: undefined,
-          OPENCLAW_LIVE_TEST_QUIET: "1",
-          OPENCLAW_TEST_FAST: "",
+          CARAPACE_LIVE_TEST: "1",
+          CARAPACE_LIVE_USE_REAL_HOME: undefined,
+          CARAPACE_LIVE_TEST_QUIET: "1",
+          CARAPACE_TEST_FAST: "",
           COREPACK_HOME: undefined,
           ACQUISITION_PROFILE_ADDED: undefined,
           ACQUISITION_PROFILE_EMPTY: "",
@@ -170,7 +170,7 @@ describe("installTestEnv", () => {
           const next = installTestEnv();
           cleanupFns.push(next.cleanup);
           expect(next.tempHome).not.toBe(failedHome);
-          expect(process.env.OPENCLAW_AGENT_DIR).toBeUndefined();
+          expect(process.env.CARAPACE_AGENT_DIR).toBeUndefined();
           expect(process.env.PI_CODING_AGENT_DIR).toBeUndefined();
           expect(process.env.ACQUISITION_PROFILE_ADDED).toBe("from-profile");
           expect(process.env.ACQUISITION_PROFILE_EMPTY).toBe("from-profile");
@@ -179,9 +179,9 @@ describe("installTestEnv", () => {
           ).toBe("{}\n");
           next.cleanup();
           expect(process.env.HOME).toBe(realHome);
-          expect(process.env.OPENCLAW_AGENT_DIR).toBe(callerEnv.OPENCLAW_AGENT_DIR);
+          expect(process.env.CARAPACE_AGENT_DIR).toBe(callerEnv.CARAPACE_AGENT_DIR);
           expect(process.env.PI_CODING_AGENT_DIR).toBe(callerEnv.PI_CODING_AGENT_DIR);
-          expect(process.env.OPENCLAW_TEST_FAST).toBe("from-profile");
+          expect(process.env.CARAPACE_TEST_FAST).toBe("from-profile");
           expect(process.env.ACQUISITION_PROFILE_ADDED).toBe("from-profile");
           expect(fs.readdirSync(sandbox)).toEqual([]);
         },
@@ -191,23 +191,23 @@ describe("installTestEnv", () => {
 
   it("keeps live tests on a temp HOME while copying config and auth state", () => {
     const realHome = createTempHome();
-    const openClawHome = createTempHome();
+    const carapaceHome = createTempHome();
     const priorIsolatedHome = createTempHome();
     writeFile(path.join(realHome, ".profile"), "export TEST_PROFILE_ONLY=from-profile\n");
     writeFile(
-      path.join(openClawHome, "custom-openclaw.json5"),
+      path.join(carapaceHome, "custom-carapace.json5"),
       `{
         // Preserve provider config, strip host-bound paths.
         agents: {
           defaults: {
             workspace: "/Users/peter/Projects",
-            agentDir: "/Users/peter/.openclaw/agents/main/agent",
+            agentDir: "/Users/peter/.carapace/agents/main/agent",
           },
           list: [
             {
               id: "dev",
               workspace: "/Users/peter/dev-workspace",
-              agentDir: "/Users/peter/.openclaw/agents/dev/agent",
+              agentDir: "/Users/peter/.carapace/agents/dev/agent",
             },
           ],
         },
@@ -234,12 +234,12 @@ describe("installTestEnv", () => {
         },
       }`,
     );
-    writeFile(path.join(openClawHome, ".openclaw", "credentials", "token.txt"), "secret\n");
+    writeFile(path.join(carapaceHome, ".carapace", "credentials", "token.txt"), "secret\n");
     writeFile(
-      path.join(openClawHome, ".openclaw", "external-plugins", "glueclaw", "openclaw.plugin.json"),
+      path.join(carapaceHome, ".carapace", "external-plugins", "glueclaw", "carapace.plugin.json"),
       '{"id":"glueclaw"}\n',
     );
-    const realStateDir = path.join(openClawHome, ".openclaw");
+    const realStateDir = path.join(carapaceHome, ".carapace");
     const realAgentDir = path.join(realStateDir, "agents", "main", "agent");
     const liveAuthStore = {
       version: 1,
@@ -250,7 +250,7 @@ describe("installTestEnv", () => {
           keyRef: {
             source: "env",
             provider: "default",
-            id: "OPENCLAW_LIVE_OPENAI_KEY",
+            id: "CARAPACE_LIVE_OPENAI_KEY",
           },
         },
       },
@@ -268,11 +268,11 @@ describe("installTestEnv", () => {
       { stateDir: realStateDir },
     );
     cleanupFns.push(() => {
-      closeOpenClawAgentDatabaseByPath(resolveAuthProfileDatabasePath(realAgentDir));
-      closeOpenClawStateDatabaseByPath(
-        resolveOpenClawStateSqlitePath({
+      closeCarapaceAgentDatabaseByPath(resolveAuthProfileDatabasePath(realAgentDir));
+      closeCarapaceStateDatabaseByPath(
+        resolveCarapaceStateSqlitePath({
           ...process.env,
-          OPENCLAW_STATE_DIR: realStateDir,
+          CARAPACE_STATE_DIR: realStateDir,
         }),
       );
     });
@@ -317,23 +317,23 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_HOME", openClawHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", "~/custom-openclaw.json5");
-    setTestEnvValue("OPENCLAW_TEST_HOME", priorIsolatedHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(priorIsolatedHome, ".openclaw"));
+    setTestEnvValue("CARAPACE_HOME", carapaceHome);
+    setTestEnvValue("CARAPACE_LIVE_TEST", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("CARAPACE_CONFIG_PATH", "~/custom-carapace.json5");
+    setTestEnvValue("CARAPACE_TEST_HOME", priorIsolatedHome);
+    setTestEnvValue("CARAPACE_STATE_DIR", path.join(priorIsolatedHome, ".carapace"));
 
     const testEnv = installTestEnv();
     cleanupFns.push(testEnv.cleanup);
 
     expect(testEnv.tempHome).not.toBe(realHome);
     expect(process.env.HOME).toBe(testEnv.tempHome);
-    expect(process.env.OPENCLAW_HOME).toBeUndefined();
-    expect(process.env.OPENCLAW_TEST_HOME).toBe(testEnv.tempHome);
+    expect(process.env.CARAPACE_HOME).toBeUndefined();
+    expect(process.env.CARAPACE_TEST_HOME).toBe(testEnv.tempHome);
     expect(process.env.TEST_PROFILE_ONLY).toBe("from-profile");
 
-    const copiedConfigPath = path.join(testEnv.tempHome, ".openclaw", "openclaw.json");
+    const copiedConfigPath = path.join(testEnv.tempHome, ".carapace", "carapace.json");
     const copiedConfig = JSON.parse(fs.readFileSync(copiedConfigPath, "utf8")) as {
       agents?: {
         defaults?: Record<string, unknown>;
@@ -370,20 +370,20 @@ describe("installTestEnv", () => {
     });
 
     expect(
-      fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "credentials", "token.txt")),
+      fs.existsSync(path.join(testEnv.tempHome, ".carapace", "credentials", "token.txt")),
     ).toBe(true);
     expect(
       fs.existsSync(
         path.join(
           testEnv.tempHome,
-          ".openclaw",
+          ".carapace",
           "external-plugins",
           "glueclaw",
-          "openclaw.plugin.json",
+          "carapace.plugin.json",
         ),
       ),
     ).toBe(true);
-    const stagedAgentDir = path.join(testEnv.tempHome, ".openclaw", "agents", "main", "agent");
+    const stagedAgentDir = path.join(testEnv.tempHome, ".carapace", "agents", "main", "agent");
     expect(inspectPersistedAuthProfileStoreRaw(stagedAgentDir)).toEqual({
       status: "readable",
       raw: liveAuthStore,
@@ -430,12 +430,12 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST", "1");
+    setTestEnvValue("CARAPACE_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST_QUIET", "1");
     const agentDir = path.join(realHome, "caller-agent");
     const legacyAgentDir = path.join(realHome, "caller-legacy-agent");
-    setTestEnvValue("OPENCLAW_AGENT_DIR", agentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", agentDir);
     setTestEnvValue("PI_CODING_AGENT_DIR", legacyAgentDir);
 
     const testEnv = installTestEnv();
@@ -443,31 +443,31 @@ describe("installTestEnv", () => {
     expect(testEnv.tempHome).toBe(realHome);
     expect(process.env.HOME).toBe(realHome);
     expect(process.env.TEST_PROFILE_ONLY).toBe("from-profile");
-    expect(process.env.OPENCLAW_AGENT_DIR).toBe(agentDir);
+    expect(process.env.CARAPACE_AGENT_DIR).toBe(agentDir);
     expect(process.env.PI_CODING_AGENT_DIR).toBe(legacyAgentDir);
     testEnv.cleanup();
-    expect(process.env.OPENCLAW_AGENT_DIR).toBe(agentDir);
+    expect(process.env.CARAPACE_AGENT_DIR).toBe(agentDir);
     expect(process.env.PI_CODING_AGENT_DIR).toBe(legacyAgentDir);
   });
 
   it("keeps hermetic mode isolated when live flags request the real HOME", () => {
     const realHome = createTempHome();
     writeFile(path.join(realHome, ".profile"), "export TEST_PROFILE_ONLY=from-profile\n");
-    writeFile(path.join(realHome, ".openclaw", "openclaw.json"), '{"live":true}\n');
-    writeFile(path.join(realHome, ".openclaw", "credentials", "token.txt"), "secret\n");
+    writeFile(path.join(realHome, ".carapace", "carapace.json"), '{"live":true}\n');
+    writeFile(path.join(realHome, ".carapace", "credentials", "token.txt"), "secret\n");
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
     setTestEnvValue("LIVE", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_GATEWAY", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST", "1");
+    setTestEnvValue("CARAPACE_LIVE_GATEWAY", "1");
+    setTestEnvValue("CARAPACE_LIVE_USE_REAL_HOME", "1");
     const callerPluginDir = path.join(realHome, "caller-plugins");
-    setTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR", callerPluginDir);
-    setTestEnvValue("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    setTestEnvValue("OPENCLAW_HOME", realHome);
-    setTestEnvValue("OPENCLAW_AGENT_DIR", path.join(realHome, "caller-agent"));
+    setTestEnvValue("CARAPACE_BUNDLED_PLUGINS_DIR", callerPluginDir);
+    setTestEnvValue("CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("CARAPACE_HOME", realHome);
+    setTestEnvValue("CARAPACE_AGENT_DIR", path.join(realHome, "caller-agent"));
     setTestEnvValue("PI_CODING_AGENT_DIR", path.join(realHome, "caller-legacy-agent"));
 
     const testEnv = installTestEnv({ mode: "hermetic" });
@@ -477,23 +477,23 @@ describe("installTestEnv", () => {
     expect(process.env.HOME).toBe(testEnv.tempHome);
     expect(process.env.TEST_PROFILE_ONLY).toBeUndefined();
     expect(process.env.LIVE).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_TEST).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_GATEWAY).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_USE_REAL_HOME).toBeUndefined();
-    expect(process.env.OPENCLAW_BUNDLED_PLUGINS_DIR).not.toBe(callerPluginDir);
-    expect(path.basename(process.env.OPENCLAW_BUNDLED_PLUGINS_DIR ?? "")).toBe("extensions");
-    expect(process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR).toBe("1");
-    expect(process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS).toBeUndefined();
-    expect(process.env.OPENCLAW_HOME).toBeUndefined();
-    expect(process.env.OPENCLAW_AGENT_DIR).toBeUndefined();
+    expect(process.env.CARAPACE_LIVE_TEST).toBeUndefined();
+    expect(process.env.CARAPACE_LIVE_GATEWAY).toBeUndefined();
+    expect(process.env.CARAPACE_LIVE_USE_REAL_HOME).toBeUndefined();
+    expect(process.env.CARAPACE_BUNDLED_PLUGINS_DIR).not.toBe(callerPluginDir);
+    expect(path.basename(process.env.CARAPACE_BUNDLED_PLUGINS_DIR ?? "")).toBe("extensions");
+    expect(process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR).toBe("1");
+    expect(process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS).toBeUndefined();
+    expect(process.env.CARAPACE_HOME).toBeUndefined();
+    expect(process.env.CARAPACE_AGENT_DIR).toBeUndefined();
     expect(process.env.PI_CODING_AGENT_DIR).toBeUndefined();
-    expect(fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "openclaw.json"))).toBe(false);
+    expect(fs.existsSync(path.join(testEnv.tempHome, ".carapace", "carapace.json"))).toBe(false);
     expect(
-      fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "credentials", "token.txt")),
+      fs.existsSync(path.join(testEnv.tempHome, ".carapace", "credentials", "token.txt")),
     ).toBe(false);
   });
 
-  it.each(["OPENCLAW_HOME", "OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR"])(
+  it.each(["CARAPACE_HOME", "CARAPACE_AGENT_DIR", "PI_CODING_AGENT_DIR"])(
     "clears and restores %s for normal isolated test runs",
     (key) => {
       const realHome = createTempHome();
@@ -586,22 +586,22 @@ describe("installTestEnv", () => {
     "isolates and restores inherited supervisor identity in %s mode",
     (mode) => {
       const supervisorEnv = {
-        LAUNCH_JOB_LABEL: "ai.openclaw.gateway",
-        LAUNCH_JOB_NAME: "ai.openclaw.gateway",
-        XPC_SERVICE_NAME: "ai.openclaw.gateway",
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+        LAUNCH_JOB_LABEL: "ai.carapace.gateway",
+        LAUNCH_JOB_NAME: "ai.carapace.gateway",
+        XPC_SERVICE_NAME: "ai.carapace.gateway",
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
         INVOCATION_ID: "test-invocation",
         SYSTEMD_EXEC_PID: "1234",
         JOURNAL_STREAM: "8:1234",
-        OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Gateway",
-        OPENCLAW_SUPERVISOR_MODE: "external",
-        OPENCLAW_WRAPPER: "/fixture/operator-wrapper",
-        OPENCLAW_GATEWAY_SERVICE_PID: "4321",
-        OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "FIXTURE_AUTH_REF",
-        OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
+        CARAPACE_WINDOWS_TASK_NAME: "Carapace Gateway",
+        CARAPACE_SUPERVISOR_MODE: "external",
+        CARAPACE_WRAPPER: "/fixture/operator-wrapper",
+        CARAPACE_GATEWAY_SERVICE_PID: "4321",
+        CARAPACE_SERVICE_MANAGED_ENV_KEYS: "FIXTURE_AUTH_REF",
+        CARAPACE_WINDOWS_TASK_HIDDEN_LAUNCHER: "1",
       };
       for (const [key, value] of Object.entries(supervisorEnv)) {
         setTestEnvValue(key, value);
@@ -611,7 +611,7 @@ describe("installTestEnv", () => {
       const testEnv = installTestEnv({ mode });
       cleanupFns.push(testEnv.cleanup);
 
-      expect(isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway")).toBe(false);
+      expect(isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway")).toBe(false);
       for (const platform of ["darwin", "linux", "win32"] as const) {
         expect(detectGatewayRespawnSupervisor(process.env, platform)).toBeNull();
       }
@@ -619,11 +619,11 @@ describe("installTestEnv", () => {
         [],
       );
       expect(process.env.TEST_UNRELATED_SERVICE_HINT).toBe("preserved");
-      withEnv({ XPC_SERVICE_NAME: "ai.openclaw.gateway" }, () => {
-        expect(isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway")).toBe(true);
+      withEnv({ XPC_SERVICE_NAME: "ai.carapace.gateway" }, () => {
+        expect(isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway")).toBe(true);
       });
       withEnv({ XPC_SERVICE_NAME: "0" }, () => {
-        expect(isCurrentProcessLaunchdServiceLabel("ai.openclaw.gateway")).toBe(false);
+        expect(isCurrentProcessLaunchdServiceLabel("ai.carapace.gateway")).toBe(false);
       });
 
       testEnv.cleanup();
@@ -640,10 +640,10 @@ describe("installTestEnv", () => {
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
     deleteTestEnvValue("LIVE");
-    deleteTestEnvValue("OPENCLAW_LIVE_TEST");
-    deleteTestEnvValue("OPENCLAW_LIVE_GATEWAY");
-    deleteTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME");
-    deleteTestEnvValue("OPENCLAW_LIVE_TEST_QUIET");
+    deleteTestEnvValue("CARAPACE_LIVE_TEST");
+    deleteTestEnvValue("CARAPACE_LIVE_GATEWAY");
+    deleteTestEnvValue("CARAPACE_LIVE_USE_REAL_HOME");
+    deleteTestEnvValue("CARAPACE_LIVE_TEST_QUIET");
 
     const testEnv = installTestEnv();
     cleanupFns.push(testEnv.cleanup);
@@ -658,9 +658,9 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST", "1");
+    setTestEnvValue("CARAPACE_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("CARAPACE_LIVE_TEST_QUIET", "1");
 
     vi.doMock("node:child_process", () => ({
       execFileSync: () => {

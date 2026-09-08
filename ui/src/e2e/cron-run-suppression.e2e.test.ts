@@ -118,7 +118,7 @@ suite.define(() => {
           expect(await suppressed.textContent()).not.toContain(
             "Synthetic delivery target unavailable.",
           );
-          const artifactRoot = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR;
+          const artifactRoot = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR;
           const artifactDir = artifactRoot
             ? createControlUiE2eArtifactDir("cron-run-suppression", artifactRoot)
             : undefined;

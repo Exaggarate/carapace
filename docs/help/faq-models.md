@@ -23,10 +23,10 @@ troubleshooting, see the main [FAQ](/help/faq).
 
     Models are `provider/model` refs (example: `openai/gpt-5.5`,
     `anthropic/claude-sonnet-4-6`). Always set `provider/model` explicitly. If
-    you omit the provider, OpenClaw tries an alias match first, then a unique
+    you omit the provider, Carapace tries an alias match first, then a unique
     configured-provider match for that model id, then falls back to the
     configured default provider (deprecated compatibility path). If that
-    provider no longer has the configured default model, OpenClaw falls back
+    provider no longer has the configured default model, Carapace falls back
     to the first configured provider/model instead of a stale default.
 
   </Accordion>
@@ -51,9 +51,9 @@ troubleshooting, see the main [FAQ](/help/faq).
     - `/model <model> -s` in chat (current session only)
     - owner/admin `/model <model> -a` (current session and agent default)
     - owner/admin `/model <model> -g` (current session and global default)
-    - `openclaw models set ...` (updates just model config)
-    - `openclaw configure --section model` (interactive)
-    - edit `agents.defaults.model` in `~/.openclaw/openclaw.json` directly
+    - `carapace models set ...` (updates just model config)
+    - `carapace configure --section model` (interactive)
+    - edit `agents.defaults.model` in `~/.carapace/carapace.json` directly
 
     Bare `/model <model>` changes only the current session, including for owners/admins,
     unless you explicitly choose a broader [model selection scope](/gateway/config-agents/models#agentsdefaultsmodelselectionscope).
@@ -61,7 +61,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     For RPC edits, inspect with `config.schema.lookup` first (normalized
     path, shallow schema docs, child summaries), then prefer `config.patch`
     over `config.apply` with a partial object. If you did overwrite config,
-    restore from backup or run `openclaw doctor` to repair.
+    restore from backup or run `carapace doctor` to repair.
 
     Docs: [Models](/concepts/models), [Configure](/cli/configure),
     [Config](/cli/config), [Doctor](/gateway/doctor).
@@ -74,11 +74,11 @@ troubleshooting, see the main [FAQ](/help/faq).
     1. Install Ollama from `https://ollama.com/download`
     2. Pull a local model, e.g. `ollama pull gemma4`
     3. For cloud models too, run `ollama signin`
-    4. Run `openclaw onboard`, choose `Ollama`, then `Local` or `Cloud + Local`
+    4. Run `carapace onboard`, choose `Ollama`, then `Local` or `Cloud + Local`
 
     `Cloud + Local` gives you cloud models plus your local Ollama models;
     cloud models such as `kimi-k2.5:cloud` need no local pull. To switch
-    manually: `openclaw models list`, then `openclaw models set ollama/<model>`.
+    manually: `carapace models list`, then `carapace models set ollama/<model>`.
 
     Smaller/heavily quantized models are more vulnerable to prompt injection.
     Use large models for any bot with tool access; if you use small models
@@ -117,7 +117,7 @@ troubleshooting, see the main [FAQ](/help/faq).
   <Accordion title="If two providers expose the same model id, which one does /model use?">
     `/model provider/model` selects that exact provider route. For example,
     `qianfan/deepseek-v4-flash` and `deepseek/deepseek-v4-flash` are different
-    refs even though the model id matches — OpenClaw does not silently switch
+    refs even though the model id matches — Carapace does not silently switch
     providers on a bare id match.
 
     A user-selected `/model` ref is strict for fallback: if that
@@ -125,7 +125,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     falling back to `agents.defaults.model.fallbacks`. Configured fallback
     chains still apply to configured defaults, cron job primaries, and
     auto-selected fallback state. When a non-session-override run is allowed
-    to use fallback, OpenClaw tries the requested provider/model first, then
+    to use fallback, Carapace tries the requested provider/model first, then
     configured fallbacks, then the configured primary — so duplicate bare
     model ids never jump straight back to the default provider.
 
@@ -137,7 +137,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     Yes — model choice and runtime choice are separate:
 
     - **Native Codex coding agent:** set `agents.defaults.model.primary` to
-      `openai/gpt-5.5`. Sign in with `openclaw models auth login --provider
+      `openai/gpt-5.5`. Sign in with `carapace models auth login --provider
       openai` for ChatGPT/Codex subscription auth.
     - **Direct OpenAI API tasks outside the agent loop:** configure
       `OPENAI_API_KEY` for images, embeddings, speech, realtime, and other
@@ -206,7 +206,7 @@ troubleshooting, see the main [FAQ](/help/faq).
   </Accordion>
 
   <Accordion title='Why do I see "Unknown model: minimax/MiniMax-M3"?'>
-    If you're on an older OpenClaw release, upgrade first (or run from source
+    If you're on an older Carapace release, upgrade first (or run from source
     `main`) and restart the gateway — `MiniMax-M3` may not be in your
     installed release's catalog yet. Otherwise the MiniMax provider is not
     configured (no provider entry or auth profile found), so the model can't
@@ -324,13 +324,13 @@ troubleshooting, see the main [FAQ](/help/faq).
     **No API key found for provider after adding a new agent**
 
     A new agent can read shared auth profiles without copying them. Its
-    own profiles live in `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+    own profiles live in `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite`
     and override the shared read-through base. See
     [Auth credential semantics](/auth-credential-semantics#agent-copy-portability).
 
-    Fix: run `openclaw models auth login --provider <providerId> --agent <agentId>`
+    Fix: run `carapace models auth login --provider <providerId> --agent <agentId>`
     on the Gateway host when the agent needs its own credentials. You can also
-    configure auth when creating an agent with `openclaw agents add <id>`.
+    configure auth when creating an agent with `carapace agents add <id>`.
     For OAuth, sign in separately when the agent needs its own account.
     See [Multi-Agent Routing](/concepts/multi-agent) for the
     full `agentDir` reuse and credential-sharing rules — never reuse
@@ -348,7 +348,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     1. **Auth profile rotation** within the same provider.
     2. **Model fallback** to the next model in `agents.defaults.model.fallbacks`.
 
-    Cooldowns apply to failing profiles (exponential backoff), so OpenClaw
+    Cooldowns apply to failing profiles (exponential backoff), so Carapace
     keeps responding when a provider is rate-limited or temporarily failing.
 
     The rate-limit bucket covers more than plain `429`: `Too many concurrent
@@ -392,28 +392,28 @@ troubleshooting, see the main [FAQ](/help/faq).
     **Fix checklist:**
 
     - Confirm where profiles live: shared and agent-local SQLite auth stores.
-      Run `openclaw doctor --fix` if an older install still has
+      Run `carapace doctor --fix` if an older install still has
       `auth-profiles.json`; it is a migration source, not the runtime store.
     - Confirm the Gateway loads your env var. `ANTHROPIC_API_KEY` set only in
       your shell won't reach a Gateway run via systemd/launchd — put it in
-      `~/.openclaw/.env` or enable `env.shellEnv`.
+      `~/.carapace/.env` or enable `env.shellEnv`.
     - Confirm you're configuring the right agent — use `--agent <agentId>`
-      with `openclaw models auth login` to select its local store.
-    - Run `openclaw models status` to see configured models and provider
+      with `carapace models auth login` to select its local store.
+    - Run `carapace models status` to see configured models and provider
       auth state.
 
     **For "No credentials found for profile anthropic" (no email suffix):**
 
     The run is pinned to an Anthropic profile the Gateway can't find.
 
-    - Use Claude CLI: run `openclaw models auth login --provider anthropic
+    - Use Claude CLI: run `carapace models auth login --provider anthropic
       --method cli --set-default` on the gateway host.
     - Prefer an API key instead: put `ANTHROPIC_API_KEY` in
-      `~/.openclaw/.env` on the gateway host, then clear any pinned order
+      `~/.carapace/.env` on the gateway host, then clear any pinned order
       that forces the missing profile:
 
       ```bash
-      openclaw models auth order clear --provider anthropic
+      carapace models auth order clear --provider anthropic
       ```
 
     - Remote mode: auth profiles live on the gateway machine, not your
@@ -423,7 +423,7 @@ troubleshooting, see the main [FAQ](/help/faq).
 
   <Accordion title="Why did it also try Google Gemini and fail?">
     If your model config includes Google Gemini as a fallback (or you
-    switched to a Gemini shorthand), OpenClaw tries it during fallback. No
+    switched to a Gemini shorthand), Carapace tries it during fallback. No
     Google credentials configured gives `No API key found for provider
     "google"`. Fix: add Google auth, or remove Google models from
     `agents.defaults.model.fallbacks`/aliases.
@@ -432,7 +432,7 @@ troubleshooting, see the main [FAQ](/help/faq).
 
     Cause: session history has thinking blocks without signatures (often
     from an aborted/partial stream); Google Antigravity requires signatures
-    on thinking blocks. OpenClaw strips unsigned thinking blocks for Google
+    on thinking blocks. Carapace strips unsigned thinking blocks for Google
     Antigravity Claude; if it still appears, start a new session or set
     `/thinking off` for that agent.
 
@@ -447,12 +447,12 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
   <Accordion title="What is an auth profile?">
     A named credential record (API key, token, or OAuth) tied to a provider,
     stored in SQLite. Agent-local profiles in
-    `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` override the
-    shared read-through base in `~/.openclaw/state/openclaw.sqlite`.
+    `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite` override the
+    shared read-through base in `~/.carapace/state/carapace.sqlite`.
     Older installs keep the shared store in the main agent's database until
-    `openclaw doctor --fix` relocates it.
+    `carapace doctor --fix` relocates it.
 
-    Inspect saved profiles without dumping secrets: `openclaw models auth
+    Inspect saved profiles without dumping secrets: `carapace models auth
     list` (optionally `--provider <id>` or `--json`). See
     [Models CLI](/cli/models#auth-profiles).
 
@@ -469,35 +469,35 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
     Yes. `auth.order.<provider>` config sets rotation order per provider
     (metadata only — no secrets stored).
 
-    OpenClaw may skip a profile in a short **cooldown** (rate limits,
+    Carapace may skip a profile in a short **cooldown** (rate limits,
     timeouts, auth failures) or a longer **disabled** state
-    (billing/insufficient credits). Inspect with `openclaw models status
+    (billing/insufficient credits). Inspect with `carapace models status
     --json` and check `auth.unusableProfiles`. Rate-limit cooldowns can be
     model-scoped — a profile cooling down for one model can still serve a
     sibling model on the same provider; billing/disabled windows block the
     whole profile.
 
     Set a per-agent order override (stored in that agent's
-    `openclaw-agent.sqlite` database):
+    `carapace-agent.sqlite` database):
 
     ```bash
     # Defaults to the configured default agent (omit --agent)
-    openclaw models auth order get --provider anthropic
+    carapace models auth order get --provider anthropic
 
     # Lock rotation to a single profile
-    openclaw models auth order set --provider anthropic anthropic:default
+    carapace models auth order set --provider anthropic anthropic:default
 
     # Or set an explicit order (fallback within provider)
-    openclaw models auth order set --provider anthropic anthropic:work anthropic:default
+    carapace models auth order set --provider anthropic anthropic:work anthropic:default
 
     # Clear override (fall back to config auth.order / round-robin)
-    openclaw models auth order clear --provider anthropic
+    carapace models auth order clear --provider anthropic
 
     # Target a specific agent
-    openclaw models auth order set --provider anthropic --agent main anthropic:default
+    carapace models auth order set --provider anthropic --agent main anthropic:default
     ```
 
-    Verify what will actually be tried: `openclaw models status --probe`. A
+    Verify what will actually be tried: `carapace models status --probe`. A
     stored profile omitted from an explicit order reports
     `excluded_by_auth_order` instead of being tried silently.
 
@@ -505,7 +505,7 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
 
   <Accordion title="OAuth vs API key - what is the difference?">
     - **OAuth / CLI login** often uses subscription access where the
-      provider supports it. For Anthropic, OpenClaw's Claude CLI backend
+      provider supports it. For Anthropic, Carapace's Claude CLI backend
       uses Claude Code `claude -p`, which Anthropic currently treats as
       Agent SDK/programmatic usage drawing from subscription usage limits —
       see [Anthropic](/providers/anthropic) for the current billing-pause

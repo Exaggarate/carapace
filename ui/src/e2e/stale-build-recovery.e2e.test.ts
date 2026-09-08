@@ -8,7 +8,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI stale-build recovery E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 suite.define(() => {
@@ -25,7 +25,7 @@ suite.define(() => {
       if (request.resourceType() === "document") {
         const url = new URL(request.url());
         documentRequests.push({
-          fresh: url.searchParams.has("openclaw_mount_recovery"),
+          fresh: url.searchParams.has("carapace_mount_recovery"),
           pathname: url.pathname,
         });
       }
@@ -60,8 +60,8 @@ suite.define(() => {
       ]);
       await gateway.resolveDeferred("connect");
 
-      await page.locator("openclaw-app-shell").waitFor();
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+      await page.locator("carapace-app-shell").waitFor();
+      expect(await page.locator("carapace-login-gate").count()).toBe(0);
       await expect.poll(() => page.url()).toBe(target.href);
     } finally {
       await closeContext(context);

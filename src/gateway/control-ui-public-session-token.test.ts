@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { loadDeviceIdentityIfPresent } from "../infra/device-identity.js";
 import { isSecretValueRegisteredForRedaction } from "../logging/secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "../logging/secret-redaction-registry.test-support.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   loadPublicSessionShareTokenCodec,
   resolvePublicSessionShareToken,
@@ -20,7 +20,7 @@ afterEach(() => resetSecretRedactionRegistryForTest());
 
 describe("public session share token", () => {
   it("round-trips an exact locator without exposing any identifier", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const codec = loadPublicSessionShareTokenCodec();
       const token = codec.mint(LOCATOR);
       expect(codec.resolve(token)).toEqual(LOCATOR);
@@ -33,7 +33,7 @@ describe("public session share token", () => {
   });
 
   it("uses fresh nonces while retaining the same restart-stable identity", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const first = loadPublicSessionShareTokenCodec();
       const firstToken = first.mint(LOCATOR);
       const secondToken = first.mint(LOCATOR);
@@ -45,7 +45,7 @@ describe("public session share token", () => {
   });
 
   it("fails closed for tampering, another installation, and malformed tokens", async () => {
-    const token = await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    const token = await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const codec = loadPublicSessionShareTokenCodec();
       const created = codec.mint(LOCATOR);
       const last = created.at(-1) ?? "";
@@ -55,16 +55,16 @@ describe("public session share token", () => {
       expect(codec.resolve(`v2.${created.slice(3)}`)).toBeNull();
       return created;
     });
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       expect(resolvePublicSessionShareToken(token)).toBeNull();
     });
   });
 
   it("does not create durable identity state from an anonymous token", async () => {
-    const foreignToken = await withOpenClawTestState({ scenario: "minimal" }, async () =>
+    const foreignToken = await withCarapaceTestState({ scenario: "minimal" }, async () =>
       loadPublicSessionShareTokenCodec().mint(LOCATOR),
     );
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       expect(resolvePublicSessionShareToken(foreignToken)).toBeNull();
       expect(loadDeviceIdentityIfPresent()).toBeNull();
 

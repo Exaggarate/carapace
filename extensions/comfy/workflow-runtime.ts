@@ -1,16 +1,16 @@
 // Comfy plugin module implements workflow runtime behavior.
 import { randomInt } from "node:crypto";
 import fs from "node:fs/promises";
-import { bufferToBlobPart } from "openclaw/plugin-sdk/blob-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import { resolvePositiveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { bufferToBlobPart } from "carapace/plugin-sdk/blob-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveGeneratedMediaMaxBytes } from "carapace/plugin-sdk/media-generation-runtime";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import { resolvePositiveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
 import {
   isProviderApiKeyConfigured,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   assertOkOrThrowHttpError,
   normalizeBaseUrl,
@@ -18,28 +18,28 @@ import {
   readProviderJsonResponse,
   redactProviderResponseErrorText,
   resolveProviderHttpRequestConfig,
-} from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-http";
 import {
   normalizeSecretInputString,
   resolveConfiguredSecretInputString,
   resolveSecretInputString,
-} from "openclaw/plugin-sdk/secret-input-runtime";
-import { canResolveEnvSecretRefInReadOnlyPath } from "openclaw/plugin-sdk/secret-ref-readonly";
+} from "carapace/plugin-sdk/secret-input-runtime";
+import { canResolveEnvSecretRefInReadOnlyPath } from "carapace/plugin-sdk/secret-ref-readonly";
 import {
   fetchWithSsrFGuard,
   isPrivateOrLoopbackHost,
   mergeSsrFPolicies,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
   type SsrFPolicy,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asBoolean,
   isRecord,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolveUserPath } from "carapace/plugin-sdk/text-utility-runtime";
 
 const DEFAULT_COMFY_LOCAL_BASE_URL = "http://127.0.0.1:8188";
 const DEFAULT_COMFY_CLOUD_BASE_URL = "https://cloud.comfy.org";
@@ -123,7 +123,7 @@ function readConfigInteger(config: ComfyProviderConfig, key: string): number | u
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
-function getComfyConfig(cfg?: OpenClawConfig): ComfyProviderConfig {
+function getComfyConfig(cfg?: CarapaceConfig): ComfyProviderConfig {
   const pluginConfig = cfg?.plugins?.entries?.comfy?.config;
   if (isRecord(pluginConfig)) {
     return pluginConfig;
@@ -158,7 +158,7 @@ function resolveComfyMode(config: ComfyProviderConfig): ComfyMode {
 
 function resolveComfyApiKey(
   config: ComfyProviderConfig,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): ComfyApiKeyResolution {
   const resolved = resolveSecretInputString({
     value: config.apiKey,
@@ -259,7 +259,7 @@ function setWorkflowInput(params: {
   inputs[params.inputName] = params.value;
 }
 
-async function resolveComfyHeadersConfig(value: unknown, cfg: OpenClawConfig): Promise<Headers> {
+async function resolveComfyHeadersConfig(value: unknown, cfg: CarapaceConfig): Promise<Headers> {
   const headers = new Headers();
   if (!isRecord(value)) {
     return headers;
@@ -649,7 +649,7 @@ async function downloadOutputFile(params: {
 
 // Only env refs can be checked without I/O. Keep other refs selectable until
 // the async request resolver can establish their availability.
-function hasUnavailableComfyHeaderSecret(value: unknown, cfg?: OpenClawConfig): boolean {
+function hasUnavailableComfyHeaderSecret(value: unknown, cfg?: CarapaceConfig): boolean {
   if (!isRecord(value)) {
     return false;
   }
@@ -675,7 +675,7 @@ function hasUnavailableComfyHeaderSecret(value: unknown, cfg?: OpenClawConfig): 
 }
 
 export function isComfyCapabilityConfigured(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
   capability: ComfyCapability;
 }): boolean {
@@ -710,7 +710,7 @@ export function isComfyCapabilityConfigured(params: {
 }
 
 export async function runComfyWorkflow(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   prompt: string;

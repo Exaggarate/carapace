@@ -1,4 +1,4 @@
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 // Deepinfra tests cover surface model catalogs plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {

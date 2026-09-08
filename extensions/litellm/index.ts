@@ -1,13 +1,13 @@
-// Litellm plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+// Litellm plugin entrypoint registers its Carapace integration.
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type CarapacePluginApi,
   type ProviderAuthMethodNonInteractiveContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeOptionalSecretInput } from "openclaw/plugin-sdk/provider-auth";
-import { buildOpenAICompatibleProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
+} from "carapace/plugin-sdk/plugin-entry";
+import { normalizeOptionalSecretInput } from "carapace/plugin-sdk/provider-auth";
+import { buildOpenAICompatibleProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
 import { buildLitellmImageGenerationProvider } from "./image-generation-provider.js";
 import { applyLitellmConfig, LITELLM_DEFAULT_MODEL_REF } from "./onboard.js";
 import { buildLitellmProvider } from "./provider-catalog.js";
@@ -15,9 +15,9 @@ import { buildLitellmProvider } from "./provider-catalog.js";
 const PROVIDER_ID = "litellm";
 
 function applyCustomBaseUrlForNonInteractiveSetup(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   customBaseUrl: unknown,
-): OpenClawConfig {
+): CarapaceConfig {
   const baseUrl = normalizeOptionalSecretInput(customBaseUrl)?.replace(/\/+$/, "");
   if (!baseUrl) {
     return cfg;
@@ -43,7 +43,7 @@ export default definePluginEntry({
   id: PROVIDER_ID,
   name: "LiteLLM Provider",
   description: "Bundled LiteLLM provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     const apiKeyAuth = createProviderApiKeyAuthMethod({
       providerId: PROVIDER_ID,
       methodId: "api-key",

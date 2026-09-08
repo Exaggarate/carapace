@@ -7,31 +7,31 @@ import { clearAuthProfileMigrationDiagnostics } from "../agents/auth-profiles/le
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
 import { clearRuntimeAuthProfileStoreSnapshots } from "../agents/auth-profiles/runtime-snapshots.js";
 import { closeAuthProfileReadPool } from "../agents/auth-profiles/sqlite.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { maybeMigrateAuthProfileJsonStoresToSqlite } from "./doctor-auth-flat-profiles.js";
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 const sourceNames = ["auth-profiles.json", "auth-state.json", "auth.json"] as const;
 const profileId = "owner-test:default";
 
 async function createOwners(env: Record<string, string | undefined> = {}) {
   const create = async () => {
-    const state = await createOpenClawTestState({
-      prefix: "openclaw-doctor-auth-source-owner-",
+    const state = await createCarapaceTestState({
+      prefix: "carapace-doctor-auth-source-owner-",
       layout: "split",
       applyEnv: false,
       env: {
-        OPENCLAW_AGENT_DIR: undefined,
+        CARAPACE_AGENT_DIR: undefined,
         PI_CODING_AGENT_DIR: undefined,
-        OPENCLAW_OAUTH_DIR: undefined,
+        CARAPACE_OAUTH_DIR: undefined,
         ...env,
       },
     });
@@ -73,8 +73,8 @@ afterEach(async () => {
   clearRuntimeAuthProfileStoreSnapshots();
   clearAuthProfileMigrationDiagnostics();
   closeAuthProfileReadPool();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const state of states.splice(0).toReversed()) {
     await state.cleanup();
     expect(fs.existsSync(state.root)).toBe(false);
@@ -153,7 +153,7 @@ describe("Doctor auth migration source ownership", () => {
     if (selectedArchive) {
       expect.soft(fs.readFileSync(selectedArchive, "utf8")).toBe(selectedSource.bytes);
     }
-    const receipts = openOpenClawStateDatabase({ env: selected.env })
+    const receipts = openCarapaceStateDatabase({ env: selected.env })
       .db.prepare("SELECT source_path, status, removed_source FROM migration_sources")
       .all();
     expect
@@ -163,7 +163,7 @@ describe("Doctor auth migration source ownership", () => {
       ]);
   });
 
-  it.each(["OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR"] as const)(
+  it.each(["CARAPACE_AGENT_DIR", "PI_CODING_AGENT_DIR"] as const)(
     "resolves a tilde %s relocation against the selected home before importing",
     async (agentDirVariable) => {
       const { selected, ambient } = await createOwners({ [agentDirVariable]: "~/relocated-auth" });

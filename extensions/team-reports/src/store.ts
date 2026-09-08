@@ -4,15 +4,15 @@ import type { DatabaseSync } from "node:sqlite";
 import {
   configureSqliteConnectionPragmas,
   migrateSqliteSchemaToStrict,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
+} from "carapace/plugin-sdk/sqlite-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
 import { MAX_REPORT_BYTES } from "./limits.js";
 import { DAY_MS } from "./periods.js";
 import {

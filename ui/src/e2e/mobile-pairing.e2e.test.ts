@@ -1,6 +1,6 @@
 // Control UI tests cover mobile pairing setup through the mocked Gateway.
 import path from "node:path";
-import { DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS } from "@openclaw/gateway-client/browser";
+import { DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS } from "@carapace/gateway-client/browser";
 import type { Page } from "playwright";
 import qrcode from "qrcode";
 import { beforeEach, expect, it } from "vitest";
@@ -16,12 +16,12 @@ const suite = createControlUiE2eSuite({
   name: "Control UI mobile pairing mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 // Visual proof rides the behavioral scenario so every captured state is one the
 // assertions above it already proved, at whatever SHA the lane ran.
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -192,14 +192,14 @@ suite.define(() => {
         await pairFromSettings.click();
 
         const dialog = page.getByRole("dialog", { name: "Pair a device" });
-        const qr = page.getByAltText("OpenClaw mobile pairing QR code");
+        const qr = page.getByAltText("Carapace mobile pairing QR code");
         await dialog.waitFor();
         await page.getByRole("button", { name: "Create setup code" }).waitFor();
         const dialogBox = await page.locator(".device-pair-setup").boundingBox();
         expect(dialogBox?.width).toBeLessThanOrEqual(390);
         await captureUiProof(page, "01-mobile-access-selection.png");
 
-        const helpDocumentUrl = "https://docs.openclaw.ai/channels/pairing";
+        const helpDocumentUrl = "https://github.com/Exaggarate/carapace";
         const helpUrl = `${helpDocumentUrl}#pair-from-the-control-ui-recommended`;
         // This mocked scenario owns navigation, not docs-site availability. Context
         // routing also covers the popup's first request, which page routing misses.
@@ -428,7 +428,7 @@ suite.define(() => {
           includeQr: false,
         });
         await page
-          .getByText('openclaw node run --pair "oc-pair://Node_AbC123"', { exact: true })
+          .getByText('carapace node run --pair "oc-pair://Node_AbC123"', { exact: true })
           .waitFor();
         expect(await qr.count()).toBe(0);
         await page.getByRole("button", { name: "Manage devices" }).click();

@@ -1,7 +1,7 @@
 import type {
   ChannelDirectoryEntry,
   DirectoryConfigParams,
-} from "openclaw/plugin-sdk/directory-runtime";
+} from "carapace/plugin-sdk/directory-runtime";
 import { listBuzzDirectoryGroupsFromConfig } from "./directory-config.js";
 import { queryBuzzDirectoryProfiles, queryBuzzDirectoryRooms } from "./directory-relay.js";
 import { BuzzDirectoryState } from "./directory-state.js";
@@ -42,7 +42,7 @@ function createConfiguredDirectoryState(params: DirectoryConfigParams): {
     channelIds,
     state: new BuzzDirectoryState({
       publicKey: account.publicKey,
-      fallbackProfileName: account.name ?? "OpenClaw",
+      fallbackProfileName: account.name ?? "Carapace",
       channelIds,
     }),
   };

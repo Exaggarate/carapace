@@ -16,7 +16,7 @@ import {
 import { loadSlackQaRuntime } from "./slack-plugin.runtime.js";
 
 export function resolveCodexFileApprovalTargetPath(token: string) {
-  return path.join(os.homedir(), `.openclaw-qa-codex-file-approval-${token.toLowerCase()}.txt`);
+  return path.join(os.homedir(), `.carapace-qa-codex-file-approval-${token.toLowerCase()}.txt`);
 }
 
 function buildCodexApprovalInstruction(params: {

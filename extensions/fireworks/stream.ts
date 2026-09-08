@@ -1,8 +1,8 @@
 // Fireworks plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
+import { createPayloadPatchStreamWrapper } from "carapace/plugin-sdk/provider-stream-shared";
 import { isFireworksKimiModelId } from "./model-id.js";
 
 function isFireworksProviderId(providerId: string): boolean {

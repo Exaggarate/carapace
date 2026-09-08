@@ -24,7 +24,7 @@ describe("cron process output", () => {
   ])(
     "drains output and preserves the exit code for $name",
     ({ args, exitCode, kind }) => {
-      const root = tempDirs.make("openclaw-cron-output-");
+      const root = tempDirs.make("carapace-cron-output-");
       const sourceUrl = (relative: string) => new URL(relative, import.meta.url).href;
       const status = exitCode === 0 ? "ok" : "error";
       const completionStatus = exitCode === 0 ? "succeeded" : "failed";
@@ -68,10 +68,10 @@ describe("cron process output", () => {
       const { runCliWithExitFinalization } = await import(${JSON.stringify(sourceUrl("./one-shot-exit.ts"))});
       const { applyResolvedCommandOutputMode } = await import(${JSON.stringify(sourceUrl("./json-output-mode.ts"))});
       const { isCommandJsonOutputMode } = await import(${JSON.stringify(sourceUrl("./program/json-mode.ts"))});
-      process.argv = [process.execPath, "openclaw", "cron", ...${JSON.stringify(args)}];
+      process.argv = [process.execPath, "carapace", "cron", ...${JSON.stringify(args)}];
       await runCliWithExitFinalization({
         run: async () => {
-          const program = new Command().name("openclaw");
+          const program = new Command().name("carapace");
           registerCronCli(program);
           program.hook("preAction", (_parent, command) => {
             const jsonMode = isCommandJsonOutputMode(command, process.argv);
@@ -85,8 +85,8 @@ describe("cron process output", () => {
     `;
       const env: NodeJS.ProcessEnv = {
         ...process.env,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
         TMPDIR: root,
         TSX_DISABLE_CACHE: "1",
         NODE_DISABLE_COMPILE_CACHE: "1",
@@ -108,7 +108,7 @@ describe("cron process output", () => {
       if (kind === "error") {
         expect(result.stdout).toBe("");
         expect(result.stderr).toContain(
-          "Automation not found: missing-job. Run `openclaw cron list` to see recent automation ids.",
+          "Automation not found: missing-job. Run `carapace cron list` to see recent automation ids.",
         );
         return;
       }

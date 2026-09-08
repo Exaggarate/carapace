@@ -156,7 +156,7 @@ suite.define(() => {
           thinkingLevel: "ultra",
         });
 
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir("chat-thinking-arguments", artifactRoot)
           : undefined;

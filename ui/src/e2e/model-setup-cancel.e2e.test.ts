@@ -1,6 +1,6 @@
 // Real routing and browser storage; Gateway/provider sign-in is mocked.
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { Page } from "playwright";
 import { beforeEach, expect, it } from "vitest";
 import type { ApplicationContext } from "../app/context.ts";
@@ -12,33 +12,33 @@ const suite = createControlUiE2eSuite({
   name: "Control UI first-run wizard cancellation ownership",
   startServerBeforeBrowser: true,
 });
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
     ? createControlUiE2eArtifactDir("model-setup-cancel", artifactRoot)
     : undefined;
 });
-const receiptKey = "openclaw.modelSetup.pendingActivation.v1";
+const receiptKey = "carapace.modelSetup.pendingActivation.v1";
 const detection = {
   candidates: [],
   manualProviders: [],
   authOptions: [{ id: "provider-login", label: "Provider login", kind: "oauth", featured: true }],
-  workspace: "/tmp/openclaw-e2e",
+  workspace: "/tmp/carapace-e2e",
   setupComplete: false,
 };
 
 const gatewayOptions = {
   featureMethods: [
-    "openclaw.setup.detect",
-    "openclaw.setup.activate.start",
-    "openclaw.setup.auth.start",
+    "carapace.setup.detect",
+    "carapace.setup.activate.start",
+    "carapace.setup.auth.start",
     "wizard.next",
     "wizard.cancel",
   ],
   methodResponses: {
-    "openclaw.setup.detect": detection,
-    "openclaw.setup.auth.start": { done: false, status: "running" },
+    "carapace.setup.detect": detection,
+    "carapace.setup.auth.start": { done: false, status: "running" },
     "wizard.next": {
       done: false,
       status: "running",
@@ -52,7 +52,7 @@ async function openFirstRunWithBackNavigation(page: Page): Promise<void> {
   await page.goto(`${suite.server.baseUrl}settings/connection`);
   await page.locator('.settings-sidebar__item[href="/settings/connection"]').waitFor();
   await page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: { context: Pick<ApplicationContext, "navigate"> };
     };
     if (!app.runtime) {
@@ -79,14 +79,14 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
             featureMethods: [
-              "openclaw.setup.detect",
-              "openclaw.setup.activate.start",
+              "carapace.setup.detect",
+              "carapace.setup.activate.start",
               "wizard.next",
               "wizard.cancel",
-              "openclaw.chat",
+              "carapace.chat",
             ],
             methodResponses: {
-              "openclaw.setup.detect": {
+              "carapace.setup.detect": {
                 ...detection,
                 candidates: [
                   {
@@ -107,7 +107,7 @@ suite.define(() => {
                   },
                 ],
               },
-              "openclaw.setup.activate.start": {
+              "carapace.setup.activate.start": {
                 sessionId: "activation-review-session",
                 done: false,
                 status: "running",
@@ -144,7 +144,7 @@ suite.define(() => {
                 ],
               },
               "wizard.cancel": { status: "cancelled" },
-              "openclaw.chat": {
+              "carapace.chat": {
                 sessionId: "consent-onboarding",
                 reply: "Your reviewed model is ready.",
                 action: "none",
@@ -153,9 +153,9 @@ suite.define(() => {
           });
           await page.goto(`${suite.server.baseUrl}settings/model-setup?firstRun=1`);
           await page.locator('[data-candidate-kind="openai-api-key"] button').waitFor();
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
           await page.locator('[data-candidate-kind="openai-api-key"] button').click();
-          const start = await gateway.waitForRequest("openclaw.setup.activate.start");
+          const start = await gateway.waitForRequest("carapace.setup.activate.start");
           const sessionId = asOptionalRecord(start.params)?.sessionId;
           expect(start.params).toEqual({
             sessionId: expect.any(String),
@@ -163,10 +163,10 @@ suite.define(() => {
             agentId: "main",
             modelRef: "provider/selected",
           });
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog.getByRole("heading", { name: "Review model setup" }).waitFor();
           expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-          expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
           await dialog.getByRole("button", { name: "Continue", exact: true }).click();
           await dialog.getByText("Apply the reviewed changes?", { exact: true }).waitFor();
           await expect
@@ -177,7 +177,7 @@ suite.define(() => {
             { sessionId },
             { sessionId, answer: { stepId: "review" } },
           ]);
-          expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
           if (artifactDir) {
             await page.screenshot({
               path: path.join(artifactDir, `activation-consent-${decision}-review.png`),
@@ -200,7 +200,7 @@ suite.define(() => {
               .poll(() => page.evaluate((key) => localStorage.getItem(key), receiptKey))
               .toBeNull();
             expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-            expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+            expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
             expect(await page.locator(".model-setup-success").count()).toBe(0);
           }
           const answered = await gateway.getRequests("wizard.next");
@@ -213,8 +213,8 @@ suite.define(() => {
               answer: { stepId: "consent", value: decision === "Yes" },
             });
           }
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(1);
-          expect(await gateway.getRequests("openclaw.setup.activate")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate")).toHaveLength(0);
           for (const method of ["config.set", "config.patch", "config.apply"]) {
             expect(await gateway.getRequests(method)).toHaveLength(0);
           }
@@ -242,14 +242,14 @@ suite.define(() => {
           expect(await readReceipt()).not.toBeNull();
           await gateway.deferNext("wizard.cancel");
           await page
-            .locator("openclaw-modal-dialog")
+            .locator("carapace-modal-dialog")
             .getByRole("button", { name: "Cancel", exact: true })
             .click();
           await gateway.waitForRequest("wizard.cancel");
-          expect(await page.locator("openclaw-modal-dialog").count()).toBe(1);
+          expect(await page.locator("carapace-modal-dialog").count()).toBe(1);
           // Browser navigation remains available while cancellation is unconfirmed.
           await page.goBack();
-          await expect.poll(() => page.locator("openclaw-model-setup-page").count()).toBe(0);
+          await expect.poll(() => page.locator("carapace-model-setup-page").count()).toBe(0);
           expect(await readReceipt()).not.toBeNull();
           if (acknowledgement === "before return") {
             await gateway.resolveDeferred("wizard.cancel");
@@ -268,9 +268,9 @@ suite.define(() => {
           await expect.poll(readReceipt).toBeNull();
           await signIn.click();
           await page.getByText("Complete provider sign-in").waitFor();
-          expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(2);
+          expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(2);
           expect(await gateway.getRequests("wizard.cancel")).toHaveLength(1);
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
           expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
         },
       );
@@ -286,13 +286,13 @@ suite.define(() => {
         await page.getByText("Complete provider sign-in").waitFor();
         await gateway.deferNext("wizard.cancel");
         await page
-          .locator("openclaw-modal-dialog")
+          .locator("carapace-modal-dialog")
           .getByRole("button", { name: "Cancel", exact: true })
           .click();
         await gateway.waitForRequest("wizard.cancel");
-        expect(await page.locator("openclaw-modal-dialog").count()).toBe(1);
+        expect(await page.locator("carapace-modal-dialog").count()).toBe(1);
         await page.goBack();
-        await expect.poll(() => page.locator("openclaw-model-setup-page").count()).toBe(0);
+        await expect.poll(() => page.locator("carapace-model-setup-page").count()).toBe(0);
 
         const replacement = await context.newPage();
         const nextGateway = await installMockGateway(replacement, gatewayOptions);
@@ -323,7 +323,7 @@ suite.define(() => {
           receipt,
         );
         await replacement.getByText("Complete provider sign-in").waitFor();
-        expect(await nextGateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
+        expect(await nextGateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
         expect(await nextGateway.getRequests("wizard.cancel")).toHaveLength(0);
         expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
         expect(new URL(replacement.url()).pathname).toBe("/settings/model-setup");

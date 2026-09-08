@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { LEGACY_OAUTH_REF_PROVIDER } from "./auth-profiles/legacy-oauth-ref.js";
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { createModelAuthAvailabilityResolver } from "./model-auth-availability.js";
@@ -10,7 +10,7 @@ describe.each(["acme", "openai"])("%s session account readiness", (provider) => 
   it.each(["api-key", "oauth"] as const)(
     "requires provider SecretRef %s auth instead of a shared profile",
     (mode) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             [provider]: {
@@ -57,7 +57,7 @@ describe.each(["acme", "openai"])("%s session account readiness", (provider) => 
   ])("matches runtime shared failover for $state (personal=$personal)", ({ personal, state }) => {
     const pin = personal ? "personal:owner:account" : `${provider}:selected`;
     const shared = `${provider}:shared`;
-    const config: OpenClawConfig = { auth: { order: { [provider]: [shared] } } };
+    const config: CarapaceConfig = { auth: { order: { [provider]: [shared] } } };
     const store: AuthProfileStore = {
       version: 1,
       profiles: {
@@ -108,7 +108,7 @@ describe.each(["acme", "openai"])("%s session account readiness", (provider) => 
     (state) => {
       const pin = `${provider}:selected`;
       const shared = `${provider}:shared`;
-      const config: OpenClawConfig = { auth: { order: { [provider]: [shared] } } };
+      const config: CarapaceConfig = { auth: { order: { [provider]: [shared] } } };
       const store: AuthProfileStore = {
         version: 1,
         profiles: {
@@ -124,7 +124,7 @@ describe.each(["acme", "openai"])("%s session account readiness", (provider) => 
                         refresh: "",
                         expires: 0,
                         oauthRef: {
-                          source: "openclaw-credentials" as const,
+                          source: "carapace-credentials" as const,
                           provider: LEGACY_OAUTH_REF_PROVIDER,
                           id: "00000000000000000000000000000000",
                         },
@@ -179,7 +179,7 @@ describe("session account pin admission", () => {
     (state) => {
       const provider = "acme";
       const pin = "acme:sdk";
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         auth: {
           profiles: { [pin]: { provider, mode: "aws-sdk" } },
           order: { [provider]: ["acme:shared"] },
@@ -239,7 +239,7 @@ describe("session account pin admission", () => {
   it("admits a pinned OAuth reference from its prepared runtime credential", () => {
     const provider = "acme";
     const pin = "acme:hydrated";
-    const config: OpenClawConfig = {};
+    const config: CarapaceConfig = {};
     const store: AuthProfileStore = {
       version: 1,
       profiles: {
@@ -250,7 +250,7 @@ describe("session account pin admission", () => {
           refresh: "",
           expires: 0,
           oauthRef: {
-            source: "openclaw-credentials",
+            source: "carapace-credentials",
             provider: LEGACY_OAUTH_REF_PROVIDER,
             id: "00000000000000000000000000000000",
           },

@@ -1,7 +1,7 @@
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginStateKeyedStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { setReplyPayloadMetadata } from "openclaw/plugin-sdk/reply-payload-testing";
-import { resetInboundDedupe } from "openclaw/plugin-sdk/reply-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
+import { createPluginStateKeyedStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { setReplyPayloadMetadata } from "carapace/plugin-sdk/reply-payload-testing";
+import { resetInboundDedupe } from "carapace/plugin-sdk/reply-runtime";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   getSlackTestState,

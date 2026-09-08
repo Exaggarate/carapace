@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withTempDir } from "../test-utils/temp-dir.js";
 import {
   clearDeviceAuthToken,
@@ -22,21 +22,21 @@ import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 
 function createEnv(stateDir: string): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_FAST: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_TEST_FAST: "1",
   };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
 describe("infra/device-auth-store", () => {
   it("reads no device auth and creates no database when shared state is absent", async () => {
-    await withTempDir("openclaw-device-auth-readonly-missing-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-readonly-missing-", async (stateDir) => {
       const env = createEnv(stateDir);
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(stateDir, "state", "carapace.sqlite");
 
       expect(
         loadDeviceAuthTokenReadOnly({ deviceId: "device-1", role: "operator", env }),
@@ -54,7 +54,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("reads existing device auth without opening writable shared state", async () => {
-    await withTempDir("openclaw-device-auth-readonly-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-readonly-", async (stateDir) => {
       const env = createEnv(stateDir);
       storeDeviceAuthToken({
         deviceId: "device-1",
@@ -69,8 +69,8 @@ describe("infra/device-auth-store", () => {
         token: "origin-token",
         env,
       });
-      closeOpenClawStateDatabaseForTest();
-      const databaseDirectory = path.dirname(path.join(stateDir, "state", "openclaw.sqlite"));
+      closeCarapaceStateDatabaseForTest();
+      const databaseDirectory = path.dirname(path.join(stateDir, "state", "carapace.sqlite"));
       const artifactsBeforeRead = fs.readdirSync(databaseDirectory).toSorted();
 
       expect(
@@ -89,7 +89,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("never exposes a device token to a different gateway origin", async () => {
-    await withTempDir("openclaw-device-auth-origin-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-origin-", async (stateDir) => {
       const env = createEnv(stateDir);
       storeOriginDeviceToken({
         gatewayScope: "wss://one.example/rpc",
@@ -125,7 +125,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("upserts and clears only the exact origin, device, and normalized role", async () => {
-    await withTempDir("openclaw-device-auth-origin-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-origin-", async (stateDir) => {
       const env = createEnv(stateDir);
       storeOriginDeviceToken({
         gatewayScope: "wss://one.example",
@@ -183,7 +183,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("stores and loads normalized device auth tokens in SQLite", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-", async (stateDir) => {
       vi.spyOn(Date, "now").mockReturnValue(1234);
       const env = createEnv(stateDir);
 
@@ -208,7 +208,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("isolates device ids and overwrites only the normalized role", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       vi.spyOn(Date, "now").mockReturnValueOnce(1).mockReturnValueOnce(2).mockReturnValueOnce(3);
 
@@ -233,9 +233,9 @@ describe("infra/device-auth-store", () => {
   });
 
   it("fails closed for malformed canonical scope metadata", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
-      const { db } = openOpenClawStateDatabase({ env });
+      const { db } = openCarapaceStateDatabase({ env });
       executeSqliteQuerySync(
         db,
         getNodeSqliteKysely<{
@@ -263,20 +263,20 @@ describe("infra/device-auth-store", () => {
   });
 
   it("fails closed with repair guidance while retired JSON remains", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       const legacyPath = path.join(stateDir, "identity", "device-auth.json");
       fs.mkdirSync(path.dirname(legacyPath), { recursive: true });
       fs.writeFileSync(legacyPath, '{"version":1}');
-      openOpenClawStateDatabase({ env })
+      openCarapaceStateDatabase({ env })
         .db.prepare(
           "INSERT INTO device_auth_tokens (device_id, role, token, scopes_json, updated_at_ms) VALUES (?, ?, ?, ?, ?)",
         )
         .run("device-1", "operator", "sqlite-token", "[]", 1);
-      openOpenClawStateDatabase({ env }).db.exec("DROP TABLE gateway_origin_device_tokens;");
+      openCarapaceStateDatabase({ env }).db.exec("DROP TABLE gateway_origin_device_tokens;");
 
       expect(() => loadDeviceAuthToken({ deviceId: "device-1", role: "operator", env })).toThrow(
-        "openclaw doctor --fix",
+        "carapace doctor --fix",
       );
       expect(() =>
         storeDeviceAuthToken({
@@ -285,7 +285,7 @@ describe("infra/device-auth-store", () => {
           token: "replacement",
           env,
         }),
-      ).toThrow("openclaw doctor --fix");
+      ).toThrow("carapace doctor --fix");
       expect(() =>
         loadOriginDeviceToken({
           gatewayScope: "wss://one.example",
@@ -293,7 +293,7 @@ describe("infra/device-auth-store", () => {
           role: "operator",
           env,
         }),
-      ).toThrow("openclaw doctor --fix");
+      ).toThrow("carapace doctor --fix");
       expect(() =>
         storeOriginDeviceToken({
           gatewayScope: "wss://one.example",
@@ -302,7 +302,7 @@ describe("infra/device-auth-store", () => {
           token: "origin-token",
           env,
         }),
-      ).toThrow("openclaw doctor --fix");
+      ).toThrow("carapace doctor --fix");
       expect(() =>
         clearOriginDeviceToken({
           gatewayScope: "wss://one.example",
@@ -310,9 +310,9 @@ describe("infra/device-auth-store", () => {
           role: "operator",
           env,
         }),
-      ).toThrow("openclaw doctor --fix");
+      ).toThrow("carapace doctor --fix");
       expect(
-        openOpenClawStateDatabase({ env })
+        openCarapaceStateDatabase({ env })
           .db.prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
           .get("gateway_origin_device_tokens"),
       ).toBeUndefined();
@@ -320,7 +320,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("clears only the requested role and device", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       storeDeviceAuthToken({ deviceId: "device-1", role: "operator", token: "operator", env });
       storeDeviceAuthToken({ deviceId: "device-1", role: "node", token: "node", env });
@@ -337,7 +337,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("keeps credentials rotated after a stale request snapshot", async () => {
-    await withTempDir("openclaw-device-auth-rotation-", async (stateDir) => {
+    await withTempDir("carapace-device-auth-rotation-", async (stateDir) => {
       const env = createEnv(stateDir);
       const targets = [
         {

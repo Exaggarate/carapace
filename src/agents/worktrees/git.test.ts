@@ -24,15 +24,15 @@ afterEach(() => {
 
 describe("Git ref mutation ownership", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-  const snapshotRef = "refs/openclaw/snapshots/held";
-  const queuedRef = "refs/openclaw/snapshots/queued";
+  const snapshotRef = "refs/carapace/snapshots/held";
+  const queuedRef = "refs/carapace/snapshots/queued";
 
   async function repository() {
-    const root = tempDirs.make("openclaw-git-ref-");
+    const root = tempDirs.make("carapace-git-ref-");
     await requireGit(root, ["init", "--quiet", "-b", "main"]);
     await requireGit(root, [
       "-c",
-      "user.name=OpenClaw Test",
+      "user.name=Carapace Test",
       "-c",
       "user.email=test@localhost",
       "-c",
@@ -144,7 +144,7 @@ describe("Git ref mutation ownership", () => {
     const root = await repository();
     const other = await repository();
     const linked = path.join(root, "linked");
-    const alias = path.join(tempDirs.make("openclaw-git-alias-"), "repo");
+    const alias = path.join(tempDirs.make("carapace-git-alias-"), "repo");
     await requireGit(root, ["worktree", "add", "--detach", linked, "HEAD"]);
     await requireGit(root, ["branch", "retired", "HEAD"]);
     await fs.symlink(root, alias, process.platform === "win32" ? "junction" : "dir");
@@ -386,7 +386,7 @@ describe("Git checkout discovery", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("reports a real Git failure with execution metadata through the worktree wrapper", async () => {
-    const root = tempDirs.make("openclaw-git-error-");
+    const root = tempDirs.make("carapace-git-error-");
     const result = await runGit(path.join(root, "missing"), ["status"]);
 
     expectTypeOf(result).toMatchTypeOf<SpawnResult>();
@@ -400,7 +400,7 @@ describe("Git checkout discovery", () => {
   });
 
   it("returns the nearest checkout root for nested paths", async () => {
-    const root = tempDirs.make("openclaw-git-root-");
+    const root = tempDirs.make("carapace-git-root-");
     const nested = path.join(root, "packages", "nested");
     await fs.mkdir(path.join(root, ".git"));
     await fs.mkdir(nested, { recursive: true });
@@ -410,14 +410,14 @@ describe("Git checkout discovery", () => {
   });
 
   it("returns null outside a checkout", async () => {
-    const root = tempDirs.make("openclaw-no-git-root-");
+    const root = tempDirs.make("carapace-no-git-root-");
 
     expect(findGitCheckoutRoot(root)).toBeNull();
     expect(insideGitCheckout(root)).toBe(false);
   });
 
   it("distinguishes contained metadata from linked checkout pointers", async () => {
-    const root = tempDirs.make("openclaw-git-metadata-");
+    const root = tempDirs.make("carapace-git-metadata-");
     await fs.mkdir(path.join(root, ".git"));
     await expect(hasSelfContainedGitMetadata(root)).resolves.toBe(true);
 
@@ -427,13 +427,13 @@ describe("Git checkout discovery", () => {
   });
 
   it("parses existing linked worktree paths and lock reasons", async () => {
-    const root = tempDirs.make("openclaw-git-worktree-list-");
+    const root = tempDirs.make("carapace-git-worktree-list-");
     const repo = path.join(root, "repo");
     const linked = path.join(root, "linked");
     expect((await runGit(root, ["init", "-b", "main", repo])).code).toBe(0);
-    expect((await runGit(repo, ["config", "user.name", "OpenClaw Test"])).code).toBe(0);
+    expect((await runGit(repo, ["config", "user.name", "Carapace Test"])).code).toBe(0);
     expect(
-      (await runGit(repo, ["config", "user.email", "openclaw-test@example.invalid"])).code,
+      (await runGit(repo, ["config", "user.email", "carapace-test@example.invalid"])).code,
     ).toBe(0);
     await fs.writeFile(path.join(repo, "README.md"), "base\n");
     expect((await runGit(repo, ["add", "README.md"])).code).toBe(0);

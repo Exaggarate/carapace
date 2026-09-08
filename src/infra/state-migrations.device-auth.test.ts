@@ -4,21 +4,21 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { loadDeviceAuthToken, storeDeviceAuthToken } from "./device-auth-store.js";
 import { detectLegacyDeviceAuth, migrateLegacyDeviceAuth } from "./state-migrations.device-auth.js";
 
 describe("legacy device-auth Doctor migration", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       cleanup();
     });
   });
 
   function useStateDir() {
-    const stateDir = tempDirs.make("openclaw-device-auth-migration-");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = tempDirs.make("carapace-device-auth-migration-");
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sourcePath = path.join(stateDir, "identity", "device-auth.json");
     return { stateDir, env, sourcePath };
   }

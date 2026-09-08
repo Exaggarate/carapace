@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   capCompactionSummary,
   fitCompactionSummary,
@@ -1479,6 +1479,6 @@ const testing = {
 } as const;
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.compactionSafeguardTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.compactionSafeguardTestApi")] =
     testing;
 }

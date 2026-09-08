@@ -1,7 +1,7 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { EmbeddingProviderOptions } from "./embeddings.types.js";
-import { requireApiKey, resolveApiKeyForProvider } from "./openclaw-runtime-auth.js";
-import type { SsrFPolicy } from "./openclaw-runtime-network.js";
+import { requireApiKey, resolveApiKeyForProvider } from "./carapace-runtime-auth.js";
+import type { SsrFPolicy } from "./carapace-runtime-network.js";
 import { buildRemoteBaseUrlPolicy } from "./remote-http.js";
 import { resolveMemorySecretInputString } from "./secret-input.js";
 
@@ -11,12 +11,12 @@ import { resolveMemorySecretInputString } from "./secret-input.js";
 export type RemoteEmbeddingProviderId = string;
 
 /** Attribution headers for native OpenAI embedding calls. */
-function resolveOpenClawAttributionHeaders(): Record<string, string> {
-  const version = typeof process !== "undefined" ? process.env.OPENCLAW_VERSION?.trim() : undefined;
+function resolveCarapaceAttributionHeaders(): Record<string, string> {
+  const version = typeof process !== "undefined" ? process.env.CARAPACE_VERSION?.trim() : undefined;
   return {
-    originator: "openclaw",
+    originator: "carapace",
     ...(version ? { version } : {}),
-    "User-Agent": version ? `openclaw/${version}` : "openclaw",
+    "User-Agent": version ? `carapace/${version}` : "carapace",
   };
 }
 
@@ -137,7 +137,7 @@ export async function resolveRemoteEmbeddingBearerClient(params: {
   }
   entries.push(...headerOverrides.values());
   if (isNativeOpenAIEmbeddingRoute(params.provider, baseUrl)) {
-    entries.push(...Object.entries(resolveOpenClawAttributionHeaders()));
+    entries.push(...Object.entries(resolveCarapaceAttributionHeaders()));
   }
   // Fetch joins duplicate names; retain only the last source, but preserve its
   // spelling so ordinary non-secret embedding cache identities stay unchanged.

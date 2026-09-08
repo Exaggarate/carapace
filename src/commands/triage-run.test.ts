@@ -32,10 +32,10 @@ describe("triage --run", () => {
   let stateDir: string;
   beforeEach(() => {
     vi.clearAllMocks();
-    stateDir = tempDirs.make("openclaw-triage-run-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", undefined);
-    vi.stubEnv("OPENCLAW_WORKSPACE_DIR", undefined);
+    stateDir = tempDirs.make("carapace-triage-run-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", undefined);
+    vi.stubEnv("CARAPACE_WORKSPACE_DIR", undefined);
     mocks.collectDoctorFindings.mockResolvedValue([]);
     mocks.resolveGatewayInstallEntrypoint.mockImplementation(async (root) =>
       path.join(root, "dist/index.js"),
@@ -67,7 +67,7 @@ describe("triage --run", () => {
 
     await withTriageTerminal(true, async () => {
       await expect(triageCommand(runtime, { noExport: true, run: true })).rejects.toThrow(
-        "Run `openclaw onboard` or use a suggested handoff command.",
+        "Run `carapace onboard` or use a suggested handoff command.",
       );
     });
     expect(mocks.runUpdateRepairLoop).toHaveBeenCalledOnce();
@@ -77,7 +77,7 @@ describe("triage --run", () => {
     const runtime = createTriageRuntime();
     const signal = new AbortController().signal;
     // A captured cwd can be another checkout; repair must stay with the running CLI's package.
-    await fs.writeFile(path.join(stateDir, "package.json"), JSON.stringify({ name: "openclaw" }));
+    await fs.writeFile(path.join(stateDir, "package.json"), JSON.stringify({ name: "carapace" }));
     mocks.runUtf8CommandWithTimeout
       .mockResolvedValueOnce({
         code: 1,
@@ -126,7 +126,7 @@ describe("triage --run", () => {
       expect.objectContaining({
         target: {
           stateDir,
-          configPath: path.join(stateDir, "openclaw.json"),
+          configPath: path.join(stateDir, "carapace.json"),
           workspaceDir: path.join(stateDir, "workspace"),
           installRoot: path.resolve(import.meta.dirname, "../.."),
         },
@@ -150,9 +150,9 @@ describe("triage --run", () => {
         cwd: path.resolve(import.meta.dirname, "../.."),
         baseEnv: {},
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-          OPENCLAW_WORKSPACE_DIR: path.join(stateDir, "workspace"),
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+          CARAPACE_WORKSPACE_DIR: path.join(stateDir, "workspace"),
         }),
         signal,
         input: "",
@@ -177,7 +177,7 @@ describe("triage --run", () => {
         triageCommand(createTriageRuntime(), { noExport: true, run: true }),
       ),
     ).rejects.toThrow(
-      "The operator's policy denies unattended repair (exec-denied-by-policy). Use `openclaw triage` for an external handoff.",
+      "The operator's policy denies unattended repair (exec-denied-by-policy). Use `carapace triage` for an external handoff.",
     );
   });
 

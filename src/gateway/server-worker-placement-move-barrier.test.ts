@@ -5,7 +5,7 @@ import { getWorkerPlacementStartupMocks } from "./server-worker-placement-startu
 const { runtimeFactoryMocks } = getWorkerPlacementStartupMocks();
 
 import { beginSessionWorkAdmission } from "../sessions/session-lifecycle-admission.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGatewayWorkerPlacementMoveBarrier } from "./server-worker-placement-move-barrier.js";
 import { createGatewayWorkerPlacementRuntime } from "./server-worker-placement-startup.js";
 import {
@@ -82,7 +82,7 @@ describe("worker placement move destination", () => {
     },
     { name: "does not persist an unclaimed turn", claimRunId: undefined, outcome: "success" },
   ] as const)("abandonment $name before interrupting its owner", async (scenario) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionId = "session-move-source";
       const sessionKey = "agent:main:move-source";
       const target = resolveGatewaySessionStoreTargetWithStore({
@@ -231,7 +231,7 @@ describe("worker placement move destination", () => {
   ])(
     "$sourceDisposition move interruption preserves its settlement contract",
     async ({ sourceDisposition, settlesImmediately }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         vi.useFakeTimers();
         const sessionId = "session-move-source";
         const sessionKey = "agent:main:move-source";

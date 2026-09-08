@@ -6,8 +6,8 @@ import {
   resolveAgentModelPrimaryValue,
   withAgentModelAliases,
   type ModelProviderConfig,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/provider-onboard";
 import {
   buildXaiCatalogModels,
   isLegacyXaiBuiltinModel,
@@ -32,7 +32,7 @@ const xaiPresetAppliers = createModelCatalogPresetAppliers({
   }),
 });
 
-function pruneRetiredXaiBuiltinModels(cfg: OpenClawConfig): OpenClawConfig {
+function pruneRetiredXaiBuiltinModels(cfg: CarapaceConfig): CarapaceConfig {
   const provider = cfg.models?.providers?.xai;
   if (!provider || !Array.isArray(provider.models)) {
     return cfg;
@@ -56,18 +56,18 @@ function pruneRetiredXaiBuiltinModels(cfg: OpenClawConfig): OpenClawConfig {
   };
 }
 
-export function applyXaiProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyXaiProviderConfig(cfg: CarapaceConfig): CarapaceConfig {
   return xaiPresetAppliers.applyProviderConfig(pruneRetiredXaiBuiltinModels(cfg));
 }
 
-export function applyXaiConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyXaiConfig(cfg: CarapaceConfig): CarapaceConfig {
   return xaiPresetAppliers.applyConfig(pruneRetiredXaiBuiltinModels(cfg));
 }
 
 export function applyXaiOAuthConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   provider: ModelProviderConfig,
-): OpenClawConfig {
+): CarapaceConfig {
   const next = applyOnboardAuthAgentModelsAndProviders(cfg, {
     agentModels: withAgentModelAliases(cfg.agents?.defaults?.models, [
       { modelRef: XAI_OAUTH_DEFAULT_MODEL_REF, alias: "Grok" },

@@ -106,7 +106,7 @@ vi.mock("../../../packages/terminal-core/src/health-style.js", () => ({
 }));
 
 vi.mock("../../../packages/terminal-core/src/links.js", () => ({
-  formatDocsLink: () => "docs.openclaw.ai/cli/gateway",
+  formatDocsLink: () => "github.com/Exaggarate/carapace",
 }));
 
 vi.mock("../../../packages/terminal-core/src/theme.js", () => ({
@@ -210,10 +210,10 @@ describe("gateway register option collisions", () => {
     },
     {
       name: "gives setup detection enough transport grace",
-      argv: ["gateway", "call", "openclaw.setup.detect", "--json"],
+      argv: ["gateway", "call", "carapace.setup.detect", "--json"],
       assert: () => {
         const [method, opts] = firstGatewayCall();
-        expect(method).toBe("openclaw.setup.detect");
+        expect(method).toBe("carapace.setup.detect");
         expect((opts as { timeout?: string } | undefined)?.timeout).toBe("40000");
       },
     },
@@ -249,7 +249,7 @@ describe("gateway register option collisions", () => {
       assert: () => {
         expectLocalGatewayCall("gateway.suspend.prepare", 19086);
         expect(defaultRuntime.log).toHaveBeenCalledWith(
-          "Resume with: openclaw gateway resume suspension-1 --port 19086",
+          "Resume with: carapace gateway resume suspension-1 --port 19086",
         );
       },
     },
@@ -259,7 +259,7 @@ describe("gateway register option collisions", () => {
       assert: () => {
         expectLocalGatewayCall("gateway.suspend.prepare", 19087);
         expect(defaultRuntime.log).toHaveBeenCalledWith(
-          "Resume with: openclaw gateway resume suspension-1 --port 19087",
+          "Resume with: carapace gateway resume suspension-1 --port 19087",
         );
       },
     },
@@ -456,7 +456,7 @@ describe("gateway register option collisions", () => {
       loadHealthStyleModule: loadHealthStyleModule as never,
     });
 
-    await program.parseAsync(["node", "openclaw", "gateway", "health", "--json"]);
+    await program.parseAsync(["node", "carapace", "gateway", "health", "--json"]);
 
     expect(callGatewayCli).toHaveBeenCalledWith(
       "health",

@@ -12,13 +12,13 @@ import {
   terminalOpenResult,
   type CreateGhosttyTerminalMock,
 } from "./terminal-panel.test-support.ts";
-import { OpenClawTerminalPanel } from "./terminal-panel.ts";
+import { CarapaceTerminalPanel } from "./terminal-panel.ts";
 
 const createGhosttyTerminalMock: CreateGhosttyTerminalMock = vi.fn();
 const TERMINAL_PANEL_ELEMENT_NAME = defineTestTerminalPanelElement(createGhosttyTerminalMock);
 
 function createPanel(client: TerminalGatewayClient) {
-  const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+  const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
   panel.client = client;
   panel.available = true;
   document.body.append(panel);
@@ -39,7 +39,7 @@ function createPickerClient() {
   } satisfies TerminalGatewayClient;
 }
 
-describe("OpenClawTerminalPanel accessibility", () => {
+describe("CarapaceTerminalPanel accessibility", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal("sessionStorage", createStorageMock());
@@ -66,7 +66,7 @@ describe("OpenClawTerminalPanel accessibility", () => {
   it("offers bottom docking from an embedded terminal", async () => {
     const event = vi.fn();
     window.addEventListener(TERMINAL_PANEL_DOCK_BOTTOM_EVENT, event);
-    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as OpenClawTerminalPanel;
+    const panel = document.createElement(TERMINAL_PANEL_ELEMENT_NAME) as CarapaceTerminalPanel;
     panel.client = createPickerClient();
     panel.available = true;
     panel.agentId = "main";
@@ -85,7 +85,7 @@ describe("OpenClawTerminalPanel accessibility", () => {
   it("opens the base-mounted focused terminal in an isolated tab", async () => {
     const open = vi.spyOn(window, "open").mockReturnValue(null);
     const panel = createPanel(createPickerClient());
-    panel.basePath = "/openclaw";
+    panel.basePath = "/carapace";
     await waitForFast(() =>
       expect(
         panel.renderRoot.querySelector('[aria-label="Open terminal in new window"]'),
@@ -97,7 +97,7 @@ describe("OpenClawTerminalPanel accessibility", () => {
       ?.click();
 
     expect(open).toHaveBeenCalledWith(
-      "http://localhost:3000/openclaw/focus/terminal",
+      "http://localhost:3000/carapace/focus/terminal",
       "_blank",
       "noopener,noreferrer",
     );

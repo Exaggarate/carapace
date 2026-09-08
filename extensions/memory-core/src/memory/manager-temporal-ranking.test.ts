@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { deleteSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { deleteSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import { describe, expect, it } from "vitest";
 import { createMemorySearchTool } from "../tools.js";
 import { createManagerIndexFixture } from "./manager-index.test-support.js";
@@ -131,7 +131,7 @@ describe("memory source temporal ranking", () => {
       }
       let manager = await fixture.getFreshManager(cfg);
       await manager.sync({ reason: "test", force: true });
-      const sourceRows = openOpenClawAgentDatabase({ agentId: "main" })
+      const sourceRows = openCarapaceAgentDatabase({ agentId: "main" })
         .db.prepare(
           "SELECT path, mtime FROM memory_index_sources WHERE source = 'sessions' ORDER BY path",
         )
@@ -147,7 +147,7 @@ describe("memory source temporal ranking", () => {
       });
       if (ftsUnavailable) {
         await manager.close();
-        openOpenClawAgentDatabase({ agentId: "main" }).db.exec(`
+        openCarapaceAgentDatabase({ agentId: "main" }).db.exec(`
           DROP TABLE memory_index_chunks_fts;
           CREATE VIEW memory_index_chunks_fts AS
             SELECT text, id, path, source, model, start_line, end_line FROM memory_index_chunks;

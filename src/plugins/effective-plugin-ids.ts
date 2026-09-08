@@ -1,12 +1,12 @@
 /** Resolves effective plugin ids from config, installed records, and activation metadata. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   listExplicitlyDisabledChannelIdsForConfig,
   listPotentialConfiguredChannelIds,
 } from "../channels/config-presence.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isVitestRuntimeEnv } from "../infra/env.js";
 import {
   listExplicitConfiguredChannelIdsForConfig,
@@ -23,8 +23,8 @@ import type { PluginManifestRecord } from "./manifest-registry.js";
 import type { PluginMetadataSnapshot } from "./plugin-metadata-snapshot.types.js";
 
 function collectConfiguredChannelIds(
-  config: OpenClawConfig,
-  activationSourceConfig: OpenClawConfig,
+  config: CarapaceConfig,
+  activationSourceConfig: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   discovery: PluginMetadataSnapshot["discovery"],
 ): string[] {
@@ -52,7 +52,7 @@ function collectConfiguredChannelIds(
 
 function addBundledChannelOwnerPluginIds(params: {
   pluginIds: Set<string>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   channelIds: readonly string[];
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
@@ -72,9 +72,9 @@ function addBundledChannelOwnerPluginIds(params: {
   const env = params.bundledPluginsDir
     ? {
         ...params.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir,
+        CARAPACE_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir,
         ...(isVitestRuntimeEnv(params.env) || isVitestRuntimeEnv()
-          ? { OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" }
+          ? { CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" }
           : {}),
       }
     : params.env;
@@ -111,7 +111,7 @@ function addBundledChannelOwnerPluginIds(params: {
 
 /** Lists plugin ids that are effectively enabled for a config/discovery context. */
 export function resolveEffectivePluginIds(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   bundledPluginsDir?: string;

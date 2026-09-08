@@ -3,13 +3,13 @@
  * follow plugin ownership aliases so scoped live runs include equivalent
  * provider IDs.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeGooglePreviewModelId } from "@openclaw/model-catalog-core/provider-model-id-normalize";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeGooglePreviewModelId } from "@carapace/model-catalog-core/provider-model-id-normalize";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { liveProvidersShareOwningPlugin } from "../live-provider-owner.js";
 
 type ModelTarget = {
@@ -72,7 +72,7 @@ function parseModelTarget(raw: string): ModelTarget | null {
 export function createLiveTargetMatcher(params: {
   providerFilter: Set<string> | null;
   modelFilter: Set<string> | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }) {

@@ -3,7 +3,7 @@
 // server standing in for the Telegram Bot API. Observes actual TCP sockets.
 import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 let sendMessageTelegram: typeof import("./send.js").sendMessageTelegram;

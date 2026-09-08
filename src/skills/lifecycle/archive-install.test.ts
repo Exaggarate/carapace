@@ -56,7 +56,7 @@ async function expectFlatRootMarkerRejected(params: {
 
   const result = await withExtractedArchiveRoot({
     archivePath,
-    tempDirPrefix: "openclaw-skill-clawhub-test-",
+    tempDirPrefix: "carapace-skill-clawhub-test-",
     timeoutMs: 120_000,
     rootMarkers: ["SKILL.md"],
     onExtracted: async () => ({ ok: true as const }),
@@ -94,7 +94,7 @@ describe("skill archive install", () => {
   it.each(["skill.md", "skills.md", "SKILL.MD"])(
     "installs a single-root ClawHub archive with legacy marker %s",
     async (marker) => {
-      const root = await tempDirs.make("openclaw-skill-archive-install-");
+      const root = await tempDirs.make("carapace-skill-archive-install-");
       const archivePath = path.join(root, "legacy.zip");
       const workspaceDir = path.join(root, "workspace");
       await writeZipArchive({
@@ -106,7 +106,7 @@ describe("skill archive install", () => {
 
       const result = await withExtractedArchiveRoot({
         archivePath,
-        tempDirPrefix: "openclaw-skill-clawhub-test-",
+        tempDirPrefix: "carapace-skill-clawhub-test-",
         timeoutMs: 120_000,
         rootMarkers: CLAWHUB_SKILL_ARCHIVE_ROOT_MARKERS,
         onExtracted: async (extractedRoot) =>
@@ -130,12 +130,12 @@ describe("skill archive install", () => {
   );
 
   it("keeps flat-root non-SKILL.md legacy markers rejected by strict packed-root resolution", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     await expectFlatRootMarkerRejected({ marker: "skills.md", root });
   });
 
   it("keeps flat-root lowercase skill.md rejected by strict packed-root resolution on case-sensitive filesystems", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     const caseSensitive = await isCaseSensitiveFileSystem(root);
     if (!caseSensitive) {
       expect(caseSensitive).toBe(false);
@@ -145,7 +145,7 @@ describe("skill archive install", () => {
   });
 
   it("keeps skill archive policy installs independent from built-in scanner blocks", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -163,7 +163,7 @@ describe("skill archive install", () => {
         config: {},
         installId: "clawhub",
         origin: { type: "clawhub", slug: "clawhub-policy-only", version: "1.0.0" },
-        source: { kind: "clawhub", authority: "openclaw", mutable: false, network: true },
+        source: { kind: "clawhub", authority: "carapace", mutable: false, network: true },
         requestedSpecifier: "clawhub:clawhub-policy-only@1.0.0",
       },
       rootMarkers: CLAWHUB_SKILL_ARCHIVE_ROOT_MARKERS,
@@ -182,7 +182,7 @@ describe("skill archive install", () => {
   });
 
   it("keeps legacy skill-upload origin for before_install hooks", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -213,7 +213,7 @@ describe("skill archive install", () => {
   });
 
   it("reports forced installs of missing skills as install mode to policy", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -251,7 +251,7 @@ describe("skill archive install", () => {
   });
 
   it("restores a skill when backup validation blocks replacement", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("carapace-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -270,7 +270,7 @@ describe("skill archive install", () => {
       rootMarkers: CLAWHUB_SKILL_ARCHIVE_ROOT_MARKERS,
       onAfterBackup: async (backupDir) => {
         stageDirsAtGuard = (await fs.readdir(skillsDir)).filter((entry) =>
-          entry.startsWith(".openclaw-install-stage-"),
+          entry.startsWith(".carapace-install-stage-"),
         );
         await fs.writeFile(path.join(backupDir, "notes.md"), "edited before backup", "utf8");
         return 'Skill "staged-update" has local file changes.';
@@ -290,7 +290,7 @@ describe("skill archive install", () => {
       "Installed Skill",
     );
     await expect(
-      fs.readdir(path.join(skillsDir, ".openclaw-install-backups")),
+      fs.readdir(path.join(skillsDir, ".carapace-install-backups")),
     ).resolves.toHaveLength(0);
   });
 
@@ -314,7 +314,7 @@ describe("skill archive install", () => {
       expectedSourceVersion: undefined,
     },
   ] as const)("attributes committed $label archive installs", async (testCase) => {
-    const root = await tempDirs.make("openclaw-skill-change-create-");
+    const root = await tempDirs.make("carapace-skill-change-create-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -359,7 +359,7 @@ describe("skill archive install", () => {
   });
 
   it("emits before and after artifacts for committed updates", async () => {
-    const root = await tempDirs.make("openclaw-skill-change-update-");
+    const root = await tempDirs.make("carapace-skill-change-update-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -418,7 +418,7 @@ describe("skill archive install", () => {
   });
 
   it("does not emit when an archive mutation fails", async () => {
-    const root = await tempDirs.make("openclaw-skill-change-failure-");
+    const root = await tempDirs.make("carapace-skill-change-failure-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });

@@ -19,13 +19,13 @@ Speech, media understanding, generation, web search, and the low-level media uti
     ```typescript
     // Standard TTS
     const clip = await api.runtime.tts.textToSpeech({
-      text: "Hello from OpenClaw",
+      text: "Hello from Carapace",
       cfg: api.config,
     });
 
     // Telephony-optimized TTS
     const telephonyClip = await api.runtime.tts.textToSpeechTelephony({
-      text: "Hello from OpenClaw",
+      text: "Hello from Carapace",
       cfg: api.config,
     });
 
@@ -157,7 +157,7 @@ Speech, media understanding, generation, web search, and the low-level media uti
 
     const result = await api.runtime.webSearch.search({
       config: api.config,
-      args: { query: "OpenClaw plugin SDK", count: 5 },
+      args: { query: "Carapace plugin SDK", count: 5 },
     });
     ```
 
@@ -172,14 +172,14 @@ Speech, media understanding, generation, web search, and the low-level media uti
     const isVoice = api.runtime.media.isVoiceCompatibleAudio(filePath);
     const metadata = await api.runtime.media.getImageMetadata(filePath);
     const resized = await api.runtime.media.resizeToJpeg(buffer, { maxWidth: 800 });
-    const terminalQr = await api.runtime.media.renderQrTerminal("https://openclaw.ai");
-    const pngQr = await api.runtime.media.renderQrPngBase64("https://openclaw.ai", {
+    const terminalQr = await api.runtime.media.renderQrTerminal("https://github.com/Exaggarate/carapace");
+    const pngQr = await api.runtime.media.renderQrPngBase64("https://github.com/Exaggarate/carapace", {
       scale: 6, // 1-12
       marginModules: 4, // 0-16
     });
-    const pngQrDataUrl = await api.runtime.media.renderQrPngDataUrl("https://openclaw.ai");
-    const tmpRoot = resolvePreferredOpenClawTmpDir();
-    const pngQrFile = await api.runtime.media.writeQrPngTempFile("https://openclaw.ai", {
+    const pngQrDataUrl = await api.runtime.media.renderQrPngDataUrl("https://github.com/Exaggarate/carapace");
+    const tmpRoot = resolvePreferredCarapaceTmpDir();
+    const pngQrFile = await api.runtime.media.writeQrPngTempFile("https://github.com/Exaggarate/carapace", {
       tmpRoot,
       dirPrefix: "my-plugin-qr-",
       fileName: "qr.png",

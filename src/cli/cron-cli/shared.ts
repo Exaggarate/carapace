@@ -3,9 +3,9 @@ import {
   MAX_DATE_TIMESTAMP_MS,
   resolveExpiresAtMsFromDurationMs,
   timestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { readCronJobNotFoundError } from "../../../packages/gateway-protocol/src/index.js";
 import { truncateToVisibleWidth, visibleWidth } from "../../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../../packages/terminal-core/src/safe-text.js";
@@ -247,7 +247,7 @@ export const formatCronLookupMiss = (jobId: string) =>
   formatLookupMiss({
     noun: "Automation",
     value: sanitizeTerminalText(jobId),
-    listCommand: "openclaw cron list",
+    listCommand: "carapace cron list",
     valueLabel: "automation id",
   });
 

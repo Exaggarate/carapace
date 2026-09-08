@@ -99,7 +99,7 @@ describe("check-assertion-safety-ratchet", () => {
   });
 
   it("blocks new debt, accepts SAFETY comments, and prunes reduced counts", () => {
-    const root = tempDirs.make("openclaw-assertion-safety-");
+    const root = tempDirs.make("carapace-assertion-safety-");
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     const baselinePath = path.join(root, "config/assertion-safety-baseline.txt");
@@ -149,7 +149,7 @@ describe("check-assertion-safety-ratchet", () => {
   });
 
   it("allows rebaselining assertion debt already present in the base tree", () => {
-    const root = tempDirs.make("openclaw-assertion-safety-base-drift-");
+    const root = tempDirs.make("carapace-assertion-safety-base-drift-");
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     const baselinePath = path.join(root, "config/assertion-safety-baseline.txt");
@@ -182,7 +182,7 @@ describe("check-assertion-safety-ratchet", () => {
   });
 
   it("compares an explicit moving base at the branch fork", () => {
-    const root = tempDirs.make("openclaw-assertion-safety-diverged-");
+    const root = tempDirs.make("carapace-assertion-safety-diverged-");
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { resolveCliRuntimeToolsAllow, stripOpenClawMcpToolPrefix } from "./tool-policy.js";
+import { resolveCliRuntimeToolsAllow, stripCarapaceMcpToolPrefix } from "./tool-policy.js";
 
-describe("stripOpenClawMcpToolPrefix", () => {
+describe("stripCarapaceMcpToolPrefix", () => {
   it("strips only the loopback transport prefix", () => {
-    expect(stripOpenClawMcpToolPrefix("mcp__openclaw__memory_search")).toBe("memory_search");
-    expect(stripOpenClawMcpToolPrefix("memory_search")).toBe("memory_search");
-    expect(stripOpenClawMcpToolPrefix("mcp__other__tool")).toBe("mcp__other__tool");
+    expect(stripCarapaceMcpToolPrefix("mcp__carapace__memory_search")).toBe("memory_search");
+    expect(stripCarapaceMcpToolPrefix("memory_search")).toBe("memory_search");
+    expect(stripCarapaceMcpToolPrefix("mcp__other__tool")).toBe("mcp__other__tool");
   });
 });
 

@@ -11,7 +11,7 @@ A preview request alone does not authorize publication.
 
 ## Prepare Locally
 
-The helper reads local Codex, Claude, Pi, and OpenClaw logs; no network is used
+The helper reads local Codex, Claude, Pi, and Carapace logs; no network is used
 for discovery/rendering. Never upload raw logs.
 
 ```bash

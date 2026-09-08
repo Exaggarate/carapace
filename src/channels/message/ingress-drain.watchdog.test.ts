@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { ChannelIngressDispatchLifecycle } from "./ingress-drain-lifecycle.js";
 import { createChannelIngressDrain, isIngressAdoptionLostError } from "./ingress-drain.js";
 import {
@@ -42,7 +42,7 @@ describe("channel ingress drain watchdog", () => {
   afterEach(() => {
     vi.clearAllTimers();
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("retries pre-adoption stalls in lane order and fences late adoption", async () => {

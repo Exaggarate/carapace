@@ -4,22 +4,22 @@ import { beforeAll, describe, expect, it } from "vitest";
 const FIXTURES = "test/fixtures/oxlint-boundary-guards";
 const cases = [
   {
-    rule: "openclaw-boundaries/no-register-http-handler-call",
+    rule: "carapace-boundaries/no-register-http-handler-call",
     violation: `${FIXTURES}/register-http-handler-violation.ts`,
     violations: 3,
   },
   {
-    rule: "openclaw-boundaries/no-raw-window-open-call",
+    rule: "carapace-boundaries/no-raw-window-open-call",
     violation: `${FIXTURES}/raw-window-open-violation.ts`,
     violations: 5,
   },
   {
-    rule: "openclaw-boundaries/no-widen-then-assert",
+    rule: "carapace-boundaries/no-widen-then-assert",
     violation: `${FIXTURES}/widen-then-assert-violation.test.ts`,
     violations: 3,
   },
   {
-    rule: "openclaw-boundaries/no-chained-type-assertions",
+    rule: "carapace-boundaries/no-chained-type-assertions",
     violation: `${FIXTURES}/chained-type-assertions-violation.ts`,
     violations: 3,
   },
@@ -33,7 +33,7 @@ describe("oxlint boundary guards", () => {
       process.execPath,
       [
         "scripts/run-oxlint.mjs",
-        "--openclaw-focused-config",
+        "--carapace-focused-config",
         "--config",
         "config/oxlint/boundary-guards.json",
         "--format",

@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { getSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { getSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { toGenericTranscriptItem } from "../session-catalog-transcript-item.js";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
@@ -14,7 +14,7 @@ import { resolveCodexUpstreamForkBoundary } from "./upstream-fork-boundary.js";
 import { forkCodexUpstreamSession } from "./upstream-session-fork.js";
 import { createForkTestRuntime, forkResponse } from "./upstream-session-fork.test-support.js";
 
-vi.mock("openclaw/plugin-sdk/session-catalog", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/session-catalog", async (importOriginal) => ({
   ...(await importOriginal()),
   deleteSessionUpstreamLink: vi.fn(),
   upsertSessionUpstreamLink: vi.fn(() => true),
@@ -62,7 +62,7 @@ async function importHistory(turns: CodexTurn[], name?: string) {
     agentId: "main",
     sessionId: "imported-session",
     sessionKey: "agent:main:imported-session",
-    storePath: path.join(root, "openclaw-agent.sqlite"),
+    storePath: path.join(root, "carapace-agent.sqlite"),
   };
   await upsertSessionEntry({
     ...target,

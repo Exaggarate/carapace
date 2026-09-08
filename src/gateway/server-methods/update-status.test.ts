@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createUpdateRun, finishUpdateRun } from "../../infra/update-run-ledger.js";
 import { createTempHomeEnv, type TempHomeEnv } from "../../test-utils/temp-home.js";
@@ -40,7 +40,7 @@ async function requestUpdateRead(method: UpdateReadMethod, params: Record<string
 
 let home: TempHomeEnv;
 beforeEach(async () => {
-  home = await createTempHomeEnv("openclaw-update-status-");
+  home = await createTempHomeEnv("carapace-update-status-");
 });
 afterEach(async () => {
   vi.restoreAllMocks();

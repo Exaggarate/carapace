@@ -18,10 +18,10 @@ a memory store outside the default built-in memory backend.
 ## Installation
 
 ```bash
-openclaw plugins install @openclaw/memory-lancedb
+carapace plugins install @carapace/memory-lancedb
 ```
 
-The plugin is published to npm; it is not bundled into the OpenClaw runtime
+The plugin is published to npm; it is not bundled into the Carapace runtime
 image. Installing it writes the plugin entry, enables it, and switches
 `plugins.slots.memory` to `memory-lancedb`. If another plugin currently owns
 the memory slot, that plugin is disabled with a warning.
@@ -36,7 +36,7 @@ LanceDB's `memory_recall` does not receive the protected private transcript
 authorization used by `memory.search.rememberAcrossConversations`. Use LanceDB's
 `autoRecall` or its `memory_recall` tool through
 [advanced Active Memory](/concepts/active-memory#lancedb-memory).
-`openclaw doctor` reports when Remember across conversations is unavailable
+`carapace doctor` reports when Remember across conversations is unavailable
 with the current memory provider.
 </Note>
 
@@ -68,8 +68,8 @@ with the current memory provider.
 Restart the Gateway after installation, then verify it loaded:
 
 ```bash
-openclaw gateway restart
-openclaw plugins list
+carapace gateway restart
+carapace plugins list
 ```
 
 ## Embedding config
@@ -140,7 +140,7 @@ base64-encoded float32 responses, so both response shapes work without config.
 
 ### Dimensions
 
-OpenClaw has a built-in dimension for `text-embedding-3-small` (1536) and
+Carapace has a built-in dimension for `text-embedding-3-small` (1536) and
 `text-embedding-3-large` (3072) only. Any other model needs an explicit
 `embedding.dimensions` so LanceDB can create the vector column, for example
 ZhiPu `embedding-3` at 2048 dimensions:
@@ -210,7 +210,7 @@ local server returns context-length errors.
 | `customTriggers`  | `[]`    | 0-50 items, each ≤100 chars | Literal phrases that make auto-capture consider a message.        |
 
 `recallMaxChars` bounds the `before_prompt_build` auto-recall query, the
-`memory_recall` tool, the `memory_forget` query path, and `openclaw ltm search`.
+`memory_recall` tool, the `memory_forget` query path, and `carapace ltm search`.
 Auto-recall embeds the current turn's prompt after removing media attachment
 notes and normalizing whitespace. The same limit bounds each recalled item
 after prompt escaping before that text reaches the model.
@@ -254,16 +254,16 @@ capture, even when the plugin-level `autoRecall`/`autoCapture` flags are on.
 (not only when it owns the active memory slot):
 
 ```bash
-openclaw ltm list [--agent <id>] [--limit <n>] [--order-by-created-at]
-openclaw ltm search <query> [--agent <id>] [--limit <n>]
-openclaw ltm stats [--agent <id>]
+carapace ltm list [--agent <id>] [--limit <n>] [--order-by-created-at]
+carapace ltm search <query> [--agent <id>] [--limit <n>]
+carapace ltm stats [--agent <id>]
 ```
 
 `ltm query` runs a non-vector query directly against the LanceDB table:
 
 ```bash
-openclaw ltm query --agent research --cols id,text,createdAt --limit 20
-openclaw ltm query --filter "category = 'preference'" --order-by createdAt:desc
+carapace ltm query --agent research --cols id,text,createdAt --limit 20
+carapace ltm query --filter "category = 'preference'" --order-by createdAt:desc
 ```
 
 | Flag                              | Default                                 | Notes                                                                                                                                     |
@@ -286,7 +286,7 @@ Agents get three tools from the active memory plugin:
 
 ## Storage
 
-LanceDB data defaults to `~/.openclaw/memory/lancedb`. Override with `dbPath`:
+LanceDB data defaults to `~/.carapace/memory/lancedb`. Override with `dbPath`:
 
 ```json5
 {
@@ -295,7 +295,7 @@ LanceDB data defaults to `~/.openclaw/memory/lancedb`. Override with `dbPath`:
       "memory-lancedb": {
         enabled: true,
         config: {
-          dbPath: "~/.openclaw/memory/lancedb",
+          dbPath: "~/.carapace/memory/lancedb",
           embedding: {
             apiKey: "${OPENAI_API_KEY}",
             model: "text-embedding-3-small",
@@ -316,7 +316,7 @@ mandatory owner predicate, so a filter cannot widen the query to another
 agent.
 
 Databases created before per-agent ownership have no reliable row provenance.
-On upgrade, `openclaw doctor --fix` assigns those legacy rows once to the
+On upgrade, `carapace doctor --fix` assigns those legacy rows once to the
 configured default agent. Runtime access fails closed until that migration has
 completed; other agents never inherit the old shared rows.
 
@@ -330,7 +330,7 @@ completed; other agents never inherit the old shared rows.
       "memory-lancedb": {
         enabled: true,
         config: {
-          dbPath: "s3://memory-bucket/openclaw",
+          dbPath: "s3://memory-bucket/carapace",
           storageOptions: {
             access_key: "${AWS_ACCESS_KEY_ID}",
             secret_key: "${AWS_SECRET_ACCESS_KEY}",
@@ -406,8 +406,8 @@ model, set `embedding.dimensions` to the vector size that model reports.
 Confirm `plugins.slots.memory` points at `memory-lancedb`, then run:
 
 ```bash
-openclaw ltm stats
-openclaw ltm search "recent preference"
+carapace ltm stats
+carapace ltm search "recent preference"
 ```
 
 If `autoCapture` is disabled, the plugin still recalls existing memories but

@@ -1,5 +1,5 @@
 // Voice Call tests cover twilio plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { guardedJsonApiRequestMock } = vi.hoisted(() => ({

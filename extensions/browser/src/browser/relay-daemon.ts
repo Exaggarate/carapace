@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { getRuntimeConfig } from "../config/config.js";
 import { extractErrorCode } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";

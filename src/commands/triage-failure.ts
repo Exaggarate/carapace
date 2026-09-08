@@ -6,7 +6,7 @@ import { resolveStateDir } from "../config/paths.js";
 import { scrubDoctorErrorMessage } from "../flows/doctor-error-message.js";
 import { createEmbeddedStateSignalBridge } from "../infra/embedded-state-lock.js";
 import { isGatewayExternallySupervised } from "../infra/gateway-supervision.js";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRoot } from "../infra/carapace-root.js";
 import { detectRespawnSupervisor } from "../infra/supervisor-markers.js";
 import {
   continueTriageInFreshProcess,
@@ -32,7 +32,7 @@ export async function triageAfterFailure(
   // Exec stamps its descendants. Codex also stamps shells even when its env policy
   // drops inherited variables; neither context should recursively launch a fixing agent.
   if (
-    process.env.OPENCLAW_SHELL === "exec" ||
+    process.env.CARAPACE_SHELL === "exec" ||
     process.env.CODEX_THREAD_ID ||
     isGatewayExternallySupervised() ||
     signal?.aborted
@@ -50,8 +50,8 @@ export async function triageAfterFailure(
     ),
     ...(failure.expectedVersion ? { expectedVersion: failure.expectedVersion.slice(0, 100) } : {}),
   };
-  const previousShell = process.env.OPENCLAW_SHELL;
-  process.env.OPENCLAW_SHELL = "exec";
+  const previousShell = process.env.CARAPACE_SHELL;
+  process.env.CARAPACE_SHELL = "exec";
   const diagnosticRuntime: RuntimeEnv = {
     log: (...args) => runtime.error(...args),
     error: (...args) => runtime.error(...args),
@@ -75,16 +75,16 @@ export async function triageAfterFailure(
   try {
     await withConsoleLogsRoutedToStderr(async () => {
       const resolvedRoot =
-        failure.installationRoot ?? (await resolveOpenClawPackageRoot({ argv1: process.argv[1] }));
+        failure.installationRoot ?? (await resolveCarapacePackageRoot({ argv1: process.argv[1] }));
       if (!resolvedRoot) {
-        throw new Error("installed CLI root is unavailable; run openclaw triage manually");
+        throw new Error("installed CLI root is unavailable; run carapace triage manually");
       }
       const root = realpathSync(resolvedRoot);
       boundedFailure.installationRoot = root;
       const supervisor =
         failure.kind === "gateway-startup"
           ? detectRespawnSupervisor(process.env, process.platform, {
-              includeLinuxOpenClawGatewayServiceMarker: true,
+              includeLinuxCarapaceGatewayServiceMarker: true,
             })
           : null;
       managedStartup = Boolean(supervisor);
@@ -157,14 +157,14 @@ export async function triageAfterFailure(
       redactSupportString(error instanceof Error ? error.message : String(error), redaction),
     );
     runtime.error(
-      `Automatic triage could not complete: ${reason}. Run \`openclaw triage\` manually.`,
+      `Automatic triage could not complete: ${reason}. Run \`carapace triage\` manually.`,
     );
     if (managedStartup && !cancellation.aborted) {
       try {
         await collectDiagnostics();
       } catch {
         runtime.error(
-          "Managed triage diagnostics could not complete; retain the original failure and run openclaw triage manually.",
+          "Managed triage diagnostics could not complete; retain the original failure and run carapace triage manually.",
         );
       }
     }
@@ -174,7 +174,7 @@ export async function triageAfterFailure(
       const outputDir = path.join(redaction.stateDir, "logs", "support");
       const promptPath = path.join(
         outputDir,
-        `openclaw-triage-failure-${Date.now()}-${process.pid}.md`,
+        `carapace-triage-failure-${Date.now()}-${process.pid}.md`,
       );
       try {
         await fs.mkdir(outputDir, { recursive: true, mode: 0o700 });
@@ -189,20 +189,20 @@ export async function triageAfterFailure(
           { mode: 0o600 },
         );
         runtime.error(
-          `Saved failure diagnostics: ${promptPath}. Run openclaw triage manually after repairing the installed CLI.`,
+          `Saved failure diagnostics: ${promptPath}. Run carapace triage manually after repairing the installed CLI.`,
         );
       } catch {
         runtime.error(
-          "Failure diagnostics could not be saved; retain the original update error and run openclaw triage manually.",
+          "Failure diagnostics could not be saved; retain the original update error and run carapace triage manually.",
         );
       }
     }
   } finally {
     bridge.dispose();
     if (previousShell === undefined) {
-      delete process.env.OPENCLAW_SHELL;
+      delete process.env.CARAPACE_SHELL;
     } else {
-      process.env.OPENCLAW_SHELL = previousShell;
+      process.env.CARAPACE_SHELL = previousShell;
     }
   }
   runtime.error(

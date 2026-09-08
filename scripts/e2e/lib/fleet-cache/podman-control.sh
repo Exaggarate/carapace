@@ -19,13 +19,13 @@ if [[ "${GITHUB_ACTIONS:-}" != true || -f /.dockerenv || "$uid" == 0 || ! -d "/r
   exit 78
 fi
 
-control_root="$(mktemp -d /tmp/openclaw-fleet-podman.XXXXXX)"
-runtime_root="$(mktemp -d "/run/user/$uid/openclaw-fleet.XXXXXX")"
+control_root="$(mktemp -d /tmp/carapace-fleet-podman.XXXXXX)"
+runtime_root="$(mktemp -d "/run/user/$uid/carapace-fleet.XXXXXX")"
 case_dir="$control_root/cell"
 engine_root="$control_root/engine"
 tenant="fleet-cache-podman-${control_root##*.}"
 tenant="${tenant,,}"
-container="openclaw-cell-$tenant"
+container="carapace-cell-$tenant"
 network="$container-net"
 initialization_attempted=false
 private_store_verified=false
@@ -40,8 +40,8 @@ static_dir = "$engine_root/data/containers/storage/libpod"
 tmp_dir = "$runtime_root/libpod/tmp"
 volume_path = "$engine_root/data/containers/storage/volumes"
 CONFIG
-runtime_env=(env -i PATH="$PATH" HOME="$case_dir/home" OPENCLAW_HOME="$case_dir/home" \
-  OPENCLAW_STATE_DIR="$case_dir/state" XDG_CACHE_HOME="$case_dir/host-cache" \
+runtime_env=(env -i PATH="$PATH" HOME="$case_dir/home" CARAPACE_HOME="$case_dir/home" \
+  CARAPACE_STATE_DIR="$case_dir/state" XDG_CACHE_HOME="$case_dir/host-cache" \
   XDG_CONFIG_HOME="$engine_root/config" XDG_DATA_HOME="$engine_root/data" \
   XDG_RUNTIME_DIR="$runtime_root" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
   CONTAINERS_STORAGE_CONF="$engine_root/storage.conf" CONTAINERS_CONF="$engine_root/containers.conf")

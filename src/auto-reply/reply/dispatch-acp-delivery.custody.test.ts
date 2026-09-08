@@ -1,7 +1,7 @@
 import { setImmediate as nextEventLoopTurn } from "node:timers/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   OutboundDeliveryError,
   PlatformMessageNotDispatchedError,
@@ -38,7 +38,7 @@ vi.mock("../../channels/plugins/index.js", () => ({
 }));
 
 function createVisibleChatAcpCoordinator(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   dispatcher: ReplyDispatcher = createDispatcher(),
   routed = true,
   abortSignal?: AbortSignal,
@@ -262,7 +262,7 @@ describe("ACP routed delivery custody", () => {
       const coordinator = createVisibleChatAcpCoordinator(createAcpTestConfig(), dispatcher);
       const payload = markReplyPayloadAsTtsSupplement({
         text: "hello",
-        mediaUrl: "/tmp/openclaw-media/acp-tts.ogg",
+        mediaUrl: "/tmp/carapace-media/acp-tts.ogg",
         audioAsVoice: true,
       });
 
@@ -303,7 +303,7 @@ describe("ACP routed delivery custody", () => {
       const coordinator = createVisibleChatAcpCoordinator(createAcpTestConfig(), dispatcher);
       const payload = markReplyPayloadAsTtsSupplement({
         text: "hello",
-        mediaUrl: "/tmp/openclaw-media/acp-tts.ogg",
+        mediaUrl: "/tmp/carapace-media/acp-tts.ogg",
         audioAsVoice: true,
       });
 

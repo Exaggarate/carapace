@@ -1,7 +1,7 @@
 /** Owns subagent run completion waits and session reconciliation. */
 import { getRuntimeConfig } from "../../../config/config.js";
 import { runWithoutOwnedSessionTranscriptWrites } from "../../../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { callGateway } from "../../../gateway/call.js";
 import {
   getAgentEventLifecycleGeneration,
@@ -214,7 +214,7 @@ export type SubagentManagerOptions = {
   resumeSubagentRun(runId: string): void;
   clearPendingLifecycleError(runId: string): void;
   clearPendingLifecycleTimeout(runId: string): void;
-  resolveSubagentWaitTimeoutMs(cfg: OpenClawConfig, runTimeoutSeconds?: number): number;
+  resolveSubagentWaitTimeoutMs(cfg: CarapaceConfig, runTimeoutSeconds?: number): number;
   scheduleSweep(args?: { delayMs?: number }): void;
   resolveSubagentSessionCompletion(args: {
     childSessionKey: string;

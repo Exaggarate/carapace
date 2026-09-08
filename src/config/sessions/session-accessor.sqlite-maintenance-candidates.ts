@@ -1,6 +1,6 @@
 import { toUSVString } from "node:util";
 import { iterateSqliteQuerySync, sqliteStringSet } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import {
   parseSessionEntryJson,
@@ -27,7 +27,7 @@ export function collectSqliteSessionMaintenanceBaseKeys(
 }
 
 export function readSessionMaintenanceKeyProjection(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
 ): Record<string, SessionEntry> {
   const db = getSessionKysely(database.db);
   const store: Record<string, SessionEntry> = {};
@@ -49,7 +49,7 @@ export function readSessionMaintenanceKeyProjection(
 }
 
 export function readSessionMaintenanceAgeCandidates(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   minimumAgeMs: number | null;
 }): Record<string, SessionEntry> {
   if (params.minimumAgeMs == null || params.minimumAgeMs <= 0) {
@@ -75,7 +75,7 @@ export function readSessionMaintenanceAgeCandidates(params: {
 }
 
 export function readSessionMaintenanceCapCandidates(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   excludedKeys: ReadonlySet<string>;
 }): Record<string, SessionEntry> {
   const db = getSessionKysely(params.database.db);

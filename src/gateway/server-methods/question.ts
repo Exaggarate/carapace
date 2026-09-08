@@ -12,7 +12,7 @@ import {
   validateQuestionWaitAnswerParams,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { registerActiveEmbeddedRunHumanInputWait } from "../../agents/embedded-agent-runner/run-state.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ENV_SECRET_REF_ID_RE } from "../../config/types.secrets.js";
 import {
   handleQuestionChannelRequested,
@@ -66,7 +66,7 @@ function questionNotFound(id: string) {
 }
 
 function authorizeQuestionRecord(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   question: QuestionRecord;
   access: "read" | "mutate";

@@ -3,8 +3,8 @@
 import {
   findNormalizedProviderKey,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/model-catalog-core/provider-id";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { tryResolveAmbientOwnerAgentId } from "../../agents/agent-scope-config.js";
 import {
@@ -40,7 +40,7 @@ import {
   type ProviderAuthAliasLookupParams,
   resolveProviderIdForAuth,
 } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { hasConfiguredSecretInput } from "../../config/types.secrets.js";
 import { providerUsageLabel, resolveUsageProviderId } from "../../infra/provider-usage.shared.js";
 import type { UsageProviderId } from "../../infra/provider-usage.types.js";
@@ -90,7 +90,7 @@ type PreparedAuthMetadataLookupParams = ProviderAuthAliasLookupParams & {
 };
 
 function buildProviderCapabilities(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir: string;
   metadataSnapshot: NonNullable<
     Awaited<ReturnType<typeof readPreparedCatalog>>
@@ -99,7 +99,7 @@ function buildProviderCapabilities(params: {
   return resolveModelProviderCapabilities(params).capabilities;
 }
 
-function resolveAuthRefreshScope(cfg: OpenClawConfig): {
+function resolveAuthRefreshScope(cfg: CarapaceConfig): {
   providerIds: string[];
   profileIds?: string[];
 } {
@@ -286,7 +286,7 @@ export function aggregateRefreshableAuthStatus(
 
 function mapProvider(
   prov: AuthProviderHealth,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   store: AuthProfileStore,
   authAliasLookupParams: ProviderAuthAliasLookupParams,
   usageByProvider: Map<string, ProviderUsageStatus>,
@@ -413,7 +413,7 @@ function mapProvider(
 }
 
 function resolveConfiguredProviders(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   apiKeys: ReadonlyMap<string, ModelAuthStatusProvider["apiKey"]>,
 ): {
   providers: string[];
@@ -574,7 +574,7 @@ export const modelsAuthStatusHandlers: GatewayRequestHandlers = {
     const refreshRequested = Boolean(params.refresh);
     const includeProfileIdentity =
       Array.isArray(client?.connect?.scopes) && client.connect.scopes.includes(ADMIN_SCOPE);
-    const resolveScope = (cfg: OpenClawConfig) =>
+    const resolveScope = (cfg: CarapaceConfig) =>
       resolveModelAuthAgentScope(
         cfg,
         params.agentId === undefined || params.agentId === ""

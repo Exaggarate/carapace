@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 
 export type DeclaredProviderOwnerIndex = ReadonlyMap<string, ReadonlySet<string>>;
 

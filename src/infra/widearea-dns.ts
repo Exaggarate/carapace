@@ -2,8 +2,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { CONFIG_DIR } from "../utils.js";
 import { replaceFileAtomicSync } from "./replace-file.js";
 
@@ -39,7 +39,7 @@ export function resolveWideAreaDiscoveryDomain(params?: {
   configDomain?: string | null;
 }): string | null {
   const env = params?.env ?? process.env;
-  const candidate = params?.configDomain ?? env.OPENCLAW_WIDE_AREA_DOMAIN ?? null;
+  const candidate = params?.configDomain ?? env.CARAPACE_WIDE_AREA_DOMAIN ?? null;
   try {
     return normalizeWideAreaDomain(candidate);
   } catch {
@@ -75,7 +75,7 @@ export function replaceWideAreaZoneFile(zonePath: string, content: string): void
     preserveExistingMode: true,
     syncTempFile: true,
     syncParentDir: true,
-    tempPrefix: ".openclaw-dns-zone",
+    tempPrefix: ".carapace-dns-zone",
   });
 }
 
@@ -120,7 +120,7 @@ function extractSerial(zoneText: string): number | null {
 }
 
 function extractContentHash(zoneText: string): string | null {
-  const match = zoneText.match(/^\s*;\s*openclaw-content-hash:\s*(\S+)\s*$/m);
+  const match = zoneText.match(/^\s*;\s*carapace-content-hash:\s*(\S+)\s*$/m);
   return match?.[1] ?? null;
 }
 
@@ -151,9 +151,9 @@ export type WideAreaGatewayZoneOpts = {
 };
 
 function renderZone(opts: WideAreaGatewayZoneOpts & { serial: number }): string {
-  const hostname = os.hostname().split(".")[0] ?? "openclaw";
-  const hostLabel = dnsLabel(opts.hostLabel ?? hostname, "openclaw");
-  const instanceLabel = dnsLabel(opts.instanceLabel ?? `${hostname}-gateway`, "openclaw-gw");
+  const hostname = os.hostname().split(".")[0] ?? "carapace";
+  const hostLabel = dnsLabel(opts.hostLabel ?? hostname, "carapace");
+  const instanceLabel = dnsLabel(opts.instanceLabel ?? `${hostname}-gateway`, "carapace-gw");
   const domain = normalizeWideAreaDomain(opts.domain) ?? "local.";
 
   const txt = [
@@ -194,9 +194,9 @@ function renderZone(opts: WideAreaGatewayZoneOpts & { serial: number }): string 
     records.push(`${hostLabel} IN AAAA ${opts.tailnetIPv6}`);
   }
 
-  records.push(`_openclaw-gw._tcp IN PTR ${instanceLabel}._openclaw-gw._tcp`);
-  records.push(`${instanceLabel}._openclaw-gw._tcp IN SRV 0 0 ${opts.gatewayPort} ${hostLabel}`);
-  records.push(`${instanceLabel}._openclaw-gw._tcp IN TXT ${txt.map(txtQuote).join(" ")}`);
+  records.push(`_carapace-gw._tcp IN PTR ${instanceLabel}._carapace-gw._tcp`);
+  records.push(`${instanceLabel}._carapace-gw._tcp IN SRV 0 0 ${opts.gatewayPort} ${hostLabel}`);
+  records.push(`${instanceLabel}._carapace-gw._tcp IN TXT ${txt.map(txtQuote).join(" ")}`);
 
   const contentBody = `${records.join("\n")}\n`;
   const hashBody = `${records
@@ -206,7 +206,7 @@ function renderZone(opts: WideAreaGatewayZoneOpts & { serial: number }): string 
     .join("\n")}\n`;
   const contentHash = computeContentHash(hashBody);
 
-  return `; openclaw-content-hash: ${contentHash}\n${contentBody}`;
+  return `; carapace-content-hash: ${contentHash}\n${contentBody}`;
 }
 
 export function renderWideAreaGatewayZoneText(

@@ -17,7 +17,7 @@ afterEach(() => {
 describe("keyboard shortcuts dialog", () => {
   it("renders grouped shortcut chips and updates the send chord when the preference changes", async () => {
     const dialog = document.body.appendChild(
-      document.createElement("openclaw-keyboard-shortcuts-dialog") as KeyboardShortcutsTestDialog,
+      document.createElement("carapace-keyboard-shortcuts-dialog") as KeyboardShortcutsTestDialog,
     );
     dialog.toggle();
     await dialog.updateComplete;
@@ -44,18 +44,18 @@ describe("keyboard shortcuts dialog", () => {
     dialog.shadowRoot?.querySelector<HTMLButtonElement>("button[aria-label='Close']")?.click();
     await dialog.updateComplete;
     expect(dialog.isOpen).toBe(false);
-    expect(dialog.shadowRoot?.querySelector("openclaw-modal-dialog")).toBeNull();
+    expect(dialog.shadowRoot?.querySelector("carapace-modal-dialog")).toBeNull();
   });
 
   it("closes when the modal dispatches its Escape cancellation", async () => {
     const dialog = document.body.appendChild(
-      document.createElement("openclaw-keyboard-shortcuts-dialog") as KeyboardShortcutsTestDialog,
+      document.createElement("carapace-keyboard-shortcuts-dialog") as KeyboardShortcutsTestDialog,
     );
     dialog.toggle();
     await dialog.updateComplete;
 
     dialog.shadowRoot
-      ?.querySelector("openclaw-modal-dialog")
+      ?.querySelector("carapace-modal-dialog")
       ?.dispatchEvent(new CustomEvent("modal-cancel"));
     await dialog.updateComplete;
 

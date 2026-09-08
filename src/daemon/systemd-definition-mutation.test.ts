@@ -52,16 +52,16 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
       code: 1,
       termination: "exit",
       stdout: "",
-      stderr: `Call failed: Unit ${serviceEnv.OPENCLAW_SYSTEMD_UNIT}.service not found.`,
+      stderr: `Call failed: Unit ${serviceEnv.CARAPACE_SYSTEMD_UNIT}.service not found.`,
     }));
-    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-definition-")));
+    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-definition-")));
     stateDir = path.join(root, "state");
     env = {
       HOME: path.join(root, "home"),
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-owned",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_SYSTEMD_UNIT: "carapace-owned",
     };
-    unitPath = path.join(env.HOME!, ".config/systemd/user/openclaw-owned.service");
+    unitPath = path.join(env.HOME!, ".config/systemd/user/carapace-owned.service");
     environmentPath = path.join(stateDir, "gateway.systemd.env");
     await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
     await fs.mkdir(stateDir, { mode: 0o700 });
@@ -82,19 +82,19 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
       }),
       programArguments: [
         "/usr/bin/node",
-        "/srv/openclaw/dist/index.js",
+        "/srv/carapace/dist/index.js",
         "gateway",
         "--port",
         "18789",
       ],
       environment: {
-        OPENCLAW_GATEWAY_PORT: "18789",
-        OPENCLAW_GATEWAY_TOKEN: "replacement-secret-canary",
+        CARAPACE_GATEWAY_PORT: "18789",
+        CARAPACE_GATEWAY_TOKEN: "replacement-secret-canary",
         ...environmentOverrides,
       },
       environmentValueSources: {
-        OPENCLAW_GATEWAY_PORT: "inline",
-        OPENCLAW_GATEWAY_TOKEN: "file",
+        CARAPACE_GATEWAY_PORT: "inline",
+        CARAPACE_GATEWAY_TOKEN: "file",
       },
     });
 
@@ -382,7 +382,7 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
         expect(await fs.readFile(environmentPath, "utf8")).toBe("OPERATOR=unchanged\n");
       } else {
         await stage();
-        expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/openclaw/dist/index.js");
+        expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/carapace/dist/index.js");
         expect(await fs.readFile(environmentPath, "utf8")).toContain("replacement-secret-canary");
       }
       expect(await fs.readFile(shared, "utf8")).toContain(changed ? "60s" : "30s");
@@ -702,7 +702,7 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
     await expect(readSystemdDefinitionMutationCapability(env)).resolves.toMatchObject({ kind });
     if (kind === "writable") {
       await stage();
-      expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/openclaw/dist/index.js");
+      expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/carapace/dist/index.js");
       expect((await fs.stat(unitPath)).mode & 0o777).toBe(mode);
     } else {
       await expect(stage()).rejects.toThrow(`SERVICE_DEFINITION_${kind.toUpperCase()}`);
@@ -797,7 +797,7 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
     await expect(readSystemdDefinitionMutationCapability(env)).resolves.toEqual({
       kind: "writable",
     });
-    expect(assertNoSystemOwnership).toHaveBeenCalledWith("openclaw-owned.service", undefined);
+    expect(assertNoSystemOwnership).toHaveBeenCalledWith("carapace-owned.service", undefined);
   });
 
   it.each([
@@ -880,7 +880,7 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
     await stage();
 
     expect(await fs.readFile(`${unitPath}.bak`, "utf8")).toBe(previous);
-    expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/openclaw/dist/index.js");
+    expect(await fs.readFile(unitPath, "utf8")).toContain("/srv/carapace/dist/index.js");
     expect(await fs.readFile(unitPath, "utf8")).not.toContain("replacement-secret-canary");
     expect(await fs.readFile(environmentPath, "utf8")).toContain(
       "OPERATOR_SECRET=preserved-canary",
@@ -898,14 +898,14 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
     await writeFixtureFile(environmentPath, "CALLER_SECRET=caller-canary\n");
     await writeFixtureFile(effectiveEnvironmentPath, "OPERATOR_SECRET=preserved-canary\n");
 
-    await stage({ OPENCLAW_STATE_DIR: effectiveStateDir });
+    await stage({ CARAPACE_STATE_DIR: effectiveStateDir });
 
     expect(await fs.readFile(environmentPath, "utf8")).toBe("CALLER_SECRET=caller-canary\n");
     expect(await fs.readFile(effectiveEnvironmentPath, "utf8")).toContain(
       "OPERATOR_SECRET=preserved-canary",
     );
     expect(await fs.readFile(effectiveEnvironmentPath, "utf8")).toContain(
-      "OPENCLAW_GATEWAY_TOKEN=replacement-secret-canary",
+      "CARAPACE_GATEWAY_TOKEN=replacement-secret-canary",
     );
     expect(await fs.readFile(unitPath, "utf8")).toContain(effectiveEnvironmentPath);
   });
@@ -915,7 +915,7 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
       unitPath,
       `[Service]\nExecStart=/usr/bin/node gateway\nEnvironmentFile=${environmentPath}\n`,
     );
-    await writeFixtureFile(environmentPath, "OPENCLAW_GATEWAY_TOKEN=retired-secret-canary\n");
+    await writeFixtureFile(environmentPath, "CARAPACE_GATEWAY_TOKEN=retired-secret-canary\n");
     managerDefinition(unitPath, [], [[environmentPath, false]]);
 
     await stageSystemdService({
@@ -925,9 +925,9 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
           done();
         },
       }),
-      programArguments: ["/usr/bin/node", "/srv/openclaw/dist/index.js", "gateway"],
-      environment: { OPENCLAW_GATEWAY_PORT: "18789" },
-      environmentValueSources: { OPENCLAW_GATEWAY_TOKEN: "file" },
+      programArguments: ["/usr/bin/node", "/srv/carapace/dist/index.js", "gateway"],
+      environment: { CARAPACE_GATEWAY_PORT: "18789" },
+      environmentValueSources: { CARAPACE_GATEWAY_TOKEN: "file" },
     });
 
     expect(await fs.readFile(environmentPath, "utf8")).toBe("");
@@ -948,10 +948,10 @@ describe.skipIf(process.platform === "win32")("systemd definition mutation owner
         await fs.mkdir(replacement, { mode: 0o755 });
         await fs.symlink(original, directory);
       } else if (shared === "environment") {
-        other.OPENCLAW_SYSTEMD_UNIT = "openclaw-secondary";
+        other.CARAPACE_SYSTEMD_UNIT = "carapace-secondary";
       } else {
-        other.OPENCLAW_STATE_DIR = path.join(root, "other-state");
-        await fs.mkdir(other.OPENCLAW_STATE_DIR, { mode: 0o700 });
+        other.CARAPACE_STATE_DIR = path.join(root, "other-state");
+        await fs.mkdir(other.CARAPACE_STATE_DIR, { mode: 0o700 });
         if (shared === "directory alias") {
           other.HOME = path.join(root, "home-alias");
           await fs.symlink(env.HOME!, other.HOME);

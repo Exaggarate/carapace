@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { normalizeChatType } from "../../channels/chat-type.js";
 import type { GroupKeyResolution, SessionEntry } from "../../config/sessions/types.js";
 import { channelRouteTargetsMatchExact } from "../../plugin-sdk/channel-route.js";

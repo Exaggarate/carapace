@@ -88,7 +88,7 @@ describe("QA inference scenario catalog", () => {
     expect(script).toContain("runtimeCredentialGenerations");
     expect(script).toContain("replyCounts[reply] !== 1");
     expect(script).not.toContain("createWorkerInferenceExecutor");
-    expect(fixture).toContain('from "openclaw/plugin-sdk/llm"');
+    expect(fixture).toContain('from "carapace/plugin-sdk/llm"');
     expect(fixture).toContain("prepareRuntimeAuth");
     expect(fixture).toContain("createStreamFn");
     expect(fixture).toContain("prepareExtraParams");

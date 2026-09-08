@@ -1,12 +1,12 @@
-import { prepareAgentRuntimeAuth } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
+import { prepareAgentRuntimeAuth } from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
 import {
   resolveAgentDir,
   resolveSessionAgentIdsStrict,
-} from "openclaw/plugin-sdk/agent-scope-runtime";
-import { resolveSessionModelRef } from "openclaw/plugin-sdk/model-session-runtime";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/agent-scope-runtime";
+import { resolveSessionModelRef } from "carapace/plugin-sdk/model-session-runtime";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { closeCodexStartupClientBestEffort } from "./app-server/attempt-client-cleanup.js";
 import { prepareCodexAppServerAuthBinding } from "./app-server/auth-binding.js";
 import { resolveCodexAppServerPreparedAuthHandoff } from "./app-server/auth-bridge.js";
@@ -129,7 +129,7 @@ async function prepareControlAuth(
   const route = plan.modelRoute;
   // A control subscription must use the same prepared auth partition as a turn.
   // Unsubscribe leaves Codex's native writer loaded for 30 minutes; another
-  // process cannot resume that thread, even after its OpenClaw binding is gone.
+  // process cannot resume that thread, even after its Carapace binding is gone.
   const resolvedAuth = route
     ? await resolveApiKeyForProvider({
         provider: route.provider,

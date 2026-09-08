@@ -4,7 +4,7 @@ import path from "node:path";
 import {
   listMemoryFiles,
   readMemoryFile,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { resolveMemoryPathClassification } from "./memory/memory-path-provenance.js";
 
@@ -15,7 +15,7 @@ describe.skipIf(process.platform !== "win32")("Windows explicit memory extra-fil
   let configuredAlias = "";
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-extra-file-case-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-extra-file-case-"));
     workspaceDir = path.join(fixtureRoot, "workspace");
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
     physicalPath = path.join(fixtureRoot, "shared-notes.md");

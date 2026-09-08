@@ -1,4 +1,4 @@
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 function hasLegacyPositivePolicy(value: unknown): boolean {
   const config = asNullableRecord(value);
@@ -23,7 +23,7 @@ export const legacyConfigRules = [
   {
     path: ["plugins", "entries", "file-transfer", "config"],
     message:
-      'File-transfer permissions need review and remain inactive. Run "openclaw file-transfer approvals migrate".',
+      'File-transfer permissions need review and remain inactive. Run "carapace file-transfer approvals migrate".',
     match: hasLegacyPositivePolicy,
   },
 ];

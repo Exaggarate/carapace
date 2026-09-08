@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveStoredCredentialReadOnlyAvailability } from "./read-only-availability.js";
 
 const cfg = {
@@ -8,7 +8,7 @@ const cfg = {
       vault: { source: "env" },
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 describe("resolveStoredCredentialReadOnlyAvailability", () => {
   it.each([
@@ -49,7 +49,7 @@ describe("resolveStoredCredentialReadOnlyAvailability", () => {
     it.each<{
       name: string;
       provider: string;
-      secrets?: OpenClawConfig["secrets"];
+      secrets?: CarapaceConfig["secrets"];
       expected: boolean | undefined;
     }>([
       { name: "implicit default", provider: "default", expected: undefined },

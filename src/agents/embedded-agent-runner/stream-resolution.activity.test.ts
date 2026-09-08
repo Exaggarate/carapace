@@ -3,12 +3,12 @@ import {
   defaultLlmRuntime,
   notifyLlmRequestActivity,
   onLlmRequestActivity,
-} from "@openclaw/ai/internal/runtime";
+} from "@carapace/ai/internal/runtime";
 import {
   createAssistantMessageEventStream,
   type AssistantMessageEventStream,
-} from "openclaw/plugin-sdk/llm";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/llm";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { streamWithIdleTimeout } from "./run/llm-idle-timeout.js";
 import { resolveEmbeddedAgentStream } from "./stream-resolution.js";

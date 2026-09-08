@@ -1,7 +1,7 @@
 import {
-  openOpenClawStateDatabase,
-  closeOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  closeCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   recordUpdateRunPhase,
   recordUpdateRunStep,
@@ -9,11 +9,11 @@ import {
 } from "./update-run-ledger.js";
 
 const [runId, role] = process.argv.slice(2);
-if (!runId || (role !== "cli" && role !== "gateway") || !process.env.OPENCLAW_STATE_DIR) {
+if (!runId || (role !== "cli" && role !== "gateway") || !process.env.CARAPACE_STATE_DIR) {
   throw new Error("Expected an isolated update run and writer role");
 }
 const options = { env: process.env };
-openOpenClawStateDatabase(options);
+openCarapaceStateDatabase(options);
 process.once("message", () => {
   for (let index = 0; index < 16; index += 1) {
     recordUpdateRunStep(runId, { step: `${role}-${index}`, status: "completed" }, options);
@@ -35,7 +35,7 @@ process.once("message", () => {
       options,
     );
   }
-  closeOpenClawStateDatabase();
+  closeCarapaceStateDatabase();
   process.disconnect?.();
 });
 process.send?.("ready");

@@ -14,7 +14,7 @@ import {
 } from "../../infra/update-run-ledger.js";
 import type { UpdateRunRecord } from "../../infra/update-run-record.js";
 import { ABANDONED_UPDATE_RUN_MS } from "../../infra/update-run-timeouts.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { runRegisteredCli } from "../../test-utils/command-runner.js";
 import { registerUpdateCli } from "../update-cli.js";
 import { updateRepairCommand } from "./update-repair-command.js";
@@ -40,9 +40,9 @@ vi.mock("../../config/config.js", () => ({
   assertConfigWriteAllowedInCurrentMode: mocks.configWriteAllowed,
   readConfigFileSnapshot: mocks.readConfig,
 }));
-vi.mock("../../state/openclaw-state-ownership.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../state/openclaw-state-ownership.js")>()),
-  assertOpenClawStateWriteAllowedAtPath: mocks.ownershipAllowed,
+vi.mock("../../state/carapace-state-ownership.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../state/carapace-state-ownership.js")>()),
+  assertCarapaceStateWriteAllowedAtPath: mocks.ownershipAllowed,
 }));
 vi.mock("../daemon-cli/restart-health-probe.js", () => ({
   resolveGatewayRestartProbeContext: async () => ({ config: {}, auth: undefined }),
@@ -82,8 +82,8 @@ function seedRun(
 beforeEach(() => {
   vi.clearAllMocks();
   vi.spyOn(Date, "now").mockReturnValue(now);
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-update-repair-"));
-  const root = tempDirs.make("openclaw-update-repair-install-");
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-update-repair-"));
+  const root = tempDirs.make("carapace-update-repair-install-");
   fs.mkdirSync(path.join(root, "dist"));
   fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ version: "2026.9.3" }));
   fs.writeFileSync(
@@ -103,7 +103,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   tempDirs.cleanup();

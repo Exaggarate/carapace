@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/openclaw-agent-db-additive-columns.js";
+import { FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS } from "../../state/carapace-agent-db-additive-columns.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   assignSessionOwner,
   loadSessionEntry,
@@ -13,12 +13,12 @@ import {
 } from "./session-accessor.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("SQLite session owner assignment", () => {
   it("lazily adds bare columns and preserves the assignment across reopen", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const scope = {
         agentId: "main",
         env: state.env,
@@ -29,11 +29,11 @@ describe("SQLite session owner assignment", () => {
         updatedAt: 1,
         createdActor: { type: "human", source: "profile", id: "profile-creator" },
       });
-      const initial = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const initial = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       for (const { columnName } of FIRST_USE_ADDITIVE_AGENT_COLUMN_DEFINITIONS) {
         initial.db.exec(`ALTER TABLE session_nodes DROP COLUMN ${columnName};`);
       }
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       expect(loadSessionEntry(scope)).toMatchObject({
         createdActor: { type: "human", source: "profile", id: "profile-creator" },
@@ -41,7 +41,7 @@ describe("SQLite session owner assignment", () => {
       expect(loadSessionEntry(scope)?.owner).toBeUndefined();
 
       expect(() =>
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           () => {
             expect(
               assignSessionOwner(scope, {
@@ -74,13 +74,13 @@ describe("SQLite session owner assignment", () => {
         assignedAt: 1234,
       });
 
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(loadSessionEntry(scope)?.owner).toEqual({
         actor: { type: "agent", id: "research" },
         assignedBy: { type: "human", id: "profile-assigner" },
         assignedAt: 1234,
       });
-      const reopened = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const reopened = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       const columns = reopened.db.prepare("PRAGMA table_info(session_nodes)").all() as Array<{
         name: string;
         notnull: number;

@@ -24,7 +24,7 @@ export function formatPluginStatus(
 export function formatPluginLine(plugin: PluginRecord): string {
   const name = theme.command(plugin.name || plugin.id);
   const idSuffix = plugin.name && plugin.name !== plugin.id ? theme.muted(` (${plugin.id})`) : "";
-  const format = plugin.format ?? "openclaw";
+  const format = plugin.format ?? "carapace";
 
   const parts = [
     `${name}${idSuffix} ${formatPluginStatus(plugin)}`,

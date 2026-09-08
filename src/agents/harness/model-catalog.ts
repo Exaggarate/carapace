@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
 import { getActivePluginRegistry } from "../../plugins/runtime.js";
 import { dedupeByKey } from "../../shared/dedupe-by-key.js";
@@ -106,7 +106,7 @@ function enrichHarnessRows(
 }
 
 export async function augmentModelCatalogWithAgentHarness(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir: string;
   workspaceDir: string;
@@ -115,7 +115,7 @@ export async function augmentModelCatalogWithAgentHarness(params: {
   snapshot: ModelCatalogSnapshot;
   pluginRegistry?: PluginRegistry | null;
   isCurrent?: () => boolean;
-  observationConfig?: OpenClawConfig;
+  observationConfig?: CarapaceConfig;
   onError?: (error: unknown) => void;
 }): Promise<ModelCatalogSnapshot> {
   const rawDefaultModel = params.defaultModel?.trim();
@@ -144,7 +144,7 @@ export async function augmentModelCatalogWithAgentHarness(params: {
     config: params.cfg,
     agentId: params.agentId,
   }).runtime;
-  if (runtime === "auto" || runtime === "openclaw") {
+  if (runtime === "auto" || runtime === "carapace") {
     return params.snapshot;
   }
   const pluginRegistry = params.observationConfig

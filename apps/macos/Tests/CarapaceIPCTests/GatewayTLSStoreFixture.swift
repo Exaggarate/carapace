@@ -1,0 +1,1 @@
+../../../shared/CarapaceKit/Tests/CarapaceKitTests/GatewayTLSStoreFixture.swift

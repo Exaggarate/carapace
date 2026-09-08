@@ -1,8 +1,8 @@
 // Zalo plugin module implements accounts behavior.
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createAccountListHelpers } from "carapace/plugin-sdk/account-helpers";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SecretInputStringResolutionMode } from "./secret-input.js";
 import { resolveZaloToken } from "./token.js";
 import type { ResolvedZaloAccount, ZaloAccountConfig, ZaloConfig } from "./types.js";
@@ -23,7 +23,7 @@ const {
 export { listZaloAccountIds, resolveDefaultZaloAccountId };
 
 function resolveZaloAccountWithMode(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   mode: SecretInputStringResolutionMode;
 }): ResolvedZaloAccount {
@@ -55,13 +55,13 @@ function resolveZaloAccountWithMode(params: {
 }
 
 export function resolveZaloAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ResolvedZaloAccount {
   return resolveZaloAccountWithMode({ ...params, mode: "strict" });
 }
 
-export function inspectZaloAccount(params: { cfg: OpenClawConfig; accountId?: string | null }) {
+export function inspectZaloAccount(params: { cfg: CarapaceConfig; accountId?: string | null }) {
   const account = resolveZaloAccountWithMode({ ...params, mode: "inspect" });
   return {
     ...account,

@@ -1,4 +1,4 @@
-// Generates setup codes used to pair external channels with OpenClaw.
+// Generates setup codes used to pair external channels with Carapace.
 import os from "node:os";
 import {
   isCarrierGradeNatIpv4Address,
@@ -7,15 +7,15 @@ import {
   isLoopbackIpAddress,
   isRfc1918Ipv4Address,
   parseCanonicalIpAddress,
-} from "@openclaw/net-policy/ip";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/net-policy/ip";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { normalizeTlsFingerprint } from "../../packages/gateway-client/src/client-address-utils.js";
 import { resolveGatewayPort } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { materializeGatewayAuthSecretRefs } from "../gateway/auth-config-utils.js";
 import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
@@ -75,7 +75,7 @@ type ResolvePairingSetupOptions = {
   loadLocalTlsFingerprint?: () => Promise<string | undefined>;
 };
 
-export function resolveConfiguredPairingPublicUrl(config: OpenClawConfig): string | undefined {
+export function resolveConfiguredPairingPublicUrl(config: CarapaceConfig): string | undefined {
   const value = config.plugins?.entries?.["device-pair"]?.config?.["publicUrl"];
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
@@ -249,7 +249,7 @@ function parseNormalizedGatewayUrl(raw: string): string | null {
 }
 
 function resolveScheme(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts?: {
     forceSecure?: boolean;
   },
@@ -283,7 +283,7 @@ function pickTailnetIPv4(
 }
 
 function resolvePairingSetupAuthLabel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): ResolveAuthLabelResult {
   const mode = cfg.gateway?.auth?.mode;
@@ -296,8 +296,8 @@ function resolvePairingSetupAuthLabel(
     value: cfg.gateway?.auth?.password,
     defaults,
   }).ref;
-  const envToken = normalizeOptionalString(env.OPENCLAW_GATEWAY_TOKEN);
-  const envPassword = normalizeOptionalString(env.OPENCLAW_GATEWAY_PASSWORD);
+  const envToken = normalizeOptionalString(env.CARAPACE_GATEWAY_TOKEN);
+  const envPassword = normalizeOptionalString(env.CARAPACE_GATEWAY_PASSWORD);
   const token =
     envToken || (tokenRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.token));
   const password =
@@ -326,7 +326,7 @@ function resolvePairingSetupAuthLabel(
 }
 
 export async function resolvePairingGatewayUrl(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: {
     env: NodeJS.ProcessEnv;
     publicUrl?: string;
@@ -482,7 +482,7 @@ export function decodePairingSetupCode(
 }
 
 export async function resolvePairingSetupFromConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: ResolvePairingSetupOptions = {},
 ): Promise<PairingSetupResolution> {
   assertExplicitGatewayAuthModeWhenBothConfigured(cfg);
@@ -493,8 +493,8 @@ export async function resolvePairingSetupFromConfig(
     mode: cfg.gateway?.auth?.mode,
     hasTokenOverride: false,
     hasPasswordOverride: false,
-    hasTokenFallback: Boolean(normalizeOptionalString(env.OPENCLAW_GATEWAY_TOKEN)),
-    hasPasswordFallback: Boolean(normalizeOptionalString(env.OPENCLAW_GATEWAY_PASSWORD)),
+    hasTokenFallback: Boolean(normalizeOptionalString(env.CARAPACE_GATEWAY_TOKEN)),
+    hasPasswordFallback: Boolean(normalizeOptionalString(env.CARAPACE_GATEWAY_PASSWORD)),
   });
   const authLabel = resolvePairingSetupAuthLabel(cfgForAuth, env);
   if (authLabel.error) {

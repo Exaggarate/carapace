@@ -6,7 +6,7 @@ import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
 const suite = createControlUiE2eSuite({ name: "Control UI goal elapsed time" });
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let artifactDir: string;
 beforeEach(() => {
   if (captureProof) {

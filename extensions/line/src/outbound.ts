@@ -2,23 +2,23 @@ import type { messagingApi } from "@line/bot-sdk";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 // Line plugin module implements outbound behavior.
 import {
   defineChannelMessageAdapter,
   listMessageReceiptPlatformIds,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   createAttachedChannelResultAdapter,
   createEmptyChannelResult,
-} from "openclaw/plugin-sdk/channel-send-result";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveOutboundMediaUrls } from "openclaw/plugin-sdk/reply-payload";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/channel-send-result";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolveOutboundMediaUrls } from "carapace/plugin-sdk/reply-payload";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import { buildLineMediaMessage } from "./outbound-media.js";
 import { buildLineQuickReplyFallbackText } from "./quick-reply-fallback.js";
 import {

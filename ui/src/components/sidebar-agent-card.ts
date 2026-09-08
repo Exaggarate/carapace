@@ -3,13 +3,13 @@ import { property } from "lit/decorators.js";
 import type { ControlUiEnvironment } from "../../../src/gateway/control-ui-bootstrap-contract.js";
 import { t } from "../i18n/index.ts";
 import { IdentityAvatarController } from "../lib/identity-avatar-loader.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 
 /** Sidebar identity row: who you're talking to. The whole body opens the
     agent menu (switcher + utilities) — the conversation itself lives on the
     Home page row, so this row carries profile semantics only. */
-class SidebarAgentCard extends OpenClawLightDomContentsElement {
+class SidebarAgentCard extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) agentName = "";
   @property({ attribute: false }) avatarUrl: string | null = null;
   @property({ attribute: false }) avatarAuthReady = false;
@@ -115,6 +115,6 @@ class SidebarAgentCard extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-sidebar-agent-card")) {
-  customElements.define("openclaw-sidebar-agent-card", SidebarAgentCard);
+if (!customElements.get("carapace-sidebar-agent-card")) {
+  customElements.define("carapace-sidebar-agent-card", SidebarAgentCard);
 }

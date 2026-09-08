@@ -1,8 +1,8 @@
 // @vitest-environment node
 // Control UI tests cover build chat items behavior.
 import { queryObjects } from "node:v8";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { markInboundContextLabel } from "../../../../src/auto-reply/reply/inbound-context-marker.js";
 import type { MessageGroup } from "../../lib/chat/chat-types.ts";
@@ -61,10 +61,10 @@ describe("persistedMessageEntryId", () => {
     expect(
       persistedMessageEntryId({
         role: "user",
-        __openclaw: { id: "pending-send:1", kind: "pending-send" },
+        __carapace: { id: "pending-send:1", kind: "pending-send" },
       }),
     ).toBeNull();
-    expect(persistedMessageEntryId({ role: "user", __openclaw: { id: "entry-1", seq: 2 } })).toBe(
+    expect(persistedMessageEntryId({ role: "user", __carapace: { id: "entry-1", seq: 2 } })).toBe(
       "entry-1",
     );
   });
@@ -83,7 +83,7 @@ type ActivityRunItem = Extract<
 
 // Inbound context blocks are stamped with the provenance marker; strippers key
 // on the marker, so display fixtures must carry it to be recognized.
-const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"openclaw-control-ui","id":"openclaw-control-ui"}\n\`\`\``;
+const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"carapace-control-ui","id":"carapace-control-ui"}\n\`\`\``;
 
 function createProps(overrides: Partial<CachedChatItemsProps> = {}): CachedChatItemsProps {
   return {
@@ -173,7 +173,7 @@ function compactionMessage(id: string, metrics: Record<string, unknown> = {}) {
   return {
     role: "system",
     timestamp: 2_000,
-    __openclaw: { kind: "compaction", id, ...metrics },
+    __carapace: { kind: "compaction", id, ...metrics },
   };
 }
 
@@ -181,7 +181,7 @@ function resetMessage(id: string) {
   return {
     role: "system",
     timestamp: 2_000,
-    __openclaw: { kind: "reset", id },
+    __carapace: { kind: "reset", id },
   };
 }
 
@@ -191,7 +191,7 @@ function canvasToolOutput(viewId: string, title: string, preferredHeight: number
     view: {
       backend: "canvas",
       id: viewId,
-      url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+      url: `/__carapace__/canvas/documents/${viewId}/index.html`,
       title,
       preferred_height: preferredHeight,
     },
@@ -201,7 +201,7 @@ function canvasToolOutput(viewId: string, title: string, preferredHeight: number
 
 function commentaryMessage(content: string, timestamp: number, itemId: string) {
   return assistantMessage(content, timestamp, {
-    openclawStreamFallback: {
+    carapaceStreamFallback: {
       replacementText: content,
       source: "segment",
       itemId,
@@ -275,10 +275,10 @@ describe("assistant commentary grouping", () => {
     const groups = messageGroups({
       runId: "run-a",
       messages: [
-        userMessage("Run A", 1, { __openclaw: { idempotencyKey: "run-a:user" } }),
-        userMessage("Steer A", 2, { __openclaw: { idempotencyKey: "steer-a:user" } }),
-        userMessage("Run B", 3, { __openclaw: { idempotencyKey: "run-b:user" } }),
-        userMessage("Steer B", 4, { __openclaw: { idempotencyKey: "steer-b:user" } }),
+        userMessage("Run A", 1, { __carapace: { idempotencyKey: "run-a:user" } }),
+        userMessage("Steer A", 2, { __carapace: { idempotencyKey: "steer-a:user" } }),
+        userMessage("Run B", 3, { __carapace: { idempotencyKey: "run-b:user" } }),
+        userMessage("Steer B", 4, { __carapace: { idempotencyKey: "steer-b:user" } }),
       ],
       streamSegments: [
         {
@@ -362,9 +362,9 @@ describe("assistant commentary grouping", () => {
         const groups = messageGroups({
           paneId,
           messages: [
-            userMessage("A", 100, { __openclaw: { idempotencyKey: "a:user" } }),
-            userMessage("B", 200, { __openclaw: { idempotencyKey: "b:user" } }),
-            userMessage("C", 300, { __openclaw: { idempotencyKey: "c:user" } }),
+            userMessage("A", 100, { __carapace: { idempotencyKey: "a:user" } }),
+            userMessage("B", 200, { __carapace: { idempotencyKey: "b:user" } }),
+            userMessage("C", 300, { __carapace: { idempotencyKey: "c:user" } }),
           ],
           streamSegments: boundaries.map((boundary, index) => ({
             text: "",
@@ -392,10 +392,10 @@ describe("assistant commentary grouping", () => {
         runId: "active-run",
         messages: [
           userMessage("Original", 1, {
-            __openclaw: { idempotencyKey: "original-submit:user", runId: "active-run" },
+            __carapace: { idempotencyKey: "original-submit:user", runId: "active-run" },
           }),
           userMessage("Steer", 2, {
-            __openclaw: {
+            __carapace: {
               idempotencyKey: "steer-run:user",
               steerTargetRunId: "active-run",
             },
@@ -441,7 +441,7 @@ describe("assistant commentary grouping", () => {
   it("keeps current live work above a future queued user turn when it becomes stable", () => {
     const paneId = "clock-skew-future-queue-transition";
     const activeUser = userMessage("Active prompt", 2_000, {
-      __openclaw: { idempotencyKey: "run-active:user" },
+      __carapace: { idempotencyKey: "run-active:user" },
     });
     const liveTool = toolResultMessage("call-active", "shell", "Current tool output", 1_000, {
       runId: "run-active",
@@ -475,7 +475,7 @@ describe("assistant commentary grouping", () => {
   it("keeps an active stream above a future queued user turn when it becomes stable", () => {
     const paneId = "clock-skew-stream-queue-transition";
     const activeUser = userMessage("Active prompt", 2_000, {
-      __openclaw: { idempotencyKey: "run-active:user" },
+      __carapace: { idempotencyKey: "run-active:user" },
     });
     const activeSend = queuedSend("active-send", "Active prompt", 2_000, "waiting-model", {
       sendRunId: "run-active",
@@ -514,10 +514,10 @@ describe("assistant commentary grouping", () => {
         runId: "run-active",
         messages: [
           userMessage("Active prompt", 2_000, {
-            __openclaw: { idempotencyKey: "run-active:user" },
+            __carapace: { idempotencyKey: "run-active:user" },
           }),
           userMessage("Queued follow-up", 3_000, {
-            __openclaw: { idempotencyKey: "run-future:user" },
+            __carapace: { idempotencyKey: "run-future:user" },
           }),
         ],
         stream: "Current partial reply",
@@ -553,14 +553,14 @@ describe("assistant commentary grouping", () => {
         runId: "run-active",
         messages: [
           userMessage("Original prompt", 1_000, {
-            __openclaw: {
+            __carapace: {
               id: "original-user",
               seq: 1,
               idempotencyKey: "run-active:user",
             },
           }),
           userMessage("Please run autoreview here", 3_000, {
-            __openclaw: {
+            __carapace: {
               id: "steering-user",
               seq: 2,
               idempotencyKey: "steer-send:user",
@@ -606,11 +606,11 @@ describe("assistant commentary grouping", () => {
         runId: "run-current",
         messages: [
           userMessage("Earlier prompt", 1_000, {
-            __openclaw: { idempotencyKey: "earlier-submit:user", runId: "run-earlier" },
+            __carapace: { idempotencyKey: "earlier-submit:user", runId: "run-earlier" },
           }),
           assistantMessage("Earlier reply", 1_300),
           userMessage("Current prompt", 2_000, {
-            __openclaw: { idempotencyKey: "current-submit:user", runId: "run-current" },
+            __carapace: { idempotencyKey: "current-submit:user", runId: "run-current" },
           }),
         ],
         streamSegments: [
@@ -740,14 +740,14 @@ describe("assistant commentary grouping", () => {
         source === "live terminal"
           ? rememberLiveTerminalRun(assistantMessage("Current reply", 1_000), "run-active")
           : assistantMessage("Current reply", 1_000, {
-              __openclaw: { id: "durable-reply", seq: 6, runId: "run-active" },
+              __carapace: { id: "durable-reply", seq: 6, runId: "run-active" },
             });
       const preceding = [
         userMessage("Earlier prompt", 500),
         assistantMessage("Unowned reply", 4_000),
-        assistantMessage("Unrelated reply", 300, { __openclaw: { runId: "other-run" } }),
+        assistantMessage("Unrelated reply", 300, { __carapace: { runId: "other-run" } }),
         assistantMessage("Imported reply", 2_500, {
-          __openclaw: {
+          __carapace: {
             importedFrom: "claude-cli",
             cliSessionId: "external-session",
             externalId: "external-reply",
@@ -759,7 +759,7 @@ describe("assistant commentary grouping", () => {
       if (search) {
         preceding.push(
           assistantMessage("Hidden earlier output", 950, {
-            __openclaw: { id: "hidden-output", seq: 5, runId: "run-active" },
+            __carapace: { id: "hidden-output", seq: 5, runId: "run-active" },
           }),
         );
       }
@@ -785,7 +785,7 @@ describe("assistant commentary grouping", () => {
           messages: [
             ...preceding,
             userMessage([{ type: "text", text: "Current prompt" }], 2_000, {
-              __openclaw: { idempotencyKey: "run-active:user" },
+              __carapace: { idempotencyKey: "run-active:user" },
             }),
             terminal,
           ],
@@ -920,7 +920,7 @@ describe("collapseCompletedTurnWork", () => {
     ({ identities, steerTargetRunId, durationMs, sizes }) => {
       const prompts = identities.map((identity, index) =>
         userMessage(`Prompt ${index + 1}`, index === 0 ? 1_000 : 982_000 + index - 1, {
-          __openclaw: {
+          __carapace: {
             senderId: "operator",
             ...(identity ? { idempotencyKey: `${identity}:user` } : {}),
             ...(index > 0 && steerTargetRunId ? { steerTargetRunId } : {}),
@@ -953,7 +953,7 @@ describe("collapseCompletedTurnWork", () => {
         userMessage("do it", 1_000),
         {
           role: "custom",
-          customType: "openclaw.context-compaction",
+          customType: "carapace.context-compaction",
           content: "Context compacted",
           display: true,
           excludeFromContext: true,
@@ -1058,15 +1058,15 @@ describe("collapseCompletedTurnWork", () => {
     (senderId) => {
       const messages = [
         userMessage("do it", 1_000, {
-          __openclaw: { idempotencyKey: "active-run:user", senderId: "operator" },
+          __carapace: { idempotencyKey: "active-run:user", senderId: "operator" },
         }),
         assistantMessage("Checking…", 2_000),
         toolResult("call-1", 3_000),
         userMessage("queued follow-up", 3_500, {
-          __openclaw: { idempotencyKey: "queued-run:user", senderId },
+          __carapace: { idempotencyKey: "queued-run:user", senderId },
         }),
         userMessage("continue", 4_000, {
-          __openclaw: {
+          __carapace: {
             idempotencyKey: "steer-run:user",
             senderId: "operator",
             steerTargetRunId: "active-run",
@@ -1151,7 +1151,7 @@ describe("collapseCompletedTurnWork", () => {
           role: "system",
           content: "",
           timestamp: 3_000,
-          __openclaw: { kind: "compaction", id: "c1" },
+          __carapace: { kind: "compaction", id: "c1" },
         },
         assistantMessage("Done.", 4_000),
       ],
@@ -1252,17 +1252,17 @@ describe("collapseCompletedTurnWork", () => {
       messages: [
         {
           ...toolResult("call-1", 1_000),
-          __openclaw: { id: "work-1", seq: 1, turnBoundary: true },
+          __carapace: { id: "work-1", seq: 1, turnBoundary: true },
         },
         assistantMessage("First run done.", 3_000, {
-          __openclaw: { id: "reply-1", seq: 2 },
+          __carapace: { id: "reply-1", seq: 2 },
         }),
         {
           ...toolResult("call-2", 4_000),
-          __openclaw: { id: "work-2", seq: 3, turnBoundary: true },
+          __carapace: { id: "work-2", seq: 3, turnBoundary: true },
         },
         assistantMessage("Second run done.", 9_000, {
-          __openclaw: { id: "reply-2", seq: 4 },
+          __carapace: { id: "reply-2", seq: 4 },
         }),
       ],
     });
@@ -1275,7 +1275,7 @@ describe("collapseCompletedTurnWork", () => {
   it("keeps a completed-work row keyed to its final reply as older work is prepended", () => {
     resetChatThreadState();
     const finalReply = assistantMessage("Done.", 3_000, {
-      __openclaw: { id: "final-reply", seq: 3 },
+      __carapace: { id: "final-reply", seq: 3 },
     });
     const initial = collapsedItems({
       messages: [toolResult("call-1", 2_000), finalReply],
@@ -1285,7 +1285,7 @@ describe("collapseCompletedTurnWork", () => {
     const prepended = collapsedItems({
       messages: [
         assistantMessage("Checking.", 1_000, {
-          __openclaw: { id: "older-commentary", seq: 1 },
+          __carapace: { id: "older-commentary", seq: 1 },
         }),
         toolResult("call-1", 2_000),
         finalReply,
@@ -1314,13 +1314,13 @@ describe("coalesceActivityRuns", () => {
         paneId: "activity-run-projection",
         messages: [
           toolResult("call-1", 1_000, {
-            __openclaw: { id: "tool-1", seq: 1, turnBoundary: true },
+            __carapace: { id: "tool-1", seq: 1, turnBoundary: true },
           }),
           toolResult("call-2", 2_000, {
-            __openclaw: { id: "tool-2", seq: 2, turnBoundary: true },
+            __carapace: { id: "tool-2", seq: 2, turnBoundary: true },
           }),
           toolResult("call-3", 3_000, {
-            __openclaw: { id: "tool-3", seq: 3, turnBoundary: true },
+            __carapace: { id: "tool-3", seq: 3, turnBoundary: true },
           }),
         ],
       }),
@@ -1381,7 +1381,7 @@ describe("coalesceActivityRuns", () => {
       messageGroups({
         messages: [
           userMessage("Start", 500, {
-            __openclaw: { idempotencyKey: "run-1:user" },
+            __carapace: { idempotencyKey: "run-1:user" },
           }),
         ],
       }),
@@ -1492,7 +1492,7 @@ describe("buildCachedChatItems row identity", () => {
         messageGroups({
           messages: [
             {
-              __openclaw: { idempotencyKey: "initial-send:user", seq: 1 },
+              __carapace: { idempotencyKey: "initial-send:user", seq: 1 },
               role: "user",
               content: "Initial image prompt",
               timestamp: 1,
@@ -1505,7 +1505,7 @@ describe("buildCachedChatItems row identity", () => {
         messageGroups({
           messages: [
             {
-              __openclaw: {
+              __carapace: {
                 id: "persisted-user-message",
                 idempotencyKey: "initial-send:user",
                 runId,
@@ -1530,7 +1530,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "terminal-message" },
+            __carapace: { id: "terminal-message" },
             role: "assistant",
             content: "Draft reply",
             timestamp: 1,
@@ -1543,7 +1543,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "terminal-message", seq: 42 },
+            __carapace: { id: "terminal-message", seq: 42 },
             role: "assistant",
             content: "Final reply",
             timestamp: 2,
@@ -1562,7 +1562,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "tool-message" },
+            __carapace: { id: "tool-message" },
             role: "assistant",
             toolCallId: "call-1",
             content: "Running",
@@ -1576,7 +1576,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "tool-message", seq: 43 },
+            __carapace: { id: "tool-message", seq: 43 },
             role: "assistant",
             toolCallId: "call-1",
             content: "Finished",
@@ -1593,13 +1593,13 @@ describe("buildCachedChatItems row identity", () => {
   it("preserves a same-role group key as messages are prepended and appended", () => {
     resetChatThreadState();
     const first = {
-      __openclaw: { id: "assistant-1", seq: 2 },
+      __carapace: { id: "assistant-1", seq: 2 },
       role: "assistant",
       content: "First",
       timestamp: 2,
     };
     const second = {
-      __openclaw: { id: "assistant-2", seq: 3 },
+      __carapace: { id: "assistant-2", seq: 3 },
       role: "assistant",
       content: "Second",
       timestamp: 3,
@@ -1609,7 +1609,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "assistant-0", seq: 1 },
+            __carapace: { id: "assistant-0", seq: 1 },
             role: "assistant",
             content: "Earlier",
             timestamp: 1,
@@ -1625,7 +1625,7 @@ describe("buildCachedChatItems row identity", () => {
         messages: [
           ...prepended.messages.map((entry) => entry.message),
           {
-            __openclaw: { id: "assistant-3", seq: 4 },
+            __carapace: { id: "assistant-3", seq: 4 },
             role: "assistant",
             content: "Later",
             timestamp: 4,
@@ -1643,13 +1643,13 @@ describe("buildCachedChatItems row identity", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "assistant-1", seq: 1 },
+          __carapace: { id: "assistant-1", seq: 1 },
           role: "assistant",
           content: "First run",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "assistant-2", seq: 2, turnBoundary: true },
+          __carapace: { id: "assistant-2", seq: 2, turnBoundary: true },
           role: "assistant",
           content: "Second run",
           timestamp: 2,
@@ -1665,14 +1665,14 @@ describe("buildCachedChatItems row identity", () => {
   it("does not reclaim a group key naturally owned by another reordered group", () => {
     resetChatThreadState();
     const first = {
-      __openclaw: { id: "first", seq: 1 },
+      __carapace: { id: "first", seq: 1 },
       role: "user",
       senderLabel: "same",
       content: "First",
       timestamp: 1,
     };
     const second = {
-      __openclaw: { id: "second", seq: 2 },
+      __carapace: { id: "second", seq: 2 },
       role: "user",
       senderLabel: "same",
       content: "Second",
@@ -1692,13 +1692,13 @@ describe("buildCachedChatItems row identity", () => {
     resetChatThreadState();
     const siblings = [
       {
-        __openclaw: { seq: 2 },
+        __carapace: { seq: 2 },
         role: "assistant",
         content: "First projection",
         timestamp: 2,
       },
       {
-        __openclaw: { seq: 2 },
+        __carapace: { seq: 2 },
         role: "assistant",
         content: "Second projection",
         timestamp: 2,
@@ -1709,19 +1709,19 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "older-user", seq: 1 },
+            __carapace: { id: "older-user", seq: 1 },
             role: "user",
             content: "Earlier",
             timestamp: 1,
           },
           {
-            __openclaw: { seq: 2 },
+            __carapace: { seq: 2 },
             role: "assistant",
             content: "Earlier projection from the same record",
             timestamp: 2,
           },
           ...siblings.map((message) => ({
-            __openclaw: { seq: message["__openclaw"].seq },
+            __carapace: { seq: message["__carapace"].seq },
             role: message.role,
             content: message.content,
             timestamp: message.timestamp,
@@ -1750,9 +1750,9 @@ describe("buildCachedChatItems working spark", () => {
     toolCallId: "tool-1",
     content: [{ type: "toolcall", name: "exec", arguments: {} }],
     timestamp: 1_000,
-    __openclawToolStreamLive: true,
-    __openclawToolStreamResultReceived: resultReceived,
-    __openclawToolStreamReceivedAt: 1_000,
+    __carapaceToolStreamLive: true,
+    __carapaceToolStreamResultReceived: resultReceived,
+    __carapaceToolStreamReceivedAt: 1_000,
   });
 
   it("shows the spark while a run works with nothing streaming", () => {
@@ -2122,14 +2122,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         userMessage("first", 1000, {
-          __openclaw: {
+          __carapace: {
             senderId: "shared",
             senderName: "Same",
             senderIdentity: { type: "profile", id: "shared" },
           },
         }),
         userMessage("second", 1001, {
-          __openclaw: {
+          __carapace: {
             senderId: "shared",
             senderName: "Renamed",
             senderProfileAvatarUrl: "/api/users/shared/avatar?v=2",
@@ -2137,7 +2137,7 @@ describe("buildCachedChatItems", () => {
           },
         }),
         userMessage("third", 1002, {
-          __openclaw: {
+          __carapace: {
             senderId: "shared",
             senderName: "Renamed",
             senderProfileAvatarUrl: "/api/users/shared/avatar?v=2",
@@ -2161,11 +2161,11 @@ describe("buildCachedChatItems", () => {
       messages: [
         userMessage("first", 1000, {
           senderLabel: "Iris",
-          __openclaw: { senderId: "iris", senderName: "Iris" },
+          __carapace: { senderId: "iris", senderName: "Iris" },
         }),
         userMessage("second", 1001, {
           senderLabel: "Joaquin De Rojas",
-          __openclaw: { senderId: "joaquin", senderName: "Joaquin De Rojas" },
+          __carapace: { senderId: "joaquin", senderName: "Joaquin De Rojas" },
         }),
       ],
     });
@@ -2200,7 +2200,7 @@ describe("buildCachedChatItems", () => {
       userMessage("before", 999),
       userMessage("[System] Continue the interrupted turn.", 1000, {
         provenance: { kind: "internal_system", sourceTool: "main_session_restart_recovery" },
-        __openclaw: { id: "restart-recovery", idempotencyKey: "run-recovered:user" },
+        __carapace: { id: "restart-recovery", idempotencyKey: "run-recovered:user" },
       }),
       userMessage("[System] Gateway restarted during update 2026.8.2 -> 2026.8.3.", 1001, {
         provenance: { kind: "internal_system", sourceTool: "restart-sentinel" },
@@ -2259,7 +2259,7 @@ describe("buildCachedChatItems", () => {
             1001,
             {
               provenance: { kind: "internal_system", sourceTool: "cli_harness_context" },
-              __openclaw: {
+              __carapace: {
                 id: "skill-meta-1",
                 importedFrom: "claude-cli",
                 cliSessionId: "cli-1",
@@ -2292,11 +2292,11 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         userMessage("Alice asks", 1000, {
-          __openclaw: { senderId: "alice", senderName: "Alice" },
+          __carapace: { senderId: "alice", senderName: "Alice" },
         }),
         assistantMessage("For Alice", 1001),
         userMessage("Bob asks", 1002, {
-          __openclaw: { senderId: "bob", senderName: "Bob" },
+          __carapace: { senderId: "bob", senderName: "Bob" },
         }),
         userMessage("Local follow-up", 1003),
         assistantMessage("For Bob", 1004),
@@ -2314,7 +2314,7 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         userMessage("Alice asks", 1000, {
-          __openclaw: { senderId: "alice", senderName: "Alice" },
+          __carapace: { senderId: "alice", senderName: "Alice" },
         }),
         assistantMessage("For Alice", 1001),
       ],
@@ -2378,7 +2378,7 @@ describe("buildCachedChatItems", () => {
   it("coalesces adjacent tool calls and results into one activity item", () => {
     const groups = messageGroups({
       messages: [
-        toolUseMessage("call-shell", "bash", { command: "run openclaw doctor" }, 1000),
+        toolUseMessage("call-shell", "bash", { command: "run carapace doctor" }, 1000),
         toolResultMessage(
           "call-shell",
           "bash",
@@ -2595,7 +2595,7 @@ describe("buildCachedChatItems", () => {
       toolResultMessage(id, "exec", [{ type: "text", text }], 20, { runId });
     const canonical = ({ runId, ...message }: Record<string, unknown>, seq: number) => ({
       ...message,
-      __openclaw: { id: `tool-entry-${seq}`, seq, runId },
+      __carapace: { id: `tool-entry-${seq}`, seq, runId },
     });
     const snapshot = (id: string, completed = true) =>
       assistantMessage(
@@ -2607,8 +2607,8 @@ describe("buildCachedChatItems", () => {
         {
           runId: "run-a",
           toolCallId: id,
-          __openclawToolStreamLive: true,
-          __openclawToolStreamResultReceived: completed,
+          __carapaceToolStreamLive: true,
+          __carapaceToolStreamResultReceived: completed,
         },
       );
     const cardsFor = (messages: unknown[], toolMessages: unknown[] = []) =>
@@ -2657,11 +2657,11 @@ describe("buildCachedChatItems", () => {
         );
         const history = [
           userMessage("Original request", 1, {
-            __openclaw: { id: "user-entry", seq: 1 },
+            __carapace: { id: "user-entry", seq: 1 },
           }),
           ...persisted,
           userMessage("Follow up after the command", 15, {
-            __openclaw: { idempotencyKey: "steer-send:user" },
+            __carapace: { idempotencyKey: "steer-send:user" },
           }),
         ];
         const before = structuredClone(history);
@@ -2794,7 +2794,7 @@ describe("buildCachedChatItems", () => {
           { type: "text", text: "After calls" },
         ],
         10,
-        { runId: "run-a", __openclaw: { id: "transcript-call" } },
+        { runId: "run-a", __carapace: { id: "transcript-call" } },
       );
       const terminal = result("a", "failed");
       terminal.content = [{ type: "text", text: "failed" }, attachment];
@@ -2840,8 +2840,8 @@ describe("buildCachedChatItems", () => {
           10,
           {
             runId: "run-a",
-            __openclawToolStreamLive: true,
-            __openclawToolStreamResultReceived: false,
+            __carapaceToolStreamLive: true,
+            __carapaceToolStreamResultReceived: false,
           },
         );
         const cards = cardsFor([
@@ -2876,7 +2876,7 @@ describe("buildCachedChatItems", () => {
         view: {
           backend: "canvas",
           id: "cv_count",
-          url: "/__openclaw__/canvas/documents/cv_count/index.html",
+          url: "/__carapace__/canvas/documents/cv_count/index.html",
           title: "Preview",
         },
         presentation: { target: "assistant_message" },
@@ -2895,7 +2895,7 @@ describe("buildCachedChatItems", () => {
           messageId: "result-a",
           details: preview,
         },
-        { ...result("b", "ready", undefined), __openclaw: { id: "result-b" } },
+        { ...result("b", "ready", undefined), __carapace: { id: "result-b" } },
       ]);
       expect(cards).toHaveLength(2);
       expect(cards.map((card) => card.messageId)).toEqual(["result-a", "result-b"]);
@@ -2964,7 +2964,7 @@ describe("buildCachedChatItems", () => {
     it("keeps per-call live diffs and conflicting-name outputs independent inside a batch", () => {
       const live = ["a", "b"].map((id, index) =>
         Object.assign(snapshot(id, false), {
-          __openclawToolStreamDiffStat: { added: index + 1, removed: 0 },
+          __carapaceToolStreamDiffStat: { added: index + 1, removed: 0 },
         }),
       );
       const cards = cardsFor(
@@ -3216,10 +3216,10 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         assistantMessage([{ type: "text", text: "Same update" }], 1, {
-          __openclaw: { seq: 7 },
+          __carapace: { seq: 7 },
         }),
         assistantMessage([{ type: "text", text: "Same update" }], 2, {
-          __openclaw: { seq: 8 },
+          __carapace: { seq: 8 },
         }),
       ],
     });
@@ -3245,16 +3245,16 @@ describe("buildCachedChatItems", () => {
       nativeText: "Found it.",
     },
     {
-      name: "deduplicates relay-labeled assistant copies by OpenClaw transcript metadata id",
-      relayIdentity: { __openclaw: { id: "reply-3" } },
-      nativeIdentity: { __openclaw: { id: "reply-3" } },
+      name: "deduplicates relay-labeled assistant copies by Carapace transcript metadata id",
+      relayIdentity: { __carapace: { id: "reply-3" } },
+      nativeIdentity: { __carapace: { id: "reply-3" } },
       relayText: "Parzival On it.",
       nativeText: "On it.",
     },
     {
-      name: "deduplicates relay-labeled assistant copies by OpenClaw metadata before surface ids",
-      relayIdentity: { id: "relay-surface-copy", __openclaw: { id: "reply-4" } },
-      nativeIdentity: { id: "native-surface-copy", __openclaw: { id: "reply-4" } },
+      name: "deduplicates relay-labeled assistant copies by Carapace metadata before surface ids",
+      relayIdentity: { id: "relay-surface-copy", __carapace: { id: "reply-4" } },
+      nativeIdentity: { id: "native-surface-copy", __carapace: { id: "reply-4" } },
       relayText: "Parzival Ship it.",
       nativeText: "Ship it.",
     },
@@ -3281,10 +3281,10 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         assistantMessage([{ type: "text", text: "Draft one" }], 1, {
-          __openclaw: { id: "reply-5" },
+          __carapace: { id: "reply-5" },
         }),
         assistantMessage([{ type: "text", text: "Draft two" }], 2, {
-          __openclaw: { id: "reply-5" },
+          __carapace: { id: "reply-5" },
         }),
       ],
     });
@@ -3316,11 +3316,11 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         assistantMessage([{ type: "text", text: relayText }], 1, {
-          __openclaw: { id },
+          __carapace: { id },
           senderLabel: "Parzival",
         }),
         assistantMessage([{ type: "text", text: nativeText }], 2, {
-          __openclaw: { id },
+          __carapace: { id },
         }),
       ],
     });
@@ -3338,11 +3338,11 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         assistantMessage([{ type: "text", text: "Parzival Draft one" }], 1, {
-          __openclaw: { id: "reply-6" },
+          __carapace: { id: "reply-6" },
           senderLabel: "Parzival",
         }),
         assistantMessage([{ type: "text", text: "Parzival Draft two" }], 2, {
-          __openclaw: { id: "reply-6" },
+          __carapace: { id: "reply-6" },
           senderLabel: "Parzival",
         }),
       ],
@@ -3392,7 +3392,7 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: {
+          __carapace: {
             id: "canonical-web-user",
             idempotencyKey: "web-same-text-run:user",
             seq: 1,
@@ -3402,7 +3402,7 @@ describe("buildCachedChatItems", () => {
           timestamp: 1,
         },
         {
-          __openclaw: {
+          __carapace: {
             id: "canonical-tui-user",
             idempotencyKey: "tui-same-text-run:user",
             seq: 2,
@@ -3416,10 +3416,10 @@ describe("buildCachedChatItems", () => {
 
     expect(groups.map((group) => group.role)).toEqual(["user", "user"]);
     expect(groups.map((group) => group.messages.length)).toEqual([1, 1]);
-    expect(messageRecord(groupAt(groups, 0), 0)["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 0), 0)["__carapace"]).toMatchObject({
       id: "canonical-web-user",
     });
-    expect(messageRecord(groupAt(groups, 1), 0)["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 1), 0)["__carapace"]).toMatchObject({
       id: "canonical-tui-user",
     });
     expect(messageAt(groupAt(groups, 0), 0).duplicateCount).toBeUndefined();
@@ -3433,7 +3433,7 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: [{ type: "text", text: "Imported clients sent the same prompt." }],
           timestamp: 1,
-          __openclaw: {
+          __carapace: {
             id: "provider-local-user",
             externalId: "provider-local-user",
             importedFrom: "claude-cli",
@@ -3445,7 +3445,7 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: [{ type: "text", text: "Imported clients sent the same prompt." }],
           timestamp: 2,
-          __openclaw: {
+          __carapace: {
             id: "provider-local-user",
             externalId: "provider-local-user",
             importedFrom: "claude-cli",
@@ -3458,10 +3458,10 @@ describe("buildCachedChatItems", () => {
 
     expect(groups).toHaveLength(1);
     expect(groupAt(groups, 0).messages).toHaveLength(2);
-    expect(messageRecord(groupAt(groups, 0), 0)["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 0), 0)["__carapace"]).toMatchObject({
       cliSessionId: "first-cli-session",
     });
-    expect(messageRecord(groupAt(groups, 0), 1)["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 0), 1)["__carapace"]).toMatchObject({
       cliSessionId: "second-cli-session",
     });
   });
@@ -3473,13 +3473,13 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: [{ type: "text", text: "Native and imported prompts coincide." }],
           timestamp: 1,
-          __openclaw: { id: "colliding-user", seq: 1 },
+          __carapace: { id: "colliding-user", seq: 1 },
         },
         {
           role: "user",
           content: [{ type: "text", text: "Native and imported prompts coincide." }],
           timestamp: 2,
-          __openclaw: {
+          __carapace: {
             id: "colliding-user",
             externalId: "colliding-user",
             importedFrom: "claude-cli",
@@ -3492,11 +3492,11 @@ describe("buildCachedChatItems", () => {
 
     expect(groups).toHaveLength(1);
     expect(groupAt(groups, 0).messages).toHaveLength(2);
-    expect(messageRecord(groupAt(groups, 0), 0)["__openclaw"]).toEqual({
+    expect(messageRecord(groupAt(groups, 0), 0)["__carapace"]).toEqual({
       id: "colliding-user",
       seq: 1,
     });
-    expect(messageRecord(groupAt(groups, 0), 1)["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 0), 1)["__carapace"]).toMatchObject({
       cliSessionId: "imported-cli-session",
     });
   });
@@ -3508,7 +3508,7 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: [{ type: "text", text: "Incomplete imports can share provider IDs." }],
           timestamp: 1,
-          __openclaw: {
+          __carapace: {
             id: "incomplete-provider-user",
             externalId: "incomplete-provider-user",
             importedFrom: "claude-cli",
@@ -3518,7 +3518,7 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: [{ type: "text", text: "Incomplete imports can share provider IDs." }],
           timestamp: 2,
-          __openclaw: {
+          __carapace: {
             id: "incomplete-provider-user",
             externalId: "incomplete-provider-user",
             importedFrom: "claude-cli",
@@ -3542,13 +3542,13 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: metadata,
+          __carapace: metadata,
           role: "user",
           content: [{ type: "text", text: "This prompt was delivered twice." }],
           timestamp: 1,
         },
         {
-          __openclaw: { ...metadata },
+          __carapace: { ...metadata },
           role: "user",
           content: [{ type: "text", text: "This prompt was delivered twice." }],
           timestamp: 2,
@@ -3566,14 +3566,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "user-1" },
+          __carapace: { id: "user-1" },
           role: "user",
           content: [{ type: "text", text: "Alice hello" }],
           senderLabel: "Alice",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "user-1" },
+          __carapace: { id: "user-1" },
           role: "user",
           content: [{ type: "text", text: "hello" }],
           timestamp: 2,
@@ -3951,7 +3951,7 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         userMessage(SENDER_METADATA_BLOCK, 1, {
-          senderLabel: "openclaw-control-ui",
+          senderLabel: "carapace-control-ui",
         }),
       ],
     });
@@ -4172,7 +4172,7 @@ describe("buildCachedChatItems", () => {
     });
 
     expect(groupAt(groups, 1).messages[0]?.message).toMatchObject({
-      __openclaw: { replyToId: "transcript-123" },
+      __carapace: { replyToId: "transcript-123" },
     });
   });
 
@@ -4273,7 +4273,7 @@ describe("buildCachedChatItems", () => {
       const groups = messageGroups({
         messages: [
           userMessage("accepted prompt", 1, {
-            __openclaw: { idempotencyKey: "accepted-run:user", seq: 1 },
+            __carapace: { idempotencyKey: "accepted-run:user", seq: 1 },
           }),
         ],
         queue,
@@ -4282,7 +4282,7 @@ describe("buildCachedChatItems", () => {
       expect(groups).toHaveLength(1);
       expect(groupAt(groups, 0).messages).toHaveLength(1);
       expect(messageAt(groupAt(groups, 0), 0).key).toBe(messageAt(groupAt(pending, 0), 0).key);
-      expect(messageRecord(groupAt(groups, 0))["__openclaw"]).toMatchObject({
+      expect(messageRecord(groupAt(groups, 0))["__carapace"]).toMatchObject({
         idempotencyKey: "accepted-run:user",
         seq: 1,
       });
@@ -4307,7 +4307,7 @@ describe("buildCachedChatItems", () => {
       expect(message).toMatchObject({
         timestamp: 1,
         content: [{ type: "text", text: "retry me from the transcript" }],
-        __openclaw: {
+        __carapace: {
           id: "attempted-send-1",
           kind: "pending-send",
           state: sendState,
@@ -4609,7 +4609,7 @@ describe("buildCachedChatItems", () => {
                   surface: "assistant_message",
                   render: "url",
                   viewId,
-                  url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+                  url: `/__carapace__/canvas/documents/${viewId}/index.html`,
                   sandbox: "scripts",
                 },
               },
@@ -4631,7 +4631,7 @@ describe("buildCachedChatItems", () => {
   )("preserves rich $kind metadata over a shortcode from $source", ({ source, kind }) => {
     const viewId = "cv_rich_shortcode";
     const callId = "call-rich-shortcode";
-    const url = `/__openclaw__/canvas/documents/${viewId}/index.html`;
+    const url = `/__carapace__/canvas/documents/${viewId}/index.html`;
     const boardOutput = JSON.stringify({
       kind: "canvas",
       view: { id: viewId, url, title: "Widget", boardWidgetName: "saved-widget" },
@@ -4694,7 +4694,7 @@ describe("buildCachedChatItems", () => {
         kind: "canvas",
         surface: "assistant_message",
         render: "url",
-        url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+        url: `/__carapace__/canvas/documents/${viewId}/index.html`,
       },
     };
     const groups = messageGroups({
@@ -4791,7 +4791,7 @@ describe("buildCachedChatItems", () => {
               view: {
                 backend: "canvas",
                 id: "cv_generic_inline",
-                url: "/__openclaw__/canvas/documents/cv_generic_inline/index.html",
+                url: "/__carapace__/canvas/documents/cv_generic_inline/index.html",
                 title: "Inline generic preview",
                 preferred_height: 420,
               },
@@ -5292,14 +5292,14 @@ describe("thread item cache", () => {
   it("sender provenance refreshes reply display without changing the person", () => {
     resetChatThreadState();
     const alice = userMessage("first", 1, {
-      __openclaw: {
+      __carapace: {
         senderId: "alice",
         senderName: "Alice",
         senderIdentity: { type: "profile", id: "alice" },
       },
     });
     const bob = userMessage("second", 2, {
-      __openclaw: {
+      __carapace: {
         senderId: "bob",
         senderName: "Bob",
         senderIdentity: { type: "profile", id: "bob" },
@@ -5309,7 +5309,7 @@ describe("thread item cache", () => {
     const input = createProps({ messages: [alice, bob, reply] });
     buildCachedChatItems(input);
     const renamed = userMessage("second", 2, {
-      __openclaw: {
+      __carapace: {
         senderId: "bob",
         senderName: "Bobby",
         senderIdentity: { type: "profile", id: "bob" },
@@ -5328,7 +5328,7 @@ describe("thread item cache", () => {
     const groups = messageGroups({
       messages: [
         userMessage("same", 1, {
-          __openclaw: {
+          __carapace: {
             seq: 1,
             senderId: "shared",
             senderName: "Same",
@@ -5336,7 +5336,7 @@ describe("thread item cache", () => {
           },
         }),
         userMessage("same", 2, {
-          __openclaw: {
+          __carapace: {
             seq: 2,
             senderId: "shared",
             senderName: "Same",
@@ -5419,9 +5419,9 @@ describe("thread item cache", () => {
     const input = createProps({
       runId: "active-run",
       messages: [
-        userMessage("Original prompt", 1, { __openclaw: { idempotencyKey: "active-run:user" } }),
+        userMessage("Original prompt", 1, { __carapace: { idempotencyKey: "active-run:user" } }),
         userMessage("Steer prompt", 4, {
-          __openclaw: { idempotencyKey: "steer-run:user", steerTargetRunId: "active-run" },
+          __carapace: { idempotencyKey: "steer-run:user", steerTargetRunId: "active-run" },
         }),
       ],
       streamSegments: [
@@ -5548,7 +5548,7 @@ function createAssistantCanvasBlock(params: { suffix: string }) {
       render: "url",
       viewId,
       title: "Inline demo",
-      url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+      url: `/__carapace__/canvas/documents/${viewId}/index.html`,
       preferredHeight: 360,
     },
   };
@@ -5563,7 +5563,7 @@ function mcpAppCanvasBlock(viewId: string, toolCallId: string) {
       render: "url",
       viewId,
       title: "Demo App",
-      url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+      url: `/__carapace__/canvas/documents/${viewId}/index.html`,
       sandbox: "scripts",
       mcpApp: {
         viewId,
@@ -5611,8 +5611,8 @@ function mcpAppLiveResult(viewId: string, toolCallId: string, timestamp: number 
     {
       toolCallId,
       runId: "run-live",
-      __openclawToolStreamLive: true,
-      __openclawToolStreamResultReceived: true,
+      __carapaceToolStreamLive: true,
+      __carapaceToolStreamResultReceived: true,
     },
   );
 }

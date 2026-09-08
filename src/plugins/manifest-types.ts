@@ -1,5 +1,5 @@
-import type { ModelPricingProvider } from "@openclaw/model-catalog-core/model-catalog-pricing";
-import type { ModelCatalog } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { ModelPricingProvider } from "@carapace/model-catalog-core/model-catalog-pricing";
+import type { ModelCatalog } from "@carapace/model-catalog-core/model-catalog-types";
 import type { ChannelConfigRuntimeSchema } from "../channels/plugins/types.config.js";
 import type { ConfigUiPresentation } from "../shared/config-ui-hints-types.js";
 import type { JsonSchemaObject } from "../shared/json-schema.types.js";
@@ -19,7 +19,7 @@ export type PluginConfigUiHint = {
 };
 
 /** Top-level plugin manifest format. */
-export type PluginFormat = "openclaw" | "bundle";
+export type PluginFormat = "carapace" | "bundle";
 
 /** Supported external bundle manifest formats. */
 export type PluginBundleFormat = "agent" | "codex" | "claude" | "cursor";
@@ -46,7 +46,7 @@ export type PluginDiagnostic = {
   sdkCompatibility?: {
     seam: string;
     coreVersion: string;
-    builtWithOpenClawVersion?: string;
+    builtWithCarapaceVersion?: string;
     nestedSdk: boolean;
   };
 };
@@ -247,7 +247,7 @@ export type PluginManifestDoctorContract = {
   resolveSessionStoreAgentIds?: boolean;
   /**
    * @deprecated Declare static ownership in top-level sessionRouteStateOwners instead.
-   * Removal plan: remove the module fallback in OpenClaw 2027.1 after external plugins migrate.
+   * Removal plan: remove the module fallback in Carapace 2027.1 after external plugins migrate.
    */
   sessionRouteStateOwners?: boolean;
   /**
@@ -265,7 +265,7 @@ export type PluginManifestDoctorContract = {
 };
 
 export type PluginManifestQaRunner = {
-  /** Subcommand mounted beneath `openclaw qa`, for example `matrix`. */
+  /** Subcommand mounted beneath `carapace qa`, for example `matrix`. */
   commandName: string;
   /** Optional user-facing help text for fallback host stubs. */
   description?: string;

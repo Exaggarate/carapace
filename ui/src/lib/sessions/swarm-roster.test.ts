@@ -24,7 +24,7 @@ function result(rows: GatewaySessionRow[], offset: number, totalCount: number): 
   const nextOffset = offset + rows.length;
   return {
     ts: Date.now(),
-    path: "state/openclaw.sqlite",
+    path: "state/carapace.sqlite",
     count: rows.length,
     totalCount,
     limitApplied: 10_000,

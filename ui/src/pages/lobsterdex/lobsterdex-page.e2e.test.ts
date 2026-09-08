@@ -69,7 +69,7 @@ suite.define(() => {
         const response = await page.goto(`${suite.server.baseUrl}settings/lobsterdex`);
         expect(response?.status()).toBe(200);
 
-        const pageRoot = page.locator("openclaw-lobsterdex-page");
+        const pageRoot = page.locator("carapace-lobsterdex-page");
         const copyButtons = pageRoot.getByRole("button", { name: "Copy link" });
         await expect.poll(() => copyButtons.count()).toBeGreaterThan(1);
         const crimson = copyButtons.nth(0);

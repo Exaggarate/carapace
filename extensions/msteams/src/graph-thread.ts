@@ -1,4 +1,4 @@
-import { decodeHtmlEntities } from "openclaw/plugin-sdk/html-entity-runtime";
+import { decodeHtmlEntities } from "carapace/plugin-sdk/html-entity-runtime";
 import { fetchGraphJson, type GraphResponse } from "./graph.js";
 import type { MSTeamsRequestDeadline } from "./request-timeout.js";
 

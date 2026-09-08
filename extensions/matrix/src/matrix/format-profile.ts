@@ -1,6 +1,6 @@
 // Matrix helper module declares formatting capabilities and shared projections.
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { convertMarkdownTables, FormatCapabilityProfile } from "openclaw/plugin-sdk/text-chunking";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
+import { convertMarkdownTables, FormatCapabilityProfile } from "carapace/plugin-sdk/text-chunking";
 
 export type MatrixSpoilerMarkers = { open: string; close: string; padding: string };
 export type MatrixSpoilerProtection = { markdown: string; markers?: MatrixSpoilerMarkers };

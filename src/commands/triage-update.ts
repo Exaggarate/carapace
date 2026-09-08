@@ -321,7 +321,7 @@ export async function writeTriageUpdateFailure(
   const body = `${JSON.stringify(sanitized)}\n`;
   const outputPath =
     options.outputPath ??
-    path.join(stateDir, "logs", "support", `openclaw-update-failure-${randomUUID()}.json`);
+    path.join(stateDir, "logs", "support", `carapace-update-failure-${randomUUID()}.json`);
   // The managed helper's private handoff keeps the latest complete outcome after cleanup.
   await writeTextAtomic(outputPath, body, { mode: 0o600, dirMode: 0o700 });
   return outputPath;

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import {
   advanceCronActiveJobGeneration,
   clearCronJobActive,
@@ -72,7 +72,7 @@ describe.each([
         job.failureAlert = { after: 1, cooldownMs: 60_000, channel: "last" };
       }
       await writeCronStoreSnapshot({ storePath, jobs: [job] });
-      const failureDatabase = writeFailure ? openOpenClawStateDatabase().db : undefined;
+      const failureDatabase = writeFailure ? openCarapaceStateDatabase().db : undefined;
       const started = createDeferred();
       const completion = createDeferred<{ status: CronRunStatus; error?: string }>();
       const runCommandJob = vi.fn<NonNullable<CronServiceDeps["runCommandJob"]>>(async () => {
@@ -164,7 +164,7 @@ describe.each([
           const previous = inspectActiveCronRunReceipt({ storePath, jobId: job.id })!;
           // Simulate an authoritative replacement while the retired caller still
           // holds its result; process-local settlement cannot grant it ownership.
-          runOpenClawStateWriteTransaction(({ db }) =>
+          runCarapaceStateWriteTransaction(({ db }) =>
             finishCronRunReceiptInDatabase({
               database: db,
               handle: previous,
@@ -178,7 +178,7 @@ describe.each([
             agentId: "alpha",
             startedAtMs: nowMs,
           });
-          successor = runOpenClawStateWriteTransaction(({ db }) =>
+          successor = runCarapaceStateWriteTransaction(({ db }) =>
             claimCronRunReceiptInDatabase({
               database: db,
               prepared,

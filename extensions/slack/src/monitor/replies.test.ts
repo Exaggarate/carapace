@@ -1,7 +1,7 @@
 // Slack tests cover replies plugin behavior.
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { createReplyDispatcher } from "openclaw/plugin-sdk/reply-runtime";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { createReplyDispatcher } from "carapace/plugin-sdk/reply-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMock = vi.fn();
@@ -15,16 +15,16 @@ const messageHookRunner = vi.hoisted(() => ({
   runMessageSent: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/hook-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/hook-runtime")>();
+vi.mock("carapace/plugin-sdk/hook-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/hook-runtime")>();
   return {
     ...actual,
     triggerInternalHook,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/plugin-runtime")>();
+vi.mock("carapace/plugin-sdk/plugin-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/plugin-runtime")>();
   return {
     ...actual,
     getGlobalHookRunner: () => messageHookRunner,
@@ -264,7 +264,7 @@ describe("deliverReplies identity passthrough", () => {
       .mockResolvedValueOnce({ messageId: "media-ts", channelId: "C123" })
       .mockResolvedValueOnce({ messageId: "chart-ts", channelId: "C123" });
     const identity = { username: "Bot", iconEmoji: ":chart_with_upwards_trend:" };
-    const metadata = { event_type: "openclaw_test", event_payload: { source: "chart" } };
+    const metadata = { event_type: "carapace_test", event_payload: { source: "chart" } };
     const listenerClient = { chat: { postMessage: vi.fn() } } as never;
     const eventScope = {
       teamId: "T1",
@@ -394,7 +394,7 @@ describe("deliverReplies identity passthrough", () => {
         elements: [
           {
             type: "button",
-            action_id: "openclaw:reply_button",
+            action_id: "carapace:reply_button",
             text: { type: "plain_text", text: "Option A" },
             value: "reply_1_option_a",
           },
@@ -456,7 +456,7 @@ describe("deliverReplies identity passthrough", () => {
     expect(blocks[0]?.type).toBe("section");
     expect(blocks[1]?.type).toBe("actions");
     expect(blocks[1]?.elements).toHaveLength(1);
-    expect(blocks[1]?.elements?.[0]?.action_id).toBe("openclaw:reply_button:1:1");
+    expect(blocks[1]?.elements?.[0]?.action_id).toBe("carapace:reply_button:1:1");
     expect(blocks[1]?.elements?.[0]?.style).toBe("primary");
     expect(blocks[1]?.elements?.[0]?.value).toBe("approve");
   });
@@ -679,7 +679,7 @@ describe("deliverSlackSlashReplies chunking", () => {
         elements: [
           {
             type: "button",
-            action_id: "openclaw:reply_button",
+            action_id: "carapace:reply_button",
             text: { type: "plain_text", text: "Refresh" },
             value: "refresh",
           },
@@ -864,7 +864,7 @@ describe("deliverSlackSlashReplies chunking", () => {
       elements: [
         {
           type: "button",
-          action_id: "openclaw:reply_button",
+          action_id: "carapace:reply_button",
           text: { type: "plain_text", text: "Refresh" },
           value: "refresh",
         },

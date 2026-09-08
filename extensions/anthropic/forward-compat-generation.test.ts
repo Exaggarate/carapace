@@ -1,5 +1,5 @@
 // Anthropic tests cover forward-compat resolution for unreleased Claude ids.
-import { supportsClaudeAdaptiveThinking } from "openclaw/plugin-sdk/provider-model-shared";
+import { supportsClaudeAdaptiveThinking } from "carapace/plugin-sdk/provider-model-shared";
 import { describe, expect, it } from "vitest";
 import { buildAnthropicProvider } from "./register.runtime.js";
 
@@ -79,7 +79,7 @@ describe("unreleased Claude generations", () => {
       expect(resolveModel(id)?.compat, id).toEqual({ codeMode: "preferred" });
     }
     // The Claude CLI provider rows are intentionally unflagged: those runs use
-    // the CLI harness where OpenClaw code mode does not apply.
+    // the CLI harness where Carapace code mode does not apply.
     expect(resolveModel("claude-opus-5", "claude-cli")?.compat).toBeUndefined();
   });
 

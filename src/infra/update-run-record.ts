@@ -1,4 +1,4 @@
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { z } from "zod";
 import type { UpdateRunRecordSchema } from "./update-run-schema.js";
 import type { UpdateStepResult } from "./update-runner-types.js";

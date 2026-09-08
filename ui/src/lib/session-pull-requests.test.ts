@@ -138,7 +138,7 @@ describe("session pull request snapshot store", () => {
       const store = sessionPullRequestsForGateway(harness.gateway);
       const key = "agent:main:demo";
       const owner = {};
-      const repository = { owner: "openclaw", repo: "openclaw" };
+      const repository = { owner: "carapace", repo: "carapace" };
       store.watch(owner, [key]);
       await flushSync();
       harness.emit({
@@ -158,10 +158,10 @@ describe("session pull request snapshot store", () => {
   );
 
   it.each([
-    { status: "unavailable", repository: { owner: "other", repo: "openclaw" } },
-    { status: "unavailable", repository: { owner: "openclaw", repo: "other" } },
-    { status: "rate-limited", repository: { owner: "other", repo: "openclaw" } },
-    { status: "rate-limited", repository: { owner: "openclaw", repo: "other" } },
+    { status: "unavailable", repository: { owner: "other", repo: "carapace" } },
+    { status: "unavailable", repository: { owner: "carapace", repo: "other" } },
+    { status: "rate-limited", repository: { owner: "other", repo: "carapace" } },
+    { status: "rate-limited", repository: { owner: "carapace", repo: "other" } },
   ] as const)(
     "drops stale PR facts when the repository changes during $status to $repository",
     async ({ status, repository }) => {
@@ -175,8 +175,8 @@ describe("session pull request snapshot store", () => {
         sessions: {
           [key]: {
             pullRequests: [{ number: 1, state: "open" }],
-            repository: { owner: "openclaw", repo: "openclaw" },
-            branch: { owner: "openclaw", repo: "openclaw", branch: "feature/demo" },
+            repository: { owner: "carapace", repo: "carapace" },
+            branch: { owner: "carapace", repo: "carapace", branch: "feature/demo" },
             rateLimited: false,
             status: "ready",
           },
@@ -631,7 +631,7 @@ describe("session pull request snapshot store", () => {
       sessions: {
         [key]: {
           pullRequests: [{ number: 1, state: "open" }],
-          repository: { owner: "openclaw", repo: "openclaw" },
+          repository: { owner: "carapace", repo: "carapace" },
           rateLimited: false,
           status: "ready",
         },
@@ -641,7 +641,7 @@ describe("session pull request snapshot store", () => {
       sessions: {
         [key]: {
           pullRequests: [],
-          branch: { owner: "openclaw", repo: "openclaw", branch: "feature/demo" },
+          branch: { owner: "carapace", repo: "carapace", branch: "feature/demo" },
           rateLimited: true,
           status: "rate-limited",
         },
@@ -651,7 +651,7 @@ describe("session pull request snapshot store", () => {
     expect(store.get(key)).toMatchObject({
       pullRequests: [{ number: 1, state: "open" }],
       branch: { branch: "feature/demo" },
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       rateLimited: true,
       status: "rate-limited",
     });
@@ -675,7 +675,7 @@ describe("session pull request snapshot store", () => {
     });
     expect(store.get(key)).toMatchObject({
       pullRequests: [{ number: 1, state: "open" }],
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       status: "unavailable",
     });
     store.unwatch(owner);

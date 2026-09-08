@@ -1,7 +1,7 @@
 /**
  * Resolves configured native harness policy for agent ids.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ProviderRouteOverridePresence } from "../../plugin-sdk/provider-model-types.js";
 import {
   AUTO_AGENT_RUNTIME_ID,
@@ -31,7 +31,7 @@ export function resolveAgentHarnessPolicy(
     modelApi?: string | null;
     modelBaseUrl?: unknown;
     requestTransportOverrides?: ProviderRouteOverridePresence;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
   } & AgentRuntimePolicyScope,
 ): AgentHarnessPolicy {

@@ -3,21 +3,21 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawAgentDatabase,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceAgentDatabase,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import "./test-runtime-mocks.js";
 import { closeAllMemoryIndexManagers, MemoryIndexManager } from "./manager.js";
 
-const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalStateDir = process.env.CARAPACE_STATE_DIR;
 
 describe("memory legacy migration cleanup", () => {
   let fixtureRoot = "";
@@ -25,28 +25,28 @@ describe("memory legacy migration cleanup", () => {
   let manager: MemoryIndexManager | undefined;
 
   beforeEach(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-migration-cleanup-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-migration-cleanup-"));
     workspaceDir = path.join(fixtureRoot, "workspace");
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", path.join(fixtureRoot, "state"));
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", path.join(fixtureRoot, "state"));
   });
 
   afterEach(async () => {
     await manager?.close();
     manager = undefined;
     await closeAllMemoryIndexManagers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     if (originalStateDir === undefined) {
-      Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+      Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
     } else {
-      Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalStateDir);
+      Reflect.set(process.env, "CARAPACE_STATE_DIR", originalStateDir);
     }
     await fs.rm(fixtureRoot, { recursive: true, force: true });
   });
 
   it("removes migrated chunks and FTS rows when the dirty source file is already deleted", async () => {
-    const seedDb = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const seedDb = openCarapaceAgentDatabase({ agentId: "main" }).db;
     const loaded = await loadSqliteVecExtension({ db: seedDb });
     expect(loaded.ok, loaded.error).toBe(true);
     const vectorExtensionPath = loaded.extensionPath;
@@ -149,7 +149,7 @@ describe("memory legacy migration cleanup", () => {
           },
           list: [{ id: "main", default: true }],
         },
-      }) as OpenClawConfig;
+      }) as CarapaceConfig;
     const cfg = createConfig({ provider: "none", vectorEnabled: false });
     const result = await MemoryIndexManager.get({ cfg, agentId: "main" });
     if (!result) {

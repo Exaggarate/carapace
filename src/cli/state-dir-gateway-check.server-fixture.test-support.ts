@@ -2,8 +2,8 @@ import { pinRuntimePaths } from "../config/paths.js";
 import { startGatewayServer } from "../gateway/server.js";
 
 pinRuntimePaths();
-const port = Number.parseInt(process.env.OPENCLAW_GATEWAY_PORT ?? "0", 10);
-const token = process.env.OPENCLAW_TEST_GATEWAY_TOKEN ?? "";
+const port = Number.parseInt(process.env.CARAPACE_GATEWAY_PORT ?? "0", 10);
+const token = process.env.CARAPACE_TEST_GATEWAY_TOKEN ?? "";
 const server = await startGatewayServer(port, {
   bind: "loopback",
   auth: { mode: "token", token },

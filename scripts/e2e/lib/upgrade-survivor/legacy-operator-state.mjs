@@ -22,7 +22,7 @@ function requiredEnv(name) {
 }
 
 function artifact(name) {
-  return path.join(requiredEnv("OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT"), name);
+  return path.join(requiredEnv("CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT"), name);
 }
 
 function readJson(file) {
@@ -35,7 +35,7 @@ function writeJson(file, value) {
 }
 
 function cli(args, label, { json = false, privateOutput = false, env = process.env } = {}) {
-  const result = spawnSync("openclaw", args, {
+  const result = spawnSync("carapace", args, {
     encoding: "utf8",
     env,
     timeout: 120_000,
@@ -96,8 +96,8 @@ function approvalsCommand() {
 }
 
 export function seedLegacyOperatorState() {
-  const workspace = requiredEnv("OPENCLAW_TEST_WORKSPACE_DIR");
-  const mockPort = readTcpPortEnv("OPENCLAW_UPGRADE_SURVIVOR_MOCK_PORT", 44081);
+  const workspace = requiredEnv("CARAPACE_TEST_WORKSPACE_DIR");
+  const mockPort = readTcpPortEnv("CARAPACE_UPGRADE_SURVIVOR_MOCK_PORT", 44081);
   const set = (key, value) =>
     cli(
       ["config", "set", key, JSON.stringify(value), "--strict-json"],
@@ -189,7 +189,7 @@ export function seedLegacyOperatorExternalPlugin() {
       !inventory.plugins?.some((plugin) => plugin.id === "duckduckgo"),
       "baseline DuckDuckGo already installed",
     );
-    const configPath = requiredEnv("OPENCLAW_CONFIG_PATH");
+    const configPath = requiredEnv("CARAPACE_CONFIG_PATH");
     const config = readJson(configPath);
     config.plugins ??= {};
     config.plugins.entries ??= {};
@@ -203,12 +203,12 @@ export function seedLegacyOperatorExternalPlugin() {
     writeJson(configPath, config);
   }
   const records = readPluginInstallIndex({
-    stateDir: requiredEnv("OPENCLAW_STATE_DIR"),
+    stateDir: requiredEnv("CARAPACE_STATE_DIR"),
   }).installRecords;
   assert(!records?.duckduckgo, "formerly bundled plugin must have no baseline install record");
   writeJson(artifact("legacy-operator-external-plugin.json"), {
     pluginId: "duckduckgo",
-    packageName: "@openclaw/duckduckgo-plugin",
+    packageName: "@carapace/duckduckgo-plugin",
     baselineState: bundled ? "bundled" : "missing",
     installRecord: null,
   });
@@ -297,13 +297,13 @@ function seedLegacyOperatorApprovals() {
     ...readJson(artifact("legacy-operator-baseline.json")),
     approvals: policy,
     approvalsJsonEra: fs.existsSync(
-      path.join(requiredEnv("OPENCLAW_STATE_DIR"), "exec-approvals.json"),
+      path.join(requiredEnv("CARAPACE_STATE_DIR"), "exec-approvals.json"),
     ),
   });
 }
 
 function unsetSystemAgent() {
-  const config = readJson(requiredEnv("OPENCLAW_CONFIG_PATH"));
+  const config = readJson(requiredEnv("CARAPACE_CONFIG_PATH"));
   if (config.agents?.defaults?.systemAgent !== undefined) {
     cli(["config", "unset", "agents.defaults.systemAgent"], "legacy-operator-unset-system-agent");
   }
@@ -358,7 +358,7 @@ export function seedLegacyOperatorAgent() {
       "add",
       "ops",
       "--workspace",
-      path.join(requiredEnv("OPENCLAW_TEST_WORKSPACE_DIR"), "ops"),
+      path.join(requiredEnv("CARAPACE_TEST_WORKSPACE_DIR"), "ops"),
       "--non-interactive",
       "--model",
       MODEL,
@@ -385,7 +385,7 @@ export function seedLegacyOperatorGatewayState() {
 }
 
 export function assertLegacyOperatorConfig(stage) {
-  const config = readJson(requiredEnv("OPENCLAW_CONFIG_PATH"));
+  const config = readJson(requiredEnv("CARAPACE_CONFIG_PATH"));
   const agents =
     config.agents?.entries ??
     Object.fromEntries((config.agents?.list ?? []).map((entry) => [entry.id, entry]));
@@ -401,7 +401,7 @@ export function assertLegacyOperatorConfig(stage) {
   assert.equal(
     fs.readFileSync(
       path.join(
-        requiredEnv("OPENCLAW_TEST_WORKSPACE_DIR"),
+        requiredEnv("CARAPACE_TEST_WORKSPACE_DIR"),
         "skills",
         "survivor-workspace",
         "SKILL.md",
@@ -414,14 +414,14 @@ export function assertLegacyOperatorConfig(stage) {
 }
 
 export function assertLegacyOperatorApprovals(stage) {
-  const stateDir = requiredEnv("OPENCLAW_STATE_DIR");
+  const stateDir = requiredEnv("CARAPACE_STATE_DIR");
   const baseline = readJson(artifact("legacy-operator-baseline.json"));
   const legacyPath = path.join(stateDir, "exec-approvals.json");
   let policy;
   if (stage === "baseline" && baseline.approvalsJsonEra) {
     policy = readJson(legacyPath);
   } else {
-    const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+    const dbPath = path.join(stateDir, "state", "carapace.sqlite");
     assert(fs.existsSync(dbPath), "legacy operator approvals database missing");
     const db = new DatabaseSync(dbPath, { readOnly: true });
     try {
@@ -472,7 +472,7 @@ export function assertLegacyOperatorCronOwners(listing, baseline) {
 
 export function runLegacyOperatorTurn(stage) {
   assert(["baseline", "candidate"].includes(stage), "unknown legacy operator turn stage");
-  const marker = `OPENCLAW_E2E_LEGACY_OPERATOR_${stage.toUpperCase()}`;
+  const marker = `CARAPACE_E2E_LEGACY_OPERATOR_${stage.toUpperCase()}`;
   const label = `legacy-operator-${stage}-turn`;
   const log = artifact("legacy-operator-requests.jsonl");
   const priorBytes = fs.existsSync(log) ? fs.statSync(log).size : 0;

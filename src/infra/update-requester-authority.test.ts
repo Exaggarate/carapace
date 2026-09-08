@@ -20,8 +20,8 @@ describe("managed update requester authority", () => {
 
   beforeEach(async () => {
     root = await fs.mkdtemp(path.join(os.tmpdir(), "update-requester-authority-"));
-    configPath = path.join(root, "openclaw.json");
-    env = { HOME: root, OPENCLAW_STATE_DIR: root, OPENCLAW_CONFIG_PATH: configPath };
+    configPath = path.join(root, "carapace.json");
+    env = { HOME: root, CARAPACE_STATE_DIR: root, CARAPACE_CONFIG_PATH: configPath };
     await fs.writeFile(configPath, allowed);
     vi.mocked(ensureCliPluginRegistryLoaded).mockReset().mockResolvedValue(undefined);
   });

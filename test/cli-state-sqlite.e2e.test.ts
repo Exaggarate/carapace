@@ -2,20 +2,20 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { requireGitCommand as requireGit } from "../src/infra/git-exec.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../src/state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  openCarapaceAgentDatabase,
+} from "../src/state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+} from "../src/state/carapace-state-db.js";
 
 function runDoctorCli(args: string[], env: NodeJS.ProcessEnv) {
-  return spawnSync(process.execPath, ["openclaw.mjs", "doctor", ...args], {
+  return spawnSync(process.execPath, ["carapace.mjs", "doctor", ...args], {
     cwd: process.cwd(),
     env,
     encoding: "utf8",
@@ -27,21 +27,21 @@ describe("SQLite CLI maintenance ownership", () => {
   it("compacts after full CLI startup without retaining a config-health database handle", async () => {
     await withTempHome(
       async (tempHome) => {
-        const stateDir = path.join(tempHome, ".openclaw");
+        const stateDir = path.join(tempHome, ".carapace");
         const env: NodeJS.ProcessEnv = {
           ...process.env,
           HOME: tempHome,
           USERPROFILE: tempHome,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         };
-        delete env.OPENCLAW_CONFIG_PATH;
-        delete env.OPENCLAW_HOME;
+        delete env.CARAPACE_CONFIG_PATH;
+        delete env.CARAPACE_HOME;
         delete env.VITEST;
 
         try {
-          const database = openOpenClawStateDatabase({ env });
+          const database = openCarapaceStateDatabase({ env });
           database.db.exec(`
             CREATE TABLE compact_cli_payload (
               id INTEGER PRIMARY KEY,
@@ -61,7 +61,7 @@ describe("SQLite CLI maintenance ownership", () => {
             PRAGMA wal_checkpoint(TRUNCATE);
           `);
         } finally {
-          closeOpenClawStateDatabase();
+          closeCarapaceStateDatabase();
         }
 
         const result = runDoctorCli(["--state-sqlite", "compact", "--json"], env);
@@ -82,9 +82,9 @@ describe("SQLite CLI maintenance ownership", () => {
           skipped: false,
         });
         expect(report.before.freelistPages).toBeGreaterThan(0);
-        expect(fs.existsSync(path.join(stateDir, "state", "openclaw.sqlite"))).toBe(true);
+        expect(fs.existsSync(path.join(stateDir, "state", "carapace.sqlite"))).toBe(true);
       },
-      { prefix: "openclaw-state-sqlite-cli-" },
+      { prefix: "carapace-state-sqlite-cli-" },
     );
   }, 90_000);
 
@@ -93,22 +93,22 @@ describe("SQLite CLI maintenance ownership", () => {
     async () => {
       await withTempHome(
         async (tempHome) => {
-          const stateDir = path.join(tempHome, ".openclaw");
+          const stateDir = path.join(tempHome, ".carapace");
           const env: NodeJS.ProcessEnv = {
             ...process.env,
             HOME: tempHome,
             USERPROFILE: tempHome,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_TEST_FAST: "1",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_TEST_FAST: "1",
           };
-          delete env.OPENCLAW_CONFIG_PATH;
-          delete env.OPENCLAW_HOME;
+          delete env.CARAPACE_CONFIG_PATH;
+          delete env.CARAPACE_HOME;
           delete env.VITEST;
 
-          const database = openOpenClawStateDatabase({ env });
+          const database = openCarapaceStateDatabase({ env });
           const walPath = `${database.path}-wal`;
-          const externalWalPath = path.join(tempHome, "external-state", "openclaw.sqlite-wal");
+          const externalWalPath = path.join(tempHome, "external-state", "carapace.sqlite-wal");
           try {
             database.db.exec(`
               PRAGMA wal_autocheckpoint = 0;
@@ -130,10 +130,10 @@ describe("SQLite CLI maintenance ownership", () => {
             expect(`${result.stderr}\n${result.stdout}`).toContain("hard-linked path");
             expect(fs.readFileSync(externalWalPath)).toEqual(externalWalBefore);
           } finally {
-            closeOpenClawStateDatabase();
+            closeCarapaceStateDatabase();
           }
         },
-        { prefix: "openclaw-state-sqlite-sidecar-cli-" },
+        { prefix: "carapace-state-sqlite-sidecar-cli-" },
       );
     },
     90_000,
@@ -142,7 +142,7 @@ describe("SQLite CLI maintenance ownership", () => {
   it("rejects destructive explicit session stores outside the active state owner", async () => {
     await withTempHome(
       async (tempHome) => {
-        const stateDir = path.join(tempHome, ".openclaw");
+        const stateDir = path.join(tempHome, ".carapace");
         const externalStorePath = path.join(
           tempHome,
           "external-state",
@@ -155,12 +155,12 @@ describe("SQLite CLI maintenance ownership", () => {
           ...process.env,
           HOME: tempHome,
           USERPROFILE: tempHome,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         };
-        delete env.OPENCLAW_CONFIG_PATH;
-        delete env.OPENCLAW_HOME;
+        delete env.CARAPACE_CONFIG_PATH;
+        delete env.CARAPACE_HOME;
         delete env.VITEST;
 
         const result = runDoctorCli(
@@ -170,21 +170,21 @@ describe("SQLite CLI maintenance ownership", () => {
 
         expect(result.status).not.toBe(0);
         expect(`${result.stderr}\n${result.stdout}`).toContain(
-          "outside the active OpenClaw state directory",
+          "outside the active Carapace state directory",
         );
         expect(fs.existsSync(externalStorePath)).toBe(false);
       },
-      { prefix: "openclaw-session-sqlite-cli-" },
+      { prefix: "carapace-session-sqlite-cli-" },
     );
   }, 90_000);
 
   it("rejects hard-linked SQLite sidecars before destructive maintenance", async () => {
     await withTempHome(
       async (tempHome) => {
-        const stateDir = path.join(tempHome, ".openclaw");
+        const stateDir = path.join(tempHome, ".carapace");
         const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
-        const sqlitePath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
-        const externalWalPath = path.join(tempHome, "external-state", "openclaw-agent.sqlite-wal");
+        const sqlitePath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
+        const externalWalPath = path.join(tempHome, "external-state", "carapace-agent.sqlite-wal");
         fs.mkdirSync(path.dirname(storePath), { recursive: true });
         fs.mkdirSync(path.dirname(sqlitePath), { recursive: true });
         fs.mkdirSync(path.dirname(externalWalPath), { recursive: true });
@@ -195,12 +195,12 @@ describe("SQLite CLI maintenance ownership", () => {
           ...process.env,
           HOME: tempHome,
           USERPROFILE: tempHome,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         };
-        delete env.OPENCLAW_CONFIG_PATH;
-        delete env.OPENCLAW_HOME;
+        delete env.CARAPACE_CONFIG_PATH;
+        delete env.CARAPACE_HOME;
         delete env.VITEST;
 
         const result = runDoctorCli(
@@ -212,7 +212,7 @@ describe("SQLite CLI maintenance ownership", () => {
         expect(`${result.stderr}\n${result.stdout}`).toContain("hard-linked path");
         expect(fs.readFileSync(externalWalPath, "utf8")).toBe("external wal\n");
       },
-      { prefix: "openclaw-session-sqlite-sidecar-cli-" },
+      { prefix: "carapace-session-sqlite-sidecar-cli-" },
     );
   }, 90_000);
 
@@ -221,14 +221,14 @@ describe("SQLite CLI maintenance ownership", () => {
     async () => {
       await withTempHome(
         async (tempHome) => {
-          const stateDir = path.join(tempHome, ".openclaw");
+          const stateDir = path.join(tempHome, ".carapace");
           const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
           const sqlitePath = path.join(
             stateDir,
             "agents",
             "main",
             "agent",
-            "openclaw-agent.sqlite",
+            "carapace-agent.sqlite",
           );
           const targetPath = path.join(stateDir, "agents", "main", "agent", "sidecar-target");
           fs.mkdirSync(path.dirname(storePath), { recursive: true });
@@ -240,12 +240,12 @@ describe("SQLite CLI maintenance ownership", () => {
             ...process.env,
             HOME: tempHome,
             USERPROFILE: tempHome,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_TEST_FAST: "1",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_TEST_FAST: "1",
           };
-          delete env.OPENCLAW_CONFIG_PATH;
-          delete env.OPENCLAW_HOME;
+          delete env.CARAPACE_CONFIG_PATH;
+          delete env.CARAPACE_HOME;
           delete env.VITEST;
 
           const result = runDoctorCli(
@@ -257,7 +257,7 @@ describe("SQLite CLI maintenance ownership", () => {
           expect(`${result.stderr}\n${result.stdout}`).toContain("symbolic-link path");
           expect(fs.readFileSync(targetPath, "utf8")).toBe("owned target\n");
         },
-        { prefix: "openclaw-session-sqlite-symlink-sidecar-cli-" },
+        { prefix: "carapace-session-sqlite-symlink-sidecar-cli-" },
       );
     },
     90_000,
@@ -266,11 +266,11 @@ describe("SQLite CLI maintenance ownership", () => {
   it("rejects hard-linked SQLite sidecars discovered through configured session stores", async () => {
     await withTempHome(
       async (tempHome) => {
-        const stateDir = path.join(tempHome, ".openclaw");
+        const stateDir = path.join(tempHome, ".carapace");
         const storePath = path.join(tempHome, "external-sessions", "sessions.json");
-        const sqlitePath = path.join(path.dirname(storePath), "openclaw-agent.sqlite");
-        const externalWalPath = path.join(tempHome, "external-alias", "openclaw-agent.sqlite-wal");
-        const configPath = path.join(stateDir, "openclaw.json");
+        const sqlitePath = path.join(path.dirname(storePath), "carapace-agent.sqlite");
+        const externalWalPath = path.join(tempHome, "external-alias", "carapace-agent.sqlite-wal");
+        const configPath = path.join(stateDir, "carapace.json");
         fs.mkdirSync(path.dirname(storePath), { recursive: true });
         fs.mkdirSync(path.dirname(externalWalPath), { recursive: true });
         fs.mkdirSync(stateDir, { recursive: true });
@@ -280,15 +280,15 @@ describe("SQLite CLI maintenance ownership", () => {
           ...process.env,
           HOME: tempHome,
           USERPROFILE: tempHome,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         };
-        delete env.OPENCLAW_HOME;
+        delete env.CARAPACE_HOME;
         delete env.VITEST;
 
-        const database = openOpenClawAgentDatabase({
+        const database = openCarapaceAgentDatabase({
           agentId: "main",
           env,
           path: sqlitePath,
@@ -314,10 +314,10 @@ describe("SQLite CLI maintenance ownership", () => {
           expect(`${result.stderr}\n${result.stdout}`).toContain("hard-linked path");
           expect(fs.readFileSync(externalWalPath)).toEqual(externalWalBefore);
         } finally {
-          closeOpenClawAgentDatabaseByPath(sqlitePath);
+          closeCarapaceAgentDatabaseByPath(sqlitePath);
         }
       },
-      { prefix: "openclaw-configured-session-sqlite-sidecar-cli-" },
+      { prefix: "carapace-configured-session-sqlite-sidecar-cli-" },
     );
   }, 90_000);
 
@@ -325,12 +325,12 @@ describe("SQLite CLI maintenance ownership", () => {
     "keeps Git backup failures useful through the shipped CLI",
     async () => {
       const repository = fs.mkdtempSync(
-        path.join(fs.realpathSync("/var/tmp"), "openclaw-backup-git-cli-"),
+        path.join(fs.realpathSync("/var/tmp"), "carapace-backup-git-cli-"),
       );
       try {
         await withTempHome(
           async (tempHome) => {
-            const stateDir = path.join(tempHome, ".openclaw");
+            const stateDir = path.join(tempHome, ".carapace");
             const remote = path.join(tempHome, "remote.git");
             const unborn = path.join(tempHome, "unborn");
             const hooks = path.join(tempHome, "hooks");
@@ -338,23 +338,23 @@ describe("SQLite CLI maintenance ownership", () => {
               ...process.env,
               HOME: tempHome,
               USERPROFILE: tempHome,
-              OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-              OPENCLAW_STATE_DIR: stateDir,
-              OPENCLAW_TEST_FAST: "1",
+              CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+              CARAPACE_STATE_DIR: stateDir,
+              CARAPACE_TEST_FAST: "1",
               GIT_CONFIG_GLOBAL: "/dev/null",
               GIT_CONFIG_NOSYSTEM: "1",
               GIT_TERMINAL_PROMPT: "0",
               NO_COLOR: "1",
             };
-            delete env.OPENCLAW_CONFIG_PATH;
-            delete env.OPENCLAW_HOME;
+            delete env.CARAPACE_CONFIG_PATH;
+            delete env.CARAPACE_HOME;
             delete env.VITEST;
 
-            openOpenClawStateDatabase({ env });
-            closeOpenClawStateDatabase();
+            openCarapaceStateDatabase({ env });
+            closeCarapaceStateDatabase();
             await requireGit(tempHome, ["init", "--bare", remote]);
 
-            const entry = path.resolve(process.cwd(), "openclaw.mjs");
+            const entry = path.resolve(process.cwd(), "carapace.mjs");
             const runCli = (args: string[], childEnv: NodeJS.ProcessEnv = env) =>
               spawnSync(process.execPath, [entry, ...args], {
                 cwd: process.cwd(),
@@ -370,7 +370,7 @@ describe("SQLite CLI maintenance ownership", () => {
               runCli(["backup", "git", "init", "--repository", repository, "--remote", remote]),
               0,
             );
-            await requireGit(repository, ["config", "user.name", "OpenClaw Backup Test"]);
+            await requireGit(repository, ["config", "user.name", "Carapace Backup Test"]);
             await requireGit(repository, ["config", "user.email", "backup@example.invalid"]);
             fs.mkdirSync(hooks);
             const username = ["synthetic", "cli", "user"].join("-");
@@ -458,7 +458,7 @@ describe("SQLite CLI maintenance ownership", () => {
             expect(historyOutput).not.toContain(historyPassword);
             expect(historyOutput).not.toContain(historyQuery);
           },
-          { prefix: "openclaw-backup-git-cli-" },
+          { prefix: "carapace-backup-git-cli-" },
         );
       } finally {
         fs.rmSync(repository, { recursive: true, force: true });

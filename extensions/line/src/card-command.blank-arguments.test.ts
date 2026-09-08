@@ -1,6 +1,6 @@
 // Line tests cover blank /card arguments, which LINE rejects atomically.
 import type { messagingApi } from "@line/bot-sdk";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { handleLineCardCommand } from "./card-command.js";
 import { buildTemplateMessageFromPayload } from "./template-messages.js";

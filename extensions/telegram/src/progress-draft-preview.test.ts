@@ -1,7 +1,7 @@
 import {
   buildChannelProgressDraftLine,
   type ChannelProgressDraftCompositorSnapshot,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { describe, expect, it } from "vitest";
 import { telegramHtmlToPlainTextFallback } from "./format.js";
 import { renderTelegramProgressDraftPreview } from "./progress-draft-preview.js";

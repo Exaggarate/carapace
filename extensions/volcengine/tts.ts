@@ -124,12 +124,12 @@ async function seedSpeechTTS(params: VolcengineTTSParams & { apiKey: string }): 
     timeoutMs = 30_000,
   } = params;
   const audioFormat = seedAudioFormat(encoding);
-  const { canonicalizeBase64 } = await import("openclaw/plugin-sdk/media-runtime");
-  const { readResponseWithLimit } = await import("openclaw/plugin-sdk/response-limit-runtime");
-  const { fetchWithSsrFGuard } = await import("openclaw/plugin-sdk/ssrf-runtime");
+  const { canonicalizeBase64 } = await import("carapace/plugin-sdk/media-runtime");
+  const { readResponseWithLimit } = await import("carapace/plugin-sdk/response-limit-runtime");
+  const { fetchWithSsrFGuard } = await import("carapace/plugin-sdk/ssrf-runtime");
 
   const payload = JSON.stringify({
-    user: { uid: "openclaw" },
+    user: { uid: "carapace" },
     req_params: {
       text,
       speaker: voice,
@@ -203,9 +203,9 @@ async function seedSpeechTTS(params: VolcengineTTSParams & { apiKey: string }): 
 async function legacyVolcengineTTS(
   params: VolcengineTTSParams & { appId: string; token: string },
 ): Promise<Buffer> {
-  const { canonicalizeBase64 } = await import("openclaw/plugin-sdk/media-runtime");
-  const { readResponseWithLimit } = await import("openclaw/plugin-sdk/response-limit-runtime");
-  const { fetchWithSsrFGuard } = await import("openclaw/plugin-sdk/ssrf-runtime");
+  const { canonicalizeBase64 } = await import("carapace/plugin-sdk/media-runtime");
+  const { readResponseWithLimit } = await import("carapace/plugin-sdk/response-limit-runtime");
+  const { fetchWithSsrFGuard } = await import("carapace/plugin-sdk/ssrf-runtime");
   const {
     text,
     appId,
@@ -223,7 +223,7 @@ async function legacyVolcengineTTS(
 
   const payload = JSON.stringify({
     app: { appid: appId, token, cluster },
-    user: { uid: "openclaw" },
+    user: { uid: "carapace" },
     audio: {
       voice_type: voice,
       encoding,

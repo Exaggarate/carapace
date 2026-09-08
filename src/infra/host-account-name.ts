@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import os from "node:os";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { runExec } from "../process/exec.js";
 
 // Account metadata is process-stable. Cache failures too so reconnects never repeat OS lookups.

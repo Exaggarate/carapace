@@ -2,8 +2,8 @@
 import {
   resolveRemoteEmbeddingBearerClient,
   type MemoryEmbeddingProvider,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { hashText } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { hashText } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -50,9 +50,9 @@ describe("OpenAI memory embedding adapter", () => {
     });
   });
 
-  it("keeps native OpenAI embedding cache identity stable across OpenClaw versions", async () => {
+  it("keeps native OpenAI embedding cache identity stable across Carapace versions", async () => {
     const createForVersion = async (version: string) => {
-      vi.stubEnv("OPENCLAW_VERSION", version);
+      vi.stubEnv("CARAPACE_VERSION", version);
       const client = await resolveRemoteEmbeddingBearerClient({
         provider: "openai",
         defaultBaseUrl: "https://api.openai.com/v1",
@@ -81,12 +81,12 @@ describe("OpenAI memory embedding adapter", () => {
     expect(previous.headers).toMatchObject({
       Authorization: "Bearer fixture-secret",
       version: "2026.7.1",
-      "User-Agent": "openclaw/2026.7.1",
+      "User-Agent": "carapace/2026.7.1",
     });
     expect(current.headers).toMatchObject({
       Authorization: "Bearer fixture-secret",
       version: "2026.7.2",
-      "User-Agent": "openclaw/2026.7.2",
+      "User-Agent": "carapace/2026.7.2",
     });
     expect(current.cacheKeyData).toEqual(previous.cacheKeyData);
     expect(hashText(JSON.stringify(current.cacheKeyData))).toBe(
@@ -98,7 +98,7 @@ describe("OpenAI memory embedding adapter", () => {
       model: "text-embedding-3-small",
       headers: [
         ["Content-Type", "application/json"],
-        ["originator", "openclaw"],
+        ["originator", "carapace"],
       ],
     });
     expect(JSON.stringify(current.cacheKeyData)).not.toContain("fixture-secret");

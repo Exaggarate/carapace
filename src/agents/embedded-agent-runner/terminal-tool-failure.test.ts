@@ -12,7 +12,7 @@ describe("resolveEmbeddedRunTerminalToolFailure", () => {
           toolName: "exec",
           errorCode: "invalid_input",
           error:
-            "Unknown tool id: MCP.notes.read. Use openclaw.tools.search to find a tool, openclaw.tools.describe to inspect it, then openclaw.tools.call with the exact id or name.",
+            "Unknown tool id: MCP.notes.read. Use carapace.tools.search to find a tool, carapace.tools.describe to inspect it, then carapace.tools.call with the exact id or name.",
         },
       }),
     ).toEqual({
@@ -31,7 +31,7 @@ describe("resolveEmbeddedRunTerminalToolFailure", () => {
           toolName: "wait",
           errorCode: "invalid_input",
           error:
-            "Unknown tool id: MCP.notes.read. Did you mean: MCP.notes.list? Use openclaw.tools.search to find a tool, openclaw.tools.describe to inspect it, then openclaw.tools.call with the exact id or name.",
+            "Unknown tool id: MCP.notes.read. Did you mean: MCP.notes.list? Use carapace.tools.search to find a tool, carapace.tools.describe to inspect it, then carapace.tools.call with the exact id or name.",
         },
       }),
     ).toEqual({
@@ -53,7 +53,7 @@ describe("resolveEmbeddedRunTerminalToolFailure", () => {
           toolName: "exec",
           errorCode: "internal_error",
           error:
-            "Error: Unknown tool id: MCP.notes.frobnicate. Did you mean: automations, browser? Use tools.search to find a tool, tools.describe to inspect it, then tools.call with the exact id or name.\n    at settle (openclaw-code-mode:controller.js:125:49)\n",
+            "Error: Unknown tool id: MCP.notes.frobnicate. Did you mean: automations, browser? Use tools.search to find a tool, tools.describe to inspect it, then tools.call with the exact id or name.\n    at settle (carapace-code-mode:controller.js:125:49)\n",
         },
       }),
     ).toEqual({
@@ -120,7 +120,7 @@ describe("resolveEmbeddedRunTerminalToolFailure", () => {
       lastToolError: {
         toolName: "exec",
         error:
-          "Unknown tool id: MCP.sk_test_abcdefghijklmnopqrstuvwxyz.read. Did you mean: MCP.notes.read? Use openclaw.tools.search to find a tool, openclaw.tools.describe to inspect it, then openclaw.tools.call with the exact id or name.",
+          "Unknown tool id: MCP.sk_test_abcdefghijklmnopqrstuvwxyz.read. Did you mean: MCP.notes.read? Use carapace.tools.search to find a tool, carapace.tools.describe to inspect it, then carapace.tools.call with the exact id or name.",
       },
     });
 

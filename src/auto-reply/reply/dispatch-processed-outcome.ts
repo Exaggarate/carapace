@@ -12,7 +12,7 @@ export type DispatchProcessedNote = {
 type DispatchProcessedOutcomeSink = { current?: DispatchProcessedNote };
 
 const DISPATCH_PROCESSED_OUTCOME_SINK_KEY: unique symbol = Symbol.for(
-  "openclaw.dispatchProcessedOutcomeSink",
+  "carapace.dispatchProcessedOutcomeSink",
 );
 
 const dispatchProcessedOutcomeSink = resolveGlobalSingleton<

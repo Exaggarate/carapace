@@ -15,7 +15,7 @@ function parsePositiveInt(value: string | undefined): number | null {
 }
 
 function resolveExplicitVitestWorkerBudget(env: NodeJS.ProcessEnv): number | null {
-  return parsePositiveInt(env.OPENCLAW_VITEST_MAX_WORKERS ?? env.OPENCLAW_TEST_WORKERS);
+  return parsePositiveInt(env.CARAPACE_VITEST_MAX_WORKERS ?? env.CARAPACE_TEST_WORKERS);
 }
 
 function shouldApplyNativeWorkerBudget(env: NodeJS.ProcessEnv): boolean {
@@ -23,7 +23,7 @@ function shouldApplyNativeWorkerBudget(env: NodeJS.ProcessEnv): boolean {
     return false;
   }
   return (
-    env.OPENCLAW_TEST_PROJECTS_SERIAL === "1" || resolveExplicitVitestWorkerBudget(env) !== null
+    env.CARAPACE_TEST_PROJECTS_SERIAL === "1" || resolveExplicitVitestWorkerBudget(env) !== null
   );
 }
 
@@ -54,8 +54,8 @@ export const DEFAULT_VITEST_NO_OUTPUT_HEARTBEAT_MS = 30_000;
 export const DEFAULT_LONG_RUNNING_VITEST_NO_OUTPUT_TIMEOUT_MS = 300_000;
 /** Extra-long watchdog timeout for broad configs that can stay silent on macOS. */
 export const DEFAULT_EXTRA_LONG_RUNNING_VITEST_NO_OUTPUT_TIMEOUT_MS = 2_400_000;
-const VITEST_NO_OUTPUT_TIMEOUT_ENV_KEY = "OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS";
-const VITEST_NO_OUTPUT_HEARTBEAT_ENV_KEY = "OPENCLAW_VITEST_NO_OUTPUT_HEARTBEAT_MS";
+const VITEST_NO_OUTPUT_TIMEOUT_ENV_KEY = "CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS";
+const VITEST_NO_OUTPUT_HEARTBEAT_ENV_KEY = "CARAPACE_VITEST_NO_OUTPUT_HEARTBEAT_MS";
 const GATEWAY_VITEST_CONFIG = "test/vitest/vitest.gateway.config.ts";
 export const VITEST_CONFIG_NO_OUTPUT_TIMEOUT_MS = new Map([
   ["test/vitest/vitest.e2e.config.ts", DEFAULT_LONG_RUNNING_VITEST_NO_OUTPUT_TIMEOUT_MS],
@@ -109,7 +109,7 @@ for (const owner of embeddedAgentVitestProjectOwners) {
  * Resolves default Node flags for Vitest, including the local Maglev opt-in.
  */
 export function resolveVitestNodeArgs(env: NodeJS.ProcessEnv = process.env): string[] {
-  if (parsePermissiveBooleanToken(env.OPENCLAW_VITEST_ENABLE_MAGLEV) === true) {
+  if (parsePermissiveBooleanToken(env.CARAPACE_VITEST_ENABLE_MAGLEV) === true) {
     return [];
   }
 

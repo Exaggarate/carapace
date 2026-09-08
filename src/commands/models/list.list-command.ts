@@ -1,6 +1,6 @@
-/** Implementation of `openclaw models list`. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+/** Implementation of `carapace models list`. */
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../../packages/terminal-core/src/safe-text.js";
 import type { PreparedAgentCredentialModes } from "../../agents/agent-auth-credential-modes.js";
 import { resolveConfiguredModelEntries } from "../../agents/configured-model-entries.js";
@@ -116,7 +116,7 @@ export async function modelsListCommand(
       ].map((providerId) => providerAliasCanonicalizer.provider(providerId)),
     );
     if (!knownProviderIds.has(providerFilter)) {
-      const message = `Unknown provider filter "${sanitizeTerminalText(rawProviderFilter ?? providerFilter)}" for this installation. Run ${formatCliCommand("openclaw plugins list --json")} to see installed providers, or configure it under models.providers.`;
+      const message = `Unknown provider filter "${sanitizeTerminalText(rawProviderFilter ?? providerFilter)}" for this installation. Run ${formatCliCommand("carapace plugins list --json")} to see installed providers, or configure it under models.providers.`;
       throw new ExpectedCliError({ message, humanOutput: message, machineOutput: message });
     }
   }

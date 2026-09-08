@@ -1,15 +1,15 @@
-// Mcp Channels Seed script supports OpenClaw repository automation.
+// Mcp Channels Seed script supports Carapace repository automation.
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { applyDockerOpenAiProviderConfig, type OpenClawConfig } from "./docker-openai-seed.ts";
+import { applyDockerOpenAiProviderConfig, type CarapaceConfig } from "./docker-openai-seed.ts";
 
 async function main() {
-  const stateDir = process.env.OPENCLAW_STATE_DIR?.trim() || path.join(os.homedir(), ".openclaw");
+  const stateDir = process.env.CARAPACE_STATE_DIR?.trim() || path.join(os.homedir(), ".carapace");
   const configPath =
-    process.env.OPENCLAW_CONFIG_PATH?.trim() || path.join(stateDir, "openclaw.json");
+    process.env.CARAPACE_CONFIG_PATH?.trim() || path.join(stateDir, "carapace.json");
   const now = Date.now();
-  const frozenTarget = process.env.OPENCLAW_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy";
+  const frozenTarget = process.env.CARAPACE_FROZEN_PLUGIN_PRERELEASE_FIXTURE_DIALECT === "legacy";
 
   await fs.mkdir(path.dirname(configPath), { recursive: true });
 
@@ -31,7 +31,7 @@ async function main() {
       plugins: {
         enabled: false,
       },
-    } satisfies OpenClawConfig,
+    } satisfies CarapaceConfig,
     "sk-docker-smoke-test",
   );
 
@@ -97,13 +97,13 @@ async function main() {
   const [
     { normalizeSessionDeliveryState, upsertSessionEntry },
     { appendSessionTranscriptMessagesByIdentity },
-    { resolveOpenClawAgentSqlitePath },
+    { resolveCarapaceAgentSqlitePath },
   ] = await Promise.all([
-    import("openclaw/plugin-sdk/session-store-runtime"),
-    import("openclaw/plugin-sdk/session-transcript-runtime"),
-    import("openclaw/plugin-sdk/sqlite-runtime"),
+    import("carapace/plugin-sdk/session-store-runtime"),
+    import("carapace/plugin-sdk/session-transcript-runtime"),
+    import("carapace/plugin-sdk/sqlite-runtime"),
   ]);
-  const storePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+  const storePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
 
   await upsertSessionEntry({
     agentId: "main",
@@ -147,7 +147,7 @@ async function main() {
         message: {
           role: "user",
           content: "seeded image attachment",
-          __openclaw: {
+          __carapace: {
             media: [
               {
                 url: "media://inbound/seeded-image.png",

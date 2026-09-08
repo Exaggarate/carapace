@@ -1,13 +1,13 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import type { ProviderAuthMethod, ProviderRuntimeModel } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { expectDefined } from "@carapace/normalization-core";
+import type { ProviderAuthMethod, ProviderRuntimeModel } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import {
   capturePluginRegistration,
   createPluginRuntimeMock,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { LiveModelCatalogHttpError } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { LiveModelCatalogHttpError } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 // Ollama tests cover index plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { OLLAMA_DEFAULT_API_KEY } from "./src/discovery-shared.js";
@@ -69,8 +69,8 @@ vi.mock("./src/provider-models.js", async (importOriginal) => ({
   queryOllamaModelShowInfo: queryOllamaModelShowInfoMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/secret-input-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/secret-input-runtime")>();
+vi.mock("carapace/plugin-sdk/secret-input-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/secret-input-runtime")>();
   return {
     ...actual,
     resolveConfiguredSecretInputString: resolveConfiguredSecretInputStringMock.mockImplementation(
@@ -79,8 +79,8 @@ vi.mock("openclaw/plugin-sdk/secret-input-runtime", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>()),
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>()),
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -798,7 +798,7 @@ describe("ollama plugin", () => {
 
     await provider.auth[0].appGuidedSetup?.detectAvailability?.({
       config: {},
-      env: { OPENCLAW_DOCKER_SETUP: "1" },
+      env: { CARAPACE_DOCKER_SETUP: "1" },
     });
 
     expect(fetchOllamaModelsMock).toHaveBeenCalledWith("http://host.docker.internal:11434", {});

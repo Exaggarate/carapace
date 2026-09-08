@@ -1,7 +1,7 @@
 import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OpenClawFilePreviewModal } from "./file-preview-modal.ts";
-import type { OpenClawModalDialog } from "./modal-dialog.ts";
+import { CarapaceFilePreviewModal } from "./file-preview-modal.ts";
+import type { CarapaceModalDialog } from "./modal-dialog.ts";
 import "./file-preview-modal-registration.ts";
 
 const browserMode = "__vitest_browser__" in globalThis;
@@ -30,7 +30,7 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-async function resolveRenderedDialog(modal: OpenClawModalDialog) {
+async function resolveRenderedDialog(modal: CarapaceModalDialog) {
   await modal.updateComplete;
   const webAwesomeDialog = modal.shadowRoot?.querySelector<WaDialog>("wa-dialog");
   expect(webAwesomeDialog).toBeInstanceOf(HTMLElement);
@@ -49,7 +49,7 @@ async function mountPreview(width: number, activePath = initialFilePath) {
   const { page } = await import("vitest/browser");
   await page.viewport(width, 844);
 
-  const preview = document.createElement("openclaw-file-preview-modal") as OpenClawFilePreviewModal;
+  const preview = document.createElement("carapace-file-preview-modal") as CarapaceFilePreviewModal;
   preview.style.setProperty("--wa-transition-normal", "150ms");
   preview.files = files;
   preview.activePath = activePath;
@@ -57,7 +57,7 @@ async function mountPreview(width: number, activePath = initialFilePath) {
   await preview.updateComplete;
 
   const ownerDialog =
-    preview.shadowRoot?.querySelector<OpenClawModalDialog>("openclaw-modal-dialog");
+    preview.shadowRoot?.querySelector<CarapaceModalDialog>("carapace-modal-dialog");
   expect(ownerDialog).toBeInstanceOf(HTMLElement);
   const dialog = await resolveRenderedDialog(ownerDialog!);
   return { preview, dialog };
@@ -74,10 +74,10 @@ async function mountModal(
   const { page } = await import("vitest/browser");
   await page.viewport(width, 844);
 
-  const modal = document.createElement("openclaw-modal-dialog");
+  const modal = document.createElement("carapace-modal-dialog");
   modal.label = "Preview";
   modal.style.setProperty("--wa-transition-normal", "150ms");
-  modal.style.setProperty("--openclaw-modal-width", options.modalWidth);
+  modal.style.setProperty("--carapace-modal-width", options.modalWidth);
   modal.classList.toggle("fullscreen", options.fullscreen === true);
   modal.classList.toggle("drawer", options.kind !== undefined);
   const content = document.createElement("div");
@@ -233,7 +233,7 @@ describe.runIf(browserMode)("file preview modal responsive layout", () => {
     });
     const style = getComputedStyle(dialog);
 
-    expect(style.animationName).toBe("openclaw-drawer-in");
+    expect(style.animationName).toBe("carapace-drawer-in");
     expect(style.animationDuration).toBe("0.2s");
   });
 });

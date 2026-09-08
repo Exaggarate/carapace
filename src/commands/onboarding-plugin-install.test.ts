@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord as PersistedPluginInstallRecord } from "../config/types.plugins.js";
 import type { PluginEnableResult } from "../plugins/enable.js";
 import { installPluginDirectoryIntoExtensions } from "../plugins/install-shared.js";
@@ -70,7 +70,7 @@ vi.mock("../plugins/clawhub.js", () => ({
 }));
 
 const enablePluginInConfig = vi.hoisted(() =>
-  vi.fn<(cfg: OpenClawConfig, pluginId: string) => PluginEnableResult>((cfg, pluginId) => ({
+  vi.fn<(cfg: CarapaceConfig, pluginId: string) => PluginEnableResult>((cfg, pluginId) => ({
     config: cfg,
     enabled: true,
     pluginId,
@@ -82,7 +82,7 @@ vi.mock("../plugins/enable.js", () => ({
 }));
 
 const recordPluginInstall = vi.hoisted(() =>
-  vi.fn((cfg: OpenClawConfig, update: { pluginId: string }) => ({
+  vi.fn((cfg: CarapaceConfig, update: { pluginId: string }) => ({
     ...cfg,
     plugins: {
       ...cfg.plugins,
@@ -175,13 +175,13 @@ function readFirstMockCall(mock: unknown, label: string): unknown[] {
 
 type NpmPackInstallCall = {
   archivePath?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   expectedPluginId?: string;
   trustedSourceLinkedOfficialInstall?: boolean;
 };
 
 type NpmSpecInstallCall = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   expectedIntegrity?: string;
   expectedPluginId?: string;
   mode?: string;
@@ -191,7 +191,7 @@ type NpmSpecInstallCall = {
 };
 
 type ClawHubInstallCall = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   expectedPluginId?: string;
   logger?: {
     info?: (message: string) => void;
@@ -222,8 +222,8 @@ describe("ensureOnboardingPluginInstalled", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     runCommandWithTimeout.mockReset();
-    vi.stubEnv("OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES", undefined);
-    vi.stubEnv("OPENCLAW_PLUGIN_INSTALL_OVERRIDES", undefined);
+    vi.stubEnv("CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES", undefined);
+    vi.stubEnv("CARAPACE_PLUGIN_INSTALL_OVERRIDES", undefined);
     withTimeout.mockImplementation(async <T>(promise: Promise<T>) => await promise);
     prepareManagedPluginArtifactConsentHandler.mockResolvedValue({
       onBeforePluginArtifactCommit: async () => {},
@@ -252,9 +252,9 @@ describe("ensureOnboardingPluginInstalled", () => {
         return { ok: false, error: "registry unavailable" };
       };
       if (source === "npm-pack") {
-        vi.stubEnv("OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES", "1");
+        vi.stubEnv("CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES", "1");
         vi.stubEnv(
-          "OPENCLAW_PLUGIN_INSTALL_OVERRIDES",
+          "CARAPACE_PLUGIN_INSTALL_OVERRIDES",
           JSON.stringify({
             "demo-plugin": "npm-pack:/tmp/demo-plugin.tgz",
           }),
@@ -352,10 +352,10 @@ describe("ensureOnboardingPluginInstalled", () => {
       prepareManagedPluginArtifactConsentHandler.mockImplementationOnce(
         actual.prepareManagedPluginArtifactConsentHandler,
       );
-      await withTestDir({ prefix: "openclaw-onboarding-consent-" }, async (artifactDir) => {
+      await withTestDir({ prefix: "carapace-onboarding-consent-" }, async (artifactDir) => {
         const pluginId = official ? "diffs" : "demo-plugin";
-        const packageName = official ? "@openclaw/diffs" : "demo-plugin";
-        const npmSpec = official ? "@openclaw/diffs@1.0.0" : "@example/demo-plugin@1.0.0";
+        const packageName = official ? "@carapace/diffs" : "demo-plugin";
+        const npmSpec = official ? "@carapace/diffs@1.0.0" : "@example/demo-plugin@1.0.0";
         const clawhubSpec = `clawhub:${packageName}@1.0.0`;
         const sourceRecord: PersistedPluginInstallRecord | undefined = !official
           ? undefined
@@ -396,8 +396,8 @@ describe("ensureOnboardingPluginInstalled", () => {
           };
         };
         if (source === "npm-pack") {
-          process.env.OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
-          process.env.OPENCLAW_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
+          process.env.CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
+          process.env.CARAPACE_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
             "demo-plugin": `npm-pack:${path.join(artifactDir, "plugin.tgz")}`,
           });
           installPluginFromNpmPackArchive.mockImplementationOnce(install);
@@ -423,7 +423,7 @@ describe("ensureOnboardingPluginInstalled", () => {
             actualEnable.enableExplicitlySelectedPluginInConfig,
           );
         }
-        const cfg: OpenClawConfig = { plugins: { entries: { [pluginId]: { enabled: false } } } };
+        const cfg: CarapaceConfig = { plugins: { entries: { [pluginId]: { enabled: false } } } };
         const pending = ensureOnboardingPluginInstalled({
           cfg,
           entry: {
@@ -501,7 +501,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       prepareManagedPluginArtifactConsentHandler.mockImplementationOnce(
         actual.prepareManagedPluginArtifactConsentHandler,
       );
-      await withTestDir({ prefix: "openclaw-hosted-install-consent-" }, async (root) => {
+      await withTestDir({ prefix: "carapace-hosted-install-consent-" }, async (root) => {
         const sourceDir = path.join(root, "source");
         const targetDir = path.join(root, "installed", "demo-plugin");
         await fs.mkdir(sourceDir);
@@ -618,8 +618,8 @@ describe("ensureOnboardingPluginInstalled", () => {
   );
 
   it("localizes plugin install choices", async () => {
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousLocale = process.env.CARAPACE_LOCALE;
+    process.env.CARAPACE_LOCALE = "zh-CN";
     let captured:
       | {
           message: string;
@@ -635,10 +635,10 @@ describe("ensureOnboardingPluginInstalled", () => {
       await ensureOnboardingPluginInstalled({
         cfg: {},
         entry: {
-          pluginId: "openclaw-qqbot",
+          pluginId: "carapace-qqbot",
           label: "QQ Bot",
           install: {
-            npmSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+            npmSpec: "@tencent-connect/carapace-qqbot@2.0.1",
           },
         },
         prompter: {
@@ -652,21 +652,21 @@ describe("ensureOnboardingPluginInstalled", () => {
 
       expect(captured?.message).toBe("安装 QQ Bot 插件？");
       expect(captured?.options).toEqual([
-        { value: "npm", label: "从 npm 下载（@tencent-connect/openclaw-qqbot@2.0.1）" },
+        { value: "npm", label: "从 npm 下载（@tencent-connect/carapace-qqbot@2.0.1）" },
         { value: "skip", label: "暂时跳过" },
       ]);
     } finally {
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.CARAPACE_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.CARAPACE_LOCALE = previousLocale;
       }
     }
   });
 
   it("localizes plugin install progress and enablement failures", async () => {
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousLocale = process.env.CARAPACE_LOCALE;
+    process.env.CARAPACE_LOCALE = "zh-CN";
     enablePluginInConfig.mockReturnValueOnce({
       config: {},
       enabled: false,
@@ -705,16 +705,16 @@ describe("ensureOnboardingPluginInstalled", () => {
       expect(withPluginLifecycleLease).toHaveBeenCalledOnce();
     } finally {
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.CARAPACE_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.CARAPACE_LOCALE = previousLocale;
       }
     }
   });
 
   it("refuses non-skipped installs in Nix mode before package work", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.CARAPACE_NIX_MODE;
+    process.env.CARAPACE_NIX_MODE = "1";
     try {
       await expect(
         ensureOnboardingPluginInstalled({
@@ -723,7 +723,7 @@ describe("ensureOnboardingPluginInstalled", () => {
             pluginId: "demo-plugin",
             label: "Demo Provider",
             install: {
-              npmSpec: "@openclaw/demo-plugin@1.2.3",
+              npmSpec: "@carapace/demo-plugin@1.2.3",
             },
           },
           promptInstall: false,
@@ -733,12 +733,12 @@ describe("ensureOnboardingPluginInstalled", () => {
           } as never,
           runtime: {} as never,
         }),
-      ).rejects.toThrow("OPENCLAW_NIX_MODE=1");
+      ).rejects.toThrow("CARAPACE_NIX_MODE=1");
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.CARAPACE_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.CARAPACE_NIX_MODE = previous;
       }
     }
 
@@ -749,7 +749,7 @@ describe("ensureOnboardingPluginInstalled", () => {
 
   it("uses a guarded npm-pack install override for the matching plugin id", async () => {
     const archivePath = path.resolve("tmp/demo-plugin.tgz");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       security: {
         installPolicy: {
           enabled: true,
@@ -761,15 +761,15 @@ describe("ensureOnboardingPluginInstalled", () => {
         },
       },
     };
-    process.env.OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
-    process.env.OPENCLAW_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
+    process.env.CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
+    process.env.CARAPACE_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
       "other-plugin": "npm:@demo/other@1.0.0",
       "demo-plugin": `npm-pack:${archivePath}`,
     });
     installPluginFromNpmPackArchive.mockResolvedValue({
       ok: true,
       pluginId: "demo-plugin",
-      targetDir: "/tmp/openclaw/extensions/demo-plugin",
+      targetDir: "/tmp/carapace/extensions/demo-plugin",
       version: "1.2.3",
       manifestName: "@demo/plugin",
       npmTarballName: "demo-plugin-1.2.3.tgz",
@@ -814,7 +814,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     expect(packCall.expectedPluginId).toBe("demo-plugin");
     expect(packCall).not.toHaveProperty("trustedSourceLinkedOfficialInstall");
     const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-      OpenClawConfig,
+      CarapaceConfig,
       PluginInstallRecord,
     ];
     expect(recordUpdate).toEqual({
@@ -822,7 +822,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       source: "npm",
       spec: "file:demo-plugin-1.2.3.tgz",
       sourcePath: archivePath,
-      installPath: "/tmp/openclaw/extensions/demo-plugin",
+      installPath: "/tmp/carapace/extensions/demo-plugin",
       version: "1.2.3",
       artifactKind: "npm-pack",
       artifactFormat: "tgz",
@@ -841,20 +841,20 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("uses a guarded npm install override without official-trust flags", async () => {
-    process.env.OPENCLAW_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
-    process.env.OPENCLAW_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
-      codex: "npm:@openclaw/codex@2026.5.8",
+    process.env.CARAPACE_ALLOW_PLUGIN_INSTALL_OVERRIDES = "1";
+    process.env.CARAPACE_PLUGIN_INSTALL_OVERRIDES = JSON.stringify({
+      codex: "npm:@carapace/codex@2026.5.8",
       "other-plugin": "npm-pack:/tmp/other.tgz",
     });
     installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
       pluginId: "codex",
-      targetDir: "/tmp/openclaw/extensions/codex",
+      targetDir: "/tmp/carapace/extensions/codex",
       version: "2026.5.8",
       npmResolution: {
-        name: "@openclaw/codex",
+        name: "@carapace/codex",
         version: "2026.5.8",
-        resolvedSpec: "@openclaw/codex@2026.5.8",
+        resolvedSpec: "@carapace/codex@2026.5.8",
       },
     });
 
@@ -864,7 +864,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         pluginId: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@carapace/codex",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -880,7 +880,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       NpmSpecInstallCall,
     ];
     expect(npmCall.trustedSourceLinkedOfficialInstall).toBeUndefined();
-    expect(npmCall.spec).toBe("@openclaw/codex@2026.5.8");
+    expect(npmCall.spec).toBe("@carapace/codex@2026.5.8");
     expect(npmCall.expectedPluginId).toBe("codex");
   });
 
@@ -890,7 +890,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       { beta: "2026.9.1-beta.1", latest: "2026.9.2", selected: "2026.9.2" },
       { beta: "2026.9.3-beta.1", latest: "2026.9.2", selected: "2026.9.3-beta.1" },
     ].flatMap(({ beta, latest, selected }) =>
-      ["@openclaw/codex", "@openclaw/codex@latest"].map((spec) => ({
+      ["@carapace/codex", "@carapace/codex@latest"].map((spec) => ({
         beta,
         latest,
         selected,
@@ -900,16 +900,16 @@ describe("ensureOnboardingPluginInstalled", () => {
   )(
     "selects $selected before npm install and preserves $spec (beta=$beta)",
     async ({ beta, latest, selected, spec }) => {
-      mockNpmChannelMetadata("@openclaw/codex", beta, latest);
+      mockNpmChannelMetadata("@carapace/codex", beta, latest);
       installPluginFromNpmSpec.mockResolvedValue({
         ok: true,
         pluginId: "codex",
-        targetDir: "/tmp/openclaw/extensions/codex",
+        targetDir: "/tmp/carapace/extensions/codex",
         version: selected,
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: selected,
-          resolvedSpec: `@openclaw/codex@${selected}`,
+          resolvedSpec: `@carapace/codex@${selected}`,
         },
       });
 
@@ -931,7 +931,7 @@ describe("ensureOnboardingPluginInstalled", () => {
 
       expect(installPluginFromNpmSpec).toHaveBeenCalledOnce();
       expect(installPluginFromNpmSpec).toHaveBeenCalledWith(
-        expect.objectContaining({ spec: `@openclaw/codex@${selected}` }),
+        expect.objectContaining({ spec: `@carapace/codex@${selected}` }),
       );
       expect(result.status).toBe("installed");
       expect(result.cfg.plugins?.installs?.codex?.spec).toBe(spec);
@@ -997,7 +997,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   );
 
   it("installs and records ClawHub provider plugins with source facts", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       security: {
         installPolicy: {
           enabled: true,
@@ -1044,7 +1044,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         label: "Demo Provider",
         install: {
           clawhubSpec: "clawhub:demo-plugin@2026.5.2",
-          npmSpec: "@openclaw/demo-plugin@2026.5.2",
+          npmSpec: "@carapace/demo-plugin@2026.5.2",
           defaultChoice: "clawhub",
         },
       },
@@ -1067,7 +1067,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     expect(update).toHaveBeenCalledWith("Downloading demo-plugin from ClawHub…");
     expect(stop).toHaveBeenCalledWith("Installed Demo Provider plugin");
     const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-      OpenClawConfig,
+      CarapaceConfig,
       PluginInstallRecord,
     ];
     expect(recordUpdate.pluginId).toBe("demo-plugin");
@@ -1089,7 +1089,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("passes npm specs and optional expected integrity to npm installs with progress", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       security: {
         installPolicy: {
           enabled: true,
@@ -1102,9 +1102,9 @@ describe("ensureOnboardingPluginInstalled", () => {
       },
     };
     const npmResolution = {
-      name: "@wecom/wecom-openclaw-plugin",
+      name: "@wecom/wecom-carapace-plugin",
       version: "1.2.3",
-      resolvedSpec: "@wecom/wecom-openclaw-plugin@1.2.3",
+      resolvedSpec: "@wecom/wecom-carapace-plugin@1.2.3",
       integrity: "sha512-wecom",
       shasum: "deadbeef",
       resolvedAt: "2026-04-24T00:00:00.000Z",
@@ -1137,7 +1137,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         pluginId: "demo-plugin",
         label: "WeCom",
         install: {
-          npmSpec: "@wecom/wecom-openclaw-plugin@1.2.3",
+          npmSpec: "@wecom/wecom-carapace-plugin@1.2.3",
           expectedIntegrity: "sha512-wecom",
         },
         trustedSourceLinkedOfficialInstall: true,
@@ -1152,7 +1152,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     const [npmCall] = readFirstMockCall(installPluginFromNpmSpec, "installPluginFromNpmSpec") as [
       NpmSpecInstallCall,
     ];
-    expect(npmCall.spec).toBe("@wecom/wecom-openclaw-plugin@1.2.3");
+    expect(npmCall.spec).toBe("@wecom/wecom-carapace-plugin@1.2.3");
     expect(npmCall.config).toBe(cfg);
     expect(npmCall.mode).toBe("update");
     expect(npmCall.expectedPluginId).toBe("demo-plugin");
@@ -1163,12 +1163,12 @@ describe("ensureOnboardingPluginInstalled", () => {
     expect(stop).toHaveBeenCalledWith("Installed WeCom plugin");
     expect(buildNpmResolutionInstallFields).toHaveBeenCalledWith(npmResolution);
     const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-      OpenClawConfig,
+      CarapaceConfig,
       PluginInstallRecord,
     ];
     expect(recordUpdate.pluginId).toBe("demo-plugin");
     expect(recordUpdate.source).toBe("npm");
-    expect(recordUpdate.spec).toBe("@wecom/wecom-openclaw-plugin@1.2.3");
+    expect(recordUpdate.spec).toBe("@wecom/wecom-carapace-plugin@1.2.3");
     expect(recordUpdate.installPath).toBe("/tmp/demo-plugin");
     expect(recordUpdate.version).toBe("1.2.3");
     expect(recordUpdate.resolvedName).toBe(installFields.resolvedName);
@@ -1184,7 +1184,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       | undefined;
     expect(installed?.pluginId).toBe("demo-plugin");
     expect(installed?.source).toBe("npm");
-    expect(installed?.spec).toBe("@wecom/wecom-openclaw-plugin@1.2.3");
+    expect(installed?.spec).toBe("@wecom/wecom-carapace-plugin@1.2.3");
     expect(clearLoadInstalledPluginIndexInstallRecordsCache).toHaveBeenCalledOnce();
     expect(clearPluginMetadataLifecycleCaches).toHaveBeenCalledOnce();
     expect(invalidatePluginRuntimeDiscoveryAfterConfigMutation).toHaveBeenCalledWith(
@@ -1194,7 +1194,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     );
   });
 
-  it.each(["@openclaw/discord", "@openclaw/discord@latest"])(
+  it.each(["@carapace/discord", "@carapace/discord@latest"])(
     "installs trusted official intent %s at the exact extended-stable core version",
     async (spec) => {
       coreVersion.value = "2026.7.33";
@@ -1204,9 +1204,9 @@ describe("ensureOnboardingPluginInstalled", () => {
         targetDir: "/tmp/discord",
         version: VERSION,
         npmResolution: {
-          name: "@openclaw/discord",
+          name: "@carapace/discord",
           version: VERSION,
-          resolvedSpec: `@openclaw/discord@${VERSION}`,
+          resolvedSpec: `@carapace/discord@${VERSION}`,
         },
       });
 
@@ -1229,9 +1229,9 @@ describe("ensureOnboardingPluginInstalled", () => {
       const [npmCall] = readFirstMockCall(installPluginFromNpmSpec, "installPluginFromNpmSpec") as [
         NpmSpecInstallCall,
       ];
-      expect(npmCall.spec).toBe(`@openclaw/discord@${VERSION}`);
+      expect(npmCall.spec).toBe(`@carapace/discord@${VERSION}`);
       const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-        OpenClawConfig,
+        CarapaceConfig,
         PluginInstallRecord,
       ];
       expect(recordUpdate.spec).toBe(spec);
@@ -1245,9 +1245,9 @@ describe("ensureOnboardingPluginInstalled", () => {
       targetDir: "/tmp/discord",
       version: "2026.7.21",
       npmResolution: {
-        name: "@openclaw/discord",
+        name: "@carapace/discord",
         version: "2026.7.21",
-        resolvedSpec: "@openclaw/discord@2026.7.21",
+        resolvedSpec: "@carapace/discord@2026.7.21",
       },
     });
 
@@ -1256,7 +1256,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       entry: {
         pluginId: "discord",
         label: "Discord",
-        install: { npmSpec: "@openclaw/discord" },
+        install: { npmSpec: "@carapace/discord" },
         trustedSourceLinkedOfficialInstall: true,
       },
       prompter: {
@@ -1268,10 +1268,10 @@ describe("ensureOnboardingPluginInstalled", () => {
     });
 
     const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-      OpenClawConfig,
+      CarapaceConfig,
       PluginInstallRecord,
     ];
-    expect(recordUpdate.spec).toBe("@openclaw/discord");
+    expect(recordUpdate.spec).toBe("@carapace/discord");
   });
 
   it.each(
@@ -1286,7 +1286,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         { version: "2026.8.1-beta.4", channel: "stable", installVersion: "2026.8.2-beta.1" },
       ] as const
     ).flatMap(({ version, channel, installVersion }) =>
-      ["@openclaw/codex", "@openclaw/codex@latest"].map((spec) => ({
+      ["@carapace/codex", "@carapace/codex@latest"].map((spec) => ({
         version,
         channel,
         installVersion,
@@ -1298,7 +1298,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     async ({ version, channel, installVersion, spec }) => {
       coreVersion.value = version;
       if (channel === "beta" || version.includes("beta")) {
-        mockNpmChannelMetadata("@openclaw/codex", "2026.8.2-beta.1", "2026.8.1");
+        mockNpmChannelMetadata("@carapace/codex", "2026.8.2-beta.1", "2026.8.1");
       }
       installPluginFromNpmSpec.mockResolvedValueOnce({
         ok: true,
@@ -1306,9 +1306,9 @@ describe("ensureOnboardingPluginInstalled", () => {
         targetDir: "/tmp/codex",
         version: installVersion,
         npmResolution: {
-          name: "@openclaw/codex",
+          name: "@carapace/codex",
           version: installVersion,
-          resolvedSpec: `@openclaw/codex@${installVersion}`,
+          resolvedSpec: `@carapace/codex@${installVersion}`,
         },
       });
 
@@ -1319,7 +1319,7 @@ describe("ensureOnboardingPluginInstalled", () => {
           label: "Codex",
           install: { npmSpec: spec },
           trustedSourceLinkedOfficialInstall: true,
-          versionBoundToOpenClaw: true,
+          versionBoundToCarapace: true,
         },
         prompter: {
           select: vi.fn(async () => "npm"),
@@ -1332,9 +1332,9 @@ describe("ensureOnboardingPluginInstalled", () => {
       const [npmCall] = readFirstMockCall(installPluginFromNpmSpec, "installPluginFromNpmSpec") as [
         NpmSpecInstallCall,
       ];
-      expect(npmCall.spec).toBe(`@openclaw/codex@${installVersion}`);
+      expect(npmCall.spec).toBe(`@carapace/codex@${installVersion}`);
       const [, recordUpdate] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-        OpenClawConfig,
+        CarapaceConfig,
         PluginInstallRecord,
       ];
       expect(recordUpdate.spec).toBe(spec);
@@ -1349,7 +1349,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       return {
         ok: true,
         pluginId: "codex",
-        targetDir: "/tmp/openclaw/extensions/codex",
+        targetDir: "/tmp/carapace/extensions/codex",
         version: "2026.5.10-beta.5",
       };
     });
@@ -1363,7 +1363,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         pluginId: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex@beta",
+          npmSpec: "@carapace/codex@beta",
         },
       },
       prompter: {
@@ -1526,7 +1526,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         label: "Demo Plugin",
         install: {
           clawhubSpec: "clawhub:demo-plugin@2026.5.2",
-          npmSpec: "@openclaw/demo-plugin@2026.5.2",
+          npmSpec: "@carapace/demo-plugin@2026.5.2",
         },
       },
       prompter: {
@@ -1539,7 +1539,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     });
 
     expect(captured?.options).toEqual([
-      { value: "npm", label: "Download from npm (@openclaw/demo-plugin@2026.5.2)" },
+      { value: "npm", label: "Download from npm (@carapace/demo-plugin@2026.5.2)" },
       { value: "clawhub", label: "Download from ClawHub (clawhub:demo-plugin@2026.5.2)" },
       { value: "skip", label: "Skip for now" },
     ]);
@@ -1562,7 +1562,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         label: "Demo Plugin",
         install: {
           clawhubSpec: "clawhub:demo-plugin@2026.5.2",
-          npmSpec: "@openclaw/demo-plugin@2026.5.2",
+          npmSpec: "@carapace/demo-plugin@2026.5.2",
           defaultChoice: "clawhub",
         },
       },
@@ -1582,9 +1582,9 @@ describe("ensureOnboardingPluginInstalled", () => {
     {
       name: "explicit stable selector",
       version: "2026.8.1",
-      npmSpec: "@openclaw/demo-plugin@2026.5.2",
+      npmSpec: "@carapace/demo-plugin@2026.5.2",
       clawhubSpec: "clawhub:demo-plugin@2026.5.2",
-      expectedNpmSpecs: ["@openclaw/demo-plugin@2026.5.2"],
+      expectedNpmSpecs: ["@carapace/demo-plugin@2026.5.2"],
       expectedClawHubSpec: "clawhub:demo-plugin@2026.5.2",
       installVersion: "2026.5.2",
       trustedSourceLinkedOfficialInstall: false,
@@ -1592,9 +1592,9 @@ describe("ensureOnboardingPluginInstalled", () => {
     {
       name: "official beta core",
       version: "2026.8.1-beta.3",
-      npmSpec: "@openclaw/demo-plugin",
+      npmSpec: "@carapace/demo-plugin",
       clawhubSpec: "clawhub:demo-plugin",
-      expectedNpmSpecs: ["@openclaw/demo-plugin@latest"],
+      expectedNpmSpecs: ["@carapace/demo-plugin@latest"],
       expectedClawHubSpec: "clawhub:demo-plugin@beta",
       installVersion: "2026.8.1-beta.3",
       trustedSourceLinkedOfficialInstall: true,
@@ -1612,7 +1612,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     }) => {
       coreVersion.value = version;
       if (version.includes("beta")) {
-        mockNpmChannelMetadata("@openclaw/demo-plugin", undefined, undefined);
+        mockNpmChannelMetadata("@carapace/demo-plugin", undefined, undefined);
       }
       for (const spec of expectedNpmSpecs) {
         installPluginFromNpmSpec.mockResolvedValueOnce({
@@ -1669,7 +1669,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       expect(clawhubCall.spec).toBe(expectedClawHubSpec);
       expect(clawhubCall.expectedPluginId).toBe("demo-plugin");
       const [, record] = readFirstMockCall(recordPluginInstall, "recordPluginInstall") as [
-        OpenClawConfig,
+        CarapaceConfig,
         PluginInstallRecord,
       ];
       expect(record.source).toBe("clawhub");
@@ -1679,7 +1679,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     },
   );
 
-  it("does not fall back from ClawHub to non-OpenClaw npm packages", async () => {
+  it("does not fall back from ClawHub to non-Carapace npm packages", async () => {
     const confirm = vi.fn(async () => true);
     const runtimeError = vi.fn();
     installPluginFromClawHub.mockResolvedValueOnce({
@@ -1739,7 +1739,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         label: "Demo Plugin",
         install: {
           clawhubSpec: "clawhub:demo-plugin@2026.5.2",
-          npmSpec: "@openclaw/demo-plugin@2026.5.2",
+          npmSpec: "@carapace/demo-plugin@2026.5.2",
           defaultChoice: "clawhub",
         },
       },
@@ -1808,7 +1808,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("does not offer local installs when the workspace only has a spoofed .git marker", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-spoofed-git-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-spoofed-git-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const cwdDir = path.join(temp, "cwd");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
@@ -1866,7 +1866,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("allows local installs for real gitdir checkouts and sanitizes prompt text", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-gitdir-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-gitdir-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
       await fs.mkdir(pluginDir, { recursive: true });
@@ -1924,7 +1924,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("does not add local plugin paths when enablement is blocked by policy", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-blocked-enable-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-blocked-enable-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
       await fs.mkdir(pluginDir, { recursive: true });
@@ -1972,7 +1972,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("allows local installs for linked git worktrees", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-worktree-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-worktree-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
       const commonGitDir = path.join(temp, "repo.git");
@@ -2026,7 +2026,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("records local install metadata on beta without registry access", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-local-record-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-local-record-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
       await fs.mkdir(path.join(workspaceDir, ".git"), { recursive: true });
@@ -2053,7 +2053,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       const [recordCfg, recordUpdate] = readFirstMockCall(
         recordPluginInstall,
         "recordPluginInstall",
-      ) as [OpenClawConfig, PluginInstallRecord];
+      ) as [CarapaceConfig, PluginInstallRecord];
       expect(recordCfg.plugins?.load?.paths).toEqual([realPluginDir]);
       expect(recordUpdate).toEqual({
         pluginId: "demo-plugin",
@@ -2085,7 +2085,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("hides the npm download option for bundled plugins so the menu matches non-npm channels", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-bundled-prompt-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-bundled-prompt-" }, async (temp) => {
       const bundledDir = path.join(temp, "dist", "extensions", "tlon");
       await fs.mkdir(bundledDir, { recursive: true });
       const realBundledDir = await fs.realpath(bundledDir);
@@ -2116,7 +2116,7 @@ describe("ensureOnboardingPluginInstalled", () => {
           pluginId: "tlon",
           label: "Tlon",
           install: {
-            npmSpec: "@openclaw/tlon",
+            npmSpec: "@carapace/tlon",
             defaultChoice: "npm",
           },
         },
@@ -2130,7 +2130,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       });
 
       const prompt = requireCapturedPrompt(captured);
-      // "Download from npm (@openclaw/tlon)" must NOT appear: the bundled
+      // "Download from npm (@carapace/tlon)" must NOT appear: the bundled
       // copy is what gets enabled, so the npm hint would only confuse
       // users into thinking the plugin is missing.
       expect(prompt.options).toEqual([
@@ -2148,7 +2148,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("enables bundled plugins without adding their bundled directory as a local install", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-bundled-record-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-bundled-record-" }, async (temp) => {
       const bundledDir = path.join(temp, "dist", "extensions", "discord");
       await fs.mkdir(bundledDir, { recursive: true });
       const realBundledDir = await fs.realpath(bundledDir);
@@ -2175,7 +2175,7 @@ describe("ensureOnboardingPluginInstalled", () => {
           pluginId: "discord",
           label: "Discord",
           install: {
-            npmSpec: "@openclaw/discord",
+            npmSpec: "@carapace/discord",
           },
         },
         prompter: {
@@ -2195,7 +2195,7 @@ describe("ensureOnboardingPluginInstalled", () => {
 
   it("records local install source metadata when npm install falls back to local", async () => {
     await withTestDir(
-      { prefix: "openclaw-onboarding-install-npm-fallback-record-" },
+      { prefix: "carapace-onboarding-install-npm-fallback-record-" },
       async (temp) => {
         const workspaceDir = path.join(temp, "workspace");
         const pluginDir = path.join(workspaceDir, "plugins", "demo");
@@ -2236,7 +2236,7 @@ describe("ensureOnboardingPluginInstalled", () => {
         const [recordCfg, recordUpdate] = readFirstMockCall(
           recordPluginInstall,
           "recordPluginInstall",
-        ) as [OpenClawConfig, PluginInstallRecord];
+        ) as [CarapaceConfig, PluginInstallRecord];
         expect(recordCfg.plugins?.load?.paths).toEqual([realPluginDir]);
         expect(recordUpdate).toEqual({
           pluginId: "demo-plugin",
@@ -2261,7 +2261,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("records absolute local catalog paths as workspace-relative source metadata", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-portable-record-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-portable-record-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", "demo");
       await fs.mkdir(path.join(workspaceDir, ".git"), { recursive: true });
@@ -2287,7 +2287,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       const [recordCfg, recordUpdate] = readFirstMockCall(
         recordPluginInstall,
         "recordPluginInstall",
-      ) as [OpenClawConfig, PluginInstallRecord];
+      ) as [CarapaceConfig, PluginInstallRecord];
       expect(recordCfg).toEqual({
         plugins: {
           load: {
@@ -2305,7 +2305,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("keeps local installs available when cwd is a git repo but workspaceDir is not", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-cwd-git-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-cwd-git-" }, async (temp) => {
       const repoDir = path.join(temp, "repo");
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(repoDir, "demo-plugin");
@@ -2359,7 +2359,7 @@ describe("ensureOnboardingPluginInstalled", () => {
   });
 
   it("rejects local install paths outside the trusted workspace roots", async () => {
-    await withTestDir({ prefix: "openclaw-onboarding-install-outside-root-" }, async (temp) => {
+    await withTestDir({ prefix: "carapace-onboarding-install-outside-root-" }, async (temp) => {
       const workspaceDir = path.join(temp, "workspace");
       const pluginDir = path.join(temp, "external-plugin");
       await fs.mkdir(path.join(workspaceDir, ".git"), { recursive: true });

@@ -4,11 +4,11 @@ import type {
   RealtimeVoiceBargeInOptions,
   RealtimeVoicePlaybackItem,
   RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_G711_ULAW_8KHZ,
   realtimeVoiceAudioDurationMs,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice-provider";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {
   AZURE_OPENAI_REALTIME_TOOL_NAME_MAX_LENGTH,
@@ -325,7 +325,7 @@ export abstract class OpenAIRealtimeProtocol {
       this.responseCancelInFlight = true;
     }
     if (cancelResponse) {
-      const eventId = `openclaw-response-cancel-${randomUUID()}`;
+      const eventId = `carapace-response-cancel-${randomUUID()}`;
       this.manualResponseCancelEventId = eventId;
       this.sendEvent({ type: "response.cancel", event_id: eventId }, "reason=barge-in");
     }
@@ -363,7 +363,7 @@ export abstract class OpenAIRealtimeProtocol {
       return;
     }
     this.responseCreateState = "in-flight";
-    const eventId = `openclaw-response-create-${randomUUID()}`;
+    const eventId = `carapace-response-create-${randomUUID()}`;
     // Realtime errors can describe unrelated client events. Keep this id until
     // the manual turn settles so only its rejection may release VAD suppression.
     this.manualResponseCreateEventId = eventId;
@@ -390,7 +390,7 @@ export abstract class OpenAIRealtimeProtocol {
     if (!text) {
       return;
     }
-    const eventId = `openclaw-standalone-speech-${randomUUID()}`;
+    const eventId = `carapace-standalone-speech-${randomUUID()}`;
     this.standaloneSpeechActive = true;
     this.standaloneSpeechEventId = eventId;
     this.responseCreateState = "in-flight";

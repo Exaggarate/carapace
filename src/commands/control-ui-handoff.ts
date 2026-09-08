@@ -4,7 +4,7 @@ import { normalizeTlsFingerprint } from "../../packages/gateway-client/src/clien
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { resolveGatewayPort } from "../config/config.js";
 import type { GatewayTlsConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayInteractiveSurfaceAuth } from "../gateway/auth-surface-resolution.js";
 import {
   CONTROL_UI_BOOTSTRAP_PROFILE_FRAGMENT_PARAM,
@@ -27,7 +27,7 @@ const CONTROL_UI_DOCUMENT_ERROR_MAX_BYTES = 2_048;
 
 /** One canonical target keeps advertised identity, local browser delivery, and document probes distinct. */
 export async function resolveControlUiHandoffTarget(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }) {
   const { config, env } = params;

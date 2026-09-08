@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createExecTool } from "./bash-tools.exec-run.js";
@@ -67,7 +67,7 @@ describe("Code Mode preflight repair", () => {
       value: {
         code,
         effectStatus: "unknown",
-        location: expect.stringContaining("openclaw-code-mode:user.js:1:"),
+        location: expect.stringContaining("carapace-code-mode:user.js:1:"),
       },
     });
     expect(target.execute).toHaveBeenCalledTimes(calls);

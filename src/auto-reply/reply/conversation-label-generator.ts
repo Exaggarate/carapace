@@ -1,12 +1,12 @@
 // Generates short labels for sessions from conversation context.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { createReasoningTagTextPartitioner } from "../../../packages/markdown-core/src/reasoning-tags.js";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { runIsolatedCompletion } from "../../agents/isolated-completion.js";
 import { splitTrailingAuthProfile } from "../../agents/model-ref-profile.js";
 import { resolveCompatibleAgentRuntimeForProvider } from "../../agents/session-runtime-compat.js";
 import { resolveSimpleCompletionSelectionForAgent } from "../../agents/simple-completion-runtime.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 const DEFAULT_MAX_LABEL_LENGTH = 128;
 // Reasoning models spend output tokens before emitting the short visible label.
@@ -25,7 +25,7 @@ type ConversationLabelAttempt = {
 export type ConversationLabelParams = {
   userMessage: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   agentHarnessRuntimeOverride?: string;

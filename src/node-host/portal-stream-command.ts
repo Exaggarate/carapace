@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
 import { NODE_PORTAL_ATTACH_PATH } from "../shared/node-desktop-stream.js";
 import { runNodeStreamTransport } from "./node-stream-transport.js";

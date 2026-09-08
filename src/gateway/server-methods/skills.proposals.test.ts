@@ -3,20 +3,20 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveWorkshopSkillsDir } from "../../skills/workshop/skills-root.js";
 import { readSkillProposalEvents } from "../../skills/workshop/store-evaluation.js";
 import { writeConfigMachineState } from "../../state/config-machine-state-write.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { callGatewayHandler } from "./skills.test-helpers.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let stateDir = "";
 
 const mocks = vi.hoisted(() => ({
@@ -67,7 +67,7 @@ vi.mock("../../infra/clawhub-skills.js", () => ({
 
 vi.mock("../../skills/security/clawhub-verdicts.js", () => ({
   collectClawHubVerdictTargets: vi.fn(() => []),
-  fetchOpenClawSkillSecurityVerdicts: vi.fn(),
+  fetchCarapaceSkillSecurityVerdicts: vi.fn(),
 }));
 
 vi.mock("../../skills/workshop/service.js", async (importOriginal) => {
@@ -110,9 +110,9 @@ function callHandler(
 
 describe("skills proposal gateway handlers", () => {
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-skills-proposals-gateway-state-",
+      prefix: "carapace-skills-proposals-gateway-state-",
     });
     mocks.chatSend.mockReset();
     mocks.chatSend.mockImplementation(async ({ respond }) => {
@@ -142,7 +142,7 @@ describe("skills proposal gateway handlers", () => {
     mocks.quarantineSkillProposal.mockClear();
     mocks.rejectSkillProposal.mockClear();
     mocks.reviseSkillProposal.mockClear();
-    mocks.workspaceDir = await tempDirs.make("openclaw-skills-proposals-gateway-");
+    mocks.workspaceDir = await tempDirs.make("carapace-skills-proposals-gateway-");
     stateDir = testState.stateDir;
   });
 
@@ -308,7 +308,7 @@ describe("skills proposal gateway handlers", () => {
   });
 
   it("inspects and applies proposals in a configured agent directory", async () => {
-    const agentDir = await tempDirs.make("openclaw-skills-proposals-gateway-agent-dir-");
+    const agentDir = await tempDirs.make("carapace-skills-proposals-gateway-agent-dir-");
     const config = {
       agents: { entries: { main: { default: true, agentDir } } },
     };
@@ -466,7 +466,7 @@ describe("skills proposal gateway handlers", () => {
     expect(first.ok).toBe(true);
     const firstCreated = first.response as { record: { id: string } };
 
-    const secondWorkspaceDir = await tempDirs.make("openclaw-skills-proposals-gateway-second-");
+    const secondWorkspaceDir = await tempDirs.make("carapace-skills-proposals-gateway-second-");
     mocks.workspaceDir = secondWorkspaceDir;
     const second = await callHandler("skills.proposals.create", {
       name: "Second Gateway Skill",
@@ -657,7 +657,7 @@ describe("skills proposal gateway handlers", () => {
     expect(status).toMatchObject({
       ok: true,
       response: {
-        schema: "openclaw.skill-workshop.history-scan.v1",
+        schema: "carapace.skill-workshop.history-scan.v1",
         hasScanned: false,
         reviewedSessions: 0,
         ideasFound: 0,
@@ -678,7 +678,7 @@ describe("skills proposal gateway handlers", () => {
         name: "Support File Sampler",
         description: "Samples support files",
         content:
-          '---\nmetadata: {"openclaw":{"skillKey":"different-key"}}\n---\n\n# Support File Sampler\n\nSample support files.\n',
+          '---\nmetadata: {"carapace":{"skillKey":"different-key"}}\n---\n\n# Support File Sampler\n\nSample support files.\n',
       });
       expect(create.ok).toBe(true);
       let created = create.response as { record: { id: string }; revisionHash: string };

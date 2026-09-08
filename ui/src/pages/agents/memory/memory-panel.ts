@@ -16,7 +16,7 @@ import { t } from "../../../i18n/index.ts";
 import { currentConfigObject } from "../../../lib/config/config-state-model.ts";
 import { formatTimeMs } from "../../../lib/format.ts";
 import { isPluginEnabledInConfigSnapshot } from "../../../lib/plugin-activation.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../../lit/subscriptions-controller.ts";
 import {
   backfillDreamDiary,
@@ -108,7 +108,7 @@ function readWikiPagePreview(value: unknown, lookup: string): WikiPagePreview {
   };
 }
 
-class AgentMemoryPanel extends OpenClawLightDomElement {
+class AgentMemoryPanel extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -570,6 +570,6 @@ class AgentMemoryPanel extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-agent-memory-panel")) {
-  customElements.define("openclaw-agent-memory-panel", AgentMemoryPanel);
+if (!customElements.get("carapace-agent-memory-panel")) {
+  customElements.define("carapace-agent-memory-panel", AgentMemoryPanel);
 }

@@ -15,7 +15,7 @@ The card is durable session state. A reconnect or page reload reads the latest c
 
 ## Adoption
 
-OpenClaw adds a short progress-card reminder only for non-main, non-sub-agent sessions when a web, iOS, Android, or macOS card renderer is paired with the Gateway and the run is not using the agent's utility model. Channel-only deployments such as a WhatsApp-only Gateway do not receive the reminder.
+Carapace adds a short progress-card reminder only for non-main, non-sub-agent sessions when a web, iOS, Android, or macOS card renderer is paired with the Gateway and the run is not using the agent's utility model. Channel-only deployments such as a WhatsApp-only Gateway do not receive the reminder.
 
 The reminder says:
 

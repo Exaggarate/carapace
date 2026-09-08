@@ -3,15 +3,15 @@ import { Worker, type WorkerOptions } from "node:worker_threads";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createDeferred, withTestTimeout } from "../../../test/helpers/promise.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  getOpenClawAgentDatabaseIfOpen,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  getCarapaceAgentDatabaseIfOpen,
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import {
   createSessionEntryWithTranscript,
   loadSessionEntry,
@@ -46,12 +46,12 @@ const message = (id: string, content = id): TranscriptEvent => ({
 });
 
 describe("incognito transcript reconciliation", () => {
-  let ambient: OpenClawTestState;
-  let explicit: OpenClawTestState;
+  let ambient: CarapaceTestState;
+  let explicit: CarapaceTestState;
 
   beforeEach(async () => {
-    ambient = await createOpenClawTestState({ prefix: "memory-reconcile-ambient-" });
-    explicit = await createOpenClawTestState({
+    ambient = await createCarapaceTestState({ prefix: "memory-reconcile-ambient-" });
+    explicit = await createCarapaceTestState({
       prefix: "memory-reconcile-explicit-",
       applyEnv: false,
     });
@@ -60,15 +60,15 @@ describe("incognito transcript reconciliation", () => {
   afterEach(async () => {
     for (const state of [explicit, ambient]) {
       await waitForSessionTranscriptIndexReconcilesInStateDir(state.stateDir);
-      closeOpenClawAgentDatabaseByPath(
-        resolveIncognitoOpenClawAgentSqlitePath({ agentId, env: state.env }),
+      closeCarapaceAgentDatabaseByPath(
+        resolveIncognitoCarapaceAgentSqlitePath({ agentId, env: state.env }),
       );
       await state.cleanup();
     }
   });
 
   function target(env: NodeJS.ProcessEnv | undefined) {
-    const path = resolveIncognitoOpenClawAgentSqlitePath({ agentId, env });
+    const path = resolveIncognitoCarapaceAgentSqlitePath({ agentId, env });
     return {
       options: { agentId, env, path },
       scope: { agentId, env, sessionId, sessionKey, storePath: path },
@@ -103,7 +103,7 @@ describe("incognito transcript reconciliation", () => {
       expect.soft(turn.messages[0]?.anchor?.storePath).toBe(options.path);
       const rowCount = (env: NodeJS.ProcessEnv | undefined) => {
         const selected = target(env).options;
-        return getOpenClawAgentDatabaseIfOpen(selected)
+        return getCarapaceAgentDatabaseIfOpen(selected)
           ?.db.prepare("SELECT count(*) AS count FROM transcript_events WHERE session_id = ?")
           .get(sessionId);
       };
@@ -120,7 +120,7 @@ describe("incognito transcript reconciliation", () => {
           message: { role: "assistant", content: "active" },
         }),
       ]);
-      const database = getOpenClawAgentDatabaseIfOpen(options)!;
+      const database = getCarapaceAgentDatabaseIfOpen(options)!;
       expect(
         database.db
           .prepare(
@@ -140,7 +140,7 @@ describe("incognito transcript reconciliation", () => {
     const { scope, options } = target(explicit.env);
     const event = message("large", "🦞".repeat(131_073));
     await replaceTranscriptEvents(scope, [event]);
-    const database = openOpenClawAgentDatabase(options);
+    const database = openCarapaceAgentDatabase(options);
     const source = createMemoryTranscriptProjectionSource(database, options);
     const bytes: Uint8Array[] = [];
     while (true) {
@@ -189,7 +189,7 @@ describe("incognito transcript reconciliation", () => {
     expect(result.messages[0]?.anchor?.storePath).toBe(options.path);
     expect(readCommittedTranscriptMessageSequence(result.messages[0]!)).toBe(1);
     expect(loadSessionEntry(scope)?.updatedAt).toBeGreaterThan(1);
-    expect(getOpenClawAgentDatabaseIfOpen(target(ambient.env).options)).toBeUndefined();
+    expect(getCarapaceAgentDatabaseIfOpen(target(ambient.env).options)).toBeUndefined();
     expectNoDiskState();
   });
 
@@ -198,20 +198,20 @@ describe("incognito transcript reconciliation", () => {
     async (mutation) => {
       const { scope, options } = target(explicit.env);
       await replaceTranscriptEvents(scope, [message("original", "x".repeat(300_000))]);
-      const database = openOpenClawAgentDatabase(options);
+      const database = openCarapaceAgentDatabase(options);
       const source = createMemoryTranscriptProjectionSource(database, options);
       const plan = prepareSessionTranscriptProjection(database.db, sessionId)!;
       expect(source.read(sessionId)).toMatchObject({ type: "source-frame", final: false });
       expect(source.isCurrentPlan(plan)).toBe(true);
       if (mutation === "dispose" || mutation === "reopen") {
-        closeOpenClawAgentDatabaseByPath(database.path);
+        closeCarapaceAgentDatabaseByPath(database.path);
         if (mutation === "reopen") {
           await replaceTranscriptEvents(scope, [message("replacement")]);
         }
         expect(() => source.read(sessionId)).toThrow("disposed");
-        expect(getOpenClawAgentDatabaseIfOpen(options)).not.toBe(database);
+        expect(getCarapaceAgentDatabaseIfOpen(options)).not.toBe(database);
         if (mutation === "dispose") {
-          expect(getOpenClawAgentDatabaseIfOpen(options)).toBeUndefined();
+          expect(getCarapaceAgentDatabaseIfOpen(options)).toBeUndefined();
         }
       } else {
         if (mutation === "append") {
@@ -235,7 +235,7 @@ describe("incognito transcript reconciliation", () => {
     async (mode) => {
       const { scope, options } = target(explicit.env);
       await replaceTranscriptEvents(scope, [message("seed")]);
-      const database = openOpenClawAgentDatabase(options);
+      const database = openCarapaceAgentDatabase(options);
       const blocked = createDeferred();
       const release = createDeferred();
       const blocker = runExclusiveSqliteSessionWrite(options, async () => {
@@ -255,7 +255,7 @@ describe("incognito transcript reconciliation", () => {
         () => "rejected",
       );
       try {
-        closeOpenClawAgentDatabaseByPath(database.path);
+        closeCarapaceAgentDatabaseByPath(database.path);
         if (mode === "scheduled") {
           await waitForSessionTranscriptProjection(scope);
         }
@@ -265,7 +265,7 @@ describe("incognito transcript reconciliation", () => {
       }
       const result = await outcome;
       expect(database.db.isOpen).toBe(false);
-      expect(getOpenClawAgentDatabaseIfOpen(options)).toBeUndefined();
+      expect(getCarapaceAgentDatabaseIfOpen(options)).toBeUndefined();
       expect(result).toBe(mode === "direct" ? "rejected" : "fulfilled");
       expectNoDiskState();
     },
@@ -276,7 +276,7 @@ describe("incognito transcript reconciliation", () => {
     async (stage) => {
       const { scope, options } = target(explicit.env);
       await replaceTranscriptEvents(scope, [message("seed")]);
-      const database = openOpenClawAgentDatabase(options);
+      const database = openCarapaceAgentDatabase(options);
       database.db
         .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
         .run(sessionId);
@@ -298,7 +298,7 @@ describe("incognito transcript reconciliation", () => {
               blocker = runExclusiveSqliteSessionWrite(options, async () => {
                 blocked.resolve();
                 await release.promise;
-                closeOpenClawAgentDatabaseByPath(database.path);
+                closeCarapaceAgentDatabaseByPath(database.path);
               });
             }
           });
@@ -326,7 +326,7 @@ describe("incognito transcript reconciliation", () => {
       expect(await outcome).toBe(stage === "pending" ? "fulfilled" : "rejected");
       expect(worker?.threadId).toBe(-1);
       expect(database.db.isOpen).toBe(false);
-      expect(getOpenClawAgentDatabaseIfOpen(options)).toBeUndefined();
+      expect(getCarapaceAgentDatabaseIfOpen(options)).toBeUndefined();
       expectNoDiskState();
     },
     20_000,
@@ -335,7 +335,7 @@ describe("incognito transcript reconciliation", () => {
   it("joins the final memory sweep after the worker exits naturally", async () => {
     const { scope, options } = target(explicit.env);
     await replaceTranscriptEvents(scope, [message("seed")]);
-    const database = openOpenClawAgentDatabase(options);
+    const database = openCarapaceAgentDatabase(options);
     database.db
       .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
       .run(sessionId);
@@ -390,9 +390,9 @@ describe("incognito transcript reconciliation", () => {
   it("hands a successor's scheduled work over after successful old-owner settlement", async () => {
     const { scope, options } = target(ambient.env);
     await replaceTranscriptEvents(scope, [message("old-owner")]);
-    const database = openOpenClawAgentDatabase(options);
+    const database = openCarapaceAgentDatabase(options);
     const state = () =>
-      getOpenClawAgentDatabaseIfOpen(options)
+      getCarapaceAgentDatabaseIfOpen(options)
         ?.db.prepare(
           "SELECT needs_rebuild FROM session_transcript_index_state WHERE session_id = ?",
         )
@@ -425,7 +425,7 @@ describe("incognito transcript reconciliation", () => {
       await withTestTimeout(joined.promise, 10_000, "old memory worker did not settle");
       expect(state()).toEqual({ needs_rebuild: 0 });
       expect(workers[0]?.threadId).toBe(-1);
-      closeOpenClawAgentDatabaseByPath(database.path);
+      closeCarapaceAgentDatabaseByPath(database.path);
       await persistSessionTranscriptTurn(scope, {
         messages: [
           { eventId: "root", parentId: null, message: { role: "user", content: "root" } },
@@ -442,7 +442,7 @@ describe("incognito transcript reconciliation", () => {
         ],
         touchSessionEntry: false,
       });
-      expect(getOpenClawAgentDatabaseIfOpen(options)).not.toBe(database);
+      expect(getCarapaceAgentDatabaseIfOpen(options)).not.toBe(database);
       expect(state()).toEqual({ needs_rebuild: 1 });
     } finally {
       release.resolve();

@@ -3,7 +3,7 @@ const UPGRADE_SURVIVOR_SCENARIOS = Object.freeze([
   "abandoned-update",
   "legacy-operator-state",
   "mobile-pairing-reconnect",
-  "acpx-openclaw-tools-bridge",
+  "acpx-carapace-tools-bridge",
   "feishu-channel",
   "bootstrap-persona",
   "channel-post-core-restore",
@@ -55,16 +55,16 @@ export function normalizeUpgradeSurvivorBaselineSpec(raw) {
   if (!value) {
     return undefined;
   }
-  const spec = value.startsWith("openclaw@") ? value : `openclaw@${value}`;
+  const spec = value.startsWith("carapace@") ? value : `carapace@${value}`;
   if (
-    !/^openclaw@(?:alpha|beta|latest|[0-9]{4}\.[0-9]+\.[0-9]+(?:-(?:[0-9]+|alpha\.[0-9]+|beta\.[0-9]+))?)$/u.test(
+    !/^carapace@(?:alpha|beta|latest|[0-9]{4}\.[0-9]+\.[0-9]+(?:-(?:[0-9]+|alpha\.[0-9]+|beta\.[0-9]+))?)$/u.test(
       spec,
     )
   ) {
     throw new Error(
       `invalid published upgrade survivor baseline: ${JSON.stringify(
         value,
-      )}. Expected openclaw@latest, openclaw@beta, openclaw@alpha, or openclaw@YYYY.M.PATCH.`,
+      )}. Expected carapace@latest, carapace@beta, carapace@alpha, or carapace@YYYY.M.PATCH.`,
     );
   }
   return spec;
@@ -117,7 +117,7 @@ export function parseUpgradeSurvivorScenarios(raw) {
 }
 
 function parsePublishedReleaseVersion(spec) {
-  const match = /^openclaw@([0-9]{4})\.([0-9]+)\.([0-9]+)/u.exec(spec ?? "");
+  const match = /^carapace@([0-9]{4})\.([0-9]+)\.([0-9]+)/u.exec(spec ?? "");
   if (!match) {
     return null;
   }
@@ -179,19 +179,19 @@ function supportsUpgradeSurvivorMobilePairingReconnect(baselineSpec) {
 function supportsUpgradeSurvivorLegacyOperatorState(baselineSpec) {
   const version = parsePublishedReleaseVersion(baselineSpec);
   const floor = parsePublishedReleaseVersion(
-    `openclaw@${OLDEST_SUPPORTED_UPGRADE_SURVIVOR_BASELINE}`,
+    `carapace@${OLDEST_SUPPORTED_UPGRADE_SURVIVOR_BASELINE}`,
   );
   return !version || comparePublishedReleaseVersion(version, floor) >= 0;
 }
 
 export function supportsUpgradeSurvivorScenarioAtBaseline(scenario, baselineSpec) {
   return (
-    (scenario !== "abandoned-update" || baselineSpec === "openclaw@2026.9.2") &&
+    (scenario !== "abandoned-update" || baselineSpec === "carapace@2026.9.2") &&
     (scenario !== "legacy-operator-state" ||
       supportsUpgradeSurvivorLegacyOperatorState(baselineSpec)) &&
     (scenario !== "plugin-deps-cleanup" ||
       supportsUpgradeSurvivorPluginDependencyCleanup(baselineSpec)) &&
-    (scenario !== "acpx-openclaw-tools-bridge" ||
+    (scenario !== "acpx-carapace-tools-bridge" ||
       supportsUpgradeSurvivorAcpToolsBridge(baselineSpec)) &&
     (scenario !== "mobile-pairing-reconnect" ||
       supportsUpgradeSurvivorMobilePairingReconnect(baselineSpec)) &&

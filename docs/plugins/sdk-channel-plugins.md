@@ -1,18 +1,18 @@
 ---
-summary: "Step-by-step guide to building a messaging channel plugin for OpenClaw"
+summary: "Step-by-step guide to building a messaging channel plugin for Carapace"
 title: "Building channel plugins"
 sidebarTitle: "Channel Plugins"
 read_when:
   - You are building a new messaging channel plugin
-  - You want to connect OpenClaw to a messaging platform
+  - You want to connect Carapace to a messaging platform
   - You need to understand the ChannelPlugin adapter surface
 ---
 
-This guide builds a channel plugin that connects OpenClaw to a messaging
+This guide builds a channel plugin that connects Carapace to a messaging
 platform: DM security, pairing, reply threading, and outbound messaging.
 
 <Info>
-  New to OpenClaw plugins? Read [Getting Started](/plugins/building-plugins)
+  New to Carapace plugins? Read [Getting Started](/plugins/building-plugins)
   first for package structure and manifest setup.
 </Info>
 
@@ -44,7 +44,7 @@ raw callback string. Actor and source-message checks remain channel-owned.
 ## Message adapter
 
 Expose a `message` adapter with `defineChannelMessageAdapter` from
-`openclaw/plugin-sdk/channel-outbound`. Declare only the durable final-send
+`carapace/plugin-sdk/channel-outbound`. Declare only the durable final-send
 capabilities your native transport actually supports, backed by a contract
 test that proves the native side effect and returned receipt. Point text/media
 sends at the same transport functions the legacy `outbound` adapter uses. For
@@ -62,7 +62,7 @@ fields.
 
 For turn adapters that aggregate confirmed visible sends, use
 `createAcceptedChannelDeliveryResult(...)` from
-`openclaw/plugin-sdk/channel-inbound`. It combines native `results` followed by
+`carapace/plugin-sdk/channel-inbound`. It combines native `results` followed by
 logical `deliveryResults`, including a partial-delivery error's accepted subset.
 A logical result's receipt takes precedence over its legacy message IDs.
 The result carries a receipt, `messageIds` (including an empty array), and
@@ -166,15 +166,15 @@ overflow rules. Core then holds final-mode streamed text for that operation and
 falls back to text when the voice payload is proven unsent.
 
 The legacy `dispatchInboundReplyWithBase` helper remains available from the
-deprecated `openclaw/plugin-sdk/inbound-reply-dispatch` compatibility shim.
+deprecated `carapace/plugin-sdk/inbound-reply-dispatch` compatibility shim.
 Do not use it for new channel code; start with the `message` adapter, receipts,
-and receive/send lifecycle helpers on `openclaw/plugin-sdk/channel-outbound`
+and receive/send lifecycle helpers on `carapace/plugin-sdk/channel-outbound`
 instead.
 
 ### Inbound ingress (experimental)
 
 Channels migrating inbound authorization can use the experimental
-`openclaw/plugin-sdk/channel-ingress-runtime` subpath from runtime receive
+`carapace/plugin-sdk/channel-ingress-runtime` subpath from runtime receive
 paths. It accepts platform facts, raw allowlists, route descriptors, command
 facts, and access group config, then returns sender/route/command/activation
 projections plus the ordered ingress graph, while platform lookup and side
@@ -199,7 +199,7 @@ supported evidence projects as unknown, never as an allow signal.
 ### Durable ingress and replay dedupe
 
 Channels adopting durable ingress should use `createChannelIngressMonitor`
-from `openclaw/plugin-sdk/channel-outbound` unless they need a materially
+from `carapace/plugin-sdk/channel-outbound` unless they need a materially
 different admission or pump contract. Enqueue the raw transport envelope at a
 single receive chokepoint (no normalization at receive time), gate the
 transport ack on the durable append for webhook transports, derive one
@@ -211,7 +211,7 @@ See [Channel outbound API](/plugins/sdk-channel-outbound#durable-ingress-monitor
 for the monitor API and shutdown contract.
 
 That tombstone is the layering rule for replay guards
-(`openclaw/plugin-sdk/persistent-dedupe`): a drained channel keeps a separate
+(`carapace/plugin-sdk/persistent-dedupe`): a drained channel keeps a separate
 replay guard only when the guard's identity or retention exceeds the queue's
 — a logical message key that differs from the transport delivery id (Telegram
 dedupes `chat_id:message_id` because debounce merges can re-surface a message
@@ -220,7 +220,7 @@ retention. If your guard key would equal the drain `event_id`, delete the
 guard when adopting the drain and size `completedTtlMs`/`completedMaxEntries`
 to cover the old guard window instead. Non-dedupe protections such as age
 fences are unrelated to this rule. Stable outbound message IDs use the shared
-outbound-echo registry from `openclaw/plugin-sdk/channel-outbound` instead of a
+outbound-echo registry from `carapace/plugin-sdk/channel-outbound` instead of a
 channel-local TTL cache.
 
 #### Transport classes and retention
@@ -259,7 +259,7 @@ can execute the side effect again. This at-least-once crash window is the
 default contract. For non-idempotent work such as config writes, storage
 clears, or visible acknowledgements outside the reply lane, use
 `createIngressEffectOnce(...)` from
-`openclaw/plugin-sdk/ingress-effect-once`. Give each call the stable ingress
+`carapace/plugin-sdk/ingress-effect-once`. Give each call the stable ingress
 `eventId` plus an effect name. Create one helper per ingress queue/account and
 use a stable, unique `namespacePrefix` for that scope because transport event
 IDs may be queue-local. The helper commits its durable claim only after the
@@ -361,7 +361,7 @@ uses the shared typing keepalive/cleanup lifecycle. Add
 ### Media source params
 
 Resolve account media limits with `resolveChannelMediaMaxBytes(...)` from
-`openclaw/plugin-sdk/account-helpers`. Pass the already-merged account's
+`carapace/plugin-sdk/account-helpers`. Pass the already-merged account's
 `mediaMaxMb` through `resolveChannelLimitMb`; the helper applies the agent
 default only when the account/channel limit is absent. Its optional byte result
 must reach the actual media loader, capped by any transport ceiling. Preserve
@@ -383,7 +383,7 @@ still works for params intentionally shared across every exposed action.
 
 Channels that must expose a temporary public URL for a platform-side media
 fetch can use `createHostedOutboundMediaStore(...)` from
-`openclaw/plugin-sdk/outbound-media` with plugin state stores. Keep platform
+`carapace/plugin-sdk/outbound-media` with plugin state stores. Keep platform
 route parsing and token enforcement in the channel plugin; the shared helper
 only owns media loading, expiry metadata, chunk rows, and cleanup.
 
@@ -400,11 +400,11 @@ so invalid tokens and `HEAD` requests do not hydrate stored media chunks.
 
 Inbound attachments use ordered facts, not parallel `Media*` fields. Normalize
 channel records with `toInboundMediaFacts(...)` from
-`openclaw/plugin-sdk/channel-inbound` and pass them as `media` when building the
+`carapace/plugin-sdk/channel-inbound` and pass them as `media` when building the
 inbound context. When a plugin must authorize local media reads, import
 `getAgentScopedMediaLocalRoots(...)` or
 `getAgentScopedMediaLocalRootsForSources(...)` from the focused
-`openclaw/plugin-sdk/media-local-roots` subpath. The old
+`carapace/plugin-sdk/media-local-roots` subpath. The old
 `agent-media-payload` builder/root facade is deprecated compatibility.
 
 ### Native payload shaping
@@ -461,7 +461,7 @@ can expose a top-level `session-key-api.ts` file with a matching
 plugins). Core uses that bootstrap-safe surface only when the runtime plugin
 registry is not available yet.
 
-Use `openclaw/plugin-sdk/channel-route` when plugin code needs to normalize
+Use `carapace/plugin-sdk/channel-route` when plugin code needs to normalize
 route-like fields, compare a child thread with its parent route, or build a
 stable dedupe key from `{ channel, to, accountId, threadId }`. The helper
 normalizes numeric thread ids the same way core does, so prefer it over ad hoc
@@ -493,7 +493,7 @@ liveness, perform network requests, or infer missing provider facts. Return:
 Keep temporary unavailability distinct from `null`: an adapter restart is not
 proof that a previously bound conversation is unowned.
 Use `inspectConversationBinding(...)` and its `ConversationBindingInspection`
-result from `openclaw/plugin-sdk/conversation-binding-inspection-runtime` for this
+result from `carapace/plugin-sdk/conversation-binding-inspection-runtime` for this
 available/unavailable distinction. This public inspection helper is synchronous,
 read-only, and does not refresh binding liveness.
 
@@ -518,7 +518,7 @@ hook gates only generic current-conversation bindings; it does not replace
 configured binding rules or plugin-owned session routing. Contract tests
 should cover at least one supported and one unsupported account through the
 `ChannelPlugin["conversationBindings"]` contract exported by
-`openclaw/plugin-sdk/channel-core`.
+`carapace/plugin-sdk/channel-core`.
 
 Binding ids are local to a channel and account. `SessionBindingService.touch(bindingId, at?, scope?)`
 and `unbind({ bindingId, reason, scope })` accept an optional `{ channel, accountId }`
@@ -533,7 +533,7 @@ await getSessionBindingService().unbind({
 });
 ```
 
-Import `getSessionBindingService` from `openclaw/plugin-sdk/session-binding-runtime`.
+Import `getSessionBindingService` from `carapace/plugin-sdk/session-binding-runtime`.
 For activity updates, use `service.touch(binding.bindingId, at, binding.conversation)`.
 Omit scope only for intentional global cleanup or an existing legacy cross-channel
 operation. Scope does not change binding ids or require a new adapter method.
@@ -544,7 +544,7 @@ inherit the previous plugin owner, agent, or label. Keep conversation transport
 details and explicit lifecycle settings separate from target metadata.
 
 Use `resolveThreadBindingLifecycle(...)` from
-`openclaw/plugin-sdk/thread-bindings-session-runtime` for standard idle and
+`carapace/plugin-sdk/thread-bindings-session-runtime` for standard idle and
 maximum-age expiration. Plugins with a different legacy timestamp contract can
 pass prepared `inactivityExpiresAt` and `maxAgeExpiresAt` values to
 `resolveThreadBindingExpiry(...)` on the same subpath. It selects the earlier
@@ -552,9 +552,9 @@ deadline and its reason, preferring idle expiration on ties; omitted deadlines
 are disabled. The plugin still owns timestamp validation and duration defaults.
 
 Preserve opaque plugin ownership metadata when projecting binding records.
-Plugin-owned targets do not require an OpenClaw agent id; use
+Plugin-owned targets do not require an Carapace agent id; use
 `isPluginOwnedSessionBindingRecord(...)` from
-`openclaw/plugin-sdk/conversation-binding-runtime` to distinguish them from
+`carapace/plugin-sdk/conversation-binding-runtime` to distinguish them from
 agent-owned targets before resolving an agent.
 
 For agent-owned targets with an unscoped session key such as `global`, preserve
@@ -592,11 +592,11 @@ custom approval payloads instead of the shared renderer.
   the common case.
 - If a channel can infer stable owner-like DM identities from existing config,
   use `createResolvedApproverActionAuthAdapter` from
-  `openclaw/plugin-sdk/approval-runtime` to restrict same-chat `/approve`
+  `carapace/plugin-sdk/approval-runtime` to restrict same-chat `/approve`
   without adding approval-specific core logic.
 - If custom approval auth intentionally allows only same-chat fallback, return
   `markImplicitSameChatApprovalAuthorization({ authorized: true })` from
-  `openclaw/plugin-sdk/approval-auth-runtime`; otherwise core treats the
+  `carapace/plugin-sdk/approval-auth-runtime`; otherwise core treats the
   result as explicit approver authorization.
 - If a channel-owned native callback resolves approvals directly, use
   `isImplicitSameChatApprovalAuthorization(...)` before resolving so implicit
@@ -627,7 +627,7 @@ target normalization plus transport/presentation facts. Use
 `createChannelExecApprovalProfile`, `createChannelNativeOriginTargetResolver`,
 `createChannelApproverDmTargetResolver`, and
 `createApproverRestrictedNativeApprovalCapability` from
-`openclaw/plugin-sdk/approval-runtime`. Put the channel-specific facts behind
+`carapace/plugin-sdk/approval-runtime`. Put the channel-specific facts behind
 `approvalCapability.nativeRuntime`, ideally via
 `createChannelApprovalNativeRuntimeAdapter(...)` or
 `createLazyChannelApprovalNativeRuntimeAdapter(...)`, so core can assemble the
@@ -660,7 +660,7 @@ do not treat the recorded approval alone as proof that the change completed.
 Other approval helpers:
 
 - Use `settleApprovalReaction` from
-  `openclaw/plugin-sdk/approval-reaction-runtime` for explicitly authorized
+  `carapace/plugin-sdk/approval-reaction-runtime` for explicitly authorized
   reaction decisions. It checks the supplied approvers and actor authorization,
   loads the Gateway resolver lazily, and calls `clearTarget` for every terminal
   result (including a losing click) or approval-not-found error. Keep transport
@@ -671,7 +671,7 @@ Other approval helpers:
   their own validation.
 - Use `formatChannelApprovalResolvedLabel` and
   `buildSystemAgentApprovalResolvedText` from
-  `openclaw/plugin-sdk/approval-runtime` for terminal presentation.
+  `carapace/plugin-sdk/approval-runtime` for terminal presentation.
   Rich labels preserve application-status precedence; prose preserves denial
   precedence, because a denied system change can also report `not-applied`.
   Both prioritize cancellation. Pass a decision formatter for transport-specific
@@ -684,7 +684,7 @@ Other approval helpers:
   `matchesApprovalRequestSessionFilter` export have been retired. The core
   implementations are unchanged.
 - Use `createNativeApprovalControlRegistry` from
-  `openclaw/plugin-sdk/approval-runtime` for process-local native card
+  `carapace/plugin-sdk/approval-runtime` for process-local native card
   tokens. Each instance owns a 1,024-binding FIFO registry and holds its claim
   through Gateway resolution and the terminal card update. Missing approvals
   retire their tokens; other failures release the claim for retry. Plugins
@@ -692,7 +692,7 @@ Other approval helpers:
   retain their lookup-expiry policy through `releaseClaimOnLookupExpiry`, and
   use `onComplete` for transport-owned cleanup such as manual-prompt suppression.
 - Use `createNativeApprovalChannelRouteGates` from
-  `openclaw/plugin-sdk/approval-native-runtime` when a channel supports both
+  `carapace/plugin-sdk/approval-native-runtime` when a channel supports both
   session-origin native delivery and explicit approval forwarding targets. The
   helper centralizes approval config selection, `mode` handling, agent/session
   filters, account binding, session-target matching, and target-list matching
@@ -717,7 +717,7 @@ Other approval helpers:
   delivery target itself should be canonicalized.
 - If the channel needs runtime-owned objects such as a client, token, Bolt
   app, or webhook receiver, register them through
-  `openclaw/plugin-sdk/channel-runtime-context`. The generic runtime-context
+  `carapace/plugin-sdk/channel-runtime-context`. The generic runtime-context
   registry lets core bootstrap capability-driven handlers from channel
   startup state without adding approval-specific wrapper glue.
 - Reach for the lower-level `createChannelApprovalHandler` or
@@ -756,37 +756,37 @@ Other approval helpers:
 For hot channel entrypoints, prefer these narrower subpaths over the broader
 `approval-runtime` barrel when you only need one part of that family:
 
-- `openclaw/plugin-sdk/approval-auth-runtime`
-- `openclaw/plugin-sdk/approval-client-runtime`
-- `openclaw/plugin-sdk/approval-delivery-runtime`
-- `openclaw/plugin-sdk/approval-gateway-runtime`
-- `openclaw/plugin-sdk/approval-reference-runtime`
-- `openclaw/plugin-sdk/approval-handler-adapter-runtime`
-- `openclaw/plugin-sdk/approval-handler-runtime`
-- `openclaw/plugin-sdk/approval-native-runtime`
-- `openclaw/plugin-sdk/approval-reply-runtime`
-- `openclaw/plugin-sdk/channel-runtime-context`
+- `carapace/plugin-sdk/approval-auth-runtime`
+- `carapace/plugin-sdk/approval-client-runtime`
+- `carapace/plugin-sdk/approval-delivery-runtime`
+- `carapace/plugin-sdk/approval-gateway-runtime`
+- `carapace/plugin-sdk/approval-reference-runtime`
+- `carapace/plugin-sdk/approval-handler-adapter-runtime`
+- `carapace/plugin-sdk/approval-handler-runtime`
+- `carapace/plugin-sdk/approval-native-runtime`
+- `carapace/plugin-sdk/approval-reply-runtime`
+- `carapace/plugin-sdk/channel-runtime-context`
 
-Likewise, prefer `openclaw/plugin-sdk/reply-runtime`,
-`openclaw/plugin-sdk/reply-dispatch-runtime`,
-`openclaw/plugin-sdk/reply-reference`, and
-`openclaw/plugin-sdk/reply-chunking` over broader umbrella surfaces when you
+Likewise, prefer `carapace/plugin-sdk/reply-runtime`,
+`carapace/plugin-sdk/reply-dispatch-runtime`,
+`carapace/plugin-sdk/reply-reference`, and
+`carapace/plugin-sdk/reply-chunking` over broader umbrella surfaces when you
 do not need them all.
 
 ### Setup subpaths
 
-- `openclaw/plugin-sdk/setup-runtime` covers the runtime-safe setup helpers:
+- `carapace/plugin-sdk/setup-runtime` covers the runtime-safe setup helpers:
   `createSetupTranslator`, import-safe setup patch adapters
   (`createPatchedAccountSetupAdapter`, `createEnvPatchedAccountSetupAdapter`,
   `createSetupInputPresenceValidator`), lookup-note output,
   `promptResolvedAllowFrom`, `splitSetupEntries`, and the delegated
   setup-proxy builders.
-- `openclaw/plugin-sdk/channel-setup` covers the optional-install setup
+- `carapace/plugin-sdk/channel-setup` covers the optional-install setup
   builders plus a few setup-safe primitives: `createOptionalChannelSetupSurface`,
   `createOptionalChannelSetupAdapter`, `createOptionalChannelSetupWizard`,
   `DEFAULT_ACCOUNT_ID`, `createTopLevelChannelDmPolicy`,
   `setSetupChannelEnabled`, and `splitSetupEntries`.
-- Use the broader `openclaw/plugin-sdk/setup` seam only when you also need
+- Use the broader `carapace/plugin-sdk/setup` seam only when you also need
   the heavier shared setup/config helpers such as
   `moveSingleAccountChannelSectionToDefaultAccount(...)`.
 
@@ -801,7 +801,7 @@ channel config schema and setup descriptors. Keep channel runtime `envVars` or
 local constants for operator-facing copy only.
 
 If your channel can appear in `status`, `channels list`, `channels status`, or
-SecretRef scans before the plugin runtime starts, add `openclaw.setupEntry` in
+SecretRef scans before the plugin runtime starts, add `carapace.setupEntry` in
 `package.json`. That entrypoint should be safe to import in read-only command
 paths and should return the channel metadata, setup-safe config adapter,
 status adapter, and channel secret target metadata needed for those
@@ -819,7 +819,7 @@ setters, or lazy capability adapters.
 ### Account schemas and inheritance
 
 Use `buildChannelAccountSchemaParts` from
-`openclaw/plugin-sdk/channel-config-schema`. Its `accountShape` leaves
+`carapace/plugin-sdk/channel-config-schema`. Its `accountShape` leaves
 `dmPolicy` and `groupPolicy` optional, so an omitted account policy inherits
 the channel root. Spread its `rootPolicyShape` into the root schema
 only: it defaults DMs to `pairing` and groups to `allowlist`. Do not apply
@@ -836,7 +836,7 @@ disabled-account filtering, and ordering relative to other refinements in the
 channel, since those rules differ between plugins.
 
 Use `mergeAccountConfig` or `resolveMergedAccountConfig` through the existing
-`openclaw/plugin-sdk/account-helpers` export for runtime inheritance. Their
+`carapace/plugin-sdk/account-helpers` export for runtime inheritance. Their
 shared implementation lives at `src/config/channel-account-config.ts`;
 plugins must use the SDK import. Account fields replace root fields, including
 explicit empty collections. `nestedObjectKeys` selects shallow object merges;
@@ -852,15 +852,15 @@ selection, and other channel-specific account concerns in the plugin.
 For other hot channel paths, prefer the narrow helpers over broader legacy
 surfaces:
 
-- `openclaw/plugin-sdk/account-core`, `openclaw/plugin-sdk/account-id`,
-  `openclaw/plugin-sdk/account-resolution`, and
-  `openclaw/plugin-sdk/account-helpers` for multi-account config and
+- `carapace/plugin-sdk/account-core`, `carapace/plugin-sdk/account-id`,
+  `carapace/plugin-sdk/account-resolution`, and
+  `carapace/plugin-sdk/account-helpers` for multi-account config and
   default-account fallback
-- `openclaw/plugin-sdk/inbound-envelope` and
-  `openclaw/plugin-sdk/channel-inbound` for inbound route/envelope and
+- `carapace/plugin-sdk/inbound-envelope` and
+  `carapace/plugin-sdk/channel-inbound` for inbound route/envelope and
   record-and-dispatch wiring
 - `readAgentRunTerminalOutcome(dispatchResult)` from
-  `openclaw/plugin-sdk/channel-inbound` when terminal reactions or status UI
+  `carapace/plugin-sdk/channel-inbound` when terminal reactions or status UI
   must distinguish a completed core agent run from a recovered failed run. It
   returns `"completed"` or `"failed"` only when a core run actually started,
   and `undefined` for commands, dedupe, busy, pre-run abort, and custom dispatch
@@ -868,19 +868,19 @@ surfaces:
   successful delivery of an error payload; the process-local carrier is not
   serialized to JSON.
 - `createInboundEventDeliveryCorrelation(...)` from
-  `openclaw/plugin-sdk/inbound-event-delivery` when successful outbound sends must
+  `carapace/plugin-sdk/inbound-event-delivery` when successful outbound sends must
   retire an active inbound-event marker; create one tracker per channel and
   keep target matching in the channel plugin
-- `openclaw/plugin-sdk/channel-targets` for target parsing helpers
-- `openclaw/plugin-sdk/channel-outbound` for outbound identity/send delegates
+- `carapace/plugin-sdk/channel-targets` for target parsing helpers
+- `carapace/plugin-sdk/channel-outbound` for outbound identity/send delegates
   and typed payload planning
 - `buildThreadAwareOutboundSessionRoute(...)` from
-  `openclaw/plugin-sdk/channel-core` when an outbound route should preserve
+  `carapace/plugin-sdk/channel-core` when an outbound route should preserve
   an explicit `replyToId`/`threadId` or recover the current `:thread:`
   session after the base session key still matches. Provider plugins can
   override precedence, suffix behavior, and thread id normalization when
   their platform has native thread delivery semantics.
-- `openclaw/plugin-sdk/thread-bindings-runtime` for thread-binding lifecycle
+- `carapace/plugin-sdk/thread-bindings-runtime` for thread-binding lifecycle
   and adapter registration
 
 The `threading.resolveReplyTransport` hook receives the payload's optional
@@ -902,8 +902,8 @@ Keep inbound mention handling split in two layers:
 - plugin-owned evidence gathering
 - shared policy evaluation
 
-Use `openclaw/plugin-sdk/channel-mention-gating` for mention-policy decisions.
-Use `openclaw/plugin-sdk/channel-inbound` only when you need the broader
+Use `carapace/plugin-sdk/channel-mention-gating` for mention-policy decisions.
+Use `carapace/plugin-sdk/channel-inbound` only when you need the broader
 inbound helper barrel.
 
 Good fit for plugin-local logic:
@@ -934,8 +934,8 @@ import {
   implicitMentionKindWhen,
   matchesMentionWithExplicit,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelImplicitMentions } from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { resolveChannelImplicitMentions } from "carapace/plugin-sdk/channel-ingress-runtime";
 
 const wasMentioned = matchesMentionWithExplicit({
   text,
@@ -989,7 +989,7 @@ bundled channel plugins that already depend on runtime injection:
 `implicitMentionKindWhen`, `resolveInboundMentionDecision`.
 
 If you only need `implicitMentionKindWhen` and `resolveInboundMentionDecision`,
-import from `openclaw/plugin-sdk/channel-mention-gating` to avoid loading
+import from `carapace/plugin-sdk/channel-mention-gating` to avoid loading
 unrelated inbound runtime helpers.
 
 ## Walkthrough
@@ -998,29 +998,29 @@ unrelated inbound runtime helpers.
   <a id="step-1-package-and-manifest"></a>
   <Step title="Package and manifest">
     Create the standard plugin files. The `channels` field in
-    `openclaw.plugin.json` (not a `kind` field) is what marks a manifest as
+    `carapace.plugin.json` (not a `kind` field) is what marks a manifest as
     owning a channel. For the full package-metadata surface, see
-    [Plugin Setup and Config](/plugins/sdk-setup#openclaw-channel):
+    [Plugin Setup and Config](/plugins/sdk-setup#carapace-channel):
 
     <CodeGroup>
     ```json package.json
     {
-      "name": "@myorg/openclaw-acme-chat",
+      "name": "@myorg/carapace-acme-chat",
       "version": "1.0.0",
       "type": "module",
-      "openclaw": {
+      "carapace": {
         "extensions": ["./index.ts"],
         "setupEntry": "./setup-entry.ts",
         "channel": {
           "id": "acme-chat",
           "label": "Acme Chat",
-          "blurb": "Connect OpenClaw to Acme Chat."
+          "blurb": "Connect Carapace to Acme Chat."
         }
       }
     }
     ```
 
-    ```json openclaw.plugin.json
+    ```json carapace.plugin.json
     {
       "id": "acme-chat",
       "channels": ["acme-chat"],
@@ -1092,8 +1092,8 @@ unrelated inbound runtime helpers.
     import {
       createChatChannelPlugin,
       createChannelPluginBase,
-    } from "openclaw/plugin-sdk/channel-core";
-    import type { OpenClawConfig } from "openclaw/plugin-sdk/channel-core";
+    } from "carapace/plugin-sdk/channel-core";
+    import type { CarapaceConfig } from "carapace/plugin-sdk/channel-core";
     import { acmeChatApi } from "./client.js"; // your platform API client
 
     type ResolvedAccount = {
@@ -1104,7 +1104,7 @@ unrelated inbound runtime helpers.
     };
 
     function resolveAccount(
-      cfg: OpenClawConfig,
+      cfg: CarapaceConfig,
       accountId?: string | null,
     ): ResolvedAccount {
       const section = (cfg.channels as Record<string, any>)?.["acme-chat"];
@@ -1195,7 +1195,7 @@ unrelated inbound runtime helpers.
     For channels that accept both canonical top-level DM keys and legacy nested keys, use the helpers from `plugin-sdk/channel-config-helpers`: `resolveChannelDmAccess`, `resolveChannelDmPolicy`, `resolveChannelDmAllowFrom`, and `normalizeChannelDmPolicy` keep account-local values ahead of inherited root values. Pair the same resolver with doctor repair through `normalizeLegacyDmAliases` so runtime and migration read the same contract.
 
     Config-backed logout handlers can use `clearAccountFieldsFromConfigSection`
-    from `openclaw/plugin-sdk/channel-config-helpers`. Pass `cfg`, `sectionKey`,
+    from `carapace/plugin-sdk/channel-config-helpers`. Pass `cfg`, `sectionKey`,
     `accountId`, and the plugin-owned `fields` to remove. It returns
     `{ nextConfig, changed, cleared }` without writing config or resolving
     credentials. Root fields clear together only for the exact `default` account
@@ -1259,7 +1259,7 @@ unrelated inbound runtime helpers.
     by skipping sender-specific overlays at both the matched-group and wildcard
     scopes while still applying the base `tools` policy.
 
-    OpenClaw sets this mode only for trusted non-ingress execution whose sender
+    Carapace sets this mode only for trusted non-ingress execution whose sender
     authority was already captured in a server-owned envelope, such as an
     explicitly capped scheduled run. Plugins must not derive the mode from
     inbound metadata, persist it as channel state, or expose it as config. Add
@@ -1269,7 +1269,7 @@ unrelated inbound runtime helpers.
     ### Native plugin command ownership
 
     Channel plugins that publish provider-native command catalogs should use
-    `openclaw/plugin-sdk/plugin-command-runtime`. Create one runtime while
+    `carapace/plugin-sdk/plugin-command-runtime`. Create one runtime while
     planning the catalog, merge its candidates with built-in and skill entries,
     and retain the winning candidate object in the registered handler closure.
     A plugin registry replacement drains and restarts loaded channel accounts
@@ -1300,7 +1300,7 @@ unrelated inbound runtime helpers.
     Create `index.ts`:
 
     ```typescript index.ts
-    import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
+    import { defineChannelPluginEntry } from "carapace/plugin-sdk/channel-core";
     import { acmeChatPlugin } from "./src/channel.js";
 
     export default defineChannelPluginEntry({
@@ -1332,7 +1332,7 @@ unrelated inbound runtime helpers.
     });
     ```
 
-    Put channel-owned CLI descriptors in `registerCliMetadata(...)` so OpenClaw
+    Put channel-owned CLI descriptors in `registerCliMetadata(...)` so Carapace
     can show them in root help without activating the full channel runtime,
     while normal full loads still pick up the same descriptors for real command
     registration. Keep `registerFull(...)` for runtime-only work.
@@ -1350,26 +1350,26 @@ unrelated inbound runtime helpers.
     Create `setup-entry.ts` for lightweight loading during onboarding:
 
     ```typescript setup-entry.ts
-    import { defineSetupPluginEntry } from "openclaw/plugin-sdk/channel-core";
+    import { defineSetupPluginEntry } from "carapace/plugin-sdk/channel-core";
     import { acmeChatPlugin } from "./src/channel.js";
 
     export default defineSetupPluginEntry(acmeChatPlugin);
     ```
 
-    OpenClaw loads this instead of the full entry when the channel is disabled
+    Carapace loads this instead of the full entry when the channel is disabled
     or unconfigured. It avoids pulling in heavy runtime code during setup flows.
     See [Setup and Config](/plugins/sdk-setup#setup-entry) for details.
 
     Bundled workspace channels that split setup-safe exports into sidecar
     modules can use `defineBundledChannelSetupEntry(...)` from
-    `openclaw/plugin-sdk/channel-entry-contract` when they also need an
+    `carapace/plugin-sdk/channel-entry-contract` when they also need an
     explicit setup-time runtime setter.
 
   </Step>
 
   <Step title="Handle inbound messages">
     Your plugin needs to receive messages from the platform and forward them to
-    OpenClaw. The typical pattern is a webhook that verifies the request and
+    Carapace. The typical pattern is a webhook that verifies the request and
     dispatches it through your channel's inbound handler:
 
     ```typescript
@@ -1380,7 +1380,7 @@ unrelated inbound runtime helpers.
         handler: async (req, res) => {
           const event = parseWebhookPayload(req);
 
-          // Your inbound handler dispatches the message to OpenClaw.
+          // Your inbound handler dispatches the message to Carapace.
           // The exact wiring depends on your platform SDK -
           // see a real example in the bundled Microsoft Teams or Google Chat plugin package.
           await handleAcmeChatInbound(api, event);
@@ -1450,8 +1450,8 @@ Write colocated tests in `src/channel.test.ts`:
 
 ```text
 <bundled-plugin-root>/acme-chat/
-├── package.json              # openclaw.channel metadata
-├── openclaw.plugin.json      # Manifest with config schema
+├── package.json              # carapace.channel metadata
+├── carapace.plugin.json      # Manifest with config schema
 ├── index.ts                  # defineChannelPluginEntry
 ├── setup-entry.ts            # defineSetupPluginEntry
 ├── api.ts                    # Public exports (optional)

@@ -20,7 +20,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("shrink-ratchet", () => {
   it("rejects missing paths whose names resemble successful batch headers", () => {
-    const root = tempDirs.make("openclaw-shrink-ratchet-missing-");
+    const root = tempDirs.make("carapace-shrink-ratchet-missing-");
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
     expect(() => loadRatchetSources(root, ["src/missing.ts"])).toThrow(
       /Could not read staged source/u,
@@ -53,14 +53,14 @@ describe("shrink-ratchet", () => {
       source: "# total debt\n2\n",
     },
   ])("loads the existing $file baseline format", ({ expected, file, parse, source }) => {
-    const root = tempDirs.make("openclaw-shrink-ratchet-");
+    const root = tempDirs.make("carapace-shrink-ratchet-");
     fs.writeFileSync(path.join(root, file), source);
 
     expect(loadRatchetSnapshot<unknown>(root, file, false, parse)).toEqual(expected);
   });
 
   it("loads worktree, index, and reference snapshots", () => {
-    const root = tempDirs.make("openclaw-shrink-ratchet-git-");
+    const root = tempDirs.make("carapace-shrink-ratchet-git-");
     const baselinePath = "baseline.txt";
     const absolutePath = path.join(root, baselinePath);
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
@@ -68,7 +68,7 @@ describe("shrink-ratchet", () => {
     execFileSync("git", ["add", baselinePath], { cwd: root, stdio: "ignore" });
     execFileSync(
       "git",
-      ["-c", "user.name=OpenClaw", "-c", "user.email=test@openclaw.local", "commit", "-m", "base"],
+      ["-c", "user.name=Carapace", "-c", "user.email=test@carapace.local", "commit", "-m", "base"],
       { cwd: root, stdio: "ignore" },
     );
     fs.writeFileSync(absolutePath, "2\n");

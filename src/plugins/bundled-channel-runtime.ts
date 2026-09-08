@@ -3,7 +3,7 @@ import path from "node:path";
 import { isVitestRuntimeEnv } from "../infra/env.js";
 import { resolveBundledPluginGeneratedPath } from "./bundled-plugin-metadata.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { CarapacePackageManifest } from "./manifest.js";
 import { pluginCacheExistsSync } from "./plugin-cache-files.js";
 import { resolvePluginMetadataSnapshot } from "./plugin-metadata-snapshot.js";
 
@@ -26,7 +26,7 @@ export type BundledChannelPluginMetadata = {
     id: string;
     channels?: readonly string[];
   };
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   rootDir: string;
 };
 
@@ -49,8 +49,8 @@ function resolveBundledMetadataScope(params?: {
     kind: "env",
     env: {
       ...process.env,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: overrideDir,
-      ...(isVitestRuntimeEnv() ? { OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" } : {}),
+      CARAPACE_BUNDLED_PLUGINS_DIR: overrideDir,
+      ...(isVitestRuntimeEnv() ? { CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" } : {}),
     },
   };
 }

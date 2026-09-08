@@ -43,11 +43,11 @@ export function registerModelsCli(program: Command) {
     .option("--json", "Output JSON (alias for `models status --json`)", false)
     .option("--status-json", "Output JSON (alias for `models status --json`)", false)
     .option("--status-plain", "Plain output (alias for `models status --plain`)", false)
-    .option("--agent <id>", "Agent id to inspect (overrides OPENCLAW_AGENT_DIR)")
+    .option("--agent <id>", "Agent id to inspect (overrides CARAPACE_AGENT_DIR)")
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/models", "docs.openclaw.ai/cli/models")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/models", "github.com/Exaggarate/carapace")}\n`,
     );
   const hasJsonOutput = (opts?: { json?: boolean }): boolean =>
     Boolean(opts?.json || models.opts<{ json?: boolean }>().json);
@@ -62,7 +62,7 @@ export function registerModelsCli(program: Command) {
     .option("--all", "Show full model catalog", false)
     .option("--local", "Filter to local models", false)
     .option("--provider <id>", "Filter by provider id")
-    .option("--agent <id>", "Agent id to inspect (overrides OPENCLAW_AGENT_DIR)")
+    .option("--agent <id>", "Agent id to inspect (overrides CARAPACE_AGENT_DIR)")
     .option("--json", "Output JSON", false)
     .option("--plain", "Plain line output", false)
     .action(async (opts, command) => {
@@ -103,7 +103,7 @@ export function registerModelsCli(program: Command) {
     .option("--probe-timeout <ms>", "Per-probe timeout in ms")
     .option("--probe-concurrency <n>", "Concurrent probes")
     .option("--probe-max-tokens <n>", "Probe max tokens (best-effort)")
-    .option("--agent <id>", "Agent id to inspect (overrides OPENCLAW_AGENT_DIR)")
+    .option("--agent <id>", "Agent id to inspect (overrides CARAPACE_AGENT_DIR)")
     .action(async (opts, command) => {
       await withModelsRuntime(async ({ defaultRuntime, resolveModelAgentOption }) => {
         const agent = resolveModelAgentOption(command, opts);

@@ -9,7 +9,7 @@ import { sharedVitestConfig } from "./vitest/vitest.shared.config.ts";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it("resolves Undici's real entry from each importer instead of the root install or Bun builtin", async () => {
-  const root = tempDirs.make("openclaw-vitest-dependency-resolution-");
+  const root = tempDirs.make("carapace-vitest-dependency-resolution-");
   const importers = [
     [root, "1.0.0"],
     [path.join(root, "extensions", "plugin-a"), "2.0.0"],

@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { AgentMessage } from "../../agents/runtime/index.js";
 import { getCodeModeSourceAppend } from "../../agents/transcript-code-mode-source.js";
 import { redactTranscriptMessage } from "../../agents/transcript-redact.js";
@@ -11,9 +11,9 @@ import {
 import { redactSecrets } from "../../logging/redact.js";
 import { canonicalizePersistedUserMessageMedia } from "../../media/media-facts.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { advanceCliHistoryBoundaryInTransaction } from "./session-accessor.sqlite-cli-history-boundary.js";
 import type {
   TranscriptEvent,
@@ -72,7 +72,7 @@ type TranscriptAppendCursor = {
   insertIdentity?: ReturnType<typeof createTranscriptIdentityInserter>;
 };
 
-export function createTranscriptEventInserter(database: OpenClawAgentDatabase, sessionId: string) {
+export function createTranscriptEventInserter(database: CarapaceAgentDatabase, sessionId: string) {
   return prepareSqliteQuerySync<{ seq: number; eventJson: string; createdAt: number }>(
     database.db,
     (parameter) =>
@@ -88,7 +88,7 @@ export function createTranscriptEventInserter(database: OpenClawAgentDatabase, s
 }
 
 function createTranscriptIdentityInserter(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   ignoreConflicts: boolean,
 ) {
@@ -115,7 +115,7 @@ function createTranscriptIdentityInserter(
 
 /** Returns the exact committed JSON, or false when an existing identity owns the event. */
 export function appendTranscriptEventInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   event: TranscriptEvent,
   options: TranscriptAppendOptions = {},
@@ -124,7 +124,7 @@ export function appendTranscriptEventInTransaction(
 }
 
 function appendTranscriptEvent(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   event: TranscriptEvent,
   options: TranscriptAppendOptions,
@@ -208,7 +208,7 @@ function appendTranscriptEvent(
 }
 
 function scheduleTranscriptProjectionReconcile(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   projectionNeedsRebuild: boolean,
   options: { scheduleProjectionReconcile?: boolean },
@@ -217,7 +217,7 @@ function scheduleTranscriptProjectionReconcile(
     return;
   }
   // Dirty state is durable: a missed post-commit kick is recovered by startup/search reconciliation.
-  deferOpenClawAgentPostCommitPublication(database, () =>
+  deferCarapaceAgentPostCommitPublication(database, () =>
     startSessionTranscriptIndexReconcile({
       agentId: database.agentId,
       path: database.path,
@@ -227,7 +227,7 @@ function scheduleTranscriptProjectionReconcile(
 }
 
 export function appendTranscriptEventsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   events: Iterable<TranscriptEvent, unknown, boolean>,
   options: Omit<TranscriptAppendOptions, "onProjectionReconcileNeeded"> = {},
@@ -320,7 +320,7 @@ function appendTranscriptEventRowInTransaction(
 }
 
 export function ensureTranscriptHeader(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   cwd: string | undefined,
 ): void {
@@ -344,7 +344,7 @@ export function ensureTranscriptHeader(
 }
 
 export function replaceSqliteTranscriptEventsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedTranscriptScope,
   events: readonly TranscriptEvent[],
   options: {
@@ -420,7 +420,7 @@ export function replaceSqliteTranscriptEventsInTransaction(
 }
 
 function recordTranscriptReplacementMutation(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   preservedUpdatedAt: number | null | undefined,
 ): void {
@@ -437,7 +437,7 @@ function recordTranscriptReplacementMutation(
 
 /** Rewrite existing transcript rows exactly, without append-time deduplication. */
 export function rewriteSqliteTranscriptEventRowsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedTranscriptScope,
   rows: readonly {
     event: TranscriptEvent;
@@ -511,7 +511,7 @@ function transcriptRewritePreservesProjection(beforeJson: string, afterJson: str
 }
 
 function reconcileRewrittenTranscriptIndex(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   rebuildSynchronously: boolean,
 ): void {
@@ -528,7 +528,7 @@ function reconcileRewrittenTranscriptIndex(
 // Preserves seq, created_at, session_key, and session activity recency; rotates the transcript
 // generation and rebuilds bounded projections immediately or defers large projections.
 export function updateSqliteTranscriptEventJsonInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   updates: ReadonlyArray<{ seq: number; eventJson: string }>,
 ): void {
@@ -564,7 +564,7 @@ export function updateSqliteTranscriptEventJsonInTransaction(
 }
 
 function readIdempotencyKeyOwner(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionId: string,
   idempotencyKey: string,
 ): { eventId: string; seq: number } | undefined {
@@ -583,7 +583,7 @@ function readIdempotencyKeyOwner(
 }
 
 function readTranscriptMessageByIdempotencyKey(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   scope: ResolvedTranscriptScope,
   idempotencyKey: string,
 ): { messageId: string; message: unknown } | undefined {
@@ -592,7 +592,7 @@ function readTranscriptMessageByIdempotencyKey(
 }
 
 export function readTranscriptMessageByScopedIdempotencyKey(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   scope: ResolvedTranscriptScope,
   idempotencyKey: string,
   lookup: TranscriptMessageAppendOptions<unknown>["idempotencyLookup"],
@@ -614,7 +614,7 @@ export function readTranscriptMessageByScopedIdempotencyKey(
 }
 
 export function readTranscriptMessageByEventId(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   eventId: string,
 ): { messageId: string; message: unknown } | undefined {
@@ -623,7 +623,7 @@ export function readTranscriptMessageByEventId(
 }
 
 function readTranscriptMessageByIdentity(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   scope: ResolvedTranscriptScope,
   identity: { eventId: string; seq: number },
 ): { messageId: string; message: unknown } | undefined {

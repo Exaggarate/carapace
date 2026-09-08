@@ -1,7 +1,7 @@
-import type { ChannelIngressContextBinding } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import type { ChannelIngressContextBinding } from "carapace/plugin-sdk/channel-ingress-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 // Discord plugin module implements message handlerm preflight behavior.
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { resolveDiscordConversationIdentity } from "../conversation-identity.js";
 import type { User } from "../internal/discord.js";
 import { resolveDiscordDmCommandAccess, type DiscordDmPolicy } from "./dm-command-auth.js";
@@ -13,7 +13,7 @@ import type {
 } from "./message-handler.preflight.types.js";
 
 const loadConversationRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/conversation-binding-runtime"),
+  () => import("carapace/plugin-sdk/conversation-binding-runtime"),
 );
 
 const loadDiscordSendRuntime = createLazyRuntimeModule(() => import("../send.js"));

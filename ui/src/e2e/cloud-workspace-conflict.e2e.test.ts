@@ -10,7 +10,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = artifactRoot
@@ -28,7 +28,7 @@ const workerFailureDiagnostic = [
 
 const conflict = {
   paths: ["src/local.ts", "ui/src/app.ts"],
-  stagedResultRef: "refs/openclaw/worker-results/claim-proof",
+  stagedResultRef: "refs/carapace/worker-results/claim-proof",
   totalCount: 2,
 };
 
@@ -232,7 +232,7 @@ suite.define(() => {
     {
       customType: "cloud-workspace-recovery-failed",
       content:
-        "Cloud workspace recovery attempt failed: snapshot verification failed. OpenClaw preserved the result and will retry.",
+        "Cloud workspace recovery attempt failed: snapshot verification failed. Carapace preserved the result and will retry.",
     },
     {
       customType: "run-failed-before-reply",

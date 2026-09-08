@@ -5,14 +5,14 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { loadInstalledPluginIndex } from "../../src/plugins/installed-plugin-index.js";
 import { createInstalledPluginOwnershipResolver } from "../../src/plugins/installed-plugin-package-ownership.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../../src/state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../../src/state/carapace-state-db.js";
 
 const PLUGIN_UPDATE_SCENARIO_SCRIPT = "scripts/e2e/lib/plugin-update/unchanged-scenario.sh";
 const CORRUPT_UPDATE_SCENARIO_SCRIPT = "scripts/e2e/lib/plugin-update/corrupt-update-scenario.sh";
@@ -25,20 +25,20 @@ const PLUGIN_INDEX_MODULE_URL = pathToFileURL(
 ).href;
 
 function seedInstallState(root: string, initialized: boolean) {
-  const stateDir = path.join(root, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const stateDir = path.join(root, ".carapace");
+  const configPath = path.join(stateDir, "carapace.json");
   const env = {
     ...process.env,
     HOME: root,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_VERSION: "2026.8.1",
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_VERSION: "2026.8.1",
     VITEST: "true",
   };
   if (initialized) {
-    const database = openOpenClawStateDatabase({ env });
-    closeOpenClawStateDatabaseByPath(database.path);
+    const database = openCarapaceStateDatabase({ env });
+    closeCarapaceStateDatabaseByPath(database.path);
   }
   execFileSync("node", [PLUGIN_UPDATE_PROBE_SCRIPT, "seed"], {
     encoding: "utf8",
@@ -49,7 +49,7 @@ function seedInstallState(root: string, initialized: boolean) {
 }
 
 function runProbe(command: string, payload: unknown): void {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-probe-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-probe-"));
   const payloadPath = path.join(root, "payload.json");
   try {
     writeFileSync(payloadPath, `${JSON.stringify(payload, null, 2)}\n`);
@@ -66,7 +66,7 @@ function runProbeStatus(
   command: string,
   payload: unknown,
 ): { status: number | null; stderr: string } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-probe-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-probe-"));
   const payloadPath = path.join(root, "payload.json");
   try {
     writeFileSync(payloadPath, `${JSON.stringify(payload, null, 2)}\n`);
@@ -109,7 +109,7 @@ function runProbeFileStatus(
 }
 
 function runCorruptUpdateDockerBaseline(env: Record<string, string>) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-corrupt-update-docker-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-corrupt-update-docker-"));
   const binDir = path.join(root, "bin");
   const dockerArgsPath = path.join(root, "docker-args");
   const packagePath = path.join(root, "candidate.tgz");
@@ -131,8 +131,8 @@ fi
       env: {
         ...process.env,
         DOCKER_ARGS_PATH: dockerArgsPath,
-        OPENCLAW_CURRENT_PACKAGE_TGZ: packagePath,
-        OPENCLAW_SKIP_DOCKER_BUILD: "1",
+        CARAPACE_CURRENT_PACKAGE_TGZ: packagePath,
+        CARAPACE_SKIP_DOCKER_BUILD: "1",
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
         ...env,
       },
@@ -141,7 +141,7 @@ fi
     return {
       baseline: dockerArgs
         .split("\n")
-        .find((entry) => entry.startsWith("OPENCLAW_UPDATE_CORRUPT_PLUGIN_BASELINE=")),
+        .find((entry) => entry.startsWith("CARAPACE_UPDATE_CORRUPT_PLUGIN_BASELINE=")),
       result,
     };
   } finally {
@@ -166,7 +166,7 @@ describe("plugin update unchanged Docker E2E", () => {
   it.each([false, true])(
     "seeds plugin ownership with initialized state=%s",
     async (initialized) => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-seed-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-seed-"));
       try {
         const { configPath, env, stateDir } = seedInstallState(root, initialized);
         const config = JSON.parse(readFileSync(configPath, "utf8")) as {
@@ -187,7 +187,7 @@ describe("plugin update unchanged Docker E2E", () => {
         expect(persisted.installRecords).toMatchObject({
           "lossless-claw": {
             source: "npm",
-            installPath: "~/.openclaw/extensions/lossless-claw",
+            installPath: "~/.carapace/extensions/lossless-claw",
           },
         });
         expect(persisted.plugins).toEqual([
@@ -198,8 +198,8 @@ describe("plugin update unchanged Docker E2E", () => {
           }),
         ]);
 
-        const database = openOpenClawStateDatabase({ env });
-        closeOpenClawStateDatabaseByPath(database.path);
+        const database = openCarapaceStateDatabase({ env });
+        closeCarapaceStateDatabaseByPath(database.path);
         const liveIndex = loadInstalledPluginIndex({
           config,
           env,
@@ -223,8 +223,8 @@ describe("plugin update unchanged Docker E2E", () => {
   it("bounds the update command and prints diagnostics on hangs", () => {
     const script = readFileSync(PLUGIN_UPDATE_SCENARIO_SCRIPT, "utf8");
 
-    expect(script).toContain("OPENCLAW_PLUGIN_UPDATE_TIMEOUT_SECONDS");
-    expect(script).toContain("registry_port_file=/tmp/openclaw-e2e-registry.port");
+    expect(script).toContain("CARAPACE_PLUGIN_UPDATE_TIMEOUT_SECONDS");
+    expect(script).toContain("registry_port_file=/tmp/carapace-e2e-registry.port");
     expect(script).toContain(
       'node scripts/e2e/lib/plugin-update/registry-server.mjs "$registry_port_file"',
     );
@@ -233,27 +233,27 @@ describe("plugin update unchanged Docker E2E", () => {
     );
     expect(script).toContain('export npm_config_registry="$NPM_CONFIG_REGISTRY"');
     expect(script).toContain(
-      "openclaw_e2e_read_positive_int_env OPENCLAW_PLUGIN_UPDATE_TIMEOUT_SECONDS 180",
+      "carapace_e2e_read_positive_int_env CARAPACE_PLUGIN_UPDATE_TIMEOUT_SECONDS 180",
     );
     expect(script).toContain(
-      'openclaw_e2e_maybe_timeout "${plugin_update_timeout_seconds}s" node "$entry" plugins update',
+      'carapace_e2e_maybe_timeout "${plugin_update_timeout_seconds}s" node "$entry" plugins update',
     );
     expect(script).not.toContain(
-      'plugin_update_timeout_seconds="${OPENCLAW_PLUGIN_UPDATE_TIMEOUT_SECONDS:-180}"',
+      'plugin_update_timeout_seconds="${CARAPACE_PLUGIN_UPDATE_TIMEOUT_SECONDS:-180}"',
     );
     expect(script).not.toMatch(
       /^\s*timeout "\$\{plugin_update_timeout_seconds\}s" node "\$entry"/mu,
     );
     expect(script).toContain('"--- plugin update output ---"');
     expect(script).toContain('"--- local registry output ---"');
-    expect(script).toContain("openclaw_e2e_print_log /tmp/plugin-update-output.log");
-    expect(script).toContain("openclaw_e2e_print_log /tmp/openclaw-e2e-registry.log");
+    expect(script).toContain("carapace_e2e_print_log /tmp/plugin-update-output.log");
+    expect(script).toContain("carapace_e2e_print_log /tmp/carapace-e2e-registry.log");
     expect(script).not.toContain("cat /tmp/plugin-update-output.log");
-    expect(script).not.toContain("cat /tmp/openclaw-e2e-registry.log");
+    expect(script).not.toContain("cat /tmp/carapace-e2e-registry.log");
   });
 
   it("serves plugin metadata from an ephemeral registry port", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-registry-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-registry-"));
     const portFile = path.join(root, "registry.port");
     const child = spawn("node", [PLUGIN_UPDATE_REGISTRY_SCRIPT, portFile], {
       stdio: "ignore",
@@ -276,7 +276,7 @@ describe("plugin update unchanged Docker E2E", () => {
   });
 
   it("bounds assert-output diagnostics to the saved command log tail", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-probe-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-probe-"));
     const logPath = path.join(root, "plugin-update-output.log");
     try {
       writeFileSync(
@@ -299,7 +299,7 @@ describe("plugin update unchanged Docker E2E", () => {
   });
 
   it("detects unexpected download output before a large log tail", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-plugin-update-probe-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-plugin-update-probe-"));
     const logPath = path.join(root, "plugin-update-output.log");
     try {
       writeFileSync(
@@ -324,7 +324,7 @@ describe("plugin update unchanged Docker E2E", () => {
   it("waits for the local registry process during cleanup", () => {
     const script = readFileSync(PLUGIN_UPDATE_SCENARIO_SCRIPT, "utf8");
 
-    expect(script).toContain('openclaw_e2e_stop_process "${registry_pid:-}"');
+    expect(script).toContain('carapace_e2e_stop_process "${registry_pid:-}"');
     expect(script).not.toContain('kill "$registry_pid"');
   });
 
@@ -334,35 +334,35 @@ describe("plugin update unchanged Docker E2E", () => {
       'node "$entry" config set agents.defaults.model anthropic/claude-sonnet-4-6 >/dev/null';
     const codexOptOut = 'node "$entry" config set plugins.entries.codex.enabled false >/dev/null';
 
-    expect(script).toContain('plugins install "npm:@openclaw/demo-corrupt-plugin@0.0.1" --force');
+    expect(script).toContain('plugins install "npm:@carapace/demo-corrupt-plugin@0.0.1" --force');
     expect(script).toContain("config set plugins.allow '[\"demo-corrupt-plugin\"]'");
     expect(script).toContain(nonCodexRoute);
     expect(script.indexOf(nonCodexRoute)).toBeLessThan(script.indexOf(codexOptOut));
-    expect(script).toContain("OPENCLAW_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS");
+    expect(script).toContain("CARAPACE_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS");
     expect(script).toContain(
-      "openclaw_e2e_read_positive_int_env OPENCLAW_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS 900",
+      "carapace_e2e_read_positive_int_env CARAPACE_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS 900",
     );
-    expect(script).toContain("OPENCLAW_UPDATE_CORRUPT_PLUGIN_STEP_TIMEOUT_SECONDS");
+    expect(script).toContain("CARAPACE_UPDATE_CORRUPT_PLUGIN_STEP_TIMEOUT_SECONDS");
     expect(script).toContain(
       "default_update_step_timeout_seconds=$((10#$update_timeout_seconds - 30))",
     );
     expect(script).not.toContain(
-      'update_timeout_seconds="${OPENCLAW_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS:-900}"',
+      'update_timeout_seconds="${CARAPACE_UPDATE_CORRUPT_PLUGIN_TIMEOUT_SECONDS:-900}"',
     );
     expect(
-      script.match(/openclaw_e2e_maybe_timeout "\$\{update_timeout_seconds\}s" \\/gu)?.length,
+      script.match(/carapace_e2e_maybe_timeout "\$\{update_timeout_seconds\}s" \\/gu)?.length,
     ).toBe(1);
     expect(script).toContain("--channel beta");
     expect(script.match(/--timeout "\$update_step_timeout_seconds"/g)).toHaveLength(1);
-    expect(script).not.toContain("OPENCLAW_UPDATE_POST_CORE=1");
+    expect(script).not.toContain("CARAPACE_UPDATE_POST_CORE=1");
     expect(script).not.toContain(
-      'node "$entry" update --channel beta --tag "${OPENCLAW_CURRENT_PACKAGE_TGZ',
+      'node "$entry" update --channel beta --tag "${CARAPACE_CURRENT_PACKAGE_TGZ',
     );
     expect(script).toContain(
-      "openclaw update failed or timed out after ${update_timeout_seconds}s",
+      "carapace update failed or timed out after ${update_timeout_seconds}s",
     );
-    expect(script.match(/openclaw_e2e_print_log \/tmp\/openclaw-update-corrupt-/g)).toHaveLength(5);
-    expect(script).not.toContain("cat /tmp/openclaw-update-corrupt-");
+    expect(script.match(/carapace_e2e_print_log \/tmp\/carapace-update-corrupt-/g)).toHaveLength(5);
+    expect(script).not.toContain("cat /tmp/carapace-update-corrupt-");
     expect(script.match(/assert-corrupt-policy-preserved/g)).toHaveLength(2);
   });
 
@@ -370,8 +370,8 @@ describe("plugin update unchanged Docker E2E", () => {
     "keeps a historical %s override out of the same-schema repair lane",
     (version) => {
       const result = runCorruptUpdateDockerBaseline({
-        OPENCLAW_UPDATE_CORRUPT_PLUGIN_BASELINE: `openclaw@${version}`,
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: `openclaw@${version}`,
+        CARAPACE_UPDATE_CORRUPT_PLUGIN_BASELINE: `carapace@${version}`,
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: `carapace@${version}`,
       });
       expect(result.result.status, result.result.stderr).toBe(0);
       expect(result.baseline).toBeUndefined();
@@ -422,7 +422,7 @@ describe("plugin update unchanged Docker E2E", () => {
             stderrTail:
               outcome === "unknown-version"
                 ? "cannot determine the required version because the target core version is unknown"
-                : "Plugin demo-corrupt-plugin requires @openclaw/demo-corrupt-plugin@0.0.1 for core 2026.9.99-first-hop.0: Package not found on npm: @openclaw/demo-corrupt-plugin@0.0.1",
+                : "Plugin demo-corrupt-plugin requires @carapace/demo-corrupt-plugin@0.0.1 for core 2026.9.99-first-hop.0: Package not found on npm: @carapace/demo-corrupt-plugin@0.0.1",
           },
         ],
       });
@@ -441,7 +441,7 @@ describe("plugin update unchanged Docker E2E", () => {
           {
             pluginId: CORRUPT_PLUGIN_ID,
             status: "skipped",
-            message: `Disabled "${CORRUPT_PLUGIN_ID}" after plugin update failure; OpenClaw will continue without it. Failed to update ${CORRUPT_PLUGIN_ID}: registry timeout`,
+            message: `Disabled "${CORRUPT_PLUGIN_ID}" after plugin update failure; Carapace will continue without it. Failed to update ${CORRUPT_PLUGIN_ID}: registry timeout`,
           },
         ],
       },
@@ -464,8 +464,8 @@ describe("plugin update unchanged Docker E2E", () => {
                 disabledAfterFailure.npm.outcomes[0],
                 "corrupt plugin update failure outcome",
               ).message +
-              " Run openclaw update repair to retry post-update plugin repair. " +
-              `Run openclaw plugins inspect ${CORRUPT_PLUGIN_ID} --runtime --json for details.`,
+              " Run carapace update repair to retry post-update plugin repair. " +
+              `Run carapace plugins inspect ${CORRUPT_PLUGIN_ID} --runtime --json for details.`,
           },
         ],
       }),
@@ -487,8 +487,8 @@ describe("plugin update unchanged Docker E2E", () => {
           pluginId: CORRUPT_PLUGIN_ID,
           reason: "package.json is missing",
           guidance: [
-            "Run openclaw update repair to retry post-update plugin repair.",
-            `Run openclaw plugins inspect ${CORRUPT_PLUGIN_ID} --runtime --json for details.`,
+            "Run carapace update repair to retry post-update plugin repair.",
+            `Run carapace plugins inspect ${CORRUPT_PLUGIN_ID} --runtime --json for details.`,
           ],
         },
       ],

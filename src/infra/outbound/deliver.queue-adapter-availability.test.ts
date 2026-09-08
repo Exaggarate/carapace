@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDefaultDeps } from "../../cli/deps.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -50,7 +50,7 @@ describe("queued lazy outbound adapter availability", () => {
   });
 
   it("retries adapter lookup failures without preserving false send evidence", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const emptyRegistry = createEmptyPluginRegistry();
     const outerRegistry = createTestRegistry([
       {
@@ -85,7 +85,7 @@ describe("queued lazy outbound adapter availability", () => {
     };
     const deliveryIntentId = "cron-direct-delivery:v1:lazy-adapter-recovery";
     const params = {
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       channel: "matrix" as const,
       to: "!room:example",
       payloads: [{ text: "recover after adapter registration" }],
@@ -123,7 +123,7 @@ describe("queued lazy outbound adapter availability", () => {
     );
 
     await recoverPendingDeliveries({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       deliver: recoveryDeliver,
       log: createRecoveryLog(),
       stateDir: tmpDir,
@@ -136,7 +136,7 @@ describe("queued lazy outbound adapter availability", () => {
   });
 
   it("retains recovery custody when no outbound adapter can be resolved", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     setActivePluginRegistry(createEmptyPluginRegistry());
     const id = await enqueueDelivery(
       {
@@ -157,7 +157,7 @@ describe("queued lazy outbound adapter availability", () => {
     });
 
     const result = await recoverPendingDeliveries({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       deliver: recoveryDeliver,
       log: createRecoveryLog(),
       stateDir: tmpDir,
@@ -184,7 +184,7 @@ describe("queued lazy outbound adapter availability", () => {
   });
 
   it("does not replay a provider call that already crossed the ambiguous send boundary", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     setActivePluginRegistry(
       createTestRegistry([
         {
@@ -199,7 +199,7 @@ describe("queued lazy outbound adapter availability", () => {
 
     await expect(
       deliverOutboundPayloads({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "matrix",
         to: "!room:example",
         payloads: [{ text: "ambiguous send" }],
@@ -217,7 +217,7 @@ describe("queued lazy outbound adapter availability", () => {
 
     const recoveryDeliver = vi.fn<DeliverFn>(async () => []);
     await recoverPendingDeliveries({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       deliver: recoveryDeliver,
       log: createRecoveryLog(),
       stateDir: tmpDir,

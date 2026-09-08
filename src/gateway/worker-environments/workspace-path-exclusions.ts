@@ -10,7 +10,7 @@ const DERIVED_WORKSPACE_DIRECTORY_NAMES = [
 
 const DERIVED_WORKSPACE_FILE_NAMES = [".DS_Store"] as const;
 const DERIVED_WORKSPACE_FILE_SUFFIXES = [".pyc", ".pyo"] as const;
-export const WORKER_ATTACHMENT_DIRECTORY_PREFIX = "openclaw-inbound-";
+export const WORKER_ATTACHMENT_DIRECTORY_PREFIX = "carapace-inbound-";
 const UUID_HEX = "[0-9a-f]";
 // randomUUID creates lowercase UUIDv4 names. This exact character-class pattern
 // has the same meaning in a regular expression and an rsync exclusion glob.

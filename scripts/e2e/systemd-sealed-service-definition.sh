@@ -5,8 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 
 IMAGE_NAME="$(docker_e2e_resolve_image \
-  "openclaw-systemd-sealed-service-definition-e2e" \
-  OPENCLAW_SYSTEMD_SEALED_SERVICE_DEFINITION_E2E_IMAGE)"
+  "carapace-systemd-sealed-service-definition-e2e" \
+  CARAPACE_SYSTEMD_SEALED_SERVICE_DEFINITION_E2E_IMAGE)"
 
 docker_e2e_build_or_reuse "$IMAGE_NAME" systemd-sealed-service-definition
 
@@ -15,12 +15,12 @@ docker_e2e_run_with_harness -i --user root "$IMAGE_NAME" bash -s <<'SCENARIO'
 set -euo pipefail
 
 service_home=/home/appuser
-state_dir="$service_home/.openclaw"
+state_dir="$service_home/.carapace"
 unit_dir="$service_home/.config/systemd/user"
-unit_path="$unit_dir/openclaw-gateway.service"
+unit_path="$unit_dir/carapace-gateway.service"
 environment_path="$state_dir/gateway.systemd.env"
-config_path="$state_dir/openclaw.json"
-shim_dir=/tmp/openclaw-sealed-systemd-bin
+config_path="$state_dir/carapace.json"
+shim_dir=/tmp/carapace-sealed-systemd-bin
 token_canary=sealed-docker-proof-token
 
 [[ "$(id -u)" == 0 && "$(runuser -u appuser -- id -u)" != 0 ]] || {
@@ -38,21 +38,21 @@ install -o root -g root -m 0644 scripts/e2e/lib/doctor-install-switch/shims/syst
 install_sealed_unit() {
   install -o root -g "$1" -m "$2" /dev/stdin "$unit_path" <<'UNIT'
 [Unit]
-Description=OpenClaw Gateway (sealed ownership proof)
+Description=Carapace Gateway (sealed ownership proof)
 [Service]
-ExecStart=/usr/local/bin/node /app/openclaw.mjs gateway --port 18789
+ExecStart=/usr/local/bin/node /app/carapace.mjs gateway --port 18789
 WorkingDirectory=/app
-Environment=OPENCLAW_GATEWAY_PORT=18789
-EnvironmentFile=/home/appuser/.openclaw/gateway.systemd.env
+Environment=CARAPACE_GATEWAY_PORT=18789
+EnvironmentFile=/home/appuser/.carapace/gateway.systemd.env
 [Install]
 WantedBy=default.target
 UNIT
 }
 
 install_sealed_unit root 0444
-printf '%s\n' 'OPENCLAW_SEALED_DOCKER_PROOF=from-state-dotenv' |
+printf '%s\n' 'CARAPACE_SEALED_DOCKER_PROOF=from-state-dotenv' |
   install -o appuser -g appuser -m 0600 /dev/stdin "$state_dir/.env"
-printf '%s\n' 'OPENCLAW_SEALED_DOCKER_PROOF=preserve-original-generated-environment' |
+printf '%s\n' 'CARAPACE_SEALED_DOCKER_PROOF=preserve-original-generated-environment' |
   install -o appuser -g appuser -m 0600 /dev/stdin "$environment_path"
 
 snapshot_managed_state() {
@@ -91,10 +91,10 @@ for scenario in missing-mode missing-token missing-config group-writable-root-ow
 
   state_before="$(snapshot_managed_state)"
   install_result=0
-  output="$(runuser -u appuser -- env -u OPENCLAW_GATEWAY_TOKEN -u OPENCLAW_GATEWAY_PASSWORD \
+  output="$(runuser -u appuser -- env -u CARAPACE_GATEWAY_TOKEN -u CARAPACE_GATEWAY_PASSWORD \
     HOME="$service_home" USER=appuser LOGNAME=appuser PATH="$shim_dir:$PATH" \
-    OPENCLAW_STATE_DIR="$state_dir" OPENCLAW_CONFIG_PATH="$config_path" \
-    node /app/openclaw.mjs gateway install --force --json 2>&1)" || install_result=$?
+    CARAPACE_STATE_DIR="$state_dir" CARAPACE_CONFIG_PATH="$config_path" \
+    node /app/carapace.mjs gateway install --force --json 2>&1)" || install_result=$?
 
   if [[ "$install_result" == 0 || "$output" != *SERVICE_DEFINITION_SEALED* ||
     "$output" != *"privileged deployment owner"* || "$output" == *"$token_canary"* ]]; then
@@ -112,11 +112,11 @@ SCENARIO
 # File mounts need SYS_ADMIN only inside this disposable fixture. Feed the helper
 # over stdin: no host paths, private data, or Docker socket enter this container.
 # Docker tmpfs defaults to noexec; only the fixture's shim directory needs execution.
-file_mount_cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-file-mount-cid.XXXXXX")"
+file_mount_cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-file-mount-cid.XXXXXX")"
 trap 'docker_e2e_cleanup_container_cidfile "$file_mount_cid_dir/container.cid"; rm -rf "$file_mount_cid_dir"' EXIT
 docker_e2e_docker_run_cmd run --rm -i --cidfile "$file_mount_cid_dir/container.cid" \
   --network none --read-only --tmpfs /tmp:rw,mode=1777 --tmpfs /home/appuser:rw \
-  --tmpfs /tmp/openclaw-file-mount/bin:rw,exec,mode=0755 \
+  --tmpfs /tmp/carapace-file-mount/bin:rw,exec,mode=0755 \
   --cap-drop ALL --cap-add SYS_ADMIN --cap-add CHOWN --cap-add DAC_OVERRIDE \
   --cap-add SETUID --cap-add SETGID --security-opt seccomp=unconfined \
   --security-opt no-new-privileges --user 0 --entrypoint node "$IMAGE_NAME" --input-type=module \
@@ -125,11 +125,11 @@ docker_e2e_cleanup_container_cidfile "$file_mount_cid_dir/container.cid"
 rmdir "$file_mount_cid_dir"
 trap - EXIT
 
-mount_fixture="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-systemd-mounts.XXXXXX")"
+mount_fixture="$(mktemp -d "${TMPDIR:-/tmp}/carapace-systemd-mounts.XXXXXX")"
 trap 'rm -rf "$mount_fixture"' EXIT
-for release in "$mount_fixture/releases/selected" "$mount_fixture/unrelated" "$mount_fixture/openclaw"; do
+for release in "$mount_fixture/releases/selected" "$mount_fixture/unrelated" "$mount_fixture/carapace"; do
   mkdir -p "$release/dist"
-  printf '%s\n' '{"name":"openclaw"}' >"$release/package.json"
+  printf '%s\n' '{"name":"carapace"}' >"$release/package.json"
   printf '%s\n' '// inert release fixture' >"$release/dist/index.js"
 done
 for relationship in same different; do
@@ -138,7 +138,7 @@ for relationship in same different; do
     current_source="$mount_fixture/unrelated"
   fi
   docker_e2e_run_with_harness --network none --user appuser \
-    --mount "type=bind,src=$mount_fixture/openclaw,dst=/proof/openclaw,readonly" \
+    --mount "type=bind,src=$mount_fixture/carapace,dst=/proof/carapace,readonly" \
     --mount "type=bind,src=$mount_fixture/releases,dst=/proof/releases,readonly" \
     --mount "type=bind,src=$current_source,dst=/proof/current,readonly" \
     "$IMAGE_NAME" node scripts/e2e/lib/systemd-sealed-service-definition/paired-mounts.mjs "$relationship"

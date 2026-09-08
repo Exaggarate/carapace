@@ -1,5 +1,5 @@
-import { isHttpsUrl, isHttpUrl } from "@openclaw/net-policy/url-protocol";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { isHttpsUrl, isHttpUrl } from "@carapace/net-policy/url-protocol";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { z } from "zod";
 import { findEdgeAuthIssue } from "../shared/gateway-edge-auth-headers.js";
 import type { ConfigSchemaShape } from "./schema.field-metadata.js";
@@ -343,7 +343,7 @@ const McpServerSchema = z
       const disabled = Reflect.get(data, "disabled") as unknown;
       const replacement =
         typeof disabled === "boolean"
-          ? `"enabled: ${!disabled}" instead, then run "openclaw doctor --fix" to migrate existing config`
+          ? `"enabled: ${!disabled}" instead, then run "carapace doctor --fix" to migrate existing config`
           : 'the canonical "enabled" boolean instead';
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

@@ -1,28 +1,28 @@
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-contract";
 // Matrix plugin module implements outbound behavior.
 import {
   createMessageReceiptFromOutboundResults,
   createReplyToFanout,
   resolveOutboundSendDep,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
+} from "carapace/plugin-sdk/channel-outbound";
+import { attachChannelToResult } from "carapace/plugin-sdk/channel-send-result";
 import {
   renderPresentationForDelivery,
   renderMessagePresentationFallbackText,
   type MessagePresentation,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import {
   resolveSendableOutboundReplyParts,
   sendPayloadMediaSequence,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/reply-payload";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 import { sendMessageMatrix, sendPollMatrix } from "./matrix/send.js";
 import type { MatrixExtraContentFields } from "./matrix/send/types.js";
 
-const MATRIX_OPENCLAW_PRESENTATION_KEY = "com.openclaw.presentation" as const;
-const MATRIX_OPENCLAW_PRESENTATION_TYPE = "message.presentation" as const;
+const MATRIX_CARAPACE_PRESENTATION_KEY = "com.carapace.presentation" as const;
+const MATRIX_CARAPACE_PRESENTATION_TYPE = "message.presentation" as const;
 const MATRIX_EMPTY_PRESENTATION_FALLBACK_TEXT = "---";
 
 const MATRIX_PRESENTATION_CAPABILITIES = {
@@ -57,7 +57,7 @@ function buildMatrixPresentationContent(presentation: MessagePresentation) {
   return {
     ...presentation,
     version: 1,
-    type: MATRIX_OPENCLAW_PRESENTATION_TYPE,
+    type: MATRIX_CARAPACE_PRESENTATION_TYPE,
   };
 }
 
@@ -65,11 +65,11 @@ function resolveMatrixPresentationContent(
   payload: ReplyPayload,
 ): Record<string, unknown> | undefined {
   const extraContent = asOptionalRecord(resolveMatrixChannelData(payload).extraContent);
-  const presentation = asOptionalRecord(extraContent?.[MATRIX_OPENCLAW_PRESENTATION_KEY]);
+  const presentation = asOptionalRecord(extraContent?.[MATRIX_CARAPACE_PRESENTATION_KEY]);
   if (
     !presentation ||
     presentation.version !== 1 ||
-    presentation.type !== MATRIX_OPENCLAW_PRESENTATION_TYPE
+    presentation.type !== MATRIX_CARAPACE_PRESENTATION_TYPE
   ) {
     return undefined;
   }
@@ -94,7 +94,7 @@ function renderMatrixPresentationPayload(params: {
       matrix: {
         ...matrixData,
         extraContent: {
-          [MATRIX_OPENCLAW_PRESENTATION_KEY]: buildMatrixPresentationContent(params.presentation),
+          [MATRIX_CARAPACE_PRESENTATION_KEY]: buildMatrixPresentationContent(params.presentation),
         },
       },
     },
@@ -125,7 +125,7 @@ export function resolveMatrixExtraContent(
   payload: ReplyPayload,
 ): MatrixExtraContentFields | undefined {
   const presentation = resolveMatrixPresentationContent(payload);
-  return presentation ? { [MATRIX_OPENCLAW_PRESENTATION_KEY]: presentation } : undefined;
+  return presentation ? { [MATRIX_CARAPACE_PRESENTATION_KEY]: presentation } : undefined;
 }
 
 function resolveMatrixDeliveryProgress(

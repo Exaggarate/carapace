@@ -1,7 +1,7 @@
 // Discord plugin module implements access behavior.
-import { resolveCommandAuthorizedFromAuthorizers } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig, DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
+import { resolveCommandAuthorizedFromAuthorizers } from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig, DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveOpenProviderRuntimeGroupPolicy } from "carapace/plugin-sdk/runtime-group-policy";
 import type { Guild } from "../internal/discord.js";
 import {
   allowListMatches,
@@ -17,7 +17,7 @@ import { resolveDiscordVoiceAccess } from "./owner-access.js";
 
 export async function authorizeDiscordVoiceIngress(initialParams: {
   readPolicy?: DiscordLivePolicyReader;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   accountId?: string;
   groupPolicy?: "open" | "disabled" | "allowlist";

@@ -1,10 +1,10 @@
 // Reads provider ids selected by auth, model, channel, and media configuration.
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString as normalizeId } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString as normalizeId } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 
-function collectConfiguredProviderIds(cfg: OpenClawConfig): Set<string> {
+function collectConfiguredProviderIds(cfg: CarapaceConfig): Set<string> {
   const ids = new Set<string>();
   const add = (value: unknown) => {
     const id = normalizeId(value);
@@ -42,7 +42,7 @@ function collectConfiguredProviderIds(cfg: OpenClawConfig): Set<string> {
   return ids;
 }
 
-function collectConfiguredMediaProviderIds(cfg: OpenClawConfig): Set<string> {
+function collectConfiguredMediaProviderIds(cfg: CarapaceConfig): Set<string> {
   const ids = new Set<string>();
   const add = (value: unknown) => {
     const id = normalizeId(value);
@@ -64,18 +64,18 @@ function collectConfiguredMediaProviderIds(cfg: OpenClawConfig): Set<string> {
 }
 
 /** Provider ids used by static and installed-registry plugin matching. */
-export function collectConfiguredProviderSelectionIds(cfg: OpenClawConfig): ReadonlySet<string> {
+export function collectConfiguredProviderSelectionIds(cfg: CarapaceConfig): ReadonlySet<string> {
   return new Set([...collectConfiguredProviderIds(cfg), ...collectConfiguredMediaProviderIds(cfg)]);
 }
 
 export function collectConfiguredMediaProviderSelectionIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): ReadonlySet<string> {
   return collectConfiguredMediaProviderIds(cfg);
 }
 
 export function collectConfiguredModelProviderSelectionIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): ReadonlySet<string> {
   return collectConfiguredProviderIds(cfg);
 }

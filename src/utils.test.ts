@@ -1,7 +1,7 @@
 // Tests shared utility helpers used by CLI and runtime modules.
 import fs from "node:fs";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import { isAbortError } from "./infra/abort-signal.js";
 import { withTestDir } from "./test-helpers/temp-dir.js";
@@ -21,7 +21,7 @@ import {
 
 describe("ensureDir", () => {
   it("creates nested directory", async () => {
-    await withTestDir({ prefix: "openclaw-test-" }, async (tmp) => {
+    await withTestDir({ prefix: "carapace-test-" }, async (tmp) => {
       const target = path.join(tmp, "nested", "dir");
       await ensureDir(target);
       expect(fs.existsSync(target)).toBe(true);
@@ -135,77 +135,77 @@ describe("normalizeE164", () => {
 
 describe("resolveConfigDir", () => {
   it("resolves the default config directory", async () => {
-    await withTestDir({ prefix: "openclaw-config-dir-" }, async (root) => {
-      const newDir = path.join(root, ".openclaw");
+    await withTestDir({ prefix: "carapace-config-dir-" }, async (root) => {
+      const newDir = path.join(root, ".carapace");
       await fs.promises.mkdir(newDir, { recursive: true });
       const resolved = resolveConfigDir({} as NodeJS.ProcessEnv, () => root);
       expect(resolved).toBe(newDir);
     });
   });
 
-  it("expands OPENCLAW_STATE_DIR using the provided env", () => {
+  it("expands CARAPACE_STATE_DIR using the provided env", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_STATE_DIR: "~/state",
+      HOME: "/tmp/carapace-home",
+      CARAPACE_STATE_DIR: "~/state",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/openclaw-home", "state"));
+    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/carapace-home", "state"));
   });
 
-  it("falls back to the config file directory when only OPENCLAW_CONFIG_PATH is set", () => {
+  it("falls back to the config file directory when only CARAPACE_CONFIG_PATH is set", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_CONFIG_PATH: "~/profiles/dev/openclaw.json",
+      HOME: "/tmp/carapace-home",
+      CARAPACE_CONFIG_PATH: "~/profiles/dev/carapace.json",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/openclaw-home", "profiles", "dev"));
+    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/carapace-home", "profiles", "dev"));
   });
 
   it("re-pins the exported configuration root after startup environment selection", () => {
     const originalConfigDir = CONFIG_DIR;
-    const selectedConfigDir = path.resolve("/tmp/openclaw-selected-config-root");
+    const selectedConfigDir = path.resolve("/tmp/carapace-selected-config-root");
     try {
       expect(
         pinConfigDir({
-          OPENCLAW_STATE_DIR: selectedConfigDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_STATE_DIR: selectedConfigDir,
+          CARAPACE_TEST_FAST: "1",
         }),
       ).toBe(selectedConfigDir);
       expect(CONFIG_DIR).toBe(selectedConfigDir);
     } finally {
       pinConfigDir({
-        OPENCLAW_STATE_DIR: originalConfigDir,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_STATE_DIR: originalConfigDir,
+        CARAPACE_TEST_FAST: "1",
       });
     }
   });
 });
 
 describe("resolveHomeDir", () => {
-  it("prefers OPENCLAW_HOME over HOME", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(resolveHomeDir()).toBe(path.resolve("/srv/openclaw-home"));
+  it("prefers CARAPACE_HOME over HOME", () => {
+    withEnv({ CARAPACE_HOME: "/srv/carapace-home", HOME: "/home/other" }, () => {
+      expect(resolveHomeDir()).toBe(path.resolve("/srv/carapace-home"));
     });
   });
 });
 
 describe("shortenHomePath", () => {
-  it("uses $OPENCLAW_HOME prefix when OPENCLAW_HOME is set", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(shortenHomePath(`${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`)).toBe(
-        "$OPENCLAW_HOME/.openclaw/openclaw.json",
+  it("uses $CARAPACE_HOME prefix when CARAPACE_HOME is set", () => {
+    withEnv({ CARAPACE_HOME: "/srv/carapace-home", HOME: "/home/other" }, () => {
+      expect(shortenHomePath(`${path.resolve("/srv/carapace-home")}/.carapace/carapace.json`)).toBe(
+        "$CARAPACE_HOME/.carapace/carapace.json",
       );
     });
   });
 
   it.skipIf(process.platform === "win32")("keeps POSIX home matching case-sensitive", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/OpenClaw-Home", HOME: "/home/other" }, () => {
-      expect(shortenHomePath("/srv/openclaw-home/workspace")).toBe("/srv/openclaw-home/workspace");
+    withEnv({ CARAPACE_HOME: "/srv/Carapace-Home", HOME: "/home/other" }, () => {
+      expect(shortenHomePath("/srv/carapace-home/workspace")).toBe("/srv/carapace-home/workspace");
     });
   });
 
   it.skipIf(process.platform !== "win32")("keeps relative Windows paths relative", () => {
-    withEnv({ OPENCLAW_HOME: process.cwd() }, () => {
+    withEnv({ CARAPACE_HOME: process.cwd() }, () => {
       expect(shortenHomePath(`relative${path.sep}workspace`)).toBe(`relative${path.sep}workspace`);
     });
   });
@@ -213,15 +213,15 @@ describe("shortenHomePath", () => {
   it.skipIf(process.platform !== "win32")(
     "shortens real extended-length Windows home aliases without exposing the absolute path",
     async () => {
-      await withTestDir({ prefix: "openclaw-home-display-" }, async (home) => {
+      await withTestDir({ prefix: "carapace-home-display-" }, async (home) => {
         const workspace = path.join(home, "workspace");
         await fs.promises.mkdir(workspace);
         const extendedAlias = `\\\\?\\${workspace.toUpperCase()}`;
         expect(fs.statSync(extendedAlias).isDirectory()).toBe(true);
 
-        withEnv({ OPENCLAW_HOME: home }, () => {
+        withEnv({ CARAPACE_HOME: home }, () => {
           const display = shortenHomePath(extendedAlias);
-          expect(display).toBe(`$OPENCLAW_HOME${path.sep}WORKSPACE`);
+          expect(display).toBe(`$CARAPACE_HOME${path.sep}WORKSPACE`);
           expect(display).not.toContain(home.toUpperCase());
         });
       });
@@ -230,22 +230,22 @@ describe("shortenHomePath", () => {
 });
 
 describe("shortenHomeInString", () => {
-  it("uses $OPENCLAW_HOME replacement when OPENCLAW_HOME is set", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
+  it("uses $CARAPACE_HOME replacement when CARAPACE_HOME is set", () => {
+    withEnv({ CARAPACE_HOME: "/srv/carapace-home", HOME: "/home/other" }, () => {
       expect(
         shortenHomeInString(
-          `config: ${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`,
+          `config: ${path.resolve("/srv/carapace-home")}/.carapace/carapace.json`,
         ),
-      ).toBe("config: $OPENCLAW_HOME/.openclaw/openclaw.json");
+      ).toBe("config: $CARAPACE_HOME/.carapace/carapace.json");
     });
   });
 
   it.skipIf(process.platform === "win32")(
     "keeps embedded POSIX home matching case-sensitive",
     () => {
-      withEnv({ OPENCLAW_HOME: "/srv/OpenClaw-Home", HOME: "/home/other" }, () => {
-        expect(shortenHomeInString("config: /srv/openclaw-home/openclaw.json")).toBe(
-          "config: /srv/openclaw-home/openclaw.json",
+      withEnv({ CARAPACE_HOME: "/srv/Carapace-Home", HOME: "/home/other" }, () => {
+        expect(shortenHomeInString("config: /srv/carapace-home/carapace.json")).toBe(
+          "config: /srv/carapace-home/carapace.json",
         );
       });
     },
@@ -254,13 +254,13 @@ describe("shortenHomeInString", () => {
   it.skipIf(process.platform !== "win32")(
     "shortens real Windows home casing aliases inside diagnostic text",
     async () => {
-      await withTestDir({ prefix: "openclaw-home-display-" }, async (home) => {
+      await withTestDir({ prefix: "carapace-home-display-" }, async (home) => {
         const homeAlias = home.toUpperCase();
         expect(fs.statSync(homeAlias).isDirectory()).toBe(true);
 
-        withEnv({ OPENCLAW_HOME: home }, () => {
-          expect(shortenHomeInString(`config: ${homeAlias}\\openclaw.json`)).toBe(
-            "config: $OPENCLAW_HOME\\openclaw.json",
+        withEnv({ CARAPACE_HOME: home }, () => {
+          expect(shortenHomeInString(`config: ${homeAlias}\\carapace.json`)).toBe(
+            "config: $CARAPACE_HOME\\carapace.json",
           );
         });
       });
@@ -274,8 +274,8 @@ describe("resolveUserPath", () => {
   });
 
   it("expands ~/ to home dir", () => {
-    expect(resolveUserPath("~/openclaw", {}, () => "/Users/thoffman")).toBe(
-      path.resolve("/Users/thoffman", "openclaw"),
+    expect(resolveUserPath("~/carapace", {}, () => "/Users/thoffman")).toBe(
+      path.resolve("/Users/thoffman", "carapace"),
     );
   });
 
@@ -283,19 +283,19 @@ describe("resolveUserPath", () => {
     expect(resolveUserPath("tmp/dir")).toBe(path.resolve("tmp/dir"));
   });
 
-  it("prefers OPENCLAW_HOME for tilde expansion", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(resolveUserPath("~/openclaw")).toBe(path.resolve("/srv/openclaw-home", "openclaw"));
+  it("prefers CARAPACE_HOME for tilde expansion", () => {
+    withEnv({ CARAPACE_HOME: "/srv/carapace-home", HOME: "/home/other" }, () => {
+      expect(resolveUserPath("~/carapace")).toBe(path.resolve("/srv/carapace-home", "carapace"));
     });
   });
 
   it("uses the provided env for tilde expansion", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      HOME: "/tmp/carapace-home",
+      CARAPACE_HOME: "/srv/carapace-home",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveUserPath("~/openclaw", env)).toBe(path.resolve("/srv/openclaw-home", "openclaw"));
+    expect(resolveUserPath("~/carapace", env)).toBe(path.resolve("/srv/carapace-home", "carapace"));
   });
 
   it("keeps blank paths blank", () => {

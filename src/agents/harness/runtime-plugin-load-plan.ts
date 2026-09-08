@@ -1,5 +1,5 @@
 /** Builds deterministic plugin load plans for selected harness, memory, and context-engine owners. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withActivatedPluginIds } from "../../plugins/activation-context.js";
 import { resolveManifestActivationPlan } from "../../plugins/activation-planner.js";
 import { normalizePluginsConfigWithResolverCore } from "../../plugins/config-normalization-shared.js";
@@ -31,7 +31,7 @@ import {
 } from "../../plugins/providers.js";
 import {
   isDefaultAgentRuntimeId,
-  OPENCLAW_AGENT_RUNTIME_ID,
+  CARAPACE_AGENT_RUNTIME_ID,
   normalizeOptionalAgentRuntimeId,
 } from "../agent-runtime-id.js";
 import { collectConfiguredAgentHarnessRuntimes } from "../harness-runtimes.js";
@@ -56,13 +56,13 @@ function dedupePluginIds(values: readonly string[]): string[] {
   return result;
 }
 
-function restrictiveAllowlistOmitsPlugin(config: OpenClawConfig | undefined, pluginId: string) {
+function restrictiveAllowlistOmitsPlugin(config: CarapaceConfig | undefined, pluginId: string) {
   const allow = config?.plugins?.allow ?? [];
   return allow.length > 0 && !allow.includes(pluginId);
 }
 
 function resolveSelectedMemoryPluginIds(params: {
-  config: OpenClawConfig | undefined;
+  config: CarapaceConfig | undefined;
   workspaceDir: string;
   metadataSnapshot?: PluginMetadataSnapshot;
 }): string[] {
@@ -103,7 +103,7 @@ function resolveSelectedMemoryPluginIds(params: {
 }
 
 export function resolveAgentRuntimePluginSelections(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   selections: readonly AgentHarnessPluginSelection[],
   configuredHarnessRuntimes: readonly string[] = collectConfiguredAgentHarnessRuntimes(
     config ?? {},
@@ -120,7 +120,7 @@ export function resolveAgentRuntimePluginSelections(
 }
 
 function resolveAgentRuntimeMetadataPluginIds(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   selections: readonly AgentHarnessPluginSelection[];
   shorthandModelIds?: readonly string[];
   index: InstalledPluginIndex;
@@ -151,7 +151,7 @@ function resolveAgentRuntimeMetadataPluginIds(params: {
     selections
       .map((selection) => resolveSelectedAgentHarnessRuntime(selection, params.config))
       .filter(
-        (runtime) => !isDefaultAgentRuntimeId(runtime) && runtime !== OPENCLAW_AGENT_RUNTIME_ID,
+        (runtime) => !isDefaultAgentRuntimeId(runtime) && runtime !== CARAPACE_AGENT_RUNTIME_ID,
       ),
   );
   if (!lookup.hasAgentHarnessOwners(runtimeIds)) {
@@ -171,7 +171,7 @@ function resolveAgentRuntimeMetadataPluginIds(params: {
 
 /** Narrows cold manifest preparation to candidates needed by one selected runtime generation. */
 export function createAgentRuntimeMetadataPluginIdScope(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   selections: readonly AgentHarnessPluginSelection[];
   shorthandModelIds?: readonly string[];
@@ -198,7 +198,7 @@ export function createAgentRuntimeMetadataPluginIdScope(params: {
 // request-time hooks resolve; late provider loading is intentionally forbidden.
 function resolveSelectedProviderOwnerPluginIds(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   metadataSnapshot?: PluginMetadataSnapshot;
 }): string[] {
@@ -234,7 +234,7 @@ function resolveSelectedProviderOwnerPluginIds(params: {
 export function resolveAgentHarnessOwnerPluginIds(params: {
   runtime: string;
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   providerOwnerPluginIds?: readonly string[];
   metadataSnapshot?: PluginMetadataSnapshot;
@@ -266,10 +266,10 @@ export function resolveAgentHarnessOwnerPluginIds(params: {
 }
 
 function withRuntimePluginIdsAllowed(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   pluginIds: readonly string[],
   materializeAllowlist: boolean,
-): OpenClawConfig | undefined {
+): CarapaceConfig | undefined {
   const existingAllowlist = config?.plugins?.allow ?? [];
   if (pluginIds.length === 0 || (!materializeAllowlist && existingAllowlist.length === 0)) {
     return config;
@@ -285,7 +285,7 @@ function withRuntimePluginIdsAllowed(
 
 export function resolveSelectedAgentHarnessRuntime(
   selection: AgentHarnessPluginSelection,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ) {
   const requestedRuntime = normalizeOptionalAgentRuntimeId(selection.runtime);
   return requestedRuntime && !isDefaultAgentRuntimeId(requestedRuntime)
@@ -301,10 +301,10 @@ export function resolveSelectedAgentHarnessRuntime(
 // Returns whether a selection needs a plugin-owned harness in its prepared generation.
 export function requiresAgentHarnessPluginSelection(
   selection: AgentHarnessPluginSelection,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): boolean {
   const runtime = resolveSelectedAgentHarnessRuntime(selection, config);
-  if (isDefaultAgentRuntimeId(runtime) || runtime === OPENCLAW_AGENT_RUNTIME_ID) {
+  if (isDefaultAgentRuntimeId(runtime) || runtime === CARAPACE_AGENT_RUNTIME_ID) {
     return false;
   }
   // Codex is a native plugin harness, never a CLI backend alias. Keep this hot-path decision
@@ -317,12 +317,12 @@ export function requiresAgentHarnessPluginSelection(
 
 /** Folds selected harness, memory, and context-engine owners into one deterministic load plan. */
 export function resolveAgentRuntimePluginLoadPlan(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   basePluginIds?: readonly string[];
   selections: readonly AgentHarnessPluginSelection[];
   metadataSnapshot?: PluginMetadataSnapshot;
-}): { config?: OpenClawConfig; pluginIds?: string[] } {
+}): { config?: CarapaceConfig; pluginIds?: string[] } {
   let config = params.config;
   const memoryPluginIds = resolveSelectedMemoryPluginIds({
     config: params.config,

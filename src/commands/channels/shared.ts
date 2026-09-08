@@ -5,7 +5,7 @@ import type { ChannelId } from "../../channels/plugins/types.public.js";
 import { resolveCommandConfigWithSecrets } from "../../cli/command-config-resolution.js";
 import type { CommandSecretResolutionMode } from "../../cli/command-secret-gateway.js";
 import { getChannelsCommandSecretTargetIds } from "../../cli/command-secret-targets.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv } from "../../runtime.js";
 import { requireValidConfig, requireValidConfigForWrite } from "../config-validation.js";
@@ -13,7 +13,7 @@ import { requireValidConfig, requireValidConfigForWrite } from "../config-valida
 export type ChatChannel = ChannelId;
 
 export const NO_CONFIGURED_CHAT_CHANNELS_LINE =
-  "- no configured chat channels (run `openclaw channels list --all` to see installable channels)";
+  "- no configured chat channels (run `carapace channels list --all` to see installable channels)";
 
 export { requireValidConfigForWrite };
 
@@ -25,7 +25,7 @@ export async function requireValidChannelConfig(
     mode?: CommandSecretResolutionMode;
     skipPluginValidation?: boolean;
   },
-): Promise<OpenClawConfig | null> {
+): Promise<CarapaceConfig | null> {
   const cfg = await requireValidConfig(
     runtime,
     secretResolution?.skipPluginValidation ? { skipPluginValidation: true } : undefined,

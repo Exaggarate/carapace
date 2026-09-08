@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import { getRuntimeConfig } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHostAccountAvatar } from "../infra/host-account-avatar.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
 import {
@@ -39,7 +39,7 @@ const MAX_GRAVATAR_BYTES = 1_000_000;
 const MAX_GRAVATAR_EMAIL_LOOKUPS = 8;
 const GRAVATAR_MIME_TYPES = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
 
-function resolveAvatarCorsOrigin(req: IncomingMessage, cfg: OpenClawConfig): string | undefined {
+function resolveAvatarCorsOrigin(req: IncomingMessage, cfg: CarapaceConfig): string | undefined {
   const rawOrigin = typeof req.headers.origin === "string" ? req.headers.origin.trim() : "";
   if (!rawOrigin) {
     return undefined;
@@ -63,7 +63,7 @@ function resolveAvatarCorsOrigin(req: IncomingMessage, cfg: OpenClawConfig): str
 function setAvatarCorsHeaders(
   req: IncomingMessage,
   res: ServerResponse,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   if (!req.headers.origin) {
     return true;

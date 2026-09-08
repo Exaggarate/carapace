@@ -134,7 +134,7 @@ function readJson(filePath: string): unknown {
 
 describe("oxlint config", () => {
   it("enforces namespace, evaluation, and unused-binding policies with the installed binary", () => {
-    const tempRoot = fs.realpathSync(createTempDir("openclaw-oxlint-policy-"));
+    const tempRoot = fs.realpathSync(createTempDir("carapace-oxlint-policy-"));
     const typescriptExtensions = ["ts", "tsx", "mts", "cts"];
     const javascriptExtensions = ["js", "jsx", "cjs", "mjs"];
     const evaluation = 'eval("1 + 1");\nglobalThis.eval("1 + 1");\n';
@@ -247,7 +247,7 @@ describe("oxlint config", () => {
   });
 
   it("keeps plugin tests in a bounded type-aware project without losing their types", () => {
-    const tempRoot = fs.realpathSync(createTempDir("openclaw-oxlint-extension-project-"));
+    const tempRoot = fs.realpathSync(createTempDir("carapace-oxlint-extension-project-"));
     for (const file of [
       ".oxlintrc.json",
       "tsconfig.json",
@@ -410,7 +410,7 @@ describe("oxlint config", () => {
       "src/auto-reply/reply/export-html/template.js",
       "vendor/",
       "**/.cache/**",
-      "**/.openclaw-runtime-deps-copy-*/**",
+      "**/.carapace-runtime-deps-copy-*/**",
       "**/build/**",
       "**/coverage/**",
       "**/dist/**",

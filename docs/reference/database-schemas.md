@@ -1,29 +1,29 @@
 ---
-summary: "OpenClaw SQLite database locations, schema versions, integrity checks, and downgrade recovery"
+summary: "Carapace SQLite database locations, schema versions, integrity checks, and downgrade recovery"
 read_when:
   - Diagnosing a newer database schema error
   - Checking database compatibility before an update or downgrade
   - Proposing a SQLite or persistent-store change
   - Preparing storage operations for another database backend
-  - Recovering a database for an older OpenClaw release
+  - Recovering a database for an older Carapace release
 title: "Database schemas"
 ---
 
-OpenClaw stores control-plane state in a global SQLite database and agent data in one SQLite database per agent. Schema migrations run forward when a database opens. Older OpenClaw builds refuse databases written by a newer schema.
+Carapace stores control-plane state in a global SQLite database and agent data in one SQLite database per agent. Schema migrations run forward when a database opens. Older Carapace builds refuse databases written by a newer schema.
 
 ## Database layout
 
 | Scope                | Default path                                               | Contents                                                                                              |
 | -------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Global control plane | `~/.openclaw/state/openclaw.sqlite`                        | Shared configuration state, registries, approvals, plugin state, and shared runtime state             |
-| Per-agent data plane | `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` | Sessions, transcripts, memory indexes, auth state, conversation state, and agent-scoped runtime state |
+| Global control plane | `~/.carapace/state/carapace.sqlite`                        | Shared configuration state, registries, approvals, plugin state, and shared runtime state             |
+| Per-agent data plane | `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite` | Sessions, transcripts, memory indexes, auth state, conversation state, and agent-scoped runtime state |
 
 The task registry uses the global control-plane database. Runtime trajectory events live with their sessions in the per-agent database or a configured shared session SQLite store.
 
 ### Mentions Inbox
 
 The [mentions Inbox](/concepts/multi-user#temporary-mentions-inbox) uses existing
-`config_machine_state` rows in `state/openclaw.sqlite`.
+`config_machine_state` rows in `state/carapace.sqlite`.
 `notifications.mentions.source.*` records retain typed source identities,
 recipients, mention identifiers, expiry times, and dismissal bookkeeping;
 `notifications.mentions.head` records the revision and sequence. Writes use the
@@ -59,7 +59,7 @@ cannot recover history already evicted by an older writer. See [ACP CLI](/cli/ac
 ### Meeting transcript tables
 
 Meeting captures use three `STRICT` tables in the shared
-`state/openclaw.sqlite` database, separate from per-agent conversation transcripts.
+`state/carapace.sqlite` database, separate from per-agent conversation transcripts.
 The transcript store (`src/transcripts/store.ts`) owns their reads and writes;
 `src/transcripts/sqlite-schema.ts` ensures the tables on first use. Markdown and
 JSON files under the transcripts directory are explicit exports, not runtime
@@ -94,7 +94,7 @@ query and ten-minute window are unchanged.
 This adds no schema, index, version, or backfill. Doctor metadata restoration
 preserves an explicitly recorded origin and leaves unknown origins unknown.
 Older runtimes do not enforce this rule, so downgrading also removes the fixed-ID
-history protection. See the [accepted ID-origin decision](https://github.com/openclaw/openclaw/pull/130860).
+history protection. See the [accepted ID-origin decision](https://github.com/Exaggarate/carapace/pull/130860).
 
 #### `meeting_transcript_utterances`
 
@@ -132,7 +132,7 @@ notes do not change their schema or database version.
 ### Update run ledger
 
 `update_runs` stores one durable record per update in the shared
-`state/openclaw.sqlite` database. `src/infra/update-run-ledger.ts` owns writes
+`state/carapace.sqlite` database. `src/infra/update-run-ledger.ts` owns writes
 from the admitting Gateway, orchestrator CLI, and restarted Gateway. The table
 is additive at shared schema version 15: the canonical schema declares it and
 first use ensures it inside the same write transaction. Existing tables and the
@@ -184,7 +184,7 @@ Reconciliation writes status `failed`, reason `abandoned`, and a retained
 history is retained. Explicit `update repair` can reconcile inactive identityless
 rows when the current Gateway generation is healthy and no post-core repair is
 pending. It cannot override a live or inconclusive recorded driver. The
-[2026.9.2 updater](https://github.com/openclaw/openclaw/blob/v2026.9.2/src/cli/update-cli/update-command.ts#L465)
+[2026.9.2 updater](https://github.com/Exaggarate/carapace/blob/v2026.9.2/src/cli/update-cli/update-command.ts#L465)
 does not record adoption: package-manager and registry preflight can
 leave a live updater at its single `requested/in_progress` step. Older writers
 may drop unknown driver JSON fields; identityless rows require explicit recovery.
@@ -240,15 +240,15 @@ Accepted checkpoint history and publication source artifacts remain until explic
 Each database records its published schema in two places:
 
 - `PRAGMA user_version` is the SQLite schema version.
-- The primary `schema_meta` row records `role`, `agent_id`, `schema_version`, and `app_version`. `app_version` is the OpenClaw build that last wrote the schema metadata.
+- The primary `schema_meta` row records `role`, `agent_id`, `schema_version`, and `app_version`. `app_version` is the Carapace build that last wrote the schema metadata.
 
-OpenClaw applies forward-only migrations when it opens an older supported database. It refuses a database whose `user_version` is newer than the running build and reports a `newer schema version` error. The Gateway checks all registered databases before startup. `openclaw update` also refuses a package or source target whose declared schema support is older than an on-disk database. Target packages published before schema metadata was added cannot be preflighted. Updates driven by the 2026.9.2 release line can temporarily defer publication of a shared-state schema version while the old updater finishes; see [Schema bumps and older updaters](#schema-bumps-and-older-updaters).
+Carapace applies forward-only migrations when it opens an older supported database. It refuses a database whose `user_version` is newer than the running build and reports a `newer schema version` error. The Gateway checks all registered databases before startup. `carapace update` also refuses a package or source target whose declared schema support is older than an on-disk database. Target packages published before schema metadata was added cannot be preflighted. Updates driven by the 2026.9.2 release line can temporarily defer publication of a shared-state schema version while the old updater finishes; see [Schema bumps and older updaters](#schema-bumps-and-older-updaters).
 
 When Gateway startup encounters a newer database schema, it exits with status 78 so the generated systemd service does not restart it repeatedly. On macOS, it also parks its managed LaunchAgent to stop `KeepAlive` retries. This applies to failures during CLI bootstrap as well as server startup and does not depend on the database-backed crash counter. Start the Gateway with a build that supports the existing schemas. The older install cannot repair them with `doctor --fix`; run Doctor from the compatible install if further migration is required, then restart through the service or deployment owner.
 
 Changes may stay at the same schema version only when downgraded readers remain safe. New tables qualify because older builds ignore them. An explicitly compatible column on an existing table qualifies only when its declaration is exactly one bare nullable SQLite `STRICT` datatype: `ANY`, `BLOB`, `INT`, `INTEGER`, `REAL`, or `TEXT`. The declaration cannot have a default, `NOT NULL`, a primary or unique key, a check, a reference, a collation, a generated expression, or another suffix. Constrained existing-table additions require a schema-version bump or a companion table instead.
 
-Matching numeric versions are necessary but not sufficient. A release can add a lazy or startup-repairable table, column, index, or trigger without advancing `user_version`, so two databases at the same version can still have different shapes. OpenClaw validates the canonical table definitions, constraints, indexes, triggers, virtual tables, and table options owned by the running release.
+Matching numeric versions are necessary but not sufficient. A release can add a lazy or startup-repairable table, column, index, or trigger without advancing `user_version`, so two databases at the same version can still have different shapes. Carapace validates the canonical table definitions, constraints, indexes, triggers, virtual tables, and table options owned by the running release.
 
 Agent schema 19 records collected input consumption in the nullable
 `session_pending_inputs.consumed_event_id TEXT` column. Doctor and the feature's
@@ -310,7 +310,7 @@ current subscription still has that binding. The table is lazily created on
 first use, rows cascade away with their approval or subscription, and older
 readers ignore it safely.
 
-Installing OpenClaw manually through npm bypasses the updater guard. Database open checks still refuse an incompatible build.
+Installing Carapace manually through npm bypasses the updater guard. Database open checks still refuse an incompatible build.
 
 Structured [Goal controls](/tools/goal#gateway-requests-and-retries) use a lazy
 per-agent `session_goal_operations` table without changing the schema version.
@@ -325,7 +325,7 @@ but disables the new structured controls; upgrading can read retained receipts.
 
 ### Schema bumps and older updaters
 
-OpenClaw 2026.9.2 introduced the update ledger but reopens it with old code after
+Carapace 2026.9.2 introduced the update ledger but reopens it with old code after
 running the target's Doctor, including a final read after recording its terminal
 outcome. The shared-state database runner lets this updater finish by applying
 migration content first and publishing the new schema version later. This rule
@@ -406,7 +406,7 @@ Complete skill bundles are product artifacts under `<state-dir>/skill-library/<s
 
 Removing a skill excludes it from future selections; existing sessions retain their selected revisions. Published history and complete orphan revisions are retained conservatively. Expired upload records are pruned when another upload begins; clearly abandoned staging directories are cleaned during later publication. Back up both the state databases and the skill-library directory, not just the current revision pointers.
 
-Older same-schema readers ignore the new tables but cannot provide managed-library selection or authoring. Keep the tables and bundle directory intact when changing builds; do not lower schema markers or delete revisions to disable the feature. The accepted storage and ownership decision is recorded in [the profile-owned skills design issue](https://github.com/openclaw/openclaw/issues/133602).
+Older same-schema readers ignore the new tables but cannot provide managed-library selection or authoring. Keep the tables and bundle directory intact when changing builds; do not lower schema markers or delete revisions to disable the feature. The accepted storage and ownership decision is recorded in [the profile-owned skills design issue](https://github.com/Exaggarate/carapace/issues/133602).
 
 ## Personal GitHub connections and publication
 
@@ -424,7 +424,7 @@ Disconnect removes usable local credentials and retains a secret-free disconnect
 
 Personal publication receipts remain for the logical session's lifetime. Archive/reset preserves receipts and invalidates incompatible unfinished work. An already-dispatched GitHub operation can still record its observed result, without gaining authority for another operation. Permanent session deletion fences execution and removes its personal receipts and lifecycle bindings. There is no timed idempotency expiry, and deleting local state does not undo an already-created GitHub commit or pull request.
 
-See the accepted [personal GitHub ownership and publication design](https://github.com/openclaw/openclaw/issues/133590) and the operator-facing [GitHub connections guide](/concepts/user-model#github-connections).
+See the accepted [personal GitHub ownership and publication design](https://github.com/Exaggarate/carapace/issues/133590) and the operator-facing [GitHub connections guide](/concepts/user-model#github-connections).
 
 ## Personal model accounts
 
@@ -439,7 +439,7 @@ See [Per-person model accounts](/concepts/multi-user#per-person-model-accounts) 
 ## Apple companion delivery journals
 
 Companion Watch chat has separate app-local storage. It does not change the
-Gateway control-plane or per-agent database schema, and `openclaw doctor`
+Gateway control-plane or per-agent database schema, and `carapace doctor`
 does not migrate it. Open the updated iPhone and Watch apps to use the new
 delivery protocol. See [Watch voice and chat](/platforms/ios#apple-watch-voice-and-chat)
 for delivery statuses and recovery.
@@ -504,7 +504,7 @@ offer the new receipt protocol. Do not remove migration markers or reset
 `client-state.sqlite` to downgrade: that file also contains other user-owned
 client state.
 
-The [accepted design](https://github.com/openclaw/openclaw/issues/136617) records
+The [accepted design](https://github.com/Exaggarate/carapace/issues/136617) records
 the schema, migration, ownership, retention and validation boundaries.
 
 ## Preparing for another database backend
@@ -634,7 +634,7 @@ For an urgent data-loss, security, or recovery fix, a maintainer may authorize a
 Before activating or rolling back a release, run that target release's CLI against one explicit copied state database:
 
 ```bash
-openclaw database preflight <copied-state.sqlite> --json
+carapace database preflight <copied-state.sqlite> --json
 ```
 
 The command does not read the default state directory or mutate the supplied file. It opens the supplied consolidated file as immutable/read-only, compares the target release's own schema contract, and reports one status:
@@ -645,7 +645,7 @@ The command does not read the default state directory or mutate the supplied fil
 - `incompatible`: the database is newer, or its same-version shape has blocking drift such as an unexpected column.
 - `indeterminate`: the file, integrity metadata, or ownership metadata could not be verified.
 
-JSON output is identified by `schema: "openclaw.state-schema-preflight.v1"`.
+JSON output is identified by `schema: "carapace.state-schema-preflight.v1"`.
 
 Use a SQLite online backup or another WAL-aware snapshot produced while the source is safely coordinated. The resulting preflight input must be one consolidated file with no sibling `-wal`, `-shm`, or `-journal`; sidecars make the result `indeterminate`. Do not copy only the main `.sqlite` file from an active WAL database. Preflight the exact runtime that will be activated; a package version or numeric schema version alone does not prove same-version shape compatibility.
 
@@ -653,22 +653,22 @@ Use a SQLite online backup or another WAL-aware snapshot produced while the sour
 
 | Version | Change                                                                                                                                                                                                                                                 | First release                                   |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
-| 1       | Initial per-agent store ([#88349](https://github.com/openclaw/openclaw/pull/88349))                                                                                                                                                                    | `v2026.5.30-beta.1`, stable through `v2026.7.1` |
-| 2       | Memory index identity ([#104449](https://github.com/openclaw/openclaw/pull/104449))                                                                                                                                                                    | `v2026.7.2-beta.1`                              |
-| 4       | Sessions and transcripts moved into SQLite ([#98236](https://github.com/openclaw/openclaw/pull/98236))                                                                                                                                                 | `v2026.7.2-beta.1`                              |
-| 5-6     | Terminal freshness and state lifecycle ([#104859](https://github.com/openclaw/openclaw/pull/104859))                                                                                                                                                   | `v2026.7.2-beta.1`                              |
-| 7       | Per-entry lifecycle status projection ([#106151](https://github.com/openclaw/openclaw/pull/106151))                                                                                                                                                    | `v2026.7.2-beta.1`                              |
-| 8       | Per-transcript session provenance ([#106766](https://github.com/openclaw/openclaw/pull/106766))                                                                                                                                                        | `v2026.7.2-beta.2`                              |
-| 9       | `STRICT` tables ([#108663](https://github.com/openclaw/openclaw/pull/108663))                                                                                                                                                                          | `v2026.7.2-beta.2`                              |
-| 10      | Materialized active transcript paths ([#108851](https://github.com/openclaw/openclaw/pull/108851))                                                                                                                                                     | Unreleased                                      |
-| 11      | Durable delivery, conversation addresses, and heartbeat outcomes ([#109636](https://github.com/openclaw/openclaw/pull/109636), [#95838](https://github.com/openclaw/openclaw/pull/95838), [#109999](https://github.com/openclaw/openclaw/pull/109999)) | Unreleased                                      |
+| 1       | Initial per-agent store ([#88349](https://github.com/Exaggarate/carapace/pull/88349))                                                                                                                                                                    | `v2026.5.30-beta.1`, stable through `v2026.7.1` |
+| 2       | Memory index identity ([#104449](https://github.com/Exaggarate/carapace/pull/104449))                                                                                                                                                                    | `v2026.7.2-beta.1`                              |
+| 4       | Sessions and transcripts moved into SQLite ([#98236](https://github.com/Exaggarate/carapace/pull/98236))                                                                                                                                                 | `v2026.7.2-beta.1`                              |
+| 5-6     | Terminal freshness and state lifecycle ([#104859](https://github.com/Exaggarate/carapace/pull/104859))                                                                                                                                                   | `v2026.7.2-beta.1`                              |
+| 7       | Per-entry lifecycle status projection ([#106151](https://github.com/Exaggarate/carapace/pull/106151))                                                                                                                                                    | `v2026.7.2-beta.1`                              |
+| 8       | Per-transcript session provenance ([#106766](https://github.com/Exaggarate/carapace/pull/106766))                                                                                                                                                        | `v2026.7.2-beta.2`                              |
+| 9       | `STRICT` tables ([#108663](https://github.com/Exaggarate/carapace/pull/108663))                                                                                                                                                                          | `v2026.7.2-beta.2`                              |
+| 10      | Materialized active transcript paths ([#108851](https://github.com/Exaggarate/carapace/pull/108851))                                                                                                                                                     | Unreleased                                      |
+| 11      | Durable delivery, conversation addresses, and heartbeat outcomes ([#109636](https://github.com/Exaggarate/carapace/pull/109636), [#95838](https://github.com/Exaggarate/carapace/pull/95838), [#109999](https://github.com/Exaggarate/carapace/pull/109999)) | Unreleased                                      |
 | 12      | Session-owned ACP parent-stream events                                                                                                                                                                                                                 | Unreleased                                      |
 | 13      | Durable transcript rewrite watermarks                                                                                                                                                                                                                  | Unreleased                                      |
 | 14      | Logical session nodes, generation windows, and node-owned artifact foreign keys                                                                                                                                                                        | Unreleased                                      |
 | 15      | Board and session-sharing tables                                                                                                                                                                                                                       | Unreleased                                      |
 | 16      | Legacy top-level transcript media fields retired                                                                                                                                                                                                       | Unreleased                                      |
-| 17      | Tenant-free per-agent lease table retired after the last writer and routing arm were removed ([#121113](https://github.com/openclaw/openclaw/pull/121113), [#121615](https://github.com/openclaw/openclaw/pull/121615))                                | Unreleased                                      |
-| 18      | Canonical participant identity namespaces and explicit unknown historical input times in the existing session-owned aggregate ([#130661](https://github.com/openclaw/openclaw/issues/130661))                                                          | Unreleased                                      |
+| 17      | Tenant-free per-agent lease table retired after the last writer and routing arm were removed ([#121113](https://github.com/Exaggarate/carapace/pull/121113), [#121615](https://github.com/Exaggarate/carapace/pull/121615))                                | Unreleased                                      |
+| 18      | Canonical participant identity namespaces and explicit unknown historical input times in the existing session-owned aggregate ([#130661](https://github.com/Exaggarate/carapace/issues/130661))                                                          | Unreleased                                      |
 | 19      | Source-qualified immutable session creators; historical ambiguity remains unknown                                                                                                                                                                      | Unreleased                                      |
 
 Version 3 was an unshipped development step folded into version 4.
@@ -679,7 +679,7 @@ Agent schema **19** and shared-state schema **14** add a source discriminator to
 
 Historical human creators stamped directly by `operator` or `run` creation become `profile`; channel creation becomes `channel`. Origin-losing cron, inherited spawn or Talk, legacy `createdBy`, and missing-source history remain `unknown`. The migration preserves IDs, attribution, creation times, content, and existing sandbox restrictions. A UUID, profile lookup, participant, current route, or required sandbox never supplies missing creator authority. Recovery from incomplete physical projections also produces unknown human attribution.
 
-Before upgrading, stop the Gateway and all other writers, then [create and verify a WAL-aware backup](/cli/backup). Run `openclaw doctor --fix` with the new build. The agent migration retains the stopped-writer maintenance gate and runs after the schema-18 participant migration, without rebuilding already migrated participant rows. Canonical data and both schema markers commit in the owning database transaction. Shared-state and agent databases are separate transactions; if one fails, keep writers stopped and rerun Doctor before starting the Gateway.
+Before upgrading, stop the Gateway and all other writers, then [create and verify a WAL-aware backup](/cli/backup). Run `carapace doctor --fix` with the new build. The agent migration retains the stopped-writer maintenance gate and runs after the schema-18 participant migration, without rebuilding already migrated participant rows. Canonical data and both schema markers commit in the owning database transaction. Shared-state and agent databases are separate transactions; if one fails, keep writers stopped and rerun Doctor before starting the Gateway.
 
 Older builds refuse the new versions. For rollback, stop all writers and restore the verified pre-upgrade backups with their matching older build. Do not decrement either schema marker: an older writer cannot maintain the creator-source contract. Unknown historical provenance is irrecoverable from the stored ID alone. Administrators retain sharing management access; assigning responsibility does not restore an implicit creator grant.
 
@@ -689,7 +689,7 @@ Required sandbox resources keep their existing keys for proven profile creators.
 
 Agent schema 18 rebuilds `session_participants` with the unique key `(session_key, identity_namespace, actor_id)`. The raw actor ID remains separate from its namespace. This replaces the old `(session_key, actor_type, actor_id)` key; it is not a same-version additive change. Both schema markers advance together. No companion table or per-input ledger is added.
 
-Before upgrading existing data, take a verified, WAL-aware backup and stop the Gateway and other agent-database writers. Run `openclaw doctor --fix` with the new build. The migration uses the existing maintenance lease to reject active writers and fence new claims. Ordinary runtime opens refuse the old participant schema rather than migrating it behind active readers. Earlier structural and media migrations run in their historical order before participant convergence. Explicit Doctor repair exits nonzero if an existing configured, default-layout, or registered database still fails runtime schema readiness, including when a live writer or an unknown table dependency blocks this migration. Readiness uses the same target discovery as migration without registering, pruning, or creating stores. Archive migration warnings remain advisory when required database schemas are ready.
+Before upgrading existing data, take a verified, WAL-aware backup and stop the Gateway and other agent-database writers. Run `carapace doctor --fix` with the new build. The migration uses the existing maintenance lease to reject active writers and fence new claims. Ordinary runtime opens refuse the old participant schema rather than migrating it behind active readers. Earlier structural and media migrations run in their historical order before participant convergence. Explicit Doctor repair exits nonzero if an existing configured, default-layout, or registered database still fails runtime schema readiness, including when a live writer or an unknown table dependency blocks this migration. Readiness uses the same target discovery as migration without registering, pruning, or creating stores. Archive migration warnings remain advisory when required database schemas are ready.
 
 Membership and recorded contribution aggregates survive. Historical profile timestamps are unknown because earlier source promotion could contaminate them even when a contribution count was present. Supported agent and channel-only observation times remain; an unresolved historical channel domain stays unresolved. Migration does not invent missing channel rows or inspect transcripts to reconstruct identities. New observations do not turn an unknown first input time into a claimed first-ever time.
 
@@ -702,11 +702,11 @@ Normal admission remains bounded at 32 identities. Same-store alias repair sums 
 | Version | Change                                                                                                                                                                                                                                                                                                                          | First release       |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | 1       | Initial shared state database                                                                                                                                                                                                                                                                                                   | `v2026.5.30-beta.1` |
-| 2       | Metadata-only message audit events ([#103903](https://github.com/openclaw/openclaw/pull/103903))                                                                                                                                                                                                                                | `v2026.7.2-beta.1`  |
-| 3       | `STRICT` tables and schema-drift hardening ([#108663](https://github.com/openclaw/openclaw/pull/108663))                                                                                                                                                                                                                        | `v2026.7.2-beta.2`  |
+| 2       | Metadata-only message audit events ([#103903](https://github.com/Exaggarate/carapace/pull/103903))                                                                                                                                                                                                                                | `v2026.7.2-beta.1`  |
+| 3       | `STRICT` tables and schema-drift hardening ([#108663](https://github.com/Exaggarate/carapace/pull/108663))                                                                                                                                                                                                                        | `v2026.7.2-beta.2`  |
 | 4       | Session watch provenance replaces encoded sentinel rows                                                                                                                                                                                                                                                                         | Unreleased          |
-| 5       | Durable cloud-worker result references on pending workspace fences ([`7a7d6bb`](https://github.com/openclaw/openclaw/commit/7a7d6bb51f42bd896de2b8a4df2ee66f3dce0a21), [#110952](https://github.com/openclaw/openclaw/pull/110952))                                                                                             | `v2026.7.2-beta.4`  |
-| 6       | Every committed shared-state table becomes part of the canonical runtime schema ([`509a5f0`](https://github.com/openclaw/openclaw/commit/509a5f03737642fec4a940e6d605887f7957ddc8), [#113473](https://github.com/openclaw/openclaw/pull/113473))                                                                                | `v2026.7.2-beta.5`  |
+| 5       | Durable cloud-worker result references on pending workspace fences ([`7a7d6bb`](https://github.com/Exaggarate/carapace/commit/7a7d6bb51f42bd896de2b8a4df2ee66f3dce0a21), [#110952](https://github.com/Exaggarate/carapace/pull/110952))                                                                                             | `v2026.7.2-beta.4`  |
+| 6       | Every committed shared-state table becomes part of the canonical runtime schema ([`509a5f0`](https://github.com/Exaggarate/carapace/commit/509a5f03737642fec4a940e6d605887f7957ddc8), [#113473](https://github.com/Exaggarate/carapace/pull/113473))                                                                                | `v2026.7.2-beta.5`  |
 | 7       | Retired inferred-commitment storage removed                                                                                                                                                                                                                                                                                     | Unreleased          |
 | 8       | Cloud-worker placement execution modes and mode-aware turn claims                                                                                                                                                                                                                                                               | Unreleased          |
 | 9       | In-root agent database registry paths stored relative to the state directory                                                                                                                                                                                                                                                    | Unreleased          |
@@ -728,7 +728,7 @@ collection review had released becomes `stale` with a status reason, so the
 skill path it once created stays user-owned and Doctor never relocates it.
 
 Skill Workshop ownership is now the physical
-`<state-dir>/agents/<agentId>/agent/workshop-skills` directory. Startup and `openclaw doctor --fix`
+`<state-dir>/agents/<agentId>/agent/workshop-skills` directory. Startup and `carapace doctor --fix`
 drop the retired columns and index in the shared schema transaction. Both then
 run the same migration to relocate applied legacy Workshop creates to the
 inferred owner agent and retarget eligible pending creates. Conflicts and ambiguous ownership become
@@ -747,9 +747,9 @@ table is required.
 
 ### State schema 15
 
-Schema 15 removes `target_agent_id` and `target_session_id` from `current_conversation_bindings`. The target index uses the complete `target_session_key` and remains non-unique: several conversations may point at the same destination. This lets plugin-owned targets persist without inventing an OpenClaw agent owner. Channel/account isolation, plugin approvals, binding identifiers, target keys, JSON metadata, expiry, and detach behavior are unchanged.
+Schema 15 removes `target_agent_id` and `target_session_id` from `current_conversation_bindings`. The target index uses the complete `target_session_key` and remains non-unique: several conversations may point at the same destination. This lets plugin-owned targets persist without inventing an Carapace agent owner. Channel/account isolation, plugin approvals, binding identifiers, target keys, JSON metadata, expiry, and detach behavior are unchanged.
 
-Startup and `openclaw doctor --fix` run the migration in the existing exclusive write transaction. They remove only the two projections and replace the target index, preserving all other row values. A dependent trigger, index, or failed schema check rolls the transaction back; migration does not discard an unknown dependency to force the upgrade. Column removal rewrites the binding table, so upgrade cost scales with its size.
+Startup and `carapace doctor --fix` run the migration in the existing exclusive write transaction. They remove only the two projections and replace the target index, preserving all other row values. A dependent trigger, index, or failed schema check rolls the transaction back; migration does not discard an unknown dependency to force the upgrade. Column removal rewrites the binding table, so upgrade cost scales with its size.
 
 Stop older writers and create a verified, WAL-aware backup before upgrading. Builds supporting shared-state schema 14 or earlier refuse the migrated database. To return to an older build, restore that pre-upgrade backup into a separate state directory; do not lower the version markers or reconstruct an agent projection. See [Downgrade](/install/updating#downgrade) for the general recovery contract.
 
@@ -777,7 +777,7 @@ Schema 9 stores an `agent_databases.path` value relative to the state directory 
 | Gateway background verifier                 | Run the full scan about once daily and log results                  |
 | Doctor, backup verification, and compaction | Run the full scan before accepting or rewriting the database        |
 
-The Gateway startup preflight reads schema headers only. `openclaw database preflight` performs the release-local shape comparison for an explicit copied file. The background verifier also scans already-open databases about once daily.
+The Gateway startup preflight reads schema headers only. `carapace database preflight` performs the release-local shape comparison for an explicit copied file. The background verifier also scans already-open databases about once daily.
 
 Memory search and maintenance managers borrow the verified per-agent connection. Acquisition does not reopen or rescan a healthy shared handle. Native and transformed plugin modules share the same process-owned connection lifecycle, query cache, and commit observers. Nested synchronous writes use SQLite savepoints on that connection. A manager retains that exact connection against cache eviction until its work drains, then releases its borrow without closing the database. Explicit quarantine and disposal still revoke it. Full memory rebuilds use separate temporary shadow databases and publish their derived tables in one synchronous transaction. Read-only memory status keeps its separate diagnostic connection and does not create or migrate a missing database.
 
@@ -789,7 +789,7 @@ Concurrent runs normally share the cached writer for an agent database on the ma
 
 Periodic agent maintenance uses passive WAL checkpoints and bounded incremental vacuum. Session reclamation keeps deletion on a separate worker write connection and uses a passive checkpoint and bounded vacuum after commit; long deletion transactions can still contend with other writers. Full compaction belongs to offline Doctor maintenance. Run errors naming the Gateway state database retain a safe SQLite diagnosis; see [storage failure troubleshooting](/gateway/troubleshooting#agent-run-failed-with-a-storage-error).
 
-Quarantine decisions live only in a dedicated `openclaw-quarantine.sqlite` store, so they survive damage to the databases being quarantined. Verification results are logged.
+Quarantine decisions live only in a dedicated `carapace-quarantine.sqlite` store, so they survive damage to the databases being quarantined. Verification results are logged.
 
 Background verification errors retain the original name and message and append bounded Node `code` and SQLite `errcode` values from up to eight cause-chain nodes. These diagnostics do not change the verdict: I/O failures remain inconclusive, while proven corruption is reconfirmed by the database owner before quarantine. A generic `disk I/O error` (`errcode=10`) does not establish disk exhaustion.
 
@@ -819,7 +819,7 @@ The heartbeat proves ownership, not migration progress. A live but stuck mainten
 
 ### Why you cannot go back after updating to 2026.7.2
 
-Every release through `v2026.7.1` used agent schema 1 and state schema 1. The 2026.7.2 release train (starting with `v2026.7.2-beta.1`) migrates your databases forward on first start. That migration is one-way: the data is rewritten into the newer schema, and installing an older OpenClaw afterwards does not undo it. The older build refuses to start with a `newer schema version` error that names the build that owns the database.
+Every release through `v2026.7.1` used agent schema 1 and state schema 1. The 2026.7.2 release train (starting with `v2026.7.2-beta.1`) migrates your databases forward on first start. That migration is one-way: the data is rewritten into the newer schema, and installing an older Carapace afterwards does not undo it. The older build refuses to start with a `newer schema version` error that names the build that owns the database.
 
 Downgrading the binary never downgrades the data. Use the managed recovery path
 or restore the verified pre-update backup with its matching release. Retain
@@ -828,13 +828,13 @@ replace a complete backup. See [Downgrade](/install/updating#downgrade).
 
 ### The Gateway refuses to start with a newer schema version error
 
-A newer OpenClaw build wrote your databases, and the running build is older. The error names the refusing install — release version, commit, and install root — plus the schema it supports and the schema it found.
+A newer Carapace build wrote your databases, and the running build is older. The error names the refusing install — release version, commit, and install root — plus the schema it supports and the schema it found.
 
-Act on the install root, not the version. One release version string spans many `main` commits, schema levels, and same-version schema shapes, so two installs can both call themselves `2026.7.2` and still disagree about a database. A prerelease version may not exist on the `latest` npm tag at all: check `npm view openclaw dist-tags` before reinstalling, because the tag carrying the schema you need may be `beta`, and reinstalling from `latest` can move you further away.
+Act on the install root, not the version. One release version string spans many `main` commits, schema levels, and same-version schema shapes, so two installs can both call themselves `2026.7.2` and still disagree about a database. A prerelease version may not exist on the `latest` npm tag at all: check `npm view carapace dist-tags` before reinstalling, because the tag carrying the schema you need may be `beta`, and reinstalling from `latest` can move you further away.
 
 When a Gateway runs from a linked source checkout, its status and schema-refusal diagnostics report the commit captured when `dist/` was built, not the checkout's current Git HEAD. If that build identity is unknown, rebuild the checkout (`pnpm build`) before concluding the version is wrong.
 
-Open the database with a build that supports its schema, or point the older build at a separate `OPENCLAW_STATE_DIR`. Do not edit the database to silence the error.
+Open the database with a build that supports its schema, or point the older build at a separate `CARAPACE_STATE_DIR`. Do not edit the database to silence the error.
 
 Config reads also save health fingerprints to this database. If that write fails,
 `Config health-state write failed` reports the first failure for that database
@@ -845,7 +845,7 @@ the underlying database error.
 
 ### A database is quarantined after integrity verification failed
 
-The background verifier proved the file is corrupt, and every open now fails fast instead of rescanning. Restore the database from a backup or repair it, then run `openclaw doctor --fix` to clear the quarantine record. Doctor reports an explicit error if the quarantine record itself cannot be cleared; rerun it until it reports clean.
+The background verifier proved the file is corrupt, and every open now fails fast instead of rescanning. Restore the database from a backup or repair it, then run `carapace doctor --fix` to clear the quarantine record. Doctor reports an explicit error if the quarantine record itself cannot be cleared; rerun it until it reports clean.
 
 <a id="downgrades-are-unsupported" />
 

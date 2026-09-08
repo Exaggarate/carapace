@@ -59,7 +59,7 @@ describe("CLI durable session context", () => {
     setCliRunnerPrepareTestDeps({
       isWorkspaceBootstrapPending: async () => false,
       resolveBootstrapContextForRun: async () => ({ bootstrapFiles: [], contextFiles: [] }),
-      resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+      resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
       prepareClaudeCliSkillsPlugin: async () => ({ args: [], cleanup: async () => {} }),
       loadManifestModelCatalog: () => [],
     });
@@ -95,7 +95,7 @@ describe("CLI durable session context", () => {
           timestamp: new Date(1).toISOString(),
           message: {
             role: "custom",
-            customType: "openclaw.system-note",
+            customType: "carapace.system-note",
             content: "FACT_AFTER_MAINTENANCE",
             display: false,
             timestamp: 1,
@@ -146,7 +146,7 @@ describe("CLI durable session context", () => {
         timestamp: new Date(1).toISOString(),
         message: {
           role: "custom",
-          customType: "openclaw.system-note",
+          customType: "carapace.system-note",
           content: "The saved audit checksum is RESULT-1234.",
           display: false,
           timestamp: 1,
@@ -178,7 +178,7 @@ describe("CLI durable session context", () => {
             expect(context.promptContext?.prependContext).toContain("RESULT-1234");
           }
         }
-        expect(context.openClawHistoryPrompt).toBeUndefined();
+        expect(context.carapaceHistoryPrompt).toBeUndefined();
       } finally {
         await context.preparedBackend.cleanup?.();
       }

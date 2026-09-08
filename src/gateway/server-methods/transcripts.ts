@@ -7,7 +7,7 @@ import {
   validateTranscriptsStatusParams,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createTranscriptsStore } from "../../transcripts/capture-operations.js";
 import { resolveSourceProvider } from "../../transcripts/capture.js";
 import {
@@ -27,7 +27,7 @@ import { assertValidParams, type Validator } from "./validation.js";
 function transcriptReadMethod<T>(
   method: string,
   validate: Validator<T>,
-  read: (store: TranscriptsStore, params: T, cfg: OpenClawConfig) => unknown,
+  read: (store: TranscriptsStore, params: T, cfg: CarapaceConfig) => unknown,
 ): GatewayRequestHandler {
   return async ({ params, context, client, respond }) => {
     if (!assertValidParams(params, validate, method, respond)) {
@@ -100,7 +100,7 @@ export const transcriptsHandlers: GatewayRequestHandlers = {
   ),
 };
 
-function providerNames(config: OpenClawConfig) {
+function providerNames(config: CarapaceConfig) {
   const names = new Map<string, string | undefined>();
   return (providerId: string) => {
     if (!names.has(providerId)) {

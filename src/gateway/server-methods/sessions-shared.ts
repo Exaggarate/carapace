@@ -1,5 +1,5 @@
 // Shared session-handler target resolution and mutation guards.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -9,7 +9,7 @@ import {
 import type { SessionEntry } from "../../config/sessions.js";
 import { isInternalSessionEffectsKey } from "../../config/sessions/internal-session-key.js";
 import { resolveAgentMainSessionKey } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { createLazyRuntimeModule } from "../../shared/lazy-runtime.js";
@@ -37,7 +37,7 @@ export function respondSessionWorkerPlacementMutationError(
 
 export function resolveSessionWorkerPlacementPatchError(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   context: GatewayRequestContext;
   entry: SessionEntry | undefined;
   key: string;
@@ -115,7 +115,7 @@ export function requireSessionKey(key: unknown, respond: RespondFn): string | nu
 
 export function resolveGatewaySessionTargetFromKey(
   key: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts?: { agentId?: string },
 ) {
   const target = resolveGatewaySessionStoreTarget({
@@ -128,7 +128,7 @@ export function resolveGatewaySessionTargetFromKey(
 
 export function loadAccessorSessionEntryForGatewayTarget(params: {
   key: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
 }) {
   const target = resolveGatewaySessionStoreTargetWithStore({
@@ -151,7 +151,7 @@ export function loadAccessorSessionEntryForGatewayTarget(params: {
 
 export function loadSessionEntriesForTarget(params: {
   key: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   includeStoreChildEntries?: boolean;
 }) {
@@ -197,7 +197,7 @@ export function isWorkerDispatchInputError(error: unknown): boolean {
   return code === "invalid_profile" || code === "profile_not_found" || code === "invalid_state";
 }
 
-export function isAgentMainSessionKey(cfg: OpenClawConfig, sessionKey: string): boolean {
+export function isAgentMainSessionKey(cfg: CarapaceConfig, sessionKey: string): boolean {
   const parsed = parseAgentSessionKey(sessionKey);
   if (!parsed) {
     return false;

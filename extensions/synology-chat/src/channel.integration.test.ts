@@ -1,5 +1,5 @@
 // Synology Chat tests cover channel.integration plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildChannelInboundEventContextMock,
@@ -182,7 +182,7 @@ describe("Synology channel wiring integration", () => {
     for (const method of ["GET", "HEAD"]) {
       await registered.handler(
         makeReq(method, "", {
-          url: "/webhook/synology?__openclaw_synology_media_token_id=token",
+          url: "/webhook/synology?__carapace_synology_media_token_id=token",
         }),
         makeRes(),
       );

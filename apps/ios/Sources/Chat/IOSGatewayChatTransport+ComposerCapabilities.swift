@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 import OSLog
 
 extension IOSGatewayChatTransport {
@@ -11,10 +11,10 @@ extension IOSGatewayChatTransport {
 
     func loadComposerCapabilityCatalog(
         sessionKey: String,
-        agentID: String?) async -> OpenClawChatComposerCapabilityCatalog
+        agentID: String?) async -> CarapaceChatComposerCapabilityCatalog
     {
         guard let route = await self.currentSessionMutationRoute() else {
-            return OpenClawChatComposerCapabilityCatalog()
+            return CarapaceChatComposerCapabilityCatalog()
         }
         async let operatorScopes = self.gateway.currentOperatorScopes(ifCurrentRoute: route)
         async let patchMethodAdvertised = self.gateway.supportsServerMethod(
@@ -29,17 +29,17 @@ extension IOSGatewayChatTransport {
         let targetAgentID = Self.composerAgentID(for: target)
 
         async let configRequest = self.composerResponse(
-            OpenClawChatGatewayRequests.composerConfigGet(),
+            CarapaceChatGatewayRequests.composerConfigGet(),
             method: "config.get",
             canRead: canRead,
             route: route)
         async let skillsRequest = self.composerResponse(
-            OpenClawChatGatewayRequests.composerSkillsStatus(agentID: targetAgentID),
+            CarapaceChatGatewayRequests.composerSkillsStatus(agentID: targetAgentID),
             method: "skills.status",
             canRead: canRead,
             route: route)
         async let toolsRequest = self.composerResponse(
-            OpenClawChatGatewayRequests.composerToolsEffective(
+            CarapaceChatGatewayRequests.composerToolsEffective(
                 sessionKey: target.sessionKey,
                 agentID: target.agentID),
             method: "tools.effective",
@@ -60,7 +60,7 @@ extension IOSGatewayChatTransport {
         let sessionSettingsAvailable = settingsSupport.settingsContract && patchAdvertised
 
         guard await self.gateway.currentRoute() == route else {
-            return OpenClawChatComposerCapabilityCatalog()
+            return CarapaceChatComposerCapabilityCatalog()
         }
         let configSurface = Self.decodeComposerResponse(configResponse, as: ComposerConfigSnapshot.self)
         let skillsSurface = Self.decodeComposerResponse(skillsResponse, as: SkillsStatusReport.self)
@@ -83,7 +83,7 @@ extension IOSGatewayChatTransport {
                 format: String(localized: "Could not load: %@. Retry."),
                 failedSurfaces.joined(separator: ", "))
 
-        return OpenClawChatComposerCapabilityCatalog(
+        return CarapaceChatComposerCapabilityCatalog(
             sessionSettingsAvailable: sessionSettingsAvailable,
             modelMutationAvailable: Self.composerMutationAvailable(
                 methodSupport: patchCapability,
@@ -95,7 +95,7 @@ extension IOSGatewayChatTransport {
             webSearchAvailable: configSurface.loaded,
             skills: (skillsReport?.skills ?? []).map(Self.composerSkill).sorted { $0.name < $1.name },
             connectors: connectorNames.map { name in
-                OpenClawChatComposerConnector(
+                CarapaceChatComposerConnector(
                     name: name,
                     baseEnabled: configuredServers[name]?.enabled != false,
                     tools: toolsByServer[name] ?? [],
@@ -134,12 +134,12 @@ extension IOSGatewayChatTransport {
         methodSupport == nil || (methodSupport == true && allowedByScope)
     }
 
-    static func composerAgentID(for target: OpenClawChatSessionTarget) -> String? {
-        target.agentID ?? OpenClawChatSessionKey.agentID(from: target.sessionKey)
+    static func composerAgentID(for target: CarapaceChatSessionTarget) -> String? {
+        target.agentID ?? CarapaceChatSessionKey.agentID(from: target.sessionKey)
     }
 
     private func composerResponse(
-        _ request: OpenClawChatGatewayRequest,
+        _ request: CarapaceChatGatewayRequest,
         method: String,
         canRead: Bool,
         route: GatewayNodeSessionRoute) async -> ComposerResponse
@@ -177,11 +177,11 @@ extension IOSGatewayChatTransport {
         }
     }
 
-    static func composerSkill(_ skill: SkillStatus) -> OpenClawChatComposerSkill {
+    static func composerSkill(_ skill: SkillStatus) -> CarapaceChatComposerSkill {
         let missing = skill.missing
         let missingDependencies = !missing.bins.isEmpty || !missing.anyBins.isEmpty ||
             !missing.env.isEmpty || !missing.config.isEmpty || !missing.os.isEmpty
-        return OpenClawChatComposerSkill(
+        return CarapaceChatComposerSkill(
             key: skill.skillKey,
             name: skill.name,
             baseEnabled: !skill.disabled,
@@ -191,9 +191,9 @@ extension IOSGatewayChatTransport {
     }
 
     static func composerToolsByServer(
-        _ result: ToolsEffectiveResult?) -> [String: [OpenClawChatComposerTool]]
+        _ result: ToolsEffectiveResult?) -> [String: [CarapaceChatComposerTool]]
     {
-        var tools: [String: [OpenClawChatComposerTool]] = [:]
+        var tools: [String: [CarapaceChatComposerTool]] = [:]
         for entry in result?.groups.flatMap(\.tools) ?? [] {
             guard (entry.source.value as? String) == "mcp",
                   let server = entry.mcpserver?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -201,7 +201,7 @@ extension IOSGatewayChatTransport {
                   let name = entry.mcptoolname?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !name.isEmpty
             else { continue }
-            tools[server, default: []].append(OpenClawChatComposerTool(
+            tools[server, default: []].append(CarapaceChatComposerTool(
                 name: name,
                 label: entry.label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     ? name
@@ -229,7 +229,7 @@ extension IOSGatewayChatTransport {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments: [CarapaceChatAttachmentPayload]) async throws -> CarapaceChatSendResponse
     {
         try await self.sendMessage(
             sessionKey: sessionKey,
@@ -248,11 +248,11 @@ extension IOSGatewayChatTransport {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments: [CarapaceChatAttachmentPayload]) async throws -> CarapaceChatSendResponse
     {
         try await self.sendMessage(
             sessionKey: sessionKey,
-            target: OpenClawChatSendTarget(
+            target: CarapaceChatSendTarget(
                 agentID: agentID,
                 expectedSessionRoutingContract: expectedSessionRoutingContract,
                 expectedSessionSettings: nil),
@@ -264,11 +264,11 @@ extension IOSGatewayChatTransport {
 
     func sendMessage(
         sessionKey: String,
-        target: OpenClawChatSendTarget,
+        target: CarapaceChatSendTarget,
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments: [CarapaceChatAttachmentPayload]) async throws -> CarapaceChatSendResponse
     {
         let route: GatewayNodeSessionRoute? = if let outboxGatewayID {
             await self.gateway.currentRoute(ifGatewayID: outboxGatewayID)
@@ -279,8 +279,8 @@ extension IOSGatewayChatTransport {
               let supportsRoutingContract = await gateway.supportsServerCapability(
                   .chatSendRoutingContract,
                   ifCurrentRoute: route)
-        else { throw OpenClawChatTransportSendError.notDispatched }
-        let guardedContract = OpenClawChatSessionRoutingContract.expectedValue(
+        else { throw CarapaceChatTransportSendError.notDispatched }
+        let guardedContract = CarapaceChatSessionRoutingContract.expectedValue(
             target.expectedSessionRoutingContract,
             serverSupportsGuard: supportsRoutingContract)
         return try await self.sendMessage(
@@ -300,13 +300,13 @@ extension IOSGatewayChatTransport {
         sessionKey: String,
         agentID: String? = nil,
         expectedSessionRoutingContract: String? = nil,
-        expectedSessionSettings: OpenClawChatSessionSettingsExpectation? = nil,
+        expectedSessionSettings: CarapaceChatSessionSettingsExpectation? = nil,
         message: String,
         thinking: String?,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload],
+        attachments: [CarapaceChatAttachmentPayload],
         ifCurrentRoute expectedRoute: GatewayNodeSessionRoute?,
-        distinguishPreDispatchRouteChange: Bool = false) async throws -> OpenClawChatSendResponse
+        distinguishPreDispatchRouteChange: Bool = false) async throws -> CarapaceChatSendResponse
     {
         let supportsSettingsCAS = if let expectedRoute {
             await self.gateway.supportsServerCapability(
@@ -316,7 +316,7 @@ extension IOSGatewayChatTransport {
             false
         }
         guard expectedSessionSettings == nil || supportsSettingsCAS else {
-            throw OpenClawChatTransportSendError.notDispatched
+            throw CarapaceChatTransportSendError.notDispatched
         }
         let target = self.sessionTarget(for: sessionKey, overrideAgentID: agentID)
         let startLogMessage =
@@ -324,7 +324,7 @@ extension IOSGatewayChatTransport {
                 + "len=\(message.count) attachments=\(attachments.count)"
         Self.logger.info("\(startLogMessage, privacy: .public)")
         GatewayDiagnostics.log(startLogMessage)
-        let request = OpenClawChatGatewayRequests.sendMessage(
+        let request = CarapaceChatGatewayRequests.sendMessage(
             sessionKey: target.sessionKey,
             agentID: target.agentID,
             expectedSessionRoutingContract: expectedSessionRoutingContract,
@@ -339,14 +339,14 @@ extension IOSGatewayChatTransport {
                 request,
                 ifCurrentRoute: expectedRoute,
                 distinguishPreDispatchRouteChange: distinguishPreDispatchRouteChange)
-            let decoded = try JSONDecoder().decode(OpenClawChatSendResponse.self, from: res)
+            let decoded = try JSONDecoder().decode(CarapaceChatSendResponse.self, from: res)
             Self.logger.info("chat.send ok runId=\(decoded.runId, privacy: .public)")
             GatewayDiagnostics.log("chat.send ok runId=\(decoded.runId) status=\(decoded.status)")
             return decoded
         } catch is GatewayNodeSessionRequestError {
             Self.logger.info("chat.send skipped because the captured route changed before dispatch")
             GatewayDiagnostics.log("chat.send skipped before dispatch: route changed")
-            throw OpenClawChatTransportSendError.notDispatched
+            throw CarapaceChatTransportSendError.notDispatched
         } catch {
             Self.logger.error("chat.send failed \(error.localizedDescription, privacy: .public)")
             GatewayDiagnostics.log("chat.send failed error=\(error.localizedDescription)")

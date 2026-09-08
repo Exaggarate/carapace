@@ -55,7 +55,7 @@ describe("owned Telegram QA network cleanup", () => {
 
 const identity = requestIdentitySchema.parse({
   request_id: "a".repeat(64),
-  repository: { id: "123", full_name: "openclaw/openclaw" },
+  repository: { id: "123", full_name: "carapace/carapace" },
   pull_request: 42,
   candidate_sha: "b".repeat(40),
   scenario: telegramQaScenario,
@@ -206,7 +206,7 @@ describe("protected stationary workflow admission", () => {
         return new Response(null, { status: 302 });
       }
       const requestUrl = typeof url === "string" ? url : url instanceof URL ? url.href : url.url;
-      const route = requestUrl.split("openclaw/openclaw/")[1];
+      const route = requestUrl.split("carapace/carapace/")[1];
       if (route === "branches/qa-proof") {
         return Response.json({
           name: "qa-proof",
@@ -239,7 +239,7 @@ describe("protected stationary workflow admission", () => {
       throw new Error("Unexpected trust route");
     };
     const admission = assertRequestWorkflowRef({
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       ref: fault === "main" ? "refs/heads/main" : "refs/heads/qa-proof",
       sha,
       token: "synthetic-only",

@@ -99,8 +99,8 @@ vi.mock("../infra/private-temp-workspace.js", () => ({
   withTempWorkspace: async (_options: unknown, run: (value: { dir: string }) => unknown) =>
     await run({ dir: "/tmp/isolated" }),
 }));
-vi.mock("../infra/tmp-openclaw-dir.js", () => ({
-  resolvePreferredOpenClawTmpDir: () => "/tmp",
+vi.mock("../infra/tmp-carapace-dir.js", () => ({
+  resolvePreferredCarapaceTmpDir: () => "/tmp",
 }));
 
 // Static re-exports bypass Vitest's import hoisting and can load runtime before mocks.

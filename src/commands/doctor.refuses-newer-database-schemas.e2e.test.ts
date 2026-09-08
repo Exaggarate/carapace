@@ -2,18 +2,18 @@ import fs from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
+import { registerCarapaceAgentDatabase } from "../state/carapace-agent-db-registry.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   autoMigrateLegacyStateDir,
   confirm,
   createDoctorRuntime,
   mockDoctorConfigSnapshot,
   readConfigFileSnapshot,
-  resolveOpenClawPackageRoot,
+  resolveCarapacePackageRoot,
   runCommandWithTimeout,
   runGatewayUpdate,
 } from "./doctor.e2e-harness.js";
@@ -28,10 +28,10 @@ describe("doctor database schema preflight", () => {
   });
 
   it("refuses a newer shared database before offering an interactive update", async () => {
-    writeStateSchemaVersion(OPENCLAW_STATE_SCHEMA_VERSION + 1);
+    writeStateSchemaVersion(CARAPACE_STATE_SCHEMA_VERSION + 1);
     mockDoctorConfigSnapshot();
     mockInteractiveGitUpdate({ status: "ok" });
-    const statePath = resolveOpenClawStateSqlitePath(process.env);
+    const statePath = resolveCarapaceStateSqlitePath(process.env);
     const original = fs.readFileSync(statePath);
 
     await expect(doctorCommand(createDoctorRuntime())).rejects.toThrow(
@@ -73,9 +73,9 @@ describe("doctor database schema preflight", () => {
   });
 
   it("refuses before config repair flows when updates are disabled", async () => {
-    writeStateSchemaVersion(OPENCLAW_STATE_SCHEMA_VERSION + 1);
+    writeStateSchemaVersion(CARAPACE_STATE_SCHEMA_VERSION + 1);
     mockDoctorConfigSnapshot();
-    const statePath = resolveOpenClawStateSqlitePath(process.env);
+    const statePath = resolveCarapaceStateSqlitePath(process.env);
     const original = fs.readFileSync(statePath);
 
     await expect(doctorCommand(createDoctorRuntime(), { nonInteractive: true })).rejects.toThrow(
@@ -93,7 +93,7 @@ describe("doctor database schema preflight", () => {
     ["plain doctor", { nonInteractive: true }],
     ["doctor --fix", { nonInteractive: true, repair: true }],
   ])("diagnoses an unreadable shared state database for %s", async (_label, options) => {
-    const statePath = resolveOpenClawStateSqlitePath(process.env);
+    const statePath = resolveCarapaceStateSqlitePath(process.env);
     fs.mkdirSync(path.dirname(statePath), { recursive: true });
     fs.writeFileSync(statePath, "not a sqlite database");
     mockDoctorConfigSnapshot();
@@ -108,8 +108,8 @@ describe("doctor database schema preflight", () => {
     expect((failure as Error).message).toMatch(/file is not a database/iu);
     expect((failure as Error).message).toContain("left unchanged");
     expect((failure as Error).message).toContain("restore this file from a verified backup");
-    expect((failure as Error).message).toContain("Stop OpenClaw processes");
-    expect((failure as Error).message).not.toContain("openclaw doctor --fix");
+    expect((failure as Error).message).toContain("Stop Carapace processes");
+    expect((failure as Error).message).not.toContain("carapace doctor --fix");
     expect(fs.readFileSync(statePath, "utf8")).toBe("not a sqlite database");
     expect(autoMigrateLegacyStateDir).not.toHaveBeenCalled();
     expect(readConfigFileSnapshot).not.toHaveBeenCalled();
@@ -119,8 +119,8 @@ describe("doctor database schema preflight", () => {
 function mockInteractiveGitUpdate(
   outcome: { status: "ok" } | { status: "skipped"; reason: "already-current" },
 ): void {
-  delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
-  resolveOpenClawPackageRoot.mockResolvedValue("/repo");
+  delete process.env.CARAPACE_UPDATE_IN_PROGRESS;
+  resolveCarapacePackageRoot.mockResolvedValue("/repo");
   runCommandWithTimeout.mockResolvedValue({
     stdout: "/repo\n",
     stderr: "",
@@ -138,13 +138,13 @@ function mockInteractiveGitUpdate(
 }
 
 function writeStateSchemaVersion(version: number): void {
-  writeSchemaVersion(resolveOpenClawStateSqlitePath(process.env), version);
+  writeSchemaVersion(resolveCarapaceStateSqlitePath(process.env), version);
 }
 
 function writeNewerAgentSchema(): void {
-  const agentPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
-  writeSchemaVersion(agentPath, OPENCLAW_AGENT_SCHEMA_VERSION + 1);
-  registerOpenClawAgentDatabase({ agentId: "main", path: agentPath });
+  const agentPath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
+  writeSchemaVersion(agentPath, CARAPACE_AGENT_SCHEMA_VERSION + 1);
+  registerCarapaceAgentDatabase({ agentId: "main", path: agentPath });
 }
 
 function writeSchemaVersion(statePath: string, version: number): void {

@@ -1,5 +1,5 @@
 // Captures source config and write ownership for administrative plugin mutations.
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import {
   assertConfigWriteAllowedInCurrentMode,
   readConfigFileSnapshotForWrite,
@@ -18,7 +18,7 @@ function assertValidConfigSnapshot(
   const { snapshot, writeOptions } = prepared;
   if (!snapshot.valid) {
     throw new ManagedPluginLifecycleError(
-      "Config invalid; run `openclaw doctor --fix` before managing plugins.",
+      "Config invalid; run `carapace doctor --fix` before managing plugins.",
     );
   }
   const mutationWriteOptions = selectInstallMutationWriteOptions(writeOptions);

@@ -6,9 +6,9 @@ import { Command } from "commander";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import {
   defineBundledChannelEntry,
-  type OpenClawPluginApi,
+  type CarapacePluginApi,
 } from "../plugin-sdk/channel-entry-contract.js";
-import { loadOpenClawPluginCliRegistry, loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePluginCliRegistry, loadCarapacePlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   EMPTY_PLUGIN_SCHEMA,
@@ -86,8 +86,8 @@ describe("plugin loader CLI metadata", () => {
       };
       const registry =
         surface === "runtime"
-          ? loadOpenClawPlugins(options)
-          : await loadOpenClawPluginCliRegistry(options);
+          ? loadCarapacePlugins(options)
+          : await loadCarapacePluginCliRegistry(options);
       const enabled = policy === "explicit" || policy === "auto";
       const reason =
         policy === "auto"
@@ -134,7 +134,7 @@ describe("plugin loader CLI metadata", () => {
       filename: "index.cjs",
       body: 'module.exports = { id: "empty-scope", register(api) { api.registerCli(() => {}, { commands: ["empty-scope"] }); } };',
     });
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: { plugins: { load: { paths: [plugin.file] }, allow: [plugin.id] } },
       manifestRegistry: { plugins: [], diagnostics: [] },
       installRecords: {},
@@ -165,7 +165,7 @@ describe("plugin loader CLI metadata", () => {
       });
       const errors: string[] = [];
 
-      const registry = await loadOpenClawPluginCliRegistry({
+      const registry = await loadCarapacePluginCliRegistry({
         cache: false,
         logger: {
           info: () => {},
@@ -208,7 +208,7 @@ describe("plugin loader CLI metadata", () => {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -243,7 +243,7 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "packaged-cli-metadata",
-        openclaw: { extensions: ["./dist/index.js"] },
+        carapace: { extensions: ["./dist/index.js"] },
       }),
     );
     fs.writeFileSync(
@@ -258,7 +258,7 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
 };`,
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [pluginDir] },
@@ -297,8 +297,8 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
     });
 
     const warnings: string[] = [];
-    const registry = await loadOpenClawPluginCliRegistry({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const registry = await loadCarapacePluginCliRegistry({
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       logger: {
         info: () => {},
         warn: (msg: string) => warnings.push(msg),
@@ -340,7 +340,7 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
 };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "carapace.plugin.json"),
       JSON.stringify(
         {
           id: "Config-Cli",
@@ -359,7 +359,7 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -392,8 +392,8 @@ module.exports = { id: "packaged-cli-metadata", register() {} };`,
       configSchema: EMPTY_PLUGIN_SCHEMA,
       channels: ["cli-metadata-channel"],
       packageJson: {
-        name: "@openclaw/cli-metadata-channel",
-        openclaw: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
+        name: "@carapace/cli-metadata-channel",
+        carapace: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
       },
     });
     fs.writeFileSync(
@@ -453,7 +453,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [pluginDir] },
@@ -481,7 +481,7 @@ module.exports = {
       const fullMarker = path.join(pluginDir, "full-loaded.txt");
 
       fs.mkdirSync(pluginDir, { recursive: true });
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+      process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
 
       writePluginMetadata({
         dir: pluginDir,
@@ -489,8 +489,8 @@ module.exports = {
         configSchema: EMPTY_PLUGIN_SCHEMA,
         ...(kind === "channel" ? { channels: [id] } : {}),
         packageJson: {
-          name: `@openclaw/${id}`,
-          openclaw: { extensions: ["./index.cjs"] },
+          name: `@carapace/${id}`,
+          carapace: { extensions: ["./index.cjs"] },
         },
       });
       fs.writeFileSync(
@@ -505,7 +505,7 @@ module.exports = {
         "utf-8",
       );
 
-      const registry = await loadOpenClawPluginCliRegistry({
+      const registry = await loadCarapacePluginCliRegistry({
         config: {
           plugins: {
             allow: [id],
@@ -531,7 +531,7 @@ module.exports = {
     const cliMarker = path.join(pluginDir, "cli-loaded.txt");
 
     fs.mkdirSync(pluginDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
 
     writePluginMetadata({
       dir: pluginDir,
@@ -539,8 +539,8 @@ module.exports = {
       configSchema: EMPTY_PLUGIN_SCHEMA,
       channels: ["bundled-cli-channel"],
       packageJson: {
-        name: "@openclaw/bundled-cli-channel",
-        openclaw: { extensions: ["./index.cjs"] },
+        name: "@carapace/bundled-cli-channel",
+        carapace: { extensions: ["./index.cjs"] },
       },
     });
     fs.writeFileSync(
@@ -575,7 +575,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           allow: ["bundled-cli-channel"],
@@ -595,7 +595,7 @@ module.exports = {
     );
     expect(
       registry.cliRegistrars[0]?.descriptors[0]?.machineOutput?.({
-        argv: ["node", "openclaw", "bundled-cli-channel", "--machine"],
+        argv: ["node", "carapace", "bundled-cli-channel", "--machine"],
         stdoutIsTTY: true,
       }),
     ).toBe(true);
@@ -626,8 +626,8 @@ module.exports = {
       configSchema: EMPTY_PLUGIN_SCHEMA,
       channels: [id],
       packageJson: {
-        name: `@openclaw/${id}`,
-        openclaw: { extensions: ["./index.cjs"] },
+        name: `@carapace/${id}`,
+        carapace: { extensions: ["./index.cjs"] },
       },
     });
     fs.writeFileSync(
@@ -679,7 +679,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       ...(mode === "discovery" ? { activate: false } : {}),
       cache: false,
       config: {
@@ -711,8 +711,8 @@ module.exports = {
       configSchema: EMPTY_PLUGIN_SCHEMA,
       channels: ["force-runtime-cli-channel"],
       packageJson: {
-        name: "@openclaw/force-runtime-cli-channel",
-        openclaw: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
+        name: "@carapace/force-runtime-cli-channel",
+        carapace: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
       },
     });
     fs.writeFileSync(
@@ -765,7 +765,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       activate: false,
       cache: false,
       channelPluginLoadIntent: "full",
@@ -855,7 +855,7 @@ module.exports = {
 
     entry.register({
       registrationMode: "discovery",
-      runtime: {} as OpenClawPluginApi["runtime"],
+      runtime: {} as CarapacePluginApi["runtime"],
       registerChannel: (registration) => {
         const plugin = "plugin" in registration ? registration.plugin : registration;
         channels.push(plugin.id);
@@ -863,7 +863,7 @@ module.exports = {
       registerCli: (_register, options) => {
         commands.push(...(options?.descriptors ?? []).map((descriptor) => descriptor.name));
       },
-    } as OpenClawPluginApi);
+    } as CarapacePluginApi);
 
     expect(channels).toEqual(["bundled-discovery-cli"]);
     expect(fs.existsSync(runtimeMarker)).toBe(true);
@@ -899,7 +899,7 @@ module.exports = {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       cache: false,
       config: {
         plugins: {
@@ -961,8 +961,8 @@ module.exports = {
       },
     };
 
-    const metadataRegistry = await loadOpenClawPluginCliRegistry({ cache: false, config });
-    const fullRegistry = loadOpenClawPlugins({ cache: false, config });
+    const metadataRegistry = await loadCarapacePluginCliRegistry({ cache: false, config });
+    const fullRegistry = loadCarapacePlugins({ cache: false, config });
     for (const registry of [metadataRegistry, fullRegistry]) {
       expect(registry.cliRegistrars[0]?.commands).toEqual(["machine-output-cli", "additional-cli"]);
       expect(
@@ -970,11 +970,11 @@ module.exports = {
       ).toEqual(["machine-output-cli", "additional-cli", "nodes nested-machine-output"]);
       const resolver = registry.cliRegistrars[0]?.descriptors[0]?.machineOutput;
       expect(
-        resolver?.({ argv: ["node", "openclaw", "machine-output-cli"], stdoutIsTTY: false }),
+        resolver?.({ argv: ["node", "carapace", "machine-output-cli"], stdoutIsTTY: false }),
       ).toBe(true);
       expect(
         resolver?.({
-          argv: ["node", "openclaw", "machine-output-cli", "--machine"],
+          argv: ["node", "carapace", "machine-output-cli", "--machine"],
           stdoutIsTTY: true,
         }),
       ).toBe(true);
@@ -1006,7 +1006,7 @@ module.exports = {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -1058,13 +1058,13 @@ module.exports = {
     });
     if (manifestKind) {
       fs.writeFileSync(
-        path.join(plugin.dir, "openclaw.plugin.json"),
+        path.join(plugin.dir, "carapace.plugin.json"),
         JSON.stringify({ id, kind: "memory", configSchema: EMPTY_PLUGIN_SCHEMA }, null, 2),
         "utf-8",
       );
     }
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadCarapacePluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },

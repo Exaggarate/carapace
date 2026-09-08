@@ -6,11 +6,11 @@ import {
 } from "../../sessions/session-lifecycle-admission.js";
 import { runQueuedStoreWrite, type StoreWriterQueue } from "../../shared/store-writer-queue.js";
 import {
-  isIncognitoOpenClawAgentSqlitePath,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  isIncognitoCarapaceAgentSqlitePath,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import { resolveStateDir } from "../paths.js";
 import {
   hasRetainedSessionTranscriptArchives,
@@ -91,7 +91,7 @@ export async function inspectSqliteSessionHistoryDiskBudget(
   input: SessionHistoryDiskBudgetParams,
 ): Promise<{ diskBudget: SessionDiskBudgetSweepResult | null; wouldMutate: boolean }> {
   const params = { ...input, env: { ...(input.env ?? process.env) } };
-  params.env.OPENCLAW_STATE_DIR = resolveStateDir(params.env);
+  params.env.CARAPACE_STATE_DIR = resolveStateDir(params.env);
   const { highWaterBytes, maxDiskBytes } = params.maintenance;
   if (maxDiskBytes == null || highWaterBytes == null) {
     return { diskBudget: null, wouldMutate: false };
@@ -138,7 +138,7 @@ export async function inspectSqliteSessionHistoryDiskBudget(
 }
 
 function collectProtectedHistoricalSessionIds(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   preserveRecentMs?: number | null;
   storePath: string;
 }): Set<string> {
@@ -155,7 +155,7 @@ function collectProtectedHistoricalSessionIds(params: {
 }
 
 function collectRecentSessionHistoryIds(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   preserveRecentMs?: number | null;
 }): Set<string> {
   if (params.preserveRecentMs == null) {
@@ -191,7 +191,7 @@ function collectRecentSessionHistoryIds(params: {
 }
 
 function collectCandidateAdditionalProtection(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   preserveRecentMs?: number | null;
   sessionId: string;
   storePath: string;
@@ -205,7 +205,7 @@ function collectCandidateAdditionalProtection(params: {
 
 /** Session ids owned by in-flight work admissions, without live-reference protection. */
 export function collectAdmissionProtectedSessionIds(params: {
-  database: OpenClawAgentDatabase;
+  database: CarapaceAgentDatabase;
   storePath: string;
 }): Set<string> {
   const protectedSessionIds = new Set<string>();
@@ -256,12 +256,12 @@ export function collectAdmissionProtectedSessionIds(params: {
 }
 
 function readHistoricalSessionIds(params: {
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   preserveRecentMs?: number | null;
   storePath: string;
 }): string[] {
-  // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
-  const database = openOpenClawAgentDatabase(params.databaseOptions);
+  // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
+  const database = openCarapaceAgentDatabase(params.databaseOptions);
   const scope = { ...params, database };
   const protectedSessionIds = collectProtectedHistoricalSessionIds(scope);
   for (const sessionId of collectRecentSessionHistoryIds(scope)) {
@@ -288,7 +288,7 @@ const DISK_EVICTABLE_ARCHIVE_BATCH_SIZE = 64;
 
 function readDiskEvictableArchivedSessionBatch(params: {
   after?: { archivedAt: number; sessionKey: string };
-  databaseOptions: OpenClawAgentDatabaseOptions;
+  databaseOptions: CarapaceAgentDatabaseOptions;
   limit?: number;
   preserveRecentMs?: number | null;
 }): {
@@ -302,7 +302,7 @@ function readDiskEvictableArchivedSessionBatch(params: {
   while (candidates.length < limit) {
     // The agent DB cache may evict idle handles across the caller's async deletion/measurement.
     // Reopen for each bounded page instead of retaining a Kysely handle across those awaits.
-    const database = openOpenClawAgentDatabase(params.databaseOptions);
+    const database = openCarapaceAgentDatabase(params.databaseOptions);
     const db = getSessionKysely(database.db);
     let query = db
       .selectFrom("session_nodes")
@@ -378,7 +378,7 @@ export function kickSessionHistoryDiskBudgetMaintenance(input: {
 }): void {
   if (
     input.agentId &&
-    isIncognitoOpenClawAgentSqlitePath(input.storePath, {
+    isIncognitoCarapaceAgentSqlitePath(input.storePath, {
       agentId: input.agentId,
       env: input.env,
     })
@@ -414,7 +414,7 @@ export function kickSessionHistoryDiskBudgetMaintenance(input: {
     return;
   }
   const params = { ...input, env: { ...(input.env ?? process.env) } };
-  params.env.OPENCLAW_STATE_DIR = resolveStateDir(params.env);
+  params.env.CARAPACE_STATE_DIR = resolveStateDir(params.env);
   state.lastCheckAt = now;
   state.running = true;
   budgetKickStateByStore.set(params.storePath, state);
@@ -454,7 +454,7 @@ export async function enforceSqliteSessionHistoryDiskBudget(
 ): Promise<SessionDiskBudgetSweepResult | null> {
   // Measurement and queued cleanup must keep the invoking shared-state owner.
   const params = { ...input, env: { ...(input.env ?? process.env) } };
-  params.env.OPENCLAW_STATE_DIR = resolveStateDir(params.env);
+  params.env.CARAPACE_STATE_DIR = resolveStateDir(params.env);
   return await runQueuedStoreWrite({
     queues: SESSION_HISTORY_MAINTENANCE_QUEUES,
     storePath: params.storePath,
@@ -515,8 +515,8 @@ async function enforceSessionHistoryMaintenanceSerialized(
       identities: [sessionId],
       run: async () => {
         const plan = await runExclusiveSqliteSessionWrite(resolved, async () => {
-          // openclaw-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
-          const database = openOpenClawAgentDatabase(databaseOptions);
+          // carapace-agent-db.ts cache rule: LRU eviction closes idle handles across awaits.
+          const database = openCarapaceAgentDatabase(databaseOptions);
           const protectedBeforeArchive = collectCandidateAdditionalProtection({
             database,
             preserveRecentMs: params.maintenance.preserveRecentMs,
@@ -551,7 +551,7 @@ async function enforceSessionHistoryMaintenanceSerialized(
           const reclamationPlan = await runExclusiveSqliteSessionWrite(
             resolved,
             async () => {
-              const database = openOpenClawAgentDatabase(databaseOptions);
+              const database = openCarapaceAgentDatabase(databaseOptions);
               return createHistoryEvictionReclamationPlan({
                 databaseOptions,
                 diskBudget: { preserveRecentMs: params.maintenance.preserveRecentMs },

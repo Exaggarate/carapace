@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { coerceErrorMessage, stableStringify } from "@openclaw/normalization-core";
+import { coerceErrorMessage, stableStringify } from "@carapace/normalization-core";
 import { runPluginInstallCommand } from "../cli/plugins-install-command.js";
 import { runPluginUninstallCommand } from "../cli/plugins-uninstall-command.js";
 import { normalizeClawHubSha256Integrity } from "../infra/clawhub-integrity.js";
@@ -19,7 +19,7 @@ import {
   maintainClawPackageLifecycleLease,
   type MaintainedClawPackageLifecycleLease,
 } from "../state/claw-package-lifecycle-lease.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { findResumableIntroducedPluginRequirement } from "./package-resume.js";
 import { resolveClawPluginSetupRequirements } from "./package-setup-requirements.js";
 import {
@@ -150,7 +150,7 @@ async function probeClawPluginArtifact(
   }
   const probeExtensionsDir = await (
     deps.createProbeExtensionsDir ??
-    (async () => await mkdtemp(join(tmpdir(), "openclaw-claw-plugin-probe-")))
+    (async () => await mkdtemp(join(tmpdir(), "carapace-claw-plugin-probe-")))
   )();
   try {
     return await probePlugin({ ...request, extensionsDir: probeExtensionsDir });
@@ -277,7 +277,7 @@ export async function preflightClawPackage(
   };
 }
 
-type InstallClawPackagesOptions = OpenClawStateDatabaseOptions & {
+type InstallClawPackagesOptions = CarapaceStateDatabaseOptions & {
   deps?: PackageInstallerDeps;
   runtime?: RuntimeEnv;
   nowMs?: number;

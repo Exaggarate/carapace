@@ -1,6 +1,6 @@
 import type { Event } from "nostr-tools";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createNostrCursorStateWriter, createNostrDurableCursor } from "./nostr-cursor.js";
 

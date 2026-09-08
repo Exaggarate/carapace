@@ -1,21 +1,21 @@
-// ClawRouter provider catalog maps credential-scoped routes to OpenClaw transports.
-import type { ProviderRuntimeModel } from "openclaw/plugin-sdk/plugin-entry";
+// ClawRouter provider catalog maps credential-scoped routes to Carapace transports.
+import type { ProviderRuntimeModel } from "carapace/plugin-sdk/plugin-entry";
 import {
   getCachedLiveProviderModelRows,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   asFiniteNumberInRange,
   asOptionalRecord,
   asPositiveSafeInteger,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
-const CLAWROUTER_DEFAULT_BASE_URL = "https://clawrouter.openclaw.ai";
+const CLAWROUTER_DEFAULT_BASE_URL = "https://github.com/Exaggarate/carapace";
 
 const PROVIDER_ID = "clawrouter";
 const CATALOG_CACHE_TTL_MS = 60_000;

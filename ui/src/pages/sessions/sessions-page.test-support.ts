@@ -239,7 +239,7 @@ export async function createRenderedPage(
   } else {
     await context.sessions.refreshList(query);
   }
-  const page = document.createElement("openclaw-sessions-page") as TestSessionsPage;
+  const page = document.createElement("carapace-sessions-page") as TestSessionsPage;
   page.context = context;
   page.routeData = {
     expandedSessionKey,

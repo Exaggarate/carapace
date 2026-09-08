@@ -1,7 +1,7 @@
 // PDF tool helper tests cover page ranges, PDF input normalization, provider
 // capability checks, and assistant text coercion.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { withPluginMetadataSnapshotScope } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import {
@@ -140,7 +140,7 @@ describe("pdf-tool.helpers", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(coercePdfModelConfig(cfg)).toEqual({
       primary: ANTHROPIC_PDF_MODEL,
       fallbacks: ["google/gemini-2.5-pro"],

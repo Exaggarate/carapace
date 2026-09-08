@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@openclaw/net-policy/ip";
+import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@carapace/net-policy/ip";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import {
   listAgentEntries,
@@ -33,7 +33,7 @@ import {
 import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { materializeRuntimeConfig } from "./materialize.js";
 import { createModelPolicyRefValidator } from "./model-policy-ref.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, CarapaceConfig } from "./types.js";
 import { collectRawBundledChannelConfigIssues } from "./validation-channel-rules.js";
 import {
   collectUnsupportedSecretRefPolicyIssues,
@@ -42,10 +42,10 @@ import {
   withConfigIssuePath,
 } from "./validation-issues.js";
 import { isBuiltInModelProviderOverlayId } from "./zod-schema.core.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { CarapaceSchema } from "./zod-schema.js";
 import { McpServerNameSchema, NodeHostMcpServerNameSchema } from "./zod-schema.root-support.js";
 
-export function collectHeartbeatOwnerWarnings(config: OpenClawConfig): ConfigValidationIssue[] {
+export function collectHeartbeatOwnerWarnings(config: CarapaceConfig): ConfigValidationIssue[] {
   const agentEntries = listAgentEntries(config);
   // Match heartbeat enrollment so validation never warns for an owner the runner can use.
   const unresolved =
@@ -64,7 +64,7 @@ export function collectHeartbeatOwnerWarnings(config: OpenClawConfig): ConfigVal
     : [];
 }
 
-function materializeBundledModelProviderOverlays(config: OpenClawConfig): OpenClawConfig {
+function materializeBundledModelProviderOverlays(config: CarapaceConfig): CarapaceConfig {
   const providers = config.models?.providers;
   if (!providers) {
     return config;
@@ -161,7 +161,7 @@ function createIdentityAvatarIssue(
 }
 
 function validateIdentityAvatar(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
 ): ConfigValidationIssue[] {
   const agents = listAgentEntriesWithSource(config);
@@ -210,7 +210,7 @@ function validateIdentityAvatar(
   return issues;
 }
 
-function validateGatewayTailscaleBind(config: OpenClawConfig): ConfigValidationIssue[] {
+function validateGatewayTailscaleBind(config: CarapaceConfig): ConfigValidationIssue[] {
   const tailscaleMode = config.gateway?.tailscale?.mode ?? "off";
   if (tailscaleMode !== "serve" && tailscaleMode !== "funnel") {
     return [];
@@ -237,7 +237,7 @@ function validateGatewayTailscaleBind(config: OpenClawConfig): ConfigValidationI
   ];
 }
 
-function validateGatewayTailscaleAuth(config: OpenClawConfig): ConfigValidationIssue[] {
+function validateGatewayTailscaleAuth(config: CarapaceConfig): ConfigValidationIssue[] {
   const tailscaleMode = config.gateway?.tailscale?.mode ?? "off";
   if (!isUnsafeGatewayTailscaleNoAuth({ authMode: config.gateway?.auth?.mode, tailscaleMode })) {
     return [];
@@ -250,7 +250,7 @@ function validateGatewayTailscaleAuth(config: OpenClawConfig): ConfigValidationI
   ];
 }
 
-function collectModelPolicyAllowIssues(config: OpenClawConfig): ConfigValidationIssue[] {
+function collectModelPolicyAllowIssues(config: CarapaceConfig): ConfigValidationIssue[] {
   const issues: ConfigValidationIssue[] = [];
   const defaultModels = config.agents?.defaults?.models;
   const validateRefs = (
@@ -289,7 +289,7 @@ function collectModelPolicyAllowIssues(config: OpenClawConfig): ConfigValidation
 }
 
 function collectSandboxContainerEnvIssues(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   sourceRaw?: unknown,
 ): ConfigValidationIssue[] {
   const agents = listAgentEntriesWithSource(config);
@@ -351,7 +351,7 @@ function collectSandboxContainerEnvIssues(
             path: issuePath,
             message:
               `${backendName} sandbox backend requires portable environment names and single-line, non-NUL values because the secure env-file transport is line-delimited. ` +
-              `${remediation} SSH/OpenShell backends may keep multiline values. Run openclaw doctor to report the invalid path; manual remediation is required.`,
+              `${remediation} SSH/OpenShell backends may keep multiline values. Run carapace doctor to report the invalid path; manual remediation is required.`,
           },
           pathSegments,
         ),
@@ -375,9 +375,9 @@ export function validateConfigObjectRaw(
     env?: NodeJS.ProcessEnv;
     homedir?: () => string;
   },
-): { ok: true; config: OpenClawConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: CarapaceConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const legacyDefaultAgentId = isRecord(raw)
-    ? tryGetLegacyDefaultAgentId(raw as OpenClawConfig)
+    ? tryGetLegacyDefaultAgentId(raw as CarapaceConfig)
     : undefined;
   let normalizedRaw = stripPreservedLegacyRootKeysForValidation(raw, opts?.preservedLegacyRootKeys);
   let syntheticLegacyOwnership = false;
@@ -406,7 +406,7 @@ export function validateConfigObjectRaw(
     (issue) => !normalizedMcpServerNameIssueKeys.has(JSON.stringify([issue.path, issue.message])),
   );
   const policyIssues = collectUnsupportedSecretRefPolicyIssues(normalizedRaw);
-  const validated = OpenClawSchema.safeParse(normalizedRaw);
+  const validated = CarapaceSchema.safeParse(normalizedRaw);
   if (!validated.success || mcpServerNameIssues.length > 0) {
     const schemaIssues = validated.success
       ? mcpServerNameIssues
@@ -416,14 +416,14 @@ export function validateConfigObjectRaw(
       issues: mergeUnsupportedMutableSecretRefIssues(policyIssues, schemaIssues),
     };
   }
-  let parsedConfig = validated.data as OpenClawConfig;
+  let parsedConfig = validated.data as CarapaceConfig;
   if (syntheticLegacyOwnership && parsedConfig.agents) {
     const agents = { ...parsedConfig.agents };
     delete agents.ownership;
     parsedConfig = { ...parsedConfig, agents };
   }
   const validatedConfig = inheritLegacyDefaultAgentId(
-    raw as OpenClawConfig,
+    raw as CarapaceConfig,
     attachAgentListProjection(materializeBundledModelProviderOverlays(parsedConfig)),
   );
   const channelIssues =
@@ -478,7 +478,7 @@ export function validateConfigObject(
     manifestRegistry?: Pick<PluginMetadataSnapshot, "manifestRegistry">["manifestRegistry"];
     sourceRaw?: unknown;
   },
-): { ok: true; config: OpenClawConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: CarapaceConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const result = validateConfigObjectRaw(migratePersistedImplicitMainRoster(raw).config, opts);
   if (!result.ok) {
     return result;

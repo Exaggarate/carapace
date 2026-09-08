@@ -3,8 +3,8 @@ import {
   ArchiveLimitError,
   inspectTarArchive,
   type ExtractArchiveOptions,
-} from "openclaw/plugin-sdk/archive";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/archive";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
 import { DIR_FETCH_ARCHIVE_LIMITS } from "./dir-fetch-limits.js";
 
 export const DIR_FETCH_ARCHIVE_POLICY = {
@@ -20,7 +20,7 @@ export async function inspectDirFetchArchive(bytes: Buffer, timeoutMs: number): 
   // Authorize the admitted identities that extraction uses, never tar's display
   // spelling. The private input copy also keeps policy tied to these exact bytes.
   return await withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-dir-fetch-" },
+    { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-dir-fetch-" },
     async (workspace) => {
       const archivePath = await workspace.write("archive.tar.gz", bytes);
       const entries = await inspectTarArchive({

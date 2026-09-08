@@ -7,7 +7,7 @@ import {
 import { resolveDeliveryProvenCanonicalSessionKey } from "../config/sessions/store-entry.js";
 import { resolveAllAgentSessionStoreTargetsSync } from "../config/sessions/targets.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveSessionStoreAgentId,
   resolveStoredSessionKeyForAgentStore,
@@ -49,7 +49,7 @@ type CanonicalSessionRepairGroup = {
 };
 
 export function listCanonicalSessionStores(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): ExistingAgentDatabaseTarget[] {
   return projectExistingAgentDatabaseTargets(
@@ -59,7 +59,7 @@ export function listCanonicalSessionStores(params: {
 }
 
 function collectCanonicalSessionCandidateFacts(
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
   stores: readonly ExistingAgentDatabaseTarget[],
 ): CanonicalSessionCandidateFact[] {
   const inventory = stores.flatMap((target) =>
@@ -145,7 +145,7 @@ function collectCanonicalSessionCandidateFacts(
 
 export function resolveCanonicalSessionDestination(params: {
   canonicalKey: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   sourceAgentId?: string;
 }) {
@@ -168,7 +168,7 @@ export function resolveCanonicalSessionDestination(params: {
 
 function groupRepairCandidates(
   candidates: readonly CanonicalSessionCandidateFact[],
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
 ): CanonicalSessionRepairGroup[] {
   const byCanonicalKey = new Map<string, CanonicalSessionCandidateFact[]>();
   for (const candidate of candidates) {
@@ -211,7 +211,7 @@ function groupRepairCandidates(
 }
 
 export function collectCanonicalSessionRepairGroups(
-  params: { cfg: OpenClawConfig; env: NodeJS.ProcessEnv },
+  params: { cfg: CarapaceConfig; env: NodeJS.ProcessEnv },
   stores: readonly ExistingAgentDatabaseTarget[],
 ): CanonicalSessionRepairGroup[] {
   return groupRepairCandidates(collectCanonicalSessionCandidateFacts(params, stores), params);

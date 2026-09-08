@@ -1,6 +1,6 @@
 /** Tests Code Mode runtime and output limits. */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { QuickJS } from "quickjs-wasi";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";

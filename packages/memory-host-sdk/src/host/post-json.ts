@@ -1,5 +1,5 @@
 import { formatErrorMessage } from "./error-utils.js";
-import type { SsrFPolicy } from "./openclaw-runtime-network.js";
+import type { SsrFPolicy } from "./carapace-runtime-network.js";
 import { withRemoteHttpResponse } from "./remote-http.js";
 import {
   readMemoryHostResponseTextSnippet,

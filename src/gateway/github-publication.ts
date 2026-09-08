@@ -8,9 +8,9 @@ import {
 } from "../infra/kysely-sync.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { createPersonalGitHubPublicationCoordinator } from "./github-personal-publication.js";
 import {
   assertExpectedSharedGitHubPublisher,
@@ -124,7 +124,7 @@ export function createGitHubPublicationCoordinator(params: {
 
   const readById = (requestId: string): PublicationRow | undefined => {
     ensureSchema();
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     return readGitHubPublicationRequest(db, { requestId });
   };
 
@@ -159,7 +159,7 @@ export function createGitHubPublicationCoordinator(params: {
         idempotencyKey: request.idempotencyKey,
         hasRequest: () =>
           Boolean(
-            readGitHubPublicationRequest(openOpenClawStateDatabase().db, {
+            readGitHubPublicationRequest(openCarapaceStateDatabase().db, {
               sessionId: request.claim.sessionId,
               idempotencyKey: request.idempotencyKey,
             }),
@@ -183,7 +183,7 @@ export function createGitHubPublicationCoordinator(params: {
     });
     const now = Date.now();
     const requestId = randomUUID();
-    const row = runOpenClawStateWriteTransaction(
+    const row = runCarapaceStateWriteTransaction(
       ({ db }) => {
         assertStoredClaim(db, request);
         const stored = insertGitHubPublicationRequest(db, {
@@ -218,7 +218,7 @@ export function createGitHubPublicationCoordinator(params: {
     sourceIndexTree: string;
     workspaceTree: string;
   }): PublicationRow =>
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         assertStoredClaim(db, {
           claim: input.claim,

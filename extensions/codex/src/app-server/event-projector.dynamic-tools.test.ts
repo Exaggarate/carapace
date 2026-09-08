@@ -1,6 +1,6 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
 import { withDynamicToolTranscriptDetails } from "./dynamic-tool-response-state.js";
 import { recordCodexDynamicToolResult } from "./dynamic-tool-result-projection.js";
 import {
@@ -57,7 +57,7 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
     expect(protocolResponse).not.toHaveProperty("details");
   });
 
-  it("records dynamic OpenClaw tool calls in mirrored transcript snapshots", async () => {
+  it("records dynamic Carapace tool calls in mirrored transcript snapshots", async () => {
     const projector = await createProjector(undefined, {
       resolveDynamicToolResultContentSource: (toolName) =>
         toolName === "browser" ? "network" : undefined,
@@ -99,7 +99,7 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
     expect(toolResultMessage.toolCallId).toBe("call-browser-1");
     expect(toolResultMessage.toolName).toBe("browser");
     expect(toolResultMessage.isError).toBe(false);
-    expect(toolResultMessage["__openclaw"]).toMatchObject({ resultContentSource: "network" });
+    expect(toolResultMessage["__carapace"]).toMatchObject({ resultContentSource: "network" });
     const toolResultContent = requireRecord(
       requireArray(toolResultMessage.content, "tool result content")[0],
       "tool result content item",
@@ -111,7 +111,7 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
     expect(toolResultContent.toolCallId).toBe("call-browser-1");
     expect(toolResultContent.content).toBe("opened");
     expect(
-      requireRecord(result.messagesSnapshot[3], "final assistant")["__openclaw"],
+      requireRecord(result.messagesSnapshot[3], "final assistant")["__carapace"],
     ).toMatchObject({
       turnTainted: true,
     });
@@ -294,10 +294,10 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
     expect(toolResult).toMatchObject({
       role: "toolResult",
       toolName: "web_search",
-      __openclaw: { resultContentSource: "network" },
+      __carapace: { resultContentSource: "network" },
     });
     expect(
-      requireRecord(result.messagesSnapshot[3], "final assistant")["__openclaw"],
+      requireRecord(result.messagesSnapshot[3], "final assistant")["__carapace"],
     ).toMatchObject({
       turnTainted: true,
     });
@@ -474,11 +474,11 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
         arguments: { action: "send", text: "hello" },
         executionStarted: false,
         outcome: "failure",
-        failure: { error: "Unknown OpenClaw tool: message" },
+        failure: { error: "Unknown Carapace tool: message" },
       }),
       success: false,
       terminalType: "error",
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: message" }],
+      contentItems: [{ type: "inputText", text: "Unknown Carapace tool: message" }],
     });
 
     const result = projector.buildResult(buildEmptyToolTelemetry());

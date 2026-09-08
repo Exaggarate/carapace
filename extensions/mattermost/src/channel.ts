@@ -4,8 +4,8 @@ import {
   readStringArrayParam,
   readStringParam,
   withNormalizedTimestamp,
-} from "openclaw/plugin-sdk/channel-actions";
-import { adaptScopedAccountAccessor } from "openclaw/plugin-sdk/channel-config-helpers";
+} from "carapace/plugin-sdk/channel-actions";
+import { adaptScopedAccountAccessor } from "carapace/plugin-sdk/channel-config-helpers";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
@@ -13,33 +13,33 @@ import type {
   ChannelThreadingContext,
   ChannelThreadingToolContext,
   ChannelToolSend,
-} from "openclaw/plugin-sdk/channel-contract";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { identityEntryAuthenticationClassifier } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
-import { createLoggedPairingApprovalNotifier } from "openclaw/plugin-sdk/channel-pairing";
-import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channel-policy";
+} from "carapace/plugin-sdk/channel-contract";
+import { createChatChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import { identityEntryAuthenticationClassifier } from "carapace/plugin-sdk/channel-ingress-runtime";
+import { createChannelMessageAdapterFromOutbound } from "carapace/plugin-sdk/channel-outbound";
+import { createLoggedPairingApprovalNotifier } from "carapace/plugin-sdk/channel-pairing";
+import { createRestrictSendersChannelSecurity } from "carapace/plugin-sdk/channel-policy";
 import {
   attachChannelToResult,
   createAttachedChannelResultAdapter,
   type ChannelOutboundAdapter,
-} from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createChannelDirectoryAdapter } from "openclaw/plugin-sdk/directory-runtime";
-import { buildPassiveProbedChannelStatusSummary } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createChannelDirectoryAdapter } from "carapace/plugin-sdk/directory-runtime";
+import { buildPassiveProbedChannelStatusSummary } from "carapace/plugin-sdk/extension-shared";
 import {
   type MessagePresentation,
   resolveMessagePresentationButtonAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolvePayloadMediaUrls, sendTextMediaPayload } from "openclaw/plugin-sdk/reply-payload";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { resolvePayloadMediaUrls, sendTextMediaPayload } from "carapace/plugin-sdk/reply-payload";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/status-helpers";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "carapace/plugin-sdk/text-chunking";
 import { mattermostApprovalAuth } from "./approval-auth.js";
 import {
   chunkTextForOutbound,
@@ -286,7 +286,7 @@ function normalizeMattermostThreadId(value: string | number | undefined): string
 }
 
 function buildMattermostThreadingToolContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   context: ChannelThreadingContext;
   hasRepliedRef?: { value: boolean };
@@ -887,7 +887,7 @@ export const mattermostPlugin: ChannelPlugin<ResolvedMattermostAccount> = create
   pairing: {
     text: {
       idLabel: "mattermostUserId",
-      message: "OpenClaw: your access has been approved.",
+      message: "Carapace: your access has been approved.",
       normalizeAllowEntry: (entry) => normalizeAllowEntry(entry),
       notify: createLoggedPairingApprovalNotifier(
         ({ id }) => `[mattermost] User ${id} approved for pairing`,

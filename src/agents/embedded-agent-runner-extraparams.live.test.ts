@@ -1,8 +1,8 @@
 // Live verification for extra-params behavior against provider APIs.
-import type { Model } from "openclaw/plugin-sdk/llm";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
+import type { Model } from "carapace/plugin-sdk/llm";
+import { streamSimple } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { applyExtraParamsToAgent } from "./embedded-agent-runner/extra-params.js";
 import { isLiveTestEnabled } from "./live-test-helpers.js";
 import type { StreamFn } from "./runtime/index.js";
@@ -32,7 +32,7 @@ describeLive("embedded agent extra params (live)", () => {
       maxTokens: 128_000,
     };
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           models: {

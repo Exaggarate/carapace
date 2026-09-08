@@ -21,12 +21,12 @@ const originalExecPath = process.execPath;
 const originalArgv = process.argv;
 beforeEach(() => {
   process.execPath = "/fixture/bun";
-  process.argv = [process.execPath, path.resolve("/opt/openclaw/dist/index.js")];
+  process.argv = [process.execPath, path.resolve("/opt/carapace/dist/index.js")];
   access.mockImplementation(async (value: string) => {
     if (
       value === "/usr/bin/node" ||
       value === process.argv[1] ||
-      value === "/opt/openclaw-wrapper"
+      value === "/opt/carapace-wrapper"
     ) {
       return;
     }
@@ -77,11 +77,11 @@ describe.skipIf(process.platform === "win32")("node-host runtime install boundar
     await expect(install()).rejects.toThrow(/Node runtime probe failed.*\/usr\/bin\/node.*EACCES/s);
   });
 
-  it("uses OPENCLAW_WRAPPER even when native runtime probes cannot execute", async () => {
+  it("uses CARAPACE_WRAPPER even when native runtime probes cannot execute", async () => {
     runExec.mockRejectedValue(new Error("spawn EACCES"));
-    const plan = await install({ OPENCLAW_WRAPPER: "/opt/openclaw-wrapper" });
+    const plan = await install({ CARAPACE_WRAPPER: "/opt/carapace-wrapper" });
     expect(plan.programArguments).toEqual([
-      "/opt/openclaw-wrapper",
+      "/opt/carapace-wrapper",
       "node",
       "run",
       "--host",
@@ -93,8 +93,8 @@ describe.skipIf(process.platform === "win32")("node-host runtime install boundar
 
   it("rejects a node-host wrapper without execute permission", async () => {
     access.mockRejectedValue(new Error("EACCES"));
-    await expect(install({ OPENCLAW_WRAPPER: "/opt/openclaw-wrapper" })).rejects.toThrow(
-      "OPENCLAW_WRAPPER must point to an executable file",
+    await expect(install({ CARAPACE_WRAPPER: "/opt/carapace-wrapper" })).rejects.toThrow(
+      "CARAPACE_WRAPPER must point to an executable file",
     );
   });
 });

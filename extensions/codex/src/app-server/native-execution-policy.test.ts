@@ -1,5 +1,5 @@
 // Codex tests cover native execution policy plugin behavior.
-import type { getSessionEntry as getSessionEntryType } from "openclaw/plugin-sdk/session-store-runtime";
+import type { getSessionEntry as getSessionEntryType } from "carapace/plugin-sdk/session-store-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexNativeExecutionPolicy } from "./native-execution-policy.js";
 
@@ -7,8 +7,8 @@ const sessionStoreMocks = vi.hoisted(() => ({
   getSessionEntry: vi.fn<typeof getSessionEntryType>(),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/session-store-runtime")>();
+vi.mock("carapace/plugin-sdk/session-store-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/session-store-runtime")>();
   return {
     ...actual,
     getSessionEntry: sessionStoreMocks.getSessionEntry,
@@ -73,7 +73,7 @@ describe("resolveCodexNativeExecutionPolicy", () => {
       effectiveExecHost: "node",
       node: "worker-1",
       blockReason:
-        "OpenClaw exec host=node is active for this session. Codex app-server native execution cannot route shell, filesystem, MCP, or app-backed work through the selected OpenClaw node.",
+        "Carapace exec host=node is active for this session. Codex app-server native execution cannot route shell, filesystem, MCP, or app-backed work through the selected Carapace node.",
     });
   });
 

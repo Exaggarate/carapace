@@ -1,17 +1,17 @@
 ---
-summary: "CLI reference for `openclaw automations` (schedule and run background jobs)"
+summary: "CLI reference for `carapace automations` (schedule and run background jobs)"
 read_when:
   - You want scheduled jobs and wakeups
   - You are debugging automation execution and logs
 title: "Automations (cron)"
 ---
 
-# `openclaw automations`
+# `carapace automations`
 
-Manage automation jobs for the Gateway scheduler. `openclaw automations` is the primary command; `openclaw cron` remains an alias, and every subcommand below works with either spelling.
+Manage automation jobs for the Gateway scheduler. `carapace automations` is the primary command; `carapace cron` remains an alias, and every subcommand below works with either spelling.
 
 <Tip>
-Run `openclaw automations --help` for the full command surface. See [Automations](/automation/cron-jobs) for the conceptual guide.
+Run `carapace automations --help` for the full command surface. See [Automations](/automation/cron-jobs) for the conceptual guide.
 </Tip>
 
 <Note>
@@ -25,10 +25,10 @@ an explicit WebSocket URL; do not combine them. Connection options such as
 
 ## Create jobs quickly
 
-`openclaw automations create` is an alias for `openclaw automations add`. For new jobs, put the schedule first and the prompt second:
+`carapace automations create` is an alias for `carapace automations add`. For new jobs, put the schedule first and the prompt second:
 
 ```bash
-openclaw automations create "0 7 * * *" \
+carapace automations create "0 7 * * *" \
   "Summarize overnight updates." \
   --name "Morning brief" \
   --agent ops
@@ -37,16 +37,16 @@ openclaw automations create "0 7 * * *" \
 Use `--webhook <url>` when the job should POST the finished payload instead of delivering to a chat target:
 
 ```bash
-openclaw automations create "0 18 * * 1-5" \
+carapace automations create "0 18 * * 1-5" \
   "Summarize today's deploys as JSON." \
   --name "Deploy digest" \
-  --webhook "https://example.invalid/openclaw/cron"
+  --webhook "https://example.invalid/carapace/cron"
 ```
 
-Use `--command` for deterministic shell-style jobs that run inside the OpenClaw scheduler without starting an isolated agent/model run:
+Use `--command` for deterministic shell-style jobs that run inside the Carapace scheduler without starting an isolated agent/model run:
 
 ```bash
-openclaw automations create "*/15 * * * *" \
+carapace automations create "*/15 * * * *" \
   --name "Queue depth probe" \
   --command "scripts/check-queue.sh" \
   --command-cwd "/srv/app" \
@@ -85,11 +85,11 @@ Agent-turn jobs default to the creating conversation when session context is ava
 
 Removing an isolated automation stops future runs and cleans up its reusable session after active work stops. The JSON removal response includes `sessionCleanup: "pending"` while that cleanup is deferred. Run history is retained.
 
-If session cleanup fails, the error is logged. A removal with no active run also returns the cleanup error to the caller. Use `openclaw sessions list --json` to find the remaining session, then `openclaw sessions delete <key> --yes` to retry cleanup after the Gateway or worker recovers.
+If session cleanup fails, the error is logged. A removal with no active run also returns the cleanup error to the caller. Use `carapace sessions list --json` to find the remaining session, then `carapace sessions delete <key> --yes` to retry cleanup after the Gateway or worker recovers.
 
 ## Delivery
 
-`openclaw automations add`, `openclaw automations list`, and `openclaw automations show <job-id>` preview the resolved delivery route. For `channel: "last"`, the preview shows whether the route resolved from the main or current session, or will fail closed.
+`carapace automations add`, `carapace automations list`, and `carapace automations show <job-id>` preview the resolved delivery route. For `channel: "last"`, the preview shows whether the route resolved from the main or current session, or will fail closed.
 
 Provider-prefixed targets can disambiguate unresolved announce channels. For example, `to: "telegram:123"` selects Telegram when `delivery.channel` is omitted or `last`. Only prefixes advertised by the loaded plugin are provider selectors. If `delivery.channel` is explicit, the prefix must match that channel; `channel: "whatsapp"` with `to: "telegram:123"` is rejected. Service prefixes such as `imessage:` and `sms:` remain channel-owned target syntax.
 
@@ -119,7 +119,7 @@ Reminders created from an active chat preserve the live chat delivery target for
 Failure notifications resolve in this order:
 
 1. Route fields in the job's `failureAlert` object.
-2. `delivery.failureDestination` on the job, layered over the global destination fields on `cron.failureAlert` (`mode`, `channel`, `to`, `accountId`). The retired `cron.failureDestination` block is merged into them by `openclaw doctor --fix`.
+2. `delivery.failureDestination` on the job, layered over the global destination fields on `cron.failureAlert` (`mode`, `channel`, `to`, `accountId`). The retired `cron.failureDestination` block is merged into them by `carapace doctor --fix`.
 3. The job's primary announce target (when neither of the above resolves to a concrete destination).
 
 Jobs with one of those routes default to an execution-failure alert after 2 consecutive failures and a 1-hour cooldown. A per-job or global `failureAlert` object explicitly activates/tunes the policy even without an existing route. `failureAlert: false` disables execution and required-delivery failure alerts for the job, but not the auto-disable safety notification. Global `enabled: false` disables inheritance unless the job has its own `failureAlert` object. `delivery.bestEffort: true` suppresses inherited/default execution alerts, but not an explicit per-job policy.
@@ -136,7 +136,7 @@ Command jobs do not start an isolated agent turn. A zero exit code records `ok`;
 
 Required completion delivery is separate: `status: "ok"` with `completionStatus: "failed"` does not increment the execution streak or backoff. Delivery-failure alerts use a resolved alternate failure destination without the `after` threshold. Every alert, including the first delivery failure after an execution alert, honors the shared job/global `failureAlert.cooldownMs` (default 1 hour), never retrying the primary route that just failed.
 
-If an isolated run times out before the first model request, `openclaw automations show` and `openclaw automations runs` include a phase-specific error such as `setup timed out before runner start` or a stall message naming the last-known startup phase (for example `context-engine`). For CLI-backed providers, the pre-model watchdog stays active until the external CLI turn starts, so session lookup, hook, auth, prompt, and CLI setup stalls are reported as pre-model automation failures.
+If an isolated run times out before the first model request, `carapace automations show` and `carapace automations runs` include a phase-specific error such as `setup timed out before runner start` or a stall message naming the last-known startup phase (for example `context-engine`). For CLI-backed providers, the pre-model watchdog stays active until the external CLI turn starts, so session lookup, hook, auth, prompt, and CLI setup stalls are reported as pre-model automation failures.
 
 ## Scheduling
 
@@ -154,27 +154,27 @@ Configured intervals and stagger windows retain millisecond precision in human-r
 
 Recurring jobs use exponential retry backoff after consecutive errors: 30s, 1m, 5m, 15m, 60m. The schedule returns to normal after the next successful run.
 
-Skipped runs are tracked separately from execution errors. They do not affect retry backoff, but `openclaw automations edit <job-id> --failure-alert-include-skipped` can opt failure alerts into repeated skipped-run notifications.
+Skipped runs are tracked separately from execution errors. They do not affect retry backoff, but `carapace automations edit <job-id> --failure-alert-include-skipped` can opt failure alerts into repeated skipped-run notifications.
 
 For isolated jobs that target a local configured model provider (base URL on loopback, a private network, or `.local`), the scheduler runs a lightweight provider preflight before starting the agent turn: `api: "ollama"` providers are probed at `/api/tags`; other local OpenAI-compatible providers (`api: "openai-completions"`, e.g. vLLM, SGLang, LM Studio) are probed at `/models`. If the endpoint is unreachable, the run is recorded as `skipped` and retried on a later schedule; the reachability result is cached per endpoint for 5 minutes so many jobs against the same local server do not hammer it with repeated probes.
 
-Automation jobs, pending runtime state, and run history live in the shared SQLite state database. Legacy `jobs.json`, `<name>-state.json`, and `runs/*.jsonl` files are imported once and renamed with a `.migrated` suffix. After import, edit schedules with `openclaw automations add|edit|remove` instead of editing JSON files.
+Automation jobs, pending runtime state, and run history live in the shared SQLite state database. Legacy `jobs.json`, `<name>-state.json`, and `runs/*.jsonl` files are imported once and renamed with a `.migrated` suffix. After import, edit schedules with `carapace automations add|edit|remove` instead of editing JSON files.
 
 ### Manual runs
 
-Manually running a disabled job does not enable its schedule or create automatic retries. Use `openclaw automations enable <job-id>` to resume scheduled runs.
+Manually running a disabled job does not enable its schedule or create automatic retries. Use `carapace automations enable <job-id>` to resume scheduled runs.
 
-`openclaw automations run <job-id>` force-runs by default and returns as soon as the manual run is queued. Successful responses include `{ ok: true, enqueued: true, runId }`. Use the returned `runId` to inspect the later result:
+`carapace automations run <job-id>` force-runs by default and returns as soon as the manual run is queued. Successful responses include `{ ok: true, enqueued: true, runId }`. Use the returned `runId` to inspect the later result:
 
 ```bash
-openclaw automations run <job-id>
-openclaw automations runs <job-id> --run-id <run-id>
+carapace automations run <job-id>
+carapace automations runs <job-id> --run-id <run-id>
 ```
 
 Add `--wait` when a script should block until that exact queued run records a terminal status:
 
 ```bash
-openclaw automations run <job-id> --wait --wait-timeout 10m --poll-interval 2s
+carapace automations run <job-id> --wait --wait-timeout 10m --poll-interval 2s
 ```
 
 With `--wait`, the CLI calls `cron.run` first, then polls the durable `cron.runs` row for the returned `runId`; it does not reread mutable job delivery settings. JSON reports payload execution as `status` and whole-run completion as `completionStatus`. The command exits `0` only for `completionStatus: "succeeded"`; `failed`, `unknown`, execution errors/skips, a missing `runId`, and timeout expiry exit non-zero (default `10m`, polled every `2s` by default). `--poll-interval` must be greater than zero. Completed JSON output, including the run summary, is flushed before the command exits, so it can be piped to a JSON reader.
@@ -196,10 +196,10 @@ The automation `--model` is a **job primary**, not a chat-session `/model` overr
 - Configured model fallbacks still apply when the selected job model fails.
 - Per-job payload `fallbacks` replaces the configured fallback list when present.
 - An empty per-job fallback list (`--fallbacks ""` or `fallbacks: []` in the job payload/API) makes the run strict.
-- When a job has `--model` but no fallback list is configured, OpenClaw passes an explicit empty fallback override so the agent primary is not appended as a hidden retry target.
+- When a job has `--model` but no fallback list is configured, Carapace passes an explicit empty fallback override so the agent primary is not appended as a hidden retry target.
 - Local-provider preflight checks walk configured fallbacks before marking a run `skipped`.
 
-`openclaw doctor` reports jobs that already have `payload.model` set, including provider namespace counts and mismatches against `agents.defaults.model`. Use that check when auth, provider, or billing behavior looks different between live chat and scheduled jobs.
+`carapace doctor` reports jobs that already have `payload.model` set, including provider namespace counts and mismatches against `agents.defaults.model`. Use that check when auth, provider, or billing behavior looks different between live chat and scheduled jobs.
 
 ### Isolated automation model precedence
 
@@ -248,7 +248,7 @@ Retention behavior:
 ## Migrating older jobs
 
 <Note>
-If you have automation jobs from before the current delivery and store format, run `openclaw doctor --fix`. Doctor normalizes legacy job fields (`jobId`, `schedule.cron`, top-level delivery fields including legacy `threadId`, payload `provider` delivery aliases) and migrates `notify: true` webhook fallback jobs from the retired raw `cron.webhook` value to explicit webhook delivery before removing that config key. Jobs that already announce to a chat keep that delivery and get a completion webhook destination. Without a legacy webhook, the inert top-level `notify` marker is removed for jobs with no migration target (the existing delivery is preserved unchanged), so `doctor --fix` no longer keeps re-warning about them.
+If you have automation jobs from before the current delivery and store format, run `carapace doctor --fix`. Doctor normalizes legacy job fields (`jobId`, `schedule.cron`, top-level delivery fields including legacy `threadId`, payload `provider` delivery aliases) and migrates `notify: true` webhook fallback jobs from the retired raw `cron.webhook` value to explicit webhook delivery before removing that config key. Jobs that already announce to a chat keep that delivery and get a completion webhook destination. Without a legacy webhook, the inert top-level `notify` marker is removed for jobs with no migration target (the existing delivery is preserved unchanged), so `doctor --fix` no longer keeps re-warning about them.
 </Note>
 
 ## Common edits
@@ -256,37 +256,37 @@ If you have automation jobs from before the current delivery and store format, r
 Update delivery settings without changing the message:
 
 ```bash
-openclaw automations edit <job-id> --announce --channel telegram --to "123456789"
+carapace automations edit <job-id> --announce --channel telegram --to "123456789"
 ```
 
 Disable delivery for an isolated job:
 
 ```bash
-openclaw automations edit <job-id> --no-deliver
+carapace automations edit <job-id> --no-deliver
 ```
 
 Enable lightweight bootstrap context for an isolated job:
 
 ```bash
-openclaw automations edit <job-id> --light-context
+carapace automations edit <job-id> --light-context
 ```
 
 Announce to a specific channel:
 
 ```bash
-openclaw automations edit <job-id> --announce --channel slack --to "channel:C1234567890"
+carapace automations edit <job-id> --announce --channel slack --to "channel:C1234567890"
 ```
 
 Announce to a Telegram forum topic:
 
 ```bash
-openclaw automations edit <job-id> --announce --channel telegram --to "-1001234567890" --thread-id 42
+carapace automations edit <job-id> --announce --channel telegram --to "-1001234567890" --thread-id 42
 ```
 
 Create an isolated job with lightweight bootstrap context:
 
 ```bash
-openclaw automations create "0 7 * * *" \
+carapace automations create "0 7 * * *" \
   "Summarize overnight updates." \
   --name "Lightweight morning brief" \
   --session isolated \
@@ -299,7 +299,7 @@ openclaw automations create "0 7 * * *" \
 Create a command job with exact argv, cwd, env, stdin, and output limits:
 
 ```bash
-openclaw automations create "*/30 * * * *" \
+carapace automations create "*/30 * * * *" \
   --name "Position export" \
   --command-argv '["node","scripts/export-position.mjs"]' \
   --command-cwd "/srv/app" \
@@ -308,7 +308,7 @@ openclaw automations create "*/30 * * * *" \
   --timeout-seconds 120 \
   --no-output-timeout-seconds 30 \
   --output-max-bytes 65536 \
-  --webhook "https://example.invalid/openclaw/cron"
+  --webhook "https://example.invalid/carapace/cron"
 ```
 
 ## Common admin commands
@@ -316,32 +316,32 @@ openclaw automations create "*/30 * * * *" \
 Manual run and inspection:
 
 ```bash
-openclaw automations list
-openclaw automations list --agent ops
-openclaw automations get <job-id>
-openclaw automations get <job-id> --json
-openclaw automations show <job-id>
-openclaw automations run <job-id>
-openclaw automations run <job-id> --due
-openclaw automations run <job-id> --wait --wait-timeout 10m
-openclaw automations run <job-id> --wait --wait-timeout 10m --poll-interval 2s
-openclaw automations runs <job-id> --limit 50
-openclaw automations runs <job-id> --limit 50 --json
-openclaw automations runs <job-id> --run-id <run-id>
+carapace automations list
+carapace automations list --agent ops
+carapace automations get <job-id>
+carapace automations get <job-id> --json
+carapace automations show <job-id>
+carapace automations run <job-id>
+carapace automations run <job-id> --due
+carapace automations run <job-id> --wait --wait-timeout 10m
+carapace automations run <job-id> --wait --wait-timeout 10m --poll-interval 2s
+carapace automations runs <job-id> --limit 50
+carapace automations runs <job-id> --limit 50 --json
+carapace automations runs <job-id> --run-id <run-id>
 ```
 
 `automations runs` is the preferred spelling. `cron runs` and the leaf-local
 `--id <job-id>` form remain supported compatibility aliases.
 
-`openclaw automations list` shows enabled jobs across agents by default, including jobs whose owner cannot be resolved. Pass `--all` to include disabled jobs, or `--agent <id>` to filter by the effective normalized agent ID. Ownership resolves from the job's declared agent, its agent-scoped session key, then the configured system-agent owner. Unresolved jobs do not match an agent filter. The `cron list` alias has the same behavior.
+`carapace automations list` shows enabled jobs across agents by default, including jobs whose owner cannot be resolved. Pass `--all` to include disabled jobs, or `--agent <id>` to filter by the effective normalized agent ID. Ownership resolves from the job's declared agent, its agent-scoped session key, then the configured system-agent owner. Unresolved jobs do not match an agent filter. The `cron list` alias has the same behavior.
 
 The human-readable Agent ID column shows the effective owner. JSON list rows preserve the declared `agentId` and include `effectiveAgentId`, which is `null` when ownership is unresolved.
 
 Existing main-session jobs can still be renamed, disabled, or rescheduled after their agent stops being the system default. Creating a main-session job or explicitly setting its agent, session target, or payload kind revalidates the current main-session rules.
 
-An unresolved owner does not stop the scheduler: that job is skipped with an explanation in `state.lastError`, while other jobs continue. Run `openclaw doctor --fix` to repair unresolved multi-agent legacy ownership, set `agents.defaults.systemAgent.agentId`, or use `openclaw cron edit <job-id> --agent <id>` to repair the job. Sole-agent rosters and legacy default markers honored by the runtime already resolve an owner and need no owner migration. The explanation stays on the job; no agent run-history entry is created because no agent run starts.
+An unresolved owner does not stop the scheduler: that job is skipped with an explanation in `state.lastError`, while other jobs continue. Run `carapace doctor --fix` to repair unresolved multi-agent legacy ownership, set `agents.defaults.systemAgent.agentId`, or use `carapace cron edit <job-id> --agent <id>` to repair the job. Sole-agent rosters and legacy default markers honored by the runtime already resolve an owner and need no owner migration. The explanation stays on the job; no agent run-history entry is created because no agent run starts.
 
-`--json` always requests JSON output. Commands whose product is already a machine-readable result emit JSON results by default: `add`/`create`, `status`, `enable`, `disable`, `rm`/`remove`/`delete`, `run`, `edit`, `get`, and `runs`. They accept `--json` as the explicit machine-output spelling. `openclaw automations get <job-id>` returns the stored job JSON directly; use `automations show <job-id>` when you want the human-readable view with delivery-route preview.
+`--json` always requests JSON output. Commands whose product is already a machine-readable result emit JSON results by default: `add`/`create`, `status`, `enable`, `disable`, `rm`/`remove`/`delete`, `run`, `edit`, `get`, and `runs`. They accept `--json` as the explicit machine-output spelling. `carapace automations get <job-id>` returns the stored job JSON directly; use `automations show <job-id>` when you want the human-readable view with delivery-route preview.
 
 `list` and `show` use human-readable output by default and switch to JSON with `--json`. `scratch` reads raw scratch content by default and prints the scratch plus revision metadata with `--json`; scratch writes return the revision result as JSON by default and accept `--json` as the explicit machine-output spelling.
 
@@ -352,11 +352,11 @@ An unresolved owner does not stop the scheduler: that job is skipped with an exp
 Private per-job scratch (heartbeat checklists and similar monitor context):
 
 ```bash
-openclaw automations scratch <job-id>                  # print current scratch content
-openclaw automations scratch <job-id> --json           # scratch plus revision metadata
-openclaw automations scratch <job-id> --set "text"     # replace scratch with exact text
-openclaw automations scratch <job-id> --file notes.md  # replace scratch from a file (- for stdin)
-openclaw automations scratch <job-id> --unset          # remove the scratch row
+carapace automations scratch <job-id>                  # print current scratch content
+carapace automations scratch <job-id> --json           # scratch plus revision metadata
+carapace automations scratch <job-id> --set "text"     # replace scratch with exact text
+carapace automations scratch <job-id> --file notes.md  # replace scratch from a file (- for stdin)
+carapace automations scratch <job-id> --unset          # remove the scratch row
 ```
 
 Scratch is stored in the shared state database, capped at 256 KiB, and never included in `automations list`/`automations get`/`automations runs` output. Writes are compare-and-swap guarded against the revision read at command start; pass `--expected-revision <n>` to pin an explicit revision instead. See [Heartbeat](/gateway/heartbeat#monitor-scratch-optional) for how heartbeat monitors use scratch.
@@ -364,22 +364,22 @@ Scratch is stored in the shared state database, capped at 256 KiB, and never inc
 Agent and session retargeting:
 
 ```bash
-openclaw automations edit <job-id> --agent ops
-openclaw automations edit <job-id> --clear-agent
-openclaw automations edit <job-id> --session current
-openclaw automations edit <job-id> --session "session:daily-brief"
+carapace automations edit <job-id> --agent ops
+carapace automations edit <job-id> --clear-agent
+carapace automations edit <job-id> --session current
+carapace automations edit <job-id> --session "session:daily-brief"
 ```
 
-`openclaw automations add` warns when `--agent` is omitted on agent-turn jobs and falls back to the default agent (`main`). Pass `--agent <id>` at create time to pin a specific agent.
+`carapace automations add` warns when `--agent` is omitted on agent-turn jobs and falls back to the default agent (`main`). Pass `--agent <id>` at create time to pin a specific agent.
 
 Delivery tweaks:
 
 ```bash
-openclaw automations edit <job-id> --announce --channel slack --to "channel:C1234567890"
-openclaw automations edit <job-id> --webhook "https://example.invalid/openclaw/cron"
-openclaw automations edit <job-id> --best-effort-deliver
-openclaw automations edit <job-id> --no-best-effort-deliver
-openclaw automations edit <job-id> --no-deliver
+carapace automations edit <job-id> --announce --channel slack --to "channel:C1234567890"
+carapace automations edit <job-id> --webhook "https://example.invalid/carapace/cron"
+carapace automations edit <job-id> --best-effort-deliver
+carapace automations edit <job-id> --no-best-effort-deliver
+carapace automations edit <job-id> --no-deliver
 ```
 
 ## Related

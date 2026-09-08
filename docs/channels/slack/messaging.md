@@ -1,18 +1,18 @@
 ---
 summary: "Acknowledgement reactions, live streaming previews, and slash commands"
 read_when:
-  - Changing how OpenClaw acknowledges an inbound Slack message
+  - Changing how Carapace acknowledges an inbound Slack message
   - Configuring live progress cards or draft previews
   - Choosing between one slash command and native commands
 title: "Slack message behavior"
 sidebarTitle: "Message behavior"
 ---
 
-What a Slack conversation looks like while OpenClaw works, and how commands reach it.
+What a Slack conversation looks like while Carapace works, and how commands reach it.
 
 ## Ack reactions
 
-`ackReaction` sends an acknowledgement emoji while OpenClaw is processing an inbound message. `ackReactionScope` decides _when_ that emoji is actually sent.
+`ackReaction` sends an acknowledgement emoji while Carapace is processing an inbound message. `ackReactionScope` decides _when_ that emoji is actually sent.
 
 The acknowledgement stays static during work. With `messages.statusReactions.enabled: true`, actual failures briefly show an error reaction before restoring the acknowledgement. Tool calls, thinking, compaction, and long-running tools do not cycle or accumulate reactions, and successful completion does not flash a separate success emoji.
 
@@ -114,12 +114,12 @@ For streamed preambles, Slack waits for the first complete preamble before creat
 
 Compact progress always uses normal final delivery, including for media and errors. Other draft modes use normal delivery when the reply cannot safely replace the draft, including oversized text, split block payloads, custom outbound identity, or an edit failure.
 
-Both surfaces link the session with **Open in OpenClaw**, but only when that link can work: `gateway.publicOrigin` must be set (the externally reachable Gateway origin) and the Control UI must not be disabled via `gateway.controlUi.enabled: false`. Installations that leave `publicOrigin` unset — where there is no way to reach OpenClaw from Slack — get no link rather than a dead one. If the Control UI is served below a path prefix, also set `gateway.controlUi.basePath`.
+Both surfaces link the session with **Open in Carapace**, but only when that link can work: `gateway.publicOrigin` must be set (the externally reachable Gateway origin) and the Control UI must not be disabled via `gateway.controlUi.enabled: false`. Installations that leave `publicOrigin` unset — where there is no way to reach Carapace from Slack — get no link rather than a dead one. If the Control UI is served below a path prefix, also set `gateway.controlUi.basePath`.
 
 - A reply thread must be available for native text streaming and Slack session status to appear. Thread selection still follows `replyToMode`.
 - Channel, group-chat, and top-level DM roots can still use the normal draft preview when native streaming is unavailable or no reply thread exists.
-- Top-level Slack DMs stay off-thread by default, so they do not show Slack's thread-style native stream/status preview; OpenClaw posts and edits a draft preview in the DM instead.
-- Custom outbound username/icon settings keep portable previews enabled. OpenClaw keeps the preview or session card app-authored and delivers the customized final separately. Slack does not allow impersonated messages to be deleted.
+- Top-level Slack DMs stay off-thread by default, so they do not show Slack's thread-style native stream/status preview; Carapace posts and edits a draft preview in the DM instead.
+- Custom outbound username/icon settings keep portable previews enabled. Carapace keeps the preview or session card app-authored and delivers the customized final separately. Slack does not allow impersonated messages to be deleted.
 - Media and non-text payloads fall back to normal delivery.
 - Outside compact progress, media/error finals cancel pending preview edits; eligible text/block finals flush only when they can edit the preview in place.
 - Native streamed replies wait for Slack's acknowledgement before delivery is marked successful. Each complete reply block flushes separately, including short blocks; routine progress updates still coalesce. A later progress-card finalization failure does not discard an already acknowledged reply.
@@ -163,11 +163,11 @@ Legacy keys:
 - `channels.slack.streamMode` (`replace | status_final | append`) is a legacy alias for `channels.slack.streaming.mode`.
 - boolean `channels.slack.streaming` is a legacy alias for `channels.slack.streaming.mode` and `channels.slack.streaming.nativeTransport`.
 - top-level `channels.slack.chunkMode` and `channels.slack.nativeStreaming` are legacy aliases for `channels.slack.streaming.chunkMode` and `channels.slack.streaming.nativeTransport`.
-- Legacy aliases are not read at runtime; run `openclaw doctor --fix` to rewrite persisted Slack streaming config to the canonical keys.
+- Legacy aliases are not read at runtime; run `carapace doctor --fix` to rewrite persisted Slack streaming config to the canonical keys.
 
 ## Typing reaction fallback
 
-`typingReaction` adds a temporary reaction to the inbound Slack message while OpenClaw is processing a reply, then removes it when the run finishes. This is most useful outside of thread replies, which use Slack's `processing` session status.
+`typingReaction` adds a temporary reaction to the inbound Slack message while Carapace is processing a reply, then removes it when the run finishes. This is most useful outside of thread replies, which use Slack's `processing` session status.
 
 Resolution order:
 
@@ -184,12 +184,12 @@ Notes:
 Slash commands appear in Slack as either a single configured command or multiple native commands. Configure `channels.slack.slashCommand` to change command defaults:
 
 - `enabled: false`
-- `name: "openclaw"`
+- `name: "carapace"`
 - `sessionPrefix: "slack:slash"`
 - `ephemeral: true`
 
 ```txt
-/openclaw /help
+/carapace /help
 ```
 
 Native commands require [additional manifest settings](/channels/slack/manifest-and-scopes#additional-manifest-settings) in your Slack app and are enabled with `channels.slack.commands.native: true` or `commands.native: true` in global configurations instead.

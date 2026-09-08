@@ -5,17 +5,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
 import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { writeSessionEntry } from "../config/sessions/session-accessor.sqlite-entry-store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   deleteSessionGroup,
   ensureSessionGroupRegistered,
@@ -32,17 +32,17 @@ import { SessionMutationAuthorizationChangedError } from "./session-mutation-aut
 describe("session groups catalog", () => {
   let root: string;
   let env: NodeJS.ProcessEnv;
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
 
   beforeEach(async () => {
     const tempRoot = await fs.realpath(os.tmpdir());
-    root = await fs.mkdtemp(path.join(tempRoot, "openclaw-session-groups-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    root = await fs.mkdtemp(path.join(tempRoot, "carapace-session-groups-"));
+    env = { ...process.env, CARAPACE_STATE_DIR: root };
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -149,8 +149,8 @@ describe("session groups catalog", () => {
   });
 
   it("keeps catalog reads and reorders schema-read-only until defaults are used", async () => {
-    const databasePath = openOpenClawStateDatabase({ env }).path;
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = openCarapaceStateDatabase({ env }).path;
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const legacy = new DatabaseSync(databasePath);
     legacy.exec("ALTER TABLE session_groups DROP COLUMN cwd;");
@@ -160,7 +160,7 @@ describe("session groups catalog", () => {
       .run("Client", 0, Date.now());
     legacy.close();
 
-    const beforeFeatureUse = openOpenClawStateDatabase({ env })
+    const beforeFeatureUse = openCarapaceStateDatabase({ env })
       .db.prepare("PRAGMA table_info(session_groups)")
       .all() as Array<{ name: string }>;
     expect(beforeFeatureUse.map((column) => column.name)).not.toEqual(
@@ -171,7 +171,7 @@ describe("session groups catalog", () => {
     expect(putSessionGroups({ cfg, names: ["Client"], env })).toEqual([
       { name: "Client", position: 0 },
     ]);
-    const afterCatalogUse = openOpenClawStateDatabase({ env })
+    const afterCatalogUse = openCarapaceStateDatabase({ env })
       .db.prepare("PRAGMA table_info(session_groups)")
       .all() as Array<{ name: string }>;
     expect(afterCatalogUse.map((column) => column.name)).not.toEqual(
@@ -181,7 +181,7 @@ describe("session groups catalog", () => {
     expect(listSessionGroupDefaults(env)).toEqual([{ name: "Client" }]);
     await renameSessionGroup({ cfg, name: "Client", to: "Customer", env });
     expect(listSessionGroupDefaults(env)).toEqual([{ name: "Customer" }]);
-    const afterDefaultsReadAndRename = openOpenClawStateDatabase({ env })
+    const afterDefaultsReadAndRename = openCarapaceStateDatabase({ env })
       .db.prepare("PRAGMA table_info(session_groups)")
       .all() as Array<{ dflt_value: unknown; name: string; notnull: number; type: string }>;
     expect(afterDefaultsReadAndRename.map((column) => column.name)).not.toEqual(
@@ -190,7 +190,7 @@ describe("session groups catalog", () => {
     expect(
       updateSessionGroupDefaults("Customer", { cwd: "/repos/customer", worktree: true }, env),
     ).toContainEqual({ name: "Customer", cwd: "/repos/customer", worktree: true });
-    const columns = openOpenClawStateDatabase({ env })
+    const columns = openCarapaceStateDatabase({ env })
       .db.prepare("PRAGMA table_info(session_groups)")
       .all() as Array<{ dflt_value: unknown; name: string; notnull: number; type: string }>;
     expect(columns.filter((column) => column.name === "cwd" || column.name === "worktree")).toEqual(
@@ -258,8 +258,8 @@ describe("session groups catalog", () => {
   });
 
   it("keeps a stale defaults update schema-free on a legacy database", () => {
-    const databasePath = openOpenClawStateDatabase({ env }).path;
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = openCarapaceStateDatabase({ env }).path;
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const legacy = new DatabaseSync(databasePath);
     legacy.exec("ALTER TABLE session_groups DROP COLUMN cwd;");
@@ -269,7 +269,7 @@ describe("session groups catalog", () => {
     expect(
       updateSessionGroupDefaults("Missing", { cwd: "/repos/missing", worktree: true }, env),
     ).toBeNull();
-    const columns = openOpenClawStateDatabase({ env })
+    const columns = openCarapaceStateDatabase({ env })
       .db.prepare("PRAGMA table_info(session_groups)")
       .all() as Array<{ name: string }>;
     expect(columns.map((column) => column.name)).not.toEqual(
@@ -358,7 +358,7 @@ describe("session groups catalog", () => {
   )(
     "keeps group state coherent when $action stops in $stopAgent (target exists: $targetExists)",
     async ({ action, targetExists, stopAgent }) => {
-      const groupCfg: OpenClawConfig = {
+      const groupCfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           defaults: { systemAgent: { agentId: "main" } },
@@ -540,7 +540,7 @@ describe("session groups catalog", () => {
   });
 
   it("retains a group when a member is assigned after its store was swept", async () => {
-    const groupCfg: OpenClawConfig = {
+    const groupCfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         defaults: { systemAgent: { agentId: "main" } },
@@ -579,7 +579,7 @@ describe("session groups catalog", () => {
             loadSessionEntry({ agentId: "main", storePath: mainStore, sessionKey: mainKey })
               ?.category,
           ).toBe("New");
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             (database) => {
               writeSessionEntry(database, lateKey, {
                 sessionId: "late",

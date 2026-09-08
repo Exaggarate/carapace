@@ -1,7 +1,7 @@
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { ExecApprovalDecision } from "openclaw/plugin-sdk/approval-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import type { ExecApprovalDecision } from "carapace/plugin-sdk/approval-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { msTeamsApprovalControls } from "./approval-card-actions.js";
 import { maybeHandleMSTeamsApprovalCardSubmit } from "./approval-card-submit.js";
@@ -11,7 +11,7 @@ import type { MSTeamsTurnContext } from "./sdk-types.js";
 
 const resolveApprovalOverGateway = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway,
 }));
 
@@ -77,7 +77,7 @@ function createContext(params: {
   value?: unknown;
 }): MSTeamsTurnContext {
   const approvalValue = {
-    openclawAction: "approval",
+    carapaceAction: "approval",
     ...(params.token ? { token: params.token } : {}),
   };
   return {

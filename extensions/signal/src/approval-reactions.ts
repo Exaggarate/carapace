@@ -1,6 +1,6 @@
 // Signal plugin module implements approval reactions behavior.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   addApprovalReactionHintToText,
   createApprovalReactionTargetStore,
@@ -10,21 +10,21 @@ import {
   listApprovalReactionBindings,
   resolveTypedApprovalReactionTarget,
   type ApprovalReactionTargetRecord,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
+} from "carapace/plugin-sdk/approval-reaction-runtime";
 import {
   getExecApprovalReplyMetadata,
   type ExecApprovalReplyDecision,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeSurface } from "openclaw/plugin-sdk/lazy-runtime";
-import { createPluginStateErrorReporter } from "openclaw/plugin-sdk/plugin-state-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/approval-reply-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeSurface } from "carapace/plugin-sdk/lazy-runtime";
+import { createPluginStateErrorReporter } from "carapace/plugin-sdk/plugin-state-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/routing";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveSignalDeliveredConversationKey } from "./aliases.js";
 import { getSignalApprovalApprovers, signalApprovalAuth } from "./approval-auth.js";
 import {
@@ -67,7 +67,7 @@ type SignalApprovalDeliveryResult = {
 };
 
 const loadResolveApprovalOverGateway = createLazyRuntimeSurface(
-  () => import("openclaw/plugin-sdk/approval-gateway-runtime"),
+  () => import("carapace/plugin-sdk/approval-gateway-runtime"),
   (runtime) => runtime.resolveApprovalOverGateway,
 );
 
@@ -186,7 +186,7 @@ function readPersistedTarget(target: unknown): SignalApprovalReactionTarget | nu
 }
 
 export function hasSignalApprovalReactionApprovers(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   return getSignalApprovalApprovers(params).length > 0;
@@ -269,7 +269,7 @@ function formatSignalApprovalTerminalTruth(approval: ApprovalResolveResult["appr
 }
 
 export function addSignalApprovalReactionHintToStructuredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   to: string;
   payload: ReplyPayload;
@@ -337,7 +337,7 @@ function listDeliveredSignalMessageIdsWithVisibleHint(params: {
 }
 
 export function registerSignalApprovalReactionTargetForDeliveredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: SignalApprovalDeliveryTarget;
   payload: ReplyPayload;
   results: readonly SignalApprovalDeliveryResult[];
@@ -473,7 +473,7 @@ export async function resolveSignalApprovalReactionTargetWithPersistence(params:
 }
 
 export async function maybeResolveSignalApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   conversationKey: string;
   messageId: string;

@@ -1,8 +1,8 @@
-// Fast `openclaw status --json` scan policy.
+// Fast `carapace status --json` scan policy.
 // Skips channel tables and most network/update work unless `--all` asks for fuller evidence.
 
 import { GENERATED_BUNDLED_CHANNEL_CONFIG_METADATA } from "../config/bundled-channel-config-metadata.generated.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import { isRecord } from "../utils.js";
@@ -34,7 +34,7 @@ function hasMeaningfulStatusJsonChannelConfig(value: unknown): boolean {
   return Object.keys(value).some((key) => key !== "enabled");
 }
 
-function hasExplicitStatusJsonChannelConfig(cfg: OpenClawConfig): boolean {
+function hasExplicitStatusJsonChannelConfig(cfg: CarapaceConfig): boolean {
   if (!isRecord(cfg.channels)) {
     return false;
   }
@@ -65,7 +65,7 @@ function hasStatusJsonChannelEnvConfig(env: NodeJS.ProcessEnv = process.env): bo
   return false;
 }
 
-function hasPotentialConfiguredChannelsForStatusJson(cfg: OpenClawConfig): boolean {
+function hasPotentialConfiguredChannelsForStatusJson(cfg: CarapaceConfig): boolean {
   return hasExplicitStatusJsonChannelConfig(cfg) || hasStatusJsonChannelEnvConfig();
 }
 

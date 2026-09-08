@@ -1,5 +1,5 @@
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { truncateUtf16Safe } from "../utils.js";
 import { createTranscriptsStore, stopTranscriptCapture } from "./capture-operations.js";
@@ -57,7 +57,7 @@ async function waitForPendingAutoStartsToSettle(pending: Set<Promise<void>>): Pr
 /** Own configured captures independently of the room's provider connection. */
 export function createTranscriptsAutoStartService(
   ctx: TranscriptsRuntimeContext,
-  getConfig: () => OpenClawConfig | undefined = () => ctx.config,
+  getConfig: () => CarapaceConfig | undefined = () => ctx.config,
 ): {
   start: () => void;
   stop: () => Promise<void>;
@@ -146,7 +146,7 @@ export function createTranscriptsAutoStartService(
       // Log diagnostics only, never the tool content or captured meeting notes.
       if (typeof details.summaryExportError === "string") {
         warnings.push(
-          `summary saved; export failed intendedSummaryPath=${formatAutoStopDiagnostic(details.intendedSummaryPath)}: ${formatAutoStopDiagnostic(details.summaryExportError)}. Correct the export destination, then run openclaw transcripts path <session> or openclaw transcripts show <session>.`,
+          `summary saved; export failed intendedSummaryPath=${formatAutoStopDiagnostic(details.intendedSummaryPath)}: ${formatAutoStopDiagnostic(details.summaryExportError)}. Correct the export destination, then run carapace transcripts path <session> or carapace transcripts show <session>.`,
         );
       }
       if (typeof details.providerStopError === "string") {

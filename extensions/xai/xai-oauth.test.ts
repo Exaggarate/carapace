@@ -1,13 +1,13 @@
 // Xai tests cover xai oauth plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { ProviderAuthContext } from "openclaw/plugin-sdk/plugin-entry";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { ProviderAuthContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   createRuntimeEnv,
   createTestWizardPrompter,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { OAuthCredential } from "openclaw/plugin-sdk/provider-auth";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { withProxyFixture } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { OAuthCredential } from "carapace/plugin-sdk/provider-auth";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { withProxyFixture } from "carapace/plugin-sdk/test-env";
 import { fetch as undiciFetch, MockAgent, type Dispatcher } from "undici";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { applyXaiConfig } from "./onboard.js";
@@ -376,7 +376,7 @@ describe("xAI OAuth", () => {
   });
 
   it("refreshes with the cached token endpoint and preserves refresh fallback", async () => {
-    vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+    vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
     const fetchImpl = vi.fn<typeof fetch>(async (_url, init) => {
       expect(init?.method).toBe("POST");
       expect(typeof init?.body).toBe("string");
@@ -385,7 +385,7 @@ describe("xAI OAuth", () => {
       expect(body).toContain(`client_id=${encodeURIComponent(XAI_OAUTH_CLIENT_ID)}`);
       expect(body).toContain("refresh_token=refresh-1");
       const headers = new Headers(init?.headers ?? {});
-      expect(headers.get("user-agent")).toBe("openclaw/2026.3.22");
+      expect(headers.get("user-agent")).toBe("carapace/2026.3.22");
       return jsonResponse({
         access_token: "access-2",
         expires_in: 120,
@@ -607,7 +607,7 @@ describe("xAI OAuth", () => {
   it.each(["fresh", "subscription", "api"] as const)(
     "logs in with device code and refreshes the %s catalog",
     async (setup) => {
-      vi.stubEnv("OPENCLAW_VERSION", "2026.3.22");
+      vi.stubEnv("CARAPACE_VERSION", "2026.3.22");
       const progress = {
         update: vi.fn(),
         stop: vi.fn(),

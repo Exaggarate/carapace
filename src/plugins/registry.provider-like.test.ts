@@ -1,12 +1,12 @@
 /** Verifies provider-like plugin registry entries across capability families. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { registryContainsRuntimePluginIds } from "./active-runtime-registry.js";
 import { createPluginRecord } from "./loader-records.js";
 import { createPluginRegistry } from "./registry.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   ProviderPluginCatalog,
   UnifiedModelCatalogProviderContext,
 } from "./types.js";
@@ -194,7 +194,7 @@ const reservationCases = [
 ] as const;
 
 function registerReservedProvider(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   family: (typeof reservationCases)[number]["family"],
   id: string,
   run: ProviderPluginCatalog["run"],
@@ -317,7 +317,7 @@ describe.each(reservationCases)(
         const alpha = createCatalogOwner(builder, "alpha");
         const beta = createCatalogOwner(builder, "beta");
         const run = vi.fn(async () => null);
-        const explicit = (api: OpenClawPluginApi) =>
+        const explicit = (api: CarapacePluginApi) =>
           api.registerModelCatalogProvider({ provider: "catalog-provider", kinds: ["text"] });
         if (order === "automatic-first") {
           registerReservedProvider(alpha.api, family, "catalog-provider", run);

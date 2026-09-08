@@ -1,5 +1,5 @@
 // Telegram plugin module implements inbound event delivery behavior.
-import { createInboundEventDeliveryCorrelation } from "openclaw/plugin-sdk/inbound-event-delivery";
+import { createInboundEventDeliveryCorrelation } from "carapace/plugin-sdk/inbound-event-delivery";
 import { stripTelegramInternalPrefixes } from "./targets.js";
 
 function normalizeTelegramDeliveryTarget(value: string): string {

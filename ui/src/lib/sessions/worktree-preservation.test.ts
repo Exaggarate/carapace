@@ -10,7 +10,7 @@ describe("preserved session worktree presentation", () => {
     ["owner-mismatch", "owned elsewhere"],
     ["busy", "live run or cleanup active"],
     ["foreign-lock", "foreign Git lock"],
-    ["snapshot-failed", "OpenClaw could not create a safety snapshot"],
+    ["snapshot-failed", "Carapace could not create a safety snapshot"],
     ["cleanup-failed", "cleanup failed"],
   ] satisfies Array<[WorktreePreservationReason, string]>)(
     "describes %s accurately",
@@ -18,7 +18,7 @@ describe("preserved session worktree presentation", () => {
       expect(
         formatPreservedWorktreeConfirmation({
           id: "wt-reason",
-          branch: "openclaw/reason",
+          branch: "carapace/reason",
           path: "/worktrees/reason",
           reason,
         }),
@@ -29,22 +29,22 @@ describe("preserved session worktree presentation", () => {
   it("formats single and batch guidance with the preserved reasons", () => {
     const busy = {
       id: "wt-busy",
-      branch: "openclaw/busy-task",
+      branch: "carapace/busy-task",
       path: "/worktrees/busy-task",
       reason: "busy" as const,
     };
     const snapshot = {
       id: "wt-snapshot",
-      branch: "openclaw/snapshot-task",
+      branch: "carapace/snapshot-task",
       path: "/worktrees/snapshot-task",
       reason: "snapshot-failed" as const,
     };
 
     expect(formatPreservedWorktreeConfirmation(snapshot)).toBe(
-      "Session needs attention: openclaw/snapshot-task — OpenClaw could not create a safety snapshot. Remove?",
+      "Session needs attention: carapace/snapshot-task — Carapace could not create a safety snapshot. Remove?",
     );
     expect(formatPreservedWorktreesNotice([busy, snapshot])).toBe(
-      "Managed Worktrees:\nopenclaw/busy-task — live run or cleanup active\nopenclaw/snapshot-task — OpenClaw could not create a safety snapshot",
+      "Managed Worktrees:\ncarapace/busy-task — live run or cleanup active\ncarapace/snapshot-task — Carapace could not create a safety snapshot",
     );
   });
 });

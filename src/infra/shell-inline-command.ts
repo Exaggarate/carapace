@@ -1,5 +1,5 @@
 // Resolves shell inline-command flags across shell families.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 
 // Shell inline-command parsing recognizes POSIX, cmd, and PowerShell command
 // flags so approval surfaces can distinguish wrapper argv from executed text.

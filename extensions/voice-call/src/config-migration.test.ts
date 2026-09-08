@@ -9,7 +9,7 @@ describe("voice-call config migration", () => {
     const packageJson: unknown = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8"),
     );
-    expect(packageJson).toMatchObject({ openclaw: { setupEntry: "./setup-api.ts" } });
+    expect(packageJson).toMatchObject({ carapace: { setupEntry: "./setup-api.ts" } });
   });
 
   it("maps deprecated provider and twilio.from fields into canonical config", () => {

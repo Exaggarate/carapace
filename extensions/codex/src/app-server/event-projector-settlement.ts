@@ -1,8 +1,8 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type { CodexTurn } from "./protocol.js";
 
 type PresentationStage =

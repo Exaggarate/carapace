@@ -1,5 +1,5 @@
 ---
-summary: "How OpenClaw manages conversation sessions"
+summary: "How Carapace manages conversation sessions"
 read_when:
   - You want to understand session routing and isolation
   - You want to configure DM scope for multi-user setups
@@ -7,7 +7,7 @@ read_when:
 title: "Session management"
 ---
 
-OpenClaw routes every inbound message to a **session** based on where it came
+Carapace routes every inbound message to a **session** based on where it came
 from: DMs, group chats, cron jobs, etc. All session state is owned by the
 **gateway**; UI clients query the gateway for session data.
 
@@ -74,7 +74,7 @@ If the same person contacts you from multiple channels, use
 they share a session.
 </Tip>
 
-Verify your setup with `openclaw security audit`.
+Verify your setup with `carapace security audit`.
 
 ## Retired channel docking
 
@@ -122,11 +122,11 @@ context, and replies to the source room remain unchanged.
 
 ## Incognito sessions
 
-Incognito sessions are available only from the Control UI's **New thread** screen. Turn on **Incognito** before starting the thread to keep its session entry, transcript, and compaction state in process memory instead of on disk. The thread disappears when the Gateway restarts, does not run OpenClaw's automatic memory flush, and does not create a transcript archive when you reset or delete it. Codex-backed runs also start their harness thread in ephemeral mode, so Codex writes no rollout or local session-state files; other model providers use HTTP APIs and keep no local provider transcript in OpenClaw.
+Incognito sessions are available only from the Control UI's **New thread** screen. Turn on **Incognito** before starting the thread to keep its session entry, transcript, and compaction state in process memory instead of on disk. The thread disappears when the Gateway restarts, does not run Carapace's automatic memory flush, and does not create a transcript archive when you reset or delete it. Codex-backed runs also start their harness thread in ephemeral mode, so Codex writes no rollout or local session-state files; other model providers use HTTP APIs and keep no local provider transcript in Carapace.
 
-The `incognito-` segment is reserved for dashboard, subagent, and hidden internal session keys; `openclaw doctor --fix` renames any colliding legacy durable keys.
+The `incognito-` segment is reserved for dashboard, subagent, and hidden internal session keys; `carapace doctor --fix` renames any colliding legacy durable keys.
 
-Incognito does not restrict the agent's normal tools. An explicit request to save information, or any tool-driven file write, can still persist data outside the incognito session store. Your configured model provider still processes the messages you send, diagnostic logging remains unchanged, and OpenClaw still records content-free audit metadata such as HMAC references.
+Incognito does not restrict the agent's normal tools. An explicit request to save information, or any tool-driven file write, can still persist data outside the incognito session store. Your configured model provider still processes the messages you send, diagnostic logging remains unchanged, and Carapace still records content-free audit metadata such as HMAC references.
 
 On multi-user gateways, incognito threads are visible only to admin-scope connections and never appear through another session's agent session tools or transcript search. This protects them from storage and other gateway-mediated users, not from the gateway owner or process operator, who can always observe live sessions.
 
@@ -200,7 +200,7 @@ Opt into automatic resets globally, then override them per chat type or channel:
 
 ## Gateway restart recovery
 
-When a Gateway restart interrupts an active turn, OpenClaw tries to continue
+When a Gateway restart interrupts an active turn, Carapace tries to continue
 the existing session automatically. Three attempts that fail to start a backend
 turn exhaust the recovery budget. Once a real backend turn starts,
 the budget refreshes, so a later Gateway restart does not consume the old allowance.
@@ -214,9 +214,9 @@ to start a replacement session.
 
 ## Where state lives
 
-- **Runtime session rows and transcripts:** `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite` by default
-- **Archived transcript files:** `~/.openclaw/agents/<agentId>/sessions/`
-- **Legacy row migration source:** `~/.openclaw/agents/<agentId>/sessions/sessions.json`
+- **Runtime session rows and transcripts:** `~/.carapace/agents/<agentId>/agent/carapace-agent.sqlite` by default
+- **Archived transcript files:** `~/.carapace/agents/<agentId>/sessions/`
+- **Legacy row migration source:** `~/.carapace/agents/<agentId>/sessions/sessions.json`
 
 The session rows in the per-agent SQLite database keep separate lifecycle
 timestamps:
@@ -228,20 +228,20 @@ timestamps:
 
 To import legacy `sessions.json` rows and hot transcript JSONL history from an
 older installation, stop the Gateway, back up its state, and run
-`openclaw doctor --fix` before restarting it. Gateway and local CLI startup use
+`carapace doctor --fix` before restarting it. Gateway and local CLI startup use
 SQLite without importing, restoring, or rewriting legacy session files.
 If startup finds a legacy store, it refuses readiness and prints the Doctor
 command for the active profile instead of silently starting with empty history.
 During Doctor import, rows without `sessionStartedAt` are resolved from the
 legacy transcript JSONL session header when available. If an older row also
 lacks `lastInteractionAt`, idle freshness falls back to that session start time,
-not to later bookkeeping writes. Use `openclaw doctor --session-sqlite inspect
+not to later bookkeeping writes. Use `carapace doctor --session-sqlite inspect
 --session-sqlite-all-agents` and the [Doctor migration
 sequence](/cli/doctor#session-sqlite-migration) for inspection and validation.
 
 ## Session maintenance
 
-OpenClaw bounds session storage over time via `session.maintenance`, defaults
+Carapace bounds session storage over time via `session.maintenance`, defaults
 shown:
 
 ```json5
@@ -262,7 +262,7 @@ For production-sized `maxEntries` limits, Gateway runtime writes use a small
 high-water buffer and clean back down to the configured cap in batches.
 Session store reads do not prune or cap entries during Gateway startup, so
 startup and isolated cron sessions do not pay for a full store cleanup.
-`openclaw sessions cleanup --enforce` applies the cap immediately.
+`carapace sessions cleanup --enforce` applies the cap immediately.
 
 `maxEntries` defaults to 5000 unarchived session rows. Archived rows do not consume
 the cap. Existing explicit limits remain unchanged.
@@ -311,18 +311,18 @@ exhausted. Sessions without a recorded archive reason remain protected.
 
 If you previously used DM isolation and later returned `session.dmScope` to
 `main`, preview stale peer-keyed DM rows with
-`openclaw sessions cleanup --dry-run --fix-dm-scope`. Applying the same flag
+`carapace sessions cleanup --dry-run --fix-dm-scope`. Applying the same flag
 retires those old direct-DM rows and keeps their transcripts as deleted
 archives.
 
-Preview any maintenance run with `openclaw sessions cleanup --dry-run`.
+Preview any maintenance run with `carapace sessions cleanup --dry-run`.
 
 ## Inspecting sessions
 
 | Command                    | Shows                                           |
 | -------------------------- | ----------------------------------------------- |
-| `openclaw status`          | Session store path and recent activity          |
-| `openclaw sessions --json` | All sessions (filter with `--active <minutes>`) |
+| `carapace status`          | Session store path and recent activity          |
+| `carapace sessions --json` | All sessions (filter with `--active <minutes>`) |
 | `/status` in chat          | Context usage, model, and toggles               |
 | `/context list`            | What is in the system prompt                    |
 

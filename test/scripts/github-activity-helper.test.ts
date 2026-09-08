@@ -8,7 +8,7 @@ import { createScriptTestHarness } from "./test-helpers.ts";
 const repoRoot = path.resolve(import.meta.dirname, "../..");
 const helperPath = path.join(
   repoRoot,
-  ".agents/skills/openclaw-pr-maintainer/scripts/github-activity.sh",
+  ".agents/skills/carapace-pr-maintainer/scripts/github-activity.sh",
 );
 const { createTempDir } = createScriptTestHarness();
 
@@ -109,7 +109,7 @@ fi
         PATH: `${binDir}:${process.env.PATH ?? ""}`,
         HOME: dir,
         GH_TOKEN: "offline-fixture",
-        OPENCLAW_GH_BIN: bypassPath,
+        CARAPACE_GH_BIN: bypassPath,
         FIXTURE: fixturePath,
         REQUEST_LOG: logPath,
         OUTPUT: outputPath,
@@ -129,7 +129,7 @@ fi
   };
 }
 
-describe("openclaw-pr-maintainer github activity helper", () => {
+describe("carapace-pr-maintainer github activity helper", () => {
   it("prints canonical identity before the first activity request returns a timeout", () => {
     const { requests } = runHelper(["alias"], { timeoutActivity: true });
     expect(requiredAt(requests, 0).args[1]).toBe("users/alias");
@@ -151,7 +151,7 @@ describe("openclaw-pr-maintainer github activity helper", () => {
       expect(args).not.toContain("-F");
       const url = new URL(requiredAt(args, 1), "https://api.github.test/");
       expect(url.searchParams.get("per_page")).toBe("1");
-      expect(url.searchParams.get("q")).toContain("repo:openclaw/openclaw author:Canonical");
+      expect(url.searchParams.get("q")).toContain("repo:carapace/carapace author:Canonical");
       return url;
     });
     expect(searches.map((url) => url.pathname)).toEqual([

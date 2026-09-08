@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 // Fetches Gemini provider usage windows.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { fetchUsageJson } from "./provider-usage.fetch.shared.js";
 import { clampPercent, providerUsageLabel } from "./provider-usage.shared.js";
 import type {

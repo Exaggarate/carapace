@@ -1,5 +1,5 @@
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceCrablineChannelDriverSelection } from "@openclaw/crabline";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   QaEvidenceRttMeasurement,
   QaEvidenceTiming,
@@ -56,13 +56,13 @@ export type QaSuiteRunParams = {
   channelId?: string;
   evidenceMode?: QaScorecardEvidenceMode;
   repoRoot?: string;
-  sutOpenClawCommand?: QaGatewayChildCommand;
-  mutateConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  sutCarapaceCommand?: QaGatewayChildCommand;
+  mutateConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
   outputDir?: string;
   providerMode?: QaProviderMode;
   transportId?: QaTransportId;
   channelDriver?: QaScorecardChannelDriver;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
   primaryModel?: string;
   alternateModel?: string;
   fastMode?: boolean;

@@ -1,5 +1,5 @@
 import { clearCurrentProviderAuthState } from "../agents/model-provider-auth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isSecretRef } from "../config/types.secrets.js";
 import { requestActiveCronJobCancellationByDeclarationKeyPrefix } from "../cron/active-jobs.js";
 import { resolveSkillWorkshopConfig } from "../skills/workshop/config.js";
@@ -34,17 +34,17 @@ function projectCanonicalSecretRefsOntoRuntime(
 }
 
 export function restoreCanonicalSecretRefs(
-  runtimeConfig: OpenClawConfig,
-  sourceConfig: OpenClawConfig,
-): OpenClawConfig {
-  return projectCanonicalSecretRefsOntoRuntime(sourceConfig, runtimeConfig) as OpenClawConfig;
+  runtimeConfig: CarapaceConfig,
+  sourceConfig: CarapaceConfig,
+): CarapaceConfig {
+  return projectCanonicalSecretRefsOntoRuntime(sourceConfig, runtimeConfig) as CarapaceConfig;
 }
 
 export function resetPreparedModelRuntimeStateForHotReload(): void {
   clearCurrentProviderAuthState();
 }
 
-export function revokeActiveSkillReviewsBeforeConfigPublication(config: OpenClawConfig): void {
+export function revokeActiveSkillReviewsBeforeConfigPublication(config: CarapaceConfig): void {
   if (resolveSkillWorkshopConfig(config).autonomous.mode === "auto") {
     return;
   }

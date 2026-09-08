@@ -1,5 +1,5 @@
-import { verifyChannelMessageAdapterCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
-import { validateJsonSchemaValue } from "openclaw/plugin-sdk/json-schema-runtime";
+import { verifyChannelMessageAdapterCapabilityProofs } from "carapace/plugin-sdk/channel-outbound";
+import { validateJsonSchemaValue } from "carapace/plugin-sdk/json-schema-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { a2aChannelPlugin } from "./channel.js";
 import { a2aPluginConfigSchema } from "./config-schema.js";

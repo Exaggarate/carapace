@@ -133,7 +133,7 @@ describe("processDiscordMessage draft streaming recovery", () => {
       {
         cfg: {
           messages: { ackReaction: "👀" },
-          session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+          session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
           channels: {
             discord: {
               maxLinesPerMessage: 120,

@@ -1,6 +1,6 @@
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import { createSubsystemLogger, danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { getGlobalHookRunner } from "carapace/plugin-sdk/plugin-runtime";
+import { createSubsystemLogger, danger, logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveDispatchTelegramContext } from "./bot-message-dispatch-context.js";
 import {
   createDeliveryState,

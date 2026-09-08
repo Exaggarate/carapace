@@ -343,7 +343,7 @@ export function matchesVitestCliSelection(
 ): boolean {
   const patterns =
     selectedPatterns ??
-    loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env) ??
+    loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env) ??
     narrowIncludePatternsForCli(include, ["node", "vitest", ...args], { scopedDir }) ??
     include;
   const relativeFile = path.posix.relative(scopedDir, file);

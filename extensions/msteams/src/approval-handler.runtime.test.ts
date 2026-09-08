@@ -4,12 +4,12 @@ import type {
   PendingApprovalView,
   PluginApprovalPendingView,
   ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/approval-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { msTeamsApprovalControls } from "./approval-card-actions.js";
 
@@ -26,7 +26,7 @@ vi.mock("./send.js", async () => ({
 
 const { msTeamsApprovalNativeRuntime } = await import("./approval-handler.runtime.js");
 
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: {
     msteams: {
       enabled: true,
@@ -186,7 +186,7 @@ describe("msTeamsApprovalNativeRuntime", () => {
       pendingPayload.actionTokens.map(({ token }, index) => ({
         type: "Action.Submit",
         title: testCase.createView().actions[index]?.label,
-        data: { openclawAction: "approval", token },
+        data: { carapaceAction: "approval", token },
       })),
     );
     expect(serializedCard).not.toContain("/approve");

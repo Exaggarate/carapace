@@ -24,7 +24,7 @@ import { homedir, tmpdir } from "node:os";
 import { delimiter, dirname, extname, isAbsolute, relative, resolve } from "node:path";
 import { StringDecoder } from "node:string_decoder";
 import { fileURLToPath } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { crabboxProviderChain, normalizeCrabboxWorkload } from "./crabbox-routing-policy.mts";
 import {
   prepareCrabboxSourceCapsule,
@@ -66,7 +66,7 @@ const MAX_TIMING_JSON_LINE_CHARS = 1024 * 1024;
 // first-run init. Retry the metadata probes once with this generous timeout so a
 // single slow probe does not hard-fail the wrapper and block all remote validation.
 const CRABBOX_METADATA_PROBE_RETRY_TIMEOUT_MS = 20_000;
-const ignoreRepoBinary = process.env.OPENCLAW_CRABBOX_WRAPPER_IGNORE_REPO_BINARY === "1";
+const ignoreRepoBinary = process.env.CARAPACE_CRABBOX_WRAPPER_IGNORE_REPO_BINARY === "1";
 const repoLocal = ignoreRepoBinary ? null : resolveCrabboxBinary(process.platform);
 const pathLocal = resolvePathBinary("crabbox", process.env, process.platform);
 const binary =
@@ -311,8 +311,8 @@ const shellControlCommandPrefixes = new Set([
 const shellCommandExecutionPrefixes = new Set(["exec"]);
 const shellInlineCommandInterpreters = new Set(["bash", "dash", "ksh", "sh", "zsh"]);
 const remoteChangedGateEnv = [
-  "OPENCLAW_CHECK_CHANGED_REMOTE_CHILD=1",
-  "OPENCLAW_CHANGED_LANES_RAW_SYNC=1",
+  "CARAPACE_CHECK_CHANGED_REMOTE_CHILD=1",
+  "CARAPACE_CHANGED_LANES_RAW_SYNC=1",
   "CI=1",
 ];
 const shellInlineCommandOptionsWithNextValue = new Set([
@@ -785,9 +785,9 @@ function selectedProvider(
     return {
       provider: "",
       source: "policy",
-      workload: workloadOption ?? process.env.OPENCLAW_CRABBOX_WORKLOAD ?? "",
+      workload: workloadOption ?? process.env.CARAPACE_CRABBOX_WORKLOAD ?? "",
       chain: [],
-      error: `unsupported Crabbox workload ${JSON.stringify(workloadOption ?? process.env.OPENCLAW_CRABBOX_WORKLOAD)}`,
+      error: `unsupported Crabbox workload ${JSON.stringify(workloadOption ?? process.env.CARAPACE_CRABBOX_WORKLOAD)}`,
     };
   }
   if (workload === "windows" && targetContext.target !== "windows") {
@@ -896,7 +896,7 @@ function requestedWorkload(commandArgs: string[]) {
   if (!isWorkloadRoutedCommand(commandArgs)) {
     return "";
   }
-  const raw = workloadOption ?? process.env.OPENCLAW_CRABBOX_WORKLOAD?.trim() ?? "";
+  const raw = workloadOption ?? process.env.CARAPACE_CRABBOX_WORKLOAD?.trim() ?? "";
   if (!raw) {
     return "";
   }
@@ -1045,7 +1045,7 @@ function shouldRequireBrokeredCloud(commandArgs: string[], provider: string, exp
 function directCloudOverrideEnabled(providerName: string) {
   return (
     canonicalProviderName(providerName) !== "aws" &&
-    process.env.OPENCLAW_CRABBOX_ALLOW_DIRECT_CLOUD === "1"
+    process.env.CARAPACE_CRABBOX_ALLOW_DIRECT_CLOUD === "1"
   );
 }
 
@@ -1067,7 +1067,7 @@ function enforceBrokeredDaytonaVersion(
       `[crabbox] provider=daytona requires Crabbox >= ${formatVersionTuple(minimumBrokeredDaytonaCrabboxVersion)} for brokered execution.`,
       `[crabbox] selected binary reported version=${versionText || "unknown"}.`,
       "[crabbox] update Crabbox before brokered Daytona execution.",
-      "[crabbox] direct Daytona debugging requires an original `--provider daytona`, no `--workload`, and OPENCLAW_CRABBOX_ALLOW_DIRECT_CLOUD=1.",
+      "[crabbox] direct Daytona debugging requires an original `--provider daytona`, no `--workload`, and CARAPACE_CRABBOX_ALLOW_DIRECT_CLOUD=1.",
     ].join("\n"),
   );
   process.exit(2);
@@ -1088,12 +1088,12 @@ function enforceBrokeredCloud(
     crabboxProviderReadiness(canonicalProvider, version.text, effectiveTargetContext(commandArgs));
   if ("brokerAuthFailure" in readiness && readiness.brokerAuthFailure) {
     const instructions = [
-      `[crabbox] provider=${canonicalProvider} requires managed Crabbox broker authentication for OpenClaw proof.`,
-      `[crabbox] run \`${recoveryCommand(["login", "--url", "https://crabbox.openclaw.ai"])}\`, then retry.`,
+      `[crabbox] provider=${canonicalProvider} requires managed Crabbox broker authentication for Carapace proof.`,
+      `[crabbox] run \`${recoveryCommand(["login", "--url", "https://github.com/Exaggarate/carapace"])}\`, then retry.`,
     ];
     if (canonicalProvider !== "aws") {
       instructions.push(
-        `[crabbox] direct ${canonicalProvider} debugging requires an original \`--provider ${canonicalProvider}\`, no \`--workload\`, and OPENCLAW_CRABBOX_ALLOW_DIRECT_CLOUD=1.`,
+        `[crabbox] direct ${canonicalProvider} debugging requires an original \`--provider ${canonicalProvider}\`, no \`--workload\`, and CARAPACE_CRABBOX_ALLOW_DIRECT_CLOUD=1.`,
       );
     }
     console.error(instructions.join("\n"));
@@ -1102,7 +1102,7 @@ function enforceBrokeredCloud(
   if (!("brokerReady" in readiness) || !readiness.brokerReady) {
     console.error(
       [
-        `[crabbox] provider=${canonicalProvider} failed readiness for OpenClaw proof: ${readiness.reason}.`,
+        `[crabbox] provider=${canonicalProvider} failed readiness for Carapace proof: ${readiness.reason}.`,
         ...(readiness.recovery ? [`[crabbox] recovery: ${readiness.recovery}.`] : []),
       ].join("\n"),
     );
@@ -2707,13 +2707,13 @@ function isHydratedNativeWindowsProvider(providerName: string) {
 
 function remoteWindowsHydratedNodeModulesBootstrap() {
   return [
-    "$openclawModulesDir = if ($env:CRABBOX_PNPM_MODULES_DIR) { $env:CRABBOX_PNPM_MODULES_DIR } else { $env:PNPM_CONFIG_MODULES_DIR }",
-    "if ($openclawModulesDir) {",
-    'if (-not (Test-Path $openclawModulesDir)) { throw "hydrated pnpm modules directory does not exist: $openclawModulesDir" }',
-    '$openclawWorkspaceModules = Join-Path (Get-Location).Path "node_modules"',
-    '$openclawSelfModules = Join-Path $openclawModulesDir "node_modules"',
-    'if (-not (Test-Path $openclawSelfModules)) { cmd /c mklink /J "$openclawSelfModules" "$openclawModulesDir" | Out-Host; if ($LASTEXITCODE -ne 0) { throw "failed to link hydrated pnpm node_modules" } }',
-    'if (-not (Test-Path $openclawWorkspaceModules)) { cmd /c mklink /J "$openclawWorkspaceModules" "$openclawModulesDir" | Out-Host; if ($LASTEXITCODE -ne 0) { throw "failed to link workspace node_modules" } }',
+    "$carapaceModulesDir = if ($env:CRABBOX_PNPM_MODULES_DIR) { $env:CRABBOX_PNPM_MODULES_DIR } else { $env:PNPM_CONFIG_MODULES_DIR }",
+    "if ($carapaceModulesDir) {",
+    'if (-not (Test-Path $carapaceModulesDir)) { throw "hydrated pnpm modules directory does not exist: $carapaceModulesDir" }',
+    '$carapaceWorkspaceModules = Join-Path (Get-Location).Path "node_modules"',
+    '$carapaceSelfModules = Join-Path $carapaceModulesDir "node_modules"',
+    'if (-not (Test-Path $carapaceSelfModules)) { cmd /c mklink /J "$carapaceSelfModules" "$carapaceModulesDir" | Out-Host; if ($LASTEXITCODE -ne 0) { throw "failed to link hydrated pnpm node_modules" } }',
+    'if (-not (Test-Path $carapaceWorkspaceModules)) { cmd /c mklink /J "$carapaceWorkspaceModules" "$carapaceModulesDir" | Out-Host; if ($LASTEXITCODE -ne 0) { throw "failed to link workspace node_modules" } }',
     "}",
   ].join("; ");
 }
@@ -2721,7 +2721,7 @@ function remoteWindowsHydratedNodeModulesBootstrap() {
 function remotePosixHydratedNodeModulesBootstrap() {
   // Knip and other non-pnpm tools walk node_modules, while hydrated boxes keep it external.
   // Without this link, dead-code scans silently lose consumer edges and report false positives.
-  return 'openclaw_modules_dir="${CRABBOX_PNPM_MODULES_DIR:-${PNPM_CONFIG_MODULES_DIR:-}}"; if [ -n "$openclaw_modules_dir" ] && [ -d "$openclaw_modules_dir" ] && [ ! -e node_modules ]; then ln -s "$openclaw_modules_dir" node_modules; fi;';
+  return 'carapace_modules_dir="${CRABBOX_PNPM_MODULES_DIR:-${PNPM_CONFIG_MODULES_DIR:-}}"; if [ -n "$carapace_modules_dir" ] && [ -d "$carapace_modules_dir" ] && [ ! -e node_modules ]; then ln -s "$carapace_modules_dir" node_modules; fi;';
 }
 
 function injectRemoteWindowsHydratedNodeModulesBootstrap(
@@ -2776,25 +2776,25 @@ function remotePosixJsEnvBootstrap(packageManager = false) {
           'corepack enable --install-directory "$PNPM_HOME" || return 1;',
         ]
       : []),
-    "openclaw_crabbox_env() {",
-    "openclaw_env_args=();",
-    "openclaw_env_ignore=0;",
-    "openclaw_env_path_seen=0;",
+    "carapace_crabbox_env() {",
+    "carapace_env_args=();",
+    "carapace_env_ignore=0;",
+    "carapace_env_path_seen=0;",
     'while [ "$#" -gt 0 ]; do',
     'case "$1" in',
-    '-i|--ignore-environment) openclaw_env_ignore=1; openclaw_env_args+=("$1"); shift ;;',
-    '-S|--split-string|-S*|--split-string=*) command env "${openclaw_env_args[@]}" "$@"; return ;;',
-    '-[!-]*i*) openclaw_env_ignore=1; openclaw_env_args+=("$1"); shift ;;',
-    '-u|--unset|-C|--chdir) openclaw_env_args+=("$1"); shift; if [ "$#" -gt 0 ]; then openclaw_env_args+=("$1"); shift; fi ;;',
-    '--unset=*|--chdir=*) openclaw_env_args+=("$1"); shift ;;',
-    'PATH=*) if [ "$openclaw_env_ignore" = "1" ]; then openclaw_env_args+=("PATH=${OPENCLAW_CRABBOX_BOOTSTRAP_PATH:-$PATH}:${1#PATH=}"); else openclaw_env_args+=("$1"); fi; openclaw_env_path_seen=1; shift ;;',
-    '[A-Za-z_]*=*) openclaw_env_args+=("$1"); shift ;;',
-    '--) openclaw_env_args+=("--"); shift; break ;;',
+    '-i|--ignore-environment) carapace_env_ignore=1; carapace_env_args+=("$1"); shift ;;',
+    '-S|--split-string|-S*|--split-string=*) command env "${carapace_env_args[@]}" "$@"; return ;;',
+    '-[!-]*i*) carapace_env_ignore=1; carapace_env_args+=("$1"); shift ;;',
+    '-u|--unset|-C|--chdir) carapace_env_args+=("$1"); shift; if [ "$#" -gt 0 ]; then carapace_env_args+=("$1"); shift; fi ;;',
+    '--unset=*|--chdir=*) carapace_env_args+=("$1"); shift ;;',
+    'PATH=*) if [ "$carapace_env_ignore" = "1" ]; then carapace_env_args+=("PATH=${CARAPACE_CRABBOX_BOOTSTRAP_PATH:-$PATH}:${1#PATH=}"); else carapace_env_args+=("$1"); fi; carapace_env_path_seen=1; shift ;;',
+    '[A-Za-z_]*=*) carapace_env_args+=("$1"); shift ;;',
+    '--) carapace_env_args+=("--"); shift; break ;;',
     "*) break ;;",
     "esac;",
     "done;",
-    'if [ "$openclaw_env_ignore" = "1" ] && [ "$openclaw_env_path_seen" = "0" ]; then openclaw_env_args+=("PATH=${OPENCLAW_CRABBOX_BOOTSTRAP_PATH:-$PATH}"); fi;',
-    'command env "${openclaw_env_args[@]}" "$@";',
+    'if [ "$carapace_env_ignore" = "1" ] && [ "$carapace_env_path_seen" = "0" ]; then carapace_env_args+=("PATH=${CARAPACE_CRABBOX_BOOTSTRAP_PATH:-$PATH}"); fi;',
+    'command env "${carapace_env_args[@]}" "$@";',
     "};",
   ];
 }
@@ -2804,14 +2804,14 @@ function remoteAwsMacosJsBootstrap({
   bun = false,
   sourceBootstrap = "",
 } = {}) {
-  const nodeVersion = process.env.OPENCLAW_CRABBOX_MACOS_NODE_VERSION?.trim() || "24.19.0";
+  const nodeVersion = process.env.CARAPACE_CRABBOX_MACOS_NODE_VERSION?.trim() || "24.19.0";
   const bootstrap = [
-    "openclaw_crabbox_bootstrap_macos_js() {",
-    'tool_root="${OPENCLAW_CRABBOX_MACOS_TOOLCHAIN_DIR:-$HOME/.openclaw-crabbox-toolchain}";',
+    "carapace_crabbox_bootstrap_macos_js() {",
+    'tool_root="${CARAPACE_CRABBOX_MACOS_TOOLCHAIN_DIR:-$HOME/.carapace-crabbox-toolchain}";',
     `node_version=${shellQuote(nodeVersion)};`,
     'arch="$(uname -m)";',
     'case "$arch" in arm64) node_arch=arm64 ;; x86_64) node_arch=x64 ;; *) echo "unsupported macOS arch: $arch" >&2; return 2 ;; esac;',
-    'macos_locale="${OPENCLAW_CRABBOX_MACOS_LOCALE:-en_US.UTF-8}";',
+    'macos_locale="${CARAPACE_CRABBOX_MACOS_LOCALE:-en_US.UTF-8}";',
     'case "${LANG:-}" in C.UTF-8|C.utf8|c.UTF-8|c.utf8) export LANG="$macos_locale" ;; esac;',
     'case "${LC_ALL:-}" in C.UTF-8|C.utf8|c.UTF-8|c.utf8) export LC_ALL="$macos_locale" ;; esac;',
     'case "${LC_CTYPE:-}" in C.UTF-8|C.utf8|c.UTF-8|c.utf8) export LC_CTYPE="$macos_locale" ;; esac;',
@@ -2819,7 +2819,7 @@ function remoteAwsMacosJsBootstrap({
     'if [ ! -d "$TMPDIR" ]; then mkdir -p "$TMPDIR" 2>/dev/null || export TMPDIR="/tmp"; fi;',
     'if [ ! -d "$TMPDIR" ]; then echo "usable TMPDIR not found: $TMPDIR" >&2; return 1; fi;',
     'node_dir="$tool_root/node-v${node_version}-darwin-${node_arch}";',
-    'ready_marker="$node_dir/.openclaw-crabbox-node-ready";',
+    'ready_marker="$node_dir/.carapace-crabbox-node-ready";',
     'export PATH="$node_dir/bin:$PATH";',
     'if [ ! -x "$node_dir/bin/node" ] || [ ! -f "$ready_marker" ]; then',
     'mkdir -p "$tool_root" || { status=$?; return "$status"; };',
@@ -2865,7 +2865,7 @@ function remoteAwsMacosJsBootstrap({
     bootstrap.push(
       `bun_version=${shellQuote(awsMacosBunVersion)};`,
       'bun_root="$tool_root/bun-v${bun_version}";',
-      'bun_ready_marker="$bun_root/.openclaw-crabbox-bun-ready";',
+      'bun_ready_marker="$bun_root/.carapace-crabbox-bun-ready";',
       'export PATH="$bun_root/bin:$PATH";',
       'if [ ! -x "$bun_root/bin/bun" ] || [ ! -f "$bun_ready_marker" ]; then',
       'mkdir -p "$tool_root" || { status=$?; return "$status"; };',
@@ -2896,16 +2896,16 @@ function remoteAwsMacosJsBootstrap({
       "bun --version >&2 || return 1;",
     );
   }
-  bootstrap.push('export OPENCLAW_CRABBOX_BOOTSTRAP_PATH="$PATH";');
-  bootstrap.push("};", "openclaw_crabbox_bootstrap_macos_js");
+  bootstrap.push('export CARAPACE_CRABBOX_BOOTSTRAP_PATH="$PATH";');
+  bootstrap.push("};", "carapace_crabbox_bootstrap_macos_js");
   return bootstrap.join(" ");
 }
 
 function remoteWsl2JsBootstrap({ packageManager = false, sourceBootstrap = "" } = {}) {
-  const nodeVersion = process.env.OPENCLAW_CRABBOX_WSL2_NODE_VERSION?.trim() || "24.19.0";
+  const nodeVersion = process.env.CARAPACE_CRABBOX_WSL2_NODE_VERSION?.trim() || "24.19.0";
   const bootstrap = [
-    "openclaw_crabbox_bootstrap_wsl2_js() {",
-    'tool_root="${OPENCLAW_CRABBOX_WSL2_TOOLCHAIN_DIR:-$HOME/.openclaw-crabbox-toolchain}";',
+    "carapace_crabbox_bootstrap_wsl2_js() {",
+    'tool_root="${CARAPACE_CRABBOX_WSL2_TOOLCHAIN_DIR:-$HOME/.carapace-crabbox-toolchain}";',
     `node_version=${shellQuote(nodeVersion)};`,
     'arch="$(uname -m)";',
     'case "$arch" in arm64|aarch64) node_arch=arm64 ;; x86_64|amd64) node_arch=x64 ;; *) echo "unsupported WSL2 arch: $arch" >&2; return 2 ;; esac;',
@@ -2913,7 +2913,7 @@ function remoteWsl2JsBootstrap({ packageManager = false, sourceBootstrap = "" } 
     'if [ ! -d "$TMPDIR" ]; then mkdir -p "$TMPDIR" 2>/dev/null || export TMPDIR="/tmp"; fi;',
     'if [ ! -d "$TMPDIR" ]; then echo "usable TMPDIR not found: $TMPDIR" >&2; return 1; fi;',
     'node_dir="$tool_root/node-v${node_version}-linux-${node_arch}";',
-    'ready_marker="$node_dir/.openclaw-crabbox-node-ready";',
+    'ready_marker="$node_dir/.carapace-crabbox-node-ready";',
     'export PATH="$node_dir/bin:$PATH";',
     'if [ ! -x "$node_dir/bin/node" ] || [ ! -f "$ready_marker" ]; then',
     'mkdir -p "$tool_root" || { status=$?; return "$status"; };',
@@ -2961,8 +2961,8 @@ function remoteWsl2JsBootstrap({ packageManager = false, sourceBootstrap = "" } 
           ]),
     );
   }
-  bootstrap.push('export OPENCLAW_CRABBOX_BOOTSTRAP_PATH="$PATH";');
-  bootstrap.push("};", "openclaw_crabbox_bootstrap_wsl2_js");
+  bootstrap.push('export CARAPACE_CRABBOX_BOOTSTRAP_PATH="$PATH";');
+  bootstrap.push("};", "carapace_crabbox_bootstrap_wsl2_js");
   return bootstrap.join(" ");
 }
 
@@ -2990,7 +2990,7 @@ function scopedAwsMacosEnvCommand(commandArgs: string[]) {
     runtimeEntrypoint: needsRuntime ? targetEntrypoint : "",
     packageManager: needsPackageManager,
     bun: needsBun,
-    shellCommand: `openclaw_crabbox_env ${shellJoin(commandArgs.slice(1))}`,
+    shellCommand: `carapace_crabbox_env ${shellJoin(commandArgs.slice(1))}`,
   };
 }
 
@@ -3042,7 +3042,7 @@ function shellCommandWithEnvShim(command: string, eligibleSegments: Set<string>)
       continue;
     }
     rewritten += command.slice(copiedUntil, envToken.start);
-    rewritten += "openclaw_crabbox_env";
+    rewritten += "carapace_crabbox_env";
     copiedUntil = envToken.end;
     changed = true;
   }
@@ -3270,7 +3270,7 @@ function prepareRemoteWsl2JsBootstrapScript(
     return { args: run.args, cleanup: () => {}, prepared: false };
   }
 
-  const scriptRoot = mkdtempSync(resolve(tmpdir(), "openclaw-crabbox-wsl2-script-"));
+  const scriptRoot = mkdtempSync(resolve(tmpdir(), "carapace-crabbox-wsl2-script-"));
   const scriptPath = resolve(scriptRoot, "script.sh");
   const originalShellCommand = facts.scopedEnvCommand?.shellCommand ?? renderRunShellCommand(run);
   const script = `${remoteWsl2JsBootstrap({
@@ -3321,28 +3321,28 @@ function injectRemoteAwsMacosJsBootstrap(
 
 function remoteAwsMacosSwiftBootstrap() {
   return [
-    "openclaw_crabbox_require_macos_swift_63() {",
-    'openclaw_xcode="";',
-    'for openclaw_candidate in /Applications/Xcode_26*.app /Applications/Xcode-26*.app /Applications/Xcode_2[7-9]*.app /Applications/Xcode-2[7-9]*.app; do if [ -d "$openclaw_candidate" ]; then openclaw_xcode="$openclaw_candidate"; fi; done;',
-    'if [ -n "$openclaw_xcode" ]; then openclaw_developer="$openclaw_xcode/Contents/Developer"; if [ ! -d "$openclaw_developer" ]; then openclaw_developer="$openclaw_xcode"; fi; sudo xcode-select -s "$openclaw_developer" || return 1; fi;',
-    'openclaw_swift_version="$(swift --version 2>&1)" || { status=$?; printf "%s\\n" "$openclaw_swift_version" >&2; return "$status"; };',
-    'printf "%s\\n" "$openclaw_swift_version" >&2;',
-    'openclaw_swift_major_minor="$(printf "%s\\n" "$openclaw_swift_version" | sed -nE "s/.*Apple Swift version ([0-9]+)\\.([0-9]+).*/\\1 \\2/p" | head -n 1)";',
-    'if [ -z "$openclaw_swift_major_minor" ]; then echo "[crabbox] OpenClaw macOS app proof requires Swift tools 6.3+; unable to parse swift --version." >&2; return 2; fi;',
-    "set -- $openclaw_swift_major_minor;",
+    "carapace_crabbox_require_macos_swift_63() {",
+    'carapace_xcode="";',
+    'for carapace_candidate in /Applications/Xcode_26*.app /Applications/Xcode-26*.app /Applications/Xcode_2[7-9]*.app /Applications/Xcode-2[7-9]*.app; do if [ -d "$carapace_candidate" ]; then carapace_xcode="$carapace_candidate"; fi; done;',
+    'if [ -n "$carapace_xcode" ]; then carapace_developer="$carapace_xcode/Contents/Developer"; if [ ! -d "$carapace_developer" ]; then carapace_developer="$carapace_xcode"; fi; sudo xcode-select -s "$carapace_developer" || return 1; fi;',
+    'carapace_swift_version="$(swift --version 2>&1)" || { status=$?; printf "%s\\n" "$carapace_swift_version" >&2; return "$status"; };',
+    'printf "%s\\n" "$carapace_swift_version" >&2;',
+    'carapace_swift_major_minor="$(printf "%s\\n" "$carapace_swift_version" | sed -nE "s/.*Apple Swift version ([0-9]+)\\.([0-9]+).*/\\1 \\2/p" | head -n 1)";',
+    'if [ -z "$carapace_swift_major_minor" ]; then echo "[crabbox] Carapace macOS app proof requires Swift tools 6.3+; unable to parse swift --version." >&2; return 2; fi;',
+    "set -- $carapace_swift_major_minor;",
     'if [ "$1" -lt 6 ] || { [ "$1" -eq 6 ] && [ "$2" -lt 3 ]; }; then',
-    'echo "[crabbox] OpenClaw macOS app proof requires Swift tools 6.3+ (Xcode 26.4+)." >&2;',
+    'echo "[crabbox] Carapace macOS app proof requires Swift tools 6.3+ (Xcode 26.4+)." >&2;',
     'echo "[crabbox] current Swift is $1.$2; select/install Xcode 26.4 or newer." >&2;',
     "return 2;",
     "fi;",
-    'openclaw_xcodebuild_version="$(xcodebuild -version 2>&1)" || { printf "%s\\n" "$openclaw_xcodebuild_version" >&2; echo "[crabbox] OpenClaw macOS app proof requires Xcode 26.4+; active developer directory does not provide usable xcodebuild." >&2; return 2; };',
-    'printf "%s\\n" "$openclaw_xcodebuild_version" >&2;',
-    'openclaw_xcode_major_minor="$(printf "%s\\n" "$openclaw_xcodebuild_version" | sed -nE "s/^Xcode ([0-9]+)\\.([0-9]+).*/\\1 \\2/p" | head -n 1)";',
-    'if [ -z "$openclaw_xcode_major_minor" ]; then echo "[crabbox] OpenClaw macOS app proof requires Xcode 26.4+; unable to parse xcodebuild -version." >&2; return 2; fi;',
-    "set -- $openclaw_xcode_major_minor;",
-    'if [ "$1" -lt 26 ] || { [ "$1" -eq 26 ] && [ "$2" -lt 4 ]; }; then echo "[crabbox] OpenClaw macOS app proof requires Xcode 26.4+; current xcodebuild is $1.$2." >&2; return 2; fi;',
+    'carapace_xcodebuild_version="$(xcodebuild -version 2>&1)" || { printf "%s\\n" "$carapace_xcodebuild_version" >&2; echo "[crabbox] Carapace macOS app proof requires Xcode 26.4+; active developer directory does not provide usable xcodebuild." >&2; return 2; };',
+    'printf "%s\\n" "$carapace_xcodebuild_version" >&2;',
+    'carapace_xcode_major_minor="$(printf "%s\\n" "$carapace_xcodebuild_version" | sed -nE "s/^Xcode ([0-9]+)\\.([0-9]+).*/\\1 \\2/p" | head -n 1)";',
+    'if [ -z "$carapace_xcode_major_minor" ]; then echo "[crabbox] Carapace macOS app proof requires Xcode 26.4+; unable to parse xcodebuild -version." >&2; return 2; fi;',
+    "set -- $carapace_xcode_major_minor;",
+    'if [ "$1" -lt 26 ] || { [ "$1" -eq 26 ] && [ "$2" -lt 4 ]; }; then echo "[crabbox] Carapace macOS app proof requires Xcode 26.4+; current xcodebuild is $1.$2." >&2; return 2; fi;',
     "};",
-    "openclaw_crabbox_require_macos_swift_63",
+    "carapace_crabbox_require_macos_swift_63",
   ].join(" ");
 }
 
@@ -3393,7 +3393,7 @@ function prepareAwsMacosScriptStdinBootstrap(commandArgs: string[], providerName
     return { args: commandArgs, cleanup: () => {}, prepared: false };
   }
 
-  const scriptRoot = mkdtempSync(resolve(tmpdir(), "openclaw-crabbox-macos-script-"));
+  const scriptRoot = mkdtempSync(resolve(tmpdir(), "carapace-crabbox-macos-script-"));
   const scriptPath = resolve(scriptRoot, "script.sh");
   const script = readFileSync(0, "utf8");
   writeFileSync(scriptPath, createAwsMacosScriptStdinWrapper(script), "utf8");
@@ -3417,9 +3417,9 @@ function wrapRemoteScript(script: string, bootstrap: string) {
   const delimiterValue = uniqueHereDocDelimiter(script);
   return [
     `${bootstrap} || exit $?`,
-    'tmp_script="$(mktemp "${TMPDIR:-/tmp}/openclaw-crabbox-script.XXXXXX")" || exit $?',
-    'cleanup_openclaw_crabbox_script() { rm -f "$tmp_script"; }',
-    "trap cleanup_openclaw_crabbox_script EXIT",
+    'tmp_script="$(mktemp "${TMPDIR:-/tmp}/carapace-crabbox-script.XXXXXX")" || exit $?',
+    'cleanup_carapace_crabbox_script() { rm -f "$tmp_script"; }',
+    "trap cleanup_carapace_crabbox_script EXIT",
     `cat >"$tmp_script" <<'${delimiterValue}'`,
     script.endsWith("\n") ? script.slice(0, -1) : script,
     delimiterValue,
@@ -3462,7 +3462,7 @@ function awsMacosScriptBootstrapRequirements(script: string) {
 function uniqueHereDocDelimiter(script: string) {
   let index = 0;
   for (;;) {
-    const delimiterLocal = `OPENCLAW_CRABBOX_SCRIPT_${index}`;
+    const delimiterLocal = `CARAPACE_CRABBOX_SCRIPT_${index}`;
     if (!new RegExp(`^${delimiterLocal}$`, "mu").test(script)) {
       return delimiterLocal;
     }
@@ -3514,13 +3514,13 @@ function shouldUseFullCheckoutForRemoteSync(commandArgs: string[], providerName:
 function defaultFullCheckoutSyncRoot() {
   const home = homedir();
   if (home) {
-    return resolve(home, ".cache", "openclaw", "crabbox-sync");
+    return resolve(home, ".cache", "carapace", "crabbox-sync");
   }
-  return resolve(tmpdir(), "openclaw-crabbox-sync");
+  return resolve(tmpdir(), "carapace-crabbox-sync");
 }
 
 function fullCheckoutSyncRoot() {
-  const configured = process.env.OPENCLAW_CRABBOX_SYNC_TMPDIR?.trim();
+  const configured = process.env.CARAPACE_CRABBOX_SYNC_TMPDIR?.trim();
   const root = configured ? resolve(configured) : defaultFullCheckoutSyncRoot();
   mkdirSync(root, { recursive: true });
   return root;
@@ -3559,7 +3559,7 @@ function formatByteCount(bytes: number) {
 
 function assertFullCheckoutSyncDisk(root: string) {
   const requiredBytes = parseNonNegativeIntegerEnv(
-    "OPENCLAW_CRABBOX_SYNC_MIN_FREE_BYTES",
+    "CARAPACE_CRABBOX_SYNC_MIN_FREE_BYTES",
     1024 * 1024 * 1024,
     "byte count",
   );
@@ -3577,7 +3577,7 @@ function assertFullCheckoutSyncDisk(root: string) {
       `root=${root}`,
       `free=${formatByteCount(freeBytes)}`,
       `required=${formatByteCount(requiredBytes)}`,
-      "set OPENCLAW_CRABBOX_SYNC_TMPDIR to a roomier filesystem or lower OPENCLAW_CRABBOX_SYNC_MIN_FREE_BYTES if you know this checkout fits",
+      "set CARAPACE_CRABBOX_SYNC_TMPDIR to a roomier filesystem or lower CARAPACE_CRABBOX_SYNC_MIN_FREE_BYTES if you know this checkout fits",
     ].join("; "),
   );
 }
@@ -3585,7 +3585,7 @@ function assertFullCheckoutSyncDisk(root: string) {
 function prepareFullCheckoutForSync() {
   const syncRoot = fullCheckoutSyncRoot();
   assertFullCheckoutSyncDisk(syncRoot);
-  const dir = mkdtempSync(resolve(syncRoot, "openclaw-crabbox-sync-"));
+  const dir = mkdtempSync(resolve(syncRoot, "carapace-crabbox-sync-"));
   let active = false;
 
   function create() {
@@ -3682,7 +3682,7 @@ function startFullCheckoutKeepalive(checkout: FullCheckout, options: KeepaliveOp
 
 function fullCheckoutKeepaliveIntervalMs() {
   return parseNonNegativeIntegerEnv(
-    "OPENCLAW_CRABBOX_SYNC_KEEPALIVE_MS",
+    "CARAPACE_CRABBOX_SYNC_KEEPALIVE_MS",
     5000,
     "millisecond interval",
   );
@@ -3780,7 +3780,7 @@ function applyRunTransforms(
           scriptOption.name === "script" ? resolve(repoRoot, scriptOption.value) : 0,
           "utf8",
         );
-        const scriptRoot = mkdtempSync(resolve(tmpdir(), "openclaw-crabbox-source-script-"));
+        const scriptRoot = mkdtempSync(resolve(tmpdir(), "carapace-crabbox-source-script-"));
         const scriptPath = resolve(scriptRoot, "script.sh");
         sourceScriptCleanup = () => rmSync(scriptRoot, { recursive: true, force: true });
         writeFileSync(
@@ -3967,7 +3967,7 @@ if (canonicalProvider === "blacksmith-testbox") {
       [
         `[crabbox] provider=blacksmith-testbox requires Crabbox >= ${formatVersionTuple(minimumBlacksmithCrabboxVersion)} for current Testbox sync, queue, and cleanup behavior.`,
         `[crabbox] selected binary reported version=${version.text || "unknown"}.`,
-        "[crabbox] if using ../crabbox, rebuild it: version=$(git -C ../crabbox describe --tags --always --dirty | sed 's/^v//') && go build -C ../crabbox -trimpath -ldflags \"-s -w -X github.com/openclaw/crabbox/internal/cli.version=${version}\" -o bin/crabbox ./cmd/crabbox",
+        "[crabbox] if using ../crabbox, rebuild it: version=$(git -C ../crabbox describe --tags --always --dirty | sed 's/^v//') && go build -C ../crabbox -trimpath -ldflags \"-s -w -X github.com/Exaggarate/carapace/crabbox/internal/cli.version=${version}\" -o bin/crabbox ./cmd/crabbox",
       ].join("\n"),
     );
     process.exit(2);
@@ -4152,7 +4152,7 @@ if (
       ? `pnpm crabbox:hydrate -- --id ${id}`
       : "pnpm crabbox:warmup, then pnpm crabbox:hydrate -- --id <id>";
     console.error(
-      `[crabbox] warning: provider=aws raw boxes may lack Node/Corepack/pnpm/Bun for ${runtimeEntrypoint}; hydrate first (${hydrate}) or pass --provider blacksmith-testbox for OpenClaw CI-like proof; not switching providers automatically`,
+      `[crabbox] warning: provider=aws raw boxes may lack Node/Corepack/pnpm/Bun for ${runtimeEntrypoint}; hydrate first (${hydrate}) or pass --provider blacksmith-testbox for Carapace CI-like proof; not switching providers automatically`,
     );
   }
 }
@@ -4181,7 +4181,7 @@ if (
 ) {
   childEnv.CRABBOX_LOCAL_CONTAINER_DOCKER_SOCKET = "1";
   console.error(
-    "[crabbox] provider=docker enabling host Docker socket pass-through for OpenClaw Docker tests",
+    "[crabbox] provider=docker enabling host Docker socket pass-through for Carapace Docker tests",
   );
 }
 if (
@@ -4190,9 +4190,9 @@ if (
   !childEnv.CRABBOX_LOCAL_CONTAINER_WORK_ROOT &&
   !hasOption(normalizedArgs, "--local-container-work-root")
 ) {
-  childEnv.CRABBOX_LOCAL_CONTAINER_WORK_ROOT = "/tmp/openclaw-crabbox-docker-work";
+  childEnv.CRABBOX_LOCAL_CONTAINER_WORK_ROOT = "/tmp/carapace-crabbox-docker-work";
   console.error(
-    "[crabbox] provider=docker using short host-visible work root for OpenClaw Docker tests",
+    "[crabbox] provider=docker using short host-visible work root for Carapace Docker tests",
   );
 }
 
@@ -4441,17 +4441,17 @@ async function waitForChildTreeExit(childProcess: ChildProcess, timeoutMs: numbe
 }
 
 function resolveChildKillGraceMs(env: ProcessEnv) {
-  if (!env.VITEST || !env.OPENCLAW_TEST_CRABBOX_CHILD_KILL_GRACE_MS) {
+  if (!env.VITEST || !env.CARAPACE_TEST_CRABBOX_CHILD_KILL_GRACE_MS) {
     return 5_000;
   }
-  const value = Number.parseInt(env.OPENCLAW_TEST_CRABBOX_CHILD_KILL_GRACE_MS, 10);
+  const value = Number.parseInt(env.CARAPACE_TEST_CRABBOX_CHILD_KILL_GRACE_MS, 10);
   return Number.isFinite(value) && value >= 0 ? value : 5_000;
 }
 
 function resolveMetadataProbeTimeoutMs(env: ProcessEnv) {
-  if (!env.VITEST || !env.OPENCLAW_TEST_CRABBOX_METADATA_PROBE_TIMEOUT_MS) {
+  if (!env.VITEST || !env.CARAPACE_TEST_CRABBOX_METADATA_PROBE_TIMEOUT_MS) {
     return CRABBOX_METADATA_PROBE_TIMEOUT_MS;
   }
-  const value = Number.parseInt(env.OPENCLAW_TEST_CRABBOX_METADATA_PROBE_TIMEOUT_MS, 10);
+  const value = Number.parseInt(env.CARAPACE_TEST_CRABBOX_METADATA_PROBE_TIMEOUT_MS, 10);
   return Number.isFinite(value) && value > 0 ? value : CRABBOX_METADATA_PROBE_TIMEOUT_MS;
 }

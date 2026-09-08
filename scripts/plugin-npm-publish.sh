@@ -51,8 +51,8 @@ if [[ "$#" -gt 0 ]]; then
   echo "unexpected plugin npm publish argument: $1" >&2
   exit 2
 fi
-if [[ "${mode}" == "--pack" && -z "${OPENCLAW_PLUGIN_NPM_PACK_OUTPUT_DIR:-}" ]]; then
-  echo "--pack requires OPENCLAW_PLUGIN_NPM_PACK_OUTPUT_DIR" >&2
+if [[ "${mode}" == "--pack" && -z "${CARAPACE_PLUGIN_NPM_PACK_OUTPUT_DIR:-}" ]]; then
+  echo "--pack requires CARAPACE_PLUGIN_NPM_PACK_OUTPUT_DIR" >&2
   exit 2
 fi
 
@@ -78,7 +78,7 @@ import {
 const plan = resolveNpmPublishPlan(
   process.env.PACKAGE_VERSION ?? "",
   process.env.CURRENT_BETA_VERSION,
-  process.env.OPENCLAW_PLUGIN_NPM_PUBLISH_TAG,
+  process.env.CARAPACE_PLUGIN_NPM_PUBLISH_TAG,
 );
 const auth = resolveNpmDistTagMirrorAuth({
   nodeAuthToken: process.env.NODE_AUTH_TOKEN,
@@ -104,7 +104,7 @@ mirror_auth_requirement="$(printf '%s\n' "${publish_plan_output}" | sed -n '5p')
 mirror_auth_source="${mirror_auth_source:-none}"
 mirror_auth_requirement="${mirror_auth_requirement:-optional}"
 publish_cmd=(npm publish --access public --tag "${publish_tag}")
-if [[ "${OPENCLAW_NPM_PUBLISH_PROVENANCE:-1}" != "0" && "${OPENCLAW_NPM_PUBLISH_PROVENANCE:-1}" != "false" ]]; then
+if [[ "${CARAPACE_NPM_PUBLISH_PROVENANCE:-1}" != "0" && "${CARAPACE_NPM_PUBLISH_PROVENANCE:-1}" != "false" ]]; then
   publish_cmd+=(--provenance)
 fi
 
@@ -120,7 +120,7 @@ log "Mirror dist-tag auth source: ${mirror_auth_source}"
 log "Mirror dist-tag auth requirement: ${mirror_auth_requirement}"
 
 build_package_runtime() {
-  if [[ "${OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD:-1}" == "0" || "${OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD:-1}" == "false" ]]; then
+  if [[ "${CARAPACE_PLUGIN_NPM_RUNTIME_BUILD:-1}" == "0" || "${CARAPACE_PLUGIN_NPM_RUNTIME_BUILD:-1}" == "false" ]]; then
     log "Package-local runtime build: skipped"
     return
   fi
@@ -135,7 +135,7 @@ check_package_npm_lock() {
   log "Package-local npm package-lock check: ${package_dir}"
   (
     cd "${repo_root}"
-    OPENCLAW_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
+    CARAPACE_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
       node "${tooling_root}/scripts/generate-npm-package-lock.mjs" \
         --package-dir "${package_dir}" >&2
   )
@@ -152,7 +152,7 @@ case "${mirror_auth_source}" in
 esac
 publish_auth_token="${mirror_auth_token}"
 publish_auth_source="${mirror_auth_source}"
-if [[ "${OPENCLAW_NPM_PUBLISH_AUTH_MODE:-}" == "trusted-publisher" ]]; then
+if [[ "${CARAPACE_NPM_PUBLISH_AUTH_MODE:-}" == "trusted-publisher" ]]; then
   publish_auth_token=""
   publish_auth_source="trusted-publisher"
 fi
@@ -173,22 +173,22 @@ if [[ "${mirror_auth_requirement}" == "required" && -z "${mirror_auth_token}" ]]
 fi
 
 verify_release_tooling_identity() {
-  if [[ "${OPENCLAW_RELEASE_TOOLING_IDENTITY_REQUIRED:-}" != "true" ]]; then
+  if [[ "${CARAPACE_RELEASE_TOOLING_IDENTITY_REQUIRED:-}" != "true" ]]; then
     return 0
   fi
   identity_args=(
     verify
-    --repository "${OPENCLAW_RELEASE_TOOLING_REPOSITORY:-}"
-    --workflow-ref "${OPENCLAW_RELEASE_TOOLING_REF:-}"
-    --workflow-full-ref "${OPENCLAW_RELEASE_TOOLING_FULL_REF:-}"
-    --workflow-sha "${OPENCLAW_RELEASE_TOOLING_SHA:-}"
-    --release-publish-run-id "${OPENCLAW_RELEASE_PUBLISH_RUN_ID:-}"
-    --release-publish-run-attempt "${OPENCLAW_RELEASE_PUBLISH_RUN_ATTEMPT:-}"
-    --release-publish-ref "${OPENCLAW_RELEASE_PUBLISH_REF:-}"
-    --release-publish-full-ref "${OPENCLAW_RELEASE_PUBLISH_FULL_REF:-}"
-    --release-publish-parent-state-policy "${OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY:-}"
+    --repository "${CARAPACE_RELEASE_TOOLING_REPOSITORY:-}"
+    --workflow-ref "${CARAPACE_RELEASE_TOOLING_REF:-}"
+    --workflow-full-ref "${CARAPACE_RELEASE_TOOLING_FULL_REF:-}"
+    --workflow-sha "${CARAPACE_RELEASE_TOOLING_SHA:-}"
+    --release-publish-run-id "${CARAPACE_RELEASE_PUBLISH_RUN_ID:-}"
+    --release-publish-run-attempt "${CARAPACE_RELEASE_PUBLISH_RUN_ATTEMPT:-}"
+    --release-publish-ref "${CARAPACE_RELEASE_PUBLISH_REF:-}"
+    --release-publish-full-ref "${CARAPACE_RELEASE_PUBLISH_FULL_REF:-}"
+    --release-publish-parent-state-policy "${CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY:-}"
   )
-  if [[ "${OPENCLAW_RELEASE_TOOLING_ALLOW_PREVALIDATED_REF:-}" == "true" ]]; then
+  if [[ "${CARAPACE_RELEASE_TOOLING_ALLOW_PREVALIDATED_REF:-}" == "true" ]]; then
     identity_args+=(--allow-prevalidated-ref)
   fi
   node "${tooling_root}/scripts/release-tooling-identity.mjs" "${identity_args[@]}"
@@ -218,14 +218,14 @@ if [[ "${mode}" == "--pack" || "${mode}" == "--pack-dry-run" ]]; then
   if [[ "${mode}" == "--pack-dry-run" ]]; then
     pack_args+=(--dry-run)
   else
-    mkdir -p "${OPENCLAW_PLUGIN_NPM_PACK_OUTPUT_DIR}"
-    pack_output_dir="$(cd "${OPENCLAW_PLUGIN_NPM_PACK_OUTPUT_DIR}" && pwd)"
+    mkdir -p "${CARAPACE_PLUGIN_NPM_PACK_OUTPUT_DIR}"
+    pack_output_dir="$(cd "${CARAPACE_PLUGIN_NPM_PACK_OUTPUT_DIR}" && pwd)"
     pack_args+=(--pack-destination "${pack_output_dir}")
   fi
   (
     cd "${repo_root}"
-    OPENCLAW_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
-      OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES=1 \
+    CARAPACE_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
+      CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES=1 \
       node "${tooling_root}/scripts/lib/plugin-npm-package-manifest.mjs" \
         --run "${package_dir}" -- "${pack_args[@]}"
   )
@@ -238,8 +238,8 @@ fi
   run_with_manifest_overlay() {
     (
       cd "${repo_root}"
-      OPENCLAW_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
-        OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES=1 \
+      CARAPACE_NPM_PACKAGE_LOCK_REPO_ROOT="${repo_root}" \
+        CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES=1 \
         node "${tooling_root}/scripts/lib/plugin-npm-package-manifest.mjs" \
           --run "${package_dir}" -- "$@"
     )

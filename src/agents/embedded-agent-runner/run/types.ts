@@ -1,7 +1,7 @@
 /**
  * Shared result and attempt types for embedded-agent run internals.
  */
-import type { AgentRunTimeoutPhase } from "@openclaw/normalization-core/agent-run-terminal-outcome";
+import type { AgentRunTimeoutPhase } from "@carapace/normalization-core/agent-run-terminal-outcome";
 import type { HeartbeatToolResponse } from "../../../auto-reply/heartbeat-tool-response.js";
 import type { ThinkLevel } from "../../../auto-reply/thinking.js";
 import type {
@@ -107,7 +107,7 @@ type EmbeddedRunAttemptToolTerminalObservation = {
   replaySafe?: boolean;
   outcome: "success" | "failure";
   failure?: Omit<ToolErrorSummary, "toolName" | "meta" | "mutatingAction">;
-  /** Protocol-owned mutation facts for native tools that do not use OpenClaw definitions. */
+  /** Protocol-owned mutation facts for native tools that do not use Carapace definitions. */
   nativeMutation?: {
     mutatingAction: boolean;
     replaySafe: boolean;
@@ -199,13 +199,13 @@ export type EmbeddedRunAttemptParams = EmbeddedRunAttemptBase & {
   captureRuntimeArtifact?: boolean;
   /** Exact implementation that must own the attempt before it creates a native thread. */
   expectedRuntimeArtifact?: AgentHarnessRuntimeArtifactBinding;
-  /** OpenClaw-owned runtime policy prepared by the orchestrator for this attempt. */
+  /** Carapace-owned runtime policy prepared by the orchestrator for this attempt. */
   runtimePlan?: AgentRuntimePlan;
   /** Reports terminal tool facts to the host-owned attempt outcome accumulator. */
   observeToolTerminal?: EmbeddedRunAttemptToolTerminalObserver;
   /** Host-issued scope for harnesses that mirror native child runs into task state. */
   agentHarnessTaskRuntimeScope?: AgentHarnessTaskRuntimeScope;
-  /** Storage-aware trajectory recorder owned by the OpenClaw host. */
+  /** Storage-aware trajectory recorder owned by the Carapace host. */
   trajectoryRecorder?: EmbeddedRunAttemptTrajectoryRecorder | null;
   /** Live observer called after wrapped tool outcomes are recorded. */
   onToolOutcome?: ToolOutcomeObserver;
@@ -240,7 +240,7 @@ export type EmbeddedRunAttemptParams = EmbeddedRunAttemptBase & {
   /** Auth profile store already resolved during startup for this attempt. */
   authProfileStore: AuthProfileStore;
   /**
-   * Full auth profile store for OpenClaw tool availability.
+   * Full auth profile store for Carapace tool availability.
    * Plugin-owned harnesses may scope `authProfileStore` to model transport credentials.
    */
   toolAuthProfileStore?: AuthProfileStore;
@@ -344,7 +344,7 @@ export type EmbeddedRunAttemptResult = {
   messagesSnapshot: AgentMessage[];
   /** Owner-eligible settled finalization, with frozen evidence or an unavailable projection. */
   settledTurnFinalizationContext?:
-    | { readonly source: "openclaw-transcript"; readonly messages: readonly AgentMessage[] }
+    | { readonly source: "carapace-transcript"; readonly messages: readonly AgentMessage[] }
     | { readonly source: "harness"; readonly data: unknown }
     | { readonly source: "unavailable" };
   beforeAgentFinalizeRevisionReason?: string;

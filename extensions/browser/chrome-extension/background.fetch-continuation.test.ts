@@ -354,7 +354,7 @@ describe.each(["all", "selected"] as const)("Fetch continuation in %s", (mode) =
     held.complete();
     const response = await rig.owner.response(held.id);
     expect(response).toMatchObject({
-      result: { stream: expect.stringMatching(/^openclaw-fetch-stream:/) },
+      result: { stream: expect.stringMatching(/^carapace-fetch-stream:/) },
     });
     expect(await rig.owner.request("Fetch.disable", {}, rig.session)).toMatchObject({
       error: { message: expect.stringContaining("streamed responses") },

@@ -146,7 +146,7 @@ describe("fetchHttpJson error body boundary", () => {
             error: "display required",
             reason: "no_display_for_headed_profile",
             details: {
-              profile: "openclaw",
+              profile: "carapace",
               requestedHeadless: false,
               headlessSource: "config",
               displayPresent: false,
@@ -285,7 +285,7 @@ describe("fetchHttpJson error body boundary", () => {
       message: "display required",
       reason: "no_display_for_headed_profile",
       details: {
-        profile: "openclaw",
+        profile: "carapace",
         requestedHeadless: false,
         headlessSource: "config",
         displayPresent: false,

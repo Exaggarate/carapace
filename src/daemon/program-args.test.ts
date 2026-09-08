@@ -54,7 +54,7 @@ describe("resolveGatewayProgramArguments", () => {
   it.skipIf(Boolean(process.versions.bun))(
     "sizes only the Gateway in an ordinary Node spawn tree",
     async () => {
-      const entryPath = path.resolve("/opt/openclaw/dist/index.js");
+      const entryPath = path.resolve("/opt/carapace/dist/index.js");
       process.argv = [originalExecPath, entryPath];
       fsMocks.realpath.mockResolvedValue(entryPath);
       fsMocks.access.mockResolvedValue(undefined);
@@ -113,7 +113,7 @@ describe("resolveGatewayProgramArguments", () => {
   ])(
     "preserves stored controls without adding an automatic override: $nodeOptions $existing",
     async ({ nodeOptions, existing, expected }) => {
-      const entryPath = path.resolve("/opt/openclaw/dist/index.js");
+      const entryPath = path.resolve("/opt/carapace/dist/index.js");
       process.argv = ["node", entryPath];
       fsMocks.realpath.mockResolvedValue(entryPath);
       fsMocks.access.mockResolvedValue(undefined);
@@ -140,7 +140,7 @@ describe("resolveGatewayProgramArguments", () => {
   it("ignores installer execArgv and keeps native defaults when capacity is unknown", async () => {
     vi.spyOn(os, "totalmem").mockReturnValue(Number.NaN);
     const originalExecArgv = process.execArgv;
-    const entryPath = path.resolve("/opt/openclaw/dist/index.js");
+    const entryPath = path.resolve("/opt/carapace/dist/index.js");
     process.argv = ["node", entryPath];
     process.execArgv = ["--max-old-space-size=24576", "--require=/tmp/preload.js"];
     fsMocks.realpath.mockResolvedValue(entryPath);
@@ -164,8 +164,8 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("prefers index.js over legacy entry.js when both exist in the same dist directory", async () => {
-    const entryPath = path.resolve("/opt/openclaw/dist/entry.js");
-    const indexPath = path.resolve("/opt/openclaw/dist/index.js");
+    const entryPath = path.resolve("/opt/carapace/dist/entry.js");
+    const indexPath = path.resolve("/opt/carapace/dist/index.js");
     process.argv = ["node", entryPath];
     fsMocks.realpath.mockResolvedValue(entryPath);
     fsMocks.access.mockResolvedValue(undefined);
@@ -187,9 +187,9 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("keeps entry.js when index.js is missing", async () => {
-    const entryPath = path.resolve("/opt/openclaw/dist/entry.js");
-    const indexPath = path.resolve("/opt/openclaw/dist/index.js");
-    const indexMjsPath = path.resolve("/opt/openclaw/dist/index.mjs");
+    const entryPath = path.resolve("/opt/carapace/dist/entry.js");
+    const indexPath = path.resolve("/opt/carapace/dist/index.js");
+    const indexMjsPath = path.resolve("/opt/carapace/dist/index.mjs");
     process.argv = ["node", entryPath];
     fsMocks.realpath.mockResolvedValue(entryPath);
     fsMocks.access.mockImplementation(async (target: string) => {
@@ -215,8 +215,8 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("uses realpath-resolved dist entry when running via npx shim", async () => {
-    const argv1 = path.resolve("/tmp/.npm/_npx/63c3/node_modules/.bin/openclaw");
-    const entryPath = path.resolve("/tmp/.npm/_npx/63c3/node_modules/openclaw/dist/entry.js");
+    const argv1 = path.resolve("/tmp/.npm/_npx/63c3/node_modules/.bin/carapace");
+    const entryPath = path.resolve("/tmp/.npm/_npx/63c3/node_modules/carapace/dist/entry.js");
     process.argv = ["node", argv1];
     fsMocks.realpath.mockResolvedValue(entryPath);
     fsMocks.access.mockImplementation(async (target: string) => {
@@ -243,13 +243,13 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("prefers symlinked path over realpath for stable service config", async () => {
-    // Simulates pnpm global install where node_modules/openclaw is a symlink
-    // to .pnpm/openclaw@X.Y.Z/node_modules/openclaw
+    // Simulates pnpm global install where node_modules/carapace is a symlink
+    // to .pnpm/carapace@X.Y.Z/node_modules/carapace
     const symlinkPath = path.resolve(
-      "/Users/test/Library/pnpm/global/5/node_modules/openclaw/dist/entry.js",
+      "/Users/test/Library/pnpm/global/5/node_modules/carapace/dist/entry.js",
     );
     const realpathResolved = path.resolve(
-      "/Users/test/Library/pnpm/global/5/node_modules/.pnpm/openclaw@2026.1.21-2/node_modules/openclaw/dist/entry.js",
+      "/Users/test/Library/pnpm/global/5/node_modules/.pnpm/carapace@2026.1.21-2/node_modules/carapace/dist/entry.js",
     );
     process.argv = ["node", symlinkPath];
     fsMocks.realpath.mockResolvedValue(realpathResolved);
@@ -264,14 +264,14 @@ describe("resolveGatewayProgramArguments", () => {
     // Should use the symlinked canonical index.js path, not the realpath-resolved versioned path
     expect(result.programArguments[0]).toBe(validatedNodePath);
     expect(result.programArguments[2]).toBe(
-      path.resolve("/Users/test/Library/pnpm/global/5/node_modules/openclaw/dist/index.js"),
+      path.resolve("/Users/test/Library/pnpm/global/5/node_modules/carapace/dist/index.js"),
     );
     expect(result.programArguments[2]).not.toContain("@2026.1.21-2");
   });
 
   it("falls back to node_modules package dist when .bin path is not resolved", async () => {
-    const argv1 = path.resolve("/tmp/.npm/_npx/63c3/node_modules/.bin/openclaw");
-    const indexPath = path.resolve("/tmp/.npm/_npx/63c3/node_modules/openclaw/dist/index.js");
+    const argv1 = path.resolve("/tmp/.npm/_npx/63c3/node_modules/.bin/carapace");
+    const indexPath = path.resolve("/tmp/.npm/_npx/63c3/node_modules/carapace/dist/index.js");
     process.argv = ["node", argv1];
     fsMocks.realpath.mockRejectedValue(new Error("no realpath"));
     fsMocks.access.mockImplementation(async (target: string) => {
@@ -325,8 +325,8 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("uses Bun directly for packaged and source-checkout Gateway commands", async () => {
-    const packagedEntryPath = path.resolve("/opt/openclaw/dist/entry.js");
-    const packagedIndexPath = path.resolve("/opt/openclaw/dist/index.js");
+    const packagedEntryPath = path.resolve("/opt/carapace/dist/entry.js");
+    const packagedIndexPath = path.resolve("/opt/carapace/dist/index.js");
     process.argv = [validatedBunPath, packagedEntryPath];
     fsMocks.realpath.mockResolvedValue(packagedEntryPath);
     fsMocks.access.mockResolvedValue(undefined);
@@ -436,7 +436,7 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("uses an executable wrapper from Bun without a selected Node path", async () => {
-    const wrapperPath = path.resolve("/usr/local/bin/openclaw-doppler");
+    const wrapperPath = path.resolve("/usr/local/bin/carapace-doppler");
     process.execPath = "/usr/local/bin/bun";
     fsMocks.stat.mockResolvedValue({ isFile: () => true } as never);
     fsMocks.access.mockResolvedValue(undefined);
@@ -452,7 +452,7 @@ describe("resolveGatewayProgramArguments", () => {
   });
 
   it("rejects a non-executable wrapper file", async () => {
-    const wrapperPath = path.resolve("/usr/local/bin/openclaw-doppler");
+    const wrapperPath = path.resolve("/usr/local/bin/carapace-doppler");
     fsMocks.stat.mockResolvedValue({ isFile: () => true } as never);
     fsMocks.access.mockRejectedValue(new Error("EACCES"));
 
@@ -462,14 +462,14 @@ describe("resolveGatewayProgramArguments", () => {
         runtime: "node",
         wrapperPath,
       }),
-    ).rejects.toThrow("OPENCLAW_WRAPPER must point to an executable file");
+    ).rejects.toThrow("CARAPACE_WRAPPER must point to an executable file");
   });
 });
 
 describe("resolveNodeProgramArguments", () => {
   it("carries an explicit plaintext selection into the managed node command", async () => {
-    const entryPath = path.resolve("/opt/openclaw/dist/entry.js");
-    const indexPath = path.resolve("/opt/openclaw/dist/index.js");
+    const entryPath = path.resolve("/opt/carapace/dist/entry.js");
+    const indexPath = path.resolve("/opt/carapace/dist/index.js");
     process.argv = ["node", entryPath];
     fsMocks.realpath.mockResolvedValue(entryPath);
     fsMocks.access.mockResolvedValue(undefined);
@@ -496,8 +496,8 @@ describe("resolveNodeProgramArguments", () => {
   });
 
   it("uses Bun for the managed node command", async () => {
-    const entryPath = path.resolve("/opt/openclaw/dist/entry.js");
-    const indexPath = path.resolve("/opt/openclaw/dist/index.js");
+    const entryPath = path.resolve("/opt/carapace/dist/entry.js");
+    const indexPath = path.resolve("/opt/carapace/dist/index.js");
     process.argv = [validatedBunPath, entryPath];
     fsMocks.realpath.mockResolvedValue(entryPath);
     fsMocks.access.mockResolvedValue(undefined);

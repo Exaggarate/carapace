@@ -1,7 +1,7 @@
 import { performance } from "node:perf_hooks";
 import { isMainThread, threadId } from "node:worker_threads";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { tryResolveCronJobEffectiveAgentId } from "../agent-id.js";
 import { resolveCronListSnapshotRevision } from "../list-snapshot-revision.js";
 import { assertCronJobStateTimestamps } from "../persisted-shape.js";
@@ -41,7 +41,7 @@ import { applyJobResult, armTimer } from "./timer.js";
 export async function status(state: CronServiceState) {
   return await locked(state, async () => {
     await ensureLoadedForRead(state);
-    const sqlitePath = resolveOpenClawStateSqlitePath();
+    const sqlitePath = resolveCarapaceStateSqlitePath();
     return {
       enabled: state.deps.cronEnabled,
       triggersEnabled: state.deps.cronConfig?.triggers?.enabled !== false,

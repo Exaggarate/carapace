@@ -46,7 +46,7 @@ function createConnectedContext(
         role: "operator",
         scopes: [options.admin === false ? "operator.read" : "operator.admin"],
       },
-      features: { methods: options.advertised === false ? [] : ["openclaw.setup.detect"] },
+      features: { methods: options.advertised === false ? [] : ["carapace.setup.detect"] },
       snapshot: { sessionDefaults },
     },
   };
@@ -73,7 +73,7 @@ describe("model setup first-run redirect", () => {
   beforeEach(() => {
     vi.stubGlobal("localStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "durable-device-private-key-for-testing" }),
     );
   });
@@ -111,8 +111,8 @@ describe("model setup first-run redirect", () => {
     ).toBe(true);
     expect(
       isDefaultChatLanding(
-        { pathname: "/openclaw/chat/main", search: "", hash: "" },
-        "/openclaw",
+        { pathname: "/carapace/chat/main", search: "", hash: "" },
+        "/carapace",
         routeIdFromPath,
       ),
     ).toBe(true);
@@ -288,7 +288,7 @@ describe("model setup first-run redirect", () => {
     const dispose = await startRedirect(context);
 
     await vi.waitFor(() => {
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
     });
     expect(replace).not.toHaveBeenCalled();
     dispose();

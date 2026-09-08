@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it } from "vitest";
 import {
   installMockGateway,
@@ -97,7 +97,7 @@ suite.define(() => {
       const docsLink = page.getByRole("link", { name: "Learn more", exact: true });
       await docsLink.waitFor();
       expect(await docsLink.getAttribute("href")).toBe(
-        "https://docs.openclaw.ai/gateway/cloud-workers",
+        "https://github.com/Exaggarate/carapace",
       );
       await gateway.waitForRequest("environments.list");
       await page.getByText("No cloud worker profiles are configured.", { exact: true }).waitFor();
@@ -117,7 +117,7 @@ suite.define(() => {
       expect(await machineClass.getAttribute("list")).toBeNull();
       expect(
         await page
-          .locator("openclaw-cloud-workers-page datalist, openclaw-cloud-workers-page option")
+          .locator("carapace-cloud-workers-page datalist, carapace-cloud-workers-page option")
           .count(),
       ).toBe(0);
       for (const invalidClass of ["", " ", "x".repeat(129)]) {
@@ -222,7 +222,7 @@ suite.define(() => {
       const configGetCount = (await gateway.getRequests("config.get")).length;
       await gateway.deferNext("config.get");
       await gateway.emitGatewayEvent("config.changed", {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         hash: "cloud-workers-2",
         ts: Date.now(),
       });
@@ -484,7 +484,7 @@ suite.define(() => {
         install: "bundle",
         settings: {
           host: "worker.example.test",
-          user: "openclaw",
+          user: "carapace",
           keyRef: { source: "env", provider: "default", id: "QA_PRIVATE_KEY" },
         },
       },
@@ -583,7 +583,7 @@ suite.define(() => {
           configResponse(replacedConfig, "cloud-workers-provider-replaced"),
         );
         await gateway.emitGatewayEvent("config.changed", {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           hash: "cloud-workers-provider-replaced",
           ts: Date.now(),
         });
@@ -741,7 +741,7 @@ suite.define(() => {
       const socketCount = await gateway.getSocketCount();
       const configGetCount = (await gateway.getRequests("config.get")).length;
       const originalGateway = await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               gateway: {
@@ -771,7 +771,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: {
                 context: {
                   gateway: {
@@ -791,7 +791,7 @@ suite.define(() => {
         )
         .toMatchObject({ gatewayUrl: originalGateway.gatewayUrl, phase: "connected" });
       const replacementClientInstanceId = await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: { context: { gateway: { snapshot: { client: { instanceId: string } } } } };
         };
         return app.runtime?.context.gateway.snapshot.client.instanceId;

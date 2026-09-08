@@ -22,13 +22,13 @@ describe("config environment across in-process restart", () => {
     { operation: "replacement", nextValue: "second" },
     { operation: "removal", nextValue: undefined },
   ])("applies config-owned value $operation after restart", ({ nextValue }) => {
-    vi.stubEnv("OPENCLAW_TEST_RESTART_VALUE", undefined);
-    vi.stubEnv("OPENCLAW_TEST_RESTART_AMBIENT", "ambient");
+    vi.stubEnv("CARAPACE_TEST_RESTART_VALUE", undefined);
+    vi.stubEnv("CARAPACE_TEST_RESTART_AMBIENT", "ambient");
     const initial = {
       env: {
         vars: {
-          OPENCLAW_TEST_RESTART_VALUE: "first",
-          OPENCLAW_TEST_RESTART_AMBIENT: "config-default",
+          CARAPACE_TEST_RESTART_VALUE: "first",
+          CARAPACE_TEST_RESTART_AMBIENT: "config-default",
         },
       },
     };
@@ -51,8 +51,8 @@ describe("config environment across in-process restart", () => {
     const next = {
       env: {
         vars: {
-          ...(nextValue ? { OPENCLAW_TEST_RESTART_VALUE: nextValue } : {}),
-          OPENCLAW_TEST_RESTART_AMBIENT: "changed-config-default",
+          ...(nextValue ? { CARAPACE_TEST_RESTART_VALUE: nextValue } : {}),
+          CARAPACE_TEST_RESTART_AMBIENT: "changed-config-default",
         },
       },
     };
@@ -62,17 +62,17 @@ describe("config environment across in-process restart", () => {
     }).publish();
     publication.commit();
 
-    expect(process.env.OPENCLAW_TEST_RESTART_VALUE).toBe(nextValue);
-    expect(process.env.OPENCLAW_TEST_RESTART_AMBIENT).toBe("ambient");
+    expect(process.env.CARAPACE_TEST_RESTART_VALUE).toBe(nextValue);
+    expect(process.env.CARAPACE_TEST_RESTART_AMBIENT).toBe("ambient");
   });
 
   it("preserves an ambient replacement of a formerly config-owned value", () => {
-    vi.stubEnv("OPENCLAW_TEST_RESTART_VALUE", "config-value");
-    const initial = { env: { vars: { OPENCLAW_TEST_RESTART_VALUE: "config-value" } } };
+    vi.stubEnv("CARAPACE_TEST_RESTART_VALUE", "config-value");
+    const initial = { env: { vars: { CARAPACE_TEST_RESTART_VALUE: "config-value" } } };
     initializePublishedConfigRuntimeEnv(initial, {
-      ownedEnv: { OPENCLAW_TEST_RESTART_VALUE: "config-value" },
+      ownedEnv: { CARAPACE_TEST_RESTART_VALUE: "config-value" },
     });
-    process.env.OPENCLAW_TEST_RESTART_VALUE = "new-ambient";
+    process.env.CARAPACE_TEST_RESTART_VALUE = "new-ambient";
 
     clearRuntimeConfigSnapshot();
     const publication = prepareConfigRuntimeEnv({
@@ -81,27 +81,27 @@ describe("config environment across in-process restart", () => {
     }).publish();
     publication.commit();
 
-    expect(process.env.OPENCLAW_TEST_RESTART_VALUE).toBe("new-ambient");
+    expect(process.env.CARAPACE_TEST_RESTART_VALUE).toBe("new-ambient");
   });
 
   it("keeps process-stable config selection in the environment during restart", () => {
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", "/synthetic/restart/openclaw.json");
-    const initial = { env: { vars: { OPENCLAW_CONFIG_PATH: "/synthetic/restart/openclaw.json" } } };
+    vi.stubEnv("CARAPACE_CONFIG_PATH", "/synthetic/restart/carapace.json");
+    const initial = { env: { vars: { CARAPACE_CONFIG_PATH: "/synthetic/restart/carapace.json" } } };
     initializePublishedConfigRuntimeEnv(initial, {
-      ownedEnv: { OPENCLAW_CONFIG_PATH: "/synthetic/restart/openclaw.json" },
+      ownedEnv: { CARAPACE_CONFIG_PATH: "/synthetic/restart/carapace.json" },
     });
 
     clearRuntimeConfigSnapshot();
 
-    expect(process.env.OPENCLAW_CONFIG_PATH).toBe("/synthetic/restart/openclaw.json");
+    expect(process.env.CARAPACE_CONFIG_PATH).toBe("/synthetic/restart/carapace.json");
   });
 
   it("fences a late rollback while retaining the published environment for restart", () => {
-    vi.stubEnv("OPENCLAW_TEST_RESTART_VALUE", "first");
-    const initial = { env: { vars: { OPENCLAW_TEST_RESTART_VALUE: "first" } } };
-    const next = { env: { vars: { OPENCLAW_TEST_RESTART_VALUE: "second" } } };
+    vi.stubEnv("CARAPACE_TEST_RESTART_VALUE", "first");
+    const initial = { env: { vars: { CARAPACE_TEST_RESTART_VALUE: "first" } } };
+    const next = { env: { vars: { CARAPACE_TEST_RESTART_VALUE: "second" } } };
     initializePublishedConfigRuntimeEnv(initial, {
-      ownedEnv: { OPENCLAW_TEST_RESTART_VALUE: "first" },
+      ownedEnv: { CARAPACE_TEST_RESTART_VALUE: "first" },
     });
     const rollback = prepareConfigRuntimeEnv({
       previousConfig: initial,
@@ -111,17 +111,17 @@ describe("config environment across in-process restart", () => {
     clearRuntimeConfigSnapshot();
     rollback();
 
-    expect(process.env.OPENCLAW_TEST_RESTART_VALUE).toBe("second");
+    expect(process.env.CARAPACE_TEST_RESTART_VALUE).toBe("second");
     const publication = prepareConfigRuntimeEnv({ previousConfig: next, nextConfig: {} }).publish();
     publication.commit();
-    expect(process.env.OPENCLAW_TEST_RESTART_VALUE).toBeUndefined();
+    expect(process.env.CARAPACE_TEST_RESTART_VALUE).toBeUndefined();
   });
 
   it("still clears environment ownership on an explicit full runtime reset", () => {
-    vi.stubEnv("OPENCLAW_TEST_RESTART_VALUE", "owned");
-    const initial = { env: { vars: { OPENCLAW_TEST_RESTART_VALUE: "owned" } } };
+    vi.stubEnv("CARAPACE_TEST_RESTART_VALUE", "owned");
+    const initial = { env: { vars: { CARAPACE_TEST_RESTART_VALUE: "owned" } } };
     initializePublishedConfigRuntimeEnv(initial, {
-      ownedEnv: { OPENCLAW_TEST_RESTART_VALUE: "owned" },
+      ownedEnv: { CARAPACE_TEST_RESTART_VALUE: "owned" },
     });
 
     resetConfigRuntimeState();

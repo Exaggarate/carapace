@@ -63,7 +63,7 @@ describe("prepared provider errors after settled tools", () => {
     const attempt = createAssistantReportedProviderFailureAttempt();
     expect(attempt).toMatchObject({
       terminal: { kind: "ok" },
-      settledTurnFinalizationContext: { source: "openclaw-transcript" },
+      settledTurnFinalizationContext: { source: "carapace-transcript" },
     });
     const request = prepareRequest(attempt);
     expect(request.payloadsWithToolMedia).toEqual([expect.objectContaining({ isError: true })]);

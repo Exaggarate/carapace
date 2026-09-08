@@ -3,7 +3,7 @@ import {
   type RealtimeVoiceBridgeCallbacks,
   type RealtimeVoiceBridgeSession,
   type TalkEvent,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import { vi } from "vitest";
 import { createVoiceCaptureState } from "./capture-state.js";
 import { DiscordRealtimePlayback } from "./realtime-playback.js";

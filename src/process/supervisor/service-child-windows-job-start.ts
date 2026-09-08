@@ -1,4 +1,4 @@
-import { asOptionalRecord, isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord, isStringRecord } from "@carapace/normalization-core/record-coerce";
 import { mergeProcessEnv } from "../../infra/process-env.js";
 import type { ServiceChildStart } from "./service-child-protocol.js";
 

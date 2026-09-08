@@ -32,11 +32,11 @@ async function rawDraftMatches(
   return page.evaluate(
     async ({ attachmentCount, text }) => {
       const databases = await indexedDB.databases();
-      if (!databases.some((database) => database.name === "openclaw-control-ui")) {
+      if (!databases.some((database) => database.name === "carapace-control-ui")) {
         return false;
       }
       const database = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open("openclaw-control-ui");
+        const request = indexedDB.open("carapace-control-ui");
         request.addEventListener("success", () => resolve(request.result), { once: true });
         request.addEventListener(
           "error",
@@ -216,7 +216,7 @@ suite.define(() => {
         globalThis.setTimeout(() => {
           state.teardownActive = false;
         }, 0);
-        document.querySelector("openclaw-new-session-page")?.remove();
+        document.querySelector("carapace-new-session-page")?.remove();
       });
       await expect
         .poll(() =>

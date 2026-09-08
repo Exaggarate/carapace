@@ -1,4 +1,4 @@
-import type { Context, Model, SimpleStreamOptions } from "@openclaw/llm-core";
+import type { Context, Model, SimpleStreamOptions } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { OPENAI_PROMPT_CACHE_KEY_MAX_LENGTH } from "../providers/openai-prompt-cache.js";
 import {

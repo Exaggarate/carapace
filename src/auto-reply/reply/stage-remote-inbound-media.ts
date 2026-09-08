@@ -1,6 +1,6 @@
 /** Shared guard for staging remote inbound media into the local cache. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/config.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/config.js";
 import { hasStagedMediaFacts } from "../../media/media-facts.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
 import type { RuntimeMsgContext as MsgContext } from "../templating.js";
@@ -19,7 +19,7 @@ const stageSandboxMediaRuntimeLoader = createLazyImportLoader(
  */
 export async function stageRemoteInboundMediaIfNeeded(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   workspaceDir: string;

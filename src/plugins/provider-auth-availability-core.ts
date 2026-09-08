@@ -15,7 +15,7 @@ import {
 } from "../agents/model-auth-provider-config.js";
 import { resolveManagedSecretRefRuntimeProviderAuth } from "../agents/model-auth-runtime-config.js";
 import { resolveDirectProviderCredentialMode } from "../agents/model-auth-runtime-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 export function createProviderAuthAvailability(
   authStore: Pick<
@@ -40,7 +40,7 @@ export function createProviderAuthAvailability(
     /** Provider id to check for config/env auth or local auth profiles. */
     provider: string;
     /** Optional runtime config used to resolve provider-owned API-key credentials. */
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     /** Agent directory containing auth profiles. */
     agentDir?: string;
     /** Optional allowed profile credential types. */
@@ -174,7 +174,7 @@ export function createProviderAuthAvailability(
     /** Provider id whose usable auth profiles should be listed. */
     provider: string;
     /** Optional runtime config used to resolve auth profile order and default agent dir. */
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     /** Agent directory containing auth profiles. */
     agentDir?: string;
     /** Optional allowed profile credential types. */
@@ -199,7 +199,7 @@ export function createProviderAuthAvailability(
     /** Provider id to check for usable auth profiles. */
     provider: string;
     /** Optional runtime config used to resolve auth profile order and default agent dir. */
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     /** Agent directory containing auth profiles. */
     agentDir?: string;
     /** Optional allowed profile credential types. */
@@ -219,7 +219,7 @@ export function createProviderAuthAvailability(
     /** Provider id whose first usable auth profile should resolve to an API key. */
     provider: string;
     /** Optional runtime config used to resolve auth profile order and secret refs. */
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     /** Agent directory containing auth profiles. */
     agentDir?: string;
     /** Optional allowed profile credential types. */
@@ -250,7 +250,7 @@ export function createProviderAuthAvailability(
 
   function resolveUsableProviderAuthProfiles(params: {
     provider: string;
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     agentDir?: string;
     allowKeychainPrompt?: boolean;
     includeExternalCliAuth?: boolean;

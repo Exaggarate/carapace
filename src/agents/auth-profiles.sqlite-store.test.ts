@@ -8,7 +8,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as kyselySync from "../infra/kysely-sync.js";
 import * as nodeSqlite from "../infra/node-sqlite.js";
@@ -18,12 +18,12 @@ import {
 } from "../infra/state-migrations.shared-auth-store.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceAgentDatabasesForTest,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
 import { resolveAgentDir } from "./agent-scope.js";
 import * as authProfileClone from "./auth-profiles/clone.js";
@@ -99,15 +99,15 @@ async function withAgentDirEnv(
     fs.mkdirSync(agentDir, { recursive: true });
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: root,
-        OPENCLAW_AGENT_DIR: agentDir,
+        CARAPACE_STATE_DIR: root,
+        CARAPACE_AGENT_DIR: agentDir,
       },
       async () => await run(agentDir, root),
     );
   } finally {
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(root, { recursive: true, force: true });
   }
 }
@@ -124,7 +124,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("persists auth profiles and runtime scheduling state in the agent sqlite database", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-", (agentDir) => {
       saveAuthProfileStore(
         {
           ...apiKeyStore("sk-test"),
@@ -143,7 +143,7 @@ describe("auth profile sqlite store", () => {
       expect(loaded.usageStats?.["openai:default"]?.lastUsed).toBe(123);
       expect(fs.existsSync(path.join(agentDir, "auth-profiles.json"))).toBe(false);
       expect(fs.existsSync(path.join(agentDir, "auth-state.json"))).toBe(false);
-      expect(fs.existsSync(path.join(agentDir, "openclaw-agent.sqlite"))).toBe(true);
+      expect(fs.existsSync(path.join(agentDir, "carapace-agent.sqlite"))).toBe(true);
     });
   });
 
@@ -151,7 +151,7 @@ describe("auth profile sqlite store", () => {
     { label: "pre-recorded ownership", recordOwnership: true },
     { label: "fresh ownership", recordOwnership: false },
   ])("persists the shared store through the shared-state adapter with $label", async (testCase) => {
-    await withAgentDirEnv("openclaw-auth-shared-state-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-shared-state-", async (agentDir) => {
       if (testCase.recordOwnership) {
         writeConfigMachineState("auth.sharedStore", { location: "state-db" });
       }
@@ -170,7 +170,7 @@ describe("auth profile sqlite store", () => {
         profiles: { "openai:default": { key: "sk-shared" } },
         order: { openai: ["openai:default"] },
       });
-      const database = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const database = new DatabaseSync(resolveCarapaceStateSqlitePath());
       expect(
         database
           .prepare(
@@ -212,7 +212,7 @@ describe("auth profile sqlite store", () => {
         ),
     },
   ])("keeps legacy ownership when the main agent has a $label", async (testCase) => {
-    await withAgentDirEnv("openclaw-auth-shared-legacy-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-shared-legacy-", async (agentDir) => {
       testCase.seed(agentDir);
 
       await upsertAuthProfileWithLockOrThrow({
@@ -221,7 +221,7 @@ describe("auth profile sqlite store", () => {
         credential: apiKeyCredential("sk-updated"),
       });
 
-      const sharedDatabase = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const sharedDatabase = new DatabaseSync(resolveCarapaceStateSqlitePath());
       expect(
         sharedDatabase
           .prepare(
@@ -242,7 +242,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("memoizes legacy inspection and follows Doctor's ownership flip", async () => {
-    await withAgentDirEnv("openclaw-auth-shared-memo-", async (agentDir, stateDir) => {
+    await withAgentDirEnv("carapace-auth-shared-memo-", async (agentDir, stateDir) => {
       const sourcePath = resolveAuthProfileDatabasePath(agentDir);
       writePersistedAuthProfileStoreRaw(apiKeyStore("sk-legacy"), agentDir);
       const realLstat = fs.lstatSync;
@@ -289,10 +289,10 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps legacy ownership while shared-auth cleanup is pending", async () => {
-    await withAgentDirEnv("openclaw-auth-shared-pending-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-shared-pending-", async (agentDir) => {
       const sourcePath = resolveAuthProfileDatabasePath(agentDir);
       writeConfigMachineState("test.seed", true);
-      const sharedDatabase = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const sharedDatabase = new DatabaseSync(resolveCarapaceStateSqlitePath());
       sharedDatabase
         .prepare(
           `INSERT INTO migration_runs (id, started_at, finished_at, status, report_json)
@@ -318,7 +318,7 @@ describe("auth profile sqlite store", () => {
         credential: apiKeyCredential("sk-after-crash"),
       });
 
-      const after = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const after = new DatabaseSync(resolveCarapaceStateSqlitePath());
       expect(
         after
           .prepare(
@@ -339,7 +339,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps legacy ownership when the main-agent source is unreadable", async () => {
-    await withAgentDirEnv("openclaw-auth-shared-unreadable-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-shared-unreadable-", async (agentDir) => {
       const sourcePath = resolveAuthProfileDatabasePath(agentDir);
       const realLstat = fs.lstatSync;
       const lstatSpy = vi.spyOn(fs, "lstatSync").mockImplementation((pathname, options) => {
@@ -359,7 +359,7 @@ describe("auth profile sqlite store", () => {
         lstatSpy.mockRestore();
       }
 
-      const sharedDatabase = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const sharedDatabase = new DatabaseSync(resolveCarapaceStateSqlitePath());
       expect(
         sharedDatabase
           .prepare(
@@ -373,7 +373,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps legacy ownership when a retired-file probe fails", async () => {
-    await withAgentDirEnv("openclaw-auth-shared-file-probe-error-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-shared-file-probe-error-", async (agentDir) => {
       const authPath = path.join(agentDir, "auth-profiles.json");
       const realExistsSync = fs.existsSync.bind(fs);
       let authPathProbes = 0;
@@ -393,7 +393,7 @@ describe("auth profile sqlite store", () => {
         existsSpy.mockRestore();
       }
 
-      const sharedDatabase = new DatabaseSync(resolveOpenClawStateSqlitePath());
+      const sharedDatabase = new DatabaseSync(resolveCarapaceStateSqlitePath());
       expect(
         sharedDatabase
           .prepare(
@@ -407,7 +407,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("does not read legacy auth-profiles.json at runtime", async () => {
-    await withAgentDirEnv("openclaw-auth-no-json-fallback-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-no-json-fallback-", (agentDir) => {
       fs.writeFileSync(
         path.join(agentDir, "auth-profiles.json"),
         `${JSON.stringify(apiKeyStore("sk-json"))}\n`,
@@ -421,7 +421,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps serving SQLite credentials when a credential source appears during the read", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-late-legacy-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-late-legacy-", (agentDir) => {
       saveAuthProfileStore(apiKeyStore("not-a-real"), agentDir);
       const legacyPath = path.join(agentDir, "auth.json");
       const existsSync = fs.existsSync.bind(fs);
@@ -452,14 +452,14 @@ describe("auth profile sqlite store", () => {
   });
 
   it("does not create sqlite files for missing-store reads", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-no-create-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-no-create-", (agentDir) => {
       expect(loadPersistedAuthProfileStore(agentDir)).toBeNull();
-      expect(fs.existsSync(path.join(agentDir, "openclaw-agent.sqlite"))).toBe(false);
+      expect(fs.existsSync(path.join(agentDir, "carapace-agent.sqlite"))).toBe(false);
     });
   });
 
   it("treats a legacy agent database without auth tables as a missing store", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-legacy-schema-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-legacy-schema-", (agentDir) => {
       const database = new DatabaseSync(resolveAuthProfileDatabasePath(agentDir));
       database.exec("CREATE TABLE legacy_state (id INTEGER PRIMARY KEY);");
       database.close();
@@ -472,7 +472,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("classifies each missing auth table through an existing database handle", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-partial-schema-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-partial-schema-", (agentDir) => {
       const database = new DatabaseSync(resolveAuthProfileDatabasePath(agentDir));
       database.exec(`
         CREATE TABLE auth_profile_store (
@@ -497,9 +497,9 @@ describe("auth profile sqlite store", () => {
   });
 
   it("rejects a newer agent database that has no current auth table", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-newer-schema-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-newer-schema-", (agentDir) => {
       const database = new DatabaseSync(resolveAuthProfileDatabasePath(agentDir));
-      database.exec(`PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION + 1};`);
+      database.exec(`PRAGMA user_version = ${CARAPACE_AGENT_SCHEMA_VERSION + 1};`);
       database.close();
 
       expect(inspectPersistedAuthProfileStoreRaw(agentDir)).toEqual({ status: "unreadable" });
@@ -507,7 +507,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("treats a non-table auth schema object as unreadable", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-invalid-schema-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-invalid-schema-", (agentDir) => {
       const database = new DatabaseSync(resolveAuthProfileDatabasePath(agentDir));
       database.exec(
         "CREATE VIEW auth_profile_store AS SELECT 'primary' AS store_key, '{}' AS store_json;",
@@ -519,11 +519,11 @@ describe("auth profile sqlite store", () => {
   });
 
   it("reads existing sqlite auth stores without registering shared state", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-readonly-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-readonly-", (agentDir) => {
       saveAuthProfileStore(apiKeyStore("sk-test"), agentDir);
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
-      const stateDbPath = resolveOpenClawStateSqlitePath();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
+      const stateDbPath = resolveCarapaceStateSqlitePath();
       fs.rmSync(path.dirname(stateDbPath), { recursive: true, force: true });
 
       const loaded = loadPersistedAuthProfileStore(agentDir);
@@ -534,7 +534,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("reuses path-keyed read handles until the runtime snapshot revision changes", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-read-reuse-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-read-reuse-", (agentDir) => {
       const secondaryAgentDir = path.join(
         path.dirname(path.dirname(agentDir)),
         "secondary",
@@ -542,7 +542,7 @@ describe("auth profile sqlite store", () => {
       );
       saveAuthProfileStore(apiKeyStore("sk-test"), agentDir);
       saveAuthProfileStore(apiKeyStore("sk-secondary"), secondaryAgentDir);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       clearRuntimeAuthProfileStoreSnapshots();
       const openSpy = vi.spyOn(nodeSqlite, "openNodeSqliteDatabase");
       const statementCacheSpy = vi.spyOn(kyselySync, "enableNodeSqliteKyselyStatementCache");
@@ -581,7 +581,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("retains scoped readers for a retry when native close fails", async () => {
-    await withAgentDirEnv("openclaw-auth-reader-close-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-reader-close-", (agentDir) => {
       const siblingAgentDir = `${agentDir}-sibling`;
       saveAuthProfileStore(apiKeyStore("qa-synthetic"), agentDir);
       saveAuthProfileStore(apiKeyStore("qa-sibling"), siblingAgentDir);
@@ -620,7 +620,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("reuses the transaction database while filtering multiple inherited OAuth profiles", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-save-reuse-", (mainAgentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-save-reuse-", (mainAgentDir) => {
       const customAgentDir = path.join(path.dirname(path.dirname(mainAgentDir)), "custom", "agent");
       const profiles = Object.fromEntries(
         Array.from({ length: 3 }, (_, index) => [
@@ -636,7 +636,7 @@ describe("auth profile sqlite store", () => {
       );
       const store: AuthProfileStore = { version: 1, profiles };
       saveAuthProfileStore(store, mainAgentDir);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const openSpy = vi.spyOn(nodeSqlite, "openNodeSqliteDatabase");
       try {
         saveAuthProfileStore(store, customAgentDir);
@@ -654,9 +654,9 @@ describe("auth profile sqlite store", () => {
   });
 
   it("waits for brief rollback-journal contention before reading persisted auth", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-contention-", async (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-contention-", async (agentDir) => {
       saveAuthProfileStore(apiKeyStore("sk-test"), agentDir);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
 
       const databasePath = resolveAuthProfileDatabasePath(agentDir);
       const setup = new DatabaseSync(databasePath);
@@ -716,7 +716,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("uses the configured agent id for custom agentDir databases", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-custom-agent-", (envAgentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-custom-agent-", (envAgentDir) => {
       const customAgentDir = path.join(path.dirname(path.dirname(envAgentDir)), "custom-coder");
       const cfg = {
         agents: {
@@ -727,7 +727,7 @@ describe("auth profile sqlite store", () => {
 
       saveAuthProfileStore(apiKeyStore("sk-test"), agentDir);
 
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "coder",
         path: resolveAuthProfileDatabasePath(agentDir),
       });
@@ -736,12 +736,12 @@ describe("auth profile sqlite store", () => {
   });
 
   it("resolves database filenames without reverse-owner filesystem discovery", async () => {
-    await withAgentDirEnv("openclaw-auth-filename-", (agentDir, stateDir) => {
+    await withAgentDirEnv("carapace-auth-filename-", (agentDir, stateDir) => {
       const alias = path.join(stateDir, "agent-alias");
       const missing = path.join(stateDir, "missing", "agent");
       fs.symlinkSync(agentDir, alias, "junction");
-      withEnv({ OPENCLAW_HOME: stateDir }, () => {
-        const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+      withEnv({ CARAPACE_HOME: stateDir }, () => {
+        const databasePath = path.join(agentDir, "carapace-agent.sqlite");
         expect(resolveAuthProfileDatabasePath("")).toBe(databasePath);
         const realpath = vi.spyOn(fs.realpathSync, "native");
         try {
@@ -749,10 +749,10 @@ describe("auth profile sqlite store", () => {
             [agentDir, databasePath],
             [path.relative(process.cwd(), agentDir), databasePath],
             ["~/agents/main/agent", databasePath],
-            [alias, path.join(alias, "openclaw-agent.sqlite")],
-            [missing, path.join(missing, "openclaw-agent.sqlite")],
+            [alias, path.join(alias, "carapace-agent.sqlite")],
+            [missing, path.join(missing, "carapace-agent.sqlite")],
             ["", databasePath],
-            ["  ", "openclaw-agent.sqlite"],
+            ["  ", "carapace-agent.sqlite"],
           ] as const) {
             expect(resolveAuthProfileDatabasePath(input)).toBe(expected);
           }
@@ -766,7 +766,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("does not copy an unused same-owner snapshot during runtime reads", async () => {
-    await withAgentDirEnv("openclaw-auth-snapshot-work-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-snapshot-work-", (agentDir) => {
       const store = { ...apiKeyStore("synthetic"), order: { openai: ["openai:default"] } };
       replaceRuntimeAuthProfileStoreSnapshots([{ agentDir, store }]);
       const clone = vi.spyOn(authProfileClone, "cloneAuthProfileStore");
@@ -785,7 +785,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps an explicit inherited snapshot authoritative for an omitted agent", async () => {
-    await withAgentDirEnv("openclaw-auth-inherited-selection-", (agentDir, stateDir) => {
+    await withAgentDirEnv("carapace-auth-inherited-selection-", (agentDir, stateDir) => {
       const inheritedAuthDir = path.join(stateDir, "inherited");
       replaceRuntimeAuthProfileStoreSnapshots([
         { agentDir, store: apiKeyStore("shared") },
@@ -798,7 +798,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("keeps SecretRef-backed credentials from persisting duplicate plaintext", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-secret-ref-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-secret-ref-", (agentDir) => {
       saveAuthProfileStore(
         {
           version: 1,
@@ -836,7 +836,7 @@ describe("auth profile sqlite store", () => {
   });
 
   it("recomputes runtime-only external auth overlays from the sqlite base store", async () => {
-    await withAgentDirEnv("openclaw-auth-sqlite-overlay-", (agentDir) => {
+    await withAgentDirEnv("carapace-auth-sqlite-overlay-", (agentDir) => {
       saveAuthProfileStore(apiKeyStore("sk-test"), agentDir);
       mocks.resolveExternalCliAuthProfiles
         .mockReturnValueOnce([

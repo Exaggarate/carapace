@@ -10,7 +10,7 @@ import {
 import type { AnyAgentTool } from "../../src/agents/tools/common.js";
 import { createTestPluginApi } from "../../src/plugin-sdk/plugin-test-api.js";
 import { getPluginToolMeta, setPluginToolMeta } from "../../src/plugins/tool-metadata.js";
-import type { OpenClawPluginApi } from "../../src/plugins/types.js";
+import type { CarapacePluginApi } from "../../src/plugins/types.js";
 import { loadBundledPluginFacade } from "../../src/test-utils/bundled-plugin-public-surface.js";
 
 describe("public plugin registrations in Tool Search", () => {
@@ -41,12 +41,12 @@ describe("public plugin registrations in Tool Search", () => {
       });
       if (pluginId === "feishu") {
         const surface = await loadBundledPluginFacade<{
-          registerFeishuBitableTools(api: OpenClawPluginApi): void;
+          registerFeishuBitableTools(api: CarapacePluginApi): void;
         }>({ pluginId, artifactBasename: "api.js" });
         surface.registerFeishuBitableTools(api);
       } else {
         const surface = await loadBundledPluginFacade<{
-          default: { register(api: OpenClawPluginApi): void };
+          default: { register(api: CarapacePluginApi): void };
         }>({ pluginId, artifactBasename: "index.js" });
         surface.default.register(api);
       }

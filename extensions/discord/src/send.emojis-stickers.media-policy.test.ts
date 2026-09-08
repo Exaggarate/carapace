@@ -1,8 +1,8 @@
 // Discord tests cover sender-scoped media policy on guild asset uploads.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { uploadEmojiDiscord, uploadStickerDiscord } from "./send.emojis-stickers.js";
 import { makeDiscordRest, requestBody, type MockCallSource } from "./send.test-harness.js";
@@ -13,7 +13,7 @@ const PNG_BYTES = Buffer.from(
   "base64",
 );
 
-const cfg = { channels: { discord: { token: "tok" } } } as OpenClawConfig;
+const cfg = { channels: { discord: { token: "tok" } } } as CarapaceConfig;
 
 describe("guild asset uploads enforce the sender-scoped media policy", () => {
   let tmpDir: string;
@@ -25,7 +25,7 @@ describe("guild asset uploads enforce the sender-scoped media policy", () => {
   beforeAll(async () => {
     // The denied source lives under a default media root, so only the sender-scoped
     // policy can keep it out of the outbound upload.
-    const defaultRoot = resolvePreferredOpenClawTmpDir();
+    const defaultRoot = resolvePreferredCarapaceTmpDir();
     await fs.mkdir(defaultRoot, { recursive: true });
     tmpDir = await fs.realpath(await fs.mkdtemp(path.join(defaultRoot, "discord-media-policy-")));
     senderRoot = path.join(tmpDir, "sender-workspace");

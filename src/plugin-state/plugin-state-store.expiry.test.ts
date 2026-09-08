@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   countPluginStateLiveEntries,
   createPluginStateKeyedStore,
@@ -16,10 +16,10 @@ import {
   setMaxPluginStateEntriesPerPluginForTests,
 } from "./plugin-state-store.test-helpers.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({ label: "plugin-state-expiry" });
+  testState = await createCarapaceTestState({ label: "plugin-state-expiry" });
 });
 
 beforeEach(() => {

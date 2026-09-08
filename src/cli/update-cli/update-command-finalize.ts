@@ -1,10 +1,10 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
   assertConfigWriteAllowedInCurrentMode,
   readConfigFileSnapshot,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   DEFAULT_PACKAGE_CHANNEL,
   normalizeUpdateChannel,
@@ -22,8 +22,8 @@ import { loadInstalledPluginIndexInstallRecords } from "../../plugins/installed-
 import { withPluginLifecycleLease } from "../../plugins/plugin-lifecycle-lease.js";
 import { withCommandProcessScope } from "../../process/exec-spawn.js";
 import { defaultRuntime } from "../../runtime.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../../state/openclaw-state-ownership.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../../state/carapace-state-ownership.js";
 import { retainCliProcessJobUntilExit } from "../runtime-cleanup-scope.js";
 import {
   parseTimeoutMsOrExit,
@@ -80,8 +80,8 @@ export async function updateFinalizeCommand(
         lifecycle.run("preflight", async () => {
           // Refused invocations cannot create a ledger or write failure-triage artifacts.
           assertConfigWriteAllowedInCurrentMode();
-          await assertOpenClawStateWriteAllowedAtPath({
-            databasePath: resolveOpenClawStateSqlitePath(process.env),
+          await assertCarapaceStateWriteAllowedAtPath({
+            databasePath: resolveCarapaceStateSqlitePath(process.env),
             recoverOrphanedSidecars: false,
           });
           await retainCliProcessJobUntilExit();
@@ -122,8 +122,8 @@ async function prepareUpdateFinalization(
   root: string,
   requestedChannel: UpdateChannel | null,
 ) {
-  await assertOpenClawStateWriteAllowedAtPath({
-    databasePath: resolveOpenClawStateSqlitePath(process.env),
+  await assertCarapaceStateWriteAllowedAtPath({
+    databasePath: resolveCarapaceStateSqlitePath(process.env),
   });
   let configSnapshot = await readConfigFileSnapshot({ skipPluginValidation: true });
   const preFinalizeConfig =
@@ -135,7 +135,7 @@ async function prepareUpdateFinalization(
       ? {
           sourceConfig: configSnapshot.sourceConfig,
           authoredConfig: isRecord(configSnapshot.parsed)
-            ? (configSnapshot.parsed as OpenClawConfig) // SAFETY: snapshot parser validated this config record.
+            ? (configSnapshot.parsed as CarapaceConfig) // SAFETY: snapshot parser validated this config record.
             : configSnapshot.sourceConfig,
         }
       : undefined);

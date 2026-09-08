@@ -1,5 +1,5 @@
 // Msteams plugin module implements monitor handler behavior.
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { serializeMSTeamsAdaptiveCardActionValue } from "./adaptive-card-submit.js";
 import { maybeHandleMSTeamsApprovalCardSubmit } from "./approval-card-submit.js";
 import { formatUnknownError } from "./errors.js";

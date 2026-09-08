@@ -1,7 +1,7 @@
 // Coverage for Google prompt-cache creation, reuse, and request rewriting.
 import crypto from "node:crypto";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import { expectDefined } from "@carapace/normalization-core";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { SessionTranscriptWriterClaimReboundError } from "../../config/sessions/transcript-write-context.js";
@@ -67,7 +67,7 @@ describe("google prompt cache", () => {
         messages[0],
         {
           ...messages[1],
-          content: `<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\n${suffix}\n\nCurrent facts\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>`,
+          content: `<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>\n${suffix}\n\nCurrent facts\n<<<END_CARAPACE_INTERNAL_CONTEXT>>>`,
         },
       ]);
     }
@@ -273,7 +273,7 @@ describe("google prompt cache", () => {
   });
 
   it("registers parsed OAuth headers when sentinels are disabled", async () => {
-    vi.stubEnv("OPENCLAW_SECRET_SENTINELS", "off");
+    vi.stubEnv("CARAPACE_SECRET_SENTINELS", "off");
     const fetchMock = createCacheFetchMock({
       name: "cachedContents/oauth-cache",
       expireTime: new Date(2_000_000).toISOString(),
@@ -359,7 +359,7 @@ describe("google prompt cache", () => {
     expect(createInit.method).toBe("POST");
     const createHeaders = createInit.headers as Record<string, string>;
     expect(createHeaders["x-goog-api-key"]).toBe("gemini-api-key");
-    expect(createHeaders["x-goog-api-client"]).toMatch(/^openclaw\//u);
+    expect(createHeaders["x-goog-api-client"]).toMatch(/^carapace\//u);
     expect(createHeaders["X-Provider"]).toBe("google");
     expect(typeof createInit.body).toBe("string");
     const createBody = JSON.parse(createInit.body as string) as Record<string, unknown>;
@@ -398,7 +398,7 @@ describe("google prompt cache", () => {
         id: "entry-1",
         parentId: null,
         timestamp: new Date(1_000).toISOString(),
-        customType: "openclaw.google-prompt-cache",
+        customType: "carapace.google-prompt-cache",
         data: {
           status: "ready",
           timestamp: now,
@@ -597,7 +597,7 @@ describe("google prompt cache", () => {
         parentId: null,
         timestamp: new Date(now - 5_000).toISOString(),
         type: "custom",
-        customType: "openclaw.google-prompt-cache",
+        customType: "carapace.google-prompt-cache",
         data: {
           status: "ready",
           timestamp: now - 5_000,
@@ -654,7 +654,7 @@ describe("google prompt cache", () => {
         parentId: null,
         timestamp: new Date(now - 5_000).toISOString(),
         type: "custom",
-        customType: "openclaw.google-prompt-cache",
+        customType: "carapace.google-prompt-cache",
         data: {
           status: "ready",
           timestamp: now - 5_000,
@@ -703,7 +703,7 @@ describe("google prompt cache", () => {
         parentId: null,
         timestamp: new Date(1_000).toISOString(),
         type: "custom",
-        customType: "openclaw.google-prompt-cache",
+        customType: "carapace.google-prompt-cache",
         data: {
           status: "failed",
           timestamp: 1_000,
@@ -808,7 +808,7 @@ describe("google prompt cache", () => {
         parentId: null,
         timestamp: new Date(now - 5_000).toISOString(),
         type: "custom",
-        customType: "openclaw.google-prompt-cache",
+        customType: "carapace.google-prompt-cache",
         data: {
           status: "ready",
           timestamp: now - 5_000,

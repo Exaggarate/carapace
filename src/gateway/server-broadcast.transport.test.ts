@@ -1,6 +1,6 @@
 import { getEventListeners, once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { describe, expect, it, vi } from "vitest";
 import { WebSocket, WebSocketServer } from "ws";
 import { createGatewayBroadcaster } from "./server-broadcast.js";

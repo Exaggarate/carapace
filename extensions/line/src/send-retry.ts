@@ -1,11 +1,11 @@
 // Line plugin module implements push retry policy behavior.
 import { HTTPFetchError } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { collectErrorGraphCandidates, extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { collectErrorGraphCandidates, extractErrorCode } from "carapace/plugin-sdk/error-runtime";
 import {
   classifyTransientNetworkErrorCode,
   createChannelApiRetryRunner,
-} from "openclaw/plugin-sdk/retry-runtime";
+} from "carapace/plugin-sdk/retry-runtime";
 import { readLineAccountMessageQuota } from "./probe.js";
 
 /** The LINE HTTP response carried by an error graph, when the request reached LINE. */
@@ -103,7 +103,7 @@ export const runLinePushWithRetries: typeof runLinePushAttempts = (fn, label) =>
 
 export async function explainLineRefusal(params: {
   error: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): Promise<{ retryable: boolean | undefined; reason: string }> {
   const retryable = resolveLineNonDispatchRetryable(params.error);

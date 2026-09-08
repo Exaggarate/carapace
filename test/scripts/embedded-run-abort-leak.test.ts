@@ -36,7 +36,7 @@ describe("scripts/embedded-run-abort-leak", () => {
     [["--iters", "-h"], "--iters requires a value"],
     [["--mode", "-h"], "--mode requires a value"],
   ])("rejects %j before writing heap snapshots", (args, message) => {
-    const snapDir = tempRoots.make("openclaw-embedded-abort-leak-test-");
+    const snapDir = tempRoots.make("carapace-embedded-abort-leak-test-");
     const result = runHarness(["--snap-dir", snapDir, ...args]);
 
     expect(result.status).toBe(2);

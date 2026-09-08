@@ -294,7 +294,7 @@ suite.define(() => {
     await currentPage.getByText("Bob operations", { exact: true }).first().waitFor();
     await currentPage.locator('[data-session-key="agent:main:ada"] a').click();
     await currentPage.getByText("Ready.", { exact: true }).waitFor();
-    await expect.poll(() => currentPage.locator("openclaw-session-owner-chip").count()).toBe(3);
+    await expect.poll(() => currentPage.locator("carapace-session-owner-chip").count()).toBe(3);
 
     const ownerMenu = await openSidebarSortMenu(currentPage);
     await captureUiProof(
@@ -312,7 +312,7 @@ suite.define(() => {
     await expectBrowser(ownerRows.first()).toBeVisible();
     await expectBrowser(ownerRows.first()).toHaveAttribute("value", "owner:profile-patrick");
     await expectBrowser(ownerRows.first()).toContainText("Patrick (You)");
-    await expectBrowser(ownerRows.locator("openclaw-session-owner-chip img")).toHaveCount(3);
+    await expectBrowser(ownerRows.locator("carapace-session-owner-chip img")).toHaveCount(3);
     await captureUiProof(
       suite,
       ownerSubmenu.locator('[part="submenu"]'),
@@ -489,7 +489,7 @@ suite.define(() => {
       await ownerMenu.locator(".sidebar-session-sort-menu__title", { hasText: "People" }).count(),
     ).toBe(0);
     expect(await ownerMenu.locator('[value^="owner:"]').count()).toBe(0);
-    expect(await currentPage.locator("openclaw-session-owner-chip").count()).toBe(0);
+    expect(await currentPage.locator("carapace-session-owner-chip").count()).toBe(0);
   });
 
   it("keeps global session actions accessible to keyboard users", async () => {
@@ -980,7 +980,7 @@ suite.define(() => {
     expect(afterScroll.membersTitleTop).toBeLessThan(beforeScroll.menuTop);
     expect(afterScroll.firstMemberTop).toBeLessThan(beforeScroll.firstMemberTop);
     await expectBrowser(
-      dropdown.locator(".chat-pane__sharing-member openclaw-session-owner-chip"),
+      dropdown.locator(".chat-pane__sharing-member carapace-session-owner-chip"),
     ).toHaveCount(30);
     // Agent and system identities render the non-human icon from identity.type,
     // not from an ID-string heuristic; owner-chip presentation is human-only.

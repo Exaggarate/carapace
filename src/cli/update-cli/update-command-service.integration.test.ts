@@ -129,7 +129,7 @@ vi.mock("../../daemon/systemd.js", async (importOriginal) => ({
   findInstalledSystemdGatewayScope: async () => null,
   isSystemdUserServiceAvailable: async () => true,
   stopSystemdService: async () => {
-    mocks.stopAllowances.push(process.env.OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS);
+    mocks.stopAllowances.push(process.env.CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS);
     mocks.events.push("native stop");
     mocks.running = false;
   },
@@ -222,7 +222,7 @@ beforeEach(async () => {
       "19305",
     ],
     environment: { HOME: root },
-    sourcePath: "/etc/systemd/system/openclaw-gateway.service",
+    sourcePath: "/etc/systemd/system/carapace-gateway.service",
   });
   mocks.child.mockImplementation(async (args) => {
     if (!args.includes("restart")) {
@@ -336,7 +336,7 @@ describe("preserved update activation with real version guards", () => {
             const command = await mocks.command(process.env);
             mocks.command.mockResolvedValue({
               ...command,
-              programArguments: ["/foreign/openclaw", "gateway"],
+              programArguments: ["/foreign/carapace", "gateway"],
             });
           }
           return {
@@ -373,7 +373,7 @@ describe("preserved update activation with real version guards", () => {
       mocks.ports.mockImplementation(async (port) => ({
         port,
         status: "busy",
-        listeners: [{ pid: 4242, command: "openclaw-gateway" }],
+        listeners: [{ pid: 4242, command: "carapace-gateway" }],
         hints: [],
       }));
       mocks.call.mockImplementation(
@@ -487,13 +487,13 @@ describe("preserved update activation with real version guards", () => {
       .mockRejectedValue(new Error("automatic repair reached"));
     mocks.child.mockImplementation(async (args, options) => {
       const snapshot = captureEnv([
-        "OPENCLAW_UPDATE_IN_PROGRESS",
-        "OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
+        "CARAPACE_UPDATE_IN_PROGRESS",
+        "CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
       ]);
       if (typeof options === "object") {
         for (const key of [
-          "OPENCLAW_UPDATE_IN_PROGRESS",
-          "OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
+          "CARAPACE_UPDATE_IN_PROGRESS",
+          "CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
         ]) {
           const value = options.env?.[key];
           if (value !== undefined) {
@@ -570,7 +570,7 @@ describe("preserved update activation with real version guards", () => {
         jsonMode: true,
       });
       expect(before.stopped).toBe(true);
-      expect(before.serviceEnv?.OPENCLAW_SYSTEMD_UNIT).toBeUndefined();
+      expect(before.serviceEnv?.CARAPACE_SYSTEMD_UNIT).toBeUndefined();
       const command = await mocks.command(process.env);
       if (!command) {
         throw new Error("missing fixture command");
@@ -586,22 +586,22 @@ describe("preserved update activation with real version guards", () => {
         ],
         environment: {
           HOME: root,
-          OPENCLAW_GATEWAY_PORT: "19002",
+          CARAPACE_GATEWAY_PORT: "19002",
           ...(change === "profile"
             ? {
-                OPENCLAW_PROFILE: "second",
-                OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-second.service",
-                OPENCLAW_STATE_DIR: path.join(root, ".openclaw-second"),
-                OPENCLAW_CONFIG_PATH: path.join(root, ".openclaw-second", "openclaw.json"),
+                CARAPACE_PROFILE: "second",
+                CARAPACE_SYSTEMD_UNIT: "carapace-gateway-second.service",
+                CARAPACE_STATE_DIR: path.join(root, ".carapace-second"),
+                CARAPACE_CONFIG_PATH: path.join(root, ".carapace-second", "carapace.json"),
               }
             : {
-                OPENCLAW_PROFILE: "default",
-                OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
-                OPENCLAW_STATE_DIR: path.join(root, ".openclaw"),
-                OPENCLAW_CONFIG_PATH: configPath,
+                CARAPACE_PROFILE: "default",
+                CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
+                CARAPACE_STATE_DIR: path.join(root, ".carapace"),
+                CARAPACE_CONFIG_PATH: configPath,
               }),
           ...(change === "unit"
-            ? { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-custom.service" }
+            ? { CARAPACE_SYSTEMD_UNIT: "carapace-gateway-custom.service" }
             : {}),
         },
       });
@@ -616,10 +616,10 @@ describe("preserved update activation with real version guards", () => {
         preManagedServiceStop: before,
       });
       if (change !== "metadata") {
-        expect(state.env.OPENCLAW_SYSTEMD_UNIT).toBe(
+        expect(state.env.CARAPACE_SYSTEMD_UNIT).toBe(
           change === "profile"
-            ? "openclaw-gateway-second.service"
-            : "openclaw-gateway-custom.service",
+            ? "carapace-gateway-second.service"
+            : "carapace-gateway-custom.service",
         );
         await expect(revalidated).rejects.toThrow("manager identity changed");
       } else {
@@ -680,7 +680,7 @@ describe("preserved update activation with real version guards", () => {
     "refuses preserved activation through %s process signaling",
     async (mode) => {
       if (mode === "external") {
-        process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+        process.env.CARAPACE_SUPERVISOR_MODE = "external";
       }
       await expect(
         runDaemonRestart({ preserveDefinition: true, safe: mode === "safe" }),
@@ -705,7 +705,7 @@ describe("preserved update activation with real version guards", () => {
     "stale retry",
   ])("checks actual LaunchAgent artifacts during %s activation", async (scenario) => {
     mockProcessPlatform("darwin");
-    const label = "ai.openclaw.gateway";
+    const label = "ai.carapace.gateway";
     const plistPath = resolveLaunchAgentPlistPath(process.env);
     const envPath = resolveLaunchAgentEnvFilePath(process.env, label);
     const wrapperPath = resolveLaunchAgentEnvWrapperPath(process.env, label);
@@ -723,8 +723,8 @@ describe("preserved update activation with real version guards", () => {
       stderrPath: path.join(root, "gateway.err"),
       environment: {
         HOME: root,
-        OPENCLAW_GATEWAY_TOKEN: "fixture-inline-token",
-        OPENCLAW_SERVICE_VERSION: "legacy",
+        CARAPACE_GATEWAY_TOKEN: "fixture-inline-token",
+        CARAPACE_SERVICE_VERSION: "legacy",
       },
     });
     if (demandOnly) {

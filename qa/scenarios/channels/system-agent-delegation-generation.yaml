@@ -10,14 +10,14 @@ scenario:
       - channels.qa-channel-outbound
   objective: Verify a channel-scoped agent can complete first-use system-agent delegation while an admitted plugin generation is active.
   successCriteria:
-    - A synthetic channel turn exposes and calls the real openclaw delegate tool once.
+    - A synthetic channel turn exposes and calls the real carapace delegate tool once.
     - First-use inference verification completes through its isolated read-only runtime.
     - The delegate result contains the system-agent marker and no generation-guard failure.
     - The parent turn records a successful tool result and emits one visible channel reply.
   docsRefs:
     - docs/channels/qa-channel.md
   codeRefs:
-    - src/agents/tools/openclaw-delegate-tool.ts
+    - src/agents/tools/carapace-delegate-tool.ts
     - src/gateway/server-methods/system-agent.ts
     - src/system-agent/inference-fallback.ts
     - src/agents/embedded-agent-runner/run-orchestrator.ts
@@ -29,7 +29,7 @@ scenario:
       requiredProvider: mock-openai
       conversationId: qa-system-agent-delegation
       promptSnippet: system agent delegation generation qa check
-      prompt: "@openclaw tool search qa check target=openclaw. System agent delegation generation QA check. Call the openclaw tool exactly once, then reply exactly: QA-SYSTEM-AGENT-DELEGATE-OK."
+      prompt: "@carapace tool search qa check target=carapace. System agent delegation generation QA check. Call the carapace tool exactly once, then reply exactly: QA-SYSTEM-AGENT-DELEGATE-OK."
       delegateReplyMarker: QA-SYSTEM-AGENT-DELEGATE-INFERENCE-OK
       expectedMarker: QA-SYSTEM-AGENT-DELEGATE-OK
       generationGuardError: prepared model runtime replaced the admitted plugin generation
@@ -89,14 +89,14 @@ flow:
             expr: "(await fetchJson(`${env.mock.baseUrl}/debug/requests?after=${requestCursorBefore}`)).filter((request) => String(request.allInputText ?? '').toLowerCase().includes(config.promptSnippet))"
         - set: delegatePlan
           value:
-            expr: "scenarioRequests.find((request) => request.plannedToolName === 'openclaw')"
+            expr: "scenarioRequests.find((request) => request.plannedToolName === 'carapace')"
         - set: delegateResult
           value:
             expr: "scenarioRequests.find((request) => request.toolOutputCallId === delegatePlan?.plannedToolCallId)"
         - assert:
-            expr: "scenarioRequests.filter((request) => request.plannedToolName === 'openclaw').length === 1 && delegatePlan?.plannedToolArgs?.message === `Reply exactly ${config.delegateReplyMarker}. Do not call tools.`"
+            expr: "scenarioRequests.filter((request) => request.plannedToolName === 'carapace').length === 1 && delegatePlan?.plannedToolArgs?.message === `Reply exactly ${config.delegateReplyMarker}. Do not call tools.`"
             message:
-              expr: "`expected exactly one openclaw delegate plan, saw ${JSON.stringify(scenarioRequests.map((request) => ({ tool: request.plannedToolName ?? null, args: request.plannedToolArgs ?? null })))}`"
+              expr: "`expected exactly one carapace delegate plan, saw ${JSON.stringify(scenarioRequests.map((request) => ({ tool: request.plannedToolName ?? null, args: request.plannedToolArgs ?? null })))}`"
         - assert:
             expr: "String(delegateResult?.toolOutput ?? '').includes(config.delegateReplyMarker) && !String(delegateResult?.toolOutput ?? '').includes(config.generationGuardError)"
             message:
@@ -107,7 +107,7 @@ flow:
             - ref: env
             - ref: sessionKey
         - assert:
-            expr: "transcript.successfulToolCallCounts.openclaw === 1 && transcript.finalText.includes(config.expectedMarker)"
+            expr: "transcript.successfulToolCallCounts.carapace === 1 && transcript.finalText.includes(config.expectedMarker)"
             message:
               expr: "`channel transcript lost the successful delegate result or final reply: ${JSON.stringify(transcript)}`"
         - set: matchingOutbound
@@ -117,4 +117,4 @@ flow:
             expr: matchingOutbound.length === 1
             message:
               expr: "`expected one visible channel reply, saw ${matchingOutbound.length}`"
-      detailsExpr: "JSON.stringify({ verdict: 'PASS', scenario: 'system-agent-delegation-generation', provider: env.providerMode, gateway: 'ephemeral-child', transport: transport.id, plannedDelegateCalls: scenarioRequests.filter((request) => request.plannedToolName === 'openclaw').length, successfulDelegateResults: transcript.successfulToolCallCounts.openclaw, delegateReplyMarkerPresent: String(delegateResult?.toolOutput ?? '').includes(config.delegateReplyMarker), generationGuardErrorPresent: String(delegateResult?.toolOutput ?? '').includes(config.generationGuardError), visibleChannelReplies: matchingOutbound.length }, null, 2)"
+      detailsExpr: "JSON.stringify({ verdict: 'PASS', scenario: 'system-agent-delegation-generation', provider: env.providerMode, gateway: 'ephemeral-child', transport: transport.id, plannedDelegateCalls: scenarioRequests.filter((request) => request.plannedToolName === 'carapace').length, successfulDelegateResults: transcript.successfulToolCallCounts.carapace, delegateReplyMarkerPresent: String(delegateResult?.toolOutput ?? '').includes(config.delegateReplyMarker), generationGuardErrorPresent: String(delegateResult?.toolOutput ?? '').includes(config.generationGuardError), visibleChannelReplies: matchingOutbound.length }, null, 2)"

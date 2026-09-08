@@ -1,17 +1,17 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { registerContextEngineInRegistry } from "../context-engine/registry.js";
 import { registerPluginInteractiveHandlerInRegistry } from "./interactive-registry.js";
 import type { PluginRegistryState } from "./registry-state.js";
 import type { PluginRecord } from "./registry-types.js";
 import { defaultSlotIdForKey } from "./slots.js";
-import type { OpenClawPluginApi, PluginRegistrationMode } from "./types.js";
+import type { CarapacePluginApi, PluginRegistrationMode } from "./types.js";
 
 export function createCapabilityRegistrars(state: PluginRegistryState) {
   const { registry, reportRegistrationError, reportRegistrationWarning } = state;
 
   const registerDetachedTaskRuntime = (
     record: PluginRecord,
-    runtime: Parameters<OpenClawPluginApi["registerDetachedTaskRuntime"]>[0],
+    runtime: Parameters<CarapacePluginApi["registerDetachedTaskRuntime"]>[0],
   ) => {
     const existing = registry.detachedTaskRuntimes[0];
     if (existing && existing.pluginId !== record.id) {
@@ -31,7 +31,7 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerInteractiveHandler = (
     record: PluginRecord,
-    registration: Parameters<OpenClawPluginApi["registerInteractiveHandler"]>[0],
+    registration: Parameters<CarapacePluginApi["registerInteractiveHandler"]>[0],
   ) => {
     const result = registerPluginInteractiveHandlerInRegistry(registry, record.id, registration, {
       pluginName: record.name,
@@ -44,8 +44,8 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerContextEngine = (
     record: PluginRecord,
-    id: Parameters<OpenClawPluginApi["registerContextEngine"]>[0],
-    factory: Parameters<OpenClawPluginApi["registerContextEngine"]>[1],
+    id: Parameters<CarapacePluginApi["registerContextEngine"]>[0],
+    factory: Parameters<CarapacePluginApi["registerContextEngine"]>[1],
     registrationMode: PluginRegistrationMode,
   ) => {
     const normalizedId = normalizeOptionalString(id) ?? "";
@@ -88,10 +88,10 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerCompactionProvider = (
     record: PluginRecord,
-    provider: Parameters<OpenClawPluginApi["registerCompactionProvider"]>[0],
+    provider: Parameters<CarapacePluginApi["registerCompactionProvider"]>[0],
   ) => {
     const id = normalizeOptionalString(
-      (provider as Partial<Parameters<OpenClawPluginApi["registerCompactionProvider"]>[0]> | null)
+      (provider as Partial<Parameters<CarapacePluginApi["registerCompactionProvider"]>[0]> | null)
         ?.id,
     );
     if (!id) {

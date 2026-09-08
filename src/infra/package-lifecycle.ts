@@ -7,7 +7,7 @@ import {
   PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH,
 } from "../../scripts/lib/package-lifecycle-marker.mjs";
 
-const PACKAGE_LIFECYCLE_LOCK_RELATIVE_PATH = ".openclaw-lifecycle-lock";
+const PACKAGE_LIFECYCLE_LOCK_RELATIVE_PATH = ".carapace-lifecycle-lock";
 const DEFAULT_PACKAGE_LIFECYCLE_SCRIPT_TIMEOUT_MS = 20 * 60_000;
 const PACKAGE_LIFECYCLE_LOCK_POLL_MS = 100;
 const PACKAGE_LIFECYCLE_LOCK_RECOVERY_GRACE_MS = 20 * 60_000;
@@ -104,7 +104,7 @@ async function acquireLifecycleLock(
         }
       }
       if (Date.now() >= waitDeadline) {
-        throw new Error("timed out waiting for another OpenClaw package lifecycle", {
+        throw new Error("timed out waiting for another Carapace package lifecycle", {
           cause: error,
         });
       }
@@ -133,7 +133,7 @@ function runPackageLifecycleScript(
   }
   if (result.status !== 0) {
     throw new Error(
-      `OpenClaw package ${script.name} failed${result.signal ? ` with ${result.signal}` : ` with exit code ${result.status ?? "unknown"}`}`,
+      `Carapace package ${script.name} failed${result.signal ? ` with ${result.signal}` : ` with exit code ${result.status ?? "unknown"}`}`,
     );
   }
 }
@@ -176,7 +176,7 @@ export async function completePendingPackageLifecycle(params: {
       await fs.rm(paths.pending, { force: true });
     }
     if (await isPackageLifecyclePending(paths)) {
-      throw new Error("OpenClaw package postinstall did not complete its lifecycle marker");
+      throw new Error("Carapace package postinstall did not complete its lifecycle marker");
     }
     return true;
   } catch (error) {

@@ -16,7 +16,7 @@ import {
 import { rotateAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import { clearAgentRunContext } from "../../infra/agent-run-registry.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { registerChatAbortController } from "../chat-abort.js";
 import { createChatRunState } from "../server-chat-state.js";
 import { resolveSessionMutationAuthorization } from "../session-sharing.js";
@@ -29,7 +29,7 @@ type DispatchOptions = Parameters<typeof dispatch.dispatchInboundMessageWithProj
 it.each(["removed", "replaced", "aborted", "released", "terminal", "rotated", "queued"] as const)(
   "keeps prepared-session binding with its exact admission: %s",
   async (closure) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const runId = "retained-preparation";
       const sessionKey = "agent:main:binding";
       const scope = { agentId: "main", sessionKey };

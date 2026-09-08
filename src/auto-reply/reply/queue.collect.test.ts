@@ -1726,7 +1726,7 @@ describe("followup queue collect routing", () => {
     enqueueTestRun(
       key,
       {
-        prompt: "[OpenClaw room event]",
+        prompt: "[Carapace room event]",
         originatingChannel: "telegram",
         originatingTo: "-100123",
       },
@@ -1755,7 +1755,7 @@ describe("followup queue collect routing", () => {
     await drainRecordedQueue(key, runFollowup, done);
 
     expect(calls).toHaveLength(2);
-    expect(calls[0]?.prompt).toBe("[OpenClaw room event]");
+    expect(calls[0]?.prompt).toBe("[Carapace room event]");
     expect(calls[0]?.currentInboundEventKind).toBe("room_event");
     expect(calls[0]?.currentInboundAudio).toBe(true);
     expect(calls[0]?.currentInboundContext?.text).toBe("room event body");
@@ -2031,7 +2031,7 @@ describe("followup queue collect routing", () => {
       `test-collect-prepared-empty-images-${Date.now()}`,
     );
     const missingMedia = {
-      path: "/openclaw-test-missing/current.png",
+      path: "/carapace-test-missing/current.png",
       contentType: "image/png",
       hydrationSuppressed: true,
     };
@@ -2699,7 +2699,7 @@ describe("followup queue collect routing", () => {
   });
 
   it("persists overflow summaries to the session selected after queue admission", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-overflow-session-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-overflow-session-"));
     const storePath = path.join(tempDir, "sessions.json");
     const oldTranscriptPath = path.join(tempDir, "old-session.jsonl");
     const { key, calls, done, settings } = createQueueCase(
@@ -3330,7 +3330,7 @@ describe("followup queue collect routing", () => {
     const message = await calls[0]?.userTurnTranscriptRecorder?.resolveMessage();
     expect(message?.content).toContain("first transcript");
     expect(message?.content).toContain("second transcript");
-    const mentions = message?.["__openclaw"]?.humanMentions;
+    const mentions = message?.["__carapace"]?.humanMentions;
     expect(mentions).toHaveLength(2);
     expect(
       mentions?.map((mention) =>
@@ -3341,8 +3341,8 @@ describe("followup queue collect routing", () => {
     ).toEqual(["@Ada", "@Ada"]);
     expect(mentions?.[1]?.start).toBeGreaterThan(mentions?.[0]?.end ?? 0);
     expect(
-      (message as unknown as { __openclaw?: { media?: Array<{ path?: string }> } } | undefined)?.[
-        "__openclaw"
+      (message as unknown as { __carapace?: { media?: Array<{ path?: string }> } } | undefined)?.[
+        "__carapace"
       ]?.media?.map((fact) => fact.path),
     ).toEqual(["/tmp/first.png", "/tmp/second.png"]);
     await vi.waitFor(() => expect(firstComplete).toHaveBeenCalledTimes(1));

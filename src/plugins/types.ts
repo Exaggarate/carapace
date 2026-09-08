@@ -73,16 +73,16 @@ export type {
   ProviderThinkingProfile,
 } from "./provider-thinking.types.js";
 export type {
-  OpenClawPluginActiveModelContext,
-  OpenClawPluginHookOptions,
-  OpenClawPluginToolContext,
-  OpenClawPluginToolFactory,
-  OpenClawPluginToolOptions,
+  CarapacePluginActiveModelContext,
+  CarapacePluginHookOptions,
+  CarapacePluginToolContext,
+  CarapacePluginToolFactory,
+  CarapacePluginToolOptions,
 } from "./tool-types.js";
 export type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandIo,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeHostCommandAvailabilityContext,
+  CarapacePluginNodeHostCommandIo,
 } from "./types.node-host.js";
 export type {
   PluginWebFetchProviderEntry,
@@ -142,26 +142,26 @@ export type {
   MigrationProviderPlugin,
   MigrationSummary,
 } from "./migration-provider.types.js";
-export type { OpenClawPluginApi } from "./plugin-api.types.js";
+export type { CarapacePluginApi } from "./plugin-api.types.js";
 export type {
   AgentPromptGuidance,
   AgentPromptGuidanceEntry,
   AgentPromptSurfaceKind,
-  OpenClawPluginCommandDefinition,
+  CarapacePluginCommandDefinition,
   PluginCommandContext,
   PluginCommandResult,
 } from "./plugin-command.types.js";
-export type { OpenClawPluginConfigSchema } from "./plugin-config-schema.types.js";
-export type { OpenClawPluginDefinition } from "./plugin-definition.types.js";
+export type { CarapacePluginConfigSchema } from "./plugin-config-schema.types.js";
+export type { CarapacePluginDefinition } from "./plugin-definition.types.js";
 export type {
-  OpenClawGatewayDiscoveryService,
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult,
-  OpenClawPluginReloadRegistration,
-  OpenClawPluginSecurityAuditCollector,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  CarapaceGatewayDiscoveryService,
+  CarapacePluginNodeInvokePolicy,
+  CarapacePluginNodeInvokePolicyContext,
+  CarapacePluginNodeInvokePolicyResult,
+  CarapacePluginReloadRegistration,
+  CarapacePluginSecurityAuditCollector,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
 } from "./plugin-registration.types.js";
 export type {
   ProviderAuthContext,
@@ -218,9 +218,9 @@ export type {
   ProviderWrapStreamFnContext,
 } from "./provider-transport.types.js";
 export type {
-  OpenClawGatewayDiscoveryAdvertiseContext,
-  OpenClawPluginHttpRouteHandler,
-  OpenClawPluginSecurityAuditContext,
+  CarapaceGatewayDiscoveryAdvertiseContext,
+  CarapacePluginHttpRouteHandler,
+  CarapacePluginSecurityAuditContext,
 } from "./plugin-registration.types.js";
 export type { ProviderUsageAuthToken } from "./provider-runtime.types.js";
 export type { WorkerSshIdentityRequest } from "./capability-provider.types.js";
@@ -231,14 +231,14 @@ export type {
   VideoGenerationProviderPlugin,
 } from "./capability-provider.types.js";
 export type {
-  OpenClawPluginCliRegistrationOptions,
-  OpenClawPluginCliRegistrar,
-  OpenClawPluginCliRootCommandDescriptor,
-  OpenClawPluginGatewayRuntimeScopeSurface,
-  OpenClawPluginHostedMediaResolver,
-  OpenClawPluginHttpRouteAuth,
-  OpenClawPluginHttpRouteMatch,
-  OpenClawPluginHttpRouteUpgradeHandler,
+  CarapacePluginCliRegistrationOptions,
+  CarapacePluginCliRegistrar,
+  CarapacePluginCliRootCommandDescriptor,
+  CarapacePluginGatewayRuntimeScopeSurface,
+  CarapacePluginHostedMediaResolver,
+  CarapacePluginHttpRouteAuth,
+  CarapacePluginHttpRouteMatch,
+  CarapacePluginHttpRouteUpgradeHandler,
   PluginInteractiveHandlerRegistration,
   PluginRegistrationMode,
 } from "./plugin-registration.types.js";

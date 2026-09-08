@@ -2,7 +2,7 @@
 import { createServer, type Server } from "node:http";
 import { connect, Socket } from "node:net";
 import { Readable } from "node:stream";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleAdminHttpRpcRequest } from "./handler.js";
 import { listAdminHttpRpcAllowedMethods } from "./methods.js";
@@ -11,7 +11,7 @@ const { dispatchGatewayMethod } = vi.hoisted(() => ({
   dispatchGatewayMethod: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/gateway-method-runtime", () => ({
+vi.mock("carapace/plugin-sdk/gateway-method-runtime", () => ({
   dispatchGatewayMethod,
 }));
 

@@ -63,13 +63,13 @@ verify_crabbox_admin_merge_bypass() {
   local crabbox_details_url
   crabbox_details_url=$(
     jq -r '
-      [.check_runs[] | select(.name == "openclaw/crabbox-gate")]
+      [.check_runs[] | select(.name == "carapace/crabbox-gate")]
       | sort_by(.id)
       | last
       | .details_url // empty
     ' "$proof_dir/check-runs.json"
   )
-  if [[ "$crabbox_details_url" =~ ^https://github.com/openclaw/openclaw/actions/runs/([0-9]+)$ ]]; then
+  if [[ "$crabbox_details_url" =~ ^https://github.com/Exaggarate/carapace/actions/runs/([0-9]+)$ ]]; then
     local crabbox_publisher_run_id="${BASH_REMATCH[1]}"
   else
     echo "Crabbox merge bypass failed: trusted gate has no exact Actions run URL." >&2
@@ -81,13 +81,13 @@ verify_crabbox_admin_merge_bypass() {
   local ci_details_url
   ci_details_url=$(
     jq -r '
-      [.check_runs[] | select(.name == "openclaw/ci-gate")]
+      [.check_runs[] | select(.name == "carapace/ci-gate")]
       | sort_by(.id)
       | last
       | .details_url // empty
     ' "$proof_dir/check-runs.json"
   )
-  if [[ "$ci_details_url" =~ ^https://github.com/openclaw/openclaw/actions/runs/([0-9]+)/job/([0-9]+)$ ]]; then
+  if [[ "$ci_details_url" =~ ^https://github.com/Exaggarate/carapace/actions/runs/([0-9]+)/job/([0-9]+)$ ]]; then
     local ci_run_id="${BASH_REMATCH[1]}"
     local ci_gate_job_id="${BASH_REMATCH[2]}"
   else
@@ -107,7 +107,7 @@ verify_crabbox_admin_merge_bypass() {
 
   local encoded_actor
   encoded_actor=$(jq -rn --arg value "$actor" '$value | @uri')
-  gh_plain "${api_read[@]}" "orgs/openclaw/memberships/$encoded_actor" \
+  gh_plain "${api_read[@]}" "orgs/carapace/memberships/$encoded_actor" \
     >"$proof_dir/membership.json" || return 1
   gh_plain "${api_read[@]}" "repos/$repo_nwo/git/ref/heads/main" >"$proof_dir/main-ref.json" || return 1
   local workflow_sha

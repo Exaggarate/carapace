@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, TransformConfigFileParams } from "../../config/config.js";
+import type { CarapaceConfig, TransformConfigFileParams } from "../../config/config.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import type { RuntimeEnv } from "../../runtime.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 const mocks = vi.hoisted(() => ({
   fetchClawHubPromotion: vi.fn(),
@@ -133,7 +133,7 @@ function makePromotion(overrides: Record<string, unknown> = {}) {
 function makeSnapshot(config: Record<string, unknown> = {}) {
   return {
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "hash-1",
     issues: [],
     config,
@@ -164,7 +164,7 @@ beforeEach(() => {
   mocks.resolveProviderInstallCatalogEntry.mockReturnValue(undefined);
   mocks.loadManifestMetadataSnapshot.mockReturnValue(
     createPluginMetadataSnapshotFixture({
-      plugins: [{ id: "openrouter", packageName: "@openclaw/openrouter-provider" }],
+      plugins: [{ id: "openrouter", packageName: "@carapace/openrouter-provider" }],
     }),
   );
   mocks.promptYesNo.mockResolvedValue(false);
@@ -310,7 +310,7 @@ describe("promosClaimCommand", () => {
     mocks.resolveProviderInstallCatalogEntry.mockReturnValue(undefined);
 
     await expect(promosClaimCommand("spring-models", {}, makeRuntime())).rejects.toThrow(
-      /Update OpenClaw/,
+      /Update Carapace/,
     );
     expect(mocks.replaceConfigFile).not.toHaveBeenCalled();
   });
@@ -328,7 +328,7 @@ describe("promosClaimCommand", () => {
 
   it("accepts a declared plugin package owned by the resolved auth choice", async () => {
     mocks.fetchClawHubPromotion.mockResolvedValue(
-      makePromotion({ pluginNames: ["@openclaw/openrouter-provider"] }),
+      makePromotion({ pluginNames: ["@carapace/openrouter-provider"] }),
     );
 
     await promosClaimCommand("spring-models", {}, makeRuntime());
@@ -338,7 +338,7 @@ describe("promosClaimCommand", () => {
 
   it("refuses a declared plugin package not owned by the resolved auth choice", async () => {
     mocks.fetchClawHubPromotion.mockResolvedValue(
-      makePromotion({ pluginNames: ["@openclaw/other-provider"] }),
+      makePromotion({ pluginNames: ["@carapace/other-provider"] }),
     );
 
     await expect(promosClaimCommand("spring-models", {}, makeRuntime())).rejects.toThrow(
@@ -421,13 +421,13 @@ describe("promosClaimCommand", () => {
   });
 
   it("preserves env references across auth before a withdrawn offer", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         label: "promo-auth-env",
-        env: { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_TEST_PROMO_PREFIX: "before-auth" },
+        env: { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_TEST_PROMO_PREFIX: "before-auth" },
       },
       async (state) => {
-        await state.writeConfig({ messages: { responsePrefix: "${OPENCLAW_TEST_PROMO_PREFIX}" } });
+        await state.writeConfig({ messages: { responsePrefix: "${CARAPACE_TEST_PROMO_PREFIX}" } });
         const raw = await fs.readFile(state.configPath, "utf8");
         const actual =
           await vi.importActual<typeof import("../../config/config.js")>("../../config/config.js");
@@ -441,10 +441,10 @@ describe("promosClaimCommand", () => {
           .mockResolvedValueOnce(promotion)
           .mockResolvedValueOnce({ ...promotion, active: false });
         mocks.applyAuthChoiceLoadedPluginProvider.mockImplementation(
-          async ({ config }: { config: OpenClawConfig }) => {
+          async ({ config }: { config: CarapaceConfig }) => {
             expect(config.messages?.responsePrefix).toBe("before-auth");
             await Promise.resolve();
-            process.env.OPENCLAW_TEST_PROMO_PREFIX = "after-auth";
+            process.env.CARAPACE_TEST_PROMO_PREFIX = "after-auth";
             expect(await fs.readFile(state.configPath, "utf8")).toBe(raw);
             return { config: { ...config, logging: { level: "debug" } } };
           },
@@ -456,7 +456,7 @@ describe("promosClaimCommand", () => {
         expect(mocks.replaceConfigFile).toHaveBeenCalledOnce();
         expect(mocks.recordPromotionClaim).not.toHaveBeenCalled();
         expect(JSON.parse(await fs.readFile(state.configPath, "utf8"))).toMatchObject({
-          messages: { responsePrefix: "${OPENCLAW_TEST_PROMO_PREFIX}" },
+          messages: { responsePrefix: "${CARAPACE_TEST_PROMO_PREFIX}" },
           logging: { level: "debug" },
         });
         const fresh = await actual.readConfigFileSnapshot();
@@ -489,11 +489,11 @@ describe("promosClaimCommand", () => {
     mocks.resolveProviderInstallCatalogEntry.mockReturnValue({
       ...authChoice,
       installSource: {
-        npm: { packageName: "@openclaw/openrouter-provider" },
+        npm: { packageName: "@carapace/openrouter-provider" },
       },
     });
     mocks.fetchClawHubPromotion.mockResolvedValue(
-      makePromotion({ pluginNames: ["@openclaw/openrouter-provider"] }),
+      makePromotion({ pluginNames: ["@carapace/openrouter-provider"] }),
     );
     mocks.hasAvailableAuthForProvider.mockResolvedValue(true);
     mocks.applyAuthChoiceLoadedPluginProvider.mockResolvedValue({ config: {} });

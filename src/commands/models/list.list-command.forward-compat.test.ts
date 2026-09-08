@@ -1,5 +1,5 @@
 // Model list forward-compat tests cover list command behavior with future catalog shapes.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred, withTestTimeout } from "../../../test/helpers/promise.js";
 
@@ -113,7 +113,7 @@ const mocks = vi.hoisted(() => {
     sourceConfig,
     resolvedConfig,
     loadModelsConfigWithSource: vi.fn(),
-    ensureOpenClawModelsJson: vi.fn(),
+    ensureCarapaceModelsJson: vi.fn(),
     ensureAuthProfileStore: vi.fn(),
     resolveDefaultAgentDir: vi.fn(),
     resolveModelsTargetAgent: vi.fn(),
@@ -138,12 +138,12 @@ function resetMocks() {
     resolvedConfig: mocks.resolvedConfig,
     diagnostics: [],
   });
-  mocks.ensureOpenClawModelsJson.mockResolvedValue({ wrote: false });
+  mocks.ensureCarapaceModelsJson.mockResolvedValue({ wrote: false });
   mocks.ensureAuthProfileStore.mockReturnValue({ version: 1, profiles: {}, order: {} });
-  mocks.resolveDefaultAgentDir.mockReturnValue("/tmp/openclaw-agent");
+  mocks.resolveDefaultAgentDir.mockReturnValue("/tmp/carapace-agent");
   mocks.resolveModelsTargetAgent.mockReturnValue({
     agentId: "main",
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
   });
   mocks.loadModelRegistry.mockResolvedValue({
     authModes: {},
@@ -324,7 +324,7 @@ function installModelsListCommandForwardCompatMocks() {
 
   vi.doMock("../../agents/agent-scope.js", () => ({
     listAgentEntries: vi.fn(() => []),
-    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-workspace"),
+    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/carapace-workspace"),
     resolveDefaultAgentDir: mocks.resolveDefaultAgentDir,
     resolveDefaultAgentId: vi.fn(() => "main"),
     resolveSessionAgentIds: vi.fn(() => ({ defaultAgentId: "main", sessionAgentId: "main" })),
@@ -400,7 +400,7 @@ async function buildAllOpenAiCodexRows(opts: { supplementCatalog?: boolean } = {
   const rows: unknown[] = [];
   const context = {
     cfg: mocks.resolvedConfig,
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     authIndex: {
       evaluateModelAuth: (provider: string) => ({
         availability: provider === "openai",
@@ -458,7 +458,7 @@ describe("modelsListCommand forward-compat", () => {
   it("uses the explicitly selected agent for auth and catalog discovery", async () => {
     mocks.resolveModelsTargetAgent.mockReturnValueOnce({
       agentId: "research",
-      agentDir: "/tmp/openclaw-agent-research",
+      agentDir: "/tmp/carapace-agent-research",
     });
 
     await modelsListCommand({ agent: "research", json: true }, createRuntime() as never);
@@ -466,7 +466,7 @@ describe("modelsListCommand forward-compat", () => {
     expect(mocks.resolveModelsTargetAgent).toHaveBeenCalledWith(mocks.resolvedConfig, "research", {
       kind: "read",
     });
-    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-agent-research", {
+    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/carapace-agent-research", {
       inheritedAuthDir: expect.any(String),
     });
   });
@@ -666,7 +666,7 @@ describe("modelsListCommand forward-compat", () => {
             {
               id: "moonshot",
               origin: "bundled",
-              rootDir: "/tmp/openclaw-moonshot",
+              rootDir: "/tmp/carapace-moonshot",
               modelCatalog: {
                 aliases: {
                   kimi: { provider: "moonshot" },
@@ -1137,7 +1137,7 @@ describe("modelsListCommand forward-compat", () => {
         mocks.resolvedConfig,
         expect.objectContaining({
           agentId: "main",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/carapace-agent",
         }),
       );
       expect(mocks.printModelTable).toHaveBeenCalled();
@@ -1217,7 +1217,7 @@ describe("modelsListCommand forward-compat", () => {
         await modelsListCommand({ provider: "anthropic", json: true }, createRuntime() as never);
 
         expect(mocks.prepareScopedReadOnlyModelAuthModes).toHaveBeenCalledWith(
-          expect.objectContaining({ config, workspaceDir: "/tmp/openclaw-workspace" }),
+          expect.objectContaining({ config, workspaceDir: "/tmp/carapace-workspace" }),
           ["claude-cli"],
           mocks.emptyPluginMetadataSnapshot,
         );
@@ -1496,7 +1496,7 @@ describe("modelsListCommand forward-compat", () => {
 
       await modelsListCommand({ all: true, provider: "codex", json: true }, runtime as never);
 
-      expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+      expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
       expect(mocks.loadModelRegistry).toHaveBeenCalledOnce();
       expect(mocks.loadModelCatalog).toHaveBeenCalledOnce();
       const rows = lastPrintedRows<{ key: string; available: boolean | null }>();

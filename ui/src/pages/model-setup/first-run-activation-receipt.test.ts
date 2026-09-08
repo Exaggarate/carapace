@@ -7,8 +7,8 @@ import {
   readFirstRunActivationReceipt,
 } from "./first-run-activation-receipt.ts";
 
-const receiptKey = "openclaw.modelSetup.pendingActivation.v1";
-const deviceKey = "openclaw-device-identity-v1";
+const receiptKey = "carapace.modelSetup.pendingActivation.v1";
+const deviceKey = "carapace-device-identity-v1";
 const privateKey = "high-entropy-device-private-key-never-in-receipts";
 
 function createContext(options: { token?: string; deviceToken?: string } = {}): ApplicationContext {

@@ -178,7 +178,7 @@ describe("apply_patch ambiguous hunk matching", () => {
   });
 
   it("leaves the file byte-identical when an ambiguous patch is refused", async () => {
-    const dir = tempDirs.make("openclaw-patch-amb-");
+    const dir = tempDirs.make("carapace-patch-amb-");
     const file = path.join(dir, "source.txt");
     const source = "before\ntarget\ntarget\nafter\n";
     await fs.writeFile(file, source);

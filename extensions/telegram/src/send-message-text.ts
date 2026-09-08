@@ -1,8 +1,8 @@
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { createMessageReceiptFromOutboundResults } from "carapace/plugin-sdk/channel-outbound";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import type { ResolvedTelegramAccount } from "./accounts.js";
 import { buildInlineKeyboard } from "./inline-keyboard.js";
 import { recordOutboundMessageForPromptContext } from "./outbound-message-context.js";
@@ -19,7 +19,7 @@ import {
 } from "./send-context.js";
 import type { TelegramSendOpts, TelegramSendResult } from "./send-message-types.js";
 import type { TelegramPreparedSender } from "./send-prepared.js";
-import type { OpenClawConfig } from "./send.runtime.js";
+import type { CarapaceConfig } from "./send.runtime.js";
 import { recordSentMessage } from "./sent-message-cache.js";
 import { planTelegramTextDeliveryPages } from "./telegram-text-delivery.js";
 import { resolveTelegramTextChunkLimit } from "./text-chunk-limit.js";
@@ -51,7 +51,7 @@ function buildTelegramTextSendReceipt(params: {
 }
 
 export function createTelegramTextSender(config: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ownerAgentId: string;
   account: ResolvedTelegramAccount;
   api: TelegramApi;

@@ -85,7 +85,7 @@ describe("spawnWithFallback", () => {
   });
 
   it("rejects ENOENT from a real missing executable", async () => {
-    await withTempDir("openclaw-spawn-missing-", async (dir) => {
+    await withTempDir("carapace-spawn-missing-", async (dir) => {
       await expect(
         spawnWithFallback({
           argv: [path.join(dir, "missing-executable")],

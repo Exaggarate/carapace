@@ -24,7 +24,7 @@ let tempHome: TempHomeEnv;
 
 beforeAll(async () => {
   vi.resetModules();
-  tempHome = await createTempHomeEnv("openclaw-playback-staging-");
+  tempHome = await createTempHomeEnv("carapace-playback-staging-");
   playback = await import("./playback-transcode.js");
 });
 

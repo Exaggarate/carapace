@@ -85,7 +85,7 @@ it.each(["reply", "abort", "deadline"] as const)(
       void verification.then(settled, settled);
       const request = socket.sent.at(-1)!;
       expect(request).toMatchObject({
-        method: "openclaw.setup.verify",
+        method: "carapace.setup.verify",
         params: { agentId: "main" },
       });
       let tick = 0;

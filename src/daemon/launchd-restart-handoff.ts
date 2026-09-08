@@ -2,8 +2,8 @@
 import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import { mergeProcessEnv } from "../infra/process-env.js";
 import { resolveLaunchAgentLabel } from "./launchd-label.js";
@@ -63,7 +63,7 @@ function buildLaunchdRestartScript(
   // current gateway process can exit cleanly after scheduling the handoff.
   const waitForCallerPid = `wait_pid="$4"
 ${renderPosixRestartLogSetup(restartLogEnv)}
-printf '[%s] openclaw restart attempt source=handoff mode=${mode} target=%s pid=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$service_target" "$wait_pid" >&2
+printf '[%s] carapace restart attempt source=handoff mode=${mode} target=%s pid=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$service_target" "$wait_pid" >&2
 if [ -n "$wait_pid" ] && [ "$wait_pid" -gt 1 ] 2>/dev/null; then
   while kill -0 "$wait_pid" >/dev/null 2>&1; do
     sleep 0.1
@@ -72,8 +72,8 @@ fi
 `;
 
   const systemOwnershipGuard = `${renderSystemLaunchDaemonOwnershipShellProbe(label)}
-if [ -n "$openclaw_system_launchd_conflict" ]; then
-  printf '[%s] openclaw restart blocked source=handoff mode=${mode} reason=%s interactive=0\n' "$(date -u +%FT%TZ)" "$openclaw_system_launchd_detail" >&2
+if [ -n "$carapace_system_launchd_conflict" ]; then
+  printf '[%s] carapace restart blocked source=handoff mode=${mode} reason=%s interactive=0\n' "$(date -u +%FT%TZ)" "$carapace_system_launchd_detail" >&2
   exit 78
 fi
 `;
@@ -90,9 +90,9 @@ else
   status=$?
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw service park done source=handoff interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] carapace service park done source=handoff interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw service park failed source=handoff status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] carapace service park failed source=handoff status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -119,9 +119,9 @@ else
   fi
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] carapace restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] carapace restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -184,9 +184,9 @@ launchctl bootout "$service_target" >/dev/null 2>&1 || true
 ${bootoutWaitLoop}
 ${bootstrapRetryLoop}
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] carapace restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] carapace restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -214,9 +214,9 @@ else
   fi
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] carapace restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] carapace restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -244,7 +244,7 @@ function scheduleDetachedLaunchdHandoff(params: {
       [
         "-c",
         buildLaunchdRestartScript(params.mode, restartLogEnv, target.label),
-        "openclaw-launchd-restart-handoff",
+        "carapace-launchd-restart-handoff",
         target.serviceTarget,
         target.domain,
         target.plistPath,

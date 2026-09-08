@@ -1,8 +1,8 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import { levenshteinDistance } from "../shared/levenshtein-distance.js";
 import { resolveAgentToolExecutionSchema } from "./agent-tool-availability.js";
 import { compactToolInputHint } from "./tool-schema-hints.js";
@@ -54,7 +54,7 @@ export function formatUnknownToolIdError(
 ): string {
   const skill = options.codeModeSkills?.find((candidate) => candidate.name === needle);
   const canReadSkills = entries.some(
-    (entry) => entry.source === "openclaw" && entry.sourceName === "core" && entry.name === "read",
+    (entry) => entry.source === "carapace" && entry.sourceName === "core" && entry.name === "read",
   );
   if (skill && canReadSkills) {
     // Use admitted, mapped prompt locations; never load a skill as a side effect of recovery.
@@ -78,7 +78,7 @@ export function formatUnknownToolIdError(
   ).slice(0, 3);
   const recoveryText =
     options.recoverySurface === "code-mode"
-      ? "Use openclaw.tools.search to find a tool, openclaw.tools.describe to inspect it, then openclaw.tools.call with the exact id or name."
+      ? "Use carapace.tools.search to find a tool, carapace.tools.describe to inspect it, then carapace.tools.call with the exact id or name."
       : options.recoverySurface === "catalog"
         ? "Use catalog.search to find a callable tool handle, then call the handle or use its describe method."
         : "Use tool_search to find a tool, tool_describe to inspect it, then tool_call with the exact id or name.";

@@ -149,7 +149,7 @@ describe.each([
       await vi.waitFor(() => expect(reportUpdateFailure).toHaveBeenCalledOnce());
       pending.resolve({
         status: "created",
-        url: "https://github.com/openclaw/openclaw/issues/123",
+        url: "https://github.com/Exaggarate/carapace/issues/123",
       });
       await Promise.all([first, duplicate]);
 
@@ -228,7 +228,7 @@ describe.each([
     const hello = harness.gateway.snapshot.hello;
     reportUpdateFailure.mockResolvedValue({
       status: "created",
-      url: "https://github.com/openclaw/openclaw/issues/123",
+      url: "https://github.com/Exaggarate/carapace/issues/123",
     });
     const overlays = createApplicationOverlays(harness.gateway);
     try {

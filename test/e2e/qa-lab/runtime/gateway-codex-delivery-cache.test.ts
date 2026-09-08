@@ -125,7 +125,7 @@ describe("Codex delivery-mode prompt caching", () => {
             const policyIndex = input.findLastIndex(
               (item) =>
                 item.role === "developer" &&
-                JSON.stringify(item.content).includes("<openclaw_source_delivery>"),
+                JSON.stringify(item.content).includes("<carapace_source_delivery>"),
             );
             expect(policyIndex).toBeGreaterThanOrEqual(0);
             expect(currentUser).toBeGreaterThan(policyIndex);

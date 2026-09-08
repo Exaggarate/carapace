@@ -1,4 +1,4 @@
-import { asNullableRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import {
   validateSecretsStoreListResult,
@@ -6,7 +6,7 @@ import {
   type QuestionWaitAnswerResult,
   type SecretsStoreListResult,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ENV_SECRET_REF_ID_RE, type SecretRef } from "../../config/types.secrets.js";
 import { ADMIN_SCOPE } from "../../gateway/operator-scopes.js";
 import { resolveDefaultSecretProviderAlias } from "../../secrets/ref-contract.js";
@@ -228,7 +228,7 @@ function listSecretStoreResult(result: SecretsStoreListResult) {
 
 /** Creates the metadata-only secret-store tool and its human-entered write flow. */
 export function createSecretsTool(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   runId?: string;

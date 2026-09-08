@@ -2,9 +2,9 @@
 import {
   DEFAULT_MEMORY_DEEP_DREAMING_MAX_PROMOTED_SNIPPET_TOKENS,
   formatMemoryDreamingDay,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { MemoryConsolidationResult } from "./dreaming-consolidation-artifacts.js";
 import { filterConsolidationCandidates } from "./dreaming-consolidation-candidates.js";
 import type { DreamingCompletion } from "./dreaming-narrative.js";
@@ -182,11 +182,11 @@ function normalizeComparableMemoryFact(value: string): string {
 }
 
 function readAttachedLineageKey(lines: string[], entryIndex: number): string | null {
-  if (!/^<!--\s*openclaw-memory-promotion:[^\n]+-->$/u.test(lines[entryIndex - 1]?.trim() ?? "")) {
+  if (!/^<!--\s*carapace-memory-promotion:[^\n]+-->$/u.test(lines[entryIndex - 1]?.trim() ?? "")) {
     return null;
   }
   return (
-    /^<!--\s*openclaw-memory-lineage:([^\n]+)-->$/u
+    /^<!--\s*carapace-memory-lineage:([^\n]+)-->$/u
       .exec(lines[entryIndex - 2]?.trim() ?? "")?.[1]
       ?.trim() ?? null
   );
@@ -344,13 +344,13 @@ export function applyMemoryConsolidationPlan(params: {
       let startIndex = attachedLineageKey ? index - 2 : index;
       if (
         startIndex === index &&
-        /^<!--\s*openclaw-memory-promotion:[^\n]+-->$/u.test(lines[startIndex - 1]?.trim() ?? "")
+        /^<!--\s*carapace-memory-promotion:[^\n]+-->$/u.test(lines[startIndex - 1]?.trim() ?? "")
       ) {
         startIndex -= 1;
       }
       if (
         !attachedLineageKey &&
-        /^<!--\s*openclaw-memory-lineage:[^\n]+-->$/u.test(lines[startIndex - 1]?.trim() ?? "")
+        /^<!--\s*carapace-memory-lineage:[^\n]+-->$/u.test(lines[startIndex - 1]?.trim() ?? "")
       ) {
         startIndex -= 1;
       }
@@ -363,7 +363,7 @@ export function applyMemoryConsolidationPlan(params: {
   const appendedEntries = new Set<string>();
   for (const operation of params.plan.operations) {
     if (operation.lineageKey) {
-      additions.push(`<!-- openclaw-memory-lineage:${operation.lineageKey} -->`);
+      additions.push(`<!-- carapace-memory-lineage:${operation.lineageKey} -->`);
     }
     additions.push(buildPromotionMarker(operation.candidateKey));
     if (!appendedEntries.has(operation.resultEntry)) {

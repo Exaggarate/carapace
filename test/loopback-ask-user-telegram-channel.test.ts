@@ -6,13 +6,13 @@
  */
 import { createServer, type Server } from "node:http";
 import type { AddressInfo, Socket } from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   createEmptyPluginRegistry,
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createOperationalRunInstanceRef,
@@ -38,12 +38,12 @@ import {
   getRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../src/config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { resolveMcpLoopbackClientGrant } from "../src/gateway/mcp-grant-store.js";
 import { closeMcpLoopbackServer, ensureMcpLoopbackServer } from "../src/gateway/mcp-http.js";
 import * as toolResolution from "../src/gateway/tool-resolution.js";
 import { createDeferredCore } from "../src/shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../src/state/carapace-state-db.js";
 import { runQaGatewayFixture } from "./helpers/qa-gateway-cleanup.js";
 
 vi.mock("../src/plugins/hook-runner-global.js", () => ({ getGlobalHookRunner: () => null }));
@@ -164,7 +164,7 @@ beforeEach(() => {
     isWorkspaceBootstrapPending: async () => false,
     makeBootstrapWarn: () => () => {},
     resolveBootstrapContextForRun: async () => ({ bootstrapFiles: [], contextFiles: [] }),
-    resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+    resolveCarapaceReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
     prepareClaudeCliSkillsPlugin: async () => ({ args: [], cleanup: async () => {} }),
     loadManifestModelCatalog: () => [],
   });
@@ -192,7 +192,7 @@ describe("loopback ask_user Telegram channel transport", () => {
       await runQaGatewayFixture(
         async () =>
           await withQuestionGateway(async (gateway) => {
-            const config: OpenClawConfig = {
+            const config: CarapaceConfig = {
               ...expectDefined(getRuntimeConfigSnapshot(), "isolated question gateway config"),
               agents: { defaults: { workspace: dir }, entries: { main: { default: true } } },
               plugins: { enabled: false },
@@ -241,7 +241,7 @@ describe("loopback ask_user Telegram channel transport", () => {
                 headers: {
                   authorization: `Bearer ${token}`,
                   "content-type": "application/json",
-                  "x-openclaw-cli-capture-key": captureKey,
+                  "x-carapace-cli-capture-key": captureKey,
                 },
                 body: JSON.stringify({
                   jsonrpc: "2.0",
@@ -285,7 +285,7 @@ describe("loopback ask_user Telegram channel transport", () => {
                 });
                 contexts.push(context);
                 const token = expectDefined(
-                  context.preparedBackend.env?.OPENCLAW_MCP_TOKEN,
+                  context.preparedBackend.env?.CARAPACE_MCP_TOKEN,
                   "prepared CLI grant",
                 );
                 context.preparedBackend.mcpClientGrantCapture?.activate(captureKey);
@@ -358,7 +358,7 @@ describe("loopback ask_user Telegram channel transport", () => {
               () => resolutions.mockRestore(),
             );
           }),
-        () => closeOpenClawStateDatabaseForTest(),
+        () => closeCarapaceStateDatabaseForTest(),
         () => cli.cleanup(),
       );
     } finally {

@@ -12,21 +12,21 @@ const GUIDANCE_SHA = "b".repeat(40);
 
 function surface(name: string) {
   return [
-    `### [${name}](https://docs.openclaw.ai/maturity/taxonomy#${name.toLowerCase()})`,
+    `### [${name}](https://github.com/Exaggarate/carapace/maturity/taxonomy#${name.toLowerCase()})`,
     "",
     "| **Maturity score** | M4 Stable |",
     "| --- | --- |",
     "| **What changed** | Runtime behavior changed. |",
-    "| **Recommended testing** | Run `{{OPENCLAW}} status`; it exits successfully. |",
+    "| **Recommended testing** | Run `{{CARAPACE}} status`; it exits successfully. |",
     "| **Testing notes** | |",
   ].join("\n");
 }
 
 function campaignBody(tag = TAG) {
   return [
-    `<!-- openclaw-release-validation:${TRAIN} -->`,
+    `<!-- carapace-release-validation:${TRAIN} -->`,
     "",
-    `- Current beta: [${tag}](https://github.com/openclaw/openclaw/releases/tag/${tag})`,
+    `- Current beta: [${tag}](https://github.com/Exaggarate/carapace/releases/tag/${tag})`,
     `- Beta commit: \`${RELEASE_COMMIT}\``,
     `- Guidance main commit: \`${GUIDANCE_SHA}\``,
     "- Test target: latest immutable `origin/main`",
@@ -61,14 +61,14 @@ function campaignBody(tag = TAG) {
 
 function betaArtifact(tag = TAG) {
   return {
-    schema: "openclaw.release-validation-campaign/v1",
+    schema: "carapace.release-validation-campaign/v1",
     operation: "upsert",
     tag,
     stableTrain: TRAIN,
-    releaseUrl: `https://github.com/openclaw/openclaw/releases/tag/${tag}`,
+    releaseUrl: `https://github.com/Exaggarate/carapace/releases/tag/${tag}`,
     releaseCommit: RELEASE_COMMIT,
     guidanceMainSha: GUIDANCE_SHA,
-    title: "OpenClaw 2026.8.1 beta feedback",
+    title: "Carapace 2026.8.1 beta feedback",
     body: campaignBody(tag),
   };
 }
@@ -79,7 +79,7 @@ function issue(number: number, body: string, labels = ["release-validation"]) {
     state: "open",
     title: "old title",
     body,
-    html_url: `https://github.com/openclaw/openclaw/issues/${number}`,
+    html_url: `https://github.com/Exaggarate/carapace/issues/${number}`,
     labels: labels.map((name) => ({ name })),
   };
 }
@@ -168,7 +168,7 @@ describe("release-validation campaign publisher", () => {
 
     const result = await runReleaseValidationCampaignPublish({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       artifact: betaArtifact(),
     });
@@ -176,7 +176,7 @@ describe("release-validation campaign publisher", () => {
     expect(result.action).toBe("create");
     expect(calls.creates).toEqual([
       expect.objectContaining({
-        title: "OpenClaw 2026.8.1 beta feedback",
+        title: "Carapace 2026.8.1 beta feedback",
         labels: ["release-validation"],
       }),
     ]);
@@ -192,7 +192,7 @@ describe("release-validation campaign publisher", () => {
 
     const result = await runReleaseValidationCampaignPublish({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       artifact: betaArtifact(),
       expectedTag: TAG,
@@ -203,7 +203,7 @@ describe("release-validation campaign publisher", () => {
     expect(result).toEqual({
       action: "update",
       issueNumber: 10,
-      issueUrl: "https://github.com/openclaw/openclaw/issues/10",
+      issueUrl: "https://github.com/Exaggarate/carapace/issues/10",
     });
     expect(calls.updates).toContainEqual(
       expect.objectContaining({ issue_number: 10, labels: ["release-validation"] }),
@@ -220,8 +220,8 @@ describe("release-validation campaign publisher", () => {
     const legacy = issue(
       10,
       campaignBody().replace(
-        `<!-- openclaw-release-validation:${TRAIN} -->`,
-        `<!-- openclaw-release-validation:${TAG} -->`,
+        `<!-- carapace-release-validation:${TRAIN} -->`,
+        `<!-- carapace-release-validation:${TAG} -->`,
       ),
       ["maintainer"],
     );
@@ -229,7 +229,7 @@ describe("release-validation campaign publisher", () => {
 
     const result = await runReleaseValidationCampaignPublish({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       artifact: betaArtifact(),
       campaignIssueNumber: 10,
@@ -249,7 +249,7 @@ describe("release-validation campaign publisher", () => {
     await expect(
       runReleaseValidationCampaignPublish({
         github,
-        context: { repo: { owner: "openclaw", repo: "openclaw" } },
+        context: { repo: { owner: "carapace", repo: "carapace" } },
         core,
         artifact: betaArtifact(),
       }),
@@ -263,14 +263,14 @@ describe("release-validation campaign publisher", () => {
 
     const result = await runReleaseValidationCampaignPublish({
       github,
-      context: { repo: { owner: "openclaw", repo: "openclaw" } },
+      context: { repo: { owner: "carapace", repo: "carapace" } },
       core,
       artifact: {
-        schema: "openclaw.release-validation-campaign/v1",
+        schema: "carapace.release-validation-campaign/v1",
         operation: "close",
         tag: TRAIN,
         stableTrain: TRAIN,
-        releaseUrl: `https://github.com/openclaw/openclaw/releases/tag/${TRAIN}`,
+        releaseUrl: `https://github.com/Exaggarate/carapace/releases/tag/${TRAIN}`,
       },
     });
 

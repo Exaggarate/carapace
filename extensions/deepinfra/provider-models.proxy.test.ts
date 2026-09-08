@@ -1,11 +1,11 @@
 // DeepInfra proxy tests cover both public transports and their resource ownership.
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>()),
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>()),
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -58,7 +58,7 @@ describe("DeepInfra model discovery proxy policy", () => {
       expect(new Set(fetchWithSsrFGuardMock.mock.calls.map(([request]) => request.url))).toEqual(
         new Set([
           "https://api.deepinfra.com/models/list",
-          "https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta",
+          "https://api.deepinfra.com/v1/openai/models?sort_by=carapace&filter=with_meta",
         ]),
       );
       for (const [request] of fetchWithSsrFGuardMock.mock.calls) {

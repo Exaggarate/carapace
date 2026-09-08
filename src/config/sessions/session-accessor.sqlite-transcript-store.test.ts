@@ -3,12 +3,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { trackSqliteStatementExecutions } from "../../../test/helpers/sqlite-statement-execution-counter.js";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { readSessionTranscriptActiveStats } from "./session-accessor.sqlite-active-events.js";
 import {
   readTranscriptGenerationInTransaction,
@@ -37,16 +37,16 @@ import { searchSessionTranscripts } from "./session-transcript-search.js";
 const tempDirs: string[] = [];
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
 describe("SQLite transcript append", () => {
   it("canonicalizes assistant media at the generic transcript append owner", async () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-append-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const committedJson = runOpenClawAgentWriteTransaction(
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const committedJson = runCarapaceAgentWriteTransaction(
       (database) =>
         appendTranscriptEventInTransaction(
           database,
@@ -71,7 +71,7 @@ describe("SQLite transcript append", () => {
         ),
       { agentId: "main", env },
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     const row = database.db
       .prepare("SELECT event_json FROM transcript_events WHERE session_id = ? AND seq = 0")
       .get("append-session") as { event_json: string };
@@ -80,7 +80,7 @@ describe("SQLite transcript append", () => {
     expect(message).toMatchObject({ role: "assistant", content: "append" });
     expect(message).not.toHaveProperty("MediaPaths");
     expect(message).not.toHaveProperty("MediaTypes");
-    expect(message["__openclaw"]).toMatchObject({
+    expect(message["__carapace"]).toMatchObject({
       media: [expect.objectContaining({ path: "/media/a.png", contentType: "image/png" })],
     });
   });
@@ -112,16 +112,16 @@ async function withRewriteFixture(
     scope: { agentId: string; sessionId: string; sessionKey: string; env: NodeJS.ProcessEnv };
   }) => void | Promise<void>,
 ) {
-  await withOpenClawTestState({ label: "exact-rewrite" }, async (state) => {
+  await withCarapaceTestState({ label: "exact-rewrite" }, async (state) => {
     const scope = {
       agentId: "main",
       sessionId: "rewrite",
       sessionKey: "agent:main:rewrite",
       env: state.env,
     };
-    const owner = openOpenClawAgentDatabase(scope);
+    const owner = openCarapaceAgentDatabase(scope);
     const { db } = owner;
-    runOpenClawAgentWriteTransaction((database) => {
+    runCarapaceAgentWriteTransaction((database) => {
       appendTranscriptEventsInTransaction(database, scope, rewriteEvents);
     }, scope);
     const snapshot = () => ({
@@ -150,7 +150,7 @@ async function withRewriteFixture(
         throw new Error("missing rewrite row");
       }
       const expectedEventJson = row.event_json;
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         rewriteSqliteTranscriptEventRowsInTransaction(database, scope, [
           { seq, event, expectedEventJson },
         ]);
@@ -173,7 +173,7 @@ describe("SQLite exact transcript rewrite", () => {
         ...rewriteEvents[1],
         message: { ...rewriteEvents[1].message, provenance: "user" },
       };
-      runOpenClawAgentWriteTransaction((database) => {
+      runCarapaceAgentWriteTransaction((database) => {
         rewriteSqliteTranscriptEventRowsInTransaction(database, scope, [
           { seq: 2, expectedEventJson: JSON.stringify(rewriteEvents[2]), event: first },
           { seq: 1, expectedEventJson: JSON.stringify(rewriteEvents[1]), event: user },
@@ -264,7 +264,7 @@ describe("SQLite exact transcript rewrite", () => {
     await withRewriteFixture(({ snapshot, scope }) => {
       const before = snapshot();
       expect(() =>
-        runOpenClawAgentWriteTransaction((database) => {
+        runCarapaceAgentWriteTransaction((database) => {
           rewriteSqliteTranscriptEventRowsInTransaction(database, scope, [
             {
               seq: 1,
@@ -417,7 +417,7 @@ describe("SQLite exact transcript rewrite", () => {
         /^delete from ["`]?session_transcript_fts["`]? /i.test(sql) ? "deletes" : null,
       );
       try {
-        runOpenClawAgentWriteTransaction(
+        runCarapaceAgentWriteTransaction(
           (database) =>
             updateSqliteTranscriptEventJsonInTransaction(database, scope.sessionId, updates),
           scope,

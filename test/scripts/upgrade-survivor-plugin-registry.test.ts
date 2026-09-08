@@ -20,7 +20,7 @@ function registryManifest(): string {
   return `${JSON.stringify({
     candidateVersion: VERSION,
     packages: [],
-    schema: "openclaw.prepublish-plugin-registry/v1",
+    schema: "carapace.prepublish-plugin-registry/v1",
     schemaVersion: 1,
     sourceSha: SOURCE_SHA,
   })}\n`;
@@ -32,10 +32,10 @@ function writeExecutable(path: string, source: string): void {
 }
 
 function runSurvivor(overrides: NodeJS.ProcessEnv = {}, shell = "bash") {
-  const root = tempDirs.make("openclaw-upgrade-survivor-registry-");
+  const root = tempDirs.make("carapace-upgrade-survivor-registry-");
   const binDir = join(root, "bin");
   const captureDir = join(root, "capture");
-  const packageTarball = join(root, "openclaw-current.tgz");
+  const packageTarball = join(root, "carapace-current.tgz");
   mkdirSync(binDir);
   mkdirSync(captureDir);
   writeFileSync(packageTarball, "candidate");
@@ -48,14 +48,14 @@ if [[ "\${1:-}" != */scripts/test-docker-all.mjs ]] || [ "\${2:-}" != "--prepare
 fi
 printf '%s\n' "$*" >>"$CAPTURE_DIR/node-args"
 printf '%s|%s|%s\n' \
-  "$OPENCLAW_DOCKER_ALL_LANES" \
-  "\${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS:-}" \
-  "$OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS" >>"$CAPTURE_DIR/node-env"
-mkdir -p "$OPENCLAW_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry"
-printf '%s' "$OPENCLAW_DOCKER_ALL_LOG_DIR" >"$CAPTURE_DIR/preparation-dir"
+  "$CARAPACE_DOCKER_ALL_LANES" \
+  "\${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS:-}" \
+  "$CARAPACE_UPGRADE_SURVIVOR_SCENARIOS" >>"$CAPTURE_DIR/node-env"
+mkdir -p "$CARAPACE_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry"
+printf '%s' "$CARAPACE_DOCKER_ALL_LOG_DIR" >"$CAPTURE_DIR/preparation-dir"
 printf '%s' "$REGISTRY_MANIFEST" \
-  >"$OPENCLAW_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry/prepublish-plugin-registry.json"
-printf '{"dir":"%s"}\n' "$OPENCLAW_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry"
+  >"$CARAPACE_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry/prepublish-plugin-registry.json"
+printf '{"dir":"%s"}\n' "$CARAPACE_DOCKER_ALL_LOG_DIR/prepublish-plugin-registry"
 `,
   );
   writeExecutable(
@@ -85,19 +85,19 @@ done
     env: {
       ...process.env,
       CAPTURE_DIR: captureDir,
-      OPENCLAW_DOCKER_E2E_SELECTED_SHA: SOURCE_SHA,
+      CARAPACE_DOCKER_E2E_SELECTED_SHA: SOURCE_SHA,
       REAL_NODE: process.execPath,
       REGISTRY_MANIFEST: registryManifest(),
-      OPENCLAW_CURRENT_PACKAGE_TGZ: packageTarball,
-      OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR: join(root, "artifacts"),
-      OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: join(root, "artifacts"),
-      OPENCLAW_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(root, "runtime"),
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@2026.7.1-2",
-      OPENCLAW_UPGRADE_SURVIVOR_E2E_SKIP_BUILD: "1",
-      OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
+      CARAPACE_CURRENT_PACKAGE_TGZ: packageTarball,
+      CARAPACE_DOCKER_E2E_DISABLE_RESOURCE_LIMITS: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR: join(root, "artifacts"),
+      CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: join(root, "artifacts"),
+      CARAPACE_UPGRADE_SURVIVOR_RUNTIME_ROOT: join(root, "runtime"),
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@2026.7.1-2",
+      CARAPACE_UPGRADE_SURVIVOR_E2E_SKIP_BUILD: "1",
+      CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
       PATH: `${binDir}:${process.env.PATH ?? ""}`,
       TMPDIR: root,
       ...overrides,
@@ -115,8 +115,8 @@ describe("standalone upgrade survivor plugin registry", () => {
       it("reaches the direct child invocation with empty optional arguments", () => {
         const { captureDir, result } = runSurvivor(
           {
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
-            OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
+            CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
           },
           shell,
         );
@@ -130,7 +130,7 @@ describe("standalone upgrade survivor plugin registry", () => {
           .split("\0")
           .slice(0, -1);
         expect(args).toContain("run");
-        expect(args).toContain("OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth");
+        expect(args).toContain("CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth");
         expect(args).not.toContain("--user");
         expect(args).not.toContain("");
         expect(args.at(-2)).toBe("-lc");
@@ -146,7 +146,7 @@ describe("standalone upgrade survivor plugin registry", () => {
           {
             BASH_ENV: prelude,
             SURVIVOR_UNSET_PREFLIGHT: undefined,
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
           },
           shell,
         );
@@ -160,7 +160,7 @@ describe("standalone upgrade survivor plugin registry", () => {
       it("preserves child failure through cleanup", () => {
         const { captureDir, result } = runSurvivor(
           {
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
             FIXTURE_RUN_EXIT: "42",
           },
           shell,
@@ -176,13 +176,13 @@ describe("standalone upgrade survivor plugin registry", () => {
         const prelude = join(tempDirs.make("survivor-scenario-fault-"), "bash-env");
         writeFileSync(
           prelude,
-          `trap 'if [[ "$BASH_COMMAND" == openclaw_e2e_eval_test_state_from_b64* ]]; then exit 0; fi' DEBUG\n`,
+          `trap 'if [[ "$BASH_COMMAND" == carapace_e2e_eval_test_state_from_b64* ]]; then exit 0; fi' DEBUG\n`,
         );
         const { captureDir, result } = runSurvivor(
           {
             BASH_ENV: prelude,
             FIXTURE_PAYLOAD_SHELL: shell,
-            OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
+            CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
           },
           shell,
         );
@@ -198,35 +198,35 @@ describe("standalone upgrade survivor plugin registry", () => {
   it.each(["direct", "published"] as const)(
     "preserves an explicitly supplied %s registry",
     (mode) => {
-      const registryDir = tempDirs.make("openclaw-external-plugin-registry-");
+      const registryDir = tempDirs.make("carapace-external-plugin-registry-");
       const manifestPath = join(registryDir, "prepublish-plugin-registry.json");
       writeFileSync(manifestPath, registryManifest());
 
       const { captureDir, result } = runSurvivor({
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: createHash("sha256")
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: registryDir,
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: createHash("sha256")
           .update(readFileSync(manifestPath))
           .digest("hex"),
         ...(mode === "direct"
           ? {
-              OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: undefined,
-              OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
-              OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+              CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: undefined,
+              CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "0",
+              CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
             }
-          : { OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "external-only-scenario" }),
+          : { CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "external-only-scenario" }),
       });
 
       expect(result.status, result.stderr).toBe(0);
       expect(existsSync(join(captureDir, "node-args"))).toBe(false);
       expect(readFileSync(join(captureDir, "docker-args"), "utf8")).toContain(
-        `${registryDir}:/tmp/openclaw-prepublish-plugin-registry:ro`,
+        `${registryDir}:/tmp/carapace-prepublish-plugin-registry:ro`,
       );
     },
   );
 
   it("prepares and mounts a planner-owned registry for the current candidate", () => {
     const { captureDir, result } = runSurvivor({
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "configured-plugin-installs",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "configured-plugin-installs",
     });
 
     expect(result.status, result.stderr).toBe(0);
@@ -234,24 +234,24 @@ describe("standalone upgrade survivor plugin registry", () => {
       "scripts/test-docker-all.mjs --prepare-plugin-registry",
     );
     expect(readFileSync(join(captureDir, "node-env"), "utf8")).toBe(
-      "published-upgrade-survivor|openclaw@2026.7.1-2|configured-plugin-installs\n",
+      "published-upgrade-survivor|carapace@2026.7.1-2|configured-plugin-installs\n",
     );
     expect(readFileSync(join(captureDir, "docker-args"), "utf8")).toContain(
-      ":/tmp/openclaw-prepublish-plugin-registry:ro",
+      ":/tmp/carapace-prepublish-plugin-registry:ro",
     );
   });
 
   it("does not prepare a registry for a published candidate", () => {
     const { captureDir, packageTarball, result } = runSurvivor({
-      OPENCLAW_CURRENT_PACKAGE_TGZ: undefined,
-      OPENCLAW_UPGRADE_SURVIVOR_CANDIDATE: "openclaw@2026.8.1",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "published-only-scenario",
+      CARAPACE_CURRENT_PACKAGE_TGZ: undefined,
+      CARAPACE_UPGRADE_SURVIVOR_CANDIDATE: "carapace@2026.8.1",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "published-only-scenario",
     });
 
     expect(result.status, result.stderr).toBe(0);
     expect(existsSync(join(captureDir, "node-args"))).toBe(false);
     expect(readFileSync(join(captureDir, "docker-args"), "utf8")).not.toContain(
-      "/tmp/openclaw-prepublish-plugin-registry",
+      "/tmp/carapace-prepublish-plugin-registry",
     );
     expect(existsSync(packageTarball)).toBe(true);
   });
@@ -261,13 +261,13 @@ describe("standalone upgrade survivor live OpenAI probe", () => {
   it("fails closed before Docker when the opted-in key is missing", () => {
     const { captureDir, result } = runSurvivor({
       OPENAI_API_KEY: undefined,
-      OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI: "1",
+      CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI: "1",
     });
 
     expect(result.status).toBe(2);
     expectFinalFailure(result.stderr, 2);
     expect(result.stderr).toContain(
-      "OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI=1 requires OPENAI_API_KEY",
+      "CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI=1 requires OPENAI_API_KEY",
     );
     expect(existsSync(join(captureDir, "docker-args"))).toBe(false);
   });
@@ -276,14 +276,14 @@ describe("standalone upgrade survivor live OpenAI probe", () => {
     const key = "live-openai-key-must-not-appear-in-arguments";
     const { captureDir, result } = runSurvivor({
       OPENAI_API_KEY: key,
-      OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI: "1",
-      OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL: "openai/test-model",
+      CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI: "1",
+      CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL: "openai/test-model",
     });
 
     expect(result.status, result.stderr).toBe(0);
     const args = readFileSync(join(captureDir, "docker-args"), "utf8");
     expect(args).toContain("-e OPENAI_API_KEY");
-    expect(args).toContain("-e OPENCLAW_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL=openai/test-model");
+    expect(args).toContain("-e CARAPACE_UPGRADE_SURVIVOR_LIVE_OPENAI_MODEL=openai/test-model");
     expect(args).not.toContain(key);
   });
 });

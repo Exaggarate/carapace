@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { getRuntimeConfig } from "../../config/io.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { rejectGitHubPublicationSelection } from "../github-publication-failure.js";
 import { SessionMutationAuthorizationChangedError } from "../session-sharing.js";
 import { loadGatewaySessionEntryReadOnly } from "../session-utils-store.js";
@@ -137,7 +137,7 @@ describe("sessions.github.publish", () => {
   it("rejects caller-supplied repository authority at the protocol boundary", async () => {
     const respond = await invoke({
       idempotencyKey: "tool-call-1",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       branch: "main",
       token: "secret",
     });
@@ -185,7 +185,7 @@ describe("sessions.github.publish", () => {
   ])(
     "publishes $sessionKey from the actual $expectedAgent store with $ownership ownership",
     async ({ sessionKey, expectedAgent, ownership, agentId: requestedAgentId }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         await state.writeConfig({
           session: { scope: "global" },
           agents:

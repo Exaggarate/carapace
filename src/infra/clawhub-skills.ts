@@ -1,5 +1,5 @@
 // ClawHub skill metadata, trust, install resolution, cards, and telemetry.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   createClawHubError,
   decodeClawHubResponseBody,

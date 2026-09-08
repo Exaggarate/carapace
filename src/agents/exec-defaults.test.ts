@@ -4,13 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as execApprovals from "../infra/exec-approvals.js";
 import { resolveExecDefaults, resolveNodeExecEligibility } from "./exec-defaults.js";
 
 const execStoreDirs = useAutoCleanupTempDirTracker(afterEach);
 
-function withDefaultAgent(config: OpenClawConfig): OpenClawConfig {
+function withDefaultAgent(config: CarapaceConfig): CarapaceConfig {
   return {
     ...config,
     agents: { ...config.agents, list: [{ id: "main", default: true }] },
@@ -66,14 +66,14 @@ describe("resolveExecDefaults", () => {
   ] as const)(
     "keeps required $sessionKey sandboxed and hides nodes despite configured host=$host",
     async ({ host, sessionKey }) => {
-      const storePath = path.join(execStoreDirs.make("openclaw-required-exec-"), "sessions.json");
+      const storePath = path.join(execStoreDirs.make("carapace-required-exec-"), "sessions.json");
       const sessionEntry = {
         sessionId: "guest-session",
         updatedAt: 1,
         sandbox: "required" as const,
       };
       await replaceSessionEntry({ agentId: "main", sessionKey, storePath }, sessionEntry);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: storePath },
         agents: {
           ownership: "explicit",
@@ -111,8 +111,8 @@ describe("resolveExecDefaults", () => {
   ])(
     "uses $agentId sandbox policy for global exec defaults",
     ({ agentId, effectiveHost, canExec }) => {
-      const storeRoot = execStoreDirs.make("openclaw-global-exec-");
-      const cfg: OpenClawConfig = {
+      const storeRoot = execStoreDirs.make("carapace-global-exec-");
+      const cfg: CarapaceConfig = {
         session: { store: path.join(storeRoot, "{agentId}", "sessions.json") },
         agents: {
           ownership: "explicit",

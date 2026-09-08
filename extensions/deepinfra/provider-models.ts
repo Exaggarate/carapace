@@ -1,21 +1,21 @@
-import { withTrustedEnvProxyGuardedFetchMode } from "openclaw/plugin-sdk/fetch-runtime";
+import { withTrustedEnvProxyGuardedFetchMode } from "carapace/plugin-sdk/fetch-runtime";
 // Deepinfra provider module implements model/runtime integration.
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
-import { fetchLiveProviderModelRows } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { isProviderApiKeyConfigured } from "carapace/plugin-sdk/provider-auth";
+import { fetchLiveProviderModelRows } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   buildManifestModelProviderConfig,
   getCachedLiveCatalogValue,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { asPositiveSafeInteger, isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
+import { asPositiveSafeInteger, isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEEPINFRA_BASE_URL,
   DEEPINFRA_TTS_FALLBACK_CATALOG,
   type DeepInfraSurfaceModel,
 } from "./media-models.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { parseDeepInfraPricingCatalog } from "./pricing-api.js";
 
 const log = createSubsystemLogger("deepinfra-models");
@@ -25,7 +25,7 @@ const DEEPINFRA_MANIFEST_PROVIDER = buildManifestModelProviderConfig({
   catalog: manifest.modelCatalog.providers.deepinfra,
 });
 
-const DEEPINFRA_MODELS_URL = `${DEEPINFRA_BASE_URL}/models?sort_by=openclaw&filter=with_meta`;
+const DEEPINFRA_MODELS_URL = `${DEEPINFRA_BASE_URL}/models?sort_by=carapace&filter=with_meta`;
 const DEEPINFRA_PRICING_URL = "https://api.deepinfra.com/models/list";
 
 const DEEPINFRA_DEFAULT_MODEL_ID = "deepseek-ai/DeepSeek-V4-Flash";
@@ -152,7 +152,7 @@ function bucketBySurface(models: DeepInfraSurfaceModel[]): DeepInfraDiscoveredCa
   return catalog;
 }
 
-// Static fallback. Chat rows live in openclaw.plugin.json (manifest-validated);
+// Static fallback. Chat rows live in carapace.plugin.json (manifest-validated);
 // non-chat surfaces live below because the manifest validator only accepts
 // chat-shaped rows. These are used pre-auth / offline; live discovery
 // overrides once a key is configured.
@@ -197,7 +197,7 @@ function manifestChatEntryToSurfaceModel(entry: ManifestChatModelEntry): DeepInf
 
 // Per-surface static fallback used only when no API key is configured or
 // live discovery fails. Kept deliberately minimal: the dynamic
-// `/v1/openai/models?sort_by=openclaw&filter=with_meta` projection is the
+// `/v1/openai/models?sort_by=carapace&filter=with_meta` projection is the
 // real source of truth (140 tagged rows today), so every retired model
 // removed from the DeepInfra catalog disappears here automatically the
 // next time discovery runs. Newer entries — additional image-gen models,

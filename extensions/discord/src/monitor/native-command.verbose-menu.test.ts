@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import * as conversationRuntime from "openclaw/plugin-sdk/conversation-binding-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import * as conversationRuntime from "carapace/plugin-sdk/conversation-binding-runtime";
 import {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { discordPlugin } from "../../api.js";
 import { createDiscordNativeCommand } from "./native-command.js";
@@ -12,15 +12,15 @@ import { nativeCommandRuntime } from "./native-command.runtime.js";
 import { createMockCommandInteraction } from "./native-command.test-helpers.js";
 import { createNoopThreadBindingManager } from "./thread-bindings.js";
 
-vi.mock("openclaw/plugin-sdk/conversation-binding-runtime", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/conversation-binding-runtime", async (importOriginal) => ({
   ...(await importOriginal<typeof conversationRuntime>()),
   ensureConfiguredBindingRouteReady: vi.fn(async () => ({ ok: true })),
 }));
 
 describe("Discord native verbose menu", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "discord-verbose-menu" });
+    state = await createCarapaceTestState({ label: "discord-verbose-menu" });
     setActivePluginRegistry(
       createTestRegistry([{ pluginId: "discord", plugin: discordPlugin, source: "test" }]),
     );
@@ -37,7 +37,7 @@ describe("Discord native verbose menu", () => {
   it.each(["ready", "unavailable", "unauthorized"] as const)(
     "preserves the %s command route",
     async (mode) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { entries: { target: { verboseDefault: "full" } } },
         commands: { allowFrom: { discord: ["user:123456789012345678"] } },
         channels: {

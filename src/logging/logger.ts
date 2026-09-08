@@ -1,10 +1,10 @@
 // Logger implementation writes structured log output with redaction and transports.
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { Logger as TsLogger } from "tslog";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { hasInternalDiagnosticEventInterest } from "../infra/diagnostic-event-listener-presence.js";
 import {
   areDiagnosticsEnabledForProcess,
@@ -20,7 +20,7 @@ import {
 } from "../infra/diagnostic-trace-context.js";
 import { expandHomePrefix } from "../infra/home-dir.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
-import { DEFAULT_POSIX_TMP_ROOT } from "../infra/tmp-openclaw-dir.js";
+import { DEFAULT_POSIX_TMP_ROOT } from "../infra/tmp-carapace-dir.js";
 import { invalidateLoggingConfigCache, readLoggingConfig } from "./config.js";
 import { resolveEnvLogLevelOverride } from "./env-log-level.js";
 import { type LogLevel, levelToMinLevel, normalizeLogLevel } from "./levels.js";
@@ -40,7 +40,7 @@ import type { LoggerSettings } from "./types.js";
 export type { LoggerSettings } from "./types.js";
 
 export const DEFAULT_LOG_DIR = DEFAULT_POSIX_TMP_ROOT;
-export const DEFAULT_LOG_FILE = `${DEFAULT_LOG_DIR}/openclaw.log`; // legacy single-file path
+export const DEFAULT_LOG_FILE = `${DEFAULT_LOG_DIR}/carapace.log`; // legacy single-file path
 
 const MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 const DEFAULT_MAX_LOG_FILE_BYTES = 100 * 1024 * 1024; // 100 MB
@@ -55,7 +55,7 @@ type ResolvedSettings = {
 type ResolvedRuntimeSettings = ResolvedSettings & { rolling: boolean };
 export type LoggerResolvedSettings = ResolvedSettings;
 type TsLogRecord = Record<string, unknown>;
-type LoggerConfigLoader = () => OpenClawConfig["logging"] | undefined;
+type LoggerConfigLoader = () => CarapaceConfig["logging"] | undefined;
 
 type DiagnosticLogCode = {
   line?: number;
@@ -75,7 +75,7 @@ function invalidateLoggerSettings(): void {
 }
 
 /** Publishes authoritative config-derived logging state for the active runtime. */
-export function applyLoggingConfig(config: OpenClawConfig["logging"] | undefined): void {
+export function applyLoggingConfig(config: CarapaceConfig["logging"] | undefined): void {
   loggingState.appliedConfig = config;
   invalidateLoggingConfigCache();
   invalidateLoggerSettings();
@@ -86,7 +86,7 @@ export function setLoggerConfigLoaderForTests(loader?: LoggerConfigLoader): void
   invalidateLoggerSettings();
 }
 
-export function readLoggerConfig(): OpenClawConfig["logging"] | undefined {
+export function readLoggerConfig(): CarapaceConfig["logging"] | undefined {
   return loadLoggerConfig();
 }
 const MAX_DIAGNOSTIC_LOG_ATTRIBUTE_COUNT = 32;
@@ -492,14 +492,14 @@ function attachDiagnosticEventTransport(logger: TsLogger<LogObj>): void {
 function canUseSilentVitestFileLogFastPath(envLevel: LogLevel | undefined): boolean {
   return (
     process.env.VITEST === "true" &&
-    process.env.OPENCLAW_TEST_FILE_LOG !== "1" &&
+    process.env.CARAPACE_TEST_FILE_LOG !== "1" &&
     !envLevel &&
     !loggingState.overrideSettings
   );
 }
 
 function resolveDefaultActiveLogFile(): string {
-  if (process.env.VITEST === "true" && process.env.OPENCLAW_TEST_FILE_LOG === "1") {
+  if (process.env.VITEST === "true" && process.env.CARAPACE_TEST_FILE_LOG === "1") {
     return path.join(
       process.cwd(),
       ".artifacts",
@@ -532,10 +532,10 @@ function resolveSettings(): ResolvedRuntimeSettings {
     };
   }
 
-  const cfg: OpenClawConfig["logging"] | LoggerSettings | undefined =
+  const cfg: CarapaceConfig["logging"] | LoggerSettings | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? loadLoggerConfig();
   const defaultLevel =
-    process.env.VITEST === "true" && process.env.OPENCLAW_TEST_FILE_LOG !== "1" ? "silent" : "info";
+    process.env.VITEST === "true" && process.env.CARAPACE_TEST_FILE_LOG !== "1" ? "silent" : "info";
   const fromConfig = normalizeLogLevel(cfg?.level, defaultLevel);
   const level = envLevel ?? fromConfig;
   const rolling = cfg?.file ? isLegacyRollingLogFilePath(cfg.file) : true;
@@ -602,7 +602,7 @@ class RuntimeLogger extends TsLogger<LogObj> {
 
 function buildLogger(): TsLogger<LogObj> {
   const logger = new RuntimeLogger({
-    name: "openclaw",
+    name: "carapace",
     maskValuesOfKeys: [],
     minLevel: levelToMinLevel("fatal"),
     type: "hidden", // no ansi formatting

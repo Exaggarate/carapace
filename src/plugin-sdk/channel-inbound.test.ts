@@ -9,8 +9,8 @@ import {
 } from "../channels/message-access/admission-evidence.js";
 import { recordInboundSession } from "../channels/session.js";
 import { loadSessionEntry, replaceSessionEntrySync } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   buildChannelInboundEventContext,
   buildChannelTurnContext,
@@ -55,15 +55,15 @@ function createInboundParams(
 describe("channel-inbound public helpers", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
     afterEach(() => {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       cleanup();
     }),
   );
 
   it("runs a lifecycle-less prepared turn through the published entry point", async () => {
     const events: string[] = [];
-    const { runChannelInboundEvent } = await import("openclaw/plugin-sdk/channel-inbound");
+    const { runChannelInboundEvent } = await import("carapace/plugin-sdk/channel-inbound");
     const result = await runChannelInboundEvent({
       channel: "test",
       raw: { id: "msg-1", text: "hello" },
@@ -106,7 +106,7 @@ describe("channel-inbound public helpers", () => {
   });
 
   it("dispatches a published inbound event before automatic session maintenance", async () => {
-    const storePath = `${tempDirs.make("openclaw-channel-inbound-maintenance-")}/sessions.json`;
+    const storePath = `${tempDirs.make("carapace-channel-inbound-maintenance-")}/sessions.json`;
     const staleSessionKey = "agent:main:published-inbound-stale";
     const activeSessionKey = "agent:main:test:peer";
     replaceSessionEntrySync(
@@ -114,7 +114,7 @@ describe("channel-inbound public helpers", () => {
       { sessionId: "published-inbound-stale", updatedAt: 1 },
     );
     let staleEntryAtDispatch: ReturnType<typeof loadSessionEntry>;
-    const { runChannelInboundEvent } = await import("openclaw/plugin-sdk/channel-inbound");
+    const { runChannelInboundEvent } = await import("carapace/plugin-sdk/channel-inbound");
 
     const result = await runChannelInboundEvent({
       channel: "test",

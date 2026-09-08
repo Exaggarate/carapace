@@ -6,7 +6,7 @@ import { loadPersistedAuthProfileStore } from "../../src/agents/auth-profiles/pe
 import { clearRuntimeAuthProfileStoreSnapshots } from "../../src/agents/auth-profiles/runtime-snapshots.js";
 import type { RuntimeEnv } from "../../src/runtime.js";
 import { captureEnv } from "../../src/test-utils/env.js";
-import { createOpenClawTestState } from "../../src/test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../src/test-utils/carapace-test-state.js";
 import type { WizardPrompter } from "../../src/wizard/prompts.js";
 import { createWizardPrompter as createBaseWizardPrompter } from "./wizard-prompter.js";
 
@@ -39,14 +39,14 @@ type AuthTestEnv = {
 };
 
 export async function setupAuthTestEnv(
-  prefix = "openclaw-auth-",
+  prefix = "carapace-auth-",
   options?: { agentSubdir?: string },
 ): Promise<AuthTestEnv> {
   clearRuntimeAuthProfileStoreSnapshots();
-  const state = await createOpenClawTestState({ prefix, layout: "state-only" });
+  const state = await createCarapaceTestState({ prefix, layout: "state-only" });
   try {
     const agentDir = path.join(state.stateDir, options?.agentSubdir ?? "agent");
-    process.env.OPENCLAW_AGENT_DIR = agentDir;
+    process.env.CARAPACE_AGENT_DIR = agentDir;
     await fs.mkdir(agentDir, { recursive: true });
     return { stateDir: state.stateDir, agentDir, cleanup: state.cleanup };
   } catch (error) {
@@ -61,7 +61,7 @@ type AuthTestLifecycle = {
   cleanup: () => Promise<void>;
 };
 
-/** Capture env and track isolated OpenClaw state fixtures for cleanup. */
+/** Capture env and track isolated Carapace state fixtures for cleanup. */
 export function createAuthTestLifecycle(envKeys: string[]): AuthTestLifecycle {
   const envSnapshot = captureEnv(envKeys);
   const cleanups: Array<() => Promise<void>> = [];

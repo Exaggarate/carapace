@@ -41,7 +41,7 @@ describe("pairing setup code", () => {
 
   it("round-trips setup codes while canonicalizing their TLS fingerprint", () => {
     const payload = {
-      url: "wss://gateway.example:8443/openclaw-gw",
+      url: "wss://gateway.example:8443/carapace-gw",
       bootstrapToken: "Bootstrap-AbC123",
       tlsFingerprint: `SHA256:${COLON_TLS_FINGERPRINT}`,
       expiresAtMs: 20_000,
@@ -297,13 +297,13 @@ describe("pairing setup code", () => {
 
   beforeEach(() => {
     gatewayEnvSnapshot = captureEnv([
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
-      "OPENCLAW_GATEWAY_PORT",
+      "CARAPACE_GATEWAY_TOKEN",
+      "CARAPACE_GATEWAY_PASSWORD",
+      "CARAPACE_GATEWAY_PORT",
     ]);
-    process.env.OPENCLAW_GATEWAY_TOKEN = "";
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "";
-    process.env.OPENCLAW_GATEWAY_PORT = "";
+    process.env.CARAPACE_GATEWAY_TOKEN = "";
+    process.env.CARAPACE_GATEWAY_PASSWORD = "";
+    process.env.CARAPACE_GATEWAY_PORT = "";
   });
 
   beforeEach(() => {
@@ -348,11 +348,11 @@ describe("pairing setup code", () => {
     await expectResolvedSetupSuccessCase({
       config: createCustomGatewayConfig({ mode: "token", token: "tok_123" }),
       options: {
-        publicUrl: "wss://gateway.example.test:18789/openclaw-gw",
+        publicUrl: "wss://gateway.example.test:18789/carapace-gw",
       },
       expected: {
         authLabel: "token",
-        url: "wss://gateway.example.test:18789/openclaw-gw",
+        url: "wss://gateway.example.test:18789/carapace-gw",
         urlSource: "plugins.entries.device-pair.config.publicUrl",
       },
     });
@@ -502,7 +502,7 @@ describe("pairing setup code", () => {
       expectedError: "MISSING_GW_TOKEN",
     },
     {
-      name: "does not let OPENCLAW_GATEWAY_PASSWORD mask a configured password SecretRef",
+      name: "does not let CARAPACE_GATEWAY_PASSWORD mask a configured password SecretRef",
       config: createCustomGatewayConfig(
         {
           mode: "password",
@@ -511,7 +511,7 @@ describe("pairing setup code", () => {
         defaultEnvSecretProviderConfig,
       ),
       options: {
-        env: { OPENCLAW_GATEWAY_PASSWORD: "password-from-env" },
+        env: { CARAPACE_GATEWAY_PASSWORD: "password-from-env" },
       },
       expectedError: "MISSING_GW_PASSWORD",
     },
@@ -531,7 +531,7 @@ describe("pairing setup code", () => {
       },
       {
         env: {
-          OPENCLAW_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
+          CARAPACE_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
         },
       },
     );
@@ -618,7 +618,7 @@ describe("pairing setup code", () => {
       } satisfies ResolveSetupConfig,
       options: {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "new-token",
+          CARAPACE_GATEWAY_TOKEN: "new-token",
         },
       } satisfies ResolveSetupOptions,
       expected: {

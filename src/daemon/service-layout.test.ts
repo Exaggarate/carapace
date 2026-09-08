@@ -11,10 +11,10 @@ describe("summarizeGatewayServiceLayout", () => {
       (
         await summarizeGatewayServiceLayout({
           programArguments: ["node", "dist/index.js", "gateway", "run"],
-          workingDirectory: "/repo/openclaw",
+          workingDirectory: "/repo/carapace",
         })
       )?.entrypoint,
-    ).toBe(path.join("/repo/openclaw", "dist", "index.js"));
+    ).toBe(path.join("/repo/carapace", "dist", "index.js"));
   });
 
   it("resolves Windows service entrypoints with Windows path semantics", async () => {
@@ -22,10 +22,10 @@ describe("summarizeGatewayServiceLayout", () => {
       (
         await summarizeGatewayServiceLayout({
           programArguments: ["node.exe", "dist\\index.js", "gateway", "run"],
-          workingDirectory: "C:\\openclaw",
+          workingDirectory: "C:\\carapace",
         })
       )?.entrypoint,
-    ).toBe("C:\\openclaw\\dist\\index.js");
+    ).toBe("C:\\carapace\\dist\\index.js");
   });
 
   it("rejects a relative entrypoint without an absolute service working directory", async () => {
@@ -48,17 +48,17 @@ describe("gatewayServiceCommandUsesRoot release ownership", () => {
     "checks the effective launcher against the managed installation (%s)",
     async (layout) => {
       const root = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-release-owner-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-release-owner-")),
       );
       try {
-        const managedRoot = path.join(root, "openclaw");
+        const managedRoot = path.join(root, "carapace");
         const release = path.join(root, "releases", "selected");
         const foreign = path.join(root, "foreign", "releases", "selected");
         const current = path.join(root, "current");
         const mounted = layout === "paired" || layout === "different-mount";
         for (const packageRoot of [managedRoot, release, foreign, ...(mounted ? [current] : [])]) {
           await fs.mkdir(path.join(packageRoot, "dist"), { recursive: true });
-          await fs.writeFile(path.join(packageRoot, "package.json"), '{"name":"openclaw"}');
+          await fs.writeFile(path.join(packageRoot, "package.json"), '{"name":"carapace"}');
           await fs.writeFile(path.join(packageRoot, "dist", "index.js"), "gateway");
         }
         if (!mounted) {

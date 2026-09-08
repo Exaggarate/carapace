@@ -1,12 +1,12 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import {
   loadSessionEntry,
   loadTranscriptEvents,
   upsertSessionEntryCore,
 } from "../../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { persistSubagentSessionTiming } from "./subagent-registry-helpers.js";
 import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
@@ -14,7 +14,7 @@ describe("subagent session failures", () => {
   it.each(["error", "timeout"] as const)(
     "persists a bounded %s reason and one durable child notice, then clears only on success",
     async (outcomeStatus) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const target = {
           agentId: "main",
           sessionKey: "agent:main:subagent:setup-failure",

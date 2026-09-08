@@ -1,4 +1,4 @@
-// Applies OpenClaw's conversational setup: config, workspace files, gateway.
+// Applies Carapace's conversational setup: config, workspace files, gateway.
 import { isDeepStrictEqual } from "node:util";
 import { listAgentEntries, toAgentEntriesRecord } from "../agents/agent-scope-config.js";
 import { resolveGatewayStartupTiming } from "../commands/gateway-startup-timing.js";
@@ -13,7 +13,7 @@ import {
   validateConfigObjectWithPlugins,
 } from "../config/config.js";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { formatExternalSupervisorActionRequired } from "../infra/gateway-supervision.js";
 import { enablePluginInConfig } from "../plugins/enable.js";
@@ -64,13 +64,13 @@ export type SystemAgentSetupApplyParams = {
   /** Provider-auth config produced in the isolated manual-key flow. */
   configPatch?: unknown;
   /** Success-gated final normalization against the config held by the write lock. */
-  finalizeConfig?: (config: OpenClawConfig, sourceConfig: OpenClawConfig) => OpenClawConfig;
+  finalizeConfig?: (config: CarapaceConfig, sourceConfig: CarapaceConfig) => CarapaceConfig;
   /** Plugin whose enablement belongs to the successful setup transaction. */
   enablePluginId?: string;
   /** Refresh an installed plugin after its success-gated enablement commits. */
   refreshPluginRegistry?: boolean;
   /** Synchronous cross-store guard receives authored config under the final write lock. */
-  assertCommitPreconditions?: (sourceConfig: OpenClawConfig) => void;
+  assertCommitPreconditions?: (sourceConfig: CarapaceConfig) => void;
   /** Resume an interrupted local installation without restarting a running Gateway. */
   resume?: boolean;
   installDaemon?: boolean;
@@ -96,7 +96,7 @@ type SystemAgentSetupApplyHooks = {
 /** Prompter for quickstart-only flows: notes go to the log, prompts fail loud. */
 export function createQuickstartNotePrompter(runtime: RuntimeEnv): WizardPrompter {
   const unexpected = (kind: string) => {
-    throw new Error(`openclaw setup hit an interactive ${kind} prompt; quickstart must not ask`);
+    throw new Error(`carapace setup hit an interactive ${kind} prompt; quickstart must not ask`);
   };
   return {
     intro: async () => {},
@@ -129,7 +129,7 @@ export function createQuickstartNotePrompter(runtime: RuntimeEnv): WizardPrompte
   };
 }
 
-function applySecurityAcknowledgement(config: OpenClawConfig): OpenClawConfig {
+function applySecurityAcknowledgement(config: CarapaceConfig): CarapaceConfig {
   if (config.wizard?.securityAcknowledgedAt) {
     return config;
   }
@@ -197,7 +197,7 @@ export async function applySystemAgentSetup(
   let sessionMigrationWarnings: string[] = [];
 
   if (hasExpectedConfigHash && resolveConfigSnapshotHash(snapshot) !== expectedConfigHash) {
-    throw new Error("OpenClaw config changed while AI access was being tested. Try setup again.");
+    throw new Error("Carapace config changed while AI access was being tested. Try setup again.");
   }
 
   let guardModules =
@@ -207,7 +207,7 @@ export async function applySystemAgentSetup(
           import("../agents/model-selection.js"),
         ] as const)
       : undefined;
-  const assertExpectedTarget = (config: OpenClawConfig): void => {
+  const assertExpectedTarget = (config: CarapaceConfig): void => {
     if (!guardModules) {
       return;
     }
@@ -258,8 +258,8 @@ export async function applySystemAgentSetup(
     ) {
       throw new Error(
         phase === "before"
-          ? "The default-agent inference route changed before setup could start, so no workspace or Gateway settings were changed. Retry setup from the current OpenClaw session."
-          : "The default-agent inference route changed after the config write, so no further setup effects were applied. Retry setup from the current OpenClaw session.",
+          ? "The default-agent inference route changed before setup could start, so no workspace or Gateway settings were changed. Retry setup from the current Carapace session."
+          : "The default-agent inference route changed after the config write, so no further setup effects were applied. Retry setup from the current Carapace session.",
       );
     }
     return currentRoute;
@@ -280,21 +280,21 @@ export async function applySystemAgentSetup(
     });
     if (!created.createdAgent || !created.configHash) {
       throw new Error(
-        "OpenClaw did not create the approved first agent because the roster changed. Retry setup.",
+        "Carapace did not create the approved first agent because the roster changed. Retry setup.",
       );
     }
     snapshot = await readSetupConfigFileSnapshot();
     snapshotConfig = requireValidSystemAgentSetupSnapshot(snapshot);
     assertCommitPreconditions?.(snapshotConfig.sourceConfig);
     if ((resolveConfigSnapshotHash(snapshot) ?? null) !== created.configHash) {
-      throw new Error("OpenClaw config changed after first-agent creation. Retry setup.");
+      throw new Error("Carapace config changed after first-agent creation. Retry setup.");
     }
     const createdRoster = listAgentEntries(snapshotConfig.sourceConfig);
     if (
       createdRoster.length !== 1 ||
       normalizeAgentId(createdRoster[0]?.id ?? "") !== created.agentId
     ) {
-      throw new Error("OpenClaw first-agent ownership changed during setup. Retry setup.");
+      throw new Error("Carapace first-agent ownership changed during setup. Retry setup.");
     }
     const rebasedRoute = await assertVerifiedRoute(snapshot, verifiedRoute, "before", true);
     verifiedRoute = rebasedRoute ?? verifiedRoute;
@@ -315,7 +315,7 @@ export async function applySystemAgentSetup(
   const prompter = createQuickstartNotePrompter(runtime);
   const { configureGatewayForSetup } = await import("../wizard/setup.gateway-config.js");
   const buildSetupCandidate = async (
-    currentBaseConfig: OpenClawConfig,
+    currentBaseConfig: CarapaceConfig,
     hasAuthoredRosterEntries: boolean,
   ) => {
     const roster = listAgentEntries(currentBaseConfig);
@@ -330,7 +330,7 @@ export async function applySystemAgentSetup(
       setupBaseConfig = enabled.config;
     }
     if (configPatch !== undefined) {
-      setupBaseConfig = applyMergePatch(setupBaseConfig, configPatch) as OpenClawConfig;
+      setupBaseConfig = applyMergePatch(setupBaseConfig, configPatch) as CarapaceConfig;
     }
     if (currentHasRoster) {
       const { list: _legacyList, ...agents } = setupBaseConfig.agents ?? {};
@@ -404,7 +404,7 @@ export async function applySystemAgentSetup(
         context.previousHash !== expectedWriteHash
       ) {
         throw new Error(
-          "OpenClaw config changed while AI access was being tested. Try setup again.",
+          "Carapace config changed while AI access was being tested. Try setup again.",
         );
       }
       await assertVerifiedRoute(context.snapshot);
@@ -430,7 +430,7 @@ export async function applySystemAgentSetup(
           !sameSetupConfiguredRoute(expectedSourceRoute.route, verifiedRoute.route, false))
       ) {
         throw new Error(
-          "The setup candidate no longer preserves the exact verified inference route, so it was not saved. Retry setup from the current OpenClaw session.",
+          "The setup candidate no longer preserves the exact verified inference route, so it was not saved. Retry setup from the current Carapace session.",
         );
       }
       // This is the auth/config operation's linearization point. Never hold
@@ -458,7 +458,7 @@ export async function applySystemAgentSetup(
   const setupResult = committed.result;
   const settings = setupResult?.settings;
   if (!settings) {
-    throw new Error("OpenClaw setup committed without resolved Gateway settings.");
+    throw new Error("Carapace setup committed without resolved Gateway settings.");
   }
   const onboardingTarget = resolveSystemTarget(nextConfig);
   const effectiveWorkspace = onboardingTarget.workspaceDir;
@@ -474,7 +474,7 @@ export async function applySystemAgentSetup(
       const issue = expectedRuntime.issues[0];
       const detail = issue ? ` (${issue.path ? `${issue.path}: ` : ""}${issue.message})` : "";
       throw new Error(
-        `OpenClaw could not validate the setup route after its config write${detail}. No further setup effects were applied. Retry setup from the current OpenClaw session.`,
+        `Carapace could not validate the setup route after its config write${detail}. No further setup effects were applied. Retry setup from the current Carapace session.`,
       );
     }
     const expectedPersistedRoute = await projectDefaultInferenceRoute(expectedRuntime.config);
@@ -483,7 +483,7 @@ export async function applySystemAgentSetup(
     // metadata change that would make the committed config run differently.
     if (!sameSetupConfiguredRoute(expectedPersistedRoute.route, verifiedRoute.route, false)) {
       throw new Error(
-        "The materialized inference route no longer matches the exact verified route, so no further setup effects were applied. Retry setup from the current OpenClaw session.",
+        "The materialized inference route no longer matches the exact verified route, so no further setup effects were applied. Retry setup from the current Carapace session.",
       );
     }
   }
@@ -522,7 +522,7 @@ export async function applySystemAgentSetup(
     (error) => lines.push(`Workspace files: ${formatErrorMessage(error)}`),
   );
 
-  // Setup approval includes consent for OpenClaw's local model harnesses.
+  // Setup approval includes consent for Carapace's local model harnesses.
   // Keep the grant agent-scoped; regular agents retain interactive approvals.
   await runCommittedFollowUp(
     async () => {
@@ -530,20 +530,20 @@ export async function applySystemAgentSetup(
       beforePersistentApply?.();
       await updateExecApprovals({
         update: (approvals) =>
-          approvals.agents?.openclaw
+          approvals.agents?.carapace
             ? null
             : {
                 ...approvals,
                 agents: {
                   ...approvals.agents,
-                  openclaw: { security: "full", ask: "off" },
+                  carapace: { security: "full", ask: "off" },
                 },
               },
       });
     },
     (error) =>
       lines.push(
-        `OpenClaw exec approval: ${formatErrorMessage(error)}; local model harnesses may ask again.`,
+        `Carapace exec approval: ${formatErrorMessage(error)}; local model harnesses may ask again.`,
       ),
   );
 
@@ -556,7 +556,7 @@ export async function applySystemAgentSetup(
         await refreshPluginRegistryAfterConfigMutation({
           configPath: committed.path,
           reason: "source-changed",
-          traceCommand: "openclaw-setup",
+          traceCommand: "carapace-setup",
           logger: {
             warn: (message) => lines.push(message),
           },
@@ -623,7 +623,7 @@ export async function applySystemAgentSetup(
           lines.push(`Gateway: ${formatExternalSupervisorActionRequired("start the gateway")}`);
         } else if (params.installDaemon === false) {
           lines.push(
-            "Gateway: service installation skipped. Run `openclaw gateway run` to start it in the foreground.",
+            "Gateway: service installation skipped. Run `carapace gateway run` to start it in the foreground.",
           );
         } else {
           lines.push(

@@ -5,20 +5,20 @@ import {
   dispatchChannelInboundReply,
   isChannelPartialDeliveryError,
   type ChannelInboundTurnPlan,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   addTestHook,
   createEmptyPluginRegistry,
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
   type PluginHookRegistration,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { clearInternalHooks, registerInternalHook } from "openclaw/plugin-sdk/hook-runtime";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { clearInternalHooks, registerInternalHook } from "carapace/plugin-sdk/hook-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createWebSendApi } from "../../inbound/send-api.js";
 import { normalizeWhatsAppSendResult } from "../../inbound/send-result.js";
@@ -36,10 +36,10 @@ type InternalHookEvent = Parameters<Parameters<typeof registerInternalHook>[1]>[
 
 const recordChannelActivity = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-activity-runtime")
-  >("openclaw/plugin-sdk/channel-activity-runtime");
+    typeof import("carapace/plugin-sdk/channel-activity-runtime")
+  >("carapace/plugin-sdk/channel-activity-runtime");
   return {
     ...actual,
     recordChannelActivity: (...args: unknown[]) => recordChannelActivity(...args),

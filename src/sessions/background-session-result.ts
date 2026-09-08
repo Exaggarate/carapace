@@ -1,5 +1,5 @@
 // Commits detached background results into an existing conversation generation.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionWorkStartError } from "../config/sessions/lifecycle.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import {
@@ -14,12 +14,12 @@ import {
   readTranscriptEventMessage,
 } from "../config/sessions/session-accessor.sqlite-read.js";
 import type { SessionTranscriptAssistantMessage } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ASSISTANT_DISPLAY_CONTENT_FIELD } from "../shared/assistant-display-content.js";
 import {
-  OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-  OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
-} from "../shared/transcript-only-openclaw-assistant.js";
+  CARAPACE_TRANSCRIPT_ARTIFACT_API,
+  CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
+} from "../shared/transcript-only-carapace-assistant.js";
 import {
   getSessionWorkAdmissionRelease,
   runExclusiveSessionLifecycleMutation,
@@ -50,7 +50,7 @@ export async function commitBackgroundResultToSession(params: {
   onMessageCommitted?: SessionTranscriptTurnPersistOptions["onMessageCommitted"];
   idempotencyKey: string;
   provenance: BackgroundSessionResultProvenance;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   signal?: AbortSignal;
 }): Promise<BackgroundSessionResultCommit> {
   const sessionKey = normalizeOptionalString(params.sessionKey);
@@ -122,8 +122,8 @@ export async function commitBackgroundResultToSession(params: {
         role: "assistant",
         content: [{ type: "text", text }],
         ...(displayContent ? { [ASSISTANT_DISPLAY_CONTENT_FIELD]: displayContent } : {}),
-        api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-        provider: OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
+        api: CARAPACE_TRANSCRIPT_ARTIFACT_API,
+        provider: CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
         model: AUTOMATION_RESULT_MODEL,
         usage: {
           input: 0,
@@ -142,10 +142,10 @@ export async function commitBackgroundResultToSession(params: {
         stopReason: "stop",
         timestamp: Date.now(),
         idempotencyKey,
-        openclawAutomation: params.provenance,
+        carapaceAutomation: params.provenance,
       } satisfies SessionTranscriptAssistantMessage & {
         idempotencyKey: string;
-        openclawAutomation: BackgroundSessionResultProvenance;
+        carapaceAutomation: BackgroundSessionResultProvenance;
       };
       const committed = await persistSessionTranscriptTurn(scope, {
         cwd: current.spawnedCwd,
@@ -154,7 +154,7 @@ export async function commitBackgroundResultToSession(params: {
         messages: [
           {
             message: priorMessage
-              ? { ...priorMessage, content: message.content, openclawAutomation: params.provenance }
+              ? { ...priorMessage, content: message.content, carapaceAutomation: params.provenance }
               : message,
             idempotencyLookup: "scan",
             ...(priorId ? { eventId: priorId } : {}),

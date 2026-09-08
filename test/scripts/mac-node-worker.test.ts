@@ -23,8 +23,8 @@ describe("Mac app worker publication", () => {
   baseIt.each(["sign", "worker", "seal", "stage", "success"])(
     "publishes only a verified replacement (%s)",
     (failure) => {
-      const root = temps.make("openclaw-worker-publication-");
-      const target = path.join(root, "OpenClaw.app");
+      const root = temps.make("carapace-worker-publication-");
+      const target = path.join(root, "Carapace.app");
       const staged = path.join(root, "candidate.app");
       mkdirSync(target);
       mkdirSync(staged);
@@ -85,16 +85,16 @@ describe("Mac app worker publication", () => {
   baseIt(
     "provisions packages without invoking the service owner or changing operator state",
     () => {
-      const root = temps.make("openclaw-worker-provision-");
+      const root = temps.make("carapace-worker-provision-");
       const home = path.join(root, "home");
       const prefix = path.join(root, "private");
-      const sentinel = path.join(root, "operator", ".openclaw", "state", "sentinel");
+      const sentinel = path.join(root, "operator", ".carapace", "state", "sentinel");
       mkdirSync(path.dirname(sentinel), { recursive: true });
       mkdirSync(home);
       writeFileSync(sentinel, "operator-owned");
       const nodeDir = path.join(prefix, "tools", "node-v24.19.0");
       mkdirSync(path.join(nodeDir, "bin"), { recursive: true });
-      // Only npm/network is replaced. The real install_openclaw implementation
+      // Only npm/network is replaced. The real install_carapace implementation
       // must remain a provision-only seam even when a loaded Gateway is reported.
       symlinkSync(process.execPath, path.join(nodeDir, "bin", "node"));
       const npm = path.join(nodeDir, "bin", "npm");
@@ -105,8 +105,8 @@ case "$1" in
   --version) echo 11.15.0 ;;
   config) echo null ;;
   install)
-    mkdir -p "$HOME/../private/tools/node-v24.19.0/lib/node_modules/openclaw/dist"
-    touch "$HOME/../private/tools/node-v24.19.0/lib/node_modules/openclaw/dist/entry.js"
+    mkdir -p "$HOME/../private/tools/node-v24.19.0/lib/node_modules/carapace/dist"
+    touch "$HOME/../private/tools/node-v24.19.0/lib/node_modules/carapace/dist/entry.js"
     ;;
   *) exit 4 ;;
 esac
@@ -122,11 +122,11 @@ esac
       set -euo pipefail
       source scripts/install-cli.sh
       PREFIX=${quote(prefix)}
-      OPENCLAW_VERSION=/fixture/openclaw.tgz
+      CARAPACE_VERSION=/fixture/carapace.tgz
       is_gateway_daemon_loaded() { echo loaded >> ${quote(calls)}; return 0; }
       refresh_gateway_service_if_loaded() { echo refresh >> ${quote(calls)}; }
-      install_openclaw
-      test -f "$(node_dir)/lib/node_modules/openclaw/dist/entry.js"
+      install_carapace
+      test -f "$(node_dir)/lib/node_modules/carapace/dist/entry.js"
     `,
         ],
         {
@@ -134,7 +134,7 @@ esac
           env: {
             HOME: home,
             PATH: `${path.join(nodeDir, "bin")}:/usr/bin:/bin`,
-            OPENCLAW_INSTALL_CLI_SH_NO_RUN: "1",
+            CARAPACE_INSTALL_CLI_SH_NO_RUN: "1",
           },
         },
       );
@@ -151,7 +151,7 @@ describe.runIf(process.platform === "darwin")("Mac worker portability inventory"
     const { auditMacWorkerPortability } =
       await import("../../scripts/lib/mac-worker-portability.mjs");
     const { machoFixture } = await import("../helpers/mac-native.js");
-    const root = temps.make("openclaw-portability-native-");
+    const root = temps.make("carapace-portability-native-");
     const node = path.join(root, "node");
     writeFileSync(node, machoFixture());
     for (const bits of [32, 64]) {
@@ -177,7 +177,7 @@ describe.runIf(process.platform === "darwin")("Mac worker portability inventory"
           await import("../../scripts/lib/mac-worker-portability.mjs");
         const { machoFixture, nativeObjectFixture, universalArchiveFixture } =
           await import("../helpers/mac-native.js");
-        const parent = mac.createTempDir("openclaw-portability-resource-");
+        const parent = mac.createTempDir("carapace-portability-resource-");
         const root = path.join(parent, "runtime");
         mkdirSync(root);
         const node = path.join(root, "node");
@@ -204,7 +204,7 @@ describe.runIf(process.platform === "darwin")("Mac worker portability inventory"
   it.each([false, true])(
     "binds captured symlink targets before publication (replacement: %s)",
     (replace) => {
-      const root = temps.make("openclaw-native-link-binding-");
+      const root = temps.make("carapace-native-link-binding-");
       const result = spawnSync(
         "/usr/bin/python3",
         [
@@ -269,7 +269,7 @@ print('symlink-binding-ok')
   );
 
   it("looks up actual filesystem child names without following links or leaking handles", () => {
-    const root = temps.make("openclaw-native-child-lookup-");
+    const root = temps.make("carapace-native-child-lookup-");
     const result = spawnSync(
       "/usr/bin/python3",
       [
@@ -334,7 +334,7 @@ print('child-lookup-ok')
     "root",
     "new-hardlink",
   ])("rejects changed child lookup bindings and closes handles (%s)", (mutation) => {
-    const root = temps.make("openclaw-native-child-replacement-");
+    const root = temps.make("carapace-native-child-replacement-");
     const result = spawnSync(
       "/usr/bin/python3",
       [
@@ -393,7 +393,7 @@ print('child-binding-rejected')
     "rejects incomplete or changed observed input even when not retained (%s)",
     async (mode) => {
       const { machoFixture } = await import("../helpers/mac-native.js");
-      const root = temps.make("openclaw-native-complete-audit-");
+      const root = temps.make("carapace-native-complete-audit-");
       const directory = path.join(
         root,
         "source",
@@ -465,7 +465,7 @@ print('complete-audit-rejected')
   it.each(["stable", "ancestor-symlink", "ancestor-directory", "root-swap"])(
     "audits deep trees with linear opens and bounded handles (%s)",
     (mode) => {
-      const root = temps.make("openclaw-native-audit-depth-");
+      const root = temps.make("carapace-native-audit-depth-");
       const result = spawnSync(
         "/usr/bin/python3",
         [
@@ -537,7 +537,7 @@ print('bounded-audit-ok')
     "binds classify-and-copy to borrowed files and closes them on %s",
     async (mode) => {
       const { machoFixture } = await import("../helpers/mac-native.js");
-      const root = temps.make("openclaw-native-borrow-");
+      const root = temps.make("carapace-native-borrow-");
       const source = path.join(root, "source");
       const outside = path.join(root, "outside");
       mkdirSync(path.join(source, "dir"), { recursive: true });
@@ -636,7 +636,7 @@ print('held-file-copy-ok')
       const { auditMacWorkerPortability } =
         await import("../../scripts/lib/mac-worker-portability.mjs");
       const { machoFixture } = await import("../helpers/mac-native.js");
-      const parent = temps.make("openclaw-portability-link-");
+      const parent = temps.make("carapace-portability-link-");
       const root = path.join(parent, "runtime");
       mkdirSync(root);
       const node = path.join(root, "node");
@@ -659,7 +659,7 @@ print('held-file-copy-ok')
     const { auditMacWorkerPortability } =
       await import("../../scripts/lib/mac-worker-portability.mjs");
     const { machoFixture } = await import("../helpers/mac-native.js");
-    const root = temps.make("openclaw-portability-slices-");
+    const root = temps.make("carapace-portability-slices-");
     const node = path.join(root, "node");
     writeFileSync(node, machoFixture());
     const command = (id: number, value: string, offset: number) => {
@@ -718,7 +718,7 @@ print('held-file-copy-ok')
     const { auditMacWorkerPortability } =
       await import("../../scripts/lib/mac-worker-portability.mjs");
     const { machoFixture } = await import("../helpers/mac-native.js");
-    const root = temps.make("openclaw-portability-load-");
+    const root = temps.make("carapace-portability-load-");
     const node = path.join(root, "node");
     writeFileSync(node, machoFixture());
     const addon = path.join(root, "addon");

@@ -22,9 +22,9 @@ import { applySkillProposal, proposeCreateSkill } from "../skills/workshop/servi
 import { resolveWorkshopSkillsDir } from "../skills/workshop/skills-root.js";
 import * as workshopStore from "../skills/workshop/store.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import * as collectionBackups from "./doctor-skill-workshop-collection-backups.js";
 import {
@@ -38,12 +38,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-doctor-workshop-sqlite-",
+    prefix: "carapace-doctor-workshop-sqlite-",
   });
 });
 
@@ -86,7 +86,7 @@ async function seedLegacyCollectionBackup(params: {
   await fs.writeFile(
     path.join(backupDir, "manifest.json"),
     JSON.stringify({
-      schema: "openclaw.skill-collection-backup.v1",
+      schema: "carapace.skill-collection-backup.v1",
       id: params.backupId,
       createdAt: params.createdAt ?? "2026-09-01T00:00:00.000Z",
       workspaceDir: params.workspaceDir,
@@ -101,7 +101,7 @@ async function seedLegacyCollectionBackup(params: {
 
 async function seedOwnedLegacyCollectionBackup(name = "owned-legacy-backup") {
   const workspaceDir = await fs.realpath(
-    await tempDirs.make("openclaw-workshop-owned-backup-workspace-"),
+    await tempDirs.make("carapace-workshop-owned-backup-workspace-"),
   );
   const proposal = await proposeCreateSkill({
     workspaceDir,
@@ -131,7 +131,7 @@ async function seedOwnedLegacyCollectionBackup(name = "owned-legacy-backup") {
         ...applied.record.target,
         skillDir: legacySkillDir,
         skillFile: legacySkillFile,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
     },
     store: { env: testState.env },
@@ -150,7 +150,7 @@ async function seedOwnedLegacyCollectionBackup(name = "owned-legacy-backup") {
     agents: { list: [{ id: "main", default: true, workspace: workspaceDir }] },
   };
   const sourceBackupDir = path.join(legacyRoot, backupId);
-  const sourceMetadata = path.join(sourceBackupDir, "workspace", "skills", name, ".openclaw");
+  const sourceMetadata = path.join(sourceBackupDir, "workspace", "skills", name, ".carapace");
   await fs.mkdir(sourceMetadata);
   await fs.writeFile(path.join(sourceMetadata, "trace.json"), '{"source":"original"}\n');
   const destinationBackupDir = path.join(
@@ -191,7 +191,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
 
   it("keeps an unowned legacy collection backup as history-only", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-legacy-backup-workspace-"),
+      await tempDirs.make("carapace-workshop-legacy-backup-workspace-"),
     );
     const backupContent =
       "---\nname: legacy-collection-skill\ndescription: Legacy backup\n---\n\n# Before cleanup\n";
@@ -277,7 +277,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
           claimReleasedTime: Date.parse("2026-09-01T00:00:01.000Z"),
         },
       ]);
-      const databasePath = path.join(testState.stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(testState.stateDir, "state", "carapace.sqlite");
       const legacy = openNodeSqliteDatabase(databasePath);
       try {
         legacy.exec(`
@@ -605,7 +605,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
       }
       const destinationSkillDir = path.join(fixture.destinationBackupDir, "skills", fixture.name);
       const destinationManifest = path.join(fixture.destinationBackupDir, "manifest.json");
-      const metadataFile = path.join(destinationSkillDir, ".openclaw", "trace.json");
+      const metadataFile = path.join(destinationSkillDir, ".carapace", "trace.json");
       await expect(fs.readFile(path.join(destinationSkillDir, "SKILL.md"), "utf8")).resolves.toBe(
         fixture.backupContent,
       );
@@ -660,7 +660,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
     const newerId = "2026-09-02T00-00-00.000Z-newer";
     const newerDir = path.join(path.dirname(fixture.destinationBackupDir), newerId);
     const manifest: CollectionBackupManifest = {
-      schema: "openclaw.skill-collection-backup.v2",
+      schema: "carapace.skill-collection-backup.v2",
       id: newerId,
       createdAt: "2026-09-02T00:00:00.000Z",
       skillDirs: [],
@@ -768,7 +768,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
           resolveWorkshopSkillsDir(config, "main", testState.env),
           "interrupted-backup",
         ),
-        source: "openclaw-workshop",
+        source: "carapace-workshop",
       },
     });
 
@@ -787,7 +787,7 @@ describe("doctor Skill Workshop collection backup migration", () => {
 
   it("preserves a legacy collection backup when its workspace has ambiguous owners", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-ambiguous-backup-workspace-"),
+      await tempDirs.make("carapace-workshop-ambiguous-backup-workspace-"),
     );
     const legacyRoot = await seedLegacyCollectionBackup({
       workspaceDir,

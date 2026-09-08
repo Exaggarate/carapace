@@ -58,7 +58,7 @@ describe("session observer model preparation", () => {
       runtimeMocks.prepareDirect.mockResolvedValue({
         selection: { provider, modelId: prepared.model, agentDir: prepared.agentDir },
         model: { provider, id: prepared.model, maxTokens: 8192 },
-        auth: { apiKey: "openclaw:claude-cli-native-auth", mode: "oauth" },
+        auth: { apiKey: "carapace:claude-cli-native-auth", mode: "oauth" },
       });
       runtimeMocks.completeDirect
         .mockReset()

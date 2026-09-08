@@ -20,7 +20,7 @@ type HookRunnerGlobalState = {
   registry: TrustedPolicyHookRunnerRegistry | null;
 };
 
-const hookRunnerGlobalStateKey = Symbol.for("openclaw.plugins.hook-runner-global-state");
+const hookRunnerGlobalStateKey = Symbol.for("carapace.plugins.hook-runner-global-state");
 
 // Lifecycle resets mutate this shared slot in place, including across source/built copies.
 export const hookRunnerGlobalState = resolveGlobalSingleton<HookRunnerGlobalState>(

@@ -14,7 +14,7 @@ vi.mock("./public-surface-loader.js", () => ({
 }));
 let doctor: typeof import("./doctor-contract-registry.js");
 function makeTempDir() {
-  return tempDirs.make("openclaw-retained-config-doctor-");
+  return tempDirs.make("carapace-retained-config-doctor-");
 }
 
 beforeAll(async () => {

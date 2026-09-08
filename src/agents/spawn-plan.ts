@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   resolveChannelDefaultBindingPlacement,
   resolveInboundConversationResolution,
@@ -16,7 +16,7 @@ import {
   DEFAULT_SUBAGENT_MAX_CHILDREN_PER_AGENT,
   DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH,
 } from "../config/agent-limits.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { getSessionBindingService } from "../infra/outbound/session-binding-service.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 import { resolveChildAdmission, type ChildAdmissionCap } from "./child-admission.js";
@@ -57,7 +57,7 @@ export function mintSpawnSessionKey(params: {
 }
 
 export function resolveSpawnChannelAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string;
   accountId?: string;
 }): string | undefined {
@@ -145,7 +145,7 @@ function buildThreadBindingUnavailableError(kind: SpawnBackendKind, mode: SpawnM
 }
 
 export function prepareSpawnThreadBinding(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   kind: SpawnBackendKind;
   mode: SpawnMode;
   bindingService: SessionBindingService;
@@ -259,7 +259,7 @@ export function prepareSpawnThreadBinding(params: {
 }
 
 export function resolveSpawnAdmission(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   enabled?: boolean;
   collector?: {
     liveChildren: number;

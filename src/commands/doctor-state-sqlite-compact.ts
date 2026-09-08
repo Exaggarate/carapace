@@ -1,18 +1,18 @@
 /** Explicit doctor maintenance for the canonical shared state SQLite database. */
 import fs from "node:fs";
 import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
-import { clearOpenClawDatabaseQuarantine } from "../state/openclaw-quarantine-store.js";
+import { clearCarapaceDatabaseQuarantine } from "../state/carapace-quarantine-store.js";
 import {
-  assertOpenClawStateDatabaseForMaintenance,
-  clearOpenClawStateDatabaseOpenFailure,
-  ensureOpenClawStatePermissions,
-  isOpenClawStateDatabaseOpen,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  assertCarapaceStateDatabaseForMaintenance,
+  clearCarapaceStateDatabaseOpenFailure,
+  ensureCarapaceStatePermissions,
+  isCarapaceStateDatabaseOpen,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  assertOpenClawStateWriteAllowed,
-  runWithOpenClawStateWriteAccess,
-} from "../state/openclaw-state-ownership.js";
+  assertCarapaceStateWriteAllowed,
+  runWithCarapaceStateWriteAccess,
+} from "../state/carapace-state-ownership.js";
 import {
   compactDoctorSqliteFile,
   type DoctorSqliteCompactSnapshot,
@@ -51,7 +51,7 @@ export async function runDoctorStateSqliteCompact(
   deps: DoctorStateSqliteCompactDeps = {},
 ): Promise<DoctorStateSqliteCompactReport> {
   const env = options.env ?? process.env;
-  const sqlitePath = resolveOpenClawStateSqlitePath(env);
+  const sqlitePath = resolveCarapaceStateSqlitePath(env);
   const stat = readCanonicalStateDatabaseStat(sqlitePath);
   if (!stat) {
     return {
@@ -62,7 +62,7 @@ export async function runDoctorStateSqliteCompact(
     };
   }
   if (!stat.isFile()) {
-    throw new Error(`Canonical OpenClaw state database is not a regular file: ${sqlitePath}`);
+    throw new Error(`Canonical Carapace state database is not a regular file: ${sqlitePath}`);
   }
   const withMaintenanceLock = deps.withMaintenanceLock ?? withDoctorSqliteMaintenanceLock;
   return await withMaintenanceLock({
@@ -70,31 +70,31 @@ export async function runDoctorStateSqliteCompact(
     operation: "state SQLite compaction",
     protectedPaths: resolveSqliteDatabaseFilePaths(sqlitePath),
     run: () =>
-      runWithOpenClawStateWriteAccess(
+      runWithCarapaceStateWriteAccess(
         { databasePath: sqlitePath, env },
         "state SQLite compaction",
         () => {
-          if (isOpenClawStateDatabaseOpen()) {
+          if (isCarapaceStateDatabaseOpen()) {
             throw new Error(
-              "The shared OpenClaw state database is already open in this process. Stop OpenClaw and retry.",
+              "The shared Carapace state database is already open in this process. Stop Carapace and retry.",
             );
           }
 
           const compact = compactDoctorSqliteFile({
             afterSuccess: () => {
-              if (!clearOpenClawDatabaseQuarantine(sqlitePath, { env })) {
+              if (!clearCarapaceDatabaseQuarantine(sqlitePath, { env })) {
                 throw new Error(
-                  `OpenClaw state database ${sqlitePath} was compacted, but its persisted quarantine record could not be cleared. Rerun openclaw doctor --fix so the database is not refused again.`,
+                  `Carapace state database ${sqlitePath} was compacted, but its persisted quarantine record could not be cleared. Rerun carapace doctor --fix so the database is not refused again.`,
                 );
               }
-              clearOpenClawStateDatabaseOpenFailure(sqlitePath);
-              ensureOpenClawStatePermissions(sqlitePath, env);
+              clearCarapaceStateDatabaseOpenFailure(sqlitePath);
+              ensureCarapaceStatePermissions(sqlitePath, env);
             },
             ...(deps.busyTimeoutMs !== undefined ? { busyTimeoutMs: deps.busyTimeoutMs } : {}),
             sqlitePath,
             validateBeforeMutation: (database) => {
-              assertOpenClawStateWriteAllowed({ database, databasePath: sqlitePath, env });
-              assertOpenClawStateDatabaseForMaintenance(database, { pathname: sqlitePath });
+              assertCarapaceStateWriteAllowed({ database, databasePath: sqlitePath, env });
+              assertCarapaceStateDatabaseForMaintenance(database, { pathname: sqlitePath });
             },
           });
           return {

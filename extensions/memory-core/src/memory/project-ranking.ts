@@ -1,4 +1,4 @@
-import { INVALID_PROJECT_ANNOTATION_KEY } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { INVALID_PROJECT_ANNOTATION_KEY } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 
 type ProjectRankable = {
   score: number;

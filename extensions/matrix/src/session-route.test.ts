@@ -2,18 +2,18 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   normalizeSessionDeliveryState,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import type { SessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import type { SessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveMatrixOutboundSessionRoute } from "./session-route.js";
 
 const tempDirs = new Set<string>();
 const currentDmSessionKey = "agent:main:matrix:channel:!dm:example.org";
-type MatrixChannelConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["matrix"]>;
+type MatrixChannelConfig = NonNullable<NonNullable<CarapaceConfig["channels"]>["matrix"]>;
 
 const perRoomDmMatrixConfig = {
   dm: {
@@ -45,7 +45,7 @@ async function createTempStore(entries: Record<string, SessionEntry>): Promise<s
 async function createMatrixRouteConfig(
   entries: Record<string, SessionEntry>,
   matrix: MatrixChannelConfig = perRoomDmMatrixConfig,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   return {
     session: {
       store: await createTempStore(entries),
@@ -53,7 +53,7 @@ async function createMatrixRouteConfig(
     channels: {
       matrix,
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
 function createStoredDirectDmSession(
@@ -114,7 +114,7 @@ function createStoredChannelSession(): SessionEntry {
   };
 }
 
-function resolveUserRoute(params: { cfg: OpenClawConfig; accountId?: string; target?: string }) {
+function resolveUserRoute(params: { cfg: CarapaceConfig; accountId?: string; target?: string }) {
   const target = params.target ?? "@alice:example.org";
   return resolveMatrixOutboundSessionRoute({
     cfg: params.cfg,

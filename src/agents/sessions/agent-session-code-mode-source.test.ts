@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { AssistantMessage, Model } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage, Model } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
@@ -20,7 +20,7 @@ import {
 } from "../../plugins/hook-runner-global.js";
 import { createMockPluginRegistry } from "../../plugins/hooks.test-helpers.js";
 import { createNestedToolActivity } from "../../sessions/nested-tool-activity.js";
-import { closeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { toToolDefinitions } from "../agent-tool-definition-adapter.js";
 import { isCodeModeExecTool } from "../code-mode-control-tools.js";
 import { createCodeModeHarness, resetCodeModeTestState } from "../code-mode.test-support.js";
@@ -114,7 +114,7 @@ describe("AgentSession runtime and transcript projections", () => {
   it.each(sourceCases)(
     "preserves $label through SQLite close, reopen, and the next provider context",
     async ({ args, outcome, label }) => {
-      const dir = tempDirs.make("openclaw-code-source-projection-");
+      const dir = tempDirs.make("carapace-code-source-projection-");
       const scope = {
         agentId: "main",
         sessionId: "source-projection",
@@ -198,7 +198,7 @@ describe("AgentSession runtime and transcript projections", () => {
         const cached = manager.buildSessionContext();
         session.dispose();
         const databasePath = resolveSqliteTargetFromSessionStorePath(scope.storePath).path!;
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         const reopened = SessionManager.open(scope, dir);
         expect(reopened.buildSessionContext()).toEqual(cached);
         const { session: nextSession } = await createTestSession({
@@ -269,7 +269,7 @@ describe("AgentSession runtime and transcript projections", () => {
   it.each(["message_end", "before_message_write"] as const)(
     "revalidates source ownership after %s replacements",
     async (hook) => {
-      const dir = tempDirs.make("openclaw-source-hooks-");
+      const dir = tempDirs.make("carapace-source-hooks-");
       const scope = {
         agentId: "main",
         sessionId: "source-hooks",
@@ -461,7 +461,7 @@ describe("AgentSession runtime and transcript projections", () => {
         const cached = manager.buildSessionContext();
         session.dispose();
         expect(
-          closeOpenClawAgentDatabaseByPath(
+          closeCarapaceAgentDatabaseByPath(
             resolveSqliteTargetFromSessionStorePath(scope.storePath).path!,
           ),
         ).toBe(true);
@@ -474,7 +474,7 @@ describe("AgentSession runtime and transcript projections", () => {
   );
 
   it("keeps mixed outer calls separate from a reentrant direct SQLite append", async () => {
-    const dir = tempDirs.make("openclaw-source-mixed-");
+    const dir = tempDirs.make("carapace-source-mixed-");
     const scope = {
       agentId: "main",
       sessionId: "source-mixed",
@@ -580,7 +580,7 @@ describe("AgentSession runtime and transcript projections", () => {
       const cached = manager.buildSessionContext();
       session.dispose();
       expect(
-        closeOpenClawAgentDatabaseByPath(
+        closeCarapaceAgentDatabaseByPath(
           resolveSqliteTargetFromSessionStorePath(scope.storePath).path!,
         ),
       ).toBe(true);
@@ -592,7 +592,7 @@ describe("AgentSession runtime and transcript projections", () => {
   });
 
   it("does not lend a previous run's source ownership to a reused manager or ordinary append batches", async () => {
-    const dir = tempDirs.make("openclaw-source-reuse-");
+    const dir = tempDirs.make("carapace-source-reuse-");
     const scope = {
       agentId: "main",
       sessionId: "source-reuse",
@@ -697,7 +697,7 @@ describe("AgentSession runtime and transcript projections", () => {
         first.map((result) => result.messageId),
       );
       expect(
-        closeOpenClawAgentDatabaseByPath(
+        closeCarapaceAgentDatabaseByPath(
           resolveSqliteTargetFromSessionStorePath(scope.storePath).path!,
         ),
       ).toBe(true);

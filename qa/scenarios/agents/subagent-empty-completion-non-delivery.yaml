@@ -126,7 +126,7 @@ flow:
             message:
               expr: "`empty completion did not stop at the lifecycle owner: ${JSON.stringify(emptyRequests)}`"
         - assert:
-            expr: "emptyOutboundHistory.every((message) => !String(message.text ?? '').includes(config.metadataSentinel) && !String(message.text ?? '').includes('BEGIN_OPENCLAW_INTERNAL_CONTEXT') && String(message.text ?? '').trim() !== 'NO_REPLY')"
+            expr: "emptyOutboundHistory.every((message) => !String(message.text ?? '').includes(config.metadataSentinel) && !String(message.text ?? '').includes('BEGIN_CARAPACE_INTERNAL_CONTEXT') && String(message.text ?? '').trim() !== 'NO_REPLY')"
             message:
               expr: "`empty completion leaked silence or internal metadata; outbound=${recentOutboundSummary(state)}`"
         - set: postCompletionRequestCursor

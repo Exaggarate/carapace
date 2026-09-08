@@ -1,12 +1,12 @@
 export type WebKitHostMessages = {
-  openclawLink: { type: "open-link"; url: string; target: "external" };
-  openclawUpdate: { type: "start-update" };
-  openclawNav: { type: "nav-state"; collapsed: boolean; width: number };
-  openclawWindowDrag: { type: "window-drag" };
-  openclawGateways:
+  carapaceLink: { type: "open-link"; url: string; target: "external" };
+  carapaceUpdate: { type: "start-update" };
+  carapaceNav: { type: "nav-state"; collapsed: boolean; width: number };
+  carapaceWindowDrag: { type: "window-drag" };
+  carapaceGateways:
     | { type: "select" | "open-window" | "set-primary"; id: string }
     | { type: "open-settings" };
-  openclawNotifications:
+  carapaceNotifications:
     | { type: "status" | "request-permission" | "send-test" }
     | {
         type: "background-session-completed";

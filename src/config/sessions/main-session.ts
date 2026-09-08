@@ -10,7 +10,7 @@ import {
   normalizeMainKey,
   resolveAgentIdFromSessionKey,
 } from "../../routing/session-key.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveCanonicalMainSessionKey } from "./main-session-key.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "./session-store-owner.js";
 import type { SessionScope } from "./types.js";
@@ -19,7 +19,7 @@ const FALLBACK_DEFAULT_AGENT_ID = "main";
 export const SESSION_ROUTING_CHANGED_ERROR_REASON = "session-routing-changed";
 
 /** Resolves the configured main session key, honoring global session scope. */
-export function resolveMainSessionKey(cfg: OpenClawConfig): string {
+export function resolveMainSessionKey(cfg: CarapaceConfig): string {
   return resolveCanonicalMainSessionKey({
     agentId: resolveAmbientOwnerAgentId(cfg, undefined, {
       surface: "main-session routing",
@@ -31,7 +31,7 @@ export function resolveMainSessionKey(cfg: OpenClawConfig): string {
 }
 
 /** Resolves the owner and canonical session target for ambient system work. */
-export function resolveSystemMainSessionTarget(cfg: OpenClawConfig): {
+export function resolveSystemMainSessionTarget(cfg: CarapaceConfig): {
   agentId: string;
   sessionKey: string;
 } {
@@ -47,12 +47,12 @@ export function resolveSystemMainSessionTarget(cfg: OpenClawConfig): {
 }
 
 /** Resolves the main session owned by configured ambient system work. */
-export function resolveSystemMainSessionKey(cfg: OpenClawConfig): string {
+export function resolveSystemMainSessionKey(cfg: CarapaceConfig): string {
   return resolveSystemMainSessionTarget(cfg).sessionKey;
 }
 
 /** Stable fingerprint for the config values that canonicalize chat session keys. */
-export function resolveSessionRoutingContract(cfg: OpenClawConfig): string {
+export function resolveSessionRoutingContract(cfg: CarapaceConfig): string {
   const scope = cfg?.session?.scope ?? "per-sender";
   // Global keys carry no agent namespace, so their durable fixed-store owner is
   // part of the routing contract; otherwise stale clients can target a changed row.

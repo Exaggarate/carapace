@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { testing as cliBackendsTesting } from "./cli-backends.test-support.js";
 import {
   resolveManualCompactionCliTarget,
@@ -12,7 +12,7 @@ describe("resolvePersistedSessionRuntimeId", () => {
     expect(
       resolvePersistedSessionRuntimeId({
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         modelSelectionLocked: true,
       }),
     ).toBe("codex");
@@ -25,10 +25,10 @@ describe("resolvePersistedSessionRuntimeId", () => {
     expect(
       resolvePersistedSessionRuntimeId({
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         ...ownership,
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("filters default overrides before falling back to the persisted harness", () => {
@@ -72,7 +72,7 @@ describe("resolveSessionRuntimeOverrideForProvider", () => {
 
   it("retains a plugin-owned runtime request after another harness reports usage", () => {
     const entry = {
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
       modelSelectionLocked: true,
       pluginOwnerId: "model-owner",
     };
@@ -82,7 +82,7 @@ describe("resolveSessionRuntimeOverrideForProvider", () => {
           provider: "openai",
           entry: { ...entry, agentHarnessId },
         }),
-      ).toBe("openclaw");
+      ).toBe("carapace");
     }
   });
 });
@@ -142,7 +142,7 @@ describe("resolveManualCompactionCliTarget", () => {
     expect(
       resolveManualCompactionCliTarget({
         provider: "anthropic",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         entry: {
           cliSessionBindings: {
             "claude-cli": { sessionId: "native-claude-session" },
@@ -157,7 +157,7 @@ describe("resolveManualCompactionCliTarget", () => {
   });
 
   it("passes config when resolving an explicit setup-registered runtime binding", () => {
-    const cfg = { plugins: { entries: { anthropic: { enabled: true } } } } as OpenClawConfig;
+    const cfg = { plugins: { entries: { anthropic: { enabled: true } } } } as CarapaceConfig;
     cliBackendsTesting.setDepsForTest({
       resolveRuntimeCliBackends: () => [],
       resolvePluginSetupCliBackend: ({ backend, config }) =>

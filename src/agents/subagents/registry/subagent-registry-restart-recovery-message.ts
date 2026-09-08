@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { extractAssistantPhaseText } from "../../../shared/chat-message-content.js";
 
 export function readSubagentRecoveryTranscriptMessage(

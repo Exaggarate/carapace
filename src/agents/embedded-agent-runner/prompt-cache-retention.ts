@@ -1,8 +1,8 @@
 /**
  * Resolves provider/model prompt-cache retention behavior.
  */
-import { resolveOpenAIPromptCacheKeySupport } from "@openclaw/ai/transports";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { resolveOpenAIPromptCacheKeySupport } from "@carapace/ai/transports";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { resolveAnthropicCacheRetentionFamily } from "../../llm/providers/stream-wrappers/anthropic-family-cache-semantics.js";
 import type { OpenAICompletionsCompat } from "../../llm/types.js";
 

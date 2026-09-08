@@ -7,17 +7,17 @@ import {
 } from "../../../test/helpers/cron/service-regression-fixtures.js";
 import type { AdmittedRunContext } from "../../agents/admitted-run-context.js";
 import { createExecutionIdentityAdmissionToken } from "../../audit/execution-identity-admission.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { createManagedTaskFlow } from "../../tasks/task-flow-registry.js";
 import {
   resetTaskFlowRegistryForTests,
   resetTaskRegistryForTests,
 } from "../../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { saveCronStore } from "../store.js";
 import {
   claimCronRunReceiptInDatabase,
@@ -36,8 +36,8 @@ const fixtures = setupCronRegressionFixtures({
 
 describe("cron run execution binding", () => {
   it("binds the exact admitted execution to the cron receipt and task rows", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-execution-binding-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-execution-binding-" },
       async () => {
         resetTaskRegistryForTests();
         resetTaskFlowRegistryForTests();
@@ -65,7 +65,7 @@ describe("cron run execution binding", () => {
                 now: dueAt,
               }),
             } satisfies AdmittedRunContext;
-            const beforeAdmissionSettles = openOpenClawStateDatabase().db;
+            const beforeAdmissionSettles = openCarapaceStateDatabase().db;
             expect(tableExists(beforeAdmissionSettles, "execution_owner_lifecycle_bindings")).toBe(
               false,
             );
@@ -91,7 +91,7 @@ describe("cron run execution binding", () => {
             }),
           }),
         );
-        const db = openOpenClawStateDatabase().db;
+        const db = openCarapaceStateDatabase().db;
         expect(
           db
             .prepare(
@@ -128,8 +128,8 @@ describe("cron run execution binding", () => {
   });
 
   it("does not partially bind task or flow rows after the cron owner is replaced", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-stale-execution-binding-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-stale-execution-binding-" },
       async () => {
         resetTaskRegistryForTests();
         resetTaskFlowRegistryForTests();
@@ -155,7 +155,7 @@ describe("cron run execution binding", () => {
           agentId: job.agentId!,
           startedAtMs: dueAt,
         });
-        const initial = runOpenClawStateWriteTransaction(({ db }) =>
+        const initial = runCarapaceStateWriteTransaction(({ db }) =>
           claimCronRunReceiptInDatabase({
             database: db,
             prepared,
@@ -189,7 +189,7 @@ describe("cron run execution binding", () => {
           }),
         } satisfies AdmittedRunContext;
         executionIdentity.onPostAdmission?.(admitted);
-        const db = openOpenClawStateDatabase().db;
+        const db = openCarapaceStateDatabase().db;
         db.prepare("UPDATE cron_run_receipts SET owner_pid = ? WHERE receipt_id = ?").run(
           2_147_483_647,
           initial.receiptId,
@@ -200,7 +200,7 @@ describe("cron run execution binding", () => {
           agentId: job.agentId!,
           startedAtMs: dueAt + 1,
         });
-        const replacement = runOpenClawStateWriteTransaction(({ db: transactionDb }) =>
+        const replacement = runCarapaceStateWriteTransaction(({ db: transactionDb }) =>
           claimCronRunReceiptInDatabase({
             database: transactionDb,
             prepared: replacementPrepared,
@@ -210,7 +210,7 @@ describe("cron run execution binding", () => {
 
         executionIdentity.onExecutionStarted?.();
         expect(
-          tableExists(openOpenClawStateDatabase().db, "execution_owner_lifecycle_bindings"),
+          tableExists(openCarapaceStateDatabase().db, "execution_owner_lifecycle_bindings"),
         ).toBe(false);
         finishCronRunReceipt({
           handle: replacement,

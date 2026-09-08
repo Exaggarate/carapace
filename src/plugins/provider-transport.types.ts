@@ -1,6 +1,6 @@
 import type { ProviderLocalServiceReconcileContext } from "../agents/provider-local-service-reconcile.js";
 import type { StreamFn } from "../agents/runtime/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "./provider-runtime-model.types.js";
 import type { ProviderPrepareExtraParamsContext } from "./provider-runtime.types.js";
 
@@ -12,7 +12,7 @@ import type { ProviderPrepareExtraParamsContext } from "./provider-runtime.types
  * as a wrapper around `streamSimple`).
  */
 export type ProviderCreateStreamFnContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -21,7 +21,7 @@ export type ProviderCreateStreamFnContext = {
 };
 
 /**
- * Provider-owned stream wrapper hook after OpenClaw applies its generic
+ * Provider-owned stream wrapper hook after Carapace applies its generic
  * transport-independent wrappers.
  *
  * Use this for provider-specific payload/header/model mutations that still run
@@ -121,7 +121,7 @@ export type PluginEmbeddingProvider = {
  * plugin instead of the core memory switchboard.
  */
 export type ProviderCreateEmbeddingProviderContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -142,7 +142,7 @@ export type ProviderCreateEmbeddingProviderContext = {
 /**
  * Provider-owned prompt-cache eligibility.
  *
- * Return `true` or `false` to override OpenClaw's built-in provider cache TTL
+ * Return `true` or `false` to override Carapace's built-in provider cache TTL
  * detection for this provider. Return `undefined` to fall back to core rules.
  */
 export type ProviderCacheTtlEligibilityContext = {
@@ -154,12 +154,12 @@ export type ProviderCacheTtlEligibilityContext = {
 /**
  * Provider-owned missing-auth message override.
  *
- * Runs only after OpenClaw exhausts normal env/profile/config auth resolution
+ * Runs only after Carapace exhausts normal env/profile/config auth resolution
  * for the requested provider. Return a custom message to replace the generic
  * "No API key found" error.
  */
 export type ProviderBuildMissingAuthMessageContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -171,11 +171,11 @@ export type ProviderBuildMissingAuthMessageContext = {
  * Provider-owned unknown-model hint override.
  *
  * Runs after catalog/runtime lookup misses for the requested provider. Return a
- * hint suffix that OpenClaw should append to the generic `Unknown model`
+ * hint suffix that Carapace should append to the generic `Unknown model`
  * error.
  */
 export type ProviderBuildUnknownModelHintContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;

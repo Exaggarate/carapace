@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_CAPS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import type { SessionCatalogProvider } from "../../plugins/session-catalog.js";
@@ -67,7 +67,7 @@ vi.mock("../session-utils.js", async () => ({
 function makeOpts(
   params: unknown,
   terminalConfig: { enabled?: boolean } | undefined,
-  terminalPolicyConfig?: OpenClawConfig,
+  terminalPolicyConfig?: CarapaceConfig,
   nodeRegistry: {
     get: (nodeId: string) => unknown;
     invoke?: (params: unknown) => Promise<unknown>;
@@ -98,7 +98,7 @@ function makeOpts(
     list: vi.fn((): TerminalSessionSummary[] => []),
     upload: vi.fn(async () => ({ path: "/tmp/upload/report.pdf", size: 4 })),
   };
-  const runtimeConfig = { gateway: { terminal: terminalConfig } } as OpenClawConfig;
+  const runtimeConfig = { gateway: { terminal: terminalConfig } } as CarapaceConfig;
   const policy = createTerminalLaunchPolicy(runtimeConfig);
   if (terminalPolicyConfig) {
     policy.prepareConfig(terminalPolicyConfig, { restartPending: true });
@@ -199,7 +199,7 @@ describe("terminal gateway policy", () => {
       state: "awaits project preparation",
       entry: {
         sessionId: "ui-session-id",
-        pendingProjectGitUrl: "https://github.com/openclaw/openclaw.git",
+        pendingProjectGitUrl: "https://github.com/Exaggarate/carapace.git",
       },
       error: {
         code: ErrorCodes.INVALID_REQUEST,

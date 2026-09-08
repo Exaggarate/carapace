@@ -1,6 +1,6 @@
-import { OPENCLAW_DATABASE_SCHEMA_DOCS_URL } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_DATABASE_SCHEMA_DOCS_URL } from "../state/carapace-state-db-contract.js";
 import { resolveRuntimeServiceCommit, VERSION } from "../version.js";
-import { resolveOpenClawPackageRootSync } from "./openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "./carapace-root.js";
 import { StartupMaintenanceRequiredError } from "./startup-maintenance-required.js";
 
 type SqliteUserVersionReader = {
@@ -33,10 +33,10 @@ export function readSqliteUserVersion(db: SqliteUserVersionReader): number {
  * Name the refusing build from immutable loaded metadata, plus its install root.
  * The path remains actionable when multiple installs share a version or build.
  */
-export function describeRunningOpenClawBuild(): string {
+export function describeRunningCarapaceBuild(): string {
   const commit = resolveRuntimeServiceCommit();
-  const root = resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url });
-  const identity = commit ? `OpenClaw ${VERSION} (${commit})` : `OpenClaw ${VERSION}`;
+  const root = resolveCarapacePackageRootSync({ moduleUrl: import.meta.url });
+  const identity = commit ? `Carapace ${VERSION} (${commit})` : `Carapace ${VERSION}`;
   return root ? `${identity} installed at ${root}` : identity;
 }
 
@@ -47,10 +47,10 @@ export function createNewerSqliteSchemaVersionError(
   supportedVersion: number,
 ): Error {
   return new SqliteSchemaVersionError(
-    "This OpenClaw build cannot open your existing data.\n" +
+    "This Carapace build cannot open your existing data.\n" +
       `${databaseLabel} ${pathname} uses newer schema version ${schemaVersion}; this build supports ${supportedVersion}.\n` +
-      `Refused by ${describeRunningOpenClawBuild()}.\n` +
-      `Use a build that supports schema ${schemaVersion} or newer with this state directory. To use an older build, restore your pre-update backup created with openclaw backup.\n` +
-      `See ${OPENCLAW_DATABASE_SCHEMA_DOCS_URL}.`,
+      `Refused by ${describeRunningCarapaceBuild()}.\n` +
+      `Use a build that supports schema ${schemaVersion} or newer with this state directory. To use an older build, restore your pre-update backup created with carapace backup.\n` +
+      `See ${CARAPACE_DATABASE_SCHEMA_DOCS_URL}.`,
   );
 }

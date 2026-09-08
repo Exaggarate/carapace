@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 // Leaf sanitizer for approval display text; keep free of exec-approvals imports
 // so approval-scope and exec-approvals-config can share it without a cycle.
 import {

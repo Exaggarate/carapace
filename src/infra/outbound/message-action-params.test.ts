@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { MEDIA_MAX_BYTES } from "../../media/store.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 const { resolveChannelMessageToolMediaSourceParamKeysMock } = vi.hoisted(() => ({
   resolveChannelMessageToolMediaSourceParamKeysMock: vi.fn(() => ["avatarPath", "avatarUrl"]),
@@ -25,12 +25,12 @@ import {
   resolveAttachmentMediaPolicy,
 } from "./message-action-params.js";
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const maybeIt = process.platform === "win32" ? it.skip : it;
 const matrixMediaSourceParamKeys = ["avatarPath", "avatarUrl"] as const;
 
-async function withTempOpenClawStateDir<T>(test: (stateDir: string) => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
+async function withTempCarapaceStateDir<T>(test: (stateDir: string) => Promise<T>): Promise<T> {
+  return await withCarapaceTestState(
     { layout: "state-only", prefix: "msg-params-state-" },
     (state) => test(state.stateDir),
   );
@@ -727,7 +727,7 @@ describe("message action media helpers", () => {
   });
 
   it.each(["contentType", "mimeType"])("stages buffer-only sends with %s metadata", async (key) => {
-    await withTempOpenClawStateDir(async () => {
+    await withTempCarapaceStateDir(async () => {
       const args: Record<string, unknown> = {
         buffer: Buffer.from("artifact bytes").toString("base64"),
         filename: "artifact.txt",
@@ -753,7 +753,7 @@ describe("message action media helpers", () => {
   });
 
   it("rejects oversized buffer-only send params before base64 decoding", async () => {
-    await withTempOpenClawStateDir(async () => {
+    await withTempCarapaceStateDir(async () => {
       const fromSpy = vi.spyOn(Buffer, "from");
       const args: Record<string, unknown> = {
         buffer: Buffer.alloc(MEDIA_MAX_BYTES + 1, 1).toString("base64"),
@@ -784,7 +784,7 @@ describe("message action media helpers", () => {
   });
 
   it("rejects invalid buffer-only send base64 without staging media", async () => {
-    await withTempOpenClawStateDir(async () => {
+    await withTempCarapaceStateDir(async () => {
       const args: Record<string, unknown> = {
         buffer: "not-base64!",
         contentType: "text/plain",
@@ -806,7 +806,7 @@ describe("message action media helpers", () => {
   });
 
   it("skips send buffer materialization when an explicit media source is present", async () => {
-    await withTempOpenClawStateDir(async (stateDir) => {
+    await withTempCarapaceStateDir(async (stateDir) => {
       const args: Record<string, unknown> = {
         buffer: Buffer.from("ignored").toString("base64"),
         mediaUrl: "https://example.com/pic.png",
@@ -833,7 +833,7 @@ describe("message action media helpers", () => {
       { mode, buffer: "data:application/octet-stream;base64,SGVsbG8=", name: "data URL" },
     ]),
   )("keeps explicit MIME for $mode $name without staging", async ({ mode, buffer }) => {
-    await withTempOpenClawStateDir(async (stateDir) => {
+    await withTempCarapaceStateDir(async (stateDir) => {
       const args: Record<string, unknown> = {
         buffer,
         filename: "preview.txt",

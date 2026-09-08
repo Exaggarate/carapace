@@ -22,7 +22,7 @@ describe("Gateway startup catalog", () => {
       bundle_json: JSON.stringify(bundle),
       generated_at: 200,
       min_version: null,
-      source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+      source_url: "https://github.com/Exaggarate/carapace",
       etag: null,
       last_modified: null,
       checked_at: 200,

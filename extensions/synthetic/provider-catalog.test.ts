@@ -1,13 +1,13 @@
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/provider-catalog-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { SYNTHETIC_BASE_URL } from "./models.js";
 import { buildSyntheticProvider } from "./provider-catalog.js";
 
 const fetchGuard = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname: (baseUrl: string) => ({
     allowedHostnames: [new URL(baseUrl).hostname],

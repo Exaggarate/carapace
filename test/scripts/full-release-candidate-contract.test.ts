@@ -23,7 +23,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 // Golden v2 request bytes bind the complete effective reported-issues inventory.
 const CANONICAL_REQUEST_JSON =
-  '{"allowFrozenTargetScenarioOmissions":false,"allowUnreleasedChangelog":false,"contractVersions":{"package":1,"prepublishPluginRegistry":1,"sharedImage":1},"packagePublished":false,"releaseProfile":"stable","releaseSoak":true,"repository":"openclaw/openclaw","schema":"openclaw.full-release-candidate-request/v2","sharedImagePolicy":"no-push-artifact","targetSha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","toolingSha":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","upgradeSurvivorBaselines":["openclaw@latest"],"upgradeSurvivorScenarios":["acpx-openclaw-tools-bridge","base","bootstrap-persona","channel-post-core-restore","configured-plugin-installs","cron-scheduled-authority","feishu-channel","legacy-operator-state","meeting-transcripts-sqlite","plugin-deps-cleanup","stale-source-plugin-shadow","tilde-log-path","versioned-runtime-deps"]}\n';
+  '{"allowFrozenTargetScenarioOmissions":false,"allowUnreleasedChangelog":false,"contractVersions":{"package":1,"prepublishPluginRegistry":1,"sharedImage":1},"packagePublished":false,"releaseProfile":"stable","releaseSoak":true,"repository":"carapace/carapace","schema":"carapace.full-release-candidate-request/v2","sharedImagePolicy":"no-push-artifact","targetSha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","toolingSha":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","upgradeSurvivorBaselines":["carapace@latest"],"upgradeSurvivorScenarios":["acpx-carapace-tools-bridge","base","bootstrap-persona","channel-post-core-restore","configured-plugin-installs","cron-scheduled-authority","feishu-channel","legacy-operator-state","meeting-transcripts-sqlite","plugin-deps-cleanup","stale-source-plugin-shadow","tilde-log-path","versioned-runtime-deps"]}\n';
 const CANONICAL_REQUEST_SHA256 = "eb44f56c41111dfe83d087148eb5f61cc7823525e9d9d434443872d2b42462c4";
 
 function manifest(overrides: Record<string, unknown> = {}) {
@@ -76,8 +76,8 @@ describe("full release candidate contract", () => {
     const reorderedRequest = buildFullReleaseCandidateRequest(reordered);
 
     expect(request).toEqual(reorderedRequest);
-    expect(request.upgradeSurvivorBaselines).toEqual(["openclaw@latest"]);
-    expect(request.upgradeSurvivorScenarios).toContain("acpx-openclaw-tools-bridge");
+    expect(request.upgradeSurvivorBaselines).toEqual(["carapace@latest"]);
+    expect(request.upgradeSurvivorScenarios).toContain("acpx-carapace-tools-bridge");
     expect(request.upgradeSurvivorScenarios).not.toContain("prerelease-plugin-registry");
     expect(request.upgradeSurvivorScenarios).not.toContain("sqlite-volume");
     expect(request.packagePublished).toBe(false);
@@ -106,7 +106,7 @@ describe("full release candidate contract", () => {
   });
 
   it.each([
-    ["repository", { repository: "openclaw/fork" }],
+    ["repository", { repository: "carapace/fork" }],
     ["target SHA", { targetSha: "4".repeat(40) }],
     ["tooling SHA", { toolingSha: "5".repeat(40) }],
     ["release profile", { releaseProfile: "beta" }],
@@ -143,7 +143,7 @@ describe("full release candidate contract", () => {
     expect(() =>
       validateFullReleaseCandidateRequest({
         ...request,
-        upgradeSurvivorBaselines: ["openclaw@latest", "openclaw@beta"],
+        upgradeSurvivorBaselines: ["carapace@latest", "carapace@beta"],
       }),
     ).toThrow("ascending ASCII order");
     expect(() =>
@@ -283,7 +283,7 @@ describe("full release candidate contract", () => {
     expect(
       runManifestContract({
         ...value,
-        schema: "openclaw.full-release-candidate/v1",
+        schema: "carapace.full-release-candidate/v1",
       }).stderr,
     ).toContain("manifest schema is invalid");
     expect(
@@ -364,7 +364,7 @@ describe("full release candidate contract", () => {
     [
       "repository identity tuple",
       (binding) => {
-        replaceBindingRequest(binding, { repository: "openclaw/other" });
+        replaceBindingRequest(binding, { repository: "carapace/other" });
         binding.producer.repository = binding.request.repository;
         binding.publisher.repository = binding.request.repository;
       },
@@ -396,8 +396,8 @@ describe("full release candidate contract", () => {
       "required prerelease packages",
       (binding) =>
         void (binding.preparation.requiredPrepublishPluginPackages = [
-          "@openclaw/codex",
-          "@openclaw/discord",
+          "@carapace/codex",
+          "@carapace/discord",
         ]),
     ],
     ["package artifact id", (binding) => void (binding.package.artifact.id = "105")],
@@ -481,7 +481,7 @@ describe("full release candidate contract", () => {
   it("rejects a canonical manifest larger than 32 KiB", () => {
     const requiredPrepublishPluginPackages = Array.from(
       { length: 1_000 },
-      (_, index) => `@openclaw/candidate-${String(index).padStart(4, "0")}-${"x".repeat(16)}`,
+      (_, index) => `@carapace/candidate-${String(index).padStart(4, "0")}-${"x".repeat(16)}`,
     );
     const value = manifest({
       preparation: {
@@ -502,7 +502,7 @@ describe("full release candidate contract", () => {
         ...value,
         preparation: {
           ...value.preparation,
-          requiredPrepublishPluginPackages: ["openclaw", "@openclaw/codex"],
+          requiredPrepublishPluginPackages: ["carapace", "@carapace/codex"],
         },
       }).stderr,
     ).toContain("ascending ASCII order");

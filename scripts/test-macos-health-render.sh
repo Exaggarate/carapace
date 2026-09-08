@@ -8,14 +8,14 @@ render_build="$(cd "$render_repo/apps/macos/.build/debug" && pwd -P)"
 render_swift="$(xcrun --find swift)"
 render_platform="$(xcrun --sdk macosx --show-sdk-platform-path)/Developer"
 render_helper="$(dirname "$render_swift")/../libexec/swift/pm/swiftpm-testing-helper"
-render_bundle="$render_build/OpenClawPackageTests.xctest/Contents/MacOS/OpenClawPackageTests"
+render_bundle="$render_build/CarapacePackageTests.xctest/Contents/MacOS/CarapacePackageTests"
 [[ -x "$render_helper" && -f "$render_bundle" ]]
 [[ -f "$render_platform/Library/Frameworks/Testing.framework/Testing" ]]
-render_root="$(mktemp -d "$RUNNER_TEMP/openclaw-health-render.XXXXXX")"
+render_root="$(mktemp -d "$RUNNER_TEMP/carapace-health-render.XXXXXX")"
 render_root="$(cd "$render_root" && pwd -P)"
 render_home="$render_root/home"
 render_original_home="$(cd "$HOME" && pwd -P)"
-render_canary="$(mktemp "$render_original_home/openclaw-health-denied.XXXXXX")"
+render_canary="$(mktemp "$render_original_home/carapace-health-denied.XXXXXX")"
 trap 'rm -f "$render_canary"' EXIT
 printf '%s\n' 'isolated-render-canary' > "$render_canary"
 mkdir -p "$render_home/state" "$render_home/Library/Preferences" "$render_root/pngs" "$render_root/tmp"
@@ -29,9 +29,9 @@ env -i \
   PATH=/usr/bin:/bin:/usr/sbin:/sbin \
   HOME="$render_home" CFFIXED_USER_HOME="$render_home" TMPDIR="$render_root/tmp/" \
   LLVM_PROFILE_FILE="$render_root/render-%p.profraw" \
-  OPENCLAW_PROFILE=health-render \
-  OPENCLAW_STATE_DIR="$render_home/state" OPENCLAW_CONFIG_PATH="$render_home/state/openclaw.json" \
-  OPENCLAW_TEST_HEALTH_RENDER_DIR="$render_root/pngs" OPENCLAW_TEST_HEALTH_DENIED_FILE="$render_canary" \
+  CARAPACE_PROFILE=health-render \
+  CARAPACE_STATE_DIR="$render_home/state" CARAPACE_CONFIG_PATH="$render_home/state/carapace.json" \
+  CARAPACE_TEST_HEALTH_RENDER_DIR="$render_root/pngs" CARAPACE_TEST_HEALTH_DENIED_FILE="$render_canary" \
   /usr/bin/sandbox-exec \
   -D "ORIGINAL_HOME=$render_original_home" -D "REPO=$render_repo" -D "ISOLATED_ROOT=$render_root" \
   -f "$render_repo/scripts/macos-health-render.sb" \

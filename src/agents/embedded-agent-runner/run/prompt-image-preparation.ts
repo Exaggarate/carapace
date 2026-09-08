@@ -1,4 +1,4 @@
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
+import { MAX_IMAGE_BYTES } from "@carapace/media-core/constants";
 import { getAgentScopedMediaLocalRoots } from "../../../media/local-roots.js";
 import { resolveImageSanitizationLimits } from "../../image-sanitization.js";
 import type { SandboxContext } from "../../sandbox/types.js";

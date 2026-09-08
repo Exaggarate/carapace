@@ -1,23 +1,23 @@
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginService,
+  CarapacePluginApi,
+  CarapacePluginService,
   PluginRuntimeLifecycleRegistration,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRegistryFixture } from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRegistryFixture } from "carapace/plugin-sdk/plugin-test-contracts";
 import {
   createEmptyPluginRegistry,
   createPluginRecord,
   getActivePluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   getSandboxBackendFactory,
   getSandboxBackendManager,
   getSandboxBackendWorkdirResolver,
   type CreateSandboxBackendParams,
-} from "openclaw/plugin-sdk/sandbox";
+} from "carapace/plugin-sdk/sandbox";
 import { afterEach, describe, expect, it } from "vitest";
 import plugin from "./index.js";
 import { createOpenShellBackendSandboxConfig } from "./src/openshell.test-support.js";
@@ -33,8 +33,8 @@ function readBackend() {
 const workdirParams: CreateSandboxBackendParams = {
   sessionKey: "agent:openshell-lifecycle:main",
   scopeKey: "agent:openshell-lifecycle:main",
-  workspaceDir: "/tmp/openclaw-openshell-lifecycle/workspace",
-  agentWorkspaceDir: "/tmp/openclaw-openshell-lifecycle/workspace",
+  workspaceDir: "/tmp/carapace-openshell-lifecycle/workspace",
+  agentWorkspaceDir: "/tmp/carapace-openshell-lifecycle/workspace",
   cfg: createOpenShellBackendSandboxConfig(),
 };
 
@@ -133,11 +133,11 @@ describe("OpenShell plugin registration lifecycle", () => {
     "setup-only",
     "setup-runtime",
     "cli-metadata",
-  ] satisfies OpenClawPluginApi["registrationMode"][])(
+  ] satisfies CarapacePluginApi["registrationMode"][])(
     "does not register runtime hooks or services in %s mode",
     (registrationMode) => {
       const original = readBackend();
-      const services: OpenClawPluginService[] = [];
+      const services: CarapacePluginService[] = [];
       const lifecycles: PluginRuntimeLifecycleRegistration[] = [];
       plugin.register(
         createTestPluginApi({

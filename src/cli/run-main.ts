@@ -2,8 +2,8 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { Command as CommanderCommand, Option as CommanderOption } from "commander";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import {
@@ -11,7 +11,7 @@ import {
   formatInvalidConfigDetails,
 } from "../config/io.invalid-config.js";
 import { resolveGatewayPort, resolveStateDir } from "../config/paths.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { isLoopbackAddress, isSecureWebSocketUrl } from "../gateway/net.js";
 import { normalizeWebSocketProtocol } from "../gateway/websocket-protocol.js";
 import { FLAG_TERMINATOR, isValueToken } from "../infra/cli-root-options.js";
@@ -196,7 +196,7 @@ async function tryRunGatewayRunFastPath(
     emitCliBanner(VERSION, { argv });
   }
   const program = new Command();
-  program.name("openclaw");
+  program.name("carapace");
   program.enablePositionalOptions();
   program.option("--no-color", "Disable ANSI colors", false);
   program.exitOverride((err) => {
@@ -280,7 +280,7 @@ type BareRootLaunchTarget =
   | {
       kind: "remote-gateway-inference";
       target: {
-        config: OpenClawConfig;
+        config: CarapaceConfig;
         gatewayUrl: string;
         token?: string;
         password?: string;
@@ -291,7 +291,7 @@ type BareRootLaunchTarget =
   | {
       kind: "tui";
       local: false;
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       gatewayUrl: string;
       token?: string;
       password?: string;
@@ -316,7 +316,7 @@ async function resolveBareRootLaunchTarget(argv: string[]): Promise<BareRootLaun
 }
 
 async function resolveConfiguredTuiLaunchTarget(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: { hasConfiguredGateway: boolean },
 ): Promise<BareRootLaunchTarget> {
   const gatewayResolution = await resolveReachableGateway(config, options);
@@ -411,7 +411,7 @@ function toReachableGateway(target: GatewayProbeTarget, auth: GatewayProbeAuth):
 }
 
 async function resolveReachableGateway(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   options: { hasConfiguredGateway: boolean },
 ): Promise<GatewayResolution> {
   const { targets, auth } = await resolveGatewayProbePlan(config);
@@ -476,7 +476,7 @@ async function resolveReachableGateway(
 }
 
 async function resolveGatewayProbePlan(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): Promise<{ targets: GatewayProbeTarget[]; auth: GatewayProbeAuth }> {
   const remoteUrl = normalizeOptionalString(config.gateway?.remote?.url);
   if (normalizeOptionalString(config.gateway?.mode) === "remote" && remoteUrl) {
@@ -510,7 +510,7 @@ function isSafeGatewayProbeTarget(target: GatewayProbeTarget): boolean {
     return isSafeRemoteGatewayProbeUrl(target.url);
   }
   return isSecureWebSocketUrl(target.url, {
-    allowPrivateWs: process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1",
+    allowPrivateWs: process.env.CARAPACE_ALLOW_INSECURE_PRIVATE_WS === "1",
   });
 }
 
@@ -532,7 +532,7 @@ function isSafeRemoteGatewayProbeUrl(url: string): boolean {
     return true;
   }
   return (
-    process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1" &&
+    process.env.CARAPACE_ALLOW_INSECURE_PRIVATE_WS === "1" &&
     isSecureWebSocketUrl(url, { allowPrivateWs: true })
   );
 }
@@ -548,7 +548,7 @@ function isLoopbackGatewayHost(hostname: string): boolean {
 }
 
 async function resolveLocalGatewayProbeTargets(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): Promise<{ targets: GatewayProbeTarget[]; auth: GatewayProbeAuth }> {
   const [
     { resolveControlUiLinks },
@@ -561,7 +561,7 @@ async function resolveLocalGatewayProbeTargets(
   ]);
   const gateway = config.gateway;
   const configuredPort = resolveGatewayPort(config);
-  const hasExplicitPort = Boolean(normalizeOptionalString(process.env.OPENCLAW_GATEWAY_PORT));
+  const hasExplicitPort = Boolean(normalizeOptionalString(process.env.CARAPACE_GATEWAY_PORT));
   const activePort = hasExplicitPort ? undefined : await readActiveGatewayLockPort();
   const port = activePort ?? configuredPort;
   // Supplying the selected local port keeps inherited remote URL overrides out
@@ -745,8 +745,8 @@ async function ensureCliEnvProxyDispatcher(): Promise<void> {
 
 function isDebugProxyCaptureEnvEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return (
-    isTruthyEnvValue(env.OPENCLAW_DEBUG_PROXY_ENABLED) ||
-    isTruthyEnvValue(env.OPENCLAW_DEBUG_PROXY_REQUIRE)
+    isTruthyEnvValue(env.CARAPACE_DEBUG_PROXY_ENABLED) ||
+    isTruthyEnvValue(env.CARAPACE_DEBUG_PROXY_REQUIRE)
   );
 }
 
@@ -789,7 +789,7 @@ function resolveBuiltInMachineOutput(argv: string[]): boolean {
 
 async function resolvePluginMachineOutput(params: {
   argv: string[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   session?: PluginCliLoadSession;
 }): Promise<boolean> {
   const { primary } = resolveCliArgvInvocation(params.argv);
@@ -810,7 +810,7 @@ async function resolvePluginMachineOutput(params: {
 
 async function isPluginCliRoot(params: {
   primary: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   session?: PluginCliLoadSession;
 }): Promise<boolean | null> {
   try {
@@ -827,7 +827,7 @@ async function isPluginCliRoot(params: {
   }
 }
 
-function createAllowlistAgnosticCliLookupConfig(config: OpenClawConfig): OpenClawConfig {
+function createAllowlistAgnosticCliLookupConfig(config: CarapaceConfig): CarapaceConfig {
   if (!Array.isArray(config.plugins?.allow) || config.plugins.allow.length === 0) {
     return config;
   }
@@ -842,7 +842,7 @@ function createAllowlistAgnosticCliLookupConfig(config: OpenClawConfig): OpenCla
 
 async function resolveCliCommandSurfaceOwner(params: {
   primary: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<string | undefined> {
   const { resolveManifestCliCommandSurfaceOwner } = await loadManifestCommandAliasesRuntimeModule();
   const manifestOwner = resolveManifestCliCommandSurfaceOwner({
@@ -883,7 +883,7 @@ function resolveUnownedCliPrimaryCandidate(argv: string[]): string | null {
 
 async function resolveUnownedCliPrimary(params: {
   argv: string[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   session?: PluginCliLoadSession;
 }): Promise<string | null> {
   const primary = resolveUnownedCliPrimaryCandidate(params.argv);
@@ -904,7 +904,7 @@ async function resolveUnownedCliPrimary(params: {
 async function resolveUnownedCliPrimaryError(params: {
   argv: string[];
   primary: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<Error> {
   const { resolveManifestCommandAliasOwner, resolveManifestToolOwner } =
     await loadManifestCommandAliasesRuntimeModule();
@@ -1045,7 +1045,7 @@ async function runCliWithPreparedOutputMode(
   }
   const parsedProfile = parseCliProfileArgs(parsedContainer.argv);
   const containerTargetName =
-    parsedContainer.container ?? normalizeOptionalString(process.env.OPENCLAW_CONTAINER) ?? null;
+    parsedContainer.container ?? normalizeOptionalString(process.env.CARAPACE_CONTAINER) ?? null;
   const hasPreHelpValidationError =
     !parsedProfile.ok || (containerTargetName !== null && parsedProfile.profile !== null);
   // Console formatting is a process-wide invariant. Install capture before
@@ -1118,7 +1118,7 @@ async function runCliWithPreparedOutputMode(
   if (
     !isHelpOrVersionInvocation &&
     normalizedInvocation.primary === "doctor" &&
-    process.env.OPENCLAW_UPDATE_IN_PROGRESS === "1"
+    process.env.CARAPACE_UPDATE_IN_PROGRESS === "1"
   ) {
     // Debug capture can migrate shared state before Commander reaches Doctor.
     // Resolve the update guard after selectors settle, before any bootstrap writer.
@@ -1144,8 +1144,8 @@ async function runCliWithPreparedOutputMode(
   }
   normalizeEnv();
   if (shouldEnsureCliPath(normalizedArgv)) {
-    const { ensureOpenClawCliOnPath } = await import("../infra/path-env.js");
-    ensureOpenClawCliOnPath();
+    const { ensureCarapaceCliOnPath } = await import("../infra/path-env.js");
+    ensureCarapaceCliOnPath();
   }
   // Cheap import gate only. Session-ref owns the authoritative URL/options parse.
   const mayContainBareSessionUrl = normalizedArgv.slice(2).some((arg) => arg.includes("://"));
@@ -1162,7 +1162,7 @@ async function runCliWithPreparedOutputMode(
   let onSigint: (() => void) | null = null;
   let onExit: (() => void) | null = null;
   let unregisterProxySignalExitBarrier: (() => void) | null = null;
-  let bestEffortConfigPromise: Promise<OpenClawConfig> | null = null;
+  let bestEffortConfigPromise: Promise<CarapaceConfig> | null = null;
   let pluginCliSession: PluginCliLoadSession | undefined;
   const getPluginCliSession = async () => {
     pluginCliSession ??= (await loadCliRegistryLoaderModule()).createPluginCliLoadSession(
@@ -1180,7 +1180,7 @@ async function runCliWithPreparedOutputMode(
   const useSourceOnlyBestEffortConfig =
     normalizedInvocation.primary === "update" ||
     (normalizedInvocation.primary === "doctor" && hasFlag(normalizedArgv, "--lint"));
-  const readBestEffortCliConfig = async (): Promise<OpenClawConfig> => {
+  const readBestEffortCliConfig = async (): Promise<CarapaceConfig> => {
     if (!bestEffortConfigPromise) {
       bestEffortConfigPromise = import("../config/io.js").then(async (configIo) => {
         if (useSourceOnlyBestEffortConfig) {
@@ -1257,7 +1257,7 @@ async function runCliWithPreparedOutputMode(
     process.once("SIGINT", onSigint);
     process.once("exit", onExit);
   };
-  const replaceStartedProxy = async (config: OpenClawConfig["proxy"]) => {
+  const replaceStartedProxy = async (config: CarapaceConfig["proxy"]) => {
     await stopStartedProxy();
     const { startProxy } = await loadProxyLifecycleModule();
     proxyHandle = await startProxy(config);
@@ -1357,7 +1357,7 @@ async function runCliWithPreparedOutputMode(
     if (bareSessionInvocation) {
       if (!process.stdin.isTTY || !process.stdout.isTTY) {
         console.error(
-          "OpenClaw TUI needs an interactive TTY. Use `openclaw agent --local ...` for automation.",
+          "Carapace TUI needs an interactive TTY. Use `carapace agent --local ...` for automation.",
         );
         process.exitCode = 1;
         return;
@@ -1368,8 +1368,8 @@ async function runCliWithPreparedOutputMode(
     }
 
     // Reject unowned command roots before help/version routing, so that
-    // `openclaw <typo> --help` surfaces the same Unknown command error as
-    // `openclaw <typo>` instead of silently showing generic top-level help.
+    // `carapace <typo> --help` surfaces the same Unknown command error as
+    // `carapace <typo>` instead of silently showing generic top-level help.
     // Runs after legitimate precomputed help fast paths so known help commands
     // still dispatch normally. See #81077.
     {
@@ -1403,7 +1403,7 @@ async function runCliWithPreparedOutputMode(
       if (bareRootLaunchTarget.kind === "remote-gateway-inference") {
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
-            "Remote Gateway inference setup needs an interactive TTY. Re-run `openclaw` in a terminal connected to this Gateway.",
+            "Remote Gateway inference setup needs an interactive TTY. Re-run `carapace` in a terminal connected to this Gateway.",
           );
           process.exitCode = 1;
           return;
@@ -1417,8 +1417,8 @@ async function runCliWithPreparedOutputMode(
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
             bareRootLaunchTarget.classic
-              ? "OpenClaw config is invalid. Run `openclaw doctor --fix` before onboarding."
-              : "Onboarding needs an interactive TTY. Use `openclaw onboard --non-interactive --accept-risk ...` for automation.",
+              ? "Carapace config is invalid. Run `carapace doctor --fix` before onboarding."
+              : "Onboarding needs an interactive TTY. Use `carapace onboard --non-interactive --accept-risk ...` for automation.",
           );
           process.exitCode = 1;
           return;
@@ -1430,7 +1430,7 @@ async function runCliWithPreparedOutputMode(
       if (bareRootLaunchTarget.kind === "tui") {
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
-            "OpenClaw TUI needs an interactive TTY. Use `openclaw agent --local ...` for automation.",
+            "Carapace TUI needs an interactive TTY. Use `carapace agent --local ...` for automation.",
           );
           process.exitCode = 1;
           return;
@@ -1504,7 +1504,7 @@ async function runCliWithPreparedOutputMode(
     const suppressStartupProgress = options.builtInMachineOutput || hasJsonOutputFlag(parseArgv);
     const { createCliProgress } = await loadProgressModule();
     const startupProgress = createCliProgress({
-      label: "Loading OpenClaw CLI…",
+      label: "Loading Carapace CLI…",
       indeterminate: true,
       delayMs: 0,
       ...(suppressStartupProgress ? { enabled: false } : {}),
@@ -1552,7 +1552,7 @@ async function runCliWithPreparedOutputMode(
         }
         if (isBenignUncaughtExceptionError(error)) {
           console.warn(
-            "[openclaw] Non-fatal uncaught exception (continuing):",
+            "[carapace] Non-fatal uncaught exception (continuing):",
             formatUncaughtError(error),
           );
           return;
@@ -1561,14 +1561,14 @@ async function runCliWithPreparedOutputMode(
           defaultRuntime.writeJson(formatCliJsonFailure(error));
         }
         for (const line of formatCliFailureLines({
-          title: "OpenClaw hit an unexpected runtime error.",
+          title: "Carapace hit an unexpected runtime error.",
           error,
           argv: normalizedArgv,
         })) {
           console.error(line);
         }
         for (const message of runFatalErrorHooks({ reason: "uncaught_exception", error })) {
-          console.error("[openclaw]", message);
+          console.error("[carapace]", message);
         }
         restoreRuntimeTerminalState("uncaught exception", { resumeStdinIfPaused: false });
         process.exit(1);

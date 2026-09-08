@@ -1,5 +1,5 @@
 // Tests media-only get-reply runs and sandboxed media attachment handling.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { MAIN_SESSION_RECOVERY_WORK_ADMISSION_OWNER } from "../../agents/main-session-recovery/main-session-recovery-admission.js";
 import type { SessionEntry } from "../../config/sessions.js";
@@ -65,7 +65,7 @@ vi.mock("../../agents/harness/hook-helpers.js", () => ({
 }));
 
 // Harness selection and built-in execution are owned by their focused suites. These tests keep
-// the real visible-reply policy resolver while supplying its default OpenClaw harness leaf.
+// the real visible-reply policy resolver while supplying its default Carapace harness leaf.
 const preparedReplyMockState = vi.hoisted(() => ({
   unexpectedCalls: [] as string[],
 }));
@@ -138,7 +138,7 @@ const selectAgentHarnessMock = vi.hoisted(() =>
       ) {
         preparedReplyMockState.unexpectedCalls.push("selectAgentHarness");
       }
-      return { id: "openclaw", deliveryDefaults: {} };
+      return { id: "carapace", deliveryDefaults: {} };
     },
   ),
 );
@@ -529,7 +529,7 @@ describe("runPreparedReply media-only handling", () => {
         spawnedCwd: "/tmp/session-worktree",
         worktree: {
           id: "worktree-1",
-          branch: "openclaw/worktree-1",
+          branch: "carapace/worktree-1",
           repoRoot: "/tmp/project",
           canonicalWorkspaceDir: "/tmp/project/packages/app",
         },
@@ -872,7 +872,7 @@ describe("runPreparedReply media-only handling", () => {
       resolvedThinkLevel: "high",
       sessionEntry,
       sessionStore,
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/carapace-sessions.json",
       modelState: {
         resolveDefaultThinkingLevel: async () => "high",
         resolveThinkingCatalog: async () => [
@@ -1209,7 +1209,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(call.followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
       role: "user",
       content: "",
-      __openclaw: { media: [expect.objectContaining({ path: "/tmp/input.png" })] },
+      __carapace: { media: [expect.objectContaining({ path: "/tmp/input.png" })] },
     });
   });
 
@@ -1895,7 +1895,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(call.followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
       role: "user",
       content: "describe this",
-      __openclaw: {
+      __carapace: {
         media: [expect.objectContaining({ path: imagePath, contentType: "image/png" })],
       },
     });
@@ -1980,7 +1980,7 @@ describe("runPreparedReply media-only handling", () => {
 
       const message = requireRunReplyAgentCall().followupRun.userTurnTranscriptRecorder?.message;
       expect(message).toMatchObject({
-        __openclaw: {
+        __carapace: {
           senderId: "user-42",
           senderName: "Ada",
           senderUsername: "ada",
@@ -2018,9 +2018,9 @@ describe("runPreparedReply media-only handling", () => {
     });
 
     const message = requireRunReplyAgentCall().followupRun.userTurnTranscriptRecorder?.message;
-    expect(message).not.toHaveProperty("__openclaw.senderId");
-    expect(message).not.toHaveProperty("__openclaw.senderName");
-    expect(message).not.toHaveProperty("__openclaw.senderUsername");
+    expect(message).not.toHaveProperty("__carapace.senderId");
+    expect(message).not.toHaveProperty("__carapace.senderName");
+    expect(message).not.toHaveProperty("__carapace.senderUsername");
   });
 
   it("does not persist sender attribution for gateway-local direct turns without channel admission", async () => {
@@ -2050,9 +2050,9 @@ describe("runPreparedReply media-only handling", () => {
     });
 
     const message = requireRunReplyAgentCall().followupRun.userTurnTranscriptRecorder?.message;
-    expect(message).not.toHaveProperty("__openclaw.senderId");
-    expect(message).not.toHaveProperty("__openclaw.senderName");
-    expect(message).not.toHaveProperty("__openclaw.senderUsername");
+    expect(message).not.toHaveProperty("__carapace.senderId");
+    expect(message).not.toHaveProperty("__carapace.senderName");
+    expect(message).not.toHaveProperty("__carapace.senderUsername");
   });
 
   it("normalizes second-based inbound timestamps before preparing user turns", async () => {
@@ -2134,7 +2134,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(
       (
         call.followupRun.userTurnTranscriptRecorder?.message as unknown as Record<string, unknown>
-      )?.["__openclaw"],
+      )?.["__carapace"],
     ).toMatchObject({
       mediaImageLayout: { slots: [], suppressedFactIndexes: [0, 1] },
     });
@@ -2202,7 +2202,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(
       (
         call.followupRun.userTurnTranscriptRecorder?.message as unknown as Record<string, unknown>
-      )?.["__openclaw"],
+      )?.["__carapace"],
     ).toMatchObject({
       mediaImageLayout: {
         slots: [{ kind: "inline", factIndex: 1 }],
@@ -2271,7 +2271,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(
       (
         call.followupRun.userTurnTranscriptRecorder?.message as unknown as Record<string, unknown>
-      )?.["__openclaw"],
+      )?.["__carapace"],
     ).toMatchObject({
       mediaImageLayout: { slots: [{ kind: "inline", factIndex: 1 }] },
     });
@@ -2329,7 +2329,7 @@ describe("runPreparedReply media-only handling", () => {
         },
       });
       expect(followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
-        __openclaw: {
+        __carapace: {
           mediaImageLayout: {
             slots: [{ kind: "inline", factIndex: 1 }],
             suppressedFactIndexes: [2],
@@ -2704,7 +2704,7 @@ describe("runPreparedReply media-only handling", () => {
         sessionId: "session-goal-interrupt",
         sessionEntry: activeEntry,
         sessionStore: { "session-key": activeEntry },
-        storePath: "/tmp/openclaw-session-store.json",
+        storePath: "/tmp/carapace-session-store.json",
       }),
     );
     while (!activeRun.abortSignal.aborted) {
@@ -2716,7 +2716,7 @@ describe("runPreparedReply media-only handling", () => {
 
     await expect(runPromise).resolves.toEqual({ text: "ok" });
     expect(loadSessionEntryMock).toHaveBeenCalledWith({
-      storePath: "/tmp/openclaw-session-store.json",
+      storePath: "/tmp/carapace-session-store.json",
       sessionKey: "session-key",
       readConsistency: "latest",
     });
@@ -3451,7 +3451,7 @@ describe("runPreparedReply media-only handling", () => {
           AmbientTranscriptMessageId: "35676",
           AmbientTranscriptTimestampMs: 1_710_000_000_000,
         },
-        storePath: "/tmp/openclaw-session-store.json",
+        storePath: "/tmp/carapace-session-store.json",
       }),
     );
 
@@ -3474,7 +3474,7 @@ describe("runPreparedReply media-only handling", () => {
         messageId: "35676",
       }),
       timestamp: expect.any(Number),
-      __openclaw: {
+      __carapace: {
         senderIsOwner: false,
         senderName: "Keśava",
         transport: {
@@ -3490,7 +3490,7 @@ describe("runPreparedReply media-only handling", () => {
       timestamp: 1_710_000_000_000,
     });
     expect(updateAmbientTranscriptWatermarkMock).toHaveBeenCalledWith({
-      storePath: "/tmp/openclaw-session-store.json",
+      storePath: "/tmp/carapace-session-store.json",
       sessionKey: "session-key",
       key: '["telegram","","-100123",""]',
       messageId: "35676",
@@ -3500,7 +3500,7 @@ describe("runPreparedReply media-only handling", () => {
     expect(call?.followupRun.currentInboundContext?.text).toContain(
       "#35675 obviyus ->#35674: Are you fr fr",
     );
-    expect(call?.followupRun.currentInboundContext?.text).toContain("[OpenClaw room event]");
+    expect(call?.followupRun.currentInboundContext?.text).toContain("[Carapace room event]");
     expect(call?.followupRun.currentInboundContext?.text).toContain(
       ROOM_EVENT_MESSAGE_TOOL_DIRECTIVE,
     );
@@ -3804,8 +3804,8 @@ describe("runPreparedReply media-only handling", () => {
         OriginatingChannel: "discord",
         OriginatingTo: "discord:channel-123",
       });
-      expect(call?.transcriptCommandBody).toBe("[OpenClaw heartbeat poll]");
-      expect(call?.followupRun.transcriptPrompt).toBe("[OpenClaw heartbeat poll]");
+      expect(call?.transcriptCommandBody).toBe("[Carapace heartbeat poll]");
+      expect(call?.followupRun.transcriptPrompt).toBe("[Carapace heartbeat poll]");
       expect(call?.followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
         provenance: { kind: "internal_system", sourceTool: "heartbeat" },
       });
@@ -4521,8 +4521,8 @@ describe("runPreparedReply media-only handling", () => {
       expect(call?.commandBody).toContain("telegram-user-1");
       expect(call?.followupRun.prompt).toContain("A new session was started via /new or /reset.");
       expect(call?.followupRun.prompt).toContain("Sender:");
-      expect(call?.transcriptCommandBody).toBe(`[OpenClaw session ${startupAction}]`);
-      expect(call?.followupRun.transcriptPrompt).toBe(`[OpenClaw session ${startupAction}]`);
+      expect(call?.transcriptCommandBody).toBe(`[Carapace session ${startupAction}]`);
+      expect(call?.followupRun.transcriptPrompt).toBe(`[Carapace session ${startupAction}]`);
       expect(call?.followupRun.transcriptPrompt).not.toContain("Sender:");
     },
   );
@@ -4579,7 +4579,7 @@ describe("runPreparedReply media-only handling", () => {
     const call = requireRunReplyAgentCall();
     expect(call?.followupRun.run.messageProvider).toBe("webchat");
     expect(call?.followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
-      __openclaw: {
+      __carapace: {
         transport: {
           channel: "telegram",
           conversationRef: expect.stringMatching(/^conv_[a-f0-9]{32}$/u),
@@ -4971,7 +4971,7 @@ describe("runPreparedReply media-only handling", () => {
     const call = requireRunReplyAgentCall();
     expect(call?.followupRun.run.senderIsOwner).toBe(true);
     expect(call?.followupRun.userTurnTranscriptRecorder?.message).toMatchObject({
-      __openclaw: { senderIsOwner: true },
+      __carapace: { senderIsOwner: true },
     });
   });
 

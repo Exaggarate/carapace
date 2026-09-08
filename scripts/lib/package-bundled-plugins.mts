@@ -58,7 +58,7 @@ export async function preparePackageBundledPlugins(sourceDir: string, pluginIds:
       await fs.readFile(path.join(pluginRoot, "package.json"), "utf8"),
     ) as PackageJson;
     const manifest = JSON.parse(
-      await fs.readFile(path.join(pluginRoot, "openclaw.plugin.json"), "utf8"),
+      await fs.readFile(path.join(pluginRoot, "carapace.plugin.json"), "utf8"),
     ) as { id: string };
     if (
       manifest.id !== id ||

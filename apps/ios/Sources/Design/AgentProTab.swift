@@ -1,11 +1,11 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 struct AgentProTab: View {
     @Environment(NodeAppModel.self) var appModel
     @Environment(\.scenePhase) var scenePhase
     let directRoute: AgentRoute
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: CarapaceSidebarHeaderAction?
     let headerTitle: String
     let openSettings: (() -> Void)?
     @State var agentRosterFilter: AgentRosterFilter = .all
@@ -48,15 +48,15 @@ struct AgentProTab: View {
 
         var color: Color {
             switch self {
-            case .online: OpenClawBrand.ok
-            case .ready: OpenClawBrand.info
+            case .online: CarapaceBrand.ok
+            case .ready: CarapaceBrand.info
             }
         }
     }
 
     init(
         directRoute: AgentRoute,
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: CarapaceSidebarHeaderAction? = nil,
         headerTitle: String = "Agents",
         openSettings: (() -> Void)? = nil)
     {

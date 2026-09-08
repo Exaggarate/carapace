@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { execBrowserProbe, WINDOWS_VERSION_DIR_RE } from "./chrome.executable-probe.js";
 import type { ResolvedBrowserConfig } from "./config.js";
 

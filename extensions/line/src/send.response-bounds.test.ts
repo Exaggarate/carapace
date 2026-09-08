@@ -1,5 +1,5 @@
 import { HTTPFetchError } from "@line/bot-sdk";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -16,14 +16,14 @@ const {
   recordChannelActivityMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-config-runtime", () => ({
   requireRuntimeConfig: requireRuntimeConfigMock,
 }));
 vi.mock("./accounts.js", () => ({ resolveLineAccount: resolveLineAccountMock }));
 vi.mock("./channel-access-token.js", () => ({
   resolveLineChannelAccessToken: resolveLineChannelAccessTokenMock,
 }));
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", () => ({
   recordChannelActivity: recordChannelActivityMock,
 }));
 
@@ -58,10 +58,10 @@ describe("LINE bounded provider responses", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/plugin-config-runtime");
+    vi.doUnmock("carapace/plugin-sdk/plugin-config-runtime");
     vi.doUnmock("./accounts.js");
     vi.doUnmock("./channel-access-token.js");
-    vi.doUnmock("openclaw/plugin-sdk/channel-activity-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-activity-runtime");
     vi.resetModules();
   });
 

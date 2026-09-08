@@ -4,13 +4,13 @@ import fs from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const TEST_TIMEOUT_MS = 180_000;
 const MODEL_REF = "no-op-proof/no-op-proof";
@@ -25,7 +25,7 @@ type MockModelServer = {
   close: () => Promise<void>;
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const modelServers: MockModelServer[] = [];
 
 afterEach(async () => {
@@ -40,16 +40,16 @@ describe("Gateway no-op mutation continuation", () => {
     async () => {
       const modelServer = await startMockModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "gateway-no-op-mutation",
         config: createTestConfig(modelServer.baseUrl),
         env: {
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
-      const notePath = path.join(instance.homeDir, ".openclaw", "workspace", "note.txt");
+      const notePath = path.join(instance.homeDir, ".carapace", "workspace", "note.txt");
       await fs.mkdir(path.dirname(notePath), { recursive: true });
       await fs.writeFile(notePath, "done\n", "utf8");
       await instance.startGateway();
@@ -93,14 +93,14 @@ describe("Gateway no-op mutation continuation", () => {
   );
 });
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): CarapaceConfig {
   return {
     plugins: { slots: { memory: "none" } },
     agents: {
       defaults: {
         heartbeat: { every: "0m" },
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
         skipBootstrap: true,
         skills: [],
       },

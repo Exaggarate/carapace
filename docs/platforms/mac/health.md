@@ -59,9 +59,9 @@ runs. Connection errors stay with the Gateway that reported them.
 
 ## When in doubt
 
-Use the CLI flow in [Gateway health](/gateway/health) (`openclaw status`,
-`openclaw status --deep`, `openclaw health --json`) and run
-`openclaw logs --follow`, filtering for `web-heartbeat` / `web-reconnect`.
+Use the CLI flow in [Gateway health](/gateway/health) (`carapace status`,
+`carapace status --deep`, `carapace health --json`) and run
+`carapace logs --follow`, filtering for `web-heartbeat` / `web-reconnect`.
 
 ## Related
 

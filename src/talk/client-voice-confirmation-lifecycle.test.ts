@@ -4,8 +4,8 @@ import {
   emitTrustedDiagnosticEvent,
   waitForDiagnosticEventsDrained,
 } from "../infra/diagnostic-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   authorizeClientVoiceConfirmation,
@@ -25,7 +25,7 @@ import {
 } from "./client-voice-session.js";
 import { clientVoiceSessionTesting } from "./client-voice-session.test-support.js";
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let tempDir: string;
 
@@ -92,15 +92,15 @@ async function completeRun(runId: string): Promise<void> {
 
 describe("client voice confirmation lifecycle", () => {
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-voice-confirmation-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    tempDir = tempDirs.make("carapace-voice-confirmation-");
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
   });
 
   afterEach(() => {
     clientVoiceSessionTesting.reset();
     resetClientVoiceConfirmationStateForTest();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
   });
 

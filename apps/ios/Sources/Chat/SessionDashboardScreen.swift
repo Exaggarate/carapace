@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 /// Session-scoped dashboard rendered by the gateway Control UI.
@@ -13,7 +13,7 @@ struct SessionDashboardScreen: View {
         let config = self.appModel.activeGatewayConnectConfig
         let storedOperatorToken = AuthenticatedControlUI.storedOperatorToken(config: config)
         ZStack {
-            OpenClawProBackground()
+            CarapaceProBackground()
             if let url = Self.dashboardURL(
                 config: config,
                 sessionKey: self.sessionKey,
@@ -48,7 +48,7 @@ struct SessionDashboardScreen: View {
                         self.showsDesktop = true
                     } label: {
                         Image(systemName: "display")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(CarapaceType.subheadSemiBold)
                     }
                     .accessibilityLabel("Open Desktop")
                     .accessibilityIdentifier("SessionDashboard.Desktop")
@@ -59,7 +59,7 @@ struct SessionDashboardScreen: View {
                     self.dismiss()
                 } label: {
                     Text("Done")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
             }
         }
@@ -70,11 +70,11 @@ struct SessionDashboardScreen: View {
 
     private var unavailableCard: some View {
         VStack(spacing: 12) {
-            ProIconBadge(systemName: "rectangle.grid.2x2", color: OpenClawBrand.accent)
+            ProIconBadge(systemName: "rectangle.grid.2x2", color: CarapaceBrand.accent)
             Text("Dashboard needs a connected gateway")
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
             Text("Connect to your gateway to open this session dashboard.")
-                .font(OpenClawType.caption)
+                .font(CarapaceType.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }

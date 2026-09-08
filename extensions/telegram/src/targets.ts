@@ -2,7 +2,7 @@
 import {
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 
 export type TelegramTarget = {
   chatId: string;

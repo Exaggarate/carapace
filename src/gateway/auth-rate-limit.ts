@@ -20,7 +20,7 @@
 import {
   resolveIntegerOption,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import type { GatewayAuthRateLimitConfig } from "../config/types.gateway.js";
 import { createDeferredCore, type Deferred } from "../shared/deferred.js";
 import { isLoopbackAddress, resolveClientIp } from "./net.js";

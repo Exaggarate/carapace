@@ -25,13 +25,13 @@ describe("node worker workspace seeds", () => {
     runtime.exec({
       ...identity,
       sessionId,
-      argv: ["openclaw-internal-workspace-seed"],
+      argv: ["carapace-internal-workspace-seed"],
       seed,
     });
 
   beforeEach(async () => {
     home = tempDirs.make("workspace-seeds-");
-    seeds = path.join(home, ".openclaw-worker", "git-seeds", identity.gatewayNamespace);
+    seeds = path.join(home, ".carapace-worker", "git-seeds", identity.gatewayNamespace);
     runtime = new NodeWorkerWorkspaceRuntime({
       root: path.join(home, "state", "node-host"),
       env: { ...process.env, HOME: home },

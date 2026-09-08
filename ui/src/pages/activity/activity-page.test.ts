@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { GatewayProtocolRequestError } from "@openclaw/gateway-client/browser";
+import { GatewayProtocolRequestError } from "@carapace/gateway-client/browser";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuditRunInspectResult } from "../../../../packages/gateway-protocol/src/schema/audit-run.js";
 import {
@@ -126,7 +126,7 @@ function activityGateway() {
 }
 
 function bindActivity(source: ApplicationContext["gateway"]): TestActivityPage {
-  const page = document.createElement("openclaw-activity-page") as TestActivityPage;
+  const page = document.createElement("carapace-activity-page") as TestActivityPage;
   page.context = activityContext(source) as ApplicationContext;
   page.routeData = { mode: "live", selector: null };
   activePages.add(page);
@@ -172,7 +172,7 @@ afterEach(() => {
 
 describe("ActivityPage gateway lifecycle", () => {
   it.each(["sessions", "run"] as const)("skips Live Activity rendering in %s mode", (mode) => {
-    const page = document.createElement("openclaw-activity-page") as TestActivityPage;
+    const page = document.createElement("carapace-activity-page") as TestActivityPage;
     page.context = { ...activityContext(gateway()), basePath: "" } as ApplicationContext;
     page.entries = [staleEntry()];
     page.routeData =
@@ -194,7 +194,7 @@ describe("ActivityPage gateway lifecycle", () => {
   });
 
   it("replays the active gateway on initial bind and source replacement", () => {
-    const page = document.createElement("openclaw-activity-page") as TestActivityPage;
+    const page = document.createElement("carapace-activity-page") as TestActivityPage;
     page.context = activityContext(gateway()) as ApplicationContext;
     page.entries = [staleEntry()];
 
@@ -457,7 +457,7 @@ describe("ActivityPage gateway lifecycle", () => {
     const activeGateway = {
       snapshot: { client, phase: "connected" },
     } as unknown as ApplicationContext["gateway"];
-    const page = document.createElement("openclaw-activity-page") as TestActivityPage;
+    const page = document.createElement("carapace-activity-page") as TestActivityPage;
     page.context = { gateway: activeGateway } as unknown as ApplicationContext;
     const selector = { kind: "run", id: "run-1" } as const;
     page.routeData = {
@@ -513,7 +513,7 @@ describe("ActivityPage gateway lifecycle", () => {
     const activeGateway = {
       snapshot: { client, phase: "connected" },
     } as unknown as ApplicationContext["gateway"];
-    const page = document.createElement("openclaw-activity-page") as TestActivityPage;
+    const page = document.createElement("carapace-activity-page") as TestActivityPage;
     page.context = { gateway: activeGateway } as unknown as ApplicationContext;
     const selector = { kind: "run", id: "run-1" } as const;
     page.routeData = {

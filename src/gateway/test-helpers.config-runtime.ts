@@ -12,7 +12,7 @@ import type {
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { AgentBinding } from "../config/types.agents.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.js";
 import { validateConfigObjectWithPlugins } from "../config/validation.js";
 import { writeJsonAtomic } from "../infra/json-files.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
@@ -39,7 +39,7 @@ type GatewayConfigOverrides = Pick<
   | "writeConfigFile"
 >;
 
-const resolveConfigPath = () => path.join(testConfigRoot.value, "openclaw.json");
+const resolveConfigPath = () => path.join(testConfigRoot.value, "carapace.json");
 
 const composeTestConfig = (baseConfig: Record<string, unknown>) => {
   const fileAgents =
@@ -54,7 +54,7 @@ const composeTestConfig = (baseConfig: Record<string, unknown>) => {
       : {};
   const defaults = {
     model: { primary: "anthropic/claude-opus-4-6" },
-    workspace: path.join(os.tmpdir(), "openclaw-gateway-test"),
+    workspace: path.join(os.tmpdir(), "carapace-gateway-test"),
     ...fileDefaults,
     ...testState.agentConfig,
   };
@@ -168,11 +168,11 @@ const composeTestConfig = (baseConfig: Record<string, unknown>) => {
     gateway,
     hooks,
     cron,
-  } as OpenClawConfig;
-  return migratePersistedImplicitMainRoster(composed).config as OpenClawConfig;
+  } as CarapaceConfig;
+  return migratePersistedImplicitMainRoster(composed).config as CarapaceConfig;
 };
 
-export function loadGatewayTestConfig(): OpenClawConfig {
+export function loadGatewayTestConfig(): CarapaceConfig {
   const configPath = resolveConfigPath();
   let fileConfig: Record<string, unknown> = {};
   try {
@@ -304,7 +304,7 @@ export function createGatewayConfigOverrides(actual: GatewayConfigRuntime): Gate
     get isNixMode() {
       return testIsNixMode.value;
     },
-    applyConfigOverrides: (cfg: OpenClawConfig) =>
+    applyConfigOverrides: (cfg: CarapaceConfig) =>
       composeTestConfig(cfg as Record<string, unknown>),
     getRuntimeConfig: loadRuntimeAwareTestConfig,
     parseConfigJson5: (raw: string) => {

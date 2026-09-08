@@ -1,4 +1,4 @@
-// Pure-logic tests for the OpenClaw Chrome extension. Runs under the
+// Pure-logic tests for the Carapace Chrome extension. Runs under the
 // extension-browser vitest glob (extensions/browser/**/*.test.ts).
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -30,7 +30,7 @@ describe("parsePairingString", () => {
       throw new Error("expected pairing string to parse");
     }
     expect(parsed.relayUrl).toBe(`ws://127.0.0.1:${port}/extension`);
-    expect(buildRelayWsProtocols()).toEqual(["openclaw-extension-relay.v2"]);
+    expect(buildRelayWsProtocols()).toEqual(["carapace-extension-relay.v2"]);
   });
 
   it("extracts the additive direct Gateway hint without passing it to the relay", () => {
@@ -300,7 +300,7 @@ describe("persisted pairing storage", () => {
       set,
       remove,
     }).read();
-    expect(afterWorkerRestart.pairingStatusHint).toContain("openclaw browser extension pair");
+    expect(afterWorkerRestart.pairingStatusHint).toContain("carapace browser extension pair");
   });
 
   it.each([

@@ -1,7 +1,7 @@
 // Control UI tests cover browser-native device-token isolation and reuse.
 import path from "node:path";
-import { gatewayCredentialScope, gatewayOriginScope } from "@openclaw/gateway-client/browser";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { gatewayCredentialScope, gatewayOriginScope } from "@carapace/gateway-client/browser";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { beforeEach, afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
@@ -15,9 +15,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let proofDir: string | undefined;
 beforeEach(() => {
   proofDir = artifactRoot
@@ -63,9 +63,9 @@ async function selectGatewayOnNextLoad(
   appBaseUrl: string,
   gatewayUrl: string,
 ): Promise<void> {
-  const settingsKey = `openclaw.control.settings.v1:${gatewayOriginScope(gatewayUrl)}`;
+  const settingsKey = `carapace.control.settings.v1:${gatewayOriginScope(gatewayUrl)}`;
   const selectionKey =
-    `openclaw.control.currentGateway.v1:` + gatewayOriginScope(browserPageGatewayUrl(appBaseUrl));
+    `carapace.control.currentGateway.v1:` + gatewayOriginScope(browserPageGatewayUrl(appBaseUrl));
   await page.addInitScript(
     ({ nextGatewayUrl, nextSelectionKey, nextSettingsKey }) => {
       localStorage.setItem(nextSettingsKey, JSON.stringify({ gatewayUrl: nextGatewayUrl }));
@@ -100,7 +100,7 @@ async function openGatewayPage(params: {
   const response = await page.goto(`${params.appBaseUrl}${params.route ?? "chat"}${tokenFragment}`);
   expect(response?.status()).toBe(200);
   const connect = await gateway.waitForRequest("connect");
-  await page.locator("openclaw-app-shell").waitFor();
+  await page.locator("carapace-app-shell").waitFor();
   return { connect, gateway, page };
 }
 
@@ -181,7 +181,7 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
     expect(requireConnectAuth(rositaReconnect.connect)).toEqual({
       deviceToken: ROSITA_DEVICE_TOKEN,
     });
-    expect(await rositaReconnect.page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await rositaReconnect.page.locator("carapace-login-gate").count()).toBe(0);
     await captureProof(rositaReconnect.page, "rosita-reconnected.png");
 
     const wilfredReconnect = await openGatewayPage({
@@ -193,10 +193,10 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
     expect(requireConnectAuth(wilfredReconnect.connect)).toEqual({
       deviceToken: WILFRED_DEVICE_TOKEN,
     });
-    expect(await wilfredReconnect.page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await wilfredReconnect.page.locator("carapace-login-gate").count()).toBe(0);
 
     const identity = await wilfredSource.page.evaluate(() => {
-      const raw = localStorage.getItem("openclaw-device-identity-v1");
+      const raw = localStorage.getItem("carapace-device-identity-v1");
       return raw ? JSON.parse(raw) : null;
     });
     const deviceId = requireRecord(identity).deviceId;
@@ -267,14 +267,14 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
     await revokeButton.click();
     // Revoke confirms in-page, not through window.confirm: webviews without a dialog
     // bridge silently answer false and would drop the action with no visible outcome.
-    const revokeConfirm = wilfredDevices.page.locator("openclaw-modal-dialog");
+    const revokeConfirm = wilfredDevices.page.locator("carapace-modal-dialog");
     await revokeConfirm.getByText("Revoke the operator token?").waitFor();
     await revokeConfirm.getByText(`Device ID: ${deviceId}`).waitFor();
     await revokeConfirm.getByRole("button", { name: "Revoke", exact: true }).click();
     const revoke = await wilfredDevices.gateway.waitForRequest("device.token.revoke");
     expect(revoke.params).toEqual({ deviceId, role: "operator" });
     const wilfredStoreKey =
-      `openclaw.device.auth.v1:` + gatewayCredentialScope(WILFRED_GATEWAY_URL);
+      `carapace.device.auth.v1:` + gatewayCredentialScope(WILFRED_GATEWAY_URL);
     await expect
       .poll(() =>
         wilfredDevices.page.evaluate((key) => {
@@ -311,7 +311,7 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
     // because Escape also exits the Settings takeover behind the dialog — pre-existing
     // shell behavior shared by every modal — which must not disturb the assertions above.
     await deviceEntry.getByRole("button", { name: "Rotate", exact: true }).click();
-    const rotateReveal = wilfredDevices.page.locator("openclaw-modal-dialog");
+    const rotateReveal = wilfredDevices.page.locator("carapace-modal-dialog");
     await rotateReveal.getByText("New operator token").waitFor();
     await rotateReveal.getByText(WILFRED_ROTATED_TOKEN).waitFor();
     await captureProof(wilfredDevices.page, "wilfred-rotated-token.png");

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterAll, afterEach, expect, it } from "vitest";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadAndActivateRootPluginRegistry } from "../plugins/loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
@@ -51,7 +51,7 @@ it("keeps root-owned memory sidecars in a direct agent registry", async () => {
 };\n`,
   });
   fs.writeFileSync(
-    path.join(plugin.dir, "openclaw.plugin.json"),
+    path.join(plugin.dir, "carapace.plugin.json"),
     JSON.stringify({ id: pluginId, configSchema, contracts: { tools: ["corpus_probe"] } }),
     "utf8",
   );
@@ -60,7 +60,7 @@ it("keeps root-owned memory sidecars in a direct agent registry", async () => {
       entries: { [pluginId]: { config: { source: "runtime" } } },
       load: { paths: [plugin.dir] },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const workspaceDir = makePluginLoaderTempDir();
   const rootConfig = applyPluginAutoEnable({ config, env: process.env }).config;
   expect(rootConfig.plugins?.entries?.[pluginId]?.enabled).toBe(true);

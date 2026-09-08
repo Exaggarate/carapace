@@ -1,5 +1,5 @@
 // Model list status tests cover status column construction and auth/probe summaries.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, type Mock, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import type { ModelDefinitionConfig } from "../../config/types.js";
@@ -50,8 +50,8 @@ const mocks = vi.hoisted(() => {
 
   return {
     store,
-    resolveAgentDir: vi.fn().mockReturnValue("/tmp/openclaw-agent"),
-    resolveAgentWorkspaceDir: vi.fn().mockReturnValue("/tmp/openclaw-agent/workspace"),
+    resolveAgentDir: vi.fn().mockReturnValue("/tmp/carapace-agent"),
+    resolveAgentWorkspaceDir: vi.fn().mockReturnValue("/tmp/carapace-agent/workspace"),
     resolveDefaultAgentId: vi.fn().mockReturnValue("main"),
     resolveSessionAgentIds: vi.fn(({ agentId }: { agentId?: string } = {}) => ({
       defaultAgentId: "main",
@@ -74,7 +74,7 @@ const mocks = vi.hoisted(() => {
     loadPersistedAuthProfileStore: vi.fn().mockReturnValue(store),
     resolveAuthProfileDisplayLabel: vi.fn(({ profileId }: { profileId: string }) => profileId),
     resolveAuthStorePathForDisplay: vi.fn(
-      (agentDir?: string) => `${agentDir ?? "/tmp/openclaw-agent"}/auth-profiles.json`,
+      (agentDir?: string) => `${agentDir ?? "/tmp/carapace-agent"}/auth-profiles.json`,
     ),
     resolveProfileUnusableUntilForDisplay: vi.fn().mockReturnValue(undefined),
     resolveEnvApiKey: vi.fn((provider: string) => {
@@ -145,7 +145,7 @@ const mocks = vi.hoisted(() => {
     getShellEnvAppliedKeys: vi.fn().mockReturnValue(["OPENAI_API_KEY", "ANTHROPIC_OAUTH_TOKEN"]),
     shouldEnableShellEnvFallback: vi.fn().mockReturnValue(true),
     createConfigIO: vi.fn().mockReturnValue({
-      configPath: "/tmp/openclaw-dev/openclaw.json",
+      configPath: "/tmp/carapace-dev/carapace.json",
     }),
     loadConfig: vi.fn().mockReturnValue({
       agents: {
@@ -198,7 +198,7 @@ vi.mock("../../agents/agent-scope.js", () => ({
   listAgentEntries: mocks.listAgentEntries,
 }));
 vi.mock("../../agents/workspace.js", () => ({
-  resolveDefaultAgentWorkspaceDir: vi.fn().mockReturnValue("/tmp/openclaw-agent/workspace"),
+  resolveDefaultAgentWorkspaceDir: vi.fn().mockReturnValue("/tmp/carapace-agent/workspace"),
 }));
 vi.mock("../../agents/auth-profiles/display.js", () => ({
   resolveAuthProfileDisplayLabel: mocks.resolveAuthProfileDisplayLabel,
@@ -435,7 +435,7 @@ async function withAgentScopeOverrides<T>(
     if (originalAgentDir) {
       mocks.resolveAgentDir.mockImplementation(originalAgentDir);
     } else {
-      mocks.resolveAgentDir.mockReturnValue("/tmp/openclaw-agent");
+      mocks.resolveAgentDir.mockReturnValue("/tmp/carapace-agent");
     }
   }
 }
@@ -589,7 +589,7 @@ describe("modelsStatusCommand auth overview", () => {
           kind: "cooldown",
           reason: "session_expired",
           recoveryHint:
-            "Re-authenticate with `openclaw models auth login --provider anthropic --profile-id 'anthropic:default'`.",
+            "Re-authenticate with `carapace models auth login --provider anthropic --profile-id 'anthropic:default'`.",
         }),
       ]);
 
@@ -600,7 +600,7 @@ describe("modelsStatusCommand auth overview", () => {
         .join("\n");
       expect(output).toContain("Unavailable auth profiles");
       expect(output).toContain("anthropic:default (anthropic) cooldown:session_expired");
-      expect(output).toContain("openclaw models auth login --provider anthropic");
+      expect(output).toContain("carapace models auth login --provider anthropic");
     } finally {
       delete store.usageStats;
       mocks.resolveProfileUnusableUntilForDisplay.mockReset().mockReturnValue(undefined);
@@ -690,7 +690,7 @@ describe("modelsStatusCommand auth overview", () => {
   it("keeps status metadata scoped while another operation publishes metadata", async () => {
     const originalLoadModelCatalog = mocks.loadModelCatalog.getMockImplementation();
     const config = mocks.loadConfig();
-    const workspaceDir = "/tmp/openclaw-agent/workspace";
+    const workspaceDir = "/tmp/carapace-agent/workspace";
     const catalogStarted = createDeferred();
     const releaseCatalog = createDeferred();
     let replacement: ReturnType<typeof getCurrentPluginMetadataSnapshot> = undefined;
@@ -792,8 +792,8 @@ describe("modelsStatusCommand auth overview", () => {
     expectResolveAgentDirCalledFor("main");
     expect(mocks.ensureAuthProfileStore).toHaveBeenCalled();
     expect(payload.defaultModel).toBe("anthropic/claude-opus-4-6");
-    expect(payload.configPath).toBe("/tmp/openclaw-dev/openclaw.json");
-    expect(payload.auth.storePath).toBe("/tmp/openclaw-agent/auth-profiles.json");
+    expect(payload.configPath).toBe("/tmp/carapace-dev/carapace.json");
+    expect(payload.auth.storePath).toBe("/tmp/carapace-agent/auth-profiles.json");
     expect(payload.auth.shellEnvFallback.enabled).toBe(true);
     expect(payload.auth.shellEnvFallback.appliedKeys).toContain("OPENAI_API_KEY");
     expect(payload.auth.missingProvidersInUse).toStrictEqual([]);
@@ -965,27 +965,27 @@ describe("modelsStatusCommand auth overview", () => {
     }
   });
 
-  it("honors OPENCLAW_AGENT_DIR when no --agent override is provided", async () => {
+  it("honors CARAPACE_AGENT_DIR when no --agent override is provided", async () => {
     const localRuntime = createRuntime();
     mocks.resolveAgentDir.mockClear();
-    await withEnvAsync({ OPENCLAW_AGENT_DIR: "/tmp/openclaw-isolated-agent" }, async () => {
+    await withEnvAsync({ CARAPACE_AGENT_DIR: "/tmp/carapace-isolated-agent" }, async () => {
       await modelsStatusCommand({ json: true }, localRuntime as never);
     });
 
     expectResolveAgentDirCalledFor("main");
-    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-isolated-agent");
+    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/carapace-isolated-agent");
     const payload = parseFirstJsonLog(localRuntime);
-    expect(payload.agentDir).toBe("/tmp/openclaw-isolated-agent");
-    expect(payload.auth.storePath).toBe("/tmp/openclaw-isolated-agent/auth-profiles.json");
+    expect(payload.agentDir).toBe("/tmp/carapace-isolated-agent");
+    expect(payload.auth.storePath).toBe("/tmp/carapace-isolated-agent/auth-profiles.json");
   });
 
-  it("honors deprecated PI_CODING_AGENT_DIR when OPENCLAW_AGENT_DIR is unset", async () => {
+  it("honors deprecated PI_CODING_AGENT_DIR when CARAPACE_AGENT_DIR is unset", async () => {
     const localRuntime = createRuntime();
     mocks.resolveAgentDir.mockClear();
     await withEnvAsync(
       {
-        OPENCLAW_AGENT_DIR: undefined,
-        PI_CODING_AGENT_DIR: "/tmp/openclaw-legacy-agent",
+        CARAPACE_AGENT_DIR: undefined,
+        PI_CODING_AGENT_DIR: "/tmp/carapace-legacy-agent",
       },
       async () => {
         await modelsStatusCommand({ json: true }, localRuntime as never);
@@ -993,9 +993,9 @@ describe("modelsStatusCommand auth overview", () => {
     );
 
     expectResolveAgentDirCalledFor("main");
-    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-legacy-agent");
+    expect(mocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/carapace-legacy-agent");
     const payload = parseFirstJsonLog(localRuntime);
-    expect(payload.agentDir).toBe("/tmp/openclaw-legacy-agent");
+    expect(payload.agentDir).toBe("/tmp/carapace-legacy-agent");
   });
 
   it("uses agent overrides and reports sources", async () => {
@@ -1004,14 +1004,14 @@ describe("modelsStatusCommand auth overview", () => {
       {
         primary: "openai/gpt-4",
         fallbacks: ["openai/gpt-3.5"],
-        agentDir: "/tmp/openclaw-agent-custom",
+        agentDir: "/tmp/carapace-agent-custom",
       },
       async () => {
         await modelsStatusCommand({ json: true, agent: "Jeremiah" }, localRuntime as never);
         expectResolveAgentDirCalledFor("jeremiah");
         const payload = parseFirstJsonLog(localRuntime);
         expect(payload.agentId).toBe("jeremiah");
-        expect(payload.agentDir).toBe("/tmp/openclaw-agent-custom");
+        expect(payload.agentDir).toBe("/tmp/carapace-agent-custom");
         expect(payload.defaultModel).toBe("openai/gpt-4");
         expect(payload.fallbacks).toEqual(["openai/gpt-3.5"]);
         expect(payload.modelConfig).toEqual({
@@ -1026,7 +1026,7 @@ describe("modelsStatusCommand auth overview", () => {
         ).find((provider) => provider.provider === "openai");
         expect(openAiCodex?.effective).toEqual({
           kind: "profiles",
-          detail: "/tmp/openclaw-agent-custom/auth-profiles.json",
+          detail: "/tmp/carapace-agent-custom/auth-profiles.json",
         });
       },
     );
@@ -1285,7 +1285,7 @@ describe("modelsStatusCommand auth overview", () => {
         runtimePluginIds: ["codex", "openai"],
         effective: {
           kind: "profiles",
-          detail: "/tmp/openclaw-agent/auth-profiles.json",
+          detail: "/tmp/carapace-agent/auth-profiles.json",
         },
       },
     ]);
@@ -1326,7 +1326,7 @@ describe("modelsStatusCommand auth overview", () => {
         status: "missing",
         effective: {
           kind: "profiles",
-          detail: "/tmp/openclaw-agent/auth-profiles.json",
+          detail: "/tmp/carapace-agent/auth-profiles.json",
         },
       },
     ]);
@@ -1980,7 +1980,7 @@ describe("modelsStatusCommand auth overview", () => {
     });
     mocks.resolveEnvApiKey.mockImplementation(
       (provider: string, _env?: NodeJS.ProcessEnv, options?: { workspaceDir?: string }) =>
-        provider === "workspace-cloud" && options?.workspaceDir === "/tmp/openclaw-agent/workspace"
+        provider === "workspace-cloud" && options?.workspaceDir === "/tmp/carapace-agent/workspace"
           ? {
               apiKey: "workspace-cloud-local-credentials",
               source: "workspace cloud credentials",

@@ -4,7 +4,7 @@
  * Rolldown/tsdown can mirror JS helpers such as `__exportAll` into declaration
  * `export { ... }` clauses without emitting a matching type declaration. Strict
  * consumers then fail with TS2304 when they import public SDK entrypoints that
- * resolve through those chunks (for example `openclaw/plugin-sdk/tool-plugin`).
+ * resolve through those chunks (for example `carapace/plugin-sdk/tool-plugin`).
  */
 import fs from "node:fs";
 import path from "node:path";

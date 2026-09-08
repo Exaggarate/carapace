@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import { recordMemoryEntryOrigins } from "../memory-entry-origins.js";
 import { forgetMemoryEntries } from "../memory-forget.js";
@@ -647,7 +647,7 @@ describe("memory index", () => {
     const memoryPath = path.join(fixture.paths.workspace, "MEMORY.md");
     await fs.writeFile(
       memoryPath,
-      "# Memory\n<!-- openclaw-memory-promotion:private-entry -->\n- Private violet alpha fragment.\n",
+      "# Memory\n<!-- carapace-memory-promotion:private-entry -->\n- Private violet alpha fragment.\n",
     );
     recordMemoryEntryOrigins({
       agentId: "main",

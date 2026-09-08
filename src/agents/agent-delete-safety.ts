@@ -1,8 +1,8 @@
 /** Safety checks for deleting agents whose workspaces may overlap other agents. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import { isSameOpenClawAgentDatabasePath } from "../state/openclaw-agent-db-registry.js";
+import { isSameCarapaceAgentDatabasePath } from "../state/carapace-agent-db-registry.js";
 import { listAgentEntries, resolveAgentWorkspaceDir } from "./agent-scope.js";
 import {
   resolveSharedAuthStoreOwnership,
@@ -19,15 +19,15 @@ export function isSharedAuthStoreOwner(params: {
 }): boolean {
   return (
     params.ownership.location === "legacy-main" &&
-    isSameOpenClawAgentDatabasePath(params.agentAuthDbPath, params.sharedAuthDbPath)
+    isSameCarapaceAgentDatabasePath(params.agentAuthDbPath, params.sharedAuthDbPath)
   );
 }
 
 export function formatSharedAuthStoreOwnerDeleteError(agentId: string): string {
-  return `Agent "${agentId}" owns the legacy shared auth store and cannot be deleted. Run openclaw doctor --fix to migrate shared auth, then retry.`;
+  return `Agent "${agentId}" owns the legacy shared auth store and cannot be deleted. Run carapace doctor --fix to migrate shared auth, then retry.`;
 }
 
-export function isInheritedAuthStoreOwner(cfg: OpenClawConfig, agentId: string): boolean {
+export function isInheritedAuthStoreOwner(cfg: CarapaceConfig, agentId: string): boolean {
   // Relocation retires the implicit agent owner, but explicit bindings must be re-pointed.
   const explicitOwner = cfg.agents?.defaults?.authInheritance?.agentId?.trim();
   if (!explicitOwner && resolveSharedAuthStoreOwnership().location !== "legacy-main") {
@@ -45,7 +45,7 @@ function workspacePathsOverlap(left: string, right: string): boolean {
 
 /** Lists other agents whose workspaces overlap a candidate delete target. */
 export function findOverlappingWorkspaceAgentIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   workspaceDir: string,
   env?: NodeJS.ProcessEnv,

@@ -1,18 +1,18 @@
 ---
-summary: "Use xAI Grok models in OpenClaw"
+summary: "Use xAI Grok models in Carapace"
 read_when:
-  - You want to use Grok models in OpenClaw
+  - You want to use Grok models in Carapace
   - You are configuring xAI auth or model ids
 title: "xAI"
 ---
 
-OpenClaw ships a bundled `xai` provider plugin for Grok models. The
+Carapace ships a bundled `xai` provider plugin for Grok models. The
 recommended path is Grok OAuth with an eligible SuperGrok or X Premium
 subscription. Gateway, config, routing, and tools stay local; only Grok
 requests go to xAI's API.
 
 OAuth does not require an xAI API key or the Grok Build app. xAI may still
-show Grok Build on the consent screen because OpenClaw uses xAI's shared
+show Grok Build on the consent screen because Carapace uses xAI's shared
 OAuth client.
 
 ## Setup
@@ -23,14 +23,14 @@ OAuth client.
     model/auth step:
 
     ```bash
-    openclaw onboard --install-daemon
+    carapace onboard --install-daemon
     ```
 
     On a VPS or over SSH, select xAI OAuth directly; it uses device-code
     verification and does not need a localhost callback:
 
     ```bash
-    openclaw onboard --install-daemon --auth-choice xai-oauth
+    carapace onboard --install-daemon --auth-choice xai-oauth
     ```
 
   </Step>
@@ -38,16 +38,16 @@ OAuth client.
     Sign in to xAI only; do not rerun full onboarding just to connect Grok:
 
     ```bash
-    openclaw models auth login --provider xai --method oauth
+    carapace models auth login --provider xai --method oauth
     ```
 
     With no existing primary model, OAuth setup selects `xai/auto`. The plugin
     resolves that stable ref from xAI's authenticated model catalog and remote
-    default, so future xAI default changes do not require an OpenClaw update.
+    default, so future xAI default changes do not require an Carapace update.
     It preserves an existing primary; opt in explicitly when needed:
 
     ```bash
-    openclaw models set xai/auto
+    carapace models set xai/auto
     ```
 
     Rerun full onboarding only if you intentionally want to change Gateway,
@@ -60,7 +60,7 @@ OAuth client.
     regional-safe setup default:
 
     ```bash
-    openclaw models auth login --provider xai --method api-key
+    carapace models auth login --provider xai --method api-key
     export XAI_API_KEY=xai-...
     ```
 
@@ -75,16 +75,16 @@ OAuth client.
 </Steps>
 
 <Note>
-OpenClaw uses the xAI Responses API as the bundled xAI transport. The same
-credential from `openclaw models auth login --provider xai --method oauth` or
+Carapace uses the xAI Responses API as the bundled xAI transport. The same
+credential from `carapace models auth login --provider xai --method oauth` or
 `--method api-key` also powers `web_search` (provider id `grok`), `x_search`,
 `code_execution`, speech/transcription, and xAI image/video generation. If you
 store an xAI key under `plugins.entries.xai.config.webSearch.apiKey`, the
 bundled xAI model provider reuses it as a fallback too.
 </Note>
 
-`openclaw status --usage`, `/status`, and the Control UI usage cards show
-SuperGrok quota when the xAI provider is signed in with OAuth. OpenClaw fetches
+`carapace status --usage`, `/status`, and the Control UI usage cards show
+SuperGrok quota when the xAI provider is signed in with OAuth. Carapace fetches
 the Grok billing window for that subscription and reports its reset time through
 the normal provider-usage surface. API-key-only xAI setups are intentionally not
 shown as SuperGrok usage because xAI Console API credits and SuperGrok
@@ -93,21 +93,21 @@ subscription quota are separate billing buckets.
 ## OAuth troubleshooting
 
 - For SSH, Docker, VPS, or other remote setups, use
-  `openclaw models auth login --provider xai --method oauth`; it uses
+  `carapace models auth login --provider xai --method oauth`; it uses
   device-code verification, not a localhost callback.
 - If a previous OAuth login left xAI using the API-key endpoint or catalog,
-  rerun `openclaw models auth login --provider xai --method oauth`. A successful
+  rerun `carapace models auth login --provider xai --method oauth`. A successful
   login refreshes the subscription catalog and proxy route from your account.
   It preserves your primary model and fallbacks; the moving alias remains
   discovery-owned so it can follow later default changes.
 - If sign-in succeeds but Grok is not the default model, run
-  `openclaw models set xai/auto`. OAuth login preserves an existing
+  `carapace models set xai/auto`. OAuth login preserves an existing
   primary model unless you explicitly change it.
 - Inspect saved xAI auth profiles:
 
   ```bash
-  openclaw models auth list --provider xai
-  openclaw models status
+  carapace models auth list --provider xai
+  carapace models status
   ```
 
 - xAI decides which accounts can receive OAuth API tokens. If an account is
@@ -123,7 +123,7 @@ Resolved environment-backed tokens also work in standalone model commands withou
 a running Gateway.
 
 <Tip>
-Use `xai-oauth` when signing in from SSH, Docker, or a VPS. OpenClaw prints a
+Use `xai-oauth` when signing in from SSH, Docker, or a VPS. Carapace prints a
 URL and short code; finish sign-in in any local browser while the remote
 process polls xAI for the completed token exchange.
 </Tip>
@@ -154,18 +154,18 @@ Catalog context and token-cost metadata follows xAI's live
 [pricing page](https://docs.x.ai/developers/pricing). xAI applies higher rates
 when a request crosses its documented 200k-token long-context threshold:
 for Grok 4.5 and Grok 4.6, input, cached-input, and output rates double.
-OpenClaw's flat catalog cost fields record the short-context rates. The current
+Carapace's flat catalog cost fields record the short-context rates. The current
 [Grok Build](https://docs.x.ai/build/overview) coding agent uses Grok 4.6. The
-historical OpenClaw `grok-build-latest` compatibility alias remains pinned to
+historical Carapace `grok-build-latest` compatibility alias remains pinned to
 Grok 4.5.
 
 ## Feature coverage
 
-The bundled plugin maps supported xAI APIs onto OpenClaw's shared provider and
+The bundled plugin maps supported xAI APIs onto Carapace's shared provider and
 tool contracts. Capabilities that do not fit the shared contract are listed
 below or under known limits.
 
-| xAI capability             | OpenClaw surface                        | Status                                               |
+| xAI capability             | Carapace surface                        | Status                                               |
 | -------------------------- | --------------------------------------- | ---------------------------------------------------- |
 | Chat / Responses           | `xai/<model>` model provider            | Yes                                                  |
 | Context compaction         | `/compact` and threshold compaction     | Yes via `/v1/responses/compact`                      |
@@ -179,10 +179,10 @@ below or under known limits.
 | Batch speech-to-text       | `tools.media.audio` media understanding | Yes                                                  |
 | Streaming speech-to-text   | Voice Call `streaming.provider: "xai"`  | Yes                                                  |
 | Realtime voice             | Talk `talk.realtime.provider: "xai"`    | Yes; gateway-relay for native Talk nodes             |
-| Files / batches            | Generic model API compatibility only    | Not a first-class OpenClaw tool                      |
+| Files / batches            | Generic model API compatibility only    | Not a first-class Carapace tool                      |
 
 <Note>
-OpenClaw uses xAI's REST image/video/TTS/STT APIs for media generation and
+Carapace uses xAI's REST image/video/TTS/STT APIs for media generation and
 batch transcription, xAI's streaming STT WebSocket for live voice-call
 transcription, xAI's Grok Voice Agent WebSocket for Talk realtime sessions,
 and the Responses API for chat, search, and code-execution tools.
@@ -210,12 +210,12 @@ Older aliases normalize as follows:
 | ------------------------------------------------------------- | ---------------- |
 | `grok-code-fast-1`, `grok-code-fast`, `grok-code-fast-1-0825` | `grok-build-0.1` |
 
-The dated 0309 ids are the selectable catalog entries. OpenClaw sends all other
+The dated 0309 ids are the selectable catalog entries. Carapace sends all other
 current Grok 4.20 aliases verbatim so xAI retains control of stable, latest,
 beta, experimental, and dated alias semantics. The global `grok-latest` alias is
 also preserved verbatim.
 
-xAI retired the following exact ids. OpenClaw keeps them as hidden compatibility
+xAI retired the following exact ids. Carapace keeps them as hidden compatibility
 rows for shipped configurations, with the limits and pricing of their current
 redirect targets:
 
@@ -226,7 +226,7 @@ redirect targets:
 | `grok-code-fast-1`                                                   | Grok Build 0.1                   |
 | `grok-imagine-image-pro`                                             | Grok Imagine Image Quality       |
 
-`openclaw doctor --fix` updates persisted xAI server-tool defaults and the
+`carapace doctor --fix` updates persisted xAI server-tool defaults and the
 retired quality image slug, removes stale generated catalog rows, and repairs
 stale context metadata on active 4.20 rows. It does not pin active 4.20
 `beta-latest` aliases to a dated snapshot.
@@ -236,7 +236,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
 <Warning>
   `x_search` and `code_execution` run on xAI's servers. xAI bills $5 per 1,000
   tool calls, plus the model's input and output tokens. With each tool's
-  `enabled` setting omitted, OpenClaw exposes it only for an active xAI model.
+  `enabled` setting omitted, Carapace exposes it only for an active xAI model.
   A known non-xAI model provider requires an explicit per-tool `enabled: true`;
   a missing or unresolved provider fails closed. xAI auth is always required,
   and `enabled: false` disables the tool for every provider.
@@ -248,8 +248,8 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     to `XAI_API_KEY` or a plugin web-search key:
 
     ```bash
-    openclaw models auth login --provider xai --method oauth
-    openclaw config set tools.web.search.provider grok
+    carapace models auth login --provider xai --method oauth
+    carapace config set tools.web.search.provider grok
     ```
 
   </Accordion>
@@ -280,11 +280,11 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     <Warning>
     Local video buffers are not accepted. Use remote `http(s)` URLs for video
     edit/extend inputs. Image-to-video accepts local image buffers because
-    OpenClaw encodes those as data URLs for xAI.
+    Carapace encodes those as data URLs for xAI.
     </Warning>
 
     Video 1.5 also recognizes xAI's `grok-imagine-video-1.5-preview` and
-    `grok-imagine-video-1.5-2026-05-30` identifiers. OpenClaw forwards the
+    `grok-imagine-video-1.5-2026-05-30` identifiers. Carapace forwards the
     selected identifier unchanged, but applies the same image-only validation.
 
     To use xAI as the default video provider:
@@ -325,7 +325,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     - Default operation timeout: 600 seconds unless `image_generate.timeoutMs`
       or `agents.defaults.mediaModels.image.timeoutMs` is set
 
-    OpenClaw asks xAI for `b64_json` image responses so generated media can be
+    Carapace asks xAI for `b64_json` image responses so generated media can be
     stored and delivered through the normal channel attachment path. Local
     reference images are converted to data URLs; remote `http(s)` references
     pass through unchanged.
@@ -348,7 +348,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
 
     <Note>
     xAI also documents `quality`, `mask`, `user`, and an `auto` aspect ratio.
-    OpenClaw forwards only the shared cross-provider image controls today;
+    Carapace forwards only the shared cross-provider image controls today;
     these native-only knobs are not exposed through `image_generate`.
     </Note>
 
@@ -359,7 +359,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     provider surface.
 
     - Voices: authenticated live catalog from xAI; list it with
-      `openclaw infer tts voices --provider xai`
+      `carapace infer tts voices --provider xai`
     - Offline fallback voices: `ara`, `eve`, `leo`, `rex`, `sal`
     - Default voice: `eve`
     - Account custom voice IDs are forwarded even when they are absent from the
@@ -385,7 +385,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     ```
 
     <Note>
-    OpenClaw uses xAI's batch `/v1/tts` endpoint for buffered synthesis,
+    Carapace uses xAI's batch `/v1/tts` endpoint for buffered synthesis,
     authenticated `/v1/tts/voices` catalog discovery, and native
     `wss://api.x.ai/v1/tts` for streaming synthesis. Streaming is restricted to
     the native `api.x.ai` host, so custom `baseUrl` values are rejected on this
@@ -402,7 +402,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
   </Accordion>
 
   <Accordion title="Speech-to-text">
-    The bundled `xai` plugin registers batch speech-to-text through OpenClaw's
+    The bundled `xai` plugin registers batch speech-to-text through Carapace's
     media-understanding transcription surface.
 
     - Endpoint: xAI REST `/v1/stt`
@@ -434,11 +434,11 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     ```
 
     Language can be supplied through the shared audio media config or per-call
-    transcription request. Prompt hints are accepted by the shared OpenClaw
+    transcription request. Prompt hints are accepted by the shared Carapace
     surface, but the xAI REST STT integration forwards only file and language
     because those map to the current public xAI endpoint.
 
-    Valid empty transcripts are skipped, and OpenClaw tries any configured
+    Valid empty transcripts are skipped, and Carapace tries any configured
     fallback. Malformed responses and HTTP failures remain errors.
 
   </Accordion>
@@ -502,7 +502,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     - Default voice: `eve`
     - Transport: `gateway-relay` (iOS, Android, and Control UI relay paths)
     - Audio: PCM16 24 kHz or G.711 µ-law 8 kHz
-    - Barge-in: xAI server VAD interrupts the response; OpenClaw clears queued playback
+    - Barge-in: xAI server VAD interrupts the response; Carapace clears queued playback
       and truncates unplayed provider history
 
     Configure Talk on the Gateway:
@@ -547,7 +547,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     </Note>
 
     <Note>
-    `sessionResumption` defaults to `false`. When set to `true`, OpenClaw asks
+    `sessionResumption` defaults to `false`. When set to `true`, Carapace asks
     xAI to retain enough session state to resume the same conversation after a
     reconnect and then reconnects with the returned conversation id. Leave it
     disabled when provider-side replay/retention is not acceptable; interrupted
@@ -557,7 +557,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
   </Accordion>
 
   <Accordion title="x_search configuration">
-    The bundled xAI plugin exposes `x_search` as an OpenClaw tool for
+    The bundled xAI plugin exposes `x_search` as an Carapace tool for
     searching X (formerly Twitter) content via Grok.
 
     Config path: `plugins.entries.xai.config.xSearch`
@@ -594,7 +594,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
   </Accordion>
 
   <Accordion title="Code execution configuration">
-    The bundled xAI plugin exposes `code_execution` as an OpenClaw tool for
+    The bundled xAI plugin exposes `code_execution` as an Carapace tool for
     remote code execution in xAI's sandbox environment.
 
     Config path: `plugins.entries.xai.config.codeExecution`
@@ -633,7 +633,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     Native `api.x.ai` Responses routes use xAI's server-side
     [`/responses/compact`](https://docs.x.ai/developers/advanced-api-usage/context-compaction)
     endpoint by default for manual `/compact` and threshold-driven preflight
-    compaction. The session keeps its OpenClaw transcript unchanged and stores
+    compaction. The session keeps its Carapace transcript unchanged and stores
     xAI's opaque checkpoint for the next request. Completion notices report
     the provider's before and after token counts.
 
@@ -659,7 +659,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
     its `context_management` compaction is already managed by
     `responsesServerCompaction`.
 
-    Endpoint failures fall back to OpenClaw's client-side summarization.
+    Endpoint failures fall back to Carapace's client-side summarization.
     Overflow recovery never calls the endpoint because xAI requires the input
     to fit the model context window before compaction.
 
@@ -670,10 +670,10 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
       fallback, or OAuth with an eligible xAI account. OAuth uses device-code
       verification without a localhost callback. xAI decides which accounts
       can receive OAuth API tokens, and the consent page may show Grok Build
-      even though OpenClaw does not require the Grok Build app.
-    - OpenClaw does not currently expose the xAI multi-agent model family. xAI
+      even though Carapace does not require the Grok Build app.
+    - Carapace does not currently expose the xAI multi-agent model family. xAI
       serves these models through the Responses API, but they do not accept
-      the client-side or custom tools used by OpenClaw's shared agent loop.
+      the client-side or custom tools used by Carapace's shared agent loop.
       See the
       [xAI multi-agent limitations](https://docs.x.ai/developers/model-capabilities/text/multi-agent#limitations).
     - xAI Realtime voice currently exposes gateway-relay Talk transport only.
@@ -685,7 +685,7 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
   </Accordion>
 
   <Accordion title="Advanced notes">
-    - OpenClaw applies xAI-specific tool-schema and tool-call compatibility
+    - Carapace applies xAI-specific tool-schema and tool-call compatibility
       fixes automatically on the shared runner path.
     - Native `https://api.x.ai/v1` Responses requests keep tool images attached
       to their tool results. On compatibility routes (including Grok OAuth),
@@ -705,8 +705,8 @@ stale context metadata on active 4.20 rows. It does not pin active 4.20
       configurable effort control, but still request
       `include: ["reasoning.encrypted_content"]` so prior encrypted reasoning
       can be replayed on follow-up turns.
-    - `web_search`, `x_search`, and `code_execution` are exposed as OpenClaw
-      tools. OpenClaw attaches only the specific xAI built-in each tool needs
+    - `web_search`, `x_search`, and `code_execution` are exposed as Carapace
+      tools. Carapace attaches only the specific xAI built-in each tool needs
       to that tool's request instead of attaching every native tool to every
       chat turn.
     - Grok `web_search` reads `plugins.entries.xai.config.webSearch.baseUrl`.
@@ -726,18 +726,18 @@ The xAI media paths are covered by unit tests and opt-in live suites. Export
 
 ```bash
 pnpm test extensions/xai
-OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/xai.live.test.ts
-OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_XAI_VIDEO=1 pnpm test:live -- extensions/xai/xai.live.test.ts -t "classic Grok Imagine"
-OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_XAI_VIDEO=1 pnpm test:live -- extensions/xai/xai.live.test.ts -t "Grok Imagine Video 1.5"
-OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/x-search.live.test.ts
-OPENCLAW_LIVE_GATEWAY_MODELS="xai/grok-4.6,xai/grok-4.5,xai/grok-build-0.1,xai/grok-4.3,xai/grok-4.20-0309-reasoning,xai/grok-4.20-0309-non-reasoning" OPENCLAW_LIVE_GATEWAY_MAX_MODELS=0 OPENCLAW_LIVE_GATEWAY_SMOKE=0 pnpm test:live -- src/gateway/gateway-models.profiles.live.test.ts
-OPENCLAW_LIVE_TEST=1 OPENCLAW_LIVE_TEST_QUIET=1 OPENCLAW_LIVE_IMAGE_GENERATION_PROVIDERS=xai pnpm test:live -- test/image-generation.runtime.live.test.ts
+CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/xai.live.test.ts
+CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_XAI_VIDEO=1 pnpm test:live -- extensions/xai/xai.live.test.ts -t "classic Grok Imagine"
+CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_XAI_VIDEO=1 pnpm test:live -- extensions/xai/xai.live.test.ts -t "Grok Imagine Video 1.5"
+CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_TEST_QUIET=1 pnpm test:live -- extensions/xai/x-search.live.test.ts
+CARAPACE_LIVE_GATEWAY_MODELS="xai/grok-4.6,xai/grok-4.5,xai/grok-build-0.1,xai/grok-4.3,xai/grok-4.20-0309-reasoning,xai/grok-4.20-0309-non-reasoning" CARAPACE_LIVE_GATEWAY_MAX_MODELS=0 CARAPACE_LIVE_GATEWAY_SMOKE=0 pnpm test:live -- src/gateway/gateway-models.profiles.live.test.ts
+CARAPACE_LIVE_TEST=1 CARAPACE_LIVE_TEST_QUIET=1 CARAPACE_LIVE_IMAGE_GENERATION_PROVIDERS=xai pnpm test:live -- test/image-generation.runtime.live.test.ts
 ```
 
 The provider-specific live file synthesizes normal TTS, telephony-friendly PCM
 TTS, transcribes audio through xAI batch STT, streams the same PCM through xAI
 realtime STT, generates text-to-image output, and edits a reference image.
-The shared image live file verifies the same xAI provider through OpenClaw's
+The shared image live file verifies the same xAI provider through Carapace's
 runtime selection, fallback, normalization, and media attachment path. The
 opt-in Video 1.5 case submits one generated first-frame image at 1080P and
 verifies the completed video download.

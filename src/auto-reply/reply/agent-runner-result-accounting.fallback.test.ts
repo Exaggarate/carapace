@@ -9,9 +9,9 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { drainSessionStoreWriterQueuesForTest } from "../../config/sessions/store-writer-state.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildGatewaySessionRow } from "../../gateway/session-utils-row.js";
-import { disposeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { disposeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { accountAgentTurn } from "./agent-runner-result-accounting.js";
 import { createMockFollowupRun } from "./test-helpers.js";
 
@@ -20,12 +20,12 @@ let root: string;
 let storePath: string;
 let sequence = 0;
 beforeAll(() => {
-  root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-fallback-projection-"));
-  storePath = path.join(root, "openclaw-agent.sqlite");
+  root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-fallback-projection-"));
+  storePath = path.join(root, "carapace-agent.sqlite");
 });
 afterAll(async () => {
   await drainSessionStoreWriterQueuesForTest();
-  disposeOpenClawAgentDatabaseByPath(storePath);
+  disposeCarapaceAgentDatabaseByPath(storePath);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -39,7 +39,7 @@ async function createFixture() {
     modelProvider: diagnostic.provider,
     model: diagnostic.model,
   };
-  const cfg: OpenClawConfig = { session: { store: storePath } };
+  const cfg: CarapaceConfig = { session: { store: storePath } };
   await replaceSessionEntry({ storePath, sessionKey }, entry);
   const context: Parameters<typeof accountAgentTurn>[0] = {
     activeSessionEntry: entry,

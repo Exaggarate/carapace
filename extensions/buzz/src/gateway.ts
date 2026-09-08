@@ -1,10 +1,10 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { waitUntilAbort } from "openclaw/plugin-sdk/channel-outbound";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { channelReadyPatch } from "openclaw/plugin-sdk/gateway-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import { computeBackoff, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import { waitUntilAbort } from "carapace/plugin-sdk/channel-outbound";
+import { attachChannelToResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { channelReadyPatch } from "carapace/plugin-sdk/gateway-runtime";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import { computeBackoff, sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import type { ChannelGatewayContext } from "../runtime-api.js";
 import { sendBuzzTextOneShot, startBuzzBus, type BuzzBus } from "./buzz-bus.js";
 import { handleBuzzInbound } from "./inbound.js";
@@ -33,7 +33,7 @@ export function getActiveBuzzBus(accountId: string): BuzzBus | undefined {
 }
 
 function resolveBuzzProfileName(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: ResolvedBuzzAccount;
   channelIds: string[];
 }): string {
@@ -54,12 +54,12 @@ function resolveBuzzProfileName(params: {
     ),
   );
   if (agentIds.size !== 1) {
-    return "OpenClaw";
+    return "Carapace";
   }
   const agentId = agentIds.values().next().value;
   return agentId
-    ? runtime.agent.resolveAgentIdentity(params.cfg, agentId)?.name?.trim() || "OpenClaw"
-    : "OpenClaw";
+    ? runtime.agent.resolveAgentIdentity(params.cfg, agentId)?.name?.trim() || "Carapace"
+    : "Carapace";
 }
 
 export async function startBuzzGatewayAccount(ctx: ChannelGatewayContext<ResolvedBuzzAccount>) {
@@ -240,7 +240,7 @@ export const buzzOutboundAdapter = {
     threadId,
     replyToId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     to: string;
     text: string;
     accountId?: string | null;
@@ -284,7 +284,7 @@ export const buzzOutboundAdapter = {
 };
 
 export async function sendBuzzTyping(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   accountId?: string | null;
   threadId?: string | number | null;

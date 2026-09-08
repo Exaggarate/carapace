@@ -1,6 +1,6 @@
-# Changelog — @openclaw/gateway-protocol
+# Changelog — @carapace/gateway-protocol
 
-Wire-protocol and schema contracts for the OpenClaw Gateway (WebSocket JSON-RPC-style
+Wire-protocol and schema contracts for the Carapace Gateway (WebSocket JSON-RPC-style
 frames, handshake, and method/event payload schemas). Protocol version is negotiated
 per connection via `minProtocol`/`maxProtocol`. This log covers the wire protocol
 version and schema surface, including removals and semantic changes. Dates are
@@ -87,7 +87,7 @@ the old tree.
 - Add browser realtime Talk and transports — origin of the talk/voice families.
 - Add Control UI PWA web push support (#44590).
 - Add plugins and artifacts schema modules.
-- Add OpenClaw SDK package and authenticated iOS background presence beacon (#73330).
+- Add Carapace SDK package and authenticated iOS background presence beacon (#73330).
 
 ### 2026-05
 
@@ -142,7 +142,7 @@ Enhancement-only month (no new schema modules):
 - Add cron event triggers via polled condition-watcher scripts (#101195) and native
   mobile Automations parity (#106355).
 - Add system-agent conversational onboarding (#99935); rename `crestodian.*` methods to
-  `openclaw.chat` / `openclaw.setup.*` (2026-07-14, `a6a0716`).
+  `carapace.chat` / `carapace.setup.*` (2026-07-14, `a6a0716`).
 - Add typed structured questions / `ask_user` with live option cards (#109922, #110242)
   and the questions schema module.
 - Add ui-command / screen-tool Control UI layout control and capability-gated
@@ -154,7 +154,7 @@ Enhancement-only month (no new schema modules):
 - Add canonical session lineage and typed `SessionRow`: creation provenance, fork ancestry, generation links, and catalog `createdBy` renamed to `createdActor`; remove writable spawn-lineage fields from `sessions.patch` (#111861).
 - Add durable `users.*` profiles with email aliases, display names, and avatars (#111224).
 - Add `session.discussion.info` / `session.discussion.open` with discussion state and URLs (#111337).
-- Add paginated `openclaw.changes.list` with typed change sources and summaries (#111286).
+- Add paginated `carapace.changes.list` with typed change sources and summaries (#111286).
 - Add durable client voice sessions: `voiceSessionId`, `voice-transcript` capability, `talk.client.transcript`, and `talk.client.close` (#111216).
 - Add `session.suggestions.*`, suggestion resolution events, and `session.typing` indicators (#113173).
 - Add machine-readable `FORBIDDEN` / `MISSING_SCOPE` errors with `missingScope` and `requiredScopes` (#110925, #111013).
@@ -162,7 +162,7 @@ Enhancement-only month (no new schema modules):
 - Add `channels.pairing.list` / `approve` / `dismiss` for pending DM sender access requests (#112401).
 - Add custom session `icon` values (emoji, named icon, or SVG; removed in August by #121263) (#110682).
 - Add semantic `agent` / `system` roster kinds negotiated through the `agent-kind` client capability (#111920).
-- Rename structured-question item `id` to `questionId`, flatten keyed answer arrays, and cap input headers at 12 characters; rename catalog `openClawSessionKey` to `sessionKey`, make cursor maps optional, and type the health snapshot (#111041).
+- Rename structured-question item `id` to `questionId`, flatten keyed answer arrays, and cap input headers at 12 characters; rename catalog `carapaceSessionKey` to `sessionKey`, make cursor maps optional, and type the health snapshot (#111041).
 - Add release-vintage metadata to core methods and selected schemas; consolidate worker schema/type exports without changing their payload shape (#111041).
 
 ### 2026-08
@@ -187,7 +187,7 @@ Enhancement-only month (no new schema modules):
 - Add node `workerRuns` admission metadata (#122966), then deprecate that envelope in favor of runner inventory while retaining its accepted v1 shape (#124356); add bundle-prewarm negotiation (#124427).
 - Project plugin tab `placement` in `hello-ok` so active plugins can target native Control UI routes (#125473).
 - Add the client `usage-refreshing` capability (#121799), `CONTROL_UI_BUILD_MISMATCH` reload details (#123882), identity-header-required errors (#125132, #125700), and structured `gateway-restarting` / `gateway-suspending` unavailability reasons (#130025).
-- Advertise server capabilities through `hello-ok.features.capabilities`: `gateway-restart-target-safe-v1`, `node-worker-bundle-retention-v1`, `node-worker-bundle-status-v1`, `node-worker-environment-session-v1`, `node-worker-portal-stream-v1`, `session-scoped-chat-metadata`, `session-unread-ack-contract`, `session-goal-start-v1`, `openclaw-chat-wizard-cancel`, `openclaw-setup-model-ref`, `taskSuggestions.acceptModes`, `board-widget-put-canvas-doc`, and `chat-send-routing-contract` (current `GATEWAY_SERVER_CAPS`; additions span #121173, #123920, #124590, #124640, #129386, #130105, #131370).
+- Advertise server capabilities through `hello-ok.features.capabilities`: `gateway-restart-target-safe-v1`, `node-worker-bundle-retention-v1`, `node-worker-bundle-status-v1`, `node-worker-environment-session-v1`, `node-worker-portal-stream-v1`, `session-scoped-chat-metadata`, `session-unread-ack-contract`, `session-goal-start-v1`, `carapace-chat-wizard-cancel`, `carapace-setup-model-ref`, `taskSuggestions.acceptModes`, `board-widget-put-canvas-doc`, and `chat-send-routing-contract` (current `GATEWAY_SERVER_CAPS`; additions span #121173, #123920, #124590, #124640, #129386, #130105, #131370).
 - Replace advertised worker `worker-launch-v2` with execution-context negotiation (#120534); advance `worker-execution-context-v1` to `worker-execution-context-v2` for permission context (#125326). These are worker-dialect tokens, not changes to `PROTOCOL_VERSION`.
 
 #### Method and event families
@@ -208,7 +208,7 @@ Enhancement-only month (no new schema modules):
 - Add `push.web.preferences.get` / `set`, notification category/detail level, quiet hours, and approval-notification preferences (#129348).
 - Add `hooks.status` (#118288), `audit.run.inspect` with execution identity/receipt/display contracts (#117034, #120534, #126007, #126082), and command-lane `diagnostics.lanes` (#125591).
 - Add `tasks.retry` / `dismiss` with `TasksRecoveryParams` / `Result` and delivery outcomes (`d9393bd3cbe`, `1f78c39bd82`, `6ca16f7f3d2`, `d0439b9ce0f`); add task-suggestion acceptance `mode` / `cloudProfileId` and reject whitespace-only title/prompt/TLDR values (#121173, #120940).
-- Extend worker RPCs with `worker.sessions.spawn` / `send`, `worker.github.publish`, and `worker.portal`, negotiated by `worker-session-tools-v1`, `worker-github-publication-v1`, and `worker-portal-v1` (#121846, #126306, #130105); add public `/__openclaw__/worker` ingress and `admission-rejected` close reason (#122578).
+- Extend worker RPCs with `worker.sessions.spawn` / `send`, `worker.github.publish`, and `worker.portal`, negotiated by `worker-session-tools-v1`, `worker-github-publication-v1`, and `worker-portal-v1` (#121846, #126306, #130105); add public `/__carapace__/worker` ingress and `admission-rejected` close reason (#122578).
 - Add scheduled-update `update.hold`, `UpdateScheduleState`, update status/availability projections, checkout-lag `refreshCheckout`, and exact update/restart targets (#120506, #120769, #118518, #124891, #128868); extend cooperative suspension with terminal policy and renewable `draining` results (#121601, #130003).
 - Add `sessions.catalog.startTerminal` plans (#121020), `controlUi.sessionPreview` (#125014), and short-reference/candidate results on existing `sessions.resolve` (#120512, #128778).
 
@@ -238,6 +238,6 @@ Enhancement-only month (no new schema modules):
 
 - Removals and semantic breaks have shipped in v4 builds without a wire-version bump, including the July question/catalog reshaping and August RPC/field removals above. The negotiated version remains `4`, with minimum client/node/probe versions `4` / `3` / `3`; it does not identify a fixed schema vintage. Monthly history records authoring, not a guarantee that every intermediate shape reached a stable package release.
 - Discover current methods, events, and capabilities through `hello-ok.features`; consult the matching release's schemas for payload contracts. The Deferred section records shape changes still waiting for an owner-approved version bump, not changes already made under v4.
-- Core method `since` values are release-train metadata (`<=2026.7` predates tracking), not exact authoring dates. Use the method table for retained methods, generated Kotlin catalog history for method/event changes, and schema/generated Swift diffs for field changes; the sparse `x-openclaw-since` annotations are not a complete schema history.
+- Core method `since` values are release-train metadata (`<=2026.7` predates tracking), not exact authoring dates. Use the method table for retained methods, generated Kotlin catalog history for method/event changes, and schema/generated Swift diffs for field changes; the sparse `x-carapace-since` annotations are not a complete schema history.
 - `schema/types.ts` was removed 2026-07-11 (#103679); it re-exported compile-time type
   aliases only and has no wire impact.

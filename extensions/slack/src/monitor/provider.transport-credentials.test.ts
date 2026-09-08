@@ -2,13 +2,13 @@ import { createHmac } from "node:crypto";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import { handleSlackHttpRequest } from "../http/index.js";
@@ -77,7 +77,7 @@ async function startSlackLoopback() {
 describe("Slack transport credential activation", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it.each(["socket", "relay", "http"] as const)(
@@ -109,7 +109,7 @@ describe("Slack transport credential activation", () => {
                 },
               },
             },
-          } satisfies OpenClawConfig;
+          } satisfies CarapaceConfig;
           const connected = createDeferred<void>();
           const controller = new AbortController();
           const run = monitorSlackProvider({

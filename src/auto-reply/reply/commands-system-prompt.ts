@@ -1,6 +1,6 @@
 // Implements system prompt inspection commands for agent runtime sessions.
 import { isAcpRuntimeSpawnAvailable } from "../../acp/runtime/availability.js";
-import { createOpenClawCodingTools } from "../../agents/agent-tools.js";
+import { createCarapaceCodingTools } from "../../agents/agent-tools.js";
 import { makeBootstrapWarn, resolveBootstrapContextForRun } from "../../agents/bootstrap-files.js";
 import type { EmbeddedContextFile } from "../../agents/embedded-agent-helpers.js";
 import { resolveEmbeddedFullAccessState } from "../../agents/embedded-agent-runner/sandbox-info.js";
@@ -211,7 +211,7 @@ export async function resolveCommandsSystemPromptBundle(
   });
   const tools = (() => {
     try {
-      return createOpenClawCodingTools({
+      return createCarapaceCodingTools({
         config: params.cfg,
         agentId: sessionAgentId,
         workspaceDir,

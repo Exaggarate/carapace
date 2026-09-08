@@ -1,13 +1,13 @@
 // Media-understanding runner resolves providers/models, local roots, auth, and
 // per-capability execution decisions for message attachments.
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import { ok } from "@openclaw/normalization-core/result";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import { ok } from "@carapace/normalization-core/result";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeNullableString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import type { ActiveMediaModel } from "../../packages/media-understanding-common/src/active-model.js";
 import { isMediaUnderstandingSkipError } from "../../packages/media-understanding-common/src/errors.js";
 import {
@@ -28,7 +28,7 @@ import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type {
   MediaUnderstandingConfig,
   MediaUnderstandingModelConfig,
@@ -101,7 +101,7 @@ const loadPreparedModelCatalogApi = createLazyRuntimeModule(async () => ({
 }));
 
 function resolveLiteralProviderApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   providerId: string,
 ): string | null {
   return normalizeNullableString(
@@ -112,7 +112,7 @@ function resolveLiteralProviderApiKey(
 async function hasProviderAuthAvailable(params: {
   capability: MediaUnderstandingCapability;
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
 }): Promise<boolean> {
@@ -132,7 +132,7 @@ async function hasProviderAuthAvailable(params: {
 }
 
 function resolveConfiguredKeyProviderOrder(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerRegistry: ProviderRegistry;
   capability: MediaUnderstandingCapability;
   fallbackProviders: readonly string[];
@@ -150,7 +150,7 @@ function resolveConfiguredKeyProviderOrder(params: {
 }
 
 function resolveConfiguredImageModelId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
 }): string | undefined {
   if (isMinimaxVlmProvider(params.providerId)) {
@@ -162,7 +162,7 @@ function resolveConfiguredImageModelId(params: {
 }
 
 function resolveConfiguredImageModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
 }): { id?: string; input?: string[] } | undefined {
   const providerCfg = findNormalizedProviderValue(
@@ -200,7 +200,7 @@ function resolveCatalogImageModelId(params: {
 }
 
 async function explicitImageModelVisionStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   providerId: string;
   model: string;
@@ -235,7 +235,7 @@ async function explicitImageModelVisionStatus(params: {
 }
 
 async function resolveAutoImageModelId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   providerId: string;
   providerRegistry: ProviderRegistry;
@@ -298,7 +298,7 @@ async function resolveAutoImageModelId(params: {
 
 export function buildProviderRegistry(
   overrides?: Record<string, MediaUnderstandingProvider>,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): ProviderRegistry {
   return buildMediaUnderstandingRegistry(overrides, cfg);
 }
@@ -309,12 +309,12 @@ function clearMediaUnderstandingBinaryCacheForTests(): void {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.mediaUnderstandingRunnerTestApi")
+    Symbol.for("carapace.mediaUnderstandingRunnerTestApi")
   ] = { clearMediaUnderstandingBinaryCacheForTests };
 }
 
 async function resolveKeyEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -354,7 +354,7 @@ async function resolveKeyEntry(params: {
 }
 
 function resolveImageModelFromAgentDefaults(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
 }): MediaUnderstandingModelConfig[] {
   const refs: string[] = [];
@@ -408,7 +408,7 @@ function resolveImageModelFromAgentDefaults(params: {
 }
 
 function hasExplicitImageUnderstandingConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerRegistry: ProviderRegistry;
 }): boolean {
   return (params.cfg.tools?.media?.models ?? []).some((entry) =>
@@ -430,7 +430,7 @@ function isMinimaxNativeVisionModel(params: { provider: string; model?: string }
 }
 
 async function activeModelSupportsNativeVision(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   activeModel?: ActiveMediaModel;
   agentDir?: string;
@@ -489,7 +489,7 @@ async function* resolveAutoAudioEntries(
 }
 
 async function resolveAutoEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -520,7 +520,7 @@ async function resolveAutoEntries(params: {
 }
 
 export async function resolveAutoImageModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -547,7 +547,7 @@ export async function resolveAutoImageModel(params: {
 }
 
 async function resolveActiveModelEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -568,7 +568,7 @@ async function resolveActiveModelEntry(params: {
 
 async function resolveAutoProviderModelEntry(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     agentDir?: string;
     workspaceDir?: string;
@@ -634,7 +634,7 @@ async function resolveAutoProviderModelEntry(
 
 async function runAttachmentEntries(params: {
   capability: MediaUnderstandingCapability;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   attachment: MediaAttachment;
   agentId?: string;
@@ -771,7 +771,7 @@ function createAttachmentDispositions(
 
 export async function runCapability(params: {
   capability: MediaUnderstandingCapability;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   attachments: MediaAttachmentCache;
   media: MediaAttachment[];

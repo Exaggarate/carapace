@@ -1,24 +1,24 @@
-// Openrouter plugin entrypoint registers its OpenClaw integration.
-import { resolveAgentConfig } from "openclaw/plugin-sdk/agent-scope-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+// Openrouter plugin entrypoint registers its Carapace integration.
+import { resolveAgentConfig } from "carapace/plugin-sdk/agent-scope-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   ProviderReplayPolicy,
   ProviderReplayPolicyContext,
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+} from "carapace/plugin-sdk/plugin-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import {
   buildProviderReplayFamilyHooks,
   DEFAULT_CONTEXT_TOKENS,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-model-shared";
 import {
   getOpenRouterModelCapabilities,
   loadOpenRouterModelCapabilities,
-} from "openclaw/plugin-sdk/provider-stream-family";
-import { asOptionalRecord as readRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/provider-stream-family";
+import { asOptionalRecord as readRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { buildOpenRouterImageGenerationProvider } from "./image-generation-provider.js";
 import { openrouterMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import {
@@ -29,7 +29,7 @@ import {
 import { buildOpenRouterMusicGenerationProvider } from "./music-generation-provider.js";
 import { createOpenRouterOAuthAuthMethod } from "./oauth.js";
 import { applyOpenrouterConfig, OPENROUTER_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   buildOpenrouterLiveProvider,
   buildOpenrouterProvider,
@@ -54,7 +54,7 @@ const OPENROUTER_CACHE_TTL_MODEL_FAMILY = /^(?:anthropic|deepseek|moonshot(?:ai)
 const MAX_PROMPT_MODEL_ID_DISPLAY_CHARS = 256;
 
 type OpenRouterFusionPromptContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   modelId: string;
 };

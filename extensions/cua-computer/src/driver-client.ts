@@ -29,7 +29,7 @@ export const EscalationReason = {
 export type EscalationReason = (typeof EscalationReason)[keyof typeof EscalationReason];
 
 // These numeric values are part of the pinned SDK contract. Keeping
-// them local avoids loading the native library while OpenClaw is only
+// them local avoids loading the native library while Carapace is only
 // registering the bundled plugin.
 export const ClickButton = {
   Left: 0 as DriverClickButton,
@@ -89,7 +89,7 @@ class DirectCuaDriverSession implements CuaDriverSession {
   readonly generation = randomUUID();
   private readonly runtime: CuaDriverLike;
   private readonly session: CuaDriverSessionLike;
-  private readonly publicSession = `openclaw-${randomUUID()}`;
+  private readonly publicSession = `carapace-${randomUUID()}`;
   private readonly desktopTarget: import("@trycua/cua-driver").ActionTarget;
   private startPromise: Promise<void> | undefined;
   private started = false;
@@ -97,7 +97,7 @@ class DirectCuaDriverSession implements CuaDriverSession {
 
   constructor(private readonly sdk: CuaDriverSdk) {
     const unrestricted = sdk.SessionPermissionMode.Unrestricted;
-    // This is an OpenClaw-owned ceiling, not plugin configuration or tool input.
+    // This is an Carapace-owned ceiling, not plugin configuration or tool input.
     // The model cannot select a session or widen this authorization after start.
     const authorization = {
       allowedModes: [unrestricted],

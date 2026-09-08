@@ -36,11 +36,11 @@ describe("project GitHub search", () => {
       json({
         total_count: 1,
         incomplete_results: false,
-        items: [repository("openclaw/openclaw", "2026-08-10T00:00:00Z")],
+        items: [repository("carapace/carapace", "2026-08-10T00:00:00Z")],
       }),
     );
 
-    const result = await searchRemoteProjects("anonymous-openclaw", {
+    const result = await searchRemoteProjects("anonymous-carapace", {
       env: {},
       fetchImpl,
       now: 100,
@@ -48,7 +48,7 @@ describe("project GitHub search", () => {
 
     expect(result).toMatchObject({
       credential: "missing",
-      projects: [{ fullName: "openclaw/openclaw" }],
+      projects: [{ fullName: "carapace/carapace" }],
     });
     expect(fetchImpl).toHaveBeenCalledOnce();
     expect(fetchImpl.mock.calls[0]?.[0]).toContain("/search/repositories?");
@@ -97,7 +97,7 @@ describe("project GitHub search", () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(
       json({
         items: [
-          repository("openclaw/best-match", "2020-01-01T00:00:00Z"),
+          repository("carapace/best-match", "2020-01-01T00:00:00Z"),
           repository("someone/recently-pushed-fork", "2026-08-25T00:00:00Z"),
         ],
       }),
@@ -106,7 +106,7 @@ describe("project GitHub search", () => {
     const result = await searchRemoteProjects("best-match", { env: {}, fetchImpl, now: 300 });
 
     expect(result.projects.map((project) => project.fullName)).toEqual([
-      "openclaw/best-match",
+      "carapace/best-match",
       "someone/recently-pushed-fork",
     ]);
     const searchUrl = requestUrl(fetchImpl.mock.calls[0]?.[0]);
@@ -115,29 +115,29 @@ describe("project GitHub search", () => {
 
   it("resolves exact owner/name queries directly and ranks the repository first", async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockImplementation(async (input) => {
-      if (requestUrl(input).includes("/repos/openclaw/openclaw")) {
-        return json(repository("openclaw/openclaw", "2026-08-20T00:00:00Z"));
+      if (requestUrl(input).includes("/repos/carapace/carapace")) {
+        return json(repository("carapace/carapace", "2026-08-20T00:00:00Z"));
       }
       return json({
         items: [
-          repository("someone/openclaw-tutorial", "2026-08-25T00:00:00Z"),
-          repository("openclaw/openclaw", "2026-08-20T00:00:00Z"),
+          repository("someone/carapace-tutorial", "2026-08-25T00:00:00Z"),
+          repository("carapace/carapace", "2026-08-20T00:00:00Z"),
         ],
       });
     });
 
-    const result = await searchRemoteProjects("openclaw/openclaw", {
+    const result = await searchRemoteProjects("carapace/carapace", {
       env: {},
       fetchImpl,
       now: 400,
     });
 
     expect(result.projects.map((project) => project.fullName)).toEqual([
-      "openclaw/openclaw",
-      "someone/openclaw-tutorial",
+      "carapace/carapace",
+      "someone/carapace-tutorial",
     ]);
     expect(fetchImpl.mock.calls.map((call) => requestUrl(call[0]))).toEqual([
-      expect.stringContaining("/repos/openclaw/openclaw"),
+      expect.stringContaining("/repos/carapace/carapace"),
       expect.stringContaining("/search/repositories?"),
     ]);
   });

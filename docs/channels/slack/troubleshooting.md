@@ -36,9 +36,9 @@ Symptom-first checks for a Slack account that is not behaving.
     Useful commands:
 
 ```bash
-openclaw channels status --probe
-openclaw logs --follow
-openclaw doctor
+carapace channels status --probe
+carapace logs --follow
+carapace doctor
 ```
 
     When preparation rejects an inbound event, the info-level log records
@@ -60,7 +60,7 @@ openclaw doctor
       recoverable human sender in message metadata
 
 ```bash
-openclaw pairing list slack
+carapace pairing list slack
 ```
 
   </Accordion>
@@ -71,9 +71,9 @@ openclaw pairing list slack
     Check, in order:
 
     - The manifest uses `features.agent_view` with `assistant:write` and subscribes to `app_context_changed`. Apps still on `features.assistant_view` get Assistant View threads instead, and Slack cannot move an app back once it switches to Agent View.
-    - OpenClaw has seen an Agent View signal since the app was installed: open the app's **Messages** tab once, or send a DM from the Agent View composer. In verbose logs, `slack suggested prompts update failed for channel D...: internal_error` on a Messages-tab open is expected for an Agent View app and counts as evidence.
+    - Carapace has seen an Agent View signal since the app was installed: open the app's **Messages** tab once, or send a DM from the Agent View composer. In verbose logs, `slack suggested prompts update failed for channel D...: internal_error` on a Messages-tab open is expected for an Agent View app and counts as evidence.
     - In HTTP mode, the Gateway has received at least one signed event since it started; `slack app id <id> learned from signed event` in the logs confirms the durable marker can be read. Socket Mode reads the app ID from the app token at startup, so no event is needed.
-    - `Slack Agent View state failed to open`, `persist`, or `load` warnings mean the durable marker could not be stored or read. A signal already detected in the running process still applies. After a restart, Agent View resumes when OpenClaw successfully reads a stored marker or detects a new signal.
+    - `Slack Agent View state failed to open`, `persist`, or `load` warnings mean the durable marker could not be stored or read. A signal already detected in the running process still applies. After a restart, Agent View resumes when Carapace successfully reads a stored marker or detects a new signal.
 
     See [Agent View DMs](/channels/slack/threads-and-sessions#agent-view-dms).
 
@@ -84,7 +84,7 @@ openclaw pairing list slack
     The App-Level Token needs `connections:write`, and the Bot User OAuth Token
     bot token must belong to the same Slack app/workspace as the app token.
 
-    If `openclaw channels status --probe --json` shows `botTokenStatus` or
+    If `carapace channels status --probe --json` shows `botTokenStatus` or
     `appTokenStatus: "configured_unavailable"`, the Slack account is
     configured but the current runtime could not resolve the SecretRef-backed
     value.

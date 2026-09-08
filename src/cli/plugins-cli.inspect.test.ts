@@ -1,6 +1,6 @@
 import { stripVTControlCharacters } from "node:util";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { recordInstalledPluginIndexInstallOwner } from "../plugins/installed-plugin-index-install-owner.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
@@ -437,23 +437,23 @@ describe("plugins cli inspect", () => {
     },
   );
 
-  it.each(["openclaw-mem0", "openclaw-mem0/core"])(
+  it.each(["carapace-mem0", "carapace-mem0/core"])(
     "keeps %s inspection static and distinguishes disabled reasons from errors",
     async (pluginId) => {
       setInspectInstallRecords(
         {
-          "openclaw-mem0": {
+          "carapace-mem0": {
             source: "clawhub",
-            spec: "clawhub:openclaw-mem0",
-            installPath: "/plugins/openclaw-mem0",
+            spec: "clawhub:carapace-mem0",
+            installPath: "/plugins/carapace-mem0",
             version: "2026.5.1",
-            clawhubPackage: "openclaw-mem0",
+            clawhubPackage: "carapace-mem0",
             clawhubChannel: "official",
             artifactKind: "npm-pack",
             artifactFormat: "tgz",
             npmIntegrity: "sha512-clawpack",
             npmShasum: "1".repeat(40),
-            npmTarballName: "openclaw-mem0-2026.5.1.tgz",
+            npmTarballName: "carapace-mem0-2026.5.1.tgz",
             clawpackSha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             clawpackSpecVersion: 1,
             clawpackManifestSha256:
@@ -465,9 +465,9 @@ describe("plugins cli inspect", () => {
           recordInstalledPluginIndexInstallOwner(
             {
               pluginId,
-              rootDir: "/plugins/openclaw-mem0",
+              rootDir: "/plugins/carapace-mem0",
             },
-            "openclaw-mem0",
+            "carapace-mem0",
           ),
         ],
       );
@@ -506,7 +506,7 @@ describe("plugins cli inspect", () => {
       expect(pluginsCliRuntimeLogs.join("\n")).toContain(
         "Gateway discovery:\nmem0-discovery\nmem0-discovery-secondary",
       );
-      expect(pluginsCliRuntimeLogs.join("\n")).toContain("ClawHub package: openclaw-mem0");
+      expect(pluginsCliRuntimeLogs.join("\n")).toContain("ClawHub package: carapace-mem0");
       expect(pluginsCliRuntimeLogs.join("\n")).toContain("Artifact kind: npm-pack");
       expect(pluginsCliRuntimeLogs.join("\n")).toContain("Npm integrity: sha512-clawpack");
       expect(pluginsCliRuntimeLogs.join("\n")).toContain(
@@ -567,14 +567,14 @@ describe("plugins cli inspect", () => {
   it("runtime-inspects exact plugin ids and display names without repairing deps", async () => {
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [
-        createPluginRecord({ id: "unrelated-plugin", name: "openclaw-mem0" }),
-        createPluginRecord({ id: "openclaw-mem0", name: "Mem0" }),
+        createPluginRecord({ id: "unrelated-plugin", name: "carapace-mem0" }),
+        createPluginRecord({ id: "carapace-mem0", name: "Mem0" }),
       ],
       diagnostics: [],
     });
     buildPluginInspectReportMock.mockReturnValue(
       createInspectReport({
-        plugin: createPluginRecord({ id: "openclaw-mem0", name: "Mem0" }),
+        plugin: createPluginRecord({ id: "carapace-mem0", name: "Mem0" }),
         shape: "hook-only",
         capabilityMode: "plain",
         capabilityCount: 1,
@@ -582,12 +582,12 @@ describe("plugins cli inspect", () => {
       }),
     );
 
-    for (const selector of ["openclaw-mem0", "Mem0"]) {
+    for (const selector of ["carapace-mem0", "Mem0"]) {
       await runPluginsCommand(["plugins", "inspect", selector, "--runtime"]);
       expect(withPluginDiagnosticsReportForInspectionMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           config: {},
-          onlyPluginIds: ["openclaw-mem0"],
+          onlyPluginIds: ["carapace-mem0"],
           runtimeInspection: true,
         }),
         expect.any(Function),
@@ -622,7 +622,7 @@ describe("plugins cli inspect", () => {
       entries: { main: {}, venus: {} },
     },
   ])("explains policy-hidden Skill Workshop for $label", async ({ agentIds, entries }) => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { profile: "messaging" },
       ...(entries ? { agents: { ownership: "explicit" as const, entries } } : {}),
     };
@@ -646,7 +646,7 @@ describe("plugins cli inspect", () => {
     if (entries) {
       expect(workshopMocks.loadMetadata).toHaveBeenCalledWith({ config, workspaceDir: undefined });
     }
-    expect(output).toContain("Skill Workshop is built into OpenClaw, not a plugin");
+    expect(output).toContain("Skill Workshop is built into Carapace, not a plugin");
     expect(output).toContain('tools.profile: "messaging" does not include "skill_workshop".');
     expect(output).toContain('Add tools.alsoAllow: ["skill_workshop"].');
     for (const agentId of agentIds) {

@@ -9,7 +9,7 @@ import { __setFsSafeTestHooksForTest, getFsSafeTestHooks } from "@openclaw/fs-sa
 import JSZip from "jszip";
 import * as tar from "tar";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolveSkillToolsRootDir } from "../runtime/tools-dir.js";
 import { createInstallDownloadTestState } from "../test-support/install-download-test-utils.js";
 import {
@@ -51,7 +51,7 @@ function buildEntry(name: string): SkillEntry {
       description: `${name} test skill`,
       filePath,
       baseDir: skillDir,
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
     }),
     frontmatter: {},
   };
@@ -211,7 +211,7 @@ function mockTarExtractionFlow(params: {
 }
 
 let workspaceDir = "";
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 beforeAll(async () => {
   testState = await createInstallDownloadTestState();
   workspaceDir = testState.workspaceDir;
@@ -280,7 +280,7 @@ describe("installDownloadSpec extraction safety", () => {
         await expect(fileExists(path.join(toolsRoot, "runtime", "oversized.bin"))).resolves.toBe(
           false,
         );
-        await expect(fileExists(path.join(toolsRoot, ".openclaw-download-staging"))).resolves.toBe(
+        await expect(fileExists(path.join(toolsRoot, ".carapace-download-staging"))).resolves.toBe(
           false,
         );
       },
@@ -324,7 +324,7 @@ describe("installDownloadSpec extraction safety", () => {
       body,
     );
     expect(release).toHaveBeenCalledOnce();
-    await expect(fileExists(path.join(toolsRoot, ".openclaw-download-staging"))).resolves.toBe(
+    await expect(fileExists(path.join(toolsRoot, ".carapace-download-staging"))).resolves.toBe(
       false,
     );
   });
@@ -398,7 +398,7 @@ describe("installDownloadSpec extraction safety", () => {
         await expect(fileExists(path.join(toolsRoot, "runtime", "oversized.bin"))).resolves.toBe(
           false,
         );
-        await expect(fileExists(path.join(toolsRoot, ".openclaw-download-staging"))).resolves.toBe(
+        await expect(fileExists(path.join(toolsRoot, ".carapace-download-staging"))).resolves.toBe(
           false,
         );
       },
@@ -437,7 +437,7 @@ describe("installDownloadSpec extraction safety", () => {
           Buffer.concat(chunks),
         );
         expect(release).toHaveBeenCalledOnce();
-        await expect(fileExists(path.join(toolsRoot, ".openclaw-download-staging"))).resolves.toBe(
+        await expect(fileExists(path.join(toolsRoot, ".carapace-download-staging"))).resolves.toBe(
           false,
         );
       },

@@ -1,9 +1,9 @@
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withTempHome } from "../plugin-sdk/test-env.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
 import { createPluginRecord } from "./loader-records.js";
 import { createPluginRegistry } from "./registry.js";
 import { createPluginRuntime } from "./runtime/index.js";
@@ -33,7 +33,7 @@ describe("plugin registry SQLite session ownership", () => {
     await withTempHome(async () => {
       const config = {
         agents: { list: [{ id: "researcher", default: true }] },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const subagent = {
         complete: vi.fn(async () => ({ text: "completed" })),
         run: vi.fn(async () => ({ runId: "workboard-run" })),
@@ -112,7 +112,7 @@ describe("plugin registry SQLite session ownership", () => {
         await expect(pending).rejects.toThrow('owned by plugin "harness-owner"');
         expect(subagent.run).toHaveBeenCalledOnce();
       } finally {
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
     });
   });
@@ -161,9 +161,9 @@ describe("plugin registry SQLite session ownership", () => {
           enabled: true,
           configSchema: false,
         });
-        const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as OpenClawConfig });
+        const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as CarapaceConfig });
         const callerApi = pluginRegistry.createApi(callerRecord, {
-          config: {} as OpenClawConfig,
+          config: {} as CarapaceConfig,
         });
         ownerApi.registerAgentHarness({
           id: "test-harness",
@@ -196,7 +196,7 @@ describe("plugin registry SQLite session ownership", () => {
         ).rejects.toThrow('owned by plugin "harness-owner"');
         expect(runEmbeddedAgent).toHaveBeenCalledOnce();
       } finally {
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
     });
   });

@@ -13,7 +13,7 @@ import { normalizeContainerPathCore } from "./path-utils.js";
 import type { SandboxWorkspaceAccess } from "./types.js";
 
 export const SANDBOX_MOUNT_FORMAT_VERSION = 4;
-const MATERIALIZED_SANDBOX_SKILLS_WORKSPACE_PARTS = [".openclaw", "sandbox-skills"] as const;
+const MATERIALIZED_SANDBOX_SKILLS_WORKSPACE_PARTS = [".carapace", "sandbox-skills"] as const;
 
 /** Managed skill directory projected read-only into the sandbox workspace. */
 export type ReadOnlyWorkspaceSkillMount = {

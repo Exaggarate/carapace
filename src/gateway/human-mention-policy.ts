@@ -1,5 +1,5 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   ErrorCodes,
   MAX_HUMAN_MENTIONS,
@@ -11,7 +11,7 @@ import {
   type UsersMentionableResult,
 } from "../../packages/gateway-protocol/src/index.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isIncognitoSessionKey } from "../routing/session-key.js";
 import { roleScopesAllow } from "../shared/operator-scope-compat.js";
 import { readUserProfileVersion } from "../state/user-profile-events.js";
@@ -65,7 +65,7 @@ export function humanMentionDisplayLabel(label: string | undefined, profileId: s
 }
 
 export function createHumanMentionPolicy(params: {
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => CarapaceConfig;
   getClients: () => Iterable<GatewayClient>;
 }) {
   let profileVersion = -1;
@@ -97,7 +97,7 @@ export function createHumanMentionPolicy(params: {
 
   function identify(
     client: GatewayClient | null,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ): Result<MentionReader, ErrorShape> {
     if (
       !client?.connect ||
@@ -147,7 +147,7 @@ export function createHumanMentionPolicy(params: {
   function recipientProfile(
     profileId: string,
     target: MentionTarget,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ): MentionProfile | undefined {
     const profile = readProfile(profileId);
     // Administrator read access does not make incognito sessions eligible for mentions.
@@ -172,7 +172,7 @@ export function createHumanMentionPolicy(params: {
   function resolveContext(
     client: GatewayClient | null,
     input: UsersMentionableParams,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ): Result<{ target: MentionTarget; profile: MentionProfile }, ErrorShape> {
     const identified = identify(client, cfg);
     if (!identified.ok) {

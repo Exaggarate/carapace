@@ -3,10 +3,10 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { clearAuthProfileMigrationDiagnostics } from "./legacy-source-diagnostic.js";
 import { loadPersistedAuthProfileStore } from "./persisted.js";
@@ -38,14 +38,14 @@ function profile(profileId: string, key: string) {
 }
 
 async function withAgentDir(run: (agentDir: string) => Promise<void>): Promise<void> {
-  const root = tempDirs.make("openclaw-auth-batch-");
+  const root = tempDirs.make("carapace-auth-batch-");
   const agentDir = path.join(root, "agents", "work", "agent");
   fs.mkdirSync(agentDir, { recursive: true });
   try {
-    await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => await run(agentDir));
+    await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => await run(agentDir));
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }
 
@@ -268,7 +268,7 @@ describe("auth profile batch persistence", () => {
         },
         agentDir,
       );
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "work",
         path: resolveAuthProfileDatabasePath(agentDir),
       });
@@ -321,7 +321,7 @@ describe("auth profile batch persistence", () => {
       }).catch((error: unknown) => error);
 
       expect(String(failure)).toContain("requires legacy credential migration");
-      expect(String(failure)).toContain("openclaw doctor --fix");
+      expect(String(failure)).toContain("carapace doctor --fix");
       expect(String(failure)).not.toContain("lock may be busy");
     });
   });
@@ -333,7 +333,7 @@ describe("auth profile batch persistence", () => {
         profileId: "openai:existing",
         credential: apiKey("sk-existing"),
       });
-      openOpenClawAgentDatabase({
+      openCarapaceAgentDatabase({
         agentId: "work",
         path: resolveAuthProfileDatabasePath(agentDir),
       }).db.exec("ALTER TABLE auth_profile_store DROP COLUMN updated_at");
@@ -351,7 +351,7 @@ describe("auth profile batch persistence", () => {
 
   it("leaves no partial profile batch when the SQLite state write fails", async () => {
     await withAgentDir(async (agentDir) => {
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "work",
         path: resolveAuthProfileDatabasePath(agentDir),
       });

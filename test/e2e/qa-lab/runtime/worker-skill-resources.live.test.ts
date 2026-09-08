@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import type { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
@@ -21,7 +21,7 @@ import {
 } from "./paired-node-worker-wire-fixture.js";
 
 const API_KEY = process.env.OPENAI_API_KEY?.trim();
-const LIVE = process.env.OPENCLAW_LIVE_TEST === "1" && Boolean(API_KEY);
+const LIVE = process.env.CARAPACE_LIVE_TEST === "1" && Boolean(API_KEY);
 const MODEL = "openai/gpt-5.6-luna";
 const SKILL = "cleanup-live-proof";
 const COMMAND = "codex.exec-server.stdio.v1";
@@ -74,7 +74,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
     "uses delivered skill paths and recovers failed cleanup before a no-skill turn",
     { timeout: 660_000 },
     async () => {
-      const root = await fs.realpath(tempDirs.make("openclaw-worker-skill-live-"));
+      const root = await fs.realpath(tempDirs.make("carapace-worker-skill-live-"));
       const nodeHome = path.join(root, "node-home");
       const nodeState = path.join(root, "node-state");
       const nodeTmp = path.join(root, "node-tmp");
@@ -129,7 +129,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
               forcedRuntime: "codex",
               enabledPluginIds: ["codex"],
               controlUiEnabled: false,
-              runtimeEnvPatch: { OPENAI_API_KEY: API_KEY, OPENCLAW_SKIP_CHANNELS: "1" },
+              runtimeEnvPatch: { OPENAI_API_KEY: API_KEY, CARAPACE_SKIP_CHANNELS: "1" },
               mutateConfig: (cfg) => ({
                 ...cfg,
                 skills: {
@@ -193,11 +193,11 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
               home: nodeHome,
               tempDir: nodeTmp,
               extra: {
-                OPENCLAW_HOME: nodeHome,
-                OPENCLAW_STATE_DIR: nodeState,
-                OPENCLAW_CONFIG_PATH: nodeConfigPath,
-                OPENCLAW_GATEWAY_TOKEN: gateway.token,
-                OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
+                CARAPACE_HOME: nodeHome,
+                CARAPACE_STATE_DIR: nodeState,
+                CARAPACE_CONFIG_PATH: nodeConfigPath,
+                CARAPACE_GATEWAY_TOKEN: gateway.token,
+                CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1",
               },
             });
             expect(nodeEnv.OPENAI_API_KEY).toBeUndefined();
@@ -269,7 +269,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
               const runId = await start(instruction);
               await vi.waitFor(async () => {
                 const allocations = (await fs.readdir(remote)).filter((name) =>
-                  name.startsWith("openclaw-inbound-"),
+                  name.startsWith("carapace-inbound-"),
                 );
                 expect(allocations).toHaveLength(1);
                 const copied = path.join(remote, allocations[0]!, "0");
@@ -296,7 +296,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
                   digest: createHash("sha256").update(payload).digest("hex"),
                   executable: true,
                 });
-                expect(receipt.directory).toMatch(/\/openclaw-inbound-[0-9a-f-]+\/0$/u);
+                expect(receipt.directory).toMatch(/\/carapace-inbound-[0-9a-f-]+\/0$/u);
                 expect(receipt.ancestors).toContain(nodePid);
                 expect(receipt.ancestors).not.toContain(gateway.pid);
                 await finish(receipt, runId);
@@ -317,7 +317,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
                 });
               },
             );
-            const abandoned = path.join(remote, `openclaw-inbound-${randomUUID()}`);
+            const abandoned = path.join(remote, `carapace-inbound-${randomUUID()}`);
             await skillTurn(
               "held",
               `$${SKILL} Run the held probe and report the result.`,
@@ -332,7 +332,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
                 expect(await fs.readFile(path.join(abandoned, "0/payload.txt"))).toEqual(payload);
               },
             );
-            const attachment = path.join(remote, `openclaw-inbound-${randomUUID()}`);
+            const attachment = path.join(remote, `carapace-inbound-${randomUUID()}`);
             const projectFile = path.join(remote, "project-sentinel.txt");
             await fs.mkdir(attachment);
             await fs.writeFile(path.join(attachment, "attachment.txt"), "attachment survives\n");
@@ -341,7 +341,7 @@ describe.skipIf(!LIVE || process.platform !== "linux")("live worker skill resour
               key,
               toolOverrides: { skills: { [SKILL]: false } },
             });
-            const probe = `node -e 'const fs=require("node:fs");const result={cwd:process.cwd(),directories:fs.readdirSync(".").filter(n=>n.startsWith("openclaw-inbound-"))};fs.writeFileSync("cleanup-no-skills.json",JSON.stringify(result));console.log(JSON.stringify(result))'`;
+            const probe = `node -e 'const fs=require("node:fs");const result={cwd:process.cwd(),directories:fs.readdirSync(".").filter(n=>n.startsWith("carapace-inbound-"))};fs.writeFileSync("cleanup-no-skills.json",JSON.stringify(result));console.log(JSON.stringify(result))'`;
             const recovery = await start(
               `Do not use skills. In the session workspace, execute this exact command: ${probe}. Report the actual output without changing or deleting other files.`,
             );

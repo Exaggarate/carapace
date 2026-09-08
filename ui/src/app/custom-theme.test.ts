@@ -222,7 +222,7 @@ describe("custom theme import helpers", () => {
     syncCustomThemeStyleTag(createImportedTheme());
 
     expect(appendChild).toHaveBeenCalledWith(style);
-    expect(style.id).toBe("openclaw-custom-theme");
+    expect(style.id).toBe("carapace-custom-theme");
     expect(style.textContent).toContain(':root[data-theme="custom"]');
 
     vi.stubGlobal("document", {

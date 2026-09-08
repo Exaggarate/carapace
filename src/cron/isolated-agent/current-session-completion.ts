@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { copyReplyPayloadMetadata } from "../../auto-reply/reply-payload.js";
 import {
   attachManagedOutgoingMediaToMessage,

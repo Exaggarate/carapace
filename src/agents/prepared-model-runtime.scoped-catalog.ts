@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import type { ProviderCatalogOutcome } from "../plugins/provider-catalog.types.js";
 import { withPluginRuntimeGenerationScope } from "../plugins/runtime/generation-scope.js";
@@ -8,7 +8,7 @@ import { prepareAmbientAgentCredentialsForDiscovery } from "./agent-auth-discove
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { createPreparedModelCatalogProviderNormalizer } from "./model-catalog-provider-normalizer.js";
 import type { ModelCatalogSnapshot } from "./model-catalog.types.js";
-import { ensureOpenClawModelsJson, planOpenClawModelsJsonSource } from "./models-config.js";
+import { ensureCarapaceModelsJson, planCarapaceModelsJsonSource } from "./models-config.js";
 import { prepareImplicitProviderStaticCatalog } from "./models-config.providers.implicit.js";
 import { loadPersistedPluginModelCatalogsReadOnly } from "./plugin-model-catalog.js";
 import type {
@@ -176,7 +176,7 @@ export async function prepareAgentCatalogSource(
   };
   const prepareSource = async () => {
     if (!persist) {
-      const source = await planOpenClawModelsJsonSource(input.config, input.agentDir, {
+      const source = await planCarapaceModelsJsonSource(input.config, input.agentDir, {
         ...options,
         ...(sourceOptions.authStore ? { authStore: sourceOptions.authStore } : {}),
         ...(catalogMode === "live" ? { onProviderCatalogOutcome: recordProviderOutcome } : {}),
@@ -188,7 +188,7 @@ export async function prepareAgentCatalogSource(
       };
     }
     if (!input.readOnly) {
-      await ensureOpenClawModelsJson(input.config, input.agentDir, {
+      await ensureCarapaceModelsJson(input.config, input.agentDir, {
         ...options,
         ...(catalogMode === "live" ? { onProviderCatalogOutcome: recordProviderOutcome } : {}),
       });

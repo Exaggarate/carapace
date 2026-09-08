@@ -8,7 +8,7 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { requestHeartbeat, setHeartbeatWakeHandler } from "../infra/heartbeat-wake.js";
 import { drainSystemEvents } from "../infra/system-events.js";
@@ -35,8 +35,8 @@ import {
 import {
   clearPluginRegistryLoadCache,
   loadAndActivateRootPluginRegistry,
-  loadOpenClawPluginCliRegistry,
-  loadOpenClawPlugins,
+  loadCarapacePluginCliRegistry,
+  loadCarapacePlugins,
   loadPluginRegistryHandle,
   resolveRuntimePluginRegistry,
 } from "./loader.js";
@@ -112,10 +112,10 @@ it.each(["cjs", "ts"])(
     );
     await withEnvAsync(
       {
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       async () => {
         const heartbeat = vi.fn(async () => ({ status: "skipped" as const, reason: "disabled" }));
@@ -157,7 +157,7 @@ it.each(["cjs", "ts"])(
             vi.fn<PluginRuntime["channel"]["reply"]["dispatchReplyFromConfig"]>();
           const config = { plugins: { entries: { [plugin.id]: { enabled: true } } } };
           setRuntimeConfigSnapshot(config);
-          const metadata = await loadOpenClawPluginCliRegistry({
+          const metadata = await loadCarapacePluginCliRegistry({
             config,
             pluginSdkResolution: "src",
           });
@@ -197,7 +197,7 @@ it.each(["cjs", "ts"])(
             provider: "fixture",
             config,
           });
-          expect(fs.existsSync(path.join(root, "state", "state", "openclaw.sqlite"))).toBe(false);
+          expect(fs.existsSync(path.join(root, "state", "state", "carapace.sqlite"))).toBe(false);
           expect(resolveRuntime).not.toHaveBeenCalled();
           const runtime = getPluginRegistryRuntime(registry)!;
           const configApi = runtime.config;
@@ -524,7 +524,7 @@ function requireMemoryEmbeddingProvider(providerId: string) {
 }
 
 function setLoaderMetadataSnapshot(params: { pluginIds?: readonly string[] } = {}) {
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     plugins: {
       allow: ["demo"],
       slots: { memory: "none" },
@@ -619,7 +619,7 @@ describe("resolvePluginLoadCacheContext", () => {
   });
 
   it("loads a custom profile's install records instead of reusing the process snapshot", () => {
-    const profileEnv = { ...process.env, OPENCLAW_STATE_DIR: makePluginLoaderTempDir() };
+    const profileEnv = { ...process.env, CARAPACE_STATE_DIR: makePluginLoaderTempDir() };
     const profileInstallRecords: Record<string, PluginInstallRecord> = {
       demo: {
         source: "npm",
@@ -650,7 +650,7 @@ describe("resolvePluginLoadCacheContext", () => {
 
   it("does not reuse metadata when the activation source adds plugin load paths", () => {
     const { config, env, workspaceDir } = setLoaderMetadataSnapshot();
-    const activationSourceConfig: OpenClawConfig = {
+    const activationSourceConfig: CarapaceConfig = {
       plugins: {
         ...config.plugins,
         load: { paths: ["/plugins/activation-source-only"] },
@@ -842,7 +842,7 @@ describe("clearPluginRegistryLoadCache", () => {
         };`,
       });
       writeFileSync(
-        path.join(plugin.dir, "openclaw.plugin.json"),
+        path.join(plugin.dir, "carapace.plugin.json"),
         JSON.stringify({
           id: plugin.id,
           configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -858,29 +858,29 @@ describe("clearPluginRegistryLoadCache", () => {
           },
         },
       };
-      const read = async (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+      const read = async (registry: ReturnType<typeof loadCarapacePlugins>) => {
         const tool = registry.tools[0]!.factory({ config: options.config });
         if (!tool || Array.isArray(tool)) {
           throw new Error("expected one lifetime probe tool");
         }
         return await tool.execute("probe", {});
       };
-      const original = loadOpenClawPlugins(options);
+      const original = loadCarapacePlugins(options);
       const originalKey = resolvePluginLoadCacheContext(options).cacheKey;
-      expect(loadOpenClawPlugins(options)).toBe(original);
+      expect(loadCarapacePlugins(options)).toBe(original);
       expect(await read(original)).toMatchObject({ content: [{ text: "live" }] });
 
       if (retirement === "clear") {
         await clearActivePluginRegistry();
       } else {
         const replacementOptions = { ...options, workspaceDir: makePluginLoaderTempDir() };
-        const replacement = loadOpenClawPlugins(replacementOptions);
+        const replacement = loadCarapacePlugins(replacementOptions);
         expect(replacement).not.toBe(original);
         expect(await read(replacement)).toMatchObject({ content: [{ text: "live" }] });
         await vi.waitFor(async () => {
           expect(await read(original)).toMatchObject({ content: [{ text: "closed" }] });
         });
-        expect(loadOpenClawPlugins(replacementOptions)).toBe(replacement);
+        expect(loadCarapacePlugins(replacementOptions)).toBe(replacement);
         expect(
           pluginLoaderCacheState.get(resolvePluginLoadCacheContext(replacementOptions).cacheKey),
         ).toBe(replacement);
@@ -888,10 +888,10 @@ describe("clearPluginRegistryLoadCache", () => {
 
       expect(pluginLoaderCacheState.get(originalKey) === undefined).toBe(true);
       expect(await read(original)).toMatchObject({ content: [{ text: "closed" }] });
-      const reloaded = loadOpenClawPlugins(options);
+      const reloaded = loadCarapacePlugins(options);
       expect(await read(reloaded)).toMatchObject({ content: [{ text: "live" }] });
       expect(reloaded).not.toBe(original);
-      expect(loadOpenClawPlugins(options)).toBe(reloaded);
+      expect(loadCarapacePlugins(options)).toBe(reloaded);
     },
   );
 
@@ -919,10 +919,10 @@ describe("clearPluginRegistryLoadCache", () => {
       },
       workspaceDir: "/tmp/workspace-a",
     };
-    const registry = loadOpenClawPlugins(loadOptions);
+    const registry = loadCarapacePlugins(loadOptions);
 
     clearPluginRegistryLoadCache();
 
-    expect(loadOpenClawPlugins(loadOptions)).not.toBe(registry);
+    expect(loadCarapacePlugins(loadOptions)).not.toBe(registry);
   });
 });

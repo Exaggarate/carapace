@@ -4,11 +4,11 @@ import { resolveCodexAppServerRuntimeOptions } from "./config-runtime.js";
 describe.each(["config", "env"] as const)("Codex app-server %s arguments", (source) => {
   it.each([
     {
-      raw: String.raw`app-server -c log_dir=/tmp/openclaw\logs --listen stdio://`,
+      raw: String.raw`app-server -c log_dir=/tmp/carapace\logs --listen stdio://`,
       expected: [
         "app-server",
         "-c",
-        String.raw`log_dir=/tmp/openclaw\logs`,
+        String.raw`log_dir=/tmp/carapace\logs`,
         "--listen",
         "stdio://",
       ],
@@ -22,7 +22,7 @@ describe.each(["config", "env"] as const)("Codex app-server %s arguments", (sour
       pluginConfig: {
         appServer: { mode: "yolo", ...(source === "config" ? { args: raw } : {}) },
       },
-      env: source === "env" ? { OPENCLAW_CODEX_APP_SERVER_ARGS: raw } : {},
+      env: source === "env" ? { CARAPACE_CODEX_APP_SERVER_ARGS: raw } : {},
       requirementsToml: null,
       codexConfigToml: null,
     });
@@ -40,12 +40,12 @@ it("preserves literal array values and existing whitespace normalization", () =>
           "-c",
           'model="gpt-5.6-luna"',
           "-c",
-          String.raw`log_dir=/tmp/openclaw\logs`,
+          String.raw`log_dir=/tmp/carapace\logs`,
           "",
         ],
       },
     },
-    env: { OPENCLAW_CODEX_APP_SERVER_ARGS: "ignored" },
+    env: { CARAPACE_CODEX_APP_SERVER_ARGS: "ignored" },
     requirementsToml: null,
     codexConfigToml: null,
   });
@@ -54,6 +54,6 @@ it("preserves literal array values and existing whitespace normalization", () =>
     "-c",
     'model="gpt-5.6-luna"',
     "-c",
-    String.raw`log_dir=/tmp/openclaw\logs`,
+    String.raw`log_dir=/tmp/carapace\logs`,
   ]);
 });

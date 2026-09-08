@@ -32,7 +32,7 @@ describe("diagnostic support export", () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-support-export-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-support-export-"));
     resetDiagnosticEventsForTest();
     resetDiagnosticStabilityRecorderForTest();
     uninstallDiagnosticStabilityFatalHook();
@@ -63,7 +63,7 @@ describe("diagnostic support export", () => {
     const proxyTlsPassphrase = "support-proxy-tls-passphrase";
     const credentialUrl =
       "wss://support-user:support-password@gateway.example/ws?token=short-token&ok=1";
-    const configPath = path.join(tempDir, "openclaw.json");
+    const configPath = path.join(tempDir, "carapace.json");
     fs.writeFileSync(
       configPath,
       JSON.stringify(
@@ -166,7 +166,7 @@ describe("diagnostic support export", () => {
     expect(bundle.status).toBe("written");
 
     const logTail: LogTailPayload = {
-      file: path.join(tempDir, "logs", "openclaw.log"),
+      file: path.join(tempDir, "logs", "carapace.log"),
       cursor: 200,
       size: 200,
       truncated: false,
@@ -237,7 +237,7 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
@@ -250,10 +250,10 @@ describe("diagnostic support export", () => {
         service: {
           loaded: true,
           command: {
-            programArguments: ["openclaw", "gateway", "run", "--token", fakeToken],
+            programArguments: ["carapace", "gateway", "run", "--token", fakeToken],
             environment: {
               HOME: tempDir,
-              OPENCLAW_GATEWAY_TOKEN: fakeToken,
+              CARAPACE_GATEWAY_TOKEN: fakeToken,
             },
           },
         },
@@ -296,7 +296,7 @@ describe("diagnostic support export", () => {
       "config/shape.json",
       "diagnostics.json",
       "health/gateway-health.json",
-      "logs/openclaw-sanitized.jsonl",
+      "logs/carapace-sanitized.jsonl",
       "manifest.json",
       "stability/latest.json",
       "status/gateway-status.json",
@@ -323,20 +323,20 @@ describe("diagnostic support export", () => {
     expect(combined).not.toContain(requestAuthValue);
     expect(combined).not.toContain(requestTlsPassphrase);
     expect(combined).not.toContain(proxyTlsPassphrase);
-    expect(combined).not.toContain("__OPENCLAW_REDACTED__");
+    expect(combined).not.toContain("__CARAPACE_REDACTED__");
     expect(combined).not.toContain("gateway-session-15555551212");
     expect(combined).not.toContain("supportEventSecret");
     expect(combined).not.toContain(fakeAwsKey);
     expect(combined).not.toContain(fakeJwt);
     expect(combined).toContain("payload.large");
     expect(combined).toContain("gateway.http.json");
-    expect(combined).toContain("$OPENCLAW_STATE_DIR");
+    expect(combined).toContain("$CARAPACE_STATE_DIR");
     expect(combined).toContain("<redacted-hostname>");
     expect(combined).toContain("gateway-status.json");
     expect(combined).toContain("gateway-health.json");
     expect(combined).toContain("Attach this zip to the bug report");
 
-    const sanitizedLogs = entries["logs/openclaw-sanitized.jsonl"];
+    const sanitizedLogs = entries["logs/carapace-sanitized.jsonl"];
     expect(sanitizedLogs).toContain('"subsystem":"gateway"');
     expect(sanitizedLogs).toContain('"component":"gateway/server"');
     expect(sanitizedLogs).toContain('"channel":"telegram"');
@@ -376,13 +376,13 @@ describe("diagnostic support export", () => {
       };
     };
     expect(status.data?.service?.command?.programArguments).toEqual([
-      "openclaw",
+      "carapace",
       "gateway",
       "run",
       "--token",
       "<redacted>",
     ]);
-    expect(status.data?.service?.command?.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("<redacted>");
+    expect(status.data?.service?.command?.environment?.CARAPACE_GATEWAY_TOKEN).toBe("<redacted>");
     expect(JSON.stringify(status)).toContain(
       "wss://<redacted>:<redacted>@gateway.example/ws?token=<redacted>",
     );
@@ -493,13 +493,13 @@ describe("diagnostic support export", () => {
   ])(
     "distinguishes an absent canonical agent roster from an empty one: $agents",
     async ({ agents, expected }) => {
-      const configPath = path.join(tempDir, "openclaw.json");
+      const configPath = path.join(tempDir, "carapace.json");
       fs.writeFileSync(configPath, JSON.stringify({ agents }));
       const result = await writeDiagnosticSupportExport({
-        env: { HOME: tempDir, OPENCLAW_CONFIG_PATH: configPath },
+        env: { HOME: tempDir, CARAPACE_CONFIG_PATH: configPath },
         stateDir: tempDir,
         readLogTail: async () => ({
-          file: path.join(tempDir, "openclaw.log"),
+          file: path.join(tempDir, "carapace.log"),
           cursor: 0,
           size: 0,
           truncated: false,
@@ -553,14 +553,14 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
       stabilityBundle: bundlePath,
       now: new Date("2026-04-22T12:00:01.000Z"),
       readLogTail: async () => ({
-        file: path.join(tempDir, "logs", "openclaw.log"),
+        file: path.join(tempDir, "logs", "carapace.log"),
         cursor: 0,
         size: 0,
         truncated: false,
@@ -605,7 +605,7 @@ describe("diagnostic support export", () => {
   });
 
   it("includes mDNS config state and recent Bonjour log summary", async () => {
-    const configPath = path.join(tempDir, "openclaw.json");
+    const configPath = path.join(tempDir, "carapace.json");
     const outputPath = path.join(tempDir, "support-bonjour.zip");
     fs.writeFileSync(
       configPath,
@@ -623,15 +623,15 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BONJOUR: "1",
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BONJOUR: "1",
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
       now: new Date("2026-04-22T12:00:01.000Z"),
       readLogTail: async () => ({
-        file: path.join(tempDir, "logs", "openclaw.log"),
+        file: path.join(tempDir, "logs", "carapace.log"),
         cursor: 0,
         size: 0,
         truncated: false,
@@ -700,13 +700,13 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
       now: new Date("2026-04-22T12:00:01.000Z"),
       readLogTail: async () => ({
-        file: path.join(tempDir, "logs", "openclaw.log"),
+        file: path.join(tempDir, "logs", "carapace.log"),
         cursor: 0,
         size: 0,
         truncated: false,
@@ -741,18 +741,18 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
       now: new Date("2026-04-22T12:00:02.000Z"),
       readLogTail: async () => {
-        throw new Error(`log tail failed at ${tempDir}/openclaw.log with token ${fakeToken}`);
+        throw new Error(`log tail failed at ${tempDir}/carapace.log with token ${fakeToken}`);
       },
     });
 
     const entries = await readZipTextEntries(outputPath);
-    expect(Object.keys(entries).toSorted()).toContain("logs/openclaw-sanitized.jsonl");
+    expect(Object.keys(entries).toSorted()).toContain("logs/carapace-sanitized.jsonl");
 
     const combined = Object.values(entries).join("\n");
     expect(combined).not.toContain(fakeToken);
@@ -763,7 +763,7 @@ describe("diagnostic support export", () => {
 
   it("keeps writing when config stat fails", async () => {
     const fakeToken = "sk-test-config-stat-secret-token-1234567890";
-    const configPath = path.join(tempDir, "openclaw.json");
+    const configPath = path.join(tempDir, "carapace.json");
     const outputPath = path.join(tempDir, "support-failed-config-stat.zip");
     fs.writeFileSync(configPath, "{}\n", "utf8");
 
@@ -780,14 +780,14 @@ describe("diagnostic support export", () => {
         env: {
           ...process.env,
           HOME: tempDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_STATE_DIR: tempDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_STATE_DIR: tempDir,
         },
         stateDir: tempDir,
         outputPath,
         now: new Date("2026-04-22T12:00:03.000Z"),
         readLogTail: async () => ({
-          file: path.join(tempDir, "logs", "openclaw.log"),
+          file: path.join(tempDir, "logs", "carapace.log"),
           cursor: 0,
           size: 0,
           truncated: false,
@@ -809,7 +809,7 @@ describe("diagnostic support export", () => {
   });
 
   it("finishes the support export when the config exceeds its read limit", async () => {
-    const configPath = path.join(tempDir, "openclaw.json");
+    const configPath = path.join(tempDir, "carapace.json");
     const outputPath = path.join(tempDir, "support-oversized-config.zip");
     fs.writeFileSync(configPath, Buffer.alloc(8 * 1024 * 1024 + 1, "{"));
 
@@ -817,14 +817,14 @@ describe("diagnostic support export", () => {
       env: {
         ...process.env,
         HOME: tempDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: tempDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: tempDir,
       },
       stateDir: tempDir,
       outputPath,
       now: new Date("2026-07-18T12:00:01.000Z"),
       readLogTail: async () => ({
-        file: path.join(tempDir, "logs", "openclaw.log"),
+        file: path.join(tempDir, "logs", "carapace.log"),
         cursor: 0,
         size: 0,
         truncated: false,
@@ -845,7 +845,7 @@ describe("diagnostic support export", () => {
       "config/sanitized.json",
       "config/shape.json",
       "diagnostics.json",
-      "logs/openclaw-sanitized.jsonl",
+      "logs/carapace-sanitized.jsonl",
       "manifest.json",
       "summary.md",
     ]);

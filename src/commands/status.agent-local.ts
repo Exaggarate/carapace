@@ -3,7 +3,7 @@
 
 import path from "node:path";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { listGatewayAgentsBasic, type GatewayAgentOwnership } from "../gateway/agent-list.js";
 import { pathExists } from "../infra/fs-safe.js";
 import { readStatusSessionStores } from "../status/session-stores.js";
@@ -30,7 +30,7 @@ type AgentLocalStatusesResult = {
 
 /** Returns per-agent local workspace, bootstrap, session count, and last activity status. */
 export async function getAgentLocalStatuses(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): Promise<AgentLocalStatusesResult> {
   const agentList = listGatewayAgentsBasic(cfg);
   const now = Date.now();

@@ -5,14 +5,14 @@ import type {
   WorkboardExecution,
   WorkboardLaunchState,
   WorkboardWorkspace,
-} from "@openclaw/workboard-contract";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "@carapace/workboard-contract";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   isFutureDateTimestampMs,
   resolveNonNegativeIntegerOption,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { canonicalPathFromExistingAncestor } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { canonicalPathFromExistingAncestor } from "carapace/plugin-sdk/security-runtime";
 import {
   assertRestrictedWorkboardTarget,
   cleanupWorkboardCardWorktree,
@@ -194,7 +194,7 @@ function buildWorkerPrompt(params: {
   token: string;
 }): string {
   return [
-    `Work on this OpenClaw Workboard card: ${params.card.title}`,
+    `Work on this Carapace Workboard card: ${params.card.title}`,
     "",
     "## Worker protocol",
     `Card id: ${params.card.id}`,

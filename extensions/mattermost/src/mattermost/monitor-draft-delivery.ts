@@ -3,18 +3,18 @@ import {
   createAcceptedChannelDeliveryResult,
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   defineFinalizableLivePreviewAdapter,
   deliverWithFinalizableLivePreviewAdapter,
   listMessageReceiptPlatformIds,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   buildTtsSupplementMediaPayload,
   getReplyPayloadTtsSupplement,
   isReasoningReplyPayload,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import { updateMattermostPost, type MattermostClient, type MattermostPost } from "./client.js";
 import { createMattermostDraftStream } from "./draft-stream.js";
 import { canFinalizeMattermostPreviewInPlace } from "./monitor-context.js";

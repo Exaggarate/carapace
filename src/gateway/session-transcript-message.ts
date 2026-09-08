@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { TranscriptDisplayPosition } from "../chat/transcript-display-position.js";
 import { isVisibleTranscriptRecord } from "../sessions/transcript-visible-record.js";
 import {
@@ -13,8 +13,8 @@ export type SessionMessageProjectionState = {
   turnBoundaryPending: boolean;
 };
 
-/** Attach OpenClaw metadata to a transcript message without dropping existing metadata. */
-export function attachOpenClawTranscriptMeta(
+/** Attach Carapace metadata to a transcript message without dropping existing metadata. */
+export function attachCarapaceTranscriptMeta(
   message: unknown,
   meta: Record<string, unknown>,
 ): unknown {
@@ -23,14 +23,14 @@ export function attachOpenClawTranscriptMeta(
   }
   const record = message as Record<string, unknown>;
   const existing =
-    record["__openclaw"] &&
-    typeof record["__openclaw"] === "object" &&
-    !Array.isArray(record["__openclaw"])
-      ? (record["__openclaw"] as Record<string, unknown>)
+    record["__carapace"] &&
+    typeof record["__carapace"] === "object" &&
+    !Array.isArray(record["__carapace"])
+      ? (record["__carapace"] as Record<string, unknown>)
       : {};
   return {
     ...record,
-    __openclaw: {
+    __carapace: {
       ...existing,
       ...meta,
     },
@@ -46,8 +46,8 @@ export function readTranscriptMessageIdempotencyKey(message: unknown): string | 
 }
 
 function readTranscriptMessageSenderIsOwner(message: unknown): boolean | undefined {
-  const openclaw = asOptionalRecord(asOptionalRecord(message)?.["__openclaw"]);
-  const value = openclaw?.senderIsOwner;
+  const carapace = asOptionalRecord(asOptionalRecord(message)?.["__carapace"]);
+  const value = carapace?.senderIsOwner;
   return typeof value === "boolean" ? value : undefined;
 }
 
@@ -66,7 +66,7 @@ export function projectSessionMessagePayload(params: {
 }): { payload?: Record<string, unknown>; projectionState: SessionMessageProjectionState } {
   const idempotencyKey = readTranscriptMessageIdempotencyKey(params.message);
   const senderIsOwner = readTranscriptMessageSenderIsOwner(params.message);
-  const rawMessage = attachOpenClawTranscriptMeta(params.message, {
+  const rawMessage = attachCarapaceTranscriptMeta(params.message, {
     // Placement comes from the selected reader snapshot, never persisted/imported metadata.
     transcriptPosition: params.transcriptPosition,
     ...(params.messageId ? { id: params.messageId } : {}),
@@ -127,7 +127,7 @@ export function projectTranscriptEntryMessage(
           ? record.timestamp
           : Number.NaN;
     const idempotencyKey = readTranscriptMessageIdempotencyKey(record.message);
-    return attachOpenClawTranscriptMeta(record.message, {
+    return attachCarapaceTranscriptMeta(record.message, {
       ...(typeof record.id === "string" ? { id: record.id } : {}),
       ...(idempotencyKey ? { idempotencyKey } : {}),
       ...(Number.isFinite(recordTimestampMs) ? { recordTimestampMs } : {}),
@@ -140,14 +140,14 @@ export function projectTranscriptEntryMessage(
   }
   const kind = record.type;
   const compactionIdentity =
-    kind === "compaction" ? asOptionalRecord(record["__openclaw"]) : undefined;
+    kind === "compaction" ? asOptionalRecord(record["__carapace"]) : undefined;
   const parsedTimestamp =
     typeof record.timestamp === "string" ? Date.parse(record.timestamp) : Number.NaN;
   return {
     role: "system",
     content: [{ type: "text", text: kind === "compaction" ? "Compaction" : "Reset" }],
     timestamp: Number.isFinite(parsedTimestamp) ? parsedTimestamp : Date.now(),
-    __openclaw: {
+    __carapace: {
       kind,
       id: typeof record.id === "string" ? record.id : undefined,
       ...(typeof compactionIdentity?.runId === "string" ? { runId: compactionIdentity.runId } : {}),

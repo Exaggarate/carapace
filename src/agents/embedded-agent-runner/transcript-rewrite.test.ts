@@ -1,10 +1,10 @@
 // Transcript rewrite tests cover in-memory and persisted branch rewrites for
 // tool-result externalization, labels, and compaction markers.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
@@ -26,10 +26,10 @@ import {
 import { waitForSessionTranscriptProjection } from "../../config/sessions/session-transcript-reconcile.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import {
-  openOpenClawAgentDatabase,
-  deferOpenClawAgentPostCommitPublication,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  deferCarapaceAgentPostCommitPublication,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 
 let rewriteTranscriptEntriesInSessionManager: typeof import("./transcript-rewrite.js").rewriteTranscriptEntriesInSessionManager;
 let installSessionToolResultGuard: typeof import("../session-tool-result-guard.js").installSessionToolResultGuard;
@@ -169,7 +169,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   ])(
     "preserves admitted input custody through repeated history rewrites ($collected, $excludeFromContext)",
     async ({ collected, excludeFromContext }) => {
-      const directory = tempDirs.make("openclaw-admitted-rewrite-");
+      const directory = tempDirs.make("carapace-admitted-rewrite-");
       const target = {
         agentId: "main",
         sessionId: "admitted-rewrite",
@@ -251,7 +251,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
         let currentEntryId = receipt.inputId;
         const beforeNested = getBranchMessages(manager);
         expect(() =>
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             () => {
               receipt.run(() =>
                 rewriteTranscriptEntriesInSessionManager({
@@ -273,13 +273,13 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
         expect(
           await receipt.run(() => appendTranscriptMessage(target, { message: receipt.message })),
         ).toMatchObject({ appended: false, messageId: receipt.inputId });
-        const publicationDatabase = openOpenClawAgentDatabase({
+        const publicationDatabase = openCarapaceAgentDatabase({
           agentId: target.agentId,
           path: resolveSessionTranscriptDatabasePath(target),
         });
         publicationDatabase.db.function("queue_custody_observer", () => {
           expect(
-            deferOpenClawAgentPostCommitPublication(publicationDatabase, () => {
+            deferCarapaceAgentPostCommitPublication(publicationDatabase, () => {
               const currentTool = manager
                 .getBranch()
                 .find((entry) => entry.type === "message" && entry.message.role === "toolResult");
@@ -481,7 +481,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
       expect(compaction.firstKeptEntryId).toBe(keptAssistant.id);
       expect(compaction.firstKeptEntryId).not.toBe(keptAssistantEntryId);
       expect(compaction.id).not.toBe(originalCompactionId);
-      const { __openclaw: rewrittenIdentity } = compaction;
+      const { __carapace: rewrittenIdentity } = compaction;
       expect(rewrittenIdentity).toEqual(identity);
     },
   );
@@ -530,7 +530,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   it.each([false, true])(
     "keeps one active suffix after repeated successful rewrites (reset=%s)",
     async (withReset) => {
-      const dir = tempDirs.make("openclaw-rewrite-reset-");
+      const dir = tempDirs.make("carapace-rewrite-reset-");
       const target = {
         agentId: "main",
         sessionId: "rewrite-reset",
@@ -668,7 +668,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   )(
     "preserves original SQLite rows and the rewritten $variant branch (bounded=$bounded)",
     async ({ variant, bounded }) => {
-      const dir = tempDirs.make("openclaw-transcript-rewrite-runtime-");
+      const dir = tempDirs.make("carapace-transcript-rewrite-runtime-");
       const storePath = path.join(dir, "sessions.json");
       const sessionId = "runtime-sqlite-branch-rewrite";
       const sessionKey = "agent:main:test";
@@ -781,7 +781,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   );
 
   it("rejects stale loaded suffix bytes even when persisted entry ids are unchanged", async () => {
-    const directory = tempDirs.make("openclaw-stale-rewrite-");
+    const directory = tempDirs.make("carapace-stale-rewrite-");
     const target = {
       agentId: "main",
       sessionId: "stale-rewrite",
@@ -817,7 +817,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   )(
     "rejects a view loaded before an opaque navigation $mutation (bounded=$bounded)",
     async ({ bounded, mutation }) => {
-      const directory = tempDirs.make("openclaw-navigation-snapshot-");
+      const directory = tempDirs.make("carapace-navigation-snapshot-");
       const target = {
         agentId: "main",
         sessionId: "navigation-snapshot",
@@ -869,7 +869,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   it.each([undefined, 3, 1])(
     "preserves the selected logical parent across a rewrite (maxEvents=%s)",
     async (maxEvents) => {
-      const directory = tempDirs.make("openclaw-logical-rewrite-");
+      const directory = tempDirs.make("carapace-logical-rewrite-");
       const target = {
         agentId: "main",
         sessionId: "logical-rewrite",
@@ -908,7 +908,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   it.each([0, 2])(
     "keeps an unhydrated prefix when rewriting bounded entry %i",
     async (replacementIndex) => {
-      const directory = tempDirs.make("openclaw-bounded-rewrite-");
+      const directory = tempDirs.make("carapace-bounded-rewrite-");
       const target = {
         agentId: "main",
         sessionId: "bounded-rewrite",
@@ -957,7 +957,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
   ])(
     "keeps the complete active branch when suffix replay is interrupted (reset=$reset, finalLeaf=$finalLeaf)",
     async ({ reset, finalLeaf }) => {
-      const dir = tempDirs.make("openclaw-transcript-rewrite-interrupted-");
+      const dir = tempDirs.make("carapace-transcript-rewrite-interrupted-");
       const storePath = path.join(dir, "sessions.json");
       const target = {
         agentId: "main",
@@ -991,7 +991,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
       }
       const originalMessages = getBranchMessages(sessionManager);
       const originalRows = await loadTranscriptEvents(target);
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: target.agentId,
         path: resolveSessionTranscriptDatabasePath(target),
       });

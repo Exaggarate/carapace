@@ -1,18 +1,18 @@
 // Openai provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   RealtimeTranscriptionProviderConfig,
   RealtimeTranscriptionProviderPlugin,
   RealtimeTranscriptionSession,
   RealtimeTranscriptionSessionCreateRequest,
   RealtimeTranscriptionWebSocketTransport,
-} from "openclaw/plugin-sdk/realtime-transcription-session";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/realtime-transcription-session";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import {
   asFiniteNumberInRange,
   asSafeIntegerInRange,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {
   createOpenAIRealtimeTranscriptionClientSecret,
@@ -31,7 +31,7 @@ type OpenAIRealtimeTranscriptionProviderConfig = {
 
 type OpenAIRealtimeTranscriptionSessionConfig = RealtimeTranscriptionSessionCreateRequest & {
   apiKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   language?: string;
   model: string;
   prompt?: string;
@@ -200,7 +200,7 @@ function createOpenAIRealtimeTranscriptionSession(
   const completedTranscripts = new Map<string, string | undefined>();
   const trackedItemIds = new Set<string>();
   const settledItemIds = new Set<string>();
-  const unkeyedTranscript = "__openclaw_unkeyed_transcript__";
+  const unkeyedTranscript = "__carapace_unkeyed_transcript__";
   let retainedTranscriptBytes = 0;
   let settledItemIdBytes = 0;
   let appendedAudioBytes = 0;

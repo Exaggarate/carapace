@@ -1,10 +1,10 @@
 // Telegram plugin module implements conversation route behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   resolveConfiguredBindingRoute,
   resolveRuntimeConversationBindingRoute,
   type ConfiguredBindingRouteResult,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import {
   buildAgentSessionKey,
   deriveLastRoutePolicy,
@@ -12,9 +12,9 @@ import {
   resolveThreadSessionKeys,
   buildAgentMainSessionKey,
   sanitizeAgentId,
-} from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/routing";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultTelegramAccountId } from "./accounts.js";
 import { buildTelegramParentPeer, shouldUseTelegramDmThreadSession } from "./bot/helpers.js";
 import {
@@ -47,7 +47,7 @@ type TelegramConversationRouteResult = {
 };
 
 type ResolveTelegramConversationRouteParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   chatId: number | string;
   isGroup: boolean;
@@ -212,7 +212,7 @@ export function resolveTelegramConversationBaseSessionKey(
 }
 
 export function resolveTelegramTargetSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   route: TelegramResolvedRoute;
   chatId: number | string;
   isGroup: boolean;

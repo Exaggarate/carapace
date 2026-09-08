@@ -6,14 +6,14 @@ import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import type { Message } from "grammy/types";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeCarapaceStateDatabaseForTest,
   createChannelIngressQueueForTests,
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { MsgContext } from "carapace/plugin-sdk/reply-runtime";
 import { expect, it, vi } from "vitest";
 import { defaultTelegramBotDeps } from "./bot-deps.js";
 import { telegramBotInfoForTest } from "./bot.create-telegram-bot.test-support.js";
@@ -36,8 +36,8 @@ const downstream = vi.hoisted(() =>
   })),
 );
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   return {
     ...actual,
     runChannelInboundEvent: async (params: Parameters<typeof actual.runChannelInboundEvent>[0]) =>
@@ -54,8 +54,8 @@ it.each(["none", "middleware", "handler"] as const)(
   async (recovery) => {
     downstream.mockClear();
     const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "telegram-native-admission-"));
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     resetPluginStateStoreForTests({ closeDatabase: false });
     resetTelegramAccountThrottlersForTest();
     setTelegramRuntime({
@@ -133,7 +133,7 @@ it.each(["none", "middleware", "handler"] as const)(
       server.listen(0, "127.0.0.1");
       await once(server, "listening");
       const apiRoot = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         commands: { native: true, nativeSkills: false },
         channels: { telegram: { apiRoot, dmPolicy: "open", allowFrom: ["*"] } },
         session: { store: path.join(stateDir, "sessions.json") },
@@ -271,12 +271,12 @@ it.each(["none", "middleware", "handler"] as const)(
       });
       clearTelegramRuntimeForTest();
       resetTelegramAccountThrottlersForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       resetPluginStateStoreForTests({ closeDatabase: false });
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
       await fs.rm(stateDir, { recursive: true, force: true });
     }

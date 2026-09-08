@@ -3,19 +3,19 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { listMemoryArtifactProvenance } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginStateKeyedStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { listMemoryArtifactProvenance } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
+import { createPluginStateKeyedStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterAll, afterEach, beforeAll, describe, expect, it as baseIt, vi } from "vitest";
 import { deriveConceptTags } from "./concept-vocabulary.js";
 import { isPromotionOriginBlocked } from "./dreaming-consolidation-candidates.js";
 
-vi.mock("openclaw/plugin-sdk/memory-host-events", () => ({
+vi.mock("carapace/plugin-sdk/memory-host-events", () => ({
   appendMemoryHostEvent: vi.fn(async () => {}),
 }));
-vi.mock("openclaw/plugin-sdk/memory-core-host-runtime-core", { spy: true });
+vi.mock("carapace/plugin-sdk/memory-core-host-runtime-core", { spy: true });
 
 import {
   configureMemoryCoreDreamingState,
@@ -731,16 +731,16 @@ describe("short-term promotion", () => {
       projectResult("path:/Users/alice/repo"),
     ]);
     await recordMemoryRecalls(workspaceDir, "mixed case repository", [
-      projectResult("github.com/OpenClaw/OpenClaw"),
+      projectResult("github.com/Carapace/Carapace"),
     ]);
     const candidates = await rankAllCandidates(workspaceDir);
     expect(candidates[0]?.projectKey).toBe(
-      "path:/Users/Alice/Repo; path:/Users/alice/repo; github.com/OpenClaw/OpenClaw",
+      "path:/Users/Alice/Repo; path:/Users/alice/repo; github.com/Carapace/Carapace",
     );
 
     await applyAllCandidates(workspaceDir, candidates);
     await expect(fs.readFile(path.join(workspaceDir, "MEMORY.md"), "utf8")).resolves.toContain(
-      "<!-- project: path:/Users/Alice/Repo; path:/Users/alice/repo; github.com/OpenClaw/OpenClaw -->",
+      "<!-- project: path:/Users/Alice/Repo; path:/Users/alice/repo; github.com/Carapace/Carapace -->",
     );
   });
 
@@ -1381,7 +1381,7 @@ describe("short-term promotion", () => {
     expect(secondApply.reconciledExisting).toBe(1);
 
     const memoryText = await fs.readFile(path.join(workspaceDir, "MEMORY.md"), "utf-8");
-    expect(memoryText.match(/openclaw-memory-promotion:/g)?.length).toBe(1);
+    expect(memoryText.match(/carapace-memory-promotion:/g)?.length).toBe(1);
     expect(memoryText.match(/The gateway should stay loopback-only on port 18789\./g)?.length).toBe(
       1,
     );
@@ -1420,9 +1420,9 @@ describe("short-term promotion", () => {
 
     const memoryText = await fs.readFile(path.join(workspaceDir, "MEMORY.md"), "utf-8");
     expect(memoryText).toContain(
-      "<!-- openclaw-memory-promotion:memory:memory/project alpha/2026-04-01.md:2:2 -->",
+      "<!-- carapace-memory-promotion:memory:memory/project alpha/2026-04-01.md:2:2 -->",
     );
-    expect(memoryText.match(/openclaw-memory-promotion:/g)?.length).toBe(1);
+    expect(memoryText.match(/carapace-memory-promotion:/g)?.length).toBe(1);
     expect(
       memoryText.match(/The project alpha gateway should stay loopback-only on port 18789\./g)
         ?.length,
@@ -1540,10 +1540,10 @@ describe("short-term promotion", () => {
       "- Plan switches use exRule, not abConfig", // 2
       "", // 3
       "## Light Sleep", // 4
-      "<!-- openclaw:dreaming:light:start -->", // 5
+      "<!-- carapace:dreaming:light:start -->", // 5
       "- Candidate: staged dream", // 6
       "  - confidence: 0.95", // 7
-      "<!-- openclaw:dreaming:light:end -->", // 8
+      "<!-- carapace:dreaming:light:end -->", // 8
     ]);
 
     // Stored recall snippet equals the marker text exactly, so relocate's
@@ -1559,7 +1559,7 @@ describe("short-term promotion", () => {
         startLine: 5,
         endLine: 5,
         score: 0.94,
-        snippet: "<!-- openclaw:dreaming:light:start -->",
+        snippet: "<!-- carapace:dreaming:light:start -->",
         source: "memory",
       },
     ]);
@@ -1572,7 +1572,7 @@ describe("short-term promotion", () => {
       .readFile(path.join(workspaceDir, "MEMORY.md"), "utf-8")
       .catch(() => "");
     expect(memoryText).not.toContain("Promoted From Short-Term Memory");
-    expect(memoryText).not.toMatch(/openclaw:dreaming/i);
+    expect(memoryText).not.toMatch(/carapace:dreaming/i);
   });
 
   it("refuses to promote rehydrated candidates that land inside a managed dreaming fence", async (workspaceDir) => {
@@ -1583,9 +1583,9 @@ describe("short-term promotion", () => {
       "Legitimate durable observation about backups.",
       "",
       "## Light Sleep",
-      "<!-- openclaw:dreaming:light:start -->",
+      "<!-- carapace:dreaming:light:start -->",
       "- Candidate: staged dream scratchwork",
-      "<!-- openclaw:dreaming:light:end -->",
+      "<!-- carapace:dreaming:light:end -->",
     ]);
     expect(dailyPath).toBeTruthy();
 
@@ -1815,7 +1815,7 @@ describe("short-term promotion", () => {
     expect(promotedLine).toMatch(
       /\[score=0\.\d{3} signals=1 recalls=1 avg=0\.\d{3} source=memory\/2026-04-01\.md:1-1\]/,
     );
-    expect(memoryText).toMatch(/<!-- openclaw-memory-promotion:[^\n]+ -->/);
+    expect(memoryText).toMatch(/<!-- carapace-memory-promotion:[^\n]+ -->/);
   });
 
   it("does not re-append candidates that were promoted in a prior run", async (workspaceDir) => {
@@ -2076,9 +2076,9 @@ describe("short-term promotion", () => {
       "# 2026-05-28",
       "",
       "## Light Sleep",
-      "<!-- openclaw:dreaming:light:start -->",
+      "<!-- carapace:dreaming:light:start -->",
       "- Candidate: scratch reflection",
-      "<!-- openclaw:dreaming:light:end -->",
+      "<!-- carapace:dreaming:light:end -->",
       "- Reviewed travel timing before the workshop.",
     ]);
     const applied = await promoteDailyHeadingSnippet(workspaceDir, {
@@ -2841,12 +2841,12 @@ describe("short-term promotion", () => {
           "# Long-Term Memory",
           "",
           "## Promoted From Short-Term Memory (2026-04-10)",
-          `<!-- openclaw-memory-promotion:${firstMarker} -->`,
+          `<!-- carapace-memory-promotion:${firstMarker} -->`,
           `- ${filler}`,
           "",
           ...between,
           "## Promoted From Short-Term Memory (2026-04-20)",
-          `<!-- openclaw-memory-promotion:${secondMarker} -->`,
+          `<!-- carapace-memory-promotion:${secondMarker} -->`,
           `- ${filler}`,
           "",
         ].join("\n"),

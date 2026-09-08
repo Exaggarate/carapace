@@ -8,7 +8,7 @@ import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
 import { setPreparedModelRuntimeAuthStore } from "../../agents/prepared-model-runtime-auth.js";
 import type { PreparedModelRuntimeSnapshot } from "../../agents/prepared-model-runtime.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { connectUserModelAccount } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail, setDisplayName } from "../../state/user-profiles.js";
@@ -37,7 +37,7 @@ export async function createPersonalChatMetadataFixture() {
       defaults: { model: { primary: "openai/gpt-5.6-luna" } },
       list: [{ id: "main", default: true }],
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const harness = createChatMetadataHarness(config, { useDefaultProjection: true });
   const owner = createChatMetadataOwner(
     config,
@@ -88,7 +88,7 @@ export function createDraftChatMetadataScope(
   };
 }
 
-export function createOpenAIChatMetadataConfig(modelIds = ["gpt-5.6-sol"]): OpenClawConfig {
+export function createOpenAIChatMetadataConfig(modelIds = ["gpt-5.6-sol"]): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -101,7 +101,7 @@ export function createOpenAIChatMetadataConfig(modelIds = ["gpt-5.6-sol"]): Open
 }
 
 export function createChatMetadataOwner(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   id: string,
   credentials: AgentCredentialMap = {},
   provider = "test",
@@ -145,7 +145,7 @@ export function createChatMetadataOwner(
 }
 
 export function createChatMetadataHarness(
-  initialConfig: OpenClawConfig = { agents: { list: [{ id: "main", default: true }] } },
+  initialConfig: CarapaceConfig = { agents: { list: [{ id: "main", default: true }] } },
   runtimeOptions: {
     beforeRefresh?: () => Promise<void>;
     refreshOnRead?: boolean;
@@ -248,7 +248,7 @@ export function createChatMetadataHarness(
     getSkillsVersion,
     invalidProjections,
     runtime,
-    setConfig(next: OpenClawConfig) {
+    setConfig(next: CarapaceConfig) {
       config = next;
     },
     setAuthStore(next: AuthProfileStore | undefined) {

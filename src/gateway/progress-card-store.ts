@@ -3,8 +3,8 @@ import {
   readSessionProgressCard,
   writeSessionProgressCard,
 } from "../session-cards/progress-card-store.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
+import { runCarapaceAgentWriteTransaction } from "../state/carapace-agent-db.js";
 import { resolveGatewaySessionDatabase } from "./board-store.js";
 
 export type ProgressCardStore = {
@@ -24,7 +24,7 @@ export type ProgressCardStore = {
 export const progressCardStore: ProgressCardStore = {
   get(sessionKey, agentId) {
     const resolved = resolveGatewaySessionDatabase(sessionKey, agentId);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withCarapaceAgentDatabaseReadOnly(
       (database) => readSessionProgressCard(database.db, resolved.sessionKey),
       resolved,
     );
@@ -32,7 +32,7 @@ export const progressCardStore: ProgressCardStore = {
   },
   put(sessionKey, input, agentId) {
     const resolved = resolveGatewaySessionDatabase(sessionKey, agentId);
-    const result = runOpenClawAgentWriteTransaction(
+    const result = runCarapaceAgentWriteTransaction(
       (transactionDatabase) => {
         input.assertCurrent?.();
         return writeSessionProgressCard(transactionDatabase.db, resolved.sessionKey, input);

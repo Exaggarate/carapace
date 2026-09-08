@@ -1,17 +1,17 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { zstdCompressSync } from "node:zlib";
-import { createOpenClawCodingTools } from "openclaw/plugin-sdk/agent-harness";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { listSessionTranscriptCorpusEntriesForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import { listMemoryArtifactProvenance } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { createCarapaceCodingTools } from "carapace/plugin-sdk/agent-harness";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { listSessionTranscriptCorpusEntriesForAgent } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import { listMemoryArtifactProvenance } from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { forgetMemoryEntries } from "./memory-forget.js";
 import {
@@ -23,22 +23,22 @@ describe("memory forget curated writes", () => {
   const { createTempWorkspace } = createMemoryCoreTestHarness();
   let stateDir: string;
   let workspaceDir: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
 
   beforeEach(async () => {
     stateDir = await fs.realpath(await createTempWorkspace("memory-forget-curated-writes-"));
     workspaceDir = path.join(stateDir, "workspace");
     await fs.mkdir(workspaceDir);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     await configureMemoryCoreDreamingStateForTests();
     cfg = {
       agents: { defaults: { workspace: workspaceDir }, list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     resetPluginStateStoreForTests();
     vi.unstubAllEnvs();
   });
@@ -54,7 +54,7 @@ describe("memory forget curated writes", () => {
   it("reports session-authored curated memory without deleting unattributable file content", async () => {
     await seedSession("target");
     const curatedContent = "# Long-Term Memory\nThe launch code is violet.\n";
-    const writeTool = createOpenClawCodingTools({
+    const writeTool = createCarapaceCodingTools({
       workspaceDir,
       config: cfg,
       sessionId: "target",

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { pathToFileURL } from "node:url";
-import type { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import type { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import { createQaGatewayChild, type QaGatewayChild } from "../../../../extensions/qa-lab/api.js";
 import {
   QA_EVIDENCE_FILENAME,
@@ -116,7 +116,7 @@ function sha256(value: string) {
 }
 
 function stateDatabasePath(stateDir: string) {
-  return path.join(stateDir, "state", "openclaw.sqlite");
+  return path.join(stateDir, "state", "carapace.sqlite");
 }
 
 function executionIdentityTableExists(stateDir: string): boolean {
@@ -570,7 +570,7 @@ async function inspectEnabledTopology(
   workerNode: PairedNodeWorkerHost,
 ) {
   const stateDir = requireString(
-    gateway.runtimeEnv.OPENCLAW_STATE_DIR,
+    gateway.runtimeEnv.CARAPACE_STATE_DIR,
     "enabled Gateway state directory",
   );
   const chain = await waitForLineageChain(stateDir, topology.runIds[0]);
@@ -657,7 +657,7 @@ async function inspectDefaultOffTopology(
   workerNode: PairedNodeWorkerHost,
 ) {
   const stateDir = requireString(
-    gateway.runtimeEnv.OPENCLAW_STATE_DIR,
+    gateway.runtimeEnv.CARAPACE_STATE_DIR,
     "default-off Gateway state directory",
   );
   if (executionIdentityTableExists(stateDir) || readPersistedContexts(stateDir).length !== 0) {
@@ -782,8 +782,8 @@ async function stopGatewayAndVerifyStateRemoved(gateway: Gateway) {
 }
 
 async function runProof(options: ProducerOptions): Promise<string> {
-  // openclaw-temp-dir: standalone QA producer owns and removes this fixture root.
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-i3-worker-lineage-"));
+  // carapace-temp-dir: standalone QA producer owns and removes this fixture root.
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-i3-worker-lineage-"));
   let mock = await startQaMockOpenAiServer();
   const published = await createPublishedWireWorkspace(fixtureRoot);
   let gatewayOwner = createQaGatewayChild();
@@ -822,7 +822,7 @@ async function runProof(options: ProducerOptions): Promise<string> {
     await workerNode.waitForWorkersIdle();
     await workerNode.waitForInvokes();
     await waitForTopologySettled(
-      requireString(gateway.runtimeEnv.OPENCLAW_STATE_DIR, "default-off Gateway state directory"),
+      requireString(gateway.runtimeEnv.CARAPACE_STATE_DIR, "default-off Gateway state directory"),
       [defaultOffTopology.root, defaultOffTopology.child, defaultOffTopology.grandchild].map(
         (session) => session.sessionId,
       ),
@@ -866,7 +866,7 @@ async function runProof(options: ProducerOptions): Promise<string> {
     await workerNode.waitForWorkersIdle();
     await workerNode.waitForInvokes();
     await waitForTopologySettled(
-      requireString(gateway.runtimeEnv.OPENCLAW_STATE_DIR, "enabled Gateway state directory"),
+      requireString(gateway.runtimeEnv.CARAPACE_STATE_DIR, "enabled Gateway state directory"),
       [enabledTopology.root, enabledTopology.child, enabledTopology.grandchild].map(
         (session) => session.sessionId,
       ),
@@ -1005,10 +1005,10 @@ async function runProducer(options: ProducerOptions): Promise<QaEvidenceSummaryJ
 
 async function main(argv: readonly string[]) {
   const options = parseOptions(argv);
-  const priorStateDir = process.env.OPENCLAW_STATE_DIR;
-  const priorConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  process.env.OPENCLAW_STATE_DIR = path.join(options.artifactBase, "script-state");
-  process.env.OPENCLAW_CONFIG_PATH = path.join(options.artifactBase, "script-openclaw.json");
+  const priorStateDir = process.env.CARAPACE_STATE_DIR;
+  const priorConfigPath = process.env.CARAPACE_CONFIG_PATH;
+  process.env.CARAPACE_STATE_DIR = path.join(options.artifactBase, "script-state");
+  process.env.CARAPACE_CONFIG_PATH = path.join(options.artifactBase, "script-carapace.json");
   try {
     const evidence = await runProducer(options);
     const status = evidence.entries[0]?.result.status;
@@ -1017,14 +1017,14 @@ async function main(argv: readonly string[]) {
     return status === "pass" ? 0 : 1;
   } finally {
     if (priorStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = priorStateDir;
+      process.env.CARAPACE_STATE_DIR = priorStateDir;
     }
     if (priorConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.CARAPACE_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = priorConfigPath;
+      process.env.CARAPACE_CONFIG_PATH = priorConfigPath;
     }
   }
 }

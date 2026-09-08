@@ -1,5 +1,5 @@
 // Discord tests cover debounce partitioning by reply target.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createDiscordMessageHandler,
@@ -31,7 +31,7 @@ function createPreflightContext(channelId = "ch-1") {
     token: "test-token",
     groupPolicy: "allowlist" as const,
   };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     channels: { discord: discordConfig },
     messages: { inbound: { debounceMs: 0 } },
   };

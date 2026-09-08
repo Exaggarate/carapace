@@ -5,7 +5,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
 export function createDoctorLintSemanticIndex(stateDir: string): string {
-  const databasePath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const databasePath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
   const database = new DatabaseSync(databasePath);
   database.exec(

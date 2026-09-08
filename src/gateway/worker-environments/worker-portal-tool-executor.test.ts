@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createGatewayPortalService } from "../portals/portal-service.js";
 import * as httpListen from "../server/http-listen.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
@@ -38,8 +38,8 @@ const PORTAL = {
   title: "Worker app",
   port: 4321,
   listenPort: 54321,
-  tokenQuery: "openclaw_portal=test-token",
-  url: "http://127.0.0.1:54321/?openclaw_portal=test-token",
+  tokenQuery: "carapace_portal=test-token",
+  url: "http://127.0.0.1:54321/?carapace_portal=test-token",
   publicUrl: "http://127.0.0.1:54321/",
   origin: "cloud-profile",
   createdAtMs: 1,
@@ -74,8 +74,8 @@ describe("worker portal tool execution", () => {
   }
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-portal-"));
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worker-portal-"));
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placements = createWorkerSessionPlacementStore({ database });
     let placement = placements.startDispatch(SOURCE);
     placement = placements.transition({
@@ -186,7 +186,7 @@ describe("worker portal tool execution", () => {
     await Promise.all([...actualServices].map((service) => service.closeAll()));
     actualServices.clear();
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -259,10 +259,10 @@ describe("worker portal tool execution", () => {
   it("never exposes local or other-worker portal bearer URLs to a delegated worker", async () => {
     portalList.mockReturnValue([
       ...portalWorkerList(),
-      { id: "local-portal", url: "http://127.0.0.1:54322/?openclaw_portal=local-secret" },
+      { id: "local-portal", url: "http://127.0.0.1:54322/?carapace_portal=local-secret" },
       {
         id: "foreign-worker-portal",
-        url: "http://127.0.0.1:54323/?openclaw_portal=foreign-secret",
+        url: "http://127.0.0.1:54323/?carapace_portal=foreign-secret",
       },
     ]);
     portalWorkerList.mockClear();

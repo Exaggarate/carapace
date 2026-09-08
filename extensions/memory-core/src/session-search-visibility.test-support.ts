@@ -1,5 +1,5 @@
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import type { normalizeSessionDeliveryState } from "openclaw/plugin-sdk/session-store-runtime";
+import type { MemorySearchResult } from "carapace/plugin-sdk/memory-core-host-runtime-files";
+import type { normalizeSessionDeliveryState } from "carapace/plugin-sdk/session-store-runtime";
 
 export type TestSessionEntry = {
   sessionId: string;

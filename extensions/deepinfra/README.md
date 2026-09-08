@@ -1,12 +1,12 @@
-# OpenClaw DeepInfra Provider
+# Carapace DeepInfra Provider
 
-Official OpenClaw provider plugin for DeepInfra.
+Official Carapace provider plugin for DeepInfra.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/deepinfra-provider
-openclaw gateway restart
+carapace plugins install @carapace/deepinfra-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/deepinfra> for setup and configuration.
+See <../../docs/providers/deepinfra.md> for setup and configuration.

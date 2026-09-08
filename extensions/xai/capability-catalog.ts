@@ -1,4 +1,4 @@
-import type { PluginCapabilityCatalogEntry } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalogEntry } from "carapace/plugin-sdk/plugin-entry";
 import {
   createLazyXaiSpeechProvider,
   createLazyXaiRealtimeTranscriptionProvider,

@@ -21,9 +21,9 @@ describe("diagnostics-prometheus runtime identity", () => {
       };
       const readIdentity = vi.fn(() => identity);
       const metrics = createMetricsHarness(readIdentity);
-      const info = `openclaw_gateway_build_info{${buildId ? `build_id="${buildId}",` : ""}process_instance_id="${identity.processInstanceId}"} 1`;
+      const info = `carapace_gateway_build_info{${buildId ? `build_id="${buildId}",` : ""}process_instance_id="${identity.processInstanceId}"} 1`;
       const initial = metrics.render();
-      expect(initial).toContain("# TYPE openclaw_gateway_build_info gauge");
+      expect(initial).toContain("# TYPE carapace_gateway_build_info gauge");
       expect(initial).toContain(info);
       identity.processInstanceId = "a-different-value-after-service-start";
       expect(metrics.render()).toBe(initial);
@@ -35,13 +35,13 @@ describe("diagnostics-prometheus runtime identity", () => {
         );
       }
       expect(metrics.render()).toContain(info);
-      expect(metrics.render()).toContain("openclaw_prometheus_series_dropped_total 53");
+      expect(metrics.render()).toContain("carapace_prometheus_series_dropped_total 53");
       metrics.stop();
       expect(metrics.render()).toBe("");
       identity.processInstanceId = "a6aa1fc7-1f10-4b56-8ae8-4ff8c4dc02ea";
       metrics.start();
       expect(metrics.render()).toContain(info);
-      expect(metrics.render()).not.toContain("openclaw_prometheus_series_dropped_total");
+      expect(metrics.render()).not.toContain("carapace_prometheus_series_dropped_total");
       expect(readIdentity).toHaveBeenCalledTimes(2);
       metrics.stop();
     },
@@ -54,8 +54,8 @@ describe("diagnostics-prometheus runtime identity", () => {
       { ...baseEvent(), type: "gateway.rpc", method: "health", phase: "received" },
       trusted,
     );
-    expect(metrics.render()).toContain('openclaw_gateway_rpc_requests_total{method="health"} 1');
-    expect(metrics.render()).not.toContain("openclaw_gateway_build_info");
+    expect(metrics.render()).toContain('carapace_gateway_rpc_requests_total{method="health"} 1');
+    expect(metrics.render()).not.toContain("carapace_gateway_build_info");
     metrics.stop();
   });
 });

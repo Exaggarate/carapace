@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type Subscription = {
   send: (method: string, params: unknown) => void;

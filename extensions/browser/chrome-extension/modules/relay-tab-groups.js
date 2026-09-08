@@ -1,22 +1,22 @@
-import { OPENCLAW_TAB_GROUP_TITLE } from "./relay-core.js";
+import { CARAPACE_TAB_GROUP_TITLE } from "./relay-core.js";
 
-async function isOpenClawGroupId(groupId) {
+async function isCarapaceGroupId(groupId) {
   if (!Number.isInteger(groupId) || groupId < 0) {
     return false;
   }
   try {
     const group = await chrome.tabGroups.get(groupId);
-    return group.title === OPENCLAW_TAB_GROUP_TITLE;
+    return group.title === CARAPACE_TAB_GROUP_TITLE;
   } catch {
     return false;
   }
 }
 
 export async function isTabSelected(tab) {
-  return await isOpenClawGroupId(tab?.groupId);
+  return await isCarapaceGroupId(tab?.groupId);
 }
 
-export async function addTabToOpenClawGroup(tabId, { chromeApi, getGroupColor, created }) {
+export async function addTabToCarapaceGroup(tabId, { chromeApi, getGroupColor, created }) {
   const assertCurrent = () => created?.assertCurrent();
   const tab = await chromeApi.tabs.get(tabId);
   assertCurrent();
@@ -24,7 +24,7 @@ export async function addTabToOpenClawGroup(tabId, { chromeApi, getGroupColor, c
     throw new Error(`tab ${tabId} changed during creation`);
   }
   const groups = await chromeApi.tabGroups
-    .query({ title: OPENCLAW_TAB_GROUP_TITLE })
+    .query({ title: CARAPACE_TAB_GROUP_TITLE })
     .catch(() => []);
   assertCurrent();
   const group = groups.find((candidate) => candidate.windowId === tab.windowId);
@@ -51,7 +51,7 @@ export async function addTabToOpenClawGroup(tabId, { chromeApi, getGroupColor, c
     if (created) {
       created.namingGroup = groupId;
     }
-    await chromeApi.tabGroups.update(groupId, { title: OPENCLAW_TAB_GROUP_TITLE, color });
+    await chromeApi.tabGroups.update(groupId, { title: CARAPACE_TAB_GROUP_TITLE, color });
     assertCurrent();
   }
 }

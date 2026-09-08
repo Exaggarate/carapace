@@ -4,12 +4,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_CODEX_CONFIG_ARG } from "./codex-adapter.js";
+import { CARAPACE_CODEX_CONFIG_ARG } from "./codex-adapter.js";
 import { prepareAcpxCodexAuthConfig } from "./codex-auth-bridge.js";
 import { splitCommandParts, type AcpxAgentCommand } from "./command-line.js";
 import { resolveAcpxPluginConfig } from "./config.js";
@@ -18,13 +18,13 @@ const execFileAsync = promisify(execFile);
 let testWorkspace: TempWorkspace;
 const previousEnv = {
   CODEX_HOME: process.env.CODEX_HOME,
-  OPENCLAW_AGENT_DIR: process.env.OPENCLAW_AGENT_DIR,
+  CARAPACE_AGENT_DIR: process.env.CARAPACE_AGENT_DIR,
 };
 
 beforeEach(async () => {
   testWorkspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
-    prefix: "openclaw-acpx-codex-auth-",
+    rootDir: resolvePreferredCarapaceTmpDir(),
+    prefix: "carapace-acpx-codex-auth-",
   });
 });
 
@@ -75,7 +75,7 @@ function expectClaudeWrapperCommand(
 afterEach(async () => {
   vi.restoreAllMocks();
   restoreEnv("CODEX_HOME");
-  restoreEnv("OPENCLAW_AGENT_DIR");
+  restoreEnv("CARAPACE_AGENT_DIR");
   await testWorkspace.cleanup();
 });
 
@@ -118,7 +118,7 @@ describe("prepareAcpxCodexAuthConfig command migration", () => {
     expectCodexWrapperCommand(resolved.agents.codex, generated.wrapperPath);
     expect(resolved.agents.codex).not.toContain("npx @zed-industries/codex-acp@0.12.0");
     expect(resolved.agents.codex).not.toContain("-c");
-    expect(resolved.agents.codex).toContain(OPENCLAW_CODEX_CONFIG_ARG);
+    expect(resolved.agents.codex).toContain(CARAPACE_CODEX_CONFIG_ARG);
     expect(resolved.agents.codex).toContain(
       JSON.stringify({
         model: "gpt-5.4",
@@ -145,7 +145,7 @@ describe("prepareAcpxCodexAuthConfig command migration", () => {
       [
         wrapperPath,
         ...wrapperArgs,
-        OPENCLAW_CODEX_CONFIG_ARG,
+        CARAPACE_CODEX_CONFIG_ARG,
         JSON.stringify({ model: "gpt-5.6-sol", model_reasoning_effort: "medium" }),
       ],
       { cwd: root },
@@ -196,7 +196,7 @@ describe("prepareAcpxCodexAuthConfig command migration", () => {
       "--config",
       'model_reasoning_effort="low"',
     ]);
-    expect(commandParts).not.toContain(OPENCLAW_CODEX_CONFIG_ARG);
+    expect(commandParts).not.toContain(CARAPACE_CODEX_CONFIG_ARG);
 
     const [nodePath, wrapperPath, ...wrapperArgs] = commandParts;
     if (!nodePath || !wrapperPath) {
@@ -207,7 +207,7 @@ describe("prepareAcpxCodexAuthConfig command migration", () => {
       [
         wrapperPath,
         ...wrapperArgs,
-        OPENCLAW_CODEX_CONFIG_ARG,
+        CARAPACE_CODEX_CONFIG_ARG,
         JSON.stringify({ model: "gpt-5.6-sol", model_reasoning_effort: "medium" }),
       ],
       { cwd: root, env: { ...process.env, CODEX_CONFIG: "" } },

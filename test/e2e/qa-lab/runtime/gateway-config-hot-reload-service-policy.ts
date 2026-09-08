@@ -10,7 +10,7 @@ import {
   ConnectErrorDetailCodes,
   readConnectErrorDetailCode,
 } from "../../../../packages/gateway-protocol/src/connect-error-details.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { GatewayClient, GatewayClientRequestError } from "../../../../src/gateway/client.js";
 import { discoverGatewayBeacons } from "../../../../src/infra/bonjour-discovery.js";
 import { createDeferredCore } from "../../../../src/shared/deferred.js";
@@ -95,7 +95,7 @@ async function probeBrowserAuth(gateway: QaGatewayChild, origin: string) {
 }
 
 function observeBonjourRemovals(port: number) {
-  const child = spawn("avahi-browse", ["-prk", "_openclaw-gw._tcp"], {
+  const child = spawn("avahi-browse", ["-prk", "_carapace-gw._tcp"], {
     stdio: ["ignore", "pipe", "pipe"],
   });
   const ownServices = new Set<string>();
@@ -175,11 +175,11 @@ export async function proveHotReloadServicePolicy({
         controlUiEnabled: true,
         enabledPluginIds: ["bonjour"],
         runtimeEnvPatch: {
-          OPENCLAW_DISABLE_BONJOUR: "0",
-          OPENCLAW_MDNS_HOSTNAME: hostname,
-          OPENCLAW_CLI_PATH: cliPath,
-          OPENCLAW_TAILNET_DNS: tailnetDns,
-          OPENCLAW_SSH_PORT: "22222",
+          CARAPACE_DISABLE_BONJOUR: "0",
+          CARAPACE_MDNS_HOSTNAME: hostname,
+          CARAPACE_CLI_PATH: cliPath,
+          CARAPACE_TAILNET_DNS: tailnetDns,
+          CARAPACE_SSH_PORT: "22222",
         },
         mutateConfig: (cfg) => ({
           ...cfg,
@@ -364,7 +364,7 @@ export async function proveHotReloadServicePolicy({
         );
 
         await patch({ gateway: { auth: { rateLimit: null } } });
-        const configured = await rpc<{ config: OpenClawConfig }>("config.get");
+        const configured = await rpc<{ config: CarapaceConfig }>("config.get");
         assert.equal(configured.config.gateway?.auth?.rateLimit, undefined);
         for (let attempt = 0; attempt < 3; attempt += 1) {
           assert.equal((await http(7)).status, 401);

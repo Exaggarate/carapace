@@ -76,7 +76,7 @@ const errors = collectPackageDistImportErrors({
 });
 
 if (errors.length > 0) {
-  fail(`OpenClaw package dist import closure failed:\n${errors.join("\n")}`);
+  fail(`Carapace package dist import closure failed:\n${errors.join("\n")}`);
 }
 
-console.log("OpenClaw package dist import closure passed.");
+console.log("Carapace package dist import closure passed.");

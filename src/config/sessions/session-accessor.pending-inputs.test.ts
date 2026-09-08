@@ -7,11 +7,11 @@ import { rotateAgentEventLifecycleGeneration } from "../../infra/agent-events.js
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
 import type { PersistedUserTurnMessage } from "../../sessions/user-turn-transcript.types.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import {
   appendTranscriptMessage,
   appendTranscriptMessageSync,
@@ -43,12 +43,12 @@ import { waitForSessionTranscriptProjection } from "./session-transcript-reconci
 import { useTempSessionsFixture } from "./test-helpers.js";
 
 describe("accepted input custody", () => {
-  const fixture = useTempSessionsFixture("openclaw-pending-inputs-");
+  const fixture = useTempSessionsFixture("carapace-pending-inputs-");
   const sessionKey = "agent:main:pending-inputs";
   const sessionId = "pending-session";
   const receipts: SessionPendingInputReceipt[] = [];
   const scope = () => ({ agentId: "main", sessionKey, sessionId, storePath: fixture.storePath() });
-  const database = () => openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
+  const database = () => openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
   const message = (runId: string, content = "Continue the task"): PersistedUserTurnMessage => ({
     role: "user",
     content,
@@ -86,7 +86,7 @@ describe("accepted input custody", () => {
     for (const receipt of receipts.splice(0)) {
       receipt.finish("interrupted");
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("keeps accepted input outside the active transcript and applies its hook once across replay and promotion", async () => {
@@ -301,9 +301,9 @@ describe("accepted input custody", () => {
       );
 
     expect(() =>
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (current) => {
-          deferOpenClawAgentPostCommitPublication(current, () => {
+          deferCarapaceAgentPostCommitPublication(current, () => {
             throw new Error("injected observer failure");
           });
           receipt.run(() => appendCopy(receipt.inputId, "relocated-before-observer"));
@@ -335,20 +335,20 @@ describe("accepted input custody", () => {
       );
 
     expect(() =>
-      runOpenClawAgentWriteTransaction(() => {
+      runCarapaceAgentWriteTransaction(() => {
         receipt.run(() => appendCopy(receipt.inputId, "rolled-back-outer"));
         throw new Error("outer rollback");
       }, databaseOptions),
     ).toThrow("outer rollback");
 
-    runOpenClawAgentWriteTransaction(() => {
+    runCarapaceAgentWriteTransaction(() => {
       receipt.run(() => {
         expect(appendCopy(receipt.inputId, "first-savepoint-copy")).toMatchObject({
           ok: true,
           value: { appended: true, messageId: "first-savepoint-copy" },
         });
         expect(() =>
-          runOpenClawAgentWriteTransaction(() => {
+          runCarapaceAgentWriteTransaction(() => {
             appendCopy("first-savepoint-copy", "rolled-back-savepoint");
             throw new Error("savepoint rollback");
           }, databaseOptions),
@@ -471,7 +471,7 @@ describe("accepted input custody", () => {
     aggregate.finish("cancelled");
     await replaceTranscriptEvents(scope(), []);
     rotateAgentEventLifecycleGeneration();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(readSessionSubmittedInput(scope(), "collect-a:user")).toEqual(first.message);
     expect(readSessionSubmittedInput(scope(), "collect-b:user")).toEqual(second.message);
     const duplicate = await stage("collect-a", {
@@ -679,7 +679,7 @@ describe("accepted input custody", () => {
   it("retires current-process custody on lifecycle rotation and never replays it after reopening", async () => {
     const receipt = await stage("restart");
     rotateAgentEventLifecycleGeneration();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(readSessionPendingInput(scope(), receipt.inputId)?.state).toBe("interrupted");
     expect(await loadTranscriptEvents(scope())).toEqual([]);
     expect(() => promote(receipt)).toThrow("ownership ended");
@@ -854,7 +854,7 @@ describe("accepted input custody", () => {
       };
       await upsertSessionEntryCore(destinationScope, { sessionId, updatedAt: 2 });
       const destinationOptions = toDatabaseOptions(resolveSqliteScope(destinationScope));
-      runOpenClawAgentWriteTransaction((destination) => {
+      runCarapaceAgentWriteTransaction((destination) => {
         copySessionNodeArtifactsForRepair(
           source,
           destination,

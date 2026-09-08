@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { McpCodexToolApprovalMode, McpServerConfig } from "../config/types.mcp.js";
 
 export type McpCodexToolAnnotations = {
@@ -16,9 +16,9 @@ function normalizeApprovalMode(value: unknown): McpCodexToolApprovalMode | undef
     : undefined;
 }
 
-function isOpenClawLoopbackServer(name: string, server: McpServerConfig): boolean {
+function isCarapaceLoopbackServer(name: string, server: McpServerConfig): boolean {
   return (
-    name === "openclaw" &&
+    name === "carapace" &&
     typeof server.url === "string" &&
     /^https?:\/\/(?:127\.0\.0\.1|localhost):\d+\/mcp(?:[?#].*)?$/.test(server.url)
   );
@@ -43,7 +43,7 @@ export function resolveProjectedMcpCodexToolApprovalMode(
     normalizeApprovalMode(codex.defaultToolsApprovalMode) ??
     normalizeApprovalMode(codex.default_tools_approval_mode) ??
     normalizeApprovalMode(projectedServer?.default_tools_approval_mode) ??
-    (isOpenClawLoopbackServer(serverName, server) ? "approve" : undefined)
+    (isCarapaceLoopbackServer(serverName, server) ? "approve" : undefined)
   );
 }
 
@@ -92,5 +92,5 @@ export function requiresMcpCodexToolApproval(params: {
 export function formatMcpCodexApprovalRemedy(serverName?: string): string {
   // Config keys are unbounded; keep model-visible hints short and never emit a CLI option as a name.
   const server = serverName && /^[\w.][\w.-]{0,127}$/.test(serverName) ? serverName : "<server>";
-  return `Run openclaw mcp configure ${server} --approval approve for a trusted server, or change the session permission mode.`;
+  return `Run carapace mcp configure ${server} --approval approve for a trusted server, or change the session permission mode.`;
 }

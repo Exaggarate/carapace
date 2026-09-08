@@ -6,9 +6,9 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import * as sessionEntries from "../../config/sessions/session-accessor.sqlite-entry.js";
 import { runExclusiveSessionStoreWrite } from "../../config/sessions/store-writer.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+} from "../../state/carapace-agent-db.js";
 import * as registry from "./reply-run-registry.js";
 import { testing } from "./reply-run-registry.test-support.js";
 import { admitReplyTurn } from "./reply-turn-admission.js";
@@ -17,7 +17,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
   testing.resetReplyRunRegistry();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   vi.restoreAllMocks();
 });
 
@@ -43,7 +43,7 @@ it.each(
         { sessionId, updatedAt: 1 },
       );
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     fs.symlinkSync(originalPath, storePath);
     const release = createDeferred();
     const writerStarted = createDeferred();
@@ -99,7 +99,7 @@ it.each(
       const database = observed.value.databaseClaim.database;
       expect(database.db.isOpen).toBe(true);
       if (replacement !== "unchanged") {
-        expect(closeOpenClawAgentDatabaseByPath(database.path)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(database.path)).toBe(true);
         expect(database.db.isOpen).toBe(false);
         if (replacement === "other-inode") {
           fs.unlinkSync(storePath);

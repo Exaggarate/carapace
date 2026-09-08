@@ -646,7 +646,7 @@ export function resetDiagnosticRunActivityForTest(): void {
 
 function installDiagnosticRunActivityTestApi(): void {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.diagnosticRunActivityTestApi")
+    Symbol.for("carapace.diagnosticRunActivityTestApi")
   ] = {
     markDiagnosticModelStartedForTest,
     markDiagnosticToolStartedForTest: recordToolStarted,

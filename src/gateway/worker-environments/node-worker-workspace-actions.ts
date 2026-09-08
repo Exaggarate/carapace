@@ -149,7 +149,7 @@ export function createNodeWorkerWorkspaceActions(params: {
     );
     try {
       const result = await exec({
-        argv: ["openclaw-internal-workspace-transfer"],
+        argv: ["carapace-internal-workspace-transfer"],
         transfer: {
           direction: "upload",
           token,
@@ -191,7 +191,7 @@ export function createNodeWorkerWorkspaceActions(params: {
               NODE_WORKSPACE_EMPTY_MANIFEST_REF,
             );
             const captured = await exec({
-              argv: ["openclaw-internal-workspace-transfer"],
+              argv: ["carapace-internal-workspace-transfer"],
               transfer: {
                 direction: "upload",
                 token: publicationToken,
@@ -284,7 +284,7 @@ export function createNodeWorkerWorkspaceActions(params: {
     let uploadedResult: Awaited<ReturnType<typeof exec>>;
     try {
       uploadedResult = await exec({
-        argv: ["openclaw-internal-workspace-transfer"],
+        argv: ["carapace-internal-workspace-transfer"],
         transfer: {
           direction: "upload",
           token: uploadToken,
@@ -334,7 +334,7 @@ export function createNodeWorkerWorkspaceActions(params: {
         });
         try {
           const published = await exec({
-            argv: ["openclaw-internal-workspace-transfer"],
+            argv: ["carapace-internal-workspace-transfer"],
             transfer: { direction: "download", token, manifestRef: accepted.manifestRef },
             timeoutMs: 10 * 60_000,
             transportRetry: "never",
@@ -466,7 +466,7 @@ export function createNodeWorkerWorkspaceActions(params: {
       });
       try {
         const applied = await exec({
-          argv: ["openclaw-internal-workspace-transfer"],
+          argv: ["carapace-internal-workspace-transfer"],
           transfer: {
             direction: "download",
             token,
@@ -506,12 +506,12 @@ export function createNodeWorkerWorkspaceActions(params: {
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const root = process.cwd();
-const script = path.join(root, ".openclaw", "worktree-setup.sh");
+const script = path.join(root, ".carapace", "worktree-setup.sh");
 const stat = fs.statSync(script, { throwIfNoEntry: false });
 if (stat?.isFile() && (stat.mode & 0o111)) {
   const run = spawnSync(script, [], {
     cwd: root,
-    env: { ...process.env, OPENCLAW_SOURCE_TREE_PATH: root, OPENCLAW_WORKTREE_PATH: root },
+    env: { ...process.env, CARAPACE_SOURCE_TREE_PATH: root, CARAPACE_WORKTREE_PATH: root },
     stdio: "inherit",
   });
   process.exitCode = run.status ?? 1;
@@ -547,7 +547,7 @@ if (stat?.isFile() && (stat.mode & 0o111)) {
       });
       try {
         const result = await exec({
-          argv: ["openclaw-internal-workspace-transfer"],
+          argv: ["carapace-internal-workspace-transfer"],
           transfer: {
             direction: "download",
             token: prepared.token,
@@ -609,7 +609,7 @@ if (stat?.isFile() && (stat.mode & 0o111)) {
             }
           }
           const transferred = await exec({
-            argv: ["openclaw-internal-workspace-transfer"],
+            argv: ["carapace-internal-workspace-transfer"],
             transfer: {
               direction: "download",
               token: prepared.token,

@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { connect, type AddressInfo } from "node:net";
-import { withEnvAsync, withServer } from "openclaw/plugin-sdk/test-env";
+import { withEnvAsync, withServer } from "carapace/plugin-sdk/test-env";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const resolveApiKeyForProviderMock = vi.hoisted(() =>
@@ -11,7 +11,7 @@ const resolveApiKeyForProviderMock = vi.hoisted(() =>
   })),
 );
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
@@ -30,15 +30,15 @@ let buildDeepInfraVideoGenerationProvider: typeof import("./video-generation-pro
 
 beforeAll(async () => {
   vi.resetModules();
-  vi.doUnmock("openclaw/plugin-sdk/provider-http");
-  vi.doMock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+  vi.doUnmock("carapace/plugin-sdk/provider-http");
+  vi.doMock("carapace/plugin-sdk/provider-auth-runtime", () => ({
     resolveApiKeyForProvider: resolveApiKeyForProviderMock,
   }));
   ({ buildDeepInfraVideoGenerationProvider } = await import("./video-generation-provider.js"));
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/provider-auth-runtime");
+  vi.doUnmock("carapace/plugin-sdk/provider-auth-runtime");
   vi.resetModules();
 });
 

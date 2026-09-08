@@ -1,7 +1,7 @@
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import { loadSessionEntryReadOnly } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSessionPinnedHarnessId } from "../../sessions/agent-harness-session-key.js";
 import { resolveSessionAgentIdsStrict } from "../agent-scope.js";
 import { AgentHarnessPreflightError } from "./errors.js";
@@ -10,7 +10,7 @@ import type { AgentHarnessSessionRuntimeOwnership } from "./types.js";
 
 /** Reads private ownership for a caller-supplied authoritative session, never a pin heuristic. */
 export function readSessionRuntimeOwnership(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   storePath?: string;

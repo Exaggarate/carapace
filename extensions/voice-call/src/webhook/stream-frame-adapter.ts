@@ -3,7 +3,7 @@
 import {
   asNullableRecord,
   asOptionalObjectRecord,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { canonicalizeVoiceCallMediaBase64 } from "../media-base64.js";
 
 /** Normalized inbound media stream frame. */

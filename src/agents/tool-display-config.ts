@@ -249,9 +249,9 @@ export const TOOL_DISPLAY_CONFIG: ToolDisplayConfig = {
       title: "Skill Workshop",
       detailKeys: ["action", "name", "proposal_id"],
     },
-    openclaw: {
+    carapace: {
       emoji: "🦀",
-      title: "OpenClaw",
+      title: "Carapace",
       detailKeys: ["action", "path", "model"],
     },
     gateway: {

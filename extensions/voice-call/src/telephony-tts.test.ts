@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Voice Call tests cover telephony tts plugin behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { VoiceCallTtsConfig } from "./config.js";
 import { createTelephonyTtsProvider, type TelephonyTtsRuntime } from "./telephony-tts.js";
 
-function createCoreConfig(): OpenClawConfig {
+function createCoreConfig(): CarapaceConfig {
   const tts: VoiceCallTtsConfig = {
     provider: "openai",
     providers: {
@@ -98,7 +98,7 @@ describe("createTelephonyTtsProvider", () => {
   );
 
   it("uses shared preparation for the surface override and request text", async () => {
-    const effectiveConfig: OpenClawConfig = {
+    const effectiveConfig: CarapaceConfig = {
       tts: { provider: "openai", timeoutMs: 15_000 },
     };
     const prepareTtsRequest = vi.fn<TelephonyTtsRuntime["prepareTtsRequest"]>(

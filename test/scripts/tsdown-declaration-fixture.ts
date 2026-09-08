@@ -38,16 +38,16 @@ export function runFixture(
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: undefined,
-      OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: undefined,
-      OPENCLAW_INCLUDE_OPTIONAL_BUNDLED: undefined,
+      CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: undefined,
+      CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS: undefined,
+      CARAPACE_INCLUDE_OPTIONAL_BUNDLED: undefined,
       ...env,
-      OPENCLAW_BUILD_PRIVATE_QA: privateQa ? "1" : "0",
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "0",
+      CARAPACE_BUILD_PRIVATE_QA: privateQa ? "1" : "0",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "0",
       // This synthetic graph fits a small heap; the full-repository floor does not apply.
-      OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB: "1024",
+      CARAPACE_TSDOWN_MAX_OLD_SPACE_MB: "1024",
       // Use the build owner's existing direct-tool path, without a fixture pnpm shim.
-      OPENCLAW_BUILD_ALL_NO_PNPM: "1",
+      CARAPACE_BUILD_ALL_NO_PNPM: "1",
     },
   });
 }
@@ -80,7 +80,7 @@ const selected = Object.fromEntries(groups.flatMap(config =>
   Object.entries(config.entry).filter(([, source]) => config.dts.entry.some(entry => path.resolve(entry) === path.resolve(source)))
 ));
 const declarations = Object.fromEntries(groups.map(config => [config.name, config.dts.entry]));
-const inputs = configs.filter(config => config.name === "openclaw-unified")
+const inputs = configs.filter(config => config.name === "carapace-unified")
   .flatMap(config => Object.values(config.entry));
 process.stdout.write(JSON.stringify({ inputs, selected, declarations }));
 `,
@@ -102,7 +102,7 @@ process.stdout.write(JSON.stringify({ inputs, selected, declarations }));
 
 export function createFixture(
   groups: readonly string[] = TSDOWN_PLUGIN_SDK_DTS_CONFIG_GROUPS,
-  root = path.join(fs.realpathSync(createTempDir("openclaw-sdk-declarations-")), "Project"),
+  root = path.join(fs.realpathSync(createTempDir("carapace-sdk-declarations-")), "Project"),
 ) {
   fs.mkdirSync(root, { recursive: true });
   fs.mkdirSync(path.join(root, ".artifacts"));
@@ -193,10 +193,10 @@ export function createFixture(
   if (groups === TSDOWN_NON_SDK_DTS_CONFIG_GROUPS) {
     // Exercise every real extension partition, even in the small compiler fixture.
     for (const id of ["fixture-a", "fixture-b", "fixture-c", "fixture-d", "fixture-e"]) {
-      write(`extensions/${id}/openclaw.plugin.json`, JSON.stringify({ id }));
+      write(`extensions/${id}/carapace.plugin.json`, JSON.stringify({ id }));
       write(
         `extensions/${id}/package.json`,
-        JSON.stringify({ name: `@openclaw/${id}`, exports: { ".": "./dist/index.js" } }),
+        JSON.stringify({ name: `@carapace/${id}`, exports: { ".": "./dist/index.js" } }),
       );
       write(`extensions/${id}/index.ts`, "export {};\n");
     }
@@ -232,8 +232,8 @@ export function createFixture(
         strict: true,
         types: [],
         paths: {
-          "@openclaw/llm-core": ["./src/shared.ts"],
-          "@openclaw/llm-core/contract": ["./contracts/current.ts"],
+          "@carapace/llm-core": ["./src/shared.ts"],
+          "@carapace/llm-core/contract": ["./contracts/current.ts"],
         },
       },
       include: ["src/**/*.ts"],
@@ -266,7 +266,7 @@ export function createFixture(
         [
           '/// <reference path="../schema.d.ts" />',
           'import schema from "../schema.sql";',
-          'export { Shared } from "@openclaw/llm-core";',
+          'export { Shared } from "@carapace/llm-core";',
           "export function getSchema(): string { return schema; }",
         ].join("\n"),
       );
@@ -275,8 +275,8 @@ export function createFixture(
     write(
       source,
       [
-        'export { Shared } from "@openclaw/llm-core";',
-        'export type { TransitiveAlias } from "@openclaw/llm-core/contract";',
+        'export { Shared } from "@carapace/llm-core";',
+        'export type { TransitiveAlias } from "@carapace/llm-core/contract";',
         ...declarationInputs.map(({ file, name }) => {
           const relative = path.relative(path.dirname(source), file).replaceAll(path.sep, "/");
           const specifier = (relative.startsWith(".") ? relative : `./${relative}`).replace(

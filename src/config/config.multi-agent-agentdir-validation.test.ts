@@ -5,12 +5,12 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { getRuntimeConfig } from "./config.js";
 import { createConfigIO } from "./io.factory.js";
-import { withTempHome, withTempHomeConfig, writeOpenClawConfig } from "./test-helpers.js";
-import type { OpenClawConfig } from "./types.js";
+import { withTempHome, withTempHomeConfig, writeCarapaceConfig } from "./test-helpers.js";
+import type { CarapaceConfig } from "./types.js";
 import { validateConfigObject } from "./validation.js";
 
 describe("multi-agent agentDir validation", () => {
-  it.each(["HOME", "USERPROFILE", "OPENCLAW_HOME", "homedir", "relative OPENCLAW_HOME"] as const)(
+  it.each(["HOME", "USERPROFILE", "CARAPACE_HOME", "homedir", "relative CARAPACE_HOME"] as const)(
     "keeps config validation and runtime paths in the selected %s",
     async (homeSource) => {
       await withTempHome(async (cliHome) => {
@@ -22,21 +22,21 @@ describe("multi-agent agentDir validation", () => {
         const env: NodeJS.ProcessEnv =
           homeSource === "homedir"
             ? {}
-            : homeSource === "relative OPENCLAW_HOME"
-              ? { OPENCLAW_HOME: "~/daemon" }
+            : homeSource === "relative CARAPACE_HOME"
+              ? { CARAPACE_HOME: "~/daemon" }
               : { [homeSource]: daemonHome };
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           agents: {
             ownership: "explicit",
             entries: { a: { agentDir: "~/shared" }, b: { agentDir: cliShared } },
           },
         };
-        const configPath = await writeOpenClawConfig(daemonHome, config);
+        const configPath = await writeCarapaceConfig(daemonHome, config);
         const raw = await fs.readFile(configPath, "utf8");
         const io = createConfigIO({
           configPath,
           env,
-          homedir: homeSource === "relative OPENCLAW_HOME" ? undefined : () => daemonHome,
+          homedir: homeSource === "relative CARAPACE_HOME" ? undefined : () => daemonHome,
           observe: false,
           pluginValidation: "core-only",
           logger: { error: vi.fn(), warn: vi.fn() },
@@ -50,7 +50,7 @@ describe("multi-agent agentDir validation", () => {
         expect(snapshot.sourceConfig.agents?.entries).toEqual(config.agents?.entries);
         await expect(fs.readFile(configPath, "utf8")).resolves.toBe(raw);
 
-        await writeOpenClawConfig(daemonHome, {
+        await writeCarapaceConfig(daemonHome, {
           agents: {
             ownership: "explicit",
             entries: { a: { agentDir: "~/shared" }, b: { agentDir: daemonShared } },
@@ -68,7 +68,7 @@ describe("multi-agent agentDir validation", () => {
   );
 
   it("rejects shared agents.entries agentDir", () => {
-    const shared = path.join(tmpdir(), "openclaw-shared-agentdir");
+    const shared = path.join(tmpdir(), "carapace-shared-agentdir");
     const res = validateConfigObject({
       agents: {
         entries: { a: { agentDir: shared, default: true }, b: { agentDir: shared } },
@@ -86,7 +86,7 @@ Conflicts:
 - ${shared}: "a", "b"
 
 Fix: remove the shared agents.entries.*.agentDir override (or give each agent its own directory).
-Auth profiles live in each agent's SQLite store, so a shared agentDir is not how credentials are shared: give each agent its own directory and either leave its store empty to inherit the main agent's profiles, or log it in with \`openclaw models auth login\`.`,
+Auth profiles live in each agent's SQLite store, so a shared agentDir is not how credentials are shared: give each agent its own directory and either leave its store empty to inherit the main agent's profiles, or log it in with \`carapace models auth login\`.`,
         },
       ]);
     }
@@ -97,8 +97,8 @@ Auth profiles live in each agent's SQLite store, so a shared agentDir is not how
       {
         agents: {
           entries: {
-            a: { agentDir: "~/.openclaw/agents/shared/agent", default: true },
-            b: { agentDir: "~/.openclaw/agents/shared/agent" },
+            a: { agentDir: "~/.carapace/agents/shared/agent", default: true },
+            b: { agentDir: "~/.carapace/agents/shared/agent" },
           },
         },
         bindings: [{ agentId: "a", match: { channel: "forum" } }],

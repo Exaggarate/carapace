@@ -1,7 +1,7 @@
 /** Agent-facing inline chat widget tool. */
 import { createHash } from "node:crypto";
-import { truncateCodePoints } from "@openclaw/normalization-core/code-points";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { truncateCodePoints } from "@carapace/normalization-core/code-points";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { Type } from "typebox";
 import type { BoardWidgetPutResult } from "../../packages/gateway-protocol/src/index.js";
 import { optionalStringEnum } from "../agents/schema/string-enum.js";
@@ -226,7 +226,7 @@ function widgetPresentationFailureText(
   }
   const nextStep =
     error.code === "no_eligible_node"
-      ? "Pair a canvas-capable device or open the OpenClaw app, then retry."
+      ? "Pair a canvas-capable device or open the Carapace app, then retry."
       : "Retry the requested presentation destination when it is available.";
   return `${message} The widget is available inline here. ${nextStep}`;
 }
@@ -276,7 +276,7 @@ function assertPinnedWidgetDocumentSize(html: string): void {
   }
 }
 
-/** Creates a self-contained widget hosted by OpenClaw core. */
+/** Creates a self-contained widget hosted by Carapace core. */
 export function createShowWidgetTool(options: ShowWidgetToolOptions = {}): AnyAgentTool {
   const gatewayCall = options.callGateway ?? callInProcessGatewayTool;
   const pinnedOnly = options.pinnedOnly === true;
@@ -321,7 +321,7 @@ export function createShowWidgetTool(options: ShowWidgetToolOptions = {}): AnyAg
   return {
     label: "Show Widget",
     name: "show_widget",
-    description: `Visual helps? Make widget. Do not wait for ask. ${usageGuidance} Update HTML by name. Use for comparisons, trends, timelines, flows, hierarchies, dashboards, status, progress, layouts, and choices. Text clearer? Skip. ${destinationGuidance}; kind defaults to html${advertisedRegisteredKinds.length ? ` and registered kinds are ${advertisedRegisteredKinds.join(", ")}` : ""}. Reuse the same explicit name with pin=true and new report data or widget_code to update pinned content. Use name for a stable widget id, tab for a tab slug, size sm|md|lg|xl|full, presentation.frame card|full-bleed|frameless, and after for a sibling widget anchor. Pinned widgets may declare capabilities.netOrigins and capabilities.tools for operator approval. HTML widgets are self-contained HTML or SVG. Dashboard host APIs: openclaw.prompt.send(text), openclaw.state.emit(payload), openclaw.data.read(bindingId, params?), openclaw.action.run(actionId, params?), and openclaw.cron.trigger(jobId). openclaw.host.controlUiBaseUrl is the Control UI origin plus base path after dashboard host initialization, otherwise null; read it at click time. Open links in a new tab with target="_blank" and rel="noopener noreferrer". \`title\` is host metadata. Start directly with content; do not repeat the title or recreate dashboard chrome. ${reportGuidance} HTML is pre-themed with --surface --card --elevated --text --text-strong --muted --border --border-strong --accent --accent-fill --accent-fg --ok --warn --danger --info --radius --font-body --font-mono.${presenterPrompt}`,
+    description: `Visual helps? Make widget. Do not wait for ask. ${usageGuidance} Update HTML by name. Use for comparisons, trends, timelines, flows, hierarchies, dashboards, status, progress, layouts, and choices. Text clearer? Skip. ${destinationGuidance}; kind defaults to html${advertisedRegisteredKinds.length ? ` and registered kinds are ${advertisedRegisteredKinds.join(", ")}` : ""}. Reuse the same explicit name with pin=true and new report data or widget_code to update pinned content. Use name for a stable widget id, tab for a tab slug, size sm|md|lg|xl|full, presentation.frame card|full-bleed|frameless, and after for a sibling widget anchor. Pinned widgets may declare capabilities.netOrigins and capabilities.tools for operator approval. HTML widgets are self-contained HTML or SVG. Dashboard host APIs: carapace.prompt.send(text), carapace.state.emit(payload), carapace.data.read(bindingId, params?), carapace.action.run(actionId, params?), and carapace.cron.trigger(jobId). carapace.host.controlUiBaseUrl is the Control UI origin plus base path after dashboard host initialization, otherwise null; read it at click time. Open links in a new tab with target="_blank" and rel="noopener noreferrer". \`title\` is host metadata. Start directly with content; do not repeat the title or recreate dashboard chrome. ${reportGuidance} HTML is pre-themed with --surface --card --elevated --text --text-strong --muted --border --border-strong --accent --accent-fill --accent-fg --ok --warn --danger --info --radius --font-body --font-mono.${presenterPrompt}`,
     parameters: createShowWidgetToolSchema(
       kinds,
       explicitPresenters,

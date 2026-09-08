@@ -1,6 +1,6 @@
 // Loads metadata snapshots and exposes Gateway startup planning entrypoints.
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayStartupPluginPlan } from "./gateway-startup-plugin-contracts.js";
 import { createGatewayStartupMetadataPluginIdScope } from "./gateway-startup-plugin-metadata.js";
 import { resolveGatewayStartupPluginPlanFromRegistry } from "./gateway-startup-plugin-plan.js";
@@ -12,7 +12,7 @@ import {
 import type { PluginRegistrySnapshot } from "./plugin-registry-snapshot.js";
 
 export function resolveChannelPluginIds(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): string[] {
@@ -20,8 +20,8 @@ export function resolveChannelPluginIds(params: {
 }
 
 export function resolveGatewayStartupPluginIdsFromRegistry(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   index: PluginRegistrySnapshot;
   manifestRegistry: PluginManifestRegistry;
@@ -32,8 +32,8 @@ export function resolveGatewayStartupPluginIdsFromRegistry(params: {
 }
 
 type GatewayStartupPluginPlanParams = {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   index?: PluginRegistrySnapshot;

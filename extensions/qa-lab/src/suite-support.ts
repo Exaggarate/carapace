@@ -1,5 +1,5 @@
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
-import { parseBooleanValue } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceCrablineChannelDriverSelection } from "@openclaw/crabline";
+import { parseBooleanValue } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { QaSuiteChannelDriverSelection } from "./crabline-artifacts.js";
 import type { QaProviderMode } from "./model-selection.js";
 import type { QaTransportId } from "./qa-transport-registry.js";
@@ -48,13 +48,13 @@ export function createQaSuiteReportNotes(params: {
   fastMode: boolean;
   concurrency: number;
   isolatedWorkers?: boolean;
-  createCrablineChannelReportNotes?: QaCrablineRuntime["createOpenClawCrablineChannelReportNotes"];
+  createCrablineChannelReportNotes?: QaCrablineRuntime["createCarapaceCrablineChannelReportNotes"];
 }) {
   return [
     ...params.transport.createReportNotes(params),
     // Crabline reports completed generation paths through this filename-narrowed selection.
     ...(params.createCrablineChannelReportNotes?.(
-      params.channelDriverSelection as OpenClawCrablineChannelDriverSelection | null | undefined,
+      params.channelDriverSelection as CarapaceCrablineChannelDriverSelection | null | undefined,
     ) ?? []),
   ];
 }
@@ -65,7 +65,7 @@ export function buildQaIsolatedScenarioWorkerParams(params: {
   providerMode: QaProviderMode;
   transportId: QaTransportId;
   channelDriver?: QaScorecardChannelDriver;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: CarapaceCrablineChannelDriverSelection | null;
   primaryModel: string;
   alternateModel: string;
   fastMode: boolean;
@@ -78,7 +78,7 @@ export function buildQaIsolatedScenarioWorkerParams(params: {
     adapterOptions: params.input?.adapterOptions,
     channelId: params.input?.channelId,
     repoRoot: params.repoRoot,
-    sutOpenClawCommand: params.input?.sutOpenClawCommand,
+    sutCarapaceCommand: params.input?.sutCarapaceCommand,
     mutateConfig: params.input?.mutateConfig,
     outputDir: params.outputDir,
     providerMode: params.providerMode,
@@ -127,7 +127,7 @@ function appendNodeOption(raw: string | undefined, option: string) {
 }
 
 export function shouldCaptureGatewayHeapCheckpoints(env: NodeJS.ProcessEnv = process.env) {
-  return parseBooleanValue(env.OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS) === true;
+  return parseBooleanValue(env.CARAPACE_QA_GATEWAY_HEAP_CHECKPOINTS) === true;
 }
 
 export function buildQaGatewayHeapCheckpointRuntimeEnvPatch(

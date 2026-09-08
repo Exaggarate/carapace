@@ -95,7 +95,7 @@ it("allocates independently in concurrent workers sharing the same parent and sc
 it("keeps explicit parents authoritative and trims the existing configured root", () => {
   const explicit = makeTempDir(tempDirs, "control-ui-proof-explicit-");
   const configured = makeTempDir(tempDirs, "control-ui-proof-configured-");
-  vi.stubEnv("OPENCLAW_UI_E2E_ARTIFACT_DIR", `  ${configured}  `);
+  vi.stubEnv("CARAPACE_UI_E2E_ARTIFACT_DIR", `  ${configured}  `);
   expect(path.dirname(createControlUiE2eArtifactDir("configured"))).toBe(configured);
   expect(path.dirname(createControlUiE2eArtifactDir("explicit", explicit))).toBe(explicit);
 });
@@ -103,7 +103,7 @@ it("keeps explicit parents authoritative and trims the existing configured root"
 it.each([undefined, "", "   "])(
   "uses the repository parent for an unset or blank root (%s)",
   (root) => {
-    vi.stubEnv("OPENCLAW_UI_E2E_ARTIFACT_DIR", root);
+    vi.stubEnv("CARAPACE_UI_E2E_ARTIFACT_DIR", root);
     const directory = createControlUiE2eArtifactDir("allocator-regression");
     // Only this exclusive child is disposable; the repository evidence parent is not ours.
     tempDirs.push(directory);
@@ -115,11 +115,11 @@ it.each([undefined, "", "   "])(
 
 it("does not enable optional capture when allocating an always-on scenario", () => {
   const parent = makeTempDir(tempDirs, "control-ui-proof-disabled-");
-  vi.stubEnv("OPENCLAW_UI_E2E_ARTIFACT_DIR", undefined);
-  vi.stubEnv("OPENCLAW_CAPTURE_UI_PROOF", "0");
+  vi.stubEnv("CARAPACE_UI_E2E_ARTIFACT_DIR", undefined);
+  vi.stubEnv("CARAPACE_CAPTURE_UI_PROOF", "0");
   expect(readdirSync(parent)).toEqual([]);
   const directory = createControlUiE2eArtifactDir("always-on", parent);
   expect(readdirSync(parent)).toEqual([path.basename(directory)]);
-  expect(process.env.OPENCLAW_CAPTURE_UI_PROOF).toBe("0");
-  expect(process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR).toBeUndefined();
+  expect(process.env.CARAPACE_CAPTURE_UI_PROOF).toBe("0");
+  expect(process.env.CARAPACE_UI_E2E_ARTIFACT_DIR).toBeUndefined();
 });

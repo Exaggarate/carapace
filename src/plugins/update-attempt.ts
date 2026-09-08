@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ClawHubTrustErrorCode } from "../infra/clawhub-install-trust.js";
 import { isPackageVersionDowngrade } from "../infra/package-update-utils.js";
 import type { UpdateChannel } from "../infra/update-channels.js";
@@ -35,7 +35,7 @@ export function formatNewerExactPinnedNpmDefaultLineMessage(params: {
   return (
     `${params.pluginId} is pinned to ${params.recordedSpec} (installed ${params.currentVersion}); ` +
     `registry ${params.newer.registryLine} resolves to ${params.newer.version}. ` +
-    `Pass \`openclaw plugins update ${params.newer.packageName}@${params.newer.registryLine}\` to replace this version pin.`
+    `Pass \`carapace plugins update ${params.newer.packageName}@${params.newer.registryLine}\` to replace this version pin.`
   );
 }
 
@@ -323,7 +323,7 @@ export async function buildDryRunPluginUpdateOutcome(params: {
 export async function runPluginUpdateAttempt(params: {
   pluginId: string;
   record: UpdatablePluginInstallRecord;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   dryRun: boolean;
   effectiveSpec?: string;
   extensionsDir?: string;

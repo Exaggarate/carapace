@@ -20,7 +20,7 @@ const inputSchema = z.strictObject({
   ownerHeaders: headersSchema,
   nonownerHeaders: headersSchema,
   workloadToken: z.string().min(1).max(8192),
-  openclawAgent: z.string().regex(/^[a-z0-9-]{1,64}$/),
+  carapaceAgent: z.string().regex(/^[a-z0-9-]{1,64}$/),
   codexAgent: z
     .string()
     .regex(/^[a-z0-9-]{1,64}$/)
@@ -47,10 +47,10 @@ const reportTemplate = {
   raw_model_rejected: 0,
   malformed_request_rejected: 0,
   alias_sse_pass: 0,
-  openclaw_picker_pass: 0,
-  openclaw_runtime_pass: 0,
-  openclaw_tool_pass: 0,
-  openclaw_second_turn_pass: 0,
+  carapace_picker_pass: 0,
+  carapace_runtime_pass: 0,
+  carapace_tool_pass: 0,
+  carapace_second_turn_pass: 0,
   codex_picker_pass: 0,
   codex_runtime_pass: 0,
   codex_tool_pass: 0,
@@ -338,8 +338,8 @@ async function probeHarness(
   scan: (text: string) => void,
   report: ProbeReport,
 ) {
-  const prefix = native ? "codex" : "openclaw";
-  const agentId = native ? input.codexAgent : input.openclawAgent;
+  const prefix = native ? "codex" : "carapace";
+  const agentId = native ? input.codexAgent : input.carapaceAgent;
   if (!agentId) {
     throw new Error("agent");
   }
@@ -383,7 +383,7 @@ async function probeHarness(
     const runtimeSchema = z.object({
       model: z.literal(ALIAS),
       modelProvider: z.literal(native ? "openai" : "clawrouter"),
-      agentRuntime: z.object({ id: z.literal(native ? "codex" : "openclaw") }),
+      agentRuntime: z.object({ id: z.literal(native ? "codex" : "carapace") }),
     });
     report[`${prefix}_runtime_pass`] = Number(runtimeSchema.safeParse(history.sessionInfo).success);
     if (!report[`${prefix}_runtime_pass`]) {
@@ -580,8 +580,8 @@ export async function runPrivateCodexProbe(raw: unknown): Promise<ProbeReport> {
       report.leak_hits === 0 &&
       report.explicit_model_failures === 0 &&
       report.native_blocked === 0 &&
-      report.openclaw_tool_pass === 1 &&
-      report.openclaw_second_turn_pass === 1 &&
+      report.carapace_tool_pass === 1 &&
+      report.carapace_second_turn_pass === 1 &&
       report.codex_tool_pass === 1 &&
       report.codex_second_turn_pass === 1,
   );

@@ -29,13 +29,13 @@ async function flushUntil(predicate: () => boolean): Promise<void> {
 function makeProfileRuntime(): ProfileRuntimeState {
   return {
     profile: {
-      name: "openclaw",
+      name: "carapace",
       cdpPort: 18800,
       cdpUrl: "http://127.0.0.1:18800",
       cdpHost: "127.0.0.1",
       cdpIsLoopback: true,
       color: "#FF4500",
-      driver: "openclaw",
+      driver: "carapace",
       headless: true,
       headlessSource: "config",
       attachOnly: false,
@@ -142,10 +142,10 @@ describe("browser tab discovery poll abort", () => {
         return { ok: true, json: async () => [] } as unknown as Response;
       });
       globalThis.fetch = withBrowserFetchPreconnect(fetchMock);
-      const state = makeState("openclaw");
-      const openclaw = createBrowserRouteContext({ getState: () => state }).forProfile("openclaw");
+      const state = makeState("carapace");
+      const carapace = createBrowserRouteContext({ getState: () => state }).forProfile("carapace");
       const controller = new AbortController();
-      const openPromise = openclaw.openTab("about:blank", { signal: controller.signal });
+      const openPromise = carapace.openTab("about:blank", { signal: controller.signal });
 
       await vi.advanceTimersByTimeAsync(0);
       expect(setTimeoutSpy.mock.calls.some((call) => call[1] === OPEN_TAB_DISCOVERY_POLL_MS)).toBe(
@@ -157,7 +157,7 @@ describe("browser tab discovery poll abort", () => {
         markBrowserRuntimeStopping(state);
         stopping = beginProfileTransition({
           state,
-          runtime: state.profiles.get("openclaw")!,
+          runtime: state.profiles.get("carapace")!,
           reason: "runtime shutdown",
           closeSharedAdapters: false,
         });

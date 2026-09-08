@@ -1,25 +1,25 @@
 {
-  "name": "@openclaw/policy",
+  "name": "@carapace/policy",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw policy doctor checks for workspace conformance",
+  "description": "Carapace policy doctor checks for workspace conformance",
   "type": "module",
   "dependencies": {
     "json5": "2.2.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*",
+    "carapace": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

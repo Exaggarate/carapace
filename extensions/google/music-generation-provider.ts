@@ -1,17 +1,17 @@
 // Google provider module implements model/runtime integration.
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import { generatedMusicAssetFromBase64 } from "openclaw/plugin-sdk/music-generation";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import { generatedMusicAssetFromBase64 } from "carapace/plugin-sdk/music-generation";
 import type {
   GeneratedMusicAsset,
   MusicGenerationProvider,
   MusicGenerationRequest,
-} from "openclaw/plugin-sdk/music-generation";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/music-generation";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   createProviderOperationDeadline,
   resolveProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveGoogleGenerativeAiApiOrigin } from "./api.js";
 import { toStandardGoogleProviderBase64 } from "./base64.js";
 import {

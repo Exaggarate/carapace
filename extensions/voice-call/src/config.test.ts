@@ -825,8 +825,8 @@ describe("normalizeVoiceCallConfig", () => {
       includeWorkspaceFiles: true,
       files: ["SOUL.md", "IDENTITY.md", "USER.md"],
     });
-    expect(normalized.realtime.instructions).toContain("openclaw_agent_consult");
-    expect(normalized.realtime.instructions).toContain("openclaw_end_call");
+    expect(normalized.realtime.instructions).toContain("carapace_agent_consult");
+    expect(normalized.realtime.instructions).toContain("carapace_end_call");
     expect(normalized.realtime.instructions).toContain("speak any final words first");
     expect(normalized.tailscale.port).toBe(443);
     expect(normalized.tunnel.provider).toBe("none");

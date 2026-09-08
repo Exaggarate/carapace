@@ -2,7 +2,7 @@ import { resolveDefaultModelForAgent } from "../agents/model-selection-config.js
 // Setup inference verification owns the shared verify/repair loop used by onboarding imports.
 import type { OnboardOptions } from "../commands/onboard-types.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withConsoleSubsystemsSuppressed } from "../logging/console.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { t } from "./i18n/index.js";
@@ -10,7 +10,7 @@ import type { WizardPrompter } from "./prompts.js";
 import { runSetupModelAuthStep, type SetupModelAuthCandidate } from "./setup.model-auth.js";
 
 export async function offerLiveModelVerification(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   initialCandidate?: SetupModelAuthCandidate;
   opts: OnboardOptions;
   prompter: WizardPrompter;
@@ -18,16 +18,16 @@ export async function offerLiveModelVerification(params: {
   workspaceDir: string;
   agentDir?: string;
   stateDir?: string;
-  writeConfig: (config: OpenClawConfig) => Promise<OpenClawConfig>;
+  writeConfig: (config: CarapaceConfig) => Promise<CarapaceConfig>;
   required?: boolean;
 }): Promise<{
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   attempted: boolean;
   persisted: boolean;
   verified: boolean;
   modelRef?: string;
 }> {
-  const requiresCandidateVerification = (config: OpenClawConfig) => {
+  const requiresCandidateVerification = (config: CarapaceConfig) => {
     const provider = resolveDefaultModelForAgent({ cfg: config }).provider;
     return (
       params.opts.nonInteractive !== true &&
@@ -50,10 +50,10 @@ export async function offerLiveModelVerification(params: {
   const [inference, authStore, agentDatabase] = await Promise.all([
     import("../system-agent/setup-inference.js"),
     import("../agents/auth-profiles/store-runtime.js"),
-    import("../state/openclaw-agent-db.js"),
+    import("../state/carapace-agent-db.js"),
   ]);
   const stagedEnv = params.stateDir
-    ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir }
+    ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir }
     : undefined;
   let shouldPersistCandidate = params.initialCandidate !== undefined;
   const verify = async (candidate: SetupModelAuthCandidate) => {
@@ -61,7 +61,7 @@ export async function offerLiveModelVerification(params: {
     const verification = withConsoleSubsystemsSuppressed(() =>
       inference.verifySetupInferenceConfig({
         // SAFETY: Canonical roster migration preserves typed config; this runtime view is never persisted.
-        config: migratePersistedImplicitMainRoster(candidate.config).config as OpenClawConfig,
+        config: migratePersistedImplicitMainRoster(candidate.config).config as CarapaceConfig,
         runtime: params.runtime,
         authProfiles: candidate.authProfiles,
         verifyAgentTools: shouldPersistCandidate && params.opts.nonInteractive !== true,
@@ -74,8 +74,8 @@ export async function offerLiveModelVerification(params: {
                     ...updateParams,
                     stateDir: params.stateDir,
                   }),
-                disposeOpenClawAgentDatabaseByPath: (pathname) =>
-                  agentDatabase.disposeOpenClawAgentDatabaseByPath(pathname, {
+                disposeCarapaceAgentDatabaseByPath: (pathname) =>
+                  agentDatabase.disposeCarapaceAgentDatabaseByPath(pathname, {
                     env: stagedEnv!,
                   }),
               },

@@ -1,7 +1,7 @@
 /** Public runtime parameter and result types for image generation calls. */
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import type { FallbackAttempt } from "../agents/model-fallback.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import type {
   GeneratedImageAsset,
@@ -16,7 +16,7 @@ import type {
 } from "./types.js";
 
 export type GenerateImageParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompt: string;
   agentDir?: string;
   authStore?: AuthProfileStore;

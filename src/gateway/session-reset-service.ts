@@ -1,9 +1,9 @@
 // Gateway session reset/delete service.
 // Rotates transcripts and coordinates lifecycle cleanup across runtimes/hooks.
 import { randomUUID } from "node:crypto";
-import { cleanupSessionResources } from "@openclaw/ai/internal/runtime";
-import { type FastMode, normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { cleanupSessionResources } from "@carapace/ai/internal/runtime";
+import { type FastMode, normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   ErrorCodes,
   errorShape,
@@ -68,7 +68,7 @@ import {
   type SessionCreatedVia,
 } from "../config/sessions/session-entry-provenance.js";
 import type { SessionAcpMeta } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { logVerbose } from "../globals.js";
 import { createInternalHookEvent, triggerInternalHook } from "../hooks/internal-hooks.js";
 import {
@@ -138,7 +138,7 @@ import {
   retireSessionWorkerPlacementBeforeMutation,
 } from "./worker-environments/session-placement-lifecycle.js";
 
-function resolveLifecycleAgentId(cfg: OpenClawConfig, agentId?: string): string {
+function resolveLifecycleAgentId(cfg: CarapaceConfig, agentId?: string): string {
   return normalizeAgentId(agentId ?? resolveAmbientOwnerAgentId(cfg));
 }
 
@@ -149,7 +149,7 @@ type McpRunEndWatcherState = {
 };
 
 const mcpRunEndWatcherState = resolveGlobalSingleton<McpRunEndWatcherState>(
-  Symbol.for("openclaw.mcpRunEndWatchers"),
+  Symbol.for("carapace.mcpRunEndWatchers"),
   () => ({ cancellations: new Map(), retirements: new Set(), watchers: new Map() }),
   async (state) => {
     for (const cancel of state.cancellations.values()) {
@@ -188,7 +188,7 @@ export function archiveSessionTranscriptsForSessionDetailed(params: {
 }
 
 export function emitGatewaySessionEndPluginHook(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   sessionId?: string;
   storePath: string;
@@ -269,7 +269,7 @@ export function emitGatewaySessionEndPluginHook(params: {
 }
 
 export function emitGatewaySessionStartPluginHook(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   sessionId?: string;
   resumedFrom?: string;
@@ -347,7 +347,7 @@ export async function emitSessionUnboundLifecycleEvent(params: {
 }
 
 async function ensureSessionRuntimeCleanup(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   target: ReturnType<typeof resolveGatewaySessionStoreTarget>;
   sessionId?: string;
@@ -543,7 +543,7 @@ async function runAcpCleanupStep(params: {
 }
 
 async function closeAcpRuntimeForSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   fallbackSessionKeys?: Array<string | undefined>;
@@ -701,7 +701,7 @@ function buildPendingAcpMeta(base: SessionAcpMeta, now: number): SessionAcpMeta 
 }
 
 async function ensureFreshAcpResetState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   reason: "session-reset" | "session-delete";
@@ -766,7 +766,7 @@ async function ensureFreshAcpResetState(params: {
 }
 
 async function closeChildAcpRuntimesForParent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   parentKey: string;
   parentAgentId?: string;
   reason: "session-reset" | "session-delete";
@@ -856,7 +856,7 @@ async function closeChildAcpRuntimesForParent(params: {
 }
 
 export async function cleanupSessionBeforeMutation(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   target: ReturnType<typeof resolveGatewaySessionStoreTarget>;
   entry: SessionEntry | undefined;
@@ -934,7 +934,7 @@ export async function cleanupSessionBeforeMutation(params: {
 }
 
 export async function emitGatewayBeforeResetPluginHook(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   key: string;
   messages?: unknown[];
   target: ReturnType<typeof resolveGatewaySessionStoreTarget>;

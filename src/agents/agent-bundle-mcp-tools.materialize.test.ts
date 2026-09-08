@@ -1,8 +1,8 @@
 /** Tests materializing MCP catalog tools into agent tool definitions and results. */
 
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { expectDefined } from "@openclaw/normalization-core";
-import { validateToolArguments } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@carapace/normalization-core";
+import { validateToolArguments } from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { getPluginToolMeta } from "../plugins/tool-metadata.js";

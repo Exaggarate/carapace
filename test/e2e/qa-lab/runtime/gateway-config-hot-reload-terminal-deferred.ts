@@ -105,7 +105,7 @@ export async function proveHotReloadTerminalDeferredRestart({
             usePackagedPlugins: true,
           },
           providerMode: "mock-openai",
-          forcedRuntime: "openclaw",
+          forcedRuntime: "carapace",
           providerBaseUrl: `http://127.0.0.1:${address.port}/v1`,
           primaryModel: MODEL,
           transportBaseUrl: "http://127.0.0.1:1",

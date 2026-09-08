@@ -41,7 +41,7 @@ function metadataSnapshot(params: {
 }) {
   const id = params.id ?? "workboard";
   const packageName =
-    params.packageName === null ? undefined : (params.packageName ?? `@openclaw/${id}`);
+    params.packageName === null ? undefined : (params.packageName ?? `@carapace/${id}`);
   const rootDir = `/tmp/${id}`;
   const installOwner = params.installRecord ? id : undefined;
   const manifest = recordPluginManifestInstallOwner(
@@ -59,7 +59,7 @@ function metadataSnapshot(params: {
       origin: params.origin ?? "bundled",
       rootDir,
       source: `${rootDir}/index.ts`,
-      manifestPath: `${rootDir}/openclaw.plugin.json`,
+      manifestPath: `${rootDir}/carapace.plugin.json`,
     },
     installOwner,
   );
@@ -127,7 +127,7 @@ function hostedFeedEntry(params: {
     state: "available",
     ...(params.featured === undefined ? {} : { featured: params.featured }),
     ...(params.featuredAt === undefined ? {} : { featuredAt: params.featuredAt }),
-    publisher: { id: "openclaw", trust: "official" },
+    publisher: { id: "carapace", trust: "official" },
     install: {
       candidates: [
         {
@@ -140,7 +140,7 @@ function hostedFeedEntry(params: {
     },
     ...(params.pluginId
       ? {
-          openclaw: {
+          carapace: {
             plugin: { id: params.pluginId, label: params.title },
             catalog: {
               ...(params.catalogFeatured === undefined ? {} : { featured: params.catalogFeatured }),
@@ -160,7 +160,7 @@ function compositionEntry(
 ) {
   return {
     featured: true,
-    openclaw: {
+    carapace: {
       plugin: { id, label: id },
       catalog: { featured: true, order },
       install,
@@ -169,7 +169,7 @@ function compositionEntry(
 }
 
 const hostedFeedDiffsEntry = hostedFeedEntry({
-  packageName: "@openclaw/diffs",
+  packageName: "@carapace/diffs",
   title: "Diffs",
   featured: true,
 });
@@ -187,10 +187,10 @@ describe("plugin management Featured authority", () => {
     const officialCatalog = {
       entries: [
         hostedFeedEntry({
-          packageName: "@expediagroup/expedia-openclaw",
+          packageName: "@expediagroup/expedia-carapace",
           title: "Expedia Travel",
           featured: true,
-          pluginId: "@expediagroup/expedia-openclaw",
+          pluginId: "@expediagroup/expedia-carapace",
           order: 10,
           description: "Search flights, stays, and travel options.",
           icon,
@@ -203,11 +203,11 @@ describe("plugin management Featured authority", () => {
     const resolved = await resolveManagedPluginIconSource({
       config: {},
       env: {},
-      pluginId: "@expediagroup/expedia-openclaw",
+      pluginId: "@expediagroup/expedia-carapace",
     });
 
     expect(catalog.plugins[0]).toMatchObject({
-      id: "@expediagroup/expedia-openclaw",
+      id: "@expediagroup/expedia-carapace",
       name: "Expedia Travel",
       description: "Search flights, stays, and travel options.",
       featured: true,
@@ -248,7 +248,7 @@ describe("plugin management Featured authority", () => {
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/diffs",
+          packageName: "@carapace/diffs",
           title: "Diffs",
         }),
       ]),
@@ -268,7 +268,7 @@ describe("plugin management Featured authority", () => {
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/new-tool",
+          packageName: "@carapace/new-tool",
           title: "New Tool",
           featured: true,
         }),
@@ -279,10 +279,10 @@ describe("plugin management Featured authority", () => {
 
     expect(catalog.plugins).toEqual([
       expect.objectContaining({
-        id: "@openclaw/new-tool",
+        id: "@carapace/new-tool",
         name: "New Tool",
         featured: true,
-        install: { source: "official", pluginId: "@openclaw/new-tool" },
+        install: { source: "official", pluginId: "@carapace/new-tool" },
       }),
     ]);
   });
@@ -292,21 +292,21 @@ describe("plugin management Featured authority", () => {
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/older-popular",
+          packageName: "@carapace/older-popular",
           title: "Older Popular",
           featured: true,
           featuredAt: 100,
           order: 1,
         }),
         hostedFeedEntry({
-          packageName: "@openclaw/newest-featured",
+          packageName: "@carapace/newest-featured",
           title: "Newest Featured",
           featured: true,
           featuredAt: 200,
           order: 99,
         }),
         hostedFeedEntry({
-          packageName: "@openclaw/legacy-featured",
+          packageName: "@carapace/legacy-featured",
           title: "Legacy Featured",
           featured: true,
           order: 0,
@@ -317,9 +317,9 @@ describe("plugin management Featured authority", () => {
     const catalog = await listManagedPlugins({ config: {}, env: {} });
 
     expect(catalog.plugins.map((plugin) => plugin.id)).toEqual([
-      "@openclaw/newest-featured",
-      "@openclaw/older-popular",
-      "@openclaw/legacy-featured",
+      "@carapace/newest-featured",
+      "@carapace/older-popular",
+      "@carapace/legacy-featured",
     ]);
     expect(catalog.plugins.map((plugin) => plugin.featuredAt)).toEqual([200, 100, undefined]);
   });
@@ -329,7 +329,7 @@ describe("plugin management Featured authority", () => {
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/new-tool",
+          packageName: "@carapace/new-tool",
           title: "New Tool",
           featured: false,
           pluginId: "new-tool",
@@ -355,7 +355,7 @@ describe("plugin management Featured authority", () => {
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/copilot",
+          packageName: "@carapace/copilot",
           title: "Copilot",
           featured: false,
           pluginId: "copilot",
@@ -382,7 +382,7 @@ describe("plugin management Featured authority", () => {
         id: "diffs",
         name: "Diffs",
         origin: "global",
-        installRecord: { source: "npm", spec: "@openclaw/diffs" },
+        installRecord: { source: "npm", spec: "@carapace/diffs" },
       }),
     );
     mocks.officialCatalog.mockResolvedValue(
@@ -407,7 +407,7 @@ describe("plugin management Featured authority", () => {
         id: "diffs",
         name: "Diffs",
         origin: "global",
-        installRecord: { source: "npm", spec: "@openclaw/diffs" },
+        installRecord: { source: "npm", spec: "@carapace/diffs" },
         featured: false,
       }),
     );
@@ -425,8 +425,8 @@ describe("plugin management Featured authority", () => {
   });
 
   it.each([
-    { id: "workboard", name: "Workboard", packageName: "@openclaw/workboard" },
-    { id: "memory-wiki", name: "Memory Wiki", packageName: "@openclaw/memory-wiki" },
+    { id: "workboard", name: "Workboard", packageName: "@carapace/workboard" },
+    { id: "memory-wiki", name: "Memory Wiki", packageName: "@carapace/memory-wiki" },
   ])("keeps local curation for private bundled-only $name", async (plugin) => {
     mocks.metadata.mockReturnValue(metadataSnapshot(plugin));
     mocks.officialCatalog.mockResolvedValue(
@@ -460,15 +460,15 @@ describe("plugin management Featured authority", () => {
       metadataSnapshot({
         id: "firecrawl",
         name: "firecrawl",
-        packageName: "@openclaw/firecrawl-plugin",
+        packageName: "@carapace/firecrawl-plugin",
         featured: false,
-        description: "Optional OpenClaw capability.",
+        description: "Optional Carapace capability.",
       }),
     );
     mocks.officialCatalog.mockResolvedValue(
       hostedCatalog([
         hostedFeedEntry({
-          packageName: "@openclaw/firecrawl-plugin",
+          packageName: "@carapace/firecrawl-plugin",
           title: "FireCrawl",
           featured: true,
           featuredAt: 1_784_280_000_000,
@@ -491,7 +491,7 @@ describe("plugin management Featured authority", () => {
         id: "firecrawl",
         name: "FireCrawl",
         description: "Crawl, scrape, search, and extract web content with FireCrawl.",
-        packageName: "@openclaw/firecrawl-plugin",
+        packageName: "@carapace/firecrawl-plugin",
         featured: true,
         featuredAt: 1_784_280_000_000,
         order: 10,
@@ -507,7 +507,7 @@ describe("plugin management Featured authority", () => {
         id: "diffs",
         name: "Private Diffs",
         origin: "global",
-        packageName: "@openclaw/diffs",
+        packageName: "@carapace/diffs",
       }),
     );
     mocks.officialCatalog.mockResolvedValue(
@@ -583,7 +583,7 @@ describe("plugin management Featured authority", () => {
         id: "diffs",
         name: "Diffs",
         origin: "global",
-        installRecord: { source: "npm", spec: "@openclaw/diffs" },
+        installRecord: { source: "npm", spec: "@carapace/diffs" },
       }),
     );
     mocks.officialCatalog.mockResolvedValue(hostedCatalog([]));
@@ -593,7 +593,7 @@ describe("plugin management Featured authority", () => {
     expect(catalog.plugins).toEqual([
       expect.objectContaining({
         id: "diffs",
-        packageName: "@openclaw/diffs",
+        packageName: "@carapace/diffs",
         featured: false,
         order: 10,
       }),
@@ -606,8 +606,8 @@ describe("plugin management Featured authority", () => {
         id: "acpx",
         name: "ACP Runtime",
         origin: "global",
-        packageName: "@openclaw/acpx",
-        installRecord: { source: "npm", spec: "@openclaw/acpx" },
+        packageName: "@carapace/acpx",
+        installRecord: { source: "npm", spec: "@carapace/acpx" },
       }),
     );
     mocks.officialCatalog.mockResolvedValue(hostedCatalog([]));
@@ -629,12 +629,12 @@ describe("plugin management Featured authority", () => {
         id: "new-tool",
         name: "New Tool",
         origin: "global",
-        packageName: "@openclaw/new-tool",
+        packageName: "@carapace/new-tool",
         installRecord: {
           source: "clawhub",
           clawhubUrl: "https://clawhub.ai",
           clawhubChannel: "official",
-          clawhubPackage: "@openclaw/new-tool",
+          clawhubPackage: "@carapace/new-tool",
         },
       }),
     );
@@ -645,7 +645,7 @@ describe("plugin management Featured authority", () => {
     expect(catalog.plugins).toEqual([
       expect.objectContaining({
         id: "new-tool",
-        packageName: "@openclaw/new-tool",
+        packageName: "@carapace/new-tool",
         featured: false,
         order: 10,
       }),
@@ -663,7 +663,7 @@ describe("plugin management Featured authority", () => {
           source: "clawhub",
           clawhubUrl: "https://clawhub.ai",
           clawhubChannel: "official",
-          clawhubPackage: "@openclaw/new-tool",
+          clawhubPackage: "@carapace/new-tool",
         },
       }),
     );
@@ -702,11 +702,11 @@ describe("plugin management Featured authority", () => {
     } else if (mode === "cloned occurrence") {
       bundledEntries = [bundled, { ...bundled }];
     } else if (mode === "different source") {
-      hosted.openclaw.install = { clawhubSpec: both.clawhubSpec };
-      bundled.openclaw.install = { npmSpec: both.npmSpec };
+      hosted.carapace.install = { clawhubSpec: both.clawhubSpec };
+      bundled.carapace.install = { npmSpec: both.npmSpec };
     } else if (mode === "different ClawHub case") {
-      hosted.openclaw.install = { clawhubSpec: "clawhub:@acme/Shared" };
-      bundled.openclaw.install = { clawhubSpec: both.clawhubSpec };
+      hosted.carapace.install = { clawhubSpec: "clawhub:@acme/Shared" };
+      bundled.carapace.install = { clawhubSpec: both.clawhubSpec };
     }
     mocks.bundledEntries = bundledEntries;
     mocks.metadata.mockReturnValue(emptyMetadataSnapshot());

@@ -1,7 +1,7 @@
 /** Parent-owned native auth preparation and compute-worker lifetime for provider warmup. */
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveRuntimeWorkerUrl } from "../infra/runtime-worker-url.js";
 import { WorkerTaskError, WorkerTaskPool } from "../infra/worker-task-pool.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
@@ -49,7 +49,7 @@ export type ProviderAuthWarmSyntheticAuthScope = {
 };
 
 export type ProviderAuthWarmWorkerInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtimeAuthStores?: ProviderAuthWarmRuntimeAuthStore[];
   runtimeAuthLookups?: ProviderAuthWarmRuntimeAuthLookup[];
   omitFalseProviderAuth?: boolean;

@@ -4,15 +4,15 @@ import os from "node:os";
 import path from "node:path";
 // Doctor enumeration cold-loads this closure; the state-DB helpers stay behind a
 // lazy doctor-repair-runtime import so enumeration never pulls the kysely/state-db graph.
-import type { OpenClawStateDatabaseSchemaMigration } from "openclaw/plugin-sdk/doctor-repair-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import type { CarapaceStateDatabaseSchemaMigration } from "carapace/plugin-sdk/doctor-repair-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeAgentId } from "carapace/plugin-sdk/routing";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
   type PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   buildVoiceCallLegacyJsonlEventKey,
   CALL_RECORD_CHUNK_MAX_ENTRIES,
@@ -72,7 +72,7 @@ function resolveUserPath(input: string, env: NodeJS.ProcessEnv): string {
 
 /** Read the configured voice-call store path from either package id. */
 function getVoiceCallConfigStore(config: PluginDoctorStateMigrationParams["config"]): string {
-  for (const pluginId of ["voice-call", "@openclaw/voice-call"]) {
+  for (const pluginId of ["voice-call", "@carapace/voice-call"]) {
     const rawConfig = config.plugins?.entries?.[pluginId]?.config;
     if (!rawConfig || typeof rawConfig !== "object" || Array.isArray(rawConfig)) {
       continue;
@@ -90,9 +90,9 @@ type PluginDoctorStateMigrationParams = Parameters<
 >[0];
 
 /** Return Voice Call agents whose templated core session stores need migration. */
-export function resolveSessionStoreAgentIds(params: { cfg: OpenClawConfig }): string[] {
+export function resolveSessionStoreAgentIds(params: { cfg: CarapaceConfig }): string[] {
   const agentIds = new Set<string>();
-  for (const pluginId of ["voice-call", "@openclaw/voice-call"]) {
+  for (const pluginId of ["voice-call", "@carapace/voice-call"]) {
     const entry = params.cfg.plugins?.entries?.[pluginId];
     if (!entry) {
       continue;
@@ -130,11 +130,11 @@ function resolveVoiceCallStateDatabaseEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...params.env,
-    OPENCLAW_STATE_DIR: resolveVoiceCallStorePath(params),
+    CARAPACE_STATE_DIR: resolveVoiceCallStorePath(params),
   };
 }
 
-function describeVoiceCallSchemaMigration(migration: OpenClawStateDatabaseSchemaMigration): string {
+function describeVoiceCallSchemaMigration(migration: CarapaceStateDatabaseSchemaMigration): string {
   switch (migration.kind) {
     case "agent-databases-composite-primary-key":
       return "agent database registry primary key -> agent_id,path";
@@ -161,7 +161,7 @@ function describeVoiceCallSchemaMigration(migration: OpenClawStateDatabaseSchema
     case "worker-placement-execution-mode-v8":
       return "cloud worker placements -> execution-mode claims";
     case "operator-approvals-system-agent":
-      return "operator approvals -> OpenClaw system changes";
+      return "operator approvals -> Carapace system changes";
     case "session-watch-cursor-provenance-v4":
       return "session watch cursors -> provenance column";
     case "strict-tables-v3":
@@ -314,12 +314,12 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
     id: "voice-call-calls-jsonl-to-plugin-state",
     label: "Voice Call call log",
     async detectLegacyState(params) {
-      const { detectOpenClawStateDatabaseSchemaMigrations } =
-        await import("openclaw/plugin-sdk/doctor-repair-runtime");
+      const { detectCarapaceStateDatabaseSchemaMigrations } =
+        await import("carapace/plugin-sdk/doctor-repair-runtime");
       const storePath = resolveVoiceCallStorePath(params);
       const filePath = resolveVoiceCallLegacyCallLogPath(storePath);
       const { entries } = await readLegacyCallRecords(filePath);
-      const schemaMigrations = detectOpenClawStateDatabaseSchemaMigrations({
+      const schemaMigrations = detectCarapaceStateDatabaseSchemaMigrations({
         env: resolveVoiceCallStateDatabaseEnv(params),
       });
       if (entries.length === 0 && schemaMigrations.length === 0) {
@@ -340,8 +340,8 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
       };
     },
     async migrateLegacyState(params) {
-      const { detectOpenClawStateDatabaseSchemaMigrations, repairOpenClawStateDatabaseSchema } =
-        await import("openclaw/plugin-sdk/doctor-repair-runtime");
+      const { detectCarapaceStateDatabaseSchemaMigrations, repairCarapaceStateDatabaseSchema } =
+        await import("carapace/plugin-sdk/doctor-repair-runtime");
       const changes: string[] = [];
       const warnings: string[] = [];
       const storePath = resolveVoiceCallStorePath(params);
@@ -349,11 +349,11 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
       const { entries, warnings: readWarnings } = await readLegacyCallRecords(filePath);
       warnings.push(...readWarnings);
       const stateDatabaseEnv = resolveVoiceCallStateDatabaseEnv(params);
-      const schemaMigrations = detectOpenClawStateDatabaseSchemaMigrations({
+      const schemaMigrations = detectCarapaceStateDatabaseSchemaMigrations({
         env: stateDatabaseEnv,
       });
       if (schemaMigrations.length > 0) {
-        const repaired = repairOpenClawStateDatabaseSchema({ env: stateDatabaseEnv });
+        const repaired = repairCarapaceStateDatabaseSchema({ env: stateDatabaseEnv });
         warnings.push(...repaired.warnings);
         if (repaired.warnings.length > 0) {
           return { changes, warnings };

@@ -141,9 +141,9 @@ suite.define(() => {
         const releaseLists = await page.evaluateHandle((row) => {
           const fixture = (
             window as Window & {
-              openclawControlUiE2eGateway?: ControlUiMockGateway;
+              carapaceControlUiE2eGateway?: ControlUiMockGateway;
             }
-          ).openclawControlUiE2eGateway;
+          ).carapaceControlUiE2eGateway;
           if (!fixture) {
             throw new Error("Mock Gateway is not installed");
           }
@@ -218,7 +218,7 @@ suite.define(() => {
         methodResponses: {
           "chat.startup": {
             agentsList: {
-              agents: [{ id: "main", name: "OpenClaw" }],
+              agents: [{ id: "main", name: "Carapace" }],
               defaultId: "main",
               mainKey: "main",
               scope: "agent",
@@ -388,7 +388,7 @@ suite.define(() => {
       await expect.poll(() => composer.locator("textarea").isDisabled()).toBe(true);
       expect(await gateway.getRequests("chat.send")).toHaveLength(0);
 
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-composer-catalog", artifactRoot)
         : undefined;
@@ -493,7 +493,7 @@ suite.define(() => {
       expect(await gateway.getRequests("chat.metadata")).toHaveLength(0);
 
       const activeComposer = () =>
-        page.locator('openclaw-chat-pane[aria-hidden="false"] .agent-chat__input');
+        page.locator('carapace-chat-pane[aria-hidden="false"] .agent-chat__input');
       await expect
         .poll(() =>
           activeComposer().locator('[data-chat-model-option="openai/work-model"]').count(),
@@ -516,7 +516,7 @@ suite.define(() => {
           .locator('.chat-controls__effort-picker:not([aria-hidden="true"])')
           .count(),
       ).toBe(0);
-      if (process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()) {
+      if (process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()) {
         await activeComposer().screenshot({
           animations: "disabled",
           path: `${suite.artifactDir}/selected-model-during-session-startup.png`,
@@ -641,7 +641,7 @@ suite.define(() => {
       await expect
         .poll(() => composer.locator("[data-chat-model-catalog-state]").textContent())
         .toContain("No models available");
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-composer-catalog", artifactRoot)
         : undefined;
@@ -727,7 +727,7 @@ suite.define(() => {
       await expect
         .poll(() => composer.locator('[data-chat-model-option="openai/gpt-5.6-luna"]').isVisible())
         .toBe(true);
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-composer-catalog", artifactRoot)
         : undefined;
@@ -790,7 +790,7 @@ suite.define(() => {
           .poll(() => textarea.evaluate((node) => node.matches(":placeholder-shown")))
           .toBe(true);
         await expect.poll(() => textarea.getAttribute("placeholder")).toContain("Message");
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir("chat-composer-catalog", artifactRoot)
           : undefined;

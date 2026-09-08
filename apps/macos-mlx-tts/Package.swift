@@ -5,45 +5,45 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenClawMLXTTS",
+    name: "CarapaceMLXTTS",
     platforms: [
         .macOS(.v15),
     ],
     products: [
-        .executable(name: "openclaw-mlx-tts", targets: ["OpenClawMLXTTSHelper"]),
+        .executable(name: "carapace-mlx-tts", targets: ["CarapaceMLXTTSHelper"]),
     ],
     dependencies: [
         // Progressive Fish chunks and cancellation are newer than the latest tagged release.
         .package(
             url: "https://github.com/Blaizzy/mlx-audio-swift",
             revision: "3506fb93cc3b9e4a642079d5384eaca0373962e6"),
-        .package(path: "../shared/OpenClawMLXTTSProtocol"),
+        .package(path: "../shared/CarapaceMLXTTSProtocol"),
     ],
     targets: [
         .target(
-            name: "OpenClawMLXTTSRuntime",
+            name: "CarapaceMLXTTSRuntime",
             dependencies: [
                 .product(name: "MLXAudioCore", package: "mlx-audio-swift"),
                 .product(name: "MLXAudioTTS", package: "mlx-audio-swift"),
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                .product(name: "CarapaceMLXTTSProtocol", package: "CarapaceMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .executableTarget(
-            name: "OpenClawMLXTTSHelper",
+            name: "CarapaceMLXTTSHelper",
             dependencies: [
-                "OpenClawMLXTTSRuntime",
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                "CarapaceMLXTTSRuntime",
+                .product(name: "CarapaceMLXTTSProtocol", package: "CarapaceMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .testTarget(
-            name: "OpenClawMLXTTSRuntimeTests",
+            name: "CarapaceMLXTTSRuntimeTests",
             dependencies: [
-                "OpenClawMLXTTSRuntime",
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                "CarapaceMLXTTSRuntime",
+                .product(name: "CarapaceMLXTTSProtocol", package: "CarapaceMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),

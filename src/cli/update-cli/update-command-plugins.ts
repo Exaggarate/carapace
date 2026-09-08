@@ -6,7 +6,7 @@ import { VERSION_BOUND_RUNTIME_PLUGIN_IDS } from "../../commands/doctor/shared/c
 import { runPostCorePluginConvergence } from "../../commands/doctor/shared/post-core-plugin-convergence.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
 import type { ConfigWriteOptions } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { resolveRegistryUpdateChannel, type UpdateChannel } from "../../infra/update-channels.js";
 import type { PluginCapabilityConsentHandler } from "../../plugins/capability-consent.js";
@@ -36,7 +36,7 @@ import {
 export type { PostCorePluginUpdateResult } from "./update-command-plugins-internals.js";
 
 const POST_UPDATE_PLUGIN_REPAIR_GUIDANCE =
-  "Run openclaw update repair to retry post-update plugin repair.";
+  "Run carapace update repair to retry post-update plugin repair.";
 
 type PostUpdatePluginWarning = NonNullable<PostCorePluginUpdateResult["warnings"]>[number];
 
@@ -55,7 +55,7 @@ function formatMissingPluginPayloadReason(entry: MissingPluginInstallPayload): s
 }
 
 function formatPostUpdatePluginInspectGuidance(pluginId: string): string {
-  return `Run openclaw plugins inspect ${pluginId} --runtime --json for details.`;
+  return `Run carapace plugins inspect ${pluginId} --runtime --json for details.`;
 }
 
 function createPostUpdatePluginWarning(params: {
@@ -315,7 +315,7 @@ export async function updatePluginsAfterCoreUpdate(params: {
     if (params.restoredAuthoredChannels !== undefined) {
       nextConfig = {
         ...nextConfig,
-        channels: structuredClone(params.restoredAuthoredChannels) as OpenClawConfig["channels"],
+        channels: structuredClone(params.restoredAuthoredChannels) as CarapaceConfig["channels"],
       };
     }
     // Installed plugin metadata can own migrations that this process has not loaded yet.

@@ -3,9 +3,9 @@
  *
  * Builds a minimal config with primary and fallback models for model-selection tests.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
-export function makeModelFallbackCfg(overrides: Partial<OpenClawConfig> = {}): OpenClawConfig {
+export function makeModelFallbackCfg(overrides: Partial<CarapaceConfig> = {}): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -16,10 +16,10 @@ export function makeModelFallbackCfg(overrides: Partial<OpenClawConfig> = {}): O
       },
     },
     ...overrides,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-export function createModelFallbackConfig(primary: string, fallbacks: string[]): OpenClawConfig {
+export function createModelFallbackConfig(primary: string, fallbacks: string[]): CarapaceConfig {
   return {
     agents: {
       defaults: {

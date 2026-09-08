@@ -20,7 +20,7 @@ it("resumes near-viewport rendering after being detached and reattached", async 
     return frames.length;
   });
   vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => undefined);
-  const element = document.createElement("openclaw-dashboard-preview") as DashboardPreviewElement;
+  const element = document.createElement("carapace-dashboard-preview") as DashboardPreviewElement;
   element.error = "Preview unavailable";
 
   document.body.append(element);

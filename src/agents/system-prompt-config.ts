@@ -4,8 +4,8 @@
  * This module gathers agent/config knobs before rendering the canonical system
  * prompt so callers do not duplicate owner, TTS, alias, memory, or FS policy.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildTtsSystemPromptHint } from "../tts/tts-settings.js";
 import { resolveMainSessionDelegationMode } from "./delegation-guidance.js";
 import { buildAgentSystemPrompt } from "./system-prompt.js";
@@ -26,11 +26,11 @@ type ResolvedAgentSystemPromptConfig = Pick<
 >;
 
 type ConfiguredAgentSystemPromptParams = AgentSystemPromptRenderParams & {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
 };
 
-function buildModelAliasLines(cfg?: OpenClawConfig) {
+function buildModelAliasLines(cfg?: CarapaceConfig) {
   const entries: Array<{ alias: string; model: string }> = [];
   for (const [keyRaw, entryRaw] of Object.entries(cfg?.agents?.defaults?.models ?? {})) {
     const model = normalizeOptionalString(keyRaw) ?? "";
@@ -46,7 +46,7 @@ function buildModelAliasLines(cfg?: OpenClawConfig) {
 
 /** Resolves all config-derived system prompt fields for an agent. */
 function resolveAgentSystemPromptConfig(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   sourceReplyDeliveryMode?: AgentSystemPromptRenderParams["sourceReplyDeliveryMode"];

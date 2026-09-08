@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.entry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { BoardStore } from "./board-store.js";
 import { createTestBoardStore } from "./board-store.test-support.js";
 import { SqliteBoardStore } from "./sqlite-board-store.js";
@@ -13,7 +13,7 @@ import { SqliteBoardStore } from "./sqlite-board-store.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function seedSession(env: NodeJS.ProcessEnv, sessionKey: string): void {
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   replaceSessionEntrySync(
     { agentId: "main", sessionKey, storePath: database.path },
     { sessionId: `session-${sessionKey.replaceAll(":", "-")}`, updatedAt: Date.now() },
@@ -33,8 +33,8 @@ function generatedIdentity(key: string, fallbackName: string) {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("generated BoardStore identity", () => {
@@ -162,7 +162,7 @@ describe("generated BoardStore identity", () => {
 });
 
 it("preserves a beta.5-format unmarked explicit row and reuses the generated fallback", () => {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-board-beta5-identity-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-board-beta5-identity-") };
   const sessionKey = "agent:main:beta5-identity";
   seedSession(env, sessionKey);
   const options = {
@@ -193,15 +193,15 @@ it("preserves a beta.5-format unmarked explicit row and reuses the generated fal
   store.applyOps({ sessionKey }, [
     { kind: "widget_resize", name: "cafe-menu", sizeW: 8, sizeH: 6 },
   ]);
-  const seededDatabase = openOpenClawAgentDatabase({ agentId: "main", env });
+  const seededDatabase = openCarapaceAgentDatabase({ agentId: "main", env });
   seededDatabase.db
     .prepare(
       "UPDATE board_widgets SET manifest = json_remove(manifest, '$.nameIdentity') WHERE session_key = ? AND name = ?",
     )
     .run(sessionKey, "cafe-menu");
 
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   const reopened = new SqliteBoardStore(options);
   const generated = reopened.putWidget({
@@ -222,8 +222,8 @@ it("preserves a beta.5-format unmarked explicit row and reuses the generated fal
   });
   expect(reopened.readWidgetHtml({ sessionKey }, "cafe-menu")?.html).toContain("approved");
 
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 
   const durable = new SqliteBoardStore(options);
   const reused = durable.putWidget({
@@ -238,7 +238,7 @@ it("preserves a beta.5-format unmarked explicit row and reuses the generated fal
     revision: 2,
   });
   expect(durable.readWidgetHtml({ sessionKey }, "cafe-menu")?.html).toContain("approved");
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 
   expect(
     new SqliteBoardStore(options)
@@ -252,7 +252,7 @@ it("preserves a beta.5-format unmarked explicit row and reuses the generated fal
     sizeH: 6,
     position: 1,
   });
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   const row = database.db
     .prepare("SELECT manifest FROM board_widgets WHERE session_key = ? AND name = ?")
     .get(sessionKey, "cafe-menu-eeeeeeee") as { manifest: string };
@@ -262,7 +262,7 @@ it("preserves a beta.5-format unmarked explicit row and reuses the generated fal
 });
 
 it("does not infer generated ownership from a canonical unmarked title match", () => {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-board-canonical-legacy-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-board-canonical-legacy-") };
   const sessionKey = "agent:main:canonical-legacy";
   seedSession(env, sessionKey);
   const options = {
@@ -276,13 +276,13 @@ it("does not infer generated ownership from a canonical unmarked title match", (
     title: "が",
     content: { kind: "html", html: "<p>legacy</p>" },
   });
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   database.db
     .prepare(
       "UPDATE board_widgets SET manifest = json_remove(manifest, '$.nameIdentity') WHERE session_key = ? AND name = ?",
     )
     .run(sessionKey, "widget-e3b21956");
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 
   const reopened = new SqliteBoardStore(options);
   const generated = reopened.putWidget({
@@ -298,7 +298,7 @@ it("does not infer generated ownership from a canonical unmarked title match", (
 });
 
 it("preserves unmarked rows whose absent or capped titles are ambiguous", () => {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-board-ambiguous-legacy-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-board-ambiguous-legacy-") };
   const sessionKey = "agent:main:ambiguous-legacy";
   seedSession(env, sessionKey);
   const options = {
@@ -318,13 +318,13 @@ it("preserves unmarked rows whose absent or capped titles are ambiguous", () => 
     title: cappedTitle,
     content: { kind: "html", html: "<p>legacy long</p>" },
   });
-  const database = openOpenClawAgentDatabase({ agentId: "main", env });
+  const database = openCarapaceAgentDatabase({ agentId: "main", env });
   database.db
     .prepare(
       "UPDATE board_widgets SET manifest = json_remove(manifest, '$.nameIdentity') WHERE session_key = ?",
     )
     .run(sessionKey);
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 
   const reopened = new SqliteBoardStore(options);
   const untitled = reopened.putWidget({
@@ -348,7 +348,7 @@ it("preserves unmarked rows whose absent or capped titles are ambiguous", () => 
 });
 
 it("persists explicit ownership across restart", () => {
-  const env = { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-board-explicit-owner-") };
+  const env = { CARAPACE_STATE_DIR: tempDirs.make("carapace-board-explicit-owner-") };
   const sessionKey = "agent:main:explicit-owner";
   seedSession(env, sessionKey);
   const options = {
@@ -361,7 +361,7 @@ it("persists explicit ownership across restart", () => {
     title: "Status",
     content: { kind: "html", html: "<p>manual</p>" },
   });
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 
   const reopened = new SqliteBoardStore(options);
   const generated = reopened.putWidget({

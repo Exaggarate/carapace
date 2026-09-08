@@ -1,6 +1,6 @@
 // Effective tools methods resolve the tools available to a session by combining
 // bundled tools, MCP tools, plugin policy, model context, and cache state.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -33,7 +33,7 @@ import { buildRuntimeCompatibleMcpToolInventory } from "../../agents/tools-effec
 import { resolveReplyToMode } from "../../auto-reply/reply/reply-threading.js";
 import { resolveRuntimeConfigCacheKey } from "../../config/config.js";
 import type { SessionToolOverrides } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { toErrorObject } from "../../infra/errors.js";
 import { pruneMapToMaxSize } from "../../infra/map-size.js";
 import { logDebug, logWarn } from "../../logger.js";
@@ -96,7 +96,7 @@ const MCP_CONFIG_SUMMARY_CACHE_LIMIT = 128;
 let nowForToolsEffectiveCache = () => Date.now();
 
 type TrustedToolsEffectiveContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
   sessionId: string;
@@ -282,7 +282,7 @@ async function resolveCachedBaseToolsEffective(params: {
 
 function resolveRequestedAgentIdOrRespondError(params: {
   rawAgentId: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   respond: RespondFn;
   dependencies: ToolsEffectiveDependencies;
 }) {
@@ -499,7 +499,7 @@ async function resolveReadOnlyToolsEffectiveInventory(
       );
     }
     // A native owner has a distinct MCP runtime. Never substitute an in-process
-    // catalog under the same OpenClaw session identity when its catalog is unavailable.
+    // catalog under the same Carapace session identity when its catalog is unavailable.
     return maybeAppendMcpNotice(base, mcpConfig.serverNames, "not-connected");
   }
   // UI panel loads call `tools.effective`, so this path must not create MCP

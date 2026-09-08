@@ -7,7 +7,7 @@ import {
   FsSafeError,
   resolveAbsolutePathForWrite,
   root,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/security-runtime";
 import { inspectStrictBase64 } from "../shared/base64.js";
 import {
   fileIdentity,

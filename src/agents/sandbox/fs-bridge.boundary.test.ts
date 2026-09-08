@@ -43,7 +43,7 @@ describe("sandbox fs bridge boundary validation", () => {
   });
 
   it("rejects mkdirp when target exists as a file", async () => {
-    await withTempDir("openclaw-fs-bridge-mkdirp-file-", async (stateDir) => {
+    await withTempDir("carapace-fs-bridge-mkdirp-file-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const filePath = path.join(workspaceDir, "memory", "kemik");
       await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -68,7 +68,7 @@ describe("sandbox fs bridge boundary validation", () => {
     async (kind) => {
       // Host-visible symlink escapes are rejected locally so Docker never follows
       // them inside a privileged bridge command.
-      await withTempDir("openclaw-fs-bridge-", async (stateDir) => {
+      await withTempDir("carapace-fs-bridge-", async (stateDir) => {
         const { workspaceDir, outsideFile } = await createHostEscapeFixture(stateDir);
         if (process.platform === "win32") {
           return;
@@ -101,7 +101,7 @@ describe("sandbox fs bridge boundary validation", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withTempDir("openclaw-fs-bridge-hardlink-", async (stateDir) => {
+    await withTempDir("carapace-fs-bridge-hardlink-", async (stateDir) => {
       const { workspaceDir, outsideFile } = await createHostEscapeFixture(stateDir);
       const hardlinkPath = path.join(workspaceDir, "link.txt");
       try {
@@ -134,7 +134,7 @@ describe("sandbox fs bridge boundary validation", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a regular file replaced by a FIFO at descriptor open",
     async () => {
-      await withTempDir("openclaw-fs-bridge-fifo-swap-", async (stateDir) => {
+      await withTempDir("carapace-fs-bridge-fifo-swap-", async (stateDir) => {
         const workspaceDir = path.join(stateDir, "workspace");
         const filePath = path.join(workspaceDir, "live.pipe");
         await fs.mkdir(workspaceDir, { recursive: true });

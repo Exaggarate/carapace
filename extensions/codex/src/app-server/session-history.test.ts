@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { embeddedAgentLog, type AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { CURRENT_SESSION_VERSION, SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { WorkerTaskPool } from "openclaw/plugin-sdk/process-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { embeddedAgentLog, type AgentMessage } from "carapace/plugin-sdk/agent-harness-runtime";
+import { CURRENT_SESSION_VERSION, SessionManager } from "carapace/plugin-sdk/agent-sessions";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { WorkerTaskPool } from "carapace/plugin-sdk/process-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readCodexNativeHistory } from "./session-history-read.js";
 import { readCodexMirroredSessionHistoryMessages } from "./session-history.js";
@@ -32,7 +32,7 @@ afterEach(async () => {
 });
 
 async function writeSession(records: unknown[]): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-"));
   tempDirs.push(dir);
   const sessionFile = path.join(dir, "session.jsonl");
   const header = {
@@ -115,9 +115,9 @@ async function writeSqliteSession(
     storePath: string;
   };
 }> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-sqlite-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-sqlite-"));
   tempDirs.push(dir);
-  const storePath = path.join(dir, "openclaw-agent.sqlite");
+  const storePath = path.join(dir, "carapace-agent.sqlite");
   const sessionId = params.incognito
     ? `codex-sqlite-${path.basename(dir)}`
     : "codex-sqlite-session";
@@ -433,7 +433,7 @@ describe("readCodexMirroredSessionHistoryMessages", () => {
       role: "user" as const,
       content: "native visible",
       timestamp: 3,
-      __openclaw: {
+      __carapace: {
         upstreamUserText,
         mirrorIdentity: "synthetic-native-turn",
         mirrorOrigin: "codex",
@@ -458,14 +458,14 @@ describe("readCodexMirroredSessionHistoryMessages", () => {
     expect(model).toMatchObject({
       content: "native visible",
       timestamp: 3,
-      __openclaw: { mirrorOrigin: "codex", turnTainted: true },
+      __carapace: { mirrorOrigin: "codex", turnTainted: true },
     });
     const after = (await readCodexMirroredSessionHistoryMessages(target))!.at(-1)!;
     expect(hash(readUpstreamUserText(after))).toBe(hash(upstreamUserText));
     expect(readMirrorIdentity(after)).toBe("synthetic-native-turn");
   });
   it("treats a missing mirrored session file as empty history", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
 
@@ -507,10 +507,10 @@ describe("readCodexMirroredSessionHistoryMessages", () => {
   });
 
   it("does not create a database for a missing explicit SQLite session key", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-missing-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-missing-"));
     tempDirs.push(dir);
     const sessionId = "missing-codex-session";
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "carapace-agent.sqlite");
 
     await expect(
       readCodexMirroredSessionHistoryMessages({
@@ -526,7 +526,7 @@ describe("readCodexMirroredSessionHistoryMessages", () => {
   it("returns [] for transcripts that do not open with a Codex session marker", async () => {
     // A non-Codex-shaped transcript (e.g. a non-Codex model run reusing this
     // hook) is an empty mirror, not a read failure, so callers must not warn.
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
     await fs.writeFile(sessionFile, JSON.stringify({ type: "message", id: "orphan" }) + "\n");
@@ -539,7 +539,7 @@ describe("readCodexMirroredSessionHistoryMessages", () => {
   it("returns undefined for a session header without a string id", async () => {
     // A `session` header with corrupt metadata is a Codex transcript gone bad,
     // not a foreign transcript — it must stay on the warn path.
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-session-history-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-session-history-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
     await fs.writeFile(sessionFile, JSON.stringify({ type: "session", id: 42 }) + "\n");

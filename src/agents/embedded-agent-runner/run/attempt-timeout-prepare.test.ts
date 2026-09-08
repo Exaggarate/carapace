@@ -1,6 +1,6 @@
 // Coverage for attempt timeout ownership and cleanup.
 import { getEventListeners } from "node:events";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { emitAgentEvent } from "../../../infra/agent-events.js";
 import { createEmbeddedAttemptRunAbort } from "./attempt-finalize.js";

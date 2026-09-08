@@ -1,4 +1,4 @@
-import type { UsersMentionableParams, UsersMentionableResult } from "@openclaw/gateway-protocol";
+import type { UsersMentionableParams, UsersMentionableResult } from "@carapace/gateway-protocol";
 import { html, nothing } from "lit";
 import type { GatewayBrowserClient } from "../../../api/gateway.ts";
 import {

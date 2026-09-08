@@ -67,20 +67,20 @@ describe("status cache formatting", () => {
 
 describe("status config diagnostic formatting", () => {
   it.each([
-    ["default", undefined, undefined, "openclaw doctor --fix"],
-    ["profile", "work", undefined, "openclaw --profile work doctor --fix"],
-    ["container", undefined, "staging", "openclaw --container staging doctor --fix"],
-    ["container over profile", "work", "staging", "openclaw --container staging doctor --fix"],
+    ["default", undefined, undefined, "carapace doctor --fix"],
+    ["profile", "work", undefined, "carapace --profile work doctor --fix"],
+    ["container", undefined, "staging", "carapace --container staging doctor --fix"],
+    ["container over profile", "work", "staging", "carapace --container staging doctor --fix"],
   ])("keeps the %s target in its repair command", (_context, profile, container, command) => {
-    const entries = withEnv({ OPENCLAW_PROFILE: profile, OPENCLAW_CONTAINER_HINT: container }, () =>
+    const entries = withEnv({ CARAPACE_PROFILE: profile, CARAPACE_CONTAINER_HINT: container }, () =>
       formatStatusConfigDiagnosticEntries({
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         issues: [{ path: "gateway.port", message: "invalid" }],
       }),
     );
 
     expect(entries).toEqual([
-      "- Config file is invalid: /tmp/openclaw.json",
+      "- Config file is invalid: /tmp/carapace.json",
       "- gateway.port: invalid",
       `- Fix: ${command}`,
     ]);

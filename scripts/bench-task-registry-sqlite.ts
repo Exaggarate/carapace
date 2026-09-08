@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   emitBenchmarkReport,
   parseBenchmarkInteger,
@@ -88,7 +88,7 @@ type WorkerLaunchRuntime = {
 };
 
 function usage(): string {
-  return `OpenClaw durable task registry churn benchmark
+  return `Carapace durable task registry churn benchmark
 
 Usage:
   node --import tsx scripts/bench-task-registry-sqlite.ts [options]
@@ -329,7 +329,7 @@ function runWorker(
   size: number,
   runtime: WorkerLaunchRuntime = {},
 ): WorkerResult {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-task-registry-bench-"));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-task-registry-bench-"));
   try {
     return runBenchmarkWorker({
       args: [

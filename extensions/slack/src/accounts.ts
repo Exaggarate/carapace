@@ -4,19 +4,19 @@ import {
   DEFAULT_ACCOUNT_ID,
   hasConfiguredAccountValue,
   normalizeAccountId,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/account-resolution";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/account-resolution";
 import {
   mapAllowFromEntries,
   normalizeChannelDmPolicy,
   type ChannelDmPolicy,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import type { SlackAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAccountEntry } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-config-helpers";
+import type { SlackAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveAccountEntry } from "carapace/plugin-sdk/routing";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { hasSlackAccountCredentials } from "./account-configured.js";
 import type { SlackAccountSurfaceFields } from "./account-surface-fields.js";
 import { resolveSlackAppToken, resolveSlackBotToken, resolveSlackUserToken } from "./token.js";
@@ -87,7 +87,7 @@ export const listSlackAccountIds = listAccountIds;
 export const resolveDefaultSlackAccountId = resolveDefaultAccountId;
 
 function resolveSlackAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
 ): SlackAccountConfig | undefined {
   return resolveAccountEntry(cfg.channels?.slack?.accounts, accountId);
@@ -150,7 +150,7 @@ function mergeSlackStreamingConfig(
 }
 
 export function mergeSlackAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
 ): SlackAccountConfig {
   const accountConfig = resolveSlackAccountConfig(cfg, accountId);
@@ -163,7 +163,7 @@ export function mergeSlackAccountConfig(
 }
 
 export function resolveSlackAccountAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): string[] | undefined {
   const accountId = normalizeAccountId(
@@ -176,7 +176,7 @@ export function resolveSlackAccountAllowFrom(params: {
 }
 
 export function resolveSlackConfigAccessorAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): SlackConfigAccessorAccount {
   const accountId = normalizeAccountId(
@@ -190,7 +190,7 @@ export function resolveSlackConfigAccessorAccount(params: {
 }
 
 export function resolveSlackAccountDmPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ChannelDmPolicy | undefined {
   const accountId = normalizeAccountId(
@@ -202,7 +202,7 @@ export function resolveSlackAccountDmPolicy(params: {
 }
 
 export function resolveSlackAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ResolvedSlackAccount {
   const accountId = normalizeAccountId(
@@ -266,7 +266,7 @@ export function resolveSlackAccount(params: {
   };
 }
 
-export function listEnabledSlackAccounts(cfg: OpenClawConfig): ResolvedSlackAccount[] {
+export function listEnabledSlackAccounts(cfg: CarapaceConfig): ResolvedSlackAccount[] {
   return listSlackAccountIds(cfg)
     .map((accountId) => resolveSlackAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

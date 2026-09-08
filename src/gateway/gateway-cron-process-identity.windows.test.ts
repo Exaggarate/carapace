@@ -1,7 +1,7 @@
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
-import { createOpenClawTestInstance } from "../../test/helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "../../test/helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "../../test/helpers/qa-gateway-cleanup.js";
 import { connectGatewayClient, disconnectGatewayClient } from "./test-helpers.e2e.js";
 
@@ -10,12 +10,12 @@ describe.skipIf(process.platform !== "win32")("Windows cron process identity", (
     "completes a scheduled Gateway job with a durable owner identity",
     { timeout: 90_000 },
     async () => {
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: `windows-cron-process-identity-${process.pid}`,
         env: {
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_SKIP_CRON: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_SKIP_CRON: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       let jobId: string | undefined;
@@ -55,7 +55,7 @@ describe.skipIf(process.platform !== "win32")("Windows cron process identity", (
         }
 
         const database = new DatabaseSync(
-          path.join(instance.stateDir, "state", "openclaw.sqlite"),
+          path.join(instance.stateDir, "state", "carapace.sqlite"),
           { readOnly: true },
         );
         const receipt = database

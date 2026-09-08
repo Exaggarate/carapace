@@ -1,6 +1,6 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { EMPTY_LEGACY_SESSION_SURFACES } from "../plugins/legacy-session-surfaces.types.js";
 import {
   inspectSkillProposal,
@@ -9,21 +9,21 @@ import {
 } from "../skills/workshop/service.js";
 import { updateSkillProposalRecord } from "../skills/workshop/store.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { openNodeSqliteDatabase } from "./node-sqlite.js";
 import { autoMigrateLegacyState } from "./state-migrations.doctor.js";
 
 describe("automatic Skill Workshop migration", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "workshop-startup-migration" });
+    state = await createCarapaceTestState({ label: "workshop-startup-migration" });
   });
 
   afterEach(async () => {
@@ -34,7 +34,7 @@ describe("automatic Skill Workshop migration", () => {
     "keeps pending proposals readable after migrating legacy targets from schema %i",
     async (schemaVersion) => {
       const agentDir = state.path("custom-agent");
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           entries: {
             main: { default: true, workspace: state.workspaceDir, agentDir },
@@ -59,13 +59,13 @@ describe("automatic Skill Workshop migration", () => {
             ...proposal.record.target,
             skillDir: legacySkillDir,
             skillFile: path.join(legacySkillDir, "SKILL.md"),
-            source: "openclaw-workspace",
+            source: "carapace-workspace",
           },
         },
         store: { config, agentId: "main", env: state.env },
       });
-      const databasePath = openOpenClawStateDatabase({ env: state.env }).path;
-      closeOpenClawStateDatabaseForTest();
+      const databasePath = openCarapaceStateDatabase({ env: state.env }).path;
+      closeCarapaceStateDatabaseForTest();
       if (schemaVersion === 15) {
         const legacy = openNodeSqliteDatabase(databasePath);
         try {
@@ -114,7 +114,7 @@ describe("automatic Skill Workshop migration", () => {
           target: {
             skillDir,
             skillFile: path.join(skillDir, "SKILL.md"),
-            source: "openclaw-workshop",
+            source: "carapace-workshop",
           },
         },
       });

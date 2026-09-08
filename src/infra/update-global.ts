@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { valid as validSemver } from "semver";
 import { BUNDLED_RUNTIME_SIDECAR_PATHS } from "../plugins/runtime-sidecar-paths.js";
 import { pathExists } from "../utils.js";
@@ -25,7 +25,7 @@ import { parseSemver } from "./runtime-guard.js";
 import { collectGitRuntimeErrors, type GitRuntimeIdentity } from "./update-git-runtime.js";
 import type { UpdateRecovery } from "./update-recovery.js";
 
-/** Supported package managers for OpenClaw global install and update flows. */
+/** Supported package managers for Carapace global install and update flows. */
 export type GlobalInstallManager = "npm" | "pnpm" | "bun";
 
 /** Runs package-manager commands with timeout and environment control. */
@@ -64,15 +64,15 @@ export type ResolvedGlobalInstallTarget = ResolvedGlobalInstallCommand & {
   };
 };
 
-const PRIMARY_PACKAGE_NAME = "openclaw";
+const PRIMARY_PACKAGE_NAME = "carapace";
 const ALL_PACKAGE_NAMES = [PRIMARY_PACKAGE_NAME] as const;
 const GLOBAL_RENAME_PREFIX = ".";
 /** npm-compatible spec used when the user asks to install the moving main branch. */
-const OPENCLAW_MAIN_PACKAGE_SPEC = "github:openclaw/openclaw#main";
+const CARAPACE_MAIN_PACKAGE_SPEC = "github:carapace/carapace#main";
 const COREPACK_ENABLE_DOWNLOAD_PROMPT_DEFAULT = "0";
 const NPM_GLOBAL_INSTALL_QUIET_FLAGS = ["--no-fund", "--no-audit", "--loglevel=error"] as const;
-const PNPM_OPENCLAW_BUILD_ALLOWLIST_FLAG = `--allow-build=${PRIMARY_PACKAGE_NAME}`;
-const BUN_OPENCLAW_TRUST_FLAG = "--trust";
+const PNPM_CARAPACE_BUILD_ALLOWLIST_FLAG = `--allow-build=${PRIMARY_PACKAGE_NAME}`;
+const BUN_CARAPACE_TRUST_FLAG = "--trust";
 const FIRST_PACKAGED_DIST_INVENTORY_VERSION = { major: 2026, minor: 4, patch: 15 };
 const OMITTED_PRIVATE_QA_BUNDLED_PLUGIN_ROOTS = new Set([
   "dist/extensions/qa-channel",
@@ -289,7 +289,7 @@ function stripPrimaryPackageAlias(spec: string): string {
 }
 
 /**
- * Extracts a pinned installed version from package specs like `openclaw@1.2.3`.
+ * Extracts a pinned installed version from package specs like `carapace@1.2.3`.
  * Moving tags, URLs, git refs, and aliases return null because they cannot be
  * compared reliably after install.
  */
@@ -326,8 +326,8 @@ export async function collectInstalledGlobalPackageErrors(params: {
       );
     } else {
       errors.push(...(await collectGitRuntimeErrors(params.expectedGitCheckout)));
-      if (!(await pathExists(path.join(installedRoot, "openclaw.mjs")))) {
-        errors.push(`missing ${path.join(installedRoot, "openclaw.mjs")}`);
+      if (!(await pathExists(path.join(installedRoot, "carapace.mjs")))) {
+        errors.push(`missing ${path.join(installedRoot, "carapace.mjs")}`);
       }
     }
   } else {
@@ -475,7 +475,7 @@ async function collectCriticalInstalledPackageDistPaths(packageRoot: string): Pr
       }
       if (
         (await pathExists(path.join(packageRoot, pluginRoot, "package.json"))) ||
-        (await pathExists(path.join(packageRoot, pluginRoot, "openclaw.plugin.json")))
+        (await pathExists(path.join(packageRoot, pluginRoot, "carapace.plugin.json")))
       ) {
         expectedFiles.add(relativePath);
       }
@@ -538,7 +538,7 @@ async function resolvePortableGitPathPrepend(): Promise<string[]> {
   if (!localAppData) {
     return [];
   }
-  const portableGitRoot = path.join(localAppData, "OpenClaw", "deps", "portable-git");
+  const portableGitRoot = path.join(localAppData, "Carapace", "deps", "portable-git");
   const candidates = [
     path.join(portableGitRoot, "mingw64", "bin"),
     path.join(portableGitRoot, "usr", "bin"),
@@ -580,14 +580,14 @@ export function resolveGlobalInstallSpec(params: {
   env?: NodeJS.ProcessEnv;
 }): string {
   const override =
-    params.env?.OPENCLAW_UPDATE_PACKAGE_SPEC?.trim() ||
-    process.env.OPENCLAW_UPDATE_PACKAGE_SPEC?.trim();
+    params.env?.CARAPACE_UPDATE_PACKAGE_SPEC?.trim() ||
+    process.env.CARAPACE_UPDATE_PACKAGE_SPEC?.trim();
   if (override) {
     return override;
   }
   const target = normalizePackageTarget(params.tag);
   if (isMainPackageTarget(target)) {
-    return OPENCLAW_MAIN_PACKAGE_SPEC;
+    return CARAPACE_MAIN_PACKAGE_SPEC;
   }
   if (isExplicitPackageInstallSpec(target)) {
     return target;
@@ -695,7 +695,7 @@ export function resolveNpmGlobalPrefixLayoutFromGlobalRoot(
 
 /**
  * Derives npm's global package and bin directories from a prefix root.
- * Used for staged installs where OpenClaw creates the prefix itself.
+ * Used for staged installs where Carapace creates the prefix itself.
  */
 export function resolveNpmGlobalPrefixLayoutFromPrefix(prefix: string): NpmGlobalPrefixLayout {
   const resolvedPrefix = path.resolve(prefix);
@@ -1087,7 +1087,7 @@ function resolveBunGlobalInstallSpec(spec: string): string {
   const hasScheme = /^[a-z][a-z0-9+.-]*:/iu.test(trimmed) && !isWindowsAbsolutePath;
   const target = /\.(?:tgz|tar\.gz)$/iu.test(trimmed) && !hasScheme ? `file:${trimmed}` : trimmed;
   // Bun needs an alias to replace the existing global dependency. A bare
-  // tarball is added beside it and can form an openclaw dependency loop.
+  // tarball is added beside it and can form an carapace dependency loop.
   return `${PRIMARY_PACKAGE_NAME}@${target}`;
 }
 
@@ -1310,7 +1310,7 @@ export async function detectGlobalInstallManagerForRoot(
 }
 
 /**
- * Detects an installed global OpenClaw package by probing package-manager roots
+ * Detects an installed global Carapace package by probing package-manager roots
  * when no trusted package root is already available.
  */
 export async function detectGlobalInstallManagerByPresence(
@@ -1339,8 +1339,8 @@ export async function detectGlobalInstallManagerByPresence(
 }
 
 /**
- * Builds the primary package-manager argv for a global OpenClaw install.
- * npm receives quiet/freshness-bypass flags; pnpm and Bun approve OpenClaw's lifecycle.
+ * Builds the primary package-manager argv for a global Carapace install.
+ * npm receives quiet/freshness-bypass flags; pnpm and Bun approve Carapace's lifecycle.
  */
 export function globalInstallArgs(
   managerOrCommand: GlobalInstallManager | ResolvedGlobalInstallCommand,
@@ -1352,14 +1352,14 @@ export function globalInstallArgs(
 ): string[] {
   const resolved = normalizeGlobalInstallCommand(managerOrCommand, pkgRoot);
   if (resolved.manager === "pnpm") {
-    return [resolved.command, "add", "-g", PNPM_OPENCLAW_BUILD_ALLOWLIST_FLAG, spec];
+    return [resolved.command, "add", "-g", PNPM_CARAPACE_BUILD_ALLOWLIST_FLAG, spec];
   }
   if (resolved.manager === "bun") {
     return [
       resolved.command,
       "add",
       "-g",
-      BUN_OPENCLAW_TRUST_FLAG,
+      BUN_CARAPACE_TRUST_FLAG,
       resolveBunGlobalInstallSpec(spec),
     ];
   }

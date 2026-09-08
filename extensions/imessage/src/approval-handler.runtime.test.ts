@@ -148,12 +148,12 @@ vi.mock("./actions.runtime.js", () => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: approvalGatewayMock.resolveApprovalOverGateway,
 }));
-vi.mock("openclaw/plugin-sdk/error-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/error-runtime")>(
-    "openclaw/plugin-sdk/error-runtime",
+vi.mock("carapace/plugin-sdk/error-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/error-runtime")>(
+    "carapace/plugin-sdk/error-runtime",
   );
   return {
     ...actual,
@@ -197,7 +197,7 @@ describe("imessageApprovalNativeRuntime", () => {
         request: {
           title: "Allow Codex to use 1Password?",
           description: "Allow Codex to use 1Password?",
-          pluginId: "openclaw-codex-app-server",
+          pluginId: "carapace-codex-app-server",
           toolName: "codex_mcp_tool_approval",
           severity: "warning",
           allowedDecisions: ["allow-once", "allow-always", "deny"],

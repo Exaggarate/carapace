@@ -1,5 +1,5 @@
 // Gateway usage methods validate requests and assemble owner-scoped usage reports.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_CAPS,
   hasGatewayClientCap,
@@ -9,7 +9,7 @@ import {
   errorShape,
   validateSessionsUsageParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadSessionLogs, loadSessionUsageTimeSeries } from "../../infra/session-cost-usage.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { createUsageAggregateAccumulator } from "../../shared/usage-aggregates.js";
@@ -54,8 +54,8 @@ import { assertValidParams } from "./validation.js";
 function resolveSessionUsageFileOrRespond(
   key: string,
   respond: RespondFn,
-  config: OpenClawConfig,
-): (NonNullable<ReturnType<typeof resolveSessionUsageTarget>> & { config: OpenClawConfig }) | null {
+  config: CarapaceConfig,
+): (NonNullable<ReturnType<typeof resolveSessionUsageTarget>> & { config: CarapaceConfig }) | null {
   const sessionOwner = resolveRequestedSessionAgentId(config, key);
   if (!sessionOwner.ok) {
     respond(false, undefined, sessionOwner.error);

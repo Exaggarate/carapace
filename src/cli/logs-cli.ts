@@ -1,15 +1,15 @@
 // Gateway logs CLI with RPC tailing, local file fallback, and systemd journal fallback.
 import { setTimeout as delay } from "node:timers/promises";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
 import {
   coerceErrorMessage as normalizeErrorMessage,
   toStringifiedError,
-} from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/normalization-core/error-coercion";
 import {
   parseStrictPositiveInteger,
   resolveIntegerOption,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { Command } from "commander";
 import {
   GATEWAY_CLIENT_MODES,
@@ -362,11 +362,11 @@ function parseJournalctlOutput(output: string): { lines: string[]; cursor?: stri
 }
 
 function resolveLogsSystemdUnitName(runtime: LogsCliRuntimeModule, env: NodeJS.ProcessEnv): string {
-  const override = env.OPENCLAW_SYSTEMD_UNIT?.trim();
+  const override = env.CARAPACE_SYSTEMD_UNIT?.trim();
   if (override) {
     return override.endsWith(".service") ? override : `${override}.service`;
   }
-  return `${runtime.resolveGatewaySystemdServiceName(env.OPENCLAW_PROFILE)}.service`;
+  return `${runtime.resolveGatewaySystemdServiceName(env.CARAPACE_PROFILE)}.service`;
 }
 
 const MAX_FOLLOW_RETRIES = 8;
@@ -459,7 +459,7 @@ function createLogWriters(onOutputClosed?: () => void) {
       onOutputClosed?.();
       const code = err.code ?? "EPIPE";
       const target = stream === process.stdout ? "stdout" : "stderr";
-      const message = `openclaw logs: output ${target} closed (${code}). Stopping tail.`;
+      const message = `carapace logs: output ${target} closed (${code}). Stopping tail.`;
       try {
         clearActiveProgressLine();
         process.stderr.write(`${message}\n`);
@@ -485,7 +485,7 @@ async function emitGatewayError(
   emitJsonLine: (payload: Record<string, unknown>, toStdErr?: boolean) => boolean,
   errorLine: (text: string) => boolean,
 ) {
-  const hint = `Hint: run \`${formatCliCommand("openclaw doctor")}\`.`;
+  const hint = `Hint: run \`${formatCliCommand("carapace doctor")}\`.`;
   const errorText = redactSensitiveUrlLikeString(formatErrorMessage(err));
 
   const details = projectGatewayConnectionDetailsForDiagnostics(
@@ -530,7 +530,7 @@ export function registerLogsCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/logs", "docs.openclaw.ai/cli/logs")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/logs", "github.com/Exaggarate/carapace")}\n`,
     );
 
   addGatewayClientOptions(logs);

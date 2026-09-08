@@ -1,5 +1,5 @@
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { ResponseInput, ResponseOutputItem } from "openai/resources/responses/responses.js";
 import { getAiTransportHost, resolveAiTransportHeaderSentinels } from "../host.js";
 import { registerSessionResourceCleanup } from "../session-resources.js";
@@ -12,7 +12,7 @@ import {
 import { sha256Hex } from "./transport-utils.js";
 
 const HTTP_CONTINUATION_IDLE_TTL_MS = 5 * 60 * 1000;
-const TURN_HEADERS = new Set(["traceparent", "x-openclaw-turn-id", "x-openclaw-turn-attempt"]);
+const TURN_HEADERS = new Set(["traceparent", "x-carapace-turn-id", "x-carapace-turn-attempt"]);
 
 export type ResponsesContinuationRequest = Record<string, unknown> & {
   input?: Array<ResponseInput[number] | ResponsesConfigurationUpdate>;
@@ -54,7 +54,7 @@ function requestWithoutInput(request: ResponsesContinuationRequest): ResponsesCo
   }
   const metadata = Object.fromEntries(
     Object.entries(rest.metadata).filter(
-      ([key]) => key !== "openclaw_turn_id" && key !== "openclaw_turn_attempt",
+      ([key]) => key !== "carapace_turn_id" && key !== "carapace_turn_attempt",
     ),
   );
   return { ...rest, metadata };

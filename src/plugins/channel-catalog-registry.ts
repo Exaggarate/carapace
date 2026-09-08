@@ -1,11 +1,11 @@
 // Maintains channel catalog entries advertised by plugins.
-import { normalizeOptionalString as resolveOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString as resolveOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import {
   getCurrentPluginMetadataSnapshotState,
   getGatewayPluginMetadataSnapshot,
 } from "./current-plugin-metadata-state.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { discoverCarapacePlugins, type PluginDiscoveryResult } from "./discovery.js";
 import { loadInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-record-reader.js";
 import type { PluginPackageChannel, PluginPackageInstall } from "./manifest.js";
 import { resolvePluginMetadataEnvFingerprint } from "./plugin-metadata-env.js";
@@ -44,7 +44,7 @@ export function listChannelCatalogEntries(
   let discovery = params.discovery;
   if (!discovery) {
     const installRecords = resolveInstallRecords(params);
-    discovery = discoverOpenClawPlugins({
+    discovery = discoverCarapacePlugins({
       workspaceDir: params.workspaceDir,
       env: params.env,
       extraPaths: params.extraPaths,

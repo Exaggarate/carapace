@@ -1,4 +1,4 @@
-import type { TranscriptStartRequest } from "openclaw/plugin-sdk/transcripts";
+import type { TranscriptStartRequest } from "carapace/plugin-sdk/transcripts";
 import { afterEach, vi } from "vitest";
 import {
   discordVoiceTranscriptsSourceProvider,

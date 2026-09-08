@@ -21,7 +21,7 @@ describe("channel rescue lifecycle ownership", () => {
   });
 
   it("marks rescue as hosted even without a capability, so it cannot fall through to CLI", async () => {
-    const params = buildCommandTestParams("/openclaw yes", baseCommandTestConfig);
+    const params = buildCommandTestParams("/carapace yes", baseCommandTestConfig);
     await handleSystemAgentCommand(params, true);
     expect(runSystemAgentRescueMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -39,7 +39,7 @@ describe("channel rescue lifecycle ownership", () => {
     const successor = vi.fn<GatewayHostLifecycle["request"]>();
     resolveContext.mockReturnValue({ hostLifecycle: { request: original } });
     const abort = new AbortController();
-    const params = buildCommandTestParams("/openclaw yes", baseCommandTestConfig);
+    const params = buildCommandTestParams("/carapace yes", baseCommandTestConfig);
     params.commandInvocationSignal = abort.signal;
     vi.mocked(runSystemAgentRescueMessage).mockImplementationOnce(async (input) => {
       resolveContext.mockReturnValue({ hostLifecycle: { request: successor } });

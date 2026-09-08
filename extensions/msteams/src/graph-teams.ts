@@ -1,5 +1,5 @@
 // Msteams plugin module implements graph teams behavior.
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import { fetchAllGraphPages, fetchGraphJson, resolveGraphToken } from "./graph.js";
 
 // ---------------------------------------------------------------------------
@@ -16,7 +16,7 @@ type GraphTeamsChannel = {
 };
 
 type ListChannelsMSTeamsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   teamId: string;
 };
 
@@ -31,7 +31,7 @@ type ListChannelsMSTeamsResult = {
 };
 
 type GetChannelInfoMSTeamsParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   teamId: string;
   channelId: string;
 };

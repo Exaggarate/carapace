@@ -1,28 +1,28 @@
 ---
-summary: "Use OpenClaw Code Mode to discover, call, and combine large tool catalogs in compact JavaScript or TypeScript workflows"
+summary: "Use Carapace Code Mode to discover, call, and combine large tool catalogs in compact JavaScript or TypeScript workflows"
 title: "Code Mode"
 sidebarTitle: "Code Mode"
 read_when:
-  - You want to enable OpenClaw code mode for an agent run
+  - You want to enable Carapace code mode for an agent run
   - You need to explain why Code Mode is different from Codex Code Mode
   - You are reviewing the compact tool contract, QuickJS-WASI sandbox, TypeScript transform, or hidden tool-catalog bridge
   - You are reviewing the MCP namespace bridge or virtual API declarations
 ---
 
-Code mode is an experimental, opt-in OpenClaw agent-runtime feature. When
+Code mode is an experimental, opt-in Carapace agent-runtime feature. When
 enabled, the model no longer sees every enabled tool schema; instead, it sees
 `exec`, `wait`, and any direct-only tool whose structured result cannot cross
 the JSON-only guest bridge. The model writes a small JavaScript or TypeScript
 program that searches, describes, and calls the hidden tool catalog.
 
 <Note>
-OpenClaw Code Mode is off by default. To try it, open **Settings → Agents &
+Carapace Code Mode is off by default. To try it, open **Settings → Agents &
 Tools → Labs** and turn on **Code Mode**. The Labs switch writes the `"auto"`
 tier, which engages only for models marked as preferred Code Mode performers.
 This is the global default; agent and model overrides take precedence.
 </Note>
 
-This page documents OpenClaw code mode, not Codex Code Mode. The two features
+This page documents Carapace code mode, not Codex Code Mode. The two features
 share a name and the same control-tool names (`exec`, `wait`), but they are
 separate implementations:
 
@@ -30,7 +30,7 @@ separate implementations:
   freeform-grammar tool: the model writes raw JavaScript source (optionally
   prefixed by a `// @exec: {...}` pragma line for execution options), executed
   in Codex's in-process V8 Code Mode runtime.
-- OpenClaw code mode runs in the generic OpenClaw agent runtime and is
+- Carapace code mode runs in the generic Carapace agent runtime and is
   enabled through global, agent, or model activation settings. Its `exec`
   tool takes a JSON `{ code, language }` payload, executed in a QuickJS-WASI
   worker.
@@ -39,7 +39,7 @@ Both are JavaScript execution surfaces, not shell-command surfaces. Treat them
 as independent, differently-implemented features that happen to expose
 identically-named `exec`/`wait` tools.
 
-In OpenClaw code mode, `command` is a JavaScript or TypeScript alias for
+In Carapace code mode, `command` is a JavaScript or TypeScript alias for
 `code`, not a shell command. For shell or file operations, call the appropriate
 async tool global from guest JavaScript. Recognizable shell
 commands are rejected before guest execution with actionable
@@ -60,7 +60,7 @@ before the call settles.
   cannot survive the guest bridge.
 - `exec` evaluates model-generated JavaScript or TypeScript in an isolated
   QuickJS-WASI worker thread.
-- Every catalog-eligible enabled non-MCP tool (OpenClaw core, plugin, client) is
+- Every catalog-eligible enabled non-MCP tool (Carapace core, plugin, client) is
   hidden as a standalone model tool and exposed inside the guest program as an
   async global function. MCP stays under the `MCP` namespace.
 - The `exec` description carries a bounded quick index of final callable names,
@@ -99,7 +99,7 @@ behavior, or model selection.
   conditional logic, and parallel nested tool calls inside one code cell.
 - Fewer model round trips: a declared output contract lets the model call and
   transform a tool result in one `exec`; unknown outputs remain raw-first.
-- Provider neutral: works for OpenClaw, plugin, MCP, and client tools without
+- Provider neutral: works for Carapace, plugin, MCP, and client tools without
   depending on provider-native code execution.
 - Fails closed: if code mode is enabled but the QuickJS-WASI runtime is
   unavailable, the run fails instead of silently falling back to broad direct
@@ -191,7 +191,7 @@ Wildcard rows such as `"openai/*"` may configure runtime policy, but cannot set
     defaults: {
       models: {
         "openai/gpt-5.6-luna": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           codeMode: true,
         },
       },
@@ -224,7 +224,7 @@ marked for **Raw** editing without hiding the supported settings beside them.
 
 Overrides affect the selected model on future runs, including fallback models;
 they do not enable tools on a tool-free run or change runtime selection. The
-example separately selects `agentRuntime.id: "openclaw"` because OpenAI routes
+example separately selects `agentRuntime.id: "carapace"` because OpenAI routes
 may otherwise use Codex. These settings do not control Codex native Code Mode.
 Model overrides change activation only; limits still come from the global and
 per-agent `tools.codeMode` options.
@@ -269,7 +269,7 @@ try {
 }
 ```
 
-Await every tool call or handle its rejection explicitly. OpenClaw drains
+Await every tool call or handle its rejection explicitly. Carapace drains
 dispatched calls before completing a cell; an unhandled rejection, including
 one from an unawaited call or timer callback, fails the cell instead of silently
 reporting success. Handlers attached after a suspension still handle their
@@ -280,7 +280,7 @@ failures become failed `exec` or `wait` results. The model can read the error,
 correct its code, inspect the current state, and continue with the normal tool
 surface. A failed cell does not impose a separate recovery mode or mutation budget.
 
-OpenClaw does not automatically replay a failed program. Earlier calls may have
+Carapace does not automatically replay a failed program. Earlier calls may have
 changed state, and a failed call may have partially applied. Inspect authoritative
 state before deciding what remains, and do not repeat completed actions. This
 also applies when `wait` resumes a suspended cell: its earlier calls belong to the
@@ -297,15 +297,15 @@ To confirm the model payload shape while debugging, run the Gateway with
 targeted logging:
 
 ```bash
-OPENCLAW_DEBUG_CODE_MODE=1 \
-OPENCLAW_DEBUG_MODEL_TRANSPORT=1 \
-OPENCLAW_DEBUG_MODEL_PAYLOAD=tools \
-openclaw gateway
+CARAPACE_DEBUG_CODE_MODE=1 \
+CARAPACE_DEBUG_MODEL_TRANSPORT=1 \
+CARAPACE_DEBUG_MODEL_PAYLOAD=tools \
+carapace gateway
 ```
 
 With code mode active, the logged model-facing tool names should be `exec` and
 `wait`. For the full redacted provider payload, add
-`OPENCLAW_DEBUG_MODEL_PAYLOAD=full-redacted` for a short debugging session.
+`CARAPACE_DEBUG_MODEL_PAYLOAD=full-redacted` for a short debugging session.
 
 ## Use Swarm for agent fan-out
 
@@ -316,7 +316,7 @@ Use normal JavaScript control flow for fan-out, decision gates, and structured
 collection.
 
 The Swarm globals, `API.read("agents.d.ts")`, and Swarm prompt hints appear only
-when Swarm is enabled and the native OpenClaw `sessions_spawn` tool is present
+when Swarm is enabled and the native Carapace `sessions_spawn` tool is present
 in the Code Mode catalog and permitted by the run's execution allowlist. An MCP
 tool with the same name does not qualify. Code Mode waits for collector results
 internally, so `agents.run()` does not require the standalone `agents_wait`
@@ -338,8 +338,8 @@ validating high-risk deployments.
 | ------------------- | ------------------------------------------------------------------------------------------- |
 | Runtime             | [`quickjs-wasi`](https://github.com/vercel-labs/quickjs-wasi)                               |
 | Default state       | disabled                                                                                    |
-| Stability           | experimental OpenClaw surface (Codex Code Mode is a separate, stable Codex harness surface) |
-| Target surface      | generic OpenClaw agent runs                                                                 |
+| Stability           | experimental Carapace surface (Codex Code Mode is a separate, stable Codex harness surface) |
+| Target surface      | generic Carapace agent runs                                                                 |
 | Security posture    | model code is hostile                                                                       |
 | User-facing promise | enabling code mode never silently falls back to broad direct tool exposure                  |
 
@@ -365,11 +365,11 @@ Provider-owned tools such as remote Python sandboxes are separate tools. See
 
 ## Terms
 
-- **Code mode**: the OpenClaw runtime mode that hides catalog-compatible model
+- **Code mode**: the Carapace runtime mode that hides catalog-compatible model
   tools and exposes `exec`, `wait`, plus required direct-only tools.
 - **Guest runtime**: the QuickJS-WASI JavaScript VM that evaluates model code.
 - **Host bridge**: the narrow JSON-compatible callback surface from guest code
-  back into OpenClaw.
+  back into Carapace.
 - **Catalog**: the run-scoped list of effective tools after normal tool
   policy, plugin, MCP, and client-tool resolution.
 - **Nested tool call**: a tool call made from guest code through the host
@@ -409,7 +409,7 @@ headless wall-clock deadline. A checkpoint does not reset that wall deadline.
 When the shell `exec` tool is available, use it for heavier computation
 and keep guest JavaScript focused on coordinating tools and processing results.
 
-If code mode is enabled but QuickJS-WASI cannot load, OpenClaw fails closed
+If code mode is enabled but QuickJS-WASI cannot load, Carapace fails closed
 for that run; it does not silently expose normal tools as a fallback. This
 holds for `true` and for `"auto"` runs where the model resolves as preferred:
 an engaged run never silently falls back to broad direct tool exposure.
@@ -484,9 +484,9 @@ preferred tier came from evaluations on the first-party endpoints, and those
 runs have not been repeated per reseller. Promoting one of those rows is a
 deliberate, evidence-backed change rather than an oversight.
 
-For OpenAI models, the flag matters only when the run resolves to the OpenClaw
+For OpenAI models, the flag matters only when the run resolves to the Carapace
 embedded agent runtime. Default OpenAI routing uses the Codex-style harness
-surface, where OpenClaw code mode does not apply; the catalog flag never
+surface, where Carapace code mode does not apply; the catalog flag never
 changes that routing decision.
 
 ### Choosing when to enable
@@ -512,7 +512,7 @@ final model request is assembled:
 
 1. Resolve the agent, model, provider, sandbox, channel, sender, and run
    policy.
-2. Build the effective OpenClaw tool list, adding eligible plugin, MCP, and
+2. Build the effective Carapace tool list, adding eligible plugin, MCP, and
    client tools.
 3. Apply allow/deny policy.
 4. Resolve activation using the [agent and model precedence](#override-one-model).
@@ -526,7 +526,7 @@ final model request is assembled:
 
 Runs that intentionally have no tools (raw model calls, `disableTools: true`,
 or an empty `tools.allow` list) do not activate the code-mode surface even
-when `tools.codeMode.enabled: true` is configured. Code mode and OpenClaw Tool
+when `tools.codeMode.enabled: true` is configured. Code mode and Carapace Tool
 Search are mutually exclusive for a run; if code mode activates, Tool Search's
 compaction does not.
 
@@ -565,22 +565,22 @@ Rules:
 - One of `code` or `command` must be non-empty.
 - `code` is the documented model-facing field.
 - `command` is accepted as an exec-compatible alias for hook policies and
-  trusted rewrites (the normal OpenClaw shell exec tool also uses a `command`
+  trusted rewrites (the normal Carapace shell exec tool also uses a `command`
   field). Blank caller aliases are treated as absent; a hook or trusted policy
   that invalidates one populated alias (blank or non-string) invalidates both so
   execution fails closed. When both aliases are non-empty, their values must match.
 - `language` defaults to `"javascript"`; the schema exposes it as a flat
   string enum (`"javascript" | "typescript"`), not a `oneOf`/`anyOf` union,
   since some providers reject those shapes.
-- If `language` is `"typescript"`, OpenClaw transpiles before evaluation.
+- If `language` is `"typescript"`, Carapace transpiles before evaluation.
 - Set `typecheck: true` with `language: "typescript"` for opt-in preflight against
   the effective generated tool declarations. Invalid field composition, arguments,
   or use of unknown outputs fails with `invalid_input` before guest execution or
   tool dispatch. This is a tool-call option, not a persisted setting.
-- Do not set `restartSafe` on a new `exec`. Set it to `true` only when OpenClaw
+- Do not set `restartSafe` on a new `exec`. Set it to `true` only when Carapace
   explicitly requests replay after a gateway restart, and never for `write`,
   `edit`, `exec`, or any mutation. Every catalog call must be explicitly
-  replay-safe. OpenClaw rejects unmarked catalog tools and namespace
+  replay-safe. Carapace rejects unmarked catalog tools and namespace
   surfaces that are not proven replay-safe. A generic exec surface is not
   replay-safe merely because one command appears read-only; use audited read,
   grep, or find tools.
@@ -631,7 +631,7 @@ type CodeModeFailedResult = {
 needs a model-visible continuation — an explicit `yield_control(...)`, or a
 bridge tool call that has not resolved within the exec deadline. The result
 includes a `runId` for `wait`. Native-channel exec approvals are different:
-while the operator decision is pending, OpenClaw suspends both the Code Mode
+while the operator decision is pending, Carapace suspends both the Code Mode
 execution budget and the owning agent-run budget. The original `exec` remains
 in flight, then resumes with exactly its unused budget after approval resolves;
 it does not return `pending_tools` or require model polling through `wait`.
@@ -647,7 +647,7 @@ block that awaits several tools runs to completion in one model turn instead of
 forcing one model tool call per await.
 
 `exec` returns `completed` only when the guest VM has no pending work and the
-final value is JSON-compatible after OpenClaw's output adapter runs.
+final value is JSON-compatible after Carapace's output adapter runs.
 
 New `exec` and `wait` result text uses compact JSON to leave more of the context
 budget for tool data. Status, continuation, replay safety, telemetry, and
@@ -658,7 +658,7 @@ as text rather than becoming Markdown links.
 
 ### Source in session history
 
-In the built-in OpenClaw runtime, the JSON Code Mode tool executes the original
+In the built-in Carapace runtime, the JSON Code Mode tool executes the original
 input. Session history preserves computations such as `const API_TOKEN = computeToken();`
 and boolean or null initializers in the outer call's JavaScript or TypeScript
 `code` and `command` fields, while masking credential literals, recognizable
@@ -688,7 +688,7 @@ type CodeModeWaitInput = {
 
 Output is the same `CodeModeResult` union returned by `exec`.
 
-`wait` exists because nested OpenClaw tools can be slow, interactive, or stream
+`wait` exists because nested Carapace tools can be slow, interactive, or stream
 partial updates; the model should not need to keep one long `exec` call open
 while the host waits for ordinary external work. Native-channel exec approvals
 are the exception: they stay inside the original `exec` so approval authority
@@ -703,11 +703,11 @@ complete inline but fail when it must genuinely park.
 QuickJS-WASI snapshot/restore is the parked resume mechanism:
 
 1. `exec` evaluates code until completion, failure, or suspension.
-2. On suspension, OpenClaw snapshots the QuickJS VM and records pending host
+2. On suspension, Carapace snapshots the QuickJS VM and records pending host
    work.
 3. When pending work settles, `wait` restores the VM snapshot and
    re-registers host callbacks by stable names.
-4. OpenClaw delivers nested tool results into the restored VM and drains
+4. Carapace delivers nested tool results into the restored VM and drains
    QuickJS pending jobs.
 5. `wait` returns `completed`, `failed`, or another `waiting` result.
 
@@ -809,7 +809,7 @@ type ToolCatalogMetadata = {
   toolName: string;
   label?: string;
   description: string;
-  source: "openclaw" | "client";
+  source: "carapace" | "client";
   input?: string;
   output?: string;
 };
@@ -830,11 +830,11 @@ handle remains callable.
 the handle's `describe()` when the exact full schema is still needed. Client
 entries use `input: "unknown"` so their untrusted schemas stay deferred until
 `describe()`. `output` is
-present only for a complete compact hint derived from a trusted OpenClaw core
+present only for a complete compact hint derived from a trusted Carapace core
 or plugin `outputSchema`. MCP and client output-schema claims are not promoted
 into this trusted catalog hint.
 
-Plugin tools use `source: "openclaw"`; there is no separate `"plugin"` source
+Plugin tools use `source: "carapace"`; there is no separate `"plugin"` source
 value. MCP entries are excluded from generic catalog discovery and remain
 available only through `MCP`.
 
@@ -887,11 +887,11 @@ is needed:
 const content = await read({ path: "README.md" });
 
 const [tool] = await catalog.search("...");
-const result = await tool({ query: "OpenClaw" });
+const result = await tool({ query: "Carapace" });
 
 const [search] = await catalog.search("search the web", { limit: 1 });
 const schema = await search.describe();
-const hits = await search({ query: "OpenClaw code mode" });
+const hits = await search({ query: "Carapace code mode" });
 ```
 
 Calling a global or catalog handle returns the normal tool's JSON `details`
@@ -917,7 +917,7 @@ remains, the result is `"truncated"` and its continuation describes the next pag
 
 ## Declared output contracts
 
-OpenClaw tools can declare `outputSchema` for the structured value placed in
+Carapace tools can declare `outputSchema` for the structured value placed in
 `AgentToolResult.details`. This is useful for Code Mode and Tool Search; it is
 not a provider-native tool response schema and does not change direct tool
 exposure.
@@ -927,7 +927,7 @@ For a tool made with `defineToolPlugin`, declare the schema beside
 
 ```typescript
 import { Type } from "typebox";
-import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
+import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
 
 const Shipment = Type.Object(
   {
@@ -959,7 +959,7 @@ property on the returned `AnyAgentTool` object.
 
 Current built-in contracts include `agents_list`, `agents_wait`, `apply_patch`,
 `conversations_list`, `conversations_send`, `conversations_turn`, `edit`,
-`openclaw`, `read`, `screen`,
+`carapace`, `read`, `screen`,
 `sessions_history`, `sessions_list`, `sessions_search`, `sessions_send`,
 `session_status`, `suggest_task`, `terminal`, `web_fetch`, and `web_search`.
 Exact passthroughs can reuse their owning protocol schema instead of
@@ -1020,7 +1020,7 @@ The contract rules are strict:
 - Close object layers with `{ additionalProperties: false }` for a complete
   quick-index hint. Open, oversized, or otherwise partial schemas stay
   available through handle `describe()` but do not enable one-turn field use.
-- OpenClaw compiles the schema before running the tool, then validates final
+- Carapace compiles the schema before running the tool, then validates final
   `details` after normal tool hooks and before a catalog call returns. An
   invalid schema cannot run the tool; a mismatch fails without printing the
   value.
@@ -1043,8 +1043,8 @@ const files = await API.list("mcp");
 const githubApi = await API.read("mcp/github.d.ts");
 
 const issue = await MCP.github.createIssue({
-  owner: "openclaw",
-  repo: "openclaw",
+  owner: "carapace",
+  repo: "carapace",
   title: "Investigate gateway logs",
 });
 
@@ -1118,7 +1118,7 @@ operations instead return their native MCP shapes: `resources.list()` returns
 `prompts`, and `prompts.get()` returns `messages` with an optional `description`.
 
 Declaration files are virtual, not written under the workspace or state
-directory. For each code-mode `exec` call, OpenClaw builds the run-scoped tool
+directory. For each code-mode `exec` call, Carapace builds the run-scoped tool
 catalog, keeps the visible MCP entries, renders `mcp/index.d.ts` plus one
 `mcp/<server>.d.ts` per visible server, and injects that small read-only table
 into the QuickJS worker. Guest code sees only the `API` object:
@@ -1184,13 +1184,13 @@ Output order matches guest calls. Cumulative guest output and the final value
 or failure diagnostic still share one `maxOutputBytes` serialized UTF-8 budget
 across all waits. Oversized errors retain their leading cause and end with
 `[error truncated]`; truncation does not turn a failure into success. For
-successful emitted or returned output that exceeds this budget, OpenClaw returns a bounded value
+successful emitted or returned output that exceeds this budget, Carapace returns a bounded value
 with `truncated: true`, a UTF-8-safe `prefix`, `omittedBytes`, and guidance to
 rerun with narrower arguments. Treat that marker as a successful partial result:
 reduce the search scope, paginate, select fewer files, or return a smaller
 projection. Non-serializable values are converted to plain strings or errors;
 binary values are not supported. Images and files travel through ordinary
-OpenClaw tools, not through the code-mode bridge.
+Carapace tools, not through the code-mode bridge.
 
 Marker prefixes and omitted-byte counts describe the original compact JSON after
 normalization, including array brackets, separators, and JSON escaping. Ordinary
@@ -1199,7 +1199,7 @@ new output or a changed final-value/error reservation can produce a replacement
 summary of that same original output.
 
 Model-facing `exec` and `wait` results also fit the effective model's per-result
-context and persistence limits. OpenClaw reserves the complete result envelope,
+context and persistence limits. Carapace reserves the complete result envelope,
 including status, continuation, diagnostics, telemetry, and JSON formatting,
 using the same compact representation for budget fitting and delivery before
 projecting output from its retained original source. Network-derived
@@ -1220,7 +1220,7 @@ served in part.
 ## Tool catalog
 
 The hidden catalog includes tools after effective policy filtering, in this
-order: OpenClaw core tools, bundled plugin tools, external plugin tools, MCP
+order: Carapace core tools, bundled plugin tools, external plugin tools, MCP
 tools, then client-provided tools for the current run.
 
 Catalog ids remain opaque host-only routing identities. They are stable within
@@ -1229,7 +1229,7 @@ are never included in the prompt, guest metadata, handle descriptions, or
 errors. Policy, approvals, telemetry, replay safety, and namespace dispatch
 continue to use them internally.
 
-Before the worker starts, OpenClaw projects one effective winner per exact tool
+Before the worker starts, Carapace projects one effective winner per exact tool
 name and computes its final guest callable name. This matches direct-mode
 precedence: later client tools win an exact-name shadow, while plugin conflict
 enforcement remains unchanged. The finalized projection is carried through
@@ -1249,27 +1249,27 @@ resolves to its host-only entry and dispatches through the same executor path.
 
 ## Tool Search interaction
 
-Code mode supersedes the OpenClaw Tool Search model surface for runs where it
+Code mode supersedes the Carapace Tool Search model surface for runs where it
 is active.
 
 When Code Mode engages through forced `true` or `"auto"` activation:
 
-- OpenClaw does not expose `tool_search_code`, `tool_search`, `tool_describe`,
+- Carapace does not expose `tool_search_code`, `tool_search`, `tool_describe`,
   or `tool_call` as model-visible tools.
 - The same cataloging idea moves inside the guest runtime.
 - The guest runtime receives bare async globals plus callable search/describe
   handles for non-MCP tools.
 - MCP calls use the generated `MCP` namespace and its `$api()` headers instead
   of generic catalog discovery.
-- Nested calls dispatch through the same OpenClaw executor path that Tool
+- Nested calls dispatch through the same Carapace executor path that Tool
   Search uses.
 
-See [Tool Search](/tools/tool-search) for the OpenClaw compact catalog bridge
+See [Tool Search](/tools/tool-search) for the Carapace compact catalog bridge
 that code mode supersedes for active runs.
 
 ## Tool names and collisions
 
-The model-visible `exec` tool is the code-mode tool. If the normal OpenClaw
+The model-visible `exec` tool is the code-mode tool. If the normal Carapace
 shell `exec` tool is enabled, it is hidden from the model and cataloged like
 any other tool.
 
@@ -1291,7 +1291,7 @@ Inside the guest runtime:
 
 ## Nested tool execution
 
-Every nested tool call crosses the host bridge and re-enters OpenClaw,
+Every nested tool call crosses the host bridge and re-enters Carapace,
 preserving: active agent id, session id and key, sender and channel context,
 sandbox policy, approval policy, plugin `before_tool_call` hooks, abort
 signal, streaming updates where available, and trajectory/audit events.
@@ -1352,7 +1352,7 @@ session.`.
 - A run's snapshot is removed from the map as soon as it settles to
   `completed` or `failed`, or is dropped on Gateway shutdown (nothing
   survives a restart: this is transient runtime state).
-- OpenClaw caps the number of concurrently suspended runs per process (64) and
+- Carapace caps the number of concurrently suspended runs per process (64) and
   rejects new suspensions past that cap with `too many suspended code mode
 runs.`.
 
@@ -1364,7 +1364,7 @@ warm worker threads and TypeScript compilers also retain memory.
 
 ## QuickJS-WASI runtime
 
-OpenClaw loads `quickjs-wasi` as a direct dependency in the owning package; it
+Carapace loads `quickjs-wasi` as a direct dependency in the owning package; it
 does not rely on a transitive copy installed for an unrelated dependency.
 
 Runtime responsibilities: compile/load the QuickJS-WASI WebAssembly module;
@@ -1375,7 +1375,7 @@ dispose VM handles and snapshots after terminal states.
 Snapshot buffers transfer directly between workers and the Gateway without
 copying the VM heap through a storage serialization format.
 
-The runtime executes in a Node.js worker thread, outside OpenClaw's main
+The runtime executes in a Node.js worker thread, outside Carapace's main
 event loop. A guest infinite loop must not block the Gateway process
 indefinitely; the worker's interrupt handler enforces the wall-clock timeout
 independent of guest code cooperating.
@@ -1435,7 +1435,7 @@ type CodeModeErrorCode =
 rejected module access, TypeScript transform failures, unknown/expired/
 wrong-scope `runId` values, and too many suspended runs. `runtime_unavailable`
 covers a QuickJS worker that fails to start or exits non-zero.
-`aborted` means the caller cancelled an active `exec` or `wait`; OpenClaw
+`aborted` means the caller cancelled an active `exec` or `wait`; Carapace
 terminates the worker or drops the suspended run, so that `runId` cannot be
 resumed. It is distinct from `timeout`, which means an execution deadline was
 exceeded.
@@ -1449,7 +1449,7 @@ objects, prototypes, and host functions do not cross into QuickJS.
 ## Telemetry
 
 Each result's `telemetry` field reports: hidden catalog size and a source
-breakdown (`openclaw`/`mcp`/`client` counts), cumulative search/describe/call
+breakdown (`carapace`/`mcp`/`client` counts), cumulative search/describe/call
 counts for the run's catalog, and the code-mode control tool names (`exec` and
 `wait`).
 The `counterScope` identifies one counter lifetime, changing when a catalog is
@@ -1462,17 +1462,17 @@ pending work, that wait returns `failed` with `code: "aborted"` and the final
 telemetry; pending calls are canceled and the snapshot is dropped. Retained
 diagnostics grant no authority to resume or repair the closed run.
 
-The run metadata (`meta.agentMeta` in `openclaw agent --json`, mirrored on the
+The run metadata (`meta.agentMeta` in `carapace agent --json`, mirrored on the
 `agent exec --json` envelope) adds per-run stats:
 
 - `codeModeEngaged`: `true` only when code mode actually owned the model tool
   surface. This is the reliable engagement signal — do not infer engagement
   from config or tool names: the shell tool is also named `exec`, and the
-  `"auto"` tier engages per model capability. Harnesses that bridge OpenClaw's
+  `"auto"` tier engages per model capability. Harnesses that bridge Carapace's
   tool surface (Copilot) report their resolved gate, so
   `codeModeEngaged: false` with `tools.codeMode.enabled=true` makes a silent
   no-op observable. Harnesses that run their own native tool surface (Codex)
-  never engage OpenClaw code mode, so they always read `false`; an attempt that
+  never engage Carapace code mode, so they always read `false`; an attempt that
   reports nothing is normalized to `false` for the same reason. Codex's own
   `codeModeOnly` is a separate native feature that this field does not track.
 - `assistantTurns`: completed assistant/provider round trips across the run.
@@ -1484,16 +1484,16 @@ The run metadata (`meta.agentMeta` in `openclaw agent --json`, mirrored on the
   model has no cost data.
 
 Telemetry must not include secrets, raw environment values, or unredacted
-tool inputs beyond existing OpenClaw trajectory policy.
+tool inputs beyond existing Carapace trajectory policy.
 
 ## Debugging
 
-JavaScript failure frames labeled `openclaw-code-mode:user.js` use line numbers
+JavaScript failure frames labeled `carapace-code-mode:user.js` use line numbers
 from the submitted code, excluding internal wrappers and headless setup. For
 TypeScript, compiler diagnostics and source-mapped runtime frames labeled
-`openclaw-code-mode:user.ts` refer to the submitted TypeScript, including after
+`carapace-code-mode:user.ts` refer to the submitted TypeScript, including after
 `wait`. Source maps account for erased declarations and UTF-8 guest columns.
-An unmapped runtime frame retains the explicit `openclaw-code-mode:generated.js`
+An unmapped runtime frame retains the explicit `carapace-code-mode:generated.js`
 label rather than pretending to identify original source. Internal wrapper and controller frames are
 omitted from new cells' failures; error messages still share the existing output
 budget. Resumed older snapshots without location metadata retain their previous
@@ -1503,18 +1503,18 @@ Use targeted model transport logging when code mode behaves differently from
 a normal tool run:
 
 ```bash
-OPENCLAW_DEBUG_CODE_MODE=1 \
-OPENCLAW_DEBUG_MODEL_TRANSPORT=1 \
-OPENCLAW_DEBUG_MODEL_PAYLOAD=tools \
-OPENCLAW_DEBUG_SSE=events \
-openclaw gateway
+CARAPACE_DEBUG_CODE_MODE=1 \
+CARAPACE_DEBUG_MODEL_TRANSPORT=1 \
+CARAPACE_DEBUG_MODEL_PAYLOAD=tools \
+CARAPACE_DEBUG_SSE=events \
+carapace gateway
 ```
 
-For payload-shape debugging, use `OPENCLAW_DEBUG_MODEL_PAYLOAD=full-redacted`.
+For payload-shape debugging, use `CARAPACE_DEBUG_MODEL_PAYLOAD=full-redacted`.
 This logs a capped, redacted JSON snapshot of the model request; use it only
 while debugging, since prompts and message text can still appear.
 
-For stream debugging, use `OPENCLAW_DEBUG_SSE=peek` to log the first five
+For stream debugging, use `CARAPACE_DEBUG_SSE=peek` to log the first five
 redacted SSE events. Code mode also fails closed if the final provider
 payload does not contain exactly one `exec`, one `wait`, and only approved
 direct-only tools after the code-mode surface has activated.
@@ -1552,7 +1552,7 @@ Code mode coverage should prove:
 - direct-only tools stay model-visible and do not appear in `catalog`
 - denied tools have no global or catalog handle
 - bare globals, callable `catalog.search` results, `catalog.all`, and handle
-  `describe()` work for OpenClaw and client tools without exposing exact ids
+  `describe()` work for Carapace and client tools without exposing exact ids
 - `API.list("mcp")` and `API.read("mcp/<server>.d.ts")` expose TypeScript-style
   MCP declarations without a bridge/tool call
 - MCP namespace `$api()` remains available as an inline fallback for schemas
@@ -1586,13 +1586,13 @@ Run these as integration or end-to-end tests when changing the runtime:
 2. Send an agent turn with a small direct tool set.
 3. Assert the model-visible tools are unchanged.
 4. Restart with `tools.codeMode.enabled: true`.
-5. Send an agent turn with OpenClaw, plugin, MCP, and client test tools.
+5. Send an agent turn with Carapace, plugin, MCP, and client test tools.
 6. Assert the model-visible tool list is `exec`, `wait`, plus only configured
    direct-only tools.
 7. In `exec`, call safe bare globals and assert normalized, reserved, and
    colliding names match the quick index.
 8. Search `catalog`, inspect handle metadata/`describe()`, and call
-   OpenClaw/plugin/client handles without observing exact ids.
+   Carapace/plugin/client handles without observing exact ids.
 9. In `exec`, call `API.list("mcp")` and `API.read("mcp/<server>.d.ts")` and
    assert the declaration files describe visible MCP tools.
 10. In `exec`, call MCP tools through `MCP.<server>.<tool>({ ...input })` and

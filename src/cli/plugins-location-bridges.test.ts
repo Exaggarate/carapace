@@ -62,8 +62,8 @@ function makeRegistry(pluginId: string, channels: string[] = [pluginId]): Plugin
         activation: {},
         startup: {},
         packageInstall: {
-          clawhubSpec: `clawhub:@openclaw/${pluginId}`,
-          npmSpec: `@openclaw/${pluginId}`,
+          clawhubSpec: `clawhub:@carapace/${pluginId}`,
+          npmSpec: `@carapace/${pluginId}`,
           defaultChoice: "clawhub",
         },
       },
@@ -82,7 +82,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "diagnostics-otel",
-        manifestPath: "/app/dist/extensions/diagnostics-otel/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/diagnostics-otel/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/diagnostics-otel/index.js",
         rootDir: "/app/dist/extensions/diagnostics-otel",
@@ -93,13 +93,13 @@ describe("listPersistedBundledPluginLocationBridges", () => {
         packageInstall: {
           defaultChoice: "clawhub",
           clawhub: {
-            spec: "clawhub:@openclaw/diagnostics-otel",
-            packageName: "@openclaw/diagnostics-otel",
+            spec: "clawhub:@carapace/diagnostics-otel",
+            packageName: "@carapace/diagnostics-otel",
             exactVersion: false,
           },
           npm: {
-            spec: "@openclaw/diagnostics-otel",
-            packageName: "@openclaw/diagnostics-otel",
+            spec: "@carapace/diagnostics-otel",
+            packageName: "@carapace/diagnostics-otel",
             selectorKind: "none",
             exactVersion: false,
             pinState: "floating-without-integrity",
@@ -116,8 +116,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
       {
         bundledPluginId: "diagnostics-otel",
         pluginId: "diagnostics-otel",
-        npmSpec: "@openclaw/diagnostics-otel",
-        clawhubSpec: "clawhub:@openclaw/diagnostics-otel",
+        npmSpec: "@carapace/diagnostics-otel",
+        clawhubSpec: "clawhub:@carapace/diagnostics-otel",
         channelIds: ["diagnostics-otel"],
       },
     ]);
@@ -127,7 +127,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "diagnostics-otel",
-        manifestPath: "/app/dist/extensions/diagnostics-otel/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/diagnostics-otel/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/diagnostics-otel/index.js",
         rootDir: "/app/dist/extensions/diagnostics-otel",
@@ -138,8 +138,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
         packageInstall: {
           defaultChoice: "clawhub",
           clawhub: {
-            spec: "clawhub:@openclaw/diagnostics-otel",
-            packageName: "@openclaw/diagnostics-otel",
+            spec: "clawhub:@carapace/diagnostics-otel",
+            packageName: "@carapace/diagnostics-otel",
             exactVersion: false,
           },
           warnings: [],
@@ -154,8 +154,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
       {
         bundledPluginId: "diagnostics-otel",
         pluginId: "diagnostics-otel",
-        npmSpec: "@openclaw/diagnostics-otel",
-        clawhubSpec: "clawhub:@openclaw/diagnostics-otel",
+        npmSpec: "@carapace/diagnostics-otel",
+        clawhubSpec: "clawhub:@carapace/diagnostics-otel",
         channelIds: ["diagnostics-otel"],
       },
     ]);
@@ -165,7 +165,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "qqbot",
-        manifestPath: "/app/dist/extensions/qqbot/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/qqbot/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/qqbot/index.js",
         rootDir: "/app/dist/extensions/qqbot",
@@ -181,8 +181,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     await expect(listPersistedBundledPluginLocationBridges({})).resolves.toEqual([
       {
         bundledPluginId: "qqbot",
-        pluginId: "openclaw-qqbot",
-        npmSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+        pluginId: "carapace-qqbot",
+        npmSpec: "@tencent-connect/carapace-qqbot@2.0.3",
         expectedIntegrity:
           "sha512-yngu/2cPeZjJfIfHWCXWB2/6KlDHrb9vpOUjKLdQxePLSp6wCn3CFOALcBIVq/9o6jlYz9WTU9idW6nfX1xpFA==",
         channelIds: ["qqbot"],
@@ -191,26 +191,26 @@ describe("listPersistedBundledPluginLocationBridges", () => {
   });
 
   it.each([
-    ["byteplus", "@openclaw/byteplus-provider", true],
-    ["duckduckgo", "@openclaw/duckduckgo-plugin", false],
-    ["mistral", "@openclaw/mistral-provider", true],
-    ["novita", "@openclaw/novita-provider", true],
-    ["opencode", "@openclaw/opencode-provider", true],
-    ["opencode-go", "@openclaw/opencode-go-provider", true],
-    ["synthetic", "@openclaw/synthetic-provider", true],
-    ["teams-meetings", "@openclaw/teams-meetings", true],
-    ["volcengine", "@openclaw/volcengine-provider", true],
-    ["voyage", "@openclaw/voyage-provider", true],
-    ["vydra", "@openclaw/vydra-provider", true],
-    ["xiaomi", "@openclaw/xiaomi-provider", true],
-    ["zoom-meetings", "@openclaw/zoom-meetings", true],
+    ["byteplus", "@carapace/byteplus-provider", true],
+    ["duckduckgo", "@carapace/duckduckgo-plugin", false],
+    ["mistral", "@carapace/mistral-provider", true],
+    ["novita", "@carapace/novita-provider", true],
+    ["opencode", "@carapace/opencode-provider", true],
+    ["opencode-go", "@carapace/opencode-go-provider", true],
+    ["synthetic", "@carapace/synthetic-provider", true],
+    ["teams-meetings", "@carapace/teams-meetings", true],
+    ["volcengine", "@carapace/volcengine-provider", true],
+    ["voyage", "@carapace/voyage-provider", true],
+    ["vydra", "@carapace/vydra-provider", true],
+    ["xiaomi", "@carapace/xiaomi-provider", true],
+    ["zoom-meetings", "@carapace/zoom-meetings", true],
   ] as const)(
     "externalizes the shipped bundled %s plugin using official install metadata",
     async (pluginId, npmSpec, enabledByDefault) => {
       readPersistedInstalledPluginIndexMock.mockResolvedValue(
         makeIndex({
           pluginId,
-          manifestPath: `/app/dist/extensions/${pluginId}/openclaw.plugin.json`,
+          manifestPath: `/app/dist/extensions/${pluginId}/carapace.plugin.json`,
           manifestHash: "hash",
           source: `/app/dist/extensions/${pluginId}/index.js`,
           rootDir: `/app/dist/extensions/${pluginId}`,
@@ -242,7 +242,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "comfy",
-        manifestPath: "/app/dist/extensions/comfy/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/comfy/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/comfy/index.js",
         rootDir: "/app/dist/extensions/comfy",
@@ -262,8 +262,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
       {
         bundledPluginId: "comfy",
         pluginId: "comfy",
-        npmSpec: "@openclaw/comfy-provider",
-        clawhubSpec: "clawhub:@openclaw/comfy-provider",
+        npmSpec: "@carapace/comfy-provider",
+        clawhubSpec: "clawhub:@carapace/comfy-provider",
         enabledByDefault: true,
       },
     ]);
@@ -273,7 +273,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "imessage",
-        manifestPath: "/app/dist/extensions/imessage/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/imessage/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/imessage/index.js",
         rootDir: "/app/dist/extensions/imessage",
@@ -293,8 +293,8 @@ describe("listPersistedBundledPluginLocationBridges", () => {
       {
         bundledPluginId: "imessage",
         pluginId: "imessage",
-        npmSpec: "@openclaw/imessage",
-        clawhubSpec: "clawhub:@openclaw/imessage",
+        npmSpec: "@carapace/imessage",
+        clawhubSpec: "clawhub:@carapace/imessage",
         enabledByDefault: true,
         channelIds: ["imessage"],
       },
@@ -305,7 +305,7 @@ describe("listPersistedBundledPluginLocationBridges", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "local-only",
-        manifestPath: "/app/dist/extensions/local-only/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/local-only/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/local-only/index.js",
         rootDir: "/app/dist/extensions/local-only",
@@ -334,7 +334,7 @@ describe("listPersistedBundledPluginRecoveryLocations", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "diagnostics-otel",
-        manifestPath: "/app/dist/extensions/diagnostics-otel/openclaw.plugin.json",
+        manifestPath: "/app/dist/extensions/diagnostics-otel/carapace.plugin.json",
         manifestHash: "hash",
         source: "/app/dist/extensions/diagnostics-otel/index.js",
         rootDir: "/app/dist/extensions/diagnostics-otel",
@@ -357,7 +357,7 @@ describe("listPersistedBundledPluginRecoveryLocations", () => {
     readPersistedInstalledPluginIndexMock.mockResolvedValue(
       makeIndex({
         pluginId: "diagnostics-otel",
-        manifestPath: "extensions/diagnostics-otel/openclaw.plugin.json",
+        manifestPath: "extensions/diagnostics-otel/carapace.plugin.json",
         manifestHash: "hash",
         source: "extensions/diagnostics-otel/index.js",
         rootDir: "extensions/diagnostics-otel",

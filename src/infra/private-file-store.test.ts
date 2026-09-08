@@ -5,7 +5,7 @@ import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { privateFileStore, privateFileStoreSync } from "./private-file-store.js";
 
 const tempDirs = createTrackedTempDirs();
-const createTempDir = () => tempDirs.make("openclaw-private-store-test-");
+const createTempDir = () => tempDirs.make("carapace-private-store-test-");
 
 afterEach(async () => {
   await tempDirs.cleanup();

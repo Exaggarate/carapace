@@ -1,11 +1,11 @@
 // Slack tests cover sent thread cache plugin behavior.
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { setSlackRuntime } from "./runtime.js";
 import {
@@ -321,7 +321,7 @@ describe("slack sent-thread-cache", () => {
   });
 
   it("preserves hydrated legacy expiration while new participation survives restart", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "slack-thread-participation", layout: "state-only", applyEnv: false },
       async (state) => {
         resetPluginStateStoreForTests();

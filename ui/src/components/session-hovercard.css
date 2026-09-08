@@ -84,7 +84,7 @@
 
 .session-hovercard__attribution-avatars
   .viewer-facepile
-  > openclaw-tooltip:not(:first-child)
+  > carapace-tooltip:not(:first-child)
   .viewer-avatar {
   margin-left: var(--session-hovercard-face-gap);
   transition: margin-left 120ms ease;

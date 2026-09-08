@@ -1,10 +1,10 @@
 // Capability approvals follow the paired-device lifecycle, not the device-auth request TTL.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { approveDevicePairing } from "./device-pairing-approval.js";
 import {
@@ -26,7 +26,7 @@ import {
   updatePairedDeviceMetadata,
 } from "./device-pairing.js";
 
-const tempDirs = createSuiteTempRootTracker({ prefix: "openclaw-node-pairing-lifecycle-" });
+const tempDirs = createSuiteTempRootTracker({ prefix: "carapace-node-pairing-lifecycle-" });
 async function withNodePairingDir<T>(run: (baseDir: string) => Promise<T>): Promise<T> {
   return await run(await tempDirs.make("case"));
 }
@@ -60,8 +60,8 @@ describe("node surface approval lifetime", () => {
             },
             baseDir,
           );
-          const database = openOpenClawStateDatabase({
-            env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+          const database = openCarapaceStateDatabase({
+            env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
           });
           now.mockReturnValue(requestedAtMs + 24 * 60 * 60 * 1000);
           const expectedPending = { requestId: request.requestId, caps: ["voiceWake"] };
@@ -74,7 +74,7 @@ describe("node surface approval lifetime", () => {
             .toMatchObject(expectedPending);
           expect.soft((await listNodePairing(baseDir)).pending).toEqual([request]);
           await updatePairedDeviceMetadata("node-1", { displayName: "Still connected" }, baseDir);
-          expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+          expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
           expect
             .soft((await getPairedDevice("node-1", baseDir))?.pendingNodeSurface)
             .toMatchObject(expectedPending);
@@ -143,10 +143,10 @@ describe("node surface approval lifetime", () => {
               removePairedDeviceRole({ deviceId: "node-1", role: "node", baseDir }),
             ).resolves.toEqual({ deviceId: "node-1", role: "node", removedDevice: false });
           }
-          const database = openOpenClawStateDatabase({
-            env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+          const database = openCarapaceStateDatabase({
+            env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
           });
-          expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+          expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
           const device = await getPairedDevice("node-1", baseDir);
           expect(device?.pendingNodeSurface).toBeUndefined();
           if (resolution === "node-role removal") {
@@ -194,10 +194,10 @@ describe("node surface approval lifetime", () => {
           }),
         ).resolves.toEqual({ recorded: true });
 
-        const database = openOpenClawStateDatabase({
-          env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+        const database = openCarapaceStateDatabase({
+          env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
         });
-        expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+        expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
         expect((await listNodePairing(baseDir)).pending).toEqual([request]);
       } finally {
         now.mockRestore();

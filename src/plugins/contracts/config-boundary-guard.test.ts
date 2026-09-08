@@ -11,7 +11,7 @@ import {
 let tempRoots: string[] = [];
 
 function makeRepoFixture(): string {
-  const repoRoot = mkdtempSync(join(tmpdir(), "openclaw-config-boundary-"));
+  const repoRoot = mkdtempSync(join(tmpdir(), "carapace-config-boundary-"));
   tempRoots.push(repoRoot);
   for (const dir of ["src", "extensions", "packages", "test", "scripts"]) {
     mkdirSync(join(repoRoot, dir), { recursive: true });
@@ -78,18 +78,18 @@ describe("config boundary guard", () => {
       repoRoot,
       "extensions/telegram/src/index.ts",
       [
-        'import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";',
-        'import { requireRuntimeConfig } from "openclaw/plugin-sdk/config-runtime";',
-        'type Loader = typeof import("openclaw/plugin-sdk/config-runtime").getRuntimeConfig;',
-        "export type Config = OpenClawConfig;",
+        'import type { CarapaceConfig } from "carapace/plugin-sdk/config-runtime";',
+        'import { requireRuntimeConfig } from "carapace/plugin-sdk/config-runtime";',
+        'type Loader = typeof import("carapace/plugin-sdk/config-runtime").getRuntimeConfig;',
+        "export type Config = CarapaceConfig;",
         "export const load: Loader = requireRuntimeConfig;",
       ].join("\n"),
     );
 
     expect(collectDeprecatedInternalConfigApiViolations({ repoRoot })).toEqual([
-      "extensions/telegram/src/index.ts:1 use narrow plugin-sdk config subpaths instead of openclaw/plugin-sdk/config-runtime",
-      "extensions/telegram/src/index.ts:2 use narrow plugin-sdk config subpaths instead of openclaw/plugin-sdk/config-runtime",
-      "extensions/telegram/src/index.ts:3 use narrow plugin-sdk config subpaths instead of openclaw/plugin-sdk/config-runtime",
+      "extensions/telegram/src/index.ts:1 use narrow plugin-sdk config subpaths instead of carapace/plugin-sdk/config-runtime",
+      "extensions/telegram/src/index.ts:2 use narrow plugin-sdk config subpaths instead of carapace/plugin-sdk/config-runtime",
+      "extensions/telegram/src/index.ts:3 use narrow plugin-sdk config subpaths instead of carapace/plugin-sdk/config-runtime",
     ]);
   });
 
@@ -98,11 +98,11 @@ describe("config boundary guard", () => {
     writeFixture(
       repoRoot,
       "extensions/telegram/src/index.test.ts",
-      'vi.mock("openclaw/plugin-sdk/config-runtime", () => ({}));',
+      'vi.mock("carapace/plugin-sdk/config-runtime", () => ({}));',
     );
 
     expect(collectDeprecatedInternalConfigApiViolations({ repoRoot })).toEqual([
-      "extensions/telegram/src/index.test.ts:1 use narrow plugin-sdk config subpaths instead of openclaw/plugin-sdk/config-runtime",
+      "extensions/telegram/src/index.test.ts:1 use narrow plugin-sdk config subpaths instead of carapace/plugin-sdk/config-runtime",
     ]);
   });
 
@@ -112,10 +112,10 @@ describe("config boundary guard", () => {
       repoRoot,
       "extensions/telegram/src/index.ts",
       [
-        'import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";',
-        'import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";',
-        'type Loader = typeof import("openclaw/plugin-sdk/runtime-config-snapshot").getRuntimeConfig;',
-        'export const load = (cfg: OpenClawConfig) => requireRuntimeConfig(cfg, "telegram");',
+        'import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";',
+        'import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";',
+        'type Loader = typeof import("carapace/plugin-sdk/runtime-config-snapshot").getRuntimeConfig;',
+        'export const load = (cfg: CarapaceConfig) => requireRuntimeConfig(cfg, "telegram");',
       ].join("\n"),
     );
 

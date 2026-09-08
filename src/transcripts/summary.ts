@@ -2,7 +2,7 @@
 import {
   normalizeStringEntries,
   normalizeUniqueStringEntries,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import type { TranscriptSessionDescriptor, TranscriptUtterance } from "./provider-types.js";
 

@@ -1,6 +1,6 @@
 import type { SessionToolOverrides } from "../config/sessions/types.js";
 /** Shared session MCP runtime constants and create-runtime factory type. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import type {
   RequesterMcpConnect,
@@ -10,13 +10,13 @@ import type {
 } from "./agent-bundle-mcp-types.js";
 import type { McpServerConnectionResolved } from "./mcp-connection-resolver.js";
 
-export const SESSION_MCP_RUNTIME_MANAGER_KEY = Symbol.for("openclaw.sessionMcpRuntimeManager");
+export const SESSION_MCP_RUNTIME_MANAGER_KEY = Symbol.for("carapace.sessionMcpRuntimeManager");
 export const SESSION_MCP_RUNTIME_SWEEP_INTERVAL_MS = 60 * 1000;
 // Includes runtimes being created or drained; existing sessions never evict for capacity.
 export const SESSION_MCP_MAX_LIVE_RUNTIMES = 256;
 
 /** Idle eviction is opt-in; zero retains the session lifetime. */
-export function resolveSessionMcpRuntimeIdleTtlMs(cfg?: OpenClawConfig): number {
+export function resolveSessionMcpRuntimeIdleTtlMs(cfg?: CarapaceConfig): number {
   const raw = cfg?.mcp?.sessionIdleTtlMs;
   return typeof raw === "number" && Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : 0;
 }
@@ -40,7 +40,7 @@ export type CreateSessionMcpRuntime = (params: {
   sessionKey?: string;
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   includeServerNames?: ReadonlySet<string>;
   excludeServerNames?: ReadonlySet<string>;

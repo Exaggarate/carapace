@@ -386,7 +386,7 @@ export function renderArray(
           </button>
         </div>
       </div>
-      <openclaw-config-form-collection-draft
+      <carapace-config-form-collection-draft
         id=${draftId}
         .props=${draftProps}
         @config-collection-draft-commit=${(event: CustomEvent<ConfigFormCollectionDraftCommit>) => {
@@ -410,7 +410,7 @@ export function renderArray(
             event.preventDefault();
           }
         }}
-      ></openclaw-config-form-collection-draft>
+      ></carapace-config-form-collection-draft>
       ${
         arrayValue.length === 0
           ? renderSettingsEmpty(t("configForm.noItems"))
@@ -424,7 +424,7 @@ export function renderArray(
                         <span class="settings-row__title">#${index + 1}</span>
                       </div>
                       <div class="settings-row__control">
-                        <openclaw-tooltip .content=${t("configForm.removeItem")}>
+                        <carapace-tooltip .content=${t("configForm.removeItem")}>
                           <button
                             type="button"
                             class="btn btn--icon"
@@ -464,7 +464,7 @@ export function renderArray(
                           >
                             ${icons.trash}
                           </button>
-                        </openclaw-tooltip>
+                        </carapace-tooltip>
                       </div>
                     </div>
                     ${renderNode({

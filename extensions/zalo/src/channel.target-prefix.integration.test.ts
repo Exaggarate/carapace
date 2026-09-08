@@ -1,6 +1,6 @@
 // Prove configured Zalo delivery against the actual Bot API HTTP boundary.
 import { createServer, type IncomingMessage, type Server } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { zaloPlugin } from "./channel.js";
 
@@ -20,7 +20,7 @@ const cfg = {
       },
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 async function readJsonBody(request: IncomingMessage): Promise<Record<string, unknown>> {
   let body = "";

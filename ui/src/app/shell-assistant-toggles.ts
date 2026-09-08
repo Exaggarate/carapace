@@ -27,15 +27,15 @@ export function renderCollapsedAssistantToggles(options: {
     {
       available: options.custodianAvailable,
       kind: "custodian",
-      label: t("nav.askOpenClaw"),
-      tooltip: t("nav.askOpenClaw"),
+      label: t("nav.askCarapace"),
+      tooltip: t("nav.askCarapace"),
       event: CUSTODIAN_PANEL_TOGGLE_EVENT,
       icon: icons.lobster,
     },
   ] as const;
   return toggles.map((toggle) =>
     toggle.available
-      ? html`<openclaw-tooltip .content=${toggle.tooltip}>
+      ? html`<carapace-tooltip .content=${toggle.tooltip}>
           <button
             type="button"
             class="shell-chrome-controls__button shell-chrome-controls__${toggle.kind}"
@@ -44,7 +44,7 @@ export function renderCollapsedAssistantToggles(options: {
           >
             ${toggle.icon}
           </button>
-        </openclaw-tooltip>`
+        </carapace-tooltip>`
       : nothing,
   );
 }

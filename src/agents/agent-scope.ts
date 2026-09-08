@@ -3,7 +3,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   resolvePrimaryStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveAgentModelFallbackValues } from "../config/model-input.js";
 import {
   resolveCollapsedSessionAuthPinSource,
@@ -15,7 +15,7 @@ import type { SessionEntry } from "../config/sessions/types.js";
 import type { AgentDefaultsConfig } from "../config/types.agent-defaults.js";
 import type { AgentModelConfig } from "../config/types.agents-shared.js";
 import type { AgentConfig } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { isPathInside } from "../infra/path-guards.js";
 import {
   isSubagentSessionKey,
@@ -306,7 +306,7 @@ export { resolveAgentIdFromSessionKey };
 
 type SessionAgentResolutionParams = {
   sessionKey?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string | undefined;
   fallbackAgentId?: string;
 };
@@ -389,7 +389,7 @@ export function resolveSessionAgentIdStrict(params: SessionAgentResolutionParams
 export const resolveSessionAgentId = resolveSessionAgentIdStrict;
 
 export function resolveAgentExecutionContract(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   agentId?: string | null,
 ): NonNullable<NonNullable<AgentDefaultsConfig["embeddedAgent"]>["executionContract"]> | undefined {
   const defaultContract = cfg?.agents?.defaults?.embeddedAgent?.executionContract;
@@ -402,14 +402,14 @@ export function resolveAgentExecutionContract(
 }
 
 export function resolveAgentSkillsFilter(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string[] | undefined {
   return resolveEffectiveAgentSkillFilter(cfg, agentId);
 }
 
 export function resolveAgentExplicitModelPrimary(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string | undefined {
   const raw = resolveAgentConfig(cfg, agentId)?.model;
@@ -417,7 +417,7 @@ export function resolveAgentExplicitModelPrimary(
 }
 
 export function resolveAgentEffectiveModelPrimary(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string | undefined {
   return (
@@ -439,7 +439,7 @@ function updateAgentModelPrimary(
 export type AgentModelPrimaryWriteTarget = "agent" | "defaults";
 
 export function resolveAgentModelPrimaryWriteTarget(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   options: { target?: AgentModelPrimaryWriteTarget; forceAgent?: boolean } = {},
 ): AgentModelPrimaryWriteTarget {
@@ -451,7 +451,7 @@ export function resolveAgentModelPrimaryWriteTarget(
 }
 
 export function setAgentEffectiveModelPrimary(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   primary: string,
   options: { target?: AgentModelPrimaryWriteTarget; forceAgent?: boolean } = {},
@@ -483,7 +483,7 @@ export function setAgentEffectiveModelPrimary(
 }
 
 export function resolveAgentModelFallbacksOverride(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string[] | undefined {
   return resolveSelectedModelFallbacksOverride(resolveAgentConfig(cfg, agentId)?.model);
@@ -525,7 +525,7 @@ export type SubagentModelConfigSelectionResult = {
 };
 
 export function resolveSubagentModelConfigSelectionResult(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   agentConfigOverride?: Pick<AgentConfig, "model" | "subagents">;
 }): SubagentModelConfigSelectionResult | undefined {
@@ -552,7 +552,7 @@ export function resolveSubagentModelConfigSelectionResult(params: {
 }
 
 export function resolveSubagentModelFallbacksOverride(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string[] | undefined {
   const agentConfig = resolveAgentConfig(cfg, agentId);
@@ -571,7 +571,7 @@ export function resolveSubagentModelFallbacksOverride(
 }
 
 export function resolveSubagentSpawnModelFallbacksOverride(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): string[] | undefined {
   const agentConfig = resolveAgentConfig(cfg, agentId);
@@ -583,7 +583,7 @@ export function resolveSubagentSpawnModelFallbacksOverride(
 }
 
 export function resolveRunModelFallbacksOverride(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   agentId?: string | null;
   sessionKey?: string | null;
 }): string[] | undefined {
@@ -644,7 +644,7 @@ export function modelFallbackOverrideFromAvailability(
  * configured ladder; splitting that fact from its models would report fallbacks that cannot run.
  */
 export function resolveModelFallbackAvailability(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey?: string | null;
   hasSessionModelOverride: boolean;
@@ -691,7 +691,7 @@ export function resolveModelFallbackAvailability(params: {
 }
 
 export function resolveEffectiveModelFallbacks(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey?: string | null;
   hasSessionModelOverride: boolean;
@@ -702,7 +702,7 @@ export function resolveEffectiveModelFallbacks(params: {
 }
 
 export function resolveAgentIdByWorkspacePath(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   workspacePath: string,
 ): string | undefined {
   const normalizedWorkspacePath = resolveCanonicalWorkspacePath(workspacePath.replaceAll("\0", ""));

@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   loadInstalledPluginIndexInstallRecords,
   writePersistedInstalledPluginIndexInstallRecords,
@@ -28,9 +28,9 @@ function writeProviderPlugin(rootDir: string): void {
   fs.writeFileSync(
     path.join(rootDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/kilocode-provider",
+      name: "@carapace/kilocode-provider",
       version: "2026.7.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         runtimeExtensions: ["./dist/index.js"],
       },
@@ -38,7 +38,7 @@ function writeProviderPlugin(rootDir: string): void {
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "kilocode",
       enabledByDefault: true,
@@ -50,7 +50,7 @@ function writeProviderPlugin(rootDir: string): void {
 }
 
 async function writePathInstallRecord(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   pluginId: string;
   installPath: string;
@@ -70,8 +70,8 @@ async function writePathInstallRecord(params: {
 
 async function createConfiguredCodexBundleFixture(
   manifestState: "valid" | "absent" | "malformed",
-): Promise<{ cfg: OpenClawConfig; env: NodeJS.ProcessEnv; pluginDir: string }> {
-  const rootDir = tempDirs.make(`openclaw-codex-${manifestState}-`);
+): Promise<{ cfg: CarapaceConfig; env: NodeJS.ProcessEnv; pluginDir: string }> {
+  const rootDir = tempDirs.make(`carapace-codex-${manifestState}-`);
   const pluginDir = path.join(rootDir, "gmail");
   fs.mkdirSync(path.join(pluginDir, ".codex-plugin"), { recursive: true });
   if (manifestState !== "absent") {
@@ -88,16 +88,16 @@ async function createConfiguredCodexBundleFixture(
     JSON.stringify({ apps: { gmail: { id: "connector_test" } } }),
     "utf8",
   );
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     plugins: {
       load: { paths: [pluginDir] },
       entries: { gmail: { enabled: true } },
     },
   };
   const env = {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: path.join(rootDir, "state"),
     VITEST: "true",
   };
   await writePathInstallRecord({ cfg, env, pluginId: "gmail", installPath: pluginDir });
@@ -111,23 +111,23 @@ function writeBundledOpenCodeGoPlugin(bundledPluginsDir: string): void {
   fs.writeFileSync(
     path.join(pluginDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/opencode-go-provider",
+      name: "@carapace/opencode-go-provider",
       version: "2026.8.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.js"],
         install: {
-          clawhubSpec: "clawhub:@openclaw/opencode-go-provider",
-          npmSpec: "@openclaw/opencode-go-provider",
+          clawhubSpec: "clawhub:@carapace/opencode-go-provider",
+          npmSpec: "@carapace/opencode-go-provider",
           defaultChoice: "npm",
         },
-        build: { openclawVersion: "2026.8.1" },
+        build: { carapaceVersion: "2026.8.1" },
         release: { publishToClawHub: true, publishToNpm: true },
       },
     }),
     "utf8",
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "opencode-go",
       activation: { onStartup: false },
@@ -141,11 +141,11 @@ function writeBundledOpenCodeGoPlugin(bundledPluginsDir: string): void {
 
 describe("configured plugin install health for explicit load paths", () => {
   it("persists removal of a stale path record shadowed by a configured plugin", async () => {
-    const rootDir = tempDirs.make("openclaw-stale-path-record-");
+    const rootDir = tempDirs.make("carapace-stale-path-record-");
     const pluginDir = path.join(rootDir, "configured-plugin");
     const stalePath = path.join(rootDir, "removed-plugin");
     writeProviderPlugin(pluginDir);
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         load: { paths: [pluginDir] },
         entries: { kilocode: { enabled: true } },
@@ -153,9 +153,9 @@ describe("configured plugin install health for explicit load paths", () => {
     };
     const env = {
       KILOCODE_API_KEY: "test-key",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
       VITEST: "true",
     };
     await writePathInstallRecord({ cfg, env, pluginId: "kilocode", installPath: stalePath });
@@ -180,22 +180,22 @@ describe("configured plugin install health for explicit load paths", () => {
   });
 
   it("uses configured selection when a load path keeps bundled origin", async () => {
-    const rootDir = tempDirs.make("openclaw-stale-bundled-record-");
+    const rootDir = tempDirs.make("carapace-stale-bundled-record-");
     const bundledPluginsDir = path.join(rootDir, "dist", "extensions");
     const pluginDir = path.join(bundledPluginsDir, "opencode-go");
     const stalePath = path.join(rootDir, "removed-plugin");
     writeBundledOpenCodeGoPlugin(bundledPluginsDir);
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         load: { paths: [pluginDir] },
         entries: { "opencode-go": { enabled: true } },
       },
     };
     const env = {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-      OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+      CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       VITEST: "true",
     };
     await writePathInstallRecord({ cfg, env, pluginId: "opencode-go", installPath: stalePath });
@@ -219,13 +219,13 @@ describe("configured plugin install health for explicit load paths", () => {
   });
 
   it("keeps a record whose source path resolves to the configured plugin", async () => {
-    const rootDir = tempDirs.make("openclaw-stale-path-alias-");
+    const rootDir = tempDirs.make("carapace-stale-path-alias-");
     const pluginDir = path.join(rootDir, "configured-plugin");
     const sourceAlias = path.join(rootDir, "source-alias");
     const stalePath = path.join(rootDir, "removed-install");
     writeProviderPlugin(pluginDir);
     fs.symlinkSync(pluginDir, sourceAlias, "dir");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       plugins: {
         load: { paths: [pluginDir] },
         entries: { kilocode: { enabled: true } },
@@ -233,9 +233,9 @@ describe("configured plugin install health for explicit load paths", () => {
     };
     const env = {
       KILOCODE_API_KEY: "test-key",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
       VITEST: "true",
     };
     await writePathInstallRecord({
@@ -255,7 +255,7 @@ describe("configured plugin install health for explicit load paths", () => {
   });
 
   it("does not install a provider plugin already present at a configured load path", async () => {
-    const rootDir = tempDirs.make("openclaw-load-path-provider-");
+    const rootDir = tempDirs.make("carapace-load-path-provider-");
     const pluginDir = path.join(rootDir, "kilocode-provider");
     writeProviderPlugin(pluginDir);
 
@@ -266,9 +266,9 @@ describe("configured plugin install health for explicit load paths", () => {
     };
     const env = {
       KILOCODE_API_KEY: "test-key",
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(rootDir, "bundled"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
       VITEST: "true",
     };
     const snapshot = loadManifestMetadataSnapshot({ config: cfg, env });
@@ -333,10 +333,10 @@ describe("configured plugin install health for explicit load paths", () => {
   );
 
   it("discovers packaged OpenCode Go before configured-plugin repair", async () => {
-    const rootDir = tempDirs.make("openclaw-bundled-opencode-go-");
+    const rootDir = tempDirs.make("carapace-bundled-opencode-go-");
     const homeDir = path.join(rootDir, "home");
     const stateDir = path.join(rootDir, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const bundledPluginsDir = path.join(rootDir, "dist", "extensions");
     fs.mkdirSync(homeDir, { recursive: true });
     fs.mkdirSync(stateDir, { recursive: true });
@@ -353,12 +353,12 @@ describe("configured plugin install health for explicit load paths", () => {
     const env = {
       HOME: homeDir,
       USERPROFILE: homeDir,
-      OPENCLAW_HOME: homeDir,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-      OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_HOME: homeDir,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+      CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       NPM_CONFIG_REGISTRY: "http://127.0.0.1:9",
       npm_config_registry: "http://127.0.0.1:9",
       XDG_CONFIG_HOME: path.join(rootDir, "xdg-config"),

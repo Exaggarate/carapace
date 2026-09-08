@@ -1,9 +1,9 @@
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { errorBackoffMs } from "../cron/service/jobs-scheduling.js";
 import { cronStreamScheduleKey } from "../cron/stream-schedule.js";
 import type { CronJob, CronJobState } from "../cron/types.js";
 import { formatErrorMessage } from "../infra/errors.js";
-import { markOpenClawExecEnv } from "../infra/openclaw-exec-env.js";
+import { markCarapaceExecEnv } from "../infra/carapace-exec-env.js";
 import type { ManagedRun, ProcessSupervisor } from "../process/supervisor/index.js";
 import type { RunExit } from "../process/supervisor/types.js";
 import {
@@ -396,7 +396,7 @@ export class CronStreamJobOwner {
         mode: "child",
         argv: this.job.schedule.command,
         ...(this.job.schedule.cwd ? { cwd: this.job.schedule.cwd } : {}),
-        env: markOpenClawExecEnv({ ...process.env }),
+        env: markCarapaceExecEnv({ ...process.env }),
         stdinMode: "pipe-closed",
         captureOutput: false,
         onStdout: (chunk) => this.output.enqueueChunk("stdout", chunk, generation),

@@ -40,7 +40,7 @@ describe.each([false, true])("zero-byte artifact accounting (dryRun=%s)", (dryRu
     it.each(EMPTY_ARTIFACTS)(
       "counts an empty $kind once without freeing bytes",
       async ({ name }) => {
-        await withTestDir({ prefix: "openclaw-zero-byte-" }, async (dir) => {
+        await withTestDir({ prefix: "carapace-zero-byte-" }, async (dir) => {
           const storePath = path.join(dir, "sessions.json");
           const artifact = await writeOldFile(dir, name);
           await fs.writeFile(path.join(dir, "filler.bin"), Buffer.alloc(128));
@@ -84,7 +84,7 @@ describe.each([false, true])("zero-byte artifact accounting (dryRun=%s)", (dryRu
   });
 
   it("counts shared empty evicted artifacts once and notifies only when applied", async () => {
-    await withTestDir({ prefix: "openclaw-zero-byte-evicted-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-zero-byte-evicted-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const artifacts = await Promise.all(
         ["old.jsonl", "old.trajectory.jsonl", "old.trajectory-path.json", PROMPT_FILE].map((name) =>
@@ -138,7 +138,7 @@ describe.each([false, true])("zero-byte artifact accounting (dryRun=%s)", (dryRu
 });
 
 it("counts empty retained archives under pressure and returns real disk usage", async () => {
-  await withTestDir({ prefix: "openclaw-zero-byte-archives-" }, async (dir) => {
+  await withTestDir({ prefix: "carapace-zero-byte-archives-" }, async (dir) => {
     const storePath = path.join(dir, "sessions.json");
     const archives = await Promise.all(
       ["deleted", "reset", "bak"].map((reason) =>
@@ -165,7 +165,7 @@ it("counts empty retained archives under pressure and returns real disk usage", 
 });
 
 it("does not count or notify an empty file removed by another cleanup before rm", async () => {
-  await withTestDir({ prefix: "openclaw-missing-removal-" }, async (dir) => {
+  await withTestDir({ prefix: "carapace-missing-removal-" }, async (dir) => {
     const artifact = await writeOldFile(dir, "orphan.jsonl");
     await fs.writeFile(path.join(dir, "filler.bin"), Buffer.alloc(128));
     const onRemoveFile = vi.fn();
@@ -197,7 +197,7 @@ it("does not count or notify an empty file removed by another cleanup before rm"
 it.each(["unreferenced", "budget", "archives"] as const)(
   "%s cleanup does not count a rejected nonempty removal or dispatch its callback",
   async (cleanup) => {
-    await withTestDir({ prefix: "openclaw-rejected-removal-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-rejected-removal-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const name = cleanup === "archives" ? `old.jsonl.deleted.${ARCHIVE_STAMP}` : "orphan.jsonl";
       const content = "x".repeat(64);

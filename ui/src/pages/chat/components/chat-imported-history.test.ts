@@ -36,7 +36,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
         ...(shape === "text"
           ? { text: wrapped }
           : { content: shape === "blocks" ? [{ type: "text", text: wrapped }] : wrapped }),
-        __openclaw: { idempotencyKey: importKey },
+        __carapace: { idempotencyKey: importKey },
       };
       const original = structuredClone(message);
       expect(extractText(message)).toBe(body);
@@ -62,7 +62,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
 
   it("renders the body as Markdown and uses it for reply and copy actions", async () => {
     const body = "Imported **answer**\n\n~~~ts\nconst answer = 42;\n~~~";
-    const message = { role, content: wrap(body), __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content: wrap(body), __carapace: { idempotencyKey: importKey } };
     render(
       renderGroupedMessage(message, "imported", { isStreaming: false, showReasoning: false }),
       container,
@@ -107,7 +107,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
     ["different source", (text: string) => text.replace("Source: External", "Source: Web Fetch")],
   ] as const)("preserves %s literally", (_name, transform) => {
     const content = transform(wrap("Keep this body"));
-    const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content, __carapace: { idempotencyKey: importKey } };
     expect(extractText(message)).toBe(content);
     expect(displayed(message)).toBe(content);
   });
@@ -115,7 +115,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
   it("preserves CRLF body whitespace while removing only framing", () => {
     const body = "  First\r\n\r\nSecond  ";
     const content = wrap(body).replaceAll("\n", "\r\n").replaceAll("\r\r\n", "\r\n");
-    const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content, __carapace: { idempotencyKey: importKey } };
     expect(projectImportedMessageForDisplay(message)).toEqual({ ...message, content: body });
     // Assistant media parsing already trims trailing whitespace; retain that display contract.
     expect(normalizeMessage(message).content).toEqual(
@@ -129,7 +129,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
     (prefix) => {
       const framed = wrap("Keep this body");
       const content = prefix + framed;
-      const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+      const message = { role, content, __carapace: { idempotencyKey: importKey } };
       expect(projectImportedMessageForDisplay(message)).toEqual(message);
       // Assistant display removes leading blank lines, without unwrapping an ineligible frame.
       expect(displayed(message)).toBe(
@@ -142,7 +142,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
   it.each(["\n", "\r\n"])("preserves extra trailing separators %j", (suffix) => {
     const framed = wrap("Keep this body");
     const content = framed + suffix;
-    const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content, __carapace: { idempotencyKey: importKey } };
     expect(projectImportedMessageForDisplay(message)).toEqual(message);
     expect(displayed(message)).toBe(role === "assistant" ? framed : content);
     expect(extractText(message)).toContain("EXTERNAL_UNTRUSTED_CONTENT");
@@ -150,7 +150,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
 
   it("retains warning-bearing external content", () => {
     const content = wrapExternalContent("Evidence", { source: "unknown" }).trim();
-    const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content, __carapace: { idempotencyKey: importKey } };
     expect(extractText(message)).toBe(content);
     expect(displayed(message)).toBe(content);
   });
@@ -158,7 +158,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
   it("does not reinterpret an ordinary message that quotes a complete wrapper", () => {
     const content = wrap("A literal wrapper example");
     for (const metadata of [{}, { idempotencyKey: "ordinary:user" }]) {
-      const message = { role, content, __openclaw: metadata };
+      const message = { role, content, __carapace: metadata };
       expect(extractText(message)).toBe(content);
       expect(displayed(message)).toBe(content);
     }
@@ -168,7 +168,7 @@ describe.each(["user", "assistant"])("imported %s history presentation", (role) 
     const inner = wrap("Literal nested example");
     const content = wrap("BODY").replace("BODY", "~~~text\n" + inner + "\n~~~");
     const body = "~~~text\n" + inner + "\n~~~";
-    const message = { role, content, __openclaw: { idempotencyKey: importKey } };
+    const message = { role, content, __carapace: { idempotencyKey: importKey } };
     expect(extractText(message)).toBe(body);
     expect(displayed(message)).toBe(body);
   });
@@ -178,7 +178,7 @@ it.each(["Thinking", "Tool call", "Tool result", "Other"])("keeps imported %s la
   const message = {
     role: "assistant",
     content: prefix + "\n\n" + wrap("Original text"),
-    __openclaw: { idempotencyKey: importKey },
+    __carapace: { idempotencyKey: importKey },
   };
   expect(extractText(message)).toBe(prefix + "\n\nOriginal text");
   expect(displayed(message)).toBe(prefix + "\n\nOriginal text");
@@ -187,6 +187,6 @@ it.each(["Thinking", "Tool call", "Tool result", "Other"])("keeps imported %s la
 it("does not hide security framing in tool output", () => {
   const content = wrap("Tool evidence");
   expect(
-    extractText({ role: "toolResult", content, __openclaw: { idempotencyKey: importKey } }),
+    extractText({ role: "toolResult", content, __carapace: { idempotencyKey: importKey } }),
   ).toBe(content);
 });

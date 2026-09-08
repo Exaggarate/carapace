@@ -1,21 +1,21 @@
-# OpenClaw docs i18n assets
+# Carapace docs i18n assets
 
 This folder stores translation config for the source docs repo.
 
 Generated locale trees and live translation memory now live in the publish repo:
 
-- repo: `openclaw/docs`
-- local checkout: `~/path/to/openclaw-docs`
+- repo: `carapace/docs`
+- local checkout: `~/path/to/carapace-docs`
 
 ## Source of truth
 
-- OpenClaw English docs are authored in `openclaw/openclaw` under `docs/`.
-- ClawHub English docs are authored in `openclaw/clawhub` under `docs/` and mirrored into the publish repo's `docs/clawhub/` tree. Do not keep competing ClawHub pages in `openclaw/openclaw`; OpenClaw-specific integration guidance stays in the owning OpenClaw docs.
+- Carapace English docs are authored in `carapace/carapace` under `docs/`.
+- ClawHub English docs are authored in `carapace/clawhub` under `docs/` and mirrored into the publish repo's `docs/clawhub/` tree. Do not keep competing ClawHub pages in `carapace/carapace`; Carapace-specific integration guidance stays in the owning Carapace docs.
 - The source repo no longer keeps committed generated locale trees such as `docs/zh-CN/**`, `docs/zh-TW/**`, `docs/ja-JP/**`, `docs/es/**`, `docs/pt-BR/**`, `docs/ko/**`, `docs/de/**`, `docs/fr/**`, `docs/hi/**`, `docs/ar/**`, `docs/it/**`, `docs/vi/**`, `docs/nl/**`, `docs/fa/**`, `docs/ru/**`, `docs/tr/**`, `docs/uk/**`, `docs/id/**`, `docs/pl/**`, or `docs/th/**`.
 
 ## End-to-end flow
 
-Edit English docs in `openclaw/openclaw` and push to `main`. The sync, translation, and publish sequence is documented in [translation-workflow.md](translation-workflow.md). Keep that file as the single description of the pipeline.
+Edit English docs in `carapace/carapace` and push to `main`. The sync, translation, and publish sequence is documented in [translation-workflow.md](translation-workflow.md). Keep that file as the single description of the pipeline.
 
 ## Why the split exists
 
@@ -27,9 +27,9 @@ Edit English docs in `openclaw/openclaw` and push to `main`. The sync, translati
 ## Locale visibility
 
 - Control UI supports `en`, `zh-CN`, `zh-TW`, `pt-BR`, `de`, `es`, `ja-JP`, `ko`, `fr`, `hi`, `ar`, `it`, `vi`, `nl`, `fa`, `ru`, `tr`, `uk`, `id`, `pl`, and `th`.
-- Docs translation workflows generate the same non-English locale set in `openclaw/docs`.
+- Docs translation workflows generate the same non-English locale set in `carapace/docs`.
 - The Mintlify docs language picker can expose only the locales accepted by Mintlify `navigation.languages`. As of 2026-09-06, the publish configuration includes Russian (`ru`) and Hindi (`hi`).
-- Do not treat locale visibility in generated `docs/docs.json` as proof that translation artifacts exist. Verify each generated locale folder and its translation memory in `openclaw/docs`.
+- Do not treat locale visibility in generated `docs/docs.json` as proof that translation artifacts exist. Verify each generated locale folder and its translation memory in `carapace/docs`.
 
 ## Files in this folder
 
@@ -98,7 +98,7 @@ Fields:
 
 - `scripts/docs-i18n` still owns translation generation.
 - Translation rules and glossary guidance are passed as Codex developer instructions; document text is user input, and repository `AGENTS.md` instructions are excluded from translation calls. Placeholder spelling and occurrence counts must match the input, even when the target language restructures comparisons or references.
-- Model selection comes from `OPENCLAW_DOCS_I18N_MODEL`; an optional `OPENCLAW_DOCS_I18N_FALLBACK_MODEL` is used only when the selected model is missing or unsupported. Each worker retains the fallback for its remaining translations. Authentication, quota, network, and generic service failures do not select a different model.
+- Model selection comes from `CARAPACE_DOCS_I18N_MODEL`; an optional `CARAPACE_DOCS_I18N_FALLBACK_MODEL` is used only when the selected model is missing or unsupported. Each worker retains the fallback for its remaining translations. Authentication, quota, network, and generic service failures do not select a different model.
 - Automated workflows inject model selections from repository secrets. Generated frontmatter, translation memory, cache keys, and failure logs omit model identifiers. Raw Codex diagnostics are not forwarded to workflow logs.
 - Doc mode writes `x-i18n.source_hash` into each translated page and requires current workflow and prompt versions before reusing it. Older workflow outputs are regenerated during incremental translation so retired metadata is removed.
 - The publish workflow precomputes a pending file list by comparing the current English source hash to the stored locale `x-i18n.source_hash`, and queues pages containing retired model/provider metadata for regeneration.
@@ -110,13 +110,13 @@ Fields:
 
 ## Operational notes
 
-- Sync metadata is written to `.openclaw-sync/source.json` in the publish repo.
-- Source repo secret: `OPENCLAW_DOCS_SYNC_TOKEN`
-- Publish repo secret: `OPENCLAW_DOCS_I18N_OPENAI_API_KEY`
-- If locale output looks stale, check the `Translate All` workflow in `openclaw/docs` first.
+- Sync metadata is written to `.carapace-sync/source.json` in the publish repo.
+- Source repo secret: `CARAPACE_DOCS_SYNC_TOKEN`
+- Publish repo secret: `CARAPACE_DOCS_I18N_OPENAI_API_KEY`
+- If locale output looks stale, check the `Translate All` workflow in `carapace/docs` first.
 
 ### Rejected translation diagnostics
 
-For an operator-approved, bounded diagnostic, set `OPENCLAW_DOCS_I18N_LOG_REJECTED_BODY=1` (the publish repo's reusable locale workflow exposes `log_rejected_body`). This opt-in logs rejected raw chunks at the placeholder-validation boundary, including the chunk ID, normalized masked input, returned translation, and error. It also logs failed leaf-fallback errors and rejected bodies at final-document validation. Validation and retry behavior stay unchanged.
+For an operator-approved, bounded diagnostic, set `CARAPACE_DOCS_I18N_LOG_REJECTED_BODY=1` (the publish repo's reusable locale workflow exposes `log_rejected_body`). This opt-in logs rejected raw chunks at the placeholder-validation boundary, including the chunk ID, normalized masked input, returned translation, and error. It also logs failed leaf-fallback errors and rejected bodies at final-document validation. Validation and retry behavior stay unchanged.
 
 The chunk input/output are the Go translator boundary values, after its whitespace and input-wrapper handling, not raw provider transport bytes. Diagnostics can contain complete document text; limit the selected paths and attempts, retain the logs, and inspect them before sharing. Enabling the flag cannot recover responses from an earlier run.

@@ -1,4 +1,4 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 /**
  * Lazy-loaded dependency bundle for remote-profile tab operation tests.
  */

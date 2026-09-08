@@ -3,7 +3,7 @@
  * Converts malformed file-tool arguments into retryable errors and fixes the
  * specific XML suffix and Office-extension corruption seen in path arguments.
  */
-import { asOptionalObjectRecord as getToolParamsRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalObjectRecord as getToolParamsRecord } from "@carapace/normalization-core/record-coerce";
 import type { AnyAgentTool } from "./agent-tools.types.js";
 import { preserveAtPrefixedRelativePath } from "./path-policy.js";
 import type { SandboxFsBridge } from "./sandbox/fs-bridge.types.js";

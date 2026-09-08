@@ -11,7 +11,7 @@ type FailureAlertConfig = NonNullable<CronServiceParams["cronConfig"]>["failureA
 type SendCronFailureAlert = NonNullable<CronServiceParams["sendCronFailureAlert"]>;
 
 const { logger: noopLogger, makeStorePath } = setupCronServiceSuite({
-  prefix: "openclaw-cron-failure-alert-",
+  prefix: "carapace-cron-failure-alert-",
   baseTimeIso: "2026-01-01T00:00:00.000Z",
 });
 

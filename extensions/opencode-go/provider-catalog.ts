@@ -1,5 +1,5 @@
-import type { ModelCatalogEntry } from "openclaw/plugin-sdk/agent-runtime";
-import type { ProviderRuntimeModel } from "openclaw/plugin-sdk/plugin-entry";
+import type { ModelCatalogEntry } from "carapace/plugin-sdk/agent-runtime";
+import type { ProviderRuntimeModel } from "carapace/plugin-sdk/plugin-entry";
 import {
   buildLiveModelProviderConfig,
   fetchLiveProviderModelIds,
@@ -11,10 +11,10 @@ import {
   type ProviderCatalogSnapshot,
   type ProjectedUpstreamProviderCatalogModel as OpencodeGoModelDefinition,
   type UpstreamProviderCatalog,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { normalizeModelCompat } from "openclaw/plugin-sdk/provider-model-shared";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { normalizeModelCompat } from "carapace/plugin-sdk/provider-model-shared";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const PROVIDER_ID = "opencode-go";
 

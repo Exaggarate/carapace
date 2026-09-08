@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Google Chat channel plugin for spaces and direct messages."
+summary: "Carapace Google Chat channel plugin for spaces and direct messages."
 read_when:
   - You are installing, configuring, or auditing the googlechat plugin
 title: "Google Chat plugin reference"
@@ -7,14 +7,14 @@ title: "Google Chat plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Google Chat channel plugin for spaces and direct messages.
+Carapace Google Chat channel plugin for spaces and direct messages.
 
 ## Distribution
 
-- Package: `@openclaw/googlechat`
+- Package: `@carapace/googlechat`
 - Install route: npm or ClawHub
 
 ## Surface

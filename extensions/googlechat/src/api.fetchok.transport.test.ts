@@ -16,8 +16,8 @@ const loopback = vi.hoisted(() => ({
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: async (...args: Parameters<typeof actual.fetchWithSsrFGuard>) => {
@@ -139,8 +139,8 @@ describe("Google Chat real guarded transport", () => {
   });
 
   it("delivers task-list fallback at the default chunk limit through the SDK", async () => {
-    const { withOpenClawTestState } = await import("openclaw/plugin-sdk/test-state");
-    await withOpenClawTestState(
+    const { withCarapaceTestState } = await import("carapace/plugin-sdk/test-state");
+    await withCarapaceTestState(
       { label: "googlechat-markdown-delivery", layout: "state-only" },
       async () => {
         const [
@@ -148,8 +148,8 @@ describe("Google Chat real guarded transport", () => {
           { createTestRegistry, withPluginRuntimeRegistryScope },
           { googlechatPlugin },
         ] = await Promise.all([
-          import("openclaw/plugin-sdk/channel-outbound"),
-          import("openclaw/plugin-sdk/channel-test-helpers"),
+          import("carapace/plugin-sdk/channel-outbound"),
+          import("carapace/plugin-sdk/channel-test-helpers"),
           import("../api.js"),
         ]);
         const requests: Array<{

@@ -1,11 +1,11 @@
-# OpenClaw Synology Chat
+# Carapace Synology Chat
 
-Official OpenClaw channel plugin for Synology Chat conversations and direct messages.
+Official Carapace channel plugin for Synology Chat conversations and direct messages.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/synology-chat
+carapace plugins install @carapace/synology-chat
 ```
 
-Configure Synology Chat credentials and allowed conversations in OpenClaw, then use the plugin to route messages between Synology Chat and OpenClaw agents.
+Configure Synology Chat credentials and allowed conversations in Carapace, then use the plugin to route messages between Synology Chat and Carapace agents.

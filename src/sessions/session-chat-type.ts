@@ -1,5 +1,5 @@
 // Session chat type helpers classify chat surfaces from session metadata.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { getBootstrapChannelPlugin } from "../channels/plugins/bootstrap-registry.js";
 import {
   deriveSessionChatTypeFromKey,

@@ -1,10 +1,10 @@
 import { isDeepStrictEqual } from "node:util";
-import type { AgentHarnessSessionForkParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessagesByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { AgentHarnessSessionForkParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessagesByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { readCodexSessionMeta } from "../session-catalog-provenance.js";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
 import { readCodexRolloutSnapshot } from "../session-rollout-snapshot.js";
@@ -47,7 +47,7 @@ export async function forkCanonicalCodexSession(params: {
   bindingStore: CodexAppServerBindingStore;
   runtime: PluginRuntime;
   harnessRuntimeId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }) {
   const { fork, resolved, control, bindingStore, sourceBinding, config } = params;
   const context = control.forkContext;

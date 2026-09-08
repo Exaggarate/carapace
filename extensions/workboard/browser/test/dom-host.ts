@@ -1,4 +1,4 @@
-import type { ControlUiHost } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiHost } from "carapace/plugin-sdk/control-ui";
 import { vi } from "vitest";
 
 /** The fixture exposes only the DOM-mount contract; host component internals have their own tests. */

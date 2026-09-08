@@ -1,7 +1,7 @@
 // Transcript event helpers serialize and trim session transcript events.
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { resolveGlobalSet, resolveGlobalSingleton } from "../shared/global-singleton.js";
 
@@ -48,13 +48,13 @@ export function attachSessionTranscriptRunId<T>(message: T, runId: string | null
   ) {
     return message;
   }
-  const metadata = isRecord(message["__openclaw"]) ? message["__openclaw"] : {};
+  const metadata = isRecord(message["__carapace"]) ? message["__carapace"] : {};
   if (metadata.runId === normalizedRunId) {
     return message;
   }
   return {
     ...message,
-    __openclaw: { ...metadata, runId: normalizedRunId },
+    __carapace: { ...metadata, runId: normalizedRunId },
   };
 }
 
@@ -63,7 +63,7 @@ export function readSessionTranscriptRunId(message: unknown): string | undefined
   if (!isRecord(message)) {
     return undefined;
   }
-  const metadata = isRecord(message["__openclaw"]) ? message["__openclaw"] : {};
+  const metadata = isRecord(message["__carapace"]) ? message["__carapace"] : {};
   return normalizeOptionalString(metadata["runId"]);
 }
 
@@ -94,16 +94,16 @@ type SessionTranscriptListener = (update: SessionTranscriptUpdate) => void;
 type InternalSessionTranscriptListener = (update: InternalSessionTranscriptUpdate) => void;
 
 const SESSION_TRANSCRIPT_LISTENERS = resolveGlobalSet<SessionTranscriptListener>(
-  Symbol.for("openclaw.sessionTranscriptListeners"),
+  Symbol.for("carapace.sessionTranscriptListeners"),
   "close-and-restart",
 );
 const INTERNAL_SESSION_TRANSCRIPT_LISTENERS = resolveGlobalSet<InternalSessionTranscriptListener>(
-  Symbol.for("openclaw.internalSessionTranscriptListeners"),
+  Symbol.for("carapace.internalSessionTranscriptListeners"),
   "close-and-restart",
 );
 
 const SESSION_TRANSCRIPT_UPDATE_STATE = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionTranscriptUpdateState"),
+  Symbol.for("carapace.sessionTranscriptUpdateState"),
   () => ({ version: 0 }),
 );
 

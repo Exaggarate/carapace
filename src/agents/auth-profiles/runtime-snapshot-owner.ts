@@ -2,7 +2,7 @@
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { isSecretRef } from "../../config/types.secrets.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { cloneAuthProfileStore } from "./clone.js";
 import { AUTH_STORE_VERSION } from "./constants.js";
 import {
@@ -253,8 +253,8 @@ export function runtimeAuthProfileSnapshotSharesOwner(
   // location; never open the cold scope or infer ownership from directory ancestry.
   const candidate =
     owner.location === "state-db"
-      ? resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: snapshot.scope.stateDir })
-      : path.join(snapshot.scope.sharedMainDir, "openclaw-agent.sqlite");
+      ? resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: snapshot.scope.stateDir })
+      : path.join(snapshot.scope.sharedMainDir, "carapace-agent.sqlite");
   return candidate === owner.sharedDatabasePath;
 }
 

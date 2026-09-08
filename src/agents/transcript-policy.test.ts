@@ -3,7 +3,7 @@
  * Exercises provider-family fallbacks, plugin replay hooks, and policy caching.
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.types.js";
 import { validateAnthropicTurns } from "./embedded-agent-helpers/turns.js";
 import type { AgentMessage } from "./runtime/index.js";
@@ -56,8 +56,8 @@ vi.mock("../plugins/provider-hook-runtime.js", async () => {
           switch (provider) {
             case "env-sensitive":
               return {
-                sanitizeToolCallIds: context?.env?.OPENCLAW_TEST_TRANSCRIPT_POLICY === "strict",
-                ...(context?.env?.OPENCLAW_TEST_TRANSCRIPT_POLICY === "strict"
+                sanitizeToolCallIds: context?.env?.CARAPACE_TEST_TRANSCRIPT_POLICY === "strict",
+                ...(context?.env?.CARAPACE_TEST_TRANSCRIPT_POLICY === "strict"
                   ? { toolCallIdMode: "strict" as const }
                   : {}),
               };
@@ -258,7 +258,7 @@ describe("resolveTranscriptPolicy", () => {
   });
 
   it("memoizes replay policy resolution for the same config and process env", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
 
     const firstPolicy = resolveTranscriptPolicy({
       provider: "mistral",
@@ -277,14 +277,14 @@ describe("resolveTranscriptPolicy", () => {
   });
 
   it("does not reuse cached replay policies across custom env objects", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const strictEnv = {
       ...process.env,
-      OPENCLAW_TEST_TRANSCRIPT_POLICY: "strict",
+      CARAPACE_TEST_TRANSCRIPT_POLICY: "strict",
     };
     const looseEnv = {
       ...process.env,
-      OPENCLAW_TEST_TRANSCRIPT_POLICY: "loose",
+      CARAPACE_TEST_TRANSCRIPT_POLICY: "loose",
     };
 
     const strictPolicy = resolveTranscriptPolicy({
@@ -483,7 +483,7 @@ describe("resolveTranscriptPolicy", () => {
   });
 
   it("does not reuse cached Anthropic policies across canonical model identities", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const model = makeOpenAiCompatibleReasoningModel({
       id: "production-claude",
       name: "Production Claude",
@@ -541,7 +541,7 @@ describe("resolveTranscriptPolicy", () => {
   });
 
   it("does not reuse cached unowned Anthropic policies across reasoning compat changes", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const model = {
       id: "moonshotai/kimi-k2.5",
       name: "Kimi K2.5",
@@ -575,7 +575,7 @@ describe("resolveTranscriptPolicy", () => {
   });
 
   it("does not reuse cached OpenAI-compatible policies across reasoning metadata changes", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
 
     const defaultPolicy = resolveTranscriptPolicy({
       config,

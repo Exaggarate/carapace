@@ -28,12 +28,12 @@ import {
   writePlugin,
 } from "../plugins/loader.test-fixtures.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { withExistingOpenClawStateDatabaseArtifactPreservingReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseArtifactPreservingReadOnly } from "../state/carapace-state-db-readonly.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  initializeNativeOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  initializeNativeCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { ensureCliExecutionBootstrap } from "./command-execution-startup.js";
 import { resolveCliStartupPolicy } from "./command-startup-policy.js";
 import { testApi as configGuardTestApi } from "./program/config-guard.js";
@@ -49,22 +49,22 @@ afterEach(() => {
   resetNodeHostPluginRegistry();
   resetPluginLoaderTestStateForTest();
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
 });
 
 function fixture() {
-  const root = fs.realpathSync(tempDirs.make("openclaw-worker-bootstrap-"));
+  const root = fs.realpathSync(tempDirs.make("carapace-worker-bootstrap-"));
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   for (const [key, value] of Object.entries({
     HOME: root,
     USERPROFILE: root,
-    OPENCLAW_HOME: root,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_HOME: root,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   })) {
     vi.stubEnv(key, value);
   }
@@ -86,7 +86,7 @@ function fixture() {
     id: "fixture-channel",
     body: "module.exports = { id: 'fixture-channel', register() {} };",
   });
-  const manifestPath = path.join(channelPlugin.dir, "openclaw.plugin.json");
+  const manifestPath = path.join(channelPlugin.dir, "carapace.plugin.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   fs.writeFileSync(
     manifestPath,
@@ -138,7 +138,7 @@ async function bootstrap() {
 }
 
 function readGatewayState() {
-  return withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(({ db }) => {
+  return withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(({ db }) => {
     const query = getNodeSqliteKysely<DB>(db);
     return {
       version: readSqliteUserVersion(db),
@@ -164,7 +164,7 @@ describe("private node worker bootstrap", () => {
     "does not adopt %s state as native bootstrap",
     async (shape) => {
       const { stateDir } = fixture();
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(stateDir, "state", "carapace.sqlite");
       seedMacNodeWorkerProofState(databasePath);
       const db = new DatabaseSync(databasePath);
       if (shape === "unknown") {
@@ -200,7 +200,7 @@ describe("private node worker bootstrap", () => {
 
   it("initializes native bootstrap before plugin state reads without losing native rows", async () => {
     const { stateDir } = fixture();
-    const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const databasePath = path.join(stateDir, "state", "carapace.sqlite");
     const rows = seedMacNodeWorkerProofState(databasePath);
     await bootstrap();
     await runStartupMigrations({ log: { info: vi.fn(), warn: vi.fn() } });
@@ -209,7 +209,7 @@ describe("private node worker bootstrap", () => {
       maxEntries: 10,
     });
     expect(store.entries()).toEqual([]);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const database = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(readMacNodeWorkerProofRows(database)).toEqual(rows);
@@ -230,9 +230,9 @@ describe("private node worker bootstrap", () => {
       );
       if (seeded) {
         loadOrCreateDeviceIdentity();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(stateDir, "state", "carapace.sqlite");
       const before = fs.existsSync(databasePath) ? fs.readFileSync(databasePath) : null;
       const gatewayBefore = readGatewayState();
       const configBefore = fs.readFileSync(configPath);
@@ -254,12 +254,12 @@ describe("private node worker bootstrap", () => {
       expect(pinned.nodeHost).toEqual(config.nodeHost);
       expect(pinned.channels?.["fixture-channel"]).toEqual(config.channels["fixture-channel"]);
       // A cold worker must admit mature state even when snapshot storage is full.
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const allocateSnapshot = vi.spyOn(fs, "mkdtempSync").mockImplementation(() => {
         throw Object.assign(new Error("snapshot storage is full"), { code: "ENOSPC" });
       });
       try {
-        initializeNativeOpenClawStateDatabase();
+        initializeNativeCarapaceStateDatabase();
         expect(allocateSnapshot).not.toHaveBeenCalled();
       } finally {
         allocateSnapshot.mockRestore();

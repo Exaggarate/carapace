@@ -35,13 +35,13 @@ function registryFixture(root: string, scenario: Scenario): NodeJS.ProcessEnv {
   const packages = ["codex", "discord", "slack"]
     .filter((id) => scenario.companion !== "missing" || id !== scenario.channel)
     .map((id) => {
-      const name = `@openclaw/${id}`;
+      const name = `@carapace/${id}`;
       writeFileSync(
         join(staging, "package/package.json"),
         JSON.stringify({
           name:
             scenario.companion === "wrong-identity" && id === scenario.channel
-              ? "@openclaw/other"
+              ? "@carapace/other"
               : name,
           version,
         }),
@@ -55,7 +55,7 @@ function registryFixture(root: string, scenario: Scenario): NodeJS.ProcessEnv {
   writeFileSync(
     manifest,
     JSON.stringify({
-      schema: "openclaw.prepublish-plugin-registry/v1",
+      schema: "carapace.prepublish-plugin-registry/v1",
       schemaVersion: 1,
       candidateVersion: version,
       sourceSha,
@@ -63,15 +63,15 @@ function registryFixture(root: string, scenario: Scenario): NodeJS.ProcessEnv {
     }),
   );
   return {
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: artifactDir,
-    OPENCLAW_DOCKER_E2E_SELECTED_SHA: sourceSha,
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: version,
-    OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifest),
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: artifactDir,
+    CARAPACE_DOCKER_E2E_SELECTED_SHA: sourceSha,
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: version,
+    CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: sha256(manifest),
   };
 }
 
 function runScenario(scenario: Scenario = {}) {
-  const root = tempDirs.make("openclaw-onboard-shell-");
+  const root = tempDirs.make("carapace-onboard-shell-");
   const home = join(root, "home");
   const bin = join(root, "bin");
   const packageRoot = join(root, "package");
@@ -85,7 +85,7 @@ function runScenario(scenario: Scenario = {}) {
   if (bundled) {
     mkdirSync(join(packageRoot, "dist/extensions", channel), { recursive: true });
   }
-  const cli = join(bin, "openclaw");
+  const cli = join(bin, "carapace");
   writeFileSync(
     cli,
     `#!/usr/bin/env node
@@ -99,7 +99,7 @@ const current = env.CONSENT === "1";
 const help = args.includes("--help");
 const fail = (message) => { console.error(message); process.exit(31); };
 if (help) {
-  console.log("OpenClaw ${version}\\nUsage: openclaw plugins install [options] <source>");
+  console.log("Carapace ${version}\\nUsage: carapace plugins install [options] <source>");
   if (current) console.log("  --accept-capabilities  Accept reviewed plugin capabilities");
   const probe = events.filter((event) => event.includes("--help")).length;
   if (probe === Number(env.FAIL_PROBE)) {
@@ -109,7 +109,7 @@ if (help) {
 } else if (args[0] === "plugins") {
   if (!current) fail("legacy package must retain automatic setup");
   if (!args.includes("--accept-capabilities")) fail("capability consent missing");
-  if (args[2] === "codex" || args[2].startsWith("npm:@openclaw/codex@")) {
+  if (args[2] === "codex" || args[2].startsWith("npm:@carapace/codex@")) {
     if (events.some((event) => event[0] === "onboard")) fail("runtime installed after onboard");
   } else {
     if (!events.some((event) => event[0] === "onboard")) fail("channel installed before onboard");
@@ -124,8 +124,8 @@ if (help) {
   if (!current) installChannelDependency();
 }
 function dependencyPath() {
-  const dep = { telegram: "grammy", discord: "discord-api-types", slack: "@slack/bolt" }[env.OPENCLAW_NPM_ONBOARD_CHANNEL];
-  return path.join(env.HOME, ".openclaw/node_modules", dep, "package.json");
+  const dep = { telegram: "grammy", discord: "discord-api-types", slack: "@slack/bolt" }[env.CARAPACE_NPM_ONBOARD_CHANNEL];
+  return path.join(env.HOME, ".carapace/node_modules", dep, "package.json");
 }
 function installChannelDependency() {
   const file = dependencyPath();
@@ -154,14 +154,14 @@ exec "$REAL_NODE" "$@"
     throw new Error("npm onboarding container program not found");
   }
   const testState = `
-openclaw_e2e_install_package() { mkdir -p "$HOME/.openclaw"; }
-openclaw_e2e_package_root() { printf '%s' "$PACKAGE_ROOT"; }
-openclaw_e2e_start_mock_openai() { :; }
-openclaw_e2e_wait_mock_openai() { :; }
+carapace_e2e_install_package() { mkdir -p "$HOME/.carapace"; }
+carapace_e2e_package_root() { printf '%s' "$PACKAGE_ROOT"; }
+carapace_e2e_start_mock_openai() { :; }
+carapace_e2e_wait_mock_openai() { :; }
 `;
   const registryEnv = scenario.registry ? registryFixture(root, scenario) : {};
   if (scenario.corruptRegistry) {
-    registryEnv.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256 = "0".repeat(64);
+    registryEnv.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256 = "0".repeat(64);
   }
   const commandPath = [bin, dirname(process.execPath), process.env.PATH]
     .filter(Boolean)
@@ -172,7 +172,7 @@ openclaw_e2e_wait_mock_openai() { :; }
     timeout: 20_000,
     env: {
       HOME: home,
-      OPENCLAW_HOME: home,
+      CARAPACE_HOME: home,
       PATH: commandPath,
       TMPDIR: root,
       REAL_NODE: process.execPath,
@@ -183,11 +183,11 @@ openclaw_e2e_wait_mock_openai() { :; }
       BUNDLED: bundled ? "1" : "0",
       HELP_FAILURE: scenario.helpFailure ?? "",
       FAIL_PROBE: scenario.helpFailure ? String(scenario.failProbe ?? 1) : "0",
-      OPENCLAW_E2E_COMMAND_TIMEOUT: scenario.helpFailure === "timeout" ? "1s" : "5s",
-      OPENCLAW_E2E_TIMEOUT_KILL_GRACE_MS: "10",
-      OPENCLAW_NPM_ONBOARD_CHANNEL: channel,
-      OPENCLAW_NPM_ONBOARD_USE_SOURCE_PLUGIN_PACKAGE: scenario.sourcePlugin ? "1" : "0",
-      OPENCLAW_TEST_STATE_SCRIPT_B64: Buffer.from(testState).toString("base64"),
+      CARAPACE_E2E_COMMAND_TIMEOUT: scenario.helpFailure === "timeout" ? "1s" : "5s",
+      CARAPACE_E2E_TIMEOUT_KILL_GRACE_MS: "10",
+      CARAPACE_NPM_ONBOARD_CHANNEL: channel,
+      CARAPACE_NPM_ONBOARD_USE_SOURCE_PLUGIN_PACKAGE: scenario.sourcePlugin ? "1" : "0",
+      CARAPACE_TEST_STATE_SCRIPT_B64: Buffer.from(testState).toString("base64"),
       ...registryEnv,
     },
   });
@@ -198,7 +198,7 @@ openclaw_e2e_wait_mock_openai() { :; }
     .map((line) => JSON.parse(line) as string[]);
   const installs = events.filter((args) => args[0] === "plugins" && !args.includes("--help"));
   const logs = readdirSync(root)
-    .filter((file) => file.startsWith("openclaw-") && file.endsWith(".log"))
+    .filter((file) => file.startsWith("carapace-") && file.endsWith(".log"))
     .map((file) => join(root, file))
     .map((file) => readFileSync(file, "utf8"))
     .join("\n");
@@ -212,7 +212,7 @@ describe("npm onboarding fixture consent", () => {
     expect(result.status, detail).toBe(0);
     expect(installs).toEqual([
       registry
-        ? ["plugins", "install", `npm:@openclaw/codex@${version}`, "--pin", "--accept-capabilities"]
+        ? ["plugins", "install", `npm:@carapace/codex@${version}`, "--pin", "--accept-capabilities"]
         : ["plugins", "install", "codex", "--accept-capabilities"],
     ]);
     const onboard = events.find((args) => args[0] === "onboard");
@@ -279,7 +279,7 @@ describe("npm onboarding fixture consent", () => {
               "plugins",
               "install",
               ...(scenario.sourcePlugin
-                ? [`npm:@openclaw/${scenario.channel}@${version}`, "--pin"]
+                ? [`npm:@carapace/${scenario.channel}@${version}`, "--pin"]
                 : [scenario.channel]),
               "--accept-capabilities",
             ],
@@ -296,7 +296,7 @@ describe("npm onboarding fixture consent", () => {
     const { result, events, detail } = runScenario({ ...scenario, sourcePlugin: true });
     expect(result.status, detail).not.toBe(0);
     expect(detail).toContain(
-      "source channel fixture requires OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR",
+      "source channel fixture requires CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR",
     );
     expect(events).toEqual([]);
   });

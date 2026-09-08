@@ -1,6 +1,6 @@
 // Owns managed source-install preparation, artifact consent and transaction settlement.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { buildNpmResolutionFields, type NpmSpecResolution } from "../infra/install-source-utils.js";
@@ -127,7 +127,7 @@ type ManagedPluginSourceInstallResult =
   | {
       ok: true;
       pluginId: string;
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       warnings?: string[];
       targetDir?: string;
       version?: string;
@@ -171,7 +171,7 @@ async function persistManagedSourceInstall(params: {
   successMessage?: string;
   beforePersistentApply?: () => void;
   beforePersistentEffect?: () => void | Promise<void>;
-}): Promise<{ config: OpenClawConfig; warnings: string[] }> {
+}): Promise<{ config: CarapaceConfig; warnings: string[] }> {
   const warnings: string[] = [];
   let committed = false;
   try {
@@ -219,19 +219,19 @@ async function persistManagedSourceInstall(params: {
 
 /**
  * Official plugin installs target the release stream the gateway is running,
- * the same target `openclaw doctor --fix` and `openclaw plugins update`
+ * the same target `carapace doctor --fix` and `carapace plugins update`
  * already resolve. Resolving here keeps every managed install path — CLI,
  * chat command, and any future caller — on one answer instead of letting the
  * registry default land a plugin the gateway then reports as drifted.
  *
  * Beta and extended-stable resolve here. Version-bound stable tracks key off a
- * per-plugin `versionBoundToOpenClaw` descriptor that a managed install request
+ * per-plugin `versionBoundToCarapace` descriptor that a managed install request
  * does not carry, and answering for them from this boundary would pin plugins
  * the policy never opted in.
  */
 async function resolveOfficialManagedInstallSpec(params: {
   request: Extract<ManagedPluginSourceInstallRequest, { source: "official" | "npm" | "clawhub" }>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<string | null> {
   const { request } = params;
   const trustedSourceLinkedOfficialInstall =

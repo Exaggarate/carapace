@@ -72,7 +72,7 @@ describe("Workshop current collection", () => {
                 content: previous.join("\n"),
                 record: {
                   ...entry.response.record,
-                  target: { ...entry.response.record.target, source: "openclaw-workshop" },
+                  target: { ...entry.response.record.target, source: "carapace-workshop" },
                 },
               },
             }
@@ -257,7 +257,7 @@ describe("Workshop current collection", () => {
       });
       const page = await context.newPage();
       await page.addInitScript(() => {
-        localStorage.setItem("openclaw:control-ui:skill-workshop-mode:v1", "history");
+        localStorage.setItem("carapace:control-ui:skill-workshop-mode:v1", "history");
       });
       const gateway = await installMockGateway(page, {
         featureMethods: [...defaultControlUiFeatureMethods, ...fixture.featureMethods],
@@ -412,7 +412,7 @@ describe("Workshop current collection", () => {
       });
       await page.getByText("Current content is readable again.", { exact: true }).waitFor();
 
-      const picker = page.locator(".agent-scope-control openclaw-agent-select");
+      const picker = page.locator(".agent-scope-control carapace-agent-select");
       await picker.locator(".agent-select__trigger").click();
       await picker
         .locator("wa-dropdown-item[data-agent-option]")

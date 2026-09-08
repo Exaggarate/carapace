@@ -1,1 +1,1 @@
-export { default as id } from "virtual:openclaw-control-ui-locale/id";
+export { default as id } from "virtual:carapace-control-ui-locale/id";

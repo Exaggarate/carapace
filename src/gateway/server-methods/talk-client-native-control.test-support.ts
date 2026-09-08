@@ -1,9 +1,9 @@
 import { setImmediate as nextEventLoopTurn } from "node:timers/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawPluginDefinition } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { createMockIncomingRequest } from "openclaw/plugin-sdk/test-env";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapacePluginDefinition } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { createMockIncomingRequest } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import type { RunEmbeddedAgentParams } from "../../agents/embedded-agent-runner/run/params.js";
 import {
@@ -16,7 +16,7 @@ import type { AgentSession } from "../../agents/sessions/agent-session.js";
 import { AuthStorage } from "../../agents/sessions/auth-storage.js";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { TalkRealtimeConfig } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createDiagnosticTraceContext } from "../../infra/diagnostic-trace-context.js";
 import { createDiagnosticEmbeddedRunOwner } from "../../logging/diagnostic-run-activity.js";
 import { loadBundledPluginPublicSurface } from "../../plugin-sdk/test-helpers/public-surface-loader.js";
@@ -30,7 +30,7 @@ import {
 } from "../../plugins/runtime.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createResponse } from "../server-http.test-harness.js";
 import { handleGatewayRequest } from "../server-methods.js";
 import { sharingPolicyClient } from "../session-sharing.test-utils.js";
@@ -106,8 +106,8 @@ vi.mock("ws", async (importOriginal) => ({
   default: nativeUpstream.NativeSocket,
   WebSocket: nativeUpstream.NativeSocket,
 }));
-vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth")>()),
+vi.mock("carapace/plugin-sdk/provider-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-auth")>()),
   isProviderAuthProfileConfigured: nativeUpstream.authConfigured,
   resolveProviderAuthProfileApiKey: nativeUpstream.resolveAuth,
 }));
@@ -115,7 +115,7 @@ vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => ({
 export const upstream = nativeUpstream;
 
 const { default: openaiPlugin } = await loadBundledPluginPublicSurface<{
-  default: OpenClawPluginDefinition;
+  default: CarapacePluginDefinition;
 }>({ pluginId: "openai", artifactBasename: "index.js" });
 
 type PluginApi = ReturnType<typeof createTestPluginApi>;
@@ -170,7 +170,7 @@ type NativePluginFixture = {
 export async function withNativePlugin(
   run: (fixture: NativePluginFixture) => Promise<void>,
 ): Promise<void> {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     { layout: "state-only", prefix: "talk-native-control-", env: { OPENAI_API_KEY: undefined } },
     async (state) => {
       const realtimeConfig: TalkRealtimeConfig = {
@@ -178,7 +178,7 @@ export async function withNativePlugin(
         providers: { openai: { apiKey: "test-key" } },
         transport: "webrtc",
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: {

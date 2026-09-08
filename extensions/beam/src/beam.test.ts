@@ -1,11 +1,11 @@
 import { once } from "node:events";
 import http from "node:http";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createBeamTestCatalog, createBeamTestRunner } from "./beam.test-support.js";
 import { createBeamRequestHandler } from "./http.js";
@@ -56,7 +56,7 @@ function persistentStore() {
     maxEntries: BEAM_MAX_SESSIONS,
     overflowPolicy: "evict-oldest",
     defaultTtlMs: BEAM_RETENTION_MS,
-    env: { OPENCLAW_STATE_DIR: tempDirs.make("beam-store-") },
+    env: { CARAPACE_STATE_DIR: tempDirs.make("beam-store-") },
   });
   const store = createBeamStore({
     state: { openKeyedStore: () => keyedStore },
@@ -440,7 +440,7 @@ describe("Beam receiver", () => {
   it("returns a Beam share URL beneath a nested Control UI base path", async () => {
     const store = memoryStore();
     const endpoint = await serve(store, {
-      resolveControlUiBasePath: () => "/admin/openclaw/",
+      resolveControlUiBasePath: () => "/admin/carapace/",
     });
     const response = await postUpload(endpoint);
 
@@ -448,7 +448,7 @@ describe("Beam receiver", () => {
     expect(await response.json()).toEqual({
       ok: true,
       beamId: "0123456789abcdef0123456789abcdef",
-      url: "/admin/openclaw/beam/fix-the-upload-flow-0123456789ab",
+      url: "/admin/carapace/beam/fix-the-upload-flow-0123456789ab",
     });
   });
 

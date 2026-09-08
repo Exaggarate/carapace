@@ -1,7 +1,7 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { UpdateChannel } from "../../infra/update-channels.js";
 import { compareSemverStrings } from "../../infra/update-check.js";
 import { recordUpdateRunPhase, recordUpdateRunStep } from "../../infra/update-run-ledger.js";
@@ -47,7 +47,7 @@ export async function convergeUpdatePlugins(params: {
     ? {
         sourceConfig: params.configSnapshot.sourceConfig,
         authoredConfig: isRecord(params.configSnapshot.parsed)
-          ? (params.configSnapshot.parsed as OpenClawConfig) // SAFETY: valid snapshot validated this authored record.
+          ? (params.configSnapshot.parsed as CarapaceConfig) // SAFETY: valid snapshot validated this authored record.
           : params.configSnapshot.sourceConfig,
       }
     : undefined;
@@ -87,7 +87,7 @@ export async function convergeUpdatePlugins(params: {
   }
 
   return await withOwnedManagedUpdateEnv(params.ownedManagedUpdateEnv, async () => {
-    const previousCompatibilityHostVersion = process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+    const previousCompatibilityHostVersion = process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
     const postUpdateInstalledVersion = await readPackageVersion(postUpdateRoot);
     const versionComparison =
       postUpdateInstalledVersion && VERSION
@@ -98,7 +98,7 @@ export async function convergeUpdatePlugins(params: {
     if (compatibilityDowngradeTarget) {
       // The parent still reports its pre-update VERSION. Convergence and fresh
       // completion must both use the installed target's compatibility contract.
-      process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = compatibilityDowngradeTarget;
+      process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = compatibilityDowngradeTarget;
     }
     try {
       let postCorePluginUpdate;
@@ -195,9 +195,9 @@ export async function convergeUpdatePlugins(params: {
     } finally {
       if (compatibilityDowngradeTarget) {
         if (previousCompatibilityHostVersion === undefined) {
-          delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
+          delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
         } else {
-          process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION = previousCompatibilityHostVersion;
+          process.env.CARAPACE_COMPATIBILITY_HOST_VERSION = previousCompatibilityHostVersion;
         }
       }
     }

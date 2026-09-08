@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   type BrowserNativeBootstrapResponse,
   type BrowserNativeRelayEnsureStatus,
@@ -11,7 +11,7 @@ import {
   readBrowserNativeFrame,
 } from "./extension-native-protocol.js";
 
-export const BROWSER_NATIVE_HOST_NAME = "ai.openclaw.browser_bootstrap";
+export const BROWSER_NATIVE_HOST_NAME = "ai.carapace.browser_bootstrap";
 const EXTENSION_ORIGIN_PATTERN = /^chrome-extension:\/\/[a-p]{32}\/$/;
 
 type NativeHostManifest = {

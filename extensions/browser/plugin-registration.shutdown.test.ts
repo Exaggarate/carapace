@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import type { Duplex } from "node:stream";
-import type { OpenClawPluginApi, OpenClawPluginService } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { CarapacePluginApi, CarapacePluginService } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerBrowserPlugin } from "./plugin-registration.js";
 
@@ -32,8 +32,8 @@ vi.mock("./src/browser/system-profile-import-state.js", () => ({
 }));
 
 function registerLifecycleCallbacks(path: string) {
-  let route: Parameters<OpenClawPluginApi["registerHttpRoute"]>[0] | undefined;
-  let service: OpenClawPluginService | undefined;
+  let route: Parameters<CarapacePluginApi["registerHttpRoute"]>[0] | undefined;
+  let service: CarapacePluginService | undefined;
   registerBrowserPlugin(
     createTestPluginApi({
       runtime: {

@@ -34,10 +34,10 @@ describe("prepareEmbeddedAttemptBootstrap", () => {
 
   it("layers execution project instructions after agent bootstrap files", async () => {
     const agentWorkspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-workspace-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-agent-workspace-")),
     );
     const sessionWorkspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-workspace-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-workspace-")),
     );
     tempDirs.push(agentWorkspace, sessionWorkspace);
     await fs.writeFile(path.join(agentWorkspace, "AGENTS.md"), "Canonical agent instructions");
@@ -75,10 +75,10 @@ describe("prepareEmbeddedAttemptBootstrap", () => {
     // Sandbox runs show the model the copy path; injection accounting still has
     // to recognize the host file it loaded, or its bytes read as never injected.
     const workspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-remap-workspace-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-remap-workspace-")),
     );
     const promptWorkspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-remap-prompt-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-remap-prompt-")),
     );
     tempDirs.push(workspace, promptWorkspace);
     const agents = "Sandboxed agent instructions";
@@ -119,7 +119,7 @@ describe("prepareEmbeddedAttemptBootstrap", () => {
 
   it("keeps same-workspace bootstrap output byte-identical", async () => {
     const workspace = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-same-workspace-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-same-workspace-")),
     );
     tempDirs.push(workspace);
     await fs.writeFile(path.join(workspace, "AGENTS.md"), "Same workspace instructions");

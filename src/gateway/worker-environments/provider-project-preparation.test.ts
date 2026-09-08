@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setImmediate } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { requireGit } from "../../agents/worktrees/git.js";
 import type {
@@ -65,7 +65,7 @@ describe("worker provider project preparation ownership", () => {
         mode: "resume",
         deviceId: "runtime-node",
         displayName: "Runtime node",
-        openclawVersion: support.NODE_BOOTSTRAP.openclawVersion,
+        carapaceVersion: support.NODE_BOOTSTRAP.carapaceVersion,
         nodeBootstrap: changedBootstrap,
         waitForDeviceId: async () => "runtime-node",
       };

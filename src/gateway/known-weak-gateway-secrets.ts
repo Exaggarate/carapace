@@ -46,7 +46,7 @@ export function assertGatewayAuthNotKnownWeak(
       throw new Error(
         "Invalid config: gateway auth token is blank, a published example placeholder, or the literal string undefined/null. " +
           "Generate a real secret (for example, `openssl rand -hex 32`) and update gateway.auth.token or its external source. " +
-          "For blank or undefined/null inline tokens, `openclaw doctor --fix --generate-gateway-token` can generate one.",
+          "For blank or undefined/null inline tokens, `carapace doctor --fix --generate-gateway-token` can generate one.",
       );
     }
     return;
@@ -59,7 +59,7 @@ export function assertGatewayAuthNotKnownWeak(
     ) {
       throw new Error(
         "Invalid config: gateway auth password is blank, a published example placeholder, or the literal string undefined/null. " +
-          "Generate a real secret (for example, `openssl rand -hex 32`) and set OPENCLAW_GATEWAY_PASSWORD " +
+          "Generate a real secret (for example, `openssl rand -hex 32`) and set CARAPACE_GATEWAY_PASSWORD " +
           "or gateway.auth.password (or its external source) before starting the gateway.",
       );
     }

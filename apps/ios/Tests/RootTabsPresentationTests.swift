@@ -1,10 +1,10 @@
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 import SwiftUI
 import Testing
 import UIKit
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct RootTabsPresentationTests {
@@ -52,7 +52,7 @@ struct RootTabsPresentationTests {
     @Test func `dashboard deep link requests overview navigation`() async throws {
         let appModel = NodeAppModel()
         let initialRequestID = appModel.dashboardNavigationRequestID
-        let url = try #require(URL(string: "openclaw://dashboard"))
+        let url = try #require(URL(string: "carapace://dashboard"))
 
         await appModel.handleDeepLink(url: url)
 
@@ -124,7 +124,7 @@ struct RootTabsPresentationTests {
             offsets.append(offset)
             let page = Array(entries.dropFirst(offset).prefix(200))
             let nextOffset = offset + page.count
-            return OpenClawChatSessionsListResponse(
+            return CarapaceChatSessionsListResponse(
                 ts: nil,
                 path: nil,
                 count: page.count,
@@ -150,7 +150,7 @@ struct RootTabsPresentationTests {
             requestCount += 1
             guard requestCount <= 51 else { throw URLError(.networkConnectionLost) }
             let sessions = (offset..<(offset + 200)).map { Self.sessionEntry(key: "session-\($0)") }
-            return OpenClawChatSessionsListResponse(
+            return CarapaceChatSessionsListResponse(
                 ts: nil,
                 path: nil,
                 count: sessions.count,
@@ -173,7 +173,7 @@ struct RootTabsPresentationTests {
 
         let snapshot = try await ChatSessionRosterSnapshot.collect { offset in
             guard offset == 0 else { throw URLError(.networkConnectionLost) }
-            return OpenClawChatSessionsListResponse(
+            return CarapaceChatSessionsListResponse(
                 ts: nil,
                 path: nil,
                 count: firstPage.count,
@@ -195,7 +195,7 @@ struct RootTabsPresentationTests {
 
         let snapshot = try await ChatSessionRosterSnapshot.collect { offset in
             requestCount += 1
-            return OpenClawChatSessionsListResponse(
+            return CarapaceChatSessionsListResponse(
                 ts: nil,
                 path: nil,
                 count: 1,
@@ -216,7 +216,7 @@ struct RootTabsPresentationTests {
         await #expect(throws: CancellationError.self) {
             _ = try await ChatSessionRosterSnapshot.collect { offset in
                 guard offset == 0 else { throw CancellationError() }
-                return OpenClawChatSessionsListResponse(
+                return CarapaceChatSessionsListResponse(
                     ts: nil,
                     path: nil,
                     count: 1,
@@ -385,42 +385,42 @@ struct RootTabsPresentationTests {
     }
 
     @Test func `app launch defaults to chat destination`() {
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw"]) == .chat)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab"]) == .chat)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "unknown"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "unknown"]) == .chat)
     }
 
     @Test func `app launch uses requested destination before chat fallback`() {
         #expect(RootTabs
-            .initialDestination(arguments: ["OpenClaw", "--openclaw-initial-destination", "overview"]) == .overview)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-destination", "chat"]) == .chat)
+            .initialDestination(arguments: ["Carapace", "--carapace-initial-destination", "overview"]) == .overview)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-destination", "chat"]) == .chat)
         #expect(RootTabs
-            .initialDestination(arguments: ["OpenClaw", "--openclaw-initial-destination", "agents"]) == .agents)
+            .initialDestination(arguments: ["Carapace", "--carapace-initial-destination", "agents"]) == .agents)
         #expect(RootTabs
-            .initialDestination(arguments: ["OpenClaw", "--openclaw-initial-destination", "gateway"]) == .gateway)
+            .initialDestination(arguments: ["Carapace", "--carapace-initial-destination", "gateway"]) == .gateway)
         #expect(
             RootTabs.initialDestination(arguments: [
-                "OpenClaw",
-                "--openclaw-initial-tab",
+                "Carapace",
+                "--carapace-initial-tab",
                 "unknown",
-                "--openclaw-initial-destination",
+                "--carapace-initial-destination",
                 "activity",
             ]) == .activity)
     }
 
     @Test func `legacy initial tab aliases map directly to sidebar destinations`() {
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "control"]) == .overview)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "overview"]) == .overview)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "chat"]) == .chat)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "talk"]) == .chat)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "voice"]) == .chat)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "agents"]) == .agents)
-        #expect(RootTabs.initialDestination(arguments: ["OpenClaw", "--openclaw-initial-tab", "settings"]) == .settings)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "control"]) == .overview)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "overview"]) == .overview)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "chat"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "talk"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "voice"]) == .chat)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "agents"]) == .agents)
+        #expect(RootTabs.initialDestination(arguments: ["Carapace", "--carapace-initial-tab", "settings"]) == .settings)
     }
 
     @Test func `chat header follows the agent badge presentation`() {
-        #expect(ChatProTab.defaultHeaderTitle(showsAgentBadge: true, agentDisplayName: "OpenClaw") == "OpenClaw")
-        #expect(ChatProTab.defaultHeaderTitle(showsAgentBadge: false, agentDisplayName: "OpenClaw") == "Chat")
+        #expect(ChatProTab.defaultHeaderTitle(showsAgentBadge: true, agentDisplayName: "Carapace") == "Carapace")
+        #expect(ChatProTab.defaultHeaderTitle(showsAgentBadge: false, agentDisplayName: "Carapace") == "Chat")
     }
 
     @Test func `chat transport identity distinguishes unresolved and resolved agents`() {
@@ -522,20 +522,20 @@ struct RootTabsPresentationTests {
     @Test func `initial sidebar visibility parses launch argument`() {
         #expect(
             RootTabs.requestedInitialSidebarVisibility(arguments: [
-                "OpenClaw",
-                "--openclaw-sidebar-visibility",
+                "Carapace",
+                "--carapace-sidebar-visibility",
                 "hidden",
             ]) == false)
         #expect(
             RootTabs.requestedInitialSidebarVisibility(arguments: [
-                "OpenClaw",
-                "--openclaw-sidebar-visibility",
+                "Carapace",
+                "--carapace-sidebar-visibility",
                 "visible",
             ]) == true)
         #expect(
             RootTabs.requestedInitialSidebarVisibility(arguments: [
-                "OpenClaw",
-                "--openclaw-sidebar-visibility",
+                "Carapace",
+                "--carapace-sidebar-visibility",
                 "unknown",
             ]) == nil)
     }
@@ -590,21 +590,21 @@ struct RootTabsPresentationTests {
     }
 
     @Test func `session work subtitle mirrors the web repo and branch line`() {
-        func entry(repoRoot: String?, branch: String?) -> OpenClawChatSessionEntry {
+        func entry(repoRoot: String?, branch: String?) -> CarapaceChatSessionEntry {
             Self.sessionEntry(
                 key: "agent:main:w1",
-                worktree: OpenClawChatSessionWorktree(id: "w1", branch: branch, repoRoot: repoRoot))
+                worktree: CarapaceChatSessionWorktree(id: "w1", branch: branch, repoRoot: repoRoot))
         }
         #expect(ChatSessionSidebarModel.workSubtitle(
-            for: entry(repoRoot: "/Users/dev/openclaw", branch: "openclaw/fix-thing")) == "openclaw \u{2387} fix-thing")
+            for: entry(repoRoot: "/Users/dev/carapace", branch: "carapace/fix-thing")) == "carapace \u{2387} fix-thing")
         #expect(ChatSessionSidebarModel.workSubtitle(
-            for: entry(repoRoot: "/Users/dev/openclaw", branch: nil)) == "openclaw")
+            for: entry(repoRoot: "/Users/dev/carapace", branch: nil)) == "carapace")
         #expect(ChatSessionSidebarModel.workSubtitle(for: entry(repoRoot: nil, branch: "main")) == nil)
         #expect(ChatSessionSidebarModel.workSubtitle(for: Self.sessionEntry(key: "plain")) == nil)
     }
 
     @Test func `sidebar subtitle keeps an unread final observer digest above work metadata`() {
-        let digest = OpenClawChatSessionObserverDigest(
+        let digest = CarapaceChatSessionObserverDigest(
             revision: 4,
             updatedAt: 2000,
             headline: "Finished with warnings",
@@ -620,10 +620,10 @@ struct RootTabsPresentationTests {
 
         #expect(ChatSessionSidebarModel.subtitle(
             for: unread,
-            workSubtitle: "openclaw \u{2387} observer") == "Finished with warnings")
+            workSubtitle: "carapace \u{2387} observer") == "Finished with warnings")
         #expect(ChatSessionSidebarModel.subtitle(
             for: read,
-            workSubtitle: "openclaw \u{2387} observer") == "openclaw \u{2387} observer")
+            workSubtitle: "carapace \u{2387} observer") == "carapace \u{2387} observer")
     }
 
     @Test func `sidebar registers event stream before subscription request`() async {
@@ -689,7 +689,7 @@ struct RootTabsPresentationTests {
                 }
             },
             onEvent: { frame in
-                guard case let .sessionsChanged(change) = OpenClawChatGatewayPayloadCodec.event(from: frame)
+                guard case let .sessionsChanged(change) = CarapaceChatGatewayPayloadCodec.event(from: frame)
                 else { return false }
                 events.append(change.reason)
                 return false
@@ -981,10 +981,10 @@ struct RootTabsPresentationTests {
         totalTokensFresh: Bool? = nil,
         contextTokens: Int? = nil,
         lastReadAt: Double? = nil,
-        observerDigest: OpenClawChatSessionObserverDigest? = nil,
-        worktree: OpenClawChatSessionWorktree? = nil) -> OpenClawChatSessionEntry
+        observerDigest: CarapaceChatSessionObserverDigest? = nil,
+        worktree: CarapaceChatSessionWorktree? = nil) -> CarapaceChatSessionEntry
     {
-        OpenClawChatSessionEntry(
+        CarapaceChatSessionEntry(
             key: key,
             kind: nil,
             displayName: nil,

@@ -1,9 +1,9 @@
 // Discord provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
+import { danger } from "carapace/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { DiscordCommandDeployHashStore } from "../command-deploy-store.js";
 import {
   Client,
@@ -235,7 +235,7 @@ export async function fetchDiscordBotIdentity(params: {
 
 export function registerDiscordMonitorListeners(params: {
   readPolicy?: DiscordLivePolicyReader;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: Pick<Client, "listeners">;
   accountId: string;
   discordConfig: DiscordListenerConfig;

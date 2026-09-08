@@ -6,7 +6,7 @@ type ExecApprovalsStoreTestApi = {
 
 function getTesting(): ExecApprovalsStoreTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.execApprovalsStoreTestApi")
+    Symbol.for("carapace.execApprovalsStoreTestApi")
   ] as ExecApprovalsStoreTestApi;
 }
 

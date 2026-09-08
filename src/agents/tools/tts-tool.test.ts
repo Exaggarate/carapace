@@ -1,8 +1,8 @@
 // TTS tool tests cover guidance, speech runtime arguments, delivery metadata,
 // timeout validation, and reply-directive defusing.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { expectDefined } from "@carapace/normalization-core";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as ttsRuntime from "../../tts/tts.js";
 import { getCoreTtsToolResultMediaUrls } from "./tts-tool-result-provenance.js";

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { loadManifestMetadataSnapshot } from "../plugins/manifest-contract-eligibility.js";
 import {
   applyNativeSessionCatalogPreference,
@@ -15,14 +15,14 @@ export type SetupNativeSessionCatalogOption = {
 };
 
 type CatalogOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   metadataSnapshot?: PluginMetadataSnapshot;
 };
 
 export function requiresSetupNativeSessionCatalogConsent(params: {
   configExists: boolean;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   catalogs: readonly SetupNativeSessionCatalogOption[];
 }): boolean {
   if (params.catalogs.length === 0) {
@@ -82,7 +82,7 @@ export function applySetupNativeSessionCatalogPreference(
   params: CatalogOptions & {
     enabled: boolean;
   },
-): OpenClawConfig {
+): CarapaceConfig {
   return applyNativeSessionCatalogPreference(
     params.config,
     listSetupNativeSessionCatalogs(params).map(({ pluginId }) => pluginId),

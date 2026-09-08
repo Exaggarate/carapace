@@ -1,14 +1,14 @@
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { updateConfigMachineState } from "../../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../../state/config-machine-state.js";
-import type { DB as OpenClawStateDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import {
   databaseOptions,
   ensureSkillWorkshopSchema,
@@ -17,7 +17,7 @@ import {
 } from "./store-sqlite-schema.js";
 
 const SKILL_COLLECTION_REVIEW_HISTORY_LIMIT = 20;
-type CollectionReviewDatabase = Pick<OpenClawStateDatabase, "skill_workshop_collection_reviews">;
+type CollectionReviewDatabase = Pick<CarapaceStateDatabase, "skill_workshop_collection_reviews">;
 type SkillCuratorState = {
   lastAttemptAtMs: number;
   lastSuccessAtMs: number | null;
@@ -56,7 +56,7 @@ function experienceReviewKey(agentId: string, workspaceDir: string): string {
   return sha256Hex(`${agentId}\0${path.resolve(workspaceDir)}`);
 }
 
-export function readSkillReviewOutcomes(options: OpenClawStateDatabaseOptions = {}) {
+export function readSkillReviewOutcomes(options: CarapaceStateDatabaseOptions = {}) {
   const state = readConfigMachineState<SkillCuratorState>("skills.curatorState", options);
   return {
     collectionReviews: state?.lastResult.collectionReviews ?? {},
@@ -68,7 +68,7 @@ export function recordSkillExperienceReviewOutcome(
   agentId: string,
   workspaceDir: string,
   review: SkillExperienceReviewStatus,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
   const entryKey = experienceReviewKey(agentId, workspaceDir);
   updateConfigMachineState<SkillCuratorState>(
@@ -142,7 +142,7 @@ export function listSkillCollectionReviewOutcomes(
   options: SkillWorkshopStoreOptions = {},
 ): SkillCollectionReviewOutcome[] {
   ensureSkillWorkshopSchema(options);
-  const database = openOpenClawStateDatabase(databaseOptions(options));
+  const database = openCarapaceStateDatabase(databaseOptions(options));
   const kysely = getNodeSqliteKysely<CollectionReviewDatabase>(database.db);
   return executeSqliteQuerySync(
     database.db,

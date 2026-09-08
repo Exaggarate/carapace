@@ -5,7 +5,7 @@
 import {
   embeddedAgentLog,
   type queueAgentHarnessMessage,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   isCodexAppServerIndeterminateRequestCancellationError,
   isCodexAppServerIndeterminateTransportError,
@@ -224,7 +224,7 @@ export function createCodexSteeringQueue(params: {
       }
       // No await between final owner validation and RPC dispatch. Only these
       // batches become accepted-unconfirmed if cancellation races the response.
-      clientUserMessageId = `openclaw:${params.turnId}:steer:${++batchSequence}`;
+      clientUserMessageId = `carapace:${params.turnId}:steer:${++batchSequence}`;
       dispatchedBatches.set(clientUserMessageId, { items: liveItems });
       const request = {
         threadId: params.threadId,

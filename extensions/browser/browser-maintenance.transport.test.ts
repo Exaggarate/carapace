@@ -1,12 +1,12 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import { closeTrackedBrowserTabsForSessions } from "./browser-maintenance.js";
@@ -19,7 +19,7 @@ import {
 } from "./src/browser/session-tab-store.js";
 
 it("closes owned tabs over their transports and rechecks claims after runtime lookup", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const requests: string[] = [];
     const closedTargets: string[] = [];
     const targets = new Set(["owned", "user"]);

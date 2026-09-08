@@ -1,8 +1,8 @@
 // Regresses legacy provider config shapes accepted by config loading.
 import { describe, expect, it } from "vitest";
 import { normalizeLegacyTalkConfig } from "../commands/doctor/shared/legacy-talk-config-normalizer.js";
-import type { OpenClawConfig } from "./types.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import type { CarapaceConfig } from "./types.js";
+import { CarapaceSchema } from "./zod-schema.js";
 
 describe("legacy provider-shaped config snapshots", () => {
   it("preserves provider-owned legacy Talk fields for the provider doctor migration", () => {
@@ -15,14 +15,14 @@ describe("legacy provider-shaped config snapshots", () => {
       },
     };
     const changes: string[] = [];
-    const migrated = normalizeLegacyTalkConfig(raw as unknown as OpenClawConfig, changes);
+    const migrated = normalizeLegacyTalkConfig(raw as unknown as CarapaceConfig, changes);
 
     expect(changes).toEqual([]);
     expect(migrated).toEqual(raw);
   });
 
   it("rejects non-string voice alias values", () => {
-    const res = OpenClawSchema.safeParse({
+    const res = CarapaceSchema.safeParse({
       talk: {
         voiceAliases: {
           Clawd: 123,

@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { SessionContextBudgetStatus, SessionEntry } from "./types.js";
 
 type SessionContextTokenOwner = Pick<

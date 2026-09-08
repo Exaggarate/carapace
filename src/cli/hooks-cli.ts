@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import type { Command } from "commander";
 import {
   GATEWAY_CLIENT_MODES,
@@ -14,7 +14,7 @@ import {
   tryResolveLegacyCompatibilityAgentId,
 } from "../agents/agent-scope.js";
 import { getRuntimeConfig, transformConfigFile } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildWorkspaceHookStatus,
   type HookStatusEntry,
@@ -66,7 +66,7 @@ type HooksReportTarget = {
   workspaceDir: string;
 };
 
-function resolveHooksReportTarget(config: OpenClawConfig, rawAgentId?: string): HooksReportTarget {
+function resolveHooksReportTarget(config: CarapaceConfig, rawAgentId?: string): HooksReportTarget {
   const requested = rawAgentId?.trim();
   if (rawAgentId !== undefined && !requested) {
     throw new Error("--agent must not be blank");
@@ -87,7 +87,7 @@ function resolveHooksReportTarget(config: OpenClawConfig, rawAgentId?: string): 
   return { agentId, workspaceDir: resolveAgentWorkspaceDir(config, agentId) };
 }
 
-function buildHooksReport(config: OpenClawConfig, target: HooksReportTarget): HookStatusReport {
+function buildHooksReport(config: CarapaceConfig, target: HooksReportTarget): HookStatusReport {
   // Plugin-managed and workspace hooks share one resolved policy view for status/actions.
   const workspaceDir = target.workspaceDir;
   const workspaceEntries = loadWorkspaceHookEntries(workspaceDir, { config });
@@ -199,7 +199,7 @@ async function setHookEnabled(hookName: string, enabled: boolean, agentId?: stri
       );
       if (!hook) {
         throw new Error(
-          `Hook "${hookName}" not found. Run \`${formatCliCommand("openclaw hooks list")}\` to see available hooks.`,
+          `Hook "${hookName}" not found. Run \`${formatCliCommand("carapace hooks list")}\` to see available hooks.`,
         );
       }
       if (hook.managedByPlugin) {
@@ -216,12 +216,12 @@ async function setHookEnabled(hookName: string, enabled: boolean, agentId?: stri
             })}.`
           : "";
         throw new Error(
-          `Hook "${hookName}" is not eligible; missing ${missing}.${installHint} Run \`${formatCliCommand(`openclaw hooks info ${hookName}`)}\` for details.`,
+          `Hook "${hookName}" is not eligible; missing ${missing}.${installHint} Run \`${formatCliCommand(`carapace hooks info ${hookName}`)}\` for details.`,
         );
       }
       const entries = { ...config.hooks?.internal?.entries };
       entries[hook.hookKey] = { ...entries[hook.hookKey], enabled };
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...config,
         hooks: {
           ...config.hooks,
@@ -254,7 +254,7 @@ export function registerHooksCli(program: Command): void {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/hooks", "docs.openclaw.ai/cli/hooks")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/hooks", "github.com/Exaggarate/carapace")}\n`,
     );
   const hasJsonOutput = (opts: { json?: boolean } | undefined): boolean =>
     Boolean(opts?.json || hooks.opts<{ json?: boolean }>().json);
@@ -269,7 +269,7 @@ export function registerHooksCli(program: Command): void {
       !new Set(["list", "info", "check", "enable", "disable"]).has(actionCommand.name())
     ) {
       throw new Error(
-        `openclaw hooks ${actionCommand.name()} does not support --agent; the option only selects an owner for read-only hook reports.`,
+        `carapace hooks ${actionCommand.name()} does not support --agent; the option only selects an owner for read-only hook reports.`,
       );
     }
   });
@@ -356,7 +356,7 @@ export function registerHooksCli(program: Command): void {
 
   hooks
     .command("install")
-    .description("Deprecated: install a hook pack via `openclaw plugins install`")
+    .description("Deprecated: install a hook pack via `carapace plugins install`")
     .argument("<path-or-spec>", "Path to a hook pack or npm package spec")
     .option("-l, --link", "Link a local path instead of copying", false)
     .option("--pin", "Record npm installs as exact resolved <name>@<version>", false)
@@ -368,7 +368,7 @@ export function registerHooksCli(program: Command): void {
     )
     .action(async (raw: string, opts: HooksInstallOptions) => {
       defaultRuntime.log(
-        theme.warn("`openclaw hooks install` is deprecated; use `openclaw plugins install`."),
+        theme.warn("`carapace hooks install` is deprecated; use `carapace plugins install`."),
       );
       await runPluginInstallCommand({
         raw,
@@ -380,7 +380,7 @@ export function registerHooksCli(program: Command): void {
 
   hooks
     .command("update")
-    .description("Deprecated: update hook packs via `openclaw plugins update`")
+    .description("Deprecated: update hook packs via `carapace plugins update`")
     .argument("[id]", "Hook pack id (omit with --all)")
     .option("--all", "Update all tracked hooks", false)
     .option("--dry-run", "Show what would change without writing", false)
@@ -391,7 +391,7 @@ export function registerHooksCli(program: Command): void {
     )
     .action(async (id: string | undefined, opts: HooksUpdateOptions) => {
       defaultRuntime.log(
-        theme.warn("`openclaw hooks update` is deprecated; use `openclaw plugins update`."),
+        theme.warn("`carapace hooks update` is deprecated; use `carapace plugins update`."),
       );
       await runPluginUpdateCommand({ id, opts });
     });

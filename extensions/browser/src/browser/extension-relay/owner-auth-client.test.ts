@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { rawDataToString } from "openclaw/plugin-sdk/webhook-ingress";
+import { rawDataToString } from "carapace/plugin-sdk/webhook-ingress";
 import { afterEach, expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import { relayTestKey } from "../../../chrome-extension/relay-key.test-support.js";

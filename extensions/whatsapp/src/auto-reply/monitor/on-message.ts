@@ -1,14 +1,14 @@
 // Whatsapp plugin module implements on message behavior.
-import type { AckReactionHandle } from "openclaw/plugin-sdk/channel-feedback";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { AckReactionHandle } from "carapace/plugin-sdk/channel-feedback";
+import type { ChannelInboundTurnPlan } from "carapace/plugin-sdk/channel-inbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   ensureConfiguredBindingRouteReady,
   resolveConfiguredBindingRoute,
-} from "openclaw/plugin-sdk/conversation-binding-runtime";
-import type { getReplyFromConfig, MsgContext } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveAgentRoute, buildGroupHistoryKey } from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/conversation-binding-runtime";
+import type { getReplyFromConfig, MsgContext } from "carapace/plugin-sdk/reply-runtime";
+import { resolveAgentRoute, buildGroupHistoryKey } from "carapace/plugin-sdk/routing";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { resolveWhatsAppAccount } from "../../accounts.js";
 import { resolveWhatsAppGroupSessionRoute } from "../../group-session-key.js";
 import { getPrimaryIdentityId, getSenderIdentity } from "../../identity.js";
@@ -30,8 +30,8 @@ import {
 } from "./status-reaction.js";
 
 export function createWebOnMessageHandler(params: {
-  cfg: OpenClawConfig;
-  loadConfig?: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  loadConfig?: () => CarapaceConfig;
   verbose: boolean;
   connectionId: string;
   maxMediaBytes: number;
@@ -40,10 +40,10 @@ export function createWebOnMessageHandler(params: {
   groupMemberNames: Map<string, Map<string, string>>;
   backgroundTasks: Set<Promise<unknown>>;
   replyResolver: typeof getReplyFromConfig;
-  replyLogger: ReturnType<(typeof import("openclaw/plugin-sdk/runtime-env"))["getChildLogger"]>;
+  replyLogger: ReturnType<(typeof import("carapace/plugin-sdk/runtime-env"))["getChildLogger"]>;
   baseMentionConfig: MentionConfig;
   account: { authDir?: string; accountId?: string; selfChatMode?: boolean };
-  buildContext?: typeof import("openclaw/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
+  buildContext?: typeof import("carapace/plugin-sdk/channel-inbound").buildChannelInboundEventContext;
   dispatchReplyFromConfig?: NonNullable<ChannelInboundTurnPlan["dispatchReplyFromConfig"]>;
 }) {
   const hasExplicitlyPassedInboundAccess = (msg: AdmittedWebInboundMessage): boolean =>
@@ -77,7 +77,7 @@ export function createWebOnMessageHandler(params: {
   };
 
   const processForRoute = async (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     msg: AdmittedWebInboundMessage,
     route: ReturnType<typeof resolveAgentRoute>,
     groupHistoryKey: string,

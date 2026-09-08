@@ -29,7 +29,7 @@ import {
 } from "../process/gateway-work-admission.js";
 import { AsyncWorkScope } from "../shared/async-work-scope.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 
@@ -84,7 +84,7 @@ describe("restart sentinel notice recovery", () => {
       vi.restoreAllMocks();
       resetGatewayWorkAdmission();
       resetPluginRuntimeStateForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       envSnapshot?.restore();
       envSnapshot = undefined;
       cleanup();
@@ -92,10 +92,10 @@ describe("restart sentinel notice recovery", () => {
   });
 
   beforeEach(() => {
-    closeOpenClawStateDatabaseForTest();
-    stateDir = tempDirs.make("openclaw-restart-notice-");
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    closeCarapaceStateDatabaseForTest();
+    stateDir = tempDirs.make("carapace-restart-notice-");
+    envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     mocks.sendDurableMessageBatch.mockReset();
     mocks.recoveryDeliver.mockReset();
     mocks.resolveOutboundChannelMessageAdapter.mockClear();
@@ -202,7 +202,7 @@ describe("restart sentinel notice recovery", () => {
     expect(
       mocks.sendDurableMessageBatch.mock.calls.map(([request]) => request.payloads[0].text),
     ).toEqual([
-      "⬆️ Updating OpenClaw 2026.9.1 → 2026.9.2. The gateway stays available while the update is validated; you'll get a message here when it finishes.",
+      "⬆️ Updating Carapace 2026.9.1 → 2026.9.2. The gateway stays available while the update is validated; you'll get a message here when it finishes.",
       "⏳ Restarting the gateway now (v2026.9.1 → v2026.9.2)…",
       "🔁 Back on v2026.9.2, verifying…",
       renderUpdateRunReport(run).markdown,

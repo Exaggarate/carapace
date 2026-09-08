@@ -15,14 +15,14 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { drainSessionStoreWriterQueuesForTest } from "../../config/sessions/store-writer-state.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
 import {
-  disposeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  disposeCarapaceAgentDatabaseByPath,
+  isCarapaceAgentDatabaseOpen,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { isReplyPayloadTerminalContent } from "../reply-payload.js";
 import type { ReplyPayload } from "../types.js";
 import type {
@@ -55,14 +55,14 @@ let suiteRoot: string;
 let storePath: string;
 let fixtureSequence = 0;
 beforeAll(() => {
-  suiteRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-accounting-suite-"));
-  storePath = path.join(suiteRoot, "openclaw-agent.sqlite");
-  openOpenClawAgentDatabase({ agentId: "main", path: storePath });
+  suiteRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-accounting-suite-"));
+  storePath = path.join(suiteRoot, "carapace-agent.sqlite");
+  openCarapaceAgentDatabase({ agentId: "main", path: storePath });
 });
 afterAll(async () => {
   await drainSessionStoreWriterQueuesForTest();
-  disposeOpenClawAgentDatabaseByPath(storePath);
-  expect(isOpenClawAgentDatabaseOpen(storePath)).toBe(false);
+  disposeCarapaceAgentDatabaseByPath(storePath);
+  expect(isCarapaceAgentDatabaseOpen(storePath)).toBe(false);
   fs.rmSync(suiteRoot, { recursive: true, force: true });
 });
 afterEach(() => {
@@ -91,7 +91,7 @@ const diagnostic = {
 } satisfies NonNullable<SessionEntry["contextBudgetStatus"]>;
 
 async function createFixture() {
-  const root = tempDirs.make("openclaw-context-pressure-");
+  const root = tempDirs.make("carapace-context-pressure-");
   const fixtureId = ++fixtureSequence;
   const sessionKey = `agent:main:accounting-${fixtureId}`;
   const sessionId = `accounting-session-${fixtureId}`;
@@ -107,7 +107,7 @@ async function createFixture() {
     estimatedCostUsd: 2,
   };
   await replaceSessionEntry({ storePath, sessionKey }, entry);
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     session: { store: storePath },
     models: {
       providers: {

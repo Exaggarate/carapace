@@ -1,22 +1,22 @@
 // Slack plugin module implements interactions.block actions behavior.
 import type { AllMiddlewareArgs, SlackActionMiddlewareArgs } from "@slack/bolt";
 import type { Block, KnownBlock } from "@slack/web-api";
-import { resolveApprovalOverGateway } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
-import { resolveCommandAuthorization } from "openclaw/plugin-sdk/command-auth-native";
-import { isApprovalNotFoundError } from "openclaw/plugin-sdk/error-runtime";
-import { requestHeartbeat } from "openclaw/plugin-sdk/heartbeat-runtime";
+import { resolveApprovalOverGateway } from "carapace/plugin-sdk/approval-gateway-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
+import { resolveCommandAuthorization } from "carapace/plugin-sdk/command-auth-native";
+import { isApprovalNotFoundError } from "carapace/plugin-sdk/error-runtime";
+import { requestHeartbeat } from "carapace/plugin-sdk/heartbeat-runtime";
 import {
   parseStrictFiniteNumber,
   timestampMsToIsoString,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
   normalizeUniqueTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { enqueueRoutedSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { enqueueRoutedSystemEvent } from "carapace/plugin-sdk/system-event-runtime";
 import {
   decodeSlackApprovalAction,
   SLACK_APPROVAL_HEADER_BLOCK_ID,

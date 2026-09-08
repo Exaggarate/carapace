@@ -1,15 +1,15 @@
 // Qa Channel plugin module implements channel behavior.
-import type { ChannelThreadingToolContext } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelThreadingToolContext } from "carapace/plugin-sdk/channel-contract";
 import {
   buildChannelOutboundSessionRoute,
   buildThreadAwareOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
+} from "carapace/plugin-sdk/channel-core";
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
   type ChannelMessageSendPayloadContext,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import { DEFAULT_ACCOUNT_ID } from "./accounts.js";
 import {
   buildQaTarget,

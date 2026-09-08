@@ -2,7 +2,7 @@
 /* @vitest-environment-options {"url":"https://gateway.example/"} */
 
 import { webcrypto } from "node:crypto";
-import type { ConnectParams } from "@openclaw/gateway-client/browser";
+import type { ConnectParams } from "@carapace/gateway-client/browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import { createDeferred } from "../../../test/helpers/promise.js";
@@ -13,7 +13,7 @@ import * as gatewayStore from "./gateway-store.ts";
 import { loadSettings, loadUiPreferences, patchSettings, persistSessionToken } from "./settings.ts";
 import * as staleChunkReload from "./stale-chunk-reload.ts";
 
-const NATIVE_AUTH_KEY = "__OPENCLAW_NATIVE_CONTROL_AUTH__";
+const NATIVE_AUTH_KEY = "__CARAPACE_NATIVE_CONTROL_AUTH__";
 const originalUrl = window.location.href;
 let runtime: ApplicationRuntime | undefined;
 
@@ -84,7 +84,7 @@ describe("pending Gateway credentials", () => {
       vi.stubGlobal("crypto", webcrypto);
       const bootstrapToken = "synthetic-bound-bootstrap";
       const originalGatewayUrl = "wss://gateway.example";
-      const remoteGatewayUrl = "wss://other-gateway.example/openclaw";
+      const remoteGatewayUrl = "wss://other-gateway.example/carapace";
       window.history.replaceState(
         {},
         "",
@@ -238,7 +238,7 @@ describe("pending Gateway credentials", () => {
       );
       expect(fetchMock).toHaveBeenCalledOnce();
       expect(fetchMock).toHaveBeenCalledWith(
-        "/.well-known/openclaw/browser-bootstrap",
+        "/.well-known/carapace/browser-bootstrap",
         expect.objectContaining({
           method: "GET",
           credentials: "same-origin",
@@ -261,7 +261,7 @@ describe("pending Gateway credentials", () => {
         window[NATIVE_AUTH_KEY] = {
           gatewayUrl: store.gateway.connection.gatewayUrl,
           client: {
-            id: "openclaw-ios",
+            id: "carapace-ios",
             mode: "ui",
             platform: "iOS 27.0.0",
             deviceFamily: "iPhone",
@@ -302,8 +302,8 @@ describe("pending Gateway credentials", () => {
   );
 
   it("re-scopes credentials before confirming a changed Gateway URL", () => {
-    const currentGatewayUrl = "wss://gateway.example/openclaw";
-    const nextGatewayUrl = "wss://other-gateway.example/openclaw";
+    const currentGatewayUrl = "wss://gateway.example/carapace";
+    const nextGatewayUrl = "wss://other-gateway.example/carapace";
     persistSessionToken(nextGatewayUrl, "next-token");
     setNativeAuth({
       gatewayUrl: currentGatewayUrl,
@@ -322,8 +322,8 @@ describe("pending Gateway credentials", () => {
   });
 
   it("holds a bootstrap token until its changed Gateway URL is confirmed", () => {
-    const currentGatewayUrl = "wss://gateway.example/openclaw";
-    const nextGatewayUrl = "wss://other-gateway.example/openclaw";
+    const currentGatewayUrl = "wss://gateway.example/carapace";
+    const nextGatewayUrl = "wss://other-gateway.example/carapace";
     setNativeAuth({ gatewayUrl: currentGatewayUrl });
     window.history.replaceState(
       {},
@@ -360,7 +360,7 @@ describe("pending Gateway credentials", () => {
           pluginFrameGrants: [
             {
               pluginId: "fixture",
-              path: "/__openclaw__/plugins/control-ui/fixture/",
+              path: "/__carapace__/plugins/control-ui/fixture/",
               match: "prefix",
             },
           ],

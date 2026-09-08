@@ -21,7 +21,7 @@ import {
   setPluginInstallRecordMapEntry,
 } from "../config/plugin-install-record-map.js";
 import { copyRuntimeConfigWriteApplication } from "../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { resolveDefaultPluginNpmDir, resolvePluginNpmProjectsDir } from "./install-paths.js";
@@ -58,7 +58,7 @@ function mergeUnsetPaths(
 }
 
 /** Return whether config still contains legacy/transient plugin install records. */
-export function hasPendingPluginInstallRecords(config: OpenClawConfig): boolean {
+export function hasPendingPluginInstallRecords(config: CarapaceConfig): boolean {
   return Object.keys(config.plugins?.installs ?? {}).length > 0;
 }
 
@@ -79,8 +79,8 @@ function pluginInstallRecordMapsEqual(
 
 /** Find pending install records that match the base config and can be stripped as unchanged. */
 export function unchangedPendingPluginInstallRecordIds(
-  config: OpenClawConfig,
-  baseConfig: OpenClawConfig,
+  config: CarapaceConfig,
+  baseConfig: CarapaceConfig,
 ): string[] {
   const pendingInstalls = config.plugins?.installs ?? {};
   return Object.entries(baseConfig.plugins?.installs ?? {})
@@ -92,9 +92,9 @@ export function unchangedPendingPluginInstallRecordIds(
 
 /** Remove pending plugin install records from config, optionally only for selected ids. */
 export function stripPendingPluginInstallRecords(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginIds?: Iterable<string>,
-): OpenClawConfig {
+): CarapaceConfig {
   if (!pluginIds) {
     return withoutPluginInstallRecords(config);
   }
@@ -121,7 +121,7 @@ export function stripPendingPluginInstallRecords(
 }
 
 type ConfigCommit = (
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   writeOptions?: ConfigWriteOptions,
 ) => Promise<ConfigReplaceResult | void>;
 const PLUGIN_SOURCE_CHANGED_RESTART_REASON = "plugin source changed";
@@ -226,7 +226,7 @@ function resolveRetainedManagedNpmInstallMarkerTarget(params: {
           plugins: {
             installs,
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         pluginId: params.pluginId,
         deleteFiles: true,
       },
@@ -389,7 +389,7 @@ async function restoreClearedRetainedManagedNpmInstallMarkers(
 
 /** Recheck staged enablement at its config writer, after any intervening plugin update. */
 async function assertPluginConfigActivationConsent(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   previousInstallRecords?: Record<string, PluginInstallRecord>;
   nextInstallRecords?: Record<string, PluginInstallRecord>;
 }): Promise<void> {
@@ -401,7 +401,7 @@ async function assertPluginConfigActivationConsent(params: {
   const { resolvePluginCapabilityConsent } = await import("./capability-consent.js");
   const { resolvePluginControlPlaneWorkspace } = await import("./control-plane-workspace.js");
   const snapshot = await readConfigFileSnapshot();
-  const metadataForConfig = (config: OpenClawConfig) =>
+  const metadataForConfig = (config: CarapaceConfig) =>
     resolvePluginMetadataSnapshot({
       config,
       allowCurrent: false,
@@ -441,7 +441,7 @@ async function commitPluginInstallRecordsWithWriter(params: {
     previousInstallRecords: Record<string, PluginInstallRecord>;
     nextInstallRecords: Record<string, PluginInstallRecord>;
   }>;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   recheckStagedActivation?: boolean;
   beforePersistentEffect?: () => void | Promise<void>;
   writeOptions?: ConfigWriteOptions;
@@ -559,7 +559,7 @@ async function commitPluginInstallRecordsWithWriter(params: {
 export async function commitPluginInstallRecordsWithConfig(params: {
   previousInstallRecords?: Record<string, PluginInstallRecord>;
   nextInstallRecords: Record<string, PluginInstallRecord>;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   baseHash?: string;
   writeOptions?: ConfigWriteOptions;
   beforePersistentEffect?: () => void | Promise<void>;
@@ -589,7 +589,7 @@ export async function commitPluginInstallRecordsWithConfig(params: {
 export async function commitPluginInstallRecordsOnly(params: {
   previousInstallRecords?: Record<string, PluginInstallRecord>;
   nextInstallRecords: Record<string, PluginInstallRecord>;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   verifyConfigFresh?: () => Promise<void>;
 }): Promise<InstalledPluginIndexWriteReceipt> {
   const result = await commitPluginInstallRecordsWithWriter({
@@ -610,13 +610,13 @@ export async function commitPluginInstallRecordsOnly(params: {
 
 /** Commit config while migrating any pending install records into the install index. */
 export async function commitConfigWriteWithPendingPluginInstalls(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   /** Source snapshot whose transient records migrate below the canonical index. */
-  sourceConfig?: OpenClawConfig;
+  sourceConfig?: CarapaceConfig;
   writeOptions?: ConfigWriteOptions;
   commit: ConfigCommit;
 }): Promise<{
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   installRecords: Record<string, PluginInstallRecord>;
   movedInstallRecords: boolean;
   persistedHash: string | null;
@@ -685,7 +685,7 @@ export async function commitConfigWithPendingPluginInstalls(
     writeOptions?: ConfigWriteOptions;
   },
 ): Promise<{
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   installRecords: Record<string, PluginInstallRecord>;
   movedInstallRecords: boolean;
   persistedHash: string | null;

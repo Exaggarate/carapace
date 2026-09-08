@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 @preconcurrency import WebRTC
 import XCTest
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 final class TalkRealtimeConsultCancellationTests: XCTestCase {
@@ -34,7 +34,7 @@ final class TalkRealtimeConsultCancellationTests: XCTestCase {
                         "timestamp": Date().timeIntervalSince1970 * 1000,
                         "stopReason": "stop",
                         "idempotencyKey": "owned-run",
-                        "__openclaw": ["runId": owned ? "owned-run" : "foreign-run"],
+                        "__carapace": ["runId": owned ? "owned-run" : "foreign-run"],
                     ]],
                 ]
             default:
@@ -52,7 +52,7 @@ final class TalkRealtimeConsultCancellationTests: XCTestCase {
             XCTAssertEqual(finished, .completed)
             let historyReads = await requests.count(method: "chat.history")
             XCTAssertGreaterThanOrEqual(historyReads, 2, "A foreign reply must not complete the consult")
-            XCTAssertFalse(delegate.statuses.contains("OpenClaw unavailable"))
+            XCTAssertFalse(delegate.statuses.contains("Carapace unavailable"))
         }
     }
 
@@ -141,7 +141,7 @@ final class TalkRealtimeConsultCancellationTests: XCTestCase {
             let channel = try XCTUnwrap(peer.dataChannel(
                 forLabel: "synthetic-consult",
                 configuration: RTCDataChannelConfiguration()))
-            let event = #"{"type":"response.function_call_arguments.done","call_id":"call-1","name":"openclaw_agent_consult","arguments":"{\"question\":\"Synthetic consult\"}"}"#
+            let event = #"{"type":"response.function_call_arguments.done","call_id":"call-1","name":"carapace_agent_consult","arguments":"{\"question\":\"Synthetic consult\"}"}"#
             talk.dataChannel(channel, didReceiveMessageWith: RTCDataBuffer(data: Data(event.utf8), isBinary: false))
             try await body(talk)
         } catch {

@@ -5,16 +5,16 @@ import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { normalizeConversationText } from "../../acp/conversation-id.js";
 import { normalizeAnyChannelId } from "../../channels/registry.js";
 import { getActivePluginChannelRegistryFromState } from "../../plugins/runtime-channel-state.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel-constants.js";
 import {
   executeSqliteQuerySync,
@@ -38,7 +38,7 @@ const CURRENT_BINDINGS_ID_PREFIX = "generic:";
 const CURRENT_BINDING_CONVERSATION_KIND = "current";
 
 type CurrentConversationBindingDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "current_conversation_bindings"
 >;
 
@@ -178,7 +178,7 @@ export function updateCurrentConversationBindingRecord(
 ): { previous: SessionBindingRecord | null; current: SessionBindingRecord | null } {
   const conversation = normalizeConversationRef(ref);
   const bindingKey = buildConversationKey(conversation);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const existingRow = readCurrentConversationBindingRow(db, conversation, bindingKey);
     const existing = existingRow ? (bindingRowsToRecords([existingRow])[0] ?? null) : null;
     const previous = existing && !isBindingExpired(existing) ? existing : null;
@@ -213,7 +213,7 @@ export function updateCurrentConversationBindingRecord(
 export function resolveCurrentConversationBindingRecord(
   ref: ConversationRef,
 ): SessionBindingRecord | null {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const conversation = normalizeConversationRef(ref);
   const bindingKey = buildConversationKey(conversation);
   const row = readCurrentConversationBindingRow(db, conversation, bindingKey);
@@ -269,13 +269,13 @@ export function listCurrentConversationBindingRecordsBySession(
   targetSessionKey: string,
   scope?: CurrentConversationBindingScope,
 ): SessionBindingRecord[] {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const rows = listCurrentConversationBindingRowsBySession(db, targetSessionKey, scope);
   const records = bindingRowsToRecords(rows);
   if (!records.some((record) => isBindingExpired(record))) {
     return records;
   }
-  return runOpenClawStateWriteTransaction(({ db: transactionDb }) => {
+  return runCarapaceStateWriteTransaction(({ db: transactionDb }) => {
     const latestRows = listCurrentConversationBindingRowsBySession(
       transactionDb,
       targetSessionKey,
@@ -300,7 +300,7 @@ export function deleteCurrentConversationBindingRecordsBySession(
   scope?: CurrentConversationBindingScope,
   genericOnly = !scope,
 ): SessionBindingRecord[] {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const rows = listCurrentConversationBindingRowsBySession(
       db,
       targetSessionKey,
@@ -556,7 +556,7 @@ export async function unbindGenericCurrentConversationBindings(
 
 export const testing = {
   clearPersistedCurrentConversationBindingsForTests() {
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       const bindingDb = getNodeSqliteKysely<CurrentConversationBindingDatabase>(db);
       executeSqliteQuerySync(db, bindingDb.deleteFrom("current_conversation_bindings"));
     });

@@ -1,6 +1,6 @@
 // Discord provider module implements model/runtime integration.
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { summarizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { summarizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatThreadBindingDurationLabel } from "./thread-bindings.messages.js";
 
 function formatThreadBindingDurationForConfigLabel(durationMs: number): string {

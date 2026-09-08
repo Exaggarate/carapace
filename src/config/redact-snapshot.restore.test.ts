@@ -97,7 +97,7 @@ describe("restoreRedactedValues", () => {
   ])("warns on missing originals only during writes with $name", async ({ hints, warningPath }) => {
     const original = { channels: { existing: { token: "existing" } } };
     const incoming = { channels: { newChannel: { token: REDACTED_SENTINEL } } };
-    const warnLogs = createWarnLogCapture("openclaw-config-redaction-test");
+    const warnLogs = createWarnLogCapture("carapace-config-redaction-test");
     try {
       // Raw replacement also changes the channel key, so its sentinel has no matching original.
       expect(redactConfigSnapshot(makeSnapshot(original), hints).raw).toBeNull();
@@ -113,7 +113,7 @@ describe("restoreRedactedValues", () => {
   it("keeps array truncation warnings during raw validation", async () => {
     const snapshot = makeSnapshot({ plugins: { allow: ["source"] } });
     const runtimeConfig = { plugins: { allow: ["source", "runtime-default"] } };
-    const warnLogs = createWarnLogCapture("openclaw-config-redaction-array-test");
+    const warnLogs = createWarnLogCapture("carapace-config-redaction-array-test");
     try {
       const result = redactConfigSnapshot({ ...snapshot, config: runtimeConfig, runtimeConfig });
       expect(result.raw).toBe(snapshot.raw);

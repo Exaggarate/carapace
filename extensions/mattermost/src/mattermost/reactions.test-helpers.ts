@@ -1,6 +1,6 @@
 // Mattermost helper module supports reactions helpers behavior.
 import { expect, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { CarapaceConfig } from "../../runtime-api.js";
 import type { MattermostFetch } from "./client.js";
 
 export function requestUrl(url: string | URL | Request): string {
@@ -17,7 +17,7 @@ let testConfigSequence = 0;
 
 export function createMattermostTestConfig(
   cacheKey = String(++testConfigSequence),
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     channels: {
       mattermost: {

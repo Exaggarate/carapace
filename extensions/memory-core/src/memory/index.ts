@@ -1,4 +1,4 @@
-// Memory Core plugin entrypoint registers its OpenClaw integration.
+// Memory Core plugin entrypoint registers its Carapace integration.
 export {
   closeAllMemorySearchManagers,
   closeMemorySearchManager,

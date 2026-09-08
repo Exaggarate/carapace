@@ -7,20 +7,20 @@ title: "Reef plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 Guarded end-to-end encrypted claw channel.
 
 ## Distribution
 
-- Package: `@openclaw/reef`
-- Install route: included in OpenClaw
+- Package: `@carapace/reef`
+- Install route: included in Carapace
 
 ## Surface
 
 - Channels: `reef`
-- CLI commands: `openclaw reef`
+- CLI commands: `carapace reef`
 
 ## Related docs
 

@@ -1,9 +1,9 @@
 import {
   readSessionMessageIdentity,
   readSessionMessageSequence,
-} from "@openclaw/gateway-client/browser";
-import type { SessionProjectionScope } from "@openclaw/gateway-client/browser";
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/gateway-client/browser";
+import type { SessionProjectionScope } from "@carapace/gateway-client/browser";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import { extractText } from "../../lib/chat/message-extract.ts";
 import { resolveChatAgentId } from "./chat-agent-id.ts";
 import type { ChatState } from "./chat-state-contract.ts";
@@ -119,10 +119,10 @@ export function applySessionMessagePayload(
   if (!sourceRecord) {
     return;
   }
-  const sourceMetadata = asNonArrayRecord(sourceRecord["__openclaw"]);
+  const sourceMetadata = asNonArrayRecord(sourceRecord["__carapace"]);
   const message = {
     ...sourceRecord,
-    __openclaw: {
+    __carapace: {
       ...sourceMetadata,
       ...(incoming.id ? { id: incoming.id } : {}),
       ...(incoming.idempotencyKey ? { idempotencyKey: incoming.idempotencyKey } : {}),

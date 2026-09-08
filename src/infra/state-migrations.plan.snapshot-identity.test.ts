@@ -19,18 +19,18 @@ import { captureLegacyStateSnapshotIdentityInProcess } from "./state-migrations.
 const tempDirs = createTrackedTempDirs();
 
 async function makeFixture() {
-  const root = await tempDirs.make("openclaw-migration-snapshot-identity-");
+  const root = await tempDirs.make("carapace-migration-snapshot-identity-");
   const homeDir = path.join(root, "home");
   const stateDir = path.join(root, "copied-state");
-  const configPath = path.join(root, "copied-openclaw.json");
+  const configPath = path.join(root, "copied-carapace.json");
   fs.mkdirSync(homeDir, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(configPath, "{}\n");
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: homeDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
   };
   return { root, homeDir, stateDir, configPath, env };
 }
@@ -235,8 +235,8 @@ describe("legacy state migration snapshot identity", () => {
   it.each([
     ["DELETE", "held.sqlite"],
     ["WAL", "held.sqlite"],
-    ["DELETE", "state/openclaw.sqlite"],
-    ["WAL", "state/openclaw.sqlite"],
+    ["DELETE", "state/carapace.sqlite"],
+    ["WAL", "state/carapace.sqlite"],
   ])(
     "preserves a caller-held %s read transaction on %s through the complete planner",
     async (journalMode, relativePath) => {

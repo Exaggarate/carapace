@@ -1,4 +1,4 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@carapace/workboard-contract";
 import type { Locator } from "playwright";
 
 export const expectedMobileScrollGeometry = {

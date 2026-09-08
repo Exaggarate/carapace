@@ -17,7 +17,7 @@ type McpToolApprovalBinding = {
 // The authoritative owner object, not a copied token/run id, owns this one-shot
 // handoff across the local RPC. Separate host processes have no entry and cannot mint.
 const bindings = resolveGlobalSingleton(
-  Symbol.for("openclaw.mcpToolApprovalBindings"),
+  Symbol.for("carapace.mcpToolApprovalBindings"),
   () => new WeakMap<AgentRunDelegatedAuthority, Set<McpToolApprovalBinding>>(),
 );
 

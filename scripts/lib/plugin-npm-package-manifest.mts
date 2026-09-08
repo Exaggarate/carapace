@@ -327,7 +327,7 @@ export function generatePluginNpmPackageLockWithRetry(
   const pluginDir = params.pluginDir ?? "plugin";
   const env = {
     ...(options.env ?? process.env),
-    OPENCLAW_NPM_LOCK_COMMAND_TIMEOUT_MS: String(timeoutMs),
+    CARAPACE_NPM_LOCK_COMMAND_TIMEOUT_MS: String(timeoutMs),
   };
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -668,7 +668,7 @@ function packPatchedDependencies(packageDir: string, dependencies: WorkspacePatc
   if (dependencies.length === 0) {
     return { artifacts: [], cleanup: () => {} };
   }
-  const outputDir = fs.mkdtempSync(path.join(packageDir, ".openclaw-patched-dependencies-"));
+  const outputDir = fs.mkdtempSync(path.join(packageDir, ".carapace-patched-dependencies-"));
   const cleanup = () => fs.rmSync(outputDir, { recursive: true, force: true });
   try {
     const artifacts: NpmLocalPackageArtifact[] = dependencies.map(
@@ -729,7 +729,7 @@ function packPatchedDependencies(packageDir: string, dependencies: WorkspacePatc
 }
 
 function packageOptsOutOfBundledRuntimeDependencies(packageJson: PluginPackageJson | undefined) {
-  return packageJson?.openclaw?.release?.bundleRuntimeDependencies === false;
+  return packageJson?.carapace?.release?.bundleRuntimeDependencies === false;
 }
 
 function shouldBundleDependencies(
@@ -876,7 +876,7 @@ export function resolveAugmentedPluginNpmPackageJson(params: PluginPackageParams
   }
   assertPluginNpmRuntimeBuildExists(plan);
 
-  const packagedChannel = resolvePluginRuntimeChannelMetadata(plan.packageJson.openclaw?.channel, {
+  const packagedChannel = resolvePluginRuntimeChannelMetadata(plan.packageJson.carapace?.channel, {
     pluginDir: plan.pluginDir,
     runtimeBuildOutputs: plan.runtimeBuildOutputs,
     runtimeRoot: "dist",
@@ -886,8 +886,8 @@ export function resolveAugmentedPluginNpmPackageJson(params: PluginPackageParams
     files: plan.packageFiles,
     peerDependencies: plan.packagePeerMetadata.peerDependencies,
     peerDependenciesMeta: plan.packagePeerMetadata.peerDependenciesMeta,
-    openclaw: {
-      ...plan.packageJson.openclaw,
+    carapace: {
+      ...plan.packageJson.carapace,
       ...(packagedChannel ? { channel: packagedChannel } : {}),
       runtimeExtensions: plan.runtimeExtensions,
       ...(plan.runtimeSetupEntry
@@ -1039,7 +1039,7 @@ export function mergeGeneratedChannelConfigs(
 export function resolveAugmentedPluginNpmManifest(params: PluginPackageParams) {
   const repoRoot = path.resolve(params.repoRoot ?? ".");
   const packageDir = resolvePackageDir(repoRoot, params.packageDir);
-  const manifestPath = path.join(packageDir, "openclaw.plugin.json");
+  const manifestPath = path.join(packageDir, "carapace.plugin.json");
   if (!fs.existsSync(manifestPath)) {
     return {
       manifestPath,
@@ -1109,7 +1109,7 @@ export function withAugmentedPluginNpmManifestForPackage<T>(
 
   // pnpm owns the source install. npm bundling needs a separate tree so its
   // production-only install and cleanup cannot replace source versions or links.
-  const stagingRoot = fs.mkdtempSync(path.join(tmpdir(), "openclaw-plugin-npm-pack-"));
+  const stagingRoot = fs.mkdtempSync(path.join(tmpdir(), "carapace-plugin-npm-pack-"));
   const stagedPackageDir = path.join(stagingRoot, path.basename(packageDir));
   try {
     fs.cpSync(packageDir, stagedPackageDir, {
@@ -1249,7 +1249,7 @@ function main(argv: string[] = process.argv.slice(2)) {
   return withAugmentedPluginNpmManifestForPackage(
     {
       packageDir,
-      bundleDependencies: process.env.OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES,
+      bundleDependencies: process.env.CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES,
     },
     ({ packageDir: cwd }) => {
       const commandArgs = [...args];

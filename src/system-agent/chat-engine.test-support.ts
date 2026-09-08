@@ -8,7 +8,7 @@ import {
   fingerprintOpaqueRuntimeOwner,
   fingerprintResolvedProviderAuth,
 } from "../agents/execution-auth-binding.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { runSetupMemoryImportStep } from "../wizard/setup.memory-import.js";
 import { runSystemAgentTurnWithDeps as runSystemAgentTurnWithDepsImpl } from "./agent-turn.test-support.js";
 import {
@@ -35,7 +35,7 @@ const mocks = vi.hoisted(() => ({
   readConfigFileSnapshot: vi.fn(async () => ({
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "h",
     config: {},
     sourceConfig: {},
@@ -109,7 +109,7 @@ export const sharedVerifiedInferenceConfig = {
       {
         id: "main",
         default: true,
-        agentDir: "/tmp/openclaw-openclaw-chat-engine-agent",
+        agentDir: "/tmp/carapace-carapace-chat-engine-agent",
         model: "openai/gpt-5.5",
       },
     ],
@@ -124,7 +124,7 @@ export const sharedVerifiedInferenceConfig = {
       },
     },
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
 export let sharedVerifiedInference: SystemAgentVerifiedInferenceBinding | undefined;
 let sharedVerifiedInferenceDeps: SystemAgentVerifiedInferenceDeps | undefined;
@@ -154,17 +154,17 @@ export const runSystemAgentTurnWithDeps: typeof runSystemAgentTurnWithDepsImpl =
 export { createSystemAgentVerifiedInferenceTestFixture };
 
 export function useTempStateDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-engine-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-engine-"));
   tempDirs.push(dir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+  vi.stubEnv("CARAPACE_STATE_DIR", dir);
   return dir;
 }
 
-export function configSnapshot(config: OpenClawConfig): ConfigFileSnapshot {
+export function configSnapshot(config: CarapaceConfig): ConfigFileSnapshot {
   return {
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash: "h",
     raw: null,
     parsed: config,
@@ -184,9 +184,9 @@ function testHarnessBinding(route: SystemAgentConfiguredRoute) {
   }
   const agentHarnessId =
     route.agentHarnessRuntimeOverride === "auto"
-      ? "openclaw"
+      ? "carapace"
       : (route.agentHarnessRuntimeOverride ?? "codex");
-  if (agentHarnessId === "openclaw") {
+  if (agentHarnessId === "carapace") {
     return { auth: { agentHarnessId }, deps: {} };
   }
   return {
@@ -203,7 +203,7 @@ function testHarnessBinding(route: SystemAgentConfiguredRoute) {
   };
 }
 
-export async function createAmbientVerifiedBinding(config: OpenClawConfig) {
+export async function createAmbientVerifiedBinding(config: CarapaceConfig) {
   const route = await resolveSystemAgentConfiguredRouteFromConfig(config);
   if (!route) {
     throw new Error("missing test route");
@@ -231,7 +231,7 @@ export async function createAmbientVerifiedBinding(config: OpenClawConfig) {
 }
 
 export async function createOAuthVerifiedBinding(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   credential: Parameters<typeof fingerprintAuthProfileCredential>[0]["credential"],
 ) {
   const route = await resolveSystemAgentConfiguredRouteFromConfig(config);
@@ -258,7 +258,7 @@ export async function createOAuthVerifiedBinding(
   });
 }
 
-export async function createCliVerifiedBinding(config: OpenClawConfig) {
+export async function createCliVerifiedBinding(config: CarapaceConfig) {
   const route = await resolveSystemAgentConfiguredRouteFromConfig(config);
   if (!route || route.runner !== "cli") {
     throw new Error("missing test CLI route");
@@ -435,7 +435,7 @@ export function fakeOverviewLoader(
 ) {
   return async () =>
     ({
-      config: { path: "/tmp/openclaw.json", exists: false, valid: true, issues: [], hash: null },
+      config: { path: "/tmp/carapace.json", exists: false, valid: true, issues: [], hash: null },
       agents: [],
       defaultAgentId: "main",
       defaultModel: overrides.defaultModel,
@@ -447,15 +447,15 @@ export function fakeOverviewLoader(
       },
       gateway: { url: "ws://127.0.0.1:18789", source: "local", reachable: false },
       references: {
-        docsUrl: "https://docs.openclaw.ai",
-        sourceUrl: "https://github.com/openclaw/openclaw",
+        docsUrl: "https://github.com/Exaggarate/carapace",
+        sourceUrl: "https://github.com/Exaggarate/carapace",
       },
     }) as never;
 }
 
-export { expectDefined } from "@openclaw/normalization-core";
+export { expectDefined } from "@carapace/normalization-core";
 export { hashSystemAgentOperation } from "./operator-approval.js";
-export type { OpenClawConfig } from "../config/types.openclaw.js";
+export type { CarapaceConfig } from "../config/types.carapace.js";
 export type { WizardPrompter } from "../wizard/prompts.js";
 export { classifySystemAgentApprovalText } from "./operator-approval.js";
 export { SystemAgentWizardAnswerError } from "./chat-engine.js";

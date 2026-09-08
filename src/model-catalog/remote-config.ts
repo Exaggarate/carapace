@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-const DEFAULT_REMOTE_MODEL_CATALOG_URL = "https://catalog.openclaw.ai/models/v1/catalog.json";
+const DEFAULT_REMOTE_MODEL_CATALOG_URL = "https://github.com/Exaggarate/carapace";
 
-export function isRemoteModelCatalogRefreshEnabled(config: OpenClawConfig): boolean {
+export function isRemoteModelCatalogRefreshEnabled(config: CarapaceConfig): boolean {
   return config.models?.catalogRefresh?.enabled !== false;
 }
 
-export function resolveRemoteCatalogUrl(config: OpenClawConfig): string {
+export function resolveRemoteCatalogUrl(config: CarapaceConfig): string {
   return config.models?.catalogRefresh?.url?.trim() || DEFAULT_REMOTE_MODEL_CATALOG_URL;
 }

@@ -3,11 +3,11 @@ import type { DatabaseSync } from "node:sqlite";
 import {
   executeSqliteQuerySync,
   getNodeSqliteKysely,
-  openOpenClawAgentDatabase,
+  openCarapaceAgentDatabase,
   runSqliteImmediateTransactionSync,
   tableExists,
-  withOpenClawAgentDatabaseReadOnly,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  withCarapaceAgentDatabaseReadOnly,
+} from "carapace/plugin-sdk/sqlite-runtime";
 import { DREAMS_FILENAMES, readDreamsFile } from "./dreaming-dreams-file.js";
 import { extractPromotionKeys } from "./short-term-promotion-memory-write.js";
 
@@ -55,7 +55,7 @@ const ensuredDatabases = new WeakSet<DatabaseSync>();
 const ensuredTombstoneDatabases = new WeakSet<DatabaseSync>();
 
 function openMemoryOriginDatabase(agentId: string): DatabaseSync {
-  const db = openOpenClawAgentDatabase({ agentId }).db;
+  const db = openCarapaceAgentDatabase({ agentId }).db;
   if (!ensuredDatabases.has(db)) {
     db.exec(`CREATE TABLE IF NOT EXISTS memory_entry_origins (
       entry_key TEXT NOT NULL,
@@ -90,7 +90,7 @@ export function listMemoryEntryOrigins(params: {
   if (params.sessionIds?.length === 0 || params.entryKeys?.length === 0) {
     return [];
   }
-  const result = withOpenClawAgentDatabaseReadOnly(({ db }) => {
+  const result = withCarapaceAgentDatabaseReadOnly(({ db }) => {
     if (!ensuredDatabases.has(db) && !tableExists(db, "memory_entry_origins")) {
       return [];
     }
@@ -120,7 +120,7 @@ export function listMemorySessionTombstones(params: {
   if (params.sessionIds?.length === 0) {
     return [];
   }
-  const result = withOpenClawAgentDatabaseReadOnly(({ db }) => {
+  const result = withCarapaceAgentDatabaseReadOnly(({ db }) => {
     if (!ensuredTombstoneDatabases.has(db) && !tableExists(db, "memory_session_tombstones")) {
       return [];
     }
@@ -152,7 +152,7 @@ export function recordMemorySessionTombstones(params: {
   if (sessionIds.length === 0) {
     return 0;
   }
-  const db = openOpenClawAgentDatabase({ agentId: params.agentId }).db;
+  const db = openCarapaceAgentDatabase({ agentId: params.agentId }).db;
   if (!ensuredTombstoneDatabases.has(db)) {
     db.exec(`CREATE TABLE IF NOT EXISTS memory_session_tombstones (
       session_id TEXT NOT NULL PRIMARY KEY,
@@ -291,7 +291,7 @@ export function reserveMemoryEntryOrigins(params: {
     for (const entry of operation.priorEntries) {
       const entryIndex = previousLines.findIndex((line) => line.trim() === entry);
       const marker = previousLines[entryIndex - 1]?.trim();
-      const parentKey = /^<!--\s*openclaw-memory-promotion:([^\n]*?)\s*-->$/u
+      const parentKey = /^<!--\s*carapace-memory-promotion:([^\n]*?)\s*-->$/u
         .exec(marker ?? "")?.[1]
         ?.trim();
       if (parentKey) {
@@ -352,7 +352,7 @@ export async function pruneMemoryEntryOrigins(params: {
   for (const agentId of new Set(params.agentIds)) {
     // A sibling may still index an older shared MEMORY snapshot. Retain its
     // lineage until that agent can identify and purge those derived records.
-    const indexed = withOpenClawAgentDatabaseReadOnly(
+    const indexed = withCarapaceAgentDatabaseReadOnly(
       ({ db }) =>
         new Set(
           executeSqliteQuerySync(
@@ -361,7 +361,7 @@ export async function pruneMemoryEntryOrigins(params: {
               .selectFrom("memory_index_chunks")
               .select("text")
               .where("source", "=", "memory")
-              .where("text", "like", "%openclaw-memory-promotion:%"),
+              .where("text", "like", "%carapace-memory-promotion:%"),
           ).rows.flatMap(({ text }) => extractPromotionKeys(text)),
         ),
       { agentId },

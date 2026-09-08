@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { PreparedModelRuntimeSnapshot } from "../agents/prepared-model-runtime.js";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createChatMetadataOwner } from "./server-methods/chat-metadata-runtime.test-support.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
 
@@ -45,7 +45,7 @@ const { createGatewayChatMetadataLifecycle } = await import("./server-chat-metad
 const { ChatMetadataSnapshotUnavailableError } =
   await import("./server-methods/chat-metadata-runtime.js");
 
-const config = {} as OpenClawConfig;
+const config = {} as CarapaceConfig;
 const context = {} as GatewayRequestContext;
 
 beforeEach(() => {

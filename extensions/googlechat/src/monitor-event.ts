@@ -1,5 +1,5 @@
 // Googlechat plugin module parses standard and Workspace Add-on webhook envelopes.
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
 import type {
   GoogleChatAction,
   GoogleChatActionParameter,

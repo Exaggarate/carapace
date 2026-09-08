@@ -1,12 +1,12 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 
 const loadOllamaStreamRuntime = createLazyRuntimeModule(() => import("./stream.runtime.js"));
 
 export type OllamaLocalService = {
   providerId: string;
-  acquire: OpenClawPluginApi["runtime"]["llm"]["acquireLocalService"];
+  acquire: CarapacePluginApi["runtime"]["llm"]["acquireLocalService"];
 };
 
 export function createLazyConfiguredOllamaStreamFn(params: {

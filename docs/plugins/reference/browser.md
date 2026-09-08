@@ -7,19 +7,19 @@ title: "Browser plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
 Adds agent-callable tools.
 
 ## Distribution
 
-- Package: `@openclaw/browser-plugin`
-- Install route: included in OpenClaw
+- Package: `@carapace/browser-plugin`
+- Install route: included in Carapace
 
 ## Surface
 
-- CLI commands: `openclaw browser`
+- CLI commands: `carapace browser`
 - Contracts: `tools`
 - Skills
 

@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 source scripts/e2e/lib/upgrade-survivor/update-restart-auth.sh
 source scripts/lib/docker-e2e-logs.sh
 
-if [ "${OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP:-0}" != "1" ]; then
-  echo "blocked destructive package self-update; set OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP=1 to run" >&2
+if [ "${CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP:-0}" != "1" ]; then
+  echo "blocked destructive package self-update; set CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP=1 to run" >&2
   exit 2
 fi
 
-SOURCE_PACKAGE=/tmp/openclaw-update-first-hop-source.tgz
-CANDIDATE_PACKAGE=/tmp/openclaw-update-first-hop-candidate.tgz
-NEGATIVE_PACKAGE=/tmp/openclaw-update-first-hop-negative.tgz
-FUTURE_PACKAGE=/tmp/openclaw-update-first-hop-future.tgz
-ARTIFACT_DIR="${OPENCLAW_UPDATE_FIRST_HOP_ARTIFACT_DIR:-/tmp/openclaw-update-first-hop-artifacts}"
-EXPECTED_MISSING_CHUNK="${OPENCLAW_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK:-shared-Y6bNiw2w.js}"
+SOURCE_PACKAGE=/tmp/carapace-update-first-hop-source.tgz
+CANDIDATE_PACKAGE=/tmp/carapace-update-first-hop-candidate.tgz
+NEGATIVE_PACKAGE=/tmp/carapace-update-first-hop-negative.tgz
+FUTURE_PACKAGE=/tmp/carapace-update-first-hop-future.tgz
+ARTIFACT_DIR="${CARAPACE_UPDATE_FIRST_HOP_ARTIFACT_DIR:-/tmp/carapace-update-first-hop-artifacts}"
+EXPECTED_MISSING_CHUNK="${CARAPACE_UPDATE_FIRST_HOP_EXPECTED_MISSING_CHUNK:-shared-Y6bNiw2w.js}"
 BASE_PATH="$PATH"
 ACCOUNT_HOME="$HOME"
 mock_pid=""
-trap 'openclaw_e2e_stop_process "${mock_pid:-}"' EXIT
+trap 'carapace_e2e_stop_process "${mock_pid:-}"' EXIT
 
 export CI=true
-export OPENCLAW_ALLOW_ROOT=1
-export OPENCLAW_NO_ONBOARD=1
-export OPENCLAW_NO_PROMPT=1
-export OPENCLAW_SKIP_PROVIDERS=1
+export CARAPACE_ALLOW_ROOT=1
+export CARAPACE_NO_ONBOARD=1
+export CARAPACE_NO_PROMPT=1
+export CARAPACE_SKIP_PROVIDERS=1
 export npm_config_audit=false
 export npm_config_fund=false
 export npm_config_loglevel=error
@@ -41,15 +41,15 @@ source_version="$(tar -xOf "$SOURCE_PACKAGE" package/package.json | node -pe 'JS
 candidate_version="$(tar -xOf "$CANDIDATE_PACKAGE" package/package.json | node -pe 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')"
 
 package_root() {
-  printf '%s/lib/node_modules/openclaw\n' "$npm_config_prefix"
+  printf '%s/lib/node_modules/carapace\n' "$npm_config_prefix"
 }
 
 run_update() {
   local output="$ARTIFACT_DIR/$1" target="$2" update_status=0
-  printf '%q ' env "PATH=$PATH" "npm_config_prefix=$npm_config_prefix" openclaw \
+  printf '%q ' env "PATH=$PATH" "npm_config_prefix=$npm_config_prefix" carapace \
     update --yes "--tag=$target" --json >"$output-command.txt"
   printf '\n' >>"$output-command.txt"
-  openclaw update --yes "--tag=$target" --json \
+  carapace update --yes "--tag=$target" --json \
     >"$output.stdout" 2>"$output.stderr" || update_status="$?"
   printf '%s\n' "$update_status" >"$output.exit"
   if [ "$update_status" -ne 0 ]; then
@@ -63,8 +63,8 @@ run_update() {
 record_residue() {
   local output="$1"
   find "$npm_config_prefix/lib/node_modules" -maxdepth 2 \
-    \( -name '.openclaw-update-*' -o -name '.openclaw.update-stage-*' \
-      -o -name '.openclaw.package-backup-*' -o -name 'openclaw.backup-*' -o -name '*.rollback-*' \) \
+    \( -name '.carapace-update-*' -o -name '.carapace.update-stage-*' \
+      -o -name '.carapace.package-backup-*' -o -name 'carapace.backup-*' -o -name '*.rollback-*' \) \
     -print | sort >"$output"
 }
 
@@ -79,7 +79,7 @@ assert_no_residue() {
 
 wait_service_active() {
   for _ in $(seq 1 300); do
-    if systemctl --user is-active openclaw-gateway.service >/dev/null 2>&1; then
+    if systemctl --user is-active carapace-gateway.service >/dev/null 2>&1; then
       return 0
     fi
     sleep 0.1
@@ -92,7 +92,7 @@ record_service_state() {
   local output="$1"
   systemctl --user show \
     --property=Id,LoadState,ActiveState,SubState,Result,NRestarts,StartLimitBurst,MainPID,ExecMainStatus,ExecMainCode,KillMode,TasksCurrent,MemoryCurrent \
-    openclaw-gateway.service >"$output"
+    carapace-gateway.service >"$output"
 }
 
 assert_installed_build() {
@@ -109,53 +109,53 @@ assert_installed_build() {
 
 setup_lane() {
   local lane="$1" port="$2"
-  local runtime_root="/tmp/openclaw-update-first-hop-runtime/$lane"
+  local runtime_root="/tmp/carapace-update-first-hop-runtime/$lane"
   export HOME="$ACCOUNT_HOME"
-  export OPENCLAW_STATE_DIR="$HOME/.openclaw"
-  export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
+  export CARAPACE_STATE_DIR="$HOME/.carapace"
+  export CARAPACE_CONFIG_PATH="$CARAPACE_STATE_DIR/carapace.json"
   export npm_config_prefix="$runtime_root/npm-prefix"
   export NPM_CONFIG_PREFIX="$npm_config_prefix"
   export npm_config_cache="$runtime_root/npm-cache"
   export NPM_CONFIG_CACHE="$npm_config_cache"
   export PATH="$npm_config_prefix/bin:$BASE_PATH"
-  export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$ARTIFACT_DIR/$lane-systemctl.log"
-  export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$ARTIFACT_DIR/$lane-systemctl.pid"
-  export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$ARTIFACT_DIR/$lane-gateway.log"
+  export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$ARTIFACT_DIR/$lane-systemctl.log"
+  export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$ARTIFACT_DIR/$lane-systemctl.pid"
+  export CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$ARTIFACT_DIR/$lane-gateway.log"
 
-  mkdir -p "$OPENCLAW_STATE_DIR" "$npm_config_prefix" "$npm_config_cache"
+  mkdir -p "$CARAPACE_STATE_DIR" "$npm_config_prefix" "$npm_config_cache"
   npm install -g --prefix "$npm_config_prefix" "$SOURCE_PACKAGE" --no-fund --no-audit \
     >"$ARTIFACT_DIR/$lane-install-source.log" 2>&1 || {
       docker_e2e_print_log "$ARTIFACT_DIR/$lane-install-source.log" >&2
       return 1
     }
-  openclaw --version >"$ARTIFACT_DIR/$lane-source-version.txt"
+  carapace --version >"$ARTIFACT_DIR/$lane-source-version.txt"
   install_update_restart_systemctl_shim
-  openclaw config set gateway.mode local >"$ARTIFACT_DIR/$lane-config.log" 2>&1
-  openclaw config set gateway.port "$port" >>"$ARTIFACT_DIR/$lane-config.log" 2>&1
-  openclaw config set gateway.reload.mode off >>"$ARTIFACT_DIR/$lane-config.log" 2>&1
+  carapace config set gateway.mode local >"$ARTIFACT_DIR/$lane-config.log" 2>&1
+  carapace config set gateway.port "$port" >>"$ARTIFACT_DIR/$lane-config.log" 2>&1
+  carapace config set gateway.reload.mode off >>"$ARTIFACT_DIR/$lane-config.log" 2>&1
   if [ "$source_version" = "2026.9.2" ]; then
     node scripts/e2e/lib/release-scenarios/assertions.mjs configure-mock-openai 44212
   fi
-  openclaw gateway install --force --json \
+  carapace gateway install --force --json \
     >"$ARTIFACT_DIR/$lane-service-install.json" \
     2>"$ARTIFACT_DIR/$lane-service-install.err"
   wait_service_active
-  cp "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE" "$ARTIFACT_DIR/$lane-before.pid"
+  cp "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE" "$ARTIFACT_DIR/$lane-before.pid"
   record_service_state "$ARTIFACT_DIR/$lane-service-before.txt"
 }
 
 stop_lane() {
-  systemctl --user stop openclaw-gateway.service >/dev/null 2>&1 || true
+  systemctl --user stop carapace-gateway.service >/dev/null 2>&1 || true
 }
 
 reset_lane() {
-  openclaw gateway uninstall --json \
+  carapace gateway uninstall --json \
     >"$ARTIFACT_DIR/negative-service-uninstall.json" \
     2>"$ARTIFACT_DIR/negative-service-uninstall.err" || true
   rm -rf \
-    "$HOME/.openclaw" \
-    "$HOME/.config/systemd/user/openclaw-gateway.service" \
-    "$HOME/.config/systemd/user/default.target.wants/openclaw-gateway.service"
+    "$HOME/.carapace" \
+    "$HOME/.config/systemd/user/carapace-gateway.service" \
+    "$HOME/.config/systemd/user/default.target.wants/carapace-gateway.service"
 }
 
 run_negative_control() {
@@ -176,7 +176,7 @@ run_negative_control() {
     echo "negative control did not reproduce missing $EXPECTED_MISSING_CHUNK" >&2
     return 1
   fi
-  if systemctl --user is-active openclaw-gateway.service >/dev/null 2>&1; then
+  if systemctl --user is-active carapace-gateway.service >/dev/null 2>&1; then
     echo "negative control unexpectedly preserved the stopped service" >&2
     return 1
   fi
@@ -199,7 +199,7 @@ run_positive_hops() {
   fi
   wait_service_active
   local candidate_pid
-  candidate_pid="$(cat "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
+  candidate_pid="$(cat "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
   if [ "$candidate_pid" = "$first_pid" ]; then
     echo "first hop did not replace the managed service process" >&2
     return 1
@@ -218,7 +218,7 @@ run_positive_hops() {
   assert_installed_build "$FUTURE_PACKAGE" "$ARTIFACT_DIR/$lane-second-build-info.json"
   wait_service_active
   local future_pid
-  future_pid="$(cat "$OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
+  future_pid="$(cat "$CARAPACE_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE")"
   if [ "$future_pid" = "$candidate_pid" ]; then
     echo "second hop did not replace the managed service process" >&2
     return 1
@@ -236,10 +236,10 @@ run_positive_hops() {
   stop_lane
 }
 
-export OPENAI_API_KEY="sk-openclaw-first-hop"
+export OPENAI_API_KEY="sk-carapace-first-hop"
 export MOCK_REQUEST_LOG="$ARTIFACT_DIR/openai-requests.jsonl"
-mock_pid="$(openclaw_e2e_start_mock_openai 44212 "$ARTIFACT_DIR/mock-openai.log")"
-openclaw_e2e_wait_mock_openai 44212
+mock_pid="$(carapace_e2e_start_mock_openai 44212 "$ARTIFACT_DIR/mock-openai.log")"
+carapace_e2e_wait_mock_openai 44212
 run_negative_control
 run_positive_hops
 

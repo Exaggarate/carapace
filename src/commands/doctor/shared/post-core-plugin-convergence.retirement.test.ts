@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
   listManagedPluginNpmRoots: vi.fn(),
   maybeRepairStaleManagedNpmBundledPlugins: vi.fn(),
   repairMissingConfiguredPluginInstalls: vi.fn(),
-  relinkOpenClawPeerDependenciesInManagedNpmRoot: vi.fn(),
+  relinkCarapacePeerDependenciesInManagedNpmRoot: vi.fn(),
   runPluginPayloadSmokeCheck: vi.fn(),
 }));
 
@@ -21,8 +21,8 @@ vi.mock("../../../plugins/plugin-peer-link.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../plugins/plugin-peer-link.js")>();
   return {
     ...actual,
-    relinkOpenClawPeerDependenciesInManagedNpmRoot:
-      mocks.relinkOpenClawPeerDependenciesInManagedNpmRoot,
+    relinkCarapacePeerDependenciesInManagedNpmRoot:
+      mocks.relinkCarapacePeerDependenciesInManagedNpmRoot,
   };
 });
 vi.mock("../../../plugins/npm-project-roots.js", async (importOriginal) => {
@@ -53,7 +53,7 @@ describe("post-core bundled plugin retirement", () => {
     mocks.listManagedPluginNpmRoots.mockImplementation((npmRoot: string) =>
       Promise.resolve([npmRoot]),
     );
-    mocks.relinkOpenClawPeerDependenciesInManagedNpmRoot.mockResolvedValue({
+    mocks.relinkCarapacePeerDependenciesInManagedNpmRoot.mockResolvedValue({
       checked: 0,
       attempted: 0,
       repaired: 0,
@@ -63,23 +63,23 @@ describe("post-core bundled plugin retirement", () => {
   });
 
   it("retires payload and record state before repair across two starts", async () => {
-    const stateDir = tempDirs.make("openclaw-post-core-convergence-");
-    const bundledRoot = tempDirs.make("openclaw-post-core-bundled-");
+    const stateDir = tempDirs.make("carapace-post-core-convergence-");
+    const bundledRoot = tempDirs.make("carapace-post-core-bundled-");
     const cfg = {
       update: { channel: "beta" as const },
       plugins: { allow: ["bundleddemo"], entries: { bundleddemo: { enabled: true } } },
     };
     const env = {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       VITEST: "true",
     };
     const bundledDir = path.join(bundledRoot, "bundleddemo");
     fs.mkdirSync(bundledDir, { recursive: true });
     fs.writeFileSync(path.join(bundledDir, "index.js"), "export default {};\n", "utf8");
     fs.writeFileSync(
-      path.join(bundledDir, "openclaw.plugin.json"),
+      path.join(bundledDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "bundleddemo",
         name: "bundleddemo",
@@ -90,28 +90,28 @@ describe("post-core bundled plugin retirement", () => {
     );
     fs.writeFileSync(
       path.join(bundledDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/bundleddemo", version: VERSION }),
+      JSON.stringify({ name: "@carapace/bundleddemo", version: VERSION }),
       "utf8",
     );
     const npmRoot = resolvePluginNpmGenerationProjectDir({
       npmDir: path.join(stateDir, "npm"),
-      packageName: "@openclaw/bundleddemo",
-      generationKey: "@openclaw/bundleddemo@2026.7.2-beta.7",
+      packageName: "@carapace/bundleddemo",
+      generationKey: "@carapace/bundleddemo@2026.7.2-beta.7",
     });
-    const packageDir = path.join(npmRoot, "node_modules", "@openclaw", "bundleddemo");
+    const packageDir = path.join(npmRoot, "node_modules", "@carapace", "bundleddemo");
     fs.mkdirSync(packageDir, { recursive: true });
     fs.writeFileSync(
       path.join(npmRoot, "package.json"),
-      JSON.stringify({ dependencies: { "@openclaw/bundleddemo": "2026.7.2-beta.7" } }),
+      JSON.stringify({ dependencies: { "@carapace/bundleddemo": "2026.7.2-beta.7" } }),
       "utf8",
     );
     fs.writeFileSync(
       path.join(packageDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/bundleddemo", version: "2026.7.2-beta.7" }),
+      JSON.stringify({ name: "@carapace/bundleddemo", version: "2026.7.2-beta.7" }),
       "utf8",
     );
     fs.writeFileSync(
-      path.join(packageDir, "openclaw.plugin.json"),
+      path.join(packageDir, "carapace.plugin.json"),
       JSON.stringify({ id: "bundleddemo", name: "bundleddemo", configSchema: { type: "object" } }),
       "utf8",
     );
@@ -119,11 +119,11 @@ describe("post-core bundled plugin retirement", () => {
       {
         bundleddemo: {
           source: "npm",
-          spec: "@openclaw/bundleddemo@beta",
+          spec: "@carapace/bundleddemo@beta",
           installPath: packageDir,
           version: "2026.7.2-beta.7",
-          resolvedName: "@openclaw/bundleddemo",
-          resolvedSpec: "@openclaw/bundleddemo@2026.7.2-beta.7",
+          resolvedName: "@carapace/bundleddemo",
+          resolvedSpec: "@carapace/bundleddemo@2026.7.2-beta.7",
           resolvedVersion: "2026.7.2-beta.7",
         },
       },
@@ -145,10 +145,10 @@ describe("post-core bundled plugin retirement", () => {
         installAttempts += 1;
         const retryRoot = resolvePluginNpmGenerationProjectDir({
           npmDir: path.join(stateDir, "npm"),
-          packageName: "@openclaw/bundleddemo",
-          generationKey: `@openclaw/bundleddemo@retry-${installAttempts}`,
+          packageName: "@carapace/bundleddemo",
+          generationKey: `@carapace/bundleddemo@retry-${installAttempts}`,
         });
-        const retryPackageDir = path.join(retryRoot, "node_modules", "@openclaw", "bundleddemo");
+        const retryPackageDir = path.join(retryRoot, "node_modules", "@carapace", "bundleddemo");
         fs.mkdirSync(retryPackageDir, { recursive: true });
         const nextRecords = {
           ...records,
@@ -160,7 +160,7 @@ describe("post-core bundled plugin retirement", () => {
         });
         return {
           changes: [
-            'Refreshed stale configured plugin "bundleddemo" from @openclaw/bundleddemo@beta.',
+            'Refreshed stale configured plugin "bundleddemo" from @carapace/bundleddemo@beta.',
           ],
           warnings: [],
           records: nextRecords,

@@ -3,11 +3,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   GatewayClient,
   startGatewayClientWhenEventLoopReady,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "carapace/plugin-sdk/gateway-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   type MockOpenAiRequestSnapshot,
@@ -132,7 +132,7 @@ async function startDiscordRestLoopback() {
   };
 }
 
-function configureDiscordActivities(cfg: OpenClawConfig): OpenClawConfig {
+function configureDiscordActivities(cfg: CarapaceConfig): CarapaceConfig {
   return {
     ...cfg,
     tools: {
@@ -164,8 +164,8 @@ async function writeDiscordFetchPreload(root: string): Promise<string> {
   await writeFile(
     preloadPath,
     `const originalFetch = globalThis.fetch.bind(globalThis);
-const loopbackBase = process.env.OPENCLAW_QA_DISCORD_REST_BASE;
-if (!loopbackBase) throw new Error("OPENCLAW_QA_DISCORD_REST_BASE is required");
+const loopbackBase = process.env.CARAPACE_QA_DISCORD_REST_BASE;
+if (!loopbackBase) throw new Error("CARAPACE_QA_DISCORD_REST_BASE is required");
 globalThis.fetch = async (input, init) => {
   const sourceUrl = new URL(input instanceof Request ? input.url : String(input));
   if (sourceUrl.origin === "https://discord.com" && sourceUrl.pathname.startsWith("/api/")) {
@@ -229,9 +229,9 @@ async function postShowWidget(params: {
     headers: {
       authorization: `Bearer ${params.gateway.token}`,
       "content-type": "application/json",
-      "x-openclaw-account-id": params.accountId,
-      "x-openclaw-message-channel": params.messageChannel,
-      "x-openclaw-message-to": params.messageTo,
+      "x-carapace-account-id": params.accountId,
+      "x-carapace-message-channel": params.messageChannel,
+      "x-carapace-message-to": params.messageTo,
     },
     body: JSON.stringify({
       tool: "show_widget",
@@ -313,7 +313,7 @@ describe("Discord show_widget contextual presenter process proof", () => {
       process.stdout.write(
         `${JSON.stringify({ proof: "discord-gateway-built-revision", head })}\n`,
       );
-      const scratch = tempDirs.make("openclaw-discord-attachment-e2e-");
+      const scratch = tempDirs.make("carapace-discord-attachment-e2e-");
       const discord = await startDiscordRestLoopback();
       cleanups.push(() => discord.stop());
       const preloadPath = await writeDiscordFetchPreload(scratch);
@@ -351,8 +351,8 @@ describe("Discord show_widget contextual presenter process proof", () => {
         runtimeEnvPatch: {
           DISCORD_BOT_TOKEN: "qa-activities-token",
           NODE_OPTIONS: `--import=${pathToFileURL(preloadPath).href}`,
-          OPENCLAW_QA_DISCORD_REST_BASE: discord.baseUrl,
-          OPENCLAW_SKIP_CHANNELS: "1",
+          CARAPACE_QA_DISCORD_REST_BASE: discord.baseUrl,
+          CARAPACE_SKIP_CHANNELS: "1",
         },
       });
       const invokeAction = async (label: string, args: JsonRecord) => {
@@ -363,9 +363,9 @@ describe("Discord show_widget contextual presenter process proof", () => {
           headers: {
             authorization: `Bearer ${gateway.token}`,
             "content-type": "application/json",
-            "x-openclaw-account-id": "default",
-            "x-openclaw-message-channel": "discord",
-            "x-openclaw-message-to": `channel:${DISCORD_CHANNEL_ID}`,
+            "x-carapace-account-id": "default",
+            "x-carapace-message-channel": "discord",
+            "x-carapace-message-to": `channel:${DISCORD_CHANNEL_ID}`,
           },
           body: JSON.stringify({
             tool: "message",
@@ -624,7 +624,7 @@ describe("Discord show_widget contextual presenter process proof", () => {
       }, 10_000);
       progress.unref();
       cleanups.push(async () => clearInterval(progress));
-      const scratch = tempDirs.make("openclaw-discord-widget-e2e-");
+      const scratch = tempDirs.make("carapace-discord-widget-e2e-");
       const discord = await startDiscordRestLoopback();
       cleanups.push(() => discord.stop());
       const preloadPath = await writeDiscordFetchPreload(scratch);
@@ -646,9 +646,9 @@ describe("Discord show_widget contextual presenter process proof", () => {
         runtimeEnvPatch: {
           DISCORD_BOT_TOKEN: "qa-activities-token",
           NODE_OPTIONS: `--import=${pathToFileURL(preloadPath).href}`,
-          OPENCLAW_QA_DISCORD_REST_BASE: discord.baseUrl,
-          OPENCLAW_SKIP_CANVAS_HOST: undefined,
-          OPENCLAW_SKIP_CHANNELS: "1",
+          CARAPACE_QA_DISCORD_REST_BASE: discord.baseUrl,
+          CARAPACE_SKIP_CANVAS_HOST: undefined,
+          CARAPACE_SKIP_CHANNELS: "1",
         },
       });
 
@@ -747,7 +747,7 @@ describe("Discord show_widget contextual presenter process proof", () => {
           details: {
             kind: "canvas",
             presentation: { target: "assistant_message" },
-            view: { url: expect.stringContaining("/__openclaw__/canvas/documents/") },
+            view: { url: expect.stringContaining("/__carapace__/canvas/documents/") },
           },
         },
       });

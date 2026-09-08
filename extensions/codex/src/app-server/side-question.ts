@@ -16,17 +16,17 @@ import {
   type EmbeddedRunAttemptParamsV2,
   type NativeHookRelayEvent,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import { resolveSessionAgentIdsStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
+import { resolveSessionAgentIdsStrict } from "carapace/plugin-sdk/agent-scope-runtime";
 import {
   loadCodexBundleMcpApprovalConfig,
   resolveCodexMcpToolOverridesForAgent,
-} from "openclaw/plugin-sdk/codex-mcp-projection";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import { readStringField as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/codex-mcp-projection";
+import { loadExecApprovals } from "carapace/plugin-sdk/exec-approvals-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
+import { readStringField as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server-policy.js";
 import { handleCodexAppServerApprovalRequest } from "./approval-bridge.js";
 import {
@@ -54,14 +54,14 @@ import {
   readCodexPluginConfig,
   readCodexRequirementsToml,
   resolveCodexAppServerHomeScope,
-  resolveOpenClawExecPolicyForCodexAppServer,
+  resolveCarapaceExecPolicyForCodexAppServer,
   resolveCodexModelBackedReviewerPolicyContext,
   shouldAutoApproveCodexAppServerApprovals,
   withMcpElicitationsApprovalPolicy,
   type CodexAppServerRuntimeOptions,
 } from "./config.js";
 import {
-  resolveCodexExternalSandboxPolicyForOpenClawSandbox,
+  resolveCodexExternalSandboxPolicyForCarapaceSandbox,
   resolveCodexMessageToolProvider,
   resolveCodexNodePlacementToolConstructionPlan,
   resolveCodexSandboxEnvironmentSelection,
@@ -236,7 +236,7 @@ export async function runCodexAppServerSideQuestion(
   });
   const agentWorkspaceDir =
     params.workspaceDir?.trim() || resolveAgentWorkspaceDir(params.cfg, sessionAgentId);
-  const execPolicy = resolveOpenClawExecPolicyForCodexAppServer({
+  const execPolicy = resolveCarapaceExecPolicyForCodexAppServer({
     permissionMode: params.sessionEntry.permissionMode,
     execOverrides: params.sessionEntry.permissionMode
       ? { mode: CODEX_SESSION_PERMISSION_EXEC_MODES[params.sessionEntry.permissionMode] }
@@ -500,7 +500,7 @@ export async function runCodexAppServerSideQuestion(
     });
     if (!environment) {
       throw new Error(
-        "Codex app-server did not register an OpenClaw sandbox exec-server environment.",
+        "Codex app-server did not register an Carapace sandbox exec-server environment.",
       );
     }
     sandboxEnvironment = environment;
@@ -593,7 +593,7 @@ export async function runCodexAppServerSideQuestion(
         return approvalResult.kind === "handled"
           ? approvalResult.response
           : createCodexElicitationResponse("decline", null, {
-              message: "OpenClaw Codex side questions do not support interactive MCP input.",
+              message: "Carapace Codex side questions do not support interactive MCP input.",
             });
       }
       if (request.method === "item/tool/requestUserInput") {
@@ -906,7 +906,7 @@ export async function runCodexAppServerSideQuestion(
             ...(sandboxEnvironment
               ? {
                   cwd: sandboxEnvironment.cwd,
-                  sandboxPolicy: resolveCodexExternalSandboxPolicyForOpenClawSandbox(
+                  sandboxPolicy: resolveCodexExternalSandboxPolicyForCarapaceSandbox(
                     params.sandbox ?? undefined,
                   ),
                   environments: resolveCodexSandboxEnvironmentSelection(
@@ -1216,8 +1216,8 @@ async function createCodexSideToolBridge(input: {
   let tools: AnyAgentTool[] = [];
   const webFetchHostnameAllowlistRef: { value?: string[] } = {};
   if (supportsModelTools(runtimeModel)) {
-    const createOpenClawCodingTools = (await import("openclaw/plugin-sdk/agent-harness"))
-      .createOpenClawCodingTools;
+    const createCarapaceCodingTools = (await import("carapace/plugin-sdk/agent-harness"))
+      .createCarapaceCodingTools;
     const sandboxSessionKey =
       input.params.sandboxSessionKey?.trim() ||
       input.params.sessionKey?.trim() ||
@@ -1247,7 +1247,7 @@ async function createCodexSideToolBridge(input: {
           ...(input.params.messageChannel ? { messageChannel: input.params.messageChannel } : {}),
         }
       : undefined;
-    const allTools = createOpenClawCodingTools({
+    const allTools = createCarapaceCodingTools({
       agentId: input.sessionAgentId,
       requesterThinkingLevel: input.params.resolvedThinkLevel ?? "off",
       sessionKey: sandboxSessionKey,

@@ -1,6 +1,6 @@
 import path from "node:path";
-import { disposeRegisteredAgentHarnesses } from "openclaw/plugin-sdk/agent-harness";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { disposeRegisteredAgentHarnesses } from "carapace/plugin-sdk/agent-harness";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { createQaGatewayChild } from "./gateway-child.js";
 import type { QaLabLatestReport } from "./lab-server.types.js";
 import {
@@ -129,7 +129,7 @@ export async function runQaFlowSuiteStandard(
     writeQaSuiteProgress(progressEnabled, "gateway start");
     const activeGateway = await gateway.start({
       repoRoot,
-      command: params?.sutOpenClawCommand,
+      command: params?.sutCarapaceCommand,
       providerBaseUrl: activeMock ? `${activeMock.baseUrl}/v1` : undefined,
       transport,
       transportBaseUrl: lab.listenUrl,
@@ -149,7 +149,7 @@ export async function runQaFlowSuiteStandard(
         gatewayConfigPatches.length > 0 || params?.mutateConfig
           ? (cfg) => {
               const patchedConfig = gatewayConfigPatches.length
-                ? (applyQaSuiteGatewayConfigPatches(cfg, gatewayConfigPatches) as OpenClawConfig)
+                ? (applyQaSuiteGatewayConfigPatches(cfg, gatewayConfigPatches) as CarapaceConfig)
                 : cfg;
               return params?.mutateConfig ? params.mutateConfig(patchedConfig) : patchedConfig;
             }
@@ -174,7 +174,7 @@ export async function runQaFlowSuiteStandard(
       lab,
       mock: activeMock,
       gateway: activeGateway,
-      runtimeId: params?.forcedRuntime ?? "openclaw",
+      runtimeId: params?.forcedRuntime ?? "carapace",
       outputDir,
       // YAML scenarios should see the full staged gateway config, not just
       // the transport fragment. Routing/session/plugin assertions depend on it.
@@ -415,7 +415,7 @@ export async function runQaFlowSuiteStandard(
     throw error;
   } finally {
     const activeEnv = env;
-    const keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1" || false;
+    const keepTemp = process.env.CARAPACE_QA_KEEP_TEMP === "1" || false;
     const activeGateway = gateway;
     const activeMock = mock;
     const cleanupFailures = await runQaFlowSuiteCleanupPlan({

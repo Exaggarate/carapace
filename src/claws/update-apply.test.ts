@@ -1,22 +1,22 @@
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { readClawCronRefs } from "./cron.js";
 import type { buildClawAddPlan } from "./lifecycle.js";
 import { ClawPackageUpdateError } from "./package-update.js";
 import { persistClawInstallRecord, readClawInstallRecord } from "./provenance.js";
-import type { ClawAddPlan, ClawManifest, ClawOpenClawProfile } from "./types.js";
+import type { ClawAddPlan, ClawManifest, ClawCarapaceProfile } from "./types.js";
 import { applyClawUpdatePlan } from "./update-apply.js";
 import { addPlan, consent, install, manifest, plan, source } from "./update-apply.test-helpers.js";
 import type { ClawUpdatePlan } from "./update-plan.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(closeOpenClawStateDatabaseForTest);
+afterEach(closeCarapaceStateDatabaseForTest);
 
 describe("applyClawUpdatePlan", () => {
   it("rejects consent that does not match the preview before rebuilding", async () => {
@@ -119,7 +119,7 @@ describe("applyClawUpdatePlan", () => {
         desiredDigest: "sha256:target-agent",
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: { worker: { name: "Worker" } } } };
+    let config: CarapaceConfig = { agents: { entries: { worker: { name: "Worker" } } } };
     const persisted = { ...install, claw: source, updatedAtMs: 2 };
     const persistInstall = vi.fn(() => persisted);
 
@@ -145,7 +145,7 @@ describe("applyClawUpdatePlan", () => {
     });
     expect(persistInstall).toHaveBeenCalledWith(addPlan, expect.any(Object));
     expect(result).toMatchObject({
-      schemaVersion: "openclaw.clawUpdateResult.v1",
+      schemaVersion: "carapace.clawUpdateResult.v1",
       status: "complete",
       agentId: "worker",
       targetClaw: { version: "2.0.0" },
@@ -154,7 +154,7 @@ describe("applyClawUpdatePlan", () => {
 
   it("activates cron only after owned state and agent updates succeed", async () => {
     const env = {
-      OPENCLAW_STATE_DIR: join(tempDirs.make("openclaw-claw-update-roster-"), "state"),
+      CARAPACE_STATE_DIR: join(tempDirs.make("carapace-claw-update-roster-"), "state"),
     };
     const job: ClawManifest["cronJobs"][number] = {
       id: "daily",
@@ -181,7 +181,7 @@ describe("applyClawUpdatePlan", () => {
       },
     ]);
     const order: string[] = [];
-    let config: OpenClawConfig = { agents: { entries: {} } };
+    let config: CarapaceConfig = { agents: { entries: {} } };
     let runtimeConfig = config;
     const runtimeApplied = createDeferred();
 
@@ -336,8 +336,8 @@ describe("applyClawUpdatePlan", () => {
   it.each(["readiness", "mutation"] as const)(
     "rolls back known failures and preserves uncertain cron prerequisites: %s",
     async (failure) => {
-      const root = tempDirs.make("openclaw-claw-update-apply-");
-      const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+      const root = tempDirs.make("carapace-claw-update-apply-");
+      const env = { CARAPACE_STATE_DIR: join(root, "state") };
       const currentAddPlan: ClawAddPlan = {
         ...addPlan,
         claw: install.claw,
@@ -366,7 +366,7 @@ describe("applyClawUpdatePlan", () => {
           reason: "target adds cron job",
         },
       ]);
-      let config: OpenClawConfig = { agents: { entries: {} } };
+      let config: CarapaceConfig = { agents: { entries: {} } };
       const workspaceRollback = vi.fn(async () => undefined);
       const mcpRollback = vi.fn(async () => undefined);
 
@@ -517,11 +517,11 @@ describe("applyClawUpdatePlan", () => {
   });
 
   it("preserves resolved plugin metadata when applying an owned version upgrade", async () => {
-    const packageRoot = tempDirs.make("openclaw-claw-plugin-update-");
+    const packageRoot = tempDirs.make("carapace-claw-plugin-update-");
     const targetSource = {
       ...source,
       packageRoot,
-      manifestPath: join(packageRoot, "openclaw.claw.json"),
+      manifestPath: join(packageRoot, "carapace.claw.json"),
     };
     const targetPackage = {
       kind: "plugin" as const,
@@ -600,11 +600,11 @@ describe("applyClawUpdatePlan", () => {
   });
 
   it("validates and applies profile extension package updates", async () => {
-    const packageRoot = tempDirs.make("openclaw-claw-extension-update-");
+    const packageRoot = tempDirs.make("carapace-claw-extension-update-");
     const targetSource = {
       ...source,
       packageRoot,
-      manifestPath: join(packageRoot, "openclaw.claw.json"),
+      manifestPath: join(packageRoot, "carapace.claw.json"),
     };
     const extension = {
       id: "github-tools",
@@ -620,7 +620,7 @@ describe("applyClawUpdatePlan", () => {
       detectedFormat: "claude" as const,
       mapped: ["commands", "skills"],
       unavailable: ["agents"],
-      adapterIdentity: "openclaw/current",
+      adapterIdentity: "carapace/current",
     };
     const targetPackage = {
       kind: extension.kind,
@@ -663,7 +663,7 @@ describe("applyClawUpdatePlan", () => {
       schemaVersion: 1,
       packages: [],
     };
-    const targetOpenClawProfile: ClawOpenClawProfile = {
+    const targetCarapaceProfile: ClawCarapaceProfile = {
       schemaVersion: 1,
       agent: {},
       extensions: [extension],
@@ -718,7 +718,7 @@ describe("applyClawUpdatePlan", () => {
 
     await applyClawUpdatePlan(
       updatePlan,
-      { targetManifest, targetOpenClawProfile, targetSource },
+      { targetManifest, targetCarapaceProfile, targetSource },
       {
         config: {},
         ...consent(updatePlan),
@@ -811,7 +811,7 @@ describe("applyClawUpdatePlan", () => {
         );
       }
       const updatePlan = plan(actions);
-      const env = { OPENCLAW_STATE_DIR: join(tempDirs.make("openclaw-claw-rollback-"), "state") };
+      const env = { CARAPACE_STATE_DIR: join(tempDirs.make("carapace-claw-rollback-"), "state") };
       const failure =
         stage === "package"
           ? new ClawPackageUpdateError("package failed", true)
@@ -835,7 +835,7 @@ describe("applyClawUpdatePlan", () => {
           return workspaceRollback;
         },
       };
-      let config: OpenClawConfig = {};
+      let config: CarapaceConfig = {};
       let commits = 0;
 
       await expect(
@@ -901,7 +901,7 @@ describe("applyClawUpdatePlan", () => {
         currentDigest,
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: { worker: { name: "Worker" } } } };
+    let config: CarapaceConfig = { agents: { entries: { worker: { name: "Worker" } } } };
     let commits = 0;
 
     await expect(
@@ -942,7 +942,7 @@ describe("applyClawUpdatePlan", () => {
         currentDigest,
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: {} } };
+    let config: CarapaceConfig = { agents: { entries: {} } };
 
     await expect(
       applyClawUpdatePlan(

@@ -57,12 +57,12 @@ describe("cli credentials", () => {
   });
 
   it("keeps external CLI credential files anchored to the OS home", () => {
-    const osHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-os-home-"));
-    const openClawHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-effective-home-"));
+    const osHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-os-home-"));
+    const carapaceHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-effective-home-"));
     const expires = Date.parse("2036-04-25T12:00:00Z");
     const codexExpiry = Math.floor(expires / 1000);
     vi.stubEnv("HOME", osHome);
-    vi.stubEnv("OPENCLAW_HOME", openClawHome);
+    vi.stubEnv("CARAPACE_HOME", carapaceHome);
     delete process.env.CODEX_HOME;
     try {
       const files = [
@@ -98,7 +98,7 @@ describe("cli credentials", () => {
       }
       const decoys = [
         {
-          filePath: path.join(openClawHome, ".codex", "auth.json"),
+          filePath: path.join(carapaceHome, ".codex", "auth.json"),
           value: {
             tokens: {
               access_token: createJwtWithExp(codexExpiry),
@@ -107,7 +107,7 @@ describe("cli credentials", () => {
           },
         },
         {
-          filePath: path.join(openClawHome, ".minimax", "oauth_creds.json"),
+          filePath: path.join(carapaceHome, ".minimax", "oauth_creds.json"),
           value: {
             access_token: "decoy-minimax-access",
             refresh_token: "decoy-minimax-refresh",
@@ -115,7 +115,7 @@ describe("cli credentials", () => {
           },
         },
         {
-          filePath: path.join(openClawHome, ".gemini", "oauth_creds.json"),
+          filePath: path.join(carapaceHome, ".gemini", "oauth_creds.json"),
           value: {
             access_token: "decoy-gemini-access",
             refresh_token: "decoy-gemini-refresh",
@@ -146,12 +146,12 @@ describe("cli credentials", () => {
       });
     } finally {
       fs.rmSync(osHome, { recursive: true, force: true });
-      fs.rmSync(openClawHome, { recursive: true, force: true });
+      fs.rmSync(carapaceHome, { recursive: true, force: true });
     }
   });
 
   it("reads Codex credentials from keychain when available", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-23T00:48:49Z") / 1000);
 
@@ -183,7 +183,7 @@ describe("cli credentials", () => {
   });
 
   it("falls back when Codex keychain JWT expiry is outside Date range", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-"));
     process.env.CODEX_HOME = tempHome;
     const lastRefresh = Date.parse("2026-01-01T00:00:00Z");
     const fallbackExpiry = lastRefresh + 60 * 60 * 1000;
@@ -212,7 +212,7 @@ describe("cli credentials", () => {
   });
 
   it("rejects Codex keychain fallback expiry when the process clock is invalid", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-"));
     process.env.CODEX_HOME = tempHome;
     const accountHash = "cli|";
     const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(Number.NaN);
@@ -236,7 +236,7 @@ describe("cli credentials", () => {
   });
 
   it("falls back to Codex auth.json when keychain is unavailable", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
     execSyncMock.mockImplementation(() => {
@@ -269,7 +269,7 @@ describe("cli credentials", () => {
   });
 
   it("does not read stale Codex tokens when auth.json resolves to API-key mode", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-api-key-mode-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-api-key-mode-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
     execSyncMock.mockImplementation(() => {
@@ -295,7 +295,7 @@ describe("cli credentials", () => {
   });
 
   it("reads API-key auth from the active Codex Keychain store", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-keychain-api-key-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-keychain-api-key-"));
     execSyncMock.mockImplementation((command: unknown) =>
       String(command).includes("codex login status")
         ? "Logged in using an API key - keychain***i-key"
@@ -312,7 +312,7 @@ describe("cli credentials", () => {
   });
 
   it("prefers active Codex OAuth over a stale file API key", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-keychain-oauth-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-keychain-oauth-"));
     fs.writeFileSync(
       path.join(tempHome, "auth.json"),
       JSON.stringify({ auth_mode: "apikey", OPENAI_API_KEY: "stale-file-api-key" }),
@@ -331,7 +331,7 @@ describe("cli credentials", () => {
   });
 
   it("uses the API key that Codex reports active instead of a stale Keychain record", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-default-file-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-default-file-"));
     fs.writeFileSync(
       path.join(tempHome, "auth.json"),
       JSON.stringify({ auth_mode: "apikey", OPENAI_API_KEY: "active-file-api-key" }),
@@ -354,7 +354,7 @@ describe("cli credentials", () => {
   });
 
   it("accepts legacy Codex API-key status only with one readable candidate", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-legacy-status-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-legacy-status-"));
     fs.writeFileSync(
       path.join(tempHome, "auth.json"),
       JSON.stringify({ auth_mode: "apikey", OPENAI_API_KEY: "legacy-file-api-key" }),
@@ -372,7 +372,7 @@ describe("cli credentials", () => {
   });
 
   it("treats an empty Codex auth.json API-key field as API-key mode", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-empty-api-key-mode-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-empty-api-key-mode-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
     execSyncMock.mockImplementation(() => {
@@ -397,7 +397,7 @@ describe("cli credentials", () => {
   });
 
   it("rejects Codex auth.json fallback expiry when stat and process clock are invalid", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-invalid-clock-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-invalid-clock-"));
     process.env.CODEX_HOME = tempHome;
     const authPath = path.join(tempHome, "auth.json");
     fs.mkdirSync(tempHome, { recursive: true, mode: 0o700 });
@@ -427,7 +427,7 @@ describe("cli credentials", () => {
   });
 
   it("uses Codex auth.json fallback expiry when file mtime has fractional milliseconds", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-fractional-mtime-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-fractional-mtime-"));
     process.env.CODEX_HOME = tempHome;
     const authPath = path.join(tempHome, "auth.json");
     fs.mkdirSync(tempHome, { recursive: true, mode: 0o700 });
@@ -460,7 +460,7 @@ describe("cli credentials", () => {
   });
 
   it("does not read Codex keychain when keychain prompts are disabled", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-no-prompt-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-no-prompt-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
     const authPath = path.join(tempHome, "auth.json");
@@ -492,7 +492,7 @@ describe("cli credentials", () => {
   });
 
   it("does not let no-keychain Codex cache misses poison keychain reads", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-cache-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-cache-"));
     process.env.CODEX_HOME = tempHome;
     const expSeconds = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
 
@@ -528,7 +528,7 @@ describe("cli credentials", () => {
   });
 
   it("keeps no-prompt Codex reads on auth.json after a keychain read", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-cache-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-cache-"));
     process.env.CODEX_HOME = tempHome;
     const keychainExpiry = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
     const fileExpiry = Math.floor(Date.parse("2026-03-25T12:34:56Z") / 1000);
@@ -580,7 +580,7 @@ describe("cli credentials", () => {
   });
 
   it("invalidates cached Codex credentials when auth.json changes within the TTL window", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-cache-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-cache-"));
     process.env.CODEX_HOME = tempHome;
     const authPath = path.join(tempHome, "auth.json");
     const firstExpiry = Math.floor(Date.parse("2026-03-24T12:34:56Z") / 1000);
@@ -640,7 +640,7 @@ describe("cli credentials", () => {
   });
 
   it("lifts Google account identity from the Gemini id_token", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gemini-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gemini-"));
     try {
       const credPath = path.join(tempHome, ".gemini", "oauth_creds.json");
       fs.mkdirSync(path.dirname(credPath), { recursive: true, mode: 0o700 });
@@ -675,7 +675,7 @@ describe("cli credentials", () => {
   });
 
   it("reads Gemini credentials without identity fields when id_token is absent", () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gemini-noid-"));
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gemini-noid-"));
     try {
       const credPath = path.join(tempHome, ".gemini", "oauth_creds.json");
       fs.mkdirSync(path.dirname(credPath), { recursive: true, mode: 0o700 });

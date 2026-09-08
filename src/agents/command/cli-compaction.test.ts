@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { CURRENT_SESSION_VERSION } from "openclaw/plugin-sdk/agent-sessions";
+import { expectDefined } from "@carapace/normalization-core";
+import { CURRENT_SESSION_VERSION } from "carapace/plugin-sdk/agent-sessions";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import { SESSION_TOTAL_TOKENS_VERSION, type SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import { resolveRuntimeWorkerUrl } from "../../infra/runtime-worker-url.js";
 import { withEnv } from "../../test-utils/env.js";
@@ -52,7 +52,7 @@ function buildContextEngine(params: {
 }
 
 async function writeSessionFile(params: { sessionFile: string; sessionId: string }) {
-  // The lifecycle compacts canonical OpenClaw session JSONL, so tests write the
+  // The lifecycle compacts canonical Carapace session JSONL, so tests write the
   // same session/message envelope the real store appends.
   await fs.mkdir(path.dirname(params.sessionFile), { recursive: true });
   await fs.writeFile(
@@ -118,7 +118,7 @@ const defaultPreemptiveCompaction = () => ({
 });
 
 function createPreparedRuntimeLease(input: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir: string;
   agentId?: string;
   workspaceDir?: string;
@@ -152,7 +152,7 @@ async function prepareCompactionScenario(params: {
   sessionKey?: string;
   sessionId?: string;
   sessionEntry?: Partial<SessionEntry>;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   cwd?: string;
   contextEngine?: (compactCalls: CompactParams[]) => ContextEngine;
   maintenance?: CliCompactionTestDeps["runContextEngineMaintenance"];
@@ -198,7 +198,7 @@ async function prepareCompactionScenario(params: {
   });
 
   const runParams: CliCompactionParams = {
-    cfg: params.cfg ?? ({} as OpenClawConfig),
+    cfg: params.cfg ?? ({} as CarapaceConfig),
     sessionId,
     sessionKey,
     sessionEntry,
@@ -260,7 +260,7 @@ describe("runCliTurnCompactionLifecycle", () => {
   let tmpDir: string;
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cli-compaction-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cli-compaction-"));
     setCliCompactionTestDeps({
       resolveCliBackendConfig: () => null,
       acquirePreparedModelRuntime: async (input) => createPreparedRuntimeLease(input),
@@ -380,7 +380,7 @@ describe("runCliTurnCompactionLifecycle", () => {
     expect(maintenanceCall?.sessionKey).toBe(sessionKey);
     expect(maintenanceCall?.sessionFile).toBe(sessionKey);
     expect(updatedEntry?.compactionCount).toBe(1);
-    // Once OpenClaw rewrites the transcript, external CLI resume ids are stale
+    // Once Carapace rewrites the transcript, external CLI resume ids are stale
     // and must be cleared so the next turn starts from the compacted prompt.
     expect(updatedEntry?.cliSessionBindings?.["claude-cli"]).toBeUndefined();
     expect(updatedEntry?.cliSessionIds?.["claude-cli"]).toBeUndefined();
@@ -526,7 +526,7 @@ describe("runCliTurnCompactionLifecycle", () => {
   it.each([
     ["agent", () => ({ agentId: "other" })],
     ["session key", () => ({ sessionKey: "agent:main:other" })],
-    ["store", () => ({ storePath: path.join(tmpDir, "other-openclaw-sessions.sqlite") })],
+    ["store", () => ({ storePath: path.join(tmpDir, "other-carapace-sessions.sqlite") })],
   ])("rejects a CLI successor outside the active %s binding", async (label, buildOverride) => {
     const scenario = await prepareContextSuccessorScenario({
       suffix: `outside-${label.replace(" ", "-")}`,
@@ -751,9 +751,9 @@ describe("runCliTurnCompactionLifecycle", () => {
   it("ignores stale native harness ids when the active provider no longer matches", async () => {
     const compactAgentHarnessSession = vi.fn();
     const scenario = await prepareCompactionScenario({
-      suffix: "openclaw-after-codex",
+      suffix: "carapace-after-codex",
       tmpDir,
-      provider: "openclaw",
+      provider: "carapace",
       model: "sonnet-4.6",
       sessionEntry: { agentHarnessId: "codex" },
       deps: { maybeCompactAgentHarnessSession: compactAgentHarnessSession as never },
@@ -1153,7 +1153,7 @@ describe("runCliTurnCompactionLifecycle", () => {
       suffix: "cli-timeout",
       tmpDir,
       sessionKey: "agent:main:cli",
-      cfg: { agents: { defaults: { compaction: { timeoutSeconds: 1 } } } } as OpenClawConfig,
+      cfg: { agents: { defaults: { compaction: { timeoutSeconds: 1 } } } } as CarapaceConfig,
       sessionEntry: {
         cliSessionBindings: { "claude-cli": { sessionId: "claude-session" } },
         cliSessionIds: { "claude-cli": "claude-session" },
@@ -1198,15 +1198,15 @@ describe("runCliTurnCompactionLifecycle", () => {
       const pluginRoot = path.join(bundled, pluginId);
       await fs.mkdir(pluginRoot, { recursive: true });
       await fs.copyFile(
-        new URL(`../../../extensions/${pluginId}/openclaw.plugin.json`, import.meta.url),
-        path.join(pluginRoot, "openclaw.plugin.json"),
+        new URL(`../../../extensions/${pluginId}/carapace.plugin.json`, import.meta.url),
+        path.join(pluginRoot, "carapace.plugin.json"),
       );
       await fs.writeFile(
         path.join(pluginRoot, "setup-api.mjs"),
         `export { default } from ${JSON.stringify(resolveRuntimeWorkerUrl(entry).href)};`,
       );
       await fs.copyFile(path.join(pluginRoot, "setup-api.mjs"), path.join(pluginRoot, "index.mjs"));
-      const backend = withEnv({ OPENCLAW_BUNDLED_PLUGINS_DIR: bundled }, () =>
+      const backend = withEnv({ CARAPACE_BUNDLED_PLUGINS_DIR: bundled }, () =>
         resolveCliBackendConfig(provider),
       );
       expect(backend).not.toBeNull();
@@ -1384,7 +1384,7 @@ describe("runCliTurnCompactionLifecycle", () => {
       recordCliCompactionInStore,
     });
     const result = await runCliTurnCompactionLifecycle({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       sessionId,
       sessionKey,
       sessionEntry,

@@ -1,20 +1,20 @@
 // Codex tests cover SQLite-only trajectory plugin behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { createAgentHarnessHostCapabilitiesForTest } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { createAgentHarnessHostCapabilitiesForTest } from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSqliteTrajectoryRuntimeEvents,
   createTrajectoryRuntimeRecorderForTest,
   exportTrajectoryBundleForTest,
   loadSqliteTrajectoryRuntimeEvents,
   type SqliteTrajectoryRuntimeEventForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspaceSync,
   type TempWorkspaceSync,
-} from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/temp-path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createCodexTrajectoryRecorder,
@@ -31,8 +31,8 @@ let testWorkspace: TempWorkspaceSync;
 
 beforeEach(() => {
   testWorkspace = tempWorkspaceSync({
-    rootDir: resolvePreferredOpenClawTmpDir(),
-    prefix: "openclaw-codex-trajectory-",
+    rootDir: resolvePreferredCarapaceTmpDir(),
+    prefix: "carapace-codex-trajectory-",
   });
 });
 
@@ -101,7 +101,7 @@ function createSqliteTrajectoryFacade(params: {
   return {
     recordEvent: (type, data) => {
       events.push({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: `${params.sessionId}:test`,
         source: "runtime",
@@ -176,7 +176,7 @@ describe("Codex trajectory recorder", () => {
     const tools = [
       {
         type: "namespace" as const,
-        name: "openclaw",
+        name: "carapace",
         description: "",
         tools: [
           {

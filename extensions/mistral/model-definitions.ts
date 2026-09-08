@@ -1,6 +1,6 @@
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { readManifestProviderDefaultModelRef } from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildMistralProvider } from "./provider-catalog.js";
 
 const MISTRAL_MANIFEST_CATALOG = manifest.modelCatalog.providers.mistral;

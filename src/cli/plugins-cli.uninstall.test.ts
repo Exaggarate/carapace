@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { installedPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { installedPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // Plugins CLI uninstall tests cover plugin removal selection and uninstall output.
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { persistClawPackageRef } from "../claws/provenance.js";
 import type { ClawAddPlan } from "../claws/types.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { recordInstalledPluginIndexInstallOwner } from "../plugins/installed-plugin-index-install-owner.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   applyPluginUninstallDirectoryRemovalMock,
   buildPluginDiagnosticsReportMock,
@@ -32,10 +32,10 @@ import {
   writePersistedInstalledPluginIndexInstallRecordsWithLeaseMock,
 } from "./plugins-cli-test-helpers.js";
 
-const CLI_STATE_ROOT = "/tmp/openclaw-state";
+const CLI_STATE_ROOT = "/tmp/carapace-state";
 let alphaInstallPath: string;
 let readInstallRecords: (typeof import("../plugins/installed-plugin-index-record-reader.js"))["loadInstalledPluginIndexInstallRecordsSync"];
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_CARAPACE_NIX_MODE = process.env.CARAPACE_NIX_MODE;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function expectRuntimeLogIncludes(fragment: string) {
@@ -58,7 +58,7 @@ describe("plugins cli uninstall", () => {
     resetPluginsCliTestState();
     ({ loadInstalledPluginIndexInstallRecordsSync: readInstallRecords } =
       await import("../plugins/installed-plugin-index-record-reader.js"));
-    alphaInstallPath = installedPluginRoot(tempDirs.make("openclaw-cli-uninstall-owned-"), "alpha");
+    alphaInstallPath = installedPluginRoot(tempDirs.make("carapace-cli-uninstall-owned-"), "alpha");
     await fs.mkdir(alphaInstallPath, { recursive: true });
     await fs.writeFile(path.join(alphaInstallPath, "keep.txt"), "owned plugin files");
     const actual =
@@ -72,7 +72,7 @@ describe("plugins cli uninstall", () => {
       ),
     );
     configWriteMock.mockImplementation(async (config) => {
-      pluginCliConfigMock.mockReturnValue(config as OpenClawConfig);
+      pluginCliConfigMock.mockReturnValue(config as CarapaceConfig);
     });
     replaceConfigFileMock.mockImplementation(async (input) => {
       const params = input as Parameters<
@@ -84,26 +84,26 @@ describe("plugins cli uninstall", () => {
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    closeCarapaceStateDatabaseForTest();
+    if (ORIGINAL_CARAPACE_NIX_MODE === undefined) {
+      delete process.env.CARAPACE_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.CARAPACE_NIX_MODE = ORIGINAL_CARAPACE_NIX_MODE;
     }
   });
 
   it("refuses plugin uninstalls in Nix mode before planning file removal", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.CARAPACE_NIX_MODE;
+    process.env.CARAPACE_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "uninstall", "alpha", "--force"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "CARAPACE_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.CARAPACE_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.CARAPACE_NIX_MODE = previous;
       }
     }
 
@@ -112,7 +112,7 @@ describe("plugins cli uninstall", () => {
   });
 
   it("shows uninstall dry-run preview without mutating config or acquiring write mode", async () => {
-    process.env.OPENCLAW_NIX_MODE = "1";
+    process.env.CARAPACE_NIX_MODE = "1";
     pluginCliConfigMock.mockReturnValue({
       plugins: {
         entries: {
@@ -131,7 +131,7 @@ describe("plugins cli uninstall", () => {
           contextEngine: "alpha",
         },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
@@ -171,7 +171,7 @@ describe("plugins cli uninstall", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       pluginCliConfigMock.mockReturnValue(baseConfig);
       setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
@@ -185,7 +185,7 @@ describe("plugins cli uninstall", () => {
       if (inheritedLease) {
         const { withPluginLifecycleLease } = await import("../plugins/plugin-lifecycle-lease.js");
         const databasePath = path.join(
-          tempDirs.make("openclaw-cli-uninstall-parent-lease-"),
+          tempDirs.make("carapace-cli-uninstall-parent-lease-"),
           "state.sqlite",
         );
         await withPluginLifecycleLease({ path: databasePath }, async (lease) => {
@@ -261,7 +261,7 @@ describe("plugins cli uninstall", () => {
           calendar: { source: "npm", spec: "calendar@1.0.0" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     pluginCliConfigMock.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
@@ -299,7 +299,7 @@ describe("plugins cli uninstall", () => {
           "calendar-two": { source: "npm", spec: "calendar-two@1.0.0" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     pluginCliConfigMock.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
@@ -325,9 +325,9 @@ describe("plugins cli uninstall", () => {
   });
 
   it("warns for a versionless scoped ClawHub spec and proceeds", async () => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = tempDirs.make("openclaw-claw-plugin-ref-");
-    closeOpenClawStateDatabaseForTest();
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = tempDirs.make("carapace-claw-plugin-ref-");
+    closeCarapaceStateDatabaseForTest();
     try {
       const { parseClawHubPluginSpec } = await vi.importActual<
         typeof import("../infra/clawhub-spec.js")
@@ -344,7 +344,7 @@ describe("plugins cli uninstall", () => {
           entries: { alpha: { enabled: true } },
           installs: { alpha: installRecord },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(baseConfig);
       setInstalledPluginIndexInstallRecords({ alpha: installRecord });
       buildPluginSnapshotReportMock.mockReturnValue({
@@ -377,11 +377,11 @@ describe("plugins cli uninstall", () => {
       );
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
@@ -401,7 +401,7 @@ describe("plugins cli uninstall", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(baseConfig);
       setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
       buildPluginSnapshotReportMock.mockReturnValue({
@@ -460,7 +460,7 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const previousPersistedIndex = createTestInstalledPluginIndex({
       policyHash: "previous-policy",
       installRecords,
@@ -511,7 +511,7 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     pluginCliConfigMock.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
@@ -565,7 +565,7 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
     buildPluginSnapshotReportMock.mockReturnValue({
@@ -600,7 +600,7 @@ describe("plugins cli uninstall", () => {
       const records = {
         alpha: { source: "npm" as const, spec: "alpha@1.0.0", installPath: alphaInstallPath },
       };
-      const config: OpenClawConfig = { plugins: { entries: { alpha: { enabled: true } } } };
+      const config: CarapaceConfig = { plugins: { entries: { alpha: { enabled: true } } } };
       pluginCliConfigMock.mockReturnValue(config);
       setInstalledPluginIndexInstallRecords(records);
       readPersistedInstalledPluginIndexMock.mockResolvedValue(
@@ -661,7 +661,7 @@ describe("plugins cli uninstall", () => {
   it.each([false, true])(
     "removes owned aliases before deleting files and preserves later edits (retry=%s)",
     async (retry) => {
-      const root = await fs.realpath(tempDirs.make("openclaw-cli-uninstall-alias-"));
+      const root = await fs.realpath(tempDirs.make("carapace-cli-uninstall-alias-"));
       const sourcePath = path.join(root, "source");
       const installPath = path.join(root, "extensions", "alpha");
       const aliasPath = path.join(root, "alias");
@@ -676,7 +676,7 @@ describe("plugins cli uninstall", () => {
       const installRecords = {
         alpha: { source: "path" as const, sourcePath, installPath },
       };
-      let currentConfig: OpenClawConfig = {
+      let currentConfig: CarapaceConfig = {
         plugins: {
           entries: { alpha: { enabled: true } },
           load: { paths: [aliasPath, unrelatedPath] },
@@ -684,7 +684,7 @@ describe("plugins cli uninstall", () => {
       };
       pluginCliConfigMock.mockImplementation(() => currentConfig);
       configWriteMock.mockImplementation(async (config) => {
-        currentConfig = config as OpenClawConfig;
+        currentConfig = config as CarapaceConfig;
       });
       setInstalledPluginIndexInstallRecords(installRecords);
       buildPluginSnapshotReportMock.mockReturnValue({
@@ -743,7 +743,7 @@ describe("plugins cli uninstall", () => {
   );
 
   it("rejects stale child-keyed records that claim one package path", async () => {
-    const sharedPath = "/tmp/openclaw-ambiguous-uninstall-pack";
+    const sharedPath = "/tmp/carapace-ambiguous-uninstall-pack";
     const installRecords = {
       "pack/one": {
         source: "npm" as const,
@@ -756,7 +756,7 @@ describe("plugins cli uninstall", () => {
         installPath: sharedPath,
       },
     };
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(installRecords);
     buildPluginSnapshotReportMock.mockReturnValue({
@@ -779,7 +779,7 @@ describe("plugins cli uninstall", () => {
         allow: ["alpha", "beta"],
         deny: ["alpha"],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(baseConfig);
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [],
@@ -800,7 +800,7 @@ describe("plugins cli uninstall", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     pluginCliConfigMock.mockReturnValue(baseConfig);
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [],
@@ -846,7 +846,7 @@ describe("plugins cli uninstall", () => {
         installs: installRecords,
       },
       channels,
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     pluginCliConfigMock.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
@@ -901,7 +901,7 @@ describe("plugins cli uninstall", () => {
           [pluginId]: { enabled: true },
           discord: { enabled: true },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       pluginCliConfigMock.mockReturnValue(baseConfig);
       setInstalledPluginIndexInstallRecords(installRecords);
       buildPluginSnapshotReportMock.mockReturnValue({
@@ -918,7 +918,7 @@ describe("plugins cli uninstall", () => {
                 {
                   pluginId: "bridge",
                   rootDir: "/tmp/bridge",
-                  manifestPath: "/tmp/bridge/openclaw.plugin.json",
+                  manifestPath: "/tmp/bridge/carapace.plugin.json",
                   manifestHash: "bridge",
                   origin: "global",
                   enabled: true,
@@ -962,7 +962,7 @@ describe("plugins cli uninstall", () => {
       } as const;
       pluginCliConfigMock.mockReturnValue({
         channels: { chat: { enabled: true }, "pack/one": { enabled: true } },
-      } as OpenClawConfig);
+      } as CarapaceConfig);
       setInstalledPluginIndexInstallRecords(installRecords);
       buildPluginSnapshotReportMock.mockReturnValue({
         plugins: [{ id: "pack/one", name: "One", status: "loaded", channelIds: ["chat"] }],
@@ -978,7 +978,7 @@ describe("plugins cli uninstall", () => {
               {
                 pluginId: "pack/one",
                 rootDir: installPath,
-                manifestPath: `${installPath}/openclaw.plugin.json`,
+                manifestPath: `${installPath}/carapace.plugin.json`,
                 manifestHash: "one",
                 origin: "global" as const,
                 enabled: true,
@@ -1011,7 +1011,7 @@ describe("plugins cli uninstall", () => {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     buildPluginSnapshotReportMock.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],

@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import officialExternalChannelCatalog from "../../scripts/lib/official-external-channel-catalog.json" with { type: "json" };
 import officialExternalPluginCatalog from "../../scripts/lib/official-external-plugin-catalog.json" with { type: "json" };
 import officialExternalProviderCatalog from "../../scripts/lib/official-external-provider-catalog.json" with { type: "json" };
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { PluginPackageInstall } from "./manifest.js";
 import { createSqliteHostedOfficialExternalPluginCatalogSnapshotStore } from "./official-external-plugin-catalog-snapshot-store.js";
 import {
@@ -37,7 +37,7 @@ import {
 
 type ExtensionPackageMetadata = {
   name?: unknown;
-  openclaw?: {
+  carapace?: {
     build?: { bundledDist?: unknown };
     install?: PluginPackageInstall;
     release?: { publishToClawHub?: unknown; publishToNpm?: unknown };
@@ -47,7 +47,7 @@ type ExtensionPackageMetadata = {
 type BundledCatalogIdentity = {
   id?: string;
   name?: string;
-  openclaw?: {
+  carapace?: {
     channel?: { id?: string };
     plugin?: { id?: string };
     providers?: readonly { id?: string }[];
@@ -56,9 +56,9 @@ type BundledCatalogIdentity = {
 
 function resolveBundledCatalogIdentity(entry: BundledCatalogIdentity): string | undefined {
   return (
-    entry.openclaw?.plugin?.id ??
-    entry.openclaw?.channel?.id ??
-    entry.openclaw?.providers?.[0]?.id ??
+    entry.carapace?.plugin?.id ??
+    entry.carapace?.channel?.id ??
+    entry.carapace?.providers?.[0]?.id ??
     entry.id
   );
 }
@@ -82,9 +82,9 @@ function listPublishedExternalPluginOwners(): Array<{
     } catch {
       return [];
     }
-    const release = packageJson.openclaw?.release;
+    const release = packageJson.carapace?.release;
     if (
-      packageJson.openclaw?.build?.bundledDist !== false ||
+      packageJson.carapace?.build?.bundledDist !== false ||
       (release?.publishToClawHub !== true && release?.publishToNpm !== true)
     ) {
       return [];
@@ -93,14 +93,14 @@ function listPublishedExternalPluginOwners(): Array<{
     if (typeof packageName !== "string" || !packageName.trim()) {
       throw new Error(`${entry.name} publishes without a package name`);
     }
-    const install = packageJson.openclaw?.install;
+    const install = packageJson.carapace?.install;
     if (!install) {
       throw new Error(`${entry.name} publishes without install metadata`);
     }
     let manifest: { id?: unknown };
     try {
       manifest = JSON.parse(
-        readFileSync(new URL("openclaw.plugin.json", extensionDir), "utf8"),
+        readFileSync(new URL("carapace.plugin.json", extensionDir), "utf8"),
       ) as { id?: unknown };
     } catch {
       throw new Error(`${entry.name} publishes without a readable plugin manifest`);
@@ -120,7 +120,7 @@ function expectCatalogEntry(id: string): OfficialExternalPluginCatalogEntry {
   return entry;
 }
 
-const HOSTED_CATALOG_PAYLOAD_TYPE = "openclaw.official-external-plugin-catalog-feed.v1";
+const HOSTED_CATALOG_PAYLOAD_TYPE = "carapace.official-external-plugin-catalog-feed.v1";
 
 type HostedCatalogConfig = NonNullable<
   NonNullable<
@@ -186,7 +186,7 @@ function hostedCatalogFeed(params: {
   const pluginId = params.pluginName.replace(/^@[^/]+\//u, "");
   return {
     schemaVersion: 1,
-    id: "openclaw-official-external-plugins",
+    id: "carapace-official-external-plugins",
     generatedAt: `2026-06-22T00:00:${String(params.sequence).padStart(2, "0")}.000Z`,
     expiresAt: params.expiresAt ?? "2099-01-01T00:00:00.000Z",
     sequence: params.sequence,
@@ -194,7 +194,7 @@ function hostedCatalogFeed(params: {
       {
         name: params.pluginName,
         kind: "plugin",
-        openclaw: {
+        carapace: {
           plugin: { id: pluginId },
           install: { sourceRef: "acme-npm", npmSpec: params.pluginName },
         },
@@ -270,8 +270,8 @@ function signedCatalogConfig(publicKeyPem: string, keyId = "acme-root"): HostedC
   return {
     feeds: {
       acme: {
-        url: "https://packages.acme.example/openclaw/feed",
-        feedId: "openclaw-official-external-plugins",
+        url: "https://packages.acme.example/carapace/feed",
+        feedId: "carapace-official-external-plugins",
         verification: {
           mode: "signed",
           keys: [{ keyId, publicKey: publicKeyPem }],
@@ -293,7 +293,7 @@ function signedHostedCatalogSnapshot(params: {
   return {
     body: params.body,
     metadata: {
-      url: "https://packages.acme.example/openclaw/feed",
+      url: "https://packages.acme.example/carapace/feed",
       status: 200,
       checksum: `sha256:${crypto.createHash("sha256").update(params.body).digest("hex")}`,
     },
@@ -341,9 +341,9 @@ describe("official external plugin catalog", () => {
   });
 
   it.each([
-    { pluginId: "google-meet", packageName: "@openclaw/google-meet", external: true },
+    { pluginId: "google-meet", packageName: "@carapace/google-meet", external: true },
     { pluginId: "google-meet", packageName: "@example/google-meet", external: false },
-    { pluginId: "other-plugin", packageName: "@openclaw/google-meet", external: false },
+    { pluginId: "other-plugin", packageName: "@carapace/google-meet", external: false },
     {
       pluginId: "source-external",
       packageName: "@example/source-external",
@@ -361,7 +361,7 @@ describe("official external plugin catalog", () => {
     expect(isOfficialExternalPluginCatalogFeed(officialExternalPluginCatalog)).toBe(true);
     expect(officialExternalPluginCatalog).toMatchObject({
       schemaVersion: 1,
-      id: "openclaw-official-external-plugins",
+      id: "carapace-official-external-plugins",
       sequence: 1,
     });
     expect(officialExternalPluginCatalog.entries.length).toBeGreaterThan(0);
@@ -419,19 +419,19 @@ describe("official external plugin catalog", () => {
     expect(entry.kind).toBe("plugin");
     expect(manifest?.providers).toBeUndefined();
     expect(resolveOfficialExternalPluginInstall(entry)).toMatchObject({
-      npmSpec: "@openclaw/codex",
+      npmSpec: "@carapace/codex",
       defaultChoice: "npm",
     });
   });
 
   it("keeps Fish Audio's legacy id migration-only across npm and ClawHub routes", () => {
-    const entry = getOfficialExternalPluginCatalogEntryForPackage("@openclaw/fish-audio-speech");
+    const entry = getOfficialExternalPluginCatalogEntryForPackage("@carapace/fish-audio-speech");
     expect(entry).toBeDefined();
     expect(resolveOfficialExternalPluginId(entry!)).toBe("fish-audio-speech");
     expect(resolveOfficialExternalPluginLegacyIds(entry!)).toEqual(["fish-audio"]);
     expect(resolveOfficialExternalPluginInstall(entry!)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/fish-audio-speech",
-      npmSpec: "@openclaw/fish-audio-speech",
+      clawhubSpec: "clawhub:@carapace/fish-audio-speech",
+      npmSpec: "@carapace/fish-audio-speech",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -441,10 +441,10 @@ describe("official external plugin catalog", () => {
 
   it("curates featured external plugins with ClawHub install alternatives", () => {
     const featured = [
-      ["diffs", "@openclaw/diffs", 40],
-      ["lobster", "@openclaw/lobster", 50],
-      ["tokenjuice", "@openclaw/tokenjuice", 60],
-      ["memory-lancedb", "@openclaw/memory-lancedb", 70],
+      ["diffs", "@carapace/diffs", 40],
+      ["lobster", "@carapace/lobster", 50],
+      ["tokenjuice", "@carapace/tokenjuice", 60],
+      ["memory-lancedb", "@carapace/memory-lancedb", 70],
     ] as const;
 
     for (const [id, npmSpec, order] of featured) {
@@ -481,7 +481,7 @@ describe("official external plugin catalog", () => {
     expect(
       isOfficialExternalPluginCatalogFeed({
         schemaVersion: 2,
-        id: "openclaw-official-external-plugins",
+        id: "carapace-official-external-plugins",
         generatedAt: "2026-06-22T00:00:00.000Z",
         sequence: 1,
         entries: [],
@@ -490,7 +490,7 @@ describe("official external plugin catalog", () => {
     expect(
       isOfficialExternalPluginCatalogFeed({
         schemaVersion: 3,
-        id: "openclaw-official-external-plugins",
+        id: "carapace-official-external-plugins",
         generatedAt: "2026-06-22T00:00:00.000Z",
         sequence: 1,
         entries: [],
@@ -504,7 +504,7 @@ describe("official external plugin catalog", () => {
       expect(
         isOfficialExternalPluginCatalogFeed({
           schemaVersion: 1,
-          id: "openclaw-official-external-plugins",
+          id: "carapace-official-external-plugins",
           generatedAt,
           sequence: 2,
           entries: [],
@@ -515,7 +515,7 @@ describe("official external plugin catalog", () => {
       expect(
         isOfficialExternalPluginCatalogFeed({
           schemaVersion: 1,
-          id: "openclaw-official-external-plugins",
+          id: "carapace-official-external-plugins",
           generatedAt: "2026-06-22T00:00:00.000Z",
           sequence,
           entries: [],
@@ -533,7 +533,7 @@ describe("official external plugin catalog", () => {
       expect(
         isOfficialExternalPluginCatalogFeed({
           schemaVersion: 1,
-          id: "openclaw-official-external-plugins",
+          id: "carapace-official-external-plugins",
           generatedAt,
           sequence: 2,
           entries: [],
@@ -556,7 +556,7 @@ describe("official external plugin catalog", () => {
 
   it("verifies the default ClawHub profile with injected trust anchors", async () => {
     const feed = {
-      ...hostedCatalogFeed({ sequence: 12, pluginName: "@openclaw/default-signed" }),
+      ...hostedCatalogFeed({ sequence: 12, pluginName: "@carapace/default-signed" }),
       id: "clawhub-official",
     };
     const signed = signedHostedCatalogFeed({ feed });
@@ -593,7 +593,7 @@ describe("official external plugin catalog", () => {
 
   it("uses configured ClawHub trust when the built-in profile is customized", async () => {
     const feed = {
-      ...hostedCatalogFeed({ sequence: 12, pluginName: "@openclaw/default-configured" }),
+      ...hostedCatalogFeed({ sequence: 12, pluginName: "@carapace/default-configured" }),
       id: "clawhub-official",
     };
     const signed = signedHostedCatalogFeed({ feed });
@@ -620,7 +620,7 @@ describe("official external plugin catalog", () => {
 
   it("allows an explicit unsigned downgrade of the default ClawHub profile", async () => {
     const body = JSON.stringify({
-      ...hostedCatalogFeed({ sequence: 12, pluginName: "@openclaw/default-unsigned" }),
+      ...hostedCatalogFeed({ sequence: 12, pluginName: "@carapace/default-unsigned" }),
       id: "clawhub-official",
     });
     const result = await loadHostedCatalog({
@@ -643,7 +643,7 @@ describe("official external plugin catalog", () => {
 
   it("rejects a valid default-profile envelope for a different feed identity", async () => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 12, pluginName: "@openclaw/replayed" }),
+      feed: hostedCatalogFeed({ sequence: 12, pluginName: "@carapace/replayed" }),
     });
 
     const result = await loadHostedCatalog({
@@ -666,7 +666,7 @@ describe("official external plugin catalog", () => {
     expectBundledFallback(result);
     expect(result.entries).toEqual([]);
     expect(result.error).toContain(
-      'feed id "openclaw-official-external-plugins" did not match expected "clawhub-official"',
+      'feed id "carapace-official-external-plugins" did not match expected "clawhub-official"',
     );
   });
 
@@ -719,7 +719,7 @@ describe("official external plugin catalog", () => {
           version: "1.0.0",
           state: "available",
           publisher: { id: "acme", trust: "community" },
-          openclaw: {
+          carapace: {
             install: { npmSpec: "@acme/community" },
           },
           install: {
@@ -736,7 +736,7 @@ describe("official external plugin catalog", () => {
           type: "plugin",
           id: "@acme/missing-authority",
           version: "1.0.0",
-          openclaw: {
+          carapace: {
             install: { npmSpec: "@acme/missing-authority" },
           },
         },
@@ -780,7 +780,7 @@ describe("official external plugin catalog", () => {
         name: "@acme/missing-state",
         kind: "plugin",
         publisher: { id: "acme", trust: "community" },
-        openclaw: manifestInstall,
+        carapace: manifestInstall,
       }),
     ).toBeNull();
     expect(
@@ -788,13 +788,13 @@ describe("official external plugin catalog", () => {
         name: "@acme/missing-publisher",
         kind: "plugin",
         state: "available",
-        openclaw: manifestInstall,
+        carapace: manifestInstall,
       }),
     ).toBeNull();
   });
 
   it("reads and updates hosted catalog snapshots in the SQLite store", async () => {
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-hosted-store-"));
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-hosted-store-"));
     try {
       const store = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({ stateDir });
       const url = "https://clawhub.ai/v1/feeds/plugins";
@@ -849,19 +849,19 @@ describe("official external plugin catalog", () => {
         },
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("keeps signed SQLite snapshot writes monotonic when writes compete", async () => {
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-snapshot-race-"));
-    const url = "https://packages.acme.example/openclaw/feed";
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-snapshot-race-"));
+    const url = "https://packages.acme.example/carapace/feed";
     const newer = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/signed-v10" }),
+      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/signed-v10" }),
     });
     const older = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/signed-v9" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/signed-v9" }),
       privateKeyPem: newer.privateKeyPem,
     });
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
@@ -902,19 +902,19 @@ describe("official external plugin catalog", () => {
       });
       await expect(snapshotStore.read(url)).resolves.toMatchObject({ body: newer.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("rejects signed payload changes at the same sequence while allowing re-signing", async () => {
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-snapshot-equivocation-"));
-    const feed = hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/signed-v10" });
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-snapshot-equivocation-"));
+    const feed = hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/signed-v10" });
     const original = signedHostedCatalogFeed({ feed });
     const resigned = signedHostedCatalogFeed({ feed, keyId: "acme-rotated" });
     const conflictingFeed = hostedCatalogFeed({
       sequence: 10,
-      pluginName: "@openclaw/conflicting-v10",
+      pluginName: "@carapace/conflicting-v10",
     });
     const conflicting = signedHostedCatalogFeed({ feed: conflictingFeed });
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
@@ -947,26 +947,26 @@ describe("official external plugin catalog", () => {
         ),
       ).rejects.toThrow("payload changed without a sequence increment");
       await expect(
-        snapshotStore.read("https://packages.acme.example/openclaw/feed"),
+        snapshotStore.read("https://packages.acme.example/carapace/feed"),
       ).resolves.toMatchObject({ body: resigned.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("replaces malformed signed SQLite snapshot metadata with a valid snapshot", async () => {
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-snapshot-repair-"));
-    const url = "https://packages.acme.example/openclaw/feed";
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-snapshot-repair-"));
+    const url = "https://packages.acme.example/carapace/feed";
     const malformed = signedHostedCatalogFeed({
       feed: {
-        ...hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/malformed-current" }),
+        ...hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/malformed-current" }),
         generatedAt: "2026-02-30T00:00:00.000Z",
       },
     });
     const validFeed = hostedCatalogFeed({
       sequence: 10,
-      pluginName: "@openclaw/repaired-current",
+      pluginName: "@carapace/repaired-current",
     });
     const valid = signedHostedCatalogFeed({
       feed: validFeed,
@@ -974,7 +974,7 @@ describe("official external plugin catalog", () => {
     });
     const lowerFeed = hostedCatalogFeed({
       sequence: 9,
-      pluginName: "@openclaw/lower-current",
+      pluginName: "@carapace/lower-current",
     });
     const lower = signedHostedCatalogFeed({
       feed: lowerFeed,
@@ -1014,19 +1014,19 @@ describe("official external plugin catalog", () => {
 
       await expect(snapshotStore.read(url)).resolves.toMatchObject({ body: valid.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("ignores an invalid recovered sequence when repairing a signed SQLite snapshot", async () => {
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-snapshot-sequence-"));
-    const url = "https://packages.acme.example/openclaw/feed";
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-snapshot-sequence-"));
+    const url = "https://packages.acme.example/carapace/feed";
     const malformedBody =
-      '{"schemaVersion":1,"id":"openclaw-official-external-plugins","generatedAt":"not-a-date","sequence":1e999,"entries":[]}';
+      '{"schemaVersion":1,"id":"carapace-official-external-plugins","generatedAt":"not-a-date","sequence":1e999,"entries":[]}';
     const validFeed = hostedCatalogFeed({
       sequence: 10,
-      pluginName: "@openclaw/repaired-sequence",
+      pluginName: "@carapace/repaired-sequence",
     });
     const valid = signedHostedCatalogFeed({ feed: validFeed });
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
@@ -1052,17 +1052,17 @@ describe("official external plugin catalog", () => {
 
       await expect(snapshotStore.read(url)).resolves.toMatchObject({ body: valid.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("verifies signed hosted feeds and rejects rollback before replacing snapshots", async () => {
     const newer = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/signed-v10" }),
+      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/signed-v10" }),
     });
     const older = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/signed-v9" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/signed-v9" }),
       privateKeyPem: newer.privateKeyPem,
     });
     const snapshotStore = createInMemoryHostedCatalogSnapshotStore();
@@ -1077,7 +1077,7 @@ describe("official external plugin catalog", () => {
     });
 
     expectHosted(accepted);
-    expect(accepted.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-v10"]);
+    expect(accepted.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-v10"]);
     if (accepted.source === "hosted") {
       expect(accepted.trust).toMatchObject({
         mode: "signed",
@@ -1097,7 +1097,7 @@ describe("official external plugin catalog", () => {
     });
 
     expectHostedSnapshot(rolledBack);
-    expect(rolledBack.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-v10"]);
+    expect(rolledBack.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-v10"]);
     if (rolledBack.source === "hosted-snapshot") {
       expect(rolledBack.error).toContain("signed feed sequence is older");
     }
@@ -1107,14 +1107,14 @@ describe("official external plugin catalog", () => {
   it("retains the accepted snapshot when a signed payload changes at the same sequence", async () => {
     const acceptedFeed = hostedCatalogFeed({
       sequence: 10,
-      pluginName: "@openclaw/signed-v10",
+      pluginName: "@carapace/signed-v10",
     });
     const accepted = signedHostedCatalogFeed({ feed: acceptedFeed });
     const conflicting = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/conflicting-v10" }),
+      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/conflicting-v10" }),
       privateKeyPem: accepted.privateKeyPem,
     });
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-equivocation-load-"));
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-equivocation-load-"));
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
       stateDir,
     });
@@ -1137,15 +1137,15 @@ describe("official external plugin catalog", () => {
       });
 
       expectHostedSnapshot(result);
-      expect(result.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-v10"]);
+      expect(result.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-v10"]);
       if (result.source === "hosted-snapshot") {
         expect(result.error).toContain("payload changed without a sequence increment");
       }
       await expect(
-        snapshotStore.read("https://packages.acme.example/openclaw/feed"),
+        snapshotStore.read("https://packages.acme.example/carapace/feed"),
       ).resolves.toMatchObject({ body: accepted.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
@@ -1153,7 +1153,7 @@ describe("official external plugin catalog", () => {
   it("rejects malformed feed timestamps before rollback handling", async () => {
     const malformed = signedHostedCatalogFeed({
       feed: {
-        ...hostedCatalogFeed({ sequence: 11, pluginName: "@openclaw/malformed-date" }),
+        ...hostedCatalogFeed({ sequence: 11, pluginName: "@carapace/malformed-date" }),
         generatedAt: "not-a-date",
       },
     });
@@ -1174,19 +1174,19 @@ describe("official external plugin catalog", () => {
   it("replaces a signed snapshot with an invalid timestamp using a valid feed", async () => {
     const malformed = signedHostedCatalogFeed({
       feed: {
-        ...hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/malformed-current" }),
+        ...hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/malformed-current" }),
         generatedAt: "not-a-date",
       },
     });
     const valid = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/repaired-current" }),
+      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/repaired-current" }),
       privateKeyPem: malformed.privateKeyPem,
     });
     const lower = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/lower-current" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/lower-current" }),
       privateKeyPem: malformed.privateKeyPem,
     });
-    const url = "https://packages.acme.example/openclaw/feed";
+    const url = "https://packages.acme.example/carapace/feed";
     const snapshotStore = createInMemoryHostedCatalogSnapshotStore([
       signedHostedCatalogSnapshot({ body: malformed.body }),
     ]);
@@ -1209,18 +1209,18 @@ describe("official external plugin catalog", () => {
     });
 
     expectHosted(result);
-    expect(result.entries.map((entry) => entry.name)).toEqual(["@openclaw/repaired-current"]);
+    expect(result.entries.map((entry) => entry.name)).toEqual(["@carapace/repaired-current"]);
     await expect(snapshotStore.read(url)).resolves.toMatchObject({ body: valid.body });
   });
 
   it("does not replace a signed snapshot that fails current trust verification", async () => {
     const current = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/current-key" }),
+      feed: hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/current-key" }),
     });
     const candidate = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/new-key" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/new-key" }),
     });
-    const url = "https://packages.acme.example/openclaw/feed";
+    const url = "https://packages.acme.example/carapace/feed";
     const snapshotStore = createInMemoryHostedCatalogSnapshotStore([
       signedHostedCatalogSnapshot({ body: current.body }),
     ]);
@@ -1243,14 +1243,14 @@ describe("official external plugin catalog", () => {
 
   it("uses accepted monotonic metadata when trusted signing keys rotate", async () => {
     const previous = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/signed-v8" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/signed-v8" }),
       keyId: "acme-root-2026-q2",
     });
     const current = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/signed-v9" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/signed-v9" }),
       keyId: "acme-root-2026-q3",
     });
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-key-rotation-"));
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-key-rotation-"));
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
       stateDir,
     });
@@ -1274,13 +1274,13 @@ describe("official external plugin catalog", () => {
       });
 
       expect(acceptedCurrent.source, JSON.stringify(acceptedCurrent)).toBe("hosted");
-      expect(acceptedCurrent.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-v9"]);
+      expect(acceptedCurrent.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-v9"]);
       if (acceptedCurrent.source === "hosted") {
         expect(acceptedCurrent.trust?.signedBy).toBe("acme-root-2026-q3");
       }
 
       const rolledBack = signedHostedCatalogFeed({
-        feed: hostedCatalogFeed({ sequence: 7, pluginName: "@openclaw/signed-v7" }),
+        feed: hostedCatalogFeed({ sequence: 7, pluginName: "@carapace/signed-v7" }),
         keyId: "acme-root-2026-q4",
       });
       const rejectedRollback = await loadHostedCatalog({
@@ -1305,9 +1305,9 @@ describe("official external plugin catalog", () => {
         snapshotStore,
       });
       expectHostedSnapshot(retainedCurrent);
-      expect(retainedCurrent.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-v9"]);
+      expect(retainedCurrent.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-v9"]);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
@@ -1315,20 +1315,20 @@ describe("official external plugin catalog", () => {
   it("repairs malformed timestamp snapshots after trusted signing keys rotate", async () => {
     const malformed = signedHostedCatalogFeed({
       feed: {
-        ...hostedCatalogFeed({ sequence: 10, pluginName: "@openclaw/malformed-current" }),
+        ...hostedCatalogFeed({ sequence: 10, pluginName: "@carapace/malformed-current" }),
         generatedAt: "not-a-date",
       },
       keyId: "acme-root-2026-q2",
     });
     const repairedFeed = hostedCatalogFeed({
       sequence: 10,
-      pluginName: "@openclaw/repaired-current",
+      pluginName: "@carapace/repaired-current",
     });
     const repaired = signedHostedCatalogFeed({
       feed: repairedFeed,
       keyId: "acme-root-2026-q3",
     });
-    const stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-signed-rotation-repair-"));
+    const stateDir = mkdtempSync(path.join(os.tmpdir(), "carapace-signed-rotation-repair-"));
     const snapshotStore = createSqliteHostedOfficialExternalPluginCatalogSnapshotStore({
       stateDir,
     });
@@ -1341,7 +1341,7 @@ describe("official external plugin catalog", () => {
         }),
       );
       await expect(
-        snapshotStore.read("https://packages.acme.example/openclaw/feed"),
+        snapshotStore.read("https://packages.acme.example/carapace/feed"),
       ).resolves.toMatchObject({
         monotonic: { mode: "signed-feed", sequence: 10 },
       });
@@ -1354,23 +1354,23 @@ describe("official external plugin catalog", () => {
       });
 
       expect(result.source, JSON.stringify(result)).toBe("hosted");
-      expect(result.entries.map((entry) => entry.name)).toEqual(["@openclaw/repaired-current"]);
+      expect(result.entries.map((entry) => entry.name)).toEqual(["@carapace/repaired-current"]);
       await expect(
-        snapshotStore.read("https://packages.acme.example/openclaw/feed"),
+        snapshotStore.read("https://packages.acme.example/carapace/feed"),
       ).resolves.toMatchObject({ body: repaired.body });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       rmSync(stateDir, { recursive: true, force: true });
     }
   });
 
   it("fails closed for unsigned signed-profile responses and re-verifies offline snapshots", async () => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/signed-offline" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/signed-offline" }),
     });
     const catalogConfig = signedCatalogConfig(signed.publicKeyPem);
     const unsignedBody = JSON.stringify(
-      hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/unsigned" }),
+      hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/unsigned" }),
     );
 
     const unsigned = await loadHostedCatalog({
@@ -1400,13 +1400,13 @@ describe("official external plugin catalog", () => {
     });
 
     expectHostedSnapshot(offline);
-    expect(offline.entries.map((entry) => entry.name)).toEqual(["@openclaw/signed-offline"]);
+    expect(offline.entries.map((entry) => entry.name)).toEqual(["@carapace/signed-offline"]);
 
     const unsignedSnapshot = createInMemoryHostedCatalogSnapshotStore([
       {
         body: unsignedBody,
         metadata: {
-          url: "https://packages.acme.example/openclaw/feed",
+          url: "https://packages.acme.example/carapace/feed",
           status: 200,
           checksum: `sha256:${crypto.createHash("sha256").update(unsignedBody).digest("hex")}`,
         },
@@ -1428,7 +1428,7 @@ describe("official external plugin catalog", () => {
 
   it("accepts beta envelopes only from persisted snapshots", async () => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/legacy-snapshot" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/legacy-snapshot" }),
     });
     const legacyBody = toLegacyBetaSignedEnvelope(signed.body);
     const catalogConfig = signedCatalogConfig(signed.publicKeyPem);
@@ -1455,12 +1455,12 @@ describe("official external plugin catalog", () => {
     });
 
     expectHostedSnapshot(offline);
-    expect(offline.entries.map((entry) => entry.name)).toEqual(["@openclaw/legacy-snapshot"]);
+    expect(offline.entries.map((entry) => entry.name)).toEqual(["@carapace/legacy-snapshot"]);
   });
 
   it("fails closed when a signed feed response does not use the DSSE media type", async () => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/wrong-media-type" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/wrong-media-type" }),
     });
     const result = await loadHostedCatalog({
       feedProfile: "acme",
@@ -1484,19 +1484,19 @@ describe("official external plugin catalog", () => {
     const feed = {
       ...hostedCatalogFeed({
         sequence: 8,
-        pluginName: "@openclaw/expiring",
+        pluginName: "@carapace/expiring",
         expiresAt: "2026-06-22T00:01:00.000Z",
       }),
       entries: [
         {
-          id: "@openclaw/expiring",
-          name: "@openclaw/expiring",
+          id: "@carapace/expiring",
+          name: "@carapace/expiring",
           type: "plugin",
           state: "available",
-          publisher: { id: "openclaw", trust: "official" },
+          publisher: { id: "carapace", trust: "official" },
           install: {
             candidates: [
-              { sourceRef: "acme-npm", package: "@openclaw/expiring", version: "1.0.0" },
+              { sourceRef: "acme-npm", package: "@carapace/expiring", version: "1.0.0" },
             ],
           },
         },
@@ -1543,7 +1543,7 @@ describe("official external plugin catalog", () => {
     expectHostedSnapshot(expiredSnapshot);
     expect(expiredSnapshot.entries).toHaveLength(1);
     expect(expiredSnapshot.entries[0]).toMatchObject({
-      id: "@openclaw/expiring",
+      id: "@carapace/expiring",
       state: "unavailable",
     });
     expect(expiredSnapshot.entries[0]?.install).toBeUndefined();
@@ -1580,7 +1580,7 @@ describe("official external plugin catalog", () => {
     const signed = signedHostedCatalogFeed({
       feed: hostedCatalogFeed({
         sequence: 8,
-        pluginName: "@openclaw/invalid-expiry",
+        pluginName: "@carapace/invalid-expiry",
         expiresAt: "2026-06-21T23:59:59.000Z",
       }),
     });
@@ -1601,7 +1601,7 @@ describe("official external plugin catalog", () => {
     const signed = signedHostedCatalogFeed({
       feed: hostedCatalogFeed({
         sequence: 8,
-        pluginName: "@openclaw/invalid-expiry-date",
+        pluginName: "@carapace/invalid-expiry-date",
         expiresAt: "2026-02-30T00:00:00.000Z",
       }),
     });
@@ -1618,14 +1618,14 @@ describe("official external plugin catalog", () => {
   });
 
   it("uses legacy signed snapshots for rollback state without preserving install authority", async () => {
-    const legacyFeed = hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/legacy" });
+    const legacyFeed = hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/legacy" });
     delete legacyFeed.expiresAt;
     const legacy = signedHostedCatalogFeed({ feed: legacyFeed });
     const newer = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@openclaw/current" }),
+      feed: hostedCatalogFeed({ sequence: 9, pluginName: "@carapace/current" }),
       privateKeyPem: legacy.privateKeyPem,
     });
-    const url = "https://packages.acme.example/openclaw/feed";
+    const url = "https://packages.acme.example/carapace/feed";
     const snapshotStore = createInMemoryHostedCatalogSnapshotStore([
       {
         body: legacy.body,
@@ -1653,7 +1653,7 @@ describe("official external plugin catalog", () => {
       snapshotStore,
     });
     expectHostedSnapshot(stale);
-    expect(stale.entries[0]).toMatchObject({ name: "@openclaw/legacy", state: "unavailable" });
+    expect(stale.entries[0]).toMatchObject({ name: "@carapace/legacy", state: "unavailable" });
     expect(resolveOfficialExternalPluginInstall(stale.entries[0]!, { catalogConfig })).toBeNull();
     expect(stale.error).toContain("has no expiresAt");
 
@@ -1665,13 +1665,13 @@ describe("official external plugin catalog", () => {
       snapshotStore,
     });
     expectHosted(updated);
-    expect(updated.entries.map((entry) => entry.name)).toEqual(["@openclaw/current"]);
+    expect(updated.entries.map((entry) => entry.name)).toEqual(["@carapace/current"]);
   });
 
   it.each([
     [
       "off-allowlist hosts",
-      "https://packages.acme.example/openclaw/feed",
+      "https://packages.acme.example/carapace/feed",
       "hostname is not allowed",
     ],
     [
@@ -1705,7 +1705,7 @@ describe("official external plugin catalog", () => {
     ["direct feed URL override", { feedUrl: "https://clawhub.ai/v1/feeds/plugins" }],
   ])("keeps a legacy signed profile without feedId usable via %s", async (_label, options) => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/legacy-profile" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/legacy-profile" }),
     });
     const catalogConfig = signedCatalogConfig(signed.publicKeyPem);
     delete catalogConfig.feeds?.acme?.feedId;
@@ -1719,16 +1719,16 @@ describe("official external plugin catalog", () => {
     });
 
     expectHosted(result);
-    expect(result.feed?.id).toBe("openclaw-official-external-plugins");
+    expect(result.feed?.id).toBe("carapace-official-external-plugins");
     expect(result.trust).toMatchObject({ mode: "signed", signedBy: "acme-root" });
   });
 
   it("preserves signed profile verification for direct feed URL overrides", async () => {
     const signed = signedHostedCatalogFeed({
-      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/signed-override" }),
+      feed: hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/signed-override" }),
     });
     const unsignedBody = JSON.stringify(
-      hostedCatalogFeed({ sequence: 8, pluginName: "@openclaw/unsigned-override" }),
+      hostedCatalogFeed({ sequence: 8, pluginName: "@carapace/unsigned-override" }),
     );
     const result = await loadHostedCatalog({
       feedProfile: "acme",
@@ -1747,14 +1747,14 @@ describe("official external plugin catalog", () => {
   it("filters every source reference and refreshes profiles between hosted loads", async () => {
     const body = JSON.stringify({
       schemaVersion: 1,
-      id: "openclaw-official-external-plugins",
+      id: "carapace-official-external-plugins",
       generatedAt: "2026-06-22T00:00:10.000Z",
       sequence: 10,
       entries: [
         {
           name: "@acme/known-source",
           kind: "plugin",
-          openclaw: {
+          carapace: {
             plugin: { id: "known-source" },
             install: { sourceRef: "acme-npm", npmSpec: "@acme/known-source" },
           },
@@ -1762,7 +1762,7 @@ describe("official external plugin catalog", () => {
         {
           name: "@acme/unknown-source",
           kind: "plugin",
-          openclaw: {
+          carapace: {
             plugin: { id: "unknown-source" },
             install: { sourceRef: "attacker-npm", npmSpec: "@acme/unknown-source" },
           },
@@ -1773,7 +1773,7 @@ describe("official external plugin catalog", () => {
           install: {
             candidates: [{ sourceRef: "acme-npm" }, { sourceRef: "attacker-npm" }],
           },
-          openclaw: {
+          carapace: {
             plugin: { id: "mixed-sources" },
             install: { sourceRef: "acme-npm", npmSpec: "@acme/mixed-sources" },
           },
@@ -1781,7 +1781,7 @@ describe("official external plugin catalog", () => {
         {
           name: "@acme/valid-tail",
           kind: "plugin",
-          openclaw: {
+          carapace: {
             plugin: { id: "valid-tail" },
             install: { sourceRef: "acme-npm", npmSpec: "@acme/valid-tail" },
           },
@@ -1794,7 +1794,7 @@ describe("official external plugin catalog", () => {
     const params: HostedCatalogLoadParams = {
       feedProfile: "acme",
       catalogConfig: {
-        feeds: { acme: { url: "https://packages.acme.example/openclaw/feed" } },
+        feeds: { acme: { url: "https://packages.acme.example/carapace/feed" } },
         sources,
       },
       fetchImpl: vi.fn(async () => new Response(body, { status: 200 })),
@@ -1911,18 +1911,18 @@ describe("official external plugin catalog", () => {
         name: "@legacy/plain-package",
         kind: "plugin",
         state: "available",
-        publisher: { id: "openclaw", trust: "official" },
+        publisher: { id: "carapace", trust: "official" },
         install: {
           candidates: [
             {
               sourceRef: "public-clawhub",
-              package: "@openclaw/candidate-package",
+              package: "@carapace/candidate-package",
               version: "1.2.3",
               integrity: "sha256:b355dda04403becaab8bbab069fd1e7b0578262e7459e598cc5b19615b5bdab9",
             },
           ],
         },
-        openclaw: {
+        carapace: {
           plugin: { id: "candidate-package" },
           install: {
             npmSpec: "@legacy/plain-package",
@@ -1933,7 +1933,7 @@ describe("official external plugin catalog", () => {
         },
       }),
     ).toEqual({
-      clawhubSpec: "clawhub:@openclaw/candidate-package@1.2.3",
+      clawhubSpec: "clawhub:@carapace/candidate-package@1.2.3",
       defaultChoice: "clawhub",
       expectedIntegrity: "sha256-s1XdoEQDvsqri7qwaf0eewV4Ji50WeWYzFsZYVtb2rk=",
       minHostVersion: ">=2026.6.1",
@@ -2029,43 +2029,43 @@ describe("official external plugin catalog", () => {
 
   it("lists the externalized provider and capability plugins with install metadata", () => {
     const providers = [
-      ["arcee", "@openclaw/arcee-provider"],
-      ["cerebras", "@openclaw/cerebras-provider"],
-      ["chutes", "@openclaw/chutes-provider"],
-      ["cloudflare-ai-gateway", "@openclaw/cloudflare-ai-gateway-provider"],
-      ["deepinfra", "@openclaw/deepinfra-provider"],
-      ["deepseek", "@openclaw/deepseek-provider"],
-      ["groq", "@openclaw/groq-provider"],
-      ["longcat", "@openclaw/longcat-provider"],
-      ["kilocode", "@openclaw/kilocode-provider"],
-      ["kimi", "@openclaw/kimi-provider"],
-      ["qianfan", "@openclaw/qianfan-provider"],
-      ["qwen", "@openclaw/qwen-provider"],
+      ["arcee", "@carapace/arcee-provider"],
+      ["cerebras", "@carapace/cerebras-provider"],
+      ["chutes", "@carapace/chutes-provider"],
+      ["cloudflare-ai-gateway", "@carapace/cloudflare-ai-gateway-provider"],
+      ["deepinfra", "@carapace/deepinfra-provider"],
+      ["deepseek", "@carapace/deepseek-provider"],
+      ["groq", "@carapace/groq-provider"],
+      ["longcat", "@carapace/longcat-provider"],
+      ["kilocode", "@carapace/kilocode-provider"],
+      ["kimi", "@carapace/kimi-provider"],
+      ["qianfan", "@carapace/qianfan-provider"],
+      ["qwen", "@carapace/qwen-provider"],
     ] as const;
     const plugins = [
-      ["exa", "@openclaw/exa-plugin"],
-      ["firecrawl", "@openclaw/firecrawl-plugin"],
-      ["gradium", "@openclaw/gradium-speech"],
-      ["inworld", "@openclaw/inworld-speech"],
-      ["parallel", "@openclaw/parallel-plugin"],
-      ["perplexity", "@openclaw/perplexity-plugin"],
+      ["exa", "@carapace/exa-plugin"],
+      ["firecrawl", "@carapace/firecrawl-plugin"],
+      ["gradium", "@carapace/gradium-speech"],
+      ["inworld", "@carapace/inworld-speech"],
+      ["parallel", "@carapace/parallel-plugin"],
+      ["perplexity", "@carapace/perplexity-plugin"],
     ] as const;
     const newlyExternalized = [
-      ["clickclack", "@openclaw/clickclack"],
-      ["fireworks", "@openclaw/fireworks-provider"],
-      ["irc", "@openclaw/irc"],
-      ["mattermost", "@openclaw/mattermost"],
-      ["moonshot", "@openclaw/moonshot-provider"],
-      ["searxng", "@openclaw/searxng-plugin"],
-      ["signal", "@openclaw/signal"],
-      ["sms", "@openclaw/sms"],
-      ["tavily", "@openclaw/tavily-plugin"],
-      ["tencent", "@openclaw/tencent-provider"],
-      ["venice", "@openclaw/venice-provider"],
-      ["vercel-ai-gateway", "@openclaw/vercel-ai-gateway-provider"],
-      ["zai", "@openclaw/zai-provider"],
+      ["clickclack", "@carapace/clickclack"],
+      ["fireworks", "@carapace/fireworks-provider"],
+      ["irc", "@carapace/irc"],
+      ["mattermost", "@carapace/mattermost"],
+      ["moonshot", "@carapace/moonshot-provider"],
+      ["searxng", "@carapace/searxng-plugin"],
+      ["signal", "@carapace/signal"],
+      ["sms", "@carapace/sms"],
+      ["tavily", "@carapace/tavily-plugin"],
+      ["tencent", "@carapace/tencent-provider"],
+      ["venice", "@carapace/venice-provider"],
+      ["vercel-ai-gateway", "@carapace/vercel-ai-gateway-provider"],
+      ["zai", "@carapace/zai-provider"],
     ] as const;
-    const currentExternalized = [["featherless", "@openclaw/featherless-provider"]] as const;
+    const currentExternalized = [["featherless", "@carapace/featherless-provider"]] as const;
 
     for (const [id, npmSpec] of [...providers, ...plugins]) {
       expect(resolveOfficialExternalPluginInstall(expectCatalogEntry(id))).toEqual({
@@ -2095,8 +2095,8 @@ describe("official external plugin catalog", () => {
 
   it("advertises StepFun with its ClawHub package and plugin API floor", () => {
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("stepfun"))).toEqual({
-      clawhubSpec: "clawhub:@openclaw/stepfun-provider",
-      npmSpec: "@openclaw/stepfun-provider",
+      clawhubSpec: "clawhub:@carapace/stepfun-provider",
+      npmSpec: "@carapace/stepfun-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.6.9",
     });
@@ -2104,30 +2104,30 @@ describe("official external plugin catalog", () => {
 
   it("resolves third-party channel lookup aliases to published plugin ids", () => {
     const wecomByChannel = expectCatalogEntry("wecom");
-    const wecomByPlugin = expectCatalogEntry("wecom-openclaw-plugin");
+    const wecomByPlugin = expectCatalogEntry("wecom-carapace-plugin");
     const yuanbaoByChannel = expectCatalogEntry("yuanbao");
     const qqbotByChannel = expectCatalogEntry("qqbot");
-    const qqbotByPlugin = expectCatalogEntry("openclaw-qqbot");
+    const qqbotByPlugin = expectCatalogEntry("carapace-qqbot");
 
-    expect(resolveOfficialExternalPluginId(wecomByChannel)).toBe("wecom-openclaw-plugin");
-    expect(resolveOfficialExternalPluginId(wecomByPlugin)).toBe("wecom-openclaw-plugin");
+    expect(resolveOfficialExternalPluginId(wecomByChannel)).toBe("wecom-carapace-plugin");
+    expect(resolveOfficialExternalPluginId(wecomByPlugin)).toBe("wecom-carapace-plugin");
     expect(resolveOfficialExternalPluginInstall(wecomByChannel)?.npmSpec).toBe(
-      "@wecom/wecom-openclaw-plugin@2026.7.2",
+      "@wecom/wecom-carapace-plugin@2026.7.2",
     );
-    expect(resolveOfficialExternalPluginId(yuanbaoByChannel)).toBe("openclaw-plugin-yuanbao");
+    expect(resolveOfficialExternalPluginId(yuanbaoByChannel)).toBe("carapace-plugin-yuanbao");
     expect(resolveOfficialExternalPluginInstall(yuanbaoByChannel)?.npmSpec).toBe(
-      "openclaw-plugin-yuanbao@2.18.2",
+      "carapace-plugin-yuanbao@2.18.2",
     );
-    expect(resolveOfficialExternalPluginId(qqbotByChannel)).toBe("openclaw-qqbot");
+    expect(resolveOfficialExternalPluginId(qqbotByChannel)).toBe("carapace-qqbot");
     expect(qqbotByPlugin).toBe(qqbotByChannel);
     expect(resolveOfficialExternalPluginLegacyNpmPackageNames(qqbotByChannel)).toEqual([
-      "@openclaw/qqbot",
+      "@carapace/qqbot",
     ]);
     expect(
       getOfficialExternalPluginCatalogManifest(qqbotByChannel)?.channel?.doctorCapabilities,
     ).toEqual({ openDmRequiresAllowFromWildcard: false });
     expect(resolveOfficialExternalPluginInstall(qqbotByChannel)).toEqual({
-      npmSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+      npmSpec: "@tencent-connect/carapace-qqbot@2.0.3",
       defaultChoice: "npm",
       expectedIntegrity:
         "sha512-yngu/2cPeZjJfIfHWCXWB2/6KlDHrb9vpOUjKLdQxePLSp6wCn3CFOALcBIVq/9o6jlYz9WTU9idW6nfX1xpFA==",
@@ -2146,24 +2146,24 @@ describe("official external plugin catalog", () => {
 
   it("keeps official launch package specs on the production package names", () => {
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("acpx"))?.npmSpec).toBe(
-      "@openclaw/acpx",
+      "@carapace/acpx",
     );
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("googlechat"))?.npmSpec).toBe(
-      "@openclaw/googlechat",
+      "@carapace/googlechat",
     );
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("line"))?.npmSpec).toBe(
-      "@openclaw/line",
+      "@carapace/line",
     );
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("diffs-language-pack"))).toEqual(
       {
-        npmSpec: "@openclaw/diffs-language-pack",
-        clawhubSpec: "clawhub:@openclaw/diffs-language-pack",
+        npmSpec: "@carapace/diffs-language-pack",
+        clawhubSpec: "clawhub:@carapace/diffs-language-pack",
         defaultChoice: "npm",
         minHostVersion: ">=2026.5.27",
       },
     );
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("llama-cpp"))?.npmSpec).toBe(
-      "@openclaw/llama-cpp-provider",
+      "@carapace/llama-cpp-provider",
     );
   });
 
@@ -2173,8 +2173,8 @@ describe("official external plugin catalog", () => {
     expect(resolveOfficialExternalPluginId(gmi)).toBe("gmi");
     expect(getOfficialExternalPluginCatalogEntry("gmi-cloud")).toBe(gmi);
     expect(resolveOfficialExternalPluginInstall(gmi)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/gmi-provider",
-      npmSpec: "@openclaw/gmi-provider",
+      clawhubSpec: "clawhub:@carapace/gmi-provider",
+      npmSpec: "@carapace/gmi-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.6.8",
     });
@@ -2185,8 +2185,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(cohere)).toBe("cohere");
     expect(resolveOfficialExternalPluginInstall(cohere)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/cohere-provider",
-      npmSpec: "@openclaw/cohere-provider",
+      clawhubSpec: "clawhub:@carapace/cohere-provider",
+      npmSpec: "@carapace/cohere-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.6.8",
     });
@@ -2198,8 +2198,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(opencode)).toBe("opencode");
     expect(resolveOfficialExternalPluginInstall(opencode)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/opencode-provider",
-      npmSpec: "@openclaw/opencode-provider",
+      clawhubSpec: "clawhub:@carapace/opencode-provider",
+      npmSpec: "@carapace/opencode-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2219,8 +2219,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(opencodeGo)).toBe("opencode-go");
     expect(resolveOfficialExternalPluginInstall(opencodeGo)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/opencode-go-provider",
-      npmSpec: "@openclaw/opencode-go-provider",
+      clawhubSpec: "clawhub:@carapace/opencode-go-provider",
+      npmSpec: "@carapace/opencode-go-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2239,8 +2239,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(synthetic)).toBe("synthetic");
     expect(resolveOfficialExternalPluginInstall(synthetic)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/synthetic-provider",
-      npmSpec: "@openclaw/synthetic-provider",
+      clawhubSpec: "clawhub:@carapace/synthetic-provider",
+      npmSpec: "@carapace/synthetic-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2251,8 +2251,8 @@ describe("official external plugin catalog", () => {
     const manifest = getOfficialExternalPluginCatalogManifest(duckduckgo);
 
     expect(resolveOfficialExternalPluginInstall(duckduckgo)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/duckduckgo-plugin",
-      npmSpec: "@openclaw/duckduckgo-plugin",
+      clawhubSpec: "clawhub:@carapace/duckduckgo-plugin",
+      npmSpec: "@carapace/duckduckgo-plugin",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2267,7 +2267,7 @@ describe("official external plugin catalog", () => {
         envVars: [],
         placeholder: "(no key needed)",
         signupUrl: "https://duckduckgo.com/",
-        docsUrl: "https://docs.openclaw.ai/tools/duckduckgo-search",
+        docsUrl: "https://github.com/Exaggarate/carapace",
         credentialPath: "",
         autoDetectOrder: 100,
       },
@@ -2280,8 +2280,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(voyage)).toBe("voyage");
     expect(resolveOfficialExternalPluginInstall(voyage)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/voyage-provider",
-      npmSpec: "@openclaw/voyage-provider",
+      clawhubSpec: "clawhub:@carapace/voyage-provider",
+      npmSpec: "@carapace/voyage-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2300,8 +2300,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(vydra)).toBe("vydra");
     expect(resolveOfficialExternalPluginInstall(vydra)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/vydra-provider",
-      npmSpec: "@openclaw/vydra-provider",
+      clawhubSpec: "clawhub:@carapace/vydra-provider",
+      npmSpec: "@carapace/vydra-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2321,8 +2321,8 @@ describe("official external plugin catalog", () => {
     expect(resolveOfficialExternalPluginId(entry)).toBe("volcengine");
     expect(getOfficialExternalPluginCatalogEntry("volcengine-plan")).toBe(entry);
     expect(resolveOfficialExternalPluginInstall(entry)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/volcengine-provider",
-      npmSpec: "@openclaw/volcengine-provider",
+      clawhubSpec: "clawhub:@carapace/volcengine-provider",
+      npmSpec: "@carapace/volcengine-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2346,8 +2346,8 @@ describe("official external plugin catalog", () => {
     expect(resolveOfficialExternalPluginId(xiaomi)).toBe("xiaomi");
     expect(getOfficialExternalPluginCatalogEntry("xiaomi-token-plan")).toBe(xiaomi);
     expect(resolveOfficialExternalPluginInstall(xiaomi)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/xiaomi-provider",
-      npmSpec: "@openclaw/xiaomi-provider",
+      clawhubSpec: "clawhub:@carapace/xiaomi-provider",
+      npmSpec: "@carapace/xiaomi-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2386,8 +2386,8 @@ describe("official external plugin catalog", () => {
 
     expect(getOfficialExternalPluginCatalogEntry("byteplus-plan")).toBe(byteplus);
     expect(resolveOfficialExternalPluginInstall(byteplus)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/byteplus-provider",
-      npmSpec: "@openclaw/byteplus-provider",
+      clawhubSpec: "clawhub:@carapace/byteplus-provider",
+      npmSpec: "@carapace/byteplus-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2409,8 +2409,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(comfy)).toBe("comfy");
     expect(resolveOfficialExternalPluginInstall(comfy)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/comfy-provider",
-      npmSpec: "@openclaw/comfy-provider",
+      clawhubSpec: "clawhub:@carapace/comfy-provider",
+      npmSpec: "@carapace/comfy-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2427,8 +2427,8 @@ describe("official external plugin catalog", () => {
 
     expect(resolveOfficialExternalPluginId(mistral)).toBe("mistral");
     expect(resolveOfficialExternalPluginInstall(mistral)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/mistral-provider",
-      npmSpec: "@openclaw/mistral-provider",
+      clawhubSpec: "clawhub:@carapace/mistral-provider",
+      npmSpec: "@carapace/mistral-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
     });
@@ -2469,8 +2469,8 @@ describe("official external plugin catalog", () => {
       docsPath: "/channels/imessage",
     });
     expect(resolveOfficialExternalPluginInstall(imessage)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/imessage",
-      npmSpec: "@openclaw/imessage",
+      clawhubSpec: "clawhub:@carapace/imessage",
+      npmSpec: "@carapace/imessage",
       defaultChoice: "npm",
       minHostVersion: ">=2026.7.2",
       allowInvalidConfigRecovery: true,
@@ -2487,8 +2487,8 @@ describe("official external plugin catalog", () => {
   });
 
   it.each([
-    ["teams-meetings", "@openclaw/teams-meetings", "teams_meetings", "teams"],
-    ["zoom-meetings", "@openclaw/zoom-meetings", "zoom_meetings", "zoom"],
+    ["teams-meetings", "@carapace/teams-meetings", "teams_meetings", "teams"],
+    ["zoom-meetings", "@carapace/zoom-meetings", "zoom_meetings", "zoom"],
   ] as const)(
     "lists %s as an official external meeting plugin",
     (id, npmSpec, toolId, transcriptSourceProviderId) => {
@@ -2512,8 +2512,8 @@ describe("official external plugin catalog", () => {
     expect(resolveOfficialExternalPluginId(longcat)).toBe("longcat");
     expect(getOfficialExternalPluginCatalogEntry("meituan-longcat")).toBe(longcat);
     expect(resolveOfficialExternalPluginInstall(longcat)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/longcat-provider",
-      npmSpec: "@openclaw/longcat-provider",
+      clawhubSpec: "clawhub:@carapace/longcat-provider",
+      npmSpec: "@carapace/longcat-provider",
       defaultChoice: "npm",
       minHostVersion: ">=2026.6.8",
     });
@@ -2643,10 +2643,10 @@ describe("official external plugin catalog", () => {
 
   it("keeps Tencent auth choices available through the cold-install auth catalog", () => {
     const tencent = expectCatalogEntry("tencent");
-    const tokenHub = tencent.openclaw?.providers?.find(
+    const tokenHub = tencent.carapace?.providers?.find(
       (provider) => provider.id === "tencent-tokenhub",
     );
-    const tokenPlan = tencent.openclaw?.providers?.find(
+    const tokenPlan = tencent.carapace?.providers?.find(
       (provider) => provider.id === "tencent-tokenplan",
     );
 
@@ -2667,7 +2667,7 @@ describe("official external plugin catalog", () => {
   });
 
   it("keeps the shared OpenRouter onboarding flag with its provider", () => {
-    const arceeChoices = expectCatalogEntry("arcee").openclaw?.providers?.find(
+    const arceeChoices = expectCatalogEntry("arcee").carapace?.providers?.find(
       (provider) => provider.id === "arcee",
     )?.authChoices;
     const directChoice = arceeChoices?.find((choice) => choice.choiceId === "arceeai-api-key");
@@ -2686,7 +2686,7 @@ describe("official external plugin catalog", () => {
 
   it("keeps Groq available through the cold-install auth catalog", () => {
     const groq = expectCatalogEntry("groq");
-    const authChoice = groq.openclaw?.providers?.find((provider) => provider.id === "groq")
+    const authChoice = groq.carapace?.providers?.find((provider) => provider.id === "groq")
       ?.authChoices?.[0];
 
     expect(authChoice).toMatchObject({
@@ -2699,23 +2699,23 @@ describe("official external plugin catalog", () => {
 
   it("allows invalid-config recovery for externalized stock plugins", () => {
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("brave"))).toMatchObject({
-      npmSpec: "@openclaw/brave-plugin",
+      npmSpec: "@carapace/brave-plugin",
       allowInvalidConfigRecovery: true,
     });
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("slack"))).toMatchObject({
-      npmSpec: "@openclaw/slack",
+      npmSpec: "@carapace/slack",
       allowInvalidConfigRecovery: true,
     });
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("discord"))).toMatchObject({
-      npmSpec: "@openclaw/discord",
+      npmSpec: "@carapace/discord",
       allowInvalidConfigRecovery: true,
     });
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("mattermost"))).toMatchObject({
-      npmSpec: "@openclaw/mattermost",
+      npmSpec: "@carapace/mattermost",
       allowInvalidConfigRecovery: true,
     });
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("tavily"))).toMatchObject({
-      npmSpec: "@openclaw/tavily-plugin",
+      npmSpec: "@carapace/tavily-plugin",
       allowInvalidConfigRecovery: true,
     });
   });
@@ -2732,8 +2732,8 @@ describe("official external plugin catalog", () => {
     expect(ids.has("matrix")).toBe(true);
     expect(ids.has("mattermost")).toBe(true);
     expect(resolveOfficialExternalPluginInstall(expectCatalogEntry("matrix"))).toEqual({
-      clawhubSpec: "clawhub:@openclaw/matrix",
-      npmSpec: "@openclaw/matrix",
+      clawhubSpec: "clawhub:@carapace/matrix",
+      npmSpec: "@carapace/matrix",
       defaultChoice: "npm",
       minHostVersion: ">=2026.4.10",
       allowInvalidConfigRecovery: true,

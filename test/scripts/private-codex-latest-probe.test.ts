@@ -97,7 +97,7 @@ vi.mock("ws", () => ({
             model: "codex-latest",
             modelProvider: harness.native ? "openai" : "clawrouter",
             agentRuntime: {
-              id: harness.wrongRuntime ? "unexpected" : harness.native ? "codex" : "openclaw",
+              id: harness.wrongRuntime ? "unexpected" : harness.native ? "codex" : "carapace",
             },
           },
         };
@@ -132,7 +132,7 @@ const input = {
   ownerHeaders: { authorization: "owner" },
   nonownerHeaders: { authorization: "nonowner" },
   workloadToken: "synthetic-workload",
-  openclawAgent: "private-pi",
+  carapaceAgent: "private-pi",
   codexAgent: "private-codex",
 };
 const catalog = {
@@ -205,9 +205,9 @@ describe("private alias acceptance client", () => {
       raw_model_rejected: 1,
       malformed_request_rejected: 1,
       alias_sse_pass: 1,
-      openclaw_picker_pass: 1,
-      openclaw_tool_pass: 1,
-      openclaw_second_turn_pass: 1,
+      carapace_picker_pass: 1,
+      carapace_tool_pass: 1,
+      carapace_second_turn_pass: 1,
       native_blocked: 1,
       protocol_pass: 0,
       errors: 0,
@@ -243,11 +243,11 @@ describe("private alias acceptance client", () => {
     const report = await runPrivateCodexProbe({ ...input, nativeSafetyContractApproved: true });
     expect(report).toMatchObject({
       native_blocked: 0,
-      openclaw_runtime_pass: 1,
+      carapace_runtime_pass: 1,
       codex_runtime_pass: 1,
-      openclaw_tool_pass: 1,
+      carapace_tool_pass: 1,
       codex_tool_pass: 1,
-      openclaw_second_turn_pass: 1,
+      carapace_second_turn_pass: 1,
       codex_second_turn_pass: 1,
       protocol_pass: 1,
       errors: 0,
@@ -289,8 +289,8 @@ describe("private alias acceptance client", () => {
     mockFacade();
     harness.toolResult = false;
     const report = await runPrivateCodexProbe(input);
-    expect(report.openclaw_tool_pass).toBe(0);
-    expect(report.openclaw_second_turn_pass).toBe(0);
+    expect(report.carapace_tool_pass).toBe(0);
+    expect(report.carapace_second_turn_pass).toBe(0);
     expect(report.protocol_pass).toBe(0);
   });
 
@@ -298,9 +298,9 @@ describe("private alias acceptance client", () => {
     mockFacade();
     harness.wrongRuntime = true;
     const report = await runPrivateCodexProbe(input);
-    expect(report.openclaw_picker_pass).toBe(1);
-    expect(report.openclaw_runtime_pass).toBe(0);
-    expect(report.openclaw_tool_pass).toBe(0);
+    expect(report.carapace_picker_pass).toBe(1);
+    expect(report.carapace_runtime_pass).toBe(0);
+    expect(report.carapace_tool_pass).toBe(0);
     expect(report.protocol_pass).toBe(0);
   });
 
@@ -317,8 +317,8 @@ describe("private alias acceptance client", () => {
     mockFacade();
     harness.toolError = true;
     const report = await runPrivateCodexProbe(input);
-    expect(report.openclaw_tool_pass).toBe(0);
-    expect(report.openclaw_second_turn_pass).toBe(0);
+    expect(report.carapace_tool_pass).toBe(0);
+    expect(report.carapace_second_turn_pass).toBe(0);
   });
 
   it("stops before facade access when nonowner admission succeeds", async () => {
@@ -365,7 +365,7 @@ describe("private alias acceptance client", () => {
         );
       const report = await runPrivateCodexProbe(input);
       expect(report.explicit_model_failures).toBeGreaterThan(0);
-      expect(report.openclaw_tool_pass).toBe(0);
+      expect(report.carapace_tool_pass).toBe(0);
       expect(report.protocol_pass).toBe(0);
     },
   );

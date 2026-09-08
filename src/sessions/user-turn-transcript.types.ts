@@ -1,5 +1,5 @@
 // User-turn transcript type contracts shared by runtime and queue option types.
-import type { HumanMention } from "@openclaw/gateway-protocol";
+import type { HumanMention } from "@carapace/gateway-protocol";
 import type { AgentMessage } from "../../packages/agent-core/src/types.js";
 import type { TranscriptSenderIdentity } from "../chat/sender-identity.js";
 import type {
@@ -42,7 +42,7 @@ export type PersistedUserTurnMessage = Extract<AgentMessage, { role: "user" }> &
   /** Private transcript correlation; never authorizes an execution. */
   idempotencyKey?: string;
   provenance?: InputProvenance;
-  __openclaw?: Record<string, unknown> & { humanMentions?: readonly HumanMention[] };
+  __carapace?: Record<string, unknown> & { humanMentions?: readonly HumanMention[] };
 };
 
 export type UserTurnInput = Pick<PersistedUserTurnMessage, "display" | "excludeFromContext"> & {

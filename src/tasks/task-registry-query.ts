@@ -1,7 +1,7 @@
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { clearTaskActivity } from "./task-registry-activity.js";
 import { isActiveTaskStatus, ensureLinkedTaskFlowRegistryReady } from "./task-registry-common.js";
 import type { TaskRegistryControlRuntime } from "./task-registry-control.types.js";
@@ -50,7 +50,7 @@ function taskMatchesRelatedSession(
   task: TaskRecord,
   sessionKey: string | undefined,
   sessionAgentId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): boolean {
   if (!sessionKey) {
     return true;
@@ -75,7 +75,7 @@ function taskMatchesRelatedSession(
 function taskMatchesAgent(
   task: TaskRecord,
   agentId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): boolean {
   if (!agentId) {
     return true;
@@ -158,7 +158,7 @@ export async function listTaskRecordPage(params: {
   agentId?: string;
   sessionKey?: string;
   sessionAgentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   prepareFilter?: (
     tasks: readonly Readonly<TaskRecord>[],
   ) => (task: Readonly<TaskRecord>) => boolean;

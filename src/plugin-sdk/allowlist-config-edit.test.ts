@@ -2,7 +2,7 @@
  * Tests allowlist config edit helpers for flat, nested, and account-scoped records.
  */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildDmGroupAccountAllowlistAdapter,
   buildLegacyDmAccountAllowlistAdapter,
@@ -226,7 +226,7 @@ describe("buildDmGroupAccountAllowlistAdapter", () => {
       };
 
       await adapter.applyConfigEdit?.({
-        cfg: parsedConfig as OpenClawConfig,
+        cfg: parsedConfig as CarapaceConfig,
         parsedConfig,
         accountId: "alt",
         scope: "dm",
@@ -248,7 +248,7 @@ describe("buildDmGroupAccountAllowlistAdapter", () => {
     };
 
     await adapter.applyConfigEdit?.({
-      cfg: parsedConfig as OpenClawConfig,
+      cfg: parsedConfig as CarapaceConfig,
       parsedConfig,
       accountId: "alt",
       scope: "dm",
@@ -265,7 +265,7 @@ describe("buildDmGroupAccountAllowlistAdapter", () => {
     const parsedConfig: Record<string, unknown> = {};
 
     await adapter.applyConfigEdit?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       parsedConfig,
       accountId: "default",
       scope: "dm",
@@ -282,7 +282,7 @@ describe("buildDmGroupAccountAllowlistAdapter", () => {
     const parsedConfig: Record<string, unknown> = {};
     const edit = (action: "add" | "remove", entry: string) =>
       adapter.applyConfigEdit?.({
-        cfg: parsedConfig as OpenClawConfig,
+        cfg: parsedConfig as CarapaceConfig,
         parsedConfig,
         accountId: "default",
         scope: "dm",

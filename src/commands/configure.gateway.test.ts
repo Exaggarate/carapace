@@ -2,7 +2,7 @@
 import { IncomingMessage } from "node:http";
 import { Socket } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { authorizeHttpGatewayConnect, resolveGatewayAuth } from "../gateway/auth.js";
 import { isTrustedProxyAddress } from "../gateway/net.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -63,7 +63,7 @@ function makeRuntime(): RuntimeEnv {
 async function runGatewayPrompt(params: {
   selectQueue: string[];
   textQueue: Array<string | undefined>;
-  baseConfig?: OpenClawConfig;
+  baseConfig?: CarapaceConfig;
   randomToken?: string;
   confirmResult?: boolean;
 }) {
@@ -86,7 +86,7 @@ async function runGatewayPrompt(params: {
 async function runTrustedProxyPrompt(params: {
   textQueue: Array<string | undefined>;
   tailscaleMode?: "off" | "serve";
-  baseConfig?: OpenClawConfig;
+  baseConfig?: CarapaceConfig;
   confirmResult?: boolean;
 }) {
   return runGatewayPrompt({
@@ -97,7 +97,7 @@ async function runTrustedProxyPrompt(params: {
 
 afterEach(() => vi.unstubAllEnvs());
 
-async function authorizeConfiguredProxy(config: OpenClawConfig, remoteAddress = "127.0.0.1") {
+async function authorizeConfiguredProxy(config: CarapaceConfig, remoteAddress = "127.0.0.1") {
   const req = new IncomingMessage(new Socket());
   Object.defineProperty(req.socket, "remoteAddress", { value: remoteAddress });
   req.headers = {
@@ -260,7 +260,7 @@ describe("promptGatewayConfig", () => {
     ["::ffff:127.0.0.2/128", "127.0.0.2"],
     [" 127.0.0.1 , \t::1/128 ", "::1"],
   ])("accepts runtime auth after consent for loopback proxy %s", async (proxies, remoteAddress) => {
-    vi.stubEnv("OPENCLAW_LOCALE", "en");
+    vi.stubEnv("CARAPACE_LOCALE", "en");
     const result = await runTrustedProxyPrompt({
       textQueue: ["18789", "x-forwarded-user", "x-forwarded-proto", "", proxies],
       confirmResult: true,
@@ -304,7 +304,7 @@ describe("promptGatewayConfig", () => {
   ])(
     "warns before and after refusing loopback consent in %s",
     async (locale, warning, prompt, refusal) => {
-      vi.stubEnv("OPENCLAW_LOCALE", locale);
+      vi.stubEnv("CARAPACE_LOCALE", locale);
       const result = await runTrustedProxyPrompt({
         textQueue: ["18789", "x-forwarded-user", "", "", "127.0.0.1"],
         confirmResult: false,
@@ -317,7 +317,7 @@ describe("promptGatewayConfig", () => {
       const refusalMessage = mocks.note.mock.calls.at(-1)?.[0];
       expect(refusalMessage).toContain(refusal);
       expect(refusalMessage).toContain("trusted_proxy_loopback_source");
-      expect(refusalMessage).toContain("https://docs.openclaw.ai/gateway/trusted-proxy-auth");
+      expect(refusalMessage).toContain("https://github.com/Exaggarate/carapace");
       expect(await authorizeConfiguredProxy(result.config)).toMatchObject({
         ok: false,
         reason: "trusted_proxy_loopback_source",
@@ -332,7 +332,7 @@ describe("promptGatewayConfig", () => {
   ])(
     "preserves or explicitly revokes loopback consent on rerun: $proxies/$answer",
     async ({ proxies, answer, expected }) => {
-      const baseConfig: OpenClawConfig = {
+      const baseConfig: CarapaceConfig = {
         gateway: {
           auth: {
             mode: "trusted-proxy",
@@ -495,10 +495,10 @@ describe("promptGatewayConfig", () => {
   });
 
   it("stores gateway token as SecretRef when token source is ref", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "env-gateway-token");
+    vi.stubEnv("CARAPACE_GATEWAY_TOKEN", "env-gateway-token");
     const result = await runGatewayPrompt({
       selectQueue: ["loopback", "token", "off", "ref"],
-      textQueue: ["18789", "OPENCLAW_GATEWAY_TOKEN"],
+      textQueue: ["18789", "CARAPACE_GATEWAY_TOKEN"],
     });
 
     expect(result.config.gateway?.auth).toEqual({
@@ -506,7 +506,7 @@ describe("promptGatewayConfig", () => {
       token: {
         source: "env",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "CARAPACE_GATEWAY_TOKEN",
       },
     });
     expect(result.token).toBeUndefined();

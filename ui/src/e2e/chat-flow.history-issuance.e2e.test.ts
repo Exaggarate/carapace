@@ -11,7 +11,7 @@ import { createControlUiE2eContextOptions } from "./control-ui-e2e-suite.test-su
 const suite = createChatFlowE2eSuite();
 
 async function captureHistoryIssuanceProof(page: Page, name: string): Promise<void> {
-  const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+  const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
     ? suite.artifactDir
     : undefined;
   if (!artifactDir) {
@@ -64,7 +64,7 @@ suite.define(() => {
         const initialStartups = (await gateway.getRequests("chat.startup")).length;
         await gateway.deferNext("chat.startup");
         await page.evaluate((pathname) => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: {
               context: { navigate: (routeId: string, options: { pathname: string }) => void };
             };
@@ -88,7 +88,7 @@ suite.define(() => {
           .waitFor({ state: "visible" });
         await page.waitForFunction(
           (key) =>
-            [...document.querySelectorAll<HTMLElement>("openclaw-chat-pane")].some(
+            [...document.querySelectorAll<HTMLElement>("carapace-chat-pane")].some(
               (pane) =>
                 pane.classList.contains("chat-pane-cache__pane--visible") &&
                 (pane as HTMLElement & { sessionKey?: string }).sessionKey === key,
@@ -141,7 +141,7 @@ suite.define(() => {
       await gateway.waitForRequest("chat.startup", { after: 1 });
       await historyError.waitFor({ state: "detached" });
       await page
-        .locator('.chat-thread openclaw-panel-loading-skeleton[data-panel-skeleton="chat"]')
+        .locator('.chat-thread carapace-panel-loading-skeleton[data-panel-skeleton="chat"]')
         .waitFor({ state: "visible" });
       await gateway.resolveDeferred("chat.startup");
       await page

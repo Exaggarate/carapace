@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
 import {
   authorizeClientVoiceConfirmation,
@@ -46,7 +46,7 @@ vi.mock("../talk/agent-consult-runtime.js", () => ({
 import { createTalkClientAgentConsultRunner } from "./talk-client-agent-consult.js";
 import type { TalkAgentConsultAuthority } from "./talk-client-gateway-control.js";
 
-const config = {} as OpenClawConfig;
+const config = {} as CarapaceConfig;
 const coreParams = {
   config,
   prompt: "check",

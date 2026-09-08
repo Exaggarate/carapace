@@ -2,7 +2,7 @@
  * Gateway channels.status method tests.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelStatusIssue } from "../../channels/plugins/types.public.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -42,7 +42,7 @@ vi.mock("../../config/config.js", () => ({
   getRuntimeConfig: mocks.getRuntimeConfig,
   readConfigFileSnapshot: vi.fn(async () => ({
     config: {},
-    path: "openclaw.config.json",
+    path: "carapace.config.json",
     raw: "{}",
   })),
 }));
@@ -433,7 +433,7 @@ describe("channelsHandlers channels.status", () => {
       expect(JSON.stringify(payload)).not.toContain(credential);
       const lastError = firstChannelAccount(payload, "broken-channel").lastError;
       expect(String(lastError).length).toBeLessThan(1200);
-      expect(lastError).toContain("run openclaw doctor");
+      expect(lastError).toContain("run carapace doctor");
       expect(firstChannelAccount(payload, "broken-channel")).toMatchObject({
         configured: true,
         running: false,

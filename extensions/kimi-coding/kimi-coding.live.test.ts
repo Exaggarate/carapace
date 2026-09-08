@@ -1,13 +1,13 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   streamSimple,
   type AssistantMessage,
   type Context,
   type Model,
   type Tool,
-} from "openclaw/plugin-sdk/llm";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+} from "carapace/plugin-sdk/llm";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";

@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs, promisify } from "node:util";
-import { asOptionalRecord as record } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as record } from "@carapace/normalization-core/record-coerce";
 import { createComputerTool } from "../../src/agents/tools/computer-tool.js";
 import { listNodes } from "../../src/agents/tools/nodes-utils.js";
 

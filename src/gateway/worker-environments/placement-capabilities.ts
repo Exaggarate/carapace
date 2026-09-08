@@ -1,4 +1,4 @@
-import { OPENCLAW_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
+import { CARAPACE_AGENT_RUNTIME_ID } from "../../agents/agent-runtime-id.js";
 import { getRegisteredAgentHarness } from "../../agents/harness/registry.js";
 import type { GatewayAgentRuntime } from "../../shared/session-types.js";
 import type { WorkerPlacementExecutionMode } from "./placement-record.js";
@@ -9,7 +9,7 @@ export function resolveWorkerPlacementCapabilities(runtime: string): {
   devicePlacement?: NonNullable<GatewayAgentRuntime["devicePlacement"]>;
 } {
   const runtimeId = runtime.trim();
-  if (runtimeId === OPENCLAW_AGENT_RUNTIME_ID) {
+  if (runtimeId === CARAPACE_AGENT_RUNTIME_ID) {
     return {
       executionMode: "worker-turn",
       devicePlacement: { requiredNodeCommands: [], consumesWorkerSlot: true },

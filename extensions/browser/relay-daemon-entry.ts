@@ -1,10 +1,10 @@
 /**
- * Standalone extension relay daemon. Hosts the loopback relay the OpenClaw
+ * Standalone extension relay daemon. Hosts the loopback relay the Carapace
  * Chrome extension dials, with no Gateway required — CDP clients (mcporter,
  * Playwright, chrome-devtools-mcp) attach through the same relay port. Spawned
  * on demand by the native messaging host, or run manually.
  */
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { getRuntimeConfig } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { runExtensionRelayDaemon } from "./src/browser/relay-daemon.js";
 
 const DEFAULT_RELAY_PORT = 18_799;
@@ -50,6 +50,6 @@ async function main(): Promise<void> {
 }
 
 void main().catch((error: unknown) => {
-  process.stderr.write(`openclaw relay daemon failed: ${String(error)}\n`);
+  process.stderr.write(`carapace relay daemon failed: ${String(error)}\n`);
   process.exitCode = 1;
 });

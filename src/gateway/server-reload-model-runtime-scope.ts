@@ -1,5 +1,5 @@
 import { refreshPreparedModelRuntimeSnapshots } from "../agents/prepared-model-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 
@@ -25,7 +25,7 @@ export function resolveReloadAgentIds(
 }
 
 export function refreshModelRuntimeAfterHotReload(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentIds: ReadonlySet<string> | undefined;
   pluginMetadataSnapshot: PluginMetadataSnapshot | undefined;
   isPublicationCurrent?: () => boolean;

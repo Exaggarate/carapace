@@ -2,10 +2,10 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
 import type { InternalSessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createChatMetadataHarness } from "./chat-metadata-runtime.test-support.js";
 
 describe("gateway chat metadata native session ownership", () => {
@@ -15,7 +15,7 @@ describe("gateway chat metadata native session ownership", () => {
         defaults: { model: { primary: "openai/gpt-5.6-sol" } },
         entries: { main: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const harness = createChatMetadataHarness(config);
     const hostModels = [
       {
@@ -126,14 +126,14 @@ describe("gateway chat metadata native session ownership", () => {
     { change: "physical session replacement", currentBinding: false, expectedNative: false },
     { change: "current binding hit", currentBinding: true, expectedNative: true },
   ])("resolves $change after metadata preparation", async (scenario) => {
-    await withOpenClawTestState({ label: "metadata-native-lineage" }, async (state) => {
+    await withCarapaceTestState({ label: "metadata-native-lineage" }, async (state) => {
       const config = {
         agents: {
           defaults: { model: { primary: "openai/gpt-5.6-sol" } },
           entries: { main: {} },
         },
         session: { store: state.path("alternate", "sessions.json") },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const harness = createChatMetadataHarness(config);
       const hostModels = [
         {

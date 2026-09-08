@@ -4,8 +4,8 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { SUPPORTED_NODE_VERSIONS } from "../../node-version.mjs";
 import { resolveInlineCommandMatch } from "../infra/shell-inline-command.js";
 import { POSIX_SHELL_WRAPPERS } from "../infra/shell-wrapper-resolution.js";
@@ -282,8 +282,8 @@ async function auditSystemdUnitBackup(unitPath: string, issues: ServiceConfigIss
         const normalizedKey = key.toUpperCase();
         if (
           value &&
-          (normalizedKey === "OPENCLAW_GATEWAY_TOKEN" ||
-            normalizedKey === "OPENCLAW_GATEWAY_PASSWORD")
+          (normalizedKey === "CARAPACE_GATEWAY_TOKEN" ||
+            normalizedKey === "CARAPACE_GATEWAY_PASSWORD")
         ) {
           embeddedKeys.add(normalizedKey);
         }
@@ -439,7 +439,7 @@ function auditGatewayToken(
   }
   issues.push({
     code: SERVICE_AUDIT_CODES.gatewayTokenEmbedded,
-    message: "Gateway service embeds OPENCLAW_GATEWAY_TOKEN and should be reinstalled.",
+    message: "Gateway service embeds CARAPACE_GATEWAY_TOKEN and should be reinstalled.",
     level: "recommended",
   });
   const expectedToken = normalizeOptionalString(expectedGatewayToken);
@@ -449,7 +449,7 @@ function auditGatewayToken(
   issues.push({
     code: SERVICE_AUDIT_CODES.gatewayTokenMismatch,
     message:
-      "Gateway service OPENCLAW_GATEWAY_TOKEN does not match gateway.auth.token in openclaw.json",
+      "Gateway service CARAPACE_GATEWAY_TOKEN does not match gateway.auth.token in carapace.json",
     detail: "service token is stale",
     level: "recommended",
   });
@@ -457,14 +457,14 @@ function auditGatewayToken(
 
 function auditGatewayPassword(command: GatewayServiceCommand, issues: ServiceConfigIssue[]) {
   if (
-    !command?.environment?.OPENCLAW_GATEWAY_PASSWORD?.trim() ||
-    isEnvironmentFileOnlySource(command.environmentValueSources?.OPENCLAW_GATEWAY_PASSWORD)
+    !command?.environment?.CARAPACE_GATEWAY_PASSWORD?.trim() ||
+    isEnvironmentFileOnlySource(command.environmentValueSources?.CARAPACE_GATEWAY_PASSWORD)
   ) {
     return;
   }
   issues.push({
     code: SERVICE_AUDIT_CODES.gatewayPasswordEmbedded,
-    message: "Gateway service embeds OPENCLAW_GATEWAY_PASSWORD and should be reinstalled.",
+    message: "Gateway service embeds CARAPACE_GATEWAY_PASSWORD and should be reinstalled.",
     detail: "Rotate the password after reinstalling because the service definition exposed it.",
     level: "recommended",
   });
@@ -519,10 +519,10 @@ export function readEmbeddedGatewayToken(command: GatewayServiceCommand): string
   if (!command) {
     return undefined;
   }
-  if (isEnvironmentFileOnlySource(command.environmentValueSources?.OPENCLAW_GATEWAY_TOKEN)) {
+  if (isEnvironmentFileOnlySource(command.environmentValueSources?.CARAPACE_GATEWAY_TOKEN)) {
     return undefined;
   }
-  return normalizeOptionalString(command.environment?.OPENCLAW_GATEWAY_TOKEN);
+  return normalizeOptionalString(command.environment?.CARAPACE_GATEWAY_TOKEN);
 }
 
 function getEquivalentMinimalPathEntries(

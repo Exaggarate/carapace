@@ -1,9 +1,9 @@
 /** Tool mutation and replay-safety classification. */
-import { asOptionalObjectRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalObjectRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { isAutomationsToolName } from "./tools/automations-tool-name.js";
 import { isComputerObservationAction } from "./tools/computer-tool-shared.js";
 

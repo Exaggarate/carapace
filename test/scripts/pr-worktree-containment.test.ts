@@ -45,10 +45,10 @@ function git(root: string, ...args: string[]) {
 }
 
 function createFixtureTemplate() {
-  const root = templateDirs.make("openclaw-pr-worktree-containment-template-");
+  const root = templateDirs.make("carapace-pr-worktree-containment-template-");
   git(root, "init", "--initial-branch=main");
-  git(root, "config", "user.name", "OpenClaw Test");
-  git(root, "config", "user.email", "test@openclaw.invalid");
+  git(root, "config", "user.name", "Carapace Test");
+  git(root, "config", "user.email", "test@carapace.invalid");
   writeFileSync(join(root, "fixture.txt"), "main\n");
   git(root, "add", "fixture.txt");
   git(root, "commit", "-m", "main fixture");
@@ -58,7 +58,7 @@ function createFixtureTemplate() {
 
 function createFixture(): Fixture {
   const template = (fixtureTemplate ??= createFixtureTemplate());
-  const root = tempDirs.make("openclaw-pr-worktree-containment-");
+  const root = tempDirs.make("carapace-pr-worktree-containment-");
   // Copy complete history before worktrees exist; each case owns its fetch and refs.
   cpSync(template.root, root, { recursive: true, mode: fsConstants.COPYFILE_FICLONE });
   const { mainSha } = template;
@@ -76,10 +76,10 @@ function createFixture(): Fixture {
 }
 
 function createReviewFixtureTemplate() {
-  const root = templateDirs.make("openclaw-pr-review-transition-template-");
+  const root = templateDirs.make("carapace-pr-review-transition-template-");
   git(root, "init", "--initial-branch=main");
-  git(root, "config", "user.name", "OpenClaw Test");
-  git(root, "config", "user.email", "test@openclaw.invalid");
+  git(root, "config", "user.name", "Carapace Test");
+  git(root, "config", "user.email", "test@carapace.invalid");
   writeFileSync(join(root, "transition-a.txt"), "base-a\n");
   writeFileSync(join(root, "transition-b.txt"), "base-b\n");
   writeFileSync(join(root, "overlap.txt"), "base-overlap\n");
@@ -110,7 +110,7 @@ function createReviewFixtureTemplate() {
 
 function createReviewFixture(): ReviewFixture {
   const template = (reviewFixtureTemplate ??= createReviewFixtureTemplate());
-  const root = tempDirs.make("openclaw-pr-review-transition-");
+  const root = tempDirs.make("carapace-pr-review-transition-");
   cpSync(template.root, root, { recursive: true, mode: fsConstants.COPYFILE_FICLONE });
   const { mainSha, prASha, prBSha } = template;
   git(root, "remote", "add", "origin", root);

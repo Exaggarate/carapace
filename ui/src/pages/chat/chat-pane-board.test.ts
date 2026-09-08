@@ -32,8 +32,8 @@ import {
 
 // These shell tests isolate board data and presentation; board rendering has its own suite.
 vi.mock("../../components/board/board-view.ts", () => {
-  if (!customElements.get("openclaw-board-view")) {
-    customElements.define("openclaw-board-view", class extends HTMLElement {});
+  if (!customElements.get("carapace-board-view")) {
+    customElements.define("carapace-board-view", class extends HTMLElement {});
   }
   return {};
 });
@@ -97,7 +97,7 @@ type TestChatPane = HTMLElement & {
 let theme: ReturnType<typeof createApplicationTheme>;
 
 function createTestPane(sessions: SessionCapability = {} as SessionCapability) {
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
   const client = {
     request: vi.fn(async () => ({ session: { key: "agent:main:current", kind: "direct" } })),
   } as unknown as GatewayBrowserClient;
@@ -298,7 +298,7 @@ describe("chat pane board shell", () => {
     first.boardProvider = provider;
     second.boardProvider = provider;
     const changed = vi.fn();
-    first.addEventListener("openclaw-chat-pane-lifecycle-changed", changed);
+    first.addEventListener("carapace-chat-pane-lifecycle-changed", changed);
     first.updated();
     second.updated();
     expect(first.conversationPresented).toBe(true);
@@ -797,7 +797,7 @@ describe("chat pane board shell", () => {
       const draw = () => render(pane.renderBoardPanel(pane.resolveBoardView(), layout), container);
       const target = () =>
         (
-          container.querySelector("openclaw-board-view") as
+          container.querySelector("carapace-board-view") as
             | (HTMLElement & { session: { sessionKey: string; agentId?: string } })
             | null
         )?.session;

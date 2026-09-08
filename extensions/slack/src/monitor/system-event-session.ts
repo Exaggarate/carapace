@@ -1,12 +1,12 @@
 // Slack plugin module owns session routing for non-message events.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveRuntimeConversationBindingRoute } from "openclaw/plugin-sdk/conversation-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveRuntimeConversationBindingRoute } from "carapace/plugin-sdk/conversation-runtime";
 import {
   resolveAgentRoute,
   resolveThreadSessionKeys,
   type ResolvedAgentRoute,
-} from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/routing";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { SlackMessageEvent } from "../types.js";
 import { normalizeSlackChannelType } from "./channel-type.js";
 import type { SlackEventScope } from "./event-scope.js";
@@ -27,7 +27,7 @@ type SlackSystemEventSessionKeyParams = {
 type SlackSystemEventRoute = Pick<ResolvedAgentRoute, "agentId" | "sessionKey">;
 
 export function createSlackSystemEventRouteResolver(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   getTeamId: () => string;
   mainKey: string;
@@ -75,7 +75,7 @@ export function createSlackSystemEventRouteResolver(params: {
 }
 
 function resolveSlackSystemEventRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   teamId: string;
   threadInheritParent: boolean;

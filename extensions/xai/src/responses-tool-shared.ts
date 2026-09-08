@@ -1,12 +1,12 @@
 // Xai plugin module implements responses tool shared behavior.
-import { readProviderJsonObjectResponse } from "openclaw/plugin-sdk/provider-http";
-import { postTrustedWebToolsJson } from "openclaw/plugin-sdk/provider-web-search";
-import { truncateSanitizedExternalContent } from "openclaw/plugin-sdk/security-runtime";
+import { readProviderJsonObjectResponse } from "carapace/plugin-sdk/provider-http";
+import { postTrustedWebToolsJson } from "carapace/plugin-sdk/provider-web-search";
+import { truncateSanitizedExternalContent } from "carapace/plugin-sdk/security-runtime";
 import {
   isRecord,
   normalizeOptionalString as trimString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { XaiWebSearchResponse } from "./web-search-response.types.js";
 
 const XAI_CITATION_MAX_COUNT = 20;

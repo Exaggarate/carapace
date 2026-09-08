@@ -1,5 +1,5 @@
-import { redactIdentifier } from "@openclaw/normalization-core/node-crypto";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { redactIdentifier } from "@carapace/normalization-core/node-crypto";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptWriteScope,
   TranscriptAppendRefusal,
@@ -43,7 +43,7 @@ export function resolveTranscriptAppendRefusal(
 }
 
 export function assertLockedTranscriptWriteAllowed(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   resolved: ResolvedTranscriptScope,
   scope: SessionTranscriptWriteScope,
 ): void {

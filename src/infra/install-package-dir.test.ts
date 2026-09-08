@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import { runCommandWithTimeout, type CommandOptions, type SpawnResult } from "../process/exec.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { npmCommandFailureCases } from "../test-utils/npm-spec-install-test-helpers.js";
 import {
@@ -145,7 +145,7 @@ async function createReboundInstallFixture(params: {
 
 describe("installPackageDir", () => {
   const fixtureRootTracker = createSuiteTempRootTracker({
-    prefix: "openclaw-install-package-dir-",
+    prefix: "carapace-install-package-dir-",
   });
   async function installWithNpmResult(npmResult: SpawnResult) {
     await fixtureRootTracker.setup();
@@ -211,10 +211,10 @@ describe("installPackageDir", () => {
     });
     await expect(fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).resolves.toBe("old");
     await expect(
-      listMatchingDirs(installBaseDir, ".openclaw-install-stage-"),
+      listMatchingDirs(installBaseDir, ".carapace-install-stage-"),
     ).resolves.toHaveLength(0);
     await expect(
-      listMatchingDirs(installBaseDir, ".openclaw-install-backups"),
+      listMatchingDirs(installBaseDir, ".carapace-install-backups"),
     ).resolves.toHaveLength(0);
   });
 
@@ -272,10 +272,10 @@ describe("installPackageDir", () => {
     await expect(fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).resolves.toBe("old");
     await expect(fs.readFile(path.join(targetDir, "local.txt"), "utf8")).resolves.toBe("keep me");
     await expect(
-      listMatchingDirs(installBaseDir, ".openclaw-install-stage-"),
+      listMatchingDirs(installBaseDir, ".carapace-install-stage-"),
     ).resolves.toHaveLength(0);
     await expect(
-      fs.readdir(path.join(installBaseDir, ".openclaw-install-backups")),
+      fs.readdir(path.join(installBaseDir, ".carapace-install-backups")),
     ).resolves.toHaveLength(0);
   });
 
@@ -311,9 +311,9 @@ describe("installPackageDir", () => {
     });
     await expect(fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).resolves.toBe("old");
     await expect(
-      listMatchingDirs(installBaseDir, ".openclaw-install-stage-"),
+      listMatchingDirs(installBaseDir, ".carapace-install-stage-"),
     ).resolves.toHaveLength(0);
-    const backupRoot = path.join(installBaseDir, ".openclaw-install-backups");
+    const backupRoot = path.join(installBaseDir, ".carapace-install-backups");
     await expect(fs.readdir(backupRoot)).resolves.toHaveLength(0);
   });
 
@@ -395,11 +395,11 @@ describe("installPackageDir", () => {
       }
       await expect(fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).resolves.toBe("old");
       await expect(
-        listMatchingDirs(installBaseDir, ".openclaw-install-stage-"),
+        listMatchingDirs(installBaseDir, ".carapace-install-stage-"),
       ).resolves.toHaveLength(0);
       await expect(listMatchingDirs(installBaseDir, ".fs-safe-move-")).resolves.toHaveLength(0);
       await expect(
-        fs.readdir(path.join(installBaseDir, ".openclaw-install-backups")),
+        fs.readdir(path.join(installBaseDir, ".carapace-install-backups")),
       ).resolves.toHaveLength(0);
     } finally {
       release.resolve();
@@ -422,7 +422,7 @@ describe("installPackageDir", () => {
       const [from, to] = args;
       const fromPath = String(from);
       if (
-        path.basename(fromPath).startsWith(".openclaw-install-stage-") &&
+        path.basename(fromPath).startsWith(".carapace-install-stage-") &&
         normalizeComparablePath(String(to)) === normalizeComparablePath(targetDir)
       ) {
         directMoves += 1;
@@ -444,7 +444,7 @@ describe("installPackageDir", () => {
     expect(directMoves).toBe(0);
     await expect(fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).resolves.toBe("new");
     await expect(
-      listMatchingDirs(installBaseDir, ".openclaw-install-stage-"),
+      listMatchingDirs(installBaseDir, ".carapace-install-stage-"),
     ).resolves.toHaveLength(0);
   });
 
@@ -676,7 +676,7 @@ describe("installPackageDir", () => {
       "Install base directory changed before backup cleanup; leaving backup in place.",
     );
     await expectMissingPath(path.join(outsideInstallRoot, "demo", "marker.txt"));
-    const backupRoot = path.join(preservedInstallRoot, ".openclaw-install-backups");
+    const backupRoot = path.join(preservedInstallRoot, ".carapace-install-backups");
     await expect(fs.readdir(backupRoot)).resolves.toHaveLength(1);
   });
 
@@ -725,7 +725,7 @@ describe("installPackageDir", () => {
       "--loglevel=error",
       "--ignore-scripts",
     ]);
-    expect(installOptions.cwd).toContain(".openclaw-install-stage-");
+    expect(installOptions.cwd).toContain(".carapace-install-stage-");
   });
 
   it("hides the staged project .npmrc while npm install runs and restores it afterward", async () => {
@@ -755,7 +755,7 @@ describe("installPackageDir", () => {
       }
       await expectMissingPath(path.join(cwd, ".npmrc"));
       await expect(
-        listMatchingEntries(cwd, ".openclaw-install-hidden-npmrc-"),
+        listMatchingEntries(cwd, ".carapace-install-hidden-npmrc-"),
       ).resolves.toHaveLength(1);
       return {
         stdout: "",
@@ -780,7 +780,7 @@ describe("installPackageDir", () => {
     expect(result).toEqual({ ok: true });
     await expect(fs.readFile(path.join(targetDir, ".npmrc"), "utf8")).resolves.toBe(npmrcContent);
     await expect(
-      listMatchingEntries(targetDir, ".openclaw-install-hidden-npmrc-"),
+      listMatchingEntries(targetDir, ".carapace-install-hidden-npmrc-"),
     ).resolves.toHaveLength(0);
   });
 
@@ -998,7 +998,7 @@ describe("installPackageDir", () => {
         );
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 });

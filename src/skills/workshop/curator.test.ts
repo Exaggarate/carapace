@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasInternalDiagnosticEventInterest } from "../../infra/diagnostic-event-listener-presence.js";
 import {
   emitDiagnosticEvent,
@@ -9,22 +9,22 @@ import {
   waitForDiagnosticEventsDrained,
 } from "../../infra/diagnostic-events.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { getSkillCuratorStatus, registerSkillUsageTracking } from "./curator.js";
 import {
   applySkillProposal as applySkillProposalImpl,
   proposeCreateSkill as proposeCreateSkillImpl,
 } from "./service.js";
 
-let testState: OpenClawTestState;
-const workshopConfig: OpenClawConfig = {};
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+let testState: CarapaceTestState;
+const workshopConfig: CarapaceConfig = {};
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 const applySkillProposal = (
   input: OptionalWorkshopConfig<Parameters<typeof applySkillProposalImpl>[0]>,
 ) => applySkillProposalImpl({ config: workshopConfig, ...input });
@@ -34,22 +34,22 @@ const proposeCreateSkill = (
 
 beforeEach(async () => {
   resetDiagnosticEventsForTest();
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-curator-",
+    prefix: "carapace-skill-curator-",
   });
 });
 
 afterEach(async () => {
   resetDiagnosticEventsForTest();
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await testState.cleanup();
 });
 
 describe("skill curator usage tracking", () => {
   it("persists trusted skill usage by absolute file identity and increments repeated use", async () => {
-    const database = openOpenClawStateDatabase({ env: testState.env });
+    const database = openCarapaceStateDatabase({ env: testState.env });
     const skillFile = testState.path("skills", "daily-brief", "SKILL.md");
     const unregister = registerSkillUsageTracking({ env: testState.env });
     expect(hasInternalDiagnosticEventInterest("skill.used")).toBe(true);
@@ -151,7 +151,7 @@ describe("skill curator usage tracking", () => {
       expectedRevisionHash: proposal.revisionHash,
     });
     const skillFile = proposal.record.target.skillFile;
-    const database = openOpenClawStateDatabase({ env: testState.env });
+    const database = openCarapaceStateDatabase({ env: testState.env });
     database.db
       .prepare(
         `INSERT INTO skill_usage (

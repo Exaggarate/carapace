@@ -84,7 +84,7 @@ async function directoryTreeFingerprint(root: string): Promise<string> {
 
   let entryCount = 0;
   const hash = createHash("sha256");
-  hash.update("openclaw-codex-computer-use-plugin-tree-v1\0");
+  hash.update("carapace-codex-computer-use-plugin-tree-v1\0");
   const visit = async (directory: string, relativeDirectory: string, before: BigIntStats) => {
     hash.update(`directory\0${relativeDirectory}\0${statTuple(before)}\0`);
     const entries = (await fs.readdir(directory, { withFileTypes: true })).toSorted(

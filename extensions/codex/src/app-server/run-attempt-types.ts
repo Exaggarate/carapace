@@ -1,8 +1,8 @@
 import type {
   EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
   NativeHookRelayEvent,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type { CodexAppServerBindingStore } from "./session-binding.js";
 import type { CodexAppServerClientFactory } from "./shared-client.js";
 

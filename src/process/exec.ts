@@ -1,4 +1,4 @@
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { danger, shouldLogVerbose } from "../globals.js";
 import {
   decodeWindowsOutputBuffer,

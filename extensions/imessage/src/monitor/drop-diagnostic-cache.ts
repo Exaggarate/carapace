@@ -1,4 +1,4 @@
-import { createDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
+import { createDedupeCache } from "carapace/plugin-sdk/dedupe-runtime";
 
 const THROTTLED_DROP_DIAGNOSTIC_CACHE_MAX_SIZE = 512;
 

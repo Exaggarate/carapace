@@ -5,9 +5,9 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { requireGitCommand } from "../infra/git-exec.js";
 import {
-  openOpenClawStateDatabase,
-  closeOpenClawStateDatabaseForTest,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  closeCarapaceStateDatabaseForTest,
+} from "../state/carapace-state-db.js";
 import { createGitBackup, restoreGitBackupRef, verifyGitBackupRef } from "./git-backup.js";
 
 // A real Git round trip must fit a heap smaller than its serialized table.
@@ -21,7 +21,7 @@ const identity = { role: "global" } as const;
 const rowCount = 4096;
 const body = "x".repeat(64 * 1024);
 await fs.mkdir(stateDir, { recursive: true });
-const database = openOpenClawStateDatabase({ path: sourcePath }).db;
+const database = openCarapaceStateDatabase({ path: sourcePath }).db;
 database.exec("CREATE TABLE content (id INTEGER PRIMARY KEY, body TEXT NOT NULL)");
 const insert = database.prepare("INSERT INTO content VALUES (?, ?)");
 const expectedHash = createHash("sha256");
@@ -31,7 +31,7 @@ for (let id = 0; id < rowCount; id += 1) {
   expectedHash.update(`${JSON.stringify({ id, body })}\n`);
 }
 database.exec("COMMIT");
-closeOpenClawStateDatabaseForTest();
+closeCarapaceStateDatabaseForTest();
 const expected = { rows: rowCount, sha256: expectedHash.digest("hex") };
 const created = await createGitBackup({
   repositoryPath,

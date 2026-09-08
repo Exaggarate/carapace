@@ -1,10 +1,10 @@
 /**
  * Canvas plugin config parsing, enablement, and schema metadata.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { isTruthyEnvValue } from "openclaw/plugin-sdk/runtime-env";
-import { asBoolean as readBoolean, isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
+import { isTruthyEnvValue } from "carapace/plugin-sdk/runtime-env";
+import { asBoolean as readBoolean, isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 /** Enablement for Canvas-owned document and renderer routes. */
 export type CanvasHostConfig = {
@@ -39,7 +39,7 @@ export function parseCanvasPluginConfig(value: unknown): CanvasPluginConfig {
 
 /** Resolves Canvas route configuration from plugin-owned config. */
 export function resolveCanvasHostConfig(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   pluginConfig?: Record<string, unknown>;
 }): CanvasHostConfig {
   const pluginConfig =
@@ -49,8 +49,8 @@ export function resolveCanvasHostConfig(params: {
 }
 
 /** Returns whether Canvas-owned document and renderer routes should be active. */
-export function isCanvasHostEnabled(config?: OpenClawConfig): boolean {
-  if (isTruthyEnvValue(process.env.OPENCLAW_SKIP_CANVAS_HOST)) {
+export function isCanvasHostEnabled(config?: CarapaceConfig): boolean {
+  if (isTruthyEnvValue(process.env.CARAPACE_SKIP_CANVAS_HOST)) {
     return false;
   }
   return resolveCanvasHostConfig({ config }).enabled !== false;

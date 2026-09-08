@@ -28,7 +28,7 @@ describe("Doctor disabled LaunchAgent diagnosis", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-launchagent-"));
+    home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-launchagent-"));
     Object.defineProperty(process, "platform", { ...platformDescriptor, value: "darwin" });
   });
 
@@ -42,31 +42,31 @@ describe("Doctor disabled LaunchAgent diagnosis", () => {
   it.each([
     {
       profile: undefined,
-      label: "ai.openclaw.gateway",
+      label: "ai.carapace.gateway",
       override: undefined,
-      command: "openclaw gateway start",
+      command: "carapace gateway start",
     },
     {
       profile: "staging",
-      label: "ai.openclaw.staging",
+      label: "ai.carapace.staging",
       override: undefined,
-      command: "openclaw --profile staging gateway start",
+      command: "carapace --profile staging gateway start",
     },
     {
       profile: undefined,
-      label: "dev.openclaw.custom",
-      override: "dev.openclaw.custom",
-      command: "OPENCLAW_LAUNCHD_LABEL=dev.openclaw.custom openclaw gateway start",
+      label: "dev.carapace.custom",
+      override: "dev.carapace.custom",
+      command: "CARAPACE_LAUNCHD_LABEL=dev.carapace.custom carapace gateway start",
     },
   ])(
     "diagnoses $label during offline repair without activating it",
     async ({ profile, label, override, command }) => {
       const env = {
         HOME: home,
-        OPENCLAW_STATE_DIR: path.join(home, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(home, "state", "openclaw.json"),
-        OPENCLAW_PROFILE: profile,
-        OPENCLAW_LAUNCHD_LABEL: override,
+        CARAPACE_STATE_DIR: path.join(home, "state"),
+        CARAPACE_CONFIG_PATH: path.join(home, "state", "carapace.json"),
+        CARAPACE_PROFILE: profile,
+        CARAPACE_LAUNCHD_LABEL: override,
       };
       await fs.mkdir(path.join(home, "Library", "LaunchAgents"), { recursive: true });
       await fs.writeFile(path.join(home, "Library", "LaunchAgents", `${label}.plist`), "fixture");
@@ -106,8 +106,8 @@ describe("Doctor disabled LaunchAgent diagnosis", () => {
     { installed: true, loaded: true, enabled: false },
     { installed: false, loaded: false, enabled: false },
   ])("leaves other service states unchanged: %j", async ({ installed, loaded, enabled }) => {
-    const label = "dev.openclaw.other-state";
-    const env = { HOME: home, OPENCLAW_LAUNCHD_LABEL: label };
+    const label = "dev.carapace.other-state";
+    const env = { HOME: home, CARAPACE_LAUNCHD_LABEL: label };
     if (installed) {
       await fs.mkdir(path.join(home, "Library", "LaunchAgents"), { recursive: true });
       await fs.writeFile(path.join(home, "Library", "LaunchAgents", `${label}.plist`), "fixture");

@@ -738,7 +738,7 @@ describe("clearCliSessionInStore", () => {
     "clears active and stored entries only for a %s owner",
     async (owner) => {
       const activeEntry = {
-        sessionId: "openclaw-active",
+        sessionId: "carapace-active",
         updatedAt: 1,
         cliSessionBindings: { "claude-cli": { sessionId: "stale-session" } },
         cliSessionIds: { "claude-cli": "stale-session" },
@@ -792,7 +792,7 @@ describe("clearCliSessionInStore", () => {
 
   it("does not clear a replacement binding adopted by another turn", async () => {
     const entry = {
-      sessionId: "openclaw-active",
+      sessionId: "carapace-active",
       updatedAt: 1,
       cliSessionBindings: { "claude-cli": { sessionId: "replacement-session" } },
       cliSessionIds: { "claude-cli": "replacement-session" },
@@ -876,12 +876,12 @@ describe("createCliToolSummaryTracker", () => {
     await tracker.noteToolEvent(startEvent);
     await tracker.noteToolEvent({
       ...resultEvent,
-      result: [{ type: "web_search_result", title: "OpenClaw", url: "https://example.com" }],
+      result: [{ type: "web_search_result", title: "Carapace", url: "https://example.com" }],
     });
 
     const payload = deliver.mock.calls[0]?.[0] as { text: string };
     expect(payload.text).toContain('"type":"web_search_result"');
-    expect(payload.text).toContain('"title":"OpenClaw"');
+    expect(payload.text).toContain('"title":"Carapace"');
   });
 
   it("emits nothing while tool summaries are disabled", async () => {

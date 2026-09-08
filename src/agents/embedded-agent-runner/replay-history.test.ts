@@ -1,13 +1,13 @@
 // Coverage for normalizing assistant replay content before provider requests.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it, vi } from "vitest";
 import { markInboundContextLabel } from "../../auto-reply/reply/inbound-context-marker.js";
 import { createAssistantMessageEventStream } from "../../llm/utils/event-stream.js";
-import { OPENCLAW_TRANSCRIPT_ARTIFACT_API } from "../../shared/transcript-only-openclaw-assistant.js";
+import { CARAPACE_TRANSCRIPT_ARTIFACT_API } from "../../shared/transcript-only-carapace-assistant.js";
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_NOTICE,
+  CARAPACE_RUNTIME_CONTEXT_NOTICE,
 } from "../internal-runtime-context.js";
 import type { StreamFn } from "../runtime/index.js";
 import { makeProviderModelFixture } from "../test-helpers/provider-model-fixture.js";
@@ -17,7 +17,7 @@ import { wrapStreamFnSanitizeMalformedToolCalls } from "./run/attempt-tool-call-
 
 // Preface of carriers persisted before the stable system prompt explained the markers.
 const LEGACY_NEXT_TURN_RUNTIME_CONTEXT_HEADER =
-  "OpenClaw runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.";
+  "Carapace runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.";
 
 const FALLBACK_TEXT = "[assistant turn failed before producing content]";
 const COPIED_INBOUND_METADATA_ONLY_TEXT = [
@@ -58,12 +58,12 @@ function userMessage(text: string): AgentMessage {
   return { role: "user", content: text, timestamp: 0 } as unknown as AgentMessage;
 }
 
-function openclawTranscriptAssistant(model: "delivery-mirror" | "gateway-injected"): AgentMessage {
+function carapaceTranscriptAssistant(model: "delivery-mirror" | "gateway-injected"): AgentMessage {
   return {
     role: "assistant",
     content: [{ type: "text", text: "channel mirror" }],
-    api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-    provider: "openclaw",
+    api: CARAPACE_TRANSCRIPT_ARTIFACT_API,
+    provider: "carapace",
     model,
     usage: createZeroUsageFixture(),
     stopReason: "stop",
@@ -100,22 +100,22 @@ describe("normalizeAssistantReplayContent", () => {
     const blankString = {
       role: "user",
       content: "",
-      __openclaw: { lateMedia: true, media: [{ path: "/tmp/late.png" }] },
+      __carapace: { lateMedia: true, media: [{ path: "/tmp/late.png" }] },
     } as unknown as AgentMessage;
     const blankArray = {
       role: "user",
       content: [{ type: "text", text: "  " }],
-      __openclaw: { lateMedia: true, media: [{}, { path: "/tmp/late-array.png" }] },
+      __carapace: { lateMedia: true, media: [{}, { path: "/tmp/late-array.png" }] },
     } as unknown as AgentMessage;
     const whitespaceOnlyPath = {
       role: "user",
       content: "",
-      __openclaw: { lateMedia: true, media: [{ path: "   " }] },
+      __carapace: { lateMedia: true, media: [{ path: "   " }] },
     } as unknown as AgentMessage;
     const urlOnly = {
       role: "user",
       content: "",
-      __openclaw: {
+      __carapace: {
         lateMedia: true,
         media: [{ url: "https://example.test/late.png", kind: "image" }],
       },
@@ -124,7 +124,7 @@ describe("normalizeAssistantReplayContent", () => {
       role: "user",
       content: "",
       MediaPath: "/tmp/legacy-late.png",
-      __openclaw: { lateMedia: true },
+      __carapace: { lateMedia: true },
     } as unknown as AgentMessage;
 
     const out = normalizeAssistantReplayContent([
@@ -472,7 +472,7 @@ describe("normalizeAssistantReplayContent", () => {
             "keep this internal",
             INTERNAL_RUNTIME_CONTEXT_END,
             LEGACY_NEXT_TURN_RUNTIME_CONTEXT_HEADER,
-            OPENCLAW_RUNTIME_CONTEXT_NOTICE,
+            CARAPACE_RUNTIME_CONTEXT_NOTICE,
             "",
             "Visible after",
           ].join("\n"),
@@ -500,14 +500,14 @@ describe("normalizeAssistantReplayContent", () => {
     expect(JSON.stringify(out)).not.toContain("assistant copied inbound metadata omitted");
   });
 
-  it("filters openclaw delivery-mirror and gateway-injected assistant messages from replay", () => {
+  it("filters carapace delivery-mirror and gateway-injected assistant messages from replay", () => {
     // Gateway mirror entries are transcript artifacts, not model-authored
     // assistant turns, so they must not be sent back to providers.
     const messages = [
       userMessage("hello"),
-      openclawTranscriptAssistant("delivery-mirror"),
+      carapaceTranscriptAssistant("delivery-mirror"),
       bedrockAssistant([{ type: "text", text: "real reply" }]),
-      openclawTranscriptAssistant("gateway-injected"),
+      carapaceTranscriptAssistant("gateway-injected"),
     ];
     const out = normalizeAssistantReplayContent(messages);
     expect(out).toHaveLength(2);
@@ -522,7 +522,7 @@ describe("normalizeAssistantReplayContent", () => {
         ...bedrockAssistant([{ type: "text", text: "channel mirror" }], "stop"),
         provider: undefined,
         model: undefined,
-        openclawDeliveryMirror: { kind },
+        carapaceDeliveryMirror: { kind },
       } as unknown as AgentMessage;
       const realReply = bedrockAssistant([{ type: "text", text: "real reply" }], "stop", {
         input: 1,
@@ -543,7 +543,7 @@ describe("normalizeAssistantReplayContent", () => {
         output: 1,
         totalTokens: 2,
       }),
-      openclawDeliveryMirror: { kind: "unknown" },
+      carapaceDeliveryMirror: { kind: "unknown" },
     } as unknown as AgentMessage;
     const messages = [userMessage("hello"), assistant];
 

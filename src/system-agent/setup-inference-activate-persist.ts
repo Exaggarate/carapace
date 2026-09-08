@@ -5,7 +5,7 @@ import {
   attachRuntimeConfigWriteApplication,
   createRuntimeConfigWriteApplication,
 } from "../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { normalizePluginTargetConfig } from "../plugins/config-state.js";
 import { enablePluginInConfig } from "../plugins/enable.js";
@@ -71,7 +71,7 @@ export async function createSetupInferenceCandidateStager(params: {
         ...(plan.manualAuth && plan.authProfileId ? { authProfileId: plan.authProfileId } : {}),
       })
     : undefined;
-  return (current: OpenClawConfig, currentSourceConfig: OpenClawConfig): OpenClawConfig => {
+  return (current: CarapaceConfig, currentSourceConfig: CarapaceConfig): CarapaceConfig => {
     let next = codexPluginPatch === undefined ? current : stripPendingPluginInstallRecords(current);
     if (plan.manualAuth) {
       next = applyManualAuthConfig(
@@ -82,7 +82,7 @@ export async function createSetupInferenceCandidateStager(params: {
       );
     }
     if (codexPluginPatch !== undefined) {
-      const patched = applyMergePatch(next, codexPluginPatch) as OpenClawConfig;
+      const patched = applyMergePatch(next, codexPluginPatch) as CarapaceConfig;
       const enabledCodex = enablePluginInConfig(
         normalizePluginTargetConfig(patched, "codex"),
         "codex",
@@ -109,8 +109,8 @@ export async function persistActivatedSetupInference(input: {
   targetAgentId?: string;
   test: Extract<Awaited<ReturnType<typeof runSetupInferenceTest>>, { ok: true }>;
   pendingCodexInstall: PluginInstallRecord | undefined;
-  cfg: OpenClawConfig;
-  sourceCfg: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceCfg: CarapaceConfig;
   verifiedRoute: ProjectedInferenceRoute;
   baselineRoute: ProjectedInferenceRoute;
   stagedRoute: NonNullable<ProjectedInferenceRoute["route"]>;
@@ -152,9 +152,9 @@ export async function persistActivatedSetupInference(input: {
   } = input;
   let { codexInstallOwnership } = state;
   const requestedAgentId = targetAgentId;
-  const projectRoute = (config: OpenClawConfig, sourceConfig: OpenClawConfig) =>
+  const projectRoute = (config: CarapaceConfig, sourceConfig: CarapaceConfig) =>
     projectInferenceRoute(config, requestedAgentId, routeDeps, sourceConfig);
-  const resolveRoute = (config: OpenClawConfig) =>
+  const resolveRoute = (config: CarapaceConfig) =>
     resolveSystemAgentConfiguredRouteFromConfig(config, requestedAgentId, routeDeps);
 
   const { stripPendingPluginInstallRecords } = await import("../plugins/install-record-commit.js");
@@ -214,7 +214,7 @@ export async function persistActivatedSetupInference(input: {
         };
       }
       throw new SetupInferenceActivationIndeterminateError(
-        "Inference activation could not confirm whether its verified credential was saved or rolled back. No config commit was attempted; run openclaw doctor --fix before retrying.",
+        "Inference activation could not confirm whether its verified credential was saved or rolled back. No config commit was attempted; run carapace doctor --fix before retrying.",
       );
     }
     if (persistedManualAuth.status === "not-persisted") {
@@ -332,7 +332,7 @@ export async function persistActivatedSetupInference(input: {
         const rolledBack = await rollbackManualAuthProfiles(manualAuthReceipt, deps);
         if (!rolledBack) {
           throw new SetupInferenceActivationIndeterminateError(
-            "Inference activation stopped before its config commit, but could not confirm removal of its staged credential. Run openclaw doctor --fix before retrying.",
+            "Inference activation stopped before its config commit, but could not confirm removal of its staged credential. Run carapace doctor --fix before retrying.",
           );
         }
       }
@@ -365,13 +365,13 @@ export async function persistActivatedSetupInference(input: {
           configReferencesManualAuthProfiles(reconciledRuntime, manualAuthReceipt)
         ) {
           throw new SetupInferenceActivationIndeterminateError(
-            "Inference activation could not confirm its config commit state. The verified credential was retained because the current config may reference it. Run openclaw doctor --fix before retrying.",
+            "Inference activation could not confirm its config commit state. The verified credential was retained because the current config may reference it. Run carapace doctor --fix before retrying.",
           );
         }
         const rolledBack = await rollbackManualAuthProfiles(manualAuthReceipt, deps);
         if (!rolledBack) {
           throw new SetupInferenceActivationIndeterminateError(
-            "Inference activation failed and its staged credential could not be rolled back. Run openclaw doctor --fix before retrying.",
+            "Inference activation failed and its staged credential could not be rolled back. Run carapace doctor --fix before retrying.",
           );
         }
       }

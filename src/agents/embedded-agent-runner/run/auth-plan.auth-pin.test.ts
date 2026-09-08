@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { Model } from "../../../llm/types.js";
 import { createPluginMetadataSnapshotFixture } from "../../../plugins/plugin-metadata.test-support.js";
 import { withPluginRuntimeGenerationScope } from "../../../plugins/runtime/generation-scope.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import { clearRuntimeAuthProfileStoreSnapshot, type OAuthCredential } from "../../auth-profiles.js";
 import { testing as externalAuthTesting } from "../../auth-profiles/external-auth.test-support.js";
 import type { AgentHarness } from "../../harness/types.js";
@@ -40,9 +40,9 @@ const platformModel: Model = {
   baseUrl: "https://api.openai.com/v1",
 };
 
-const openClawHarness: AgentHarness = {
-  id: "openclaw",
-  label: "OpenClaw fixture",
+const carapaceHarness: AgentHarness = {
+  id: "carapace",
+  label: "Carapace fixture",
   supports: () => ({ supported: true }),
   runAttempt: async () => {
     throw new Error("Auth preparation must not execute a model turn");
@@ -50,12 +50,12 @@ const openClawHarness: AgentHarness = {
 };
 
 describe("embedded run auth plan provider pin", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let agentDir: string;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({
-      prefix: "openclaw-auth-pin-",
+    state = await createCarapaceTestState({
+      prefix: "carapace-auth-pin-",
       env: { OPENAI_API_KEY: "platform-api-key" },
     });
     agentDir = state.agentDir();
@@ -83,7 +83,7 @@ describe("embedded run auth plan provider pin", () => {
   ])(
     "selects $authMode with ambient Codex OAuth and api-key pin=$pin",
     async ({ pin, authMode, authRequirement, kind }) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: { ...(pin ? { auth: "api-key" as const } : {}), baseUrl: "", models: [] },
@@ -103,7 +103,7 @@ describe("embedded run auth plan provider pin", () => {
         }),
       );
       let model = subscriptionModel;
-      let harness = openClawHarness;
+      let harness = carapaceHarness;
       // A prepared generation owns plugin discovery; no provider runtime is needed here.
       const prepared = await withPluginRuntimeGenerationScope(
         { metadataSnapshot: createPluginMetadataSnapshotFixture() },
@@ -133,7 +133,7 @@ describe("embedded run auth plan provider pin", () => {
             applyResolvedRuntimeModel: (next) => {
               model = next;
             },
-            selectHarnessForPreparedAttempts: () => openClawHarness,
+            selectHarnessForPreparedAttempts: () => carapaceHarness,
           }),
       );
 

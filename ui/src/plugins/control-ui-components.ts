@@ -91,7 +91,7 @@ export function createControlUiComponents(options: {
         props,
         async () => {
           await import("../components/modal-dialog.ts");
-          return document.createElement("openclaw-modal-dialog");
+          return document.createElement("carapace-modal-dialog");
         },
         (element, next) => {
           element.label = next.label;
@@ -121,7 +121,7 @@ export function createControlUiComponents(options: {
         props,
         async () => {
           await import("../components/agent-select-registration.ts");
-          return document.createElement("openclaw-agent-select");
+          return document.createElement("carapace-agent-select");
         },
         (element, next, current) => {
           const agents = current().agents.state.agentsList?.agents ?? [];
@@ -147,7 +147,7 @@ export function createControlUiComponents(options: {
         props,
         async () => {
           await import("./control-ui-dashboard.ts");
-          return document.createElement("openclaw-plugin-session-dashboard");
+          return document.createElement("carapace-plugin-session-dashboard");
         },
         (element, next, current) => {
           const snapshot = current().gateway.snapshot;

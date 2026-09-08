@@ -3,14 +3,14 @@
  * Reads provider-specific and manifest-declared env names without logging or
  * exposing secret values, with explicit single-key pins for flaky live lanes.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { getProviderEnvVars } from "../secrets/provider-env-vars.js";
 import { classifyFailoverSignal } from "./failover/classify.js";
 
 const KEY_SPLIT_RE = /[\s,;]+/g;
-const GOOGLE_LIVE_SINGLE_KEY = "OPENCLAW_LIVE_GEMINI_KEY";
+const GOOGLE_LIVE_SINGLE_KEY = "CARAPACE_LIVE_GEMINI_KEY";
 
 const PROVIDER_PREFIX_OVERRIDES: Record<string, string> = {
   google: "GEMINI",
@@ -32,8 +32,8 @@ type CollectProviderApiKeysOptions = {
 
 const PROVIDER_API_KEY_CONFIG: Record<string, Omit<ProviderApiKeyConfig, "fallbackVars">> = {
   anthropic: {
-    liveSingle: "OPENCLAW_LIVE_ANTHROPIC_KEY",
-    listVar: "OPENCLAW_LIVE_ANTHROPIC_KEYS",
+    liveSingle: "CARAPACE_LIVE_ANTHROPIC_KEY",
+    listVar: "CARAPACE_LIVE_ANTHROPIC_KEYS",
     primaryVar: "ANTHROPIC_API_KEY",
     prefixedVar: "ANTHROPIC_API_KEY_",
   },
@@ -50,7 +50,7 @@ const PROVIDER_API_KEY_CONFIG: Record<string, Omit<ProviderApiKeyConfig, "fallba
     prefixedVar: "GEMINI_API_KEY_",
   },
   openai: {
-    liveSingle: "OPENCLAW_LIVE_OPENAI_KEY",
+    liveSingle: "CARAPACE_LIVE_OPENAI_KEY",
     listVar: "OPENAI_API_KEYS",
     primaryVar: "OPENAI_API_KEY",
     prefixedVar: "OPENAI_API_KEY_",
@@ -84,7 +84,7 @@ function resolveProviderApiKeyConfig(provider: string): ProviderApiKeyConfig {
   const custom = PROVIDER_API_KEY_CONFIG[normalized];
   const base = PROVIDER_PREFIX_OVERRIDES[normalized] ?? normalized.toUpperCase().replace(/-/g, "_");
 
-  const liveSingle = custom?.liveSingle ?? `OPENCLAW_LIVE_${base}_KEY`;
+  const liveSingle = custom?.liveSingle ?? `CARAPACE_LIVE_${base}_KEY`;
   const listVar = custom?.listVar ?? `${base}_API_KEYS`;
   const primaryVar = custom?.primaryVar ?? `${base}_API_KEY`;
   const prefixedVar = custom?.prefixedVar ?? `${base}_API_KEY_`;
@@ -121,7 +121,7 @@ export function collectProviderApiKeys(
     ? normalizeOptionalString(env[config.liveSingle])
     : undefined;
   if (forcedSingle) {
-    // OPENCLAW_LIVE_*_KEY pins a single key so retries do not rotate fixtures.
+    // CARAPACE_LIVE_*_KEY pins a single key so retries do not rotate fixtures.
     return [forcedSingle];
   }
 

@@ -5,15 +5,15 @@ import fs from "node:fs/promises";
 import { createServer as createHttpServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { configureAiTransportHost, getAiTransportHost } from "@openclaw/ai";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { configureAiTransportHost, getAiTransportHost } from "@carapace/ai";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   clampThinkingLevel,
   type Api,
   type Model,
   type ModelThinkingLevel,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderCatNoncePngBase64 } from "../../test/helpers/live-image-probe.js";
 import { installTestEnv } from "../../test/test-env.js";
@@ -51,7 +51,7 @@ import {
 import { getApiKeyForModelCore, type ResolvedProviderAuth } from "../agents/model-auth.js";
 import { normalizeProviderId } from "../agents/model-selection.js";
 import { shouldSuppressBuiltInModelCore } from "../agents/model-suppression.js";
-import { ensureOpenClawModelsJson } from "../agents/models-config.js";
+import { ensureCarapaceModelsJson } from "../agents/models-config.js";
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
 import { STREAM_ERROR_FALLBACK_TEXT } from "../agents/stream-message-shared.js";
 import {
@@ -82,7 +82,7 @@ import {
   getOwnedSessionTranscriptWriterFence,
   withOwnedSessionTranscriptWrites,
 } from "../config/sessions/transcript-write-context.js";
-import type { ModelsConfig, ModelProviderConfig, OpenClawConfig } from "../config/types.js";
+import type { ModelsConfig, ModelProviderConfig, CarapaceConfig } from "../config/types.js";
 import {
   captureAgentRunLifecycleGeneration,
   withAgentRunLifecycleGeneration,
@@ -148,12 +148,12 @@ import {
 import { readSessionMessagesAsync } from "./session-transcript-readers.js";
 import { loadSessionEntry } from "./session-utils.js";
 
-const ZAI_FALLBACK = isTruthyEnvValue(process.env.OPENCLAW_LIVE_GATEWAY_ZAI_FALLBACK);
+const ZAI_FALLBACK = isTruthyEnvValue(process.env.CARAPACE_LIVE_GATEWAY_ZAI_FALLBACK);
 const REQUIRE_PROFILE_KEYS = isLiveProfileKeyModeEnabled();
-const PROVIDERS = parseFilter(process.env.OPENCLAW_LIVE_GATEWAY_PROVIDERS);
-const GATEWAY_LIVE_SMOKE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_GATEWAY_SMOKE);
+const PROVIDERS = parseFilter(process.env.CARAPACE_LIVE_GATEWAY_PROVIDERS);
+const GATEWAY_LIVE_SMOKE = isTruthyEnvValue(process.env.CARAPACE_LIVE_GATEWAY_SMOKE);
 const GATEWAY_LIVE_OPENAI_API_DEFAULT = isTruthyEnvValue(
-  process.env.OPENCLAW_LIVE_GATEWAY_OPENAI_API_DEFAULT,
+  process.env.CARAPACE_LIVE_GATEWAY_OPENAI_API_DEFAULT,
 );
 const GATEWAY_LIVE_THINKING_LEVELS = [
   "off",
@@ -167,7 +167,7 @@ const GATEWAY_LIVE_THINKING_LEVELS = [
 ] as const;
 type GatewayLiveThinkingLevel = (typeof GATEWAY_LIVE_THINKING_LEVELS)[number];
 const THINKING_LEVEL = resolveGatewayLiveThinkingLevel({
-  raw: process.env.OPENCLAW_LIVE_GATEWAY_THINKING,
+  raw: process.env.CARAPACE_LIVE_GATEWAY_THINKING,
   smoke: GATEWAY_LIVE_SMOKE,
 });
 const ENABLE_EXTRA_TOOL_PROBES = !GATEWAY_LIVE_SMOKE;
@@ -180,7 +180,7 @@ const EXPLICIT_LIVE_FALLBACK_CONTEXT_WINDOW = 128_000;
 const GATEWAY_LIVE_MAX_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 const GATEWAY_LIVE_PROBE_TIMEOUT_MS = Math.max(
   30_000,
-  toInt(process.env.OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS, 90_000),
+  toInt(process.env.CARAPACE_LIVE_GATEWAY_STEP_TIMEOUT_MS, 90_000),
 );
 const GATEWAY_LIVE_SETUP_TIMEOUT_MS = resolveGatewayLiveSetupTimeoutMs();
 const GATEWAY_LIVE_MODEL_TIMEOUT_MS = resolveGatewayLiveModelTimeoutMs();
@@ -190,7 +190,7 @@ const GATEWAY_LIVE_AGENT_RUN_TIMEOUT_MS = resolveGatewayLiveAgentRunTimeoutMs();
 const GATEWAY_LIVE_AGENT_WAIT_TIMEOUT_MS = resolveGatewayLiveAgentWaitTimeoutMs();
 const GATEWAY_LIVE_HEARTBEAT_MS = Math.max(
   1_000,
-  toInt(process.env.OPENCLAW_LIVE_GATEWAY_HEARTBEAT_MS, 30_000),
+  toInt(process.env.CARAPACE_LIVE_GATEWAY_HEARTBEAT_MS, 30_000),
 );
 const GATEWAY_LIVE_STRIP_SCAFFOLDING_MODEL_KEYS = new Set([
   "google/gemini-3-flash-preview",
@@ -201,10 +201,10 @@ const GATEWAY_LIVE_STRIP_SCAFFOLDING_MODEL_KEYS = new Set([
 ]);
 const GATEWAY_LIVE_AGENT_ID = "dev";
 const GATEWAY_LIVE_OPERATOR_SCOPES = [READ_SCOPE, WRITE_SCOPE];
-const GATEWAY_LIVE_CONFIG_TEST_WORKSPACE = path.join(os.tmpdir(), "openclaw-live-config-test");
+const GATEWAY_LIVE_CONFIG_TEST_WORKSPACE = path.join(os.tmpdir(), "carapace-live-config-test");
 const GATEWAY_LIVE_CONFIG_TEST_AGENT_DIR = path.join(
   os.tmpdir(),
-  "openclaw-live-config-test-agent",
+  "carapace-live-config-test-agent",
 );
 const GATEWAY_LIVE_EXEC_READ_NONCE_MISS_SKIP_MODEL_KEYS = new Set([
   "fireworks/accounts/fireworks/models/glm-5",
@@ -222,9 +222,9 @@ const GATEWAY_LIVE_TOOL_NONCE_MISS_SKIP_MODEL_KEYS = new Set([
 ]);
 const GATEWAY_LIVE_MAX_MODELS = resolveGatewayLiveMaxModels();
 const GATEWAY_LIVE_SUITE_TIMEOUT_MS = resolveGatewayLiveSuiteTimeoutMs(GATEWAY_LIVE_MAX_MODELS);
-const QUIET_LIVE_LOGS = process.env.OPENCLAW_LIVE_TEST_QUIET !== "0";
+const QUIET_LIVE_LOGS = process.env.CARAPACE_LIVE_TEST_QUIET !== "0";
 
-const describeLive = isLiveTestEnabled(["OPENCLAW_LIVE_GATEWAY"]) ? describe : describe.skip;
+const describeLive = isLiveTestEnabled(["CARAPACE_LIVE_GATEWAY"]) ? describe : describe.skip;
 
 function parseFilter(raw?: string): Set<string> | null {
   const trimmed = raw?.trim();
@@ -369,22 +369,22 @@ function toInt(value: string | undefined, fallback: number): number {
 }
 
 function resolveGatewayLiveSetupTimeoutMs(
-  raw = process.env.OPENCLAW_LIVE_GATEWAY_SETUP_TIMEOUT_MS,
+  raw = process.env.CARAPACE_LIVE_GATEWAY_SETUP_TIMEOUT_MS,
 ): number {
   return Math.max(1_000, toInt(raw, 180_000));
 }
 
 function resolveGatewayLiveMaxModels(): number {
-  const gatewayRaw = process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS?.trim();
+  const gatewayRaw = process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS?.trim();
   if (gatewayRaw) {
     return Math.max(0, toInt(gatewayRaw, 0));
   }
-  const rawModels = process.env.OPENCLAW_LIVE_GATEWAY_MODELS?.trim();
+  const rawModels = process.env.CARAPACE_LIVE_GATEWAY_MODELS?.trim();
   const useSmallModels = rawModels === "small";
   const useExplicitModels =
     Boolean(rawModels) && rawModels !== "modern" && rawModels !== "all" && !useSmallModels;
   return resolveHighSignalLiveModelLimit({
-    rawMaxModels: process.env.OPENCLAW_LIVE_MAX_MODELS,
+    rawMaxModels: process.env.CARAPACE_LIVE_MAX_MODELS,
     useExplicitModels,
     defaultLimit: useSmallModels
       ? DEFAULT_SMALL_LIVE_MODEL_LIMIT
@@ -408,8 +408,8 @@ function resolveGatewayLiveSuiteTimeoutMs(maxModels: number): number {
 }
 
 function resolveGatewayLiveModelTimeoutMs(
-  gatewayModelTimeoutRaw = process.env.OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS,
-  liveModelTimeoutRaw = process.env.OPENCLAW_LIVE_MODEL_TIMEOUT_MS,
+  gatewayModelTimeoutRaw = process.env.CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS,
+  liveModelTimeoutRaw = process.env.CARAPACE_LIVE_MODEL_TIMEOUT_MS,
   stepTimeoutMs = GATEWAY_LIVE_PROBE_TIMEOUT_MS,
 ): number {
   const requested = toInt(gatewayModelTimeoutRaw, toInt(liveModelTimeoutRaw, 300_000));
@@ -653,10 +653,10 @@ function enterProductionEnvForLiveRun() {
   const previous = {
     vitest: process.env.VITEST,
     nodeEnv: process.env.NODE_ENV,
-    testFast: process.env.OPENCLAW_TEST_FAST,
+    testFast: process.env.CARAPACE_TEST_FAST,
   };
   delete process.env.VITEST;
-  delete process.env.OPENCLAW_TEST_FAST;
+  delete process.env.CARAPACE_TEST_FAST;
   process.env.NODE_ENV = "production";
   return previous;
 }
@@ -672,9 +672,9 @@ function restoreProductionEnvForLiveRun(previous: {
     process.env.VITEST = previous.vitest;
   }
   if (previous.testFast === undefined) {
-    delete process.env.OPENCLAW_TEST_FAST;
+    delete process.env.CARAPACE_TEST_FAST;
   } else {
-    process.env.OPENCLAW_TEST_FAST = previous.testFast;
+    process.env.CARAPACE_TEST_FAST = previous.testFast;
   }
   if (previous.nodeEnv === undefined) {
     delete process.env.NODE_ENV;
@@ -1324,9 +1324,9 @@ describe("resolveGatewayLiveSuiteTimeoutMs", () => {
 });
 
 describe("resolveGatewayLiveMaxModels", () => {
-  const originalGatewayModels = process.env.OPENCLAW_LIVE_GATEWAY_MODELS;
-  const originalGatewayMax = process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS;
-  const originalSharedMax = process.env.OPENCLAW_LIVE_MAX_MODELS;
+  const originalGatewayModels = process.env.CARAPACE_LIVE_GATEWAY_MODELS;
+  const originalGatewayMax = process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS;
+  const originalSharedMax = process.env.CARAPACE_LIVE_MAX_MODELS;
   function restoreEnvValue(name: string, value: string | undefined): void {
     if (value === undefined) {
       deleteTestEnvValue(name);
@@ -1336,35 +1336,35 @@ describe("resolveGatewayLiveMaxModels", () => {
   }
 
   afterEach(() => {
-    restoreEnvValue("OPENCLAW_LIVE_GATEWAY_MODELS", originalGatewayModels);
-    restoreEnvValue("OPENCLAW_LIVE_GATEWAY_MAX_MODELS", originalGatewayMax);
-    restoreEnvValue("OPENCLAW_LIVE_MAX_MODELS", originalSharedMax);
+    restoreEnvValue("CARAPACE_LIVE_GATEWAY_MODELS", originalGatewayModels);
+    restoreEnvValue("CARAPACE_LIVE_GATEWAY_MAX_MODELS", originalGatewayMax);
+    restoreEnvValue("CARAPACE_LIVE_MAX_MODELS", originalSharedMax);
   });
 
   it("defaults modern gateway sweeps to the curated high-signal cap", () => {
-    delete process.env.OPENCLAW_LIVE_GATEWAY_MODELS;
-    delete process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS;
-    delete process.env.OPENCLAW_LIVE_MAX_MODELS;
+    delete process.env.CARAPACE_LIVE_GATEWAY_MODELS;
+    delete process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS;
+    delete process.env.CARAPACE_LIVE_MAX_MODELS;
 
     expect(resolveGatewayLiveMaxModels()).toBe(DEFAULT_HIGH_SIGNAL_LIVE_MODEL_LIMIT);
   });
 
   it("defaults small gateway sweeps to the curated small-model cap", () => {
-    process.env.OPENCLAW_LIVE_GATEWAY_MODELS = "small";
-    delete process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS;
-    delete process.env.OPENCLAW_LIVE_MAX_MODELS;
+    process.env.CARAPACE_LIVE_GATEWAY_MODELS = "small";
+    delete process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS;
+    delete process.env.CARAPACE_LIVE_MAX_MODELS;
 
     expect(resolveGatewayLiveMaxModels()).toBe(DEFAULT_SMALL_LIVE_MODEL_LIMIT);
   });
 
   it("keeps explicit gateway model lists uncapped unless a cap is provided", () => {
-    process.env.OPENCLAW_LIVE_GATEWAY_MODELS = "openai/gpt-5.5,anthropic/claude-opus-4-6";
-    delete process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS;
-    delete process.env.OPENCLAW_LIVE_MAX_MODELS;
+    process.env.CARAPACE_LIVE_GATEWAY_MODELS = "openai/gpt-5.5,anthropic/claude-opus-4-6";
+    delete process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS;
+    delete process.env.CARAPACE_LIVE_MAX_MODELS;
 
     expect(resolveGatewayLiveMaxModels()).toBe(0);
 
-    process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS = "2";
+    process.env.CARAPACE_LIVE_GATEWAY_MAX_MODELS = "2";
     expect(resolveGatewayLiveMaxModels()).toBe(2);
   });
 });
@@ -1397,7 +1397,7 @@ function resolveExplicitLiveFallbackApi(provider: string): Api {
 
 function resolveDefaultBedrockLiveBaseUrl(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     env?: NodeJS.ProcessEnv;
   } = {},
 ): string {
@@ -1411,7 +1411,7 @@ function resolveDefaultBedrockLiveBaseUrl(
   return `https://bedrock-runtime.${region}.amazonaws.com`;
 }
 
-function resolveBedrockDiscoveryRegion(cfg: OpenClawConfig | undefined): string | undefined {
+function resolveBedrockDiscoveryRegion(cfg: CarapaceConfig | undefined): string | undefined {
   const pluginConfig = cfg?.plugins?.entries?.["amazon-bedrock"]?.config;
   if (!isRecord(pluginConfig)) {
     return undefined;
@@ -1547,7 +1547,7 @@ function createExplicitLiveFallbackModel(provider: string, id: string): Model {
     context: {
       provider,
       modelId: id,
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
       reasoning: true,
     },
   });
@@ -1878,7 +1878,7 @@ describe("resolveGatewayLiveModelThinkingLevel", () => {
   });
 
   it.each(["gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"])(
-    "preserves OpenClaw Ultra for openai/%s",
+    "preserves Carapace Ultra for openai/%s",
     (id) => {
       expect(
         resolveGatewayLiveModelThinkingLevel({
@@ -2024,7 +2024,7 @@ describe("buildLiveGatewayConfig", () => {
 
     expect(cfg.agents?.defaults?.thinkingDefault).toBe("medium");
     expect(cfg.agents?.defaults?.models?.["openai/gpt-5.5"]).toEqual({
-      agentRuntime: { id: "openclaw" },
+      agentRuntime: { id: "carapace" },
     });
   });
 
@@ -2156,7 +2156,7 @@ describe("buildLiveGatewayConfig", () => {
       deleteTestEnvValue("AWS_PROFILE");
       deleteTestEnvValue("AWS_CONFIG_FILE");
       deleteTestEnvValue("AWS_SHARED_CREDENTIALS_FILE");
-      setTestEnvValue("HOME", path.join(os.tmpdir(), `openclaw-empty-aws-home-${randomUUID()}`));
+      setTestEnvValue("HOME", path.join(os.tmpdir(), `carapace-empty-aws-home-${randomUUID()}`));
 
       const cfg = buildLiveGatewayConfig({
         cfg: {},
@@ -2329,7 +2329,7 @@ describe("buildLiveGatewayConfig", () => {
       awsSharedCredentialsFile: process.env.AWS_SHARED_CREDENTIALS_FILE,
       home: process.env.HOME,
     };
-    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bedrock-aws-home-"));
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bedrock-aws-home-"));
     try {
       const awsDir = path.join(tempHome, ".aws");
       await fs.mkdir(awsDir, { recursive: true });
@@ -2377,7 +2377,7 @@ describe("buildLiveGatewayConfig", () => {
       awsSharedCredentialsFile: process.env.AWS_SHARED_CREDENTIALS_FILE,
       home: process.env.HOME,
     };
-    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bedrock-aws-home-"));
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bedrock-aws-home-"));
     try {
       const awsDir = path.join(tempHome, ".aws");
       await fs.mkdir(awsDir, { recursive: true });
@@ -2425,7 +2425,7 @@ describe("buildLiveGatewayConfig", () => {
       awsSharedCredentialsFile: process.env.AWS_SHARED_CREDENTIALS_FILE,
       home: process.env.HOME,
     };
-    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bedrock-aws-home-"));
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-bedrock-aws-home-"));
     try {
       const awsDir = path.join(tempHome, ".aws");
       await fs.mkdir(awsDir, { recursive: true });
@@ -2475,22 +2475,22 @@ describe("enterProductionEnvForLiveRun", () => {
     const previous = {
       vitest: process.env.VITEST,
       nodeEnv: process.env.NODE_ENV,
-      testFast: process.env.OPENCLAW_TEST_FAST,
+      testFast: process.env.CARAPACE_TEST_FAST,
     };
     process.env.VITEST = "1";
     process.env.NODE_ENV = "test";
-    process.env.OPENCLAW_TEST_FAST = "1";
+    process.env.CARAPACE_TEST_FAST = "1";
 
     const runtimeEnv = enterProductionEnvForLiveRun();
     try {
       expect(process.env.VITEST).toBeUndefined();
       expect(process.env.NODE_ENV).toBe("production");
-      expect(process.env.OPENCLAW_TEST_FAST).toBeUndefined();
+      expect(process.env.CARAPACE_TEST_FAST).toBeUndefined();
     } finally {
       restoreProductionEnvForLiveRun(runtimeEnv);
       restoreOptionalEnv("VITEST", previous.vitest);
       restoreOptionalEnv("NODE_ENV", previous.nodeEnv);
-      restoreOptionalEnv("OPENCLAW_TEST_FAST", previous.testFast);
+      restoreOptionalEnv("CARAPACE_TEST_FAST", previous.testFast);
     }
   });
 });
@@ -3100,10 +3100,10 @@ function resolveGatewayLivePreparedProfileId(
 }
 
 async function enterIsolatedGatewayLiveDiscoveryState(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   providers?: Iterable<string>;
 }): Promise<() => Promise<void>> {
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+  const previousStateDir = process.env.CARAPACE_STATE_DIR;
   const source = ensureAuthProfileStoreWithoutExternalProfiles(
     resolveDefaultAgentDir(params.config),
     {
@@ -3128,13 +3128,13 @@ async function enterIsolatedGatewayLiveDiscoveryState(params: {
       `[all-models] isolated discovery omitted ${portable.skippedProfileIds.length} non-portable auth profile(s)`,
     );
   }
-  const tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-discovery-state-"));
-  setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+  const tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-discovery-state-"));
+  setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
   const cleanup = async () => {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     await fs.rm(tempStateDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   };
@@ -3354,11 +3354,11 @@ describe("buildLiveGatewayAuthProfileStore", () => {
   });
 
   it("copies selected portable discovery credentials without mutating the ambient auth store", async () => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
     const ambientStateDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-live-ambient-state-"),
+      path.join(os.tmpdir(), "carapace-live-ambient-state-"),
     );
-    process.env.OPENCLAW_STATE_DIR = ambientStateDir;
+    process.env.CARAPACE_STATE_DIR = ambientStateDir;
     const ambientAgentDir = resolveDefaultAgentDir({});
     const ambientStore: AuthProfileStore = {
       version: 1,
@@ -3385,7 +3385,7 @@ describe("buildLiveGatewayAuthProfileStore", () => {
     try {
       expect(existsSync(path.join(ambientStateDir, "agents"))).toBe(false);
       await withEnvAsync(
-        { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_USE_REAL_HOME: undefined },
+        { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_USE_REAL_HOME: undefined },
         async () => {
           const testEnv = installTestEnv({ loadProfileEnv: false });
           try {
@@ -3421,9 +3421,9 @@ describe("buildLiveGatewayAuthProfileStore", () => {
       ).toEqual(ambientStore.profiles);
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
       await fs.rm(ambientStateDir, { recursive: true, force: true });
     }
@@ -4330,7 +4330,7 @@ async function requestGatewayAgentText(params: {
 
 type GatewayModelSuiteParams = {
   label: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   candidates: PreparedGatewayLiveModelCandidate[];
   authProfileStore: AuthProfileStore;
   allowNotFoundSkip: boolean;
@@ -4985,7 +4985,7 @@ const OPENAI_LIVE_DEFAULT_BASE_URL = "https://api.openai.com/v1";
 
 function resolveOpenAIUltraUpstreamBaseUrl(params: {
   candidate: Model;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): string {
   const providerConfig = params.cfg.models?.providers?.openai;
   const configuredModel = providerConfig?.models?.find((model) => model.id === params.candidate.id);
@@ -5166,7 +5166,7 @@ function createStaticLiveModelRegistry(models: Array<Model>): LiveModelRegistry 
 
 async function loadAuthBackedLiveModelRegistry(params: {
   agentDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerList: string[] | undefined;
 }): Promise<{
   authProfileStore: AuthProfileStore;
@@ -5261,7 +5261,7 @@ function mergeLiveProviderConfig(params: {
 
 function buildLiveProviderConfigs(params: {
   candidates: Array<Model>;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): Record<string, ModelProviderConfig> {
   const providers: Record<string, ModelProviderConfig> = {};
   for (const model of params.candidates) {
@@ -5278,7 +5278,7 @@ function buildLiveProviderConfigs(params: {
 
 function buildLiveProviderConfig(params: {
   model: Model;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ModelProviderConfig {
   const { model } = params;
   const provider = normalizeProviderId(model.provider);
@@ -5380,7 +5380,7 @@ function resolveGatewayLiveModelThinkingLevel(params: {
       provider: model.provider,
       modelId: model.id,
       api: model.api,
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
       reasoning: model.reasoning,
       compat: getProviderThinkingModelCompat(model),
     },
@@ -5454,23 +5454,23 @@ function resolveGatewayLiveThinkingLevel(params: { raw?: string; smoke: boolean 
 }
 
 async function resolveGatewayLiveRequestedModels(): Promise<string | undefined> {
-  const configured = process.env.OPENCLAW_LIVE_GATEWAY_MODELS?.trim();
+  const configured = process.env.CARAPACE_LIVE_GATEWAY_MODELS?.trim();
   if (!GATEWAY_LIVE_OPENAI_API_DEFAULT) {
     return configured;
   }
   if (configured) {
     throw new Error(
-      "OPENCLAW_LIVE_GATEWAY_OPENAI_API_DEFAULT cannot be combined with OPENCLAW_LIVE_GATEWAY_MODELS",
+      "CARAPACE_LIVE_GATEWAY_OPENAI_API_DEFAULT cannot be combined with CARAPACE_LIVE_GATEWAY_MODELS",
     );
   }
   if (!PROVIDERS || PROVIDERS.size !== 1 || !PROVIDERS.has("openai")) {
     throw new Error(
-      "OPENCLAW_LIVE_GATEWAY_OPENAI_API_DEFAULT requires OPENCLAW_LIVE_GATEWAY_PROVIDERS=openai",
+      "CARAPACE_LIVE_GATEWAY_OPENAI_API_DEFAULT requires CARAPACE_LIVE_GATEWAY_PROVIDERS=openai",
     );
   }
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
-    throw new Error("OPENCLAW_LIVE_GATEWAY_OPENAI_API_DEFAULT requires OPENAI_API_KEY");
+    throw new Error("CARAPACE_LIVE_GATEWAY_OPENAI_API_DEFAULT requires OPENAI_API_KEY");
   }
   const { detectInferenceBackends } = await import("../commands/onboard-inference.js");
   const candidates = await detectInferenceBackends({
@@ -5497,12 +5497,12 @@ function isGatewayLiveThinkingLevel(value: string): value is GatewayLiveThinking
 }
 
 function buildLiveGatewayConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   candidates: Array<Model>;
   liveAgentDir: string;
   liveAgentWorkspaceDir: string;
   providerOverrides?: Record<string, ModelProviderConfig>;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const providerOverrides = params.providerOverrides ?? {};
   const lmstudioProvider = params.cfg.models?.providers?.lmstudio;
   const baseProviders = params.cfg.models?.providers ?? {};
@@ -5536,7 +5536,7 @@ function buildLiveGatewayConfig(params: {
       workspace: params.liveAgentWorkspaceDir,
       sandbox: { mode: "off" },
     },
-  } satisfies NonNullable<OpenClawConfig["agents"]>["entries"];
+  } satisfies NonNullable<CarapaceConfig["agents"]>["entries"];
   const baseModels = params.cfg.models;
   return {
     ...params.cfg,
@@ -5556,7 +5556,7 @@ function buildLiveGatewayConfig(params: {
         models: Object.fromEntries(
           params.candidates.map((m) => [
             `${m.provider}/${m.id}`,
-            { agentRuntime: { id: "openclaw" as const } },
+            { agentRuntime: { id: "carapace" as const } },
           ]),
         ),
       },
@@ -5569,15 +5569,15 @@ function buildLiveGatewayConfig(params: {
 }
 
 function sanitizeAuthConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   store: AuthProfileStore;
-}): OpenClawConfig["auth"] | undefined {
+}): CarapaceConfig["auth"] | undefined {
   const auth = params.cfg.auth;
   if (!auth) {
     return auth;
   }
 
-  let profiles: NonNullable<OpenClawConfig["auth"]>["profiles"] | undefined;
+  let profiles: NonNullable<CarapaceConfig["auth"]>["profiles"] | undefined;
   if (auth.profiles) {
     profiles = {};
     for (const [profileId, profile] of Object.entries(auth.profiles)) {
@@ -5617,7 +5617,7 @@ function sanitizeAuthConfig(params: {
 }
 
 function buildMinimaxProviderOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   api: "openai-completions" | "anthropic-messages";
   baseUrl: string;
 }): ModelProviderConfig | null {
@@ -5646,13 +5646,13 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   );
   if (ultraCandidates.length > 0 && ultraCandidates.length !== params.candidates.length) {
     throw new Error(
-      "OPENCLAW_LIVE_GATEWAY_THINKING=ultra requires an explicit GPT-5.6 OpenAI model list",
+      "CARAPACE_LIVE_GATEWAY_THINKING=ultra requires an explicit GPT-5.6 OpenAI model list",
     );
   }
   const previousEnv = snapshotLiveEnv([
-    "OPENCLAW_DISABLE_BONJOUR",
-    "OPENCLAW_LOG_LEVEL",
-    "OPENCLAW_AGENT_DIR",
+    "CARAPACE_DISABLE_BONJOUR",
+    "CARAPACE_LOG_LEVEL",
+    "CARAPACE_AGENT_DIR",
   ]);
   const { startGatewayServerCore } = await import("./server-start.js");
   let runtimeEnv: ReturnType<typeof enterProductionEnvForLiveRun> | undefined;
@@ -5668,26 +5668,26 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
     clearRuntimeConfigSnapshot();
     runtimeEnv = enterProductionEnvForLiveRun();
 
-    process.env.OPENCLAW_SKIP_CHANNELS = "1";
-    process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-    process.env.OPENCLAW_SKIP_CRON = "1";
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
+    process.env.CARAPACE_SKIP_CHANNELS = "1";
+    process.env.CARAPACE_SKIP_GMAIL_WATCHER = "1";
+    process.env.CARAPACE_SKIP_CRON = "1";
+    process.env.CARAPACE_SKIP_CANVAS_HOST = "1";
     if (QUIET_LIVE_LOGS) {
-      process.env.OPENCLAW_DISABLE_BONJOUR = "1";
-      process.env.OPENCLAW_LOG_LEVEL = "silent";
+      process.env.CARAPACE_DISABLE_BONJOUR = "1";
+      process.env.CARAPACE_LOG_LEVEL = "silent";
     }
 
     const token = `test-${randomUUID()}`;
-    process.env.OPENCLAW_GATEWAY_TOKEN = token;
+    process.env.CARAPACE_GATEWAY_TOKEN = token;
     const agentId = GATEWAY_LIVE_AGENT_ID;
 
     const isolatedStore = buildLiveGatewayAuthProfileStore({
       store: params.authProfileStore,
       candidates: params.candidates,
     });
-    const tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-state-"));
+    const tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-state-"));
     cleanupTempStateDir = tempStateDir;
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const tempAgentDir: string | undefined = path.join(
       tempStateDir,
       "agents",
@@ -5700,7 +5700,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
     if (tempSessionAgentDir !== tempAgentDir) {
       saveAuthProfileStore(isolatedStore, tempSessionAgentDir);
     }
-    setTestEnvValue("OPENCLAW_AGENT_DIR", tempAgentDir);
+    setTestEnvValue("CARAPACE_AGENT_DIR", tempAgentDir);
 
     const workspaceDir = path.join(tempStateDir, "workspace-dev");
     await prepareLiveGatewayWorkspace(workspaceDir);
@@ -5708,11 +5708,11 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
     const nonceB = randomUUID();
     // Keep probe values out of the path: weak tool callers may echo the filename
     // instead of reading the file, turning nonceA into a false duplicate answer.
-    const toolProbePath = path.join(workspaceDir, ".openclaw-live-tool-probe.txt");
+    const toolProbePath = path.join(workspaceDir, ".carapace-live-tool-probe.txt");
     cleanupToolProbePath = toolProbePath;
     await fs.writeFile(toolProbePath, `nonceA=${nonceA}\nnonceB=${nonceB}\n`);
 
-    const sanitizedCfg: OpenClawConfig = {
+    const sanitizedCfg: CarapaceConfig = {
       ...params.cfg,
       auth: sanitizeAuthConfig({ cfg: params.cfg, store: isolatedStore }),
       ...(ultraCandidates.length > 0
@@ -5742,11 +5742,11 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
       liveAgentWorkspaceDir: workspaceDir,
       providerOverrides: params.providerOverrides,
     });
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-"));
     cleanupTempDir = tempDir;
-    const tempConfigPath = path.join(tempDir, "openclaw.json");
+    const tempConfigPath = path.join(tempDir, "carapace.json");
     await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", tempConfigPath);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", tempConfigPath);
 
     const liveProviders = nextCfg.models?.providers;
     if (liveProviders && Object.keys(liveProviders).length > 0) {
@@ -6002,10 +6002,10 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
                     idempotencyKey: `idem-${runIdTool}-tool-${toolReadAttempt + 1}`,
                     modelKey,
                     message: strictReply
-                      ? "OpenClaw live tool probe (local, safe): " +
+                      ? "Carapace live tool probe (local, safe): " +
                         `use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolProbePath}"}. ` +
                         "Then reply with exactly the two nonce values from that file, separated by one space. No extra text."
-                      : "OpenClaw live tool probe (local, safe): " +
+                      : "Carapace live tool probe (local, safe): " +
                         `use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolProbePath}"}. ` +
                         "Then reply with the two nonce values you read (include both).",
                     thinkingLevel,
@@ -6098,12 +6098,12 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
                     idempotencyKey: `idem-${runIdTool}-exec-read-${execReadAttempt + 1}`,
                     modelKey,
                     message: strictReply
-                      ? "OpenClaw live tool probe (local, safe): " +
+                      ? "Carapace live tool probe (local, safe): " +
                         "use the tool named `exec` (or `Exec`) to run this command: " +
                         `mkdir -p "${tempDir}" && printf '%s' '${nonceC}' > "${toolWritePath}". ` +
                         `Then use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolWritePath}"}. ` +
                         "Then reply with exactly the nonce text from that file. No extra text."
-                      : "OpenClaw live tool probe (local, safe): " +
+                      : "Carapace live tool probe (local, safe): " +
                         "use the tool named `exec` (or `Exec`) to run this command: " +
                         `mkdir -p "${tempDir}" && printf '%s' '${nonceC}' > "${toolWritePath}". ` +
                         `Then use the tool named \`read\` (or \`Read\`) with JSON arguments {"path":"${toolWritePath}"}. ` +
@@ -6640,7 +6640,7 @@ describeLive("gateway live (dev agent, profile keys)", () => {
         }
         logProgress("[all-models] preparing models.json");
         const modelsJsonResult = await withGatewayLiveSetupTimeout(
-          ensureOpenClawModelsJson(cfg, discoveryAgentDir, {
+          ensureCarapaceModelsJson(cfg, discoveryAgentDir, {
             workspaceDir,
             ...(providerList ? { providerDiscoveryProviderIds: providerList } : {}),
           }),
@@ -6833,7 +6833,7 @@ describeLive("gateway live (dev agent, profile keys)", () => {
         );
         if (selectedCandidates.length < candidates.length) {
           logProgress(
-            `[all-models] capped to ${selectedCandidates.length}/${candidates.length} via OPENCLAW_LIVE_GATEWAY_MAX_MODELS=${maxModels}`,
+            `[all-models] capped to ${selectedCandidates.length}/${candidates.length} via CARAPACE_LIVE_GATEWAY_MAX_MODELS=${maxModels}`,
           );
         }
         expect(selectedCandidates.length).toBeGreaterThan(0);
@@ -6892,16 +6892,16 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     }
     clearRuntimeConfigSnapshot();
     const runtimeEnv = enterProductionEnvForLiveRun();
-    const previousEnv = snapshotLiveEnv(["OPENCLAW_AGENT_DIR"]);
+    const previousEnv = snapshotLiveEnv(["CARAPACE_AGENT_DIR"]);
     const { startGatewayServerCore } = await import("./server-start.js");
 
-    process.env.OPENCLAW_SKIP_CHANNELS = "1";
-    process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-    process.env.OPENCLAW_SKIP_CRON = "1";
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
+    process.env.CARAPACE_SKIP_CHANNELS = "1";
+    process.env.CARAPACE_SKIP_GMAIL_WATCHER = "1";
+    process.env.CARAPACE_SKIP_CRON = "1";
+    process.env.CARAPACE_SKIP_CANVAS_HOST = "1";
 
     const token = `test-${randomUUID()}`;
-    process.env.OPENCLAW_GATEWAY_TOKEN = token;
+    process.env.CARAPACE_GATEWAY_TOKEN = token;
 
     let server: GatewayServer | undefined;
     let client: GatewayClient | undefined;
@@ -6910,7 +6910,7 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     let tempStateDir: string | undefined;
     try {
       const cfg = await readLiveTestConfig();
-      await ensureOpenClawModelsJson(cfg);
+      await ensureCarapaceModelsJson(cfg);
 
       const agentDir = resolveDefaultAgentDir(cfg);
       const hostStore = ensureAuthProfileStore(agentDir, {
@@ -6949,14 +6949,14 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       }
 
       const agentId = GATEWAY_LIVE_AGENT_ID;
-      tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-zai-state-"));
-      setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+      tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-zai-state-"));
+      setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
       const workspaceDir = path.join(tempStateDir, "workspace-dev");
       await prepareLiveGatewayWorkspace(workspaceDir);
       const nonceA = randomUUID();
       const nonceB = randomUUID();
       // Match the broad probe: the filename must not reveal either expected value.
-      toolProbePath = path.join(workspaceDir, ".openclaw-live-zai-fallback.txt");
+      toolProbePath = path.join(workspaceDir, ".carapace-live-zai-fallback.txt");
       await fs.writeFile(toolProbePath, `nonceA=${nonceA}\nnonceB=${nonceB}\n`);
 
       const isolatedStore = buildLiveGatewayAuthProfileStore({
@@ -6968,9 +6968,9 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       });
       const tempAgentDir = path.join(tempStateDir, "agents", agentId, "agent");
       saveAuthProfileStore(isolatedStore, tempAgentDir);
-      setTestEnvValue("OPENCLAW_AGENT_DIR", tempAgentDir);
+      setTestEnvValue("CARAPACE_AGENT_DIR", tempAgentDir);
 
-      const sanitizedCfg: OpenClawConfig = {
+      const sanitizedCfg: CarapaceConfig = {
         ...cfg,
         auth: sanitizeAuthConfig({ cfg, store: isolatedStore }),
       };
@@ -6980,10 +6980,10 @@ describeLive("gateway live (dev agent, profile keys)", () => {
         liveAgentDir: tempAgentDir,
         liveAgentWorkspaceDir: workspaceDir,
       });
-      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-zai-"));
-      const tempConfigPath = path.join(tempDir, "openclaw.json");
+      tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-zai-"));
+      const tempConfigPath = path.join(tempDir, "carapace.json");
       await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", tempConfigPath);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", tempConfigPath);
       clearRuntimeConfigSnapshot();
 
       const liveProviders = nextCfg.models?.providers;

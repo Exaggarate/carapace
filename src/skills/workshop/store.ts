@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { FsSafeError, root, type Root } from "../../infra/fs-safe.js";
 import {
   executeSqliteQuerySync,
@@ -8,7 +8,7 @@ import {
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
 import { logWarn } from "../../logger.js";
-import { runOpenClawStateWriteTransaction } from "../../state/openclaw-state-db.js";
+import { runCarapaceStateWriteTransaction } from "../../state/carapace-state-db.js";
 import { normalizeSkillIndexName } from "../discovery/skill-index.js";
 import {
   assertInsideSkillsRoot,
@@ -82,7 +82,7 @@ type SkillProposalLookupScope = {
 };
 
 type SkillProposalReadOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   reconcile?: boolean;
 };
 
@@ -145,7 +145,7 @@ export function prepareSkillProposalSupportFiles(
 
 export function resolveSkillProposalTarget(params: {
   skillName: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   env?: NodeJS.ProcessEnv;
 }): {
@@ -175,7 +175,7 @@ export class SkillProposalDraftMissingError extends Error {
     options?: ErrorOptions,
   ) {
     super(
-      `Skill proposal draft is missing: ${proposalId}. Run openclaw doctor --fix for recovery.`,
+      `Skill proposal draft is missing: ${proposalId}. Run carapace doctor --fix for recovery.`,
       options,
     );
   }
@@ -262,7 +262,7 @@ export async function writeSkillProposal(params: {
   await stageSkillProposalGeneration(params);
 
   try {
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<SkillWorkshopDatabase>(db);
         const existing = executeSqliteQueryTakeFirstSync(
@@ -377,7 +377,7 @@ export async function updateSkillProposalRecord(params: {
 }): Promise<SkillProposalEvent | undefined> {
   assertProposalId(params.record.id);
   ensureSkillWorkshopSchema(params.store);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<SkillWorkshopDatabase>(db);
       const current = executeSqliteQueryTakeFirstSync(
@@ -404,7 +404,7 @@ export async function updateSkillProposalRecord(params: {
         )
       ) {
         throw new Error(
-          "Skill proposal has unfinished apply recovery. Run openclaw doctor --fix and restore the files it identifies before retrying.",
+          "Skill proposal has unfinished apply recovery. Run carapace doctor --fix and restore the files it identifies before retrying.",
         );
       }
       if (params.invalidateRollback) {
@@ -569,7 +569,7 @@ export function importLegacySkillProposal(params: {
 }): "imported" | "already-imported" {
   assertProposalId(params.record.id);
   ensureSkillWorkshopSchema(params.store);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<SkillWorkshopDatabase>(db);
       const current = executeSqliteQueryTakeFirstSync(

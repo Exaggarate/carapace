@@ -42,7 +42,7 @@ function makeFakePnpm(waitFor?: { command: string; event: string }): {
   eventsPath: string;
   logPath: string;
 } {
-  const root = makeTempDir(tempDirs, "openclaw-release-preflight-");
+  const root = makeTempDir(tempDirs, "carapace-release-preflight-");
   const binDir = join(root, "bin");
   const eventsPath = join(root, "pnpm-events.log");
   const logPath = join(root, "pnpm.log");
@@ -55,12 +55,12 @@ function makeFakePnpm(waitFor?: { command: string; event: string }): {
 import { appendFileSync, readFileSync } from "node:fs";
 
 const command = ${JSON.stringify(bin)} + " " + process.argv.slice(2).join(" ");
-appendFileSync(process.env.OPENCLAW_RELEASE_PREFLIGHT_PNPM_LOG, command + "\\n");
-appendFileSync(process.env.OPENCLAW_RELEASE_PREFLIGHT_PNPM_EVENTS, "start " + command + "\\n");
+appendFileSync(process.env.CARAPACE_RELEASE_PREFLIGHT_PNPM_LOG, command + "\\n");
+appendFileSync(process.env.CARAPACE_RELEASE_PREFLIGHT_PNPM_EVENTS, "start " + command + "\\n");
 const waitFor = ${JSON.stringify(waitFor ?? null)};
 if (waitFor?.command === command) {
   const deadline = Date.now() + 3000;
-  while (!readFileSync(process.env.OPENCLAW_RELEASE_PREFLIGHT_PNPM_EVENTS, "utf8").split("\\n").includes(waitFor.event)) {
+  while (!readFileSync(process.env.CARAPACE_RELEASE_PREFLIGHT_PNPM_EVENTS, "utf8").split("\\n").includes(waitFor.event)) {
     if (Date.now() >= deadline) {
       console.error("Ready work did not start while another command held a worker");
       process.exit(9);
@@ -68,12 +68,12 @@ if (waitFor?.command === command) {
     await new Promise(resolve => setTimeout(resolve, 10));
   }
 }
-const delayMs = Number(process.env.OPENCLAW_RELEASE_PREFLIGHT_DELAY_MS ?? "0");
+const delayMs = Number(process.env.CARAPACE_RELEASE_PREFLIGHT_DELAY_MS ?? "0");
 if (delayMs > 0) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
 }
-appendFileSync(process.env.OPENCLAW_RELEASE_PREFLIGHT_PNPM_EVENTS, "end " + command + "\\n");
-const failures = new Set((process.env.OPENCLAW_RELEASE_PREFLIGHT_FAIL_COMMANDS ?? "").split(";").filter(Boolean));
+appendFileSync(process.env.CARAPACE_RELEASE_PREFLIGHT_PNPM_EVENTS, "end " + command + "\\n");
+const failures = new Set((process.env.CARAPACE_RELEASE_PREFLIGHT_FAIL_COMMANDS ?? "").split(";").filter(Boolean));
 process.exit(failures.has(command) ? 7 : 0);
 `,
       { mode: 0o755 },
@@ -97,8 +97,8 @@ function runPreflight(
       ...extraEnv,
       ...(fakePnpm
         ? {
-            OPENCLAW_RELEASE_PREFLIGHT_PNPM_LOG: fakePnpm.logPath,
-            OPENCLAW_RELEASE_PREFLIGHT_PNPM_EVENTS: fakePnpm.eventsPath,
+            CARAPACE_RELEASE_PREFLIGHT_PNPM_LOG: fakePnpm.logPath,
+            CARAPACE_RELEASE_PREFLIGHT_PNPM_EVENTS: fakePnpm.eventsPath,
             PATH: `${fakePnpm.binDir}${delimiter}${process.env.PATH ?? ""}`,
           }
         : {}),
@@ -113,8 +113,8 @@ function makeReleaseFixture(
     shortVersion?: string;
   } = {},
 ): string {
-  const root = makeTempDir(tempDirs, "openclaw-release-preflight-fixture-");
-  const plistDir = join(root, "apps", "macos", "Sources", "OpenClaw", "Resources");
+  const root = makeTempDir(tempDirs, "carapace-release-preflight-fixture-");
+  const plistDir = join(root, "apps", "macos", "Sources", "Carapace", "Resources");
   mkdirSync(plistDir, { recursive: true });
   writeFileSync(
     join(root, "package.json"),
@@ -228,7 +228,7 @@ describe("scripts/release-preflight.mjs", () => {
   it("runs every check command and reports all failed release artifact checks", () => {
     const fakePnpm = makeFakePnpm();
     const result = runPreflight(["--check"], fakePnpm, {
-      OPENCLAW_RELEASE_PREFLIGHT_FAIL_COMMANDS:
+      CARAPACE_RELEASE_PREFLIGHT_FAIL_COMMANDS:
         "node --import tsx scripts/sync-plugin-versions.ts --check;pnpm config:docs:check",
     });
 
@@ -247,10 +247,10 @@ describe("scripts/release-preflight.mjs", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_RELEASE_PREFLIGHT_FAIL_COMMANDS:
+        CARAPACE_RELEASE_PREFLIGHT_FAIL_COMMANDS:
           "node --import tsx scripts/generate-plugin-inventory-doc.mts --write",
-        OPENCLAW_RELEASE_PREFLIGHT_PNPM_EVENTS: fakePnpm.eventsPath,
-        OPENCLAW_RELEASE_PREFLIGHT_PNPM_LOG: fakePnpm.logPath,
+        CARAPACE_RELEASE_PREFLIGHT_PNPM_EVENTS: fakePnpm.eventsPath,
+        CARAPACE_RELEASE_PREFLIGHT_PNPM_LOG: fakePnpm.logPath,
         PATH: `${fakePnpm.binDir}${delimiter}${process.env.PATH ?? ""}`,
       },
     });
@@ -269,7 +269,7 @@ describe("scripts/release-preflight.mjs", () => {
       ["--fix", "--jobs", "8"],
       fakePnpm,
       {
-        OPENCLAW_RELEASE_PREFLIGHT_DELAY_MS: "40",
+        CARAPACE_RELEASE_PREFLIGHT_DELAY_MS: "40",
       },
       root,
     );
@@ -315,7 +315,7 @@ describe("scripts/release-preflight.mjs", () => {
       ["--fix", "--jobs", "4"],
       fakePnpm,
       {
-        OPENCLAW_RELEASE_PREFLIGHT_FAIL_COMMANDS:
+        CARAPACE_RELEASE_PREFLIGHT_FAIL_COMMANDS:
           "node --import tsx scripts/sync-plugin-versions.ts",
       },
       makeReleaseFixture(),
@@ -376,7 +376,7 @@ describe("scripts/release-preflight.mjs", () => {
 
   it("checks non-version scopes without requiring macOS source metadata", () => {
     const fakePnpm = makeFakePnpm();
-    const root = makeTempDir(tempDirs, "openclaw-release-preflight-config-");
+    const root = makeTempDir(tempDirs, "carapace-release-preflight-config-");
     const result = runPreflight(["--scope", "config"], fakePnpm, {}, root);
 
     expect(result.status).toBe(0);
@@ -490,7 +490,7 @@ process.once("exit", () => {
   it("fails closed when required macOS plist values are missing", () => {
     const fakePnpm = makeFakePnpm();
     const root = makeReleaseFixture();
-    const plistPath = join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist");
+    const plistPath = join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist");
     writeFileSync(
       plistPath,
       readFileSync(plistPath, "utf8").replace(
@@ -512,7 +512,7 @@ process.once("exit", () => {
       buildVersion: "2026061000",
       shortVersion: "2026.6.10",
     });
-    const plistPath = join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist");
+    const plistPath = join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist");
     const before = readFileSync(plistPath, "utf8");
     const result = runPreflight(["--fix"], fakePnpm, {}, root);
 

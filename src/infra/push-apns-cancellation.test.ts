@@ -40,7 +40,7 @@ describe("APNs cancellation", () => {
           nodeId: "ios-node-cancelled-stream",
           transport: "direct",
           token: "ABCD1234ABCD1234ABCD1234ABCD1234",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "production",
           updatedAtMs: 1,
         },

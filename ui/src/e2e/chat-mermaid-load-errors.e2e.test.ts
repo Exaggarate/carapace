@@ -44,7 +44,7 @@ suite.define(() => {
 
         await page.unroute(blockedScript);
         await page.reload();
-        const image = page.locator("openclaw-mermaid img");
+        const image = page.locator("carapace-mermaid img");
         await image.waitFor({ timeout: 25_000 });
         await image.evaluate((element: HTMLImageElement) => element.decode());
         expect(await failure.count()).toBe(0);

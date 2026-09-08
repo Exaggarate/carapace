@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@carapace/normalization-core/number-coercion";
 import { stripAnsi } from "../../../packages/terminal-core/src/ansi.js";
 import { isApprovalNotFoundError } from "../../infra/approval-errors.js";
 import { toErrorObject } from "../../infra/errors.js";
@@ -172,7 +172,7 @@ async function resolveNativeHookRelayPreToolUseApproval(
       handled: true,
       outcome: "denied",
       reason:
-        "OpenClaw tool policy rewrote Codex app-server approval params; refusing original request.",
+        "Carapace tool policy rewrote Codex app-server approval params; refusing original request.",
     };
   }
   return { handled: true, outcome: "approved-once" };
@@ -243,7 +243,7 @@ export async function runNativeHookRelayPermissionRequest(params: {
       }));
     params.registration.assertActive?.();
     if ((decision === "allow" || decision === "allow-always") && mutableFileBinding.binding) {
-      // PermissionRequest is OpenClaw's last boundary before the native runtime
+      // PermissionRequest is Carapace's last boundary before the native runtime
       // owns spawn; recheck after the wait before returning its allow response.
       const current = await revalidateSystemRunMutableFileBinding({
         binding: mutableFileBinding.binding,
@@ -571,7 +571,7 @@ async function requestNativeHookRelayPermissionApproval(
     "plugin.approval.request",
     { timeoutMs: timeoutMs + 10_000 },
     {
-      pluginId: `openclaw-native-hook-relay-${request.provider}`,
+      pluginId: `carapace-native-hook-relay-${request.provider}`,
       title: truncateRelayText(
         `${nativeHookRelayProviderDisplayName(request.provider)} permission request`,
         MAX_APPROVAL_TITLE_LENGTH,

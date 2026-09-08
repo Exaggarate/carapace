@@ -1,5 +1,5 @@
 // Codex tests cover client plugin behavior.
-import { embeddedAgentLog, OPENCLAW_VERSION } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog, CARAPACE_VERSION } from "carapace/plugin-sdk/agent-harness-runtime";
 import { SemVer } from "semver";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -418,7 +418,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
+      result: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION} (macOS; test)` },
     });
 
     await expect(initializing).resolves.toBeUndefined();
@@ -427,9 +427,9 @@ describe("CodexAppServerClient", () => {
       method: "initialize",
       params: {
         clientInfo: {
-          name: "openclaw",
-          title: "OpenClaw",
-          version: OPENCLAW_VERSION,
+          name: "carapace",
+          title: "Carapace",
+          version: CARAPACE_VERSION,
         },
         capabilities: {
           experimentalApi: true,
@@ -451,7 +451,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.146.9 (macOS; test)" },
+      result: { userAgent: "carapace/0.146.9 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -466,7 +466,7 @@ describe("CodexAppServerClient", () => {
       const { harness, initializing, outbound } = startInitialize();
       harness.send({
         id: outbound.id,
-        result: { userAgent: `openclaw/${version} (macOS; test)` },
+        result: { userAgent: `carapace/${version} (macOS; test)` },
       });
 
       await expect(initializing).rejects.toThrow(
@@ -480,7 +480,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.149.0-alpha.2 (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0-alpha.2 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -494,7 +494,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.149.0+desktop (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0+desktop (macOS; test)" },
     });
 
     await expect(initializing).resolves.toBeUndefined();
@@ -507,7 +507,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.144.0-alpha.1 (macOS; test)" },
+      result: { userAgent: "carapace/0.144.0-alpha.1 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -520,7 +520,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.144.0+custom (macOS; test)" },
+      result: { userAgent: "carapace/0.144.0+custom (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -541,7 +541,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: `openclaw/${version} (macOS; test)` },
+      result: { userAgent: `carapace/${version} (macOS; test)` },
     });
 
     await expect(initializing).resolves.toBeUndefined();
@@ -550,7 +550,7 @@ describe("CodexAppServerClient", () => {
     expect(warn).toHaveBeenCalledTimes(warnings);
     if (warnings > 0) {
       expect(warn).toHaveBeenCalledWith(
-        "codex app-server is newer than OpenClaw's managed runtime; continuing with normal startup validation",
+        "codex app-server is newer than Carapace's managed runtime; continuing with normal startup validation",
         {
           detectedVersion: version,
           validatedVersion: CODEX_APP_SERVER_VERSION,
@@ -565,7 +565,7 @@ describe("CodexAppServerClient", () => {
       const { harness, initializing, outbound } = startInitialize();
       harness.send({
         id: outbound.id,
-        result: { userAgent: `openclaw/${version} (macOS; test)` },
+        result: { userAgent: `carapace/${version} (macOS; test)` },
       });
 
       await expect(initializing).rejects.toThrow(
@@ -837,7 +837,7 @@ describe("CodexAppServerClient", () => {
         contentItems: [
           {
             type: "inputText",
-            text: `OpenClaw dynamic tool call timed out after ${CODEX_DYNAMIC_TOOL_SERVER_REQUEST_TIMEOUT_MS}ms before sending a response to Codex.`,
+            text: `Carapace dynamic tool call timed out after ${CODEX_DYNAMIC_TOOL_SERVER_REQUEST_TIMEOUT_MS}ms before sending a response to Codex.`,
           },
         ],
       },
@@ -970,7 +970,7 @@ describe("CodexAppServerClient", () => {
       result: {
         action: "decline",
         content: null,
-        _meta: { message: "OpenClaw has no interactive handler for this elicitation." },
+        _meta: { message: "Carapace has no interactive handler for this elicitation." },
       },
     });
   });

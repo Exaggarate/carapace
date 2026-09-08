@@ -4,7 +4,7 @@
 import { TOOL_NAME_SEPARATOR } from "../../agent-bundle-mcp-names.js";
 import {
   type CoreToolFactoryFamily,
-  type OpenClawCodingToolConstructionPlan,
+  type CarapaceCodingToolConstructionPlan,
   listCoreToolFactoryDescriptors,
   resolveCoreToolFactoryFamily,
 } from "../../core-tool-factory-descriptors.js";
@@ -21,25 +21,25 @@ import {
   readToolAllowlistIntersection,
 } from "../../tool-policy.js";
 
-const ALL_CODING_TOOL_CONSTRUCTION_PLAN: OpenClawCodingToolConstructionPlan = {
+const ALL_CODING_TOOL_CONSTRUCTION_PLAN: CarapaceCodingToolConstructionPlan = {
   includeBaseCodingTools: true,
   includeShellTools: true,
   includeChannelTools: true,
-  includeOpenClawTools: true,
+  includeCarapaceTools: true,
   includePluginTools: true,
 };
 
-const NO_CODING_TOOL_CONSTRUCTION_PLAN: OpenClawCodingToolConstructionPlan = {
+const NO_CODING_TOOL_CONSTRUCTION_PLAN: CarapaceCodingToolConstructionPlan = {
   includeBaseCodingTools: false,
   includeShellTools: false,
   includeChannelTools: false,
-  includeOpenClawTools: false,
+  includeCarapaceTools: false,
   includePluginTools: false,
 };
 
 function cloneCodingToolConstructionPlan(
-  plan: OpenClawCodingToolConstructionPlan,
-): OpenClawCodingToolConstructionPlan {
+  plan: CarapaceCodingToolConstructionPlan,
+): CarapaceCodingToolConstructionPlan {
   return { ...plan };
 }
 
@@ -124,7 +124,7 @@ export function mergeForcedEmbeddedAttemptToolsAllow(
 
 function resolveCodingToolConstructionPlanForAllowlist(
   toolsAllow?: string[],
-): OpenClawCodingToolConstructionPlan {
+): CarapaceCodingToolConstructionPlan {
   if (!toolsAllow) {
     return cloneCodingToolConstructionPlan(ALL_CODING_TOOL_CONSTRUCTION_PLAN);
   }
@@ -162,7 +162,7 @@ function resolveCodingToolConstructionPlanForAllowlist(
   }
   const includeBaseCodingTools = coreFamilies.has("base-coding");
   const includeShellTools = coreFamilies.has("shell");
-  const includeOpenClawTools = coreFamilies.has("openclaw");
+  const includeCarapaceTools = coreFamilies.has("carapace");
   // Channel delivery tools are constructed through plugin-capable runtime setup.
   const includeChannelTools = includePluginTools;
 
@@ -170,7 +170,7 @@ function resolveCodingToolConstructionPlanForAllowlist(
     includeBaseCodingTools,
     includeShellTools,
     includeChannelTools,
-    includeOpenClawTools,
+    includeCarapaceTools,
     includePluginTools,
   };
 }
@@ -190,7 +190,7 @@ export function resolveEmbeddedAttemptToolConstructionPlan(params: {
   constructTools: boolean;
   includeCoreTools: boolean;
   runtimeToolAllowlist?: string[];
-  codingToolConstructionPlan: OpenClawCodingToolConstructionPlan;
+  codingToolConstructionPlan: CarapaceCodingToolConstructionPlan;
 } {
   // Model capability is authoritative: forced delivery cannot materialize a
   // tool the selected model cannot call.
@@ -212,7 +212,7 @@ export function resolveEmbeddedAttemptToolConstructionPlan(params: {
   const includeCoreTools =
     codingToolConstructionPlan.includeBaseCodingTools ||
     codingToolConstructionPlan.includeShellTools ||
-    codingToolConstructionPlan.includeOpenClawTools;
+    codingToolConstructionPlan.includeCarapaceTools;
   const constructTools =
     includeCoreTools ||
     codingToolConstructionPlan.includeChannelTools ||

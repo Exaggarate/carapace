@@ -7,11 +7,11 @@ import {
   createFakeThreadStartResponse,
 } from "../../../../scripts/e2e/lib/codex-app-server-fixture.mjs";
 
-const requestLog = process.env.OPENCLAW_QA_CODEX_HEARTBEAT_LOG;
-const appServerVersion = process.env.OPENCLAW_QA_CODEX_APP_SERVER_VERSION;
-const compactMode = process.env.OPENCLAW_QA_CODEX_HEARTBEAT_COMPACT_MODE;
-const providerBaseUrl = process.env.OPENCLAW_QA_CODEX_HEARTBEAT_PROVIDER_BASE_URL;
-const proofMode = process.env.OPENCLAW_QA_CODEX_HEARTBEAT_PROOF_MODE;
+const requestLog = process.env.CARAPACE_QA_CODEX_HEARTBEAT_LOG;
+const appServerVersion = process.env.CARAPACE_QA_CODEX_APP_SERVER_VERSION;
+const compactMode = process.env.CARAPACE_QA_CODEX_HEARTBEAT_COMPACT_MODE;
+const providerBaseUrl = process.env.CARAPACE_QA_CODEX_HEARTBEAT_PROVIDER_BASE_URL;
+const proofMode = process.env.CARAPACE_QA_CODEX_HEARTBEAT_PROOF_MODE;
 const appServerMode = process.argv.includes("--app-server");
 
 const threadId = "thread-qa-codex-heartbeat";
@@ -130,9 +130,9 @@ function runAppServer() {
         sendResult(
           message.id,
           createFakeInitializeResponse({
-            name: "openclaw-qa-codex-heartbeat",
+            name: "carapace-qa-codex-heartbeat",
             version: appServerVersion,
-            userAgent: `openclaw/${appServerVersion} (test)`,
+            userAgent: `carapace/${appServerVersion} (test)`,
           }),
         );
         return;
@@ -300,7 +300,7 @@ async function installProviderRedirect() {
     throw new Error(`expected one built AI transport host chunk, found ${hostChunks.length}`);
   }
   await import(pathToFileURL(path.join(distDir, hostChunks[0])).href);
-  const { configureAiTransportHost, getAiTransportHost } = await import("@openclaw/ai");
+  const { configureAiTransportHost, getAiTransportHost } = await import("@carapace/ai");
   const host = getAiTransportHost();
   const buildModelFetch = host.buildModelFetch;
   configureAiTransportHost({

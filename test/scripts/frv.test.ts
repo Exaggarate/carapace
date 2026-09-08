@@ -24,7 +24,7 @@ import {
 const SHA = "a".repeat(40);
 const TARGET_SHA = "b".repeat(40);
 const SOURCE_REF = `release-ci/${SHA.slice(0, 12)}-77`;
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 
 function job(name: string, conclusion = "success") {
   return {
@@ -121,7 +121,7 @@ function executionPlanArtifact({
     toolingSha: SHA,
     releaseProfile: "beta",
     releaseSoak: false,
-    upgradeSurvivorBaseline: "openclaw@latest",
+    upgradeSurvivorBaseline: "carapace@latest",
     upgradeSurvivorBaselines: "",
     upgradeSurvivorScenarios: "",
     allowFrozenTargetScenarioOmissions: false,
@@ -299,9 +299,9 @@ function controllerClient(
 }
 
 async function withFastPolling<T>(run: () => Promise<T>, reconcileTimeoutMs?: string) {
-  vi.stubEnv("OPENCLAW_FRV_POLL_MS", "1");
+  vi.stubEnv("CARAPACE_FRV_POLL_MS", "1");
   if (reconcileTimeoutMs) {
-    vi.stubEnv("OPENCLAW_FRV_RECONCILE_TIMEOUT_MS", reconcileTimeoutMs);
+    vi.stubEnv("CARAPACE_FRV_RECONCILE_TIMEOUT_MS", reconcileTimeoutMs);
   }
   try {
     return await run();

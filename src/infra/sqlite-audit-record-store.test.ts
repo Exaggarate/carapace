@@ -1,10 +1,10 @@
 import { DeleteQueryNode } from "kysely";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { getNodeSqliteKysely } from "./kysely-sync.js";
 import { createSqliteAuditRecordStore } from "./sqlite-audit-record-store.js";
@@ -12,15 +12,15 @@ import { createSqliteAuditRecordStore } from "./sqlite-audit-record-store.js";
 describe("SQLite audit record store", () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
   });
 
   it("keeps the newest configured number of rows per scope", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "bounded-test",
         maxEntries: 2,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("one", { value: 1 }, 1);
@@ -33,11 +33,11 @@ describe("SQLite audit record store", () => {
   });
 
   it("reads bounded newest-first pages by sequence", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-latest-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-latest-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "latest-test",
         maxEntries: 10,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("one", { value: 1 }, 100);
@@ -55,11 +55,11 @@ describe("SQLite audit record store", () => {
   });
 
   it("preserves insertion order and prunes the oldest row when timestamps tie", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-ties-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-ties-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "tied-timestamps",
         maxEntries: 2,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("z-first", { value: 1 }, 1);
@@ -72,11 +72,11 @@ describe("SQLite audit record store", () => {
   });
 
   it("prunes by insertion order when wall-clock timestamps move", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-clock-skew-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-clock-skew-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "clock-skew",
         maxEntries: 2,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("future-first", { value: 1 }, 4_000_000_000_000);
@@ -88,8 +88,8 @@ describe("SQLite audit record store", () => {
   });
 
   it("prunes a legacy batch with one delete while preserving runtime rows and other scopes", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-batch-" }, async (stateDir) => {
-      const options = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+    await withTestDir({ prefix: "carapace-audit-store-batch-" }, async (stateDir) => {
+      const options = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
       const store = createSqliteAuditRecordStore<{ value: number }>({
         ...options,
         scope: "batch-test",
@@ -102,7 +102,7 @@ describe("SQLite audit record store", () => {
       });
       store.register("runtime", { value: 100 }, 0);
       sibling.register("legacy-0", { value: 200 }, 1);
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       const compile = vi.spyOn(getNodeSqliteKysely(db).getExecutor(), "compileQuery");
 
       store.registerLegacyMany(
@@ -130,10 +130,10 @@ describe("SQLite audit record store", () => {
   it.each(["register", "upsert", "compareAndSet"] as const)(
     "protects the oldest key during %s without changing its insertion age",
     async (operation) => {
-      await withTestDir({ prefix: "openclaw-audit-store-protected-" }, async (stateDir) => {
+      await withTestDir({ prefix: "carapace-audit-store-protected-" }, async (stateDir) => {
         const options = {
           scope: "protected-test",
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         };
         const seed = createSqliteAuditRecordStore<{ value: number }>({
           ...options,
@@ -165,8 +165,8 @@ describe("SQLite audit record store", () => {
   );
 
   it("rolls back failed pruning and lets a caller-owned transaction continue", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-rollback-" }, async (stateDir) => {
-      const options = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+    await withTestDir({ prefix: "carapace-audit-store-rollback-" }, async (stateDir) => {
+      const options = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
       const store = createSqliteAuditRecordStore<{ value: number }>({
         ...options,
         scope: "rollback-test",
@@ -175,7 +175,7 @@ describe("SQLite audit record store", () => {
       store.register("one", { value: 1 }, 1);
       store.register("two", { value: 2 }, 2);
       const before = store.latest({ limit: 3 });
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       db.exec(`
         CREATE TEMP TRIGGER reject_audit_pruning BEFORE DELETE ON diagnostic_events
         WHEN OLD.scope = 'rollback-test' AND OLD.event_key = 'one'
@@ -185,7 +185,7 @@ describe("SQLite audit record store", () => {
       expect(append).toThrow("audit pruning refused");
       expect(store.latest({ limit: 3 })).toEqual(before);
 
-      runOpenClawStateWriteTransaction(() => {
+      runCarapaceStateWriteTransaction(() => {
         expect(append).toThrow("audit pruning refused");
         store.upsert("two", { value: 20 }, 20);
       }, options);
@@ -200,11 +200,11 @@ describe("SQLite audit record store", () => {
   });
 
   it("keeps keyed mutations atomic without changing insertion age", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-upsert-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-upsert-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "upsert-test",
         maxEntries: 2,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("one", { value: 1 }, 1);
@@ -248,11 +248,11 @@ describe("SQLite audit record store", () => {
   });
 
   it("orders legacy batches before existing runtime rows", async () => {
-    await withTestDir({ prefix: "openclaw-audit-store-legacy-order-" }, async (stateDir) => {
+    await withTestDir({ prefix: "carapace-audit-store-legacy-order-" }, async (stateDir) => {
       const store = createSqliteAuditRecordStore<{ value: number }>({
         scope: "legacy-order",
         maxEntries: 4,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
 
       store.register("runtime", { value: 3 }, 3);

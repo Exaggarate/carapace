@@ -1,10 +1,10 @@
 // Control UI view renders agents utils screen content.
-import { formatByteSize } from "@openclaw/normalization-core";
+import { formatByteSize } from "@carapace/normalization-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { formatAgentRuntimeLabel } from "../../../../src/shared/agent-runtime-display.js";
 import type {
   AgentIdentityResult,

@@ -1,6 +1,6 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { DEVICE_WORKER_PROVIDER_ID } from "./device-provider-identity.js";
 import type { WorkerPlacementDispatchRequest } from "./service-contract.js";
 
@@ -18,7 +18,7 @@ type WorkerPlacementDestination =
     };
 
 export function resolveWorkerPlacementDestination(params: {
-  cfg: Pick<OpenClawConfig, "cloudWorkers">;
+  cfg: Pick<CarapaceConfig, "cloudWorkers">;
   profileId?: string;
   deviceId?: string;
   machineClass?: string;

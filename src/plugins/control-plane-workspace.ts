@@ -3,7 +3,7 @@ import {
   resolveAgentWorkspaceDir,
   tryResolveAmbientOwnerAgentId,
 } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginDiagnostic } from "./manifest-types.js";
 
 const PLUGIN_WORKSPACE_SCOPE_OMITTED_DIAGNOSTIC_CODE = "workspace-scope-omitted" as const;
@@ -20,7 +20,7 @@ type PluginControlPlaneWorkspaceResolution = {
  * Shared roots remain safe to inspect when no system owner can be proven.
  */
 export function resolvePluginControlPlaneWorkspace(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): PluginControlPlaneWorkspaceResolution {

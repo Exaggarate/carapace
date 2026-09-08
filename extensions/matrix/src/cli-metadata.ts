@@ -1,7 +1,7 @@
 // Matrix plugin module implements cli metadata behavior.
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/channel-plugin-common";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/channel-plugin-common";
 
-export function registerMatrixCliMetadata(api: OpenClawPluginApi) {
+export function registerMatrixCliMetadata(api: CarapacePluginApi) {
   api.registerCli(
     async ({ program }) => {
       const { registerMatrixCli } = await import("./cli.js");

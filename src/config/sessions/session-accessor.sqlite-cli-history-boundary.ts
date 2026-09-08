@@ -1,4 +1,4 @@
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { getCliHistoryWriter, isKnownCliHistoryBoundary } from "./cli-history-boundary.js";
 import { readSessionEntryRow, writeSessionEntry } from "./session-accessor.sqlite-entry-store.js";
 import type { ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
@@ -7,7 +7,7 @@ import type { InternalSessionEntry } from "./types.js";
 
 /** Advance only a contiguous prefix written by the exact prepared CLI account's live owner. */
 export function advanceCliHistoryBoundaryInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   seq: number,
 ): void {

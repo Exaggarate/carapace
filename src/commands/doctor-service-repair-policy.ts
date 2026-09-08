@@ -8,7 +8,7 @@ import { UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION_ENV } from "./doctor/shared/upd
 type ServiceRepairPolicy = "auto" | "external";
 const GATEWAY_SERVICE_MANAGER_TIMEOUT_MS = 5_000;
 
-export const SERVICE_REPAIR_POLICY_ENV = "OPENCLAW_SERVICE_REPAIR_POLICY";
+export const SERVICE_REPAIR_POLICY_ENV = "CARAPACE_SERVICE_REPAIR_POLICY";
 
 export const EXTERNAL_SERVICE_REPAIR_NOTE =
   "Gateway service is managed externally; skipped service install/start repair. Start or repair the gateway through your supervisor.";

@@ -19,12 +19,12 @@ const SIDEBAR_PROOF_USER = {
 export function createSidebarFooterProofSuite(name: string, buildInfo?: ControlUiBuildInfo) {
   return createControlUiE2eSuite({
     name,
-    browserLaunchOptions: { headless: process.env.OPENCLAW_UI_E2E_HEADED !== "1" },
+    browserLaunchOptions: { headless: process.env.CARAPACE_UI_E2E_HEADED !== "1" },
     startServer: buildInfo ? () => startControlUiE2eServer(buildInfo, { source: true }) : undefined,
     startServerBeforeBrowser: true,
     trackBrowserContexts: true,
     unavailableMessage: (executablePath) =>
-      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+      `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
   });
 }
 
@@ -43,7 +43,7 @@ export async function openSidebarFooterProofPage(
     ...scenario,
   });
   await page.goto(`${suite.server.baseUrl}chat`);
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("carapace-app-sidebar");
   await sidebar.locator(".sidebar-identity-card").waitFor();
   return { context, gateway, page, sidebar };
 }
@@ -68,7 +68,7 @@ export async function captureUnionProof(
   fileName: string,
   locators: readonly Locator[],
 ) {
-  if (process.env.OPENCLAW_CAPTURE_UI_PROOF !== "1") {
+  if (process.env.CARAPACE_CAPTURE_UI_PROOF !== "1") {
     return;
   }
   const boxes: Array<{ x: number; y: number; width: number; height: number }> = [];

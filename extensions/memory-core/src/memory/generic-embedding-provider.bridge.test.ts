@@ -1,10 +1,10 @@
 // Memory Core tests cover generic embedding provider.bridge plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { EmbeddingProvider } from "openclaw/plugin-sdk/embedding-providers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { EmbeddingProvider } from "carapace/plugin-sdk/embedding-providers";
 import {
   createPluginRegistryFixture,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "carapace/plugin-sdk/plugin-test-contracts";
 import {
   clearEmbeddingProviders,
   createEmptyPluginRegistry,
@@ -14,17 +14,17 @@ import {
   type RegisteredEmbeddingProvider,
   restoreRegisteredEmbeddingProviders,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEmbeddingProvider, resolveEmbeddingProviderIndexIdentity } from "./embeddings.js";
 
 let embeddingProvidersSnapshot: RegisteredEmbeddingProvider[];
 let previousPluginRegistry: ReturnType<typeof getActivePluginRegistry>;
 
-function createOptions(config: OpenClawConfig) {
+function createOptions(config: CarapaceConfig) {
   return {
     config,
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/carapace-agent",
     provider: "virtual-generic",
     fallback: "none",
     model: "virtual-model",
@@ -51,7 +51,7 @@ describe("memory-core generic embedding provider contract", () => {
       plugins: {
         enabled: false,
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     registerVirtualTestPlugin({
       registry,

@@ -122,14 +122,14 @@ describe("AppSidebar session ownership", () => {
 
     await waitForFast(() => {
       expect(
-        sidebar.querySelector('[data-session-key="agent:main:ada"] openclaw-viewer-avatar img'),
+        sidebar.querySelector('[data-session-key="agent:main:ada"] carapace-viewer-avatar img'),
       ).not.toBeNull();
       expect(
-        sidebar.querySelector('[data-session-key="agent:main:bob"] openclaw-viewer-avatar img'),
+        sidebar.querySelector('[data-session-key="agent:main:bob"] carapace-viewer-avatar img'),
       ).not.toBeNull();
     });
     const bobAvatarBefore = sidebar
-      .querySelector('[data-session-key="agent:main:bob"] openclaw-viewer-avatar img')
+      .querySelector('[data-session-key="agent:main:bob"] carapace-viewer-avatar img')
       ?.getAttribute("src");
     expect(
       sidebar
@@ -154,7 +154,7 @@ describe("AppSidebar session ownership", () => {
     await sidebar.updateComplete;
     expect(
       sidebar
-        .querySelector('[data-session-key="agent:main:bob"] openclaw-viewer-avatar img')
+        .querySelector('[data-session-key="agent:main:bob"] carapace-viewer-avatar img')
         ?.getAttribute("src"),
     ).toBe(bobAvatarBefore);
     const bobChip = sidebar.querySelector(
@@ -237,7 +237,7 @@ describe("AppSidebar session ownership", () => {
 
     expect(sidebar.sessionData.sessionsResult?.owners).toHaveLength(2);
     expect(sidebar.querySelector('[data-session-key="agent:main:ada"]')).not.toBeNull();
-    expect(sidebar.querySelectorAll("openclaw-session-owner-chip")).toHaveLength(1);
+    expect(sidebar.querySelectorAll("carapace-session-owner-chip")).toHaveLength(1);
     const menu = await openOwnerMenu(sidebar);
     expect(menu.textContent).toContain("Owners");
     expect(menu.querySelector('[value="owner:"]')).not.toBeNull();
@@ -305,7 +305,7 @@ describe("AppSidebar session ownership", () => {
       "owner:profile-colin",
     ]);
     expect(ownerRows[0]?.querySelector(".session-menu__text")?.textContent).toBe("Patrick (You)");
-    expect(ownerRows[0]?.querySelector("openclaw-session-owner-chip")).not.toBeNull();
+    expect(ownerRows[0]?.querySelector("carapace-session-owner-chip")).not.toBeNull();
   });
 
   it("shows and requests Involving me for a participant session", async () => {
@@ -431,7 +431,7 @@ describe("AppSidebar session ownership", () => {
       ),
     ).toBe(false);
     expect(menu.querySelector('[value^="owner:"]')).toBeNull();
-    expect(sidebar.querySelector("openclaw-session-owner-chip")).toBeNull();
+    expect(sidebar.querySelector("carapace-session-owner-chip")).toBeNull();
   });
 
   it("owns People availability and fallback at the live session-owner roster", async () => {
@@ -565,7 +565,7 @@ describe("AppSidebar session ownership", () => {
       ownerSections()[0]?.querySelector(".sidebar-recent-sessions__label-text")?.textContent,
     ).toBe("Zoe");
     expect(
-      ownerSections()[0]?.querySelector("openclaw-viewer-avatar")?.getAttribute("aria-hidden"),
+      ownerSections()[0]?.querySelector("carapace-viewer-avatar")?.getAttribute("aria-hidden"),
     ).toBe("true");
     expect(
       ownerSections()[0]
@@ -642,14 +642,14 @@ describe("AppSidebar session ownership", () => {
     await sidebar.updateComplete;
 
     expect(
-      sidebar.querySelector('openclaw-session-owner-chip span[title="Archived by Bob"]'),
+      sidebar.querySelector('carapace-session-owner-chip span[title="Archived by Bob"]'),
     ).not.toBeNull();
     expect(sidebar.querySelector('span[title="Created by Ada"]')).toBeNull();
     // Facepile dedup follows the rendered lead: the archivist chip is shown,
     // so Bob is excluded while owner Ada must stay visible as a viewer.
     const archivedFacepile = sidebar.querySelector(
-      '[data-session-key="agent:main:archived"] openclaw-viewer-facepile',
-    ) as HTMLElementTagNameMap["openclaw-viewer-facepile"] | null;
+      '[data-session-key="agent:main:archived"] carapace-viewer-facepile',
+    ) as HTMLElementTagNameMap["carapace-viewer-facepile"] | null;
     expect(archivedFacepile?.excludeIdentities).toEqual([archived.archivedBy.identity]);
 
     setEffectiveOwner(collaborator, { type: "human", id: "profile-ada", label: "Ada" });
@@ -657,10 +657,10 @@ describe("AppSidebar session ownership", () => {
     harness.publishList({ result, agentId: "main" });
     await sidebar.updateComplete;
 
-    expect(sidebar.querySelector("openclaw-session-owner-chip")).toBeNull();
+    expect(sidebar.querySelector("carapace-session-owner-chip")).toBeNull();
     const soloFacepile = sidebar.querySelector(
-      '[data-session-key="agent:main:archived"] openclaw-viewer-facepile',
-    ) as HTMLElementTagNameMap["openclaw-viewer-facepile"] | null;
+      '[data-session-key="agent:main:archived"] carapace-viewer-facepile',
+    ) as HTMLElementTagNameMap["carapace-viewer-facepile"] | null;
     expect(soloFacepile?.excludeIdentities).toEqual([]);
   });
 });

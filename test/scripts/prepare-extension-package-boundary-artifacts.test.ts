@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createVitestResourceOwner } from "../../scripts/lib/vitest-resource-ownership.mts";
 import {
@@ -101,7 +101,7 @@ describe("prepare-extension-package-boundary-artifacts", () => {
 
   it.runIf(process.platform !== "win32")("force-kills aborted sibling step process groups", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-boundary-abort-group-");
+      const rootDir = createTempDir("carapace-boundary-abort-group-");
       const descendantPidPath = path.join(rootDir, "descendant.pid");
       let descendantPid = 0;
       const descendantScript = [
@@ -174,7 +174,7 @@ describe("prepare-extension-package-boundary-artifacts", () => {
           ? createVitestResourceOwner(createTempDir("boundary-cleanup-owner-"))
           : undefined;
       const driverFixture = retainedOwner ? createFixtureLifetime(retainedOwner.root) : fixture;
-      const rootDir = driverFixture.createTempDir("openclaw-boundary-abort-drain-");
+      const rootDir = driverFixture.createTempDir("carapace-boundary-abort-drain-");
       let descendantPid = 0;
       let command: ReturnType<typeof runNodeStepsInParallel> | undefined;
       let outcome: Promise<unknown> | undefined;
@@ -331,7 +331,7 @@ describe("prepare-extension-package-boundary-artifacts", () => {
     "joins timed-out prep groups launched with %s",
     (launch) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-boundary-timeout-group-");
+        const rootDir = createTempDir("carapace-boundary-timeout-group-");
         const descendantPidPath = path.join(rootDir, "descendant.pid");
         let descendantPid = 0;
         const nativeSetTimeout = globalThis.setTimeout;
@@ -392,7 +392,7 @@ describe("prepare-extension-package-boundary-artifacts", () => {
     "forwards wrapper termination to detached prep step groups",
     () =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-boundary-signal-group-");
+        const rootDir = createTempDir("carapace-boundary-signal-group-");
         const descendantPidPath = path.join(rootDir, "descendant.pid");
         let descendantPid = 0;
         const moduleHref = pathToFileURL(
@@ -446,7 +446,7 @@ describe("prepare-extension-package-boundary-artifacts", () => {
     "rejects and joins descendants left behind by a step exiting %s",
     (exitCode) =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-boundary-unjoined-");
+        const rootDir = createTempDir("carapace-boundary-unjoined-");
         const pidFile = path.join(rootDir, "descendant.pid");
         const leafScript = `
 const fs = require("node:fs");
@@ -487,7 +487,7 @@ child.once("message", () => process.exit(${exitCode}));
 
   it("does not admit work after sibling cancellation", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-boundary-canceled-");
+      const rootDir = createTempDir("carapace-boundary-canceled-");
       const startedPath = path.join(rootDir, "started");
       const abortController = new AbortController();
       abortController.abort();
@@ -506,7 +506,7 @@ child.once("message", () => process.exit(${exitCode}));
     "keeps cancellation a failure when the child handles SIGTERM with exit zero",
     () =>
       fixture.run(async () => {
-        const rootDir = createTempDir("openclaw-boundary-canceled-zero-");
+        const rootDir = createTempDir("carapace-boundary-canceled-zero-");
         const readyPath = path.join(rootDir, "ready");
         const stoppedPath = path.join(rootDir, "stopped");
         const abortController = new AbortController();
@@ -558,7 +558,7 @@ child.once("message", () => process.exit(${exitCode}));
 
   it("runs boundary prep steps serially for local checks", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-boundary-serial-");
+      const rootDir = createTempDir("carapace-boundary-serial-");
       const logPath = path.join(rootDir, "steps.log");
       const appendScript = (label: string) =>
         `const fs=require("node:fs");` +
@@ -571,7 +571,7 @@ child.once("message", () => process.exit(${exitCode}));
           { label: "first", args: ["--eval", appendScript("first")], timeoutMs: 5_000 },
           { label: "second", args: ["--eval", appendScript("second")], timeoutMs: 5_000 },
         ],
-        { OPENCLAW_LOCAL_CHECK: "1" },
+        { CARAPACE_LOCAL_CHECK: "1" },
       );
 
       expect(fs.readFileSync(logPath, "utf8").trim().split("\n")).toEqual([
@@ -584,17 +584,17 @@ child.once("message", () => process.exit(${exitCode}));
 
   it("passes step-specific environment overrides to child steps", () =>
     fixture.run(async () => {
-      const rootDir = createTempDir("openclaw-boundary-env-");
+      const rootDir = createTempDir("carapace-boundary-env-");
       const outputPath = path.join(rootDir, "env.txt");
       const writeEnvScript =
         `const fs=require("node:fs");` +
-        `fs.writeFileSync(${JSON.stringify(outputPath)}, process.env.OPENCLAW_TEST_ENV || "", "utf8");`;
+        `fs.writeFileSync(${JSON.stringify(outputPath)}, process.env.CARAPACE_TEST_ENV || "", "utf8");`;
 
       await runNodeStepsInParallel([
         {
           label: "env-step",
           args: ["--eval", writeEnvScript],
-          env: { OPENCLAW_TEST_ENV: "passed" },
+          env: { CARAPACE_TEST_ENV: "passed" },
           timeoutMs: 5_000,
         },
       ]);
@@ -612,18 +612,18 @@ child.once("message", () => process.exit(${exitCode}));
     expect(resolveBoundaryRootShimsTimeoutMs({})).toBe(300_000);
     expect(
       resolveBoundaryRootShimsTimeoutMs({
-        OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "450000",
+        CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "450000",
       }),
     ).toBe(450_000);
     expect(() =>
       resolveBoundaryRootShimsTimeoutMs({
-        OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "120s",
+        CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "120s",
       }),
-    ).toThrow("OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS must be a positive integer");
+    ).toThrow("CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS must be a positive integer");
     expect(() =>
       resolveBoundaryRootShimsTimeoutMs({
-        OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "0",
+        CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS: "0",
       }),
-    ).toThrow("OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS must be a positive integer");
+    ).toThrow("CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS must be a positive integer");
   });
 });

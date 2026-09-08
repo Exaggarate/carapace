@@ -3,7 +3,7 @@
 // and the pages-parameter contract that is exclusive to extraction paths.
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import * as pdfExtractModule from "../../media/pdf-extract.js";
 import * as preparedModelRuntime from "../prepared-model-runtime.js";
 import * as pdfNativeProviders from "./pdf-native-providers.js";
@@ -52,10 +52,10 @@ function requirePdfTool(
   return tool;
 }
 
-function withPdfModel(primary: string): OpenClawConfig {
+function withPdfModel(primary: string): CarapaceConfig {
   return {
     agents: { defaults: { pdfModel: { primary } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function expectFields(value: unknown, expected: Record<string, unknown>): void {

@@ -110,14 +110,14 @@ describe("runGuidedOnboarding quick start", () => {
       const securityNotes = vi
         .mocked(prompter.note)
         .mock.calls.filter(([message]) =>
-          message.includes("https://docs.openclaw.ai/gateway/security"),
+          message.includes("https://github.com/Exaggarate/carapace"),
         );
       expect(securityNotes).toEqual(
         acknowledgedAt
           ? []
           : [
               [
-                "OpenClaw runs an AI agent with real access to this machine. Security guide: https://docs.openclaw.ai/gateway/security",
+                "Carapace runs an AI agent with real access to this machine. Security guide: https://github.com/Exaggarate/carapace",
                 "Security disclaimer",
               ],
             ],
@@ -177,7 +177,7 @@ describe("runGuidedOnboarding quick start", () => {
 
     expect(vi.mocked(prompter.select).mock.calls.map(([params]) => params.message)).toEqual([
       "How would you like to start?",
-      "Help make OpenClaw better?",
+      "Help make Carapace better?",
       "How should I set things up?",
     ]);
     const selects = vi.mocked(prompter.select).mock.invocationCallOrder;

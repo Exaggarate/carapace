@@ -2,7 +2,7 @@
 import {
   isRecord,
   normalizeNullableString as nonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const LINE_WEBHOOK_SPOOL_VERSION = 1;
 

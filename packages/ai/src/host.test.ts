@@ -1,10 +1,10 @@
-import { createAssistantMessageEventStream } from "@openclaw/llm-core";
-import type { Api, Model, StreamFn } from "@openclaw/llm-core";
+import { createAssistantMessageEventStream } from "@carapace/llm-core";
+import type { Api, Model, StreamFn } from "@carapace/llm-core";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { createApiRegistry, type ApiRegistry } from "./api-registry.js";
 import type { AiTransformTransportMessages } from "./host.js";
 
-const CUSTOM_API = "openclaw-openai-chatgpt-responses-transport";
+const CUSTOM_API = "carapace-openai-chatgpt-responses-transport";
 
 function registerCustomApi(registry: ApiRegistry, api: Api, _streamFn: StreamFn): boolean {
   if (registry.getApiProvider(api)) {

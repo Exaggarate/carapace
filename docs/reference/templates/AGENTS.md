@@ -67,7 +67,7 @@ Every few days, use a scheduled automation to review recent daily notes. Fold st
 
 ## Existing Solutions Preflight
 
-Before proposing or building a custom solution, briefly check existing open-source projects, maintained libraries, OpenClaw plugins, or free platforms. Prefer an adequate existing option. Build custom only when those options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom work. Recommend paid services only with explicit spend approval.
+Before proposing or building a custom solution, briefly check existing open-source projects, maintained libraries, Carapace plugins, or free platforms. Prefer an adequate existing option. Build custom only when those options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom work. Recommend paid services only with explicit spend approval.
 
 ## External vs Internal
 
@@ -109,7 +109,7 @@ Record camera names, SSH hosts and users, preferred voices and speakers, and dev
 
 ## Automations - Be Proactive
 
-Use scheduled automations for recurring checks, reminders, and background work. Keep checklists and check timing in each automation's scratch. Keep it small; do not create a separate state file. Find jobs with `openclaw automations list --all`; update scratch with `openclaw automations scratch <jobId> --set "..."`.
+Use scheduled automations for recurring checks, reminders, and background work. Keep checklists and check timing in each automation's scratch. Keep it small; do not create a separate state file. Find jobs with `carapace automations list --all`; update scratch with `carapace automations scratch <jobId> --set "..."`.
 
 **Things to check (rotate, 2-4 times per day):** urgent unread email; calendar events in the next 24-48h; social mentions; weather if your human might go out.
 

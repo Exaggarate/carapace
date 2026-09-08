@@ -99,7 +99,7 @@ describe("ChatLog run state", () => {
       message: {
         role: "user",
         content: "Persisted prompt.",
-        __openclaw: {
+        __carapace: {
           id: "shared-user",
           idempotencyKey: "local-send:user",
           runId: "shared-run",

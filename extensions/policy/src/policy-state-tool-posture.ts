@@ -1,10 +1,10 @@
-import { resolveExecModePolicy } from "openclaw/plugin-sdk/exec-approvals-runtime";
+import { resolveExecModePolicy } from "carapace/plugin-sdk/exec-approvals-runtime";
 import {
   asNonArrayRecord,
   isRecord,
   asBoolean as readBoolean,
   normalizeOptionalString as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { collectPolicyConfiguredAgents, ocPathSegment } from "./policy-state-helpers.js";
 import type { PolicyToolPostureEvidence } from "./policy-state-types.js";
 
@@ -25,8 +25,8 @@ export function scanPolicyToolPosture(
     inheritedTools: {},
     sandbox: defaultSandbox,
     inheritedSandbox: {},
-    sourceBase: "oc://openclaw.config/tools",
-    inheritedSourceBase: "oc://openclaw.config/tools",
+    sourceBase: "oc://carapace.config/tools",
+    inheritedSourceBase: "oc://carapace.config/tools",
   });
 
   collectPolicyConfiguredAgents(agents).forEach((configured) => {
@@ -43,7 +43,7 @@ export function scanPolicyToolPosture(
       sandbox: asNonArrayRecord(agent.sandbox),
       inheritedSandbox: defaultSandbox,
       sourceBase: `${configured.sourceBase}/tools`,
-      inheritedSourceBase: "oc://openclaw.config/tools",
+      inheritedSourceBase: "oc://carapace.config/tools",
     });
   });
 

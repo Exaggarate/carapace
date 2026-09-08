@@ -3,8 +3,8 @@ import {
   finiteSecondsToTimerSafeMilliseconds,
   MAX_TIMER_TIMEOUT_MS,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createTypingKeepaliveLoop } from "../../channels/typing-lifecycle.js";
 import { isSilentReplyPrefixText, isSilentReplyText, SILENT_REPLY_TOKEN } from "../tokens.js";
 

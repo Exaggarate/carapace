@@ -4,7 +4,7 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import type { ClientRequest, IncomingMessage } from "node:http";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CloudflareAccessCredentials } from "../../packages/gateway-client/src/cloudflare-access.js";
 import { boundedWorkerError } from "../gateway/worker-environments/worker-error.js";
 import {
@@ -302,7 +302,7 @@ async function downloadWorkspace(params: {
         let packPath: string | undefined;
         if (!seeded) {
           baseSource = "gateway-pack";
-          packPath = path.join(staging, ".openclaw-base.pack");
+          packPath = path.join(staging, ".carapace-base.pack");
           const packStartedAt = performance.now();
           await downloadFile({
             request: {
@@ -502,7 +502,7 @@ async function uploadWorkspace(params: {
   const baseRaw = await fsp.readFile(
     path.join(
       params.manifestHome,
-      ".openclaw-worker",
+      ".carapace-worker",
       "manifests",
       `${params.transfer.baseManifestRef.slice("sha256:".length)}.json`,
     ),
@@ -520,7 +520,7 @@ async function uploadWorkspace(params: {
   const currentRaw = await fsp.readFile(
     path.join(
       params.manifestHome,
-      ".openclaw-worker",
+      ".carapace-worker",
       "manifests",
       `${currentRef.slice("sha256:".length)}.json`,
     ),
@@ -562,7 +562,7 @@ async function uploadWorkspace(params: {
       method: "POST",
       token: params.transfer.token,
       headers: {
-        "content-type": "application/vnd.openclaw.worker-workspace-reconcile-v1",
+        "content-type": "application/vnd.carapace.worker-workspace-reconcile-v1",
         "content-length": String(contentLength),
       },
       signal: params.signal,

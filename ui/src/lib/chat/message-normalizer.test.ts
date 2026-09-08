@@ -211,7 +211,7 @@ describe("message-normalizer", () => {
             source: {
               type: "url",
               media_type: "audio/mpeg",
-              url: "/tmp/openclaw/clip.mp3",
+              url: "/tmp/carapace/clip.mp3",
             },
           },
         ],
@@ -221,7 +221,7 @@ describe("message-normalizer", () => {
         {
           type: "attachment",
           attachment: {
-            url: "/tmp/openclaw/clip.mp3",
+            url: "/tmp/carapace/clip.mp3",
             kind: "audio",
             label: "clip.mp3",
             mimeType: "audio/mpeg",
@@ -326,7 +326,7 @@ describe("message-normalizer", () => {
             surface: "assistant_message",
             render: "url",
             viewId: "cv_status",
-            url: "/__openclaw__/canvas/documents/cv_status/index.html",
+            url: "/__carapace__/canvas/documents/cv_status/index.html",
             title: "Status",
             preferredHeight: 320,
           },
@@ -345,7 +345,7 @@ describe("message-normalizer", () => {
               kind: "canvas",
               surface: "assistant_message",
               render: "url",
-              url: "/__openclaw__/canvas/documents/cv_widget/index.html",
+              url: "/__carapace__/canvas/documents/cv_widget/index.html",
               sandbox: "scripts",
               boardWidgetName: "release-status",
             },
@@ -360,8 +360,8 @@ describe("message-normalizer", () => {
     });
 
     it.each([
-      { viewId: "cv_widget", url: "/__openclaw__/canvas/documents/cv_widget/index.html" },
-      { url: "/__openclaw__/canvas/documents/cv_widget/index.html" },
+      { viewId: "cv_widget", url: "/__carapace__/canvas/documents/cv_widget/index.html" },
+      { url: "/__carapace__/canvas/documents/cv_widget/index.html" },
     ])("keeps the canonical Canvas block instead of its shortcode copy: %j", (identity) => {
       const result = normalizeMessage({
         role: "assistant",
@@ -409,7 +409,7 @@ describe("message-normalizer", () => {
               kind: "canvas",
               surface: "assistant_message",
               render: "url",
-              url: "/__openclaw__/canvas/documents/cv_widget/index.html",
+              url: "/__carapace__/canvas/documents/cv_widget/index.html",
               boardWidgetName: "Invalid widget name",
             },
           },
@@ -453,7 +453,7 @@ describe("message-normalizer", () => {
         role: "assistant",
         content:
           "Intro\nMEDIA:https://example.com/image.png\nOutro\nMEDIA:https://example.com/voice.ogg",
-        openclawDelivery: { audioAsVoice: true, replyToId: "thread-123" },
+        carapaceDelivery: { audioAsVoice: true, replyToId: "thread-123" },
       });
 
       expect(result.replyTarget).toEqual({ kind: "id", id: "thread-123" });
@@ -548,7 +548,7 @@ describe("message-normalizer", () => {
         normalizeMessage({
           role: "assistant",
           content: `${code}\nMEDIA:https://example.com/image.png`,
-          openclawDelivery: { audioAsVoice: true, replyToCurrent: true },
+          carapaceDelivery: { audioAsVoice: true, replyToCurrent: true },
         }).content,
       ).toEqual([
         { type: "text", text: code },
@@ -571,7 +571,7 @@ describe("message-normalizer", () => {
           const result = normalizeMessage({
             role: "assistant",
             content: "The answer remains visible.",
-            openclawDelivery: {
+            carapaceDelivery: {
               audioAsVoice: true,
               replyToCurrent: true,
               replyToId: "target",
@@ -646,7 +646,7 @@ describe("message-normalizer", () => {
       const result = normalizeMessage({
         role: "assistant",
         content: "MEDIA:https://example.com/voice.ogg",
-        openclawDelivery: { audioAsVoice: true },
+        carapaceDelivery: { audioAsVoice: true },
       });
 
       expect(result.audioAsVoice).toBe(true);
@@ -715,7 +715,7 @@ describe("message-normalizer", () => {
 
     it("classifies signed same-origin MEDIA image and audio routes", () => {
       const imageUrl = "/media/inbound/photo.png?mediaTicket=signed#preview";
-      const audioUrl = "/__openclaw__/media/voice%2Eogg?mediaTicket=signed";
+      const audioUrl = "/__carapace__/media/voice%2Eogg?mediaTicket=signed";
       const result = normalizeMessage({
         role: "assistant",
         content: `MEDIA:${imageUrl}\nMEDIA:${audioUrl}`,
@@ -744,7 +744,7 @@ describe("message-normalizer", () => {
     });
 
     it.each([
-      ["/tmp/openclaw/test-image.png", "test-image.png"],
+      ["/tmp/carapace/test-image.png", "test-image.png"],
       ["file:///tmp/caf%C3%A9%20image.png", "caf%C3%A9%20image.png"],
       ["FILE:///tmp/caf%C3%A9%20image.png", "caf%C3%A9%20image.png"],
       ["FILE:/tmp/caf%C3%A9%20image.png", "caf%C3%A9%20image.png"],
@@ -770,14 +770,14 @@ describe("message-normalizer", () => {
     it("classifies absolute WebM MEDIA paths as video attachments", () => {
       const result = normalizeMessage({
         role: "assistant",
-        content: "MEDIA:/tmp/openclaw/clip.webm",
+        content: "MEDIA:/tmp/carapace/clip.webm",
       });
 
       expect(result.content).toEqual([
         {
           type: "attachment",
           attachment: {
-            url: "/tmp/openclaw/clip.webm",
+            url: "/tmp/carapace/clip.webm",
             kind: "video",
             label: "clip.webm",
             mimeType: "video/webm",
@@ -789,14 +789,14 @@ describe("message-normalizer", () => {
     it("keeps spaced local filenames together instead of leaking suffix text", () => {
       const result = normalizeMessage({
         role: "assistant",
-        content: "MEDIA:/tmp/openclaw/shinkansen kato - Google Shopping.pdf",
+        content: "MEDIA:/tmp/carapace/shinkansen kato - Google Shopping.pdf",
       });
 
       expect(result.content).toEqual([
         {
           type: "attachment",
           attachment: {
-            url: "/tmp/openclaw/shinkansen kato - Google Shopping.pdf",
+            url: "/tmp/carapace/shinkansen kato - Google Shopping.pdf",
             kind: "document",
             label: "shinkansen kato - Google Shopping.pdf",
             mimeType: "application/pdf",
@@ -896,7 +896,7 @@ describe("message-normalizer", () => {
       const result = normalizeMessage({
         role: "assistant",
         content: "Reply body",
-        openclawDelivery: { replyToCurrent: true },
+        carapaceDelivery: { replyToCurrent: true },
       });
 
       expect(result.replyTarget).toEqual({ kind: "current" });
@@ -907,7 +907,7 @@ describe("message-normalizer", () => {
       const result = normalizeMessage({
         role: "assistant",
         content: "",
-        openclawDelivery: { replyToCurrent: true },
+        carapaceDelivery: { replyToCurrent: true },
       });
 
       expect(result.replyTarget).toEqual({ kind: "current" });

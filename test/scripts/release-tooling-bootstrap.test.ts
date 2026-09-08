@@ -8,7 +8,7 @@ import { createScriptTestHarness } from "./test-helpers.js";
 const { createTempDir } = createScriptTestHarness();
 
 it("installs with the tooling cwd while retaining the release source root", () => {
-  const workflow = parse(readFileSync(".github/workflows/openclaw-release-publish.yml", "utf8"));
+  const workflow = parse(readFileSync(".github/workflows/carapace-release-publish.yml", "utf8"));
   const install = workflow.jobs.publish.steps.find(
     (step: { name: string }) => step.name === "Install trusted release tooling dependencies",
   );

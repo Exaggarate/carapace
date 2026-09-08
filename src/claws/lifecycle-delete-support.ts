@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
   isPathOwnedBySurvivingAgent,
   readAgentDeleteDatabaseRegistry,
@@ -27,7 +27,7 @@ import {
 import { pruneAgentConfig } from "../commands/agents.config.js";
 import { moveToTrash } from "../commands/cleanup-utils.js";
 import { resolveSessionTranscriptsDirForAgent } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCronJobConfigRevision } from "../cron/config-revision.js";
 import { loadedCronStoreFromRows } from "../cron/store/row-codec.js";
 import type { CronJobRow } from "../cron/store/schema.js";
@@ -39,15 +39,15 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { unregisterOpenClawAgentDatabases } from "../state/openclaw-agent-db-registry.js";
-import type { OpenClawStateDatabase } from "../state/openclaw-state-db-contract.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { unregisterCarapaceAgentDatabases } from "../state/carapace-agent-db-registry.js";
+import type { CarapaceStateDatabase } from "../state/carapace-state-db-contract.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import type { ClawMonitorCleanupGateway, ClawMonitorSnapshot } from "./monitor-cleanup-contract.js";
 import { deleteCachedClawInstallSchemaVersion } from "./provenance-runtime-read.js";
 import type { PersistedClawInstall } from "./provenance.js";
@@ -76,7 +76,7 @@ export function synthesizeOrphanInstall(params: {
 }): PersistedClawInstall {
   const updatedAtMs = params.updatedAtMs ?? 0;
   return {
-    schemaVersion: "openclaw.clawInstallRecord.v1" as PersistedClawInstall["schemaVersion"],
+    schemaVersion: "carapace.clawInstallRecord.v1" as PersistedClawInstall["schemaVersion"],
     claw: {
       kind: "development",
       name: params.clawName ?? `orphan:${params.agentId}`,
@@ -100,7 +100,7 @@ export function synthesizeOrphanInstall(params: {
 }
 
 export function deletionEffects(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
   fallbackWorkspace = "",
   env?: NodeJS.ProcessEnv,
@@ -136,9 +136,9 @@ export type AttachedCronJob = {
 /** Inventories cron jobs that would retain a reference to a removed agent. */
 export function readAttachedCronJobs(
   agentId: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): AttachedCronJob[] {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   if (!tableExists(db, "cron_jobs")) {
     return [];
   }
@@ -175,7 +175,7 @@ export function readAttachedCronJobs(
 /** Offline preview keeps local blockers; only a serving owner can make a monitor removable. */
 export async function readClawRemoveCronInventory(
   agentId: string,
-  options: OpenClawStateDatabaseOptions & { monitorGateway?: ClawMonitorCleanupGateway },
+  options: CarapaceStateDatabaseOptions & { monitorGateway?: ClawMonitorCleanupGateway },
 ) {
   let attachedJobs = readAttachedCronJobs(agentId, options);
   let monitors: ClawMonitorSnapshot[] = [];
@@ -249,12 +249,12 @@ export async function workspaceContainsUntrackedEntries(
 /** Applies canonical post-config filesystem cleanup and reports every failed effect. */
 export async function cleanupClawAgentFilesystem(params: {
   agentId: string;
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   targets: ClawCleanupTargets;
   runtime: RuntimeEnv;
   trashPath?: ClawTrashPath;
   retainWorkspace?: boolean;
-  stateDatabase?: OpenClawStateDatabaseOptions;
+  stateDatabase?: CarapaceStateDatabaseOptions;
   assertCurrent: () => void;
 }): Promise<string[]> {
   const errors: string[] = [];
@@ -394,7 +394,7 @@ export async function inspectClawWorkspaceFile(
 
 export async function inspectClawBootstrap(
   install: PersistedClawInstall,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): Promise<ClawBootstrapStatus> {
   const nativeState = await resolveWorkspaceBootstrapStatus(install.workspace, options);
   const setupState = readWorkspaceStateSnapshot(install.workspace, options).setup;
@@ -469,7 +469,7 @@ export async function removeClawWorkspaceFile(
     if (!(await workspace.exists(record.path))) {
       return { path: record.path, action: "missing" };
     }
-    const stagedPath = `${record.path}.openclaw-claw-remove-${randomUUID()}`;
+    const stagedPath = `${record.path}.carapace-claw-remove-${randomUUID()}`;
     assertCurrent();
     await workspace.move(record.path, stagedPath, { overwrite: false });
     let outcome: Result<void, unknown>;
@@ -512,17 +512,17 @@ export function releaseClawRemoveRows(
   agentId: string,
   files: RemovedWorkspaceFile[],
   cleanupErrors: string[],
-  assertCurrent: (database: OpenClawStateDatabase) => void,
-  completeDeletion: (database: OpenClawStateDatabase) => void,
-  options: OpenClawStateDatabaseOptions,
+  assertCurrent: (database: CarapaceStateDatabase) => void,
+  completeDeletion: (database: CarapaceStateDatabase) => void,
+  options: CarapaceStateDatabaseOptions,
 ): boolean {
   const complete = cleanupErrors.length === 0;
   try {
-    runOpenClawStateWriteTransaction((database) => {
+    runCarapaceStateWriteTransaction((database) => {
       assertCurrent(database);
       if (complete) {
         // Discovery and owned rows must retire under the same current-operation transaction.
-        unregisterOpenClawAgentDatabases({ agentId, env: options.env, database });
+        unregisterCarapaceAgentDatabases({ agentId, env: options.env, database });
       }
       const { db } = database;
       const query = getNodeSqliteKysely<ClawRemovalDatabase>(db);

@@ -9,8 +9,8 @@ import {
   readSessionTranscriptMessageEvents,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { resetClientVoiceConfirmationStateForTest } from "./client-voice-confirmation.test-support.js";
 import {
@@ -24,21 +24,21 @@ import {
 import { clientVoiceSessionTesting } from "./client-voice-session.test-support.js";
 
 describe("client voice session startup", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   let tempDir: string;
 
   beforeEach(async () => {
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-voice-startup-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-voice-startup-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", tempDir);
   });
 
   afterEach(async () => {
     clientVoiceSessionTesting.reset();
     resetClientVoiceConfirmationStateForTest();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     envSnapshot.restore();
     await fs.rm(tempDir, { recursive: true, force: true });
   });

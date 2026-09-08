@@ -68,7 +68,7 @@ describe("AppSidebar multi-select", () => {
       const label = row?.querySelector(".sidebar-recent-session__name")?.textContent?.trim();
       const pin = row?.querySelector<HTMLElement>("[data-sidebar-session-pin]");
       const menu = row?.querySelector<HTMLElement>("[data-session-menu]");
-      const tooltip = menu?.closest("openclaw-tooltip") as
+      const tooltip = menu?.closest("carapace-tooltip") as
         | (HTMLElement & { content: string; describe: boolean })
         | null;
       expect(label).toBeTruthy();
@@ -86,7 +86,7 @@ describe("AppSidebar multi-select", () => {
     const trigger = sidebar.querySelector<HTMLElement>(
       '[data-session-key="agent:main:a"] [data-session-menu]',
     );
-    const tooltip = trigger?.closest("openclaw-tooltip") as
+    const tooltip = trigger?.closest("carapace-tooltip") as
       | (HTMLElement & {
           disabled: boolean;
           renderRoot: ShadowRoot;
@@ -354,7 +354,7 @@ describe("AppSidebar multi-select", () => {
       menu.querySelector<HTMLButtonElement>('[data-shortcut="d"]')?.click();
 
       const actions = await waitForConfirmDialogActions();
-      expect(document.body.querySelector("openclaw-modal-dialog")?.textContent).toContain("2");
+      expect(document.body.querySelector("carapace-modal-dialog")?.textContent).toContain("2");
       answerConfirmDialog(actions, "confirm");
 
       await waitForFast(() => expect(harness.deleteMany).toHaveBeenCalledOnce());
@@ -440,7 +440,7 @@ describe("AppSidebar catalog session rows", () => {
 
   it("opens the catalog view menu from its header and hides that section with undo", async () => {
     vi.useFakeTimers();
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     await toastHost.updateComplete;
     try {
@@ -637,7 +637,7 @@ describe("AppSidebar catalog session rows", () => {
         }),
       );
       await sidebar.updateComplete;
-      const menu = sidebar.querySelector("openclaw-catalog-session-menu") as HTMLElement & {
+      const menu = sidebar.querySelector("carapace-catalog-session-menu") as HTMLElement & {
         updateComplete: Promise<boolean>;
       };
       await menu.updateComplete;
@@ -659,7 +659,7 @@ describe("AppSidebar catalog session rows", () => {
       });
       row.querySelector("a")?.dispatchEvent(keyboardContextMenu);
       await sidebar.updateComplete;
-      expect(sidebar.querySelector("openclaw-catalog-session-menu")).not.toBeNull();
+      expect(sidebar.querySelector("carapace-catalog-session-menu")).not.toBeNull();
       expect(keyboardContextMenu.defaultPrevented).toBe(true);
     } finally {
       vi.useRealTimers();

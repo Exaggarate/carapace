@@ -196,7 +196,7 @@ describe("TUI attachment failure presentation", () => {
           [
             {
               ...assistant(streamed ? [caption, ...content] : content),
-              __openclaw: { id: "assistant-1", seq: 1, runId: event.runId },
+              __carapace: { id: "assistant-1", seq: 1, runId: event.runId },
             },
           ],
         ]) {

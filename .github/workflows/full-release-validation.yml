@@ -128,7 +128,7 @@ on:
         default: ""
         type: string
       dispatch_release_evidence:
-        description: Dispatch the validated run to openclaw/releases after child proof succeeds
+        description: Dispatch the validated run to carapace/releases after child proof succeeds
         required: false
         default: false
         type: boolean
@@ -177,7 +177,7 @@ jobs:
   resolve_target:
     name: Resolve target ref
     # Hosted admission delays compound along this serial release path.
-    runs-on: ${{ github.repository == 'openclaw/openclaw' && vars.OPENCLAW_CI_RUNNER_BACKEND == 'hybrid' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
+    runs-on: ${{ github.repository == 'carapace/carapace' && vars.CARAPACE_CI_RUNNER_BACKEND == 'hybrid' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     timeout-minutes: 10
     outputs:
       sha: ${{ steps.resolve.outputs.sha }}
@@ -237,7 +237,7 @@ jobs:
           TARGET_CONTEXT_REF: ${{ inputs.target_context_ref }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
-          bash workflow/scripts/github/resolve-openclaw-ref.sh \
+          bash workflow/scripts/github/resolve-carapace-ref.sh \
             --ref "$TARGET_REF" \
             --expected-sha "$EXPECTED_SHA" \
             --github-output "$GITHUB_OUTPUT"
@@ -286,7 +286,7 @@ jobs:
             --arg toolingSha "$GITHUB_SHA" \
             --arg releaseProfile "$RELEASE_PROFILE" \
             --argjson releaseSoak "$RELEASE_SOAK" \
-            --arg upgradeSurvivorBaseline "openclaw@latest" \
+            --arg upgradeSurvivorBaseline "carapace@latest" \
             --arg upgradeSurvivorBaselines "" \
             --arg upgradeSurvivorScenarios "$UPGRADE_SURVIVOR_SCENARIOS" \
             --argjson allowFrozenTargetScenarioOmissions "$ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS" \
@@ -383,7 +383,7 @@ jobs:
           import { resolveReleaseContextIdentity } from './workflow/scripts/lib/release-context.mjs';
           const env = process.env;
           const identity = resolveReleaseContextIdentity(env.TARGET_CONTEXT_REF || env.TARGET_REF, env.TARGET_VERSION);
-          if (!identity && env.TARGET_CONTEXT_REF) throw new Error('target_context_ref must be a canonical OpenClaw release branch or tag.');
+          if (!identity && env.TARGET_CONTEXT_REF) throw new Error('target_context_ref must be a canonical Carapace release branch or tag.');
           console.log(JSON.stringify(identity ?? { kind: '', releaseTag: `v${env.TARGET_VERSION}`, baseTag: null }));
           NODE
           )"
@@ -514,7 +514,7 @@ jobs:
             if [[ "$COVERAGE_POLICY" == "npm-beta-v1" ]]; then
               echo "- Product performance: not run; deferred to postpublish confidence"
             elif [[ "$RERUN_GROUP" == "all" || "$RERUN_GROUP" == "performance" ]]; then
-              echo "- Product performance: \`OpenClaw Performance\` with \`target_ref=${TARGET_SHA}\`"
+              echo "- Product performance: \`Carapace Performance\` with \`target_ref=${TARGET_SHA}\`"
             else
               echo "- Product performance: skipped by rerun group"
             fi
@@ -525,7 +525,7 @@ jobs:
               echo "- Plugin prerelease: skipped by rerun group"
             fi
             if [[ "$RERUN_GROUP" == "all" || "$RERUN_GROUP" == "install-smoke" || "$RERUN_GROUP" == "cross-os" || "$RERUN_GROUP" == "live-e2e" || "$RERUN_GROUP" == "package" || "$RERUN_GROUP" == "qa-parity" || "$RERUN_GROUP" == "qa-live" ]]; then
-              echo "- Release/live/Docker/package/QA: \`OpenClaw Release Checks\`"
+              echo "- Release/live/Docker/package/QA: \`Carapace Release Checks\`"
             else
               echo "- Release/live/Docker/package/QA: skipped by rerun group"
             fi
@@ -544,7 +544,7 @@ jobs:
               if [[ "$SKIP_PACKAGE_TELEGRAM_E2E" == "true" ]]; then
                 echo "- Package Telegram E2E: deferred by \`skip_package_telegram_e2e\`"
               else
-                echo "- Package Telegram E2E: OpenClaw Release Checks Package Acceptance"
+                echo "- Package Telegram E2E: Carapace Release Checks Package Acceptance"
               fi
             else
               echo "- Package Telegram E2E: skipped by rerun group"
@@ -568,7 +568,7 @@ jobs:
     name: Check for reusable validation evidence
     needs: [resolve_target]
     if: inputs.rerun_group == 'all' && inputs.reuse_evidence && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release-ci/'))
-    runs-on: ${{ github.repository == 'openclaw/openclaw' && vars.OPENCLAW_CI_RUNNER_BACKEND == 'hybrid' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
+    runs-on: ${{ github.repository == 'carapace/carapace' && vars.CARAPACE_CI_RUNNER_BACKEND == 'hybrid' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     timeout-minutes: 10
     outputs:
       reuse: ${{ steps.find.outputs.reuse }}
@@ -600,7 +600,7 @@ jobs:
           path: target
           sparse-checkout: |
             package.json
-            apps/macos/Sources/OpenClaw/Resources/Info.plist
+            apps/macos/Sources/Carapace/Resources/Info.plist
           sparse-checkout-cone-mode: false
           fetch-depth: 1
           persist-credentials: false
@@ -612,7 +612,7 @@ jobs:
         run: |
           set -euo pipefail
           source workflow/.github/actions/setup-pnpm-store-cache/ensure-node.sh
-          openclaw_ensure_node "$REQUESTED_NODE_VERSION"
+          carapace_ensure_node "$REQUESTED_NODE_VERSION"
 
       - name: Find reusable validation evidence
         id: find
@@ -742,7 +742,7 @@ jobs:
           set -euo pipefail
           timeout --kill-after=30s 15m docker build \
             --target runtime-assets \
-            --build-arg OPENCLAW_EXTENSIONS="diagnostics-otel,codex" \
+            --build-arg CARAPACE_EXTENSIONS="diagnostics-otel,codex" \
             .
 
   normal_ci:
@@ -1073,9 +1073,9 @@ jobs:
                 args+=(-f candidate_artifact_json="$CANDIDATE_ARTIFACT_JSON")
               fi
               dispatch_id="full-release-validation-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-release-checks-${PHASE}"
-              dispatch_run_name="OpenClaw Release Checks ${dispatch_id}"
+              dispatch_run_name="Carapace Release Checks ${dispatch_id}"
               args+=(-f dispatch_id="$dispatch_id")
-              dispatch_child openclaw-release-checks.yml "$dispatch_run_name" "${args[@]}"
+              dispatch_child carapace-release-checks.yml "$dispatch_run_name" "${args[@]}"
               ;;
             npm-telegram)
               args=(-f package_spec="$PACKAGE_SPEC" -f harness_ref="$TARGET_SHA" -f provider_mode="$PROVIDER_MODE")
@@ -1109,7 +1109,7 @@ jobs:
                 fi
               } >> "$GITHUB_STEP_SUMMARY"
               dispatch_id="full-release-validation-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-              dispatch_run_name="OpenClaw Performance ${dispatch_id}"
+              dispatch_run_name="Carapace Performance ${dispatch_id}"
               args=(
                 -f target_ref="$TARGET_SHA"
                 -f profile=release
@@ -1120,7 +1120,7 @@ jobs:
                 -f publish_reports=false
                 -f dispatch_id="$dispatch_id"
               )
-              dispatch_child openclaw-performance.yml "$dispatch_run_name" "${args[@]}"
+              dispatch_child carapace-performance.yml "$dispatch_run_name" "${args[@]}"
               ;;
             *)
               echo "::error::Unsupported full-release child workflow kind ${CHILD_WORKFLOW_KIND}." >&2
@@ -1184,7 +1184,7 @@ jobs:
     name: Run release checks independent validation
     needs: [resolve_target, evidence_reuse]
     if: ${{ always() && github.run_attempt == 1 && needs.resolve_target.result == 'success' && contains(fromJSON('["all","install-smoke","live-e2e","qa-parity","qa-live"]'), inputs.rerun_group) && needs.evidence_reuse.outputs.reuse != 'true' }}
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 15
     outputs:
       run_id: ${{ steps.dispatch.outputs.run_id }}
@@ -1223,7 +1223,7 @@ jobs:
     name: Run release checks candidate validation
     needs: [resolve_target, evidence_reuse, candidate_acquisition]
     if: ${{ always() && github.run_attempt == 1 && needs.resolve_target.result == 'success' && (needs.resolve_target.outputs.release_candidate_artifact_required != 'true' || (needs.candidate_acquisition.result == 'success' && needs.candidate_acquisition.outputs.state == 'ready')) && (contains(fromJSON('["all","cross-os","package"]'), inputs.rerun_group) || (inputs.rerun_group == 'live-e2e' && needs.resolve_target.outputs.live_suite_filter == '')) && needs.evidence_reuse.outputs.reuse != 'true' }}
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 15
     outputs:
       run_id: ${{ steps.dispatch.outputs.run_id }}
@@ -1287,14 +1287,14 @@ jobs:
     name: Run product performance evidence
     needs: [resolve_target, evidence_reuse]
     if: ${{ always() && github.run_attempt == 1 && needs.resolve_target.result == 'success' && needs.resolve_target.outputs.coverage_policy != 'npm-beta-v1' && contains(fromJSON('["all","performance"]'), inputs.rerun_group) && needs.evidence_reuse.outputs.reuse != 'true' }}
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 15
     outputs:
       run_id: ${{ steps.dispatch.outputs.run_id }}
       run_attempt: ${{ steps.dispatch.outputs.run_attempt }}
       url: ${{ steps.dispatch.outputs.url }}
     steps:
-      - name: Dispatch OpenClaw Performance
+      - name: Dispatch Carapace Performance
         id: dispatch
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1472,7 +1472,7 @@ jobs:
         performance,
       ]
     if: always()
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 15
     outputs:
       sha256: ${{ steps.plan.outputs.sha256 }}
@@ -1677,7 +1677,7 @@ jobs:
     name: Release Decision
     needs: [resolve_target, release_execution_plan]
     if: always()
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 720
     outputs:
       state: ${{ steps.state.outputs.state }}
@@ -1736,7 +1736,7 @@ jobs:
     name: Diagnostic Drain
     needs: [resolve_target, release_execution_plan]
     if: always()
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-4vcpu-ubuntu-2404' }}
     timeout-minutes: 720
     outputs:
       state: ${{ steps.state.outputs.state }}
@@ -1913,7 +1913,7 @@ jobs:
       - name: Request release evidence update
         if: ${{ inputs.dispatch_release_evidence }}
         env:
-          RELEASES_DISPATCH_TOKEN: ${{ secrets.OPENCLAW_RELEASES_DISPATCH_TOKEN }}
+          RELEASES_DISPATCH_TOKEN: ${{ secrets.CARAPACE_RELEASES_DISPATCH_TOKEN }}
           TARGET_REF: ${{ inputs.ref }}
           PACKAGE_SPEC: ${{ inputs.evidence_package_spec || inputs.npm_telegram_package_spec }}
           GITHUB_RUN_ID_VALUE: ${{ github.run_id }}
@@ -1936,7 +1936,7 @@ jobs:
             notes="Automatically requested by Full Release Validation ${GITHUB_RUN_ID_VALUE}, which reused green product evidence from chain-root run ${EVIDENCE_ROOT_RUN_ID} under policy ${EVIDENCE_POLICY}."
           fi
           if [[ -z "${RELEASES_DISPATCH_TOKEN// }" ]]; then
-            echo "OPENCLAW_RELEASES_DISPATCH_TOKEN is not configured; skipping automatic release evidence update."
+            echo "CARAPACE_RELEASES_DISPATCH_TOKEN is not configured; skipping automatic release evidence update."
             exit 0
           fi
 
@@ -1944,13 +1944,13 @@ jobs:
           if [[ -z "${evidence_package_spec// }" ]]; then
             tag_ref="${TARGET_REF#refs/tags/}"
             if [[ "$tag_ref" =~ ^v([0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*((-(alpha|beta)\.[1-9][0-9]*)|(-[1-9][0-9]*))?)$ ]]; then
-              evidence_package_spec="openclaw@${BASH_REMATCH[1]}"
+              evidence_package_spec="carapace@${BASH_REMATCH[1]}"
             fi
           fi
 
           release_id="${TARGET_REF#refs/tags/}"
           release_id="${release_id#v}"
-          if [[ "$evidence_package_spec" =~ ^openclaw@(.+)$ ]]; then
+          if [[ "$evidence_package_spec" =~ ^carapace@(.+)$ ]]; then
             release_id="${BASH_REMATCH[1]}"
           fi
           release_id="$(printf '%s' "$release_id" | tr '/:@ ' '----' | tr -cd 'A-Za-z0-9._-')"
@@ -1967,7 +1967,7 @@ jobs:
               --arg package_spec "$evidence_package_spec" \
               --arg notes "$notes" \
               '{
-                event_type: "openclaw_full_release_validation_completed",
+                event_type: "carapace_full_release_validation_completed",
                 client_payload: {
                   full_validation_run_id: $full_validation_run_id,
                   release_id: $release_id,
@@ -1985,16 +1985,16 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${RELEASES_DISPATCH_TOKEN}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/openclaw/releases/dispatches \
+            https://api.github.com/repos/carapace/releases/dispatches \
             -d "$payload"; then
             echo "::warning::Automatic release evidence dispatch failed; child workflow validation remains authoritative."
             {
               echo "### Release evidence dispatch failed"
               echo
-              echo "Child workflow validation remains authoritative. Backfill durable evidence from \`openclaw/releases\`:"
+              echo "Child workflow validation remains authoritative. Backfill durable evidence from \`carapace/releases\`:"
               echo
               echo "\`\`\`bash"
-              echo "gh workflow run openclaw-release-evidence-from-full-validation.yml --repo openclaw/releases --ref main -f full_validation_run_id=${GITHUB_RUN_ID_VALUE} -f release_id=${release_id} -f release_ref=${TARGET_REF} -f package_spec=${evidence_package_spec}"
+              echo "gh workflow run carapace-release-evidence-from-full-validation.yml --repo carapace/releases --ref main -f full_validation_run_id=${GITHUB_RUN_ID_VALUE} -f release_id=${release_id} -f release_ref=${TARGET_REF} -f package_spec=${evidence_package_spec}"
               echo "\`\`\`"
             } >> "$GITHUB_STEP_SUMMARY"
           fi

@@ -43,7 +43,7 @@ jobs:
           fi
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout selected tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -64,7 +64,7 @@ jobs:
 
       - name: Build Control UI
         env:
-          OPENCLAW_CONTROL_UI_RELEASE_BUILD: "1"
+          CARAPACE_CONTROL_UI_RELEASE_BUILD: "1"
         run: pnpm ui:build
 
       - name: Validate release tag and package metadata
@@ -84,7 +84,7 @@ jobs:
           export RELEASE_SHA RELEASE_TAG RELEASE_MAIN_REF
           python3 -I -S "$CI_GIT_OWNER" --checkout-git 120 fetch --no-tags origin \
             "+refs/heads/${PUBLIC_RELEASE_BRANCH}:refs/remotes/origin/${PUBLIC_RELEASE_BRANCH}"
-          pnpm release:openclaw:npm:check
+          pnpm release:carapace:npm:check
 
       - name: Summarize next step
         env:
@@ -97,8 +97,8 @@ jobs:
             echo "It does not sign, notarize, or upload macOS assets."
             echo
             echo "Next step:"
-            echo "- Run \`openclaw/releases/.github/workflows/openclaw-macos-validate.yml\` with tag \`${RELEASE_TAG}\` and wait for the macOS validation lane to pass."
-            echo "- Run \`openclaw/releases/.github/workflows/openclaw-macos-publish.yml\` with tag \`${RELEASE_TAG}\` and \`preflight_only=true\` for the full macOS preflight."
+            echo "- Run \`carapace/releases/.github/workflows/carapace-macos-validate.yml\` with tag \`${RELEASE_TAG}\` and wait for the macOS validation lane to pass."
+            echo "- Run \`carapace/releases/.github/workflows/carapace-macos-publish.yml\` with tag \`${RELEASE_TAG}\` and \`preflight_only=true\` for the full macOS preflight."
             echo "- For the real publish path, run the same macOS publish workflow from \`main\` with the successful preflight \`preflight_run_id\` so it promotes the prepared artifacts instead of rebuilding them."
             echo "- For stable releases, the publish workflow also publishes the signed \`appcast.xml\` to public \`main\`, or opens an appcast PR if direct push is blocked."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -38,7 +38,7 @@ const { registerBrowserAgentActHookRoutes } = await import("./agent.act.hooks.js
 
 function createProfileContext(options?: {
   attachOnly?: boolean;
-  driver?: "openclaw" | "extension" | "existing-session";
+  driver?: "carapace" | "extension" | "existing-session";
   tabUrl?: string;
 }) {
   return {
@@ -46,7 +46,7 @@ function createProfileContext(options?: {
       attachOnly: options?.attachOnly ?? false,
       cdpIsLoopback: true,
       cdpUrl: "http://127.0.0.1:9222",
-      driver: options?.driver ?? ("openclaw" as const),
+      driver: options?.driver ?? ("carapace" as const),
       name: "default",
     },
     ensureTabAvailable: vi.fn(async () => ({
@@ -192,7 +192,7 @@ describe("agent act hook current URL guard", () => {
     { targeting: { ref: "upload-button" }, paths: ["first.txt"] },
     { targeting: { inputRef: "upload-button" }, paths: ["first.txt", "second.txt"] },
   ])("uploads every resolved file through Chrome MCP: $paths", async ({ targeting, paths }) => {
-    const resolvedPaths = paths.map((file) => `/tmp/openclaw/uploads/${file}`);
+    const resolvedPaths = paths.map((file) => `/tmp/carapace/uploads/${file}`);
     pathMocks.resolveExistingUploadPaths.mockResolvedValueOnce({ ok: true, paths: resolvedPaths });
     const response = await callHook({
       path: "/hooks/file-chooser",

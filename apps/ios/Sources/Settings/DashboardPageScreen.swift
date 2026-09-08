@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 /// Dashboard pages share the Settings hub's authority gate, bridge, and native fallback.
@@ -9,7 +9,7 @@ struct DashboardPageScreen: View {
     @State private var navigationPath: [SettingsRoute] = []
     let path: String
     let title: String
-    var headerSidebarAction: OpenClawSidebarHeaderAction?
+    var headerSidebarAction: CarapaceSidebarHeaderAction?
     var onClose: (() -> Void)?
     var onRouteChange: ((SettingsRoute?) -> Void)?
     var onApprovalNotificationsRoute: ((String?) -> Void)?
@@ -22,7 +22,7 @@ struct DashboardPageScreen: View {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button(action: onClose) {
                                 Text("Done")
-                                    .font(OpenClawType.subheadSemiBold)
+                                    .font(CarapaceType.subheadSemiBold)
                             }
                             .accessibilityIdentifier("DashboardPage.Close")
                         }
@@ -46,7 +46,7 @@ struct DashboardPageScreen: View {
             isOperatorConnected: self.appModel.isOperatorGatewayConnected,
             hasOperatorAdminScope: self.appModel.hasOperatorAdminScope,
             isDemoMode: self.appModel.isAppleReviewDemoModeEnabled,
-            isScreenshotMode: ProcessInfo.processInfo.arguments.contains("--openclaw-screenshot-mode")),
+            isScreenshotMode: ProcessInfo.processInfo.arguments.contains("--carapace-screenshot-mode")),
             let url = AuthenticatedControlUI.pageURL(config: config, path: self.path, queryItems: [])
         {
             EmbeddedDashboardContent(
@@ -64,7 +64,7 @@ struct DashboardPageScreen: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     if let headerSidebarAction {
-                        OpenClawSidebarToolbarItem(action: headerSidebarAction, placement: .topBarLeading)
+                        CarapaceSidebarToolbarItem(action: headerSidebarAction, placement: .topBarLeading)
                     }
                 }
         } else {

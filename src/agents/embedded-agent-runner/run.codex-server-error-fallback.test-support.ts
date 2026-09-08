@@ -1,6 +1,6 @@
 // Full-entry coverage for handing Codex server_error turns to model fallback.
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAssistantMessageFixture } from "../test-helpers/assistant-message-fixtures.js";
 import { createModelFallbackConfig } from "../test-helpers/model-fallback-config-fixture.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
@@ -17,7 +17,7 @@ import {
 } from "./run.overflow-compaction.harness.js";
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 
 describe("runEmbeddedAgent Codex server_error fallback handoff", () => {
@@ -27,8 +27,8 @@ describe("runEmbeddedAgent Codex server_error fallback handoff", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.codex-server-error-fallback" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.codex-server-error-fallback" });
     useOpenAIPlatformAuthFixture();
     mockedGlobalHookRunner.hasHooks.mockImplementation(() => false);
   });
@@ -67,7 +67,7 @@ describe("runEmbeddedAgent Codex server_error fallback handoff", () => {
     const promise = runEmbeddedAgent({
       ...createOverflowRunParams(state),
       runId: "run-codex-server-error-fallback",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       config: createModelFallbackConfig("openai/gpt-5.4", ["anthropic/claude-opus-4-6"]),
     });
 

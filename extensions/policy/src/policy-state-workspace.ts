@@ -3,7 +3,7 @@ import {
   asNonArrayRecord,
   isRecord,
   normalizeOptionalString as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { collectPolicyConfiguredAgents } from "./policy-state-helpers.js";
 import { AGENT_WORKSPACE_POLICY_TOOLS, readStringArray } from "./policy-state-tool-posture.js";
 import type { PolicyAgentWorkspaceEvidence } from "./policy-state-types.js";
@@ -24,10 +24,10 @@ export function scanPolicyAgentWorkspace(
     inheritedSandbox: {},
     tools: defaultTools,
     inheritedTools: {},
-    workspaceSourceBase: "oc://openclaw.config/agents/defaults",
-    inheritedWorkspaceSourceBase: "oc://openclaw.config/agents/defaults",
-    toolsSourceBase: "oc://openclaw.config/tools",
-    inheritedToolsSourceBase: "oc://openclaw.config/tools",
+    workspaceSourceBase: "oc://carapace.config/agents/defaults",
+    inheritedWorkspaceSourceBase: "oc://carapace.config/agents/defaults",
+    toolsSourceBase: "oc://carapace.config/tools",
+    inheritedToolsSourceBase: "oc://carapace.config/tools",
   });
 
   collectPolicyConfiguredAgents(agents).forEach((configured) => {
@@ -46,9 +46,9 @@ export function scanPolicyAgentWorkspace(
       tools,
       inheritedTools: defaultTools,
       workspaceSourceBase: configured.sourceBase,
-      inheritedWorkspaceSourceBase: "oc://openclaw.config/agents/defaults",
+      inheritedWorkspaceSourceBase: "oc://carapace.config/agents/defaults",
       toolsSourceBase: `${configured.sourceBase}/tools`,
-      inheritedToolsSourceBase: "oc://openclaw.config/tools",
+      inheritedToolsSourceBase: "oc://carapace.config/tools",
     });
   });
   return entries.toSorted((a, b) => a.source.localeCompare(b.source) || a.id.localeCompare(b.id));
@@ -79,7 +79,7 @@ function pushAgentWorkspaceEvidence(
       ? `${params.workspaceSourceBase}/sandbox/mode`
       : inheritedSandboxMode !== undefined
         ? `${params.inheritedWorkspaceSourceBase}/sandbox/mode`
-        : "oc://openclaw.config/agents/defaults/sandbox/mode";
+        : "oc://carapace.config/agents/defaults/sandbox/mode";
   const explicitWorkspaceAccess = readString(params.sandbox.workspaceAccess);
   const inheritedWorkspaceAccess = readString(params.inheritedSandbox.workspaceAccess);
   entries.push({
@@ -90,7 +90,7 @@ function pushAgentWorkspaceEvidence(
         ? `${params.workspaceSourceBase}/sandbox/workspaceAccess`
         : inheritedWorkspaceAccess !== undefined
           ? `${params.inheritedWorkspaceSourceBase}/sandbox/workspaceAccess`
-          : "oc://openclaw.config/agents/defaults/sandbox/workspaceAccess",
+          : "oc://carapace.config/agents/defaults/sandbox/workspaceAccess",
     scope: params.scope,
     ...(params.agentId === undefined ? {} : { agentId: params.agentId }),
     value: explicitWorkspaceAccess ?? inheritedWorkspaceAccess ?? "none",

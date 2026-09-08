@@ -6,7 +6,7 @@ import {
   resolveInternalSessionKey,
   resolveMainSessionAlias,
 } from "../agents/tools/sessions-resolution.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -45,7 +45,7 @@ function collector(index: number, overrides: Partial<SubagentRunRecord> = {}): S
 
 async function withCollectors(runs: SubagentRunRecord[], run: () => Promise<void>) {
   await withStateDirEnv("session-swarm-summary-", async () => {
-    await withEnvAsync({ OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, async () => {
+    await withEnvAsync({ CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, async () => {
       saveSubagentRegistryToSqlite(new Map(runs.map((entry) => [entry.runId, entry])));
       await run();
     });
@@ -53,7 +53,7 @@ async function withCollectors(runs: SubagentRunRecord[], run: () => Promise<void
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   clearSubagentRunsReadCacheForTest();
 });
 

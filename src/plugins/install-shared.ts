@@ -22,7 +22,7 @@ import {
   type PluginInstallLogger,
   type PluginInstallPolicyRequest,
 } from "./install-types.js";
-import { resolvePackageExtensionEntries, type OpenClawPackageManifest } from "./manifest.js";
+import { resolvePackageExtensionEntries, type CarapacePackageManifest } from "./manifest.js";
 import { satisfiesPluginApiRange, resolvePackagePluginApiRange } from "./package-compat.js";
 import {
   emitPluginAuditSecurityEvent,
@@ -45,22 +45,22 @@ type PluginCompatibilityRuntime = Pick<
 
 export const defaultLogger: PluginInstallLogger = {};
 
-export function formatUnresolvedOpenClawPeerLinkError(packageName: string): string {
-  return `Installed plugin ${packageName} declares an openclaw dependency, but OpenClaw could not create a plugin-local node_modules/openclaw link. Run from a packaged OpenClaw install or reinstall OpenClaw, then retry.`;
+export function formatUnresolvedCarapacePeerLinkError(packageName: string): string {
+  return `Installed plugin ${packageName} declares an carapace dependency, but Carapace could not create a plugin-local node_modules/carapace link. Run from a packaged Carapace install or reinstall Carapace, then retry.`;
 }
 
 const MISSING_EXTENSIONS_ERROR =
-  'package.json missing openclaw.extensions; update the plugin package to include openclaw.extensions (for example ["./dist/index.js"]). See https://docs.openclaw.ai/help/troubleshooting#plugin-install-fails-with-missing-openclaw-extensions';
-function validateOpenClawPackageCompatibility(params: {
+  'package.json missing carapace.extensions; update the plugin package to include carapace.extensions (for example ["./dist/index.js"]). See https://github.com/Exaggarate/carapace#plugin-install-fails-with-missing-carapace-extensions';
+function validateCarapacePackageCompatibility(params: {
   pluginId: string;
   currentHostVersion: string;
-  packageMetadata?: OpenClawPackageManifest;
+  packageMetadata?: CarapacePackageManifest;
 }): PluginInstallFailureResult | null {
   const pluginApiRangeCheck = resolvePackagePluginApiRange(params.packageMetadata);
   if (!pluginApiRangeCheck.ok) {
     return {
       ok: false,
-      error: `invalid package.json openclaw.compat.pluginApi: ${pluginApiRangeCheck.error}`,
+      error: `invalid package.json carapace.compat.pluginApi: ${pluginApiRangeCheck.error}`,
       code: PLUGIN_INSTALL_ERROR_CODE.INVALID_PLUGIN_API,
     };
   }
@@ -68,7 +68,7 @@ function validateOpenClawPackageCompatibility(params: {
   if (pluginApiRange && !satisfiesPluginApiRange(params.currentHostVersion, pluginApiRange)) {
     return {
       ok: false,
-      error: `plugin "${params.pluginId}" requires plugin API ${pluginApiRange}, but this OpenClaw runtime exposes ${params.currentHostVersion}. Upgrade OpenClaw or install a compatible plugin version and retry.`,
+      error: `plugin "${params.pluginId}" requires plugin API ${pluginApiRange}, but this Carapace runtime exposes ${params.currentHostVersion}. Upgrade Carapace or install a compatible plugin version and retry.`,
       code: PLUGIN_INSTALL_ERROR_CODE.INCOMPATIBLE_PLUGIN_API,
     };
   }
@@ -76,10 +76,10 @@ function validateOpenClawPackageCompatibility(params: {
   return null;
 }
 
-export function validateOpenClawPackageInstallCompatibility(params: {
+export function validateCarapacePackageInstallCompatibility(params: {
   runtime: PluginCompatibilityRuntime;
   pluginId: string;
-  packageMetadata?: OpenClawPackageManifest;
+  packageMetadata?: CarapacePackageManifest;
 }): PluginInstallFailureResult | null {
   const currentHostVersion = params.runtime.resolveCompatibilityHostVersion();
   const minHostVersionCheck = params.runtime.checkMinHostVersion({
@@ -90,25 +90,25 @@ export function validateOpenClawPackageInstallCompatibility(params: {
     if (minHostVersionCheck.kind === "invalid") {
       return {
         ok: false,
-        error: `invalid package.json openclaw.install.minHostVersion: ${minHostVersionCheck.error}`,
+        error: `invalid package.json carapace.install.minHostVersion: ${minHostVersionCheck.error}`,
         code: PLUGIN_INSTALL_ERROR_CODE.INVALID_MIN_HOST_VERSION,
       };
     }
     if (minHostVersionCheck.kind === "unknown_host_version") {
       return {
         ok: false,
-        error: `plugin "${params.pluginId}" requires OpenClaw >=${minHostVersionCheck.requirement.minimumLabel}, but this host version could not be determined. Re-run from a released build or set OPENCLAW_VERSION and retry.`,
+        error: `plugin "${params.pluginId}" requires Carapace >=${minHostVersionCheck.requirement.minimumLabel}, but this host version could not be determined. Re-run from a released build or set CARAPACE_VERSION and retry.`,
         code: PLUGIN_INSTALL_ERROR_CODE.UNKNOWN_HOST_VERSION,
       };
     }
     return {
       ok: false,
-      error: `plugin "${params.pluginId}" requires OpenClaw >=${minHostVersionCheck.requirement.minimumLabel}, but this host is ${minHostVersionCheck.currentVersion}. Upgrade OpenClaw and retry.`,
+      error: `plugin "${params.pluginId}" requires Carapace >=${minHostVersionCheck.requirement.minimumLabel}, but this host is ${minHostVersionCheck.currentVersion}. Upgrade Carapace and retry.`,
       code: PLUGIN_INSTALL_ERROR_CODE.INCOMPATIBLE_HOST_VERSION,
     };
   }
 
-  return validateOpenClawPackageCompatibility({
+  return validateCarapacePackageCompatibility({
     pluginId: params.pluginId,
     currentHostVersion,
     packageMetadata: params.packageMetadata,
@@ -134,7 +134,7 @@ export async function readOptionalPackageManifest(params: {
   }
 }
 
-export function ensureOpenClawExtensions(params: { manifest: PackageManifest }):
+export function ensureCarapaceExtensions(params: { manifest: PackageManifest }):
   | {
       ok: true;
       entries: string[];
@@ -149,21 +149,21 @@ export function ensureOpenClawExtensions(params: { manifest: PackageManifest }):
     return {
       ok: false,
       error: MISSING_EXTENSIONS_ERROR,
-      code: PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS,
+      code: PLUGIN_INSTALL_ERROR_CODE.MISSING_CARAPACE_EXTENSIONS,
     };
   }
   if (resolved.status === "empty") {
     return {
       ok: false,
-      error: "package.json openclaw.extensions is empty",
-      code: PLUGIN_INSTALL_ERROR_CODE.EMPTY_OPENCLAW_EXTENSIONS,
+      error: "package.json carapace.extensions is empty",
+      code: PLUGIN_INSTALL_ERROR_CODE.EMPTY_CARAPACE_EXTENSIONS,
     };
   }
   if (resolved.status === "invalid") {
     return {
       ok: false,
       error: resolved.error,
-      code: PLUGIN_INSTALL_ERROR_CODE.INVALID_OPENCLAW_EXTENSIONS,
+      code: PLUGIN_INSTALL_ERROR_CODE.INVALID_CARAPACE_EXTENSIONS,
     };
   }
   return {
@@ -354,7 +354,7 @@ export async function runInstallSourceScan(params: {
     });
     return {
       ok: false,
-      error: `${params.subject} installation blocked: code safety scan failed (${String(err)}). Run "openclaw security audit --deep" for details.`,
+      error: `${params.subject} installation blocked: code safety scan failed (${String(err)}). Run "carapace security audit --deep" for details.`,
       code: PLUGIN_INSTALL_ERROR_CODE.SECURITY_SCAN_FAILED,
     };
   }

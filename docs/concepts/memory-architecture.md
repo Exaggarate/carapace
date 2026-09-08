@@ -1,14 +1,14 @@
 ---
-summary: "End-to-end architecture of OpenClaw memory: tiers, provenance, dreaming, recall lanes, the user model, and standing intents"
+summary: "End-to-end architecture of Carapace memory: tiers, provenance, dreaming, recall lanes, the user model, and standing intents"
 title: "Memory architecture"
 sidebarTitle: "Memory architecture"
 read_when:
-  - You want the complete picture of how OpenClaw memory works end to end
+  - You want the complete picture of how Carapace memory works end to end
   - You want to understand why memory behaves differently for trusted and untrusted content
   - You are deciding which memory surface a new feature or plugin should write to
 ---
 
-OpenClaw memory is a set of plain files and one SQLite index, organized into
+Carapace memory is a set of plain files and one SQLite index, organized into
 tiers with different trust levels, write rules, and injection behavior. This
 page explains the whole system: what gets written where, how content earns its
 way into long-term memory, how recall works on every turn, and how the system
@@ -31,10 +31,10 @@ Five rules shape everything below:
    with far heavier designs; what degrades memory systems is unreliable
    write-time curation. Long-horizon evaluations consistently show that what
    was written matters more than how it is indexed (LongMemEval,
-   arXiv:2410.10813). OpenClaw therefore moves curation off the busy reply
+   arXiv:2410.10813). Carapace therefore moves curation off the busy reply
    path and into a dedicated background pass.
 3. **The write path is the security boundary.** Content-level scanning of
-   memory cannot catch poisoned facts reliably, so OpenClaw enforces
+   memory cannot catch poisoned facts reliably, so Carapace enforces
    provenance at write time and gates promotion structurally instead of
    trying to detect bad memories later.
 4. **Deterministic gates, model judgment inside them.** Scoring, thresholds,
@@ -98,7 +98,7 @@ noise, and recall feedback loops:
 
 Beyond per-chunk trust metadata, automatic session ingestion records source
 sessions for its staged entries. Consolidation carries those origins forward,
-so `openclaw memory forget` can remove tracked entries derived from selected
+so `carapace memory forget` can remove tracked entries derived from selected
 sessions and exclude those session IDs from future ingestion. Separately,
 admission policy can exclude matching sources from dreaming ingestion and session backfill.
 Neither control covers every workspace write or retained copy; see the
@@ -271,7 +271,7 @@ turn runs inside a Git repository, memory written by that work carries a
 trailing project annotation:
 
 ```markdown
-- Use the release helper for package validation. <!-- project: github.com/openclaw/openclaw -->
+- Use the release helper for package validation. <!-- project: github.com/Exaggarate/carapace -->
 ```
 
 The identity comes from the normalized `origin` remote, so ordinary clones and
@@ -341,7 +341,7 @@ storing intentions as prose in a memory file is the least reliable design
 available: prospective recall degrades sharply with context length even
 while retrospective recall stays near perfect, and models cannot be trusted
 to re-infer cancellation (TriggerBench, arXiv:2606.23459; ProEvent-class
-event benchmarks). OpenClaw therefore compiles intentions out of the model:
+event benchmarks). Carapace therefore compiles intentions out of the model:
 
 - **Time-based intents** ("remind me Friday") become cron jobs via
   [scheduled tasks](/automation/cron-jobs) at the moment they are uttered.
@@ -366,7 +366,7 @@ Memory is the persistence layer an injection attack wants: plant an
 instruction once, have it re-injected forever. Memory poisoning is a
 recognized attack class (OWASP Agentic Applications ASI06; memory injection
 research such as MINJA, arXiv:2503.03704), and detection-based defenses
-measure poorly. OpenClaw defends structurally:
+measure poorly. Carapace defends structurally:
 
 - **Unforgeable provenance.** Origin labels live in SQLite columns written
   by classification code, never parsed out of memory text. Prose claiming
@@ -387,7 +387,7 @@ measure poorly. OpenClaw defends structurally:
 
 The conservative posture is deliberate. Independent memory-poisoning
 benchmarks score agents better the less automatically they retrieve and the
-more conservatively they write; OpenClaw keeps those properties even with
+more conservatively they write; Carapace keeps those properties even with
 dreaming and lane-1 recall on by default, because promotion and injection
 are both gated on provenance rather than on content looking safe.
 

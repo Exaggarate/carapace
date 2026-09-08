@@ -80,7 +80,7 @@ struct WatchRealtimeCallView: View {
                     if self.directNode.voiceConnection == nil {
                         self.setupGuidance
                     } else if self.controller.state == .idle {
-                        Text("Keep OpenClaw on screen until connected. Tap End to finish.")
+                        Text("Keep Carapace on screen until connected. Tap End to finish.")
                             .font(WatchClawType.body(size: 12))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -140,7 +140,7 @@ struct WatchRealtimeCallView: View {
 
     private var setupGuidance: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("On iPhone, open OpenClaw → Settings → Apple Watch → Connect Apple Watch.")
+            Text("On iPhone, open Carapace → Settings → Apple Watch → Connect Apple Watch.")
                 .font(WatchClawType.body(size: 12))
                 .fixedSize(horizontal: false, vertical: true)
             Text(verbatim: self.directNode.statusText)

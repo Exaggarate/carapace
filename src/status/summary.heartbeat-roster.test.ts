@@ -2,15 +2,15 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { getStatusSummary } from "./summary.js";
 
 const AGENT_COUNT = 200;
 
 /** Fleet enrolled through owner-target heartbeat defaults, so every agent takes the route lookup. */
-function makeFleetConfig(storePath: string): OpenClawConfig {
+function makeFleetConfig(storePath: string): CarapaceConfig {
   const entries: Record<string, { heartbeat?: { every?: string } }> = {};
   for (let index = 0; index < AGENT_COUNT; index += 1) {
     entries[`agent-${index}`] = {};
@@ -26,7 +26,7 @@ function makeFleetConfig(storePath: string): OpenClawConfig {
 }
 
 /** Counts how often the roster is read: every walk starts at `agents.entries`. */
-function countRosterReads(cfg: OpenClawConfig): { cfg: OpenClawConfig; reads: () => number } {
+function countRosterReads(cfg: CarapaceConfig): { cfg: CarapaceConfig; reads: () => number } {
   let reads = 0;
   const agents = new Proxy(cfg.agents as object, {
     get(target, property, receiver) {
@@ -36,7 +36,7 @@ function countRosterReads(cfg: OpenClawConfig): { cfg: OpenClawConfig; reads: ()
       return Reflect.get(target, property, receiver);
     },
   });
-  return { cfg: { ...cfg, agents: agents as OpenClawConfig["agents"] }, reads: () => reads };
+  return { cfg: { ...cfg, agents: agents as CarapaceConfig["agents"] }, reads: () => reads };
 }
 
 describe("getStatusSummary heartbeat roster", () => {
@@ -44,14 +44,14 @@ describe("getStatusSummary heartbeat roster", () => {
 
   afterEach(() => {
     cliBackendsTesting.resetDepsForTest();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("projects heartbeat status for the whole fleet without re-walking the roster per agent", async () => {
     // An absent store keeps the read-only route probe empty; only roster work is under test.
     const storePath = path.join(
-      tempDirs.make("openclaw-status-heartbeat-roster-"),
+      tempDirs.make("carapace-status-heartbeat-roster-"),
       "sessions.json",
     );
     const counted = countRosterReads(makeFleetConfig(storePath));

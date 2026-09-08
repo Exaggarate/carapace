@@ -16,7 +16,7 @@ import { startTelegramProofIngress } from "../../scripts/mantis/telegram-proof-i
 const identity = requestIdentitySchema.parse({
   request_id: "a".repeat(64),
   plan_sha256: "d".repeat(64),
-  repository: { id: "123", full_name: "openclaw/openclaw" },
+  repository: { id: "123", full_name: "carapace/carapace" },
   pull_request: 42,
   candidate_sha: "b".repeat(40),
   scenario: "telegram-bot-e2e-proof",

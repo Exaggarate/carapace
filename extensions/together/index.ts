@@ -1,7 +1,7 @@
-// Together plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Together plugin entrypoint registers its Carapace integration.
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
 import { applyTogetherConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildTogetherVideoGenerationProvider } from "./video-generation-provider.js";
 
 const PROVIDER_ID = "together";

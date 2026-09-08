@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   getRuntimeConfig: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", () => ({
+vi.mock("carapace/plugin-sdk/runtime-config-snapshot", () => ({
   getRuntimeConfig: mocks.getRuntimeConfig,
 }));
 

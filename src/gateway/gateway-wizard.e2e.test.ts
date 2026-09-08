@@ -27,7 +27,7 @@ describe("gateway wizard e2e", () => {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-wizard-consent-home-",
+        prefix: "carapace-wizard-consent-home-",
         minimalGateway: true,
       });
       const token = nextGatewayId("wizard-consent");
@@ -69,7 +69,7 @@ describe("gateway wizard e2e", () => {
 
   it("contains hosted wizard exits", { timeout: GATEWAY_E2E_TIMEOUT_MS }, async () => {
     const { envSnapshot, tempHome } = await setupGatewayTempHome({
-      prefix: "openclaw-wizard-contained-exit-home-",
+      prefix: "carapace-wizard-contained-exit-home-",
       minimalGateway: true,
     });
     const wizardToken = nextGatewayId("wiz-contained-exit");
@@ -136,7 +136,7 @@ describe("gateway wizard e2e", () => {
     { timeout: GATEWAY_E2E_TIMEOUT_MS },
     async () => {
       const { envSnapshot, tempHome } = await setupGatewayTempHome({
-        prefix: "openclaw-wizard-channels-home-",
+        prefix: "carapace-wizard-channels-home-",
         minimalGateway: true,
       });
       const wizAuth = nextGatewayId("wiz-chan");

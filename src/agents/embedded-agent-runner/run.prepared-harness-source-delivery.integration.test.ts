@@ -1,4 +1,4 @@
-import * as agentHarnessToolRuntime from "openclaw/plugin-sdk/agent-harness-tool-runtime";
+import * as agentHarnessToolRuntime from "carapace/plugin-sdk/agent-harness-tool-runtime";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { settleReplyDispatcher } from "../../auto-reply/dispatch-dispatcher.js";
@@ -33,7 +33,7 @@ import { buildTestCtx } from "../../auto-reply/reply/test-ctx.js";
 import type { MsgContext } from "../../auto-reply/templating.js";
 import type { GetReplyOptions, ReplyPayload } from "../../auto-reply/types.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { FailoverReason } from "../failover/signal.js";
 import type { AgentHarnessHostCapabilities } from "../harness/host-capability-types.js";
 import { registerAgentHarness } from "../harness/registry.js";
@@ -78,14 +78,14 @@ function runAdmittedAttempt(
 beforeAll(globalBeforeAll0);
 
 describe("prepared harness source delivery", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let restoreSynthesis: (() => void) | undefined;
   async function loadSourceDeliveryHarness() {
     // The runner resets modules; keep its private payload metadata shared with dispatch.
     vi.doMock("../../auto-reply/reply-payload.js", () => replyPayloadRuntime);
     const loaded = await loadRunOverflowCompactionHarness();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "prepared-source-delivery" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "prepared-source-delivery" });
     return loaded;
   }
   afterEach(async () => {
@@ -770,8 +770,8 @@ describe("prepared harness source delivery", () => {
       const config = {};
       const workspaceDir = state.workspaceDir;
       const baseLease = await mockedAcquireAgentRunPreparedModelRuntime({
-        agentId: "openclaw",
-        agentDir: state.agentDir("openclaw"),
+        agentId: "carapace",
+        agentDir: state.agentDir("carapace"),
         workspaceDir,
       });
       const admittedGeneration: PreparedModelRuntimePluginGeneration = {
@@ -821,8 +821,8 @@ describe("prepared harness source delivery", () => {
 
       const isolatedProbeParams: RunEmbeddedAgentInternalParams = {
         ...createOverflowRunParams(state),
-        agentId: "openclaw",
-        agentDir: state.agentDir("openclaw"),
+        agentId: "carapace",
+        agentDir: state.agentDir("carapace"),
         config,
         provider: "openai",
         model: "gpt-5.4",

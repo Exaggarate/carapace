@@ -19,15 +19,15 @@ export function setControlUiBasePath(value: string | undefined) {
       "window",
       value == null
         ? ({} as TestWindow)
-        : ({ __OPENCLAW_CONTROL_UI_BASE_PATH__: value } as unknown as TestWindow),
+        : ({ __CARAPACE_CONTROL_UI_BASE_PATH__: value } as unknown as TestWindow),
     );
     return;
   }
   if (value == null) {
-    delete (window as TestWindow)["__OPENCLAW_CONTROL_UI_BASE_PATH__"];
+    delete (window as TestWindow)["__CARAPACE_CONTROL_UI_BASE_PATH__"];
     return;
   }
-  Object.defineProperty(window, "__OPENCLAW_CONTROL_UI_BASE_PATH__", {
+  Object.defineProperty(window, "__CARAPACE_CONTROL_UI_BASE_PATH__", {
     value,
     writable: true,
     configurable: true,

@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import type { CodexThread } from "./protocol.js";
 import { sessionBindingIdentity, type CodexAppServerBindingStore } from "./session-binding.js";
 import { prepareCodexSessionInitialization } from "./session-initialization.js";
@@ -15,7 +15,7 @@ export async function createImportedCodexSession(params: {
   runtime: PluginRuntime;
   bindingStore: CodexAppServerBindingStore;
   prepareCleanup?: () => (assertCurrent: () => void) => Promise<void>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   key: string;
   agentId: string;
   // Adoption explicitly snapshots a title; native forks must not inherit one.

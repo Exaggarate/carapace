@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { withEphemeralCodexAuthStore } from "./auth-start-options.js";
 import type { CodexAppServerStartOptions } from "./config-contracts.js";
@@ -182,7 +182,7 @@ async function readNativeConfig(startOptions: CodexAppServerStartOptions, env: N
         id: 1,
         method: "initialize",
         params: {
-          clientInfo: { name: "openclaw_config_test", version: "1.0.0" },
+          clientInfo: { name: "carapace_config_test", version: "1.0.0" },
           capabilities: { experimentalApi: true },
         },
       });
@@ -199,7 +199,7 @@ describe("Codex stdio effective configuration", () => {
     if (testCase.posixOnly && process.platform === "win32") {
       context.skip();
     }
-    await withTempDir("openclaw-codex-config-", async (dir) => {
+    await withTempDir("carapace-codex-config-", async (dir) => {
       const root = await fs.realpath(dir);
       const { command, launcher, cwd, codexHome, env } = await createCodexNativeTestState(root);
       // No auth, inference, model discovery, or operator-home access is needed.

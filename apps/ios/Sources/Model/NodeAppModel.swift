@@ -1,8 +1,8 @@
 import CoreLocation
 import Observation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceKit
+import CarapaceProtocol
 import os
 import Security
 import SwiftUI
@@ -10,7 +10,7 @@ import UIKit
 import UserNotifications
 
 private let clientDatabaseLogger = Logger(
-    subsystem: "ai.openclawfoundation.app",
+    subsystem: "ai.carapacefoundation.app",
     category: "ClientDatabases")
 
 private struct GatewayRelayIdentityResponse: Decodable {
@@ -19,8 +19,8 @@ private struct GatewayRelayIdentityResponse: Decodable {
 }
 
 private struct WatchChatPreview {
-    var items: [OpenClawWatchChatItem]
-    var status: OpenClawWatchAppStatus?
+    var items: [CarapaceWatchChatItem]
+    var status: CarapaceWatchAppStatus?
     var statusText: String?
 }
 
@@ -324,16 +324,16 @@ final class NodeAppModel {
         var pendingResolutions: [WatchExecApprovalResolveEvent]?
     }
 
-    private let deepLinkLogger = Logger(subsystem: "ai.openclawfoundation.app", category: "DeepLink")
+    private let deepLinkLogger = Logger(subsystem: "ai.carapacefoundation.app", category: "DeepLink")
     private nonisolated static let agentRequestNodeEventTimeoutSeconds = 8
     private nonisolated static let execApprovalNotificationGuidanceSuppressedKey =
         "notifications.execApprovalGuidance.suppressed"
-    private let pushWakeLogger = Logger(subsystem: "ai.openclawfoundation.app", category: "PushWake")
-    private let pendingActionLogger = Logger(subsystem: "ai.openclawfoundation.app", category: "PendingAction")
-    private let locationWakeLogger = Logger(subsystem: "ai.openclawfoundation.app", category: "LocationWake")
-    private let watchExecApprovalLogger = Logger(subsystem: "ai.openclawfoundation.app", category: "WatchExecApproval")
+    private let pushWakeLogger = Logger(subsystem: "ai.carapacefoundation.app", category: "PushWake")
+    private let pendingActionLogger = Logger(subsystem: "ai.carapacefoundation.app", category: "PendingAction")
+    private let locationWakeLogger = Logger(subsystem: "ai.carapacefoundation.app", category: "LocationWake")
+    private let watchExecApprovalLogger = Logger(subsystem: "ai.carapacefoundation.app", category: "WatchExecApproval")
     private let execApprovalNotificationLogger = Logger(
-        subsystem: "ai.openclawfoundation.app",
+        subsystem: "ai.carapacefoundation.app",
         category: "ExecApprovalNotification")
     enum CameraHUDKind {
         case photo
@@ -349,9 +349,9 @@ final class NodeAppModel {
 
     var isBackgrounded: Bool = false
     private let camera: any CameraServicing
-    private(set) var preferredCameraFacing: OpenClawCameraFacing
+    private(set) var preferredCameraFacing: CarapaceCameraFacing
     private let screenRecorder: any ScreenRecordingServicing
-    private var watchGatewayConnectionStatus: OpenClawWatchAppStatusCode?
+    private var watchGatewayConnectionStatus: CarapaceWatchAppStatusCode?
     var gatewayStatusText: String = "Offline" {
         didSet {
             self.watchGatewayConnectionStatus = nil
@@ -493,7 +493,7 @@ final class NodeAppModel {
     private var gatewayHealthMonitorDisabled = false
     private let notificationCenter: NotificationCentering
     let voiceWake = VoiceWakeManager()
-    let voiceNoteRecorder: OpenClawVoiceNoteRecorder
+    let voiceNoteRecorder: CarapaceVoiceNoteRecorder
     let talkMode: TalkModeManager
     private(set) var locationAuthorizationSnapshot = LocationAuthorizationSnapshot.undetermined
     private let locationService: any LocationServicing
@@ -546,11 +546,11 @@ final class NodeAppModel {
     }
 
     @ObservationIgnored private var watchReplyCoordinator: WatchReplyCoordinator?
-    @ObservationIgnored private var preparedWatchJournal: OpenClawWatchMessageJournal?
+    @ObservationIgnored private var preparedWatchJournal: CarapaceWatchMessageJournal?
     @ObservationIgnored private let appleReviewDemoChatTransport = LocalFixtureChatTransport(fixture: .appleReviewDemo)
-    @ObservationIgnored private var clientDatabases: OpenClawClientDatabases?
+    @ObservationIgnored private var clientDatabases: CarapaceClientDatabases?
     @ObservationIgnored private var chatTranscriptCachesByGatewayID:
-        [GatewayStableIdentifier.Key: OpenClawChatSQLiteTranscriptCache] = [:]
+        [GatewayStableIdentifier.Key: CarapaceChatSQLiteTranscriptCache] = [:]
     @ObservationIgnored var chatSessionRoutingRestoreTask: Task<Void, Never>?
     private var watchExecApprovalPromptsByID: [ExecApprovalIdentifier.Key: ExecApprovalPrompt] = [:]
     private var execApprovalInboxPromptsByKey: [ExecApprovalInboxKey: ExecApprovalPrompt] = [:]
@@ -623,7 +623,7 @@ final class NodeAppModel {
         return self.isOperatorGatewayConnected ? "operator" : "offline"
     }
 
-    func makeChatTransport(outboxGatewayID: String? = nil) -> any OpenClawChatTransport {
+    func makeChatTransport(outboxGatewayID: String? = nil) -> any CarapaceChatTransport {
         if self.isScreenshotFixtureModeEnabled {
             return LocalFixtureChatTransport(fixture: .appScreenshots)
         }
@@ -688,7 +688,7 @@ final class NodeAppModel {
 
     /// Gateway-scoped facade over the installation-wide cache and client-state
     /// databases. Nil for fixture/unpaired transports: no cache and no outbox.
-    func makeChatOfflineStore() -> OpenClawChatSQLiteTranscriptCache? {
+    func makeChatOfflineStore() -> CarapaceChatSQLiteTranscriptCache? {
         guard let gatewayID = self.chatTranscriptCacheGatewayID,
               let gatewayKey = GatewayStableIdentifier.key(gatewayID),
               !self.quarantinedChatOfflineGatewayIDs.contains(gatewayKey)
@@ -743,7 +743,7 @@ final class NodeAppModel {
 
     func loadCachedChatSessions(
         gatewayID: String?,
-        agentID: String?) async -> [OpenClawChatSessionEntry]
+        agentID: String?) async -> [CarapaceChatSessionEntry]
     {
         guard GatewayStableIdentifier.matches(self.chatTranscriptCacheGatewayID, gatewayID),
               let cache = self.makeChatOfflineStore(),
@@ -762,7 +762,7 @@ final class NodeAppModel {
     }
 
     func storeCachedChatSessions(
-        _ sessions: [OpenClawChatSessionEntry],
+        _ sessions: [CarapaceChatSessionEntry],
         gatewayID: String?,
         agentID: String?) async
     {
@@ -907,12 +907,12 @@ final class NodeAppModel {
     }
 
     static func chatDatabaseDirectoryURL() -> URL? {
-        try? OpenClawNodeStorage.appSupportDir()
+        try? CarapaceNodeStorage.appSupportDir()
             .appendingPathComponent("databases", isDirectory: true)
     }
 
     private static func legacyChatDatabaseDirectoryURL() -> URL? {
-        try? OpenClawNodeStorage.appSupportDir()
+        try? CarapaceNodeStorage.appSupportDir()
             .appendingPathComponent("chat-cache", isDirectory: true)
     }
 
@@ -926,7 +926,7 @@ final class NodeAppModel {
         }
         #endif
         if let directoryURL = Self.chatDatabaseDirectoryURL() {
-            try OpenClawClientDatabases.removeDatabaseFiles(in: directoryURL)
+            try CarapaceClientDatabases.removeDatabaseFiles(in: directoryURL)
         }
         if let legacyDirectoryURL = Self.legacyChatDatabaseDirectoryURL(),
            FileManager.default.fileExists(atPath: legacyDirectoryURL.path)
@@ -935,11 +935,11 @@ final class NodeAppModel {
         }
     }
 
-    private static func makeClientDatabases() -> OpenClawClientDatabases? {
+    private static func makeClientDatabases() -> CarapaceClientDatabases? {
         guard let directoryURL = chatDatabaseDirectoryURL() else { return nil }
         let legacyDirectories = Self.legacyChatDatabaseDirectoryURL().map { [$0] } ?? []
         do {
-            return try OpenClawClientDatabases(
+            return try CarapaceClientDatabases(
                 directoryURL: directoryURL,
                 legacyDirectoryURLs: legacyDirectories,
                 registeredGatewayIDs: GatewaySettingsStore.loadGatewayRegistry().entries.map(\.stableID))
@@ -989,7 +989,7 @@ final class NodeAppModel {
         healthSummaryService: any HealthSummaryServicing = HealthSummaryService(),
         watchMessagingService: any WatchMessagingServicing = WatchMessagingService(),
         talkMode: TalkModeManager = TalkModeManager(),
-        voiceNoteRecorder: OpenClawVoiceNoteRecorder = OpenClawVoiceNoteRecorder(),
+        voiceNoteRecorder: CarapaceVoiceNoteRecorder = CarapaceVoiceNoteRecorder(),
         audioAdmissionInitiallyAllowed: Bool = true)
     {
         self.camera = camera
@@ -1571,7 +1571,7 @@ final class NodeAppModel {
     }
 
     func requestLocationPermissions(
-        mode: OpenClawLocationMode,
+        mode: CarapaceLocationMode,
         isCurrent: @MainActor () -> Bool = { true }) async -> Bool
     {
         guard !Task.isCancelled, isCurrent() else { return false }
@@ -1597,7 +1597,7 @@ final class NodeAppModel {
     }
 
     private func reconcileSignificantLocationMonitoring(
-        mode: OpenClawLocationMode,
+        mode: CarapaceLocationMode,
         authorizationStatus: CLAuthorizationStatus)
     {
         guard mode == .always, authorizationStatus == .authorizedAlways else {
@@ -1678,12 +1678,12 @@ final class NodeAppModel {
                   GatewayStableIdentifier.matches(sourceStore.gatewayID, sourceGatewayID),
                   let sourceRoute = await operatorGateway.currentRoute(ifGatewayID: sourceGatewayID)
             else { return }
-            let request = OpenClawChatGatewayRequests.agentsList(timeoutMs: 8000)
+            let request = CarapaceChatGatewayRequests.agentsList(timeoutMs: 8000)
             let res = try await operatorGateway.request(
                 request,
                 ifCurrentRoute: sourceRoute)
             let decoded = try JSONDecoder().decode(AgentsListResult.self, from: res)
-            let routingIdentity = OpenClawChatSessionRoutingIdentity(
+            let routingIdentity = CarapaceChatSessionRoutingIdentity(
                 scope: decoded.scope.value as? String,
                 mainSessionKey: decoded.mainkey,
                 defaultAgentID: decoded.defaultid)
@@ -2202,7 +2202,7 @@ final class NodeAppModel {
                         method: "health",
                         paramsJSON: nil,
                         timeoutSeconds: 6)
-                    guard let decoded = try? JSONDecoder().decode(OpenClawGatewayHealthOK.self, from: data) else {
+                    guard let decoded = try? JSONDecoder().decode(CarapaceGatewayHealthOK.self, from: data) else {
                         return false
                     }
                     return decoded.ok ?? false
@@ -2244,7 +2244,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .backgroundUnavailable,
                     message: "NODE_BACKGROUND_UNAVAILABLE: camera/screen/talk commands require foreground"))
         }
@@ -2253,7 +2253,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .unavailable,
                     message: "CAMERA_DISABLED: enable Camera in iOS Settings → Camera → Allow Camera"))
         }
@@ -2267,12 +2267,12 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                    error: CarapaceNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
             case .handlerUnavailable:
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .unavailable, message: "node handler unavailable"))
+                    error: CarapaceNodeError(code: .unavailable, message: "node handler unavailable"))
             }
         } catch is CancellationError {
             if command.hasPrefix("camera.") {
@@ -2281,7 +2281,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "node invoke cancelled"))
+                error: CarapaceNodeError(code: .unavailable, message: "node invoke cancelled"))
         } catch {
             if command.hasPrefix("camera.") {
                 let text = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -2290,7 +2290,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: error.localizedDescription))
+                error: CarapaceNodeError(code: .unavailable, message: error.localizedDescription))
         }
     }
 
@@ -2308,15 +2308,15 @@ final class NodeAppModel {
         BridgeInvokeResponse(
             id: request.id,
             ok: false,
-            error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+            error: CarapaceNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
     }
 
     private static func scopedWatchNotificationRequest(
         _ req: BridgeInvokeRequest,
         gatewayStableID: String?) -> BridgeInvokeRequest
     {
-        guard req.command == OpenClawWatchCommand.notify.rawValue,
-              var params = try? decodeParams(OpenClawWatchNotifyParams.self, from: req.paramsJSON)
+        guard req.command == CarapaceWatchCommand.notify.rawValue,
+              var params = try? decodeParams(CarapaceWatchNotifyParams.self, from: req.paramsJSON)
         else { return req }
         // Gateway identity comes from the installed node route, never the request payload.
         params.gatewayStableID = GatewayStableIdentifier.exact(gatewayStableID)
@@ -2340,7 +2340,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .unavailable,
                     message: "LOCATION_DISABLED: enable Location in Settings"))
         }
@@ -2348,12 +2348,12 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .backgroundUnavailable,
                     message: "LOCATION_BACKGROUND_UNAVAILABLE: background location requires Always"))
         }
-        let params = (try? Self.decodeParams(OpenClawLocationGetParams.self, from: req.paramsJSON)) ??
-            OpenClawLocationGetParams()
+        let params = (try? Self.decodeParams(CarapaceLocationGetParams.self, from: req.paramsJSON)) ??
+            CarapaceLocationGetParams()
         let desired = params.desiredAccuracy ??
             (isLocationPreciseEnabled() ? .precise : .balanced)
         let status = self.locationService.authorizationStatus()
@@ -2361,7 +2361,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .unavailable,
                     message: "LOCATION_PERMISSION_REQUIRED: grant Location permission"))
         }
@@ -2369,7 +2369,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .unavailable,
                     message: "LOCATION_PERMISSION_REQUIRED: enable Always for background access"))
         }
@@ -2379,7 +2379,7 @@ final class NodeAppModel {
             maxAgeMs: params.maxAgeMs,
             timeoutMs: params.timeoutMs)
         let isPrecise = self.locationService.accuracyAuthorization() == .fullAccuracy
-        let payload = OpenClawLocationPayload(
+        let payload = CarapaceLocationPayload(
             lat: location.coordinate.latitude,
             lon: location.coordinate.longitude,
             accuracyMeters: location.horizontalAccuracy,
@@ -2394,18 +2394,18 @@ final class NodeAppModel {
 
     private func handleCameraInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawCameraCommand.list.rawValue:
+        case CarapaceCameraCommand.list.rawValue:
             let devices = await camera.listDevices()
             struct Payload: Codable {
                 var devices: [CameraController.CameraDeviceInfo]
             }
             let payload = try Self.encodePayload(Payload(devices: devices))
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case OpenClawCameraCommand.snap.rawValue:
+        case CarapaceCameraCommand.snap.rawValue:
             showCameraHUD(ownerID: req.id, text: "Taking photo…", kind: .photo)
             triggerCameraFlash()
-            let params = (try? Self.decodeParams(OpenClawCameraSnapParams.self, from: req.paramsJSON)) ??
-                OpenClawCameraSnapParams()
+            let params = (try? Self.decodeParams(CarapaceCameraSnapParams.self, from: req.paramsJSON)) ??
+                CarapaceCameraSnapParams()
             let defaultFacing = self.preferredCameraFacing
             let res = try await self.withForegroundCapture {
                 try await self.camera.snap(
@@ -2428,9 +2428,9 @@ final class NodeAppModel {
             try Task.checkCancellation()
             updateCameraHUD(ownerID: req.id, text: "Photo captured", kind: .success, autoHideSeconds: 1.6)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case OpenClawCameraCommand.clip.rawValue:
-            let params = (try? Self.decodeParams(OpenClawCameraClipParams.self, from: req.paramsJSON)) ??
-                OpenClawCameraClipParams()
+        case CarapaceCameraCommand.clip.rawValue:
+            let params = (try? Self.decodeParams(CarapaceCameraClipParams.self, from: req.paramsJSON)) ??
+                CarapaceCameraClipParams()
 
             let includeAudio = params.includeAudio ?? true
             let defaultFacing = self.preferredCameraFacing
@@ -2464,8 +2464,8 @@ final class NodeAppModel {
     }
 
     private func handleScreenRecordInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = (try? Self.decodeParams(OpenClawScreenRecordParams.self, from: req.paramsJSON)) ??
-            OpenClawScreenRecordParams()
+        let params = (try? Self.decodeParams(CarapaceScreenRecordParams.self, from: req.paramsJSON)) ??
+            CarapaceScreenRecordParams()
         if let format = params.format, format.lowercased() != "mp4" {
             throw NSError(domain: "Screen", code: 30, userInfo: [
                 NSLocalizedDescriptionKey: "INVALID_REQUEST: screen format must be mp4",
@@ -2511,14 +2511,14 @@ final class NodeAppModel {
     }
 
     private func handleSystemNotify(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(OpenClawSystemNotifyParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(CarapaceSystemNotifyParams.self, from: req.paramsJSON)
         let title = params.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let body = params.body.trimmingCharacters(in: .whitespacesAndNewlines)
         if title.isEmpty, body.isEmpty {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty notification"))
+                error: CarapaceNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty notification"))
         }
 
         let status = await notificationAuthorizationStatus()
@@ -2526,7 +2526,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
+                error: CarapaceNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
         }
 
         let addResult = await NotificationOperationRunner.run(timeoutSeconds: 2.0) { [notificationCenter] in
@@ -2559,19 +2559,19 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
+                error: CarapaceNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
         }
         return BridgeInvokeResponse(id: req.id, ok: true)
     }
 
     private func handleChatPushInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(OpenClawChatPushParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(CarapaceChatPushParams.self, from: req.paramsJSON)
         let text = params.text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty chat.push text"))
+                error: CarapaceNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty chat.push text"))
         }
 
         let shouldSpeak = params.speak ?? true
@@ -2582,14 +2582,14 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
+                error: CarapaceNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
         }
 
         let messageId = UUID().uuidString
         if notificationsAllowed {
             let addResult = await NotificationOperationRunner.run(timeoutSeconds: 2.0) { [notificationCenter] in
                 let content = UNMutableNotificationContent()
-                content.title = "OpenClaw"
+                content.title = "Carapace"
                 content.body = text
                 content.sound = .default
                 content.userInfo = ["messageId": messageId]
@@ -2603,7 +2603,7 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
+                    error: CarapaceNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
             }
         }
 
@@ -2617,7 +2617,7 @@ final class NodeAppModel {
             }
         }
 
-        let payload = OpenClawChatPushPayload(messageId: messageId)
+        let payload = CarapaceChatPushPayload(messageId: messageId)
         return try Self.successfulInvokeResponse(req, payload: payload)
     }
 
@@ -2678,10 +2678,10 @@ final class NodeAppModel {
 
     private func handleDeviceInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawDeviceCommand.status.rawValue:
+        case CarapaceDeviceCommand.status.rawValue:
             let payload = try await deviceStatusService.status()
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawDeviceCommand.info.rawValue:
+        case CarapaceDeviceCommand.info.rawValue:
             let payload = self.deviceStatusService.info()
             return try Self.successfulInvokeResponse(req, payload: payload)
         default:
@@ -2690,21 +2690,21 @@ final class NodeAppModel {
     }
 
     private func handlePhotosInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = (try? Self.decodeParams(OpenClawPhotosLatestParams.self, from: req.paramsJSON)) ??
-            OpenClawPhotosLatestParams()
+        let params = (try? Self.decodeParams(CarapacePhotosLatestParams.self, from: req.paramsJSON)) ??
+            CarapacePhotosLatestParams()
         let payload = try await photosService.latest(params: params)
         return try Self.successfulInvokeResponse(req, payload: payload)
     }
 
     private func handleContactsInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawContactsCommand.search.rawValue:
-            let params = (try? Self.decodeParams(OpenClawContactsSearchParams.self, from: req.paramsJSON)) ??
-                OpenClawContactsSearchParams()
+        case CarapaceContactsCommand.search.rawValue:
+            let params = (try? Self.decodeParams(CarapaceContactsSearchParams.self, from: req.paramsJSON)) ??
+                CarapaceContactsSearchParams()
             let payload = try await contactsService.search(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawContactsCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawContactsAddParams.self, from: req.paramsJSON)
+        case CarapaceContactsCommand.add.rawValue:
+            let params = try Self.decodeParams(CarapaceContactsAddParams.self, from: req.paramsJSON)
             let payload = try await contactsService.add(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
         default:
@@ -2714,13 +2714,13 @@ final class NodeAppModel {
 
     private func handleCalendarInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawCalendarCommand.events.rawValue:
-            let params = (try? Self.decodeParams(OpenClawCalendarEventsParams.self, from: req.paramsJSON)) ??
-                OpenClawCalendarEventsParams()
+        case CarapaceCalendarCommand.events.rawValue:
+            let params = (try? Self.decodeParams(CarapaceCalendarEventsParams.self, from: req.paramsJSON)) ??
+                CarapaceCalendarEventsParams()
             let payload = try await calendarService.events(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawCalendarCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawCalendarAddParams.self, from: req.paramsJSON)
+        case CarapaceCalendarCommand.add.rawValue:
+            let params = try Self.decodeParams(CarapaceCalendarAddParams.self, from: req.paramsJSON)
             let payload = try await calendarService.add(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
         default:
@@ -2730,13 +2730,13 @@ final class NodeAppModel {
 
     private func handleRemindersInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawRemindersCommand.list.rawValue:
-            let params = (try? Self.decodeParams(OpenClawRemindersListParams.self, from: req.paramsJSON)) ??
-                OpenClawRemindersListParams()
+        case CarapaceRemindersCommand.list.rawValue:
+            let params = (try? Self.decodeParams(CarapaceRemindersListParams.self, from: req.paramsJSON)) ??
+                CarapaceRemindersListParams()
             let payload = try await remindersService.list(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawRemindersCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawRemindersAddParams.self, from: req.paramsJSON)
+        case CarapaceRemindersCommand.add.rawValue:
+            let params = try Self.decodeParams(CarapaceRemindersAddParams.self, from: req.paramsJSON)
             let payload = try await remindersService.add(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
         default:
@@ -2746,14 +2746,14 @@ final class NodeAppModel {
 
     private func handleMotionInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawMotionCommand.activity.rawValue:
-            let params = (try? Self.decodeParams(OpenClawMotionActivityParams.self, from: req.paramsJSON)) ??
-                OpenClawMotionActivityParams()
+        case CarapaceMotionCommand.activity.rawValue:
+            let params = (try? Self.decodeParams(CarapaceMotionActivityParams.self, from: req.paramsJSON)) ??
+                CarapaceMotionActivityParams()
             let payload = try await motionService.activities(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawMotionCommand.pedometer.rawValue:
-            let params = (try? Self.decodeParams(OpenClawPedometerParams.self, from: req.paramsJSON)) ??
-                OpenClawPedometerParams()
+        case CarapaceMotionCommand.pedometer.rawValue:
+            let params = (try? Self.decodeParams(CarapacePedometerParams.self, from: req.paramsJSON)) ??
+                CarapacePedometerParams()
             let payload = try await motionService.pedometer(params: params)
             return try Self.successfulInvokeResponse(req, payload: payload)
         default:
@@ -2762,11 +2762,11 @@ final class NodeAppModel {
     }
 
     private func handleHealthInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        guard let params = try? Self.decodeParams(OpenClawHealthSummaryParams.self, from: req.paramsJSON) else {
+        guard let params = try? Self.decodeParams(CarapaceHealthSummaryParams.self, from: req.paramsJSON) else {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: CarapaceNodeError(
                     code: .invalidRequest,
                     message: "INVALID_REQUEST: period must be today"))
         }
@@ -2777,7 +2777,7 @@ final class NodeAppModel {
     private func handleTalkInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         try Task.checkCancellation()
         switch req.command {
-        case OpenClawTalkCommand.pttStart.rawValue:
+        case CarapaceTalkCommand.pttStart.rawValue:
             let commandEpoch = self.talkPttCommandEpoch
             var reservedCaptureId: String?
             do {
@@ -2809,7 +2809,7 @@ final class NodeAppModel {
                 }
                 throw error
             }
-        case OpenClawTalkCommand.pttOnce.rawValue:
+        case CarapaceTalkCommand.pttOnce.rawValue:
             let commandEpoch = self.talkPttCommandEpoch
             var reservedCaptureId: String?
             let start: TalkPushToTalkOnceStart
@@ -2833,20 +2833,20 @@ final class NodeAppModel {
                 }
                 throw error
             }
-            let payload: OpenClawTalkPTTStopPayload = switch start {
+            let payload: CarapaceTalkPTTStopPayload = switch start {
             case let .busy(busyPayload):
                 busyPayload
             case .started:
                 await self.talkMode.awaitPushToTalkOnce(start)
             }
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawTalkCommand.pttStop.rawValue:
+        case CarapaceTalkCommand.pttStop.rawValue:
             // Interrupt commands invalidate suspended preparation before touching
             // capture state, then bypass the preparation queue entirely.
             self.talkPttCommandEpoch &+= 1
             let payload = self.talkMode.endPushToTalk(expectedTranscriptionOnly: false)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawTalkCommand.pttCancel.rawValue:
+        case CarapaceTalkCommand.pttCancel.rawValue:
             self.talkPttCommandEpoch &+= 1
             let payload = self.talkMode.cancelPushToTalk(expectedTranscriptionOnly: false)
             return try Self.successfulInvokeResponse(req, payload: payload)
@@ -3142,59 +3142,59 @@ extension NodeAppModel {
             }
         }
 
-        register([OpenClawLocationCommand.get.rawValue]) { try await $0.handleLocationInvoke($1) }
+        register([CarapaceLocationCommand.get.rawValue]) { try await $0.handleLocationInvoke($1) }
 
         register([
-            OpenClawCameraCommand.list.rawValue,
-            OpenClawCameraCommand.snap.rawValue,
-            OpenClawCameraCommand.clip.rawValue,
+            CarapaceCameraCommand.list.rawValue,
+            CarapaceCameraCommand.snap.rawValue,
+            CarapaceCameraCommand.clip.rawValue,
         ]) { try await $0.handleCameraInvoke($1) }
 
-        register([OpenClawScreenCommand.record.rawValue]) { try await $0.handleScreenRecordInvoke($1) }
+        register([CarapaceScreenCommand.record.rawValue]) { try await $0.handleScreenRecordInvoke($1) }
 
-        register([OpenClawSystemCommand.notify.rawValue]) { try await $0.handleSystemNotify($1) }
+        register([CarapaceSystemCommand.notify.rawValue]) { try await $0.handleSystemNotify($1) }
 
-        register([OpenClawChatCommand.push.rawValue]) { try await $0.handleChatPushInvoke($1) }
+        register([CarapaceChatCommand.push.rawValue]) { try await $0.handleChatPushInvoke($1) }
 
         register([
-            OpenClawDeviceCommand.status.rawValue,
-            OpenClawDeviceCommand.info.rawValue,
+            CarapaceDeviceCommand.status.rawValue,
+            CarapaceDeviceCommand.info.rawValue,
         ]) { try await $0.handleDeviceInvoke($1) }
 
         register([
-            OpenClawWatchCommand.status.rawValue,
-            OpenClawWatchCommand.notify.rawValue,
+            CarapaceWatchCommand.status.rawValue,
+            CarapaceWatchCommand.notify.rawValue,
         ]) { try await $0.handleWatchInvoke($1) }
 
-        register([OpenClawPhotosCommand.latest.rawValue]) { try await $0.handlePhotosInvoke($1) }
+        register([CarapacePhotosCommand.latest.rawValue]) { try await $0.handlePhotosInvoke($1) }
 
         register([
-            OpenClawContactsCommand.search.rawValue,
-            OpenClawContactsCommand.add.rawValue,
+            CarapaceContactsCommand.search.rawValue,
+            CarapaceContactsCommand.add.rawValue,
         ]) { try await $0.handleContactsInvoke($1) }
 
         register([
-            OpenClawCalendarCommand.events.rawValue,
-            OpenClawCalendarCommand.add.rawValue,
+            CarapaceCalendarCommand.events.rawValue,
+            CarapaceCalendarCommand.add.rawValue,
         ]) { try await $0.handleCalendarInvoke($1) }
 
         register([
-            OpenClawRemindersCommand.list.rawValue,
-            OpenClawRemindersCommand.add.rawValue,
+            CarapaceRemindersCommand.list.rawValue,
+            CarapaceRemindersCommand.add.rawValue,
         ]) { try await $0.handleRemindersInvoke($1) }
 
         register([
-            OpenClawMotionCommand.activity.rawValue,
-            OpenClawMotionCommand.pedometer.rawValue,
+            CarapaceMotionCommand.activity.rawValue,
+            CarapaceMotionCommand.pedometer.rawValue,
         ]) { try await $0.handleMotionInvoke($1) }
 
-        register([OpenClawHealthCommand.summary.rawValue]) { try await $0.handleHealthInvoke($1) }
+        register([CarapaceHealthCommand.summary.rawValue]) { try await $0.handleHealthInvoke($1) }
 
         register([
-            OpenClawTalkCommand.pttStart.rawValue,
-            OpenClawTalkCommand.pttStop.rawValue,
-            OpenClawTalkCommand.pttCancel.rawValue,
-            OpenClawTalkCommand.pttOnce.rawValue,
+            CarapaceTalkCommand.pttStart.rawValue,
+            CarapaceTalkCommand.pttStop.rawValue,
+            CarapaceTalkCommand.pttCancel.rawValue,
+            CarapaceTalkCommand.pttOnce.rawValue,
         ]) { try await $0.handleTalkInvoke($1) }
 
         return NodeCapabilityRouter(handlers: handlers)
@@ -3202,17 +3202,17 @@ extension NodeAppModel {
 
     private func handleWatchInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawWatchCommand.status.rawValue:
+        case CarapaceWatchCommand.status.rawValue:
             let status = await watchMessagingService.status()
-            let payload = OpenClawWatchStatusPayload(
+            let payload = CarapaceWatchStatusPayload(
                 supported: status.supported,
                 paired: status.paired,
                 appInstalled: status.appInstalled,
                 reachable: status.reachable,
                 activationState: status.activationState)
             return try Self.successfulInvokeResponse(req, payload: payload)
-        case OpenClawWatchCommand.notify.rawValue:
-            let params = try Self.decodeParams(OpenClawWatchNotifyParams.self, from: req.paramsJSON)
+        case CarapaceWatchCommand.notify.rawValue:
+            let params = try Self.decodeParams(CarapaceWatchNotifyParams.self, from: req.paramsJSON)
             let gatewayStableID = GatewayStableIdentifier.exact(params.gatewayStableID)
             var normalizedParams = Self.normalizeWatchNotifyParams(params)
             normalizedParams.gatewayStableID = gatewayStableID
@@ -3222,12 +3222,12 @@ extension NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: CarapaceNodeError(
                         code: .invalidRequest,
                         message: "INVALID_REQUEST: empty watch notification"))
             }
             let generation = self.gatewayConnectGeneration
-            let context: OpenClawWatchChatDeliveryContext?
+            let context: CarapaceWatchChatDeliveryContext?
             // Informational alerts may outlive their route, but they cannot borrow
             // the currently selected Gateway's authority to issue a reply target.
             if GatewayStableIdentifier.matches(gatewayStableID, self.currentWatchChatGatewayStableID()) {
@@ -3264,7 +3264,7 @@ extension NodeAppModel {
                         notificationCenter: notificationCenter)
                 }
             }
-            let payload = OpenClawWatchNotifyPayload(
+            let payload = CarapaceWatchNotifyPayload(
                 deliveredImmediately: result.deliveredImmediately,
                 queuedForDelivery: result.queuedForDelivery,
                 transport: result.transport)
@@ -3295,7 +3295,7 @@ extension NodeAppModel {
         let status = await watchMessagingService.status()
         guard status.supported, status.paired, status.appInstalled else {
             throw NSError(domain: "WatchDirectSetup", code: 3, userInfo: [
-                NSLocalizedDescriptionKey: "Pair an Apple Watch and install the OpenClaw watch app first.",
+                NSLocalizedDescriptionKey: "Pair an Apple Watch and install the Carapace watch app first.",
             ])
         }
 
@@ -3321,9 +3321,9 @@ extension NodeAppModel {
         self.watchMessagingStatus = await self.watchMessagingService.status()
     }
 
-    private func locationMode() -> OpenClawLocationMode {
+    private func locationMode() -> CarapaceLocationMode {
         let raw = UserDefaults.standard.string(forKey: "location.enabledMode") ?? "off"
-        return OpenClawLocationMode(rawValue: raw) ?? .off
+        return CarapaceLocationMode(rawValue: raw) ?? .off
     }
 
     private func isLocationPreciseEnabled() -> Bool {
@@ -3357,11 +3357,11 @@ extension NodeAppModel {
         return UserDefaults.standard.bool(forKey: "camera.enabled")
     }
 
-    nonisolated static func cameraFacingPreference(rawValue: String?) -> OpenClawCameraFacing {
-        rawValue.flatMap(OpenClawCameraFacing.init(rawValue:)) ?? .front
+    nonisolated static func cameraFacingPreference(rawValue: String?) -> CarapaceCameraFacing {
+        rawValue.flatMap(CarapaceCameraFacing.init(rawValue:)) ?? .front
     }
 
-    func setPreferredCameraFacing(_ facing: OpenClawCameraFacing) {
+    func setPreferredCameraFacing(_ facing: CarapaceCameraFacing) {
         guard self.preferredCameraFacing != facing else { return }
         self.preferredCameraFacing = facing
         UserDefaults.standard.set(facing.rawValue, forKey: Self.preferredCameraFacingKey)
@@ -3545,7 +3545,7 @@ extension NodeAppModel {
     }
 
     var chatSessionRoutingContract: String? {
-        OpenClawChatSessionRoutingContract.make(
+        CarapaceChatSessionRoutingContract.make(
             scope: self.gatewaySessionScope,
             mainKey: self.mainSessionBaseKey,
             defaultAgentID: self.gatewayDefaultAgentId)
@@ -4283,7 +4283,7 @@ extension NodeAppModel {
                 Generate a new iPhone setup code on the Gateway, then scan it in Settings → Gateway. \
                 Automatic reconnect is paused until you retry setup.
                 """,
-                docsURL: URL(string: "https://docs.openclaw.ai/platforms/ios"),
+                docsURL: URL(string: "https://github.com/Exaggarate/carapace"),
                 retryable: true,
                 pauseReconnect: true,
                 technicalDetails: technicalDetails)
@@ -4295,7 +4295,7 @@ extension NodeAppModel {
                 kind: .unknown,
                 owner: .iphone,
                 title: "Credential save failed",
-                message: "OpenClaw disconnected because it could not securely save the new gateway credential.",
+                message: "Carapace disconnected because it could not securely save the new gateway credential.",
                 retryable: true,
                 pauseReconnect: true,
                 technicalDetails: technicalDetails)
@@ -4600,7 +4600,7 @@ extension NodeAppModel {
                             BridgeInvokeResponse(
                                 id: req.id,
                                 ok: false,
-                                error: OpenClawNodeError(
+                                error: CarapaceNodeError(
                                     code: .invalidRequest,
                                     message: "INVALID_REQUEST: operator session cannot invoke node commands"))
                         },
@@ -4690,7 +4690,7 @@ extension NodeAppModel {
         let gateway = self.nodeGateway
         self.nodeHostStatsTask = Task {
             var failureLogged = false
-            let logger = Logger(subsystem: "ai.openclawfoundation.app", category: "NodeHostStats")
+            let logger = Logger(subsystem: "ai.carapacefoundation.app", category: "NodeHostStats")
             // App route generations survive socket reconnects; the captured route fences both.
             while !Task.isCancelled, shouldContinue(), await gateway.currentRoute() == route {
                 guard !Task.isCancelled, shouldContinue() else { return }
@@ -4867,7 +4867,7 @@ extension NodeAppModel {
                         return BridgeInvokeResponse(
                             id: req.id,
                             ok: false,
-                            error: OpenClawNodeError(
+                            error: CarapaceNodeError(
                                 code: .unavailable,
                                 message: "UNAVAILABLE: node not ready"))
                     }
@@ -5128,8 +5128,8 @@ extension NodeAppModel {
             scopes: scopes,
             scopesAreExplicit: forceExplicitScopes,
             caps: [
-                OpenClawGatewayClientCapability.agentKind,
-                OpenClawGatewayClientCapability.inlineWidgets,
+                CarapaceGatewayClientCapability.agentKind,
+                CarapaceGatewayClientCapability.inlineWidgets,
             ],
             commands: [],
             permissions: [:],
@@ -5143,7 +5143,7 @@ extension NodeAppModel {
 
     private func legacyClientIdFallback(currentClientId: String, error: Error) -> String? {
         let normalizedClientId = currentClientId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard normalizedClientId == "openclaw-ios" else { return nil }
+        guard normalizedClientId == "carapace-ios" else { return nil }
         let message = error.localizedDescription.lowercased()
         guard message.contains("invalid connect params"), message.contains("/client/id") else {
             return nil
@@ -5338,7 +5338,7 @@ extension NodeAppModel {
             else { return }
             let sourceAgentID = self.chatDeliveryAgentId
             let sourceMainSessionKey = self.mainSessionKey
-            let request = OpenClawChatGatewayRequests.sessionsList(
+            let request = CarapaceChatGatewayRequests.sessionsList(
                 limit: 80,
                 search: nil,
                 archived: false,
@@ -5973,10 +5973,10 @@ extension NodeAppModel {
         self.persistWatchExecApprovalBridgeState()
     }
 
-    private static func makeWatchExecApprovalItem(from prompt: ExecApprovalPrompt) -> OpenClawWatchExecApprovalItem {
-        let decisions = prompt.allowedDecisions.compactMap(OpenClawWatchExecApprovalDecision.init(rawValue:))
+    private static func makeWatchExecApprovalItem(from prompt: ExecApprovalPrompt) -> CarapaceWatchExecApprovalItem {
+        let decisions = prompt.allowedDecisions.compactMap(CarapaceWatchExecApprovalDecision.init(rawValue:))
         let preview = Self.trimmedOrNil(prompt.commandPreview) ?? Self.trimmedOrNil(prompt.commandText)
-        return OpenClawWatchExecApprovalItem(
+        return CarapaceWatchExecApprovalItem(
             id: prompt.id,
             gatewayStableID: prompt.gatewayStableID,
             commandText: prompt.commandText,
@@ -6003,7 +6003,7 @@ extension NodeAppModel {
               !self.terminalExecApprovalKeys.contains(inboxKey)
         else { return }
         let deliveryGeneration = self.gatewayConnectGeneration
-        let message = OpenClawWatchExecApprovalPromptMessage(
+        let message = CarapaceWatchExecApprovalPromptMessage(
             approval: Self.makeWatchExecApprovalItem(from: prompt),
             sentAtMs: Int64(Date().timeIntervalSince1970 * 1000),
             resetResolutionAttemptId: resetResolutionAttemptId)
@@ -6033,8 +6033,8 @@ extension NodeAppModel {
     private func publishWatchExecApprovalResolved(
         approvalId: String,
         gatewayStableID: String,
-        decision: OpenClawWatchExecApprovalDecision?,
-        outcome: OpenClawWatchExecApprovalOutcome,
+        decision: CarapaceWatchExecApprovalDecision?,
+        outcome: CarapaceWatchExecApprovalOutcome,
         outcomeText: String,
         resolvedAtMs: Int64? = nil,
         source: String,
@@ -6046,7 +6046,7 @@ extension NodeAppModel {
         self.markExecApprovalOwnerTerminal(
             approvalId: approvalID,
             gatewayStableID: gatewayStableID)
-        let message = OpenClawWatchExecApprovalResolvedMessage(
+        let message = CarapaceWatchExecApprovalResolvedMessage(
             approvalId: approvalID,
             gatewayStableID: gatewayStableID,
             decision: decision,
@@ -6085,7 +6085,7 @@ extension NodeAppModel {
             await self.publishWatchExecApprovalResolved(
                 approvalId: terminal.id,
                 gatewayStableID: gatewayStableID,
-                decision: terminal.decision.flatMap(OpenClawWatchExecApprovalDecision.init(rawValue:)),
+                decision: terminal.decision.flatMap(CarapaceWatchExecApprovalDecision.init(rawValue:)),
                 outcome: outcome,
                 outcomeText: Self.execApprovalTerminalText(
                     terminal,
@@ -6120,7 +6120,7 @@ extension NodeAppModel {
     }
 
     private static func watchExecApprovalOutcome(
-        for verdict: ExecApprovalTerminalVerdict) -> OpenClawWatchExecApprovalOutcome?
+        for verdict: ExecApprovalTerminalVerdict) -> CarapaceWatchExecApprovalOutcome?
     {
         switch verdict {
         case .allowOnce:
@@ -6137,7 +6137,7 @@ extension NodeAppModel {
     private func publishWatchExecApprovalExpired(
         approvalId: String,
         gatewayStableID: String,
-        reason: OpenClawWatchExecApprovalCloseReason,
+        reason: CarapaceWatchExecApprovalCloseReason,
         approvalKind: ApprovalKind = .exec,
         syncSnapshots: Bool = true) async
     {
@@ -6148,7 +6148,7 @@ extension NodeAppModel {
             approvalId: approvalID,
             gatewayStableID: gatewayStableID)
         guard approvalKind == .exec else { return }
-        let message = OpenClawWatchExecApprovalExpiredMessage(
+        let message = CarapaceWatchExecApprovalExpiredMessage(
             approvalId: approvalID,
             gatewayStableID: gatewayStableID,
             reason: reason,
@@ -6200,7 +6200,7 @@ extension NodeAppModel {
             false
         }
         let canAcknowledgeRequest = requestId?.isEmpty == false && requestOwnerMatches
-        let message = OpenClawWatchExecApprovalSnapshotMessage(
+        let message = CarapaceWatchExecApprovalSnapshotMessage(
             approvals: approvals,
             gatewayStableID: gatewayStableID,
             sentAtMs: Int64(Date().timeIntervalSince1970 * 1000),
@@ -6232,39 +6232,39 @@ extension NodeAppModel {
 
     private func makeWatchChatPreview(sessionKey: String, agentID: String?) async -> WatchChatPreview {
         do {
-            let payload: OpenClawChatHistoryPayload
+            let payload: CarapaceChatHistoryPayload
             if self.isAppleReviewDemoModeEnabled {
                 payload = try await self.appleReviewDemoChatTransport.requestHistory(sessionKey: sessionKey)
             } else {
                 guard self.isOperatorGatewayConnected else {
                     return WatchChatPreview(
                         items: [],
-                        status: OpenClawWatchAppStatus(code: .chatConnectIPhone),
+                        status: CarapaceWatchAppStatus(code: .chatConnectIPhone),
                         statusText: "Connect iPhone chat to read messages")
                 }
                 payload = try await IOSGatewayChatTransport(gateway: self.operatorSession, globalAgentId: agentID)
                     .requestHistory(sessionKey: sessionKey)
             }
 
-            let items = OpenClawChatHistoryPresentation.makeWatchItems(from: payload.messages ?? [])
+            let items = CarapaceChatHistoryPresentation.makeWatchItems(from: payload.messages ?? [])
             return WatchChatPreview(
                 items: items,
                 status: items.isEmpty
-                    ? OpenClawWatchAppStatus(code: .chatNoMessages)
+                    ? CarapaceWatchAppStatus(code: .chatNoMessages)
                     : nil,
                 statusText: items.isEmpty ? "No chat messages yet" : nil)
         } catch {
             GatewayDiagnostics.log("watch app snapshot: chat preview failed error=\(error.localizedDescription)")
             return WatchChatPreview(
                 items: [],
-                status: OpenClawWatchAppStatus(code: .chatUnavailable),
+                status: CarapaceWatchAppStatus(code: .chatUnavailable),
                 statusText: "Chat unavailable")
         }
     }
 
     private func makeWatchAppSnapshot(
         chatPreview: WatchChatPreview? = nil,
-        chatDeliveryContext: OpenClawWatchChatDeliveryContext? = nil) -> OpenClawWatchAppSnapshotMessage
+        chatDeliveryContext: CarapaceWatchChatDeliveryContext? = nil) -> CarapaceWatchAppSnapshotMessage
     {
         self.pruneExpiredWatchExecApprovalPrompts()
         let watchGatewayConnected = self.isAppleReviewDemoModeEnabled
@@ -6273,7 +6273,7 @@ extension NodeAppModel {
         let watchGatewayStatusText = watchGatewayConnected || displayStatusText != "Connected"
             ? displayStatusText
             : self.operatorStatusText
-        return OpenClawWatchAppSnapshotMessage(
+        return CarapaceWatchAppSnapshotMessage(
             gatewayStatus: self.makeWatchGatewayStatus(connected: watchGatewayConnected),
             gatewayStatusText: watchGatewayStatusText,
             gatewayConnected: watchGatewayConnected,
@@ -6296,23 +6296,23 @@ extension NodeAppModel {
             chatDeliveryContext: chatDeliveryContext)
     }
 
-    private func makeWatchGatewayStatus(connected: Bool) -> OpenClawWatchAppStatus {
+    private func makeWatchGatewayStatus(connected: Bool) -> CarapaceWatchAppStatus {
         if connected {
-            return OpenClawWatchAppStatus(code: .gatewayConnected)
+            return CarapaceWatchAppStatus(code: .gatewayConnected)
         }
         if let problem = self.lastGatewayProblem {
             return Self.makeWatchGatewayProblemStatus(problem)
         }
         if let watchGatewayConnectionStatus {
-            return OpenClawWatchAppStatus(code: watchGatewayConnectionStatus)
+            return CarapaceWatchAppStatus(code: watchGatewayConnectionStatus)
         }
         let statusText = self.gatewayStatusText == "Connected"
             ? self.operatorStatusText
             : self.gatewayStatusText
         if statusText == "Offline" {
-            return OpenClawWatchAppStatus(code: .gatewayOffline)
+            return CarapaceWatchAppStatus(code: .gatewayOffline)
         }
-        return OpenClawWatchAppStatus(code: .legacy, verbatim: statusText)
+        return CarapaceWatchAppStatus(code: .legacy, verbatim: statusText)
     }
 
     func setGatewayConnectionProgress(reconnecting: Bool) {
@@ -6323,7 +6323,7 @@ extension NodeAppModel {
     }
 
     private static func makeWatchGatewayProblemStatus(
-        _ problem: GatewayConnectionProblem) -> OpenClawWatchAppStatus
+        _ problem: GatewayConnectionProblem) -> CarapaceWatchAppStatus
     {
         let requestID: String? = switch problem.kind {
         case .pairingRequired, .pairingRoleUpgradeRequired, .pairingScopeUpgradeRequired,
@@ -6332,35 +6332,35 @@ extension NodeAppModel {
         default:
             nil
         }
-        let code: OpenClawWatchAppStatusCode = requestID != nil
+        let code: CarapaceWatchAppStatusCode = requestID != nil
             ? .gatewayProblemWithRequestID
             : .gatewayProblem
         let requestArguments = requestID.map { [$0] } ?? []
         return switch problem.titlePresentation {
         case let .localized(key):
-            OpenClawWatchAppStatus(
+            CarapaceWatchAppStatus(
                 code: code,
                 localizationKey: key,
                 arguments: requestArguments)
         case let .localizedFormat(key, arguments):
-            OpenClawWatchAppStatus(
+            CarapaceWatchAppStatus(
                 code: code,
                 localizationKey: key,
                 arguments: arguments + requestArguments)
         case let .verbatim(value):
-            OpenClawWatchAppStatus(
+            CarapaceWatchAppStatus(
                 code: code,
                 arguments: requestArguments,
                 verbatim: value)
         }
     }
 
-    private func makeWatchTalkStatus() -> OpenClawWatchAppStatus {
+    private func makeWatchTalkStatus() -> CarapaceWatchAppStatus {
         if self.talkMode.isSpeaking {
-            return OpenClawWatchAppStatus(code: .talkSpeaking)
+            return CarapaceWatchAppStatus(code: .talkSpeaking)
         }
         if self.talkMode.isListening {
-            return OpenClawWatchAppStatus(code: .talkListening)
+            return CarapaceWatchAppStatus(code: .talkListening)
         }
         if self.talkMode.hasActivePushToTalkSession {
             return self.makeWatchTalkPresentationStatus()
@@ -6372,48 +6372,48 @@ extension NodeAppModel {
             break
         }
         if !self.talkMode.isEnabled {
-            return OpenClawWatchAppStatus(code: .talkOff)
+            return CarapaceWatchAppStatus(code: .talkOff)
         }
         if !self.talkMode.isGatewayConnected {
-            return OpenClawWatchAppStatus(code: .talkOffline)
+            return CarapaceWatchAppStatus(code: .talkOffline)
         }
         switch self.talkMode.gatewayTalkPermissionState {
         case .unknown, .ready:
             break
         case let .missingScope(scope):
-            return OpenClawWatchAppStatus(code: .talkPermissionRequired, arguments: [scope])
+            return CarapaceWatchAppStatus(code: .talkPermissionRequired, arguments: [scope])
         case .requestingUpgrade:
-            return OpenClawWatchAppStatus(code: .talkRequestingApproval)
+            return CarapaceWatchAppStatus(code: .talkRequestingApproval)
         case .upgradeRequested:
-            return OpenClawWatchAppStatus(code: .talkApprovalRequested)
+            return CarapaceWatchAppStatus(code: .talkApprovalRequested)
         case let .requestFailed(message), let .loadFailed(message):
-            return OpenClawWatchAppStatus(code: .talkFailure, verbatim: message)
+            return CarapaceWatchAppStatus(code: .talkFailure, verbatim: message)
         case .apiKeyMissing:
-            return OpenClawWatchAppStatus(code: .talkAPIKeyMissing)
+            return CarapaceWatchAppStatus(code: .talkAPIKeyMissing)
         }
         return self.makeWatchTalkPresentationStatus()
     }
 
-    private func makeWatchTalkPresentationStatus() -> OpenClawWatchAppStatus {
+    private func makeWatchTalkPresentationStatus() -> CarapaceWatchAppStatus {
         switch self.talkMode.watchPresentation {
         case let .localized(key):
-            return OpenClawWatchAppStatus(code: .talkFailure, localizationKey: key)
+            return CarapaceWatchAppStatus(code: .talkFailure, localizationKey: key)
         case .phase:
             break
         case let .verbatim(value):
-            return OpenClawWatchAppStatus(code: .talkFailure, verbatim: value)
+            return CarapaceWatchAppStatus(code: .talkFailure, verbatim: value)
         }
         return switch self.talkMode.phase {
         case .connecting:
-            OpenClawWatchAppStatus(code: .talkConnecting)
+            CarapaceWatchAppStatus(code: .talkConnecting)
         case .thinking:
-            OpenClawWatchAppStatus(code: .talkThinking)
+            CarapaceWatchAppStatus(code: .talkThinking)
         case .listening:
-            OpenClawWatchAppStatus(code: .talkListening)
+            CarapaceWatchAppStatus(code: .talkListening)
         case .speaking:
-            OpenClawWatchAppStatus(code: .talkSpeaking)
+            CarapaceWatchAppStatus(code: .talkSpeaking)
         case .idle:
-            OpenClawWatchAppStatus(code: .talkReady)
+            CarapaceWatchAppStatus(code: .talkReady)
         }
     }
 
@@ -6447,7 +6447,7 @@ extension NodeAppModel {
             includeChat: true)
     }
 
-    func watchMessageJournal() async throws -> OpenClawWatchMessageJournal {
+    func watchMessageJournal() async throws -> CarapaceWatchMessageJournal {
         var databaseOwner = self.clientDatabases
         do {
             guard UIApplication.shared.isProtectedDataAvailable else { throw WatchMessagingError.admissionUnavailable }
@@ -6478,11 +6478,11 @@ extension NodeAppModel {
         }
     }
 
-    func clearWatchChatStorageWarning(for journal: OpenClawWatchMessageJournal) {
+    func clearWatchChatStorageWarning(for journal: CarapaceWatchMessageJournal) {
         self.updateWatchChatStorageWarning(nil, for: journal)
     }
 
-    private func updateWatchChatStorageWarning(_ message: String?, for journal: OpenClawWatchMessageJournal) {
+    private func updateWatchChatStorageWarning(_ message: String?, for journal: CarapaceWatchMessageJournal) {
         // A live SQLite handle does not resolve failed re-import or a replacement owner's warning.
         guard !Task.isCancelled, self.preparedWatchJournal === journal,
               self.clientDatabases?.watchMessages === journal
@@ -6511,19 +6511,19 @@ extension NodeAppModel {
     }
 
     func admitWatchChatDelivery(
-        _ command: OpenClawWatchChatDeliveryCommand,
-        destination: OpenClawWatchMessageReceiptDestination = .watch) async throws
+        _ command: CarapaceWatchChatDeliveryCommand,
+        destination: CarapaceWatchMessageReceiptDestination = .watch) async throws
     {
         let coordinator: WatchReplyCoordinator
-        let entry: OpenClawWatchMessageEntry
+        let entry: CarapaceWatchMessageEntry
         do {
             coordinator = try await self.watchChatCoordinator()
             entry = try await coordinator.admit(command, destination: destination)
-        } catch let error as OpenClawWatchChatDeliveryError {
-            if destination == .watch, OpenClawWatchChatDeliveryCodec.isPermanentRejectionCode(error.code) {
+        } catch let error as CarapaceWatchChatDeliveryError {
+            if destination == .watch, CarapaceWatchChatDeliveryCodec.isPermanentRejectionCode(error.code) {
                 // Rejected work never entered phone custody. Only its exact Watch row
                 // consumes this denial; there is no phone journal row or receipt ACK.
-                let receipt = OpenClawWatchChatDeliveryReceipt(
+                let receipt = CarapaceWatchChatDeliveryReceipt(
                     context: command.context,
                     commandId: command.commandId,
                     state: .rejected(code: error.code, message: error.message))
@@ -6552,7 +6552,7 @@ extension NodeAppModel {
 
     func rejectLegacyWatchChat() {
         self.watchChatAdmissionWarning = String(
-            localized: "Update OpenClaw on iPhone and Apple Watch before sending Watch messages.")
+            localized: "Update Carapace on iPhone and Apple Watch before sending Watch messages.")
         GatewayDiagnostics.log("watch chat rejected: upgrade_required")
     }
 
@@ -6584,7 +6584,7 @@ extension NodeAppModel {
         return GatewayStableIdentifier.matches(eventGatewayID, self.currentWatchChatGatewayStableID())
     }
 
-    nonisolated static func watchThinkingOverride(for kind: OpenClawWatchChatDeliveryKind) -> String? {
+    nonisolated static func watchThinkingOverride(for kind: CarapaceWatchChatDeliveryKind) -> String? {
         // Free-form Watch chat follows the session; only quick replies request a cheap level.
         kind == .quickReply ? "low" : nil
     }
@@ -6592,7 +6592,7 @@ extension NodeAppModel {
     private func makeWatchChatDeliveryContext(
         sessionKey: String,
         agentID: String?,
-        gatewayStableID: String?) async -> OpenClawWatchChatDeliveryContext?
+        gatewayStableID: String?) async -> CarapaceWatchChatDeliveryContext?
     {
         guard let gatewayStableID = GatewayStableIdentifier.exact(gatewayStableID),
               let agentID = agentID?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
@@ -6613,14 +6613,14 @@ extension NodeAppModel {
                   let generation = route.owner.routeGeneration
             else { return nil }
             let target = IOSGatewayChatTransport.sessionTarget(for: key, selectedAgentID: agentID)
-            let context = OpenClawWatchChatDeliveryContext(
+            let context = CarapaceWatchChatDeliveryContext(
                 gatewayStableID: gatewayStableID,
                 routeGeneration: generation,
                 agentId: agentID,
                 sessionKey: key,
                 deliverySessionKey: target.sessionKey,
                 sessionRoutingContract: route.routingIdentity.contract)
-            try OpenClawWatchChatDeliveryCodec.validateContext(context)
+            try CarapaceWatchChatDeliveryCodec.validateContext(context)
             return context
         } catch {
             return nil
@@ -7659,7 +7659,7 @@ extension NodeAppModel {
             self.pushWakeLogger.info("Ignored APNs payload wakeId=\(wakeId, privacy: .public): not silent push")
             return .unhandled
         }
-        let pushKind = Self.openclawPushKind(userInfo)
+        let pushKind = Self.carapacePushKind(userInfo)
         let receivedMessage =
             "Silent push received wakeId=\(wakeId) "
                 + "kind=\(pushKind) "
@@ -7964,14 +7964,14 @@ extension NodeAppModel {
         return String(raw.prefix(8))
     }
 
-    private static func openclawPushKind(_ userInfo: [AnyHashable: Any]) -> String {
-        if let payload = userInfo["openclaw"] as? [String: Any],
+    private static func carapacePushKind(_ userInfo: [AnyHashable: Any]) -> String {
+        if let payload = userInfo["carapace"] as? [String: Any],
            let kind = payload["kind"] as? String
         {
             let trimmed = kind.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { return trimmed }
         }
-        if let payload = userInfo["openclaw"] as? [AnyHashable: Any],
+        if let payload = userInfo["carapace"] as? [AnyHashable: Any],
            let kind = payload["kind"] as? String
         {
             let trimmed = kind.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -8975,7 +8975,7 @@ extension NodeAppModel {
         else {
             self.execApprovalNotificationLogger.error(
                 "Exec approval action failed id=\(approvalID, privacy: .public): operator not connected")
-            return .failed(message: "OpenClaw couldn't connect to the gateway operator session.")
+            return .failed(message: "Carapace couldn't connect to the gateway operator session.")
         }
 
         let rpcFamily = await self.execApprovalRPCFamily(route: context.route)
@@ -9294,9 +9294,9 @@ extension NodeAppModel {
             // Legacy get removes committed rows, so not-found cannot distinguish success from
             // expiry. Keep every surface frozen until an explicit terminal event/reconnect.
             return .uncertain(
-                message: "Decision status is unknown. Actions remain locked until OpenClaw reconnects.")
+                message: "Decision status is unknown. Actions remain locked until Carapace reconnects.")
         case .failed:
-            return .uncertain(message: "Decision status is unknown. Actions remain locked until OpenClaw reconnects.")
+            return .uncertain(message: "Decision status is unknown. Actions remain locked until Carapace reconnects.")
         }
     }
 
@@ -9880,7 +9880,7 @@ extension NodeAppModel {
             self.dashboardNavigationRequestID &+= 1
         case .gatewayAdd:
             self.recordShareEvent(
-                "This browser sign-in link is for the OpenClaw Mac app. Use a device pairing link on iOS.")
+                "This browser sign-in link is for the Carapace Mac app. Use a device pairing link on iOS.")
         }
     }
 

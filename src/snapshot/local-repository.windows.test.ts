@@ -22,7 +22,7 @@ describe("local SQLite snapshot repository on Windows", () => {
   it.runIf(process.platform === "win32")(
     "uses Desktop ACL modules when an inherited Core-only module shadows them",
     async () => {
-      const tempDir = tempDirs.make("openclaw-snapshot-module-", privateTempRoot);
+      const tempDir = tempDirs.make("carapace-snapshot-module-", privateTempRoot);
       const moduleRoot = path.join(tempDir, "modules");
       const shadowModule = path.join(moduleRoot, "Microsoft.PowerShell.Security", "99.0.0");
       await fs.mkdir(shadowModule, { recursive: true });
@@ -66,7 +66,7 @@ describe("local SQLite snapshot repository on Windows", () => {
   it.runIf(process.platform === "win32")(
     "verifies and cleans staging when the SQLite path exceeds MAX_PATH",
     async () => {
-      const tempDir = tempDirs.make("openclaw-snapshot-repository-windows-", privateTempRoot);
+      const tempDir = tempDirs.make("carapace-snapshot-repository-windows-", privateTempRoot);
       const privateRootPath = path.join(tempDir, "private");
       await createPrivateSqliteDirectory(privateRootPath);
       const sourcePath = path.join(privateRootPath, "source.sqlite");

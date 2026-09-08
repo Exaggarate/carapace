@@ -1,8 +1,8 @@
 // Normalizes plugin command specs for CLI and slash command surfaces.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { getLoadedChannelPlugin } from "../channels/plugins/index.js";
 import { resolveReadOnlyChannelCommandDefaults } from "../channels/plugins/read-only-command-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   pluginCommandSupportsChannel,
   projectPluginCommandNativeMetadata,
@@ -10,13 +10,13 @@ import {
 import { listRegisteredPluginCommands } from "./plugin-command-registry.js";
 import type { PluginCommandRegistration } from "./registry-types.js";
 import { requireActivePluginRegistry } from "./runtime.js";
-import type { OpenClawPluginCommandDefinition } from "./types.js";
+import type { CarapacePluginCommandDefinition } from "./types.js";
 
 type PluginCommandSpecOptions = {
   env?: NodeJS.ProcessEnv;
   stateDir?: string;
   workspaceDir?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 type PluginCommandEntrySpec = {
@@ -24,10 +24,10 @@ type PluginCommandEntrySpec = {
   description: string;
   acceptsArgs: boolean;
   nativeName?: string;
-  clientPresentation?: NonNullable<OpenClawPluginCommandDefinition["clientPresentation"]>;
+  clientPresentation?: NonNullable<CarapacePluginCommandDefinition["clientPresentation"]>;
 };
 
-function resolvePluginTextName(command: OpenClawPluginCommandDefinition): string {
+function resolvePluginTextName(command: CarapacePluginCommandDefinition): string {
   const name = command.name.trim();
   return name || command.name;
 }
@@ -105,7 +105,7 @@ export function listProviderPluginCommandSpecs(provider?: string): Array<{
 }
 
 function serializePluginCommandSpec(
-  cmd: OpenClawPluginCommandDefinition,
+  cmd: CarapacePluginCommandDefinition,
   provider?: string,
 ): {
   name: string;
@@ -131,7 +131,7 @@ function serializePluginCommandSpec(
 }
 
 function serializePluginCommandEntrySpec(
-  cmd: OpenClawPluginCommandDefinition,
+  cmd: CarapacePluginCommandDefinition,
   provider: string | undefined,
   nativeCommandsEnabled: boolean,
 ): PluginCommandEntrySpec | null {

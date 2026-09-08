@@ -1,8 +1,8 @@
 // Meta plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
-import { filterStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { createPayloadPatchStreamWrapper } from "carapace/plugin-sdk/provider-stream-shared";
+import { filterStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const META_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_content";
 

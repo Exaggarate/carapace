@@ -4,11 +4,11 @@
  */
 import fsPromises from "node:fs/promises";
 import { toUSVString } from "node:util";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
 import {
   asNullableRecord,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { BROWSER_PROXY_COMMAND, BROWSER_PROXY_UPLOAD_COMMAND } from "../browser-node-commands.js";
 import {
   assertBrowserProxyFileCountWithinLimit,

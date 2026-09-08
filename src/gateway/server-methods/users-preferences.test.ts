@@ -1,8 +1,8 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { GatewayErrorDetailCodes } from "../../../packages/gateway-protocol/src/index.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { GatewayClient } from "./types.js";
 import { usersHandlers } from "./users.js";
 
@@ -30,11 +30,11 @@ async function invokePreferenceMethod(
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 test("users.prefs remains self-scoped across durable identities", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "users-prefs-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "users-prefs-rpc-" });
   try {
     const ada = ensureProfileForEmail("ada@example.test");
     const grace = ensureProfileForEmail("grace@example.test");
@@ -91,7 +91,7 @@ test("users.prefs returns a typed result without a durable identity", async () =
 });
 
 test("users.prefs.set notifies only connections belonging to the same merged profile", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     prefix: "users-prefs-events-",
   });
@@ -137,7 +137,7 @@ test("users.prefs.set notifies only connections belonging to the same merged pro
 });
 
 test("users.prefs.set returns typed profile quota details", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     layout: "state-only",
     prefix: "users-prefs-quota-",
   });

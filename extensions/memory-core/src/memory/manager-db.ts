@@ -16,12 +16,12 @@ import {
   MEMORY_INDEX_DERIVED_TABLES,
   MEMORY_INDEX_STATE_TABLE,
   MEMORY_INDEX_VECTOR_TABLE,
-  openOpenClawAgentDatabaseReadOnly,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+  openCarapaceAgentDatabaseReadOnly,
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/sqlite-runtime";
 import { withMemoryWorkspaceLock } from "../memory-workspace-lock.js";
 import { withMemoryIndexPublishGeneration } from "./manager-index-generation-lease.js";
 import { waitForMemoryReindexLock } from "./manager-reindex-lock.js";
@@ -431,7 +431,7 @@ export function openMemoryDatabaseReadOnlyAtPath(
   allowExtension: boolean,
   agentId: string,
 ) {
-  const opened = openOpenClawAgentDatabaseReadOnly({ agentId, path: dbPath }, { allowExtension });
+  const opened = openCarapaceAgentDatabaseReadOnly({ agentId, path: dbPath }, { allowExtension });
   if (!opened.found) {
     if (opened.reason === "database-missing") {
       return openUninitializedMemoryDatabase(allowExtension);

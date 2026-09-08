@@ -1,7 +1,7 @@
 // Google Meet tests cover chrome plugin behavior.
 import { runInNewContext } from "node:vm";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resolveGoogleMeetConfig } from "../config.js";
 import { GoogleMeetRuntime } from "../runtime.js";
@@ -482,7 +482,7 @@ describe("google meet chrome transport", () => {
             JSON,
             URL,
             location: { href: MEET_URL_EN },
-            window: { __openclawMeetCaptions: captionState },
+            window: { __carapaceMeetCaptions: captionState },
             clearTimeout,
           }),
         };

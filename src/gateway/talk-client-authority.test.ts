@@ -14,7 +14,7 @@ import { getReplyFromConfig } from "../auto-reply/reply/get-reply.js";
 import { finalizeInboundContext } from "../auto-reply/reply/inbound-context.js";
 import { createPluginRuntime } from "../plugins/runtime/index.js";
 import { controlRealtimeVoiceAgentRun } from "../talk/agent-run-control.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { registerChatAbortController, type ChatAbortControllerEntry } from "./chat-abort.js";
 import { resolveOwnedActiveTalkRunTarget } from "./server-methods/talk-client-run-ownership.js";
 import { sharingPolicyClient } from "./session-sharing.test-utils.js";
@@ -37,14 +37,14 @@ afterEach(() => {
 it.each([true, false])(
   "steers a GA chat-owned Talk run captured before backend publication=%s",
   async (beforePublication) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const config = withFullRuntimeReplyConfig({
         agents: {
           entries: { main: { workspace: state.workspaceDir } },
           defaults: {
             skipBootstrap: true,
             model: { primary: "mock-openai/gpt-5.6-luna" },
-            models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "openclaw" } } },
+            models: { "mock-openai/gpt-5.6-luna": { agentRuntime: { id: "carapace" } } },
           },
         },
         plugins: { enabled: false },
@@ -189,7 +189,7 @@ it.each([true, false])(
           BodyForAgent: "Check the repository",
           CommandAuthorized: false,
           CommandInterpretationSuppressed: true,
-          InputProvenance: { kind: "internal_system", sourceTool: "openclaw_agent_consult" },
+          InputProvenance: { kind: "internal_system", sourceTool: "carapace_agent_consult" },
         }),
         { toolsAllow: authority.toolsAllow, runId, abortSignal: registration.controller.signal },
         config,

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import * as processExec from "../process/exec.js";
 import { createChildAdapter } from "../process/supervisor/adapters/child.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { completeWorkerLaunchDescriptor } from "../worker/launch-descriptor.js";
 import type { WorkerConnectionEndpoint } from "../worker/worker-connection-endpoint.js";
 import { buildWorkerProcessTurn } from "../worker/worker-process-protocol.js";
@@ -34,11 +34,11 @@ import { NodeWorkerTurnStore } from "./node-worker-turn-store.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const endpoint: WorkerConnectionEndpoint = {
   kind: "websocket",
-  url: "wss://gateway.example/__openclaw__/worker",
+  url: "wss://gateway.example/__carapace__/worker",
 };
-const hostLabel = "openclaw.node-worker.host";
-const gatewayLabel = "openclaw.node-worker.gateway";
-const launchLabel = "openclaw.node-worker.launch";
+const hostLabel = "carapace.node-worker.host";
+const gatewayLabel = "carapace.node-worker.gateway";
+const launchLabel = "carapace.node-worker.launch";
 const DAEMON_TIMER_SCALE = 5;
 const fileLockModule = createRequire(import.meta.url).resolve("@openclaw/fs-safe/file-lock");
 
@@ -63,7 +63,7 @@ type EngineEvent = {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function containerFixture(
@@ -290,12 +290,12 @@ describe("node worker supervisor container isolation", () => {
         LANG: "en_US.UTF-8",
         PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
         TMPDIR: "/tmp",
-        NODE_COMPILE_CACHE: "/tmp/openclaw-node-worker-compile-cache",
-        OPENCLAW_NO_RESPAWN: "1",
+        NODE_COMPILE_CACHE: "/tmp/carapace-node-worker-compile-cache",
+        CARAPACE_NO_RESPAWN: "1",
       });
       expect(create?.container?.env).not.toHaveProperty("NODE_OPTIONS");
       expect(create?.container?.env).not.toHaveProperty("SUPPLIED_SECRET");
-      expect(create?.container?.env).not.toHaveProperty("OPENCLAW_STATE_DIR");
+      expect(create?.container?.env).not.toHaveProperty("CARAPACE_STATE_DIR");
       const started = fixture.events().find((event) => event.argv[0] === "start");
       expect(started?.argv).toEqual([
         "start",

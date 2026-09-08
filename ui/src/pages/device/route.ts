@@ -7,7 +7,7 @@ export const page = definePage({
   component: () =>
     import("./device-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-device-page></openclaw-device-page>`,
+      render: () => html`<carapace-device-page></carapace-device-page>`,
     })),
 });
 
@@ -16,6 +16,6 @@ export const permissionsPage = definePage({
   component: () =>
     import("./permissions-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-device-permissions-page></openclaw-device-permissions-page>`,
+      render: () => html`<carapace-device-permissions-page></carapace-device-permissions-page>`,
     })),
 });

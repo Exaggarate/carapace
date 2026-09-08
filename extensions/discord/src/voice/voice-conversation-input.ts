@@ -1,5 +1,5 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import type { DiscordVoiceIngressContext } from "./ingress.js";
 import type { DiscordVoiceAudioReceipt, DiscordVoiceSegmentOutcome } from "./recording-types.js";
 import type { VoiceRealtimeSpeakerTurn } from "./session.js";

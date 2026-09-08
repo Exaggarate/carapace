@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import type { PreparedGitHubPublicationIdentity } from "../agents/github-tool-identity.js";
 import { GitHubPublicationKnownFailure } from "./github-publication-failure.js";
 import { requirePublicationCommand } from "./github-publication-git-transport.js";

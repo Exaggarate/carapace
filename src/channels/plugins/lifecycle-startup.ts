@@ -1,5 +1,5 @@
 /** Invokes optional startup maintenance for loaded channel plugins. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { listLoadedChannelPlugins } from "./registry-loaded.js";
 
 type ChannelStartupLogger = {
@@ -11,7 +11,7 @@ type ChannelStartupLogger = {
  * Runs startup maintenance hooks for all loaded channel plugins.
  */
 export async function runChannelPluginStartupMaintenance(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   log: ChannelStartupLogger;
   trigger?: string;

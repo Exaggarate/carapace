@@ -7,15 +7,15 @@ import {
   resolveApiKeyForProvider,
   resolveDefaultModelForAgent,
   type ModelCatalogEntry,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   resolveAutoImageModel,
   resolveAutoMediaKeyProviders,
   resolveDefaultMediaModel,
-} from "openclaw/plugin-sdk/media-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/media-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { getTelegramRuntime } from "./runtime.js";
 export {
   cacheSticker,
@@ -41,7 +41,7 @@ function isMinimaxVlmProvider(provider: string): boolean {
 
 export interface DescribeStickerParams {
   imagePath: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   agentId?: string;
 }

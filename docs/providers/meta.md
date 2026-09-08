@@ -2,44 +2,44 @@
 summary: "Meta setup, authentication, and Muse Spark model selection"
 title: "Meta"
 read_when:
-  - You want to use Meta with OpenClaw
+  - You want to use Meta with Carapace
   - You need the MODEL_API_KEY env var or CLI auth choice
 ---
 
 The **Meta API** uses the OpenAI-compatible **Responses API** (`POST /v1/responses`)
-for the Muse Spark reasoning models. OpenClaw provides Meta as an official external
+for the Muse Spark reasoning models. Carapace provides Meta as an official external
 plugin.
 
 | Property                   | Value                              |
 | -------------------------- | ---------------------------------- |
 | Provider id                | `meta`                             |
-| Plugin                     | `@openclaw/meta-provider`          |
+| Plugin                     | `@carapace/meta-provider`          |
 | Auth env var               | `MODEL_API_KEY`                    |
 | Onboarding flag            | `--auth-choice meta-api-key`       |
 | Direct CLI flag            | `--meta-api-key <key>`             |
 | API                        | Responses API (`openai-responses`) |
 | Base URL                   | `https://api.meta.ai/v1`           |
 | Default model              | `meta/muse-spark-1.3`              |
-| OpenClaw reasoning default | `high` (`reasoning.effort`)        |
+| Carapace reasoning default | `high` (`reasoning.effort`)        |
 
 ## Getting started
 
 <Steps>
   <Step title="Install the plugin">
     ```bash
-    openclaw plugins install @openclaw/meta-provider
-    openclaw gateway restart
+    carapace plugins install @carapace/meta-provider
+    carapace gateway restart
     ```
   </Step>
   <Step title="Set the API key">
     <CodeGroup>
 
 ```bash Onboarding
-openclaw onboard --auth-choice meta-api-key
+carapace onboard --auth-choice meta-api-key
 ```
 
 ```bash Direct flag
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --auth-choice meta-api-key \
   --meta-api-key "$MODEL_API_KEY"
 ```
@@ -53,11 +53,11 @@ export MODEL_API_KEY=<key>
   </Step>
   <Step title="Verify models are available">
     ```bash
-    openclaw models list --provider meta
+    carapace models list --provider meta
     ```
 
     Lists the static Muse Spark catalog entries. If `MODEL_API_KEY` is unresolved,
-    `openclaw models status --json` reports the missing credential under
+    `carapace models status --json` reports the missing credential under
     `auth.unusableProfiles`.
 
   </Step>
@@ -66,7 +66,7 @@ export MODEL_API_KEY=<key>
 ## Non-interactive setup
 
 ```bash
-openclaw onboard --non-interactive --accept-risk --skip-health \
+carapace onboard --non-interactive --accept-risk --skip-health \
   --mode local \
   --auth-choice meta-api-key \
   --meta-api-key "$MODEL_API_KEY"
@@ -80,7 +80,7 @@ documentation.
 Meta's [model catalog](https://dev.meta.ai/docs/models) identifies Muse Spark 1.3
 as the latest version and recommends it for new work.
 
-| Model ref                         | Name                       | OpenClaw input | Reasoning | Context window | Input / cached input / output per 1M tokens |
+| Model ref                         | Name                       | Carapace input | Reasoning | Context window | Input / cached input / output per 1M tokens |
 | --------------------------------- | -------------------------- | -------------- | --------- | -------------- | ------------------------------------------- |
 | `meta/muse-spark-1.3`             | Muse Spark 1.3             | text, image    | yes       | 1,048,576      | $1.25 / $0.15 / $4.25                       |
 | `meta/muse-spark-1.3-contributor` | Muse Spark 1.3 Contributor | text, image    | yes       | 1,048,576      | $0.10 / $0.002 / $0.20                      |
@@ -109,23 +109,23 @@ Standard Services.
 
 Capabilities:
 
-- Text and image input through OpenClaw
+- Text and image input through Carapace
 - Tool calling and streaming
-- Reasoning effort: `minimal`, `low`, `medium`, `high`, `xhigh` (OpenClaw default: `high`)
+- Reasoning effort: `minimal`, `low`, `medium`, `high`, `xhigh` (Carapace default: `high`)
 - Stateless encrypted reasoning replay (`store: false`, `include: ["reasoning.encrypted_content"]`)
 
 Meta's [model catalog](https://dev.meta.ai/docs/models) lists text, image, video,
-audio, and PDF input for these models. OpenClaw's model catalog directly represents
+audio, and PDF input for these models. Carapace's model catalog directly represents
 text and image input only; the other upstream modalities are not model-manifest input
 values.
 
-OpenClaw explicitly selects `high` when no thinking level is configured. This is an
-OpenClaw default, not Meta's omitted-parameter behavior: Meta's
+Carapace explicitly selects `high` when no thinking level is configured. This is an
+Carapace default, not Meta's omitted-parameter behavior: Meta's
 [reasoning documentation](https://dev.meta.ai/docs/reasoning/) says that when
 `reasoning.effort` is omitted, the model reasons at a model-determined level.
 
 <Warning>
-Muse Spark does not accept `reasoning.effort: "none"`. OpenClaw maps
+Muse Spark does not accept `reasoning.effort: "none"`. Carapace maps
 `--thinking off` to `minimal` for this provider.
 </Warning>
 
@@ -148,7 +148,7 @@ Muse Spark does not accept `reasoning.effort: "none"`. OpenClaw maps
 <Note>
 If the Gateway runs as a daemon (launchd, systemd, Docker), make sure
 `MODEL_API_KEY` is available to that process — for example in
-`~/.openclaw/.env` or through `env.shellEnv`. A key exported only in an
+`~/.carapace/.env` or through `env.shellEnv`. A key exported only in an
 interactive shell will not help a managed service unless the env is imported
 separately.
 </Note>

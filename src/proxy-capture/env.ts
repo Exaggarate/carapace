@@ -11,11 +11,11 @@ import {
 
 // Environment contract for debug proxy capture. These vars are passed to child
 // processes and provider transports so capture sessions share one store/proxy.
-const OPENCLAW_DEBUG_PROXY_ENABLED = "OPENCLAW_DEBUG_PROXY_ENABLED";
-const OPENCLAW_DEBUG_PROXY_URL = "OPENCLAW_DEBUG_PROXY_URL";
-const OPENCLAW_DEBUG_PROXY_CERT_DIR = "OPENCLAW_DEBUG_PROXY_CERT_DIR";
-const OPENCLAW_DEBUG_PROXY_SESSION_ID = "OPENCLAW_DEBUG_PROXY_SESSION_ID";
-const OPENCLAW_DEBUG_PROXY_REQUIRE = "OPENCLAW_DEBUG_PROXY_REQUIRE";
+const CARAPACE_DEBUG_PROXY_ENABLED = "CARAPACE_DEBUG_PROXY_ENABLED";
+const CARAPACE_DEBUG_PROXY_URL = "CARAPACE_DEBUG_PROXY_URL";
+const CARAPACE_DEBUG_PROXY_CERT_DIR = "CARAPACE_DEBUG_PROXY_CERT_DIR";
+const CARAPACE_DEBUG_PROXY_SESSION_ID = "CARAPACE_DEBUG_PROXY_SESSION_ID";
+const CARAPACE_DEBUG_PROXY_REQUIRE = "CARAPACE_DEBUG_PROXY_REQUIRE";
 
 export type DebugProxySettings = {
   enabled: boolean;
@@ -39,20 +39,20 @@ function isTruthy(value: string | undefined): boolean {
 export function resolveDebugProxySettings(
   env: NodeJS.ProcessEnv = process.env,
 ): DebugProxySettings {
-  const enabled = isTruthy(env[OPENCLAW_DEBUG_PROXY_ENABLED]);
-  const explicitSessionId = env[OPENCLAW_DEBUG_PROXY_SESSION_ID]?.trim() || undefined;
+  const enabled = isTruthy(env[CARAPACE_DEBUG_PROXY_ENABLED]);
+  const explicitSessionId = env[CARAPACE_DEBUG_PROXY_SESSION_ID]?.trim() || undefined;
   // Local implicit sessions stay stable within one process so repeated callers
   // write to the same capture session until an explicit id overrides it.
   const sessionId = explicitSessionId ?? (cachedImplicitSessionId ??= randomUUID());
   return {
     enabled,
-    required: isTruthy(env[OPENCLAW_DEBUG_PROXY_REQUIRE]),
-    proxyUrl: env[OPENCLAW_DEBUG_PROXY_URL]?.trim() || undefined,
+    required: isTruthy(env[CARAPACE_DEBUG_PROXY_REQUIRE]),
+    proxyUrl: env[CARAPACE_DEBUG_PROXY_URL]?.trim() || undefined,
     dbPath: resolveDebugProxyDbPath(env),
     blobDir: resolveDebugProxyBlobDir(env),
-    certDir: env[OPENCLAW_DEBUG_PROXY_CERT_DIR]?.trim() || resolveDebugProxyCertDir(env),
+    certDir: env[CARAPACE_DEBUG_PROXY_CERT_DIR]?.trim() || resolveDebugProxyCertDir(env),
     sessionId,
-    sourceProcess: "openclaw",
+    sourceProcess: "carapace",
   };
 }
 
@@ -61,7 +61,7 @@ export function resolveEnabledDebugProxySettings(
 ): DebugProxySettings | undefined {
   // Disabled transport capture must not discover filesystem paths on every frame.
   // Explicit settings retain their lifecycle; ambient callers observe current env.
-  if (!(resolved?.enabled ?? isTruthy(process.env[OPENCLAW_DEBUG_PROXY_ENABLED]))) {
+  if (!(resolved?.enabled ?? isTruthy(process.env[CARAPACE_DEBUG_PROXY_ENABLED]))) {
     return undefined;
   }
   return resolved ?? resolveDebugProxySettings();
@@ -79,11 +79,11 @@ export function applyDebugProxyEnv(
   // preserving unrelated environment values.
   return {
     ...env,
-    [OPENCLAW_DEBUG_PROXY_ENABLED]: "1",
-    [OPENCLAW_DEBUG_PROXY_REQUIRE]: "1",
-    [OPENCLAW_DEBUG_PROXY_URL]: params.proxyUrl,
-    [OPENCLAW_DEBUG_PROXY_CERT_DIR]: params.certDir ?? resolveDebugProxyCertDir(env),
-    [OPENCLAW_DEBUG_PROXY_SESSION_ID]: params.sessionId,
+    [CARAPACE_DEBUG_PROXY_ENABLED]: "1",
+    [CARAPACE_DEBUG_PROXY_REQUIRE]: "1",
+    [CARAPACE_DEBUG_PROXY_URL]: params.proxyUrl,
+    [CARAPACE_DEBUG_PROXY_CERT_DIR]: params.certDir ?? resolveDebugProxyCertDir(env),
+    [CARAPACE_DEBUG_PROXY_SESSION_ID]: params.sessionId,
     HTTP_PROXY: params.proxyUrl,
     HTTPS_PROXY: params.proxyUrl,
     ALL_PROXY: params.proxyUrl,

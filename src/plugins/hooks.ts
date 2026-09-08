@@ -7,8 +7,8 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
-import { clampPositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { clampPositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import { createToolPolicyMatcher } from "../agents/tool-policy-match.js";
 import {
   attachToolAllowlistIntersection,

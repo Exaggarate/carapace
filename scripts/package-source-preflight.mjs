@@ -71,18 +71,18 @@ export function validatePackageSource({
   });
 
   const rootDependencies = rootManifest.dependencies ?? {};
-  const aiDependency = rootDependencies["@openclaw/ai"];
+  const aiDependency = rootDependencies["@carapace/ai"];
   if (aiManifestContent === null) {
     if (aiDependency === undefined) {
       return rootManifest.version;
     }
-    throw new Error(`${ROOT_MANIFEST_PATH} declares @openclaw/ai without ${AI_MANIFEST_PATH}.`);
+    throw new Error(`${ROOT_MANIFEST_PATH} declares @carapace/ai without ${AI_MANIFEST_PATH}.`);
   }
 
   const aiManifest = parseManifest(aiManifestContent, AI_MANIFEST_PATH);
   if (aiDependency !== "workspace:*") {
     throw new Error(
-      `${ROOT_MANIFEST_PATH} must depend on @openclaw/ai via workspace:*; found ${JSON.stringify(aiDependency)}.`,
+      `${ROOT_MANIFEST_PATH} must depend on @carapace/ai via workspace:*; found ${JSON.stringify(aiDependency)}.`,
     );
   }
   if (aiManifest.version !== rootManifest.version) {

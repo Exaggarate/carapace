@@ -18,7 +18,7 @@ import type {
   ChannelPlugin,
 } from "../channels/plugins/types.public.js";
 import { formatGatewayChannelsStatusLines } from "../commands/channels/status.runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayNativeApprovalRuntime } from "../infra/approval-gateway-runtime.types.js";
 import { tryReadSecretFileSync } from "../infra/secret-file.js";
 import {
@@ -1029,7 +1029,7 @@ describe("server-channels auto restart", () => {
   it.each(["changed", "removed", "plugin-replaced"] as const)(
     "stops the admitted account after its configuration is %s without stopping a sibling",
     async (change) => {
-      const originalConfig: OpenClawConfig = {
+      const originalConfig: CarapaceConfig = {
         channels: { discord: { accounts: { alpha: { enabled: true }, beta: { enabled: true } } } },
       };
       let config = originalConfig;
@@ -1089,7 +1089,7 @@ describe("server-channels auto restart", () => {
   );
 
   it("retains the admitted teardown owner for a failed stop retry after account removal", async () => {
-    const originalConfig: OpenClawConfig = {
+    const originalConfig: CarapaceConfig = {
       channels: { discord: { accounts: { alpha: { enabled: true } } } },
     };
     let config = originalConfig;
@@ -4010,7 +4010,7 @@ describe("server-channels auto restart", () => {
   it.each(["channel", "account"] as const)(
     "inspects and skips accounts disabled at %s scope without resolving inactive credentials",
     async (scope) => {
-      const resolveAccount = vi.fn((_cfg: OpenClawConfig, accountId?: string | null) => {
+      const resolveAccount = vi.fn((_cfg: CarapaceConfig, accountId?: string | null) => {
         if (accountId === "missing") {
           throw new Error("unknown account");
         }
@@ -4068,7 +4068,7 @@ describe("server-channels auto restart", () => {
   it("keeps only the degraded channel account cold", async () => {
     const discordStart = vi.fn(async (_context: ChannelGatewayContext<TestAccount>) => {});
     const slackStart = vi.fn(async () => {});
-    const discordResolve = vi.fn((_cfg: OpenClawConfig, accountId?: string | null) => {
+    const discordResolve = vi.fn((_cfg: CarapaceConfig, accountId?: string | null) => {
       if (accountId === "broken") {
         throw new Error("unresolved operational credential");
       }
@@ -4120,7 +4120,7 @@ describe("server-channels auto restart", () => {
     "reinspects file credentials and recovers only their account (skipUnavailableAccounts=%s)",
     async (skipUnavailableAccounts) => {
       const credentialPath = path.join(
-        channelTempDirs.make("openclaw-channel-credential-"),
+        channelTempDirs.make("carapace-channel-credential-"),
         "token",
       );
       const credentialConfigPath = "channels.telegram.accounts.broken.tokenFile";
@@ -4655,7 +4655,7 @@ describe("server-channels auto restart", () => {
   });
 
   it("monitors a healthy sibling without resolving disabled or blocked credentials", async () => {
-    const resolveAccount = vi.fn((_cfg: OpenClawConfig, accountId?: string | null) => {
+    const resolveAccount = vi.fn((_cfg: CarapaceConfig, accountId?: string | null) => {
       if (accountId !== "healthy") {
         throw new Error("unresolved SecretRef");
       }

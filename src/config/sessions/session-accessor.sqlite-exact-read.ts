@@ -1,11 +1,11 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import type { ExactSessionEntry } from "./session-accessor.sqlite-contract.js";
 import { readExactSessionEntryRowValidated } from "./session-accessor.sqlite-entry-store.js";
 import { resolveSqliteScope, toDatabaseOptions } from "./session-accessor.sqlite-scope.js";
@@ -35,15 +35,15 @@ export function loadExactSessionEntryCandidates(
   }
   const resolved = resolveSqliteScope({ ...scope, sessionKey });
   // Alias candidates share a store; fresh handles must not rescan canonical state per key.
-  const read = (database: Pick<OpenClawAgentDatabase, "agentId" | "db">) =>
+  const read = (database: Pick<CarapaceAgentDatabase, "agentId" | "db">) =>
     sessionKeys.flatMap((key) => {
       const entry = readExactSessionEntryRowValidated(database, key, scope.projection)?.entry;
       return entry ? [{ sessionKey: key, entry }] : [];
     });
   if (!scope.readOnly) {
-    return read(openOpenClawAgentDatabase(toDatabaseOptions(resolved)));
+    return read(openCarapaceAgentDatabase(toDatabaseOptions(resolved)));
   }
-  const result = withOpenClawAgentDatabaseReadOnly(read, toDatabaseOptions(resolved));
+  const result = withCarapaceAgentDatabaseReadOnly(read, toDatabaseOptions(resolved));
   return result.found ? result.value : [];
 }
 
@@ -68,7 +68,7 @@ export function loadExactSessionEntryCandidatesReadOnlyBatch(
   const groups = new Map<
     string,
     {
-      options: OpenClawAgentDatabaseOptions;
+      options: CarapaceAgentDatabaseOptions;
       projection: SessionEntryReadScope["projection"];
       requests: Array<{ index: number; sessionKeys: string[] }>;
     }
@@ -83,7 +83,7 @@ export function loadExactSessionEntryCandidatesReadOnlyBatch(
       const options = toDatabaseOptions(resolveSqliteScope({ ...scope, sessionKey }));
       const groupKey = [
         options.agentId,
-        resolveOpenClawAgentSqlitePath(options),
+        resolveCarapaceAgentSqlitePath(options),
         scope.projection ?? "full",
       ].join("\u0000");
       const group = groups.get(groupKey) ?? { options, projection: scope.projection, requests: [] };
@@ -95,7 +95,7 @@ export function loadExactSessionEntryCandidatesReadOnlyBatch(
   }
   for (const group of groups.values()) {
     try {
-      withOpenClawAgentDatabaseReadOnly((database) => {
+      withCarapaceAgentDatabaseReadOnly((database) => {
         // Admission failures affect this store; an invalid requested row must not
         // suppress healthy logical targets after a warm handle was validated.
         assertCanonicalSqliteSessionKeysCurrent(database);

@@ -4,9 +4,9 @@ import { TLSSocket } from "node:tls";
 import {
   buildControlUiPublicSessionSharePath,
   parseControlUiPublicSessionShareUrl,
-} from "@openclaw/session-url-contract/public-share";
+} from "@carapace/session-url-contract/public-share";
 import { resolveGatewayPublicOrigin } from "../config/gateway-public-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { respondNotFound } from "./control-ui-http-utils.js";
 import { resolveControlUiShareOrigin } from "./control-ui-share.js";
@@ -37,7 +37,7 @@ type ControlUiPublicSessionRequestGate = {
   run(params: {
     publicationKey: string;
     requestKey: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     work: () => Promise<string | null>;
   }): Promise<PublicSessionAdmissionResult>;
 };
@@ -87,7 +87,7 @@ function createControlUiPublicSessionRequestGate(): ControlUiPublicSessionReques
   let nextConfigId = 1;
   let activeReads = 0;
 
-  const configId = (config: OpenClawConfig): number => {
+  const configId = (config: CarapaceConfig): number => {
     const existing = configIds.get(config);
     if (existing !== undefined) {
       return existing;
@@ -113,7 +113,7 @@ function createControlUiPublicSessionRequestGate(): ControlUiPublicSessionReques
     async run(params: {
       publicationKey: string;
       requestKey: string;
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       work: () => Promise<string | null>;
     }): Promise<PublicSessionAdmissionResult> {
       const now = Date.now();
@@ -178,7 +178,7 @@ async function serveControlUiPublicSession(
   res: ServerResponse,
   url: URL,
   basePath: string,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   requestGate: ControlUiPublicSessionRequestGate,
   clientKey: string,
   secureIngress: boolean,
@@ -313,7 +313,7 @@ export function createControlUiPublicSessionRoute() {
       req: IncomingMessage;
       res: ServerResponse;
       basePath: string;
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       ingress: GatewayAttributedIngress;
     }): Promise<true> {
       const url = params.req.url ? new URL(params.req.url, "http://localhost") : undefined;

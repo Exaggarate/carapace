@@ -2,11 +2,11 @@
 summary: "IRC plugin setup, access controls, and troubleshooting"
 title: IRC
 read_when:
-  - You want to connect OpenClaw to IRC channels or DMs
+  - You want to connect Carapace to IRC channels or DMs
   - You are configuring IRC allowlists, group policy, or mention gating
 ---
 
-Use IRC when you want OpenClaw in classic channels (`#room`) and direct messages.
+Use IRC when you want Carapace in classic channels (`#room`) and direct messages.
 Install the official IRC plugin, then configure it under `channels.irc`.
 
 ## Quick start
@@ -14,10 +14,10 @@ Install the official IRC plugin, then configure it under `channels.irc`.
 1. Install the plugin:
 
 ```bash
-openclaw plugins install @openclaw/irc
+carapace plugins install @carapace/irc
 ```
 
-2. Set at least host, nick, and the channels to join in `~/.openclaw/openclaw.json`:
+2. Set at least host, nick, and the channels to join in `~/.carapace/carapace.json`:
 
 ```json5
 {
@@ -27,8 +27,8 @@ openclaw plugins install @openclaw/irc
       host: "irc.example.com",
       port: 6697,
       tls: true,
-      nick: "openclaw-bot",
-      channels: ["#openclaw"],
+      nick: "carapace-bot",
+      channels: ["#carapace"],
     },
   },
 }
@@ -37,16 +37,16 @@ openclaw plugins install @openclaw/irc
 3. Start/restart the Gateway:
 
 ```bash
-openclaw gateway run
+carapace gateway run
 ```
 
 Prefer a private IRC server for bot coordination. If you intentionally use a public IRC network, common choices include Libera.Chat, OFTC, and Snoonet. Avoid predictable public channels for bot or swarm backchannel traffic.
 
 ## Inbound durability
 
-OpenClaw writes each accepted IRC `PRIVMSG` to its durable ingress queue before normal policy checks and agent dispatch. Pending or retryable messages survive a Gateway restart and remain serialized per channel or direct-message peer.
+Carapace writes each accepted IRC `PRIVMSG` to its durable ingress queue before normal policy checks and agent dispatch. Pending or retryable messages survive a Gateway restart and remain serialized per channel or direct-message peer.
 
-IRC does not provide a replayable delivery ID or resend messages missed by a disconnected client. OpenClaw therefore assigns a local ID that is stable only within the current TCP connection. The queue protects the local accept-to-dispatch window; it cannot recover a message that never reached OpenClaw or deduplicate a server resend across connections.
+IRC does not provide a replayable delivery ID or resend messages missed by a disconnected client. Carapace therefore assigns a local ID that is stable only within the current TCP connection. The queue protects the local accept-to-dispatch window; it cannot recover a message that never reached Carapace or deduplicate a server resend across connections.
 
 ## Connection settings
 
@@ -56,10 +56,10 @@ IRC does not provide a replayable delivery ID or resend messages missed by a dis
 | `port`                        | `6697` with TLS, `6667` plain | 1-65535                                                     |
 | `tls`                         | `true`                        | Set `false` only for intentional plaintext                  |
 | `nick`                        | none (required)               | Bot nick                                                    |
-| `username`                    | nick, else `openclaw`         | IRC username                                                |
-| `realname`                    | `OpenClaw`                    | Realname/GECOS field                                        |
+| `username`                    | nick, else `carapace`         | IRC username                                                |
+| `realname`                    | `Carapace`                    | Realname/GECOS field                                        |
 | `password` / `passwordFile`   | none                          | Server password; file must be a regular file                |
-| `channels`                    | none                          | Channels to join (`["#openclaw"]`)                          |
+| `channels`                    | none                          | Channels to join (`["#carapace"]`)                          |
 | `replyToMode`                 | `all`                         | Reply-reference mode: `off`, `first`, `all`, or `batched`   |
 | `accounts` / `defaultAccount` | none                          | Multi-account setup; env vars fill only the default account |
 
@@ -88,13 +88,13 @@ IRC's line-size limit.
 Send directly to a channel or nick with the message CLI:
 
 ```bash
-openclaw message send --channel irc --target '#openclaw' --message 'Hello from OpenClaw'
+carapace message send --channel irc --target '#carapace' --message 'Hello from Carapace'
 ```
 
 ## Security defaults
 
-- IRC uses raw TCP/TLS sockets outside OpenClaw operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
-- `channels.irc.dmPolicy` defaults to `"pairing"`: unknown DM senders get a pairing code you approve with `openclaw pairing approve irc <code>`.
+- IRC uses raw TCP/TLS sockets outside Carapace operator-managed forward proxy routing. In deployments that require all egress through that forward proxy, set `channels.irc.enabled=false` unless direct IRC egress is explicitly approved.
+- `channels.irc.dmPolicy` defaults to `"pairing"`: unknown DM senders get a pairing code you approve with `carapace pairing approve irc <code>`.
 - `channels.irc.groupPolicy` defaults to `"allowlist"`.
 - With `groupPolicy="allowlist"`, set `channels.irc.groups` to define allowed channels.
 - Use TLS (`channels.irc.tls=true`) unless you intentionally accept plaintext transport.
@@ -127,7 +127,7 @@ If you see logs like:
 - setting `channels.irc.groupAllowFrom` (global for all channels), or
 - setting per-channel sender allowlists: `channels.irc.groups["#channel"].allowFrom`
 
-Example (allow anyone in `#openclaw` to talk to the bot):
+Example (allow anyone in `#carapace` to talk to the bot):
 
 ```json5
 {
@@ -135,7 +135,7 @@ Example (allow anyone in `#openclaw` to talk to the bot):
     irc: {
       groupPolicy: "allowlist",
       groups: {
-        "#openclaw": { allowFrom: ["*"] },
+        "#carapace": { allowFrom: ["*"] },
       },
     },
   },
@@ -144,7 +144,7 @@ Example (allow anyone in `#openclaw` to talk to the bot):
 
 ## Reply triggering (mentions)
 
-Even if a channel is allowed (via `groupPolicy` + `groups`) and the sender is allowed, OpenClaw defaults to **mention-gating** in group contexts. The bot counts as mentioned when the message contains the connected bot nick or matches your configured mention patterns.
+Even if a channel is allowed (via `groupPolicy` + `groups`) and the sender is allowed, Carapace defaults to **mention-gating** in group contexts. The bot counts as mentioned when the message contains the connected bot nick or matches your configured mention patterns.
 
 That means you may see logs like `drop channel … (missing-mention)` unless the message includes a mention pattern that matches the bot.
 
@@ -156,7 +156,7 @@ To make the bot reply in an IRC channel **without needing a mention**, disable m
     irc: {
       groupPolicy: "allowlist",
       groups: {
-        "#openclaw": {
+        "#carapace": {
           requireMention: false,
           allowFrom: ["*"],
         },
@@ -193,7 +193,7 @@ To reduce risk, restrict tools for that channel.
   channels: {
     irc: {
       groups: {
-        "#openclaw": {
+        "#carapace": {
           allowFrom: ["*"],
           tools: {
             deny: ["group:runtime", "group:fs", "gateway", "nodes", "cron", "browser"],
@@ -214,7 +214,7 @@ Use `toolsBySender` to apply a stricter policy to `"*"` and a looser one to your
   channels: {
     irc: {
       groups: {
-        "#openclaw": {
+        "#carapace": {
           allowFrom: ["*"],
           toolsBySender: {
             "*": {

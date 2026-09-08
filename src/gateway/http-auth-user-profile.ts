@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { GatewayOperatorRoleDefinition } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHostAccountName } from "../infra/host-account-name.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
@@ -32,7 +32,7 @@ export function usesSharedSecretGatewayMethod(
 
 export async function resolveAuthenticatedHttpUserProfile(params: {
   authResult: GatewayAuthResult;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   req: IncomingMessage;
 }): Promise<AuthenticatedHttpUserProfile> {
   const authenticatedUserId = normalizeOptionalString(params.authResult.user);
@@ -80,7 +80,7 @@ export async function resolveAuthenticatedHttpUserProfile(params: {
   }
 }
 
-export function resolveHttpProfile(profileId: string, updatedAt: number, cfg?: OpenClawConfig) {
+export function resolveHttpProfile(profileId: string, updatedAt: number, cfg?: CarapaceConfig) {
   const display = getUserProfileDisplay(profileId);
   const operatorRolePolicy = cfg ? resolveOperatorRolePolicyForProfile(display.id, cfg) : undefined;
   return {

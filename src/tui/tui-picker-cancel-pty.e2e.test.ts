@@ -17,15 +17,15 @@ const cancelKeys = [
 ];
 
 it("returns to the editor as soon as a model is selected, before the update finishes", async () => {
-  const directory = await mkdtemp(path.join(tmpdir(), "openclaw-picker-selection-"));
+  const directory = await mkdtemp(path.join(tmpdir(), "carapace-picker-selection-"));
   const releasePath = path.join(directory, "release-patch");
   const fixture = await startTuiFixture({
     env: {
       TERM_PROGRAM: "vscode",
-      OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-      OPENCLAW_TUI_PTY_PATCH_RELEASE_PATH: releasePath,
-      OPENCLAW_TUI_PTY_COLS: "100",
-      OPENCLAW_TUI_PTY_ROWS: "30",
+      CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+      CARAPACE_TUI_PTY_PATCH_RELEASE_PATH: releasePath,
+      CARAPACE_TUI_PTY_COLS: "100",
+      CARAPACE_TUI_PTY_ROWS: "30",
     },
   });
   const waitForRows = (predicate: Parameters<typeof waitForSynchronizedFrameRows>[1]) =>
@@ -79,9 +79,9 @@ it.each(
         WARP_SESSION_ID: undefined,
         WARP_TERMINAL_SESSION_UUID: undefined,
         TERMINAL_EMULATOR: undefined,
-        OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
-        OPENCLAW_TUI_PTY_COLS: "100",
-        OPENCLAW_TUI_PTY_ROWS: "30",
+        CARAPACE_TUI_PTY_PICKER_FIXTURE: "1",
+        CARAPACE_TUI_PTY_COLS: "100",
+        CARAPACE_TUI_PTY_ROWS: "30",
       },
     });
     const waitForRows = (predicate: Parameters<typeof waitForSynchronizedFrameRows>[1]) =>

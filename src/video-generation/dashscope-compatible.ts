@@ -1,6 +1,6 @@
-import { kindFromMime, normalizeMimeType } from "@openclaw/media-core/mime";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { kindFromMime, normalizeMimeType } from "@carapace/media-core/mime";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 // DashScope-compatible video provider adapts DashScope-style generation APIs.
 import { resolveGeneratedMediaMaxBytes } from "../media/configured-max-bytes.js";
 import {
@@ -584,7 +584,7 @@ function resolveDashscopeVideoDownloadTimeoutMs(
 }
 
 // Downloads task result URLs into generated video assets. The byte limit comes
-// from OpenClaw media config so provider URLs cannot overfill memory.
+// from Carapace media config so provider URLs cannot overfill memory.
 export async function downloadDashscopeGeneratedVideos(params: {
   providerLabel: string;
   urls: string[];

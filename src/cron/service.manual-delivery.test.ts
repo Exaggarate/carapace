@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   captureActivePluginRegistrySnapshot,
   restoreActivePluginRegistrySnapshot,
@@ -7,7 +7,7 @@ import {
 } from "../plugins/runtime.js";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { resolveCronDeliveryPlan } from "./delivery-plan.js";
 import { dispatchCronDelivery } from "./isolated-agent/delivery-dispatch.js";
 import { CronService } from "./service.js";
@@ -24,8 +24,8 @@ describe("manual cron delivery occurrence", () => {
   ] as const)(
     "delivers according to the $label occurrence after the scheduled slot ages",
     async ({ mode, queued }) => {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-cron-manual-delivery-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-cron-manual-delivery-" },
         async (state) => {
           const registry = captureActivePluginRegistrySnapshot();
           const sendText = vi.fn(async () => ({ channel: "telegram", messageId: "fresh-result" }));
@@ -43,7 +43,7 @@ describe("manual cron delivery occurrence", () => {
           );
           resetTaskRegistryForTests({ persist: false });
           let now = Date.now() - FOUR_HOURS_MS;
-          const cfg: OpenClawConfig = {
+          const cfg: CarapaceConfig = {
             agents: { entries: { main: { workspace: state.workspaceDir } } },
           };
           await state.writeConfig(cfg);

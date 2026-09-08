@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import type { TaskRecord } from "../tasks/task-registry.types.js";
 import { hasOperatorBoundary } from "./operator-role-policy.js";
@@ -31,7 +31,7 @@ export function resolveTaskRequesterSessionTarget(
 
 export function canAccessTaskRequesterSession(params: {
   access?: "read" | "write";
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   task: Pick<TaskRecord, "ownerKey" | "requesterAgentId" | "requesterSessionKey">;
 }): boolean {
@@ -85,7 +85,7 @@ function canAccessResolvedTaskSession(
 
 /** Prepare only this slice's entries; the registry drops this filter before yielding. */
 export function prepareTaskSessionReadFilter(
-  params: { cfg: OpenClawConfig; client: GatewayClient | null },
+  params: { cfg: CarapaceConfig; client: GatewayClient | null },
   tasks: readonly Readonly<TaskRecord>[],
 ): (task: Readonly<TaskRecord>) => boolean {
   if (isGatewayAdmin(params.client)) {

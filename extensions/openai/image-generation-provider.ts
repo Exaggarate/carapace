@@ -1,21 +1,21 @@
 // Openai provider module implements model/runtime integration.
 import path from "node:path";
-import { bufferToBlobPart, canonicalizeBase64 } from "openclaw/plugin-sdk/blob-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { bufferToBlobPart, canonicalizeBase64 } from "carapace/plugin-sdk/blob-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   ImageGenerationOutputFormat,
   ImageGenerationProvider,
   ImageGenerationResult,
-} from "openclaw/plugin-sdk/image-generation";
-import type { resolveClosestSize } from "openclaw/plugin-sdk/media-generation-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { AuthProfileStore } from "openclaw/plugin-sdk/provider-auth";
-import type { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { hasConfiguredSecretInput } from "openclaw/plugin-sdk/secret-input";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-policy";
-import { filterStringRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/image-generation";
+import type { resolveClosestSize } from "carapace/plugin-sdk/media-generation-runtime";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import type { AuthProfileStore } from "carapace/plugin-sdk/provider-auth";
+import type { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import { hasConfiguredSecretInput } from "carapace/plugin-sdk/secret-input";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-policy";
+import { filterStringRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   canonicalizeCodexResponsesBaseUrl,
   isOpenAICodexBaseUrl,
@@ -269,7 +269,7 @@ function isValidFlexibleOpenAIImageSize(model: string, size: string | undefined)
   );
 }
 
-function resolveConfiguredOpenAIImageBaseUrl(cfg: OpenClawConfig | undefined, model: string) {
+function resolveConfiguredOpenAIImageBaseUrl(cfg: CarapaceConfig | undefined, model: string) {
   const modelId = model.trim().replace(/^openai\//u, "");
   const modelBaseUrl = cfg?.models?.providers?.openai?.models
     ?.find((candidate) => candidate.id.trim().replace(/^openai\//u, "") === modelId)
@@ -313,7 +313,7 @@ function resolveOpenAIImageRequestSize(
 function shouldAllowPrivateImageEndpoint(req: {
   provider: string;
   model: string;
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
 }) {
   if (req.provider === MOCK_OPENAI_PROVIDER_ID) {
     return true;
@@ -325,11 +325,11 @@ function shouldAllowPrivateImageEndpoint(req: {
   if (!baseUrl.startsWith("http://127.0.0.1:") && !baseUrl.startsWith("http://localhost:")) {
     return false;
   }
-  return process.env.OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER === "1";
+  return process.env.CARAPACE_QA_ALLOW_LOCAL_IMAGE_PROVIDER === "1";
 }
 
 type OpenAIImageModelAuth = Pick<
-  OpenClawPluginApi["runtime"]["modelAuth"],
+  CarapacePluginApi["runtime"]["modelAuth"],
   "ensureAuthProfileStore" | "listProfilesForProvider" | "isProviderApiKeyConfigured"
 >;
 
@@ -350,7 +350,7 @@ function resolveRequestAuthStore(
 }
 
 function hasDirectOpenAIImageApiKeyAuth(
-  params: { cfg?: OpenClawConfig; agentDir?: string },
+  params: { cfg?: CarapaceConfig; agentDir?: string },
   modelAuth: OpenAIImageModelAuth,
 ): boolean {
   if (hasExplicitOpenAIImageApiKeyConfig(params.cfg)) {
@@ -390,12 +390,12 @@ function hasCodexResponseTransportProfileConfigured(
     );
 }
 
-function hasExplicitOpenAIImageApiKeyConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasExplicitOpenAIImageApiKeyConfig(cfg: CarapaceConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   return providerConfig?.apiKey !== undefined || providerConfig?.auth === "api-key";
 }
 
-function hasExplicitDirectOpenAIImageConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasExplicitDirectOpenAIImageConfig(cfg: CarapaceConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   if (!providerConfig) {
     return false;
@@ -409,7 +409,7 @@ function hasExplicitDirectOpenAIImageConfig(cfg: OpenClawConfig | undefined): bo
   );
 }
 
-function hasChatGPTImageRouteConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasChatGPTImageRouteConfig(cfg: CarapaceConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   return (
     isOpenAICodexBaseUrl(resolveConfiguredOpenAIBaseUrl(cfg)) ||
@@ -418,12 +418,12 @@ function hasChatGPTImageRouteConfig(cfg: OpenClawConfig | undefined): boolean {
 }
 
 function resolveConfiguredOpenAIImageHeaders(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
 ): Record<string, string> | undefined {
   return filterStringRecord(cfg?.models?.providers?.openai?.headers);
 }
 
-function forceOpenAIImageApiKeyAuth(cfg: OpenClawConfig | undefined): OpenClawConfig | undefined {
+function forceOpenAIImageApiKeyAuth(cfg: CarapaceConfig | undefined): CarapaceConfig | undefined {
   if (!hasExplicitOpenAIImageApiKeyConfig(cfg)) {
     return cfg;
   }
@@ -705,7 +705,7 @@ function createOpenAIImageGenerationProviderBase(params: {
 async function resolveOptionalApiKeyForProvider(
   params: Parameters<typeof resolveApiKeyForProvider>[0],
 ) {
-  const { resolveApiKeyForProvider } = await import("openclaw/plugin-sdk/provider-auth-runtime");
+  const { resolveApiKeyForProvider } = await import("carapace/plugin-sdk/provider-auth-runtime");
   try {
     return await resolveApiKeyForProvider(params);
   } catch (error) {
@@ -723,7 +723,7 @@ async function logCodexImageAuthSelected(params: {
   authMode?: unknown;
   timeoutMs: number;
 }) {
-  const { createSubsystemLogger } = await import("openclaw/plugin-sdk/logging-core");
+  const { createSubsystemLogger } = await import("carapace/plugin-sdk/logging-core");
   const log = createSubsystemLogger("image-generation/openai");
   const model = resolveOpenAIImageRequestModel(params.req, {
     allowTransparentDefaultReroute: true,
@@ -751,9 +751,9 @@ async function generateOpenAICodexImage(params: {
     { toImageDataUrl },
     { resolveClosestSize },
   ] = await Promise.all([
-    import("openclaw/plugin-sdk/provider-http"),
-    import("openclaw/plugin-sdk/image-generation"),
-    import("openclaw/plugin-sdk/media-generation-runtime"),
+    import("carapace/plugin-sdk/provider-http"),
+    import("carapace/plugin-sdk/image-generation"),
+    import("carapace/plugin-sdk/media-generation-runtime"),
   ]);
   const { req, apiKey } = params;
   const inputImages = req.inputImages ?? [];
@@ -994,9 +994,9 @@ export function buildOpenAIImageGenerationProvider(
         { parseOpenAiCompatibleImageResponse, resolveInlineImageJsonResponseMaxBytes },
         { resolveClosestSize, resolveGeneratedMediaMaxBytes },
       ] = await Promise.all([
-        import("openclaw/plugin-sdk/provider-http"),
-        import("openclaw/plugin-sdk/image-generation"),
-        import("openclaw/plugin-sdk/media-generation-runtime"),
+        import("carapace/plugin-sdk/provider-http"),
+        import("carapace/plugin-sdk/image-generation"),
+        import("carapace/plugin-sdk/media-generation-runtime"),
       ]);
       const isAzure = isAzureOpenAIBaseUrl(rawBaseUrl);
       const openAIProviderConfig = req.cfg?.models?.providers?.openai;

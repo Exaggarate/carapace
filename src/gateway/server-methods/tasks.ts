@@ -1,7 +1,7 @@
 // Task gateway methods expose detached task list/get/cancel operations with
 // bounded public summaries over the runtime task registry.
 import { createHash, randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   TASKS_LIST_CURSOR_MAX_LENGTH,

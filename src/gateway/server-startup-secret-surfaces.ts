@@ -1,12 +1,12 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 
 export function resolveGatewayStartupSourceConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv,
-): OpenClawConfig {
+): CarapaceConfig {
   const skipChannels =
-    isTruthyEnvValue(env.OPENCLAW_SKIP_CHANNELS) || isTruthyEnvValue(env.OPENCLAW_SKIP_PROVIDERS);
+    isTruthyEnvValue(env.CARAPACE_SKIP_CHANNELS) || isTruthyEnvValue(env.CARAPACE_SKIP_PROVIDERS);
   if (!skipChannels || !config.channels) {
     return config;
   }

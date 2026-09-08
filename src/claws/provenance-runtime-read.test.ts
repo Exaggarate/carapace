@@ -3,21 +3,21 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   initializeCachedClawInstallSchemaVersions,
   readCachedClawInstallSchemaVersions,
 } from "./provenance-runtime-read.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeCarapaceStateDatabaseForTest());
 
 describe("Claw runtime provenance cache", () => {
   it("treats an absent first-run state database as empty ownership", () => {
-    const root = tempDirs.make("openclaw-claw-runtime-provenance-first-run-");
-    const options = { env: { OPENCLAW_STATE_DIR: root } };
+    const root = tempDirs.make("carapace-claw-runtime-provenance-first-run-");
+    const options = { env: { CARAPACE_STATE_DIR: root } };
 
     initializeCachedClawInstallSchemaVersions(options);
 
@@ -28,9 +28,9 @@ describe("Claw runtime provenance cache", () => {
   });
 
   it("refreshes install ownership written by another process", () => {
-    const root = tempDirs.make("openclaw-claw-runtime-provenance-");
-    const options = { env: { OPENCLAW_STATE_DIR: root } };
-    const database = openOpenClawStateDatabase(options);
+    const root = tempDirs.make("carapace-claw-runtime-provenance-");
+    const options = { env: { CARAPACE_STATE_DIR: root } };
+    const database = openCarapaceStateDatabase(options);
 
     initializeCachedClawInstallSchemaVersions(options);
     expect(readCachedClawInstallSchemaVersions(options)).toMatchObject({
@@ -52,12 +52,12 @@ describe("Claw runtime provenance cache", () => {
         )
         .run(
           "worker",
-          "openclaw.clawInstallRecord.v2",
+          "carapace.clawInstallRecord.v2",
           "package",
           "@acme/worker",
           "1.0.0",
           root,
-          `${root}\\openclaw.claw.json`,
+          `${root}\\carapace.claw.json`,
           "artifact",
           "sha256:manifest",
           100,
@@ -82,11 +82,11 @@ describe("Claw runtime provenance cache", () => {
     }
     expect(refreshed.schemaVersions.get("worker")).toMatchObject({
       kind: "ok",
-      schemaVersion: "openclaw.clawInstallRecord.v2",
+      schemaVersion: "carapace.clawInstallRecord.v2",
       agentConfigDigest: "sha256:agent-config",
     });
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     rmSync(database.path);
     initializeCachedClawInstallSchemaVersions(options);
     expect(readCachedClawInstallSchemaVersions(options)).toMatchObject({

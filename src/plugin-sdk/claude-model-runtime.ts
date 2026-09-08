@@ -6,5 +6,5 @@ export {
   resolveClaudeMythos5ModelIdentity,
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 export { resolveClaudeThinkingProfile } from "../plugins/provider-claude-thinking.js";

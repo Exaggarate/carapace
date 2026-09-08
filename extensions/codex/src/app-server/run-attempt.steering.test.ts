@@ -1,12 +1,12 @@
 // Codex tests cover run attempt.steering plugin behavior.
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "openclaw/plugin-sdk/provider-model-shared";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "carapace/plugin-sdk/provider-model-shared";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   readSessionTranscriptEvents,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { CodexSteeringQueueOptions } from "./attempt-steering.js";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
@@ -35,8 +35,8 @@ const activeRunRegistrationMocks = vi.hoisted(() => ({
   cancelQuestionError: undefined as Error | undefined,
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>();
   const gatewayCall = async (...args: Parameters<typeof actual.callGatewayTool>) => {
     const [method, , rawParams] = args;
     const params = rawParams as { id?: string; answers?: unknown; cancel?: boolean } | undefined;
@@ -185,7 +185,7 @@ describe("runCodexAppServerAttempt steering", () => {
       await waitForMethod("turn/start");
       expect(requests.find((request) => request.method === "turn/start")?.params).toMatchObject({
         additionalContext: {
-          openclaw_permission_change: { kind: "application", value: permissionChange.notice },
+          carapace_permission_change: { kind: "application", value: permissionChange.notice },
         },
       });
       let handle:
@@ -546,7 +546,7 @@ describe("runCodexAppServerAttempt steering", () => {
               message?: {
                 role: string;
                 content: string | Array<{ type: string; text?: string }>;
-                __openclaw?: { mirrorIdentity?: string };
+                __carapace?: { mirrorIdentity?: string };
                 provenance?: JsonObject;
               };
             }
@@ -565,7 +565,7 @@ describe("runCodexAppServerAttempt steering", () => {
                 {
                   role: message.role,
                   text,
-                  mirrorIdentity: message["__openclaw"]?.mirrorIdentity,
+                  mirrorIdentity: message["__carapace"]?.mirrorIdentity,
                   ...(message.provenance ? { provenance: message.provenance } : {}),
                 },
               ]
@@ -656,7 +656,7 @@ describe("runCodexAppServerAttempt steering", () => {
     const steer = requests.find((entry) => entry.method === "turn/steer");
     const clientUserMessageId = (steer?.params as { clientUserMessageId?: string } | undefined)
       ?.clientUserMessageId;
-    expect(clientUserMessageId).toBe("openclaw:turn-1:steer:1");
+    expect(clientUserMessageId).toBe("carapace:turn-1:steer:1");
     if (!clientUserMessageId) {
       throw new Error("turn/steer clientUserMessageId missing");
     }
@@ -713,7 +713,7 @@ describe("runCodexAppServerAttempt steering", () => {
         { type: "text", text: "more context", text_elements: [] },
         { type: "image", url: `data:image/png;base64,${PNG_1X1}` },
       ],
-      clientUserMessageId: "openclaw:turn-1:steer:1",
+      clientUserMessageId: "carapace:turn-1:steer:1",
     });
   });
 
@@ -791,7 +791,7 @@ describe("runCodexAppServerAttempt steering", () => {
               threadId: "thread-1",
               expectedTurnId: "turn-1",
               input: [{ type: "text", text: "subagent complete", text_elements: [] }],
-              clientUserMessageId: "openclaw:turn-1:steer:1",
+              clientUserMessageId: "carapace:turn-1:steer:1",
             },
           },
         ]),
@@ -832,7 +832,7 @@ describe("runCodexAppServerAttempt steering", () => {
               threadId: "thread-1",
               expectedTurnId: "turn-1",
               input: [{ type: "text", text: "session-file registered", text_elements: [] }],
-              clientUserMessageId: "openclaw:turn-1:steer:1",
+              clientUserMessageId: "carapace:turn-1:steer:1",
             },
           },
         ]),

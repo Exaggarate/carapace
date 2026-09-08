@@ -67,12 +67,12 @@ class MenuSurface extends HTMLElement {
   }
 }
 
-if (!customElements.get("openclaw-menu-surface")) {
-  customElements.define("openclaw-menu-surface", MenuSurface);
+if (!customElements.get("carapace-menu-surface")) {
+  customElements.define("carapace-menu-surface", MenuSurface);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-menu-surface": MenuSurface;
+    "carapace-menu-surface": MenuSurface;
   }
 }

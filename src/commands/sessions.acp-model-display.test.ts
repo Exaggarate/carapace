@@ -8,9 +8,9 @@ import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.js";
 import { enforceSqliteSessionHistoryDiskBudget } from "../config/sessions/session-history-eviction.js";
 import { resolveMaintenanceConfig } from "../config/sessions/store-maintenance-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabases } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceAgentDatabases } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { sessionsCommand } from "./sessions.js";
 
 const ACP_SESSION_KEY = "agent:copilot:acp:86b7b5af-3773-4a56-b244-069d6c5d3db9";
@@ -27,7 +27,7 @@ type SessionRow = {
 };
 
 let stateDir: string;
-let cfg: OpenClawConfig;
+let cfg: CarapaceConfig;
 const stores = new Map<string, string>();
 
 function configureAgents(agentIds: string[]): void {
@@ -39,7 +39,7 @@ function configureAgents(agentIds: string[]): void {
         model: { primary: `${AGENT_CONFIGURED_PROVIDER}/${AGENT_CONFIGURED_MODEL}` },
         models: {
           [`${AGENT_CONFIGURED_PROVIDER}/${AGENT_CONFIGURED_MODEL}`]: {
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
           },
         },
       },
@@ -49,7 +49,7 @@ function configureAgents(agentIds: string[]): void {
 }
 
 function writeSession(agentId: string, sessionKey: string, sessionId = `${agentId}-session`): void {
-  const storePath = path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+  const storePath = path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
   stores.set(agentId, storePath);
   replaceSessionEntrySync(
     { agentId, sessionKey, storePath },
@@ -96,8 +96,8 @@ async function readSessions(): Promise<SessionRow[]> {
 
 describe("sessionsCommand ACP model display", () => {
   beforeEach(() => {
-    stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-acp-sessions-")));
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-acp-sessions-")));
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     configureAgents(["copilot"]);
   });
 
@@ -116,8 +116,8 @@ describe("sessionsCommand ACP model display", () => {
         ),
       );
     } finally {
-      closeOpenClawAgentDatabases(stateDir);
-      closeOpenClawStateDatabase();
+      closeCarapaceAgentDatabases(stateDir);
+      closeCarapaceStateDatabase();
       clearRuntimeConfigSnapshot();
       stores.clear();
       fs.rmSync(stateDir, { recursive: true, force: true });
@@ -153,7 +153,7 @@ describe("sessionsCommand ACP model display", () => {
         model: AGENT_CONFIGURED_MODEL,
         modelProvider: AGENT_CONFIGURED_PROVIDER,
         acpRuntime: false,
-        agentRuntime: { id: "openclaw", source: "model" },
+        agentRuntime: { id: "carapace", source: "model" },
       },
     ]);
   });
@@ -188,7 +188,7 @@ describe("sessionsCommand ACP model display", () => {
       model: AGENT_CONFIGURED_MODEL,
       modelProvider: AGENT_CONFIGURED_PROVIDER,
       acpRuntime: false,
-      agentRuntime: { id: "openclaw", source: "model" },
+      agentRuntime: { id: "carapace", source: "model" },
     });
   });
 });

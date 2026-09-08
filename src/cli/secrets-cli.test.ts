@@ -14,7 +14,7 @@ import {
 import { registerSecretsCli } from "./secrets-cli.js";
 
 const execFileAsync = promisify(execFile);
-const missingPlan = path.join(os.tmpdir(), "openclaw-secrets-cli-missing-plan.json");
+const missingPlan = path.join(os.tmpdir(), "carapace-secrets-cli-missing-plan.json");
 
 const mocks = await vi.hoisted(async () => {
   const { createCliRuntimeMock } = await import("./test-runtime-mock.js");
@@ -96,13 +96,13 @@ function createConfigureInteractiveResult(options?: {
       version: 1,
       protocolVersion: 1,
       generatedAt: "2026-02-26T00:00:00.000Z",
-      generatedBy: "openclaw secrets configure",
+      generatedBy: "carapace secrets configure",
       targets: options?.targets ?? [],
     },
     preflight: {
       mode: "dry-run" as const,
       changed: options?.changed ?? false,
-      changedFiles: options?.changed ? ["/tmp/openclaw.json"] : [],
+      changedFiles: options?.changed ? ["/tmp/carapace.json"] : [],
       checks: {
         resolvability: true,
         resolvabilityComplete: options?.resolvabilityComplete ?? true,
@@ -146,7 +146,7 @@ function createSecretsApplyResult(options?: {
   return {
     mode: options?.mode ?? "dry-run",
     changed: options?.changed ?? false,
-    changedFiles: options?.changed ? ["/tmp/openclaw.json"] : [],
+    changedFiles: options?.changed ? ["/tmp/carapace.json"] : [],
     checks: {
       resolvability: true,
       resolvabilityComplete: options?.resolvabilityComplete ?? true,
@@ -164,7 +164,7 @@ async function withPlanFile(
 ) {
   const planPath = path.join(
     os.tmpdir(),
-    `openclaw-secrets-cli-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+    `carapace-secrets-cli-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
   );
   await fs.writeFile(planPath, contents, "utf8");
   try {
@@ -269,7 +269,7 @@ describe("secrets CLI", () => {
   it("explains Gateway reload failures without duplicate doctor noise", async () => {
     callGatewayFromCli.mockRejectedValue(
       new Error(
-        "gateway closed (1006 abnormal closure). Gateway target: ws://127.0.0.1:18789 Source: local loopback Config: /tmp/openclaw.json Bind: loopback Possible causes: - Gateway not yet ready. Run `openclaw doctor` for diagnostics.",
+        "gateway closed (1006 abnormal closure). Gateway target: ws://127.0.0.1:18789 Source: local loopback Config: /tmp/carapace.json Bind: loopback Possible causes: - Gateway not yet ready. Run `carapace doctor` for diagnostics.",
       ),
     );
 
@@ -280,7 +280,7 @@ describe("secrets CLI", () => {
     expect(runtimeErrors.at(-1)).toContain(
       "Could not reload secrets because the Gateway did not respond: gateway closed (1006 abnormal closure).",
     );
-    expect(runtimeErrors.at(-1)).toContain("openclaw gateway status --deep");
+    expect(runtimeErrors.at(-1)).toContain("carapace gateway status --deep");
     expect(runtimeErrors.at(-1)).not.toContain("Gateway target:");
     expect(runtimeErrors.at(-1)).not.toContain("diagnostics..");
   });
@@ -479,7 +479,7 @@ describe("secrets CLI", () => {
   it("writes generated secrets plan files at the apply limit", async () => {
     const planPath = path.join(
       os.tmpdir(),
-      `openclaw-secrets-configure-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+      `carapace-secrets-configure-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
     );
     runSecretsConfigureInteractive.mockResolvedValue(
       createConfigureInteractiveResultWithPlanBytes(16 * 1024 * 1024),
@@ -502,7 +502,7 @@ describe("secrets CLI", () => {
   it("rejects generated secrets plan files that exceed the apply limit", async () => {
     const planPath = path.join(
       os.tmpdir(),
-      `openclaw-secrets-configure-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+      `carapace-secrets-configure-test-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
     );
     runSecretsConfigureInteractive.mockResolvedValue(
       createConfigureInteractiveResultWithPlanBytes(16 * 1024 * 1024 + 1),
@@ -551,7 +551,7 @@ describe("secrets CLI", () => {
       runtimeLogs.length = 0;
       runtimeErrors.length = 0;
 
-      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-cli-fifo-"));
+      const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-secrets-cli-fifo-"));
       const fifoPath = path.join(tmpDir, "plan.json");
       await execFileAsync("mkfifo", [fifoPath]);
 

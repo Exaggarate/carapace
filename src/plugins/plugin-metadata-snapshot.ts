@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   getActiveDiagnosticsTimelineSpan,
   measureDiagnosticsTimelineSpanSync,
@@ -138,7 +138,7 @@ export function isPluginMetadataSnapshotCompatible(params: {
     PluginMetadataSnapshot,
     "configFingerprint" | "index" | "pluginIds" | "policyHash" | "workspaceDir"
   >;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   allowScopedSnapshot?: boolean;
   pluginIds?: readonly string[];
@@ -412,7 +412,7 @@ export function loadPluginMetadataSnapshot(
 /** Promotes a planning-scoped graph to the complete process-lifecycle metadata snapshot. */
 export function completePluginMetadataSnapshot(params: {
   snapshot?: PluginMetadataSnapshot;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
 }): PluginMetadataSnapshot | undefined {

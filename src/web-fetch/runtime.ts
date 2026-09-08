@@ -1,7 +1,7 @@
 /** Runtime provider selection and tool construction for the `web_fetch` tool. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { resolveRuntimeConfigCacheKey } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { logVerbose } from "../globals.js";
 import { sortPluginEntriesForAutoDetect } from "../plugins/plugin-entry-order.js";
 import { getActivePluginRegistryVersion } from "../plugins/runtime.js";
@@ -24,14 +24,14 @@ import {
 
 // Runtime provider selection for the web_fetch tool. It resolves config,
 // credentials, runtime metadata, and sandbox-safe bundled provider scopes.
-type WebFetchConfig = NonNullable<OpenClawConfig["tools"]>["web"] extends infer Web
+type WebFetchConfig = NonNullable<CarapaceConfig["tools"]>["web"] extends infer Web
   ? Web extends { fetch?: infer Fetch }
     ? Fetch
     : undefined
   : undefined;
 
 type ResolveWebFetchDefinitionParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sandboxed?: boolean;
   runtimeWebFetch?: RuntimeWebFetchMetadata;
   providerId?: string;
@@ -47,9 +47,9 @@ type WebFetchProviderCacheEntry = {
   providers: PluginWebFetchProviderEntry[];
 };
 
-let webFetchProviderCache = new WeakMap<OpenClawConfig, WebFetchProviderCacheEntry>();
+let webFetchProviderCache = new WeakMap<CarapaceConfig, WebFetchProviderCacheEntry>();
 
-function resolveFetchConfig(config: OpenClawConfig | undefined): WebFetchConfig | undefined {
+function resolveFetchConfig(config: CarapaceConfig | undefined): WebFetchConfig | undefined {
   return resolveWebProviderConfig(config, "fetch") as NonNullable<WebFetchConfig> | undefined;
 }
 
@@ -61,7 +61,7 @@ function hasEntryCredential(
     | "getConfiguredCredentialValue"
     | "requiresCredential"
   >,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   fetch: WebFetchConfig | undefined,
 ): boolean {
   return hasWebProviderEntryCredential({
@@ -85,7 +85,7 @@ function hasAutoDetectCredential(
     | "getConfiguredCredentialValue"
     | "requiresCredential"
   >,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   fetch: WebFetchConfig | undefined,
 ): boolean {
   return hasEntryCredential(
@@ -108,14 +108,14 @@ export function isWebFetchProviderConfigured(params: {
     | "getCredentialValue"
     | "requiresCredential"
   >;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): boolean {
   return hasEntryCredential(params.provider, params.config, resolveFetchConfig(params.config));
 }
 
 /** Lists web_fetch providers available to runtime selection. */
 export function listWebFetchProviders(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): PluginWebFetchProviderEntry[] {
   return resolvePluginWebFetchProviders({
     config: params?.config,
@@ -125,7 +125,7 @@ export function listWebFetchProviders(params?: {
 /** Auto-detects a web_fetch provider after explicit selections have been resolved. */
 function resolveAutoWebFetchProviderId(params: {
   fetch?: WebFetchConfig;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   providers: PluginWebFetchProviderEntry[];
 }): string {
   const raw =
@@ -181,7 +181,7 @@ function resolveWebFetchProviderCacheKey(
 
 function resolveCachedWebFetchProviders(params: {
   cacheKey: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configFingerprint: string;
   load: () => PluginWebFetchProviderEntry[];
 }): PluginWebFetchProviderEntry[] {

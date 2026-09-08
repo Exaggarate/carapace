@@ -1,9 +1,9 @@
 // Bundles MCP metadata exposed by plugins for package output.
 import path from "node:path";
-import { isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { isStringRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveMcpTransportConfig } from "../agents/mcp-transport-config.js";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { isRecord } from "../utils.js";
 import {
@@ -573,7 +573,7 @@ function inspectMcpServerRuntimeSupport(loaded: {
 
 export function loadEnabledBundleMcpConfig(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
 }): EnabledBundleMcpConfigResult {
   const loaded = loadEnabledBundleConfig({

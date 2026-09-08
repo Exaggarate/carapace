@@ -5,7 +5,7 @@ import { getActivePluginRegistryWorkspaceDirFromStateCore } from "./runtime-work
 export { PLUGIN_REGISTRY_STATE };
 
 type PluginRegistry = import("./registry-types.js").PluginRegistry;
-type MemoryCapabilityRegistrar = import("./types.js").OpenClawPluginApi["registerMemoryCapability"];
+type MemoryCapabilityRegistrar = import("./types.js").CarapacePluginApi["registerMemoryCapability"];
 
 export type RegistryState = {
   activeRegistry: PluginRegistry | null;

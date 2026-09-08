@@ -1,9 +1,9 @@
 // Tavily helper module supports config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePositiveTimeoutSeconds } from "openclaw/plugin-sdk/provider-web-search";
-import { normalizeSecretInput } from "openclaw/plugin-sdk/secret-input";
-import { resolveReadOnlyEnvSecretRef } from "openclaw/plugin-sdk/secret-ref-readonly";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolvePositiveTimeoutSeconds } from "carapace/plugin-sdk/provider-web-search";
+import { normalizeSecretInput } from "carapace/plugin-sdk/secret-input";
+import { resolveReadOnlyEnvSecretRef } from "carapace/plugin-sdk/secret-ref-readonly";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const DEFAULT_TAVILY_BASE_URL = "https://api.tavily.com";
 const DEFAULT_TAVILY_SEARCH_TIMEOUT_SECONDS = 30;
@@ -25,7 +25,7 @@ type PluginEntryConfig = {
   };
 };
 
-function resolveTavilySearchConfig(cfg?: OpenClawConfig): TavilySearchConfig {
+function resolveTavilySearchConfig(cfg?: CarapaceConfig): TavilySearchConfig {
   const pluginConfig = cfg?.plugins?.entries?.tavily?.config as PluginEntryConfig;
   const pluginWebSearch = pluginConfig?.webSearch;
   if (pluginWebSearch && typeof pluginWebSearch === "object" && !Array.isArray(pluginWebSearch)) {
@@ -34,7 +34,7 @@ function resolveTavilySearchConfig(cfg?: OpenClawConfig): TavilySearchConfig {
   return undefined;
 }
 
-function resolveConfiguredSecret(value: unknown, path: string, cfg?: OpenClawConfig) {
+function resolveConfiguredSecret(value: unknown, path: string, cfg?: CarapaceConfig) {
   return resolveReadOnlyEnvSecretRef({
     value,
     path,
@@ -44,7 +44,7 @@ function resolveConfiguredSecret(value: unknown, path: string, cfg?: OpenClawCon
   });
 }
 
-export function resolveTavilyApiKey(cfg?: OpenClawConfig): string | undefined {
+export function resolveTavilyApiKey(cfg?: CarapaceConfig): string | undefined {
   const search = resolveTavilySearchConfig(cfg);
   const resolved = resolveConfiguredSecret(search?.apiKey, TAVILY_API_KEY_CONFIG_PATH, cfg);
   if (resolved.status === "available") {
@@ -56,7 +56,7 @@ export function resolveTavilyApiKey(cfg?: OpenClawConfig): string | undefined {
   return normalizeSecretInput(process.env.TAVILY_API_KEY) || undefined;
 }
 
-export function resolveTavilyBaseUrl(cfg?: OpenClawConfig): string {
+export function resolveTavilyBaseUrl(cfg?: CarapaceConfig): string {
   const search = resolveTavilySearchConfig(cfg);
   const configured =
     (normalizeOptionalString(search?.baseUrl) ?? "") ||

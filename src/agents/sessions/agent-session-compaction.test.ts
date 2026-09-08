@@ -4,7 +4,7 @@ import type {
   Context,
   Model,
   SimpleStreamOptions,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
@@ -394,7 +394,7 @@ describe("AgentSession compaction", () => {
   });
 
   it("sends a pre-persisted keyed user once after pre-prompt compaction", async () => {
-    const dir = tempDirs.make("openclaw-agent-session-compaction-keyed-user-");
+    const dir = tempDirs.make("carapace-agent-session-compaction-keyed-user-");
     const scope = {
       agentId: "main",
       sessionId: "sqlite-agent-session-compaction-keyed-user",

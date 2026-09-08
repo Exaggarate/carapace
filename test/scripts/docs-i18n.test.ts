@@ -14,7 +14,7 @@ describe.skipIf(!hasGoToolchain)("docs-i18n Go module", () => {
   let tempDir = "";
 
   beforeAll(() => {
-    tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-docs-i18n-test-"));
+    tempDir = mkdtempSync(path.join(tmpdir(), "carapace-docs-i18n-test-"));
     binaryPath = path.join(
       tempDir,
       process.platform === "win32" ? "docs-i18n.test.exe" : "docs-i18n.test",

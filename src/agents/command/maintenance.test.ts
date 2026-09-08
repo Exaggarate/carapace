@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
@@ -181,7 +181,7 @@ describe("agent command foreground completion", () => {
         sessionId,
         text: "Completed foreground answer.",
         runner: "embedded",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       });
     });
     state.runMemoryFlushIfNeededMock.mockImplementationOnce(async (params) => {
@@ -253,7 +253,7 @@ describe("agent command foreground completion", () => {
           sessionId,
           text: "one-shot answer",
           runner,
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
         });
       });
       state.runCliTurnCompactionLifecycleMock.mockImplementationOnce(async (params) => {

@@ -1,7 +1,7 @@
 ---
 summary: "Org-wide Slack installs across every workspace in a Grid organization"
 read_when:
-  - Installing OpenClaw at the Enterprise Grid organization level
+  - Installing Carapace at the Enterprise Grid organization level
   - Writing workspace-qualified channel and user policy keys
   - Checking which features an enterprise account supports
 title: "Slack Enterprise Grid"
@@ -18,22 +18,22 @@ or HTTP Request URLs; relay mode is not supported for enterprise accounts. Both
 least-privilege manifests below enable the Enterprise message, mention,
 reaction, pin, channel-created, and channel-renamed event paths, immediate
 replies, listener-owned status reactions, Slack interactivity for Block Kit
-actions and modal submissions, and the single `/openclaw` slash command.
+actions and modal submissions, and the single `/carapace` slash command.
 
 ### Socket Mode
 
 ```json
 {
   "display_information": {
-    "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "name": "Carapace",
+    "description": "Slack connector for Carapace"
   },
   "features": {
-    "bot_user": { "display_name": "OpenClaw", "always_online": true },
+    "bot_user": { "display_name": "Carapace", "always_online": true },
     "slash_commands": [
       {
-        "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "command": "/carapace",
+        "description": "Send a message to Carapace",
         "should_escape": false
       }
     ]
@@ -89,7 +89,7 @@ actions and modal submissions, and the single `/openclaw` slash command.
 Have an Enterprise Grid Org Admin or Org Owner approve the app, install it at
 the organization level, and choose the workspaces the installation covers.
 Confirm that the app is available in every intended workspace before starting
-OpenClaw. Generate an app-level token with `connections:write` for Socket Mode,
+Carapace. Generate an app-level token with `connections:write` for Socket Mode,
 then copy the bot token from the org installation. Configure the account that
 uses the org-installed bot token:
 
@@ -101,7 +101,7 @@ uses the org-installed bot token:
       mode: "socket",
       appToken: { source: "env", provider: "default", id: "SLACK_APP_TOKEN" },
       botToken: { source: "env", provider: "default", id: "SLACK_BOT_TOKEN" },
-      slashCommand: { enabled: true, name: "openclaw" },
+      slashCommand: { enabled: true, name: "carapace" },
       dmPolicy: "open",
       allowFrom: ["*"],
       groupPolicy: "allowlist",
@@ -122,15 +122,15 @@ Socket Mode connection. Replace the example URL with the Gateway's public
 ```json
 {
   "display_information": {
-    "name": "OpenClaw",
-    "description": "Slack connector for OpenClaw"
+    "name": "Carapace",
+    "description": "Slack connector for Carapace"
   },
   "features": {
-    "bot_user": { "display_name": "OpenClaw", "always_online": true },
+    "bot_user": { "display_name": "Carapace", "always_online": true },
     "slash_commands": [
       {
-        "command": "/openclaw",
-        "description": "Send a message to OpenClaw",
+        "command": "/carapace",
+        "description": "Send a message to Carapace",
         "should_escape": false,
         "url": "https://gateway-host.example.com/slack/events"
       }
@@ -205,7 +205,7 @@ the enterprise account with the same Request URL path:
         provider: "default",
         id: "SLACK_SIGNING_SECRET",
       },
-      slashCommand: { enabled: true, name: "openclaw" },
+      slashCommand: { enabled: true, name: "carapace" },
       webhookPath: "/slack/events",
       dmPolicy: "open",
       allowFrom: ["*"],
@@ -222,22 +222,22 @@ For each selected workspace, open it in Slack's web app and copy the `T...`
 workspace ID from `https://app.slack.com/client/T.../...`. Use that workspace ID
 with the channel's `C...` ID in every qualified policy key, as shown above.
 
-At startup, OpenClaw uses Slack `auth.test` to detect whether the token belongs
+At startup, Carapace uses Slack `auth.test` to detect whether the token belongs
 to a workspace installation or an Enterprise Grid org-wide installation. No
 installation-mode setting is required. Slack remains the source of truth for
-which workspaces have granted the installation; OpenClaw then applies the
+which workspaces have granted the installation; Carapace then applies the
 configured channel, user, DM, and mention policies to each delivered event.
 Enterprise installs reject bot-authored `message` and `app_mention` events by
 default. Set `allowBots` on the account or channel to admit them under the same
-loop-prevention rules used by workspace installs. OpenClaw retains the org
+loop-prevention rules used by workspace installs. Carapace retains the org
 installation's `auth.test` `user_id` and `bot_id` for that check.
 
 Enterprise support accepts direct Socket Mode or HTTP message, mention,
 membership, reaction, pin, channel-created, channel-renamed, Block Kit action,
 modal, and configured shortcut and slash-command payloads plus
 workspace-qualified outbound messages and presence polling. Add any shortcuts to the app manifest's
-`features.shortcuts` list; OpenClaw accepts their callback IDs through the same
-interaction path. The manifest examples register the single `/openclaw`
+`features.shortcuts` list; Carapace accepts their callback IDs through the same
+interaction path. The manifest examples register the single `/carapace`
 command; native command mode still requires the administrator-managed command
 entries described in
 [Optional native slash commands](/channels/slack/manifest-and-scopes#optional-native-slash-commands).
@@ -259,7 +259,7 @@ use validated listener-owned, workspace-scoped event routing. Outbound
 acknowledgment, typing, and status reactions are also supported through that
 client and require `reactions:write`.
 
-OpenClaw records Enterprise Grid destinations as
+Carapace records Enterprise Grid destinations as
 `team:<team-id>:channel:<channel-id>` or `team:<team-id>:user:<user-id>`.
 Current-conversation Slack tool actions inherit that workspace. Detached or
 proactive calls must provide a workspace-qualified target; bare channel and

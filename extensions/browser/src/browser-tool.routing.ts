@@ -55,7 +55,7 @@ export async function resolveBrowserToolNodeTarget(params: {
         !hasGatewayToolRoutingContext() &&
         cfg.gateway?.mode !== "remote" &&
         !cfg.gateway?.remote?.url?.trim() &&
-        !process.env.OPENCLAW_GATEWAY_URL?.trim()))
+        !process.env.CARAPACE_GATEWAY_URL?.trim()))
   ) {
     return null;
   }
@@ -100,7 +100,7 @@ export function resolveBrowserBaseUrl(params: {
   }
   if (!resolved.enabled) {
     throw new Error(
-      "Browser control is disabled. Set browser.enabled=true in ~/.openclaw/openclaw.json.",
+      "Browser control is disabled. Set browser.enabled=true in ~/.carapace/carapace.json.",
     );
   }
   return undefined;

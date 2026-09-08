@@ -6,8 +6,8 @@ import path from "node:path";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { withEnvAsync, withTempDir } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
+import { withEnvAsync, withTempDir } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, type RawData } from "ws";
 import { parsePairingString } from "../../../chrome-extension/modules/relay-core.js";
@@ -37,7 +37,7 @@ import { handleGatewayExtensionUpgrade } from "./gateway-relay-route.js";
 import { RawHttpConnection } from "./relay-http.test-support.js";
 
 const getPluginRuntimeGatewayRequestScopeMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: () => getPluginRuntimeGatewayRequestScopeMock(),
 }));
 
@@ -133,9 +133,9 @@ afterEach(async () => {
 describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
   it.each([
     { name: "disabled Browser", enabled: false, driver: "extension" as const },
-    { name: "no extension profiles", enabled: true, driver: "openclaw" as const },
+    { name: "no extension profiles", enabled: true, driver: "carapace" as const },
   ])("leaves the relay key absent with $name", async ({ enabled, driver }) => {
-    await withTempDir("openclaw-relay-service-", async (dir) => {
+    await withTempDir("carapace-relay-service-", async (dir) => {
       const stateDir = await fs.realpath(dir);
       const credentials = path.join(stateDir, "credentials");
       const config = {
@@ -144,7 +144,7 @@ describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
       };
       setRuntimeConfigSnapshot(config, config);
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_OAUTH_DIR: credentials },
+        { CARAPACE_STATE_DIR: stateDir, CARAPACE_OAUTH_DIR: credentials },
         async () => {
           try {
             const state = await startBrowserControlServiceFromConfig();
@@ -190,7 +190,7 @@ describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
       saturatedSource,
     }) => {
       const stateDir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-relay-wakeup-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-relay-wakeup-")),
       );
       try {
         const gatewayPort = await getFreePort();
@@ -220,9 +220,9 @@ describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
 
         await withEnvAsync(
           {
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_OAUTH_DIR: path.join(stateDir, "credentials"),
-            OPENCLAW_GATEWAY_PORT: String(gatewayPort),
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_OAUTH_DIR: path.join(stateDir, "credentials"),
+            CARAPACE_GATEWAY_PORT: String(gatewayPort),
           },
           async () => {
             const inventory = {
@@ -287,7 +287,7 @@ describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
               }
 
               const protocols = legacy
-                ? ["openclaw-extension-relay", `openclaw-extension-token.${RELAY_KEY}`]
+                ? ["carapace-extension-relay", `carapace-extension-token.${RELAY_KEY}`]
                 : BROWSER_RELAY_EXTENSION_SUBPROTOCOL;
               if (saturatedSource) {
                 saturationSockets = await Promise.all(
@@ -394,14 +394,14 @@ describe("local Gateway extension relay wakeup", { concurrent: false }, () => {
               for (let request = 0; request < 3; request += 1) {
                 const profile = createBrowserControlContext().forProfile("chrome").profile;
                 const cdpUrl = new URL(profile.cdpUrl);
-                expect(cdpUrl.username).toBe("openclaw-internal");
+                expect(cdpUrl.username).toBe("carapace-internal");
                 expect(cdpUrl.password === relay.internalToken).toBe(true);
                 expect(getBrowserControlState()?.extensionRelays?.get("chrome")).toBe(relay);
                 expect(extension.readyState).toBe(WebSocket.OPEN);
               }
 
               const authorization = Buffer.from(
-                `openclaw-internal:${relay.internalToken}`,
+                `carapace-internal:${relay.internalToken}`,
               ).toString("base64");
               const response = await fetch(`http://127.0.0.1:${pairing.relayPort}/json/version`, {
                 headers: { Authorization: `Basic ${authorization}` },

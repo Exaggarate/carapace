@@ -3,7 +3,7 @@
  *
  * Merges allowlists, applies identifier authentication policy, and redacts access-graph facts.
  */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   meetsIdentifierAuthentication,
   minimumIdentifierAuthenticationFrom,

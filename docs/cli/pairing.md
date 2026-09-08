@@ -1,13 +1,13 @@
 ---
-summary: "CLI reference for `openclaw pairing` (approve/list pairing requests)"
+summary: "CLI reference for `carapace pairing` (approve/list pairing requests)"
 read_when:
   - You're using pairing-mode DMs and need to approve senders
 title: "Pairing CLI"
 ---
 
-# `openclaw pairing`
+# `carapace pairing`
 
-Approve or inspect DM pairing requests for channels that support pairing (chat DMs only - node/device pairing uses `openclaw devices`).
+Approve or inspect DM pairing requests for channels that support pairing (chat DMs only - node/device pairing uses `carapace devices`).
 
 Related: [Pairing flow](/channels/pairing)
 
@@ -19,13 +19,13 @@ not permanently block the sender.
 ## Commands
 
 ```bash
-openclaw pairing list telegram
-openclaw pairing list --channel telegram --account work
-openclaw pairing list telegram --json
+carapace pairing list telegram
+carapace pairing list --channel telegram --account work
+carapace pairing list telegram --json
 
-openclaw pairing approve <code>
-openclaw pairing approve telegram <code>
-openclaw pairing approve --channel telegram --account work <code> --notify
+carapace pairing approve <code>
+carapace pairing approve telegram <code>
+carapace pairing approve --channel telegram --account work <code> --notify
 ```
 
 Use `--account <accountId>` to restrict either command to one channel account.
@@ -53,9 +53,9 @@ Approve a pending pairing code and allow that sender.
 
 Usage:
 
-- `openclaw pairing approve <channel> <code>`
-- `openclaw pairing approve --channel <channel> <code>`
-- `openclaw pairing approve <code>` when exactly one pairing-capable channel is configured
+- `carapace pairing approve <channel> <code>`
+- `carapace pairing approve --channel <channel> <code>`
+- `carapace pairing approve <code>` when exactly one pairing-capable channel is configured
 
 Options: `--channel <channel>`, `--account <accountId>`, `--notify` (send a confirmation back to the requester on the same channel).
 
@@ -65,7 +65,7 @@ If `commands.ownerAllowFrom` is empty when you approve a pairing code, the CLI a
 
 The command owner is the human operator account allowed to run owner-only commands and approve dangerous actions such as `/diagnostics`, `/export-session`, `/export-trajectory`, `/config`, and exec approvals. Pairing only lets a sender talk to the agent; it does not by itself grant owner privileges beyond this one-time bootstrap.
 
-If you approved a sender before this bootstrap existed, run `openclaw doctor`; it warns when no command owner is configured and shows the exact `openclaw config set commands.ownerAllowFrom ...` command to fix it.
+If you approved a sender before this bootstrap existed, run `carapace doctor`; it warns when no command owner is configured and shows the exact `carapace config set commands.ownerAllowFrom ...` command to fix it.
 
 ## Related
 

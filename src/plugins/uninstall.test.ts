@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { runCommandWithTimeout } from "../process/exec.js";
 import { toRepoRelativePath } from "../test-utils/repo-files.js";
 import {
@@ -33,7 +33,7 @@ vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: runCommandWithTimeoutMock,
 }));
 
-type PluginConfig = NonNullable<OpenClawConfig["plugins"]>;
+type PluginConfig = NonNullable<CarapaceConfig["plugins"]>;
 type PluginInstallRecord = NonNullable<PluginConfig["installs"]>[string];
 
 async function uninstallPlugin(
@@ -69,7 +69,7 @@ async function createInstalledNpmPluginFixture(params: {
   pluginId: string;
   extensionsDir: string;
   pluginDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }> {
   const pluginId = params.pluginId ?? "my-plugin";
   const extensionsDir = path.join(params.baseDir, "extensions");
@@ -195,8 +195,8 @@ function createPluginConfig(params: {
   enabled?: boolean;
   slots?: PluginConfig["slots"];
   loadPaths?: string[];
-  channels?: OpenClawConfig["channels"];
-}): OpenClawConfig {
+  channels?: CarapaceConfig["channels"];
+}): CarapaceConfig {
   const plugins: PluginConfig = {};
   if (params.entries) {
     plugins.entries = params.entries;
@@ -226,14 +226,14 @@ function createPluginConfig(params: {
 }
 
 function expectRemainingChannels(
-  channels: OpenClawConfig["channels"],
+  channels: CarapaceConfig["channels"],
   expected: Record<string, unknown> | undefined,
 ) {
   expect(channels as Record<string, unknown> | undefined).toEqual(expected);
 }
 
 function expectChannelCleanupResult(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginId: string;
   expectedChannels: Record<string, unknown> | undefined;
   expectedChanged: boolean;
@@ -252,14 +252,14 @@ function expectChannelCleanupResult(params: {
   expect(actions.channelConfig).toBe(params.expectedChanged);
 }
 
-function createSinglePluginWithEmptySlotsConfig(): OpenClawConfig {
+function createSinglePluginWithEmptySlotsConfig(): CarapaceConfig {
   return createPluginConfig({
     entries: createSinglePluginEntries(),
     slots: {},
   });
 }
 
-function createSingleNpmInstallConfig(installPath: string): OpenClawConfig {
+function createSingleNpmInstallConfig(installPath: string): CarapaceConfig {
   return createPluginConfig({
     entries: createSinglePluginEntries(),
     installs: {
@@ -529,7 +529,7 @@ describe("removePluginFromConfig", () => {
   it("removes a canonical marketplace install path without removing siblings", async () => {
     const tempRoot = path.join(process.cwd(), ".tmp");
     await fs.mkdir(tempRoot, { recursive: true });
-    const tempDir = await fs.mkdtemp(path.join(tempRoot, "openclaw-uninstall-marketplace-path-"));
+    const tempDir = await fs.mkdtemp(path.join(tempRoot, "carapace-uninstall-marketplace-path-"));
     try {
       const installPath = path.join(tempDir, "managed", "my-plugin");
       const linkedPath = path.join(tempDir, "my-plugin-link");
@@ -555,7 +555,7 @@ describe("removePluginFromConfig", () => {
   it("removes absolute load path for a workspace-relative install source path", async () => {
     const tempRoot = path.join(process.cwd(), ".tmp");
     await fs.mkdir(tempRoot, { recursive: true });
-    const tempDir = await fs.mkdtemp(path.join(tempRoot, "openclaw-uninstall-portable-source-"));
+    const tempDir = await fs.mkdtemp(path.join(tempRoot, "carapace-uninstall-portable-source-"));
     try {
       const pluginDir = path.join(tempDir, "plugins", "demo");
       await fs.mkdir(pluginDir, { recursive: true });
@@ -822,7 +822,7 @@ describe("removePluginFromConfig", () => {
           defaults: { groupPolicy: "opt-in" },
           modelByChannel: { timbot: "gpt-3.5" } as Record<string, string>,
           timbot: { sdkAppId: "123" },
-        } as unknown as OpenClawConfig["channels"],
+        } as unknown as CarapaceConfig["channels"],
       }),
       pluginId: "timbot",
       expectedChannels: {
@@ -842,7 +842,7 @@ describe("removePluginFromConfig", () => {
         },
         channels: {
           defaults: { groupPolicy: "opt-in" },
-        } as unknown as OpenClawConfig["channels"],
+        } as unknown as CarapaceConfig["channels"],
       }),
       pluginId: "bad-plugin",
       options: {
@@ -1050,11 +1050,11 @@ describe("uninstallPlugin", () => {
       config: createPluginConfig({
         installs: {
           "missing-linked-plugin": createPathInstallRecord(
-            "/missing/openclaw/plugin",
-            "/missing/openclaw/plugin",
+            "/missing/carapace/plugin",
+            "/missing/carapace/plugin",
           ),
         },
-        loadPaths: ["/missing/openclaw/plugin", "/keep/this/plugin"],
+        loadPaths: ["/missing/carapace/plugin", "/keep/this/plugin"],
       }),
       expectedActions: {
         entry: false,
@@ -1189,7 +1189,7 @@ describe("uninstallPlugin", () => {
     const stateDir = path.join(tempDir, "state");
     const extensionsDir = path.join(stateDir, "extensions");
     const npmRoot = path.join(stateDir, "npm");
-    const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(npmRoot, "node_modules", "@carapace", "kitchen-sink");
     const hoistedDir = path.join(npmRoot, "node_modules", "is-number");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(hoistedDir, { recursive: true });
@@ -1199,7 +1199,7 @@ describe("uninstallPlugin", () => {
         {
           private: true,
           dependencies: {
-            "@openclaw/kitchen-sink": "1.0.0",
+            "@carapace/kitchen-sink": "1.0.0",
             "is-number": "7.0.0",
           },
         },
@@ -1214,20 +1214,20 @@ describe("uninstallPlugin", () => {
       recordPluginPackageUninstallPlan(
         {
           config: createPluginConfig({
-            entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+            entries: createSinglePluginEntries("carapace-kitchen-sink-fixture"),
             installs: {
-              "openclaw-kitchen-sink-fixture": {
+              "carapace-kitchen-sink-fixture": {
                 source: "npm",
-                spec: "@openclaw/kitchen-sink@1.0.0",
+                spec: "@carapace/kitchen-sink@1.0.0",
                 installPath: pluginDir,
               },
             },
           }),
-          pluginId: "openclaw-kitchen-sink-fixture",
+          pluginId: "carapace-kitchen-sink-fixture",
           deleteFiles: true,
           extensionsDir,
         },
-        { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+        { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
       ),
     );
 
@@ -1240,7 +1240,7 @@ describe("uninstallPlugin", () => {
       cleanup: {
         kind: "npm",
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@carapace/kitchen-sink",
         rootKind: "legacy-shared",
       },
     });
@@ -1248,7 +1248,7 @@ describe("uninstallPlugin", () => {
     const applied = await applyPluginUninstallDirectoryRemoval(plan.directoryRemoval);
 
     expect(applied).toEqual({ directoryRemoved: true, warnings: [] });
-    expectNpmUninstallCommand({ packageName: "@openclaw/kitchen-sink", npmRoot });
+    expectNpmUninstallCommand({ packageName: "@carapace/kitchen-sink", npmRoot });
     await expectPathAccessState(pluginDir, "missing");
   });
 
@@ -1262,14 +1262,14 @@ describe("uninstallPlugin", () => {
     const npmRoot = fixture.generationKey
       ? resolvePluginNpmGenerationProjectDir({
           npmDir: npmBaseDir,
-          packageName: "@openclaw/kitchen-sink",
+          packageName: "@carapace/kitchen-sink",
           generationKey: fixture.generationKey,
         })
       : resolvePluginNpmProjectDir({
           npmDir: npmBaseDir,
-          packageName: "@openclaw/kitchen-sink",
+          packageName: "@carapace/kitchen-sink",
         });
-    const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(npmRoot, "node_modules", "@carapace", "kitchen-sink");
     const hoistedDir = path.join(npmRoot, "node_modules", "is-number");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(hoistedDir, { recursive: true });
@@ -1279,7 +1279,7 @@ describe("uninstallPlugin", () => {
         {
           private: true,
           dependencies: {
-            "@openclaw/kitchen-sink": "1.0.0",
+            "@carapace/kitchen-sink": "1.0.0",
             "is-number": "7.0.0",
           },
         },
@@ -1294,20 +1294,20 @@ describe("uninstallPlugin", () => {
       recordPluginPackageUninstallPlan(
         {
           config: createPluginConfig({
-            entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+            entries: createSinglePluginEntries("carapace-kitchen-sink-fixture"),
             installs: {
-              "openclaw-kitchen-sink-fixture": {
+              "carapace-kitchen-sink-fixture": {
                 source: "npm",
-                spec: "@openclaw/kitchen-sink@1.0.0",
+                spec: "@carapace/kitchen-sink@1.0.0",
                 installPath: pluginDir,
               },
             },
           }),
-          pluginId: "openclaw-kitchen-sink-fixture",
+          pluginId: "carapace-kitchen-sink-fixture",
           deleteFiles: true,
           extensionsDir,
         },
-        { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+        { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
       ),
     );
 
@@ -1320,7 +1320,7 @@ describe("uninstallPlugin", () => {
       cleanup: {
         kind: "npm",
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@carapace/kitchen-sink",
         rootKind: "isolated-project",
       },
     });
@@ -1340,7 +1340,7 @@ describe("uninstallPlugin", () => {
       `${path.basename(
         resolvePluginNpmProjectDir({
           npmDir: "/managed/npm",
-          packageName: "@openclaw/kitchen-sink",
+          packageName: "@carapace/kitchen-sink",
         }),
       )}-lookalike`,
     ],
@@ -1349,27 +1349,27 @@ describe("uninstallPlugin", () => {
       `${path.basename(
         resolvePluginNpmProjectDir({
           npmDir: "/managed/npm",
-          packageName: "@openclaw/kitchen-sink",
+          packageName: "@carapace/kitchen-sink",
         }),
-      )}__openclaw-generation_g-0123456789abcdef`,
+      )}__carapace-generation_g-0123456789abcdef`,
     ],
     [
       "short generation suffix",
-      `${resolvePluginNpmGenerationProjectDirPrefix("@openclaw/kitchen-sink")}g-0123456789abcde`,
+      `${resolvePluginNpmGenerationProjectDirPrefix("@carapace/kitchen-sink")}g-0123456789abcde`,
     ],
     [
       "uppercase generation suffix",
-      `${resolvePluginNpmGenerationProjectDirPrefix("@openclaw/kitchen-sink")}g-0123456789abcdeF`,
+      `${resolvePluginNpmGenerationProjectDirPrefix("@carapace/kitchen-sink")}g-0123456789abcdeF`,
     ],
     [
       "generation suffix lookalike",
-      `${resolvePluginNpmGenerationProjectDirPrefix("@openclaw/kitchen-sink")}g-0123456789abcdef-extra`,
+      `${resolvePluginNpmGenerationProjectDirPrefix("@carapace/kitchen-sink")}g-0123456789abcdef-extra`,
     ],
   ])("preserves a noncanonical npm project root ($name)", async (_name, projectName) => {
     const stateDir = path.join(tempDir, "state");
     const extensionsDir = path.join(stateDir, "extensions");
     const npmRoot = path.join(stateDir, "npm", "projects", projectName);
-    const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(npmRoot, "node_modules", "@carapace", "kitchen-sink");
     const siblingFile = path.join(npmRoot, "must-remain.txt");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(
@@ -1378,7 +1378,7 @@ describe("uninstallPlugin", () => {
         {
           private: true,
           dependencies: {
-            "@openclaw/kitchen-sink": "1.0.0",
+            "@carapace/kitchen-sink": "1.0.0",
           },
         },
         null,
@@ -1392,20 +1392,20 @@ describe("uninstallPlugin", () => {
       recordPluginPackageUninstallPlan(
         {
           config: createPluginConfig({
-            entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+            entries: createSinglePluginEntries("carapace-kitchen-sink-fixture"),
             installs: {
-              "openclaw-kitchen-sink-fixture": {
+              "carapace-kitchen-sink-fixture": {
                 source: "npm",
-                spec: "@openclaw/kitchen-sink@1.0.0",
+                spec: "@carapace/kitchen-sink@1.0.0",
                 installPath: pluginDir,
               },
             },
           }),
-          pluginId: "openclaw-kitchen-sink-fixture",
+          pluginId: "carapace-kitchen-sink-fixture",
           deleteFiles: true,
           extensionsDir,
         },
-        { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+        { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
       ),
     );
 
@@ -1418,7 +1418,7 @@ describe("uninstallPlugin", () => {
       cleanup: {
         kind: "npm",
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@carapace/kitchen-sink",
         rootKind: "isolated-project",
       },
     });
@@ -1441,25 +1441,25 @@ describe("uninstallPlugin", () => {
     await fs.symlink(outsideProjectsDir, path.join(npmDir, "projects"), "dir");
     const projectRoot = resolvePluginNpmProjectDir({
       npmDir,
-      packageName: "@openclaw/kitchen-sink",
+      packageName: "@carapace/kitchen-sink",
     });
-    const pluginDir = path.join(projectRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(projectRoot, "node_modules", "@carapace", "kitchen-sink");
     const sentinel = path.join(projectRoot, "must-remain.txt");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(sentinel, "preserve me");
 
     const result = await uninstallPlugin({
       config: createPluginConfig({
-        entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+        entries: createSinglePluginEntries("carapace-kitchen-sink-fixture"),
         installs: {
-          "openclaw-kitchen-sink-fixture": {
+          "carapace-kitchen-sink-fixture": {
             source: "npm",
-            spec: "@openclaw/kitchen-sink@1.0.0",
+            spec: "@carapace/kitchen-sink@1.0.0",
             installPath: pluginDir,
           },
         },
       }),
-      pluginId: "openclaw-kitchen-sink-fixture",
+      pluginId: "carapace-kitchen-sink-fixture",
       deleteFiles: true,
       extensionsDir,
     });
@@ -1479,14 +1479,14 @@ describe("uninstallPlugin", () => {
     const npmDir = path.join(stateDir, "npm");
     const projectRoot = resolvePluginNpmProjectDir({
       npmDir,
-      packageName: "@openclaw/kitchen-sink",
+      packageName: "@carapace/kitchen-sink",
     });
     const outsideProjectRoot = path.join(tempDir, "outside-project");
-    const pluginDir = path.join(projectRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(projectRoot, "node_modules", "@carapace", "kitchen-sink");
     const outsidePluginDir = path.join(
       outsideProjectRoot,
       "node_modules",
-      "@openclaw",
+      "@carapace",
       "kitchen-sink",
     );
     const sentinel = path.join(outsideProjectRoot, "must-remain.txt");
@@ -1497,16 +1497,16 @@ describe("uninstallPlugin", () => {
 
     const result = await uninstallPlugin({
       config: createPluginConfig({
-        entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+        entries: createSinglePluginEntries("carapace-kitchen-sink-fixture"),
         installs: {
-          "openclaw-kitchen-sink-fixture": {
+          "carapace-kitchen-sink-fixture": {
             source: "npm",
-            spec: "@openclaw/kitchen-sink@1.0.0",
+            spec: "@carapace/kitchen-sink@1.0.0",
             installPath: pluginDir,
           },
         },
       }),
-      pluginId: "openclaw-kitchen-sink-fixture",
+      pluginId: "carapace-kitchen-sink-fixture",
       deleteFiles: true,
       extensionsDir,
     });
@@ -1526,9 +1526,9 @@ describe("uninstallPlugin", () => {
     const npmDir = path.join(stateDir, "npm");
     const projectRoot = resolvePluginNpmProjectDir({
       npmDir,
-      packageName: "@openclaw/kitchen-sink",
+      packageName: "@carapace/kitchen-sink",
     });
-    const pluginDir = path.join(projectRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(projectRoot, "node_modules", "@carapace", "kitchen-sink");
     const packageTarget = path.join(projectRoot, "node_modules", "package-target");
     const sentinel = path.join(projectRoot, "must-remain.txt");
     await fs.mkdir(path.dirname(pluginDir), { recursive: true });
@@ -1542,18 +1542,18 @@ describe("uninstallPlugin", () => {
         {
           config: createPluginConfig({
             installs: {
-              "openclaw-kitchen-sink-fixture": {
+              "carapace-kitchen-sink-fixture": {
                 source: "npm",
-                spec: "@openclaw/kitchen-sink@1.0.0",
+                spec: "@carapace/kitchen-sink@1.0.0",
                 installPath: pluginDir,
               },
             },
           }),
-          pluginId: "openclaw-kitchen-sink-fixture",
+          pluginId: "carapace-kitchen-sink-fixture",
           deleteFiles: true,
           extensionsDir,
         },
-        { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+        { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
       ),
     );
     expect(plan.ok).toBe(true);
@@ -1582,28 +1582,28 @@ describe("uninstallPlugin", () => {
         layout === "canonical"
           ? resolvePluginNpmProjectDir({
               npmDir,
-              packageName: "@openclaw/kitchen-sink",
+              packageName: "@carapace/kitchen-sink",
             })
           : path.join(npmDir, "projects", "noncanonical-race");
-      const pluginDir = path.join(projectRoot, "node_modules", "@openclaw", "kitchen-sink");
+      const pluginDir = path.join(projectRoot, "node_modules", "@carapace", "kitchen-sink");
       await fs.mkdir(pluginDir, { recursive: true });
       const plan = planPluginUninstall(
         recordPluginPackageUninstallPlan(
           {
             config: createPluginConfig({
               installs: {
-                "openclaw-kitchen-sink-fixture": {
+                "carapace-kitchen-sink-fixture": {
                   source: "npm",
-                  spec: "@openclaw/kitchen-sink@1.0.0",
+                  spec: "@carapace/kitchen-sink@1.0.0",
                   installPath: pluginDir,
                 },
               },
             }),
-            pluginId: "openclaw-kitchen-sink-fixture",
+            pluginId: "carapace-kitchen-sink-fixture",
             deleteFiles: true,
             extensionsDir,
           },
-          { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+          { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
         ),
       );
       expect(plan.ok).toBe(true);
@@ -1617,7 +1617,7 @@ describe("uninstallPlugin", () => {
       const outsideTarget =
         layout === "canonical"
           ? outsideProjectRoot
-          : path.join(outsideProjectRoot, "node_modules", "@openclaw", "kitchen-sink");
+          : path.join(outsideProjectRoot, "node_modules", "@carapace", "kitchen-sink");
       const sentinel = path.join(outsideTarget, "must-remain.txt");
       await fs.mkdir(outsideTarget, { recursive: true });
       await fs.writeFile(sentinel, "preserve me");
@@ -1644,10 +1644,10 @@ describe("uninstallPlugin", () => {
         layout === "canonical"
           ? resolvePluginNpmProjectDir({
               npmDir,
-              packageName: "@openclaw/kitchen-sink",
+              packageName: "@carapace/kitchen-sink",
             })
           : path.join(npmDir, "projects", "noncanonical-manifest");
-      const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+      const pluginDir = path.join(npmRoot, "node_modules", "@carapace", "kitchen-sink");
       const manifestPath = path.join(npmRoot, "package.json");
       await fs.mkdir(pluginDir, { recursive: true });
       await fs.writeFile(manifestPath, "{}\n");
@@ -1656,18 +1656,18 @@ describe("uninstallPlugin", () => {
           {
             config: createPluginConfig({
               installs: {
-                "openclaw-kitchen-sink-fixture": {
+                "carapace-kitchen-sink-fixture": {
                   source: "npm",
-                  spec: "@openclaw/kitchen-sink@1.0.0",
+                  spec: "@carapace/kitchen-sink@1.0.0",
                   installPath: pluginDir,
                 },
               },
             }),
-            pluginId: "openclaw-kitchen-sink-fixture",
+            pluginId: "carapace-kitchen-sink-fixture",
             deleteFiles: true,
             extensionsDir,
           },
-          { runtimePluginIds: ["openclaw-kitchen-sink-fixture"] },
+          { runtimePluginIds: ["carapace-kitchen-sink-fixture"] },
         ),
       );
       expect(plan.ok).toBe(true);
@@ -1694,12 +1694,12 @@ describe("uninstallPlugin", () => {
     },
   );
 
-  it("repairs remaining npm plugin openclaw peer links after npm uninstall prunes them", async () => {
+  it("repairs remaining npm plugin carapace peer links after npm uninstall prunes them", async () => {
     const stateDir = path.join(tempDir, "state");
     const npmRoot = path.join(stateDir, "npm");
     const removedPluginDir = path.join(npmRoot, "node_modules", "removed-plugin");
     const peerPluginDir = path.join(npmRoot, "node_modules", "peer-plugin");
-    const peerLink = path.join(peerPluginDir, "node_modules", "openclaw");
+    const peerLink = path.join(peerPluginDir, "node_modules", "carapace");
     await fs.mkdir(removedPluginDir, { recursive: true });
     await fs.mkdir(path.dirname(peerLink), { recursive: true });
     await fs.writeFile(
@@ -1723,7 +1723,7 @@ describe("uninstallPlugin", () => {
         {
           name: "peer-plugin",
           version: "1.0.0",
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { carapace: ">=2026.0.0" },
         },
         null,
         2,
@@ -1733,7 +1733,7 @@ describe("uninstallPlugin", () => {
     runCommandWithTimeoutMock.mockImplementationOnce(async (argv: string[]) => {
       await fs.rm(peerLink, { recursive: true, force: true });
       if (!argv.includes("--legacy-peer-deps")) {
-        await fs.mkdir(path.join(npmRoot, "node_modules", "openclaw"), { recursive: true });
+        await fs.mkdir(path.join(npmRoot, "node_modules", "carapace"), { recursive: true });
       }
       return {
         code: 0,
@@ -1757,7 +1757,7 @@ describe("uninstallPlugin", () => {
 
     expect(applied).toEqual({ directoryRemoved: true, warnings: [] });
     await expectPathAccessState(removedPluginDir, "missing");
-    await expectPathAccessState(path.join(npmRoot, "node_modules", "openclaw"), "missing");
+    await expectPathAccessState(path.join(npmRoot, "node_modules", "carapace"), "missing");
     await expect(fs.lstat(peerLink).then((stat) => stat.isSymbolicLink())).resolves.toBe(true);
   });
 
@@ -1777,7 +1777,7 @@ describe("uninstallPlugin", () => {
             "removed-plugin": "1.0.0",
             "runtime-peer": "1.0.0",
           },
-          openclaw: {
+          carapace: {
             managedPeerDependencies: ["runtime-peer"],
           },
         },
@@ -1871,11 +1871,11 @@ describe("uninstallPlugin", () => {
       await fs.readFile(path.join(npmRoot, "package.json"), "utf8"),
     ) as {
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      carapace?: { managedPeerDependencies?: string[] };
     };
     expect(rootManifest.dependencies?.["removed-plugin"]).toBeUndefined();
     expect(rootManifest.dependencies?.["runtime-peer"]).toBeUndefined();
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain("runtime-peer");
+    expect(rootManifest.carapace?.managedPeerDependencies ?? []).not.toContain("runtime-peer");
     expect(runCommandWithTimeoutMock).toHaveBeenCalledTimes(3);
   });
 
@@ -1895,7 +1895,7 @@ describe("uninstallPlugin", () => {
               "node-domexception": "npm:@nolyfill/domexception@1.0.28",
               "werift-ice@0.2.2>ip": "npm:neoip@3.1.0",
             },
-            openclaw: {
+            carapace: {
               managedOverrides: ["axios", "node-domexception", "werift-ice@0.2.2>ip"],
               managedPeerDependencies: ["stale-peer"],
             },
@@ -1975,7 +1975,7 @@ describe("uninstallPlugin", () => {
       await expect(
         pruneManagedNpmPeerDependenciesAfterUninstall({
           npmRoot,
-          packageName: "@openclaw/kitchen-sink",
+          packageName: "@carapace/kitchen-sink",
           managedOverrides: {
             axios: "1.18.1",
             hono: "4.12.32",
@@ -1990,7 +1990,7 @@ describe("uninstallPlugin", () => {
       ) as {
         dependencies?: Record<string, string>;
         overrides?: Record<string, unknown>;
-        openclaw?: {
+        carapace?: {
           managedOverrides?: string[];
           managedPeerDependencies?: string[];
         };
@@ -2002,10 +2002,10 @@ describe("uninstallPlugin", () => {
         ...(!rejectAliases ? { "node-domexception": "npm:@nolyfill/domexception@1.0.28" } : {}),
       };
       expect(manifest.overrides).toEqual(expectedOverrides);
-      expect(manifest.openclaw?.managedOverrides).toEqual(
+      expect(manifest.carapace?.managedOverrides).toEqual(
         Object.keys(expectedOverrides).toSorted(),
       );
-      expect(manifest.openclaw?.managedPeerDependencies).toBeUndefined();
+      expect(manifest.carapace?.managedPeerDependencies).toBeUndefined();
     },
   );
 
@@ -2059,12 +2059,12 @@ describe("uninstallPlugin", () => {
     await expect(
       pruneManagedNpmPeerDependenciesAfterUninstall({
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@carapace/kitchen-sink",
         managedOverrides: { axios: "1.18.1" },
         runCommand,
       }),
     ).resolves.toContain(
-      "Failed to prune managed peer dependencies after uninstalling @openclaw/kitchen-sink: npm error code EINVALIDTAGNAME",
+      "Failed to prune managed peer dependencies after uninstalling @carapace/kitchen-sink: npm error code EINVALIDTAGNAME",
     );
     expect(cleanupAttempts).toBe(1);
   });
@@ -2074,7 +2074,7 @@ describe("uninstallPlugin", () => {
     const npmRoot = path.join(stateDir, "npm");
     const pluginDir = path.join(npmRoot, "node_modules", "missing-plugin");
     const peerPluginDir = path.join(npmRoot, "node_modules", "peer-plugin");
-    const peerLink = path.join(peerPluginDir, "node_modules", "openclaw");
+    const peerLink = path.join(peerPluginDir, "node_modules", "carapace");
     await fs.mkdir(path.dirname(peerLink), { recursive: true });
     await fs.writeFile(
       path.join(npmRoot, "package.json"),
@@ -2096,7 +2096,7 @@ describe("uninstallPlugin", () => {
         {
           name: "peer-plugin",
           version: "1.0.0",
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { carapace: ">=2026.0.0" },
         },
         null,
         2,

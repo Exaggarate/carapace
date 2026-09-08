@@ -1,6 +1,6 @@
 // Lmstudio tests cover runtime plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
-import { CUSTOM_LOCAL_AUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
+import { CUSTOM_LOCAL_AUTH_MARKER } from "carapace/plugin-sdk/provider-auth";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { LMSTUDIO_LOCAL_API_KEY_PLACEHOLDER } from "./defaults.js";
 import {
@@ -12,8 +12,8 @@ import {
 
 const resolveApiKeyForProviderMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth-runtime")>();
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/provider-auth-runtime")>();
   return {
     ...actual,
     resolveApiKeyForProvider: (...args: unknown[]) => resolveApiKeyForProviderMock(...args),
@@ -21,7 +21,7 @@ vi.mock("openclaw/plugin-sdk/provider-auth-runtime", async (importOriginal) => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/provider-auth-runtime");
+  vi.doUnmock("carapace/plugin-sdk/provider-auth-runtime");
   vi.resetModules();
 });
 
@@ -29,7 +29,7 @@ function buildLmstudioConfig(overrides?: {
   apiKey?: unknown;
   headers?: unknown;
   auth?: "api-key";
-}): OpenClawConfig {
+}): CarapaceConfig {
   return {
     models: {
       providers: {
@@ -43,7 +43,7 @@ function buildLmstudioConfig(overrides?: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("lmstudio-runtime", () => {
@@ -62,7 +62,7 @@ describe("lmstudio-runtime", () => {
       resolveLmstudioRuntimeApiKey({
         config: buildLmstudioConfig({ auth: "api-key" }),
       }),
-    ).rejects.toThrow('or run "openclaw models auth login --provider lmstudio".');
+    ).rejects.toThrow('or run "carapace models auth login --provider lmstudio".');
   });
 
   it("falls back to configured env marker key when profile resolution fails", async () => {

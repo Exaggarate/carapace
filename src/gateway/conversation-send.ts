@@ -8,7 +8,7 @@ import {
   resolveConversationRegistryScope,
 } from "../config/sessions/conversation-registry.js";
 import { resolveConversationRouteFingerprint } from "../config/sessions/conversation-route-fingerprint.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   ConversationDeliveryRejectedError,
   defaultConversationDeliveryDeps,
@@ -37,8 +37,8 @@ const defaultDeps: ConversationSendDeps = {
 /** Performs one durable conversation send inside the Gateway channel owner. */
 export async function runGatewayConversationSend(
   params: {
-    config: OpenClawConfig;
-    readCurrentConfig?: () => OpenClawConfig;
+    config: CarapaceConfig;
+    readCurrentConfig?: () => CarapaceConfig;
     agentId: string;
     senderIsOwner: boolean;
     sourceSessionKey?: string;

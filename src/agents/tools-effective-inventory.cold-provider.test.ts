@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { setRuntimeConfigSnapshot } from "../config/config.js";
 import { applySessionEntryLifecycleMutation } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createToolsEffectiveHandlers,
   testing,
@@ -27,9 +27,9 @@ import {
 } from "../plugins/test-helpers/cold-plugin-fixtures.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolveModelAsync } from "./embedded-agent-runner/model.js";
 import { acquireReadOnlyPreparedModelRuntime } from "./prepared-model-runtime.js";
 import { resetPreparedModelRuntimeSnapshotsForTest } from "./prepared-model-runtime.test-support.js";
@@ -44,7 +44,7 @@ vi.mock("./agent-tools.js", () => {
     throw new Error("Inventory must not execute tools");
   };
   return {
-    createOpenClawCodingTools: () =>
+    createCarapaceCodingTools: () =>
       [
         {
           name: "healthy_tool",
@@ -73,20 +73,20 @@ const throwingId = "chat-throws";
 function ownerCount() {
   // Reuse the existing owner API without importing the harness that mocks preparation.
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.preparedModelRuntimeTestApi")
+    Symbol.for("carapace.preparedModelRuntimeTestApi")
   ] as { getPreparedModelRuntimeOwnerCountForTest(): number };
   return api.getPreparedModelRuntimeOwnerCountForTest();
 }
 
 async function withColdFixture(run: (fixture: ReturnType<typeof createFixture>) => Promise<void>) {
-  await withOpenClawTestState(
-    { prefix: "openclaw-cold-inventory-", layout: "split" },
+  await withCarapaceTestState(
+    { prefix: "carapace-cold-inventory-", layout: "split" },
     async (state) => {
       const fixture = createFixture(state);
       await withEnvAsync(
         {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: fixture.emptyBundledRoot,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: fixture.emptyBundledRoot,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         },
         async () => {
           await resetPreparedModelRuntimeSnapshotsForTest();
@@ -113,7 +113,7 @@ async function withColdFixture(run: (fixture: ReturnType<typeof createFixture>) 
   );
 }
 
-function createFixture(state: OpenClawTestState) {
+function createFixture(state: CarapaceTestState) {
   const root = state.root;
   const selectedRoot = path.join(root, "selected");
   const unrelatedRoot = path.join(root, "unrelated");
@@ -180,7 +180,7 @@ module.exports = {
 `,
     "utf8",
   );
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     agents: {
       defaults: { model: { primary: `${provider}/${pinnedId}` }, workspace: workspaceDir },
     },
@@ -316,7 +316,7 @@ describe("cold dynamic-model effective inventory", () => {
     { policy: "restrictive allow omission", plugins: { allow: ["unrelated-inventory-plugin"] } },
   ])("honors $policy despite an ambient competing provider", async ({ plugins }) => {
     await withColdFixture(async (fixture) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         ...fixture.config,
         plugins: { ...fixture.config.plugins, ...plugins },
       };

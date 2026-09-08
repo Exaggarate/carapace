@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { threadId } from "node:worker_threads";
 import { expect, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createGatewayChatMetadataRuntime } from "../gateway/server-methods/chat-metadata-runtime.js";
 import {
   buildModelsListResult,
@@ -43,15 +43,15 @@ export const PROFILE_ID = `${SHARED_AUTH_PROVIDER_ID}:named`;
 export const MATERIALIZED_SECRET = "materialized-worker-secret-not-real";
 const UNRELATED_SECRET = "unrelated-worker-secret-not-real";
 export const REF_ONLY_API_PROVIDER_ID = `${PROVIDER_ID}-ref-api`;
-export const REF_ONLY_API_ENV = "OPENCLAW_WORKER_REF_ONLY_API_KEY";
+export const REF_ONLY_API_ENV = "CARAPACE_WORKER_REF_ONLY_API_KEY";
 export const REF_ONLY_TOKEN_PROVIDER_ID = `${PROVIDER_ID}-ref-token`;
-export const REF_ONLY_TOKEN_ENV = "OPENCLAW_WORKER_REF_ONLY_TOKEN";
+export const REF_ONLY_TOKEN_ENV = "CARAPACE_WORKER_REF_ONLY_TOKEN";
 export const DURABLE_AUTH_PROVIDER_ID = `${PROVIDER_ID}-durable-auth`;
 export const DURABLE_AUTH_KEY = "post-startup-durable-key-not-real";
 export const EXTERNAL_AUTH_PROFILE_ID = `${PROVIDER_ID}:external`;
-export const EXTERNAL_AUTH_PATH_ENV = "OPENCLAW_WORKER_EXTERNAL_AUTH_PATH";
+export const EXTERNAL_AUTH_PATH_ENV = "CARAPACE_WORKER_EXTERNAL_AUTH_PATH";
 export const UNRELATED_PLUGIN_ID = "worker-catalog-unrelated";
-export const UNRELATED_PLUGIN_WORKER_MARKER_ENV = "OPENCLAW_WORKER_UNRELATED_PLUGIN_MARKER";
+export const UNRELATED_PLUGIN_WORKER_MARKER_ENV = "CARAPACE_WORKER_UNRELATED_PLUGIN_MARKER";
 
 export function writeUnrelatedFixturePlugin(root: string): string {
   const pluginDir = path.join(root, "unrelated-plugin");
@@ -69,7 +69,7 @@ module.exports = { id: ${JSON.stringify(UNRELATED_PLUGIN_ID)}, register() {} };
     "utf8",
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: UNRELATED_PLUGIN_ID,
       configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -232,11 +232,11 @@ module.exports = {
         },
       },
       async augmentModelCatalog(context) {
-        const marker = process.env.OPENCLAW_WORKER_CATALOG_MARKER;
+        const marker = process.env.CARAPACE_WORKER_CATALOG_MARKER;
         const invocation = fs.existsSync(marker)
           ? fs.readFileSync(marker, "utf8").split("start\\n").length
           : 1;
-        fs.appendFileSync(process.env.OPENCLAW_WORKER_CATALOG_MARKER, "start\\n");
+        fs.appendFileSync(process.env.CARAPACE_WORKER_CATALOG_MARKER, "start\\n");
         const barrier = marker + ".hold";
         if (fs.existsSync(barrier)) {
           await new Promise((resolve) => {
@@ -254,7 +254,7 @@ module.exports = {
           entry.provider === ${JSON.stringify(PROVIDER_ID)} && entry.id === "sqlite-model");
         const hasShared = context.resolveProviderApiKey(${JSON.stringify(SHARED_AUTH_PROVIDER_ID)}).apiKey === ${JSON.stringify(MATERIALIZED_SECRET)};
         const hasUnrelated = context.resolveProviderApiKey("unrelated-provider").apiKey === ${JSON.stringify(UNRELATED_SECRET)};
-        fs.appendFileSync(process.env.OPENCLAW_WORKER_CATALOG_MARKER, "done\\n");
+        fs.appendFileSync(process.env.CARAPACE_WORKER_CATALOG_MARKER, "done\\n");
         return [{
           provider: ${JSON.stringify(PROVIDER_ID)},
           id: \`proof-refresh-\${invocation}-sqlite-\${hasSqlite}-shared-\${hasShared}-unrelated-\${hasUnrelated}\`,
@@ -290,7 +290,7 @@ module.exports = {
     pluginFile = sourceFile;
   }
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: PLUGIN_ID,
       providers: [PROVIDER_ID, DISCOVERED_HARNESS_ID, MISSING_AUTH_HARNESS_ID],
@@ -328,7 +328,7 @@ export function createCatalogFixture(
     asyncSyntheticAuth?: boolean;
   },
 ) {
-  const root = makeTempDir("openclaw-model-catalog-worker-");
+  const root = makeTempDir("carapace-model-catalog-worker-");
   const stateDir = path.join(root, "state");
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   const workspaceDir = path.join(root, "workspace");
@@ -340,9 +340,9 @@ export function createCatalogFixture(
   fs.writeFileSync(externalAuthPath, "A", "utf8");
   const env = {
     ...process.env,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_WORKER_CATALOG_MARKER: marker,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_WORKER_CATALOG_MARKER: marker,
     [EXTERNAL_AUTH_PATH_ENV]: externalAuthPath,
     ...envOverride,
     [REF_ONLY_API_ENV]: "ref-only-api-secret-not-real",
@@ -362,7 +362,7 @@ export function createCatalogFixture(
       load: { paths: [pluginFile] },
       entries: { [PLUGIN_ID]: { enabled: true } },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   replaceRuntimeAuthProfileStoreSnapshots([
     {
       agentDir,
@@ -415,7 +415,7 @@ export function createCatalogFixture(
 }
 
 async function expectNativeHarnessModelsPublished(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   metadataSnapshot: PluginMetadataSnapshot;
   snapshot: PreparedModelRuntimeSnapshot;
 }): Promise<void> {
@@ -524,7 +524,7 @@ export async function expectNativeHarnessModelsPublishedFromWorker(params: {
   retireAfterTest: (retire: () => void) => void;
 }): Promise<void> {
   const inventoryOwner: Pick<PreparedModelRuntimeOwner, "catalogInventory"> = {};
-  const root = params.makeTempDir("openclaw-native-model-catalog-worker-");
+  const root = params.makeTempDir("carapace-native-model-catalog-worker-");
   const stateDir = path.join(root, "state");
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   const workspaceDir = path.join(root, "workspace");
@@ -539,8 +539,8 @@ export async function expectNativeHarnessModelsPublishedFromWorker(params: {
         models: {
           [`${PROVIDER_ID}/sqlite-model`]: { agentRuntime: { id: HARNESS_ID } },
           [`${PROVIDER_ID}/account-scoped-model`]: { agentRuntime: { id: HARNESS_ID } },
-          [`${PROVIDER_ID}/configured-dynamic-model`]: { agentRuntime: { id: "openclaw" } },
-          [`${PROVIDER_ID}/unresolved-configured-model`]: { agentRuntime: { id: "openclaw" } },
+          [`${PROVIDER_ID}/configured-dynamic-model`]: { agentRuntime: { id: "carapace" } },
+          [`${PROVIDER_ID}/unresolved-configured-model`]: { agentRuntime: { id: "carapace" } },
         },
       },
     },
@@ -549,12 +549,12 @@ export async function expectNativeHarnessModelsPublishedFromWorker(params: {
       load: { paths: [pluginFile] },
       entries: { [PLUGIN_ID]: { enabled: true } },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const env = {
     ...process.env,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_WORKER_CATALOG_MARKER: marker,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_WORKER_CATALOG_MARKER: marker,
     [EXTERNAL_AUTH_PATH_ENV]: "",
     [REF_ONLY_API_ENV]: "ref-only-api-secret-not-real",
     [REF_ONLY_TOKEN_ENV]: "ref-only-token-secret-not-real",

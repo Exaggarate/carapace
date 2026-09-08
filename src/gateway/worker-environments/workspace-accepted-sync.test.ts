@@ -109,10 +109,10 @@ describe("accepted workspace publication", () => {
   it.skipIf(process.platform === "win32")(
     "waits for the staging receiver group before promoting its inodes live",
     async () => {
-      const root = tempDirs.make("openclaw-accepted-receiver-lock-");
+      const root = tempDirs.make("carapace-accepted-receiver-lock-");
       let home = path.join(root, "home");
       const local = path.join(root, "local");
-      const workspaceRelative = ".openclaw-worker/workspaces/env/session/1";
+      const workspaceRelative = ".carapace-worker/workspaces/env/session/1";
       const bin = path.join(root, "bin");
       const gate = path.join(root, "receiver-gate");
       const receiverMarker = path.join(root, "receiver-marker");
@@ -129,7 +129,7 @@ describe("accepted workspace publication", () => {
       const gateController = await fs.open(gate, "r+");
       await fs.writeFile(
         path.join(bin, "rsync"),
-        '#!/bin/sh\nset -eu\nfor destination do :; done\nprintf "staged\\n" > "$destination/result.txt"\n( : > "$OPENCLAW_TEST_RECEIVER_MARKER"; read -r _ < "$OPENCLAW_TEST_RECEIVER_GATE"; printf "local\\n" > "$destination/result.txt" ) </dev/null >/dev/null 2>&1 &\nexit 0\n',
+        '#!/bin/sh\nset -eu\nfor destination do :; done\nprintf "staged\\n" > "$destination/result.txt"\n( : > "$CARAPACE_TEST_RECEIVER_MARKER"; read -r _ < "$CARAPACE_TEST_RECEIVER_GATE"; printf "local\\n" > "$destination/result.txt" ) </dev/null >/dev/null 2>&1 &\nexit 0\n',
         { mode: 0o755 },
       );
 
@@ -153,9 +153,9 @@ describe("accepted workspace publication", () => {
       const env = {
         ...process.env,
         HOME: home,
-        OPENCLAW_TEST_RECEIVER_PATH: `${bin}:${process.env.PATH ?? ""}`,
-        OPENCLAW_TEST_RECEIVER_GATE: gate,
-        OPENCLAW_TEST_RECEIVER_MARKER: receiverMarker,
+        CARAPACE_TEST_RECEIVER_PATH: `${bin}:${process.env.PATH ?? ""}`,
+        CARAPACE_TEST_RECEIVER_GATE: gate,
+        CARAPACE_TEST_RECEIVER_MARKER: receiverMarker,
       };
       const runWorkspaceCommand = async (command: WorkerWorkspaceCommand): Promise<SpawnResult> => {
         if (command.argv[2] !== REMOTE_WORKSPACE_ACCEPTED_TRANSACTION_JS) {
@@ -226,7 +226,7 @@ describe("accepted workspace publication", () => {
       try {
         await waitForFile(applyMarker, 10_000);
         const workspaceKey = createHash("sha256").update(workspace).digest("hex");
-        const lock = path.join(path.dirname(workspace), `.openclaw-accepted-lock-${workspaceKey}`);
+        const lock = path.join(path.dirname(workspace), `.carapace-accepted-lock-${workspaceKey}`);
         const [ownerName] = await fs.readdir(lock);
         const receiverPid = Number(
           /^owner\.receiver\.[a-f0-9]{32}\.([1-9][0-9]*)\.[1-9][0-9]*\.[a-f0-9]{32}$/u.exec(
@@ -265,7 +265,7 @@ describe("accepted workspace publication", () => {
   );
 
   it("settles a still-running apply after SSH loses its exit status", async () => {
-    const root = tempDirs.make("openclaw-accepted-ssh-loss-");
+    const root = tempDirs.make("carapace-accepted-ssh-loss-");
     const local = path.join(root, "local");
     let workspace = path.join(root, "workspace");
     const gate = path.join(root, "gate.fifo");
@@ -287,10 +287,10 @@ const renameSync = fs.renameSync;
 let gated = false;
 fs.renameSync = function(source, destination) {
   const value = renameSync.apply(this, arguments);
-  if (!gated && process.argv[1] === "apply" && source === process.env.OPENCLAW_TEST_GATE_SOURCE && destination.includes(path.sep + "backup" + path.sep)) {
+  if (!gated && process.argv[1] === "apply" && source === process.env.CARAPACE_TEST_GATE_SOURCE && destination.includes(path.sep + "backup" + path.sep)) {
     gated = true;
-    fs.writeFileSync(process.env.OPENCLAW_TEST_APPLY_MARKER, "");
-    fs.readFileSync(process.env.OPENCLAW_TEST_GATE);
+    fs.writeFileSync(process.env.CARAPACE_TEST_APPLY_MARKER, "");
+    fs.readFileSync(process.env.CARAPACE_TEST_GATE);
   }
   return value;
 };
@@ -298,9 +298,9 @@ fs.renameSync = function(source, destination) {
     );
     const env = {
       ...process.env,
-      OPENCLAW_TEST_GATE: gate,
-      OPENCLAW_TEST_GATE_SOURCE: path.join(workspace, "result.txt"),
-      OPENCLAW_TEST_APPLY_MARKER: applyMarker,
+      CARAPACE_TEST_GATE: gate,
+      CARAPACE_TEST_GATE_SOURCE: path.join(workspace, "result.txt"),
+      CARAPACE_TEST_APPLY_MARKER: applyMarker,
     };
     const remote = manifest("worker\n");
     const accepted = manifest("local\n");
@@ -436,12 +436,12 @@ fs.renameSync = function(source, destination) {
     ]);
     expect(transactionCalls.every((entry) => entry.transportRetry === "never")).toBe(true);
     expect(
-      (await fs.readdir(root)).filter((name) => name.startsWith(".openclaw-accepted-")),
+      (await fs.readdir(root)).filter((name) => name.startsWith(".carapace-accepted-")),
     ).toEqual([]);
   });
 
   it("leaves publication pending when settle reaches its lock deadline behind a live apply", async () => {
-    const root = tempDirs.make("openclaw-accepted-settle-deadline-");
+    const root = tempDirs.make("carapace-accepted-settle-deadline-");
     const local = path.join(root, "local");
     let workspace = path.join(root, "workspace");
     const gate = path.join(root, "gate.fifo");
@@ -474,10 +474,10 @@ const renameSync = fs.renameSync;
 let gated = false;
 fs.renameSync = function(source, destination) {
   const value = renameSync.apply(this, arguments);
-  if (!gated && process.argv[1] === "apply" && source === process.env.OPENCLAW_TEST_GATE_SOURCE && destination.includes(path.sep + "backup" + path.sep)) {
+  if (!gated && process.argv[1] === "apply" && source === process.env.CARAPACE_TEST_GATE_SOURCE && destination.includes(path.sep + "backup" + path.sep)) {
     gated = true;
-    fs.writeFileSync(process.env.OPENCLAW_TEST_APPLY_MARKER, "");
-    fs.readFileSync(process.env.OPENCLAW_TEST_GATE);
+    fs.writeFileSync(process.env.CARAPACE_TEST_APPLY_MARKER, "");
+    fs.readFileSync(process.env.CARAPACE_TEST_GATE);
   }
   return value;
 };
@@ -496,9 +496,9 @@ Atomics.wait = function(waitArray, index, value, timeout) {
     ]);
     const env = {
       ...process.env,
-      OPENCLAW_TEST_GATE: gate,
-      OPENCLAW_TEST_GATE_SOURCE: path.join(workspace, "result.txt"),
-      OPENCLAW_TEST_APPLY_MARKER: applyMarker,
+      CARAPACE_TEST_GATE: gate,
+      CARAPACE_TEST_GATE_SOURCE: path.join(workspace, "result.txt"),
+      CARAPACE_TEST_APPLY_MARKER: applyMarker,
     };
     const remote = manifest("worker\n");
     const accepted = manifest("local\n");
@@ -596,7 +596,7 @@ Atomics.wait = function(waitArray, index, value, timeout) {
         "worker\n",
       );
       expect(
-        (await fs.readdir(root)).filter((name) => name.startsWith(".openclaw-accepted-")),
+        (await fs.readdir(root)).filter((name) => name.startsWith(".carapace-accepted-")),
       ).toEqual([]);
     } finally {
       await releaseApply().catch(() => undefined);

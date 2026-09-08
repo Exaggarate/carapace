@@ -9,12 +9,12 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   AUDIT_EVENT_SCHEMA_VERSION,
   AUDIT_INBOUND_MESSAGE_COMPLETED_REASONS,
@@ -42,8 +42,8 @@ import {
   recordConfirmedTerminalMessageExecutionBinding,
 } from "./message-execution-binding.js";
 
-type AuditEventsTable = OpenClawStateKyselyDatabase["audit_events"];
-type AuditDatabase = Pick<OpenClawStateKyselyDatabase, "audit_events">;
+type AuditEventsTable = CarapaceStateKyselyDatabase["audit_events"];
+type AuditDatabase = Pick<CarapaceStateKyselyDatabase, "audit_events">;
 type AuditEventRow = Selectable<AuditEventsTable>;
 
 export const AUDIT_EVENT_RETENTION_MS = 30 * 24 * 60 * 60_000;
@@ -608,7 +608,7 @@ function pruneAuditEventsAfterInsert(db: DatabaseSync, now: number): void {
 /** Persist one projected event idempotently and prune fixed retention bounds. */
 export function recordAuditEvent(
   input: AuditEventInput,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): AuditEventRecord | undefined {
   if (isOutboundMessageProgressInput(input)) {
     throw new Error("outbound message progress belongs to its companion store");
@@ -622,7 +622,7 @@ export function recordAuditEvent(
   }
   let countCacheDatabase: DatabaseSync | undefined;
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       countCacheDatabase = db;
       // Read losslessly so Node's rowid decoding cannot preempt the safe-integer guard.
       const insert = executeSqliteQueryTakeFirstSync(
@@ -669,9 +669,9 @@ export function listAuditEvents(params: {
   cursor?: number;
   limit: number;
   now?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): AuditEventListPage {
-  const { db } = openOpenClawStateDatabase(params.database);
+  const { db } = openCarapaceStateDatabase(params.database);
   const filters = params.filters ?? {};
   const retainedAfter = (params.now ?? Date.now()) - AUDIT_EVENT_RETENTION_MS;
   let query = getAuditKysely(db)
@@ -730,10 +730,10 @@ export function listAuditEvents(params: {
 export function pruneExpiredAuditEvents(
   params: {
     now?: number;
-    database?: OpenClawStateDatabaseOptions;
+    database?: CarapaceStateDatabaseOptions;
   } = {},
 ): number {
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runCarapaceStateWriteTransaction(({ db }) => {
     const deleted = deleteExpiredAuditEvents(db, params.now ?? Date.now());
     auditEventRowCounts.delete(db);
     return Number(deleted.numAffectedRows ?? 0n);

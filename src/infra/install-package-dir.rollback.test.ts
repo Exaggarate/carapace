@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import {
   installPackageDir,
@@ -19,7 +19,7 @@ import {
 
 describe("installPackageDir rollback", () => {
   const fixtureRootTracker = createSuiteTempRootTracker({
-    prefix: "openclaw-install-package-dir-rollback-",
+    prefix: "carapace-install-package-dir-rollback-",
   });
 
   afterEach(async () => {
@@ -36,7 +36,7 @@ describe("installPackageDir rollback", () => {
       if (
         !denied &&
         normalizeComparablePath(String(from)) === normalizeComparablePath(targetDir) &&
-        path.basename(path.dirname(String(to))) === ".openclaw-install-backups"
+        path.basename(path.dirname(String(to))) === ".carapace-install-backups"
       ) {
         denied = true;
         throw Object.assign(new Error("Windows sharing violation"), { code: "EPERM" });
@@ -102,7 +102,7 @@ describe("installPackageDir rollback", () => {
       if (
         !revoked &&
         path.basename(String(args[0])).startsWith(".fs-safe-move-") &&
-        path.basename(path.dirname(String(args[1]))) === ".openclaw-install-backups"
+        path.basename(path.dirname(String(args[1]))) === ".carapace-install-backups"
       ) {
         await fs.mkdir(targetDir, { recursive: true });
         await fs.writeFile(path.join(targetDir, "successor.txt"), "successor-owned");
@@ -246,7 +246,7 @@ describe("installPackageDir rollback", () => {
         release.resolve();
         await original.catch(() => undefined);
         await rollback.catch(() => undefined);
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );
@@ -321,7 +321,7 @@ describe("installPackageDir rollback", () => {
       await transaction.rollback();
       expect(await fs.readFile(path.join(targetDir, "marker.txt"), "utf8")).toBe("old");
       expect(await fs.readdir(path.dirname(backupDir))).toEqual([]);
-      expect(await listMatchingDirs(installBaseDir, ".openclaw-install-rollback-")).toEqual([]);
+      expect(await listMatchingDirs(installBaseDir, ".carapace-install-rollback-")).toEqual([]);
     },
   );
 
@@ -481,7 +481,7 @@ describe("installPackageDir rollback", () => {
         },
       );
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 });

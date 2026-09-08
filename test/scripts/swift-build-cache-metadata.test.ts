@@ -58,7 +58,7 @@ function setTime(time: bigint, ...files: string[]) {
 }
 
 function fixture() {
-  const root = tempDirs.make("openclaw-swift-cache-metadata-");
+  const root = tempDirs.make("carapace-swift-cache-metadata-");
   mkdirSync(path.join(root, "apps/macos/.build"), { recursive: true });
   const source = writeInput(root, sourcePath);
   chmodSync(source, 0o644);
@@ -70,25 +70,25 @@ describe.skipIf(process.platform === "win32")("Swift build-cache input metadata"
   it("restores original nanoseconds only for byte-identical current inputs", () => {
     const { root, source, metadata } = fixture();
     const sharedFixture =
-      "apps/shared/OpenClawKit/Tests/OpenClawKitTests/GatewayTLSStoreFixture.swift";
+      "apps/shared/CarapaceKit/Tests/CarapaceKitTests/GatewayTLSStoreFixture.swift";
     const unchanged = [
       sourcePath,
       "apps/macos/Tests/FeatureTests.swift",
-      "apps/shared/OpenClawKit/Sources/Shared.swift",
-      "apps/shared/OpenClawMLXTTSProtocol/Sources/OpenClawMLXTTSProtocol/MLXTTSProtocol.swift",
+      "apps/shared/CarapaceKit/Sources/Shared.swift",
+      "apps/shared/CarapaceMLXTTSProtocol/Sources/CarapaceMLXTTSProtocol/MLXTTSProtocol.swift",
       sharedFixture,
       "apps/swabble/Sources/Voice.swift",
       "apps/macos/.build/checkouts/dependency/Sources/Library.swift",
       "apps/macos/Package.swift",
       "apps/macos/Package.resolved",
-      "apps/shared/OpenClawKit/Package.swift",
-      "apps/shared/OpenClawMLXTTSProtocol/Package.swift",
+      "apps/shared/CarapaceKit/Package.swift",
+      "apps/shared/CarapaceMLXTTSProtocol/Package.swift",
       "apps/swabble/Package.swift",
     ];
     setTime(originalTime, ...unchanged.slice(1).map((relative) => writeInput(root, relative)));
     const sharedFixtureLink = path.join(
       root,
-      "apps/macos/Tests/OpenClawIPCTests/GatewayTLSStoreFixture.swift",
+      "apps/macos/Tests/CarapaceIPCTests/GatewayTLSStoreFixture.swift",
     );
     mkdirSync(path.dirname(sharedFixtureLink), { recursive: true });
     symlinkSync(
@@ -161,7 +161,7 @@ describe.skipIf(process.platform === "win32")("Swift build-cache input metadata"
     const { root, source, metadata } = fixture();
     run(root, "record");
     const artifact = JSON.parse(readFileSync(metadata, "utf8"));
-    const outside = tempDirs.make("openclaw-swift-cache-outside-");
+    const outside = tempDirs.make("carapace-swift-cache-outside-");
     const external = writeInput(outside, "Feature.swift");
     for (const relative of [
       external,

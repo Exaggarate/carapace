@@ -9,14 +9,14 @@ describe("normalizeWindowsArgv", () => {
     try {
       expect(
         normalizeWindowsArgv([
-          "openclaw",
+          "carapace",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
           "status",
         ]),
       ).toEqual([
-        "openclaw",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "carapace",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
         "status",
       ]);
     } finally {
@@ -29,16 +29,16 @@ describe("normalizeWindowsArgv", () => {
     try {
       expect(
         normalizeWindowsArgv([
-          "openclaw",
+          "carapace",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
           "agent",
           "--message",
           "debug node.exe-wrapper startup",
         ]),
       ).toEqual([
-        "openclaw",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "carapace",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
         "agent",
         "--message",
         "debug node.exe-wrapper startup",
@@ -55,13 +55,13 @@ describe("normalizeWindowsArgv", () => {
         normalizeWindowsArgv([
           "C:\\Program Files\\nodejs\\node.exe",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
           "debug node.exe-wrapper startup",
           "--verbose",
         ]),
       ).toEqual([
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js",
         "debug node.exe-wrapper startup",
         "--verbose",
       ]);
@@ -73,8 +73,8 @@ describe("normalizeWindowsArgv", () => {
   it("preserves exact node.exe option values outside the launcher prefix", () => {
     const platform = mockProcessPlatform("win32");
     try {
-      expect(normalizeWindowsArgv(["openclaw", "run", "--message", "node.exe"])).toEqual([
-        "openclaw",
+      expect(normalizeWindowsArgv(["carapace", "run", "--message", "node.exe"])).toEqual([
+        "carapace",
         "run",
         "--message",
         "node.exe",
@@ -90,13 +90,13 @@ describe("normalizeWindowsArgv", () => {
       expect(
         normalizeWindowsArgv([
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\pkg\\openclaw.mjs",
+          "C:\\pkg\\carapace.mjs",
           "node.exe",
           "--help",
         ]),
       ).toEqual([
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\pkg\\openclaw.mjs",
+        "C:\\pkg\\carapace.mjs",
         "node.exe",
         "--help",
       ]);
@@ -112,13 +112,13 @@ describe("normalizeWindowsArgv", () => {
         normalizeWindowsArgv([
           "C:\\Program Files\\nodejs\\node.exe",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\pkg\\openclaw.mjs",
+          "C:\\pkg\\carapace.mjs",
           "node.exe",
           "--help",
         ]),
       ).toEqual([
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\pkg\\openclaw.mjs",
+        "C:\\pkg\\carapace.mjs",
         "node.exe",
         "--help",
       ]);
@@ -128,7 +128,7 @@ describe("normalizeWindowsArgv", () => {
   });
 
   it("does not normalize POSIX argv", () => {
-    const argv = ["/usr/bin/node", "/opt/openclaw/openclaw.mjs", "node.exe", "--help"];
+    const argv = ["/usr/bin/node", "/opt/carapace/carapace.mjs", "node.exe", "--help"];
     expect(normalizeWindowsArgv(argv, { platform: "linux" })).toBe(argv);
   });
 });

@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/xiaomi-provider",
+  "name": "@carapace/xiaomi-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw Xiaomi provider plugin.",
+  "description": "Carapace Xiaomi provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/xiaomi-provider",
-      "npmSpec": "@openclaw/xiaomi-provider",
+      "clawhubSpec": "clawhub:@carapace/xiaomi-provider",
+      "npmSpec": "@carapace/xiaomi-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": false
     },
     "release": {

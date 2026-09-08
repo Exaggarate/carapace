@@ -8,7 +8,7 @@ import type {
   AgentModelPolicyConfig,
 } from "./types.agent-defaults.js";
 import type { AgentConfig } from "./types.agents.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import { validateConfigObjectRaw } from "./validation-core.js";
 
 const models = { "openai/gpt-5.5": {} };
@@ -17,7 +17,7 @@ const marker = { migrations: { modelPolicyAllowlist: true as const } };
 const withModels = (
   entries: Record<string, AgentModelEntryConfig>,
   modelPolicy?: AgentModelPolicyConfig,
-): OpenClawConfig => ({
+): CarapaceConfig => ({
   agents: {
     defaults: { models: entries, ...(modelPolicy ? { modelPolicy } : {}) },
     entries: { main: {} },
@@ -26,7 +26,7 @@ const withModels = (
 const legacy = withModels(models);
 const versionedLegacy = { ...legacy, meta: { lastTouchedVersion: "2026.7.1" } };
 const restricted = withModels(models, { allow: Object.keys(models) });
-const withAgent = (agent: AgentConfig, defaults: AgentDefaultsConfig = {}): OpenClawConfig => ({
+const withAgent = (agent: AgentConfig, defaults: AgentDefaultsConfig = {}): CarapaceConfig => ({
   agents: { defaults, list: [agent] },
 });
 
@@ -42,7 +42,7 @@ describe("config write metadata stamping", () => {
   });
 
   const cases: Array<
-    [string, OpenClawConfig | null, OpenClawConfig, AgentModelPolicyConfig | undefined]
+    [string, CarapaceConfig | null, CarapaceConfig, AgentModelPolicyConfig | undefined]
   > = [
     [
       "preserves a legacy restriction across version updates",

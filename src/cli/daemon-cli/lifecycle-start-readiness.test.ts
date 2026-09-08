@@ -71,7 +71,7 @@ function invokeStartPostCheck() {
 describe("Gateway service start readiness", () => {
   beforeEach(() => {
     service.readCommand.mockReset().mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
+      programArguments: ["carapace", "gateway", "--port", "18789"],
       environment: {},
     });
     runServiceStart.mockReset();

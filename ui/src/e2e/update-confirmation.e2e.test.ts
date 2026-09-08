@@ -30,7 +30,7 @@ beforeEach(() => {
 
 /** The dialog element lives in a shadow root; its visible copy is slotted light DOM. */
 function confirmationCopy(page: Page) {
-  return page.locator("openclaw-modal-dialog");
+  return page.locator("carapace-modal-dialog");
 }
 
 function confirmationDialog(page: Page) {
@@ -59,7 +59,7 @@ async function openUpdateCard(page: Page, baseUrl: string, compact = false) {
   }
   await page.locator(".sidebar-issues-button:visible").click();
   const updateIssue = page.locator(
-    'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+    'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
   );
   await updateIssue.locator("summary").click();
   const updateButton = updateIssue.locator(".sidebar-update-card__action");
@@ -100,7 +100,7 @@ suite.define(() => {
         await inboxBadge.waitFor();
         expect(
           await page
-            .locator("openclaw-sidebar-attention")
+            .locator("carapace-sidebar-attention")
             .evaluate((attention) =>
               [...attention.children]
                 .map((child) => child.className)
@@ -114,7 +114,7 @@ suite.define(() => {
 
         await page.locator(".sidebar-issues-button").click();
         const updateIssue = page.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         await updateIssue.waitFor();
         const dismissButton = updateIssue.locator(".sidebar-issues-panel__dismiss");
@@ -161,7 +161,7 @@ suite.define(() => {
         await scopeGuidance.locator(".sidebar-issues-panel__dismiss").click();
         await scopeGuidance.waitFor({ state: "detached" });
         const updateIssue = page.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         await updateIssue.waitFor();
         expect(await updateIssue.locator(".sidebar-issues-panel__dismiss").count()).toBe(0);
@@ -329,7 +329,7 @@ suite.define(() => {
         await confirmationCopy(page)
           .getByRole("button", { name: "Updating…", exact: true })
           .waitFor();
-        await confirmationCopy(page).locator("openclaw-update-run-view").waitFor();
+        await confirmationCopy(page).locator("carapace-update-run-view").waitFor();
         await page.screenshot({
           animations: "disabled",
           path: path.join(PROOF_DIR, "07-update-running.png"),
@@ -339,11 +339,11 @@ suite.define(() => {
         await page.getByRole("button", { name: "Close", exact: true }).click();
         await page.locator(".sidebar-issues-button").click();
         const updateIssue = page.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         await updateIssue.locator("summary").click();
         await updateIssue.locator(".sidebar-update-card__action").click();
-        await confirmationCopy(page).locator("openclaw-update-run-view").waitFor();
+        await confirmationCopy(page).locator("carapace-update-run-view").waitFor();
         expect(await gateway.getRequests("update.run")).toHaveLength(1);
       },
     );

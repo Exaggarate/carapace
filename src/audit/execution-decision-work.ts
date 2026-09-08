@@ -1,12 +1,12 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /** Private, bounded decision work projected by the canonical audit writer. */
 import type { DecisionReceiptV1 } from "../../packages/gateway-protocol/src/index.js";
 import { validateDecisionReceiptV1 } from "../../packages/gateway-protocol/src/index.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { pseudonymizeExecutionIdentityRef } from "./audit-identity.js";
 import { recordExecutionDecisionFact } from "./execution-decision-facts.js";
 import {
@@ -47,7 +47,7 @@ export type ExecutionDecisionWork = {
 type ExecutionDecisionWorkSink = (work: ExecutionDecisionWork) => boolean;
 
 const state = resolveGlobalSingleton<{ sink: ExecutionDecisionWorkSink | undefined }>(
-  Symbol.for("openclaw.executionDecisionWorkSink"),
+  Symbol.for("carapace.executionDecisionWorkSink"),
   () => ({ sink: undefined }),
 );
 
@@ -181,10 +181,10 @@ export function parseExecutionDecisionWork(value: unknown): ExecutionDecisionWor
 /** Project raw private refs at the audit owner, then persist only the bounded receipt. */
 export function processExecutionDecisionWork(
   value: unknown,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): "inserted" | "existing" {
   const work = parseExecutionDecisionWork(value);
-  const db = openOpenClawStateDatabase(options).db;
+  const db = openCarapaceStateDatabase(options).db;
   const resourceRef = work.refs?.resource
     ? pseudonymizeExecutionIdentityRef({
         db,

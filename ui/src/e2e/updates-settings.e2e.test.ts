@@ -14,7 +14,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
 
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 suite.define(() => {
   it("locks update policy while an automatic apply runs and shows readable recovery guidance", async () => {

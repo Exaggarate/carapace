@@ -1,4 +1,4 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@carapace/normalization-core/string-coerce";
 // Defines agent routing, model, and runtime configuration types.
 import type { ChatType } from "../channels/chat-type.js";
 import type {
@@ -157,7 +157,7 @@ export type AgentConfig = {
     /** Require explicit agentId in sessions_spawn (no default same-as-caller). */
     requireAgentId?: boolean;
   };
-  /** Optional per-agent embedded OpenClaw overrides. */
+  /** Optional per-agent embedded Carapace overrides. */
   embeddedAgent?: {
     /** Optional per-agent execution contract override. */
     executionContract?: EmbeddedAgentExecutionContract;

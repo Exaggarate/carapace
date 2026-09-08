@@ -11,14 +11,14 @@ describe("repository session workspace", () => {
           kind: "direct",
           repositoryWorkspaceId: "repository-1",
           repository: {
-            url: "https://github.com/openclaw/openclaw.git",
-            branch: "openclaw/cloud-task",
+            url: "https://github.com/Exaggarate/carapace.git",
+            branch: "carapace/cloud-task",
           },
         },
         agentWorkspace: "/gateway/workspace",
         worktreePath: "/gateway/stale-checkout",
       }),
-    ).toEqual({ root: null, label: "openclaw" });
+    ).toEqual({ root: null, label: "carapace" });
   });
 
   it("uses the actual remote path after placement", () => {

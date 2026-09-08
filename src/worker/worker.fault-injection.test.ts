@@ -110,7 +110,7 @@ describe("cloud worker milestone 2 fault injection", () => {
       descriptor.assignment.github = {
         login: "worker-cleanup-fixture",
         token: "synthetic-worker-cleanup-token",
-        branch: "openclaw/cleanup-fixture",
+        branch: "carapace/cleanup-fixture",
       };
       descriptor.assignment.skillResources = await prepareSkillResourceDelivery(
         buildSkillSnapshot(harness.root, {
@@ -118,7 +118,7 @@ describe("cloud worker milestone 2 fault injection", () => {
         }),
         () => {},
       );
-      const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+      const previousStateDir = process.env.CARAPACE_STATE_DIR;
       let environmentStateDir: string | undefined;
       const providerRelease = createDeferred<WorkerInferenceTerminalOutcome>();
       const providerStarted = createDeferred();
@@ -160,7 +160,7 @@ describe("cloud worker milestone 2 fault injection", () => {
       let turnDirectory: string | undefined;
       try {
         await providerStarted.promise;
-        environmentStateDir = process.env.OPENCLAW_STATE_DIR;
+        environmentStateDir = process.env.CARAPACE_STATE_DIR;
         expect(environmentStateDir).toBeDefined();
         expect(environmentStateDir).not.toBe(previousStateDir);
         const request = harness.requestParams(
@@ -254,7 +254,7 @@ describe("cloud worker milestone 2 fault injection", () => {
         }
         expect(lifetime.dispose).toHaveBeenCalledOnce();
         expect(lifetime.terminateOwnedTree).not.toHaveBeenCalled();
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(previousStateDir);
+        expect(process.env.CARAPACE_STATE_DIR).toBe(previousStateDir);
         expect(harness.providerCalls).toBe(1);
         expect(harness.requestParams("worker.inference.start")).toHaveLength(1);
         expect(harness.requestParams("worker.live-event")).toHaveLength(finishing[0]!.seq);

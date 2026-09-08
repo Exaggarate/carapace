@@ -2,7 +2,7 @@
  * Resolves hook-selected model state and pre-model attachments for a run.
  */
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../../../plugins/provider-runtime-model.types.js";
 import type {
   PluginHookBeforeModelResolveAttachment,
@@ -181,7 +181,7 @@ export function createNativeModelOwnedRuntimeModel(params: {
  * limit as the guard.
  */
 function resolveEffectiveRuntimeModel(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   contextConfigProvider?: string;
   modelId: string;
@@ -259,9 +259,9 @@ function resolveEffectiveRuntimeModel(params: {
   };
 }
 
-/** Resolves only OpenClaw-owned context policy; native model owners keep that policy private. */
+/** Resolves only Carapace-owned context policy; native model owners keep that policy private. */
 export function resolveEmbeddedRuntimeModelPolicy(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   contextConfigProvider?: string;
   modelId: string;

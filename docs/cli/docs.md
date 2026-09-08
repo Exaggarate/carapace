@@ -1,21 +1,21 @@
 ---
-summary: "CLI reference for `openclaw docs` (search the live docs index)"
+summary: "CLI reference for `carapace docs` (search the live docs index)"
 read_when:
-  - You want to search the live OpenClaw docs from the terminal
+  - You want to search the live Carapace docs from the terminal
   - You need to know which hosted search API the docs CLI calls
 title: "Docs"
 ---
 
-# `openclaw docs`
+# `carapace docs`
 
-Search the live OpenClaw docs index from the terminal.
+Search the live Carapace docs index from the terminal.
 
 ## Usage
 
 ```bash
-openclaw docs                              # print docs entrypoint and example search
-openclaw docs --json                       # print the same guidance as JSON
-openclaw docs <query...> [--json] [--limit <count>]
+carapace docs                              # print docs entrypoint and example search
+carapace docs --json                       # print the same guidance as JSON
+carapace docs <query...> [--json] [--limit <count>]
 ```
 
 | Argument/option   | Description                                                                        |
@@ -24,23 +24,23 @@ openclaw docs <query...> [--json] [--limit <count>]
 | `--json`          | Emit one machine-readable JSON object on stdout.                                   |
 | `--limit <count>` | Return at most this many results. The value must be a positive integer.            |
 
-With no query, `openclaw docs` prints the docs entrypoint URL and a sample search command instead of running a search.
+With no query, `carapace docs` prints the docs entrypoint URL and a sample search command instead of running a search.
 
 Omit `--limit` to show all results returned by the search service. The limit applies to displayed results and does not reduce the downloaded response size.
 
 ## Examples
 
 ```bash
-openclaw docs browser existing-session
-openclaw docs browser existing-session --json
-openclaw docs plugin --limit 5
-openclaw docs sandbox allowHostControl
-openclaw docs gateway token secretref
+carapace docs browser existing-session
+carapace docs browser existing-session --json
+carapace docs plugin --limit 5
+carapace docs sandbox allowHostControl
+carapace docs gateway token secretref
 ```
 
 ## How it works
 
-`openclaw docs` calls `https://docs.openclaw.ai/api/search` and renders the JSON results. The search request uses a fixed 30 second timeout.
+`carapace docs` calls `https://github.com/Exaggarate/carapace` and renders the JSON results. The search request uses a fixed 30 second timeout.
 
 ## Output
 
@@ -51,8 +51,8 @@ In non-rich output (piped, `--no-color`, scripts), the same data renders as Mark
 ```markdown
 # Docs search: <query>
 
-- [Title](https://docs.openclaw.ai/...) - snippet
-- [Title](https://docs.openclaw.ai/...) - snippet
+- [Title](https://github.com/Exaggarate/carapace...) - snippet
+- [Title](https://github.com/Exaggarate/carapace...) - snippet
 ```
 
 With `--json`, stdout contains one object with the normalized query and result
@@ -70,4 +70,4 @@ stay on stderr so stdout can be piped directly to a JSON parser.
 ## Related
 
 - [CLI reference](/cli)
-- [Live docs](https://docs.openclaw.ai)
+- [Live docs](https://github.com/Exaggarate/carapace)

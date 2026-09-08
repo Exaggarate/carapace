@@ -1,7 +1,7 @@
 // Replay, restart-adoption, and serialization coverage for worker provider provisioning.
 // Split from provider-provisioning.test.ts to stay under the max-lines cap.
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import {
   GATEWAY_CLIENT_IDS,
@@ -12,9 +12,9 @@ import { NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE } from "../../infra/node-runner
 import { WorkerProviderError, type WorkerProvider } from "../../plugins/types.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { bindDeviceWorkerAvailability } from "./device-provider.js";
 import { REQUEST } from "./placement-dispatch-test-fixtures.js";
 import { createWorkerPlacementDispatchService } from "./placement-dispatch.js";
@@ -126,9 +126,9 @@ describe("worker environment service provision replay", () => {
 
     await first.stop();
     support.testState.service = undefined;
-    closeOpenClawStateDatabaseForTest();
-    support.testState.stateDb = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: support.testState.root },
+    closeCarapaceStateDatabaseForTest();
+    support.testState.stateDb = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: support.testState.root },
     });
     support.testState.store = createWorkerEnvironmentStore({
       database: support.testState.stateDb,
@@ -242,9 +242,9 @@ describe("worker environment service provision replay", () => {
     await first.stop();
     events.push("first:stopped");
     support.testState.service = undefined;
-    closeOpenClawStateDatabaseForTest();
-    support.testState.stateDb = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: support.testState.root },
+    closeCarapaceStateDatabaseForTest();
+    support.testState.stateDb = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: support.testState.root },
     });
     support.testState.store = createWorkerEnvironmentStore({
       database: support.testState.stateDb,
@@ -286,8 +286,8 @@ describe("worker environment service provision replay", () => {
           mode: "connect" as const,
           setupCode: "setup-code",
           setupId: enrolled.nodeSetupId!,
-          openclawVersion: "2026.8.19",
-          nodeBootstrap: { ...support.NODE_BOOTSTRAP, openclawVersion: "2026.8.19" },
+          carapaceVersion: "2026.8.19",
+          nodeBootstrap: { ...support.NODE_BOOTSTRAP, carapaceVersion: "2026.8.19" },
           displayName: "Cloud worker replay",
           waitForDeviceId: async () => await enrollmentConnected.promise,
         };
@@ -484,9 +484,9 @@ describe("worker environment service provision replay", () => {
 
       await workerService.stop();
       support.testState.service = undefined;
-      closeOpenClawStateDatabaseForTest();
-      support.testState.stateDb = openOpenClawStateDatabase({
-        env: { OPENCLAW_STATE_DIR: support.testState.root },
+      closeCarapaceStateDatabaseForTest();
+      support.testState.stateDb = openCarapaceStateDatabase({
+        env: { CARAPACE_STATE_DIR: support.testState.root },
       });
       support.testState.store = createWorkerEnvironmentStore({
         database: support.testState.stateDb,
@@ -765,7 +765,7 @@ describe("worker environment service provision replay", () => {
           apps: [
             {
               id: "browser",
-              executablePath: "/usr/local/bin/openclaw-worker-browser",
+              executablePath: "/usr/local/bin/carapace-worker-browser",
               cdpPort: 9222,
               command: "chromium",
             },

@@ -1,20 +1,20 @@
 import type {
   AudioTranscriptionRequest,
   MediaUnderstandingProvider,
-} from "openclaw/plugin-sdk/media-understanding";
-import { transcribeOpenAiCompatibleAudio } from "openclaw/plugin-sdk/media-understanding";
+} from "carapace/plugin-sdk/media-understanding";
+import { transcribeOpenAiCompatibleAudio } from "carapace/plugin-sdk/media-understanding";
 import {
   findNormalizedProviderValue,
   hasConfiguredSecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   collectProviderApiKeysForExecution,
   executeWithApiKeyRotation,
   isProviderAuthError,
   requireApiKey,
   resolveApiKeyForProvider,
-} from "openclaw/plugin-sdk/provider-auth-runtime";
-import { providerOperationRetryConfig } from "openclaw/plugin-sdk/provider-http";
+} from "carapace/plugin-sdk/provider-auth-runtime";
+import { providerOperationRetryConfig } from "carapace/plugin-sdk/provider-http";
 import { classifyOpenAIBaseUrl, OPENAI_API_BASE_URL } from "./base-url.js";
 import { OPENAI_DEFAULT_AUDIO_TRANSCRIPTION_MODEL } from "./default-models.js";
 

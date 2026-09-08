@@ -1,6 +1,6 @@
 import type { PluginUpdateOutcome } from "../plugins/update.js";
 import type { CommandOptions } from "../process/exec.js";
-import type { OpenClawSchemaVersions } from "../state/openclaw-schema-versions.js";
+import type { CarapaceSchemaVersions } from "../state/carapace-schema-versions.js";
 import type { UpdateChannel } from "./update-channels.js";
 import type { DevUpdateTarget } from "./update-dev-target.js";
 import type { PackageUpdateStepAdvisory } from "./update-doctor-result.js";
@@ -117,7 +117,7 @@ export type UpdateRunnerOptions = {
   publishGitCheckout?: () => Promise<string>;
   /** Read-only admission before executing a fetched candidate; never stops a service. */
   inspectGitTarget?: (target: {
-    schemaVersions?: OpenClawSchemaVersions;
+    schemaVersions?: CarapaceSchemaVersions;
     metadataUnreadable?: string;
   }) => Promise<void>;
   validateCandidate?: (root: string) => Promise<void>;
@@ -127,7 +127,7 @@ export type UpdateRunnerOptions = {
     env: NodeJS.ProcessEnv | undefined,
   ) => Promise<void>;
   beforeGitMutation?: (target: {
-    schemaVersions?: OpenClawSchemaVersions;
+    schemaVersions?: CarapaceSchemaVersions;
     metadataUnreadable?: string;
   }) => Promise<{
     allowGatewayServiceRepair?: boolean;

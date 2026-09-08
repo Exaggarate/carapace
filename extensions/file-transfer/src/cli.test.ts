@@ -14,12 +14,12 @@ const { mutateConfigMock, prompterMock, readSnapshotMock } = vi.hoisted(() => ({
   readSnapshotMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/config-mutation", () => ({
+vi.mock("carapace/plugin-sdk/config-mutation", () => ({
   mutateConfigFile: mutateConfigMock,
   readConfigFileSnapshotForWrite: readSnapshotMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/setup-runtime", () => ({
+vi.mock("carapace/plugin-sdk/setup-runtime", () => ({
   createClackPrompter: () => prompterMock,
 }));
 
@@ -36,7 +36,7 @@ function snapshot(
     snapshot: {
       valid: true,
       hash: "hash",
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       ...(pluginsIncludePath
         ? {
             includeProvenance: [
@@ -88,7 +88,7 @@ describe("file-transfer approvals migration CLI", () => {
 
     await program.parseAsync([
       "node",
-      "openclaw",
+      "carapace",
       "file-transfer",
       "approvals",
       "migrate",
@@ -98,7 +98,7 @@ describe("file-transfer approvals migration CLI", () => {
     expect(JSON.parse(writes.join(""))).toMatchObject({
       status: "needs-input",
       changed: false,
-      command: "openclaw file-transfer approvals migrate",
+      command: "carapace file-transfer approvals migrate",
     });
     expect(process.exitCode).toBe(2);
     expect(mutateConfigMock).not.toHaveBeenCalled();
@@ -119,7 +119,7 @@ describe("file-transfer approvals migration CLI", () => {
     const program = new Command();
     registerFileTransferCli(program);
 
-    await program.parseAsync(["node", "openclaw", "file-transfer", "approvals", "migrate"]);
+    await program.parseAsync(["node", "carapace", "file-transfer", "approvals", "migrate"]);
 
     expect(prompterMock.note).toHaveBeenCalledWith(
       expect.stringContaining("restore the adjacent config backup"),
@@ -138,7 +138,7 @@ describe("file-transfer approvals migration CLI", () => {
     const program = new Command();
     registerFileTransferCli(program);
 
-    await program.parseAsync(["node", "openclaw", "file-transfer", "approvals", "migrate"]);
+    await program.parseAsync(["node", "carapace", "file-transfer", "approvals", "migrate"]);
 
     expect(prompterMock.select).toHaveBeenCalledWith(
       expect.objectContaining({ message: "* · read · /tmp/**" }),
@@ -170,7 +170,7 @@ describe("file-transfer approvals migration CLI", () => {
     const program = new Command();
     registerFileTransferCli(program);
 
-    await program.parseAsync(["node", "openclaw", "file-transfer", "approvals", "migrate"]);
+    await program.parseAsync(["node", "carapace", "file-transfer", "approvals", "migrate"]);
 
     expect(fs.stat).toHaveBeenNthCalledWith(1, `${pluginsPath}.bak`);
     expect(fs.stat).toHaveBeenNthCalledWith(2, `${pluginsPath}.bak`);
@@ -185,7 +185,7 @@ describe("file-transfer approvals migration CLI", () => {
     registerFileTransferCli(program);
 
     await expect(
-      program.parseAsync(["node", "openclaw", "file-transfer", "approvals", "migrate", "--json"]),
+      program.parseAsync(["node", "carapace", "file-transfer", "approvals", "migrate", "--json"]),
     ).rejects.toThrow("must run on the Gateway host");
     expect(mutateConfigMock).not.toHaveBeenCalled();
   });

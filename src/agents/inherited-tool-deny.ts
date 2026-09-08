@@ -1,7 +1,7 @@
 /**
  * Normalizes inherited tool allow/deny lists and ACP compatibility errors.
  */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { createToolPolicyMatcher } from "./tool-policy-match.js";
 import { normalizeToolPolicyName } from "./tool-policy-shared.js";
 
@@ -19,7 +19,7 @@ const ACP_UNSUPPORTED_INHERITED_TOOL_DENY = [
   "write",
 ] as const;
 
-// Inherited allowlists are rebuilt from the effective OpenClaw tool surface.
+// Inherited allowlists are rebuilt from the effective Carapace tool surface.
 // ACP-only aliases can appear in explicit deny policies, but not in that
 // effective allowlist unless a plugin happens to expose matching tool names.
 const ACP_REQUIRED_INHERITED_TOOL_ALLOW = [

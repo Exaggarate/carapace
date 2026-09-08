@@ -1,5 +1,5 @@
 // ClickClack plugin module exposes a setup-only channel surface.
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
 import { clickClackConfigAdapter, clickClackMeta } from "./channel-config.js";
 import { clickClackConfigSchema } from "./config-schema.js";
 import { clickClackSetupContract } from "./setup-core.js";

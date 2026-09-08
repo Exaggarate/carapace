@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { insertRegistryWorktree } from "../../agents/worktrees/registry.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import {
   loadSessionEntry,
   replaceSessionEntry,
@@ -17,12 +17,12 @@ import { migrateManagedWorktreeCanonicalWorkspaces } from "./worktree-workspace-
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it("backfills a nested requested workspace once instead of using the agent default", async () => {
-  const root = tempDirs.make("openclaw-worktree-workspace-migration-");
+  const root = tempDirs.make("carapace-worktree-workspace-migration-");
   const stateDir = path.join(root, "state");
   const repoRoot = path.join(root, "repo");
   const agentWorkspace = path.join(repoRoot, "agent-default");
@@ -34,11 +34,11 @@ it("backfills a nested requested workspace once instead of using the agent defau
     fs.mkdir(requestedWorkspace, { recursive: true }),
     fs.mkdir(spawnedCwd, { recursive: true }),
   ]);
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
   const sessionKey = "agent:main:dashboard:legacy-worktree";
   const ordinarySessionKey = "agent:main:dashboard:ordinary";
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { list: [{ id: "main", default: true, workspace: agentWorkspace }] },
     session: { store: storePath },
   };
@@ -48,7 +48,7 @@ it("backfills a nested requested workspace once instead of using the agent defau
     repoFingerprint: "0123456789abcdef",
     repoRoot,
     path: worktreeRoot,
-    branch: "openclaw/legacy",
+    branch: "carapace/legacy",
     baseRef: "HEAD",
     ownerKind: "session",
     ownerId: sessionKey,
@@ -61,7 +61,7 @@ it("backfills a nested requested workspace once instead of using the agent defau
       sessionId: "legacy-session",
       updatedAt: 10,
       spawnedCwd,
-      worktree: { id: "legacy", branch: "openclaw/legacy", repoRoot },
+      worktree: { id: "legacy", branch: "carapace/legacy", repoRoot },
     },
   );
   await replaceSessionEntry(
@@ -96,12 +96,12 @@ it("backfills a nested requested workspace once instead of using the agent defau
 });
 
 it("repairs a foreign logical row in its source partition without changing a same-key sibling", async () => {
-  const root = tempDirs.make("openclaw-worktree-source-partition-");
+  const root = tempDirs.make("carapace-worktree-source-partition-");
   const stateDir = path.join(root, "state");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const storePath = path.join(stateDir, "shared.json");
   const workspace = path.join(root, "ops-workspace");
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: {
       ownership: "explicit",
       entries: { main: {}, ops: { workspace } },
@@ -123,14 +123,14 @@ it("repairs a foreign logical row in its source partition without changing a sam
   await replaceSessionEntry(sourceScope, {
     sessionId: "source-session",
     updatedAt: 10,
-    worktree: { id: "legacy", branch: "openclaw/legacy", repoRoot: workspace },
+    worktree: { id: "legacy", branch: "carapace/legacy", repoRoot: workspace },
   });
   await replaceSessionEntry(scope, {
     sessionId: "sibling-session",
     updatedAt: 20,
     worktree: {
       id: "legacy",
-      branch: "openclaw/legacy",
+      branch: "carapace/legacy",
       repoRoot: path.join(root, "unrelated-workspace"),
     },
   });
@@ -144,7 +144,7 @@ it("repairs a foreign logical row in its source partition without changing a sam
     updatedAt: 10,
     worktree: {
       id: "legacy",
-      branch: "openclaw/legacy",
+      branch: "carapace/legacy",
       repoRoot: workspace,
       canonicalWorkspaceDir: workspace,
     },
@@ -157,12 +157,12 @@ it("repairs a foreign logical row in its source partition without changing a sam
 it.each(["main", "ops"])(
   "backfills each logical owner's workspace in a shared SQLite store selected for %s",
   async (agentId) => {
-    const root = tempDirs.make("openclaw-shared-worktree-workspace-migration-");
+    const root = tempDirs.make("carapace-shared-worktree-workspace-migration-");
     const stateDir = path.join(root, "state");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const storePath = path.join(stateDir, "shared.sqlite");
     const agents = ["main", "ops"].map((id) => ({ id, workspace: path.join(root, id) }));
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: Object.fromEntries(agents.map(({ id, workspace }) => [id, { workspace }])),
@@ -178,7 +178,7 @@ it.each(["main", "ops"])(
         {
           sessionId: `${agent.id}-session`,
           updatedAt: 10,
-          worktree: { id: agent.id, branch: `openclaw/${agent.id}`, repoRoot: agent.workspace },
+          worktree: { id: agent.id, branch: `carapace/${agent.id}`, repoRoot: agent.workspace },
         },
       );
     }
@@ -206,7 +206,7 @@ it.each(["main", "ops"])(
           updatedAt: 10,
           worktree: {
             id: agent.id,
-            branch: `openclaw/${agent.id}`,
+            branch: `carapace/${agent.id}`,
             repoRoot: agent.workspace,
             canonicalWorkspaceDir: agent.workspace,
           },

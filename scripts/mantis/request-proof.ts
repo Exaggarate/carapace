@@ -41,7 +41,7 @@ export const requestIdentitySchema = z
     plan_sha256: digest.optional(),
     repository: z.strictObject({
       id: numericId,
-      full_name: z.literal("openclaw/openclaw"),
+      full_name: z.literal("carapace/carapace"),
     }),
     pull_request: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
     candidate_sha: sha,
@@ -219,7 +219,7 @@ export function createRequestReceipt(
         ? [
             "Actual candidate Gateway send and Telegram formatter against a Crabline Bot API emulator; no Telegram Test Server, TDLib, live model, or readiness claim.",
             "The trusted canonical telegram-markdown-parser-fidelity recipe judges four formatting cases. Candidate code has no real credentials, host mounts, observer files, or external network.",
-            "Only the ephemeral trusted observer uses OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 for its isolated container hostname and synthetic per-run Gateway token; no host configuration is changed.",
+            "Only the ephemeral trusted observer uses CARAPACE_ALLOW_INSECURE_PRIVATE_WS=1 for its isolated container hostname and synthetic per-run Gateway token; no host configuration is changed.",
           ]
         : identity.scenario === "telegram-bot-e2e-proof"
           ? [

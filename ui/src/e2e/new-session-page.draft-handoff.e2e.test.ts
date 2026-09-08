@@ -37,7 +37,7 @@ suite.define(() => {
         (url) => url.pathname.endsWith("/new") && url.search === "?agent=main",
       );
 
-      const newSessionA = pageA.locator("openclaw-new-session-page");
+      const newSessionA = pageA.locator("carapace-new-session-page");
       const messageA = newSessionA.locator(".new-session-page__message");
       await messageA.fill(staleText);
       await newSessionA
@@ -52,7 +52,7 @@ suite.define(() => {
       const pageB = await context.newPage();
       await installMockGateway(pageB);
       await pageB.goto(`${suite.server.baseUrl}new?agent=main`);
-      const newSessionB = pageB.locator("openclaw-new-session-page");
+      const newSessionB = pageB.locator("carapace-new-session-page");
       const messageB = newSessionB.locator(".new-session-page__message");
       await expect.poll(() => messageB.inputValue()).toBe(staleText);
       await newSessionB.getByRole("button", { name: `Open image ${staleFileName}` }).waitFor();

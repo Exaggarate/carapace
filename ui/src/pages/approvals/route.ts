@@ -7,6 +7,6 @@ export const page = definePage({
   component: () =>
     import("./approvals-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-approvals-page></openclaw-approvals-page>`,
+      render: () => html`<carapace-approvals-page></carapace-approvals-page>`,
     })),
 });

@@ -115,7 +115,7 @@ function formatInstallLine(line) {
     {
       node: "Node runtime",
       git: "Git checkout",
-      openclaw: "OpenClaw CLI",
+      carapace: "Carapace CLI",
       "gateway-service": "Gateway service",
       "control-ui": "Control UI build",
       "cli-build": "CLI build",
@@ -167,7 +167,7 @@ function friendlyError(error) {
   if (typeof error === "string") {
     return error;
   }
-  return error?.message || "OpenClaw could not complete the operation.";
+  return error?.message || "Carapace could not complete the operation.";
 }
 
 function gatewayHost(gateway) {
@@ -191,7 +191,7 @@ function renderGateways(gateways) {
   if (!gateways.length) {
     const empty = document.createElement("p");
     empty.className = "discovery-empty";
-    empty.textContent = "Looking for nearby OpenClaw gateways…";
+    empty.textContent = "Looking for nearby Carapace gateways…";
     elements.gatewayList.append(empty);
     return;
   }
@@ -271,7 +271,7 @@ async function connect() {
   render({
     activity: "Checking local services…",
     description: "Finding your gateway and preparing the Control UI.",
-    title: "Connecting to OpenClaw",
+    title: "Connecting to Carapace",
   });
   try {
     const snapshot = await invoke("bootstrap");
@@ -294,7 +294,7 @@ function renderWelcome() {
       "Your personal AI assistant, living wherever you choose. It answers questions, works with your files and apps, and can chat with you wherever you are.",
     dot: "idle",
     eyebrow: "WELCOME",
-    title: "Welcome to OpenClaw",
+    title: "Welcome to Carapace",
   });
   show(elements.discovery, false);
   show(elements.welcomeScreen, true);
@@ -303,7 +303,7 @@ function renderWelcome() {
 function renderConnectionChoices() {
   render({
     description:
-      "Most people choose this computer. OpenClaw installs everything and keeps your assistant running in the background.",
+      "Most people choose this computer. Carapace installs everything and keeps your assistant running in the background.",
     dot: "idle",
     eyebrow: "CHOOSE YOUR GATEWAY",
     title: "Where should your assistant live?",
@@ -343,7 +343,7 @@ async function continueLocalSetup() {
   if (firstRunPhase === "unconfigured") {
     render({
       activity: "Starting your local Gateway…",
-      description: "OpenClaw is preparing your assistant on this computer.",
+      description: "Carapace is preparing your assistant on this computer.",
       eyebrow: "FIRST-RUN SETUP",
       title: "Preparing your companion",
     });
@@ -357,7 +357,7 @@ async function continueLocalSetup() {
   if (firstRunBuild?.releaseBuild === false) {
     render({
       description:
-        "This development build works best with a matching OpenClaw release channel.",
+        "This development build works best with a matching Carapace release channel.",
       eyebrow: "FIRST-RUN SETUP",
       showInstall: true,
       title: "Choose a release channel",
@@ -415,7 +415,7 @@ async function connectRemoteGateway() {
       password: elements.remotePassword.value || null,
       remotePort: isDirect ? null : remotePort,
     });
-    showRemoteFeedback("Gateway connected. Opening OpenClaw…", false);
+    showRemoteFeedback("Gateway connected. Opening Carapace…", false);
   } catch (error) {
     const message = friendlyError(error);
     if (/auth|token|password|unauthori[sz]ed|forbidden|401|403/i.test(message)) {
@@ -442,7 +442,7 @@ async function install() {
   elements.logStatus.textContent = "RUNNING";
   show(elements.logWrap, true);
   render({
-    activity: "Installing OpenClaw…",
+    activity: "Installing Carapace…",
     description: "A managed CLI and Node runtime are being installed in your home directory.",
     eyebrow: "INSTALLING",
     title: "Preparing your companion",
@@ -459,7 +459,7 @@ async function install() {
       dot: "error",
       eyebrow: "SETUP ISSUE",
       showInstall: true,
-      title: "OpenClaw needs attention",
+      title: "Carapace needs attention",
     });
   } finally {
     elements.installButton.disabled = false;
@@ -470,7 +470,7 @@ async function install() {
 async function runGatewayAction(action) {
   render({
     activity: `${action === "restart" ? "Restarting" : "Starting"} gateway…`,
-    description: "OpenClaw is waiting for the local gateway to become healthy.",
+    description: "Carapace is waiting for the local gateway to become healthy.",
     eyebrow: "GATEWAY",
     title: "One moment",
   });
@@ -492,7 +492,7 @@ function renderRetry(message) {
       // A broken managed CLI can only be replaced by reinstalling; retry alone
       // must never be the sole exit from a connection failure.
       showInstall: true,
-      title: "OpenClaw needs attention",
+      title: "Carapace needs attention",
     },
     connect,
   );
@@ -539,7 +539,7 @@ await listen("install-progress", ({ payload }) => appendLog(payload.line));
 await listen("updater://not-available", () => {
   renderUpdate({
     message: "No update is available.",
-    title: "OpenClaw is up to date",
+    title: "Carapace is up to date",
   });
 });
 await listen("updater://available", ({ payload }) => {
@@ -595,16 +595,16 @@ window.setInterval(() => void refreshGateways(), 2000);
 const mode = new URLSearchParams(window.location.search).get("mode");
 if (mode === "missingCli") {
   render({
-    description: "Install the OpenClaw CLI to connect to a local Gateway.",
+    description: "Install the Carapace CLI to connect to a local Gateway.",
     dot: "idle",
     eyebrow: "CLI REQUIRED",
     showInstall: true,
-    title: "OpenClaw needs the CLI",
+    title: "Carapace needs the CLI",
   });
 } else if (mode === "reconnecting") {
   render({
     activity: "Retrying every few seconds…",
-    description: "The gateway connection dropped. OpenClaw will restore the dashboard automatically.",
+    description: "The gateway connection dropped. Carapace will restore the dashboard automatically.",
     eyebrow: "GATEWAY OFFLINE",
     title: "Reconnecting",
   });
@@ -615,7 +615,7 @@ if (mode === "missingCli") {
       description: "The gateway is stopped. The desktop companion will remain available in the tray.",
       dot: "idle",
       eyebrow: "GATEWAY STOPPED",
-      title: "OpenClaw is standing by",
+      title: "Carapace is standing by",
     },
     () => runGatewayAction("start"),
   );

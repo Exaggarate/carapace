@@ -4,7 +4,7 @@ import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatForLog } from "../../gateway/ws-log.js";
 import * as installedManifests from "../../plugins/manifest-registry-installed.js";
 import { restorePluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.js";
@@ -55,7 +55,7 @@ function installedProviderRecord(
 
 function attachPreparedPluginFacts(
   pluginRegistry: ReturnType<typeof createEmptyPluginRegistry>,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   manifestRegistry: ReturnType<typeof makeRegistry>,
 ) {
   prepareOwnedPluginLoadContext(
@@ -150,12 +150,12 @@ describe("harness runtime plugins", () => {
     expect((error as Error).message).toContain(
       'Owner plugin "codex" is absent from this prepared plugin generation.',
     );
-    expect((error as Error).message).toContain('Run "openclaw doctor --fix"');
+    expect((error as Error).message).toContain('Run "carapace doctor --fix"');
   });
 
   it("reports a manifest owner's restrictive allowlist blocker", async () => {
     const pluginRegistry = createEmptyPluginRegistry();
-    const config = { plugins: { allow: ["telegram"] } } satisfies OpenClawConfig;
+    const config = { plugins: { allow: ["telegram"] } } satisfies CarapaceConfig;
     attachPreparedPluginFacts(
       pluginRegistry,
       config,
@@ -185,7 +185,7 @@ describe("harness runtime plugins", () => {
 
   it("reports global plugin disablement before a selected Codex owner's absence", async () => {
     const pluginRegistry = createEmptyPluginRegistry();
-    const config = { plugins: { enabled: false } } satisfies OpenClawConfig;
+    const config = { plugins: { enabled: false } } satisfies CarapaceConfig;
     attachPreparedPluginFacts(pluginRegistry, config, makeRegistry([]));
 
     const error = await ensureSelectedAgentHarnessPlugin({
@@ -203,7 +203,7 @@ describe("harness runtime plugins", () => {
     );
     expect((error as Error).message).not.toContain("absent from this prepared plugin generation");
     // The first chat error uses the Gateway's bounded formatter, before the full reply arrives.
-    expect(formatForLog((error as Error).message)).toContain('Run "openclaw doctor --fix"');
+    expect(formatForLog((error as Error).message)).toContain('Run "carapace doctor --fix"');
   });
 
   it.each([
@@ -229,7 +229,7 @@ describe("harness runtime plugins", () => {
     },
   ] satisfies Array<{
     name: string;
-    plugins: NonNullable<OpenClawConfig["plugins"]>;
+    plugins: NonNullable<CarapaceConfig["plugins"]>;
     expectedReason: string;
   }>)("reports $name without a prepared registry context", async ({ plugins, expectedReason }) => {
     const error = await ensureSelectedAgentHarnessPlugin({
@@ -251,7 +251,7 @@ describe("harness runtime plugins", () => {
     async (blockedCount) => {
       const config = {
         plugins: { allow: ["ready-owner"], entries: { "ready-owner": { enabled: true } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const pluginRegistry = createEmptyPluginRegistry();
       attachPreparedPluginFacts(
         pluginRegistry,
@@ -289,7 +289,7 @@ describe("harness runtime plugins", () => {
 
   it("reports the prepared owner's loader failure before activation policy", async () => {
     const pluginRegistry = createEmptyPluginRegistry();
-    const config = { plugins: { allow: ["telegram"] } } satisfies OpenClawConfig;
+    const config = { plugins: { allow: ["telegram"] } } satisfies CarapaceConfig;
     attachPreparedPluginFacts(
       pluginRegistry,
       config,
@@ -326,18 +326,18 @@ describe("harness runtime plugins", () => {
       'Owner plugin "custom-owner" failed during register.',
     );
     expect((error as Error).message).toContain(
-      'Run "openclaw plugins inspect custom-owner --runtime --json"',
+      'Run "carapace plugins inspect custom-owner --runtime --json"',
     );
     expect((error as Error).message).not.toContain("not in allowlist");
     expect((error as Error).message).not.toContain("registration exploded");
     expect(formatForLog((error as Error).message)).toContain(
-      'Run "openclaw plugins inspect custom-owner --runtime --json"',
+      'Run "carapace plugins inspect custom-owner --runtime --json"',
     );
   });
 
   it("reports a loaded owner that omitted the selected harness registration", async () => {
     const pluginRegistry = createEmptyPluginRegistry();
-    const config = { plugins: { allow: ["telegram"] } } satisfies OpenClawConfig;
+    const config = { plugins: { allow: ["telegram"] } } satisfies CarapaceConfig;
     attachPreparedPluginFacts(
       pluginRegistry,
       config,
@@ -368,7 +368,7 @@ describe("harness runtime plugins", () => {
     );
     expect((error as Error).message).not.toContain("not in allowlist");
     expect(formatForLog((error as Error).message)).toContain(
-      'Run "openclaw plugins inspect custom-owner --runtime --json"',
+      'Run "carapace plugins inspect custom-owner --runtime --json"',
     );
   });
 
@@ -421,7 +421,7 @@ describe("harness runtime plugins", () => {
     );
   });
 
-  it("keeps the built-in OpenClaw harness independent from plugin registration", async () => {
+  it("keeps the built-in Carapace harness independent from plugin registration", async () => {
     const pluginRegistry = createEmptyPluginRegistry();
     attachPreparedPluginFacts(pluginRegistry, { plugins: { enabled: false } }, makeRegistry([]));
 
@@ -429,7 +429,7 @@ describe("harness runtime plugins", () => {
       ensureSelectedAgentHarnessPlugin({
         provider: "openai",
         modelId: "gpt-5.5",
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "carapace",
         workspaceDir: "/tmp/workspace",
         pluginRegistry,
       }),
@@ -453,7 +453,7 @@ describe("harness runtime plugins", () => {
     const plan = resolveAgentRuntimePluginLoadPlan({
       config: { plugins: { allow: ["openai"] } },
       workspaceDir: "/tmp/workspace",
-      selections: [{ provider: "openai", modelId: "gpt-5.5", runtime: "openclaw" }],
+      selections: [{ provider: "openai", modelId: "gpt-5.5", runtime: "carapace" }],
     });
 
     expect(plan.pluginIds).toEqual(["openai"]);
@@ -465,7 +465,7 @@ describe("harness runtime plugins", () => {
       config: { plugins: { slots: { memory: "none" } } },
       workspaceDir: "/tmp/workspace",
       selections: [
-        { provider: "selected-provider", modelId: "selected-model", runtime: "openclaw" },
+        { provider: "selected-provider", modelId: "selected-model", runtime: "carapace" },
       ],
     });
     expect(
@@ -574,7 +574,7 @@ describe("harness runtime plugins", () => {
 
   const memorySelectionCases: Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     expectedPluginIds: string[];
   }> = [
     {
@@ -636,7 +636,7 @@ describe("harness runtime plugins", () => {
   );
 
   it("reuses prepared memory aliases while applying current activation policy", () => {
-    const config: OpenClawConfig = { plugins: { slots: { memory: "fixture-memory" } } };
+    const config: CarapaceConfig = { plugins: { slots: { memory: "fixture-memory" } } };
     const snapshot = createPluginMetadataSnapshot({
       config,
       manifestRegistry: makeRegistry([
@@ -648,7 +648,7 @@ describe("harness runtime plugins", () => {
         ...installedProviderRecord("fixture-memory"),
         origin: "config",
         rootDir: "/fake/fixture-memory",
-        manifestPath: "/fake/fixture-memory/openclaw.plugin.json",
+        manifestPath: "/fake/fixture-memory/carapace.plugin.json",
         manifestHash: "fixture",
         enabled: true,
         enabledByDefault: true,
@@ -832,7 +832,7 @@ describe("harness runtime plugins", () => {
   });
 
   it("keeps a restrictive allowlist authoritative", () => {
-    const config = { plugins: { allow: ["telegram"] } } as OpenClawConfig;
+    const config = { plugins: { allow: ["telegram"] } } as CarapaceConfig;
     mocks.resolveManifestActivationPlan.mockReturnValueOnce({ entries: [] });
     expect(
       resolveAgentHarnessRuntimeAvailability({

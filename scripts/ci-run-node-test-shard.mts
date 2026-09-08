@@ -17,7 +17,7 @@ import os, { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { decodeNodeTestGroups } from "./lib/ci-node-test-groups-codec.mts";
 import { isDirectRunUrl } from "./lib/direct-run.mjs";
 import { isConstrainedCiCheckHost } from "./lib/local-check-runtime.mts";
@@ -26,16 +26,16 @@ import { parsePositiveInt, readPositiveEnvInt } from "./lib/numeric-options.mjs"
 // CI admits at most two plans only when the actual host has room. Each plan
 // keeps inner test-projects parallelism 1; runner labels cannot establish capacity.
 const PLAN_CONCURRENCY = 2;
-const FS_MODULE_CACHE_PATH_ENV_KEY = "OPENCLAW_VITEST_FS_MODULE_CACHE_PATH";
-const FS_MODULE_CACHE_WRITER_ENV_KEY = "OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER";
+const FS_MODULE_CACHE_PATH_ENV_KEY = "CARAPACE_VITEST_FS_MODULE_CACHE_PATH";
+const FS_MODULE_CACHE_WRITER_ENV_KEY = "CARAPACE_VITEST_FS_MODULE_CACHE_WRITER";
 const NODE_COMPILE_CACHE_PATH_ENV_KEY = "NODE_COMPILE_CACHE";
-const NODE_COMPILE_CACHE_WRITER_ENV_KEY = "OPENCLAW_NODE_COMPILE_CACHE_WRITER";
-const VITEST_EXTRA_ARGS_ENV_KEY = "OPENCLAW_NODE_TEST_VITEST_ARGS_JSON";
+const NODE_COMPILE_CACHE_WRITER_ENV_KEY = "CARAPACE_NODE_COMPILE_CACHE_WRITER";
+const VITEST_EXTRA_ARGS_ENV_KEY = "CARAPACE_NODE_TEST_VITEST_ARGS_JSON";
 const FS_MODULE_CACHE_MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const NODE_COMPILE_CACHE_MAX_BYTES = 1024 * 1024 * 1024;
 const FS_MODULE_CACHE_PRUNE_TARGET_RATIO = 0.75;
 const FS_MODULE_CACHE_METADATA_FILE = "_metadata.json";
-const FS_MODULE_CACHE_GENERATION_FILE = ".openclaw-transform-generation";
+const FS_MODULE_CACHE_GENERATION_FILE = ".carapace-transform-generation";
 
 export type ShardTargetPlan = { kind: "target"; name: string; target: string };
 type ShardGroupConfig = {
@@ -84,7 +84,7 @@ function parseJsonEnv(
 }
 
 export function resolveShardPlans(env: NodeJS.ProcessEnv = process.env): ShardPlan[] {
-  const targets = parseJsonEnv(env, "OPENCLAW_NODE_TEST_TARGETS_JSON");
+  const targets = parseJsonEnv(env, "CARAPACE_NODE_TEST_TARGETS_JSON");
   if (isStringArray(targets) && targets.length > 0) {
     // One target per child process preserves the isolation boundaries encoded
     // by full-suite include-pattern shards while keeping one runner job.
@@ -94,14 +94,14 @@ export function resolveShardPlans(env: NodeJS.ProcessEnv = process.env): ShardPl
   // The CI manifest packs matrix groups so preflight's job outputs stay under
   // GitHub's 1 MiB UTF-16 cap. Plain JSON remains for the Vitest cache warmer,
   // which writes its small group list straight into GITHUB_ENV.
-  const packedGroups = env.OPENCLAW_NODE_TEST_GROUPS_GZIP_BASE64?.trim();
+  const packedGroups = env.CARAPACE_NODE_TEST_GROUPS_GZIP_BASE64?.trim();
   const groups = packedGroups
     ? decodeNodeTestGroups(packedGroups)
-    : parseJsonEnv(env, "OPENCLAW_NODE_TEST_GROUPS_JSON");
+    : parseJsonEnv(env, "CARAPACE_NODE_TEST_GROUPS_JSON");
   const groupPlans = Array.isArray(groups) ? groups.filter(isShardGroupConfig) : [];
-  const configs = parseJsonEnv(env, "OPENCLAW_NODE_TEST_CONFIGS_JSON", []);
-  const groupEnv = parseJsonEnv(env, "OPENCLAW_NODE_TEST_ENV_JSON");
-  const includePatterns = parseJsonEnv(env, "OPENCLAW_NODE_TEST_INCLUDE_PATTERNS_JSON");
+  const configs = parseJsonEnv(env, "CARAPACE_NODE_TEST_CONFIGS_JSON", []);
+  const groupEnv = parseJsonEnv(env, "CARAPACE_NODE_TEST_ENV_JSON");
+  const includePatterns = parseJsonEnv(env, "CARAPACE_NODE_TEST_INCLUDE_PATTERNS_JSON");
   const plans: ShardGroupConfig[] =
     groupPlans.length > 0
       ? groupPlans
@@ -110,7 +110,7 @@ export function resolveShardPlans(env: NodeJS.ProcessEnv = process.env): ShardPl
             configs: isStringArray(configs) ? configs : [],
             env: isRecord(groupEnv) ? groupEnv : null,
             includePatterns: isStringArray(includePatterns) ? includePatterns : null,
-            shard_name: env.OPENCLAW_VITEST_SHARD_NAME,
+            shard_name: env.CARAPACE_VITEST_SHARD_NAME,
           },
         ];
   return plans.map((plan) => {
@@ -139,12 +139,12 @@ export function buildChildEnv(
     // slots so serial plans on one worker reuse transforms without ENOTEMPTY
     // races. The scratch fallback preserves per-plan isolation.
     [FS_MODULE_CACHE_PATH_ENV_KEY]: join(persistentCacheRoot || scratchDir, cacheDirectory),
-    OPENCLAW_TEST_PROJECTS_PARALLEL: "1",
+    CARAPACE_TEST_PROJECTS_PARALLEL: "1",
   };
   if (entry.kind === "group") {
     const plan = entry.plan;
     if (plan.shard_name) {
-      childEnv.OPENCLAW_VITEST_SHARD_NAME = plan.shard_name;
+      childEnv.CARAPACE_VITEST_SHARD_NAME = plan.shard_name;
     }
     if (plan.env && typeof plan.env === "object" && !Array.isArray(plan.env)) {
       for (const [key, value] of Object.entries(plan.env)) {
@@ -156,9 +156,9 @@ export function buildChildEnv(
     if (Array.isArray(plan.includePatterns) && plan.includePatterns.length > 0) {
       const includeFile = join(scratchDir, `node-test-include-${index}.json`);
       writeFileSync(includeFile, JSON.stringify(plan.includePatterns), "utf8");
-      childEnv.OPENCLAW_VITEST_INCLUDE_FILE = includeFile;
+      childEnv.CARAPACE_VITEST_INCLUDE_FILE = includeFile;
     } else {
-      delete childEnv.OPENCLAW_VITEST_INCLUDE_FILE;
+      delete childEnv.CARAPACE_VITEST_INCLUDE_FILE;
     }
   }
   return childEnv;
@@ -328,7 +328,7 @@ export async function runShardPlans(plans: ShardPlan[], options: RunShardOptions
   // cannot receive a plan.
   const requestedConcurrency =
     options.concurrency === undefined
-      ? readPositiveEnvInt("OPENCLAW_NODE_TEST_PLAN_CONCURRENCY", baseEnv, PLAN_CONCURRENCY)
+      ? readPositiveEnvInt("CARAPACE_NODE_TEST_PLAN_CONCURRENCY", baseEnv, PLAN_CONCURRENCY)
       : parsePositiveInt(options.concurrency, "Shard plan concurrency");
   const ci = baseEnv.CI === "true" || baseEnv.GITHUB_ACTIONS === "true";
   const hostResources = ci
@@ -349,7 +349,7 @@ export async function runShardPlans(plans: ShardPlan[], options: RunShardOptions
     );
   }
   const runner = options.runChild ?? runChild;
-  const scratchDir = options.scratchDir ?? mkdtempSync(join(tmpdir(), "openclaw-node-shard-"));
+  const scratchDir = options.scratchDir ?? mkdtempSync(join(tmpdir(), "carapace-node-shard-"));
   const persistentCacheRoot = baseEnv[FS_MODULE_CACHE_PATH_ENV_KEY]?.trim();
   const nodeCompileCacheRoot = baseEnv[NODE_COMPILE_CACHE_PATH_ENV_KEY]?.trim();
   const clonedCacheSlots = clonePersistentCacheSlots(persistentCacheRoot, concurrency);
@@ -448,6 +448,6 @@ export async function runShardPlans(plans: ShardPlan[], options: RunShardOptions
 if (isDirectRunUrl(process.argv[1], import.meta.url)) {
   const plans = resolveShardPlans();
   process.exitCode = await runShardPlans(plans, {
-    continueOnFailure: process.env.OPENCLAW_NODE_TEST_PLAN_CONTINUE_ON_FAILURE === "1",
+    continueOnFailure: process.env.CARAPACE_NODE_TEST_PLAN_CONTINUE_ON_FAILURE === "1",
   });
 }

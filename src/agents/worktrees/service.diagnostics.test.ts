@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as commandExec from "../../process/exec.js";
 import type { SpawnResult } from "../../process/exec.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { ManagedWorktreeService } from "./service.js";
 import { useManagedWorktreeTestRepository } from "./service.test-support.js";
 
@@ -88,21 +88,21 @@ describe("ManagedWorktreeService failure diagnostics", () => {
   let service: ManagedWorktreeService;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worktree-errors-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worktree-errors-"));
     repo = await initializeRepository(root);
     service = new ManagedWorktreeService({
-      env: { ...process.env, OPENCLAW_STATE_DIR: path.join(root, "state") },
+      env: { ...process.env, CARAPACE_STATE_DIR: path.join(root, "state") },
     });
   });
 
   afterEach(async () => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
   async function writeFailingSetup(): Promise<string> {
-    const script = path.join(repo, ".openclaw", "worktree-setup.sh");
+    const script = path.join(repo, ".carapace", "worktree-setup.sh");
     await fs.mkdir(path.dirname(script));
     await fs.writeFile(script, "#!/bin/sh\nprintf 'fatal: setup failed\\n' >&2\nexit 9\n", {
       mode: 0o755,
@@ -116,7 +116,7 @@ describe("ManagedWorktreeService failure diagnostics", () => {
       script,
       [
         "#!/bin/sh",
-        'printf "%s\\n" "$OPENCLAW_WORKTREE_PATH" > "$OPENCLAW_SOURCE_TREE_PATH/setup-path.txt"',
+        'printf "%s\\n" "$CARAPACE_WORKTREE_PATH" > "$CARAPACE_SOURCE_TREE_PATH/setup-path.txt"',
         "printf '%s\\n' 'fatal: create local-fixture-input.txt and retry'",
         "printf '%s\\n' 'warning: optional fixture hint is unset' >&2",
         "exit 23",
@@ -129,7 +129,7 @@ describe("ManagedWorktreeService failure diagnostics", () => {
     const allocated = (await fs.readFile(path.join(repo, "setup-path.txt"), "utf8")).trim();
     await expect(fs.stat(allocated)).rejects.toMatchObject({ code: "ENOENT" });
     expect(await git(repo, "worktree", "list", "--porcelain")).not.toContain("actual-failed-setup");
-    expect(await git(repo, "branch", "--list", "openclaw/actual-failed-setup")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/actual-failed-setup")).toBe("");
     expect(service.listRegistryRecords()).toEqual([]);
     expect(message).toContain("worktree setup failed (exit code 23)");
     expect(message).toContain("create local-fixture-input.txt and retry");
@@ -151,7 +151,7 @@ describe("ManagedWorktreeService failure diagnostics", () => {
     );
 
     expect(await git(repo, "worktree", "list", "--porcelain")).not.toContain("terminated-setup");
-    expect(await git(repo, "branch", "--list", "openclaw/terminated-setup")).toBe("");
+    expect(await git(repo, "branch", "--list", "carapace/terminated-setup")).toBe("");
     expect(service.listRegistryRecords()).toEqual([]);
     expect(message).toContain("worktree setup failed");
     for (const pattern of entry.expected) {
@@ -173,7 +173,7 @@ describe("ManagedWorktreeService failure diagnostics", () => {
       const removeFails = failedOperation !== "branch";
       const branchFails = failedOperation !== "remove";
       const name = "cleanup-failure";
-      const branch = `openclaw/${name}`;
+      const branch = `carapace/${name}`;
       let record;
       if (phase === "restore") {
         record = await service.create({ repoRoot: repo, name, baseRef: "HEAD" });
@@ -248,7 +248,7 @@ describe("ManagedWorktreeService failure diagnostics", () => {
     await git(path.join(root, "remote.git"), "symbolic-ref", "HEAD", "refs/heads/main");
     await git(repo, "remote", "set-head", "origin", "-a");
     const name = "retry-evidence";
-    const branch = `openclaw/${name}`;
+    const branch = `carapace/${name}`;
     let allocatedPath: string | undefined;
     let firstAdd = true;
     vi.spyOn(commandExec, "runCommandWithTimeout").mockImplementation(async (argv, options) => {

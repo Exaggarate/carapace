@@ -1,6 +1,6 @@
-import { buildModelCatalogMergeKey } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { buildModelCatalogMergeKey } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { planEffectiveModelCatalogRows } from "../../model-catalog/index.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
@@ -14,7 +14,7 @@ type ModelReferenceInspection = {
 };
 
 type ModelReferenceInspectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;
   workspaceDir?: string;

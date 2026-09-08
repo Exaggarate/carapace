@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { applyEmbeddedAttemptToolsAllow } from "./embedded-agent-runner/run/attempt-tool-construction-plan.js";
 import { buildEmbeddedAttemptToolRunContext } from "./embedded-agent-runner/run/attempt-tool-run-context.js";
 import {
@@ -55,7 +55,7 @@ it.each([
     swarmCollector: collector,
     swarmOutputSchema: schema,
   });
-  const constructedTools = createOpenClawCodingTools({
+  const constructedTools = createCarapaceCodingTools({
     ...context,
     config: {
       agents: { entries: { main: { default: true } } },

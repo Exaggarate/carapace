@@ -6,7 +6,7 @@ import {
   archiveLegacyStateSource,
   asObjectRecord,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { resolveAcpxPluginConfig } from "./config.js";
 import {
   hashAcpxProcessCommand,
@@ -23,7 +23,7 @@ type Claim = Awaited<
 function sessionDirectory(input: MigrationInput): string {
   if (!input.serviceWorkspaceDir) {
     throw new Error(
-      "ACP ownership repair requires the Gateway service workspace; upgrade OpenClaw Doctor.",
+      "ACP ownership repair requires the Gateway service workspace; upgrade Carapace Doctor.",
     );
   }
   return path.join(
@@ -46,7 +46,7 @@ async function legacyRecords(input: MigrationInput): Promise<{ directory: string
   const ids = names
     .filter((name) => name.endsWith(".json"))
     .map((name) => decodeURIComponent(name.slice(0, -5)))
-    .filter((id) => !id.startsWith("agent:") && !id.startsWith(".openclaw-owner-"));
+    .filter((id) => !id.startsWith("agent:") && !id.startsWith(".carapace-owner-"));
   if (ids.length === 0) {
     return { directory, ids };
   }
@@ -228,7 +228,7 @@ async function migrateRecord(
   if (!source) {
     throw new Error("pinned ACPX reader rejected the source record");
   }
-  const temporaryId = `.openclaw-owner-${randomUUID()}`;
+  const temporaryId = `.carapace-owner-${randomUUID()}`;
   const temporaryPath = recordPath(directory, temporaryId);
   const file = await fs.open(temporaryPath, "wx", 0o600);
   try {
@@ -335,7 +335,7 @@ export const acpxSessionOwnerMigration: PluginDoctorStateMigration = {
     return ids.length
       ? {
           preview: [
-            `ACP backend has ${ids.length} unqualified record(s). Stop the Gateway and run openclaw doctor --fix; ambiguous histories remain intact.`,
+            `ACP backend has ${ids.length} unqualified record(s). Stop the Gateway and run carapace doctor --fix; ambiguous histories remain intact.`,
           ],
         }
       : null;

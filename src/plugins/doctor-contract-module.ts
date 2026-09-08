@@ -1,7 +1,7 @@
 import type { ChannelIngressQueue } from "../channels/message/ingress-queue.js";
 import type { LegacyConfigRule } from "../config/legacy.shared.js";
 import type { SessionAcpMeta, SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorRawStateEntry,
@@ -96,7 +96,7 @@ export type PluginDoctorChannelIngressQueueAccess = {
 };
 
 type PluginDoctorStateMigrationInput = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   oauthDir: string;
@@ -129,20 +129,20 @@ export type PluginDoctorContractModule = {
   normalizeCompatibilityConfig?: unknown;
   resolveSessionStoreAgentIds?: unknown;
   /**
-   * @deprecated Declare static ownership in openclaw.plugin.json sessionRouteStateOwners.
-   * Removal plan: remove the module fallback in OpenClaw 2027.1 after external plugins migrate.
+   * @deprecated Declare static ownership in carapace.plugin.json sessionRouteStateOwners.
+   * Removal plan: remove the module fallback in Carapace 2027.1 after external plugins migrate.
    */
   sessionRouteStateOwners?: unknown;
   stateMigrations?: unknown;
 };
 
-type PluginDoctorCompatibilityNormalizer = (params: { cfg: OpenClawConfig }) => {
-  config: OpenClawConfig;
+type PluginDoctorCompatibilityNormalizer = (params: { cfg: CarapaceConfig }) => {
+  config: CarapaceConfig;
   changes: string[];
 };
 
 type PluginDoctorSessionStoreAgentIdsResolver = (params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }) => readonly string[];
 
 function coerceLegacyConfigRules(value: unknown): LegacyConfigRule[] {

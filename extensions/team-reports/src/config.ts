@@ -1,5 +1,5 @@
 import { open } from "node:fs/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/plugin-entry";
 import { z } from "zod";
 import type { DiscordSourceConfig, GithubSourceConfig, Person } from "./types.js";
 
@@ -156,13 +156,13 @@ async function readPeopleFile(filePath: string): Promise<Person[]> {
 
 export async function resolveTeamReportsConfig(
   config: TeamReportsConfig,
-  fullConfig: OpenClawConfig,
+  fullConfig: CarapaceConfig,
 ): Promise<{ github: GithubSourceConfig; discord?: DiscordSourceConfig; people: Person[] }> {
   const people = config.peopleFile
     ? await readPeopleFile(config.peopleFile)
     : (config.people ?? []);
   const { applyResolvedAssignments, createResolverContext, resolveSecretRefValues } =
-    await import("openclaw/plugin-sdk/secret-ref-runtime");
+    await import("carapace/plugin-sdk/secret-ref-runtime");
   const context = createResolverContext({ sourceConfig: fullConfig, env: process.env });
   const tokens: Record<"github" | "discord", string> = { github: "", discord: "" };
   for (const name of ["github", "discord"] as const) {

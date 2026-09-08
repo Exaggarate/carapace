@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
   getSessionRepositoryWorkspaceStore,
@@ -57,7 +57,7 @@ function owner(params: CheckpointOwner) {
 
 function checkpointRef(workspace: SessionRepositoryWorkspaceRecord, ref?: string): string {
   const selected = ref ?? workspace.checkpointRef;
-  if (!selected || !/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(selected)) {
+  if (!selected || !/^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u.test(selected)) {
     throw new Error("Repository workspace has no valid checkpoint");
   }
   return selected;
@@ -190,7 +190,7 @@ async function stagePublication(params: {
   if (snapshot.baseCommit !== params.baseCommit) {
     throw new Error("Repository publication checkpoint base changed");
   }
-  const stagingRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-publication-payload-"));
+  const stagingRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-publication-payload-"));
   try {
     await fs.mkdir(path.join(stagingRoot, "blobs"), { mode: 0o700 });
     await fs.writeFile(path.join(stagingRoot, "snapshot.json"), metadata, { mode: 0o600 });

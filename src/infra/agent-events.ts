@@ -100,8 +100,8 @@ type AgentEventState = {
   lifecycleRotationHandlers?: Map<string, (lifecycleGeneration: string) => void>;
 };
 
-const AGENT_EVENT_STATE_KEY = Symbol.for("openclaw.agentEvents.state");
-const AGENT_EVENT_EXECUTION_CONTEXT_KEY = Symbol.for("openclaw.agentEvents.executionContext");
+const AGENT_EVENT_STATE_KEY = Symbol.for("carapace.agentEvents.state");
+const AGENT_EVENT_EXECUTION_CONTEXT_KEY = Symbol.for("carapace.agentEvents.executionContext");
 
 type AgentEventExecutionContext = {
   lifecycleGeneration: string;

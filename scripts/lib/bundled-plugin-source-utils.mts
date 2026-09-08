@@ -25,7 +25,7 @@ function readJsonFile(filePath: string): unknown {
 
 function collectTrackedBundledPluginSourceCandidates(repoRoot: string) {
   const pathspecs = [
-    ":(glob)extensions/*/openclaw.plugin.json",
+    ":(glob)extensions/*/carapace.plugin.json",
     ":(glob)extensions/*/package.json",
   ];
   const runGitLsFiles = (args: string[]) =>
@@ -52,7 +52,7 @@ function collectTrackedBundledPluginSourceCandidates(repoRoot: string) {
     if (deletedPaths.has(line)) {
       continue;
     }
-    const match = /^extensions\/([^/]+)\/(openclaw\.plugin\.json|package\.json)$/u.exec(line);
+    const match = /^extensions\/([^/]+)\/(carapace\.plugin\.json|package\.json)$/u.exec(line);
     if (!match?.[1] || !match[2]) {
       continue;
     }
@@ -62,7 +62,7 @@ function collectTrackedBundledPluginSourceCandidates(repoRoot: string) {
       packageJsonPath: null,
       pluginDir: path.join(repoRoot, "extensions", match[1]),
     };
-    if (match[2] === "openclaw.plugin.json") {
+    if (match[2] === "carapace.plugin.json") {
       current.manifestPath = path.join(repoRoot, line);
     } else {
       current.packageJsonPath = path.join(repoRoot, line);
@@ -86,7 +86,7 @@ function collectBundledPluginSourceCandidatesFromDirectory(repoRoot: string) {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => {
       const pluginDir = path.join(extensionsRoot, dirent.name);
-      const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+      const manifestPath = path.join(pluginDir, "carapace.plugin.json");
       const packageJsonPath = path.join(pluginDir, "package.json");
       return {
         dirName: dirent.name,

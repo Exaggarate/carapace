@@ -1,7 +1,7 @@
 // Normalizes tool availability metadata from plugin manifests.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import { canResolveEnvSecretRefInReadOnlyPath } from "../plugin-sdk/secret-ref-readonly.internal.js";
 import { isBuiltInDefaultSecretProviderRef } from "../secrets/ref-contract.js";
@@ -38,7 +38,7 @@ function readStringAtPath(root: unknown, path: string): string | undefined {
 }
 
 function readEffectiveConfigs(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   rootPath: string;
   overlayPath?: string;
   overlayMapPath?: string;
@@ -64,7 +64,7 @@ function readEffectiveConfigs(params: {
 }
 
 function hasConfiguredValue(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
 }): boolean {
@@ -98,7 +98,7 @@ function hasConfiguredValue(params: {
 }
 
 export function manifestConfigSignalPasses(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   signal: ManifestConfigAvailabilitySignal;
 }): boolean {
@@ -122,7 +122,7 @@ export function manifestConfigSignalPasses(params: {
 }
 
 function manifestEffectiveConfigSignalPasses(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   effectiveConfig: Record<string, unknown>;
   signal: ManifestConfigAvailabilitySignal;
@@ -173,7 +173,7 @@ function normalizeBaseUrlForManifestGuard(value: string): string {
 }
 
 export function manifestProviderBaseUrlGuardPasses(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   guard: ManifestAuthAvailabilitySignal["providerBaseUrl"];
 }): boolean {
   const guard = params.guard;
@@ -223,7 +223,7 @@ function listToolAuthSignals(metadata: ToolMetadata): ManifestAuthAvailabilitySi
 function toolMetadataPasses(params: {
   plugin: PluginManifestRecord;
   metadata: ToolMetadata;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   hasAuthForProvider?: (providerId: string) => boolean;
 }): boolean {
@@ -269,7 +269,7 @@ function toolMetadataPasses(params: {
 export function hasManifestToolAvailability(params: {
   plugin: PluginManifestRecord;
   toolNames: readonly string[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   hasAuthForProvider?: (providerId: string) => boolean;
 }): boolean {

@@ -43,8 +43,8 @@ describe("agent exec owner selection", () => {
       },
     },
   ])("uses $name for the run and its SQLite store scope", async ({ config }) => {
-    const configRoot = tempDirs.make("openclaw-agent-exec-default-agent-");
-    const configPath = path.join(configRoot, "openclaw.json");
+    const configRoot = tempDirs.make("carapace-agent-exec-default-agent-");
+    const configPath = path.join(configRoot, "carapace.json");
     await fs.writeFile(configPath, JSON.stringify(config), "utf8");
     const runAgent = vi.fn(async (options: Record<string, unknown>) => {
       const requestedAgentId = typeof options.agentId === "string" ? options.agentId : "main";

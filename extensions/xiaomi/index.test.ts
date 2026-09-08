@@ -1,15 +1,15 @@
 // Xiaomi tests cover index plugin behavior.
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "carapace/plugin-sdk/llm";
 import {
   registerProviderPlugin,
   requireRegisteredProvider,
   resolveProviderPluginChoice,
   type RegisteredProviderCollections,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
-import * as ssrfRuntime from "openclaw/plugin-sdk/ssrf-runtime";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
+import * as ssrfRuntime from "carapace/plugin-sdk/ssrf-runtime";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import xiaomiPlugin from "./index.js";

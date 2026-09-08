@@ -2,18 +2,18 @@ import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it, vi } from "vitest";
 import type { SessionsResolveParams } from "../../packages/gateway-protocol/src/index.js";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { roleClient, rolePolicyConfig } from "./session-sharing.test-utils.js";
 import { resolveSessionKeyFromResolveParams } from "./sessions-resolve.js";
 
 const scope = { agentId: "main", sessionKey: "agent:main:target" };
 const entry = { sessionId: "target-id", updatedAt: 1, label: "original" };
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   agents: { ownership: "explicit", entries: { main: {} } },
 };
 const selectors: SessionsResolveParams[] = [
@@ -31,7 +31,7 @@ const resolved = { ok: true, key: scope.sessionKey, agentId: "main" };
 
 describe("session resolution metadata", () => {
   it.each(selectors)("resolves %j without decoding unrelated saved prompts", async (p) => {
-    await withOpenClawTestState({ label: "resolve-prompts" }, async () => {
+    await withCarapaceTestState({ label: "resolve-prompts" }, async () => {
       replaceSessionEntrySync(scope, entry);
       for (let index = 0; index < 3; index++) {
         replaceSessionEntrySync(
@@ -56,7 +56,7 @@ describe("session resolution metadata", () => {
   });
 
   it("observes same-timestamp external and tracked label/visibility changes", async () => {
-    await withOpenClawTestState({ label: "resolve-freshness" }, async () => {
+    await withCarapaceTestState({ label: "resolve-freshness" }, async () => {
       const client = roleClient("view", "resolve-viewer");
       const roleCfg = { ...cfg, ...rolePolicyConfig() };
       const visible = { ...entry, visibility: "shared" as const };
@@ -67,7 +67,7 @@ describe("session resolution metadata", () => {
         expect(await lookup({ key: scope.sessionKey })).toEqual(resolved);
         expect(await lookup({ label: entry.label })).toEqual(resolved);
       }
-      const external = new DatabaseSync(openOpenClawAgentDatabase(scope).path);
+      const external = new DatabaseSync(openCarapaceAgentDatabase(scope).path);
       try {
         const hidden = { ...visible, label: "external", visibility: "draft" };
         external
@@ -102,7 +102,7 @@ describe("session resolution metadata", () => {
   it.each(["malformed", "nul", "mismatched-time", "mismatched-window"])(
     "preserves warm and cold lookup outcomes for %s rows",
     async (kind) => {
-      await withOpenClawTestState({ label: "resolve-corruption" }, async () => {
+      await withCarapaceTestState({ label: "resolve-corruption" }, async () => {
         const siblingKey = "agent:main:sibling";
         replaceSessionEntrySync(scope, entry);
         replaceSessionEntrySync(
@@ -110,7 +110,7 @@ describe("session resolution metadata", () => {
           { sessionId: "sibling", updatedAt: 1 },
         );
         expect(await resolve({ key: scope.sessionKey })).toEqual(resolved);
-        const database = openOpenClawAgentDatabase(scope).db;
+        const database = openCarapaceAgentDatabase(scope).db;
         if (kind === "malformed" || kind === "nul") {
           database
             .prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?")
@@ -135,7 +135,7 @@ describe("session resolution metadata", () => {
           key: siblingKey,
           agentId: "main",
         });
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         expect(await resolve({ key: scope.sessionKey, allowMissing: true })).toEqual({
           ok: true,
           missing: true,

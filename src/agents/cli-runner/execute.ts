@@ -137,7 +137,7 @@ export async function executePreparedCliRun(
   // Fresh recovery retains its exact account/read authority across every await
   // and through the process/plugin execution callbacks, not just preparation.
   const context =
-    !cliSessionIdToUse && inputContext.openClawHistoryPrompt && inputContext.cliHistoryWriter
+    !cliSessionIdToUse && inputContext.carapaceHistoryPrompt && inputContext.cliHistoryWriter
       ? {
           ...inputContext,
           params: {
@@ -181,7 +181,7 @@ export async function executePreparedCliRun(
 
   const basePrompt = cliSessionIdToUse
     ? params.prompt
-    : (context.openClawHistoryPrompt ?? params.prompt);
+    : (context.carapaceHistoryPrompt ?? params.prompt);
   let prompt =
     params.controlOperation !== undefined
       ? basePrompt
@@ -259,7 +259,7 @@ export async function executePreparedCliRun(
     // not exist on the node, and auto-approval must not cross that boundary.
     toolAvailability:
       params.cliToolAvailability && nodePlacement
-        ? { native: params.cliToolAvailability.native, openClaw: [] }
+        ? { native: params.cliToolAvailability.native, carapace: [] }
         : params.cliToolAvailability,
     useResume,
     baseArgs: baseArgsWithSkills,
@@ -412,7 +412,7 @@ export async function executePreparedCliRun(
           cliSessionId: cliSessionIdToUse,
           resolvedSessionId,
           reusableSession: context.reusableCliSession,
-          hasHistoryPrompt: Boolean(context.openClawHistoryPrompt),
+          hasHistoryPrompt: Boolean(context.carapaceHistoryPrompt),
         }),
       );
       const logOutputText =

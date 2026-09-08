@@ -1,6 +1,6 @@
 import os from "node:os";
 import { patchSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   readProjectCheckoutRemoteHead,
   ProjectCloneError,
@@ -23,7 +23,7 @@ import { applyStagedWorkerWorkspace } from "./worker-environments/workspace-reco
 
 /** Called only by an explicit Gateway move, after the source result is accepted. */
 export async function materializeSessionRepositoryWorkspaceOnGateway(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionId: string;
   sessionKey: string;
   agentId: string;
@@ -147,7 +147,7 @@ export async function materializeSessionRepositoryWorkspaceOnGateway(params: {
       ancestor.code !== 0 ||
       tree !== published.workspace_tree ||
       parent !== (published.previous_head_commit ?? repository.baseCommit) ||
-      !message.includes(`OpenClaw-Publication: ${published.request_id}`)
+      !message.includes(`Carapace-Publication: ${published.request_id}`)
     ) {
       throw new Error(
         "Recorded repository publication commit could not be verified; review publication before retrying the Gateway move",

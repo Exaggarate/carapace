@@ -1,8 +1,8 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import type { ProviderRouteOverridePresence } from "../plugin-sdk/provider-model-types.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "./types.models.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 type MergedModelProviderEntry = {
   providerKey: string;
@@ -154,7 +154,7 @@ function hasRequestCompatOverrides(compat: ModelDefinitionConfig["compat"]): boo
 /** Prepares row lookups within one stable authored config view. */
 export function createModelProviderRouteOverrideResolver(params: {
   provider: string;
-  authoredConfig?: OpenClawConfig;
+  authoredConfig?: CarapaceConfig;
   canonicalizeModelId?: (modelId: string) => string;
 }): (modelId?: string) => ProviderRouteOverridePresence {
   const providerConfig = resolveMergedModelProviderConfig(params.authoredConfig, params.provider);
@@ -198,7 +198,7 @@ export function createModelProviderRouteOverrideResolver(params: {
 
 /** Resolves the provider entry produced by models-config key normalization. */
 export function resolveMergedModelProviderEntry(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   provider: string,
 ): MergedModelProviderEntry | undefined {
   const requestedProvider = provider.trim();
@@ -237,7 +237,7 @@ export function resolveMergedModelProviderEntry(
 
 /** Resolves only the merged provider config when its canonical key is not needed. */
 export function resolveMergedModelProviderConfig(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   provider: string,
 ): ModelProviderConfig | undefined {
   return resolveMergedModelProviderEntry(config, provider)?.providerConfig;

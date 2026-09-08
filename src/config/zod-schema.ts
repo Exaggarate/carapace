@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { listAgentEntries } from "../agents/agent-scope-config.js";
 import { DEFAULT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
-import { OpenClawSchemaShape } from "./zod-schema.root-shape.js";
+import type { CarapaceConfig } from "./types.carapace.js";
+import { CarapaceSchemaShape } from "./zod-schema.root-shape.js";
 
 // zod@4 ships "sideEffects": false, so bundlers tree-shake the classic entry's
 // implicit config(en()) locale registration (zod/v4/classic/external.js) and a
@@ -14,8 +14,8 @@ function installZodDefaultLocale(): void {
 }
 installZodDefaultLocale();
 
-export const OpenClawSchema = z.strictObject(OpenClawSchemaShape).superRefine((cfg, ctx) => {
-  const agents = listAgentEntries(cfg as OpenClawConfig);
+export const CarapaceSchema = z.strictObject(CarapaceSchemaShape).superRefine((cfg, ctx) => {
+  const agents = listAgentEntries(cfg as CarapaceConfig);
   const agentIds = new Set(agents.map((agent) => agent.id));
   const effectiveAgentIds = new Set(agents.map((agent) => normalizeAgentId(agent.id)));
   if (agents.length === 0) {

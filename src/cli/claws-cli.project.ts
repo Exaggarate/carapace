@@ -37,7 +37,7 @@ type PreparedDev = {
   plan: ClawAddPlan;
 };
 
-const CLAW_DEV_RESULT_SCHEMA_VERSION = "openclaw.clawDev.v1" as const;
+const CLAW_DEV_RESULT_SCHEMA_VERSION = "carapace.clawDev.v1" as const;
 
 function reportProjectError(
   error: unknown,
@@ -68,7 +68,7 @@ function logDevPlanSummary(plan: ClawAddPlan, runtime: RuntimeEnv): void {
 }
 
 async function prepareDev(projectPath: string, opts: ClawsDevOptions): Promise<PreparedDev> {
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "openclaw-claw-dev-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "carapace-claw-dev-"));
   try {
     const build = await buildClawProject(projectPath, join(temporaryDirectory, "claw.tgz"));
     const extracted = await extractBuiltClawArtifact(build.artifact);
@@ -87,7 +87,7 @@ async function prepareDev(projectPath: string, opts: ClawsDevOptions): Promise<P
       if (!configSnapshot.valid) {
         throw new ClawProjectError(
           "config_unavailable",
-          "OpenClaw config is invalid; fix it before previewing a Claw project.",
+          "Carapace config is invalid; fix it before previewing a Claw project.",
         );
       }
       const config = configSnapshot.resolved;
@@ -97,7 +97,7 @@ async function prepareDev(projectPath: string, opts: ClawsDevOptions): Promise<P
         manifest: result.manifest,
         clawMarkdownBody: result.clawMarkdownBody,
         packageBootstrap: result.packageBootstrap,
-        openClawProfile: result.openClawProfile,
+        carapaceProfile: result.carapaceProfile,
         source: {
           ...result.source,
           integrityKind: "artifact",
@@ -184,7 +184,7 @@ export async function runClawsValidateCommand(
       root: result.root,
       source: result.claw.source,
       manifest: result.claw.manifest,
-      ...(result.claw.openClawProfile ? { openClawProfile: result.claw.openClawProfile } : {}),
+      ...(result.claw.carapaceProfile ? { carapaceProfile: result.claw.carapaceProfile } : {}),
       excludedPaths: result.excludedPaths,
       diagnostics: result.diagnostics,
     });

@@ -6,17 +6,17 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import type { AgentConfig } from "../../config/types.agents.js";
 import type { GatewayOperatorRoleDefinition } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import * as userModelAccounts from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
 
 const pluginMetadata = vi.hoisted(() => ({
@@ -75,11 +75,11 @@ const defaultConfig = {
     defaults: { model: "anthropic/claude-opus-4-6" },
     list: defaultAgents,
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 
-let cfg: OpenClawConfig;
-let persistedConfig: OpenClawConfig | undefined;
-let openClawTestState: OpenClawTestState;
+let cfg: CarapaceConfig;
+let persistedConfig: CarapaceConfig | undefined;
+let carapaceTestState: CarapaceTestState;
 let accountOwnerId: string;
 let otherPersonId: string;
 let personalAuthProfileId: string;
@@ -125,7 +125,7 @@ function client(scopes: string[]): TestClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes,
     },
@@ -164,7 +164,7 @@ async function patchSession(
 }
 
 beforeAll(async () => {
-  openClawTestState = await createOpenClawTestState({ scenario: "minimal" });
+  carapaceTestState = await createCarapaceTestState({ scenario: "minimal" });
   accountOwnerId = ensureProfileForEmail("personal-owner@example.test").id;
   otherPersonId = ensureProfileForEmail("other-person@example.test").id;
   personalAuthProfileId = userModelAccounts.connectUserModelAccount({
@@ -197,7 +197,7 @@ beforeEach(() => {
   effects.mutateConfigFileWithRetry
     .mockReset()
     .mockImplementation(
-      async (params: { mutate: (draft: OpenClawConfig, context: unknown) => unknown }) => {
+      async (params: { mutate: (draft: CarapaceConfig, context: unknown) => unknown }) => {
         const draft = structuredClone(cfg);
         const result = await params.mutate(draft, {});
         persistedConfig = draft;
@@ -207,8 +207,8 @@ beforeEach(() => {
 });
 
 afterAll(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  await openClawTestState.cleanup();
+  closeCarapaceAgentDatabasesForTest();
+  await carapaceTestState.cleanup();
 });
 
 describe("sessions.patch sticky model persistence", () => {
@@ -604,7 +604,7 @@ describe("sessions.patch personal model-account ownership", () => {
 
   it("preserves shared-profile selection without requiring a personal identity", async () => {
     const sharedAuthProfileId = "openai:shared-session-control";
-    await openClawTestState.writeAuthProfiles({
+    await carapaceTestState.writeAuthProfiles({
       version: 1,
       profiles: {
         [sharedAuthProfileId]: {

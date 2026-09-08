@@ -1,9 +1,9 @@
 import { isDeepStrictEqual } from "node:util";
-import type { AgentHarnessSessionDeletionParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentHarnessSessionDeletionParams } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   deleteSessionUpstreamLink,
   upsertSessionUpstreamLink,
-} from "openclaw/plugin-sdk/session-catalog";
+} from "carapace/plugin-sdk/session-catalog";
 import {
   validateBindingForWrite,
   type CodexAppServerBindingIdentity,

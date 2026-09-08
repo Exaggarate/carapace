@@ -1,8 +1,8 @@
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { withOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { withCarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { expect, it, vi } from "vitest";
 
 const runtime = vi.hoisted(() => ({
@@ -15,7 +15,7 @@ const runtime = vi.hoisted(() => ({
   getControlState: vi.fn(() => null),
 }));
 
-vi.mock("openclaw/plugin-sdk/browser-config", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/browser-config", async (importOriginal) => {
   runtime.coldImports.push("browser-config");
   return await importOriginal();
 });
@@ -39,7 +39,7 @@ vi.mock("./src/browser-control-state.js", () => {
 });
 
 it("loads browser close runtimes only for owned tabs", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     await state.writeConfig({
       browser: {
         profiles: {

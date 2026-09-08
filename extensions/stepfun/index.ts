@@ -1,11 +1,11 @@
 import {
   definePluginEntry,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ProviderCatalogContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
-import { buildOpenAICompatibleLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-auth-api-key";
+import { buildOpenAICompatibleLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   applyStepFunPlanConfig,
   applyStepFunPlanConfigCn,
@@ -137,7 +137,7 @@ function createStepFunApiKeyMethod(params: {
   choiceId: string;
   choiceLabel: string;
   choiceHint: string;
-  applyConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyConfig: (cfg: CarapaceConfig) => CarapaceConfig;
 }) {
   return createProviderApiKeyAuthMethod({
     providerId: params.providerId,

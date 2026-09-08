@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  inspectOpenClawAgentDatabaseOwner,
-  listOpenClawRegisteredAgentDatabases,
-} from "../state/openclaw-agent-db.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  inspectCarapaceAgentDatabaseOwner,
+  listCarapaceRegisteredAgentDatabases,
+} from "../state/carapace-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.paths.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { GatewayClient } from "./client.js";
 import { connectGatewayClient, disconnectGatewayClient } from "./test-helpers.e2e.js";
 import {
@@ -44,7 +44,7 @@ describe("agent database recreation product proof", () => {
         });
 
         const workspace = path.join(
-          process.env.OPENCLAW_STATE_DIR ?? process.cwd(),
+          process.env.CARAPACE_STATE_DIR ?? process.cwd(),
           "workspace-recreated-agent",
         );
         const created = await client.request<{ agentId: string; ok: true }>("agents.create", {
@@ -59,7 +59,7 @@ describe("agent database recreation product proof", () => {
           { sessions: [expect.objectContaining({ key: SESSION_KEY })] },
         );
 
-        const databasePath = resolveOpenClawAgentSqlitePath({
+        const databasePath = resolveCarapaceAgentSqlitePath({
           agentId: AGENT_ID,
           env: process.env,
         });
@@ -93,11 +93,11 @@ describe("agent database recreation product proof", () => {
           dev: originalIdentity.dev,
           ino: originalIdentity.ino,
         });
-        expect(inspectOpenClawAgentDatabaseOwner(databasePath)).toEqual({
+        expect(inspectCarapaceAgentDatabaseOwner(databasePath)).toEqual({
           agentId: AGENT_ID,
           status: "owned",
         });
-        expect(listOpenClawRegisteredAgentDatabases({ env: process.env })).toEqual(
+        expect(listCarapaceRegisteredAgentDatabases({ env: process.env })).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ agentId: AGENT_ID, path: databasePath }),
           ]),
@@ -107,8 +107,8 @@ describe("agent database recreation product proof", () => {
           await disconnectGatewayClient(client);
         }
         await server.close({ reason: "agent database recreation product proof complete" });
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
       }
     },
   );

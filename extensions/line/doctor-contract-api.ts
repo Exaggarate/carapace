@@ -3,7 +3,7 @@ import type {
   PluginDoctorChannelIngressQueueAccess,
   PluginDoctorStateMigration,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import type { LineWebhookSpoolPayload } from "./src/webhook-spool-contract.js";
 import { countLegacySpoolRows, migrateLineLegacySpoolRows } from "./src/webhook-spool-migration.js";
 

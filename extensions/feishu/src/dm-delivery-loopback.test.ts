@@ -2,7 +2,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 import { describe, expect, it } from "vitest";
 import type { ClawdbotConfig } from "../runtime-api.js";
 import { sendMediaFeishu } from "./media.js";

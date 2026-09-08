@@ -48,7 +48,7 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
   ])(
     "preserves $layout native project ownership (sibling change=$siblingChange, shim failure=$shimFailure, rollback failure=$rollbackFailure)",
     async ({ layout, siblingChange, shimFailure, rollbackFailure }) => {
-      await withTestDir({ prefix: "openclaw-native-update-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-native-update-" }, async (base) => {
         const manager = layout === "bun" ? "bun" : "pnpm";
         const project = path.join(base, manager, "global");
         const globalRoot =
@@ -62,10 +62,10 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
           layout === "pnpm11" ? path.join(globalRoot, "old") : path.dirname(globalRoot);
         const packageRoot =
           layout === "pnpm11"
-            ? path.join(oldOwner, "node_modules", "openclaw")
-            : path.join(globalRoot, "openclaw");
+            ? path.join(oldOwner, "node_modules", "carapace")
+            : path.join(globalRoot, "carapace");
         const binDir = path.join(base, "native-bin");
-        const launcher = path.join(binDir, "openclaw");
+        const launcher = path.join(binDir, "carapace");
         const metadata = path.join(project, "manager-metadata");
         const sibling = path.join(project, "sibling-package");
         await writePackageRoot(packageRoot, "1.0.0");
@@ -82,10 +82,10 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         if (layout === "pnpm11") {
           await fs.writeFile(
             path.join(oldOwner, "package.json"),
-            JSON.stringify({ dependencies: { openclaw: "1.0.0" } }),
+            JSON.stringify({ dependencies: { carapace: "1.0.0" } }),
           );
           await fs.writeFile(path.join(oldOwner, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n");
-          await fs.symlink("old", path.join(globalRoot, "hash-openclaw"));
+          await fs.symlink("old", path.join(globalRoot, "hash-carapace"));
         }
         const target: ResolvedGlobalInstallTarget = {
           manager,
@@ -126,8 +126,8 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         });
         const update = runGlobalPackageUpdateSteps({
           installTarget: target,
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           env: {
             PATH: process.env.PATH,
             PNPM_HOME: path.dirname(project),
@@ -171,31 +171,31 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
               layout === "pnpm11" ? path.join(stageGlobal, "new") : path.dirname(stageGlobal);
             const candidateRoot =
               layout === "pnpm11"
-                ? path.join(nextOwner, "node_modules", "openclaw")
-                : path.join(stageGlobal, "openclaw");
+                ? path.join(nextOwner, "node_modules", "carapace")
+                : path.join(stageGlobal, "carapace");
             await writePackageRoot(candidateRoot, "2.0.0");
             await fs.writeFile(path.join(stageProject, "manager-metadata"), "candidate metadata\n");
             if (layout === "pnpm11") {
               await fs.writeFile(
                 path.join(nextOwner, "package.json"),
-                JSON.stringify({ dependencies: { openclaw: "2.0.0" } }),
+                JSON.stringify({ dependencies: { carapace: "2.0.0" } }),
               );
               await fs.writeFile(
                 path.join(nextOwner, "pnpm-lock.yaml"),
                 "lockfileVersion: '9.0'\n",
               );
-              await fs.rm(path.join(stageGlobal, "hash-openclaw"));
-              await fs.symlink("new", path.join(stageGlobal, "hash-openclaw"));
+              await fs.rm(path.join(stageGlobal, "hash-carapace"));
+              await fs.symlink("new", path.join(stageGlobal, "hash-carapace"));
               if (shimFailure) {
                 await fs.rm(path.join(stageGlobal, "old"), { recursive: true });
               }
             }
             const linkedPackage =
               layout === "pnpm11"
-                ? path.join(stageGlobal, "hash-openclaw", "node_modules", "openclaw")
+                ? path.join(stageGlobal, "hash-carapace", "node_modules", "carapace")
                 : candidateRoot;
             await fs.mkdir(stageBin, { recursive: true });
-            stagedLauncher = path.join(stageBin, "openclaw");
+            stagedLauncher = path.join(stageBin, "carapace");
             await fs.symlink(
               path.relative(stageBin, path.join(linkedPackage, "dist", "index.js")),
               stagedLauncher,
@@ -241,7 +241,7 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         const siblingManifest = path.join(siblingOwner, "package.json");
         const siblingEntry = path.join(siblingOwner, "node_modules", "sibling", "index.js");
         const concurrentManifest = JSON.stringify({
-          dependencies: { openclaw: "1.0.0", sibling: "2.0.0" },
+          dependencies: { carapace: "1.0.0", sibling: "2.0.0" },
         });
         if (siblingChange === "before") {
           await preparationStarted.promise;
@@ -286,7 +286,7 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
           return;
         }
         if (shimFailure) {
-          const activeRoot = path.join(globalRoot, "new", "node_modules", "openclaw");
+          const activeRoot = path.join(globalRoot, "new", "node_modules", "carapace");
           expect(result.failedStep).toMatchObject({ name: "global install swap", exitCode: 1 });
           expect(result.activePackageRoot).toBe(activeRoot);
           expect(result.afterVersion).toBe("2.0.0");
@@ -390,7 +390,7 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         // Verification may repair only the candidate payload without changing sibling ownership.
         await fs.writeFile(
           path.join(result.activePackageRoot!, "package.json"),
-          '{"name":"openclaw","version":"2.0.1"}',
+          '{"name":"carapace","version":"2.0.1"}',
         );
         const copyFile = fs.copyFile.bind(fs);
         const rename = fs.rename.bind(fs);
@@ -446,14 +446,14 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
   it.each(["root", "bin", "probe-error"] as const)(
     "refuses pnpm staging before install when the effective destination fails (%s)",
     async (failure) => {
-      await withTestDir({ prefix: "openclaw-pnpm-stage-destination-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-pnpm-stage-destination-" }, async (base) => {
         const project = path.join(base, "global");
         const globalRoot = path.join(project, "5", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         const binDir = path.join(base, "bin");
         await writePackageRoot(packageRoot, "1.0.0");
         await fs.mkdir(binDir);
-        await fs.writeFile(path.join(binDir, "openclaw"), "live launcher\n");
+        await fs.writeFile(path.join(binDir, "carapace"), "live launcher\n");
         const beforeActivate = vi.fn(async () => {});
         const runStep = vi.fn(async () => {
           throw new Error("installation must not run after a refused destination probe");
@@ -462,8 +462,8 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         let stageBin: string | undefined;
         const result = await runGlobalPackageUpdateSteps({
           installTarget: { manager: "pnpm", command: "pnpm", globalRoot, packageRoot },
-          packageName: "openclaw",
-          installSpec: "openclaw@2.0.0",
+          packageName: "carapace",
+          installSpec: "carapace@2.0.0",
           runCommand: async (argv, options) => {
             const stage = readPnpmStageArgs(argv);
             if (!stage.projectRoot) {
@@ -498,7 +498,7 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
         expect(await fs.readFile(path.join(packageRoot, "package.json"), "utf8")).toContain(
           '"version":"1.0.0"',
         );
-        expect(await fs.readFile(path.join(binDir, "openclaw"), "utf8")).toBe("live launcher\n");
+        expect(await fs.readFile(path.join(binDir, "carapace"), "utf8")).toBe("live launcher\n");
         expect(stageRoot).toBeDefined();
         expect(stageBin).toBeDefined();
         await expect(fs.stat(stageRoot!)).rejects.toMatchObject({ code: "ENOENT" });
@@ -509,10 +509,10 @@ describe.runIf(process.platform !== "win32")("native package transactions", () =
 });
 
 it("gives actionable Windows Bun recovery before stopping or installing", async () => {
-  await withTestDir({ prefix: "openclaw-windows-bun-refusal-" }, async (base) => {
+  await withTestDir({ prefix: "carapace-windows-bun-refusal-" }, async (base) => {
     const project = path.join(base, "global");
     const globalRoot = path.join(project, "node_modules");
-    const packageRoot = path.join(globalRoot, "openclaw");
+    const packageRoot = path.join(globalRoot, "carapace");
     const binDir = path.join(base, "bin");
     await writePackageRoot(packageRoot, "1.0.0");
     const beforeActivate = vi.fn(async () => {});
@@ -523,8 +523,8 @@ it("gives actionable Windows Bun recovery before stopping or installing", async 
     try {
       const result = await runGlobalPackageUpdateSteps({
         installTarget: { manager: "bun", command: "bun", globalRoot, packageRoot },
-        packageName: "openclaw",
-        installSpec: "openclaw@2.0.0",
+        packageName: "carapace",
+        installSpec: "carapace@2.0.0",
         env: { BUN_INSTALL_GLOBAL_DIR: project, BUN_INSTALL_BIN: binDir },
         runCommand: async () => ({ code: 0, stdout: binDir, stderr: "" }),
         runStep,
@@ -532,9 +532,9 @@ it("gives actionable Windows Bun recovery before stopping or installing", async 
         timeoutMs: 1000,
       });
       expect(result.failedStep).toMatchObject({ name: "global install stage", exitCode: 1 });
-      expect(result.failedStep?.stderrTail).toContain("bun add -g --trust openclaw@2.0.0");
-      expect(result.failedStep?.stderrTail).toContain("openclaw gateway restart");
-      expect(result.failedStep?.stderrTail).toContain("openclaw update status");
+      expect(result.failedStep?.stderrTail).toContain("bun add -g --trust carapace@2.0.0");
+      expect(result.failedStep?.stderrTail).toContain("carapace gateway restart");
+      expect(result.failedStep?.stderrTail).toContain("carapace update status");
       expect(result.recovery).toEqual({ serviceRestartSafe: true, version: "1.0.0" });
       expect(runStep).not.toHaveBeenCalled();
       expect(beforeActivate).not.toHaveBeenCalled();

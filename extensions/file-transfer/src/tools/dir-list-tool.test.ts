@@ -6,10 +6,10 @@ import {
   callGatewayTool,
   listNodes,
   resolveNodeIdFromList,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import pluginEntry from "../../index.js";
 import { handleDirList } from "../node-host/dir-list.js";
@@ -18,7 +18,7 @@ import { createDirListTool } from "./dir-list-tool.js";
 import { createFileFetchTool } from "./file-fetch-tool.js";
 import { createFileWriteTool } from "./file-write-tool.js";
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", () => ({
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", () => ({
   callGatewayTool: vi.fn(),
   listNodes: vi.fn(),
   resolveNodeIdFromList: vi.fn(),

@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
 import {
   normalizeSlackRouteBindingConfig,
   resolveSlackConversationBindingRoute,
@@ -12,7 +12,7 @@ import {
 import { parseSlackTarget } from "./targets.js";
 
 export function inspectSlackConversationRouteOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   conversation: {
     kind: "direct" | "group" | "channel";

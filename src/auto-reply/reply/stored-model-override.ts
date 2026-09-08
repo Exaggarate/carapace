@@ -1,5 +1,5 @@
 // Normalizes stored reply models and detects stale heartbeat fallback pins.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { hasSessionAutoModelFallbackProvenance } from "../../agents/agent-scope.js";
 import { resolveCliRuntimeCanonicalProvider } from "../../agents/cli-backends.js";
 import {
@@ -9,7 +9,7 @@ import {
 import { modelKey, normalizeModelRef } from "../../agents/model-selection.js";
 import { RUNTIME_MODEL_VISIBILITY_NORMALIZATION } from "../../agents/model-visibility-policy.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { StoredModelOverride } from "../../sessions/stored-model-overrides.js";
 import type { RuntimeModelNormalization } from "./model-runtime-normalization.js";
 
@@ -17,7 +17,7 @@ import type { RuntimeModelNormalization } from "./model-runtime-normalization.js
 export function normalizeStoredRuntimeModelRef(
   provider: string,
   model: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   sessionEntry?: SessionEntry,
   normalization: RuntimeModelNormalization = RUNTIME_MODEL_VISIBILITY_NORMALIZATION,
 ) {

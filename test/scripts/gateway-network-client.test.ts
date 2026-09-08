@@ -79,31 +79,31 @@ describe("gateway network client", () => {
   it("rejects loose client timeout env values instead of parsing prefixes", () => {
     expect(() =>
       readGatewayNetworkClientConnectTimeoutMs({
-        OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "100ms",
+        CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "100ms",
       }),
-    ).toThrow("invalid OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: 100ms");
+    ).toThrow("invalid CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: 100ms");
     expect(() =>
       readGatewayNetworkClientConnectTimeoutMs({
-        OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "1e3",
+        CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "1e3",
       }),
-    ).toThrow("invalid OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: 1e3");
+    ).toThrow("invalid CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: 1e3");
     expect(() =>
       readGatewayNetworkClientConnectTimeoutMs({
-        OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "0",
+        CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "0",
       }),
-    ).toThrow("invalid OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: 0");
+    ).toThrow("invalid CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: 0");
   });
 
   it("prefers the explicit client timeout over the connect-ready fallback", () => {
     expect(
       readGatewayNetworkClientConnectTimeoutMs({
-        OPENCLAW_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "5000",
-        OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "1000",
+        CARAPACE_GATEWAY_NETWORK_CLIENT_CONNECT_TIMEOUT_MS: "5000",
+        CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "1000",
       }),
     ).toBe(5000);
     expect(
       readGatewayNetworkClientConnectTimeoutMs({
-        OPENCLAW_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "3000",
+        CARAPACE_GATEWAY_NETWORK_CONNECT_READY_TIMEOUT_MS: "3000",
       }),
     ).toBe(3000);
   });
@@ -246,7 +246,7 @@ describe("gateway network client", () => {
 
   it("bounds a stalled post-restart admin request by the client deadline", async () => {
     const timeoutSpy = vi.spyOn(AbortSignal, "timeout");
-    const workDir = tempDirs.make("openclaw-gateway-network-post-restart-");
+    const workDir = tempDirs.make("carapace-gateway-network-post-restart-");
     const statePath = join(workDir, "suspension.json");
     writeFileSync(
       statePath,
@@ -394,7 +394,7 @@ describe("gateway network client", () => {
     },
     { methods: ["health", "status"], expected: "unsupported" },
   ])("records $expected suspension support from connect hello methods", async (testCase) => {
-    const workDir = tempDirs.make("openclaw-gateway-network-capabilities-");
+    const workDir = tempDirs.make("carapace-gateway-network-capabilities-");
     const capabilitiesPath = join(workDir, "capabilities.json");
     const harness = createNetworkClientHarness([
       connectResponse(testCase.methods),

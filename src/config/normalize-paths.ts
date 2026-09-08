@@ -1,6 +1,6 @@
 // Normalizes path-like config values to canonical user paths.
 import { isPlainObject, resolveUserPath } from "../utils.js";
-import type { OpenClawConfig } from "./types.js";
+import type { CarapaceConfig } from "./types.js";
 
 const PATH_VALUE_RE = /^~(?=$|[\\/])/;
 
@@ -9,9 +9,9 @@ const PATH_LIST_KEYS = new Set(["paths", "pathPrepend"]);
 
 /** Normalize tilde paths in path-like config fields using the config reader's home. */
 export function normalizeConfigPaths(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
-): OpenClawConfig {
+): CarapaceConfig {
   // Status can read a daemon's config from a different home. Capture that
   // resolution context once so nested paths cannot fall back to the CLI home.
   function normalizeAny(key: string | undefined, value: unknown): unknown {

@@ -29,7 +29,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 function initGitRepo(root: string): void {
   execFileSync("git", ["init", "--quiet", root]);
   execFileSync("git", ["-C", root, "config", "user.email", "test@example.invalid"]);
-  execFileSync("git", ["-C", root, "config", "user.name", "OpenClaw Test"]);
+  execFileSync("git", ["-C", root, "config", "user.name", "Carapace Test"]);
 }
 
 function writePublishableManifest(
@@ -44,7 +44,7 @@ function writePublishableManifest(
     join(packageDir, "package.json"),
     `${JSON.stringify({
       name: packageName,
-      openclaw: { release: { publishToNpm: true } },
+      carapace: { release: { publishToNpm: true } },
       version: "1.0.0",
       ...extra,
     })}\n`,
@@ -63,7 +63,7 @@ function writePluginArtifact(params: {
 }) {
   const root = params.artifactRoot
     ? join(params.artifactRoot, "..")
-    : tempDirs.make("openclaw-plugin-npm-security-artifact-");
+    : tempDirs.make("carapace-plugin-npm-security-artifact-");
   const artifactRoot = params.artifactRoot ?? join(root, "artifacts");
   const packageRoot = join(root, `source-${params.extensionId}`);
   const artifactDir = join(
@@ -79,7 +79,7 @@ function writePluginArtifact(params: {
     "utf8",
   );
   writeFileSync(
-    join(packageRoot, "openclaw.plugin.json"),
+    join(packageRoot, "carapace.plugin.json"),
     `${JSON.stringify({ id: params.extensionId })}\n`,
     "utf8",
   );
@@ -150,45 +150,45 @@ function writePluginArtifact(params: {
 
 function currentLayoutFindings(): string[] {
   return [
-    "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/sandbox-child.ts",
-    "@openclaw/codex:dangerous-exec:src/app-server/transport-process-snapshot.ts",
+    "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/sandbox-child.ts",
+    "@carapace/codex:dangerous-exec:src/app-server/transport-process-snapshot.ts",
   ];
 }
 
 function frozenReviewedFindings(): string[] {
   return [
-    "@openclaw/acpx:dangerous-exec:src/codex-auth-bridge.ts",
-    "@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs",
-    "@openclaw/codex:dangerous-exec:src/app-server/transport-stdio.ts",
-    "@openclaw/codex:dangerous-exec:src/node-cli-sessions.ts",
-    "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts",
-    "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts",
-    "@openclaw/discord:dangerous-exec:src/voice/audio.ts",
-    ...Array.from({ length: 3 }, () => "@openclaw/google-meet:dangerous-exec:src/node-host.ts"),
-    ...Array.from({ length: 2 }, () => "@openclaw/google-meet:dangerous-exec:src/realtime.ts"),
-    "@openclaw/matrix:dangerous-exec:src/matrix/deps.ts",
-    "@openclaw/raft:dangerous-exec:src/gateway.ts",
-    "@openclaw/signal:dangerous-exec:src/daemon.ts",
-    ...Array.from({ length: 4 }, () => "@openclaw/voice-call:dangerous-exec:src/tunnel.ts"),
-    "@openclaw/voice-call:dangerous-exec:src/webhook/tailscale.ts",
+    "@carapace/acpx:dangerous-exec:src/codex-auth-bridge.ts",
+    "@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.mjs",
+    "@carapace/codex:dangerous-exec:src/app-server/transport-stdio.ts",
+    "@carapace/codex:dangerous-exec:src/node-cli-sessions.ts",
+    "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts",
+    "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts",
+    "@carapace/discord:dangerous-exec:src/voice/audio.ts",
+    ...Array.from({ length: 3 }, () => "@carapace/google-meet:dangerous-exec:src/node-host.ts"),
+    ...Array.from({ length: 2 }, () => "@carapace/google-meet:dangerous-exec:src/realtime.ts"),
+    "@carapace/matrix:dangerous-exec:src/matrix/deps.ts",
+    "@carapace/raft:dangerous-exec:src/gateway.ts",
+    "@carapace/signal:dangerous-exec:src/daemon.ts",
+    ...Array.from({ length: 4 }, () => "@carapace/voice-call:dangerous-exec:src/tunnel.ts"),
+    "@carapace/voice-call:dangerous-exec:src/webhook/tailscale.ts",
   ];
 }
 
 // Recorded by the inert package scan for candidate 292991c9d814 in
-// https://github.com/openclaw/openclaw/actions/runs/33807502201/job/100821685649.
+// https://github.com/Exaggarate/carapace/actions/runs/33807502201/job/100821685649.
 function frozen2026_7_33ReviewedFindings(): string[] {
   return [
     ...frozenReviewedFindings(),
     ...Array.from(
       { length: 3 },
-      () => "@openclaw/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts",
+      () => "@carapace/acpx:dangerous-exec:src/runtime-internals/mcp-proxy.test.ts",
     ),
-    "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts",
-    "@openclaw/google-meet:dangerous-exec:src/realtime.process.test.ts",
-    "@openclaw/openshell-sandbox:dangerous-exec:src/backend.e2e.test.ts",
+    "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server.http.test.ts",
+    "@carapace/google-meet:dangerous-exec:src/realtime.process.test.ts",
+    "@carapace/openshell-sandbox:dangerous-exec:src/backend.e2e.test.ts",
     ...Array.from(
       { length: 2 },
-      () => "@openclaw/openshell-sandbox:dangerous-exec:src/openshell-core.test.ts",
+      () => "@carapace/openshell-sandbox:dangerous-exec:src/openshell-core.test.ts",
     ),
   ];
 }
@@ -230,8 +230,8 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   it("selects the complete reviewed layout from the canonical release context", () => {
     const current = currentLayoutFindings();
     const frozenLegacy = [
-      "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts",
-      "@openclaw/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts",
+      "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/http.ts",
+      "@carapace/codex:dangerous-exec:src/app-server/sandbox-exec-server/processes.ts",
     ];
 
     for (const context of ["", "release/2026.9.1", "release/2026.9.2", "release/2026.9.3"]) {
@@ -312,7 +312,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
     const legacyPackageResults = packageResults.map((result) =>
       Object.assign({}, result, {
         expectedReviewedCriticalFindings:
-          result.packageName === "@openclaw/acpx"
+          result.packageName === "@carapace/acpx"
             ? result.expectedReviewedCriticalFindings.slice(0, 1)
             : result.expectedReviewedCriticalFindings,
       }),
@@ -329,7 +329,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   it.each([0, 1, 2])(
     "preserves frozen doctor counts while shrinking current policy: %s",
     async (count) => {
-      const packageName = "@openclaw/codex";
+      const packageName = "@carapace/codex";
       const probe = 'import { spawn } from "node:child_process";\nspawn(process.execPath, []);\n';
       const artifact = writePluginArtifact({
         extensionId: "codex",
@@ -374,7 +374,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   it.each([null, 0, 2, 3, 4])(
     "requires exactly three reviewed one-shot fixture spawns when packed: %s",
     async (count) => {
-      const packageName = "@openclaw/codex";
+      const packageName = "@carapace/codex";
       const fixturePath = "src/app-server/run-attempt-one-shot-cleanup.test.ts";
       const fixtureKey = `${packageName}:dangerous-exec:${fixturePath}`;
       const spawnProbe =
@@ -418,7 +418,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   it.each([1, 2])(
     "reviews exactly one current hardware probe, preserving frozen policy: %s",
     async (count) => {
-      const packageName = "@openclaw/llama-cpp-provider";
+      const packageName = "@carapace/llama-cpp-provider";
       const hardwareKey = `${packageName}:dangerous-exec:src/hardware.ts`;
       const installerKey = `${packageName}:dangerous-exec:src/llama-server-install.ts`;
       const probe =
@@ -442,7 +442,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         candidateSha: CANDIDATE_SHA,
         packageResults: [
           ...current.packageResults,
-          syntheticResult("@openclaw/codex", { reviewedCriticalFindings: currentLayoutFindings() }),
+          syntheticResult("@carapace/codex", { reviewedCriticalFindings: currentLayoutFindings() }),
         ],
         toolingSha: TOOLING_SHA,
       });
@@ -464,8 +464,8 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   );
 
   it("scans checked-in malicious code without running candidate hooks or helpers", async () => {
-    const candidateRoot = tempDirs.make("openclaw-plugin-security-inert-pack-");
-    const artifactRoot = tempDirs.make("openclaw-plugin-security-inert-artifacts-");
+    const candidateRoot = tempDirs.make("carapace-plugin-security-inert-pack-");
+    const artifactRoot = tempDirs.make("carapace-plugin-security-inert-artifacts-");
     const packageDir = join(candidateRoot, "extensions", "inert");
     const executionMarkers = ["asset", "prepare", "prepack", "postpack", "replacement"].map(
       (name) => join(candidateRoot, `${name}-ran`),
@@ -481,12 +481,12 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         files: [
           "build-assets.mjs",
           "index.js",
-          "openclaw.plugin.json",
+          "carapace.plugin.json",
           "package.json",
           "plugin-npm-security-scan.mjs",
         ],
-        name: "@openclaw/test-inert-pack",
-        openclaw: {
+        name: "@carapace/test-inert-pack",
+        carapace: {
           assetScripts: { build: markerCommand(executionMarkers[0]!) },
           release: { publishToNpm: true },
         },
@@ -500,7 +500,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       "utf8",
     );
     writeFileSync(
-      join(packageDir, "openclaw.plugin.json"),
+      join(packageDir, "carapace.plugin.json"),
       `${JSON.stringify({ id: "inert" })}\n`,
       "utf8",
     );
@@ -542,7 +542,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         "--package-dir",
         "extensions/inert",
         "--package-name",
-        "@openclaw/test-inert-pack",
+        "@carapace/test-inert-pack",
         "--tooling-sha",
         toolingSha,
       ],
@@ -565,7 +565,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
     const expectedPackage = {
       extensionId: "inert",
       packageDir: "extensions/inert",
-      packageName: "@openclaw/test-inert-pack",
+      packageName: "@carapace/test-inert-pack",
       packageVersion: "2026.8.1-beta.1",
     };
     const loaded = loadPluginNpmSecurityArtifacts({
@@ -585,14 +585,14 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   });
 
   it("bounds manifests and rejects noncanonical or duplicate package identities", async () => {
-    expect(() => assertCanonicalNpmPackageName("OpenClaw/Bad", "fixture")).toThrow(
+    expect(() => assertCanonicalNpmPackageName("Carapace/Bad", "fixture")).toThrow(
       "invalid npm package name",
     );
 
-    const duplicateRoot = tempDirs.make("openclaw-plugin-npm-security-duplicates-");
+    const duplicateRoot = tempDirs.make("carapace-plugin-npm-security-duplicates-");
     initGitRepo(duplicateRoot);
-    writePublishableManifest(duplicateRoot, "one", "@openclaw/duplicate");
-    writePublishableManifest(duplicateRoot, "two", "@openclaw/duplicate");
+    writePublishableManifest(duplicateRoot, "one", "@carapace/duplicate");
+    writePublishableManifest(duplicateRoot, "two", "@carapace/duplicate");
     await expect(listPublishablePluginPackages(duplicateRoot)).rejects.toThrow(
       "duplicate publishable package",
     );
@@ -600,9 +600,9 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       listPublishablePluginPackages(duplicateRoot, { maxPackageManifests: 1 }),
     ).rejects.toThrow("package-count limit");
 
-    const manifestRoot = tempDirs.make("openclaw-plugin-npm-security-manifest-");
+    const manifestRoot = tempDirs.make("carapace-plugin-npm-security-manifest-");
     initGitRepo(manifestRoot);
-    writePublishableManifest(manifestRoot, "large", "@openclaw/large", {
+    writePublishableManifest(manifestRoot, "large", "@carapace/large", {
       description: "x".repeat(1024),
     });
     await expect(
@@ -611,16 +611,16 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   });
 
   it("fails closed on truncated scans, candidate package escapes, and tarball symlinks", () => {
-    expect(() => assertCompleteScannerSummary("@openclaw/test", { truncated: true })).toThrow(
+    expect(() => assertCompleteScannerSummary("@carapace/test", { truncated: true })).toThrow(
       "security scan reached its file limit",
     );
 
-    const candidateRoot = tempDirs.make("openclaw-plugin-npm-security-candidate-");
-    const outsideDir = tempDirs.make("openclaw-plugin-npm-security-outside-");
+    const candidateRoot = tempDirs.make("carapace-plugin-npm-security-candidate-");
+    const outsideDir = tempDirs.make("carapace-plugin-npm-security-outside-");
     mkdirSync(join(candidateRoot, "extensions"), { recursive: true });
     writeFileSync(
       join(outsideDir, "package.json"),
-      `${JSON.stringify({ name: "@openclaw/escape", version: "1.0.0" })}\n`,
+      `${JSON.stringify({ name: "@carapace/escape", version: "1.0.0" })}\n`,
       "utf8",
     );
     symlinkSync(outsideDir, join(candidateRoot, "extensions", "escape"));
@@ -634,7 +634,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
     const artifact = writePluginArtifact({
       extensionId: "symlink",
       files: { "index.js": "export const value = 1;\n" },
-      packageName: "@openclaw/test-symlink",
+      packageName: "@carapace/test-symlink",
     });
     symlinkSync(outsideFile, join(artifact.packageRoot, "escape.ts"));
     execFileSync(
@@ -659,7 +659,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         "dist/service-BaCqPs_5.js": "export const value = 1;\n",
         "dist/service-malware.js": "export const value = 2;\n",
       },
-      packageName: "@openclaw/test-packed",
+      packageName: "@carapace/test-packed",
     });
     const staged = stageScannerRelevantPluginTarballFiles(artifact.tarballPath);
     try {
@@ -673,19 +673,19 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   });
 
   it("finds malicious packed input code, ignores candidate scanner replacements, and fails slow", async () => {
-    const marker = join(tempDirs.make("openclaw-plugin-npm-security-marker-"), "ran");
+    const marker = join(tempDirs.make("carapace-plugin-npm-security-marker-"), "ran");
     const malicious = writePluginArtifact({
       extensionId: "malicious",
       files: {
         "index.js": `const { execSync } = require("node:child_process");\nexecSync("id");\n`,
         "scripts/plugin-npm-security-scan.mts": `require("node:fs").writeFileSync(${JSON.stringify(marker)}, "ran");\n`,
       },
-      packageName: "@openclaw/test-malicious",
+      packageName: "@carapace/test-malicious",
     });
     const oversized = writePluginArtifact({
       extensionId: "oversized",
       files: { "oversized.js": Buffer.alloc(1024 * 1024 + 1) },
-      packageName: "@openclaw/test-oversized",
+      packageName: "@carapace/test-oversized",
     });
 
     const { packageResults, scanErrors } = await scanPublishablePluginPackages([
@@ -701,7 +701,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       ruleId: "dangerous-exec",
     });
     expect(scanErrors).toHaveLength(1);
-    expect(scanErrors[0]).toContain("@openclaw/test-oversized");
+    expect(scanErrors[0]).toContain("@carapace/test-oversized");
     expect(scanErrors[0]).not.toContain(oversized.artifact.tarballPath);
 
     const report = buildPluginNpmSecurityScanReport({
@@ -735,7 +735,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         dependencies: { dependency: "1.0.0" },
         directories: { bin: "tools" },
       },
-      packageName: "@openclaw/test-file",
+      packageName: "@carapace/test-file",
     });
 
     const scanned = await scanPublishablePluginPackages([artifact.artifact]);
@@ -743,7 +743,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
     expect(scanned.scanErrors).toEqual([]);
     expect(scanned.packageResults).toMatchObject([
       {
-        packageName: "@openclaw/test-file",
+        packageName: "@carapace/test-file",
         scanFindingCount: 6,
         unexpectedCriticalFindings: [
           {
@@ -788,14 +788,14 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         "dist/service-abcdefgh.js": "export const first = 1;\n",
         "dist/service-ijklmnop.js": "export const second = 2;\n",
       },
-      packageName: "@openclaw/test-ambiguous-bundle",
+      packageName: "@carapace/test-ambiguous-bundle",
     });
 
     const scanned = await scanPublishablePluginPackages([artifact.artifact]);
 
     expect(scanned.packageResults).toEqual([]);
     expect(scanned.scanErrors).toEqual([
-      "@openclaw/test-ambiguous-bundle: package scan failed: multiple packed files normalize to dist/service-<hash>.js.",
+      "@carapace/test-ambiguous-bundle: package scan failed: multiple packed files normalize to dist/service-<hash>.js.",
     ]);
   });
 
@@ -803,7 +803,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
     const artifact = writePluginArtifact({
       extensionId: "identity",
       files: { "index.js": "export const value = 1;\n" },
-      packageName: "@openclaw/test-identity",
+      packageName: "@carapace/test-identity",
     });
     expect(
       listPluginNpmSecurityArtifacts({
@@ -812,7 +812,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
         expectedPackages: [artifact.expectedPackage],
         toolingSha: TOOLING_SHA,
       }).map((entry) => entry.packageName),
-    ).toEqual(["@openclaw/test-identity"]);
+    ).toEqual(["@carapace/test-identity"]);
     expect(() =>
       listPluginNpmSecurityArtifacts({
         artifactRoot: artifact.artifactRoot,
@@ -824,18 +824,18 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   });
 
   it("retains valid package scans when a sibling artifact is malformed", async () => {
-    const artifactRoot = tempDirs.make("openclaw-plugin-npm-security-mixed-");
+    const artifactRoot = tempDirs.make("carapace-plugin-npm-security-mixed-");
     const valid = writePluginArtifact({
       artifactRoot,
       extensionId: "valid",
       files: { "index.js": "export const value = 1;\n" },
-      packageName: "@openclaw/test-valid",
+      packageName: "@carapace/test-valid",
     });
     const malformed = writePluginArtifact({
       artifactRoot,
       extensionId: "malformed",
       files: { "index.js": "export const value = 2;\n" },
-      packageName: "@openclaw/test-malformed",
+      packageName: "@carapace/test-malformed",
     });
     writeFileSync(
       join(malformed.artifact.artifactDir, "plugin-npm-security-artifact.json"),
@@ -853,32 +853,32 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       toolingSha: TOOLING_SHA,
     });
     expect(loaded.artifacts.map((artifact) => artifact.packageName)).toEqual([
-      "@openclaw/test-valid",
+      "@carapace/test-valid",
     ]);
     expect(loaded.ingestionErrors).toEqual([
-      "@openclaw/test-malformed: Plugin security artifact metadata is not valid JSON.",
+      "@carapace/test-malformed: Plugin security artifact metadata is not valid JSON.",
     ]);
 
     const scanned = await scanPublishablePluginPackages(loaded.artifacts);
     expect(scanned.scanErrors).toEqual([]);
     expect(scanned.packageResults.map((result) => result.packageName)).toEqual([
-      "@openclaw/test-valid",
+      "@carapace/test-valid",
     ]);
   });
 
   it("bounds aggregate compressed and expanded artifact bytes deterministically", () => {
-    const artifactRoot = tempDirs.make("openclaw-plugin-npm-security-aggregate-");
+    const artifactRoot = tempDirs.make("carapace-plugin-npm-security-aggregate-");
     const alpha = writePluginArtifact({
       artifactRoot,
       extensionId: "alpha",
       files: { "alpha.js": Buffer.alloc(256, 1) },
-      packageName: "@openclaw/test-alpha",
+      packageName: "@carapace/test-alpha",
     });
     const beta = writePluginArtifact({
       artifactRoot,
       extensionId: "beta",
       files: { "beta.js": Buffer.alloc(256, 2) },
-      packageName: "@openclaw/test-beta",
+      packageName: "@carapace/test-beta",
     });
     const expectedPackages = [alpha.expectedPackage, beta.expectedPackage];
     const baseline = loadPluginNpmSecurityArtifacts({
@@ -897,10 +897,10 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       toolingSha: TOOLING_SHA,
     });
     expect(compressed.artifacts.map((artifact) => artifact.packageName)).toEqual([
-      "@openclaw/test-alpha",
+      "@carapace/test-alpha",
     ]);
     expect(compressed.ingestionErrors).toEqual([
-      "@openclaw/test-beta: aggregate compressed-byte limit exceeded.",
+      "@carapace/test-beta: aggregate compressed-byte limit exceeded.",
     ]);
 
     const expanded = loadPluginNpmSecurityArtifacts({
@@ -911,16 +911,16 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
       toolingSha: TOOLING_SHA,
     });
     expect(expanded.artifacts.map((artifact) => artifact.packageName)).toEqual([
-      "@openclaw/test-alpha",
+      "@carapace/test-alpha",
     ]);
     expect(expanded.ingestionErrors).toEqual([
-      "@openclaw/test-beta: aggregate expanded-byte limit exceeded.",
+      "@carapace/test-beta: aggregate expanded-byte limit exceeded.",
     ]);
   });
 
   it("caps total findings and emits byte-identical bounded reports", () => {
     const packageResults = [
-      syntheticResult("@openclaw/codex", {
+      syntheticResult("@carapace/codex", {
         reviewedCriticalFindings: currentLayoutFindings(),
         scanFindingCount: 51,
       }),
@@ -953,7 +953,7 @@ describe("scripts/lib/plugin-npm-security-scan.mts", () => {
   it("retains the complete current-root publishable plugin inventory contract", async () => {
     const packages = await listPublishablePluginPackages(process.cwd());
     expect(packages.length).toBeGreaterThan(0);
-    expect(packages.map((plugin) => plugin.packageName)).toContain("@openclaw/acpx");
+    expect(packages.map((plugin) => plugin.packageName)).toContain("@carapace/acpx");
     expect(new Set(packages.map((plugin) => plugin.packageName)).size).toBe(packages.length);
     expect(packages).toEqual(
       packages.toSorted((left, right) =>

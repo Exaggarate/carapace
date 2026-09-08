@@ -3,7 +3,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   resolveAccountEntry,
-} from "openclaw/plugin-sdk/account-resolution";
+} from "carapace/plugin-sdk/account-resolution";
 import {
   buildChannelConfigSchema,
   buildChannelReactionShape,
@@ -14,8 +14,8 @@ import {
   ExecutableTokenSchema,
   ReplyToModeSchema,
   refineChannelDmPolicy,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-config-schema";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import { signalChannelConfigUiHints } from "./config-ui-hints.js";
 
@@ -44,7 +44,7 @@ const SignalTransportUrlSchema = z
   );
 
 function projectSignalConfigForUpdateValidation(value: unknown): unknown {
-  if (process.env.OPENCLAW_UPDATE_IN_PROGRESS !== "1" || !isRecord(value)) {
+  if (process.env.CARAPACE_UPDATE_IN_PROGRESS !== "1" || !isRecord(value)) {
     return value;
   }
   const next = { ...value };

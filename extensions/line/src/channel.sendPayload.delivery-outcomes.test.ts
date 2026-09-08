@@ -1,8 +1,8 @@
 import { HTTPFetchError } from "@line/bot-sdk";
-import { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { resolveRequestUrl } from "openclaw/plugin-sdk/request-url";
+import { createChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { resolveRequestUrl } from "carapace/plugin-sdk/request-url";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import { createRuntime } from "./channel.sendPayload.test-support.js";
 import { lineOutboundAdapter } from "./outbound.js";
 import {
@@ -38,7 +38,7 @@ describe("line outbound delivery outcomes", () => {
         text: "hello",
         payload: { text: "hello" },
         accountId: "default",
-        cfg: { channels: { line: {} } } as OpenClawConfig,
+        cfg: { channels: { line: {} } } as CarapaceConfig,
       }),
     ).rejects.toMatchObject({
       name: "PlatformMessageNotDispatchedError",
@@ -246,7 +246,7 @@ describe("line outbound delivery outcomes", () => {
         text: "hello",
         payload: { text: "hello" },
         accountId: "default",
-        cfg: { channels: { line: {} } } as OpenClawConfig,
+        cfg: { channels: { line: {} } } as CarapaceConfig,
       }),
     ).rejects.toBe(partial);
   });

@@ -5,13 +5,13 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import type { DB as OpenClawStateKyselyDatabase } from "./openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "./carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "./openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "./carapace-state-feature-schema.js";
 
 export type AgentCreatedVia = "operator" | "agent" | "claw";
 
@@ -22,10 +22,10 @@ export type AgentProvenance = {
   createdAtMs: number;
 };
 
-type AgentProvenanceDatabase = Pick<OpenClawStateKyselyDatabase, "agent_provenance">;
-type AgentProvenanceOptions = OpenClawStateDatabaseOptions & { nowMs?: number };
+type AgentProvenanceDatabase = Pick<CarapaceStateKyselyDatabase, "agent_provenance">;
+type AgentProvenanceOptions = CarapaceStateDatabaseOptions & { nowMs?: number };
 
-export const ensureAgentProvenanceSchema = createOpenClawStateSchemaEnsurer({
+export const ensureAgentProvenanceSchema = createCarapaceStateSchemaEnsurer({
   table: "agent_provenance",
   operationLabel: "agent-provenance.schema.ensure",
 });
@@ -65,7 +65,7 @@ export function recordAgentProvenance(
     ? normalizeAgentId(provenance.creatorAgentId)
     : null;
   const createdAtMs = options.nowMs ?? Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       const db = getNodeSqliteKysely<AgentProvenanceDatabase>(sqlite);
       executeSqliteQuerySync(
@@ -94,10 +94,10 @@ export function recordAgentProvenance(
 
 export function readAgentProvenance(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): AgentProvenance | undefined {
   ensureAgentProvenanceSchema(options);
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const db = getNodeSqliteKysely<AgentProvenanceDatabase>(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -106,9 +106,9 @@ export function readAgentProvenance(
   return row ? fromRow(row) : undefined;
 }
 
-export function listAgentProvenance(options: OpenClawStateDatabaseOptions = {}): AgentProvenance[] {
+export function listAgentProvenance(options: CarapaceStateDatabaseOptions = {}): AgentProvenance[] {
   ensureAgentProvenanceSchema(options);
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const db = getNodeSqliteKysely<AgentProvenanceDatabase>(database.db);
   return executeSqliteQuerySync(
     database.db,

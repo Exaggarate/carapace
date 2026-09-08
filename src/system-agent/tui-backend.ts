@@ -1,4 +1,4 @@
-// OpenClaw TUI backend runs setup-helper dialogue inside the shared local TUI shell.
+// Carapace TUI backend runs setup-helper dialogue inside the shared local TUI shell.
 import { randomUUID } from "node:crypto";
 import type {
   SessionsPatchParams,
@@ -119,7 +119,7 @@ function splitModelRef(ref: string | undefined): { provider?: string; model?: st
 }
 
 class SystemAgentTuiBackend implements TuiBackend {
-  readonly connection = { url: "openclaw local" };
+  readonly connection = { url: "carapace local" };
 
   onEvent?: (evt: TuiEvent) => void;
   onConnected?: () => void;
@@ -165,7 +165,7 @@ class SystemAgentTuiBackend implements TuiBackend {
   }
 
   stop(): void {
-    // The enclosing TUI owns terminal shutdown; OpenClaw has no transport to close.
+    // The enclosing TUI owns terminal shutdown; Carapace has no transport to close.
   }
 
   async sendChat(opts: ChatSendOptions): Promise<{ runId: string }> {
@@ -191,7 +191,7 @@ class SystemAgentTuiBackend implements TuiBackend {
   }> {
     const limit = Math.min(opts.limit ?? SYSTEM_AGENT_HISTORY_LIMIT, SYSTEM_AGENT_HISTORY_LIMIT);
     return {
-      sessionId: "openclaw",
+      sessionId: "carapace",
       messages: limit > 0 ? this.messages.slice(-limit) : [],
       thinkingLevel: this.route.thinkingLevel,
       verboseLevel: "off",
@@ -201,7 +201,7 @@ class SystemAgentTuiBackend implements TuiBackend {
   async listSessions(): Promise<TuiSessionList> {
     return {
       ts: Date.now(),
-      path: "openclaw",
+      path: "carapace",
       count: 1,
       defaults: {
         model: this.route.model ?? null,
@@ -211,8 +211,8 @@ class SystemAgentTuiBackend implements TuiBackend {
       sessions: [
         {
           key: SYSTEM_AGENT_SESSION_KEY,
-          sessionId: "openclaw",
-          displayName: "OpenClaw",
+          sessionId: "carapace",
+          displayName: "Carapace",
           updatedAt: Date.now(),
           thinkingLevel: this.route.thinkingLevel,
           verboseLevel: "off",
@@ -228,23 +228,23 @@ class SystemAgentTuiBackend implements TuiBackend {
       defaultId: SYSTEM_AGENT_ID,
       mainKey: "main",
       scope: "per-sender",
-      agents: [{ id: SYSTEM_AGENT_ID, kind: "system", name: "OpenClaw" }],
+      agents: [{ id: SYSTEM_AGENT_ID, kind: "system", name: "Carapace" }],
     };
   }
 
   async patchSession(opts: SessionsPatchParams): Promise<SessionsPatchResult> {
     if (opts.model !== undefined) {
       throw new Error(
-        "OpenClaw cannot change the model inside its active verified session. Exit and run `openclaw onboard`, then start OpenClaw again.",
+        "Carapace cannot change the model inside its active verified session. Exit and run `carapace onboard`, then start Carapace again.",
       );
     }
     return {
       ok: true,
-      path: "openclaw",
+      path: "carapace",
       key: SYSTEM_AGENT_SESSION_KEY,
       entry: {
-        sessionId: "openclaw",
-        displayName: "OpenClaw",
+        sessionId: "carapace",
+        displayName: "Carapace",
         updatedAt: Date.now(),
       },
       resolved: {},
@@ -270,7 +270,7 @@ class SystemAgentTuiBackend implements TuiBackend {
     return {
       ok: true as const,
       key: SYSTEM_AGENT_SESSION_KEY,
-      entry: { sessionId: "openclaw", updatedAt: Date.now() },
+      entry: { sessionId: "carapace", updatedAt: Date.now() },
     };
   }
 
@@ -327,7 +327,7 @@ class SystemAgentTuiBackend implements TuiBackend {
   private emitFinal(runId: string, sessionKey: string, text: string): void {
     const assistant = message(
       "assistant",
-      text || "OpenClaw listened and found nothing to change.",
+      text || "Carapace listened and found nothing to change.",
     );
     this.appendMessage(assistant);
     this.emit("chat", {
@@ -357,7 +357,7 @@ class SystemAgentTuiBackend implements TuiBackend {
     try {
       const reply = await this.engine.handle(text);
       if ((reply.action === "open-tui" || reply.action === "open-setup") && reply.handoff) {
-        // The outer loop owns interactive handoffs after the OpenClaw TUI exits.
+        // The outer loop owns interactive handoffs after the Carapace TUI exits.
         this.handoff = reply.handoff;
         queueMicrotask(() => this.requestExit?.());
       } else if (reply.action === "exit") {
@@ -396,7 +396,7 @@ async function runSetupHandoff(
     handoff.target !== "gateway"
   ) {
     runtime.error(
-      "Setup cannot replace the inference route powering OpenClaw. Exit and run `openclaw onboard`, then start OpenClaw again.",
+      "Setup cannot replace the inference route powering Carapace. Exit and run `carapace onboard`, then start Carapace again.",
     );
     return;
   }
@@ -426,7 +426,7 @@ async function runSetupHandoff(
   if (handoff.target === "gateway") {
     if (opts.runGatewaySetupHandoff) {
       await opts.runGatewaySetupHandoff(runtime, beforePersistentEffect);
-      runtime.log("Done — gateway settings saved. Run `openclaw gateway restart` to apply them.");
+      runtime.log("Done — gateway settings saved. Run `carapace gateway restart` to apply them.");
       return;
     }
     const { createClackPrompter, hostedSetup } = await loadHostedSetupForTui();
@@ -435,7 +435,7 @@ async function runSetupHandoff(
       async () => await beforePersistentEffect(),
       runtime,
     );
-    runtime.log("Done — gateway settings saved. Run `openclaw gateway restart` to apply them.");
+    runtime.log("Done — gateway settings saved. Run `carapace gateway restart` to apply them.");
     return;
   }
   if (handoff.target === "search") {
@@ -475,7 +475,7 @@ export async function runSystemAgentTui(
   for (;;) {
     const route = await requireTuiVerifiedInference(boundOpts);
     // A returned agent request is single-use; a later wizard handoff must not
-    // replay it when OpenClaw re-enters the chat shell.
+    // replay it when Carapace re-enters the chat shell.
     const initialMessage = nextInput;
     const engine = createChatEngine(boundOpts);
     let welcome: string;
@@ -505,7 +505,7 @@ export async function runSystemAgentTui(
         historyLimit: SYSTEM_AGENT_HISTORY_LIMIT,
         backend,
         config: {},
-        title: "openclaw setup",
+        title: "carapace setup",
         ...(initialMessage ? { message: initialMessage } : {}),
       });
     } finally {
@@ -518,7 +518,7 @@ export async function runSystemAgentTui(
     }
     if (handoff.kind === "model-setup") {
       runtime.error(
-        "OpenClaw cannot replace its active inference route. Run `openclaw onboard` outside this session, then start OpenClaw again.",
+        "Carapace cannot replace its active inference route. Run `carapace onboard` outside this session, then start Carapace again.",
       );
       return;
     }

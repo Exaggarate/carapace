@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { HelloOk } from "../../packages/gateway-protocol/src/schema/frames.js";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { CallGatewayCliOptions } from "../gateway/call.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -34,7 +34,7 @@ function makeRuntime(): RuntimeEnv {
   };
 }
 
-function makeLocalConfig(): OpenClawConfig {
+function makeLocalConfig(): CarapaceConfig {
   return {
     wizard: { securityAcknowledgedAt: "2026-07-11T00:00:00.000Z" },
     agents: {
@@ -51,7 +51,7 @@ function makeLocalConfig(): OpenClawConfig {
 }
 
 function makeTarget(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   auth: { token?: string; password?: string },
 ): RemoteGatewayInferenceTarget {
   return {
@@ -160,7 +160,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       secret: "selected-password",
     },
   ])(
-    "pins $label across detect, activate, verify, OpenClaw, and in-process TUI",
+    "pins $label across detect, activate, verify, Carapace, and in-process TUI",
     async ({ auth, secret }) => {
       const localConfig = makeLocalConfig();
       const localConfigBefore = structuredClone(localConfig);
@@ -175,11 +175,11 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
         expect(options.config?.gateway?.remote?.url).toBe("wss://selected.example/ws");
         order.push(options.method);
 
-        if (options.method === "openclaw.setup.detect") {
+        if (options.method === "carapace.setup.detect") {
           expect(options.timeoutMs).toBe(40_000);
           return detectResult();
         }
-        if (options.method === "openclaw.setup.activate") {
+        if (options.method === "carapace.setup.activate") {
           expect(options.timeoutMs).toBe(150_000);
           expect(options.params).toEqual({
             kind: "claude-cli",
@@ -194,12 +194,12 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
             lines: ["Default model: claude-cli/opus"],
           };
         }
-        if (options.method === "openclaw.setup.verify") {
+        if (options.method === "carapace.setup.verify") {
           expect(options.timeoutMs).toBe(30_000);
           expect(remoteConfig.modelRef).toBe("claude-cli/opus");
           return { ok: true, modelRef: remoteConfig.modelRef, latencyMs: 100 };
         }
-        if (options.method === "openclaw.chat") {
+        if (options.method === "carapace.chat") {
           expect(options.timeoutMs).toBe(190_000);
           expect(remoteConfig.modelRef).toBe("claude-cli/opus");
           expect(options.params).toEqual({
@@ -245,10 +245,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       });
 
       expect(order).toEqual([
-        "openclaw.setup.detect",
-        "openclaw.setup.activate",
-        "openclaw.setup.verify",
-        "openclaw.chat",
+        "carapace.setup.detect",
+        "carapace.setup.activate",
+        "carapace.setup.verify",
+        "carapace.chat",
         "tui",
       ]);
       expect(remoteConfig.modelRef).toBe("claude-cli/opus");
@@ -284,14 +284,14 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     let verifyAttempts = 0;
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       options.onHelloOk?.(
-        gatewayHello(options.method === "openclaw.setup.verify" ? "new-boot" : "old-boot"),
+        gatewayHello(options.method === "carapace.setup.verify" ? "new-boot" : "old-boot"),
       );
       options.signal?.throwIfAborted();
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         return {
           ok: true,
           modelRef: "openai/gpt-5.5",
@@ -300,10 +300,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           gatewayRestartRequired: true,
         };
       }
-      if (options.method === "openclaw.setup.verify" && verifyAttempts++ === 0) {
+      if (options.method === "carapace.setup.verify" && verifyAttempts++ === 0) {
         return await firstVerification();
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         return { ok: true, modelRef: "openai/gpt-5.5", latencyMs: 100 };
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -333,10 +333,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     );
 
     expect(methods).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
-      "openclaw.setup.verify",
+      "carapace.setup.detect",
+      "carapace.setup.activate",
+      "carapace.setup.verify",
+      "carapace.setup.verify",
     ]);
   });
 
@@ -353,10 +353,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     let verificationConnections = 0;
     let bootId: string | undefined = "old-boot";
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
-      if (options.method === "openclaw.setup.activate" && mode === "missing activation identity") {
+      if (options.method === "carapace.setup.activate" && mode === "missing activation identity") {
         bootId = undefined;
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         if (mode === "restart timeout") {
           now.mockReturnValue(45_000);
         } else if (verificationConnections++ > 0) {
@@ -366,10 +366,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       options.onHelloOk?.(gatewayHello(bootId));
       options.signal?.throwIfAborted();
       sent.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -378,11 +378,11 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           gatewayRestartRequired: true,
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         verifiedBoots.push(bootId ?? "unidentified");
         return { ok: true, modelRef: "claude-cli/opus", latencyMs: 100 };
       }
-      if (options.method === "openclaw.chat") {
+      if (options.method === "carapace.chat") {
         expect(bootId).toBe("new-boot");
         return { sessionId: "test-session", reply: "Ready.", action: "exit" };
       }
@@ -405,16 +405,16 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           : "Inference settings were saved, but the Gateway did not provide a boot identity",
       );
       expect(verifiedBoots).toEqual([]);
-      expect(sent).toEqual(["openclaw.setup.detect", "openclaw.setup.activate"]);
+      expect(sent).toEqual(["carapace.setup.detect", "carapace.setup.activate"]);
       return;
     }
     await onboarding;
     expect(verifiedBoots).toEqual(["new-boot"]);
     expect(sent).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
-      "openclaw.chat",
+      "carapace.setup.detect",
+      "carapace.setup.activate",
+      "carapace.setup.verify",
+      "carapace.chat",
     ]);
   });
 
@@ -422,13 +422,13 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(45_500).mockReturnValueOnce(1_000);
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       options.onHelloOk?.(
-        gatewayHello(options.method === "openclaw.setup.verify" ? "new-boot" : "old-boot"),
+        gatewayHello(options.method === "carapace.setup.verify" ? "new-boot" : "old-boot"),
       );
       options.signal?.throwIfAborted();
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         return {
           ok: true,
           modelRef: "openai/gpt-5.5",
@@ -437,7 +437,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           gatewayRestartRequired: true,
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         return { ok: true, modelRef: "openai/gpt-5.5", latencyMs: 100 };
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -467,17 +467,17 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
 
     expect(
       callGatewayMock.mock.calls.find(
-        ([options]) => options.method === "openclaw.setup.verify",
+        ([options]) => options.method === "carapace.setup.verify",
       )?.[0].timeoutMs,
     ).toBe(500);
   });
 
   it("hands an auth-free Gateway to the TUI as the exact bound route", async () => {
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -485,10 +485,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         return { ok: true, modelRef: "claude-cli/opus", latencyMs: 100 };
       }
-      if (options.method === "openclaw.chat") {
+      if (options.method === "carapace.chat") {
         return {
           sessionId: (options.params as { sessionId: string }).sessionId,
           reply: "Ready.",
@@ -531,16 +531,16 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       verification: { ok: true, modelRef: "openai/other", latencyMs: 100 },
       error: "Gateway verified openai/other, not the activated claude-cli/opus",
     },
-  ])("fails closed on $label before OpenClaw", async ({ verification, error }) => {
+  ])("fails closed on $label before Carapace", async ({ verification, error }) => {
     const localConfig = makeLocalConfig();
     const localConfigBefore = structuredClone(localConfig);
     const methods: string[] = [];
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -548,7 +548,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "carapace.setup.verify") {
         return verification;
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -569,9 +569,9 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     ).rejects.toThrow(error);
 
     expect(methods).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
+      "carapace.setup.detect",
+      "carapace.setup.activate",
+      "carapace.setup.verify",
     ]);
     expect(runTui).not.toHaveBeenCalled();
     expect(localConfig).toEqual(localConfigBefore);
@@ -581,10 +581,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     const methods: string[] = [];
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "carapace.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "carapace.setup.activate") {
         throw new Error("gateway connection closed after request");
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -604,7 +604,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       ),
     ).rejects.toThrow("gateway connection closed after request");
 
-    expect(methods).toEqual(["openclaw.setup.detect", "openclaw.setup.activate"]);
+    expect(methods).toEqual(["carapace.setup.detect", "carapace.setup.activate"]);
     expect(runTui).not.toHaveBeenCalled();
   });
 
@@ -621,10 +621,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       let connections = 0;
       const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
         methods.push(options.method);
-        if (options.method === "openclaw.setup.detect") {
+        if (options.method === "carapace.setup.detect") {
           return detectResult();
         }
-        if (options.method === "openclaw.setup.activate") {
+        if (options.method === "carapace.setup.activate") {
           return {
             ok: true,
             modelRef: "claude-cli/opus",
@@ -632,10 +632,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
             lines: ["Default model: claude-cli/opus"],
           };
         }
-        if (options.method === "openclaw.setup.verify") {
+        if (options.method === "carapace.setup.verify") {
           return { ok: true, modelRef: "claude-cli/opus", latencyMs: 100 };
         }
-        if (options.method === "openclaw.chat") {
+        if (options.method === "carapace.chat") {
           // The Gateway falls back to connection ownership when there is no
           // authenticated profile or device; one-shot calls use new connections.
           const owner =
@@ -643,7 +643,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
               ? "authenticated-profile"
               : (options.deviceIdentity?.deviceId ?? `connection:${++connections}`);
           if (chatOwner && chatOwner !== owner) {
-            throw new Error("OpenClaw session belongs to another caller.");
+            throw new Error("Carapace session belongs to another caller.");
           }
           chatOwner = owner;
           return {
@@ -675,13 +675,13 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       );
 
       expect(methods).toEqual([
-        "openclaw.setup.detect",
-        "openclaw.setup.activate",
-        "openclaw.setup.verify",
-        "openclaw.chat",
-        "openclaw.chat",
+        "carapace.setup.detect",
+        "carapace.setup.activate",
+        "carapace.setup.verify",
+        "carapace.chat",
+        "carapace.chat",
       ]);
-      expect(prompter.outro).toHaveBeenCalledWith("OpenClaw setup paused.");
+      expect(prompter.outro).toHaveBeenCalledWith("Carapace setup paused.");
       expect(runTui).not.toHaveBeenCalled();
     },
   );

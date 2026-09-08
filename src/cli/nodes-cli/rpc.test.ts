@@ -139,7 +139,7 @@ describe("node inventory resolution", () => {
 
 describe("node invoke envelope", () => {
   it("preserves caller-owned params, idempotency key, descriptors, and key order", () => {
-    const params = { url: "openclaw://widget/local" };
+    const params = { url: "carapace://widget/local" };
     const result = buildNodeInvokeParams({
       nodeId: "mac-1",
       command: "canvas.present",

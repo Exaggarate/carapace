@@ -3,7 +3,7 @@
  * select, screenshots, and input files.
  */
 import type { Command } from "commander";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { BrowserActRequest } from "../../browser/client-actions.types.js";
 import {
   BROWSER_TAB_REFERENCE_HELP,

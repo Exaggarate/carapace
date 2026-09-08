@@ -19,7 +19,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -106,7 +106,7 @@ suite.define(() => {
         const input = page.locator(".cmd-palette__input");
         await input.fill("Needle");
         await page.getByRole("option", { name: "Needle Bravo", exact: true }).waitFor();
-        const options = page.locator("openclaw-command-palette").getByRole("option");
+        const options = page.locator("carapace-command-palette").getByRole("option");
         await expect
           .poll(async () =>
             (await options.allTextContents()).map((text) => text.replace(/\s+/g, " ").trim()),
@@ -145,7 +145,7 @@ suite.define(() => {
             await gateway.resolveDeferred("connect");
           }
           await gateway.waitForRequest("agents.list");
-          const sidebar = page.locator("openclaw-app-sidebar");
+          const sidebar = page.locator("carapace-app-sidebar");
           await expect
             .poll(async () =>
               (await sidebar.locator(".sidebar-agent-card__name").textContent())?.trim(),
@@ -157,7 +157,7 @@ suite.define(() => {
           await result.waitFor();
           await screenshot(page, "07-palette-reviewer-result.png");
           await result.click();
-          const selectedAgent = page.locator("openclaw-agents-page openclaw-agent-select");
+          const selectedAgent = page.locator("carapace-agents-page carapace-agent-select");
           await selectedAgent.waitFor();
           await expect.poll(() => new URL(page.url()).pathname).toBe("/settings/agents/reviewer");
           await expect
@@ -228,7 +228,7 @@ suite.define(() => {
           agents: [{ id: "research", name: "Research" }],
         });
 
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         await expect
           .poll(async () =>
             (await sidebar.locator(".sidebar-agent-card__name").textContent())?.trim(),
@@ -271,7 +271,7 @@ suite.define(() => {
         await gateway.emitGatewayEvent("config.changed", { path: "agents.entries" });
         await gateway.waitForRequest("agents.list", { after: 1 });
 
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         const agentName = sidebar.locator(".sidebar-agent-card__name");
         await expect.poll(async () => (await agentName.textContent())?.trim()).toBe("Research");
 
@@ -285,7 +285,7 @@ suite.define(() => {
         await expect.poll(async () => (await agentName.textContent())?.trim()).toBe("Research");
         await expect
           .poll(() =>
-            page.locator("openclaw-chat-pane").evaluate((pane) => {
+            page.locator("carapace-chat-pane").evaluate((pane) => {
               const state = (
                 pane as HTMLElement & {
                   state?: {
@@ -366,7 +366,7 @@ suite.define(() => {
 
         await page.goto(`${suite.server.baseUrl}usage`);
         await gateway.waitForRequest("agents.list");
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         await sidebar.getByRole("button", { name: /Switch agent/ }).click();
         const agentMenu = sidebar.locator("wa-dropdown.sidebar-agent-menu");
         // The card sits at the top of the sidebar: the menu drops below it so the
@@ -399,7 +399,7 @@ suite.define(() => {
           .click();
         await expect.poll(() => new URL(page.url()).pathname).toBe("/usage");
         await waitForRequest(gateway, "sessions.usage", (params) => params.agentId === "writer");
-        const pageScope = page.locator(".agent-scope-control openclaw-agent-select");
+        const pageScope = page.locator(".agent-scope-control carapace-agent-select");
         await expect
           .poll(() =>
             pageScope.evaluate((picker) => (picker as HTMLElement & { value: string }).value),
@@ -447,7 +447,7 @@ suite.define(() => {
 
         await page.goto(`${suite.server.baseUrl}sessions`);
         await gateway.waitForRequest("agents.list");
-        const pageScope = page.locator(".agent-scope-control openclaw-agent-select");
+        const pageScope = page.locator(".agent-scope-control carapace-agent-select");
         await expect
           .poll(() =>
             pageScope.evaluate((picker) => (picker as HTMLElement & { value: string }).value),

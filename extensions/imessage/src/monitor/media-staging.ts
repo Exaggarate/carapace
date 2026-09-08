@@ -1,12 +1,12 @@
 // Imessage plugin module implements media staging behavior.
 import fs, { type FileHandle } from "node:fs/promises";
 import path from "node:path";
-import type { ChannelInboundMediaInput } from "openclaw/plugin-sdk/channel-inbound";
-import { isInboundPathAllowed, kindFromMime } from "openclaw/plugin-sdk/media-runtime";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
-import { openLocalFileSafely } from "openclaw/plugin-sdk/security-runtime";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
-import { loadWebMedia } from "openclaw/plugin-sdk/web-media";
+import type { ChannelInboundMediaInput } from "carapace/plugin-sdk/channel-inbound";
+import { isInboundPathAllowed, kindFromMime } from "carapace/plugin-sdk/media-runtime";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
+import { openLocalFileSafely } from "carapace/plugin-sdk/security-runtime";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
+import { loadWebMedia } from "carapace/plugin-sdk/web-media";
 import type { IMessageAttachment } from "./types.js";
 
 type StagedIMessageAttachment = ChannelInboundMediaInput;
@@ -119,7 +119,7 @@ async function readAttachmentBuffer(params: {
       try {
         const convert = params.deps.convertHeicToJpeg;
         const converted = await withTempWorkspace(
-          { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-imessage-heic-" },
+          { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-imessage-heic-" },
           async (workspace) => {
             const pinnedPath = await workspace.write("attachment.heic", buffer);
             return convert

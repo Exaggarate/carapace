@@ -10,11 +10,11 @@ import { ConfigMutationConflictError, replaceConfigFile } from "../config/config
 import { readConfigFileSnapshot } from "../config/io.js";
 import { logConfigUpdated } from "../config/logging.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import { withSetupMigrationTargetLock } from "../wizard/setup.migration-snapshot.js";
 import { createNonInteractiveLoggingPrompter } from "./non-interactive-prompter.js";
 import { runNonInteractiveLocalSetup } from "./onboard-non-interactive/local.js";
@@ -32,7 +32,7 @@ function isMigrationImport(opts: OnboardOptions): boolean {
 async function runNonInteractiveMigrationImport(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
 }) {
   const providerId = params.opts.importFrom?.trim();
   if (!providerId) {
@@ -41,7 +41,7 @@ async function runNonInteractiveMigrationImport(params: {
     rejectOnboardingOption(
       params.opts,
       params.runtime,
-      `--import-from is required for non-interactive migration import. Run ${formatCliCommand("openclaw migrate list")} to choose a provider.`,
+      `--import-from is required for non-interactive migration import. Run ${formatCliCommand("carapace migrate list")} to choose a provider.`,
     );
     return;
   }
@@ -64,14 +64,14 @@ async function runNonInteractiveMigrationImport(params: {
     async readConfigFile() {
       const snapshot = await readConfigFileSnapshot();
       if (!snapshot.valid) {
-        throw new Error("Migration target config became invalid. Run `openclaw doctor`.");
+        throw new Error("Migration target config became invalid. Run `carapace doctor`.");
       }
       return snapshot.exists ? (snapshot.sourceConfig ?? snapshot.config) : {};
     },
     async commitConfigFile(config, expectedConfig) {
       const latest = await readConfigFileSnapshot();
       if (!latest.valid) {
-        throw new Error("Migration target config became invalid. Run `openclaw doctor`.");
+        throw new Error("Migration target config became invalid. Run `carapace doctor`.");
       }
       const latestConfig = latest.exists ? (latest.sourceConfig ?? latest.config) : {};
       if (!isDeepStrictEqual(latestConfig, expectedConfig)) {
@@ -101,12 +101,12 @@ async function runNonInteractiveSetupExclusive(opts: OnboardOptions, runtime: Ru
     rejectOnboardingOption(
       opts,
       runtime,
-      `Config invalid. Run \`${formatCliCommand("openclaw doctor")}\` to repair it, then re-run setup.`,
+      `Config invalid. Run \`${formatCliCommand("carapace doctor")}\` to repair it, then re-run setup.`,
     );
     return;
   }
 
-  const baseConfig: OpenClawConfig = snapshot.valid
+  const baseConfig: CarapaceConfig = snapshot.valid
     ? snapshot.exists
       ? (snapshot.sourceConfig ?? snapshot.config)
       : {}
@@ -116,7 +116,7 @@ async function runNonInteractiveSetupExclusive(opts: OnboardOptions, runtime: Ru
     rejectOnboardingOption(
       opts,
       runtime,
-      `Invalid --mode "${String(mode)}". Use "local" or "remote", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Invalid --mode "${String(mode)}". Use "local" or "remote", or run ${formatCliCommand("carapace onboard")} for interactive setup.`,
     );
     return;
   }
@@ -153,7 +153,7 @@ export async function runNonInteractiveSetup(
       await runNonInteractiveSetupExclusive(opts, runtime);
       return;
     }
-    await withOpenClawStateLease(
+    await withCarapaceStateLease(
       {
         scope: "core:onboarding",
         key: "global",

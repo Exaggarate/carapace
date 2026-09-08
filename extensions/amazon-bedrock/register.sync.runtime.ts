@@ -3,15 +3,15 @@
  * model discovery, thinking policy, guardrails, and embedding integration.
  */
 import type { BedrockClient } from "@aws-sdk/client-bedrock";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
+import { resolvePluginConfigObject } from "carapace/plugin-sdk/plugin-config-runtime";
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   ProviderNormalizeResolvedModelContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "carapace/plugin-sdk/plugin-entry";
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   buildProviderReplayFamilyHooks,
   normalizeProviderId,
@@ -20,9 +20,9 @@ import {
   resolveClaudeMythos5ModelIdentity,
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
-import { splitSystemPromptCacheBoundary } from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { createPayloadPatchStreamWrapper } from "carapace/plugin-sdk/provider-stream-shared";
+import { splitSystemPromptCacheBoundary } from "carapace/plugin-sdk/provider-transport-runtime";
 import { refreshAwsSharedConfigCacheForBedrock } from "./aws-credential-refresh.js";
 import {
   resolveBedrockPromptCachePolicy,
@@ -215,7 +215,7 @@ function extractRegionFromArn(arn: string): string | undefined {
  * otherwise opaque.
  *
  * Region is extracted from the profile ARN itself to avoid mismatches when
- * the OpenClaw config region differs from the profile's home region.
+ * the Carapace config region differs from the profile's home region.
  */
 type BedrockAppProfileTraits = {
   cacheEligible: boolean;
@@ -352,7 +352,7 @@ function patchMaxThinkingEffort(payload: Record<string, unknown>): void {
 }
 
 /** Register Amazon Bedrock provider, discovery catalog, stream wrappers, and embeddings. */
-export function registerAmazonBedrockPlugin(api: OpenClawPluginApi): void {
+export function registerAmazonBedrockPlugin(api: CarapacePluginApi): void {
   // Keep registration-local constants inside the function so partial module
   // initialization during test bootstrap cannot trip TDZ reads.
   const providerId = "amazon-bedrock";
@@ -372,7 +372,7 @@ export function registerAmazonBedrockPlugin(api: OpenClawPluginApi): void {
   const startupPluginConfig = (api.pluginConfig ?? {}) as AmazonBedrockPluginConfig;
 
   function resolveCurrentPluginConfig(
-    config: OpenClawConfig | undefined,
+    config: CarapaceConfig | undefined,
   ): AmazonBedrockPluginConfig | undefined {
     const runtimePluginConfig = resolvePluginConfigObject(config, providerId);
     return (

@@ -50,12 +50,12 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function candidateRequestInput(overrides: Record<string, unknown> = {}) {
   return {
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     targetSha: TARGET_SHA,
     toolingSha: SHA,
     releaseProfile: "stable",
     releaseSoak: true,
-    upgradeSurvivorBaseline: "openclaw@latest",
+    upgradeSurvivorBaseline: "carapace@latest",
     upgradeSurvivorBaselines: "",
     upgradeSurvivorScenarios: "reported-issues",
     allowFrozenTargetScenarioOmissions: false,
@@ -171,7 +171,7 @@ function executionPlan(
   const expected = {
     parentRunAttempt: 1,
     parentRunId: "77",
-    repository: "openclaw/openclaw",
+    repository: "carapace/carapace",
     targetSha: TARGET_SHA,
     workflowRef: "release-ci/tooling",
     workflowSha: SHA,
@@ -194,8 +194,8 @@ function reusedEvidenceChildren() {
   return [
     ["normalCi", "101", "CI"],
     ["pluginPrerelease", "202", "Plugin Prerelease"],
-    ["releaseChecks", "303", "OpenClaw Release Checks"],
-    ["productPerformance", "505", "OpenClaw Performance"],
+    ["releaseChecks", "303", "Carapace Release Checks"],
+    ["productPerformance", "505", "Carapace Performance"],
   ].map(([role, runId, name]) => ({
     displayTitle: `${name} full-release-validation-99-1`,
     headBranch: "release-ci/tooling",
@@ -232,7 +232,7 @@ function runPlanSubprocess(overrides: Record<string, unknown>) {
       FULL_RELEASE_EXECUTION_PLAN_PATH: output,
       FULL_RELEASE_PLAN_INPUTS_JSON: JSON.stringify(planInputs),
       GITHUB_REF_NAME: "release-ci/tooling",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ATTEMPT: "1",
       GITHUB_RUN_ID: "77",
       GITHUB_SHA: SHA,
@@ -316,7 +316,7 @@ describe("full release execution plan", () => {
       ...betaCoverage,
       childPhaseVersion: 3,
       children: {},
-      releasePackageSpec: "openclaw@2026.8.28-beta.1",
+      releasePackageSpec: "carapace@2026.8.28-beta.1",
     };
     const historical = plan({ ...input, coveragePolicy: undefined });
     const bounded = plan(input);
@@ -399,7 +399,7 @@ describe("full release execution plan", () => {
         ...stableCoverage,
         childPhaseVersion: 3,
         targetVersion,
-        releasePackageSpec: `openclaw@${targetVersion}`,
+        releasePackageSpec: `carapace@${targetVersion}`,
       };
       const full = plan({ ...input, coveragePolicy: undefined });
       const npm = plan(input);
@@ -477,10 +477,10 @@ describe("full release execution plan", () => {
         validateReleaseChildDispatchBinding({
           child: { key: "normalCi", runId: "101" },
           plannedRunAttempt: 1,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           targetSha: TARGET_SHA,
           coveragePolicy,
-          log: `TARGET_SHA: ${TARGET_SHA}\n${scope ? `CI_RELEASE_SCOPE: ${scope}\n` : ""}Dispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/101 (attempt 1)`,
+          log: `TARGET_SHA: ${TARGET_SHA}\n${scope ? `CI_RELEASE_SCOPE: ${scope}\n` : ""}Dispatched ci.yml: https://github.com/Exaggarate/carapace/actions/runs/101 (attempt 1)`,
         });
       if (accepted) {
         expect(verify).not.toThrow();
@@ -495,9 +495,9 @@ describe("full release execution plan", () => {
     (version) => {
       const input = {
         releaseProfile: "stable",
-        releasePackageSpec: `openclaw@${version}`,
-        packageAcceptancePackageSpec: `openclaw@${version}`,
-        npmTelegramPackageSpec: `openclaw@${version}`,
+        releasePackageSpec: `carapace@${version}`,
+        packageAcceptancePackageSpec: `carapace@${version}`,
+        npmTelegramPackageSpec: `carapace@${version}`,
         targetVersion: version,
         telegramWaiver: `${version}-owner-approved`,
         children: {},
@@ -548,9 +548,9 @@ describe("full release execution plan", () => {
     { liveSuiteFilter: "non-slack" },
     { liveSuiteFilter: "no-slack" },
     { liveSuiteFilter: "without-slack" },
-    { releasePackageSpec: "openclaw@2026.8.2" },
-    { packageAcceptancePackageSpec: "openclaw@latest" },
-    { npmTelegramPackageSpec: "openclaw@2026.8.1-beta.3" },
+    { releasePackageSpec: "carapace@2026.8.2" },
+    { packageAcceptancePackageSpec: "carapace@latest" },
+    { npmTelegramPackageSpec: "carapace@2026.8.1-beta.3" },
   ])("rejects a Telegram waiver outside its owner-approved scope: %j", (override) => {
     expect(() =>
       plan({
@@ -676,7 +676,7 @@ describe("full release execution plan", () => {
     ["tooling", { toolingSha: "d".repeat(40) }],
     ["profile", { releaseProfile: "minimum" }],
     ["soak", { releaseSoak: false }],
-    ["survivor baseline", { upgradeSurvivorBaseline: "openclaw@beta" }],
+    ["survivor baseline", { upgradeSurvivorBaseline: "carapace@beta" }],
     ["survivor scenarios", { upgradeSurvivorScenarios: "base" }],
     ["frozen-target policy", { allowFrozenTargetScenarioOmissions: true }],
     ["changelog policy", { allowUnreleasedChangelog: true }],
@@ -876,7 +876,7 @@ describe("full release execution plan", () => {
   it("does not prepare a candidate for published packages", () => {
     expect(
       plan({
-        packageAcceptancePackageSpec: "openclaw@2026.8.4-beta.3",
+        packageAcceptancePackageSpec: "carapace@2026.8.4-beta.3",
         candidateBindingResult: "skipped",
         rerunGroup: "package",
       }).gates.at(-1),
@@ -1317,7 +1317,7 @@ describe("release decision policy", () => {
           html_url: original.url,
           id: 101,
           path: ".github/workflows/ci.yml@refs/heads/release-ci/tooling",
-          repository: { full_name: "openclaw/openclaw" },
+          repository: { full_name: "carapace/carapace" },
           run_attempt: 2,
           status: "completed",
           triggering_actor: { login: "release-operator" },
@@ -1376,7 +1376,7 @@ describe("release decision policy", () => {
         html_url: planned.url,
         id: 101,
         path: ".github/workflows/ci.yml",
-        repository: { full_name: "openclaw/openclaw" },
+        repository: { full_name: "carapace/carapace" },
         run_attempt: 1,
         status: "completed",
         triggering_actor: { login: "github-actions[bot]" },
@@ -1495,7 +1495,7 @@ describe("release decision policy", () => {
           head_sha: "c".repeat(40),
           id: 101,
           path: ".github/workflows/ci.yml",
-          repository: { full_name: "openclaw/openclaw" },
+          repository: { full_name: "carapace/carapace" },
           run_attempt: 1,
           status: "completed",
           triggering_actor: { login: "github-actions[bot]" },
@@ -1566,7 +1566,7 @@ describe("release decision policy", () => {
         head_sha: planned.workflowSha,
         id: 101,
         path: ".github/workflows/ci.yml",
-        repository: { full_name: "openclaw/openclaw" },
+        repository: { full_name: "carapace/carapace" },
         run_attempt: 2,
         status: "in_progress",
         triggering_actor: { login: "github-actions[bot]" },
@@ -1598,7 +1598,7 @@ describe("release decision policy", () => {
             head_sha: planned.workflowSha,
             id: 101,
             path: ".github/workflows/ci.yml",
-            repository: { full_name: "openclaw/openclaw" },
+            repository: { full_name: "carapace/carapace" },
             run_attempt: 1,
             status: "in_progress",
             triggering_actor: { login: "github-actions[bot]" },
@@ -1793,7 +1793,7 @@ describe("release state artifacts", () => {
       jobs: composite.jobs,
       observedRunAttempts: attempts.map((attempt) => attempt.runAttempt),
       plannedRunAttempt: 1,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt,
       triggeringActor: "release-operator",
     });
@@ -1832,7 +1832,7 @@ describe("release state artifacts", () => {
       jobs: composite.jobs,
       observedRunAttempts: [1],
       plannedRunAttempt: 1,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       status,
       triggeringActor: "github-actions[bot]",
@@ -2073,7 +2073,7 @@ describe("release state artifacts", () => {
       dispatchActor: "github-actions[bot]",
       observedRunAttempts: [1],
       plannedRunAttempt: 1,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runAttempt: 1,
       runId: "101",
       status: "completed",
@@ -2747,7 +2747,7 @@ describe("release state artifacts", () => {
         DIAGNOSTIC_DRAIN_PATH: drainPath,
         GITHUB_OUTPUT: outputPath,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "3",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -2942,11 +2942,11 @@ console.log(JSON.stringify({
         FULL_RELEASE_EXECUTION_PLAN_PATH: output,
         FULL_RELEASE_PLAN_INPUTS_JSON: JSON.stringify(planInputs),
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "1",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
-        OPENCLAW_RELEASE_CI_SUMMARY_VALIDATOR: validator,
+        CARAPACE_RELEASE_CI_SUMMARY_VALIDATOR: validator,
         RELEASE_PROFILE: "stable",
         RERUN_GROUP: "all",
         TARGET_SHA,
@@ -3048,7 +3048,7 @@ case "$*" in
     exit 0
     ;;
 esac
-printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/ci.yml@refs/heads/release-ci/tooling","display_title":"CI full-release-validation-77-1-ci","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"completed","conclusion":"success","created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/101","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"openclaw/openclaw"}}'
+printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/ci.yml@refs/heads/release-ci/tooling","display_title":"CI full-release-validation-77-1-ci","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"completed","conclusion":"success","created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/101","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"carapace/carapace"}}'
 `,
     );
     chmodSync(gh, 0o755);
@@ -3069,11 +3069,11 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
         FULL_RELEASE_EXECUTION_PLAN_PATH: executionPlanPath,
         FULL_RELEASE_STATE_PATH: output,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "2",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
-        OPENCLAW_RELEASE_CI_SUMMARY_VALIDATOR: validator,
+        CARAPACE_RELEASE_CI_SUMMARY_VALIDATOR: validator,
         PATH: `${root}:${process.env.PATH}`,
         RELEASE_PROFILE: "stable",
         RERUN_GROUP: "ci",
@@ -3102,7 +3102,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
     const env = {
       ...process.env,
       GITHUB_REF_NAME: "release-ci/tooling",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ATTEMPT: "2",
       GITHUB_RUN_ID: "77",
       GITHUB_SHA: SHA,
@@ -3186,7 +3186,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
           jobs: composite.jobs,
           observedRunAttempts: [1],
           plannedRunAttempt: 1,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           status: "completed",
           triggeringActor: "github-actions[bot]",
           updatedAt: "2026-08-21T00:01:00Z",
@@ -3259,7 +3259,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
         ...process.env,
         DIAGNOSTIC_DRAIN_PATH: drainPath,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "2",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -3359,7 +3359,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
       env: {
         ...process.env,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "2",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -3410,11 +3410,11 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
       ...process.env,
       FULL_RELEASE_EXECUTION_PLAN_PATH: output,
       GITHUB_REF_NAME: "release-ci/tooling",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ATTEMPT: "1",
       GITHUB_RUN_ID: "77",
       GITHUB_SHA: SHA,
-      OPENCLAW_RELEASE_CI_SUMMARY_VALIDATOR: validator,
+      CARAPACE_RELEASE_CI_SUMMARY_VALIDATOR: validator,
       RELEASE_PROFILE: "stable",
       RERUN_GROUP: "all",
       TARGET_SHA,
@@ -3504,7 +3504,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
           FULL_RELEASE_RESTORE_PLAN: "true",
           GITHUB_OUTPUT: githubOutput,
           GITHUB_REF_NAME: "release-ci/tooling",
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_RUN_ATTEMPT: "2",
           GITHUB_RUN_ID: "77",
           GITHUB_SHA: SHA,
@@ -3612,7 +3612,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
           workflowSha: SHA,
         }),
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "1",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -3669,7 +3669,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
         FULL_RELEASE_EXECUTION_PLAN_PATH: executionPlanPath,
         FULL_RELEASE_STATE_PATH: output,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "2",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -3717,11 +3717,11 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
       `#!/bin/sh
 printf ready > "$FRV_GH_READY"
 case "$*" in
-  "api --paginate repos/openclaw/openclaw/actions/runs/101/attempts/1/jobs?per_page=100 --jq .jobs[] | @json")
+  "api --paginate repos/carapace/carapace/actions/runs/101/attempts/1/jobs?per_page=100 --jq .jobs[] | @json")
     exit 0
     ;;
 esac
-printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/ci.yml@refs/heads/release-ci/tooling","display_title":"CI full-release-validation-77-1-ci","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"in_progress","conclusion":null,"created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/101","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"openclaw/openclaw"}}'
+printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/ci.yml@refs/heads/release-ci/tooling","display_title":"CI full-release-validation-77-1-ci","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"in_progress","conclusion":null,"created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/101","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"carapace/carapace"}}'
 `,
     );
     chmodSync(gh, 0o755);
@@ -3734,7 +3734,7 @@ printf '%s\\n' '{"id":101,"event":"workflow_dispatch","path":".github/workflows/
         FULL_RELEASE_POLL_INTERVAL_MS: "60000",
         FULL_RELEASE_STATE_PATH: output,
         GITHUB_REF_NAME: "release-ci/tooling",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
+        GITHUB_REPOSITORY: "carapace/carapace",
         GITHUB_RUN_ATTEMPT: "2",
         GITHUB_RUN_ID: "77",
         GITHUB_SHA: SHA,
@@ -3783,12 +3783,12 @@ title="CI full-release-validation-77-1-ci"
 workflow="ci.yml"
 case "$run_id" in
   202) title="Plugin Prerelease full-release-validation-77-1-plugin-prerelease"; workflow="plugin-prerelease.yml" ;;
-  303) title="OpenClaw Release Checks full-release-validation-77-1-release-checks"; workflow="openclaw-release-checks.yml" ;;
-  505) title="OpenClaw Performance full-release-validation-77-1"; workflow="openclaw-performance.yml" ;;
+  303) title="Carapace Release Checks full-release-validation-77-1-release-checks"; workflow="carapace-release-checks.yml" ;;
+  505) title="Carapace Performance full-release-validation-77-1"; workflow="carapace-performance.yml" ;;
 esac
 status="completed"
 [ "$run_id" = 101 ] && status="$FRV_FAILED_RUN_STATUS"
-printf '{"id":%s,"event":"workflow_dispatch","path":".github/workflows/%s@refs/heads/release-ci/tooling","display_title":"%s","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"%s","conclusion":"%s","created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/%s","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"openclaw/openclaw"}}\\n' "$run_id" "$workflow" "$title" "$status" "$([ "$run_id" = 101 ] && echo failure || echo success)" "$run_id"
+printf '{"id":%s,"event":"workflow_dispatch","path":".github/workflows/%s@refs/heads/release-ci/tooling","display_title":"%s","head_branch":"release-ci/tooling","head_sha":"${SHA}","run_attempt":1,"status":"%s","conclusion":"%s","created_at":"2026-08-21T00:00:00Z","updated_at":"2026-08-21T00:01:00Z","html_url":"https://example.invalid/runs/%s","actor":{"login":"github-actions[bot]"},"triggering_actor":{"login":"github-actions[bot]"},"repository":{"full_name":"carapace/carapace"}}\\n' "$run_id" "$workflow" "$title" "$status" "$([ "$run_id" = 101 ] && echo failure || echo success)" "$run_id"
 `,
     );
     chmodSync(gh, 0o755);
@@ -3829,7 +3829,7 @@ printf '{"id":%s,"event":"workflow_dispatch","path":".github/workflows/%s@refs/h
       FRV_GH_CALLS: calls,
       FULL_RELEASE_EXECUTION_PLAN_PATH: executionPlanPath,
       GITHUB_REF_NAME: "release-ci/tooling",
-      GITHUB_REPOSITORY: "openclaw/openclaw",
+      GITHUB_REPOSITORY: "carapace/carapace",
       GITHUB_RUN_ATTEMPT: "2",
       GITHUB_RUN_ID: "77",
       GITHUB_SHA: SHA,

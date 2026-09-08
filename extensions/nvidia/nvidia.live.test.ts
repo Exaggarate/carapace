@@ -1,4 +1,4 @@
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+import { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { describe, expect, it } from "vitest";
 import { buildLiveNvidiaProvider } from "./provider-catalog.js";
 

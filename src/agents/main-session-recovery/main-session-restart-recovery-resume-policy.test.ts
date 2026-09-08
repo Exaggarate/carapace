@@ -12,7 +12,7 @@ vi.mock("../tool-replay-safety.js", () => ({
 
 vi.mock("../run-termination.js", () => ({
   AGENT_RUN_RESTART_ABORT_ERROR: "agent run aborted for restart",
-  AGENT_RUN_RESTART_ABORT_ERROR_CODE: "OPENCLAW_RESTART_ABORT",
+  AGENT_RUN_RESTART_ABORT_ERROR_CODE: "CARAPACE_RESTART_ABORT",
 }));
 
 function progressMessage(text: string, itemId: string): Record<string, unknown> {
@@ -20,7 +20,7 @@ function progressMessage(text: string, itemId: string): Record<string, unknown> 
     role: "assistant",
     content: [{ type: "text", text }],
     stopReason: "stop",
-    openclawStreamFallback: {
+    carapaceStreamFallback: {
       replacementText: text,
       source: "segment",
       itemId,
@@ -34,7 +34,7 @@ function asyncDeliveryMessage(text: string, itemId: string): Record<string, unkn
     content: [{ type: "text", text }],
     stopReason: "stop",
     phase: "final_answer",
-    openclawAsyncDelivery: { itemId },
+    carapaceAsyncDelivery: { itemId },
   };
 }
 
@@ -301,7 +301,7 @@ describe("resolveMainSessionResumePolicy progress tails", () => {
           role: "assistant",
           content: [{ type: "text", text: "Possibly final output." }],
           stopReason: "stop",
-          openclawStreamFallback: { replacementText: "Possibly final output.", source: "current" },
+          carapaceStreamFallback: { replacementText: "Possibly final output.", source: "current" },
         },
       ]),
     ).toEqual({ action: "resume", forceRestartSafeTools: false });
@@ -326,7 +326,7 @@ describe("resolveMainSessionResumePolicy progress tails", () => {
           content: [{ type: "text", text: "The work is complete." }],
           stopReason: "stop",
           phase: "final_answer",
-          openclawAsyncDelivery: { itemId: " " },
+          carapaceAsyncDelivery: { itemId: " " },
         },
       ]),
     ).toEqual({ action: "resume", forceRestartSafeTools: false });

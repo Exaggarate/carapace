@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DuplicateAgentDirError } from "./agent-dirs.js";
 import { createConfigIO, restoreEnvChangesIfUnchanged } from "./io.js";
 import { getConfigResolutionFacts } from "./resolution-facts.js";
-import { withTempHome, writeOpenClawConfig } from "./test-helpers.js";
+import { withTempHome, writeCarapaceConfig } from "./test-helpers.js";
 
 describe("restoreEnvChangesIfUnchanged", () => {
   it("removes a newly injected key when unchanged from after snapshot", () => {
@@ -56,7 +56,7 @@ describe("restoreEnvChangesIfUnchanged", () => {
 describe("loadConfig env restoration", () => {
   it("returns resolution facts with a valid synchronous load", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         gateway: { auth: { mode: "token", token: "${MISSING_GATEWAY_TOKEN}" } },
       });
       const config = createConfigIO({
@@ -71,7 +71,7 @@ describe("loadConfig env restoration", () => {
 
   it("restores newly set env var after INVALID_CONFIG is thrown", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         env: { vars: { TEST_VAR: "injected-value" } },
         // gateway.port must be a number; a string triggers INVALID_CONFIG
         gateway: { port: "invalid" },
@@ -92,7 +92,7 @@ describe("loadConfig env restoration", () => {
 
   it("restores overwritten env key when another config section is invalid", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         env: { vars: { PRE_EXISTING: "new-value" } },
         gateway: { port: "invalid" },
       });
@@ -116,7 +116,7 @@ describe("loadConfig env restoration", () => {
 
   it("restores env changes after non-INVALID_CONFIG error (DuplicateAgentDirError)", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         env: { vars: { DUP_DIR_TEST_VAR: "injected-value" } },
         agents: {
           list: [
@@ -143,7 +143,7 @@ describe("loadConfig env restoration", () => {
 describe("readConfigFileSnapshot env restoration", () => {
   it("removes a newly injected env var after invalid snapshot validation", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         env: { vars: { TEST_VAR: "injected-value" } },
         gateway: { port: "invalid" },
       });
@@ -164,7 +164,7 @@ describe("readConfigFileSnapshot env restoration", () => {
 
   it("restores an overwritten env var after invalid snapshot validation", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeCarapaceConfig(home, {
         env: { vars: { PRE_EXISTING: "new-value" } },
         gateway: { port: "invalid" },
       });

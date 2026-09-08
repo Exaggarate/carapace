@@ -1,6 +1,6 @@
 import path from "node:path";
-import { registerSessionResourceCleanup } from "@openclaw/ai/internal/runtime";
-import { createAssistantMessageEventStream, type AssistantMessage } from "openclaw/plugin-sdk/llm";
+import { registerSessionResourceCleanup } from "@carapace/ai/internal/runtime";
+import { createAssistantMessageEventStream, type AssistantMessage } from "carapace/plugin-sdk/llm";
 // Agent session SDK tests cover default tool wiring, prompt preservation, and
 // session write-settlement behavior.
 import { Type } from "typebox";
@@ -13,7 +13,7 @@ import { readRuntimePromptImageOrder } from "../../media/media-facts.js";
 import { finalizeRuntimePromptImages } from "../../media/runtime-prompt-image-provenance.js";
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
 import { createTestUserTurnTranscriptTarget } from "../../sessions/user-turn-transcript.test-support.js";
-import { disposeOpenClawAgentDatabaseByPath } from "../../state/openclaw-agent-db.js";
+import { disposeCarapaceAgentDatabaseByPath } from "../../state/carapace-agent-db.js";
 import { createZeroUsageFixture } from "../test-helpers/usage-fixtures.js";
 
 const thinkingMocks = vi.hoisted(() => ({
@@ -102,10 +102,10 @@ describe("createAgentSession runtime ownership", () => {
   });
 
   it("keeps the default SQLite session inside an explicit agent directory", async () => {
-    const root = sdkSessionTempDirs.make("openclaw-sdk-session-");
+    const root = sdkSessionTempDirs.make("carapace-sdk-session-");
     const agentDir = path.join(root, "isolated-agent");
     const cwd = path.join(root, "explicit-sdk-cwd");
-    const databasePath = path.join(agentDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(agentDir, "carapace-agent.sqlite");
     try {
       const { session } = await createAgentSession({
         agentDir,
@@ -129,7 +129,7 @@ describe("createAgentSession runtime ownership", () => {
       );
       session.dispose();
     } finally {
-      disposeOpenClawAgentDatabaseByPath(databasePath);
+      disposeCarapaceAgentDatabaseByPath(databasePath);
     }
   });
 });
@@ -417,7 +417,7 @@ describe("AgentSession queued user turns", () => {
       message: {
         role: "user",
         content: "visible group prompt",
-        __openclaw: { senderId: "user-42", senderName: "Ada" },
+        __carapace: { senderId: "user-42", senderName: "Ada" },
       },
       recorder,
     });
@@ -439,7 +439,7 @@ describe("AgentSession queued user turns", () => {
     const runtimeMessage = steer.mock.calls[0]?.[0];
     expect(runtimeMessage).toBeDefined();
     const mediaSymbol = Object.getOwnPropertySymbols(runtimeMessage ?? {}).find(
-      (symbol) => Symbol.keyFor(symbol) === "openclaw.runtimePromptMediaFacts",
+      (symbol) => Symbol.keyFor(symbol) === "carapace.runtimePromptMediaFacts",
     );
     expect(mediaSymbol).toBeDefined();
     if (!runtimeMessage || !mediaSymbol) {
@@ -449,13 +449,13 @@ describe("AgentSession queued user turns", () => {
       expect.objectContaining({ path: "/tmp/a.png", contentType: "image/png", kind: "image" }),
     ]);
     expect(readRuntimePromptImageOrder(runtimeMessage)).toEqual(imageOrder);
-    expect((runtimeMessage as unknown as Record<string, unknown>)["__openclaw"]).toEqual({
+    expect((runtimeMessage as unknown as Record<string, unknown>)["__carapace"]).toEqual({
       mediaImageBlockFactIndexes: [0],
     });
     expect(JSON.stringify(runtimeMessage)).not.toContain("runtimePromptMediaFacts");
     await session.followUp("inspect queued attachment", images);
     expect(followUp.mock.calls[0]?.[0]).toMatchObject({
-      __openclaw: { mediaImageBlockFactIndexes: [0] },
+      __carapace: { mediaImageBlockFactIndexes: [0] },
     });
   });
 });
@@ -487,13 +487,13 @@ describe("createAgentSession attribution headers", () => {
     });
 
     expect(providerOptions.headers).toMatchObject({
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
       "X-OpenRouter-Categories": "cli-agent",
     });
     expect(endpointOptions.headers).toMatchObject({
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://github.com/Exaggarate/carapace",
+      "X-OpenRouter-Title": "Carapace",
       "X-OpenRouter-Categories": "cli-agent",
     });
   });
@@ -510,8 +510,8 @@ describe("createAgentSession attribution headers", () => {
       baseUrl: "https://gateway.ai.cloudflare.com/v1/account/gateway/openai",
     });
 
-    expect(providerOptions.headers).toMatchObject({ "User-Agent": "openclaw" });
-    expect(endpointOptions.headers).toMatchObject({ "User-Agent": "openclaw" });
+    expect(providerOptions.headers).toMatchObject({ "User-Agent": "carapace" });
+    expect(endpointOptions.headers).toMatchObject({ "User-Agent": "carapace" });
   });
 });
 
@@ -624,7 +624,7 @@ describe("createAgentSession tool defaults", () => {
       settingsManager: SettingsManager.inMemory(),
       modelRegistry: ModelRegistry.inMemory(AuthStorage.inMemory()),
     });
-    const systemPrompt = "You are a personal assistant running inside OpenClaw.";
+    const systemPrompt = "You are a personal assistant running inside Carapace.";
 
     session.setBaseSystemPrompt(systemPrompt);
     session.setActiveToolsByName(["bash", "custom_lookup"]);

@@ -1,4 +1,4 @@
-import { readMissingScopeError } from "@openclaw/gateway-client/browser";
+import { readMissingScopeError } from "@carapace/gateway-client/browser";
 import type {
   FsDirEntry,
   FsListDirResult,

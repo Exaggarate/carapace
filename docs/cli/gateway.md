@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Gateway CLI (`openclaw gateway`) — run, query, and discover gateways"
+summary: "Carapace Gateway CLI (`carapace gateway`) — run, query, and discover gateways"
 read_when:
   - Running the Gateway from the CLI (dev or servers)
   - Debugging Gateway auth, bind modes, and connectivity
@@ -9,14 +9,14 @@ title: "Gateway"
 sidebarTitle: "Gateway"
 ---
 
-The Gateway is OpenClaw's WebSocket server (channels, nodes, sessions, hooks). All subcommands below live under `openclaw gateway ...`.
+The Gateway is Carapace's WebSocket server (channels, nodes, sessions, hooks). All subcommands below live under `carapace gateway ...`.
 
 <CardGroup cols={3}>
   <Card title="Bonjour discovery" href="/gateway/bonjour">
     Local mDNS + wide-area DNS-SD setup.
   </Card>
   <Card title="Discovery overview" href="/gateway/discovery">
-    How OpenClaw advertises and finds gateways.
+    How Carapace advertises and finds gateways.
   </Card>
   <Card title="Configuration" href="/gateway/configuration">
     Top-level gateway config keys.
@@ -26,19 +26,19 @@ The Gateway is OpenClaw's WebSocket server (channels, nodes, sessions, hooks). A
 ## Run the Gateway
 
 ```bash
-openclaw gateway
-openclaw gateway run   # equivalent, explicit form
+carapace gateway
+carapace gateway run   # equivalent, explicit form
 ```
 
 <AccordionGroup>
   <Accordion title="Startup behavior">
-    - Refuses to start unless `gateway.mode=local` is set in `~/.openclaw/openclaw.json`. Use `--allow-unconfigured` for ad-hoc/dev runs; it bypasses the guard without writing or repairing config.
+    - Refuses to start unless `gateway.mode=local` is set in `~/.carapace/carapace.json`. Use `--allow-unconfigured` for ad-hoc/dev runs; it bypasses the guard without writing or repairing config.
     - Startup automatically applies deterministic, prompt-free legacy-key migrations to eligible invalid single-file configs, including in non-interactive service runs. It writes only after full validation, including plugins, and keeps the previous config in the `.bak` ring. Configs using `$include`, Nix-managed configs, and configs written by a newer version are excluded. See [Legacy config key migrations](/gateway/doctor#detailed-behavior-and-rationale).
-    - If automatic migration cannot make the config valid, an interactive terminal can offer to run `openclaw doctor --fix` and retry startup once after consent. Non-interactive runs print the command instead. If the repaired config is still invalid, startup remains stopped.
-    - `openclaw onboard --mode local` and `openclaw setup` write `gateway.mode=local`. If the config file exists but `gateway.mode` is missing, that is treated as damaged/clobbered config and the Gateway refuses to guess `local` for you — re-run onboarding, set the key manually, or pass `--allow-unconfigured`.
+    - If automatic migration cannot make the config valid, an interactive terminal can offer to run `carapace doctor --fix` and retry startup once after consent. Non-interactive runs print the command instead. If the repaired config is still invalid, startup remains stopped.
+    - `carapace onboard --mode local` and `carapace setup` write `gateway.mode=local`. If the config file exists but `gateway.mode` is missing, that is treated as damaged/clobbered config and the Gateway refuses to guess `local` for you — re-run onboarding, set the key manually, or pass `--allow-unconfigured`.
     - Binding beyond loopback without auth is blocked.
     - `--bind` values `lan`, `tailnet`, and `custom` resolve over IPv4-only paths today; IPv6-only bring-your-own-host setups need an IPv4 sidecar or proxy in front of the Gateway.
-    - `SIGUSR1` triggers an in-process restart when authorized. `commands.restart` (default: enabled) gates externally-sent `SIGUSR1`; set it to `false` to block manual OS-signal restarts. The agent-facing `gateway` tool is read-only; agents request restart through the `openclaw` delegation tool. Effective Full Access, including Default (Full Access), authorizes permitted delegated changes without an approval prompt; restricted runs require human approval. See [Delegated setup and repair](/gateway/permission-modes#delegated-setup-and-repair).
+    - `SIGUSR1` triggers an in-process restart when authorized. `commands.restart` (default: enabled) gates externally-sent `SIGUSR1`; set it to `false` to block manual OS-signal restarts. The agent-facing `gateway` tool is read-only; agents request restart through the `carapace` delegation tool. Effective Full Access, including Default (Full Access), authorizes permitted delegated changes without an approval prompt; restricted runs require human approval. See [Delegated setup and repair](/gateway/permission-modes#delegated-setup-and-repair).
     - `SIGINT`/`SIGTERM` stop the process but do not restore custom terminal state — if you wrap the CLI in a TUI or raw-mode input, restore the terminal yourself before exit.
 
   </Accordion>
@@ -53,7 +53,7 @@ openclaw gateway run   # equivalent, explicit form
   Bind mode: `loopback` (default), `lan`, `tailnet`, `auto`, `custom`.
 </ParamField>
 <ParamField path="--token <token>" type="string">
-  Shared token for `connect.params.auth.token`. Defaults to `OPENCLAW_GATEWAY_TOKEN` when set.
+  Shared token for `connect.params.auth.token`. Defaults to `CARAPACE_GATEWAY_TOKEN` when set.
 </ParamField>
 <ParamField path="--auth <mode>" type="string">
   Auth mode: `none`, `token`, `password`, `trusted-proxy`.
@@ -113,21 +113,21 @@ For `--bind custom`, set `gateway.customBindHost` to an IPv4 address. Any addres
 Run this on the Gateway host when a client needs the configured shared token:
 
 ```bash
-openclaw gateway auth-token --show
+carapace gateway auth-token --show
 ```
 
-The command resolves `gateway.auth.token`, `OPENCLAW_GATEWAY_TOKEN`, and configured SecretRefs, then prints only the token. It requires an interactive terminal and refuses redirected or piped output so the credential does not silently enter command logs. Treat the terminal output as a secret.
+The command resolves `gateway.auth.token`, `CARAPACE_GATEWAY_TOKEN`, and configured SecretRefs, then prints only the token. It requires an interactive terminal and refuses redirected or piped output so the credential does not silently enter command logs. Treat the terminal output as a secret.
 
-If no persistent token is configured, run `openclaw doctor --generate-gateway-token`, restart the Gateway, and then rerun the command. Generic `openclaw config get` output remains redacted, including `--json`.
+If no persistent token is configured, run `carapace doctor --generate-gateway-token`, restart the Gateway, and then rerun the command. Generic `carapace config get` output remains redacted, including `--json`.
 
 ## Restart the Gateway
 
 ```bash
-openclaw gateway restart
-openclaw gateway restart --safe
-openclaw gateway restart --safe --skip-deferral
-openclaw gateway restart --force
-openclaw gateway restart --wait 30s
+carapace gateway restart
+carapace gateway restart --safe
+carapace gateway restart --safe --skip-deferral
+carapace gateway restart --force
+carapace gateway restart --wait 30s
 ```
 
 `--safe` asks the running Gateway to preflight active work and schedule one coalesced restart after that work drains. The wait is bounded to 5 minutes; when the budget expires the restart is forced. `--safe` cannot combine with `--force` or `--wait`.
@@ -138,9 +138,9 @@ openclaw gateway restart --wait 30s
 
 `--force` skips the active-work drain and restarts immediately. Plain `restart` normally uses the service-manager restart path.
 
-On Windows, a plain restart launched from a Gateway service process, including an agent's shell command, automatically uses the safe restart path. The running Gateway owns the deferred Scheduled Task handoff, so stopping its process tree cannot kill the caller before relaunch. This requires a reachable Gateway; the command acknowledges the restart request, not successor health. Use `openclaw gateway status` afterward to verify recovery.
+On Windows, a plain restart launched from a Gateway service process, including an agent's shell command, automatically uses the safe restart path. The running Gateway owns the deferred Scheduled Task handoff, so stopping its process tree cannot kill the caller before relaunch. This requires a reachable Gateway; the command acknowledges the restart request, not successor health. Use `carapace gateway status` afterward to verify recovery.
 
-On macOS, when `openclaw gateway restart`, `stop`, `install`, or `uninstall` runs inside the managed LaunchAgent's process tree, including an agent's shell command, OpenClaw detects that from launchd's service environment or, when a hand-written plist omits those variables, from process ancestry against the PID launchd reports for the job. Restart hands off to a detached helper so `kickstart -k` cannot kill the caller. Stop, install, and uninstall refuse and ask you to run the command from an external shell.
+On macOS, when `carapace gateway restart`, `stop`, `install`, or `uninstall` runs inside the managed LaunchAgent's process tree, including an agent's shell command, Carapace detects that from launchd's service environment or, when a hand-written plist omits those variables, from process ancestry against the PID launchd reports for the job. Restart hands off to a detached helper so `kickstart -k` cannot kill the caller. Stop, install, and uninstall refuse and ask you to run the command from an external shell.
 
 External terminals without Gateway-service markers, externally supervised Gateways, node services, and non-Windows callers keep their existing routing. Explicit `--force`, `--wait`, `--preserve-definition`, or `--skip-deferral` also retain their existing behavior and validation; they do not implicitly enable `--safe`.
 
@@ -150,15 +150,15 @@ Inline `--password` can be exposed in local process listings. Prefer `--password
 
 ### Install identity
 
-Service management (`install`, `start`, `stop`, `restart`, `uninstall`, Doctor service repair, and self-update service handling) belongs to the install that owns the host service. That is the canonical `.openclaw` directory under the OS account home, or the `.openclaw-<profile>` directory a named profile projects there. Named profiles use distinct native service identities.
+Service management (`install`, `start`, `stop`, `restart`, `uninstall`, Doctor service repair, and self-update service handling) belongs to the install that owns the host service. That is the canonical `.carapace` directory under the OS account home, or the `.carapace-<profile>` directory a named profile projects there. Named profiles use distinct native service identities.
 
-`OPENCLAW_HOME`, or an `OPENCLAW_STATE_DIR` or `OPENCLAW_CONFIG_PATH` that points elsewhere, is treated as isolated state and skipped. A relocated or copied state tree cannot adopt and rewrite the account's host service.
+`CARAPACE_HOME`, or an `CARAPACE_STATE_DIR` or `CARAPACE_CONFIG_PATH` that points elsewhere, is treated as isolated state and skipped. A relocated or copied state tree cannot adopt and rewrite the account's host service.
 
 On macOS and Windows, native service-managed profile names must be lowercase. Runtime-only profiles may still use uppercase, but case-distinct names such as `Main` and `main` share paths on normal case-insensitive filesystems and cannot safely own separate native services. On macOS, the lowercase names `gateway` and `node` are also unavailable for native service management because their historical LaunchAgent labels collide with the default Gateway and node-host services.
 
-Named profiles must also use the native service identity derived from `OPENCLAW_PROFILE`. Unset `OPENCLAW_LAUNCHD_LABEL`, `OPENCLAW_SYSTEMD_UNIT`, or `OPENCLAW_WINDOWS_TASK_NAME` before service management; custom identities remain available for the default profile or runtime-only/external-supervisor setups.
+Named profiles must also use the native service identity derived from `CARAPACE_PROFILE`. Unset `CARAPACE_LAUNCHD_LABEL`, `CARAPACE_SYSTEMD_UNIT`, or `CARAPACE_WINDOWS_TASK_NAME` before service management; custom identities remain available for the default profile or runtime-only/external-supervisor setups.
 
-On Linux, `openclaw gateway install --force` refuses a sealed systemd service
+On Linux, `carapace gateway install --force` refuses a sealed systemd service
 definition, or one whose write authority cannot be verified, before changing
 configuration, authentication tokens, or service files. The error keeps its
 `SERVICE_DEFINITION_SEALED` or `SERVICE_DEFINITION_UNKNOWN` prefix and adds a
@@ -188,38 +188,38 @@ remain protected.
 
 ### External supervisors
 
-Set `OPENCLAW_SUPERVISOR_MODE=external` only when another process manager owns the Gateway lifecycle. In this mode:
+Set `CARAPACE_SUPERVISOR_MODE=external` only when another process manager owns the Gateway lifecycle. In this mode:
 
-- `openclaw gateway restart` preserves the existing safe, forced, and bounded-wait behavior while targeting the verified running Gateway instead of launchd, systemd, or Task Scheduler. Exact-lock restart delivery runs inside that Gateway, so a replacement CLI does not migrate shared state before the old process hands off.
+- `carapace gateway restart` preserves the existing safe, forced, and bounded-wait behavior while targeting the verified running Gateway instead of launchd, systemd, or Task Scheduler. Exact-lock restart delivery runs inside that Gateway, so a replacement CLI does not migrate shared state before the old process hands off.
 - Native service install, start, stop, and uninstall operations are refused with guidance to use the external supervisor.
-- OpenClaw self-update is refused so the supervisor can stop the Gateway, replace and finalize the runtime, and restart it safely.
+- Carapace self-update is refused so the supervisor can stop the Gateway, replace and finalize the runtime, and restart it safely.
 - A fresh-process restart writes a bounded SQLite handoff before clean exit. If persistence fails, the Gateway falls back to an in-process restart instead of exiting without a consumable handoff.
 
 An external supervisor can also claim durable ownership of shared-state writes:
 
 ```bash
-OPENCLAW_SUPERVISOR_MODE=external \
-  openclaw database ownership claim --manager gateway-supervisor --json
+CARAPACE_SUPERVISOR_MODE=external \
+  carapace database ownership claim --manager gateway-supervisor --json
 ```
 
-Before claiming, stop and verify every older Gateway, CLI, Doctor, updater, and native app process that can write the shared state database. Pre-contract processes do not understand the ownership row and cannot be retroactively fenced. Claim only after every remaining writer uses ownership-aware code and carries `OPENCLAW_SUPERVISOR_MODE=external`.
+Before claiming, stop and verify every older Gateway, CLI, Doctor, updater, and native app process that can write the shared state database. Pre-contract processes do not understand the ownership row and cannot be retroactively fenced. Claim only after every remaining writer uses ownership-aware code and carries `CARAPACE_SUPERVISOR_MODE=external`.
 
 The claim is idempotent for the same stable manager identifier and refuses a different manager. There is no automatic claim or unclaim path. Once claimed, unmarked writable shared-state opens fail before permissions, schema migration, additive repair, compaction, or other mutation. Read-only access remains available. This is protection against accidental unmarked same-user writers, not an authentication or lease protocol.
 
-For upgrades and rollbacks, have the supervisor create a consolidated WAL-consistent copied snapshot with no SQLite sidecars, then run the target release's own `openclaw database preflight <copied-state.sqlite> --json` before activation. Numeric schema versions alone do not prove that a same-version additive shape is compatible. See [Database schemas](/reference/database-schemas).
+For upgrades and rollbacks, have the supervisor create a consolidated WAL-consistent copied snapshot with no SQLite sidecars, then run the target release's own `carapace database preflight <copied-state.sqlite> --json` before activation. Numeric schema versions alone do not prove that a same-version additive shape is compatible. See [Database schemas](/reference/database-schemas).
 
-`OPENCLAW_SERVICE_REPAIR_POLICY=external` remains a separate Doctor repair policy. It does not declare runtime ownership; supervisors that need both behaviors should set both variables.
+`CARAPACE_SERVICE_REPAIR_POLICY=external` remains a separate Doctor repair policy. It does not declare runtime ownership; supervisors that need both behaviors should set both variables.
 
 External supervisors can negotiate and consume restart handoffs through the hidden machine contract:
 
 ```bash
-openclaw gateway restart-handoff capabilities --json
-openclaw gateway restart-handoff consume --expected-pid <pid> --json
+carapace gateway restart-handoff capabilities --json
+carapace gateway restart-handoff consume --expected-pid <pid> --json
 ```
 
 Protocol version `1` supports the `consume` operation. Consumption validates the expected PID and bounded handoff fields inside one immediate SQLite transaction. An accepted handoff is deleted before success is returned, so concurrent or replayed consumers cannot both accept it. A PID mismatch is retained for the matching owner; missing, expired, and invalid rows do not authorize a restart.
 
-Valid machine requests return JSON with exit code `0`, including non-restart results. Invalid arguments return `reason: "invalid-expected-pid"` with exit code `2`; state-store failures return `reason: "store-unavailable"` with exit code `1`. Supervisors should probe `capabilities` on the exact runtime or launcher they will use rather than infer support from an OpenClaw version string or read the private SQLite schema directly.
+Valid machine requests return JSON with exit code `0`, including non-restart results. Invalid arguments return `reason: "invalid-expected-pid"` with exit code `2`; state-store failures return `reason: "store-unavailable"` with exit code `1`. Supervisors should probe `capabilities` on the exact runtime or launcher they will use rather than infer support from an Carapace version string or read the private SQLite schema directly.
 
 External supervisor implementations should also apply these acceptance rules:
 
@@ -229,9 +229,9 @@ External supervisor implementations should also apply these acceptance rules:
 
 ### Gateway profiling
 
-- `OPENCLAW_GATEWAY_STARTUP_TRACE=1` logs phase timings during startup, including per-phase `eventLoopMax` delay and plugin lookup-table timings (installed-index, manifest registry, startup planning, owner-map work).
-- `OPENCLAW_GATEWAY_RESTART_TRACE=1` logs `restart trace:` lines for restart signal handling, active-work drain, shutdown phases, next start, ready timing, and memory metrics. Ordinary stops also start a fresh trace with `stop.signal.received` and `stop.drain` timing. Named shutdown steps and coarse close phases emit `.begin` before waiting, then a duration when they settle; an unmatched begin identifies an entered phase that has not settled. These phases do not time every nested cleanup operation individually.
-- `OPENCLAW_DIAGNOSTICS=timeline` with `OPENCLAW_DIAGNOSTICS_TIMELINE_PATH=<path>` writes a best-effort JSONL startup diagnostics timeline for external QA harnesses (equivalent to config `diagnostics.flags: ["timeline"]`; the path is still env-only). Add `OPENCLAW_DIAGNOSTICS_EVENT_LOOP=1` to include event-loop samples.
+- `CARAPACE_GATEWAY_STARTUP_TRACE=1` logs phase timings during startup, including per-phase `eventLoopMax` delay and plugin lookup-table timings (installed-index, manifest registry, startup planning, owner-map work).
+- `CARAPACE_GATEWAY_RESTART_TRACE=1` logs `restart trace:` lines for restart signal handling, active-work drain, shutdown phases, next start, ready timing, and memory metrics. Ordinary stops also start a fresh trace with `stop.signal.received` and `stop.drain` timing. Named shutdown steps and coarse close phases emit `.begin` before waiting, then a duration when they settle; an unmatched begin identifies an entered phase that has not settled. These phases do not time every nested cleanup operation individually.
+- `CARAPACE_DIAGNOSTICS=timeline` with `CARAPACE_DIAGNOSTICS_TIMELINE_PATH=<path>` writes a best-effort JSONL startup diagnostics timeline for external QA harnesses (equivalent to config `diagnostics.flags: ["timeline"]`; the path is still env-only). Add `CARAPACE_DIAGNOSTICS_EVENT_LOOP=1` to include event-loop samples.
 - `pnpm build` then `pnpm test:startup:gateway -- --runs 5 --warmup 1` benchmarks Gateway startup against the built CLI entry: first process output, `/healthz`, `/readyz`, startup trace timings, event-loop delay, and plugin lookup-table timing.
 - `pnpm build` then `pnpm test:restart:gateway -- --case skipChannels --runs 1 --restarts 5` benchmarks in-process restart on macOS or Linux (not supported on Windows; restart requires `SIGUSR1`). Uses `SIGUSR1`, enables both traces in the child process, and records next `/healthz`, next `/readyz`, downtime, ready timing, CPU, RSS, and restart trace metrics.
 - `/healthz` is liveness; `/readyz` is usable readiness. Treat trace lines and benchmark output as owner-attribution signal, not a complete performance conclusion from one span or sample.
@@ -276,14 +276,14 @@ When you set `--url`, the CLI does not fall back to config or environment creden
 ### `gateway health`
 
 ```bash
-openclaw gateway health --url ws://127.0.0.1:18789
-openclaw gateway health --port 18789
+carapace gateway health --url ws://127.0.0.1:18789
+carapace gateway health --port 18789
 ```
 
 `/healthz` is a liveness probe: it returns as soon as the server can answer HTTP. `/readyz` is stricter and stays red while startup plugin sidecars, channels, or configured hooks are still settling. Local or authenticated detailed `/readyz` responses include an `eventLoop` diagnostic block (delay, utilization, CPU-core ratio, `degraded` flag).
 
 <ParamField path="--port <port>" type="number">
-  Target a local loopback Gateway on this port. Overrides `OPENCLAW_GATEWAY_URL` and `OPENCLAW_GATEWAY_PORT` for this call.
+  Target a local loopback Gateway on this port. Overrides `CARAPACE_GATEWAY_URL` and `CARAPACE_GATEWAY_PORT` for this call.
 </ParamField>
 
 ### `gateway usage-cost`
@@ -291,11 +291,11 @@ openclaw gateway health --port 18789
 Fetch usage-cost summaries from session logs.
 
 ```bash
-openclaw gateway usage-cost
-openclaw gateway usage-cost --days 7
-openclaw gateway usage-cost --agent work --json
-openclaw gateway usage-cost --all-agents
-openclaw gateway usage-cost --json
+carapace gateway usage-cost
+carapace gateway usage-cost --days 7
+carapace gateway usage-cost --agent work --json
+carapace gateway usage-cost --all-agents
+carapace gateway usage-cost --json
 ```
 
 <ParamField path="--days <days>" type="number" default="30">
@@ -313,11 +313,11 @@ openclaw gateway usage-cost --json
 Fetch the recent diagnostic stability recorder from a running Gateway.
 
 ```bash
-openclaw gateway stability
-openclaw gateway stability --type payload.large
-openclaw gateway stability --bundle latest
-openclaw gateway stability --bundle latest --export
-openclaw gateway stability --json
+carapace gateway stability
+carapace gateway stability --type payload.large
+carapace gateway stability --bundle latest
+carapace gateway stability --bundle latest --export
+carapace gateway stability --json
 ```
 
 <ParamField path="--limit <limit>" type="number" default="25">
@@ -342,7 +342,7 @@ openclaw gateway stability --json
 <AccordionGroup>
   <Accordion title="Privacy and bundle behavior">
     - Records keep operational metadata: event names, counts, byte sizes, memory readings, queue/session state, approval ids, channel/plugin names, and redacted session summaries. They exclude chat text, webhook bodies, tool outputs, raw request/response bodies, tokens, cookies, secret values, hostnames, and raw session ids. Set `diagnostics.enabled: false` to disable the recorder entirely.
-    - Fatal Gateway exits, shutdown timeouts, and restart startup failures write the same diagnostic snapshot to `~/.openclaw/logs/stability/openclaw-stability-*.json` when the recorder has events. Inspect the newest bundle with `openclaw gateway stability --bundle latest`; `--limit`, `--type`, and `--since-seq` apply to bundle output too.
+    - Fatal Gateway exits, shutdown timeouts, and restart startup failures write the same diagnostic snapshot to `~/.carapace/logs/stability/carapace-stability-*.json` when the recorder has events. Inspect the newest bundle with `carapace gateway stability --bundle latest`; `--limit`, `--type`, and `--since-seq` apply to bundle output too.
 
   </Accordion>
 </AccordionGroup>
@@ -352,9 +352,9 @@ openclaw gateway stability --json
 Write a local diagnostics zip designed for bug reports. For the privacy model and bundle contents, see [Diagnostics Export](/gateway/diagnostics).
 
 ```bash
-openclaw gateway diagnostics export
-openclaw gateway diagnostics export --output openclaw-diagnostics.zip
-openclaw gateway diagnostics export --json
+carapace gateway diagnostics export
+carapace gateway diagnostics export --output carapace-diagnostics.zip
+carapace gateway diagnostics export --json
 ```
 
 <ParamField path="--output <path>" type="string">
@@ -385,7 +385,7 @@ openclaw gateway diagnostics export --json
   Print the written path, size, and manifest as JSON.
 </ParamField>
 
-The export bundles: `manifest.json` (file inventory), `summary.md` (Markdown summary), `diagnostics.json` (top-level config/logs/discovery/stability/status/health summary), `config/sanitized.json`, `status/gateway-status.json`, `health/gateway-health.json`, `logs/openclaw-sanitized.jsonl`, and `stability/latest.json` when a bundle exists.
+The export bundles: `manifest.json` (file inventory), `summary.md` (Markdown summary), `diagnostics.json` (top-level config/logs/discovery/stability/status/health summary), `config/sanitized.json`, `status/gateway-status.json`, `health/gateway-health.json`, `logs/carapace-sanitized.jsonl`, and `stability/latest.json` when a bundle exists.
 
 It is designed to be shared. It keeps operational details useful for debugging — safe log fields, subsystem names, status codes, durations, configured modes, ports, plugin/provider ids, non-secret feature settings, and redacted operational log messages — and omits or redacts chat text, webhook bodies, tool outputs, credentials, cookies, account/message identifiers, prompt/instruction text, hostnames, and secret values. When a log message looks like user/chat/tool payload text (e.g. "user said", "chat text", "tool output", "webhook body"), the export keeps only the fact that a message was omitted plus its byte count.
 
@@ -394,10 +394,10 @@ It is designed to be shared. It keeps operational details useful for debugging �
 Shows the Gateway service (launchd/systemd/schtasks) plus an optional connectivity/auth probe.
 
 ```bash
-openclaw gateway status
-openclaw gateway status --json
-openclaw gateway status --require-rpc
-openclaw gateway status --port 19001
+carapace gateway status
+carapace gateway status --json
+carapace gateway status --require-rpc
+carapace gateway status --port 19001
 ```
 
 <ParamField path="--url <url>" type="string">
@@ -464,9 +464,9 @@ If multiple probe targets are reachable, all are printed. An SSH tunnel, TLS/pro
 </Note>
 
 ```bash
-openclaw gateway probe
-openclaw gateway probe --json
-openclaw gateway probe --port 18789
+carapace gateway probe
+carapace gateway probe --json
+carapace gateway probe --port 18789
 ```
 
 <ParamField path="--port <port>" type="number">
@@ -502,10 +502,10 @@ openclaw gateway probe --port 18789
   </Accordion>
   <Accordion title="Common warning codes">
     - `ssh_tunnel_failed`: SSH tunnel setup failed; the command fell back to direct probes.
-    - `multiple_gateways`: distinct gateway identities were reachable, or OpenClaw could not prove reachable targets are the same gateway. An SSH tunnel, proxy URL, or configured remote URL to the same gateway does not trigger this.
+    - `multiple_gateways`: distinct gateway identities were reachable, or Carapace could not prove reachable targets are the same gateway. An SSH tunnel, proxy URL, or configured remote URL to the same gateway does not trigger this.
     - `auth_secretref_unresolved`: a configured auth SecretRef could not be resolved for a failed target.
     - `probe_scope_limited`: WebSocket connect succeeded, but the read probe was limited by missing `operator.read`.
-    - `local_tls_runtime_unavailable`: local Gateway TLS is enabled but OpenClaw could not load the local certificate fingerprint.
+    - `local_tls_runtime_unavailable`: local Gateway TLS is enabled but Carapace could not load the local certificate fingerprint.
 
   </Accordion>
 </AccordionGroup>
@@ -517,14 +517,14 @@ The macOS app "Remote over SSH" mode uses a local port-forward so a loopback-onl
 CLI equivalent:
 
 ```bash
-openclaw gateway probe --ssh user@gateway-host
+carapace gateway probe --ssh user@gateway-host
 ```
 
 <ParamField path="--ssh <target>" type="string">
   `user@host` or `user@host:port` (port defaults to `22`).
 </ParamField>
 
-OpenClaw launches only an SSH client found in OS-managed system directories. On native Windows,
+Carapace launches only an SSH client found in OS-managed system directories. On native Windows,
 install the **OpenSSH Client** optional feature; Windows places it under
 `%SystemRoot%\System32\OpenSSH`.
 
@@ -542,9 +542,9 @@ Config defaults (optional): `gateway.remote.sshTarget`, `gateway.remote.sshIdent
 Low-level RPC helper.
 
 ```bash
-openclaw gateway call status
-openclaw gateway call health --port 18999
-openclaw gateway call logs.tail --params '{"limit": 200}'
+carapace gateway call status
+carapace gateway call health --port 18999
+carapace gateway call logs.tail --params '{"limit": 200}'
 ```
 
 <ParamField path="--params <json>" type="string" default="{}">
@@ -554,7 +554,7 @@ openclaw gateway call logs.tail --params '{"limit": 200}'
   Gateway WebSocket URL.
 </ParamField>
 <ParamField path="--port <port>" type="number">
-  Target a local loopback Gateway on this port. Overrides `OPENCLAW_GATEWAY_URL` and `OPENCLAW_GATEWAY_PORT` for this call. Cannot combine with `--url`.
+  Target a local loopback Gateway on this port. Overrides `CARAPACE_GATEWAY_URL` and `CARAPACE_GATEWAY_PORT` for this call. Cannot combine with `--url`.
 </ParamField>
 <ParamField path="--token <token>" type="string">
   Gateway token.
@@ -572,7 +572,7 @@ openclaw gateway call logs.tail --params '{"limit": 200}'
   Machine-readable JSON output.
 </ParamField>
 
-`openclaw.setup.detect` uses a 40-second default so the Gateway can finish its
+`carapace.setup.detect` uses a 40-second default so the Gateway can finish its
 bounded AI-access scan. An explicit `--timeout` still takes precedence.
 
 <Note>
@@ -588,9 +588,9 @@ ID. The value must be a non-negative number of seconds; an empty value is reject
 Use `--wait 0` for a single attempt without polling.
 
 ```bash
-openclaw gateway suspend
-openclaw gateway suspend --request-id snapshot-2026-08-11 --wait 30
-openclaw gateway suspend --port 18999 --json
+carapace gateway suspend
+carapace gateway suspend --request-id snapshot-2026-08-11 --wait 30
+carapace gateway suspend --port 18999 --json
 ```
 
 The ready output includes the suspension ID, lease expiry, and the matching
@@ -603,8 +603,8 @@ Release a prepared suspension after thaw or when the host operation is
 abandoned.
 
 ```bash
-openclaw gateway resume <suspensionId>
-openclaw gateway resume <suspensionId> --port 18999 --json
+carapace gateway resume <suspensionId>
+carapace gateway resume <suspensionId> --port 18999 --json
 ```
 
 An already expired or resumed lease is a successful no-op. A different active
@@ -613,33 +613,33 @@ suspension ID is rejected.
 ## Manage the Gateway service
 
 ```bash
-openclaw gateway install
-openclaw gateway start
-openclaw gateway stop
-openclaw gateway restart
-openclaw gateway uninstall
+carapace gateway install
+carapace gateway start
+carapace gateway stop
+carapace gateway restart
+carapace gateway uninstall
 ```
 
 `gateway stop` remains available when plugin configuration needs Doctor migration.
 It still validates core configuration and refuses configuration written by a newer
-OpenClaw binary. Start and restart continue to validate plugin configuration.
+Carapace binary. Start and restart continue to validate plugin configuration.
 
 ### Recover an unreadable native service definition
 
 If installation or a managed update reports `SERVICE_DEFINITION_UNKNOWN`, first
 restore access to the service files and native service manager. `--force` does not
 bypass unknown service facts. Inspect the selected service with
-`openclaw gateway status --deep` from the account and profile that own it.
+`carapace gateway status --deep` from the account and profile that own it.
 
 For a malformed definition or unsupported environment syntax, privately back up
 the service files and any values stored only in its environment. Correct unresolved
-or unsupported values before reinstalling; OpenClaw cannot infer their intended
+or unsupported values before reinstalling; Carapace cannot infer their intended
 values. Then, from an external shell using the same account and profile:
 
 ```bash
-openclaw gateway uninstall
-openclaw gateway install
-openclaw gateway health
+carapace gateway uninstall
+carapace gateway install
+carapace gateway health
 ```
 
 Uninstall removes the native registration and launcher, preserving configuration,
@@ -651,7 +651,7 @@ of deleting state or bypassing inspection.
 
 ### Lifecycle requests from Gateway chat
 
-Gateway-hosted OpenClaw chat controls the exact Gateway serving that session.
+Gateway-hosted Carapace chat controls the exact Gateway serving that session.
 An approved start request reports **Gateway already running** without discovering
 or starting another service. Restart keeps the safe local restart behavior.
 
@@ -692,38 +692,38 @@ If systemd definitively refuses a stop after teardown and the same native instan
 remains active with no pending job, the host logs the failed stop and starts a fresh
 Gateway generation in the same process. An uncertain native result is recorded as
 a failed shutdown, without claiming success or starting an in-process replacement.
-After an unexpected disconnect, check `openclaw gateway status` and the native
+After an unexpected disconnect, check `carapace gateway status` and the native
 service logs from an external shell before retrying. Standalone CLI lifecycle
 commands retain their service-management behavior.
 
 ### Install with a wrapper
 
-Use `--wrapper` when the managed service must start through another executable, for example a secrets manager shim or a run-as helper. The wrapper receives the normal Gateway args and is responsible for eventually exec'ing `openclaw` or Node with those args.
+Use `--wrapper` when the managed service must start through another executable, for example a secrets manager shim or a run-as helper. The wrapper receives the normal Gateway args and is responsible for eventually exec'ing `carapace` or Node with those args.
 
 ```bash
-cat > ~/.local/bin/openclaw-doppler <<'EOF'
+cat > ~/.local/bin/carapace-doppler <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-exec doppler run --project my-project --config production -- openclaw "$@"
+exec doppler run --project my-project --config production -- carapace "$@"
 EOF
-chmod +x ~/.local/bin/openclaw-doppler
+chmod +x ~/.local/bin/carapace-doppler
 
-openclaw gateway install --wrapper ~/.local/bin/openclaw-doppler --force
-openclaw gateway restart
+carapace gateway install --wrapper ~/.local/bin/carapace-doppler --force
+carapace gateway restart
 ```
 
-You can also set the wrapper through the environment. `gateway install` validates that the path is an executable file, writes the wrapper into the service `ProgramArguments`, and persists `OPENCLAW_WRAPPER` in the service environment for later forced reinstalls, updates, and doctor repairs.
+You can also set the wrapper through the environment. `gateway install` validates that the path is an executable file, writes the wrapper into the service `ProgramArguments`, and persists `CARAPACE_WRAPPER` in the service environment for later forced reinstalls, updates, and doctor repairs.
 
 ```bash
-OPENCLAW_WRAPPER="$HOME/.local/bin/openclaw-doppler" openclaw gateway install --force
-openclaw doctor
+CARAPACE_WRAPPER="$HOME/.local/bin/carapace-doppler" carapace gateway install --force
+carapace doctor
 ```
 
-To remove a persisted wrapper, clear `OPENCLAW_WRAPPER` while reinstalling:
+To remove a persisted wrapper, clear `CARAPACE_WRAPPER` while reinstalling:
 
 ```bash
-OPENCLAW_WRAPPER= openclaw gateway install --force
-openclaw gateway restart
+CARAPACE_WRAPPER= carapace gateway install --force
+carapace gateway restart
 ```
 
 <AccordionGroup>
@@ -743,10 +743,10 @@ openclaw gateway restart
   <Accordion title="Lifecycle behavior">
     - `gateway start` is idempotent: when the managed service is already running, it reports the running process and leaves it untouched. A loaded but stopped service is started as before.
     - If no managed service is installed, `gateway start` prints install hints and exits nonzero. `gateway restart` can first recover an installed-but-unloaded LaunchAgent or a verified unmanaged Gateway; if neither a managed service nor recovery handles the action, it prints the same hints and exits nonzero. Stopping an absent service remains a successful no-op.
-    - If `gateway start` or `gateway restart` needs to repair a stale service definition, the command refuses when the invoking shell resolves a different state directory, config path, or port than the installed service. Match or unset the conflicting environment overrides, or use `openclaw gateway install --force` to retarget the service intentionally.
+    - If `gateway start` or `gateway restart` needs to repair a stale service definition, the command refuses when the invoking shell resolves a different state directory, config path, or port than the installed service. Match or unset the conflicting environment overrides, or use `carapace gateway install --force` to retarget the service intentionally.
     - On Linux, `gateway start` and `gateway restart` also refuse ineffective repairs when an operator-owned systemd drop-in overrides the command or working directory. Inspect the effective unit with `systemctl --user cat <unit>.service`, then update or remove that drop-in. `gateway install --force` rewrites only the managed base unit and warns if the override remains; `Environment=` drop-ins remain supported.
     - `gateway restart --preserve-definition` restarts only an inspectable native service, skips automatic definition repair, and checks health at the installed launcher's port. It does not recover an unmanaged listener and cannot be combined with `--safe` or external supervision. On macOS it can bootstrap an unloaded readable plist without rewriting the plist, environment, wrapper, or permissions; denied native activation fails without file repair. On Windows it also retains existing Startup entries. The legacy `daemon restart` command accepts the same option. Older CLIs reject the option before running restart or repair.
-    - During writable Linux service installs or refreshes, keep the unit and state directories stationary and avoid concurrent manual edits. OpenClaw serializes its own writers and aborts on detected changes, but cannot coordinate arbitrary filesystem edits. Moving or replacing a parent directory mid-publication can leave a temporary file inside the moved directory; inspect it before retrying.
+    - During writable Linux service installs or refreshes, keep the unit and state directories stationary and avoid concurrent manual edits. Carapace serializes its own writers and aborts on detected changes, but cannot coordinate arbitrary filesystem edits. Moving or replacing a parent directory mid-publication can leave a temporary file inside the moved directory; inspect it before retrying.
     - Use `gateway restart` to restart a managed service. Do not chain `gateway stop` and `gateway start` as a restart substitute.
     - In a non-interactive shell, `gateway stop` requires `--force`. Interactive terminals keep the existing prompt-free behavior. For automation and tests, prefer `gateway run --dev` or an isolated `--profile` with a free port.
     - On macOS, `gateway stop` uses `launchctl bootout` by default, which removes the LaunchAgent from the current boot session without persisting a disable — KeepAlive auto-recovery stays active for future crashes and `gateway start` re-enables cleanly without a manual `launchctl enable`. Pass `--disable` to persistently suppress KeepAlive and RunAtLoad so the gateway does not respawn until the next explicit `gateway start`; use this when a manual stop should survive reboots.
@@ -761,7 +761,7 @@ openclaw gateway restart
     - Examples: 32 GiB capacity selects 8 GiB old space; 64 GiB selects 16 GiB; 128 GiB selects 32 GiB. Old space is only part of V8's total heap, and neither is a limit on total process memory (RSS). Raising the ceiling does not preallocate that memory.
     - Existing managed service heap controls are preserved across forced reinstalls and doctor repairs, including absolute old-space, percentage old-space, and total-heap flags. Only heap flags survive managed `NODE_OPTIONS` sanitization; arbitrary preload/debug flags do not. Put intentional preload/debug settings in an operator-owned systemd `Environment=` drop-in, or set them inside an [installed wrapper](#install-with-a-wrapper) before it launches Node. Do not edit the generated service environment for those settings. Existing stored numbers are preserved even when they resemble an older automatic default or exceed the new recommendation.
     - When an operator-owned service override controls `NODE_OPTIONS` (including an empty value or reset), regeneration does not add a new automatic heap argument. Operator values and drop-in files stay separate from the managed base. Existing managed argv controls remain: Node's argv wins over `NODE_OPTIONS` for the same option, and percentage old-space sizing takes precedence over absolute old-space sizing. Inspect both surfaces before changing a cap.
-    - Ambient installer `NODE_OPTIONS` and the installer's own Node arguments are not saved as Gateway heap settings. The budget is chosen at installation and takes effect when the service process starts; it is not recalculated while the Gateway runs. Upgrading OpenClaw alone does not resize a running Gateway, and foreground launches do not replace themselves to apply this policy.
+    - Ambient installer `NODE_OPTIONS` and the installer's own Node arguments are not saved as Gateway heap settings. The budget is chosen at installation and takes effect when the service process starts; it is not recalculated while the Gateway runs. Upgrading Carapace alone does not resize a running Gateway, and foreground launches do not replace themselves to apply this policy.
     - The installer's memory constraints can differ from the future service's constraints. Node/libuv reporting is platform-dependent and does not guarantee detection of every ancestor cgroup limit; inspect the actual service or container limits before increasing a budget.
     - This policy applies to managed Node Gateway launches, not foreground `gateway run`, custom supervisors, Docker runtime commands, Bun, or node-host services. Those retain their own runtime configuration. See [memory troubleshooting](/gateway/troubleshooting#gateway-exits-during-high-memory-use) for explicit native Node settings.
 
@@ -769,8 +769,8 @@ openclaw gateway restart
   <Accordion title="Auth and SecretRefs at install time">
     - When token auth requires a token and `gateway.auth.token` is SecretRef-managed, `gateway install` validates that the SecretRef is resolvable but does not persist the resolved token into service environment metadata.
     - If token auth requires a token and the configured token SecretRef is unresolved, install fails closed instead of persisting fallback plaintext.
-    - For password auth on `gateway run`, prefer `OPENCLAW_GATEWAY_PASSWORD`, `--password-file`, or a SecretRef-backed `gateway.auth.password` over inline `--password`.
-    - In inferred auth mode, shell-only `OPENCLAW_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
+    - For password auth on `gateway run`, prefer `CARAPACE_GATEWAY_PASSWORD`, `--password-file`, or a SecretRef-backed `gateway.auth.password` over inline `--password`.
+    - In inferred auth mode, shell-only `CARAPACE_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
     - If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, install is blocked until mode is set explicitly.
 
   </Accordion>
@@ -778,10 +778,10 @@ openclaw gateway restart
 
 ## Discover gateways (Bonjour)
 
-`gateway discover` scans for Gateway beacons (`_openclaw-gw._tcp`).
+`gateway discover` scans for Gateway beacons (`_carapace-gw._tcp`).
 
 - Multicast DNS-SD: `local.`
-- Unicast DNS-SD (wide-area Bonjour): choose a domain (example: `openclaw.internal.`) and set up split DNS + a DNS server; see [Bonjour](/gateway/bonjour).
+- Unicast DNS-SD (wide-area Bonjour): choose a domain (example: `carapace.internal.`) and set up split DNS + a DNS server; see [Bonjour](/gateway/bonjour).
 
 Only gateways with Bonjour discovery enabled (default) advertise the beacon.
 
@@ -790,7 +790,7 @@ TXT hints on every beacon: `role` (gateway role hint), `transport` (transport hi
 ### `gateway discover`
 
 ```bash
-openclaw gateway discover
+carapace gateway discover
 ```
 
 <ParamField path="--timeout <ms>" type="number" default="2000">
@@ -803,8 +803,8 @@ openclaw gateway discover
 Examples:
 
 ```bash
-openclaw gateway discover --timeout 4000
-openclaw gateway discover --json | jq '.beacons[].wsUrl'
+carapace gateway discover --timeout 4000
+carapace gateway discover --json | jq '.beacons[].wsUrl'
 ```
 
 <Note>

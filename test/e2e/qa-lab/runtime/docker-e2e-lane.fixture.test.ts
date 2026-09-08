@@ -54,40 +54,40 @@ describe("QA Docker E2E lane fixture", () => {
     );
 
     const updateMigration = resolveQaDockerE2eLane("update-migration", {
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@custom",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "custom-scenario",
+      CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@custom",
+      CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "custom-scenario",
     });
 
     expect(updateMigration.script).toBe("scripts/e2e/upgrade-survivor-docker.sh");
-    expect(updateMigration.env.OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE).toBe("1");
-    expect(updateMigration.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe("openclaw@custom");
-    expect(updateMigration.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO).toBe("custom-scenario");
+    expect(updateMigration.env.CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE).toBe("1");
+    expect(updateMigration.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe("carapace@custom");
+    expect(updateMigration.env.CARAPACE_UPGRADE_SURVIVOR_SCENARIO).toBe("custom-scenario");
 
     const updateRestartAuth = resolveQaDockerE2eLane("update-restart-auth", {});
-    expect(updateRestartAuth.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe("openclaw@latest");
-    expect(updateRestartAuth.env.OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE).toBe("1");
-    expect(updateRestartAuth.env.OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE).toBe("auto-auth");
-    expect(updateRestartAuth.env.OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT).toBe("1500s");
+    expect(updateRestartAuth.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe("carapace@latest");
+    expect(updateRestartAuth.env.CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE).toBe("1");
+    expect(updateRestartAuth.env.CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE).toBe("auto-auth");
+    expect(updateRestartAuth.env.CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT).toBe("1500s");
 
     expect(
       resolveQaDockerE2eLane("update-restart-auth", {
-        OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@custom",
-      }).env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC,
-    ).toBe("openclaw@custom");
+        CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "carapace@custom",
+      }).env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC,
+    ).toBe("carapace@custom");
   });
 
   it.each(["update-migration", "update-restart-auth"])(
     "%s defaults to stable while preserving replay overrides",
     (lane) => {
-      for (const baseline of [undefined, "openclaw@2026.4.23"]) {
+      for (const baseline of [undefined, "carapace@2026.4.23"]) {
         const resolved = resolveQaDockerE2eLane(lane, {
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: baseline,
-          OPENCLAW_CURRENT_PACKAGE_TGZ: "/tmp/candidate.tgz",
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: baseline,
+          CARAPACE_CURRENT_PACKAGE_TGZ: "/tmp/candidate.tgz",
         });
-        expect(resolved.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe(
-          baseline ?? "openclaw@latest",
+        expect(resolved.env.CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC).toBe(
+          baseline ?? "carapace@latest",
         );
-        expect(resolved.env.OPENCLAW_CURRENT_PACKAGE_TGZ).toBe("/tmp/candidate.tgz");
+        expect(resolved.env.CARAPACE_CURRENT_PACKAGE_TGZ).toBe("/tmp/candidate.tgz");
       }
     },
   );

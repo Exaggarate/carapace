@@ -2,7 +2,7 @@
  * Emit a `JsonlAst` to bytes. Round-trip echoes `ast.raw`; render mode
  * rebuilds from line entries (preserves blank/malformed lines verbatim).
  *
- * @module @openclaw/oc-path/jsonl/emit
+ * @module @carapace/oc-path/jsonl/emit
  */
 
 import { renderJsoncValue } from "../jsonc/emit.js";

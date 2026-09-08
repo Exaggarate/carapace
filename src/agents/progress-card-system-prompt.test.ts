@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveIncognitoCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
 import { appendIncognitoSystemPrompt } from "./incognito-system-prompt.js";
 import { appendProgressCardSystemPrompt } from "./progress-card-system-prompt.js";
 
@@ -85,7 +85,7 @@ describe("progress card system prompt", () => {
     const incognitoPrompt = appendIncognitoSystemPrompt({
       agentId: "main",
       extraSystemPrompt: "Existing context.",
-      storePath: resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" }),
+      storePath: resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" }),
     });
 
     await expect(append({ extraSystemPrompt: incognitoPrompt })).resolves.toBe(

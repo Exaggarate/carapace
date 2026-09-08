@@ -16,7 +16,7 @@ afterAll(async () => {
 
 function createVisibilityProgram(): Command {
   const program = new Command()
-    .name("openclaw")
+    .name("carapace")
     .option("--visible-root", "Visible root option")
     .addOption(new Option("--hidden-root").hideHelp())
     .addOption(new Option("--internal-value <value>").hideHelp());
@@ -53,10 +53,10 @@ const engines = [
 for (const engine of engines) {
   describe(`${engine.name} completion visibility`, () => {
     engine.test.each([
-      { name: "root", prefix: ["openclaw"], visible: "--visible-root", hidden: "--hidden-root" },
+      { name: "root", prefix: ["carapace"], visible: "--visible-root", hidden: "--hidden-root" },
       {
         name: "nested",
-        prefix: ["openclaw", "parent"],
+        prefix: ["carapace", "parent"],
         visible: "--visible-child",
         hidden: "--hidden-child",
       },
@@ -73,7 +73,7 @@ for (const engine of engines) {
 
     engine.test("keeps the context after a typed hidden value option", async () => {
       const completions = await engine.complete(createVisibilityProgram(), [
-        "openclaw",
+        "carapace",
         "--internal-value",
         "parent",
         "parent",
@@ -85,10 +85,10 @@ for (const engine of engines) {
 
     engine.test("keeps descendants after manually typed hidden command aliases", async () => {
       expect(
-        await engine.complete(createVisibilityProgram(), ["openclaw", "private", "ch"]),
+        await engine.complete(createVisibilityProgram(), ["carapace", "private", "ch"]),
       ).toContain("child");
       expect(
-        await engine.complete(createVisibilityProgram(), ["openclaw", "parent", "private", "--i"]),
+        await engine.complete(createVisibilityProgram(), ["carapace", "parent", "private", "--i"]),
       ).toContain("--inside");
     });
   });

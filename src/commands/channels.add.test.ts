@@ -1,5 +1,5 @@
 // Channels add tests cover guided setup, plugin install paths, and channel account config writes.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { getBundledChannelSetupPlugin } from "../channels/plugins/bundled.js";
 import type { ChannelPluginCatalogEntry } from "../channels/plugins/catalog.js";
@@ -7,7 +7,7 @@ import { defineChannelSetupContract } from "../channels/plugins/setup-contract.j
 import type { SetupChannelsOptions } from "../channels/plugins/setup-wizard-types.js";
 import type { ChannelSetupInput } from "../channels/plugins/types.core.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { PluginPackageChannelCliOption } from "../plugins/manifest.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
@@ -70,7 +70,7 @@ const channelWizardMocks = vi.hoisted(() => {
   };
   return {
     prompter,
-    setupChannels: vi.fn(async (...args: unknown[]) => args[0] as OpenClawConfig),
+    setupChannels: vi.fn(async (...args: unknown[]) => args[0] as CarapaceConfig),
   };
 });
 
@@ -146,7 +146,7 @@ function createSetupOptionCatalogEntry(
       docsPath: `/channels/${id}`,
       blurb: `${label} test channel.`,
     },
-    install: { npmSpec: `@openclaw/${id}` },
+    install: { npmSpec: `@carapace/${id}` },
   };
 }
 
@@ -530,7 +530,7 @@ describe("channelsAddCommand", () => {
     channelWizardMocks.prompter.progress.mockClear();
     channelWizardMocks.setupChannels.mockClear();
     channelWizardMocks.setupChannels.mockImplementation(
-      async (...args: unknown[]) => args[0] as OpenClawConfig,
+      async (...args: unknown[]) => args[0] as CarapaceConfig,
     );
     setMinimalChannelsAddRegistryForTests();
   });
@@ -542,7 +542,7 @@ describe("channelsAddCommand", () => {
   it.each(["direct", "guided", "gateway"] as const)(
     "keeps the original write ownership across awaited %s channel setup",
     async (flow) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: { auth: { mode: "token", token: "at-read" } },
         agents: {
           ownership: "explicit",
@@ -591,7 +591,7 @@ describe("channelsAddCommand", () => {
   );
 
   it.each([false, true])("retains the selected workspace when hasFlags=%s", async (hasFlags) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         defaults: { systemAgent: { agentId: "research" } },
@@ -621,7 +621,7 @@ describe("channelsAddCommand", () => {
   it.each([undefined, "research"])(
     "keeps workspace selection separate from the routing prompt with ambient owner %s",
     async (systemAgentId) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: { research: {}, ops: { workspace: "/tmp/ops-workspace" } },
@@ -690,7 +690,7 @@ describe("channelsAddCommand", () => {
       await channelsAddCommand({ channel }, runtime, { hasFlags: false });
 
       expect(runtime.error).toHaveBeenCalledWith(
-        `Unknown channel "${expectedChannel}". Run \`openclaw channels list --all\` to see configured and installable channels.`,
+        `Unknown channel "${expectedChannel}". Run \`carapace channels list --all\` to see configured and installable channels.`,
       );
       expect(runtime.exit).toHaveBeenCalledWith(1);
       expect(runtime.log).not.toHaveBeenCalled();
@@ -716,7 +716,7 @@ describe("channelsAddCommand", () => {
       await expect(
         runChannelsSetupWizard({ channel }, runtime, channelWizardMocks.prompter),
       ).rejects.toThrow(
-        `Unknown channel "${expectedChannel}". Run \`openclaw channels list --all\` to see configured and installable channels.`,
+        `Unknown channel "${expectedChannel}". Run \`carapace channels list --all\` to see configured and installable channels.`,
       );
 
       expect(runtime.exit).not.toHaveBeenCalled();
@@ -727,7 +727,7 @@ describe("channelsAddCommand", () => {
   );
 
   it("keeps an omitted hosted selector on the shared picker path", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: CarapaceConfig = { channels: {} };
     configMocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,
       sourceConfig: config,
@@ -744,7 +744,7 @@ describe("channelsAddCommand", () => {
   it.each(["external-chat", "ext"])(
     "preselects a hosted catalog channel from the %s selector",
     async (channel) => {
-      const config: OpenClawConfig = { channels: {} };
+      const config: CarapaceConfig = { channels: {} };
       configMocks.readConfigFileSnapshot.mockResolvedValue({
         ...baseConfigSnapshot,
         sourceConfig: config,
@@ -845,7 +845,7 @@ describe("channelsAddCommand", () => {
   });
 
   it("keeps guided channel setup lazy until the user selects a channel", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: CarapaceConfig = { channels: {} };
     configMocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,
       sourceConfig: config,
@@ -866,8 +866,8 @@ describe("channelsAddCommand", () => {
   });
 
   it("persists an accepted plugin install after setup returns to an empty selection", async () => {
-    const config: OpenClawConfig = { channels: {} };
-    const installedConfig: OpenClawConfig = {
+    const config: CarapaceConfig = { channels: {} };
+    const installedConfig: CarapaceConfig = {
       ...config,
       plugins: {
         entries: { "external-chat": { enabled: true } },
@@ -902,7 +902,7 @@ describe("channelsAddCommand", () => {
   it.each(["external-chat", "ext"])(
     "preselects an installable catalog channel from the %s selector",
     async (channel) => {
-      const config: OpenClawConfig = { channels: {} };
+      const config: CarapaceConfig = { channels: {} };
       configMocks.readConfigFileSnapshot.mockResolvedValue({
         ...baseConfigSnapshot,
         sourceConfig: config,
@@ -925,7 +925,7 @@ describe("channelsAddCommand", () => {
   );
 
   it("preselects an inactive known channel in guided setup", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       channels: { "lifecycle-chat": { enabled: false } },
     };
     configMocks.readConfigFileSnapshot.mockResolvedValue({
@@ -941,7 +941,7 @@ describe("channelsAddCommand", () => {
   });
 
   it("opens an exact channel id instead of an earlier plugin alias", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: CarapaceConfig = { channels: {} };
     const aliasOwner = createChannelTestPluginBase({
       id: "alias-owner",
       label: "Alias Owner",
@@ -1187,7 +1187,7 @@ describe("channelsAddCommand", () => {
       {
         channel: "whatsapp",
         account: "work",
-        authDir: "/tmp/openclaw-wa-auth",
+        authDir: "/tmp/carapace-wa-auth",
       },
       runtime,
       { hasFlags: true },
@@ -1198,7 +1198,7 @@ describe("channelsAddCommand", () => {
       accounts: {
         work: {
           enabled: true,
-          authDir: "/tmp/openclaw-wa-auth",
+          authDir: "/tmp/carapace-wa-auth",
         },
       },
     });
@@ -1443,7 +1443,7 @@ describe("channelsAddCommand", () => {
         blurb: "WhatsApp channel",
       },
       install: {
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@carapace/whatsapp",
       },
     };
     catalogMocks.listChannelPluginCatalogEntries.mockReturnValue([catalogEntry]);
@@ -1484,7 +1484,7 @@ describe("channelsAddCommand", () => {
       {
         channel: "whatsapp",
         account: "work",
-        authDir: "/tmp/openclaw-wa-auth",
+        authDir: "/tmp/carapace-wa-auth",
       },
       runtime,
       { hasFlags: true },
@@ -1498,7 +1498,7 @@ describe("channelsAddCommand", () => {
       accounts: {
         work: {
           enabled: true,
-          authDir: "/tmp/openclaw-wa-auth",
+          authDir: "/tmp/carapace-wa-auth",
         },
       },
     });
@@ -1512,7 +1512,7 @@ describe("channelsAddCommand", () => {
     setActivePluginRegistry(
       createTestRegistry([
         {
-          pluginId: "openclaw-qqbot",
+          pluginId: "carapace-qqbot",
           plugin: {
             ...createChannelTestPluginBase({ id: "qqbot", label: "QQ Bot" }),
             setup: {
@@ -1550,7 +1550,7 @@ describe("channelsAddCommand", () => {
       appId: "app-id",
       clientSecret: "secret",
       dmPolicy: "open",
-      allowFrom: ["openclaw:approval-disabled"],
+      allowFrom: ["carapace:approval-disabled"],
     });
   });
 
@@ -1898,7 +1898,7 @@ describe("channelsAddCommand", () => {
       },
     };
     pluginInstallRecordCommitMocks.commitConfigWithPendingPluginInstalls.mockImplementationOnce(
-      async (params: { sourceConfig: OpenClawConfig }) => {
+      async (params: { sourceConfig: CarapaceConfig }) => {
         const { installs: _installs, ...plugins } = params.sourceConfig.plugins ?? {};
         const writtenConfigLocal = { ...params.sourceConfig, plugins };
         await configMocks.writeConfigFile(writtenConfigLocal);

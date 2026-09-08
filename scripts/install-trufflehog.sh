@@ -2,7 +2,7 @@
 set -euo pipefail
 
 trufflehog_version="3.97.0"
-trufflehog_bin_dir="${OPENCLAW_TRUFFLEHOG_BIN_DIR:-/usr/local/bin}"
+trufflehog_bin_dir="${CARAPACE_TRUFFLEHOG_BIN_DIR:-/usr/local/bin}"
 
 log() {
   printf 'trufflehog-install: %s\n' "$*" >&2
@@ -122,7 +122,7 @@ install_trufflehog() {
   log "installed TruffleHog $trufflehog_version at $target"
 }
 
-if [[ "${OPENCLAW_TRUFFLEHOG_SOURCE_ONLY:-0}" == "1" ]]; then
+if [[ "${CARAPACE_TRUFFLEHOG_SOURCE_ONLY:-0}" == "1" ]]; then
   return 0 2>/dev/null || exit 0
 fi
 

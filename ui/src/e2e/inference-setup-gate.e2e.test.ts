@@ -12,13 +12,13 @@ import {
 const suite = createNewSessionPageE2eSuite();
 let proofDir: string;
 beforeEach(() => {
-  if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+  if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
     proofDir = createControlUiE2eArtifactDir("inference-setup-gate");
   }
 });
 
 async function captureProof(page: import("playwright").Page, fileName: string) {
-  if (process.env.OPENCLAW_CAPTURE_UI_PROOF !== "1") {
+  if (process.env.CARAPACE_CAPTURE_UI_PROOF !== "1") {
     return;
   }
   if (page.video()) {
@@ -99,14 +99,14 @@ suite.define(() => {
     const page = await context.newPage();
     const gateway = await installMockGateway(page, {
       agentModel: null,
-      featureMethods: ["chat.metadata", "chat.startup", "openclaw.chat"],
+      featureMethods: ["chat.metadata", "chat.startup", "carapace.chat"],
     });
 
     try {
       await page.goto(`${suite.server.baseUrl}custodian`);
       await page.getByRole("heading", { name: "No AI provider configured" }).waitFor();
 
-      expect(await gateway.getRequests("openclaw.chat")).toHaveLength(0);
+      expect(await gateway.getRequests("carapace.chat")).toHaveLength(0);
       await expect.poll(() => page.locator(".custodian__error").count()).toBe(0);
       await expect.poll(() => page.locator(".agent-chat__composer-shell").count()).toBe(0);
       await expect.poll(() => page.locator("textarea").count()).toBe(0);
@@ -148,26 +148,26 @@ suite.define(() => {
         locale: "en-US",
         serviceWorkers: "block",
         viewport,
-        ...(process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+        ...(process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
           ? { recordVideo: { dir: proofDir, size: viewport } }
           : {}),
       });
       const page = await context.newPage();
       const runtimeError =
-        "OpenClaw requires working inference: The configured runtime could not start. Repair the launcher and retry.";
+        "Carapace requires working inference: The configured runtime could not start. Repair the launcher and retry.";
       const gateway = await installMockGateway(page, {
         sessionKey: "agent:main:work",
-        deferredMethods: ["openclaw.chat"],
+        deferredMethods: ["carapace.chat"],
         featureMethods: [
           "chat.metadata",
           "chat.startup",
           "chat.history",
           "chat.send",
-          "openclaw.chat",
-          "openclaw.chat.history",
+          "carapace.chat",
+          "carapace.chat.history",
         ],
         methodResponses: {
-          "openclaw.chat.history": {
+          "carapace.chat.history": {
             turns: [
               {
                 role: "assistant",
@@ -188,13 +188,13 @@ suite.define(() => {
         if (surface === "panel") {
           await page.locator(".sidebar-footer-bar__home").click();
           await page
-            .locator("openclaw-assistant-panel")
-            .getByRole("button", { name: "Ask OpenClaw", exact: true })
+            .locator("carapace-assistant-panel")
+            .getByRole("button", { name: "Ask Carapace", exact: true })
             .click();
         }
-        const chat = page.locator("openclaw-custodian-surface");
-        await gateway.waitForRequest("openclaw.chat");
-        await gateway.rejectDeferred("openclaw.chat", {
+        const chat = page.locator("carapace-custodian-surface");
+        await gateway.waitForRequest("carapace.chat");
+        await gateway.rejectDeferred("carapace.chat", {
           code: "UNAVAILABLE",
           details: { code: "system_agent_inference_unavailable" },
           message: runtimeError,
@@ -210,12 +210,12 @@ suite.define(() => {
         expect(await chat.getByRole("textbox").isDisabled()).toBe(true);
 
         // Each deferral is consumed by one request, including the failed startup check.
-        await gateway.deferNext("openclaw.chat");
+        await gateway.deferNext("carapace.chat");
         await chat.getByRole("button", { name: "Retry", exact: true }).click();
-        const retry = await gateway.waitForRequest("openclaw.chat", { after: 1 });
+        const retry = await gateway.waitForRequest("carapace.chat", { after: 1 });
         expect(retry.params).not.toHaveProperty("message");
         expect(await chat.getByRole("textbox").isDisabled()).toBe(true);
-        await gateway.resolveDeferred("openclaw.chat", {
+        await gateway.resolveDeferred("carapace.chat", {
           sessionId: "runtime-recovered",
           reply: "Ready to help again.",
           action: "none",
@@ -225,12 +225,12 @@ suite.define(() => {
         expect(await chat.locator(".custodian__error").count()).toBe(0);
         await captureProof(page, "02-runtime-recovered.png");
 
-        await gateway.deferNext("openclaw.chat", { message: "Check my setup" });
+        await gateway.deferNext("carapace.chat", { message: "Check my setup" });
         await chat.getByRole("textbox").fill("Check my setup");
         await chat.getByRole("button", { name: "Send", exact: true }).click();
-        const turn = await gateway.waitForRequest("openclaw.chat", { after: 2 });
+        const turn = await gateway.waitForRequest("carapace.chat", { after: 2 });
         expect(turn.params).toMatchObject({ message: "Check my setup" });
-        await gateway.resolveDeferred("openclaw.chat", {
+        await gateway.resolveDeferred("carapace.chat", {
           sessionId: "runtime-recovered",
           reply: "Your setup is working.",
           action: "none",

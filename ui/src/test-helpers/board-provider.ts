@@ -3,7 +3,7 @@ import type {
   BoardCommandEvent,
   BoardOp,
   BoardSnapshot,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import { t } from "../i18n/index.ts";
 import { normalizeBoardWidgetTitle } from "../lib/board/provider-helpers.ts";
 import {

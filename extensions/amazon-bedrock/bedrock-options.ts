@@ -9,8 +9,8 @@ import type {
   ModelThinkingLevel,
   StreamOptions,
   ThinkingBudgets,
-} from "openclaw/plugin-sdk/llm";
-import { resolveClaudeModelIdentity } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/llm";
+import { resolveClaudeModelIdentity } from "carapace/plugin-sdk/provider-model-shared";
 
 export function resolveBedrockPromptCachePolicy(
   model: Pick<Model, "id" | "params"> & { name?: string },

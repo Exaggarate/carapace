@@ -1,6 +1,6 @@
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import { resolveSessionEntryAccessTarget } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveSessionWorkerPlacementContext } from "../../gateway/session-worker-placement-context.js";
 import { prepareSessionWorkerPlacementMutationCheck } from "../../gateway/worker-environments/session-placement-lifecycle.js";
 import {
@@ -11,7 +11,7 @@ import { IDLE_GC_MS } from "./service.js";
 import type { ManagedWorktreeOwnerKind } from "./types.js";
 
 export function createManagedWorktreeOwnerPolicy(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   now: () => number = Date.now,
 ): {
   shouldProtectOwner: (ownerKind: ManagedWorktreeOwnerKind, ownerId: string) => boolean;

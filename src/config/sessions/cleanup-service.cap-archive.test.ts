@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 
 vi.mock("./store-maintenance-runtime.js", () => ({
   resolveMaintenanceConfig: () => ({
@@ -24,7 +24,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("session cleanup cap archives", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("reports cap archives separately from dashboard-age archives", () => {
@@ -46,7 +46,7 @@ describe("session cleanup cap archives", () => {
   it("separates cap archives in cleanup summary JSON", async () => {
     const now = Date.now();
     const storePath = path.join(
-      tempDirs.make("openclaw-cleanup-cap-summary-"),
+      tempDirs.make("carapace-cleanup-cap-summary-"),
       "agents",
       "main",
       "sessions",
@@ -79,7 +79,7 @@ describe("session cleanup cap archives", () => {
   it("uses unarchived pressure consistently in preview and apply", async () => {
     const now = Date.now();
     const storePath = path.join(
-      tempDirs.make("openclaw-cleanup-cap-archive-"),
+      tempDirs.make("carapace-cleanup-cap-archive-"),
       "agents",
       "main",
       "sessions",

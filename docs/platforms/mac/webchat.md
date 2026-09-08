@@ -167,12 +167,12 @@ Disable the feature entirely under **Dashboard → Settings → This Mac → App
 - Auto-open for testing:
 
   ```bash
-  dist/OpenClaw.app/Contents/MacOS/OpenClaw --chat
+  dist/Carapace.app/Contents/MacOS/Carapace --chat
   ```
 
   (`--webchat` is accepted as a legacy alias.)
 
-- Logs: `./scripts/clawlog.sh` (subsystem `ai.openclaw`, category `WebChatSwiftUI`).
+- Logs: `./scripts/clawlog.sh` (subsystem `ai.carapace`, category `WebChatSwiftUI`).
 
 ## How it is wired
 
@@ -182,7 +182,7 @@ Disable the feature entirely under **Dashboard → Settings → This Mac → App
 - Session groups: `sessions.groups.list`, `sessions.groups.put`, `sessions.groups.rename`, and `sessions.groups.delete` own the path-free group catalog. Write-scoped `sessions.groups.defaults` and `sessions.groups.update` own optional New Session folder/worktree defaults. Membership is the session `category` updated through `sessions.patch` or assigned during `sessions.create`.
 - Unread state: after a session activates and its live history loads successfully, the app clears the unread state it observed. A manual unread marker created while that session is already open remains through refreshes and run completion; leave and reopen the session, or mark it read explicitly, to clear it. Failed history loads do not clear unread state, and a transient patch failure retries on the next activation. During staggered upgrades, an older active app can still send a bare read acknowledgement that clears the marker. Cross-client protection therefore requires every active app to support the acknowledgement contract; update all connected clients before relying on the reminder.
 - Onboarding uses a dedicated session to keep first-run setup separate.
-- Offline storage: recent sessions and transcripts are cached per Gateway in `~/Library/Application Support/OpenClaw/databases/gateway-cache.sqlite`. Client-owned pending commands and routing state live separately in `client-state.sqlite` in the same directory. Cold opens paint cached transcripts before the connection is ready and refresh once the Gateway responds.
+- Offline storage: recent sessions and transcripts are cached per Gateway in `~/Library/Application Support/Carapace/databases/gateway-cache.sqlite`. Client-owned pending commands and routing state live separately in `client-state.sqlite` in the same directory. Cold opens paint cached transcripts before the connection is ready and refresh once the Gateway responds.
 
 ## Security surface
 

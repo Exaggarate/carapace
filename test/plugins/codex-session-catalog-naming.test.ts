@@ -2,7 +2,7 @@ import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import plugin from "../../extensions/codex/index.js";
@@ -17,10 +17,10 @@ import {
 import { createPluginRegistry } from "../../src/plugins/registry.js";
 import { createPluginRuntime } from "../../src/plugins/runtime/index.js";
 import { withEnvAsync } from "../../src/test-utils/env.js";
-import { withOpenClawTestState } from "../../src/test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../src/test-utils/carapace-test-state.js";
 
 it("adopts duplicate native titles without claiming labels or replacing local naming", async () => {
-  await withOpenClawTestState({ label: "native-adoption-naming" }, async (state) => {
+  await withCarapaceTestState({ label: "native-adoption-naming" }, async (state) => {
     const nativeHome = state.path("native-home");
     await fs.mkdir(nativeHome);
     await withEnvAsync({ CODEX_HOME: nativeHome }, async () => {
@@ -64,7 +64,7 @@ it("adopts duplicate native titles without claiming labels or replacing local na
           logger: { info() {}, warn() {}, error() {}, debug() {} },
         });
         const rootDir = fileURLToPath(new URL("../../extensions/codex/", import.meta.url));
-        const manifest = JSON.parse(await fs.readFile(`${rootDir}/openclaw.plugin.json`, "utf8"));
+        const manifest = JSON.parse(await fs.readFile(`${rootDir}/carapace.plugin.json`, "utf8"));
         const record = createPluginRecord({
           id: "codex",
           source: `${rootDir}/index.ts`,
@@ -144,7 +144,7 @@ it("adopts duplicate native titles without claiming labels or replacing local na
             const thread = threads.find((entry) => entry.id === request.params?.threadId);
             const result =
               request.method === "initialize"
-                ? { userAgent: "openclaw/0.150.1 (test)" }
+                ? { userAgent: "carapace/0.150.1 (test)" }
                 : request.method === "thread/list"
                   ? {
                       data: threads.map((entry) => Object.assign({}, entry, { turns: [] })),

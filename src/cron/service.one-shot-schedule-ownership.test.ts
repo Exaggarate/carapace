@@ -6,7 +6,7 @@ import {
   setCommandLaneConcurrency,
 } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { CronService } from "./service.js";
 import { setupCronServiceSuite } from "./service.test-harness.js";
 import type { CronEvent, CronServiceDeps } from "./service/state.js";
@@ -195,7 +195,7 @@ describe("cron one-shot schedule ownership", () => {
             runId: finishedEvents[0]?.runId,
           }),
         ]);
-        const receipts = openOpenClawStateDatabase()
+        const receipts = openCarapaceStateDatabase()
           .db.prepare(
             "SELECT receipt_id AS receiptId, status, error_text AS error FROM cron_run_receipts WHERE store_key = ? AND job_id = ?",
           )

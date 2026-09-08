@@ -1,6 +1,6 @@
 /** CLI commands for listing, inspecting, and cancelling TaskFlow records. */
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -36,7 +36,7 @@ const REV_PAD = 6;
 const CTRL_PAD = 20;
 
 function formatFlowLookupMiss(lookup: string): string {
-  return `TaskFlow not found: ${sanitizeTerminalText(lookup)}. Run ${formatCliCommand("openclaw tasks flow list")} to see recent flow ids.`;
+  return `TaskFlow not found: ${sanitizeTerminalText(lookup)}. Run ${formatCliCommand("carapace tasks flow list")} to see recent flow ids.`;
 }
 
 function safeFlowDisplayText(value: string | undefined, maxChars?: number): string {
@@ -164,7 +164,7 @@ export async function flowsListCommand(
   }
   if (flows.length === 0) {
     runtime.log(
-      `No TaskFlows found. Run ${formatCliCommand("openclaw tasks list")} to inspect standalone background tasks.`,
+      `No TaskFlows found. Run ${formatCliCommand("carapace tasks list")} to inspect standalone background tasks.`,
     );
     return;
   }

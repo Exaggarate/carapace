@@ -1,4 +1,4 @@
-import { ACCESS_MODE_SELECTED, OPENCLAW_TAB_GROUP_TITLE } from "./relay-core.js";
+import { ACCESS_MODE_SELECTED, CARAPACE_TAB_GROUP_TITLE } from "./relay-core.js";
 
 /** Owns group-scoped authority clocks and the private initial naming exception. */
 export function createTabGroupRevocations({
@@ -31,7 +31,7 @@ export function createTabGroupRevocations({
       return;
     }
     reviseDiscovery();
-    if (!removed && group.title === OPENCLAW_TAB_GROUP_TITLE) {
+    if (!removed && group.title === CARAPACE_TAB_GROUP_TITLE) {
       for (const created of createdTabs.values()) {
         if (
           !created.handedOff &&

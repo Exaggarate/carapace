@@ -1,6 +1,6 @@
 /** Browser-safe identity and replay rules shared by Gateway conversation clients. */
 
-import { asNullableRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 import {
   isSessionProjectionErrorMessage,
   readSessionMessageDisplayContent,
@@ -128,7 +128,7 @@ export function isLocallyOptimisticSessionMessage(message: unknown): boolean {
   if (!identity || (identity.role !== "user" && identity.role !== "assistant")) {
     return false;
   }
-  const metadata = readRecord(readRecord(message)?.["__openclaw"]);
+  const metadata = readRecord(readRecord(message)?.["__carapace"]);
   return !metadata || Object.keys(metadata).every((key) => key === "idempotencyKey");
 }
 
@@ -240,7 +240,7 @@ function entryMatches(
   }
   const durableEntry = left.identity?.id ? left : right.identity?.id ? right : null;
   const provisionalEntry = durableEntry === left ? right : durableEntry === right ? left : null;
-  const durableMetadata = readRecord(readRecord(durableEntry?.message)?.["__openclaw"]);
+  const durableMetadata = readRecord(readRecord(durableEntry?.message)?.["__carapace"]);
   if (
     durableEntry?.identity?.role === "assistant" &&
     provisionalEntry?.identity?.role === "assistant" &&
@@ -478,7 +478,7 @@ export function readSessionProjectionFinalMessageIdentity(message: unknown): str
     return `seq:${identity.role}:${identity.sequence}`;
   }
   const record = readRecord(message);
-  const metadata = readRecord(record?.["__openclaw"]);
+  const metadata = readRecord(record?.["__carapace"]);
   try {
     return `content:${JSON.stringify([
       identity?.role ?? "assistant",

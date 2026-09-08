@@ -30,7 +30,7 @@ test("protects Web Push ownership through authenticated browser RPCs and profile
   await writeConfigFile({
     gateway: { auth, trustedProxies: ["127.0.0.1"], controlUi: { allowedOrigins: [origin] } },
   });
-  const identities = tempDirs.make("openclaw-push-owners-");
+  const identities = tempDirs.make("carapace-push-owners-");
   const endpoint = "https://push.example.test/owner-subscription";
   const keys = { p256dh: "browser-p256dh", auth: "browser-auth" };
 

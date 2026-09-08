@@ -21,7 +21,7 @@ describe("plugin setup registry artifact lifecycle", () => {
   it.each([undefined, ["trace-provider"], []])(
     "traces prepared setup lookup with plugin IDs %j",
     (pluginIds) => {
-      const rootDir = fs.realpathSync(makeTrackedTempDir("openclaw-setup-trace", tempDirs));
+      const rootDir = fs.realpathSync(makeTrackedTempDir("carapace-setup-trace", tempDirs));
       const setupSource = path.join(rootDir, "setup-api.cjs");
       fs.writeFileSync(
         setupSource,
@@ -38,7 +38,7 @@ describe("plugin setup registry artifact lifecycle", () => {
           },
         ],
       });
-      vi.stubEnv("OPENCLAW_PLUGIN_LIFECYCLE_TRACE", "1");
+      vi.stubEnv("CARAPACE_PLUGIN_LIFECYCLE_TRACE", "1");
       const trace = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
       const provider = withPluginMetadataSnapshotScope(
@@ -79,7 +79,7 @@ describe("plugin setup registry artifact lifecycle", () => {
   ])(
     "reloads installed $artifactDir setup artifacts (declared: $declared, dist conflict: $competingDist)",
     ({ artifactDir, declared, competingDist }) => {
-      const rootDir = fs.realpathSync(makeTrackedTempDir("openclaw-setup-lifecycle", tempDirs));
+      const rootDir = fs.realpathSync(makeTrackedTempDir("carapace-setup-lifecycle", tempDirs));
       const artifactRoot = path.join(rootDir, artifactDir);
       fs.mkdirSync(artifactRoot, { recursive: true });
       const setupSource = path.join(artifactRoot, "setup-api.cjs");
@@ -107,7 +107,7 @@ describe("plugin setup registry artifact lifecycle", () => {
             rootDir,
             source: setupSource,
             ...(declared ? { setupSource } : {}),
-            manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+            manifestPath: path.join(rootDir, "carapace.plugin.json"),
             origin: "global",
             channels: [],
             providers: ["setup-lifecycle"],
@@ -138,7 +138,7 @@ describe("plugin setup registry artifact lifecycle", () => {
     "reloads bundled setup artifacts and their dependencies from %s",
     (artifactRootName) => {
       const packageRoot = fs.realpathSync(
-        makeTrackedTempDir("openclaw-bundled-setup-lifecycle", tempDirs),
+        makeTrackedTempDir("carapace-bundled-setup-lifecycle", tempDirs),
       );
       const rootDir = path.join(packageRoot, "extensions", "bundled-setup");
       const artifactRoot = path.join(packageRoot, artifactRootName, "extensions", "bundled-setup");
@@ -146,7 +146,7 @@ describe("plugin setup registry artifact lifecycle", () => {
       fs.mkdirSync(artifactRoot, { recursive: true });
       fs.writeFileSync(
         path.join(artifactRoot, "package.json"),
-        JSON.stringify({ openclaw: { setupEntry: "./setup-api.js" } }),
+        JSON.stringify({ carapace: { setupEntry: "./setup-api.js" } }),
       );
       const sourcePath = path.join(rootDir, "setup-api.ts");
       const artifactPath = path.join(artifactRoot, "setup-api.js");
@@ -172,7 +172,7 @@ describe("plugin setup registry artifact lifecycle", () => {
             rootDir,
             source: sourcePath,
             setupSource: sourcePath,
-            manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+            manifestPath: path.join(rootDir, "carapace.plugin.json"),
             origin: "bundled",
             channels: [],
             providers: ["bundled-setup"],

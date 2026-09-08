@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it } from "vitest";
 import { getRuntimeConfig } from "../config/config.js";
 import {
@@ -11,9 +11,9 @@ import { runExclusiveSqliteSessionWrite } from "../config/sessions/session-acces
 import { withOwnedSessionTranscriptWrites } from "../config/sessions/transcript-write-context.js";
 import { CURRENT_SESSION_VERSION } from "../config/sessions/version.js";
 import { runCommandWithTimeout } from "../process/exec.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   REQUEST,
   type DispatchStage,
@@ -34,8 +34,8 @@ const IDENTITY = {
 };
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function loadSessionRuntime() {
@@ -56,11 +56,11 @@ describe("worker workspace recovery transcript reporting", () => {
   it.each(["leaf", "reset", "opaque"])(
     "selects conflict reports through %s navigation without adopting an inactive clear",
     async (navigation) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertSessionEntryCore(IDENTITY, { sessionId: IDENTITY.sessionId, updatedAt: 1 });
         const conflict = {
           paths: ["edited.ts"],
-          stagedResultRef: "refs/openclaw/worker-results/result-1",
+          stagedResultRef: "refs/carapace/worker-results/result-1",
           totalCount: 1,
         };
         await replaceTranscriptEvents(IDENTITY, [
@@ -123,11 +123,11 @@ describe("worker workspace recovery transcript reporting", () => {
   );
   it.each([
     { label: "invalid staged ref", paths: ["edited.ts"], stagedResultRef: "refs/heads/main" },
-    { label: "empty paths", paths: [], stagedResultRef: "refs/openclaw/worker-results/result-1" },
+    { label: "empty paths", paths: [], stagedResultRef: "refs/carapace/worker-results/result-1" },
   ])(
     "reports $label as unknown instead of treating a retained conflict as absent",
     async (details) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertSessionEntryCore(IDENTITY, { sessionId: IDENTITY.sessionId, updatedAt: 1 });
         await replaceTranscriptEvents(IDENTITY, [
           { type: "session", id: IDENTITY.sessionId, version: CURRENT_SESSION_VERSION },
@@ -157,7 +157,7 @@ describe("worker workspace recovery transcript reporting", () => {
   it.each(["missing", "rebound"])(
     "reports a %s session as unavailable instead of treating its conflict as absent",
     async (sessionState) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         if (sessionState === "rebound") {
           await upsertSessionEntryCore(IDENTITY, {
             sessionId: "replacement-workspace-session",
@@ -174,7 +174,7 @@ describe("worker workspace recovery transcript reporting", () => {
   );
 
   it("records historical recovery failures while preserving the live pending-result owner", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       await upsertSessionEntryCore(REQUEST, { sessionId: REQUEST.sessionId, updatedAt: 1 });
       const workspacePath = state.statePath("recovery-workspace");
       await fs.mkdir(workspacePath, { recursive: true });
@@ -247,7 +247,7 @@ describe("worker workspace recovery transcript reporting", () => {
   });
 
   it("persists bounded recovery failures and deduplicates identical consecutive attempts", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(IDENTITY, { sessionId: IDENTITY.sessionId, updatedAt: 1 });
       const { reportWorkspaceResultRecoveryFailure } =
         createWorkerWorkspaceConflictTranscriptHandlers(loadSessionRuntime);
@@ -268,7 +268,7 @@ describe("worker workspace recovery transcript reporting", () => {
         customType: WORKSPACE_RECOVERY_FAILURE_TRANSCRIPT_TYPE,
         display: true,
         content: expect.stringMatching(
-          /^Cloud workspace recovery attempt failed: snapshot rejected token=.*OpenClaw preserved the result and will retry\.$/u,
+          /^Cloud workspace recovery attempt failed: snapshot rejected token=.*Carapace preserved the result and will retry\.$/u,
         ),
       });
       expect(JSON.stringify(firstEvents[0])).not.toContain(secret);
@@ -290,7 +290,7 @@ describe("worker workspace recovery transcript reporting", () => {
   });
 
   it("rejects a rebound session identity without touching its replacement transcript", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(IDENTITY, { sessionId: IDENTITY.sessionId, updatedAt: 1 });
       const { reportWorkspaceResultRecoveryFailure } =
         createWorkerWorkspaceConflictTranscriptHandlers(loadSessionRuntime);
@@ -312,7 +312,7 @@ describe("worker workspace recovery transcript reporting", () => {
   it.each(["session", "writer"])(
     "revalidates a rebound %s after waiting for the transcript writer",
     async (reboundKind) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         await upsertSessionEntryCore(IDENTITY, {
           sessionId: IDENTITY.sessionId,
           updatedAt: 1,

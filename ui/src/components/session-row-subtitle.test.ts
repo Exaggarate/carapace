@@ -8,7 +8,7 @@ function workSession(): SidebarRecentSession {
     hasActiveRun: false,
     label: "Backing session",
     status: "done",
-    subtitle: "~/Projects/openclaw",
+    subtitle: "~/Projects/carapace",
     workSession: true,
   } as unknown as SidebarRecentSession;
 }
@@ -37,7 +37,7 @@ describe("resolveSidebarSessionSubtitle", () => {
         showPreview: true,
         narrationLine: "Still running",
       }),
-    ).toEqual({ subtitle: "~/Projects/openclaw", narration: undefined });
+    ).toEqual({ subtitle: "~/Projects/carapace", narration: undefined });
   });
 
   it("does not replace the work subtitle for queued sessions", () => {
@@ -50,7 +50,7 @@ describe("resolveSidebarSessionSubtitle", () => {
         showPreview: true,
         narrationLine: undefined,
       }),
-    ).toEqual({ subtitle: "~/Projects/openclaw", narration: undefined });
+    ).toEqual({ subtitle: "~/Projects/carapace", narration: undefined });
   });
 
   it.each(["stuck", "waiting-on-user"] as const)(

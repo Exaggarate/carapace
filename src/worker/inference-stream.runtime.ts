@@ -3,7 +3,7 @@ import {
   parseStreamingJson,
   parseTerminalToolCallArguments,
   type ToolArgumentPreviewSchedule,
-} from "@openclaw/ai/internal/runtime";
+} from "@carapace/ai/internal/runtime";
 import { WORKER_PROTOCOL_MAX_IDENTIFIER_LENGTH } from "../../packages/gateway-protocol/src/schema/worker-admission.js";
 import type {
   WorkerInferenceContext,

@@ -13,13 +13,13 @@ title: "TUI"
 1. Start the Gateway.
 
 ```bash
-openclaw gateway
+carapace gateway
 ```
 
 2. Open the TUI.
 
 ```bash
-openclaw tui
+carapace tui
 ```
 
 3. Type a message and press Enter.
@@ -27,7 +27,7 @@ openclaw tui
 Remote Gateway:
 
 ```bash
-openclaw tui --url ws://<host>:<port> --token <gateway-token>
+carapace tui --url ws://<host>:<port> --token <gateway-token>
 ```
 
 Use `--password` if your Gateway uses password auth.
@@ -37,15 +37,15 @@ Use `--password` if your Gateway uses password auth.
 Run the TUI without a Gateway:
 
 ```bash
-openclaw chat
+carapace chat
 # or
-openclaw tui --local
+carapace tui --local
 ```
 
-- `openclaw chat` and `openclaw terminal` are aliases for `openclaw tui --local`.
+- `carapace chat` and `carapace terminal` are aliases for `carapace tui --local`.
 - `--local` cannot be combined with `--url`, `--token`, or `--password`.
 - Local mode uses the embedded agent runtime directly. Most local tools work, but Gateway-only features are unavailable.
-- Bare `openclaw` (no subcommand) picks a target automatically: an unconfigured install runs inference onboarding; invalid config opens classic doctor guidance; a reachable configured Gateway opens this TUI shell in gateway mode; otherwise a configured local model opens it in local mode.
+- Bare `carapace` (no subcommand) picks a target automatically: an unconfigured install runs inference onboarding; invalid config opens classic doctor guidance; a reachable configured Gateway opens this TUI shell in gateway mode; otherwise a configured local model opens it in local mode.
 
 ## What you see
 
@@ -75,7 +75,7 @@ openclaw tui --local
 
 - Messages always go to the Gateway (or embedded runtime in local mode); delivering the assistant's reply back out to a chat provider is a separate, off-by-default step.
 - The TUI is an internal source surface like WebChat, not a generic outbound channel. Harnesses that require `tools.message` for visible replies can satisfy the active TUI turn with a targetless `message.send`; explicit provider delivery still uses normal configured channels and never falls back to `lastChannel`.
-- Delivery is fixed for the whole TUI session at launch: start with `openclaw tui --deliver` to turn it on. There is no `/deliver` slash command or Settings toggle to flip it mid-session; restart the TUI to change it.
+- Delivery is fixed for the whole TUI session at launch: start with `carapace tui --deliver` to turn it on. There is no `/deliver` slash command or Settings toggle to flip it mid-session; restart the TUI to change it.
 
 ## Pickers + overlays
 
@@ -156,9 +156,9 @@ pending prompts, and `interrupt` stops the current run before starting the new
 one. Explicit `/steer <message>` is Gateway-only; use `/queue steer` plus a
 normal message in local mode.
 
-OpenClaw:
+Carapace:
 
-- `/openclaw [request]` returns from the normal agent TUI to the [OpenClaw](#openclaw-setup-and-repair-helper) setup/repair chat, optionally forwarding one request.
+- `/carapace [request]` returns from the normal agent TUI to the [Carapace](#carapace-setup-and-repair-helper) setup/repair chat, optionally forwarding one request.
 
 Other Gateway slash commands (for example, `/context`) are forwarded to the Gateway and shown as system output. See [Slash commands](/tools/slash-commands).
 
@@ -167,33 +167,33 @@ Other Gateway slash commands (for example, `/context`) are forwarded to the Gate
 - Prefix a line with `!` to run a local shell command on the TUI host.
 - The TUI prompts once per session to allow local execution; declining keeps `!` disabled for the session.
 - Commands run in a fresh, non-interactive shell in the TUI working directory (no persistent `cd`/env).
-- Local shell commands receive `OPENCLAW_SHELL=tui-local` in their environment.
+- Local shell commands receive `CARAPACE_SHELL=tui-local` in their environment.
 - A lone `!` is sent as a normal message; leading spaces do not trigger local exec.
 
-## OpenClaw setup and repair helper
+## Carapace setup and repair helper
 
-OpenClaw is the ring-zero setup/repair assistant, exposed as `openclaw setup` after the configured default model passes a live inference check. If inference is unavailable, an interactive invocation returns to inference onboarding and automation fails with repair guidance. It runs inside the same local TUI shell as `openclaw tui --local`, backed by an AI agent restricted to OpenClaw's typed, approval-gated operations:
+Carapace is the ring-zero setup/repair assistant, exposed as `carapace setup` after the configured default model passes a live inference check. If inference is unavailable, an interactive invocation returns to inference onboarding and automation fails with repair guidance. It runs inside the same local TUI shell as `carapace tui --local`, backed by an AI agent restricted to Carapace's typed, approval-gated operations:
 
 ```bash
-openclaw setup                       # start interactively
-openclaw setup -m "status"           # run one request and exit
-openclaw setup -m "set default model openai/gpt-5.2" --yes   # apply a config write
+carapace setup                       # start interactively
+carapace setup -m "status"           # run one request and exit
+carapace setup -m "set default model openai/gpt-5.2" --yes   # apply a config write
 ```
 
 - Persistent config writes need approval: either confirm interactively or pass `--yes`.
 - `--json` prints the startup overview as JSON instead of starting the chat.
-- From inside OpenClaw, an `open-tui` request (for example, asking to talk to a normal agent) exits OpenClaw and opens the regular agent TUI; use `/openclaw` there to come back.
+- From inside Carapace, an `open-tui` request (for example, asking to talk to a normal agent) exits Carapace and opens the regular agent TUI; use `/carapace` there to come back.
 
 Use local mode when the current config already validates and you want the embedded agent to inspect it on the same machine, compare it against the docs, and help repair drift without depending on a running Gateway.
 
-If `openclaw config validate` is already failing, start with `openclaw configure` or `openclaw doctor --fix` first; `openclaw chat` still needs a loadable config to start.
+If `carapace config validate` is already failing, start with `carapace configure` or `carapace doctor --fix` first; `carapace chat` still needs a loadable config to start.
 
 Typical loop:
 
 1. Start local mode:
 
 ```bash
-openclaw chat
+carapace chat
 ```
 
 2. Ask the agent what you want checked, for example:
@@ -205,20 +205,20 @@ Compare my gateway auth config with the docs and suggest the smallest fix.
 3. Use local shell commands for exact evidence and validation:
 
 ```text
-!openclaw config file
-!openclaw docs gateway auth token secretref
-!openclaw config validate
-!openclaw doctor
+!carapace config file
+!carapace docs gateway auth token secretref
+!carapace config validate
+!carapace doctor
 ```
 
-4. Apply narrow changes with `openclaw config set` or `openclaw configure`, then rerun `!openclaw config validate`.
-5. If Doctor recommends an automatic migration or repair, review it and run `!openclaw doctor --fix`.
+4. Apply narrow changes with `carapace config set` or `carapace configure`, then rerun `!carapace config validate`.
+5. If Doctor recommends an automatic migration or repair, review it and run `!carapace doctor --fix`.
 
 Tips:
 
-- Prefer `openclaw config set` or `openclaw configure` over hand-editing `openclaw.json`.
-- `openclaw docs "<query>"` searches the live docs index from the same machine.
-- `openclaw config validate --json` is useful when you want structured schema and SecretRef/resolvability errors.
+- Prefer `carapace config set` or `carapace configure` over hand-editing `carapace.json`.
+- `carapace docs "<query>"` searches the live docs index from the same machine.
+- `carapace config validate --json` is useful when you want structured schema and SecretRef/resolvability errors.
 
 ## Tool output
 
@@ -229,8 +229,8 @@ Tips:
 ## Terminal colors
 
 - The TUI keeps assistant body text in your terminal's default foreground so dark and light terminals both stay readable.
-- If your terminal uses a light background and auto-detection is wrong, set `OPENCLAW_THEME=light` before launching `openclaw tui`.
-- To force the original dark palette instead, set `OPENCLAW_THEME=dark`.
+- If your terminal uses a light background and auto-detection is wrong, set `CARAPACE_THEME=light` before launching `carapace tui`.
+- To force the original dark palette instead, set `CARAPACE_THEME=dark`.
 
 ## History + streaming
 
@@ -243,7 +243,7 @@ Tips:
 
 ## Connection details
 
-- The TUI connects with client id `openclaw-tui` under the coarse `ui` client mode (the same mode Control UI and WebChat use for Gateway policy).
+- The TUI connects with client id `carapace-tui` under the coarse `ui` client mode (the same mode Control UI and WebChat use for Gateway policy).
 - Reconnects show a system message; event gaps are surfaced in the log.
 
 ## Options
@@ -269,19 +269,19 @@ When you set `--url`, the TUI does not fall back to config or environment creden
 No output after sending a message:
 
 - Run `/status` in the TUI to confirm the Gateway is connected and idle/busy.
-- Check the Gateway logs: `openclaw logs --follow`.
-- Confirm the agent can run: `openclaw status` and `openclaw models status`.
+- Check the Gateway logs: `carapace logs --follow`.
+- Confirm the agent can run: `carapace status` and `carapace models status`.
 - If you expect messages in a chat channel, confirm the TUI was started with `--deliver` (this cannot be turned on later without restarting).
 
 ## Connection troubleshooting
 
 - `disconnected`: ensure the Gateway is running and your `--url/--token/--password` are correct.
-- No agents in picker: check `openclaw agents list` and your routing config.
+- No agents in picker: check `carapace agents list` and your routing config.
 - Empty session picker: you might be in global scope or have no sessions yet.
 
 ## Related
 
 - [Control UI](/web/control-ui) — web-based control interface
-- [Config](/cli/config) — inspect, validate, and edit `openclaw.json`
+- [Config](/cli/config) — inspect, validate, and edit `carapace.json`
 - [Doctor](/cli/doctor) — guided repair and migration checks
 - [CLI Reference](/cli) — full CLI command reference

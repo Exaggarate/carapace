@@ -34,8 +34,8 @@ async function loadControlUiPage(currentPage: Page) {
   await currentPage.clock.install({ time: new Date("2026-07-09T12:00:00") });
   await installMockGateway(currentPage);
   await currentPage.goto(suite.server.baseUrl);
-  await currentPage.waitForFunction(() => Boolean(customElements.get("openclaw-lobster-pet")));
-  await currentPage.locator("openclaw-app-sidebar").waitFor();
+  await currentPage.waitForFunction(() => Boolean(customElements.get("carapace-lobster-pet")));
+  await currentPage.locator("carapace-app-sidebar").waitFor();
   await currentPage.locator(".community-invite-card").waitFor();
   const loadedAt = await currentPage.evaluate(() => Date.now());
   await currentPage.clock.pauseAt(loadedAt + 1_000);
@@ -55,7 +55,7 @@ async function withDismissMenuPage(
  *  positioning and hit testing remain part of the assertion. */
 async function configureRealSidebarPet(currentPage: Page, seed: number) {
   await currentPage.evaluate(async (petSeed) => {
-    const pet = document.querySelector("openclaw-lobster-pet") as BrowserLobsterPet | null;
+    const pet = document.querySelector("carapace-lobster-pet") as BrowserLobsterPet | null;
     if (!pet) {
       throw new Error("sidebar lobster pet not found");
     }
@@ -83,7 +83,7 @@ async function measureDismissMenu(currentPage: Page) {
     }
     const menuStyle = getComputedStyle(menu);
     const menuRect = menu.getBoundingClientRect();
-    const host = document.querySelector<HTMLElement>("openclaw-lobster-pet");
+    const host = document.querySelector<HTMLElement>("carapace-lobster-pet");
     const hostStyle = host ? getComputedStyle(host) : null;
     const hostRect = host?.getBoundingClientRect() ?? null;
     const invite = document.querySelector<HTMLElement>(".sidebar-shell__invite");
@@ -130,7 +130,7 @@ async function measureDismissMenu(currentPage: Page) {
       menuTop: menuRect.top,
       menuBottom: menuRect.bottom,
       popupIsTopLayer: popupBox ? popupBox.matches(":popover-open") : null,
-      hasOuterMenuSurface: dropdown.closest("openclaw-menu-surface") !== null,
+      hasOuterMenuSurface: dropdown.closest("carapace-menu-surface") !== null,
       hostHeight: hostStyle?.height ?? null,
       hostOverflow: hostStyle?.overflow ?? null,
       hostParentClass: host?.parentElement?.className ?? null,

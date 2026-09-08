@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ensureCodexManagedBundledMarketplace,
@@ -17,7 +17,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("publishes a real reserved root with links to the selected desktop marketplace", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-");
+    const root = tempDirs.make("carapace-codex-marketplace-");
     const candidate = await writeCandidate(root);
     const agentDir = path.join(root, "agent");
     const codexHome = path.join(agentDir, "codex-home");
@@ -46,7 +46,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("coalesces concurrent publication without leaving swap debris", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-concurrent-");
+    const root = tempDirs.make("carapace-codex-marketplace-concurrent-");
     const candidate = await writeCandidate(root);
     const agentDir = path.join(root, "agent");
     const codexHome = path.join(agentDir, "codex-home");
@@ -74,7 +74,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("converges a concurrent replacement to the newly selected desktop source", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-transition-");
+    const root = tempDirs.make("carapace-codex-marketplace-transition-");
     const firstCandidate = await writeCandidate(path.join(root, "first"));
     const secondCandidate = await writeCandidate(path.join(root, "second"));
     const agentDir = path.join(root, "agent");
@@ -122,7 +122,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("does not let a matching fast path outrun a conflicting publication", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-conflict-");
+    const root = tempDirs.make("carapace-codex-marketplace-conflict-");
     const firstCandidate = await writeCandidate(path.join(root, "first"));
     const secondCandidate = await writeCandidate(path.join(root, "second"));
     const agentDir = path.join(root, "agent");
@@ -186,7 +186,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("replaces a prior owned wrapper when desktop app selection changes", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-owner-transition-");
+    const root = tempDirs.make("carapace-codex-marketplace-owner-transition-");
     const firstCandidate = await writeCandidate(path.join(root, "first"));
     const secondCandidate = await writeCandidate(path.join(root, "second"));
     const agentDir = path.join(root, "agent");
@@ -215,7 +215,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("leaves the prior wrapper intact when its generation becomes stale before publication", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-stale-");
+    const root = tempDirs.make("carapace-codex-marketplace-stale-");
     const firstCandidate = await writeCandidate(path.join(root, "first"));
     const secondCandidate = await writeCandidate(path.join(root, "second"));
     const agentDir = path.join(root, "agent");
@@ -257,7 +257,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("does not replace an unowned directory at the reserved managed path", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-unowned-");
+    const root = tempDirs.make("carapace-codex-marketplace-unowned-");
     const candidate = await writeCandidate(root);
     const agentDir = path.join(root, "agent");
     const codexHome = path.join(agentDir, "codex-home");
@@ -278,7 +278,7 @@ describe("managed Codex bundled marketplace", () => {
   });
 
   it("restores the prior managed wrapper when publication fails after backup", async () => {
-    const root = tempDirs.make("openclaw-codex-marketplace-rollback-");
+    const root = tempDirs.make("carapace-codex-marketplace-rollback-");
     const firstCandidate = await writeCandidate(path.join(root, "first"));
     const secondCandidate = await writeCandidate(path.join(root, "second"));
     const agentDir = path.join(root, "agent");
@@ -322,7 +322,7 @@ describe("managed Codex bundled marketplace", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked isolated home without touching its external target",
     async () => {
-      const root = tempDirs.make("openclaw-codex-marketplace-home-link-");
+      const root = tempDirs.make("carapace-codex-marketplace-home-link-");
       const candidate = await writeCandidate(root);
       const agentDir = path.join(root, "agent");
       const external = path.join(root, "external");
@@ -347,7 +347,7 @@ describe("managed Codex bundled marketplace", () => {
   it.runIf(process.platform !== "win32")(
     "does not publish through a marketplace parent rebound during the staged swap",
     async () => {
-      const root = tempDirs.make("openclaw-codex-marketplace-rebind-");
+      const root = tempDirs.make("carapace-codex-marketplace-rebind-");
       const candidate = await writeCandidate(root);
       const agentDir = path.join(root, "agent");
       const codexHome = path.join(agentDir, "codex-home");

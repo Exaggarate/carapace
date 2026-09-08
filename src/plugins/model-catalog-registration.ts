@@ -2,7 +2,7 @@
 import type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
+} from "@carapace/model-catalog-core/model-catalog-types";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { uniqueValues } from "../../packages/normalization-core/src/string-normalization.js";
 import type { PluginDiagnostic } from "./manifest-types.js";

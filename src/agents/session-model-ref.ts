@@ -1,7 +1,7 @@
 // Resolves persisted session model metadata without loading Gateway projections.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import {
   inferUniqueProviderFromConfiguredModels,
@@ -24,7 +24,7 @@ type SessionModelEntry =
     >;
 
 export function resolveSessionModelRef(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   entry?: SessionModelEntry,
   agentId?: string,
   options?: { allowPluginNormalization?: boolean },
@@ -78,7 +78,7 @@ export function resolveSessionModelRef(
 }
 
 export function resolveSessionModelIdentityRef(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   entry?: SessionModelEntry,
   agentId?: string,
   fallbackModelRef?: string,

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { applyNonInteractiveSkillsConfig } from "./skills-config.js";
 
 describe("non-interactive skills config", () => {
@@ -13,7 +13,7 @@ describe("non-interactive skills config", () => {
     ["bun", "pnpm", "pnpm"],
     ["pnpm", "bun", "bun"],
   ] as const)("resolves saved %s with requested %s to %s", (saved, requested, expected) => {
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: CarapaceConfig = {
       skills: { install: { nodeManager: saved, preferBrew: false } },
     };
     const result = applyNonInteractiveSkillsConfig({
@@ -27,7 +27,7 @@ describe("non-interactive skills config", () => {
   });
 
   it("leaves skills untouched when setup is skipped, even with an explicit manager", () => {
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: CarapaceConfig = {
       skills: { install: { nodeManager: "yarn", preferBrew: false } },
     };
     expect(

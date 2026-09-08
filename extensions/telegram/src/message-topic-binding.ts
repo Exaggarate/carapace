@@ -1,12 +1,12 @@
 // Telegram provider-owned authorization for message mutations in forum topics.
-import { normalizeAccountId, normalizeOptionalAccountId } from "openclaw/plugin-sdk/account-core";
+import { normalizeAccountId, normalizeOptionalAccountId } from "carapace/plugin-sdk/account-core";
 import type {
   ChannelMessageActionContext,
   ChannelThreadingToolContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import { resolveTelegramAccountOwnerAgentId } from "./account-owner.js";
 import { resolveDefaultTelegramAccountId } from "./accounts.js";
 import { resolveTelegramMessageCacheScope } from "./message-cache-persistence.js";
@@ -69,7 +69,7 @@ function resolveCurrentTelegramConversation(
 }
 
 function resolveMatchingTelegramRequesterAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   context?: TelegramMessageMutationContext;
 }): string | undefined {
@@ -86,7 +86,7 @@ function resolveMatchingTelegramRequesterAccount(params: {
 
 export function resolveTelegramConversationReadChatId(params: {
   chatId?: string | number;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   context?: TelegramMessageMutationContext;
 }): string {
@@ -119,7 +119,7 @@ export function resolveTelegramConversationReadChatId(params: {
 export async function resolveTelegramMessageMutationChatId(params: {
   chatId: string | number;
   messageId: number;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   context?: TelegramMessageMutationContext;
 }): Promise<string | number> {

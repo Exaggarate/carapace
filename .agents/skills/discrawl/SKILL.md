@@ -2,14 +2,14 @@
 name: discrawl
 description: "Discord archive: search, sync freshness, DMs, summaries, TUI, repo/release work."
 metadata:
-  openclaw:
-    homepage: https://github.com/openclaw/discrawl
+  carapace:
+    homepage: https://github.com/Exaggarate/carapace/discrawl
     requires:
       bins:
         - discrawl
     install:
       - kind: go
-        module: github.com/openclaw/discrawl/cmd/discrawl@latest
+        module: github.com/Exaggarate/carapace/discrawl/cmd/discrawl@latest
         bins:
           - discrawl
 ---
@@ -54,7 +54,7 @@ DMs are local-only, not part of the published Git snapshot. Git-share snapshots
 must exclude secrets and `@me` DM rows.
 
 For implementation work or a genuinely missing CLI feature, verify the checkout
-remote is `openclaw/discrawl` and follow its instructions. Do not assume a
+remote is `carapace/discrawl` and follow its instructions. Do not assume a
 machine-specific historical checkout path.
 
 ## ClawSweeper Sandbox
@@ -67,7 +67,7 @@ discrawl-sandbox messages --channel clawtributors --days 7 --all
 discrawl-sandbox status --json
 ```
 
-This reader imports `https://github.com/openclaw/discord-store.git` into
+This reader imports `https://github.com/Exaggarate/carapace/discord-store.git` into
 `/root/clawsweeper-sandbox-workspace/.discrawl/discrawl.db` with
 `discord.token_source = "none"`. The published Git snapshot is public-channel
 filtered; do not use `/root/.discrawl/config.toml` or the rich writer DB from

@@ -31,7 +31,7 @@ function captureWarningLogger() {
 
 describe("workspace bootstrap read diagnostics", () => {
   it("does not split surrogate pairs when bounding unreadable reasons", async () => {
-    const tempDir = tempDirs.make("openclaw-workspace-");
+    const tempDir = tempDirs.make("carapace-workspace-");
     await fs.writeFile(path.join(tempDir, DEFAULT_AGENTS_FILENAME), "# AGENTS.md\n");
     const reason = `${"x".repeat(299)}😀tail`;
     const readSpy = vi.spyOn(syncFs, "read").mockImplementation(((...args: unknown[]) => {
@@ -50,7 +50,7 @@ describe("workspace bootstrap read diagnostics", () => {
   });
 
   it("marks oversized bootstrap files unreadable and warns with the bounded-read reason", async () => {
-    const tempDir = tempDirs.make("openclaw-workspace-");
+    const tempDir = tempDirs.make("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     await fs.writeFile(agentsPath, "x".repeat(MAX_WORKSPACE_BOOTSTRAP_FILE_BYTES + 1));
     const warn = captureWarningLogger();

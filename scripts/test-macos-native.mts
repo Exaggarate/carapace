@@ -71,9 +71,9 @@ await runWithFailedTrailer("macos-native", async () => {
       TEMP: tmp,
       // The full suite protects default-profile lifecycle behavior. Named-profile
       // construction is exercised separately; both use the disposable runner's account.
-      OPENCLAW_PROFILE: profileMode === "named" ? `test-${randomUUID()}` : "default",
-      OPENCLAW_STATE_DIR: state,
-      OPENCLAW_CONFIG_PATH: path.join(state, "openclaw.json"),
+      CARAPACE_PROFILE: profileMode === "named" ? `test-${randomUUID()}` : "default",
+      CARAPACE_STATE_DIR: state,
+      CARAPACE_CONFIG_PATH: path.join(state, "carapace.json"),
     });
 
     // Keep SwiftPM's build cache available without inheriting the runner's app state.

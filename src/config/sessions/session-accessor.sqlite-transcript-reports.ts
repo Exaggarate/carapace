@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
   executeSqliteQueryTakeFirstSync,
   iterateSqliteQuerySync,
@@ -8,9 +8,9 @@ import {
 import type { AssistantMessage } from "../../llm/types.js";
 import { readSessionTranscriptRunId } from "../../sessions/transcript-events.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptWriteScope,
   TranscriptAppendRefusal,
@@ -108,7 +108,7 @@ class TranscriptReportNavigation extends SessionEntryNavigation<ReportNavigation
   }
 }
 
-function readReportBranch(database: OpenClawAgentDatabase, sessionId: string) {
+function readReportBranch(database: CarapaceAgentDatabase, sessionId: string) {
   function* rows() {
     for (const row of iterateSqliteQuerySync(
       database.db,
@@ -137,7 +137,7 @@ function readReportBranch(database: OpenClawAgentDatabase, sessionId: string) {
 }
 
 function latestCustomReport(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   branch: ReturnType<typeof readReportBranch>,
   customTypes: readonly string[],
@@ -168,14 +168,14 @@ function latestCustomReport(
 
 async function withCurrentTranscript<T>(
   scope: SessionTranscriptWriteScope,
-  run: (database: OpenClawAgentDatabase, resolved: ResolvedTranscriptScope) => T,
+  run: (database: CarapaceAgentDatabase, resolved: ResolvedTranscriptScope) => T,
 ): Promise<Result<T, TranscriptAppendRefusal>> {
   // Capture the logical store identity before SQLite resolves a physical path,
   // or inherited writer fences would stop matching after the queue wait.
   const fenced = withOwnedSessionTranscriptWriterFence(scope);
   const resolved = resolveSqliteTranscriptScope(fenced);
   return runExclusiveSqliteSessionWrite(resolved, async () =>
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         assertOwnedTranscriptWriteCommit(fenced);
         const refusal = resolveTranscriptAppendRefusal(

@@ -11,7 +11,7 @@ const headSha = "0123456789abcdef0123456789abcdef01234567";
 const baseSha = "1111111111111111111111111111111111111111";
 const workflowSha = "2222222222222222222222222222222222222222";
 const changedSha = "fedcba9876543210fedcba9876543210fedcba98";
-const runUrl = "https://github.com/openclaw/openclaw/actions/runs/99";
+const runUrl = "https://github.com/Exaggarate/carapace/actions/runs/99";
 const summary = formatCrabboxGateCheckSummary({
   baseSha,
   headSha,
@@ -24,7 +24,7 @@ const summary = formatCrabboxGateCheckSummary({
 const describePosix = process.platform === "win32" ? describe.skip : describe;
 
 function createFakeGh() {
-  const tempDir = tempDirs.make("openclaw-pr-ci-dispatch-");
+  const tempDir = tempDirs.make("carapace-pr-ci-dispatch-");
   const binDir = join(tempDir, "bin");
   const pathGh = join(binDir, "gh");
   const realGh = join(tempDir, "real-gh");
@@ -34,34 +34,34 @@ function createFakeGh() {
   mkdirSync(binDir);
   const fakeGhScript = `#!/usr/bin/env bash
 set -euo pipefail
-printf '%s\\t%s\\n' "$(basename "$0")" "$*" >> "$OPENCLAW_TEST_GH_CALLS"
+printf '%s\\t%s\\n' "$(basename "$0")" "$*" >> "$CARAPACE_TEST_GH_CALLS"
 case "$1 $2" in
   "auth token") printf 'forwarded-test-token\\n' ;;
   "pr view")
-    if [ -e "$OPENCLAW_TEST_GH_DISPATCHED" ] && [ "\${OPENCLAW_TEST_GH_MODE:-}" = "head-change" ]; then
-      printf '%s\\n' "$OPENCLAW_TEST_CHANGED_HEAD_SHA"
+    if [ -e "$CARAPACE_TEST_GH_DISPATCHED" ] && [ "\${CARAPACE_TEST_GH_MODE:-}" = "head-change" ]; then
+      printf '%s\\n' "$CARAPACE_TEST_CHANGED_HEAD_SHA"
     else
-      printf '%s\\n' "$OPENCLAW_TEST_HEAD_SHA"
+      printf '%s\\n' "$CARAPACE_TEST_HEAD_SHA"
     fi
     ;;
   "workflow run")
     test "\${GH_TOKEN-}" = "forwarded-test-token"
-    : > "$OPENCLAW_TEST_GH_DISPATCHED"
+    : > "$CARAPACE_TEST_GH_DISPATCHED"
     ;;
   "api --method")
     case "$4" in
       *"/actions/workflows/"*"/runs")
-        if [ -e "$OPENCLAW_TEST_GH_DISPATCHED" ]; then
-          printf '%s\\n' "$OPENCLAW_TEST_RUN_LIST"
+        if [ -e "$CARAPACE_TEST_GH_DISPATCHED" ]; then
+          printf '%s\\n' "$CARAPACE_TEST_RUN_LIST"
         else
           printf '{"workflow_runs":[]}\\n'
         fi
         ;;
-      *"/actions/runs/99") printf '%s\\n' "$OPENCLAW_TEST_RUN" ;;
+      *"/actions/runs/99") printf '%s\\n' "$CARAPACE_TEST_RUN" ;;
       *) echo "unexpected API: $*" >&2; exit 2 ;;
     esac
     ;;
-  "api --paginate") printf '%s\\n' "$OPENCLAW_TEST_CHECK_PAGES" ;;
+  "api --paginate") printf '%s\\n' "$CARAPACE_TEST_CHECK_PAGES" ;;
   *) echo "unexpected gh invocation: $*" >&2; exit 2 ;;
 esac
 `;
@@ -107,15 +107,15 @@ function runDispatch(
     details_url: runUrl,
     head_sha: headSha,
     id: 88,
-    name: "openclaw/crabbox-gate",
+    name: "carapace/crabbox-gate",
     output: { summary },
     status: "completed",
   };
   const env: NodeJS.ProcessEnv = {
     ...process.env,
-    OPENCLAW_GH_BIN: fakeGh.realGh,
-    OPENCLAW_TEST_CHANGED_HEAD_SHA: changedSha,
-    OPENCLAW_TEST_CHECK_PAGES: JSON.stringify([
+    CARAPACE_GH_BIN: fakeGh.realGh,
+    CARAPACE_TEST_CHANGED_HEAD_SHA: changedSha,
+    CARAPACE_TEST_CHECK_PAGES: JSON.stringify([
       {
         check_runs: options.checkOnLaterPage
           ? [{ ...check, id: 77, name: "unrelated/check" }]
@@ -123,11 +123,11 @@ function runDispatch(
       },
       ...(options.checkOnLaterPage ? [{ check_runs: [check] }] : []),
     ]),
-    OPENCLAW_TEST_GH_CALLS: fakeGh.calls,
-    OPENCLAW_TEST_GH_DISPATCHED: fakeGh.dispatched,
-    OPENCLAW_TEST_GH_MODE: options.mode ?? "",
-    OPENCLAW_TEST_HEAD_SHA: headSha,
-    OPENCLAW_TEST_RUN: JSON.stringify({
+    CARAPACE_TEST_GH_CALLS: fakeGh.calls,
+    CARAPACE_TEST_GH_DISPATCHED: fakeGh.dispatched,
+    CARAPACE_TEST_GH_MODE: options.mode ?? "",
+    CARAPACE_TEST_HEAD_SHA: headSha,
+    CARAPACE_TEST_RUN: JSON.stringify({
       conclusion: "success",
       event: "workflow_dispatch",
       head_branch: "main",
@@ -137,7 +137,7 @@ function runDispatch(
       path: ".github/workflows/pr-crabbox-gate-publisher.yml",
       status: "completed",
     }),
-    OPENCLAW_TEST_RUN_LIST: JSON.stringify(runList),
+    CARAPACE_TEST_RUN_LIST: JSON.stringify(runList),
     PATH: `${fakeGh.binDir}:${process.env.PATH ?? ""}`,
   };
   for (const name of [
@@ -202,9 +202,9 @@ describePosix("scripts/pr ci-dispatch", () => {
     expect(calls).toContain(
       `real-gh\tworkflow run pr-crabbox-gate-publisher.yml --ref main -f pr_number=12345 -f head_sha=${headSha} -f base_sha=${baseSha}`,
     );
-    expect(calls).toContain(`gh\tapi --method GET repos/openclaw/openclaw/actions/runs/99`);
+    expect(calls).toContain(`gh\tapi --method GET repos/carapace/carapace/actions/runs/99`);
     expect(calls).toContain(
-      `gh\tapi --paginate --slurp repos/openclaw/openclaw/commits/${headSha}/check-runs?filter=latest&per_page=100`,
+      `gh\tapi --paginate --slurp repos/carapace/carapace/commits/${headSha}/check-runs?filter=latest&per_page=100`,
     );
   });
 
@@ -239,8 +239,8 @@ describePosix("scripts/pr ci-dispatch", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_GH_BIN: fakeGh.realGh,
-          OPENCLAW_TEST_GH_CALLS: fakeGh.calls,
+          CARAPACE_GH_BIN: fakeGh.realGh,
+          CARAPACE_TEST_GH_CALLS: fakeGh.calls,
           PATH: `${fakeGh.binDir}:${process.env.PATH ?? ""}`,
         },
       },
@@ -272,8 +272,8 @@ describePosix("scripts/pr ci-dispatch", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_GH_BIN: fakeGh.realGh,
-          OPENCLAW_TEST_GH_CALLS: fakeGh.calls,
+          CARAPACE_GH_BIN: fakeGh.realGh,
+          CARAPACE_TEST_GH_CALLS: fakeGh.calls,
           PATH: `${fakeGh.binDir}:${process.env.PATH ?? ""}`,
         },
       },

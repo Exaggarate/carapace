@@ -32,7 +32,7 @@ describe("unavailable finalization through the real core backend", () => {
   it.each([
     { terminal: "ok", context: "unavailable", toolFailed: false },
     { terminal: "failed", context: "unavailable", toolFailed: false },
-    { terminal: "failed", context: "openclaw-transcript", toolFailed: false },
+    { terminal: "failed", context: "carapace-transcript", toolFailed: false },
     { terminal: "ok", context: "unavailable", toolFailed: true },
   ] as const)(
     "preserves settled work when finalization is unavailable ($terminal/$context/toolFailed=$toolFailed)",
@@ -153,7 +153,7 @@ describe("unavailable finalization through the real core backend", () => {
       expect(transcript.slice(prefix.length)).toMatchObject([
         {
           message: {
-            provider: "openclaw",
+            provider: "carapace",
             model: "delivery-mirror",
             content: [{ type: "text", text: FALLBACK }],
           },

@@ -6,8 +6,8 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it } from "vitest";
 import { createAppliedLegacyProposal } from "../commands/doctor-skill-workshop-sqlite.test-support.js";
 import { importLegacySkillProposal } from "../skills/workshop/store.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { planLegacyStateMigrationsReadOnly } from "./state-migrations.doctor.js";
 import { captureLegacyStateSnapshotIdentity } from "./state-migrations.plan.js";
@@ -37,18 +37,18 @@ function writeWalIndexHeaderChecksum(header: Buffer): void {
 }
 
 async function makeFixture() {
-  const root = await tempDirs.make("openclaw-migration-plan-identity-");
+  const root = await tempDirs.make("carapace-migration-plan-identity-");
   const homeDir = path.join(root, "home");
   const stateDir = path.join(root, "copied-state");
-  const configPath = path.join(root, "copied-openclaw.json");
+  const configPath = path.join(root, "copied-carapace.json");
   fs.mkdirSync(homeDir, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(configPath, "{}\n");
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: homeDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
   };
   return { root, homeDir, stateDir, configPath, env };
 }
@@ -68,7 +68,7 @@ async function planFixture(fixture: Awaited<ReturnType<typeof makeFixture>>, sta
 }
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 
@@ -87,7 +87,7 @@ describe("legacy state migration plan identity", () => {
     fs.mkdirSync(skillDir, { recursive: true });
     fs.writeFileSync(record.target.skillFile, content);
     importLegacySkillProposal({ record, ownerAgentId: "main", store: { env: fixture.env } });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const before = await captureLegacyStateSnapshotIdentity(fixture);
 
     const plan = await planFixture(fixture);
@@ -95,12 +95,12 @@ describe("legacy state migration plan identity", () => {
     expect(plan.steps.find((step) => step.id === "skill-workshop")).toMatchObject({
       phase: "final",
       source: [
-        { kind: "sqlite", path: resolveOpenClawStateSqlitePath(fixture.env) },
+        { kind: "sqlite", path: resolveCarapaceStateSqlitePath(fixture.env) },
         { kind: "path", path: path.join(fixture.stateDir, "skill-workshop") },
         { kind: "owner", id: "core:skill-workshop" },
       ],
       target: [
-        { kind: "sqlite", path: resolveOpenClawStateSqlitePath(fixture.env) },
+        { kind: "sqlite", path: resolveCarapaceStateSqlitePath(fixture.env) },
         { kind: "owner", id: "core:skill-workshop" },
       ],
       requiredness: "conditional",
@@ -113,7 +113,7 @@ describe("legacy state migration plan identity", () => {
 
   it("does not treat SQLite shared-memory coordination as a copied-state mutation", async () => {
     const fixture = await makeFixture();
-    const databasePath = resolveOpenClawStateSqlitePath(fixture.env);
+    const databasePath = resolveCarapaceStateSqlitePath(fixture.env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const database = new DatabaseSync(databasePath);
     database.exec(`
@@ -161,7 +161,7 @@ describe("legacy state migration plan identity", () => {
         CREATE TABLE planner_probe (id INTEGER PRIMARY KEY, value TEXT NOT NULL);
         INSERT INTO planner_probe(value) VALUES ('copied-state');
       `);
-      const databasePath = resolveOpenClawStateSqlitePath(fixture.env);
+      const databasePath = resolveCarapaceStateSqlitePath(fixture.env);
       fs.mkdirSync(path.dirname(databasePath), { recursive: true });
       fs.copyFileSync(sourcePath, databasePath);
       fs.copyFileSync(`${sourcePath}-wal`, `${databasePath}-wal`);
@@ -203,7 +203,7 @@ describe("legacy state migration plan identity", () => {
 
   it("binds fake files and directories at a SQLite shared-memory path", async () => {
     const fixture = await makeFixture();
-    const databasePath = resolveOpenClawStateSqlitePath(fixture.env);
+    const databasePath = resolveCarapaceStateSqlitePath(fixture.env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     const database = new DatabaseSync(databasePath);
     database.exec("CREATE TABLE planner_probe (id INTEGER PRIMARY KEY);");

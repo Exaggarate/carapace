@@ -1,13 +1,13 @@
 import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import type { AcpRuntime, AcpRuntimeTurnInput } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntime, AcpRuntimeTurnInput } from "@carapace/acp-core/runtime/types";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { consumeAcpTurnStream } from "../../acp/control-plane/manager.turn-stream.js";
 import { DEFAULT_CRON_MAX_CONCURRENT_RUNS } from "../../config/cron-limits.js";
 import type { HookMappingConfig } from "../../config/types.hooks.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RunCronAgentTurnResult } from "../../cron/isolated-agent/run.types.js";
 import { resolveSystemEventOwnerAgentId } from "../../infra/system-event-ownership.js";
 import { createSuiteLogPathTracker } from "../../logging/log-test-helpers.js";
@@ -32,7 +32,7 @@ import { applyGatewayLaneConcurrency, resolveGatewayLaneConcurrency } from "../s
 
 const mocks = vi.hoisted(() => ({
   enqueueSystemEvent: vi.fn(),
-  getRuntimeConfig: vi.fn<() => OpenClawConfig>(),
+  getRuntimeConfig: vi.fn<() => CarapaceConfig>(),
   requestHeartbeat: vi.fn(),
   runCronIsolatedAgentTurn: vi.fn(),
 }));
@@ -84,7 +84,7 @@ function queueHookRunner(onStart = vi.fn()) {
   return onStart;
 }
 
-function createConfig(global: boolean): OpenClawConfig {
+function createConfig(global: boolean): CarapaceConfig {
   return {
     agents: { entries: { main: { default: true }, hooks: {} } },
     hooks: { enabled: true, token: "hook-secret" },
@@ -156,7 +156,7 @@ async function postAgentHook(
 }
 
 describe("gateway hook early-failure recovery", () => {
-  const logPathTracker = createSuiteLogPathTracker("openclaw-hook-terminal-");
+  const logPathTracker = createSuiteLogPathTracker("carapace-hook-terminal-");
 
   beforeAll(async () => {
     await logPathTracker.setup();
@@ -604,7 +604,7 @@ describe("gateway hook early-failure recovery", () => {
   it.each([undefined, false, true])(
     "contains plugin email turns with HTTP hooks enabled=%s",
     async (enabled) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { entries: { main: { default: true }, hooks: {} } },
         hooks: {
           enabled,

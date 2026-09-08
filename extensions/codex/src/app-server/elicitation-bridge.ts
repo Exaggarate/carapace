@@ -3,13 +3,13 @@ import {
   embeddedAgentLog,
   type CodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   formatMcpCodexApprovalRemedy,
   requiresMcpCodexToolApproval,
   resolveProjectedMcpCodexToolApprovalMode,
-} from "openclaw/plugin-sdk/codex-mcp-projection";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/codex-mcp-projection";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { formatCodexDisplayText } from "../command-formatters.js";
 import {
   createCodexElicitationResponse,
@@ -565,7 +565,7 @@ function readBridgeableApprovalElicitation(
       meta: requestParams["_meta"],
       requestedSchema,
       serverName: sanitizeOptionalDisplayText(serverName),
-      // Only OpenClaw-configured servers have a `mcp configure` remedy; plugin
+      // Only Carapace-configured servers have a `mcp configure` remedy; plugin
       // and computer-use prompts are governed by their own policies.
       remedy: serverName ? formatMcpCodexApprovalRemedy(serverName) : undefined,
     }),

@@ -3,7 +3,7 @@
  * receive the prompt, and fail closed when durable delivery did not land.
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 const sendDurableMessageBatchCore = vi.hoisted(() => vi.fn());
 
@@ -15,7 +15,7 @@ vi.mock("../../channels/message/runtime.js", () => ({
 
 import { createChannelQuestionPromptDelivery } from "./question-prompt-send.js";
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const receipt = {
   platformMessageIds: ["m1"],
   parts: [],

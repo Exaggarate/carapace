@@ -4,8 +4,8 @@
 import {
   clampTimerTimeoutMs,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/normalization-core/number-coercion";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "./model-catalog.types.js";
 import {
   buildConfiguredModelCatalog,
@@ -24,7 +24,7 @@ export type ModelCatalogBrowseView = "default" | "configured" | "provider-config
 
 /** Source-authored provider rows for inventory UIs, independent of picker allowlists. */
 export function buildProviderConfigModelCatalogForBrowse(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
 }): ModelCatalogEntry[] {
   return buildConfiguredModelCatalog(params).toSorted(
@@ -37,7 +37,7 @@ export function buildProviderConfigModelCatalogForBrowse(params: {
 
 /** True when a browse view requires the full published catalog generation. */
 export function modelCatalogBrowseRequiresFullDiscovery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   view?: ModelCatalogBrowseView;
 }): boolean {
@@ -55,7 +55,7 @@ export function modelCatalogBrowseRequiresFullDiscovery(params: {
   // An explicit modelPolicy.allow provider wildcard makes model pickers,
   // configured views, and provider-config inventory resolve against the
   // discovered catalog so key-scoped runtime rows appear without an explicit
-  // allowlist entry (see openclaw#115953). Legacy agents.defaults.models
+  // allowlist entry (see carapace#115953). Legacy agents.defaults.models
   // wildcard entries keep the historical read-only default path and only
   // escalate the configured view, as before.
   if (visibility.configPath === LEGACY_MODEL_POLICY_ALLOW_CONFIG_PATH) {
@@ -70,7 +70,7 @@ function resolveModelCatalogBrowseTimeoutMs(value: number | undefined): number {
 
 /** Loads an explicit logical/physical catalog snapshot for route-aware browse surfaces. */
 export async function loadPreparedModelCatalogSnapshotForBrowse(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   view?: ModelCatalogBrowseView;
   /** Never starts provider discovery; a completed generation cache may still be reused. */

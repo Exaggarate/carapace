@@ -59,8 +59,8 @@ async function initializeRepository(root: string): Promise<string> {
   const remote = path.join(root, "origin.git");
   await fs.mkdir(repo, { recursive: true });
   await git(repo, "init", "-b", "main");
-  await git(repo, "config", "user.name", "OpenClaw Test");
-  await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+  await git(repo, "config", "user.name", "Carapace Test");
+  await git(repo, "config", "user.email", "carapace-test@example.invalid");
   await fs.writeFile(path.join(repo, "README.md"), "base\n");
   await git(repo, "add", "README.md");
   await git(repo, "commit", "-m", "initialize Workboard worktree fixture");
@@ -276,7 +276,7 @@ describe("managed worktrees Workboard-owner product proof", () => {
     { timeout: 240_000 },
     async () => {
       const canonicalTmp = await fs.realpath(os.tmpdir());
-      const fixtureRoot = tempDirs.make("openclaw-managed-worktree-workboard-", canonicalTmp);
+      const fixtureRoot = tempDirs.make("carapace-managed-worktree-workboard-", canonicalTmp);
       const repo = await initializeRepository(fixtureRoot);
       const activeHarness = await startHarness();
       const stateDir = path.join(await fs.realpath(activeHarness.gateway.tempRoot), "state");
@@ -298,7 +298,7 @@ describe("managed worktrees Workboard-owner product proof", () => {
       const dispatchedWorkspace = dispatchedCard?.metadata?.automation?.workspace;
       expect(dispatchedWorkspace).toMatchObject({
         kind: "worktree",
-        branch: `openclaw/${name}`,
+        branch: `carapace/${name}`,
         sourcePath: repo,
         sourceBranch: "main",
       });
@@ -310,7 +310,7 @@ describe("managed worktrees Workboard-owner product proof", () => {
       );
       expect(activeRecord).toMatchObject({
         name,
-        branch: `openclaw/${name}`,
+        branch: `carapace/${name}`,
         repoRoot: repo,
         ownerKind: "workboard",
         ownerId: card.id,
@@ -332,7 +332,7 @@ describe("managed worktrees Workboard-owner product proof", () => {
       });
       expect(removed).toMatchObject({
         id: activeRecord?.id,
-        snapshotRef: `refs/openclaw/snapshots/${activeRecord?.id}`,
+        snapshotRef: `refs/carapace/snapshots/${activeRecord?.id}`,
         removedAt: expect.any(Number),
         runEndCleanup: {
           outcome: "removed-lossless",

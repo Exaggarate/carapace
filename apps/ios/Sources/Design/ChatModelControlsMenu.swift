@@ -1,5 +1,5 @@
 import Observation
-import OpenClawChatUI
+import CarapaceChatUI
 import SwiftUI
 
 enum ChatActionMenuMetric {
@@ -16,17 +16,17 @@ struct ChatActionSystemRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: self.systemImage)
-                .foregroundStyle(OpenClawBrand.accentForeground)
+                .foregroundStyle(CarapaceBrand.accentForeground)
                 .frame(width: ChatActionMenuMetric.iconWidth, alignment: .leading)
                 .accessibilityHidden(true)
             Text(self.title)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
                 .multilineTextAlignment(.leading)
             Spacer(minLength: 12)
             if self.isSelected {
                 Image(systemName: "checkmark")
-                    .font(OpenClawType.body)
-                    .foregroundStyle(OpenClawBrand.accentForeground)
+                    .font(CarapaceType.body)
+                    .foregroundStyle(CarapaceBrand.accentForeground)
                     .accessibilityIdentifier("chat-menu-selection-checkmark")
             }
         }
@@ -47,10 +47,10 @@ struct ChatActionMenuSectionHeader: View {
             Color.clear
                 .frame(width: ChatActionMenuMetric.iconWidth, height: 1)
             Text(self.title)
-                .font(OpenClawType.caption)
+                .font(CarapaceType.caption)
             if let detail {
                 Text(detail)
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .foregroundStyle(.tertiary)
             }
             Spacer(minLength: 0)
@@ -61,7 +61,7 @@ struct ChatActionMenuSectionHeader: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(OpenClawBrand.accentForeground)
+                .foregroundStyle(CarapaceBrand.accentForeground)
                 .accessibilityLabel(String(localized: "Use default"))
                 .accessibilityIdentifier(resetAccessibilityIdentifier)
             }
@@ -82,7 +82,7 @@ enum ChatModelProviderPalette: Equatable {
 }
 
 enum ChatModelMenuPresentation {
-    static func providerID(for model: OpenClawChatModelChoice) -> String? {
+    static func providerID(for model: CarapaceChatModelChoice) -> String? {
         let metadataProvider = self.normalizedProviderID(model.provider)
         if let metadataProvider {
             return metadataProvider
@@ -160,29 +160,29 @@ enum ChatThinkingSliderPresentation {
     static func index(
         selectionID: String,
         effectiveLevelID: String,
-        options: [OpenClawChatThinkingLevelOption]) -> Int
+        options: [CarapaceChatThinkingLevelOption]) -> Int
     {
-        let resolvedID = selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID
+        let resolvedID = selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID
             ? effectiveLevelID
             : selectionID
         return options.firstIndex { $0.id == resolvedID } ?? 0
     }
 
-    static func selectionID(index: Int, options: [OpenClawChatThinkingLevelOption]) -> String? {
+    static func selectionID(index: Int, options: [CarapaceChatThinkingLevelOption]) -> String? {
         guard options.indices.contains(index) else { return nil }
         return options[index].id
     }
 
-    static func notchIndices(options: [OpenClawChatThinkingLevelOption]) -> [Int] {
+    static func notchIndices(options: [CarapaceChatThinkingLevelOption]) -> [Int] {
         Array(options.indices)
     }
 
     static func valueLabel(
         selectionID: String,
         effectiveLevelID: String,
-        options: [OpenClawChatThinkingLevelOption]) -> String
+        options: [CarapaceChatThinkingLevelOption]) -> String
     {
-        if selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID {
+        if selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID {
             let label = options.first { $0.id == effectiveLevelID }?.label ?? effectiveLevelID
             return "Default (\(label.capitalized))"
         }
@@ -234,7 +234,7 @@ private struct ChatModelProviderIcon: View {
                     .scaledToFit()
             } else {
                 Text(ChatModelMenuPresentation.fallbackMonogram(providerID: self.providerID))
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.secondary.opacity(0.16), in: Circle())
             }
@@ -249,9 +249,9 @@ private struct ChatModelProviderIcon: View {
 
     private var brandColor: Color {
         switch ChatModelMenuPresentation.brandPalette(providerID: self.providerID) {
-        case .openAI: OpenClawBrand.providerOpenAI
-        case .anthropic: OpenClawBrand.providerAnthropic
-        case .google: OpenClawBrand.providerGoogle
+        case .openAI: CarapaceBrand.providerOpenAI
+        case .anthropic: CarapaceBrand.providerAnthropic
+        case .google: CarapaceBrand.providerGoogle
         case .adaptiveMonochrome: .primary
         }
     }
@@ -259,13 +259,13 @@ private struct ChatModelProviderIcon: View {
 
 @MainActor
 struct ChatModelControlsMenuItems: View {
-    @Bindable var viewModel: OpenClawChatViewModel
+    @Bindable var viewModel: CarapaceChatViewModel
     let agentModelReference: String?
     let onSelection: @MainActor () -> Void
     @State private var expandedProviderIDs: Set<String> = []
 
     init(
-        viewModel: OpenClawChatViewModel,
+        viewModel: CarapaceChatViewModel,
         agentModelReference: String? = nil,
         onSelection: @escaping @MainActor () -> Void = {})
     {
@@ -296,7 +296,7 @@ struct ChatModelControlsMenuItems: View {
             self.modelOption(
                 title: self.defaultModelLabel,
                 providerID: self.defaultProviderID,
-                selectionID: OpenClawChatViewModel.defaultModelSelectionID)
+                selectionID: CarapaceChatViewModel.defaultModelSelectionID)
             if !sections.pinned.isEmpty {
                 ChatActionMenuSectionHeader(title: "Pinned")
                 self.modelOptions(sections.pinned)
@@ -321,12 +321,12 @@ struct ChatModelControlsMenuItems: View {
             VStack(spacing: 0) {
                 ChatActionMenuSectionHeader(
                     title: "Thinking",
-                    resetAccessibilityIdentifier: selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID
+                    resetAccessibilityIdentifier: selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID
                         ? nil
                         : "chat-thinking-use-default",
-                    resetAction: selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID
+                    resetAction: selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID
                         ? nil
-                        : { self.viewModel.selectThinkingLevel(OpenClawChatViewModel.inheritedThinkingSelectionID) })
+                        : { self.viewModel.selectThinkingLevel(CarapaceChatViewModel.inheritedThinkingSelectionID) })
                 self.settingsOption(
                     title: option.label,
                     systemImage: "brain.head.profile",
@@ -337,7 +337,7 @@ struct ChatModelControlsMenuItems: View {
         }
     }
 
-    private func thinkingSlider(options: [OpenClawChatThinkingLevelOption]) -> some View {
+    private func thinkingSlider(options: [CarapaceChatThinkingLevelOption]) -> some View {
         let selectionID = self.viewModel.thinkingSelectionID
         let committedIndex = ChatThinkingSliderPresentation.index(
             selectionID: selectionID,
@@ -351,12 +351,12 @@ struct ChatModelControlsMenuItems: View {
             ChatActionMenuSectionHeader(
                 title: "Thinking",
                 detail: valueLabel,
-                resetAccessibilityIdentifier: selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID
+                resetAccessibilityIdentifier: selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID
                     ? nil
                     : "chat-thinking-use-default",
-                resetAction: selectionID == OpenClawChatViewModel.inheritedThinkingSelectionID
+                resetAction: selectionID == CarapaceChatViewModel.inheritedThinkingSelectionID
                     ? nil
-                    : { self.viewModel.selectThinkingLevel(OpenClawChatViewModel.inheritedThinkingSelectionID) })
+                    : { self.viewModel.selectThinkingLevel(CarapaceChatViewModel.inheritedThinkingSelectionID) })
             ZStack {
                 Slider(
                     value: Binding(
@@ -371,7 +371,7 @@ struct ChatModelControlsMenuItems: View {
                         }),
                     in: 0...Double(options.count - 1),
                     step: 1)
-                    .tint(OpenClawBrand.accentForeground)
+                    .tint(CarapaceBrand.accentForeground)
                     .disabled(self.viewModel.isUpdatingSessionSettings)
                     .accessibilityIdentifier("chat-thinking-slider")
                     .accessibilityLabel(String(localized: "Thinking level"))
@@ -400,10 +400,10 @@ struct ChatModelControlsMenuItems: View {
             .padding(.horizontal, ChatActionMenuMetric.horizontalPadding)
             HStack {
                 Text("Faster")
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
                 Spacer(minLength: 8)
                 Text("Smarter")
-                    .font(OpenClawType.caption)
+                    .font(CarapaceType.caption)
             }
             .foregroundStyle(.secondary)
             .padding(.horizontal, ChatActionMenuMetric.horizontalPadding)
@@ -420,27 +420,27 @@ struct ChatModelControlsMenuItems: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 Image(systemName: "bolt.fill")
-                    .foregroundStyle(OpenClawBrand.accentForeground)
+                    .foregroundStyle(CarapaceBrand.accentForeground)
                     .frame(width: ChatActionMenuMetric.iconWidth, alignment: .leading)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Fast mode")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                     Text("Faster responses, higher usage of limits.")
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                if selectionID != OpenClawChatViewModel.inheritedThinkingSelectionID {
+                if selectionID != CarapaceChatViewModel.inheritedThinkingSelectionID {
                     Button {
-                        self.viewModel.selectFastMode(OpenClawChatViewModel.inheritedThinkingSelectionID)
+                        self.viewModel.selectFastMode(CarapaceChatViewModel.inheritedThinkingSelectionID)
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                             .frame(width: ChatActionMenuMetric.rowHeight, height: ChatActionMenuMetric.rowHeight)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(OpenClawBrand.accentForeground)
+                    .foregroundStyle(CarapaceBrand.accentForeground)
                     .disabled(self.viewModel.isUpdatingSessionSettings)
                     .accessibilityLabel(String(localized: "Use default"))
                     .accessibilityIdentifier("chat-fast-mode-use-default")
@@ -452,7 +452,7 @@ struct ChatModelControlsMenuItems: View {
                             ChatFastModeControlPresentation.selectionID(isOn: isOn))
                     })) {
                         Text("Fast mode")
-                            .font(OpenClawType.body)
+                            .font(CarapaceType.body)
                     }
                     .labelsHidden()
                         .frame(
@@ -466,7 +466,7 @@ struct ChatModelControlsMenuItems: View {
                             self.viewModel.selectFastMode(
                                 ChatFastModeControlPresentation.selectionID(isOn: !isOn))
                         })
-                        .tint(OpenClawBrand.accentForeground)
+                        .tint(CarapaceBrand.accentForeground)
                         .disabled(self.viewModel.isUpdatingSessionSettings)
                         .accessibilityIdentifier("chat-fast-mode-toggle")
             }
@@ -488,27 +488,27 @@ struct ChatModelControlsMenuItems: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 Image(systemName: "text.alignleft")
-                    .foregroundStyle(OpenClawBrand.accentForeground)
+                    .foregroundStyle(CarapaceBrand.accentForeground)
                     .frame(width: ChatActionMenuMetric.iconWidth, alignment: .leading)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Tool details")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                     Text("Choose how much tool activity to show.")
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                if selectionID != OpenClawChatViewModel.inheritedThinkingSelectionID {
+                if selectionID != CarapaceChatViewModel.inheritedThinkingSelectionID {
                     Button {
-                        self.viewModel.selectVerboseLevel(OpenClawChatViewModel.inheritedThinkingSelectionID)
+                        self.viewModel.selectVerboseLevel(CarapaceChatViewModel.inheritedThinkingSelectionID)
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                             .frame(width: ChatActionMenuMetric.rowHeight, height: ChatActionMenuMetric.rowHeight)
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(OpenClawBrand.accentForeground)
+                    .foregroundStyle(CarapaceBrand.accentForeground)
                     .disabled(self.viewModel.isUpdatingSessionSettings)
                     .accessibilityLabel(String(localized: "Use default"))
                     .accessibilityIdentifier("chat-verbosity-use-default")
@@ -521,7 +521,7 @@ struct ChatModelControlsMenuItems: View {
                 {
                     ForEach(ChatVerbosityControlPresentation.levelIDs, id: \.self) { level in
                         Text(ChatVerbosityControlPresentation.label(levelID: level))
-                            .font(OpenClawType.caption)
+                            .font(CarapaceType.caption)
                             .tag(level)
                     }
                 }
@@ -539,7 +539,7 @@ struct ChatModelControlsMenuItems: View {
         .padding(.bottom, 10)
     }
 
-    private func modelOptions(_ models: [OpenClawChatModelChoice]) -> some View {
+    private func modelOptions(_ models: [CarapaceChatModelChoice]) -> some View {
         ForEach(models) { model in
             self.modelOption(
                 title: model.displayLabel,
@@ -578,19 +578,19 @@ struct ChatModelControlsMenuItems: View {
                     ChatModelProviderIcon(providerID: provider.id)
                         .frame(width: ChatActionMenuMetric.iconWidth, alignment: .leading)
                     Text(provider.displayName)
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                     Text(verbatim: provider.models.count.formatted())
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                     if isDefaultProvider {
                         Text("Default")
-                            .font(OpenClawType.caption)
+                            .font(CarapaceType.caption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 12)
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .font(OpenClawType.caption)
-                        .foregroundStyle(OpenClawBrand.accentForeground)
+                        .font(CarapaceType.caption)
+                        .foregroundStyle(CarapaceBrand.accentForeground)
                         .accessibilityHidden(true)
                 }
                 .frame(maxWidth: .infinity, minHeight: ChatActionMenuMetric.rowHeight, alignment: .leading)
@@ -628,24 +628,24 @@ struct ChatModelControlsMenuItems: View {
                     .frame(width: ChatActionMenuMetric.iconWidth, alignment: .leading)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                         .multilineTextAlignment(.leading)
                     if let unavailableDescription {
                         Text(unavailableDescription)
-                            .font(OpenClawType.caption)
+                            .font(CarapaceType.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
                 if showsDefaultBadge {
                     Text("Default")
-                        .font(OpenClawType.caption)
+                        .font(CarapaceType.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 12)
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .font(OpenClawType.body)
-                        .foregroundStyle(OpenClawBrand.accentForeground)
+                        .font(CarapaceType.body)
+                        .foregroundStyle(CarapaceBrand.accentForeground)
                         .accessibilityIdentifier("chat-menu-selection-checkmark")
                 }
             }

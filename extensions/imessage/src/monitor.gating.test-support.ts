@@ -1,5 +1,5 @@
 // Imessage tests cover monitor.gating plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { parseIMessageNotification } from "./monitor/parse-notification.js";
 import type { IMessagePayload } from "./monitor/types.js";
@@ -10,7 +10,7 @@ type DecisionParams = Parameters<InboundProcessingModule["resolveIMessageInbound
 let buildIMessageInboundContext: InboundProcessingModule["buildIMessageInboundContext"];
 let resolveIMessageInboundDecision: InboundProcessingModule["resolveIMessageInboundDecision"];
 
-function baseCfg(): OpenClawConfig {
+function baseCfg(): CarapaceConfig {
   return {
     channels: {
       imessage: {
@@ -22,13 +22,13 @@ function baseCfg(): OpenClawConfig {
     },
     session: { mainKey: "main" },
     messages: {
-      groupChat: { mentionPatterns: ["@openclaw"] },
+      groupChat: { mentionPatterns: ["@carapace"] },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
 async function resolve(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   message: IMessagePayload;
   storeAllowFrom?: string[];
 }) {
@@ -43,7 +43,7 @@ async function resolve(params: {
 }
 
 async function resolveDecision(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   message: IMessagePayload;
   groupHistories?: DecisionParams["groupHistories"];
   allowFrom?: string[];
@@ -82,7 +82,7 @@ async function resolveDispatchDecision(params: Parameters<typeof resolveDecision
 }
 
 async function buildDispatchContextPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   message: IMessagePayload;
   allowFrom?: string[];
   groupAllowFrom?: string[];
@@ -163,7 +163,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_id: 42,
       sender: "+15550002222",
       is_from_me: false,
-      text: "@openclaw ping",
+      text: "@carapace ping",
       is_group: true,
       chat_name: "Lobster Squad",
       participants: ["+1555", "+1556"],
@@ -187,7 +187,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_identifier: "thread-42",
       sender: "+15550002222",
       is_from_me: false,
-      text: "@openclaw ping",
+      text: "@carapace ping",
       is_group: true,
       chat_name: "Lobster Squad",
       participants: ["+1555", "+1556"],
@@ -241,7 +241,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_id: 55,
       sender: "+15550001111",
       is_from_me: false,
-      text: "@openclaw replying now",
+      text: "@carapace replying now",
       is_group: true,
       reply_to_guid: "parent-9001",
       reply_to_text: "blocked quote",
@@ -273,7 +273,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_id: 55,
       sender: "+15550001111",
       is_from_me: false,
-      text: "@openclaw replying now",
+      text: "@carapace replying now",
       is_group: true,
       reply_to_guid: "parent-9001",
       reply_to_text: "quoted context",
@@ -311,7 +311,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_id: 56,
       sender: "+15559998888",
       is_from_me: false,
-      text: "@openclaw replying now",
+      text: "@carapace replying now",
       is_group: true,
       reply_to_guid: "parent-9002",
       reply_to_text: "own quoted context",
@@ -343,7 +343,7 @@ describe("imessage monitor gating + envelope builders", () => {
       chat_id: 55,
       sender: "+15550001111",
       is_from_me: false,
-      text: "@openclaw replying now",
+      text: "@carapace replying now",
       is_group: true,
       reply_to_guid: "parent-9001",
       reply_to_text: "quoted context",
@@ -418,7 +418,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 123,
         sender: "+15550001111",
         is_from_me: false,
-        text: "@openclaw hello",
+        text: "@carapace hello",
         is_group: true,
       },
       groupPolicy: "open",
@@ -441,7 +441,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 202,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw hi",
+        text: "@carapace hi",
         is_group: true,
       },
       allowFrom: ["*"],
@@ -460,7 +460,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 101,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw ok",
+        text: "@carapace ok",
         is_group: true,
       },
       allowFrom: ["*"],
@@ -486,7 +486,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 101,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw ok",
+        text: "@carapace ok",
         is_group: true,
       },
       allowFrom: ["chat_id:101"],
@@ -511,7 +511,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 101,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw ok",
+        text: "@carapace ok",
         is_group: true,
       },
       allowFrom: ["chat_id:101"],
@@ -539,7 +539,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 101,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw ok",
+        text: "@carapace ok",
         is_group: true,
       },
       allowFrom: ["chat_id:101"],
@@ -615,7 +615,7 @@ describe("imessage monitor gating + envelope builders", () => {
         chat_id: 303,
         sender: "+15550003333",
         is_from_me: false,
-        text: "@openclaw hi",
+        text: "@carapace hi",
         is_group: true,
       },
       groupPolicy: "disabled",

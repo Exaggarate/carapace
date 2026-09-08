@@ -1,4 +1,4 @@
-import type { Context, Model } from "@openclaw/llm-core";
+import type { Context, Model } from "@carapace/llm-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupSessionResources } from "../session-resources.js";
 import { createOpenAIResponsesTransportStreamFn } from "./openai-responses-client.js";
@@ -6,8 +6,8 @@ import type { OpenAIResponsesOptions } from "./openai-responses-contracts.js";
 import { captureOpenAIResponses } from "./openai-responses-live-capture.test-support.js";
 
 const apiKey = process.env.OPENAI_API_KEY ?? "";
-const describeLive = process.env.OPENCLAW_LIVE_TEST === "1" && apiKey ? describe : describe.skip;
-const modelId = process.env.OPENCLAW_LIVE_RESPONSES_MODEL || "gpt-5.6-luna";
+const describeLive = process.env.CARAPACE_LIVE_TEST === "1" && apiKey ? describe : describe.skip;
+const modelId = process.env.CARAPACE_LIVE_RESPONSES_MODEL || "gpt-5.6-luna";
 const model = {
   id: modelId,
   name: modelId,

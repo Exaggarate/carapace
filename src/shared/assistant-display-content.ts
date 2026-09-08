@@ -1,7 +1,7 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { AssistantMessage } from "../llm/types.js";
 
-export const ASSISTANT_DISPLAY_CONTENT_FIELD = "openclawDisplayContent";
+export const ASSISTANT_DISPLAY_CONTENT_FIELD = "carapaceDisplayContent";
 
 type AssistantModelContentBlock = AssistantMessage["content"][number];
 

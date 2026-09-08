@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -79,7 +79,7 @@ suite.define(() => {
           },
           "agents.list": {
             agents: [
-              { id: "main", name: "OpenClaw" },
+              { id: "main", name: "Carapace" },
               { id: "writer", name: "Writer" },
             ],
             defaultId: "main",
@@ -93,7 +93,7 @@ suite.define(() => {
       expect(response?.status()).toBe(200);
       await gateway.waitForRequest("agent.identity.get");
       await expect.poll(() => avatarRequestCount).toBe(1);
-      const picker = page.locator("openclaw-agent-select");
+      const picker = page.locator("carapace-agent-select");
       await expect
         .poll(() =>
           picker.locator(".agent-select__avatar--text").first().getAttribute("data-avatar"),

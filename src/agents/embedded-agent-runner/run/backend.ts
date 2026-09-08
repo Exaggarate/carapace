@@ -1,5 +1,5 @@
 /**
- * Dispatches embedded attempts to native harness or OpenClaw backend execution.
+ * Dispatches embedded attempts to native harness or Carapace backend execution.
  */
 import {
   runAgentHarnessAttempt,
@@ -40,9 +40,9 @@ export async function runEmbeddedAttemptWithBackend(
   // Native harness fields cannot attest core registry settlement. The built-in
   // runner has already settled at its own attempt boundary.
   let requesterContinuationSettled =
-    result.agentHarnessId === "openclaw" && result.requesterContinuationSettled === true;
+    result.agentHarnessId === "carapace" && result.requesterContinuationSettled === true;
   if (
-    result.agentHarnessId !== "openclaw" &&
+    result.agentHarnessId !== "carapace" &&
     params.sessionKey &&
     result.acceptedSessionSpawns?.length
   ) {

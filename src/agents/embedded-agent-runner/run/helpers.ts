@@ -126,7 +126,7 @@ export function resolveActiveErrorContext(params: {
 }
 
 function isEmbeddedHarnessProvider(provider: string): boolean {
-  return provider.trim().toLowerCase() === "openclaw";
+  return provider.trim().toLowerCase() === "carapace";
 }
 
 export function resolveReportedModelRef(params: {

@@ -5,9 +5,9 @@ import {
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   BASE_HEAD,
   BRANCH,
@@ -38,7 +38,7 @@ const mocks = githubPublicationTestMocks();
 describe("Gateway GitHub publication", () => {
   installGitHubPublicationTestHarness();
   it("publishes through exact HTTPS and replays the durable terminal result", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const coordinator = createGitHubPublicationCoordinator({ placements });
     const request = {
@@ -53,12 +53,12 @@ describe("Gateway GitHub publication", () => {
       publisher: { source: "system-configured", accountId: 42, login: "roboclaw-bot" },
       requestId: expect.any(String),
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/125200",
-      repository: "openclaw/openclaw",
+      url: "https://github.com/Exaggarate/carapace/pull/125200",
+      repository: "carapace/carapace",
       branch: BRANCH,
       headCommit: NEW_HEAD,
     });
-    expect(commands.some((argv) => argv.includes("https://github.com/openclaw/openclaw.git"))).toBe(
+    expect(commands.some((argv) => argv.includes("https://github.com/Exaggarate/carapace.git"))).toBe(
       true,
     );
     expect(commands.some((argv) => argv.some((arg) => arg.includes("roboclaw-token")))).toBe(false);
@@ -114,14 +114,14 @@ describe("Gateway GitHub publication", () => {
       "github.com",
       "--method",
       "POST",
-      "repos/openclaw/openclaw/pulls",
+      "repos/carapace/carapace/pulls",
       "--input",
       "-",
     ]);
     expect(JSON.parse(post?.input ?? "null")).toEqual({
       title: "Publish the reconciled fix",
-      body: `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- openclaw-publication:${first.requestId} -->`,
-      head: `openclaw:${BRANCH}`,
+      body: `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- carapace-publication:${first.requestId} -->`,
+      head: `carapace:${BRANCH}`,
       base: "main",
       draft: true,
     });
@@ -132,8 +132,8 @@ describe("Gateway GitHub publication", () => {
     expect(JSON.stringify(persisted)).not.toContain("token");
 
     const commandCount = commands.length;
-    closeOpenClawStateDatabaseForTest();
-    const reopened = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeCarapaceStateDatabaseForTest();
+    const reopened = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const afterRestart = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database: reopened }),
     });
@@ -145,25 +145,25 @@ describe("Gateway GitHub publication", () => {
     mocks.resolveRepository.mockResolvedValue({
       checkoutRoot: "/repo/worktree",
       repoRoot: "/repo",
-      originUrl: "git@github.com:roboclaw-bot/openclaw.git",
+      originUrl: "git@github.com:roboclaw-bot/carapace.git",
       fingerprint: "fingerprint-1",
     });
     const fallback = mocks.runCommand.getMockImplementation()!;
     mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
       const command = argv.join(" ");
-      if (command.startsWith("gh api --hostname github.com repos/roboclaw-bot/openclaw --jq")) {
+      if (command.startsWith("gh api --hostname github.com repos/roboclaw-bot/carapace --jq")) {
         return commandResult(
-          '{"fork":true,"default_branch":"main","parent":{"name":"openclaw","default_branch":"main","owner":{"login":"openclaw"}}}\n',
+          '{"fork":true,"default_branch":"main","parent":{"name":"carapace","default_branch":"main","owner":{"login":"carapace"}}}\n',
         );
       }
-      if (command.includes("ls-remote") && command.includes("roboclaw-bot/openclaw.git")) {
+      if (command.includes("ls-remote") && command.includes("roboclaw-bot/carapace.git")) {
         return commandResult(`${NEW_HEAD}\trefs/heads/${BRANCH}\n`);
       }
-      if (command.includes("repos/openclaw/openclaw/pulls") && command.includes("state=all")) {
+      if (command.includes("repos/carapace/carapace/pulls") && command.includes("state=all")) {
         return commandResult(
           JSON.stringify([
             {
-              url: "https://github.com/openclaw/openclaw/pull/125201",
+              url: "https://github.com/Exaggarate/carapace/pull/125201",
               userId: 42,
               state: "open",
               body: "",
@@ -178,7 +178,7 @@ describe("Gateway GitHub publication", () => {
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -190,12 +190,12 @@ describe("Gateway GitHub publication", () => {
 
     expect(result).toMatchObject({
       status: "published",
-      repository: "openclaw/openclaw",
-      url: "https://github.com/openclaw/openclaw/pull/125201",
+      repository: "carapace/carapace",
+      url: "https://github.com/Exaggarate/carapace/pull/125201",
     });
     expect(
       mocks.runCommand.mock.calls.some(([argv]) =>
-        argv.includes("head=roboclaw-bot:openclaw/publication"),
+        argv.includes("head=roboclaw-bot:carapace/publication"),
       ),
     ).toBe(true);
     expect(mocks.runCommand.mock.calls.some(([argv]) => argv.includes("POST"))).toBe(false);
@@ -205,36 +205,36 @@ describe("Gateway GitHub publication", () => {
     mocks.resolveRepository.mockResolvedValue({
       checkoutRoot: "/repo/worktree",
       repoRoot: "/repo",
-      originUrl: "git@github.com:roboclaw-bot/openclaw.git",
+      originUrl: "git@github.com:roboclaw-bot/carapace.git",
       fingerprint: "fingerprint-1",
     });
     const fallback = mocks.runCommand.getMockImplementation()!;
     let remoteLookups = 0;
     mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
       const command = argv.join(" ");
-      if (command.startsWith("gh api --hostname github.com repos/roboclaw-bot/openclaw --jq")) {
+      if (command.startsWith("gh api --hostname github.com repos/roboclaw-bot/carapace --jq")) {
         return commandResult(
-          '{"fork":true,"default_branch":"main","parent":{"name":"openclaw","default_branch":"trunk","owner":{"login":"openclaw"}}}\n',
+          '{"fork":true,"default_branch":"main","parent":{"name":"carapace","default_branch":"trunk","owner":{"login":"carapace"}}}\n',
         );
       }
-      if (command.includes("ls-remote") && command.includes("roboclaw-bot/openclaw.git")) {
+      if (command.includes("ls-remote") && command.includes("roboclaw-bot/carapace.git")) {
         remoteLookups += 1;
         return commandResult(remoteLookups === 1 ? "" : `${NEW_HEAD}\trefs/heads/${BRANCH}\n`);
       }
-      if (command.includes("repos/openclaw/openclaw/pulls") && command.includes("state=all")) {
+      if (command.includes("repos/carapace/carapace/pulls") && command.includes("state=all")) {
         return commandResult("[]\n");
       }
       if (
         command ===
-        "gh api --hostname github.com --method POST repos/openclaw/openclaw/pulls --input -"
+        "gh api --hostname github.com --method POST repos/carapace/carapace/pulls --input -"
       ) {
-        return commandResult('{"html_url":"https://github.com/openclaw/openclaw/pull/125202"}\n');
+        return commandResult('{"html_url":"https://github.com/Exaggarate/carapace/pull/125202"}\n');
       }
       return await fallback(argv, options);
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -247,12 +247,12 @@ describe("Gateway GitHub publication", () => {
 
     expect(result).toMatchObject({
       status: "published",
-      repository: "openclaw/openclaw",
-      url: "https://github.com/openclaw/openclaw/pull/125202",
+      repository: "carapace/carapace",
+      url: "https://github.com/Exaggarate/carapace/pull/125202",
     });
     expect(
       mocks.runCommand.mock.calls.some(([argv]) =>
-        argv.includes("https://github.com/roboclaw-bot/openclaw.git"),
+        argv.includes("https://github.com/roboclaw-bot/carapace.git"),
       ),
     ).toBe(true);
     const post = mocks.runCommand.mock.calls.find(([argv]) => argv.includes("POST"));
@@ -263,13 +263,13 @@ describe("Gateway GitHub publication", () => {
       "github.com",
       "--method",
       "POST",
-      "repos/openclaw/openclaw/pulls",
+      "repos/carapace/carapace/pulls",
       "--input",
       "-",
     ]);
     expect(JSON.parse(post?.[1]?.input ?? "null")).toEqual({
       title: "Publish from the fork",
-      body: `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- openclaw-publication:${result.requestId} -->`,
+      body: `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- carapace-publication:${result.requestId} -->`,
       head: `roboclaw-bot:${BRANCH}`,
       base: "trunk",
       draft: true,
@@ -287,14 +287,14 @@ describe("Gateway GitHub publication", () => {
       let createdBody = "";
       mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
         const command = argv.join(" ");
-        if (command.includes("repos/openclaw/openclaw/pulls") && command.includes("state=all")) {
+        if (command.includes("repos/carapace/carapace/pulls") && command.includes("state=all")) {
           pullLookups += 1;
           return commandResult(
             pullLookups < 3
               ? "[]\n"
               : JSON.stringify([
                   {
-                    url: "https://github.com/openclaw/openclaw/pull/125203",
+                    url: "https://github.com/Exaggarate/carapace/pull/125203",
                     userId: 42,
                     state,
                     body: createdBody,
@@ -307,7 +307,7 @@ describe("Gateway GitHub publication", () => {
         }
         if (
           command ===
-          "gh api --hostname github.com --method POST repos/openclaw/openclaw/pulls --input -"
+          "gh api --hostname github.com --method POST repos/carapace/carapace/pulls --input -"
         ) {
           createdBody = String(JSON.parse(options?.input ?? "{}").body ?? "");
           return commandResult("", 1);
@@ -316,7 +316,7 @@ describe("Gateway GitHub publication", () => {
       });
       const coordinator = createGitHubPublicationCoordinator({
         placements: createWorkerSessionPlacementStore({
-          database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+          database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
         }),
       });
 
@@ -330,7 +330,7 @@ describe("Gateway GitHub publication", () => {
         expectedStatus === "published"
           ? {
               status: "published",
-              url: "https://github.com/openclaw/openclaw/pull/125203",
+              url: "https://github.com/Exaggarate/carapace/pull/125203",
             }
           : {
               status: "failed",
@@ -348,11 +348,11 @@ describe("Gateway GitHub publication", () => {
     const fallback = mocks.runCommand.getMockImplementation()!;
     mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
       const command = argv.join(" ");
-      if (command.includes("repos/openclaw/openclaw/pulls") && command.includes("state=all")) {
+      if (command.includes("repos/carapace/carapace/pulls") && command.includes("state=all")) {
         return commandResult(
           JSON.stringify([
             {
-              url: "https://github.com/openclaw/openclaw/pull/old-base",
+              url: "https://github.com/Exaggarate/carapace/pull/old-base",
               userId: 42,
               state: "open",
               body: "",
@@ -365,17 +365,17 @@ describe("Gateway GitHub publication", () => {
       }
       if (
         command ===
-        "gh api --hostname github.com --method POST repos/openclaw/openclaw/pulls --input -"
+        "gh api --hostname github.com --method POST repos/carapace/carapace/pulls --input -"
       ) {
         return commandResult(
-          '{"html_url":"https://github.com/openclaw/openclaw/pull/right-base"}\n',
+          '{"html_url":"https://github.com/Exaggarate/carapace/pull/right-base"}\n',
         );
       }
       return await fallback(argv, options);
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -387,10 +387,10 @@ describe("Gateway GitHub publication", () => {
 
     expect(result).toMatchObject({
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/right-base",
+      url: "https://github.com/Exaggarate/carapace/pull/right-base",
     });
     const lookup = mocks.runCommand.mock.calls.find(
-      ([argv]) => argv.includes("state=all") && argv.includes("head=openclaw:openclaw/publication"),
+      ([argv]) => argv.includes("state=all") && argv.includes("head=carapace:carapace/publication"),
     );
     expect(lookup?.[0]).toContain("base=main");
     expect(mocks.runCommand.mock.calls.filter(([argv]) => argv.includes("POST"))).toHaveLength(1);
@@ -409,7 +409,7 @@ describe("Gateway GitHub publication", () => {
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -427,12 +427,12 @@ describe("Gateway GitHub publication", () => {
     mocks.resolveRepository.mockResolvedValue({
       checkoutRoot: "/tmp/other-checkout",
       repoRoot: "/repo",
-      originUrl: "git@github.com:openclaw/openclaw.git",
+      originUrl: "git@github.com:Exaggarate/carapace.git",
       fingerprint: "fingerprint-1",
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -456,7 +456,7 @@ describe("Gateway GitHub publication", () => {
     );
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -472,7 +472,7 @@ describe("Gateway GitHub publication", () => {
   });
 
   it("fails a restarted request when the branch advanced beyond its accepted snapshot", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -511,7 +511,7 @@ describe("Gateway GitHub publication", () => {
       },
     };
     mocks.getConfigSnapshot.mockReturnValue({ config: resolved, sourceConfig: source });
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -543,11 +543,11 @@ describe("Gateway GitHub publication", () => {
       return {
         checkoutRoot: "/repo/worktree",
         repoRoot: "/repo",
-        originUrl: "git@github.com:openclaw/openclaw.git",
+        originUrl: "git@github.com:Exaggarate/carapace.git",
         fingerprint: "fingerprint-1",
       };
     });
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const first = createGitHubPublicationCoordinator({ placements });
     const second = createGitHubPublicationCoordinator({ placements });
@@ -579,7 +579,7 @@ describe("Gateway GitHub publication", () => {
   });
 
   it("rejects a stale turn claim after awaited identity verification", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-1",
@@ -620,7 +620,7 @@ describe("Gateway GitHub publication", () => {
   });
 
   it("rejects reuse of a worker publication idempotency key by a later turn", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-idempotency",
@@ -662,7 +662,7 @@ describe("Gateway GitHub publication", () => {
   });
 
   it("binds the accepted worker snapshot before acceptance and never recaptures it", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-snapshot",
@@ -731,11 +731,11 @@ describe("Gateway GitHub publication", () => {
       return {
         checkoutRoot: "/repo/worktree",
         repoRoot: "/repo",
-        originUrl: "git@github.com:openclaw/openclaw.git",
+        originUrl: "git@github.com:Exaggarate/carapace.git",
         fingerprint: "fingerprint-1",
       };
     });
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({ database }),
     });
@@ -768,14 +768,14 @@ describe("Gateway GitHub publication", () => {
   ])(
     "resumes after $phase without duplicating completed publication steps",
     async ({ phase, remoteInitiallyPublished, pullRequestExists }) => {
-      const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+      const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
       const first = createGitHubPublicationCoordinator({
         placements: createWorkerSessionPlacementStore({ database }),
       });
       first.read("create-schema");
       const requestId = `publication-after-${phase.replaceAll(" ", "-")}`;
       seedLocalPublication(database, { requestId, status: "publishing" });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       let remoteLookups = 0;
       mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
@@ -793,20 +793,20 @@ describe("Gateway GitHub publication", () => {
         }
         if (
           command.startsWith(
-            "gh api --hostname github.com repos/openclaw/openclaw --jq {fork, default_branch",
+            "gh api --hostname github.com repos/carapace/carapace --jq {fork, default_branch",
           )
         ) {
           return commandResult('{"fork":false,"default_branch":"main"}\n');
         }
         if (
           command.startsWith(
-            "gh api --hostname github.com repos/openclaw/openclaw/git/ref/heads/main --jq",
+            "gh api --hostname github.com repos/carapace/carapace/git/ref/heads/main --jq",
           )
         ) {
           return commandResult(JSON.stringify({ ref: "refs/heads/main", sha: BASE_HEAD }));
         }
         if (command === "git show -s --format=%B HEAD") {
-          return commandResult(`Resume the publication\n\nOpenClaw-Publication: ${requestId}\n`);
+          return commandResult(`Resume the publication\n\nCarapace-Publication: ${requestId}\n`);
         }
         if (command === "git rev-parse HEAD^{tree}") {
           return commandResult(`${WORKSPACE_TREE}\n`);
@@ -841,12 +841,12 @@ describe("Gateway GitHub publication", () => {
               : "",
           );
         }
-        if (command.includes(" repos/openclaw/openclaw/pulls ") && command.includes("state=all")) {
+        if (command.includes(" repos/carapace/carapace/pulls ") && command.includes("state=all")) {
           return commandResult(
             pullRequestExists
               ? JSON.stringify([
                   {
-                    url: "https://github.com/openclaw/openclaw/pull/125200",
+                    url: "https://github.com/Exaggarate/carapace/pull/125200",
                     userId: 42,
                     state: "open",
                     body: "",
@@ -860,13 +860,13 @@ describe("Gateway GitHub publication", () => {
         }
         if (
           command ===
-          "gh api --hostname github.com --method POST repos/openclaw/openclaw/pulls --input -"
+          "gh api --hostname github.com --method POST repos/carapace/carapace/pulls --input -"
         ) {
-          return commandResult('{"html_url":"https://github.com/openclaw/openclaw/pull/125200"}\n');
+          return commandResult('{"html_url":"https://github.com/Exaggarate/carapace/pull/125200"}\n');
         }
         return commandResult();
       });
-      const reopened = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+      const reopened = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
       const resumed = createGitHubPublicationCoordinator({
         placements: createWorkerSessionPlacementStore({ database: reopened }),
       });
@@ -877,8 +877,8 @@ describe("Gateway GitHub publication", () => {
         publisher: { source: "system-configured", accountId: 42, login: "roboclaw-bot" },
         requestId,
         status: "published",
-        url: "https://github.com/openclaw/openclaw/pull/125200",
-        repository: "openclaw/openclaw",
+        url: "https://github.com/Exaggarate/carapace/pull/125200",
+        repository: "carapace/carapace",
         branch: BRANCH,
         headCommit: NEW_HEAD,
       });
@@ -897,7 +897,7 @@ describe("Gateway GitHub publication", () => {
   );
 
   it("projects an accepted worker publication exactly once across transcript-report restart", async () => {
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const placements = createWorkerSessionPlacementStore({ database });
     const active = seedActivePlacement(placements, {
       environmentId: "environment-publication",
@@ -970,8 +970,8 @@ describe("Gateway GitHub publication", () => {
     });
     expect(publicationTranscriptMessages(events, requested.requestId)).toHaveLength(1);
 
-    closeOpenClawStateDatabaseForTest();
-    const reopened = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeCarapaceStateDatabaseForTest();
+    const reopened = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     const restarted = createGitHubPublicationRuntime({
       placements: createWorkerSessionPlacementStore({ database: reopened }),
       loadSessionRuntime,

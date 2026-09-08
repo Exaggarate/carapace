@@ -1,8 +1,8 @@
 // Simple completion runtime tests cover model resolution, provider auth, and
 // one-shot completion wiring before requests reach the shared LLM stream path.
-import { createApiRegistry } from "@openclaw/ai";
+import { createApiRegistry } from "@carapace/ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../plugins/plugin-metadata.test-support.js";
 import {
   looksLikeSecretSentinel,
@@ -103,7 +103,7 @@ beforeEach(() => {
   hoisted.getCurrentPluginMetadataSnapshotMock.mockReset();
   hoisted.acquireRuntimeLeaseMock.mockResolvedValue({
     snapshot: {
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       workspaceDir: "/tmp/runtime-workspace",
       config: {},
       authModes: {},
@@ -223,7 +223,7 @@ describe("prepareSimpleCompletionModel", () => {
       cfg: undefined,
       provider: "anthropic",
       modelId: "claude-opus-4-6",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       workspaceDir: "/tmp/runtime-workspace",
       modelResolver: hoisted.resolveModelAsyncMock as typeof resolveModelAsync,
     });
@@ -258,7 +258,7 @@ describe("prepareSimpleCompletionModel", () => {
       cfg: {},
       provider: "anthropic",
       modelId: "claude-opus-4-6",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       profileId: "anthropic:p2",
       bindAuthOwner: true,
     });
@@ -645,7 +645,7 @@ describe("prepareSimpleCompletionModel", () => {
       cfg: undefined,
       provider: "amazon-bedrock-mantle",
       modelId: "anthropic.claude-opus-4-7",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     });
 
     const runtimeAuthInput = callArg(hoisted.prepareProviderRuntimeAuthMock) as {
@@ -709,7 +709,7 @@ describe("prepareSimpleCompletionModel", () => {
     expect(hoisted.resolveModelAsyncMock).toHaveBeenCalledWith(
       "ollama",
       "llama3.2:latest",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       undefined,
       expect.objectContaining({
         skipAgentDiscovery: true,
@@ -750,7 +750,7 @@ describe("prepareSimpleCompletionModel", () => {
     expect(resolveModelAsync).toHaveBeenCalledWith(
       "anthropic",
       "claude-opus-4-6",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       undefined,
       expect.objectContaining({
         workspaceDir: "/tmp/runtime-workspace",
@@ -785,7 +785,7 @@ describe("prepareSimpleCompletionModel", () => {
     expect(hoisted.resolveModelAsyncMock).toHaveBeenCalledWith(
       "mistral",
       "mistral-medium-3-5",
-      "/tmp/openclaw-agent",
+      "/tmp/carapace-agent",
       undefined,
       expect.objectContaining({
         allowBundledStaticCatalogFallback: true,
@@ -815,7 +815,7 @@ describe("prepareSimpleCompletionModelForAgent", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(
       resolveSimpleCompletionSelectionForAgent({
@@ -847,7 +847,7 @@ describe("prepareSimpleCompletionModelForAgent", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const modelResolver = createOpenAIRouteModelResolver({
       api: "openai-chatgpt-responses",
       baseUrl: "https://chatgpt.com/backend-api/codex",
@@ -889,7 +889,7 @@ describe("prepareSimpleCompletionModelForAgent", () => {
   it("keeps the Codex route for OAuth auth", async () => {
     const cfg = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const modelResolver = createOpenAIRouteModelResolver({
       api: "openai-chatgpt-responses",
       baseUrl: "https://chatgpt.com/backend-api/codex",
@@ -931,7 +931,7 @@ describe("prepareSimpleCompletionModelForAgent", () => {
         },
       },
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const modelResolver = createOpenAIRouteModelResolver({
       api: "openai-responses",
       baseUrl: "https://relay.example/v1",
@@ -960,7 +960,7 @@ describe("prepareSimpleCompletionModelForAgent", () => {
   it("honors an explicit model ref while selecting its auth-compatible route", async () => {
     const cfg = {
       agents: { defaults: { model: "anthropic/claude-opus-4-6" } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const modelResolver = createOpenAIRouteModelResolver({
       api: "openai-chatgpt-responses",
       baseUrl: "https://chatgpt.com/backend-api/codex",

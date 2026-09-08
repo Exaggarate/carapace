@@ -1,6 +1,6 @@
 import path from "node:path";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveStateDir } from "../../config/paths.js";
 import {
   listConfiguredSessionStoreAgentIds,
@@ -11,7 +11,7 @@ import {
 } from "../../config/sessions.js";
 import { hasSessionEntriesByStatusReadOnly } from "../../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { LEGACY_IMPLICIT_AGENT_ID } from "../../routing/session-key.js";
 import { resolveAgentSessionDirs } from "../session-dirs.js";
@@ -65,13 +65,13 @@ export function hasCurrentProcessOwner(params: {
 }
 
 export async function discoverRestartRecoveryStoreTargets(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   stateDir?: string;
   statuses?: Parameters<typeof hasSessionEntriesByStatusReadOnly>[1];
 }): Promise<SessionStoreTarget[]> {
   const storeTargets: SessionStoreTarget[] = [];
   const stateDir = params.stateDir ?? resolveStateDir(process.env);
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   if (params.cfg) {
     // Recovery must not reopen a deleted or otherwise unconfigured agent database merely
     // because its old directory still exists on disk. Those stores are intentionally fenced

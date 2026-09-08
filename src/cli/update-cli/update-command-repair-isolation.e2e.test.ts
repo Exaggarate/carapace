@@ -7,7 +7,7 @@ import { hasNodeErrorCode } from "../../infra/path-guards.js";
 import { tryListenOnPort } from "../../infra/ports-probe.js";
 import { createUpdateRun, getUpdateRun } from "../../infra/update-run-ledger.js";
 import { withServer } from "../../plugin-sdk/test-helpers/http-test-server.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   repairIsolationConfig,
   repairIsolationProvider,
@@ -62,14 +62,14 @@ describe("staged CLI repair isolation", () => {
   ])(
     "$name",
     async ({ configChange }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           prefix: "repair-isolation-",
           layout: "split",
           env: {
-            OPENCLAW_GATEWAY_PORT: undefined,
-            OPENCLAW_GATEWAY_TOKEN: undefined,
-            OPENCLAW_GATEWAY_PASSWORD: undefined,
+            CARAPACE_GATEWAY_PORT: undefined,
+            CARAPACE_GATEWAY_TOKEN: undefined,
+            CARAPACE_GATEWAY_PASSWORD: undefined,
           },
         },
         async (state) => {
@@ -83,7 +83,7 @@ describe("staged CLI repair isolation", () => {
             // The update ledger has its own fixture so its intended writes cannot
             // disguise a write to the serving installation under examination.
             createUpdateRun({ trigger: "cli" }, { env: state.env });
-            const databasePath = state.statePath("state", "openclaw.sqlite");
+            const databasePath = state.statePath("state", "carapace.sqlite");
             const database = openNodeSqliteDatabase(databasePath);
             database.exec("PRAGMA journal_mode = WAL; PRAGMA wal_autocheckpoint = 0;");
             database.exec(
@@ -96,7 +96,7 @@ describe("staged CLI repair isolation", () => {
                 `${databasePath}-wal`,
                 `${databasePath}-shm`,
               ];
-              const ledgerEnv = { ...state.env, OPENCLAW_STATE_DIR: state.path("ledger") };
+              const ledgerEnv = { ...state.env, CARAPACE_STATE_DIR: state.path("ledger") };
               const run = createUpdateRun({ trigger: "cli" }, { env: ledgerEnv });
               const before = await Promise.all(
                 liveFiles.map(async (file) => ({ file, identity: await fileIdentity(file) })),
@@ -145,7 +145,7 @@ describe("staged CLI repair isolation", () => {
                   if (configChange) {
                     expect(proof.doctor, JSON.stringify(proof.doctor)).toMatchObject({ status: 0 });
                     const copied = openNodeSqliteDatabase(
-                      path.join(proof.stateDir, "state", "openclaw.sqlite"),
+                      path.join(proof.stateDir, "state", "carapace.sqlite"),
                     );
                     try {
                       expect(
@@ -212,7 +212,7 @@ describe("staged CLI repair isolation", () => {
               ]);
               if (configChange) {
                 expect(record?.repair[0]?.reason).toBe("repair-requires-config-change");
-                expect(result.finalValidation.summary).toContain("openclaw doctor --fix");
+                expect(result.finalValidation.summary).toContain("carapace doctor --fix");
                 expect(result.finalValidation.summary).not.toContain("debug");
               }
               await expect(fs.access(oracleTarget.stateDir)).rejects.toMatchObject({

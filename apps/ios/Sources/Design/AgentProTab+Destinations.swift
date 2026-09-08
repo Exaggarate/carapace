@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 import SwiftUI
 
 extension AgentProTab {
@@ -38,21 +38,21 @@ extension AgentProTab {
         .refreshable {
             await self.refreshAgents()
         }
-        .font(OpenClawType.body)
+        .font(CarapaceType.body)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 self.agentFilterMenu
                 self.gatewayToolbarButton
             }
             if let headerSidebarAction {
-                OpenClawSidebarToolbarItem(
+                CarapaceSidebarToolbarItem(
                     action: headerSidebarAction,
                     placement: .topBarLeading)
             }
         }
     }
 
-    func directHeaderSidebarAction(for route: AgentRoute) -> OpenClawSidebarHeaderAction? {
+    func directHeaderSidebarAction(for route: AgentRoute) -> CarapaceSidebarHeaderAction? {
         self.directRoute == route ? self.headerSidebarAction : nil
     }
 }

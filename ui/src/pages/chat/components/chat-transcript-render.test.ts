@@ -134,9 +134,9 @@ describe("chat transcript rendering", () => {
         ...props.messages,
         {
           role: "custom",
-          customType: "openclaw.context-compaction",
+          customType: "carapace.context-compaction",
           content: "Context compacted",
-          __openclaw: { id: "compacted-item", runId: "compact-run" },
+          __carapace: { id: "compacted-item", runId: "compact-run" },
           timestamp: 6_000,
         },
       ];
@@ -172,9 +172,9 @@ describe("chat transcript rendering", () => {
   it("keeps repeated compactions in one run distinct during history adoption", async () => {
     const persisted = (itemId: string, timestamp: number) => ({
       role: "custom",
-      customType: "openclaw.context-compaction",
+      customType: "carapace.context-compaction",
       content: "Context compacted",
-      __openclaw: { id: itemId, runId: "same-run", itemId },
+      __carapace: { id: itemId, runId: "same-run", itemId },
       timestamp,
     });
     const props = threadProps("pane-repeated-compaction", "agent:main:main", [
@@ -220,7 +220,7 @@ describe("chat transcript rendering", () => {
         role: "user",
         content: "Check the workspace",
         timestamp: 1_000,
-        __openclaw: { idempotencyKey: `${runId}:user` },
+        __carapace: { idempotencyKey: `${runId}:user` },
       },
       { role: "assistant", content: "Workspace checked", timestamp: 2_000, runId },
     ]);
@@ -345,8 +345,8 @@ describe("chat transcript rendering", () => {
       transcript.hostConnected();
       await flushDeferredRowPrune();
       expect(container.querySelector(".chat-work-group")).not.toBeNull();
-      expect(container.querySelectorAll("openclaw-browser-tab-card")).toHaveLength(1);
-      expect(container.querySelector("openclaw-browser-tab-card")?.latest).toBe(active);
+      expect(container.querySelectorAll("carapace-browser-tab-card")).toHaveLength(1);
+      expect(container.querySelector("carapace-browser-tab-card")?.latest).toBe(active);
       transcript.hostDisconnected();
     },
   );
@@ -444,7 +444,7 @@ describe("chat transcript rendering", () => {
           role: "user",
           content: "Start the task",
           timestamp: 1_000,
-          __openclaw: { idempotencyKey: "run-1:user" },
+          __carapace: { idempotencyKey: "run-1:user" },
         },
         { role: "assistant", content: "Partial response", timestamp: 2_000 },
       ]),
@@ -476,7 +476,7 @@ describe("chat transcript rendering", () => {
           role: "user",
           content: "Stop this task",
           timestamp: 3_000,
-          __openclaw: { idempotencyKey: "run-2:user" },
+          __carapace: { idempotencyKey: "run-2:user" },
         },
       ]),
       runStatus: {
@@ -563,7 +563,7 @@ describe("chat transcript rendering", () => {
             role: "user",
             content: "Inspect the workspace",
             timestamp: 1_000,
-            __openclaw: { id: "stream-prompt", idempotencyKey: `${runId}:user` },
+            __carapace: { id: "stream-prompt", idempotencyKey: `${runId}:user` },
           },
         ]),
         runId,
@@ -642,13 +642,13 @@ describe("chat transcript rendering", () => {
       {
         role: "assistant",
         content: "The original answer",
-        __openclaw: { id: "source-message" },
+        __carapace: { id: "source-message" },
         timestamp: 1_000,
       },
       {
         role: "user",
         content: "Follow up",
-        __openclaw: { id: "reply-message", replyToId: "source-message" },
+        __carapace: { id: "reply-message", replyToId: "source-message" },
         timestamp: 2_000,
       },
     ]);
@@ -683,7 +683,7 @@ describe("chat transcript rendering", () => {
         {
           role: "user",
           content: "Follow up",
-          __openclaw: { id: "reply-message", replyToId: "source-message" },
+          __carapace: { id: "reply-message", replyToId: "source-message" },
           timestamp: 2_000,
         },
       ]),
@@ -709,7 +709,7 @@ describe("chat transcript rendering", () => {
     resolvedMessage = {
       role: "assistant",
       content: "The original answer",
-      __openclaw: { id: "source-message" },
+      __carapace: { id: "source-message" },
       timestamp: 1_000,
     };
     props.replyMessageAccess.revision += 1;
@@ -734,13 +734,13 @@ describe("chat transcript rendering", () => {
         {
           role: "assistant",
           content: "The original answer",
-          __openclaw: { id: "source-message" },
+          __carapace: { id: "source-message" },
           timestamp: 1_000,
         },
         {
           role: "user",
           content: "Follow up",
-          __openclaw: {
+          __carapace: {
             id: "reply-message",
             replyToId: "source-message",
             replyToPreview: { text: "The original answer", senderLabel: "Molty" },

@@ -5,10 +5,10 @@ import {
   setDiscordTranscriptsVoiceManager,
 } from "../extensions/discord/test-api.js";
 import { createTranscriptsTool } from "../src/agents/tools/transcripts-tool.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../src/plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../src/plugins/runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../src/state/carapace-state-db.js";
 import { activeSessions } from "../src/transcripts/capture.js";
 import { TranscriptsStore } from "../src/transcripts/store.js";
 import { createTempDirTracker } from "./helpers/temp-dir.js";
@@ -37,7 +37,7 @@ function createTool(params: {
         groupSpace?: string;
         roleIds: readonly string[];
       };
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   stateDir: string;
 }) {
   return createTranscriptsTool({
@@ -52,7 +52,7 @@ function createTool(params: {
 
 function storeFor(stateDir: string): TranscriptsStore {
   return new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
   });
 }
 
@@ -85,12 +85,12 @@ describe("transcripts tool with the registered Discord provider", () => {
     }
     managers.clear();
     setActivePluginRegistry(createEmptyPluginRegistry(), "discord-transcripts-tool-test-cleanup");
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     tempDirs.cleanup();
   });
 
   it("keeps a model-requested account switch on the trusted Discord account", async () => {
-    const stateDir = tempDirs.make("openclaw-transcripts-discord-provider-");
+    const stateDir = tempDirs.make("carapace-transcripts-discord-provider-");
     const accountAJoin = vi.fn(async () => ({ ok: true, message: "joined account-a" }));
     const accountALeave = vi.fn(async () => {});
     const accountBJoin = vi.fn(async () => ({ ok: true, message: "joined account-b" }));
@@ -129,7 +129,7 @@ describe("transcripts tool with the registered Discord provider", () => {
         },
       },
       transcripts: { enabled: true },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const ownerTool = createTool({
       accountId: "account-a",
       caller: {
@@ -228,7 +228,7 @@ describe("transcripts tool with the registered Discord provider", () => {
   });
 
   it("rejects a Discord sender that the voice command policy denies", async () => {
-    const stateDir = tempDirs.make("openclaw-transcripts-discord-provider-denied-");
+    const stateDir = tempDirs.make("carapace-transcripts-discord-provider-denied-");
     const join = vi.fn(async () => ({ ok: true, message: "joined" }));
     registerManager({
       accountId: "account-a",
@@ -253,7 +253,7 @@ describe("transcripts tool with the registered Discord provider", () => {
         },
       },
       transcripts: { enabled: true },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const deniedTool = createTool({
       accountId: "account-a",
       caller: {

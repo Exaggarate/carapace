@@ -2,7 +2,7 @@
 import type {
   PluginDoctorStateMigration,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import type {
   PersistedWorkboardAttachment,
   PersistedWorkboardBoard,
@@ -14,7 +14,7 @@ import type {
 const MAX_CARDS = 2000;
 
 function migrationEnv(params: { env: NodeJS.ProcessEnv; stateDir: string }): NodeJS.ProcessEnv {
-  return { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
+  return { ...params.env, CARAPACE_STATE_DIR: params.stateDir };
 }
 
 function openLegacyStore<T>(params: {

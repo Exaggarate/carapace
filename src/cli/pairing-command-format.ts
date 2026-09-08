@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { formatCliCommand } from "./command-format.js";
 import type { GatewayRpcOpts } from "./gateway-rpc.types.js";
 import { quoteCliArg } from "./quote-cli-arg.js";
@@ -9,7 +9,7 @@ export function formatPairingApproveCommand(
   requestId: string,
   opts: Pick<GatewayRpcOpts, "url" | "timeout" | "json"> = {},
 ): string {
-  const args = ["openclaw", group, "approve", requestId];
+  const args = ["carapace", group, "approve", requestId];
   const url = normalizeOptionalString(opts.url);
   if (url) {
     args.push("--url", url);

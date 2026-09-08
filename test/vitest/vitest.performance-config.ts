@@ -43,23 +43,23 @@ export function loadVitestPerformanceConfig(
   const config: VitestPerformanceConfig = {};
   const windowsEnv = isWindowsEnv(env, platform);
 
-  if (!windowsEnv && !isDisabled(env.OPENCLAW_VITEST_FS_MODULE_CACHE)) {
+  if (!windowsEnv && !isDisabled(env.CARAPACE_VITEST_FS_MODULE_CACHE)) {
     config.fsModuleCache = true;
   }
-  if (windowsEnv && isEnabled(env.OPENCLAW_VITEST_FS_MODULE_CACHE)) {
+  if (windowsEnv && isEnabled(env.CARAPACE_VITEST_FS_MODULE_CACHE)) {
     config.fsModuleCache = true;
   }
   if (config.fsModuleCache) {
     // The default leaf cannot contain the scheduler's concurrent cache leaves:
     // Vitest recursively removes its selected directory when lockfiles change.
     config.fsModuleCachePath =
-      env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH?.trim() ||
+      env.CARAPACE_VITEST_FS_MODULE_CACHE_PATH?.trim() ||
       path.join(resolveVitestFsModuleCacheRoot(cwd), "default");
   }
-  if (isEnabled(env.OPENCLAW_VITEST_IMPORT_DURATIONS)) {
+  if (isEnabled(env.CARAPACE_VITEST_IMPORT_DURATIONS)) {
     (config.experimental ??= {}).importDurations = { print: true };
   }
-  if (isEnabled(env.OPENCLAW_VITEST_PRINT_IMPORT_BREAKDOWN)) {
+  if (isEnabled(env.CARAPACE_VITEST_PRINT_IMPORT_BREAKDOWN)) {
     (config.experimental ??= {}).printImportBreakdown = true;
   }
 

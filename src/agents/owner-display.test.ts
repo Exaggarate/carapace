@@ -1,6 +1,6 @@
 // Verifies bounded owner prompt identities and retired secret-generation behavior.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ensureOwnerDisplaySecret, resolveOwnerPromptNumbers } from "./owner-display.js";
 
 describe("resolveOwnerPromptNumbers", () => {
@@ -65,7 +65,7 @@ describe("ensureOwnerDisplaySecret", () => {
       commands: {
         ownerDisplay: "hash",
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = ensureOwnerDisplaySecret(cfg, () => "generated-owner-secret");
     expect(result.generatedSecret).toBeUndefined();
@@ -79,7 +79,7 @@ describe("ensureOwnerDisplaySecret", () => {
         ownerDisplay: "hash",
         ownerDisplaySecret: "existing-owner-secret", // pragma: allowlist secret
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = ensureOwnerDisplaySecret(cfg, () => "generated-owner-secret");
     expect(result.generatedSecret).toBeUndefined();

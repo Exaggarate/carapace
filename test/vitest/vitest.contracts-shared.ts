@@ -34,7 +34,7 @@ export function createContractsVitestConfig(
   const cliIncludePatterns = narrowIncludePatternsForCli(includePatterns, argv);
   const envIncludePatterns = intersectIncludePatterns(
     includePatterns,
-    loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env),
+    loadPatternListFromEnv("CARAPACE_VITEST_INCLUDE_FILE", env),
   );
   return defineConfig({
     ...base,

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach } from "vitest";
 import { generateChromeExtensionIdForPath } from "./extension-install-layout.js";
 
@@ -52,9 +52,9 @@ export function useExtensionInstallFixture() {
   // Register before caller cleanup hooks so Vitest restores mocks before deleting fixtures.
   const tempRoots = useAutoCleanupTempDirTracker(afterEach);
   async function fixture(platform: NodeJS.Platform = "linux") {
-    const root = tempRoots.make("openclaw-extension-install-");
+    const root = tempRoots.make("carapace-extension-install-");
     const homeDir = path.join(root, "home");
-    const stateDir = path.join(homeDir, ".openclaw");
+    const stateDir = path.join(homeDir, ".carapace");
     const bundledDir = path.join(root, "package", "extensions", "browser", "chrome-extension");
     const pluginRoot = path.dirname(bundledDir);
     const nativeHostPath = path.join(root, "package", "native-host-entry.js");

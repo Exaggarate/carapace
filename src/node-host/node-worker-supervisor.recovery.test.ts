@@ -3,13 +3,13 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { NodeWorkerCapacity } from "./node-worker-capacity.js";
 import { NodeWorkerContainerLifecycle } from "./node-worker-container-lifecycle.js";
 import { NodeWorkerLaunchStore, type NodeWorkerLaunchReceipt } from "./node-worker-launch-store.js";
@@ -54,7 +54,7 @@ afterEach(async () => {
   }
   spawned.clear();
   ownedProcessGroups.length = 0;
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function fixture(label: string) {
@@ -82,7 +82,7 @@ function insertLaunch(params: {
   worker?: NodeWorkerProcessIdentity;
   turn?: true;
 }) {
-  const database = openOpenClawStateDatabase({ env: params.env }).db;
+  const database = openCarapaceStateDatabase({ env: params.env }).db;
   const state = params.turn ? "pending" : params.state;
   database
     .prepare(
@@ -171,7 +171,7 @@ function writeSupervisorOwnerScript(root: string): string {
       const [bundleRoot, stateDir, inputPath] = process.argv.slice(2);
       const supervisor = createNodeWorkerSupervisor({
         bundleRoot,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const shutdown = async () => {
         await supervisor.close();
@@ -179,7 +179,7 @@ function writeSupervisorOwnerScript(root: string): string {
       };
       process.once("SIGTERM", () => void shutdown());
       const input = JSON.parse(fs.readFileSync(inputPath, "utf8"));
-      const receipt = await supervisor.launch(input, ${JSON.stringify({ kind: "unix", socketPath: "/tmp/openclaw-worker/gateway.sock" })});
+      const receipt = await supervisor.launch(input, ${JSON.stringify({ kind: "unix", socketPath: "/tmp/carapace-worker/gateway.sock" })});
       process.stdout.write(JSON.stringify(receipt) + "\\n");
       setInterval(() => {}, 1000);
     `,
@@ -202,7 +202,7 @@ function spawnSupervisorOwner(params: {
       "tsx",
       writeSupervisorOwnerScript(params.root),
       params.bundleRoot,
-      params.env.OPENCLAW_STATE_DIR!,
+      params.env.CARAPACE_STATE_DIR!,
       inputPath,
     ],
     { stdio: ["ignore", "pipe", "pipe"] },
@@ -466,7 +466,7 @@ describe("node worker supervisor recovery", () => {
         import { NodeWorkerTurnStore } from ${JSON.stringify(turnsUrl)};
         import { requireNodeWorkerProcessIdentity } from ${JSON.stringify(identityUrl)};
         const [stateDir, claimPath] = process.argv.slice(2);
-        const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+        const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
         const store = new NodeWorkerLaunchStore({ env });
         const claim = JSON.parse(fs.readFileSync(claimPath, "utf8"));
         const supervisor = requireNodeWorkerProcessIdentity(process.pid);
@@ -484,7 +484,7 @@ describe("node worker supervisor recovery", () => {
     );
     const owner = spawn(
       process.execPath,
-      ["--import", "tsx", scriptPath, env.OPENCLAW_STATE_DIR!, claimPath],
+      ["--import", "tsx", scriptPath, env.CARAPACE_STATE_DIR!, claimPath],
       { stdio: ["ignore", "pipe", "pipe"] },
     );
     spawned.add(owner);
@@ -528,7 +528,7 @@ describe("node worker supervisor recovery", () => {
       const lifecycle = new NodeWorkerContainerLifecycle(engine, bundleRoot, store);
       const replaceOwner = async () => {
         await Promise.resolve();
-        openOpenClawStateDatabase({ env })
+        openCarapaceStateDatabase({ env })
           .db.prepare(
             "UPDATE node_worker_launches SET supervisor_pid = ?, supervisor_start_time = ? WHERE launch_id = ?",
           )

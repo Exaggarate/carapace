@@ -1,7 +1,7 @@
 // Store-bound question ownership keeps credential metadata and plaintext handling together.
-import { asSafeIntegerInRange } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { asSafeIntegerInRange } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import type {
   Question,
   QuestionAnswers,

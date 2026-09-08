@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { DiscordError } from "../internal/discord.js";
 import type { MockCallSource } from "./manager.e2e.test-support.js";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
@@ -115,7 +115,7 @@ defineDiscordVoiceTests(
 
       await manager.join({ guildId: "g1", channelId: "1001" });
 
-      expect(getVoiceConnectionMock).toHaveBeenCalledWith("g1", "openclaw:default");
+      expect(getVoiceConnectionMock).toHaveBeenCalledWith("g1", "carapace:default");
       expect(staleConnection.destroy).toHaveBeenCalledTimes(1);
       expectConnectedStatus(manager, "1001");
     });
@@ -127,15 +127,15 @@ defineDiscordVoiceTests(
       await firstManager.join({ guildId: "g1", channelId: "1001" });
       await secondManager.join({ guildId: "g1", channelId: "1002" });
 
-      expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(1, "g1", "openclaw:first");
-      expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(2, "g1", "openclaw:second");
+      expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(1, "g1", "carapace:first");
+      expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(2, "g1", "carapace:second");
       expect(joinVoiceChannelMock).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining({ group: "openclaw:first" }),
+        expect.objectContaining({ group: "carapace:first" }),
       );
       expect(joinVoiceChannelMock).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ group: "openclaw:second" }),
+        expect.objectContaining({ group: "carapace:second" }),
       );
     });
 

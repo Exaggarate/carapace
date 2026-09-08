@@ -1,5 +1,5 @@
 // Talk provider registry stores realtime voice provider factories.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolvePluginCapabilityProvider,
   resolvePluginCapabilityProviders,
@@ -24,7 +24,7 @@ export function normalizeRealtimeVoiceProviderId(
  * Lists canonical realtime voice providers, discovering additional candidates through manifest policy.
  */
 export function listRealtimeVoiceProviders(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   additionalProviderIds?: readonly string[],
 ): RealtimeVoiceProviderPlugin[] {
   const providers = resolvePluginCapabilityProviders({
@@ -40,7 +40,7 @@ export function listRealtimeVoiceProviders(
  */
 export function getRealtimeVoiceProvider(
   providerId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): RealtimeVoiceProviderPlugin | undefined {
   const normalized = normalizeRealtimeVoiceProviderId(providerId);
   if (!normalized) {
@@ -58,7 +58,7 @@ export function getRealtimeVoiceProvider(
  */
 export function canonicalizeRealtimeVoiceProviderId(
   providerId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): RealtimeVoiceProviderId | undefined {
   const normalized = normalizeRealtimeVoiceProviderId(providerId);
   if (!normalized) {

@@ -1,6 +1,6 @@
 # Basic turns
 
-Basic turns prove that a dedicated Telegram user can reach the OpenClaw bot and
+Basic turns prove that a dedicated Telegram user can reach the Carapace bot and
 receive the deterministic provider response in the same chat.
 
 ## Sub-features
@@ -28,13 +28,13 @@ Preconditions:
   mkdir -p "$TELEGRAM_E2E_PROOF_DIR/basic-turns"
   node "$TELEGRAM_E2E_SKILL_DIR/scripts/run-mock-sut-user-e2e.mjs" \
     --dm --timeout-ms 25000 \
-    --text 'Please answer with OPENCLAW_E2E_BASIC only.' \
+    --text 'Please answer with CARAPACE_E2E_BASIC only.' \
     --record "$TELEGRAM_E2E_PROOF_DIR/basic-turns/events.ndjson" \
     --output "$TELEGRAM_E2E_PROOF_DIR/basic-turns/summary.json"
   ```
 
   `summary.json` names the sent message, records at least one SUT message, and
-  includes `OPENCLAW_E2E_BASIC` in `sutRevisionTexts`.
+  includes `CARAPACE_E2E_BASIC` in `sutRevisionTexts`.
 
 - **Confirm the boundary.** Require at least one `POST /v1/responses` row in
   `mock-openai-requests.ndjson`. The real Telegram event and provider request
@@ -46,13 +46,13 @@ Preconditions:
   mkdir -p "$TELEGRAM_E2E_PROOF_DIR/basic-group"
   node "$TELEGRAM_E2E_SKILL_DIR/scripts/run-mock-sut-user-e2e.mjs" \
     --timeout-ms 25000 \
-    --text '@{sut} Please answer with OPENCLAW_E2E_GROUP only.' \
+    --text '@{sut} Please answer with CARAPACE_E2E_GROUP only.' \
     --record "$TELEGRAM_E2E_PROOF_DIR/basic-group/events.ndjson" \
     --output "$TELEGRAM_E2E_PROOF_DIR/basic-group/summary.json"
   ```
 
   Require the sent group message, a SUT reply containing
-  `OPENCLAW_E2E_GROUP`, and one logged model request.
+  `CARAPACE_E2E_GROUP`, and one logged model request.
 
 - **Drive a native command.** Run:
 

@@ -1,9 +1,9 @@
 // Verifies persisted provider auth markers preserve credential provenance.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 import { captureEnv, withEnvAsync } from "../test-utils/env.js";
 import type { AuthProfileCredential, AuthProfileStore } from "./auth-profiles/types.js";
@@ -116,15 +116,15 @@ describe("models-config provider auth provenance", () => {
       clear: () => void;
       cold: () => void;
       discover: (
-        config?: OpenClawConfig,
+        config?: CarapaceConfig,
       ) => ReturnType<
         typeof import("./models-config.providers.implicit.js").resolveImplicitProviders
       >;
       emitOutcome: () => void;
       plan: (
-        source?: OpenClawConfig,
-        prepared?: OpenClawConfig,
-      ) => ReturnType<typeof import("./models-config.plan.js").planOpenClawModelsJson>;
+        source?: CarapaceConfig,
+        prepared?: CarapaceConfig,
+      ) => ReturnType<typeof import("./models-config.plan.js").planCarapaceModelsJson>;
       authorization: Array<string | null>;
       authResults: Array<{ apiKey?: string; discoveryApiKey?: string }>;
       outcomes: Array<import("../plugins/provider-catalog.types.js").ProviderCatalogOutcome>;
@@ -135,9 +135,9 @@ describe("models-config provider auth provenance", () => {
     refSource: "store" | "env" = "store",
   ) {
     const stateDir = tempDirs.make("discovery-ref-provenance-");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir, OPENAI_API_KEY: undefined }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir, OPENAI_API_KEY: undefined }, async () => {
       const { resolveImplicitProviders } = await import("./models-config.providers.implicit.js");
-      const { planOpenClawModelsJson } = await import("./models-config.plan.js");
+      const { planCarapaceModelsJson } = await import("./models-config.plan.js");
       const { clearRuntimeAuthProfileStoreSnapshots, setRuntimeAuthProfileStoreSnapshot } =
         await import("./auth-profiles/runtime-snapshots.js");
       const { resolveApiKeyForProfile } = await import("./auth-profiles/oauth.js");
@@ -276,7 +276,7 @@ describe("models-config provider auth provenance", () => {
             emitProfileOutcome = true;
           },
           plan: (source = {}, prepared = source) =>
-            planOpenClawModelsJson({
+            planCarapaceModelsJson({
               context: {
                 cfg: source,
                 discoveryAuthConfig: prepared,
@@ -640,8 +640,8 @@ describe("models-config provider auth provenance", () => {
 
   const configRef = { source: "store", provider: "default", id: "CONFIG_KEY" } as const;
   const configWithKey = (
-    apiKey: NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>[string]["apiKey"],
-  ): OpenClawConfig => ({
+    apiKey: NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>[string]["apiKey"],
+  ): CarapaceConfig => ({
     models: {
       providers: { openai: { baseUrl: "https://catalog.example.test/v1", apiKey, models: [] } },
     },

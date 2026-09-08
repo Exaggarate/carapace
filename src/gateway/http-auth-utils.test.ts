@@ -1,8 +1,8 @@
 import type { IncomingMessage } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setDisplayName } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { GatewayAuthResult } from "./auth.js";
 import {
   checkGatewayHttpRequestAuth,
@@ -23,7 +23,7 @@ vi.mock("../state/user-profiles.js", async (importOriginal) => {
   return { ...actual, ensureGatewayOwnerProfile: ensureOwner };
 });
 
-const roles: NonNullable<NonNullable<OpenClawConfig["gateway"]>["roles"]> = {
+const roles: NonNullable<NonNullable<CarapaceConfig["gateway"]>["roles"]> = {
   default: "reader",
   definitions: { reader: { sessions: { others: "view" }, agents: "*", scopes: ["operator.read"] } },
 };
@@ -31,7 +31,7 @@ const req = { headers: {}, socket: { remoteAddress: "127.0.0.1" } } as IncomingM
 
 async function authenticate(
   method: GatewayAuthResult["method"],
-  cfg: OpenClawConfig = {},
+  cfg: CarapaceConfig = {},
   user?: string,
 ) {
   authorize.mockResolvedValueOnce({ ok: true, method, ...(user ? { user } : {}) });
@@ -42,7 +42,7 @@ describe("HTTP gateway owner profiles", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("shares the durable owner across auth methods and preserves an edited name", async () => {
-    await withOpenClawTestState({ label: "http-owner-profile" }, async () => {
+    await withCarapaceTestState({ label: "http-owner-profile" }, async () => {
       let profileId: string | undefined;
       for (const method of ["token", "password", "device-token", "none"] as const) {
         const result = await authenticate(method);
@@ -69,7 +69,7 @@ describe("HTTP gateway owner profiles", () => {
   it.each(["token", "password"] as const)(
     "keeps %s owner authority with configured roles",
     async (method) => {
-      await withOpenClawTestState({ label: "http-owner-roles" }, async () => {
+      await withCarapaceTestState({ label: "http-owner-roles" }, async () => {
         const result = await authenticate(method, { gateway: { roles } });
         expect(result.ok).toBe(true);
         if (!result.ok) {
@@ -97,7 +97,7 @@ describe("HTTP gateway owner profiles", () => {
   );
 
   it("preserves a verified user's profile and role ceiling", async () => {
-    await withOpenClawTestState({ label: "http-identified-profile" }, async () => {
+    await withCarapaceTestState({ label: "http-identified-profile" }, async () => {
       const result = await authenticate(
         "trusted-proxy",
         { gateway: { roles } },

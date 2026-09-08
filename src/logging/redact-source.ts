@@ -1,5 +1,5 @@
 import { parseExpressionAt, tokenizer, tokTypes, type TokenType } from "acorn";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { redactInputTextWithSourcePolicy, redactToolPayloadTextWithConfig } from "./redact.js";
 
 // This bounds syntax work, not accepted tool input. Oversized or unlexable source
@@ -49,7 +49,7 @@ function createSourceAssignmentMatcher(): (text: string, offset: number) => bool
 
 export function redactSourceInputTextWithConfig(
   text: string,
-  loggingConfig?: OpenClawConfig["logging"],
+  loggingConfig?: CarapaceConfig["logging"],
 ): string {
   if (text.length > MAX_SOURCE_REDACTION_SYNTAX_CHARS) {
     return redactToolPayloadTextWithConfig(text, loggingConfig);

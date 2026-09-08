@@ -6,7 +6,7 @@
  */
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { Type } from "typebox";
 import type { AssistantMessage, Message, Tool } from "../../llm/types.js";
 import { extractEmbeddedAssistantText } from "../embedded-agent-utils.js";
@@ -546,7 +546,7 @@ export async function runLiveCacheRegression(): Promise<LiveCacheRegressionResul
     config: {
       provider: "openai",
       api: "openai-responses",
-      envVar: "OPENCLAW_LIVE_OPENAI_CACHE_MODEL",
+      envVar: "CARAPACE_LIVE_OPENAI_CACHE_MODEL",
       preferredModelIds: ["gpt-5.6-luna", "gpt-5.5", "gpt-5.4-mini", "gpt-5.4"],
     },
     regressions,
@@ -557,7 +557,7 @@ export async function runLiveCacheRegression(): Promise<LiveCacheRegressionResul
     config: {
       provider: "anthropic",
       api: "anthropic-messages",
-      envVar: "OPENCLAW_LIVE_ANTHROPIC_CACHE_MODEL",
+      envVar: "CARAPACE_LIVE_ANTHROPIC_CACHE_MODEL",
       preferredModelIds: ["claude-sonnet-5", "claude-haiku-4-5"],
     },
     regressions,

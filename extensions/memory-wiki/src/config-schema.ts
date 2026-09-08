@@ -1,5 +1,5 @@
 // Keep exported JSON Schema construction outside Doctor's config-resolution closure.
-import { mapPluginConfigIssues } from "openclaw/plugin-sdk/extension-shared";
+import { mapPluginConfigIssues } from "carapace/plugin-sdk/extension-shared";
 import { buildPluginConfigSchema } from "../api.js";
 import { MemoryWikiConfigSource, resolveMemoryWikiConfig } from "./config.js";
 

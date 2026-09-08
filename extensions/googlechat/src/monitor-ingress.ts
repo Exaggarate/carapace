@@ -1,13 +1,13 @@
 // Googlechat plugin module owns raw webhook durable admission and draining.
-import { createStandardRawEventIngressMonitor } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { createStandardRawEventIngressMonitor } from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   createChannelIngressError,
   type ChannelIngressQueue,
   type ChannelIngressMonitorDeliveryResult,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
-import { collectErrorGraphCandidates, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
+import { collectErrorGraphCandidates, formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { GoogleChatEventPayloadError, parseGoogleChatInboundPayload } from "./monitor-event.js";
 import { getGoogleChatRuntime } from "./runtime.js";
 import type { GoogleChatEvent } from "./types.js";

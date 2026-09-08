@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 const [ref, workflowSha, allowFrozenSource] = process.argv.slice(2);
 const isSha = (value) => /^[0-9a-f]{40}$/u.test(value ?? "");
 const NATIVE_MARKER =
-  /\b(?:configureFsSafeNative|getFsSafeNativeConfig|getNativeBinding)\b|@openclaw\/fs-safe\/native/u;
+  /\b(?:configureFsSafeNative|getFsSafeNativeConfig|getNativeBinding)\b|@carapace\/fs-safe\/native/u;
 const LEGACY_PYTHON_ONLY_FS_SAFE_VERSION = "0.3.0";
 assert.ok(isSha(ref), "ref must be a full lowercase commit SHA");
 assert.ok(isSha(workflowSha), "workflow SHA must be a full lowercase commit SHA");

@@ -1,4 +1,4 @@
-// Tests OpenClaw home directory resolution.
+// Tests Carapace home directory resolution.
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -15,14 +15,14 @@ import {
 describe("resolveEffectiveHomeDir", () => {
   it.each([
     {
-      name: "prefers OPENCLAW_HOME over HOME and USERPROFILE",
+      name: "prefers CARAPACE_HOME over HOME and USERPROFILE",
       env: {
-        OPENCLAW_HOME: " /srv/openclaw-home ",
+        CARAPACE_HOME: " /srv/carapace-home ",
         HOME: "/home/other",
         USERPROFILE: "C:/Users/other",
       } as NodeJS.ProcessEnv,
       homedir: () => "/fallback",
-      expected: "/srv/openclaw-home",
+      expected: "/srv/carapace-home",
     },
     {
       name: "falls back to HOME",
@@ -40,7 +40,7 @@ describe("resolveEffectiveHomeDir", () => {
     {
       name: "falls back to homedir when env values are blank",
       env: {
-        OPENCLAW_HOME: " ",
+        CARAPACE_HOME: " ",
         HOME: " ",
         USERPROFILE: "\t",
       } as NodeJS.ProcessEnv,
@@ -50,7 +50,7 @@ describe("resolveEffectiveHomeDir", () => {
     {
       name: "treats literal undefined env values as unset",
       env: {
-        OPENCLAW_HOME: "undefined",
+        CARAPACE_HOME: "undefined",
         HOME: "undefined",
         USERPROFILE: "null",
       } as NodeJS.ProcessEnv,
@@ -65,7 +65,7 @@ describe("resolveEffectiveHomeDir", () => {
     {
       name: "expands ~/ using HOME",
       env: {
-        OPENCLAW_HOME: "~/svc",
+        CARAPACE_HOME: "~/svc",
         HOME: "/home/alice",
       } as NodeJS.ProcessEnv,
       expected: "/home/alice/svc",
@@ -73,7 +73,7 @@ describe("resolveEffectiveHomeDir", () => {
     {
       name: "expands ~\\\\ using USERPROFILE",
       env: {
-        OPENCLAW_HOME: "~\\svc",
+        CARAPACE_HOME: "~\\svc",
         HOME: " ",
         USERPROFILE: "C:/Users/alice",
       } as NodeJS.ProcessEnv,
@@ -120,7 +120,7 @@ describe("resolveEffectiveHomeDir", () => {
 
   it("uses Termux PREFIX for tilde expansion when HOME is unset", () => {
     const env = {
-      OPENCLAW_HOME: "~/workspace",
+      CARAPACE_HOME: "~/workspace",
       PREFIX: "/data/data/com.termux/files/usr",
       ANDROID_DATA: "/data",
     } as NodeJS.ProcessEnv;
@@ -131,18 +131,18 @@ describe("resolveEffectiveHomeDir", () => {
     ).toBe(path.resolve("/data/data/com.termux/files/home/workspace"));
   });
 
-  it("expands OPENCLAW_HOME when set to ~", () => {
+  it("expands CARAPACE_HOME when set to ~", () => {
     const env = {
-      OPENCLAW_HOME: "~/svc",
+      CARAPACE_HOME: "~/svc",
       HOME: "/home/alice",
     } as NodeJS.ProcessEnv;
 
     expect(resolveEffectiveHomeDir(env)).toBe(path.resolve("/home/alice/svc"));
   });
 
-  it("does not interpret $ patterns in HOME when expanding OPENCLAW_HOME tilde", () => {
+  it("does not interpret $ patterns in HOME when expanding CARAPACE_HOME tilde", () => {
     const env = {
-      OPENCLAW_HOME: "~/state",
+      CARAPACE_HOME: "~/state",
       HOME: "/home/$&user",
     } as NodeJS.ProcessEnv;
 
@@ -161,14 +161,14 @@ describe("resolveRequiredHomeDir", () => {
       expected: process.cwd(),
     },
     {
-      name: "returns a fully resolved path for OPENCLAW_HOME",
-      env: { OPENCLAW_HOME: "/custom/home" } as NodeJS.ProcessEnv,
+      name: "returns a fully resolved path for CARAPACE_HOME",
+      env: { CARAPACE_HOME: "/custom/home" } as NodeJS.ProcessEnv,
       homedir: () => "/fallback",
       expected: path.resolve("/custom/home"),
     },
     {
-      name: "returns cwd when OPENCLAW_HOME is tilde-only and no fallback home exists",
-      env: { OPENCLAW_HOME: "~" } as NodeJS.ProcessEnv,
+      name: "returns cwd when CARAPACE_HOME is tilde-only and no fallback home exists",
+      env: { CARAPACE_HOME: "~" } as NodeJS.ProcessEnv,
       homedir: () => {
         throw new Error("no home");
       },
@@ -187,7 +187,7 @@ describe("resolveRequiredHomeDir", () => {
     };
 
     try {
-      expect(() => resolveRequiredHomeDir({}, noHome)).toThrow(/set OPENCLAW_HOME/i);
+      expect(() => resolveRequiredHomeDir({}, noHome)).toThrow(/set CARAPACE_HOME/i);
       expect(() => resolveRequiredOsHomeDir({}, noHome)).toThrow(/set HOME/i);
     } finally {
       cwdSpy.mockRestore();
@@ -196,11 +196,11 @@ describe("resolveRequiredHomeDir", () => {
 });
 
 describe("resolveOsHomeDir", () => {
-  it("ignores OPENCLAW_HOME and uses HOME", () => {
+  it("ignores CARAPACE_HOME and uses HOME", () => {
     expect(
       resolveOsHomeDir(
         {
-          OPENCLAW_HOME: "/srv/openclaw-home",
+          CARAPACE_HOME: "/srv/carapace-home",
           HOME: "/home/alice",
           USERPROFILE: "C:/Users/alice",
         } as NodeJS.ProcessEnv,
@@ -216,15 +216,15 @@ describe("expandHomePrefix", () => {
       name: "expands ~/ using effective home",
       input: "~/x",
       opts: {
-        env: { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_HOME: "/srv/carapace-home" } as NodeJS.ProcessEnv,
       },
-      expected: `${path.resolve("/srv/openclaw-home")}/x`,
+      expected: `${path.resolve("/srv/carapace-home")}/x`,
     },
     {
       name: "expands exact ~ using explicit home",
       input: "~",
-      opts: { home: " /srv/openclaw-home " },
-      expected: "/srv/openclaw-home",
+      opts: { home: " /srv/carapace-home " },
+      expected: "/srv/carapace-home",
     },
     {
       name: "expands ~\\\\ using resolved env home",
@@ -271,9 +271,9 @@ describe("resolveHomeRelativePath", () => {
       name: "expands tilde paths using the resolved home directory",
       input: "~/docs",
       opts: {
-        env: { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_HOME: "/srv/carapace-home" } as NodeJS.ProcessEnv,
       },
-      expected: path.resolve("/srv/openclaw-home/docs"),
+      expected: path.resolve("/srv/carapace-home/docs"),
     },
     {
       name: "falls back to cwd when tilde paths have no home source",
@@ -299,11 +299,11 @@ describe("resolveUserPath", () => {
 });
 
 describe("resolveOsHomeRelativePath", () => {
-  it("expands tilde paths using the OS home instead of OPENCLAW_HOME", () => {
+  it("expands tilde paths using the OS home instead of CARAPACE_HOME", () => {
     expect(
       resolveOsHomeRelativePath("~/docs", {
         env: {
-          OPENCLAW_HOME: "/srv/openclaw-home",
+          CARAPACE_HOME: "/srv/carapace-home",
           HOME: "/home/alice",
         } as NodeJS.ProcessEnv,
       }),

@@ -1,6 +1,6 @@
 /** Command-registry facade for native specs, text aliases, argument parsing, and menus. */
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { resolveAgentConfig } from "../agents/agent-scope-config.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../agents/defaults.js";
 import {
@@ -10,7 +10,7 @@ import {
 import { getChannelPlugin, getLoadedChannelPlugin } from "../channels/plugins/index.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { SkillCommandSpec } from "../skills/types.js";
 import type { CommandTurnContext } from "./command-turn-context.js";
 import { listChatCommands, listChatCommandsForConfig } from "./commands-registry-list.js";
@@ -145,7 +145,7 @@ export function listNativeCommandSpecs(
 
 /** Lists native command specs that are enabled for the provided config. */
 export function listNativeCommandSpecsForConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params?: {
     skillCommands?: SkillCommandSpec[];
     provider?: string;
@@ -210,7 +210,7 @@ export function findCommandByNativeName(
 /** Returns true only when the command owner permits handler work beside an active run. */
 export function isActiveRunSafeCommandTurn(params: {
   commandTurn: CommandTurnContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
 }): boolean {
   const { commandTurn } = params;
@@ -340,12 +340,12 @@ export function buildCommandTextFromArgs(
   return buildCommandText(commandName, serializeCommandArgs(command, args));
 }
 
-function resolveDefaultCommandContext(cfg?: OpenClawConfig): {
+function resolveDefaultCommandContext(cfg?: CarapaceConfig): {
   provider: string;
   model: string;
 } {
   const resolved = resolveConfiguredModelRef({
-    cfg: cfg ?? ({} as OpenClawConfig),
+    cfg: cfg ?? ({} as CarapaceConfig),
     defaultProvider: DEFAULT_PROVIDER,
     defaultModel: DEFAULT_MODEL,
   });
@@ -361,7 +361,7 @@ export type ResolvedCommandArgChoice = { value: string; label: string };
 export function resolveCommandArgChoices(params: {
   command: ChatCommandDefinition;
   arg: CommandArgDefinition;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider?: string;
   model?: string;
   agentRuntime?: string;
@@ -396,7 +396,7 @@ export function resolveCommandArgChoices(params: {
 export function resolveCommandArgMenu(params: {
   command: ChatCommandDefinition;
   args?: CommandArgs;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   provider?: string;
   model?: string;
   agentRuntime?: string;

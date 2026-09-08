@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { getAsyncWorkSignal } from "../shared/async-work-scope.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
-const REQUEST_SIGNAL_KEY = Symbol.for("openclaw.sessionMcpRequestSignal");
+const REQUEST_SIGNAL_KEY = Symbol.for("carapace.sessionMcpRequestSignal");
 const requestSignals = resolveGlobalSingleton<AsyncLocalStorage<AbortSignal>>(
   REQUEST_SIGNAL_KEY,
   () => new AsyncLocalStorage(),

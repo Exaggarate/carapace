@@ -2,8 +2,8 @@
 import {
   asSafeIntegerInRange,
   MAX_DATE_TIMESTAMP_MS,
-} from "@openclaw/normalization-core/number-coercion";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { compileSafeRegex } from "../security/safe-regex.js";
 import { parseAbsoluteTimeMs } from "./parse.js";
 import { isSystemOwnedCronPayloadKind, type CronJobState } from "./types.js";

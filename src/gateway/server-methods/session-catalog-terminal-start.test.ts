@@ -179,7 +179,7 @@ describe("sessions.catalog.startTerminal", () => {
   });
 
   it("rechecks local cwd after the provider plan resolves", async () => {
-    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-catalog-start-"));
+    const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-catalog-start-"));
     let releasePlan!: () => void;
     const planGate = new Promise<void>((resolve) => {
       releasePlan = resolve;
@@ -273,16 +273,16 @@ describe("sessions.catalog.startTerminal", () => {
     });
     activeProvider = provider({ startTerminalSession: startTerminalSession as never });
     const home = os.userInfo().homedir;
-    const stateDir = path.join(home, ".openclaw-dev");
+    const stateDir = path.join(home, ".carapace-dev");
 
     const respond = await withEnvAsync(
       {
         HOME: home,
         USERPROFILE: home,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_PROFILE: "dev",
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+        CARAPACE_HOME: undefined,
+        CARAPACE_PROFILE: "dev",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
       },
       async () =>
         await call(
@@ -310,7 +310,7 @@ describe("sessions.catalog.startTerminal", () => {
     );
   });
 
-  it("reuses terminal.open admission and ownership without an OpenClaw model target", async () => {
+  it("reuses terminal.open admission and ownership without an Carapace model target", async () => {
     const cwd = process.cwd();
     const resolveCreateSession = vi.fn(() => undefined);
     const startTerminalSession = vi.fn(async () => ({

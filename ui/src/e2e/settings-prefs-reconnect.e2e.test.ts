@@ -13,7 +13,7 @@ const suite = createControlUiE2eSuite({
   name: "Control UI server prefs reconnect sync",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 function configResponse(prefs: Record<string, unknown>, hash: string) {
@@ -75,7 +75,7 @@ async function proxyReconnect(
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: { context: { gateway: { snapshot: { phase: string } } } };
         };
         return app.runtime?.context.gateway.snapshot.phase;
@@ -91,7 +91,7 @@ async function proxyReconnect(
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: { context: { gateway: { snapshot: { phase: string } } } };
         };
         return app.runtime?.context.gateway.snapshot.phase;
@@ -104,7 +104,7 @@ async function proxyReconnect(
 async function readSettingsMirror(page: Page): Promise<Record<string, unknown> | null> {
   return page.evaluate(() => {
     const key = Object.keys(localStorage).find((candidate) =>
-      candidate.startsWith("openclaw.control.settings.v1:"),
+      candidate.startsWith("carapace.control.settings.v1:"),
     );
     if (!key) {
       return null;
@@ -117,7 +117,7 @@ async function readSettingsMirror(page: Page): Promise<Record<string, unknown> |
 async function readPendingPrefStorage(page: Page): Promise<Record<string, unknown>[]> {
   return page.evaluate(() =>
     Object.keys(localStorage)
-      .filter((key) => key.startsWith("openclaw.control.serverPrefs.pending.v1:"))
+      .filter((key) => key.startsWith("carapace.control.serverPrefs.pending.v1:"))
       .map((key) => JSON.parse(localStorage.getItem(key) ?? "null") as Record<string, unknown>),
   );
 }
@@ -154,12 +154,12 @@ suite.define(() => {
         await textarea.fill("Synthetic preference proof");
         const reads = await page.evaluate(async (activeRoute) => {
           const owner = document.querySelector(
-            activeRoute === "new" ? "openclaw-new-session-page" : "openclaw-chat-pane",
+            activeRoute === "new" ? "carapace-new-session-page" : "carapace-chat-pane",
           ) as HTMLElement & { requestUpdate(): void; updateComplete: Promise<unknown> };
           const descriptor = Object.getOwnPropertyDescriptor(Storage.prototype, "getItem")!;
           const keys: string[] = [];
           Storage.prototype.getItem = function (key) {
-            if (/^openclaw\.control\.(settings|currentGateway|token)\./u.test(key)) {
+            if (/^carapace\.control\.(settings|currentGateway|token)\./u.test(key)) {
               keys.push(key);
             }
             return Reflect.apply(descriptor.value, this, [key]);
@@ -196,7 +196,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             page.evaluate(() => {
-              const app = document.querySelector("openclaw-app") as HTMLElement & {
+              const app = document.querySelector("carapace-app") as HTMLElement & {
                 runtime: { context: { theme: { settings: { chatSendShortcut: string } } } };
               };
               return app.runtime.context.theme.settings.chatSendShortcut;
@@ -426,7 +426,7 @@ suite.define(() => {
       await gatewayB.resolveDeferred("config.patch", combined);
       await gatewayA.setMethodResponse("config.get", combined);
       await gatewayA.emitGatewayEvent("config.changed", {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         hash: "prefs-b-3",
         ts: Date.now(),
       });
@@ -473,7 +473,7 @@ suite.define(() => {
       const serverChanged = configResponse({ locale: "de", theme: "claw" }, "prefs-c-2");
       await gateway.setMethodResponse("config.get", serverChanged);
       await gateway.emitGatewayEvent("config.changed", {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         hash: "prefs-c-2",
         ts: Date.now(),
       });

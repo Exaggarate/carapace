@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Covers plugin registry assembly, contribution lookup, and reset behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { recordPluginCandidateInstallOwner } from "./candidate-install-owner.js";
 import type { PluginCandidate } from "./discovery.js";
 import { writePersistedInstalledPluginIndex } from "./installed-plugin-index-store-write.js";
@@ -56,19 +56,19 @@ function listPluginRecords(params: { index: InstalledPluginIndex }) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   clearPluginMetadataLifecycleCaches();
   cleanupTrackedTempDirs(tempDirs);
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugin-registry", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-registry", tempDirs);
 }
 
 function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
     ...overrides,
   };
@@ -90,7 +90,7 @@ function createCandidate(
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       name: pluginId,
@@ -158,7 +158,7 @@ function createIndex(
     plugins: [
       {
         pluginId,
-        manifestPath: path.join(pluginRoot, "openclaw.plugin.json"),
+        manifestPath: path.join(pluginRoot, "carapace.plugin.json"),
         manifestHash: "manifest-hash",
         rootDir: pluginRoot,
         origin: "global",
@@ -343,7 +343,7 @@ describe("plugin registry facade", () => {
     const lookUpTable = loadPluginLookUpTable({ config: {}, env, index });
     for (const indexed of [false, true]) {
       if (indexed) {
-        fs.unlinkSync(path.join(rootDir, "openclaw.plugin.json"));
+        fs.unlinkSync(path.join(rootDir, "carapace.plugin.json"));
       }
       const source = indexed ? { lookUpTable } : { index };
       for (const [contribution, ids] of [
@@ -382,7 +382,7 @@ describe("plugin registry facade", () => {
     }
     expect(resolveProviderOwners({ lookUpTable, providerId: "DEMO" })).toEqual(["demo"]);
 
-    const policies: Array<[OpenClawConfig["plugins"], boolean]> = [
+    const policies: Array<[CarapaceConfig["plugins"], boolean]> = [
       [undefined, true],
       [{ enabled: false }, false],
       [{ deny: ["demo"] }, false],
@@ -421,7 +421,7 @@ describe("plugin registry facade", () => {
     const rootDir = makeTempDir();
     fs.writeFileSync(path.join(rootDir, "index.ts"), "", "utf8");
     fs.writeFileSync(
-      path.join(rootDir, "openclaw.plugin.json"),
+      path.join(rootDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "openai",
         legacyPluginIds: ["openai-codex"],
@@ -438,7 +438,7 @@ describe("plugin registry facade", () => {
             createIndex("openai").plugins[0],
             'createIndex("openai").plugins[0] test invariant',
           ),
-          manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+          manifestPath: path.join(rootDir, "carapace.plugin.json"),
           source: path.join(rootDir, "index.ts"),
           rootDir,
         },
@@ -479,7 +479,7 @@ describe("plugin registry facade", () => {
       env,
       index,
     });
-    fs.unlinkSync(path.join(rootDir, "openclaw.plugin.json"));
+    fs.unlinkSync(path.join(rootDir, "carapace.plugin.json"));
 
     const normalizePluginId = createPluginRegistryIdNormalizer(index, {
       manifestRegistry: lookUpTable.manifestRegistry,
@@ -504,7 +504,7 @@ describe("plugin registry facade", () => {
     const config = {} as const;
     fs.writeFileSync(path.join(persistedRootDir, "index.ts"), "", "utf8");
     fs.writeFileSync(
-      path.join(persistedRootDir, "openclaw.plugin.json"),
+      path.join(persistedRootDir, "carapace.plugin.json"),
       JSON.stringify({ id: "persisted", configSchema: { type: "object" } }),
       "utf8",
     );
@@ -517,8 +517,8 @@ describe("plugin registry facade", () => {
               createIndex("persisted").plugins[0],
               'createIndex("persisted").plugins[0] test invariant',
             ),
-            manifestPath: path.join(persistedRootDir, "openclaw.plugin.json"),
-            manifestHash: hashFile(path.join(persistedRootDir, "openclaw.plugin.json")),
+            manifestPath: path.join(persistedRootDir, "carapace.plugin.json"),
+            manifestHash: hashFile(path.join(persistedRootDir, "carapace.plugin.json")),
             source: path.join(persistedRootDir, "index.ts"),
             rootDir: persistedRootDir,
           },
@@ -563,7 +563,7 @@ describe("plugin registry facade", () => {
       },
       { stateDir },
     );
-    const manifestPath = path.join(rootDir, "openclaw.plugin.json");
+    const manifestPath = path.join(rootDir, "carapace.plugin.json");
     const future = new Date(Date.now() + 1_000);
     fs.utimesSync(manifestPath, future, future);
 
@@ -578,8 +578,8 @@ describe("plugin registry facade", () => {
     const rootDir = makeTempDir();
     const filePath = path.join(tempDir, "custom-registry.sqlite");
     const env = hermeticEnv({
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: tempDir,
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: tempDir,
     });
     const installRecords = {
       demo: { source: "npm" as const, spec: "demo@1.0.0", installPath: rootDir },
@@ -639,7 +639,7 @@ describe("plugin registry facade", () => {
     });
     await writePersistedInstalledPluginIndex(persisted, { stateDir });
     fs.writeFileSync(
-      path.join(rootDir, "openclaw.plugin.json"),
+      path.join(rootDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "demo",
         name: "Demo",
@@ -753,7 +753,7 @@ describe("plugin registry facade", () => {
               createIndex("persisted").plugins[0],
               'createIndex("persisted").plugins[0] test invariant',
             ),
-            manifestPath: path.join(staleBundledRootDir, "openclaw.plugin.json"),
+            manifestPath: path.join(staleBundledRootDir, "carapace.plugin.json"),
             source: path.join(staleBundledRootDir, "index.ts"),
             rootDir: staleBundledRootDir,
             origin: "bundled",
@@ -766,7 +766,7 @@ describe("plugin registry facade", () => {
     const result = loadPluginRegistrySnapshotWithMetadata({
       stateDir,
       candidates: [candidate],
-      env: hermeticEnv({ OPENCLAW_BUNDLED_PLUGINS_DIR: rootDir }),
+      env: hermeticEnv({ CARAPACE_BUNDLED_PLUGINS_DIR: rootDir }),
     });
 
     expect(result.source).toBe("derived");
@@ -777,7 +777,7 @@ describe("plugin registry facade", () => {
   it("refreshes stale built records and accepts source records for dist-opt-out plugins", async () => {
     const tempRoot = makeTempDir();
     const stateDir = path.join(tempRoot, "state");
-    const packageRoot = path.join(tempRoot, "openclaw");
+    const packageRoot = path.join(tempRoot, "carapace");
     const sourceRoot = path.join(packageRoot, "extensions", "demo");
     const builtRoot = path.join(packageRoot, "dist", "extensions", "demo");
     fs.mkdirSync(path.join(packageRoot, ".git"), { recursive: true });
@@ -792,18 +792,18 @@ describe("plugin registry facade", () => {
       packageManifest: { extensions: ["./index.ts"], build: { bundledDist: false } },
     } satisfies PluginCandidate;
     const packageJson = JSON.stringify({
-      openclaw: sourceCandidate.packageManifest,
+      carapace: sourceCandidate.packageManifest,
     });
     fs.writeFileSync(path.join(sourceRoot, "package.json"), packageJson);
     fs.copyFileSync(
-      path.join(sourceRoot, "openclaw.plugin.json"),
-      path.join(builtRoot, "openclaw.plugin.json"),
+      path.join(sourceRoot, "carapace.plugin.json"),
+      path.join(builtRoot, "carapace.plugin.json"),
     );
     fs.copyFileSync(path.join(sourceRoot, "index.ts"), path.join(builtRoot, "index.ts"));
     fs.writeFileSync(path.join(builtRoot, "package.json"), packageJson);
     const env = hermeticEnv({
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.dirname(builtRoot),
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.dirname(builtRoot),
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
     });
     const freshIndex = loadPluginRegistrySnapshot({
       candidates: [sourceCandidate],
@@ -837,7 +837,7 @@ describe("plugin registry facade", () => {
     for (const plugin of staleBuiltIndex.plugins) {
       plugin.rootDir = builtRoot;
       plugin.source = path.join(builtRoot, "index.ts");
-      plugin.manifestPath = path.join(builtRoot, "openclaw.plugin.json");
+      plugin.manifestPath = path.join(builtRoot, "carapace.plugin.json");
       delete plugin.packageBuild;
     }
     await writePersistedInstalledPluginIndex(staleBuiltIndex, { stateDir });
@@ -912,7 +912,7 @@ describe("plugin registry facade", () => {
     const rootDir = path.join(bundledRoot, "demo");
     fs.mkdirSync(rootDir, { recursive: true });
     createCandidate(rootDir);
-    const env = hermeticEnv({ OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot });
+    const env = hermeticEnv({ CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot });
     const config = { plugins: { entries: { demo: { enabled: true } } } } as const;
     const first = loadPluginRegistrySnapshotWithMetadata({
       stateDir,
@@ -940,8 +940,8 @@ describe("plugin registry facade", () => {
     fs.mkdirSync(firstRoot, { recursive: true });
     createCandidate(firstRoot, "first");
     const env = hermeticEnv({
-      OPENCLAW_CONFIG_PATH: path.join(configDir, "openclaw.json"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_CONFIG_PATH: path.join(configDir, "carapace.json"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     });
 
     const first = loadPluginRegistrySnapshotWithMetadata({ stateDir, env });
@@ -968,14 +968,14 @@ describe("plugin registry facade", () => {
     const first = loadPluginRegistrySnapshotWithMetadata({
       stateDir,
       config,
-      env: hermeticEnv({ OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot }),
+      env: hermeticEnv({ CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot }),
     });
     const second = loadPluginRegistrySnapshotWithMetadata({
       stateDir,
       config,
       env: hermeticEnv({
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-        OPENCLAW_VERSION: "2026.4.26",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_VERSION: "2026.4.26",
       }),
     });
 

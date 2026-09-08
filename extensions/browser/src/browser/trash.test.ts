@@ -3,14 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const browserUtilsMock = vi.hoisted(() => ({ configDir: "/tmp/openclaw-state" }));
+const browserUtilsMock = vi.hoisted(() => ({ configDir: "/tmp/carapace-state" }));
 const realMkdirSync = fs.mkdirSync.bind(fs);
 const realMkdtempSync = fs.mkdtempSync.bind(fs);
 const realRmSync = fs.rmSync.bind(fs);
 const realWriteFileSync = fs.writeFileSync.bind(fs);
 const realRealpathSyncNative = fs.realpathSync.native.bind(fs.realpathSync);
 
-vi.mock("openclaw/plugin-sdk/text-utility-runtime", () => ({
+vi.mock("carapace/plugin-sdk/text-utility-runtime", () => ({
   get CONFIG_DIR() {
     return browserUtilsMock.configDir;
   },
@@ -24,7 +24,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/text-utility-runtime");
+  vi.doUnmock("carapace/plugin-sdk/text-utility-runtime");
   vi.resetModules();
 });
 
@@ -35,7 +35,7 @@ describe("browser trash", () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    testRoot = realRealpathSyncNative(realMkdtempSync(path.join(os.tmpdir(), "openclaw-browser-")));
+    testRoot = realRealpathSyncNative(realMkdtempSync(path.join(os.tmpdir(), "carapace-browser-")));
     configDir = path.join(testRoot, "state");
     homeDir = path.join(testRoot, "home", "test");
     browserUtilsMock.configDir = configDir;

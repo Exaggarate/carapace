@@ -23,7 +23,7 @@ import { renderLoadingState } from "../../components/loading-state.ts";
 import { t } from "../../i18n/index.ts";
 import { registerLoginEnglish } from "../../i18n/locales/en-login.ts";
 import { resolveEmbedSandbox } from "../../lib/chat/tool-display.ts";
-import { OpenClawLightDomContentsElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderCustomPluginUiDisabled } from "../../plugins/control-ui-disabled.ts";
 import { renderPluginContribution } from "../../plugins/control-ui-view.ts";
@@ -98,7 +98,7 @@ const BUNDLED_TAB_VIEWS: Record<string, () => Promise<BundledPluginTabView>> = {
   },
 };
 
-export class PluginPage extends OpenClawLightDomContentsElement {
+export class PluginPage extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) pluginId = "";
   @property({ attribute: false }) tabId = "";
   @property({ attribute: false }) params: Readonly<Record<string, string>> = {};
@@ -687,6 +687,6 @@ export class PluginPage extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-plugin-page")) {
-  customElements.define("openclaw-plugin-page", PluginPage);
+if (!customElements.get("carapace-plugin-page")) {
+  customElements.define("carapace-plugin-page", PluginPage);
 }

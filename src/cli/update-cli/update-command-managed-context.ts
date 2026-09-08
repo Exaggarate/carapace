@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { readConfigFileSnapshot } from "../../config/config.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { loadInstalledPluginIndexInstallRecords } from "../../plugins/installed-plugin-index-records.js";
 import { captureTargetDatabaseSchemaContext } from "./schema-preflight.js";

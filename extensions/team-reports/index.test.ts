@@ -1,11 +1,11 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import type {
-  OpenClawConfig,
-  OpenClawPluginApi,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+  CarapaceConfig,
+  CarapacePluginApi,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { capturePluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as configRuntime from "./src/config.js";
 import { createTeamReportsStore } from "./src/store.js";
@@ -23,15 +23,15 @@ const pluginConfig = {
   github: { token: "fixture-github-token", orgs: ["sample"] },
   summaries: { enabled: false },
 };
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   gateway: { controlUi: { basePath: "/control" } },
   plugins: { entries: { "team-reports": { enabled: true, config: pluginConfig } } },
 };
 
 function captureReports() {
-  const services: OpenClawPluginService[] = [];
-  const routes: Array<Parameters<OpenClawPluginApi["registerHttpRoute"]>[0]> = [];
-  const methods: Array<Parameters<OpenClawPluginApi["registerGatewayMethod"]>> = [];
+  const services: CarapacePluginService[] = [];
+  const routes: Array<Parameters<CarapacePluginApi["registerHttpRoute"]>[0]> = [];
+  const methods: Array<Parameters<CarapacePluginApi["registerGatewayMethod"]>> = [];
   const captured = capturePluginRegistration({
     id: plugin.id,
     name: plugin.name,
@@ -130,7 +130,7 @@ describe("Team Reports registration", () => {
       if (!service || !lifecycle?.cleanup) {
         throw new Error("Team Reports must register its service and runtime cleanup");
       }
-      const context: OpenClawPluginServiceContext = {
+      const context: CarapacePluginServiceContext = {
         config,
         stateDir: "/unused-team-reports-test-state",
         logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },

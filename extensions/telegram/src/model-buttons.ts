@@ -11,8 +11,8 @@
  * - mdl_back              - back to providers list
  */
 import { createHash } from "node:crypto";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { fitsTelegramCallbackData } from "./approval-callback-data.js";
 
 export type ButtonRow = Array<{ text: string; callback_data: string }>;
@@ -61,7 +61,7 @@ const CALLBACK_PREFIX = {
 
 function hashOpaqueCallback(domain: "model" | "provider", ...values: string[]): string {
   return createHash("sha256")
-    .update(JSON.stringify([`openclaw.telegram.${domain}-callback.v1`, ...values]))
+    .update(JSON.stringify([`carapace.telegram.${domain}-callback.v1`, ...values]))
     .digest("base64url");
 }
 

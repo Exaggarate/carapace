@@ -105,9 +105,9 @@ test("expires task cursors when a profile merge changes the same caller's sessio
           loadSnapshot: () => ({ tasks, deliveryStates: new Map() }),
         },
       });
-      const stateDir = process.env.OPENCLAW_STATE_DIR;
+      const stateDir = process.env.CARAPACE_STATE_DIR;
       if (!stateDir) {
-        throw new Error("OPENCLAW_STATE_DIR is required for the Gateway proof");
+        throw new Error("CARAPACE_STATE_DIR is required for the Gateway proof");
       }
       const connect = async (email: string, scopes: string[]) => {
         const ws = await openWs(port, {

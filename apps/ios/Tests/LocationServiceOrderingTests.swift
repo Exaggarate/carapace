@@ -2,7 +2,7 @@ import CoreLocation
 import Foundation
 import Testing
 import XCTest
-@testable import OpenClaw
+@testable import Carapace
 
 /// Run only on a fresh, task-owned simulator. The existing callback setter starts
 /// CoreLocation monitoring; it never requests authorization, and no location is injected into the OS.

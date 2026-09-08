@@ -17,10 +17,10 @@ describe("chat media playback renditions", () => {
   it("appends playback=1 without dropping assistant or managed media tickets", () => {
     expect(
       appendChatMediaPlaybackParam(
-        "/__openclaw__/assistant-media?source=%2Ftmp%2Fvoice.caf&mediaTicket=assistant",
+        "/__carapace__/assistant-media?source=%2Ftmp%2Fvoice.caf&mediaTicket=assistant",
       ),
     ).toBe(
-      "/__openclaw__/assistant-media?source=%2Ftmp%2Fvoice.caf&mediaTicket=assistant&playback=1",
+      "/__carapace__/assistant-media?source=%2Ftmp%2Fvoice.caf&mediaTicket=assistant&playback=1",
     );
     expect(
       appendChatMediaPlaybackParam(

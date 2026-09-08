@@ -102,8 +102,8 @@ describe("catalog share route resolution", () => {
       });
 
       const loaded = await loadChatRoute(
-        catalogContext(request, "/openclaw"),
-        { pathname: `/openclaw/beam/${reference}`, search: "", hash: "" },
+        catalogContext(request, "/carapace"),
+        { pathname: `/carapace/beam/${reference}`, search: "", hash: "" },
         "chat",
         new AbortController().signal,
       );
@@ -119,12 +119,12 @@ describe("catalog share route resolution", () => {
       } else {
         expect(loaded).toMatchObject({
           canonicalLocation: {
-            pathname: "/openclaw/beam/pretty-beam-route-0123456789ab",
+            pathname: "/carapace/beam/pretty-beam-route-0123456789ab",
             search: "",
             hash: "",
           },
           canonicalLocationSource: {
-            pathname: `/openclaw/beam/${reference}`,
+            pathname: `/carapace/beam/${reference}`,
             search: "",
             hash: "",
           },
@@ -256,11 +256,11 @@ describe("catalog share route resolution", () => {
 
   it("preserves full-id links while canonicalizing an internally bridged stale name", async () => {
     const request = vi.fn(async () => beamCatalog([{ threadId: fullId, name: "Renamed session" }]));
-    const originalPath = `/openclaw/beam/old-name-${fullId}`;
+    const originalPath = `/carapace/beam/old-name-${fullId}`;
     const loaded = await loadChatRoute(
-      catalogContext(request, "/openclaw"),
+      catalogContext(request, "/carapace"),
       {
-        pathname: "/openclaw/chat",
+        pathname: "/carapace/chat",
         search: `?${new URLSearchParams({ [INTERNAL_SESSION_PATH_PARAM]: originalPath })}`,
         hash: "",
       },
@@ -271,7 +271,7 @@ describe("catalog share route resolution", () => {
       kind: "session",
       sessionKey: `agent:research:catalog:beam:gateway:${fullId}`,
       canonicalLocation: {
-        pathname: `/openclaw/beam/renamed-session-${fullId}`,
+        pathname: `/carapace/beam/renamed-session-${fullId}`,
         search: "",
         hash: "",
       },

@@ -1,18 +1,18 @@
-import { resolveSessionAgentIdStrict } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-// Memory Core plugin entrypoint registers its OpenClaw integration.
+import { resolveSessionAgentIdStrict } from "carapace/plugin-sdk/agent-scope-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+// Memory Core plugin entrypoint registers its Carapace integration.
 import {
   jsonResult,
   type MemoryPluginRuntime,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { resolveMemoryBackendConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { resolveMemoryBackendConfig } from "carapace/plugin-sdk/memory-core-host-runtime-files";
 import {
   definePluginEntry,
   type AnyAgentTool,
-  type OpenClawPluginToolContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+  type CarapacePluginToolContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import { configureMemoryCoreDreamingState } from "./src/dreaming-state.js";
 import { registerShortTermPromotionDreaming } from "./src/dreaming.js";
 import { buildMemoryFlushPlan } from "./src/flush-plan.js";
@@ -96,7 +96,7 @@ function createLazyMemoryGetTool(options: MemoryToolOptions): AnyAgentTool | nul
 }
 
 function createLazyStandingIntentTool(
-  ctx: OpenClawPluginToolContext,
+  ctx: CarapacePluginToolContext,
   reportUnavailable: (reason: string) => void,
 ): AnyAgentTool | null {
   if (ctx.senderIsOwner !== true) {
@@ -169,7 +169,7 @@ function createLazyStandingIntentTool(
 }
 
 function resolveMemoryToolOptions(
-  ctx: OpenClawPluginToolContext,
+  ctx: CarapacePluginToolContext,
   host: MemoryCoreRuntimeHost,
 ): MemoryToolOptions {
   const getConfig = ctx.getRuntimeConfig
@@ -228,7 +228,7 @@ function createLazyMemoryRuntime(host: MemoryCoreRuntimeHost): MemoryPluginRunti
 
 export default definePluginEntry({
   id: "memory-core",
-  name: "OpenClaw Memory",
+  name: "Carapace Memory",
   description: "File-backed memory search tools and CLI",
   kind: "memory",
   register(api) {
@@ -254,7 +254,7 @@ export default definePluginEntry({
         const liveConfig = api.runtime.config?.current ? api.runtime.config.current() : api.config;
         const context = resolveMemoryToolContext({
           // SAFETY: Runtime config is host-validated and this resolver only reads the snapshot.
-          config: liveConfig as OpenClawConfig,
+          config: liveConfig as CarapaceConfig,
           agentId: params.agentId,
           agentSessionKey: params.agentSessionKey,
         });
@@ -295,7 +295,7 @@ export default definePluginEntry({
         if (!module.isEligibleStandingIntentTurn(ctx)) {
           return undefined;
         }
-        const config = (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+        const config = (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
         const agentId = resolveSessionAgentIdStrict({
           sessionKey: ctx.sessionKey,
           config,
@@ -331,7 +331,7 @@ export default definePluginEntry({
         }
         try {
           const module = await loadStandingIntentsModule();
-          const config = (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+          const config = (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
           const agentId = resolveSessionAgentIdStrict({
             sessionKey: ctx.sessionKey,
             config,

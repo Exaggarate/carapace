@@ -64,7 +64,7 @@ describe("agent selection", () => {
   it("restores a persisted selection before the Gateway default arrives", () => {
     const harness = createGateway(null);
     const persistence = {
-      load: () => "OpenClaw",
+      load: () => "Carapace",
       save: vi.fn(),
     };
     const selection = createAgentSelectionCapability(
@@ -78,7 +78,7 @@ describe("agent selection", () => {
       assistantAgentId: "Dummy",
     });
 
-    expect(selection.state).toEqual({ selectedId: "openclaw", scopeId: "openclaw" });
+    expect(selection.state).toEqual({ selectedId: "carapace", scopeId: "carapace" });
     expect(persistence.save).not.toHaveBeenCalled();
   });
 
@@ -91,14 +91,14 @@ describe("agent selection", () => {
       scope: "global",
       agents: [
         { id: "dummy", kind: "agent" },
-        { id: "openclaw", kind: "agent" },
+        { id: "carapace", kind: "agent" },
       ],
     });
     const persistence = { load: () => null, save: vi.fn() };
     const selection = createAgentSelectionCapability(harness.gateway, roster.roster, persistence);
 
-    selection.set("OpenClaw");
-    expect(persistence.save).toHaveBeenLastCalledWith("ws://gateway-a.test", "openclaw");
+    selection.set("Carapace");
+    expect(persistence.save).toHaveBeenLastCalledWith("ws://gateway-a.test", "carapace");
 
     roster.publish({
       defaultId: "dummy",
@@ -114,7 +114,7 @@ describe("agent selection", () => {
     const harness = createGateway("Dummy");
     const persistence = {
       load: (gatewayUrl: string) =>
-        gatewayUrl === "wss://gateway-b.test" ? "Research" : "OpenClaw",
+        gatewayUrl === "wss://gateway-b.test" ? "Research" : "Carapace",
       save: vi.fn(),
     };
     const selection = createAgentSelectionCapability(
@@ -123,7 +123,7 @@ describe("agent selection", () => {
       persistence,
     );
 
-    expect(selection.state.selectedId).toBe("openclaw");
+    expect(selection.state.selectedId).toBe("carapace");
     harness.switchGateway("wss://gateway-b.test");
     expect(selection.state).toEqual({ selectedId: "research", scopeId: "research" });
   });
@@ -153,27 +153,27 @@ describe("agent selection", () => {
   });
 
   it("clears system page scopes when the typed roster becomes known", () => {
-    const gateway = createGateway("OpenClaw");
+    const gateway = createGateway("Carapace");
     const roster = createRoster();
     const selection = createAgentSelectionCapability(gateway.gateway, roster.roster);
 
-    expect(selection.state).toEqual({ selectedId: "openclaw", scopeId: "openclaw" });
+    expect(selection.state).toEqual({ selectedId: "carapace", scopeId: "carapace" });
     roster.publish({
       defaultId: "main",
       mainKey: "main",
       scope: "per-sender",
       agents: [
         { id: "main", kind: "agent" },
-        { id: "openclaw", kind: "system" },
+        { id: "carapace", kind: "system" },
       ],
     });
-    expect(selection.state).toEqual({ selectedId: "openclaw", scopeId: null });
+    expect(selection.state).toEqual({ selectedId: "carapace", scopeId: null });
 
     selection.setScope("historical");
     expect(selection.state.scopeId).toBe("historical");
     selection.setScope("main");
     expect(selection.state.scopeId).toBe("main");
-    selection.setScope("openclaw");
+    selection.setScope("carapace");
     expect(selection.state.scopeId).toBeNull();
   });
 

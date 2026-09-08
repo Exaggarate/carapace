@@ -46,7 +46,7 @@ const INDIRECT_RUNTIME_DEPENDENCIES = new Map<string, Set<string>>([
   ],
   [
     "extensions/memory-core",
-    // Packaged memory tools run through generated OpenClaw runtime chunks that parse JSON5 config.
+    // Packaged memory tools run through generated Carapace runtime chunks that parse JSON5 config.
     new Set(["json5"]),
   ],
   [
@@ -74,7 +74,7 @@ type PackageManifest = {
   devDependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
-  openclaw?: {
+  carapace?: {
     build?: {
       staticAssets?: Array<{ source?: string }>;
     };
@@ -147,7 +147,7 @@ function listRuntimeFiles(root: string): string[] {
   const manifest = readPackageManifest(path.join(root, "package.json"));
   // Static assets execute from the packaged plugin even when a dirty remote sync has not added
   // their new source paths to Git's index, so the manifest must remain an authoritative input.
-  const staticAssetSources = (manifest.openclaw?.build?.staticAssets ?? []).flatMap((entry) => {
+  const staticAssetSources = (manifest.carapace?.build?.staticAssets ?? []).flatMap((entry) => {
     const source = entry.source?.trim().replace(/^\.\/+/, "");
     if (!source || source.startsWith("../") || source.includes("/../")) {
       return [];
@@ -196,7 +196,7 @@ function listRuntimeFiles(root: string): string[] {
 }
 
 function readManifestText(root: string): string {
-  const manifestPath = path.join(root, "openclaw.plugin.json");
+  const manifestPath = path.join(root, "carapace.plugin.json");
   const resolvedManifestPath = path.resolve(REPO_ROOT, manifestPath);
   return fs.existsSync(resolvedManifestPath) ? fs.readFileSync(resolvedManifestPath, "utf8") : "";
 }
@@ -269,7 +269,7 @@ function collectBundledRuntimeDependencies(root: string, manifest: PackageManife
   const declared = runtimeDependencyNames(manifest);
   const buildDependencies = new Set(
     Object.keys(manifest.devDependencies ?? {}).filter(
-      (name) => !name.startsWith("@openclaw/") && !declared.has(name),
+      (name) => !name.startsWith("@carapace/") && !declared.has(name),
     ),
   );
   const plan = buildDependencies.size
@@ -279,7 +279,7 @@ function collectBundledRuntimeDependencies(root: string, manifest: PackageManife
     return { dependencies, entryFiles };
   }
   const require = createRequire(path.resolve(REPO_ROOT, root, "package.json"));
-  const staticAssets = (manifest.openclaw?.build?.staticAssets ?? []).flatMap((asset) =>
+  const staticAssets = (manifest.carapace?.build?.staticAssets ?? []).flatMap((asset) =>
     asset.source ? [path.resolve(REPO_ROOT, root, asset.source)] : [],
   );
   for (const filePath of Object.values(plan.entry)) {
@@ -394,8 +394,8 @@ describe("extension runtime dependency manifests", () => {
       for (const filePath of listRuntimeFiles(extensionDir)) {
         for (const packageName of collectRuntimeImports(filePath)) {
           if (
-            packageName === "openclaw" ||
-            packageName.startsWith("@openclaw/") ||
+            packageName === "carapace" ||
+            packageName.startsWith("@carapace/") ||
             BUILTIN_MODULES.has(packageName) ||
             declared.has(packageName) ||
             (bundled.entryFiles.has(filePath) && bundled.dependencies.has(packageName)) ||

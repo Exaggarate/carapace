@@ -1,6 +1,6 @@
 // SQLite persistence for plugin-owned byte blobs and JSON metadata.
 import type { DatabaseSync } from "node:sqlite";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@carapace/normalization-core/number-coercion";
 import type { Insertable, Selectable } from "kysely";
 import { hasErrnoCode } from "../infra/errno.js";
 import {
@@ -13,15 +13,15 @@ import {
   normalizeSqliteNumber,
 } from "../infra/sqlite-number.js";
 import {
-  hasOpenClawStateTablesBeyondStartupCheckpoint,
-  withExistingOpenClawStateDatabaseReadOnly,
-} from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+  hasCarapaceStateTablesBeyondStartupCheckpoint,
+  withExistingCarapaceStateDatabaseReadOnly,
+} from "../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import type {
   PluginBlobEntry,
   PluginBlobEntryInfo,
@@ -35,8 +35,8 @@ export const MAX_PLUGIN_BLOB_BYTES_PER_ENTRY = 100 * 1024 * 1024;
 export const MAX_PLUGIN_BLOB_BYTES_PER_PLUGIN = 512 * 1024 * 1024;
 export const MAX_PLUGIN_BLOB_ENTRIES_PER_PLUGIN = 50_000;
 
-type PluginBlobTable = OpenClawStateKyselyDatabase["plugin_blob_entries"];
-type PluginBlobDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_blob_entries">;
+type PluginBlobTable = CarapaceStateKyselyDatabase["plugin_blob_entries"];
+type PluginBlobDatabase = Pick<CarapaceStateKyselyDatabase, "plugin_blob_entries">;
 type PluginBlobRow = Selectable<PluginBlobTable>;
 
 type PluginBlobStoredInfo = Pick<
@@ -74,7 +74,7 @@ function createError(params: {
   return new PluginBlobStoreError(params.message, {
     code: params.code,
     operation: params.operation,
-    path: resolveOpenClawStateSqlitePath(params.env ?? process.env),
+    path: resolveCarapaceStateSqlitePath(params.env ?? process.env),
     cause: params.cause,
   });
 }
@@ -93,7 +93,7 @@ function wrapError(
 
 function openDatabase(operation: PluginBlobStoreOperation, env?: NodeJS.ProcessEnv) {
   try {
-    const database = openOpenClawStateDatabase(env ? { env } : {});
+    const database = openCarapaceStateDatabase(env ? { env } : {});
     return database;
   } catch (error) {
     throw wrapError(
@@ -113,7 +113,7 @@ function readDatabase<T>(
 ): T | undefined {
   let readStarted = false;
   try {
-    return withExistingOpenClawStateDatabaseReadOnly(
+    return withExistingCarapaceStateDatabaseReadOnly(
       ({ db }) => {
         readStarted = true;
         try {
@@ -123,7 +123,7 @@ function readDatabase<T>(
             error instanceof Error &&
             hasErrnoCode(error, "ERR_SQLITE_ERROR") &&
             error.message === "no such table: plugin_blob_entries" &&
-            !hasOpenClawStateTablesBeyondStartupCheckpoint(db)
+            !hasCarapaceStateTablesBeyondStartupCheckpoint(db)
           ) {
             return undefined;
           }
@@ -503,7 +503,7 @@ function upsertBlob(db: DatabaseSync, params: BlobWriteParams, now: number): voi
 function writeBlob(params: BlobWriteParams, ifAbsent: boolean): boolean {
   try {
     openDatabase("register", params.env);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const now = Date.now();
         if (ifAbsent && blobKeyExists(db, params)) {
@@ -588,7 +588,7 @@ export function pluginBlobDelete(params: {
 }): boolean {
   try {
     openDatabase("delete", params.env);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => deleteKey(db, params) > 0,
       params.env ? { env: params.env } : {},
     );
@@ -611,7 +611,7 @@ export function pluginBlobDeleteExpiredKey<TMetadata>(params: {
 }): PluginBlobEntryInfo<TMetadata> | undefined {
   try {
     openDatabase("sweep", params.env);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const row = selectExpiredKeyInfo(db, { ...params, now: Date.now() });
         if (!row) {
@@ -642,7 +642,7 @@ export function pluginBlobDeleteExpired<TMetadata>(params: {
 }): PluginBlobEntryInfo<TMetadata>[] {
   try {
     openDatabase("sweep", params.env);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const now = Date.now();
         const rows = executeSqliteQuerySync(
@@ -683,7 +683,7 @@ export function pluginBlobClear(params: {
 }): void {
   try {
     openDatabase("clear", params.env);
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         executeSqliteQuerySync(
           db,

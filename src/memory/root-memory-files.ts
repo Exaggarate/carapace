@@ -7,7 +7,7 @@ import { isMissingPathError } from "../infra/errno.js";
 export const CANONICAL_ROOT_MEMORY_FILENAME = "MEMORY.md";
 /** Legacy root memory file name kept out of auxiliary scans. */
 export const LEGACY_ROOT_MEMORY_FILENAME = "memory.md";
-const ROOT_MEMORY_REPAIR_RELATIVE_DIR = ".openclaw-repair/root-memory";
+const ROOT_MEMORY_REPAIR_RELATIVE_DIR = ".carapace-repair/root-memory";
 
 /** Resolves the canonical root memory file path for a workspace. */
 export function resolveCanonicalRootMemoryPath(workspaceDir: string): string {
@@ -21,7 +21,7 @@ export function resolveLegacyRootMemoryPath(workspaceDir: string): string {
 
 /** Resolves the repair directory used while migrating root memory files. */
 export function resolveRootMemoryRepairDir(workspaceDir: string): string {
-  return path.join(workspaceDir, ".openclaw-repair", "root-memory");
+  return path.join(workspaceDir, ".carapace-repair", "root-memory");
 }
 
 function normalizeWorkspaceRelativePath(value: string): string {

@@ -146,7 +146,7 @@ describe("runIsolatedCompletion", () => {
           provider: "claude-cli",
           modelProvider: "anthropic",
           isolatedCompletion: true,
-          cliToolAvailability: { native: [], openClaw: [] },
+          cliToolAvailability: { native: [], carapace: [] },
         }),
       );
     },
@@ -491,7 +491,7 @@ describe("runIsolatedCompletion", () => {
           executionMode: "side-question",
           isolatedCompletion: true,
           disableTools: true,
-          cliToolAvailability: { native: [], openClaw: [] },
+          cliToolAvailability: { native: [], carapace: [] },
         }),
       );
     },

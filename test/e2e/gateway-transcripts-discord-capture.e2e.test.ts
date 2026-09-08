@@ -5,15 +5,15 @@ import { createServer, type ServerResponse } from "node:http";
 import { Socket } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, inject, it, vi } from "vitest";
 import type {
   TranscriptsGetResult,
   TranscriptsListResult,
 } from "../../packages/gateway-protocol/src/schema/transcripts.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import { buildMockOpenAiResponsesProvider } from "../../src/gateway/test-openai-responses-model.js";
-import type { OpenClawPluginApi } from "../../src/plugins/types.js";
+import type { CarapacePluginApi } from "../../src/plugins/types.js";
 import { resolveRelativeBundledPluginPublicModuleId } from "../../src/test-utils/bundled-plugin-public-surface.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../../src/test-utils/env.js";
 import { withIsolatedTestHome } from "../../test/test-env.js";
@@ -34,9 +34,9 @@ type ScriptedCall = {
   output?: string;
 };
 type DiscordCaptureFixture = {
-  register(api: OpenClawPluginApi): void;
+  register(api: CarapacePluginApi): void;
   bindPublishedRuntime(): void;
-  rotateManager(cfg: OpenClawConfig): Promise<void>;
+  rotateManager(cfg: CarapaceConfig): Promise<void>;
   expectReady(): Promise<{ speakerId: string; speakerLabel: string; voiceSessionKey: string }>;
   recordAfterTurn(): Promise<void>;
   beginLateDelivery(): Promise<void>;
@@ -53,7 +53,7 @@ type DiscordCaptureTestApi = {
     createDiscordGatewayCaptureFixture(
       this: void,
       params: {
-        cfg: OpenClawConfig;
+        cfg: CarapaceConfig;
         test: { expect: typeof expect; vi: typeof vi };
       },
     ): DiscordCaptureFixture;
@@ -110,23 +110,23 @@ describe("Gateway admitted Discord transcript capture", () => {
     // Ordinary CI uses this scripted loopback provider and the Node socket guard below.
     const env = captureEnv([
       "NODE_ENV",
-      "OPENCLAW_TEST_MINIMAL_GATEWAY",
-      "OPENCLAW_SKIP_CHANNELS",
-      "OPENCLAW_SKIP_GMAIL_WATCHER",
-      "OPENCLAW_SKIP_CRON",
-      "OPENCLAW_SKIP_CANVAS_HOST",
-      "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-      "OPENCLAW_SKIP_PROVIDERS",
-      "OPENCLAW_BUILD_PRIVATE_QA",
-      "OPENCLAW_QA_FORCE_RUNTIME",
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
-      "OPENCLAW_GATEWAY_PORT",
+      "CARAPACE_TEST_MINIMAL_GATEWAY",
+      "CARAPACE_SKIP_CHANNELS",
+      "CARAPACE_SKIP_GMAIL_WATCHER",
+      "CARAPACE_SKIP_CRON",
+      "CARAPACE_SKIP_CANVAS_HOST",
+      "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+      "CARAPACE_SKIP_PROVIDERS",
+      "CARAPACE_BUILD_PRIVATE_QA",
+      "CARAPACE_QA_FORCE_RUNTIME",
+      "CARAPACE_GATEWAY_TOKEN",
+      "CARAPACE_GATEWAY_PASSWORD",
+      "CARAPACE_GATEWAY_PORT",
     ]);
     const isolated = withIsolatedTestHome({ mode: "hermetic" });
-    const stateDir = path.join(isolated.tempHome, ".openclaw");
+    const stateDir = path.join(isolated.tempHome, ".carapace");
     const workspace = path.join(isolated.tempHome, "workspace");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     let gateway:
       | Awaited<
           ReturnType<typeof import("../../src/gateway/test-helpers.e2e.js").startGatewayWithClient>
@@ -145,8 +145,8 @@ describe("Gateway admitted Discord transcript capture", () => {
     const calls: ScriptedCall[] = [];
     const deniedConnections: string[] = [];
     let providerPort: number | undefined;
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PORT");
-    const selectedGatewayPort = () => ports?.gateway ?? Number(process.env.OPENCLAW_GATEWAY_PORT);
+    deleteTestEnvValue("CARAPACE_GATEWAY_PORT");
+    const selectedGatewayPort = () => ports?.gateway ?? Number(process.env.CARAPACE_GATEWAY_PORT);
     // The native method must retain each caller's socket, supplied by Reflect.apply below.
     // oxlint-disable-next-line typescript/unbound-method
     const originalConnect = Socket.prototype.connect;
@@ -283,28 +283,28 @@ describe("Gateway admitted Discord transcript capture", () => {
       // VITEST and the explicit minimal flag retain test lifecycle isolation.
       setTestEnvValue("NODE_ENV", "production");
       for (const key of [
-        "OPENCLAW_BUILD_PRIVATE_QA",
-        "OPENCLAW_QA_FORCE_RUNTIME",
-        "OPENCLAW_GATEWAY_TOKEN",
-        "OPENCLAW_GATEWAY_PASSWORD",
+        "CARAPACE_BUILD_PRIVATE_QA",
+        "CARAPACE_QA_FORCE_RUNTIME",
+        "CARAPACE_GATEWAY_TOKEN",
+        "CARAPACE_GATEWAY_PASSWORD",
         // These flags remove channel config from the effective runtime as well as
         // skipping startup. Minimal Gateway mode already skips channel login.
-        "OPENCLAW_SKIP_CHANNELS",
-        "OPENCLAW_SKIP_PROVIDERS",
+        "CARAPACE_SKIP_CHANNELS",
+        "CARAPACE_SKIP_PROVIDERS",
       ]) {
         deleteTestEnvValue(key);
       }
       for (const key of [
-        "OPENCLAW_TEST_MINIMAL_GATEWAY",
-        "OPENCLAW_SKIP_GMAIL_WATCHER",
-        "OPENCLAW_SKIP_CRON",
-        "OPENCLAW_SKIP_CANVAS_HOST",
-        "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
+        "CARAPACE_TEST_MINIMAL_GATEWAY",
+        "CARAPACE_SKIP_GMAIL_WATCHER",
+        "CARAPACE_SKIP_CRON",
+        "CARAPACE_SKIP_CANVAS_HOST",
+        "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
       ]) {
         setTestEnvValue(key, "1");
       }
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
       await Promise.all([
         fs.mkdir(workspace, { recursive: true }),
         fs.mkdir(stateDir, { recursive: true }),
@@ -337,7 +337,7 @@ describe("Gateway admitted Discord transcript capture", () => {
       phase("plugin-loader:import");
       const [
         { createPluginModuleLoader },
-        { resolveOpenClawDevSourceRoot },
+        { resolveCarapaceDevSourceRoot },
         { preparePluginLoaderAliases, resolvePluginRuntimeModulePathWithDiagnostics },
       ] = await Promise.all([
         import("../../src/plugins/loader-module-runtime.js"),
@@ -345,7 +345,7 @@ describe("Gateway admitted Discord transcript capture", () => {
         import("../../src/plugins/sdk-alias.js"),
       ]);
       phase("plugin-loader:imported");
-      const devSourceRoot = resolveOpenClawDevSourceRoot();
+      const devSourceRoot = resolveCarapaceDevSourceRoot();
       const sdkAliases = preparePluginLoaderAliases({
         modulePath: testApiPath,
         devSourceRoot,
@@ -353,7 +353,7 @@ describe("Gateway admitted Discord transcript capture", () => {
       const isBuiltPath = (target: string) => /[/\\]dist(?:-runtime)?[/\\]/.test(target);
       const sdkTargets = ["runtime-store", "extension-shared", "channel-entry-contract"].map(
         (subpath) => {
-          const target = sdkAliases.resolveAlias(`openclaw/plugin-sdk/${subpath}`);
+          const target = sdkAliases.resolveAlias(`carapace/plugin-sdk/${subpath}`);
           expect(target, `Missing SDK seam: ${subpath}`).toBeDefined();
           expect(
             isBuiltPath(target!),
@@ -411,8 +411,8 @@ describe("Gateway admitted Discord transcript capture", () => {
       const { resetConfigOverrides } = await import("../../src/config/runtime-overrides.js");
       const { drainSessionStoreWriterQueuesForTest, clearSessionStoreCacheForTest } =
         await import("../../src/config/sessions/store-writer-state.js");
-      const { closeOpenClawStateDatabaseByPath } =
-        await import("../../src/state/openclaw-state-db.js");
+      const { closeCarapaceStateDatabaseByPath } =
+        await import("../../src/state/carapace-state-db.js");
       const { activeSessions, resolveSourceProvider } =
         await import("../../src/transcripts/capture.js");
       const { createTranscriptsAutoStartService } =
@@ -438,7 +438,7 @@ describe("Gateway admitted Discord transcript capture", () => {
           } finally {
             clearSessionStoreCacheForTest();
             await resetPreparedModelRuntimeSnapshotsForTest();
-            closeOpenClawStateDatabaseByPath(path.join(stateDir, "state", "openclaw.sqlite"));
+            closeCarapaceStateDatabaseByPath(path.join(stateDir, "state", "carapace.sqlite"));
             resetConfigOverrides();
             clearRuntimeConfigSnapshot();
             clearConfigCache();
@@ -448,7 +448,7 @@ describe("Gateway admitted Discord transcript capture", () => {
       };
       resetConfigOverrides();
       const token = "synthetic-gateway-capture-token";
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           list: [
             { id: "main", default: true, workspace },
@@ -461,7 +461,7 @@ describe("Gateway admitted Discord transcript capture", () => {
             model: { primary: provider.modelRef, fallbacks: [] },
             models: {
               [provider.modelRef]: {
-                agentRuntime: { id: "openclaw" },
+                agentRuntime: { id: "carapace" },
                 params: { transport: "sse", openaiWsWarmup: false },
               },
             },
@@ -713,7 +713,7 @@ describe("Gateway admitted Discord transcript capture", () => {
       expect(summaryRequests).toBe(1);
 
       // Rotate the real manager and transport while preserving the scenario's SDK spies.
-      const routedConfig: OpenClawConfig = {
+      const routedConfig: CarapaceConfig = {
         ...cfg,
         bindings: [{ ...cfg.bindings![0]!, agentId: "agent-b" }],
         transcripts: {

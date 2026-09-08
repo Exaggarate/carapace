@@ -28,7 +28,7 @@ import {
   rewrapToolWithBeforeToolCallHook,
   runBeforeToolCallHook,
 } from "../agent-tools.before-tool-call.js";
-import { createOpenClawCodingTools } from "../agent-tools.js";
+import { createCarapaceCodingTools } from "../agent-tools.js";
 import { log } from "../embedded-agent-runner/logger.js";
 import type { EmbeddedRunAttemptParams } from "../embedded-agent-runner/run/types.js";
 import { runBestEffortCallback } from "../embedded-agent-subscribe.callback.js";
@@ -508,7 +508,7 @@ export function createAgentHarnessHostCapabilities(params: {
       const tools = bindTools(
         withAgentQuestionAnswerAuthority(resolveAgentQuestionAnswerAuthority(capabilities), () =>
           withInstallationTarget(installationTarget, () =>
-            createOpenClawCodingTools({ ...options, operationalRunInstance }),
+            createCarapaceCodingTools({ ...options, operationalRunInstance }),
           ),
         ),
         bindingOptions,

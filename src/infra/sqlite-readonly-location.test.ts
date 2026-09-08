@@ -30,7 +30,7 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
 });
 
 function createTempDatabasePath(): string {
-  const tempDir = tempDirs.make("openclaw-sqlite-readonly-");
+  const tempDir = tempDirs.make("carapace-sqlite-readonly-");
   return path.join(tempDir, "state.sqlite");
 }
 
@@ -100,7 +100,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
     { mode: "async", prepare: prepareSqliteReadOnlyLocation },
     { mode: "sync", prepare: prepareSqliteReadOnlyLocationSync },
   ])("stages the $mode isolated worker snapshot in the private user cache", async ({ prepare }) => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-cache-");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-cache-");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -122,7 +122,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   });
 
   it("avoids an exhausted OS temp root when a private cache can hold the snapshot", async () => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-quota-");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-quota-");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -155,7 +155,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   it.each([13, 778, 1034, 1290])(
     "retains SQLite destination write failure %i and identifies the snapshot cache",
     async (errcode) => {
-      const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-full-");
+      const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-full-");
       const sqlite = requireNodeSqlite();
       const databasePath = createTempDatabasePath();
       const database = new sqlite.DatabaseSync(databasePath);
@@ -173,7 +173,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
           message: expect.stringContaining(`SQLite errcode=${errcode}`),
         });
       });
-      expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+      expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
     },
   );
 
@@ -205,7 +205,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   )(
     "identifies $mode private cache allocation failure $code before backup or copying",
     async ({ code, empty, prepare, sync }) => {
-      const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-allocation-");
+      const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-allocation-");
       const databasePath = createTempDatabasePath();
       const sqlite = requireNodeSqlite();
       if (empty) {
@@ -215,10 +215,10 @@ describe("prepareSqliteReadOnlyLocation", () => {
         database.exec("CREATE TABLE probe (value TEXT);");
         database.close();
       }
-      const stagingRoot = path.join(cacheRoot, "openclaw");
+      const stagingRoot = path.join(cacheRoot, "carapace");
       const allocationError = Object.assign(new Error("snapshot directory allocation failed"), {
         code,
-        path: path.join(stagingRoot, "openclaw-sqlite-readonly-stage"),
+        path: path.join(stagingRoot, "carapace-sqlite-readonly-stage"),
       });
       const backup = vi.spyOn(sqlite, "backup");
       const write = vi.spyOn(fs, "writeSync");
@@ -253,14 +253,14 @@ describe("prepareSqliteReadOnlyLocation", () => {
   ])(
     "identifies sanitized $mode Windows allocation failures without losing their causes",
     async ({ prepare, sync }) => {
-      const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-windows-allocation-");
+      const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-windows-allocation-");
       const databasePath = createTempDatabasePath();
       const sqlite = requireNodeSqlite();
       const database = new sqlite.DatabaseSync(databasePath);
       database.exec("CREATE TABLE probe (value TEXT);");
       database.close();
-      const stagingRoot = path.join(cacheRoot, "openclaw");
-      const directoryPath = path.join(stagingRoot, "openclaw-sqlite-readonly-stage");
+      const stagingRoot = path.join(cacheRoot, "carapace");
+      const directoryPath = path.join(stagingRoot, "carapace-sqlite-readonly-stage");
       const allocationError = new Error("PowerShell failed (status=1); stderr: Access is denied.");
       const windowsError = new Error(
         `Unable to create private Windows SQLite directory: ${directoryPath}`,
@@ -294,7 +294,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
     { label: "SQLite source locking", code: "ERR_SQLITE_ERROR", errcode: 5 },
     { label: "filesystem source read", code: "EACCES", errcode: undefined },
   ])("preserves $label failures without staging guidance", async ({ label, code, errcode }) => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-source-failure-");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-source-failure-");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -309,12 +309,12 @@ describe("prepareSqliteReadOnlyLocation", () => {
     await withEnvAsync({ XDG_CACHE_HOME: cacheRoot }, async () => {
       await expect(prepareSqliteReadOnlyLocationInProcess(databasePath)).rejects.toBe(sourceError);
     });
-    expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+    expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
   });
 
   it("preserves source failures inside the snapshot cache without staging guidance", async () => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-cached-source-");
-    const stagingRoot = path.join(cacheRoot, "openclaw");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-cached-source-");
+    const stagingRoot = path.join(cacheRoot, "carapace");
     fs.mkdirSync(stagingRoot, { mode: 0o700 });
     const databasePath = path.join(stagingRoot, "source.sqlite");
     const sqlite = requireNodeSqlite();
@@ -338,7 +338,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   });
 
   it("identifies filesystem failures whose path belongs to the staging destination", async () => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-destination-path-");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-destination-path-");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -357,7 +357,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
         message: expect.stringContaining(cacheRoot),
       });
     });
-    expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+    expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
   });
 
   it.each([
@@ -388,7 +388,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   });
 
   it("preserves source corruption without reporting a snapshot staging quota failure", async () => {
-    const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-corrupt-source-");
+    const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-corrupt-source-");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -435,7 +435,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   it.each(["EDQUOT", "ENOSPC"])(
     "keeps synchronous destination %s failures actionable without changing the source",
     async (code) => {
-      const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-sync-full-");
+      const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-sync-full-");
       const sqlite = requireNodeSqlite();
       const databasePath = createTempDatabasePath();
       const database = new sqlite.DatabaseSync(databasePath);
@@ -456,12 +456,12 @@ describe("prepareSqliteReadOnlyLocation", () => {
         );
       });
       expect(readFamily(databasePath)).toEqual(before);
-      expect(fs.readdirSync(path.join(cacheRoot, "openclaw"))).toEqual([]);
+      expect(fs.readdirSync(path.join(cacheRoot, "carapace"))).toEqual([]);
     },
   );
 
   it("keeps a newly created cache root on the requested cache filesystem", async () => {
-    const cacheRoot = path.join(tempDirs.make("openclaw-sqlite-snapshot-new-cache-"), "missing");
+    const cacheRoot = path.join(tempDirs.make("carapace-sqlite-snapshot-new-cache-"), "missing");
     const sqlite = requireNodeSqlite();
     const databasePath = createTempDatabasePath();
     const database = new sqlite.DatabaseSync(databasePath);
@@ -482,7 +482,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
   it.runIf(process.platform !== "win32")(
     "reports the real SQLite write errcode across the isolated worker boundary",
     () => {
-      const cacheRoot = tempDirs.make("openclaw-sqlite-snapshot-worker-full-");
+      const cacheRoot = tempDirs.make("carapace-sqlite-snapshot-worker-full-");
       const sqlite = requireNodeSqlite();
       const databasePath = createTempDatabasePath();
       const database = new sqlite.DatabaseSync(databasePath);
@@ -507,7 +507,7 @@ describe("prepareSqliteReadOnlyLocation", () => {
         [
           "-c",
           'ulimit -f 1; exec "$@"',
-          "openclaw-sqlite-snapshot-quota",
+          "carapace-sqlite-snapshot-quota",
           process.execPath,
           ...resolveRuntimeWorkerArgv(workerUrl).slice(0, -1),
           "--input-type=module",
@@ -530,14 +530,14 @@ describe("prepareSqliteReadOnlyLocation", () => {
   );
 
   it("propagates async public entry point failures", async () => {
-    const missingPath = path.join(tempDirs.make("openclaw-sqlite-readonly-missing-"), "missing.db");
+    const missingPath = path.join(tempDirs.make("carapace-sqlite-readonly-missing-"), "missing.db");
     await expect(prepareSqliteReadOnlyLocation(missingPath)).rejects.toThrow(
       /SQLite read-only worker .*ENOENT.*\(code=ENOENT\)/u,
     );
   });
 
   it("propagates sync public entry point failures", () => {
-    const missingPath = path.join(tempDirs.make("openclaw-sqlite-readonly-missing-"), "missing.db");
+    const missingPath = path.join(tempDirs.make("carapace-sqlite-readonly-missing-"), "missing.db");
     expect(() => prepareSqliteReadOnlyLocationSync(missingPath)).toThrow(
       /SQLite read-only worker .*ENOENT.*\(code=ENOENT\)/u,
     );

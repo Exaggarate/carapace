@@ -79,7 +79,7 @@ suite.define(() => {
 
       // Compact viewports keep the whole dialog on screen.
       await page.setViewportSize({ height: 720, width: 420 });
-      const card = page.locator("openclaw-modal-dialog .exec-approval-card");
+      const card = page.locator("carapace-modal-dialog .exec-approval-card");
       const bounds = await card.boundingBox();
       expect(bounds).not.toBeNull();
       expect(bounds!.x).toBeGreaterThanOrEqual(0);

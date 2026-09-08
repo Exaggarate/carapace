@@ -1,13 +1,13 @@
 // Covers doctor detection of a gateway.auth.token that is a stringified nullish placeholder.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { CORE_HEALTH_CHECKS } from "./doctor-core-checks.js";
 
 const gatewayAuthCheck = () =>
   CORE_HEALTH_CHECKS.find((entry) => entry.id === "core/doctor/gateway-auth");
 
 async function detectFindings(
-  token: NonNullable<NonNullable<OpenClawConfig["gateway"]>["auth"]>["token"],
+  token: NonNullable<NonNullable<CarapaceConfig["gateway"]>["auth"]>["token"],
   mode: "token" | "password" | "none" = "token",
   env: NodeJS.ProcessEnv = {},
 ) {
@@ -52,7 +52,7 @@ describe("doctor gateway auth placeholder token", () => {
     expect(
       await detectFindings({ source: "env", provider: "default", id: "SYNTHETIC_TOKEN" }, "token", {
         SYNTHETIC_TOKEN: "synthetic-valid-token",
-        OPENCLAW_GATEWAY_TOKEN: "undefined",
+        CARAPACE_GATEWAY_TOKEN: "undefined",
       }),
     ).toEqual([]);
   });

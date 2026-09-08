@@ -22,7 +22,7 @@ import {
   copyConfigResolutionFactsExcept,
 } from "../config/resolution-facts.js";
 import type { GatewayAuthConfig, GatewayTailscaleConfig } from "../config/types.gateway.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import {
   GATEWAY_AUTH_SURFACE_PATHS,
@@ -75,7 +75,7 @@ export function assertValidGatewayStartupConfigSnapshot(
 
 function withRuntimeConfig(
   snapshot: ConfigFileSnapshot,
-  runtimeConfig: OpenClawConfig,
+  runtimeConfig: CarapaceConfig,
 ): ConfigFileSnapshot {
   copyConfigResolutionFacts(snapshot.sourceConfig, runtimeConfig);
   return {
@@ -147,7 +147,7 @@ export async function loadGatewayStartupConfigSnapshot(params: {
   };
 }
 
-export function hasActiveGatewayAuthSecretRef(config: OpenClawConfig): boolean {
+export function hasActiveGatewayAuthSecretRef(config: CarapaceConfig): boolean {
   const states = evaluateGatewayAuthSurfaceStates({
     config,
     defaults: config.secrets?.defaults,
@@ -159,7 +159,7 @@ export function hasActiveGatewayAuthSecretRef(config: OpenClawConfig): boolean {
   });
 }
 
-export function assertRuntimeGatewayAuthNotKnownWeak(config: OpenClawConfig): void {
+export function assertRuntimeGatewayAuthNotKnownWeak(config: CarapaceConfig): void {
   assertGatewayAuthNotKnownWeak(
     resolveGatewayAuthForConfig({
       config,
@@ -173,7 +173,7 @@ export function assertRuntimeGatewayAuthNotKnownWeak(config: OpenClawConfig): vo
 
 export function logGatewayAuthSurfaceDiagnostics(
   prepared: {
-    sourceConfig: OpenClawConfig;
+    sourceConfig: CarapaceConfig;
     warnings: Array<{ code: string; path: string; message: string }>;
   },
   logSecrets: GatewayStartupLog,
@@ -204,9 +204,9 @@ export function logGatewayAuthSurfaceDiagnostics(
 }
 
 export function applyGatewayAuthOverridesForStartupPreflight(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   overrides: { auth?: GatewayAuthConfig; tailscale?: GatewayTailscaleConfig },
-): OpenClawConfig {
+): CarapaceConfig {
   if (!overrides.auth && !overrides.tailscale) {
     return config;
   }

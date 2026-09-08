@@ -1,12 +1,12 @@
-# OpenClaw Cerebras Provider
+# Carapace Cerebras Provider
 
-Official OpenClaw provider plugin for Cerebras.
+Official Carapace provider plugin for Cerebras.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/cerebras-provider
-openclaw gateway restart
+carapace plugins install @carapace/cerebras-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/cerebras> for setup and configuration.
+See <../../docs/providers/cerebras.md> for setup and configuration.

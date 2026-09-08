@@ -1,7 +1,7 @@
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { itemNotification } from "./protocol.test-helpers.js";
 import {

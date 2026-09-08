@@ -107,7 +107,7 @@ suite.define(() => {
         role: "user",
         content: text,
         timestamp,
-        __openclaw: {
+        __carapace: {
           id: `user-${after}`,
           idempotencyKey: `${runId}:user`,
           senderId: "operator",
@@ -119,7 +119,7 @@ suite.define(() => {
         sessionKey,
         clientRunId: runId,
         message,
-        messageId: message["__openclaw"].id,
+        messageId: message["__carapace"].id,
         messageSeq: messages.length,
         activeRunIds: [runId],
         hasActiveRun: true,
@@ -159,7 +159,7 @@ suite.define(() => {
       toolCallId: "successful-tool",
       content: "ok",
       timestamp: firstStartedAt + 982_000,
-      __openclaw: { id: "successful-tool-result", runId },
+      __carapace: { id: "successful-tool-result", runId },
     };
     messages.push(tool);
     await gateway.setHistoryMessages(messages);
@@ -167,7 +167,7 @@ suite.define(() => {
       sessionKey,
       runId,
       message: tool,
-      messageId: tool["__openclaw"].id,
+      messageId: tool["__carapace"].id,
       messageSeq: messages.length,
       activeRunIds: [runId],
       hasActiveRun: true,
@@ -177,7 +177,7 @@ suite.define(() => {
       role: "assistant",
       content: "Success after the earlier failure.",
       timestamp: firstStartedAt + 994_000,
-      __openclaw: { id: "successful-reply", runId },
+      __carapace: { id: "successful-reply", runId },
     };
     messages.push(reply);
     // The same canonical history must survive a full page reload, not just
@@ -251,7 +251,7 @@ suite.define(() => {
           role: "assistant",
           content: "Older run result.",
           timestamp: Date.now() - 1_000,
-          __openclaw: { id: "older-result", idempotencyKey: "older-run" },
+          __carapace: { id: "older-result", idempotencyKey: "older-run" },
         },
       ],
       inFlightRun: { runId: "newer-run", text: "" },
@@ -277,10 +277,10 @@ suite.define(() => {
 
   it("restores only the unpersisted assistant response after reconnecting", async () => {
     const artifactDir =
-      process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+      process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
         ? path.join(suite.artifactDir, "chat-inflight-reconnect")
         : "";
-    const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+    const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
     const context = await suite.newBrowserContext({
       viewport: { height: 800, width: 1200 },
       ...(captureProof
@@ -344,7 +344,7 @@ suite.define(() => {
     await expect
       .poll(() =>
         currentPage.evaluate(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime?: { context: { gateway: { snapshot: { phase: string } } } };
           };
           return app.runtime?.context.gateway.snapshot.phase;
@@ -353,7 +353,7 @@ suite.define(() => {
       .toBe("reconnecting");
     await stop.waitFor({ state: "visible" });
     expect(await stop.isEnabled()).toBe(true);
-    if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+    if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
       await currentPage.screenshot({
         path: path.join(suite.artifactDir, "offline-stop-visible.png"),
         fullPage: true,
@@ -383,7 +383,7 @@ suite.define(() => {
         {
           role: "system",
           timestamp: Date.now() - 1_000,
-          __openclaw: {
+          __carapace: {
             kind: "compaction",
             id: "compact-entry-1",
             tokensBefore: 900_000,
@@ -676,10 +676,10 @@ suite.define(() => {
 
   it("renders a safe self-abort diagnostic without leaving stale composer status", async () => {
     const artifactDir =
-      process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+      process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
         ? path.join(suite.artifactDir, "chat-abort-diagnostic")
         : "";
-    const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+    const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
     const context = await suite.newBrowserContext({ viewport: { height: 800, width: 1200 } });
     const currentPage = await context.newPage();
     page = currentPage;

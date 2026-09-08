@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { requireNodeSqlite } from "../../infra/node-sqlite.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import {
   deleteRegistryWorktree,
   getRegistryWorktreeProvisionedChunk,
@@ -29,19 +29,19 @@ describe("managed worktree registry", () => {
 
   beforeEach(async () => {
     const tempRoot = await fs.realpath(os.tmpdir());
-    root = await fs.mkdtemp(path.join(tempRoot, "openclaw-worktree-registry-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: path.join(root, "state") };
+    root = await fs.mkdtemp(path.join(tempRoot, "carapace-worktree-registry-"));
+    env = { ...process.env, CARAPACE_STATE_DIR: path.join(root, "state") };
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
   it("inspects absent legacy worktrees without creating the state database", async () => {
     expect(listLegacyRegistryWorktreesForMigration(env)).toEqual([]);
     expect(listRegistryWorktreesForMigration(env)).toEqual([]);
-    await expect(fs.stat(env.OPENCLAW_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(fs.stat(env.CARAPACE_STATE_DIR!)).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("persists, orders, updates, and deletes worktree rows through Kysely", () => {
@@ -51,7 +51,7 @@ describe("managed worktree registry", () => {
       repoFingerprint: "0123456789abcdef",
       repoRoot: path.join(root, "repo"),
       path: path.join(root, "worktrees", "task"),
-      branch: "openclaw/task",
+      branch: "carapace/task",
       baseRef: "HEAD",
       ownerKind: "workboard",
       ownerId: "card-1",
@@ -88,7 +88,7 @@ describe("managed worktree registry", () => {
       },
       lastActiveAt: 30,
       removedAt: 40,
-      snapshotRef: "refs/openclaw/snapshots/first",
+      snapshotRef: "refs/carapace/snapshots/first",
       provisionedState: [{ path: ".env.local", mode: 0o600, chunks: 1 }],
     });
     expect(getRegistryWorktree(env, "first")).toMatchObject({
@@ -96,7 +96,7 @@ describe("managed worktree registry", () => {
       repoFingerprint: "fedcba9876543210",
       lastActiveAt: 30,
       removedAt: 40,
-      snapshotRef: "refs/openclaw/snapshots/first",
+      snapshotRef: "refs/carapace/snapshots/first",
     });
     expect(findLiveRegistryWorktreeByPath(env, record.path)).toBeUndefined();
     expect(getRegistryWorktreeProvisionedPaths(env, "first")).toEqual([".env.local"]);
@@ -129,15 +129,15 @@ describe("managed worktree registry", () => {
       }),
     ).toBeUndefined();
 
-    openOpenClawStateDatabase({ env })
+    openCarapaceStateDatabase({ env })
       .db.prepare("UPDATE worktrees SET provisioned_paths_json = ? WHERE id = ?")
       .run("not-json", "second");
     expect(getRegistryWorktreeProvisionedPaths(env, "second")).toBeUndefined();
   });
 
   it("adds the provisioned-path ledger to an existing worktree registry", () => {
-    const databasePath = openOpenClawStateDatabase({ env }).path;
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = openCarapaceStateDatabase({ env }).path;
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const legacy = new DatabaseSync(databasePath);
     legacy.exec(`
@@ -148,7 +148,7 @@ describe("managed worktree registry", () => {
     legacy.close();
 
     expect(getRegistryWorktreeProvisionedPaths(env, "missing")).toBeUndefined();
-    const database = openOpenClawStateDatabase({ env }).db;
+    const database = openCarapaceStateDatabase({ env }).db;
     const columns = database.prepare("PRAGMA table_info(worktrees)").all() as Array<{
       name?: unknown;
     }>;

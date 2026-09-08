@@ -22,7 +22,7 @@ afterEach(async () => {
 
 describe("context-engine maintenance task ownership", () => {
   it("rechecks process ownership registered while recovery yields", async () => {
-    await withStateDirEnv("openclaw-context-maintenance-race-", async () => {
+    await withStateDirEnv("carapace-context-maintenance-race-", async () => {
       resetTaskRegistryForTests({ persist: false });
       configureTaskRegistryMaintenance({ runtimeAuthoritative: true });
       const staleAt = Date.now() - 10 * 60_000;

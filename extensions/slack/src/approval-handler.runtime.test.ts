@@ -3,7 +3,7 @@ import type {
   ApprovalActionView,
   ChannelApprovalKind,
   ApprovalMetadataView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { decodeSlackApprovalAction } from "./approval-actions.js";
 import { slackApprovalNativeRuntime } from "./approval-handler.runtime.js";
@@ -470,7 +470,7 @@ describe("slackApprovalNativeRuntime", () => {
 
     expect(payload.text).toContain("*Exec approval required*");
     expect((payload.blocks as Array<{ block_id?: string }>)[0]?.block_id).toBe(
-      "openclaw_approval_header",
+      "carapace_approval_header",
     );
     const actionsBlock = findSlackActionsBlock(
       payload.blocks as Array<{ type?: string; elements?: unknown[] }>,
@@ -480,7 +480,7 @@ describe("slackApprovalNativeRuntime", () => {
     expect(labels).toEqual(["Allow Once", "Deny"]);
     expect(JSON.stringify(payload.blocks)).not.toContain("Allow Always");
     expect(JSON.stringify(payload.blocks)).not.toContain("/approve");
-    expect(JSON.stringify(payload.blocks)).toContain("openclaw:approval_button");
+    expect(JSON.stringify(payload.blocks)).toContain("carapace:approval_button");
     expect(decodeSlackApprovalElements(actionsBlock)).toEqual([
       expect.objectContaining({ approvalKind: "exec", decision: "allow-once" }),
       expect.objectContaining({ approvalKind: "exec", decision: "deny" }),
@@ -503,7 +503,7 @@ describe("slackApprovalNativeRuntime", () => {
 
     expect(payload.text).toContain("*Plugin approval required*");
     expect((payload.blocks as Array<{ block_id?: string }>)[0]?.block_id).toBe(
-      "openclaw_approval_header",
+      "carapace_approval_header",
     );
     expect(payload.text).toContain("Share screen with Computer Use");
     expect(payload.text).toContain("*Approval ID:* plugin:req-1");
@@ -556,7 +556,7 @@ describe("slackApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           id: "system-agent:change-1",
           request: {
-            title: "OpenClaw change",
+            title: "Carapace change",
             description: "restart the Gateway",
             command: "restart the Gateway",
             proposalHash: "a".repeat(64),
@@ -577,7 +577,7 @@ describe("slackApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           approvalId: "system-agent:change-1",
           phase: "resolved",
-          title: "OpenClaw change",
+          title: "Carapace change",
           metadata: [],
           commandText: "restart the Gateway",
           operationSummary: "restart the Gateway",
@@ -591,9 +591,9 @@ describe("slackApprovalNativeRuntime", () => {
       expect(result).toMatchObject({
         kind: "update",
         payload: {
-          text: `*OpenClaw change approval: ${label}*\nResolved.\n\n*Change*\n\`\`\`\nrestart the Gateway\n\`\`\``,
+          text: `*Carapace change approval: ${label}*\nResolved.\n\n*Change*\n\`\`\`\nrestart the Gateway\n\`\`\``,
           blocks: [
-            { text: { text: `*OpenClaw change approval: ${label}*\nResolved.` } },
+            { text: { text: `*Carapace change approval: ${label}*\nResolved.` } },
             { text: { text: "*Change*\n```\nrestart the Gateway\n```" } },
           ],
         },

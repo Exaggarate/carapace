@@ -6,9 +6,9 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { collectSessionMaintenancePreserveKeys } from "../config/sessions/store-maintenance-preserve.js";
 import { resolveMaintenanceConfigFromInput } from "../config/sessions/store-maintenance.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import * as workspaceRetention from "./worker-environments/node-workspace-retain-coordinator.js";
 import type { WorkerSessionPlacementRecord } from "./worker-environments/placement-record.js";
 
@@ -147,8 +147,8 @@ async function startMaintenanceRuntime(
 
 describe("worker placement session maintenance ownership", () => {
   it("retains a configured-store repository base after its placement manifest advances", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const storePath = state.path("custom-sessions", "openclaw-agent.sqlite");
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const storePath = state.path("custom-sessions", "carapace-agent.sqlite");
       await state.writeConfig({ session: { store: storePath } });
       const placement = {
         ...createPlacementFixture("agent:main:dashboard:repository-retention"),
@@ -158,7 +158,7 @@ describe("worker placement session maintenance ownership", () => {
       const repository = repositories.create({
         agentId: placement.agentId,
         sessionKey: placement.sessionKey,
-        url: "https://github.com/openclaw/fixture.git",
+        url: "https://github.com/Exaggarate/carapace/fixture.git",
         assertCurrent: () => {},
       });
       repositories.bindBase({
@@ -203,10 +203,10 @@ describe("worker placement session maintenance ownership", () => {
   ] as const)(
     "preserves active placements during write-triggered $maintenance and releases them on stop",
     async ({ maintenance, sessionKey }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const now = Date.now();
         const placement = createPlacementFixture(sessionKey);
-        const storePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env: state.env });
+        const storePath = resolveCarapaceAgentSqlitePath({ agentId: "main", env: state.env });
         const sessionScope = (key: string) => ({
           agentId: "main",
           env: state.env,

@@ -1,11 +1,11 @@
 import { SourceMap, type SourceMapPayload } from "node:module";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { QuickJS } from "quickjs-wasi";
 import type { CodeModeLanguage } from "./code-mode-worker-types.js";
 
-export const USER_SOURCE_FILE = "openclaw-code-mode:user.js";
-const GENERATED_SOURCE_FILE = "openclaw-code-mode:generated.js";
-export const SOURCE_LOCATION_KEY = "__openclawSourceLocation";
+export const USER_SOURCE_FILE = "carapace-code-mode:user.js";
+const GENERATED_SOURCE_FILE = "carapace-code-mode:generated.js";
+export const SOURCE_LOCATION_KEY = "__carapaceSourceLocation";
 
 export type SourceLocation = {
   file: typeof USER_SOURCE_FILE | typeof GENERATED_SOURCE_FILE;
@@ -98,9 +98,9 @@ export function normalizeSourceStack(
     : undefined;
   // Leave arbitrary guest stack text opaque instead of copying every line into an array.
   return stack.replace(
-    /^[^\S\r\n]+at [^\r\n]*openclaw-code-mode:(?:user|controller)\.js:\d+:\d+\)?(?:\r?\n|$)/gmu,
+    /^[^\S\r\n]+at [^\r\n]*carapace-code-mode:(?:user|controller)\.js:\d+:\d+\)?(?:\r?\n|$)/gmu,
     (frame) => {
-      const match = /openclaw-code-mode:user\.js:(\d+):(\d+)(?=\)?(?:\r?\n)?$)/u.exec(frame);
+      const match = /carapace-code-mode:user\.js:(\d+):(\d+)(?=\)?(?:\r?\n)?$)/u.exec(frame);
       if (!match) {
         return "";
       }
@@ -125,7 +125,7 @@ export function normalizeSourceStack(
         if ("originalLine" in original) {
           return frame.replace(
             match[0],
-            "openclaw-code-mode:user.ts:" +
+            "carapace-code-mode:user.ts:" +
               (original.originalLine + 1) +
               ":" +
               (original.originalColumn + 1),
@@ -142,7 +142,7 @@ export function buildUserSource(
   prelude = "",
   language?: CodeModeLanguage,
 ): { source: string; location: SourceLocation } {
-  const prefix = `globalThis.__openclawResult = (async () => {\n${prelude}`;
+  const prefix = `globalThis.__carapaceResult = (async () => {\n${prelude}`;
   const before = sourceExtent(prefix);
   const body = sourceExtent(code);
   const columnOffset = before.lastColumn - 1;

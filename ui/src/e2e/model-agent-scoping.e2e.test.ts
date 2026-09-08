@@ -61,7 +61,7 @@ suite.define(() => {
       const modelsListCount = (await gateway.getRequests("models.list")).length;
       const authStatusCount = (await gateway.getRequests("models.authStatus")).length;
       await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               navigate: (routeId: string, options: { pathname: string }) => void;

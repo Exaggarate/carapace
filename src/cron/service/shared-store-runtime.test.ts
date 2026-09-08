@@ -52,7 +52,7 @@ async function addTarget(cron: CronService, suffix: string): Promise<CronJob> {
 const schedulerChildScript = String.raw`
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-const runs = JSON.parse(process.env.OPENCLAW_CRON_SHARED_STORE_RUNS);
+const runs = JSON.parse(process.env.CARAPACE_CRON_SHARED_STORE_RUNS);
 const { CronService } = await import(pathToFileURL(path.join(process.cwd(), "src/cron/service.ts")).href);
 const log = { debug() {}, info() {}, warn() {}, error() {} };
 for (const run of runs) {
@@ -104,7 +104,7 @@ describe("scheduler-disabled shared-store mutations", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_CRON_SHARED_STORE_RUNS: JSON.stringify(
+          CARAPACE_CRON_SHARED_STORE_RUNS: JSON.stringify(
             cases.map(({ canary, storePath }) => ({ jobId: canary.id, storePath })),
           ),
         },

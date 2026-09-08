@@ -1,9 +1,9 @@
 import type {
   ExecApprovalPendingView,
   ResolvedApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import {
@@ -41,7 +41,7 @@ const account = {
   },
 } as ResolvedGoogleChatAccount;
 
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   channels: {
     googlechat: {
       serviceAccount: {
@@ -371,7 +371,7 @@ describe("googleChatApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           id: "system-agent:change-1",
           request: {
-            title: "OpenClaw change",
+            title: "Carapace change",
             description: "restart the Gateway",
             command: "restart the Gateway",
             proposalHash: "a".repeat(64),
@@ -392,7 +392,7 @@ describe("googleChatApprovalNativeRuntime", () => {
           approvalKind: "system-agent",
           approvalId: "system-agent:change-1",
           phase: "resolved",
-          title: "OpenClaw change",
+          title: "Carapace change",
           metadata: [],
           commandText: "restart the Gateway",
           operationSummary: "restart the Gateway",
@@ -406,7 +406,7 @@ describe("googleChatApprovalNativeRuntime", () => {
       expect(result).toMatchObject({
         kind: "update",
         payload: {
-          cardsV2: [{ card: { header: { title: `OpenClaw Change Approval: ${label}` } } }],
+          cardsV2: [{ card: { header: { title: `Carapace Change Approval: ${label}` } } }],
         },
       });
     },
@@ -507,7 +507,7 @@ describe("googleChatApprovalNativeRuntime", () => {
       view,
     });
 
-    expect(JSON.stringify(pendingPayload.cardsV2)).toContain("openclaw.approval");
+    expect(JSON.stringify(pendingPayload.cardsV2)).toContain("carapace.approval");
     expect(JSON.stringify(pendingPayload.cardsV2)).not.toContain(
       "https://chat-app.example.test/googlechat",
     );

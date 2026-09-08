@@ -3,10 +3,10 @@ import {
   isDefinitiveRunLifecycle,
   resolveAgentRunLifecycleTerminalFacts,
   resolveAgentRunWaitTerminalFacts,
-} from "@openclaw/normalization-core/agent-run-terminal-outcome";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonEmptyStringPreservingWhitespace } from "@openclaw/normalization-core/string-coerce";
-import type { JsonObject, OpenClawEventType, RunResult, RunTimestamp } from "./types.js";
+} from "@carapace/normalization-core/agent-run-terminal-outcome";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonEmptyStringPreservingWhitespace } from "@carapace/normalization-core/string-coerce";
+import type { JsonObject, CarapaceEventType, RunResult, RunTimestamp } from "./types.js";
 
 const SDK_STATUS_BY_TERMINAL_CLASSIFICATION = {
   success: "completed",
@@ -25,7 +25,7 @@ export function readSdkRunTimestamp(value: unknown): RunTimestamp | undefined {
 export function resolveSdkLifecycleEventType(
   data: JsonObject,
   phase: "end" | "error",
-): OpenClawEventType {
+): CarapaceEventType {
   if (!isDefinitiveRunLifecycle({ phase, data })) {
     return "raw";
   }

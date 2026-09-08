@@ -41,7 +41,7 @@ describe("session placement recovery", () => {
     const sessionKey = "admin";
     const scopePrefix = sessionPlacementRecoveryScopeStoragePrefix(gatewayUrl, recoveryScope);
     expect(scopePrefix).toBe(
-      `openclaw.new-session.session-placement-recovery.v1:${gatewayUrl.length}:${gatewayUrl}:${recoveryScope.length}:${recoveryScope}:`,
+      `carapace.new-session.session-placement-recovery.v1:${gatewayUrl.length}:${gatewayUrl}:${recoveryScope.length}:${recoveryScope}:`,
     );
     expect(sessionPlacementRecoveryExactStorageKey(gatewayUrl, recoveryScope, sessionKey)).toBe(
       `${scopePrefix}${sessionKey.length}:${sessionKey}`,
@@ -413,8 +413,8 @@ describe("session placement recovery", () => {
   });
 
   it.each([
-    { projectId: "openclaw", worktree: true as const },
-    { repository: { url: "https://github.com/openclaw/openclaw.git", ref: "release/next" } },
+    { projectId: "carapace", worktree: true as const },
+    { repository: { url: "https://github.com/Exaggarate/carapace.git", ref: "release/next" } },
   ])("requires matching create parameters for a creating recovery: %j", (workspace) => {
     const creating = {
       ...recovery,
@@ -459,23 +459,23 @@ describe("session placement recovery", () => {
   it.each([
     { name: "an empty project id", value: { projectId: "" } },
     { name: "a non-string project id", value: { projectId: 42 } },
-    { name: "a project id with a cwd", value: { projectId: "openclaw", cwd: "/tmp/repo" } },
+    { name: "a project id with a cwd", value: { projectId: "carapace", cwd: "/tmp/repo" } },
     {
       name: "a repository with a Gateway worktree",
-      value: { repository: { url: "https://github.com/openclaw/openclaw.git" } },
+      value: { repository: { url: "https://github.com/Exaggarate/carapace.git" } },
     },
     { name: "an invalid repository", value: { worktree: undefined, repository: { url: "" } } },
     {
       name: "a repository with a local path",
       value: {
         worktree: undefined,
-        repository: { url: "https://github.com/openclaw/openclaw.git" },
+        repository: { url: "https://github.com/Exaggarate/carapace.git" },
         cwd: "/gateway/repo",
       },
     },
     {
       name: "a project id with an exec node",
-      value: { projectId: "openclaw", execNode: "macbook" },
+      value: { projectId: "carapace", execNode: "macbook" },
     },
     { name: "an unsupported visibility", value: { visibility: "shared" } },
     { name: "an unsupported Fast Mode", value: { fastMode: "fast" } },

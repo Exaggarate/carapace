@@ -1,7 +1,7 @@
 ---
 summary: "Build a third-party operator or WebChat client for the Gateway WebSocket protocol"
 read_when:
-  - Building an operator, dashboard, or WebChat client outside the OpenClaw repository
+  - Building an operator, dashboard, or WebChat client outside the Carapace repository
   - Implementing Gateway reconnect, history, approvals, or device pairing
   - Updating a third-party client for a new Gateway wire version
 title: "Building a Gateway client"
@@ -14,37 +14,37 @@ the wire contract: authentication, capabilities, reconnect recovery, history,
 subscriptions, and version upgrades.
 
 For frame shapes, the handshake, errors, and the complete method surface, read the
-[Gateway protocol specification](https://docs.openclaw.ai/gateway/protocol).
+[Gateway protocol specification](protocol.md).
 
 ## Install the packages
 
 Install the verified stable release, `2026.8.1`, with exact version pins:
 
 ```bash
-npm install --save-exact @openclaw/gateway-client@2026.8.1 @openclaw/gateway-protocol@2026.8.1
+npm install --save-exact @carapace/gateway-client@2026.8.1 @carapace/gateway-protocol@2026.8.1
 ```
 
 If an existing lockfile still pins either package to the reserved `0.0.0`
 artifact, rerun the command above to replace it. Those reserved artifacts have no
 runnable entrypoint or TypeScript declarations.
 
-Package versions follow the OpenClaw release train and are separate from the wire
+Package versions follow the Carapace release train and are separate from the wire
 protocol version. The `2026.8.1` packages export wire version `4`; that does not
-guarantee compatibility with every Gateway release. The root `openclaw` CLI has
+guarantee compatibility with every Gateway release. The root `carapace` CLI has
 its own package versions and dist-tags. Pin and test the client and Gateway
 versions together, and check the [wire-version rules](/gateway/clients#track-protocol-versions)
 before upgrading. The `2026.8.1` client pins protocol package `2026.8.1` exactly.
 
-- [`@openclaw/gateway-protocol`](https://www.npmjs.com/package/@openclaw/gateway-protocol)
+- [`@carapace/gateway-protocol`](https://www.npmjs.com/package/@carapace/gateway-protocol)
   provides schemas, runtime validators, TypeScript types, client identity and
   capability registries, structured error readers, and protocol version constants.
   Its npm tarball also includes the generated
-  [`protocol.schema.json`](https://unpkg.com/@openclaw/gateway-protocol@2026.8.1/protocol.schema.json)
+  [`protocol.schema.json`](https://unpkg.com/@carapace/gateway-protocol@2026.8.1/protocol.schema.json)
   machine-readable contract. Download it as a file; it is not an exported package
   import subpath.
-- [`@openclaw/gateway-client`](https://www.npmjs.com/package/@openclaw/gateway-client)
+- [`@carapace/gateway-client`](https://www.npmjs.com/package/@carapace/gateway-client)
   is the reference connection implementation. Import the package root for the Node
-  client and `@openclaw/gateway-client/browser` for the browser-safe protocol,
+  client and `@carapace/gateway-client/browser` for the browser-safe protocol,
   device-auth, and reconnect helpers.
 
 These package releases declare Node.js `>=22.19.0`. The Node entry includes the `ws`
@@ -66,12 +66,12 @@ A full interactive chat client that also renders approval prompts should request
 Add `operator.questions` only if the client handles interactive questions,
 `operator.pairing` only if it manages paired devices or nodes, and
 `operator.admin` only for administrative operations such as `config.patch`.
-The [operator scopes reference](https://docs.openclaw.ai/gateway/operator-scopes)
+The [operator scopes reference](operator-scopes.md)
 defines the complete method and approval-time rules.
 
-Do not create a per-client bearer token by hand-editing `openclaw.json`. Configure
-the Gateway's shared bootstrap authentication with `openclaw configure --section
-gateway` or the `openclaw onboard --gateway-auth ...` options, then let device
+Do not create a per-client bearer token by hand-editing `carapace.json`. Configure
+the Gateway's shared bootstrap authentication with `carapace configure --section
+gateway` or the `carapace onboard --gateway-auth ...` options, then let device
 pairing mint the client token:
 
 1. Persist an Ed25519 device identity in the client.
@@ -83,14 +83,14 @@ pairing mint the client token:
    `connect.challenge` existed may use local time only on their no-challenge path.
 3. If the Gateway returns structured `PAIRING_REQUIRED` details, show the request
    ID and pause or retry according to `error.details.recommendedNextStep`.
-4. On the Gateway host, review the request with `openclaw devices list`, then
-   approve that exact current request with `openclaw devices approve <requestId>`.
+4. On the Gateway host, review the request with `carapace devices list`, then
+   approve that exact current request with `carapace devices approve <requestId>`.
 5. Reconnect and persist `hello-ok.auth.deviceToken` with the negotiated role and
    scopes. Use that device token for later connections.
 
 Scope or role upgrades create a new pending pairing request. Token rotation cannot
 expand the approved pairing contract. See the
-[Devices CLI](https://docs.openclaw.ai/cli/devices) for approval, rotation, and
+[Devices CLI](../cli/devices.md) for approval, rotation, and
 revocation commands.
 
 ## Advertise client capabilities
@@ -100,7 +100,7 @@ not grant authorization. Import names from `GATEWAY_CLIENT_CAPS` instead of
 duplicating string literals:
 
 ```ts
-import { GATEWAY_CLIENT_CAPS } from "@openclaw/gateway-protocol/client-info";
+import { GATEWAY_CLIENT_CAPS } from "@carapace/gateway-protocol/client-info";
 
 const caps = [GATEWAY_CLIENT_CAPS.TOOL_EVENTS];
 ```
@@ -229,7 +229,7 @@ than forward a shared owner credential.
 
 ## Use history metadata and stable anchors
 
-Rows returned by `chat.history` can carry an `__openclaw` metadata envelope:
+Rows returned by `chat.history` can carry an `__carapace` metadata envelope:
 
 - `id` is the transcript entry identity. Use it for anchored history requests,
   but not as a unique display-row key.
@@ -245,7 +245,7 @@ Rows returned by `chat.history` can carry an `__openclaw` metadata envelope:
 
 Page backward with the response's `hasMore` and `nextOffset` values. Numeric
 offsets describe the current transcript projection, so do not persist them as
-long-lived bookmarks across reset or compaction. Persist `__openclaw.id` instead.
+long-lived bookmarks across reset or compaction. Persist `__carapace.id` instead.
 To restore around a known row, call `chat.history` with `messageId` and the
 `sessionId` that returned it. The Gateway can resolve that anchor from reset
 archive history; anchored responses intentionally omit numeric paging metadata.
@@ -302,12 +302,12 @@ release-vintage metadata and required scope metadata for core methods, but a wir
 version bump is still an explicit breaking event for third-party clients. Pin the
 package versions you test, upgrade the client and Gateway together when the wire
 version changes, and review the
-[OpenClaw changelog](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
+[Carapace changelog](https://github.com/Exaggarate/carapace/blob/main/CHANGELOG.md)
 before each upgrade.
 
 ## Related
 
-- [Gateway protocol](https://docs.openclaw.ai/gateway/protocol)
-- [Embedding OpenClaw](https://docs.openclaw.ai/gateway/embedding)
-- [Gateway RPC reference](https://docs.openclaw.ai/reference/rpc)
-- [Gateway integrations for external apps](https://docs.openclaw.ai/gateway/external-apps)
+- [Gateway protocol](protocol.md)
+- [Embedding Carapace](embedding.md)
+- [Gateway RPC reference](../reference/rpc.md)
+- [Gateway integrations for external apps](external-apps.md)

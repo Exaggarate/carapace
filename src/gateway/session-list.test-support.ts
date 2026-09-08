@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { listAgentIds } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import { listSessionsFromStoreAsync } from "./session-utils-list.js";
 import { buildGatewaySessionRow } from "./session-utils-row.js";
 
-function fixtureOwner(cfg: OpenClawConfig, key: string, agentId?: string): string {
+function fixtureOwner(cfg: CarapaceConfig, key: string, agentId?: string): string {
   const configured = listAgentIds(cfg);
   return expectDefined(
     parseAgentSessionKey(key)?.agentId ??

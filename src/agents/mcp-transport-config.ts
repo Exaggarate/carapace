@@ -1,16 +1,16 @@
 /**
  * Resolves MCP transport command, environment, and timeout configuration.
  */
-import { redactSensitiveUrl } from "@openclaw/net-policy/redact-sensitive-url";
+import { redactSensitiveUrl } from "@carapace/net-policy/redact-sensitive-url";
 import {
   asPositiveFiniteNumber,
   clampPositiveTimerTimeoutMs,
   resolvePositiveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asOptionalObjectRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
-import { resolveOpenClawMcpTransportAlias } from "../config/mcp-config-normalize.js";
+import { resolveCarapaceMcpTransportAlias } from "../config/mcp-config-normalize.js";
 import { createDedupeCache } from "../infra/dedupe.js";
 import { logWarn } from "../logger.js";
 import { readTrimmedStringAlias } from "../utils/string-readers.js";
@@ -185,7 +185,7 @@ export function resolveMcpTransportConfig(
   );
   const requestedTransportAlias = requestedTransport
     ? ""
-    : (resolveOpenClawMcpTransportAlias(getStringField(rawServer, ["type"])) ?? "");
+    : (resolveCarapaceMcpTransportAlias(getStringField(rawServer, ["type"])) ?? "");
   const effectiveTransport = requestedTransport || requestedTransportAlias;
   const stdioLaunch = resolveStdioMcpServerLaunchConfig(
     rawServer,

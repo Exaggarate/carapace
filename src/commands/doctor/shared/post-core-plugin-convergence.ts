@@ -1,7 +1,7 @@
 // Reconciles configured plugin installs after the core package update has completed.
 import path from "node:path";
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../../../packages/gateway-protocol/src/capability-consent-error-details.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
 import {
   filterRecordsToActive,
@@ -15,8 +15,8 @@ import {
 import { listManagedPluginNpmRoots } from "../../../plugins/npm-project-roots.js";
 import type { PluginPayloadSmokeFailure } from "../../../plugins/payload-verification.js";
 import {
-  reconcileRegisteredOpenClawHostLinks,
-  relinkOpenClawPeerDependenciesInManagedNpmRoot,
+  reconcileRegisteredCarapaceHostLinks,
+  relinkCarapacePeerDependenciesInManagedNpmRoot,
 } from "../../../plugins/plugin-peer-link.js";
 import { pruneStaleLocalBundledPluginInstallRecords } from "../../../plugins/stale-local-bundled-plugin-install-records.js";
 import type { PluginUpdateOutcome } from "../../../plugins/update.js";
@@ -54,9 +54,9 @@ type PostCoreConvergenceResult = {
   installRecords: Record<string, PluginInstallRecord>;
 };
 
-const REPAIR_GUIDANCE = "Run `openclaw update repair` to retry plugin repair.";
+const REPAIR_GUIDANCE = "Run `carapace update repair` to retry plugin repair.";
 const inspectGuidance = (pluginId: string) =>
-  `Run \`openclaw plugins inspect ${pluginId} --runtime --json\` for details.`;
+  `Run \`carapace plugins inspect ${pluginId} --runtime --json\` for details.`;
 
 function smokeFailureGuidance(failure: PluginPayloadSmokeFailure): string[] {
   if (failure.reason !== "unreadable-package-json") {
@@ -66,12 +66,12 @@ function smokeFailureGuidance(failure: PluginPayloadSmokeFailure): string[] {
     ? path.join(failure.installPath, "package.json")
     : "the plugin package.json";
   return [
-    `Fix file access for ${packageJsonPath} so it is readable by the user running OpenClaw. For EACCES or EPERM, correct its ownership or permissions; otherwise resolve the reported filesystem I/O error, then retry.`,
+    `Fix file access for ${packageJsonPath} so it is readable by the user running Carapace. For EACCES or EPERM, correct its ownership or permissions; otherwise resolve the reported filesystem I/O error, then retry.`,
     inspectGuidance(failure.pluginId),
   ];
 }
 
-async function repairInstalledNpmOpenClawHostLinks(params: {
+async function repairInstalledNpmCarapaceHostLinks(params: {
   env: NodeJS.ProcessEnv;
   installRecords: Record<string, PluginInstallRecord>;
 }): Promise<{
@@ -84,7 +84,7 @@ async function repairInstalledNpmOpenClawHostLinks(params: {
     const npmRoots = await listManagedPluginNpmRoots(resolveDefaultPluginNpmDir(params.env));
     const results = await Promise.all(
       npmRoots.map((npmRoot) =>
-        relinkOpenClawPeerDependenciesInManagedNpmRoot({
+        relinkCarapacePeerDependenciesInManagedNpmRoot({
           npmRoot,
           logger: {},
           onPackageReadError: (error, packageDir) => {
@@ -95,7 +95,7 @@ async function repairInstalledNpmOpenClawHostLinks(params: {
     );
     const repaired = results.reduce((total, result) => total + result.repaired, 0);
     // Legacy npm-owned installs live under extensions/, outside every managed npm project root.
-    const registeredRepair = await reconcileRegisteredOpenClawHostLinks({
+    const registeredRepair = await reconcileRegisteredCarapaceHostLinks({
       installRecords: params.installRecords,
       extensionsDir: resolveDefaultPluginExtensionsDir(params.env),
       env: params.env,
@@ -107,11 +107,11 @@ async function repairInstalledNpmOpenClawHostLinks(params: {
     return {
       changes: [
         ...(repaired > 0
-          ? [`Repaired OpenClaw host peer link(s) for ${repaired} managed npm plugin package(s).`]
+          ? [`Repaired Carapace host peer link(s) for ${repaired} managed npm plugin package(s).`]
           : []),
         ...(registeredRepair.repaired > 0
           ? [
-              `Repaired OpenClaw host peer link(s) for ${registeredRepair.repaired} registered npm plugin package(s).`,
+              `Repaired Carapace host peer link(s) for ${registeredRepair.repaired} registered npm plugin package(s).`,
             ]
           : []),
       ],
@@ -119,7 +119,7 @@ async function repairInstalledNpmOpenClawHostLinks(params: {
       packageReadFailures,
     };
   } catch (err) {
-    const message = `Failed to repair managed npm OpenClaw host peer links: ${err instanceof Error ? err.message : String(err)}`;
+    const message = `Failed to repair managed npm Carapace host peer links: ${err instanceof Error ? err.message : String(err)}`;
     return {
       changes: [],
       warnings: [
@@ -135,7 +135,7 @@ async function repairInstalledNpmOpenClawHostLinks(params: {
 }
 
 function formatPeerLinkPackageReadWarning(failure: { error: unknown }): PostCoreConvergenceWarning {
-  const message = `Failed to repair managed npm OpenClaw host peer links: ${failure.error instanceof Error ? failure.error.message : String(failure.error)}`;
+  const message = `Failed to repair managed npm Carapace host peer links: ${failure.error instanceof Error ? failure.error.message : String(failure.error)}`;
   return {
     reason: message,
     message,
@@ -152,7 +152,7 @@ function formatPeerLinkPackageReadWarning(failure: { error: unknown }): PostCore
  * then boots with those plugins marked configured-unavailable.
  */
 export async function runPostCorePluginConvergence(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   compatibilityHostVersion?: string;
   /**
@@ -168,7 +168,7 @@ export async function runPostCorePluginConvergence(params: {
 }): Promise<PostCoreConvergenceResult> {
   const env: NodeJS.ProcessEnv = {
     ...params.env,
-    OPENCLAW_COMPATIBILITY_HOST_VERSION: params.compatibilityHostVersion ?? VERSION,
+    CARAPACE_COMPATIBILITY_HOST_VERSION: params.compatibilityHostVersion ?? VERSION,
     [UPDATE_POST_CORE_CONVERGENCE_ENV]: "1",
   };
   // Retire obsolete managed shadows before relinking or smoke-checking them. A package that
@@ -200,7 +200,7 @@ export async function runPostCorePluginConvergence(params: {
     message,
     guidance: [REPAIR_GUIDANCE],
   }));
-  const peerLinkRepair = await repairInstalledNpmOpenClawHostLinks({
+  const peerLinkRepair = await repairInstalledNpmCarapaceHostLinks({
     env,
     installRecords: repair.records,
   });

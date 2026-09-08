@@ -28,7 +28,7 @@ function buildGuidance(
 }
 
 describe("buildCopilotPromptGuidance", () => {
-  it("composes ordered OpenClaw policy from the final callable capabilities", () => {
+  it("composes ordered Carapace policy from the final callable capabilities", () => {
     const guidance = buildGuidance();
 
     expect(guidance).toContain("policy-filtered for this turn");
@@ -87,7 +87,7 @@ describe("buildCopilotPromptGuidance", () => {
     ]);
     expect(unavailable).toContain("remains private");
     expect(unavailable).not.toContain("Use `message`");
-    expect(unavailable).not.toContain("OpenClaw delivers your final response automatically");
+    expect(unavailable).not.toContain("Carapace delivers your final response automatically");
   });
 
   it.each([false, true])(

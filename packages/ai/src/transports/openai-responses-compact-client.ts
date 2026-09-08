@@ -1,5 +1,5 @@
-import type { Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type OpenAI from "openai";
 import type { OpenAIResponsesCompactEndpointResult } from "./openai-responses-compact-request.js";
 import { buildOpenAIResponsesReasoningReplayMetadata } from "./openai-responses-compaction-replay.js";

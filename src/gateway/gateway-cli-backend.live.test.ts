@@ -15,7 +15,7 @@ import { loadCliSessionHistoryMessages } from "../agents/cli-runner/session-hist
 import { isLiveTestEnabled } from "../agents/live-test-helpers.js";
 import { shouldSkipLiveProviderDrift } from "../agents/live-test-provider-drift.js";
 import { parseModelRef } from "../agents/model-selection.js";
-import { clearRuntimeConfigSnapshot, type OpenClawConfig } from "../config/config.js";
+import { clearRuntimeConfigSnapshot, type CarapaceConfig } from "../config/config.js";
 import { resolveSessionTranscriptRuntimeTarget } from "../config/sessions/session-accessor.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { resetGlobalHookRunner } from "../plugins/hook-runner-global.js";
@@ -68,16 +68,16 @@ import { loadGatewaySessionEntryReadOnly } from "./session-utils.js";
 import { extractPayloadText } from "./test-helpers.agent-results.js";
 
 const LIVE = isLiveTestEnabled();
-const CLI_LIVE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_CLI_BACKEND);
-const CLI_CACHE_PROBE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_CLI_BACKEND_CACHE_PROBE);
+const CLI_LIVE = isTruthyEnvValue(process.env.CARAPACE_LIVE_CLI_BACKEND);
+const CLI_CACHE_PROBE = isTruthyEnvValue(process.env.CARAPACE_LIVE_CLI_BACKEND_CACHE_PROBE);
 const CLI_RESUME =
-  CLI_CACHE_PROBE || isTruthyEnvValue(process.env.OPENCLAW_LIVE_CLI_BACKEND_RESUME_PROBE);
-const CLI_DEBUG = isTruthyEnvValue(process.env.OPENCLAW_LIVE_CLI_BACKEND_DEBUG);
+  CLI_CACHE_PROBE || isTruthyEnvValue(process.env.CARAPACE_LIVE_CLI_BACKEND_RESUME_PROBE);
+const CLI_DEBUG = isTruthyEnvValue(process.env.CARAPACE_LIVE_CLI_BACKEND_DEBUG);
 const CLI_CI_SAFE_CODEX_CONFIG = isTruthyEnvValue(
-  process.env.OPENCLAW_LIVE_CLI_BACKEND_USE_CI_SAFE_CODEX_CONFIG,
+  process.env.CARAPACE_LIVE_CLI_BACKEND_USE_CI_SAFE_CODEX_CONFIG,
 );
 const CLI_MCP_SCHEMA_PROBE = isTruthyEnvValue(
-  process.env.OPENCLAW_LIVE_CLI_BACKEND_MCP_SCHEMA_PROBE,
+  process.env.CARAPACE_LIVE_CLI_BACKEND_MCP_SCHEMA_PROBE,
 );
 const CLI_ALLOW_PROVIDER_SKIP = shouldAllowCliBackendLiveProviderSkip();
 const describeLive = LIVE && CLI_LIVE ? describe : describe.skip;
@@ -97,7 +97,7 @@ const DEFAULT_PROVIDER = "claude-cli";
 const DEFAULT_MODEL =
   resolveCliBackendLiveTest(DEFAULT_PROVIDER)?.defaultModelRef ?? "claude-cli/claude-sonnet-4-6";
 const CLI_BACKEND_REQUEST_TIMEOUT_MS = parsePositiveIntegerEnv(
-  "OPENCLAW_LIVE_CLI_BACKEND_REQUEST_TIMEOUT_MS",
+  "CARAPACE_LIVE_CLI_BACKEND_REQUEST_TIMEOUT_MS",
   15 * 60_000,
 );
 const CLI_BACKEND_CODEX_TIMEOUT_RETRY_ATTEMPTS = 2;
@@ -158,7 +158,7 @@ function resolveCliBackendAgentAttemptTimeouts(): CliBackendAgentAttemptTimeouts
 
 function openAiProviderConfigForCodexCli(
   modelKey: string,
-): NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>["openai"] {
+): NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>["openai"] {
   const parsed = parseModelRef(modelKey, DEFAULT_PROVIDER);
   const modelId = parsed?.model?.trim() || "gpt-5.6-luna";
   return {
@@ -275,8 +275,8 @@ describeLive("gateway live (cli backend)", () => {
     async () => {
       const preservedEnv = new Set(
         parseJsonStringArray(
-          "OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV",
-          process.env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV,
+          "CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV",
+          process.env.CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV,
         ) ?? [],
       );
       const previousEnv = snapshotCliBackendLiveEnv();
@@ -285,11 +285,11 @@ describeLive("gateway live (cli backend)", () => {
       applyCliBackendLiveEnv(preservedEnv);
 
       const token = `test-${randomUUID()}`;
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
       const port = await getCliBackendPortBlock();
       logCliBackendLiveStep("env-ready", { port });
 
-      const rawModel = process.env.OPENCLAW_LIVE_CLI_BACKEND_MODEL ?? DEFAULT_MODEL;
+      const rawModel = process.env.CARAPACE_LIVE_CLI_BACKEND_MODEL ?? DEFAULT_MODEL;
       const initialParsed = parseModelRef(rawModel, "claude-cli");
       const initialProviderId = initialParsed?.provider ?? "";
       const initialModelKey = initialParsed
@@ -309,7 +309,7 @@ describeLive("gateway live (cli backend)", () => {
       const configModelKey = modelSelection.configModelKey;
       const backendResolved = resolveCliBackendConfig(providerId);
       if (CLI_CACHE_PROBE && providerId !== "claude-cli") {
-        throw new Error("OPENCLAW_LIVE_CLI_BACKEND_CACHE_PROBE requires provider claude-cli");
+        throw new Error("CARAPACE_LIVE_CLI_BACKEND_CACHE_PROBE requires provider claude-cli");
       }
       const enableCliImageProbe = !CLI_CACHE_PROBE && shouldRunCliImageProbe(providerId);
       const enableCliMcpProbe = !CLI_CACHE_PROBE && shouldRunCliMcpProbe(providerId);
@@ -344,10 +344,10 @@ describeLive("gateway live (cli backend)", () => {
       });
       const providerDefaults = backendResolved?.config;
 
-      const cliCommand = process.env.OPENCLAW_LIVE_CLI_BACKEND_COMMAND ?? providerDefaults?.command;
+      const cliCommand = process.env.CARAPACE_LIVE_CLI_BACKEND_COMMAND ?? providerDefaults?.command;
       if (!cliCommand) {
         throw new Error(
-          `OPENCLAW_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`,
+          `CARAPACE_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`,
         );
       }
 
@@ -359,8 +359,8 @@ describeLive("gateway live (cli backend)", () => {
 
       const cliClearEnv =
         parseJsonStringArray(
-          "OPENCLAW_LIVE_CLI_BACKEND_CLEAR_ENV",
-          process.env.OPENCLAW_LIVE_CLI_BACKEND_CLEAR_ENV,
+          "CARAPACE_LIVE_CLI_BACKEND_CLEAR_ENV",
+          process.env.CARAPACE_LIVE_CLI_BACKEND_CLEAR_ENV,
         ) ??
         providerDefaults?.clearEnv ??
         [];
@@ -371,19 +371,19 @@ describeLive("gateway live (cli backend)", () => {
           .filter((entry): entry is [string, string] => typeof entry[1] === "string"),
       );
       const cliImageArg =
-        process.env.OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG?.trim() || providerDefaults?.imageArg;
+        process.env.CARAPACE_LIVE_CLI_BACKEND_IMAGE_ARG?.trim() || providerDefaults?.imageArg;
       const cliImageMode =
-        parseImageMode(process.env.OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE) ??
+        parseImageMode(process.env.CARAPACE_LIVE_CLI_BACKEND_IMAGE_MODE) ??
         providerDefaults?.imageMode;
       if (cliImageMode && !cliImageArg) {
         throw new Error(
-          "OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE requires OPENCLAW_LIVE_CLI_BACKEND_IMAGE_ARG.",
+          "CARAPACE_LIVE_CLI_BACKEND_IMAGE_MODE requires CARAPACE_LIVE_CLI_BACKEND_IMAGE_ARG.",
         );
       }
       if (!backendResolved || !providerDefaults) {
         throw new Error(`missing CLI backend metadata for ${providerId}`);
       }
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-cli-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-live-cli-"));
       const stateDir = path.join(tempDir, "state");
       await fs.mkdir(stateDir, { recursive: true });
       const enableMcpSchemaProbe = CLI_MCP_SCHEMA_PROBE || CLI_CACHE_PROBE;
@@ -403,13 +403,13 @@ describeLive("gateway live (cli backend)", () => {
       });
       const probePluginPath = probePlugin.pluginPath;
       const useMinimalToolsProfile = providerId === "codex-cli" && !enableMcpSchemaProbe;
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       const bundleMcp = backendResolved.bundleMcp;
       const bootstrapWorkspace = await createBootstrapWorkspace(tempDir);
       if (CLI_CACHE_PROBE) {
         await initializeCacheProbeGitWorkspace(bootstrapWorkspace.workspaceRootDir);
       }
-      const disableMcpConfig = process.env.OPENCLAW_LIVE_CLI_BACKEND_DISABLE_MCP_CONFIG !== "0";
+      const disableMcpConfig = process.env.CARAPACE_LIVE_CLI_BACKEND_DISABLE_MCP_CONFIG !== "0";
       let cliArgs = baseCliArgs;
       if (
         bundleMcp &&
@@ -447,8 +447,8 @@ describeLive("gateway live (cli backend)", () => {
         });
       }
 
-      const cfg: OpenClawConfig = {};
-      const nextCfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {};
+      const nextCfg: CarapaceConfig = {
         ...cfg,
         ...(CLI_CACHE_PROBE
           ? {
@@ -546,9 +546,9 @@ describeLive("gateway live (cli backend)", () => {
           entries: { dev: {} },
         },
       };
-      const tempConfigPath = path.join(tempDir, "openclaw.json");
+      const tempConfigPath = path.join(tempDir, "carapace.json");
       await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", tempConfigPath);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", tempConfigPath);
       const cacheProbeBackend = CLI_CACHE_PROBE
         ? prepareClaudeCacheProbeBackend({ config: nextCfg, liveBackend, providerId })
         : undefined;
@@ -628,7 +628,7 @@ describeLive("gateway live (cli backend)", () => {
             sessionKey,
           });
           if (!history.sessionId) {
-            throw new Error("Claude CLI cache probe could not resolve its OpenClaw session");
+            throw new Error("Claude CLI cache probe could not resolve its Carapace session");
           }
           cacheProbeOwner = {
             backendId: providerId,
@@ -755,7 +755,7 @@ describeLive("gateway live (cli backend)", () => {
             expect(continuitySessionId).toBeTruthy();
             expect(continuityEntry?.sessionId).toBe(continuitySessionId);
             if (!continuitySessionId) {
-              throw new Error("Claude CLI continuity probe could not resolve its OpenClaw session");
+              throw new Error("Claude CLI continuity probe could not resolve its Carapace session");
             }
             // chat.history also displays native CLI imports. Check the canonical replay
             // source so recall cannot pass by reseeding the hook-only context from SQLite.

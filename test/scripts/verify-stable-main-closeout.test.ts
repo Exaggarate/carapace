@@ -29,7 +29,7 @@ describe("verify-stable-main-closeout", () => {
   });
 
   it("closes npm releases with apps pending and preserves that snapshot after app attachment", () => {
-    const dir = mkdtempSync(path.join(tmpdir(), "openclaw-closeout-"));
+    const dir = mkdtempSync(path.join(tmpdir(), "carapace-closeout-"));
     tempDirs.push(dir);
     for (const name of ["main", "tag"]) {
       const root = path.join(dir, name);
@@ -44,7 +44,7 @@ describe("verify-stable-main-closeout", () => {
     const outputPath = path.join(dir, "closeout.json");
     const originalPath = path.join(dir, "original.json");
     const evidence = {
-      name: "openclaw-2026.6.8-postpublish-evidence.json",
+      name: "carapace-2026.6.8-postpublish-evidence.json",
       digest: `sha256:${"b".repeat(64)}`,
     };
     const release = {
@@ -89,26 +89,26 @@ describe("verify-stable-main-closeout", () => {
     writeFileSync(originalPath, initialBytes);
     release.assets.push(
       ...[
-        "OpenClaw-2026.6.8.zip",
-        "OpenClaw-2026.6.8.dmg",
-        "OpenClaw-2026.6.8.dSYM.zip",
-        "OpenClaw-Android.apk",
-        "OpenClaw-Android-SHA256SUMS.txt",
-        "OpenClawCompanion-Setup-arm64.exe",
-        "OpenClawCompanion-Setup-x64.exe",
-        "OpenClawCompanion-SHA256SUMS.txt",
+        "Carapace-2026.6.8.zip",
+        "Carapace-2026.6.8.dmg",
+        "Carapace-2026.6.8.dSYM.zip",
+        "Carapace-Android.apk",
+        "Carapace-Android-SHA256SUMS.txt",
+        "CarapaceCompanion-Setup-arm64.exe",
+        "CarapaceCompanion-Setup-x64.exe",
+        "CarapaceCompanion-SHA256SUMS.txt",
       ].map((name) => ({ name, digest: `sha256:${"c".repeat(64)}` })),
     );
     writeFileSync(releasePath, JSON.stringify(release));
     const missingAppcast = runCli(...args, "--existing-manifest", originalPath);
     expect(missingAppcast.status).toBe(1);
     expect(missingAppcast.stderr).toContain(
-      "main appcast.xml does not point at OpenClaw-2026.6.8.zip",
+      "main appcast.xml does not point at Carapace-2026.6.8.zip",
     );
     const publishedAppcastPath = path.join(dir, "published-appcast.xml");
     writeFileSync(
       publishedAppcastPath,
-      "https://github.com/openclaw/openclaw/releases/download/v2026.6.8/OpenClaw-2026.6.8.zip",
+      "https://github.com/Exaggarate/carapace/releases/download/v2026.6.8/Carapace-2026.6.8.zip",
     );
     const replay = runCli(
       ...args,

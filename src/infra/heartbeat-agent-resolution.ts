@@ -1,6 +1,6 @@
 import { tryResolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
-export function tryResolveAmbientHeartbeatAgentId(cfg: OpenClawConfig): string | undefined {
+export function tryResolveAmbientHeartbeatAgentId(cfg: CarapaceConfig): string | undefined {
   return tryResolveAmbientOwnerAgentId(cfg, cfg.agents?.defaults?.heartbeat?.agentId);
 }

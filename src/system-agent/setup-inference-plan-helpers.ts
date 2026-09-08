@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { findNormalizedProviderKey } from "@openclaw/model-catalog-core/provider-id";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { findNormalizedProviderKey } from "@carapace/model-catalog-core/provider-id";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { AgentRunResultView } from "../agents/agent-run-result.js";
 import { listAgentEntries, resolveAmbientOwnerAgentId } from "../agents/agent-scope.js";
 import { loadAuthProfileStoreForRuntime } from "../agents/auth-profiles/store-runtime.js";
@@ -21,7 +21,7 @@ import { buildAgentRuntimeAuthPlan } from "../agents/runtime-plan/auth.js";
 import { GEMINI_CLI_DEFAULT_MODEL_REF } from "../commands/onboard-inference.js";
 import { createMergePatch } from "../config/merge-patch.js";
 import { mergeAgentModelEntryForConfig } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { ProviderAuthResult, ProviderPlugin } from "../plugins/types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -40,12 +40,12 @@ export type SetupInferenceTestPlan = {
   model: string;
   modelRef: string;
   /** Authored/staged config used for route, auth, and persistence decisions. */
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   /** Installer-owned preparation facts, separate from provider-authored config patches. */
   pendingPluginInstalls?: Record<string, PluginInstallRecord>;
-  /** Execution-only projection that admits the reserved OpenClaw agent. */
-  executionConfig?: OpenClawConfig;
-  /** Execution identity used by the real OpenClaw turn. */
+  /** Execution-only projection that admits the reserved Carapace agent. */
+  executionConfig?: CarapaceConfig;
+  /** Execution identity used by the real Carapace turn. */
   agentId?: string;
   /** Default-agent owner whose model/runtime config is being selected. */
   routeAgentId?: string;
@@ -57,16 +57,16 @@ export type SetupInferenceTestPlan = {
   persistModelRef?: string;
   manualAuth?: {
     profiles: ProviderAuthResult["profiles"];
-    sourceConfigBase: OpenClawConfig;
+    sourceConfigBase: CarapaceConfig;
     configPatch: unknown;
     pluginId?: string;
   };
 };
 
 export function configureCodexCliPreparedAuth(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   homeScope: "agent" | "user",
-): Result<OpenClawConfig, string> {
+): Result<CarapaceConfig, string> {
   const entry = cfg.plugins?.entries?.codex;
   const pluginConfig = entry?.config ?? {};
   const appServer =
@@ -211,7 +211,7 @@ export function parseRef(modelRef: string): { provider: string; model: string } 
 }
 
 export function projectSetupTargetModelMetadata(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   modelRef: string,
   agentId?: string,
 ): unknown {
@@ -260,7 +260,7 @@ export function resolveSetupAgentRuntimeId(
     kind === "provider-auth" ||
     parseProviderAutoSetupChoiceId(kind) !== undefined
   ) {
-    return "openclaw";
+    return "carapace";
   }
   return undefined;
 }
@@ -293,8 +293,8 @@ export function mapFailoverReasonToSetupStatus(
 }
 
 export function prepareManualAuthForActivation(params: {
-  baseConfig: OpenClawConfig;
-  preparedConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
+  preparedConfig: CarapaceConfig;
   profiles: ProviderAuthResult["profiles"];
   selectedProfileId: string;
   modelRef: string;
@@ -303,7 +303,7 @@ export function prepareManualAuthForActivation(params: {
   pluginId?: string;
   agentId?: string;
 }): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   profiles: ProviderAuthResult["profiles"];
   selectedProfileId: string;
 } {
@@ -329,8 +329,8 @@ export function prepareManualAuthForActivation(params: {
 }
 
 function copySelectedModelMetadata(params: {
-  target: OpenClawConfig;
-  prepared: OpenClawConfig;
+  target: CarapaceConfig;
+  prepared: CarapaceConfig;
   modelRef: string;
   targetModelRef: string;
   agentId?: string;
@@ -359,12 +359,12 @@ function copySelectedModelMetadata(params: {
 
 /**
  * Provider auth hooks are untrusted setup input. Carry only the selected
- * inference route's config into the probe; OpenClaw owns every other setup
+ * inference route's config into the probe; Carapace owns every other setup
  * surface after intelligence exists.
  */
 function projectManualInferenceConfig(params: {
-  baseConfig: OpenClawConfig;
-  preparedConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
+  preparedConfig: CarapaceConfig;
   selectedProfile?: ProviderAuthResult["profiles"][number];
   selectedProfileId?: string;
   modelRef: string;
@@ -372,7 +372,7 @@ function projectManualInferenceConfig(params: {
   providerId: string;
   pluginId?: string;
   agentId?: string;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const config = structuredClone(params.baseConfig);
   if (params.selectedProfile && params.selectedProfileId) {
     const metadata = params.preparedConfig.auth?.profiles?.[params.selectedProfile.profileId] ?? {
@@ -430,7 +430,7 @@ function projectManualInferenceConfig(params: {
 }
 
 export function canonicalizeSetupModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   raw: string;
   defaultProvider: string;
 }): string {
@@ -448,9 +448,9 @@ export function canonicalizeSetupModelRef(params: {
 }
 
 export function buildPreparedProviderTestPlan(params: {
-  cfg: OpenClawConfig;
-  sourceCfg: OpenClawConfig;
-  preparedConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceCfg: CarapaceConfig;
+  preparedConfig: CarapaceConfig;
   profiles: ProviderAuthResult["profiles"];
   providerPlugin?: ProviderPlugin;
   modelRef: string;
@@ -514,7 +514,7 @@ export function buildPreparedProviderTestPlan(params: {
       provider: ref.provider,
       modelId: ref.model,
       agentId: params.routeAgentId,
-    }).policy?.id ?? "openclaw";
+    }).policy?.id ?? "carapace";
   const cliProvider = resolveCliRuntimeExecutionProvider({
     cfg: prepared.config,
     provider: ref.provider,
@@ -535,7 +535,7 @@ export function buildPreparedProviderTestPlan(params: {
     ...(params.pendingPluginInstalls
       ? { pendingPluginInstalls: structuredClone(params.pendingPluginInstalls) }
       : {}),
-    agentId: "openclaw",
+    agentId: "carapace",
     routeAgentId: params.routeAgentId,
     ...(prepared.selectedProfileId ? { authProfileId: prepared.selectedProfileId } : {}),
     persistModelRef: modelRef,

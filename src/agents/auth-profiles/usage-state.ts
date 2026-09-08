@@ -3,8 +3,8 @@
  * Mutation and persistence live in usage.ts; this module owns reusable state
  * predicates used by rotation and failure handling.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { asDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import type { AuthProfileFailureReason, AuthProfileStore, ProfileUsageStats } from "./types.js";
 
 /** Clears failure windows while preserving unrelated usage history. */

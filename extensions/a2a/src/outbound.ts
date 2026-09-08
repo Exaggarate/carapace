@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 import { z } from "zod";
 import { resolveA2aChannelAccount } from "./accounts.js";
 
@@ -29,7 +29,7 @@ const A2aOutboundResponseSchema = z.object({
 });
 
 type A2aOutboundSendParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   to: string;
   text: string;

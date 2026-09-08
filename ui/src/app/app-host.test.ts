@@ -198,7 +198,7 @@ function configureLazyPaletteShell(
   element: TestOptionalCustomElement,
   openPalette: () => void,
 ): ShellLazySurfaceState {
-  const shell = document.createElement("openclaw-app-shell") as unknown as ShellLazySurfaceState;
+  const shell = document.createElement("carapace-app-shell") as unknown as ShellLazySurfaceState;
   shell.commandPaletteElement = element;
   Object.defineProperty(shell, "updateComplete", {
     configurable: true,
@@ -279,9 +279,9 @@ function committedRouterState(
   } as unknown as RouterState<RouteId>;
 }
 
-describe("OpenClaw app lifecycle", () => {
+describe("Carapace app lifecycle", () => {
   it("hides revealed login credentials when the app connection epoch ends", () => {
-    const app = document.createElement("openclaw-app") as unknown as AppLifecycleState;
+    const app = document.createElement("carapace-app") as unknown as AppLifecycleState;
     app.loginShowGatewaySecret = true;
 
     app.disconnectedCallback();
@@ -290,7 +290,7 @@ describe("OpenClaw app lifecycle", () => {
   });
 
   it("hides revealed login credentials when the Gateway source changes", () => {
-    const app = document.createElement("openclaw-app") as unknown as AppLifecycleState;
+    const app = document.createElement("carapace-app") as unknown as AppLifecycleState;
     const snapshot = {
       client: null,
       phase: "stopped",
@@ -320,12 +320,12 @@ describe("OpenClaw app lifecycle", () => {
   });
 });
 
-describe("OpenClaw shell source initialization", () => {
+describe("Carapace shell source initialization", () => {
   it("preserves reload intent on disconnect but clears it on context replacement", () => {
     vi.stubGlobal("sessionStorage", createStorageMock());
     persistLazyShellAction({ eventType: COMMAND_PALETTE_OPEN_EVENT });
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellLazyLifecycleState;
 
     shell.resetForDocumentDisconnect();
@@ -353,7 +353,7 @@ describe("OpenClaw shell source initialization", () => {
   it("retries a pending locale once when the Gateway becomes connected", () => {
     const retryPendingLocale = vi.spyOn(i18n, "retryPendingLocale").mockImplementation(() => {});
     // Owner-direct: the shared jsdom lane can retain a sibling graph's
-    // openclaw-app-shell class bound to a different i18n instance; constructing
+    // carapace-app-shell class bound to a different i18n instance; constructing
     // the owner keeps the spy and the callee in the current module graph.
     const host = {
       activeSessionKey: "",
@@ -392,7 +392,7 @@ describe("OpenClaw shell source initialization", () => {
   });
 
   it("clears retained presentation and source ownership when its context epoch ends", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellEpochState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellEpochState;
     const client = {} as GatewayBrowserClient;
     const agents = {} as ApplicationContext["agents"];
     const runtimeConfig = {} as ApplicationContext["runtimeConfig"];
@@ -429,7 +429,7 @@ describe("OpenClaw shell source initialization", () => {
 
   it("initializes replacement capabilities even when the Gateway client is unchanged", () => {
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellInitializationState;
     shell.routeState = { routeId: "usage" };
     const client = {} as GatewayBrowserClient;
@@ -463,11 +463,11 @@ describe("OpenClaw shell source initialization", () => {
   });
 });
 
-describe("OpenClaw shell route session commits", () => {
+describe("Carapace shell route session commits", () => {
   it("builds session paths from the requested destination face", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -495,7 +495,7 @@ describe("OpenClaw shell route session commits", () => {
   it("preserves catalog identity when routing a slash-command draft", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -522,7 +522,7 @@ describe("OpenClaw shell route session commits", () => {
     const replace = vi.fn();
     const snapshot = { phase: "connecting", hello: null };
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -552,7 +552,7 @@ describe("OpenClaw shell route session commits", () => {
     const calls: string[] = [];
     const setAgent = vi.fn((agentId: string | null) => calls.push(`agent:${agentId}`));
     const setSessionKey = vi.fn((sessionKey: string) => calls.push(`session:${sessionKey}`));
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellRouteCommitState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellRouteCommitState;
     shell.runtime = {
       context: {
         gateway: {
@@ -583,7 +583,7 @@ describe("OpenClaw shell route session commits", () => {
 
   it("retains the custodian leave transition through an unresolved route state", () => {
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellCustodianRouteState;
 
     shell.updateRouteState({ routeId: "custodian" });
@@ -595,7 +595,7 @@ describe("OpenClaw shell route session commits", () => {
   });
 });
 
-describe("OpenClaw shell server preferences", () => {
+describe("Carapace shell server preferences", () => {
   it("refreshes live navigation when a sidebar preference arrives from the gateway", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     resetServerUiPrefsSync();
@@ -621,7 +621,7 @@ describe("OpenClaw shell server preferences", () => {
       runtimeConfig,
     } as unknown as ApplicationContext;
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellServerPreferencesState;
     shell.runtime = { context };
 
@@ -633,14 +633,14 @@ describe("OpenClaw shell server preferences", () => {
   });
 });
 
-describe("OpenClaw shell settings search", () => {
+describe("Carapace shell settings search", () => {
   it("loads config and schema for a non-empty query", async () => {
     const runtimeConfig = {
       ensureLoaded: vi.fn(() => Promise.resolve()),
       ensureSchemaLoaded: vi.fn(() => Promise.resolve()),
     } as unknown as ApplicationContext["runtimeConfig"];
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSettingsSearchLoadState;
     shell.runtime = {
       context: { runtimeConfig } as unknown as ApplicationContext,
@@ -668,7 +668,7 @@ describe("OpenClaw shell settings search", () => {
       ensureSchemaLoaded: vi.fn(() => Promise.resolve()),
     } as unknown as ApplicationContext["runtimeConfig"];
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "carapace-app-shell",
     ) as unknown as ShellSettingsSearchLoadState;
     shell.runtime = {
       context: { runtimeConfig: firstRuntimeConfig } as unknown as ApplicationContext,
@@ -702,7 +702,7 @@ describe("OpenClaw shell settings search", () => {
         ),
       } as unknown as ApplicationContext["runtimeConfig"];
       const shell = document.createElement(
-        "openclaw-app-shell",
+        "carapace-app-shell",
       ) as unknown as ShellSettingsSearchLoadState;
       shell.runtime = {
         context: { runtimeConfig } as unknown as ApplicationContext,
@@ -718,7 +718,7 @@ describe("OpenClaw shell settings search", () => {
   );
 });
 
-describe("OpenClaw shell keyboard shortcuts", () => {
+describe("Carapace shell keyboard shortcuts", () => {
   it("resolves onboarding mode from the active route search", () => {
     expect(resolveOnboardingMode("?onboarding=1")).toBe(true);
     expect(resolveOnboardingMode("?onboarding=true")).toBe(true);
@@ -740,14 +740,14 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       shouldMergeChatChrome({ mobileNavLayout: true, routeId: "chat", onboarding: true }),
     ).toBe(false);
 
-    document.documentElement.classList.add("openclaw-native-nav");
+    document.documentElement.classList.add("carapace-native-nav");
     expect(
       shouldMergeChatChrome({ mobileNavLayout: true, routeId: "chat", onboarding: false }),
     ).toBe(false);
   });
 
   it("prevents unhandled window file drops without overriding accepted targets", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellChromeEventState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellChromeEventState;
     const acceptedDropTarget = document.createElement("div");
     const nativeFileInput = document.createElement("input");
     nativeFileInput.type = "file";
@@ -787,7 +787,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
   });
 
   it("keeps focus in place when the navigation drawer closes without restoration", () => {
-    const shell = document.createElement("openclaw-app-shell") as ShellNavDrawerCloseState;
+    const shell = document.createElement("carapace-app-shell") as ShellNavDrawerCloseState;
     const trigger = document.body.appendChild(document.createElement("button"));
     const restoreTriggerFocus = vi.spyOn(trigger, "focus");
     shell.navDrawerOpen = true;
@@ -804,7 +804,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
   it("closes an open navigation drawer before moving its sidebar into desktop layout", async () => {
     await import("../components/app-sidebar.ts");
     vi.stubGlobal("matchMedia", () => ({ matches: false }));
-    const shell = document.createElement("openclaw-app-shell") as ShellNavDrawerCloseState;
+    const shell = document.createElement("carapace-app-shell") as ShellNavDrawerCloseState;
     const updateNavigation = vi.fn();
     shell.runtime = {
       context: {
@@ -814,7 +814,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
         },
       } as unknown as ApplicationContext,
     };
-    const sidebar = document.createElement("openclaw-app-sidebar") as HTMLElement & {
+    const sidebar = document.createElement("carapace-app-sidebar") as HTMLElement & {
       dismissTransientMenus: () => boolean;
     };
     const dismissTransientMenus = vi.spyOn(sidebar, "dismissTransientMenus").mockReturnValue(true);
@@ -847,7 +847,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
     );
     const openPalette = vi.fn();
     const trigger = document.createElement("button");
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellChromeEventState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellChromeEventState;
     shell.runtime = {
       context: {
         navigation: { snapshot: { navCollapsed: false }, update: vi.fn() },
@@ -937,7 +937,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
     const uiCommandEvent = vi.fn();
     window.addEventListener(TERMINAL_PANEL_TOGGLE_EVENT, panelEvent);
     window.addEventListener(UI_COMMAND_EVENT, uiCommandEvent);
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = {
       context: {
         basePath: "",
@@ -1027,7 +1027,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       ]),
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -1048,7 +1048,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: roster("main", [{ id: "fallback" }, { id: "main" }]),
       selectedId: "writer",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -1065,7 +1065,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: structuredClone(unchanged),
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -1085,7 +1085,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: unchanged,
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });

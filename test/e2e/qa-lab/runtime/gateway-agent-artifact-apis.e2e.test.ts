@@ -25,8 +25,8 @@ import {
 } from "../../../../src/gateway/test-helpers.e2e.js";
 import { GATEWAY_STARTUP_MUTATED_ENV_KEYS } from "../../../../src/gateway/test-helpers.env.js";
 import type { WorkerEnvironmentServiceRecord } from "../../../../src/gateway/worker-environments/service-contract.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../../src/state/carapace-state-db.js";
 import { createTaskRecord, deleteTaskRecordById } from "../../../../src/tasks/task-registry.js";
 import { captureEnv, setTestEnvValue } from "../../../../src/test-utils/env.js";
 import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
@@ -109,17 +109,17 @@ vi.mock("../../../../src/gateway/server-request-context.js", async () => {
 const ENV_KEYS = [
   "HOME",
   ...GATEWAY_STARTUP_MUTATED_ENV_KEYS,
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PASSWORD",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_GATEWAY_PASSWORD",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 type Cleanup = () => Promise<void> | void;
@@ -137,8 +137,8 @@ describe("Gateway agent and artifact APIs", () => {
     for (const step of cleanup.splice(0).toReversed()) {
       await step();
     }
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     clearSessionStoreCacheForTest();
     clearRuntimeConfigSnapshot();
     clearConfigCache();
@@ -149,8 +149,8 @@ describe("Gateway agent and artifact APIs", () => {
     cleanup.push(() => envSnapshot.restore());
 
     const tempHome = tempDirs.make("gateway-agent-artifacts-");
-    const stateDir = path.join(tempHome, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(tempHome, ".carapace");
+    const configPath = path.join(stateDir, "carapace.json");
     const mainWorkspace = path.join(tempHome, "workspace-main");
     const createdWorkspace = path.join(tempHome, "workspace-artifact-agent");
     const token = "gateway-agent-artifacts-token";
@@ -174,22 +174,22 @@ describe("Gateway agent and artifact APIs", () => {
     );
 
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-    setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-    setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-    setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-    setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-    setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-    setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-    setTestEnvValue("OPENCLAW_SKIP_PROVIDERS", "1");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
+    setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+    setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+    setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+    setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+    setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+    setTestEnvValue("CARAPACE_SKIP_PROVIDERS", "1");
+    setTestEnvValue("CARAPACE_DISABLE_BUNDLED_PLUGINS", "1");
     clearRuntimeConfigSnapshot();
     clearConfigCache();
     clearSessionStoreCacheForTest();
 
     const port = await getGatewayE2ePortBlock();
-    setTestEnvValue("OPENCLAW_GATEWAY_PORT", String(port));
+    setTestEnvValue("CARAPACE_GATEWAY_PORT", String(port));
     let server = await startGatewayServer(port, {
       bind: "loopback",
       auth: { mode: "token", token },
@@ -371,7 +371,7 @@ describe("Gateway agent and artifact APIs", () => {
       {
         name: "report.pdf",
         mimeType: "application/pdf",
-        body: Buffer.from("%PDF-1.4\n% OpenClaw artifact proof\n"),
+        body: Buffer.from("%PDF-1.4\n% Carapace artifact proof\n"),
       },
     ];
     await Promise.all(
@@ -401,7 +401,7 @@ describe("Gateway agent and artifact APIs", () => {
         role: "assistant",
         content: managedBlocks,
         timestamp: Date.now(),
-        __openclaw: {
+        __carapace: {
           id: messageId,
           seq: 1,
           messageTaskId: task.taskId,

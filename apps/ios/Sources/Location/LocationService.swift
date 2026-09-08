@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import UIKit
 
 @MainActor
@@ -60,7 +60,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate, ConcurrentLoca
     }
 
     func ensureAuthorization(
-        mode: OpenClawLocationMode,
+        mode: CarapaceLocationMode,
         isCurrent: @MainActor () -> Bool) async -> CLAuthorizationStatus
     {
         guard !Task.isCancelled, isCurrent() else { return self.authorizationStatus() }
@@ -88,8 +88,8 @@ final class LocationService: NSObject, CLLocationManagerDelegate, ConcurrentLoca
     }
 
     func currentLocation(
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
+        params: CarapaceLocationGetParams,
+        desiredAccuracy: CarapaceLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {

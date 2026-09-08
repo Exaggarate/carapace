@@ -1,4 +1,4 @@
-// Covers conversion from OpenClaw bundle-MCP config into Codex app-server
+// Covers conversion from Carapace bundle-MCP config into Codex app-server
 // thread config patches.
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -51,33 +51,33 @@ afterEach(async () => {
 });
 
 describe("buildCodexMcpServersConfig", () => {
-  it("normalizes OpenClaw MCP servers into Codex app-server mcp_servers shape", () => {
+  it("normalizes Carapace MCP servers into Codex app-server mcp_servers shape", () => {
     // Authorization is represented as Codex's bearer env var, while other env
     // placeholders become env_http_headers for per-thread substitution.
     expect(
       buildCodexMcpServersConfig({
         mcpServers: {
-          openclaw: {
+          carapace: {
             type: "http",
             url: "http://127.0.0.1:23119/mcp",
             headers: {
-              Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-              "x-session-key": "${OPENCLAW_MCP_SESSION_KEY}",
+              Authorization: "Bearer ${CARAPACE_MCP_TOKEN}",
+              "x-session-key": "${CARAPACE_MCP_SESSION_KEY}",
               "x-static": "static-value",
             },
           },
         },
       }),
     ).toEqual({
-      openclaw: {
+      carapace: {
         url: "http://127.0.0.1:23119/mcp",
         default_tools_approval_mode: "approve",
-        bearer_token_env_var: "OPENCLAW_MCP_TOKEN",
+        bearer_token_env_var: "CARAPACE_MCP_TOKEN",
         http_headers: {
           "x-static": "static-value",
         },
         env_http_headers: {
-          "x-session-key": "OPENCLAW_MCP_SESSION_KEY",
+          "x-session-key": "CARAPACE_MCP_SESSION_KEY",
         },
       },
     });
@@ -162,7 +162,7 @@ describe("loadCodexBundleMcpThreadConfigCore", () => {
   });
 
   it("prepares Agent Plugins data dirs before projecting Codex thread config", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-agent-mcp-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-agent-mcp-"));
     tempDirs.push(tempDir);
     const dataDir = path.join(tempDir, "plugin-data");
     const collisionPath = path.join(tempDir, "plugin-data-collision");

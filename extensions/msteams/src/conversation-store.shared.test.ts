@@ -1,6 +1,6 @@
 // Msteams tests cover conversation store.shared plugin behavior.
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMSTeamsConversationStoreState } from "./conversation-store-state.js";
 import { setMSTeamsRuntime } from "./runtime.js";
@@ -14,9 +14,9 @@ const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
 );
 
 function createStore() {
-  const stateDir = tempDirs.make("openclaw-msteams-store-");
+  const stateDir = tempDirs.make("carapace-msteams-store-");
   return createMSTeamsConversationStoreState({
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     ttlMs: 60_000,
   });
 }

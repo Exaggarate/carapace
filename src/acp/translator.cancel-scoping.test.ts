@@ -4,9 +4,9 @@ import type {
   PromptRequest,
   PromptResponse,
 } from "@agentclientprotocol/sdk";
-import { createInMemorySessionStore } from "@openclaw/acp-core/session";
+import { createInMemorySessionStore } from "@carapace/acp-core/session";
 /** Tests prompt cancellation scoping across concurrent ACP sessions and Gateway runs. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, type Mock, vi } from "vitest";
 import type { EventFrame } from "../../packages/gateway-protocol/src/index.js";
 import { createDeferred } from "../../test/helpers/promise.js";

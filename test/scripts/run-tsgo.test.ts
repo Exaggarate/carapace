@@ -65,7 +65,7 @@ it.each([false, true])(
 
 describe("run-tsgo sparse guard", () => {
   it("ends sparse-checkout failures with the stable failure trailer", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
     spawnSync("git", ["init", "-q"], { cwd });
     spawnSync("git", ["config", "core.sparseCheckout", "true"], { cwd });
 
@@ -84,7 +84,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("ignores non-core projects", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "tsconfig.extensions.json"], {
@@ -95,7 +95,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("ignores full worktrees", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "test/tsconfig/tsconfig.core.test.json"], {
@@ -106,7 +106,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("ignores metadata-only commands", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "test/tsconfig/tsconfig.core.test.json", "--showConfig"], {
@@ -117,7 +117,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("ignores sparse worktrees when the required files are present", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
     const requiredPaths = [
       "packages/plugin-package-contract/src/index.ts",
       "ui/config/control-ui-chunking.ts",
@@ -144,7 +144,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("rejects package-test sparse worktrees missing inherited declaration roots", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "test/tsconfig/tsconfig.test.packages.json"], {
@@ -162,7 +162,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("rejects declaration-shard sparse worktrees missing inherited roots", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "test/tsconfig/tsconfig.test.extension-declarations.json"], {
@@ -180,7 +180,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("rejects sparse core worktrees that include only selected ui and package files", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
     const requiredPaths = [
       "packages/plugin-package-contract/src/index.ts",
       "ui/config/control-ui-chunking.ts",
@@ -219,7 +219,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("returns a helpful message for sparse UI worktrees missing transitive project files", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
     const uiToolDisplay = path.join(cwd, "ui/src/lib/chat/tool-display.ts");
     fs.mkdirSync(path.dirname(uiToolDisplay), { recursive: true });
     fs.writeFileSync(uiToolDisplay, "", "utf8");
@@ -231,13 +231,13 @@ describe("run-tsgo sparse guard", () => {
       }),
     ).toMatchInlineSnapshot(`
       "tsconfig.ui.json cannot be typechecked from this sparse checkout because tracked project inputs are missing or only partially included:
-      - apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/tool-display.json
+      - apps/shared/CarapaceKit/Sources/CarapaceKit/Resources/tool-display.json
       Expand this worktree's sparse checkout to include those paths, or rerun in a full worktree."
     `);
   });
 
   it("rejects sparse UI worktrees missing the transitive src root", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "tsconfig.ui.json"], {
@@ -258,7 +258,7 @@ describe("run-tsgo sparse guard", () => {
     "test/tsconfig/tsconfig.core.test.json",
     "test/tsconfig/tsconfig.core.test.ui-other.json",
   ])("does not require plugin browser sources for %s", (project) => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
     const options = {
       cwd,
       fileExists: () => true,
@@ -270,7 +270,7 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("returns a helpful message for sparse core-test worktrees missing ui and packages files", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-");
+    const cwd = createTempDir("carapace-run-tsgo-");
 
     expect(
       getSparseTsgoGuardError(["-p", "test/tsconfig/tsconfig.core.test.json"], {
@@ -290,12 +290,12 @@ describe("run-tsgo sparse guard", () => {
   });
 
   it("recognizes the check:changed sparse-skip env", () => {
-    expect(shouldSkipSparseTsgoGuardError({ OPENCLAW_TSGO_SPARSE_SKIP: "1" })).toBe(true);
-    expect(shouldSkipSparseTsgoGuardError({ OPENCLAW_TSGO_SPARSE_SKIP: "true" })).toBe(true);
-    expect(shouldSkipSparseTsgoGuardError({ OPENCLAW_TSGO_SPARSE_SKIP: "0" })).toBe(false);
+    expect(shouldSkipSparseTsgoGuardError({ CARAPACE_TSGO_SPARSE_SKIP: "1" })).toBe(true);
+    expect(shouldSkipSparseTsgoGuardError({ CARAPACE_TSGO_SPARSE_SKIP: "true" })).toBe(true);
+    expect(shouldSkipSparseTsgoGuardError({ CARAPACE_TSGO_SPARSE_SKIP: "0" })).toBe(false);
     expect(createSparseTsgoSkipEnv({ PATH: "/usr/bin" })).toStrictEqual({
       PATH: "/usr/bin",
-      OPENCLAW_TSGO_SPARSE_SKIP: "1",
+      CARAPACE_TSGO_SPARSE_SKIP: "1",
     });
   });
 });
@@ -303,8 +303,8 @@ describe("run-tsgo sparse guard", () => {
 describe.skipIf(process.platform === "win32")("run-tsgo watchdog", () => {
   it("keeps the watchdog opt-in", () => {
     expect(resolveTsgoTimeoutMs({})).toBeUndefined();
-    expect(resolveTsgoTimeoutMs({ OPENCLAW_TSGO_TIMEOUT_MS: "  " })).toBeUndefined();
-    expect(resolveTsgoTimeoutMs({ OPENCLAW_TSGO_TIMEOUT_MS: "30000" })).toBe(30_000);
+    expect(resolveTsgoTimeoutMs({ CARAPACE_TSGO_TIMEOUT_MS: "  " })).toBeUndefined();
+    expect(resolveTsgoTimeoutMs({ CARAPACE_TSGO_TIMEOUT_MS: "30000" })).toBe(30_000);
   });
 
   function writeFakeTsgo(cwd: string, body: string) {
@@ -368,7 +368,7 @@ describe.skipIf(process.platform === "win32")("run-tsgo watchdog", () => {
     timeoutMs: string | undefined,
     onBeforeReap?: (pid: number | undefined) => void,
   ) {
-    const { OPENCLAW_TSGO_TIMEOUT_MS: _unset, ...baseEnv } = process.env;
+    const { CARAPACE_TSGO_TIMEOUT_MS: _unset, ...baseEnv } = process.env;
     try {
       return spawnSync(
         process.execPath,
@@ -378,7 +378,7 @@ describe.skipIf(process.platform === "win32")("run-tsgo watchdog", () => {
           encoding: "utf8",
           env: withSupervisorClock(
             cwd,
-            timeoutMs === undefined ? baseEnv : { ...baseEnv, OPENCLAW_TSGO_TIMEOUT_MS: timeoutMs },
+            timeoutMs === undefined ? baseEnv : { ...baseEnv, CARAPACE_TSGO_TIMEOUT_MS: timeoutMs },
           ),
           // spawnSync blocks this thread, so vitest's own per-test budget can never
           // fire; a regression here would hang the worker instead of failing.
@@ -393,7 +393,7 @@ describe.skipIf(process.platform === "win32")("run-tsgo watchdog", () => {
   }
 
   it("rejects and drains compiler descendants left after a successful leader exit", async () => {
-    const cwd = createTempDir("openclaw-run-tsgo-lingering-");
+    const cwd = createTempDir("carapace-run-tsgo-lingering-");
     const descendantPidPath = path.join(cwd, "descendant.pid");
     writeFakeTsgo(
       cwd,
@@ -452,9 +452,9 @@ child.once("message", () => process.exit(0));
   }, 30_000);
 
   it.each([{ bound: "0" }, { bound: "abc" }])(
-    "explains a rejected OPENCLAW_TSGO_TIMEOUT_MS of $bound instead of crashing",
+    "explains a rejected CARAPACE_TSGO_TIMEOUT_MS of $bound instead of crashing",
     ({ bound }) => {
-      const cwd = createTempDir("openclaw-run-tsgo-watchdog-");
+      const cwd = createTempDir("carapace-run-tsgo-watchdog-");
       writeFakeTsgo(cwd, "#!/bin/sh\nexit 0\n");
 
       const result = runFakeTsgo(cwd, bound);
@@ -469,7 +469,7 @@ child.once("message", () => process.exit(0));
   );
 
   it("kills a wedged tsgo that ignores SIGTERM instead of blocking its caller forever", () => {
-    const cwd = createTempDir("openclaw-run-tsgo-watchdog-");
+    const cwd = createTempDir("carapace-run-tsgo-watchdog-");
     // Mirrors the observed wedge: the checker refuses SIGTERM and never reports,
     // so only a process-group SIGKILL frees the caller. It records its pid so the
     // harness can reap the tree, and self-exits as a last-resort backstop.
@@ -638,7 +638,7 @@ syncBuiltinESMExports();
   ])(
     "leaves a completing tsgo alone under $name",
     ({ bound, body }) => {
-      const cwd = createTempDir("openclaw-run-tsgo-watchdog-");
+      const cwd = createTempDir("carapace-run-tsgo-watchdog-");
       writeFakeTsgo(cwd, body);
 
       const result = runFakeTsgo(cwd, bound);

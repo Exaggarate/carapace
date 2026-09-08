@@ -4,13 +4,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { SessionManager } from "../src/agents/sessions/session-manager.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import { writeOpenAiResponsesSse } from "./helpers/openai-responses-sse.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "./helpers/carapace-test-instance.js";
 
 const TEST_TIMEOUT_MS = 180_000;
 const MODEL_REF = "replay-proof/replay-proof";
@@ -30,7 +30,7 @@ type MockModelServer = {
 
 type MockSseEvent = { type: string } & Record<string, unknown>;
 
-const instances: OpenClawTestInstance[] = [];
+const instances: CarapaceTestInstance[] = [];
 const modelServers: MockModelServer[] = [];
 
 afterEach(async () => {
@@ -45,13 +45,13 @@ describe("Gateway OpenAI Responses compaction replay", () => {
     async () => {
       const modelServer = await startMockModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createCarapaceTestInstance({
         name: "gateway-openai-compaction-replay",
         config: createTestConfig(modelServer.baseUrl),
         env: {
-          OPENCLAW_DEBUG_MODEL_TRANSPORT: "1",
-          OPENCLAW_SKIP_PROVIDERS: undefined,
-          OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+          CARAPACE_DEBUG_MODEL_TRANSPORT: "1",
+          CARAPACE_SKIP_PROVIDERS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
         },
       });
       instances.push(instance);
@@ -80,7 +80,7 @@ describe("Gateway OpenAI Responses compaction replay", () => {
           agentId: "main",
           sessionId,
           sessionKey: SESSION_KEY,
-          storePath: path.join(instance.state.agentDir("main"), "openclaw-agent.sqlite"),
+          storePath: path.join(instance.state.agentDir("main"), "carapace-agent.sqlite"),
         });
         const contextMessages = manager.buildSessionContext().messages;
         const persistedReplay = contextMessages.find(
@@ -146,14 +146,14 @@ describe("Gateway OpenAI Responses compaction replay", () => {
   );
 });
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): CarapaceConfig {
   return {
     plugins: { slots: { memory: "none" } },
     agents: {
       defaults: {
         heartbeat: { every: "0m" },
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
         skipBootstrap: true,
         skills: [],
       },

@@ -3,7 +3,7 @@ import {
   resolveMaxTokensParam,
   detectOpenAICompletionsCompat,
   resolveOpenAICompletionsCompat,
-} from "@openclaw/ai/transports";
+} from "@carapace/ai/transports";
 import {
   type NativeWebSearchToolPolicyParams,
   isNativeWebSearchAllowedByToolPolicy,
@@ -11,7 +11,7 @@ import {
 /**
  * Resolves model extra parameters and transport overrides for embedded agents.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createGoogleThinkingPayloadWrapper } from "../../llm/providers/stream-wrappers/google.js";
 import { createMinimaxThinkingDisabledWrapper } from "../../llm/providers/stream-wrappers/minimax.js";
 import {
@@ -74,7 +74,7 @@ function supportsGptParallelToolCallsPayload(api: unknown): boolean {
  * Used to pass through stream params like temperature/maxTokens.
  */
 export function resolveExtraParams(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelId: string;
   agentId?: string;
@@ -165,7 +165,7 @@ function hasExplicitTransportSetting(settings: { transport?: unknown }): boolean
 }
 
 export function resolvePreparedExtraParams(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelId: string;
   agentDir?: string;
@@ -690,7 +690,7 @@ function createOpenAICompletionsExtraBodyWrapper(
 
 type ApplyExtraParamsContext = {
   agent: { streamFn?: StreamFn };
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelId: string;
   agentDir?: string;
@@ -969,7 +969,7 @@ function isMiMoReasoningAsVisibleTextOpenAICompatibleModel(
  */
 export function applyExtraParamsToAgent(
   agent: { streamFn?: StreamFn },
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   provider: string,
   modelId: string,
   extraParamsOverride?: Record<string, unknown>,

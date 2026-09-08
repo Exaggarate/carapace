@@ -1,5 +1,5 @@
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { SessionEntry } from "../config/sessions.js";
 import { SessionTranscriptProjectionUnavailableError } from "../config/sessions/session-transcript-projection-error.js";
 import {
@@ -21,12 +21,12 @@ const SILENT_CHAT_HISTORY_TAIL_SCAN_CHUNK_MESSAGES = 100;
 const SILENT_CHAT_HISTORY_TAIL_SCAN_MAX_CHUNK_MESSAGES = 400;
 
 export function readChatHistoryMessageId(message: unknown): string | undefined {
-  const id = asOptionalRecord(asOptionalRecord(message)?.["__openclaw"])?.id;
+  const id = asOptionalRecord(asOptionalRecord(message)?.["__carapace"])?.id;
   return typeof id === "string" && id ? id : undefined;
 }
 
 export function readChatHistoryMessageSeq(message: unknown): number | undefined {
-  const metadata = asOptionalRecord(asOptionalRecord(message)?.["__openclaw"]);
+  const metadata = asOptionalRecord(asOptionalRecord(message)?.["__carapace"]);
   return asPositiveSafeInteger(metadata?.seq);
 }
 

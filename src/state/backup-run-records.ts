@@ -1,19 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { BACKUP_RUN_ERROR_MAX_LENGTH } from "./backup-run-records.contract.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "./openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "./carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "./carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "./carapace-state-db.paths.js";
 
-type BackupRunDatabase = Pick<OpenClawStateDatabase, "backup_runs">;
+type BackupRunDatabase = Pick<CarapaceStateDatabase, "backup_runs">;
 
 type BackupRunKind = "archive" | "sqlite-snapshot" | "git";
 
@@ -82,7 +82,7 @@ export function recordBackupRunOutcome(params: {
   // Best-effort log only: never bootstrap an absent state database to record an
   // outcome, or a failed backup on a fresh host would create a blank DB that a
   // retry then treats as real backup input.
-  if (!existsSync(resolveOpenClawStateSqlitePath(params.env ?? process.env))) {
+  if (!existsSync(resolveCarapaceStateSqlitePath(params.env ?? process.env))) {
     return;
   }
   const manifest = JSON.stringify({
@@ -93,7 +93,7 @@ export function recordBackupRunOutcome(params: {
       : {}),
     ...(params.pushFailed === true ? { pushFailed: true } : {}),
   });
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<BackupRunDatabase>(db);
       executeSqliteQuerySync(

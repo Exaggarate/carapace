@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createCodexCatalogHomeResolver } from "../session-catalog-homes.js";
 import { resolveCodexAppServerHomeDir } from "./auth-start-options.js";
@@ -34,7 +34,7 @@ import {
   codexForkTurn,
 } from "./upstream-session-fork.test-support.js";
 
-vi.mock("openclaw/plugin-sdk/session-catalog", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/session-catalog", async (importOriginal) => ({
   ...(await importOriginal()),
   deleteSessionUpstreamLink: vi.fn(),
   upsertSessionUpstreamLink: vi.fn(() => true),
@@ -53,7 +53,7 @@ describe("persistent upstream fork continuation", () => {
       supervision: { enabled: true },
       appServer: { approvalsReviewer: "user" },
     };
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         list: [
@@ -61,7 +61,7 @@ describe("persistent upstream fork continuation", () => {
           { id: "source", agentDir: sourceAgentDir },
         ],
       },
-      session: { store: path.join(root, "openclaw-agent.sqlite") },
+      session: { store: path.join(root, "carapace-agent.sqlite") },
     };
     const params = forkParams();
     const retained = codexForkTurn("turn-1", "one");

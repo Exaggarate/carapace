@@ -136,34 +136,34 @@ pub(crate) fn validate_ssh_target(raw: &str) -> Result<(String, u16), String> {
 }
 
 pub(crate) fn config_path() -> Result<PathBuf, String> {
-    if let Some(path) = env::var_os("OPENCLAW_CONFIG_PATH").filter(|path| !path.is_empty()) {
+    if let Some(path) = env::var_os("CARAPACE_CONFIG_PATH").filter(|path| !path.is_empty()) {
         return Ok(PathBuf::from(path));
     }
-    let state_dir = env::var_os("OPENCLAW_STATE_DIR")
+    let state_dir = env::var_os("CARAPACE_STATE_DIR")
         .filter(|path| !path.is_empty())
         .map(PathBuf::from)
         .map(Ok)
-        .unwrap_or_else(|| crate::cli::openclaw_home().map_err(|error| error.to_string()))?;
-    Ok(state_dir.join("openclaw.json"))
+        .unwrap_or_else(|| crate::cli::carapace_home().map_err(|error| error.to_string()))?;
+    Ok(state_dir.join("carapace.json"))
 }
 
 fn read_config(path: &Path) -> Result<Option<Value>, String> {
     let metadata = match fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
         Err(error) if error.kind() == ErrorKind::NotFound => return Ok(None),
-        Err(error) => return Err(format!("Could not inspect OpenClaw configuration: {error}")),
+        Err(error) => return Err(format!("Could not inspect Carapace configuration: {error}")),
     };
     if metadata.file_type().is_symlink() || !metadata.is_file() {
-        return Err("OpenClaw configuration must be a regular file, not a symlink.".to_string());
+        return Err("Carapace configuration must be a regular file, not a symlink.".to_string());
     }
     let raw = fs::read_to_string(path)
-        .map_err(|error| format!("Could not read OpenClaw configuration: {error}"))?;
+        .map_err(|error| format!("Could not read Carapace configuration: {error}"))?;
     let value: Value = tauri_utils::config::parse::parse_json5_value(&raw, path).map_err(|_| {
-        "OpenClaw configuration is not valid JSON5. Run `openclaw doctor --fix`, then try again."
+        "Carapace configuration is not valid JSON5. Run `carapace doctor --fix`, then try again."
             .to_string()
     })?;
     if !value.is_object() {
-        return Err("OpenClaw configuration must contain a JSON object.".to_string());
+        return Err("Carapace configuration must contain a JSON object.".to_string());
     }
     Ok(Some(value))
 }
@@ -493,13 +493,13 @@ fn ensure_private_parent(parent: &Path) -> Result<(), String> {
             builder.mode(0o700);
         }
         builder.create(parent).map_err(|error| {
-            format!("Could not create OpenClaw configuration directory: {error}")
+            format!("Could not create Carapace configuration directory: {error}")
         })?;
     }
     let metadata = fs::symlink_metadata(parent)
-        .map_err(|error| format!("Could not inspect OpenClaw configuration directory: {error}"))?;
+        .map_err(|error| format!("Could not inspect Carapace configuration directory: {error}"))?;
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
-        return Err("OpenClaw configuration directory must not be a symlink.".to_string());
+        return Err("Carapace configuration directory must not be a symlink.".to_string());
     }
     Ok(())
 }
@@ -511,17 +511,17 @@ pub(crate) fn save_config_at(
 ) -> Result<(), String> {
     let parent = path
         .parent()
-        .ok_or_else(|| "OpenClaw configuration path has no parent directory.".to_string())?;
+        .ok_or_else(|| "Carapace configuration path has no parent directory.".to_string())?;
     ensure_private_parent(parent)?;
     let mut root = read_config(path)?.unwrap_or_else(|| json!({}));
     let root_object = root
         .as_object_mut()
-        .ok_or_else(|| "OpenClaw configuration must contain a JSON object.".to_string())?;
+        .ok_or_else(|| "Carapace configuration must contain a JSON object.".to_string())?;
     let gateway = root_object
         .entry("gateway")
         .or_insert_with(|| json!({}))
         .as_object_mut()
-        .ok_or_else(|| "OpenClaw Gateway configuration must contain a JSON object.".to_string())?;
+        .ok_or_else(|| "Carapace Gateway configuration must contain a JSON object.".to_string())?;
     gateway.insert("mode".to_string(), json!("remote"));
     let old_remote = gateway
         .get("remote")
@@ -562,7 +562,7 @@ pub(crate) fn save_config_at(
     gateway.insert("remote".to_string(), Value::Object(remote));
 
     let temporary = parent.join(format!(
-        ".openclaw-config-{}.{}",
+        ".carapace-config-{}.{}",
         std::process::id(),
         uuid::Uuid::new_v4()
     ));
@@ -575,27 +575,27 @@ pub(crate) fn save_config_at(
     }
     let mut file = options
         .open(&temporary)
-        .map_err(|error| format!("Could not prepare secure OpenClaw configuration: {error}"))?;
+        .map_err(|error| format!("Could not prepare secure Carapace configuration: {error}"))?;
     let result = (|| {
         serde_json::to_writer_pretty(&mut file, &root)
-            .map_err(|error| format!("Could not serialize OpenClaw configuration: {error}"))?;
+            .map_err(|error| format!("Could not serialize Carapace configuration: {error}"))?;
         file.write_all(b"\n")
             .and_then(|()| file.sync_all())
-            .map_err(|error| format!("Could not save OpenClaw configuration: {error}"))?;
+            .map_err(|error| format!("Could not save Carapace configuration: {error}"))?;
         if path.exists() {
             let metadata = fs::symlink_metadata(path)
-                .map_err(|error| format!("Could not verify OpenClaw configuration: {error}"))?;
+                .map_err(|error| format!("Could not verify Carapace configuration: {error}"))?;
             if metadata.file_type().is_symlink() || !metadata.is_file() {
-                return Err("OpenClaw configuration must remain a regular file.".to_string());
+                return Err("Carapace configuration must remain a regular file.".to_string());
             }
         }
         fs::rename(&temporary, path)
-            .map_err(|error| format!("Could not replace OpenClaw configuration: {error}"))?;
+            .map_err(|error| format!("Could not replace Carapace configuration: {error}"))?;
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(path, fs::Permissions::from_mode(0o600))
-                .map_err(|error| format!("Could not secure OpenClaw configuration: {error}"))?;
+                .map_err(|error| format!("Could not secure Carapace configuration: {error}"))?;
         }
         Ok(())
     })();
@@ -754,7 +754,7 @@ mod tests {
     fn request() -> RemoteGatewayRequest {
         RemoteGatewayRequest {
             transport: "direct".to_string(),
-            url: Some("http://192.168.1.25:18789/openclaw".to_string()),
+            url: Some("http://192.168.1.25:18789/carapace".to_string()),
             ssh_target: None,
             token: Some("test-token".to_string()),
             password: None,
@@ -765,23 +765,23 @@ mod tests {
 
     fn isolated_path() -> std::path::PathBuf {
         std::env::temp_dir()
-            .join(format!("openclaw-remote-config-{}", uuid::Uuid::new_v4()))
-            .join("openclaw.json")
+            .join(format!("carapace-remote-config-{}", uuid::Uuid::new_v4()))
+            .join("carapace.json")
     }
 
     #[test]
     fn normalizes_dashboard_and_websocket_urls_without_exposing_auth() {
         assert_eq!(
-            normalize_gateway_url("https://gateway.example.com:443/openclaw")
+            normalize_gateway_url("https://gateway.example.com:443/carapace")
                 .expect("TLS URL")
                 .as_str(),
-            "wss://gateway.example.com/openclaw"
+            "wss://gateway.example.com/carapace"
         );
         assert_eq!(
-            normalize_gateway_url("http://192.168.1.25:18789/openclaw")
+            normalize_gateway_url("http://192.168.1.25:18789/carapace")
                 .expect("private HTTP URL")
                 .as_str(),
-            "ws://192.168.1.25:18789/openclaw"
+            "ws://192.168.1.25:18789/carapace"
         );
         assert!(normalize_gateway_url("http://gateway.example.com:18789").is_err());
         let userinfo = ["user", "fixture"].join(":");
@@ -904,10 +904,10 @@ mod tests {
 
     #[test]
     fn dashboard_url_preserves_gateway_path_without_credentials() {
-        let url = normalize_gateway_url("wss://gateway.example.com/openclaw").expect("URL");
+        let url = normalize_gateway_url("wss://gateway.example.com/carapace").expect("URL");
         let dashboard = dashboard_url(&url).expect("dashboard");
         assert_eq!(dashboard.scheme(), "https");
-        assert_eq!(dashboard.path(), "/openclaw");
+        assert_eq!(dashboard.path(), "/carapace");
         assert_eq!(dashboard.query(), None);
         assert_eq!(dashboard.fragment(), None);
     }

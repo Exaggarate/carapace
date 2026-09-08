@@ -22,7 +22,7 @@ import {
   PLUGIN_SERVICE_REPLACEMENT_STOP_TIMEOUT_MS,
   startPluginServices,
 } from "../plugins/services.js";
-import type { OpenClawPluginService } from "../plugins/types.js";
+import type { CarapacePluginService } from "../plugins/types.js";
 import { getProcessSupervisor, type ManagedRun } from "../process/supervisor/index.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { resolveGlobalMap, resolveGlobalSingleton } from "../shared/global-singleton.js";
@@ -150,7 +150,7 @@ type MarkMainSessionsAbortedForRestart = NonNullable<
 type DrainActiveSessionsForShutdown = NonNullable<
   GatewayCloseParams["drainActiveSessionsForShutdown"]
 >;
-const originalRestartTraceEnv = process.env.OPENCLAW_GATEWAY_RESTART_TRACE;
+const originalRestartTraceEnv = process.env.CARAPACE_GATEWAY_RESTART_TRACE;
 
 function createGatewayCloseHandler(params: GatewayCloseParams) {
   return async (opts?: GatewayCloseOptions) =>
@@ -261,9 +261,9 @@ describe("createGatewayCloseHandler", () => {
     resetPluginRuntimeStateForTest();
     vi.useRealTimers();
     if (originalRestartTraceEnv === undefined) {
-      delete process.env.OPENCLAW_GATEWAY_RESTART_TRACE;
+      delete process.env.CARAPACE_GATEWAY_RESTART_TRACE;
     } else {
-      process.env.OPENCLAW_GATEWAY_RESTART_TRACE = originalRestartTraceEnv;
+      process.env.CARAPACE_GATEWAY_RESTART_TRACE = originalRestartTraceEnv;
     }
   });
 
@@ -290,7 +290,7 @@ describe("createGatewayCloseHandler", () => {
   });
 
   it("retains Gateway dependencies when a trusted diagnostic service rejects shutdown", async () => {
-    const service: OpenClawPluginService = {
+    const service: CarapacePluginService = {
       id: "diagnostics-otel",
       start: async () => {},
       stop: async () => {
@@ -386,7 +386,7 @@ describe("createGatewayCloseHandler", () => {
 
   it("clears the process-root plugin registry after teardown", async () => {
     const lifecycleSlot = resolveGlobalMap<string, number>(
-      Symbol.for("openclaw.test.gatewayCloseLifecycleSlot"),
+      Symbol.for("carapace.test.gatewayCloseLifecycleSlot"),
       (state) => state.clear(),
     );
     lifecycleSlot.set("stale", 1);
@@ -403,7 +403,7 @@ describe("createGatewayCloseHandler", () => {
     const drainError = new Error("owner drain failed");
     let rejectDrain = true;
     resolveGlobalSingleton(
-      Symbol("openclaw.test.gatewayCloseFailedLifecycleOwner"),
+      Symbol("carapace.test.gatewayCloseFailedLifecycleOwner"),
       () => ({}),
       () => {
         if (rejectDrain) {
@@ -426,8 +426,8 @@ describe("createGatewayCloseHandler", () => {
   it.skipIf(process.platform === "win32")(
     "terminates supervised process trees before Gateway close returns",
     async () => {
-      const previousServiceMarker = process.env.OPENCLAW_SERVICE_MARKER;
-      process.env.OPENCLAW_SERVICE_MARKER = "openclaw";
+      const previousServiceMarker = process.env.CARAPACE_SERVICE_MARKER;
+      process.env.CARAPACE_SERVICE_MARKER = "carapace";
       const supervisor = getProcessSupervisor();
       let output = "";
       let run: ManagedRun | undefined;
@@ -462,9 +462,9 @@ describe("createGatewayCloseHandler", () => {
         run?.cancel();
         await run?.waitForExtinction?.().catch(() => undefined);
         if (previousServiceMarker === undefined) {
-          delete process.env.OPENCLAW_SERVICE_MARKER;
+          delete process.env.CARAPACE_SERVICE_MARKER;
         } else {
-          process.env.OPENCLAW_SERVICE_MARKER = previousServiceMarker;
+          process.env.CARAPACE_SERVICE_MARKER = previousServiceMarker;
         }
       }
     },
@@ -493,7 +493,7 @@ describe("createGatewayCloseHandler", () => {
 
     const failedStart = supervisor.spawn({
       mode: "child",
-      argv: [`/openclaw-missing-adapter-${process.pid}`],
+      argv: [`/carapace-missing-adapter-${process.pid}`],
       exactEnv: true,
       stdinMode: "pipe-closed",
     });
@@ -516,7 +516,7 @@ describe("createGatewayCloseHandler", () => {
   it.each([false, true])(
     "reports and joins an in-flight config reload before teardown (trace=%s)",
     async (trace) => {
-      process.env.OPENCLAW_GATEWAY_RESTART_TRACE = trace ? "1" : "0";
+      process.env.CARAPACE_GATEWAY_RESTART_TRACE = trace ? "1" : "0";
       startGatewayRestartTrace("stop.signal.received");
       const events: string[] = [];
       mocks.fenceSessionSuspensionWritesForGatewayShutdown.mockImplementation(() => {
@@ -752,7 +752,7 @@ describe("createGatewayCloseHandler", () => {
   });
 
   it("emits parseable restart close trace spans when enabled", async () => {
-    process.env.OPENCLAW_GATEWAY_RESTART_TRACE = "1";
+    process.env.CARAPACE_GATEWAY_RESTART_TRACE = "1";
     const drainActiveSessionsForShutdown = vi.fn<DrainActiveSessionsForShutdown>(async () => ({
       emittedSessionIds: [],
       timedOut: false,
@@ -814,7 +814,7 @@ describe("createGatewayCloseHandler", () => {
   });
 
   it("emits restart ready child spans without shortening the parent ready span", async () => {
-    process.env.OPENCLAW_GATEWAY_RESTART_TRACE = "1";
+    process.env.CARAPACE_GATEWAY_RESTART_TRACE = "1";
 
     startGatewayRestartTrace("restart.signal.received", [["reason", "test restart"]]);
     await new Promise((resolve) => {

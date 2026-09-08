@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Development runner that rebuilds OpenClaw, runs runtime postbuild steps, and
+// Development runner that rebuilds Carapace, runs runtime postbuild steps, and
 // restarts the CLI when watched source or metadata changes.
 import {
   spawn,
@@ -493,7 +493,7 @@ const listRequiredBundledPluginMetadataOutputs = (
       requiredPaths.push(path.join(builtPluginDir, "package.json"));
     }
     if (hasManifest) {
-      requiredPaths.push(path.join(builtPluginDir, "openclaw.plugin.json"));
+      requiredPaths.push(path.join(builtPluginDir, "carapace.plugin.json"));
     }
     return requiredPaths;
   });
@@ -571,7 +571,7 @@ const readPackageJsonPluginSdkAliasFileNames = (deps: RunNodeRequirementDeps) =>
   return fileNames.size > 0 ? fileNames : null;
 };
 
-const listRequiredOpenClawExtensionAliasOutputs = (deps: RunNodeRequirementDeps) => {
+const listRequiredCarapaceExtensionAliasOutputs = (deps: RunNodeRequirementDeps) => {
   const distRoot = deps.distRoot;
   const distExtensionsRoot = path.join(distRoot, "extensions");
   if (!deps.fs.existsSync(distExtensionsRoot)) {
@@ -586,7 +586,7 @@ const listRequiredOpenClawExtensionAliasOutputs = (deps: RunNodeRequirementDeps)
   }
 
   const exportedPluginSdkFileNames = readPackageJsonPluginSdkAliasFileNames(deps);
-  const aliasDir = path.join(distRoot, "extensions", "node_modules", "openclaw");
+  const aliasDir = path.join(distRoot, "extensions", "node_modules", "carapace");
   return [
     path.join(aliasDir, "package.json"),
     ...dirents
@@ -599,7 +599,7 @@ const listRequiredOpenClawExtensionAliasOutputs = (deps: RunNodeRequirementDeps)
 };
 
 const listRequiredStaticExtensionAssetOutputs = (deps: RunNodeRequirementDeps) => {
-  if (deps.env.OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS === "0") {
+  if (deps.env.CARAPACE_RUNTIME_POSTBUILD_STATIC_ASSETS === "0") {
     return [];
   }
   const distRoot = deps.distRoot;
@@ -629,7 +629,7 @@ const listRequiredRuntimePostBuildOutputs = (deps: RunNodeRequirementDeps) => {
   const builtPluginEntries = listBuiltBundledPluginEntries(deps);
   return [
     ...listRequiredCoreRuntimePostBuildOutputs(deps),
-    ...listRequiredOpenClawExtensionAliasOutputs(deps),
+    ...listRequiredCarapaceExtensionAliasOutputs(deps),
     ...listRequiredStaticExtensionAssetOutputs(deps),
     ...listRequiredBundledPluginMetadataOutputs(builtPluginEntries, deps),
     ...listRequiredBundledPluginRuntimeOverlayOutputs(deps),
@@ -643,11 +643,11 @@ const hasMissingRequiredRuntimePostBuildOutput = (deps: RunNodeRequirementDeps) 
 
 /** Decides whether source changes require a new dev build. */
 export const resolveBuildRequirement = (deps: RunNodeRequirementDeps): BuildRequirement => {
-  if (deps.env.OPENCLAW_FORCE_BUILD === "1") {
+  if (deps.env.CARAPACE_FORCE_BUILD === "1") {
     return { shouldBuild: true, reason: "force_build" };
   }
   if (
-    deps.env.OPENCLAW_BUILD_PRIVATE_QA === "1" &&
+    deps.env.CARAPACE_BUILD_PRIVATE_QA === "1" &&
     (deps.privateQaRequiredDistEntries ?? resolvePrivateQaRequiredDistEntries(deps.distRoot)).some(
       (entry) => statMtime(entry, deps.fs) == null,
     )
@@ -703,7 +703,7 @@ export const resolveBuildRequirement = (deps: RunNodeRequirementDeps): BuildRequ
 export const resolveRuntimePostBuildRequirement = (
   deps: RunNodeRuntimeRequirementDeps,
 ): RuntimePostBuildRequirement => {
-  if (deps.env.OPENCLAW_FORCE_RUNTIME_POSTBUILD === "1") {
+  if (deps.env.CARAPACE_FORCE_RUNTIME_POSTBUILD === "1") {
     return { shouldSync: true, reason: "force_runtime_postbuild" };
   }
 
@@ -752,7 +752,7 @@ export const resolveRuntimePostBuildRequirement = (
 };
 
 const BUILD_REASON_LABELS = {
-  force_build: "forced by OPENCLAW_FORCE_BUILD",
+  force_build: "forced by CARAPACE_FORCE_BUILD",
   missing_build_stamp: "build stamp missing",
   missing_dist_entry: "dist entry missing",
   config_newer: "config newer than build stamp",
@@ -766,7 +766,7 @@ const BUILD_REASON_LABELS = {
 };
 
 const RUNTIME_POSTBUILD_REASON_LABELS = {
-  force_runtime_postbuild: "forced by OPENCLAW_FORCE_RUNTIME_POSTBUILD",
+  force_runtime_postbuild: "forced by CARAPACE_FORCE_RUNTIME_POSTBUILD",
   missing_runtime_postbuild_output: "required runtime postbuild output missing",
   missing_runtime_postbuild_stamp: "runtime postbuild stamp missing",
   missing_build_stamp: "build stamp missing",
@@ -788,8 +788,8 @@ const refuseImmutableDeploymentMutation = async (
   reason: string,
 ) => {
   const message =
-    `[openclaw] Cannot regenerate ${artifactKind} artifacts in an immutable deployment (${reason}). ` +
-    "Replace this deployment with a complete release, then use its installed `openclaw` command or run `node openclaw.mjs ...` from that release.\n";
+    `[carapace] Cannot regenerate ${artifactKind} artifacts in an immutable deployment (${reason}). ` +
+    "Replace this deployment with a complete release, then use its installed `carapace` command or run `node carapace.mjs ...` from that release.\n";
   deps.stderr.write(message);
   deps.outputTee?.write(message);
   return await closeRunNodeOutputTee(deps, 1);
@@ -808,14 +808,14 @@ const isSignalKey = (signal: NodeJS.Signals): signal is keyof typeof SIGNAL_EXIT
 const getSignalExitCode = (signal: NodeJS.Signals) =>
   isSignalKey(signal) ? SIGNAL_EXIT_CODES[signal] : 1;
 
-const RUN_NODE_OUTPUT_LOG_ENV = "OPENCLAW_RUN_NODE_OUTPUT_LOG";
-const RUN_NODE_CPU_PROF_DIR_ENV = "OPENCLAW_RUN_NODE_CPU_PROF_DIR";
-const RUN_NODE_CPU_PROF_MAX_FILES_ENV = "OPENCLAW_RUN_NODE_CPU_PROF_MAX_FILES";
-const RUN_NODE_FILTER_SYNC_IO_STDERR_ENV = "OPENCLAW_RUN_NODE_FILTER_SYNC_IO_STDERR";
-const RUN_NODE_BUILD_LOCK_TIMEOUT_ENV = "OPENCLAW_RUN_NODE_BUILD_LOCK_TIMEOUT_MS";
-const RUN_NODE_BUILD_LOCK_POLL_ENV = "OPENCLAW_RUN_NODE_BUILD_LOCK_POLL_MS";
-const RUN_NODE_BUILD_LOCK_STALE_ENV = "OPENCLAW_RUN_NODE_BUILD_LOCK_STALE_MS";
-const RUN_NODE_SKIP_DTS_BUILD_ENV = "OPENCLAW_RUN_NODE_SKIP_DTS_BUILD";
+const RUN_NODE_OUTPUT_LOG_ENV = "CARAPACE_RUN_NODE_OUTPUT_LOG";
+const RUN_NODE_CPU_PROF_DIR_ENV = "CARAPACE_RUN_NODE_CPU_PROF_DIR";
+const RUN_NODE_CPU_PROF_MAX_FILES_ENV = "CARAPACE_RUN_NODE_CPU_PROF_MAX_FILES";
+const RUN_NODE_FILTER_SYNC_IO_STDERR_ENV = "CARAPACE_RUN_NODE_FILTER_SYNC_IO_STDERR";
+const RUN_NODE_BUILD_LOCK_TIMEOUT_ENV = "CARAPACE_RUN_NODE_BUILD_LOCK_TIMEOUT_MS";
+const RUN_NODE_BUILD_LOCK_POLL_ENV = "CARAPACE_RUN_NODE_BUILD_LOCK_POLL_MS";
+const RUN_NODE_BUILD_LOCK_STALE_ENV = "CARAPACE_RUN_NODE_BUILD_LOCK_STALE_MS";
+const RUN_NODE_SKIP_DTS_BUILD_ENV = "CARAPACE_RUN_NODE_SKIP_DTS_BUILD";
 const DEFAULT_BUILD_LOCK_TIMEOUT_MS = 5 * 60 * 1000;
 const DEFAULT_BUILD_LOCK_POLL_MS = 100;
 const DEFAULT_BUILD_LOCK_STALE_MS = 10 * 60 * 1000;
@@ -904,10 +904,10 @@ const createRunNodeOutputTee = (deps: RunNodeDeps): RunNodeOutputTee | null => {
 };
 
 const logRunner = (message: string, deps: RunNodeLogDeps) => {
-  if (deps.env.OPENCLAW_RUNNER_LOG === "0") {
+  if (deps.env.CARAPACE_RUNNER_LOG === "0") {
     return;
   }
-  const line = `[openclaw] ${message}\n`;
+  const line = `[carapace] ${message}\n`;
   deps.runNodeProgress?.clearLine();
   deps.stderr.write(line);
   deps.runNodeProgress?.render();
@@ -918,7 +918,7 @@ const RUN_NODE_PROGRESS_FRAMES = ["-", "\\", "|", "/"];
 
 const shouldUseRunNodeProgress = (deps: RunNodeDeps) =>
   deps.stderr?.isTTY === true &&
-  deps.env.OPENCLAW_RUNNER_PROGRESS !== "0" &&
+  deps.env.CARAPACE_RUNNER_PROGRESS !== "0" &&
   deps.env.CI !== "true" &&
   !deps.outputTee;
 
@@ -945,7 +945,7 @@ const createRunNodeProgress = (label: string, deps: RunNodeDeps) => {
     const elapsedSeconds = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
     const frame = RUN_NODE_PROGRESS_FRAMES[frameIndex % RUN_NODE_PROGRESS_FRAMES.length];
     frameIndex += 1;
-    deps.stderr.write(`\r[openclaw] ${frame} ${label} (${elapsedSeconds}s)`);
+    deps.stderr.write(`\r[carapace] ${frame} ${label} (${elapsedSeconds}s)`);
     visible = true;
   };
   const timer = setInterval(render, 120);
@@ -1024,7 +1024,7 @@ const listRunNodeCpuProfiles = (
   } catch {
     return [];
   }
-  const prefix = `openclaw-${commandName}-`;
+  const prefix = `carapace-${commandName}-`;
   return entries
     .filter(
       (entry) =>
@@ -1076,7 +1076,7 @@ const resolveRunNodeCpuProfileArgs = (deps: RunNodeDeps) => {
   pruneRunNodeCpuProfiles(deps, absoluteProfileDir, commandName);
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const pid = Number.isInteger(deps.process.pid) && deps.process.pid > 0 ? deps.process.pid : "pid";
-  const profileName = `openclaw-${commandName}-${pid}-${timestamp}.cpuprofile`;
+  const profileName = `carapace-${commandName}-${pid}-${timestamp}.cpuprofile`;
   const profilePath = path.join(absoluteProfileDir, profileName);
   const relativeProfilePath = path.relative(deps.cwd, profilePath) || profilePath;
   logRunner(`Writing Node CPU profile to ${relativeProfilePath}.`, deps);
@@ -1085,7 +1085,7 @@ const resolveRunNodeCpuProfileArgs = (deps: RunNodeDeps) => {
 
 const resolveRunNodeDiagnosticArgs = (deps: RunNodeDeps) => {
   const args = [...resolveRunNodeCpuProfileArgs(deps)];
-  if (deps.env.OPENCLAW_TRACE_SYNC_IO === "1") {
+  if (deps.env.CARAPACE_TRACE_SYNC_IO === "1") {
     logRunner("Enabling Node --trace-sync-io for startup I/O diagnostics.", deps);
     args.push("--trace-sync-io");
   }
@@ -1215,8 +1215,8 @@ const runNodeChild = async (deps: RunNodeDeps, args: string[]) => {
   return res.exitCode ?? 1;
 };
 
-const runOpenClaw = (deps: RunNodeDeps) =>
-  runNodeChild(deps, [...resolveRunNodeDiagnosticArgs(deps), "openclaw.mjs", ...deps.args]);
+const runCarapace = (deps: RunNodeDeps) =>
+  runNodeChild(deps, [...resolveRunNodeDiagnosticArgs(deps), "carapace.mjs", ...deps.args]);
 
 const pipeSpawnedOutput = (
   childProcess: RunNodeChild,
@@ -1313,7 +1313,7 @@ const closeRunNodeOutputTee = async (deps: RunNodeDeps, exitCode: number) => {
   try {
     await deps.outputTee.close();
   } catch (error) {
-    deps.stderr.write(`[openclaw] Failed to write output log: ${getErrorMessage(error)}\n`);
+    deps.stderr.write(`[carapace] Failed to write output log: ${getErrorMessage(error)}\n`);
     return exitCode === 0 ? 1 : exitCode;
   }
   return exitCode;
@@ -1484,7 +1484,7 @@ const syncRuntimeArtifactsAndStamp = async (deps: RunNodeDeps) => {
 };
 
 const shouldSkipWatchRuntimeSync = (deps: RunNodeDeps, requirement: RuntimePostBuildRequirement) =>
-  deps.env.OPENCLAW_WATCH_MODE === "1" &&
+  deps.env.CARAPACE_WATCH_MODE === "1" &&
   requirement.reason === "missing_runtime_postbuild_stamp" &&
   hasDirtyRuntimePostBuildInputs(deps) !== true &&
   !hasMissingRequiredRuntimePostBuildOutput(deps);
@@ -1496,7 +1496,7 @@ const isGatewayClientCommand = (args: string[]) =>
 
 const shouldFastPathExistingDistForGatewayClient = (deps: RunNodeDeps) =>
   isGatewayClientCommand(deps.args) &&
-  deps.env.OPENCLAW_FORCE_BUILD !== "1" &&
+  deps.env.CARAPACE_FORCE_BUILD !== "1" &&
   statMtime(deps.distEntry, deps.fs) != null &&
   canUseStampedGatewayClientDist(deps);
 
@@ -1523,7 +1523,7 @@ const canUseStampedGatewayClientDist = (deps: RunNodeDeps) => {
     runtimeStamp.mtime == null ||
     runtimeStamp.mtime < buildStamp.mtime ||
     runtimeStamp.head !== currentHead ||
-    deps.env.OPENCLAW_FORCE_RUNTIME_POSTBUILD === "1"
+    deps.env.CARAPACE_FORCE_RUNTIME_POSTBUILD === "1"
   ) {
     return false;
   }
@@ -1537,7 +1537,7 @@ const resolveQaReportSourceScript = (deps: RunNodeDeps, buildRequirement: BuildR
   if (
     buildRequirement.reason !== "missing_private_qa_dist" ||
     deps.args[0] !== "qa" ||
-    deps.env.OPENCLAW_FORCE_BUILD === "1" ||
+    deps.env.CARAPACE_FORCE_BUILD === "1" ||
     statMtime(sourceEntrypoint, deps.fs) == null
   ) {
     return null;
@@ -1559,7 +1559,7 @@ function createRunNodeDeps(params: RunNodeMainParams) {
   const distRoot = path.join(cwd, "dist");
   const env = params.env ? { ...params.env } : { ...process.env };
   // Select this checkout's plugins over tracked installs without changing source/dist loading.
-  env.OPENCLAW_DEV_SOURCE_ROOT ??= cwd;
+  env.CARAPACE_DEV_SOURCE_ROOT ??= cwd;
   const mutableState: RunNodeMutableState = {
     outputTee: null,
     runNodeProgress: undefined,
@@ -1595,16 +1595,16 @@ function createRunNodeDeps(params: RunNodeMainParams) {
 export async function runNodeMain(params: RunNodeMainParams = {}): Promise<number> {
   const deps = createRunNodeDeps(params);
   if (deps.args[0] === "qa") {
-    deps.env.OPENCLAW_BUILD_PRIVATE_QA = "1";
-    deps.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
-    deps.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS ??= "0";
+    deps.env.CARAPACE_BUILD_PRIVATE_QA = "1";
+    deps.env.CARAPACE_ENABLE_PRIVATE_QA_CLI = "1";
+    deps.env.CARAPACE_DISABLE_BUNDLED_PLUGINS ??= "0";
   }
   deps.outputTee = createRunNodeOutputTee(deps);
 
   try {
     let exitCode = 1;
     if (shouldFastPathExistingDistForGatewayClient(deps)) {
-      exitCode = await runOpenClaw(deps);
+      exitCode = await runCarapace(deps);
       return await closeRunNodeOutputTee(deps, exitCode);
     }
     const buildRequirement = resolveBuildRequirement(deps);
@@ -1654,7 +1654,7 @@ export async function runNodeMain(params: RunNodeMainParams = {}): Promise<numbe
           return await closeRunNodeOutputTee(deps, 1);
         }
       }
-      exitCode = await runOpenClaw(deps);
+      exitCode = await runCarapace(deps);
       return await closeRunNodeOutputTee(deps, exitCode);
     }
 
@@ -1699,7 +1699,7 @@ export async function runNodeMain(params: RunNodeMainParams = {}): Promise<numbe
     if (buildExitCode !== 0) {
       return await closeRunNodeOutputTee(deps, buildExitCode);
     }
-    exitCode = await runOpenClaw(deps);
+    exitCode = await runCarapace(deps);
     return await closeRunNodeOutputTee(deps, exitCode);
   } catch (error) {
     await closeRunNodeOutputTee(deps, 1);

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runDaemonStart, runDaemonStop } from "../cli/daemon-cli/lifecycle.js";
-import type { ConfigFileSnapshot } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../config/types.carapace.js";
 import type { GatewayService } from "../daemon/service.js";
 import { mockSystemAccountHome } from "../daemon/service.test-helpers.js";
 import type { GatewayHostLifecycle } from "../gateway/server-public.js";
@@ -35,7 +35,7 @@ vi.mock("../daemon/service.js", async (importOriginal) => ({
 vi.mock("../config/config.js", async () => {
   const { resolveGatewayPort } = await import("../config/paths.js");
   const snapshot: ConfigFileSnapshot = {
-    path: "/test/openclaw.json",
+    path: "/test/carapace.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -72,11 +72,11 @@ describe("SystemAgent hosted gateway lifecycle", () => {
     // Preserve the real service-identity guard within the wrapper's isolated HOME.
     mockSystemAccountHome();
     for (const key of [
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_PROFILE",
-      "OPENCLAW_SUPERVISOR_MODE",
+      "CARAPACE_HOME",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
+      "CARAPACE_PROFILE",
+      "CARAPACE_SUPERVISOR_MODE",
     ]) {
       vi.stubEnv(key, undefined);
     }
@@ -140,7 +140,7 @@ describe("SystemAgent hosted gateway lifecycle", () => {
       }),
     ).rejects.toThrow("native service ownership changed");
     expect(appendAudit).not.toHaveBeenCalled();
-    expect(lines.join("\n")).not.toContain("[openclaw] done:");
+    expect(lines.join("\n")).not.toContain("[carapace] done:");
     expect(defaultRuntime.exit).not.toHaveBeenCalled();
   });
 
@@ -190,7 +190,7 @@ describe("SystemAgent hosted gateway lifecycle", () => {
       expect(outcome.reason).not.toBe(exitSentinel);
       expect(outcome.reason).toMatchObject({ message: expect.stringMatching(/gateway|host/i) });
       expect(appendAudit).not.toHaveBeenCalled();
-      expect(lines.join("\n")).not.toContain("[openclaw] done:");
+      expect(lines.join("\n")).not.toContain("[carapace] done:");
       return;
     }
 
@@ -208,6 +208,6 @@ describe("SystemAgent hosted gateway lifecycle", () => {
         : /scheduled|requested|accepted|unavailable|not available|cannot/i,
     );
     expect(appendAudit).not.toHaveBeenCalled();
-    expect(report).not.toContain("[openclaw] done:");
+    expect(report).not.toContain("[carapace] done:");
   });
 });

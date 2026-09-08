@@ -8,16 +8,16 @@ import {
   replaceSessionEntrySync,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { sha256HexPrefixCore } from "../../infra/crypto-digest.js";
 import {
   registerClonedProjectRegistry,
   registerProjectRegistry,
 } from "../../projects/project-registry.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createProjectsHandlers } from "./projects.js";
 
 const execFileAsync = promisify(execFile);
@@ -41,13 +41,13 @@ beforeEach(() => {
 async function initializeRepository(
   root: string,
   name = "registered",
-  originUrl = "https://github.com/openclaw/openclaw.git",
+  originUrl = "https://github.com/Exaggarate/carapace.git",
 ): Promise<string> {
   const repo = path.join(root, name);
   await fs.mkdir(repo, { recursive: true });
   await execFileAsync("git", ["init", "-b", "main", repo]);
-  await execFileAsync("git", ["-C", repo, "config", "user.name", "OpenClaw Tests"]);
-  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@openclaw.invalid"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.name", "Carapace Tests"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@carapace.invalid"]);
   await execFileAsync("git", ["-C", repo, "remote", "add", "origin", originUrl]);
   await fs.writeFile(path.join(repo, "README.md"), "registered\n");
   await execFileAsync("git", ["-C", repo, "add", "README.md"]);
@@ -75,7 +75,7 @@ async function invokeProjectMethod(
     respond: (ok, payload, error) => {
       capture.result = { ok, payload, error };
     },
-    context: { getRuntimeConfig: () => cfg as OpenClawConfig } as never,
+    context: { getRuntimeConfig: () => cfg as CarapaceConfig } as never,
     client: {
       connect: { scopes },
       ...(profileId ? { authenticatedUserProfile: { profileId } } : {}),
@@ -86,7 +86,7 @@ async function invokeProjectMethod(
 }
 
 test("projects.list merges synthesized workspaces with stored rows deterministically", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const repo = await initializeRepository(state.root);
     await registerProjectRegistry({ path: repo, name: "Beta" });
@@ -114,7 +114,7 @@ test("projects.list merges synthesized workspaces with stored rows deterministic
 });
 
 test("projects.list exposes checkout details only at write scope", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const repo = await initializeRepository(state.root);
     await registerProjectRegistry({ path: repo, name: "Registered" });
@@ -158,7 +158,7 @@ test("projects.list exposes checkout details only at write scope", async () => {
             {
               id: "registered",
               repoRoot: repo,
-              originUrl: "https://github.com/openclaw/openclaw.git",
+              originUrl: "https://github.com/Exaggarate/carapace.git",
             },
           ],
         },
@@ -184,7 +184,7 @@ test("projects.list exposes checkout details only at write scope", async () => {
 });
 
 test("project responses redact credentials and URL suffixes from registered origins", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const repo = await initializeRepository(state.root);
     await execFileAsync("git", [
@@ -223,7 +223,7 @@ test("project responses redact credentials and URL suffixes from registered orig
 });
 
 test("projects.remove returns INVALID_REQUEST for an unknown id", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     expect(await invokeProjectMethod("projects.remove", { id: "missing" })).toMatchObject({
       ok: false,
@@ -235,7 +235,7 @@ test("projects.remove returns INVALID_REQUEST for an unknown id", async () => {
 });
 
 test("projects.list returns only the caller's deterministic resolved recents", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const repo = await initializeRepository(state.root);
     const project = await registerProjectRegistry({ path: repo, name: "Registered" });
@@ -329,18 +329,18 @@ test("projects.list returns only the caller's deterministic resolved recents", a
 });
 
 test("projects.add returns an existing project for the same canonical remote", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const repo = await initializeRepository(
       state.root,
       "existing",
-      "git@github.com:OpenClaw/OpenClaw.git",
+      "git@github.com:Carapace/Carapace.git",
     );
     const existing = await registerProjectRegistry({ path: repo, name: "Existing" });
 
     expect(
       await invokeProjectMethod("projects.add", {
-        gitUrl: "https://github.com/openclaw/openclaw.git",
+        gitUrl: "https://github.com/Exaggarate/carapace.git",
       }),
     ).toEqual({ ok: true, payload: existing, error: undefined });
   } finally {
@@ -349,7 +349,7 @@ test("projects.add returns an existing project for the same canonical remote", a
 });
 
 test("projects.add returns a typed invalid-url failure", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     expect(
       await invokeProjectMethod("projects.add", { gitUrl: "file:///tmp/repo.git" }),
@@ -366,7 +366,7 @@ test("projects.add returns a typed invalid-url failure", async () => {
 });
 
 test("projects.remove refuses to delete a cloned checkout referenced by a live worktree", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const originUrl = "https://github.com/acme/managed.git";
     const fingerprint = sha256HexPrefixCore(originUrl, 16);
@@ -388,7 +388,7 @@ test("projects.remove refuses to delete a cloned checkout referenced by a live w
         repoFingerprint: fingerprint,
         repoRoot: repo,
         path: path.join(state.stateDir, "worktrees", fingerprint, "live-worktree"),
-        branch: "openclaw/live-worktree",
+        branch: "carapace/live-worktree",
         baseRef: "main",
         ownerKind: "session",
         ownerId: "agent:main:session",
@@ -411,7 +411,7 @@ test("projects.remove refuses to delete a cloned checkout referenced by a live w
 });
 
 test("projects.remove deletes an unreferenced Gateway-managed clone", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const originUrl = "https://github.com/acme/removable.git";
     const fingerprint = sha256HexPrefixCore(originUrl, 16);
@@ -436,7 +436,7 @@ test("projects.remove deletes an unreferenced Gateway-managed clone", async () =
 });
 
 test("projects.remove preserves a cloned checkout while a duplicate registry row remains", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const originUrl = "https://github.com/acme/shared-managed.git";
     const fingerprint = sha256HexPrefixCore(originUrl, 16);
@@ -451,7 +451,7 @@ test("projects.remove preserves a cloned checkout while a duplicate registry row
       originUrl,
     });
     const now = Date.now();
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare(
         `INSERT INTO projects
           (id, display_name, repo_root, origin_url, source, created_at_ms, updated_at_ms)
@@ -488,7 +488,7 @@ test("projects.remove preserves a cloned checkout while a duplicate registry row
 });
 
 test("projects.remove refuses to delete a cloned checkout configured as an agent workspace", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const originUrl = "https://github.com/acme/workspace-project.git";
     const fingerprint = sha256HexPrefixCore(originUrl, 16);
@@ -504,7 +504,7 @@ test("projects.remove refuses to delete a cloned checkout configured as an agent
     });
     const cfg = {
       agents: { list: [{ id: "main", default: true, workspace: repo }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       await invokeProjectMethod("projects.remove", { id: project.id, deleteCheckout: true }, cfg),
@@ -519,7 +519,7 @@ test("projects.remove refuses to delete a cloned checkout configured as an agent
 });
 
 test("projects.remove refuses to delete a cloned checkout used by a live direct session", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const originUrl = "https://github.com/acme/session-project.git";
     const fingerprint = sha256HexPrefixCore(originUrl, 16);
@@ -539,7 +539,7 @@ test("projects.remove refuses to delete a cloned checkout used by a live direct 
     );
     const cfg = {
       agents: { list: [{ id: "main", default: true, workspace: state.workspaceDir }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       await invokeProjectMethod("projects.remove", { id: project.id, deleteCheckout: true }, cfg),
@@ -563,7 +563,7 @@ test.each([
   ],
   ["mixed separators", "C:\\Users/dev\\projects/mixed-project/", "mixed-project"],
 ] as const)("projects.list names folder recents from %s paths", async (_, folder, displayName) => {
-  const state = await createOpenClawTestState({ layout: "state-only", prefix: "projects-rpc-" });
+  const state = await createCarapaceTestState({ layout: "state-only", prefix: "projects-rpc-" });
   try {
     const profile = ensureProfileForEmail("windows-recents@example.test");
     replaceSessionEntrySync(

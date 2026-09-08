@@ -151,7 +151,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.agentStepTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.agentStepTestApi")] = {
     testing,
   };
 }

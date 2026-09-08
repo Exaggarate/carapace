@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetConfigRuntimeState } from "../config/config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resetGatewayWorkAdmission } from "../process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { resetHeartbeatEventsForTest } from "./heartbeat-events.js";
 import {
@@ -25,7 +25,7 @@ import { enqueueSystemEvent, peekSystemEvents, resetSystemEventsForTest } from "
 describe("stale exec heartbeat wakes", () => {
   type WakeRequest = Parameters<typeof requestHeartbeat>[0];
   type WakeHandler = Parameters<typeof setRuntimeHeartbeatWakeHandler>[0];
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   let currentHandlerDisposer: (() => void) | undefined;
 
   function setHeartbeatWakeHandler(handler: WakeHandler): void {
@@ -33,12 +33,12 @@ describe("stale exec heartbeat wakes", () => {
     currentHandlerDisposer = setRuntimeHeartbeatWakeHandler(handler);
   }
 
-  function heartbeatConfig(every = "30m"): OpenClawConfig {
+  function heartbeatConfig(every = "30m"): CarapaceConfig {
     return {
       agents: {
         defaults: { heartbeat: { every } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
   }
 
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe("stale exec heartbeat wakes", () => {
     }
     currentHandlerDisposer?.();
     currentHandlerDisposer = undefined;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetConfigRuntimeState();
     resetGatewayWorkAdmission();
     resetHeartbeatEventsForTest();
@@ -175,8 +175,8 @@ describe("stale exec heartbeat wakes", () => {
 
   it("keeps a scheduled turn alive when an acknowledged exec wake coalesces with it", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
-      const cfg: OpenClawConfig = {
+      setTestEnvValue("CARAPACE_STATE_DIR", tmpDir);
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -218,8 +218,8 @@ describe("stale exec heartbeat wakes", () => {
 
   it("keeps tagged cron work alive when an exec wake is coalesced", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
-      const cfg: OpenClawConfig = {
+      setTestEnvValue("CARAPACE_STATE_DIR", tmpDir);
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -257,8 +257,8 @@ describe("stale exec heartbeat wakes", () => {
 
   it("retires a stale exec wake before retryable busy gates", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
-      const cfg: OpenClawConfig = {
+      setTestEnvValue("CARAPACE_STATE_DIR", tmpDir);
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

@@ -12,12 +12,12 @@ import { formatDoctorStateRepairFailure } from "../infra/state-repair-message.js
 import { resolveUserPath } from "../utils.js";
 import { resolveWorkspaceStateIdentity } from "./workspace-state-identity.js";
 
-export const LEGACY_WORKSPACE_STATE_DIRNAME = ".openclaw";
+export const LEGACY_WORKSPACE_STATE_DIRNAME = ".carapace";
 const LEGACY_WORKSPACE_STATE_FILENAME = "workspace-state.json";
-export const LEGACY_WORKSPACE_STATE_CURRENT_FILENAME = "openclaw-workspace-state.json";
+export const LEGACY_WORKSPACE_STATE_CURRENT_FILENAME = "carapace-workspace-state.json";
 export const LEGACY_WORKSPACE_ATTESTATION_DIRNAME = "workspace-attestations";
 const LEGACY_WORKSPACE_ATTESTATION_SUFFIX = ".attested";
-export const LEGACY_WORKSPACE_ATTESTATION_HEADER = "openclaw-workspace-attestation:v1";
+export const LEGACY_WORKSPACE_ATTESTATION_HEADER = "carapace-workspace-attestation:v1";
 export const LEGACY_WORKSPACE_ATTESTATION_MAX_BYTES = 2048;
 export const WORKSPACE_DOCTOR_CLAIM_SUFFIX = ".doctor-importing";
 
@@ -166,7 +166,7 @@ function workspaceMigrationError(
           `Legacy workspace setup state requires migration at ${blockedPaths.join(", ")}`,
           "Stop the Gateway, then restore the retained setup file or claim from a verified backup.",
         )
-      : `Legacy workspace setup state requires migration for ${blockedPaths.join(", ")}; run ${formatCliCommand("openclaw doctor --fix", env)}.`,
+      : `Legacy workspace setup state requires migration for ${blockedPaths.join(", ")}; run ${formatCliCommand("carapace doctor --fix", env)}.`,
   );
 }
 
@@ -213,7 +213,7 @@ function resetLegacyWorkspaceStateCheckForTest(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.workspaceLegacyStateTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.workspaceLegacyStateTestApi")] =
     { resetLegacyWorkspaceStateCheckForTest };
 }
 
@@ -241,7 +241,7 @@ export function prepareLegacyWorkspaceStateReset(
     ...sources.stateDirAttestationPaths.map((sourcePath) => ({
       rootDir: path.dirname(path.dirname(sourcePath)),
       sourcePath,
-      // Hashed paths inside OpenClaw-owned attestation directories are
+      // Hashed paths inside Carapace-owned attestation directories are
       // reserved state. Explicit reset must remove malformed blockers too.
       requireAttestationHeader: false,
     })),
@@ -255,7 +255,7 @@ export function prepareLegacyWorkspaceStateReset(
     {
       ...candidate,
       sourcePath: `${candidate.sourcePath}${WORKSPACE_DOCTOR_CLAIM_SUFFIX}`,
-      // Sibling claims remain outside OpenClaw-owned roots. Renaming a claimed
+      // Sibling claims remain outside Carapace-owned roots. Renaming a claimed
       // marker preserves its header, so require that ownership proof there too.
       requireAttestationHeader: candidate.requireAttestationHeader,
     },

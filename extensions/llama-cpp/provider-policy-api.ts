@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   MANAGED_LLAMA_CPP_CONFIG_REQUIRED_MESSAGE,
   resolveManagedLlamaCppProviderConfig,
 } from "./src/managed-provider-config.js";
 
 export function inspectEmbeddingProviderSetup(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   agentId: string;
   provider: string;
@@ -19,7 +19,7 @@ export function inspectEmbeddingProviderSetup(params: {
     return null;
   }
   const fixHint =
-    `Run \`openclaw models --agent ${params.agentId} auth login --provider llama-cpp --method local\` ` +
+    `Run \`carapace models --agent ${params.agentId} auth login --provider llama-cpp --method local\` ` +
     "in an interactive terminal, then rerun this check.";
   try {
     resolveManagedLlamaCppProviderConfig(params.config);

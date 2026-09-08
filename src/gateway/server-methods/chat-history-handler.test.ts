@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
@@ -11,14 +11,14 @@ import {
   updateSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   clearUserProfileAuthLink,
   listUserProfileAuthLinks,
   readUserModelAuthProfile,
 } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { chatHistoryHandlers } from "./chat-history-handler.js";
 import { connectChatMetadataAccount } from "./chat-metadata-runtime.test-support.js";
@@ -33,7 +33,7 @@ function createPersonalMetadataFixture() {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.read"],
     },
@@ -53,7 +53,7 @@ function createPersonalMetadataFixture() {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const clients = new Set([client]);
   const metadata = { models: [], swarmEnabled: false };
   const readChatMetadata = vi.fn<GatewayRequestContext["readChatMetadata"]>(async () => metadata);
@@ -91,11 +91,11 @@ function createPersonalMetadataFixture() {
 
 describe("chat history model selection defaults", () => {
   it("keeps a stored literal global conversation separate from main in per-sender scope", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const cfg = {
         session: { scope: "per-sender" },
         agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await state.writeConfig(cfg);
       for (const agentId of ["ops", "research"]) {
         await upsertSessionEntryCore(
@@ -137,7 +137,7 @@ describe("chat history model selection defaults", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s keeps selection session-only for an agent with an explicit default",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const cfg = {
           agents: {
             defaults: { model: "openai/gpt-5.6-sol" },
@@ -147,7 +147,7 @@ describe("chat history model selection defaults", () => {
               work: { model: "anthropic/claude-sonnet-4-6" },
             },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await state.writeConfig(cfg);
         const scope = {
           agentId: "work",
@@ -184,7 +184,7 @@ describe("chat history sharing projection", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s carries current caller sharing controls on sessionInfo",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const scope = { agentId: "main", sessionKey: "agent:main:sharing-history" };
         await upsertSessionEntryCore(scope, {
           sessionId: "sharing-history",
@@ -227,7 +227,7 @@ describe("chat history sharing projection", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s refreshes sharing after startup work and rejects a replaced session",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const scope = { agentId: "main", sessionKey: "agent:main:sharing-history-race" };
         await upsertSessionEntryCore(scope, {
           sessionId: "sharing-history-race",
@@ -293,7 +293,7 @@ describe("chat history sharing projection", () => {
 
 describe("chat history consumption receipts", () => {
   it("projects pending input at its acceptance time", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const now = vi.spyOn(Date, "now").mockReturnValue(2_000);
       const scope = {
         agentId: "main",
@@ -348,7 +348,7 @@ describe("chat history consumption receipts", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s returns only requested current-session receipts in pages and empty deltas",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const scope = {
           agentId: "main",
           sessionKey: "agent:main:collected",
@@ -493,7 +493,7 @@ describe("chat history exact-entry snapshots", () => {
   it.each(["chat.history", "chat.startup"] as const)(
     "%s projects fresh owned session state without another preparation copy",
     async (method) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const now = Date.now();
         const scope = {
           agentId: "main",
@@ -588,7 +588,7 @@ describe("chat history exact-entry snapshots", () => {
 
 describe("chat metadata ownership", () => {
   it("previews a retained personal account with read scope without changing its cleared default", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async () => {
+    await withCarapaceTestState({ layout: "state-only" }, async () => {
       const { owner, authProfileId, metadata, readChatMetadata, request } =
         createPersonalMetadataFixture();
       clearUserProfileAuthLink({ profileId: owner.id, provider: "openai" });
@@ -620,7 +620,7 @@ describe("chat metadata ownership", () => {
   ] as const)(
     "rejects a personal draft preview from %s before projecting credentials",
     async (caller) => {
-      await withOpenClawTestState({ layout: "state-only" }, async () => {
+      await withCarapaceTestState({ layout: "state-only" }, async () => {
         const { owner, client, authProfileId, readChatMetadata, request } =
           createPersonalMetadataFixture();
         client.connect.scopes = ["operator.admin"];
@@ -657,7 +657,7 @@ describe("chat metadata ownership", () => {
   );
 
   it("rejects combining a personal draft preview with a persisted session selector", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async () => {
+    await withCarapaceTestState({ layout: "state-only" }, async () => {
       const { authProfileId, readChatMetadata, request } = createPersonalMetadataFixture();
       const respond = await request({
         agentId: "main",
@@ -677,7 +677,7 @@ describe("chat metadata ownership", () => {
   it.each(["disconnect", "role loss", "abort"] as const)(
     "rejects a personal draft preview after %s during the metadata read",
     async (loss) => {
-      await withOpenClawTestState({ layout: "state-only" }, async () => {
+      await withCarapaceTestState({ layout: "state-only" }, async () => {
         const { client, clients, authProfileId, config, metadata, readChatMetadata, request } =
           createPersonalMetadataFixture();
         const entered = createDeferred();
@@ -714,7 +714,7 @@ describe("chat metadata ownership", () => {
   );
 
   it("reads the persisted session profile without contaminating neutral agent metadata", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:locked";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },
@@ -775,7 +775,7 @@ describe("chat metadata ownership", () => {
   });
 
   it("returns a typed selection error for an ownerless explicit fleet", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: {
         ownership: "explicit",
         entries: { ops: {}, research: {} },

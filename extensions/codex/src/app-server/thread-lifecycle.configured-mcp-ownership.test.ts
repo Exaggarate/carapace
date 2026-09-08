@@ -47,7 +47,7 @@ describe("startOrResumeThread — configured MCP ownership", () => {
 
   beforeEach(() => {
     sharedClientMocks.retainByInstanceId = undefined;
-    tempDir = tempDirs.make("openclaw-configured-mcp-ownership-");
+    tempDir = tempDirs.make("carapace-configured-mcp-ownership-");
     resetCodexTestBindingStore();
   });
 

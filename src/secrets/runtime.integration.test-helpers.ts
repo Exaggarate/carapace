@@ -20,12 +20,12 @@ export const SECRETS_RUNTIME_INTEGRATION_TIMEOUT_MS = 300_000;
 /** Start an isolated secrets runtime integration test with bundled plugin env removed. */
 export function beginSecretsRuntimeIsolationForTest(): SecretsRuntimeEnvSnapshot {
   const envSnapshot = captureEnv([
-    "OPENCLAW_BUNDLED_PLUGINS_DIR",
-    "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-    "OPENCLAW_VERSION",
+    "CARAPACE_BUNDLED_PLUGINS_DIR",
+    "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+    "CARAPACE_VERSION",
   ]);
-  delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  delete process.env.OPENCLAW_VERSION;
+  delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+  delete process.env.CARAPACE_VERSION;
   return envSnapshot;
 }
 

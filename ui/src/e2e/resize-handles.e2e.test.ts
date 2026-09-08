@@ -69,7 +69,7 @@ async function waitForAnimations(locator: Locator) {
 }
 
 async function captureResizeState(page: Page, name: string) {
-  if (process.env.OPENCLAW_CAPTURE_UI_PROOF !== "1") {
+  if (process.env.CARAPACE_CAPTURE_UI_PROOF !== "1") {
     return;
   }
   const output = path.join(suite.artifactDir, "resize-handles");
@@ -92,12 +92,12 @@ suite.define(() => {
               additions: 0,
               deletions: 0,
               files: [],
-              root: "/tmp/openclaw",
+              root: "/tmp/carapace",
               sessionKey,
             },
           },
           sessionKey,
-          workspace: "/tmp/openclaw",
+          workspace: "/tmp/carapace",
           workspaceGit: true,
         });
         await page.goto(`${suite.server.baseUrl}chat`);

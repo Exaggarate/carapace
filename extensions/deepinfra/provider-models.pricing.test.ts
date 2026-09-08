@@ -1,10 +1,10 @@
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildDeepInfraProvider } from "./api.js";
 import { DEEPINFRA_MODEL_CATALOG, discoverDeepInfraModels } from "./provider-models.js";
 
 const DEEPINFRA_MODELS_URL =
-  "https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta";
+  "https://api.deepinfra.com/v1/openai/models?sort_by=carapace&filter=with_meta";
 const jsonResponse = Response.json.bind(Response);
 
 function makeAgentModelEntry({ id }: { id: string }) {

@@ -2,10 +2,10 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { makeTempDir, cleanupTempDirs } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   createSessionEntryWithTranscript,
   assignSessionOwner,
@@ -21,8 +21,8 @@ import { readTranscriptStorageRows } from "./session-accessor.sqlite-read.js";
 const tempDirs: string[] = [];
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
@@ -30,11 +30,11 @@ describe("session creation snapshot", () => {
   it.each([undefined, 3, 4, 99])(
     "preserves adopted history without selecting a new projection (header=%s)",
     async (version) => {
-      const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-history-") };
+      const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-history-") };
       const scope = { agentId: "main", env, sessionKey: "agent:main:target", sessionId: "target" };
       const entry = { sessionId: "target", updatedAt: 1 };
       replaceSessionEntrySync(scope, entry);
-      const database = openOpenClawAgentDatabase(scope);
+      const database = openCarapaceAgentDatabase(scope);
       let before: ReturnType<typeof readTranscriptStorageRows> = [];
       const result = await createSessionEntryWithTranscript(scope, async () => {
         await Promise.resolve();
@@ -59,7 +59,7 @@ describe("session creation snapshot", () => {
   );
 
   it("prepares and adopts a complete target without decoding sibling saved prompts", async () => {
-    const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-snapshot-") };
+    const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-snapshot-") };
     const scope = { agentId: "main", env, sessionKey: "agent:main:target" };
     const target = {
       sessionId: "target",
@@ -113,7 +113,7 @@ describe("session creation snapshot", () => {
   it.each([false, true])(
     "preserves normalized and opaque target identities (cold=%s)",
     async (cold) => {
-      const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-identities-") };
+      const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-identities-") };
       const scope = { agentId: "main", env };
       const key = "agent:main:matrix:group:!Room:example.org";
       const sibling = "agent:main:matrix:group:!room:example.org";
@@ -129,7 +129,7 @@ describe("session creation snapshot", () => {
         { sessionId: "sibling", updatedAt: 1, label: "taken" },
       );
       if (cold) {
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
       }
       const result = await createSessionEntryWithTranscript(
         { ...scope, sessionKey: "AGENT:MAIN:MATRIX:GROUP:!Room:example.org" },
@@ -149,7 +149,7 @@ describe("session creation snapshot", () => {
   it.each(["malformed", "mismatched-window", "mismatched-time", "nul"])(
     "preserves warm listing behavior for a %s target",
     async (kind) => {
-      const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-warm-rows-") };
+      const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-warm-rows-") };
       const scope = { agentId: "main", env, sessionKey: "agent:main:target" };
       const entry = {
         sessionId: "target",
@@ -163,7 +163,7 @@ describe("session creation snapshot", () => {
         { sessionId: "sibling", updatedAt: 1, label: "taken" },
       );
       listSessionEntriesCore(scope);
-      const db = openOpenClawAgentDatabase(scope).db;
+      const db = openCarapaceAgentDatabase(scope).db;
       if (kind === "malformed" || kind === "nul") {
         db.prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?").run(
           kind === "malformed" ? "{" : JSON.stringify(entry) + "\0trailing",
@@ -189,15 +189,15 @@ describe("session creation snapshot", () => {
         expect(context.isLabelInUse("taken")).toBe(true);
         return { ok: false, error: "inspection complete" };
       });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       await expect(
         createSessionEntryWithTranscript(scope, () => ({ ok: false, error: "unreachable" })),
-      ).rejects.toThrow("openclaw doctor --fix");
+      ).rejects.toThrow("carapace doctor --fix");
     },
   );
 
   it("keeps the target and sibling labels on one snapshot across an external commit and callback await", async () => {
-    const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-concurrent-snapshot-") };
+    const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-concurrent-snapshot-") };
     const scope = { agentId: "main", env, sessionKey: "agent:main:a-target" };
     const entry = {
       sessionId: "target",
@@ -208,7 +208,7 @@ describe("session creation snapshot", () => {
     replaceSessionEntrySync(scope, entry);
     replaceSessionEntrySync({ ...scope, sessionKey: "agent:main:z-sibling" }, sibling);
     listSessionEntriesCore(scope);
-    const external = new DatabaseSync(openOpenClawAgentDatabase(scope).path);
+    const external = new DatabaseSync(openCarapaceAgentDatabase(scope).path);
     const parse = JSON.parse;
     let changed = false;
     vi.spyOn(JSON, "parse").mockImplementation((value, ...rest) => {
@@ -243,7 +243,7 @@ describe("session creation snapshot", () => {
     expect(loadSessionEntry(scope)?.skillsSnapshot?.prompt).toBe("new target");
   });
   it("keeps selective full payloads detached from the metadata cache", () => {
-    const env = { OPENCLAW_STATE_DIR: makeTempDir(tempDirs, "creation-cache-") };
+    const env = { CARAPACE_STATE_DIR: makeTempDir(tempDirs, "creation-cache-") };
     const scope = { agentId: "main", env, sessionKey: "agent:main:target" };
     replaceSessionEntrySync(scope, {
       sessionId: "target",
@@ -251,7 +251,7 @@ describe("session creation snapshot", () => {
       label: "original",
       skillsSnapshot: { prompt: "saved target", skills: [] },
     });
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openCarapaceAgentDatabase(scope);
     const options = { cache: true, projection: "list" as const };
     readSessionEntryCache(database, options);
     const mixed = readSessionEntryCache(database, {

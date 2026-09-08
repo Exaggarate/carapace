@@ -20,7 +20,7 @@ const tempDirs: string[] = [];
 const scriptPath = "scripts/package-mac-dist.sh";
 
 function makeDistributionFixture(layout: "native" | "xcode", missingArch?: string) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-dist-symbols-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-dist-symbols-"));
   tempDirs.push(root);
   const scripts = path.join(root, "scripts");
   const tools = path.join(root, "tools");
@@ -42,14 +42,14 @@ function makeDistributionFixture(layout: "native" | "xcode", missingArch?: strin
   executable(path.join(tools, "swift"), "echo 'Apple Swift version 6.3'");
   executable(path.join(tools, "xcrun"), "echo 'Xcode 26.4'");
   executable(path.join(tools, "node"), "echo 2608000290");
-  const contents = path.join(root, "dist", "OpenClaw.app", "Contents");
+  const contents = path.join(root, "dist", "Carapace.app", "Contents");
   mkdirSync(contents, { recursive: true });
   writeFileSync(
     path.join(contents, "Info.plist"),
     `<plist version="1.0"><dict>
 <key>CFBundleShortVersionString</key><string>2026.8.2</string>
 <key>CFBundleVersion</key><string>2608000290</string>
-<key>CFBundleIdentifier</key><string>ai.openclaw.mac</string>
+<key>CFBundleIdentifier</key><string>ai.carapace.mac</string>
 <key>SUFeedURL</key><string>https://example.com/appcast.xml</string>
 </dict></plist>`,
   );
@@ -67,7 +67,7 @@ function makeDistributionFixture(layout: "native" | "xcode", missingArch?: strin
     if (arch === missingArch) {
       continue;
     }
-    const binary = path.join(products, "OpenClaw");
+    const binary = path.join(products, "Carapace");
     const symbols = `${binary}.dSYM`;
     for (const args of [
       ["clang", "-arch", arch, "-g", source, "-o", binary],
@@ -111,7 +111,7 @@ function makeDistributionFixture(layout: "native" | "xcode", missingArch?: strin
 }
 
 function makePlist(): string {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-dist-plist-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "carapace-dist-plist-"));
   tempDirs.push(dir);
   const plist = path.join(dir, "Info.plist");
   writeFileSync(
@@ -161,7 +161,7 @@ describe("package-mac-dist plist validation", () => {
     const script = readFileSync(scriptPath, "utf8");
     const readBlock = script.slice(
       script.indexOf("VERSION="),
-      script.indexOf('ZIP="$ROOT_DIR/dist/OpenClaw-$VERSION.zip"'),
+      script.indexOf('ZIP="$ROOT_DIR/dist/Carapace-$VERSION.zip"'),
     );
 
     expect(script).toContain('source "$ROOT_DIR/scripts/lib/plistbuddy.sh"');
@@ -195,7 +195,7 @@ describe("package-mac-dist plist validation", () => {
 
   it("marks the distributed Control UI as an official release artifact", () => {
     const script = readFileSync(scriptPath, "utf8");
-    const releaseMarkerIndex = script.indexOf("export OPENCLAW_CONTROL_UI_RELEASE_BUILD=1");
+    const releaseMarkerIndex = script.indexOf("export CARAPACE_CONTROL_UI_RELEASE_BUILD=1");
     const packageAppIndex = script.indexOf('"$ROOT_DIR/scripts/package-mac-app.sh"');
 
     expect(releaseMarkerIndex).toBeGreaterThanOrEqual(0);
@@ -243,7 +243,7 @@ describe("package-mac-dist plist validation", () => {
   });
 
   it("fails on old Swift before reading package metadata", () => {
-    const toolsDir = mkdtempSync(path.join(tmpdir(), "openclaw-dist-swift-tools-"));
+    const toolsDir = mkdtempSync(path.join(tmpdir(), "carapace-dist-swift-tools-"));
     tempDirs.push(toolsDir);
 
     writeFileSync(
@@ -286,16 +286,16 @@ describe("package-mac-dist plist validation", () => {
     `);
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("OpenClaw macOS app packaging requires Swift tools 6.3+");
+    expect(result.stderr).toContain("Carapace macOS app packaging requires Swift tools 6.3+");
     expect(result.stderr).toContain("Current Swift is 6.0");
     expect(result.stderr).not.toContain("node should not run before Swift preflight");
   });
 
   it("prefers repo Corepack pnpm over a global pnpm shim", () => {
     const helperBlock = getPackageManagerHelperBlock();
-    const tempRoot = mkdtempSync(path.join(tmpdir(), "openclaw-dist-pnpm-root-"));
-    const outerRoot = mkdtempSync(path.join(tmpdir(), "openclaw-dist-pnpm-outer-"));
-    const toolsDir = mkdtempSync(path.join(tmpdir(), "openclaw-dist-pnpm-tools-"));
+    const tempRoot = mkdtempSync(path.join(tmpdir(), "carapace-dist-pnpm-root-"));
+    const outerRoot = mkdtempSync(path.join(tmpdir(), "carapace-dist-pnpm-outer-"));
+    const toolsDir = mkdtempSync(path.join(tmpdir(), "carapace-dist-pnpm-tools-"));
     const logPath = path.join(tempRoot, "pnpm.log");
     tempDirs.push(tempRoot, outerRoot, toolsDir);
 
@@ -312,7 +312,7 @@ describe("package-mac-dist plist validation", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'printf "global|%s|%s\\n" "$PWD" "$*" >> "$OPENCLAW_TEST_LOG"',
+        'printf "global|%s|%s\\n" "$PWD" "$*" >> "$CARAPACE_TEST_LOG"',
         'if [[ "${1:-}" == "--version" ]]; then echo "11.8.0"; fi',
         "",
       ].join("\n"),
@@ -323,7 +323,7 @@ describe("package-mac-dist plist validation", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'printf "corepack|%s|%s\\n" "$PWD" "$*" >> "$OPENCLAW_TEST_LOG"',
+        'printf "corepack|%s|%s\\n" "$PWD" "$*" >> "$CARAPACE_TEST_LOG"',
         'if [[ "${1:-}" == "pnpm" && "${2:-}" == "--version" ]]; then',
         '  if grep -q "pnpm@11.2.2" package.json 2>/dev/null; then echo "11.2.2"; else echo "11.8.0"; fi',
         "fi",
@@ -337,8 +337,8 @@ describe("package-mac-dist plist validation", () => {
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(tempRoot)}
-      OPENCLAW_TEST_LOG=${JSON.stringify(logPath)}
-      export OPENCLAW_TEST_LOG
+      CARAPACE_TEST_LOG=${JSON.stringify(logPath)}
+      export CARAPACE_TEST_LOG
       PATH=${JSON.stringify(`${toolsDir}:/usr/bin:/bin`)}
       cd ${JSON.stringify(outerRoot)}
       ${helperBlock}
@@ -359,7 +359,7 @@ describe("package-mac-dist plist validation", () => {
       script.indexOf("DIST_PNPM_CMD=()"),
       script.indexOf("correction_build_from_exact_tag()"),
     );
-    const dir = mkdtempSync(path.join(tmpdir(), "openclaw-dist-sparkle-"));
+    const dir = mkdtempSync(path.join(tmpdir(), "carapace-dist-sparkle-"));
     tempDirs.push(dir);
     const tools = path.join(dir, "tools");
     const marker = path.join(dir, "installed");
@@ -372,11 +372,11 @@ describe("package-mac-dist plist validation", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'if [[ "$PWD" != "$OPENCLAW_ROOT" ]]; then',
+        'if [[ "$PWD" != "$CARAPACE_ROOT" ]]; then',
         '  echo "node ran outside repo root: $PWD" >&2',
         "  exit 1",
         "fi",
-        'if [[ ! -f "$OPENCLAW_MARKER" ]]; then',
+        'if [[ ! -f "$CARAPACE_MARKER" ]]; then',
         '  echo "Cannot find package tsx" >&2',
         "  exit 1",
         "fi",
@@ -393,7 +393,7 @@ describe("package-mac-dist plist validation", () => {
         "#!/usr/bin/env bash",
         "set -euo pipefail",
         "echo 'Already up to date'",
-        'touch "$OPENCLAW_MARKER"',
+        'touch "$CARAPACE_MARKER"',
         "",
       ].join("\n"),
       "utf8",
@@ -403,10 +403,10 @@ describe("package-mac-dist plist validation", () => {
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(process.cwd())}
-      OPENCLAW_ROOT=${JSON.stringify(process.cwd())}
-      OPENCLAW_MARKER=${JSON.stringify(marker)}
+      CARAPACE_ROOT=${JSON.stringify(process.cwd())}
+      CARAPACE_MARKER=${JSON.stringify(marker)}
       PATH=${JSON.stringify(tools)}:/usr/bin:/bin
-      export OPENCLAW_MARKER OPENCLAW_ROOT PATH
+      export CARAPACE_MARKER CARAPACE_ROOT PATH
       ${helpers}
       require_canonical_sparkle_build 2026.6.2
     `);
@@ -424,7 +424,7 @@ describe("package-mac-dist plist validation", () => {
       script.indexOf("DIST_PNPM_CMD=()"),
       script.indexOf("correction_build_from_exact_tag()"),
     );
-    const dir = mkdtempSync(path.join(tmpdir(), "openclaw-dist-sparkle-"));
+    const dir = mkdtempSync(path.join(tmpdir(), "carapace-dist-sparkle-"));
     tempDirs.push(dir);
     const tools = path.join(dir, "tools");
     const marker = path.join(dir, "installed");
@@ -437,11 +437,11 @@ describe("package-mac-dist plist validation", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'if [[ "$PWD" != "$OPENCLAW_ROOT" ]]; then',
+        'if [[ "$PWD" != "$CARAPACE_ROOT" ]]; then',
         '  echo "node ran outside repo root: $PWD" >&2',
         "  exit 1",
         "fi",
-        'if [[ ! -f "$OPENCLAW_MARKER" ]]; then',
+        'if [[ ! -f "$CARAPACE_MARKER" ]]; then',
         '  echo "Cannot find package tsx" >&2',
         "  exit 1",
         "fi",
@@ -457,7 +457,7 @@ describe("package-mac-dist plist validation", () => {
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
-        'touch "$OPENCLAW_MARKER"',
+        'touch "$CARAPACE_MARKER"',
         'echo "pnpm failed" >&2',
         "exit 42",
         "",
@@ -469,10 +469,10 @@ describe("package-mac-dist plist validation", () => {
     const result = runHelper(`
       set -euo pipefail
       ROOT_DIR=${JSON.stringify(process.cwd())}
-      OPENCLAW_ROOT=${JSON.stringify(process.cwd())}
-      OPENCLAW_MARKER=${JSON.stringify(marker)}
+      CARAPACE_ROOT=${JSON.stringify(process.cwd())}
+      CARAPACE_MARKER=${JSON.stringify(marker)}
       PATH=${JSON.stringify(tools)}:/usr/bin:/bin
-      export OPENCLAW_MARKER OPENCLAW_ROOT PATH
+      export CARAPACE_MARKER CARAPACE_ROOT PATH
       ${helpers}
       require_canonical_sparkle_build 2026.6.2
     `);
@@ -487,19 +487,19 @@ describe("package-mac-dist plist validation", () => {
     "resumes without build products and allows the next fresh package after success",
     () => {
       const fixture = makeDistributionFixture("native");
-      const app = path.join(fixture.root, "dist/OpenClaw.app");
+      const app = path.join(fixture.root, "dist/Carapace.app");
       const plist = path.join(app, "Contents/Info.plist");
       writeFileSync(
         plist,
         readFileSync(plist, "utf8").replace(
           "</dict>",
-          "<key>CFBundleExecutable</key><string>OpenClaw</string></dict>",
+          "<key>CFBundleExecutable</key><string>Carapace</string></dict>",
         ),
       );
       mkdirSync(path.join(app, "Contents/MacOS"));
       copyFileSync(
-        path.join(fixture.root, "apps/macos/.build/arm64/release/OpenClaw"),
-        path.join(app, "Contents/MacOS/OpenClaw"),
+        path.join(fixture.root, "apps/macos/.build/arm64/release/Carapace"),
+        path.join(app, "Contents/MacOS/Carapace"),
       );
       const signed = spawnSync("/usr/bin/codesign", ["--force", "--sign", "-", app], {
         encoding: "utf8",
@@ -561,8 +561,8 @@ fi
       const resumed = fixture.run({ resume: true, notarize: true });
       expect(resumed.status, resumed.stderr).toBe(0);
       expect(readFileSync(path.join(fixture.root, "submissions"), "utf8")).toBe("submit\n");
-      expect(existsSync(path.join(fixture.root, "dist/OpenClaw-2026.8.2.zip"))).toBe(true);
-      expect(existsSync(path.join(fixture.root, "dist/OpenClaw-2026.8.2.dSYM.zip"))).toBe(true);
+      expect(existsSync(path.join(fixture.root, "dist/Carapace-2026.8.2.zip"))).toBe(true);
+      expect(existsSync(path.join(fixture.root, "dist/Carapace-2026.8.2.dSYM.zip"))).toBe(true);
       renameSync(path.join(fixture.root, "saved-build-products"), path.join(fixture.root, "apps"));
       writeFileSync(
         path.join(fixture.root, "scripts/package-mac-app.sh"),
@@ -625,13 +625,13 @@ describe.runIf(process.platform === "darwin")("package-mac-dist symbol archives"
       const fixture = makeDistributionFixture(layout);
       const result = fixture.run();
       expect(result.status, result.stderr).toBe(0);
-      const archive = path.join(fixture.root, "dist", "OpenClaw-2026.8.2.dSYM.zip");
+      const archive = path.join(fixture.root, "dist", "Carapace-2026.8.2.dSYM.zip");
       const extracted = path.join(fixture.root, "extracted");
       const unpack = spawnSync("ditto", ["-x", "-k", archive, extracted], { encoding: "utf8" });
       expect(unpack.status, unpack.stderr).toBe(0);
       const uuid = spawnSync(
         "xcrun",
-        ["dwarfdump", "--uuid", path.join(extracted, "OpenClaw.dSYM")],
+        ["dwarfdump", "--uuid", path.join(extracted, "Carapace.dSYM")],
         { encoding: "utf8" },
       );
       expect(uuid.status, uuid.stderr).toBe(0);
@@ -642,7 +642,7 @@ describe.runIf(process.platform === "darwin")("package-mac-dist symbol archives"
           .map((line) => line.split(" ").slice(0, 3).join(" "))
           .sort(),
       ).toEqual(fixture.expectedUUIDs.sort());
-      expect(existsSync(path.join(fixture.root, "dist", "OpenClaw.dSYM"))).toBe(false);
+      expect(existsSync(path.join(fixture.root, "dist", "Carapace.dSYM"))).toBe(false);
     },
   );
 
@@ -651,6 +651,6 @@ describe.runIf(process.platform === "darwin")("package-mac-dist symbol archives"
     const result = fixture.run();
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("dSYM not found for architecture(s): x86_64");
-    expect(existsSync(path.join(fixture.root, "dist", "OpenClaw-2026.8.2.dSYM.zip"))).toBe(false);
+    expect(existsSync(path.join(fixture.root, "dist", "Carapace-2026.8.2.dSYM.zip"))).toBe(false);
   });
 });

@@ -7,8 +7,8 @@ import {
 
 describe("sessions.create schema", () => {
   it.each([
-    { url: "https://github.com/openclaw/openclaw.git" },
-    { url: "https://github.com/openclaw/openclaw.git", ref: "release/next" },
+    { url: "https://github.com/Exaggarate/carapace.git" },
+    { url: "https://github.com/Exaggarate/carapace.git", ref: "release/next" },
   ])("accepts a repository source without a Gateway checkout: %j", (repository) => {
     expect(validateSessionsCreateParams({ agentId: "main", repository })).toBe(true);
   });
@@ -16,9 +16,9 @@ describe("sessions.create schema", () => {
   it.each([
     { url: "" },
     { url: "x".repeat(2049) },
-    { url: "https://github.com/openclaw/openclaw.git", ref: "" },
-    { url: "https://github.com/openclaw/openclaw.git", ref: "x".repeat(1025) },
-    { url: "https://github.com/openclaw/openclaw.git", path: "/gateway/repo" },
+    { url: "https://github.com/Exaggarate/carapace.git", ref: "" },
+    { url: "https://github.com/Exaggarate/carapace.git", ref: "x".repeat(1025) },
+    { url: "https://github.com/Exaggarate/carapace.git", path: "/gateway/repo" },
   ])("rejects malformed repository source %#", (repository) => {
     expect(validateSessionsCreateParams({ agentId: "main", repository })).toBe(false);
   });

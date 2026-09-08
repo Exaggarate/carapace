@@ -90,10 +90,10 @@ function hasAuditedLifecycleScripts(manifest, relativePath) {
 
 function normalizeManifest(manifest) {
   const normalized = { ...manifest };
-  // Pnpm ignores OpenClaw's package metadata, and the audited install hooks do
+  // Pnpm ignores Carapace's package metadata, and the audited install hooks do
   // not read it. Runtime schema/publication metadata must not relink the whole
   // workspace or hold canonical main fanout behind a cold dependency rebuild.
-  delete normalized.openclaw;
+  delete normalized.carapace;
   if (
     manifest.scripts &&
     typeof manifest.scripts === "object" &&

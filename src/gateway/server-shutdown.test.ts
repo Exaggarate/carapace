@@ -32,7 +32,7 @@ describe("gateway shutdown steps", () => {
   it.each([false, true])(
     "reports a held step before it settles without changing order (trace=%s)",
     async (trace) => {
-      vi.stubEnv("OPENCLAW_GATEWAY_RESTART_TRACE", trace ? "1" : "0");
+      vi.stubEnv("CARAPACE_GATEWAY_RESTART_TRACE", trace ? "1" : "0");
       startGatewayRestartTrace("stop.signal.received");
       const entered = createDeferredCore();
       const released = createDeferredCore();
@@ -125,7 +125,7 @@ describe("gateway shutdown steps", () => {
   );
 
   it("names an unavailable module step and continues the remaining shutdown", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_RESTART_TRACE", "1");
+    vi.stubEnv("CARAPACE_GATEWAY_RESTART_TRACE", "1");
     startGatewayRestartTrace("stop.signal.received");
     const missingModule = Object.assign(new Error("Cannot find module 'rotated-chunk.js'"), {
       code: "ERR_MODULE_NOT_FOUND",

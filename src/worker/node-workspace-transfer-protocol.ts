@@ -7,7 +7,7 @@ export const NODE_WORKSPACE_EMPTY_MANIFEST = JSON.stringify({
 });
 export const NODE_WORKSPACE_EMPTY_MANIFEST_REF = `sha256:${createHash("sha256").update(NODE_WORKSPACE_EMPTY_MANIFEST).digest("hex")}`;
 
-export const NODE_WORKSPACE_TRANSFER_PATH = "/__openclaw__/worker-transfer/v1";
+export const NODE_WORKSPACE_TRANSFER_PATH = "/__carapace__/worker-transfer/v1";
 export const NODE_WORKSPACE_TRANSFER_ERROR_CODE = "WORKSPACE_TRANSFER_FAILED";
 
 const NODE_WORKSPACE_TRANSFER_INVALID_REASONS = [

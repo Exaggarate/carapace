@@ -1,11 +1,11 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import {
   appendTranscriptEvent,
   loadSessionEntryReadOnly,
   resolveSessionTranscriptRuntimeTarget,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildHostChannelInboundEventContext } from "./inbound-event/context.js";
 import { createChannelInboundEnvelopeBuilder } from "./inbound-event/envelope.js";
 import { dispatchRoutedChannelTurn } from "./turn/lifecycle.js";
@@ -16,7 +16,7 @@ const MAX_COOLDOWN_ENTRIES = 500;
 const lastReflectionBySession = new Map<string, number>();
 
 export async function recordChannelFeedbackEvent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
   event: Parameters<typeof appendTranscriptEvent>[1];
@@ -100,7 +100,7 @@ function parseReflectionResponse(text: string) {
 }
 
 export async function runChannelFeedbackReflection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   channelLabel: string;
   accountId?: string;

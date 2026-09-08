@@ -3,11 +3,11 @@ import type { RequestConfig } from "@microsoft/teams.common";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 
-const PRIVATE_QA_BUILD_ENV = "OPENCLAW_BUILD_PRIVATE_QA";
-const PRIVATE_QA_NONCE_HEADER = "x-openclaw-msteams-qa-nonce";
-const PRIVATE_QA_RUNTIME_SYMBOL = Symbol.for("openclaw.msteams.privateQaRuntime");
+const PRIVATE_QA_BUILD_ENV = "CARAPACE_BUILD_PRIVATE_QA";
+const PRIVATE_QA_NONCE_HEADER = "x-carapace-msteams-qa-nonce";
+const PRIVATE_QA_RUNTIME_SYMBOL = Symbol.for("carapace.msteams.privateQaRuntime");
 
 type PrivateQaEnv = Partial<Record<typeof PRIVATE_QA_BUILD_ENV, string>>;
 
@@ -138,7 +138,7 @@ export function resolveMSTeamsPrivateQaRuntime(
     return undefined;
   }
   if (env[PRIVATE_QA_BUILD_ENV] !== "1") {
-    throw new Error("Microsoft Teams private QA runtime requires OPENCLAW_BUILD_PRIVATE_QA=1");
+    throw new Error("Microsoft Teams private QA runtime requires CARAPACE_BUILD_PRIVATE_QA=1");
   }
   const connectorUrl = bootstrap.connectorUrl?.trim();
   const nonce = bootstrap.nonce?.trim();

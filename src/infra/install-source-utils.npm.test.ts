@@ -18,14 +18,14 @@ describe("npm archive output ownership", () => {
     { source: "npmrc", setting: "pack-destination" },
     { source: "npmrc", setting: "dry-run" },
   ])("packs into its workspace despite $source $setting", async ({ source, setting }) => {
-    const root = await fs.realpath(await tempDirs.make("openclaw-npm-output-"));
+    const root = await fs.realpath(await tempDirs.make("carapace-npm-output-"));
     const packageDir = path.join(root, "source");
     const workspace = path.join(root, "workspace");
     const unrelatedDestination = path.join(root, "unrelated");
     await Promise.all([packageDir, workspace, unrelatedDestination].map((dir) => fs.mkdir(dir)));
     await fs.writeFile(
       path.join(packageDir, "package.json"),
-      JSON.stringify({ name: "openclaw-output-fixture", version: "1.0.0" }),
+      JSON.stringify({ name: "carapace-output-fixture", version: "1.0.0" }),
     );
     const value = setting === "pack-destination" ? unrelatedDestination : "true";
     const userConfig = path.join(root, "user.npmrc");
@@ -51,10 +51,10 @@ describe("npm archive output ownership", () => {
 
     expect(result).toMatchObject({
       ok: true,
-      archivePath: path.join(workspace, "openclaw-output-fixture-1.0.0.tgz"),
-      metadata: { name: "openclaw-output-fixture", version: "1.0.0" },
+      archivePath: path.join(workspace, "carapace-output-fixture-1.0.0.tgz"),
+      metadata: { name: "carapace-output-fixture", version: "1.0.0" },
     });
-    expect(await fs.readdir(workspace)).toEqual(["openclaw-output-fixture-1.0.0.tgz"]);
+    expect(await fs.readdir(workspace)).toEqual(["carapace-output-fixture-1.0.0.tgz"]);
     expect(await fs.readdir(unrelatedDestination)).toEqual([]);
   });
 });

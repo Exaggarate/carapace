@@ -1,13 +1,13 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type {
   ChannelMessageActionContext,
   ChannelPlugin,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../../utils/message-channel.js";
@@ -83,7 +83,7 @@ describe("runMessageAction plugin dispatch", () => {
       const cfg = {
         channels: { actionhub: { enabled: true } },
         tools: { message: { crossContext: { allowWithinProvider: false } } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const toolContext = {
         currentChannelProvider: "actionhub" as const,
         currentChannelId: "oc_current",
@@ -131,7 +131,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "edit",
         params: {
           channel: "actionhub",
@@ -167,7 +167,7 @@ describe("runMessageAction plugin dispatch", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       await expect(
         runMessageAction({
@@ -243,7 +243,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "channel-info",
         params: {
           channel: "actionhub",
@@ -279,7 +279,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "pin",
         params: {
           channel: "actionhub",
@@ -315,7 +315,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "pin",
         params: {
           channel: "actionhub",
@@ -374,7 +374,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "pin",
         params: {
           channel: "actionhub",
@@ -446,7 +446,7 @@ describe("runMessageAction plugin dispatch", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       setTestPlugin(discordPlugin, "discord", "bundled");
 
@@ -548,7 +548,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "react",
         params: {
           channel: "gatewaychat",

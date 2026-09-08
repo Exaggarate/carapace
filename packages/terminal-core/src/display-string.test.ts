@@ -5,10 +5,10 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDisplayStringFormatter } from "./display-string.js";
 
-function stubHome(home: string, openclawHome = ""): void {
+function stubHome(home: string, carapaceHome = ""): void {
   vi.stubEnv("HOME", home);
   vi.stubEnv("USERPROFILE", "");
-  vi.stubEnv("OPENCLAW_HOME", openclawHome);
+  vi.stubEnv("CARAPACE_HOME", carapaceHome);
 }
 
 describe("createDisplayStringFormatter", () => {
@@ -38,31 +38,31 @@ describe("createDisplayStringFormatter", () => {
     expect(displayString(`/tmp${home}/project`)).toBe(`/tmp${home}/project`);
   });
 
-  it("uses OPENCLAW_HOME as the display prefix", () => {
+  it("uses CARAPACE_HOME as the display prefix", () => {
     const home = path.resolve("test-home", "alice");
-    const openclawHome = path.resolve("test-openclaw-home");
-    stubHome(home, openclawHome);
+    const carapaceHome = path.resolve("test-carapace-home");
+    stubHome(home, carapaceHome);
     const displayString = createDisplayStringFormatter();
 
-    expect(displayString(openclawHome)).toBe("$OPENCLAW_HOME");
-    expect(displayString(`${openclawHome}/state`)).toBe("$OPENCLAW_HOME/state");
-    expect(displayString(`${openclawHome}2/state`)).toBe(`${openclawHome}2/state`);
+    expect(displayString(carapaceHome)).toBe("$CARAPACE_HOME");
+    expect(displayString(`${carapaceHome}/state`)).toBe("$CARAPACE_HOME/state");
+    expect(displayString(`${carapaceHome}2/state`)).toBe(`${carapaceHome}2/state`);
   });
 
-  it.each(["$&", "$`", "$'", "$$"])("keeps %s literal when expanding OPENCLAW_HOME", (pattern) => {
+  it.each(["$&", "$`", "$'", "$$"])("keeps %s literal when expanding CARAPACE_HOME", (pattern) => {
     const home = path.resolve("test-home", `${pattern}user`);
     stubHome(home, "~/state");
     const displayString = createDisplayStringFormatter();
 
     expect(displayString(path.join(home, "state", "project"))).toBe(
-      `$OPENCLAW_HOME${path.sep}project`,
+      `$CARAPACE_HOME${path.sep}project`,
     );
   });
 
   it.skipIf(process.platform !== "win32")(
     "shortens real Windows home casing aliases inside table display text",
     () => {
-      const home = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-home-display-"));
+      const home = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-home-display-"));
       try {
         const homeAlias = home.toUpperCase();
         expect(fs.statSync(homeAlias).isDirectory()).toBe(true);

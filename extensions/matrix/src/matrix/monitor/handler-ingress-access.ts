@@ -1,5 +1,5 @@
-import type { ChannelBotLoopProtectionFacts } from "openclaw/plugin-sdk/channel-inbound";
-import { mergePairLoopGuardConfig } from "openclaw/plugin-sdk/pair-loop-guard-runtime";
+import type { ChannelBotLoopProtectionFacts } from "carapace/plugin-sdk/channel-inbound";
+import { mergePairLoopGuardConfig } from "carapace/plugin-sdk/pair-loop-guard-runtime";
 import { resolveMatrixThreadRootId } from "../relations.js";
 import { resolveMatrixMonitorAccessState } from "./access-state.js";
 import { resolveMatrixAllowBotsMode } from "./handler-helpers.js";

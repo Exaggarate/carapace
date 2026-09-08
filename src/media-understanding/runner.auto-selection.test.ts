@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { buildMediaUnderstandingRegistry } from "./provider-registry.js";
 import { resolveAutoImageModel, runCapability } from "./runner.js";
 import { clearMediaUnderstandingBinaryCacheForTests } from "./runner.test-support.js";
@@ -71,7 +71,7 @@ describe("automatic media selection", () => {
         describeVideo: async ({ model }) => ({ text: "video", model }),
       });
       const activeModel = { provider: " GEMINI ", model: "before-auth" };
-      const cfg: OpenClawConfig = {};
+      const cfg: CarapaceConfig = {};
       let outcome: { provider?: string; model?: string } | null = null;
       if (scenario.capability === "image") {
         const pending = resolveAutoImageModel({ cfg, activeModel });

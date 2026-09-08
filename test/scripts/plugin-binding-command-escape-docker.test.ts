@@ -26,7 +26,7 @@ class ParserExit extends Error {
 }
 
 function runParser(log: string, options: { maxReadBytes?: number } = {}) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-plugin-binding-log-proof-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-plugin-binding-log-proof-"));
   const logPath = join(root, "vitest.log");
   const errors: string[] = [];
   const readSizes: number[] = [];

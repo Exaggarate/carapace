@@ -1,6 +1,6 @@
 /** Loads manifest and installed-index contributions used to build plugin registry snapshots. */
-import { normalizeSortedUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeSortedUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   normalizePluginsConfigWithResolverCore,
   type NormalizedPluginsConfig,
@@ -192,7 +192,7 @@ export function loadPluginManifestRegistryForPluginRegistry(
 }
 
 export function normalizePluginsConfigWithRegistry(
-  config: OpenClawConfig["plugins"] | undefined,
+  config: CarapaceConfig["plugins"] | undefined,
   index: PluginRegistrySnapshot,
   options: PluginRegistryIdNormalizerOptions = {},
 ): NormalizedPluginsConfig {

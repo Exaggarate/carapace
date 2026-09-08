@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 function runBackupCli(params: {
   env: NodeJS.ProcessEnv;
@@ -46,7 +46,7 @@ function runBackupCli(params: {
 
 describe("backup create CLI", () => {
   it("completes when the SQLite snapshot outlives the audit lease", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "backup-cli-audit-lease-", scenario: "minimal" },
       async (state) => {
         await state.writeConfig({ gateway: { mode: "local" } });
@@ -56,7 +56,7 @@ describe("backup create CLI", () => {
             ts: "2026-09-03T00:00:00.000Z",
             source: "config-io",
             event: "config.write",
-            argv: ["openclaw", "config", "set", "proof", "lease"],
+            argv: ["carapace", "config", "set", "proof", "lease"],
             execArgv: [],
           })}\n`,
         );
@@ -87,7 +87,7 @@ describe("backup create CLI", () => {
           env: {
             ...process.env,
             ...state.env,
-            OPENCLAW_TEST_CONSOLE: "1",
+            CARAPACE_TEST_CONSOLE: "1",
             PROOF_SNAPSHOT_MARKER: markerPath,
           },
           outputPath,

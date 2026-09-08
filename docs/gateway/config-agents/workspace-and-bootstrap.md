@@ -11,15 +11,15 @@ title: "Configuration — agent workspace and bootstrap"
 
 ## `agents.defaults.workspace`
 
-Default: `OPENCLAW_WORKSPACE_DIR` when set, otherwise `<state-dir>/workspace`. This is `~/.openclaw/workspace` for the default install and `~/.openclaw-<profile>/workspace` for a named profile. A custom `OPENCLAW_STATE_DIR` keeps the workspace under that state directory.
+Default: `CARAPACE_WORKSPACE_DIR` when set, otherwise `<state-dir>/workspace`. This is `~/.carapace/workspace` for the default install and `~/.carapace-<profile>/workspace` for a named profile. A custom `CARAPACE_STATE_DIR` keeps the workspace under that state directory.
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
+  agents: { defaults: { workspace: "~/.carapace/workspace" } },
 }
 ```
 
-An explicit `agents.defaults.workspace` value takes precedence over `OPENCLAW_WORKSPACE_DIR`. A sole agent uses this path directly. In a multi-agent fleet, agents without their own `workspace` use an agent-id subdirectory so no implicit owner claims the shared root.
+An explicit `agents.defaults.workspace` value takes precedence over `CARAPACE_WORKSPACE_DIR`. A sole agent uses this path directly. In a multi-agent fleet, agents without their own `workspace` use an agent-id subdirectory so no implicit owner claims the shared root.
 
 ## `agents.defaults.cwd`
 
@@ -30,7 +30,7 @@ in the managed agent workspace.
 ```json5
 {
   agents: {
-    defaults: { workspace: "~/.openclaw/workspace" },
+    defaults: { workspace: "~/.carapace/workspace" },
     entries: { coder: { cwd: "~/path/to/app", sandbox: { mode: "off" } } },
   },
 }
@@ -45,11 +45,11 @@ identifies their separate roles so deliverables stay in the working directory.
 
 ## `agents.defaults.repoRoot`
 
-Optional repository root shown in the system prompt's Runtime line. If unset, OpenClaw auto-detects by walking upward from the workspace.
+Optional repository root shown in the system prompt's Runtime line. If unset, Carapace auto-detects by walking upward from the workspace.
 
 ```json5
 {
-  agents: { defaults: { repoRoot: "~/path/to/openclaw" } },
+  agents: { defaults: { repoRoot: "~/path/to/carapace" } },
 }
 ```
 
@@ -171,7 +171,7 @@ injection behavior from the shared defaults. Omitted fields inherit from
 
 ## Bootstrap truncation notice
 
-When bootstrap context is truncated, OpenClaw always injects a concise
+When bootstrap context is truncated, Carapace always injects a concise
 agent-visible notice into the system prompt saying some bootstrap files were
 truncated and to read the affected files directly. This notice is built in
 and not configurable, and it deliberately omits per-file diagnostics: file
@@ -180,7 +180,7 @@ context/status reports and logs.
 
 ## Context budget ownership map
 
-OpenClaw has multiple high-volume prompt/context budgets, and they are
+Carapace has multiple high-volume prompt/context budgets, and they are
 intentionally split by subsystem instead of all flowing through one generic
 knob.
 
@@ -241,7 +241,7 @@ Shared defaults for bounded runtime context surfaces.
 
 - `memoryGetMaxChars`: default `memory_get` excerpt cap before truncation
   metadata and continuation notice are added.
-- When `memory_get` omits `lines`, OpenClaw uses a built-in 120-line window and
+- When `memory_get` omits `lines`, Carapace uses a built-in 120-line window and
   then applies `memoryGetMaxChars`.
 - Live tool results use a model-context auto cap: `16000` chars below 100K
   tokens, `32000` chars at 100K+ tokens, and `64000` chars at 200K+ tokens.
@@ -314,7 +314,7 @@ Higher values preserve more visual detail.
 Image-tool compression/detail preference for images loaded from file paths, URLs, and media references.
 Default: `auto`.
 
-OpenClaw adapts the resize ladder to the selected image model. For example, Claude Opus 4.8, OpenAI GPT-5.6 Sol, Qwen VL, and hosted Llama 4 vision models can use larger images than older/default high-detail vision paths, while multi-image turns are compressed more aggressively in `auto` mode to control token and latency cost.
+Carapace adapts the resize ladder to the selected image model. For example, Claude Opus 4.8, OpenAI GPT-5.6 Sol, Qwen VL, and hosted Llama 4 vision models can use larger images than older/default high-detail vision paths, while multi-image turns are compressed more aggressively in `auto` mode to control token and latency cost.
 
 Values:
 

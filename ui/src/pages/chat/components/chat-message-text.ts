@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { html } from "lit";
 import { ref } from "lit/directives/ref.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -77,7 +77,7 @@ export function resolveMessageDisplayMarkdown(
   message: unknown,
   normalizedMessage: NormalizedMessage,
 ): string {
-  const metadata = asNullableRecord(asNullableRecord(message)?.["__openclaw"]);
+  const metadata = asNullableRecord(asNullableRecord(message)?.["__carapace"]);
   if (metadata?.truncated === true && metadata.reason === "oversized") {
     return t("chat.messages.tooLargeToDisplay");
   }

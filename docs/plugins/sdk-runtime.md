@@ -26,7 +26,7 @@ register(api) {
 }
 ```
 
-`api.runtime.version` is the current OpenClaw product version, sourced from the shared version resolver so plugins see the same value the CLI reports.
+`api.runtime.version` is the current Carapace product version, sourced from the shared version resolver so plugins see the same value the CLI reports.
 
 ## What each page covers
 
@@ -77,8 +77,8 @@ Use `createPluginRuntimeStore` to store the runtime reference for use outside th
 <Steps>
   <Step title="Create the store">
     ```typescript
-    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-    import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+    import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
+    import type { PluginRuntime } from "carapace/plugin-sdk/runtime-store";
 
     const store = createPluginRuntimeStore<PluginRuntime>({
       pluginId: "my-plugin",
@@ -126,7 +126,7 @@ Beyond `api.runtime`, the API object also provides:
 <ParamField path="api.name" type="string">
   Plugin display name.
 </ParamField>
-<ParamField path="api.config" type="OpenClawConfig">
+<ParamField path="api.config" type="CarapaceConfig">
   Current config snapshot (active in-memory runtime snapshot when available).
 </ParamField>
 <ParamField path="api.pluginConfig" type="Record<string, unknown>">

@@ -7,7 +7,7 @@ import type {
   TextContent,
   ToolResultMessage,
   UserMessage,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import {
   PROVIDER_CONTEXT_HANDOFF,

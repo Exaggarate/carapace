@@ -1,13 +1,13 @@
 // Gateway node event tests protect how node clients surface inbound commands,
 // delivery metadata, pairing state, and outbound payload lifecycle events.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { PROTOCOL_VERSION } from "../../packages/gateway-protocol/src/index.js";
 import { createDeferred } from "../../test/helpers/promise.js";
 import type { DurableMessageBatchSendResult } from "../channels/message/runtime.js";
 import { createOutboundSendDeps } from "../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { getCurrentActiveNodeContext, setActiveNodeContext } from "../infra/active-node-context.js";
 import {
@@ -47,7 +47,7 @@ const buildSessionLookup = (
     parentSessionKey?: string;
   } = {},
 ): ReturnType<typeof loadSessionEntryType> => ({
-  cfg: { session: { mainKey: "agent:main:main" } } as OpenClawConfig,
+  cfg: { session: { mainKey: "agent:main:main" } } as CarapaceConfig,
   agentId: "main",
   storePath: "/tmp/sessions.json",
   store: {} as ReturnType<typeof loadSessionEntryType>["store"],
@@ -145,7 +145,7 @@ const runtimeMocks = vi.hoisted(() => ({
   })),
   resolveSessionAgentId: vi.fn(() => "main"),
   resolveSessionModelRef: vi.fn(
-    (_cfg: OpenClawConfig, entry?: { model?: string; modelProvider?: string }) => ({
+    (_cfg: CarapaceConfig, entry?: { model?: string; modelProvider?: string }) => ({
       provider: entry?.modelProvider ?? "test-provider",
       model: entry?.model ?? "default-model",
     }),
@@ -800,7 +800,7 @@ describe("node exec events", () => {
         event: "push.apns.register",
         payloadJSON: JSON.stringify({
           token: "abcd1234abcd1234abcd1234abcd1234",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "sandbox",
         }),
       },
@@ -811,7 +811,7 @@ describe("node exec events", () => {
       nodeId: "node-direct",
       transport: "direct",
       token: "abcd1234abcd1234abcd1234abcd1234",
-      topic: "ai.openclaw.ios",
+      topic: "ai.carapace.ios",
       environment: "sandbox",
       expectedPairingGeneration: "generation-node-direct",
     });
@@ -830,7 +830,7 @@ describe("node exec events", () => {
           sendGrant: "send-grant-123",
           gatewayDeviceId: "gateway-device-1",
           installationId: "install-123",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "production",
           distribution: "official",
           tokenDebugSuffix: "abcd1234",
@@ -845,7 +845,7 @@ describe("node exec events", () => {
       relayHandle: "relay-handle-123",
       sendGrant: "send-grant-123",
       installationId: "install-123",
-      topic: "ai.openclaw.ios",
+      topic: "ai.carapace.ios",
       environment: "production",
       distribution: "official",
       tokenDebugSuffix: "abcd1234",
@@ -866,7 +866,7 @@ describe("node exec events", () => {
           sendGrant: "send-grant-123",
           gatewayDeviceId: "gateway-device-1",
           installationId: "install-123",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "sandbox",
           distribution: "official",
           tokenDebugSuffix: "abcd1234",
@@ -881,7 +881,7 @@ describe("node exec events", () => {
       relayHandle: "relay-handle-123",
       sendGrant: "send-grant-123",
       installationId: "install-123",
-      topic: "ai.openclaw.ios",
+      topic: "ai.carapace.ios",
       environment: "sandbox",
       distribution: "official",
       tokenDebugSuffix: "abcd1234",
@@ -899,7 +899,7 @@ describe("node exec events", () => {
         sendGrant: "send-grant-123",
         gatewayDeviceId: "gateway-device-other",
         installationId: "install-123",
-        topic: "ai.openclaw.ios",
+        topic: "ai.carapace.ios",
         environment: "production",
         distribution: "official",
       }),
@@ -918,7 +918,7 @@ describe("node exec events", () => {
         event: "push.apns.register",
         payloadJSON: JSON.stringify({
           token: "abcd1234abcd1234abcd1234abcd1234",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "sandbox",
         }),
       },
@@ -948,7 +948,7 @@ describe("node exec events", () => {
         event: "push.apns.register",
         payloadJSON: JSON.stringify({
           token: "abcd1234abcd1234abcd1234abcd1234",
-          topic: "ai.openclaw.ios",
+          topic: "ai.carapace.ios",
           environment: "sandbox",
         }),
       },

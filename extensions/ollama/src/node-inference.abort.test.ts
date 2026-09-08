@@ -1,7 +1,7 @@
 /** Proves paired-node Ollama work stops at every node-local HTTP phase. */
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { createOllamaNodeHostCommands, createOllamaNodeInferenceTool } from "./node-inference.js";
 import {

@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../../config/sessions/types.js";
 import type { ModelDefinitionConfig } from "../../../config/types.models.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ProviderRuntimeModel } from "../../../plugins/provider-runtime-model.types.js";
 import { AGENT_HARNESS_SESSION_ID_LOCKED_MESSAGE } from "../../../sessions/agent-harness-session-key.js";
 import { resolveEmbeddedRunEffectiveModel } from "./model-harness.js";
@@ -44,7 +44,7 @@ describe("agent harness run admission", () => {
     expect(
       resolveAgentHarnessRunAdmissionError({
         entry: {
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           sessionId: "legacy-session",
           updatedAt: 1,
         },
@@ -83,7 +83,7 @@ describe("agent harness run admission", () => {
   it.each([
     ["a different session id", { sessionId: "other-session" }],
     ["an omitted runtime lock", { modelSelectionLocked: undefined }],
-    ["a different harness", { agentHarnessId: "openclaw" }],
+    ["a different harness", { agentHarnessId: "carapace" }],
   ])("rejects an ordinary-key locked session with %s", (_label, overrides) => {
     expect(
       resolveAgentHarnessRunAdmissionError({
@@ -98,7 +98,7 @@ describe("agent harness run admission", () => {
   });
 
   it.each([
-    { agentHarnessId: "openclaw", modelSelectionLocked: true, entry },
+    { agentHarnessId: "carapace", modelSelectionLocked: true, entry },
     { agentHarnessId: "codex", modelSelectionLocked: false, entry },
     { agentHarnessId: "codex", modelSelectionLocked: true, entry: undefined },
     {
@@ -252,7 +252,7 @@ describe("resolveEmbeddedRuntimeModelPolicy", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = resolveEmbeddedRuntimeModelPolicy({
       cfg,
@@ -280,7 +280,7 @@ describe("resolveEmbeddedRuntimeModelPolicy", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = resolveEmbeddedRuntimeModelPolicy({
       cfg,
@@ -360,7 +360,7 @@ describe("resolveEmbeddedRuntimeModelPolicy", () => {
       ],
       contextWindowDefault: "1m",
     };
-    const resolve = (params: { cfg?: OpenClawConfig; contextWindow?: string }) =>
+    const resolve = (params: { cfg?: CarapaceConfig; contextWindow?: string }) =>
       resolveEmbeddedRuntimeModelPolicy({
         cfg: params.cfg,
         provider: "anthropic",
@@ -385,7 +385,7 @@ describe("resolveEmbeddedRuntimeModelPolicy", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
     });
     expect(configured.contextTokenBudget).toBe(200_000);
     expect(configured.effectiveModel.contextWindow).toBe(200_000);

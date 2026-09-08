@@ -1,4 +1,4 @@
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import type {
   ErrorShape,
   MentionsListResult,

@@ -50,11 +50,11 @@ export function resolveDaemonInstallBlockMessage(
   if (process.platform === "linux" && hasSudoToRootSystemdUserManagerMismatch(env)) {
     return (
       "Gateway install blocked: Refusing a sudo-to-root systemd user-service install because " +
-      "OpenClaw state and service files would belong to root while systemctl targets the " +
+      "Carapace state and service files would belong to root while systemctl targets the " +
       "invoking user's manager. Rerun the same command without sudo. If [unsafe-permissions] " +
       "blocked the non-sudo command, repair the reported directory with `chmod go-w <path>` " +
       "and retry; do not use sudo or --force to bypass it. " +
-      "See https://docs.openclaw.ai/cli/gateway#install-identity."
+      "See https://github.com/Exaggarate/carapace#install-identity."
     );
   }
   return undefined;
@@ -105,11 +105,11 @@ export function pickProbeHostForBind(
 }
 
 const SAFE_DAEMON_ENV_KEYS = [
-  "OPENCLAW_PROFILE",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_PORT",
-  "OPENCLAW_NIX_MODE",
+  "CARAPACE_PROFILE",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_PORT",
+  "CARAPACE_NIX_MODE",
 ];
 
 /** Keep only daemon env keys safe to print in diagnostics. */
@@ -172,13 +172,13 @@ export function renderGatewayServiceStartHints(env: NodeJS.ProcessEnv = process.
   if (container) {
     return [`Restart the container or the service that manages it for ${container}.`];
   }
-  const profile = env.OPENCLAW_PROFILE;
+  const profile = env.CARAPACE_PROFILE;
   const installHint =
     resolveDaemonInstallBlockMessage("gateway", env) ??
-    formatCliCommand("openclaw gateway install", env);
+    formatCliCommand("carapace gateway install", env);
   return buildPlatformServiceStartHints({
     installHint,
-    startCommand: formatCliCommand("openclaw gateway start", env),
+    startCommand: formatCliCommand("carapace gateway start", env),
     launchAgentPlistPath: `~/Library/LaunchAgents/${resolveGatewayLaunchAgentLabel(profile)}.plist`,
     systemdServiceName: resolveGatewaySystemdServiceName(profile),
     windowsTaskName: resolveGatewayWindowsTaskName(profile),

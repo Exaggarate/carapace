@@ -87,7 +87,7 @@ export function latestDurableWorkspaceConflict(
       (details.totalCount !== undefined &&
         (!Number.isSafeInteger(details.totalCount) ||
           (details.totalCount as number) < details.paths.length)) ||
-      !/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef)
+      !/^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef)
     ) {
       return undefined;
     }

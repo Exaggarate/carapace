@@ -19,7 +19,7 @@ describe("resolveWindowsSpawnProgram", () => {
   it.runIf(process.platform === "win32")(
     "resolves mixed-case PATH and PATHEXT keys for a native Windows spawn",
     async () => {
-      const dir = await createTempDir("openclaw-windows-spawn-env-case-");
+      const dir = await createTempDir("carapace-windows-spawn-env-case-");
       const executable = path.join(dir, "mixed-env-tool.MiXeD");
       await copyFile(process.execPath, executable);
       const env = { pAtH: dir, pAtHeXt: ".MiXeD" };
@@ -60,7 +60,7 @@ describe("resolveWindowsSpawnProgram", () => {
   it.each(["pnpm checkout", "node tools"])(
     "preserves an existing launcher path inside %s on Windows",
     async (directory) => {
-      const root = await realpath(await createTempDir("openclaw-windows-spawn-test-"));
+      const root = await realpath(await createTempDir("carapace-windows-spawn-test-"));
       const dir = path.join(root, directory);
       await mkdir(dir);
       const launcher = path.join(dir, "launcher.js");
@@ -100,7 +100,7 @@ describe("resolveWindowsSpawnProgram", () => {
   });
 
   it("fails closed by default for unresolved windows wrappers", async () => {
-    const dir = await createTempDir("openclaw-windows-spawn-test-");
+    const dir = await createTempDir("carapace-windows-spawn-test-");
     const shimPath = path.join(dir, "wrapper.cmd");
     await writeFile(shimPath, "@ECHO off\r\necho wrapper\r\n", "utf8");
 
@@ -115,7 +115,7 @@ describe("resolveWindowsSpawnProgram", () => {
   });
 
   it("only returns shell fallback when explicitly opted in", async () => {
-    const dir = await createTempDir("openclaw-windows-spawn-test-");
+    const dir = await createTempDir("carapace-windows-spawn-test-");
     const shimPath = path.join(dir, "wrapper.cmd");
     await writeFile(shimPath, "@ECHO off\r\necho wrapper\r\n", "utf8");
 
@@ -138,7 +138,7 @@ describe("resolveWindowsSpawnProgram", () => {
   });
 
   it("preserves custom batch-wrapper behavior instead of bypassing its target", async () => {
-    const dir = await createTempDir("openclaw-windows-spawn-test-");
+    const dir = await createTempDir("carapace-windows-spawn-test-");
     const targetPath = path.join(dir, "tool.exe");
     const wrapperPath = path.join(dir, "wrapper.cmd");
     await writeFile(targetPath, "", "utf8");
@@ -165,7 +165,7 @@ describe("resolveWindowsSpawnProgram", () => {
   });
 
   it("does not reinterpret a forwarded batch wrapper as a Node script", async () => {
-    const dir = await createTempDir("openclaw-windows-spawn-test-");
+    const dir = await createTempDir("carapace-windows-spawn-test-");
     const targetPath = path.join(dir, "inner.cmd");
     const wrapperPath = path.join(dir, "wrapper.cmd");
     await writeFile(targetPath, "@ECHO off\r\necho inner\r\n", "utf8");

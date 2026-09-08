@@ -56,7 +56,7 @@ describe("memory search provenance enrichment", () => {
     ).run(paths[4]!);
     db.prepare(
       `INSERT OR REPLACE INTO memory_index_chunk_recall_metadata (chunk_id, importance, triggers, project_key)
-       SELECT id, 9, ' when flying ', ' github.com/openclaw/openclaw '
+       SELECT id, 9, ' when flying ', ' github.com/Exaggarate/carapace '
        FROM memory_index_chunks WHERE path = ?`,
     ).run(paths[0]!);
 
@@ -74,7 +74,7 @@ describe("memory search provenance enrichment", () => {
         path: paths[0],
         importance: 9,
         triggers: "when flying",
-        projectKey: "github.com/openclaw/openclaw",
+        projectKey: "github.com/Exaggarate/carapace",
       });
       for (const result of results) {
         expect(result.snippet).toContain("Alpha violet record");

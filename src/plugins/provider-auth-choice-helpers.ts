@@ -1,11 +1,11 @@
 // Normalizes provider auth choice metadata from plugin setup surfaces.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { isRecord as isPlainRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   listAgentEntries,
   readAgentRosterProperty,
@@ -19,7 +19,7 @@ import {
 import { normalizeProviderConfigForConfigDefaults } from "../config/provider-policy.js";
 import type { AgentModelConfig } from "../config/types.agents-shared.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderAuthMethod, ProviderPlugin } from "./types.js";
 
 export function resolveProviderMatch(
@@ -185,9 +185,9 @@ function normalizeProviderCatalogModelIdsForWrite(
 }
 
 function normalizeModelProviderConfigsForWrite(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   providerConfigNormalizer: typeof normalizeProviderConfigForConfigDefaults,
-): OpenClawConfig {
+): CarapaceConfig {
   const providers = cfg.models?.providers;
   if (!providers) {
     return cfg;
@@ -263,9 +263,9 @@ function normalizeAgentListForWrite(value: unknown): unknown {
 }
 
 function normalizeConfigModelRefsForWrite(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   providerConfigNormalizer: typeof normalizeProviderConfigForConfigDefaults,
-): OpenClawConfig {
+): CarapaceConfig {
   const providerNormalized = normalizeModelProviderConfigsForWrite(cfg, providerConfigNormalizer);
   const defaults = providerNormalized.agents?.defaults;
   const agentsList = listAgentEntries(providerNormalized);
@@ -311,13 +311,13 @@ function normalizeConfigModelRefsForWrite(
 }
 
 export function applyProviderAuthConfigPatch(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   patch: unknown,
   options?: {
     replaceDefaultModels?: boolean;
     providerConfigNormalizer?: typeof normalizeProviderConfigForConfigDefaults;
   },
-): OpenClawConfig {
+): CarapaceConfig {
   const providerConfigNormalizer =
     options?.providerConfigNormalizer ?? normalizeProviderConfigForConfigDefaults;
   const merged = normalizeConfigModelRefsForWrite(
@@ -343,7 +343,7 @@ export function applyProviderAuthConfigPatch(
           ...merged.agents?.defaults,
           // Opt-in replacement for migrations that rename/remove model keys.
           models: sanitizeConfigPatchValue(patchModels) as NonNullable<
-            NonNullable<OpenClawConfig["agents"]>["defaults"]
+            NonNullable<CarapaceConfig["agents"]>["defaults"]
           >["models"],
         },
       },
@@ -357,10 +357,10 @@ export function applyProviderAuthConfigPatch(
  * the user did not pass `--set-default`.
  */
 export function restorePriorAgentsDefaultsModelUnlessOptIn(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   priorAgentsDefaultsModel?: AgentModelConfig;
   setDefault?: boolean;
-}): OpenClawConfig {
+}): CarapaceConfig {
   if (params.setDefault) {
     return params.cfg;
   }
@@ -386,10 +386,10 @@ export function restorePriorAgentsDefaultsModelUnlessOptIn(params: {
 }
 
 export function applyDefaultModel(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   model: string,
   opts?: { preserveExistingPrimary?: boolean },
-): OpenClawConfig {
+): CarapaceConfig {
   const normalizedModel = normalizeAgentModelRefForConfig(model);
   const models = {
     ...normalizeAgentModelMapForConfig(cfg.agents?.defaults?.models ?? {}),

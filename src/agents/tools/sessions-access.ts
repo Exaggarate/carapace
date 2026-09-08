@@ -1,15 +1,15 @@
 /**
  * Session visibility and access helpers for session tools.
  *
- * Adds OpenClaw session-key alias normalization and sandbox requester scoping over SDK visibility contracts.
+ * Adds Carapace session-key alias normalization and sandbox requester scoping over SDK visibility contracts.
  */
 import { randomUUID } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { recordExecutionDecisionWork } from "../../audit/execution-decision-work.js";
 import { SESSION_LIFECYCLE_CHANGED_ERROR_REASON } from "../../config/sessions/lifecycle.js";
 import { resolveCanonicalMainSessionKey } from "../../config/sessions/main-session-key.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isGatewayClientRequestError } from "../../gateway/call.js";
 import {
   createSessionVisibilityDecisionChecker,
@@ -328,7 +328,7 @@ export async function resolveSessionToolAccess(params: {
 
 /** Resolves the requester context used to filter sandboxed session-tool access. */
 export function resolveSandboxedSessionToolContext(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentSessionKey?: string;
   requesterAgentId?: string;
   sandboxed?: boolean;

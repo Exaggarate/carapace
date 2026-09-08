@@ -1,7 +1,7 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig, TtsConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { TtsStreamResult } from "openclaw/plugin-sdk/tts-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig, TtsConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import type { TtsStreamResult } from "carapace/plugin-sdk/tts-runtime";
 import { getDiscordRuntime } from "../runtime.js";
 import { sanitizeVoiceReplyTextForSpeech } from "./sanitize.js";
 
@@ -34,7 +34,7 @@ type VoiceReplyAudioResult =
     };
 
 export async function transcribeVoiceAudio(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   filePath: string;
 }) {
@@ -57,7 +57,7 @@ export async function transcribeVoiceAudio(params: {
 }
 
 export async function synthesizeVoiceReplyAudio(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   override?: TtsConfig;
   replyText: string;
   speakerLabel: string;

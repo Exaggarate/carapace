@@ -1,9 +1,9 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { normalizeChatType } from "../../channels/chat-type.js";
 import { resolveGroupSessionKey } from "../../config/sessions/group.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
 import { isPluginOwnedSessionBindingRecord } from "../../plugins/conversation-binding-metadata.js";
 import { isAcpSessionKey } from "../../routing/session-key.js";
@@ -63,7 +63,7 @@ export function resolveRoutedPolicyConversationType(
 
 export function resolveSessionStoreLookup(
   ctx: FinalizedMsgContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): {
   agentId?: string;
   sessionKey?: string;
@@ -97,7 +97,7 @@ export function resolveSessionStoreLookup(
 
 export function resolveBoundAcpDispatchSessionKey(params: {
   ctx: FinalizedMsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): string | undefined {
   const bindingContext = resolveConversationBindingContextFromMessage({
     cfg: params.cfg,
@@ -128,7 +128,7 @@ export function resolveBoundAcpDispatchSessionKey(params: {
 
 export function resolveDispatchResetAdmission(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: FinalizedMsgContext;
   entry?: SessionEntry;
   hasPluginOwnedBinding: boolean;

@@ -3,12 +3,12 @@ import {
   type AgentEvent,
   type AgentTool,
   type StreamFn,
-} from "openclaw/plugin-sdk/agent-core";
+} from "carapace/plugin-sdk/agent-core";
 import {
   type AssistantMessage,
   createAssistantMessageEventStream,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -224,8 +224,8 @@ describe("Tool Search flattened call arguments", () => {
     const baseEntry = catalogRef.current?.entries[0];
     expect(baseEntry).toBeDefined();
     catalogRef.current!.entries = [
-      { ...baseEntry!, id: "openclaw:first:shared_search", tool: first },
-      { ...baseEntry!, id: "openclaw:second:shared_search", tool: second },
+      { ...baseEntry!, id: "carapace:first:shared_search", tool: first },
+      { ...baseEntry!, id: "carapace:second:shared_search", tool: second },
     ];
     const callTool = createToolSearchTools({ catalogRef, config }).find(
       (tool) => tool.name === TOOL_CALL_RAW_TOOL_NAME,
@@ -267,8 +267,8 @@ describe("Tool Search dispatcher argument preparation", () => {
   it.each([
     {
       label: "args-wrapped selector and input",
-      input: { args: { id: "openclaw:example-plugin:example_tool", args: { path: "/x" } } },
-      expected: { id: "openclaw:example-plugin:example_tool", args: { path: "/x" } },
+      input: { args: { id: "carapace:example-plugin:example_tool", args: { path: "/x" } } },
+      expected: { id: "carapace:example-plugin:example_tool", args: { path: "/x" } },
     },
     {
       label: "input-wrapped selector and args",
@@ -496,8 +496,8 @@ describe("Tool Search terminal results", () => {
 
       const result = await codeTool!.execute("code-parent", {
         code: `
-          await openclaw.tools.call("first_action", {});
-          return await openclaw.tools.call("second_action", {});
+          await carapace.tools.call("first_action", {});
+          return await carapace.tools.call("second_action", {});
         `,
       });
 
@@ -691,7 +691,7 @@ describe("Tool Search input schemas", () => {
     const result = await codeTool!.execute("invalid-code-call", {
       code: `
         try {
-          await openclaw.tools.call("strict_instruction", { instructions: "run" });
+          await carapace.tools.call("strict_instruction", { instructions: "run" });
           return { executed: true };
         } catch (error) {
           return { error: error.message };
@@ -777,7 +777,7 @@ describe("Tool Search catalog indexing", () => {
     const effectiveOptions = { limit: 1, allowedIds: projection.byId };
 
     await expect(runtime.search("harvesting", { limit: 1 })).resolves.toEqual([
-      expect.objectContaining({ name: shadowed.name, source: "openclaw" }),
+      expect.objectContaining({ name: shadowed.name, source: "carapace" }),
     ]);
     const matches = await runtime.search("harvesting", effectiveOptions);
 
@@ -802,7 +802,7 @@ describe("Tool Search catalog indexing", () => {
       expect.objectContaining({ name: visible.name }),
     ]);
     await expect(runtime.search("harvesting", { limit: 1 })).resolves.toEqual([
-      expect.objectContaining({ name: shadowed.name, source: "openclaw" }),
+      expect.objectContaining({ name: shadowed.name, source: "carapace" }),
     ]);
   });
 

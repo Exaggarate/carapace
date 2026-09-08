@@ -1,5 +1,5 @@
-import { asNullableObjectRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString as toTrimmedString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableObjectRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString as toTrimmedString } from "@carapace/normalization-core/string-coerce";
 import type { ChatGuardianNotice, ToolApprovalReview } from "../../lib/chat/chat-types.ts";
 import {
   MAX_TOOL_APPROVAL_REVIEWS,
@@ -130,12 +130,12 @@ function buildToolStreamMessage(entry: ToolStreamEntry): Record<string, unknown>
     // and completion comes from the result event — partial `update` output
     // must not end the running state. Transcript messages never carry these,
     // so historical output-less calls (aborted runs) stay inert.
-    __openclawToolStreamLive: true,
-    __openclawToolStreamResultReceived: entry.resultReceived === true,
+    __carapaceToolStreamLive: true,
+    __carapaceToolStreamResultReceived: entry.resultReceived === true,
     ...(entry.resultReceived !== true && entry.liveDiffStat
-      ? { __openclawToolStreamDiffStat: entry.liveDiffStat }
+      ? { __carapaceToolStreamDiffStat: entry.liveDiffStat }
       : {}),
-    __openclawToolStreamReceivedAt: entry.receivedAt,
+    __carapaceToolStreamReceivedAt: entry.receivedAt,
   };
 }
 

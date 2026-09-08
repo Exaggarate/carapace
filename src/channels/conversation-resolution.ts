@@ -6,8 +6,8 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveTargetPrefixedChannel,
   stripOutboundTargetKindPrefix,
@@ -38,7 +38,7 @@ type ConversationResolution = {
  * Command-side inputs used to resolve a canonical conversation binding target.
  */
 export type ResolveCommandConversationResolutionInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   /** Preserve the command's selected registry through all provider resolution. */
   plugin?: ChannelPlugin;
   channel?: string | null;
@@ -57,7 +57,7 @@ export type ResolveCommandConversationResolutionInput = {
 };
 
 type ResolveInboundConversationResolutionInput = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string | null;
   accountId?: string | null;
   to?: string | null;
@@ -122,7 +122,7 @@ function normalizeResolutionTarget(params: {
 function resolveBindingAccountId(params: {
   rawAccountId?: string | null;
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): string {
   return (
     normalizeOptionalString(params.rawAccountId) ||

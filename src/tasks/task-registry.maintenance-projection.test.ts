@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { replaceSessionEntrySync } from "../config/sessions/session-accessor.js";
 import { drainGlobalSingletonLifecycleState } from "../shared/global-singleton.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { getDetachedTaskLifecycleRuntime } from "./detached-task-runtime.js";
 import { getTaskById } from "./task-registry.js";
@@ -28,7 +28,7 @@ afterEach(async () => {
 
 describe("task maintenance session metadata", () => {
   it("reconciles backing and wedged children without decoding their saved prompts", async () => {
-    await withStateDirEnv("openclaw-task-maintenance-metadata-", async () => {
+    await withStateDirEnv("carapace-task-maintenance-metadata-", async () => {
       resetTaskRegistryForTests({ persist: false });
       const staleAt = Date.now() - 45 * 60_000;
       for (const agentId of ["main", "worker"]) {
@@ -76,7 +76,7 @@ describe("task maintenance session metadata", () => {
     });
   });
   it("keeps warm corrupt-row handling while reconciling healthy siblings", async () => {
-    await withStateDirEnv("openclaw-task-maintenance-corruption-", async () => {
+    await withStateDirEnv("carapace-task-maintenance-corruption-", async () => {
       resetTaskRegistryForTests({ persist: false });
       const staleAt = Date.now() - 45 * 60_000;
       const tasks = ["healthy", "corrupt"].map((suffix) => {
@@ -92,7 +92,7 @@ describe("task maintenance session metadata", () => {
       });
       expect(previewTaskRegistryMaintenance().reconciled).toBe(0);
       // Existing warm listings skip malformed rows; exact reads intentionally throw.
-      openOpenClawAgentDatabase({ agentId: "main" })
+      openCarapaceAgentDatabase({ agentId: "main" })
         .db.prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?")
         .run("{", "agent:main:subagent:corrupt");
       expect(previewTaskRegistryMaintenance().reconciled).toBe(1);
@@ -102,7 +102,7 @@ describe("task maintenance session metadata", () => {
   });
 
   it("sees backing metadata repaired by the recovery hook", async () => {
-    await withStateDirEnv("openclaw-task-maintenance-recovery-", async () => {
+    await withStateDirEnv("carapace-task-maintenance-recovery-", async () => {
       resetTaskRegistryForTests({ persist: false });
       const staleAt = Date.now() - 45 * 60_000;
       const scope = { sessionKey: "agent:main:subagent:recovered" };

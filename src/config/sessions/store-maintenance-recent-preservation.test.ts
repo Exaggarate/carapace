@@ -123,7 +123,7 @@ describe("recent session maintenance preservation", () => {
   it("keeps recent and external sessions under disk pressure without invoking plugins", async () => {
     const resolveSessionConversation = installThrowingConversationResolver();
     try {
-      await withTestDir({ prefix: "openclaw-preserve-recent-budget-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-preserve-recent-budget-" }, async (dir) => {
         const now = Date.now();
         const recentKey = "agent:main:dashboard:recent";
         const staleKey = "agent:main:dashboard:stale";

@@ -1,6 +1,6 @@
 // Checks published public repository advisories independently of aggregate advisory feeds.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { Result } from "@openclaw/normalization-core/result";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { Result } from "@carapace/normalization-core/result";
 import semver from "semver";
 import { runTasksWithConcurrency } from "../../src/utils/run-with-concurrency.js";
 import { withAdvisoryRequestTimeout } from "../pre-commit/pnpm-audit-prod.mjs";

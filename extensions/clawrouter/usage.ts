@@ -1,11 +1,11 @@
-import { withTrustedEnvProxyGuardedFetchMode } from "openclaw/plugin-sdk/fetch-runtime";
-import type { ProviderUsageSnapshot } from "openclaw/plugin-sdk/provider-usage";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+import { withTrustedEnvProxyGuardedFetchMode } from "carapace/plugin-sdk/fetch-runtime";
+import type { ProviderUsageSnapshot } from "carapace/plugin-sdk/provider-usage";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { asFiniteNumberInRange, asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
+import { asFiniteNumberInRange, asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeClawRouterRootUrl } from "./provider-catalog.js";
 
 const CLAWROUTER_USAGE_RESPONSE_MAX_BYTES = 1024 * 1024;

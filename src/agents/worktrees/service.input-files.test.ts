@@ -16,7 +16,7 @@ import {
   captureManifest,
   runWorkspaceCommand,
 } from "../../node-host/node-worker-workspace-commands.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { requireGit } from "./git.js";
 import { ManagedWorktreeService } from "./service.js";
 import { initializeManagedWorktreeTestRepository } from "./service.test-support.js";
@@ -25,7 +25,7 @@ const sandbox = vi.hoisted(() => ({ ensureSandboxWorkspaceForSession: vi.fn() })
 vi.mock("../sandbox.js", () => sandbox);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
@@ -39,9 +39,9 @@ it.each(["host", "writable sandbox", "cloud"])(
       await fs.writeFile(path.join(repo, "media/inbound/project.png"), png);
       await fs.writeFile(
         path.join(repo, ".gitignore"),
-        "unrelated-private.txt\nmedia/inbound/openclaw-staged-*/\n",
+        "unrelated-private.txt\nmedia/inbound/carapace-staged-*/\n",
       );
-      const explicitInput = `media/inbound/openclaw-staged-${"d".repeat(64)}/input-secret.txt`;
+      const explicitInput = `media/inbound/carapace-staged-${"d".repeat(64)}/input-secret.txt`;
       await fs.mkdir(path.dirname(path.join(repo, explicitInput)), { recursive: true });
       await fs.writeFile(path.join(repo, explicitInput), `fixture bytes: ${explicitInput}\n`);
       await fs.writeFile(path.join(repo, ".worktreeinclude"), `${explicitInput}\n`);
@@ -52,7 +52,7 @@ it.each(["host", "writable sandbox", "cloud"])(
         "media/inbound/project.png",
       ]);
       await requireGit(repo, ["commit", "-qm", "project-owned inputs"]);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, "state") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: path.join(home, "state") };
       const service = new ManagedWorktreeService({ env });
       const worktree = await service.create({ repoRoot: repo, name: "inputs", baseRef: "HEAD" });
       const cwd = worktree.path;
@@ -215,7 +215,7 @@ it.each(["host", "writable sandbox", "cloud"])(
         referenceManifestRef: base.manifestRef,
       });
       const raw = await fs.readFile(
-        path.join(home, ".openclaw-worker", "manifests", `${manifestRef.slice(7)}.json`),
+        path.join(home, ".carapace-worker", "manifests", `${manifestRef.slice(7)}.json`),
         "utf8",
       );
       const current = parseWorkerWorkspaceManifest(raw, manifestRef);
@@ -266,13 +266,13 @@ it.each(["host", "writable sandbox", "cloud"])(
       );
       await expect(fs.readFile(path.join(cwd, "media/inbound/project.png"))).resolves.toEqual(png);
       await expect(fs.readFile(path.join(cwd, ".gitignore"), "utf8")).resolves.toBe(
-        "unrelated-private.txt\nmedia/inbound/openclaw-staged-*/\n",
+        "unrelated-private.txt\nmedia/inbound/carapace-staged-*/\n",
       );
       await expect(fs.readFile(path.join(cwd, ".worktreeinclude"), "utf8")).resolves.toBe(
         `${explicitInput}\n`,
       );
       await assertPublication(cwd);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     });
   },
 );

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
 import {
   buildRealtimeVoiceAgentControlSpeechMessage,
@@ -62,7 +62,7 @@ export type RealtimeVoiceBridgeSession = {
  */
 export type RealtimeVoiceBridgeSessionParams = {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   /** Host-selected agent scope for provider auth and agent-owned bridge state. */
   agentId?: string;
   providerConfig: RealtimeVoiceProviderConfig;

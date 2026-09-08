@@ -1,23 +1,23 @@
 import {
   createAccountListHelpers,
   resolveChannelMediaMaxBytes,
-} from "openclaw/plugin-sdk/account-helpers";
+} from "carapace/plugin-sdk/account-helpers";
 // Sms plugin module implements accounts behavior.
-import { normalizeOptionalAccountId } from "openclaw/plugin-sdk/account-id";
+import { normalizeOptionalAccountId } from "carapace/plugin-sdk/account-id";
 import {
   DEFAULT_ACCOUNT_ID,
   hasConfiguredAccountValue,
   resolveAccountEntry,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/account-resolution";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/account-resolution";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
 import {
   hasConfiguredSecretInput,
   resolveSecretInputString,
   type SecretInputStringResolution,
   type SecretInputStringResolutionMode,
-} from "openclaw/plugin-sdk/secret-input";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/secret-input";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import { normalizeSmsAllowFrom, normalizeSmsPhoneNumber } from "./phone.js";
 import { parseSmsPublicWebhookUrl } from "./public-webhook-url.js";
 import type { ResolvedSmsAccount, SmsChannelConfig } from "./types.js";
@@ -26,7 +26,7 @@ const CHANNEL_ID = "sms";
 const DEFAULT_WEBHOOK_PATH = "/webhooks/sms";
 const DEFAULT_TEXT_CHUNK_LIMIT = 1500;
 
-function getChannelConfig(cfg: OpenClawConfig): SmsChannelConfig | undefined {
+function getChannelConfig(cfg: CarapaceConfig): SmsChannelConfig | undefined {
   return cfg?.channels?.[CHANNEL_ID] as SmsChannelConfig | undefined;
 }
 
@@ -87,14 +87,14 @@ const {
 export { listSmsAccountIds, resolveDefaultSmsAccountId };
 
 export function resolveSmsAccount(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId?: string | null,
 ): ResolvedSmsAccount {
   return readSmsAccount(cfg, accountId, "strict").account;
 }
 
 function readSmsAccount(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string | null | undefined,
   mode: SecretInputStringResolutionMode,
 ): { account: ResolvedSmsAccount; tokenStatus: SecretInputStringResolution["status"] } {
@@ -155,7 +155,7 @@ function readSmsAccount(
   return { account, tokenStatus: authToken.status };
 }
 
-export function inspectSmsAccount(cfg: OpenClawConfig, accountId?: string | null) {
+export function inspectSmsAccount(cfg: CarapaceConfig, accountId?: string | null) {
   const { account, tokenStatus } = readSmsAccount(cfg, accountId, "inspect");
   const configured = Boolean(
     account.accountSid &&

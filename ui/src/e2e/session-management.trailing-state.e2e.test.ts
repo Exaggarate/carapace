@@ -26,7 +26,7 @@ suite.define(() => {
     const page = await context.newPage();
     const baseTime = Date.parse("2026-07-01T16:00:00.000Z");
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "true");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "true");
     });
     await installMockGateway(page, {
       mainSessionKey: "agent:main:main",
@@ -305,7 +305,7 @@ suite.define(() => {
     const context = await suite.browser.newContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "false");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "false");
     });
     const gateway = await installMockGateway(page, {
       featureMethods: ["chat.metadata", "chat.startup", SESSION_PULL_REQUESTS_SUBSCRIBE_METHOD],
@@ -320,7 +320,7 @@ suite.define(() => {
             worktree: {
               id: "unread-pr-worktree",
               branch: "fix/unread-pr",
-              repoRoot: "/tmp/openclaw",
+              repoRoot: "/tmp/carapace",
             },
           }),
         ]),
@@ -352,11 +352,11 @@ suite.define(() => {
               {
                 branch: "fix/unread-pr",
                 number: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 state: "merged",
                 title: "Unread row pull request",
-                url: "https://example.test/openclaw/openclaw/pull/1",
+                url: "https://example.test/carapace/carapace/pull/1",
               },
             ],
             rateLimited: false,
@@ -478,7 +478,7 @@ suite.define(() => {
     const context = await suite.browser.newContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "true");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "true");
     });
     const gateway = await installMockGateway(page, {
       featureMethods: [
@@ -503,7 +503,7 @@ suite.define(() => {
               worktree: {
                 id: "combined-state-worktree",
                 branch: "fix/combined-state",
-                repoRoot: "/tmp/openclaw",
+                repoRoot: "/tmp/carapace",
               },
             },
           ),
@@ -535,11 +535,11 @@ suite.define(() => {
               {
                 branch: "fix/combined-state",
                 number: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 state: "open",
                 title: "Combined state fix",
-                url: "https://example.test/openclaw/openclaw/pull/1",
+                url: "https://example.test/carapace/carapace/pull/1",
               },
             ],
             rateLimited: false,

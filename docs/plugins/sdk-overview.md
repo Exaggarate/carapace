@@ -4,7 +4,7 @@ title: "Plugin SDK overview"
 sidebarTitle: "Plugin SDK overview"
 read_when:
   - You need to know which SDK subpath to import from
-  - You want a reference for all registration methods on OpenClawPluginApi
+  - You want a reference for all registration methods on CarapacePluginApi
   - You are looking up a specific SDK export
 ---
 
@@ -12,8 +12,8 @@ The plugin SDK is the typed contract between plugins and core. This page is the
 reference for **what to import** and **what you can register**.
 
 <Note>
-  This page is for plugin authors using `openclaw/plugin-sdk/*` inside
-  OpenClaw. For external apps, scripts, dashboards, CI jobs, and IDE extensions
+  This page is for plugin authors using `carapace/plugin-sdk/*` inside
+  Carapace. For external apps, scripts, dashboards, CI jobs, and IDE extensions
   that want to run agents through the Gateway, use
   [Gateway integrations for external apps](/gateway/external-apps) instead.
 </Note>
@@ -24,12 +24,12 @@ Looking for a how-to guide instead? Start with [Building plugins](/plugins/build
 
 ## API stability
 
-All OpenClaw plugin APIs are **experimental**. This includes every
-`openclaw/plugin-sdk/*` subpath, registration and runtime APIs, channel and
+All Carapace plugin APIs are **experimental**. This includes every
+`carapace/plugin-sdk/*` subpath, registration and runtime APIs, channel and
 provider contracts, hooks, and native Control UI APIs. These contracts can
-change between OpenClaw releases.
+change between Carapace releases.
 
-Pin the OpenClaw version used to develop and deploy your plugin, and test each
+Pin the Carapace version used to develop and deploy your plugin, and test each
 host version you declare compatible. Set package compatibility ranges from
 those tested versions; do not assume a working build supports future releases.
 Existing [compatibility windows and upgrade migrations](/plugins/compatibility)
@@ -49,26 +49,26 @@ replacement contracts.
 Always import from a specific subpath:
 
 ```typescript
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { defineChannelPluginEntry } from "openclaw/plugin-sdk/channel-core";
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import { defineChannelPluginEntry } from "carapace/plugin-sdk/channel-core";
 ```
 
 Each subpath is a small, self-contained module. This keeps startup fast and
 prevents circular dependency issues. For channel-specific entry/build helpers,
-prefer `openclaw/plugin-sdk/channel-core`; keep `openclaw/plugin-sdk/core` for
+prefer `carapace/plugin-sdk/channel-core`; keep `carapace/plugin-sdk/core` for
 the broader umbrella surface and shared helpers such as
 `buildChannelConfigSchema`.
 
 For channel config, publish the channel-owned JSON Schema through
-`openclaw.plugin.json#channelConfigs`. The `plugin-sdk/channel-config-schema`
-subpath is for shared schema primitives and the generic builder. OpenClaw's
+`carapace.plugin.json#channelConfigs`. The `plugin-sdk/channel-config-schema`
+subpath is for shared schema primitives and the generic builder. Carapace's
 bundled plugins use `plugin-sdk/bundled-channel-config-schema` for retained
 bundled-channel schemas. That bundled schema subpath is not a pattern for new
 plugins.
 
 <Warning>
   Do not import provider- or channel-branded convenience seams (for example
-  `openclaw/plugin-sdk/slack`, `.../discord`, `.../signal`, `.../whatsapp`).
+  `carapace/plugin-sdk/slack`, `.../discord`, `.../signal`, `.../whatsapp`).
   Bundled plugins compose generic SDK subpaths inside their own `api.ts` /
   `runtime-api.ts` barrels; core consumers should either use those plugin-local
   barrels or add a narrow generic SDK contract when a need is truly
@@ -79,7 +79,7 @@ map when they have tracked owner usage. They exist for bundled-plugin
 maintenance only and are not recommended import paths for new third-party
 plugins.
 
-`openclaw/plugin-sdk/discord` and `openclaw/plugin-sdk/telegram-account` are
+`carapace/plugin-sdk/discord` and `carapace/plugin-sdk/telegram-account` are
 also kept as deprecated compatibility facades for tracked owner usage. Do not
 copy those import paths into new plugins; use injected runtime helpers and
 generic channel SDK subpaths instead.
@@ -106,12 +106,12 @@ deprecated re-export barrels are tracked in
 
 ## Registration API
 
-The `register(api)` callback receives an `OpenClawPluginApi` object with these
+The `register(api)` callback receives an `CarapacePluginApi` object with these
 methods:
 
 Plugins that provide an external team-chat surface for a session can register
 the single process-wide provider exported by
-`openclaw/plugin-sdk/session-discussion`. Its `info({ sessionKey })` method
+`carapace/plugin-sdk/session-discussion`. Its `info({ sessionKey })` method
 reports whether a discussion is unavailable, ready to open, or already open;
 `open({ sessionKey })` creates or resolves the discussion and returns its embed
 and external URLs. Registering another provider replaces the current provider.
@@ -141,14 +141,14 @@ and external URLs. Registering another provider replaces the current provider.
 
 Transcript source providers that share an account namespace with an inbound
 channel declare an `accountOwnership` descriptor with that channel id and a
-canonical account resolver. OpenClaw then
+canonical account resolver. Carapace then
 ignores model-selected account ids for same-channel capture, binds the trusted
 inbound account, and records it as the session owner for later lifecycle
-actions. The resolver also selects an omitted account before OpenClaw starts or
+actions. The resolver also selects an omitted account before Carapace starts or
 persists live capture. It validates an already-bound trusted account without
 redirecting it and returns an actionable typed error when no unique capable
 account exists. Configured auto-start must supply a nonempty source account or
-resolve one with this descriptor. OpenClaw rejects ambiguous or unresolved ownership before it
+resolve one with this descriptor. Carapace rejects ambiguous or unresolved ownership before it
 persists the start or invokes the provider. Provider aliases are lookup names
 only and must not be used for this declaration.
 
@@ -162,7 +162,7 @@ Providers can implement `prepareProvision(profile, operationId, options?)`, retu
 
 Every worker provider must implement `resolveAllocation(profile, operationId)`, returning `{ leaseId: string; sharedHost: boolean }` for the exact operation. Core passes the frozen settings snapshot, even after the named profile changes or is removed. The handle identifies the cleanup target; it does not prove a machine was created or a transport is ready. Resolution must not allocate, start, renew, run setup, read setup secrets, enroll nodes, or wait for availability. Throw if the identity cannot be resolved safely. When destruction is requested before a provision result is recorded, core persists this handle with the existing teardown state and calls `destroy`, without replaying `provision`. `destroy` still must prove release or authoritative absence. Both calls remain serialized behind any earlier provider operation until it actually settles, including after a caller-visible timeout.
 
-Providers that enroll cloud nodes set `requiresNodeEnrollment: true` and call `options.beginNodeEnrollment()` after allocating the machine. The returned `WorkerNodeEnrollment` supplies `displayName`, `openclawVersion`, an optional enrollment-lifetime `signal`, `waitForDeviceId()`, and either `mode: "connect"` with `setupCode` and `setupId`, or `mode: "resume"` with the bound `deviceId`. Its required `nodeBootstrap` contains the Gateway-prepared runtime archive's `url`, secret bearer `token`, `sha256`, `bytes`, `openclawVersion`, `enabledPluginIds`, and optional `tlsFingerprint`. Download that exact archive, verify its size and digest, install its target-platform dependencies, and enable the listed plugins in the node's isolated state before connecting. Do not substitute a global or registry package based only on a matching version. Keep download and enrollment credentials out of command arguments, logs, npm, and the launched node's environment; cancel work when `signal` aborts. Download authority belongs to the live enrollment attempt, not the URL or digest alone. After connection, return the device identity from `waitForDeviceId()` in the node lease. See [Bundle installation](/gateway/cloud-workers#bundle-installation) for source builds, artifact reuse, and proxy requirements. Bootstrap installation does not authorize node commands or replace invocation policy.
+Providers that enroll cloud nodes set `requiresNodeEnrollment: true` and call `options.beginNodeEnrollment()` after allocating the machine. The returned `WorkerNodeEnrollment` supplies `displayName`, `carapaceVersion`, an optional enrollment-lifetime `signal`, `waitForDeviceId()`, and either `mode: "connect"` with `setupCode` and `setupId`, or `mode: "resume"` with the bound `deviceId`. Its required `nodeBootstrap` contains the Gateway-prepared runtime archive's `url`, secret bearer `token`, `sha256`, `bytes`, `carapaceVersion`, `enabledPluginIds`, and optional `tlsFingerprint`. Download that exact archive, verify its size and digest, install its target-platform dependencies, and enable the listed plugins in the node's isolated state before connecting. Do not substitute a global or registry package based only on a matching version. Keep download and enrollment credentials out of command arguments, logs, npm, and the launched node's environment; cancel work when `signal` aborts. Download authority belongs to the live enrollment attempt, not the URL or digest alone. After connection, return the device identity from `waitForDeviceId()` in the node lease. See [Bundle installation](/gateway/cloud-workers#bundle-installation) for source builds, artifact reuse, and proxy requirements. Bootstrap installation does not authorize node commands or replace invocation policy.
 
 Providers that capture reusable project images can declare `supportsProjectPreparation(profile, machineClass)`. For eligible Git placements, core persists a project identity and pinned base commit before allocation, then supplies `options.project`. Call its `prepare({ runScript, upload })` adapter on the allocated machine; core owns the bounded Git pack, clean checkout verification, and cache layout, while the provider owns command and file transport. Honor `project.signal` and call `project.assertCurrent()` around awaited provider work. Retained callbacks reject after the provision attempt closes. Project keys are scoped to the Gateway and repository, including linked worktrees; session edits and Git credentials are excluded from the prepared base.
 
@@ -201,7 +201,7 @@ or fully dynamic tool registration.
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `api.registerTool(tool, opts?)`          | Agent tool (required or `{ optional: true }`)                                                                                            |
 | `api.registerCommand(def)`               | Custom command (bypasses the LLM)                                                                                                        |
-| `api.registerNodeHostCommand(command)`   | Command handled by `openclaw node run`; optional `agentTool` metadata can expose it as an agent-visible tool while the node is connected |
+| `api.registerNodeHostCommand(command)`   | Command handled by `carapace node run`; optional `agentTool` metadata can expose it as an agent-visible tool while the node is connected |
 | `api.registerWidgetPresenter(presenter)` | Explicit or current-channel destination behind the core `show_widget` tool                                                               |
 
 Explicit widget presenters declare a unique model-visible target such as `node_panel`. Current-channel presenters use `target: "current_channel"`, provide a synchronous `match(context)` predicate over trusted delivery facts, and declare supported source kinds and delivery limits. Multiple transport presenters may coexist, but core selects an implicit route only when exactly one matches.
@@ -209,7 +209,7 @@ Explicit widget presenters declare a unique model-visible target such as `node_p
 Core validates the canonical `show_widget` schema, composes the bounded HTML document, and passes immutable HTML plus an optional hosted URL to `present(...)`. Presenters return either a generic message receipt or a node receipt. Expected availability and presentation failures use the closed error result instead of throwing; core falls back inline only for an actual `inline-widgets` client and otherwise surfaces the failure.
 
 Computer Use providers use `registerComputerUseProvider(api, provider)` from
-`openclaw/plugin-sdk/computer-use`. It registers the shared
+`carapace/plugin-sdk/computer-use`. It registers the shared
 `screen.snapshot`/`computer.act` node-host envelope once while the provider
 keeps its driver, frame, availability, and execution lifecycle local.
 Its optional `prepare(context)` hook settles native startup before the node's
@@ -241,13 +241,13 @@ structured entries:
 ```ts
 agentPromptGuidance: [
   "Global command hint.",
-  { text: "Only show this in the main OpenClaw prompt.", surfaces: ["openclaw_main"] },
+  { text: "Only show this in the main Carapace prompt.", surfaces: ["carapace_main"] },
 ];
 ```
 
-Structured `surfaces` may include `openclaw_main`, `codex_app_server`,
+Structured `surfaces` may include `carapace_main`, `codex_app_server`,
 `cli_backend`, `acp_backend`, or `subagent`. `pi_main` remains a deprecated alias
-for `openclaw_main`. Omit `surfaces` for intentional all-surface guidance. Do
+for `carapace_main`. Omit `surfaces` for intentional all-surface guidance. Do
 not pass an empty `surfaces` array; it is rejected so accidental scope loss does
 not become global prompt text.
 
@@ -278,7 +278,7 @@ advertised node command.
 | `api.registerGatewayMethod(name, handler, opts?)` | Gateway RPC method                                                     |
 | `api.registerGatewayDiscoveryService(service)`    | Local Gateway discovery advertiser                                     |
 | `api.registerCli(registrar, opts?)`               | CLI subcommand                                                         |
-| `api.registerNodeCliFeature(registrar, opts?)`    | Node feature CLI under `openclaw nodes`                                |
+| `api.registerNodeCliFeature(registrar, opts?)`    | Node feature CLI under `carapace nodes`                                |
 | `api.registerService(service)`                    | Background service                                                     |
 | `api.registerInteractiveHandler(registration)`    | Interactive handler                                                    |
 | `api.registerAgentToolResultMiddleware(...)`      | Runtime tool-result middleware                                         |
@@ -289,18 +289,18 @@ advertised node command.
 | `api.registerMcpServerConnectionResolver(...)`    | Per-requester MCP transport (`url`/`headers`) for a static server name |
 | `api.registerTextTransforms(transforms)`          | Plugin-owned prompt/message compatibility text rewrites                |
 | `api.registerConfigMigration(migrate)`            | Lightweight config migration run before plugin runtime loads           |
-| `api.registerMigrationProvider(provider)`         | Importer for `openclaw migrate`                                        |
+| `api.registerMigrationProvider(provider)`         | Importer for `carapace migrate`                                        |
 | `api.registerAutoEnableProbe(probe)`              | Config probe that can auto-enable this plugin                          |
 | `api.registerReload(registration)`                | Restart/hot/noop config-prefix policy for reload handling              |
 | `api.registerNodeHostCommand(command)`            | Command handler exposed to paired nodes                                |
 | `api.registerNodeInvokePolicy(policy)`            | Allowlist/approval policy for node-invoked commands                    |
-| `api.registerSecurityAuditCollector(collector)`   | Findings collector for `openclaw security audit`                       |
+| `api.registerSecurityAuditCollector(collector)`   | Findings collector for `carapace security audit`                       |
 
 Gateway methods default to `profileAccess: "required"`, so authenticated-profile verification fails closed before plugin dispatch. Set `profileAccess: "independent"` only for an audited method that neither reads nor mutates durable user or session state. Operator scope remains a separate authorization requirement.
 
 #### File-watch capacity errors
 
-`getFileWatchCapacityCode(error)` from `openclaw/plugin-sdk/file-access-runtime`
+`getFileWatchCapacityCode(error)` from `carapace/plugin-sdk/file-access-runtime`
 returns `EMFILE`, `ENFILE`, or `ENOSPC` for a native watch failure, or `undefined`
 for other errors. It requires `syscall: "watch"` because watcher libraries can
 forward directory-scan errors through the same error event. Use the result in
@@ -310,7 +310,7 @@ refresh path.
 #### SQLite write admission
 
 `runSqliteImmediateTransaction(db, prepare, options?)` from
-`openclaw/plugin-sdk/sqlite-runtime` waits for write admission without blocking
+`carapace/plugin-sdk/sqlite-runtime` waits for write admission without blocking
 the event loop. Its asynchronous `prepare` function may run more than once when
 another writer holds the database. Keep preparation repeatable: read and plan
 there, then return a **synchronous** transaction callback. Revalidate current
@@ -330,7 +330,7 @@ database handle and its owning operation alive until the returned promise settle
 #### Webhook body rejection
 
 Use `readWebhookBodyOrReject` or `readJsonWebhookBodyOrReject` from
-`openclaw/plugin-sdk/webhook-request-guards` for bounded body reads. Return when
+`carapace/plugin-sdk/webhook-request-guards` for bounded body reads. Return when
 the result is `{ ok: false }`; the helper owns the error response and connection
 cleanup. Body byte limits and read timeouts remain separate from transport cleanup.
 
@@ -365,7 +365,7 @@ Webhook routes that acknowledge a request before processing finishes must move
 that detached work onto its own tracked admission root:
 
 ```typescript
-import { runDetachedWebhookWork } from "openclaw/plugin-sdk/webhook-request-guards";
+import { runDetachedWebhookWork } from "carapace/plugin-sdk/webhook-request-guards";
 
 void runDetachedWebhookWork(() => processWebhookEvent(event)).catch((error) => {
   runtime.error?.(`webhook dispatch failed: ${String(error)}`);
@@ -448,7 +448,7 @@ Contract notes:
   senders change. Before any requester resolves, no scoped specs are advertised.
 - Unauthenticated requesters on a shared-thread harness still see the advertised
   scoped tools; calling one returns a clean not-connected tool error for that
-  requester. OpenClaw never falls back to another requester's credentials.
+  requester. Carapace never falls back to another requester's credentials.
 
 Memory prompt supplement builders receive optional `agentId`,
 `agentSessionKey`, and `sandboxed` context. Memory corpus supplement `search`
@@ -462,13 +462,13 @@ Use `registerMemoryPromptPreparation(...)` when prompt text depends on async
 plugin state. The callback runs once before each full agent prompt and receives
 the same tool, agent, session, and sandbox context as synchronous memory prompt
 builders. Validate the current storage-owner instance before loading persisted
-state, then return only lines for that run. OpenClaw freezes those lines and
+state, then return only lines for that run. Carapace freezes those lines and
 hands the immutable result to synchronous prompt assembly. Keep persistence,
 atomic replacement, and owner-removal deletion inside the owning plugin; do not
 poll or read files from a prompt builder.
 
 Telegram interactive handlers can return `{ submitText }` to route text through
-Telegram's normal inbound agent path after the handler succeeds. OpenClaw keeps
+Telegram's normal inbound agent path after the handler succeeds. Carapace keeps
 the callback button when inbound policy skips the text or processing fails, so
 the user can retry after the blocking condition changes. This result field is
 Telegram-specific; other channels keep their own interactive result contracts.
@@ -562,7 +562,7 @@ browser-trusted loopback origin; plain HTTP on a LAN host shows the
 secure-context error instead of mounting a panel that cannot authenticate.
 Full third-party-cookie blocking also makes gateway-protected tabs unavailable.
 As with all native plugin surfaces, the frame remains inside the installed
-plugin trust boundary; OpenClaw does not treat installed plugins as mutually
+plugin trust boundary; Carapace does not treat installed plugins as mutually
 isolated browser security principals.
 Cookie grants use the browser's hostname boundary, not its port boundary. Do
 not cohost mutually untrusted services on the Gateway hostname, even on other
@@ -613,7 +613,7 @@ turn runs; the Plugin SDK only constrains the target session, plugin-owned
 naming, and cleanup. Use `api.runtime.tasks.managedFlows` inside the scheduled
 turn when the work itself needs durable multi-step Task Flow state.
 
-Within session extensions, `openclaw/plugin-sdk/agent-sessions` provides the host's
+Within session extensions, `carapace/plugin-sdk/agent-sessions` provides the host's
 model-selection helpers. Exact provider/model IDs take precedence over case-insensitive
 matches; ambiguous references need exact provider and model IDs. Pass the provider
 separately when distinct identities share a combined reference. Human-name
@@ -661,9 +661,9 @@ Examples of non-Plan consumers:
   seam for async output reducers such as tokenjuice.
 
 Plugins must declare `contracts.agentToolResultMiddleware` for each targeted
-runtime, for example `["openclaw", "codex"]`. Installed plugins without that
+runtime, for example `["carapace", "codex"]`. Installed plugins without that
 contract, or without explicit enablement, cannot register this middleware; keep
-normal OpenClaw plugin hooks for work that does not need pre-model tool-result
+normal Carapace plugin hooks for work that does not need pre-model tool-result
 timing. The old
 embedded-runner-only extension factory registration path has been removed.
 </Accordion>
@@ -671,7 +671,7 @@ embedded-runner-only extension factory registration path has been removed.
 ### Gateway discovery registration
 
 `api.registerGatewayDiscoveryService(...)` lets a plugin advertise the active
-Gateway on a local discovery transport such as mDNS/Bonjour. OpenClaw calls the
+Gateway on a local discovery transport such as mDNS/Bonjour. Carapace calls the
 service during Gateway startup when local discovery is enabled, passes the
 current Gateway ports and non-secret TXT hint data, and calls the returned
 `stop` handler during Gateway shutdown.
@@ -707,7 +707,7 @@ own trust.
 For paired-node features, prefer
 `api.registerNodeCliFeature(registrar, opts?)`. It is a small wrapper around
 `api.registerCli(..., { parentPath: ["nodes"] })` and makes commands such as
-`openclaw nodes canvas` explicit plugin-owned node features.
+`carapace nodes canvas` explicit plugin-owned node features.
 
 Reuse the core node CLI owners when a plugin-owned node command needs the same
 Gateway flags, invoke envelope, terminal presentation, and authorization hints:
@@ -718,7 +718,7 @@ import {
   getNodesTheme,
   nodesCallOpts,
   runNodesCommand,
-} from "openclaw/plugin-sdk/node-cli-runtime";
+} from "carapace/plugin-sdk/node-cli-runtime";
 ```
 
 If you want a plugin command to stay lazy-loaded in the normal root CLI path,
@@ -745,13 +745,13 @@ api.registerCli(
 
 A root descriptor can also declare `machineOutput({ argv, stdoutIsTTY })` when
 the command reserves stdout for JSON, JSONL, or another machine-readable format
-without relying exclusively on a literal `--json` flag. OpenClaw evaluates this
+without relying exclusively on a literal `--json` flag. Carapace evaluates this
 resolver before plugin activation so startup diagnostics can be routed to
 stderr. The resolver must be synchronous, pure, and dependency-light: inspect
 only the supplied raw argv and stdout TTY state. Reuse the same resolver in
 lightweight CLI metadata and full registration so discovery and execution do
 not disagree. Use `getRootOptionAwareCommandPath` from
-`openclaw/plugin-sdk/cli-argv` when the resolver needs command-path tokens; it
+`carapace/plugin-sdk/cli-argv` when the resolver needs command-path tokens; it
 accepts supported root options before or after the command root. `machineOutput`
 is root metadata; nested descriptors cannot use it because their owning root
 must already be active before they are visible.
@@ -790,11 +790,11 @@ AI CLI backend such as `claude-cli` or `my-cli`.
 - The backend `config` is the authoritative command adapter: argv, environment,
   parser, session, image, and reliability behavior live in plugin code.
 - Users select the backend through model refs or model-scoped `agentRuntime.id`;
-  `openclaw.json` does not rewrite the adapter.
+  `carapace.json` does not rewrite the adapter.
 - Use `normalizeConfig` when registered static fields need a runtime-aware
   normalization pass.
 - Use `resolveExecutionArgs` for request-scoped argv rewrites that belong to
-  the CLI dialect, such as mapping OpenClaw thinking levels to a native effort
+  the CLI dialect, such as mapping Carapace thinking levels to a native effort
   flag. The hook receives `ctx.executionMode`; use `"side-question"` to add
   backend-native isolation flags for ephemeral `/btw` calls. If those flags
   reliably disable native tools for an otherwise always-on CLI, declare
@@ -810,10 +810,10 @@ AI CLI backend such as `claude-cli` or `my-cli`.
 - Backends that can disable all native tools for a specific run may declare
   `nativeToolMode: "selectable"`. Restricted calls pass an exact
   `ctx.toolAvailability.native` list plus canonical
-  `ctx.toolAvailability.openClaw` names. Declare
+  `ctx.toolAvailability.carapace` names. Declare
   `toolAvailabilityEnforcement: "execution-args"` and enforce the contract in
   final fresh/resume argv, or declare `"prepare-execution"`, enforce it in
-  staged policy, and return `toolAvailabilityEnforced: true`. OpenClaw disables
+  staged policy, and return `toolAvailabilityEnforced: true`. Carapace disables
   native tools for runtime caps such as cron `toolsAllow` and fails closed when
   the declared enforcement path is incomplete.
 
@@ -831,10 +831,10 @@ To participate in durable admitted turns, context engines must declare
 `currentTurnFence: "before-current-turn-entry-v1"` and
 `turnAdvancementIdempotency: "atomic-idempotent-v1"` under
 `info.transcriptSemantics`, then implement `commitTurn(...)` as an atomic,
-idempotent write keyed by `advancementKey`. OpenClaw supplies only the inclusive
+idempotent write keyed by `advancementKey`. Carapace supplies only the inclusive
 accepted turn, from its admitted user entry through its terminal entry; use the
 `readSessionTranscriptVisibleMessageDelta(...)` cursor API to bootstrap or
-rebuild earlier history. Without the full contract, OpenClaw uses the legacy
+rebuild earlier history. Without the full contract, Carapace uses the legacy
 context path for the whole logical turn and its retries, leaves the configured
 engine unchanged, and tries that engine again on the next logical turn.
 
@@ -844,13 +844,13 @@ engine unchanged, and tries that engine again on the next logical turn.
 - `registerMemoryCapability` may also expose `publicArtifacts.listArtifacts(...)`
   for host-managed exports. Companion plugins that enumerate those declared
   artifacts still use `listActiveMemoryPublicArtifacts(...)` from the retained
-  `openclaw/plugin-sdk/memory-host-core` facade until a focused public consumer
+  `carapace/plugin-sdk/memory-host-core` facade until a focused public consumer
   API exists; they must not reach into another plugin's private layout.
 - A memory runtime that can return session-transcript hits should implement
   `runtime.authorizeSearchHits(...)`. The host calls this hook before raw search
   hits reach caller-visible surfaces and supplies the requesting agent, session
   key, and sandbox state. Return only hits the requester may observe. If the hook
-  is absent, OpenClaw fails closed by withholding session-source hits while
+  is absent, Carapace fails closed by withholding session-source hits while
   retaining ordinary memory hits. Keep transcript identity and visibility
   policy in the owning memory plugin; callers must not infer authorization from
   paths or duplicate plugin-specific rules.
@@ -898,7 +898,7 @@ Use `cron_reconciled` as the full-snapshot trigger for durable state loaded at
 Gateway startup or scheduler replacement. It is not replayed for a plugin-only
 hot reload. Observation handlers run in parallel, and fire-and-forget
 dispatches can overlap, so consumers must not depend on event completion order.
-Keep OpenClaw as the source of truth for due checks and execution.
+Keep Carapace as the source of truth for due checks and execution.
 
 For a single-flight adapter with durable replacement, retry/backoff, and clean
 shutdown, see [Safe external cron projection](/plugins/hooks#safe-external-cron-projection).
@@ -913,7 +913,7 @@ shutdown, see [Safe external cron projection](/plugins/hooks#safe-external-cron-
 | `api.description`        | `string?`                 | Plugin description (optional)                                                             |
 | `api.source`             | `string`                  | Plugin source path                                                                        |
 | `api.rootDir`            | `string?`                 | Plugin root directory (optional)                                                          |
-| `api.config`             | `OpenClawConfig`          | Current config snapshot (active in-memory runtime snapshot when available)                |
+| `api.config`             | `CarapaceConfig`          | Current config snapshot (active in-memory runtime snapshot when available)                |
 | `api.pluginConfig`       | `Record<string, unknown>` | Plugin-specific config from `plugins.entries.<id>.config`                                 |
 | `api.runtime`            | `PluginRuntime`           | [Runtime helpers](/plugins/sdk-runtime)                                                   |
 | `api.logger`             | `PluginLogger`            | Scoped logger (`debug`, `info`, `warn`, `error`)                                          |
@@ -933,16 +933,16 @@ my-plugin/
 ```
 
 <Warning>
-  Never import your own plugin through `openclaw/plugin-sdk/<your-plugin>`
+  Never import your own plugin through `carapace/plugin-sdk/<your-plugin>`
   from production code. Route internal imports through `./api.ts` or
   `./runtime-api.ts`. The SDK path is the external contract only.
 </Warning>
 
 Facade-loaded bundled plugin public surfaces (`api.ts`, `runtime-api.ts`,
 `index.ts`, `setup-entry.ts`, and similar public entry files) prefer the
-active runtime config snapshot when OpenClaw is already running. If no runtime
+active runtime config snapshot when Carapace is already running. If no runtime
 snapshot exists yet, they fall back to the resolved config file on disk.
-Packaged bundled plugin facades should be loaded through OpenClaw's plugin
+Packaged bundled plugin facades should be loaded through Carapace's plugin
 facade loaders; direct imports from `dist/extensions/...` bypass the manifest
 and runtime sidecar checks that packaged installs use for plugin-owned code.
 
@@ -952,15 +952,15 @@ subpath yet. Bundled examples:
 
 - **Anthropic**: public `api.ts` / `contract-api.ts` seam for Claude
   beta-header and `service_tier` stream helpers.
-- **`@openclaw/openai-provider`**: `api.ts` exports provider builders,
+- **`@carapace/openai-provider`**: `api.ts` exports provider builders,
   default-model helpers, and realtime provider builders.
-- **`@openclaw/openrouter-provider`**: `api.ts` exports the provider builder
+- **`@carapace/openrouter-provider`**: `api.ts` exports the provider builder
   plus onboarding/config helpers.
 
 <Warning>
-  Extension production code should also avoid `openclaw/plugin-sdk/<other-plugin>`
+  Extension production code should also avoid `carapace/plugin-sdk/<other-plugin>`
   imports. If a helper is truly shared, promote it to a neutral SDK subpath
-  such as `openclaw/plugin-sdk/speech`, `.../provider-model-shared`, or another
+  such as `carapace/plugin-sdk/speech`, `.../provider-model-shared`, or another
   capability-oriented surface instead of coupling two plugins together.
 </Warning>
 

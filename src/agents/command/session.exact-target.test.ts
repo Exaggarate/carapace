@@ -2,25 +2,25 @@ import fs from "node:fs";
 import { expect, it, vi } from "vitest";
 import { resolveInternalSessionEffectsIdentity } from "../../config/sessions/internal-session-key.js";
 import * as sessionAccessor from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
-  isOpenClawAgentDatabaseOpen,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  isCarapaceAgentDatabaseOpen,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolveSession, resolveSessionKeyForRequestCore } from "./session.js";
 
 it.each(["work", "dashboard:incognito-work"])(
   "resolves the exact %s session without enumerating unrelated rows",
   async (key) => {
-    await withOpenClawTestState({ label: "command-exact-session" }, async (state) => {
+    await withCarapaceTestState({ label: "command-exact-session" }, async (state) => {
       const storePath = state.path("sessions.sqlite");
       const sessionKey = `agent:main:${key}`;
       const incognito = key.startsWith("dashboard:incognito-");
       const cfg = {
         agents: { defaults: {} },
         session: { store: storePath, reset: { mode: "idle", idleMinutes: 60 } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const entry = {
         sessionId: "selected-session",
         updatedAt: Date.now(),
@@ -80,15 +80,15 @@ it.each(["work", "dashboard:incognito-work"])(
 );
 
 it("does not provision a missing incognito lookup or select a hidden run-owned entry", async () => {
-  await withOpenClawTestState({ label: "command-private-session" }, async (state) => {
+  await withCarapaceTestState({ label: "command-private-session" }, async (state) => {
     const storePath = state.path("sessions.sqlite");
     const cfg = { agents: { defaults: {} }, session: { store: storePath } };
-    const incognitoPath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
+    const incognitoPath = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" });
     expect(
       resolveSessionKeyForRequestCore({ cfg, sessionKey: "agent:main:dashboard:incognito-missing" })
         .sessionEntry,
     ).toBeUndefined();
-    expect(isOpenClawAgentDatabaseOpen(incognitoPath)).toBe(false);
+    expect(isCarapaceAgentDatabaseOpen(incognitoPath)).toBe(false);
     expect(fs.existsSync(storePath)).toBe(false);
 
     const hidden = resolveInternalSessionEffectsIdentity({ agentId: "main", runId: "hidden-run" });

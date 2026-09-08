@@ -6,7 +6,7 @@ import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js"
 import type { HistoryEntry } from "../../auto-reply/reply/history.types.js";
 import type { DispatchReplyWithBufferedBlockDispatcher } from "../../auto-reply/reply/provider-dispatcher.types.js";
 import type { FinalizedMsgContext } from "../../auto-reply/templating.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetDiagnosticEventsForTest } from "../../infra/diagnostic-events.js";
 import { resetLogger, setLoggerOverride } from "../../logging/logger.js";
 import {
@@ -92,7 +92,7 @@ vi.mock("../../config/sessions/transcript.js", () => ({
   readRecentUserAssistantTextForSession,
 }));
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as CarapaceConfig;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let storePath: string;
 
@@ -204,7 +204,7 @@ function loggedEvents(log: ReturnType<typeof vi.fn>): TurnLogEvent[] {
 
 describe("channel turn finalize", () => {
   beforeEach(() => {
-    storePath = path.join(tempDirs.make("openclaw-channel-turn-finalize-"), "sessions.json");
+    storePath = path.join(tempDirs.make("carapace-channel-turn-finalize-"), "sessions.json");
     vi.clearAllMocks();
     recordInboundSessionCore.mockResolvedValue(undefined);
     dispatchReplyWithBufferedBlockDispatcherCore.mockImplementation(createDispatch());

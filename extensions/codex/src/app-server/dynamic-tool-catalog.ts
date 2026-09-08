@@ -1,10 +1,10 @@
-import { projectRuntimeToolInputSchema } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { JsonSchemaObject } from "openclaw/plugin-sdk/json-schema-runtime";
-import { normalizeOpenAIStrictCompatSchema } from "openclaw/plugin-sdk/provider-tools";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { projectRuntimeToolInputSchema } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { JsonSchemaObject } from "carapace/plugin-sdk/json-schema-runtime";
+import { normalizeOpenAIStrictCompatSchema } from "carapace/plugin-sdk/provider-tools";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexDynamicToolsLoading } from "./config.js";
 import {
-  CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+  CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
   type CodexDynamicToolFunctionSpec,
   type CodexDynamicToolSpec,
   type JsonValue,
@@ -24,12 +24,12 @@ export type ProjectedCodexDynamicTool<T extends CodexToolDescriptor> = {
 };
 export type CodexDynamicToolSchemaQuarantine = { tool: string; violations: readonly string[] };
 
-/** Namespace attached to OpenClaw-owned dynamic tools exposed to Codex. */
-const CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE = "openclaw";
+/** Namespace attached to Carapace-owned dynamic tools exposed to Codex. */
+const CODEX_CARAPACE_DYNAMIC_TOOL_NAMESPACE = "carapace";
 const CODEX_DYNAMIC_TOOL_NAME_MAX_CHARS = 128;
 const CODEX_DYNAMIC_TOOL_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/u;
 
-// Keep OpenClaw control-path tools directly callable even when Codex tool_search
+// Keep Carapace control-path tools directly callable even when Codex tool_search
 // is unavailable or resolves a connector-only universe. Developer instructions
 // still steer normal Codex subagents to native spawn_agent.
 // sessions_yield is normally routed by its catalogMode "direct-only" before
@@ -64,8 +64,8 @@ export function createCodexDynamicToolSpecs(params: {
       : params.entries.toSorted((left, right) => left.name.localeCompare(right.name));
   for (const entry of entries) {
     const functionSpec = createCodexDynamicToolFunctionSpec({ entry });
-    if (entry.name === "openclaw" && directToolNames.has(entry.name)) {
-      // OpenClaw is ring-zero and its whole turn surface. Keep its canonical
+    if (entry.name === "carapace" && directToolNames.has(entry.name)) {
+      // Carapace is ring-zero and its whole turn surface. Keep its canonical
       // root name even though generic direct-only tools use a model namespace.
       specs.push(functionSpec);
       continue;
@@ -83,7 +83,7 @@ export function createCodexDynamicToolSpecs(params: {
   if (namespaceTools.length > 0) {
     specs.push({
       type: "namespace",
-      name: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+      name: CODEX_CARAPACE_DYNAMIC_TOOL_NAMESPACE,
       description: "",
       tools: namespaceTools,
     });
@@ -91,7 +91,7 @@ export function createCodexDynamicToolSpecs(params: {
   if (directOnlyNamespaceTools.length > 0) {
     specs.push({
       type: "namespace",
-      name: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+      name: CODEX_CARAPACE_DIRECT_DYNAMIC_TOOL_NAMESPACE,
       description: "",
       tools: directOnlyNamespaceTools,
     });

@@ -1,5 +1,5 @@
 // Command startup policy tests cover which CLI commands require startup side effects.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { cliCommandCatalog } from "./command-catalog.js";
 import { resolveCliStartupPolicy } from "./command-startup-policy.js";
@@ -53,13 +53,13 @@ describe("command-startup-policy", () => {
     }
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent"],
+        argv: ["node", "carapace", "agent"],
         commandPath: ["agent"],
       }).skipConfigGuard,
     ).toBe(true);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "--local"],
+        argv: ["node", "carapace", "agent", "--local"],
         commandPath: ["agent"],
       }).skipConfigGuard,
     ).toBe(false);
@@ -67,7 +67,7 @@ describe("command-startup-policy", () => {
     for (const flag of ["--index", "--fix"]) {
       expect(
         resolvePolicy({
-          argv: ["node", "openclaw", "memory", "status", flag],
+          argv: ["node", "carapace", "memory", "status", flag],
           commandPath: ["memory", "status"],
         }).skipConfigGuard,
       ).toBe(false);
@@ -105,30 +105,30 @@ describe("command-startup-policy", () => {
 
   it("defers startup migrations for every update invocation", () => {
     for (const testCase of [
-      { argv: ["node", "openclaw", "update"], commandPath: ["update"] },
-      { argv: ["node", "openclaw", "--update"], commandPath: ["update"] },
+      { argv: ["node", "carapace", "update"], commandPath: ["update"] },
+      { argv: ["node", "carapace", "--update"], commandPath: ["update"] },
       {
-        argv: ["node", "openclaw", "--profile", "work", "update"],
+        argv: ["node", "carapace", "--profile", "work", "update"],
         commandPath: ["update"],
       },
       {
-        argv: ["node", "openclaw", "update", "--dry-run"],
+        argv: ["node", "carapace", "update", "--dry-run"],
         commandPath: ["update"],
       },
       {
-        argv: ["node", "openclaw", "update", "status"],
+        argv: ["node", "carapace", "update", "status"],
         commandPath: ["update", "status"],
       },
       {
-        argv: ["node", "openclaw", "update", "repair"],
+        argv: ["node", "carapace", "update", "repair"],
         commandPath: ["update", "repair"],
       },
       {
-        argv: ["node", "openclaw", "update", "finalize"],
+        argv: ["node", "carapace", "update", "finalize"],
         commandPath: ["update", "finalize"],
       },
       {
-        argv: ["node", "openclaw", "update", "wizard"],
+        argv: ["node", "carapace", "update", "wizard"],
         commandPath: ["update", "wizard"],
       },
     ]) {
@@ -140,7 +140,7 @@ describe("command-startup-policy", () => {
     for (const entry of cliCommandCatalog.filter((candidate) => candidate.route)) {
       expect(entry.policy?.configGuard, entry.commandPath.join(" ")).toBeDefined();
       for (const jsonOutputMode of [false, true]) {
-        const argv = ["node", "openclaw", ...entry.commandPath];
+        const argv = ["node", "carapace", ...entry.commandPath];
         const expectedSkip = entry.commandPath.join(" ") !== "config unset";
         expect(
           resolveCliStartupPolicy({ argv, commandPath: [...entry.commandPath], jsonOutputMode })
@@ -241,27 +241,27 @@ describe("command-startup-policy", () => {
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "--json"],
+        argv: ["node", "carapace", "agent", "--json"],
         commandPath: ["agent"],
         jsonOutputMode: true,
       }).loadPlugins,
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "--json", "--local"],
+        argv: ["node", "carapace", "agent", "--json", "--local"],
         commandPath: ["agent"],
         jsonOutputMode: true,
       }).loadPlugins,
     ).toBe(true);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "exec", "fix it"],
+        argv: ["node", "carapace", "agent", "exec", "fix it"],
         commandPath: ["agent", "exec"],
       }).loadPlugins,
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent"],
+        argv: ["node", "carapace", "agent"],
         commandPath: ["agent"],
       }).loadPlugins,
     ).toBe(false);
@@ -318,7 +318,7 @@ describe("command-startup-policy", () => {
         commandPath: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_HIDE_BANNER: "1",
+          CARAPACE_HIDE_BANNER: "1",
         },
       }).hideBanner,
     ).toBe(true);
@@ -329,9 +329,9 @@ describe("command-startup-policy", () => {
   });
 
   it("uses process env banner suppression when startup env is omitted", () => {
-    const originalHideBanner = process.env.OPENCLAW_HIDE_BANNER;
+    const originalHideBanner = process.env.CARAPACE_HIDE_BANNER;
     try {
-      process.env.OPENCLAW_HIDE_BANNER = "1";
+      process.env.CARAPACE_HIDE_BANNER = "1";
 
       expect(
         resolveCliStartupPolicy({
@@ -348,9 +348,9 @@ describe("command-startup-policy", () => {
       ).toBe(false);
     } finally {
       if (originalHideBanner === undefined) {
-        delete process.env.OPENCLAW_HIDE_BANNER;
+        delete process.env.CARAPACE_HIDE_BANNER;
       } else {
-        process.env.OPENCLAW_HIDE_BANNER = originalHideBanner;
+        process.env.CARAPACE_HIDE_BANNER = originalHideBanner;
       }
     }
   });

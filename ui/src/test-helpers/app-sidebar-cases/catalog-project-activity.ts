@@ -6,7 +6,7 @@ import "../../components/app-sidebar.ts";
 describe("AppSidebar project session activity", () => {
   it("preserves collapsed project sections stored by earlier versions", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "carapace:sidebar:sessions:collapsed-sections",
       JSON.stringify(["catalog-project:codex:gateway:local:custom:repo"]),
     );
     const gateway = createGateway({} as GatewayBrowserClient);
@@ -64,7 +64,7 @@ describe("AppSidebar project session activity", () => {
     await sidebar.updateComplete;
     expect(customGroup?.getAttribute("aria-expanded")).toBe("true");
     expect(
-      JSON.parse(localStorage.getItem("openclaw:sidebar:sessions:collapsed-sections") ?? "[]"),
+      JSON.parse(localStorage.getItem("carapace:sidebar:sessions:collapsed-sections") ?? "[]"),
     ).not.toContain("catalog-project:codex:gateway:local:custom:repo");
 
     project?.click();
@@ -74,7 +74,7 @@ describe("AppSidebar project session activity", () => {
     expect(project?.getAttribute("aria-expanded")).toBe("false");
     expect(customGroup?.getAttribute("aria-expanded")).toBe("false");
     expect(
-      JSON.parse(localStorage.getItem("openclaw:sidebar:sessions:collapsed-sections") ?? "[]"),
+      JSON.parse(localStorage.getItem("carapace:sidebar:sessions:collapsed-sections") ?? "[]"),
     ).toEqual([
       "catalog-project:codex:gateway:local:project:custom:repo",
       "catalog-custom:codex:gateway:local:custom:repo",
@@ -82,10 +82,10 @@ describe("AppSidebar project session activity", () => {
   });
 
   it("preserves and migrates collapsed person sections stored by earlier versions", async () => {
-    localStorage.setItem("openclaw:sidebar:sessions:catalog-grouping", "person");
+    localStorage.setItem("carapace:sidebar:sessions:catalog-grouping", "person");
     const legacySectionId = "catalog-project:codex:gateway:local:person:profile-ada";
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "carapace:sidebar:sessions:collapsed-sections",
       JSON.stringify([legacySectionId]),
     );
     const gateway = createGateway({} as GatewayBrowserClient);
@@ -136,7 +136,7 @@ describe("AppSidebar project session activity", () => {
     person?.click();
     await sidebar.updateComplete;
     expect(
-      JSON.parse(localStorage.getItem("openclaw:sidebar:sessions:collapsed-sections") ?? "[]"),
+      JSON.parse(localStorage.getItem("carapace:sidebar:sessions:collapsed-sections") ?? "[]"),
     ).toEqual(["catalog-person:codex:gateway:local:person:profile:profile-ada"]);
   });
 
@@ -204,7 +204,7 @@ describe("AppSidebar project session activity", () => {
               {
                 threadId: "active-thread",
                 name: "Active session",
-                cwd: "/work/openclaw",
+                cwd: "/work/carapace",
                 status: "active",
                 archived: false,
                 canContinue: false,
@@ -213,7 +213,7 @@ describe("AppSidebar project session activity", () => {
               {
                 threadId: "idle-thread",
                 name: "Idle session",
-                cwd: "/work/openclaw",
+                cwd: "/work/carapace",
                 status: "idle",
                 archived: false,
                 canContinue: true,
@@ -236,7 +236,7 @@ describe("AppSidebar project session activity", () => {
     await sidebar.updateComplete;
 
     const project = sidebar.querySelector(
-      '[data-session-catalog-project="project:/work/openclaw"]',
+      '[data-session-catalog-project="project:/work/carapace"]',
     );
     const active = sidebar.querySelector('[data-session-key*="active-thread"]');
     const idle = sidebar.querySelector('[data-session-key*="idle-thread"]');
@@ -251,7 +251,7 @@ describe("AppSidebar project session activity", () => {
       [...(hostList?.children ?? [])].every((item) => item.getAttribute("role") === "listitem"),
     ).toBe(true);
     expect(projectItem?.getAttribute("role")).toBe("listitem");
-    expect(projectList?.getAttribute("aria-label")).toBe("Local Codex: openclaw");
+    expect(projectList?.getAttribute("aria-label")).toBe("Local Codex: carapace");
     expect(
       [...(projectList?.children ?? [])].every((item) => item.getAttribute("role") === "listitem"),
     ).toBe(true);

@@ -32,7 +32,7 @@ export function transferRepoE2eArtifacts(
     node: process.versions.node,
     platform: process.platform,
     arch: process.arch,
-    privateQa: process.env.OPENCLAW_BUILD_PRIVATE_QA === "1",
+    privateQa: process.env.CARAPACE_BUILD_PRIVATE_QA === "1",
   };
   if (!identity.privateQa) {
     throw new Error("Repo E2E artifacts require a private-QA build");

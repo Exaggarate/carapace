@@ -7,7 +7,7 @@ import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 import { installScriptedRfbServer } from "./desktop-rfb-test-support.ts";
 
-const realVncWsUrl = process.env.OPENCLAW_DESKTOP_REAL_VNC_WS_URL?.trim() || null;
+const realVncWsUrl = process.env.CARAPACE_DESKTOP_REAL_VNC_WS_URL?.trim() || null;
 const suite = createControlUiE2eSuite({
   name: "desktop fullscreen",
   browserLaunchOptions: realVncWsUrl
@@ -17,8 +17,8 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) =>
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const proofStage = process.env.OPENCLAW_DESKTOP_FULLSCREEN_PROOF_STAGE ?? "after";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const proofStage = process.env.CARAPACE_DESKTOP_FULLSCREEN_PROOF_STAGE ?? "after";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -63,11 +63,11 @@ async function openDesktopPanel(page: Page) {
   await page.goto(`${suite.server.baseUrl}activity`);
   await waitForControlUiGatewayReady(page);
   await page.evaluate(() => {
-    window.dispatchEvent(new CustomEvent("openclaw:command-palette-open"));
+    window.dispatchEvent(new CustomEvent("carapace:command-palette-open"));
   });
   await page.getByRole("combobox", { name: "Search chats and commands…" }).waitFor();
   await page.getByRole("option", { name: "Desktop", exact: true }).click();
-  const panel = page.locator("openclaw-desktop-panel");
+  const panel = page.locator("carapace-desktop-panel");
   await panel.locator("section[aria-label='Desktop']").waitFor();
   return panel;
 }
@@ -157,7 +157,7 @@ suite.define(() => {
           await gateway.waitForRequest("environments.list");
           if (!realVncWsUrl) {
             // CI uses the canonical scripted RFB endpoint. Visual proof sets
-            // OPENCLAW_DESKTOP_REAL_VNC_WS_URL to a genuine VNC desktop.
+            // CARAPACE_DESKTOP_REAL_VNC_WS_URL to a genuine VNC desktop.
             await installScriptedRfbServer(page);
           }
           await panel.getByRole("button", { name: "Connect", exact: true }).click();

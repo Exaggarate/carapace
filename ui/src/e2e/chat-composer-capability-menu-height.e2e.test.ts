@@ -16,8 +16,8 @@ function skill(index: number) {
     name,
     description: `${name} skill`,
     source: "test",
-    filePath: `/tmp/openclaw-e2e/skills/${name}/SKILL.md`,
-    baseDir: `/tmp/openclaw-e2e/skills/${name}`,
+    filePath: `/tmp/carapace-e2e/skills/${name}/SKILL.md`,
+    baseDir: `/tmp/carapace-e2e/skills/${name}`,
     skillKey: name.toLowerCase().replaceAll(" ", "-"),
     always: false,
     disabled: false,
@@ -123,8 +123,8 @@ suite.define(() => {
           "config.get": configResponse(),
           "sessions.list": sessionsList(),
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: Array.from({ length: 36 }, (_, index) => skill(index + 1)),
           },
           "tools.effective": toolsEffectiveResponse(),
@@ -142,11 +142,11 @@ suite.define(() => {
       await dropdown.locator('[value="open-skills"]').click();
       await expect.poll(() => dropdown.getAttribute("data-view")).toBe("skills");
 
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-composer-capability-menu-height", artifactDirParent)
         : undefined;
-      const captureStage = process.env.OPENCLAW_UI_E2E_CAPTURE_STAGE?.trim();
+      const captureStage = process.env.CARAPACE_UI_E2E_CAPTURE_STAGE?.trim();
       const capture = async (view: string, theme: "dark" | "light") => {
         if (!artifactDir || !captureStage) {
           return;

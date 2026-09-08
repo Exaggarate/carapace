@@ -1,8 +1,8 @@
 /**
  * Resolves memory-search source, sync, and ranking configuration.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/config.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/config.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import {
   normalizeConfiguredMemoryExtraPaths,
@@ -17,7 +17,7 @@ import {
 import { getMemoryEmbeddingProvider } from "../plugins/memory-embedding-provider-runtime.js";
 import { assertSecretOwnerAvailable } from "../secrets/runtime-degraded-state.js";
 import { runtimeMemorySecretOwnerId } from "../secrets/runtime-memory-secret-owner.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.paths.js";
 import { clampNumber } from "../utils.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 
@@ -158,7 +158,7 @@ function normalizeSources(
   return Array.from(normalized);
 }
 
-function getConfiguredMemoryEmbeddingProvider(providerId: string, cfg: OpenClawConfig) {
+function getConfiguredMemoryEmbeddingProvider(providerId: string, cfg: CarapaceConfig) {
   // `none` is the built-in FTS-only sentinel, never a plugin capability.
   // Avoid cold plugin discovery when semantic memory is intentionally disabled.
   if (normalizeProviderId(providerId) === "none") {
@@ -168,7 +168,7 @@ function getConfiguredMemoryEmbeddingProvider(providerId: string, cfg: OpenClawC
 }
 
 /** Resolves source and query settings without loading an embedding provider runtime. */
-export function resolveMemorySearchIndexConfig(cfg: OpenClawConfig, agentId: string) {
+export function resolveMemorySearchIndexConfig(cfg: CarapaceConfig, agentId: string) {
   const defaults = cfg.memory?.search;
   const overrides = resolveAgentConfig(cfg, agentId)?.memory?.search;
   const enabled = overrides?.enabled ?? defaults?.enabled ?? true;
@@ -228,7 +228,7 @@ export function resolveMemorySearchIndexConfig(cfg: OpenClawConfig, agentId: str
 }
 
 export function resolveMemorySearchConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): ResolvedMemorySearchConfig | null {
   const indexConfig = resolveMemorySearchIndexConfig(cfg, agentId);
@@ -303,7 +303,7 @@ export function resolveMemorySearchConfig(
   };
   const store = {
     driver: "sqlite" as const,
-    databasePath: resolveOpenClawAgentSqlitePath({ agentId, env: process.env }),
+    databasePath: resolveCarapaceAgentSqlitePath({ agentId, env: process.env }),
     fts,
     vector,
   };
@@ -369,7 +369,7 @@ function resolveSyncConfig(): ResolvedMemorySearchSyncConfig {
 }
 
 export function resolveMemorySearchSyncConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
 ): ResolvedMemorySearchSyncConfig | null {
   const defaults = cfg.memory?.search;

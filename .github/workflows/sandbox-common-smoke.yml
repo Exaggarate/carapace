@@ -32,7 +32,7 @@ env:
 jobs:
   sandbox-common-smoke:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'openclaw/openclaw') && 'blacksmith-16vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'carapace/carapace') && 'blacksmith-16vcpu-ubuntu-2404' || 'ubuntu-24.04' }}
     timeout-minutes: 45
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          timeout --kill-after=30s 5m docker build -t openclaw-sandbox-smoke-base:bookworm-slim - <<'EOF'
+          timeout --kill-after=30s 5m docker build -t carapace-sandbox-smoke-base:bookworm-slim - <<'EOF'
           FROM debian:bookworm-slim
           RUN useradd --create-home --shell /bin/bash sandbox
           USER sandbox
@@ -60,13 +60,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          BASE_IMAGE="openclaw-sandbox-smoke-base:bookworm-slim" \
-            TARGET_IMAGE="openclaw-sandbox-common-smoke:bookworm-slim" \
+          BASE_IMAGE="carapace-sandbox-smoke-base:bookworm-slim" \
+            TARGET_IMAGE="carapace-sandbox-common-smoke:bookworm-slim" \
             PACKAGES="ca-certificates" \
             INSTALL_BUN=0 \
             INSTALL_BREW=0 \
             FINAL_USER=sandbox \
             scripts/sandbox-common-setup.sh
 
-          timeout --kill-after=30s 2m docker run --rm openclaw-sandbox-common-smoke:bookworm-slim sh -lc \
+          timeout --kill-after=30s 2m docker run --rm carapace-sandbox-common-smoke:bookworm-slim sh -lc \
             'set -e; test "$(id -un)" = sandbox; node --version; pnpm --version'

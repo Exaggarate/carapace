@@ -1,20 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import * as pluginRuntime from "../plugins/runtime.js";
 import { createPluginRecord } from "../plugins/status.test-helpers.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { useMockHttp } from "../test-utils/mock-http.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { VERSION } from "../version.js";
 import {
   buildTelemetryPayload,
@@ -24,7 +24,7 @@ import {
 
 const NOW = Date.parse("2026-08-23T12:00:00.000Z");
 const DAY_MS = 24 * 60 * 60 * 1000;
-const TELEMETRY_URL = "https://telemetry.openclaw.ai/api/latest-version";
+const TELEMETRY_URL = "https://github.com/Exaggarate/carapace";
 const TELEMETRY_STATE_KEY = "telemetry.updateCheck";
 const mockHttp = useMockHttp();
 
@@ -34,7 +34,7 @@ function installPluginRegistry(...plugins: Parameters<typeof createPluginRecord>
   pluginRuntime.setActivePluginRegistry(registry);
 }
 
-function createFeatureConfig(enabled = true): OpenClawConfig {
+function createFeatureConfig(enabled = true): CarapaceConfig {
   return {
     telemetry: { enabled },
     auth: {
@@ -87,18 +87,18 @@ function createFeatureConfig(enabled = true): OpenClawConfig {
 }
 
 describe("anonymous telemetry", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-telemetry-",
+      prefix: "carapace-telemetry-",
       env: {
         CI: undefined,
         DO_NOT_TRACK: undefined,
-        OPENCLAW_NIX_MODE: undefined,
-        OPENCLAW_NO_AUTO_UPDATE: undefined,
-        OPENCLAW_TELEMETRY_ENDPOINT: undefined,
+        CARAPACE_NIX_MODE: undefined,
+        CARAPACE_NO_AUTO_UPDATE: undefined,
+        CARAPACE_TELEMETRY_ENDPOINT: undefined,
       },
     });
     installPluginRegistry(
@@ -114,7 +114,7 @@ describe("anonymous telemetry", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await testState.cleanup();
   });
 
@@ -275,7 +275,7 @@ describe("anonymous telemetry", () => {
   });
 
   it("retains a successful response through write failures and recovers without extending its throttle", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     const update = { version: "2026.8.24", note: "A newer release is available." };
     mockHttp.intercept({ url: TELEMETRY_URL, reply: { json: update } });
@@ -319,7 +319,7 @@ describe("anonymous telemetry", () => {
   it.each(["endpoint", "state directory", "implicit home"] as const)(
     "keeps an unpersisted response isolated when the %s changes",
     async (scope) => {
-      const { db } = openOpenClawStateDatabase();
+      const { db } = openCarapaceStateDatabase();
       db.exec("PRAGMA query_only = ON");
       const options = { surface: "gateway" as const, fetchImpl: globalThis.fetch };
       mockHttp.intercept({
@@ -331,12 +331,12 @@ describe("anonymous telemetry", () => {
       let endpoint = TELEMETRY_URL;
       if (scope === "endpoint") {
         endpoint = "https://telemetry.example.invalid/api/latest-version";
-        setTestEnvValue("OPENCLAW_TELEMETRY_ENDPOINT", endpoint);
+        setTestEnvValue("CARAPACE_TELEMETRY_ENDPOINT", endpoint);
       } else if (scope === "state directory") {
-        setTestEnvValue("OPENCLAW_STATE_DIR", testState.path("alternate-state"));
+        setTestEnvValue("CARAPACE_STATE_DIR", testState.path("alternate-state"));
       } else {
-        deleteTestEnvValue("OPENCLAW_STATE_DIR");
-        setTestEnvValue("OPENCLAW_HOME", testState.path("alternate-home"));
+        deleteTestEnvValue("CARAPACE_STATE_DIR");
+        setTestEnvValue("CARAPACE_HOME", testState.path("alternate-home"));
       }
       mockHttp.intercept({ url: endpoint, reply: { json: { version: "2026.8.25" } } });
 
@@ -354,7 +354,7 @@ describe("anonymous telemetry", () => {
   );
 
   it("shares the retained success across equivalent resolved state paths", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     mockHttp.intercept({
       url: TELEMETRY_URL,
@@ -362,7 +362,7 @@ describe("anonymous telemetry", () => {
     });
     const options = { surface: "gateway" as const, fetchImpl: globalThis.fetch };
     await checkTelemetryUpdate({}, { ...options, nowMs: NOW });
-    setTestEnvValue("OPENCLAW_STATE_DIR", `${testState.stateDir}/.`);
+    setTestEnvValue("CARAPACE_STATE_DIR", `${testState.stateDir}/.`);
 
     await expect(checkTelemetryUpdate({}, { ...options, nowMs: NOW + 120_000 })).resolves.toEqual({
       version: "2026.8.24",
@@ -371,10 +371,10 @@ describe("anonymous telemetry", () => {
   });
 
   it("keeps the request's state destination when the environment changes during HTTP", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     const fetchImpl = vi.fn<typeof fetch>().mockImplementation(async () => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", testState.path("alternate-state"));
+      setTestEnvValue("CARAPACE_STATE_DIR", testState.path("alternate-state"));
       return Response.json({ version: "2026.8.24" });
     });
     const options = { surface: "gateway" as const, fetchImpl };
@@ -397,7 +397,7 @@ describe("anonymous telemetry", () => {
   });
 
   it("does not replace a newer persisted success with a retained older response", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     mockHttp.intercept({
       url: TELEMETRY_URL,
@@ -431,7 +431,7 @@ describe("anonymous telemetry", () => {
   });
 
   it("uses a newer transaction-selected success instead of sending at the pending timestamp's expiry", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openCarapaceStateDatabase();
     db.exec("PRAGMA query_only = ON");
     const fetchImpl = vi
       .fn<typeof fetch>()
@@ -463,14 +463,14 @@ describe("anonymous telemetry", () => {
   });
 
   it.each([
-    { name: "never opted in", config: {} satisfies OpenClawConfig },
+    { name: "never opted in", config: {} satisfies CarapaceConfig },
     { name: "explicitly opted out", config: createFeatureConfig(false) },
   ])("sends only an anonymous GET when $name", async ({ config }) => {
     mockHttp.intercept({
       url: TELEMETRY_URL,
       method: "GET",
       requestHeaders: {
-        "user-agent": `openclaw/${VERSION} (${process.platform}; node/${process.versions.node}; ${process.arch}; gateway)`,
+        "user-agent": `carapace/${VERSION} (${process.platform}; node/${process.versions.node}; ${process.arch}; gateway)`,
       },
       reply: { json: { version: "2026.8.24" } },
     });
@@ -542,8 +542,8 @@ describe("anonymous telemetry", () => {
     expect(readConfigMachineState(TELEMETRY_STATE_KEY)).toBeUndefined();
   });
 
-  it("never sends a request when OPENCLAW_NO_AUTO_UPDATE disables update checks", async () => {
-    setTestEnvValue("OPENCLAW_NO_AUTO_UPDATE", "1");
+  it("never sends a request when CARAPACE_NO_AUTO_UPDATE disables update checks", async () => {
+    setTestEnvValue("CARAPACE_NO_AUTO_UPDATE", "1");
 
     await expect(
       checkTelemetryUpdate(createFeatureConfig(), {
@@ -576,7 +576,7 @@ describe("anonymous telemetry", () => {
   it("still reports from an automated environment when an endpoint is configured for it", async () => {
     const customEndpoint = "https://telemetry.example.invalid/api/latest-version";
     setTestEnvValue("CI", "true");
-    setTestEnvValue("OPENCLAW_TELEMETRY_ENDPOINT", customEndpoint);
+    setTestEnvValue("CARAPACE_TELEMETRY_ENDPOINT", customEndpoint);
     mockHttp.intercept({ url: customEndpoint, reply: { json: { version: "2026.8.24" } } });
 
     await expect(
@@ -587,7 +587,7 @@ describe("anonymous telemetry", () => {
   });
 
   it("never sends a request for Nix-managed installations", async () => {
-    setTestEnvValue("OPENCLAW_NIX_MODE", "1");
+    setTestEnvValue("CARAPACE_NIX_MODE", "1");
 
     await expect(
       checkTelemetryUpdate(createFeatureConfig(), {
@@ -609,7 +609,7 @@ describe("anonymous telemetry", () => {
 
   it("uses the configured telemetry endpoint instead of the public endpoint", async () => {
     const customEndpoint = "https://telemetry.example.invalid/api/latest-version";
-    setTestEnvValue("OPENCLAW_TELEMETRY_ENDPOINT", customEndpoint);
+    setTestEnvValue("CARAPACE_TELEMETRY_ENDPOINT", customEndpoint);
     mockHttp.intercept({
       url: customEndpoint,
       reply: { json: { version: "2026.8.24" } },

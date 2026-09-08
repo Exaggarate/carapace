@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { captureEnv, withServer } from "openclaw/plugin-sdk/test-env";
+import { captureEnv, withServer } from "carapace/plugin-sdk/test-env";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { saveMediaStreamWithIdleTimeout } from "./media-chunk-idle.js";
 
@@ -18,9 +18,9 @@ describe("saveMediaStreamWithIdleTimeout", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeAll(async () => {
-    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-feishu-idle-"));
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-feishu-idle-"));
+    envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    process.env.CARAPACE_STATE_DIR = stateDir;
   });
 
   afterAll(async () => {

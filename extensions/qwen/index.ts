@@ -1,8 +1,8 @@
-// Qwen plugin entrypoint registers its OpenClaw integration.
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
-import { buildOpenAICompatibleLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+// Qwen plugin entrypoint registers its Carapace integration.
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-auth-api-key";
+import { buildOpenAICompatibleLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildQwenMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import {
   isQwen38ModelId,

@@ -2,14 +2,14 @@
 name: gitcrawl
 description: "GitHub archive: issue/PR search, sync freshness, duplicate clusters, current GitHub handoff, and Gitcrawl repo work."
 metadata:
-  openclaw:
-    homepage: https://github.com/openclaw/gitcrawl
+  carapace:
+    homepage: https://github.com/Exaggarate/carapace/gitcrawl
     requires:
       bins:
         - gitcrawl
     install:
       - kind: go
-        module: github.com/openclaw/gitcrawl/cmd/gitcrawl@latest
+        module: github.com/Exaggarate/carapace/gitcrawl/cmd/gitcrawl@latest
         bins:
           - gitcrawl
 ---
@@ -47,7 +47,7 @@ gh issue view <number> -R owner/repo --json number,title,state,closedAt,url
 Do not pass its `--live`/`--cached` flags or old field names to `gh`, restore an
 old Gitcrawl, bypass the existing Octopool shim, or change auth/PATH/config to
 repair that removed command. Octopool owns the shared `gh` cache; Gitcrawl owns
-the local archive. See the [upstream migration guide](https://github.com/openclaw/gitcrawl/blob/main/docs/gh-shim.md)
+the local archive. See the [upstream migration guide](https://github.com/Exaggarate/carapace/gitcrawl/blob/main/docs/gh-shim.md)
 when setting up or diagnosing that handoff.
 
 ## Archive Boundaries
@@ -61,4 +61,4 @@ Public mutations use authorized `gh` workflows and checkout proof.
 For exact archive counts, Gitcrawl has no `sql` subcommand. Resolve `.db_path`
 from `doctor --json` and use `sqlite3 -readonly`; do not modify database rows
 instead of using the maintainer commands. For Gitcrawl implementation work,
-verify the checkout remote is `openclaw/gitcrawl` and use its own instructions.
+verify the checkout remote is `carapace/gitcrawl` and use its own instructions.

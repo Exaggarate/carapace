@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { BoundWebPushSubscription } from "../infra/push-web.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { HumanMentionWebPush } from "./event-web-push.js";
 import { invalidateOperatorRolePolicy } from "./operator-role-policy.js";
 
@@ -167,7 +167,7 @@ describe("event Web Push classification", () => {
     await vi.waitFor(() => expect(preparedWebPushSendMock).toHaveBeenCalledOnce());
     expect(preparedWebPushSendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: expect.objectContaining({ tag: "openclaw-agent-finished-run-1" }),
+        payload: expect.objectContaining({ tag: "carapace-agent-finished-run-1" }),
       }),
     );
   });
@@ -249,7 +249,7 @@ describe("event Web Push classification", () => {
       runId: "inject-message-1",
       message: {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "gateway-injected",
         content: [{ type: "text", text: "Injected transcript update" }],
       },
@@ -271,7 +271,7 @@ describe("event Web Push classification", () => {
     await vi.waitFor(() => expect(preparedWebPushSendMock).toHaveBeenCalledOnce());
     expect(preparedWebPushSendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: expect.objectContaining({ tag: "openclaw-question-question\\u{A}1" }),
+        payload: expect.objectContaining({ tag: "carapace-question-question\\u{A}1" }),
       }),
     );
   });
@@ -389,7 +389,7 @@ describe("event Web Push classification", () => {
         await vi.waitFor(() => expect(preparedWebPushSendMock).toHaveBeenCalledOnce());
         expect(preparedWebPushSendMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            payload: expect.objectContaining({ title: "OpenClaw scheduled task failed" }),
+            payload: expect.objectContaining({ title: "Carapace scheduled task failed" }),
           }),
         );
       } else {
@@ -562,11 +562,11 @@ describe("event Web Push classification", () => {
           roles.resolveOperatorRolePolicyForProfile,
         );
         canReceiveSessionEventMock.mockImplementation(sharing.canReceiveSessionEvent);
-        await withOpenClawTestState({ scenario: "minimal" }, async () => {
+        await withCarapaceTestState({ scenario: "minimal" }, async () => {
           const owner = ensureProfileForEmail("draft-owner@example.test");
           const recipient = ensureProfileForEmail("draft-admin@example.test");
           setUserProfileRole(recipient.id, "admin");
-          let cfg: OpenClawConfig = {
+          let cfg: CarapaceConfig = {
             gateway: {
               roles: {
                 default: "reader",
@@ -648,12 +648,12 @@ describe("event Web Push classification", () => {
         expect(preparedWebPushSendMock).toHaveBeenCalledWith(
           expect.objectContaining({
             payload: {
-              title: "OpenClaw mention",
+              title: "Carapace mention",
               body:
                 detailLevel === "private"
                   ? "Someone mentioned you in a conversation."
                   : "Al\\u{A}ice mentioned you in Review\\u{202E}.",
-              tag: expect.stringMatching(/^openclaw-mention-[\w-]{43}$/u),
+              tag: expect.stringMatching(/^carapace-mention-[\w-]{43}$/u),
               renotify: false,
               url: "chat/research/thread%2E1#gatewayUrl=wss%3A%2F%2Fgateway.example.test%2Foperator",
             },

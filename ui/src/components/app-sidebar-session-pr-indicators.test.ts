@@ -180,8 +180,8 @@ describe("SessionPullRequestIndicatorsController", () => {
               { number: 2, state: state === "closed" ? "closed" : "merged" },
               {
                 number: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 branch: "feature/demo",
                 title: "Demo",
                 url: "https://example.test/pr/1",
@@ -247,8 +247,8 @@ describe("SessionPullRequestIndicatorsController", () => {
           pullRequests: [
             {
               number: 1,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "feature/demo",
               title: "Demo",
               url: "https://example.test/pr/1",

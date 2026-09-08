@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { controlUiPublicAssetPath, inferControlUiPublicAssetPath } from "./public-assets.ts";
 
 function withConfiguredBasePath<T>(basePath: string, run: () => T): T {
-  const key = "__OPENCLAW_CONTROL_UI_BASE_PATH__";
+  const key = "__CARAPACE_CONTROL_UI_BASE_PATH__";
   const previous = Object.getOwnPropertyDescriptor(window, key);
   Object.defineProperty(window, key, { configurable: true, value: basePath });
   try {
@@ -19,7 +19,7 @@ function withConfiguredBasePath<T>(basePath: string, run: () => T): T {
 
 describe("controlUiPublicAssetPath", () => {
   it("versions public assets with the document build while keeping the worker revalidating", () => {
-    const attribute = "data-openclaw-control-ui-build-id";
+    const attribute = "data-carapace-control-ui-build-id";
     document.documentElement.setAttribute(attribute, "build-a");
     try {
       for (const asset of [
@@ -56,7 +56,7 @@ describe("controlUiPublicAssetPath", () => {
 
   it("resolves base-mounted public assets under the configured base path", () => {
     expect(controlUiPublicAssetPath("favicon.svg", "/ui")).toBe("/ui/favicon.svg");
-    expect(controlUiPublicAssetPath("sw.js", "/apps/openclaw/")).toBe("/apps/openclaw/sw.js");
+    expect(controlUiPublicAssetPath("sw.js", "/apps/carapace/")).toBe("/apps/carapace/sw.js");
   });
 });
 
@@ -68,23 +68,23 @@ describe("inferControlUiPublicAssetPath", () => {
     expect(
       inferControlUiPublicAssetPath("favicon.svg", {
         resourceBasePath: "",
-        pathname: "/__openclaw__/new",
+        pathname: "/__carapace__/new",
       }),
     ).toBe("/favicon.svg");
   });
 
   it("infers base-mounted assets from nested routes", () => {
-    expect(inferControlUiPublicAssetPath("sw.js", { pathname: "/openclaw/skills/workshop" })).toBe(
-      "/openclaw/sw.js",
+    expect(inferControlUiPublicAssetPath("sw.js", { pathname: "/carapace/skills/workshop" })).toBe(
+      "/carapace/sw.js",
     );
   });
 
   it("keeps explicit pathname inference independent from ambient page state", () => {
     expect(
       withConfiguredBasePath("/other", () =>
-        inferControlUiPublicAssetPath("sw.js", { pathname: "/openclaw/skills/workshop" }),
+        inferControlUiPublicAssetPath("sw.js", { pathname: "/carapace/skills/workshop" }),
       ),
-    ).toBe("/openclaw/sw.js");
+    ).toBe("/carapace/sw.js");
   });
 
   it("keeps an about mount root distinct from the settings About route", () => {

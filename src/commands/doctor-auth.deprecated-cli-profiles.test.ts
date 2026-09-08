@@ -1,8 +1,8 @@
 // Doctor deprecated CLI profile tests cover legacy auth profile migration and warnings.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 import { maybeRepairLegacyOAuthProfileIds } from "./doctor-auth-legacy-oauth.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
@@ -13,7 +13,7 @@ const authProfileStoreMock = vi.hoisted(() => ({
   store: { version: 1, profiles: {} } as AuthProfileStore,
 }));
 const candidateMocks = vi.hoisted(() => ({
-  candidates: [{ agentDir: undefined, authPath: "/tmp/shared/openclaw-agent.sqlite" }] as Array<{
+  candidates: [{ agentDir: undefined, authPath: "/tmp/shared/carapace-agent.sqlite" }] as Array<{
     agentDir?: string;
     authPath: string;
   }>,
@@ -23,7 +23,7 @@ const repairMocks = vi.hoisted(() => ({
   repairOAuthProfileIdMismatch: vi.fn(),
 }));
 const providerPolicyMocks = vi.hoisted(() => ({
-  applyConfigDefaults: vi.fn((params: { config: OpenClawConfig }) => params.config),
+  applyConfigDefaults: vi.fn((params: { config: CarapaceConfig }) => params.config),
 }));
 
 vi.mock("../plugins/providers.runtime.js", () => ({
@@ -79,7 +79,7 @@ function makePrompter(confirmValue: boolean): DoctorPrompter {
   };
 }
 
-function requireAuthConfig(config: OpenClawConfig): NonNullable<OpenClawConfig["auth"]> {
+function requireAuthConfig(config: CarapaceConfig): NonNullable<CarapaceConfig["auth"]> {
   if (!config.auth) {
     throw new Error("expected repaired auth config");
   }
@@ -100,7 +100,7 @@ beforeEach(() => {
   resolvePluginProvidersMock.mockReturnValue([]);
   authProfileStoreMock.store = { version: 1, profiles: {} };
   candidateMocks.candidates = [
-    { agentDir: undefined, authPath: "/tmp/shared/openclaw-agent.sqlite" },
+    { agentDir: undefined, authPath: "/tmp/shared/carapace-agent.sqlite" },
   ];
   candidateMocks.stores.clear();
   repairMocks.repairOAuthProfileIdMismatch.mockReset();
@@ -128,7 +128,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
         },
       },
     },
-  ] satisfies OpenClawConfig[])(
+  ] satisfies CarapaceConfig[])(
     "skips provider discovery without profile state (%#)",
     async (cfg) => {
       const result = await maybeRepairLegacyOAuthProfileIds(cfg, makePrompter(true));
@@ -195,7 +195,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
             anthropic: ["anthropic:default"],
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       makePrompter(true),
     );
 
@@ -204,7 +204,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
       repairMocks.repairOAuthProfileIdMismatch,
       "OAuth profile repair",
     ) as {
-      cfg?: OpenClawConfig;
+      cfg?: CarapaceConfig;
       store?: AuthProfileStore;
       provider?: unknown;
       legacyProfileId?: unknown;
@@ -292,7 +292,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       makePrompter(true),
     );
 
@@ -326,7 +326,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
         },
       },
     },
-  ] satisfies OpenClawConfig[])(
+  ] satisfies CarapaceConfig[])(
     "removes config-only retired profile references (%#)",
     async (cfg) => {
       resolvePluginProvidersMock.mockReturnValue([
@@ -358,8 +358,8 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
     async (accepted) => {
       const secondaryAgentDir = "/tmp/state/agents/secondary/agent";
       candidateMocks.candidates = [
-        { agentDir: undefined, authPath: "/tmp/shared/openclaw-agent.sqlite" },
-        { agentDir: secondaryAgentDir, authPath: `${secondaryAgentDir}/openclaw-agent.sqlite` },
+        { agentDir: undefined, authPath: "/tmp/shared/carapace-agent.sqlite" },
+        { agentDir: secondaryAgentDir, authPath: `${secondaryAgentDir}/carapace-agent.sqlite` },
       ];
       candidateMocks.stores.set(secondaryAgentDir, {
         version: 1,
@@ -422,7 +422,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
     const result = await maybeRepairLegacyOAuthProfileIds(
       {
         agents: { defaults: { model: { primary: "claude-cli/claude-sonnet-4-6" } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       makePrompter(true),
     );
 
@@ -472,7 +472,7 @@ describe("maybeRepairLegacyOAuthProfileIds", () => {
             "anthropic:default": { provider: "anthropic", mode: "oauth" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter,
     );
 

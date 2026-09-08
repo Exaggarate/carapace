@@ -1,4 +1,4 @@
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/setup";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/setup";
 import { describe, expect, it } from "vitest";
 import { discordSetupContract } from "./setup-adapter.js";
 

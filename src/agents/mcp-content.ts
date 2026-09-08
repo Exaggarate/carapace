@@ -1,6 +1,6 @@
 import type { GetPromptResult } from "@modelcontextprotocol/sdk/types.js";
-import { stableStringify } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { stableStringify } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { AgentToolResult } from "./runtime/index.js";
 import { isToolResultError } from "./tool-result-error.js";
 import { toToolSearchJsonSafe } from "./tool-search-json.js";

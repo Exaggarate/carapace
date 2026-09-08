@@ -6,7 +6,7 @@ import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-or
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { storeOriginDeviceToken } from "../infra/device-auth-store.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { runCliProcessChild } from "./cli-process-child.test-helpers.js";
 import { closeActiveGatewayServers } from "./gateway-backed-exit.test-helpers.js";
 
@@ -21,7 +21,7 @@ export async function prepareGatewayCliFixture(
   gateway: Record<string, unknown>,
 ): Promise<{ stateDir: string; configPath: string }> {
   const stateDir = path.join(root, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   await fs.mkdir(stateDir, { recursive: true });
   await fs.writeFile(configPath, JSON.stringify({ gateway }));
   return { stateDir, configPath };
@@ -68,7 +68,7 @@ export async function prepareUnreachableGatewayCliFixture(params: {
   label: string;
   seeded: boolean;
 }): Promise<{ root: string; stateDir: string; configPath: string }> {
-  const root = tempDirs.make(`openclaw-${params.label}-${params.seeded ? "seeded" : "absent"}-`);
+  const root = tempDirs.make(`carapace-${params.label}-${params.seeded ? "seeded" : "absent"}-`);
   const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
     mode: "remote",
     auth: { mode: "none" },
@@ -78,8 +78,8 @@ export async function prepareUnreachableGatewayCliFixture(params: {
     const stateEnv = {
       ...process.env,
       HOME: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: stateDir,
     };
     const identity = loadOrCreateDeviceIdentity({ env: stateEnv });
     storeOriginDeviceToken({
@@ -90,7 +90,7 @@ export async function prepareUnreachableGatewayCliFixture(params: {
       scopes: ["operator.admin"],
       env: stateEnv,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
   return { root, stateDir, configPath };
 }
@@ -121,15 +121,15 @@ export async function runIsolatedGatewayCli(params: {
       NODE_DISABLE_COMPILE_CACHE: "1",
       NODE_ENV: undefined,
       NODE_OPTIONS: undefined,
-      OPENCLAW_CONFIG_PATH: params.configPath,
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_URL: undefined,
-      OPENCLAW_HOME: params.root,
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_STATE_DIR: params.stateDir,
+      CARAPACE_CONFIG_PATH: params.configPath,
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_URL: undefined,
+      CARAPACE_HOME: params.root,
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_STATE_DIR: params.stateDir,
       DISCORD_BOT_TOKEN: undefined,
       TWILIO_ACCOUNT_SID: undefined,
       TWILIO_AUTH_TOKEN: undefined,

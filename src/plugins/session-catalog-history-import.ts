@@ -1,9 +1,9 @@
-import { parseDateStringTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { parseDateStringTimestampMs } from "@carapace/normalization-core/number-coercion";
 import type {
   SessionCatalogTranscriptItem,
   SessionsCatalogReadResult,
 } from "../../packages/gateway-protocol/src/schema/sessions-catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentMessage } from "../plugin-sdk/agent-core.js";
 import { withSessionTranscriptWriteLock } from "../plugin-sdk/session-transcript-runtime.js";
 
@@ -23,13 +23,13 @@ function importedSessionCatalogMessage(params: {
   }
   const text = importedText || "[Unsupported catalog transcript item]";
   if (params.item.type === "userMessage") {
-    // Imported native rows are not OpenClaw-authored; mirrorOrigin excludes them
+    // Imported native rows are not Carapace-authored; mirrorOrigin excludes them
     // from self-echo provenance so a repeated external prompt stays observable.
     return {
       role: "user",
       content: text,
       timestamp,
-      __openclaw: { mirrorOrigin: `${params.catalogId}-catalog-import` },
+      __carapace: { mirrorOrigin: `${params.catalogId}-catalog-import` },
     } as AgentMessage;
   }
   const prefix =
@@ -67,7 +67,7 @@ function sessionCatalogContinuationNotice(text: string, timestamp: number): Agen
     content: [{ type: "text", text }],
     timestamp,
     api: "openai-responses",
-    provider: "openclaw",
+    provider: "carapace",
     model: "session-catalog",
     usage: {
       input: 0,
@@ -174,7 +174,7 @@ export async function importSessionCatalogHistory(params: {
   sessionKey: string;
   agentId: string;
   cwd?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   continuationNotice?: string;
   commitGuard?: () => void;
 }): Promise<void> {

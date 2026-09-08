@@ -1,10 +1,10 @@
 import { html, nothing, type TemplateResult } from "lit";
 import { property, state } from "lit/decorators.js";
 import { AuthenticatedAvatarRouteLoader } from "../lib/authenticated-avatar-route.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 
 /** Channel conversation image loaded from the Gateway's authenticated proxy route. */
-class ChannelAvatar extends OpenClawLightDomContentsElement {
+class ChannelAvatar extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) routeUrl: string | null = null;
   @property({ attribute: false }) authTokens: readonly string[] = [];
   @property({ attribute: false }) authReady = false;
@@ -39,6 +39,6 @@ class ChannelAvatar extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-channel-avatar")) {
-  customElements.define("openclaw-channel-avatar", ChannelAvatar);
+if (!customElements.get("carapace-channel-avatar")) {
+  customElements.define("carapace-channel-avatar", ChannelAvatar);
 }

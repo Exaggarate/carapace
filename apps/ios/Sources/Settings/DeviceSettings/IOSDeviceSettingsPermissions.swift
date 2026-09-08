@@ -2,7 +2,7 @@ import AVFoundation
 import Contacts
 import CoreLocation
 import EventKit
-import OpenClawKit
+import CarapaceKit
 import Photos
 import Speech
 import UserNotifications

@@ -19,9 +19,9 @@ afterEach(async () => {
 
 describe("CLI terminal failure logging", () => {
   it("writes one redacted warning after a real CLI subprocess exhausts recovery", async () => {
-    const dir = tempDirs.make("openclaw-cli-terminal-log-");
+    const dir = tempDirs.make("carapace-cli-terminal-log-");
     const scriptPath = path.join(dir, "fail.mjs");
-    const logFile = path.join(dir, "openclaw.log");
+    const logFile = path.join(dir, "carapace.log");
     const sessionFile = path.join(dir, "agents", "main", "sessions", "session-test.jsonl");
     fs.mkdirSync(path.dirname(sessionFile), { recursive: true });
     fs.writeFileSync(

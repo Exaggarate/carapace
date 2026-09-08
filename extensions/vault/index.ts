@@ -1,10 +1,10 @@
-import { definePluginEntry, type OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry, type CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 
 export default definePluginEntry({
   id: "vault",
   name: "Vault",
   description: "HashiCorp Vault SecretRef provider integration.",
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     api.registerCli(
       async ({ program, config }) => {
         const { registerVaultCommands } = await import("./src/cli.js");

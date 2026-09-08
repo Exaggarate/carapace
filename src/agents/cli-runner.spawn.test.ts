@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSolidPngBuffer } from "../../test/helpers/image-fixtures.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -128,7 +128,7 @@ async function createCliPackageFixture(version: string): Promise<{
   root: string;
   entrypoint: string;
 }> {
-  const root = tempDirs.make("openclaw-cli-version-gate-");
+  const root = tempDirs.make("carapace-cli-version-gate-");
   const entrypoint = path.join(root, "bin", "cli.js");
   await fs.mkdir(path.dirname(entrypoint), { recursive: true });
   await fs.writeFile(
@@ -142,13 +142,13 @@ async function createCliPackageFixture(version: string): Promise<{
 
 describe("runCliAgent spawn path", () => {
   it("hydrates a session-key-owned agent workspace image before spawning the CLI", async () => {
-    const stateDir = tempDirs.make("openclaw-cli-agent-image-");
+    const stateDir = tempDirs.make("carapace-cli-agent-image-");
     const workspaceDir = path.join(stateDir, "workspace-arthur");
     const imagePath = path.join(workspaceDir, "media", "inbound", "photo.png");
     const image = createSolidPngBuffer(1, 1, { r: 255, g: 0, b: 0 });
     await fs.mkdir(path.dirname(imagePath), { recursive: true });
     await fs.writeFile(imagePath, image);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     mockSuccessfulCliRun(CLAUDE_OK_JSONL);
     const context = buildPreparedCliRunContext({
       sessionKey: "agent:arthur:main",
@@ -245,7 +245,7 @@ describe("runCliAgent spawn path", () => {
       runId: "run-node-claude",
       prompt: "current turn",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -263,7 +263,7 @@ describe("runCliAgent spawn path", () => {
           "--mcp-config",
           "/tmp/gateway-mcp.json",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__carapace__*",
         ],
         resumeArgs: [
           "-p",
@@ -276,7 +276,7 @@ describe("runCliAgent spawn path", () => {
           "--mcp-config",
           "/tmp/gateway-mcp.json",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__carapace__*",
           "--resume",
           "{sessionId}",
         ],
@@ -290,14 +290,14 @@ describe("runCliAgent spawn path", () => {
         toolAvailability = execution.toolAvailability;
         return [...execution.baseArgs];
       },
-      cliToolAvailability: { native: [], openClaw: ["message"] },
+      cliToolAvailability: { native: [], carapace: ["message"] },
     });
     context.preparedBackend.secretInput = {
       fd: 3,
       fingerprint: "selected-node-token-fingerprint",
       createData: () => Buffer.from("selected-node-token"),
     };
-    context.openClawHistoryPrompt = "gateway transcript reseed";
+    context.carapaceHistoryPrompt = "gateway transcript reseed";
     context.claudeSkillsPluginArgs = ["--plugin-dir", "/tmp/gateway-skills"];
     context.params.forkCliSessionOnResume = true;
     context.params.claimCliSessionFork = vi.fn(async () => true);
@@ -315,8 +315,8 @@ describe("runCliAgent spawn path", () => {
 
     expect(output).toMatchObject({ text: "node answer", sessionId: "forked-node-session" });
     // Node runs keep the gateway's native tool policy; loopback MCP tools do
-    // not exist on the node so the OpenClaw list is projected empty.
-    expect(toolAvailability).toEqual({ native: [], openClaw: [] });
+    // not exist on the node so the Carapace list is projected empty.
+    expect(toolAvailability).toEqual({ native: [], carapace: [] });
     expect(writeSystemPrompt).not.toHaveBeenCalled();
     expect(supervisorSpawnMock).not.toHaveBeenCalled();
     expect(invokeNode).toHaveBeenCalledWith(
@@ -378,7 +378,7 @@ describe("runCliAgent spawn path", () => {
         model: "claude-fable-5",
         runId: `run-node-context-${testCase.selection}`,
         sessionEntry: {
-          sessionId: `openclaw-context-${testCase.selection}`,
+          sessionId: `carapace-context-${testCase.selection}`,
           updatedAt: 1,
           execHost: "node",
           execNode: "node-a",
@@ -428,7 +428,7 @@ describe("runCliAgent spawn path", () => {
       runId: "run-node-synthetic-empty",
       prompt: "current turn",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -460,7 +460,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       prompt: "current turn",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -502,7 +502,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       runId: "run-node-abort",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -579,7 +579,7 @@ describe("runCliAgent spawn path", () => {
       sessionKey: plan.sessionKey,
       agentId: "main",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -642,7 +642,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       timeoutMs: 25,
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -680,7 +680,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       timeoutMs: 25,
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -700,7 +700,7 @@ describe("runCliAgent spawn path", () => {
     const context = buildPreparedCliRunContext({
       model: "claude-opus-4-8",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -733,7 +733,7 @@ describe("runCliAgent spawn path", () => {
       runId: "run-node-offloaded-media-facts",
       prompt: "describe the attachment",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "carapace-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -790,7 +790,7 @@ describe("runCliAgent spawn path", () => {
     expect(allArgs).toContain("You are a helpful assistant.");
   });
 
-  it("includes the OpenClaw skills prompt in CLI system prompts", () => {
+  it("includes the Carapace skills prompt in CLI system prompts", () => {
     const systemPrompt = buildCliAgentSystemPrompt({
       workspaceDir: "/tmp",
       modelDisplay: "claude-cli/sonnet",
@@ -1128,7 +1128,7 @@ describe("runCliAgent spawn path", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = (args[0] ?? {}) as { argv?: string[] };
       systemPromptPath = requireArgAfter(input.argv, "--append-system-prompt-file");
-      expect(systemPromptPath).toContain("openclaw-cli-system-prompt-");
+      expect(systemPromptPath).toContain("carapace-cli-system-prompt-");
       await expect(fs.readFile(systemPromptPath, "utf-8")).resolves.toBe(
         "You are a helpful assistant.",
       );
@@ -1152,7 +1152,7 @@ describe("runCliAgent spawn path", () => {
 
   it("resends system prompts through a file for soft-resumed prompt-tool drift", async () => {
     const writeSoftResumeSystemPromptFile = vi.fn(async () => ({
-      filePath: "/tmp/openclaw-soft-resume-system-prompt.md",
+      filePath: "/tmp/carapace-soft-resume-system-prompt.md",
       cleanup: async () => {},
     }));
     setCliRunnerExecuteTestDeps({
@@ -1162,7 +1162,7 @@ describe("runCliAgent spawn path", () => {
       const input = (args[0] ?? {}) as { argv?: string[] };
       expect(input.argv).toContain("resume");
       expect(input.argv).toContain("soft-cli-session");
-      expect(input.argv?.join(" ")).toContain("/tmp/openclaw-soft-resume-system-prompt.md");
+      expect(input.argv?.join(" ")).toContain("/tmp/carapace-soft-resume-system-prompt.md");
       return createManagedRun({
         ...createSuccessfulProcessExit(),
         stdout: "ok",
@@ -1250,7 +1250,7 @@ describe("runCliAgent spawn path", () => {
     mockSuccessfulCliRun(CLAUDE_OK_JSONL);
     const toolAvailability: NonNullable<PreparedCliRunContext["params"]["cliToolAvailability"]> = {
       native: [],
-      openClaw: ["openclaw"],
+      carapace: ["carapace"],
     };
     const resolveExecutionArgs = vi.fn(({ baseArgs }) => baseArgs);
 
@@ -1277,7 +1277,7 @@ describe("runCliAgent spawn path", () => {
         buildPreparedCliRunContext({
           cliToolAvailability: {
             native: [],
-            openClaw: ["openclaw"],
+            carapace: ["carapace"],
           },
           resolveExecutionArgs,
         }),
@@ -1293,7 +1293,7 @@ describe("runCliAgent spawn path", () => {
       buildPreparedCliRunContext({
         provider: "google-gemini-cli",
         model: "gemini-3.1-pro-preview",
-        cliToolAvailability: { native: [], openClaw: ["openclaw"] },
+        cliToolAvailability: { native: [], carapace: ["carapace"] },
         toolAvailabilityEnforcement: "prepare-execution",
       }),
     );
@@ -1383,7 +1383,7 @@ describe("runCliAgent spawn path", () => {
           provider: "google-gemini-cli",
           model: "gemini-3.1-pro-preview",
           backend: { command: fixture.entrypoint },
-          cliToolAvailability: { native: [], openClaw: [] },
+          cliToolAvailability: { native: [], carapace: [] },
           runtimeArtifact: {
             kind: "bundled-package-tree",
             packageName: "@fixture/versioned-cli",
@@ -1410,7 +1410,7 @@ describe("runCliAgent spawn path", () => {
         provider: "google-gemini-cli",
         model: "gemini-3.1-pro-preview",
         backend: { command: fixture.entrypoint },
-        cliToolAvailability: { native: [], openClaw: [] },
+        cliToolAvailability: { native: [], carapace: [] },
         runtimeArtifact: {
           kind: "bundled-package-tree",
           packageName: "@fixture/versioned-cli",
@@ -1456,7 +1456,7 @@ describe("runCliAgent spawn path", () => {
             provider: "google-gemini-cli",
             model: "gemini-3.1-pro-preview",
             backend: { command: fixture.entrypoint },
-            cliToolAvailability: { native: [], openClaw: [] },
+            cliToolAvailability: { native: [], carapace: [] },
             runtimeArtifact: {
               kind: "bundled-package-tree",
               packageName: "@fixture/versioned-cli",
@@ -1542,22 +1542,22 @@ describe("runCliAgent spawn path", () => {
           },
         },
         preparedEnv: {
-          GEMINI_CLI_HOME: "/tmp/openclaw-gemini-profile-home",
-          GEMINI_CLI_SYSTEM_SETTINGS_PATH: "/tmp/openclaw-gemini-system-settings.json",
+          GEMINI_CLI_HOME: "/tmp/carapace-gemini-profile-home",
+          GEMINI_CLI_SYSTEM_SETTINGS_PATH: "/tmp/carapace-gemini-system-settings.json",
         },
       }),
     );
 
     const input = mockCallArg(supervisorSpawnMock) as { env?: Record<string, string> };
     expect(input.env?.STATIC_BACKEND_FLAG).toBe("set");
-    expect(input.env?.GEMINI_CLI_HOME).toBe("/tmp/openclaw-gemini-profile-home");
+    expect(input.env?.GEMINI_CLI_HOME).toBe("/tmp/carapace-gemini-profile-home");
     expect(input.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe(
-      "/tmp/openclaw-gemini-system-settings.json",
+      "/tmp/carapace-gemini-system-settings.json",
     );
   });
 
   it("captures a runtime artifact while preserving a strict CLI shim invocation", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cli-strict-artifact-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cli-strict-artifact-"));
     const implementation = path.join(dir, "2.1.205");
     const executable = path.join(dir, "claude-fixture");
     try {
@@ -2009,7 +2009,7 @@ describe("runCliAgent spawn path", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.CARAPACE_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: { action: "send", target: "chat123", message: "done" },
       });
@@ -2139,7 +2139,7 @@ describe("runCliAgent spawn path", () => {
   ])("$name", async (testCase) => {
     Object.assign(process.env, testCase.baseEnv);
     if (testCase.preserve) {
-      process.env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV = JSON.stringify(testCase.preserve);
+      process.env.CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV = JSON.stringify(testCase.preserve);
     }
     try {
       mockSuccessfulCliRun();
@@ -2159,7 +2159,7 @@ describe("runCliAgent spawn path", () => {
         expect(input.env?.[key]).toBe(value);
       }
     } finally {
-      delete process.env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV;
+      delete process.env.CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV;
       for (const key of Object.keys(testCase.baseEnv)) {
         delete process.env[key];
       }
@@ -2167,7 +2167,7 @@ describe("runCliAgent spawn path", () => {
   });
 
   it("keeps selected Claude auth authoritative over ambient and configured credentials", async () => {
-    vi.stubEnv("OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV", '["ANTHROPIC_API_KEY"]');
+    vi.stubEnv("CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV", '["ANTHROPIC_API_KEY"]');
     vi.stubEnv("ANTHROPIC_API_KEY", "ambient-api-key");
     mockSuccessfulCliRun(CLAUDE_OK_JSONL);
 

@@ -1,6 +1,6 @@
 // Real browser flow with a mocked Gateway; no Ollama server or model is used.
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { Locator } from "playwright";
 import { beforeEach, expect, it } from "vitest";
 import type { ApplicationRuntime } from "../app/bootstrap.ts";
@@ -15,7 +15,7 @@ const suite = createControlUiE2eSuite({
   name: "Model Setup activation feedback mocked Gateway E2E",
   startServerBeforeBrowser: true,
 });
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -44,16 +44,16 @@ suite.define(() => {
         const pageErrors: string[] = [];
         page.on("pageerror", (error) => pageErrors.push(error.message));
         const gateway = await installMockGateway(page, {
-          featureMethods: [...defaultControlUiFeatureMethods, "openclaw.setup.detect"],
-          heldMethods: ["openclaw.setup.detect"],
+          featureMethods: [...defaultControlUiFeatureMethods, "carapace.setup.detect"],
+          heldMethods: ["carapace.setup.detect"],
           historyMessages: [
             { role: "assistant", content: [{ type: "text", text: "The existing chat is ready." }] },
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               candidates: [],
               manualProviders: [],
-              workspace: "/tmp/openclaw-e2e",
+              workspace: "/tmp/carapace-e2e",
               setupComplete: false,
             },
             "models.authStatus": {
@@ -66,16 +66,16 @@ suite.define(() => {
           },
         });
         await page.goto(`${suite.server.baseUrl}settings/model-setup`);
-        await gateway.waitForRequest("openclaw.setup.detect");
+        await gateway.waitForRequest("carapace.setup.detect");
         await page.locator(".model-setup__loading").waitFor();
         await page.waitForFunction(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: ApplicationRuntime;
           };
           return app.runtime.context.gateway.snapshot.client?.recoveryScopeReady;
         });
         const connectionOwner = await page.evaluateHandle(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime: ApplicationRuntime;
           };
           const client = app.runtime.context.gateway.snapshot.client!;
@@ -90,13 +90,13 @@ suite.define(() => {
         // Revisit before the old detection replies: this visit must own a fresh
         // request rather than inherit the abandoned route loader's pending work.
         await page.goBack();
-        await gateway.waitForRequest("openclaw.setup.detect", { after: 1 });
-        await gateway.resolveDeferred("openclaw.setup.detect");
+        await gateway.waitForRequest("carapace.setup.detect", { after: 1 });
+        await gateway.resolveDeferred("carapace.setup.detect");
         await page
           .locator(".model-setup__intro")
           .getByRole("button", { name: "Check again" })
           .waitFor();
-        expect(await gateway.getRequests("openclaw.setup.detect")).toHaveLength(2);
+        expect(await gateway.getRequests("carapace.setup.detect")).toHaveLength(2);
         await page.getByRole("button", { name: "Back to app" }).click();
         await page.getByText("The existing chat is ready.", { exact: true }).waitFor();
         const composer = page.locator(".agent-chat__composer-combobox textarea");
@@ -117,7 +117,7 @@ suite.define(() => {
         expect(await gateway.getRequests("connect")).toHaveLength(1);
         expect(
           await connectionOwner.evaluate(({ client, recoveryScope }) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime: ApplicationRuntime;
             };
             return {
@@ -147,8 +147,8 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
             featureMethods: [
-              "openclaw.setup.detect",
-              "openclaw.setup.activate.start",
+              "carapace.setup.detect",
+              "carapace.setup.activate.start",
               "wizard.next",
             ],
             methodResponses: {
@@ -158,7 +158,7 @@ suite.define(() => {
                 error: "Authentication failed (provider returned HTTP 401).",
                 activationRejection: { disposition: "rejected-before-promotion", status: "auth" },
               },
-              "openclaw.setup.detect": {
+              "carapace.setup.detect": {
                 candidates:
                   entry === "candidate"
                     ? Array.from({ length: 5 }, (_, index) => ({
@@ -177,7 +177,7 @@ suite.define(() => {
                   kind: "oauth",
                   featured: true,
                 })),
-                workspace: "/tmp/openclaw-e2e",
+                workspace: "/tmp/carapace-e2e",
                 setupComplete: false,
               },
             },
@@ -205,15 +205,15 @@ suite.define(() => {
           expect(
             await page.locator(".content").evaluate((element) => element.scrollTop),
           ).toBeGreaterThan(0);
-          await gateway.deferNext("openclaw.setup.activate.start");
+          await gateway.deferNext("carapace.setup.activate.start");
           await activate.click();
-          const request = await gateway.waitForRequest("openclaw.setup.activate.start");
+          const request = await gateway.waitForRequest("carapace.setup.activate.start");
           expect(request.params).toMatchObject(
             entry === "manual"
               ? { kind: "api-key", authChoice: "openai", apiKey: "invalid-test-key" }
               : { kind: "provider-auto:local", modelRef: "local/model-5" },
           );
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           const progress = dialog.getByRole("status");
           await progress.waitFor();
           expect(await progress.count()).toBe(1);
@@ -224,7 +224,7 @@ suite.define(() => {
             });
           }
 
-          await gateway.resolveDeferred("openclaw.setup.activate.start", {
+          await gateway.resolveDeferred("carapace.setup.activate.start", {
             sessionId: "activation-session",
             done: false,
             status: "running",
@@ -246,7 +246,7 @@ suite.define(() => {
           await scrollToBottom();
           await input.fill("another-invalid-test-key");
           expect(await input.evaluate((element) => document.activeElement === element)).toBe(true);
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(1);
         },
       );
     },
@@ -267,13 +267,13 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
             featureMethods: [
-              "openclaw.setup.detect",
-              "openclaw.setup.prepare.start",
-              "openclaw.setup.activate.start",
+              "carapace.setup.detect",
+              "carapace.setup.prepare.start",
+              "carapace.setup.activate.start",
               "wizard.next",
             ],
             methodResponses: {
-              "openclaw.setup.detect": {
+              "carapace.setup.detect": {
                 candidates: [],
                 manualProviders: [{ id: "openai", label: "OpenAI", brandId: "openai" }],
                 prepareOptions: [
@@ -286,10 +286,10 @@ suite.define(() => {
                     actionLabel: "Choose connection",
                   },
                 ],
-                workspace: "/tmp/openclaw-e2e",
+                workspace: "/tmp/carapace-e2e",
                 setupComplete: false,
               },
-              "openclaw.setup.prepare.start": {
+              "carapace.setup.prepare.start": {
                 sessionId: "idle-model-prepare",
                 done: false,
                 status: "running",
@@ -326,25 +326,25 @@ suite.define(() => {
           const choose = setup.getByRole("button", { name: "Choose connection" });
           await choose.click();
           expect(
-            (await gateway.waitForRequest("openclaw.setup.prepare.start")).params,
+            (await gateway.waitForRequest("carapace.setup.prepare.start")).params,
           ).toMatchObject({ authChoice: "ollama" });
           await page.getByRole("radio", { name: "Local only" }).check();
           await page.getByRole("button", { name: "Continue", exact: true }).click();
           await expect
             .poll(() => page.getByLabel("Ollama base URL").inputValue())
             .toBe("http://127.0.0.1:11434");
-          await gateway.deferNext("openclaw.setup.activate.start");
+          await gateway.deferNext("carapace.setup.activate.start");
           await page.getByRole("button", { name: "Submit", exact: true }).click();
-          expect((await gateway.waitForRequest("openclaw.setup.activate.start")).params).toEqual({
+          expect((await gateway.waitForRequest("carapace.setup.activate.start")).params).toEqual({
             kind: "provider-auto:ollama",
             modelRef: "ollama/qwen3:4b",
             agentId: "main",
             sessionId: expect.any(String),
           });
-          await expect.poll(() => page.locator("openclaw-modal-dialog").count()).toBe(1);
+          await expect.poll(() => page.locator("carapace-modal-dialog").count()).toBe(1);
           expect(await setup.locator("[data-candidate-kind]").count()).toBe(0);
           expect(await choose.isDisabled()).toBe(true);
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           const progress = dialog.getByRole("status");
           await progress.waitFor();
           expect.soft(await viewportIntersection(progress)).toBeGreaterThan(0.99);
@@ -364,13 +364,13 @@ suite.define(() => {
               error: "The model did not finish the setup test in time.",
               activationRejection: { disposition: "rejected-before-promotion", status: "timeout" },
             });
-            await gateway.resolveDeferred("openclaw.setup.activate.start", {
+            await gateway.resolveDeferred("carapace.setup.activate.start", {
               sessionId: "activation-session",
               done: false,
               status: "running",
             });
           } else {
-            await gateway.rejectDeferred("openclaw.setup.activate.start", {
+            await gateway.rejectDeferred("carapace.setup.activate.start", {
               code: "UNAVAILABLE",
               message: "The model did not finish the setup test in time.",
             });
@@ -398,7 +398,7 @@ suite.define(() => {
           expect(await setup.locator("[data-candidate-kind]").count()).toBe(0);
           expect(await page.locator(".model-setup-success").count()).toBe(0);
           expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(1);
           expect(await gateway.getRequests("config.set")).toHaveLength(0);
           const next = await gateway.getRequests("wizard.next");
           expect(next).toHaveLength(outcome === "provider timeout" ? 4 : 3);

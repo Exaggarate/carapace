@@ -5,21 +5,21 @@ import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  readOpenClawDatabaseQuarantine,
-  recordOpenClawDatabaseQuarantine,
-} from "../state/openclaw-quarantine-store.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+  readCarapaceDatabaseQuarantine,
+  recordCarapaceDatabaseQuarantine,
+} from "../state/carapace-quarantine-store.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import { runDoctorStateSqliteCompact } from "./doctor-state-sqlite-compact.js";
 
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
   afterEach(() => {
-    closeOpenClawStateDatabase();
+    closeCarapaceStateDatabase();
     cleanup();
   });
 });
@@ -30,8 +30,8 @@ type CompletedStateSqliteCompactReport = Extract<
 >;
 
 function createStateEnv(): NodeJS.ProcessEnv {
-  const stateDir = tempDirs.make("openclaw-state-compact-");
-  return { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = tempDirs.make("carapace-state-compact-");
+  return { ...process.env, CARAPACE_STATE_DIR: stateDir };
 }
 
 function seedStateDatabase(params: {
@@ -40,16 +40,16 @@ function seedStateDatabase(params: {
   schemaVersion?: number;
   withBloat?: boolean;
 }): string {
-  const sqlitePath = resolveOpenClawStateSqlitePath(params.env);
+  const sqlitePath = resolveCarapaceStateSqlitePath(params.env);
   fs.mkdirSync(path.dirname(sqlitePath), { recursive: true });
   const sqlite = requireNodeSqlite();
   const database = new sqlite.DatabaseSync(sqlitePath);
-  const schemaVersion = params.schemaVersion ?? OPENCLAW_STATE_SCHEMA_VERSION;
+  const schemaVersion = params.schemaVersion ?? CARAPACE_STATE_SCHEMA_VERSION;
   try {
     database.exec(`
       PRAGMA auto_vacuum = NONE;
       PRAGMA journal_mode = WAL;
-      ${OPENCLAW_STATE_SCHEMA_SQL}
+      ${CARAPACE_STATE_SCHEMA_SQL}
       CREATE TABLE compact_payload (
         id INTEGER PRIMARY KEY,
         payload TEXT NOT NULL
@@ -158,7 +158,7 @@ describe("runDoctorStateSqliteCompact", () => {
 
     await expect(runDoctorStateSqliteCompact({ env })).resolves.toEqual({
       mode: "compact",
-      path: resolveOpenClawStateSqlitePath(env),
+      path: resolveCarapaceStateSqlitePath(env),
       reason: "missing",
       skipped: true,
     });
@@ -240,7 +240,7 @@ describe("runDoctorStateSqliteCompact", () => {
     const env = createStateEnv();
     const sqlitePath = seedStateDatabase({ env, withBloat: true });
     expect(
-      recordOpenClawDatabaseQuarantine({
+      recordCarapaceDatabaseQuarantine({
         env,
         kind: "state",
         path: sqlitePath,
@@ -250,8 +250,8 @@ describe("runDoctorStateSqliteCompact", () => {
 
     await runDoctorStateSqliteCompact({ env });
 
-    expect(readOpenClawDatabaseQuarantine(sqlitePath, { env })).toBeUndefined();
-    expect(openOpenClawStateDatabase({ env }).db.isOpen).toBe(true);
+    expect(readCarapaceDatabaseQuarantine(sqlitePath, { env })).toBeUndefined();
+    expect(openCarapaceStateDatabase({ env }).db.isOpen).toBe(true);
   });
 
   it.skipIf(process.platform === "win32")("reapplies owner-only SQLite permissions", async () => {
@@ -280,8 +280,8 @@ describe("runDoctorStateSqliteCompact", () => {
   });
 
   it.each([
-    ["legacy", OPENCLAW_STATE_SCHEMA_VERSION - 1, /doctor --fix before compacting/],
-    ["future", OPENCLAW_STATE_SCHEMA_VERSION + 1, /uses newer schema version/],
+    ["legacy", CARAPACE_STATE_SCHEMA_VERSION - 1, /doctor --fix before compacting/],
+    ["future", CARAPACE_STATE_SCHEMA_VERSION + 1, /uses newer schema version/],
   ] as const)(
     "rejects a %s shared-state schema before mutation",
     async (_label, schemaVersion, message) => {
@@ -304,7 +304,7 @@ describe("runDoctorStateSqliteCompact", () => {
     "refuses a symlink at the canonical database path",
     async () => {
       const env = createStateEnv();
-      const canonicalPath = resolveOpenClawStateSqlitePath(env);
+      const canonicalPath = resolveCarapaceStateSqlitePath(env);
       const externalEnv = createStateEnv();
       const externalPath = seedStateDatabase({ env: externalEnv });
       fs.mkdirSync(path.dirname(canonicalPath), { recursive: true });
@@ -316,7 +316,7 @@ describe("runDoctorStateSqliteCompact", () => {
 
   it("refuses compaction while this process owns an open shared-state handle", async () => {
     const env = createStateEnv();
-    openOpenClawStateDatabase({ env });
+    openCarapaceStateDatabase({ env });
 
     await expect(runDoctorStateSqliteCompact({ env })).rejects.toThrow(
       /already open in this process/,
@@ -332,7 +332,7 @@ describe("runDoctorStateSqliteCompact", () => {
         { env },
         {
           withMaintenanceLock: async () => {
-            throw new Error("Gateway owns this OpenClaw state directory");
+            throw new Error("Gateway owns this Carapace state directory");
           },
         },
       ),
@@ -352,7 +352,7 @@ describe("runDoctorStateSqliteCompact", () => {
     const env = createStateEnv();
     const sqlitePath = seedStateDatabase({ env });
     expect(
-      recordOpenClawDatabaseQuarantine({
+      recordCarapaceDatabaseQuarantine({
         env,
         kind: "state",
         path: sqlitePath,
@@ -371,7 +371,7 @@ describe("runDoctorStateSqliteCompact", () => {
         /checkpoint remained busy/,
       );
       expect(readPragma(writer, "auto_vacuum")).toBe(0);
-      expect(readOpenClawDatabaseQuarantine(sqlitePath, { env })?.reason).toBe("busy checkpoint");
+      expect(readCarapaceDatabaseQuarantine(sqlitePath, { env })?.reason).toBe("busy checkpoint");
     } finally {
       reader.exec("ROLLBACK;");
       reader.close();

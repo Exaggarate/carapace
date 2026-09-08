@@ -1,7 +1,7 @@
 // Pure state contracts shared by doctor migrations and the live iMessage caches.
 // Keep runtime/store imports out: detecting legacy state must not initialize the channel.
 import { createHash } from "node:crypto";
-import type { MediaPlaceholderTextFact } from "openclaw/plugin-sdk/channel-inbound";
+import type { MediaPlaceholderTextFact } from "carapace/plugin-sdk/channel-inbound";
 
 export const IMESSAGE_REPLY_CACHE_NAMESPACE = "imessage.reply-cache";
 export const IMESSAGE_REPLY_CACHE_MAX_ENTRIES = 2000;

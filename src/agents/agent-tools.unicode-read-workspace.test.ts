@@ -3,9 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
-import "./test-helpers/fast-openclaw-tools.js";
-import type { OpenClawConfig } from "../config/config.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import "./test-helpers/fast-carapace-tools.js";
+import type { CarapaceConfig } from "../config/config.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { expectReadWriteEditTools, getTextContent } from "./test-helpers/agent-tools-fs-helpers.js";
 
 vi.mock("../infra/shell-env.js", async () => {
@@ -25,7 +25,7 @@ async function withTempDir<T>(prefix: string, fn: (dir: string) => Promise<T>) {
 
 describe("workspace-only Unicode read fallback", () => {
   it("does not follow a filename fallback into a sibling workspace", async (context) => {
-    await withTempDir("openclaw-unicode-parent-", async (rootDir) => {
+    await withTempDir("carapace-unicode-parent-", async (rootDir) => {
       const workspaceDir = path.join(rootDir, "cafe\u0301");
       const outsideDir = path.join(rootDir, "caf\u00e9");
       await fs.mkdir(workspaceDir);
@@ -40,8 +40,8 @@ describe("workspace-only Unicode read fallback", () => {
       }
       await fs.writeFile(path.join(outsideDir, "secret.txt"), "outside secret", "utf8");
 
-      const config: OpenClawConfig = { tools: { fs: { workspaceOnly: true } } };
-      const tools = createOpenClawCodingTools({ workspaceDir, config });
+      const config: CarapaceConfig = { tools: { fs: { workspaceOnly: true } } };
+      const tools = createCarapaceCodingTools({ workspaceDir, config });
       const { readTool } = expectReadWriteEditTools(tools);
 
       await expect(
@@ -51,11 +51,11 @@ describe("workspace-only Unicode read fallback", () => {
   });
 
   it("keeps filename fallback working inside the guarded workspace", async () => {
-    await withTempDir("openclaw-unicode-leaf-", async (workspaceDir) => {
+    await withTempDir("carapace-unicode-leaf-", async (workspaceDir) => {
       await fs.writeFile(path.join(workspaceDir, "d\u2019accord.txt"), "allowed fallback", "utf8");
 
-      const config: OpenClawConfig = { tools: { fs: { workspaceOnly: true } } };
-      const tools = createOpenClawCodingTools({ workspaceDir, config });
+      const config: CarapaceConfig = { tools: { fs: { workspaceOnly: true } } };
+      const tools = createCarapaceCodingTools({ workspaceDir, config });
       const { readTool } = expectReadWriteEditTools(tools);
 
       const result = await readTool.execute("ws-read-unicode-leaf", { path: "d'accord.txt" });

@@ -20,7 +20,7 @@ creation, edits, tool activity, receipt finalization, and persistent answer deli
 Preconditions:
 
 - Baseline doctor passes.
-- OpenClaw's repo `mock-openai` fixture supports `OPENCLAW_E2E_DRAFTPROOF`.
+- Carapace's repo `mock-openai` fixture supports `CARAPACE_E2E_DRAFTPROOF`.
 
 - **Drive progress and finalization.** Run:
 
@@ -30,14 +30,14 @@ Preconditions:
   E2E_TELEGRAM_CONFIG_PATCH='{"streaming":{"mode":"progress","progress":{"commentary":true}}}' \
   node "$TELEGRAM_E2E_SKILL_DIR/scripts/run-mock-sut-user-e2e.mjs" \
     --dm --timeout-ms 30000 \
-    --text 'Run the OPENCLAW_E2E_DRAFTPROOF scenario.' \
+    --text 'Run the CARAPACE_E2E_DRAFTPROOF scenario.' \
     --record "$TELEGRAM_E2E_PROOF_DIR/delivery-lifecycle/events.ndjson" \
     --output "$TELEGRAM_E2E_PROOF_DIR/delivery-lifecycle/summary.json"
   ```
 
   Require two model requests, SUT typing, one progress message with same-id edits
   containing commentary and tool activity, and a separate persistent final
-  message containing `OPENCLAW_E2E_DRAFTPROOF`.
+  message containing `CARAPACE_E2E_DRAFTPROOF`.
 
 - **Confirm finalization.** Match progress edits by `botApiMessageId`. Its last
   revision is the activity receipt. Require no `delete` event on this happy path.

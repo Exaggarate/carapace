@@ -1,4 +1,4 @@
-import { isProviderRefusalAssistantError } from "@openclaw/llm-core/diagnostics";
+import { isProviderRefusalAssistantError } from "@carapace/llm-core/diagnostics";
 import { emitAgentEvent } from "../../../infra/agent-events.js";
 import { formatErrorMessage, toErrorObject } from "../../../infra/errors.js";
 import { isRetryableAssistantError } from "../../../llm/utils/retry.js";

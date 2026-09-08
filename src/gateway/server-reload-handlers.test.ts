@@ -33,7 +33,7 @@ import {
   createRuntimeConfigWriteApplication,
   type RuntimeConfigWriteApplicationStatus,
 } from "../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { CronService } from "../cron/service.js";
 import { skillCollectionReviewMonitorAgentId } from "../cron/skill-collection-review-monitor.js";
 import { loadCronJobsStore } from "../cron/store.js";
@@ -103,7 +103,7 @@ import {
   getActiveSecretsRuntimeSnapshotRevision,
   type PreparedSecretsRuntimeSnapshot,
 } from "../secrets/runtime.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { isRecord } from "../utils.js";
 import { diffConfigPaths, diffGatewayReloadPaths } from "./config-diff.js";
@@ -233,7 +233,7 @@ function startManagedGatewayConfigReloader(params: ManagedReloaderTestParams) {
     minimalTestGateway: false,
     initialCompareConfig: params.initialConfig,
     initialInternalWriteHash: null,
-    watchPath: "/tmp/openclaw.json",
+    watchPath: "/tmp/carapace.json",
     promoteSnapshot: vi.fn(async () => true) as never,
     deps: {} as never,
     broadcast: vi.fn(),
@@ -252,7 +252,7 @@ function startManagedGatewayConfigReloader(params: ManagedReloaderTestParams) {
       pruneInactiveChannelAccountState: vi.fn(),
       releaseChannelRouteHandoffs: vi.fn(),
     } as never,
-    activateRuntimeSecrets: vi.fn(async (config: OpenClawConfig) =>
+    activateRuntimeSecrets: vi.fn(async (config: CarapaceConfig) =>
       makePreparedSecretsSnapshot(config),
     ) as never,
     resolveSharedGatewaySessionGenerationForConfig: () => undefined,
@@ -278,7 +278,7 @@ function startManagedGatewayConfigReloader(params: ManagedReloaderTestParams) {
 }
 
 type GmailWatcherRestartParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   log: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -307,14 +307,14 @@ const hoisted = vi.hoisted(() => ({
   activeEmbeddedRunSessionIds: [] as string[],
   activeEmbeddedRunSessionKeys: [] as string[],
   markRestartAbortedMainSessions: vi.fn(async (_params: unknown) => ({ marked: 1, skipped: 0 })),
-  runtimeConfig: { value: { session: { store: "/tmp/active-sessions.json" } } as OpenClawConfig },
-  assertOpenClawDatabasesReady: vi.fn(() => {}),
+  runtimeConfig: { value: { session: { store: "/tmp/active-sessions.json" } } as CarapaceConfig },
+  assertCarapaceDatabasesReady: vi.fn(() => {}),
   applyLoggingConfig: vi.fn(),
   resetSkillSnapshotConfigFingerprintCache: vi.fn(),
   reloadEvents: [] as string[],
-  loadModelCatalog: vi.fn(async (_params: { config: OpenClawConfig }) => []),
+  loadModelCatalog: vi.fn(async (_params: { config: CarapaceConfig }) => []),
   resetModelCatalogCache: vi.fn(() => {}),
-  advancePreparedModelRuntimeConfig: vi.fn((_cfg: OpenClawConfig) => {}),
+  advancePreparedModelRuntimeConfig: vi.fn((_cfg: CarapaceConfig) => {}),
   markPreparedModelRuntimeSnapshotsStale: vi.fn(
     (
       _reason?: string,
@@ -329,9 +329,9 @@ const hoisted = vi.hoisted(() => ({
     (_gateId: symbol | undefined, _error: unknown) => {},
   ),
   refreshPreparedModelRuntimeSnapshots: vi.fn(
-    async (_cfg: OpenClawConfig, _options?: { catalogMode?: "live" | "static" }) => {},
+    async (_cfg: CarapaceConfig, _options?: { catalogMode?: "live" | "static" }) => {},
   ),
-  refreshContextWindowCache: vi.fn(async (_cfg: OpenClawConfig) => {}),
+  refreshContextWindowCache: vi.fn(async (_cfg: CarapaceConfig) => {}),
   clearCurrentProviderAuthState: vi.fn(() => {}),
   reloadSessionMcpRuntimes: vi.fn(async () => {}),
   buildGatewayCronService: vi.fn((_params?: { env?: NodeJS.ProcessEnv }) => ({
@@ -402,8 +402,8 @@ vi.mock("../config/config.js", async () => {
   };
 });
 
-vi.mock("../state/openclaw-database-preflight.js", () => ({
-  assertOpenClawDatabasesReady: hoisted.assertOpenClawDatabasesReady,
+vi.mock("../state/carapace-database-preflight.js", () => ({
+  assertCarapaceDatabasesReady: hoisted.assertCarapaceDatabasesReady,
 }));
 
 vi.mock("../logging/logger.js", async (importOriginal) => ({
@@ -417,7 +417,7 @@ vi.mock("../skills/runtime/snapshot-config-fingerprint.js", async (importOrigina
 }));
 
 vi.mock("../agents/model-catalog.js", () => ({
-  loadModelCatalog: (params: { config: OpenClawConfig }) => {
+  loadModelCatalog: (params: { config: CarapaceConfig }) => {
     hoisted.reloadEvents.push("load-model-catalog");
     return hoisted.loadModelCatalog(params);
   },
@@ -428,7 +428,7 @@ vi.mock("../agents/model-catalog.js", () => ({
 }));
 
 vi.mock("../agents/prepared-model-runtime.js", () => ({
-  advancePreparedModelRuntimeConfig: (cfg: OpenClawConfig) =>
+  advancePreparedModelRuntimeConfig: (cfg: CarapaceConfig) =>
     hoisted.advancePreparedModelRuntimeConfig(cfg),
   markPreparedModelRuntimeSnapshotsStale: (
     reason?: string,
@@ -440,7 +440,7 @@ vi.mock("../agents/prepared-model-runtime.js", () => ({
   rejectPendingPreparedModelRuntimeReplacement: (gateId: symbol | undefined, error: unknown) =>
     hoisted.rejectPendingPreparedModelRuntimeReplacement(gateId, error),
   refreshPreparedModelRuntimeSnapshots: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     options?: { catalogMode?: "live" | "static" },
   ) => {
     hoisted.reloadEvents.push("refresh-prepared-model-runtime");
@@ -449,7 +449,7 @@ vi.mock("../agents/prepared-model-runtime.js", () => ({
 }));
 
 vi.mock("../agents/context.js", () => ({
-  refreshContextWindowCache: async (cfg: OpenClawConfig) => {
+  refreshContextWindowCache: async (cfg: CarapaceConfig) => {
     hoisted.reloadEvents.push("refresh-context-window");
     await hoisted.refreshContextWindowCache(cfg);
   },
@@ -500,7 +500,7 @@ async function withReloadChannelManager(
     start: ReturnType<typeof vi.fn<ReloadHandlerParams["startChannel"]>>;
     stop: ReturnType<typeof vi.fn<ReloadHandlerParams["stopChannel"]>>;
   }) => Promise<void>,
-  getRuntimeConfig: () => OpenClawConfig = () => ({}),
+  getRuntimeConfig: () => CarapaceConfig = () => ({}),
 ) {
   let closing = false;
   const monitors: Array<{ signal: AbortSignal; finished: Promise<void> }> = [];
@@ -569,7 +569,7 @@ async function withReloadChannelManager(
 }
 
 function makePreparedSecretsSnapshot(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   overrides: Omit<Partial<PreparedSecretsRuntimeSnapshot>, "authStores"> & {
     authStores?: Parameters<typeof prepareRuntimeAuthProfileStoreSnapshots>[0];
   } = {},
@@ -607,20 +607,20 @@ function makePluginReloadResult(
 }
 
 function enableChannelReloadsForTest() {
-  const previousSkipChannels = process.env.OPENCLAW_SKIP_CHANNELS;
-  const previousSkipProviders = process.env.OPENCLAW_SKIP_PROVIDERS;
-  delete process.env.OPENCLAW_SKIP_CHANNELS;
-  delete process.env.OPENCLAW_SKIP_PROVIDERS;
+  const previousSkipChannels = process.env.CARAPACE_SKIP_CHANNELS;
+  const previousSkipProviders = process.env.CARAPACE_SKIP_PROVIDERS;
+  delete process.env.CARAPACE_SKIP_CHANNELS;
+  delete process.env.CARAPACE_SKIP_PROVIDERS;
   return () => {
     if (previousSkipChannels === undefined) {
-      delete process.env.OPENCLAW_SKIP_CHANNELS;
+      delete process.env.CARAPACE_SKIP_CHANNELS;
     } else {
-      process.env.OPENCLAW_SKIP_CHANNELS = previousSkipChannels;
+      process.env.CARAPACE_SKIP_CHANNELS = previousSkipChannels;
     }
     if (previousSkipProviders === undefined) {
-      delete process.env.OPENCLAW_SKIP_PROVIDERS;
+      delete process.env.CARAPACE_SKIP_PROVIDERS;
     } else {
-      process.env.OPENCLAW_SKIP_PROVIDERS = previousSkipProviders;
+      process.env.CARAPACE_SKIP_PROVIDERS = previousSkipProviders;
     }
   };
 }
@@ -677,9 +677,9 @@ function createPluginReloadPlan(): GatewayReloadPlan {
   });
 }
 
-function createValidConfigSnapshot(config: OpenClawConfig, hash: string) {
+function createValidConfigSnapshot(config: CarapaceConfig, hash: string) {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -696,7 +696,7 @@ function createValidConfigSnapshot(config: OpenClawConfig, hash: string) {
 }
 
 function createConfigWriteNotification(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   persistedHash: string,
   revision: number,
   fingerprint: string,
@@ -704,7 +704,7 @@ function createConfigWriteNotification(
   overrides: Partial<ConfigWriteNotification> = {},
 ): ConfigWriteNotification {
   return {
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
     sourceConfig: config,
     runtimeConfig: config,
     persistedHash,
@@ -815,7 +815,7 @@ function createManagedRestartSequenceHarness(
       reload: {},
       terminal: { enabled: true },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   setRuntimeConfigSnapshot(initialConfig, initialConfig);
   activateSecretsRuntimeSnapshot(makePreparedSecretsSnapshot(initialConfig));
   const deferredConfig = {
@@ -832,7 +832,7 @@ function createManagedRestartSequenceHarness(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const invalidConfig = {
     gateway: {
       ...deferredConfig.gateway,
@@ -847,7 +847,7 @@ function createManagedRestartSequenceHarness(
       },
       terminal: { enabled: false },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const missingHotSecret = {
     source: "env" as const,
     provider: "default",
@@ -864,7 +864,7 @@ function createManagedRestartSequenceHarness(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const invalidNoopConfig = {
     ...deferredConfig,
     plugins: {
@@ -874,13 +874,13 @@ function createManagedRestartSequenceHarness(
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const replacementConfig = {
     gateway: {
       ...deferredConfig.gateway,
       bind: "lan",
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const terminalPolicy = createTerminalLaunchPolicy(initialConfig);
   const writeListenerRef = createConfigWriteListenerRef();
   let snapshotConfig = initialConfig;
@@ -909,7 +909,7 @@ function createManagedRestartSequenceHarness(
       recordReloadError = undefined;
     }),
   };
-  const activateRuntimeSecrets = vi.fn(async (config: OpenClawConfig, _params: unknown) => {
+  const activateRuntimeSecrets = vi.fn(async (config: CarapaceConfig, _params: unknown) => {
     const secretInputs = [
       config.gateway?.auth?.token,
       config.models?.providers?.test?.apiKey,
@@ -963,10 +963,10 @@ function createManagedRestartSequenceHarness(
     requestRecoveryRestart,
   });
   const writeConfig = (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     hash: string,
     revision: number,
-    runtimeConfig: OpenClawConfig = config,
+    runtimeConfig: CarapaceConfig = config,
   ) => {
     const listener = writeListenerRef.current;
     if (!listener) {
@@ -983,7 +983,7 @@ function createManagedRestartSequenceHarness(
 
   return {
     activateRuntimeSecrets,
-    assertRestartReady: hoisted.assertOpenClawDatabasesReady,
+    assertRestartReady: hoisted.assertCarapaceDatabasesReady,
     deferredConfig,
     initialConfig,
     invalidConfig,
@@ -1018,7 +1018,7 @@ async function withGatewayRestartSignal(
 }
 
 // Other gateway test helpers (test-helpers.mocks.ts, test-helpers.server.ts)
-// set OPENCLAW_SKIP_CHANNELS / OPENCLAW_SKIP_PROVIDERS at module load. When a
+// set CARAPACE_SKIP_CHANNELS / CARAPACE_SKIP_PROVIDERS at module load. When a
 // shared vitest worker imports those helpers before this file runs, the leaked
 // env routes reloads into the skip branch and channel restarts never fire.
 const testGatewayRestartListener = () => {};
@@ -1032,8 +1032,8 @@ beforeEach(() => {
   // deliberately revokes its authority to restart cron or channels.
   restartTesting.resetSigusr1State();
   resetProcessRegistryForTests();
-  delete process.env.OPENCLAW_SKIP_CHANNELS;
-  delete process.env.OPENCLAW_SKIP_PROVIDERS;
+  delete process.env.CARAPACE_SKIP_CHANNELS;
+  delete process.env.CARAPACE_SKIP_PROVIDERS;
   hoisted.resetSkillSnapshotConfigFingerprintCache.mockClear();
   hoisted.applyLoggingConfig.mockClear();
 });
@@ -1054,7 +1054,7 @@ afterEach(() => {
   hoisted.activeEmbeddedRunSessionKeys.length = 0;
   hoisted.markRestartAbortedMainSessions.mockClear();
   hoisted.runtimeConfig.value = { session: { store: "/tmp/active-sessions.json" } };
-  hoisted.assertOpenClawDatabasesReady.mockClear();
+  hoisted.assertCarapaceDatabasesReady.mockClear();
   hoisted.reloadEvents.length = 0;
   hoisted.advancePreparedModelRuntimeConfig.mockClear();
   hoisted.markPreparedModelRuntimeSnapshotsStale.mockClear();
@@ -1097,7 +1097,7 @@ async function runManagedOwnershipScenario(params: {
       ? { secrets: { providers: { default: { source: "file" as const, path: "/old" } } } }
       : {}),
     hooks: { enabled: true, token: "test-token", path: "/old" },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const configA = {
     gateway: {
       reload: {
@@ -1117,9 +1117,9 @@ async function runManagedOwnershipScenario(params: {
       ? { secrets: { providers: { default: { source: "file" as const, path: "/new" } } } }
       : {}),
     ...(params.loggingChanged ? { logging: { level: "debug" as const } } : {}),
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const configB = structuredClone(initialConfig);
-  const snapshot = (config: OpenClawConfig) => makePreparedSecretsSnapshot(config);
+  const snapshot = (config: CarapaceConfig) => makePreparedSecretsSnapshot(config);
   const writeListenerRef = createConfigWriteListenerRef();
   const { promise: accepted, resolve: resolveAccepted } = createDeferred();
   const acceptTerminalConfig = vi.fn(() => resolveAccepted?.());
@@ -1128,8 +1128,8 @@ async function runManagedOwnershipScenario(params: {
   const reconcileRuntimePolicy = vi.fn();
   const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
   let queuedB = false;
-  const resolvedConfigs: OpenClawConfig[] = [];
-  const activateRuntimeSecrets = vi.fn(async (config: OpenClawConfig) => {
+  const resolvedConfigs: CarapaceConfig[] = [];
+  const activateRuntimeSecrets = vi.fn(async (config: CarapaceConfig) => {
     if (params.queueRevert && !queuedB) {
       queuedB = true;
       writeListenerRef.current?.(
@@ -1141,7 +1141,7 @@ async function runManagedOwnershipScenario(params: {
     }
     // Real secret resolution returns a NEW config object. Returning the input
     // unchanged is what let a rebuild against the source candidate look correct.
-    const resolved: OpenClawConfig = {
+    const resolved: CarapaceConfig = {
       ...config,
       ...(params.sharedAuthRotation
         ? { gateway: { ...config.gateway, auth: { mode: "token", token: "new-shared-token" } } }
@@ -1150,7 +1150,7 @@ async function runManagedOwnershipScenario(params: {
     resolvedConfigs.push(resolved);
     return makePreparedSecretsSnapshot(config, { config: resolved });
   });
-  const initialRuntimeConfig: OpenClawConfig = params.sharedAuthRotation
+  const initialRuntimeConfig: CarapaceConfig = params.sharedAuthRotation
     ? {
         ...initialConfig,
         gateway: { ...initialConfig.gateway, auth: { mode: "token", token: "old-shared-token" } },
@@ -1249,15 +1249,15 @@ async function withManagedChannelSecretFixture(
     accountScopedRestart?: boolean;
   },
   run: (fixture: {
-    initialSource: OpenClawConfig;
-    nextSource: (providerPath: string, hot?: boolean) => OpenClawConfig;
+    initialSource: CarapaceConfig;
+    nextSource: (providerPath: string, hot?: boolean) => CarapaceConfig;
     oldPath: string;
     newPath: string;
     missingPath: string;
     starts: Array<{ accountId: string; token: unknown }>;
     stops: string[];
     manager: ReturnType<typeof createChannelManager>;
-    write: (config: OpenClawConfig) => Promise<RuntimeConfigWriteApplicationStatus>;
+    write: (config: CarapaceConfig) => Promise<RuntimeConfigWriteApplicationStatus>;
     failStop: () => void;
     failStart: () => void;
     recoverDuringPreparation: () => void;
@@ -1266,7 +1266,7 @@ async function withManagedChannelSecretFixture(
     requestRecoveryRestart: ReturnType<typeof vi.fn>;
   }) => Promise<void>,
 ) {
-  const fixtureDir = fs.realpathSync(autoCleanupTempDirs.make("openclaw-channel-secret-reload-"));
+  const fixtureDir = fs.realpathSync(autoCleanupTempDirs.make("carapace-channel-secret-reload-"));
   const oldPath = path.join(fixtureDir, "old.json");
   const newPath = path.join(fixtureDir, "next.json");
   const missingPath = path.join(fixtureDir, "missing.json");
@@ -1276,7 +1276,7 @@ async function withManagedChannelSecretFixture(
   writeToken(newPath, "new-channel-token");
   const ref = { source: "file" as const, provider: "channel", id: "/token" };
   const shape = options.shape ?? "named";
-  const initialSource: OpenClawConfig = {
+  const initialSource: CarapaceConfig = {
     gateway: { reload: { mode: "hot" } },
     secrets: { providers: { channel: { source: "file", path: oldPath, mode: "json" } } },
     channels: {
@@ -1288,7 +1288,7 @@ async function withManagedChannelSecretFixture(
             : { accounts: { root: { botToken: "independent" }, ada: { botToken: ref } } },
     },
   };
-  const readChannel = (config: OpenClawConfig) => {
+  const readChannel = (config: CarapaceConfig) => {
     const channel = config.channels?.mattermost;
     if (!isRecord(channel) || !isRecord(channel.accounts)) {
       throw new Error("Expected channel-account fixture");
@@ -1353,7 +1353,7 @@ async function withManagedChannelSecretFixture(
     channelFields: ["botToken"],
     mode: "account-inheritance",
   });
-  const prepare = async (sourceConfig: OpenClawConfig) => {
+  const prepare = async (sourceConfig: CarapaceConfig) => {
     const config = structuredClone(sourceConfig);
     const context = createResolverContext({ sourceConfig, env: {} });
     contract.collectRuntimeConfigAssignments({ config, context });
@@ -1403,7 +1403,7 @@ async function withManagedChannelSecretFixture(
     return snapshot;
   };
   const activateRuntimeSecrets = Object.assign(
-    vi.fn(async (config: OpenClawConfig) => {
+    vi.fn(async (config: CarapaceConfig) => {
       preparationCount += 1;
       return await prepare(config);
     }),
@@ -1606,7 +1606,7 @@ describe("managed channel credential publication", () => {
       await withManagedChannelSecretFixture({}, async (fixture) => {
         await fixture.manager.stopChannel("mattermost", "ada");
         fixture.stops.length = 0;
-        const next: OpenClawConfig =
+        const next: CarapaceConfig =
           change === "provider recovery"
             ? fixture.nextSource(fixture.newPath)
             : {
@@ -1982,7 +1982,7 @@ describe("gateway hot reload model state", () => {
       publishes,
       rejectsBeforeCommit,
     }) => {
-      const fixtureDir = autoCleanupTempDirs.make("openclaw-skill-review-reload-");
+      const fixtureDir = autoCleanupTempDirs.make("carapace-skill-review-reload-");
       const outputPath = path.join(fixtureDir, "review-output.md");
       const reviewStarted = createDeferred<AbortSignal>();
       const releaseReview = createDeferred();
@@ -2006,10 +2006,10 @@ describe("gateway hot reload model state", () => {
       });
       const previousConfig = {
         skills: { workshop: { autonomous: { mode: "auto" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const nextConfig = {
         skills: { workshop: { autonomous: { mode: "off" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       let activeRun: Promise<unknown> | undefined;
       const reconcileSystemJobs = vi.fn(async () => {
         await releaseReconciliation.promise;
@@ -2099,14 +2099,14 @@ describe("gateway hot reload model state", () => {
   it.each(["eager", "lazy"] as const)(
     "keeps a supervised on-exit child alive exactly once across %s cron reload",
     async (initialOwner) => {
-      const fixtureDir = autoCleanupTempDirs.make("openclaw-cron-exit-reload-");
+      const fixtureDir = autoCleanupTempDirs.make("carapace-cron-exit-reload-");
       const childScriptPath = path.join(fixtureDir, "watcher.cjs");
       const markerPath = path.join(fixtureDir, "watcher-runs.txt");
       const releasePath = path.join(fixtureDir, "release-watcher");
       const config = {
         session: { mainKey: "main", store: path.join(fixtureDir, "sessions.json") },
         cron: { enabled: true, store: path.join(fixtureDir, "jobs.json") },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       await writeFile(
         childScriptPath,
         "const fs=require('node:fs');" +
@@ -2127,8 +2127,8 @@ describe("gateway hot reload model state", () => {
       }
       let state: ReturnType<ReloadHandlerParams["getState"]> | undefined;
 
-      vi.stubEnv("OPENCLAW_STATE_DIR", fixtureDir);
-      vi.stubEnv("OPENCLAW_SKIP_CRON", "0");
+      vi.stubEnv("CARAPACE_STATE_DIR", fixtureDir);
+      vi.stubEnv("CARAPACE_SKIP_CRON", "0");
       hoisted.runtimeConfig.value = config;
       setRuntimeConfigSnapshot(config, config);
 
@@ -2210,7 +2210,7 @@ describe("gateway hot reload model state", () => {
   it("passes an agent-entry-local refresh scope through the commit and rebuild", async () => {
     const logReload = { info: vi.fn(), warn: vi.fn() };
     const { applyHotReload } = createReloadHandlersForTest(logReload);
-    const nextConfig = {} as OpenClawConfig;
+    const nextConfig = {} as CarapaceConfig;
 
     await applyHotReload(
       buildGatewayReloadPlan(["agents.entries.Alpha.model", "meta.lastTouchedAt"]),
@@ -2247,7 +2247,7 @@ describe("gateway hot reload model state", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await applyHotReload(buildGatewayReloadPlan([changedPath]), nextConfig);
 
@@ -2300,7 +2300,7 @@ describe("gateway hot reload model state", () => {
         order.push("hook");
       },
     }));
-    const nextConfig = { cron: { enabled: true } } as OpenClawConfig;
+    const nextConfig = { cron: { enabled: true } } as CarapaceConfig;
 
     await withGatewayRestartSignal(async () => {
       await applyHotReload(createCronRestartPlan(), nextConfig);
@@ -2436,8 +2436,8 @@ describe("gateway hot reload model state", () => {
   it.each(["preparation", "policy"] as const)(
     "drains a replaced cron only after commit when managed %s fails",
     async (failure) => {
-      const initialConfig = { cron: { enabled: false } } satisfies OpenClawConfig;
-      const nextConfig = { cron: { enabled: true } } satisfies OpenClawConfig;
+      const initialConfig = { cron: { enabled: false } } satisfies CarapaceConfig;
+      const nextConfig = { cron: { enabled: true } } satisfies CarapaceConfig;
       activateSecretsRuntimeSnapshot(makePreparedSecretsSnapshot(initialConfig));
       const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
       const handlers = createReloadHandlersForTest(
@@ -2525,7 +2525,7 @@ describe("gateway hot reload model state", () => {
     };
     hoisted.buildGatewayCronService.mockReturnValueOnce(rebuiltCronState);
     const { applyHotReload, cronReconciliation } = createReloadHandlersForTest();
-    const nextConfig = { cron: { enabled: false } } as OpenClawConfig;
+    const nextConfig = { cron: { enabled: false } } as CarapaceConfig;
 
     await withGatewayRestartSignal(async () => {
       await applyHotReload(createCronRestartPlan(), nextConfig);
@@ -2564,7 +2564,7 @@ describe("gateway hot reload model state", () => {
     "keeps partial monitor writes aligned with accepted config through a %s successor",
     async (successor) => {
       vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-      const fixtureDir = autoCleanupTempDirs.make("openclaw-monitor-publication-");
+      const fixtureDir = autoCleanupTempDirs.make("carapace-monitor-publication-");
       const initialConfig = {
         agents: {
           entries: {
@@ -2573,7 +2573,7 @@ describe("gateway hot reload model state", () => {
           },
         },
         skills: { workshop: { autonomous: { mode: "auto" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const nextConfig = {
         ...initialConfig,
         agents: {
@@ -2583,18 +2583,18 @@ describe("gateway hot reload model state", () => {
           },
         },
         skills: { workshop: { autonomous: { mode: "off" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       activateSecretsRuntimeSnapshot(makePreparedSecretsSnapshot(initialConfig));
       const { buildGatewayCronService } =
         await vi.importActual<typeof import("./server-cron.js")>("./server-cron.js");
       const cronState = buildGatewayCronService({
         cfg: initialConfig,
         deps: {} as never,
-        env: { ...process.env, OPENCLAW_STATE_DIR: fixtureDir, OPENCLAW_SKIP_CRON: "0" },
+        env: { ...process.env, CARAPACE_STATE_DIR: fixtureDir, CARAPACE_SKIP_CRON: "0" },
         broadcast: vi.fn(),
       });
       cronState.cron.pauseScheduling();
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       let state = createDefaultGatewayReloadState({ cronState });
       const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
       const handlers = createGatewayReloadHandlers({
@@ -2611,7 +2611,7 @@ describe("gateway hot reload model state", () => {
         publishRuntimeEnv: vi.fn(),
         commitRuntimeEnv: vi.fn(),
         rollbackRuntimeEnv: vi.fn(),
-        reapplyRuntimeOverlays: (config: OpenClawConfig) => config,
+        reapplyRuntimeOverlays: (config: CarapaceConfig) => config,
       };
       const managed = createManagedReloadSecretHandlers({
         params: {
@@ -2708,10 +2708,10 @@ describe("gateway hot reload model state", () => {
         createReloadHandlersForTest(undefined, undefined, undefined, vi.fn(), false);
       const previousConfig = {
         skills: { workshop: { autonomous: { mode: from } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const nextConfig = {
         skills: { workshop: { autonomous: { mode: to } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
 
       await expect(
         applyHotReload(buildGatewayReloadPlan(["skills.workshop.autonomous.mode"]), nextConfig, {
@@ -2749,7 +2749,7 @@ describe("gateway hot reload model state", () => {
       await expect(
         applyHotReload(
           buildGatewayReloadPlan(["agents.defaults.heartbeat.every"]),
-          { agents: { defaults: { maxConcurrent: 1 } } } as OpenClawConfig,
+          { agents: { defaults: { maxConcurrent: 1 } } } as CarapaceConfig,
           {
             sourceConfig: { agents: { defaults: { maxConcurrent: 1 } } },
             publish,
@@ -2893,7 +2893,7 @@ describe("gateway hot reload model state", () => {
       logReload,
     });
 
-    const nextConfig = { plugins: { enabled: true } } as OpenClawConfig;
+    const nextConfig = { plugins: { enabled: true } } as CarapaceConfig;
     await applyHotReload(createPluginReloadPlan(), nextConfig);
 
     const firstResetIndex = hoisted.reloadEvents.indexOf("clear-provider-auth");
@@ -2927,7 +2927,7 @@ describe("gateway hot reload model state", () => {
       undefined,
       vi.fn(),
     );
-    const nextConfig = { mcp: { servers: {} } } as OpenClawConfig;
+    const nextConfig = { mcp: { servers: {} } } as CarapaceConfig;
 
     await applyHotReload(
       createHotTailPlan({
@@ -2974,7 +2974,7 @@ describe("gateway hot reload model state", () => {
         agents: { entries: { main: {}, worker: { workspace: "/virtual/worker-workspace" } } },
       },
     },
-  ] satisfies Array<{ name: string; changedPath: string; nextConfig: OpenClawConfig }>)(
+  ] satisfies Array<{ name: string; changedPath: string; nextConfig: CarapaceConfig }>)(
     "keeps $name reloads lazy and authenticates the next user lookup once",
     async ({ changedPath, nextConfig }) => {
       const { applyHotReload } = createReloadHandlersForTest();
@@ -3044,7 +3044,7 @@ describe("gateway hot reload model state", () => {
     );
     const nextConfig = {
       agents: { defaults: { workspace: "/tmp/next-workspace" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await applyHotReload(
       createHotTailPlan({
@@ -3073,7 +3073,7 @@ describe("gateway hot reload model state", () => {
           changedPaths: ["agents.defaults.workspace"],
           hotReasons: ["agents.defaults.workspace"],
         }),
-        { agents: { defaults: { workspace: "/tmp/next-workspace" } } } as OpenClawConfig,
+        { agents: { defaults: { workspace: "/tmp/next-workspace" } } } as CarapaceConfig,
       ),
     ).rejects.toThrow(
       "config reload requires a managed gateway restart owner for irreversible hot reload",
@@ -3098,8 +3098,8 @@ describe("gateway hot reload model state", () => {
     },
   ])("refreshes context metadata when a workspace change $label", async (testCase) => {
     const { applyHotReload } = createReloadHandlersForTest();
-    const previousConfig = testCase.previousConfig as OpenClawConfig;
-    const nextConfig = testCase.nextConfig as OpenClawConfig;
+    const previousConfig = testCase.previousConfig as CarapaceConfig;
+    const nextConfig = testCase.nextConfig as CarapaceConfig;
     const changedPaths = diffConfigPaths(previousConfig, nextConfig);
     expect(changedPaths).toEqual([testCase.expectedPath]);
 
@@ -3120,8 +3120,8 @@ describe("gateway targeted service reload", () => {
       service: { id: "exporter", reload: { configPrefixes: ["diagnostics.otel"] }, start() {} },
     });
     setActivePluginRegistry(registry);
-    const initialConfig: OpenClawConfig = { diagnostics: { otel: { enabled: true } } };
-    const nextConfig: OpenClawConfig = { diagnostics: { otel: { enabled: false } } };
+    const initialConfig: CarapaceConfig = { diagnostics: { otel: { enabled: true } } };
+    const nextConfig: CarapaceConfig = { diagnostics: { otel: { enabled: false } } };
     const listener = createConfigWriteListenerRef();
     const reloadPluginServices = vi.fn(async () => {});
     const reloader = startManagedGatewayConfigReloader({
@@ -3157,7 +3157,7 @@ describe("gateway targeted service reload", () => {
     async (mode) => {
       vi.useFakeTimers();
       const events: string[] = [];
-      const nextConfig: OpenClawConfig = { diagnostics: { otel: { enabled: false } } };
+      const nextConfig: CarapaceConfig = { diagnostics: { otel: { enabled: false } } };
       const selected = new Set(["exporter"]);
       const failure = new Error(mode);
       const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
@@ -3219,7 +3219,7 @@ describe("gateway hot reload superseded tail recovery", () => {
   it("rearms detached stale-tail recovery against an already accepted config", async () => {
     vi.useFakeTimers();
     const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
-    const prepareRuntimeConfig = vi.fn(async (): Promise<OpenClawConfig> => ({
+    const prepareRuntimeConfig = vi.fn(async (): Promise<CarapaceConfig> => ({
       logging: { level: "debug" },
     }));
     const handlers = createReloadHandlersForTest(
@@ -3276,8 +3276,8 @@ describe("gateway hot reload superseded tail recovery", () => {
       undefined,
       requestRecoveryRestart,
     );
-    const configA = { logging: { level: "info" as const } } satisfies OpenClawConfig;
-    const configC = { logging: { level: "debug" as const } } satisfies OpenClawConfig;
+    const configA = { logging: { level: "info" as const } } satisfies CarapaceConfig;
+    const configC = { logging: { level: "debug" as const } } satisfies CarapaceConfig;
     const prepareA = vi.fn(async () => configA);
     const prepareC = vi.fn(async () => configC);
     handlers.recordAcceptedRestartTarget({
@@ -3358,8 +3358,8 @@ describe("gateway hot reload superseded tail recovery", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
-      let pendingConfig: OpenClawConfig | null = null;
+      } satisfies CarapaceConfig;
+      let pendingConfig: CarapaceConfig | null = null;
       const isCurrent = () => pendingConfig === null;
       const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
       const startChannel = vi.fn(async () => new Map());
@@ -3417,7 +3417,7 @@ describe("gateway hot reload superseded tail recovery", () => {
       );
       const configA = {
         agents: { defaults: { workspace: "/tmp/a" } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const reloadA = handlers.applyHotReload(plan, configA, {
         sourceConfig: configA,
         isCurrent,
@@ -3434,7 +3434,7 @@ describe("gateway hot reload superseded tail recovery", () => {
         expect.stringContaining("recovery deferred to the newer config"),
       );
 
-      const configC = { logging: { level: "debug" as const } } satisfies OpenClawConfig;
+      const configC = { logging: { level: "debug" as const } } satisfies CarapaceConfig;
       pendingConfig = configC;
       await handlers.applyHotReload(createHotTailPlan(), configC, {
         sourceConfig: configC,
@@ -3529,7 +3529,7 @@ describe("gateway hot reload superseded tail recovery", () => {
 
 describe("gateway hot reload commit policy", () => {
   it("reloads configured workspace hooks when expanding to an explicit multi-agent roster", async () => {
-    const root = autoCleanupTempDirs.make("openclaw-hook-roster-reload-");
+    const root = autoCleanupTempDirs.make("carapace-hook-roster-reload-");
     const beforeWorkspace = path.join(root, "before");
     const afterWorkspace = path.join(root, "after");
     for (const [workspace, message] of [
@@ -3544,7 +3544,7 @@ describe("gateway hot reload commit policy", () => {
           "---",
           "name: roster-workspace",
           "description: Configured workspace hook fixture",
-          'metadata: {"openclaw":{"events":["command:new"]}}',
+          'metadata: {"carapace":{"events":["command:new"]}}',
           "---",
         ].join("\n"),
       );
@@ -3553,11 +3553,11 @@ describe("gateway hot reload commit policy", () => {
         `export default async function(event) { event.messages.push(${JSON.stringify(message)}); }\n`,
       );
     }
-    const beforeConfig: OpenClawConfig = {
+    const beforeConfig: CarapaceConfig = {
       agents: { defaults: { workspace: beforeWorkspace }, entries: { main: {} } },
       hooks: { internal: { enabled: true, entries: { "roster-workspace": { enabled: true } } } },
     };
-    const afterConfig: OpenClawConfig = {
+    const afterConfig: CarapaceConfig = {
       ...beforeConfig,
       agents: {
         ownership: "explicit",
@@ -3569,7 +3569,7 @@ describe("gateway hot reload commit policy", () => {
     const { createInternalHookEvent, triggerInternalHook } =
       await import("../hooks/internal-hooks.js");
     const { applyHotReload } = createReloadHandlersForTest();
-    let previousConfig: OpenClawConfig = {};
+    let previousConfig: CarapaceConfig = {};
     try {
       for (const [config, message] of [
         [beforeConfig, "before roster expansion"],
@@ -3611,7 +3611,7 @@ describe("gateway hot reload commit policy", () => {
   });
 
   it("preserves the active hook transform cache across rejected and policy-only reloads", async () => {
-    const configDir = autoCleanupTempDirs.make("openclaw-rejected-hook-reload-");
+    const configDir = autoCleanupTempDirs.make("carapace-rejected-hook-reload-");
     const transformsRoot = path.join(configDir, "hooks", "transforms");
     fs.mkdirSync(transformsRoot, { recursive: true });
     const transformPath = path.join(transformsRoot, "reloadable.mjs");
@@ -3817,11 +3817,11 @@ describe("gateway restart deferral preflight", () => {
       );
     const configA = {
       hooks: { enabled: true, token: "test-token", path: "/a" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configB = {
       ...configA,
       logging: { level: "debug" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const forcedRestartPlan = {
       changedPaths: ["hooks.path"],
       restartGateway: true,
@@ -3925,15 +3925,15 @@ describe("gateway restart deferral preflight", () => {
     const configA = {
       channels: { discord: { token: "discord-token-a" } },
       logging: { level: "info" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configC = {
       ...configA,
       logging: { level: "debug" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configB = {
       ...configA,
       gateway: { port: 19_001 },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const plan = createHotTailPlan({
       changedPaths: ["channels.discord.token", "logging.level"],
       hotReasons: ["channels.discord.token"],
@@ -4020,11 +4020,11 @@ describe("gateway restart deferral preflight", () => {
     );
     const configA = {
       channels: { discord: { token: "discord-token-a" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const configB = {
       ...configA,
       gateway: { port: 19_001 },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const recoveryPlan = {
       ...createHotTailPlan(),
       changedPaths: ["channels.discord.token"],
@@ -4526,7 +4526,7 @@ describe("gateway channel hot reload handlers", () => {
   async function withDiscordAccountResolver(
     listAccountIds: () => string[],
     run: () => Promise<void>,
-    resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) => unknown = () => ({}),
+    resolveAccount: (cfg: CarapaceConfig, accountId?: string | null) => unknown = () => ({}),
   ) {
     const registry = createTestRegistry([
       {
@@ -4996,7 +4996,7 @@ describe("gateway Gmail hot reload handlers", () => {
     });
   }
 
-  function createGmailConfig(account: string): OpenClawConfig {
+  function createGmailConfig(account: string): CarapaceConfig {
     return {
       gateway: { reload: {} },
       hooks: { enabled: true, token: "test-token", gmail: { account } },
@@ -5072,20 +5072,20 @@ describe("gateway Gmail hot reload handlers", () => {
   it("retries managed no-op reloads without publishing superseded secret failures", async () => {
     vi.useFakeTimers();
     const writeListenerRef = createConfigWriteListenerRef();
-    const initialConfig: OpenClawConfig = {
+    const initialConfig: CarapaceConfig = {
       gateway: { reload: {} },
       messages: { visibleReplies: "automatic" },
     };
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: CarapaceConfig = {
       gateway: { reload: {} },
       messages: { visibleReplies: "message_tool" },
     };
-    const snapshot = (config: OpenClawConfig) => makePreparedSecretsSnapshot(config);
+    const snapshot = (config: CarapaceConfig) => makePreparedSecretsSnapshot(config);
     const failurePublicationEligibility: boolean[] = [];
     let preparationAttempt = 0;
     const activateRuntimeSecrets = vi.fn(
       async (
-        config: OpenClawConfig,
+        config: CarapaceConfig,
         activation: { canPublishFailureAsDegraded?: () => boolean },
       ) => {
         const attempt = preparationAttempt++;
@@ -5155,7 +5155,7 @@ describe("gateway Gmail hot reload handlers", () => {
 
   it("refreshes owner refs when only the resolved source snapshot changes", async () => {
     vi.useFakeTimers();
-    const authAgentDir = "/tmp/openclaw-source-only-auth-owner";
+    const authAgentDir = "/tmp/carapace-source-only-auth-owner";
     const authProfileId = "openai:source-only";
     const authOwnerId = resolveAuthProfileSecretOwnerId({
       agentDir: authAgentDir,
@@ -5165,11 +5165,11 @@ describe("gateway Gmail hot reload handlers", () => {
     const secondRef = { source: "env" as const, provider: "default", id: "TTS_SECOND" };
     const thirdRef = { source: "env" as const, provider: "default", id: "TTS_THIRD" };
     const fourthRef = { source: "env" as const, provider: "default", id: "TTS_FOURTH" };
-    const sourceConfig = (ref: typeof firstRef): OpenClawConfig => ({
+    const sourceConfig = (ref: typeof firstRef): CarapaceConfig => ({
       gateway: { reload: {} },
       tts: { providers: { elevenlabs: { apiKey: ref } } },
     });
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       gateway: { reload: {} },
       tts: { providers: { elevenlabs: { apiKey: String(42) } } },
     };
@@ -5235,7 +5235,7 @@ describe("gateway Gmail hot reload handlers", () => {
       }),
     );
     const writeListenerRef = createConfigWriteListenerRef();
-    const activateRuntimeSecrets = vi.fn(async (config: OpenClawConfig, _params: unknown) =>
+    const activateRuntimeSecrets = vi.fn(async (config: CarapaceConfig, _params: unknown) =>
       makePreparedSecretsSnapshot(config, {
         config: runtimeConfig,
         authStores: [
@@ -5272,7 +5272,7 @@ describe("gateway Gmail hot reload handlers", () => {
     const reloader = startManagedGatewayConfigReloader({
       initialConfig: runtimeConfig,
       readSnapshot: vi.fn(async () => ({
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         parsed: nextSourceConfig,
@@ -5379,7 +5379,7 @@ describe("gateway Gmail hot reload handlers", () => {
         }),
       ).toBe("stale");
 
-      activateRuntimeSecrets.mockImplementationOnce(async (config: OpenClawConfig) =>
+      activateRuntimeSecrets.mockImplementationOnce(async (config: CarapaceConfig) =>
         makePreparedSecretsSnapshot(config, {
           config: { ...runtimeConfig, logging: { level: "debug" } },
           secretOwners: [
@@ -5420,7 +5420,7 @@ describe("gateway Gmail hot reload handlers", () => {
 
       const { promise: preparationStarted, resolve: markPreparationStarted } = createDeferred();
       const { promise: preparationGate, resolve: releasePreparation } = createDeferred();
-      activateRuntimeSecrets.mockImplementationOnce(async (config: OpenClawConfig) => {
+      activateRuntimeSecrets.mockImplementationOnce(async (config: CarapaceConfig) => {
         markPreparationStarted?.();
         await preparationGate;
         return makePreparedSecretsSnapshot(config, {
@@ -5481,7 +5481,7 @@ describe("gateway Gmail hot reload handlers", () => {
 
   it("rejects ownerless irreversible plans but applies safe hot plans", async () => {
     vi.useFakeTimers();
-    const initialConfig: OpenClawConfig = {
+    const initialConfig: CarapaceConfig = {
       gateway: {
         port: 18789,
         reload: {},
@@ -5495,7 +5495,7 @@ describe("gateway Gmail hot reload handlers", () => {
       logging: { level: "info" },
     };
     const terminalPolicy = createTerminalLaunchPolicy(initialConfig);
-    const prepareTerminalConfig = vi.fn((plan: GatewayReloadPlan, nextConfig: OpenClawConfig) => {
+    const prepareTerminalConfig = vi.fn((plan: GatewayReloadPlan, nextConfig: CarapaceConfig) => {
       terminalPolicy.prepareConfig(nextConfig, { restartPending: plan.restartGateway });
     });
     const reconcileRuntimePolicy = vi.fn();
@@ -5505,7 +5505,7 @@ describe("gateway Gmail hot reload handlers", () => {
     const writeListenerRef = createConfigWriteListenerRef();
     let snapshotConfig = initialConfig;
     let snapshotHash = "initial";
-    const activateRuntimeSecrets = vi.fn(async (config: OpenClawConfig) =>
+    const activateRuntimeSecrets = vi.fn(async (config: CarapaceConfig) =>
       makePreparedSecretsSnapshot(config),
     );
     const reloader = startManagedGatewayConfigReloader({
@@ -5525,7 +5525,7 @@ describe("gateway Gmail hot reload handlers", () => {
       restartRecoveryAvailable: false,
     });
     let revision = 0;
-    const writeConfig = (config: OpenClawConfig, hash: string) => {
+    const writeConfig = (config: CarapaceConfig, hash: string) => {
       const listener = writeListenerRef.current;
       if (!listener) {
         throw new Error("Expected config write listener to be registered");
@@ -5566,7 +5566,7 @@ describe("gateway Gmail hot reload handlers", () => {
           },
           surface: "irreversible hot reload",
         },
-      ] satisfies Array<{ label: string; config: OpenClawConfig; surface: string }>;
+      ] satisfies Array<{ label: string; config: CarapaceConfig; surface: string }>;
 
       for (const testCase of rejectedConfigs) {
         writeConfig(testCase.config, `${testCase.label}-unsupported`);
@@ -5586,7 +5586,7 @@ describe("gateway Gmail hot reload handlers", () => {
         logReload.error.mockClear();
       }
 
-      const safeConfig: OpenClawConfig = {
+      const safeConfig: CarapaceConfig = {
         ...initialConfig,
         gateway: { ...initialConfig.gateway, terminal: { enabled: false } },
         logging: { level: "debug" },
@@ -5613,13 +5613,13 @@ describe("gateway Gmail hot reload handlers", () => {
     "preserves terminals when a failed $kind restriction is replaced (cron cleanup fails: $cronCleanupFails)",
     async ({ kind, cronCleanupFails }) => {
       vi.useFakeTimers();
-      const initialConfig: OpenClawConfig = {
+      const initialConfig: CarapaceConfig = {
         gateway: { reload: {}, terminal: { enabled: true } },
       };
-      const disabledConfig: OpenClawConfig = {
+      const disabledConfig: CarapaceConfig = {
         gateway: { reload: {}, terminal: { enabled: false } },
       };
-      const rejectedConfig: OpenClawConfig =
+      const rejectedConfig: CarapaceConfig =
         kind === "disabled"
           ? disabledConfig
           : {
@@ -5680,7 +5680,7 @@ describe("gateway Gmail hot reload handlers", () => {
         acceptTerminalConfig: policy.acceptConfig,
         requestRecoveryRestart,
       });
-      const writeConfig = (config: OpenClawConfig, revision: number) => {
+      const writeConfig = (config: CarapaceConfig, revision: number) => {
         const application = createRuntimeConfigWriteApplication();
         if (!writeListenerRef.current) {
           throw new Error("Expected managed config writer");
@@ -5764,14 +5764,14 @@ describe("gateway Gmail hot reload handlers", () => {
         reload: {},
         terminal: { enabled: true },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const rejectedConfig = {
       gateway: {
         port: 18790,
         reload: {},
         terminal: { enabled: false },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const terminalPolicy = createTerminalLaunchPolicy(initialConfig);
     const expectedReloadError = "config reload failed: Error: restart secrets preflight failed";
     const { promise: reloadFailed, resolve: recordReloadFailure } = createDeferred();
@@ -5791,7 +5791,7 @@ describe("gateway Gmail hot reload handlers", () => {
         recordRestartRetired?.();
       }
     };
-    const activateRuntimeSecrets = vi.fn(async (config: OpenClawConfig) => {
+    const activateRuntimeSecrets = vi.fn(async (config: CarapaceConfig) => {
       if (config.gateway?.port === rejectedConfig.gateway?.port) {
         throw new Error("restart secrets preflight failed");
       }
@@ -5923,7 +5923,7 @@ describe("gateway Gmail hot reload handlers", () => {
       const acceptedWithLogging = {
         ...harness.deferredConfig,
         logging: { level: "debug" },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const revertPromotion = harness.nextPromotion();
       harness.writeConfig(acceptedWithLogging, "accepted-a-plus-logging", 3);
       await vi.advanceTimersByTimeAsync(0);
@@ -5971,7 +5971,7 @@ describe("gateway Gmail hot reload handlers", () => {
       expect(harness.reloader.isConfigReloadSettled()).toBe(false);
       expect(harness.requestRecoveryRestart).not.toHaveBeenCalled();
 
-      watcher.emit("change", "/tmp/openclaw.json");
+      watcher.emit("change", "/tmp/carapace.json");
       await vi.advanceTimersByTimeAsync(300);
       expect(harness.reloader.isConfigReloadSettled()).toBe(false);
       expect(getActiveSecretsRuntimeSnapshot()?.sourceConfig).toEqual(harness.initialConfig);
@@ -6030,7 +6030,7 @@ describe("gateway Gmail hot reload handlers", () => {
       const harness = createManagedRestartSequenceHarness();
       const { promise: preflightStarted, resolve: markPreflightStarted } = createDeferred();
       const { promise: preflightBlocked, resolve: releasePreflight } = createDeferred();
-      harness.activateRuntimeSecrets.mockImplementationOnce(async (config: OpenClawConfig) => {
+      harness.activateRuntimeSecrets.mockImplementationOnce(async (config: CarapaceConfig) => {
         markPreflightStarted?.();
         await preflightBlocked;
         if (outcome === "AbortError") {
@@ -6120,7 +6120,7 @@ describe("gateway Gmail hot reload handlers", () => {
         const acceptedConfig = {
           ...harness.deferredConfig,
           logging: { level: "debug" },
-        } as OpenClawConfig;
+        } as CarapaceConfig;
         const acceptedPromotion = harness.nextPromotion();
         harness.writeConfig(acceptedConfig, `accepted-after-${_kind}`, 3);
         await vi.advanceTimersByTimeAsync(0);
@@ -6145,7 +6145,7 @@ describe("gateway Gmail hot reload handlers", () => {
         ...harness.deferredConfig.gateway,
         auth: { mode: "token" as const, token: "resolved-restart-token" },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     harness.setSecretUnavailable("RESTART_A_TOKEN");
 
     try {
@@ -6347,11 +6347,11 @@ describe("gateway Gmail hot reload handlers", () => {
     const initialConfig = {
       gateway: { reload: {} },
       hooks: { enabled: true, token: "test-token", path: "/old" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const nextConfig = {
       gateway: { reload: {} },
       hooks: { enabled: true, token: "test-token", path: "/next" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const initialSnapshot = makePreparedSecretsSnapshot(initialConfig);
     const refreshedSnapshot: PreparedSecretsRuntimeSnapshot = {
       ...initialSnapshot,
@@ -6381,7 +6381,7 @@ describe("gateway Gmail hot reload handlers", () => {
     );
     let preparationCount = 0;
     const activateRuntimeSecrets = Object.assign(
-      vi.fn(async (config: OpenClawConfig) => {
+      vi.fn(async (config: CarapaceConfig) => {
         preparationCount += 1;
         if (preparationCount === 1) {
           expect(
@@ -6510,7 +6510,7 @@ describe("gateway Gmail hot reload handlers", () => {
       vi.useFakeTimers();
       const writeListenerRef = createConfigWriteListenerRef();
       const initialConfig = createGmailConfig("old@example.com");
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...createGmailConfig("next@example.com"),
         models: { providers: {} },
       };
@@ -6565,7 +6565,7 @@ describe("gateway Gmail hot reload handlers", () => {
       initialConfig,
       readSnapshot: vi.fn(async () => createValidConfigSnapshot(nextConfig, "hash-next")) as never,
       subscribeToWrites: captureConfigWriteListener(writeListenerRef),
-      activateRuntimeSecrets: vi.fn(async (config: OpenClawConfig) => {
+      activateRuntimeSecrets: vi.fn(async (config: CarapaceConfig) => {
         secretsEntered?.();
         await releaseSecretsPromise;
         return makePreparedSecretsSnapshot(config, { webTools: {} as never });
@@ -6601,11 +6601,11 @@ describe("gateway Gmail hot reload handlers", () => {
 
 describe("gateway plugin hot reload handlers", () => {
   it("restarts channels when the candidate env removes an active skip flag", async () => {
-    const envKey = "OPENCLAW_SKIP_CHANNELS";
+    const envKey = "CARAPACE_SKIP_CHANNELS";
     const previousValue = process.env[envKey];
     process.env[envKey] = "1";
     const targetEnv: NodeJS.ProcessEnv = { [envKey]: "1" };
-    const previousConfig = { env: { vars: { [envKey]: "1" } } } satisfies OpenClawConfig;
+    const previousConfig = { env: { vars: { [envKey]: "1" } } } satisfies CarapaceConfig;
     const runtimeEnv = prepareConfigRuntimeEnv({
       previousConfig,
       nextConfig: {},
@@ -6664,11 +6664,11 @@ describe("gateway plugin hot reload handlers", () => {
   });
 
   it("skips channel work when the candidate env adds a skip flag", async () => {
-    const envKey = "OPENCLAW_SKIP_PROVIDERS";
+    const envKey = "CARAPACE_SKIP_PROVIDERS";
     const previousValue = process.env[envKey];
     delete process.env[envKey];
     const targetEnv: NodeJS.ProcessEnv = {};
-    const nextConfig = { env: { vars: { [envKey]: "1" } } } satisfies OpenClawConfig;
+    const nextConfig = { env: { vars: { [envKey]: "1" } } } satisfies CarapaceConfig;
     const runtimeEnv = prepareConfigRuntimeEnv({
       previousConfig: {},
       nextConfig,
@@ -6720,29 +6720,29 @@ describe("gateway plugin hot reload handlers", () => {
     expect(stopChannel).not.toHaveBeenCalled();
     expect(startChannel).not.toHaveBeenCalled();
     expect(logChannels.info).toHaveBeenCalledWith(
-      "skipping channel reload (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+      "skipping channel reload (CARAPACE_SKIP_CHANNELS=1 or CARAPACE_SKIP_PROVIDERS=1)",
     );
   });
 
   it("publishes candidate env before cron, plugin, and channel replacements start", async () => {
-    const envKey = "OPENCLAW_TEST_HOT_RELOAD_SERVICE_ENV";
+    const envKey = "CARAPACE_TEST_HOT_RELOAD_SERVICE_ENV";
     const targetEnv: NodeJS.ProcessEnv = { [envKey]: "old" };
     const initialConfig = {
       gateway: { reload: {} },
       cron: { enabled: false },
       plugins: { enabled: false },
       env: { vars: { [envKey]: "old" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const nextConfig = {
       ...initialConfig,
       cron: { enabled: true },
       plugins: { enabled: true },
       env: { vars: { [envKey]: "candidate" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const compareConfig = {
       ...nextConfig,
       env: initialConfig.env,
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const runtimeEnv = prepareConfigRuntimeEnv({
       previousConfig: initialConfig,
       nextConfig,
@@ -6888,14 +6888,14 @@ describe("gateway plugin hot reload handlers", () => {
   it("passes authored plugin config separately from synthesized runtime trust to replacement planning", async () => {
     const sourceConfig = {
       plugins: { enabled: true },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const runtimeConfig = {
       plugins: {
         enabled: true,
         allow: ["external-plugin"],
         entries: { "external-plugin": { enabled: true } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const reloadPlugins = vi.fn(
       async (params: {
         commitRuntime: () => Promise<void>;
@@ -6913,7 +6913,7 @@ describe("gateway plugin hot reload handlers", () => {
     });
 
     const reloadParams = reloadPlugins.mock.calls[0]?.[0] as
-      | { nextConfig: OpenClawConfig; sourceConfig?: OpenClawConfig }
+      | { nextConfig: CarapaceConfig; sourceConfig?: CarapaceConfig }
       | undefined;
     expect(reloadParams?.nextConfig).toBe(runtimeConfig);
     expect(reloadParams?.sourceConfig).toBe(sourceConfig);
@@ -7076,7 +7076,7 @@ describe("gateway plugin hot reload handlers", () => {
       undefined,
       requestRecoveryRestart,
     );
-    const config: OpenClawConfig = { plugins: { enabled: true } };
+    const config: CarapaceConfig = { plugins: { enabled: true } };
     const reload = handlers.applyHotReload(createPluginReloadPlan(), config, {
       sourceConfig: config,
       isCurrent: () => current,
@@ -7647,7 +7647,7 @@ describe("gateway plugin hot reload handlers", () => {
       pruneInactiveChannelAccountState,
       reloadPlugins,
     });
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       plugins: { enabled: false, allow: ["discord"] },
     };
 
@@ -7774,8 +7774,8 @@ describe("deferred channel reload abort generation", () => {
   afterEach(() => {
     hoisted.activeTaskCount.value = 0;
     vi.useRealTimers();
-    delete process.env.OPENCLAW_SKIP_CHANNELS;
-    delete process.env.OPENCLAW_SKIP_PROVIDERS;
+    delete process.env.CARAPACE_SKIP_CHANNELS;
+    delete process.env.CARAPACE_SKIP_PROVIDERS;
   });
 
   const createTestHandlers = (
@@ -8086,13 +8086,13 @@ describe("deferred channel reload abort generation", () => {
         gateway: { reload: {} },
         channels: { whatsapp: { enabled: true, selfChatMode: false } },
         plugins: { entries: { fixture: { config: { value: "before" } } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const nextConfig = {
         ...initialConfig,
         ...(surface === "channel"
           ? { channels: { whatsapp: { enabled: true, selfChatMode: true } } }
           : { plugins: { entries: { fixture: { config: { value: "after" } } } } }),
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const whatsappPlugin = {
         ...createChannelTestPluginBase({ id: "whatsapp" }),
         reload: {
@@ -8178,7 +8178,7 @@ describe("deferred channel reload abort generation", () => {
         // Hold the disk reread so cancellation settles before exact-candidate replay.
         const watcher = watch.mock.results[0]?.value;
         expect(watcher).toBeDefined();
-        watcher.emit("change", "/tmp/openclaw.json");
+        watcher.emit("change", "/tmp/carapace.json");
         expect(reloader.getDeferredChannelReloads?.()).toEqual([]);
         await vi.advanceTimersByTimeAsync(500);
         await vi.advanceTimersByTimeAsync(300);
@@ -8248,11 +8248,11 @@ describe("deferred channel reload abort generation", () => {
   it.each(["same watcher echo", "newer admitted write", "prepared refresh failure"] as const)(
     "finishes committed runtime work before settling its receipt: %s",
     async (successor) => {
-      const initialConfig: OpenClawConfig = {
+      const initialConfig: CarapaceConfig = {
         gateway: { reload: {} },
         channels: { whatsapp: { enabled: true, selfChatMode: false } },
       };
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...initialConfig,
         plugins: { entries: { fixture: { enabled: true } } },
       };
@@ -8283,7 +8283,7 @@ describe("deferred channel reload abort generation", () => {
       const requestRecoveryRestart = vi.fn(() => ({ status: "emitted" as const }));
       let blocker: ReturnType<typeof tryBeginGatewayRootWorkAdmission> = null;
       let successorRequest: Promise<RuntimeConfigWriteApplicationStatus> | undefined;
-      const submitWrite = (config: OpenClawConfig, hash: string, revision: number) =>
+      const submitWrite = (config: CarapaceConfig, hash: string, revision: number) =>
         runWithGatewayIndependentRootWorkAdmission(async () => {
           const application = createRuntimeConfigWriteApplication(
             captureGatewayRootWorkAdmissionContinuationScope()?.run,
@@ -8345,7 +8345,7 @@ describe("deferred channel reload abort generation", () => {
         if (successor === "newer admitted write") {
           successorRequest = submitWrite(initialConfig, "newer-write", 2);
         } else {
-          watcher.emit("change", "/tmp/openclaw.json");
+          watcher.emit("change", "/tmp/carapace.json");
         }
         await vi.advanceTimersByTimeAsync(500);
         blocker.release();
@@ -8450,7 +8450,7 @@ describe("deferred channel reload abort generation", () => {
     let reloadWasCancelled = false;
     const reloadPlugins = vi.fn(
       async (params: {
-        nextConfig: OpenClawConfig;
+        nextConfig: CarapaceConfig;
         beforeReplace: (channels: ReadonlySet<ChannelKind>) => Promise<void>;
         isAborted?: () => boolean;
       }): Promise<GatewayPluginReloadResult> => {

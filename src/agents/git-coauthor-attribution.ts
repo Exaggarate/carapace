@@ -1,6 +1,6 @@
 import { listSessionParticipantsReadOnly } from "../config/sessions/session-accessor.js";
 import { MAX_SESSION_PARTICIPANTS } from "../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveUserProfileGitHubAttribution } from "../state/user-profile-github-identity.js";
 import { resolveConfiguredGitHubToolIdentity } from "./github-tool-identity.js";
 
@@ -10,7 +10,7 @@ export function appendGitCoauthorContext(prompt: string, attribution: string | u
 
 export function prepareGitCoauthorAttribution(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   currentProfileId?: string;
   excludeAccountId?: number;
   env?: NodeJS.ProcessEnv;
@@ -35,7 +35,7 @@ type GitCoauthorContributor = {
 
 export function resolveGitCoauthorAttribution(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   currentProfileId?: string;
   excludeAccountId?: number;
   env?: NodeJS.ProcessEnv;

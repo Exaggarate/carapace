@@ -4,23 +4,23 @@ trap "" PIPE
 export TERM=xterm-256color
 export NO_COLOR=1
 
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/carapace-e2e-instance.sh
 source scripts/e2e/lib/prepublish-plugin-registry.sh
 
-openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_SCRIPT_B64:?missing OPENCLAW_TEST_STATE_SCRIPT_B64}"
-openclaw_e2e_install_trash_shim
+carapace_e2e_eval_test_state_from_b64 "${CARAPACE_TEST_STATE_SCRIPT_B64:?missing CARAPACE_TEST_STATE_SCRIPT_B64}"
+carapace_e2e_install_trash_shim
 
 export NPM_CONFIG_PREFIX="$HOME/.npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 export npm_config_loglevel=error
 export npm_config_fund=false
 export npm_config_audit=false
-export OPENAI_API_KEY="sk-openclaw-release-typed-onboarding"
+export OPENAI_API_KEY="sk-carapace-release-typed-onboarding"
 
 PORT="18789"
 MOCK_PORT="44190"
-SUCCESS_MARKER="OPENCLAW_E2E_OK_TYPED_ONBOARDING"
-scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-release-typed-onboarding.XXXXXX")"
+SUCCESS_MARKER="CARAPACE_E2E_OK_TYPED_ONBOARDING"
+scenario_tmp="$(mktemp -d "${TMPDIR:-/tmp}/carapace-release-typed-onboarding.XXXXXX")"
 LOG_DIR="$scenario_tmp/logs"
 mkdir -p "$LOG_DIR"
 INSTALL_LOG="$LOG_DIR/install.log"
@@ -37,9 +37,9 @@ wizard_pid=""
 input_fifo_dir=""
 cleanup() {
   { exec 3>&-; } 2>/dev/null || true
-  openclaw_e2e_stop_process "${wizard_pid:-}"
-  openclaw_e2e_stop_process "${mock_pid:-}"
-  openclaw_e2e_stop_process "${plugin_registry_pid:-}"
+  carapace_e2e_stop_process "${wizard_pid:-}"
+  carapace_e2e_stop_process "${mock_pid:-}"
+  carapace_e2e_stop_process "${plugin_registry_pid:-}"
   if [ -n "${input_fifo_dir:-}" ]; then
     rm -rf "$input_fifo_dir"
   fi
@@ -50,7 +50,7 @@ trap cleanup EXIT
 dump_debug_logs() {
   local status="$1"
   echo "release typed onboarding failed with exit code $status" >&2
-  openclaw_e2e_dump_logs \
+  carapace_e2e_dump_logs \
     "$INSTALL_LOG" \
     "$ONBOARD_LOG" \
     "$CODEX_INSTALL_LOG" \
@@ -58,7 +58,7 @@ dump_debug_logs() {
     "$MOCK_REQUEST_LOG" \
     "$AGENT_LOG"
 }
-openclaw_e2e_enable_failure_diagnostics
+carapace_e2e_enable_failure_diagnostics
 
 send() {
   local payload="$1"
@@ -93,11 +93,11 @@ onboarding_log_contains() {
 }
 
 drive_typed_onboarding() {
-  local hook_mode="${OPENCLAW_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE:-}"
+  local hook_mode="${CARAPACE_FROZEN_TARGET_ONBOARD_SESSION_MEMORY_HOOK_MODE:-}"
   wait_for_log "Continue?" 60
   send $'y\r' 0.4
   if [[ "$hook_mode" != "interactive" ]]; then
-    wait_for_log "Help make OpenClaw better?" 60
+    wait_for_log "Help make Carapace better?" 60
     send $'\r' 0.4
     wait_for_log "What should we call your first agent?" 60
     send $'\r' 0.4
@@ -113,22 +113,22 @@ drive_typed_onboarding() {
   send $'\r' 0.4
 }
 
-openclaw_e2e_install_package "$INSTALL_LOG"
-echo "Installed the OpenClaw package."
-openclaw_prepublish_plugin_registry_start_mounted "$scenario_tmp/registry" plugin_registry_pid '["@openclaw/codex"]'
-command -v openclaw >/dev/null
-package_root="$(openclaw_e2e_package_root)"
-entry="$(openclaw_e2e_package_entrypoint "$package_root")"
-openclaw_e2e_enable_openclaw_cli_timeout
+carapace_e2e_install_package "$INSTALL_LOG"
+echo "Installed the Carapace package."
+carapace_prepublish_plugin_registry_start_mounted "$scenario_tmp/registry" plugin_registry_pid '["@carapace/codex"]'
+command -v carapace >/dev/null
+package_root="$(carapace_e2e_package_root)"
+entry="$(carapace_e2e_package_entrypoint "$package_root")"
+carapace_e2e_enable_carapace_cli_timeout
 
-mock_pid="$(openclaw_e2e_start_mock_openai "$MOCK_PORT" "$OPENAI_LOG")"
-openclaw_e2e_wait_mock_openai "$MOCK_PORT"
+mock_pid="$(carapace_e2e_start_mock_openai "$MOCK_PORT" "$OPENAI_LOG")"
+carapace_e2e_wait_mock_openai "$MOCK_PORT"
 echo "Mock OpenAI provider is ready."
 
 input_fifo_dir="$(mktemp -d "$scenario_tmp/input.XXXXXX")"
 input_fifo="$input_fifo_dir/stdin.fifo"
 mkfifo "$input_fifo"
-openclaw_e2e_run_script_with_pty "node \"$entry\" onboard --flow quickstart --mode local --auth-choice skip --gateway-port \"$PORT\" --gateway-bind loopback --skip-daemon --skip-ui --skip-channels --skip-skills --skip-health --suppress-gateway-token-output" "$ONBOARD_LOG" <"$input_fifo" >/dev/null 2>&1 &
+carapace_e2e_run_script_with_pty "node \"$entry\" onboard --flow quickstart --mode local --auth-choice skip --gateway-port \"$PORT\" --gateway-bind loopback --skip-daemon --skip-ui --skip-channels --skip-skills --skip-health --suppress-gateway-token-output" "$ONBOARD_LOG" <"$input_fifo" >/dev/null 2>&1 &
 wizard_pid="$!"
 exec 3>"$input_fifo"
 
@@ -144,19 +144,19 @@ echo "Interactive typed onboarding completed."
 node scripts/e2e/lib/release-scenarios/assertions.mjs assert-session-memory-hook-enabled
 
 # Explicit older packages keep automatic setup; successful help establishes consent support.
-plugin_install_help="$(openclaw plugins install --help)"
+plugin_install_help="$(carapace plugins install --help)"
 fixture_consent="$(printf '%s' "$plugin_install_help" | node scripts/e2e/lib/package-compat.mjs fixture-consent)"
 if [ -n "$fixture_consent" ]; then
   codex_install_args=(codex)
-  if [ -n "${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
-    candidate_version="${OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:?missing candidate version}"
-    codex_install_args=("npm:@openclaw/codex@$candidate_version" --pin)
+  if [ -n "${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR:-}" ]; then
+    candidate_version="${CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION:?missing candidate version}"
+    codex_install_args=("npm:@carapace/codex@$candidate_version" --pin)
   fi
-  openclaw_e2e_fixture_plugin_command openclaw -- plugins install "${codex_install_args[@]}" \
+  carapace_e2e_fixture_plugin_command carapace -- plugins install "${codex_install_args[@]}" \
     >"$CODEX_INSTALL_LOG" 2>&1
 fi
 
-openclaw onboard \
+carapace onboard \
   --non-interactive \
   --accept-risk \
   --flow quickstart \
@@ -176,7 +176,7 @@ node scripts/e2e/lib/release-scenarios/assertions.mjs assert-openai-env-ref "$OP
 echo "OpenAI environment-reference onboarding completed."
 node scripts/e2e/lib/release-scenarios/assertions.mjs configure-mock-openai "$MOCK_PORT"
 
-if ! openclaw agent --local \
+if ! carapace agent --local \
   --agent main \
   --session-id release-typed-onboarding-agent \
   --message "Return marker $SUCCESS_MARKER" \

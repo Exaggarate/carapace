@@ -4,8 +4,8 @@ const authMocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-runtime")>()),
+vi.mock("carapace/plugin-sdk/agent-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-runtime")>()),
   ensureAuthProfileStore: authMocks.ensureAuthProfileStore,
 }));
 
@@ -44,7 +44,7 @@ describe("Codex account workspace identity", () => {
 
     const overview = await readCodexAccountAuthOverview({
       ctx: { config: {} } as never,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
       pluginConfig: {},
       safeCodexControlRequest,
       account: {

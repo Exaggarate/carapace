@@ -45,7 +45,7 @@ function createDoctorHealthContext(params: {
     cfg,
     cfgForPersistence: cfg,
     sourceConfigValid: true,
-    configPath: "/tmp/openclaw-doctor-session-owner/openclaw.json",
+    configPath: "/tmp/carapace-doctor-session-owner/carapace.json",
     env,
   };
 }
@@ -65,7 +65,7 @@ describe("Codex session doctor health owner", () => {
   it("applies the exact ephemeral auth map after earlier session migration owners", async () => {
     const authProfileIdMap = new Map([["openai-codex:default", "openai:chatgpt-default"]]);
     const retiredModelRefConfig = { agents: { defaults: { model: "openai/retired-model" } } };
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-doctor-session-owner" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/carapace-doctor-session-owner" };
     const cfg = {};
     const ctx = createDoctorHealthContext({
       cfg,

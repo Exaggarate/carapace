@@ -3,9 +3,9 @@ import {
   parseModelRef,
   resolveAgentEffectiveModelPrimary,
   resolveDefaultModelForAgent,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   ACTIVE_MEMORY_CLOSE_TAG,
   ACTIVE_MEMORY_OPEN_TAG,
@@ -294,7 +294,7 @@ function parseModelCandidate(modelRef: string | undefined, defaultProvider = DEF
 }
 
 function getModelRef(
-  runtimeConfig: OpenClawConfig,
+  runtimeConfig: CarapaceConfig,
   agentId: string,
   config: ResolvedActiveRecallPluginConfig,
   ctx?: {

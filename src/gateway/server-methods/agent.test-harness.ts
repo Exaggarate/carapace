@@ -1,7 +1,7 @@
 // Agent method tests cover run/steer/reset/wait behavior, task/subagent state,
 // approval followups, lifecycle hooks, and emitted gateway events.
-import { expectDefined } from "@openclaw/normalization-core";
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { expectDefined } from "@carapace/normalization-core";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
 import { expect, vi } from "vitest";
 import type { readAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import type { AgentInternalEvent } from "../../agents/internal-events.js";
@@ -15,7 +15,7 @@ import type {
   listSessionParticipantsReadOnly,
   stageSessionPendingInput,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resetDiagnosticEventsForTest } from "../../infra/diagnostic-events.js";
 import { trackAsyncWork } from "../../shared/async-work-scope.js";
 import {
@@ -31,7 +31,7 @@ import { flushPendingSessionsChangedEvents } from "./session-change-event.js";
 import { suspendHandlers } from "./suspend.js";
 import type { GatewayRequestContext } from "./types.js";
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
 
 export const REAL_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
@@ -69,7 +69,7 @@ const mocks = vi.hoisted(() => ({
   resolveAgentExplicitRecipientSession: vi.fn(async () => ({})),
   readAcpSessionMeta: vi.fn<typeof readAcpSessionMeta>(() => undefined),
   listAgentIds: vi.fn(() => ["main"]),
-  loadConfigReturn: {} as OpenClawConfig,
+  loadConfigReturn: {} as CarapaceConfig,
   loadVoiceWakeRoutingConfig: vi.fn(),
   resolveVoiceWakeRouteByTrigger: vi.fn(),
   getChannelPlugin: vi.fn(),
@@ -88,7 +88,7 @@ export function getAgentTestMocks() {
   return mocks;
 }
 
-function resolveAgentTestConfig(cfg: OpenClawConfig = mocks.loadConfigReturn): OpenClawConfig {
+function resolveAgentTestConfig(cfg: CarapaceConfig = mocks.loadConfigReturn): CarapaceConfig {
   if (cfg.agents?.list) {
     return cfg;
   }
@@ -780,7 +780,7 @@ export function resetTimeConfig() {
 }
 
 export function useTestStateDir(root: string): void {
-  setTestEnvValue("OPENCLAW_STATE_DIR", root);
+  setTestEnvValue("CARAPACE_STATE_DIR", root);
 }
 
 export async function expectResetCall(expectedMessage: string) {
@@ -946,7 +946,7 @@ export function operatorWriteGatewayClient(): AgentHandlerArgs["client"] {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "ui",

@@ -1,6 +1,6 @@
 // Real CLI scope selection, Gateway handlers, and token storage with in-process transport.
 // Authentication mode is supplied by the fixture; device scope grants use the real verifier.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayClientOptions } from "../gateway/client.js";
@@ -15,7 +15,7 @@ import {
 } from "../infra/device-pairing-tokens.js";
 import { getPairedDevice, requestDevicePairing } from "../infra/device-pairing.js";
 import { normalizeDeviceAuthScopes } from "../shared/device-auth.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { registerDevicesCli } from "./devices-cli.js";
 
@@ -66,7 +66,7 @@ vi.mock("../gateway/client.js", async (importOriginal) => ({
   },
 }));
 
-const roots = createSuiteTempRootTracker({ prefix: "openclaw-devices-cli-scopes-" });
+const roots = createSuiteTempRootTracker({ prefix: "carapace-devices-cli-scopes-" });
 const targetDeviceId = "device-1";
 let baseDir: string;
 const warn = vi.fn();
@@ -77,10 +77,10 @@ beforeAll(async () => {
 beforeEach(async () => {
   vi.clearAllMocks();
   baseDir = await roots.make();
-  vi.stubEnv("OPENCLAW_STATE_DIR", baseDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", baseDir);
 });
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 afterAll(async () => {

@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   assertInsideSkillsRoot,
   readWorkspaceSkillFile,
@@ -64,7 +64,7 @@ export { evaluateSkillProposal, listSkillProposalEvents } from "./service-evalua
 function proposalStoreOptions(
   env: NodeJS.ProcessEnv | undefined,
   agentId: string | undefined,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ) {
   if (!agentId) {
     throw new Error("Skill Workshop requires the active agent id.");
@@ -73,7 +73,7 @@ function proposalStoreOptions(
 }
 
 function workshopSkillsDir(input: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   env?: NodeJS.ProcessEnv;
 }): string {

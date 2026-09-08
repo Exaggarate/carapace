@@ -1,6 +1,6 @@
-## OpenClaw Vision
+## Carapace Vision
 
-OpenClaw is the AI that actually does things.
+Carapace is the AI that actually does things.
 It runs on your devices, in your channels, with your rules.
 
 This document explains the current state and direction of the project.
@@ -8,15 +8,15 @@ We are still early, so iteration is fast.
 Project overview and developer docs: [`README.md`](README.md)
 Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
-OpenClaw started as a personal playground to learn AI and build something genuinely useful:
+Carapace started as a personal playground to learn AI and build something genuinely useful:
 an assistant that can run real tasks on a real computer.
-It evolved through several names and shells: Warelay -> Clawdbot -> Moltbot -> OpenClaw.
+It evolved through several names and shells: Warelay -> Clawdbot -> Moltbot -> Carapace.
 
 The goal: a personal assistant that is easy to use, supports a wide range of platforms, and respects privacy and security.
 
-OpenClaw is a great personal assistant and a great team assistant.
+Carapace is a great personal assistant and a great team assistant.
 A personal install is yours alone; a shared Gateway is a place people work together, so the same session can carry several humans, their credit, and their history.
-We build OpenClaw with OpenClaw on [team.openclaw.ai](https://team.openclaw.ai), and we sometimes invite visitors there.
+We build Carapace with Carapace on [github.com/Exaggarate/carapace](https://github.com/Exaggarate/carapace), and we sometimes invite visitors there.
 
 The current focus is:
 
@@ -44,16 +44,16 @@ Contribution rules:
 
 Configuration compatibility:
 
-OpenClaw runtime code reads the current configuration schema only.
+Carapace runtime code reads the current configuration schema only.
 We do not keep long-lived aliases or compatibility branches that silently accept old, renamed, or malformed config keys.
 
 When a config change makes existing user config invalid, the same change needs a doctor migration.
-`openclaw doctor --fix` should detect the old shape, explain it, back it up when needed, and rewrite it to the canonical format.
+`carapace doctor --fix` should detect the old shape, explain it, back it up when needed, and rewrite it to the canonical format.
 Core-owned config and auth state are repaired in core doctor code; plugin-owned config is repaired by that plugin's doctor contract.
 
 ## Security
 
-Security in OpenClaw is a deliberate tradeoff: strong defaults without killing capability.
+Security in Carapace is a deliberate tradeoff: strong defaults without killing capability.
 The goal is to stay powerful for real work while making risky paths explicit and operator-controlled.
 
 Canonical security policy and reporting:
@@ -63,14 +63,14 @@ Canonical security policy and reporting:
 We prioritize secure defaults, but also expose clear knobs for trusted high-power workflows.
 
 Privacy follows the same default rule.
-OpenClaw sends no usage analytics, tracking identifiers, or telemetry attribution to the project unless the operator turned that on themselves.
+Carapace sends no usage analytics, tracking identifiers, or telemetry attribution to the project unless the operator turned that on themselves.
 This rule governs what leaves your install. It is not a rule about shared Gateways: when you join a team Gateway, the people you share it with see the work you do there, and features like Git co-author credit exist to attribute that work to you.
 The setup wizard offers optional anonymous feature statistics, with no selected by default; the daily update check reports version and platform and can be disabled.
-See [Usage telemetry and update checks](https://docs.openclaw.ai/gateway/telemetry).
+See [Usage telemetry and update checks](docs/gateway/telemetry.md).
 
 ## Plugins & Memory
 
-OpenClaw has an extensive plugin API.
+Carapace has an extensive plugin API.
 Core stays lean; optional capabilities should usually ship as plugins.
 We are generally slimming down core while expanding what plugins can do.
 If a useful feature cannot be built as a plugin yet, we welcome PRs and design discussions that extend the plugin API instead of adding one-off core behavior.
@@ -85,7 +85,7 @@ Once several independent PRs or requests wire in the same kind of capability, th
 
 There are two broad plugin styles:
 
-- Code plugins run OpenClaw plugin code and are appropriate for deeper runtime extension.
+- Code plugins run Carapace plugin code and are appropriate for deeper runtime extension.
 - Bundle-style plugins package stable external surfaces such as skills, MCP servers, and related configuration.
 
 Prefer bundle-style plugins when they can express the capability.
@@ -97,7 +97,7 @@ If you build a plugin, host and maintain it in your own repository.
 The bar for adding optional plugins to core is intentionally high.
 Plugin docs: [`docs/tools/plugin.md`](docs/tools/plugin.md)
 Plugin discovery, official publisher status, provenance, and security review live in [ClawHub](https://clawhub.ai/).
-OpenClaw docs should document core extension points; plugin promotion belongs in ClawHub, preferably under vetted org publishers for official plugins.
+Carapace docs should document core extension points; plugin promotion belongs in ClawHub, preferably under vetted org publishers for official plugins.
 
 Memory is a special plugin slot where only one memory plugin can be active at a time.
 Today we ship multiple memory options; over time we plan to converge on one recommended default path.
@@ -110,7 +110,7 @@ Official or bundled promotion should require a clear product, security, or maint
 
 ### MCP Support
 
-OpenClaw supports MCP as both a server and a runtime integration surface.
+Carapace supports MCP as both a server and a runtime integration surface.
 MCP details live in [`docs/cli/mcp.md`](docs/cli/mcp.md).
 
 The project goal is pragmatic MCP support without duplicating existing agent,
@@ -118,7 +118,7 @@ tool, ACPX, plugin, or ClawHub paths.
 
 ### Setup
 
-OpenClaw is currently terminal-first by design.
+Carapace is currently terminal-first by design.
 This keeps setup explicit: users see docs, auth, permissions, and security posture up front.
 
 Long term, we want easier onboarding flows as hardening matures.
@@ -126,8 +126,8 @@ We do not want convenience wrappers that hide critical security decisions from u
 
 ### Why TypeScript?
 
-OpenClaw is primarily an orchestration system: prompts, tools, protocols, and integrations.
-TypeScript was chosen to keep OpenClaw hackable by default.
+Carapace is primarily an orchestration system: prompts, tools, protocols, and integrations.
+TypeScript was chosen to keep Carapace hackable by default.
 It is widely known, fast to iterate in, and easy to read, modify, and extend.
 
 ## What We Will Not Merge (For Now)
@@ -135,7 +135,7 @@ It is widely known, fast to iterate in, and easy to read, modify, and extend.
 - New core skills when they can live on [ClawHub](https://clawhub.ai/)
 - Full-doc translation sets for all docs (deferred; we plan AI-generated translations later)
 - Commercial service integrations that do not clearly fit the model-provider category
-- Cloud-based sandbox providers as OpenClaw plugins; implement provider support in [Crabbox](https://github.com/openclaw/crabbox) instead
+- Cloud-based sandbox providers as Carapace plugins; implement provider support in [Crabbox](https://github.com/Exaggarate/carapace/crabbox) instead
 - Wrapper channels around already supported channels without a clear capability or security gap
 - MCP work that duplicates existing MCP, ACPX, plugin, or ClawHub paths without a clear product or security gap
 - Heavy orchestration layers that duplicate existing agent and tool infrastructure

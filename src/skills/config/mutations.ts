@@ -1,14 +1,14 @@
 // Skill config mutation helpers update persisted skill settings through config retries.
 import { mutateConfigFileWithRetry } from "../../config/config.js";
 import { REDACTED_SENTINEL } from "../../config/redact-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeSecretInput } from "../../utils/normalize-secret-input.js";
 
 function patchSkillConfigEntry(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   skillKey: string,
   patch: { enabled?: boolean; apiKey?: string; env?: Record<string, string> },
-): OpenClawConfig {
+): CarapaceConfig {
   const entries = { ...cfg.skills?.entries };
   const current = entries[skillKey] ? { ...entries[skillKey] } : {};
   if (typeof patch.enabled === "boolean") {

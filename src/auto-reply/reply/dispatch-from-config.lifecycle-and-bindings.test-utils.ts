@@ -3,7 +3,7 @@ import { AsyncResource } from "node:async_hooks";
 import path from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { waitForAbortSignal } from "../../infra/abort-signal.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import { registerPluginCommand } from "../../plugins/commands.js";
@@ -528,7 +528,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("emits diagnostics when enabled", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "slack",
@@ -574,7 +574,7 @@ describe("dispatchReplyFromConfig", () => {
     sessionStoreMocks.currentEntry = {
       sessionId: "test-uuid-1234",
     };
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "slack",
@@ -612,7 +612,7 @@ describe("dispatchReplyFromConfig", () => {
     sessionStoreMocks.currentEntry = {
       sessionId: "target-session-uuid-9999",
     };
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "slack",
@@ -637,7 +637,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("marks diagnostic progress for real reply events but not reply start callbacks", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as OpenClawConfig;
+    const cfg = { diagnostics: { enabled: true } } as CarapaceConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "slack",
@@ -679,7 +679,7 @@ describe("dispatchReplyFromConfig", () => {
           verboseDefault: "on",
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -753,7 +753,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true },
@@ -771,13 +771,13 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
         data: {
           kind: "codex-app-server-session",
           version: 1,
           sessionFile: "/tmp/session.jsonl",
-          workspaceDir: "/workspace/openclaw",
+          workspaceDir: "/workspace/carapace",
         },
       },
     } satisfies SessionBindingRecord);
@@ -834,7 +834,7 @@ describe("dispatchReplyFromConfig", () => {
         ]
       | undefined;
     expect(resolveCalls).toBe(1);
-    expect(inboundClaimCall?.[0]).toBe("openclaw-codex-app-server");
+    expect(inboundClaimCall?.[0]).toBe("carapace-codex-app-server");
     expect(inboundClaimCall?.[1]?.channel).toBe("discord");
     expect(inboundClaimCall?.[1]?.accountId).toBe("default");
     expect(inboundClaimCall?.[1]?.conversationId).toBe("conversation-1");
@@ -972,8 +972,8 @@ describe("dispatchReplyFromConfig", () => {
     );
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
-      Provider: "openclaw",
-      Surface: "openclaw",
+      Provider: "carapace",
+      Surface: "carapace",
       OriginatingChannel: "slack",
       OriginatingTo: "user:U123",
       From: "user:U123",
@@ -1566,7 +1566,7 @@ describe("dispatchReplyFromConfig", () => {
     const order: string[] = [];
     const rawPath = "/Users/demo/Library/Messages/Attachments/ab/cd/photo.jpg";
     const stagedPath =
-      "/tmp/openclaw-proof/.openclaw/media/remote-cache/agent-main-imessage/photo.jpg";
+      "/tmp/carapace-proof/.carapace/media/remote-cache/agent-main-imessage/photo.jpg";
     stageSandboxMediaMocks.stageSandboxMedia.mockImplementationOnce(async (paramsUnknown) => {
       order.push("stage");
       const params = paramsUnknown as {
@@ -1577,7 +1577,7 @@ describe("dispatchReplyFromConfig", () => {
         remoteMediaMode?: string;
       };
       expect(params.sessionKey).toBe("agent:main:imessage:direct:user");
-      expect(params.workspaceDir).toContain(path.join(".openclaw", "workspace"));
+      expect(params.workspaceDir).toContain(path.join(".carapace", "workspace"));
       expect(params.remoteMediaMode).toBe("cache");
       params.ctx.media = [{ path: stagedPath, url: stagedPath, contentType: "image/jpeg" }];
       params.sessionCtx.media = params.ctx.media;
@@ -1587,7 +1587,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockImplementationOnce(
       async (_plugin, event) => {
         order.push("claim");
@@ -1614,13 +1614,13 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/plugins/openclaw-codex-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/plugins/carapace-codex-app-server",
         data: {
           kind: "codex-app-server-session",
           version: 1,
           sessionFile: "/tmp/session.jsonl",
-          workspaceDir: "/workspace/openclaw",
+          workspaceDir: "/workspace/carapace",
         },
       },
     } satisfies SessionBindingRecord);
@@ -1835,7 +1835,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true },
@@ -1864,8 +1864,8 @@ describe("dispatchReplyFromConfig", () => {
               boundAt: 1710000000000,
               metadata: {
                 pluginBindingOwner: "plugin",
-                pluginId: "openclaw-codex-app-server",
-                pluginRoot: "/plugins/openclaw-codex-app-server",
+                pluginId: "carapace-codex-app-server",
+                pluginRoot: "/plugins/carapace-codex-app-server",
               },
             } satisfies SessionBindingRecord)
           : null,
@@ -1907,7 +1907,7 @@ describe("dispatchReplyFromConfig", () => {
       }),
     );
     expect(hookMocks.runner.runInboundClaimForPluginOutcome).toHaveBeenCalledWith(
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       expect.objectContaining({
         channel: "discord",
         conversationId: "1510164477642014740",
@@ -1928,7 +1928,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true, reply: { text: "should not send" } },
@@ -1946,13 +1946,13 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/workspace/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/workspace/carapace-app-server",
         data: {
           kind: "codex-app-server-session",
           version: 1,
           sessionFile: "/tmp/session.jsonl",
-          workspaceDir: "/workspace/openclaw",
+          workspaceDir: "/workspace/carapace",
         },
       },
     } satisfies SessionBindingRecord);
@@ -2018,7 +2018,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true },
@@ -2036,14 +2036,14 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
         detachHint: "/codex detach",
         data: {
           kind: "codex-app-server-session",
           version: 1,
           sessionFile: "/tmp/session.jsonl",
-          workspaceDir: "/workspace/openclaw",
+          workspaceDir: "/workspace/carapace",
         },
       },
     } satisfies SessionBindingRecord);
@@ -2098,7 +2098,7 @@ describe("dispatchReplyFromConfig", () => {
       ((hookName?: string) =>
         hookName === "inbound_claim" || hookName === "message_received") as () => boolean,
     );
-    hookMocks.registry.plugins = [{ id: "openclaw-codex-app-server", status: "loaded" }];
+    hookMocks.registry.plugins = [{ id: "carapace-codex-app-server", status: "loaded" }];
     hookMocks.runner.runInboundClaimForPluginOutcome.mockResolvedValue({
       status: "handled",
       result: { handled: true },
@@ -2116,8 +2116,8 @@ describe("dispatchReplyFromConfig", () => {
       boundAt: 1710000000000,
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "carapace-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/carapace-app-server",
       },
     } satisfies SessionBindingRecord);
     const cfg = emptyConfig;
@@ -2151,7 +2151,7 @@ describe("dispatchReplyFromConfig", () => {
       expect.objectContaining({ channel: "discord", accountId: "default" }),
     );
     expect(hookMocks.runner.runInboundClaimForPluginOutcome).toHaveBeenCalledWith(
-      "openclaw-codex-app-server",
+      "carapace-codex-app-server",
       expect.objectContaining({ content: "/notes keep this with the bound plugin" }),
       expect.objectContaining({
         pluginBinding: expect.objectContaining({ bindingId: "binding-command-unknown-slash" }),

@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import {
   MAX_TIMER_TIMEOUT_MS,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { loadMcpToolGrants } from "../../infra/exec-approvals-mcp.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { resolveProjectedMcpCodexToolApprovalMode } from "../mcp-codex-tool-approval.js";
 import { retainBeforeToolCallForNativeHookRelay } from "./host-private-capabilities.js";
 import {
@@ -86,7 +86,7 @@ type RelayLifetime = {
   expiryTimer?: ReturnType<typeof setTimeout>;
 };
 
-const RELAY_LIFETIME = "__openclawNativeHookRelayLifetimeV1";
+const RELAY_LIFETIME = "__carapaceNativeHookRelayLifetimeV1";
 
 /** Private bundled-runtime callbacks for retained direct-child hook policy. */
 export type NativeHookRelayRetention = Readonly<{
@@ -179,7 +179,7 @@ function registerNativeHookRelayInternal(
     throw new Error("Native hook relay expiry is outside the supported Date range");
   }
   const allowedEvents = normalizeAllowedEvents(params.allowedEvents);
-  const stateDbPath = resolveOpenClawStateSqlitePath();
+  const stateDbPath = resolveCarapaceStateSqlitePath();
   const deliverReplacedRegistrationUnregister = unregisterNativeHookRelay(relayId, undefined, {
     deferListenerCloseMs: NATIVE_HOOK_BRIDGE_REPLACEMENT_RECORD_GRACE_MS,
     deferOnUnregister: true,

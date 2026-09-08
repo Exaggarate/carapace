@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { resolveRemoteCatalogUrl } from "./remote-config.js";
 import { refreshRemoteModelCatalog, REMOTE_MODEL_CATALOG_TTL_MS } from "./remote-refresh.js";
 import { readRemoteModelCatalog, writeRemoteModelCatalog } from "./remote-store.js";
@@ -24,13 +24,13 @@ const bundle = {
 };
 
 function options() {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-refresh-")));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-refresh-")));
   roots.push(root);
   return { path: path.join(root, "state.sqlite") };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
   }

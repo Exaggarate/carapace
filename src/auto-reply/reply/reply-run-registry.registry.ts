@@ -1,6 +1,6 @@
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 // Tracks active reply runs so stop, queue, and status commands can coordinate.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { GatewayContextResolver } from "../../gateway/server-methods/types.js";
 import {
   isAgentEventLifecycleGenerationCurrent,
@@ -542,6 +542,6 @@ const replyRunRegistryTestApi = {
 };
 
 if (process.env.VITEST === "true" || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.replyRunRegistryTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.replyRunRegistryTestApi")] =
     replyRunRegistryTestApi;
 }

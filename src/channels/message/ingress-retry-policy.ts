@@ -6,7 +6,7 @@
 import {
   collectNestedErrorCandidates,
   extractErrorCode,
-} from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/normalization-core/error-coercion";
 import {
   SESSION_RESTART_RECOVERY_TOMBSTONE_ERROR_CODE,
   SESSION_WORK_START_CHANGED_ERROR_CODE,

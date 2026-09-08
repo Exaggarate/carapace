@@ -1,6 +1,6 @@
 // Synology Chat tests cover channel plugin behavior.
-import { verifyChannelMessageAdapterCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
-import { createPluginSetupWizardStatus } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { verifyChannelMessageAdapterCapabilityProofs } from "carapace/plugin-sdk/channel-outbound";
+import { createPluginSetupWizardStatus } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedSynologyChatAccount } from "./types.js";
 
@@ -24,7 +24,7 @@ const securityAccountDefaults: ResolvedSynologyChatAccount = {
 
 const { preparedCapabilityUrl, prepareSynologyHostedMediaMock } = vi.hoisted(() => ({
   preparedCapabilityUrl:
-    "https://gateway.example.com/w?__openclaw_synology_media_token_aaaaaaaaaaaaaaaaaaaaaaaa=secret",
+    "https://gateway.example.com/w?__carapace_synology_media_token_aaaaaaaaaaaaaaaaaaaaaaaa=secret",
   prepareSynologyHostedMediaMock: vi.fn(),
 }));
 
@@ -214,7 +214,7 @@ describe("createSynologyChatPlugin", () => {
   it.each([
     "http://gateway.example.com/webhook/synology",
     "https://gateway.example.com/webhook/synology#fragment",
-    "https://gateway.example.com/webhook/synology?__openclaw_synology_media_token_fixture=value",
+    "https://gateway.example.com/webhook/synology?__carapace_synology_media_token_fixture=value",
   ])("reports attachments unready when webhookUrl is invalid: %s", async (webhookUrl) => {
     const cfg = {
       channels: {
@@ -385,7 +385,7 @@ describe("createSynologyChatPlugin", () => {
 
       expect(mockSendMessage).toHaveBeenCalledWith(
         "https://nas/incoming",
-        "OpenClaw: your access has been approved.",
+        "Carapace: your access has been approved.",
         "USER1",
         true,
       );

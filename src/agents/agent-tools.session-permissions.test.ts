@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { withTempDir } from "../test-utils/temp-dir.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import "./test-helpers/fast-coding-tools.js";
-import "./test-helpers/fast-openclaw-tools.js";
+import "./test-helpers/fast-carapace-tools.js";
 import { expectReadWriteEditTools, getTextContent } from "./test-helpers/agent-tools-fs-helpers.js";
 
 vi.mock("../infra/shell-env.js", async () => {
@@ -48,7 +48,7 @@ const fileToolCases = [
 async function withAliasedWorkspace(
   run: (paths: { parent: string; root: string; alias: string }) => Promise<void>,
 ) {
-  await withTempDir("openclaw-permission-alias-", async (dir) => {
+  await withTempDir("carapace-permission-alias-", async (dir) => {
     const parent = await fs.realpath(dir);
     const root = path.join(parent, "workspace");
     const alias = path.join(parent, "workspace-alias");
@@ -72,7 +72,7 @@ describe("session permission filesystem tools", () => {
         it.each(fileToolCases)("allows $name within the same directory", async (testCase) => {
           await withAliasedWorkspace(async ({ root, alias }) => {
             const cwd = path.join(alias, cwdSuffix);
-            const tools = createOpenClawCodingTools({
+            const tools = createCarapaceCodingTools({
               workspaceDir: alias,
               cwd,
               sessionPermissionPolicy: { root, mode: "guarded" },
@@ -107,7 +107,7 @@ describe("session permission filesystem tools", () => {
       it.each(["relative", "absolute"])("allows %s alias reads in read-only mode", async (form) => {
         await withAliasedWorkspace(async ({ root, alias }) => {
           await fs.writeFile(path.join(root, "proof.txt"), "original\n", "utf8");
-          const tools = createOpenClawCodingTools({
+          const tools = createCarapaceCodingTools({
             workspaceDir: alias,
             cwd: alias,
             sessionPermissionPolicy: { root, mode: "read-only" },
@@ -131,7 +131,7 @@ describe("session permission filesystem tools", () => {
         await withAliasedWorkspace(async ({ parent, root, alias }) => {
           const inside = path.join(root, "proof.txt");
           await fs.writeFile(inside, "original\n", "utf8");
-          const tools = createOpenClawCodingTools({
+          const tools = createCarapaceCodingTools({
             workspaceDir: alias,
             cwd: alias,
             sessionPermissionPolicy: { root, mode: "guarded" },
@@ -158,7 +158,7 @@ describe("session permission filesystem tools", () => {
         "keeps missing daily memory optional with alias=%s",
         async (aliased) => {
           await withAliasedWorkspace(async ({ root, alias }) => {
-            const tools = createOpenClawCodingTools({
+            const tools = createCarapaceCodingTools({
               workspaceDir: aliased ? alias : root,
               sessionPermissionPolicy: { root, mode: "guarded" },
             });
@@ -175,7 +175,7 @@ describe("session permission filesystem tools", () => {
         await withAliasedWorkspace(async ({ root, alias }) => {
           await fs.mkdir(path.join(root, "real"));
           await fs.symlink(path.join(root, "real"), path.join(root, "link"), "dir");
-          const tools = createOpenClawCodingTools({
+          const tools = createCarapaceCodingTools({
             workspaceDir: alias,
             cwd: alias,
             sessionPermissionPolicy: { root, mode: "guarded" },
@@ -228,7 +228,7 @@ describe("session permission filesystem tools", () => {
             const canonicalInput = `${root}/${relativeEscape}`;
             await expect(fs.readFile(canonicalInput, "utf8")).resolves.toBe("original\n");
             await expect(fs.realpath(canonicalInput)).resolves.toBe(outside);
-            const tools = createOpenClawCodingTools({
+            const tools = createCarapaceCodingTools({
               workspaceDir: alias,
               cwd: alias,
               sessionPermissionPolicy: { root, mode: "guarded" },
@@ -256,7 +256,7 @@ describe("session permission filesystem tools", () => {
   it.each(["guarded", "workspace"] as const)(
     "separates a nested session cwd from its %s permission boundary",
     async (mode) => {
-      await withTempDir("openclaw-permission-root-", async (root) => {
+      await withTempDir("carapace-permission-root-", async (root) => {
         const cwd = path.join(root, "packages", "app");
         const outside = path.join(path.dirname(root), `outside-${path.basename(root)}.txt`);
         const escape = path.join(root, "escape.txt");
@@ -267,7 +267,7 @@ describe("session permission filesystem tools", () => {
           await fs.symlink(outside, escape);
         }
         try {
-          const tools = createOpenClawCodingTools({
+          const tools = createCarapaceCodingTools({
             workspaceDir: root,
             cwd,
             sessionPermissionPolicy: { root, mode },
@@ -309,12 +309,12 @@ describe("session permission filesystem tools", () => {
   );
 
   it("removes mutating filesystem tools in read-only mode", async () => {
-    await withTempDir("openclaw-permission-read-only-", async (root) => {
+    await withTempDir("carapace-permission-read-only-", async (root) => {
       const outside = path.join(path.dirname(root), `outside-${path.basename(root)}.txt`);
       await fs.writeFile(path.join(root, "inside.txt"), "inside", "utf8");
       await fs.writeFile(outside, "outside", "utf8");
       try {
-        const tools = createOpenClawCodingTools({
+        const tools = createCarapaceCodingTools({
           workspaceDir: root,
           sessionPermissionPolicy: { root, mode: "read-only" },
         });
@@ -341,8 +341,8 @@ describe("session permission filesystem tools", () => {
   });
 
   it("denies exec when a turn tightens the dispatch-provided full mode", async () => {
-    await withTempDir("openclaw-permission-exec-", async (root) => {
-      const tools = createOpenClawCodingTools({
+    await withTempDir("carapace-permission-exec-", async (root) => {
+      const tools = createCarapaceCodingTools({
         workspaceDir: root,
         sessionPermissionPolicy: { root, mode: "full" },
         exec: { host: "gateway", mode: "full", security: "deny", ask: "off" },
@@ -359,13 +359,13 @@ describe("session permission filesystem tools", () => {
 
   describe.each([undefined, true] as const)("full mode with required root=%s", (required) => {
     it("lists directories without granting access beyond a required root", async () => {
-      await withTempDir("openclaw-listing-root-", async (parent) => {
+      await withTempDir("carapace-listing-root-", async (parent) => {
         const root = path.join(await fs.realpath(parent), "workspace");
         const outside = path.join(await fs.realpath(parent), "other-agent");
         await fs.mkdir(path.join(root, "nested"), { recursive: true });
         await fs.mkdir(outside);
         await fs.writeFile(path.join(outside, "private.txt"), "private");
-        const ls = createOpenClawCodingTools({
+        const ls = createCarapaceCodingTools({
           workspaceDir: root,
           requireWorkspaceOnly: required,
           sessionPermissionPolicy: { root, mode: "full" },
@@ -385,7 +385,7 @@ describe("session permission filesystem tools", () => {
     });
 
     it.each(fileToolCases)("preserves $name authority and final file effects", async (testCase) => {
-      await withTempDir("openclaw-permission-full-", async (parent) => {
+      await withTempDir("carapace-permission-full-", async (parent) => {
         const root = path.join(await fs.realpath(parent), "workshop");
         const inside = path.join(root, "proof.txt");
         const outside = path.join(parent, "other-agent.txt");
@@ -394,7 +394,7 @@ describe("session permission filesystem tools", () => {
         if (testCase.initial !== undefined) {
           await fs.writeFile(inside, testCase.initial);
         }
-        const tool = createOpenClawCodingTools({
+        const tool = createCarapaceCodingTools({
           workspaceDir: root,
           requireWorkspaceOnly: required,
           sessionPermissionPolicy: { root, mode: "full" },

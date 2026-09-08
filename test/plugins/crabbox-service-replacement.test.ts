@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import * as processRuntime from "carapace/plugin-sdk/process-runtime";
 import { describe, expect, it, vi } from "vitest";
 import crabboxPlugin from "../../extensions/crabbox/index.js";
 import { createEmptyPluginRegistry } from "../../src/plugins/registry.js";
@@ -63,7 +63,7 @@ describe("Crabbox service replacement", () => {
             sshHost: "worker.example.test",
             sshKey: "/mock/worker-key",
             sshPort: 2222,
-            sshUser: "openclaw",
+            sshUser: "carapace",
             ready: true,
             state: "running",
           }),

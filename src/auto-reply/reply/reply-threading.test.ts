@@ -1,6 +1,6 @@
 // Tests reply-to threading mode resolution across global and plugin config.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -12,7 +12,7 @@ import {
   resolveReplyToMode,
 } from "./reply-threading.js";
 
-const emptyCfg = {} as OpenClawConfig;
+const emptyCfg = {} as CarapaceConfig;
 
 describe("resolveReplyToMode", () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("resolveReplyToMode", () => {
         discord: { replyToMode: "first" },
         slack: { replyToMode: "all" },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const chatTypeCfg = {
       channels: {
         slack: {
@@ -38,16 +38,16 @@ describe("resolveReplyToMode", () => {
           replyToModeByChatType: { direct: "all", group: "first" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const topLevelFallbackCfg = {
       channels: {
         slack: {
           replyToMode: "first",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const cases: Array<{
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       channel?: "telegram" | "discord" | "slack";
       chatType?: "direct" | "group" | "channel";
       expected: "off" | "all" | "first";
@@ -102,8 +102,8 @@ describe("resolveReplyToMode", () => {
       ]),
     );
 
-    expect(resolveReplyToMode({} as OpenClawConfig, "whatsapp", "work", "group")).toBe("first");
-    expect(resolveReplyToMode({} as OpenClawConfig, "whatsapp", "default", "group")).toBe("all");
+    expect(resolveReplyToMode({} as CarapaceConfig, "whatsapp", "work", "group")).toBe("first");
+    expect(resolveReplyToMode({} as CarapaceConfig, "whatsapp", "default", "group")).toBe("all");
   });
 
   it("resolves the same listed default account used by routed delivery", () => {
@@ -141,7 +141,7 @@ describe("resolveReplyToMode", () => {
         { pluginId: "irc", source: "test", plugin: createChannelTestPluginBase({ id: "irc" }) },
       ]),
     );
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         irc: {
           replyToMode: "off",

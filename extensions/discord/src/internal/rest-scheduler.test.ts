@@ -1,6 +1,6 @@
 // Discord tests cover rest scheduler plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { MAX_DATE_TIMESTAMP_MS, MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { MAX_DATE_TIMESTAMP_MS, MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { RateLimitError } from "./rest-errors.js";
 import { RestScheduler } from "./rest-scheduler.js";

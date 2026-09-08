@@ -4,7 +4,7 @@ import {
   normalizeLanguageCode,
   normalizeSeed,
   requireInRange,
-} from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-provider";
 import { isValidElevenLabsVoiceId, normalizeElevenLabsBaseUrl } from "./shared.js";
 
 function assertElevenLabsVoiceSettings(settings: {
@@ -126,9 +126,9 @@ export async function elevenLabsTTS(params: ElevenLabsTtsRequestParams): Promise
     stream: false,
   });
   const { assertOkOrThrowProviderError, readProviderBinaryResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
 
   const { response, release } = await fetchWithSsrFGuard({
     url: url.toString(),
@@ -163,13 +163,13 @@ export async function elevenLabsTTSStream(params: ElevenLabsTtsRequestParams): P
     ...params,
     stream: true,
   });
-  const { MAX_AUDIO_BYTES } = await import("openclaw/plugin-sdk/media-runtime");
+  const { MAX_AUDIO_BYTES } = await import("carapace/plugin-sdk/media-runtime");
   const { createBoundedProviderBinaryStream } =
-    await import("openclaw/plugin-sdk/provider-binary-stream");
+    await import("carapace/plugin-sdk/provider-binary-stream");
   const { assertOkOrThrowProviderError, assertProviderBinaryResponseContent } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
 
   const { response, release } = await fetchWithSsrFGuard({
     url: url.toString(),

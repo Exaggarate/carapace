@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { ExecApprovalDecision } from "../infra/exec-approvals.js";
 import {
   captureGatewayRootWorkAdmissionContinuationScope,

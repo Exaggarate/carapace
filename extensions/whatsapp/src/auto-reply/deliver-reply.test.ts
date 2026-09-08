@@ -2,13 +2,13 @@ import type { WAMessage } from "baileys";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { listMessageReceiptPlatformIds } from "openclaw/plugin-sdk/channel-outbound";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { MEDIA_FFMPEG_MAX_AUDIO_DURATION_SECS } from "openclaw/plugin-sdk/media-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-inbound";
+import { listMessageReceiptPlatformIds } from "carapace/plugin-sdk/channel-outbound";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { MEDIA_FFMPEG_MAX_AUDIO_DURATION_SECS } from "carapace/plugin-sdk/media-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 // Whatsapp tests cover deliver reply plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { createWebSendApi } from "../inbound/send-api.js";
 import { normalizeWhatsAppSendResult } from "../inbound/send-result.js";
@@ -24,19 +24,19 @@ const hoisted = vi.hoisted(() => ({
   transcodeAudioBufferToOpus: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-activity-runtime")
-  >("openclaw/plugin-sdk/channel-activity-runtime");
+    typeof import("carapace/plugin-sdk/channel-activity-runtime")
+  >("carapace/plugin-sdk/channel-activity-runtime");
   return {
     ...actual,
     recordChannelActivity: (...args: unknown[]) => hoisted.recordChannelActivity(...args),
   };
 });
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/media-runtime")>(
-    "openclaw/plugin-sdk/media-runtime",
+vi.mock("carapace/plugin-sdk/media-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/media-runtime")>(
+    "carapace/plugin-sdk/media-runtime",
   );
   return {
     ...actual,
@@ -44,9 +44,9 @@ vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,

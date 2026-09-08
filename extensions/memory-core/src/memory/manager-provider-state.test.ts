@@ -1,8 +1,8 @@
 // Memory Core tests cover manager.mistral provider plugin behavior.
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import { describe, expect, it, vi } from "vitest";
 import type { EmbeddingProvider } from "./embeddings.js";
 import {
@@ -188,7 +188,7 @@ describe("memory manager mistral provider wiring", () => {
 
       const fallbackRequest = expectMemoryFallbackRequest(
         resolveMemoryFallbackProviderRequest({
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
           settings,
           currentProviderId: "openai",
         }),
@@ -242,7 +242,7 @@ describe("memory manager mistral provider wiring", () => {
   it("does not activate a fallback that is already the current provider", () => {
     expect(
       resolveMemoryFallbackProviderRequest({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         settings: createSettings({ provider: "openai", fallback: "lmstudio" }),
         currentProviderId: "lmstudio",
       }),

@@ -15,7 +15,7 @@ const tempDirs: string[] = [];
 
 beforeEach(() => {
   vi.resetModules();
-  vi.stubEnv("OPENCLAW_CI_TEST_TIMINGS", undefined);
+  vi.stubEnv("CARAPACE_CI_TEST_TIMINGS", undefined);
 });
 
 afterEach(() => {
@@ -68,7 +68,7 @@ function specifications(
 }
 
 function temporaryFiles(sizes: number[]): TestSpecification[] {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-ui-e2e-shards-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-ui-e2e-shards-"));
   tempDirs.push(tempDir);
   return specifications(
     sizes.map((bytes, index) => {
@@ -105,7 +105,7 @@ const qaLabFiles = [
   "extensions/qa-lab/src/control-ui-automation-management.real-gateway.e2e.test.ts",
   "extensions/qa-lab/src/control-ui-media-transcript.real-gateway.e2e.test.ts",
   "extensions/qa-lab/src/session-host-command-state.real-gateway.e2e.test.ts",
-  "extensions/qa-lab/src/control-ui-openclaw-delegation.real-gateway.e2e.test.ts",
+  "extensions/qa-lab/src/control-ui-carapace-delegation.real-gateway.e2e.test.ts",
 ] as const;
 const realGatewayFiles = [
   "agent-file-lifecycle.real-gateway",
@@ -289,8 +289,8 @@ function probeOwnership(
       timeout: DEFAULT_VITEST_TEST_TIMEOUT_MS,
       env: {
         ...process.env,
-        OPENCLAW_VITEST_INCLUDE_FILE: options.include ? includeFile : "",
-        OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY: options.skipRealGateway ? "1" : "",
+        CARAPACE_VITEST_INCLUDE_FILE: options.include ? includeFile : "",
+        CARAPACE_UI_E2E_SKIP_REAL_GATEWAY: options.skipRealGateway ? "1" : "",
       },
     },
   );

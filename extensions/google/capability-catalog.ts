@@ -1,4 +1,4 @@
-import type { PluginCapabilityCatalog } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalog } from "carapace/plugin-sdk/plugin-entry";
 import { createLazyGoogleRealtimeVoiceProvider } from "./realtime-voice-lazy.js";
 import { buildGoogleSpeechProvider } from "./speech-provider.js";
 

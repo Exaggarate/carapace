@@ -3,7 +3,7 @@ import { subtitleForRoute, titleForRoute } from "../../app-navigation.ts";
 import { renderLearnMoreLink } from "../../components/settings-ui.ts";
 import { renderPluginsHubTabs, type PluginsHubTab } from "./plugins-hub.ts";
 
-const PLUGINS_DOCS_URL = "https://docs.openclaw.ai/plugins/manage-plugins";
+const PLUGINS_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type PluginsHubHeaderProps = {
   active: PluginsHubTab;

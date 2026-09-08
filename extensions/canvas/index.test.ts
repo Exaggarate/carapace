@@ -1,14 +1,14 @@
 // Canvas tests cover index plugin behavior.
 import { IncomingMessage, ServerResponse } from "node:http";
 import { Socket } from "node:net";
-import type { AgentMessage, StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { AssistantMessage, Model } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage, StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { AssistantMessage, Model } from "carapace/plugin-sdk/llm";
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginNodeInvokePolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+  CarapacePluginApi,
+  CarapacePluginNodeInvokePolicyContext,
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import canvasPlugin from "./index.js";
 
@@ -47,23 +47,23 @@ vi.mock("./src/tool.js", () => ({
   createCanvasTool: mocks.createCanvasTool,
 }));
 
-function registerCanvas(config: OpenClawPluginApi["config"] = {}) {
-  const routes: Array<Parameters<OpenClawPluginApi["registerHttpRoute"]>[0]> = [];
-  const services: Array<Parameters<OpenClawPluginApi["registerService"]>[0]> = [];
-  const resolvers: Array<Parameters<OpenClawPluginApi["registerHostedMediaResolver"]>[0]> = [];
-  const widgetPresenters: Array<Parameters<OpenClawPluginApi["registerWidgetPresenter"]>[0]> = [];
+function registerCanvas(config: CarapacePluginApi["config"] = {}) {
+  const routes: Array<Parameters<CarapacePluginApi["registerHttpRoute"]>[0]> = [];
+  const services: Array<Parameters<CarapacePluginApi["registerService"]>[0]> = [];
+  const resolvers: Array<Parameters<CarapacePluginApi["registerHostedMediaResolver"]>[0]> = [];
+  const widgetPresenters: Array<Parameters<CarapacePluginApi["registerWidgetPresenter"]>[0]> = [];
   const tools: Array<{
-    tool: Parameters<OpenClawPluginApi["registerTool"]>[0];
-    opts: Parameters<OpenClawPluginApi["registerTool"]>[1];
+    tool: Parameters<CarapacePluginApi["registerTool"]>[0];
+    opts: Parameters<CarapacePluginApi["registerTool"]>[1];
   }> = [];
   const cliFeatures: Array<{
-    registrar: Parameters<OpenClawPluginApi["registerNodeCliFeature"]>[0];
-    opts: Parameters<OpenClawPluginApi["registerNodeCliFeature"]>[1];
+    registrar: Parameters<CarapacePluginApi["registerNodeCliFeature"]>[0];
+    opts: Parameters<CarapacePluginApi["registerNodeCliFeature"]>[1];
   }> = [];
-  const nodeInvokePolicies: Array<Parameters<OpenClawPluginApi["registerNodeInvokePolicy"]>[0]> =
+  const nodeInvokePolicies: Array<Parameters<CarapacePluginApi["registerNodeInvokePolicy"]>[0]> =
     [];
   const boardWidgetContentKinds: Array<
-    Parameters<OpenClawPluginApi["registerBoardWidgetContentKind"]>[0]
+    Parameters<CarapacePluginApi["registerBoardWidgetContentKind"]>[0]
   > = [];
   canvasPlugin.register?.(
     createTestPluginApi({
@@ -93,8 +93,8 @@ function registerCanvas(config: OpenClawPluginApi["config"] = {}) {
 }
 
 function createNodeInvokeContext(
-  params: Partial<OpenClawPluginNodeInvokePolicyContext>,
-): OpenClawPluginNodeInvokePolicyContext {
+  params: Partial<CarapacePluginNodeInvokePolicyContext>,
+): CarapacePluginNodeInvokePolicyContext {
   return {
     nodeId: "node-1",
     command: "canvas.present",
@@ -119,7 +119,7 @@ describe("Canvas plugin entry", () => {
       defaultPlatforms: ["macos"],
     });
     expect(routes).toEqual([
-      expect.objectContaining({ path: "/__openclaw__/a2ui", match: "prefix" }),
+      expect.objectContaining({ path: "/__carapace__/a2ui", match: "prefix" }),
     ]);
     expect(boardWidgetContentKinds).toEqual([
       expect.objectContaining({ kind: "a2ui", label: "A2UI" }),
@@ -152,7 +152,7 @@ describe("Canvas plugin entry", () => {
     expect(mocks.loadRenderer).not.toHaveBeenCalled();
 
     const request = new IncomingMessage(new Socket());
-    request.url = "/__openclaw__/a2ui/a2ui.bundle.js";
+    request.url = "/__carapace__/a2ui/a2ui.bundle.js";
     await routes[0]?.handler(request, new ServerResponse(request));
     expect(mocks.loadRenderer).toHaveBeenCalledTimes(1);
     expect(mocks.httpHandler.handleHttpRequest).toHaveBeenCalledTimes(1);
@@ -204,10 +204,10 @@ describe("Canvas plugin entry", () => {
 
   it("preserves registered Canvas network provenance through the real agent loop", async () => {
     const [{ runAgentLoop }, { createAssistantMessageEventStream }] = await Promise.all([
-      vi.importActual<typeof import("openclaw/plugin-sdk/agent-core")>(
-        "openclaw/plugin-sdk/agent-core",
+      vi.importActual<typeof import("carapace/plugin-sdk/agent-core")>(
+        "carapace/plugin-sdk/agent-core",
       ),
-      vi.importActual<typeof import("openclaw/plugin-sdk/llm")>("openclaw/plugin-sdk/llm"),
+      vi.importActual<typeof import("carapace/plugin-sdk/llm")>("carapace/plugin-sdk/llm"),
     ]);
     const registeredTool = registerCanvas().tools[0]?.tool;
     if (typeof registeredTool !== "function") {
@@ -280,7 +280,7 @@ describe("Canvas plugin entry", () => {
       streamFn,
     );
     const metadata = (message: AgentMessage | undefined) =>
-      message ? (message as unknown as Record<string, unknown>)["__openclaw"] : undefined;
+      message ? (message as unknown as Record<string, unknown>)["__carapace"] : undefined;
 
     expect(metadata(messages.find((message) => message.role === "toolResult"))).toEqual({
       resultContentSource: "network",

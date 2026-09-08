@@ -1,5 +1,5 @@
 // Display-metadata mutations for sessions.patch: label, icon, color, category, boardFace.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SessionsPatchParams } from "../../packages/gateway-protocol/src/index.js";
 import {
   normalizeSessionColorValue,

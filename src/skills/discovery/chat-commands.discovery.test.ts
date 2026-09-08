@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withEnv } from "../../test-utils/env.js";
 import { writeSkill } from "../test-support/e2e-test-helpers.js";
 import { resolveWorkshopSkillsDir } from "../workshop/skills-root.js";
@@ -14,7 +14,7 @@ describe("skill command discovery through workspace loading", () => {
   it.each(["workspace", "workshop"] as const)(
     "reports allowlist-hidden %s skills without loading another agent's skills",
     async (source) => {
-      const root = tempDirs.make("openclaw-skill-command-discovery-");
+      const root = tempDirs.make("carapace-skill-command-discovery-");
       const workspaceDir = path.join(root, "workspace");
       const config = {
         plugins: { enabled: false },
@@ -29,7 +29,7 @@ describe("skill command discovery through workspace loading", () => {
           },
         },
         skills: { allowBundled: [], entries: { disabled: { enabled: false } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const skillRoot =
         source === "workshop"
           ? resolveWorkshopSkillsDir(config, "alpha")
@@ -53,7 +53,7 @@ describe("skill command discovery through workspace loading", () => {
       });
       const bundledSkillsDir = path.join(root, "bundled");
       await fs.mkdir(bundledSkillsDir);
-      withEnv({ OPENCLAW_STATE_DIR: root, OPENCLAW_BUNDLED_SKILLS_DIR: bundledSkillsDir }, () => {
+      withEnv({ CARAPACE_STATE_DIR: root, CARAPACE_BUNDLED_SKILLS_DIR: bundledSkillsDir }, () => {
         const params = { workspaceDir, cfg: config, agentId: "alpha" };
         const skillCommands = listSkillCommandsForWorkspace(params);
         const allSkillCommands = listSkillCommandsForWorkspace({

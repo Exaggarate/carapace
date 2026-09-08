@@ -64,7 +64,7 @@ vi.mock("../internal/gateway.js", () => ({
   GatewayPlugin,
 }));
 
-vi.mock("openclaw/plugin-sdk/proxy-capture", () => ({
+vi.mock("carapace/plugin-sdk/proxy-capture", () => ({
   captureHttpExchange: vi.fn(),
   captureWsEvent: vi.fn(),
   resolveEffectiveDebugProxyUrl: () => undefined,
@@ -73,8 +73,8 @@ vi.mock("openclaw/plugin-sdk/proxy-capture", () => ({
 
 // Suite runs isolate=false: a partial factory here poisons the shared module
 // cache for later files in the worker (#123025), so spread the real module.
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     danger: (value: string) => value,
@@ -162,7 +162,7 @@ describe("createDiscordGatewayPlugin", () => {
   it("resolves gateway metadata timeout from env, then default", () => {
     expect(
       resolveDiscordGatewayInfoTimeoutMs({
-        env: { OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS: "25000" },
+        env: { CARAPACE_DISCORD_GATEWAY_INFO_TIMEOUT_MS: "25000" },
       }),
     ).toBe(25_000);
     expect(resolveDiscordGatewayInfoTimeoutMs({ env: {} })).toBe(30_000);
@@ -242,7 +242,7 @@ describe("createDiscordGatewayPlugin", () => {
     );
   });
 
-  it("leaves autoInteractions disabled so OpenClaw owns interaction handoff", () => {
+  it("leaves autoInteractions disabled so Carapace owns interaction handoff", () => {
     const plugin = createPlugin();
 
     expect(

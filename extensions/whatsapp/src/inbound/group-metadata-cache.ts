@@ -3,7 +3,7 @@ import type { AnyMessageContent, BaileysEventMap, GroupMetadata, WASocket } from
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   readWhatsAppBaileysCacheEntry,
   rememberWhatsAppBaileysCacheEntry,

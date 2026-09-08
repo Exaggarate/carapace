@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { repairMergedGatewayOwnerProfile } from "../state/user-profiles-owner-migration.js";
 import { UserProfileNotFoundError } from "../state/user-profiles-schema.js";
 import { handleUserProfileAvatarHttpRequest } from "./user-profiles-http.js";
@@ -18,7 +18,7 @@ const getUserProfileListItem = vi.hoisted(() => vi.fn());
 const resolveHostAccountAvatar = vi.hoisted(() => vi.fn());
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanup();
   });
 });
@@ -211,10 +211,10 @@ describe("profile avatar HTTP endpoint", () => {
     const profiles = await vi.importActual<typeof import("../state/user-profiles.js")>(
       "../state/user-profiles.js",
     );
-    const options = { path: join(tempDirs.make("openclaw-owner-avatar-"), "openclaw.sqlite") };
+    const options = { path: join(tempDirs.make("carapace-owner-avatar-"), "carapace.sqlite") };
     const owner = profiles.ensureGatewayOwnerProfile("Local Owner", options);
     const person = profiles.ensureProfileForEmail("person@example.test", options);
-    openOpenClawStateDatabase(options)
+    openCarapaceStateDatabase(options)
       .db.prepare("UPDATE user_profiles SET merged_into = ? WHERE id = ?")
       .run(person.id, owner.id);
     getProfileAvatar.mockImplementation((id: string) => profiles.getProfileAvatar(id, options));
@@ -266,9 +266,9 @@ describe("profile avatar HTTP endpoint", () => {
     const res = response();
 
     const handled = await handleUserProfileAvatarHttpRequest(
-      request("/__openclaw__/workspace-icon/one"),
+      request("/__carapace__/workspace-icon/one"),
       res.response,
-      "/__openclaw__/workspace-icon/one",
+      "/__carapace__/workspace-icon/one",
       { auth: {} as never, basePath: "/control" },
     );
 

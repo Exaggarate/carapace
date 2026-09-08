@@ -12,7 +12,7 @@ const bytes = Buffer.concat([Buffer.alloc(1024 * 1024, 0x61), Buffer.from("tail"
 const expectedHash = createHash("sha256").update(bytes).digest("hex");
 
 beforeEach(() => {
-  directory = tempDirs.make("openclaw-file-descriptor-");
+  directory = tempDirs.make("carapace-file-descriptor-");
 });
 
 describe("pinned file descriptors", () => {

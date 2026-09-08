@@ -1,5 +1,5 @@
 /** Exact migration item selection for embedded and non-interactive callers. */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { markMigrationItemSkipped, summarizeMigrationItems } from "../../plugin-sdk/migration.js";
 import type { MigrationPlan } from "../../plugins/types.js";
 

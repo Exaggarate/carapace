@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
 import { AsyncWorkScope, getAsyncWorkSignal } from "../shared/async-work-scope.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { createInternalAgentTurnFacade } from "./agent-turn/internal-facade.js";
 import { withLocalGatewayRequestScope } from "./local-request-context.js";
@@ -17,7 +17,7 @@ describe("in-process Gateway original execution ownership", () => {
   it.for(["raw", "typed"] as const)(
     "rejects %s dispatch when its inherited execution scope is closed",
     async (surface) => {
-      const state = await createOpenClawTestState({ label: `closed-local-${surface}-execution` });
+      const state = await createCarapaceTestState({ label: `closed-local-${surface}-execution` });
       const scope = new AsyncWorkScope();
       const releaseCallback = createDeferred();
       let dispatch: Promise<unknown> | undefined;
@@ -64,16 +64,16 @@ describe("in-process Gateway original execution ownership", () => {
   it.for(["raw", "typed"] as const)(
     "keeps %s execution alive after acceptance until its Gateway can release dependencies",
     async (surface, { signal }) => {
-      const state = await createOpenClawTestState({
+      const state = await createCarapaceTestState({
         label: `gateway-${surface}-execution`,
         env: {
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         },
       });
       const release = createDeferred();

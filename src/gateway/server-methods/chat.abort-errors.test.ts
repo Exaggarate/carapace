@@ -3,7 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {
@@ -31,10 +31,10 @@ import {
 import { isPathInside } from "../../infra/path-guards.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  listOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  listCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { SUBAGENT_KILL_TASK_ERROR } from "../../tasks/detached-task-runtime-contract.js";
 import { cancelTaskById, findTaskByRunId, getTaskById } from "../../tasks/task-registry.js";
 import { finishFailedGatewayHttpResponse } from "../http-common.js";
@@ -54,11 +54,11 @@ import { sessionMutationHandlers } from "./sessions-mutations.js";
 const fixture = useChatAbortRegistryFixture();
 
 async function corruptChildDatabase(storePath: string, sessionKey: string) {
-  const database = listOpenClawAgentDatabasesForTest().find(
+  const database = listCarapaceAgentDatabasesForTest().find(
     (item) => item.agentId === "broken" && isPathInside(fixture.stateDir, item.path),
   );
   expect(database).toBeDefined();
-  expect(closeOpenClawAgentDatabaseByPath(database!.path)).toBe(true);
+  expect(closeCarapaceAgentDatabaseByPath(database!.path)).toBe(true);
   await writeFile(database!.path, "not a SQLite database");
   expect(() => loadExactSessionEntryReadOnly({ storePath, sessionKey })).toThrow();
 }
@@ -333,7 +333,7 @@ it.each(
         const headers = {
           "x-test-user": "operator@example.test",
           "x-forwarded-for": "203.0.113.10",
-          "x-openclaw-scopes": "operator.write",
+          "x-carapace-scopes": "operator.write",
         };
         const unauthenticated = await fetch(url, {
           method: "POST",
@@ -345,7 +345,7 @@ it.each(
           `${url.replace(encodeURIComponent(sessionKey), encodeURIComponent(badKey))}?agentId=main`,
           {
             method: "POST",
-            headers: { ...headers, "x-openclaw-scopes": "operator.admin" },
+            headers: { ...headers, "x-carapace-scopes": "operator.admin" },
           },
         );
         expect(wrongAgent.status).toBe(400);
@@ -356,7 +356,7 @@ it.each(
         expect(parentAbort).not.toHaveBeenCalled();
         const response = await fetch(url, {
           method: "POST",
-          headers: { ...headers, "x-openclaw-scopes": "operator.admin" },
+          headers: { ...headers, "x-carapace-scopes": "operator.admin" },
         });
         result = { status: response.status, body: await response.json() };
       } else {
@@ -443,7 +443,7 @@ it.each(["exact native new", "cascade native new", "RPC reset", "RPC delete"])(
       defaultSessionId: "incarnation-child",
     });
     const scope = { storePath, sessionKey, sessionId, agentId: "main" };
-    const parentDatabase = openOpenClawAgentDatabase({ agentId: "main" });
+    const parentDatabase = openCarapaceAgentDatabase({ agentId: "main" });
     const transcriptRows = () =>
       parentDatabase.db
         .prepare(`SELECT

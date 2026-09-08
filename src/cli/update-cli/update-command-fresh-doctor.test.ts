@@ -47,7 +47,7 @@ const pluginUpdate: PostCorePluginUpdateResult = {
 };
 
 const updateOptions = {
-  root: "/opt/openclaw",
+  root: "/opt/carapace",
   pluginUpdate,
   freshDoctorRequired: true,
   yes: true,
@@ -69,7 +69,7 @@ const validConfigSnapshot = {
 describe("post-plugin update readiness", () => {
   beforeEach(() => {
     mocks.readConfig.mockReset().mockResolvedValue(validConfigSnapshot);
-    mocks.resolveEntrypoint.mockReset().mockResolvedValue("/opt/openclaw/dist/index.js");
+    mocks.resolveEntrypoint.mockReset().mockResolvedValue("/opt/carapace/dist/index.js");
     mocks.runExec.mockReset().mockImplementation(async (_command, args: string[]) => ({
       stdout: args.includes("--lint")
         ? `${JSON.stringify({ ok: true, checksRun: 1, checksSkipped: 0, findings: [] })}\n`
@@ -85,18 +85,18 @@ describe("post-plugin update readiness", () => {
 
     expect(mocks.runExec.mock.calls.map(([, args]) => args)).toEqual([
       [
-        "/opt/openclaw/dist/index.js",
+        "/opt/carapace/dist/index.js",
         "doctor",
         "--repair",
         "--non-interactive",
         "--no-workspace-suggestions",
         "--yes",
       ],
-      ["/opt/openclaw/dist/index.js", "config", "validate", "--json"],
-      ["/opt/openclaw/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
+      ["/opt/carapace/dist/index.js", "config", "validate", "--json"],
+      ["/opt/carapace/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
     ]);
     expect(mocks.runExec.mock.calls[2]?.[2]).toMatchObject({
-      env: { OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1" },
+      env: { CARAPACE_UPDATE_POST_CORE_CONVERGENCE: "1" },
     });
   });
 
@@ -111,8 +111,8 @@ describe("post-plugin update readiness", () => {
 
     expect(beforeDoctor).not.toHaveBeenCalled();
     expect(mocks.runExec.mock.calls.map(([, args]) => args)).toEqual([
-      ["/opt/openclaw/dist/index.js", "config", "validate", "--json"],
-      ["/opt/openclaw/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
+      ["/opt/carapace/dist/index.js", "config", "validate", "--json"],
+      ["/opt/carapace/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
     ]);
   });
 
@@ -138,8 +138,8 @@ describe("post-plugin update readiness", () => {
     expect(result.pluginUpdate.status).toBe("ok");
     expect(result.configSnapshot.valid).toBe(false);
     expect(mocks.runExec.mock.calls.map(([, args]) => args)).toEqual([
-      ["/opt/openclaw/dist/index.js", "config", "validate", "--json"],
-      ["/opt/openclaw/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
+      ["/opt/carapace/dist/index.js", "config", "validate", "--json"],
+      ["/opt/carapace/dist/index.js", "doctor", "--lint", "--json", "--severity-min", "error"],
     ]);
   });
 
@@ -177,7 +177,7 @@ describe("post-plugin update readiness", () => {
                 source: "memory-core",
                 message: "Managed local embeddings are unavailable.",
                 fixHint:
-                  "Run `openclaw models --agent main auth login --provider llama-cpp --method local`.",
+                  "Run `carapace models --agent main auth login --provider llama-cpp --method local`.",
               },
             ],
           })}\n`,
@@ -200,7 +200,7 @@ describe("post-plugin update readiness", () => {
           reason: "memory-core/managed-local-embedding-setup",
           message: "Managed local embeddings are unavailable.",
           guidance: [
-            "Run `openclaw models --agent main auth login --provider llama-cpp --method local`.",
+            "Run `carapace models --agent main auth login --provider llama-cpp --method local`.",
           ],
         },
       ],

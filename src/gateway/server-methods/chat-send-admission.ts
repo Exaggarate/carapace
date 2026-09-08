@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import {
   createAgentRunRestartAbortError,

@@ -4,20 +4,20 @@
  * Sends requests to either an absolute HTTP browser-control URL or the local
  * in-process dispatcher, adding loopback auth and operator-facing diagnostics.
  */
-import { parseBrowserHttpUrl } from "openclaw/plugin-sdk/browser-cdp";
+import { parseBrowserHttpUrl } from "carapace/plugin-sdk/browser-cdp";
 import {
   extractErrorCode,
   formatErrorMessage,
   toErrorObject,
-} from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { formatCliCommand } from "openclaw/plugin-sdk/setup-tools";
-import { fetchWithSsrFGuard, isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { formatCliCommand } from "carapace/plugin-sdk/setup-tools";
+import { fetchWithSsrFGuard, isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   normalizeOptionalString,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { getRuntimeConfig } from "../config/config.js";
 import { getBridgeAuthForPort } from "./bridge-auth-registry.js";
 import { resolveBrowserConfig, resolveProfile } from "./config.js";
@@ -90,7 +90,7 @@ function withLoopbackBrowserAuthImpl(
   deps: LoopbackBrowserAuthDeps,
 ): RequestInit & { timeoutMs?: number } {
   const headers = new Headers(init?.headers ?? {});
-  if (headers.has("authorization") || headers.has("x-openclaw-password")) {
+  if (headers.has("authorization") || headers.has("x-carapace-password")) {
     return { ...init, headers };
   }
   if (!isLoopbackHttpUrl(url)) {
@@ -105,7 +105,7 @@ function withLoopbackBrowserAuthImpl(
       return { ...init, headers };
     }
     if (auth.password) {
-      headers.set("x-openclaw-password", auth.password);
+      headers.set("x-carapace-password", auth.password);
       return { ...init, headers };
     }
   } catch {
@@ -120,7 +120,7 @@ function withLoopbackBrowserAuthImpl(
     if (bridgeAuth?.token) {
       headers.set("Authorization", `Bearer ${bridgeAuth.token}`);
     } else if (bridgeAuth?.password) {
-      headers.set("x-openclaw-password", bridgeAuth.password);
+      headers.set("x-carapace-password", bridgeAuth.password);
     }
   } catch {
     // ignore
@@ -189,7 +189,7 @@ function resolveDispatcherBrowserControlOwnership(url: string): BrowserControlOw
     if (!profile) {
       return "unknown";
     }
-    return profile.driver === "openclaw" && profile.cdpIsLoopback && !profile.attachOnly
+    return profile.driver === "carapace" && profile.cdpIsLoopback && !profile.attachOnly
       ? "local-managed"
       : "external-browser";
   } catch {
@@ -203,13 +203,13 @@ function resolveBrowserFetchOperatorHint(
 ): string {
   if (opts?.ownership === "external-browser") {
     return (
-      "The browser profile is external to OpenClaw; make sure its browser/CDP endpoint " +
-      "is running and reachable. Restarting the OpenClaw gateway will not launch it."
+      "The browser profile is external to Carapace; make sure its browser/CDP endpoint " +
+      "is running and reachable. Restarting the Carapace gateway will not launch it."
     );
   }
   const isLocal = !isAbsoluteHttp(url);
   return isLocal
-    ? `Restart the OpenClaw gateway (OpenClaw.app menubar, or \`${formatCliCommand("openclaw gateway")}\`).`
+    ? `Restart the Carapace gateway (Carapace.app menubar, or \`${formatCliCommand("carapace gateway")}\`).`
     : "If this is a sandboxed session, ensure the sandbox browser is running.";
 }
 
@@ -327,7 +327,7 @@ function enhanceBrowserFetchError(url: string, err: unknown, timeoutMs: number):
   const kind = classifyBrowserFetchFailure(err);
   if (kind === "timeout") {
     return new Error(
-      `Can't reach the OpenClaw browser control service (timed out after ${timeoutMs}ms). ${operatorHint} ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
+      `Can't reach the Carapace browser control service (timed out after ${timeoutMs}ms). ${operatorHint} ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
       err instanceof Error ? { cause: err } : undefined,
     );
   }
@@ -339,13 +339,13 @@ function enhanceBrowserFetchError(url: string, err: unknown, timeoutMs: number):
   }
   if (kind === "transient-network") {
     return new Error(
-      `Can't reach the OpenClaw browser control service. ${operatorHint} (${msg}) ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
+      `Can't reach the Carapace browser control service. ${operatorHint} (${msg}) ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
       err instanceof Error ? { cause: err } : undefined,
     );
   }
   return new Error(
     appendBrowserToolModelHint(
-      `Can't reach the OpenClaw browser control service. ${operatorHint} (${msg})`,
+      `Can't reach the Carapace browser control service. ${operatorHint} (${msg})`,
       BROWSER_TOOL_PERSISTENT_MODEL_HINT,
     ),
     err instanceof Error ? { cause: err } : undefined,

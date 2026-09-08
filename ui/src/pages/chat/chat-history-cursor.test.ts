@@ -33,7 +33,7 @@ function createState(handler: (params?: unknown) => unknown) {
 }
 
 function message(role: "assistant" | "user", content: unknown, id: string, seq: number) {
-  return { role, content, __openclaw: { id, seq } };
+  return { role, content, __carapace: { id, seq } };
 }
 
 function seedCachedHistory(
@@ -122,7 +122,7 @@ describe("chat history cursor revalidation", () => {
         [
           {
             ...message("user", "Run the long command.", "alice-user", 1),
-            __openclaw: {
+            __carapace: {
               id: "alice-user",
               seq: 1,
               idempotencyKey: "alice-run:user",
@@ -140,7 +140,7 @@ describe("chat history cursor revalidation", () => {
             role: "toolResult",
             toolCallId: "exec-call",
             content: "Command finished.",
-            __openclaw: { id: "alice-tool-result", seq: 3 },
+            __carapace: { id: "alice-tool-result", seq: 3 },
           },
         ],
         "cursor-3",
@@ -199,7 +199,7 @@ describe("chat history cursor revalidation", () => {
         content: queued.text,
         timestamp: queued.createdAt,
         idempotencyKey: `${sendRunId}:user`,
-        __openclaw: {
+        __carapace: {
           id: "bob-user",
           seq: 5,
           idempotencyKey: `${sendRunId}:user`,
@@ -398,8 +398,8 @@ describe("chat history cursor revalidation", () => {
       const cached = message("user", "cached", "cached-user", 1);
       const commentary = {
         ...message("assistant", "Checking the workspace", "persisted-commentary", 2),
-        __openclaw: { id: "persisted-commentary", seq: 2, runId: persistedRunId },
-        openclawStreamFallback: {
+        __carapace: { id: "persisted-commentary", seq: 2, runId: persistedRunId },
+        carapaceStreamFallback: {
           itemId: "preamble-restored",
           replacementText: "Checking the workspace",
           source: "segment",
@@ -491,13 +491,13 @@ describe("chat history cursor revalidation", () => {
       const prompt = {
         ...message("user", "Inspect the workspace", "user", 1),
         timestamp: 1,
-        __openclaw: { id: "user", seq: 1, idempotencyKey: `${runId}:user` },
+        __carapace: { id: "user", seq: 1, idempotencyKey: `${runId}:user` },
       };
       const commentary = {
         ...message("assistant", text, "commentary", 2),
         timestamp: 2,
-        __openclaw: { id: "commentary", seq: 2, runId, mirrorOrigin: "codex-app-server" },
-        openclawStreamFallback: { itemId: "item-1", replacementText: text, source: "segment" },
+        __carapace: { id: "commentary", seq: 2, runId, mirrorOrigin: "codex-app-server" },
+        carapaceStreamFallback: { itemId: "item-1", replacementText: text, source: "segment" },
       };
       // Intermediate Codex rows carry producer ownership in metadata, without a terminal run envelope.
       const payload = {

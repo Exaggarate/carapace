@@ -6,7 +6,7 @@ import http from "node:http";
 import https from "node:https";
 import net from "node:net";
 import path from "node:path";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import * as tar from "tar";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -47,7 +47,7 @@ async function packageFixture(build: string): Promise<Buffer> {
   fs.writeFileSync(
     path.join(packageRoot, "package.json"),
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version: "2026.8.1",
       scripts: { postinstall: "node install.cjs" },
     }),
@@ -57,17 +57,17 @@ async function packageFixture(build: string): Promise<Buffer> {
     `require("node:fs").writeFileSync("installed.json", JSON.stringify({ token: process.env.CRABBOX_WORKER_BOOTSTRAP_TOKEN, setupCode: process.env.CRABBOX_WORKER_SETUP_CODE, scriptsRan: true }));`,
   );
   fs.writeFileSync(
-    path.join(packageRoot, "openclaw.mjs"),
+    path.join(packageRoot, "carapace.mjs"),
     `import fs from "node:fs";
 import path from "node:path";
 const args = process.argv.slice(2);
-const state = process.env.OPENCLAW_STATE_DIR;
+const state = process.env.CARAPACE_STATE_DIR;
 if (args[0] === "--version") {
-  console.log("OpenClaw 2026.8.1");
+  console.log("Carapace 2026.8.1");
 } else if (args[0] === "plugins" && args[1] === "enable") {
   fs.appendFileSync(path.join(state, "enabled"), args[2] + "\\n");
 } else {
-  process.title = "openclaw-connect";
+  process.title = "carapace-connect";
   fs.writeFileSync(path.join(state, "launch.json.tmp"), JSON.stringify({ build: ${JSON.stringify(build)}, args, cli: process.argv[1], token: process.env.CRABBOX_WORKER_BOOTSTRAP_TOKEN, setupCode: process.env.CRABBOX_WORKER_SETUP_CODE, environment: { DISPLAY: process.env.DISPLAY, DBUS_SESSION_BUS_ADDRESS: process.env.DBUS_SESSION_BUS_ADDRESS, XDG_RUNTIME_DIR: process.env.XDG_RUNTIME_DIR }, enabledPlugins: fs.readFileSync(path.join(state, "enabled"), "utf8").trim().split("\\n") }));
   // Existence signals readiness only after the child publishes complete JSON.
   fs.renameSync(path.join(state, "launch.json.tmp"), path.join(state, "launch.json"));
@@ -82,7 +82,7 @@ if (args[0] === "--version") {
 
 function testHome() {
   const home = fs.realpathSync(tempDirs.make("crabbox-bootstrap-home-"));
-  const stateDir = path.join(home, ".openclaw", "cloud-workers", leaseId);
+  const stateDir = path.join(home, ".carapace", "cloud-workers", leaseId);
   const stop = () => {
     const pidFile = path.join(stateDir, "node.pid");
     if (fs.existsSync(pidFile)) {
@@ -241,7 +241,7 @@ echo 123
           mode: "connect",
           setupCode,
           setupId: "bootstrap-test",
-          openclawVersion: "2026.8.1",
+          carapaceVersion: "2026.8.1",
           nodeBootstrap,
           displayName: "Bootstrap test",
           waitForDeviceId: async () => "device-test",
@@ -316,7 +316,7 @@ async function readLaunch(stateDir: string) {
 describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
   it("reuses a completed runtime upgrade on the next fresh warm child", async () => {
     const root = fs.realpathSync(tempDirs.make("warm-runtime-repeat-proof-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(root, "gateway-state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(root, "gateway-state"));
     const oldArtifact = await serveArtifact(await packageFixture("older-runtime"));
     const currentArtifact = await serveArtifact(await packageFixture("current-runtime"));
     expect(oldArtifact.nodeBootstrap.sha256).not.toBe(currentArtifact.nodeBootstrap.sha256);
@@ -331,7 +331,7 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
       homes.set(id, home);
       return home;
     };
-    const runtimeRoot = (home: string) => path.join(home, ".openclaw-worker", "node-runtimes");
+    const runtimeRoot = (home: string) => path.join(home, ".carapace-worker", "node-runtimes");
     const context = (id: string, digest = oldArtifact.nodeBootstrap.sha256) => ({
       nodeRuntimeIdentity: { nodeBootstrapSha256: digest, executionMode: "worker-turn" as const },
       binary: "crabbox",
@@ -418,7 +418,7 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
     const upgradePhases = await expectSetupPhases(
       enroll(homes.get(upgraded.id)!, currentArtifact.nodeBootstrap, undefined, true),
     );
-    expect(upgradePhases).toContain("openclaw-bootstrap-installation");
+    expect(upgradePhases).toContain("carapace-bootstrap-installation");
     expect(
       fs.existsSync(
         path.join(runtimeRoot(homes.get(upgraded.id)!), currentArtifact.nodeBootstrap.sha256),
@@ -444,7 +444,7 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
     expect(forkChoices).toEqual([originalCheckpoint, retainedCheckpoint]);
     expect(nextChoice).toEqual({ kind: "checkpoint", checkpointId: retainedCheckpoint });
     expect(currentWasCached).toBe(true);
-    expect(repeatPhases).not.toContain("openclaw-bootstrap-installation");
+    expect(repeatPhases).not.toContain("carapace-bootstrap-installation");
     expect(openCrabboxWarmImageStore().entries()).toHaveLength(1);
     expect(Object.keys(openCrabboxWarmImageStore().entries()[0]!.value.allocations)).toEqual([]);
   }, 60_000);
@@ -473,11 +473,11 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
     await expectSetupPhases(enroll(home, nodeBootstrap, undefined, true, workerBundle));
     const archivePath = path.join(
       home,
-      ".openclaw-worker",
+      ".carapace-worker",
       "node-runtimes",
       nodeBootstrap.sha256,
       "node_modules",
-      "openclaw",
+      "carapace",
       workerBundle.packageRelativePath,
     );
     fs.unlinkSync(archivePath);
@@ -506,29 +506,29 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
     expect(
       await expectSetupPhases(enroll(home, nodeBootstrap, undefined, true, workerBundle)),
     ).toEqual([
-      "openclaw-bootstrap-preparation",
-      "openclaw-bootstrap-download-connection",
-      "openclaw-bootstrap-download-http-response",
-      "openclaw-bootstrap-download-body",
-      "openclaw-bootstrap-download-connection",
-      "openclaw-bootstrap-download-http-response",
-      "openclaw-bootstrap-download-body",
-      "openclaw-bootstrap-installation",
-      "openclaw-bootstrap-runtime-verification",
-      "openclaw-bootstrap-worker-archive-publication",
-      "openclaw-bootstrap-complete",
+      "carapace-bootstrap-preparation",
+      "carapace-bootstrap-download-connection",
+      "carapace-bootstrap-download-http-response",
+      "carapace-bootstrap-download-body",
+      "carapace-bootstrap-download-connection",
+      "carapace-bootstrap-download-http-response",
+      "carapace-bootstrap-download-body",
+      "carapace-bootstrap-installation",
+      "carapace-bootstrap-runtime-verification",
+      "carapace-bootstrap-worker-archive-publication",
+      "carapace-bootstrap-complete",
     ]);
-    expect(fs.existsSync(path.join(home, ".openclaw"))).toBe(false);
-    expect(fs.readdirSync(path.join(home, ".openclaw-worker", "node-runtimes"))).toEqual([
+    expect(fs.existsSync(path.join(home, ".carapace"))).toBe(false);
+    expect(fs.readdirSync(path.join(home, ".carapace-worker", "node-runtimes"))).toEqual([
       nodeBootstrap.sha256,
     ]);
     const preparedPackage = path.join(
       home,
-      ".openclaw-worker",
+      ".carapace-worker",
       "node-runtimes",
       nodeBootstrap.sha256,
       "node_modules",
-      "openclaw",
+      "carapace",
     );
     expect(
       JSON.parse(fs.readFileSync(path.join(preparedPackage, "installed.json"), "utf8")),
@@ -556,20 +556,20 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
     expect(
       await expectSetupPhases(enroll(home, nodeBootstrap, undefined, true, workerBundle)),
     ).toEqual([
-      "openclaw-bootstrap-preparation",
-      "openclaw-bootstrap-runtime-verification",
-      "openclaw-bootstrap-worker-archive-verification",
-      "openclaw-bootstrap-worker-archive-publication",
-      "openclaw-bootstrap-complete",
+      "carapace-bootstrap-preparation",
+      "carapace-bootstrap-runtime-verification",
+      "carapace-bootstrap-worker-archive-verification",
+      "carapace-bootstrap-worker-archive-publication",
+      "carapace-bootstrap-complete",
     ]);
     expect(worker.authorizations).toEqual([`Bearer ${workerBundle.token}`]);
     expect(await expectSetupPhases(enroll(home, nodeBootstrap))).toEqual([
-      "openclaw-bootstrap-preparation",
-      "openclaw-bootstrap-runtime-verification",
-      "openclaw-bootstrap-activation",
-      "openclaw-bootstrap-plugin-activation",
-      "openclaw-bootstrap-node-launch",
-      "openclaw-bootstrap-complete",
+      "carapace-bootstrap-preparation",
+      "carapace-bootstrap-runtime-verification",
+      "carapace-bootstrap-activation",
+      "carapace-bootstrap-plugin-activation",
+      "carapace-bootstrap-node-launch",
+      "carapace-bootstrap-complete",
     ]);
     const launch = await readLaunch(stateDir);
     expect(launch).toMatchObject({
@@ -667,7 +667,7 @@ describe.skipIf(process.platform === "win32")("source node bootstrap", () => {
       );
       expect(fs.existsSync(path.join(stateDir, "node.pid"))).toBe(false);
       expect(fs.readdirSync(stateDir)).toEqual([]);
-      expect(fs.readdirSync(path.join(home, ".openclaw-worker", "node-runtimes"))).toEqual([]);
+      expect(fs.readdirSync(path.join(home, ".carapace-worker", "node-runtimes"))).toEqual([]);
     },
   );
 

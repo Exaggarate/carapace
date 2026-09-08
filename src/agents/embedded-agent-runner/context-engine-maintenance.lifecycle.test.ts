@@ -36,7 +36,7 @@ afterEach(async () => {
 
 describe("deferred context-engine maintenance lifecycle", () => {
   it("retains live work across restart and loses it after the owning process closes", async () => {
-    await withStateDirEnv("openclaw-context-maintenance-lifecycle-", async () => {
+    await withStateDirEnv("carapace-context-maintenance-lifecycle-", async () => {
       vi.useFakeTimers();
       resetCommandQueueStateForTest();
       resetTaskRegistryForTests({ persist: false });

@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { SecretRef } from "../config/types.secrets.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   assertSecretOwnerAvailable,
   SecretSurfaceUnavailableError,
@@ -17,7 +17,7 @@ const tempDirs = createTempDirTracker();
 const NOSTR_TEST_PRIVATE_KEY = "1".repeat(64);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -28,9 +28,9 @@ describe("Nostr SecretRef runtime ownership", () => {
       if (source === "exec" && process.platform === "win32") {
         return;
       }
-      const root = tempDirs.make("openclaw-nostr-secret-");
+      const root = tempDirs.make("carapace-nostr-secret-");
       const env = {
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
         PATH: process.env.PATH ?? "",
         NOSTR_ENV_KEY: NOSTR_TEST_PRIVATE_KEY,
       };

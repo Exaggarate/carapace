@@ -48,10 +48,10 @@ const WORKFLOWS: {
     },
   },
   {
-    file: ".github/workflows/shared-openclawkit-periphery.yml",
-    prGroup: "shared-openclawkit-periphery-123",
+    file: ".github/workflows/shared-carapacekit-periphery.yml",
+    prGroup: "shared-carapacekit-periphery-123",
     convertToDraft: true,
-    manual: { mode: "same-SHA cancels", group: `shared-openclawkit-periphery-${"a".repeat(40)}` },
+    manual: { mode: "same-SHA cancels", group: `shared-carapacekit-periphery-${"a".repeat(40)}` },
   },
   {
     file: ".github/workflows/opengrep-precise.yml",

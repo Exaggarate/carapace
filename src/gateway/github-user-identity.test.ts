@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setRuntimeConfigSnapshot } from "../config/runtime-snapshot.js";
 import { SecretSurfaceUnavailableError } from "../secrets/runtime-degraded-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   ensureProfileForTailscaleIdentity,
   getUserProfileDisplay,
@@ -9,7 +9,7 @@ import {
   setDisplayName,
   syncGitHubIdentity,
 } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { buildAuthenticatedPresenceUser } from "./authenticated-presence-user.js";
 import { ControlUiGitHubError } from "./control-ui-github-api.js";
 import { createAuthenticatedGitHubIdentitySync } from "./github-user-identity.js";
@@ -72,14 +72,14 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("authenticated GitHub identity sync", () => {
   it.each(["tailscale", "access"] as const)(
     "verifies a fresh %s identity with the service credential when anonymous quota is exhausted",
     async (provider) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         setRuntimeConfigSnapshot({
           gateway: { controlUi: { github: { token: "configured-service-token" } } },
         });
@@ -128,7 +128,7 @@ describe("authenticated GitHub identity sync", () => {
   it.each(["success", "network failure"])(
     "preserves verified identity after stale service auth and anonymous %s",
     async (anonymousOutcome) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const profile = syncGitHubIdentity({
           identity: { accountId: 58493, login: "Ada" },
           authenticationAlias: { kind: "email", email: "ada@example.com" },
@@ -158,7 +158,7 @@ describe("authenticated GitHub identity sync", () => {
   );
 
   it("does not bypass an unavailable configured credential with anonymous or cached identity", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { scenario: "minimal", env: { GH_TOKEN: "other-process-token" } },
       async () => {
         syncGitHubIdentity({
@@ -211,7 +211,7 @@ describe("authenticated GitHub identity sync", () => {
       },
       { label: "no names", expected: null },
     ])("adopts $label without extra requests", async ({ name, initial, expected }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const fetchMock = vi.spyOn(globalThis, "fetch");
         if (provider === "access") {
           fetchMock.mockResolvedValueOnce(
@@ -252,7 +252,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("resolves the canonical public account without authentication", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForTailscaleIdentity({ login: "octocat@github" });
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
@@ -280,7 +280,7 @@ describe("authenticated GitHub identity sync", () => {
       const headers = fetchMock.mock.calls[0]?.[1]?.headers;
       expect(headers).toMatchObject({
         Accept: "application/vnd.github+json",
-        "User-Agent": "OpenClaw-Control-UI",
+        "User-Agent": "Carapace-Control-UI",
         "X-GitHub-Api-Version": "2022-11-28",
       });
       expect(headers).not.toHaveProperty("Authorization");
@@ -300,7 +300,7 @@ describe("authenticated GitHub identity sync", () => {
     },
     { name: "malformed", response: githubResponse({ id: "583231" }), statusCode: 502 },
   ])("maps a $name response", async ({ response, statusCode }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
       const sync = createAuthenticatedGitHubIdentitySync({
         authResult: {
@@ -317,7 +317,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("maps network failures and rejects invalid usernames before fetch", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network down"));
       const sync = createAuthenticatedGitHubIdentitySync({
         authResult: {
@@ -335,7 +335,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("deduplicates concurrent sync and preserves a custom edit during the lookup", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForTailscaleIdentity({ login: "ada@github" });
       setDisplayName(profile.id, "Ada");
       let resolveLookup: ((response: Response) => void) | undefined;
@@ -369,7 +369,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("preserves verified identity after lookup failure and retries later", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForTailscaleIdentity({ login: "ada@github" });
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
@@ -406,7 +406,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("activates only the standard required-header Cloudflare Access contract", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       expect(cloudflareSync({})).toBeTypeOf("function");
       expect(cloudflareSync({ userHeader: "x-forwarded-user" })).toBeUndefined();
       expect(cloudflareSync({ requiredHeaders: ["x-forwarded-proto"] })).toBeUndefined();
@@ -414,7 +414,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("binds Cloudflare identity to email, GitHub IdP, numeric id, and canonical GitHub login", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
@@ -481,7 +481,7 @@ describe("authenticated GitHub identity sync", () => {
     { name: "non-root issuer", issuer: "https://team.cloudflareaccess.com/path" },
     { name: "hostile suffix", issuer: "https://team.cloudflareaccess.com.evil.test" },
   ])("rejects a $name before network access", async ({ assertion, issuer }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const fetchMock = vi.spyOn(globalThis, "fetch");
       const sync = cloudflareSync({
         assertion: assertion ?? accessAssertion(issuer),
@@ -526,7 +526,7 @@ describe("authenticated GitHub identity sync", () => {
       }),
     },
   ])("fails safely for a $name", async ({ access }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const profile = ensureProfileForTailscaleIdentity({ login: "ada@passkey" });
       vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(access);
       const sync = cloudflareSync({});
@@ -536,7 +536,7 @@ describe("authenticated GitHub identity sync", () => {
   });
 
   it("rejects a GitHub account-id mismatch without erasing prior identity", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
       setRuntimeConfigSnapshot({
         gateway: { controlUi: { github: { token: "configured-service-token" } } },
@@ -582,7 +582,7 @@ describe("authenticated GitHub identity sync", () => {
   ])(
     "reattaches the exact cached verified identity after a $name",
     async ({ githubResult, githubError }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const clock = vi.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
         const fetchMock = vi
           .spyOn(globalThis, "fetch")
@@ -651,7 +651,7 @@ describe("authenticated GitHub identity sync", () => {
       otherProfile,
       seedCache,
     }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         if (seedCache !== false) {
           syncGitHubIdentity({
             identity: { accountId: 58493, login: "steipete" },
@@ -691,7 +691,7 @@ describe("authenticated GitHub identity sync", () => {
   );
 
   it("redacts the Access assertion from network failures and retries on the same connection", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const assertion = accessAssertion("https://team.cloudflareaccess.com");
       const fetchMock = vi
         .spyOn(globalThis, "fetch")

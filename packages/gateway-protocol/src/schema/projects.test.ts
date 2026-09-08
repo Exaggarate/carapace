@@ -23,24 +23,24 @@ describe("project protocol schemas", () => {
     expect(validateProjectsListParams({ includeObserved: false })).toBe(true);
     expect(validateProjectsListParams({ includeObserved: "yes" })).toBe(false);
     expect(validateProjectsListParams({ extra: true })).toBe(false);
-    expect(validateProjectsRegisterParams({ path: "/repo", name: "OpenClaw" })).toBe(true);
+    expect(validateProjectsRegisterParams({ path: "/repo", name: "Carapace" })).toBe(true);
     expect(validateProjectsRegisterParams({ path: "" })).toBe(false);
-    expect(validateProjectsAddParams({ gitUrl: "https://github.com/openclaw/openclaw.git" })).toBe(
+    expect(validateProjectsAddParams({ gitUrl: "https://github.com/Exaggarate/carapace.git" })).toBe(
       true,
     );
     expect(validateProjectsAddParams({ gitUrl: "", unexpected: true })).toBe(false);
-    expect(validateProjectsSearchRemoteParams({ query: "openclaw" })).toBe(true);
+    expect(validateProjectsSearchRemoteParams({ query: "carapace" })).toBe(true);
     expect(validateProjectsSearchRemoteParams({ query: "" })).toBe(false);
-    expect(validateProjectsRemoveParams({ id: "openclaw-2", deleteCheckout: true })).toBe(true);
+    expect(validateProjectsRemoveParams({ id: "carapace-2", deleteCheckout: true })).toBe(true);
     expect(validateProjectsRemoveParams({ id: "workspace:main" })).toBe(false);
   });
 
   it("accepts bounded remote search and clone results", () => {
     const project = {
-      id: "openclaw",
-      displayName: "OpenClaw",
-      repoRoot: "/state/projects/fingerprint/openclaw",
-      originUrl: "https://github.com/openclaw/openclaw.git",
+      id: "carapace",
+      displayName: "Carapace",
+      repoRoot: "/state/projects/fingerprint/carapace",
+      originUrl: "https://github.com/Exaggarate/carapace.git",
       source: "cloned",
     };
     expect(Value.Check(ProjectsAddResultSchema, project)).toBe(true);
@@ -49,11 +49,11 @@ describe("project protocol schemas", () => {
         credential: "missing",
         projects: [
           {
-            name: "openclaw",
-            fullName: "openclaw/openclaw",
+            name: "carapace",
+            fullName: "carapace/carapace",
             description: "Personal AI assistant",
-            cloneUrl: "https://github.com/openclaw/openclaw.git",
-            webUrl: "https://github.com/openclaw/openclaw",
+            cloneUrl: "https://github.com/Exaggarate/carapace.git",
+            webUrl: "https://github.com/Exaggarate/carapace",
             private: false,
           },
         ],
@@ -65,7 +65,7 @@ describe("project protocol schemas", () => {
     expect(
       Value.Check(ProjectRecordSchema, {
         id: "workspace:main",
-        displayName: "openclaw",
+        displayName: "carapace",
         source: "workspace",
         agentId: "main",
       }),
@@ -74,15 +74,15 @@ describe("project protocol schemas", () => {
       Value.Check(ProjectsListResultSchema, {
         projects: [
           {
-            id: "openclaw",
-            displayName: "OpenClaw",
-            repoRoot: "/repo/openclaw",
-            originUrl: "https://github.com/openclaw/openclaw.git",
+            id: "carapace",
+            displayName: "Carapace",
+            repoRoot: "/repo/carapace",
+            originUrl: "https://github.com/Exaggarate/carapace.git",
             source: "registered",
           },
         ],
         recents: [
-          { kind: "project", projectId: "openclaw", displayName: "OpenClaw" },
+          { kind: "project", projectId: "carapace", displayName: "Carapace" },
           { kind: "folder", folder: "/repo/scratch", displayName: "scratch" },
         ],
         observedProjects: [],
@@ -94,9 +94,9 @@ describe("project protocol schemas", () => {
 
   it("bounds observed projects and their checkout lists", () => {
     const project = {
-      name: "openclaw",
-      originUrl: "https://github.com/openclaw/openclaw.git",
-      checkouts: [{ runnerId: "gateway", path: "/repo/openclaw" }],
+      name: "carapace",
+      originUrl: "https://github.com/Exaggarate/carapace.git",
+      checkouts: [{ runnerId: "gateway", path: "/repo/carapace" }],
       lastUsedAt: 1,
     };
     expect(Value.Check(ProjectSummarySchema, project)).toBe(true);
@@ -105,7 +105,7 @@ describe("project protocol schemas", () => {
         ...project,
         checkouts: Array.from(
           { length: PROJECTS_LIST_MAX_CHECKOUTS_PER_PROJECT + 1 },
-          (_, index) => ({ runnerId: "gateway", path: `/repo/openclaw-${index}` }),
+          (_, index) => ({ runnerId: "gateway", path: `/repo/carapace-${index}` }),
         ),
       }),
     ).toBe(false);
@@ -118,12 +118,12 @@ describe("project protocol schemas", () => {
   });
 
   it("accepts bounded project identity and remote URL as additive sessions.create parameters", () => {
-    expect(validateSessionsCreateParams({ agentId: "main", projectId: "openclaw" })).toBe(true);
+    expect(validateSessionsCreateParams({ agentId: "main", projectId: "carapace" })).toBe(true);
     expect(validateSessionsCreateParams({ agentId: "main", projectId: "" })).toBe(false);
     expect(
       validateSessionsCreateParams({
         agentId: "main",
-        projectGitUrl: "https://github.com/openclaw/openclaw.git",
+        projectGitUrl: "https://github.com/Exaggarate/carapace.git",
       }),
     ).toBe(true);
     expect(validateSessionsCreateParams({ agentId: "main", projectGitUrl: "" })).toBe(false);

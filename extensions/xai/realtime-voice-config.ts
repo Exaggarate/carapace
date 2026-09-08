@@ -2,15 +2,15 @@ import type {
   OpenAICompatibleRealtimeAudioFormat,
   RealtimeVoiceBridgeCreateRequest,
   RealtimeVoiceProviderConfig,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/realtime-voice";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import {
   asFiniteNumberInRange,
   asOptionalObjectRecord as readXaiObjectRecord,
   asSafeIntegerInRange,
   normalizeOptionalString,
   parseBooleanValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { XAI_BASE_URL } from "./model-definitions.js";
 
 type XaiRealtimeVoice = "eve" | "ara" | "rex" | "sal" | "leo";

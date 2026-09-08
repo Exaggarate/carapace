@@ -61,9 +61,9 @@ describe("readConfiguredLogTail", () => {
 
   it("tails configured rolling placeholders through the real file logger", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
+    const tempDir = tempDirs.make("carapace-log-tail-");
     setLoggerOverride({
-      file: path.join(tempDir, "openclaw-YYYY-MM-DD.log"),
+      file: path.join(tempDir, "carapace-YYYY-MM-DD.log"),
       level: "info",
     });
 
@@ -75,14 +75,14 @@ describe("readConfiguredLogTail", () => {
     expect(result.lines).toEqual([expect.stringContaining("rolling log record")]);
     for (const file of [result.file, getResolvedLoggerSettings().file]) {
       expect(path.dirname(file)).toBe(tempDir);
-      expect(path.basename(file)).toMatch(/^openclaw-\d{4}-\d{2}-\d{2}\.log$/);
+      expect(path.basename(file)).toMatch(/^carapace-\d{4}-\d{2}-\d{2}\.log$/);
     }
   });
 
   it("applies redaction once per request across all returned lines", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
 
     await fs.writeFile(file, "custom-secret-abcdefghijklmnopqrstuvwxyz\nsecond line\n");
     setLoggerOverride({ file });
@@ -100,8 +100,8 @@ describe("readConfiguredLogTail", () => {
 
   it("fills short positional reads before splitting log lines", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
     const realOpen = fs.open.bind(fs);
     vi.spyOn(fs, "open").mockImplementation(async (...args) => {
       const handle = await realOpen(...args);
@@ -123,8 +123,8 @@ describe("readConfiguredLogTail", () => {
 
   it("holds an unterminated record until a later read completes it", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
     const completePrefix = "complete-before ✅\n";
 
     await fs.writeFile(file, `${completePrefix}partial`);
@@ -147,8 +147,8 @@ describe("readConfiguredLogTail", () => {
 
   it("reports truncation when the line limit omits complete records", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
     const content = "one\ntwo\nthree\n";
 
     await fs.writeFile(file, content);
@@ -167,8 +167,8 @@ describe("readConfiguredLogTail", () => {
 
   it("distinguishes a byte-budget re-anchor from file shrink", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
 
     await fs.writeFile(file, "first line\n");
     setLoggerOverride({ file });
@@ -189,8 +189,8 @@ describe("readConfiguredLogTail", () => {
 
   it("keeps the first line when the byte window starts exactly after a newline", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const file = path.join(tempDir, "openclaw-2026-01-22.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const file = path.join(tempDir, "carapace-2026-01-22.log");
     const line = (message: string) => `${message}${" ".repeat(199 - message.length)}\n`;
     const content = Array.from({ length: 10_000 }, (_, index) =>
       line(index === 5000 ? "first-line-in-window" : "filler"),
@@ -208,12 +208,12 @@ describe("readConfiguredLogTail", () => {
   it.each(operationalMetadataFailures)(
     "rethrows $code from the $boundary boundary",
     async ({ boundary, code }) => {
-      const tempDir = tempDirs.make("openclaw-log-tail-");
+      const tempDir = tempDirs.make("carapace-log-tail-");
       const configured = path.join(
         tempDir,
-        boundary === "final stat" ? "configured.log" : "openclaw-2026-01-22.log",
+        boundary === "final stat" ? "configured.log" : "carapace-2026-01-22.log",
       );
-      const candidate = path.join(tempDir, "openclaw-2026-01-21.log");
+      const candidate = path.join(tempDir, "carapace-2026-01-21.log");
       const error = Object.assign(new Error(`${code} injected`), { code });
       const realStat = fs.stat.bind(fs);
 
@@ -247,10 +247,10 @@ describe("readConfiguredLogTail", () => {
   );
 
   it("falls back only within the active profile's rolling log family", async () => {
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const missing = path.join(tempDir, "openclaw-2026-01-22.log");
-    const defaultLog = path.join(tempDir, "openclaw-2026-01-21.log");
-    const devLog = path.join(tempDir, "openclaw-dev-2026-01-21.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const missing = path.join(tempDir, "carapace-2026-01-22.log");
+    const defaultLog = path.join(tempDir, "carapace-2026-01-21.log");
+    const devLog = path.join(tempDir, "carapace-dev-2026-01-21.log");
     await fs.writeFile(defaultLog, "default profile\n");
     await fs.writeFile(devLog, "dev profile\n");
     await fs.utimes(defaultLog, new Date(0), new Date(0));
@@ -266,9 +266,9 @@ describe("readConfiguredLogTail", () => {
 
   it("does not reinterpret an explicit profile-shaped logging.file as rolling", async () => {
     const { readConfiguredLogTail } = await import("./log-tail.js");
-    const tempDir = tempDirs.make("openclaw-log-tail-");
-    const configured = path.join(tempDir, "openclaw-dev-2026-01-22.log");
-    const sibling = path.join(tempDir, "openclaw-dev-2026-01-21.log");
+    const tempDir = tempDirs.make("carapace-log-tail-");
+    const configured = path.join(tempDir, "carapace-dev-2026-01-22.log");
+    const sibling = path.join(tempDir, "carapace-dev-2026-01-21.log");
     await fs.writeFile(sibling, "sibling profile log\n");
     setLoggerOverride({ file: configured });
 

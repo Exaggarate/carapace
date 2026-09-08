@@ -66,7 +66,7 @@ export type NativePluginLoadBindings = Pick<PluginRuntime, "modelAuth" | "modelC
   capabilityCatalogContext: NonNullable<PluginLoadOptions["capabilityCatalogContext"]>;
 };
 
-export function loadOpenClawPluginsCore(
+export function loadCarapacePluginsCore(
   options: PluginLoadOptions,
   nativeBindings: NativePluginLoadBindings,
   overrides?: InternalPluginLoadOverrides,
@@ -301,7 +301,7 @@ export function loadOpenClawPluginsCore(
         logger.warn(
           `[plugins] ${failedPlugins.length} plugin(s) failed to initialize (${formatPluginFailureSummary(
             failedPlugins,
-          )}). Run 'openclaw plugins inspect <id> --runtime --json' for runtime diagnostics, 'openclaw plugins list' for registry state, and restart the Gateway after plugin code or load-path changes.`,
+          )}). Run 'carapace plugins inspect <id> --runtime --json' for runtime diagnostics, 'carapace plugins list' for registry state, and restart the Gateway after plugin code or load-path changes.`,
         );
       }
     }

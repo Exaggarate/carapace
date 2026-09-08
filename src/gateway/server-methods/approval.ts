@@ -1,6 +1,6 @@
 // Unified operator approval lookup and first-answer resolution handlers.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -14,7 +14,7 @@ import {
   validateApprovalHistoryParams,
   validateApprovalResolveParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ExecApprovalForwarder } from "../../infra/exec-approval-forwarder.js";
 import type {
   ExecApprovalDecision,
@@ -22,7 +22,7 @@ import type {
 } from "../../infra/exec-approvals.js";
 import type { PluginApprovalRequestPayload } from "../../infra/plugin-approvals.js";
 import type { SystemAgentApprovalRequestPayload } from "../../infra/system-agent-approvals.js";
-import type { OpenClawStateDatabaseOptions } from "../../state/openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "../../state/carapace-state-db.js";
 import { prepareApprovalChannelCustody } from "../approval-channel-custody.js";
 import { normalizeControlUiBasePath } from "../control-ui-shared.js";
 import type { ExecApprovalManager, ExecApprovalRecord } from "../exec-approval-manager.js";
@@ -55,7 +55,7 @@ type CreateApprovalHandlersParams = {
   forwarder?: ExecApprovalForwarder;
   iosPushDelivery?: ExecApprovalIosPushDelivery;
   pluginIosPushDelivery?: PluginApprovalIosPushDelivery;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 };
 
 function buildApprovalSnapshot(
@@ -122,13 +122,13 @@ function readExactApprovalId(params: unknown): string | null {
 function loadVisibleApproval(params: {
   id: string;
   client: GatewayClient | null;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   allowApprovalRuntime?: boolean;
   allowTransportRef?: boolean;
   execApprovalManager: ExecApprovalManager;
   pluginApprovalManager: ExecApprovalManager<PluginApprovalRequestPayload>;
   systemAgentApprovalManager?: ExecApprovalManager<SystemAgentApprovalRequestPayload>;
-  databaseOptions?: OpenClawStateDatabaseOptions;
+  databaseOptions?: CarapaceStateDatabaseOptions;
 }): OperatorApprovalRecord | null {
   // Reconciliation can settle a live waiter, so authorization must precede
   // every durable read and no unauthorized lookup may reach the bridge.

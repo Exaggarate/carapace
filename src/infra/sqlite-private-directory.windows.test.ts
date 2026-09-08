@@ -24,7 +24,7 @@ describe.runIf(process.platform === "win32")("private SQLite directory creation 
   afterEach(() => vi.clearAllMocks());
 
   it("creates protected directories without spawning PowerShell or a compiler", async () => {
-    const root = tempDirs.make("openclaw-sqlite-private-directory-");
+    const root = tempDirs.make("carapace-sqlite-private-directory-");
     const asyncPath = path.join(root, "private 测试");
     await createPrivateSqliteDirectory(asyncPath);
     const syncPath = createPrivateSqliteTempDirectorySync(root, "sync-");
@@ -63,7 +63,7 @@ describe.runIf(process.platform === "win32")("private SQLite directory creation 
   });
 
   it("rejects concurrent creation, existing files, and junctions without modifying them", async () => {
-    const root = tempDirs.make("openclaw-sqlite-private-existing-");
+    const root = tempDirs.make("carapace-sqlite-private-existing-");
     const directory = path.join(root, "private");
     const attempts = await Promise.allSettled([
       createPrivateSqliteDirectory(directory),
@@ -87,7 +87,7 @@ describe.runIf(process.platform === "win32")("private SQLite directory creation 
   });
 
   it("reports native failure when the parent is a regular file", async () => {
-    const root = tempDirs.make("openclaw-sqlite-private-failure-");
+    const root = tempDirs.make("carapace-sqlite-private-failure-");
     const regularFile = path.join(root, "parent-file");
     await fs.writeFile(regularFile, "not a directory");
     await expect(createPrivateSqliteDirectory(path.join(regularFile, "child"))).rejects.toThrow(

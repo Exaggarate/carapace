@@ -3,7 +3,7 @@ import type {
   RealtimeVoiceBridgeEvent,
   RealtimeVoiceBridgeCreateRequest,
   RealtimeVoiceResponseOutcome,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import { vi, type Mock } from "vitest";
 import { ChannelType } from "../internal/discord.js";
 import type { voiceTestMocks } from "./voice-test-mocks.test-support.js";

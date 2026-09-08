@@ -213,7 +213,7 @@ export function createDependencyEvidenceManifest({
     releaseRef,
     releaseSha,
     npmDistTag,
-    packageName: "openclaw",
+    packageName: "carapace",
     packageVersion,
     workflowRunId,
     workflowRunAttempt,
@@ -533,7 +533,7 @@ export async function generateDependencyReleaseEvidence({
     await appendFile(
       githubStepSummary,
       renderDependencyEvidenceStepSummary({
-        evidenceArtifactName: `openclaw-release-dependency-evidence-${releaseRef}`,
+        evidenceArtifactName: `carapace-release-dependency-evidence-${releaseRef}`,
         baseRef: dependencyChangeBaseRef,
         counts,
       }) +

@@ -1,7 +1,7 @@
 /**
  * Lifecycle callback state helpers for a single agent attempt.
  */
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { AgentMessage } from "../runtime/index.js";
 
 /** Mutable lifecycle flags observed while a single agent attempt runs. */

@@ -3,7 +3,7 @@ import { linkSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { MissingPublicSurfaceError } from "../plugin-sdk/facade-loader.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { loadPluginManifest } from "../plugins/manifest.js";
@@ -252,10 +252,10 @@ describe("registerBundledHealthChecks", () => {
   });
 
   it("scopes plugin state only while the selected provider setup is inspected", async () => {
-    const sourceEnv = { ...process.env, OPENCLAW_STATE_DIR: "/operator/state" };
+    const sourceEnv = { ...process.env, CARAPACE_STATE_DIR: "/operator/state" };
     const pluginMetadataEnv = {
       ...sourceEnv,
-      OPENCLAW_STATE_DIR: "/private/read-only-state",
+      CARAPACE_STATE_DIR: "/private/read-only-state",
     };
     let snapshotRuns = 0;
     const runWithPluginStateSnapshot = async <T>(
@@ -341,7 +341,7 @@ describe("registerBundledHealthChecks", () => {
           hooks: [],
           rootDir: "/bundled/crabbox",
           source: "/bundled/crabbox/index.js",
-          manifestPath: "/bundled/crabbox/openclaw.plugin.json",
+          manifestPath: "/bundled/crabbox/carapace.plugin.json",
         },
       ],
       diagnostics: [],
@@ -372,7 +372,7 @@ describe("registerBundledHealthChecks", () => {
     expect(mocks.registerWorkerProviderDoctorChecks).not.toHaveBeenCalled();
   });
 
-  const codexConfig: OpenClawConfig = {
+  const codexConfig: CarapaceConfig = {
     agents: {
       defaults: {
         model: { primary: "openai/gpt-5.6-sol" },
@@ -459,7 +459,7 @@ describe("registerBundledHealthChecks", () => {
     trustedOfficialInstall?: boolean,
     healthChecks = true,
   ) {
-    const manifestPath = join(workspaceDir, "openclaw.plugin.json");
+    const manifestPath = join(workspaceDir, "carapace.plugin.json");
     writeFileSync(
       manifestPath,
       JSON.stringify({
@@ -490,7 +490,7 @@ describe("registerBundledHealthChecks", () => {
   }
 
   it("continues other health checks for a retained stable Codex without a health API", () => {
-    // Published @openclaw/codex@2026.7.1-1 has neither a health declaration nor api.js.
+    // Published @carapace/codex@2026.7.1-1 has neither a health declaration nor api.js.
     mocks.loadPluginManifestRegistryForPluginRegistry.mockReturnValue({
       plugins: [codexRecord("global", true, false)],
       diagnostics: [],
@@ -531,7 +531,7 @@ describe("registerBundledHealthChecks", () => {
         plugins: [codexRecord(origin, origin === "global")],
         diagnostics: [],
       });
-      const env = { ...process.env, OPENCLAW_STATE_DIR: join(workspaceDir, "state") };
+      const env = { ...process.env, CARAPACE_STATE_DIR: join(workspaceDir, "state") };
       for (let attempt = 0; attempt < 2; attempt += 1) {
         registerBundledHealthChecks({ cfg: codexConfig, cwd: workspaceDir, env });
       }
@@ -604,13 +604,13 @@ describe("registerBundledHealthChecks", () => {
     expect(mocks.registerCodexManagedAppServerDoctorChecks).not.toHaveBeenCalled();
   });
 
-  it("does not load managed Codex health for an OpenClaw route", () => {
+  it("does not load managed Codex health for an Carapace route", () => {
     registerBundledHealthChecks({
       cfg: {
         agents: {
           defaults: {
             model: { primary: "openai/gpt-5.6-sol" },
-            models: { "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } } },
+            models: { "openai/gpt-5.6-sol": { agentRuntime: { id: "carapace" } } },
           },
         },
       },

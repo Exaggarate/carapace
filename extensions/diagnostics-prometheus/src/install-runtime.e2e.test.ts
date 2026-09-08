@@ -7,15 +7,15 @@ import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspace,
   type TempWorkspace,
-} from "openclaw/plugin-sdk/temp-path";
-import { stopChildProcess } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/temp-path";
+import { stopChildProcess } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 
 const execFileAsync = promisify(execFile);
-const packageName = "@openclaw/diagnostics-prometheus";
+const packageName = "@carapace/diagnostics-prometheus";
 const pluginId = "diagnostics-prometheus";
 const repoRoot = path.resolve(import.meta.dirname, "../../..");
 const pluginRoot = path.resolve(import.meta.dirname, "..");
@@ -60,21 +60,21 @@ function isolatedEnv(params: {
     ...process.env,
     HOME: params.home,
     USERPROFILE: params.home,
-    OPENCLAW_HOME: params.home,
-    OPENCLAW_STATE_DIR: params.stateDir,
-    OPENCLAW_CONFIG_PATH: params.configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_HOME: params.home,
+    CARAPACE_STATE_DIR: params.stateDir,
+    CARAPACE_CONFIG_PATH: params.configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     NODE_ENV: "production",
     NO_COLOR: "1",
   };
   for (const key of [
-    "OPENCLAW_BUNDLED_PLUGINS_DIR",
-    "OPENCLAW_PLUGIN_CATALOG_PATHS",
-    "OPENCLAW_PLUGINS_PATHS",
-    "OPENCLAW_TEST_FAST",
-    "OPENCLAW_TEST_HOME",
-    "OPENCLAW_TEST_MINIMAL_GATEWAY",
-    "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+    "CARAPACE_BUNDLED_PLUGINS_DIR",
+    "CARAPACE_PLUGIN_CATALOG_PATHS",
+    "CARAPACE_PLUGINS_PATHS",
+    "CARAPACE_TEST_FAST",
+    "CARAPACE_TEST_HOME",
+    "CARAPACE_TEST_MINIMAL_GATEWAY",
+    "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR",
     "VITEST",
     "VITEST_POOL_ID",
     "VITEST_WORKER_ID",
@@ -89,7 +89,7 @@ function isolatedEnv(params: {
 }
 
 async function runCli(args: string[], env: NodeJS.ProcessEnv, build = false): Promise<string> {
-  const entry = build ? "scripts/run-node.mjs" : "openclaw.mjs";
+  const entry = build ? "scripts/run-node.mjs" : "carapace.mjs";
   const result = await execFileAsync(process.execPath, [entry, ...args], {
     cwd: repoRoot,
     env,
@@ -137,7 +137,7 @@ async function packPlugin(
       cwd: repoRoot,
       env: {
         ...process.env,
-        OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1",
+        CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1",
       },
       maxBuffer: 2 * 1024 * 1024,
       timeout: 60_000,
@@ -259,14 +259,14 @@ describe("diagnostics-prometheus managed install runtime", () => {
     signal,
   }) => {
     const workspace = await tempWorkspace({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-prometheus-install-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-prometheus-install-",
     });
     tempWorkspaces.push(workspace);
     const root = workspace.dir;
     const home = path.join(root, "home");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const gatewayLog = path.join(root, "gateway.log");
     const gatewayPassword = "prometheus-managed-install-test-password";
     const gatewayPort = await reservePort();
@@ -370,7 +370,7 @@ describe("diagnostics-prometheus managed install runtime", () => {
     const gatewayLogHandle = await fs.open(gatewayLog, "a");
     const gateway = spawn(
       process.execPath,
-      ["openclaw.mjs", "gateway", "run", "--bind", "loopback", "--port", String(gatewayPort)],
+      ["carapace.mjs", "gateway", "run", "--bind", "loopback", "--port", String(gatewayPort)],
       {
         cwd: repoRoot,
         env,
@@ -394,7 +394,7 @@ describe("diagnostics-prometheus managed install runtime", () => {
     expect(authenticated.status).toBe(200);
     expect(authenticated.headers.get("content-type")).toContain("text/plain");
     expect(body).toContain(
-      'openclaw_telemetry_exporter_total{exporter="diagnostics-prometheus",reason="configured",signal="metrics",status="started"} 1',
+      'carapace_telemetry_exporter_total{exporter="diagnostics-prometheus",reason="configured",signal="metrics",status="started"} 1',
     );
     const restrictedHeaders = {
       "x-forwarded-for": "203.0.113.25",
@@ -406,7 +406,7 @@ describe("diagnostics-prometheus managed install runtime", () => {
     expect(restricted.status).toBe(403);
     expect(restricted.headers.get("cache-control")).toBe("no-store");
     expect(restrictedBody).toBe("missing scope: operator.read");
-    expect(restrictedBody).not.toContain("openclaw_telemetry_exporter_total");
+    expect(restrictedBody).not.toContain("carapace_telemetry_exporter_total");
 
     const restrictedHead = await fetch(url, { headers: restrictedHeaders, method: "HEAD" });
     expect(restrictedHead.status).toBe(403);
@@ -422,7 +422,7 @@ describe("diagnostics-prometheus managed install runtime", () => {
       expect(response.status).toBe(200);
       const lines = (await response.text())
         .split("\n")
-        .filter((line) => line.startsWith("openclaw_gateway_event_loop_"));
+        .filter((line) => line.startsWith("carapace_gateway_event_loop_"));
       const value = (name: string) =>
         Number(
           lines
@@ -432,9 +432,9 @@ describe("diagnostics-prometheus managed install runtime", () => {
         );
       return {
         lines,
-        count: value("openclaw_gateway_event_loop_delay_max_seconds_count"),
-        sum: value("openclaw_gateway_event_loop_delay_max_seconds_sum"),
-        observed: value("openclaw_gateway_event_loop_observed_seconds_total"),
+        count: value("carapace_gateway_event_loop_delay_max_seconds_count"),
+        sum: value("carapace_gateway_event_loop_delay_max_seconds_sum"),
+        observed: value("carapace_gateway_event_loop_observed_seconds_total"),
       };
     };
     const readCompletedWindow = async () => {

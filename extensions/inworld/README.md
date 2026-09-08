@@ -1,12 +1,12 @@
-# OpenClaw Inworld Plugin
+# Carapace Inworld Plugin
 
-Official OpenClaw plugin for Inworld.
+Official Carapace plugin for Inworld.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/inworld-speech
-openclaw gateway restart
+carapace plugins install @carapace/inworld-speech
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/inworld> for setup and configuration.
+See <../../docs/providers/inworld.md> for setup and configuration.

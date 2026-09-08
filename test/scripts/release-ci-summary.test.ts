@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { crc32 } from "node:zlib";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildFullReleaseCandidateRequest } from "../../scripts/full-release-candidate-contract.mjs";
 import {
@@ -121,7 +121,7 @@ describe("GitHub API commands", () => {
         jobs: composite.jobs,
         observedRunAttempts: [1],
         plannedRunAttempt: 1,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: childRunId,
         triggeringActor: "github-actions[bot]",
       },
@@ -181,7 +181,7 @@ describe("GitHub API commands", () => {
         artifact: fixture.artifact,
         artifactList: { artifacts: [fixture.artifact] },
         child: fixture.childRun,
-        jobLog: `TARGET_SHA: ${targetSha}\nDispatched: https://github.com/openclaw/openclaw/actions/runs/${childRunId} (attempt 1)`,
+        jobLog: `TARGET_SHA: ${targetSha}\nDispatched: https://github.com/Exaggarate/carapace/actions/runs/${childRunId} (attempt 1)`,
         jobs: { jobs: [fixture.parentJob] },
         lineage: { merge_base_commit: { sha: workflowSha }, status: "ahead" },
         parent: fixture.parentRun,
@@ -201,13 +201,13 @@ let output;
 if (args[0] === "run" && args[1] === "view") output = fixtures.parentView;
 else if (args[0] === "auth" && args[1] === "token") output = "wrapper-only-token";
 else if (endpoint === "rate_limit") output = fixtures.rate;
-else if (endpoint === "repos/openclaw/openclaw/actions/runs/${runId}") output = fixtures.parent;
-else if (endpoint.startsWith("repos/openclaw/openclaw/actions/runs/${runId}/artifacts?")) output = fixtures.artifactList;
-else if (endpoint === "repos/openclaw/openclaw/actions/artifacts/${artifactId}") output = fixtures.artifact;
-else if (endpoint.startsWith("repos/openclaw/openclaw/actions/runs/${runId}/jobs?")) output = fixtures.jobs;
-else if (endpoint === "repos/openclaw/openclaw/actions/runs/${childRunId}") output = fixtures.child;
-else if (endpoint === "repos/openclaw/openclaw/actions/jobs/${fixture.parentJob.id}/logs") output = fixtures.jobLog;
-else if (endpoint === "repos/openclaw/openclaw/compare/${workflowSha}...${verifierSha}?per_page=1&page=2") output = fixtures.lineage;
+else if (endpoint === "repos/carapace/carapace/actions/runs/${runId}") output = fixtures.parent;
+else if (endpoint.startsWith("repos/carapace/carapace/actions/runs/${runId}/artifacts?")) output = fixtures.artifactList;
+else if (endpoint === "repos/carapace/carapace/actions/artifacts/${artifactId}") output = fixtures.artifact;
+else if (endpoint.startsWith("repos/carapace/carapace/actions/runs/${runId}/jobs?")) output = fixtures.jobs;
+else if (endpoint === "repos/carapace/carapace/actions/runs/${childRunId}") output = fixtures.child;
+else if (endpoint === "repos/carapace/carapace/actions/jobs/${fixture.parentJob.id}/logs") output = fixtures.jobLog;
+else if (endpoint === "repos/carapace/carapace/compare/${workflowSha}...${verifierSha}?per_page=1&page=2") output = fixtures.lineage;
 else { console.error("unexpected cached gh request: " + args.join(" ")); process.exit(43); }
 process.stdout.write(typeof output === "string" ? output : JSON.stringify(output));
 `,
@@ -222,7 +222,7 @@ if (process.env.GH_TOKEN !== "wrapper-only-token") {
   console.error("plain gh did not receive wrapper authentication");
   process.exit(41);
 }
-if (args[0] !== "api" || args[1] !== "repos/openclaw/openclaw/actions/artifacts/${artifactId}/zip") {
+if (args[0] !== "api" || args[1] !== "repos/carapace/carapace/actions/artifacts/${artifactId}/zip") {
   console.error("plain gh used for evidence read: " + args.join(" "));
   process.exit(42);
 }
@@ -237,7 +237,7 @@ process.stdout.write(readFileSync(process.env.ARCHIVE));
         ...process.env,
         ARCHIVE: archivePath,
         FIXTURES: fixturesPath,
-        OPENCLAW_GH_BIN: plainGh,
+        CARAPACE_GH_BIN: plainGh,
         PATH: `${root}:${process.env.PATH ?? ""}`,
         PLAIN_LOG: plainLog,
         SHIM_LOG: shimLog,
@@ -252,7 +252,7 @@ process.stdout.write(readFileSync(process.env.ARCHIVE));
           "--input-type=module",
           "--eval",
           `import { createReleaseEvidenceClient } from ${JSON.stringify(pathToFileURL(resolve(SCRIPT)).href)};
-           process.stdout.write(JSON.stringify(createReleaseEvidenceClient("openclaw/openclaw").compareCommitLineage("${workflowSha}", "${verifierSha}")));`,
+           process.stdout.write(JSON.stringify(createReleaseEvidenceClient("carapace/carapace").compareCommitLineage("${workflowSha}", "${verifierSha}")));`,
         ],
         { encoding: "utf8", env },
       );
@@ -267,7 +267,7 @@ process.stdout.write(readFileSync(process.env.ARCHIVE));
       expect(result.stderr).toBe("");
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(
-        `child: ${childRunId} OpenClaw Release Checks completed/failure`,
+        `child: ${childRunId} Carapace Release Checks completed/failure`,
       );
       expect(result.stdout).toContain(
         "advisory: releaseChecksCandidate completed/failure cross_os_release_checks / Windows / packaged fresh",
@@ -282,20 +282,20 @@ process.stdout.write(readFileSync(process.env.ARCHIVE));
       const plainCalls = readFileSync(plainLog, "utf8");
       expect(shimCalls).toContain('"run","view"');
       expect(shimCalls).toContain('"auth","token"');
-      expect(shimCalls).toContain(`"repos/openclaw/openclaw/actions/runs/${runId}"`);
+      expect(shimCalls).toContain(`"repos/carapace/carapace/actions/runs/${runId}"`);
       expect(shimCalls).toContain(
-        `"repos/openclaw/openclaw/compare/${workflowSha}...${verifierSha}?per_page=1&page=2"`,
+        `"repos/carapace/carapace/compare/${workflowSha}...${verifierSha}?per_page=1&page=2"`,
       );
       expect(shimCalls).toContain(
         JSON.stringify([
           "api",
-          `repos/openclaw/openclaw/actions/jobs/${fixture.parentJob.id}/logs`,
+          `repos/carapace/carapace/actions/jobs/${fixture.parentJob.id}/logs`,
           "--allow-escape-sequences",
         ]),
       );
       expect(shimCalls).not.toContain(`/actions/artifacts/${artifactId}/zip`);
       expect(plainCalls.trim()).toBe(
-        JSON.stringify(["api", `repos/openclaw/openclaw/actions/artifacts/${artifactId}/zip`]),
+        JSON.stringify(["api", `repos/carapace/carapace/actions/artifacts/${artifactId}/zip`]),
       );
     } finally {
       rmSync(root, { force: true, recursive: true });
@@ -411,12 +411,12 @@ describe("runReleaseCiGh", () => {
     const execFileSyncImpl = vi.fn(() => "result");
 
     expect(
-      runReleaseCiGh(["api", "repos/openclaw/openclaw/actions/runs/1"], { execFileSyncImpl }),
+      runReleaseCiGh(["api", "repos/carapace/carapace/actions/runs/1"], { execFileSyncImpl }),
     ).toBe("result");
     expect(execFileSyncImpl).toHaveBeenCalledOnce();
     expect(execFileSyncImpl).toHaveBeenCalledWith(
       expect.any(String),
-      ["api", "repos/openclaw/openclaw/actions/runs/1"],
+      ["api", "repos/carapace/carapace/actions/runs/1"],
       expect.objectContaining({
         encoding: "utf8",
         killSignal: "SIGKILL",
@@ -454,7 +454,7 @@ process.exit(1);
     const previousPath = process.env.PATH;
     process.env.PATH = `${root}:${previousPath ?? ""}`;
     try {
-      expect(createReleaseEvidenceClient("openclaw/openclaw").loadExecutionPlan("123")).toBe(
+      expect(createReleaseEvidenceClient("carapace/carapace").loadExecutionPlan("123")).toBe(
         undefined,
       );
     } finally {
@@ -472,7 +472,7 @@ describe("Release Decision artifact polling", () => {
 
   it("treats GitHub CLI 2.93 missing named artifacts as unavailable", () => {
     expect(
-      tryReadReleaseDecisionArtifact(parent, "123", "openclaw/openclaw", () => {
+      tryReadReleaseDecisionArtifact(parent, "123", "carapace/carapace", () => {
         throw Object.assign(
           new Error("no artifact matches any of the names or patterns provided"),
           {
@@ -489,7 +489,7 @@ describe("Release Decision artifact polling", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       try {
         expect(
-          tryReadReleaseDecisionArtifact(parent, "123", "openclaw/openclaw", () => {
+          tryReadReleaseDecisionArtifact(parent, "123", "carapace/carapace", () => {
             throw Object.assign(new Error(message), { stderr: message });
           }),
         ).toBeUndefined();
@@ -508,7 +508,7 @@ describe("Release Decision artifact polling", () => {
       "unknown flag: --name\nUsage: gh run download",
     ]) {
       expect(() =>
-        tryReadReleaseDecisionArtifact(parent, "123", "openclaw/openclaw", () => {
+        tryReadReleaseDecisionArtifact(parent, "123", "carapace/carapace", () => {
           throw Object.assign(new Error(message), { stderr: message });
         }),
       ).toThrow("release decision artifact read failed");
@@ -731,10 +731,10 @@ function trustedMainPackageFixture({
     event: "workflow_dispatch",
     head_branch: workflowRef,
     head_sha: workflowSha,
-    html_url: `https://github.com/openclaw/openclaw/actions/runs/${runId}`,
+    html_url: `https://github.com/Exaggarate/carapace/actions/runs/${runId}`,
     id: Number(runId),
     path: parentPath,
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "carapace/carapace" },
     run_attempt: 1,
     status: "completed",
   };
@@ -770,10 +770,10 @@ function trustedMainPackageFixture({
     event: "workflow_dispatch",
     head_branch: workflowRef,
     head_sha: workflowSha,
-    html_url: `https://github.com/openclaw/openclaw/actions/runs/${childRunId}`,
+    html_url: `https://github.com/Exaggarate/carapace/actions/runs/${childRunId}`,
     id: Number(childRunId),
-    path: ".github/workflows/openclaw-release-checks.yml",
-    repository: { full_name: "openclaw/openclaw" },
+    path: ".github/workflows/carapace-release-checks.yml",
+    repository: { full_name: "carapace/carapace" },
     run_attempt: 1,
     status: "completed",
     triggering_actor: { login: "github-actions[bot]" },
@@ -804,7 +804,7 @@ function trustedMainPackageFixture({
       expect(jobId).toBe(parentJob.id);
       return [
         `TARGET_SHA: ${targetSha}`,
-        `Dispatched openclaw-release-checks.yml: ${childRun.html_url} (attempt ${childRun.run_attempt})`,
+        `Dispatched carapace-release-checks.yml: ${childRun.html_url} (attempt ${childRun.run_attempt})`,
       ].join("\n");
     },
     getParentJobs(requestedRunId: string) {
@@ -897,7 +897,7 @@ function trustedMainFullFixture() {
       const index = jobs.findIndex((job) => job.id === jobId);
       const child = expectDefined(children[index], "dispatch child");
       const run = expectDefined(runs[index], "child run");
-      return `TARGET_SHA: ${fixture.targetSha}\n-f publish_reports=false\nDispatched ${child.workflow}: https://github.com/openclaw/openclaw/actions/runs/${run.id} (attempt 1)`;
+      return `TARGET_SHA: ${fixture.targetSha}\n-f publish_reports=false\nDispatched ${child.workflow}: https://github.com/Exaggarate/carapace/actions/runs/${run.id} (attempt 1)`;
     }),
     getParentJobs: vi.fn((runId: string) =>
       runId === fixture.runId
@@ -962,12 +962,12 @@ function trustedMainNpmFixture(releaseProfile: "beta" | "stable" = "beta") {
     evidenceReuse: { requested: false },
     expected: {
       candidateRequest: buildFullReleaseCandidateRequest({
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         targetSha: fixture.targetSha,
         toolingSha: fixture.workflowSha,
         releaseProfile,
         releaseSoak: !beta,
-        upgradeSurvivorBaseline: "openclaw@latest",
+        upgradeSurvivorBaseline: "carapace@latest",
         upgradeSurvivorBaselines: "",
         upgradeSurvivorScenarios: "",
         allowFrozenTargetScenarioOmissions: false,
@@ -977,7 +977,7 @@ function trustedMainNpmFixture(releaseProfile: "beta" | "stable" = "beta") {
       }),
       parentRunAttempt: 1,
       parentRunId: fixture.runId,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       targetSha: fixture.targetSha,
       workflowRef: "main",
       workflowSha: fixture.workflowSha,
@@ -1009,7 +1009,7 @@ function trustedMainNpmFixture(releaseProfile: "beta" | "stable" = "beta") {
               jobs: composite.jobs,
               observedRunAttempts: [1],
               plannedRunAttempt: 1,
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runId: child.runId,
               triggeringActor: "github-actions[bot]",
             },
@@ -1070,7 +1070,7 @@ if (args[0] === "run" && args[1] === "view") {
   mkdirSync(dir, { recursive: true });
   writeFileSync(dir + "/full-release-decision.json", JSON.stringify({
     version: 2,
-    kind: "openclaw.full-release-decision",
+    kind: "carapace.full-release-decision",
     mode: "decision",
     parentRunId: ${JSON.stringify(runId)},
     parentRunAttempt: 1,
@@ -1091,8 +1091,8 @@ if (args[0] === "run" && args[1] === "view") {
   }));
   process.exit(0);
 } else if (endpoint === "rate_limit") output = { resources: { core: { limit: 5000, remaining: 4999, reset: 2_000_000_000 } } };
-else if (endpoint === "repos/openclaw/openclaw/actions/runs/${runId}") output = ${JSON.stringify(parent)};
-else if (endpoint.startsWith("repos/openclaw/openclaw/actions/runs/${runId}/artifacts?")) output = { artifacts: [] };
+else if (endpoint === "repos/carapace/carapace/actions/runs/${runId}") output = ${JSON.stringify(parent)};
+else if (endpoint.startsWith("repos/carapace/carapace/actions/runs/${runId}/artifacts?")) output = { artifacts: [] };
 else { console.error("unexpected gh call: " + args.join(" ")); process.exit(43); }
 process.stdout.write(JSON.stringify(output));
 `,
@@ -1403,7 +1403,7 @@ describe("release CI summary child correlation", () => {
       (
         await validateReleaseRunEvidence(
           {
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runId: legacyV2.runId,
             verifierSourceContent: readFileSync(SCRIPT),
             verifierSourceSha: "c".repeat(40),
@@ -1421,7 +1421,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: legacyV3.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -1439,7 +1439,7 @@ describe("release CI summary child correlation", () => {
     const verifierSourceSha = "c".repeat(40);
     const evidence = await validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: fixture.runId,
         verifierSourceContent: readFileSync(SCRIPT),
         verifierSourceSha,
@@ -1451,10 +1451,10 @@ describe("release CI summary child correlation", () => {
       directRoot: true,
       evidenceReuse: null,
       releaseProfile: "full",
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       rerunGroup: "package",
       runReleaseSoak: true,
-      schema: "openclaw.release-validation-evidence/v3",
+      schema: "carapace.release-validation-evidence/v3",
       producerOnTrustedMainLineage: true,
       trustedWorkflowFullRef: "refs/heads/main",
       trustedWorkflowRef: "main",
@@ -1542,7 +1542,7 @@ describe("release CI summary child correlation", () => {
     expect(evidence.runReleaseSoak).toBe(true);
     expect(fixture.client.getRunAttemptJobs).toHaveBeenCalledTimes(6);
     const performance = expectDefined(
-      fixture.runs.find((run) => run.path === ".github/workflows/openclaw-performance.yml"),
+      fixture.runs.find((run) => run.path === ".github/workflows/carapace-performance.yml"),
       "performance child",
     );
     performance.conclusion = "failure";
@@ -1595,7 +1595,7 @@ describe("release CI summary child correlation", () => {
     } else if (drift === "full-ci") {
       fixture.client.getJobLog.mockImplementation(
         (jobId: number) =>
-          `TARGET_SHA: ${fixture.targetSha}\nCI_RELEASE_SCOPE: full\nDispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/${jobId - 100} (attempt 1)`,
+          `TARGET_SHA: ${fixture.targetSha}\nCI_RELEASE_SCOPE: full\nDispatched ci.yml: https://github.com/Exaggarate/carapace/actions/runs/${jobId - 100} (attempt 1)`,
       );
     } else if (drift === "package-telegram") {
       fixture.manifest.validationInputs.skipPackageTelegramE2e = "false";
@@ -1824,7 +1824,7 @@ describe("release CI summary child correlation", () => {
         selected: true,
         source: "fresh",
         url: fixture.childRun.html_url,
-        workflow: "openclaw-release-checks.yml",
+        workflow: "carapace-release-checks.yml",
         workflowRef: fixture.childRun.head_branch,
         workflowSha: fixture.childRun.head_sha,
       };
@@ -1836,12 +1836,12 @@ describe("release CI summary child correlation", () => {
         evidenceReuse: { requested: false },
         expected: {
           candidateRequest: buildFullReleaseCandidateRequest({
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             targetSha: fixture.targetSha,
             toolingSha: fixture.workflowSha,
             releaseProfile: "full",
             releaseSoak: true,
-            upgradeSurvivorBaseline: "openclaw@latest",
+            upgradeSurvivorBaseline: "carapace@latest",
             upgradeSurvivorBaselines: "",
             upgradeSurvivorScenarios: "reported-issues",
             allowFrozenTargetScenarioOmissions: false,
@@ -1851,7 +1851,7 @@ describe("release CI summary child correlation", () => {
           }),
           parentRunAttempt: 1,
           parentRunId: fixture.runId,
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           targetSha: fixture.targetSha,
           workflowRef: fixture.parentRun.head_branch,
           workflowSha: fixture.workflowSha,
@@ -1899,7 +1899,7 @@ describe("release CI summary child correlation", () => {
         jobs: compositeJobs,
         observedRunAttempts: [1, 2],
         plannedRunAttempt: 1,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: String(fixture.childRun.id),
         triggeringActor: "release-operator",
       };
@@ -1938,7 +1938,7 @@ describe("release CI summary child correlation", () => {
         expect(jobId).toBe(fixture.parentJob.id);
         return [
           `TARGET_SHA: ${fixture.targetSha}`,
-          `Dispatched openclaw-release-checks.yml: ${fixture.childRun.html_url} (attempt 1)`,
+          `Dispatched carapace-release-checks.yml: ${fixture.childRun.html_url} (attempt 1)`,
         ].join("\n");
       };
 
@@ -1946,7 +1946,7 @@ describe("release CI summary child correlation", () => {
         validateReleaseRunEvidence(
           {
             expectedRunAttempts,
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runId: fixture.runId,
             verifierSourceContent: readFileSync(SCRIPT),
             verifierSourceSha: "c".repeat(40),
@@ -2001,7 +2001,7 @@ describe("release CI summary child correlation", () => {
         jobs: staleJobs,
         observedRunAttempts: [1],
         plannedRunAttempt: 1,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: String(fixture.childRun.id),
         triggeringActor: "github-actions[bot]",
       };
@@ -2010,7 +2010,7 @@ describe("release CI summary child correlation", () => {
         validate({ [fixture.runId]: 2, [String(fixture.childRun.id)]: 2 }),
       ).rejects.toThrowError(
         expect.objectContaining({
-          message: "successful parent manifest predates OpenClaw Release Checks attempt 2",
+          message: "successful parent manifest predates Carapace Release Checks attempt 2",
           refreshable: true,
         }),
       );
@@ -2127,7 +2127,7 @@ describe("release CI summary child correlation", () => {
 
       const evidence = await validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -2160,7 +2160,7 @@ describe("release CI summary child correlation", () => {
       (
         await validateReleaseRunEvidence(
           {
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runId: fixture.runId,
             verifierSourceContent: readFileSync(SCRIPT),
             verifierSourceSha: "c".repeat(40),
@@ -2182,7 +2182,7 @@ describe("release CI summary child correlation", () => {
     });
     const evidence = await validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: fixture.runId,
         verifierSourceContent: readFileSync(SCRIPT),
         verifierSourceSha: "c".repeat(40),
@@ -2208,7 +2208,7 @@ describe("release CI summary child correlation", () => {
     });
     const evidence = await validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runId: fixture.runId,
         trustedWorkflowRef: workflowRef,
         verifierSourceContent: readFileSync(SCRIPT),
@@ -2233,7 +2233,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -2252,7 +2252,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -2271,7 +2271,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           trustedWorkflowRef: "main",
           verifierSourceContent: readFileSync(SCRIPT),
@@ -2298,7 +2298,7 @@ describe("release CI summary child correlation", () => {
       (
         await validateReleaseRunEvidence(
           {
-            repository: "openclaw/openclaw",
+            repository: "carapace/carapace",
             runId: fixture.runId,
             verifierSourceContent: readFileSync(SCRIPT),
             verifierSourceSha: "c".repeat(40),
@@ -2330,7 +2330,7 @@ describe("release CI summary child correlation", () => {
     expect(
       await validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           trustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
           trustedWorkflowRef,
@@ -2381,7 +2381,7 @@ describe("release CI summary child correlation", () => {
     expect(
       await validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: olderFixture.runId,
           trustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
           trustedWorkflowRef,
@@ -2411,7 +2411,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: validFixture.runId,
           trustedWorkflowFullRef: `refs/heads/${trustedWorkflowRef}`,
           trustedWorkflowRef,
@@ -2444,7 +2444,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: unrelatedFixture.runId,
           trustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
           trustedWorkflowRef,
@@ -2465,7 +2465,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: sameNameFixture.runId,
           trustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
           trustedWorkflowRef,
@@ -2491,7 +2491,7 @@ describe("release CI summary child correlation", () => {
     });
     fixture.manifest.targetRef = fixture.targetSha;
     const options = {
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runId: fixture.runId,
       trustedWorkflowFullRef: `refs/tags/${trustedWorkflowRef}`,
       trustedWorkflowRef,
@@ -2529,7 +2529,7 @@ describe("release CI summary child correlation", () => {
         (
           await validateReleaseRunEvidence(
             {
-              repository: "openclaw/openclaw",
+              repository: "carapace/carapace",
               runId: fixture.runId,
               verifierSourceContent: readFileSync(SCRIPT),
               verifierSourceSha: "c".repeat(40),
@@ -2590,7 +2590,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -2605,7 +2605,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceContent: "different verifier bytes",
           verifierSourceSha: "c".repeat(40),
@@ -2616,7 +2616,7 @@ describe("release CI summary child correlation", () => {
     await expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "carapace/carapace",
           runId: fixture.runId,
           verifierSourceSha: "f".repeat(40),
         },
@@ -2706,7 +2706,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateParentRunBinding(
         parentView,
-        { ...parentRest, path: ".github/workflows/openclaw-release-checks.yml" },
+        { ...parentRest, path: ".github/workflows/carapace-release-checks.yml" },
         "29090000000",
       ),
     ).toThrow("full release parent run binding mismatch");
@@ -2726,14 +2726,14 @@ describe("release CI summary child correlation", () => {
       },
       {
         displayTitle:
-          "OpenClaw Release Checks full-release-validation-29090000000-3-release-checks",
+          "Carapace Release Checks full-release-validation-29090000000-3-release-checks",
         headBranch: "release/2026.7.1",
         manifestKey: "releaseChecks",
-        name: "OpenClaw Release Checks",
+        name: "Carapace Release Checks",
         parentJobName: "Run release/live/Docker/QA validation",
         suffix: "-release-checks",
         trustedRef: "parent",
-        workflow: "openclaw-release-checks.yml",
+        workflow: "carapace-release-checks.yml",
       },
       {
         displayTitle: "Plugin Prerelease full-release-validation-29090000000-3-plugin-prerelease",
@@ -2756,14 +2756,14 @@ describe("release CI summary child correlation", () => {
         workflow: "npm-telegram-beta-e2e.yml",
       },
       {
-        displayTitle: "OpenClaw Performance full-release-validation-29090000000-3",
+        displayTitle: "Carapace Performance full-release-validation-29090000000-3",
         headBranch: "release/2026.7.1",
         manifestKey: "productPerformance",
-        name: "OpenClaw Performance",
+        name: "Carapace Performance",
         parentJobName: "Run product performance evidence",
         suffix: "",
         trustedRef: "parent",
-        workflow: "openclaw-performance.yml",
+        workflow: "carapace-performance.yml",
       },
     ]);
   });
@@ -2799,13 +2799,13 @@ describe("release CI summary child correlation", () => {
       },
       {
         displayTitle:
-          "OpenClaw Release Checks full-release-validation-29090000000-3-release-checks-independent",
+          "Carapace Release Checks full-release-validation-29090000000-3-release-checks-independent",
         manifestKey: "releaseChecksIndependent",
         parentJobName: "Run release checks independent validation",
       },
       {
         displayTitle:
-          "OpenClaw Release Checks full-release-validation-29090000000-3-release-checks-candidate",
+          "Carapace Release Checks full-release-validation-29090000000-3-release-checks-candidate",
         manifestKey: "releaseChecksCandidate",
         parentJobName: "Run release checks candidate validation",
       },
@@ -2813,7 +2813,7 @@ describe("release CI summary child correlation", () => {
   });
 
   it("ignores same-SHA and nearby-name runs without the exact parent dispatch binding", () => {
-    const expected = "OpenClaw Performance full-release-validation-29090000000-3";
+    const expected = "Carapace Performance full-release-validation-29090000000-3";
     const exact = {
       display_title: expected,
       event: "workflow_dispatch",
@@ -2825,7 +2825,7 @@ describe("release CI summary child correlation", () => {
       selectExactChildRun(
         [
           {
-            display_title: "OpenClaw Performance",
+            display_title: "Carapace Performance",
             event: "workflow_dispatch",
             head_branch: "main",
             head_sha: exact.head_sha,
@@ -2870,7 +2870,7 @@ describe("release CI summary child correlation", () => {
   });
 
   it("returns one exact child after a full bounded pagination scan", () => {
-    const expected = "OpenClaw Performance full-release-validation-29090000000-3";
+    const expected = "Carapace Performance full-release-validation-29090000000-3";
     const exact = {
       display_title: expected,
       event: "workflow_dispatch",
@@ -2939,7 +2939,7 @@ describe("release CI summary child correlation", () => {
       jobs: composite.jobs,
       observedRunAttempts: [1],
       plannedRunAttempt: composite.plannedRunAttempt,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       runId: "404",
       triggeringActor: "github-actions[bot]",
     };
@@ -2976,7 +2976,7 @@ describe("release CI summary child correlation", () => {
   it("requires the npm Telegram child for all-validation with an effective package spec", () => {
     const raw = rawManifest({});
     raw.childRuns.npmTelegram = "505";
-    raw.validationInputs.npmTelegramPackageSpec = "openclaw@beta";
+    raw.validationInputs.npmTelegramPackageSpec = "carapace@beta";
     raw.validationInputs.skipPackageTelegramE2e = "true";
     const manifest = validateParentManifest(raw, {
       runAttempt: 2,
@@ -3011,7 +3011,7 @@ describe("release CI summary child correlation", () => {
       Object.assign(raw.validationInputs, {
         telegramWaiver: `${version}-owner-approved`,
         targetVersion: version,
-        releasePackageSpec: `openclaw@${version}`,
+        releasePackageSpec: `carapace@${version}`,
       });
       const expected = { runAttempt: 2, runId: "29090000000" };
       const manifest = validateParentManifest(raw, expected);
@@ -3029,7 +3029,7 @@ describe("release CI summary child correlation", () => {
     Object.assign(raw.validationInputs, {
       telegramWaiver: "2026.10.1-owner-approved",
       targetVersion: "2026.10.1",
-      releasePackageSpec: "openclaw@2026.10.1",
+      releasePackageSpec: "carapace@2026.10.1",
     });
     expect(() => validateParentManifest(raw, { runAttempt: 2, runId: "29090000000" })).toThrow(
       /Telegram waiver/u,
@@ -3131,7 +3131,7 @@ describe("release CI summary child correlation", () => {
       rawManifest({ candidateBinding, version: 3, workflowSha }),
       {
         candidateBinding,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 2,
         runId: "29090000000",
         workflowSha,
@@ -3141,7 +3141,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateParentManifest(rawManifest({ candidateBinding: null, version: 3, workflowSha }), {
         candidateBinding,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         runAttempt: 2,
         runId: "29090000000",
         workflowSha,
@@ -3475,7 +3475,7 @@ describe("release CI summary child correlation", () => {
     ];
     const parentLog = [
       `TARGET_SHA: ${parentManifest.targetSha}`,
-      "Dispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/101 (attempt 1)",
+      "Dispatched ci.yml: https://github.com/Exaggarate/carapace/actions/runs/101 (attempt 1)",
     ].join("\n");
     const run = {
       actor: { login: "github-actions[bot]" },
@@ -3526,10 +3526,10 @@ describe("release CI summary child correlation", () => {
         {
           originAttempt: 1,
           runId: 28717802171,
-          title: "OpenClaw Performance full-release-validation-28717729503-1",
+          title: "Carapace Performance full-release-validation-28717729503-1",
         },
       ],
-      ["releaseChecks", { originAttempt: 1, runId: 28717802397, title: "OpenClaw Release Checks" }],
+      ["releaseChecks", { originAttempt: 1, runId: 28717802397, title: "Carapace Release Checks" }],
     ]);
     const fingerprint = {
       completed_at: "2026-07-04T20:29:21Z",
@@ -3586,7 +3586,7 @@ describe("release CI summary child correlation", () => {
       const parentLog = [
         `TARGET_SHA: ${parentManifest.targetSha}`,
         ...(child.manifestKey === "productPerformance" ? ["-f publish_reports=false"] : []),
-        `Dispatched ${child.workflow}: https://github.com/openclaw/openclaw/actions/runs/${runId} (attempt ${run.run_attempt})`,
+        `Dispatched ${child.workflow}: https://github.com/Exaggarate/carapace/actions/runs/${runId} (attempt ${run.run_attempt})`,
       ].join("\n");
       expect(resolveManifestChildOriginAttempt(run, child, parentManifest, parentJobs)).toBe(
         originAttempt,
@@ -3639,7 +3639,7 @@ describe("release CI summary child correlation", () => {
     ];
     const ciLog = [
       `TARGET_SHA: ${parentManifest.targetSha}`,
-      "Dispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/101 (attempt 1)",
+      "Dispatched ci.yml: https://github.com/Exaggarate/carapace/actions/runs/101 (attempt 1)",
     ].join("\n");
     expect(() =>
       validateManifestChildRun(wrongParent, ci, "101", parentManifest, ciJobs, ciLog),

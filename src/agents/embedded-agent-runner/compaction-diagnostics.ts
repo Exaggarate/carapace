@@ -1,6 +1,6 @@
 /** Diagnostic helpers for embedded-agent compaction. */
-import type { ApiRegistry } from "@openclaw/ai";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { ApiRegistry } from "@carapace/ai";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { generateSecureToken } from "../../infra/secure-random.js";
 import type { ProviderRuntimeModel } from "../../plugins/provider-runtime-model.types.js";
 import { isRealConversationMessage } from "../compaction-real-conversation.js";
@@ -15,7 +15,7 @@ export function createDirectCompactionDiagId(): string {
 
 export function resolveCompactionProviderStream(params: {
   effectiveModel: ProviderRuntimeModel;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir: string;
   effectiveWorkspace: string;
   apiRegistry: ApiRegistry;

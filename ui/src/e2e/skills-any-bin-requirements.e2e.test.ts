@@ -16,10 +16,10 @@ function codingAgentSkill(missingAnyBins: string[]) {
   return {
     name: "Coding Agent",
     description: "Delegate coding work to an available coding CLI.",
-    source: "openclaw-bundled",
+    source: "carapace-bundled",
     bundled: true,
-    filePath: "/tmp/openclaw-e2e/skills/coding-agent/SKILL.md",
-    baseDir: "/tmp/openclaw-e2e/skills/coding-agent",
+    filePath: "/tmp/carapace-e2e/skills/coding-agent/SKILL.md",
+    baseDir: "/tmp/carapace-e2e/skills/coding-agent",
     skillKey: "coding-agent",
     always: false,
     disabled: false,
@@ -63,8 +63,8 @@ suite.define(() => {
         featureMethods: ["chat.metadata", "chat.startup", "skills.install"],
         methodResponses: {
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [codingAgentSkill(["claude", "codex", "opencode"])],
           },
           "skills.install": { message: "Installed Codex CLI" },
@@ -75,7 +75,7 @@ suite.define(() => {
       expect(response?.status()).toBe(200);
       await page.getByRole("button", { name: "Open Coding Agent details" }).click();
 
-      const dialog = page.locator("openclaw-modal-dialog", { hasText: "Coding Agent" });
+      const dialog = page.locator("carapace-modal-dialog", { hasText: "Coding Agent" });
       await expect.poll(async () => await dialog.count()).toBe(1);
       expect(await dialog.textContent()).toContain("bin:any of (claude, codex, opencode)");
       await dialog.getByRole("button", { name: "Install Codex CLI (npm)" }).click();
@@ -94,8 +94,8 @@ suite.define(() => {
       await installMockGateway(page, {
         methodResponses: {
           "skills.status": {
-            workspaceDir: "/tmp/openclaw-e2e/workspace",
-            managedSkillsDir: "/tmp/openclaw-e2e/skills",
+            workspaceDir: "/tmp/carapace-e2e/workspace",
+            managedSkillsDir: "/tmp/carapace-e2e/skills",
             skills: [codingAgentSkill([])],
           },
         },
@@ -105,7 +105,7 @@ suite.define(() => {
       expect(response?.status()).toBe(200);
       await page.getByRole("button", { name: "Open Coding Agent details" }).click();
 
-      const dialog = page.locator("openclaw-modal-dialog", { hasText: "Coding Agent" });
+      const dialog = page.locator("carapace-modal-dialog", { hasText: "Coding Agent" });
       await expect.poll(async () => await dialog.count()).toBe(1);
       expect(await dialog.getByText("bin:any of", { exact: false }).count()).toBe(0);
       expect(await dialog.getByRole("button", { name: "Install Codex CLI (npm)" }).count()).toBe(0);

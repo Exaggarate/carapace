@@ -6,7 +6,7 @@ import type { FastModeAutoProgressState } from "../../agents/fast-mode.js";
 import type { ContextEngineLogicalTurnLease } from "../../agents/harness/context-engine-logical-turn.js";
 import type { CompactionRequestBudget } from "../../agents/sessions/compaction/request-budget.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ThinkLevel } from "../thinking.js";
 import type { AgentLifecycleTerminalBackstop } from "./agent-lifecycle-terminal.js";
 import type {
@@ -26,7 +26,7 @@ export type AgentFallbackCandidateCommonParams = {
   preparedRunAdmission: PreparedAgentRunAdmission;
   turn: AgentTurnParams;
   candidateRun: FollowupRun["run"];
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
   provider: string;
   model: string;
   candidateThinkLevel?: ThinkLevel;
@@ -101,7 +101,7 @@ export type AgentFallbackCycleParams = {
   preparedRunAdmission: PreparedAgentRunAdmission;
   turn: AgentTurnParams;
   effectiveRun: FollowupRun["run"];
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
   liveModelSwitchRuntimeEntry?: Pick<
     SessionEntry,
     "agentHarnessId" | "agentRuntimeOverride" | "modelSelectionLocked" | "pluginOwnerId"

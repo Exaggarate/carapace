@@ -1,13 +1,13 @@
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { emitSessionLifecycleEvent } from "../../sessions/session-lifecycle-events.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import {
   confirmSessionParticipantsSchemaEnsured,
   ensureSessionParticipantsSchema,
-} from "../../state/openclaw-agent-session-participants-schema.js";
+} from "../../state/carapace-agent-session-participants-schema.js";
 import { readUserProfileAliases } from "../../state/user-profiles.js";
 import type { SessionAccessScope } from "./session-accessor.sqlite-contract.js";
 import { publishSessionEntryCacheInvalidation } from "./session-accessor.sqlite-entry-cache.js";
@@ -47,10 +47,10 @@ export function recordSessionParticipant(
     params.identity.type === "profile"
       ? readUserProfileAliases(actorId, { env: scope.env })
       : undefined;
-  const result = runOpenClawAgentWriteTransaction(
+  const result = runCarapaceAgentWriteTransaction(
     (database) => {
       if (ensureSessionParticipantsSchema(database.db)) {
-        deferOpenClawAgentPostCommitPublication(database, () =>
+        deferCarapaceAgentPostCommitPublication(database, () =>
           confirmSessionParticipantsSchemaEnsured(database.db),
         );
       }
@@ -97,7 +97,7 @@ export function recordSessionParticipant(
           ),
       );
       publishSessionEntryCacheInvalidation(database);
-      deferOpenClawAgentPostCommitPublication(database, () =>
+      deferCarapaceAgentPostCommitPublication(database, () =>
         emitSessionLifecycleEvent({
           agentId: resolved.agentId,
           sessionKey: resolved.sessionKey,

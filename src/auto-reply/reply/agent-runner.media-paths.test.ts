@@ -9,7 +9,7 @@ import {
   type TestModelFallbackRunnerParams,
 } from "../../agents/test-helpers/model-fallback-runner.test-support.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { TemplateContext } from "../templating.js";
 import type { AgentTurnParams } from "./agent-runner-execution.types.js";
 import type { FollowupRun, QueueSettings } from "./queue.js";
@@ -86,7 +86,7 @@ vi.mock("../../agents/model-selection.js", async () => {
   );
   return {
     ...actual,
-    isCliProvider: (provider: string, _cfg?: OpenClawConfig) => {
+    isCliProvider: (provider: string, _cfg?: CarapaceConfig) => {
       const normalized = provider.trim().toLowerCase();
       return (
         normalized === "claude-cli" ||
@@ -328,7 +328,7 @@ function makeRunReplyAgentParams(
 
 describe("runReplyAgent media path normalization", () => {
   beforeEach(() => {
-    testWorkspaceDir = tempDirs.make("openclaw-agent-media-workspace-");
+    testWorkspaceDir = tempDirs.make("carapace-agent-media-workspace-");
     runEmbeddedAgentMock.mockReset();
     runWithModelFallbackMock.mockReset();
     abortEmbeddedAgentRunMock.mockReset();
@@ -370,7 +370,7 @@ describe("runReplyAgent media path normalization", () => {
     }));
     resolveOutboundAttachmentFromUrlMock.mockReset();
     createReplyMediaContextRuntimeMock.mockReset();
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     resolveOutboundAttachmentFromUrlMock.mockImplementation(async (mediaUrl: string) => ({
       path: path.join("/tmp/outbound-media", path.basename(mediaUrl)),
     }));
@@ -393,7 +393,7 @@ describe("runReplyAgent media path normalization", () => {
   it.each(["agent:qa:main", "global"])(
     "normalizes final MEDIA replies for the prepared %s owner",
     async (sessionKey) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { qa: {}, beta: {} } },
       };
       setRuntimeConfigSnapshot(config, config);
@@ -758,7 +758,7 @@ describe("runReplyAgent media path normalization", () => {
   it.each([true, false])(
     "keeps the prepared global owner in executeAgentTurn (provided context: %s)",
     async (providedContext) => {
-      // Regression test for openclaw/openclaw#68056.
+      // Regression test for carapace/carapace#68056.
       // executeAgentTurn must use the caller-provided context so block
       // replies and final replies can share one media cache.
       runEmbeddedAgentMock.mockResolvedValue({
@@ -822,8 +822,8 @@ describe("runReplyAgent media path normalization", () => {
     },
   );
 
-  it("passes current inbound media paths as native OpenClaw images", async () => {
-    const tmpDir = tempDirs.make("openclaw-native-agent-media-");
+  it("passes current inbound media paths as native Carapace images", async () => {
+    const tmpDir = tempDirs.make("carapace-native-agent-media-");
     const imagePath = path.join(tmpDir, "photo.png");
     await writeFile(
       imagePath,
@@ -872,8 +872,8 @@ describe("runReplyAgent media path normalization", () => {
     expect(call?.imageOrder).toEqual(["inline"]);
   });
 
-  it("does not pass recent history images as unlabeled native OpenClaw images", async () => {
-    const tmpDir = tempDirs.make("openclaw-native-agent-history-");
+  it("does not pass recent history images as unlabeled native Carapace images", async () => {
+    const tmpDir = tempDirs.make("carapace-native-agent-history-");
     const imagePath = path.join(tmpDir, "recent.png");
     await writeFile(
       imagePath,
@@ -926,7 +926,7 @@ describe("runReplyAgent media path normalization", () => {
   });
 
   it("retains resolved current images and skips unresolved attachments", async () => {
-    const tmpDir = tempDirs.make("openclaw-native-agent-partial-");
+    const tmpDir = tempDirs.make("carapace-native-agent-partial-");
     const imagePath = path.join(tmpDir, "present.png");
     await writeFile(
       imagePath,

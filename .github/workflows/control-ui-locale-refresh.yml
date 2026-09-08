@@ -54,7 +54,7 @@ concurrency:
 jobs:
   resolve-base:
     if: >-
-      github.repository == 'openclaw/openclaw' &&
+      github.repository == 'carapace/carapace' &&
       (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     outputs:
@@ -167,17 +167,17 @@ jobs:
 
       - name: Refresh locale translations
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENCLAW_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
-          OPENCLAW_CONTROL_UI_I18N_PROVIDER: openai
-          OPENCLAW_CONTROL_UI_I18N_MODEL: ${{ secrets.OPENCLAW_I18N_MODEL }}
-          OPENCLAW_I18N_FALLBACK_MODEL: ${{ secrets.OPENCLAW_I18N_FALLBACK_MODEL }}
-          OPENCLAW_CONTROL_UI_I18N_THINKING: low
-          OPENCLAW_CONTROL_UI_I18N_AUTH_OPTIONAL: "0"
+          OPENAI_API_KEY: ${{ secrets.CARAPACE_DOCS_I18N_OPENAI_API_KEY || secrets.OPENAI_API_KEY }}
+          CARAPACE_CONTROL_UI_I18N_PROVIDER: openai
+          CARAPACE_CONTROL_UI_I18N_MODEL: ${{ secrets.CARAPACE_I18N_MODEL }}
+          CARAPACE_I18N_FALLBACK_MODEL: ${{ secrets.CARAPACE_I18N_FALLBACK_MODEL }}
+          CARAPACE_CONTROL_UI_I18N_THINKING: low
+          CARAPACE_CONTROL_UI_I18N_AUTH_OPTIONAL: "0"
           FULL_REFRESH: ${{ inputs.full_refresh || false }}
           LOCALE: ${{ matrix.locale }}
         run: |
           set -euo pipefail
-          if [[ -z "${OPENAI_API_KEY}" || -z "${OPENCLAW_CONTROL_UI_I18N_MODEL}" || -z "${OPENCLAW_I18N_FALLBACK_MODEL}" ]]; then
+          if [[ -z "${OPENAI_API_KEY}" || -z "${CARAPACE_CONTROL_UI_I18N_MODEL}" || -z "${CARAPACE_I18N_FALLBACK_MODEL}" ]]; then
             echo "Translation API key and private primary/fallback model secrets are required." >&2
             exit 1
           fi

@@ -1,9 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import type { Command } from "commander";
 import type { MessageReceipt } from "../channels/message/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ApprovalScope } from "../infra/approval-scope.js";
 import type { InternalDiagnosticEventInterest } from "../infra/diagnostic-event-listener-presence.js";
 import type {
@@ -16,7 +16,7 @@ import type { DiagnosticTracePropagationBridge as DiagnosticTracePropagationBrid
 import type { SecurityAuditFinding } from "../security/audit.types.js";
 import type { DeliveryContext } from "../utils/delivery-context.types.js";
 import type { PluginLogger } from "./logger-types.js";
-import type { OpenClawPluginNodeWorkspace } from "./types.node-host.js";
+import type { CarapacePluginNodeWorkspace } from "./types.node-host.js";
 
 type ChannelPlugin = import("../channels/plugins/types.plugin.js").ChannelPlugin;
 type DiagnosticTracePropagationBridge = DiagnosticTracePropagationBridgeContract<
@@ -40,28 +40,28 @@ export type PluginInteractiveRegistration<
 
 export type PluginInteractiveHandlerRegistration = PluginInteractiveRegistration;
 
-export type OpenClawPluginHttpRouteAuth = "gateway" | "plugin";
-export type OpenClawPluginHttpRouteMatch = "exact" | "prefix";
-export type OpenClawPluginGatewayRuntimeScopeSurface = "write-default" | "trusted-operator";
+export type CarapacePluginHttpRouteAuth = "gateway" | "plugin";
+export type CarapacePluginHttpRouteMatch = "exact" | "prefix";
+export type CarapacePluginGatewayRuntimeScopeSurface = "write-default" | "trusted-operator";
 
-export type OpenClawPluginHttpRouteHandler = (
+export type CarapacePluginHttpRouteHandler = (
   req: IncomingMessage,
   res: ServerResponse,
 ) => Promise<boolean | void> | boolean | void;
 
-export type OpenClawPluginHttpRouteUpgradeHandler = (
+export type CarapacePluginHttpRouteUpgradeHandler = (
   req: IncomingMessage,
   socket: Duplex,
   head: Buffer,
 ) => Promise<boolean | void> | boolean | void;
 
-export type OpenClawPluginHttpRouteParams = {
+export type CarapacePluginHttpRouteParams = {
   path: string;
-  handler: OpenClawPluginHttpRouteHandler;
-  handleUpgrade?: OpenClawPluginHttpRouteUpgradeHandler;
-  auth: OpenClawPluginHttpRouteAuth;
-  match?: OpenClawPluginHttpRouteMatch;
-  gatewayRuntimeScopeSurface?: OpenClawPluginGatewayRuntimeScopeSurface;
+  handler: CarapacePluginHttpRouteHandler;
+  handleUpgrade?: CarapacePluginHttpRouteUpgradeHandler;
+  auth: CarapacePluginHttpRouteAuth;
+  match?: CarapacePluginHttpRouteMatch;
+  gatewayRuntimeScopeSurface?: CarapacePluginGatewayRuntimeScopeSurface;
   nodeCapability?: {
     surface: string;
     ttlMs?: number;
@@ -69,7 +69,7 @@ export type OpenClawPluginHttpRouteParams = {
   replaceExisting?: boolean;
 };
 
-export type OpenClawPluginHostedMediaResolver = (
+export type CarapacePluginHostedMediaResolver = (
   mediaUrl: string,
 ) => string | null | undefined | Promise<string | null | undefined>;
 
@@ -128,84 +128,84 @@ export type WidgetPresenter = WidgetPresenterBase &
       }
   );
 
-export type OpenClawPluginCliContext = {
+export type CarapacePluginCliContext = {
   /**
    * Command object where this plugin should register its commands.
    *
-   * For root CLI registrations this is the root `openclaw` program. For nested
+   * For root CLI registrations this is the root `carapace` program. For nested
    * registrations it is the resolved parent command from `parentPath`.
    */
   program: Command;
   parentPath: readonly string[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   logger: PluginLogger;
 };
 
-export type OpenClawPluginCliRegistrar = (ctx: OpenClawPluginCliContext) => void | Promise<void>;
+export type CarapacePluginCliRegistrar = (ctx: CarapacePluginCliContext) => void | Promise<void>;
 
 /**
  * Top-level CLI metadata for plugin-owned commands.
  *
  * Descriptors are the parse-time contract for lazy plugin CLI registration.
- * If you want OpenClaw to keep a plugin command lazy-loaded while still
+ * If you want Carapace to keep a plugin command lazy-loaded while still
  * advertising it at the root CLI level, provide descriptors that cover every
  * top-level command root registered by that plugin CLI surface.
  */
-type OpenClawPluginCliCommandDescriptor = {
+type CarapacePluginCliCommandDescriptor = {
   name: string;
   description: string;
   hasSubcommands: boolean;
 };
 
 /** Root-command metadata that is available before a plugin registrar is activated. */
-export type OpenClawPluginCliRootCommandDescriptor = OpenClawPluginCliCommandDescriptor & {
+export type CarapacePluginCliRootCommandDescriptor = CarapacePluginCliCommandDescriptor & {
   machineOutput?: (params: { argv: readonly string[]; stdoutIsTTY: boolean }) => boolean;
 };
 
-type OpenClawPluginRootCliRegistrationOptions = {
+type CarapacePluginRootCliRegistrationOptions = {
   /** Omit or pass an empty path for root commands. */
   parentPath?: readonly [];
   commands?: readonly string[];
-  descriptors?: readonly OpenClawPluginCliRootCommandDescriptor[];
+  descriptors?: readonly CarapacePluginCliRootCommandDescriptor[];
 };
 
 /** Backward-compatible registration shape for dynamic root or nested paths. */
-type OpenClawPluginLegacyCliRegistrationOptions = {
+type CarapacePluginLegacyCliRegistrationOptions = {
   parentPath?: readonly string[];
   commands?: readonly string[];
-  descriptors?: readonly OpenClawPluginCliCommandDescriptor[];
+  descriptors?: readonly CarapacePluginCliCommandDescriptor[];
 };
 
-export type OpenClawPluginCliRegistrationOptions =
-  | OpenClawPluginRootCliRegistrationOptions
-  | OpenClawPluginLegacyCliRegistrationOptions;
+export type CarapacePluginCliRegistrationOptions =
+  | CarapacePluginRootCliRegistrationOptions
+  | CarapacePluginLegacyCliRegistrationOptions;
 
-export type OpenClawPluginNodeCliFeatureOptions = {
-  /** Explicit node feature command names owned under `openclaw nodes`. */
+export type CarapacePluginNodeCliFeatureOptions = {
+  /** Explicit node feature command names owned under `carapace nodes`. */
   commands?: string[];
   /**
    * Parse-time command descriptors for lazy node feature CLI registration.
    *
-   * Descriptors are registered under `openclaw nodes`, so a descriptor named
-   * `"camera"` exposes `openclaw nodes camera`.
+   * Descriptors are registered under `carapace nodes`, so a descriptor named
+   * `"camera"` exposes `carapace nodes camera`.
    */
-  descriptors?: OpenClawPluginCliCommandDescriptor[];
+  descriptors?: CarapacePluginCliCommandDescriptor[];
 };
 
-export type OpenClawPluginReloadRegistration = {
+export type CarapacePluginReloadRegistration = {
   restartPrefixes?: string[];
   hotPrefixes?: string[];
   noopPrefixes?: string[];
 };
 
 export type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandIo,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeHostCommandAvailabilityContext,
+  CarapacePluginNodeHostCommandIo,
 } from "./types.node-host.js";
 
-export type OpenClawPluginNodeInvokeTransportResult =
+export type CarapacePluginNodeInvokeTransportResult =
   | {
       ok: true;
       payload?: unknown;
@@ -218,9 +218,9 @@ export type OpenClawPluginNodeInvokeTransportResult =
       details?: Record<string, unknown>;
     };
 
-type OpenClawPluginNodeInvokeApprovalDecision = "allow-once" | "allow-always" | "deny";
+type CarapacePluginNodeInvokeApprovalDecision = "allow-once" | "allow-always" | "deny";
 
-type OpenClawPluginNodeInvokePolicyApprovalRuntime = {
+type CarapacePluginNodeInvokePolicyApprovalRuntime = {
   request: (input: {
     title: string;
     description: string;
@@ -230,21 +230,21 @@ type OpenClawPluginNodeInvokePolicyApprovalRuntime = {
     toolCallId?: string;
     agentId?: string;
     sessionKey?: string;
-    allowedDecisions?: readonly OpenClawPluginNodeInvokeApprovalDecision[];
+    allowedDecisions?: readonly CarapacePluginNodeInvokeApprovalDecision[];
     timeoutMs?: number;
   }) => Promise<{
     id?: string;
-    decision?: OpenClawPluginNodeInvokeApprovalDecision | null;
+    decision?: CarapacePluginNodeInvokeApprovalDecision | null;
   }>;
 };
 
-export type OpenClawPluginNodeInvokePolicyContext = {
+export type CarapacePluginNodeInvokePolicyContext = {
   nodeId: string;
   command: string;
   params: unknown;
   timeoutMs?: number;
   idempotencyKey?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   pluginConfig?: Record<string, unknown>;
   node?: {
     nodeId: string;
@@ -262,23 +262,23 @@ export type OpenClawPluginNodeInvokePolicyContext = {
     /** Stable, content-free family name; never include user or action arguments. */
     family: string;
   };
-  approvals?: OpenClawPluginNodeInvokePolicyApprovalRuntime;
+  approvals?: CarapacePluginNodeInvokePolicyApprovalRuntime;
   /** Full covers only the selected harness's declared node commands; undefined requires a human decision. */
   invokeNodeWithSessionFull?: (input: {
-    workspace: OpenClawPluginNodeWorkspace;
+    workspace: CarapacePluginNodeWorkspace;
     /** Called only after the host authorizes this exact admitted Full launch. */
     createParams: () => unknown;
-  }) => Promise<OpenClawPluginNodeInvokeTransportResult | undefined>;
+  }) => Promise<CarapacePluginNodeInvokeTransportResult | undefined>;
   invokeNode: (input?: {
     params?: unknown;
     /** Bind an approved launch to its admitted managed workspace, when present. */
-    workspace?: OpenClawPluginNodeWorkspace;
+    workspace?: CarapacePluginNodeWorkspace;
     timeoutMs?: number;
     idempotencyKey?: string;
-  }) => Promise<OpenClawPluginNodeInvokeTransportResult>;
+  }) => Promise<CarapacePluginNodeInvokeTransportResult>;
 };
 
-export type OpenClawPluginNodeInvokePolicyResult =
+export type CarapacePluginNodeInvokePolicyResult =
   | {
       ok: true;
       payload?: unknown;
@@ -292,7 +292,7 @@ export type OpenClawPluginNodeInvokePolicyResult =
       unavailable?: boolean;
     };
 
-export type OpenClawPluginNodeInvokePolicy = {
+export type CarapacePluginNodeInvokePolicy = {
   commands: string[];
   /**
    * Platforms where these node-handled commands should be allowlisted by default.
@@ -322,26 +322,26 @@ export type OpenClawPluginNodeInvokePolicy = {
    * Throwing rejects the invocation before dispatch.
    */
   classifyRisk?: (
-    ctx: Pick<OpenClawPluginNodeInvokePolicyContext, "command" | "params">,
-  ) => NonNullable<OpenClawPluginNodeInvokePolicyContext["risk"]>;
+    ctx: Pick<CarapacePluginNodeInvokePolicyContext, "command" | "params">,
+  ) => NonNullable<CarapacePluginNodeInvokePolicyContext["risk"]>;
   handle: (
-    ctx: OpenClawPluginNodeInvokePolicyContext,
-  ) => Promise<OpenClawPluginNodeInvokePolicyResult> | OpenClawPluginNodeInvokePolicyResult;
+    ctx: CarapacePluginNodeInvokePolicyContext,
+  ) => Promise<CarapacePluginNodeInvokePolicyResult> | CarapacePluginNodeInvokePolicyResult;
 };
 
-export type OpenClawPluginSecurityAuditContext = {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+export type CarapacePluginSecurityAuditContext = {
+  config: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   configPath: string;
 };
 
-export type OpenClawPluginSecurityAuditCollector = (
-  ctx: OpenClawPluginSecurityAuditContext,
+export type CarapacePluginSecurityAuditCollector = (
+  ctx: CarapacePluginSecurityAuditContext,
 ) => SecurityAuditFinding[] | Promise<SecurityAuditFinding[]>;
 
-export type OpenClawGatewayDiscoveryAdvertiseContext = {
+export type CarapaceGatewayDiscoveryAdvertiseContext = {
   machineDisplayName: string;
   gatewayPort: number;
   gatewayTlsEnabled: boolean;
@@ -353,28 +353,28 @@ export type OpenClawGatewayDiscoveryAdvertiseContext = {
   minimal: boolean;
 };
 
-export type OpenClawGatewayDiscoveryService = {
+export type CarapaceGatewayDiscoveryService = {
   id: string;
   advertise: (
-    ctx: OpenClawGatewayDiscoveryAdvertiseContext,
+    ctx: CarapaceGatewayDiscoveryAdvertiseContext,
   ) => void | Promise<void | { stop?: () => void | Promise<void> }>;
 };
 
 /** Context passed to long-lived plugin services. */
-export type OpenClawPluginServiceHealth = {
+export type CarapacePluginServiceHealth = {
   reportFailure: (error: unknown) => void;
   clearFailure: () => void;
 };
 
-export type OpenClawPluginServiceContext = {
-  config: OpenClawConfig;
+export type CarapacePluginServiceContext = {
+  config: CarapaceConfig;
   workspaceDir?: string;
   stateDir: string;
   logger: PluginLogger;
-  serviceHealth?: OpenClawPluginServiceHealth;
+  serviceHealth?: CarapacePluginServiceHealth;
   /** Gateway-owned scheduler access, revoked when this service stops. */
   getCron?: () => import("./hook-types.js").PluginHookGatewayCronService | undefined;
-  gatewayEvents?: import("./gateway-events.js").OpenClawPluginGatewayEvents;
+  gatewayEvents?: import("./gateway-events.js").CarapacePluginGatewayEvents;
   startupTrace?: {
     detail?: (name: string, metrics: ReadonlyArray<readonly [string, number | string]>) => void;
     measure: <T>(name: string, run: () => T | Promise<T>) => Promise<T>;
@@ -396,15 +396,15 @@ export type OpenClawPluginServiceContext = {
 };
 
 /** Background service registered by a plugin during `register(api)`. */
-export type OpenClawPluginService = {
+export type CarapacePluginService = {
   id: string;
   /** Restart this service with committed config when one of these paths changes. */
   reload?: { configPrefixes: readonly string[] };
-  start: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
-  stop?: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
+  start: (ctx: CarapacePluginServiceContext) => void | Promise<void>;
+  stop?: (ctx: CarapacePluginServiceContext) => void | Promise<void>;
 };
 
-export type OpenClawPluginChannelRegistration = {
+export type CarapacePluginChannelRegistration = {
   plugin: ChannelPlugin;
 };
 

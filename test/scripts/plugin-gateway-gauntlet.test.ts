@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildObservationGuardFailures,
@@ -63,7 +63,7 @@ describe("plugin gateway gauntlet helpers", () => {
     rowAssertion?: "metrics" | "missing";
   }) {
     const outputDir = path.join(repoRoot, "artifacts");
-    await writeManifest("alpha", "openclaw.plugin.json", JSON.stringify({ id: "alpha" }));
+    await writeManifest("alpha", "carapace.plugin.json", JSON.stringify({ id: "alpha" }));
     await fs.writeFile(path.join(repoRoot, "extensions", "alpha", "index.ts"), "export {};\n");
     await fs.mkdir(path.join(repoRoot, "scripts"), { recursive: true });
     const summaryAction =
@@ -107,7 +107,7 @@ describe("plugin gateway gauntlet helpers", () => {
           ? {
               env: {
                 ...process.env,
-                OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES: params.maxBytes,
+                CARAPACE_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES: params.maxBytes,
               },
             }
           : {}),
@@ -237,7 +237,7 @@ describe("plugin gateway gauntlet helpers", () => {
       ]),
     ).toThrow("Duplicate --qa-scenario value: channel-chat-baseline");
 
-    vi.stubEnv("OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_IDS", "telegram,discord");
+    vi.stubEnv("CARAPACE_PLUGIN_GATEWAY_GAUNTLET_IDS", "telegram,discord");
     expect(() => parseArgs(["--plugin", "telegram"])).toThrow("Duplicate --plugin value: telegram");
   });
 
@@ -280,7 +280,7 @@ describe("plugin gateway gauntlet helpers", () => {
   it("discovers bundled plugin manifests into lifecycle matrix rows", async () => {
     await writeManifest(
       "alpha",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({
         id: "alpha",
         enabledByDefault: true,
@@ -300,7 +300,7 @@ describe("plugin gateway gauntlet helpers", () => {
     );
     await writeManifest(
       "beta",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({ id: "beta", commandAliases: ["dreaming"], onboardingScopes: ["memory"] }),
     );
 
@@ -319,7 +319,7 @@ describe("plugin gateway gauntlet helpers", () => {
       hasConfigSchema: true,
       hasRequiredConfigFields: true,
       id: "alpha",
-      manifestPath: path.join("extensions", "alpha", "openclaw.plugin.json"),
+      manifestPath: path.join("extensions", "alpha", "carapace.plugin.json"),
       name: "alpha",
       onboardingScopes: ["models"],
       providers: ["openai"],
@@ -335,7 +335,7 @@ describe("plugin gateway gauntlet helpers", () => {
   });
 
   it("keeps manifest ids separate from bounded build entry ids", async () => {
-    await writeManifest("kimi-coding", "openclaw.plugin.json", JSON.stringify({ id: "kimi" }));
+    await writeManifest("kimi-coding", "carapace.plugin.json", JSON.stringify({ id: "kimi" }));
 
     const matrix = discoverBundledPluginManifests(repoRoot);
 
@@ -347,14 +347,14 @@ describe("plugin gateway gauntlet helpers", () => {
     ]);
     const kimi = expectDefined(matrix[0], "Kimi bundled plugin manifest");
     expect(buildGauntletPrebuildEnv({}, { buildIds: [kimi.buildId] })).toEqual({
-      OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "kimi-coding",
+      CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "kimi-coding",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
     });
   });
 
   it("skips source-only plugin dirs that are excluded from the built runtime", async () => {
-    await writeManifest("qa-lab", "openclaw.plugin.json", JSON.stringify({ id: "qa-lab" }));
-    await writeManifest("telegram", "openclaw.plugin.json", JSON.stringify({ id: "telegram" }));
+    await writeManifest("qa-lab", "carapace.plugin.json", JSON.stringify({ id: "qa-lab" }));
+    await writeManifest("telegram", "carapace.plugin.json", JSON.stringify({ id: "telegram" }));
 
     const matrix = discoverBundledPluginManifests(repoRoot);
 
@@ -580,9 +580,9 @@ describe("plugin gateway gauntlet helpers", () => {
   it("prebuilds private QA dist when QA chunks are enabled", () => {
     expect(buildGauntletPrebuildEnv({ EXISTING: "1" }, { includePrivateQa: true })).toEqual({
       EXISTING: "1",
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "qa-channel,qa-lab",
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
+      CARAPACE_BUILD_PRIVATE_QA: "1",
+      CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "qa-channel,qa-lab",
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "1",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
     });
     const env = { EXISTING: "1" };
@@ -600,8 +600,8 @@ describe("plugin gateway gauntlet helpers", () => {
       ),
     ).toEqual({
       EXISTING: "1",
-      OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "acpx",
-      OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1",
+      CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "acpx",
+      CARAPACE_RUN_NODE_SKIP_DTS_BUILD: "1",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
     });
   });
@@ -617,9 +617,9 @@ describe("plugin gateway gauntlet helpers", () => {
       ),
     ).toEqual({
       EXISTING: "1",
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: "acpx,active-memory,qa-channel,qa-lab",
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
+      CARAPACE_BUILD_PRIVATE_QA: "1",
+      CARAPACE_BUNDLED_PLUGIN_BUILD_IDS: "acpx,active-memory,qa-channel,qa-lab",
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "1",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
     });
   });
@@ -1315,12 +1315,12 @@ try {
       "--command-timeout-ms",
       "--build-timeout-ms",
       "--qa-timeout-ms",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_IDS",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_TOTAL",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_INDEX",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_FAIL_ON_OBSERVATION",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_KEEP_RUN_ROOT",
-      "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_IDS",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_TOTAL",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_INDEX",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_FAIL_ON_OBSERVATION",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_KEEP_RUN_ROOT",
+      "CARAPACE_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES",
     ]) {
       expect(result.stdout).toContain(text);
     }
@@ -1328,7 +1328,7 @@ try {
 
   it("fails once when skip-prebuild leaves plugin lifecycle probes without a built entry", async () => {
     const outputDir = path.join(repoRoot, "artifacts");
-    await writeManifest("acpx", "openclaw.plugin.json", JSON.stringify({ id: "acpx" }));
+    await writeManifest("acpx", "carapace.plugin.json", JSON.stringify({ id: "acpx" }));
 
     const result = spawnSync(
       process.execPath,
@@ -1372,7 +1372,7 @@ try {
 
   it("allows skip-prebuild slash-only dry runs when selected plugins have no slash probes", async () => {
     const outputDir = path.join(repoRoot, "artifacts");
-    await writeManifest("acpx", "openclaw.plugin.json", JSON.stringify({ id: "acpx" }));
+    await writeManifest("acpx", "carapace.plugin.json", JSON.stringify({ id: "acpx" }));
 
     const result = spawnSync(
       process.execPath,
@@ -1413,7 +1413,7 @@ try {
       failOnObservation: true,
     });
 
-    vi.stubEnv("OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_FAIL_ON_OBSERVATION", "1");
+    vi.stubEnv("CARAPACE_PLUGIN_GATEWAY_GAUNTLET_FAIL_ON_OBSERVATION", "1");
     expect(parseArgs(["--allow-empty"])).toMatchObject({
       allowEmpty: true,
       failOnObservation: true,
@@ -1518,7 +1518,7 @@ try {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES: "not-a-number",
+          CARAPACE_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES: "not-a-number",
         },
       },
     );
@@ -1540,7 +1540,7 @@ try {
     const outputDir = path.join(repoRoot, `artifacts-${mode}`);
     await writeManifest(
       "workboard",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({
         id: "workboard",
         commandAliases: [
@@ -1559,7 +1559,7 @@ try {
       [
         'const fs = require("node:fs");',
         'const path = require("node:path");',
-        "const stateDir = process.env.OPENCLAW_STATE_DIR ?? process.cwd();",
+        "const stateDir = process.env.CARAPACE_STATE_DIR ?? process.cwd();",
         'const marker = path.join(stateDir, "workboard-enabled");',
         "const args = process.argv.slice(2);",
         'if (args[0] === "plugins") {',
@@ -1570,7 +1570,7 @@ try {
         "}",
         'if (args[0] === "workboard" && args[1] === "--help") {',
         "  if (fs.existsSync(marker)) {",
-        '    console.log("Usage: openclaw workboard");',
+        '    console.log("Usage: carapace workboard");',
         "    process.exit(0);",
         "  }",
         '  console.error("workboard help was probed after uninstall");',
@@ -1626,7 +1626,7 @@ try {
       const slashHelpLogPath = slashHelpRow?.logPath;
       expect(slashHelpLogPath).toEqual(expect.any(String));
       await expect(fs.readFile(slashHelpLogPath as string, "utf8")).resolves.toContain(
-        "Usage: openclaw workboard",
+        "Usage: carapace workboard",
       );
       return;
     }
@@ -1662,10 +1662,10 @@ try {
     );
     await writeManifest(
       "alpha",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({ id: "alpha", requiresPlugins: ["beta"] }),
     );
-    await writeManifest("beta", "openclaw.plugin.json", JSON.stringify({ id: "beta" }));
+    await writeManifest("beta", "carapace.plugin.json", JSON.stringify({ id: "beta" }));
     await fs.writeFile(path.join(repoRoot, "extensions", "alpha", "index.ts"), "export {};\n");
     await fs.writeFile(path.join(repoRoot, "extensions", "beta", "index.ts"), "export {};\n");
     await fs.mkdir(path.join(repoRoot, "scripts"), { recursive: true });
@@ -1677,7 +1677,7 @@ try {
         'const outputArgIndex = process.argv.indexOf("--output-dir");',
         "const outputDir = path.resolve(process.cwd(), process.argv[outputArgIndex + 1]);",
         "fs.mkdirSync(outputDir, { recursive: true });",
-        'fs.writeFileSync(path.join(outputDir, "env.txt"), process.env.OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS ?? "", "utf8");',
+        'fs.writeFileSync(path.join(outputDir, "env.txt"), process.env.CARAPACE_BUNDLED_PLUGIN_BUILD_IDS ?? "", "utf8");',
         'fs.writeFileSync(path.join(outputDir, "args.txt"), process.argv.slice(2).join("\\n"), "utf8");',
         `fs.writeFileSync(path.join(outputDir, "qa-suite-summary.json"), ${JSON.stringify(qaSummaryJson)}, "utf8");`,
       ].join("\n"),
@@ -1721,10 +1721,10 @@ try {
     const outputDir = path.join(repoRoot, "artifacts");
     await writeManifest(
       "alpha",
-      "openclaw.plugin.json",
+      "carapace.plugin.json",
       JSON.stringify({ id: "alpha", requiresPlugins: ["beta"] }),
     );
-    await writeManifest("beta", "openclaw.plugin.json", JSON.stringify({ id: "beta" }));
+    await writeManifest("beta", "carapace.plugin.json", JSON.stringify({ id: "beta" }));
     await fs.writeFile(path.join(repoRoot, "extensions", "alpha", "index.ts"), "export {};\n");
     await fs.writeFile(path.join(repoRoot, "extensions", "beta", "index.ts"), "export {};\n");
     await fs.mkdir(path.join(repoRoot, "dist"), { recursive: true });

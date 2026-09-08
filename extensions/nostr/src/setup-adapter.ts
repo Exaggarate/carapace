@@ -2,16 +2,16 @@
 import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/channel-setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/routing";
 import {
   createSetupTranslator,
   createStandardChannelSetupStatus,
   patchTopLevelChannelConfigSection,
   splitSetupEntries,
-} from "openclaw/plugin-sdk/setup";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/setup";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { DEFAULT_RELAYS } from "./default-relays.js";
 import { NOSTR_PRIVATE_KEY_ENV_VAR, validatePrivateKey } from "./private-key.js";
 
@@ -48,7 +48,7 @@ export function parseRelayUrls(raw: string): { relays: string[]; error?: string 
 }
 
 export function createNostrSetupAdapter(params: {
-  resolveAccountId: (cfg: OpenClawConfig, accountId?: string | null) => string;
+  resolveAccountId: (cfg: CarapaceConfig, accountId?: string | null) => string;
 }): ChannelSetupAdapter<NostrSetupInput> {
   return {
     resolveAccountId: ({ cfg, accountId }) => params.resolveAccountId(cfg, accountId),
@@ -116,7 +116,7 @@ export function createNostrSetupContract(adapter: ChannelSetupAdapter<NostrSetup
 }
 
 export function createNostrSetupStatus(
-  resolveAccount: (params: { cfg: OpenClawConfig; accountId?: string | null }) => {
+  resolveAccount: (params: { cfg: CarapaceConfig; accountId?: string | null }) => {
     configured: boolean;
     relays: string[];
   },

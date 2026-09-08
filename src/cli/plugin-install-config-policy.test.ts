@@ -28,7 +28,7 @@ function parseInstallRequest(
   spec: string,
   marketplace?: string,
 ): PluginInstallRequestContext | null {
-  const argv = ["node", "openclaw", "plugins", "install", spec];
+  const argv = ["node", "carapace", "plugins", "install", spec];
   if (marketplace) {
     argv.push("--marketplace", marketplace);
   }
@@ -53,13 +53,13 @@ function parseInstallRequest(
 
 describe("plugin install recovery source ownership", () => {
   beforeEach(() => {
-    fixture.bundledPath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-recovery-owner-"));
+    fixture.bundledPath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-recovery-owner-"));
     fs.writeFileSync(
       path.join(fixture.bundledPath, "package.json"),
-      JSON.stringify({ openclaw: { install: { allowInvalidConfigRecovery: true } } }),
+      JSON.stringify({ carapace: { install: { allowInvalidConfigRecovery: true } } }),
     );
     fs.writeFileSync(
-      path.join(fixture.bundledPath, "openclaw.plugin.json"),
+      path.join(fixture.bundledPath, "carapace.plugin.json"),
       JSON.stringify({ id: "bundled-demo", configSchema: { type: "object" } }),
     );
     fixture.entries = [];
@@ -73,7 +73,7 @@ describe("plugin install recovery source ownership", () => {
     fixture.entries = [
       {
         name: "@fixture/recovery",
-        openclaw: {
+        carapace: {
           plugin: { id: "official-demo" },
           install: { npmSpec: "@fixture/recovery", allowInvalidConfigRecovery: allowed },
         },
@@ -109,10 +109,10 @@ describe("plugin install recovery source ownership", () => {
       fs.mkdirSync(localPath);
       fs.writeFileSync(
         path.join(localPath, "package.json"),
-        JSON.stringify({ openclaw: { install: { allowInvalidConfigRecovery: allowed } } }),
+        JSON.stringify({ carapace: { install: { allowInvalidConfigRecovery: allowed } } }),
       );
       fs.writeFileSync(
-        path.join(localPath, "openclaw.plugin.json"),
+        path.join(localPath, "carapace.plugin.json"),
         JSON.stringify({ id: "local-demo", configSchema: { type: "object" } }),
       );
       const request = parseInstallRequest(`${prefix}${localPath}`);

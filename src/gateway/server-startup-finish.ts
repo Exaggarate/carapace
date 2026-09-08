@@ -6,7 +6,7 @@ import {
   registerConfigWriteListener,
 } from "../config/io.js";
 import { isNixMode } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { createLazyPromise } from "../shared/lazy-runtime.js";
@@ -362,15 +362,15 @@ export async function finishGatewayStartup(params: {
     return { startupSettled: postAttachHandles.startupSettled };
   }
   if (!minimalTestGateway) {
-    const { startOpenClawDatabaseIntegrityVerifier } =
-      await import("../state/openclaw-database-verify.js");
-    kernel.addGatewayLifetimeSidecar(startOpenClawDatabaseIntegrityVerifier({ env: process.env }));
+    const { startCarapaceDatabaseIntegrityVerifier } =
+      await import("../state/carapace-database-verify.js");
+    kernel.addGatewayLifetimeSidecar(startCarapaceDatabaseIntegrityVerifier({ env: process.env }));
   }
   postAttachRuntimeReturned = true;
   activateScheduledServicesWhenReady();
 
   const { startManagedGatewayConfigReloader } = await import("./server-reload-managed.js");
-  const assertRuntimeSecurityConfig = (cfg: OpenClawConfig, env?: NodeJS.ProcessEnv) => {
+  const assertRuntimeSecurityConfig = (cfg: CarapaceConfig, env?: NodeJS.ProcessEnv) => {
     assertGatewayRuntimeSecurityConfig({
       cfg,
       port,

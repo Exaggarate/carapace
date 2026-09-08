@@ -3,16 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { expandHomePrefix } from "../infra/home-dir.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { resolveConfigDir } from "../utils.js";
 import { resolveCronJobConfigRevision } from "./config-revision.js";
 import { readCronStoreStatePath } from "./store/config-state.js";
@@ -118,13 +118,13 @@ function isRetiredCollectionReview(row: CronJobRow): boolean {
 function loadMutableCronStore(storePath: string): LoadedCronStore {
   const resolvedStorePath = path.resolve(storePath);
   const storeKey = cronStoreKey(resolvedStorePath);
-  const database = openOpenClawStateDatabase().db;
+  const database = openCarapaceStateDatabase().db;
   let rows = loadCronRows(database, storeKey);
   const retiredIds = new Set(rows.filter(isRetiredCollectionReview).map((row) => row.job_id));
   if (retiredIds.size > 0) {
     // Retire generated jobs before runtime validation, including databases already
     // on v16. Gateway convergence recreates them with the isolated agent-turn target.
-    const removed = runOpenClawStateWriteTransaction(
+    const removed = runCarapaceStateWriteTransaction(
       ({ db }) => {
         const current = loadCronRows(db, storeKey, retiredIds).filter(isRetiredCollectionReview);
         for (const row of current) {
@@ -189,7 +189,7 @@ function repairLoadedCronRuntimeAuthority(params: {
   if (params.jobIds.length === 0) {
     return;
   }
-  const repaired = runOpenClawStateWriteTransaction(
+  const repaired = runCarapaceStateWriteTransaction(
     ({ db }) => {
       const rows = loadCronRows(db, params.storeKey, new Set(params.jobIds));
       if (rows.length === 0) {
@@ -217,7 +217,7 @@ export function removeStaleCronJobFamilyRows(
   family: CronJobFamilyIdentity,
 ): number {
   const activeStoreKey = cronStoreKey(path.resolve(storePath));
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => deleteStaleCronJobFamilyRows(db, activeStoreKey, family),
     {},
     { operationLabel: "cron.job-family-adoption" },
@@ -239,7 +239,7 @@ export async function loadCronJobsStoreWithConfigJobsReadOnly(
   storePath: string,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<LoadedCronStore> {
-  const statePath = resolveOpenClawStateSqlitePath(env);
+  const statePath = resolveCarapaceStateSqlitePath(env);
   if (!fs.existsSync(statePath)) {
     return emptyLoadedCronStore();
   }
@@ -357,7 +357,7 @@ export async function saveCronJobsStoreChanges(
   if (changedIds.size === 0) {
     return previous;
   }
-  const committed = runOpenClawStateWriteTransaction(
+  const committed = runCarapaceStateWriteTransaction(
     ({ db }) => {
       const rows = loadCronRows(db, storeKey);
       const rowsById = new Map(rows.map((row) => [row.job_id, row] as const));
@@ -459,7 +459,7 @@ export async function saveCronJobsStore(
   if (!stateOnly) {
     assertCronStoreCanPersist(store);
   }
-  runOpenClawStateWriteTransaction((database) => {
+  runCarapaceStateWriteTransaction((database) => {
     opts?.transactionHooks?.beforeWrite?.(database.db);
     if (opts?.quarantine?.entries.length) {
       saveCronQuarantinedJobs({
@@ -502,7 +502,7 @@ export async function saveCronJobsStoreWithMetadata(
   const resolvedStorePath = path.resolve(storePath);
   const storeKey = cronStoreKey(resolvedStorePath);
   assertCronStoreCanPersist(store);
-  const committed = runOpenClawStateWriteTransaction((database) => {
+  const committed = runCarapaceStateWriteTransaction((database) => {
     if (!acquireMetadata(database.db)) {
       return false;
     }

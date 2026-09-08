@@ -1,6 +1,6 @@
 // Verifies session thinking levels reach OpenAI and Codex Responses transports.
-import { createLlmRuntime } from "@openclaw/ai";
-import { Agent, type StreamFn } from "openclaw/plugin-sdk/agent-core";
+import { createLlmRuntime } from "@carapace/ai";
+import { Agent, type StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   createAssistantMessageEventStream,
   type AssistantMessage,
@@ -8,8 +8,8 @@ import {
   type Model,
   type SimpleStreamOptions,
   streamSimple,
-} from "openclaw/plugin-sdk/llm";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/llm";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { resolveEmbeddedAgentStream } from "./embedded-agent-runner/stream-resolution.js";
 import { createZeroUsageFixture } from "./test-helpers/usage-fixtures.js";

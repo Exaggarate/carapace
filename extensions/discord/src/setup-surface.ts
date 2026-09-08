@@ -1,5 +1,5 @@
 // Discord plugin module implements setup surface behavior.
-import { resolveBasicAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
+import { resolveBasicAllowFromEntries } from "carapace/plugin-sdk/allow-from";
 import {
   createSetupTranslator,
   patchChannelConfigForAccount,
@@ -8,10 +8,10 @@ import {
   resolveSetupAccountId,
   splitSetupEntries,
   type ChannelSetupWizard,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+} from "carapace/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "carapace/plugin-sdk/setup-tools";
 import { resolveDiscordAccountAllowFrom } from "./accounts.js";
 import { resolveDiscordChannelAllowlist } from "./resolve-channels.js";
 import { resolveDiscordUserAllowlist } from "./resolve-users.js";
@@ -36,10 +36,10 @@ async function resolveDiscordAllowFromEntries(params: { token?: string; entries:
 }
 
 async function promptDiscordAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const accountId = resolveSetupAccountId({
     accountId: params.accountId,
     defaultAccountId: resolveDefaultDiscordSetupAccountId(params.cfg),
@@ -95,7 +95,7 @@ async function promptDiscordAllowFrom(params: {
 }
 
 async function resolveDiscordGroupAllowlist(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   credentialValues: { token?: string };
   entries: string[];

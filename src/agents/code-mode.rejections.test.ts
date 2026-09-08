@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   applyCodeModeCatalog,
@@ -81,9 +81,9 @@ describe("Code Mode promise rejection settlement", () => {
       status: "failed",
       error: expect.stringContaining("lost failure"),
     });
-    expect(String(result.error)).not.toContain("openclaw-code-mode:controller.js");
+    expect(String(result.error)).not.toContain("carapace-code-mode:controller.js");
     if (userFrame) {
-      expect(String(result.error)).toMatch(/openclaw-code-mode:user\.js:2:\d+/);
+      expect(String(result.error)).toMatch(/carapace-code-mode:user\.js:2:\d+/);
     }
     expect(testing.activeRuns.size).toBe(0);
   });
@@ -112,7 +112,7 @@ describe("Code Mode promise rejection settlement", () => {
         throw new Error("Expected guest runtime failure");
       }
       expect(String(result.error)).toContain(
-        `openclaw-code-mode:user.js:${mode === "wait" ? 3 : 2}:`,
+        `carapace-code-mode:user.js:${mode === "wait" ? 3 : 2}:`,
       );
       expect(String(result.error)).not.toContain("<eval>");
       expect(String(result.error)).not.toContain("controller.js");
@@ -175,7 +175,7 @@ describe("Code Mode promise rejection settlement", () => {
         message: "synthetic actionable cause",
         code: "SYNTHETIC",
         effectStatus: "unknown",
-        location: expect.stringMatching(/openclaw-code-mode:user\.js:2:/),
+        location: expect.stringMatching(/carapace-code-mode:user\.js:2:/),
       };
       const value = {
         results: [

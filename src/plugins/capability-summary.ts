@@ -1,6 +1,6 @@
 // Inventory needs capability facts without artifact inspection or lifecycle writes.
 import { createHash } from "node:crypto";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
+import { redactSensitiveUrlLikeString } from "@carapace/net-policy/redact-sensitive-url";
 import { PLUGIN_DECLARED_SURFACE_GROUPS } from "../../packages/gateway-protocol/src/schema/plugin-declared-surface-groups.js";
 import type {
   PluginDeclaredSurface,
@@ -10,7 +10,7 @@ import type {
   PluginInstallTrust,
   PluginsInspectResult,
 } from "../../packages/gateway-protocol/src/schema/plugins.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   PluginAcceptedDeclaredSurface,
   PluginEntryConfig,
@@ -135,7 +135,7 @@ export function resolveAcceptedSurfaceCurrent(
 }
 
 export function formatPluginCapabilityConsentRequired(pluginId: string): string {
-  return `Plugin "${pluginId}" requires capability consent; disable and re-enable it or run \`openclaw plugins enable ${pluginId} --accept-capabilities\`.`;
+  return `Plugin "${pluginId}" requires capability consent; disable and re-enable it or run \`carapace plugins enable ${pluginId} --accept-capabilities\`.`;
 }
 
 function buildHookGrant(effective: boolean, configured: boolean | undefined): PluginHookGrant {
@@ -265,7 +265,7 @@ export function buildPluginCapabilityConsentReview(params: {
     version?: string;
   };
   record: PluginInstallRecord;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   declared?: PluginAcceptedDeclaredSurface;
   previousDeclared?: PluginAcceptedDeclaredSurface;
   widened?: Partial<PluginAcceptedDeclaredSurface>;

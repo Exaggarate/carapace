@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
@@ -15,9 +15,9 @@ import { readSessionTranscriptBoundedActiveContextCore } from "../../config/sess
 import { runWithSessionTranscriptReadFence } from "../../config/sessions/session-transcript-read-fence.js";
 import { waitForSessionTranscriptIndexReconcile } from "../../config/sessions/session-transcript-reconcile.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { rewriteTranscriptEntriesInSessionManager } from "../embedded-agent-runner/transcript-rewrite.js";
 import { SessionManager } from "./session-manager.js";
 
@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 it("publishes the rewritten view before commit observers append", async () => {
-  const dir = tempDirs.make("openclaw-rewrite-observer-");
+  const dir = tempDirs.make("carapace-rewrite-observer-");
   const scope = {
     agentId: "main",
     sessionId: "rewrite-observer",
@@ -51,13 +51,13 @@ it("publishes the rewritten view before commit observers append", async () => {
   const manager = SessionManager.open(scope, dir);
   const first = manager.appendMessage({ role: "user", content: "first", timestamp: 1 });
   manager.appendMessage({ role: "user", content: "tail", timestamp: 2 });
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: scope.agentId,
     path: resolveSessionTranscriptDatabasePath(scope),
   });
   database.db.function("queue_observer_append", () => {
     expect(
-      deferOpenClawAgentPostCommitPublication(database, () => {
+      deferCarapaceAgentPostCommitPublication(database, () => {
         manager.appendMessage({ role: "user", content: "observer", timestamp: 3 });
       }),
     ).toBe(true);
@@ -82,7 +82,7 @@ it("publishes the rewritten view before commit observers append", async () => {
 });
 
 it("does not certify stale navigation with a post-commit replacement version", async () => {
-  const dir = tempDirs.make("openclaw-postcommit-rewrite-race-");
+  const dir = tempDirs.make("carapace-postcommit-rewrite-race-");
   const scope = {
     agentId: "main",
     sessionId: "postcommit-race",
@@ -100,7 +100,7 @@ it("does not certify stale navigation with a post-commit replacement version", a
   });
   const kept = manager.appendMessage({ role: "user", content: "kept-after-trim", timestamp: 3 });
   manager.appendMessage({ role: "user", content: "remove-tail", timestamp: 4 });
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: scope.agentId,
     path: resolveSessionTranscriptDatabasePath(scope),
   });
@@ -109,7 +109,7 @@ it("does not certify stale navigation with a post-commit replacement version", a
     if (!queued) {
       queued = true;
       expect(
-        deferOpenClawAgentPostCommitPublication(database, () => {
+        deferCarapaceAgentPostCommitPublication(database, () => {
           const events = loadTranscriptEventsSync(scope);
           for (const event of events) {
             if (isRecord(event) && event.id === control.id) {
@@ -156,7 +156,7 @@ it("does not certify stale navigation with a post-commit replacement version", a
 it.each(["compaction", "reset"] as const)(
   "adopts canonical boundary counts and navigation after replaying %s",
   async (kind) => {
-    const dir = tempDirs.make("openclaw-bounded-rewrite-boundary-");
+    const dir = tempDirs.make("carapace-bounded-rewrite-boundary-");
     const scope = {
       agentId: "main",
       sessionId: "rewrite-boundary",
@@ -190,7 +190,7 @@ it.each(["compaction", "reset"] as const)(
 );
 
 it("keeps generated entry ids unique outside a bounded transcript tail", async () => {
-  const dir = tempDirs.make("openclaw-session-manager-bounded-id-");
+  const dir = tempDirs.make("carapace-session-manager-bounded-id-");
   const scope = {
     agentId: "main",
     sessionId: "bounded-id-session",
@@ -238,7 +238,7 @@ it("keeps generated entry ids unique outside a bounded transcript tail", async (
 });
 
 it("excludes interleaved display payloads without inventing events or losing fenced append ancestry", async () => {
-  const dir = tempDirs.make("openclaw-bounded-display-");
+  const dir = tempDirs.make("carapace-bounded-display-");
   const scope = {
     agentId: "main",
     sessionId: "display",
@@ -298,12 +298,12 @@ it("excludes interleaved display payloads without inventing events or losing fen
 });
 
 it.each([1, 2])("retains the forward cut after %i excluded first-kept entries", async (count) => {
-  const dir = tempDirs.make("openclaw-bounded-excluded-cut-");
+  const dir = tempDirs.make("carapace-bounded-excluded-cut-");
   const scope = {
     agentId: "main",
     sessionId: "excluded-cut",
     sessionKey: "agent:main:excluded-cut",
-    storePath: path.join(dir, "openclaw-agent.sqlite"),
+    storePath: path.join(dir, "carapace-agent.sqlite"),
   };
   await upsertSessionEntryCore(scope, { sessionId: scope.sessionId, updatedAt: 1 });
   const manager = SessionManager.open(scope, dir);
@@ -339,7 +339,7 @@ it.each([1, 2])("retains the forward cut after %i excluded first-kept entries", 
 });
 
 it("bounds runtime hydration while preserving older durable transcript rows on rewrites", async () => {
-  const dir = tempDirs.make("openclaw-session-manager-bounded-");
+  const dir = tempDirs.make("carapace-session-manager-bounded-");
   const storePath = path.join(dir, "sessions.json");
   const scope = {
     agentId: "main",
@@ -379,7 +379,7 @@ it("bounds runtime hydration while preserving older durable transcript rows on r
 });
 
 it("preserves inactive siblings when the bounded active branch fits its limits", async () => {
-  const dir = tempDirs.make("openclaw-session-manager-bounded-branch-");
+  const dir = tempDirs.make("carapace-session-manager-bounded-branch-");
   const scope = {
     agentId: "main",
     sessionId: "bounded-branch-session",
@@ -411,7 +411,7 @@ it("preserves inactive siblings when the bounded active branch fits its limits",
   expect(openBounded).toThrow(SessionTranscriptProjectionUnavailableError);
   await waitForSessionTranscriptIndexReconcile({
     agentId: scope.agentId,
-    path: path.join(dir, "openclaw-agent.sqlite"),
+    path: path.join(dir, "carapace-agent.sqlite"),
   });
   const manager = openBounded();
 
@@ -431,7 +431,7 @@ it("preserves inactive siblings when the bounded active branch fits its limits",
 });
 
 it("preserves explicit reset retention of excluded user input in a bounded reopen", async () => {
-  const dir = tempDirs.make("openclaw-bounded-reset-excluded-");
+  const dir = tempDirs.make("carapace-bounded-reset-excluded-");
   const scope = {
     agentId: "main",
     sessionId: "reset-excluded",

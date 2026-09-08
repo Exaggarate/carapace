@@ -85,7 +85,7 @@ runs:
         fi
 
         workspace="$(cd "$GITHUB_WORKSPACE" && pwd -P)"
-        sync_root="$(mktemp -d "$RUNNER_TEMP/openclaw-testbox-sync.XXXXXX")"
+        sync_root="$(mktemp -d "$RUNNER_TEMP/carapace-testbox-sync.XXXXXX")"
         sync_root="$(cd "$sync_root" && pwd -P)"
         case "$sync_root/" in
           "$workspace/"*) echo "Testbox sync must stay outside the execution workspace" >&2; exit 1 ;;

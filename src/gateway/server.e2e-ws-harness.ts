@@ -27,9 +27,9 @@ export async function startGatewayServerHarness(): Promise<GatewayServerHarness>
   gatewayFixtureLifetime.assertAdmission();
   const port = await getGatewayTestPort();
   gatewayFixtureLifetime.assertAdmission();
-  const envSnapshot = captureEnv(["OPENCLAW_GATEWAY_TOKEN"]);
+  const envSnapshot = captureEnv(["CARAPACE_GATEWAY_TOKEN"]);
   const clients = new Set<WebSocket>();
-  delete process.env.OPENCLAW_GATEWAY_TOKEN;
+  delete process.env.CARAPACE_GATEWAY_TOKEN;
   const server = await startTestGatewayServer(port, {
     auth: { mode: "none" },
     bind: "loopback",

@@ -10,7 +10,7 @@ import { readLoggingConfig } from "../logging/config.js";
 import { resetLogger } from "../logging/logger.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 
 // Local boot completes in ~10s; the budget only buys headroom for loaded CI
@@ -28,17 +28,17 @@ afterEach(() => {
 describe("gateway minimal boot smoke", () => {
   it("suppresses ambient channel triggers when the server option is omitted", async () => {
     const port = await getFreePort();
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "gateway-bootstrap-ambient-default",
       layout: "home",
       env: {
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         VITEST: "1",
       },
     });
@@ -70,8 +70,8 @@ describe("gateway minimal boot smoke", () => {
 
       expect(bootstrap.ambientEnvTriggers).toBe("suppress");
       vi.stubEnv(
-        "OPENCLAW_CONFIG_PATH",
-        `/tmp/openclaw-bootstrap-missing-${process.pid}-${Date.now()}.json`,
+        "CARAPACE_CONFIG_PATH",
+        `/tmp/carapace-bootstrap-missing-${process.pid}-${Date.now()}.json`,
       );
       expect(readLoggingConfig()).toMatchObject({ level: "debug" });
     } finally {
@@ -81,26 +81,26 @@ describe("gateway minimal boot smoke", () => {
 
   it("boots a minimal test gateway within budget", { timeout: BOOT_BUDGET_MS }, async () => {
     const port = await getFreePort();
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "gateway-minimal-boot-smoke",
       layout: "home",
       env: {
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_CRON: "1",
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_CRON: "1",
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_TEST_MINIMAL_GATEWAY: "1",
         VITEST: "1",
       },
     });
     const token = "gateway-minimal-boot-smoke-token";
     const timelinePath = state.path("gateway-startup.jsonl");
-    state.envVars.OPENCLAW_DIAGNOSTICS = "1";
-    state.envVars.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH = timelinePath;
+    state.envVars.CARAPACE_DIAGNOSTICS = "1";
+    state.envVars.CARAPACE_DIAGNOSTICS_TIMELINE_PATH = timelinePath;
     await state.writeConfig({
       gateway: {
         auth: { mode: "token", token },

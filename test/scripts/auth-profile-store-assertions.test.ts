@@ -12,8 +12,8 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function makeStateDir(): string {
-  const root = tempDirs.make("openclaw-auth-profile-assertions-");
-  return path.join(root, ".openclaw");
+  const root = tempDirs.make("carapace-auth-profile-assertions-");
+  return path.join(root, ".carapace");
 }
 
 function writeSharedDatabase(
@@ -26,7 +26,7 @@ function writeSharedDatabase(
     storeJson?: string;
   } = {},
 ): string {
-  const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+  const dbPath = path.join(stateDir, "state", "carapace.sqlite");
   mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   try {
@@ -104,7 +104,7 @@ function writeAgentDatabase(
     storeAsView?: boolean;
   } = {},
 ): string {
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
   mkdirSync(path.dirname(dbPath), { recursive: true });
   const db = new DatabaseSync(dbPath);
   try {
@@ -231,7 +231,7 @@ describe("auth profile store E2E assertions", () => {
     const stateDir = makeStateDir();
 
     expect(readSharedAuthProfileStoreText(stateDir)).toBe("");
-    const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+    const dbPath = path.join(stateDir, "state", "carapace.sqlite");
     mkdirSync(path.dirname(dbPath), { recursive: true });
     new DatabaseSync(dbPath).close();
     expect(readSharedAuthProfileStoreText(stateDir)).toBe("");
@@ -239,7 +239,7 @@ describe("auth profile store E2E assertions", () => {
 
   it("fails closed for a corrupt shared database", () => {
     const stateDir = makeStateDir();
-    const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+    const dbPath = path.join(stateDir, "state", "carapace.sqlite");
     mkdirSync(path.dirname(dbPath), { recursive: true });
     writeFileSync(dbPath, "not sqlite");
 
@@ -286,7 +286,7 @@ describe("auth profile store E2E assertions", () => {
   it("fails closed for a corrupt main-agent database", () => {
     const stateDir = makeStateDir();
     writeSharedDatabase(stateDir);
-    const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const dbPath = path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite");
     mkdirSync(path.dirname(dbPath), { recursive: true });
     writeFileSync(dbPath, "not sqlite");
 

@@ -4,11 +4,11 @@ import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildEmbeddedRunBaseParams } from "./agent-runner-run-params.js";
 import type { FollowupRun } from "./queue.js";
 
-function makeRun(config: OpenClawConfig): FollowupRun["run"] {
+function makeRun(config: CarapaceConfig): FollowupRun["run"] {
   return {
     sessionId: "session-1",
     agentId: "agent-1",
@@ -46,7 +46,7 @@ afterEach(() => {
 
 describe("buildEmbeddedRunBaseParams runtime config", () => {
   it("keeps an already-resolved run config instead of reverting to a stale runtime snapshot", async () => {
-    const staleSnapshot: OpenClawConfig = {
+    const staleSnapshot: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -61,7 +61,7 @@ describe("buildEmbeddedRunBaseParams runtime config", () => {
         },
       },
     };
-    const resolvedRunConfig: OpenClawConfig = {
+    const resolvedRunConfig: CarapaceConfig = {
       models: {
         providers: {
           openai: {

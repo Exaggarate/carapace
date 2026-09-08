@@ -35,7 +35,7 @@ function refreshPathBeforeSecondStat(targetPath: string): ReturnType<typeof vi.s
 
 describe("pruneUnreferencedSessionArtifacts", () => {
   it("reclaims stale store temp sidecars but preserves in-flight ones (#56827)", async () => {
-    await withTestDir({ prefix: "openclaw-prune-temp-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-prune-temp-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const staleTemp = path.join(
         dir,
@@ -68,7 +68,7 @@ describe("pruneUnreferencedSessionArtifacts", () => {
   });
 
   it("reclaims unreferenced skills prompt blobs during normal artifact cleanup", async () => {
-    await withTestDir({ prefix: "openclaw-prune-prompt-blob-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-prune-prompt-blob-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const oldKey = "agent:main:old";
       const keepKey = "agent:main:keep";
@@ -135,7 +135,7 @@ describe("pruneUnreferencedSessionArtifacts", () => {
   });
 
   it("preserves fresh unreferenced skills prompt blobs during normal artifact cleanup", async () => {
-    await withTestDir({ prefix: "openclaw-prune-fresh-prompt-blob-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-prune-fresh-prompt-blob-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const hash = "c".repeat(64);
       const blobDir = path.join(dir, "skills-prompts", "sha256", hash.slice(0, 2));
@@ -156,7 +156,7 @@ describe("pruneUnreferencedSessionArtifacts", () => {
   });
 
   it("revalidates stale prompt blobs before removing them during normal artifact cleanup", async () => {
-    await withTestDir({ prefix: "openclaw-prune-revalidate-prompt-blob-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-prune-revalidate-prompt-blob-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const hash = "e".repeat(64);
       const blobDir = path.join(dir, "skills-prompts", "sha256", hash.slice(0, 2));
@@ -183,7 +183,7 @@ describe("pruneUnreferencedSessionArtifacts", () => {
   });
 
   it("reclaims stale skills prompt blob temps during normal artifact cleanup", async () => {
-    await withTestDir({ prefix: "openclaw-prune-prompt-temp-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-prune-prompt-temp-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const store: Record<string, SessionEntry> = {
         "agent:main:main": { sessionId: "keep", updatedAt: Date.now() },

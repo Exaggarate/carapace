@@ -1,26 +1,26 @@
 // Discord provider module implements model/runtime integration.
-import type { ChannelRuntimeSurface } from "openclaw/plugin-sdk/channel-contract";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import type { OpenClawConfig, ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
+import type { ChannelRuntimeSurface } from "carapace/plugin-sdk/channel-contract";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import type { CarapaceConfig, ReplyToMode } from "carapace/plugin-sdk/config-contracts";
+import { resolveTextChunkLimit } from "carapace/plugin-sdk/reply-chunking";
 import {
   createRuntimeConfigReader,
   getRuntimeConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   logVerbose,
   warn,
   createSubsystemLogger,
   createNonExitingRuntime,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/runtime-env";
 import {
   GROUP_POLICY_BLOCKED_LABEL,
   resolveOpenProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/runtime-group-policy";
+import { formatErrorMessage } from "carapace/plugin-sdk/ssrf-runtime";
 import { resolveDiscordAccountAllowFrom, resolveDiscordAccountDmPolicy } from "../accounts.js";
 import type { DiscordCommandDeployHashStore } from "../command-deploy-store.js";
 import { GatewayCloseCodes } from "../internal/gateway.js";
@@ -56,8 +56,8 @@ import { createDiscordReadyStatusPatch, type DiscordMonitorStatusSink } from "./
 export type MonitorDiscordOpts = {
   token?: string;
   accountId?: string;
-  config?: OpenClawConfig;
-  readConfig?: () => OpenClawConfig;
+  config?: CarapaceConfig;
+  readConfig?: () => CarapaceConfig;
   runtime?: RuntimeEnv;
   channelRuntime?: ChannelRuntimeSurface;
   abortSignal?: AbortSignal;

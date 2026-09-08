@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 // Extension relay bridge: CDP target synthesis and extension command routing.
 import { describe, expect, it, vi } from "vitest";
 import { ExtensionRelayBridge } from "./relay-bridge.js";
@@ -222,7 +222,7 @@ describe("ExtensionRelayBridge", () => {
       sessionId?: string;
     };
     expect(params.targetInfo?.targetId).toBe("target-1");
-    expect(params.targetInfo?.browserContextId).toBe("openclaw-extension-context");
+    expect(params.targetInfo?.browserContextId).toBe("carapace-extension-context");
     expect(typeof params.sessionId).toBe("string");
   });
 
@@ -533,7 +533,7 @@ describe("ExtensionRelayBridge", () => {
 
     handlers.onClose();
     // A subsequent session command should surface a clean error, not hang.
-    cdp.onMessage(JSON.stringify({ id: 2, sessionId: "openclaw-tab-1-1", method: "Page.reload" }));
+    cdp.onMessage(JSON.stringify({ id: 2, sessionId: "carapace-tab-1-1", method: "Page.reload" }));
     await flush();
     const response = client.frames().find((frame) => frame.id === 2);
     expect(response?.error).toBeTruthy();

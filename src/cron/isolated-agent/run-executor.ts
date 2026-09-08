@@ -1,6 +1,6 @@
 /** Executes isolated cron prompts with model fallbacks and interim-ack retries. */
 import { createHash } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   createOperationalRunInstanceRef,
   prepareAgentRunAdmission,
@@ -35,7 +35,7 @@ import {
 import type { ThinkLevel, VerboseLevel } from "../../auto-reply/thinking.js";
 import type { CliSessionBinding } from "../../config/sessions.js";
 import type { AgentDefaultsConfig } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildGenericCliContextEngineHostSupport } from "../../context-engine/host-compat.js";
 import { registerCronRunExecSource } from "../../infra/cron-run-exec-source.js";
 import type { SourceDeliveryPlan } from "../../infra/outbound/source-delivery-plan.js";
@@ -149,7 +149,7 @@ function resolveIsolatedCronPromptCacheKey(params: {
   const digest = createHash("sha256").update(material).digest("hex").slice(0, 32);
   // Isolated cron rotates transcript/session ids per run; keep cache affinity
   // on stable job identity without sending raw local session labels upstream.
-  return `openclaw-cron-${digest}`;
+  return `carapace-cron-${digest}`;
 }
 
 /** Detects single-line cron prompts that look like shell commands or command invocations. */
@@ -234,8 +234,8 @@ export type CronExecutionResult = {
 };
 
 type CronRunExecutionParams = {
-  cfg: OpenClawConfig;
-  cfgWithAgentDefaults: OpenClawConfig;
+  cfg: CarapaceConfig;
+  cfgWithAgentDefaults: CarapaceConfig;
   job: CronStoredJob;
   agentId: string;
   agentDir: string;
@@ -619,7 +619,7 @@ function createCronPromptExecutor(
         const bootstrapPromptWarningSignature =
           bootstrapPromptWarningSignaturesSeen[bootstrapPromptWarningSignaturesSeen.length - 1];
         // CLI providers can resume provider-native sessions; embedded providers
-        // use OpenClaw's transcript/session file plus prompt-cache affinity.
+        // use Carapace's transcript/session file plus prompt-cache affinity.
         if (cliExecution) {
           // Cron intentionally reuses its durable session id as the run id; turn
           // claims stay unique via per-claim ids and the worker gate handles this

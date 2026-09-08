@@ -13,7 +13,7 @@ import {
   replaceSessionEntry,
 } from "../../../../src/config/sessions/session-accessor.js";
 import { clearSessionStoreCacheForTest } from "../../../../src/config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { readSessionMessagesAsync } from "../../../../src/gateway/session-transcript-readers.js";
 import {
   disconnectGatewayClient,
@@ -32,20 +32,20 @@ import { useAutoCleanupTempDirTracker } from "../../../helpers/temp-dir.js";
 const PROOF_CHANNEL_ID = "heartbeat-route-proof";
 const ISOLATED_GATEWAY_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_TEST_GATEWAY_OVERRIDE_TOKEN",
-  "OPENCLAW_TEST_RUNTIME_OVERRIDE_TOKEN",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_TEST_GATEWAY_OVERRIDE_TOKEN",
+  "CARAPACE_TEST_RUNTIME_OVERRIDE_TOKEN",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 type DeliveryTrace = {
@@ -106,7 +106,7 @@ async function writeRouteCapturePlugin(params: {
 }): Promise<void> {
   await fs.mkdir(params.pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(params.pluginDir, "openclaw.plugin.json"),
+    path.join(params.pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: PROOF_CHANNEL_ID,
@@ -211,14 +211,14 @@ describe("Gateway heartbeat session routing", () => {
     { timeout: 90_000 },
     async () => {
       const envSnapshot = captureEnv([...ISOLATED_GATEWAY_ENV_KEYS]);
-      const tempHome = tempDirs.make("openclaw-gateway-heartbeat-routing-");
-      const stateDir = path.join(tempHome, ".openclaw");
+      const tempHome = tempDirs.make("carapace-gateway-heartbeat-routing-");
+      const stateDir = path.join(tempHome, ".carapace");
       const workspaceDir = path.join(tempHome, "workspace");
       const pluginDir = path.join(workspaceDir, "plugins", PROOF_CHANNEL_ID);
       const deliveryTracePath = path.join(tempHome, "heartbeat-deliveries.jsonl");
       const cronReadyPath = path.join(tempHome, "cron-reconciled.json");
       const bundledPluginsDir = path.join(tempHome, "empty-bundled-plugins");
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await Promise.all([
         fs.mkdir(workspaceDir, { recursive: true }),
         fs.mkdir(bundledPluginsDir, { recursive: true }),
@@ -235,21 +235,21 @@ describe("Gateway heartbeat session routing", () => {
       const token = nextId("heartbeat-routing-token");
       for (const [key, value] of Object.entries({
         HOME: tempHome,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_GATEWAY_TOKEN: token,
-        OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-        OPENCLAW_SKIP_CRON: "0",
-        OPENCLAW_SKIP_CANVAS_HOST: "1",
-        OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_GATEWAY_TOKEN: token,
+        CARAPACE_SKIP_GMAIL_WATCHER: "1",
+        CARAPACE_SKIP_CRON: "0",
+        CARAPACE_SKIP_CANVAS_HOST: "1",
+        CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       })) {
         setTestEnvValue(key, value);
       }
-      deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-      deleteTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY");
-      deleteTestEnvValue("OPENCLAW_SKIP_CHANNELS");
+      deleteTestEnvValue("CARAPACE_CONFIG_PATH");
+      deleteTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY");
+      deleteTestEnvValue("CARAPACE_SKIP_CHANNELS");
 
       const configuredSessionKey = "agent:main:ops-heartbeat";
       const configuredSessionId = nextId("configured-heartbeat-session");
@@ -343,7 +343,7 @@ describe("Gateway heartbeat session routing", () => {
             entries: { [PROOF_CHANNEL_ID]: { enabled: true } },
             slots: { memory: "none" },
           },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
 
         gateway = await startGatewayWithClient({
           cfg: config,

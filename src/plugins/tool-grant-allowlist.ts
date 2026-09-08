@@ -1,4 +1,4 @@
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { compileGlobPatterns, matchesAnyGlobPattern } from "../agents/glob-pattern.js";
 import {
   DEFAULT_PLUGIN_TOOLS_ALLOWLIST_ENTRY,
@@ -6,7 +6,7 @@ import {
 } from "../agents/tool-policy.js";
 import type { RuntimePluginToolGrant } from "./runtime/tool-grant.js";
 
-const RUNTIME_PLUGIN_TOOL_GRANT_PREFIX = "__openclaw_runtime_plugin_tool_grant__";
+const RUNTIME_PLUGIN_TOOL_GRANT_PREFIX = "__carapace_runtime_plugin_tool_grant__";
 
 function runtimePluginToolGrantKey(pluginId: string, toolName: string): string {
   return `${RUNTIME_PLUGIN_TOOL_GRANT_PREFIX}:${pluginId.trim().toLowerCase()}:${normalizeToolPolicyName(toolName)}`;

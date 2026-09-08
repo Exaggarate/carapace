@@ -36,12 +36,12 @@ describe("lockWorktreeForProcess", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   async function setupWorktree(): Promise<ManagedWorktreeRecord> {
-    const root = await fs.realpath(tempDirs.make("openclaw-git-lock-"));
+    const root = await fs.realpath(tempDirs.make("carapace-git-lock-"));
     const repo = path.join(root, "repo");
     await fs.mkdir(repo, { recursive: true });
     await git(repo, "init", "-b", "main");
-    await git(repo, "config", "user.name", "OpenClaw Test");
-    await git(repo, "config", "user.email", "openclaw-test@example.invalid");
+    await git(repo, "config", "user.name", "Carapace Test");
+    await git(repo, "config", "user.email", "carapace-test@example.invalid");
     await fs.writeFile(path.join(repo, "README.md"), "base\n");
     await git(repo, "add", "README.md");
     await git(repo, "commit", "-m", "initial");
@@ -61,7 +61,7 @@ describe("lockWorktreeForProcess", () => {
     };
   }
 
-  it("reclaims a lock left behind by a dead OpenClaw process", async () => {
+  it("reclaims a lock left behind by a dead Carapace process", async () => {
     const record = await setupWorktree();
     const stalePid = await exitedPid();
     await git(
@@ -69,17 +69,17 @@ describe("lockWorktreeForProcess", () => {
       "worktree",
       "lock",
       "--reason",
-      `openclaw pid=${stalePid}`,
+      `carapace pid=${stalePid}`,
       record.path,
     );
     expect(await lockState(record)).toEqual({ kind: "dead", pid: stalePid });
 
     await expect(lockWorktreeForProcess(record)).resolves.toBeUndefined();
 
-    expect(await lockedReason(record.repoRoot, record.path)).toBe(`openclaw pid=${process.pid}`);
+    expect(await lockedReason(record.repoRoot, record.path)).toBe(`carapace pid=${process.pid}`);
   });
 
-  it("keeps a lock held by a live OpenClaw process", async () => {
+  it("keeps a lock held by a live Carapace process", async () => {
     const record = await setupWorktree();
     // The parent process is alive and is not this process, so the lock must stand.
     const livePid = process.ppid;
@@ -88,16 +88,16 @@ describe("lockWorktreeForProcess", () => {
       "worktree",
       "lock",
       "--reason",
-      `openclaw pid=${livePid}`,
+      `carapace pid=${livePid}`,
       record.path,
     );
 
     await expect(lockWorktreeForProcess(record)).rejects.toThrow(/git worktree lock/);
 
-    expect(await lockedReason(record.repoRoot, record.path)).toBe(`openclaw pid=${livePid}`);
+    expect(await lockedReason(record.repoRoot, record.path)).toBe(`carapace pid=${livePid}`);
   });
 
-  it("keeps a foreign lock that OpenClaw does not own", async () => {
+  it("keeps a foreign lock that Carapace does not own", async () => {
     const record = await setupWorktree();
     await git(record.repoRoot, "worktree", "lock", "--reason", "held by hand", record.path);
 
@@ -112,6 +112,6 @@ describe("lockWorktreeForProcess", () => {
 
     await expect(lockWorktreeForProcess(record)).resolves.toBeUndefined();
 
-    expect(await lockedReason(record.repoRoot, record.path)).toBe(`openclaw pid=${process.pid}`);
+    expect(await lockedReason(record.repoRoot, record.path)).toBe(`carapace pid=${process.pid}`);
   });
 });

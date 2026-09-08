@@ -69,13 +69,13 @@ export function resolveUiBuildEnvironment(
     now: sources.now,
     readGitCommit: sources.readGitCommit ?? readCurrentGitCommit,
   });
-  if (env.OPENCLAW_BUILD_TIMESTAMP?.trim() || env.OPENCLAW_CONTROL_UI_BUILD_ID?.trim()) {
+  if (env.CARAPACE_BUILD_TIMESTAMP?.trim() || env.CARAPACE_CONTROL_UI_BUILD_ID?.trim()) {
     return buildEnv;
   }
 
   const existing = normalizeControlUiBuildInfo((sources.readBuildInfo ?? readExistingBuildInfo)());
   const version = (sources.readPackageVersion ?? readCurrentPackageVersion)();
-  const release = env.OPENCLAW_CONTROL_UI_RELEASE_BUILD?.trim() === "1";
+  const release = env.CARAPACE_CONTROL_UI_RELEASE_BUILD?.trim() === "1";
   if (
     existing.buildId === "dev" ||
     !existing.builtAt ||
@@ -87,8 +87,8 @@ export function resolveUiBuildEnvironment(
   }
   return {
     ...buildEnv,
-    OPENCLAW_BUILD_TIMESTAMP: existing.builtAt,
-    OPENCLAW_CONTROL_UI_BUILD_ID: existing.buildId,
+    CARAPACE_BUILD_TIMESTAMP: existing.builtAt,
+    CARAPACE_CONTROL_UI_BUILD_ID: existing.buildId,
   };
 }
 
@@ -424,7 +424,7 @@ export function runUiCli(argv: string[] = process.argv.slice(2)): void {
     return;
   }
 
-  const noPnpmBuild = action === "build" && process.env.OPENCLAW_BUILD_ALL_NO_PNPM === "1";
+  const noPnpmBuild = action === "build" && process.env.CARAPACE_BUILD_ALL_NO_PNPM === "1";
   if (!noPnpmBuild && !depsInstalled(action === "test" ? "test" : "build")) {
     runSpawnCallSync(resolvePnpmSpawnCall(["install"]), "pnpm");
   }

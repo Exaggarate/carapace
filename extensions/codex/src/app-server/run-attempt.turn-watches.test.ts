@@ -5,10 +5,10 @@ import {
   invokeNativeHookRelay,
   nativeHookRelayTesting,
   resolveActiveEmbeddedRunSessionId,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import * as mediaStore from "openclaw/plugin-sdk/media-store";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import * as mediaStore from "carapace/plugin-sdk/media-store";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { describe, expect, it, vi } from "vitest";
 import * as approvalBridge from "./approval-bridge.js";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
@@ -318,7 +318,7 @@ describe("runCodexAppServerAttempt native lifecycle", () => {
     expectSuccessfulAttempt(await run);
   });
 
-  it("waits beyond the old post-tool limit after an OpenClaw dynamic tool response", async () => {
+  it("waits beyond the old post-tool limit after an Carapace dynamic tool response", async () => {
     vi.useFakeTimers();
     const harness = createStartedThreadHarness();
     const run = runCodexAppServerAttempt(makeTestParams({ timeoutMs: 60 * 60_000 }));
@@ -425,7 +425,7 @@ describe("runCodexAppServerAttempt native lifecycle", () => {
     const harness = createStartedThreadHarness();
     vi.useFakeTimers();
     const params = makeTestParams({ timeoutMs: 60_000 });
-    vi.stubEnv("OPENCLAW_STATE_DIR", path.join(tempDir, "state"));
+    vi.stubEnv("CARAPACE_STATE_DIR", path.join(tempDir, "state"));
 
     const run = runCodexAppServerAttempt(params);
     await harness.waitForMethod("turn/start");
@@ -1659,7 +1659,7 @@ describe("runCodexAppServerAttempt native lifecycle", () => {
   });
 
   it("releases completion when a projector callback throws during turn/completed", async () => {
-    // Regression for openclaw/openclaw#67996: a throw inside the projector's
+    // Regression for carapace/carapace#67996: a throw inside the projector's
     // turn/completed handler must not strand resolveCompletion, otherwise the
     // gateway session lane stays locked and every follow-up message queues
     // behind a run that will never resolve.

@@ -53,7 +53,7 @@ export const createCodexAppServerStartupLifetime = (): CodexAppServerStartupLife
 
 // Share same-build module copies without adopting an older in-process plugin's clients.
 export const getSharedCodexAppServerClientState = defineCodexBuildState(
-  "openclaw.codexAppServerClientState",
+  "carapace.codexAppServerClientState",
   (): SharedCodexAppServerClientState => ({
     clients: new Map(),
     liveClients: new Set(),

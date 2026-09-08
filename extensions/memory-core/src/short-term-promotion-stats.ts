@@ -1,6 +1,6 @@
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { isSameMemoryDreamingDay } from "openclaw/plugin-sdk/memory-core-host-status";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { isSameMemoryDreamingDay } from "carapace/plugin-sdk/memory-core-host-status";
+import { normalizeStringEntries, uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatErrorMessage } from "./dreaming-shared.js";
 import { withMemoryWorkspaceLock } from "./memory-workspace-lock.js";
 import {

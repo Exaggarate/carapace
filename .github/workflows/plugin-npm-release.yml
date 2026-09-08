@@ -56,20 +56,20 @@ on:
         required: false
         type: string
       release_publish_run_id:
-        description: Approved OpenClaw Release Publish workflow run id
+        description: Approved Carapace Release Publish workflow run id
         required: false
         type: string
       release_publish_run_attempt:
-        description: Exact approved OpenClaw Release Publish workflow run attempt
+        description: Exact approved Carapace Release Publish workflow run attempt
         required: false
         type: string
       release_publish_branch:
-        description: Branch or protected tag name of the approving OpenClaw Release Publish workflow run
+        description: Branch or protected tag name of the approving Carapace Release Publish workflow run
         required: false
         default: ""
         type: string
       release_publish_full_ref:
-        description: Full ref of the approving OpenClaw Release Publish workflow run
+        description: Full ref of the approving Carapace Release Publish workflow run
         required: false
         default: ""
         type: string
@@ -115,7 +115,7 @@ jobs:
       all_matrix: ${{ steps.plan.outputs.all_matrix }}
     steps:
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -525,7 +525,7 @@ jobs:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
-          OPENCLAW_PLUGIN_NPM_PUBLISH_TAG: ${{ inputs.npm_dist_tag == 'extended-stable' && inputs.npm_dist_tag || '' }}
+          CARAPACE_PLUGIN_NPM_PUBLISH_TAG: ${{ inputs.npm_dist_tag == 'extended-stable' && inputs.npm_dist_tag || '' }}
         run: |
           set -euo pipefail
           artifact_dir="${RUNNER_TEMP}/${ARTIFACT_NAME}"
@@ -534,7 +534,7 @@ jobs:
           pack_output="${RUNNER_TEMP}/${EXTENSION_ID}-npm-pack-output.txt"
           pack_json="${artifact_dir}/npm-pack.json"
 
-          OPENCLAW_PLUGIN_NPM_PACK_OUTPUT_DIR="${artifact_dir}" \
+          CARAPACE_PLUGIN_NPM_PACK_OUTPUT_DIR="${artifact_dir}" \
             bash .release-tooling/scripts/plugin-npm-publish.sh \
               --repo-root "$GITHUB_WORKSPACE" \
               --pack "${PACKAGE_DIR}" > "${pack_output}"
@@ -595,7 +595,7 @@ jobs:
           packed_package_json="${RUNNER_TEMP}/${EXTENSION_ID}-packed-package.json"
           packed_plugin_json="${RUNNER_TEMP}/${EXTENSION_ID}-packed-plugin.json"
           tar -xOf "${tarball_path}" package/package.json > "${packed_package_json}"
-          tar -xOf "${tarball_path}" package/openclaw.plugin.json > "${packed_plugin_json}"
+          tar -xOf "${tarball_path}" package/carapace.plugin.json > "${packed_plugin_json}"
           source_package_json="${PACKAGE_DIR}/package.json"
           [[ -f "${source_package_json}" ]] || {
             echo "Source package.json is missing: ${source_package_json}." >&2
@@ -644,10 +644,10 @@ jobs:
           ) {
             fail(`Packed package version mismatch: expected ${process.env.PACKAGE_VERSION}.`);
           }
-          if (packageJson.openclaw?.install?.npmSpec !== process.env.INSTALL_NPM_SPEC) {
+          if (packageJson.carapace?.install?.npmSpec !== process.env.INSTALL_NPM_SPEC) {
             fail(`Packed npm install route mismatch: expected ${process.env.INSTALL_NPM_SPEC}.`);
           }
-          if (repositoryUrl !== "https://github.com/openclaw/openclaw") {
+          if (repositoryUrl !== "https://github.com/Exaggarate/carapace") {
             fail(`Packed repository route mismatch: ${JSON.stringify(repositoryUrl)}.`);
           }
           if (typeof pluginManifest.id !== "string" || pluginManifest.id.length === 0) {
@@ -659,7 +659,7 @@ jobs:
 
           const manifest = {
             schemaVersion: 1,
-            kind: "openclaw-plugin-npm-preflight",
+            kind: "carapace-plugin-npm-preflight",
             mode: "preflight-only",
             repository: process.env.REPOSITORY,
             workflow: {
@@ -751,7 +751,7 @@ jobs:
         plugin: ${{ fromJson(inputs.preflight_only && !inputs.trusted_publisher_preflight && needs.preview_plugins_npm.outputs.all_matrix || needs.preview_plugins_npm.outputs.matrix) }}
     steps:
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout trusted npm preflight tooling
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -903,7 +903,7 @@ jobs:
 
           const expectedManifest = {
             schemaVersion: 1,
-            kind: "openclaw-plugin-npm-preflight",
+            kind: "carapace-plugin-npm-preflight",
             mode: "preflight-only",
             repository: process.env.REPOSITORY,
             workflow: {
@@ -973,7 +973,7 @@ jobs:
             .digest("hex");
           const packageJson = JSON.parse(packedPackageJson.toString("utf8"));
           const pluginManifest = JSON.parse(
-            execFileSync("tar", ["-xOf", tarballPath, "package/openclaw.plugin.json"], {
+            execFileSync("tar", ["-xOf", tarballPath, "package/carapace.plugin.json"], {
               encoding: "utf8",
             }),
           );
@@ -988,10 +988,10 @@ jobs:
             packageJson.version !== process.env.PACKAGE_VERSION ||
             manifest.package.name !== process.env.PACKAGE_NAME ||
             manifest.package.version !== process.env.PACKAGE_VERSION ||
-            packageJson.openclaw?.install?.npmSpec !== process.env.INSTALL_NPM_SPEC ||
+            packageJson.carapace?.install?.npmSpec !== process.env.INSTALL_NPM_SPEC ||
             manifest.package.installNpmSpec !== process.env.INSTALL_NPM_SPEC ||
             manifest.package.publishTag !== process.env.PUBLISH_TAG ||
-            repositoryUrl !== "https://github.com/openclaw/openclaw" ||
+            repositoryUrl !== "https://github.com/Exaggarate/carapace" ||
             typeof pluginManifest.id !== "string" ||
             pluginManifest.id.length === 0 ||
             manifest.package.pluginId !== pluginManifest.id ||
@@ -1159,7 +1159,7 @@ jobs:
             --publication-reason "Stable npm registry preflight selected ${PUBLISH_ROUTE}." \
             --publish-tag "$PUBLISH_TAG" \
             --publisher-policy-id plugin-npm-release-workflow \
-            --publisher-policy-schema openclaw.plugin-npm-publisher-policy/v1 \
+            --publisher-policy-schema carapace.plugin-npm-publisher-policy/v1 \
             --publisher-policy-sha256 "$policy_sha256" \
             --route "$PUBLISH_ROUTE" \
             --source-package-json-sha256 "$SOURCE_PACKAGE_JSON_SHA256" \
@@ -1262,7 +1262,7 @@ jobs:
         plugin: ${{ fromJson(needs.preview_plugins_npm.outputs.matrix) }}
     steps:
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout trusted publication tooling
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -1487,7 +1487,7 @@ jobs:
             --publication-reason "Stable npm registry preflight selected ${publish_route}." \
             --publish-tag "$PUBLISH_TAG" \
             --publisher-policy-id plugin-npm-release-workflow \
-            --publisher-policy-schema openclaw.plugin-npm-publisher-policy/v1 \
+            --publisher-policy-schema carapace.plugin-npm-publisher-policy/v1 \
             --publisher-policy-sha256 "$policy_sha256" \
             --repository "$GITHUB_REPOSITORY" \
             --route "$publish_route" \
@@ -1544,15 +1544,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TARBALL_PATH: ${{ steps.publication_evidence.outputs.tarball_path }}
           PUBLISH_TAG: ${{ steps.publication_evidence.outputs.publish_tag }}
-          OPENCLAW_RELEASE_PUBLISH_RUN_ID: ${{ inputs.release_publish_run_id }}
-          OPENCLAW_RELEASE_PUBLISH_RUN_ATTEMPT: ${{ inputs.release_publish_run_attempt }}
-          OPENCLAW_RELEASE_PUBLISH_REF: ${{ inputs.release_publish_branch }}
-          OPENCLAW_RELEASE_PUBLISH_FULL_REF: ${{ inputs.release_publish_full_ref }}
-          OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY: ${{ inputs.release_publish_run_id != '' && (github.actor == 'github-actions[bot]' && 'active-or-failure' || 'manual-recovery') || '' }}
-          OPENCLAW_RELEASE_TOOLING_FULL_REF: ${{ github.ref }}
-          OPENCLAW_RELEASE_TOOLING_REF: ${{ github.ref_name }}
-          OPENCLAW_RELEASE_TOOLING_REPOSITORY: ${{ github.repository }}
-          OPENCLAW_RELEASE_TOOLING_SHA: ${{ github.workflow_sha }}
+          CARAPACE_RELEASE_PUBLISH_RUN_ID: ${{ inputs.release_publish_run_id }}
+          CARAPACE_RELEASE_PUBLISH_RUN_ATTEMPT: ${{ inputs.release_publish_run_attempt }}
+          CARAPACE_RELEASE_PUBLISH_REF: ${{ inputs.release_publish_branch }}
+          CARAPACE_RELEASE_PUBLISH_FULL_REF: ${{ inputs.release_publish_full_ref }}
+          CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY: ${{ inputs.release_publish_run_id != '' && (github.actor == 'github-actions[bot]' && 'active-or-failure' || 'manual-recovery') || '' }}
+          CARAPACE_RELEASE_TOOLING_FULL_REF: ${{ github.ref }}
+          CARAPACE_RELEASE_TOOLING_REF: ${{ github.ref_name }}
+          CARAPACE_RELEASE_TOOLING_REPOSITORY: ${{ github.repository }}
+          CARAPACE_RELEASE_TOOLING_SHA: ${{ github.workflow_sha }}
         run: |
           set -euo pipefail
           unset NODE_AUTH_TOKEN NPM_TOKEN NODE_OPTIONS
@@ -1561,15 +1561,15 @@ jobs:
           trap 'rm -f "$npmrc"' EXIT
           # Publish the attested bytes; rebuilding here loses the candidate's patched install.
           node scripts/release-tooling-identity.mjs verify \
-            --repository "$OPENCLAW_RELEASE_TOOLING_REPOSITORY" \
-            --workflow-ref "$OPENCLAW_RELEASE_TOOLING_REF" \
-            --workflow-full-ref "$OPENCLAW_RELEASE_TOOLING_FULL_REF" \
-            --workflow-sha "$OPENCLAW_RELEASE_TOOLING_SHA" \
-            --release-publish-run-id "$OPENCLAW_RELEASE_PUBLISH_RUN_ID" \
-            --release-publish-run-attempt "$OPENCLAW_RELEASE_PUBLISH_RUN_ATTEMPT" \
-            --release-publish-ref "$OPENCLAW_RELEASE_PUBLISH_REF" \
-            --release-publish-full-ref "$OPENCLAW_RELEASE_PUBLISH_FULL_REF" \
-            --release-publish-parent-state-policy "$OPENCLAW_RELEASE_PUBLISH_PARENT_STATE_POLICY" \
+            --repository "$CARAPACE_RELEASE_TOOLING_REPOSITORY" \
+            --workflow-ref "$CARAPACE_RELEASE_TOOLING_REF" \
+            --workflow-full-ref "$CARAPACE_RELEASE_TOOLING_FULL_REF" \
+            --workflow-sha "$CARAPACE_RELEASE_TOOLING_SHA" \
+            --release-publish-run-id "$CARAPACE_RELEASE_PUBLISH_RUN_ID" \
+            --release-publish-run-attempt "$CARAPACE_RELEASE_PUBLISH_RUN_ATTEMPT" \
+            --release-publish-ref "$CARAPACE_RELEASE_PUBLISH_REF" \
+            --release-publish-full-ref "$CARAPACE_RELEASE_PUBLISH_FULL_REF" \
+            --release-publish-parent-state-policy "$CARAPACE_RELEASE_PUBLISH_PARENT_STATE_POLICY" \
             --allow-prevalidated-ref
           NPM_CONFIG_USERCONFIG="$npmrc" \
             NPM_CONFIG_GLOBALCONFIG=/dev/null \
@@ -1669,7 +1669,7 @@ jobs:
           approval="${RUNNER_TEMP}/npm-stable-bootstrap-approval/approval.json"
           gh attestation verify "$approval" \
             --repo "$GITHUB_REPOSITORY" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/openclaw-release-publish.yml" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/carapace-release-publish.yml" \
             --signer-digest "$EXPECTED_WORKFLOW_SHA" \
             --source-digest "$EXPECTED_WORKFLOW_SHA" \
             --source-ref "$EXPECTED_WORKFLOW_FULL_REF" \

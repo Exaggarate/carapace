@@ -9,10 +9,10 @@ import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-s
 import { runExclusiveSessionStoreWrite } from "../config/sessions/store-writer.js";
 import { resetFileLockStateForTest } from "../infra/file-lock.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   cleanupSessionStateForTest,
   resetSessionStateCleanupRuntimeForTests,
@@ -50,8 +50,8 @@ describe("cleanupSessionStateForTest", () => {
   });
 
   it("waits for in-flight session store writer queues before clearing test state", async () => {
-    const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-cleanup-"));
-    const storePath = path.join(fixtureRoot, "openclaw-sessions.json");
+    const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-cleanup-"));
+    const storePath = path.join(fixtureRoot, "carapace-sessions.json");
     const started = createDeferred();
     const release = createDeferred();
     const drainRequested = createDeferred();
@@ -99,13 +99,13 @@ describe("cleanupSessionStateForTest", () => {
 
   it("waits for SQLite session writers before closing their database handles", async () => {
     const fixtureRoot = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-session-cleanup-sqlite-"),
+      path.join(os.tmpdir(), "carapace-session-cleanup-sqlite-"),
     );
-    const databasePath = path.join(fixtureRoot, "openclaw-agent.sqlite");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: fixtureRoot };
+    const databasePath = path.join(fixtureRoot, "carapace-agent.sqlite");
+    const env = { ...process.env, CARAPACE_STATE_DIR: fixtureRoot };
     const started = createDeferred();
     const release = createDeferred();
-    let database: ReturnType<typeof openOpenClawAgentDatabase> | undefined;
+    let database: ReturnType<typeof openCarapaceAgentDatabase> | undefined;
     let cleanupPromise: Promise<void> | undefined;
     setSessionStateCleanupRuntimeForTests({ drainSessionStoreWriterQueuesForTest: null });
 
@@ -114,7 +114,7 @@ describe("cleanupSessionStateForTest", () => {
       async () => {
         started.resolve();
         await release.promise;
-        database = openOpenClawAgentDatabase({ agentId: "main", env, path: databasePath });
+        database = openCarapaceAgentDatabase({ agentId: "main", env, path: databasePath });
       },
     );
     try {
@@ -139,8 +139,8 @@ describe("cleanupSessionStateForTest", () => {
       if (cleanupPromise) {
         await cleanupPromise;
       }
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(fixtureRoot, { recursive: true, force: true });
     }
   });

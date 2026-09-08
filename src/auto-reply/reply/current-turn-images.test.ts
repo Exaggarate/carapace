@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import type { MsgContext } from "../templating.js";
@@ -17,7 +17,7 @@ vi.mock("./agent-turn-attachments.js", async (importOriginal) => {
   };
 });
 
-const originalStateDirEnv = process.env.OPENCLAW_STATE_DIR;
+const originalStateDirEnv = process.env.CARAPACE_STATE_DIR;
 const PNG_IMAGE_BYTES = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=",
   "base64",
@@ -45,9 +45,9 @@ function createDescribedImageContext(describedIndexes: number[]): MsgContext {
 
 function restoreProcessState() {
   if (originalStateDirEnv === undefined) {
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
+    deleteTestEnvValue("CARAPACE_STATE_DIR");
   } else {
-    setTestEnvValue("OPENCLAW_STATE_DIR", originalStateDirEnv);
+    setTestEnvValue("CARAPACE_STATE_DIR", originalStateDirEnv);
   }
 }
 
@@ -58,7 +58,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("hydrates Telegram-style state-relative media into native prompt images", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-images-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-images-" }, async (base) => {
       const stateDir = path.join(base, "state");
       const cwd = path.join(base, "cwd");
       const relativePath = "media/inbound/telegram.jpg";
@@ -67,7 +67,7 @@ describe("resolveCurrentTurnImages", () => {
       await fs.mkdir(path.dirname(attachmentPath), { recursive: true });
       await fs.mkdir(cwd, { recursive: true });
       await fs.writeFile(attachmentPath, imageBytes);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       vi.spyOn(process, "cwd").mockReturnValue(cwd);
 
       const result = await resolveCurrentTurnImages({
@@ -75,7 +75,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "caption",
           media: [{ path: relativePath, contentType: "image/jpeg" }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result).toStrictEqual({
@@ -126,7 +126,7 @@ describe("resolveCurrentTurnImages", () => {
       expectedMime: "image/png",
     },
   ])("hydrates $name using the verified byte MIME", async (testCase) => {
-    await withTestDir({ prefix: "openclaw-current-turn-canonical-kind-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-canonical-kind-" }, async (base) => {
       const imagePath = path.join(base, testCase.fileName);
       await fs.writeFile(imagePath, testCase.imageBytes);
 
@@ -143,7 +143,7 @@ describe("resolveCurrentTurnImages", () => {
             },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result).toEqual({
@@ -162,7 +162,7 @@ describe("resolveCurrentTurnImages", () => {
   it.each([undefined, "application/pdf", "application/octet-stream", "image/png"] as const)(
     "never hydrates valid image bytes when the authoritative document MIME is %s",
     async (contentType) => {
-      await withTestDir({ prefix: "openclaw-current-turn-document-image-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-current-turn-document-image-" }, async (base) => {
         const documentPath = path.join(base, "report.png");
         await fs.writeFile(documentPath, PNG_IMAGE_BYTES);
 
@@ -171,7 +171,7 @@ describe("resolveCurrentTurnImages", () => {
             Body: "summarize this document",
             media: [{ path: documentPath, contentType, kind: "document", workspaceDir: base }],
           } satisfies MsgContext,
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
         });
 
         expect(result.images).toBeUndefined();
@@ -182,7 +182,7 @@ describe("resolveCurrentTurnImages", () => {
   it.each([undefined, "application/octet-stream", "binary/octet-stream"] as const)(
     "hydrates unknown-kind filename images when MIME %s has no concrete category",
     async (contentType) => {
-      await withTestDir({ prefix: "openclaw-current-turn-unknown-image-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-current-turn-unknown-image-" }, async (base) => {
         const imagePath = path.join(base, "upload.png");
         await fs.writeFile(imagePath, PNG_IMAGE_BYTES);
 
@@ -191,7 +191,7 @@ describe("resolveCurrentTurnImages", () => {
             Body: "describe this upload",
             media: [{ path: imagePath, contentType, kind: "unknown", workspaceDir: base }],
           } satisfies MsgContext,
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
         });
 
         expect(result.images).toEqual([
@@ -208,7 +208,7 @@ describe("resolveCurrentTurnImages", () => {
   it.each(["application/pdf", "application/zip", "text/plain"] as const)(
     "never hydrates valid PNG bytes when unknown-kind MIME %s declares a document",
     async (contentType) => {
-      await withTestDir({ prefix: "openclaw-current-turn-unknown-document-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-current-turn-unknown-document-" }, async (base) => {
         const documentPath = path.join(base, "report.png");
         await fs.writeFile(documentPath, PNG_IMAGE_BYTES);
 
@@ -217,7 +217,7 @@ describe("resolveCurrentTurnImages", () => {
             Body: "summarize this upload",
             media: [{ path: documentPath, contentType, kind: "unknown", workspaceDir: base }],
           } satisfies MsgContext,
-          cfg: {} as OpenClawConfig,
+          cfg: {} as CarapaceConfig,
         });
 
         expect(result.images).toBeUndefined();
@@ -229,7 +229,7 @@ describe("resolveCurrentTurnImages", () => {
     { name: "PDF", bytes: PDF_BYTES },
     { name: "ZIP", bytes: ZIP_BYTES },
   ])("rejects $name bytes despite a spoofed image kind, MIME, and filename", async (testCase) => {
-    await withTestDir({ prefix: "openclaw-current-turn-spoofed-image-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-spoofed-image-" }, async (base) => {
       const imagePath = path.join(base, "spoofed.png");
       await fs.writeFile(imagePath, testCase.bytes);
 
@@ -245,7 +245,7 @@ describe("resolveCurrentTurnImages", () => {
             },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result.images).toBeUndefined();
@@ -253,7 +253,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("hydrates AVIF attachments when transport metadata only declares generic bytes", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-avif-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-avif-" }, async (base) => {
       const imagePath = path.join(base, "photo.avif");
       const imageBytes = Buffer.from("avif-image");
       await fs.writeFile(imagePath, imageBytes);
@@ -263,7 +263,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "caption",
           media: [{ path: imagePath, contentType: "application/octet-stream", workspaceDir: base }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result.images).toEqual([
@@ -278,7 +278,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("does not duplicate a prepared host-staged image during runner hydration", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-staged-image-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-staged-image-" }, async (base) => {
       const stagingRoot = path.join(base, "media", "inbound", "staged");
       const imagePath = path.join(stagingRoot, "photo.png");
       const imageBytes = Buffer.from("host-staged-image");
@@ -294,11 +294,11 @@ describe("resolveCurrentTurnImages", () => {
           ...sharedContext,
           media: [{ path: imagePath, contentType: "image/png", workspaceDir: stagingRoot }],
         },
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
       const runner = await resolveCurrentTurnImages({
         ctx: sharedContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         images: prepared.images,
         imageOrder: prepared.imageOrder,
       });
@@ -310,7 +310,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("does not let a staging root expose sibling workspace images", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-staged-image-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-staged-image-" }, async (base) => {
       const stagingRoot = path.join(base, "media", "inbound", "staged");
       const rejectedPath = path.join(base, "private.png");
       await fs.mkdir(stagingRoot, { recursive: true });
@@ -321,7 +321,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "caption",
           media: [{ path: rejectedPath, contentType: "image/png", workspaceDir: stagingRoot }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result.images).toBeUndefined();
@@ -337,7 +337,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       images: [inlineImage],
       imageOrder: ["offloaded", "inline", "offloaded"],
     });
@@ -351,7 +351,7 @@ describe("resolveCurrentTurnImages", () => {
   it("preserves all-offloaded image order without inline payloads", async () => {
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       images: [],
       imageOrder: ["offloaded", "offloaded"],
     });
@@ -370,7 +370,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       images: inlineImages,
       imageOrder: ["inline", "offloaded", "inline"],
     });
@@ -386,7 +386,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: createDescribedImageContext([0, 1]),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
     });
 
     expect(result).toEqual({});
@@ -403,7 +403,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: createDescribedImageContext([0]),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
     });
 
     expect(resolveAgentTurnAttachments).toHaveBeenCalledWith({
@@ -418,7 +418,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("appends extracted PDF page images without dropping current image attachments", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-pdf-images-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-pdf-images-" }, async (base) => {
       const imagePath = path.join(base, "photo.png");
       const imageBytes = Buffer.from("current-photo");
       await fs.writeFile(imagePath, imageBytes);
@@ -442,7 +442,7 @@ describe("resolveCurrentTurnImages", () => {
             },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         extractedFileImages: [pdfPage],
       });
 
@@ -463,7 +463,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("orders extracted PDF page images before later current image attachments", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-pdf-order-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-pdf-order-" }, async (base) => {
       const imagePath = path.join(base, "photo.png");
       await fs.writeFile(imagePath, "current-photo");
       const pdfPage = {
@@ -485,7 +485,7 @@ describe("resolveCurrentTurnImages", () => {
             { path: imagePath, contentType: "image/png", workspaceDir: base },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         extractedFileImages: [pdfPage],
       });
 
@@ -498,7 +498,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("retains undescribed native images when a described sibling and missing sibling coexist", async () => {
-    await withTestDir({ prefix: "openclaw-current-turn-partial-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-partial-" }, async (base) => {
       const imagePath = path.join(base, "present.png");
       const imageBytes = Buffer.from("present-image");
       await fs.writeFile(imagePath, imageBytes);
@@ -528,7 +528,7 @@ describe("resolveCurrentTurnImages", () => {
             },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result.images).toEqual([
@@ -546,7 +546,7 @@ describe("resolveCurrentTurnImages", () => {
 
   it("proceeds without native images when current media resolution throws", async () => {
     vi.mocked(resolveAgentTurnAttachments).mockRejectedValueOnce(new Error("boom"));
-    await withTestDir({ prefix: "openclaw-current-turn-throw-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-current-turn-throw-" }, async (base) => {
       const imagePath = path.join(base, "present.png");
       await fs.writeFile(imagePath, "present-image");
 
@@ -555,7 +555,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "describe this image",
           media: [{ path: imagePath, contentType: "image/png", workspaceDir: base }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
       });
 
       expect(result.images).toBeUndefined();

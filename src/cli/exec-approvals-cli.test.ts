@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
 // Exec approvals CLI tests cover approval command registration and output handling.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { SESSION_EXEC_OVERRIDES_NOTE } from "../infra/exec-approvals-effective.js";
@@ -591,7 +591,7 @@ describe("exec approvals CLI", () => {
 
     expect(writtenJson().defaultAction).toBe("deny");
     expect(effectivePolicy()).toEqual({
-      note: "This node enforces a host-native exec policy; OpenClaw approvals-file policy math does not apply.",
+      note: "This node enforces a host-native exec policy; Carapace approvals-file policy math does not apply.",
       scopes: [],
     });
     expect(callGatewayFromCli.mock.calls.map((call) => call[0])).toEqual([
@@ -601,7 +601,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("writes host-native node approvals with the current hash", async () => {
-    const dir = tempDirs.make("openclaw-native-approvals-");
+    const dir = tempDirs.make("carapace-native-approvals-");
     const policyPath = path.join(dir, "policy.json");
     fs.writeFileSync(
       policyPath,
@@ -648,7 +648,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("rejects unknown host-native policy fields instead of dropping them", async () => {
-    const dir = tempDirs.make("openclaw-native-approvals-");
+    const dir = tempDirs.make("carapace-native-approvals-");
     const policyPath = path.join(dir, "policy.json");
     fs.writeFileSync(
       policyPath,
@@ -809,7 +809,7 @@ describe("exec approvals CLI", () => {
       "tools.exec askFallback",
       {
         effective: "deny",
-        source: "OpenClaw default (deny)",
+        source: "Carapace default (deny)",
       },
     );
 
@@ -826,7 +826,7 @@ describe("exec approvals CLI", () => {
     });
     expectFields(requireRecord(agentScope.askFallback, "agent askFallback"), "agent askFallback", {
       effective: "deny",
-      source: "OpenClaw default (deny)",
+      source: "Carapace default (deny)",
     });
   });
 
@@ -874,7 +874,7 @@ describe("exec approvals CLI", () => {
       ).rejects.toThrow("__exit__:1");
 
       expect(runtimeErrors).toStrictEqual([
-        'Unknown agent id "nope-agent". Run openclaw agents list to see configured agents.',
+        'Unknown agent id "nope-agent". Run carapace agents list to see configured agents.',
       ]);
       expect(updateExecApprovals).not.toHaveBeenCalled();
       expect(localSnapshot.file.agents).toEqual({});
@@ -983,7 +983,7 @@ describe("exec approvals CLI", () => {
         main: { mcpTools: [retainedGrant, { ...retainedGrant, tool: "publish_page" }] },
       },
     };
-    const filePath = path.join(tempDirs.make("openclaw-mcp-grants-revoke-"), "approvals.json");
+    const filePath = path.join(tempDirs.make("carapace-mcp-grants-revoke-"), "approvals.json");
     fs.writeFileSync(
       filePath,
       JSON.stringify({
@@ -1008,7 +1008,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("reads approvals JSON from a regular file", async () => {
-    const dir = tempDirs.make("openclaw-approvals-file-bound-");
+    const dir = tempDirs.make("carapace-approvals-file-bound-");
     const filePath = path.join(dir, "approvals.json");
     fs.writeFileSync(filePath, JSON.stringify({ defaultAction: "deny", rules: [] }));
 
@@ -1023,7 +1023,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("rejects an oversized approvals file", async () => {
-    const dir = tempDirs.make("openclaw-approvals-file-bound-");
+    const dir = tempDirs.make("carapace-approvals-file-bound-");
     const filePath = path.join(dir, "oversized.json");
     fs.writeFileSync(filePath, Buffer.alloc(1024 * 1024 + 1, "x"));
 
@@ -1037,7 +1037,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("preserves the directory read error", async () => {
-    const dir = tempDirs.make("openclaw-approvals-file-directory-");
+    const dir = tempDirs.make("carapace-approvals-file-directory-");
 
     await expect(runNativeApprovalsFileCommand(dir)).rejects.toThrow(/EISDIR|directory/i);
 
@@ -1047,7 +1047,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("follows a symlinked approvals file", async () => {
-    const dir = tempDirs.make("openclaw-approvals-file-symlink-");
+    const dir = tempDirs.make("carapace-approvals-file-symlink-");
     const targetPath = path.join(dir, "target.json");
     const symlinkPath = path.join(dir, "approvals.json");
     fs.writeFileSync(targetPath, JSON.stringify({ defaultAction: "deny", rules: [] }));
@@ -1062,7 +1062,7 @@ describe("exec approvals CLI", () => {
   });
 
   it("rejects a file that grows past the limit after opening", async () => {
-    const dir = tempDirs.make("openclaw-approvals-file-growth-");
+    const dir = tempDirs.make("carapace-approvals-file-growth-");
     const filePath = path.join(dir, "growing.json");
     fs.writeFileSync(filePath, Buffer.alloc(1024 * 1024, "x"));
     const open = fs.promises.open.bind(fs.promises);

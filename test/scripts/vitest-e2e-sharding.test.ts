@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 function testFiles(sizes: number[]): TestSpecification[] {
-  const directory = realpathSync(mkdtempSync(path.join(tmpdir(), "openclaw-sharding-")));
+  const directory = realpathSync(mkdtempSync(path.join(tmpdir(), "carapace-sharding-")));
   directories.push(directory);
   return sizes.map((bytes, index) => {
     const moduleId = path.join(directory, `${index}.e2e.test.ts`);

@@ -15,36 +15,36 @@ describe("resolveGatewayLaunchAgentLabel", () => {
   it("returns default label when no profile is set", () => {
     const result = resolveGatewayLaunchAgentLabel();
     expect(result).toBe(GATEWAY_LAUNCH_AGENT_LABEL);
-    expect(result).toBe("ai.openclaw.gateway");
+    expect(result).toBe("ai.carapace.gateway");
   });
 
   it("returns profile-specific label when profile is set", () => {
     const result = resolveGatewayLaunchAgentLabel("dev");
-    expect(result).toBe("ai.openclaw.dev");
+    expect(result).toBe("ai.carapace.dev");
   });
 });
 
 describe("resolveGatewaySystemdServiceName", () => {
   it("returns default service name when no profile is set", () => {
     const result = resolveGatewaySystemdServiceName();
-    expect(result).toBe("openclaw-gateway");
+    expect(result).toBe("carapace-gateway");
   });
 
   it("returns profile-specific service name when profile is set", () => {
     const result = resolveGatewaySystemdServiceName("dev");
-    expect(result).toBe("openclaw-gateway-dev");
+    expect(result).toBe("carapace-gateway-dev");
   });
 });
 
 describe("resolveGatewayWindowsTaskName", () => {
   it("returns default task name when no profile is set", () => {
     const result = resolveGatewayWindowsTaskName();
-    expect(result).toBe("OpenClaw Gateway");
+    expect(result).toBe("Carapace Gateway");
   });
 
   it("returns profile-specific task name when profile is set", () => {
     const result = resolveGatewayWindowsTaskName("dev");
-    expect(result).toBe("OpenClaw Gateway (dev)");
+    expect(result).toBe("Carapace Gateway (dev)");
   });
 });
 
@@ -52,23 +52,23 @@ describe("resolveGatewayNativeServiceIdentityConflict", () => {
   it.each([
     {
       platform: "darwin" as const,
-      envKey: "OPENCLAW_LAUNCHD_LABEL",
-      value: "ai.openclaw.gateway",
+      envKey: "CARAPACE_LAUNCHD_LABEL",
+      value: "ai.carapace.gateway",
     },
     {
       platform: "linux" as const,
-      envKey: "OPENCLAW_SYSTEMD_UNIT",
-      value: "openclaw-gateway.service",
+      envKey: "CARAPACE_SYSTEMD_UNIT",
+      value: "carapace-gateway.service",
     },
     {
       platform: "win32" as const,
-      envKey: "OPENCLAW_WINDOWS_TASK_NAME",
-      value: "OpenClaw Gateway",
+      envKey: "CARAPACE_WINDOWS_TASK_NAME",
+      value: "Carapace Gateway",
     },
   ])("rejects $envKey overrides for named profiles on $platform", ({ platform, envKey, value }) => {
     expect(
       resolveGatewayNativeServiceIdentityConflict(
-        { OPENCLAW_PROFILE: "work", [envKey]: value },
+        { CARAPACE_PROFILE: "work", [envKey]: value },
         platform,
       ),
     ).toMatchObject({ envKey });
@@ -77,13 +77,13 @@ describe("resolveGatewayNativeServiceIdentityConflict", () => {
   it("accepts canonical named-profile identities and default-profile overrides", () => {
     expect(
       resolveGatewayNativeServiceIdentityConflict(
-        { OPENCLAW_PROFILE: "work", OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-work" },
+        { CARAPACE_PROFILE: "work", CARAPACE_SYSTEMD_UNIT: "carapace-gateway-work" },
         "linux",
       ),
     ).toBeNull();
     expect(
       resolveGatewayNativeServiceIdentityConflict(
-        { OPENCLAW_SYSTEMD_UNIT: "custom-gateway.service" },
+        { CARAPACE_SYSTEMD_UNIT: "custom-gateway.service" },
         "linux",
       ),
     ).toBeNull();
@@ -111,25 +111,25 @@ describe("resolveGatewayProfileSuffix", () => {
 
 describe("resolveGatewayServiceDescription", () => {
   it("returns default description when no profile", () => {
-    expect(resolveGatewayServiceDescription({ env: {} })).toBe("OpenClaw Gateway");
+    expect(resolveGatewayServiceDescription({ env: {} })).toBe("Carapace Gateway");
   });
 
   it("includes profile when set", () => {
-    expect(resolveGatewayServiceDescription({ env: { OPENCLAW_PROFILE: "work" } })).toBe(
-      "OpenClaw Gateway (profile: work)",
+    expect(resolveGatewayServiceDescription({ env: { CARAPACE_PROFILE: "work" } })).toBe(
+      "Carapace Gateway (profile: work)",
     );
   });
 
   it("ignores legacy install-time version metadata", () => {
     expect(
-      resolveGatewayServiceDescription({ env: { OPENCLAW_SERVICE_VERSION: "2026.1.10" } }),
-    ).toBe("OpenClaw Gateway");
+      resolveGatewayServiceDescription({ env: { CARAPACE_SERVICE_VERSION: "2026.1.10" } }),
+    ).toBe("Carapace Gateway");
   });
 
   it("prefers explicit description override", () => {
     expect(
       resolveGatewayServiceDescription({
-        env: { OPENCLAW_PROFILE: "work" },
+        env: { CARAPACE_PROFILE: "work" },
         description: "Custom",
       }),
     ).toBe("Custom");

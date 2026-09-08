@@ -2,15 +2,15 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   type WorkerProfile,
   type WorkerProvider,
   WorkerProviderError,
-} from "openclaw/plugin-sdk/plugin-entry";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-entry";
+import * as processRuntime from "carapace/plugin-sdk/process-runtime";
+import type { SpawnResult } from "carapace/plugin-sdk/process-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as doctorRuntime from "./crabbox-worker-doctor-runtime.js";
 import { createNodeBootstrapFixture } from "./crabbox-worker-node-enrollment.test-support.js";
@@ -20,7 +20,7 @@ import {
   parseCrabboxProfile,
   resolveCrabboxBinary,
 } from "./crabbox-worker-profile.js";
-import { createCrabboxWorkerProvider, resolveOpenClawRoot } from "./crabbox-worker-provider.js";
+import { createCrabboxWorkerProvider, resolveCarapaceRoot } from "./crabbox-worker-provider.js";
 import {
   CRABBOX_COMMAND_SETTLEMENT_TIMEOUT_MS,
   CRABBOX_LIFECYCLE_TIMEOUT_MS,
@@ -32,10 +32,10 @@ import {
 const OPERATION_ID = `provision:v2:${"0".repeat(64)}`;
 const LEASE_ID = "cbx_6071fc2062a6";
 const HOST_KEY = [["ssh", "ed25519"].join("-"), "AAAA"].join(" ");
-const OPENCLAW_ROOT = path.resolve(path.sep, "workspace", "openclaw");
-const SIBLING_BINARY = path.resolve(OPENCLAW_ROOT, "../crabbox/bin/crabbox");
+const CARAPACE_ROOT = path.resolve(path.sep, "workspace", "carapace");
+const SIBLING_BINARY = path.resolve(CARAPACE_ROOT, "../crabbox/bin/crabbox");
 const WORKER_WALLPAPER_PATH = fileURLToPath(
-  new URL("../assets/openclaw-worker-wallpaper.png", import.meta.url),
+  new URL("../assets/carapace-worker-wallpaper.png", import.meta.url),
 );
 const INSPECT_FAILURE_PREFIX = "Crabbox inspect failed with exit code 2: ";
 // These lifecycle cases opt out of capture; defaults and checkpoints have boundary coverage
@@ -108,7 +108,7 @@ function inspectJson(overrides: Record<string, unknown> = {}): string {
     host: "fallback.example.test",
     sshHost: "worker.example.test",
     sshPort: "2222",
-    sshUser: "openclaw",
+    sshUser: "carapace",
     sshKey: "/tmp/crabbox-worker-key",
     ready: true,
     ...overrides,
@@ -126,7 +126,7 @@ function providerWithRawRunner(
 ): WorkerProvider {
   const provider = createCrabboxWorkerProvider({
     runCommand,
-    openclawRoot: OPENCLAW_ROOT,
+    carapaceRoot: CARAPACE_ROOT,
     pathEnv: "",
     isExecutable: (candidate) => candidate === SIBLING_BINARY,
     sleep,
@@ -148,7 +148,7 @@ function providerWithRawRunner(
             mode: "connect" as const,
             setupCode: "secret-setup-value",
             setupId: "setup-id",
-            openclawVersion: "2026.8.1",
+            carapaceVersion: "2026.8.1",
             nodeBootstrap: createNodeBootstrapFixture(),
             displayName: "Cloud worker test",
             waitForDeviceId: async () => "device-1",
@@ -182,7 +182,7 @@ function failedNodeEnrollment(
       mode: "connect",
       setupCode: "secret-setup-value",
       setupId: "setup-id",
-      openclawVersion: "2026.8.1",
+      carapaceVersion: "2026.8.1",
       nodeBootstrap: createNodeBootstrapFixture(),
       displayName: "Cloud worker test",
       waitForDeviceId: async () => {
@@ -214,7 +214,7 @@ describe("Crabbox worker provider", () => {
   it.each(["aws", "hetzner", "machine0"])(
     "resolves %s cleanup without commands or setup environment resolution",
     async (backend) => {
-      vi.stubEnv("OPENCLAW_TEST_MISSING_SETUP", undefined);
+      vi.stubEnv("CARAPACE_TEST_MISSING_SETUP", undefined);
       const runCommand = vi.fn<CrabboxCommandRunner>();
       const provider = providerWithRawRunner(runCommand);
       await expect(
@@ -223,7 +223,7 @@ describe("Crabbox worker provider", () => {
             ...PROFILE,
             provider: backend,
             setup: "true",
-            setupEnv: ["OPENCLAW_TEST_MISSING_SETUP"],
+            setupEnv: ["CARAPACE_TEST_MISSING_SETUP"],
           },
           OPERATION_ID,
         ),
@@ -788,7 +788,7 @@ describe("Crabbox worker provider", () => {
       message: "Crabbox worker wallpaper must be 1024x576; got 1023x576",
     },
   ])("rejects $name during provider registration", ({ bytes, message }) => {
-    const tempDir = tempDirs.make("openclaw-crabbox-wallpaper-");
+    const tempDir = tempDirs.make("carapace-crabbox-wallpaper-");
     const wallpaperPath = path.join(tempDir, "wallpaper.png");
     fs.writeFileSync(wallpaperPath, bytes);
     expect(() => createCrabboxWorkerProvider({ wallpaperPath })).toThrow(message);
@@ -796,7 +796,7 @@ describe("Crabbox worker provider", () => {
 
   it.each([
     { name: "the direct-environment default", executionMode: undefined },
-    { name: "an OpenClaw worker turn", executionMode: "worker-turn" },
+    { name: "an Carapace worker turn", executionMode: "worker-turn" },
     { name: "a Codex remote-exec turn", executionMode: "remote-exec" },
   ] as const)("returns the same enrolled node transport for $name", async ({ executionMode }) => {
     const calls: Array<{ argv: string[]; options: Parameters<CrabboxCommandRunner>[1] }> = [];
@@ -875,7 +875,7 @@ describe("Crabbox worker provider", () => {
         beginNodeEnrollment: async () => ({
           mode: "resume",
           deviceId: "device-bound",
-          openclawVersion: "2026.8.1",
+          carapaceVersion: "2026.8.1",
           nodeBootstrap: createNodeBootstrapFixture(),
           displayName: "Bound worker",
           waitForDeviceId: async () => "device-bound",
@@ -891,7 +891,7 @@ describe("Crabbox worker provider", () => {
     });
     const desktopSetup = calls.find(
       (call) =>
-        call.argv[1] === "run" && String(call.options.input).includes("openclaw-worker-browser"),
+        call.argv[1] === "run" && String(call.options.input).includes("carapace-worker-browser"),
     )?.options.input;
     const desktopSetupText = String(desktopSetup);
     expect(desktopSetupText).toContain("worker_user=$(id -un)");
@@ -947,7 +947,7 @@ describe("Crabbox worker provider", () => {
     }
     expect(desktopSetupText).toContain('pgrep -u "$worker_uid" -x xfdesktop >/dev/null || break');
     expect(desktopSetupText).toContain(
-      'nohup xfdesktop >"$worker_home/.cache/openclaw/xfdesktop.log" 2>&1 </dev/null &',
+      'nohup xfdesktop >"$worker_home/.cache/carapace/xfdesktop.log" 2>&1 </dev/null &',
     );
     expect(desktopSetupText).toMatch(
       /for _attempt in \$\(seq 1 \d+\); do bind_xfdesktop_renderer && break; sleep 0\.1; done/u,
@@ -976,7 +976,7 @@ describe("Crabbox worker provider", () => {
     expect(desktopSetupText).toContain("xrandr --listmonitors");
     expect(desktopSetupText).toContain('printf "/backdrop/screen0/monitor%s/workspace%s');
     expect(desktopSetupText).toContain(
-      'wallpaper_path="$worker_home/.local/share/backgrounds/openclaw-worker.png"',
+      'wallpaper_path="$worker_home/.local/share/backgrounds/carapace-worker.png"',
     );
     expect(desktopSetupText).toContain('for backdrop in "${backdrop_roots[@]}"; do');
     const sessionExportIndex = desktopSetupText.indexOf("export DBUS_SESSION_BUS_ADDRESS");
@@ -1031,17 +1031,17 @@ describe("Crabbox worker provider", () => {
     { name: "without forwarded environment", setupEnv: undefined, forwardedEnv: undefined },
     {
       name: "with only explicitly forwarded Gateway environment",
-      setupEnv: ["OPENCLAW_WORKER_ARTIFACT_TOKEN", "CRABBOX_EMPTY_VALUE"],
+      setupEnv: ["CARAPACE_WORKER_ARTIFACT_TOKEN", "CRABBOX_EMPTY_VALUE"],
       forwardedEnv: {
-        OPENCLAW_WORKER_ARTIFACT_TOKEN: "fixture artifact #tag \"quoted\" \\path 'single'",
+        CARAPACE_WORKER_ARTIFACT_TOKEN: "fixture artifact #tag \"quoted\" \\path 'single'",
         CRABBOX_EMPTY_VALUE: "",
       },
     },
   ])(
     "runs profile setup $name without widening node enrollment",
     async ({ setupEnv, forwardedEnv }) => {
-      vi.stubEnv("CRABBOX_ENV_ALLOW", "OPENCLAW_UNSELECTED_SECRET");
-      vi.stubEnv("OPENCLAW_UNSELECTED_SECRET", "unselected-secret");
+      vi.stubEnv("CRABBOX_ENV_ALLOW", "CARAPACE_UNSELECTED_SECRET");
+      vi.stubEnv("CARAPACE_UNSELECTED_SECRET", "unselected-secret");
       for (const [name, value] of Object.entries(forwardedEnv ?? {})) {
         vi.stubEnv(name, value);
       }
@@ -1172,7 +1172,7 @@ describe("Crabbox worker provider", () => {
   );
 
   it("rejects a missing profile setup environment variable before invoking Crabbox", async () => {
-    const missingName = "OPENCLAW_MISSING_WORKER_ARTIFACT_TOKEN";
+    const missingName = "CARAPACE_MISSING_WORKER_ARTIFACT_TOKEN";
     vi.stubEnv(missingName, undefined);
     const runCommand = vi.fn<CrabboxCommandRunner>();
     const provider = providerWithRawRunner(runCommand);
@@ -1197,7 +1197,7 @@ describe("Crabbox worker provider", () => {
   ])(
     "rejects profile setup environment containing $name without exposing its value",
     async ({ value }) => {
-      const envName = "OPENCLAW_WORKER_ARTIFACT_TOKEN";
+      const envName = "CARAPACE_WORKER_ARTIFACT_TOKEN";
       vi.stubEnv(envName, value);
       const calls: string[][] = [];
       const provider = providerWithRunner(async (argv) => {
@@ -1373,7 +1373,7 @@ describe("Crabbox worker provider", () => {
   ])(
     "stops the lease and removes its private env profile when setup $name",
     async ({ result, message }) => {
-      const envName = "OPENCLAW_WORKER_ARTIFACT_TOKEN";
+      const envName = "CARAPACE_WORKER_ARTIFACT_TOKEN";
       vi.stubEnv(envName, "fixture-artifact-token");
       const calls: string[][] = [];
       let profilePath: string | undefined;
@@ -1495,7 +1495,7 @@ describe("Crabbox worker provider", () => {
       });
       expect(calls.at(-1)?.[1]).toBe("stop");
       expect(
-        fs.existsSync(path.join(home, ".openclaw", "cloud-workers", LEASE_ID, "node.pid")),
+        fs.existsSync(path.join(home, ".carapace", "cloud-workers", LEASE_ID, "node.pid")),
       ).toBe(false);
     },
   );
@@ -1581,7 +1581,7 @@ describe("Crabbox worker provider", () => {
         }
         return commandResult();
       },
-      openclawRoot: OPENCLAW_ROOT,
+      carapaceRoot: CARAPACE_ROOT,
       pathEnv: "",
       isExecutable: (candidate) => candidate === SIBLING_BINARY,
       sleep: async () => {},
@@ -1734,8 +1734,8 @@ describe("Crabbox worker provider", () => {
   });
 
   it.each([
-    ["OPENCLAW_WORKER_ARTIFACT_TOKEN"],
-    ["OPENCLAW_WORKER_ARTIFACT_TOKEN", "_SECOND_VALUE2"],
+    ["CARAPACE_WORKER_ARTIFACT_TOKEN"],
+    ["CARAPACE_WORKER_ARTIFACT_TOKEN", "_SECOND_VALUE2"],
   ])("accepts valid profile setup environment names %j", (...setupEnv) => {
     expect(parseCrabboxProfile({ ...PROFILE, setup: "install-node", setupEnv })).toMatchObject({
       setup: "install-node",
@@ -1859,7 +1859,7 @@ describe("Crabbox worker provider", () => {
       if (argv[1] === "inspect" || argv[1] === "status") {
         return commandResult({ stdout: inspectJson({ sshHostKey: HOST_KEY }) });
       }
-      if (argv[1] === "run" && String(options.input).includes("openclaw-worker-browser")) {
+      if (argv[1] === "run" && String(options.input).includes("carapace-worker-browser")) {
         setupOrder.push("desktop");
       }
       return commandResult();
@@ -1873,7 +1873,7 @@ describe("Crabbox worker provider", () => {
             mode: "connect" as const,
             setupCode: "secret-setup-value",
             setupId: "setup-id",
-            openclawVersion: "2026.8.1",
+            carapaceVersion: "2026.8.1",
             nodeBootstrap: createNodeBootstrapFixture(),
             displayName: "Cloud worker test",
             waitForDeviceId: async () => "device-1",
@@ -1891,12 +1891,12 @@ describe("Crabbox worker provider", () => {
         apps: [
           {
             id: "browser",
-            executablePath: "/usr/local/bin/openclaw-worker-browser",
+            executablePath: "/usr/local/bin/carapace-worker-browser",
             cdpPort: 9222,
           },
           {
             id: "terminal",
-            executablePath: "/usr/local/bin/openclaw-worker-terminal",
+            executablePath: "/usr/local/bin/carapace-worker-terminal",
           },
         ],
       },
@@ -1934,7 +1934,7 @@ describe("Crabbox worker provider", () => {
         if (
           failurePoint === "desktop setup" &&
           argv[1] === "run" &&
-          String(options.input).includes("openclaw-worker-browser")
+          String(options.input).includes("carapace-worker-browser")
         ) {
           return commandResult({ code: 9, stderr: "desktop setup failed" });
         }
@@ -1950,7 +1950,7 @@ describe("Crabbox worker provider", () => {
             return {
               mode: "resume" as const,
               deviceId: "device-bound",
-              openclawVersion: "2026.8.1",
+              carapaceVersion: "2026.8.1",
               nodeBootstrap: createNodeBootstrapFixture(),
               displayName: "Bound worker",
               waitForDeviceId: async () => {
@@ -2143,7 +2143,7 @@ describe("Crabbox worker provider", () => {
             return {
               mode: "resume" as const,
               deviceId: "device-bound",
-              openclawVersion: "2026.8.1",
+              carapaceVersion: "2026.8.1",
               nodeBootstrap: createNodeBootstrapFixture(),
               displayName: "Bound worker",
               signal: controller.signal,
@@ -2213,7 +2213,7 @@ describe("Crabbox worker provider", () => {
         "--lease-id",
         LEASE_ID,
         "--slug",
-        expect.stringMatching(/^openclaw-[a-f0-9]{32}$/u),
+        expect.stringMatching(/^carapace-[a-f0-9]{32}$/u),
         "--keep=true",
       ]);
       expect({
@@ -2368,7 +2368,7 @@ describe("Crabbox worker provider", () => {
             beginNodeEnrollment: async () => ({
               mode: "resume" as const,
               deviceId: "device-bound",
-              openclawVersion: "2026.8.1",
+              carapaceVersion: "2026.8.1",
               nodeBootstrap: createNodeBootstrapFixture(),
               displayName: "Bound worker",
               waitForDeviceId: async () => {
@@ -2711,7 +2711,7 @@ describe("Crabbox worker provider", () => {
         }
         return commandResult();
       },
-      openclawRoot: OPENCLAW_ROOT,
+      carapaceRoot: CARAPACE_ROOT,
       pathEnv: "",
       isExecutable: (candidate) => candidate === SIBLING_BINARY,
       sleep: async () => {
@@ -2817,7 +2817,7 @@ describe("Crabbox worker provider", () => {
         calls.push(argv);
         return argv[1] === "inspect" ? commandResult({ stdout: inspectJson() }) : commandResult();
       },
-      openclawRoot: OPENCLAW_ROOT,
+      carapaceRoot: CARAPACE_ROOT,
       pathEnv: "",
       isExecutable: () => false,
       wallpaperPath: WORKER_WALLPAPER_PATH,
@@ -3260,34 +3260,34 @@ describe("Crabbox binary resolution", () => {
     expect(
       resolveCrabboxBinary({
         explicit: explicitBinary,
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         isExecutable: () => false,
       }),
     ).toBe(explicitBinary);
     expect(
       resolveCrabboxBinary({
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         pathEnv: toolsDir,
         isExecutable: (candidate) => candidate === SIBLING_BINARY || candidate === pathBinary,
       }),
     ).toBe(SIBLING_BINARY);
     expect(
       resolveCrabboxBinary({
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         pathEnv: [path.resolve(path.sep, "not-executable"), toolsDir].join(path.delimiter),
         isExecutable: (candidate) => candidate === pathBinary,
       }),
     ).toBe(pathBinary);
     expect(
       resolveCrabboxBinary({
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         pathEnv: "relative-tools",
         isExecutable: (candidate) => candidate === relativePathBinary,
       }),
     ).toBe(relativePathBinary);
     expect(
       resolveCrabboxBinary({
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         pathEnv: path.resolve(path.sep, "not-executable"),
         isExecutable: () => false,
       }),
@@ -3300,13 +3300,13 @@ describe("Crabbox binary resolution", () => {
     expect(
       findCrabboxBinary({
         explicit: explicitBinary,
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         isExecutable: () => false,
       }),
     ).toBeUndefined();
     expect(
       findCrabboxBinary({
-        openclawRoot: OPENCLAW_ROOT,
+        carapaceRoot: CARAPACE_ROOT,
         pathEnv: path.resolve(path.sep, "not-executable"),
         isExecutable: () => false,
       }),
@@ -3314,11 +3314,11 @@ describe("Crabbox binary resolution", () => {
   });
 
   it("derives the package root from source and bundled plugin roots", () => {
-    expect(resolveOpenClawRoot(path.join(OPENCLAW_ROOT, "extensions", "crabbox"))).toBe(
-      OPENCLAW_ROOT,
+    expect(resolveCarapaceRoot(path.join(CARAPACE_ROOT, "extensions", "crabbox"))).toBe(
+      CARAPACE_ROOT,
     );
-    expect(resolveOpenClawRoot(path.join(OPENCLAW_ROOT, "dist", "extensions", "crabbox"))).toBe(
-      OPENCLAW_ROOT,
+    expect(resolveCarapaceRoot(path.join(CARAPACE_ROOT, "dist", "extensions", "crabbox"))).toBe(
+      CARAPACE_ROOT,
     );
   });
 });

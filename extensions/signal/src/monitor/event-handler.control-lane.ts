@@ -1,21 +1,21 @@
-import type { ChannelInboundMediaInput } from "openclaw/plugin-sdk/channel-inbound";
+import type { ChannelInboundMediaInput } from "carapace/plugin-sdk/channel-inbound";
 import type {
   ChannelIngressContextBinding,
   ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 // Signal plugin helpers isolate active-run control scheduling from the inbound handler.
 import {
   listChatCommands,
   maybeResolveTextAlias,
   normalizeCommandBody,
-} from "openclaw/plugin-sdk/command-auth-native";
-import { isAbortRequestText } from "openclaw/plugin-sdk/command-primitives-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/command-auth-native";
+import { isAbortRequestText } from "carapace/plugin-sdk/command-primitives-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { SignalIngressLifecycle } from "../signal-ingress.js";
 
 export type SignalInboundEntry = {
   /** Admission, buffered dispatch, and retries share this receipt-time snapshot. */
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   senderName: string;
   senderDisplay: string;
   senderRecipient: string;

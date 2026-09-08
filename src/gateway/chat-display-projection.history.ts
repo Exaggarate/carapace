@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../agents/internal-runtime-context.js";
+import { expectDefined } from "@carapace/normalization-core";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE } from "../agents/internal-runtime-context.js";
 import { isHeartbeatOkResponse, isHeartbeatUserMessage } from "../auto-reply/heartbeat-filter.js";
 import { HEARTBEAT_PROMPT } from "../auto-reply/heartbeat.js";
 import {
@@ -14,7 +14,7 @@ import {
 } from "../sessions/input-provenance.js";
 import { parseAgentSessionKey } from "../sessions/session-key-utils.js";
 import { projectAssistantDisplayContent } from "../shared/assistant-display-content.js";
-import { isOpenClawDeliveryMirrorAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { isCarapaceDeliveryMirrorAssistantMessage } from "../shared/transcript-only-carapace-assistant.js";
 import { extractChatHistoryBlockText } from "./chat-display-projection.canvas.js";
 import {
   asRoleContentMessage,
@@ -32,7 +32,7 @@ type TtsSupplementMarker = { textSha256?: string; spokenText?: string };
 function readTtsSupplementMarker(
   message: Record<string, unknown>,
 ): TtsSupplementMarker | undefined {
-  const marker = readRecord(message.openclawTtsSupplement);
+  const marker = readRecord(message.carapaceTtsSupplement);
   if (!marker) {
     return undefined;
   }
@@ -171,7 +171,7 @@ function isSubagentAnnounceInterSessionUserMessage(message: Record<string, unkno
 }
 
 function readChatHistoryRecordTimestampMs(message: unknown): number | undefined {
-  const meta = readRecord(readRecord(message)?.["__openclaw"]);
+  const meta = readRecord(readRecord(message)?.["__carapace"]);
   return asFiniteNumber(meta?.recordTimestampMs) ?? asFiniteNumber(readRecord(message)?.timestamp);
 }
 
@@ -237,7 +237,7 @@ function isDisplayHiddenProjectedMessage(message: Record<string, unknown>): bool
   if (message.display === false) {
     return true;
   }
-  return message.role === "custom" && message.customType === OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE;
+  return message.role === "custom" && message.customType === CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE;
 }
 
 function shouldHideProjectedHistoryMessage(
@@ -284,13 +284,13 @@ export function isHeartbeatHistoryTurnBoundaryMessage(message: unknown): boolean
 }
 
 function attachProjectedTurnBoundary(message: Record<string, unknown>): Record<string, unknown> {
-  const metadata = readRecord(message["__openclaw"]);
+  const metadata = readRecord(message["__carapace"]);
   if (metadata?.turnBoundary === true) {
     return message;
   }
   return {
     ...message,
-    __openclaw: {
+    __carapace: {
       ...metadata,
       turnBoundary: true,
     },
@@ -301,9 +301,9 @@ function canCarryProjectedTurnBoundary(message: RoleContentMessage | null): bool
   return Boolean(message && message.role !== "system" && message.role !== "custom");
 }
 
-function openclawAssistantModel(message: Record<string, unknown>): string | undefined {
+function carapaceAssistantModel(message: Record<string, unknown>): string | undefined {
   return message.role === "assistant" &&
-    message.provider === "openclaw" &&
+    message.provider === "carapace" &&
     typeof message.model === "string"
     ? message.model
     : undefined;
@@ -322,8 +322,8 @@ function isDuplicateAcpGatewayInjectedMessage(
     return false;
   }
   if (
-    openclawAssistantModel(previousVisible) !== "acp-runtime" ||
-    openclawAssistantModel(current) !== "gateway-injected"
+    carapaceAssistantModel(previousVisible) !== "acp-runtime" ||
+    carapaceAssistantModel(current) !== "gateway-injected"
   ) {
     return false;
   }
@@ -339,23 +339,23 @@ function isDuplicateChannelFinalDeliveryMirror(
   current: Record<string, unknown>,
   previousVisible: Record<string, unknown> | undefined,
 ): boolean {
-  if (!previousVisible || !isOpenClawDeliveryMirrorAssistantMessage(current)) {
+  if (!previousVisible || !isCarapaceDeliveryMirrorAssistantMessage(current)) {
     return false;
   }
-  const deliveryMirror = readRecord(current.openclawDeliveryMirror);
+  const deliveryMirror = readRecord(current.carapaceDeliveryMirror);
   if (deliveryMirror?.kind !== "channel-final") {
     return false;
   }
   if (asRoleContentMessage(previousVisible)?.role !== "assistant") {
     return false;
   }
-  if (isOpenClawDeliveryMirrorAssistantMessage(previousVisible)) {
+  if (isCarapaceDeliveryMirrorAssistantMessage(previousVisible)) {
     return false;
   }
   if (isProjectedSessionsSendForwardedMessage(previousVisible)) {
     return false;
   }
-  const previousMeta = readRecord(previousVisible["__openclaw"]);
+  const previousMeta = readRecord(previousVisible["__carapace"]);
   if (typeof previousMeta?.mirrorIdentity !== "string" || !previousMeta.mirrorIdentity.trim()) {
     return false;
   }

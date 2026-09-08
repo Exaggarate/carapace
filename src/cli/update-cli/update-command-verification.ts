@@ -151,7 +151,7 @@ export async function verifyUpdatedGateway(params: {
         ]
       : []),
     `Restart log: ${resolveGatewayRestartLogPath(params.serviceEnv)}`,
-    `Run \`${formatCliCommand("openclaw gateway status --deep")}\` for details.`,
+    `Run \`${formatCliCommand("carapace gateway status --deep")}\` for details.`,
     ...formatPostUpdateGatewayRecoveryInstructions(params.result),
   ];
   const reason = health.versionMismatch

@@ -4,11 +4,11 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { createAssistantMessageEventStream, type Model } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream, type Model } from "carapace/plugin-sdk/llm";
 import {
   notifyProviderStreamOpened,
   withProviderAcceptanceObserver,
-} from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/provider-transport-runtime";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { AnthropicVertexStreamDeps } from "./stream-runtime.js";
 
@@ -181,7 +181,7 @@ describe("createAnthropicVertexStreamFn", () => {
   });
 
   it("passes bounded ADC credentials to google-auth-library", () => {
-    const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-anthropic-vertex-stream-adc-"));
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), "carapace-anthropic-vertex-stream-adc-"));
     const credentialsPath = path.join(tempDir, "application_default_credentials.json");
     const credentials = {
       type: "service_account",
@@ -308,7 +308,7 @@ describe("createAnthropicVertexStreamFn", () => {
     const streamFn = createAnthropicVertexStreamFn("vertex-project", "us-east5", undefined, deps);
     const model = {
       ...makeModel({ id: "claude-fable-5", maxTokens: 128000 }),
-      api: "openclaw-anthropic-vertex-simple:default",
+      api: "carapace-anthropic-vertex-simple:default",
     };
 
     void streamFn(model as never, { messages: [] }, {});

@@ -10,10 +10,10 @@ import type { LegacyStateMigrationPlan } from "../infra/state-migrations.types.j
 import { CONTROL_PLANE_UPDATE_SENTINEL_META_ENV } from "../infra/update-control-plane-sentinel.js";
 import { getUpdateRun } from "../infra/update-run-ledger.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { claimOpenClawStateOwnership } from "../state/openclaw-state-ownership-operations.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { claimCarapaceStateOwnership } from "../state/carapace-state-ownership-operations.js";
 import { formatCliProcessFailure, runCliProcessChild } from "./cli-process-child.test-helpers.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -48,9 +48,9 @@ async function sha256File(filePath: string): Promise<string> {
 }
 
 function runUpdateProcess(root: string, args: string[], env: NodeJS.ProcessEnv = {}) {
-  const configPath = path.join(root, "config", "openclaw.json");
+  const configPath = path.join(root, "config", "carapace.json");
   const stateDir = path.join(root, "state");
-  const entryPath = path.resolve("openclaw.mjs");
+  const entryPath = path.resolve("carapace.mjs");
   return spawnSync(process.execPath, [entryPath, ...args], {
     cwd: path.resolve("."),
     encoding: "utf8",
@@ -65,14 +65,14 @@ function runUpdateProcess(root: string, args: string[], env: NodeJS.ProcessEnv =
       NODE_ENV: undefined,
       NODE_OPTIONS: undefined,
       NO_COLOR: "1",
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_DEBUG_PROXY_ENABLED: undefined,
-      OPENCLAW_DEBUG_PROXY_REQUIRE: undefined,
-      OPENCLAW_HIDE_BANNER: "1",
-      OPENCLAW_HOME: root,
-      OPENCLAW_NO_RESPAWN: "1",
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SUPERVISOR_MODE: undefined,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_DEBUG_PROXY_ENABLED: undefined,
+      CARAPACE_DEBUG_PROXY_REQUIRE: undefined,
+      CARAPACE_HIDE_BANNER: "1",
+      CARAPACE_HOME: root,
+      CARAPACE_NO_RESPAWN: "1",
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_SUPERVISOR_MODE: undefined,
       VITEST: undefined,
       VITEST_POOL_ID: undefined,
       VITEST_WORKER_ID: undefined,
@@ -89,11 +89,11 @@ function runUpdateProcess(root: string, args: string[], env: NodeJS.ProcessEnv =
 async function expectPreviewLedger(root: string, runId: string, before: string[]): Promise<void> {
   const after = await snapshotTree(root);
   const ledgerArtifacts = after.filter((entry) =>
-    /^(?:d state\/state$|f state\/state\/openclaw\.sqlite(?:-(?:wal|shm))? )/.test(entry),
+    /^(?:d state\/state$|f state\/state\/carapace\.sqlite(?:-(?:wal|shm))? )/.test(entry),
   );
   expect(ledgerArtifacts).toContain("d state/state");
   expect(ledgerArtifacts).toContainEqual(
-    expect.stringMatching(/^f state\/state\/openclaw\.sqlite [a-f0-9]{64}$/),
+    expect.stringMatching(/^f state\/state\/carapace\.sqlite [a-f0-9]{64}$/),
   );
   expect(after.filter((entry) => !ledgerArtifacts.includes(entry))).toEqual(before);
 
@@ -113,15 +113,15 @@ async function expectPreviewLedger(root: string, runId: string, before: string[]
 
 describe("update process state", () => {
   it("allows cleanup after an admitted updater dies without finishing its ledger", async () => {
-    const root = tempDirs.make("openclaw-cleanup-orphan-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-cleanup-orphan-");
+    const configPath = path.join(root, "config", "carapace.json");
     const env = {
       PATH: process.env.PATH,
       HOME: root,
       USERPROFILE: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      CARAPACE_HOME: root,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: path.join(root, "state"),
     };
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.writeFile(configPath, '{"gateway":{"mode":"local"}}\n');
@@ -166,8 +166,8 @@ process.stdin.resume();
   it.each([true, false])(
     "keeps cleanup preview/refusal byte-identical (dryRun=%s)",
     async (dryRun) => {
-      const root = tempDirs.make("openclaw-cleanup-process-");
-      const config = path.join(root, "config", "openclaw.json");
+      const root = tempDirs.make("carapace-cleanup-process-");
+      const config = path.join(root, "config", "carapace.json");
       const runs = path.join(root, "state", "session-sqlite-migration-runs");
       const cache = path.join(root, "cache");
       const temporary = path.join(root, "tmp");
@@ -191,8 +191,8 @@ process.stdin.resume();
   );
 
   it("keeps malformed config immutable while producing a best-effort preview", async () => {
-    const root = tempDirs.make("openclaw-update-dry-run-malformed-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-dry-run-malformed-");
+    const configPath = path.join(root, "config", "carapace.json");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.mkdir(path.join(root, "state"), { recursive: true });
     await fs.writeFile(configPath, "{ definitely-not-json\n");
@@ -214,8 +214,8 @@ process.stdin.resume();
   });
 
   it("keeps migration-pending config and SQLite markers immutable for the shorthand", async () => {
-    const root = tempDirs.make("openclaw-update-dry-run-migration-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-dry-run-migration-");
+    const configPath = path.join(root, "config", "carapace.json");
     const tasksDir = path.join(root, "state", "tasks");
     const migrationMarkerPath = path.join(tasksDir, "runs.sqlite.migrated");
     const walPath = path.join(tasksDir, "runs.sqlite-wal");
@@ -251,8 +251,8 @@ process.stdin.resume();
   it.each([false, true])(
     "describes Doctor migrations but refuses without staged candidate identity (unknownPlugin=%s)",
     async (unknownPlugin) => {
-      const root = tempDirs.make("openclaw-update-migration-plan-");
-      const configPath = path.join(root, "config", "openclaw.json");
+      const root = tempDirs.make("carapace-update-migration-plan-");
+      const configPath = path.join(root, "config", "carapace.json");
       const stateDir = path.join(root, "state");
       const execPath = path.join(stateDir, "exec-approvals.json");
       const tuiPath = path.join(stateDir, "tui", "last-session.json");
@@ -323,7 +323,7 @@ process.stdin.resume();
           outcome: unknownPlugin ? "deferred" : "planned",
           requiredness: "required",
           source: [{ kind: "path", path: sourcePath }],
-          target: [{ kind: "sqlite", path: path.join(stateDir, "state", "openclaw.sqlite") }],
+          target: [{ kind: "sqlite", path: path.join(stateDir, "state", "carapace.sqlite") }],
           ...(unknownPlugin ? { refusal: { code: "blocked-by-prior-refusal" } } : {}),
         });
       }
@@ -356,8 +356,8 @@ process.stdin.resume();
   );
 
   it("preserves snapshot path bytes and rejects blank snapshot paths", async () => {
-    const root = tempDirs.make("openclaw-update-migration-plan-paths-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-migration-plan-paths-");
+    const configPath = path.join(root, "config", "carapace.json");
     const stateDir = path.join(root, " copied state ");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
@@ -378,7 +378,7 @@ process.stdin.resume();
           snapshotState,
           "--json",
         ],
-        { OPENCLAW_STATE_DIR: snapshotState },
+        { CARAPACE_STATE_DIR: snapshotState },
       );
 
     const valid = runPlan(stateDir);
@@ -397,8 +397,8 @@ process.stdin.resume();
   });
 
   it("refuses configured session stores outside the copied state snapshot", async () => {
-    const root = tempDirs.make("openclaw-update-migration-plan-session-root-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-migration-plan-session-root-");
+    const configPath = path.join(root, "config", "carapace.json");
     const stateDir = path.join(root, "state");
     const externalStore = path.join(root, "external", "sessions.json");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -468,8 +468,8 @@ process.stdin.resume();
   });
 
   it("rejects caller-supplied snapshot identity without touching the copy", async () => {
-    const root = tempDirs.make("openclaw-update-migration-plan-identity-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-migration-plan-identity-");
+    const configPath = path.join(root, "config", "carapace.json");
     const stateDir = path.join(root, "state");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.mkdir(stateDir, { recursive: true });
@@ -497,8 +497,8 @@ process.stdin.resume();
   });
 
   it("refuses a copied state path that is not a directory", async () => {
-    const root = tempDirs.make("openclaw-update-migration-plan-unbound-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-migration-plan-unbound-");
+    const configPath = path.join(root, "config", "carapace.json");
     const stateDir = path.join(root, "copied-state-file");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.mkdir(path.join(root, "state"));
@@ -532,8 +532,8 @@ process.stdin.resume();
   it.each(["update", "repair"])(
     "keeps rejected %s arguments from touching legacy state",
     async (command) => {
-      const root = tempDirs.make("openclaw-update-legacy-state-");
-      const configPath = path.join(root, "config", "openclaw.json");
+      const root = tempDirs.make("carapace-update-legacy-state-");
+      const configPath = path.join(root, "config", "carapace.json");
       const sessionsDir = path.join(root, "state", "sessions");
       const sessionId = "legacy-会議-session";
       await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -574,14 +574,14 @@ process.stdin.resume();
   );
 
   it("keeps an orphaned SQLite journal immutable when a managed handoff is refused", async () => {
-    const root = tempDirs.make("openclaw-update-refused-handoff-");
-    const configPath = path.join(root, "config", "openclaw.json");
+    const root = tempDirs.make("carapace-update-refused-handoff-");
+    const configPath = path.join(root, "config", "carapace.json");
     const stateDir = path.join(root, "state");
     const metaPath = path.join(root, "handoff.json");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.mkdir(path.join(stateDir, "state"), { recursive: true });
     await fs.writeFile(configPath, '{ "gateway": { "mode": "local" } }\n');
-    await fs.writeFile(path.join(stateDir, "state", "openclaw.sqlite-journal"), "orphan journal\n");
+    await fs.writeFile(path.join(stateDir, "state", "carapace.sqlite-journal"), "orphan journal\n");
     await fs.writeFile(
       metaPath,
       `${JSON.stringify({ version: 1, meta: { root: path.join(root, "wrong-install") } })}\n`,
@@ -604,22 +604,22 @@ process.stdin.resume();
   it.each(["update", "repair", "cleanup"])(
     "fences the mutable %s path before observation or action",
     async (command) => {
-      const root = tempDirs.make("openclaw-update-owned-state-");
-      const configPath = path.join(root, "config", "openclaw.json");
+      const root = tempDirs.make("carapace-update-owned-state-");
+      const configPath = path.join(root, "config", "carapace.json");
       const stateDir = path.join(root, "state");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, '{ "gateway": { "mode": "local" } }\n');
       const externalEnv = {
         ...process.env,
         HOME: root,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_SUPERVISOR_MODE: "external",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_SUPERVISOR_MODE: "external",
       };
-      claimOpenClawStateOwnership("gateway-supervisor", { env: externalEnv });
-      const databasePath = openOpenClawStateDatabase({ env: externalEnv }).path;
-      closeOpenClawStateDatabaseForTest();
+      claimCarapaceStateOwnership("gateway-supervisor", { env: externalEnv });
+      const databasePath = openCarapaceStateDatabase({ env: externalEnv }).path;
+      closeCarapaceStateDatabaseForTest();
       const before = await snapshotTree(root);
       const beforeDatabaseHash = await sha256File(databasePath);
 
@@ -639,7 +639,7 @@ process.stdin.resume();
       expect(refused.error).toBeUndefined();
       expect(refused.status).not.toBe(0);
       expect(`${refused.stdout}\n${refused.stderr}`).toMatch(/gateway-supervisor/u);
-      expect(`${refused.stdout}\n${refused.stderr}`).toMatch(/OPENCLAW_SUPERVISOR_MODE=external/u);
+      expect(`${refused.stdout}\n${refused.stderr}`).toMatch(/CARAPACE_SUPERVISOR_MODE=external/u);
       expect(await snapshotTree(root)).toEqual(before);
       expect(await sha256File(databasePath)).toBe(beforeDatabaseHash);
     },
@@ -647,25 +647,25 @@ process.stdin.resume();
 });
 
 it("exits the node worker after a stop frame while the supervisor keeps stdin open", async () => {
-  const root = tempDirs.make("openclaw-worker-exit-");
+  const root = tempDirs.make("carapace-worker-exit-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   await fs.writeFile(configPath, JSON.stringify({ nodeHost: { skills: { enabled: false } } }));
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     HOME: root,
     USERPROFILE: root,
     NODE_DISABLE_COMPILE_CACHE: "1",
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_NO_RESPAWN: "1",
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_NO_RESPAWN: "1",
+    CARAPACE_STATE_DIR: stateDir,
   };
   delete env.VITEST;
   delete env.VITEST_POOL_ID;
   delete env.VITEST_WORKER_ID;
   const result = await runCliProcessChild({
-    nodeArgs: [path.resolve("openclaw.mjs"), "node", "worker"],
+    nodeArgs: [path.resolve("carapace.mjs"), "node", "worker"],
     env,
     interact: async (child) => {
       let stdout = "";

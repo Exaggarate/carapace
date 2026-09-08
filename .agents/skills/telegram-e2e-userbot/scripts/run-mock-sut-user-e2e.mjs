@@ -34,7 +34,7 @@ const CHILD_ENV_DENIED_PREFIXES = [
   "CRABFLEET_",
   "GH_",
   "GITHUB_",
-  "OPENCLAW_QA_CONVEX_",
+  "CARAPACE_QA_CONVEX_",
 ];
 const CHILD_ENV_DENIED_KEYS = new Set(["TELEGRAM_E2E_STATE_DIR", "TELEGRAM_USER_DRIVER_STATE_DIR"]);
 const CHILD_ENV_SECRET_KEY =
@@ -60,8 +60,8 @@ export function sanitizeChildEnvironment(env = process.env) {
 function createControlEnvironment({ baseEnv = process.env, configPath, stateDir }) {
   return {
     ...sanitizeChildEnvironment(baseEnv),
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
   };
 }
 
@@ -93,10 +93,10 @@ export function createGatewayEnvironment({
 }) {
   return {
     ...sanitizeChildEnvironment(baseEnv),
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: configPath,
+    CARAPACE_STATE_DIR: stateDir,
     TELEGRAM_BOT_TOKEN: sutToken,
-    OPENAI_API_KEY: "openclaw-e2e-mock-key",
+    OPENAI_API_KEY: "carapace-e2e-mock-key",
   };
 }
 
@@ -172,7 +172,7 @@ export async function waitForGatewayLeaseReady({ child, readiness, leaseFailure 
 
 function parseArgs(argv) {
   const args = {
-    text: "@{sut} Please answer with OPENCLAW_E2E_OK only.",
+    text: "@{sut} Please answer with CARAPACE_E2E_OK only.",
     textProvided: false,
     photos: [],
     caption: "",
@@ -261,15 +261,15 @@ function parseArgs(argv) {
     }
     args.scenario = readScenarioFile(resolve(args.scenarioPath));
   }
-  if (!args.expectPassed) args.expect.push("OPENCLAW_E2E_OK");
+  if (!args.expectPassed) args.expect.push("CARAPACE_E2E_OK");
   return args;
 }
 
 function printHelp() {
   console.log(`Usage:
   node .agents/skills/telegram-e2e-userbot/scripts/run-mock-sut-user-e2e.mjs \\
-    --text '@{sut} Please answer with OPENCLAW_E2E_OK only.' \\
-    --expect OPENCLAW_E2E_OK
+    --text '@{sut} Please answer with CARAPACE_E2E_OK only.' \\
+    --expect CARAPACE_E2E_OK
 
   node .agents/skills/telegram-e2e-userbot/scripts/run-mock-sut-user-e2e.mjs \\
     --text '@{sut} <prompt>' --record /tmp/events.ndjson \\
@@ -291,14 +291,14 @@ Runtime:
 
 Backends:
   --backend mock          (default) basic deterministic mock-openai
-  --backend qa-mock       OpenClaw QA mock with tool and delayed-response fixtures
+  --backend qa-mock       Carapace QA mock with tool and delayed-response fixtures
   --backend claude-cli    real Claude CLI backend; no mock provider, uses your Claude
                         CLI credentials. Model via E2E_TELEGRAM_CLI_MODEL
                         (default claude-haiku-4-5).
 
 Credentials are acquired and released through the shared Convex pool.
 
-Run from the OpenClaw repo under test. The runner restores one bot and
+Run from the Carapace repo under test. The runner restores one bot and
 independent TDLib session. It starts mock-openai and a temporary SUT
 gateway, drives the bot as the real QA user, then removes credential state.
 Recording captures evidence without applying probe expectations.`);
@@ -421,12 +421,12 @@ export function assertSutMatchesLease(sut, credential) {
 const PROVIDER_API = process.env.E2E_TELEGRAM_PROVIDER_API || "openai-responses";
 
 function writeConfig(params) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tg-user-mock-sut-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-tg-user-mock-sut-"));
   const stateDir = path.join(root, "state");
   const workspace = path.join(root, "workspace");
   fs.mkdirSync(stateDir, { recursive: true });
   fs.mkdirSync(workspace, { recursive: true });
-  const configPath = path.join(root, "openclaw.json");
+  const configPath = path.join(root, "carapace.json");
   // The Claude CLI backend authenticates through the operator's own Claude CLI
   // credentials and needs no model provider entry; it also must not point at
   // mock-openai, or the CLI would talk to the mock instead of Anthropic.
@@ -466,7 +466,7 @@ function writeConfig(params) {
       auth: { mode: "none" },
       ...(params.sourceGateway ? { controlUi: { enabled: false } } : {}),
     },
-    // Scope logs to this run. The default /tmp/openclaw/<date>.log is shared by
+    // Scope logs to this run. The default /tmp/carapace/<date>.log is shared by
     // every gateway on the box, so it is useless as evidence. Only the config
     // option works: the gateway reads no log-dir environment variable.
     logging: { file: params.gatewayLog || path.join(root, "gateway.log") },
@@ -705,7 +705,7 @@ async function runCronScenarioAction({
     const added = await runCommand(
       "pnpm",
       [
-        "openclaw",
+        "carapace",
         "cron",
         "add",
         "--name",
@@ -735,7 +735,7 @@ async function runCronScenarioAction({
     if (isStopped()) throw new Error("Cron scenario cancelled after lease loss.");
     const run = await runCommand(
       "pnpm",
-      ["openclaw", "cron", "run", jobId, "--wait", "--wait-timeout", "1m", "--json"],
+      ["carapace", "cron", "run", jobId, "--wait", "--wait-timeout", "1m", "--json"],
       { cwd: repoRoot, env: gatewayEnv },
     );
     if (run.status !== 0) {
@@ -746,7 +746,7 @@ async function runCronScenarioAction({
     cronError = error;
   } finally {
     if (jobId && !isStopped()) {
-      const removed = await runCommand("pnpm", ["openclaw", "cron", "rm", jobId, "--json"], {
+      const removed = await runCommand("pnpm", ["carapace", "cron", "rm", jobId, "--json"], {
         cwd: repoRoot,
         env: gatewayEnv,
       });
@@ -965,7 +965,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
   if (!fs.existsSync(path.join(repoRoot, "scripts/e2e/mock-openai-server.mjs"))) {
-    throw new Error("Run from the OpenClaw repo root; missing scripts/e2e/mock-openai-server.mjs.");
+    throw new Error("Run from the Carapace repo root; missing scripts/e2e/mock-openai-server.mjs.");
   }
 
   const credentialPromise = ownCredentialAcquisition(acquireTelegramTestCredential());
@@ -1067,7 +1067,7 @@ async function driveWithTelegramProxy(args, repoRoot, creds) {
             ...sanitizeChildEnvironment(driverEnv),
             MOCK_PORT: String(args.mockPort),
             MOCK_REQUEST_LOG: requestLog,
-            SUCCESS_MARKER: process.env.E2E_TELEGRAM_MOCK_RESPONSE ?? "OPENCLAW_E2E_OK",
+            SUCCESS_MARKER: process.env.E2E_TELEGRAM_MOCK_RESPONSE ?? "CARAPACE_E2E_OK",
           },
         },
       );
@@ -1075,10 +1075,10 @@ async function driveWithTelegramProxy(args, repoRoot, creds) {
     } else if (args.backend === "qa-mock") {
       mock = spawnProcess(
         "pnpm",
-        ["openclaw", "qa", "mock-openai", "--host", "127.0.0.1", "--port", String(args.mockPort)],
+        ["carapace", "qa", "mock-openai", "--host", "127.0.0.1", "--port", String(args.mockPort)],
         {
           cwd: repoRoot,
-          env: { ...sanitizeChildEnvironment(driverEnv), OPENCLAW_BUILD_PRIVATE_QA: "1" },
+          env: { ...sanitizeChildEnvironment(driverEnv), CARAPACE_BUILD_PRIVATE_QA: "1" },
         },
       );
       await waitForOutput(mock, /QA mock OpenAI:/u, "QA mock OpenAI", 30_000);
@@ -1119,8 +1119,8 @@ async function driveWithTelegramProxy(args, repoRoot, creds) {
       gatewayEnv.TELEGRAM_E2E_FOLLOWUP_CONTROL_STATUS = followupControlStatusPath;
     }
     if (args.sourceGateway) {
-      gatewayEnv.OPENCLAW_BUNDLED_PLUGINS_DIR = path.join(repoRoot, "extensions");
-      gatewayEnv.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+      gatewayEnv.CARAPACE_BUNDLED_PLUGINS_DIR = path.join(repoRoot, "extensions");
+      gatewayEnv.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
     }
     const controlEnv = createControlEnvironment({
       configPath: temp.configPath,
@@ -1374,7 +1374,7 @@ async function driveWithTelegramProxy(args, repoRoot, creds) {
           } else if (action.type === "systemEvent") {
             const result = await runCommand(
               "pnpm",
-              ["openclaw", "system", "event", "--text", action.text, "--mode", "now", "--json"],
+              ["carapace", "system", "event", "--text", action.text, "--mode", "now", "--json"],
               { cwd: repoRoot, env: controlEnv, timeoutMs: action.timeoutMs ?? 60_000 },
             );
             if (result.status !== 0 || result.timedOut) {

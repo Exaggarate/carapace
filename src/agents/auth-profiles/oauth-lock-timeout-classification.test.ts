@@ -25,7 +25,7 @@ describe("OAuth refresh lock timeout classification", () => {
     const provider = "openai";
     const refreshLockPath = resolveOAuthRefreshLockPath(provider, profileId);
     const authStoreLockPath = resolveAuthProfileDatabasePath(
-      "/tmp/openclaw-oauth-lock-timeout/agent",
+      "/tmp/carapace-oauth-lock-timeout/agent",
     );
 
     expect(

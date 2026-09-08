@@ -1,11 +1,11 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   ProviderAuthMethodNonInteractiveContext,
   ProviderWrapStreamFnContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { CUSTOM_LOCAL_AUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
+} from "carapace/plugin-sdk/plugin-entry";
+import { CUSTOM_LOCAL_AUTH_MARKER } from "carapace/plugin-sdk/provider-auth";
+import { buildProviderToolCompatFamilyHooks } from "carapace/plugin-sdk/provider-tools";
 import {
   LLAMA_CPP_PROVIDER_ID,
   LLAMA_CPP_PROVIDER_LABEL,
@@ -58,7 +58,7 @@ function wrapManagedLlamaCppStream(
   };
 }
 
-export function registerLlamaCppProvider(api: OpenClawPluginApi): void {
+export function registerLlamaCppProvider(api: CarapacePluginApi): void {
   api.registerProvider({
     id: LLAMA_CPP_PROVIDER_ID,
     label: LLAMA_CPP_PROVIDER_LABEL,
@@ -94,7 +94,7 @@ export function registerLlamaCppProvider(api: OpenClawPluginApi): void {
         wizard: {
           choiceId: "llama-cpp-existing-server",
           choiceLabel: "Existing llama-server",
-          choiceHint: "Connect to a llama.cpp server managed outside OpenClaw",
+          choiceHint: "Connect to a llama.cpp server managed outside Carapace",
           groupId: LLAMA_CPP_PROVIDER_ID,
           groupLabel: "Local llama.cpp",
           groupHint: "Managed or external llama.cpp server",

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord plugin module implements runtime.messaging behavior.
 import { readDiscordComponentSpec } from "../components.js";
 import { sendDiscordComponentMessage } from "../send.components.js";
@@ -58,7 +58,7 @@ export const discordMessagingActionRuntime = {
 
 async function resolveDiscordReactionTargetChannelId(params: {
   target: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
 }): Promise<string> {
   try {

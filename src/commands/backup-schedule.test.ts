@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCronCli } from "../cli/cron-cli.js";
@@ -39,8 +39,8 @@ vi.mock("../config/config.js", async (importOriginal) => {
 import { GIT_BACKUP_PUSH_CREDENTIAL_WARNING } from "./backup-git.js";
 import { backupDisableCommand, backupEnableCommand } from "./backup-schedule.js";
 
-const BACKUP_CRON_JOB_NAME = "openclaw-backup-scheduled";
-const { makeStorePath } = createCronStoreHarness({ prefix: "openclaw-backup-lookup-" });
+const BACKUP_CRON_JOB_NAME = "carapace-backup-scheduled";
+const { makeStorePath } = createCronStoreHarness({ prefix: "carapace-backup-lookup-" });
 
 const roots: string[] = [];
 
@@ -54,7 +54,7 @@ async function runCli(args: string[]) {
 
 // enable --push preflights an origin remote, so push fixtures need a real repo.
 async function pushReadyRepository(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-schedule-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-backup-schedule-test-"));
   roots.push(root);
   execFileSync("git", ["-C", root, "init"], { stdio: "ignore" });
   execFileSync("git", ["-C", root, "remote", "add", "origin", "git@example.invalid:backups.git"], {
@@ -107,7 +107,7 @@ describe("scheduled backups", () => {
         payload: {
           kind: "command",
           argv: [
-            "openclaw",
+            "carapace",
             "backup",
             "git",
             "create",
@@ -129,7 +129,7 @@ describe("scheduled backups", () => {
     const runtime = createTestRuntime();
 
     await backupEnableCommand(runtime, {
-      repository: "/tmp/openclaw-backups",
+      repository: "/tmp/carapace-backups",
       agent: "Ops Team",
     });
 
@@ -142,7 +142,7 @@ describe("scheduled backups", () => {
     [
       "unknown",
       "nope-agent",
-      'Unknown agent id "nope-agent". Run openclaw agents list to see configured agents.',
+      'Unknown agent id "nope-agent". Run carapace agents list to see configured agents.',
     ],
     ["empty", "", "--agent must not be blank"],
     ["whitespace-only", "   ", "--agent must not be blank"],
@@ -151,7 +151,7 @@ describe("scheduled backups", () => {
 
     await expect(
       backupEnableCommand(runtime, {
-        repository: "/tmp/openclaw-backups",
+        repository: "/tmp/carapace-backups",
         agent,
       }),
     ).rejects.toThrow(message);
@@ -164,7 +164,7 @@ describe("scheduled backups", () => {
     gatewayRpc.call.mockResolvedValue({ created: true, job: { id: "backup-job" } });
 
     await expect(
-      backupEnableCommand(runtime, { repository: "/tmp/openclaw-backups", every }),
+      backupEnableCommand(runtime, { repository: "/tmp/carapace-backups", every }),
     ).rejects.toThrow("Invalid duration (empty)");
     expect(gatewayRpc.call).not.toHaveBeenCalled();
   });
@@ -322,7 +322,7 @@ describe("scheduled backups", () => {
 
   it("refuses a pushed schedule when the repository has no origin remote", async () => {
     const runtime = createTestRuntime();
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-schedule-test-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-backup-schedule-test-"));
     roots.push(root);
     execFileSync("git", ["-C", root, "init"], { stdio: "ignore" });
     await expect(backupEnableCommand(runtime, { repository: root, push: true })).rejects.toThrow(
@@ -335,7 +335,7 @@ describe("scheduled backups", () => {
     gatewayRpc.isImplicitLocalTarget.mockResolvedValue(false);
     const runtime = createTestRuntime();
     const expected =
-      "backup enable manages backups on the Gateway host and currently requires a local Gateway. Create the cron job manually with openclaw cron add for remote Gateways.";
+      "backup enable manages backups on the Gateway host and currently requires a local Gateway. Create the cron job manually with carapace cron add for remote Gateways.";
 
     await expect(
       backupEnableCommand(runtime, {

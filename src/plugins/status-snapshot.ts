@@ -1,7 +1,7 @@
 /** Builds plugin status reports from persisted metadata without importing full plugin runtimes. */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildPluginCapabilitySummary,
   formatPluginCapabilityConsentRequired,
@@ -31,7 +31,7 @@ import {
 } from "./status-dependencies-core.js";
 import type { PluginLogger } from "./types.js";
 
-/** Control-plane plugin status shape used by `openclaw plugins status` style surfaces. */
+/** Control-plane plugin status shape used by `carapace plugins status` style surfaces. */
 export type PluginRegistryStatusReport = PluginRegistry & {
   workspaceDir?: string;
   workspaceScope: "selected" | "omitted";
@@ -40,7 +40,7 @@ export type PluginRegistryStatusReport = PluginRegistry & {
 };
 
 type PluginRegistrySnapshotReportParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   /** Use an explicit env when plugin roots should resolve independently from process.env. */
   env?: NodeJS.ProcessEnv;
@@ -114,7 +114,7 @@ function buildPluginRecordFromInstalledIndex(
   plugin: import("./installed-plugin-index.js").InstalledPluginIndexRecord,
   manifest?: import("./manifest-registry.js").PluginManifestRecord,
 ): PluginRecord {
-  const format = plugin.format ?? manifest?.format ?? "openclaw";
+  const format = plugin.format ?? manifest?.format ?? "carapace";
   const bundleFormat = plugin.bundleFormat ?? manifest?.bundleFormat;
   return {
     id: plugin.pluginId,

@@ -1,13 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayOperatorRoleDefinition } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import { connectUserModelAccount } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { sessionTitleHandlers } from "./sessions-title.js";
 import type { GatewayClient, GatewayRequestContext } from "./types.js";
 
@@ -23,7 +23,7 @@ vi.mock("./session-catalog.js", () => ({
   resolveRegisteredCatalogCreateTarget: mocks.resolveRegisteredCatalogCreateTarget,
 }));
 
-const cfg: OpenClawConfig = {
+const cfg: CarapaceConfig = {
   agents: {
     entries: { main: {} },
     defaults: {
@@ -33,7 +33,7 @@ const cfg: OpenClawConfig = {
   },
 };
 
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let ownerId: string;
 let otherId: string;
 let personalAccountId: string;
@@ -44,7 +44,7 @@ function connectedClient(profileId?: string): GatewayClient {
     connect: {
       minProtocol: 1,
       maxProtocol: 1,
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
       role: "operator",
       scopes: ["operator.write"],
     },
@@ -63,7 +63,7 @@ function connectedClient(profileId?: string): GatewayClient {
 
 async function prepare(
   params: Record<string, unknown>,
-  config: OpenClawConfig = cfg,
+  config: CarapaceConfig = cfg,
   client: GatewayClient | null = null,
   controls: { connections?: ReadonlySet<GatewayClient>; signal?: AbortSignal } = {},
 ) {
@@ -96,7 +96,7 @@ async function prepare(
 
 describe("sessions.title.prepare", () => {
   beforeAll(async () => {
-    testState = await createOpenClawTestState({ scenario: "minimal" });
+    testState = await createCarapaceTestState({ scenario: "minimal" });
     ownerId = ensureProfileForEmail("title-owner@example.test").id;
     otherId = ensureProfileForEmail("title-other@example.test").id;
     personalAccountId = connectUserModelAccount({
@@ -193,7 +193,7 @@ describe("sessions.title.prepare", () => {
   });
 
   it("enforces the operator's allowed creation agent before inference", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...cfg,
       gateway: {
         roles: {
@@ -332,7 +332,7 @@ describe("sessions.title.prepare", () => {
         scopes: ["operator.write"],
         sessions: { others: "none" },
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         ...cfg,
         gateway: { roles: { default: "writer", definitions: { writer } } },
       };

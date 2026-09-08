@@ -129,7 +129,7 @@ export async function runUpdateCommandRepair(params: {
                   ...validation,
                   ok: false,
                   stopReason: "repair-requires-config-change",
-                  summary: `Config changes required in top-level keys: ${keys.join(", ")}. Copies were discarded; run openclaw doctor --fix under your own authority, or openclaw triage.`,
+                  summary: `Config changes required in top-level keys: ${keys.join(", ")}. Copies were discarded; run carapace doctor --fix under your own authority, or carapace triage.`,
                 };
               }
             }

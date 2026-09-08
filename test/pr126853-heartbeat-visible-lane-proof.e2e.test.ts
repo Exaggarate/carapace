@@ -9,7 +9,7 @@ import {
   getRuntimeConfigSnapshot,
 } from "../src/config/config.js";
 import { clearSessionStoreCacheForTest } from "../src/config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import {
   disconnectGatewayClient,
   startGatewayWithClient,
@@ -20,17 +20,17 @@ import { useAutoCleanupTempDirTracker } from "./helpers/temp-dir.js";
 
 const envKeys = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 type LaneSnapshot = {
@@ -117,10 +117,10 @@ describe("PR #126853 real Gateway lane proof", () => {
       let visibleTurnDispatched = false;
 
       try {
-        const tempHome = tempDirs.make("openclaw-pr126853-proof-");
-        const stateDir = path.join(tempHome, ".openclaw");
+        const tempHome = tempDirs.make("carapace-pr126853-proof-");
+        const stateDir = path.join(tempHome, ".carapace");
         const workspaceDir = path.join(tempHome, "workspace");
-        const configPath = path.join(stateDir, "openclaw.json");
+        const configPath = path.join(stateDir, "carapace.json");
         const bundledPluginsDir = path.join(tempHome, "bundled-plugins");
         await Promise.all([
           fs.mkdir(workspaceDir, { recursive: true }),
@@ -134,17 +134,17 @@ describe("PR #126853 real Gateway lane proof", () => {
         const token = "pr126853-proof-token";
         for (const [key, value] of Object.entries({
           HOME: tempHome,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_GATEWAY_TOKEN: token,
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_CRON: "0",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_GATEWAY_TOKEN: token,
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_CRON: "0",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         })) {
           setTestEnvValue(key, value);
         }
@@ -212,7 +212,7 @@ describe("PR #126853 real Gateway lane proof", () => {
           },
           gateway: { auth: { mode: "token", token } },
           plugins: { slots: { memory: "none" } },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         gateway = await within(
           startGatewayWithClient({
             cfg,

@@ -4,13 +4,13 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../state/carapace-state-schema.js";
 import type { NodeWorkerSupervisorIdentity } from "../worker/node-supervisor-protocol.js";
 import {
   isNodeWorkerTerminalState,
@@ -33,7 +33,7 @@ export type {
 } from "./node-worker-launch-receipt.js";
 
 type NodeWorkerLaunchDatabase = Pick<
-  OpenClawStateDatabase,
+  CarapaceStateDatabase,
   "node_worker_launch_containers" | "node_worker_launches" | "node_worker_turns"
 >;
 
@@ -79,12 +79,12 @@ function ensureNodeWorkerLaunchSchema(
       : NODE_WORKER_LAUNCH_CONTAINER_SCHEMA_START;
   const endMarker =
     kind === "journal" ? NODE_WORKER_LAUNCH_SCHEMA_END : NODE_WORKER_LAUNCH_CONTAINER_SCHEMA_END;
-  const start = OPENCLAW_STATE_SCHEMA_SQL.indexOf(startMarker);
-  const end = start >= 0 ? OPENCLAW_STATE_SCHEMA_SQL.indexOf(endMarker, start) : -1;
+  const start = CARAPACE_STATE_SCHEMA_SQL.indexOf(startMarker);
+  const end = start >= 0 ? CARAPACE_STATE_SCHEMA_SQL.indexOf(endMarker, start) : -1;
   if (start < 0 || end < start) {
-    throw new Error(`OpenClaw node worker launch ${kind} schema marker is missing.`);
+    throw new Error(`Carapace node worker launch ${kind} schema marker is missing.`);
   }
-  database.exec(OPENCLAW_STATE_SCHEMA_SQL.slice(start, end + endMarker.length)); // sqlite-allow-raw -- Canonical feature-local additive DDL only.
+  database.exec(CARAPACE_STATE_SCHEMA_SQL.slice(start, end + endMarker.length)); // sqlite-allow-raw -- Canonical feature-local additive DDL only.
 }
 
 function query(database: DatabaseSync) {
@@ -314,7 +314,7 @@ function rowMatchesImmutableIdentity(
 
 /** Synchronous shared-state owner for durable node worker launch supervision. */
 export class NodeWorkerLaunchStore {
-  private readonly databaseOptions: OpenClawStateDatabaseOptions;
+  private readonly databaseOptions: CarapaceStateDatabaseOptions;
 
   constructor(options: { env?: NodeJS.ProcessEnv } = {}) {
     this.databaseOptions = options.env ? { env: options.env } : {};
@@ -322,7 +322,7 @@ export class NodeWorkerLaunchStore {
 
   private write<T>(operationLabel: string, operation: (database: DatabaseSync) => T): T {
     let initializedDatabase: DatabaseSync | undefined;
-    const result = runOpenClawStateWriteTransaction(
+    const result = runCarapaceStateWriteTransaction(
       ({ db }) => {
         if (!initializedDatabases.has(db)) {
           ensureNodeWorkerLaunchSchema(db);

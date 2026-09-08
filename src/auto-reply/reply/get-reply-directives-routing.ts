@@ -1,5 +1,5 @@
 // Resolves directive interpretation and prompt projection at the text-command boundary.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeCommandBody } from "../commands-registry-normalize.js";
 import type { FinalizedRuntimeMsgContext } from "../templating.js";
 import { isDirectiveOnly } from "./directive-handling.directive-only.js";
@@ -21,7 +21,7 @@ export function resolveReplyDirectiveRouting(params: {
   isGroup: boolean;
   wasMentioned: boolean;
   ctx: FinalizedRuntimeMsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   resetTriggered: boolean;
 }): {

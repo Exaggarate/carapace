@@ -2,7 +2,7 @@
 // handling for sandbox and browser containers.
 import fs from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { resolveSandboxConfigForAgent } from "./config.js";
 
 const dockerMocks = vi.hoisted(() => ({
@@ -34,7 +34,7 @@ const {
   podmanSandboxBackendManager,
 } = await import("./docker-backend.js");
 
-function createConfig(): OpenClawConfig {
+function createConfig(): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -43,11 +43,11 @@ function createConfig(): OpenClawConfig {
           scope: "session",
           workspaceAccess: "none",
           docker: {
-            image: "openclaw-sandbox:bookworm-slim",
+            image: "carapace-sandbox:bookworm-slim",
           },
           browser: {
             enabled: true,
-            image: "openclaw-sandbox-browser:bookworm-slim",
+            image: "carapace-sandbox-browser:bookworm-slim",
           },
         },
       },
@@ -173,14 +173,14 @@ describe("docker sandbox backend manager", () => {
     expect(execSpec.argv).toContain("/workspace/project");
     expect(execSpec.argv.slice(-4, -1)).toEqual(["sandbox-container", "/bin/sh", "-lc"]);
     expect(execSpec.argv.at(-1)).toBe(
-      'export PATH="${OPENCLAW_PREPEND_PATH}:$PATH"; unset OPENCLAW_PREPEND_PATH; printf ready',
+      'export PATH="${CARAPACE_PREPEND_PATH}:$PATH"; unset CARAPACE_PREPEND_PATH; printf ready',
     );
     expect(execSpec.stdinMode).toBe("pipe-open");
     const envFile = execSpec.argv[execSpec.argv.indexOf("--env-file") + 1];
     expect(envFile).toBeDefined();
     const envFileContent = fs.readFileSync(envFile!, "utf8");
     expect(envFileContent).toContain(`CONFIGURED_VALUE=${sentinel}\n`);
-    expect(envFileContent).toContain(`OPENCLAW_PREPEND_PATH=${requestedPath}\n`);
+    expect(envFileContent).toContain(`CARAPACE_PREPEND_PATH=${requestedPath}\n`);
     expect(envFileContent).not.toMatch(/^PATH=/m);
     expect(backend.finalizeExec).toBeDefined();
 
@@ -199,9 +199,9 @@ describe("docker sandbox backend manager", () => {
   it.each([
     {
       description: "never interpolates shell metacharacters from PATH into the command",
-      requestedPath: "$(touch /tmp/openclaw-path-injection)",
+      requestedPath: "$(touch /tmp/carapace-path-injection)",
       expectedCommand:
-        'export PATH="${OPENCLAW_PREPEND_PATH}:$PATH"; unset OPENCLAW_PREPEND_PATH; echo hello',
+        'export PATH="${CARAPACE_PREPEND_PATH}:$PATH"; unset CARAPACE_PREPEND_PATH; echo hello',
     },
     {
       description: "does not add a PATH export when PATH is absent",
@@ -222,9 +222,9 @@ describe("docker sandbox backend manager", () => {
       const envFileContent = fs.readFileSync(envFile!, "utf8");
       if (requestedPath) {
         expect(execSpec.argv.join(" ")).not.toContain(requestedPath);
-        expect(envFileContent).toContain(`OPENCLAW_PREPEND_PATH=${requestedPath}\n`);
+        expect(envFileContent).toContain(`CARAPACE_PREPEND_PATH=${requestedPath}\n`);
       } else {
-        expect(envFileContent).not.toContain("OPENCLAW_PREPEND_PATH=");
+        expect(envFileContent).not.toContain("CARAPACE_PREPEND_PATH=");
       }
     } finally {
       await backend.finalizeExec?.({
@@ -239,7 +239,7 @@ describe("docker sandbox backend manager", () => {
   it("matches ordinary sandbox runtimes against sandbox.docker.image", async () => {
     dockerMocks.execContainer.mockResolvedValueOnce({
       code: 0,
-      stdout: "openclaw-sandbox:bookworm-slim\n",
+      stdout: "carapace-sandbox:bookworm-slim\n",
       stderr: "",
     });
 
@@ -260,7 +260,7 @@ describe("docker sandbox backend manager", () => {
 
     expect(result).toEqual({
       running: true,
-      actualConfigLabel: "openclaw-sandbox:bookworm-slim",
+      actualConfigLabel: "carapace-sandbox:bookworm-slim",
       configLabelMatch: true,
     });
   });
@@ -268,7 +268,7 @@ describe("docker sandbox backend manager", () => {
   it("matches browser runtimes against sandbox.browser.image", async () => {
     dockerMocks.execContainer.mockResolvedValueOnce({
       code: 0,
-      stdout: "openclaw-sandbox-browser:bookworm-slim\n",
+      stdout: "carapace-sandbox-browser:bookworm-slim\n",
       stderr: "",
     });
 
@@ -289,7 +289,7 @@ describe("docker sandbox backend manager", () => {
 
     expect(result).toEqual({
       running: true,
-      actualConfigLabel: "openclaw-sandbox-browser:bookworm-slim",
+      actualConfigLabel: "carapace-sandbox-browser:bookworm-slim",
       configLabelMatch: true,
     });
   });
@@ -299,7 +299,7 @@ describe("docker sandbox backend manager", () => {
     // sandbox matching stable for those existing containers.
     dockerMocks.execContainer.mockResolvedValueOnce({
       code: 0,
-      stdout: "openclaw-sandbox:bookworm-slim\n",
+      stdout: "carapace-sandbox:bookworm-slim\n",
       stderr: "",
     });
 
@@ -319,7 +319,7 @@ describe("docker sandbox backend manager", () => {
 
     expect(result).toEqual({
       running: true,
-      actualConfigLabel: "openclaw-sandbox:bookworm-slim",
+      actualConfigLabel: "carapace-sandbox:bookworm-slim",
       configLabelMatch: true,
     });
   });
@@ -340,7 +340,7 @@ describe("docker sandbox backend manager", () => {
           sessionKey: "agent:coder:main",
           createdAtMs: 1,
           lastUsedAtMs: 1,
-          image: "openclaw-sandbox:bookworm-slim",
+          image: "carapace-sandbox:bookworm-slim",
         },
         config: createConfig(),
       }),
@@ -365,7 +365,7 @@ describe("docker sandbox backend manager", () => {
           sessionKey: "agent:coder:main",
           createdAtMs: 1,
           lastUsedAtMs: 1,
-          image: "openclaw-sandbox:bookworm-slim",
+          image: "carapace-sandbox:bookworm-slim",
         },
         config: createConfig(),
       }),
@@ -388,7 +388,7 @@ describe("docker sandbox backend manager", () => {
         sessionKey: "agent:coder:main",
         createdAtMs: 1,
         lastUsedAtMs: 1,
-        image: "openclaw-sandbox:bookworm-slim",
+        image: "carapace-sandbox:bookworm-slim",
       },
       config: createConfig(),
     });
@@ -421,7 +421,7 @@ describe("docker sandbox backend manager", () => {
           sessionKey: "agent:coder:main",
           createdAtMs: 1,
           lastUsedAtMs: 1,
-          image: "openclaw-sandbox:bookworm-slim",
+          image: "carapace-sandbox:bookworm-slim",
         },
         config: createConfig(),
       }),
@@ -448,7 +448,7 @@ describe("docker sandbox backend manager", () => {
           sessionKey: "agent:coder:main",
           createdAtMs: 1,
           lastUsedAtMs: 1,
-          image: "openclaw-sandbox:bookworm-slim",
+          image: "carapace-sandbox:bookworm-slim",
         },
         config: createConfig(),
       }),
@@ -466,7 +466,7 @@ describe("docker sandbox backend manager", () => {
         scopeKey: "agent:coder:main",
         workspaceDir: "/workspace",
         agentWorkspaceDir: "/workspace",
-        skillsWorkspaceDir: "/workspace/.openclaw/sandbox-skills",
+        skillsWorkspaceDir: "/workspace/.carapace/sandbox-skills",
         cfg: resolveSandboxConfigForAgent(config),
       }),
     ).rejects.toThrow(
@@ -480,7 +480,7 @@ describe("docker sandbox backend manager", () => {
     dockerMocks.execContainer
       .mockResolvedValueOnce({
         code: 0,
-        stdout: "localhost/openclaw-sandbox:bookworm-slim\tsha256:abc123\n",
+        stdout: "localhost/carapace-sandbox:bookworm-slim\tsha256:abc123\n",
         stderr: "",
       })
       .mockResolvedValueOnce({
@@ -498,7 +498,7 @@ describe("docker sandbox backend manager", () => {
         sessionKey: "agent:coder:main",
         createdAtMs: 1,
         lastUsedAtMs: 1,
-        image: "openclaw-sandbox:bookworm-slim",
+        image: "carapace-sandbox:bookworm-slim",
         configLabelKind: "Image",
       },
       config: createConfig(),
@@ -507,13 +507,13 @@ describe("docker sandbox backend manager", () => {
 
     expect(result).toEqual({
       running: true,
-      actualConfigLabel: "localhost/openclaw-sandbox:bookworm-slim",
+      actualConfigLabel: "localhost/carapace-sandbox:bookworm-slim",
       configLabelMatch: true,
     });
     expect(dockerMocks.execContainer).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ id: "podman", command: "podman" }),
-      ["image", "inspect", "-f", "{{.Id}}", "openclaw-sandbox:bookworm-slim"],
+      ["image", "inspect", "-f", "{{.Id}}", "carapace-sandbox:bookworm-slim"],
       { allowFailure: true },
     );
   });

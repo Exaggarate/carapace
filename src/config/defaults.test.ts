@@ -1,6 +1,6 @@
-import { normalizeModelCostConfig } from "@openclaw/llm-core";
+import { normalizeModelCostConfig } from "@carapace/llm-core";
 // Verifies default config values and environment-sensitive overrides.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProviderResolveModelRoutesContext } from "../plugin-sdk/provider-model-types.js";
 import { resolveProviderModelRoutes } from "../plugins/provider-model-routes.js";
@@ -16,7 +16,7 @@ import {
   applyMessageDefaults,
 } from "./defaults.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "./runtime-snapshot.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const mocks = vi.hoisted(() => ({
   applyProviderConfigDefaultsForConfig: vi.fn(),
@@ -253,7 +253,7 @@ describe("applyModelDefaults catalog seeding", () => {
 
   it("keeps catalog-seeded compatibility out of authored route overrides", async () => {
     const { applyModelDefaults } = await import("./defaults.js");
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       models: {
         providers: {
           openai: {

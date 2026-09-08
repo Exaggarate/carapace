@@ -7,7 +7,7 @@ import { build as esbuild } from "esbuild";
 import { afterAll, beforeAll, expect, it } from "vitest";
 import packageJson from "../../package.json" with { type: "json" };
 import { runtimeProcessCoreBuildEntries } from "../../scripts/lib/runtime-process-core-build-entries.mts";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { sqliteImportMemorySupportUrl } from "./doctor-session-sqlite.memory.test-support.js";
 
 const execFileAsync = promisify(execFile);
@@ -21,7 +21,7 @@ beforeAll(async () => {
   const outDir = path.join(bundleDir, "dist");
   fs.mkdirSync(outDir);
   childPath = path.join(outDir, "child.js");
-  for (const schema of ["openclaw-agent-schema.sql", "openclaw-state-schema.sql"]) {
+  for (const schema of ["carapace-agent-schema.sql", "carapace-state-schema.sql"]) {
     fs.copyFileSync(path.join(process.cwd(), "src/state", schema), path.join(outDir, schema));
   }
   await esbuild({
@@ -54,7 +54,7 @@ afterAll(() => {
 it.each(["batch", "deep", "public"])(
   "imports %s transcripts and completes branch projections under a 256 MiB heap",
   async (scenario) => {
-    await withOpenClawTestState({ applyEnv: false, label: "import-memory" }, async (state) => {
+    await withCarapaceTestState({ applyEnv: false, label: "import-memory" }, async (state) => {
       const { stdout } = await execFileAsync(
         process.execPath,
         ["--max-old-space-size=256", childPath, state.stateDir, scenario],

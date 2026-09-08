@@ -1,5 +1,5 @@
 // Line plugin module implements group history behavior.
-import { createChannelHistoryWindow, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+import { createChannelHistoryWindow, type HistoryEntry } from "carapace/plugin-sdk/reply-history";
 
 type LineGroupHistoryReservation = {
   inboundHistory?: HistoryEntry[];

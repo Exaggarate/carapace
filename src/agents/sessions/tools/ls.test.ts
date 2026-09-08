@@ -101,7 +101,7 @@ describe("ls tool", () => {
   });
 
   it("continues after a deleted directory using its raw name without skipping unseen entries", async () => {
-    const cwd = tempDirs.make("openclaw-ls-delete-page-");
+    const cwd = tempDirs.make("carapace-ls-delete-page-");
     await fs.mkdir(path.join(cwd, "alpha"));
     await Promise.all(["beta", "gamma"].map((name) => fs.writeFile(path.join(cwd, name), "")));
     const tool = createLsTool(cwd);
@@ -119,7 +119,7 @@ describe("ls tool", () => {
   });
 
   it("retains links without following targets and marks only actual directories", async () => {
-    const cwd = tempDirs.make("openclaw-ls-links-");
+    const cwd = tempDirs.make("carapace-ls-links-");
     const tool = createLsTool(cwd);
     const symlinkType = process.platform === "win32" ? "junction" : "dir";
     const list = (limit?: number) => tool.execute("ls-links", limit ? { limit } : {});

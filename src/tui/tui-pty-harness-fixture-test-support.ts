@@ -34,7 +34,7 @@ export async function disposeActiveTuiFixtures(): Promise<void> {
 export async function startTuiFixture(
   opts: { env?: NodeJS.ProcessEnv; execPath?: string; holdStartupHistory?: boolean } = {},
 ) {
-  const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-tui-pty-"));
+  const tempDir = await mkdtemp(path.join(tmpdir(), "carapace-tui-pty-"));
   const scriptPath = await writeTuiPtyFixtureScript(tempDir);
   const logPath = path.join(tempDir, "fixture-log.jsonl");
   const startupHistoryReleasePath = opts.holdStartupHistory
@@ -45,11 +45,11 @@ export async function startTuiFixture(
     activeRuns,
     cwd: process.cwd(),
     env: {
-      OPENCLAW_THEME: "dark",
-      OPENCLAW_TUI_PTY_LOG_PATH: logPath,
+      CARAPACE_THEME: "dark",
+      CARAPACE_TUI_PTY_LOG_PATH: logPath,
       NO_COLOR: undefined,
       ...opts.env,
-      OPENCLAW_TUI_PTY_STARTUP_RELEASE_PATH: startupHistoryReleasePath,
+      CARAPACE_TUI_PTY_STARTUP_RELEASE_PATH: startupHistoryReleasePath,
     },
     exitTimeoutMs: EXIT_TIMEOUT_MS,
     outputTimeoutMs: OUTPUT_TIMEOUT_MS,
@@ -107,20 +107,20 @@ export async function writeTuiPtyFixtureScript(dir: string) {
       import type { TuiBackend } from ${JSON.stringify(tuiBackendTypeUrl)};
       import { runTui } from ${JSON.stringify(tuiModuleUrl)};
 
-      const actionLogPath = process.env.OPENCLAW_TUI_PTY_LOG_PATH;
-      const gatewayStatus = process.env.OPENCLAW_TUI_PTY_GATEWAY_STATUS ?? "fixture gateway ok";
-      const startupDelayMs = Number(process.env.OPENCLAW_TUI_PTY_STARTUP_DELAY_MS ?? 0);
+      const actionLogPath = process.env.CARAPACE_TUI_PTY_LOG_PATH;
+      const gatewayStatus = process.env.CARAPACE_TUI_PTY_GATEWAY_STATUS ?? "fixture gateway ok";
+      const startupDelayMs = Number(process.env.CARAPACE_TUI_PTY_STARTUP_DELAY_MS ?? 0);
       ${TUI_PTY_STARTUP_SESSION_FIXTURE.variables}
-      const footerModel = process.env.OPENCLAW_TUI_PTY_MODEL;
-      const footerThinkingLevel = process.env.OPENCLAW_TUI_PTY_THINKING_LEVEL;
-      let verboseLevel = process.env.OPENCLAW_TUI_PTY_VERBOSE_LEVEL;
+      const footerModel = process.env.CARAPACE_TUI_PTY_MODEL;
+      const footerThinkingLevel = process.env.CARAPACE_TUI_PTY_THINKING_LEVEL;
+      let verboseLevel = process.env.CARAPACE_TUI_PTY_VERBOSE_LEVEL;
       let modeTargetTraceLevel: string | undefined;
-      const launchThinkingLevel = process.env.OPENCLAW_TUI_PTY_LAUNCH_THINKING;
-      const initialMessage = process.env.OPENCLAW_TUI_PTY_INITIAL_MESSAGE;
-      const inFlightRunText = process.env.OPENCLAW_TUI_PTY_IN_FLIGHT_TEXT;
-      const dynamicCommandDescription = process.env.OPENCLAW_TUI_PTY_DYNAMIC_COMMAND_DESCRIPTION;
-      const thinkingLabel = process.env.OPENCLAW_TUI_PTY_THINKING_LABEL;
-      const safeThinkingLabel = process.env.OPENCLAW_TUI_PTY_SAFE_THINKING_LABEL;
+      const launchThinkingLevel = process.env.CARAPACE_TUI_PTY_LAUNCH_THINKING;
+      const initialMessage = process.env.CARAPACE_TUI_PTY_INITIAL_MESSAGE;
+      const inFlightRunText = process.env.CARAPACE_TUI_PTY_IN_FLIGHT_TEXT;
+      const dynamicCommandDescription = process.env.CARAPACE_TUI_PTY_DYNAMIC_COMMAND_DESCRIPTION;
+      const thinkingLabel = process.env.CARAPACE_TUI_PTY_THINKING_LABEL;
+      const safeThinkingLabel = process.env.CARAPACE_TUI_PTY_SAFE_THINKING_LABEL;
       const liveReplyHistory: unknown[] = [];
       let liveReplySequence = 0;
       const thinkingLevels = [
@@ -128,18 +128,18 @@ export async function writeTuiPtyFixtureScript(dir: string) {
         ...(safeThinkingLabel ? [{ id: "fixture-thinking-safe", label: safeThinkingLabel }] : []),
       ];
       ${TUI_PTY_RECONNECT_FIXTURE.variables}
-      const enablePickerFixture = process.env.OPENCLAW_TUI_PTY_PICKER_FIXTURE === "1";
-      const pickerModelValue = process.env.OPENCLAW_TUI_PTY_PICKER_MODEL_VALUE ?? "fixture-provider/fixture-model-2";
-      const pickerModelName = process.env.OPENCLAW_TUI_PTY_PICKER_MODEL_NAME ?? "Fixture 2";
-      const pickerSessionKey = process.env.OPENCLAW_TUI_PTY_PICKER_SESSION_KEY ?? "agent:main:picker-target";
-      const pickerSessionTitle = process.env.OPENCLAW_TUI_PTY_PICKER_SESSION_TITLE;
-      const pickerSessionPreview = process.env.OPENCLAW_TUI_PTY_PICKER_SESSION_PREVIEW;
-      const pickerSessionDisplayName = process.env.OPENCLAW_TUI_PTY_PICKER_SESSION_DISPLAY_NAME ?? "Picker target";
-      const initialPluginApprovalSessionKey = process.env.OPENCLAW_TUI_PTY_INITIAL_APPROVAL_SESSION_KEY;
+      const enablePickerFixture = process.env.CARAPACE_TUI_PTY_PICKER_FIXTURE === "1";
+      const pickerModelValue = process.env.CARAPACE_TUI_PTY_PICKER_MODEL_VALUE ?? "fixture-provider/fixture-model-2";
+      const pickerModelName = process.env.CARAPACE_TUI_PTY_PICKER_MODEL_NAME ?? "Fixture 2";
+      const pickerSessionKey = process.env.CARAPACE_TUI_PTY_PICKER_SESSION_KEY ?? "agent:main:picker-target";
+      const pickerSessionTitle = process.env.CARAPACE_TUI_PTY_PICKER_SESSION_TITLE;
+      const pickerSessionPreview = process.env.CARAPACE_TUI_PTY_PICKER_SESSION_PREVIEW;
+      const pickerSessionDisplayName = process.env.CARAPACE_TUI_PTY_PICKER_SESSION_DISPLAY_NAME ?? "Picker target";
+      const initialPluginApprovalSessionKey = process.env.CARAPACE_TUI_PTY_INITIAL_APPROVAL_SESSION_KEY;
       const xaiLimitError = '403 {"code":"The caller does not have permission to execute the specified operation","error":"Your team team-redacted has either used all available credits or reached its monthly spending limit. To continue making API requests, please purchase more credits or raise your spending limit."}';
       let currentModel = footerModel ?? "fixture-provider/fixture-model";
       let currentThinkingLevel = footerThinkingLevel;
-      let fastMode = process.env.OPENCLAW_TUI_PTY_FAST_MODE === "true";
+      let fastMode = process.env.CARAPACE_TUI_PTY_FAST_MODE === "true";
       function pluginApproval(sessionKey: string) {
         return {
           id: "plugin:skill-pty",
@@ -242,7 +242,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
             const userMessage = {
               role: "user",
               content: [{ type: "text", text: opts.message }],
-              __openclaw: {
+              __carapace: {
                 id: "live-user-" + userSequence,
                 idempotencyKey: runId + ":user",
                 seq: userSequence,
@@ -251,7 +251,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
             const assistantMessage = {
               role: "assistant",
               content: [{ type: "text", text: reply }],
-              __openclaw: { id: "live-assistant-" + assistantSequence, seq: assistantSequence },
+              __carapace: { id: "live-assistant-" + assistantSequence, seq: assistantSequence },
             };
             liveReplyHistory.push(userMessage, assistantMessage);
             queueMicrotask(() => {
@@ -260,7 +260,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
                 payload: {
                   sessionKey: opts.sessionKey,
                   message: userMessage,
-                  messageId: userMessage.__openclaw.id,
+                  messageId: userMessage.__carapace.id,
                   messageSeq: userSequence,
                 },
               });
@@ -289,7 +289,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
                 payload: {
                   sessionKey: opts.sessionKey,
                   message: assistantMessage,
-                  messageId: assistantMessage.__openclaw.id,
+                  messageId: assistantMessage.__carapace.id,
                   messageSeq: assistantSequence,
                 },
               });
@@ -316,7 +316,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
                   kind: "btw",
                   runId,
                   sessionKey: opts.sessionKey,
-                  question: process.env.OPENCLAW_TUI_PTY_BTW_QUESTION ?? "picker focus proof",
+                  question: process.env.CARAPACE_TUI_PTY_BTW_QUESTION ?? "picker focus proof",
                   text: "PTY_SIDE_OK",
                 },
               });
@@ -568,7 +568,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
 
         async patchSession(opts: Parameters<TuiBackend["patchSession"]>[0]) {
           record("patchSession", opts);
-          const releasePath = process.env.OPENCLAW_TUI_PTY_PATCH_RELEASE_PATH;
+          const releasePath = process.env.CARAPACE_TUI_PTY_PATCH_RELEASE_PATH;
           while (releasePath && !existsSync(releasePath)) {
             await new Promise((resolve) => setTimeout(resolve, 5));
           }
@@ -679,12 +679,12 @@ export async function writeTuiPtyFixtureScript(dir: string) {
             },
             session: { scope: "per-sender", mainKey: "main" },
           },
-          deliver: process.env.OPENCLAW_TUI_PTY_DELIVER === "1",
-          session: process.env.OPENCLAW_TUI_PTY_SESSION,
+          deliver: process.env.CARAPACE_TUI_PTY_DELIVER === "1",
+          session: process.env.CARAPACE_TUI_PTY_SESSION,
           thinking: launchThinkingLevel,
           message: initialMessage,
           historyLimit: 5,
-          title: "openclaw tui pty fixture",
+          title: "carapace tui pty fixture",
           ${TUI_PTY_RESET_FIXTURE.options}
         });
       }

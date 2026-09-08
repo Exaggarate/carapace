@@ -1,4 +1,4 @@
-import type { SessionTranscriptMessageEntry } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { SessionTranscriptMessageEntry } from "carapace/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { CodexThreadItem, CodexTurn } from "./protocol.js";
 import {
@@ -12,7 +12,7 @@ const transcriptMocks = vi.hoisted(() => ({
   readVisibleEntries: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", () => ({
+vi.mock("carapace/plugin-sdk/session-transcript-runtime", () => ({
   readVisibleSessionTranscriptMessageEntries: transcriptMocks.readVisibleEntries,
 }));
 

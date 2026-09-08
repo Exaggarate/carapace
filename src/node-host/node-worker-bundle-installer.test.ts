@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import * as tar from "tar";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import * as openclawRoot from "../infra/openclaw-root.js";
+import * as carapaceRoot from "../infra/carapace-root.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import {
   DEFAULT_WORKER_BUNDLE_ARCHIVE_LIMITS,
@@ -39,7 +39,7 @@ describe("node worker bundle installer", () => {
 
   beforeAll(async () => {
     const fixtureRoot = await fs.mkdtemp(
-      path.join(await fs.realpath(os.tmpdir()), "openclaw-node-bundle-fixture-"),
+      path.join(await fs.realpath(os.tmpdir()), "carapace-node-bundle-fixture-"),
     );
     try {
       defaultFixture = await buildBundleFixture(fixtureRoot);
@@ -49,7 +49,7 @@ describe("node worker bundle installer", () => {
   });
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-node-bundle-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-node-bundle-"));
   });
 
   afterEach(async () => {
@@ -104,12 +104,12 @@ describe("node worker bundle installer", () => {
     ];
     if (options.packageShell) {
       await fs.mkdir(path.join(source, "dist"));
-      await fs.writeFile(path.join(source, "openclaw.mjs"), "#!/usr/bin/env node\n", {
+      await fs.writeFile(path.join(source, "carapace.mjs"), "#!/usr/bin/env node\n", {
         mode: 0o700,
       });
-      await fs.writeFile(path.join(source, "package.json"), '{"name":"openclaw"}\n');
+      await fs.writeFile(path.join(source, "package.json"), '{"name":"carapace"}\n');
       await fs.writeFile(path.join(source, "dist", "worker.js"), "export {};\n");
-      archiveEntries.push("dist/worker.js", "openclaw.mjs", "package.json");
+      archiveEntries.push("dist/worker.js", "carapace.mjs", "package.json");
     }
     const manifest = await readWorkerBundleDirectoryManifest({
       root: source,
@@ -126,7 +126,7 @@ describe("node worker bundle installer", () => {
       input: {
         gatewayNamespace: "gateway-test",
         ...(options.bundlePrewarm ? { bundlePrewarm: options.bundlePrewarm } : {}),
-        build: { bundleHash, openclawVersion: "2026.8.1", protocolFeatures: [] },
+        build: { bundleHash, carapaceVersion: "2026.8.1", protocolFeatures: [] },
         archive: {
           token: "A".repeat(43),
           sha256: createHash("sha256").update(archive).digest("hex"),
@@ -169,7 +169,7 @@ describe("node worker bundle installer", () => {
     );
     await fs.mkdir(path.dirname(archivePath), { recursive: true });
     await fs.writeFile(archivePath, fixture.archive);
-    vi.spyOn(openclawRoot, "resolveOpenClawPackageRootSync").mockReturnValue(packageRoot);
+    vi.spyOn(carapaceRoot, "resolveCarapacePackageRootSync").mockReturnValue(packageRoot);
     return archivePath;
   }
 
@@ -509,8 +509,8 @@ describe("node worker bundle installer", () => {
         ...process.env,
         NODE_COMPILE_CACHE: "/tmp/ambient-host-compile-cache",
         NODE_DISABLE_COMPILE_CACHE: "1",
-        OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.node",
-        OPENCLAW_SERVICE_KIND: "node",
+        CARAPACE_LAUNCHD_LABEL: "ai.carapace.node",
+        CARAPACE_SERVICE_KIND: "node",
       },
     });
 

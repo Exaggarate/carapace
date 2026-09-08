@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { hasGeneratedMediaCompletionEvent } from "../../agents/internal-event-contract.js";
 import {
@@ -13,7 +13,7 @@ import {
 } from "../../config/sessions.js";
 import { readTranscriptStatsSync } from "../../config/sessions/session-accessor.js";
 import { resolveMaintenanceConfigFromInput } from "../../config/sessions/store-maintenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { parseCronRunScopeSuffix } from "../../sessions/session-key-utils.js";
 import { sessionDeliveryChannel } from "../../utils/delivery-context.shared.js";
@@ -28,7 +28,7 @@ import { evaluateAgentSessionReuse } from "./agent-session-patch.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 type PreparedAgentSession = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   storePath: string;
   entry?: SessionEntry;
   canonicalKey: string;
@@ -56,7 +56,7 @@ type PreparedAgentSession = {
 };
 
 export function prepareAgentSession(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requestedSessionKey: string;
   requestedSessionId?: string;
   expectedExistingSessionId?: string;

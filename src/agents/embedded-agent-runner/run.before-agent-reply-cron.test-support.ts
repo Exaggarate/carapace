@@ -1,6 +1,6 @@
 // Full-entry coverage for before_agent_reply hook handling before embedded attempts.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
   mockedGlobalHookRunner,
@@ -10,7 +10,7 @@ import {
 } from "./run.overflow-compaction.harness.js";
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 
 function firstBeforeAgentReplyCall() {
@@ -52,8 +52,8 @@ describe("runEmbeddedAgent before_agent_reply seam", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.before-agent-reply-cron" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.before-agent-reply-cron" });
   });
 
   afterEach(async () => {
@@ -76,7 +76,7 @@ describe("runEmbeddedAgent before_agent_reply seam", () => {
       ...createOverflowRunParams(state),
       trigger: "cron",
       jobId: "cron-job-123",
-      prompt: "__openclaw_memory_core_short_term_promotion_dream__",
+      prompt: "__carapace_memory_core_short_term_promotion_dream__",
       onExecutionPhase,
     });
 
@@ -86,7 +86,7 @@ describe("runEmbeddedAgent before_agent_reply seam", () => {
     );
     const [hookPayload, hookContext] = firstBeforeAgentReplyCall();
     expect(hookPayload).toEqual({
-      cleanedBody: "__openclaw_memory_core_short_term_promotion_dream__",
+      cleanedBody: "__carapace_memory_core_short_term_promotion_dream__",
     });
     expect(hookContext?.jobId).toBe("cron-job-123");
     expect(hookContext?.agentId).toBe("main");

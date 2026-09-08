@@ -1,6 +1,6 @@
 // MCP loopback runtime scope cache.
 // Resolves Gateway-visible tools for MCP clients with short-lived schema caching.
-import { stableStringify } from "@openclaw/normalization-core/stable-stringify";
+import { stableStringify } from "@carapace/normalization-core/stable-stringify";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import {
   isCoreCodingSurfaceToolName,
@@ -10,7 +10,7 @@ import { applyEmbeddedAttemptToolsAllow } from "../agents/embedded-agent-runner/
 import { loadNodeExecAvailability } from "../agents/node-exec-availability.js";
 import type { PreparedRootedExecutionCapability } from "../agents/rooted-run-params.js";
 import { normalizeToolPolicyName } from "../agents/tool-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { DirectoryCache } from "../infra/outbound/directory-cache.js";
 import { getPluginToolMeta } from "../plugins/tool-metadata.js";
 import type { SkillLibraryAuthoringCapability } from "../skills/library/authoring.js";
@@ -46,7 +46,7 @@ type CachedScopedTools = {
 
 type McpLoopbackScopeParams = {
   context: Omit<McpLoopbackRequestContext, "senderIsOwner"> & { senderIsOwner?: boolean };
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   authProfileStore?: AuthProfileStore;
   authProfileStoreAgentDir?: string;
   skillLibraryAuthoring?: SkillLibraryAuthoringCapability;
@@ -110,7 +110,7 @@ function resolveMcpLoopbackTools(
   params.signal?.throwIfAborted();
   const { toolsAllow, ...context } = params.context;
   const excludeToolNames = new Set(NATIVE_TOOL_EXCLUDE);
-  // Restricted CLI grants use OpenClaw's implementations for coding tools;
+  // Restricted CLI grants use Carapace's implementations for coding tools;
   // native CLI tools bypass path, approval, sandbox, and exec policy.
   const mediatedNativeTools = params.rootedExecution
     ? new Set(NATIVE_TOOL_EXCLUDE)
@@ -211,7 +211,7 @@ function applyPolicyToolsAllow(
 export class McpLoopbackToolCache {
   #entries = new DirectoryCache<CachedScopedTools>(TOOL_CACHE_TTL_MS, TOOL_CACHE_MAX_ENTRIES);
   // Revocation needs the config scopes where one grant may have cached tools.
-  #grantConfigScopes = new Map<string, Set<OpenClawConfig>>();
+  #grantConfigScopes = new Map<string, Set<CarapaceConfig>>();
   #epoch = 0;
 
   async resolve(input: McpLoopbackScopeParams): Promise<CachedScopedTools> {
@@ -259,7 +259,7 @@ export class McpLoopbackToolCache {
     }
     this.#entries.set(cacheKey, nextEntry, params.cfg);
     if (params.grantToken) {
-      const scopes = this.#grantConfigScopes.get(params.grantToken) ?? new Set<OpenClawConfig>();
+      const scopes = this.#grantConfigScopes.get(params.grantToken) ?? new Set<CarapaceConfig>();
       scopes.add(params.cfg);
       this.#grantConfigScopes.set(params.grantToken, scopes);
     }

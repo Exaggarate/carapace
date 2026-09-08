@@ -12,7 +12,7 @@ describePosix("native hosted merge handoff", () => {
   let preparedGates: string;
 
   beforeAll(() => {
-    f = createMainRefreshFixture(tempDirs.make("openclaw-pr-merge-hosted-"));
+    f = createMainRefreshFixture(tempDirs.make("carapace-pr-merge-hosted-"));
     f.configure({ hostedCi: "release" });
     const prepare = f.run("prepare-run");
     expect(prepare.status, prepare.stdout + prepare.stderr).toBe(0);
@@ -25,7 +25,7 @@ describePosix("native hosted merge handoff", () => {
         expect.objectContaining({ id: 6, event: "workflow_dispatch", headSha: f.head }),
       ]),
     });
-    delete f.env.OPENCLAW_TESTBOX;
+    delete f.env.CARAPACE_TESTBOX;
     // A changelog-only checkout must not narrow the prepared source change's
     // gates, nor may a PR-controlled helper replace the canonical verifier.
     f.git(f.worktree, "checkout", "--detach", f.main);
@@ -95,7 +95,7 @@ describePosix("native hosted merge handoff", () => {
           f.canonical,
           "for-each-ref",
           "--format=%(refname)",
-          "refs/openclaw/pr-merge-outcomes/42",
+          "refs/carapace/pr-merge-outcomes/42",
         ),
       ).toBe("");
     },
@@ -190,7 +190,7 @@ describePosix("native hosted merge handoff", () => {
       "Fixture squash\n\nReviewed fixture body",
     );
     expect(
-      JSON.parse(f.git(f.canonical, "show", "refs/openclaw/pr-merge-outcomes/42:outcome.json")),
+      JSON.parse(f.git(f.canonical, "show", "refs/carapace/pr-merge-outcomes/42:outcome.json")),
     ).toMatchObject({ head: f.head, route: "immediate", phase: "complete" });
     expect(
       f

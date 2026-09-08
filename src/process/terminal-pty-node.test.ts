@@ -58,7 +58,7 @@ describe.runIf(process.platform !== "win32")("Node-owned terminal PTY", () => {
   });
 
   it("retains bounded pipe output while paused and drains it before reporting exit", async () => {
-    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-pty-output-"));
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-pty-output-"));
     tempDirs.push(directory);
     const payload = "x".repeat(2 * 1024 * 1024);
     const file = path.join(directory, "output.txt");

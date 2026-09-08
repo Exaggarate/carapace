@@ -2,10 +2,10 @@ import path from "node:path";
 import {
   createAdmittedHostCapabilityTestFixture,
   loadUserTurnTranscriptRecorderFactoryForTest,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "carapace/plugin-sdk/session-transcript-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { expect, it } from "vitest";
 import { CodexAppServerEventProjector } from "./event-projector.js";
 import {
@@ -34,7 +34,7 @@ it.each([undefined, "transport-user-key"])(
       agentId: "main",
       sessionId: base.sessionId,
       sessionKey: "agent:main:monitor",
-      storePath: path.join(base.workspaceDir, "openclaw-agent.sqlite"),
+      storePath: path.join(base.workspaceDir, "carapace-agent.sqlite"),
     };
     await upsertSessionEntry({ ...target, entry: { sessionId: target.sessionId, updatedAt: 1 } });
     const recorder = createUserTurnTranscriptRecorder({
@@ -89,7 +89,7 @@ it.each([undefined, "transport-user-key"])(
       await codexTranscriptMirrorRuntime.mirrorBestEffort({ ...mirror, result });
       const prompts = (await readSessionTranscriptEvents(target)).filter((event) => {
         const message = asOptionalRecord(asOptionalRecord(event)?.message);
-        return asOptionalRecord(message?.["__openclaw"])?.mirrorIdentity === "turn-1:prompt";
+        return asOptionalRecord(message?.["__carapace"])?.mirrorIdentity === "turn-1:prompt";
       });
       expect(prompts).toHaveLength(1);
       if (idempotencyKey) {

@@ -84,7 +84,7 @@ describe("agent file lifecycle", () => {
       files: () => ({ list, loading: false, error: null }),
       recordFile: () => list,
     } as unknown as ApplicationContext["agents"];
-    const page = document.createElement("openclaw-agents-page") as TestAgentsPage;
+    const page = document.createElement("carapace-agents-page") as TestAgentsPage;
     page.context = { gateway: gateway(snapshot(client)), agents } as unknown as ApplicationContext;
     setPageGateway(page, client);
     page.agentsSelectedId = "main";
@@ -112,7 +112,7 @@ describe("agent file lifecycle", () => {
     }));
     const refreshFiles = vi.fn(async () => list);
     const client = { request } as unknown as GatewayBrowserClient;
-    const page = document.createElement("openclaw-agents-page") as TestAgentsPage;
+    const page = document.createElement("carapace-agents-page") as TestAgentsPage;
     page.context = {
       gateway: gateway(snapshot(client)),
       agents: {
@@ -147,7 +147,7 @@ describe("agent file lifecycle", () => {
       files: () => ({ list: null, loading: false, error: null }),
       refreshFiles,
     } as unknown as ApplicationContext["agents"];
-    const page = document.createElement("openclaw-agents-page") as TestAgentsPage;
+    const page = document.createElement("carapace-agents-page") as TestAgentsPage;
     page.context = { gateway: gateway(snapshot(client)), agents } as unknown as ApplicationContext;
     setPageGateway(page, client);
     page.agentsSelectedId = "main";
@@ -199,7 +199,7 @@ describe("agent file lifecycle", () => {
       const currentGateway = gateway(snapshot(client));
       const agents = createAgentCapability(currentGateway);
       await agents.ensureFiles("main");
-      const page = document.createElement("openclaw-agents-page") as TestAgentsPage;
+      const page = document.createElement("carapace-agents-page") as TestAgentsPage;
       page.context = { gateway: currentGateway, agents } as unknown as ApplicationContext;
       setPageGateway(page, client);
       page.agentsSelectedId = "main";
@@ -287,7 +287,7 @@ describe("agent file lifecycle", () => {
       const currentGateway = gateway(snapshot(client));
       const agents = createAgentCapability(currentGateway);
       await agents.ensureFiles("main");
-      const page = document.createElement("openclaw-agents-page") as TestAgentsPage;
+      const page = document.createElement("carapace-agents-page") as TestAgentsPage;
       page.context = {
         basePath: "",
         gateway: { ...currentGateway, connection: { password: "" } },

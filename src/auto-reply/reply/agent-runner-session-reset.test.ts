@@ -56,7 +56,7 @@ async function initializeGitWorkspace(root: string): Promise<string> {
   const workspace = path.join(root, "workspace");
   await fs.mkdir(workspace);
   git(workspace, "init", "-q", "-b", "main");
-  git(workspace, "config", "user.email", "test@openclaw.test");
+  git(workspace, "config", "user.email", "test@carapace.test");
   git(workspace, "config", "user.name", "Test");
   git(workspace, "config", "commit.gpgsign", "false");
   await fs.writeFile(path.join(workspace, "tracked.txt"), "initial\n", "utf8");
@@ -102,7 +102,7 @@ describe("resetReplyRunSession", () => {
   let rootDir = "";
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-reset-run-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-reset-run-"));
     sessionDiffCapture.fail = false;
     sessionDiffCapture.onStart = undefined;
     sessionDiffCapture.wait = undefined;

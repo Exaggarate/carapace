@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { getGatewayToolCallerIdentity } from "../agents/tools/gateway-caller-context.js";
 import { resolveToolsMcpAgentId, resolveToolsMcpSessionContext } from "./agent-session-env.js";
-import { resolveOpenClawToolsForMcp } from "./openclaw-tools-serve.js";
+import { resolveCarapaceToolsForMcp } from "./carapace-tools-serve.js";
 const { callGatewayTool } = vi.hoisted(() => ({ callGatewayTool: vi.fn() }));
 vi.mock("../config/config.js", async (original) => ({
   ...(await original<typeof import("../config/config.js")>()),
@@ -16,12 +16,12 @@ afterEach(() => {
 });
 
 it("carries the private argv owner and exact logical key into the real automations tool", async () => {
-  const agentId = resolveToolsMcpAgentId(["--openclaw-agent-id", "work"]);
+  const agentId = resolveToolsMcpAgentId(["--carapace-agent-id", "work"]);
   expect(resolveToolsMcpSessionContext({ agentId, agentSessionKey: "global" })).toEqual({
     agentId: "work",
     sessionKey: "global",
   });
-  const [tool] = resolveOpenClawToolsForMcp({ agentId, agentSessionKey: "global" });
+  const [tool] = resolveCarapaceToolsForMcp({ agentId, agentSessionKey: "global" });
   callGatewayTool.mockImplementationOnce(async () => {
     expect(getGatewayToolCallerIdentity()).toMatchObject({
       agentId: "work",
@@ -32,13 +32,13 @@ it("carries the private argv owner and exact logical key into the real automatio
   await tool!.execute("owner-proof", { action: "status" });
   expect(callGatewayTool).toHaveBeenCalledOnce();
   expect(() =>
-    resolveOpenClawToolsForMcp({ agentId: "main", agentSessionKey: "agent:work:main" }),
+    resolveCarapaceToolsForMcp({ agentId: "main", agentSessionKey: "agent:work:main" }),
   ).toThrow("matching explicit");
 });
 
 it("rejects missing or duplicate private argv owners", () => {
-  expect(() => resolveToolsMcpAgentId(["--openclaw-agent-id"])).toThrow("requires one");
+  expect(() => resolveToolsMcpAgentId(["--carapace-agent-id"])).toThrow("requires one");
   expect(() =>
-    resolveToolsMcpAgentId(["--openclaw-agent-id", "work", "--openclaw-agent-id", "main"]),
+    resolveToolsMcpAgentId(["--carapace-agent-id", "work", "--carapace-agent-id", "main"]),
   ).toThrow("requires one");
 });

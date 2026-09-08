@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import type { HumanMention } from "@openclaw/gateway-protocol";
-import { expectDefined, stableStringify } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import type { HumanMention } from "@carapace/gateway-protocol";
+import { expectDefined, stableStringify } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { MediaImageLayout } from "../../../agents/embedded-agent-runner/run/prompt-image-metadata.js";
 import { runAgentHarnessBeforeMessageWriteHook } from "../../../agents/harness/hook-helpers.js";
 import { runOutsidePreparedModelRuntimePluginGenerationScope } from "../../../agents/prepared-model-runtime-generation-scope.js";
@@ -67,7 +67,7 @@ function hasPreparedCurrentTurnImages(run: FollowupRun): boolean {
 
 // Persists the most recent runFollowup callback per queue key so that
 // enqueueFollowupRun can restart a drain that finished and deleted the queue.
-const FOLLOWUP_DRAIN_CALLBACKS_KEY = Symbol.for("openclaw.followupDrainCallbacks");
+const FOLLOWUP_DRAIN_CALLBACKS_KEY = Symbol.for("carapace.followupDrainCallbacks");
 
 const FOLLOWUP_RUN_CALLBACKS = resolveGlobalMap<string, (run: FollowupRun) => Promise<void>>(
   FOLLOWUP_DRAIN_CALLBACKS_KEY,
@@ -94,7 +94,7 @@ function bindFollowupRestartDrainSignal(): void {
   );
 }
 
-const QUEUED_ADMISSION_OWNER_STATE_KEY = Symbol.for("openclaw.queuedAdmissionOwnerState");
+const QUEUED_ADMISSION_OWNER_STATE_KEY = Symbol.for("carapace.queuedAdmissionOwnerState");
 const queuedAdmissionOwnerState = resolveGlobalSingleton(QUEUED_ADMISSION_OWNER_STATE_KEY, () => ({
   keys: new WeakMap<NonNullable<FollowupRun["turnAdoptionLifecycle"]>, string>(),
   nextId: 1,
@@ -600,7 +600,7 @@ function buildCollectTranscriptInput(
       const block = renderCollectItemPrompt(item, index, sourceText);
       const sourceOffset = offset + 2 + buildCollectItemPrefix(item, index).length;
       const sourceEnd = sourceText.trimEnd().length;
-      for (const mention of message?.["__openclaw"]?.humanMentions ?? []) {
+      for (const mention of message?.["__carapace"]?.humanMentions ?? []) {
         if (mention.end <= sourceEnd) {
           mentions.push({
             ...mention,

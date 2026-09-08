@@ -1,8 +1,8 @@
 // Xai tests cover web search plugin behavior.
-import { createTestWizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { NON_ENV_SECRETREF_MARKER } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { createNonExitingRuntime } from "openclaw/plugin-sdk/runtime-env";
-import { withEnvAsync, withFetchPreconnect } from "openclaw/plugin-sdk/test-env";
+import { createTestWizardPrompter } from "carapace/plugin-sdk/plugin-test-runtime";
+import { NON_ENV_SECRETREF_MARKER } from "carapace/plugin-sdk/provider-auth-runtime";
+import { createNonExitingRuntime } from "carapace/plugin-sdk/runtime-env";
+import { withEnvAsync, withFetchPreconnect } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildXaiCatalogModels, resolveXaiCatalogEntry } from "./model-definitions.js";
 import { isModernXaiModel, resolveXaiForwardCompatModel } from "./provider-models.js";
@@ -19,12 +19,12 @@ const providerAuthMocks = vi.hoisted(() => ({
   listUsableProviderAuthProfileIds: vi.fn(() => ({ agentDir: "", profileIds: [] as string[] })),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => {
+vi.mock("carapace/plugin-sdk/agent-runtime", () => {
   throw new Error("xAI web search must not load the broad agent runtime");
 });
 
-vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => {
-  const original = await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth")>();
+vi.mock("carapace/plugin-sdk/provider-auth", async (importOriginal) => {
+  const original = await importOriginal<typeof import("carapace/plugin-sdk/provider-auth")>();
   return {
     ...original,
     ensureAuthProfileStore: providerAuthMocks.ensureAuthProfileStore,
@@ -32,9 +32,9 @@ vi.mock("openclaw/plugin-sdk/provider-auth", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", async (importOriginal) => {
   const original =
-    await importOriginal<typeof import("openclaw/plugin-sdk/provider-auth-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/provider-auth-runtime")>();
   return {
     ...original,
     resolveApiKeyForProvider: providerAuthRuntimeMocks.resolveApiKeyForProvider,
@@ -142,7 +142,7 @@ function requireXaiWebSearchTool(
 
 const defaultAgentConfig = {
   agents: {
-    list: [{ id: "main", default: true, agentDir: "/tmp/openclaw-xai-main-agent" }],
+    list: [{ id: "main", default: true, agentDir: "/tmp/carapace-xai-main-agent" }],
   },
 };
 
@@ -217,7 +217,7 @@ describe("xai web search config resolution", () => {
         }),
       });
 
-      const result = await maybeTool.execute({ query: "OpenClaw" });
+      const result = await maybeTool.execute({ query: "Carapace" });
       expect(result.error).toBe("missing_xai_api_key");
       expect(result.message).toContain("use web_fetch for a specific URL or the browser tool");
     });
@@ -238,7 +238,7 @@ describe("xai web search config resolution", () => {
       },
     });
 
-    await tool.execute({ query: "OpenClaw Grok OAuth web search" });
+    await tool.execute({ query: "Carapace Grok OAuth web search" });
 
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -258,23 +258,23 @@ describe("xai web search config resolution", () => {
     });
     const mockFetch = installXaiWebSearchFetch();
     const tool = requireXaiWebSearchTool({
-      agentDir: "/tmp/openclaw-xai-active-agent",
+      agentDir: "/tmp/carapace-xai-active-agent",
       config: {
         agents: {
           list: [
-            { id: "main", default: true, agentDir: "/tmp/openclaw-xai-main-agent" },
-            { id: "side", agentDir: "/tmp/openclaw-xai-active-agent" },
+            { id: "main", default: true, agentDir: "/tmp/carapace-xai-main-agent" },
+            { id: "side", agentDir: "/tmp/carapace-xai-active-agent" },
           ],
         },
       },
     });
 
-    await tool.execute({ query: "OpenClaw Grok active agent OAuth web search" });
+    await tool.execute({ query: "Carapace Grok active agent OAuth web search" });
 
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenCalledWith(
       expect.objectContaining({
         provider: "xai",
-        agentDir: "/tmp/openclaw-xai-active-agent",
+        agentDir: "/tmp/carapace-xai-active-agent",
       }),
     );
     expect(fetchCallHeader(mockFetch, 0, "Authorization")).toBe("Bearer active-agent-oauth-token");
@@ -301,7 +301,7 @@ describe("xai web search config resolution", () => {
     global.fetch = withFetchPreconnect(mockFetch);
     const tool = createAuthSearchTool();
 
-    const result = await tool.execute({ query: "OpenClaw Grok OAuth refresh test" });
+    const result = await tool.execute({ query: "Carapace Grok OAuth refresh test" });
 
     expect(result.content).toContain("Fresh OAuth Grok answer");
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenNthCalledWith(
@@ -344,7 +344,7 @@ describe("xai web search config resolution", () => {
     global.fetch = withFetchPreconnect(mockFetch);
     const tool = createAuthSearchTool();
 
-    const result = await tool.execute({ query: "OpenClaw Grok API fallback test" });
+    const result = await tool.execute({ query: "Carapace Grok API fallback test" });
 
     expect(result.content).toContain("API key fallback Grok answer");
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenNthCalledWith(
@@ -385,7 +385,7 @@ describe("xai web search config resolution", () => {
         profileId: "xai:key",
       });
     providerAuthMocks.listUsableProviderAuthProfileIds.mockReturnValue({
-      agentDir: "/tmp/openclaw-xai-main-agent",
+      agentDir: "/tmp/carapace-xai-main-agent",
       profileIds: ["xai:default", "xai:key"],
     });
     providerAuthMocks.ensureAuthProfileStore.mockReturnValue({
@@ -413,14 +413,14 @@ describe("xai web search config resolution", () => {
     global.fetch = withFetchPreconnect(mockFetch);
     const tool = createAuthSearchTool();
 
-    const result = await tool.execute({ query: "OpenClaw Grok profile fallback test" });
+    const result = await tool.execute({ query: "Carapace Grok profile fallback test" });
 
     expect(result.content).toContain("Profile API key Grok answer");
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenNthCalledWith(
       4,
       expect.objectContaining({
         provider: "xai",
-        agentDir: "/tmp/openclaw-xai-main-agent",
+        agentDir: "/tmp/carapace-xai-main-agent",
         profileId: "xai:key",
         lockedProfile: true,
       }),
@@ -450,7 +450,7 @@ describe("xai web search config resolution", () => {
     global.fetch = withFetchPreconnect(mockFetch);
     const tool = createAuthSearchTool();
 
-    const result = await tool.execute({ query: "OpenClaw Grok API-key fallback test" });
+    const result = await tool.execute({ query: "Carapace Grok API-key fallback test" });
 
     expect(result.content).toContain("Env fallback Grok answer");
     expect(providerAuthRuntimeMocks.resolveApiKeyForProvider).toHaveBeenNthCalledWith(
@@ -570,7 +570,7 @@ describe("xai web search config resolution", () => {
       searchConfig: { provider: "grok" },
     });
 
-    const result = await tool.execute({ query: "OpenClaw Grok proxy test" });
+    const result = await tool.execute({ query: "Carapace Grok proxy test" });
 
     expect(firstFetchUrl(mockFetch)).toBe("https://api.x.ai/proxy/v1/responses");
     expect(firstFetchBody(mockFetch)).toMatchObject({
@@ -595,7 +595,7 @@ describe("xai web search config resolution", () => {
       config: xaiPluginConfig({ webSearch: { apiKey: "xai-test-key" } }),
     });
 
-    await expect(tool.execute({ query: "OpenClaw" })).rejects.toThrow(
+    await expect(tool.execute({ query: "Carapace" })).rejects.toThrow(
       "xAI web search failed: malformed JSON response",
     );
   });
@@ -609,7 +609,7 @@ describe("xai web search config resolution", () => {
       config: xaiPluginConfig({ webSearch: { apiKey: "xai-test-key" } }),
     });
 
-    await expect(tool.execute({ query: "OpenClaw" })).rejects.toThrow(
+    await expect(tool.execute({ query: "Carapace" })).rejects.toThrow(
       "xAI web search failed: no answer text returned; try a simpler request",
     );
   });
@@ -620,7 +620,7 @@ describe("xai web search config resolution", () => {
     const tool = requireXaiWebSearchTool({
       config: xaiPluginConfig({ webSearch: { apiKey: "xai-test-key" } }),
     });
-    const request = () => tool.execute({ query: "OpenClaw timeout" });
+    const request = () => tool.execute({ query: "Carapace timeout" });
 
     await expect(request()).rejects.toThrow("xAI web search timed out after 60s");
 
@@ -904,7 +904,7 @@ describe("xai provider models", () => {
     });
   });
 
-  it("publishes the remaining Grok 3 family in the OpenClaw catalog", () => {
+  it("publishes the remaining Grok 3 family in the Carapace catalog", () => {
     expectCatalogEntry("grok-3-mini-fast", {
       id: "grok-3-mini-fast",
       reasoning: true,

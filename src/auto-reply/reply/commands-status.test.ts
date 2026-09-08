@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { normalizeTestText } from "../../../test/helpers/normalize-text.js";
 import { saveAuthProfileStore } from "../../agents/auth-profiles/store-runtime.js";
@@ -13,7 +13,7 @@ import {
   addSubagentRunForTests,
   resetSubagentRegistryForTests,
 } from "../../agents/subagents/registry/subagent-registry.test-helpers.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   persistSessionTranscriptTurn,
   replaceSessionEntry,
@@ -91,10 +91,10 @@ vi.mock("../../plugins/provider-thinking-active.js", async (importOriginal) => (
 
 vi.mock("../../status/status-plugin-health.runtime.js", () => pluginHealthRuntimeMock);
 
-vi.mock("../../agents/harness/builtin-openclaw.js", () => ({
-  createOpenClawAgentHarness: () => ({
-    id: "openclaw",
-    label: "OpenClaw Default",
+vi.mock("../../agents/harness/builtin-carapace.js", () => ({
+  createCarapaceAgentHarness: () => ({
+    id: "carapace",
+    label: "Carapace Default",
     supports: () => ({ supported: true, priority: 0 }),
     runAttempt: async () => {
       throw new Error("not used in status tests");
@@ -124,7 +124,7 @@ const codexStatusModel: ModelDefinitionConfig = {
 async function buildStatusReplyForTest(params: {
   sessionKey?: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   verbose?: boolean;
 }) {
   const cfg = params.cfg ?? baseCfg;
@@ -187,7 +187,7 @@ function saveStatusTestAuthProfiles(params: {
   dir: string;
   profiles: Array<{ profileId: string; provider: "openai" | "anthropic" }>;
 }): void {
-  const agentDir = path.join(params.dir, ".openclaw", "agents", "main", "agent");
+  const agentDir = path.join(params.dir, ".carapace", "agents", "main", "agent");
   fs.mkdirSync(agentDir, { recursive: true });
   saveAuthProfileStore(
     {
@@ -259,7 +259,7 @@ async function writeTranscriptUsageLog(params: {
 }) {
   const storePath = path.join(
     params.dir,
-    ".openclaw",
+    ".carapace",
     "agents",
     params.agentId,
     "sessions",
@@ -574,7 +574,7 @@ describe("buildStatusReply subagent summary", () => {
       runId: "run-status-task-leak",
       endedAt: Date.now(),
       error: [
-        "OpenClaw runtime context (internal):",
+        "Carapace runtime context (internal):",
         "This context is runtime-generated, not user-authored. Keep internal details private.",
         "",
         "[Internal task completion event]",
@@ -586,7 +586,7 @@ describe("buildStatusReply subagent summary", () => {
 
     expect(reply?.text).toContain("📌 Tasks: 1 recent failure");
     expect(reply?.text).toContain("leaked context task");
-    expect(reply?.text).not.toContain("OpenClaw runtime context (internal):");
+    expect(reply?.text).not.toContain("Carapace runtime context (internal):");
     expect(reply?.text).not.toContain("Internal task completion event");
   });
 
@@ -1031,7 +1031,7 @@ describe("buildStatusReply subagent summary", () => {
     expect(pluginHealthRuntimeMock.collectInstalledPluginHealthSnapshot).not.toHaveBeenCalled();
   });
 
-  it("shows the effective non-OpenClaw embedded harness in /status", async () => {
+  it("shows the effective non-Carapace embedded harness in /status", async () => {
     registerStatusCodexHarness();
 
     const text = await buildStatusText({
@@ -1081,7 +1081,7 @@ describe("buildStatusReply subagent summary", () => {
 
     await withTempHome(
       async (dir) => {
-        const agentDir = path.join(dir, ".openclaw", "agents", "main", "agent");
+        const agentDir = path.join(dir, ".carapace", "agents", "main", "agent");
         fs.mkdirSync(agentDir, { recursive: true });
         saveAuthProfileStore(
           {
@@ -1194,7 +1194,7 @@ describe("buildStatusReply subagent summary", () => {
 
     await withTempHome(
       async (dir) => {
-        const agentDir = path.join(dir, ".openclaw", "agents", "main", "agent");
+        const agentDir = path.join(dir, ".carapace", "agents", "main", "agent");
         const codexHome = path.join(agentDir, "codex-home");
         fs.mkdirSync(codexHome, { recursive: true });
         fs.writeFileSync(
@@ -1257,7 +1257,7 @@ describe("buildStatusReply subagent summary", () => {
 
     await withTempHome(
       async (dir) => {
-        const agentDir = path.join(dir, ".openclaw", "agents", "main", "agent");
+        const agentDir = path.join(dir, ".carapace", "agents", "main", "agent");
         fs.mkdirSync(agentDir, { recursive: true });
         saveAuthProfileStore(
           {
@@ -2015,10 +2015,10 @@ describe("buildStatusReply subagent summary", () => {
     );
   });
 
-  it("uses Codex OAuth auth labels for explicit OpenAI OpenClaw auth order", async () => {
+  it("uses Codex OAuth auth labels for explicit OpenAI Carapace auth order", async () => {
     await withTempHome(
       async (dir) => {
-        const agentDir = path.join(dir, ".openclaw", "agents", "main", "agent");
+        const agentDir = path.join(dir, ".carapace", "agents", "main", "agent");
         fs.mkdirSync(agentDir, { recursive: true });
         saveAuthProfileStore(
           {
@@ -2049,7 +2049,7 @@ describe("buildStatusReply subagent summary", () => {
               defaults: {
                 models: {
                   "openai/gpt-5.5": {
-                    agentRuntime: { id: "openclaw" },
+                    agentRuntime: { id: "carapace" },
                   },
                 },
               },
@@ -2071,7 +2071,7 @@ describe("buildStatusReply subagent summary", () => {
           provider: "openai",
           model: "gpt-5.5",
           contextTokens: 32_000,
-          resolvedHarness: "openclaw",
+          resolvedHarness: "carapace",
           resolvedFastMode: false,
           resolvedVerboseLevel: "off",
           resolvedReasoningLevel: "off",
@@ -2279,9 +2279,9 @@ describe("buildStatusReply subagent summary", () => {
   });
 
   it("uses workspace-scoped auth evidence in /status auth labels", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-status-auth-label-"));
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-status-auth-label-"));
     const workspaceDir = path.join(tempRoot, "workspace");
-    const pluginDir = path.join(workspaceDir, ".openclaw", "extensions", "workspace-auth-label");
+    const pluginDir = path.join(workspaceDir, ".carapace", "extensions", "workspace-auth-label");
     const bundledDir = path.join(tempRoot, "bundled");
     const stateDir = path.join(tempRoot, "state");
     const credentialPath = path.join(tempRoot, "credentials.json");
@@ -2291,7 +2291,7 @@ describe("buildStatusReply subagent summary", () => {
     fs.writeFileSync(path.join(pluginDir, "index.ts"), "export default {}\n", "utf8");
     fs.writeFileSync(credentialPath, "{}", "utf8");
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "workspace-auth-label",
         configSchema: { type: "object" },
@@ -2317,8 +2317,8 @@ describe("buildStatusReply subagent summary", () => {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+          CARAPACE_STATE_DIR: stateDir,
           ANTHROPIC_API_KEY: undefined,
           ANTHROPIC_OAUTH_TOKEN: undefined,
           WORKSPACE_STATUS_CREDENTIALS: credentialPath,
@@ -2357,7 +2357,7 @@ describe("buildStatusReply subagent summary", () => {
     }
   });
 
-  it("keeps /status on an explicit OpenClaw runtime override after config changes", async () => {
+  it("keeps /status on an explicit Carapace runtime override after config changes", async () => {
     registerStatusCodexHarness();
 
     const text = await buildStatusText({
@@ -2373,7 +2373,7 @@ describe("buildStatusReply subagent summary", () => {
         sessionId: "sess-status-pinned-agent",
         updatedAt: 0,
         fastMode: true,
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         agentHarnessId: "codex",
       },
       sessionKey: "agent:main:main",
@@ -2487,7 +2487,7 @@ describe("buildStatusReply subagent summary", () => {
       sessionEntry: {
         sessionId: "sess-status-observed-agent",
         updatedAt: 0,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       },
       sessionKey: "agent:main:main",
       parentSessionKey: "agent:main:main",
@@ -2507,7 +2507,7 @@ describe("buildStatusReply subagent summary", () => {
     });
 
     expect(normalizeTestText(text)).toContain("Runtime: OpenAI Codex");
-    expect(normalizeTestText(text)).toContain("previous runtime: OpenClaw Default");
+    expect(normalizeTestText(text)).toContain("previous runtime: Carapace Default");
   });
 
   it("labels a divergent locked harness as an active session pin in /status", async () => {
@@ -2518,7 +2518,7 @@ describe("buildStatusReply subagent summary", () => {
       sessionEntry: {
         sessionId: "sess-status-locked-agent",
         updatedAt: 0,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         modelSelectionLocked: true,
       },
       sessionKey: "agent:main:main",
@@ -2540,7 +2540,7 @@ describe("buildStatusReply subagent summary", () => {
     });
 
     expect(normalizeTestText(text)).toContain(
-      "Runtime: OpenAI Codex (session pin: OpenClaw Default)",
+      "Runtime: OpenAI Codex (session pin: Carapace Default)",
     );
   });
 });
@@ -2632,7 +2632,7 @@ describe("buildStatusReply error handling", () => {
 });
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */
 
-async function buildKiraStatusReply(cfg: OpenClawConfig) {
+async function buildKiraStatusReply(cfg: CarapaceConfig) {
   return await buildStatusReply({
     cfg,
     command: {
@@ -2663,7 +2663,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
   });
 
   it("shows per-agent thinkingDefault in the status card", async () => {
@@ -2684,7 +2684,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const reply = await buildKiraStatusReply(cfg);
 
@@ -2714,7 +2714,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const reply = await buildKiraStatusReply(cfg);
 
@@ -2741,7 +2741,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const reply = await buildKiraStatusReply(cfg);
 
@@ -2770,7 +2770,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const reply = await buildKiraStatusReply(cfg);
 
@@ -2800,7 +2800,7 @@ describe("buildStatusReply", () => {
       channels: {
         whatsapp: { allowFrom: ["*"] },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const reply = await buildKiraStatusReply(cfg);
 

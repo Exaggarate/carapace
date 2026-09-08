@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { loadSessionEntry } from "../../config/sessions/session-accessor.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { AgentSessionPatchBuild } from "../server-methods/agent-session-patch.js";
 import { persistAgentSessionPhase } from "./agent-session-persist.js";
 
 describe("persistAgentSessionPhase", () => {
   it("sandboxes a new synthetic run using its host-minted operator identity", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const profile = ensureProfileForEmail("synthetic-sandbox-creator@example.com");
       const sessionKey = "agent:main:synthetic-sandbox";
       const runId = "synthetic-sandbox-run";
@@ -83,7 +83,7 @@ describe("persistAgentSessionPhase", () => {
   });
 
   it("surfaces session creation authorization failures before concurrent lifecycle rotation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:role-denied";
       const runId = "role-denied-run";
       const respond = vi.fn<Parameters<typeof persistAgentSessionPhase>[0]["respond"]>();

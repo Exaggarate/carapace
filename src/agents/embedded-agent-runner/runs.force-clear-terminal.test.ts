@@ -12,9 +12,9 @@ import {
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createDeferredEmbeddedRunLifecycleManager } from "./run/deferred-lifecycle-owner.js";
 import {
   abortAndDrainEmbeddedAgentRun,
@@ -41,13 +41,13 @@ function createRunHandle(
 }
 
 describe("force-clear terminal state persistence", () => {
-  let testState: OpenClawTestState | undefined;
+  let testState: CarapaceTestState | undefined;
   let storePath: string;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-forceclear-",
+      prefix: "carapace-forceclear-",
     });
     storePath = path.join(testState.sessionsDir(), "sessions.json");
     setRuntimeConfigSnapshot({ session: { store: storePath } });

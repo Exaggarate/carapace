@@ -1,5 +1,5 @@
 import type { LookupAddress } from "node:dns";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import * as undici from "undici";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createBraveWebSearchProvider } from "./brave-web-search-provider.js";
@@ -65,7 +65,7 @@ beforeEach(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) =>
     fetchNetwork(input, init),
   );
-  vi.stubGlobal("__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__", { ...undici, fetch: fetchNetwork });
+  vi.stubGlobal("__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__", { ...undici, fetch: fetchNetwork });
   for (const key of [
     "HTTP_PROXY",
     "HTTPS_PROXY",
@@ -73,8 +73,8 @@ beforeEach(() => {
     "http_proxy",
     "https_proxy",
     "all_proxy",
-    "OPENCLAW_PROXY_ACTIVE",
-    "OPENCLAW_DEBUG_PROXY_ENABLED",
+    "CARAPACE_PROXY_ACTIVE",
+    "CARAPACE_DEBUG_PROXY_ENABLED",
   ]) {
     vi.stubEnv(key, "");
   }

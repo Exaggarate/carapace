@@ -4,7 +4,7 @@ import type {
   EnvironmentSummary,
   EnvironmentsListResult,
   SystemInfoResult,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import { html, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { GATEWAY_EVENT_DEVICE_PAIR_CHANGED } from "../../../../src/gateway/events.js";
@@ -44,13 +44,13 @@ import {
   GatewayPageController,
   type GatewayPageChange,
 } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { DevicesDialogController } from "./devices-dialogs.ts";
 import { renderDevices } from "./view.ts";
 
-const DEVICES_DOCS_URL = "https://docs.openclaw.ai/nodes";
+const DEVICES_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 export type DevicesRouteData = {
   // Client identity alone cannot distinguish provider replacement or reconnect epochs.
@@ -62,7 +62,7 @@ export type DevicesRouteData = {
 const DEVICES_ACTIVE_POLL_INTERVAL_MS = 30_000;
 const SYSTEM_INFO_POLL_INTERVAL_MS = 60_000;
 
-class DevicesPage extends OpenClawLightDomElement {
+class DevicesPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -642,6 +642,6 @@ class DevicesPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-devices-page")) {
-  customElements.define("openclaw-devices-page", DevicesPage);
+if (!customElements.get("carapace-devices-page")) {
+  customElements.define("carapace-devices-page", DevicesPage);
 }

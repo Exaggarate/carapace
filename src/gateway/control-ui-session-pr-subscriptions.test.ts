@@ -132,8 +132,8 @@ describe("control UI session PR subscriptions", () => {
       pullRequests: [
         {
           number: 1,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "carapace",
+          repo: "carapace",
           branch: "feature/demo",
           title: "Demo",
           url: "https://example.test/pr/1",
@@ -761,7 +761,7 @@ describe("control UI session PR subscriptions", () => {
         if (sessionKey === "repository-only") {
           return {
             pullRequests: [],
-            repository: { owner: "openclaw", repo: "openclaw" },
+            repository: { owner: "carapace", repo: "carapace" },
             rateLimited: false,
             status: "unavailable",
           };
@@ -783,7 +783,7 @@ describe("control UI session PR subscriptions", () => {
       failed: { pullRequests: [], rateLimited: false, status: "unavailable" },
       "repository-only": {
         pullRequests: [],
-        repository: { owner: "openclaw", repo: "openclaw" },
+        repository: { owner: "carapace", repo: "carapace" },
         rateLimited: false,
         status: "unavailable",
       },

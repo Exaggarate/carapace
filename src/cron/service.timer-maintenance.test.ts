@@ -6,17 +6,17 @@ import type { CronJob } from "./types.js";
 
 const sqliteTransactionLabels = vi.hoisted(() => [] as string[]);
 
-vi.mock("../state/openclaw-state-db.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../state/openclaw-state-db.js")>();
-  const runOpenClawStateWriteTransaction: typeof actual.runOpenClawStateWriteTransaction = (
+vi.mock("../state/carapace-state-db.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../state/carapace-state-db.js")>();
+  const runCarapaceStateWriteTransaction: typeof actual.runCarapaceStateWriteTransaction = (
     operation,
     options,
     transactionOptions,
   ) => {
     sqliteTransactionLabels.push(transactionOptions?.operationLabel ?? "state.write");
-    return actual.runOpenClawStateWriteTransaction(operation, options, transactionOptions);
+    return actual.runCarapaceStateWriteTransaction(operation, options, transactionOptions);
   };
-  return { ...actual, runOpenClawStateWriteTransaction };
+  return { ...actual, runCarapaceStateWriteTransaction };
 });
 
 const { logger, makeStorePath } = setupCronServiceSuite({

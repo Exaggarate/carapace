@@ -42,7 +42,7 @@ import {
   buildWatchedSessionsPromptLines,
   prepareWatchedSessionsPrompt,
 } from "../agents/watched-sessions-prompt.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveExecModePolicy } from "../infra/exec-approvals-core.js";
 import { maxAsk, minSecurity } from "../infra/exec-approvals-policy.js";
 import type { ImageContent } from "../llm/types.js";
@@ -60,10 +60,10 @@ export const execPolicy = Object.freeze({ resolveExecModePolicy, minSecurity, ma
  * Renders the Watched Sessions prompt block for plugin-owned harness prompts.
  * Harness runtimes that assemble their own instruction layers (e.g. Codex)
  * must surface the same watched-session facts as the embedded prompt, or the
- * model keeps refusing cross-session questions on those runtimes (openclaw#114797).
+ * model keeps refusing cross-session questions on those runtimes (carapace#114797).
  */
 export function buildWatchedSessionsHarnessContext(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   sandboxed?: boolean;
   toolNames: Iterable<string>;
@@ -127,7 +127,7 @@ export const agentHarnessAttemptTerminal = {
   setFailure: setAgentRunAttemptTerminalFailure,
 };
 export { projectAgentHarnessTranscriptMessageForDisplay } from "../agents/harness/transcript-visibility.js";
-export { isOpenClawRuntimeContextCustomMessage } from "../agents/internal-runtime-context.js";
+export { isCarapaceRuntimeContextCustomMessage } from "../agents/internal-runtime-context.js";
 export { restorePreparedUserTurnOperationalMetaForRuntime } from "../sessions/user-turn-transcript.metadata.js";
 export { fingerprintResolvedAuthProfileCredential } from "../agents/execution-auth-binding.js";
 export type {
@@ -192,7 +192,7 @@ export type {
   AgentToolResultMiddlewareOptions,
   AgentToolResultMiddlewareResult,
   AgentToolResultMiddlewareRuntime,
-  OpenClawAgentToolResult,
+  CarapaceAgentToolResult,
 } from "../plugins/agent-tool-result-middleware-types.js";
 export type {
   CodexAppServerExtensionContext,
@@ -208,7 +208,7 @@ export type {
   NativeHookRelayRegistrationHandle,
 } from "../agents/harness/native-hook-relay.js";
 
-export { VERSION as OPENCLAW_VERSION } from "../version.js";
+export { VERSION as CARAPACE_VERSION } from "../version.js";
 export { formatErrorMessage } from "../infra/errors.js";
 export { formatApprovalDisplayPath } from "../infra/approval-display-paths.js";
 export { buildAgentHookContextChannelFields } from "../plugins/hook-agent-context.js";
@@ -356,7 +356,7 @@ export async function detectAndLoadAgentHarnessPromptImages(params: {
   existingImages?: ImageContent[];
   imageOrder?: PromptImageOrderEntry[];
   media?: import("../media/media-facts.js").MediaFact[];
-  config?: import("../config/types.openclaw.js").OpenClawConfig;
+  config?: import("../config/types.carapace.js").CarapaceConfig;
   workspaceOnly?: boolean;
   localRoots?: readonly string[];
   sandbox?: { root: string; bridge: SandboxFsBridge };
@@ -371,7 +371,7 @@ export async function detectAndLoadAgentHarnessPromptImages(params: {
     await Promise.all([
       import("../agents/image-sanitization.js"),
       import("../agents/embedded-agent-runner/run/images.js"),
-      import("@openclaw/media-core/constants"),
+      import("@carapace/media-core/constants"),
     ]);
 
   return detectAndLoadPromptImages({
@@ -583,7 +583,7 @@ export {
 } from "../agents/harness/native-hook-relay.js";
 
 /**
- * Derive the same compact user-facing tool detail that embedded OpenClaw uses for progress logs.
+ * Derive the same compact user-facing tool detail that embedded Carapace uses for progress logs.
  */
 export type ToolProgressDetailMode = "explain" | "raw";
 
@@ -634,7 +634,7 @@ export type AgentHarnessTerminalOutcomeClassification = NonNullable<
  * should advance fallback. Deliberate silent replies such as NO_REPLY count as
  * intentional output, while whitespace-only text remains fallback-eligible.
  * This is intentionally SDK-level so plugin harness adapters such as Codex
- * preserve the same OpenClaw-owned fallback signals as the built-in OpenClaw path
+ * preserve the same Carapace-owned fallback signals as the built-in Carapace path
  * without re-implementing terminal-result policy.
  */
 export function classifyAgentHarnessTerminalOutcome(

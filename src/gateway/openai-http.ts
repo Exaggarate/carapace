@@ -1,14 +1,14 @@
 // Gateway OpenAI-compatible chat completions endpoint.
-// Translates OpenAI chat requests to OpenClaw agent runs and SSE/JSON responses.
+// Translates OpenAI chat requests to Carapace agent runs and SSE/JSON responses.
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { avoidTrailingHighSurrogateBreak } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { avoidTrailingHighSurrogateBreak } from "@carapace/normalization-core/utf16-slice";
 import { z } from "zod";
 import type { AdmittedRunContext } from "../agents/admitted-run-context.js";
 import { isClientToolNameConflictError } from "../agents/agent-tool-definition-adapter.js";
@@ -835,7 +835,7 @@ export async function handleOpenAiHttpRequest(
   }
   const stream = payload.stream === true;
   const streamIncludeUsage = stream && resolveIncludeUsageForStreaming(payload);
-  const model = typeof payload.model === "string" ? payload.model : "openclaw";
+  const model = typeof payload.model === "string" ? payload.model : "carapace";
   const user = typeof payload.user === "string" ? payload.user : undefined;
   let maxTokens: number | undefined;
   try {
@@ -1088,7 +1088,7 @@ export async function handleOpenAiHttpRequest(
         });
         return true;
       }
-      const content = resolveAssistantResultText(result) || "No response from OpenClaw.";
+      const content = resolveAssistantResultText(result) || "No response from Carapace.";
 
       sendJson(res, 200, {
         id: runId,
@@ -1168,7 +1168,7 @@ export async function handleOpenAiHttpRequest(
         pending: pendingAssistantText,
         resultText: finalResultText,
         streamedText: streamedAssistantText,
-        fallbackText: finalToolCalls ? "" : "No response from OpenClaw.",
+        fallbackText: finalToolCalls ? "" : "No response from Carapace.",
       });
       if (!text.startsWith(streamedAssistantText)) {
         finishStreamWithError({

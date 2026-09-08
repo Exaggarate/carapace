@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { copyCoreTtsAttemptResultProvenance } from "../../tools/tts-tool-result-provenance.js";
 import { hasOutboundDeliveryEvidence } from "../delivery-evidence.js";
 import type { ToolSummaryTrace } from "../types.js";

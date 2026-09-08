@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { describe, expect, it } from "vitest";
 import { codexCatalogHomeId } from "../session-catalog-home-id.js";
 import {

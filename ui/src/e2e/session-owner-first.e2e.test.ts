@@ -8,7 +8,7 @@ import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts"
 
 const suite = createControlUiE2eSuite({ name: "Control UI owner-first session roster" });
 const rosterMatch = { includeGlobal: true };
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 function sessionRoster(ownerId: string, key: string, label: string, updatedAt: number) {
   const owner = {

@@ -54,7 +54,7 @@ const mocks = vi.hoisted(() => ({
   writeQaSuiteProgress: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness", () => ({
+vi.mock("carapace/plugin-sdk/agent-harness", () => ({
   disposeRegisteredAgentHarnesses: vi.fn(async () => {}),
 }));
 vi.mock("./gateway-child.js", () => ({
@@ -350,7 +350,7 @@ describe("QA runtime parity scenario retry isolation", () => {
   });
 
   it.each([
-    { forcedRuntime: undefined, expectedRuntime: "openclaw" },
+    { forcedRuntime: undefined, expectedRuntime: "carapace" },
     { forcedRuntime: "codex" as const, expectedRuntime: "codex" },
   ])(
     "records $expectedRuntime as the selected runtime fact",
@@ -419,7 +419,7 @@ describe("QA runtime parity scenario retry isolation", () => {
   it.each(["pass", "fail"] as const)(
     "retains sanitized logs after an initial %s only when the scenario retried",
     async (firstStatus) => {
-      vi.stubEnv("OPENCLAW_QA_KEEP_TEMP", undefined);
+      vi.stubEnv("CARAPACE_QA_KEEP_TEMP", undefined);
       const root = await tempDirs.makeTempDir("qa-retry-artifacts-");
       const tempRoot = path.join(root, "runtime");
       await fs.mkdir(tempRoot);

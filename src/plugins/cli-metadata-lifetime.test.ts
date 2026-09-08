@@ -9,7 +9,7 @@ import {
   setRuntimeConfigSnapshot,
   setRuntimeConfigSourceSnapshotIfCurrent,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { setTestEnvValue, withEnvAsync } from "../test-utils/env.js";
 import {
   createPluginCliLoadSession,
@@ -20,7 +20,7 @@ import {
 import { registerPluginCliCommands, registerPluginCliCommandsFromValidatedConfig } from "./cli.js";
 import { getCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata.test-support.js";
-import { loadOpenClawPluginCliRegistry } from "./loader.js";
+import { loadCarapacePluginCliRegistry } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   makePluginLoaderTempDir,
@@ -50,14 +50,14 @@ describe("CLI prepared metadata lifetime", () => {
     const cfg = { plugins: { load: { paths: [plugin.dir] }, allow: [plugin.id] } };
     const env = {
       HOME: root,
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
     };
     const session = createPluginCliLoadSession();
     const params = { cfg, env, session, primaryCommand: "prepared" };
     const entries = await loadPluginCliRegistrationEntriesWithDefaults(params);
     expect(entries).toHaveLength(1);
-    fs.unlinkSync(path.join(plugin.dir, "openclaw.plugin.json"));
+    fs.unlinkSync(path.join(plugin.dir, "carapace.plugin.json"));
     clearPluginMetadataLifecycleCaches();
     const program = new Command();
     await expect(entries[0]!.register(program)).rejects.toThrow(/plugin CLI preparation/i);
@@ -81,8 +81,8 @@ describe("CLI prepared metadata lifetime", () => {
       cfg: { plugins: { load: { paths: [plugin.dir] }, allow: [plugin.id] } },
       env: {
         HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
       session: createPluginCliLoadSession(),
       primaryCommand: "prepared",
@@ -99,11 +99,11 @@ describe("CLI prepared metadata lifetime", () => {
     "validates all workspaces with $first first and execution owner $owner",
     async ({ first, owner }) => {
       const root = fs.realpathSync(makePluginLoaderTempDir());
-      const configPath = path.join(root, "openclaw.json");
+      const configPath = path.join(root, "carapace.json");
       for (const id of ["alpha", "beta"]) {
         writePlugin({
           id,
-          dir: path.join(root, id, ".openclaw", "extensions", id),
+          dir: path.join(root, id, ".carapace", "extensions", id),
           filename: "index.cjs",
           configSchema: {
             type: "object",
@@ -113,7 +113,7 @@ describe("CLI prepared metadata lifetime", () => {
           body: `module.exports = { id: ${JSON.stringify(id)}, register(api) { require("node:fs").writeFileSync(${JSON.stringify(path.join(root, `${id}-registered`))}, api.registrationMode); api.registerCli(({program}) => program.command(${JSON.stringify(id)}), { descriptors: [{ name: ${JSON.stringify(id)}, description: "Workspace", hasSubcommands: false }] }); } };`,
         });
       }
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           entries: Object.fromEntries(
@@ -129,10 +129,10 @@ describe("CLI prepared metadata lifetime", () => {
       fs.writeFileSync(configPath, JSON.stringify(cfg));
       await withEnvAsync(
         {
-          OPENCLAW_HOME: root,
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_HOME: root,
+          CARAPACE_STATE_DIR: path.join(root, "state"),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         },
         async () => {
           const session = createPluginCliLoadSession();
@@ -194,7 +194,7 @@ describe("CLI prepared metadata lifetime", () => {
         path.join(plugin.dir, "cli-metadata.cjs"),
         'module.exports = require("./index.cjs");',
       );
-      const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+      const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
       fs.writeFileSync(
         manifestPath,
         JSON.stringify({
@@ -206,8 +206,8 @@ describe("CLI prepared metadata lifetime", () => {
       fs.writeFileSync(
         path.join(plugin.dir, "package.json"),
         JSON.stringify({
-          name: "@openclaw/cli-inputs",
-          openclaw: {
+          name: "@carapace/cli-inputs",
+          carapace: {
             extensions: ["./index.cjs"],
             channel: { id: plugin.id, configuredState: { env: { allOf: ["CLI_INPUTS_TOKEN"] } } },
           },
@@ -215,14 +215,14 @@ describe("CLI prepared metadata lifetime", () => {
       );
       await withEnvAsync(
         {
-          OPENCLAW_HOME: root,
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_HOME: root,
+          CARAPACE_STATE_DIR: path.join(root, "state"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
           CLI_INPUTS_TOKEN: undefined,
         },
         async () => {
-          const cfg: OpenClawConfig = {
+          const cfg: CarapaceConfig = {
             agents: { defaults: { workspace: path.join(root, "workspace") } },
             plugins: { enabled: true },
             auth: { profiles: {} },
@@ -287,7 +287,7 @@ describe("CLI prepared metadata lifetime", () => {
 
   it("does not borrow another environment's Gateway graph through config identity", async () => {
     const root = fs.realpathSync(makePluginLoaderTempDir());
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { defaults: { workspace: path.join(root, "workspace") } },
       plugins: { allow: ["environment-cli"], entries: { "environment-cli": { enabled: true } } },
     };
@@ -299,7 +299,7 @@ describe("CLI prepared metadata lifetime", () => {
         filename: "index.cjs",
         body: `module.exports = { id: "environment-cli", register(api) { api.registerCli(() => {}, { descriptors: [{ name: "prepared", description: ${JSON.stringify(label)}, hasSubcommands: false }] }); } };`,
       });
-      return { HOME: root, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" };
+      return { HOME: root, CARAPACE_STATE_DIR: stateDir, CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" };
     });
     const gateway = resolvePluginRuntimeLoadContext({ config: cfg, env: environments[0] });
     expect(gateway.metadataSnapshot).toBeDefined();
@@ -348,7 +348,7 @@ describe("CLI prepared metadata lifetime", () => {
   },
 };`,
       });
-      const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+      const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
       if (!legacy) {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
         manifest.cliCommands = [
@@ -358,10 +358,10 @@ describe("CLI prepared metadata lifetime", () => {
       }
       const env = {
         HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       };
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         plugins: {
           load: { paths: [plugin.dir] },
           allow: [plugin.id],
@@ -409,14 +409,14 @@ describe("CLI prepared metadata lifetime", () => {
       const root = fs.realpathSync(makePluginLoaderTempDir());
       const env = {
         HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       };
       const createWorkspace = (label: string) => {
         const workspace = path.join(root, label);
         writePlugin({
           id: "workspace-cli",
-          dir: path.join(workspace, ".openclaw", "extensions", "workspace-cli"),
+          dir: path.join(workspace, ".carapace", "extensions", "workspace-cli"),
           filename: "index.cjs",
           body: `module.exports = { id: "workspace-cli", register(api) {
           api.registerCli(({ program }) => program.command("prepared").description(${JSON.stringify(label)}), {
@@ -428,7 +428,7 @@ describe("CLI prepared metadata lifetime", () => {
       };
       const firstWorkspace = createWorkspace("first");
       const secondWorkspace = createWorkspace("second");
-      const config = (workspace: string, enabled = true): OpenClawConfig => ({
+      const config = (workspace: string, enabled = true): CarapaceConfig => ({
         agents: { defaults: { workspace } },
         plugins: { allow: ["workspace-cli"], entries: { "workspace-cli": { enabled } } },
       });
@@ -490,10 +490,10 @@ describe("CLI prepared metadata lifetime", () => {
       });
       const env = {
         HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       };
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           load: { paths: [plugin.dir] },
           allow: [plugin.id],
@@ -508,8 +508,8 @@ describe("CLI prepared metadata lifetime", () => {
       const manifestRegistry = loadPluginManifestRegistryCore({ config, env });
       expect(manifestRegistry.plugins.map((entry) => entry.id)).toEqual([plugin.id]);
       // The caller owns this graph; subsequent discovery cannot recover the removed manifest.
-      fs.unlinkSync(path.join(plugin.dir, "openclaw.plugin.json"));
-      const registry = await loadOpenClawPluginCliRegistry({
+      fs.unlinkSync(path.join(plugin.dir, "carapace.plugin.json"));
+      const registry = await loadCarapacePluginCliRegistry({
         config,
         env,
         manifestRegistry,

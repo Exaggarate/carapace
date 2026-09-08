@@ -23,7 +23,7 @@ import { readClawManifestFile } from "./reader.js";
 import { isSafeClawRelativePath } from "./schema-portability.js";
 import { MAX_MANAGED_FILE_BYTES } from "./source-limits.js";
 
-export const CLAW_BUILD_RESULT_SCHEMA_VERSION = "openclaw.clawBuild.v1" as const;
+export const CLAW_BUILD_RESULT_SCHEMA_VERSION = "carapace.clawBuild.v1" as const;
 
 // zlib's public numeric API defines Z_FILTERED as strategy 1.
 const ZLIB_FILTERED_STRATEGY = 1;
@@ -88,7 +88,7 @@ export async function extractBuiltClawArtifact(artifact: string): Promise<{
   packageRoot: string;
   dispose: () => Promise<void>;
 }> {
-  const temporaryDirectory = await mkdtemp(join(tmpdir(), "openclaw-claw-artifact-"));
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), "carapace-claw-artifact-"));
   try {
     await tar.x({ cwd: temporaryDirectory, file: resolve(artifact), strict: true });
     const packageRoot = join(temporaryDirectory, "package");
@@ -140,7 +140,7 @@ export async function buildClawProject(
     );
   }
 
-  const temporaryDirectory = await mkdtemp(join(dirname(artifact), ".openclaw-claw-build-"));
+  const temporaryDirectory = await mkdtemp(join(dirname(artifact), ".carapace-claw-build-"));
   const stagingRoot = join(temporaryDirectory, "staging");
   const temporaryArtifact = join(temporaryDirectory, "claw.tgz");
   try {
@@ -155,12 +155,12 @@ export async function buildClawProject(
       assertValidatedBytes("BOOTSTRAP.md", bootstrap, project.claw.packageBootstrap);
       files.set("BOOTSTRAP.md", bootstrap);
     }
-    if (project.claw.openClawProfile) {
-      const profileSnapshot = project.claw.snapshot.openClawProfile;
+    if (project.claw.carapaceProfile) {
+      const profileSnapshot = project.claw.snapshot.carapaceProfile;
       if (!profileSnapshot) {
         throw new ClawProjectError(
           "project_invalid",
-          "Validated OpenClaw profile is missing its source snapshot.",
+          "Validated Carapace profile is missing its source snapshot.",
         );
       }
       const profile = await readSelectedProjectFile(project.root, profileSnapshot.sourcePath);

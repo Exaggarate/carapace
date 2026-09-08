@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { html, LitElement } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../../test/helpers/promise.js";
@@ -25,7 +25,7 @@ type FullMessageResult = Awaited<ReturnType<SidebarFullMessageLoader>>;
 const previewMessage = {
   role: "assistant",
   content: "Preview\n...(truncated)...",
-  __openclaw: { id: "assistant-full-1", truncated: true },
+  __carapace: { id: "assistant-full-1", truncated: true },
   timestamp: 1_000,
 };
 
@@ -263,7 +263,7 @@ describe("chat transcript full-message recovery", () => {
         message: {
           ...previewMessage,
           role: "user",
-          __openclaw: { id: "pending:accepted-1", truncated: true },
+          __carapace: { id: "pending:accepted-1", truncated: true },
         },
       },
     ];

@@ -1,5 +1,5 @@
-import { formatConnectErrorMessage } from "@openclaw/gateway-protocol/connect-error-details";
-import type { ErrorShape } from "@openclaw/gateway-protocol/frame-guards";
+import { formatConnectErrorMessage } from "@carapace/gateway-protocol/connect-error-details";
+import type { ErrorShape } from "@carapace/gateway-protocol/frame-guards";
 import { GatewayProtocolRequestError } from "./protocol-request.js";
 
 export class GatewayClientRequestError extends GatewayProtocolRequestError {

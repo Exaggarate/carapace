@@ -127,7 +127,7 @@ describe("SystemAgentChatEngine approval", () => {
           value: "19001",
           cliOptions: {},
         });
-        expect(applied?.text).toContain("[openclaw] done: config.set");
+        expect(applied?.text).toContain("[carapace] done: config.set");
         expect(observedInputs[1]).toContain("was approved");
       } else {
         expect(runConfigSet).not.toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe("SystemAgentChatEngine approval", () => {
     expect(pending.text).toContain("Approval pending");
     expect(runAgentTurn).not.toHaveBeenCalled();
     expect(runConfigSet).toHaveBeenCalledOnce();
-    expect(applied?.text).toContain("[openclaw] done: config.set");
+    expect(applied?.text).toContain("[carapace] done: config.set");
     expect(engine.getPendingOperatorProposal()).toBeNull();
   });
 
@@ -179,7 +179,7 @@ describe("SystemAgentChatEngine approval", () => {
     const reply = await engine.handle("yes");
     expect(runConfigSet).toHaveBeenCalledOnce();
     expect(reply.action).toBe("none");
-    expect(reply.text).toContain("[openclaw] done: config.set");
+    expect(reply.text).toContain("[carapace] done: config.set");
     expect(reply.agentDraft).toBeUndefined();
     expect(reply.handoff).toBeUndefined();
     expect(engine.getPendingOperatorProposal()).toBeNull();
@@ -189,7 +189,7 @@ describe("SystemAgentChatEngine approval", () => {
     {
       origin: "custodian",
       requesterAgentId: undefined,
-      expectedCreatorAgentId: "openclaw",
+      expectedCreatorAgentId: "carapace",
       expectedDescription: "create agent researcher with workspace /tmp/researcher",
     },
     {
@@ -255,7 +255,7 @@ describe("SystemAgentChatEngine approval", () => {
   it("stays in setup when an established workspace has no bootstrap pending", async () => {
     useTempStateDir();
     const applySetup = vi.fn(async () => ({
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
       configHashBefore: "before",
       configHashAfter: "after",
       bootstrapPending: false,
@@ -297,7 +297,7 @@ describe("SystemAgentChatEngine approval", () => {
     const applySetup = vi.fn(async () => {
       applied = true;
       return {
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
         configHashBefore: "before",
         configHashAfter: "after",
         bootstrapPending: true,
@@ -353,14 +353,14 @@ describe("SystemAgentChatEngine approval", () => {
     expect(reply.handoff).toBeUndefined();
     expect(reply.sensitive).toBeUndefined();
     expect(reply.text).toContain("replace the inference route powering this session");
-    // A gateway reader is in a browser or the app and cannot "exit OpenClaw"
+    // A gateway reader is in a browser or the app and cannot "exit Carapace"
     // into a shell; the copy must name where the command runs instead.
-    expect(reply.text).toContain("`openclaw onboard`");
-    expect(reply.text).toContain("machine running OpenClaw");
-    expect(reply.text).toContain("Stop the OpenClaw host");
+    expect(reply.text).toContain("`carapace onboard`");
+    expect(reply.text).toContain("machine running Carapace");
+    expect(reply.text).toContain("Stop the Carapace host");
     expect(reply.text).toContain("restart the host");
-    expect(reply.text).toContain("return to OpenClaw");
-    expect(reply.text).not.toContain("Exit OpenClaw");
+    expect(reply.text).toContain("return to Carapace");
+    expect(reply.text).not.toContain("Exit Carapace");
   });
 
   it("drops the proposal when the user declines", async () => {
@@ -585,7 +585,7 @@ describe("SystemAgentChatEngine approval", () => {
 
     const applied = await engine.handle("yes");
     expect(runConfigSet).toHaveBeenCalledOnce();
-    expect(applied.text).toContain("[openclaw] done: config.set");
+    expect(applied.text).toContain("[carapace] done: config.set");
   });
 
   it.each([
@@ -881,7 +881,7 @@ describe("SystemAgentChatEngine approval", () => {
     expect(runAgentTurn).toHaveBeenCalledOnce();
     expect(reply.text).toContain("requesting session's permission policy");
     expect(reply.text).toContain("returns the final outcome");
-    expect(reply.text).not.toContain("OpenClaw operator UI");
+    expect(reply.text).not.toContain("Carapace operator UI");
     expect(reply.text).not.toContain("ask the user to reply yes");
     expect(reply.action).toBe("none");
     expect(engine.getPendingOperatorProposal()?.operation).toEqual({

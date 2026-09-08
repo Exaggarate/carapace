@@ -1,6 +1,6 @@
 import AVFAudio
-import OpenClawChatUI
-import OpenClawProtocol
+import CarapaceChatUI
+import CarapaceProtocol
 import SwiftUI
 
 private struct ChatScrollEdgeTreatment: ViewModifier {
@@ -35,9 +35,9 @@ struct ChatProTab: View {
     }
 
     @Environment(NodeAppModel.self) private var appModel
-    @AppStorage("openclaw.webchat.showAssistantTrace")
+    @AppStorage("carapace.webchat.showAssistantTrace")
     private var showsAssistantTrace = true
-    @State private var viewModel: OpenClawChatViewModel?
+    @State private var viewModel: CarapaceChatViewModel?
     @State private var viewModelOwnerID = ""
     @State private var transcriptShareItem: TranscriptShareItem?
     @State private var showsTranscriptExportError = false
@@ -53,15 +53,15 @@ struct ChatProTab: View {
     @State private var viewModelPresentationAgentName = "Main"
     @State private var viewModelPresentationAgentBadge = "M"
     @State private var viewModelHasVerifiedOfflineRoutingIdentity = false
-    @State private var speech: OpenClawChatSpeechController?
+    @State private var speech: CarapaceChatSpeechController?
     @State private var isGatewayStatusManuallyExpanded = false
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: CarapaceSidebarHeaderAction?
     let headerTitle: String?
     let showsAgentBadge: Bool
     let openSettings: (() -> Void)?
 
     init(
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: CarapaceSidebarHeaderAction? = nil,
         headerTitle: String? = nil,
         showsAgentBadge: Bool = true,
         openSettings: (() -> Void)? = nil)
@@ -80,7 +80,7 @@ struct ChatProTab: View {
                 await self.handleNewChatRequest(self.appModel.newChatRequestID)
                 if self.speech == nil {
                     let gateway = self.appModel.operatorSession
-                    self.speech = OpenClawChatSpeechController { text in
+                    self.speech = CarapaceChatSpeechController { text in
                         try await ChatMessageSpeechClient.synthesize(text: text, gateway: gateway)
                     }
                 }
@@ -133,7 +133,7 @@ struct ChatProTab: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if let headerSidebarAction {
-                    OpenClawSidebarToolbarItem(
+                    CarapaceSidebarToolbarItem(
                         action: headerSidebarAction,
                         placement: .topBarLeading)
                 }
@@ -190,18 +190,18 @@ struct ChatProTab: View {
             {
                 Button(role: .cancel) {} label: {
                     Text("OK")
-                        .font(OpenClawType.body)
+                        .font(CarapaceType.body)
                 }
             } message: {
-                Text("OpenClaw could not prepare the Markdown file.")
-                    .font(OpenClawType.body)
+                Text("Carapace could not prepare the Markdown file.")
+                    .font(CarapaceType.body)
             }
     }
 
     @ViewBuilder
     private var chatSurface: some View {
         if let viewModel {
-            OpenClawChatView(
+            CarapaceChatView(
                 viewModel: viewModel,
                 drawsBackground: true,
                 showsSessionSwitcher: false,
@@ -209,7 +209,7 @@ struct ChatProTab: View {
                 showsAssistantTrace: self.showsAssistantTrace,
                 assistantName: self.agentDisplayName,
                 assistantAvatarText: self.agentBadge,
-                assistantAvatarTint: OpenClawBrand.accent,
+                assistantAvatarTint: CarapaceBrand.accent,
                 showsAssistantAvatars: false,
                 composerChrome: .clean,
                 isComposerEnabled: self.gatewayConnected || self.canQueueOffline,
@@ -233,7 +233,7 @@ struct ChatProTab: View {
                         !self.appModel.voiceNoteRecorder.ownsPendingChatAttachment
                 })
                 // iMessage-style grey bubbles for agent replies in the clean chrome.
-                .environment(\.openClawAssistantBubblesInCleanChrome, true)
+                .environment(\.carapaceAssistantBubblesInCleanChrome, true)
                 .id(ObjectIdentifier(viewModel))
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         } else {
@@ -241,7 +241,7 @@ struct ChatProTab: View {
                 "Preparing Chat",
                 systemImage: "bubble.left.and.bubble.right",
                 description: Text("The session attaches once the gateway is ready.")
-                    .font(OpenClawType.body))
+                    .font(CarapaceType.body))
         }
     }
 
@@ -250,17 +250,17 @@ struct ChatProTab: View {
     private var headerIdentityBadge: some View {
         TalkAvatarWaveformView(
             phase: self.voiceAvatarPhase,
-            palette: .openClawBrand,
+            palette: .carapaceBrand,
             diameter: 38,
             avatarDiameter: 28)
         {
             Text(self.agentBadge)
-                .font(OpenClawType.avatar(size: self.agentBadge.count > 2 ? 12 : 16))
+                .font(CarapaceType.avatar(size: self.agentBadge.count > 2 ? 12 : 16))
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
                 .frame(width: 28, height: 28)
-                .background(Circle().fill(OpenClawBrand.carapaceElevated))
+                .background(Circle().fill(CarapaceBrand.carapaceElevated))
         }
         .overlay(alignment: .topTrailing) {
             self.gatewayAvatarStatusDot
@@ -348,7 +348,7 @@ struct ChatProTab: View {
                         .transition(.opacity.combined(with: .move(edge: .leading)))
                 } else {
                     Text(self.agentDisplayName)
-                        .font(OpenClawType.headline)
+                        .font(CarapaceType.headline)
                         .lineLimit(1)
                         .transition(.opacity)
                 }
@@ -359,18 +359,18 @@ struct ChatProTab: View {
         }
     }
 
-    private var coloredHeaderSession: OpenClawChatSessionEntry? {
+    private var coloredHeaderSession: CarapaceChatSessionEntry? {
         guard let session = viewModel?.currentSessionEntry(),
-              OpenClawSessionColor(name: session.color) != nil
+              CarapaceSessionColor(name: session.color) != nil
         else { return nil }
         return session
     }
 
-    private func headerSessionTitle(_ session: OpenClawChatSessionEntry) -> some View {
+    private func headerSessionTitle(_ session: CarapaceChatSessionEntry) -> some View {
         HStack(spacing: 5) {
-            OpenClawSessionColorDot(color: session.color)
+            CarapaceSessionColorDot(color: session.color)
             Text(verbatim: CommandCenterTab.sessionTitle(session))
-                .font(OpenClawType.captionMedium)
+                .font(CarapaceType.captionMedium)
                 .lineLimit(1)
         }
     }
@@ -399,7 +399,7 @@ struct ChatProTab: View {
 
     private var expandedGatewayStatusLabel: some View {
         Text(Self.gatewayStatusTitle(state: self.gatewayDisplayState, isGatewayUsable: self.gatewayConnected))
-            .font(OpenClawType.subheadMedium)
+            .font(CarapaceType.subheadMedium)
             .foregroundStyle(.primary)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
@@ -497,7 +497,7 @@ struct ChatProTab: View {
         self.viewModelHasVerifiedOfflineRoutingIdentity = self.appModel.hasVerifiedChatOfflineRoutingIdentity
     }
 
-    private func makeChatViewModel(sessionKey: String) -> OpenClawChatViewModel {
+    private func makeChatViewModel(sessionKey: String) -> CarapaceChatViewModel {
         let appModel = self.appModel
         // Tool activity belongs to this model's captured agent, including while attachment-pinned.
         // Never relabel an old agent's tools with a newly selected agent's presentation.
@@ -507,7 +507,7 @@ struct ChatProTab: View {
         // operations to their separate installation-wide databases.
         let offlineStore = self.appModel.makeChatOfflineStore()
         let voiceNoteRecorder = self.appModel.voiceNoteRecorder
-        return OpenClawChatViewModel(
+        return CarapaceChatViewModel(
             sessionKey: sessionKey,
             // Bind durable rows and their transport lease to the exact same
             // gateway owner even if app state switches between these calls.
@@ -537,8 +537,8 @@ struct ChatProTab: View {
             })
     }
 
-    private var talkControl: OpenClawChatTalkControl {
-        OpenClawChatTalkControl(
+    private var talkControl: CarapaceChatTalkControl {
+        CarapaceChatTalkControl(
             isEnabled: self.appModel.talkMode.isEnabled,
             isListening: self.appModel.talkMode.isListening,
             isSpeaking: self.appModel.talkMode.isSpeaking,
@@ -561,9 +561,9 @@ struct ChatProTab: View {
             })
     }
 
-    private var talkInputDevices: [OpenClawChatAudioInputDevice] {
+    private var talkInputDevices: [CarapaceChatAudioInputDevice] {
         (AVAudioSession.sharedInstance().availableInputs ?? []).map { input in
-            OpenClawChatAudioInputDevice(id: input.uid, name: input.portName)
+            CarapaceChatAudioInputDevice(id: input.uid, name: input.portName)
         }
     }
 
@@ -574,8 +574,8 @@ struct ChatProTab: View {
         return preferredID
     }
 
-    private var dictationControl: OpenClawChatDictationControl {
-        OpenClawChatDictationControl(
+    private var dictationControl: CarapaceChatDictationControl {
+        CarapaceChatDictationControl(
             isActive: self.appModel.isChatDictationActive,
             isAvailable: !self.appModel.isTalkCaptureActive || self.appModel.isChatDictationActive,
             start: {
@@ -599,8 +599,8 @@ struct ChatProTab: View {
         return 0
     }
 
-    private var voiceNoteControl: OpenClawChatVoiceNoteControl {
-        OpenClawChatVoiceNoteControl(
+    private var voiceNoteControl: CarapaceChatVoiceNoteControl {
+        CarapaceChatVoiceNoteControl(
             recorder: self.appModel.voiceNoteRecorder,
             isTalkActive: self.appModel.isTalkCaptureActive)
     }
@@ -610,7 +610,7 @@ struct ChatProTab: View {
             self.showsChatActions.toggle()
         } label: {
             Image(systemName: "ellipsis.circle")
-                .foregroundStyle(OpenClawBrand.accent)
+                .foregroundStyle(CarapaceBrand.accent)
         }
         .frame(width: 44, height: 44)
         .contentShape(Rectangle())
@@ -732,7 +732,7 @@ struct ChatProTab: View {
             sessionTitle: title,
             sessionKey: viewModel.sessionKey)
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("OpenClawTranscripts", isDirectory: true)
+            .appendingPathComponent("CarapaceTranscripts", isDirectory: true)
         let fileURL = directory.appendingPathComponent(filename, isDirectory: false)
 
         do {
@@ -789,11 +789,11 @@ struct ChatProTab: View {
             isGatewayUsable: self.gatewayConnected)
         {
         case .success:
-            OpenClawBrand.statusSuccess
+            CarapaceBrand.statusSuccess
         case .warning:
-            OpenClawBrand.statusWarning
+            CarapaceBrand.statusWarning
         case .error:
-            OpenClawBrand.statusError
+            CarapaceBrand.statusError
         }
     }
 
@@ -865,7 +865,7 @@ struct ChatProTab: View {
     }
 
     private var chatUserAccent: Color {
-        ColorHexSupport.color(fromHex: self.appModel.gatewayAccentColorHex) ?? OpenClawBrand.accent
+        ColorHexSupport.color(fromHex: self.appModel.gatewayAccentColorHex) ?? CarapaceBrand.accent
     }
 
     private var isAttachmentOwnerPinned: Bool {
@@ -938,16 +938,16 @@ struct ChatProTab: View {
         currentOwnerID != nextOwnerID || currentTransportAgentID != nextTransportAgentID
     }
 
-    nonisolated static let emptyAssistantPrompts: [OpenClawChatView.StarterPrompt] = [
-        OpenClawChatView.StarterPrompt(
+    nonisolated static let emptyAssistantPrompts: [CarapaceChatView.StarterPrompt] = [
+        CarapaceChatView.StarterPrompt(
             id: "summarize-status",
-            title: String(localized: "Check OpenClaw status"),
-            prompt: String(localized: "Summarize the current OpenClaw status and tell me what needs attention.")),
-        OpenClawChatView.StarterPrompt(
+            title: String(localized: "Check Carapace status"),
+            prompt: String(localized: "Summarize the current Carapace status and tell me what needs attention.")),
+        CarapaceChatView.StarterPrompt(
             id: "show-controls",
             title: String(localized: "What can I control here?"),
             prompt: String(localized: "Show me which phone controls and device capabilities are available right now.")),
-        OpenClawChatView.StarterPrompt(
+        CarapaceChatView.StarterPrompt(
             id: "start-voice",
             title: String(localized: "Help me start voice chat"),
             prompt: String(localized: "Help me start a realtime voice session from this phone.")),

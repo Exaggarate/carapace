@@ -19,23 +19,23 @@ import {
 
 const { requestPreparedCompaction } = vi.hoisted(() => ({
   requestPreparedCompaction:
-    vi.fn<typeof import("@openclaw/ai/transports").requestPreparedOpenAIResponsesCompaction>(),
+    vi.fn<typeof import("@carapace/ai/transports").requestPreparedOpenAIResponsesCompaction>(),
 }));
-vi.mock("@openclaw/ai/transports", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@openclaw/ai/transports")>()),
+vi.mock("@carapace/ai/transports", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@carapace/ai/transports")>()),
   requestPreparedOpenAIResponsesCompaction: requestPreparedCompaction,
 }));
 
 let delegate: typeof import("../../context-engine/delegate.js").delegateCompactionToRuntime;
 let sessions: typeof import("../sessions/index.js");
 let accessor: typeof import("../../config/sessions/session-accessor.js");
-let databases: typeof import("../../state/openclaw-agent-db.js");
+let databases: typeof import("../../state/carapace-agent-db.js");
 let streamResolution: typeof import("./stream-resolution.js");
 let replay: typeof import("../openai-transport-stream.test-support.js").testing;
 let accounting: typeof import("./run/compaction-accounting-bridge.js");
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    databases.closeOpenClawAgentDatabasesForTest();
+    databases.closeCarapaceAgentDatabasesForTest();
     cleanup();
   }),
 );
@@ -66,7 +66,7 @@ beforeAll(async () => {
     import("../../context-engine/delegate.js"),
     import("../sessions/index.js"),
     import("../../config/sessions/session-accessor.js"),
-    import("../../state/openclaw-agent-db.js"),
+    import("../../state/carapace-agent-db.js"),
     import("./stream-resolution.js"),
     import("../openai-transport-stream.test-support.js"),
     import("./run/compaction-accounting-bridge.js"),
@@ -74,7 +74,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  workspaceDir = tempDirs.make("openclaw-compaction-delegate-");
+  workspaceDir = tempDirs.make("carapace-compaction-delegate-");
   resetCompactHooksHarnessMocks(workspaceDir);
   const actualScope =
     await vi.importActual<typeof import("../agent-scope.js")>("../agent-scope.js");
@@ -94,9 +94,9 @@ async function createFixture(operation: "summary" | "endpoint", globalAlias = fa
     agentId: globalAlias ? "marketing" : "main",
     sessionId: "compaction-session",
     sessionKey: globalAlias ? "global" : "agent:main:compaction-session",
-    storePath: join(workspaceDir, "alternate", "openclaw-agent.sqlite"),
+    storePath: join(workspaceDir, "alternate", "carapace-agent.sqlite"),
   };
-  const configuredStore = join(workspaceDir, "configured", "openclaw-agent.sqlite");
+  const configuredStore = join(workspaceDir, "configured", "carapace-agent.sqlite");
   await accessor.upsertSessionEntryCore(target, { sessionId: target.sessionId, updatedAt: 1 });
   // The same physical id in another store must not redirect partial-target resolution.
   const decoy = { ...target, storePath: configuredStore };
@@ -213,7 +213,7 @@ describe("direct compactor through the context-engine delegate", () => {
         throw new Error("Compactor must return its complete resolved identity");
       }
       // Close the actual DB handles before observing the returned identity and history.
-      databases.closeOpenClawAgentDatabasesForTest();
+      databases.closeCarapaceAgentDatabasesForTest();
       const reopened = sessions.SessionManager.open({
         agentId: returned.agentId,
         sessionId: returned.sessionId,
@@ -286,7 +286,7 @@ describe("direct compactor through the context-engine delegate", () => {
           },
         );
       } else {
-        const { createAssistantMessageEventStream } = await import("openclaw/plugin-sdk/llm");
+        const { createAssistantMessageEventStream } = await import("carapace/plugin-sdk/llm");
         fixture.stream.mockImplementationOnce((activeModel, _context, options) => {
           const stream = createAssistantMessageEventStream();
           started.resolve();
@@ -319,7 +319,7 @@ describe("direct compactor through the context-engine delegate", () => {
       await stopped.promise;
       expect(result).toMatchObject({ ok: false, compacted: false });
       expect(result.result).toBeUndefined();
-      databases.closeOpenClawAgentDatabasesForTest();
+      databases.closeCarapaceAgentDatabasesForTest();
       const reopened = sessions.SessionManager.open(fixture.target);
       expect(reopened.getSessionId()).toBe(fixture.target.sessionId);
       expect(reopened.getEntries()).toEqual(fixture.originalEntries);
@@ -342,7 +342,7 @@ describe("direct compactor through the context-engine delegate", () => {
     expect(fixture.stream).not.toHaveBeenCalled();
     expect(resolveModelMock).not.toHaveBeenCalled();
     expect(hookRunner.runBeforeCompaction).not.toHaveBeenCalled();
-    databases.closeOpenClawAgentDatabasesForTest();
+    databases.closeCarapaceAgentDatabasesForTest();
     expect(sessions.SessionManager.open(fixture.target).getEntries()).toEqual(
       fixture.originalEntries,
     );

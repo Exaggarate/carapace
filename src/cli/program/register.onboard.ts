@@ -1,5 +1,5 @@
 // Commander registration for onboard setup flags and lazy onboard runtime execution.
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { Option, type Command } from "commander";
 import { formatDocsLink } from "../../../packages/terminal-core/src/links.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
@@ -155,7 +155,7 @@ export function registerOnboardGatewayOptions(command: Command): Command {
     .option("--gateway-token <token>", "Gateway token (token auth)")
     .option(
       "--gateway-token-ref-env <name>",
-      "Gateway token SecretRef env var name (token auth; e.g. OPENCLAW_GATEWAY_TOKEN)",
+      "Gateway token SecretRef env var name (token auth; e.g. CARAPACE_GATEWAY_TOKEN)",
     )
     .option("--gateway-password <password>", "Gateway password (password auth)");
 }
@@ -283,7 +283,7 @@ export function registerOnboardCommand(program: Command): void {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/onboard", "docs.openclaw.ai/cli/onboard")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/onboard", "github.com/Exaggarate/carapace")}\n`,
     )
     .option(
       "--workspace <dir>",
@@ -296,7 +296,7 @@ export function registerOnboardCommand(program: Command): void {
     )
     .option("--reset-scope <scope>", "Reset scope: config|config+creds+sessions|full")
     .option("--non-interactive", "Run without prompts", false)
-    .option("--modern", "Open inference-gated OpenClaw (kept for compatibility)", false)
+    .option("--modern", "Open inference-gated Carapace (kept for compatibility)", false)
     .option("--classic", "Use the classic multi-step setup wizard", false)
     .option("--tui", "Use the terminal hatch instead of the browser handoff", false)
     .option(
@@ -382,7 +382,7 @@ export function registerOnboardCommand(program: Command): void {
           rejectOption(
             [
               `--modern cannot be combined with: ${unsupportedOptions.join(", ")}.`,
-              "Run those setup options without --modern, or remove them to open OpenClaw.",
+              "Run those setup options without --modern, or remove them to open Carapace.",
             ].join("\n"),
           );
           return;
@@ -391,8 +391,8 @@ export function registerOnboardCommand(program: Command): void {
           rejectOption(
             [
               "Non-interactive setup requires explicit risk acknowledgement.",
-              "Read: https://docs.openclaw.ai/security",
-              `Re-run with: ${formatCliCommand("openclaw onboard --modern --non-interactive --accept-risk ...")}`,
+              "Read: https://github.com/Exaggarate/carapace",
+              `Re-run with: ${formatCliCommand("carapace onboard --modern --non-interactive --accept-risk ...")}`,
             ].join("\n"),
           );
           return;

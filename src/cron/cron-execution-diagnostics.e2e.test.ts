@@ -6,10 +6,10 @@ import {
   createAgentRunRestartAbortError,
   createAgentRunSupersededAbortError,
 } from "../agents/run-termination.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { createAgentRunStaleLifecycleError } from "../infra/agent-lifecycle-error.js";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   loadRunCronIsolatedAgentTurn,
   dispatchCronDeliveryMock,
@@ -58,7 +58,7 @@ async function closeServer(server: Server): Promise<void> {
   });
 }
 
-function configFor(modelRef: ModelRef, localBaseUrl?: string): OpenClawConfig {
+function configFor(modelRef: ModelRef, localBaseUrl?: string): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -82,12 +82,12 @@ function configFor(modelRef: ModelRef, localBaseUrl?: string): OpenClawConfig {
 }
 
 async function runPersistedDiagnosticCase(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelRef: ModelRef;
   name: string;
 }) {
-  return await withOpenClawTestState(
-    { layout: "state-only", prefix: "openclaw-cron-execution-diagnostics-" },
+  return await withCarapaceTestState(
+    { layout: "state-only", prefix: "carapace-cron-execution-diagnostics-" },
     async (state) => {
       resetTaskRegistryForTests();
       const events: CronEvent[] = [];

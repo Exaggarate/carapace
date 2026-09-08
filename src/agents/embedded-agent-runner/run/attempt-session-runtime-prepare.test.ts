@@ -48,7 +48,7 @@ type PrepareInput = Parameters<typeof prepareEmbeddedAttemptSessionRuntime>[0];
 
 function createFixture() {
   const order: string[] = [];
-  const activeMarker = { type: "custom", customType: "openclaw.cache-ttl", data: "active" };
+  const activeMarker = { type: "custom", customType: "carapace.cache-ttl", data: "active" };
   const sessionManager = {
     kind: "manager",
     getBranch: () => [activeMarker],

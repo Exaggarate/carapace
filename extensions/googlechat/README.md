@@ -1,11 +1,11 @@
-# OpenClaw Google Chat
+# Carapace Google Chat
 
-Official OpenClaw channel plugin for Google Chat spaces and direct messages.
+Official Carapace channel plugin for Google Chat spaces and direct messages.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/googlechat
+carapace plugins install @carapace/googlechat
 ```
 
-Configure the Google Chat app credentials and allowed spaces in OpenClaw. The plugin lets agents receive Google Chat events and reply through the configured app.
+Configure the Google Chat app credentials and allowed spaces in Carapace. The plugin lets agents receive Google Chat events and reply through the configured app.

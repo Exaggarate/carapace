@@ -10,9 +10,9 @@ const indexHtmlPath = path.resolve(
   process.cwd(),
   path.basename(process.cwd()) === "ui" ? "index.html" : "ui/index.html",
 );
-const renderEvent = "openclaw-control-ui-rendered";
-const loadCountKey = "openclaw.control-ui-e2e.mount-fallback-loads";
-const renderCountKey = "openclaw.control-ui-e2e.mount-fallback-renders";
+const renderEvent = "carapace-control-ui-rendered";
+const loadCountKey = "carapace.control-ui-e2e.mount-fallback-loads";
+const renderCountKey = "carapace.control-ui-e2e.mount-fallback-renders";
 let syntheticModuleRenders = false;
 
 async function startRegisteredElementFixture(): Promise<ControlUiE2eServer> {
@@ -23,13 +23,13 @@ async function startRegisteredElementFixture(): Promise<ControlUiE2eServer> {
       response.setHeader("content-type", "text/javascript; charset=utf-8");
       response.end(
         syntheticModuleRenders
-          ? `customElements.define("openclaw-app", class extends HTMLElement {
+          ? `customElements.define("carapace-app", class extends HTMLElement {
               connectedCallback() {
                 this.textContent = "Application rendered";
                 window.dispatchEvent(new Event(${JSON.stringify(renderEvent)}));
               }
             });`
-          : 'customElements.define("openclaw-app", class extends HTMLElement {});',
+          : 'customElements.define("carapace-app", class extends HTMLElement {});',
       );
       return;
     }
@@ -94,9 +94,9 @@ registeredElementSuite.define(() => {
         await page.clock.install();
         await pauseVirtualClock(page);
         await page.goto(registeredElementSuite.server.baseUrl, { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => customElements.get("openclaw-app") !== undefined);
+        await page.waitForFunction(() => customElements.get("carapace-app") !== undefined);
 
-        expect(await page.locator("openclaw-app").textContent()).toBe("");
+        expect(await page.locator("carapace-app").textContent()).toBe("");
         expect(
           await page.evaluate((key) => sessionStorage.getItem(key), renderCountKey),
         ).toBeNull();
@@ -120,7 +120,7 @@ registeredElementSuite.define(() => {
         await page.getByText("Application rendered", { exact: true }).waitFor();
         await page.clock.runFor(12_001);
 
-        expect(await page.locator("#openclaw-mount-fallback").isHidden()).toBe(true);
+        expect(await page.locator("#carapace-mount-fallback").isHidden()).toBe(true);
         expect(await page.evaluate((key) => sessionStorage.getItem(key), renderCountKey)).toBe("1");
       },
     );
@@ -143,7 +143,7 @@ runtimeFailureSuite.define(() => {
           Object.defineProperty(globalThis, "getComputedStyle", {
             configurable: true,
             value: (element: Element, pseudoElement?: string | null) => {
-              if (customElements.get("openclaw-app")) {
+              if (customElements.get("carapace-app")) {
                 throw new Error("forced application runtime creation failure");
               }
               return browserGetComputedStyle(element, pseudoElement);
@@ -153,7 +153,7 @@ runtimeFailureSuite.define(() => {
         await page.clock.install();
         await pauseVirtualClock(page);
         await page.goto(runtimeFailureSuite.server.baseUrl, { waitUntil: "domcontentloaded" });
-        await page.waitForFunction(() => customElements.get("openclaw-app") !== undefined);
+        await page.waitForFunction(() => customElements.get("carapace-app") !== undefined);
 
         await page.clock.runFor(12_001);
         await waitForRecoveryDocument(page);

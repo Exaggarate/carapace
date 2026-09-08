@@ -79,7 +79,7 @@ describe("A2A JSON-RPC request contracts", () => {
   });
 
   it("validates bounded canonical conversation identifiers", () => {
-    expect(isA2aContextId("ctx-openclaw:peer_1.2")).toBe(true);
+    expect(isA2aContextId("ctx-carapace:peer_1.2")).toBe(true);
     expect(isA2aContextId("../escape")).toBe(false);
     expect(isA2aContextId("a".repeat(129))).toBe(false);
     expect(

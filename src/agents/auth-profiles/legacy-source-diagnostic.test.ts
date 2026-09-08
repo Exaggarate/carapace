@@ -14,7 +14,7 @@ afterEach(() => {
 
 describe("assertAuthProfileMigrationReady", () => {
   it("reports only credential sources without marking runtime migration state", async () => {
-    await withTestDir({ prefix: "openclaw-auth-migration-diagnostic-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-auth-migration-diagnostic-" }, async (root) => {
       const credentialAgentDir = path.join(root, "credential-agent");
       const authStateAgentDir = path.join(root, "auth-state-agent");
       await fs.mkdir(credentialAgentDir, { recursive: true });
@@ -36,7 +36,7 @@ describe("assertAuthProfileMigrationReady", () => {
   });
 
   it("clears the requirement once the canonical store holds credentials", async () => {
-    await withTestDir({ prefix: "openclaw-auth-migration-migrated-" }, async (root) => {
+    await withTestDir({ prefix: "carapace-auth-migration-migrated-" }, async (root) => {
       const agentDir = path.join(root, "migrated-agent");
       await fs.mkdir(agentDir, { recursive: true });
       await fs.writeFile(path.join(agentDir, "auth.json"), '{"openai":{"key":"not-a-real"}}\n');

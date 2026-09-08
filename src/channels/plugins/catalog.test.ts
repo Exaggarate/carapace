@@ -51,7 +51,7 @@ function writeChannelCatalog(
       entries: [
         {
           name: `@example/${id}`,
-          openclaw: {
+          carapace: {
             channel: { id, label, selectionLabel: label, docsPath: `/channels/${id}`, blurb: id },
             install: { npmSpec: `@example/${id}`, ...(defaultChoice ? { defaultChoice } : {}) },
           },
@@ -63,9 +63,9 @@ function writeChannelCatalog(
 
 describe("channel plugin catalog", () => {
   it("keeps catalog-only channel IDs in the selected metadata owner", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-catalog-ids-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channel-catalog-ids-"));
     tempDirs.push(root);
-    fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
     vi.spyOn(process, "cwd").mockReturnValue(root);
     const catalogPath = path.join(root, "dist", "channel-catalog.json");
     writeChannelCatalog(catalogPath, "catalog-original", "Original catalog");
@@ -86,9 +86,9 @@ describe("channel plugin catalog", () => {
   it.each(["present", "missing"] as const)(
     "shares %s generated catalog facts across consumers until the owner changes",
     (initialState) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-shared-channel-catalog-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-shared-channel-catalog-"));
       tempDirs.push(root);
-      fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+      fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
       vi.spyOn(process, "cwd").mockReturnValue(root);
       const catalogPath = path.join(root, "dist", "channel-catalog.json");
       const options = { catalogPaths: [path.join(root, "external.json")], env: {} };
@@ -152,21 +152,21 @@ describe("channel plugin catalog", () => {
 
   it("keeps third-party channel ids mapped with catalog install trust", () => {
     const options = {
-      workspaceDir: "/tmp/openclaw-channel-catalog-empty-workspace",
+      workspaceDir: "/tmp/carapace-channel-catalog-empty-workspace",
       env: {},
     };
 
     const wecom = getChannelPluginCatalogEntry("wecom", options);
     expect(wecom?.id).toBe("wecom");
-    expect(wecom?.pluginId).toBe("wecom-openclaw-plugin");
+    expect(wecom?.pluginId).toBe("wecom-carapace-plugin");
     expect(wecom?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(wecom?.install?.npmSpec).toBe("@wecom/wecom-openclaw-plugin@2026.7.2");
+    expect(wecom?.install?.npmSpec).toBe("@wecom/wecom-carapace-plugin@2026.7.2");
 
     const yuanbao = getChannelPluginCatalogEntry("yuanbao", options);
     expect(yuanbao?.id).toBe("yuanbao");
-    expect(yuanbao?.pluginId).toBe("openclaw-plugin-yuanbao");
+    expect(yuanbao?.pluginId).toBe("carapace-plugin-yuanbao");
     expect(yuanbao?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(yuanbao?.install?.npmSpec).toBe("openclaw-plugin-yuanbao@2.18.2");
+    expect(yuanbao?.install?.npmSpec).toBe("carapace-plugin-yuanbao@2.18.2");
   });
 
   it("excludes only the rejected origin/plugin pair when resolving fallback copies", () => {
@@ -189,7 +189,7 @@ describe("channel plugin catalog", () => {
         pluginId: "telegram",
         origin: "bundled",
         rootDir: "/tmp/bundled-telegram",
-        packageName: "@openclaw/telegram",
+        packageName: "@carapace/telegram",
         channel: {
           id: "telegram",
           label: "Telegram",
@@ -197,7 +197,7 @@ describe("channel plugin catalog", () => {
           docsPath: "/channels/telegram",
           blurb: "bundled",
         },
-        install: { npmSpec: "@openclaw/telegram@1.0.0" },
+        install: { npmSpec: "@carapace/telegram@1.0.0" },
       },
     ] satisfies PluginChannelCatalogEntry[]);
 
@@ -211,7 +211,7 @@ describe("channel plugin catalog", () => {
   it.each(["__proto__", "constructor", "toString"])(
     "rejects inherited install default choice %s from external catalog input",
     (defaultChoice) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-catalog-choice-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channel-catalog-choice-"));
       tempDirs.push(root);
       const catalogPath = path.join(root, "catalog.json");
       writeChannelCatalog(catalogPath, "unsafe-choice", "Unsafe Choice", defaultChoice);
@@ -226,7 +226,7 @@ describe("channel plugin catalog", () => {
   );
 
   it("reloads external catalog entries after the explicit plugin metadata lifecycle reset", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-external-catalog-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channel-external-catalog-"));
     tempDirs.push(root);
     const catalogPath = path.join(root, "catalog.json");
     const options = { catalogPaths: [catalogPath], workspaceDir: root, env: {} };
@@ -241,9 +241,9 @@ describe("channel plugin catalog", () => {
   });
 
   it("reloads official generated catalog entries after the explicit plugin metadata lifecycle reset", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-official-catalog-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channel-official-catalog-"));
     tempDirs.push(root);
-    fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    fs.writeFileSync(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
     vi.spyOn(process, "cwd").mockReturnValue(root);
     const catalogPath = path.join(root, "dist", "channel-catalog.json");
     const options = { catalogPaths: [path.join(root, "external.json")], env: {} };

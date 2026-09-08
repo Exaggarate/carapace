@@ -2,7 +2,7 @@
 import {
   claimPendingAgentQuestionAnswer,
   type AgentHarnessQuestionGatewayCall,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCodexUserInputBridge } from "./user-input-bridge.js";
 import { createCodexUserInputTestParams as createParams } from "./user-input-bridge.test-support.js";

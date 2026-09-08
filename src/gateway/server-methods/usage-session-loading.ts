@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSessionCostSummaryAccumulator } from "../../infra/session-cost-usage-rollup.js";
 import {
   discoverAllSessions,
@@ -40,7 +40,7 @@ export async function runUsageAgentTasks<T>(tasks: Array<() => Promise<T>>): Pro
 }
 
 export async function discoverAllSessionsForUsage(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   startMs: number;
   endMs: number;
@@ -88,7 +88,7 @@ export function mergeUsageCacheStatus(
 
 export async function loadUsageSessionSummaries(params: {
   entries: UsageSessionSummaryTarget[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   startMs: number;
   endMs: number;
   includeUntimestamped?: boolean;

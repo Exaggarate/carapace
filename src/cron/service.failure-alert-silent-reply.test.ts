@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   loadRunCronIsolatedAgentTurn,
   mockRunCronFallbackPassthrough,
@@ -38,8 +38,8 @@ describe("CronService silent failure alerts", { concurrent: false }, () => {
       meta: { agentMeta: {}, finalAssistantVisibleText: "NO_REPLY" },
     });
 
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-silent-failure-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-silent-failure-" },
       async (state) => {
         resetTaskRegistryForTests();
         const sendCronFailureAlert = vi.fn(

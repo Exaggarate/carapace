@@ -1,6 +1,6 @@
 import { setImmediate as nextTurn } from "node:timers/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { AsyncWorkScope } from "../../shared/async-work-scope.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 
@@ -92,7 +92,7 @@ describe("costUsageCache bounded growth", () => {
   it("does not grow without bound when (startMs, endMs) varies across day rollover and range switches", async () => {
     const config = {
       agents: { entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     // 600 distinct (startMs, endMs) pairs — larger than the 256 caps used by
     // the smallest sibling caches (RUN_LOOKUP_CACHE_LIMIT,
@@ -127,7 +127,7 @@ describe("costUsageCache bounded growth", () => {
   it("evicts settled entries before in-flight entries when possible", async () => {
     const config = {
       agents: { entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const pending = createDeferredCore<ReturnType<typeof createSummary>>();
     mocks.loadCostUsageSummaryFromCache.mockReturnValueOnce(pending.promise);
 

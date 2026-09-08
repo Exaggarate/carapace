@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import type { PreparedAgentCredentialModes } from "../../agents/agent-auth-credential-modes.js";
 import { resolveAgentDir, resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
 import { resolveExternalCliAuthScopeFromConfig } from "../../agents/auth-profiles/external-cli-scope.js";
@@ -21,7 +21,7 @@ import {
 } from "../../agents/openai-model-routes.js";
 import { isPreparedModelCatalogFull } from "../../agents/prepared-model-runtime.full-catalog.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isManifestPluginAvailableForControlPlane } from "../../plugins/manifest-contract-eligibility.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import type { ProviderCatalogOutcome } from "../../plugins/provider-catalog.types.js";
@@ -31,7 +31,7 @@ import { listUserProfileAuthLinks } from "../../state/user-model-accounts.js";
 
 function listEnabledSyntheticAuthProviderRefs(
   metadataSnapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): readonly string[] {
   return metadataSnapshot.plugins
     .filter((plugin) =>
@@ -41,7 +41,7 @@ function listEnabledSyntheticAuthProviderRefs(
 }
 
 function createModelsListAuthResolver(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   metadataSnapshot: PluginMetadataSnapshot;
   preparedAuthStore: AuthProfileStore;
@@ -135,7 +135,7 @@ function createModelsListEntryEvaluator(params: {
 }
 
 export type ModelsListAuthProjectionParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -147,7 +147,7 @@ export type ModelsListAuthProjectionParams = {
   preparedSyntheticAuthComplete?: boolean;
   requesterProfileId?: string;
   pluginRegistry?: PluginRegistry;
-  observationConfig?: OpenClawConfig;
+  observationConfig?: CarapaceConfig;
   preferredProfileId?: string;
   pinnedProfileId?: string;
   routeResolverFactory?: typeof createOpenAIModelRoutesResolver;

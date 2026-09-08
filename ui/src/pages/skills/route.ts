@@ -63,6 +63,6 @@ export const page = definePage({
     import("./skills-page.ts").then(() => ({
       header: true,
       render: (data: SkillsRouteData | undefined) =>
-        data ? html`<openclaw-skills-page .routeData=${data}></openclaw-skills-page>` : nothing,
+        data ? html`<carapace-skills-page .routeData=${data}></carapace-skills-page>` : nothing,
     })),
 });

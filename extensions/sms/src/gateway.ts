@@ -1,12 +1,12 @@
 // Sms plugin module implements gateway behavior.
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
-import { waitUntilAbort } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/channel-contract";
+import { waitUntilAbort } from "carapace/plugin-sdk/channel-outbound";
 import {
   channelBlockedPatch,
   channelReadyPatch,
   channelStoppedPatch,
-} from "openclaw/plugin-sdk/gateway-runtime";
-import { registerPluginHttpRoute } from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/gateway-runtime";
+import { registerPluginHttpRoute } from "carapace/plugin-sdk/webhook-ingress";
 import { createSmsIngressSpool, type SmsIngressLog } from "./ingress-spool.js";
 import { resolveTwilioStatusCallbackUrl } from "./public-webhook-url.js";
 import type { ResolvedSmsAccount } from "./types.js";
@@ -79,7 +79,7 @@ export function collectSmsStartupWarnings(account: ResolvedSmsAccount): string[]
     !resolveTwilioStatusCallbackUrl(account.publicWebhookUrl)
   ) {
     warnings.push(
-      "- SMS: publicWebhookUrl must be a properly encoded absolute HTTP(S) URL with a valid hostname, no embedded credentials, and remain within OpenClaw's 4,000-character callback safety limit; OpenClaw will omit the per-message delivery callback until fixed.",
+      "- SMS: publicWebhookUrl must be a properly encoded absolute HTTP(S) URL with a valid hostname, no embedded credentials, and remain within Carapace's 4,000-character callback safety limit; Carapace will omit the per-message delivery callback until fixed.",
     );
   }
   if (account.dmPolicy === "allowlist" && account.allowFrom.length === 0) {

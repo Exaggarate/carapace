@@ -1,11 +1,11 @@
 /** Migration provider context and report-directory helpers. */
 import path from "node:path";
-import { isValidAgentId, normalizeAgentId } from "@openclaw/normalization-core/agent-id";
-import { timestampMsToIsoFileStamp } from "@openclaw/normalization-core/number-coercion";
+import { isValidAgentId, normalizeAgentId } from "@carapace/normalization-core/agent-id";
+import { timestampMsToIsoFileStamp } from "@carapace/normalization-core/number-coercion";
 import { resolveConfiguredAgentId } from "../../agents/agent-scope-config.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { MigrationProviderContext } from "../../plugins/types.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
@@ -14,7 +14,7 @@ export function createMigrationLogger(runtime: RuntimeEnv, opts: { json?: boolea
   const info = opts.json ? runtime.error : runtime.log;
   return {
     debug: (message: string) => {
-      if (process.env.OPENCLAW_VERBOSE === "1") {
+      if (process.env.CARAPACE_VERBOSE === "1") {
         info(message);
       }
     },
@@ -36,7 +36,7 @@ export function buildMigrationReportDir(
 
 /** Resolves an explicit migration owner without allowing typo-created agent stores. */
 export function resolveMigrationTargetAgentId(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   rawAgentId: string | undefined,
 ): string | undefined {
   const raw = rawAgentId?.trim();
@@ -62,7 +62,7 @@ export function buildMigrationContext(params: {
   overwrite?: boolean;
   providerOptions?: Record<string, unknown>;
   backupPath?: string;
-  configOverride?: OpenClawConfig;
+  configOverride?: CarapaceConfig;
   runtime: RuntimeEnv;
   reportDir?: string;
   json?: boolean;

@@ -8,7 +8,7 @@ import "./web-awesome.ts";
 // a stacking context (.shell-nav z-index 10) painted below the sidebar
 // resizer (.sidebar-resizer z-index 20), so a fixed-position menu rendered
 // inside the nav is overdrawn by the divider unless it is promoted to the
-// popover top layer. Plain overlays use openclaw-menu-surface; Web Awesome
+// popover top layer. Plain overlays use carapace-menu-surface; Web Awesome
 // dropdowns already own their popup and must not nest inside that surface.
 //
 // The repo-level test shard also collects *.browser.test.ts under jsdom,
@@ -79,10 +79,10 @@ describe.skipIf(!hasPopoverApi)("sidebar menu stacking", () => {
     expect(hitTestOnDivider(menu, divider)).toBe(divider);
   });
 
-  it("paints a plain menu hosted in openclaw-menu-surface above the resizer divider", async () => {
+  it("paints a plain menu hosted in carapace-menu-surface above the resizer divider", async () => {
     await useDesktopViewport();
     const { nav, divider } = mountShell();
-    const surface = document.createElement("openclaw-menu-surface");
+    const surface = document.createElement("carapace-menu-surface");
     const menu = createSortMenu();
     surface.append(menu);
     nav.append(surface);
@@ -119,7 +119,7 @@ describe.skipIf(!hasPopoverApi)("sidebar menu stacking", () => {
     const popup = dropdown.shadowRoot?.querySelector<HTMLElement>("wa-popup");
     const popupSurface = popup?.shadowRoot?.querySelector<HTMLElement>('[part="popup"]');
     await expect.poll(() => popupSurface?.matches(":popover-open")).toBe(true);
-    expect(dropdown.closest("openclaw-menu-surface")).toBeNull();
+    expect(dropdown.closest("carapace-menu-surface")).toBeNull();
 
     const menu = dropdown.shadowRoot?.querySelector<HTMLElement>('[part="menu"]');
     expect(menu).not.toBeNull();

@@ -15,8 +15,8 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
     export { admitReplyTurn } from ${source("src/auto-reply/reply/reply-turn-admission.ts")};
     export { replyRunRegistry } from ${source("src/auto-reply/reply/reply-run-registry.ts")};
     export { replaceSessionEntrySync } from ${source("src/config/sessions/session-accessor.ts")};
-    export { closeOpenClawAgentDatabases } from ${source("src/state/openclaw-agent-db.ts")};
-    export { closeOpenClawStateDatabase } from ${source("src/state/openclaw-state-db.ts")};
+    export { closeCarapaceAgentDatabases } from ${source("src/state/carapace-agent-db.ts")};
+    export { closeCarapaceStateDatabase } from ${source("src/state/carapace-state-db.ts")};
   `;
   try {
     fs.mkdirSync(dist);
@@ -31,7 +31,7 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
     fs.writeFileSync(path.join(root, "admission-runtime.ts"), ownerExports);
     fs.writeFileSync(
       path.join(root, "plugin.ts"),
-      'export * from "openclaw/plugin-sdk/admission-fixture";\n',
+      'export * from "carapace/plugin-sdk/admission-fixture";\n',
     );
     // Model the packaged host/SDK graph, then load a plugin through its supported transform path.
     await build({
@@ -47,7 +47,7 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
       deps: {
         // Match compiled workers: workspace packages bring their private dependencies.
         alwaysBundle: (id) =>
-          (id.startsWith("@openclaw/") || id.startsWith("openclaw/")) &&
+          (id.startsWith("@carapace/") || id.startsWith("carapace/")) &&
           id !== "@openclaw/fs-safe" &&
           !id.startsWith("@openclaw/fs-safe/"),
       },
@@ -58,7 +58,7 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
       tsconfig: path.join(repo, "tsconfig.json"),
       logLevel: "silent",
     });
-    for (const schema of ["openclaw-agent-schema.sql", "openclaw-state-schema.sql"]) {
+    for (const schema of ["carapace-agent-schema.sql", "carapace-state-schema.sql"]) {
       fs.copyFileSync(path.join(repo, "src/state", schema), path.join(dist, schema));
     }
     const result = spawnNodeEvalSync(
@@ -90,8 +90,8 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
           const modulePath = path.join(root, "plugin.ts");
           transformed = host.getCachedPluginModuleLoader({
             modulePath, rootDir: root, importerUrl: import.meta.url, tryNative: false,
-            transformOpenClawDependencies: true,
-            aliasMap: { "openclaw/plugin-sdk/admission-fixture": path.join(root, "dist/admission-runtime.js") },
+            transformCarapaceDependencies: true,
+            aliasMap: { "carapace/plugin-sdk/admission-fixture": path.join(root, "dist/admission-runtime.js") },
           })(modulePath);
           assert.notEqual(transformed.admitReplyTurn, host.admitReplyTurn, "transformed SDK evaluates a separate graph");
           const cases = [
@@ -168,10 +168,10 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
           ]);
         } finally {
           for (const operation of operations) operation.complete();
-          transformed?.closeOpenClawAgentDatabases();
-          host?.closeOpenClawAgentDatabases();
-          transformed?.closeOpenClawStateDatabase();
-          host?.closeOpenClawStateDatabase();
+          transformed?.closeCarapaceAgentDatabases();
+          host?.closeCarapaceAgentDatabases();
+          transformed?.closeCarapaceStateDatabase();
+          host?.closeCarapaceStateDatabase();
         }
       `,
       {
@@ -181,8 +181,8 @@ it("keeps admitted session ownership across native and transformed SDK graphs", 
           SystemRoot: process.env.SystemRoot,
           HOME: root,
           USERPROFILE: root,
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
-          OPENCLAW_CONFIG_PATH: path.join(root, "config.json"),
+          CARAPACE_STATE_DIR: path.join(root, "state"),
+          CARAPACE_CONFIG_PATH: path.join(root, "config.json"),
           XDG_CACHE_HOME: path.join(root, "cache"),
           JITI_FS_CACHE: "0",
         },

@@ -79,8 +79,8 @@ describe("resolveControlUiHandoffTarget", () => {
           },
         },
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "ambient-token",
-          OPENCLAW_GATEWAY_PASSWORD: ambientPassword,
+          CARAPACE_GATEWAY_TOKEN: "ambient-token",
+          CARAPACE_GATEWAY_PASSWORD: ambientPassword,
         },
       });
 
@@ -96,7 +96,7 @@ describe("waitForControlUiDocument", () => {
   it.runIf(openssl)(
     "verifies a CA-signed HTTPS leaf without the issuer or private key and rejects a replacement",
     async () => {
-      const root = await tempDirs.make("openclaw-tls-owner-https-");
+      const root = await tempDirs.make("carapace-tls-owner-https-");
       const certPath = path.join(root, "leaf.pem");
       const keyPath = path.join(root, "signer.key");
       const caPath = path.join(root, "signer.pem");
@@ -166,7 +166,7 @@ describe("waitForControlUiDocument", () => {
   );
 
   it("can inspect dashboard TLS using only the public certificate", async () => {
-    const root = await tempDirs.make("openclaw-tls-owner-dashboard-");
+    const root = await tempDirs.make("carapace-tls-owner-dashboard-");
     const certPath = path.join(root, "cert.pem");
     await fs.writeFile(certPath, TEST_TLS_CERT_PEM);
     const read = vi.spyOn(fs, "readFile");
@@ -285,7 +285,7 @@ describe("waitForControlUiDocument", () => {
   it("reads one bounded sanitized diagnostic only for terminal plain-text failures", async () => {
     const head = guardedResponse(new Response(null, { status: 503 }));
     const diagnostic = guardedResponse(
-      new Response("Invalid configured root\nRun openclaw doctor --fix", {
+      new Response("Invalid configured root\nRun carapace doctor --fix", {
         status: 503,
         headers: { "content-type": "text/plain; charset=utf-8" },
       }),
@@ -294,7 +294,7 @@ describe("waitForControlUiDocument", () => {
 
     await expect(waitForControlUiDocument({ url: documentUrl, deps: { fetch } })).resolves.toEqual({
       ready: false,
-      reason: "Invalid configured root Run openclaw doctor --fix",
+      reason: "Invalid configured root Run carapace doctor --fix",
       status: 503,
     });
 
@@ -347,7 +347,7 @@ describe("waitForControlUiDocument", () => {
   });
 
   it("trusts the public certificate and rejects a different peer without reading a server CA", async () => {
-    const root = await tempDirs.make("openclaw-tls-owner-dashboard-");
+    const root = await tempDirs.make("carapace-tls-owner-dashboard-");
     const certPath = path.join(root, "cert.pem");
     await fs.writeFile(certPath, TEST_TLS_CERT_PEM);
     const fingerprint = new X509Certificate(TEST_TLS_CERT_PEM).fingerprint256

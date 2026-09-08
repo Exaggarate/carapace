@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolvePluginInstallPreflight } from "../cli/plugins-install-preflight.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { installPluginFromGitSpec } from "./git-install.js";
 import {
   requestDeferredPluginInstall,
@@ -15,7 +15,7 @@ import {
 } from "./install-transaction.js";
 
 describe("git install target ownership", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let sourceDir: string;
   let spec: string;
 
@@ -28,10 +28,10 @@ describe("git install target ownership", () => {
   async function commitPlugin(pluginId: string, version: string) {
     await fs.writeFile(
       path.join(sourceDir, "package.json"),
-      JSON.stringify({ name: "git-fixture", version, openclaw: { extensions: ["index.js"] } }),
+      JSON.stringify({ name: "git-fixture", version, carapace: { extensions: ["index.js"] } }),
     );
     await fs.writeFile(
-      path.join(sourceDir, "openclaw.plugin.json"),
+      path.join(sourceDir, "carapace.plugin.json"),
       JSON.stringify({ id: pluginId, configSchema: { type: "object", properties: {} } }),
     );
     await fs.writeFile(
@@ -44,14 +44,14 @@ describe("git install target ownership", () => {
   }
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "git-install-target" });
+    state = await createCarapaceTestState({ label: "git-install-target" });
     const globalConfig = await state.writeText("global-npmrc", "");
     vi.stubEnv("NPM_CONFIG_GLOBALCONFIG", globalConfig);
     sourceDir = state.path("source");
     await fs.mkdir(sourceDir);
     await git(sourceDir, "init", "--initial-branch=main");
-    await git(sourceDir, "config", "user.name", "OpenClaw Test");
-    await git(sourceDir, "config", "user.email", "test@openclaw.invalid");
+    await git(sourceDir, "config", "user.name", "Carapace Test");
+    await git(sourceDir, "config", "user.email", "test@carapace.invalid");
     await commitPlugin("demo", "1.0.0");
     spec = `git:${pathToFileURL(sourceDir).href}`;
   });
@@ -143,7 +143,7 @@ describe("git install target ownership", () => {
       expect.soft(await git(installed.targetDir, "rev-parse", "HEAD")).toBe(installed.git.commit);
       await expect.soft(fs.readFile(markerPath, "utf8")).resolves.toBe("keep this checkout");
       await expect
-        .soft(fs.readFile(path.join(installed.targetDir, "openclaw.plugin.json"), "utf8"))
+        .soft(fs.readFile(path.join(installed.targetDir, "carapace.plugin.json"), "utf8"))
         .resolves.toContain('"id":"demo"');
     },
   );

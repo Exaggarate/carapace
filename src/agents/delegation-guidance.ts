@@ -1,11 +1,11 @@
 import { resolveCanonicalMainSessionKey } from "../config/sessions/main-session-key.js";
 import type { SubagentDelegationMode } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { parseCronRunScopeSuffix } from "../sessions/session-key-utils.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 
 export function resolveMainSessionDelegationMode(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
 }): SubagentDelegationMode {

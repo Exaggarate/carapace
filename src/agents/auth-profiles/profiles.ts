@@ -4,9 +4,9 @@
  * records through locked or immediate store writes.
  */
 import { isDeepStrictEqual } from "node:util";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { isUserModelAuthProfileId } from "../../state/user-model-account-id.js";
 import { resolveProviderIdForAuth } from "../provider-auth-aliases.js";

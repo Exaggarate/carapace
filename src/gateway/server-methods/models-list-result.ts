@@ -1,5 +1,5 @@
 // Resolves public model catalogs without exposing runtime-only provider params.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import type { ModelChoice } from "../../../packages/gateway-protocol/src/schema/agents-models-skills.js";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { resolveConfiguredModelEntries } from "../../agents/configured-model-entries.js";
@@ -41,7 +41,7 @@ import { isPreparedModelCatalogFull } from "../../agents/prepared-model-runtime.
 import { preparedModelRuntimeConfigsMatch } from "../../agents/prepared-model-runtime.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
 import { getRuntimeConfigSourceSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { loadDeferredCatalog, readPreparedCatalog } from "../server-model-catalog-auth.js";
@@ -154,7 +154,7 @@ export function createGatewayAgentModelCatalogProjector(params: ModelsListAuthPr
 
 function createPublicModelsListProjector(params: {
   thinkingCatalog: ModelCatalogEntry[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   configuredEntriesByKey: ReturnType<typeof resolveConfiguredModelEntries>["byKey"];
   includeInput?: boolean;
@@ -236,7 +236,7 @@ function createPublicModelsListProjector(params: {
 }
 
 function apiKeyProviderCapabilities(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   metadataSnapshot: PluginMetadataSnapshot;
   workspaceDir: string;
 }): ApiKeyProviderCapabilities {
@@ -260,7 +260,7 @@ type BuildModelsListResultParams = {
   params: Record<string, unknown>;
   preloadedCatalog?: {
     agentId: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     snapshot: ModelCatalogSnapshot;
   };
   catalogProjector?: ReturnType<typeof createGatewayAgentModelCatalogProjector>;

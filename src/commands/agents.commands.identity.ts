@@ -1,7 +1,7 @@
 // Implements identity metadata updates for configured agents.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import {
   listAgentIds,
@@ -21,7 +21,7 @@ import { replaceConfigFile } from "../config/config.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { logConfigUpdated } from "../config/logging.js";
 import type { IdentityConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { normalizeAgentId, normalizeAgentIdStrict } from "../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
@@ -72,7 +72,7 @@ export async function agentsSetIdentityCommand(
     return;
   }
   const cfg = migratePersistedImplicitMainRoster(writeSnapshot.snapshot.sourceConfig)
-    .config as OpenClawConfig;
+    .config as CarapaceConfig;
 
   const nameRaw = normalizeOptionalString(opts.name);
   const emojiRaw = normalizeOptionalString(opts.emoji);
@@ -85,7 +85,7 @@ export async function agentsSetIdentityCommand(
   const wantsIdentityFile = Boolean(opts.fromIdentity || identityFileRaw || !hasExplicitIdentity);
   const normalizedAgent = opts.agent === undefined ? null : normalizeAgentIdStrict(opts.agent);
   if (normalizedAgent && !normalizedAgent.ok) {
-    failAgentIdentity(`Agent "${opts.agent}" not found. Create it with \`openclaw agents add\`.`);
+    failAgentIdentity(`Agent "${opts.agent}" not found. Create it with \`carapace agents add\`.`);
   }
   let agentId = normalizedAgent?.value;
 
@@ -125,7 +125,7 @@ export async function agentsSetIdentityCommand(
   const resolvedAgentIds = listAgentIds(cfg).map((id) => normalizeAgentId(id));
   if (!resolvedAgentIds.includes(resolvedAgentId)) {
     failAgentIdentity(
-      `Agent "${resolvedAgentId}" not found. Create it with \`openclaw agents add\`.`,
+      `Agent "${resolvedAgentId}" not found. Create it with \`carapace agents add\`.`,
     );
   }
   let identityFromFile: AgentIdentityFile | null = null;
@@ -212,7 +212,7 @@ export async function agentsSetIdentityCommand(
   if (locatorDiffers && workspaceLocatorDir) {
     runtime.log(`Workspace locator: ${sanitizeTerminalText(shortenHomePath(workspaceLocatorDir))}`);
     runtime.log(
-      `Stored workspace unchanged. Relocate with ${formatCliCommand(`openclaw config set agents.entries.${resolvedAgentId}.workspace ${quoteCliArg(workspaceLocatorDir)}`)}.`,
+      `Stored workspace unchanged. Relocate with ${formatCliCommand(`carapace config set agents.entries.${resolvedAgentId}.workspace ${quoteCliArg(workspaceLocatorDir)}`)}.`,
     );
   } else if (identitySourceDiffers && identitySourceDir) {
     runtime.log(`Identity source: ${sanitizeTerminalText(shortenHomePath(identitySourceDir))}`);

@@ -27,7 +27,7 @@ const resolveGatewayProbeSnapshot = (
 ) =>
   resolveGatewayProbeSnapshotOwner({
     ...params,
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
     env: process.env,
   });
 
@@ -427,7 +427,7 @@ describe("resolveGatewayProbeSnapshot", () => {
         await vi.importActual<typeof import("../gateway/call.js")>("../gateway/call.js");
       return await callGateway(...(args as Parameters<typeof callGateway>));
     });
-    const parsed = parseStatusRouteArgs(["node", "openclaw", "status", "--timeout", "250"]);
+    const parsed = parseStatusRouteArgs(["node", "carapace", "status", "--timeout", "250"]);
     expect(parsed?.timeoutMs).toBe(250);
 
     try {
@@ -582,7 +582,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       close: vi.fn(async () => {}),
     };
     const resolveMemoryConfig = vi.fn(() => ({
-      store: { databasePath: `/tmp/openclaw-missing-memory-${process.pid}.sqlite` },
+      store: { databasePath: `/tmp/carapace-missing-memory-${process.pid}.sqlite` },
     }));
     const getMemorySearchManager = vi.fn(async () => ({ manager }));
 
@@ -593,7 +593,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       resolveMemoryConfig,
       getMemorySearchManager,
       requireDefaultDatabasePath: () =>
-        `/tmp/openclaw-missing-default-memory-${process.pid}.sqlite`,
+        `/tmp/carapace-missing-default-memory-${process.pid}.sqlite`,
     });
 
     expect(resolveMemoryConfig).toHaveBeenCalledOnce();
@@ -621,7 +621,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
     const resolveMemoryConfig = vi.fn(() => null);
     const getMemorySearchManager = vi.fn(async () => ({ manager }));
     const requireDefaultDatabasePath = vi.fn(
-      () => `/tmp/openclaw-missing-memory-${process.pid}.sqlite`,
+      () => `/tmp/carapace-missing-memory-${process.pid}.sqlite`,
     );
 
     const result = await resolveSharedMemoryStatusSnapshot({
@@ -678,7 +678,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       memoryPlugin: { enabled: true, slot: "memory-core" },
       resolveMemoryConfig,
       getMemorySearchManager,
-      requireDefaultDatabasePath: () => `/tmp/openclaw-missing-memory-${process.pid}.sqlite`,
+      requireDefaultDatabasePath: () => `/tmp/carapace-missing-memory-${process.pid}.sqlite`,
     });
 
     expect(result).toBeNull();
@@ -687,8 +687,8 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
   });
 
   it("recognizes shipped memory tables before the manager migrates them", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-status-memory-");
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const tempDir = makeTempDir(tempDirs, "carapace-status-memory-");
+    const databasePath = path.join(tempDir, "carapace-agent.sqlite");
     const db = new DatabaseSync(databasePath);
     db.exec(`
       CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -743,8 +743,8 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
   });
 
   it("does not initialize memory status for an agent database owned by another feature", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-status-memory-");
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const tempDir = makeTempDir(tempDirs, "carapace-status-memory-");
+    const databasePath = path.join(tempDir, "carapace-agent.sqlite");
     const db = new DatabaseSync(databasePath);
     db.exec(`
       CREATE TABLE cache_entries (

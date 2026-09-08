@@ -2,8 +2,8 @@
 import {
   collectManifestModelIdNormalizationPolicies,
   type ManifestModelIdNormalizationProvider,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 // Snapshot reads go through the registration-slot bridge so this module stays
 // off the control-plane/kysely graph; doctor closures cold-load it via
@@ -21,7 +21,7 @@ export type ManifestModelIdNormalizationSource =
   | { owners: Pick<PluginMetadataSnapshot["owners"], "modelIdNormalizationPolicies"> };
 
 type ManifestModelIdNormalizationLookupParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   plugins?: ManifestModelIdNormalizationSource;

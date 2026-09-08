@@ -1,9 +1,9 @@
 import { MessageType } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import { expect, it, vi } from "vitest";
 import { Message } from "../internal/discord.js";
 import { createInternalTestClient } from "../internal/test-builders.test-support.js";
@@ -24,7 +24,7 @@ it("applies current inbound timing without losing queued Discord messages", asyn
       },
     },
   });
-  const publish = (inbound: NonNullable<OpenClawConfig["messages"]>["inbound"]) => {
+  const publish = (inbound: NonNullable<CarapaceConfig["messages"]>["inbound"]) => {
     const cfg = { ...params.cfg, messages: { inbound } };
     setRuntimeConfigSnapshot(cfg, cfg);
   };

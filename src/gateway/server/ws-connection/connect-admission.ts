@@ -51,7 +51,7 @@ export function isStartupNodeConnect(connectParams: ConnectParams): boolean {
   return connectParams.role === "node" && connectParams.client.mode === GATEWAY_CLIENT_MODES.NODE;
 }
 
-/** Exact first-connect shape emitted by `openclaw connect` for a setup-code node. */
+/** Exact first-connect shape emitted by `carapace connect` for a setup-code node. */
 export function isStartupNodeBootstrapConnect(connectParams: ConnectParams): boolean {
   const auth = connectParams.auth;
   const device = connectParams.device;
@@ -111,7 +111,7 @@ export function applyConnectionScopeCap(params: {
   scopes: string[];
   upgradeReq: IncomingMessage;
 }): string[] {
-  const header = params.upgradeReq.headers["x-openclaw-scopes"];
+  const header = params.upgradeReq.headers["x-carapace-scopes"];
   const rawHeader = Array.isArray(header) ? header[0] : header;
   if (rawHeader === undefined) {
     return params.scopes;

@@ -1,7 +1,7 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /** Reads official external plugin/channel/provider catalogs into manifest-like metadata. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { normalizeClawHubSha256Integrity } from "../infra/clawhub-integrity.js";
 import { resolvePluginInstallSources, type PluginInstallSource } from "./install-channel-specs.js";
 import { BUNDLED_OFFICIAL_EXTERNAL_PLUGIN_CATALOG_ENTRIES } from "./official-external-plugin-bundled-catalogs.js";

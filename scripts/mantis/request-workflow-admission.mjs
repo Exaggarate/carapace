@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 // guard lets that ref stay stationary without trusting an arbitrary PR branch.
 export async function assertRequestWorkflowRef({ repository, ref, sha, token, fetchImpl = fetch }) {
   if (
-    repository !== "openclaw/openclaw" ||
+    repository !== "carapace/carapace" ||
     !ref?.startsWith("refs/heads/") ||
     !/^[a-f0-9]{40}$/.test(sha ?? "") ||
     !token

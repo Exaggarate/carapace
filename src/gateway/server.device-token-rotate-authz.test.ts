@@ -1,6 +1,6 @@
 // Device token rotation tests cover pairing-scoped operators, admin rotation
 // rights, approved node reconnects, and invoke continuity after token changes.
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { WebSocket } from "ws";
 import { approveDevicePairing } from "../infra/device-pairing-approval.js";

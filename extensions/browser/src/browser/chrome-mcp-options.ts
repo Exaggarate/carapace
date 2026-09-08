@@ -1,5 +1,5 @@
 // Normalizes Chrome MCP profile options and subprocess arguments.
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import parseArgs from "yargs-parser";
 import type {
   ChromeMcpOptionsInput,

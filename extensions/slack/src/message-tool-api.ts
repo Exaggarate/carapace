@@ -4,7 +4,7 @@ import type {
   ChannelMessageActionName,
   ChannelMessageToolDiscovery,
   ChannelMessageToolSchemaContribution,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/channel-contract";
 import { Type, type TSchema } from "typebox";
 import { listSlackMessageActions } from "./message-actions.js";
 

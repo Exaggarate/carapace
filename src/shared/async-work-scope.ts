@@ -4,7 +4,7 @@ import { resolveGlobalSingleton } from "./global-singleton.js";
 
 // Lazy runtime chunks share the context carrier, never the lifetime of its owners.
 const currentWorkScope = resolveGlobalSingleton(
-  Symbol.for("openclaw.asyncWorkScope"),
+  Symbol.for("carapace.asyncWorkScope"),
   () => new AsyncLocalStorage<AsyncWorkScope>(),
 );
 

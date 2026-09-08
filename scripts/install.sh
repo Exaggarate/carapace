@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# OpenClaw Installer for macOS and Linux
-# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+# Carapace Installer for macOS and Linux
+# Usage: curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
 
 BOLD='\033[1m'
 ACCENT='\033[38;2;255;77;77m'       # coral-bright  #ff4d4d
@@ -15,7 +15,7 @@ ERROR='\033[38;2;230;57;70m'        # coral-mid     #e63946
 MUTED='\033[38;2;90;100;128m'       # text-muted    #5a6480
 NC='\033[0m' # No Color
 
-DEFAULT_TAGLINE="All your chats, one OpenClaw."
+DEFAULT_TAGLINE="All your chats, one Carapace."
 NODE_DEFAULT_MAJOR=26
 # Homebrew ships the current Node line as plain "node" (no versioned node@26
 # formula exists); versioned formulas only cover LTS lines like node@24.
@@ -32,13 +32,13 @@ NODE_SUPPORTED_VERSION_LABEL="24.16.0+ or 26.1.0+"
 ORIGINAL_PATH="${PATH:-}"
 
 TMPFILES=()
-OPENCLAW_BIN_BACKUP_TARGET=""
-OPENCLAW_BIN_BACKUP_PATH=""
-OPENCLAW_BIN_BACKUP_CANDIDATE=""
-OPENCLAW_BIN_BACKUP_DISCARD=0
+CARAPACE_BIN_BACKUP_TARGET=""
+CARAPACE_BIN_BACKUP_PATH=""
+CARAPACE_BIN_BACKUP_CANDIDATE=""
+CARAPACE_BIN_BACKUP_DISCARD=0
 cleanup_tmpfiles() {
-    if [[ "$(type -t restore_openclaw_bin_backup 2>/dev/null || true)" == "function" ]]; then
-        restore_openclaw_bin_backup || true
+    if [[ "$(type -t restore_carapace_bin_backup 2>/dev/null || true)" == "function" ]]; then
+        restore_carapace_bin_backup || true
     fi
     local f
     for f in "${TMPFILES[@]:-}"; do
@@ -71,27 +71,27 @@ mktempfile() {
     printf -v "$output_var" '%s' "$f"
 }
 
-resolve_openclaw_effective_home() {
-    local openclaw_home="${OPENCLAW_HOME:-}"
-    if [[ -z "$openclaw_home" ]]; then
+resolve_carapace_effective_home() {
+    local carapace_home="${CARAPACE_HOME:-}"
+    if [[ -z "$carapace_home" ]]; then
         echo "$HOME"
         return
     fi
-    if [[ "$openclaw_home" == "~" ]]; then
+    if [[ "$carapace_home" == "~" ]]; then
         echo "$HOME"
         return
     fi
-    if [[ "$openclaw_home" == \~/* ]]; then
-        echo "${HOME}${openclaw_home:1}"
+    if [[ "$carapace_home" == \~/* ]]; then
+        echo "${HOME}${carapace_home:1}"
         return
     fi
-    echo "$openclaw_home"
+    echo "$carapace_home"
 }
 
-resolve_openclaw_user_path() {
+resolve_carapace_user_path() {
     local input="$1"
     local effective_home
-    effective_home="$(resolve_openclaw_effective_home)"
+    effective_home="$(resolve_carapace_effective_home)"
     if [[ "$input" == "~" ]]; then
         echo "$effective_home"
     elif [[ "$input" == \~/* ]]; then
@@ -181,7 +181,7 @@ run_remote_bash() {
     /bin/bash "$tmp"
 }
 
-GUM_VERSION="${OPENCLAW_GUM_VERSION:-2.0.0}"
+GUM_VERSION="${CARAPACE_GUM_VERSION:-2.0.0}"
 GUM=""
 GUM_STATUS="skipped"
 GUM_REASON=""
@@ -396,7 +396,7 @@ print_gum_status() {
 print_installer_banner() {
     if [[ -n "$GUM" ]]; then
         local title tagline hint card
-        title="$("$GUM" style --foreground "#ff4d4d" --bold "🦞 OpenClaw Installer")"
+        title="$("$GUM" style --foreground "#ff4d4d" --bold "🦞 Carapace Installer")"
         tagline="$("$GUM" style --foreground "#8892b0" "$TAGLINE")"
         hint="$("$GUM" style --foreground "#5a6480" "modern installer mode")"
         card="$(printf '%s\n%s\n%s' "$title" "$tagline" "$hint")"
@@ -406,7 +406,7 @@ print_installer_banner() {
     fi
 
     echo -e "${ACCENT}${BOLD}"
-    echo "  🦞 OpenClaw Installer"
+    echo "  🦞 Carapace Installer"
     echo -e "${NC}${INFO}  ${TAGLINE}${NC}"
     echo ""
 }
@@ -422,7 +422,7 @@ detect_os_or_die() {
     if [[ "$OS" == "unknown" ]]; then
         ui_error "Unsupported operating system"
         echo "This installer supports macOS and Linux (including WSL)."
-        echo "For Windows, use: iwr -useb https://openclaw.ai/install.ps1 | iex"
+        echo "For Windows, use: iwr -useb https://github.com/Exaggarate/carapace | iex"
         exit 1
     fi
 
@@ -522,7 +522,7 @@ show_install_plan() {
     ui_section "Install plan"
     ui_kv "OS" "$OS"
     ui_kv "Install method" "$INSTALL_METHOD"
-    ui_kv "Requested version" "$OPENCLAW_VERSION"
+    ui_kv "Requested version" "$CARAPACE_VERSION"
     if [[ "$USE_BETA" == "1" ]]; then
         ui_kv "Beta channel" "enabled"
     fi
@@ -542,7 +542,7 @@ show_install_plan() {
 }
 
 show_footer_links() {
-    local faq_url="https://docs.openclaw.ai/start/faq"
+    local faq_url="https://github.com/Exaggarate/carapace"
     if [[ -n "$GUM" ]]; then
         local content
         content="$(printf '%s\n%s' "Need help?" "FAQ: ${faq_url}")"
@@ -704,65 +704,65 @@ cleanup_legacy_submodules() {
     fi
 }
 
-begin_openclaw_bin_backup() {
+begin_carapace_bin_backup() {
     local target="$1" candidate="$2" discard="${3:-0}" backup=""
-    [[ -z "$OPENCLAW_BIN_BACKUP_PATH" ]] || return 0
+    [[ -z "$CARAPACE_BIN_BACKUP_PATH" ]] || return 0
     [[ -e "$target" || -L "$target" ]] || return 0
-    backup="$(mktemp "${target}.openclaw-backup.XXXXXX")" || return 1
+    backup="$(mktemp "${target}.carapace-backup.XXXXXX")" || return 1
     rm -f "$backup" || return 1
-    OPENCLAW_BIN_BACKUP_TARGET="$target"
-    OPENCLAW_BIN_BACKUP_PATH="$backup"
-    OPENCLAW_BIN_BACKUP_CANDIDATE="$candidate"
-    OPENCLAW_BIN_BACKUP_DISCARD="$discard"
+    CARAPACE_BIN_BACKUP_TARGET="$target"
+    CARAPACE_BIN_BACKUP_PATH="$backup"
+    CARAPACE_BIN_BACKUP_CANDIDATE="$candidate"
+    CARAPACE_BIN_BACKUP_DISCARD="$discard"
     if ! mv "$target" "$backup"; then
-        OPENCLAW_BIN_BACKUP_TARGET=""
-        OPENCLAW_BIN_BACKUP_PATH=""
-        OPENCLAW_BIN_BACKUP_CANDIDATE=""
-        OPENCLAW_BIN_BACKUP_DISCARD=0
+        CARAPACE_BIN_BACKUP_TARGET=""
+        CARAPACE_BIN_BACKUP_PATH=""
+        CARAPACE_BIN_BACKUP_CANDIDATE=""
+        CARAPACE_BIN_BACKUP_DISCARD=0
         return 1
     fi
 }
 
-is_npm_openclaw_shim() {
+is_npm_carapace_shim() {
     local target="$1" launcher="$2"
     if [[ -L "$target" ]]; then
         local link_target=""
         link_target="$(readlink "$target" 2>/dev/null || true)"
-        [[ "$link_target" == "$launcher" || "$link_target" == *"/node_modules/openclaw/openclaw.mjs" ]]
+        [[ "$link_target" == "$launcher" || "$link_target" == *"/node_modules/carapace/carapace.mjs" ]]
         return
     fi
-    [[ -f "$target" ]] && grep -Fq "/node_modules/openclaw/openclaw.mjs" "$target"
+    [[ -f "$target" ]] && grep -Fq "/node_modules/carapace/carapace.mjs" "$target"
 }
 
-restore_openclaw_bin_backup() {
-    local target="$OPENCLAW_BIN_BACKUP_TARGET" backup="$OPENCLAW_BIN_BACKUP_PATH"
+restore_carapace_bin_backup() {
+    local target="$CARAPACE_BIN_BACKUP_TARGET" backup="$CARAPACE_BIN_BACKUP_PATH"
     [[ -n "$backup" && ( -e "$backup" || -L "$backup" ) ]] || return 0
     if [[ -e "$target" || -L "$target" ]]; then
-        is_npm_openclaw_shim "$target" "$OPENCLAW_BIN_BACKUP_CANDIDATE" || return 1
+        is_npm_carapace_shim "$target" "$CARAPACE_BIN_BACKUP_CANDIDATE" || return 1
         rm -f "$target" || return 1
     fi
     mv "$backup" "$target" || return 1
-    OPENCLAW_BIN_BACKUP_TARGET=""
-    OPENCLAW_BIN_BACKUP_PATH=""
-    OPENCLAW_BIN_BACKUP_CANDIDATE=""
-    OPENCLAW_BIN_BACKUP_DISCARD=0
+    CARAPACE_BIN_BACKUP_TARGET=""
+    CARAPACE_BIN_BACKUP_PATH=""
+    CARAPACE_BIN_BACKUP_CANDIDATE=""
+    CARAPACE_BIN_BACKUP_DISCARD=0
 }
 
-commit_openclaw_bin_backup() {
-    local backup="$OPENCLAW_BIN_BACKUP_PATH"
+commit_carapace_bin_backup() {
+    local backup="$CARAPACE_BIN_BACKUP_PATH"
     [[ -n "$backup" ]] || return 0
-    if [[ "$OPENCLAW_BIN_BACKUP_DISCARD" == "1" ]]; then
+    if [[ "$CARAPACE_BIN_BACKUP_DISCARD" == "1" ]]; then
         rm -f "$backup" || return 1
     else
-        ui_info "Preserved previous openclaw command at ${backup}"
+        ui_info "Preserved previous carapace command at ${backup}"
     fi
-    OPENCLAW_BIN_BACKUP_TARGET=""
-    OPENCLAW_BIN_BACKUP_PATH=""
-    OPENCLAW_BIN_BACKUP_CANDIDATE=""
-    OPENCLAW_BIN_BACKUP_DISCARD=0
+    CARAPACE_BIN_BACKUP_TARGET=""
+    CARAPACE_BIN_BACKUP_PATH=""
+    CARAPACE_BIN_BACKUP_CANDIDATE=""
+    CARAPACE_BIN_BACKUP_DISCARD=0
 }
 
-extract_openclaw_conflict_path() {
+extract_carapace_conflict_path() {
     local log="$1"
     local path=""
     path="$(sed -n 's/.*File exists: //p' "$log" | head -n1)"
@@ -776,16 +776,16 @@ extract_openclaw_conflict_path() {
     return 1
 }
 
-cleanup_openclaw_bin_conflict() {
+cleanup_carapace_bin_conflict() {
     local bin_path="$1"
     if [[ -z "$bin_path" || ( ! -e "$bin_path" && ! -L "$bin_path" ) ]]; then
         return 1
     fi
     local npm_bin=""
     npm_bin="$(npm_global_bin_dir 2>/dev/null || true)"
-    if [[ -n "$npm_bin" && "$bin_path" != "$npm_bin/openclaw" ]]; then
+    if [[ -n "$npm_bin" && "$bin_path" != "$npm_bin/carapace" ]]; then
         case "$bin_path" in
-            "/opt/homebrew/bin/openclaw"|"/usr/local/bin/openclaw")
+            "/opt/homebrew/bin/carapace"|"/usr/local/bin/carapace")
                 ;;
             *)
                 return 1
@@ -795,15 +795,15 @@ cleanup_openclaw_bin_conflict() {
     local npm_root=""
     npm_root="$(npm root -g 2>/dev/null || true)"
     [[ -n "$npm_root" ]] || return 1
-    begin_openclaw_bin_backup "$bin_path" "${npm_root%/}/openclaw/openclaw.mjs" 0 || return 1
-    ui_info "Moved existing openclaw command aside for npm retry"
+    begin_carapace_bin_backup "$bin_path" "${npm_root%/}/carapace/carapace.mjs" 0 || return 1
+    ui_info "Moved existing carapace command aside for npm retry"
 }
 
 cleanup_npm_stale_rename_dirs() {
     local npm_root="" stale="" found=0
     npm_root="$(npm root -g 2>/dev/null || true)"
     [[ -n "$npm_root" && "$npm_root" == *node_modules* ]] || return 1
-    for stale in "$npm_root"/.openclaw-*; do
+    for stale in "$npm_root"/.carapace-*; do
         [[ -d "$stale" && ! -L "$stale" ]] || continue
         found=1
         rm -rf "$stale" || return 1
@@ -1058,9 +1058,9 @@ const fail = (message) => { process.stderr.write(`${message}\n`); process.exit(1
 if (!parsed) fail("Unable to determine npm version; no package changes were made.");
 if (+parsed[1] < 12 && (+parsed[1] !== 11 || +parsed[2] < 16)) process.exit(0);
 const normalized = spec.trim();
-const unaliased = normalized.toLowerCase().startsWith("openclaw@") ? normalized.slice(9).trim() : normalized;
+const unaliased = normalized.toLowerCase().startsWith("carapace@") ? normalized.slice(9).trim() : normalized;
 const explicit = (value) => /\.(?:tgz|tar\.gz)$/i.test(value) || value.includes("://") || value.includes("#") || /^(?:file|github|git\+(?:ssh|https|http|file)|npm):/i.test(value);
-let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "openclaw";
+let identity = !normalized || explicit(normalized) || explicit(unaliased) || /^\.{1,2}(?:[\\/]|$)/.test(unaliased) || path.isAbsolute(normalized) || path.isAbsolute(unaliased) ? unaliased : "carapace";
 const alias = /^npm:/i.test(identity);
 if (alias) identity = /^npm:(@[^/]+\/[^@]+|[^@]+?)(?:@.*)?$/i.exec(identity)?.[1] ?? "";
 const filePrefix = /^file:/i.test(identity) ? "file:" : "";
@@ -1097,8 +1097,8 @@ verify_npm_lifecycle_completed() {
     local npm_cmd="$1" npm_root=""
     npm_root="$("$npm_cmd" root -g 2>/dev/null | awk 'NF { value = $0 } END { print value }')" || true
     [[ -n "$npm_root" ]] || { echo "Unable to resolve npm global root after install." >&2; return 1; }
-    [[ ! -e "${npm_root%/}/openclaw/.openclaw-lifecycle-pending" && ! -e "${npm_root%/}/openclaw/dist/openclaw-install-guard" ]] || {
-      echo "OpenClaw lifecycle scripts did not complete; refusing installer success." >&2
+    [[ ! -e "${npm_root%/}/carapace/.carapace-lifecycle-pending" && ! -e "${npm_root%/}/carapace/dist/carapace-install-guard" ]] || {
+      echo "Carapace lifecycle scripts did not complete; refusing installer success." >&2
       return 1
     }
 }
@@ -1141,9 +1141,9 @@ run_npm_global_install() {
         local log_quoted=""
         printf -v cmd_quoted '%q ' "${cmd[@]}"
         printf -v log_quoted '%q' "$log"
-        run_with_spinner "Installing OpenClaw package" bash -c "${cmd_quoted}>${log_quoted} 2>&1" || install_status=$?
+        run_with_spinner "Installing Carapace package" bash -c "${cmd_quoted}>${log_quoted} 2>&1" || install_status=$?
     else
-        ui_info "Installing OpenClaw package"
+        ui_info "Installing Carapace package"
         "${cmd[@]}" < /dev/null >"$log" 2>&1 || install_status=$?
     fi
     (( install_status == 0 )) || return "$install_status"
@@ -1234,7 +1234,7 @@ print_npm_failure_diagnostics() {
     fi
 }
 
-install_openclaw_npm() {
+install_carapace_npm() {
     local spec="$1"
     local log
     mktempfile log
@@ -1244,7 +1244,7 @@ install_openclaw_npm() {
             attempted_build_tool_fix=true
             ui_info "Retrying npm install after build tools setup"
             if run_verified_npm_global_install "$spec" "$log"; then
-                ui_success "OpenClaw npm package installed"
+                ui_success "Carapace npm package installed"
                 return 0
             fi
         fi
@@ -1260,26 +1260,26 @@ install_openclaw_npm() {
             tail -n 80 "$log" >&2 || true
         fi
 
-        if grep -q "ENOTEMPTY: directory not empty, rename .*openclaw" "$log"; then
+        if grep -q "ENOTEMPTY: directory not empty, rename .*carapace" "$log"; then
             ui_warn "npm left stale directory; cleaning and retrying"
             cleanup_npm_stale_rename_dirs || return 1
             if run_verified_npm_global_install "$spec" "$log"; then
-                ui_success "OpenClaw npm package installed"
+                ui_success "Carapace npm package installed"
                 return 0
             fi
             return 1
         fi
         if grep -q "EEXIST" "$log"; then
             local conflict=""
-            conflict="$(extract_openclaw_conflict_path "$log" || true)"
-            if [[ -n "$conflict" ]] && cleanup_openclaw_bin_conflict "$conflict"; then
+            conflict="$(extract_carapace_conflict_path "$log" || true)"
+            if [[ -n "$conflict" ]] && cleanup_carapace_bin_conflict "$conflict"; then
                 if run_verified_npm_global_install "$spec" "$log"; then
-                    ui_success "OpenClaw npm package installed"
+                    ui_success "Carapace npm package installed"
                     return 0
                 fi
                 return 1
             fi
-            ui_error "npm failed because an openclaw binary already exists"
+            ui_error "npm failed because an carapace binary already exists"
             if [[ -n "$conflict" ]]; then
                 ui_info "Remove or move ${conflict}, then retry"
             fi
@@ -1287,7 +1287,7 @@ install_openclaw_npm() {
         fi
         return 1
     fi
-    ui_success "OpenClaw npm package installed"
+    ui_success "Carapace npm package installed"
     return 0
 }
 
@@ -1390,9 +1390,9 @@ pick_tagline() {
         echo "$DEFAULT_TAGLINE"
         return
     fi
-    if [[ -n "${OPENCLAW_TAGLINE_INDEX:-}" ]]; then
-        if [[ "${OPENCLAW_TAGLINE_INDEX}" =~ ^[0-9]+$ ]]; then
-            local idx=$((OPENCLAW_TAGLINE_INDEX % count))
+    if [[ -n "${CARAPACE_TAGLINE_INDEX:-}" ]]; then
+        if [[ "${CARAPACE_TAGLINE_INDEX}" =~ ^[0-9]+$ ]]; then
+            local idx=$((CARAPACE_TAGLINE_INDEX % count))
             echo "${TAGLINES[$idx]}"
             return
         fi
@@ -1403,29 +1403,29 @@ pick_tagline() {
 
 TAGLINE=$(pick_tagline)
 
-NO_ONBOARD=${OPENCLAW_NO_ONBOARD:-0}
-NO_PROMPT=${OPENCLAW_NO_PROMPT:-0}
-DRY_RUN=${OPENCLAW_DRY_RUN:-0}
-INSTALL_METHOD=${OPENCLAW_INSTALL_METHOD:-}
-OPENCLAW_VERSION=${OPENCLAW_VERSION:-latest}
-USE_BETA=${OPENCLAW_BETA:-0}
-GIT_DIR=${OPENCLAW_GIT_DIR:-"$(resolve_openclaw_effective_home)/openclaw"}
-GIT_DIR_EXPLICIT=${OPENCLAW_GIT_DIR:+1}
-GIT_UPDATE=${OPENCLAW_GIT_UPDATE:-1}
-NPM_LOGLEVEL="${OPENCLAW_NPM_LOGLEVEL:-error}"
-VERBOSE="${OPENCLAW_VERBOSE:-0}"
-VERIFY_INSTALL="${OPENCLAW_VERIFY_INSTALL:-0}"
-OPENCLAW_BIN=""
+NO_ONBOARD=${CARAPACE_NO_ONBOARD:-0}
+NO_PROMPT=${CARAPACE_NO_PROMPT:-0}
+DRY_RUN=${CARAPACE_DRY_RUN:-0}
+INSTALL_METHOD=${CARAPACE_INSTALL_METHOD:-}
+CARAPACE_VERSION=${CARAPACE_VERSION:-latest}
+USE_BETA=${CARAPACE_BETA:-0}
+GIT_DIR=${CARAPACE_GIT_DIR:-"$(resolve_carapace_effective_home)/carapace"}
+GIT_DIR_EXPLICIT=${CARAPACE_GIT_DIR:+1}
+GIT_UPDATE=${CARAPACE_GIT_UPDATE:-1}
+NPM_LOGLEVEL="${CARAPACE_NPM_LOGLEVEL:-error}"
+VERBOSE="${CARAPACE_VERBOSE:-0}"
+VERIFY_INSTALL="${CARAPACE_VERIFY_INSTALL:-0}"
+CARAPACE_BIN=""
 PNPM_CMD=()
 GIT_REF_KIND=""
 HELP=0
 
 print_usage() {
     cat <<EOF
-OpenClaw installer (macOS + Linux)
+Carapace installer (macOS + Linux)
 
 Usage:
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- [options]
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- [options]
 
 Options:
   --install-method, --method npm|git   Install via npm (default) or from a git checkout
@@ -1433,7 +1433,7 @@ Options:
   --git, --github                     Shortcut for --install-method git
   --version <version|dist-tag|spec>    npm install target (default: latest)
   --beta                               Use beta if available, else latest
-  --git-dir, --dir <path>             Checkout directory (default: ~/openclaw)
+  --git-dir, --dir <path>             Checkout directory (default: ~/carapace)
   --no-git-update                      Skip git pull for existing checkout
   --no-onboard                          Skip onboarding (non-interactive)
   --no-prompt                           Disable prompts (required in CI/automation)
@@ -1443,23 +1443,23 @@ Options:
   --help, -h                            Show this help
 
 Environment variables:
-  OPENCLAW_INSTALL_METHOD=git|npm
-  OPENCLAW_VERSION=latest|next|<semver>|<spec>
-  OPENCLAW_BETA=0|1
-  OPENCLAW_GIT_DIR=...
-  OPENCLAW_GIT_UPDATE=0|1
-  OPENCLAW_NO_PROMPT=1
-  OPENCLAW_VERIFY_INSTALL=1
-  OPENCLAW_DRY_RUN=1
-  OPENCLAW_NO_ONBOARD=1
-  OPENCLAW_VERBOSE=1
-  OPENCLAW_NPM_LOGLEVEL=error|warn|notice  Default: error (hide npm deprecation noise)
+  CARAPACE_INSTALL_METHOD=git|npm
+  CARAPACE_VERSION=latest|next|<semver>|<spec>
+  CARAPACE_BETA=0|1
+  CARAPACE_GIT_DIR=...
+  CARAPACE_GIT_UPDATE=0|1
+  CARAPACE_NO_PROMPT=1
+  CARAPACE_VERIFY_INSTALL=1
+  CARAPACE_DRY_RUN=1
+  CARAPACE_NO_ONBOARD=1
+  CARAPACE_VERBOSE=1
+  CARAPACE_NPM_LOGLEVEL=error|warn|notice  Default: error (hide npm deprecation noise)
 Examples:
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard --verify
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --version main
-  curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git --no-onboard
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --no-onboard
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --no-onboard --verify
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git --version main
+  curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method git --no-onboard
 EOF
 }
 
@@ -1507,7 +1507,7 @@ parse_args() {
                     ui_error "Missing value for $1"
                     return 2
                 fi
-                OPENCLAW_VERSION="$2"
+                CARAPACE_VERSION="$2"
                 shift 2
                 ;;
             --beta)
@@ -1583,7 +1583,7 @@ choose_install_method_interactive() {
 
     if [[ -n "$GUM" ]] && gum_is_tty; then
         local header selection
-        header="Detected OpenClaw checkout in: ${detected_checkout}
+        header="Detected Carapace checkout in: ${detected_checkout}
 Choose install method"
         selection="$("$GUM" choose \
             --header "$header" \
@@ -1606,7 +1606,7 @@ Choose install method"
 
     local choice=""
     choice="$(prompt_choice "$(cat <<EOF
-${WARN}→${NC} Detected a OpenClaw source checkout in: ${INFO}${detected_checkout}${NC}
+${WARN}→${NC} Detected a Carapace source checkout in: ${INFO}${detected_checkout}${NC}
 Choose install method:
   1) Update this checkout (git) and use it
   2) Install global via npm (migrate away from git)
@@ -1628,7 +1628,7 @@ EOF
     return 1
 }
 
-detect_openclaw_checkout() {
+detect_carapace_checkout() {
     local dir="$1"
     if [[ ! -f "$dir/package.json" ]]; then
         return 1
@@ -1636,7 +1636,7 @@ detect_openclaw_checkout() {
     if [[ ! -f "$dir/pnpm-workspace.yaml" ]]; then
         return 1
     fi
-    if ! grep -q '"name"[[:space:]]*:[[:space:]]*"openclaw"' "$dir/package.json" 2>/dev/null; then
+    if ! grep -q '"name"[[:space:]]*:[[:space:]]*"carapace"' "$dir/package.json" 2>/dev/null; then
         return 1
     fi
     echo "$dir"
@@ -1664,7 +1664,7 @@ print_homebrew_admin_fix() {
     echo "  2) Ask an Administrator to grant admin rights, then sign out/in:"
     echo "     sudo dseditgroup -o edit -a ${current_user} -t user admin"
     echo "Then retry:"
-    echo "  curl -fsSL https://openclaw.ai/install.sh | bash"
+    echo "  curl -fsSL https://github.com/Exaggarate/carapace | bash"
 }
 
 install_homebrew() {
@@ -1701,7 +1701,7 @@ parse_node_version_components_for_binary() {
     version="${version#"${version%%[![:space:]]*}"}"
     version="${version%"${version##*[![:space:]]}"}"
 
-    # This standalone installer runs before OpenClaw exists on disk. Mirror the
+    # This standalone installer runs before Carapace exists on disk. Mirror the
     # release grammar in node-version.mjs; parity cases guard this boundary.
     if [[ ! "$version" =~ ^v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
         return 1
@@ -1859,7 +1859,7 @@ persist_shell_path_prepend() {
     fi
 
     local targets=()
-    local fish_rc="$HOME/.config/fish/conf.d/openclaw.fish"
+    local fish_rc="$HOME/.config/fish/conf.d/carapace.fish"
     case "$shell_name" in
         bash)
             targets+=("bash:$HOME/.bashrc" "bash:$bash_login_rc")
@@ -1997,7 +1997,7 @@ persist_path_line_to_profile() {
     if [[ "$(sed -n '1p' "$rc" 2>/dev/null || true)" == "$path_line" ]]; then
         return 0
     fi
-    tmp_rc="$(mktemp "${rc}.openclaw-tmp.XXXXXX")"
+    tmp_rc="$(mktemp "${rc}.carapace-tmp.XXXXXX")"
     TMPFILES+=("$tmp_rc")
     if [[ -f "$rc" ]]; then
         if ! cp -p "$rc" "$tmp_rc"; then
@@ -2151,7 +2151,7 @@ ensure_default_node_active_shell() {
         echo "  nvm use ${NODE_DEFAULT_MAJOR}"
         echo "  nvm alias default ${NODE_DEFAULT_MAJOR}"
         echo "Then open a new shell and rerun:"
-        echo "  curl -fsSL https://openclaw.ai/install.sh | bash"
+        echo "  curl -fsSL https://github.com/Exaggarate/carapace | bash"
     else
         echo "Install/select Node.js ${NODE_DEFAULT_MAJOR} and ensure it is first on PATH, then rerun installer."
     fi
@@ -2259,25 +2259,25 @@ install_node_with_apk() {
 
 install_node_with_user_prefix() {
     local cli_installer prefix node_bin_dir
-    prefix="${HOME}/.openclaw"
+    prefix="${HOME}/.carapace"
     node_bin_dir="${prefix}/tools/node/bin"
     mktempfile cli_installer
 
     ui_info "Using a user-space Node.js runtime because the system Node.js links unsafe SQLite"
     run_required_step "Downloading user-space Node.js installer" \
-        download_validated_script "https://openclaw.ai/install-cli.sh" "$cli_installer"
+        download_validated_script "https://github.com/Exaggarate/carapace" "$cli_installer"
     # The child Bash expands this script's positional arguments, not this shell.
     # shellcheck disable=SC2016
     run_required_step "Installing user-space Node.js" \
-        env OPENCLAW_INSTALL_CLI_SH_NO_RUN=1 OPENCLAW_PREFIX="$prefix" \
+        env CARAPACE_INSTALL_CLI_SH_NO_RUN=1 CARAPACE_PREFIX="$prefix" \
         bash -c '
             set -euo pipefail
             source "$1"
             install_node "$(os_detect)" "$(arch_detect)"
-        ' openclaw-install-node "$cli_installer"
+        ' carapace-install-node "$cli_installer"
 
     prepend_path_dir "$node_bin_dir"
-    persist_shell_path_prepend "$node_bin_dir" "\$HOME/.openclaw/tools/node/bin" || true
+    persist_shell_path_prepend "$node_bin_dir" "\$HOME/.carapace/tools/node/bin" || true
     finish_linux_node_install
 }
 
@@ -2472,7 +2472,7 @@ fix_npm_permissions() {
     ui_info "Configuring npm for user-local installs"
     mkdir -p "$HOME/.npm-global"
     npm config set prefix "$HOME/.npm-global" < /dev/null
-    ui_warn "Avoid sudo npm i -g for future OpenClaw updates; use npm i -g openclaw@latest so npm keeps using this user prefix instead of a different global prefix."
+    ui_warn "Avoid sudo npm i -g for future Carapace updates; use npm i -g carapace@latest so npm keeps using this user prefix instead of a different global prefix."
 
     persist_shell_path_prepend "$HOME/.npm-global/bin" "\$HOME/.npm-global/bin" || true
 
@@ -2480,10 +2480,10 @@ fix_npm_permissions() {
     ui_success "npm configured for user installs"
 }
 
-ensure_openclaw_bin_link() {
+ensure_carapace_bin_link() {
     local npm_root=""
     npm_root="$(npm root -g 2>/dev/null || true)"
-    local launcher="${npm_root}/openclaw/openclaw.mjs"
+    local launcher="${npm_root}/carapace/carapace.mjs"
     if [[ -z "$npm_root" || ! -x "$launcher" ]] || ! "$launcher" --version >/dev/null 2>&1; then
         return 1
     fi
@@ -2493,23 +2493,23 @@ ensure_openclaw_bin_link() {
         return 1
     fi
     mkdir -p "$npm_bin" || return 1
-    local target="${npm_bin}/openclaw" temp=""
+    local target="${npm_bin}/carapace" temp=""
     if [[ -e "$target" || -L "$target" ]]; then
-        is_npm_openclaw_shim "$target" "$launcher" || return 1
+        is_npm_carapace_shim "$target" "$launcher" || return 1
     fi
-    temp="$(mktemp "${npm_bin}/.openclaw-link.XXXXXX")" || return 1
+    temp="$(mktemp "${npm_bin}/.carapace-link.XXXXXX")" || return 1
     TMPFILES+=("$temp")
     rm -f "$temp" || return 1
     ln -s "$launcher" "$temp" || return 1
     mv -f "$temp" "$target" || return 1
-    ui_info "Published openclaw bin link at ${target}"
+    ui_info "Published carapace bin link at ${target}"
     "$target" --version >/dev/null 2>&1
 }
 
-# Check for existing OpenClaw installation
-check_existing_openclaw() {
-    if [[ -n "$(type -P openclaw 2>/dev/null || true)" ]]; then
-        ui_info "Existing OpenClaw installation detected, upgrading"
+# Check for existing Carapace installation
+check_existing_carapace() {
+    if [[ -n "$(type -P carapace 2>/dev/null || true)" ]]; then
+        ui_info "Existing Carapace installation detected, upgrading"
         return 0
     fi
     return 1
@@ -2535,7 +2535,7 @@ ensure_pnpm() {
     [[ "$spec" == pnpm@* ]] || spec="pnpm@12.3.4"
     version="${spec#pnpm@}"
     version="${version%%+*}"
-    pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-pnpm.XXXXXX")" || return 1
+    pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-pnpm.XXXXXX")" || return 1
     TMPFILES+=("$pnpm_dir")
     corepack_cmd="$(command -v corepack || true)"
     if [[ -n "$corepack_cmd" ]]; then
@@ -2586,13 +2586,13 @@ should_prefer_offline_pnpm_install() {
     [[ -z "$configured" || "$configured" == "undefined" || "$configured" == "null" ]]
 }
 
-resolve_git_openclaw_ref() {
-    local requested="${OPENCLAW_VERSION:-latest}"
+resolve_git_carapace_ref() {
+    local requested="${CARAPACE_VERSION:-latest}"
     local resolved_version=""
 
     case "$requested" in
         ""|latest)
-            resolved_version="$(npm view "openclaw" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
+            resolved_version="$(npm view "carapace" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
             if [[ -n "$resolved_version" ]]; then
                 echo "v${resolved_version}"
                 return 0
@@ -2601,7 +2601,7 @@ resolve_git_openclaw_ref() {
             return 0
             ;;
         next|beta)
-            resolved_version="$(npm view "openclaw" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
+            resolved_version="$(npm view "carapace" "dist-tags.${requested:-latest}" 2>/dev/null || true)"
             if [[ -n "$resolved_version" ]]; then
                 echo "v${resolved_version}"
                 return 0
@@ -2644,7 +2644,7 @@ verify_git_rebase_recovery() {
         [[ ! -d "$git_dir/rebase-merge" && ! -d "$git_dir/rebase-apply" ]]
 }
 
-checkout_git_openclaw_ref() {
+checkout_git_carapace_ref() {
     local repo_dir="$1"
     local ref="$2"
     local original_head=""
@@ -2772,14 +2772,14 @@ clone_git_checkout_transactionally() {
     if [[ -d "$repo_dir" && -z "$(ls -A "$repo_dir" 2>/dev/null || true)" ]]; then
         preserve_repo_dir=1
         repo_dir="$(cd "$repo_dir" && pwd -P)"
-        staging_dir="$(mktemp -d "${repo_dir}/.openclaw-clone.XXXXXX")"
+        staging_dir="$(mktemp -d "${repo_dir}/.carapace-clone.XXXXXX")"
     else
         repo_dir="${parent_dir}/$(basename "$repo_dir")"
-        staging_dir="$(mktemp -d "${parent_dir}/.openclaw-clone.XXXXXX")"
+        staging_dir="$(mktemp -d "${parent_dir}/.carapace-clone.XXXXXX")"
     fi
     TMPFILES+=("$staging_dir")
 
-    run_quiet_step "Cloning OpenClaw" git clone "$@" "$repo_url" "$staging_dir" || clone_status=$?
+    run_quiet_step "Cloning Carapace" git clone "$@" "$repo_url" "$staging_dir" || clone_status=$?
     if (( clone_status != 0 )); then
         return "$clone_status"
     fi
@@ -2892,7 +2892,7 @@ canonicalize_dir() {
     (cd "$dir" 2>/dev/null && pwd -P) || return 1
 }
 
-openclaw_package_version() {
+carapace_package_version() {
     local package_json="$1"
     if [[ ! -f "$package_json" ]]; then
         echo "unknown"
@@ -2916,7 +2916,7 @@ emit_npm_root_candidate() {
     fi
 }
 
-collect_openclaw_npm_root_candidates() {
+collect_carapace_npm_root_candidates() {
     local root=""
     root="$(npm root -g 2>/dev/null || true)"
     emit_npm_root_candidate "$root"
@@ -2931,7 +2931,7 @@ collect_openclaw_npm_root_candidates() {
     local extra_root=""
     local old_ifs="$IFS"
     IFS=":"
-    for extra_root in ${OPENCLAW_INSTALL_EXTRA_NPM_ROOTS:-}; do
+    for extra_root in ${CARAPACE_INSTALL_EXTRA_NPM_ROOTS:-}; do
         emit_npm_root_candidate "$extra_root"
     done
     IFS="$old_ifs"
@@ -2964,12 +2964,12 @@ collect_openclaw_npm_root_candidates() {
     done
 }
 
-find_openclaw_global_installs() {
+find_carapace_global_installs() {
     local seen="|"
     local npm_root=""
     while IFS= read -r npm_root; do
         [[ -n "$npm_root" ]] || continue
-        local package_dir="${npm_root%/}/openclaw"
+        local package_dir="${npm_root%/}/carapace"
         local package_json="${package_dir}/package.json"
         [[ -f "$package_json" ]] || continue
 
@@ -2982,35 +2982,35 @@ find_openclaw_global_installs() {
         seen="${seen}${real_package_dir}|"
 
         local version=""
-        version="$(openclaw_package_version "$package_json")"
+        version="$(carapace_package_version "$package_json")"
         printf '%s\t%s\t%s\n' "$version" "$real_package_dir" "$npm_root"
-    done < <(collect_openclaw_npm_root_candidates)
+    done < <(collect_carapace_npm_root_candidates)
 }
 
-warn_duplicate_openclaw_global_installs() {
+warn_duplicate_carapace_global_installs() {
     local installs=()
     local line=""
     while IFS= read -r line; do
         [[ -n "$line" ]] && installs+=("$line")
-    done < <(find_openclaw_global_installs)
+    done < <(find_carapace_global_installs)
 
     if [[ "${#installs[@]}" -le 1 ]]; then
         return 0
     fi
 
-    ui_warn "Multiple OpenClaw global installs detected"
-    echo "  Different Node/npm environments can run different OpenClaw versions."
+    ui_warn "Multiple Carapace global installs detected"
+    echo "  Different Node/npm environments can run different Carapace versions."
 
-    local active_node active_npm active_openclaw
+    local active_node active_npm active_carapace
     active_node="$(command -v node 2>/dev/null || true)"
     active_npm="$(command -v npm 2>/dev/null || true)"
-    active_openclaw="${OPENCLAW_BIN:-}"
-    if [[ -z "$active_openclaw" ]]; then
-        active_openclaw="$(type -P openclaw 2>/dev/null || true)"
+    active_carapace="${CARAPACE_BIN:-}"
+    if [[ -z "$active_carapace" ]]; then
+        active_carapace="$(type -P carapace 2>/dev/null || true)"
     fi
     echo -e "  Active node: ${INFO}${active_node:-none}${NC}"
     echo -e "  Active npm: ${INFO}${active_npm:-none}${NC}"
-    echo -e "  Active openclaw: ${INFO}${active_openclaw:-none}${NC}"
+    echo -e "  Active carapace: ${INFO}${active_carapace:-none}${NC}"
     echo ""
     echo "  Found installs:"
 
@@ -3023,7 +3023,7 @@ warn_duplicate_openclaw_global_installs() {
 
     echo ""
     echo "  Keep one install source, then remove stale installs with that environment's npm:"
-    echo "    npm uninstall -g openclaw"
+    echo "    npm uninstall -g carapace"
 }
 
 refresh_shell_command_cache() {
@@ -3056,14 +3056,14 @@ warn_shell_path_missing_dir() {
     # that case new shells are fine and the user only needs to reload this one.
     # RC lines may spell the home dir as $HOME instead of the expanded path.
     local dir_home_form="\$HOME${dir#"$HOME"}"
-    local managed_node_bin="$HOME/.openclaw/tools/node/bin"
-    local managed_node_home_form="\$HOME/.openclaw/tools/node/bin"
+    local managed_node_bin="$HOME/.carapace/tools/node/bin"
+    local managed_node_home_form="\$HOME/.carapace/tools/node/bin"
     if [[ ! -d "$managed_node_bin" || ! -d "$dir" ||
         "$(canonicalize_dir "$managed_node_bin" || true)" != "$(canonicalize_dir "$dir" || true)" ]]; then
         managed_node_bin=""
         managed_node_home_form=""
     fi
-    for rc in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.profile" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.config/fish/conf.d/openclaw.fish"; do
+    for rc in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.profile" "$HOME/.zshrc" "$HOME/.zprofile" "$HOME/.config/fish/conf.d/carapace.fish"; do
         if [[ -f "$rc" ]] && {
             grep -Fq "$dir" "$rc" || grep -Fq "$dir_home_form" "$rc" ||
                 { [[ -n "$managed_node_bin" ]] && { grep -Fq "$managed_node_bin" "$rc" || grep -Fq "$managed_node_home_form" "$rc"; }; }
@@ -3082,9 +3082,9 @@ warn_shell_path_missing_dir() {
 
     echo ""
     ui_warn "PATH missing ${label}: ${dir}"
-    echo "  This can make openclaw show as \"command not found\" in new terminals."
+    echo "  This can make carapace show as \"command not found\" in new terminals."
     if [[ "${SHELL:-}" == */fish ]]; then
-        echo "  Fix (Fish: ~/.config/fish/conf.d/openclaw.fish):"
+        echo "  Fix (Fish: ~/.config/fish/conf.d/carapace.fish):"
         echo "    fish_add_path -- \"${dir}\""
     else
         echo "  Fix (zsh: ~/.zshrc, bash: ~/.bashrc):"
@@ -3092,17 +3092,17 @@ warn_shell_path_missing_dir() {
     fi
 }
 
-openclaw_command_for_user() {
+carapace_command_for_user() {
     local claw="${1:-}"
     if [[ -z "$claw" ]]; then
-        echo "openclaw"
+        echo "carapace"
         return 0
     fi
 
     local original_claw=""
-    original_claw="$(PATH="$ORIGINAL_PATH" type -P openclaw 2>/dev/null || true)"
+    original_claw="$(PATH="$ORIGINAL_PATH" type -P carapace 2>/dev/null || true)"
     if [[ "$original_claw" == "$claw" ]]; then
-        echo "openclaw"
+        echo "carapace"
         return 0
     fi
 
@@ -3128,7 +3128,7 @@ maybe_nodenv_rehash() {
 bounded_probe_output() {
     local label="$1"
     shift
-    local timeout_seconds="${OPENCLAW_INSTALL_PROBE_TIMEOUT_SECONDS:-5}"
+    local timeout_seconds="${CARAPACE_INSTALL_PROBE_TIMEOUT_SECONDS:-5}"
     local output_file status_file timeout_file pid watchdog status
     output_file="$(mktemp)"
     status_file="$(mktemp)"
@@ -3182,13 +3182,13 @@ bounded_probe_output() {
     return 1
 }
 
-warn_openclaw_not_found() {
-    ui_warn "Installed, but openclaw is not discoverable on PATH in this shell"
+warn_carapace_not_found() {
+    ui_warn "Installed, but carapace is not discoverable on PATH in this shell"
     echo "  Try: hash -r (bash) or rehash (zsh), then retry."
     local t=""
-    t="$(type -t openclaw 2>/dev/null || true)"
+    t="$(type -t carapace 2>/dev/null || true)"
     if [[ "$t" == "alias" || "$t" == "function" ]]; then
-        ui_warn "Found a shell ${t} named openclaw; it may shadow the real binary"
+        ui_warn "Found a shell ${t} named carapace; it may shadow the real binary"
     fi
     if command -v nodenv &> /dev/null; then
         echo -e "Using nodenv? Run: ${INFO}nodenv rehash${NC}"
@@ -3207,10 +3207,10 @@ warn_openclaw_not_found() {
     fi
 }
 
-resolve_openclaw_bin() {
+resolve_carapace_bin() {
     refresh_shell_command_cache
     local resolved=""
-    resolved="$(type -P openclaw 2>/dev/null || true)"
+    resolved="$(type -P carapace 2>/dev/null || true)"
     if [[ -n "$resolved" && -x "$resolved" ]]; then
         echo "$resolved"
         return 0
@@ -3218,7 +3218,7 @@ resolve_openclaw_bin() {
 
     ensure_npm_global_bin_on_path
     refresh_shell_command_cache
-    resolved="$(type -P openclaw 2>/dev/null || true)"
+    resolved="$(type -P carapace 2>/dev/null || true)"
     if [[ -n "$resolved" && -x "$resolved" ]]; then
         echo "$resolved"
         return 0
@@ -3226,21 +3226,21 @@ resolve_openclaw_bin() {
 
     local npm_bin=""
     npm_bin="$(npm_global_bin_dir || true)"
-    if [[ -n "$npm_bin" && -x "${npm_bin}/openclaw" ]]; then
-        echo "${npm_bin}/openclaw"
+    if [[ -n "$npm_bin" && -x "${npm_bin}/carapace" ]]; then
+        echo "${npm_bin}/carapace"
         return 0
     fi
 
     maybe_nodenv_rehash
     refresh_shell_command_cache
-    resolved="$(type -P openclaw 2>/dev/null || true)"
+    resolved="$(type -P carapace 2>/dev/null || true)"
     if [[ -n "$resolved" && -x "$resolved" ]]; then
         echo "$resolved"
         return 0
     fi
 
-    if [[ -n "$npm_bin" && -x "${npm_bin}/openclaw" ]]; then
-        echo "${npm_bin}/openclaw"
+    if [[ -n "$npm_bin" && -x "${npm_bin}/carapace" ]]; then
+        echo "${npm_bin}/carapace"
         return 0
     fi
 
@@ -3248,15 +3248,15 @@ resolve_openclaw_bin() {
     return 1
 }
 
-resolve_installed_openclaw_bin() {
+resolve_installed_carapace_bin() {
     local installed_bin=""
     if [[ "$INSTALL_METHOD" == "git" ]]; then
-        installed_bin="$HOME/.local/bin/openclaw"
+        installed_bin="$HOME/.local/bin/carapace"
     elif [[ "$INSTALL_METHOD" == "npm" ]]; then
         local npm_bin=""
         npm_bin="$(npm_global_bin_dir || true)"
         if [[ -n "$npm_bin" ]]; then
-            installed_bin="${npm_bin}/openclaw"
+            installed_bin="${npm_bin}/carapace"
         fi
     fi
 
@@ -3264,23 +3264,23 @@ resolve_installed_openclaw_bin() {
         echo "$installed_bin"
         return 0
     fi
-    resolve_openclaw_bin
+    resolve_carapace_bin
 }
 
 publish_executable_wrapper() {
     local target="$1" target_dir="" temp=""
     target_dir="${target%/*}"
     mkdir -p "$target_dir"
-    temp="$(mktemp "${target_dir}/.openclaw-wrapper.XXXXXX")" || return 1
+    temp="$(mktemp "${target_dir}/.carapace-wrapper.XXXXXX")" || return 1
     TMPFILES+=("$temp")
     cat > "$temp"
     chmod +x "$temp"
     mv -f "$temp" "$target"
 }
 
-install_openclaw_from_git() {
+install_carapace_from_git() {
     local repo_dir="$1"
-    local repo_url="https://github.com/openclaw/openclaw.git"
+    local repo_url="https://github.com/Exaggarate/carapace.git"
 
     mkdir -p "$(dirname "$repo_dir")"
     if [[ -d "$repo_dir" ]]; then
@@ -3290,9 +3290,9 @@ install_openclaw_from_git() {
     fi
 
     if [[ -d "$repo_dir/.git" ]]; then
-        ui_info "Installing OpenClaw from git checkout: ${repo_dir}"
+        ui_info "Installing Carapace from git checkout: ${repo_dir}"
     else
-        ui_info "Installing OpenClaw from GitHub (${repo_url})"
+        ui_info "Installing Carapace from GitHub (${repo_url})"
     fi
 
     if ! check_git; then
@@ -3309,10 +3309,10 @@ install_openclaw_from_git() {
     fi
 
     local git_ref
-    git_ref="$(resolve_git_openclaw_ref)"
+    git_ref="$(resolve_git_carapace_ref)"
     if [[ -z "$(git -C "$repo_dir" status --porcelain 2>/dev/null || true)" ]]; then
         ui_info "Using git ref: ${git_ref}"
-        checkout_git_openclaw_ref "$repo_dir" "$git_ref"
+        checkout_git_carapace_ref "$repo_dir" "$git_ref"
     else
         ui_info "Repo has local changes; skipping git checkout/update"
         if git -C "$repo_dir" symbolic-ref --quiet HEAD >/dev/null; then
@@ -3336,7 +3336,7 @@ install_openclaw_from_git() {
     if ! run_quiet_step "Building UI" run_pnpm -C "$repo_dir" ui:build; then
         ui_warn "UI build failed; continuing (CLI may still work)"
     fi
-    run_quiet_step "Building OpenClaw" run_pnpm -C "$repo_dir" build
+    run_quiet_step "Building Carapace" run_pnpm -C "$repo_dir" build
 
     ensure_user_local_bin_on_path
 
@@ -3360,19 +3360,19 @@ install_openclaw_from_git() {
     printf -v node_bin_quoted "%q" "$node_bin"
     printf -v entry_path_quoted "%q" "${repo_dir}/dist/entry.js"
 
-    publish_executable_wrapper "$HOME/.local/bin/openclaw" <<EOF
+    publish_executable_wrapper "$HOME/.local/bin/carapace" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 exec ${node_bin_quoted} ${entry_path_quoted} "\$@"
 EOF
-    ui_success "OpenClaw wrapper installed to \$HOME/.local/bin/openclaw"
-    ui_info "Manual builds need the checkout-pinned pnpm launcher; installer bootstrap is temporary: https://docs.openclaw.ai/install/installer#source-build-toolchain"
+    ui_success "Carapace wrapper installed to \$HOME/.local/bin/carapace"
+    ui_info "Manual builds need the checkout-pinned pnpm launcher; installer bootstrap is temporary: https://github.com/Exaggarate/carapace#source-build-toolchain"
 }
 
-# Install OpenClaw
+# Install Carapace
 resolve_beta_version() {
     local beta=""
-    beta="$(npm view openclaw dist-tags.beta 2>/dev/null || true)"
+    beta="$(npm view carapace dist-tags.beta 2>/dev/null || true)"
     if [[ -z "$beta" || "$beta" == "undefined" || "$beta" == "null" ]]; then
         return 1
     fi
@@ -3389,20 +3389,20 @@ is_explicit_package_install_spec() {
     [[ "$value" == *"://"* || "$value" == *"#"* || "$value" == /* || "$value" == ./* || "$value" == ../* || "$value" =~ \.(tgz|tar\.gz)$ || "$value" =~ ^(file|github|git\+ssh|git\+https|git\+http|git\+file|npm): ]]
 }
 
-is_openclaw_source_package_install_spec() {
+is_carapace_source_package_install_spec() {
     local value="${1:-}"
     local normalized_value=""
     normalized_value="$(to_lowercase_ascii "$value")"
-    normalized_value="${normalized_value#openclaw@}"
+    normalized_value="${normalized_value#carapace@}"
 
     [[ "$normalized_value" == "main" ]] && return 0
-    [[ "$normalized_value" =~ ^github:openclaw/openclaw($|[#/]) ]] && return 0
+    [[ "$normalized_value" =~ ^github:carapace/carapace($|[#/]) ]] && return 0
 
     normalized_value="${normalized_value#git+}"
-    [[ "$normalized_value" =~ ^https?://github\.com/openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-    [[ "$normalized_value" =~ ^ssh://git@github\.com[:/]openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-    [[ "$normalized_value" =~ ^git://github\.com/openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
-    [[ "$normalized_value" =~ ^git@github\.com:openclaw/openclaw(\.git)?($|[?#]) ]] && return 0
+    [[ "$normalized_value" =~ ^https?://github\.com/carapace/carapace(\.git)?($|[?#]) ]] && return 0
+    [[ "$normalized_value" =~ ^ssh://git@github\.com[:/]carapace/carapace(\.git)?($|[?#]) ]] && return 0
+    [[ "$normalized_value" =~ ^git://github\.com/carapace/carapace(\.git)?($|[?#]) ]] && return 0
+    [[ "$normalized_value" =~ ^git@github\.com:carapace/carapace(\.git)?($|[?#]) ]] && return 0
     return 1
 }
 
@@ -3428,7 +3428,7 @@ resolve_package_install_spec() {
     local normalized_value=""
     normalized_value="$(to_lowercase_ascii "$value")"
     if [[ "$normalized_value" == "main" ]]; then
-        echo "github:openclaw/openclaw#main"
+        echo "github:carapace/carapace#main"
         return 0
     fi
     if is_explicit_package_install_spec "$value"; then
@@ -3442,48 +3442,48 @@ resolve_package_install_spec() {
     echo "${package_name}@${value}"
 }
 
-install_openclaw() {
-    local package_name="openclaw"
+install_carapace() {
+    local package_name="carapace"
     if [[ "$USE_BETA" == "1" ]]; then
         local beta_version=""
         beta_version="$(resolve_beta_version || true)"
         if [[ -n "$beta_version" ]]; then
-            OPENCLAW_VERSION="$beta_version"
+            CARAPACE_VERSION="$beta_version"
             ui_info "Beta tag detected (${beta_version})"
-            package_name="openclaw"
+            package_name="carapace"
         else
-            OPENCLAW_VERSION="latest"
+            CARAPACE_VERSION="latest"
             ui_info "No beta tag found; using latest"
         fi
     fi
 
-    if [[ -z "${OPENCLAW_VERSION}" ]]; then
-        OPENCLAW_VERSION="latest"
+    if [[ -z "${CARAPACE_VERSION}" ]]; then
+        CARAPACE_VERSION="latest"
     fi
 
-    if is_openclaw_source_package_install_spec "${OPENCLAW_VERSION}"; then
-        ui_error "npm installs do not support OpenClaw GitHub source targets like '${OPENCLAW_VERSION}'."
+    if is_carapace_source_package_install_spec "${CARAPACE_VERSION}"; then
+        ui_error "npm installs do not support Carapace GitHub source targets like '${CARAPACE_VERSION}'."
         ui_info "Use --install-method git --version main for the moving main checkout, or use latest, beta, an exact version, or a built .tgz package."
         return 1
     fi
 
     local resolved_version=""
-    if can_resolve_registry_package_version "${OPENCLAW_VERSION}"; then
-        resolved_version="$(npm view "${package_name}@${OPENCLAW_VERSION}" version 2>/dev/null || true)"
+    if can_resolve_registry_package_version "${CARAPACE_VERSION}"; then
+        resolved_version="$(npm view "${package_name}@${CARAPACE_VERSION}" version 2>/dev/null || true)"
     fi
     if [[ -n "$resolved_version" ]]; then
-        ui_info "Installing OpenClaw v${resolved_version}"
+        ui_info "Installing Carapace v${resolved_version}"
     else
-        ui_info "Installing OpenClaw (${OPENCLAW_VERSION})"
+        ui_info "Installing Carapace (${CARAPACE_VERSION})"
     fi
     local install_spec=""
-    install_spec="$(resolve_package_install_spec "${package_name}" "${OPENCLAW_VERSION}")"
+    install_spec="$(resolve_package_install_spec "${package_name}" "${CARAPACE_VERSION}")"
 
-    if ! install_openclaw_npm "${install_spec}" || ! ensure_openclaw_bin_link; then
-        ui_warn "npm install did not produce a usable OpenClaw package; retrying"
-        if ! install_openclaw_npm "${install_spec}" || ! ensure_openclaw_bin_link; then
-            ui_error "npm install did not produce a usable OpenClaw package"
-            restore_openclaw_bin_backup || ui_error "Could not restore the previous openclaw command"
+    if ! install_carapace_npm "${install_spec}" || ! ensure_carapace_bin_link; then
+        ui_warn "npm install did not produce a usable Carapace package; retrying"
+        if ! install_carapace_npm "${install_spec}" || ! ensure_carapace_bin_link; then
+            ui_error "npm install did not produce a usable Carapace package"
+            restore_carapace_bin_backup || ui_error "Could not restore the previous carapace command"
             return 1
         fi
     fi
@@ -3493,13 +3493,13 @@ install_openclaw() {
 # Run doctor for migrations (safe, non-interactive)
 run_doctor() {
     ui_info "Running doctor to migrate settings"
-    local claw="${OPENCLAW_BIN:-}"
+    local claw="${CARAPACE_BIN:-}"
     if [[ -z "$claw" ]]; then
-        claw="$(resolve_openclaw_bin || true)"
+        claw="$(resolve_carapace_bin || true)"
     fi
     if [[ -z "$claw" ]]; then
-        ui_info "Skipping doctor (openclaw not on PATH yet)"
-        warn_openclaw_not_found
+        ui_info "Skipping doctor (carapace not on PATH yet)"
+        warn_carapace_not_found
         return 0
     fi
     local doctor_exit=0
@@ -3514,9 +3514,9 @@ run_doctor() {
 }
 
 maybe_open_dashboard() {
-    local claw="${OPENCLAW_BIN:-}"
+    local claw="${CARAPACE_BIN:-}"
     if [[ -z "$claw" ]]; then
-        claw="$(resolve_openclaw_bin || true)"
+        claw="$(resolve_carapace_bin || true)"
     fi
     if [[ -z "$claw" ]]; then
         return 0
@@ -3527,28 +3527,28 @@ maybe_open_dashboard() {
     run_with_safe_stdin "$claw" dashboard || true
 }
 
-has_openclaw_config() {
+has_carapace_config() {
     local effective_home
-    effective_home="$(resolve_openclaw_effective_home)"
-    if [[ -n "${OPENCLAW_CONFIG_PATH:-}" ]]; then
+    effective_home="$(resolve_carapace_effective_home)"
+    if [[ -n "${CARAPACE_CONFIG_PATH:-}" ]]; then
         local config_path
-        config_path="$(resolve_openclaw_user_path "$OPENCLAW_CONFIG_PATH")"
+        config_path="$(resolve_carapace_user_path "$CARAPACE_CONFIG_PATH")"
         [[ -f "$config_path" ]]
         return
     fi
 
-    if [[ -n "${OPENCLAW_STATE_DIR:-}" ]]; then
+    if [[ -n "${CARAPACE_STATE_DIR:-}" ]]; then
         local state_dir
-        state_dir="$(resolve_openclaw_user_path "$OPENCLAW_STATE_DIR")"
-        if [[ -f "$state_dir/openclaw.json" || -f "$state_dir/clawdbot.json" ]]; then
+        state_dir="$(resolve_carapace_user_path "$CARAPACE_STATE_DIR")"
+        if [[ -f "$state_dir/carapace.json" || -f "$state_dir/clawdbot.json" ]]; then
             return 0
         fi
         return 1
     fi
 
-    if [[ -f "$effective_home/.openclaw/openclaw.json" ||
-        -f "$effective_home/.openclaw/clawdbot.json" ||
-        -f "$effective_home/.clawdbot/openclaw.json" ||
+    if [[ -f "$effective_home/.carapace/carapace.json" ||
+        -f "$effective_home/.carapace/clawdbot.json" ||
+        -f "$effective_home/.clawdbot/carapace.json" ||
         -f "$effective_home/.clawdbot/clawdbot.json" ]]; then
         return 0
     fi
@@ -3577,9 +3577,9 @@ load_install_version_helpers() {
 
 load_install_version_helpers
 
-if ! declare -F extract_openclaw_semver >/dev/null 2>&1; then
+if ! declare -F extract_carapace_semver >/dev/null 2>&1; then
 # Inline fallback when version-parse.sh could not be sourced (for example, stdin install).
-extract_openclaw_semver() {
+extract_carapace_semver() {
     local raw="${1:-}"
     raw="${raw//$'\r'/}"
     if [[ "$raw" =~ v?([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?(\+[0-9A-Za-z.-]+)?) ]]; then
@@ -3588,18 +3588,18 @@ extract_openclaw_semver() {
 }
 fi
 
-resolve_openclaw_version() {
+resolve_carapace_version() {
     local version=""
     local raw_version_output=""
-    local claw="${OPENCLAW_BIN:-}"
-    if [[ -z "$claw" ]] && command -v openclaw &> /dev/null; then
-        claw="$(command -v openclaw)"
+    local claw="${CARAPACE_BIN:-}"
+    if [[ -z "$claw" ]] && command -v carapace &> /dev/null; then
+        claw="$(command -v carapace)"
     fi
     if [[ -n "$claw" ]]; then
         raw_version_output=$("$claw" --version 2>/dev/null || true)
         raw_version_output="${raw_version_output%%$'\n'*}"
         raw_version_output="${raw_version_output//$'\r'/}"
-        version="$(extract_openclaw_semver "$raw_version_output")"
+        version="$(extract_carapace_semver "$raw_version_output")"
         if [[ -z "$version" ]]; then
             version="$raw_version_output"
         fi
@@ -3607,8 +3607,8 @@ resolve_openclaw_version() {
     if [[ -z "$version" ]]; then
         local npm_root=""
         npm_root=$(npm root -g 2>/dev/null || true)
-        if [[ -n "$npm_root" && -f "$npm_root/openclaw/package.json" ]]; then
-            version=$(node -e "console.log(require('${npm_root}/openclaw/package.json').version)" 2>/dev/null || true)
+        if [[ -n "$npm_root" && -f "$npm_root/carapace/package.json" ]]; then
+            version=$(node -e "console.log(require('${npm_root}/carapace/package.json').version)" 2>/dev/null || true)
         fi
     fi
     echo "$version"
@@ -3621,7 +3621,7 @@ is_gateway_daemon_loaded() {
     fi
 
     local status_json=""
-    status_json="$(bounded_probe_output "openclaw daemon status --json" "$claw" daemon status --json || true)"
+    status_json="$(bounded_probe_output "carapace daemon status --json" "$claw" daemon status --json || true)"
     if [[ -z "$status_json" ]]; then
         return 1
     fi
@@ -3640,9 +3640,9 @@ try {
 }
 
 refresh_gateway_service_if_loaded() {
-    local claw="${OPENCLAW_BIN:-}" refresh_output
+    local claw="${CARAPACE_BIN:-}" refresh_output
     if [[ -z "$claw" ]]; then
-        claw="$(resolve_openclaw_bin || true)"
+        claw="$(resolve_carapace_bin || true)"
     fi
     if [[ -z "$claw" ]]; then
         return 0
@@ -3656,7 +3656,7 @@ refresh_gateway_service_if_loaded() {
     if ! refresh_output="$({ set +x; "$claw" gateway install --force; } 2>&1 | sed -n -e 's/.*SERVICE_DEFINITION_SEALED:.*/ask the privileged deployment owner to manually repair it/p' -e 's/.*SERVICE_DEFINITION_UNKNOWN:.*/inspect service-definition access and manually repair it/p')"; then
         if [[ -n "$refresh_output" ]]; then
             ui_warn "Code installed; gateway service definition left unchanged; ${refresh_output}"
-            ui_info "Run openclaw gateway status --deep, verify the installation owner, and restart it manually if needed."
+            ui_info "Run carapace gateway status --deep, verify the installation owner, and restart it manually if needed."
             return 0
         else
             ui_warn "Gateway service refresh failed; continuing"
@@ -3679,24 +3679,24 @@ verify_installation() {
     local verify_gateway="${1:-true}"
 
     ui_stage "Verifying installation"
-    local claw="${OPENCLAW_BIN:-}"
+    local claw="${CARAPACE_BIN:-}"
     if [[ -z "$claw" ]]; then
-        claw="$(resolve_openclaw_bin || true)"
+        claw="$(resolve_carapace_bin || true)"
     fi
     if [[ -z "$claw" ]]; then
-        ui_error "Install verify failed: openclaw not on PATH yet"
-        warn_openclaw_not_found
+        ui_error "Install verify failed: carapace not on PATH yet"
+        warn_carapace_not_found
         return 1
     fi
 
-    run_quiet_step "Checking OpenClaw version" "$claw" --version || return 1
+    run_quiet_step "Checking Carapace version" "$claw" --version || return 1
 
     if [[ "$verify_gateway" != "true" ]]; then
         ui_info "Setup not complete; skipping gateway service check"
     elif is_gateway_daemon_loaded "$claw"; then
         run_quiet_step "Checking gateway service" "$claw" gateway status --deep || {
             local user_claw
-            user_claw="$(openclaw_command_for_user "$claw")"
+            user_claw="$(carapace_command_for_user "$claw")"
             ui_error "Install verify failed: gateway service unhealthy"
             ui_info "Run: ${user_claw} gateway status --deep"
             return 1
@@ -3709,28 +3709,28 @@ verify_installation() {
 }
 
 retire_npm_owner_after_git_install() {
-    local wrapper="$HOME/.local/bin/openclaw" npm_cmd="" npm_root="" npm_bin="" package_root="" package_name=""
+    local wrapper="$HOME/.local/bin/carapace" npm_cmd="" npm_root="" npm_bin="" package_root="" package_name=""
     if ! npm_cmd="$(npm_command_path npm)"; then
         ui_error "Could not retire the previous npm install: npm not found on PATH"
         return 1
     fi
     npm_root="$("$npm_cmd" root -g 2>/dev/null | awk 'NF { value = $0 } END { print value }')" || true
-    package_root="${npm_root%/}/openclaw"
+    package_root="${npm_root%/}/carapace"
     [[ -n "$npm_root" && -f "$package_root/package.json" ]] || return 0
     package_name="$(node -e 'const p=require(process.argv[1]); process.stdout.write(String(p.name || ""))' "$package_root/package.json" 2>/dev/null || true)"
-    if [[ "$package_name" != "openclaw" ]]; then
-        ui_error "Could not retire the previous npm install: ${package_root} contains package '${package_name:-unknown}', not openclaw"
+    if [[ "$package_name" != "carapace" ]]; then
+        ui_error "Could not retire the previous npm install: ${package_root} contains package '${package_name:-unknown}', not carapace"
         return 1
     fi
     npm_bin="$(npm_global_bin_dir "$npm_cmd" || true)"
-    if [[ "${npm_bin%/}/openclaw" == "$wrapper" ]]; then
+    if [[ "${npm_bin%/}/carapace" == "$wrapper" ]]; then
         if ! rm -rf "$package_root"; then
             ui_error "Could not retire the previous npm install: failed to remove ${package_root}"
             return 1
         fi
     else
-        if ! "$npm_cmd" uninstall -g openclaw >/dev/null 2>&1; then
-            ui_error "Could not retire the previous npm install: npm uninstall -g openclaw failed"
+        if ! "$npm_cmd" uninstall -g carapace >/dev/null 2>&1; then
+            ui_error "Could not retire the previous npm install: npm uninstall -g carapace failed"
             return 1
         fi
     fi
@@ -3738,7 +3738,7 @@ retire_npm_owner_after_git_install() {
 }
 
 is_installer_git_wrapper() {
-    local wrapper="${1:-$HOME/.local/bin/openclaw}" first="" second="" third="" fourth=""
+    local wrapper="${1:-$HOME/.local/bin/carapace}" first="" second="" third="" fourth=""
     [[ -f "$wrapper" && ! -L "$wrapper" ]] || return 1
     IFS= read -r first < "$wrapper" || return 1
     second="$(sed -n '2p' "$wrapper")"; third="$(sed -n '3p' "$wrapper")"; fourth="$(sed -n '4p' "$wrapper")"
@@ -3755,14 +3755,14 @@ prepare_git_wrapper_backup_for_npm() {
     npm_root="$("$npm_cmd" root -g 2>/dev/null || true)"
     npm_bin="$(npm_global_bin_dir "$npm_cmd" || true)"
     [[ -n "$npm_root" && -n "$npm_bin" ]] || return 0
-    target="${npm_bin%/}/openclaw"
+    target="${npm_bin%/}/carapace"
     is_installer_git_wrapper "$target" || return 0
-    launcher="${npm_root%/}/openclaw/openclaw.mjs"
-    begin_openclaw_bin_backup "$target" "$launcher" 1
+    launcher="${npm_root%/}/carapace/carapace.mjs"
+    begin_carapace_bin_backup "$target" "$launcher" 1
 }
 
 retire_git_wrapper_after_npm_install() {
-    local wrapper="$HOME/.local/bin/openclaw"
+    local wrapper="$HOME/.local/bin/carapace"
     is_installer_git_wrapper "$wrapper" || return 0
     if ! rm -f "$wrapper"; then
         ui_error "Could not retire the previous git wrapper: failed to remove ${wrapper}"
@@ -3795,11 +3795,11 @@ main() {
     fi
 
     local detected_checkout=""
-    detected_checkout="$(detect_openclaw_checkout "$PWD" || true)"
+    detected_checkout="$(detect_carapace_checkout "$PWD" || true)"
 
     if [[ -z "$INSTALL_METHOD" && -n "$detected_checkout" ]]; then
         if ! is_promptable; then
-            ui_info "Found OpenClaw checkout but no TTY; defaulting to npm install"
+            ui_info "Found Carapace checkout but no TTY; defaulting to npm install"
             INSTALL_METHOD="npm"
         else
             local selected_method=""
@@ -3810,7 +3810,7 @@ main() {
                     ;;
                 *)
                     ui_error "no install method selected"
-                    echo "Re-run with: --install-method git|npm (or set OPENCLAW_INSTALL_METHOD)."
+                    echo "Re-run with: --install-method git|npm (or set CARAPACE_INSTALL_METHOD)."
                     exit 2
                     ;;
             esac
@@ -3836,7 +3836,7 @@ main() {
 
     # Check for existing installation
     local is_upgrade=false
-    if check_existing_openclaw; then
+    if check_existing_carapace; then
         is_upgrade=true
         VERIFY_INSTALL=1
     fi
@@ -3857,12 +3857,12 @@ main() {
         exit 1
     fi
 
-    ui_stage "Installing OpenClaw"
+    ui_stage "Installing Carapace"
 
     local final_git_dir=""
     if [[ "$INSTALL_METHOD" == "git" ]]; then
         local had_npm_owner=false
-        if npm list -g openclaw &>/dev/null; then
+        if npm list -g carapace &>/dev/null; then
             had_npm_owner=true
         fi
 
@@ -3870,7 +3870,7 @@ main() {
         if [[ -z "$GIT_DIR_EXPLICIT" && -n "$detected_checkout" ]]; then
             final_git_dir="$detected_checkout"
         fi
-        install_openclaw_from_git "$final_git_dir"
+        install_carapace_from_git "$final_git_dir"
         if [[ "$had_npm_owner" == "true" ]]; then
             retire_npm_owner_after_git_install || return $?
         fi
@@ -3883,28 +3883,28 @@ main() {
         # Step 4: npm permissions (Linux)
         fix_npm_permissions
 
-        # Step 5: OpenClaw
+        # Step 5: Carapace
         prepare_git_wrapper_backup_for_npm || return $?
-        install_openclaw
+        install_carapace
         local npm_candidate=""
-        npm_candidate="$(resolve_installed_openclaw_bin || true)"
+        npm_candidate="$(resolve_installed_carapace_bin || true)"
         if [[ -z "$npm_candidate" ]] || ! "$npm_candidate" --version >/dev/null 2>&1; then
             ui_error "npm replacement failed verification"
-            restore_openclaw_bin_backup || ui_error "Could not restore the previous openclaw command"
+            restore_carapace_bin_backup || ui_error "Could not restore the previous carapace command"
             return 1
         fi
-        if ! commit_openclaw_bin_backup; then
-            restore_openclaw_bin_backup || ui_error "Could not restore the previous openclaw command"
+        if ! commit_carapace_bin_backup; then
+            restore_carapace_bin_backup || ui_error "Could not restore the previous carapace command"
             return 1
         fi
-        ui_success "OpenClaw installed"
+        ui_success "Carapace installed"
         retire_git_wrapper_after_npm_install || return $?
     fi
 
     ui_stage "Finalizing setup"
 
-    OPENCLAW_BIN="$(resolve_installed_openclaw_bin || true)"
-    warn_duplicate_openclaw_global_installs || true
+    CARAPACE_BIN="$(resolve_installed_carapace_bin || true)"
+    warn_duplicate_carapace_global_installs || true
 
     # PATH warning: installs can succeed while the user's login shell still lacks npm's global bin dir.
     local npm_bin=""
@@ -3913,13 +3913,13 @@ main() {
         warn_shell_path_missing_dir "$npm_bin" "npm global bin dir"
     fi
     if [[ "$INSTALL_METHOD" == "git" ]]; then
-        if [[ -x "$HOME/.local/bin/openclaw" ]]; then
+        if [[ -x "$HOME/.local/bin/carapace" ]]; then
             warn_shell_path_missing_dir "$HOME/.local/bin" "user-local bin dir (~/.local/bin)"
         fi
     fi
 
     local config_present=false defer_success=false
-    if has_openclaw_config; then
+    if has_carapace_config; then
         config_present=true
         refresh_gateway_service_if_loaded
     fi
@@ -3930,25 +3930,25 @@ main() {
 
     if [[ "$config_present" == "true" && "$is_upgrade" == "true" ]]; then
         if has_controlling_tty || [[ "$NO_ONBOARD" == "1" || "$NO_PROMPT" == "1" ]]; then
-            local claw="${OPENCLAW_BIN:-}"
+            local claw="${CARAPACE_BIN:-}"
             if [[ -z "$claw" ]]; then
-                claw="$(resolve_installed_openclaw_bin || true)"
+                claw="$(resolve_installed_carapace_bin || true)"
             fi
             if [[ -z "$claw" ]]; then
-                ui_info "Skipping doctor (openclaw not on PATH yet)"
-                warn_openclaw_not_found
+                ui_info "Skipping doctor (carapace not on PATH yet)"
+                warn_carapace_not_found
                 return 0
             fi
             local -a doctor_args=("--fix")
             if [[ "$NO_ONBOARD" == "1" || "$NO_PROMPT" == "1" ]]; then
                 doctor_args+=("--non-interactive")
             fi
-            ui_info "Running openclaw doctor"
+            ui_info "Running carapace doctor"
             local doctor_exit=0
             if [[ "$NO_ONBOARD" == "1" || "$NO_PROMPT" == "1" ]]; then
-                OPENCLAW_UPDATE_IN_PROGRESS=1 "$claw" doctor "${doctor_args[@]}" </dev/null || doctor_exit=$?
+                CARAPACE_UPDATE_IN_PROGRESS=1 "$claw" doctor "${doctor_args[@]}" </dev/null || doctor_exit=$?
             else
-                OPENCLAW_UPDATE_IN_PROGRESS=1 "$claw" doctor "${doctor_args[@]}" </dev/tty || doctor_exit=$?
+                CARAPACE_UPDATE_IN_PROGRESS=1 "$claw" doctor "${doctor_args[@]}" </dev/tty || doctor_exit=$?
             fi
             if (( doctor_exit == 130 )); then
                 abort_install_int
@@ -3959,12 +3959,12 @@ main() {
             fi
             should_open_dashboard=true
             ui_info "Updating plugins"
-            OPENCLAW_UPDATE_IN_PROGRESS=1 run_with_safe_stdin "$claw" plugins update --all || true
+            CARAPACE_UPDATE_IN_PROGRESS=1 run_with_safe_stdin "$claw" plugins update --all || true
         else
             run_doctor || return $?
             should_open_dashboard=true
             local user_claw
-            user_claw="$(openclaw_command_for_user "${OPENCLAW_BIN:-}")"
+            user_claw="$(carapace_command_for_user "${CARAPACE_BIN:-}")"
             ui_info "No TTY; run ${user_claw} plugins update --all manually"
         fi
     elif [[ "$config_present" == "true" ]]; then
@@ -3975,18 +3975,18 @@ main() {
     fi
 
     if [[ "$config_present" == "true" ]]; then
-        local claw="${OPENCLAW_BIN:-}"
+        local claw="${CARAPACE_BIN:-}"
         if [[ -z "$claw" ]]; then
-            claw="$(resolve_installed_openclaw_bin || true)"
+            claw="$(resolve_installed_carapace_bin || true)"
         fi
         if [[ -n "$claw" ]] && is_gateway_daemon_loaded "$claw"; then
             local user_claw
-            user_claw="$(openclaw_command_for_user "$claw")"
+            user_claw="$(carapace_command_for_user "$claw")"
             if [[ "$DRY_RUN" == "1" ]]; then
                 ui_info "Gateway daemon detected; would restart (${user_claw} daemon restart)"
             else
                 ui_info "Gateway daemon detected; restarting"
-                if OPENCLAW_UPDATE_IN_PROGRESS=1 "$claw" daemon restart < /dev/null >/dev/null 2>&1; then
+                if CARAPACE_UPDATE_IN_PROGRESS=1 "$claw" daemon restart < /dev/null >/dev/null 2>&1; then
                     ui_success "Gateway restarted"
                 else
                     ui_warn "Gateway restart failed; try: ${user_claw} daemon restart"
@@ -3998,19 +3998,19 @@ main() {
     if [[ "$defer_success" == "true" ]] && ! verify_installation "$config_present"; then
         if [[ "$config_present" != "true" && "$NO_ONBOARD" != "1" ]] && ! is_promptable; then
             local user_claw
-            user_claw="$(openclaw_command_for_user "${OPENCLAW_BIN:-}")"
+            user_claw="$(carapace_command_for_user "${CARAPACE_BIN:-}")"
             ui_info "No TTY; run ${user_claw} onboard to finish setup"
         fi
         return 1
     fi
 
     local installed_version=""
-    installed_version="$(resolve_openclaw_version)"
+    installed_version="$(resolve_carapace_version)"
     echo ""
     if [[ -n "$installed_version" ]]; then
-        ui_celebrate "🦞 OpenClaw installed successfully (${installed_version})!"
+        ui_celebrate "🦞 Carapace installed successfully (${installed_version})!"
     else
-        ui_celebrate "🦞 OpenClaw installed successfully!"
+        ui_celebrate "🦞 Carapace installed successfully!"
     fi
     if [[ "$is_upgrade" == "true" ]]; then
         ui_info "Upgrade complete"
@@ -4035,37 +4035,37 @@ main() {
 
     if [[ "$INSTALL_METHOD" == "git" && -n "$final_git_dir" ]]; then
         local user_claw
-        user_claw="$(openclaw_command_for_user "${OPENCLAW_BIN:-}")"
+        user_claw="$(carapace_command_for_user "${CARAPACE_BIN:-}")"
         ui_section "Source install details"
         ui_kv "Checkout" "$final_git_dir"
-        ui_kv "Wrapper" "$HOME/.local/bin/openclaw"
+        ui_kv "Wrapper" "$HOME/.local/bin/carapace"
         ui_kv "Update command" "${user_claw} update"
-        ui_kv "Switch to npm" "curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method npm"
+        ui_kv "Switch to npm" "curl -fsSL --proto '=https' --tlsv1.2 https://github.com/Exaggarate/carapace | bash -s -- --install-method npm"
     fi
 
     if [[ "$config_present" != "true" ]]; then
         if [[ "$NO_ONBOARD" == "1" ]]; then
             local user_claw
-            user_claw="$(openclaw_command_for_user "${OPENCLAW_BIN:-}")"
+            user_claw="$(carapace_command_for_user "${CARAPACE_BIN:-}")"
             ui_info "Skipping onboard (requested); run ${user_claw} onboard later"
         else
             ui_info "Starting setup"
             echo ""
             if is_promptable; then
-                local claw="${OPENCLAW_BIN:-}"
+                local claw="${CARAPACE_BIN:-}"
                 if [[ -z "$claw" ]]; then
-                    claw="$(resolve_installed_openclaw_bin || true)"
+                    claw="$(resolve_installed_carapace_bin || true)"
                 fi
                 if [[ -z "$claw" ]]; then
-                    ui_info "Skipping onboarding (openclaw not on PATH yet)"
-                    warn_openclaw_not_found
+                    ui_info "Skipping onboarding (carapace not on PATH yet)"
+                    warn_carapace_not_found
                     return 0
                 fi
                 exec </dev/tty
                 exec "$claw" onboard
             fi
             local user_claw
-            user_claw="$(openclaw_command_for_user "${OPENCLAW_BIN:-}")"
+            user_claw="$(carapace_command_for_user "${CARAPACE_BIN:-}")"
             ui_info "No TTY; run ${user_claw} onboard to finish setup"
         fi
     fi
@@ -4077,7 +4077,7 @@ main() {
     show_footer_links
 }
 
-if [[ "${OPENCLAW_INSTALL_SH_NO_RUN:-0}" != "1" ]]; then
+if [[ "${CARAPACE_INSTALL_SH_NO_RUN:-0}" != "1" ]]; then
     parse_args "$@"
     configure_verbose
     main

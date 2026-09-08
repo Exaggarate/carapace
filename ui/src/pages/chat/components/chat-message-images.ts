@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { html, noChange, nothing } from "lit";
 import { AsyncDirective, directive } from "lit/async-directive.js";
 import { Directive } from "lit/directive.js";
@@ -556,7 +556,7 @@ async function fetchManagedOutgoingImageBlob(
     headers.set("Authorization", `Bearer ${authToken}`);
   }
   if (!artifactDownload && requesterSessionKey) {
-    headers.set("x-openclaw-requester-session-key", requesterSessionKey);
+    headers.set("x-carapace-requester-session-key", requesterSessionKey);
   }
   const timeout = globalThis.setTimeout(() => {
     controller.abort(new DOMException("managed outgoing image fetch timed out", "TimeoutError"));

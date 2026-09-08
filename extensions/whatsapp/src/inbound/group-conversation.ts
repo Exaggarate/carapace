@@ -1,4 +1,4 @@
-import { resolveGroupSessionKey } from "openclaw/plugin-sdk/session-store-runtime";
+import { resolveGroupSessionKey } from "carapace/plugin-sdk/session-store-runtime";
 
 export function resolveWhatsAppGroupConversationId(conversationId: string): string {
   return (

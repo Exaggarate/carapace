@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   AgentSelectionRequiredError,
   listAgentIds,
@@ -14,7 +14,7 @@ import {
   resolveAgentMainSessionKey,
 } from "../config/sessions/main-session.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   DEFAULT_AGENT_ID,
   normalizeAgentId,
@@ -38,7 +38,7 @@ export function canonicalizeSessionKeyForAgent(agentId: string, key: string): st
 
 // Logical unscoped keys must honor the durable fixed-store owner. The physical-store
 // compatibility fallback is intentionally not used here because it can name a retired agent.
-function resolveLogicalSessionStoreAgentId(cfg: OpenClawConfig, sessionKey: string): string {
+function resolveLogicalSessionStoreAgentId(cfg: CarapaceConfig, sessionKey: string): string {
   const persistedOwner = resolvePersistedSessionStoreOwnerForKey(cfg, sessionKey);
   if (persistedOwner.kind === "configured") {
     return persistedOwner.agentId;
@@ -60,7 +60,7 @@ function resolveLogicalSessionStoreAgentId(cfg: OpenClawConfig, sessionKey: stri
 }
 
 function resolveParsedSessionStoreKey(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   raw: string,
   parsed: ParsedAgentSessionKey,
   options?: { storeAgentId?: string },
@@ -85,7 +85,7 @@ function resolveParsedSessionStoreKey(
 
 /** Resolve any incoming session key into the canonical key used in persisted session stores. */
 export function resolveSessionStoreKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   storeAgentId?: string;
 }): string {
@@ -127,7 +127,7 @@ export function resolveSessionStoreKey(params: {
 
 /** Resolve ownership before a prepared agent's main alias collapses to global. */
 export function resolveSessionStoreAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   canonicalKey: string,
   explicitAgentId?: string,
 ): string {
@@ -148,7 +148,7 @@ export function resolveSessionStoreAgentId(
 
 /** Preserve raw alias ownership and validate the canonical fixed-store boundary together. */
 export function resolveSessionStoreIdentity(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
 }): { agentId: string; canonicalKey: string } {
@@ -172,7 +172,7 @@ export function resolveSessionStoreIdentity(params: {
 
 /** Resolve a session key for lookup inside a specific agent's store. */
 export function resolveStoredSessionKeyForAgentStore(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }): string {
@@ -204,7 +204,7 @@ export function resolveStoredSessionKeyForAgentStore(params: {
 
 /** Resolve the owner agent for a stored session key, returning null for global/unknown keys. */
 export function resolveStoredSessionOwnerAgentId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   sessionKey: string;
 }): string | null {

@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
 import { clearRuntimeAuthProfileStoreSnapshots } from "../../../src/agents/auth-profiles.js";
 import type { EmbeddedAgentQueueMessageOutcome } from "../../../src/agents/embedded-agent-runner/runs.js";
 import { withFastReplyConfig } from "../../../src/auto-reply/reply/get-reply-fast-path.test-support.js";
-import type { OpenClawConfig } from "../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../src/config/types.carapace.js";
 
 // Avoid exporting vitest mock types (TS2742 under pnpm + d.ts emit).
 type AnyMock = any;
@@ -22,7 +22,7 @@ function getSharedMocks<T>(key: string, create: () => T): T {
   return store[symbol];
 }
 
-const embeddedAgentMocks = getSharedMocks("openclaw.trigger-handling.embedded-agent-mocks", () => ({
+const embeddedAgentMocks = getSharedMocks("carapace.trigger-handling.embedded-agent-mocks", () => ({
   abortEmbeddedAgentRun: vi.fn().mockReturnValue(false),
   compactEmbeddedAgentSession: vi.fn(),
   runEmbeddedAgent: vi.fn(),
@@ -120,7 +120,7 @@ const DEFAULT_MODEL_CATALOG = [
   { provider: "minimax", id: "MiniMax-M2.7", name: "MiniMax M2.7" },
 ];
 
-const modelCatalogMocks = getSharedMocks("openclaw.trigger-handling.model-catalog-mocks", () => ({
+const modelCatalogMocks = getSharedMocks("carapace.trigger-handling.model-catalog-mocks", () => ({
   loadManifestModelCatalog: vi.fn(() => DEFAULT_MODEL_CATALOG),
   loadPreparedModelCatalog: vi.fn().mockResolvedValue(DEFAULT_MODEL_CATALOG),
 }));
@@ -161,7 +161,7 @@ vi.doMock("../../../src/plugins/provider-runtime.runtime.js", () => ({
   refreshProviderOAuthCredentialWithPlugin: async () => undefined,
 }));
 
-const modelFallbackMocks = getSharedMocks("openclaw.trigger-handling.model-fallback-mocks", () => ({
+const modelFallbackMocks = getSharedMocks("carapace.trigger-handling.model-fallback-mocks", () => ({
   runWithModelFallback: vi.fn(
     async (params: {
       provider: string;
@@ -185,7 +185,7 @@ vi.doMock("../../../src/infra/git-commit.js", () => ({
   resolveCommitHash: vi.fn(() => "abcdef0"),
 }));
 
-const webSessionMocks = getSharedMocks("openclaw.trigger-handling.web-session-mocks", () => ({
+const webSessionMocks = getSharedMocks("carapace.trigger-handling.web-session-mocks", () => ({
   webAuthExists: vi.fn().mockResolvedValue(true),
   getWebAuthAgeMs: vi.fn().mockReturnValue(120_000),
   readWebSelfId: vi.fn().mockReturnValue({ e164: "+1999" }),
@@ -207,7 +207,7 @@ type TempHomeEnvSnapshot = {
   userProfile: string | undefined;
   homeDrive: string | undefined;
   homePath: string | undefined;
-  openclawHome: string | undefined;
+  carapaceHome: string | undefined;
   stateDir: string | undefined;
 };
 
@@ -220,8 +220,8 @@ function snapshotTempHomeEnv(): TempHomeEnvSnapshot {
     userProfile: process.env.USERPROFILE,
     homeDrive: process.env.HOMEDRIVE,
     homePath: process.env.HOMEPATH,
-    openclawHome: process.env.OPENCLAW_HOME,
-    stateDir: process.env.OPENCLAW_STATE_DIR,
+    carapaceHome: process.env.CARAPACE_HOME,
+    stateDir: process.env.CARAPACE_STATE_DIR,
   };
 }
 
@@ -238,15 +238,15 @@ function restoreTempHomeEnv(snapshot: TempHomeEnvSnapshot): void {
   restoreKey("USERPROFILE", snapshot.userProfile);
   restoreKey("HOMEDRIVE", snapshot.homeDrive);
   restoreKey("HOMEPATH", snapshot.homePath);
-  restoreKey("OPENCLAW_HOME", snapshot.openclawHome);
-  restoreKey("OPENCLAW_STATE_DIR", snapshot.stateDir);
+  restoreKey("CARAPACE_HOME", snapshot.carapaceHome);
+  restoreKey("CARAPACE_STATE_DIR", snapshot.stateDir);
 }
 
 function setTempHomeEnv(home: string): void {
   process.env.HOME = home;
   process.env.USERPROFILE = home;
-  delete process.env.OPENCLAW_HOME;
-  process.env.OPENCLAW_STATE_DIR = join(home, ".openclaw");
+  delete process.env.CARAPACE_HOME;
+  process.env.CARAPACE_STATE_DIR = join(home, ".carapace");
 
   if (process.platform !== "win32") {
     return;
@@ -260,7 +260,7 @@ function setTempHomeEnv(home: string): void {
 }
 
 beforeAll(async () => {
-  suiteTempHomeRoot = await fs.mkdtemp(join(os.tmpdir(), "openclaw-triggers-suite-"));
+  suiteTempHomeRoot = await fs.mkdtemp(join(os.tmpdir(), "carapace-triggers-suite-"));
 });
 
 afterAll(async () => {
@@ -279,7 +279,7 @@ afterAll(async () => {
 export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
   const home = join(suiteTempHomeRoot, `case-${++suiteTempHomeId}`);
   const snapshot = snapshotTempHomeEnv();
-  await fs.mkdir(join(home, ".openclaw", "agents", "main", "sessions"), { recursive: true });
+  await fs.mkdir(join(home, ".carapace", "agents", "main", "sessions"), { recursive: true });
   setTempHomeEnv(home);
 
   try {
@@ -304,7 +304,7 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
   }
 }
 
-export function makeCfg(home: string): OpenClawConfig {
+export function makeCfg(home: string): CarapaceConfig {
   return withFastReplyConfig({
     agents: {
       defaults: {
@@ -315,7 +315,7 @@ export function makeCfg(home: string): OpenClawConfig {
           "openai/gpt-4.1-mini": {},
           "openai/gpt-5.4": {},
         },
-        workspace: join(home, "openclaw"),
+        workspace: join(home, "carapace"),
         // Test harness: avoid 1s coalescer idle sleeps that dominate trigger suites.
         blockStreamingCoalesce: { idleMs: 1 },
         // Trigger tests assert routing/authorization behavior, not delivery pacing.
@@ -334,7 +334,7 @@ export function makeCfg(home: string): OpenClawConfig {
       },
     },
     session: { store: join(home, "sessions.json") },
-  } as OpenClawConfig);
+  } as CarapaceConfig);
 }
 
 async function loadGetReplyFromConfig() {

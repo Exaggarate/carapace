@@ -1,7 +1,7 @@
 import { fileURLToPath, pathToFileURL } from "node:url";
 import type { VitestWorkerDescriptor } from "./vitest-worker-artifacts.mts";
 
-const descriptorKey = Symbol.for("openclaw.vitest.compiled-subprocess-descriptor");
+const descriptorKey = Symbol.for("carapace.vitest.compiled-subprocess-descriptor");
 const bootstrapProcess = process as NodeJS.Process & {
   [descriptorKey]?: VitestWorkerDescriptor;
 };

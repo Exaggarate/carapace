@@ -88,8 +88,8 @@ vi.mock("../harness/runtime-plugin.js", () => ({
 
 vi.mock("../harness/selection.js", () => ({
   selectAgentHarness: vi.fn(() => ({
-    id: "openclaw",
-    label: "OpenClaw",
+    id: "carapace",
+    label: "Carapace",
     supports: () => ({ supported: true }),
     runAttempt: vi.fn(),
   })),
@@ -133,7 +133,7 @@ vi.mock("./compaction-runtime-preparation.js", () => ({
       plan: { selectedAuthMode: "api-key" },
       attempts: [{ kind: "direct", plan: { selectedAuthMode: "api-key" } }],
     },
-    selectedPreparedHarness: { id: "openclaw" },
+    selectedPreparedHarness: { id: "carapace" },
     providerUsesProfileScopedModelMetadata: false,
   })),
 }));
@@ -182,7 +182,7 @@ function createPreparedModelRuntime(config: Record<string, unknown>) {
   return {
     agentDir: "/tmp/agents/main/agent",
     config,
-    workspaceDir: "/tmp/openclaw-model-resolution",
+    workspaceDir: "/tmp/carapace-model-resolution",
     pluginRegistry: {},
     configuredRuntimeModels: [],
     inlineProviderModels: [],
@@ -351,7 +351,7 @@ describe("embedded model resolution consistency", () => {
     const capability = {
       provider: PROVIDER,
       modelId: STATIC_MODEL_ID,
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
       route: { api: staticCatalogModel.api, baseUrl: staticCatalogModel.baseUrl },
       compat: {
         supportedReasoningEfforts: ["low", "medium", "high", "xhigh", "max"],
@@ -362,7 +362,7 @@ describe("embedded model resolution consistency", () => {
       resolvePreparedModelThinkingCompat({
         capability,
         model: staticCatalogModel,
-        agentRuntime: "openclaw",
+        agentRuntime: "carapace",
       }),
     ).toEqual(capability.compat);
   });
@@ -427,12 +427,12 @@ describe("embedded model resolution consistency", () => {
     {
       name: "model",
       model: { ...staticCatalogModel, id: "hook-rerouted-model" },
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
     },
     {
       name: "physical route",
       model: { ...staticCatalogModel, baseUrl: "https://other.example/v1" },
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
     },
     {
       name: "agent harness",
@@ -446,7 +446,7 @@ describe("embedded model resolution consistency", () => {
         capability: {
           provider: PROVIDER,
           modelId: STATIC_MODEL_ID,
-          agentRuntime: "openclaw",
+          agentRuntime: "carapace",
           route: { api: staticCatalogModel.api, baseUrl: staticCatalogModel.baseUrl },
           compat: { supportedReasoningEfforts: ["max"] },
         },

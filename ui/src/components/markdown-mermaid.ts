@@ -2,13 +2,13 @@ import {
   MermaidTransientError,
   renderMermaidSvg,
   type MermaidTheme,
-} from "@openclaw/mermaid-renderer";
+} from "@carapace/mermaid-renderer";
 import { css, html, nothing, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { t } from "../i18n/index.ts";
 import { copyToClipboard } from "../lib/clipboard.ts";
 import { resolveThemeColor } from "../lib/theme-color.ts";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 import "./image-lightbox.ts";
 import "./web-awesome.ts";
@@ -50,7 +50,7 @@ function cachedDiagram(key: string, source: string, theme: MermaidTheme): Promis
   return result;
 }
 
-class OpenClawMermaid extends OpenClawLitElement {
+class CarapaceMermaid extends CarapaceLitElement {
   @property({ attribute: false }) source = "";
   @state() private imageUrl = "";
   @state() private showSource = false;
@@ -345,21 +345,21 @@ class OpenClawMermaid extends OpenClawLitElement {
       }
       ${
         this.expanded && this.imageUrl
-          ? html`<openclaw-image-lightbox
+          ? html`<carapace-image-lightbox
               src=${this.imageUrl}
               .imageTitle=${t("chat.mermaid.title")}
               @image-lightbox-close=${() => {
                 this.expanded = false;
               }}
-            ></openclaw-image-lightbox>`
+            ></carapace-image-lightbox>`
           : nothing
       }
     `;
   }
 }
 
-if (!customElements.get("openclaw-mermaid")) {
-  customElements.define("openclaw-mermaid", OpenClawMermaid);
+if (!customElements.get("carapace-mermaid")) {
+  customElements.define("carapace-mermaid", CarapaceMermaid);
 }
 
 export function mountMermaidBlocks(root: Element): boolean {
@@ -369,7 +369,7 @@ export function mountMermaidBlocks(root: Element): boolean {
     if (!code) {
       continue;
     }
-    const diagram = document.createElement("openclaw-mermaid");
+    const diagram = document.createElement("carapace-mermaid");
     diagram.source = code.textContent ?? "";
     block.replaceChildren(diagram);
     mounted = true;
@@ -379,6 +379,6 @@ export function mountMermaidBlocks(root: Element): boolean {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-mermaid": OpenClawMermaid;
+    "carapace-mermaid": CarapaceMermaid;
   }
 }

@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import type {
-  OpenClawCrablineInbound,
-  OpenClawCrablineInboundInput,
-  StartedOpenClawCrablineAdapter,
-  StartedOpenClawCrablineCorrelatedAdapter,
+  CarapaceCrablineInbound,
+  CarapaceCrablineInboundInput,
+  StartedCarapaceCrablineAdapter,
+  StartedCarapaceCrablineCorrelatedAdapter,
 } from "@openclaw/crabline";
 import { parseQaTarget } from "./qa-bus-protocol.js";
 import type { QaBusInboundMessageInput } from "./runtime-api.js";
@@ -93,15 +93,15 @@ function resolveMatrixQaTarget(target: string) {
 
 function resolveMatrixQaText(text: string, botUserId: string) {
   return text.replace(
-    /(^|[\s([{])@openclaw(?=$|[\s.,!?;)\]}])/gu,
+    /(^|[\s([{])@carapace(?=$|[\s.,!?;)\]}])/gu,
     (_match, prefix: string) => `${prefix}${botUserId}`,
   );
 }
 
 export function createCrablineProviderInboundInput(
-  adapter: StartedOpenClawCrablineAdapter,
+  adapter: StartedCarapaceCrablineAdapter,
   input: QaBusInboundMessageInput,
-): OpenClawCrablineInboundInput {
+): CarapaceCrablineInboundInput {
   const kind = input.conversation.kind === "direct" ? "direct" : "group";
   return {
     ...input,
@@ -127,9 +127,9 @@ export function createCrablineProviderInboundInput(
 }
 
 export function resolveCrablineStateConversation(params: {
-  adapter: StartedOpenClawCrablineAdapter;
+  adapter: StartedCarapaceCrablineAdapter;
   input: QaBusInboundMessageInput;
-  providerInbound: OpenClawCrablineInbound;
+  providerInbound: CarapaceCrablineInbound;
 }) {
   return params.adapter.channel === "matrix"
     ? params.input.conversation
@@ -137,7 +137,7 @@ export function resolveCrablineStateConversation(params: {
 }
 
 export function createCrablineProviderDelivery(
-  adapter: Pick<StartedOpenClawCrablineCorrelatedAdapter, "channel" | "createAgentDelivery">,
+  adapter: Pick<StartedCarapaceCrablineCorrelatedAdapter, "channel" | "createAgentDelivery">,
   target: string,
 ) {
   const { providerTargetKey, ...delivery } = adapter.createAgentDelivery({

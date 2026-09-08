@@ -1,6 +1,6 @@
 /** Reads and renders macOS LaunchAgent plists for gateway service installs. */
 import fs from "node:fs/promises";
-import { asOptionalRecord, isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord, isStringRecord } from "@carapace/normalization-core/record-coerce";
 import { hasErrnoCode } from "../infra/errno.js";
 import { runExec } from "../process/exec.js";
 import type {

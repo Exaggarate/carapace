@@ -6,10 +6,10 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-id";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { Model } from "../../llm/types.js";
 import { withBundledPluginEnablementCompat } from "../../plugins/bundled-compat.js";
 import type {
@@ -178,7 +178,7 @@ export function shouldExcludeProviderFromDefaultHighSignalLiveSweep(params: {
   provider?: string | null;
   useExplicitModels: boolean;
   providerFilter?: ReadonlySet<string> | null;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   resolveProviderOwners?: (provider: string) => readonly string[] | undefined;
@@ -323,7 +323,7 @@ async function runProviderDynamicModelDefault(
 async function normalizeDynamicModelDefault(
   model: Model,
   agentDir: string,
-  options: { config?: OpenClawConfig; workspaceDir?: string },
+  options: { config?: CarapaceConfig; workspaceDir?: string },
 ): Promise<Model> {
   const { normalizeDiscoveredAgentModel } = await import("../agent-model-discovery.js");
   return normalizeDiscoveredAgentModel(model, agentDir, options);
@@ -359,10 +359,10 @@ export function resolveLiveProviderDiscoveryProviderIds(params: {
 }
 
 export function applyLiveProviderPluginDiscoveryCompat(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   providers: readonly string[] | undefined;
   env?: NodeJS.ProcessEnv;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const pluginIds = new Set<string>();
   for (const provider of params.providers ?? []) {
     const owners =
@@ -414,7 +414,7 @@ export function applyLiveProviderPluginDiscoveryCompat(params: {
  */
 export async function appendPrioritizedDynamicLiveModels(params: {
   models: Model[];
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir: string;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

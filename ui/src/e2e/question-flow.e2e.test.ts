@@ -1,6 +1,6 @@
 // Control UI E2E tests cover composer-replacing Gateway questions through the mocked WebSocket.
 import path from "node:path";
-import type { Question, QuestionResolveResult } from "@openclaw/gateway-protocol";
+import type { Question, QuestionResolveResult } from "@carapace/gateway-protocol";
 import type { BrowserContext, Page } from "playwright";
 import { beforeEach, afterEach, expect, it } from "vitest";
 import type { SessionsListResult } from "../api/types.ts";
@@ -21,7 +21,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -163,7 +163,7 @@ async function openQuestionPage(viewport = { height: 900, width: 1440 }) {
 }
 
 function panelFor(page: Page, prompt: string) {
-  return page.locator("openclaw-chat-question-panel").filter({ hasText: prompt });
+  return page.locator("carapace-chat-question-panel").filter({ hasText: prompt });
 }
 
 async function expectQuestionAttention(page: Page, present: boolean): Promise<void> {
@@ -176,7 +176,7 @@ async function expectQuestionAttention(page: Page, present: boolean): Promise<vo
       .poll(() =>
         questionAttention.evaluate(
           (element) =>
-            (element.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+            (element.closest("carapace-tooltip") as (HTMLElement & { content?: string }) | null)
               ?.content,
         ),
       )
@@ -395,7 +395,7 @@ suite.define(() => {
     await panel.waitFor();
     await expectQuestionAttention(page, true);
     await expect
-      .poll(() => page.locator(".chat-thread openclaw-chat-question-panel").count())
+      .poll(() => page.locator(".chat-thread carapace-chat-question-panel").count())
       .toBe(0);
     await expect.poll(() => panel.getByText("1/1", { exact: true }).count()).toBe(1);
     await expect.poll(() => panel.getByPlaceholder("Type your own answer here").count()).toBe(1);
@@ -425,13 +425,13 @@ suite.define(() => {
     await page
       .locator(`[data-session-key="${questionSessionKey}"] [data-session-attention="question"]`)
       .hover();
-    await expect.poll(() => page.locator("openclaw-tooltip wa-tooltip[open]").count()).toBe(1);
+    await expect.poll(() => page.locator("carapace-tooltip wa-tooltip[open]").count()).toBe(1);
     await page.mouse.move(400, 50);
-    await expect.poll(() => page.locator("openclaw-tooltip wa-tooltip[open]").count()).toBe(0);
+    await expect.poll(() => page.locator("carapace-tooltip wa-tooltip[open]").count()).toBe(0);
     await page
       .locator(`[data-session-key="${questionSessionKey}"] [data-session-attention="question"]`)
       .focus();
-    await expect.poll(() => page.locator("openclaw-tooltip wa-tooltip[open]").count()).toBe(1);
+    await expect.poll(() => page.locator("carapace-tooltip wa-tooltip[open]").count()).toBe(1);
     await expect
       .poll(() => page.locator('.session-progress-hovercard[data-open="true"]').count())
       .toBe(0);
@@ -590,10 +590,10 @@ suite.define(() => {
     const getRequest = await gateway.waitForRequest("question.get");
     expect(getRequest.params).toEqual({ id: request.id });
 
-    const document = page.locator("openclaw-question-page");
+    const document = page.locator("carapace-question-page");
     await document.waitFor();
-    expect(await page.locator("openclaw-app-shell, openclaw-app-sidebar").count()).toBe(0);
-    const panel = document.locator("openclaw-chat-question-panel");
+    expect(await page.locator("carapace-app-shell, carapace-app-sidebar").count()).toBe(0);
+    const panel = document.locator("carapace-chat-question-panel");
     await panel.waitFor();
     await screenshot(page, "11-secret-store-ask-pending.png");
     const secretInput = panel.locator('input[type="password"]');
@@ -706,7 +706,7 @@ suite.define(() => {
     async ({ status, closeSubmittingPane }) => {
       const { gateway, page } = await openQuestionPage();
       await page.getByRole("button", { name: "Open split view" }).click();
-      const panes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+      const panes = page.locator("carapace-chat-pane.chat-split-view__pane");
       await expect.poll(() => panes.count()).toBe(2);
       await expect
         .poll(async () => (await gateway.getRequests("question.list")).length)
@@ -747,7 +747,7 @@ suite.define(() => {
         status === "answered" ? { id: request.id, answers } : { id: request.id, cancel: true },
       );
       expect(await gateway.getRequests("question.resolve")).toHaveLength(1);
-      const remainingPanes = page.locator("openclaw-chat-pane");
+      const remainingPanes = page.locator("carapace-chat-pane");
       if (closeSubmittingPane) {
         await submittingPane.getByRole("button", { name: "Close pane", exact: true }).click();
         await expect.poll(() => remainingPanes.count()).toBe(1);

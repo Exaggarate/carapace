@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { listBuzzAccountIds, resolveBuzzAccount, resolveDefaultBuzzAccountId } from "./types.js";
 
@@ -17,7 +17,7 @@ describe("listBuzzAccountIds", () => {
           privateKey: { source: "file", provider: "vault", id: "/buzz/private-key" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listBuzzAccountIds(cfg)).toEqual(["default"]);
   });
@@ -43,7 +43,7 @@ describe("resolveBuzzAccount", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(listBuzzAccountIds(cfg)).toEqual(["ada", "default", "empty"]);
     expect(resolveDefaultBuzzAccountId(cfg)).toBe("default");
     expect(resolveBuzzAccount({ cfg, accountId: "ada" })).toMatchObject({
@@ -78,7 +78,7 @@ describe("resolveBuzzAccount", () => {
           accounts: { default: { name: "Explicit default" } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(resolveBuzzAccount({ cfg })).toMatchObject({
       accountId: "default",
       name: "Explicit default",
@@ -100,7 +100,7 @@ describe("resolveBuzzAccount", () => {
           accounts: { first: {}, second: { enabled: true } },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(listBuzzAccountIds(cfg)).toEqual(["first", "second"]);
     expect(resolveDefaultBuzzAccountId(cfg)).toBe("second");
     expect(resolveBuzzAccount({ cfg })).toMatchObject({ accountId: "second", enabled: false });
@@ -160,7 +160,7 @@ describe("resolveBuzzAccount", () => {
       channels: {
         buzz: { relayUrl: "wss://buzz.example.com", ...credentials },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveBuzzAccount({ cfg })).toMatchObject(expected);
   });

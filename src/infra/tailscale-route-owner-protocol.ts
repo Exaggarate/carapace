@@ -1,4 +1,4 @@
-export const TAILSCALE_ROUTE_OWNER_ARG = "--openclaw-tailscale-route-owner";
+export const TAILSCALE_ROUTE_OWNER_ARG = "--carapace-tailscale-route-owner";
 
 export type TailscaleRouteOwnerMessage =
   | { type: "spawned"; pid: number }

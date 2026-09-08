@@ -4,7 +4,7 @@ import {
   DEFAULT_MEMORY_DEEP_DREAMING_MIN_SCORE,
   DEFAULT_MEMORY_DEEP_DREAMING_MIN_UNIQUE_QUERIES,
   resolveMemoryDeepDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
+} from "carapace/plugin-sdk/memory-core-host-status";
 import { describe, expect, it } from "vitest";
 import type { PromotionWeights } from "./short-term-promotion-types.js";
 import {

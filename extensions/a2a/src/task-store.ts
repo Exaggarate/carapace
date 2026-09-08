@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { A2aMessageRecord, A2aTaskRecord } from "./protocol.js";
 
 const A2A_TERMINAL_MAX_TASKS = 500;

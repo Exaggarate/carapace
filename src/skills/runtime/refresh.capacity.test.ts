@@ -35,7 +35,7 @@ describe("ensureSkillsWatcher", () => {
   beforeEach(async () => {
     watchMock.mockClear();
     createdWatchers.length = 0;
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-watch-capacity-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-watch-capacity-"));
     fixtureWorkspaceDir = await createFixtureDirectory("workspace");
     await createFixtureDirectory("workspace/skills");
   });

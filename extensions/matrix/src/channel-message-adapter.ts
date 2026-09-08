@@ -1,5 +1,5 @@
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
+import { createChannelMessageAdapterFromOutbound } from "carapace/plugin-sdk/channel-outbound";
+import type { ChannelOutboundAdapter } from "carapace/plugin-sdk/channel-send-result";
 import type { matrixChannelRuntime } from "./channel.runtime.js";
 
 export function createMatrixMessageAdapter(params: {

@@ -78,7 +78,7 @@ it.each([
           lsofCalls += 1;
           return {
             status: lsofCalls > 1 ? 1 : 0,
-            stdout: lsofCalls > 1 ? "" : "p424242\ncopenclaw-gateway\n",
+            stdout: lsofCalls > 1 ? "" : "p424242\nccarapace-gateway\n",
           };
         },
       );
@@ -89,7 +89,7 @@ it.each([
             throw Object.assign(new Error("missing"), { code: "ENOENT" });
           }
           if (command === "ps") {
-            return "node openclaw.mjs gateway";
+            return "node carapace.mjs gateway";
           }
           if (command === "fuser") {
             fuserArgs.push(args);
@@ -119,11 +119,11 @@ it.each([
             pid: 424242,
             port: 43123,
             createdAt: "2026-09-03T00:00:00Z",
-            configPath: path.join(root, "openclaw.json"),
+            configPath: path.join(root, "carapace.json"),
           }),
         );
         expect(
-          await readActiveGatewayLockIdentity({ lockDir: root, env: { OPENCLAW_STATE_DIR: root } }),
+          await readActiveGatewayLockIdentity({ lockDir: root, env: { CARAPACE_STATE_DIR: root } }),
         ).toMatchObject({ pid: 424242, port: 43123 });
       } else if (surface.startsWith("CLI fuser")) {
         mocks.probe.mockResolvedValue("busy");

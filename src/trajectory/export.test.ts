@@ -2,16 +2,16 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { Message, Usage } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@carapace/normalization-core";
+import type { Message, Usage } from "carapace/plugin-sdk/llm";
 import { afterAll, describe, expect, it } from "vitest";
 import { formatSqliteSessionFileMarker } from "../config/sessions/legacy-sqlite-marker.js";
 import {
   replaceSessionEntry,
   replaceTranscriptEvents,
 } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { exportTrajectoryBundle, resolveDefaultTrajectoryExportDir } from "./export.js";
 import {
   TRAJECTORY_POINTER_FILE_MAX_BYTES,
@@ -22,7 +22,7 @@ import {
 import { appendSqliteTrajectoryRuntimeEvents } from "./runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "./types.js";
 
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-trajectory-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-trajectory-"));
 let tempDirId = 0;
 
 function makeTempDir(): string {
@@ -86,7 +86,7 @@ function runtimeAttemptEvents(
   rows: ReadonlyArray<readonly [type: string, runId: string, data?: Record<string, unknown>]>,
 ): TrajectoryEvent[] {
   return rows.map(([type, runId, data], index) => ({
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "carapace-trajectory",
     schemaVersion: 1,
     traceId: "session-1",
     source: "runtime",
@@ -244,8 +244,8 @@ function writeToolCallSessionFile(sessionFile: string): void {
 }
 
 afterAll(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   fs.rmSync(tempRoot, { recursive: true, force: true });
 });
 
@@ -342,9 +342,9 @@ describe("exportTrajectoryBundle", () => {
     expect(outputDir).toBe(
       path.join(
         "/tmp/workspace",
-        ".openclaw",
+        ".carapace",
         "trajectory-exports",
-        "openclaw-trajectory-___evil_-2026-04-22T08-00-00",
+        "carapace-trajectory-___evil_-2026-04-22T08-00-00",
       ),
     );
   });
@@ -461,7 +461,7 @@ describe("exportTrajectoryBundle", () => {
     );
     appendSqliteTrajectoryRuntimeEvents({ agentId: "main", sessionId, storePath }, [
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: sessionId,
         source: "runtime",
@@ -560,7 +560,7 @@ describe("exportTrajectoryBundle", () => {
     const outputDir = path.join(tmpDir, "bundle");
     writeSimpleSessionFile(sessionFile);
     const runtimeEvent: TrajectoryEvent = {
-      traceSchema: "openclaw-trajectory",
+      traceSchema: "carapace-trajectory",
       schemaVersion: 1,
       traceId: "session-1",
       source: "runtime",
@@ -594,7 +594,7 @@ describe("exportTrajectoryBundle", () => {
       { ts: "2026", type: "date-compatible" },
       { ts: "999999", type: "numeric-milliseconds-only" },
     ].map(({ ts, type }, index) => ({
-      traceSchema: "openclaw-trajectory",
+      traceSchema: "carapace-trajectory",
       schemaVersion: 1,
       traceId: "session-1",
       source: "runtime",
@@ -655,7 +655,7 @@ describe("exportTrajectoryBundle", () => {
     const promptCache = { readTokens: 333_824, writeTokens: 51_130 };
     writeSimpleSessionFile(sessionFile);
     const runtimeEvent: TrajectoryEvent = {
-      traceSchema: "openclaw-trajectory",
+      traceSchema: "carapace-trajectory",
       schemaVersion: 1,
       traceId: "session-1",
       source: "runtime",
@@ -875,7 +875,7 @@ describe("exportTrajectoryBundle", () => {
     const runtimeFile = path.join(tmpDir, "session.trajectory.jsonl");
     writeSimpleSessionFile(sessionFile);
     const runtimeEvent: TrajectoryEvent = {
-      traceSchema: "openclaw-trajectory",
+      traceSchema: "carapace-trajectory",
       schemaVersion: 1,
       traceId: "session-1",
       source: "runtime",
@@ -906,7 +906,7 @@ describe("exportTrajectoryBundle", () => {
     const runtimeFile = path.join(tmpDir, "session.trajectory.jsonl");
     writeSimpleSessionFile(sessionFile);
     const runtimeEvent: TrajectoryEvent = {
-      traceSchema: "openclaw-trajectory",
+      traceSchema: "carapace-trajectory",
       schemaVersion: 1,
       traceId: "session-1",
       source: "runtime",
@@ -936,23 +936,23 @@ describe("exportTrajectoryBundle", () => {
   it.each([
     {
       name: "facts-only",
-      message: { __openclaw: { media: [{ path: "media/fact.png", contentType: "image/png" }] } },
+      message: { __carapace: { media: [{ path: "media/fact.png", contentType: "image/png" }] } },
       expectedPath: "media/fact.png",
     },
     {
       name: "sparse",
-      message: { __openclaw: { media: [{}, { path: "media/sparse.png" }] } },
+      message: { __carapace: { media: [{}, { path: "media/sparse.png" }] } },
       expectedPath: "media/sparse.png",
       expectedIndex: 1,
     },
     {
       name: "type-only",
-      message: { __openclaw: { media: [{ contentType: "image/png" }] } },
+      message: { __carapace: { media: [{ contentType: "image/png" }] } },
       expectedPath: undefined,
     },
     {
       name: "media-only",
-      message: { content: "", __openclaw: { media: [{ path: "media/media-only.png" }] } },
+      message: { content: "", __carapace: { media: [{ path: "media/media-only.png" }] } },
       expectedPath: "media/media-only.png",
     },
   ])("exports $name transcript rows as facts only", async (testCase) => {
@@ -974,7 +974,7 @@ describe("exportTrajectoryBundle", () => {
       fs.readFileSync(path.join(outputDir, "session-branch.json"), "utf8"),
     ) as { entries?: Array<{ type?: string; message?: Record<string, unknown> }> };
     const exported = sessionBranch.entries?.find((entry) => entry.type === "message")?.message;
-    const media = (exported?.["__openclaw"] as { media?: Array<{ path?: string }> })?.media;
+    const media = (exported?.["__carapace"] as { media?: Array<{ path?: string }> })?.media;
     const expectedIndex = "expectedIndex" in testCase ? (testCase.expectedIndex ?? 0) : 0;
     expect(media?.[expectedIndex]?.path).toBe(testCase.expectedPath);
     expect(exported).not.toHaveProperty("MediaPath");
@@ -1058,7 +1058,7 @@ describe("exportTrajectoryBundle", () => {
       runtimeFile,
       [
         {
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1074,7 +1074,7 @@ describe("exportTrajectoryBundle", () => {
           },
         },
         {
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1084,7 +1084,7 @@ describe("exportTrajectoryBundle", () => {
           sourceSeq: 2,
           sessionId: "session-1",
           data: {
-            harness: { type: "openclaw", token: rawSecrets[3] },
+            harness: { type: "carapace", token: rawSecrets[3] },
             metadata: {
               [`https://example.test/callback?token=${rawSecrets[1]}`]:
                 "secret-looking metadata key",
@@ -1096,7 +1096,7 @@ describe("exportTrajectoryBundle", () => {
           },
         },
         {
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1108,7 +1108,7 @@ describe("exportTrajectoryBundle", () => {
           data: { prompt: `submitted ${rawSecrets[1]}` },
         },
         {
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1201,7 +1201,7 @@ describe("exportTrajectoryBundle", () => {
         JSON.stringify({}),
         "",
         JSON.stringify({
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1214,7 +1214,7 @@ describe("exportTrajectoryBundle", () => {
         }),
         '{"traceSchema":',
         JSON.stringify({
-          traceSchema: "openclaw-trajectory",
+          traceSchema: "carapace-trajectory",
           schemaVersion: 1,
           traceId: "session-1",
           source: "runtime",
@@ -1737,7 +1737,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "carapace-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "session-1",
         runtimeFile: recordedRuntimeFile,
@@ -1747,7 +1747,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       recordedRuntimeFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -1762,7 +1762,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       path.join(envRuntimeDir, "session-1.jsonl"),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -1774,8 +1774,8 @@ describe("exportTrajectoryBundle", () => {
       })}\n`,
       "utf8",
     );
-    const previous = process.env.OPENCLAW_TRAJECTORY_DIR;
-    process.env.OPENCLAW_TRAJECTORY_DIR = envRuntimeDir;
+    const previous = process.env.CARAPACE_TRAJECTORY_DIR;
+    process.env.CARAPACE_TRAJECTORY_DIR = envRuntimeDir;
     try {
       const bundle = await exportTrajectoryBundle({
         outputDir,
@@ -1789,9 +1789,9 @@ describe("exportTrajectoryBundle", () => {
       expect(eventTypes(bundle.events)).not.toContain("env-runtime");
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_TRAJECTORY_DIR;
+        delete process.env.CARAPACE_TRAJECTORY_DIR;
       } else {
-        process.env.OPENCLAW_TRAJECTORY_DIR = previous;
+        process.env.CARAPACE_TRAJECTORY_DIR = previous;
       }
     }
   });
@@ -1805,7 +1805,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "carapace-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "session-1",
         runtimeFile: outsideFile,
@@ -1815,7 +1815,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       outsideFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -1852,7 +1852,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "carapace-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "session-1",
         runtimeFile: path.join(tmpDir, "recorded", "session-1.jsonl"),
@@ -1862,7 +1862,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       defaultRuntimeFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -1897,7 +1897,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "carapace-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "session-1",
         runtimeFile: symlinkFile,
@@ -1907,7 +1907,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       targetFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -1958,7 +1958,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       runtimeFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "other-session",
         source: "runtime",
@@ -1994,7 +1994,7 @@ describe("exportTrajectoryBundle", () => {
     fs.writeFileSync(
       runtimeFile,
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -2046,7 +2046,7 @@ describe("exportTrajectoryBundle", () => {
 
     const runtimeEvents: TrajectoryEvent[] = [
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -2062,7 +2062,7 @@ describe("exportTrajectoryBundle", () => {
         },
       },
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -2083,7 +2083,7 @@ describe("exportTrajectoryBundle", () => {
         },
       },
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -2093,7 +2093,7 @@ describe("exportTrajectoryBundle", () => {
         sourceSeq: 3,
         sessionId: "session-1",
         data: {
-          harness: { type: "openclaw", version: "0.1.0" },
+          harness: { type: "carapace", version: "0.1.0" },
           model: { provider: "openai", name: "gpt-5.4" },
           skills: {
             entries: [
@@ -2112,7 +2112,7 @@ describe("exportTrajectoryBundle", () => {
         },
       },
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",
@@ -2126,7 +2126,7 @@ describe("exportTrajectoryBundle", () => {
         },
       },
       {
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: "session-1",
         source: "runtime",

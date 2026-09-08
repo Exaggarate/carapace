@@ -14,7 +14,7 @@ type CliAuthEpochTestApi = {
 
 function getTestApi(): CliAuthEpochTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.cliAuthEpochTestApi")
+    Symbol.for("carapace.cliAuthEpochTestApi")
   ] as CliAuthEpochTestApi;
 }
 

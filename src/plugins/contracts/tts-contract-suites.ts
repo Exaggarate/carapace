@@ -1,6 +1,6 @@
 // TTS contract suites provide reusable text-to-speech plugin contract assertions.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ResolvedTtsConfig, SpeechProviderPlugin } from "openclaw/plugin-sdk/speech-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ResolvedTtsConfig, SpeechProviderPlugin } from "carapace/plugin-sdk/speech-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AssistantMessage, Model } from "../../llm/types.js";
 import {
@@ -11,8 +11,8 @@ import {
 import { withEnv, withEnvAsync } from "../../plugin-sdk/test-env.js";
 import { createLazyRuntimeModule } from "../../shared/lazy-runtime.js";
 
-type TtsRuntimeModule = typeof import("openclaw/plugin-sdk/tts-runtime");
-type TtsCoreModule = typeof import("openclaw/plugin-sdk/speech-core");
+type TtsRuntimeModule = typeof import("carapace/plugin-sdk/tts-runtime");
+type TtsCoreModule = typeof import("carapace/plugin-sdk/speech-core");
 type SummarizeTextDeps = NonNullable<Parameters<TtsCoreModule["summarizeText"]>[1]>;
 
 let ttsRuntime: TtsRuntimeModule;
@@ -61,7 +61,7 @@ async function withIsolatedSpeechProviderEnvAsync<T>(
   return await withEnvAsync(isolatedSpeechProviderEnv(overrides), fn);
 }
 
-vi.mock("openclaw/plugin-sdk/llm", () => {
+vi.mock("carapace/plugin-sdk/llm", () => {
   const getApiProvider = vi.fn(() => undefined);
   return {
     completeSimple: vi.fn(),
@@ -91,11 +91,11 @@ function createResolvedModel(provider: string, modelId: string) {
   };
 }
 
-function asLegacyTtsConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asLegacyTtsConfig(value: unknown): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
-function asLegacyOpenClawConfig(value: Record<string, unknown>): OpenClawConfig {
+function asLegacyCarapaceConfig(value: Record<string, unknown>): CarapaceConfig {
   return asLegacyTtsConfig(value);
 }
 
@@ -332,7 +332,7 @@ function setupTestSpeechProviderRegistry() {
   setActivePluginRegistry(registry);
 }
 
-function createResolvedSummarizationConfig(cfg: OpenClawConfig): ResolvedTtsConfig {
+function createResolvedSummarizationConfig(cfg: CarapaceConfig): ResolvedTtsConfig {
   const rawConfig = typeof cfg.tts === "object" && cfg.tts !== null ? cfg.tts : {};
   return {
     auto: "off",
@@ -388,7 +388,7 @@ export function describeTtsConfigContract() {
     beforeEach(setupTtsContractTest);
 
     describe("resolveEdgeOutputFormat", () => {
-      const baseCfg: OpenClawConfig = {
+      const baseCfg: CarapaceConfig = {
         agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
         tts: {},
       };
@@ -536,7 +536,7 @@ export function describeTtsConfigContract() {
             GOOGLE_API_KEY: undefined,
           },
           () => {
-            const cfg = asLegacyOpenClawConfig({
+            const cfg = asLegacyCarapaceConfig({
               agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
               models: {
                 providers: {
@@ -565,7 +565,7 @@ export function describeTtsConfigContract() {
     describe("resolveTtsConfig provider normalization", () => {
       it("normalizes legacy edge provider ids to microsoft", () => {
         const config = resolveTtsConfig(
-          asLegacyOpenClawConfig({
+          asLegacyCarapaceConfig({
             agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
             tts: {
               provider: "edge",
@@ -589,7 +589,7 @@ export function describeTtsSummarizationContract() {
   describe("tts summarization contract", () => {
     beforeEach(setupTtsSummarizationTest);
 
-    const baseCfg: OpenClawConfig = {
+    const baseCfg: CarapaceConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       tts: {},
     };
@@ -597,7 +597,7 @@ export function describeTtsSummarizationContract() {
     async function runSummarizeText(params?: {
       text?: string;
       targetLength?: number;
-      cfg?: OpenClawConfig;
+      cfg?: CarapaceConfig;
     }) {
       const cfg = params?.cfg ?? baseCfg;
       const config = createResolvedSummarizationConfig(cfg);
@@ -653,7 +653,7 @@ export function describeTtsSummarizationContract() {
     });
 
     it("uses summaryModel override when configured", async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
         tts: { summaryModel: "openai/gpt-4.1-mini" },
       };
@@ -892,7 +892,7 @@ export function describeTtsAutoApplyContract() {
     beforeAll(setupTtsRuntime);
     beforeEach(setupTtsContractTest);
 
-    const baseCfg: OpenClawConfig = asLegacyOpenClawConfig({
+    const baseCfg: CarapaceConfig = asLegacyCarapaceConfig({
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       tts: {
         auto: "inbound",
@@ -903,19 +903,19 @@ export function describeTtsAutoApplyContract() {
       },
     });
 
-    const taggedCfg: OpenClawConfig = {
+    const taggedCfg: CarapaceConfig = {
       ...baseCfg,
       tts: { ...baseCfg.tts, auto: "tagged" },
     };
 
     async function expectAutoTtsOutcome(params: {
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       payload: { text: string };
       inboundAudio?: boolean;
       expectedSynthesisCalls: number;
       expectSamePayload: boolean;
     }) {
-      await withEnvAsync({ OPENCLAW_TTS_PREFS: `/tmp/tts-test-${Date.now()}.json` }, async () => {
+      await withEnvAsync({ CARAPACE_TTS_PREFS: `/tmp/tts-test-${Date.now()}.json` }, async () => {
         const result = await maybeApplyTtsToPayload({
           payload: params.payload,
           cfg: params.cfg,

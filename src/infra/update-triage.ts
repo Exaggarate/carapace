@@ -62,7 +62,7 @@ const triageReportPathsSchema = z.object({
   bundleError: z.string().max(1024).nullish(),
 });
 const TRIAGE_OUTPUT_HINT =
-  "See the Gateway host command output for saved diagnostics and the installation-specific openclaw triage command.";
+  "See the Gateway host command output for saved diagnostics and the installation-specific carapace triage command.";
 
 /** Capture the interactive handoff before replacement; invoke it after native cleanup releases. */
 export async function prepareUpdateFailureTriage(params: {
@@ -119,7 +119,7 @@ async function runPreparedUpdateFailureTriage(
     ),
     ...installationTargetEnv(installationTarget),
   };
-  delete env.OPENCLAW_UPDATE_IN_PROGRESS;
+  delete env.CARAPACE_UPDATE_IN_PROGRESS;
   delete env[UPDATE_RUN_ID_ENV];
   const redaction = { env, stateDir: installationTarget.stateDir };
   const { log, error: logError } = prepared.runtime;
@@ -178,7 +178,7 @@ async function runPreparedUpdateFailureTriage(
         return { status: "cancelled" };
       }
       if (!entryPath) {
-        throw new Error("The installed OpenClaw entrypoint is unavailable.");
+        throw new Error("The installed Carapace entrypoint is unavailable.");
       }
       const args = [
         entryPath,
@@ -240,7 +240,7 @@ async function runPreparedUpdateFailureTriage(
     const reason = scrubDoctorErrorMessage(redactSupportString(detail, redaction));
     const message = `Triage could not complete: ${reason}`;
     const command = formatInstallationTargetCommand(
-      ["openclaw", "triage", ...(contextPath ? ["--update-result", contextPath] : [])],
+      ["carapace", "triage", ...(contextPath ? ["--update-result", contextPath] : [])],
       installationTarget,
       { env: targetEnv },
     );

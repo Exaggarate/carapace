@@ -4,7 +4,7 @@ import {
   parseAgentCommandModelRef,
 } from "../agents/command/model-ref.js";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginRuntimePluginIdScope } from "../plugins/runtime/gateway-request-scope.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
 import {
@@ -40,7 +40,7 @@ vi.mock("../agents/provider-model-normalization.runtime.js", () => ({
           : undefined,
 }));
 
-let config: OpenClawConfig;
+let config: CarapaceConfig;
 
 beforeEach(() => {
   dispatch.mockClear();

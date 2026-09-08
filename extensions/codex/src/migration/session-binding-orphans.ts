@@ -3,8 +3,8 @@ import { setImmediate } from "node:timers/promises";
 import type {
   PluginDoctorStateMigration,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { CODEX_APP_SERVER_BINDING_NAMESPACE } from "../app-server/session-binding-meta.js";
 
 const PAGE_SIZE = 512;

@@ -12,7 +12,7 @@ function git(cwd: string, ...args: string[]): string {
 }
 
 function createRepository(files: Record<string, string | Buffer>): string {
-  const rootDir = createTempDir("openclaw-conflict-markers-");
+  const rootDir = createTempDir("carapace-conflict-markers-");
   git(rootDir, "init", "-q");
   for (const [file, content] of Object.entries(files)) {
     const filePath = path.join(rootDir, file);

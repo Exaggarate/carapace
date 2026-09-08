@@ -9,7 +9,7 @@ import { createDeferred } from "../../../test/helpers/promise.js";
 import { clearGitHubCredentialVerificationCache } from "../../agents/github-oauth-client.js";
 import { resolveManagedGitHubProfileDir } from "../../agents/github-tool-identity.js";
 import { createTestBoardStore } from "../../boards/board-store.test-support.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginBoardWidgetContentKindRegistrar } from "../../plugins/board-widget-content-kinds.js";
 import { createPluginRecord } from "../../plugins/loader-records.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
@@ -17,9 +17,9 @@ import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../p
 import * as processExec from "../../process/exec.js";
 import * as lazyPromise from "../../shared/lazy-promise.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { toRequestUrl } from "../../test-utils/provider-usage-fetch.js";
 import { readGitHubJsonResponse } from "../control-ui-github-api.js";
 import { createBoardHarness } from "./board.test-support.js";
@@ -70,8 +70,8 @@ function observeSharedReadAdmission() {
 }
 
 describe("board authenticated GitHub Actions", () => {
-  let state: OpenClawTestState;
-  let config: OpenClawConfig;
+  let state: CarapaceTestState;
+  let config: CarapaceConfig;
   let actions: () => Response | Promise<Response>;
   let http: Mock<typeof fetch>;
   const account = vi.fn(async () => json({ id: 100, login: "fixture-user", avatar_url: null }));
@@ -95,7 +95,7 @@ describe("board authenticated GitHub Actions", () => {
   beforeEach(async () => {
     resetPluginRuntimeStateForTest();
     clearGitHubCredentialVerificationCache();
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       prefix: "board-github-",
       env: { GH_TOKEN: undefined, GITHUB_TOKEN: undefined },
     });

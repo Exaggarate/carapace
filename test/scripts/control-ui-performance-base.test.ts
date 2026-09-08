@@ -89,10 +89,10 @@ import { brotliCompressSync } from "node:zlib";
 import { gzip } from "pako";
 const outDir = path.resolve(import.meta.dirname, "../dist/control-ui");
 function recordBuildIdentity() {
-  const identityCapture = process.env.OPENCLAW_TEST_BUILD_IDENTITY_CAPTURE;
+  const identityCapture = process.env.CARAPACE_TEST_BUILD_IDENTITY_CAPTURE;
   if (!identityCapture) return;
   fs.appendFileSync(identityCapture, JSON.stringify({
-    identity: ["GIT_COMMIT", "OPENCLAW_BUILD_TIMESTAMP", "GIT_BRANCH", "OPENCLAW_CONTROL_UI_BUILD_ID", "OPENCLAW_CONTROL_UI_RELEASE_BUILD"].map((key) => process.env[key]),
+    identity: ["GIT_COMMIT", "CARAPACE_BUILD_TIMESTAMP", "GIT_BRANCH", "CARAPACE_CONTROL_UI_BUILD_ID", "CARAPACE_CONTROL_UI_RELEASE_BUILD"].map((key) => process.env[key]),
     gitDisabled: !fs.existsSync(process.env.GIT_DIR ?? "") && spawnSync("git", ["rev-parse", "HEAD"]).status !== 0,
     packageVersion: JSON.parse(fs.readFileSync(path.resolve(import.meta.dirname, "../package.json"), "utf8")).version,
   }) + "\\n");
@@ -138,7 +138,7 @@ export default {
           cwd: root,
           env: {
             ...process.env,
-            OPENCLAW_TEST_BUILD_IDENTITY_CAPTURE: identityCapture,
+            CARAPACE_TEST_BUILD_IDENTITY_CAPTURE: identityCapture,
             TMPDIR: scratch,
             TMP: scratch,
             TEMP: scratch,
@@ -179,7 +179,7 @@ export default {
       expect(identities.every(({ gitDisabled }) => gitDisabled)).toBe(true);
       expect(fs.existsSync(path.join(root, "dist/control-ui/index.html"))).toBe(true);
       expect(
-        fs.readdirSync(scratch).filter((name) => name.startsWith("openclaw-ui-performance-base-")),
+        fs.readdirSync(scratch).filter((name) => name.startsWith("carapace-ui-performance-base-")),
       ).toEqual([]);
     }
     const protectedRoot = path.join(temporaryRoot, "protected");

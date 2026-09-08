@@ -1,17 +1,17 @@
 // One-shot diagnostics exporter start/flush lifecycle for embedded CLI runs.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
 import type { PluginServicesHandle } from "./services.js";
-import type { OpenClawPluginService, OpenClawPluginServiceContext } from "./types.js";
+import type { CarapacePluginService, CarapacePluginServiceContext } from "./types.js";
 
-const loadOpenClawPlugins = vi.hoisted(() => vi.fn());
+const loadCarapacePlugins = vi.hoisted(() => vi.fn());
 const startPluginServices = vi.hoisted(() => vi.fn());
 const waitForDiagnosticEventsDrained = vi.hoisted(() => vi.fn(async () => {}));
 const warn = vi.hoisted(() => vi.fn());
 
-vi.mock("./loader.js", () => ({ loadOpenClawPlugins }));
+vi.mock("./loader.js", () => ({ loadCarapacePlugins }));
 vi.mock("./services.js", () => ({ startPluginServices }));
 vi.mock("../logging/subsystem.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../logging/subsystem.js")>()),
@@ -26,7 +26,7 @@ import { startOneShotDiagnosticsExporters } from "./one-shot-diagnostics.js";
 
 const otelEnabledConfig = {
   diagnostics: { otel: { enabled: true, endpoint: "http://127.0.0.1:4318" } },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function mockRegistryWithServices(serviceIds: string[]) {
   const registry = {
@@ -38,16 +38,16 @@ function mockRegistryWithServices(serviceIds: string[]) {
       origin: "bundled",
     })),
   };
-  loadOpenClawPlugins.mockReturnValue(registry);
+  loadCarapacePlugins.mockReturnValue(registry);
   return registry;
 }
 
-async function mockRealExporter(service: OpenClawPluginService, origin: "bundled" | "workspace") {
+async function mockRealExporter(service: CarapacePluginService, origin: "bundled" | "workspace") {
   const { startPluginServices: startRealServices } =
     await vi.importActual<typeof import("./services.js")>("./services.js");
   const registry = createEmptyPluginRegistry();
   registry.services.push({ pluginId: "diagnostics-otel", service, source: "test", origin });
-  loadOpenClawPlugins.mockReturnValue(registry);
+  loadCarapacePlugins.mockReturnValue(registry);
   let servicesHandle: PluginServicesHandle | undefined;
   startPluginServices.mockImplementationOnce(
     async (params: Parameters<typeof startRealServices>[0]) => {
@@ -70,10 +70,10 @@ describe("startOneShotDiagnosticsExporters", () => {
     ["diagnostics disabled", { diagnostics: { enabled: false, otel: { enabled: true } } }],
     ["otel disabled", { diagnostics: { otel: { enabled: false } } }],
   ])("skips plugin loading when otel export is not configured (%s)", async (_label, config) => {
-    const handle = await startOneShotDiagnosticsExporters({ config: config as OpenClawConfig });
+    const handle = await startOneShotDiagnosticsExporters({ config: config as CarapaceConfig });
 
     expect(handle).toBeNull();
-    expect(loadOpenClawPlugins).not.toHaveBeenCalled();
+    expect(loadCarapacePlugins).not.toHaveBeenCalled();
     expect(startPluginServices).not.toHaveBeenCalled();
   });
 
@@ -84,7 +84,7 @@ describe("startOneShotDiagnosticsExporters", () => {
     const handle = await startOneShotDiagnosticsExporters({ config: otelEnabledConfig });
 
     expect(handle).not.toBeNull();
-    expect(loadOpenClawPlugins).toHaveBeenCalledWith(
+    expect(loadCarapacePlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config: otelEnabledConfig,
         onlyPluginIds: ["diagnostics-otel"],
@@ -95,7 +95,7 @@ describe("startOneShotDiagnosticsExporters", () => {
     expect(startPluginServices).toHaveBeenCalledTimes(1);
     const startParams = startPluginServices.mock.calls[0]?.[0] as {
       registry: { services: Array<{ service: { id: string } }> };
-      config: OpenClawConfig;
+      config: CarapaceConfig;
     };
     expect(startParams.config).toBe(otelEnabledConfig);
     expect(startParams.registry.services.map((entry) => entry.service.id)).toEqual([
@@ -106,7 +106,7 @@ describe("startOneShotDiagnosticsExporters", () => {
   it("keeps OTLP logs but suppresses stdout JSONL logs when requested", async () => {
     const config = {
       diagnostics: { otel: { enabled: true, logs: true, logsExporter: "both" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mockRegistryWithServices(["diagnostics-otel"]);
     startPluginServices.mockResolvedValue({ stop: vi.fn(async () => {}) });
 
@@ -117,7 +117,7 @@ describe("startOneShotDiagnosticsExporters", () => {
 
     expect(handle).not.toBeNull();
     const startParams = startPluginServices.mock.calls[0]?.[0] as {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
     };
     expect(startParams.config.diagnostics?.otel?.logs).toBe(true);
     expect(startParams.config.diagnostics?.otel?.logsExporter).toBe("otlp");
@@ -127,7 +127,7 @@ describe("startOneShotDiagnosticsExporters", () => {
   it("disables stdout-only JSONL logs when requested", async () => {
     const config = {
       diagnostics: { otel: { enabled: true, logs: true, logsExporter: "stdout" } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mockRegistryWithServices(["diagnostics-otel"]);
     startPluginServices.mockResolvedValue({ stop: vi.fn(async () => {}) });
 
@@ -138,7 +138,7 @@ describe("startOneShotDiagnosticsExporters", () => {
 
     expect(handle).not.toBeNull();
     const startParams = startPluginServices.mock.calls[0]?.[0] as {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
     };
     expect(startParams.config.diagnostics?.otel?.logs).toBe(false);
     expect(startParams.config.diagnostics?.otel?.logsExporter).toBe("otlp");
@@ -217,7 +217,7 @@ describe("startOneShotDiagnosticsExporters", () => {
       const drain = createDeferredCore();
       const flush = createDeferredCore();
       const exporterStop = vi.fn(() => flush.promise);
-      let internalDiagnostics: OpenClawPluginServiceContext["internalDiagnostics"];
+      let internalDiagnostics: CarapacePluginServiceContext["internalDiagnostics"];
       const services = await mockRealExporter(
         {
           id: "diagnostics-otel",

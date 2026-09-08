@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { lookupSessionGoalOperation } from "./goals-operations.js";
 import {
   applySessionEntryLifecycleMutation,
@@ -20,7 +20,7 @@ import { useTempSessionsFixture } from "./test-helpers.js";
 import type { SessionEntry } from "./types.js";
 
 describe("first transcript turn initialization", () => {
-  const fixture = useTempSessionsFixture("openclaw-first-goal-turn-");
+  const fixture = useTempSessionsFixture("carapace-first-goal-turn-");
   const now = 1_800_000_000_000;
   const sessionId = "first-goal-session";
   const scope = () => ({
@@ -46,7 +46,7 @@ describe("first transcript turn initialization", () => {
     createdActor: { type: "human", source: "profile", id: "operator-profile" },
     sandbox: "required",
   };
-  const database = () => openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
+  const database = () => openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
   const counts = () =>
     database()
       .db.prepare(
@@ -87,7 +87,7 @@ describe("first transcript turn initialization", () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("creates the first session, Goal, input and run receipt atomically and replays after reopen", async () => {
@@ -112,7 +112,7 @@ describe("first transcript turn initialization", () => {
       lookupSessionGoalOperation({ ...scope(), expectedSessionId: sessionId, operation }),
     ).toEqual(turn.sessionTurnMutationResult?.result);
 
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const replay = await admit();
     expect(replay).toMatchObject({
       appendedCount: 0,

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { err, ok } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { err, ok } from "@carapace/normalization-core/result";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../packages/gateway-protocol/src/index.js";
 import { slugifyWorktreeTitle } from "../agents/worktrees/name.js";
 import { managedWorktrees, WorktreeRepositoryError } from "../agents/worktrees/service.js";

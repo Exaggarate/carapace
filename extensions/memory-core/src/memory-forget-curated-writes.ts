@@ -1,6 +1,6 @@
 import path from "node:path";
-import { isPathInside } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isPathInside } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function collectTranscriptWrites(params: {
   message: unknown;

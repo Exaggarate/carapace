@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
+import { normalizeModelCatalog } from "@carapace/model-catalog-core/model-catalog-normalize";
 import {
   MODEL_PRICING_SOURCES,
   normalizeModelPricingCatalog,
@@ -11,10 +11,10 @@ import {
   normalizeUpstreamModelPricing,
   type ModelPricingProvider,
   type ModelPricingSource,
-} from "@openclaw/model-catalog-core/model-catalog-pricing";
-import { normalizeModelCatalogProviderId } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { parseStrictFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/model-catalog-core/model-catalog-pricing";
+import { normalizeModelCatalogProviderId } from "@carapace/model-catalog-core/model-catalog-refs";
+import { parseStrictFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { ModelCatalogModel } from "../packages/model-catalog-core/src/model-catalog-types.js";
 import type {
   RemoteModelCatalogBundle,
@@ -120,7 +120,7 @@ export function readModelCatalogManifests(
     .filter((entry) => entry.isDirectory())
     .map((entry) => ({
       pluginId: entry.name,
-      manifestPath: path.join(extensionsDir, entry.name, "openclaw.plugin.json"),
+      manifestPath: path.join(extensionsDir, entry.name, "carapace.plugin.json"),
     }))
     .filter((entry) => fs.existsSync(entry.manifestPath))
     .map((entry) => ({

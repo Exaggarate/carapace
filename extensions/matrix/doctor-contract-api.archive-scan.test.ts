@@ -2,18 +2,18 @@
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   getPluginStateCapacityForTests,
   importPluginStateEntriesForDoctorForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { PluginDoctorStateMigrationContext } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import { SqliteBackedMatrixSyncStore } from "./src/matrix/client/file-sync-store.js";
@@ -22,7 +22,7 @@ import { installMatrixTestRuntime } from "./src/test-runtime.js";
 import { useAutoCleanupTempDirTracker } from "./test-support.js";
 
 function createMigrationParams(stateDir: string) {
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+  const env = { CARAPACE_STATE_DIR: stateDir };
   const context: PluginDoctorStateMigrationContext = {
     getPluginStateCapacity: () => getPluginStateCapacityForTests("matrix", env),
     importPluginStateEntries: (options, entries) =>
@@ -31,7 +31,7 @@ function createMigrationParams(stateDir: string) {
       createPluginStateKeyedStoreForTests<T>("matrix", options),
   };
   return {
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     env,
     stateDir,
     oauthDir: path.join(stateDir, "oauth"),
@@ -134,7 +134,7 @@ describe("matrix doctor archive scan boundaries", () => {
   });
 
   it("keeps archive-like account IDs active while excluding token-root archives", async () => {
-    const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+    const stateDir = tempDirs.make("carapace-matrix-doctor-");
     const { activeRoots, excludedRoots } = createStateRoots(stateDir);
     for (const [index, storageRootDir] of [...activeRoots, ...excludedRoots].entries()) {
       writeLegacySyncCache(storageRootDir, `legacy-token-${index}`);
@@ -165,7 +165,7 @@ describe("matrix doctor archive scan boundaries", () => {
   });
 
   it("imports dedupe state for archive-like account IDs without opening token archives", async () => {
-    const stateDir = tempDirs.make("openclaw-matrix-doctor-");
+    const stateDir = tempDirs.make("carapace-matrix-doctor-");
     const { activeRoots, excludedRoots } = createStateRoots(stateDir);
     const now = Date.now();
     for (const [index, storageRootDir] of activeRoots.entries()) {
@@ -185,7 +185,7 @@ describe("matrix doctor archive scan boundaries", () => {
     for (const storageRootDir of excludedRoots) {
       fs.mkdirSync(path.join(storageRootDir, "state"), { recursive: true });
       fs.writeFileSync(
-        path.join(storageRootDir, "state", "openclaw.sqlite"),
+        path.join(storageRootDir, "state", "carapace.sqlite"),
         "archived SQLite sentinel must not be opened",
       );
       fs.writeFileSync(
@@ -215,7 +215,7 @@ describe("matrix doctor archive scan boundaries", () => {
     for (const [index, accountId] of ["sync-cache-backup", "legacy"].entries()) {
       const deduper = createMatrixInboundEventDeduper({
         auth: { accountId },
-        env: { OPENCLAW_STATE_DIR: stateDir },
+        env: { CARAPACE_STATE_DIR: stateDir },
       });
       await expect(
         deduper.claim({ roomId: "!room:example.org", eventId: `$active-${index}` }),
@@ -223,7 +223,7 @@ describe("matrix doctor archive scan boundaries", () => {
     }
     for (const storageRootDir of excludedRoots) {
       expect(fs.existsSync(path.join(storageRootDir, "inbound-dedupe.json"))).toBe(true);
-      expect(fs.readFileSync(path.join(storageRootDir, "state", "openclaw.sqlite"), "utf8")).toBe(
+      expect(fs.readFileSync(path.join(storageRootDir, "state", "carapace.sqlite"), "utf8")).toBe(
         "archived SQLite sentinel must not be opened",
       );
       expectRootNotVisited(visitedDirs, storageRootDir);

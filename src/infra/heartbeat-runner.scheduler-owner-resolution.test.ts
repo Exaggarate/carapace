@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { heartbeatLog } from "./heartbeat-runner-config.js";
 import { startHeartbeatRunner } from "./heartbeat-runner.js";
 import { requestHeartbeat } from "./heartbeat-wake.js";
@@ -20,7 +20,7 @@ describe("startHeartbeatRunner ambient owner resolution", () => {
         entries: { ops: {}, main: {} },
         defaults: { systemAgent: { agentId: "ops" } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const runner = startHeartbeatRunner({ cfg, runOnce });
     requestHeartbeat({ source: "manual", intent: "manual", reason: "manual", coalesceMs: 0 });
@@ -36,7 +36,7 @@ describe("startHeartbeatRunner ambient owner resolution", () => {
     const warn = vi.spyOn(heartbeatLog, "warn").mockImplementation(() => undefined);
     const cfg = {
       agents: { ownership: "explicit", entries: { ops: {}, main: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const runner = startHeartbeatRunner({ cfg });
     runner.updateConfig(cfg);

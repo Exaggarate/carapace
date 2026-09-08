@@ -1,21 +1,21 @@
 import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJson } from "@carapace/normalization-core/json-coercion";
 import { lazyCompile } from "../../../packages/gateway-protocol/src/protocol-validator.js";
 import { SessionsGoalMutationResultSchema } from "../../../packages/gateway-protocol/src/schema/sessions-goal.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
 import {
   ensureSessionGoalOperationsSchema,
   SESSION_GOAL_OPERATIONS_TABLE,
-} from "../../state/openclaw-agent-goal-operations-schema.js";
+} from "../../state/carapace-agent-goal-operations-schema.js";
 import type {
   SessionGoalOperation,
   SessionGoalOperationResult,
@@ -112,7 +112,7 @@ export function lookupSessionGoalOperation(
 ): SessionGoalOperationResult | undefined {
   assertOperationTime(options.operation, Date.now());
   const resolved = resolveSqliteScope(options);
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const { db } = database;
     const table = executeSqliteQueryTakeFirstSync(
       db,
@@ -310,8 +310,8 @@ export async function mutateSessionGoal(
   const resolved = resolveSqliteScope(options);
   const databaseOptions = toDatabaseOptions(resolved);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    ensureSessionGoalOperationsSchema(openOpenClawAgentDatabase(databaseOptions).db);
-    const committed = runOpenClawAgentWriteTransaction((database) => {
+    ensureSessionGoalOperationsSchema(openCarapaceAgentDatabase(databaseOptions).db);
+    const committed = runCarapaceAgentWriteTransaction((database) => {
       options.assertCurrent?.();
       const fresh = readSessionEntryRow(database, resolved.sessionKey);
       const replay = readSessionGoalOperationReceipt(

@@ -3,4 +3,4 @@ export {
   EventStream,
   AssistantMessageEventStream,
   createAssistantMessageEventStream,
-} from "@openclaw/llm-core/event-stream";
+} from "@carapace/llm-core/event-stream";

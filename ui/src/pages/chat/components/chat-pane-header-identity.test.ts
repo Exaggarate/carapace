@@ -41,11 +41,11 @@ describe("chat pane header identity links", () => {
     });
 
     const facepile = container.querySelector<HTMLElement & { updateComplete?: Promise<unknown> }>(
-      "openclaw-viewer-facepile.chat-pane__participants",
+      "carapace-viewer-facepile.chat-pane__participants",
     );
     await facepile?.updateComplete;
     const ownerLink = container.querySelector<HTMLAnchorElement>(
-      "a.person-activity-avatar-link:has(openclaw-session-owner-chip)",
+      "a.person-activity-avatar-link:has(carapace-session-owner-chip)",
     );
     expect(ownerLink?.getAttribute("href")).toBe("/activity/ada");
     const participantLinks = [
@@ -80,6 +80,6 @@ describe("chat pane header identity links", () => {
     });
 
     expect(container.querySelector("a.person-activity-avatar-link")).toBeNull();
-    expect(container.querySelector("openclaw-session-owner-chip")).not.toBeNull();
+    expect(container.querySelector("carapace-session-owner-chip")).not.toBeNull();
   });
 });

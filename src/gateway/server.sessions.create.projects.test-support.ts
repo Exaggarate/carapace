@@ -32,8 +32,8 @@ export async function initializeRepository(root: string, name: string): Promise<
   const repo = path.join(root, name);
   await fs.mkdir(repo, { recursive: true });
   await execFileAsync("git", ["init", "-b", "main", repo]);
-  await execFileAsync("git", ["-C", repo, "config", "user.name", "OpenClaw Tests"]);
-  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@openclaw.invalid"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.name", "Carapace Tests"]);
+  await execFileAsync("git", ["-C", repo, "config", "user.email", "tests@carapace.invalid"]);
   await fs.writeFile(path.join(repo, "README.md"), `${name}\n`);
   await execFileAsync("git", ["-C", repo, "add", "README.md"]);
   await execFileAsync("git", ["-C", repo, "commit", "-m", "initial"]);

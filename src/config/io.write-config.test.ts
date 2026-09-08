@@ -9,11 +9,11 @@ import { startGatewayConfigReloader } from "../gateway/config-reload.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { initializePublishedConfigRuntimeEnv, prepareConfigRuntimeEnv } from "./config-env-vars.js";
@@ -36,10 +36,10 @@ import { replaceConfigFile, transformConfigFile, transformConfigFileWithRetry } 
 import { ConfigMutationConflictError } from "./mutation-conflict.js";
 import { createProviderConfigFixture } from "./runtime-snapshot.test-fixtures.js";
 import type { AgentModelEntryConfig, AgentModelPolicyConfig } from "./types.agent-defaults.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.carapace.js";
 
 const CONFIG_CLOBBER_SNAPSHOT_LIMIT = 32;
-type ConfigHealthDatabase = Pick<OpenClawStateKyselyDatabase, "config_health_entries">;
+type ConfigHealthDatabase = Pick<CarapaceStateKyselyDatabase, "config_health_entries">;
 
 // Mock the plugin manifest registry so we can register a fake channel whose
 // AJV JSON Schema carries a `default` value.  This lets the #56772 regression
@@ -100,7 +100,7 @@ function createConfigIO(options: ConfigIoOptions = {}) {
 }
 
 describe("config io write", () => {
-  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-config-io-" });
+  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "carapace-config-io-" });
   const silentLogger = {
     warn: () => {},
     error: () => {},
@@ -117,9 +117,9 @@ describe("config io write", () => {
         cliBackends: [],
         skills: [],
         hooks: [],
-        rootDir: "/tmp/openclaw-test-demo",
-        source: "/tmp/openclaw-test-demo/index.ts",
-        manifestPath: "/tmp/openclaw-test-demo/openclaw.plugin.json",
+        rootDir: "/tmp/carapace-test-demo",
+        source: "/tmp/carapace-test-demo/index.ts",
+        manifestPath: "/tmp/carapace-test-demo/carapace.plugin.json",
         configSchema: {
           type: "object",
           properties: { mode: { type: "string", default: "auto" } },
@@ -133,9 +133,9 @@ describe("config io write", () => {
     const home = await suiteRootTracker.make("case");
     return withEnvAsync(
       {
-        OPENCLAW_DEFER_SHELL_ENV_FALLBACK: undefined,
-        OPENCLAW_LOAD_SHELL_ENV: undefined,
-        OPENCLAW_SHELL_ENV_TIMEOUT_MS: undefined,
+        CARAPACE_DEFER_SHELL_ENV_FALLBACK: undefined,
+        CARAPACE_LOAD_SHELL_ENV: undefined,
+        CARAPACE_SHELL_ENV_TIMEOUT_MS: undefined,
       },
       () => fn(home),
     );
@@ -159,13 +159,13 @@ describe("config io write", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     resetConfigRuntimeState();
     await suiteRootTracker.cleanup();
   });
 
   function readConfigHealthRow(home: string, configPath: string) {
-    const { db } = openOpenClawStateDatabase({ env: { HOME: home } as NodeJS.ProcessEnv });
+    const { db } = openCarapaceStateDatabase({ env: { HOME: home } as NodeJS.ProcessEnv });
     const healthDb = getNodeSqliteKysely<ConfigHealthDatabase>(db);
     return executeSqliteQueryTakeFirstSync(
       db,
@@ -217,14 +217,14 @@ describe("config io write", () => {
     expect(warnMessages(warn).join("\n")).toContain(expected);
   };
 
-  const configPathForHome = (home: string, fileName = "openclaw.json") =>
-    path.join(home, ".openclaw", fileName);
+  const configPathForHome = (home: string, fileName = "carapace.json") =>
+    path.join(home, ".carapace", fileName);
 
   const formatConfig = (config: unknown) => `${JSON.stringify(config, null, 2)}\n`;
 
   const createExistingConfigSnapshot = (
     configPath: string,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     raw: string | null,
   ): ConfigFileSnapshot => ({
     path: configPath,
@@ -241,8 +241,8 @@ describe("config io write", () => {
     legacyIssues: [],
   });
 
-  const readPersistedConfig = async (configPath: string): Promise<OpenClawConfig> =>
-    JSON.parse(await fs.readFile(configPath, "utf-8")) as OpenClawConfig;
+  const readPersistedConfig = async (configPath: string): Promise<CarapaceConfig> =>
+    JSON.parse(await fs.readFile(configPath, "utf-8")) as CarapaceConfig;
 
   const writeConfigJson = async (configPath: string, config: unknown) => {
     await fs.writeFile(configPath, formatConfig(config), "utf-8");
@@ -264,7 +264,7 @@ describe("config io write", () => {
 
   const createFastConfigIO = (home: string, options: ConfigIoOptions = {}) =>
     createHomeConfigIO(home, {
-      env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
       ...options,
     });
 
@@ -284,7 +284,7 @@ describe("config io write", () => {
     const rootRaw = formatConfig(params.authored);
     await fs.writeFile(configPath, rootRaw, "utf-8");
     const io = createFastConfigIO(params.home, {
-      env: { OPENCLAW_TEST_FAST: "1", ...params.env } as NodeJS.ProcessEnv,
+      env: { CARAPACE_TEST_FAST: "1", ...params.env } as NodeJS.ProcessEnv,
     });
     const snapshot = await io.readConfigFileSnapshot();
     expect(snapshot.valid).toBe(true);
@@ -325,7 +325,7 @@ describe("config io write", () => {
   itWithHome(
     "preserves a bare legacy restriction through an unrelated write and reload",
     async (home) => {
-      const original: OpenClawConfig = { agents: { defaults: { models: { bare: {} } } } };
+      const original: CarapaceConfig = { agents: { defaults: { models: { bare: {} } } } };
       const { configPath } = await writeConfigFixture(home, original);
       const io = createFastConfigIO(home, { configPath });
 
@@ -401,7 +401,7 @@ describe("config io write", () => {
             }
             return;
           }
-          const policyFor = (cfg: OpenClawConfig) =>
+          const policyFor = (cfg: CarapaceConfig) =>
             createModelVisibilityPolicy({
               cfg,
               catalog: [],
@@ -470,15 +470,15 @@ describe("config io write", () => {
 
   itWithHome("writes health state to SQLite through public config reads", async (home) => {
     const configPath = configPathForHome(home);
-    const healthPath = path.join(home, ".openclaw", "logs", "config-health.json");
+    const healthPath = path.join(home, ".carapace", "logs", "config-health.json");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await writeConfigJson(configPath, { gateway: { mode: "local" } });
     const warn = vi.fn();
     const io = createHomeConfigIO(home, {
       configPath,
       env: {
-        OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+        CARAPACE_TEST_FAST: "1",
       } as NodeJS.ProcessEnv,
       logger: { warn, error: vi.fn() },
       observe: true,
@@ -504,13 +504,13 @@ describe("config io write", () => {
     const io = createHomeConfigIO(home, {
       configPath,
       env: {
-        OPENCLAW_NIX_MODE: "1",
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_NIX_MODE: "1",
+        CARAPACE_TEST_FAST: "1",
       } as NodeJS.ProcessEnv,
     });
 
     await expect(io.writeConfigFile({ gateway: { mode: "local", port: 19001 } })).rejects.toThrow(
-      "Agent-first Nix setup: https://github.com/openclaw/nix-openclaw#quick-start",
+      "Agent-first Nix setup: https://github.com/Exaggarate/carapace/nix-carapace#quick-start",
     );
 
     await expect(fs.readFile(configPath, "utf-8")).resolves.toBe(initialRaw);
@@ -521,7 +521,7 @@ describe("config io write", () => {
     async (home) => {
       const warn = vi.fn();
       const io = createHomeConfigIO(home, {
-        env: { HOME: home, OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+        env: { HOME: home, CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
         logger: { warn, error: vi.fn() },
       });
       const staleConfig = {
@@ -557,19 +557,19 @@ describe("config io write", () => {
   );
 
   itWithHome(
-    "keeps writes inside an OPENCLAW_STATE_DIR override even when the real home config exists",
+    "keeps writes inside an CARAPACE_STATE_DIR override even when the real home config exists",
     async (home) => {
       const liveConfigPath = configPathForHome(home);
       await fs.mkdir(path.dirname(liveConfigPath), { recursive: true });
       await writeConfigJson(liveConfigPath, { gateway: { mode: "local", port: 18789 } });
 
       const overrideDir = path.join(home, "isolated-state");
-      const env = { OPENCLAW_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
+      const env = { CARAPACE_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
       const io = createHomeConfigIO(home, {
         env,
       });
 
-      expect(io.configPath).toBe(path.join(overrideDir, "openclaw.json"));
+      expect(io.configPath).toBe(path.join(overrideDir, "carapace.json"));
 
       await io.writeConfigFile({
         agents: { entries: { main: { default: true } } },
@@ -583,7 +583,7 @@ describe("config io write", () => {
       expect(livePersisted.gateway).toEqual({ mode: "local", port: 18789 });
 
       const overridePersisted = JSON.parse(
-        await fs.readFile(path.join(overrideDir, "openclaw.json"), "utf-8"),
+        await fs.readFile(path.join(overrideDir, "carapace.json"), "utf-8"),
       ) as {
         session?: { store?: unknown };
       };
@@ -628,7 +628,7 @@ describe("config io write", () => {
       { gateway: { mode: "local", port: 19001 } },
     );
 
-    await io.writeConfigFile(nextConfig as OpenClawConfig);
+    await io.writeConfigFile(nextConfig as CarapaceConfig);
 
     const persisted = JSON.parse(await fs.readFile(configPath, "utf-8")) as Record<string, unknown>;
     expect(persisted.gateway).toEqual({ mode: "local", port: 19001 });
@@ -662,14 +662,14 @@ describe("config io write", () => {
     {
       name: "prints missing-meta write anomalies when test anomaly logging is requested",
       seedExistingConfig: true,
-      env: { OPENCLAW_TEST_CONFIG_WRITE_LOG: "1" },
+      env: { CARAPACE_TEST_CONFIG_WRITE_LOG: "1" },
       logPrefix: "Config write anomaly:",
       expectedWarnings: ["Config write anomaly:", "missing-meta-before-write"],
     },
     {
       name: "suppresses overwrite audit output when skipOutputLogs is set",
       seedExistingConfig: true,
-      env: { VITEST: "true", OPENCLAW_TEST_CONFIG_WRITE_LOG: "1" },
+      env: { VITEST: "true", CARAPACE_TEST_CONFIG_WRITE_LOG: "1" },
       logPrefix: "Config overwrite:",
       skipOutputLogs: true,
     },
@@ -685,7 +685,7 @@ describe("config io write", () => {
         env: auditCase.env ?? ({} as NodeJS.ProcessEnv),
         logger: { warn, error: vi.fn() },
       });
-      const config: OpenClawConfig = auditCase.seedExistingConfig
+      const config: CarapaceConfig = auditCase.seedExistingConfig
         ? { gateway: { mode: "local", port: 18790 } }
         : { gateway: { mode: "local" } };
 
@@ -709,12 +709,12 @@ describe("config io write", () => {
 
   itWithHome("preserves root $schema during partial writes", async (home) => {
     const { configPath } = await writeConfigFixture(home, {
-      $schema: "https://openclaw.ai/config.json",
+      $schema: "https://github.com/Exaggarate/carapace",
       gateway: { mode: "local" },
     });
 
     const persisted = await writeGatewayPortAndReadConfig(home, configPath);
-    expect(persisted.$schema).toBe("https://openclaw.ai/config.json");
+    expect(persisted.$schema).toBe("https://github.com/Exaggarate/carapace");
     expect(persisted.gateway).toEqual({ mode: "local", port: 18789 });
   });
 
@@ -924,7 +924,7 @@ describe("config io write", () => {
     "reports the rejected payload save outcome accurately: %s",
     async (outcome) => {
       await withSuiteHome(async (home) => {
-        const original = { gateway: { mode: "local" } } satisfies OpenClawConfig;
+        const original = { gateway: { mode: "local" } } satisfies CarapaceConfig;
         const { configPath, raw: originalRaw } = await writeConfigFixture(home, original);
         const previousPayload = "previous rejected payload\n";
         const warn = vi.fn();
@@ -1257,7 +1257,7 @@ describe("config io write", () => {
         params: { transport: "sse", openaiWsWarmup: false },
       });
       expect(persisted.agents?.entries).toEqual({
-        main: { workspace: path.join(home, ".openclaw", "workspace") },
+        main: { workspace: path.join(home, ".carapace", "workspace") },
         ops: {},
       });
     },
@@ -1296,21 +1296,21 @@ describe("config io write", () => {
       await writeConfigFixture(home, {
         gateway: {
           mode: "local",
-          auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+          auth: { mode: "token", token: "${CARAPACE_GATEWAY_TOKEN}" },
         },
         channels: { "test-plugin-channel": { enabled: true } },
       });
       const io = createHomeConfigIO(home, {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "gateway-token-at-read",
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_GATEWAY_TOKEN: "gateway-token-at-read",
+          CARAPACE_TEST_FAST: "1",
         } as NodeJS.ProcessEnv,
       });
 
       const result = await io.readConfigFileSnapshotForWrite();
 
       expect(result.snapshot.valid).toBe(false);
-      expect(result.writeOptions.envSnapshotForRestore?.OPENCLAW_GATEWAY_TOKEN).toBe(
+      expect(result.writeOptions.envSnapshotForRestore?.CARAPACE_GATEWAY_TOKEN).toBe(
         "gateway-token-at-read",
       );
     },
@@ -1322,7 +1322,7 @@ describe("config io write", () => {
       await writeConfigFixture(home, {
         gateway: {
           mode: "local",
-          auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+          auth: { mode: "token", token: "${CARAPACE_GATEWAY_TOKEN}" },
         },
         channels: { "test-plugin-channel": { enabled: true } },
       });
@@ -1331,15 +1331,15 @@ describe("config io write", () => {
       });
       const io = createHomeConfigIO(home, {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "gateway-token-at-read",
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_GATEWAY_TOKEN: "gateway-token-at-read",
+          CARAPACE_TEST_FAST: "1",
         } as NodeJS.ProcessEnv,
       });
 
       const result = await io.readConfigFileSnapshotForWrite();
 
       expect(result.snapshot.valid).toBe(false);
-      expect(result.writeOptions.envSnapshotForRestore?.OPENCLAW_GATEWAY_TOKEN).toBe(
+      expect(result.writeOptions.envSnapshotForRestore?.CARAPACE_GATEWAY_TOKEN).toBe(
         "gateway-token-at-read",
       );
     },
@@ -1347,7 +1347,7 @@ describe("config io write", () => {
 
   itWithHome("returns the snapshot-time hash when an included file is malformed", async (home) => {
     const configPath = configPathForHome(home);
-    const includePath = path.join(home, ".openclaw", "plugins.json5");
+    const includePath = path.join(home, ".carapace", "plugins.json5");
     const malformedRaw = "{ malformed";
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await writeConfigJson(configPath, { plugins: { $include: "./plugins.json5" } });
@@ -1367,19 +1367,19 @@ describe("config io write", () => {
   });
 
   itWithHome("returns a write guard that rejects a changed active config path", async (home) => {
-    const firstConfigPath = path.join(home, ".openclaw", "first.json");
-    const secondConfigPath = path.join(home, ".openclaw", "second.json");
+    const firstConfigPath = path.join(home, ".carapace", "first.json");
+    const secondConfigPath = path.join(home, ".carapace", "second.json");
     await fs.mkdir(path.dirname(firstConfigPath), { recursive: true });
     await fs.writeFile(firstConfigPath, "{}", "utf-8");
     await fs.writeFile(secondConfigPath, "{}", "utf-8");
     const env = {
-      OPENCLAW_CONFIG_PATH: firstConfigPath,
-      OPENCLAW_TEST_FAST: "1",
+      CARAPACE_CONFIG_PATH: firstConfigPath,
+      CARAPACE_TEST_FAST: "1",
     } as NodeJS.ProcessEnv;
     const io = createHomeConfigIO(home, { env });
 
     const result = await io.readConfigFileSnapshotForWrite();
-    env.OPENCLAW_CONFIG_PATH = secondConfigPath;
+    env.CARAPACE_CONFIG_PATH = secondConfigPath;
 
     expect(() => result.writeOptions.assertConfigPathForWrite?.()).toThrow(
       "config path changed since last load",
@@ -1390,21 +1390,21 @@ describe("config io write", () => {
     "composes caller authority with captured destination ownership for %s",
     async (mutation) => {
       await withSuiteHome(async (home) => {
-        const firstConfigPath = path.join(home, ".openclaw", "first.json");
-        const secondConfigPath = path.join(home, ".openclaw", "second.json");
+        const firstConfigPath = path.join(home, ".carapace", "first.json");
+        const secondConfigPath = path.join(home, ".carapace", "second.json");
         await fs.mkdir(path.dirname(firstConfigPath), { recursive: true });
         await fs.writeFile(firstConfigPath, "{}\n");
         await fs.writeFile(secondConfigPath, "{}\n");
-        const env = { OPENCLAW_CONFIG_PATH: firstConfigPath, OPENCLAW_TEST_FAST: "1" };
+        const env = { CARAPACE_CONFIG_PATH: firstConfigPath, CARAPACE_TEST_FAST: "1" };
         const io = createHomeConfigIO(home, { env });
         const callerGuard = vi.fn();
         const writeOptions = {
           assertConfigPathForWrite: callerGuard,
           preCommitRuntimePreflight: async () => {
-            env.OPENCLAW_CONFIG_PATH = secondConfigPath;
+            env.CARAPACE_CONFIG_PATH = secondConfigPath;
           },
         };
-        const nextConfig: OpenClawConfig = { gateway: { port: 19001 } };
+        const nextConfig: CarapaceConfig = { gateway: { port: 19001 } };
         const transform = () => ({ nextConfig });
         const pending =
           mutation === "replace"
@@ -1426,17 +1426,17 @@ describe("config io write", () => {
   itWithHome(
     "rejects write snapshots when the IO instance no longer owns its config path",
     async (home) => {
-      const firstConfigPath = path.join(home, ".openclaw", "first.json");
-      const secondConfigPath = path.join(home, ".openclaw", "second.json");
+      const firstConfigPath = path.join(home, ".carapace", "first.json");
+      const secondConfigPath = path.join(home, ".carapace", "second.json");
       await fs.mkdir(path.dirname(firstConfigPath), { recursive: true });
       await fs.writeFile(firstConfigPath, "{}", "utf-8");
       await fs.writeFile(secondConfigPath, "{}", "utf-8");
       const env = {
-        OPENCLAW_CONFIG_PATH: firstConfigPath,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: firstConfigPath,
+        CARAPACE_TEST_FAST: "1",
       } as NodeJS.ProcessEnv;
       const io = createHomeConfigIO(home, { env });
-      env.OPENCLAW_CONFIG_PATH = secondConfigPath;
+      env.CARAPACE_CONFIG_PATH = secondConfigPath;
 
       await expect(io.readConfigFileSnapshotForWrite()).rejects.toThrow(
         "config path changed since last load",
@@ -1445,16 +1445,16 @@ describe("config io write", () => {
   );
 
   itWithHome("does not use expectedConfigPath as the write destination", async (home) => {
-    const expectedConfigPath = path.join(home, ".openclaw", "expected.json");
-    const activeConfigPath = path.join(home, ".openclaw", "active.json");
+    const expectedConfigPath = path.join(home, ".carapace", "expected.json");
+    const activeConfigPath = path.join(home, ".carapace", "active.json");
     await fs.mkdir(path.dirname(expectedConfigPath), { recursive: true });
     await writeConfigJson(expectedConfigPath, { gateway: { mode: "local" } });
     await fs.writeFile(activeConfigPath, "{}\n", "utf-8");
 
     await withEnvAsync(
       {
-        OPENCLAW_CONFIG_PATH: activeConfigPath,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: activeConfigPath,
+        CARAPACE_TEST_FAST: "1",
       },
       async () => {
         await writeConfigFile(
@@ -1474,7 +1474,7 @@ describe("config io write", () => {
 
   itWithHome("returns the missing-file hash when an included file is absent", async (home) => {
     const configPath = configPathForHome(home);
-    const includePath = path.join(home, ".openclaw", "plugins.json5");
+    const includePath = path.join(home, ".carapace", "plugins.json5");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await writeConfigJson(configPath, { plugins: { $include: "./plugins.json5" } });
     const io = createFastConfigIO(home);
@@ -1494,10 +1494,10 @@ describe("config io write", () => {
     "rejects root-include partial writes instead of flattening the root config",
     async (home) => {
       const configPath = configPathForHome(home);
-      const includePath = path.join(home, ".openclaw", "extra.json5");
+      const includePath = path.join(home, ".carapace", "extra.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(includePath, {
-        $schema: "https://openclaw.ai/config-from-include.json",
+        $schema: "https://github.com/Exaggarate/carapace",
       });
       await fs.writeFile(
         configPath,
@@ -1532,19 +1532,19 @@ describe("config io write", () => {
   itWithHome(
     "rejects a base snapshot from a different config path before overwriting the root config",
     async (home) => {
-      const firstConfigPath = path.join(home, ".openclaw", "first.json");
-      const secondConfigPath = path.join(home, ".openclaw", "second.json");
+      const firstConfigPath = path.join(home, ".carapace", "first.json");
+      const secondConfigPath = path.join(home, ".carapace", "second.json");
       await fs.mkdir(path.dirname(firstConfigPath), { recursive: true });
       const originalRaw = formatConfig({ gateway: { mode: "local", port: 18789 } });
       await fs.writeFile(firstConfigPath, originalRaw, "utf-8");
       await fs.writeFile(secondConfigPath, originalRaw, "utf-8");
       const firstIo = createHomeConfigIO(home, {
         configPath: firstConfigPath,
-        env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
       });
       const secondIo = createHomeConfigIO(home, {
         configPath: secondConfigPath,
-        env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
       });
       const firstSnapshot = await firstIo.readConfigFileSnapshot();
 
@@ -1563,7 +1563,7 @@ describe("config io write", () => {
     "rolls back a root write when config path ownership changes during commit",
     async (home) => {
       const configPath = configPathForHome(home);
-      const secondConfigPath = path.join(home, ".openclaw", "second.json");
+      const secondConfigPath = path.join(home, ".carapace", "second.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const originalRaw = formatConfig({ gateway: { mode: "local", port: 18789 } });
       await fs.writeFile(configPath, originalRaw, "utf-8");
@@ -1664,7 +1664,7 @@ describe("config io write", () => {
     const snapshot = await io.readConfigFileSnapshot();
     expect(snapshot.exists).toBe(false);
     expect(snapshot.config.agents?.entries).toEqual({ main: {} });
-    let preflightConfig: OpenClawConfig | undefined;
+    let preflightConfig: CarapaceConfig | undefined;
 
     await io.writeConfigFile(
       {
@@ -1717,8 +1717,8 @@ describe("config io write", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_FAST: "1",
       },
       async () => {
         await writeConfigFile(
@@ -1782,19 +1782,19 @@ describe("config io write", () => {
     "rejects invalid include-backed repairs instead of persisting substituted secrets",
     async (home) => {
       const configPath = configPathForHome(home);
-      const includePath = path.join(home, ".openclaw", "gateway.json5");
+      const includePath = path.join(home, ".carapace", "gateway.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(includePath, {
         mode: "local",
-        auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+        auth: { mode: "token", token: "${CARAPACE_GATEWAY_TOKEN}" },
         invalid: true,
       });
       await writeConfigJson(configPath, { gateway: { $include: "./gateway.json5" } });
       const originalRootRaw = await fs.readFile(configPath, "utf-8");
       const io = createHomeConfigIO(home, {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "gateway-token-runtime",
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_GATEWAY_TOKEN: "gateway-token-runtime",
+          CARAPACE_TEST_FAST: "1",
         } as NodeJS.ProcessEnv,
       });
       const snapshot = await io.readConfigFileSnapshot();
@@ -1811,7 +1811,7 @@ describe("config io write", () => {
 
       await expect(fs.readFile(configPath, "utf-8")).resolves.toBe(originalRootRaw);
       await expect(fs.readFile(includePath, "utf-8")).resolves.toContain(
-        '"token": "${OPENCLAW_GATEWAY_TOKEN}"',
+        '"token": "${CARAPACE_GATEWAY_TOKEN}"',
       );
     },
   );
@@ -1820,7 +1820,7 @@ describe("config io write", () => {
     "repairs invalid root-authored siblings without flattening included config",
     async (home) => {
       const configPath = configPathForHome(home);
-      const includePath = path.join(home, ".openclaw", "agent-defaults.json5");
+      const includePath = path.join(home, ".carapace", "agent-defaults.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(includePath, { maxConcurrent: 1 });
       await writeConfigJson(configPath, {
@@ -1847,7 +1847,7 @@ describe("config io write", () => {
     "does not let an unrelated include mask removal of a local gateway mode",
     async (home) => {
       const configPath = configPathForHome(home);
-      const includePath = path.join(home, ".openclaw", "agents.json5");
+      const includePath = path.join(home, ".carapace", "agents.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         includePath,
@@ -1866,7 +1866,7 @@ describe("config io write", () => {
         "utf-8",
       );
       const io = createHomeConfigIO(home, {
-        env: { GATEWAY_MODE: "local", OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+        env: { GATEWAY_MODE: "local", CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
       });
       const snapshot = await io.readConfigFileSnapshot();
 
@@ -1896,8 +1896,8 @@ describe("config io write", () => {
     "preserves a leaf-included gateway mode during an unrelated include override",
     async (home) => {
       const configPath = configPathForHome(home);
-      const agentsPath = path.join(home, ".openclaw", "agents.json5");
-      const modePath = path.join(home, ".openclaw", "gateway-mode.json5");
+      const agentsPath = path.join(home, ".carapace", "agents.json5");
+      const modePath = path.join(home, ".carapace", "gateway-mode.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         agentsPath,
@@ -1943,8 +1943,8 @@ describe("config io write", () => {
     "does not let a surviving sibling include mask removal of the gateway include",
     async (home) => {
       const configPath = configPathForHome(home);
-      const agentsPath = path.join(home, ".openclaw", "agents.json5");
-      const gatewayPath = path.join(home, ".openclaw", "gateway.json5");
+      const agentsPath = path.join(home, ".carapace", "agents.json5");
+      const gatewayPath = path.join(home, ".carapace", "gateway.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         agentsPath,
@@ -1984,7 +1984,7 @@ describe("config io write", () => {
     "adds a root-owned agent beside a keyed include without rewriting the include file",
     async (home) => {
       const configPath = configPathForHome(home);
-      const tonyPath = path.join(home, ".openclaw", "tony.json5");
+      const tonyPath = path.join(home, ".carapace", "tony.json5");
       const tonyRaw = `{
   // Keep operator comments and references byte-identical.
   workspace: "/w/tony",
@@ -2000,7 +2000,7 @@ describe("config io write", () => {
       });
       const io = createFastConfigIO(home, {
         env: {
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_TEST_FAST: "1",
           TONY_MODEL: "openai/gpt-5.4",
         } as NodeJS.ProcessEnv,
       });
@@ -2044,8 +2044,8 @@ describe("config io write", () => {
         },
       },
       includeFiles: {
-        ".openclaw/tony-base.json5": `{ workspace: "/w/tony" }\n`,
-        ".openclaw/tony-extra.json5": `{ name: "Tony" }\n`,
+        ".carapace/tony-base.json5": `{ workspace: "/w/tony" }\n`,
+        ".carapace/tony-extra.json5": `{ name: "Tony" }\n`,
       },
     });
   });
@@ -2061,7 +2061,7 @@ describe("config io write", () => {
           },
         },
       },
-      includeFiles: { ".openclaw/tony.json5": `{ name: "Tony" }\n` },
+      includeFiles: { ".carapace/tony.json5": `{ name: "Tony" }\n` },
     });
   });
 
@@ -2075,8 +2075,8 @@ describe("config io write", () => {
         },
       },
       includeFiles: {
-        ".openclaw/tony-delegate.json5": `{ $include: "./tony.json5" }\n`,
-        ".openclaw/tony.json5": `{ workspace: "/w/tony" }\n`,
+        ".carapace/tony-delegate.json5": `{ $include: "./tony.json5" }\n`,
+        ".carapace/tony.json5": `{ workspace: "/w/tony" }\n`,
       },
     });
   });
@@ -2092,7 +2092,7 @@ describe("config io write", () => {
         },
       },
       includeFiles: { "shared/tony.json5": `{ workspace: "/w/tony" }\n` },
-      env: { OPENCLAW_INCLUDE_ROOTS: sharedDir } as NodeJS.ProcessEnv,
+      env: { CARAPACE_INCLUDE_ROOTS: sharedDir } as NodeJS.ProcessEnv,
     });
   });
 
@@ -2100,7 +2100,7 @@ describe("config io write", () => {
     "rejects repairs that would flatten a valid outer include with a broken nested include",
     async (home) => {
       const configPath = configPathForHome(home);
-      const pluginsPath = path.join(home, ".openclaw", "plugins.json5");
+      const pluginsPath = path.join(home, ".carapace", "plugins.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(pluginsPath, { $include: "./missing-entries.json5" });
       await writeConfigJson(configPath, { plugins: { $include: "./plugins.json5" } });
@@ -2164,9 +2164,9 @@ describe("config io write", () => {
           cliBackends: [],
           skills: [],
           hooks: [],
-          rootDir: "/tmp/openclaw-test-literal-plugin",
-          source: "/tmp/openclaw-test-literal-plugin/index.ts",
-          manifestPath: "/tmp/openclaw-test-literal-plugin/openclaw.plugin.json",
+          rootDir: "/tmp/carapace-test-literal-plugin",
+          source: "/tmp/carapace-test-literal-plugin/index.ts",
+          manifestPath: "/tmp/carapace-test-literal-plugin/carapace.plugin.json",
           configSchema: {
             type: "object",
             properties: {
@@ -2181,7 +2181,7 @@ describe("config io write", () => {
 
     await withSuiteHome(async (home) => {
       const configPath = configPathForHome(home);
-      const agentsPath = path.join(home, ".openclaw", "agents.json5");
+      const agentsPath = path.join(home, ".carapace", "agents.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(agentsPath, { entries: { main: { default: true } } });
       await writeConfigJson(configPath, {
@@ -2197,7 +2197,7 @@ describe("config io write", () => {
       });
       const io = createHomeConfigIO(home, {
         env: {
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_TEST_FAST: "1",
           ROOT_LITERAL_TOKEN: "secret",
         } as NodeJS.ProcessEnv,
       });
@@ -2217,9 +2217,9 @@ describe("config io write", () => {
 
   itWithHome("repairs invalid config without flattening record-nested includes", async (home) => {
     const configPath = configPathForHome(home);
-    const includePath = path.join(home, ".openclaw", "main-agent.json5");
+    const includePath = path.join(home, ".carapace", "main-agent.json5");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
-    await writeConfigJson(includePath, { workspace: "${OPENCLAW_AGENT_WORKSPACE}" });
+    await writeConfigJson(includePath, { workspace: "${CARAPACE_AGENT_WORKSPACE}" });
     await writeConfigJson(configPath, {
       agents: {
         defaults: { params: { stale: true } },
@@ -2230,8 +2230,8 @@ describe("config io write", () => {
     const originalRootRaw = await fs.readFile(configPath, "utf-8");
     const io = createHomeConfigIO(home, {
       env: {
-        OPENCLAW_AGENT_WORKSPACE: "/resolved/agent-workspace",
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_AGENT_WORKSPACE: "/resolved/agent-workspace",
+        CARAPACE_TEST_FAST: "1",
       } as NodeJS.ProcessEnv,
     });
     const snapshot = await io.readConfigFileSnapshot();
@@ -2254,7 +2254,7 @@ describe("config io write", () => {
       main: { $include: "./main-agent.json5" },
     });
     await expect(fs.readFile(includePath, "utf-8")).resolves.toContain(
-      '"workspace": "${OPENCLAW_AGENT_WORKSPACE}"',
+      '"workspace": "${CARAPACE_AGENT_WORKSPACE}"',
     );
   });
 
@@ -2270,9 +2270,9 @@ describe("config io write", () => {
           cliBackends: [],
           skills: [],
           hooks: [],
-          rootDir: "/tmp/openclaw-test-required-plugin",
-          source: "/tmp/openclaw-test-required-plugin/index.ts",
-          manifestPath: "/tmp/openclaw-test-required-plugin/openclaw.plugin.json",
+          rootDir: "/tmp/carapace-test-required-plugin",
+          source: "/tmp/carapace-test-required-plugin/index.ts",
+          manifestPath: "/tmp/carapace-test-required-plugin/carapace.plugin.json",
           configSchema: {
             type: "object",
             properties: {
@@ -2319,7 +2319,7 @@ describe("config io write", () => {
           ...createProviderConfigFixture(),
         });
 
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshot(
             {
               gateway: { mode: "local" },
@@ -2331,7 +2331,7 @@ describe("config io write", () => {
             },
           );
 
-          const nextConfig: OpenClawConfig = {
+          const nextConfig: CarapaceConfig = {
             gateway: { mode: "local", port: 18789 },
             ...createProviderConfigFixture("sk-runtime-resolved"),
           };
@@ -2375,7 +2375,7 @@ describe("config io write", () => {
       const { configPath } = await writeConfigFixture(home, {
         gateway: {
           mode: "local",
-          auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+          auth: { mode: "token", token: "${CARAPACE_GATEWAY_TOKEN}" },
         },
         agents: { defaults: { model: { primary: "openai/gpt-5.4" } } },
       });
@@ -2387,8 +2387,8 @@ describe("config io write", () => {
       try {
         await withEnvAsync(
           {
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_GATEWAY_TOKEN: "gateway-token-runtime",
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_GATEWAY_TOKEN: "gateway-token-runtime",
           },
           async () => {
             setRuntimeConfigSnapshot(
@@ -2421,7 +2421,7 @@ describe("config io write", () => {
             const persisted = JSON.parse(await fs.readFile(configPath, "utf-8")) as {
               gateway?: { auth?: { token?: string } };
             };
-            expect(persisted.gateway?.auth?.token).toBe("${OPENCLAW_GATEWAY_TOKEN}");
+            expect(persisted.gateway?.auth?.token).toBe("${CARAPACE_GATEWAY_TOKEN}");
             expect(observedSources).toHaveLength(1);
             const observedSource = requireRecord(observedSources[0], "observed source config");
             expect(observedSource.gateway).toEqual({
@@ -2450,11 +2450,11 @@ describe("config io write", () => {
       const initialConfig = {
         gateway: { mode: "local" as const },
         logging: { level: "info" as const },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await writeConfigJson(configPath, initialConfig);
       const preflight = vi.fn(
         async (
-          sourceConfig: OpenClawConfig,
+          sourceConfig: CarapaceConfig,
           refreshOptions?: { includeAuthStoreRefs?: boolean },
         ) => ({
           runtimeConfig: sourceConfig,
@@ -2472,7 +2472,7 @@ describe("config io write", () => {
       );
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshot(initialConfig, initialConfig);
           await writeConfigFile(
             { ...initialConfig, logging: { level: "debug" } },
@@ -2492,25 +2492,25 @@ describe("config io write", () => {
 
   itWithHome("stages managed root-write config env until the owner accepts it", async (home) => {
     const configPath = configPathForHome(home);
-    const envKey = "OPENCLAW_TEST_MANAGED_ROOT_ENV";
+    const envKey = "CARAPACE_TEST_MANAGED_ROOT_ENV";
     const initialAuthoredConfig = {
       gateway: {
         mode: "local" as const,
-        auth: { mode: "token" as const, token: "${OPENCLAW_TEST_MANAGED_ROOT_ENV}" },
+        auth: { mode: "token" as const, token: "${CARAPACE_TEST_MANAGED_ROOT_ENV}" },
       },
       env: { vars: { [envKey]: "old" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const initialConfig = {
       ...initialAuthoredConfig,
       gateway: {
         ...initialAuthoredConfig.gateway,
         auth: { mode: "token" as const, token: "old" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await writeConfigJson(configPath, initialAuthoredConfig);
     let preparedEnv: NodeJS.ProcessEnv | undefined;
-    let notifiedSource: OpenClawConfig | undefined;
+    let notifiedSource: CarapaceConfig | undefined;
     const unsubscribe = registerConfigWriteListener(
       (event) => {
         notifiedSource = event.sourceConfig;
@@ -2529,7 +2529,7 @@ describe("config io write", () => {
     );
 
     try {
-      await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath, [envKey]: "old" }, async () => {
+      await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath, [envKey]: "old" }, async () => {
         setRuntimeConfigSnapshot(initialConfig, initialConfig);
         initializePublishedConfigRuntimeEnv(initialConfig, {
           ownedEnv: { [envKey]: "old" },
@@ -2552,19 +2552,19 @@ describe("config io write", () => {
     "resolves watcher candidates after removing the accepted config env layer",
     async (home) => {
       const configPath = configPathForHome(home);
-      const envKey = "OPENCLAW_TEST_WATCHER_ENV";
+      const envKey = "CARAPACE_TEST_WATCHER_ENV";
       const activeConfig = {
         env: { vars: { [envKey]: "old" } },
         gateway: { auth: { mode: "token" as const, token: "old" } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const candidate = {
         env: { vars: { [envKey]: "new" } },
-        gateway: { auth: { mode: "token" as const, token: "${OPENCLAW_TEST_WATCHER_ENV}" } },
-      } satisfies OpenClawConfig;
+        gateway: { auth: { mode: "token" as const, token: "${CARAPACE_TEST_WATCHER_ENV}" } },
+      } satisfies CarapaceConfig;
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(configPath, candidate);
 
-      await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath, [envKey]: "old" }, async () => {
+      await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath, [envKey]: "old" }, async () => {
         initializePublishedConfigRuntimeEnv(activeConfig, {
           ownedEnv: { [envKey]: "old" },
         });
@@ -2580,8 +2580,8 @@ describe("config io write", () => {
     "rereads a managed write against an env transaction accepted during preflight",
     async (home) => {
       const configPath = configPathForHome(home);
-      const envKey = "OPENCLAW_TEST_INTERLEAVED_WRITE_ENV";
-      const makeConfig = (value: string, token: string): OpenClawConfig => ({
+      const envKey = "CARAPACE_TEST_INTERLEAVED_WRITE_ENV";
+      const makeConfig = (value: string, token: string): CarapaceConfig => ({
         env: { vars: { [envKey]: value } },
         gateway: { mode: "local", auth: { mode: "token", token } },
       });
@@ -2591,7 +2591,7 @@ describe("config io write", () => {
       const configC = makeConfig("c", "c");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(configPath, authoredA);
-      let notifiedSource: OpenClawConfig | undefined;
+      let notifiedSource: CarapaceConfig | undefined;
       const unsubscribe = registerConfigWriteListener(
         (event) => {
           notifiedSource = event.sourceConfig;
@@ -2618,7 +2618,7 @@ describe("config io write", () => {
       );
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath, [envKey]: "a" }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath, [envKey]: "a" }, async () => {
           setRuntimeConfigSnapshot(configA, configA);
           initializePublishedConfigRuntimeEnv(configA, {
             ownedEnv: { [envKey]: "a" },
@@ -2642,7 +2642,7 @@ describe("config io write", () => {
       });
       const io = createHomeConfigIO(home, {
         env: {
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_TEST_FAST: "1",
           PLUGIN_A: "same-plugin",
           PLUGIN_B: "same-plugin",
         } as NodeJS.ProcessEnv,
@@ -2696,7 +2696,7 @@ describe("config io write", () => {
       });
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
 
           await writeConfigFile({
@@ -2709,7 +2709,7 @@ describe("config io write", () => {
           });
 
           const postWriteSnapshot = await createHomeConfigIO(home, {
-            env: { OPENCLAW_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
+            env: { CARAPACE_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
           }).readConfigFileSnapshot();
 
           expect(postWriteSnapshot.valid).toBe(true);
@@ -2736,7 +2736,7 @@ describe("config io write", () => {
     async (value) => {
       await withSuiteHome(async (home) => {
         const { configPath, raw } = await writeConfigFixture(home, {
-          $schema: "https://openclaw.ai/config.json",
+          $schema: "https://github.com/Exaggarate/carapace",
           gateway: { mode: "local" },
           plugins: { enabled: false },
         });
@@ -2789,7 +2789,7 @@ describe("config io write", () => {
         const maximumPath = [...defaultsPath, "maxConcurrent"];
         const modelsPath = [...defaultsPath, "models"];
         const fallbacksPath = [...defaultsPath, "model", "fallbacks"];
-        const authored: OpenClawConfig = {
+        const authored: CarapaceConfig = {
           gateway: { mode: "local" },
           plugins: { enabled: false },
           messages: { responsePrefix: prefix },
@@ -2828,9 +2828,9 @@ describe("config io write", () => {
         await withEnvAsync(
           {
             HOME: home,
-            OPENCLAW_HOME: home,
-            OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-            OPENCLAW_CONFIG_PATH: configPath,
+            CARAPACE_HOME: home,
+            CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+            CARAPACE_CONFIG_PATH: configPath,
             INCLUDE_PREFIX: "[include]",
             INCLUDE_WORKSPACE: path.join(home, "workspace"),
             INCLUDE_NAME: "Included agent",
@@ -2884,7 +2884,7 @@ describe("config io write", () => {
             } else if (edit === "policy-unset") {
               writeOptions.unsetPaths = [[...defaultsPath, "modelPolicy"]];
             }
-            const edited = (config: OpenClawConfig): OpenClawConfig => {
+            const edited = (config: CarapaceConfig): CarapaceConfig => {
               const next = structuredClone(config);
               if (edit === "temperature" || edit === "active-overlay") {
                 setConfigValueAtPath(next, temperaturePath, 0.7);
@@ -2985,7 +2985,7 @@ describe("config io write", () => {
           await writeConfigJson(agentsPath, agents);
         }
         const originalRoot = await fs.readFile(configPath, "utf8");
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           const snapshot = await createHomeConfigIO(home, { configPath }).readConfigFileSnapshot();
           // Exercise the reader's real normalization, not only a manually changed active snapshot.
           expect(Object.keys(snapshot.runtimeConfig.agents?.defaults?.models ?? {})).toEqual([
@@ -2993,7 +2993,7 @@ describe("config io write", () => {
           ]);
           setRuntimeConfigSnapshot(snapshot.runtimeConfig, snapshot.sourceConfig);
 
-          const renameModels = (config: OpenClawConfig): OpenClawConfig => ({
+          const renameModels = (config: CarapaceConfig): CarapaceConfig => ({
             ...config,
             agents: { ...config.agents, defaults: { models: { [canonical]: canonicalEntry } } },
           });
@@ -3009,7 +3009,7 @@ describe("config io write", () => {
                 });
 
           const persisted = await readPersistedConfig(configPath);
-          const savedAgents: OpenClawConfig["agents"] =
+          const savedAgents: CarapaceConfig["agents"] =
             layout === "root"
               ? persisted.agents
               : JSON.parse(await fs.readFile(agentsPath, "utf8"));
@@ -3042,7 +3042,7 @@ describe("config io write", () => {
             },
           },
         });
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           const snapshot = await createHomeConfigIO(home, { configPath }).readConfigFileSnapshot();
           setRuntimeConfigSnapshot(snapshot.runtimeConfig, snapshot.sourceConfig);
           const defaults = { ...snapshot.sourceConfig.agents?.defaults };
@@ -3084,7 +3084,7 @@ describe("config io write", () => {
     async ({ caller, pluginEntry }) => {
       await withSuiteHome(async (home) => {
         mockLoadPluginManifestRegistry.mockReturnValue(defaultedDemoPluginRegistry);
-        const initialConfig: OpenClawConfig = {
+        const initialConfig: CarapaceConfig = {
           ...createProviderConfigFixture(),
           gateway: { mode: "local" },
           agents: { entries: { main: {} } },
@@ -3096,7 +3096,7 @@ describe("config io write", () => {
           },
           tools: { web: {} },
         };
-        const activateRuntime = (config: OpenClawConfig): OpenClawConfig => ({
+        const activateRuntime = (config: CarapaceConfig): CarapaceConfig => ({
           ...config,
           ...createProviderConfigFixture("synthetic-runtime-value"),
           plugins: {
@@ -3107,18 +3107,18 @@ describe("config io write", () => {
             },
           },
         });
-        const observedSources: OpenClawConfig[] = [];
-        const expectedSources: OpenClawConfig[] = [];
+        const observedSources: CarapaceConfig[] = [];
+        const expectedSources: CarapaceConfig[] = [];
         const unsubscribe = registerConfigWriteListener((event) => {
           observedSources.push(structuredClone(event.sourceConfig));
         });
 
         try {
           const { configPath } = await writeConfigFixture(home, initialConfig);
-          await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+          await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
             const io = createHomeConfigIO(home, {
               configPath,
-              env: { OPENCLAW_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
+              env: { CARAPACE_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
             });
             let prepared = await io.readConfigFileSnapshotForWrite();
             expect(prepared.snapshot.valid).toBe(true);
@@ -3139,7 +3139,7 @@ describe("config io write", () => {
                   : caller === "snapshot-source"
                     ? prepared.snapshot.sourceConfig
                     : runtimeConfig;
-              const nextConfig: OpenClawConfig = {
+              const nextConfig: CarapaceConfig = {
                 ...base,
                 tools: { ...base.tools, swarm },
               };
@@ -3222,7 +3222,7 @@ describe("config io write", () => {
       gateway: { mode: "local", auth: { mode: "token", token: "${MODEL_MUTATION_TOKEN}" } },
     });
     await withEnvAsync(
-      { OPENCLAW_CONFIG_PATH: configPath, MODEL_MUTATION_TOKEN: "synthetic-before-mutation" },
+      { CARAPACE_CONFIG_PATH: configPath, MODEL_MUTATION_TOKEN: "synthetic-before-mutation" },
       async () => {
         const { updateConfig } = await import("../commands/models/shared.js");
         const updated = await updateConfig(async (config) => {
@@ -3246,7 +3246,7 @@ describe("config io write", () => {
     });
     await withEnvAsync(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
         TOKEN_A: "synthetic-same-token",
         TOKEN_B: "synthetic-same-token",
       },
@@ -3286,16 +3286,16 @@ describe("config io write", () => {
           gateway: { mode: "local" },
           logging: { level: "warn" },
         });
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           const io = createHomeConfigIO(home, { configPath });
           const prepared = await io.readConfigFileSnapshotForWrite();
           expect(prepared.snapshot.valid).toBe(true);
           expect(prepared.snapshot.sourceConfig.logging?.level).toBe("warn");
-          const activeSource: OpenClawConfig = {
+          const activeSource: CarapaceConfig = {
             ...prepared.snapshot.sourceConfig,
             logging: { ...prepared.snapshot.sourceConfig.logging, level: "debug" },
           };
-          const activeRuntime: OpenClawConfig = {
+          const activeRuntime: CarapaceConfig = {
             ...prepared.snapshot.config,
             logging: { ...prepared.snapshot.config.logging, level: "debug" },
           };
@@ -3305,7 +3305,7 @@ describe("config io write", () => {
             caller === "snapshot-source"
               ? prepared.snapshot.sourceConfig
               : prepared.snapshot.config;
-          const nextConfig: OpenClawConfig = {
+          const nextConfig: CarapaceConfig = {
             ...base,
             logging: { ...base.logging, level: "debug" },
           };
@@ -3332,16 +3332,16 @@ describe("config io write", () => {
     await withSuiteHome(async (home) => {
       mockLoadPluginManifestRegistry.mockReturnValue(defaultedDemoPluginRegistry);
       try {
-        const initialConfig: OpenClawConfig = {
+        const initialConfig: CarapaceConfig = {
           gateway: { mode: "local" },
           agents: { entries: { main: {} } },
           plugins: { entries: { browser: { enabled: false } } },
         };
         const { configPath } = await writeConfigFixture(home, initialConfig);
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           const io = createHomeConfigIO(home, {
             configPath,
-            env: { OPENCLAW_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
+            env: { CARAPACE_CONFIG_PATH: configPath, VITEST: "true" } as NodeJS.ProcessEnv,
           });
           const snapshot = await io.readConfigFileSnapshot();
           expect(snapshot.valid).toBe(true);
@@ -3349,7 +3349,7 @@ describe("config io write", () => {
           expect(snapshot.config.plugins?.entries?.demo).toStrictEqual({
             config: { mode: "auto" },
           });
-          const runtimeConfig: OpenClawConfig = {
+          const runtimeConfig: CarapaceConfig = {
             ...snapshot.config,
             plugins: {
               ...snapshot.config.plugins,
@@ -3389,7 +3389,7 @@ describe("config io write", () => {
     const initialConfig = {
       gateway: { mode: "local", port: 18789 },
       plugins: { entries: { "google-antigravity-auth": { enabled: false } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const initialRaw = formatConfig(initialConfig);
     await fs.writeFile(configPath, initialRaw, "utf-8");
     const warn = vi.fn();
@@ -3402,7 +3402,7 @@ describe("config io write", () => {
     expect(warn).toHaveBeenCalledTimes(1);
 
     try {
-      await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+      await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
         setRuntimeConfigSnapshotRefreshHandler({
           refresh: () => {
             throw new Error("synthetic refresh failure");
@@ -3430,12 +3430,12 @@ describe("config io write", () => {
     async (home) => {
       const configPath = configPathForHome(home);
       await fs.mkdir(path.dirname(configPath), { recursive: true });
-      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies OpenClawConfig;
+      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies CarapaceConfig;
       await writeConfigJson(configPath, initialConfig);
       const baseSnapshot = createExistingConfigSnapshot(configPath, initialConfig, null);
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshotRefreshHandler({
             refresh: () => {
               throw new Error("synthetic refresh failure");
@@ -3469,7 +3469,7 @@ describe("config io write", () => {
       const concurrentRaw = formatConfig({ gateway: { mode: "local", port: 19191 } });
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshotRefreshHandler({
             refresh: async () => {
               await fs.writeFile(configPath, concurrentRaw, "utf-8");
@@ -3492,13 +3492,13 @@ describe("config io write", () => {
   itWithHome("blocks runtime preflight failures before committing root writes", async (home) => {
     const configPath = configPathForHome(home);
     const initialRaw = formatConfig({ gateway: { mode: "local" } });
-    let observedSource: OpenClawConfig | undefined;
+    let observedSource: CarapaceConfig | undefined;
 
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.writeFile(configPath, initialRaw, "utf-8");
 
     try {
-      await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+      await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
         setRuntimeConfigSnapshotRefreshHandler({
           preflight: async ({ sourceConfig }) => {
             observedSource = sourceConfig;
@@ -3533,7 +3533,7 @@ describe("config io write", () => {
       await fs.writeFile(configPath, initialRaw, "utf-8");
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshotRefreshHandler({
             preflight: () => {
               events.push("runtime");
@@ -3570,9 +3570,9 @@ describe("config io write", () => {
       const initialRaw = formatConfig({ gateway: { mode: "local" } });
       const env = {
         ...process.env,
-        OPENCLAW_CONFIG_PATH: configPath,
+        CARAPACE_CONFIG_PATH: configPath,
       } as NodeJS.ProcessEnv;
-      let observedSource: OpenClawConfig | undefined;
+      let observedSource: CarapaceConfig | undefined;
       const beforeCommit = vi.fn();
 
       await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -3622,7 +3622,7 @@ describe("config io write", () => {
         active = false;
       });
       await withEnvAsync(
-        { OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_TEST_FAST: "1" },
+        { CARAPACE_CONFIG_PATH: configPath, CARAPACE_TEST_FAST: "1" },
         async () => {
           const write =
             writer === "runtime"
@@ -3690,8 +3690,8 @@ describe("config io write", () => {
     "restores config env vars when post-write runtime refresh rollback succeeds",
     async (home) => {
       const configPath = configPathForHome(home);
-      const envKey = "OPENCLAW_TEST_RUNTIME_ROLLBACK_ENV";
-      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies OpenClawConfig;
+      const envKey = "CARAPACE_TEST_RUNTIME_ROLLBACK_ENV";
+      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies CarapaceConfig;
       const initialRaw = formatConfig(initialConfig);
 
       await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -3700,7 +3700,7 @@ describe("config io write", () => {
       try {
         await withEnvAsync(
           {
-            OPENCLAW_CONFIG_PATH: configPath,
+            CARAPACE_CONFIG_PATH: configPath,
             [envKey]: undefined,
           },
           async () => {
@@ -3732,13 +3732,13 @@ describe("config io write", () => {
     "restores the prior snapshot slot when post-commit refresh rolls back",
     async (home) => {
       const configPath = configPathForHome(home);
-      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies OpenClawConfig;
+      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies CarapaceConfig;
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await writeConfigJson(configPath, initialConfig);
 
       try {
         await withEnvAsync(
-          { OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_TEST_FAST: "1" },
+          { CARAPACE_CONFIG_PATH: configPath, CARAPACE_TEST_FAST: "1" },
           async () => {
             await writeConfigFile(initialConfig, { skipRuntimeSnapshotRefresh: true });
             const priorSlot = readConfigSnapshotAuditRecord({
@@ -3775,7 +3775,7 @@ describe("config io write", () => {
     "rolls back a managed root write when canonical rereads exhaust env generations",
     async (home) => {
       const configPath = configPathForHome(home);
-      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies OpenClawConfig;
+      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies CarapaceConfig;
       const initialRaw = formatConfig(initialConfig);
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, initialRaw, "utf-8");
@@ -3799,7 +3799,7 @@ describe("config io write", () => {
       });
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshot(initialConfig, initialConfig);
           initializePublishedConfigRuntimeEnv(initialConfig);
 
@@ -3821,14 +3821,14 @@ describe("config io write", () => {
     "uses injected filesystem operations when rolling back ownership loss",
     async (home) => {
       const configPath = configPathForHome(home);
-      const otherConfigPath = path.join(home, ".openclaw", "other.json");
-      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies OpenClawConfig;
+      const otherConfigPath = path.join(home, ".carapace", "other.json");
+      const initialConfig = { gateway: { mode: "local", port: 18789 } } satisfies CarapaceConfig;
       const initialRaw = formatConfig(initialConfig);
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, initialRaw, "utf-8");
       const env = {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_TEST_FAST: "1",
       } as NodeJS.ProcessEnv;
       const readFile = fsNode.promises.readFile.bind(fsNode.promises);
       const rename = fsNode.promises.rename.bind(fsNode.promises);
@@ -3842,7 +3842,7 @@ describe("config io write", () => {
             await rename(from, to);
             if (!committed && to === configPath) {
               committed = true;
-              env.OPENCLAW_CONFIG_PATH = otherConfigPath;
+              env.CARAPACE_CONFIG_PATH = otherConfigPath;
             }
           },
         },
@@ -3912,9 +3912,9 @@ describe("config io write", () => {
           cliBackends: [],
           skills: [],
           hooks: [],
-          rootDir: "/tmp/openclaw-test-demo",
-          source: "/tmp/openclaw-test-demo/index.ts",
-          manifestPath: "/tmp/openclaw-test-demo/openclaw.plugin.json",
+          rootDir: "/tmp/carapace-test-demo",
+          source: "/tmp/carapace-test-demo/index.ts",
+          manifestPath: "/tmp/carapace-test-demo/carapace.plugin.json",
           configSchema: {
             type: "object",
             properties: {
@@ -3944,7 +3944,7 @@ describe("config io write", () => {
       } satisfies ConfigFileSnapshot["config"];
 
       try {
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
 
           await writeConfigFile(runtimeConfig, {
@@ -3992,9 +3992,9 @@ describe("config io write", () => {
             cliBackends: [],
             skills: [],
             hooks: [],
-            rootDir: "/tmp/openclaw-test-strict-plugin",
-            source: "/tmp/openclaw-test-strict-plugin/index.ts",
-            manifestPath: "/tmp/openclaw-test-strict-plugin/openclaw.plugin.json",
+            rootDir: "/tmp/carapace-test-strict-plugin",
+            source: "/tmp/carapace-test-strict-plugin/index.ts",
+            manifestPath: "/tmp/carapace-test-strict-plugin/carapace.plugin.json",
             configSchema: {
               type: "object",
               properties: { token: { type: "string" } },
@@ -4007,12 +4007,12 @@ describe("config io write", () => {
 
       try {
         // Plugin is enabled but missing required "token" — validation fails without skip.
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: { entries: { main: { default: true } } },
           plugins: { entries: { "strict-plugin": { enabled: true } } },
         };
 
-        await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+        await withEnvAsync({ CARAPACE_CONFIG_PATH: configPath }, async () => {
           await writeConfigFile(cfg, { skipPluginValidation: true });
           await expect(fs.readFile(configPath, "utf-8")).resolves.toContain('"strict-plugin"');
 
@@ -4020,7 +4020,7 @@ describe("config io write", () => {
             /Config validation failed/,
           );
           await expect(
-            writeConfigFile({ agents: { entries: "not-array" } } as unknown as OpenClawConfig, {
+            writeConfigFile({ agents: { entries: "not-array" } } as unknown as CarapaceConfig, {
               skipPluginValidation: true,
             }),
           ).rejects.toThrow(/Config validation failed/);
@@ -4038,7 +4038,7 @@ describe("config io write", () => {
     "preserves authored tilde paths when runtime-shaped writes hand back absolute paths",
     async (home) => {
       const { configPath } = await writeConfigFixture(home, {
-        logging: { file: "~/openclaw-upgrade-survivor/gateway.jsonl" },
+        logging: { file: "~/carapace-upgrade-survivor/gateway.jsonl" },
       });
       const io = createFastConfigIO(home);
       const snapshot = await io.readConfigFileSnapshot();
@@ -4046,7 +4046,7 @@ describe("config io write", () => {
       await io.writeConfigFile(
         {
           logging: {
-            file: path.join(home, "openclaw-upgrade-survivor", "gateway.jsonl"),
+            file: path.join(home, "carapace-upgrade-survivor", "gateway.jsonl"),
             level: "debug",
           },
         },
@@ -4054,7 +4054,7 @@ describe("config io write", () => {
       );
 
       const persisted = await readPersistedConfig(configPath);
-      expect(persisted.logging?.file).toBe("~/openclaw-upgrade-survivor/gateway.jsonl");
+      expect(persisted.logging?.file).toBe("~/carapace-upgrade-survivor/gateway.jsonl");
       expect(persisted.logging?.level).toBe("debug");
     },
   );
@@ -4077,7 +4077,7 @@ gateway: { mode: "local", port: 18789 }
       commentWarnings.push(message);
     });
     const io = createHomeConfigIO(home, {
-      env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+      env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
       logger: { warn, error: vi.fn() },
     });
     const nextConfig = { gateway: { mode: "local" as const, port: 18790 } };
@@ -4121,9 +4121,9 @@ gateway: { mode: "local", port: 18789 }
 
         const result = await withEnvAsync(
           {
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-            OPENCLAW_TEST_FAST: "1",
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+            CARAPACE_TEST_FAST: "1",
           },
           () =>
             writeConfigFile(nextConfig, {
@@ -4137,7 +4137,7 @@ gateway: { mode: "local", port: 18789 }
         );
 
         const record = listConfigAuditRecordsForTests({
-          env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+          env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
           homedir: () => home,
         })
           .filter((candidate) => candidate.event === "config.write")
@@ -4168,7 +4168,7 @@ gateway: { mode: "local", port: 18789 }
         ]);
 
         const slot = readConfigSnapshotAuditRecord({
-          env: { OPENCLAW_TEST_FAST: "1" } as NodeJS.ProcessEnv,
+          env: { CARAPACE_TEST_FAST: "1" } as NodeJS.ProcessEnv,
           homedir: () => home,
           configPath,
         });
@@ -4198,9 +4198,9 @@ gateway: { mode: "local", port: 18789 }
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await withEnvAsync(
         {
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+          CARAPACE_TEST_FAST: "1",
         },
         async () => {
           const io = createHomeConfigIO(home, {
@@ -4237,12 +4237,12 @@ gateway: { mode: "local", port: 18789 }
     "shares raw snapshot hashes between config writes and gateway startup reconciliation",
     async (home) => {
       const configPath = configPathForHome(home);
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       await withEnvAsync(
         {
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         },
         async () => {
           const io = createHomeConfigIO(home, {
@@ -4295,7 +4295,7 @@ gateway: { mode: "local", port: 18789 }
 
           const handEditedAuthoredConfig = structuredClone(
             writtenSnapshot.parsed,
-          ) as OpenClawConfig;
+          ) as CarapaceConfig;
           handEditedAuthoredConfig.gateway = {
             ...handEditedAuthoredConfig.gateway,
             port: 18790,
@@ -4326,14 +4326,14 @@ gateway: { mode: "local", port: 18789 }
   itWithHome(
     "reseeds a shared state slot when the gateway starts for another config path",
     async (home) => {
-      const configPathA = path.join(home, ".openclaw", "config-a.json");
-      const configPathB = path.join(home, ".openclaw", "config-b.json");
-      const stateDir = path.join(home, ".openclaw");
+      const configPathA = path.join(home, ".carapace", "config-a.json");
+      const configPathB = path.join(home, ".carapace", "config-b.json");
+      const stateDir = path.join(home, ".carapace");
       await withEnvAsync(
         {
-          OPENCLAW_CONFIG_PATH: configPathA,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_CONFIG_PATH: configPathA,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         },
         async () => {
           const io = createHomeConfigIO(home, {
@@ -4343,7 +4343,7 @@ gateway: { mode: "local", port: 18789 }
           await io.writeConfigFile({ gateway: { port: 18789 } });
           await writeConfigJson(configPathB, { gateway: { port: 18790 } });
 
-          await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPathB }, async () => {
+          await withEnvAsync({ CARAPACE_CONFIG_PATH: configPathB }, async () => {
             const snapshot = await readConfigFileSnapshotForRuntimeTransaction({});
             const watcher = {
               options: { usePolling: false },

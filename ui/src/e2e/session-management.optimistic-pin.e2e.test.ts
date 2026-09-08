@@ -109,7 +109,7 @@ suite.define(() => {
       const pinnedRow = zoneEntry.locator(".sidebar-recent-session");
       await pinnedRow.hover();
       await pinnedRow.getByRole("button", { name: "Open session menu: Pin me" }).click();
-      const menuHost = page.locator("openclaw-session-menu");
+      const menuHost = page.locator("carapace-session-menu");
       await activateSelfRemovingControl(menuHost.getByRole("menuitem", { name: "Unpin session" }));
 
       await expect.poll(() => zoneEntry.count()).toBe(0);

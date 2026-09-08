@@ -8,22 +8,22 @@ import { expect, it } from "vitest";
 import { appendTranscriptMessage } from "../../../src/config/sessions/session-accessor.js";
 import { ensureGatewayOwnerProfile, setAvatar } from "../../../src/state/user-profiles.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { controlUiSessionUrl } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite, tooltipTitleText } from "./control-ui-e2e-suite.test-support.ts";
 
-const captureEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const execFileAsync = promisify(execFile);
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 const suite = createControlUiE2eSuite({
   name: "Control UI project media with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({
+    const owner = await createCarapaceTestInstance({
       name: "control-ui-project-media",
       config: {
         gateway: { controlUi: { enabled: true } },
@@ -105,7 +105,7 @@ suite.define(() => {
     const worktree = session.worktree as { path: string };
     expect(typeof worktree.path).toBe("string");
     expect(worktree.path).not.toBe(projectRoot);
-    const projectImage = path.join(worktree.path, ".openclaw", "tmp", "proof", "project.png");
+    const projectImage = path.join(worktree.path, ".carapace", "tmp", "proof", "project.png");
     const outsideImage = owner.state.path("outside", "selected.png");
     const siblingImage = owner.state.path("outside", "unselected.png");
     for (const target of [projectImage, outsideImage, siblingImage]) {
@@ -195,7 +195,7 @@ suite.define(() => {
         await selectedTitle.hover();
         await expect.poll(() => tooltipTitleText(selectedTitle)).toContain(outsideImage);
         await page
-          .locator("openclaw-tooltip .tooltip-content")
+          .locator("carapace-tooltip .tooltip-content")
           .filter({ hasText: outsideImage })
           .waitFor({ state: "visible" });
         await capture("02-outside-path-and-allow.png");
@@ -209,7 +209,7 @@ suite.define(() => {
         );
         await capture("03-selected-image-allowed.png");
 
-        const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+        const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
         const permissionTrigger = pane.locator('[data-chat-permission-select="true"]');
         const selectPermission = async (mode: "full" | "workspace") => {
           await permissionTrigger.click();

@@ -19,7 +19,7 @@ import { requireNodeTool } from "../helpers/node-toolchain.js";
 
 const workflowPath = ".github/workflows/plugin-npm-release.yml";
 const metaPackagePath = "extensions/meta/package.json";
-const metaManifestPath = "extensions/meta/openclaw.plugin.json";
+const metaManifestPath = "extensions/meta/carapace.plugin.json";
 
 type Step = {
   env?: Record<string, string>;
@@ -92,7 +92,7 @@ function runStableBootstrapAdmission(
     const targetSha = "a".repeat(40);
     const branch = `release-publish/${toolingSha.slice(0, 12)}-123`;
     const approval = createStablePluginNpmBootstrapApproval({
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       parentRunId: "123",
       parentRunAttempt: 2,
       workflowBranch: branch,
@@ -104,7 +104,7 @@ function runStableBootstrapAdmission(
       releaseProfile: "stable",
       validationRunId: "456",
       validationRunAttempt: 3,
-      packages: ["@openclaw/team-reports"],
+      packages: ["@carapace/team-reports"],
     });
     const approvalDir = join(root, "npm-stable-bootstrap-approval");
     mkdirSync(approvalDir);
@@ -113,15 +113,15 @@ function runStableBootstrapAdmission(
       JSON.stringify({ ...approval, ...overrides.approval }),
     );
     const run = {
-      workflowName: "OpenClaw Release Publish",
+      workflowName: "Carapace Release Publish",
       headBranch: branch,
       headSha: toolingSha,
       event: "workflow_dispatch",
       status: "in_progress",
       conclusion: null,
       runAttempt: 2,
-      repository: "openclaw/openclaw",
-      path: `.github/workflows/openclaw-release-publish.yml@refs/tags/${branch}`,
+      repository: "carapace/carapace",
+      path: `.github/workflows/carapace-release-publish.yml@refs/tags/${branch}`,
       ...overrides.run,
     };
     const bin = join(root, "bin");
@@ -146,9 +146,9 @@ function runStableBootstrapAdmission(
         env: {
           PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`,
           RUNNER_TEMP: root,
-          GITHUB_REPOSITORY: "openclaw/openclaw",
+          GITHUB_REPOSITORY: "carapace/carapace",
           GITHUB_ACTOR: "github-actions[bot]",
-          PACKAGE_NAME: "@openclaw/team-reports",
+          PACKAGE_NAME: "@carapace/team-reports",
           PACKAGE_VERSION: "2026.9.3",
           PUBLISH_TAG: "latest",
           RELEASE_TARGET_SHA: targetSha,
@@ -177,7 +177,7 @@ describe("plugin npm extended-stable workflow", () => {
     "creates bootstrap approval only with qualified evidence: %s",
     (_name, profile, distTag, evidenceMode, expected) => {
       const parent = parse(
-        readFileSync(".github/workflows/openclaw-release-publish.yml", "utf8"),
+        readFileSync(".github/workflows/carapace-release-publish.yml", "utf8"),
       ) as Workflow;
       for (const name of [
         "Prepare stable npm bootstrap approval",
@@ -190,7 +190,7 @@ describe("plugin npm extended-stable workflow", () => {
             inputs: {
               npm_dist_tag: distTag,
               release_evidence_mode: evidenceMode,
-              publish_openclaw_npm: false,
+              publish_carapace_npm: false,
               plugin_publish_scope: "selected",
             },
             needs: { resolve_release_target: { outputs: { release_profile: profile } } },
@@ -217,7 +217,7 @@ describe("plugin npm extended-stable workflow", () => {
   );
 
   it.skipIf(process.platform === "win32").each([
-    ["package scope", { env: { PACKAGE_NAME: "@openclaw/unselected" } }],
+    ["package scope", { env: { PACKAGE_NAME: "@carapace/unselected" } }],
     ["version", { env: { PACKAGE_VERSION: "2026.9.4" } }],
     ["selector", { env: { PUBLISH_TAG: "beta" } }],
     ["alpha", { env: { PACKAGE_VERSION: "2026.9.3-alpha.1", PUBLISH_TAG: "alpha" } }],
@@ -311,7 +311,7 @@ describe("plugin npm extended-stable workflow", () => {
       "${{ inputs.npm_dist_tag == 'extended-stable' && inputs.npm_dist_tag || '' }}";
     expect(
       step(parsed.jobs?.preview_plugin_pack, "Prepare immutable npm preflight artifact").env,
-    ).toMatchObject({ OPENCLAW_PLUGIN_NPM_PUBLISH_TAG: expectedOverride });
+    ).toMatchObject({ CARAPACE_PLUGIN_NPM_PUBLISH_TAG: expectedOverride });
   });
 
   it("runs complete trusted packaging tooling against the frozen source checkout", () => {
@@ -541,7 +541,7 @@ process.exit(${JSON.stringify(command)} === "node" ? Number(process.env.IDENTITY
     expect(prepare.run).toContain("bash .release-tooling/scripts/plugin-npm-publish.sh");
     expect(prepare.run).toContain('--repo-root "$GITHUB_WORKSPACE"');
     expect(prepare.run).toContain('--pack "${PACKAGE_DIR}"');
-    expect(prepare.run).not.toContain("OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD=0");
+    expect(prepare.run).not.toContain("CARAPACE_PLUGIN_NPM_RUNTIME_BUILD=0");
     expect(
       preview?.steps?.filter((entry) => entry.run?.includes("plugin-npm-publish.sh")),
     ).toHaveLength(1);
@@ -555,7 +555,7 @@ process.exit(${JSON.stringify(command)} === "node" ? Number(process.env.IDENTITY
       "fs.writeFileSync(process.argv[3], `${JSON.stringify(pack, null, 2)}\\n`)",
     );
     expect(prepare.run).toContain('join(process.env.ARTIFACT_DIR, "preflight-manifest.json")');
-    expect(prepare.run).toContain('kind: "openclaw-plugin-npm-preflight"');
+    expect(prepare.run).toContain('kind: "carapace-plugin-npm-preflight"');
     expect(prepare.run).toContain('mode: "preflight-only"');
     expect(prepare.run).toContain("source_package_json_sha256=");
     expect(prepare.run).toContain("packed_package_json_sha256=");
@@ -726,15 +726,15 @@ process.exit(${JSON.stringify(command)} === "node" ? Number(process.env.IDENTITY
   it("attests the canonical Meta provider package and install route", () => {
     const packageJson = JSON.parse(readFileSync(metaPackagePath, "utf8")) as {
       name?: string;
-      openclaw?: {
+      carapace?: {
         install?: { npmSpec?: string };
         release?: { publishToClawHub?: boolean; publishToNpm?: boolean };
       };
     };
     const pluginManifest = JSON.parse(readFileSync(metaManifestPath, "utf8")) as { id?: string };
-    expect(packageJson.name).toBe("@openclaw/meta-provider");
-    expect(packageJson.openclaw?.install?.npmSpec).toBe("@openclaw/meta-provider");
-    expect(packageJson.openclaw?.release).toEqual({
+    expect(packageJson.name).toBe("@carapace/meta-provider");
+    expect(packageJson.carapace?.install?.npmSpec).toBe("@carapace/meta-provider");
+    expect(packageJson.carapace?.release).toEqual({
       publishToClawHub: true,
       publishToNpm: true,
     });
@@ -775,7 +775,7 @@ process.exit(${JSON.stringify(command)} === "node" ? Number(process.env.IDENTITY
     );
     expect(bootstrap.env?.NPM_TOKEN).toBe("${{ secrets.NPM_TOKEN }}");
     expect(bootstrap.env?.PACKAGE_NAME).toContain("publication_evidence.outputs.package_name");
-    expect(bootstrap.run).not.toContain("@openclaw/meta-provider");
+    expect(bootstrap.run).not.toContain("@carapace/meta-provider");
     expect(bootstrap.run).toContain("NPM_CONFIG_USERCONFIG");
     expect(bootstrap.run).toContain("unset NODE_AUTH_TOKEN NPM_TOKEN NODE_OPTIONS");
     expect(bootstrap.run).toContain('npm publish "$TARBALL_PATH"');

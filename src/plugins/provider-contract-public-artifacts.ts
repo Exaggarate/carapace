@@ -1,6 +1,6 @@
 // Extracts provider contract public artifacts from plugin manifests.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { collectPublicArtifactFactories } from "./public-artifact-factories.js";
 import { loadBundledPluginPublicArtifactModuleSync } from "./public-surface-loader.js";
 import type { ProviderPlugin } from "./types.js";

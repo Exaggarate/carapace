@@ -35,8 +35,8 @@ describe("runPreparedReply prepared metadata", () => {
 
   it("keeps the admitted Gateway generation active through a different reply workspace", async () => {
     const config = {};
-    const workspaceDir = "/tmp/openclaw-reply-workspace";
-    const gatewayWorkspaceDir = "/tmp/openclaw-configured-workspace";
+    const workspaceDir = "/tmp/carapace-reply-workspace";
+    const gatewayWorkspaceDir = "/tmp/carapace-configured-workspace";
     const metadataSnapshot = {
       index: { plugins: [] },
       pluginIds: undefined,
@@ -90,7 +90,7 @@ describe("runPreparedReply prepared metadata", () => {
     const run = bindPreparedReplyDispatchRuntime(
       {
         agentId: "main",
-        agentDir: "/tmp/openclaw-reply-agent",
+        agentDir: "/tmp/carapace-reply-agent",
         workspaceDir: gatewayWorkspaceDir,
         config,
         pluginGeneration,
@@ -103,7 +103,7 @@ describe("runPreparedReply prepared metadata", () => {
       {
         config,
         agentId: "main",
-        agentDir: "/tmp/openclaw-reply-agent",
+        agentDir: "/tmp/carapace-reply-agent",
         allowGatewaySubagentBinding: true,
         workspaceDir,
         runtimePluginSelections: [

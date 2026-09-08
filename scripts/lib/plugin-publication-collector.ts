@@ -16,7 +16,7 @@ export type PluginPackageJson = {
         type?: string;
         url?: string;
       };
-  openclaw?: {
+  carapace?: {
     extensions?: string[];
     install?: {
       defaultChoice?: string;
@@ -29,7 +29,7 @@ export type PluginPackageJson = {
     };
     build?: {
       bundledDist?: boolean;
-      openclawVersion?: string;
+      carapaceVersion?: string;
       pluginSdkVersion?: string;
     };
     release?: {
@@ -77,28 +77,28 @@ type PublishablePluginPackageSource = Pick<
   "extensionId" | "packageDir" | "packageName"
 >;
 
-export const OPENCLAW_PLUGIN_NPM_REPOSITORY_URL = "https://github.com/openclaw/openclaw";
+export const CARAPACE_PLUGIN_NPM_REPOSITORY_URL = "https://github.com/Exaggarate/carapace";
 const SAFE_CLAWHUB_EXTENSION_ID = /^[a-z0-9][a-z0-9._-]*$/;
 
 /** Explicit core ownership defers staged external publication until the plugin is externalized. */
 function isPluginExternalPublicationDeferred(packageJson: {
-  openclaw?: { build?: { bundledDist?: unknown } };
+  carapace?: { build?: { bundledDist?: unknown } };
 }): boolean {
-  return packageJson.openclaw?.build?.bundledDist === true;
+  return packageJson.carapace?.build?.bundledDist === true;
 }
 
 function collectRequiredLatestDependencies(packageJson: PluginPackageJson): {
   dependencies: RequiredLatestDependency[];
   errors: string[];
 } {
-  const configured = packageJson.openclaw?.release?.requireLatestDependencies;
+  const configured = packageJson.carapace?.release?.requireLatestDependencies;
   if (configured === undefined) {
     return { dependencies: [], errors: [] };
   }
   if (!Array.isArray(configured)) {
     return {
       dependencies: [],
-      errors: ["openclaw.release.requireLatestDependencies must be an array of package names."],
+      errors: ["carapace.release.requireLatestDependencies must be an array of package names."],
     };
   }
 
@@ -113,14 +113,14 @@ function collectRequiredLatestDependencies(packageJson: PluginPackageJson): {
   for (const value of configured) {
     if (typeof value !== "string" || !value.trim()) {
       errors.push(
-        "openclaw.release.requireLatestDependencies must contain only non-empty package names.",
+        "carapace.release.requireLatestDependencies must contain only non-empty package names.",
       );
       continue;
     }
     const packageName = value.trim();
     if (seen.has(packageName)) {
       errors.push(
-        `openclaw.release.requireLatestDependencies must not contain duplicate package names; found "${packageName}".`,
+        `carapace.release.requireLatestDependencies must not contain duplicate package names; found "${packageName}".`,
       );
       continue;
     }
@@ -129,7 +129,7 @@ function collectRequiredLatestDependencies(packageJson: PluginPackageJson): {
     const version = runtimeDependencies[packageName];
     if (typeof version !== "string" || !version.trim()) {
       errors.push(
-        `openclaw.release.requireLatestDependencies must reference package.json dependencies or optionalDependencies; "${packageName}" is not a runtime dependency.`,
+        `carapace.release.requireLatestDependencies must reference package.json dependencies or optionalDependencies; "${packageName}" is not a runtime dependency.`,
       );
       continue;
     }
@@ -162,17 +162,17 @@ export function collectPublishablePluginPackageErrors(
   const errors: string[] = [];
   const packageName = packageJson.name?.trim() ?? "";
   const packageVersion = packageJson.version?.trim() ?? "";
-  const installNpmSpec = normalizeOptionalString(packageJson.openclaw?.install?.npmSpec);
+  const installNpmSpec = normalizeOptionalString(packageJson.carapace?.install?.npmSpec);
   const repositoryUrl =
     typeof packageJson.repository === "string"
       ? packageJson.repository.trim()
       : (packageJson.repository?.url?.trim() ?? "");
-  const extensions = packageJson.openclaw?.extensions ?? [];
+  const extensions = packageJson.carapace?.extensions ?? [];
   const requiredLatestDependencies = collectRequiredLatestDependencies(packageJson);
 
-  if (!packageName.startsWith("@openclaw/")) {
+  if (!packageName.startsWith("@carapace/")) {
     errors.push(
-      `package name must start with "@openclaw/"; found "${packageName || "<missing>"}".`,
+      `package name must start with "@carapace/"; found "${packageName || "<missing>"}".`,
     );
   }
   if (packageJson.private === true) {
@@ -184,9 +184,9 @@ export function collectPublishablePluginPackageErrors(
   if (!candidate.readmeText?.trim()) {
     errors.push("README.md must exist and contain package documentation.");
   }
-  if (repositoryUrl !== OPENCLAW_PLUGIN_NPM_REPOSITORY_URL) {
+  if (repositoryUrl !== CARAPACE_PLUGIN_NPM_REPOSITORY_URL) {
     errors.push(
-      `package.json repository.url must be "${OPENCLAW_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "${repositoryUrl || "<missing>"}".`,
+      `package.json repository.url must be "${CARAPACE_PLUGIN_NPM_REPOSITORY_URL}" so npm provenance can validate GitHub trusted publishing; found "${repositoryUrl || "<missing>"}".`,
     );
   }
   if (!packageVersion) {
@@ -197,13 +197,13 @@ export function collectPublishablePluginPackageErrors(
     );
   }
   if (!Array.isArray(extensions) || extensions.length === 0) {
-    errors.push("openclaw.extensions must contain at least one entry.");
+    errors.push("carapace.extensions must contain at least one entry.");
   }
   if (extensions.some((entry) => typeof entry !== "string" || !entry.trim())) {
-    errors.push("openclaw.extensions must contain only non-empty strings.");
+    errors.push("carapace.extensions must contain only non-empty strings.");
   }
   if (!installNpmSpec) {
-    errors.push("openclaw.install.npmSpec must be a non-empty string for publishable plugins.");
+    errors.push("carapace.install.npmSpec must be a non-empty string for publishable plugins.");
   }
   errors.push(...requiredLatestDependencies.errors);
   errors.push(
@@ -271,8 +271,8 @@ export function collectPublishablePluginPackagesFromCandidates(
         .filter(
           (candidate) =>
             !isPluginExternalPublicationDeferred(candidate.packageJson) &&
-            (candidate.packageJson.openclaw?.release?.publishToNpm === true ||
-              candidate.packageJson.openclaw?.release?.publishToClawHub === true),
+            (candidate.packageJson.carapace?.release?.publishToNpm === true ||
+              candidate.packageJson.carapace?.release?.publishToClawHub === true),
         )
         .map((candidate) => ({
           extensionId: candidate.extensionId,
@@ -296,8 +296,8 @@ export function collectPublishablePluginPackagesFromCandidates(
     }
     const enabled =
       target === "npm"
-        ? packageJson.openclaw?.release?.publishToNpm === true
-        : packageJson.openclaw?.release?.publishToClawHub === true;
+        ? packageJson.carapace?.release?.publishToNpm === true
+        : packageJson.carapace?.release?.publishToClawHub === true;
     if (!enabled) {
       continue;
     }
@@ -340,7 +340,7 @@ export function collectPublishablePluginPackagesFromCandidates(
       channel: parsedVersion.channel,
       publishTag,
       ...(target === "npm"
-        ? { installNpmSpec: normalizeOptionalString(packageJson.openclaw?.install?.npmSpec) }
+        ? { installNpmSpec: normalizeOptionalString(packageJson.carapace?.install?.npmSpec) }
         : {}),
       ...(requiredLatestDependencies.length > 0 ? { requiredLatestDependencies } : {}),
     });

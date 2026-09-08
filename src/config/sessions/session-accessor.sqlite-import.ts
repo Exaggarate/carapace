@@ -3,10 +3,10 @@ import {
   iterateSqliteQuerySync,
 } from "../../infra/kysely-sync.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  runCarapaceAgentWriteTransaction,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { readExactSessionEntryRowForCanonicalRepair } from "./session-accessor.sqlite-canonical-repair.js";
 import type { SessionAccessScope, TranscriptEvent } from "./session-accessor.sqlite-contract.js";
 import { publishSessionEntryCacheInvalidation } from "./session-accessor.sqlite-entry-cache.js";
@@ -76,7 +76,7 @@ function resolveSqliteSessionImport(params: SqliteSessionImportRowsParams) {
 }
 
 function importSqliteSessionRowsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   prepared: ReturnType<typeof resolveSqliteSessionImport>,
   stage: SqliteSessionImportStage,
   source: number,
@@ -210,10 +210,10 @@ export async function importSqliteSessionRowsBatch(
   }
   const prepared = params.map(resolveSqliteSessionImport);
   const resolved = prepared[0]!.resolved;
-  const databasePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(resolved));
+  const databasePath = resolveCarapaceAgentSqlitePath(toDatabaseOptions(resolved));
   if (
     prepared.some(
-      (row) => resolveOpenClawAgentSqlitePath(toDatabaseOptions(row.resolved)) !== databasePath,
+      (row) => resolveCarapaceAgentSqlitePath(toDatabaseOptions(row.resolved)) !== databasePath,
     )
   ) {
     throw new Error("SQLite session import batch spans multiple stores");
@@ -248,7 +248,7 @@ export async function importSqliteSessionRowsBatch(
       for (const { params: importParams } of prepared) {
         importParams.beforePersistentApply?.();
       }
-      return runOpenClawAgentWriteTransaction(
+      return runCarapaceAgentWriteTransaction(
         (database) =>
           prepared.map((row, source) =>
             importSqliteSessionRowsInTransaction(database, row, stage, source, repairs.get(source)),

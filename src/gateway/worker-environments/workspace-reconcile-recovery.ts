@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { root as openFsSafeRoot } from "../../infra/fs-safe.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import {
   createStagedInputPathMatcher,
   stagedInputDirectoriesFromEntries,
@@ -107,7 +107,7 @@ async function writeRawWorkspaceTree(params: {
     blobs.push({ entry, mark, content });
     mark += 1;
   }
-  const ref = `refs/heads/openclaw-snapshot-${randomBytes(16).toString("hex")}`;
+  const ref = `refs/heads/carapace-snapshot-${randomBytes(16).toString("hex")}`;
   const chunks: Uint8Array[] = [];
   for (const blob of blobs) {
     chunks.push(Buffer.from(`blob\nmark :${blob.mark}\ndata ${blob.content.byteLength}\n`));
@@ -115,7 +115,7 @@ async function writeRawWorkspaceTree(params: {
   }
   chunks.push(
     Buffer.from(
-      `commit ${ref}\ncommitter OpenClaw <noreply@openclaw.ai> 0 +0000\ndata 0\ndeleteall\n`,
+      `commit ${ref}\ncommitter Carapace <noreply@github.com/Exaggarate/carapace> 0 +0000\ndata 0\ndeleteall\n`,
     ),
   );
   for (const blob of blobs) {
@@ -149,7 +149,7 @@ export async function createWorkspacePatch(params: {
   appliedEntries: WorkerWorkspaceManifestEntry[];
 }): Promise<{ patch: Uint8Array; baseTree: string; basePack: Uint8Array }> {
   const temporary = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-workspace-patch-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-workspace-patch-"),
   );
   try {
     // Rollback journals have a fixed SHA-1 object-id contract. Do not inherit
@@ -248,7 +248,7 @@ export async function applyWorkspacePatch(params: {
   // repository filters cannot reinterpret authenticated bytes. Disable inherited
   // autocrlf too: no-index still runs Git's working-tree newline conversion.
   const temporary = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-no-git-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-no-git-"),
   );
   try {
     await requireGit(
@@ -282,7 +282,7 @@ function validateJournalSnapshot(journal: WorkerWorkspaceReconciliationJournal):
 
 async function createWorkspaceRecoveryPatch(params: WorkspaceRecoveryContext): Promise<Uint8Array> {
   const temporary = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-workspace-recovery-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-workspace-recovery-"),
   );
   try {
     await requireGit(temporary, ["init", "--quiet", "--object-format=sha1"]);

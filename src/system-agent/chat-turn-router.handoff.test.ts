@@ -7,8 +7,8 @@ import {
 } from "./chat-engine.test-support.js";
 
 describe.each([
-  ["cli", "Use /openclaw to come back."],
-  ["gateway", "You can return through Settings → Ask OpenClaw."],
+  ["cli", "Use /carapace to come back."],
+  ["gateway", "You can return through Settings → Ask Carapace."],
 ] as const)("SystemAgentChatEngine %s handoff", (surface, returnHint) => {
   it.each(["command", "tool"] as const)(
     "hands personal accounts to the human from a %s",
@@ -36,7 +36,7 @@ describe.each([
       expect(reply.handoff).toEqual(surface === "gateway" ? { kind: "model-accounts" } : undefined);
       expect(reply.text).toContain("Settings → Profile → Connected accounts");
       if (surface === "cli") {
-        expect(reply.text).toContain("openclaw models accounts login <provider>");
+        expect(reply.text).toContain("carapace models accounts login <provider>");
       }
       expect(runAgentTurn).toHaveBeenCalledTimes(source === "command" ? 0 : 1);
       expect(executeOperation).not.toHaveBeenCalled();
@@ -67,7 +67,7 @@ describe.each([
       latencyMs: 100,
     }));
     const applySetup = vi.fn(async () => ({
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
       configHashBefore: "before",
       configHashAfter: "after",
       bootstrapPending: true,

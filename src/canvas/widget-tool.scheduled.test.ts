@@ -11,7 +11,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 describe("scheduled show_widget", () => {
   it("keeps scheduled widget authoring pinned-only without an inline client", async () => {
     const { mock: callGatewayMock, callGateway } = createBoardPutCaller();
-    const stateDir = tempDirs.make("openclaw-scheduled-widget-");
+    const stateDir = tempDirs.make("carapace-scheduled-widget-");
     const tool = createShowWidgetTool({
       stateDir,
       sessionId: "scheduled-board-only",

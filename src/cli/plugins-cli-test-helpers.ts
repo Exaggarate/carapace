@@ -6,7 +6,7 @@ import { getRuntimeConfig } from "../config/config.js";
 import type { ConfigWriteOptions } from "../config/io.types.js";
 import type { ConfigReplaceInput } from "../config/mutate.js";
 import type { HookInstallRecord } from "../config/types.hooks.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { PLUGIN_INSTALL_ERROR_CODE } from "../plugins/install-types.js";
 import type { InstalledPluginIndex } from "../plugins/installed-plugin-index.js";
@@ -62,7 +62,7 @@ function createEmptyUninstallActions() {
 let mockInstalledPluginIndexInstallRecords: PluginInstallRecordMap = {};
 let mockHookInstallRecords: Record<string, HookInstallRecord> = {};
 let mockInstalledPluginIndexRevision = 0;
-const mockPersistedConfigs = new Map<string, OpenClawConfig>();
+const mockPersistedConfigs = new Map<string, CarapaceConfig>();
 
 export function setHookInstallRecords(records: Record<string, HookInstallRecord>): void {
   mockHookInstallRecords = structuredClone(records);
@@ -98,15 +98,15 @@ function invokeMock<TArgs extends unknown[], TResult>(mock: unknown, ...args: TA
 }
 
 export const pluginCliConfigMock: Mock<LoadConfigFn> = vi.fn<LoadConfigFn>(
-  () => ({}) as OpenClawConfig,
+  () => ({}) as CarapaceConfig,
 );
 export const readConfigFileSnapshotMock: AsyncUnknownMock = vi.fn();
 export const readConfigFileSnapshotForWriteMock: AsyncUnknownMock = vi.fn();
 export const configWriteMock: AsyncUnknownMock = vi.fn(async () => undefined);
 export const replaceConfigFileMock: AsyncUnknownMock = vi.fn(
-  async (params: { nextConfig: OpenClawConfig }) => await configWriteMock(params.nextConfig),
+  async (params: { nextConfig: CarapaceConfig }) => await configWriteMock(params.nextConfig),
 ) as AsyncUnknownMock;
-const resolveStateDir: Mock<() => string> = vi.fn(() => "/tmp/openclaw-state");
+const resolveStateDir: Mock<() => string> = vi.fn(() => "/tmp/carapace-state");
 export const installPluginFromMarketplaceMock: Mock<InstallPluginFromMarketplaceFn> = vi.fn();
 export const installPluginFromGitSpecMock: Mock<InstallPluginFromGitSpecFn> = vi.fn();
 const parseGitPluginSpec: Mock<ParseGitPluginSpecFn> = vi.fn();
@@ -121,7 +121,7 @@ const loadInstalledPluginIndexInstallRecords: AsyncUnknownMock = vi.fn(async () 
 const writePersistedInstalledPluginIndexInstallRecords: Mock<WritePersistedInstalledPluginIndexInstallRecordsFn> =
   vi.fn<WritePersistedInstalledPluginIndexInstallRecordsFn>(async (records) => {
     mockInstalledPluginIndexInstallRecords = clonePluginInstallRecords(records);
-    return "/tmp/openclaw-state/openclaw.sqlite";
+    return "/tmp/carapace-state/carapace.sqlite";
   });
 export const readPersistedInstalledPluginIndexMock: Mock<ReadPersistedInstalledPluginIndexFn> =
   vi.fn<ReadPersistedInstalledPluginIndexFn>(async () => null);
@@ -140,7 +140,7 @@ const writeMockInstalledIndexWithLease: WritePersistedInstalledPluginIndexInstal
       previous,
       revision: mockInstalledPluginIndexRevision,
       mutation: {
-        databasePath: "/tmp/openclaw-state/openclaw.sqlite",
+        databasePath: "/tmp/carapace-state/carapace.sqlite",
         before,
         after: row(
           createTestInstalledPluginIndex({ policyHash: "test-policy", installRecords: records }),
@@ -310,13 +310,13 @@ vi.mock("../config/io.factory.js", async (importOriginal) => {
 
 vi.mock("../config/config.js", () => ({
   assertConfigWriteAllowedInCurrentMode: () => {
-    if (process.env.OPENCLAW_NIX_MODE === "1") {
+    if (process.env.CARAPACE_NIX_MODE === "1") {
       throw new Error(
         [
-          "Config is managed by Nix (`OPENCLAW_NIX_MODE=1`), so OpenClaw treats openclaw.json as immutable.",
-          "Do not run setup, onboarding, openclaw update, plugin install/update/uninstall/enable, doctor repair/token-generation, or config set against this file.",
-          "Agent-first Nix setup: https://github.com/openclaw/nix-openclaw#quick-start",
-          "OpenClaw Nix overview: https://docs.openclaw.ai/install/nix",
+          "Config is managed by Nix (`CARAPACE_NIX_MODE=1`), so Carapace treats carapace.json as immutable.",
+          "Do not run setup, onboarding, carapace update, plugin install/update/uninstall/enable, doctor repair/token-generation, or config set against this file.",
+          "Agent-first Nix setup: https://github.com/Exaggarate/carapace/nix-carapace#quick-start",
+          "Carapace Nix overview: https://github.com/Exaggarate/carapace",
         ].join("\n"),
       );
     }
@@ -343,9 +343,9 @@ vi.mock("../config/config.js", () => ({
       readConfigFileSnapshotForWriteMock,
       ...args,
     )) as (typeof import("../config/config.js"))["readConfigFileSnapshotForWrite"],
-  writeConfigFile: ((config: OpenClawConfig) =>
+  writeConfigFile: ((config: CarapaceConfig) =>
     invokeMock<
-      [OpenClawConfig],
+      [CarapaceConfig],
       ReturnType<(typeof import("../config/config.js"))["writeConfigFile"]>
     >(configWriteMock, config)) as (typeof import("../config/config.js"))["writeConfigFile"],
   replaceConfigFile: ((
@@ -821,8 +821,8 @@ vi.mock("../plugins/git-install.js", () => ({
 
 vi.mock("../hooks/install.js", () => ({
   HOOK_INSTALL_ERROR_CODE: {
-    MISSING_OPENCLAW_HOOKS: "missing_openclaw_hooks",
-    EMPTY_OPENCLAW_HOOKS: "empty_openclaw_hooks",
+    MISSING_CARAPACE_HOOKS: "missing_carapace_hooks",
+    EMPTY_CARAPACE_HOOKS: "empty_carapace_hooks",
   },
   installHooksFromNpmSpec: ((
     ...args: Parameters<(typeof import("../hooks/install.js"))["installHooksFromNpmSpec"]>
@@ -976,11 +976,11 @@ export function resetPluginsCliTestState() {
   installHooksFromPathMock.mockReset();
   recordHookInstallMock.mockReset();
 
-  pluginCliConfigMock.mockReturnValue({} as OpenClawConfig);
+  pluginCliConfigMock.mockReturnValue({} as CarapaceConfig);
   readConfigFileSnapshotMock.mockImplementation(async () => {
     const config = getRuntimeConfig();
     return {
-      path: "/tmp/openclaw-config.json5",
+      path: "/tmp/carapace-config.json5",
       exists: true,
       raw: "{}",
       parsed: config,
@@ -1012,30 +1012,30 @@ export function resetPluginsCliTestState() {
   ) => {
     const nextConfig = params.sourceConfig ?? params.nextConfig;
     await configWriteMock(nextConfig);
-    const configPath = params.writeOptions?.ownedConfigPathForWrite ?? "/tmp/openclaw-config.json5";
+    const configPath = params.writeOptions?.ownedConfigPathForWrite ?? "/tmp/carapace-config.json5";
     mockPersistedConfigs.set(configPath, structuredClone(nextConfig));
     return { path: configPath, nextConfig };
   }) as (...args: unknown[]) => Promise<unknown>);
-  resolveStateDir.mockReturnValue("/tmp/openclaw-state");
+  resolveStateDir.mockReturnValue("/tmp/carapace-state");
   resolveMarketplaceInstallShortcutMock.mockResolvedValue(null);
   installPluginFromMarketplaceMock.mockResolvedValue({
     ok: false,
     error: "marketplace install failed",
   });
-  enablePluginInConfigMock.mockImplementation(((cfg: OpenClawConfig, pluginId: string) => ({
+  enablePluginInConfigMock.mockImplementation(((cfg: CarapaceConfig, pluginId: string) => ({
     config: cfg,
     enabled: true,
     pluginId,
   })) as (...args: unknown[]) => unknown);
   recordPluginInstallMock.mockImplementation(
-    ((cfg: OpenClawConfig) => cfg) as (...args: unknown[]) => unknown,
+    ((cfg: CarapaceConfig) => cfg) as (...args: unknown[]) => unknown,
   );
   loadInstalledPluginIndexInstallRecords.mockImplementation(async () =>
     clonePluginInstallRecords(mockInstalledPluginIndexInstallRecords),
   );
   writePersistedInstalledPluginIndexInstallRecords.mockImplementation(async (records) => {
     mockInstalledPluginIndexInstallRecords = clonePluginInstallRecords(records);
-    return "/tmp/openclaw-state/openclaw.sqlite";
+    return "/tmp/carapace-state/carapace.sqlite";
   });
   readPersistedInstalledPluginIndexMock.mockResolvedValue(null);
   writePersistedInstalledPluginIndexInstallRecordsWithLeaseMock.mockImplementation(
@@ -1070,7 +1070,7 @@ export function resetPluginsCliTestState() {
             origin: "global",
             rootDir,
             source: `${rootDir}/index.js`,
-            manifestPath: `${rootDir}/openclaw.plugin.json`,
+            manifestPath: `${rootDir}/carapace.plugin.json`,
           },
           pluginId,
         );
@@ -1109,7 +1109,7 @@ export function resetPluginsCliTestState() {
   });
   refreshPluginRegistryMock.mockResolvedValue(defaultRegistryIndex);
   notifyGatewayPluginMetadataChangedMock.mockResolvedValue(true);
-  applyExclusiveSlotSelectionMock.mockImplementation((({ config }: { config: OpenClawConfig }) => ({
+  applyExclusiveSlotSelectionMock.mockImplementation((({ config }: { config: CarapaceConfig }) => ({
     config,
     warnings: [],
   })) as (...args: unknown[]) => unknown);
@@ -1117,7 +1117,7 @@ export function resetPluginsCliTestState() {
     config,
     pluginId,
   }: {
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     pluginId: string;
   }) => ({
     ok: true,
@@ -1133,12 +1133,12 @@ export function resetPluginsCliTestState() {
   updateNpmInstalledPluginsMock.mockResolvedValue({
     outcomes: [],
     changed: false,
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
   });
   updateNpmInstalledHookPacksMock.mockResolvedValue({
     outcomes: [],
     changed: false,
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
   });
   promptYesNoMock.mockResolvedValue(true);
   promptText.mockResolvedValue("demo");

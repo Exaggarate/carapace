@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runWithAgentRingZeroTools } from "./agent-tools.ring-zero-context.js";
 import { createCodeModeTools } from "./code-mode.js";
 import { createStubTool } from "./test-helpers/agent-tool-stubs.js";
@@ -16,7 +16,7 @@ import { applyAgentToolSurfaceCatalog, resolveAgentToolSurfacePlan } from "./too
 // keep a public export alive that no production caller needs.
 type AgentToolSurfacePlanParams = Parameters<typeof resolveAgentToolSurfacePlan>[0];
 
-const controlsEnabledConfig: OpenClawConfig = {
+const controlsEnabledConfig: CarapaceConfig = {
   tools: { codeMode: true, toolSearch: true },
 };
 const basePlanParams: AgentToolSurfacePlanParams = {
@@ -39,7 +39,7 @@ describe("resolveAgentToolSurfacePlan", () => {
   ])(
     "honors explicit Tool Search $toolSearch over the model preference",
     ({ toolSearch, expected, expectedMode }) => {
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         tools: { toolSearch },
         agents: {
           ownership: "explicit",
@@ -62,7 +62,7 @@ describe("resolveAgentToolSurfacePlan", () => {
   );
 
   it("reevaluates derived Tool Search for sibling agents and fallback models without changing config", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { local: {}, hosted: {} } },
     };
     const params = { ...basePlanParams, config, agentId: "local" };
@@ -101,7 +101,7 @@ describe("resolveAgentToolSurfacePlan", () => {
   );
 
   it("uses the selected model policy before transport aliases and reevaluates fallbacks", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: "auto" },
       agents: { defaults: { models: { "test/family": { codeMode: false } } } },
     };
@@ -129,7 +129,7 @@ describe("resolveAgentToolSurfacePlan", () => {
     const resolve = () =>
       resolveAgentToolSurfacePlan({ ...basePlanParams, codeModeOverride: true, ...overrides });
     const plan = ringZero
-      ? runWithAgentRingZeroTools([createStubTool("openclaw")], resolve)
+      ? runWithAgentRingZeroTools([createStubTool("carapace")], resolve)
       : resolve();
 
     expect(plan.codeModeControlsEnabled).toBe(false);
@@ -149,7 +149,7 @@ describe("resolveAgentToolSurfacePlan", () => {
     },
   ] satisfies Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     expected: { codeMode: boolean; toolSearch: boolean };
   }>)("keeps controls mutually exclusive: $name", ({ config, expected }) => {
     const plan = resolveAgentToolSurfacePlan({ ...basePlanParams, config });
@@ -160,7 +160,7 @@ describe("resolveAgentToolSurfacePlan", () => {
   });
 
   it("preserves Code Mode controls for a checkpoint-proven restart recovery", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: false, toolSearch: true },
     };
     const plan = resolveAgentToolSurfacePlan({
@@ -199,7 +199,7 @@ describe("resolveAgentToolSurfacePlan", () => {
     },
   ] satisfies Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     toolsAllow?: string[];
     forceCodeModeControls?: boolean;
     model?: { toolSearchMode: "tools" };
@@ -264,7 +264,7 @@ describe("resolveAgentToolSurfacePlan", () => {
     },
   ] satisfies Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     toolsAllow?: string[];
     forceCodeModeControls?: boolean;
     expected: { codeMode: boolean; toolSearch: boolean };
@@ -285,7 +285,7 @@ describe("applyAgentToolSurfaceCatalog", () => {
   const executeTool: ToolSearchCatalogToolExecutor = async () => ({ content: [], details: {} });
 
   it("uses the code-mode catalog when code-mode controls are enabled", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: true, toolSearch: { enabled: true, mode: "directory" } },
     };
     const plan = resolveAgentToolSurfacePlan({ ...basePlanParams, config });
@@ -308,7 +308,7 @@ describe("applyAgentToolSurfaceCatalog", () => {
   });
 
   it("keeps checkpoint-proven recovery executable after Code Mode is disabled", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: false, toolSearch: { enabled: true, mode: "directory" } },
     };
     const plan = resolveAgentToolSurfacePlan({
@@ -349,7 +349,7 @@ describe("applyAgentToolSurfaceCatalog", () => {
   });
 
   it("uses the schema-directory catalog in directory mode", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: false, toolSearch: { enabled: true, mode: "directory" } },
     };
     const plan = resolveAgentToolSurfacePlan({ ...basePlanParams, config });
@@ -370,7 +370,7 @@ describe("applyAgentToolSurfaceCatalog", () => {
   });
 
   it("uses the tool-search catalog outside directory mode", () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       tools: { codeMode: false, toolSearch: { enabled: true, mode: "tools" } },
     };
     const plan = resolveAgentToolSurfacePlan({ ...basePlanParams, config });

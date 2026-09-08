@@ -1,6 +1,6 @@
 import type { SystemEvent } from "../../infra/system-events.js";
 
-const REPLY_SYSTEM_EVENT_CONTEXT = Symbol("openclaw.reply.systemEventContext");
+const REPLY_SYSTEM_EVENT_CONTEXT = Symbol("carapace.reply.systemEventContext");
 
 type ReplySystemEventContext = {
   sessionKey: string;

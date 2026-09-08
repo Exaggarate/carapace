@@ -1,7 +1,7 @@
 // Imessage plugin module implements watch error log behavior.
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { sanitizeTerminalText } from "carapace/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 const MAX_WATCH_ERROR_MESSAGE_CHARS = 200;
 

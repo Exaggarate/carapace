@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import path from "node:path";
 import process from "node:process";
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 import { execa, type Options as ExecaOptions, type ResultPromise } from "execa";
-import { markOpenClawExecEnv } from "../infra/openclaw-exec-env.js";
+import { markCarapaceExecEnv } from "../infra/carapace-exec-env.js";
 import { mergeProcessEnv } from "../infra/process-env.js";
 import { getFileLockProcessStartTime } from "../shared/pid-alive.js";
 import { killProcessTree } from "./kill-tree.js";
@@ -169,5 +169,5 @@ export function resolveCommandEnv(params: {
       resolvedEnv.npm_config_fund = "false";
     }
   }
-  return markOpenClawExecEnv(resolvedEnv);
+  return markCarapaceExecEnv(resolvedEnv);
 }

@@ -1,7 +1,7 @@
 /** Session MCP config loading, filtering, and catalog fingerprints. */
 import crypto from "node:crypto";
 import type { SessionToolOverrides } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { logWarn } from "../logger.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { assignSafeServerNames } from "./agent-bundle-mcp-names.js";
@@ -78,7 +78,7 @@ function filterMcpServers<T>(
 
 export function loadSessionMcpConfig(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   loaded?: LoadedMcpConfig;
   logDiagnostics?: boolean;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
@@ -146,7 +146,7 @@ export function loadSessionMcpConfig(params: {
  */
 export function resolveSessionMcpConfigSummary(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   toolOverrides?: Pick<SessionToolOverrides, "mcpServers" | "mcpToolsDeny">;
 }): { fingerprint: string; serverNames: string[] } {
@@ -173,7 +173,7 @@ export function resolveSessionMcpConfigSummary(params: {
 /** Reads the enabled static MCP server set without opening transports or listing tools. */
 export function resolveStaticSessionMcpServerNames(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   toolOverrides?: Pick<SessionToolOverrides, "mcpServers" | "mcpToolsDeny">;
 }): string[] {

@@ -1,7 +1,7 @@
 // Real provider, process replacement, and browser proof of recovered dashboard authoring.
 import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { chromium, type Browser } from "playwright";
 import { expect, it, vi } from "vitest";
 import {
@@ -11,7 +11,7 @@ import {
 import type { BoardSnapshot } from "../packages/gateway-protocol/src/index.js";
 import { inspectManagedProcessGroup } from "../scripts/lib/managed-child-process.mts";
 import { isLiveTestEnabled, logLiveProgress } from "../src/agents/live-test-helpers.js";
-import type { OpenClawConfig } from "../src/config/config.js";
+import type { CarapaceConfig } from "../src/config/config.js";
 import type { GatewayClient } from "../src/gateway/client.js";
 import type { SessionsListResult } from "../src/gateway/session-utils.types.js";
 import { loadOrCreateDeviceIdentity } from "../src/infra/device-identity.js";
@@ -20,7 +20,7 @@ import { createControlUiE2eArtifactDir } from "../ui/src/test-helpers/control-ui
 import { waitForControlUiGatewayReady } from "../ui/src/test-helpers/control-ui-e2e-readiness.js";
 import { controlUiSessionUrl } from "../ui/src/test-helpers/control-ui-e2e.js";
 import { acquireGatewayTestClient } from "./helpers/gateway-client.js";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "./helpers/qa-gateway-cleanup.js";
 
 const MODEL = "gpt-5.6-luna";
@@ -55,15 +55,15 @@ it.skipIf(!isLiveTestEnabled() || process.platform === "win32")(
       throw new Error("Gateway widget restart live proof requires a built checkout");
     }
     const artifactDir = createControlUiE2eArtifactDir("gateway-widget-restart");
-    const instance = await createOpenClawTestInstance({
+    const instance = await createCarapaceTestInstance({
       name: "gateway-widget-restart-live",
       env: {
         OPENAI_API_KEY: apiKey,
         OPENAI_BASE_URL: undefined,
         OPENAI_API_BASE: undefined,
-        OPENCLAW_SKIP_PROVIDERS: undefined,
-        OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-        OPENCLAW_SKIP_CANVAS_HOST: "0",
+        CARAPACE_SKIP_PROVIDERS: undefined,
+        CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+        CARAPACE_SKIP_CANVAS_HOST: "0",
       },
       startTimeoutMs: 120_000,
       stopTimeoutMs: 10_000,
@@ -72,7 +72,7 @@ it.skipIf(!isLiveTestEnabled() || process.platform === "win32")(
     let browser: Browser | undefined;
     await runQaGatewayFixture(
       async () => {
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           secrets: { providers: { default: { source: "env" } } },
           models: {
             mode: "replace",
@@ -100,7 +100,7 @@ it.skipIf(!isLiveTestEnabled() || process.platform === "win32")(
             defaults: {
               workspace: instance.state.workspaceDir,
               model: { primary: MODEL_REF },
-              models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+              models: { [MODEL_REF]: { agentRuntime: { id: "carapace" } } },
               thinkingDefault: "low",
               heartbeat: { every: "0m" },
               skipBootstrap: true,
@@ -288,7 +288,7 @@ it.skipIf(!isLiveTestEnabled() || process.platform === "win32")(
           JSON.stringify(
             {
               model: MODEL_REF,
-              runtime: "openclaw",
+              runtime: "carapace",
               sessionKey: SESSION_KEY,
               originalRunId: initialRun.runId,
               originalPid: originalProcess.pid,

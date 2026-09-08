@@ -1,6 +1,6 @@
-import OpenClawChatUI
+import CarapaceChatUI
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct ChatModelMenuPresentationTests {
     @Test func `provider identities resolve to bundled brand marks`() {
@@ -29,17 +29,17 @@ struct ChatModelMenuPresentationTests {
     }
 
     @Test func `model provider prefers metadata and falls back to qualified id`() {
-        let metadata = OpenClawChatModelChoice(
+        let metadata = CarapaceChatModelChoice(
             modelID: "gpt-5.6-sol",
             name: "GPT-5.6 Sol",
             provider: " OpenAI ",
             contextWindow: 200_000)
-        let qualified = OpenClawChatModelChoice(
+        let qualified = CarapaceChatModelChoice(
             modelID: "anthropic/claude-opus-4-7",
             name: "Claude Opus 4.7",
             provider: "",
             contextWindow: 200_000)
-        let unqualified = OpenClawChatModelChoice(
+        let unqualified = CarapaceChatModelChoice(
             modelID: "custom-model",
             name: "Custom Model",
             provider: "",
@@ -75,13 +75,13 @@ struct ChatModelMenuPresentationTests {
 
     @Test func `thinking slider maps gateway stops without inventing levels`() {
         let options = [
-            OpenClawChatThinkingLevelOption(id: "low", label: "Low"),
-            OpenClawChatThinkingLevelOption(id: "medium", label: "Medium"),
-            OpenClawChatThinkingLevelOption(id: "high", label: "High"),
+            CarapaceChatThinkingLevelOption(id: "low", label: "Low"),
+            CarapaceChatThinkingLevelOption(id: "medium", label: "Medium"),
+            CarapaceChatThinkingLevelOption(id: "high", label: "High"),
         ]
 
         #expect(ChatThinkingSliderPresentation.index(
-            selectionID: OpenClawChatViewModel.inheritedThinkingSelectionID,
+            selectionID: CarapaceChatViewModel.inheritedThinkingSelectionID,
             effectiveLevelID: "high",
             options: options) == 2)
         #expect(ChatThinkingSliderPresentation.index(
@@ -95,12 +95,12 @@ struct ChatModelMenuPresentationTests {
 
     @Test func `thinking slider labels inherited and explicit effort distinctly`() {
         let options = [
-            OpenClawChatThinkingLevelOption(id: "low", label: "Low"),
-            OpenClawChatThinkingLevelOption(id: "high", label: "High"),
+            CarapaceChatThinkingLevelOption(id: "low", label: "Low"),
+            CarapaceChatThinkingLevelOption(id: "high", label: "High"),
         ]
 
         #expect(ChatThinkingSliderPresentation.valueLabel(
-            selectionID: OpenClawChatViewModel.inheritedThinkingSelectionID,
+            selectionID: CarapaceChatViewModel.inheritedThinkingSelectionID,
             effectiveLevelID: "high",
             options: options) == "Default (High)")
         #expect(ChatThinkingSliderPresentation.valueLabel(
@@ -108,24 +108,24 @@ struct ChatModelMenuPresentationTests {
             effectiveLevelID: "high",
             options: options) == "Low")
         #expect(ChatThinkingSliderPresentation.valueLabel(
-            selectionID: OpenClawChatViewModel.inheritedThinkingSelectionID,
+            selectionID: CarapaceChatViewModel.inheritedThinkingSelectionID,
             effectiveLevelID: "ultra",
             options: options) == "Default (Ultra)")
     }
 
     @Test func `thinking slider exposes one notch per gateway stop`() {
         let options = [
-            OpenClawChatThinkingLevelOption(id: "off", label: "Off"),
-            OpenClawChatThinkingLevelOption(id: "low", label: "Low"),
-            OpenClawChatThinkingLevelOption(id: "medium", label: "Medium"),
-            OpenClawChatThinkingLevelOption(id: "high", label: "High"),
+            CarapaceChatThinkingLevelOption(id: "off", label: "Off"),
+            CarapaceChatThinkingLevelOption(id: "low", label: "Low"),
+            CarapaceChatThinkingLevelOption(id: "medium", label: "Medium"),
+            CarapaceChatThinkingLevelOption(id: "high", label: "High"),
         ]
 
         #expect(ChatThinkingSliderPresentation.notchIndices(options: options) == [0, 1, 2, 3])
     }
 
     @Test func `fast switch reflects effective inheritance and emits only binary values`() {
-        let inherited = OpenClawChatViewModel.inheritedThinkingSelectionID
+        let inherited = CarapaceChatViewModel.inheritedThinkingSelectionID
 
         #expect(ChatFastModeControlPresentation.isOn(
             selectionID: inherited,
@@ -144,7 +144,7 @@ struct ChatModelMenuPresentationTests {
     }
 
     @Test func `verbosity segments resolve inheritance without inventing a fourth level`() {
-        let inherited = OpenClawChatViewModel.inheritedThinkingSelectionID
+        let inherited = CarapaceChatViewModel.inheritedThinkingSelectionID
 
         #expect(ChatVerbosityControlPresentation.resolvedSelectionID(
             selectionID: inherited,

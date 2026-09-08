@@ -1,4 +1,4 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { isScalar, parseDocument, visit } from "yaml";
 import type { ClawDiagnostic } from "./types.js";
 
@@ -15,9 +15,9 @@ export function parseClawYaml(
     kind === "frontmatter"
       ? ["invalid_claw_frontmatter", "unsupported_claw_yaml_feature", "CLAW.md frontmatter"]
       : [
-          "invalid_openclaw_profile",
-          "unsupported_openclaw_profile_yaml_feature",
-          "OpenClaw profile YAML",
+          "invalid_carapace_profile",
+          "unsupported_carapace_profile_yaml_feature",
+          "Carapace profile YAML",
         ];
   const document = parseDocument(raw, {
     prettyErrors: false,

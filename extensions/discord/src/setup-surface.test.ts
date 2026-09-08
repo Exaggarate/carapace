@@ -1,6 +1,6 @@
 // Discord tests cover setup surface plugin behavior.
-import { installChannelDmPolicyContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { installChannelDmPolicyContractSuite } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { createDiscordSetupWizardBase } from "./setup-core.js";
 
@@ -52,7 +52,7 @@ describe("discordSetupWizard.status", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(configured).toBe(false);
@@ -74,11 +74,11 @@ describe("discordSetupWizard.groupAccess", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
       resolved: [
         {
-          input: "OpenClaw/#triage",
+          input: "Carapace/#triage",
           resolved: true,
           guildId: "guild-1",
           channelId: "channel-1",

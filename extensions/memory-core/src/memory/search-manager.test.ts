@@ -1,5 +1,5 @@
 // Memory Core tests cover builtin search manager acquisition and cleanup.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const builtinManager = vi.hoisted(() => ({
@@ -34,7 +34,7 @@ describe("builtin memory search manager", () => {
   });
 
   it("returns the builtin manager for every purpose", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
 
     const result = await getMemorySearchManager({ cfg, agentId: "main", purpose: "status" });
 
@@ -49,12 +49,12 @@ describe("builtin memory search manager", () => {
     memoryIndexGet.mockRejectedValueOnce(new Error("index unavailable"));
 
     await expect(
-      getMemorySearchManager({ cfg: {} as OpenClawConfig, agentId: "main" }),
+      getMemorySearchManager({ cfg: {} as CarapaceConfig, agentId: "main" }),
     ).resolves.toMatchObject({ manager: null, error: "index unavailable" });
   });
 
   it("closes all loaded builtin managers", async () => {
-    await getMemorySearchManager({ cfg: {} as OpenClawConfig, agentId: "main" });
+    await getMemorySearchManager({ cfg: {} as CarapaceConfig, agentId: "main" });
 
     await closeAllMemorySearchManagers();
 
@@ -62,7 +62,7 @@ describe("builtin memory search manager", () => {
   });
 
   it("normalizes the agent id before scoped cleanup", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     await getMemorySearchManager({ cfg, agentId: " Main " });
 
     await closeMemorySearchManager({ cfg, agentId: " Main " });

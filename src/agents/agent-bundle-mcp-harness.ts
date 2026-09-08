@@ -1,6 +1,6 @@
 /** Harness-facing materialization of configured MCP tools. */
 import type { SessionToolOverrides } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { getPluginToolMeta, setPluginToolMeta } from "../plugins/tool-metadata.js";
 import {
@@ -155,7 +155,7 @@ type MaterializeRequesterScopedMcpToolsForHarnessRunParams = {
   agentId?: string;
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   toolOverrides?: Pick<SessionToolOverrides, "mcpServers" | "mcpToolsDeny">;
   requesterSenderId?: string | null;

@@ -117,8 +117,8 @@ afterEach(() => {
 function fixture(): FinishUpdateParams {
   const home = dirs.make("post-update-repair-");
   for (const key of [
-    "OPENCLAW_HOME",
-    "OPENCLAW_SUPERVISOR_MODE",
+    "CARAPACE_HOME",
+    "CARAPACE_SUPERVISOR_MODE",
     ...GATEWAY_SERVICE_SELECTOR_ENV_KEYS,
   ]) {
     vi.stubEnv(key, undefined);
@@ -126,10 +126,10 @@ function fixture(): FinishUpdateParams {
   vi.stubEnv("HOME", home);
   vi.stubEnv("USERPROFILE", home);
   vi.spyOn(os, "userInfo").mockReturnValue({ ...os.userInfo(), homedir: home });
-  const stateDir = path.join(home, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+  const stateDir = path.join(home, ".carapace");
+  const configPath = path.join(stateDir, "carapace.json");
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
   const env = { ...process.env };
   const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
   return {
@@ -303,7 +303,7 @@ describe("post-activation repair after rollback refusal or failure", () => {
       params.rollbackBlockedReason = undefined;
       params.previousVerified = true;
       params.schemaVersions = await readUpdateStateSchemaVersions({
-        stateDir: run.env.OPENCLAW_STATE_DIR!,
+        stateDir: run.env.CARAPACE_STATE_DIR!,
         config: {},
         env: run.env,
       });
@@ -328,8 +328,8 @@ describe("post-activation repair after rollback refusal or failure", () => {
       expect(repair.context.phase).toBe("verifying");
       expect(repair.target).toMatchObject({
         installRoot: activeRoot,
-        stateDir: run.env.OPENCLAW_STATE_DIR,
-        configPath: run.env.OPENCLAW_CONFIG_PATH,
+        stateDir: run.env.CARAPACE_STATE_DIR,
+        configPath: run.env.CARAPACE_CONFIG_PATH,
       });
       expect(repair.target.candidateRoot).toBeUndefined();
       expect(getUpdateRun(run.runId, { env: run.env })?.phase).toBe("repairing");
@@ -433,10 +433,10 @@ describe("post-activation repair after rollback refusal or failure", () => {
     async (activated) => {
       const params = fixture();
       const run = params.opts.run!;
-      vi.stubEnv("OPENCLAW_WINDOWS_TASK_NAME", "repair-plugin-fixture");
-      run.env.OPENCLAW_WINDOWS_TASK_NAME = "repair-plugin-fixture";
+      vi.stubEnv("CARAPACE_WINDOWS_TASK_NAME", "repair-plugin-fixture");
+      run.env.CARAPACE_WINDOWS_TASK_NAME = "repair-plugin-fixture";
       const root = await fs.realpath(dirs.make("repair-plugin-windows-candidate-"));
-      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
       const state: GatewayServiceState = {
         installed: true,
         loadState: { status: "loaded" },
@@ -624,7 +624,7 @@ describe("post-activation repair after rollback refusal or failure", () => {
       const params = fixture();
       const env = params.opts.run!.env;
       const root = dirs.make("repair-windows-candidate-");
-      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+      await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "carapace" }));
       const state: GatewayServiceState = {
         installed: true,
         loadState: { status: "loaded" },

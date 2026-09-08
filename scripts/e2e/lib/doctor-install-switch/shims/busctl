@@ -50,7 +50,7 @@ if (args[0] !== "--user" || args[1] !== "--json=short") {
 }
 
 const invocation = args.slice(2);
-const unitName = `${process.env.OPENCLAW_SYSTEMD_UNIT || "openclaw-gateway"}`.replace(
+const unitName = `${process.env.CARAPACE_SYSTEMD_UNIT || "carapace-gateway"}`.replace(
   /(?:\.service)?$/u,
   ".service",
 );

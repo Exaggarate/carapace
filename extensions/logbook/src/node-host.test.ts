@@ -15,9 +15,9 @@ vi.mock("node:fs/promises", () => ({
   writeFile: vi.fn(async () => undefined),
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", () => ({ runExec: runExecMock }));
-vi.mock("openclaw/plugin-sdk/temp-path", () => ({
-  resolvePreferredOpenClawTmpDir: () => "/data/openclaw-tests",
+vi.mock("carapace/plugin-sdk/process-runtime", () => ({ runExec: runExecMock }));
+vi.mock("carapace/plugin-sdk/temp-path", () => ({
+  resolvePreferredCarapaceTmpDir: () => "/data/carapace-tests",
 }));
 
 import { handleLogbookSnapshot } from "./node-host.js";

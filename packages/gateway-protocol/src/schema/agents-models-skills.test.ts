@@ -63,7 +63,7 @@ const proposalRecord = (overrides: Record<string, unknown> = {}) => ({
   status: "pending",
   title: "weather-helper",
   description: "Improve weather checks",
-  schema: "openclaw.skill-workshop.proposal.v1",
+  schema: "carapace.skill-workshop.proposal.v1",
   createdAt: "2026-05-30T00:00:00.000Z",
   updatedAt: "2026-05-30T00:00:00.000Z",
   createdBy: "gateway",
@@ -316,7 +316,7 @@ describe("ModelsListResultSchema", () => {
       provider: "openai",
       agentRuntime: {
         id: "codex",
-        fallback: "openclaw",
+        fallback: "carapace",
         cloudPlacementSupported: true,
         cloudPlacementExecutionMode: "remote-exec",
         devicePlacementSupported: true,

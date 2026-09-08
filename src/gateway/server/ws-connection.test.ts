@@ -133,7 +133,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     const buildRequestContext = vi.fn(() => createGatewayWsTestRequestContext() as never);
     Object.assign(socket, {
       [GATEWAY_WS_CONNECTION_KIND_PROPERTY]: "worker",
-      __openclawPreauthBudgetKey: "203.0.113.10",
+      __carapacePreauthBudgetKey: "203.0.113.10",
     });
     markPublicWorkerIngress(socket as never, {
       clientIp: "203.0.113.10",
@@ -161,7 +161,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     });
     const client = {
       socket,
-      connect: { client: { id: "openclaw-worker", mode: "worker" } },
+      connect: { client: { id: "carapace-worker", mode: "worker" } },
       worker: { environmentId: "worker-1" },
     };
     expect(handler.setClient(client as never)).toBe(true);
@@ -240,7 +240,7 @@ describe("attachGatewayWsConnectionHandler", () => {
           minProtocol: PROTOCOL_VERSION,
           maxProtocol: PROTOCOL_VERSION,
           caps: [capability],
-          client: { id: "openclaw-macos", mode: "node" },
+          client: { id: "carapace-macos", mode: "node" },
         },
         connId: "pending-node",
         usesSharedGatewayAuth: false,
@@ -298,7 +298,7 @@ describe("attachGatewayWsConnectionHandler", () => {
 
     const registered = handlerParams.setClient({
       socket,
-      connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+      connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
       connId: "late-client",
       usesSharedGatewayAuth: false,
     });
@@ -317,7 +317,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     };
     const firstClient = {
       socket,
-      connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+      connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
       connId: "first-client",
       usesSharedGatewayAuth: false,
     };
@@ -349,7 +349,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     expect(
       handlerParams.setClient({
         socket,
-        connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+        connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
         connId: handlerParams.connId,
         usesSharedGatewayAuth: false,
         connectionSignal: AbortSignal.abort(),
@@ -385,7 +385,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     expect(
       handlerParams.setClient({
         socket,
-        connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+        connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
         connId: "ping-client",
         presenceKey: "ping-client",
         usesSharedGatewayAuth: false,
@@ -494,7 +494,7 @@ describe("attachGatewayWsConnectionHandler", () => {
       };
       handlerParams.setClient({
         socket,
-        connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+        connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
         connId: "closing-client",
         usesSharedGatewayAuth: false,
       });
@@ -532,7 +532,7 @@ describe("attachGatewayWsConnectionHandler", () => {
         };
         handlerParams.setClient({
           socket,
-          connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+          connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
           connId: "real-closing-client",
           usesSharedGatewayAuth: false,
         });
@@ -598,7 +598,7 @@ describe("attachGatewayWsConnectionHandler", () => {
         maxProtocol: 1,
         role: "node",
         client: {
-          id: "openclaw-macos",
+          id: "carapace-macos",
           version: "1.0.0",
           platform: "darwin",
           mode: "node",
@@ -674,7 +674,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     expect(
       handlerParams.setClient({
         socket,
-        connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+        connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
         connId: "failed-response-client",
         usesSharedGatewayAuth: false,
       }),
@@ -742,7 +742,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     async (closeCode) => {
       let startupPending = true;
       const { socket, logWsControl } = await connectTestWs({
-        headers: { "user-agent": "OpenClaw/2607000290 CFNetwork/3860 Darwin/25" },
+        headers: { "user-agent": "Carapace/2607000290 CFNetwork/3860 Darwin/25" },
         options: { isStartupPending: () => startupPending },
       });
 
@@ -764,7 +764,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     const logWsControl = createGatewayWsTestLogger();
     const { socket } = attachGatewayWsForTest({
       attach: attachGatewayWsConnectionHandler,
-      headers: { "user-agent": "OpenClaw/2607000290 CFNetwork/3860 Darwin/25" },
+      headers: { "user-agent": "Carapace/2607000290 CFNetwork/3860 Darwin/25" },
       options: { isStartupPending: () => true, logWsControl: logWsControl as never },
     });
 
@@ -809,7 +809,7 @@ describe("attachGatewayWsConnectionHandler", () => {
     expect(
       handlerParams.setClient({
         socket,
-        connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+        connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
         connId: "ready-client",
         usesSharedGatewayAuth: false,
       } as never),
@@ -860,7 +860,7 @@ describe("attachGatewayWsConnectionHandler", () => {
       expect(
         handlerParams.setClient({
           socket,
-          connect: { client: { id: "openclaw-control-ui", mode: "webchat" } },
+          connect: { client: { id: "carapace-control-ui", mode: "webchat" } },
           connId: "conn-authenticated-user",
           authenticatedUserId: "alice@example.com",
           usesSharedGatewayAuth: false,
@@ -935,7 +935,7 @@ describe("attachGatewayWsConnectionHandler", () => {
         socket,
         connect: {
           role: "node",
-          client: { id: "openclaw-macos", mode: "node" },
+          client: { id: "carapace-macos", mode: "node" },
           device: { id: "node-1" },
         },
         connId: handler.connId,
@@ -977,7 +977,7 @@ describe("attachGatewayWsConnectionHandler", () => {
         socket,
         connect: {
           role: "node",
-          client: { id: "openclaw-macos", mode: "node" },
+          client: { id: "carapace-macos", mode: "node" },
           device: { id: "node-1" },
         },
         connId: "conn-old",

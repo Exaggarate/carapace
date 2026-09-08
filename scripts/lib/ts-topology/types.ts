@@ -1,4 +1,4 @@
-// Types script supports OpenClaw repository automation.
+// Types script supports Carapace repository automation.
 import type ts from "typescript";
 
 export type UsageBucket = "internal" | "production" | "test";

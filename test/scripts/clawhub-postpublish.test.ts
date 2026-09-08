@@ -17,8 +17,8 @@ afterEach(() =>
 );
 const sha = "a".repeat(40);
 const ref = `release-publish/${sha.slice(0, 12)}-1`;
-const repository = "openclaw/openclaw";
-const parentWorkflow = ".github/workflows/openclaw-release-publish.yml";
+const repository = "carapace/carapace";
+const parentWorkflow = ".github/workflows/carapace-release-publish.yml";
 const childWorkflow = ".github/workflows/plugin-clawhub-release.yml";
 const digest = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 
@@ -59,9 +59,9 @@ function fixture(parentOnMain = false) {
   mkdirSync(artifactDir);
   writeFileSync(
     join(packageDir, "package.json"),
-    JSON.stringify({ name: "@openclaw/example", version: "2026.8.2" }),
+    JSON.stringify({ name: "@carapace/example", version: "2026.8.2" }),
   );
-  writeFileSync(join(packageDir, "openclaw.plugin.json"), JSON.stringify({ id: "example" }));
+  writeFileSync(join(packageDir, "carapace.plugin.json"), JSON.stringify({ id: "example" }));
   const tarballPath = join(artifactDir, "example.tgz");
   tar.create(
     {
@@ -73,12 +73,12 @@ function fixture(parentOnMain = false) {
       mtime: new Date("1985-10-26T08:15:00.000Z"),
       noPax: true,
     },
-    ["package/package.json", "package/openclaw.plugin.json"],
+    ["package/package.json", "package/carapace.plugin.json"],
   );
   const tarball = readFileSync(tarballPath);
   const entry = readPackedClawHubTransaction({
     artifactDir,
-    packageName: "@openclaw/example",
+    packageName: "@carapace/example",
     version: "2026.8.2",
     artifactName: "package-example",
   });
@@ -133,14 +133,14 @@ function fixture(parentOnMain = false) {
   };
   const receiptArtifact = artifact(
     1,
-    "openclaw-clawhub-parent-authorization-v2-10-1-20-1",
+    "carapace-clawhub-parent-authorization-v2-10-1-20-1",
     10,
     "authorization.json",
     Buffer.from(JSON.stringify(receipt)),
   );
   const transactionsArtifact = artifact(
     2,
-    "openclaw-clawhub-transactions-20-1",
+    "carapace-clawhub-transactions-20-1",
     20,
     "transactions.json",
     Buffer.from(JSON.stringify(transactions)),
@@ -161,7 +161,7 @@ function fixture(parentOnMain = false) {
   };
   const dispatchArtifact = artifact(
     4,
-    "openclaw-release-children-10-1",
+    "carapace-release-children-10-1",
     10,
     "dispatch.json",
     Buffer.from(JSON.stringify(dispatch)),
@@ -179,7 +179,7 @@ function fixture(parentOnMain = false) {
       { total_count: 2, artifacts: [transactionsArtifact, packageArtifact] },
     ],
     [
-      "actions/runs/20/artifacts?name=openclaw-clawhub-transactions-20-1&per_page=100",
+      "actions/runs/20/artifacts?name=carapace-clawhub-transactions-20-1&per_page=100",
       { total_count: 1, artifacts: [transactionsArtifact] },
     ],
     [

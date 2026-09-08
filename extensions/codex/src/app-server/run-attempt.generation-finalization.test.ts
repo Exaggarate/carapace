@@ -1,10 +1,10 @@
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { patchSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
+import { patchSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import {

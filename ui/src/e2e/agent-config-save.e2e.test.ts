@@ -1,6 +1,6 @@
 // Control UI E2E proves per-agent config writes use the canonical keyed shape.
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, expect, it } from "vitest";
 import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-artifacts.ts";
 import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
@@ -15,7 +15,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -56,7 +56,7 @@ suite.define(() => {
         ).toBe(200);
         await gateway.waitForRequest("agents.list");
         await gateway.waitForRequest("config.get");
-        const agentsPage = page.locator("openclaw-agents-page");
+        const agentsPage = page.locator("carapace-agents-page");
         const reload = agentsPage.getByRole("button", { name: "Reload Config" });
         await reload.waitFor();
         if (captureUiProof) {
@@ -65,7 +65,7 @@ suite.define(() => {
             fullPage: true,
             path: path.join(
               proofDir,
-              `agent-config-load-${process.env.OPENCLAW_UI_PROOF_LABEL ?? "failed"}.png`,
+              `agent-config-load-${process.env.CARAPACE_UI_PROOF_LABEL ?? "failed"}.png`,
             ),
           });
         }
@@ -242,7 +242,7 @@ suite.define(() => {
       const skill = (name: string, blockedByAgentFilter: boolean) => ({
         name,
         description: `${name} skill`,
-        source: "openclaw-managed",
+        source: "carapace-managed",
         bundled: false,
         filePath: `/tmp/skills/${name}/SKILL.md`,
         baseDir: `/tmp/skills/${name}`,

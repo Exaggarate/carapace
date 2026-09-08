@@ -4,7 +4,7 @@ import { baseEvent, createMetricsHarness, trusted, untrusted } from "./service.t
 
 // HTTP scrapes in this file exercise an authorized operator; the exporter's scope guard is
 // covered in service.http-scope.test.ts.
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: () => ({
     client: { connect: { scopes: ["operator.read"] } },
   }),
@@ -45,7 +45,7 @@ describe("diagnostics-prometheus runtime metrics", () => {
             metrics
               .render()
               .split("\n")
-              .find((line) => line.startsWith("openclaw_prometheus_series_dropped_total "))
+              .find((line) => line.startsWith("carapace_prometheus_series_dropped_total "))
               ?.split(" ")
               .at(-1),
           );
@@ -56,12 +56,12 @@ describe("diagnostics-prometheus runtime metrics", () => {
         expect(drops()).toBe(before + (preseed ? 0 : 3));
         const rendered = metrics.render();
         if (preseed) {
-          expect(rendered).toContain("openclaw_gateway_event_loop_delay_max_seconds_count 2");
-          expect(rendered).toContain("openclaw_gateway_event_loop_observed_seconds_total 2");
-          expect(rendered).toContain("openclaw_gc_duration_seconds_count 2");
+          expect(rendered).toContain("carapace_gateway_event_loop_delay_max_seconds_count 2");
+          expect(rendered).toContain("carapace_gateway_event_loop_observed_seconds_total 2");
+          expect(rendered).toContain("carapace_gc_duration_seconds_count 2");
         } else {
-          expect(rendered).not.toContain("openclaw_gateway_event_loop_");
-          expect(rendered).not.toContain("openclaw_gc_duration_seconds");
+          expect(rendered).not.toContain("carapace_gateway_event_loop_");
+          expect(rendered).not.toContain("carapace_gc_duration_seconds");
         }
       } finally {
         metrics.stop();
@@ -94,9 +94,9 @@ describe("diagnostics-prometheus runtime metrics", () => {
       );
       metrics.record({ ...baseEvent(), type: "diagnostic.gc", durationMs: 1_250 }, trusted);
       const first = await scrape();
-      expect(first).toContain("openclaw_gateway_event_loop_delay_max_seconds_count 1");
-      expect(first).toContain("openclaw_gateway_event_loop_observed_seconds_total 2");
-      expect(first).toContain("openclaw_gc_duration_seconds_count 1");
+      expect(first).toContain("carapace_gateway_event_loop_delay_max_seconds_count 1");
+      expect(first).toContain("carapace_gateway_event_loop_observed_seconds_total 2");
+      expect(first).toContain("carapace_gc_duration_seconds_count 1");
       expect(await scrape()).toBe(first);
       metrics.record(
         { ...baseEvent(), type: "gateway.event_loop.sample", intervalMs: 8_000, delayMaxMs: 20 },
@@ -118,15 +118,15 @@ describe("diagnostics-prometheus runtime metrics", () => {
       );
       const second = await scrape();
       for (const expected of [
-        'openclaw_gateway_event_loop_delay_max_seconds_bucket{le="1"} 1',
-        'openclaw_gateway_event_loop_delay_max_seconds_bucket{le="2.5"} 2',
-        "openclaw_gateway_event_loop_delay_max_seconds_count 2",
-        "openclaw_gateway_event_loop_delay_max_seconds_sum 1.27",
-        "openclaw_gateway_event_loop_observed_seconds_total 10",
-        'openclaw_gc_duration_seconds_bucket{le="1"} 1',
-        'openclaw_gc_duration_seconds_bucket{le="2.5"} 2',
-        "openclaw_gc_duration_seconds_count 2",
-        "openclaw_gc_duration_seconds_sum 1.27",
+        'carapace_gateway_event_loop_delay_max_seconds_bucket{le="1"} 1',
+        'carapace_gateway_event_loop_delay_max_seconds_bucket{le="2.5"} 2',
+        "carapace_gateway_event_loop_delay_max_seconds_count 2",
+        "carapace_gateway_event_loop_delay_max_seconds_sum 1.27",
+        "carapace_gateway_event_loop_observed_seconds_total 10",
+        'carapace_gc_duration_seconds_bucket{le="1"} 1',
+        'carapace_gc_duration_seconds_bucket{le="2.5"} 2',
+        "carapace_gc_duration_seconds_count 2",
+        "carapace_gc_duration_seconds_sum 1.27",
       ]) {
         expect(second).toContain(expected);
       }

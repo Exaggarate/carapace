@@ -1,4 +1,4 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import type {
   SetupInferenceActivationRejection,
   SetupInferenceFailureStatus,
@@ -15,7 +15,7 @@ import type {
   detectInferenceBackends,
   InferenceBackendKind,
 } from "../commands/onboard-inference.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { enablePluginInConfig } from "../plugins/enable.js";
 import type {
@@ -211,7 +211,7 @@ export type ActivateSetupInferenceParams = {
   /** Preparation effects are complete; the selected route is ready for its live test. */
   onPreparationComplete?: () => void;
   /** Observe the authored config held by the inference writer before it commits. */
-  onCommitStarted?: (sourceConfig: OpenClawConfig) => void;
+  onCommitStarted?: (sourceConfig: CarapaceConfig) => void;
   /** Gateway callers await application only after releasing the setup queue and lane. */
   onRuntimeApplication?: (
     application: ReturnType<
@@ -296,7 +296,7 @@ export type ActivateSetupInferenceDeps = {
   clearLoadInstalledPluginIndexInstallRecordsCache?: typeof import("../plugins/installed-plugin-index-records.js").clearLoadInstalledPluginIndexInstallRecordsCache;
   clearPluginMetadataLifecycleCaches?: typeof import("../plugins/plugin-metadata-lifecycle.js").clearPluginMetadataLifecycleCaches;
   invalidatePluginRuntimeDiscoveryAfterConfigMutation?: typeof import("../plugins/registry-refresh.js").invalidatePluginRuntimeDiscoveryAfterConfigMutation;
-  disposeOpenClawAgentDatabaseByPath?: typeof import("../state/openclaw-agent-db.js").disposeOpenClawAgentDatabaseByPath;
+  disposeCarapaceAgentDatabaseByPath?: typeof import("../state/carapace-agent-db.js").disposeCarapaceAgentDatabaseByPath;
   createTempDir?: () => Promise<string>;
   removeTempDir?: (dir: string) => Promise<void>;
   timeoutMs?: number;
@@ -337,7 +337,7 @@ export function invalidSetupConfigError(snapshot: {
 }): string {
   const issue = snapshot.issues?.[0];
   const detail = issue ? ` (${issue.path ? `${issue.path}: ` : ""}${issue.message})` : "";
-  return `OpenClaw config ${snapshot.path} is invalid${detail}. Fix it before running setup.`;
+  return `Carapace config ${snapshot.path} is invalid${detail}. Fix it before running setup.`;
 }
 
 export async function redactSetupInferenceError(

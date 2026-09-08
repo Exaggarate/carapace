@@ -1,7 +1,7 @@
 // Boundary proof: real silent dispatch, service persistence, Gateway handlers, and CLI rendering.
 // The agent-output input and RPC transport are test boundaries; no provider or channel send is claimed.
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Command } from "commander";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isRich, theme } from "../../../packages/terminal-core/src/theme.js";
@@ -19,7 +19,7 @@ import type { RespondFn } from "../../gateway/server-methods/types.js";
 import { getActiveGatewayRootWorkCount } from "../../process/gateway-work-admission.js";
 import { ExitError } from "../../runtime.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 
 const mocks = vi.hoisted(() => ({
   runtime: {
@@ -101,8 +101,8 @@ afterEach(() => {
 
 describe("cron CLI delivery suppression readback", () => {
   it("distinguishes intentional silence from failures across repeated runs of one stored job", async () => {
-    await withOpenClawTestState(
-      { layout: "home", prefix: "openclaw-cron-cli-suppression-" },
+    await withCarapaceTestState(
+      { layout: "home", prefix: "carapace-cron-cli-suppression-" },
       async (state) => {
         await state.writeConfig({});
         resetTaskRegistryForTests({ persist: false });

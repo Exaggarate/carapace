@@ -1,17 +1,17 @@
 import type { WebClient } from "@slack/web-api";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { WebMediaResult } from "openclaw/plugin-sdk/web-media";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { WebMediaResult } from "carapace/plugin-sdk/web-media";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { loadMedia, guardedFetch } = vi.hoisted(() => ({
   loadMedia: vi.fn<() => Promise<WebMediaResult>>(),
-  guardedFetch: vi.fn<typeof import("openclaw/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>(),
+  guardedFetch: vi.fn<typeof import("carapace/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard>(),
 }));
 
-vi.mock("openclaw/plugin-sdk/outbound-media", () => ({
+vi.mock("carapace/plugin-sdk/outbound-media", () => ({
   loadOutboundMediaFromUrl: loadMedia,
 }));
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: guardedFetch,
 }));
 

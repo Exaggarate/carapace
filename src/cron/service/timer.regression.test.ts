@@ -18,7 +18,7 @@ import {
   setHeartbeatWakeHandler,
   type HeartbeatRunResult,
 } from "../../infra/heartbeat-wake.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { CRON_TASK_KIND } from "../../tasks/cron-task-contract.js";
 import { cancelTaskById, listTaskRecords } from "../../tasks/task-registry.js";
 import {
@@ -1984,7 +1984,7 @@ describe("cron service timer regressions", () => {
         (await loadCronStore(store.storePath)).jobs.find((job) => job.id === catchupJob.id)?.state
           .runningAtMs,
       ).toBeUndefined();
-      const receipt = openOpenClawStateDatabase()
+      const receipt = openCarapaceStateDatabase()
         .db.prepare(
           "SELECT status FROM cron_run_receipts WHERE store_key = ? AND job_id = ? ORDER BY started_at_ms DESC LIMIT 1",
         )
@@ -2859,7 +2859,7 @@ describe("cron service timer regressions", () => {
 
       const order: string[] = [];
       const enqueueSystemEvent = vi.fn(() => {
-        const persisted = openOpenClawStateDatabase()
+        const persisted = openCarapaceStateDatabase()
           .db.prepare("SELECT enabled FROM cron_jobs WHERE store_key = ? AND job_id = ?")
           .get(cronStoreKey(store.storePath), malformed.id) as { enabled: number };
         expect(persisted.enabled).toBe(0);

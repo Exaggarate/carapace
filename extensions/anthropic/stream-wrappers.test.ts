@@ -1,9 +1,9 @@
-import { configureAiTransportHost, getAiTransportHost } from "@openclaw/ai";
-import { calculateUsageCost } from "@openclaw/llm-core";
+import { configureAiTransportHost, getAiTransportHost } from "@carapace/ai";
+import { calculateUsageCost } from "@carapace/llm-core";
 // Anthropic tests cover stream wrappers plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { resolveProviderEndpoint } from "openclaw/plugin-sdk/provider-model-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import { resolveProviderEndpoint } from "carapace/plugin-sdk/provider-model-shared";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   createAnthropicBetaHeadersWrapper,

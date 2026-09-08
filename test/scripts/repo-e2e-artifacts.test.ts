@@ -20,7 +20,7 @@ function fixture() {
   write(
     "extensions/demo/package.json",
     JSON.stringify({
-      openclaw: {
+      carapace: {
         assetScripts: { build: "fixture-build", buildOutputs: ["assets/.bundle.hash"] },
         build: { staticAssets: [{ source: "assets/runtime.js", output: "assets/runtime.js" }] },
       },
@@ -76,7 +76,7 @@ function requirement(root: string) {
 }
 
 describe("repo E2E artifact transfer", () => {
-  beforeEach(() => vi.stubEnv("OPENCLAW_BUILD_PRIVATE_QA", "1"));
+  beforeEach(() => vi.stubEnv("CARAPACE_BUILD_PRIVATE_QA", "1"));
   afterEach(() => vi.unstubAllEnvs());
 
   it.each(["full", "ciArtifacts"])(
@@ -130,7 +130,7 @@ describe("repo E2E artifact transfer", () => {
     let originalManifest: string;
 
     beforeAll(() => {
-      vi.stubEnv("OPENCLAW_BUILD_PRIVATE_QA", "1");
+      vi.stubEnv("CARAPACE_BUILD_PRIVATE_QA", "1");
       try {
         ({ root, artifact } = fixture());
         transferRepoE2eArtifacts("pack", artifact, "full", root);

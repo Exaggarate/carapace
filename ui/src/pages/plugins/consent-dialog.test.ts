@@ -54,11 +54,11 @@ describe("renderPluginConsentDialog", () => {
     {
       source: {
         kind: "clawhub",
-        packageName: "@openclaw/calendar-plus",
+        packageName: "@carapace/calendar-plus",
         integrity: "sha256-0123456789abcdefghijklmnop",
         integrityKind: "ssri",
       },
-      provenance: "ClawHub · @openclaw/calendar-plus",
+      provenance: "ClawHub · @carapace/calendar-plus",
       integrityLabel: "Integrity: sha256-0123456789abc…",
     },
     {
@@ -115,7 +115,7 @@ describe("renderPluginConsentDialog", () => {
         consent: {
           intent: {
             kind: "install",
-            request: { source: "clawhub", packageName: "@openclaw/calendar-plus" },
+            request: { source: "clawhub", packageName: "@carapace/calendar-plus" },
             installIdentity: "plugin:calendar-runtime",
           },
           pluginId: "calendar-runtime",
@@ -130,7 +130,7 @@ describe("renderPluginConsentDialog", () => {
       for (const value of [
         "Calendar Plus",
         "v2.0.0",
-        "@openclaw/calendar-plus",
+        "@carapace/calendar-plus",
         provenance,
         integrityLabel,
         "Review required",
@@ -253,7 +253,7 @@ describe("renderPluginConsentDialog", () => {
 
     expect(confirm?.disabled).toBe(false);
     expect(confirm?.getAttribute("aria-disabled")).toBe("true");
-    const tooltip = confirm?.closest("openclaw-tooltip") as
+    const tooltip = confirm?.closest("carapace-tooltip") as
       | (HTMLElement & { content?: string; updateComplete: Promise<unknown> })
       | null;
     await tooltip?.updateComplete;

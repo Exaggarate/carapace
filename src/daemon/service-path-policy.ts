@@ -1,6 +1,6 @@
 /** Classifies service PATH entries that should not be frozen into daemons. */
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { matchesVersionManagerPath } from "../shared/version-manager-path.js";
 
 // Service PATH policy keeps managed services away from user shell package-manager paths.

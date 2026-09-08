@@ -11,7 +11,7 @@ import {
   sendMinimalGatewayResponse,
   startMinimalRealGateway,
 } from "../../gateway/minimal-gateway.test-helpers.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { probeGatewayStatus } from "./probe.js";
 import type { DaemonStatus } from "./status.gather.js";
 
@@ -63,10 +63,10 @@ describe("Gateway reachability over real sockets", () => {
   it.each([{}, { token: "service-token" }, { password: "service-password" }])(
     "freezes resolved service auth %j without pairing writes",
     async (auth) => {
-      const state = await createOpenClawTestState({
+      const state = await createCarapaceTestState({
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "ambient-token",
-          OPENCLAW_GATEWAY_PASSWORD: "ambient-password",
+          CARAPACE_GATEWAY_TOKEN: "ambient-token",
+          CARAPACE_GATEWAY_PASSWORD: "ambient-password",
         },
       });
       cleanups.push(() => state.cleanup());
@@ -119,7 +119,7 @@ describe("Gateway reachability over real sockets", () => {
   it.each(["terminate", "policy-close", "silent", "upgrade-rejected"] as const)(
     "does not start a second service or accept a %s listener",
     async (mode) => {
-      const state = await createOpenClawTestState();
+      const state = await createCarapaceTestState();
       cleanups.push(() => state.cleanup());
       const wss = new WebSocketServer({
         host: "127.0.0.1",
@@ -155,7 +155,7 @@ describe("Gateway reachability over real sockets", () => {
   );
 
   it("preserves the accepted handshake when a subsequent status RPC fails", async () => {
-    const state = await createOpenClawTestState();
+    const state = await createCarapaceTestState();
     cleanups.push(() => state.cleanup());
     const wss = new WebSocketServer({ host: "127.0.0.1", port: 0 });
     cleanups.push(() => closeMinimalGatewayServer(wss));

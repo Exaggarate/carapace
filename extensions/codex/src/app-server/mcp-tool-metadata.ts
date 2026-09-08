@@ -1,7 +1,7 @@
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 /** Hosted app ownership is authoritative only on metadata supplied by Codex. */
 export function readCodexMcpToolConnectorId(tool: unknown): string | undefined {

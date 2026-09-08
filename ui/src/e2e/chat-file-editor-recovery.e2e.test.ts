@@ -91,7 +91,7 @@ suite.define(() => {
         );
         await page.evaluate(() => {
           window.editorInitMaySucceed = true;
-          const panel = document.querySelector("openclaw-chat-detail-panel") as HTMLElement & {
+          const panel = document.querySelector("carapace-chat-detail-panel") as HTMLElement & {
             requestUpdate(): void;
           };
           panel.requestUpdate();
@@ -243,7 +243,7 @@ suite.define(() => {
               "Synthetic other.txt content",
             );
           } else {
-            expect(await page.locator("openclaw-chat-detail-panel").count()).toBe(0);
+            expect(await page.locator("carapace-chat-detail-panel").count()).toBe(0);
           }
         },
       );

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ActionResult } from "@trycua/cua-driver";
-import { asOptionalRecord as record } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord as record } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   ClickButton,
   EscalationReason,
@@ -178,7 +178,7 @@ function createClient(binaryPath: string, socketPath: string, env: NodeJS.Proces
     }
   }
   // The normal Windows/Linux SDK route never loads the MCP runtime graph.
-  return import("openclaw/plugin-sdk/agent-harness-runtime")
+  return import("carapace/plugin-sdk/agent-harness-runtime")
     .then(({ mcpStdioRuntime }) => mcpStdioRuntime.load())
     .then(({ createMcpStdioClient }) =>
       createMcpStdioClient({
@@ -189,7 +189,7 @@ function createClient(binaryPath: string, socketPath: string, env: NodeJS.Proces
           CUA_DRIVER_RS_TELEMETRY_ENABLED: "false",
           CUA_DRIVER_RS_UPDATE_CHECK: "false",
         },
-        clientInfo: { name: "openclaw-cua-computer", version: "1" },
+        clientInfo: { name: "carapace-cua-computer", version: "1" },
         protocolVersion: MCP_PROTOCOL_VERSION,
         startupTimeoutMs: MCP_STARTUP_TIMEOUT_MS,
         maxPendingRequests: MAX_PENDING_REQUESTS,
@@ -251,7 +251,7 @@ function sessionState(value: CuaToolResult): import("@trycua/cua-driver").Sessio
 
 class McpCuaDriverSession implements CuaDriverSession {
   readonly generation = randomUUID();
-  private readonly publicSession = `openclaw-${randomUUID()}`;
+  private readonly publicSession = `carapace-${randomUUID()}`;
   private startPromise: Promise<void> | undefined;
   private started = false;
   private disposed = false;

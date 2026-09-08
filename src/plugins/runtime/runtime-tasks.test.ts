@@ -1,5 +1,5 @@
 // Runtime task tests cover plugin task runtime registration, invocation, and cleanup.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDetachedTaskLifecycleRuntime } from "../../tasks/detached-task-runtime.js";
 import { createAcpTaskBackingDetailForTest } from "../../tasks/task-backing-authority.test-support.js";

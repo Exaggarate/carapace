@@ -6,17 +6,17 @@ import {
   formatKeyboardShortcutParts,
   resolveKeyboardShortcutSections,
 } from "../lib/keyboard-shortcut-catalog.ts";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 import "./modal-dialog.ts";
 
-class KeyboardShortcutsDialog extends OpenClawLitElement {
+class KeyboardShortcutsDialog extends CarapaceLitElement {
   @property({ attribute: false }) sendShortcut: ChatSendShortcut = "enter";
   @state() private open = false;
 
   static override styles = css`
     :host {
       display: contents;
-      --openclaw-modal-width: 560px;
+      --carapace-modal-width: 560px;
     }
 
     .dialog {
@@ -130,7 +130,7 @@ class KeyboardShortcutsDialog extends OpenClawLitElement {
       this.open = false;
     };
     return html`
-      <openclaw-modal-dialog label=${t("shortcutsOverlay.title")} @modal-cancel=${close}>
+      <carapace-modal-dialog label=${t("shortcutsOverlay.title")} @modal-cancel=${close}>
         <div class="dialog">
           <header class="header">
             <h2>${t("shortcutsOverlay.title")}</h2>
@@ -166,11 +166,11 @@ class KeyboardShortcutsDialog extends OpenClawLitElement {
             )}
           </div>
         </div>
-      </openclaw-modal-dialog>
+      </carapace-modal-dialog>
     `;
   }
 }
 
-if (!customElements.get("openclaw-keyboard-shortcuts-dialog")) {
-  customElements.define("openclaw-keyboard-shortcuts-dialog", KeyboardShortcutsDialog);
+if (!customElements.get("carapace-keyboard-shortcuts-dialog")) {
+  customElements.define("carapace-keyboard-shortcuts-dialog", KeyboardShortcutsDialog);
 }

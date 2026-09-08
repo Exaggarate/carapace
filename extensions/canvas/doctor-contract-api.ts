@@ -1,8 +1,8 @@
 // Canvas Doctor keeps copy-time dependencies cold until legacy documents exist.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginDoctorStateMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
   listLegacyCanvasDocumentIds,
   migrateCanvasHostConfig,
@@ -16,17 +16,17 @@ export const legacyConfigRules = [
   {
     path: ["canvasHost"],
     message:
-      'canvasHost is retired; only plugins.entries.canvas.config.host.enabled remains. Run "openclaw doctor --fix".',
+      'canvasHost is retired; only plugins.entries.canvas.config.host.enabled remains. Run "carapace doctor --fix".',
   },
   ...(["root", "port", "liveReload"] as const).map((key) => ({
     path: [...RETIRED_CANVAS_HOST_CONFIG_PATH, key],
-    message: `${[...RETIRED_CANVAS_HOST_CONFIG_PATH, key].join(".")} is retired. Run "openclaw doctor --fix".`,
+    message: `${[...RETIRED_CANVAS_HOST_CONFIG_PATH, key].join(".")} is retired. Run "carapace doctor --fix".`,
   })),
 ];
 
 /** Removes retired file-host config while preserving the surviving enablement switch. */
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: CarapaceConfig }): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   return migrateCanvasHostConfig(cfg) ?? { config: cfg, changes: [] };
@@ -63,7 +63,7 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
       if (documentIds.length === 0) {
         return { changes, warnings };
       }
-      const { pathExists } = await import("openclaw/plugin-sdk/text-utility-runtime");
+      const { pathExists } = await import("carapace/plugin-sdk/text-utility-runtime");
 
       const coreDir = path.resolve(params.stateDir, "canvas", "documents");
       await fs.mkdir(coreDir, { recursive: true });
@@ -92,7 +92,7 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
           migrated += 1;
         } catch (error) {
           warnings.push(
-            `Skipped Canvas document ${documentId}; core target may already exist: ${String(error)}. Keep plugins.entries.canvas.config.host.root, resolve the copy or target conflict, then rerun "openclaw doctor --fix".`,
+            `Skipped Canvas document ${documentId}; core target may already exist: ${String(error)}. Keep plugins.entries.canvas.config.host.root, resolve the copy or target conflict, then rerun "carapace doctor --fix".`,
           );
         } finally {
           if (tempParent) {

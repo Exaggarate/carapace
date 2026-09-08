@@ -1,13 +1,13 @@
 import type { Bot, Context } from "grammy";
 import type {
   ChannelGroupPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramAccountConfig,
   TelegramDirectConfig,
   TelegramGroupConfig,
   TelegramTopicConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import type {
   TelegramMediaRef,
@@ -25,7 +25,7 @@ import type { TelegramTransport } from "./fetch.js";
 import type { TelegramReplyChainEntry } from "./message-cache.js";
 
 export type TelegramMessageProcessorTurnContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   telegramCfg: TelegramAccountConfig;
   onDispatchStart?: () => Promise<void> | void;
   spooledReplayAbortSignal?: AbortSignal;
@@ -71,7 +71,7 @@ type TelegramHandlerLogger = {
 };
 
 export type RegisterTelegramHandlerParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   ownerAgentId: string;
   bot: Bot;
@@ -81,17 +81,17 @@ export type RegisterTelegramHandlerParams = {
   runtime: RuntimeEnv;
   telegramCfg: TelegramAccountConfig;
   telegramDeps: TelegramBotDeps;
-  resolveGroupPolicy: (chatId: string | number, cfg: OpenClawConfig) => ChannelGroupPolicy;
+  resolveGroupPolicy: (chatId: string | number, cfg: CarapaceConfig) => ChannelGroupPolicy;
   resolveGroupActivation: (params: {
     agentId?: string;
     sessionKey: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   }) => boolean | undefined;
-  resolveGroupRequireMention: (chatId: string | number, cfg: OpenClawConfig) => boolean;
+  resolveGroupRequireMention: (chatId: string | number, cfg: CarapaceConfig) => boolean;
   resolveTelegramGroupConfig: (
     chatId: string | number,
     messageThreadId: number | undefined,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ) => TelegramResolvedGroupConfig;
   shouldSkipUpdate: (ctx: TelegramUpdateKeyContext) => boolean;
   processMessage: ProcessTelegramMessage;

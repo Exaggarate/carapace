@@ -17,10 +17,10 @@ export const buildInfo = {
   builtAt: "2026-08-28T00:00:00Z",
   buildId: "fixture-build",
 };
-const authority = "Developer ID Application: OpenClaw Foundation (FWJYW4S8P8)";
+const authority = "Developer ID Application: Carapace Foundation (FWJYW4S8P8)";
 const entitlements = "<plist><dict/></plist>\n";
 export const workerRoot = "Contents/Resources/node-worker";
-export const workerDist = "lib/node_modules/openclaw/dist";
+export const workerDist = "lib/node_modules/carapace/dist";
 export const addon = "lib/node_modules/native [fixture]/addon.node";
 // Universal file output repeats the path; names must not choose the binary format.
 export const library = "lib/node_modules/native [fixture]/library ERROR COFF.dylib";
@@ -37,11 +37,11 @@ export async function write(file: string, contents: string | Buffer, mode = 0o64
 }
 
 export async function artifactFixture(mac: MacScriptFixture) {
-  const root = mac.createTempDir("openclaw-elevation-native-");
+  const root = mac.createTempDir("carapace-elevation-native-");
   const binaries = await compiledMacNativeFixtures(root, mac);
   const home = path.join(root, "home [portable]");
   const payload = path.join(root, "payload [archive]");
-  const app = path.join(payload, "OpenClaw.app");
+  const app = path.join(payload, "Carapace.app");
   const bin = path.join(home, "bin");
   const installer = path.join(home, "elevation-installer.sh");
   const archive = path.join(home, "elevation.zip");
@@ -57,17 +57,17 @@ export async function artifactFixture(mac: MacScriptFixture) {
   await write(
     app + "/Contents/Info.plist",
     `<?xml version="1.0"?><plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>ai.openclaw.mac</string>
+<key>CFBundleIdentifier</key><string>ai.carapace.mac</string>
 <key>CFBundleShortVersionString</key><string>${buildInfo.version}</string>
 <key>CFBundleVersion</key><string>420</string>
-<key>OpenClawGitCommit</key><string>${sourceCommit}</string>
+<key>CarapaceGitCommit</key><string>${sourceCommit}</string>
 <key>PeekabooSourceCommit</key><string>${peekabooCommit}</string>
-<key>OpenClawBuildTimestamp</key><string>${buildInfo.builtAt}</string>
-<key>OpenClawWorkerBuildID</key><string>${buildInfo.buildId}</string>
+<key>CarapaceBuildTimestamp</key><string>${buildInfo.builtAt}</string>
+<key>CarapaceWorkerBuildID</key><string>${buildInfo.buildId}</string>
 </dict></plist>`,
   );
-  await write(app + "/Contents/MacOS/OpenClaw", binaries.universal, 0o755);
-  await write(app + "/Contents/MacOS/openclaw-mlx-tts", binaries.universal, 0o755);
+  await write(app + "/Contents/MacOS/Carapace", binaries.universal, 0o755);
+  await write(app + "/Contents/MacOS/carapace-mlx-tts", binaries.universal, 0o755);
   await write(
     app + "/Contents/Frameworks/shared [fixture].dylib",
     binaries.universalLibrary,
@@ -87,7 +87,7 @@ export async function artifactFixture(mac: MacScriptFixture) {
       path.join(worker, "lib/native.a"),
       binaries[arch === "arm64" ? "armArchive" : "intelArchive"],
     );
-    await symlink("../lib/node_modules/openclaw/dist/entry.js", path.join(worker, "bin/openclaw"));
+    await symlink("../lib/node_modules/carapace/dist/entry.js", path.join(worker, "bin/carapace"));
     await symlink("native [fixture]", path.join(worker, "lib/node_modules/native-alias"));
   }
   const jq = await mac.run("/bin/sh", ["-c", "command -v jq"], {
@@ -106,10 +106,10 @@ deny() { printf '%s\\n' "$*" >>"$TEST_FORBIDDEN"; exit 97; }
 shasum() {
   [[ "$1 $2" == '-a 256' && "$#" -le 3 ]] || deny unexpected-shasum
   shift 2
-  if [[ -n "\${WORK_ROOT:-}" && "\${1:-}" == "$WORK_ROOT/OpenClaw.app/Contents/MacOS/OpenClaw" ]]; then record candidate-helper-hash; fi
+  if [[ -n "\${WORK_ROOT:-}" && "\${1:-}" == "$WORK_ROOT/Carapace.app/Contents/MacOS/Carapace" ]]; then record candidate-helper-hash; fi
   /usr/bin/openssl dgst -sha256 -r "$@"
 }
-for tool in launchctl open kill pkill killall pgrep lsof defaults diskutil sqlite3 security osascript openclaw node python python3 curl ssh; do
+for tool in launchctl open kill pkill killall pgrep lsof defaults diskutil sqlite3 security osascript carapace node python python3 curl ssh; do
   eval "$tool() { deny $tool; }"
 done
 codesign() (
@@ -119,7 +119,7 @@ codesign() (
     if [[ "$TEST_FAULT" == apple-events && "$target" == *'/arm64/${addon}' ||
           "$TEST_FAULT" == bundle-events && "$target" == *'/fixture.xpc' ]]; then
       printf '%s\\n' '<plist><dict><key>com.apple.security.automation.apple-events</key><true/></dict></plist>'
-    elif [[ "$TEST_FAULT" == mlx && "$target" == */openclaw-mlx-tts ]]; then
+    elif [[ "$TEST_FAULT" == mlx && "$target" == */carapace-mlx-tts ]]; then
       printf '%s\\n' '<plist><dict><key>com.apple.security.cs.allow-jit</key><true/></dict></plist>'
     else
       printf '%s\\n' '${entitlements.trim()}'
@@ -212,7 +212,7 @@ plutil() {
     "launchctl",
     "open",
     "security",
-    "openclaw",
+    "carapace",
     "node",
     "python3",
     "curl",
@@ -246,14 +246,14 @@ plutil() {
       `verify must not invoke apps, services, secrets, or live tools: ${existsSync(forbidden) ? readFileSync(forbidden, "utf8") : ""}`,
     ).toBe(false);
     expect(result.error, `file classifier invocations: ${fileCallCount()}`).toBeUndefined();
-    expect(readdirSync(home).filter((name) => name.startsWith("openclaw-elevation-code."))).toEqual(
+    expect(readdirSync(home).filter((name) => name.startsWith("carapace-elevation-code."))).toEqual(
       [],
     );
     return result;
   };
   const receipt = {
     schemaVersion: 1,
-    kind: "openclaw-elevation-artifact",
+    kind: "carapace-elevation-artifact",
     archive: path.basename(archive),
     archiveChecksum: `${path.basename(archive)}.sha256`,
     archiveSha256: "",
@@ -270,13 +270,13 @@ plutil() {
     architectures: {
       main: await runMacFixtureTool(
         "/usr/bin/lipo",
-        ["-archs", app + "/Contents/MacOS/OpenClaw"],
+        ["-archs", app + "/Contents/MacOS/Carapace"],
         root,
         mac,
       ),
       helper: await runMacFixtureTool(
         "/usr/bin/lipo",
-        ["-archs", app + "/Contents/MacOS/openclaw-mlx-tts"],
+        ["-archs", app + "/Contents/MacOS/carapace-mlx-tts"],
         root,
         mac,
       ),
@@ -382,7 +382,7 @@ printf 'Staged copy verified: %s\\n' "$STAGED_INSTALL_APP_PATH"
         `set -euo pipefail
 ${functions.join("\n")}
 APP_PATH="$1"
-EXPECTED_BUNDLE_ID=ai.openclaw.mac
+EXPECTED_BUNDLE_ID=ai.carapace.mac
 EXPECTED_TEAM_ID=FWJYW4S8P8
 EXPECTED_AUTHORITY='${authority}'
 durable_path_identity() { [[ "$1" == "$APP_PATH" ]] || deny unexpected-identity; printf 'fixture-identity'; }

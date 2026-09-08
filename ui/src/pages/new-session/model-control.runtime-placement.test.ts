@@ -21,7 +21,7 @@ describe("new-session model runtime placement", () => {
     {
       name: "accepts a worker-turn runtime on a worker-turn profile",
       runtime: {
-        id: "openclaw",
+        id: "carapace",
         cloudPlacementSupported: true,
         cloudPlacementExecutionMode: "worker-turn" as const,
         source: "model" as const,
@@ -32,7 +32,7 @@ describe("new-session model runtime placement", () => {
     {
       name: "accepts a worker-turn runtime on a profile supporting both execution modes",
       runtime: {
-        id: "openclaw",
+        id: "carapace",
         cloudPlacementSupported: true,
         cloudPlacementExecutionMode: "worker-turn" as const,
         source: "model" as const,
@@ -114,7 +114,7 @@ describe("new-session model runtime placement", () => {
     },
     {
       name: "allows embedded execution",
-      runtimeId: "openclaw",
+      runtimeId: "carapace",
       devicePlacement: { requiredNodeCommands: [], consumesWorkerSlot: true },
     },
     { name: "rejects a cloud-only runtime", runtimeId: "cloud-only" },

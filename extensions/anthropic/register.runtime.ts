@@ -2,19 +2,19 @@
  * Anthropic provider runtime registration. It owns API-key/setup-token/Claude
  * CLI auth, dynamic model normalization, usage auth, media, and stream wrappers.
  */
-import { createLazyRuntimeMethod, createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeMethod, createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import type {
-  OpenClawPluginApi,
+  CarapacePluginApi,
   ProviderAuthContext,
   ProviderResolveDynamicModelContext,
   ProviderNormalizeResolvedModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   buildManifestModelProviderConfig,
   type ProviderCatalogResult,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
+} from "carapace/plugin-sdk/provider-catalog-shared";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
 import {
   buildProviderReplayFamilyHooks,
   cloneFirstTemplateModel,
@@ -31,8 +31,8 @@ import {
   supportsClaudeAdaptiveThinking,
   supportsClaudeNativeMaxEffort,
   supportsClaudeNativeXhighEffort,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { buildAnthropicCliBackend } from "./cli-backend.js";
 import {
   CLAUDE_CLI_CANONICAL_DEFAULT_MODEL_REF,
@@ -51,7 +51,7 @@ import {
 } from "./config-defaults.js";
 import { acceptsAnthropicLiveModelContract } from "./live-model-contract-gate.js";
 import { anthropicMediaUnderstandingProvider } from "./media-understanding-provider.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import anthropicProviderDiscovery from "./provider-discovery.js";
 import {
   createClaudeSessionNodeInvokePolicies,
@@ -64,7 +64,7 @@ import { fetchAnthropicUsage, resolveAnthropicUsageAuth } from "./usage.js";
 const loadAuthRuntime = createLazyRuntimeModule(() => import("./auth.runtime.js"));
 // Static registration must not initialize live catalog transport and policy.
 const buildOpenAICompatibleProviderCatalog = createLazyRuntimeMethod(
-  createLazyRuntimeModule(() => import("openclaw/plugin-sdk/provider-catalog-live-runtime")),
+  createLazyRuntimeModule(() => import("carapace/plugin-sdk/provider-catalog-live-runtime")),
   (runtime) => runtime.buildOpenAICompatibleProviderCatalog,
 );
 
@@ -255,7 +255,7 @@ function resolveAnthropicModelGeneration(
 
 /**
  * Claude ids from a generation newer than anything this plugin encodes. Request
- * shaping is selected by version predicates in `@openclaw/llm-core`, so such an
+ * shaping is selected by version predicates in `@carapace/llm-core`, so such an
  * id would otherwise fall through to pre-4.6 shaping — manual `budget_tokens`
  * plus caller sampling params — which current models reject outright.
  */
@@ -886,7 +886,7 @@ export function buildAnthropicProvider(): ProviderPlugin {
 }
 
 /** Register Anthropic provider, Claude CLI backend, and media understanding provider. */
-export function registerAnthropicPlugin(api: OpenClawPluginApi): void {
+export function registerAnthropicPlugin(api: CarapacePluginApi): void {
   let supportsDynamicSystemPromptSections = false;
   // Catalog discovery must not materialize the runtime for a CLI-only capability probe.
   // First CLI executions share and await it before resolving immutable process argv.

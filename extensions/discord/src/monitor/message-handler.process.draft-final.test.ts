@@ -758,7 +758,7 @@ describe("processDiscordMessage draft streaming final delivery", () => {
         messages: {
           groupChat: { visibleReplies: "message_tool" },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/carapace-discord-process-test-sessions.json" },
       },
       route: BASE_CHANNEL_ROUTE,
     });

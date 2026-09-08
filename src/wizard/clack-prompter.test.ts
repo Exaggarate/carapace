@@ -395,7 +395,7 @@ describe("createClackPrompter", () => {
     await expect(
       prompter.text({
         message: "Workspace",
-        initialValue: "~/.openclaw/workspace",
+        initialValue: "~/.carapace/workspace",
         placeholder: "path",
         navigation: { canGoBack: true, canGoForward: true },
       }),
@@ -405,7 +405,7 @@ describe("createClackPrompter", () => {
     expect(navigationPromptMocks.textWithNavigationFooter).toHaveBeenCalledWith(
       expect.objectContaining({
         message: expect.stringContaining("Workspace"),
-        initialValue: "~/.openclaw/workspace",
+        initialValue: "~/.carapace/workspace",
         placeholder: "path",
         navigation: { canGoBack: true, canGoForward: true },
         signal: expect.any(AbortSignal),

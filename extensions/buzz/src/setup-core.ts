@@ -2,9 +2,9 @@ import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { patchScopedAccountConfig } from "openclaw/plugin-sdk/setup";
+} from "carapace/plugin-sdk/channel-setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { patchScopedAccountConfig } from "carapace/plugin-sdk/setup";
 import { decodeBuzzPrivateKey, resolveBuzzAccountConfig, resolveBuzzPublicKey } from "./types.js";
 
 type BuzzSetupInput = ChannelSetupInput & {
@@ -22,11 +22,11 @@ function validRelayUrl(value: string | undefined): boolean {
 }
 
 export function patchBuzzAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   patch: Record<string, unknown>;
   clearFields?: readonly string[];
-}): OpenClawConfig {
+}): CarapaceConfig {
   const { accountId, allowEnv } = resolveBuzzAccountConfig(params);
   return patchScopedAccountConfig({
     ...params,
@@ -38,7 +38,7 @@ export function patchBuzzAccountConfig(params: {
   });
 }
 
-function resolveComparableCurrentKey(cfg: OpenClawConfig, accountId: string): string | undefined {
+function resolveComparableCurrentKey(cfg: CarapaceConfig, accountId: string): string | undefined {
   const { config, allowEnv } = resolveBuzzAccountConfig({ cfg, accountId });
   const configured = config.privateKey;
   if (configured !== undefined) {

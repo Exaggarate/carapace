@@ -18,12 +18,12 @@ import {
 } from "../../sessions/session-lifecycle-admission.js";
 import { deletePersonalGitHubSessionReceipts } from "../../state/github-personal-publication-lifecycle.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import { createSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import { resolveSessionStorePathCore } from "./paths.js";
 import { readSessionEntryRow } from "./session-accessor.sqlite-entry-read.js";
@@ -139,7 +139,7 @@ export async function withSqliteSessionDeletions<T>(
   targets.forEach(assertTargetIdle);
   const prepare = captureAgentHarnessSessionDeletions();
   const repositories = createSessionRepositoryWorkspaceStore({
-    database: openOpenClawStateDatabase({ env: scope.env }),
+    database: openCarapaceStateDatabase({ env: scope.env }),
   });
   const repositoryWorkspaces = targets.flatMap((target) => {
     const workspace = repositories.find(target);
@@ -175,7 +175,7 @@ export async function withSqliteSessionDeletions<T>(
           for (const workspace of repositoryWorkspaces) {
             const currentEntry = () =>
               readSessionEntryRow(
-                openOpenClawAgentDatabase(toDatabaseOptions(scope)),
+                openCarapaceAgentDatabase(toDatabaseOptions(scope)),
                 workspace.sessionKey,
               );
             if (currentEntry()) {
@@ -240,21 +240,21 @@ export function commitSqliteSessionDeletion(sessionKey: string, entry: SessionEn
 
 /** Roll back companion state only if SQLite failed before COMMIT, never after publication. */
 export function runSqliteSessionDeletionTransaction<T>(
-  operation: (database: OpenClawAgentDatabase) => T,
-  options: Parameters<typeof runOpenClawAgentWriteTransaction>[1],
-  transactionOptions?: Parameters<typeof runOpenClawAgentWriteTransaction>[2],
+  operation: (database: CarapaceAgentDatabase) => T,
+  options: Parameters<typeof runCarapaceAgentWriteTransaction>[1],
+  transactionOptions?: Parameters<typeof runCarapaceAgentWriteTransaction>[2],
 ): T {
   if (!deletions.getStore() || transactionMutations.getStore()) {
-    return runOpenClawAgentWriteTransaction(operation, options, transactionOptions);
+    return runCarapaceAgentWriteTransaction(operation, options, transactionOptions);
   }
   const rollback: AgentHarnessSessionDeletionMutation[] = [];
   const initializations = new Set<SessionInitialization>();
   let committed = false;
   try {
     return transactionMutations.run({ rollback, initializations }, () =>
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => {
-          deferOpenClawAgentPostCommitPublication(database, () => {
+          deferCarapaceAgentPostCommitPublication(database, () => {
             committed = true;
             initializations.forEach(commitSessionInitializationRollback);
           });

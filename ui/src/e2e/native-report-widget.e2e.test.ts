@@ -140,7 +140,7 @@ suite.define(() => {
 
         const dashboardUrl = controlUiSessionUrl(suite.server.baseUrl, sessionKey, "dashboard");
         await page.goto(dashboardUrl);
-        const report = page.locator("openclaw-report-widget");
+        const report = page.locator("carapace-report-widget");
         await report.waitFor();
         await expect.poll(() => report.textContent()).toContain("A welcoming week");
         expect(await report.getByRole("article", { name: "Weekly community report" }).count()).toBe(
@@ -183,7 +183,7 @@ suite.define(() => {
         expect(
           await originalReport.evaluate(
             (element) =>
-              element.isConnected && element === document.querySelector("openclaw-report-widget"),
+              element.isConnected && element === document.querySelector("carapace-report-widget"),
           ),
         ).toBe(true);
         await originalReport.dispose();

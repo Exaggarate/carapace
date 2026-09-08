@@ -4,7 +4,7 @@ import net from "node:net";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 import type { QaSuiteSummaryJson } from "./suite-summary.js";
 import { runQaWindowsTaskkill } from "./windows-system-tools.js";
@@ -29,19 +29,19 @@ function buildSuiteProcessEnv(outputDir: string) {
     ...process.env,
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: path.join(home, ".openclaw"),
-    OPENCLAW_CONFIG_PATH: path.join(home, ".openclaw", "openclaw.json"),
-    OPENCLAW_QA_SUITE_PROGRESS: "1",
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: path.join(home, ".carapace"),
+    CARAPACE_CONFIG_PATH: path.join(home, ".carapace", "carapace.json"),
+    CARAPACE_QA_SUITE_PROGRESS: "1",
   };
   delete env.VITEST;
   delete env.VITEST_POOL_ID;
   delete env.VITEST_WORKER_ID;
-  delete env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH;
-  delete env.OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER;
+  delete env.CARAPACE_VITEST_FS_MODULE_CACHE_PATH;
+  delete env.CARAPACE_VITEST_FS_MODULE_CACHE_WRITER;
   delete env.NODE_COMPILE_CACHE;
   delete env.NODE_DISABLE_COMPILE_CACHE;
-  delete env.OPENCLAW_NODE_COMPILE_CACHE_WRITER;
+  delete env.CARAPACE_NODE_COMPILE_CACHE_WRITER;
   if (env.NODE_ENV === "test") {
     delete env.NODE_ENV;
   }

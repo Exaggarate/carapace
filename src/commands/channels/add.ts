@@ -1,6 +1,6 @@
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
-// Implements guided and non-interactive `openclaw channels add` account setup.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
+// Implements guided and non-interactive `carapace channels add` account setup.
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import {
   applyPreparedChannelAccountConfiguration,
   type ChannelAccountMutationPlugin,
@@ -17,7 +17,7 @@ import {
   formatUnsupportedChannelActionMessage,
 } from "../../cli/error-format.js";
 import { isTerminalInteractive } from "../../cli/terminal-interactivity.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { commitConfigWithPendingPluginInstalls } from "../../plugins/install-record-commit.js";
 import { refreshPluginRegistryAfterConfigMutation } from "../../plugins/registry-refresh.js";
 import { defaultRuntime, type RuntimeEnv } from "../../runtime.js";
@@ -45,7 +45,7 @@ const CHANNEL_ADD_CONTROL_OPTION_KEYS = new Set(["agent", "channel", "account"])
 
 async function resolveCatalogChannelEntry(
   raw: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   resolveWorkspaceDir: () => string,
 ) {
   const trimmed = normalizeOptionalLowercaseString(raw);
@@ -155,7 +155,7 @@ async function channelsAddCommandImpl(
     }
     if (!isTerminalInteractive()) {
       runtime.error(
-        "Interactive channel setup requires a TTY. Use `openclaw channels add --channel <id> --use-env` or pass the channel's credential flags for non-interactive setup.",
+        "Interactive channel setup requires a TTY. Use `carapace channels add --channel <id> --use-env` or pass the channel's credential flags for non-interactive setup.",
       );
       runtime.exit(1);
       return;
@@ -248,7 +248,7 @@ async function channelsAddCommandImpl(
 
   if (!channel) {
     const hint = catalogEntry
-      ? `Plugin ${catalogEntry.meta.label} could not be loaded after install. Run openclaw doctor --fix, then retry openclaw channels add.`
+      ? `Plugin ${catalogEntry.meta.label} could not be loaded after install. Run carapace doctor --fix, then retry carapace channels add.`
       : formatUnknownChannelMessage({ channel: rawChannel });
     runtime.error(hint);
     runtime.exit(1);
@@ -261,7 +261,7 @@ async function channelsAddCommandImpl(
       `${formatUnsupportedChannelActionMessage({
         channel,
         action: "non-interactive add",
-      })} Run ${formatCliCommand("openclaw channels add")} with no flags for guided setup.`,
+      })} Run ${formatCliCommand("carapace channels add")} with no flags for guided setup.`,
     );
     runtime.exit(1);
     return;
@@ -283,7 +283,7 @@ async function channelsAddCommandImpl(
         ? `${formatUnsupportedChannelActionMessage({
             channel,
             action: "non-interactive add",
-          })} Run ${formatCliCommand("openclaw channels add")} with no flags for guided setup.`
+          })} Run ${formatCliCommand("carapace channels add")} with no flags for guided setup.`
         : prepared.error.message,
     );
     runtime.exit(1);

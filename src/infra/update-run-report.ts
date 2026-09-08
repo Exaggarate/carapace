@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { UPDATE_RUN_PHASES } from "../../packages/gateway-protocol/src/update-run-vocabulary.js";
 import { formatDurationPrecise } from "./format-time/format-duration.ts";
 import type { RestartSentinelPayload } from "./restart-sentinel-store.js";
@@ -39,7 +39,7 @@ export function renderUpdateRunNotice(
   const target = run.after.version ?? run.target.version;
   const to = target ? bounded(target, 120) : undefined;
   if (kind === "ack") {
-    return `⬆️ Updating OpenClaw ${from ?? "the current version"} → ${to ?? "the latest release"}. The gateway stays available while the update is validated; you'll get a message here when it finishes.`;
+    return `⬆️ Updating Carapace ${from ?? "the current version"} → ${to ?? "the latest release"}. The gateway stays available while the update is validated; you'll get a message here when it finishes.`;
   }
   if (kind === "activating" || kind === "parking") {
     return `⏳ Restarting the gateway now${from && to ? ` (v${from} → v${to})` : ""}…`;
@@ -56,7 +56,7 @@ function bounded(text: string, limit: number): string {
 
 function recoveryHints(run: ReportInput, nextAction?: string): string[] {
   if (run.status === "running") {
-    return ["Check progress with openclaw update status."];
+    return ["Check progress with carapace update status."];
   }
   if (run.status !== "failed") {
     return [];
@@ -84,7 +84,7 @@ function recoveryHints(run: ReportInput, nextAction?: string): string[] {
     );
   }
   if (!nextAction) {
-    hints.push("Run openclaw triage to diagnose and repair the failed update.");
+    hints.push("Run carapace triage to diagnose and repair the failed update.");
   }
   return hints;
 }
@@ -104,20 +104,20 @@ export function renderUpdateRunReport(
   switch (run.status) {
     case "succeeded":
       headline = after
-        ? `✅ OpenClaw updated to ${after}${before ? ` (from ${before})` : ""}.`
-        : "✅ OpenClaw updated.";
+        ? `✅ Carapace updated to ${after}${before ? ` (from ${before})` : ""}.`
+        : "✅ Carapace updated.";
       break;
     case "failed":
-      headline = `⚠️ OpenClaw update failed: ${reason}.${running ? ` The gateway is running ${running}.` : ""}`;
+      headline = `⚠️ Carapace update failed: ${reason}.${running ? ` The gateway is running ${running}.` : ""}`;
       break;
     case "skipped":
-      headline = `ℹ️ OpenClaw update skipped: ${reason}.`;
+      headline = `ℹ️ Carapace update skipped: ${reason}.`;
       break;
     case "rolled-back":
-      headline = `↩️ OpenClaw update rolled back to ${after ?? running ?? before ?? "the previous version"}: ${reason}.`;
+      headline = `↩️ Carapace update rolled back to ${after ?? running ?? before ?? "the previous version"}: ${reason}.`;
       break;
     case "running":
-      headline = `⬆️ OpenClaw update in progress: ${run.phase}.`;
+      headline = `⬆️ Carapace update in progress: ${run.phase}.`;
       break;
   }
   headline = bounded(headline, 500);
@@ -177,11 +177,11 @@ export function renderUpdateRunReport(
     run.status === "failed" && repairStopReason === "requester-revoked"
       ? nextAction
         ? "Repair stopped because the chat requester is no longer a command owner. Further recovery requires a current command owner."
-        : "Repair stopped because the chat requester is no longer a command owner. A current command owner must start a new update, or the operator can run openclaw triage locally."
+        : "Repair stopped because the chat requester is no longer a command owner. A current command owner must start a new update, or the operator can run carapace triage locally."
       : run.status === "failed" && repairStopReason === "repair-requires-config-change"
         ? nextAction
           ? "Rehearsal config changes were not promoted. Review the named top-level keys before continuing recovery."
-          : "Rehearsal config changes were not promoted. Review the named top-level keys, then run openclaw doctor --fix under your own authority, or openclaw triage."
+          : "Rehearsal config changes were not promoted. Review the named top-level keys, then run carapace doctor --fix under your own authority, or carapace triage."
         : undefined;
   const hints =
     run.status === "running"

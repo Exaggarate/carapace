@@ -1,6 +1,6 @@
 // Skill discovery status helpers summarize installed, workspace, and bundled skills.
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { evaluateEntryRequirementsForCurrentPlatform } from "../../shared/entry-status.js";
 import { CONFIG_DIR } from "../../utils.js";
@@ -172,7 +172,7 @@ function normalizeInstallOptions(
 }
 
 type BuildSkillStatusContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   prefs: SkillsInstallPreferences;
   eligibility?: SkillEligibilityContext;
   allowBundled: ReadonlySet<string> | undefined;
@@ -224,7 +224,7 @@ function buildSkillStatus(
   const userInvocable = indexed.userInvocable;
 
   // Source ownership survives canonicalization of symlinked managed installs.
-  const isGlobalManagedSkill = !bundled && skillSource === "openclaw-managed";
+  const isGlobalManagedSkill = !bundled && skillSource === "carapace-managed";
   const clawhub =
     workspaceDir && !bundled
       ? resolveClawHubSkillStatusLinkSync({
@@ -271,7 +271,7 @@ function buildSkillStatus(
 export function buildWorkspaceSkillStatus(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     managedSkillsDir?: string;
     entries?: SkillEntry[];
     eligibility?: SkillEligibilityContext;

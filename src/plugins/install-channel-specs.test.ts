@@ -76,16 +76,16 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
   ])(
     "preserves the $channel release-cohort contract for $coreVersion",
     async ({ channel, versionBoundToCore, coreVersion, expectedVersion }) => {
-      for (const spec of ["@openclaw/codex", "@openclaw/codex@latest"]) {
+      for (const spec of ["@carapace/codex", "@carapace/codex@latest"]) {
         expect(
           await resolveNpmInstallSpecsForUpdateChannel({
             spec,
             updateChannel: channel,
-            officialPackageName: "@openclaw/codex",
+            officialPackageName: "@carapace/codex",
             coreVersion,
             versionBoundToCore,
           }),
-        ).toEqual({ installSpec: `@openclaw/codex@${expectedVersion}`, recordSpec: spec });
+        ).toEqual({ installSpec: `@carapace/codex@${expectedVersion}`, recordSpec: spec });
       }
       expect(resolveNpmSpecMetadata).not.toHaveBeenCalled();
     },
@@ -94,12 +94,12 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
   it.each(["2026.6.33", "next", "^2026.6.0"])(
     "preserves an explicit selector %s on beta",
     async (selector) => {
-      const spec = `@openclaw/codex@${selector}`;
+      const spec = `@carapace/codex@${selector}`;
       expect(
         await resolveNpmInstallSpecsForUpdateChannel({
           spec,
           updateChannel: "beta",
-          officialPackageName: "@openclaw/codex",
+          officialPackageName: "@carapace/codex",
           coreVersion: "2026.8.1-beta.3",
         }),
       ).toEqual({ installSpec: spec, recordSpec: spec });
@@ -110,12 +110,12 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
   it.each(["stable", "dev", "extended-stable"] as const)(
     "preserves explicit beta on %s",
     async (updateChannel) => {
-      const spec = "@openclaw/codex@beta";
+      const spec = "@carapace/codex@beta";
       expect(
         await resolveNpmInstallSpecsForUpdateChannel({
           spec,
           updateChannel,
-          officialPackageName: "@openclaw/codex",
+          officialPackageName: "@carapace/codex",
           coreVersion: "2026.8.1-beta.3",
         }),
       ).toEqual({ installSpec: spec, recordSpec: spec });
@@ -127,7 +127,7 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
       await resolveNpmInstallSpecsForUpdateChannel({
         spec: "@acme/discord",
         updateChannel: "extended-stable",
-        officialPackageName: "@openclaw/discord",
+        officialPackageName: "@carapace/discord",
         coreVersion: "2026.7.33",
       }),
     ).toEqual({ installSpec: "@acme/discord", recordSpec: "@acme/discord" });
@@ -136,9 +136,9 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
   it("fails closed without an authoritative extended-stable core version", async () => {
     await expect(
       resolveNpmInstallSpecsForUpdateChannel({
-        spec: "@openclaw/codex",
+        spec: "@carapace/codex",
         updateChannel: "extended-stable",
-        officialPackageName: "@openclaw/codex",
+        officialPackageName: "@carapace/codex",
       }),
     ).rejects.toThrow("requires an exact core version");
   });
@@ -164,29 +164,29 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
           ? {
               ok: true,
               metadata: {
-                name: "@openclaw/codex",
+                name: "@carapace/codex",
                 version,
-                resolvedSpec: `@openclaw/codex@${version}`,
+                resolvedSpec: `@carapace/codex@${version}`,
                 integrity: `sha512-${version}`,
               },
             }
           : { ok: false, error: "Package not found on npm" };
       });
-      for (const spec of ["@openclaw/codex", "@openclaw/codex@latest", "@openclaw/codex@beta"]) {
+      for (const spec of ["@carapace/codex", "@carapace/codex@latest", "@carapace/codex@beta"]) {
         const result = await resolveNpmInstallSpecsForUpdateChannel({
           spec,
           updateChannel: "beta",
-          officialPackageName: "@openclaw/codex",
+          officialPackageName: "@carapace/codex",
           coreVersion: "2026.9.1-beta.1",
           versionBoundToCore: true,
         });
         expect(result).toEqual({
-          installSpec: `@openclaw/codex@${expected}`,
+          installSpec: `@carapace/codex@${expected}`,
           recordSpec: spec,
           npmResolution: {
-            name: "@openclaw/codex",
+            name: "@carapace/codex",
             version: expected,
-            resolvedSpec: `@openclaw/codex@${expected}`,
+            resolvedSpec: `@carapace/codex@${expected}`,
             integrity: `sha512-${expected}`,
           },
           channelTag: tag,
@@ -203,10 +203,10 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
     });
     expect(
       await resolveNpmInstallSpecsForUpdateChannel({
-        spec: "@openclaw/codex@beta",
+        spec: "@carapace/codex@beta",
         updateChannel: "beta",
       }),
-    ).toEqual({ installSpec: "@openclaw/codex@latest", recordSpec: "@openclaw/codex@beta" });
+    ).toEqual({ installSpec: "@carapace/codex@latest", recordSpec: "@carapace/codex@beta" });
   });
 
   it.each(["beta", "latest"] as const)(
@@ -215,10 +215,10 @@ describe("resolveNpmInstallSpecsForUpdateChannel", () => {
       vi.mocked(resolveNpmSpecMetadata).mockImplementation(async ({ spec }) =>
         spec.endsWith(`@${failedTag}`)
           ? { ok: false, category: "metadata-env", error: "Registry unavailable" }
-          : { ok: true, metadata: { name: "@openclaw/codex", version: "2026.9.1-beta.1" } },
+          : { ok: true, metadata: { name: "@carapace/codex", version: "2026.9.1-beta.1" } },
       );
       await expect(
-        resolveNpmInstallSpecsForUpdateChannel({ spec: "@openclaw/codex", updateChannel: "beta" }),
+        resolveNpmInstallSpecsForUpdateChannel({ spec: "@carapace/codex", updateChannel: "beta" }),
       ).rejects.toThrow("Registry unavailable");
     },
   );
@@ -235,13 +235,13 @@ describe("resolveClawHubInstallSpecsForUpdateChannel", () => {
   ] as const)(
     "resolves declared ClawHub defaults on %s (bound: %s, core: %s)",
     (updateChannel, versionBoundToCore, coreVersion, selector) => {
-      for (const spec of ["clawhub:@openclaw/discord", "clawhub:@openclaw/discord@latest"]) {
-        const installSpec = selector ? `clawhub:@openclaw/discord@${selector}` : spec;
+      for (const spec of ["clawhub:@carapace/discord", "clawhub:@carapace/discord@latest"]) {
+        const installSpec = selector ? `clawhub:@carapace/discord@${selector}` : spec;
         expect(
           resolveClawHubInstallSpecsForUpdateChannel({
             spec,
             updateChannel,
-            officialPackageName: "@openclaw/discord",
+            officialPackageName: "@carapace/discord",
             coreVersion,
             versionBoundToCore,
           }),
@@ -258,12 +258,12 @@ describe("resolveClawHubInstallSpecsForUpdateChannel", () => {
     "preserves exact and non-latest ClawHub selectors on %s",
     (updateChannel) => {
       for (const selector of ["2026.6.33", "next", "beta"]) {
-        const spec = `clawhub:@openclaw/discord@${selector}`;
+        const spec = `clawhub:@carapace/discord@${selector}`;
         expect(
           resolveClawHubInstallSpecsForUpdateChannel({
             spec,
             updateChannel,
-            officialPackageName: "@openclaw/discord",
+            officialPackageName: "@carapace/discord",
             coreVersion: updateChannel === "beta" ? "2026.8.1-beta.3" : "2026.7.33",
             versionBoundToCore: true,
           }),
@@ -275,12 +275,12 @@ describe("resolveClawHubInstallSpecsForUpdateChannel", () => {
   it("does not rewrite ClawHub on extended-stable", () => {
     expect(
       resolveClawHubInstallSpecsForUpdateChannel({
-        spec: "clawhub:@openclaw/discord",
+        spec: "clawhub:@carapace/discord",
         updateChannel: "extended-stable",
       }),
     ).toEqual({
-      installSpec: "clawhub:@openclaw/discord",
-      recordSpec: "clawhub:@openclaw/discord",
+      installSpec: "clawhub:@carapace/discord",
+      recordSpec: "clawhub:@carapace/discord",
     });
   });
 });

@@ -8,7 +8,7 @@ const suite = createControlUiE2eSuite({
   startServer: () => startControlUiE2eServer(undefined, { source: true }),
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
 type BrowserTerminalController = {
@@ -36,13 +36,13 @@ async function loadRuntime(page: Page): Promise<void> {
   // addScriptTag resolves before the module body runs, so the global is not
   // observable yet; wait for the assignment instead of racing page.evaluate.
   await page.addScriptTag({
-    content: `globalThis.openclawTerminalRuntimeModule = import(${JSON.stringify(moduleUrl)});`,
+    content: `globalThis.carapaceTerminalRuntimeModule = import(${JSON.stringify(moduleUrl)});`,
     type: "module",
   });
   await page.waitForFunction(() =>
     Boolean(
-      (globalThis as unknown as { openclawTerminalRuntimeModule?: unknown })
-        .openclawTerminalRuntimeModule,
+      (globalThis as unknown as { carapaceTerminalRuntimeModule?: unknown })
+        .carapaceTerminalRuntimeModule,
     ),
   );
 }
@@ -54,11 +54,11 @@ suite.define(() => {
       const result = await page.evaluate(async () => {
         const runtime = await (
           window as unknown as {
-            openclawTerminalRuntimeModule: Promise<
+            carapaceTerminalRuntimeModule: Promise<
               typeof import("../components/terminal/terminal-runtime.ts")
             >;
           }
-        ).openclawTerminalRuntimeModule;
+        ).carapaceTerminalRuntimeModule;
         const host = document.body.appendChild(document.createElement("div"));
         const input: string[] = [];
         const controller = await runtime.createIsolatedGhosttyTerminal({
@@ -114,11 +114,11 @@ suite.define(() => {
         async ({ staleText }) => {
           const runtimeModule = await (
             window as unknown as Window & {
-              openclawTerminalRuntimeModule: Promise<{
+              carapaceTerminalRuntimeModule: Promise<{
                 createIsolatedGhosttyTerminal: BrowserTerminalFactory;
               }>;
             }
-          ).openclawTerminalRuntimeModule;
+          ).carapaceTerminalRuntimeModule;
           const createTerminal = async () => {
             const host = document.createElement("div");
             host.style.height = "400px";

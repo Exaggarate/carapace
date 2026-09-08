@@ -1,7 +1,7 @@
 // Codex tests cover native Computer Use service provisioning.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ensureCodexComputerUseServiceApp } from "./computer-use-service.js";
 import { resolveMacOSDesktopCodexComputerUseServiceAppCandidates } from "./desktop-app-paths.js";
@@ -44,7 +44,7 @@ describe("Codex Computer Use native service", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("creates a fresh agent tree and installs beneath the isolated Codex home", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "agent", "codex-home");
     await writeServiceFixture(sourcePath, CURRENT_IDENTITY);
@@ -71,7 +71,7 @@ describe("Codex Computer Use native service", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked isolated Codex home without touching its external target",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-service-symlink-");
+      const root = tempDirs.make("carapace-computer-use-service-symlink-");
       const sourcePath = path.join(root, "source", "Codex Computer Use.app");
       const agentDir = path.join(root, "agent");
       const codexHome = path.join(agentDir, "codex-home");
@@ -109,7 +109,7 @@ describe("Codex Computer Use native service", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked ownership root without touching its external target",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-service-symlink-");
+      const root = tempDirs.make("carapace-computer-use-service-symlink-");
       const sourcePath = path.join(root, "source", "Codex Computer Use.app");
       const ownershipRoot = path.join(root, "agent");
       const codexHome = path.join(ownershipRoot, "codex-home");
@@ -147,7 +147,7 @@ describe("Codex Computer Use native service", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked Computer Use parent without touching its external target",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-service-symlink-");
+      const root = tempDirs.make("carapace-computer-use-service-symlink-");
       const sourcePath = path.join(root, "source", "Codex Computer Use.app");
       const codexHome = path.join(root, "codex-home");
       const targetParent = path.join(codexHome, "computer-use");
@@ -184,7 +184,7 @@ describe("Codex Computer Use native service", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a symlinked service target without following its external app",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-service-symlink-");
+      const root = tempDirs.make("carapace-computer-use-service-symlink-");
       const sourcePath = path.join(root, "source", "Codex Computer Use.app");
       const codexHome = path.join(root, "codex-home");
       const targetParent = path.join(codexHome, "computer-use");
@@ -219,7 +219,7 @@ describe("Codex Computer Use native service", () => {
   it.runIf(process.platform !== "win32")(
     "refuses to publish or clean up through a parent rebound during staging",
     async () => {
-      const root = tempDirs.make("openclaw-computer-use-service-rebind-");
+      const root = tempDirs.make("carapace-computer-use-service-rebind-");
       const sourcePath = path.join(root, "source", "Codex Computer Use.app");
       const codexHome = path.join(root, "codex-home");
       const targetParent = path.join(codexHome, "computer-use");
@@ -274,7 +274,7 @@ describe("Codex Computer Use native service", () => {
   );
 
   it("reuses a target only when its full signed identity matches the selected source", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -299,7 +299,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("refreshes when the signed desktop service changes at the same source path", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     await writeServiceFixture(sourcePath, CURRENT_IDENTITY);
@@ -337,7 +337,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("revalidates the current source after a different selection fails", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const firstSourcePath = path.join(root, "first", "Codex Computer Use.app");
     const failingSourcePath = path.join(root, "failing", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
@@ -379,7 +379,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("refreshes a complete but stale signed generation through the staged swap", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -404,7 +404,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("reports a missing or untrusted source without changing the target", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "untrusted", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -424,7 +424,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("replaces an incomplete home-owned service app", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -448,7 +448,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("preserves the previous target when the staged copy does not match its source", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -473,7 +473,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("keeps a concurrent installer that wins with the same selected identity", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -497,7 +497,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("restores an unexpected concurrent generation instead of overwriting it", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const sourcePath = path.join(root, "source", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
     const targetPath = path.join(codexHome, "computer-use", "Codex Computer Use.app");
@@ -522,7 +522,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("serializes different selected sources and revalidates each selection", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-");
+    const root = tempDirs.make("carapace-computer-use-service-");
     const firstSourcePath = path.join(root, "first", "Codex Computer Use.app");
     const secondSourcePath = path.join(root, "second", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");
@@ -596,7 +596,7 @@ describe("Codex Computer Use native service", () => {
   });
 
   it("leaves the prior service intact when its generation becomes stale before publication", async () => {
-    const root = tempDirs.make("openclaw-computer-use-service-stale-");
+    const root = tempDirs.make("carapace-computer-use-service-stale-");
     const firstSourcePath = path.join(root, "first", "Codex Computer Use.app");
     const secondSourcePath = path.join(root, "second", "Codex Computer Use.app");
     const codexHome = path.join(root, "codex-home");

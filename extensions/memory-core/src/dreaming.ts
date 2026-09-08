@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMemoryDreamingPluginConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveMemoryDreamingPluginConfig } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   LEGACY_MEMORY_LIGHT_DREAMING_CRON_NAME as LEGACY_LIGHT_SLEEP_CRON_NAME,
   LEGACY_MEMORY_LIGHT_DREAMING_CRON_TAG as LEGACY_LIGHT_SLEEP_CRON_TAG,
@@ -12,15 +12,15 @@ import {
   MEMORY_DREAMING_SYSTEM_EVENT_TEXT as DREAMING_SYSTEM_EVENT_TEXT,
   resolveMemoryDeepDreamingConfig,
   resolveMemoryDreamingWorkspaces,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { peekSystemEventEntries } from "openclaw/plugin-sdk/system-event-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { peekSystemEventEntries } from "carapace/plugin-sdk/system-event-runtime";
 import { appendFailedDreamingEvent } from "./dreaming-events.js";
 import type { NarrativePhaseData } from "./dreaming-narrative.js";
 import { formatErrorMessage, includesSystemEventToken } from "./dreaming-shared.js";
@@ -29,7 +29,7 @@ const RUNTIME_CRON_RECONCILE_INTERVAL_MS = 60_000;
 const HEARTBEAT_ISOLATED_SESSION_SUFFIX = ":heartbeat";
 const MANAGED_DREAMING_DECLARATION_KEY = "memory-core:memory-dreaming-promotion";
 
-type Logger = Pick<OpenClawPluginApi["logger"], "info" | "warn" | "error">;
+type Logger = Pick<CarapacePluginApi["logger"], "info" | "warn" | "error">;
 
 type CronSchedule = { kind: "cron"; expr: string; tz?: string };
 type CronPayload =
@@ -469,10 +469,10 @@ async function runShortTermDreamingPromotionIfTriggered(params: {
   /** Agent whose heartbeat/cron turn triggered the sweep. */
   agentId?: string;
   workspaceDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   config: ShortTermPromotionDreamingConfig;
   logger: Logger;
-  subagent?: OpenClawPluginApi["runtime"]["subagent"];
+  subagent?: CarapacePluginApi["runtime"]["subagent"];
 }): Promise<{ handled: true; reason: string } | undefined> {
   if (params.trigger !== "heartbeat" && params.trigger !== "cron") {
     return undefined;
@@ -740,7 +740,7 @@ async function runShortTermDreamingPromotionIfTriggered(params: {
   };
 }
 
-export function registerShortTermPromotionDreaming(api: OpenClawPluginApi): void {
+export function registerShortTermPromotionDreaming(api: CarapacePluginApi): void {
   let resolveServiceCron: (() => CronServiceLike | null) | null = null;
   let unavailableCronWarningEmitted = false;
   let startupDreamingCleanupTimer: ReturnType<typeof setTimeout> | null = null;
@@ -750,8 +750,8 @@ export function registerShortTermPromotionDreaming(api: OpenClawPluginApi): void
   let disposed = true;
   let serviceStartedAtMs: number | undefined;
 
-  const resolveCurrentConfig = (): OpenClawConfig =>
-    (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+  const resolveCurrentConfig = (): CarapaceConfig =>
+    (api.runtime.config?.current?.() ?? api.config) as CarapaceConfig;
 
   const disposeDreaming = (): void => {
     disposed = true;
@@ -769,7 +769,7 @@ export function registerShortTermPromotionDreaming(api: OpenClawPluginApi): void
 
   const reconcileManagedDreamingCron = async (params: {
     reason: "startup" | "runtime";
-    startupConfig?: OpenClawConfig;
+    startupConfig?: CarapaceConfig;
   }): Promise<void> => {
     const startupCfg =
       params.reason === "startup" ? (params.startupConfig ?? api.config) : resolveCurrentConfig();
@@ -834,7 +834,7 @@ export function registerShortTermPromotionDreaming(api: OpenClawPluginApi): void
   };
 
   const startDreamingSessionCleanup = async (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     generation: number,
     startupStartedAtMs: number,
   ): Promise<void> => {
@@ -846,7 +846,7 @@ export function registerShortTermPromotionDreaming(api: OpenClawPluginApi): void
       return;
     }
     const scrubConfiguredAgents = async (
-      currentConfig: OpenClawConfig,
+      currentConfig: CarapaceConfig,
       nowMs?: number,
     ): Promise<void> => {
       const agentIds = uniqueStrings(

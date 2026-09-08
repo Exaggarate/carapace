@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { discoverConfigWidePluginManifestRegistry } from "../config/io.plugin-metadata.js";
-import { writeOpenClawConfig } from "../config/test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { writeCarapaceConfig } from "../config/test-helpers.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import * as migrationCheckpoint from "../infra/startup-migration-checkpoint.js";
 import { migrateLegacyConfigMachineState } from "../infra/state-migrations.config-machine-state.js";
@@ -22,11 +22,11 @@ import {
   withPluginCache,
 } from "../plugins/plugin-cache.js";
 import { resolvePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { resolveMigrationCheckpointIdentity } from "./doctor-config-preflight-checkpoint.js";
 import {
   persistRefreshedPluginIndex,
@@ -40,7 +40,7 @@ import { createDoctorPluginMetadataSnapshotScope } from "./doctor/shared/plugin-
 async function withPreflightPluginFixture(
   run: (
     writeVersion: (version: string) => Promise<void>,
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     workspaces: Record<string, string>,
   ) => Promise<void>,
   workspaceNames: string[] = [],
@@ -50,14 +50,14 @@ async function withPreflightPluginFixture(
     // Scope real discovery to the synthetic plugins owned by this fixture.
     const bundledRoot = path.join(home, "bundled");
     await fs.mkdir(bundledRoot, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledRoot;
     const workspaces = Object.fromEntries(
       workspaceNames.map((name) => [name, path.join(home, name)]),
     );
     const plugins = workspaceNames.length
       ? workspaceNames.map((name) => ({
           id: `preflight-${name}`,
-          root: path.join(workspaces[name]!, ".openclaw", "extensions", `preflight-${name}`),
+          root: path.join(workspaces[name]!, ".carapace", "extensions", `preflight-${name}`),
         }))
       : [{ id: fixturePluginId, root: path.join(home, "fixture-plugin") }];
     for (const { root } of plugins) {
@@ -71,11 +71,11 @@ async function withPreflightPluginFixture(
           JSON.stringify({
             name: id,
             version,
-            openclaw: { extensions: ["./index.js"] },
+            carapace: { extensions: ["./index.js"] },
           }),
         );
         await fs.writeFile(
-          path.join(root, "openclaw.plugin.json"),
+          path.join(root, "carapace.plugin.json"),
           JSON.stringify({
             id,
             version,
@@ -85,7 +85,7 @@ async function withPreflightPluginFixture(
       }
     };
     await writeVersion("1.0.0");
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...(workspaceNames.length
         ? {
             agents: {
@@ -108,9 +108,9 @@ async function withPreflightPluginFixture(
           : { load: { paths: plugins.map(({ root }) => root) } }),
       },
     };
-    await writeOpenClawConfig(home, config);
+    await writeCarapaceConfig(home, config);
     // Non-pristine state requires index persistence even though this fixture has no migrations.
-    openOpenClawStateDatabase({ env: process.env });
+    openCarapaceStateDatabase({ env: process.env });
     await run(writeVersion, config, workspaces);
   });
 }
@@ -125,7 +125,7 @@ const readPluginPreflight = () =>
   });
 
 describe("Doctor plugin persistence", () => {
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeCarapaceStateDatabaseForTest());
 
   it.each([
     { scope: "process", replaceBeforeLease: false },
@@ -414,10 +414,10 @@ describe("Doctor plugin persistence", () => {
           } else {
             const manifestPath = path.join(
               workspaces.beta!,
-              ".openclaw",
+              ".carapace",
               "extensions",
               "preflight-beta",
-              "openclaw.plugin.json",
+              "carapace.plugin.json",
             );
             const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
             await fs.writeFile(
@@ -647,7 +647,7 @@ describe("Doctor plugin persistence", () => {
             throw new Error("expected plugin registry persistence to fail", { cause: failure });
           }
           expect(failure.message).toMatch(
-            /differences: preflight-fixture .*persisted source: .*fixture-plugin.*derived source: .*fixture-plugin.*openclaw plugins registry --refresh/u,
+            /differences: preflight-fixture .*persisted source: .*fixture-plugin.*derived source: .*fixture-plugin.*carapace plugins registry --refresh/u,
           );
           expect(failure.message).not.toContain("\u001b");
         } finally {
@@ -687,8 +687,8 @@ describe("Doctor plugin persistence", () => {
           recordCheckpoint.mockRestore();
         });
         const readStateCheckpoint = () => {
-          const { db } = openOpenClawStateDatabase({ env: process.env });
-          const kysely = getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "schema_meta">>(db);
+          const { db } = openCarapaceStateDatabase({ env: process.env });
+          const kysely = getNodeSqliteKysely<Pick<CarapaceStateKyselyDatabase, "schema_meta">>(db);
           return executeSqliteQueryTakeFirstSync(
             db,
             kysely

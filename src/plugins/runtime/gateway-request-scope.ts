@@ -10,7 +10,7 @@ import type { PluginOrigin } from "../plugin-origin.types.js";
 import type { DeclaredProviderOwnerIndex } from "../provider-owner-index.js";
 import type { PluginRegistry } from "../registry-types.js";
 import { getPluginRegistryState } from "../runtime-state.js";
-import type { OpenClawPluginNodeWorkspace } from "../types.node-host.js";
+import type { CarapacePluginNodeWorkspace } from "../types.node-host.js";
 import { getPluginRuntimeLoadContextState } from "./load-context-state.js";
 
 type PluginRuntimeGatewayRequestScope = {
@@ -19,7 +19,7 @@ type PluginRuntimeGatewayRequestScope = {
     runId: string;
     agentId: string;
     nodeId: string;
-    workspace: OpenClawPluginNodeWorkspace;
+    workspace: CarapacePluginNodeWorkspace;
   }) => void;
   /** In-process admitted owner only; never projected into RPC parameters. */
   invokeWithSessionNodeAuthority?: <T>(
@@ -28,7 +28,7 @@ type PluginRuntimeGatewayRequestScope = {
       command: string;
       source: "session-full" | "human-approved";
       nodeId: string;
-      workspace: OpenClawPluginNodeWorkspace;
+      workspace: CarapacePluginNodeWorkspace;
     },
     invoke: (assertCurrent: () => void, signal: AbortSignal) => Promise<T>,
   ) => Promise<T | undefined>;
@@ -41,7 +41,7 @@ type PluginRuntimeGatewayRequestScope = {
       pluginId: string;
       command: string;
       nodeId: string;
-      workspace: OpenClawPluginNodeWorkspace;
+      workspace: CarapacePluginNodeWorkspace;
     }) => void;
   };
   context?: GatewayRequestContext;
@@ -65,9 +65,9 @@ type PluginRuntimePluginScope = {
 };
 
 const PLUGIN_RUNTIME_GATEWAY_REQUEST_SCOPE_KEY: unique symbol = Symbol.for(
-  "openclaw.pluginRuntimeGatewayRequestScope",
+  "carapace.pluginRuntimeGatewayRequestScope",
 );
-const GATEWAY_CONTEXT_RESOLVERS_KEY: unique symbol = Symbol.for("openclaw.gatewayContextResolvers");
+const GATEWAY_CONTEXT_RESOLVERS_KEY: unique symbol = Symbol.for("carapace.gatewayContextResolvers");
 
 const pluginRuntimeGatewayRequestScope = resolveGlobalSingleton<
   AsyncLocalStorage<PluginRuntimeGatewayRequestScope>

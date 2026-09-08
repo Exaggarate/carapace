@@ -1,5 +1,5 @@
 // Skill source helpers normalize source metadata for loaded skill records.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { SkillTelemetrySource } from "../types.js";
 import type { Skill } from "./skill-contract.js";
 
@@ -22,15 +22,15 @@ export function resolveSkillSource(skill: Skill): string {
 
 export function resolveSkillTelemetrySourceValue(value: unknown): SkillTelemetrySource {
   const source = normalizeOptionalString(value) ?? "";
-  if (source === "bundled" || source === "openclaw-bundled" || source === "openclaw-custodian") {
+  if (source === "bundled" || source === "carapace-bundled" || source === "carapace-custodian") {
     return "bundled";
   }
   if (
     source === "workspace" ||
-    source === "openclaw-workspace" ||
-    source === "openclaw-workshop" ||
-    source === "openclaw-managed" ||
-    source === "openclaw-extra" ||
+    source === "carapace-workspace" ||
+    source === "carapace-workshop" ||
+    source === "carapace-managed" ||
+    source === "carapace-extra" ||
     source === "agents-skills-personal" ||
     source === "agents-skills-project"
   ) {

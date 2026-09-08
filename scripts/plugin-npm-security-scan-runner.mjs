@@ -106,7 +106,7 @@ function sanitizeOutput(value, args) {
     output = output.replaceAll(source, replacement);
   }
   return output
-    .replaceAll(/\/(?:private\/)?tmp\/openclaw-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
+    .replaceAll(/\/(?:private\/)?tmp\/carapace-plugin-npm-scan-[^/\s:]+/gu, "<scanner-stage>")
     .replaceAll(/(^|[\s:(])\/[^ \t\n\r:,)\]}]+/gu, "$1<path>");
 }
 
@@ -164,11 +164,11 @@ function existingReportStatus(args) {
 
 async function run(argv) {
   const args = parseArgs(argv);
-  const scannerPath = testOverride("OPENCLAW_PLUGIN_SECURITY_RUNNER_CHILD", SCANNER_PATH);
-  const heapMb = Number(testOverride("OPENCLAW_PLUGIN_SECURITY_RUNNER_HEAP_MB", DEFAULT_HEAP_MB));
-  const rssMb = Number(testOverride("OPENCLAW_PLUGIN_SECURITY_RUNNER_RSS_MB", DEFAULT_RSS_MB));
+  const scannerPath = testOverride("CARAPACE_PLUGIN_SECURITY_RUNNER_CHILD", SCANNER_PATH);
+  const heapMb = Number(testOverride("CARAPACE_PLUGIN_SECURITY_RUNNER_HEAP_MB", DEFAULT_HEAP_MB));
+  const rssMb = Number(testOverride("CARAPACE_PLUGIN_SECURITY_RUNNER_RSS_MB", DEFAULT_RSS_MB));
   const timeoutMs = Number(
-    testOverride("OPENCLAW_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS", DEFAULT_TIMEOUT_MS),
+    testOverride("CARAPACE_PLUGIN_SECURITY_RUNNER_TIMEOUT_MS", DEFAULT_TIMEOUT_MS),
   );
   if (
     !Number.isSafeInteger(heapMb) ||

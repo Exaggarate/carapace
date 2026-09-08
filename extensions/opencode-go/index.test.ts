@@ -1,16 +1,16 @@
 import {
   registerProviderPlugin,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { NON_ENV_SECRETREF_MARKER } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { expectPassthroughReplayPolicy } from "openclaw/plugin-sdk/provider-test-contracts";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { NON_ENV_SECRETREF_MARKER } from "carapace/plugin-sdk/provider-auth-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { expectPassthroughReplayPolicy } from "carapace/plugin-sdk/provider-test-contracts";
+import { buildOpenAICompletionsParams } from "carapace/plugin-sdk/provider-transport-runtime";
 // Opencode Go tests cover index plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   buildOpencodeGoLiveProviderConfig,
   buildStaticOpencodeGoProviderConfig,
@@ -620,7 +620,7 @@ describe("opencode-go provider plugin", () => {
       },
       {
         wrap: provider.wrapSimpleCompletionStreamFn,
-        runtimeApi: "openclaw-provider-simple:opencode-go:qwen3.8-max",
+        runtimeApi: "carapace-provider-simple:opencode-go:qwen3.8-max",
         sourceApi: "anthropic-messages",
       },
     ] as const) {
@@ -661,7 +661,7 @@ describe("opencode-go provider plugin", () => {
 
       expect(capturedHeaders).toEqual([
         {
-          "User-Agent": expect.stringMatching(/^openclaw\//),
+          "User-Agent": expect.stringMatching(/^carapace\//),
           "X-Custom": "1",
         },
         { "User-Agent": "configured-client/2.0", "X-Custom": "2" },

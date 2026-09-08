@@ -4,11 +4,11 @@ import {
   deriveDurableFinalDeliveryRequirements,
   projectOutboundPayloadPlanForDelivery,
   resolveTranscriptBackedChannelFinalText,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import { isSingleUseReplyToMode } from "openclaw/plugin-sdk/reply-reference";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
+import { isSingleUseReplyToMode } from "carapace/plugin-sdk/reply-reference";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import {
   flushDraftLane,
   prepareAnswerLaneForText,

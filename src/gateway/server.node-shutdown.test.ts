@@ -32,7 +32,7 @@ installGatewayTestHooks({ scope: "suite" });
 test.for(["direct", "restart"] as const)(
   "settles rootless worker cleanup and joins an unanswered invoke during %s Gateway shutdown",
   async (mode, { signal }) => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("node shutdown proof requires an isolated Gateway state directory");
     }
@@ -63,19 +63,19 @@ test.for(["direct", "restart"] as const)(
         kernel = await createKernel(...args);
         return kernel;
       });
-    const previousMinimalGateway = process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+    const previousMinimalGateway = process.env.CARAPACE_TEST_MINIMAL_GATEWAY;
     let started: Awaited<ReturnType<typeof startServer>>;
     try {
-      delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+      delete process.env.CARAPACE_TEST_MINIMAL_GATEWAY;
       started = await startServer("secret");
     } catch (error) {
       factory.mockRestore();
       throw error;
     } finally {
       if (previousMinimalGateway === undefined) {
-        delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+        delete process.env.CARAPACE_TEST_MINIMAL_GATEWAY;
       } else {
-        process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = previousMinimalGateway;
+        process.env.CARAPACE_TEST_MINIMAL_GATEWAY = previousMinimalGateway;
       }
     }
     const { port, server } = started;
@@ -197,7 +197,7 @@ test.for(["direct", "restart"] as const)(
               sharedHost: true,
               bootstrapReceipt: {
                 bundleHash: BUNDLE_HASH,
-                openclawVersion: "2026.8.19",
+                carapaceVersion: "2026.8.19",
                 protocolFeatures: [WORKER_EXECUTION_CONTEXT_PROTOCOL_FEATURE],
                 installKind: "bundle",
               },

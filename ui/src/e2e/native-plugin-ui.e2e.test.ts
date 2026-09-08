@@ -99,7 +99,7 @@ suite.define(() => {
               "plugins.controlUi.reload": catalog("two"),
             },
           });
-          await page.route("**/__openclaw__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
+          await page.route("**/__carapace__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
             route.fulfill({
               status: 200,
               contentType: "text/javascript",
@@ -163,7 +163,7 @@ suite.define(() => {
             },
           },
         });
-        await page.route("**/__openclaw__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
+        await page.route("**/__carapace__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
           route.fulfill({ status: 200, contentType: "text/javascript", body: actionPluginModule }),
         );
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey, "chat"));
@@ -174,7 +174,7 @@ suite.define(() => {
               .locator(`.sidebar-recent-session[data-session-key="${sessionKey}"]`)
               .click({ button: "right" });
             await page
-              .locator("openclaw-session-menu")
+              .locator("carapace-session-menu")
               .getByRole("menuitem", { name: "Hold session action", exact: true })
               .click();
           } else {
@@ -280,7 +280,7 @@ suite.define(() => {
             },
           },
         });
-        await page.route("**/__openclaw__/plugins/control-ui/ui-fixture/*/index.js", (route) => {
+        await page.route("**/__carapace__/plugins/control-ui/ui-fixture/*/index.js", (route) => {
           const revision = new URL(route.request().url()).pathname.split("/").at(-2)!;
           return route.fulfill({
             status: 200,
@@ -385,7 +385,7 @@ suite.define(() => {
           pluginId: "hung-ui",
           name: "Hung fixture",
           revision: "pending",
-          entryUrl: "/__openclaw__/plugins/control-ui/hung-ui/pending/index.js",
+          entryUrl: "/__carapace__/plugins/control-ui/hung-ui/pending/index.js",
           styles: [],
         });
         const gateway = await installMockGateway(page, {
@@ -408,7 +408,7 @@ suite.define(() => {
           await bootstrapGate.promise;
           await route.fallback();
         });
-        await page.route("**/__openclaw__/plugins/control-ui/*/*/index.js", (route) =>
+        await page.route("**/__carapace__/plugins/control-ui/*/*/index.js", (route) =>
           route.fulfill({
             status: 200,
             contentType: "text/javascript",
@@ -417,7 +417,7 @@ suite.define(() => {
               : pluginModule("pending"),
           }),
         );
-        const pluginPage = page.locator("openclaw-plugin-page");
+        const pluginPage = page.locator("carapace-plugin-page");
         const expectLoading = async () => {
           await pluginPage.getByRole("status", { name: "Loading…", exact: true }).waitFor();
           expect(
@@ -432,13 +432,13 @@ suite.define(() => {
           await expectLoading();
           expect(
             await page.evaluate(() => ({
-              contributions: Boolean(customElements.get("openclaw-plugin-contributions")),
-              manager: Boolean(customElements.get("openclaw-plugin-manager")),
+              contributions: Boolean(customElements.get("carapace-plugin-contributions")),
+              manager: Boolean(customElements.get("carapace-plugin-manager")),
             })),
           ).toEqual({ contributions: false, manager: true });
           expect(
             await page
-              .locator("openclaw-plugin-contributions")
+              .locator("carapace-plugin-contributions")
               .first()
               .evaluate((element) => getComputedStyle(element).display),
           ).toBe("contents");
@@ -530,7 +530,7 @@ suite.define(() => {
             },
           },
         });
-        await page.route("**/__openclaw__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
+        await page.route("**/__carapace__/plugins/control-ui/ui-fixture/*/index.js", (route) =>
           route.fulfill({ status: 200, contentType: "text/javascript", body: pluginModule("one") }),
         );
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey, "chat"));
@@ -579,7 +579,7 @@ suite.define(() => {
           await composer.waitFor();
           expect(
             await composer.evaluate((element) =>
-              Boolean(element.closest("openclaw-plugin-view[data-plugin-composer]")),
+              Boolean(element.closest("carapace-plugin-view[data-plugin-composer]")),
             ),
           ).toBe(replacement !== "");
           if (replacement === "ui-fixture/failing-composer") {
@@ -716,7 +716,7 @@ suite.define(() => {
             "plugins.controlUi.reload": catalog("two"),
           },
         });
-        await page.route("**/__openclaw__/plugins/control-ui/ui-fixture/*/index.js", (route) => {
+        await page.route("**/__carapace__/plugins/control-ui/ui-fixture/*/index.js", (route) => {
           const revision = new URL(route.request().url()).pathname.split("/").at(-2)!;
           return route.fulfill({
             status: 200,
@@ -885,7 +885,7 @@ suite.define(() => {
             .toBeGreaterThanOrEqual(0);
         }
         await page.locator(".shell-chrome-controls__nav-toggle").click();
-        const pluginPage = page.locator("openclaw-plugin-page");
+        const pluginPage = page.locator("carapace-plugin-page");
         await pluginPage.getByRole("status", { name: "Loading…", exact: true }).waitFor();
         expect(
           await pluginPage.getByText("Plugin panel unavailable", { exact: true }).count(),
@@ -927,7 +927,7 @@ suite.define(() => {
             "plugins.controlUi.report": { ok: true },
           },
         });
-        await page.route("**/__openclaw__/plugins/control-ui/*/*/index.js", (route) => {
+        await page.route("**/__carapace__/plugins/control-ui/*/*/index.js", (route) => {
           const segments = new URL(route.request().url()).pathname.split("/");
           const body =
             segments.at(-3) === "hung-ui" ? hungPluginModule : pluginModule(segments.at(-2)!);
@@ -943,7 +943,7 @@ suite.define(() => {
           pluginId: "hung-ui",
           name: "Hung fixture",
           revision: "pending",
-          entryUrl: "/__openclaw__/plugins/control-ui/hung-ui/pending/index.js",
+          entryUrl: "/__carapace__/plugins/control-ui/hung-ui/pending/index.js",
           styles: [],
         });
         await gateway.setMethodResponse("plugins.controlUi.list", next);

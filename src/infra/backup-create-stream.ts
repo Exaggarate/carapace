@@ -2,7 +2,7 @@ import fsSync, { createWriteStream, type Stats } from "node:fs";
 import fs from "node:fs/promises";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { sameFileIdentity } from "./fs-safe-advanced.js";
 
 const BACKUP_ARCHIVE_IDLE_TIMEOUT_MS = 5 * 60_000;
@@ -47,7 +47,7 @@ export function observeBackupTarEntryProgress(
   }
 }
 
-// OpenClaw's one-user trust model treats hostile same-UID pathname rewrites as
+// Carapace's one-user trust model treats hostile same-UID pathname rewrites as
 // trusted host mutation. Keep the check and unlink synchronous so cooperative
 // processes cannot interleave through an in-process await boundary.
 export function removePreparedBackupArchive(prepared: PreparedBackupArchive): boolean {

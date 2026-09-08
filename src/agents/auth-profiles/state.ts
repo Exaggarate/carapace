@@ -3,10 +3,10 @@
  * This state tracks order, last-good profile, and cooldown/failure metadata
  * separately from secret-bearing credentials.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeTrimmedStringList } from "@carapace/normalization-core/string-normalization";
 import { AUTH_STORE_VERSION } from "./constants.js";
 import { coerceProfileUsageStats } from "./profile-usage-stats.js";
 import { readPersistedAuthProfileStateRaw, type AuthProfileDatabase } from "./sqlite.js";

@@ -185,7 +185,7 @@ describe("fallback field", () => {
       ),
       container,
     );
-    const field = container.querySelector<MultiSelect>("openclaw-multi-select.agent-fallbacks");
+    const field = container.querySelector<MultiSelect>("carapace-multi-select.agent-fallbacks");
     if (!field) {
       throw new Error("fallback field missing");
     }

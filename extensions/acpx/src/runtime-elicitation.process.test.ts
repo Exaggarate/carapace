@@ -17,7 +17,7 @@ afterEach(async () => {
 });
 
 it("round-trips codex-acp request_user_input through real processes without empty answers", async () => {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-acpx-elicitation-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-acpx-elicitation-"));
   temporaryDirectories.push(stateDir);
   const codexAcpPath = createRequire(import.meta.url).resolve("@agentclientprotocol/codex-acp");
   const appServerPath = path.resolve("extensions/acpx/test/fixtures/codex-app-server.mjs");

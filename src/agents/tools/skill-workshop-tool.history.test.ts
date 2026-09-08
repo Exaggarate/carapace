@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool as createSkillWorkshopToolImpl } from "./skill-workshop-tool.js";
 
@@ -19,7 +19,7 @@ function recordSkillCollectionReviewHistory(
   },
   options: { env: NodeJS.ProcessEnv },
 ) {
-  openOpenClawStateDatabase(options)
+  openCarapaceStateDatabase(options)
     .db.prepare(`INSERT INTO skill_workshop_collection_reviews
     (review_id, owner_agent_id, backup_id, create_time, kept_names_json, written_names_json, dropped_json)
     VALUES (?, ?, ?, ?, ?, ?, ?)`)
@@ -36,7 +36,7 @@ function recordSkillCollectionReviewHistory(
 
 const createSkillWorkshopTool = (
   options: Omit<Parameters<typeof createSkillWorkshopToolImpl>[0], "config" | "agentId"> & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
   },
 ) => createSkillWorkshopToolImpl({ config: {}, agentId: "main", ...options });
@@ -48,12 +48,12 @@ afterEach(async () => {
 
 describe("skill_workshop collection history", () => {
   it("renders recent collection outcomes with drop reasons", async () => {
-    const testState = await createOpenClawTestState({
+    const testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-skill-collection-history-state-",
+      prefix: "carapace-skill-collection-history-state-",
     });
     cleanups.push(async () => await testState.cleanup());
-    const workspaceDir = await tempDirs.make("openclaw-skill-collection-history-");
+    const workspaceDir = await tempDirs.make("carapace-skill-collection-history-");
     const tool = createSkillWorkshopTool({
       workspaceDir,
       config: {},
@@ -98,12 +98,12 @@ describe("skill_workshop collection history", () => {
   });
 
   it("caps names and aggregate history output", async () => {
-    const testState = await createOpenClawTestState({
+    const testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-skill-collection-history-caps-state-",
+      prefix: "carapace-skill-collection-history-caps-state-",
     });
     cleanups.push(async () => await testState.cleanup());
-    const workspaceDir = await tempDirs.make("openclaw-skill-collection-history-caps-");
+    const workspaceDir = await tempDirs.make("carapace-skill-collection-history-caps-");
     const names = (kind: string, review: number) =>
       Array.from(
         { length: 200 },

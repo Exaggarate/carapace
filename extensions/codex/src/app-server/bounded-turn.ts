@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AuthProfileStore } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+import type { AuthProfileStore } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
 import {
   CODEX_APP_SERVER_INTERRUPT_TIMEOUT_MS,
   closeCodexStartupClientBestEffort,
@@ -43,7 +43,7 @@ import {
   readCodexInheritedMcpServerNames,
 } from "./thread-requests.js";
 
-const CODEX_APP_SERVER_ARGS_ENV_KEY = "OPENCLAW_CODEX_APP_SERVER_ARGS";
+const CODEX_APP_SERVER_ARGS_ENV_KEY = "CARAPACE_CODEX_APP_SERVER_ARGS";
 const CODEX_BOUNDED_THREAD_CONFIG: JsonObject = {
   "agents.enabled": false,
   "features.multi_agent": false,
@@ -88,7 +88,7 @@ class CodexBoundedTurnTimeoutError extends Error {
 }
 
 type CodexBoundedTurnParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   model: CodexBoundedTurnModelSelection;
   modelProvider?: string;
   profile?: string;
@@ -130,7 +130,7 @@ export async function runBoundedCodexAppServerTurn(
   }
   return await withTempWorkspace(
     {
-      rootDir: resolvePreferredOpenClawTmpDir(),
+      rootDir: resolvePreferredCarapaceTmpDir(),
       prefix: "codex-bounded-turn-",
     },
     async (workspace) => {
@@ -259,7 +259,7 @@ async function runBoundedCodexAppServerTurnInWorkspace(
           cwd: workspace.cwd,
           approvalPolicy: "on-request",
           sandbox: "read-only",
-          serviceName: "OpenClaw",
+          serviceName: "Carapace",
           ...(params.requireNoExternalCapabilities ? { baseInstructions: "" } : {}),
           developerInstructions: params.developerInstructions,
           config: threadConfig,
@@ -400,7 +400,7 @@ function resolveBoundedThreadConfig(
       privateConfig,
       CODEX_SETTLED_FINALIZER_THREAD_CONFIG,
       buildCodexRingZeroThreadConfigPatch(
-        { toolsAllow: ["openclaw"] },
+        { toolsAllow: ["carapace"] },
         true,
         inheritedMcpServerNames,
       ),
@@ -432,7 +432,7 @@ function buildPrivateCodexAppServerStartOptions(
   });
   return {
     ...start,
-    // A fresh private home has no native account; bridge OpenClaw auth even
+    // A fresh private home has no native account; bridge Carapace auth even
     // when the operator's ordinary harness uses their native Codex home.
     homeScope: "agent",
     args: ["app-server", ...providerArgs, "--listen", "stdio://"],
@@ -452,7 +452,7 @@ function createCodexBoundedApprovalHandler(taskLabel: string) {
     ) {
       return {
         decision: "decline",
-        reason: `OpenClaw Codex ${taskLabel} does not grant tool or file approvals.`,
+        reason: `Carapace Codex ${taskLabel} does not grant tool or file approvals.`,
       };
     }
     if (request.method === "item/permissions/requestApproval") {
@@ -461,12 +461,12 @@ function createCodexBoundedApprovalHandler(taskLabel: string) {
     if (request.method.includes("requestApproval")) {
       return {
         decision: "decline",
-        reason: `OpenClaw Codex ${taskLabel} does not grant native approvals.`,
+        reason: `Carapace Codex ${taskLabel} does not grant native approvals.`,
       };
     }
     if (request.method === "mcpServer/elicitation/request") {
       return createCodexElicitationResponse("decline", null, {
-        message: `OpenClaw Codex ${taskLabel} does not support interactive input.`,
+        message: `Carapace Codex ${taskLabel} does not support interactive input.`,
       });
     }
     return undefined;

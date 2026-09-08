@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { formatConfigPatchPath, isMergePatchObjectKeyAllowed } from "./patch-replace-paths.js";
 
 /** Projects runtime edits onto source values; only missing keys represent deletion. */

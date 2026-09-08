@@ -19,7 +19,7 @@ import type { ResumeCliOptions } from "./resume-cli.js";
 import { isTerminalInteractive } from "./terminal-interactivity.js";
 
 const RESUME_INTERACTIVE_TERMINAL_GUIDANCE =
-  "Attaching to a session requires an interactive terminal. Re-run `openclaw resume [query]` from an interactive terminal.";
+  "Attaching to a session requires an interactive terminal. Re-run `carapace resume [query]` from an interactive terminal.";
 const RESUME_HANDOFF_UNRESOLVED =
   "Could not resolve the session handoff. Copy a fresh command from the Control UI.";
 
@@ -136,7 +136,7 @@ async function promptResumeSession(
   const choices = buildSessionChoices(sessions);
   if (choices.length === 0) {
     throw new Error(
-      "No recent sessions found. Run `openclaw sessions` to inspect sessions or `openclaw tui` to start one.",
+      "No recent sessions found. Run `carapace sessions` to inspect sessions or `carapace tui` to start one.",
     );
   }
   const selected = await selectStyled({
@@ -168,7 +168,7 @@ function reportResumeFailure(
   }
   defaultRuntime.error(`No recent session matched ${JSON.stringify(query)}.`);
   defaultRuntime.error(
-    "Run `openclaw resume` to choose from recent sessions or `openclaw sessions` to inspect all sessions.",
+    "Run `carapace resume` to choose from recent sessions or `carapace sessions` to inspect all sessions.",
   );
 }
 

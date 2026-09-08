@@ -122,7 +122,7 @@ describe("classifyAttachmentBytes", () => {
 
   it("infers delimited text from otherwise untyped bytes", async () => {
     await expect(
-      classifyAttachmentBytes({ buffer: Buffer.from("name,value\nopenclaw,1"), name: "data.bin" }),
+      classifyAttachmentBytes({ buffer: Buffer.from("name,value\ncarapace,1"), name: "data.bin" }),
     ).resolves.toEqual({ mime: "text/csv", class: "text" });
   });
 

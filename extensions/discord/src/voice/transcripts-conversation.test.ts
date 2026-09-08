@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { createDiscordRecordingFixture } from "./transcripts-recording.test-support.js";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 

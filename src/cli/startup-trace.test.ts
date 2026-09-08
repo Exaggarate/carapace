@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { flushDiagnosticsTimeline } from "../infra/diagnostics-timeline.js";
 import { createGatewayDispatchStartupTrace } from "./startup-trace.js";
 
@@ -22,13 +22,13 @@ describe("CLI startup trace", () => {
   });
 
   it("records entry marks and measured spans in the diagnostics timeline", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-startup-trace-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-startup-trace-"));
     const timelinePath = path.join(dir, "timeline.jsonl");
-    vi.stubEnv("OPENCLAW_DIAGNOSTICS", "timeline");
-    vi.stubEnv("OPENCLAW_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
+    vi.stubEnv("CARAPACE_DIAGNOSTICS", "timeline");
+    vi.stubEnv("CARAPACE_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
 
     const trace = createGatewayDispatchStartupTrace(
-      ["node", "openclaw", "agent", "--local"],
+      ["node", "carapace", "agent", "--local"],
       "entry",
     );
     trace.mark("bootstrap");
@@ -72,13 +72,13 @@ describe("CLI startup trace", () => {
   });
 
   it("flushes buffered startup phases when config enables the timeline", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-startup-trace-config-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-startup-trace-config-"));
     const timelinePath = path.join(dir, "timeline.jsonl");
-    vi.stubEnv("OPENCLAW_DIAGNOSTICS", "");
-    vi.stubEnv("OPENCLAW_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
+    vi.stubEnv("CARAPACE_DIAGNOSTICS", "");
+    vi.stubEnv("CARAPACE_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
 
     const trace = createGatewayDispatchStartupTrace(
-      ["node", "openclaw", "agent", "--local"],
+      ["node", "carapace", "agent", "--local"],
       "entry",
     );
     trace.mark("bootstrap");
@@ -89,7 +89,7 @@ describe("CLI startup trace", () => {
 
     await trace.configureDiagnosticsTimeline({
       diagnostics: { flags: ["timeline"] },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
 
     expect(readTimelineEvents(timelinePath)).toEqual(
       expect.arrayContaining([

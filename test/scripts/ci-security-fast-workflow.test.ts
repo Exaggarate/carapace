@@ -102,7 +102,7 @@ function readGitHubEnvironment(filePath: string): Record<string, string> {
 }
 
 function createFixture() {
-  const root = tempDirs.make("openclaw-security-fast-");
+  const root = tempDirs.make("carapace-security-fast-");
   const repo = join(root, "repo");
   const bin = join(root, "bin");
   const runnerTemp = join(root, "runner");
@@ -175,7 +175,7 @@ case "$command" in
     exit 97
     ;;
 esac
-exec "$OPENCLAW_TEST_REAL_GIT" "$@"
+exec "$CARAPACE_TEST_REAL_GIT" "$@"
 `,
   );
 
@@ -183,7 +183,7 @@ exec "$OPENCLAW_TEST_REAL_GIT" "$@"
     baseSha,
     environment: {
       GITHUB_ENV: githubEnv,
-      OPENCLAW_TEST_REAL_GIT: realGit,
+      CARAPACE_TEST_REAL_GIT: realGit,
       PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
       RUNNER_TEMP: runnerTemp,
     },
@@ -215,7 +215,7 @@ describe("security-fast workflow", () => {
   it.each([0, 1, 2, 3, 130])(
     "propagates audit exit %s in ordinary and scheduled CI",
     (auditExit) => {
-      const repo = tempDirs.make("openclaw-audit-ci-");
+      const repo = tempDirs.make("carapace-audit-ci-");
       mkdirSync(join(repo, "scripts", "pre-commit"), { recursive: true });
       writeFileSync(
         join(repo, "scripts", "pre-commit", "pnpm-audit-prod.mjs"),

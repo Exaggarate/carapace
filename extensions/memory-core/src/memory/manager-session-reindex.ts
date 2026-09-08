@@ -1,5 +1,5 @@
 // Memory Core plugin module implements manager session reindex behavior.
-import type { MemorySyncParams } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySyncParams } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 
 export function shouldSyncSessionsForReindex(params: {
   hasSessionSource: boolean;

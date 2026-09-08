@@ -8,8 +8,8 @@ const tabLookup = vi.hoisted(() => vi.fn());
 const routeState = vi.hoisted(() => ({
   profileCtx: {
     profile: {
-      driver: "openclaw" as const,
-      name: "openclaw",
+      driver: "carapace" as const,
+      name: "carapace",
       cdpUrl: "http://127.0.0.1:18800",
       cdpIsLoopback: true,
     },

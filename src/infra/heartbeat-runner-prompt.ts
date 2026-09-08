@@ -1,10 +1,10 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   HEARTBEAT_RESPONSE_TOOL_INSTRUCTIONS,
   isHeartbeatContentEffectivelyEmpty,
 } from "../auto-reply/heartbeat.js";
 import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readHeartbeatMonitorScratch } from "../cron/scratch-store.js";
 import { resolveCronJobsStorePathFromConfig } from "../cron/store.js";
 import { formatErrorMessage } from "./errors.js";
@@ -80,7 +80,7 @@ export function shouldPreflightWakeBeforeBusy(
 }
 
 export async function resolveHeartbeatPreflight(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   heartbeat?: HeartbeatConfig;
   sessionKey?: string;
@@ -213,7 +213,7 @@ function appendHeartbeatScratch(prompt: string, heartbeatScratchContent?: string
 }
 
 export function resolveHeartbeatRunPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   heartbeat?: HeartbeatConfig;
   preflight: HeartbeatPreflight;
   canRelayToUser: boolean;

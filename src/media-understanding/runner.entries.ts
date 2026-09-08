@@ -2,15 +2,15 @@
 // rotation, output extraction, and decision summaries.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
-import { expectDefined } from "@openclaw/normalization-core";
-import { ok, type Result } from "@openclaw/normalization-core/result";
+import { findNormalizedProviderValue } from "@carapace/model-catalog-core/provider-id";
+import { expectDefined } from "@carapace/normalization-core";
+import { ok, type Result } from "@carapace/normalization-core/result";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeNullableString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { MediaUnderstandingSkipError } from "../../packages/media-understanding-common/src/errors.js";
 import { extractGeminiResponse } from "../../packages/media-understanding-common/src/output-extract.js";
 import { normalizeMediaExecutionProviderId } from "../../packages/media-understanding-common/src/provider-id.js";
@@ -31,7 +31,7 @@ import {
 import type { RuntimeMsgContext as MsgContext, TemplateContext } from "../auto-reply/templating.js";
 import { applyTemplate } from "../auto-reply/templating.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type {
   MediaUnderstandingConfig,
   MediaUnderstandingModelConfig,
@@ -40,7 +40,7 @@ import { logVerbose, shouldLogVerbose } from "../globals.js";
 import { hasErrnoCode } from "../infra/errors.js";
 import { writeExternalFileWithinRoot } from "../infra/fs-safe.js";
 import { resolveProxyFetchFromEnv } from "../infra/net/proxy-fetch.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../infra/tmp-carapace-dir.js";
 import { runFfmpeg } from "../media/media-services.js";
 import {
   getOfficialExternalPluginCatalogManifest,
@@ -81,7 +81,7 @@ type ProviderRegistry = Map<string, MediaUnderstandingProvider>;
 const loadModelAuth = createLazyRuntimeModule(async () => await import("../agents/model-auth.js"));
 
 function resolveLiteralProviderApiKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
 }): string | null {
   return normalizeNullableString(params.cfg.models?.providers?.[params.providerId]?.apiKey);
@@ -406,7 +406,7 @@ export function buildModelDecision(params: {
 function resolveEntryRunOptions(params: {
   capability: MediaUnderstandingCapability;
   entry: MediaUnderstandingModelConfig;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   config?: MediaUnderstandingConfig;
 }): {
   maxBytes: number;
@@ -466,7 +466,7 @@ function resolveAudioProviderPrompt(params: {
     return params.prompt;
   }
   // OpenAI-compatible transcription prompts guide style/context and should
-  // match the audio language; omit OpenClaw's English default for autodetection
+  // match the audio language; omit Carapace's English default for autodetection
   // and non-English hints unless the user supplied an explicit prompt.
   return undefined;
 }
@@ -486,7 +486,7 @@ async function resolveProviderExecutionAuth(params: {
   capability: MediaUnderstandingCapability;
   providerId: string;
   provider?: MediaUnderstandingProvider;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: MediaUnderstandingModelConfig;
   agentDir?: string;
   workspaceDir?: string;
@@ -591,7 +591,7 @@ async function resolveProviderExecutionAuth(params: {
 
 function resolveProviderRequestContext(params: {
   providerId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: MediaUnderstandingModelConfig;
   config?: MediaUnderstandingConfig;
 }) {
@@ -734,14 +734,14 @@ function formatMissingProviderHint(providerId: string): string {
   if (!catalogHint) {
     return "";
   }
-  return ` Install the official external plugin with: ${formatCliCommand(catalogHint.installCommand)}, then run ${formatCliCommand("openclaw plugins registry --refresh")} and stop and start the gateway service, or run ${formatCliCommand(catalogHint.doctorFixCommand)} to repair automatically.`;
+  return ` Install the official external plugin with: ${formatCliCommand(catalogHint.installCommand)}, then run ${formatCliCommand("carapace plugins registry --refresh")} and stop and start the gateway service, or run ${formatCliCommand(catalogHint.doctorFixCommand)} to repair automatically.`;
 }
 
 /** Executes one provider-backed media-understanding entry for one attachment. */
 export async function runProviderEntry(params: {
   capability: MediaUnderstandingCapability;
   entry: MediaUnderstandingModelConfig;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   attachmentIndex: number;
   cache: MediaAttachmentCache;
@@ -1018,7 +1018,7 @@ export async function runProviderEntry(params: {
 export async function runCliEntry(params: {
   capability: MediaUnderstandingCapability;
   entry: MediaUnderstandingModelConfig;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   attachment: MediaAttachment;
   cache: MediaAttachmentCache;
@@ -1049,7 +1049,7 @@ export async function runCliEntry(params: {
     assertMinAudioSize({ size: stat.size, attachmentIndex });
   }
   const outputDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-media-cli-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-media-cli-"),
   );
   try {
     const mediaPath = await resolveCliMediaPath({

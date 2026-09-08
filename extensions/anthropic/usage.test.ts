@@ -1,4 +1,4 @@
-import { CLAUDE_CLI_PROFILE_ID as SDK_CLAUDE_CLI_PROFILE_ID } from "openclaw/plugin-sdk/provider-auth";
+import { CLAUDE_CLI_PROFILE_ID as SDK_CLAUDE_CLI_PROFILE_ID } from "carapace/plugin-sdk/provider-auth";
 import { describe, expect, it, vi } from "vitest";
 import { CLAUDE_CLI_PROFILE_ID } from "./cli-constants.js";
 import { fetchAnthropicUsage, resolveAnthropicUsageAuth } from "./usage.js";
@@ -136,7 +136,7 @@ describe("Anthropic provider usage", () => {
       resolveOAuthToken: async () => ({ token: "oauth-token" }),
     });
     expect(result).toEqual({
-      token: 'openclaw:anthropic-admin:v1:{"token":"sk-ant-admin-explicit"}',
+      token: 'carapace:anthropic-admin:v1:{"token":"sk-ant-admin-explicit"}',
     });
   });
 
@@ -149,7 +149,7 @@ describe("Anthropic provider usage", () => {
       resolveOAuthToken: async () => null,
     });
     expect(result).toEqual({
-      token: 'openclaw:anthropic-admin:v1:{"token":"sk-ant-admin-profile"}',
+      token: 'carapace:anthropic-admin:v1:{"token":"sk-ant-admin-profile"}',
     });
   });
 
@@ -166,7 +166,7 @@ describe("Anthropic provider usage", () => {
       resolveOAuthToken: async () => ({ token: "oauth-token" }),
     });
     expect(result).toEqual({
-      token: 'openclaw:anthropic-admin:v1:{"token":"sk-ant-admin-billing"}',
+      token: 'carapace:anthropic-admin:v1:{"token":"sk-ant-admin-billing"}',
     });
   });
 

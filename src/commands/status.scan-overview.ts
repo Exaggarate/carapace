@@ -2,7 +2,7 @@
 // It collects config, update, gateway, channel, and local agent state before specialized callers add details.
 
 import type { BestEffortConfigSnapshot } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolveGatewayAuthTokenSourceConflict } from "../gateway/auth-token-source-conflict.js";
 import type { collectChannelStatusIssues as collectChannelStatusIssuesFn } from "../infra/channels-status-issues.js";
 import { resolveOsSummary } from "../infra/os-summary.js";
@@ -49,7 +49,7 @@ const commandSecretTargetsModuleLoader = createLazyImportLoader(
 );
 
 async function resolveStatusChannelsStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   configPath: string;
   gatewayReachable: boolean;
   opts: { timeoutMs?: number; all?: boolean };
@@ -82,8 +82,8 @@ export type StatusScanOverviewResult = {
   coldStart: boolean;
   hasConfiguredChannels: boolean;
   skipColdStartNetworkChecks: boolean;
-  cfg: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  cfg: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
   configDiagnostics: BestEffortConfigSnapshot["configDiagnostics"];
   secretDiagnostics: string[];
   osSummary: ReturnType<typeof resolveOsSummary>;
@@ -126,8 +126,8 @@ export async function collectStatusScanOverview(params: {
   fetchGitUpdate?: boolean;
   includeRegistryUpdate?: boolean;
   resolveHasConfiguredChannels?: (
-    cfg: OpenClawConfig,
-    sourceConfig: OpenClawConfig,
+    cfg: CarapaceConfig,
+    sourceConfig: CarapaceConfig,
   ) => boolean | Promise<boolean>;
   includeChannelsData?: boolean;
   includeLiveChannelStatus?: boolean;

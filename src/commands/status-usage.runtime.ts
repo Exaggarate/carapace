@@ -8,7 +8,7 @@ import { resolveAgentHarnessPolicy } from "../agents/harness/policy.js";
 import { resolveModelAuthLabel } from "../agents/model-auth-label.js";
 import { resolveDefaultModelForAgent } from "../agents/model-selection.js";
 import { listOpenAIAuthProfileProvidersForAgentRuntime } from "../agents/openai-routing.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import {
@@ -21,7 +21,7 @@ import {
 const providerUsageLoader = createLazyImportLoader(() => import("../infra/provider-usage.js"));
 
 function shouldUseConfiguredCodexSyntheticUsage(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentDir: string;
   agentId?: string;
 }): boolean {
@@ -59,7 +59,7 @@ function shouldUseConfiguredCodexSyntheticUsage(params: {
 }
 
 export type StatusUsageSummaryOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   timeoutMs?: number;
   agentId?: string;
   agentDir?: string;

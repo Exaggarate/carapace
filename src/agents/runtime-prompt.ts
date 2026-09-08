@@ -1,6 +1,6 @@
 import os from "node:os";
 import type { ChatType } from "../channels/chat-type.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getMachineDisplayName } from "../infra/machine-name.js";
 import { resolveRuntimeOsLabel } from "../infra/os-summary.js";
 import { normalizeMessageChannel } from "../utils/message-channel.js";
@@ -11,7 +11,7 @@ import { detectRuntimeShell } from "./shell-utils.js";
 import { buildSystemPromptParams } from "./system-prompt-params.js";
 
 export async function resolveAgentRuntimePrompt(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
   workspaceDir?: string;
   cwd?: string;

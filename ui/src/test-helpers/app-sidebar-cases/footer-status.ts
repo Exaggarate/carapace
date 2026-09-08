@@ -15,8 +15,8 @@ type SidebarNativeGatewayTestSnapshot = {
 };
 
 type SidebarNativeGatewayTestWindow = Window & {
-  __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-  __OPENCLAW_NATIVE_GATEWAYS__?: SidebarNativeGatewayTestSnapshot;
+  __CARAPACE_NATIVE_WEB_CHROME__?: boolean;
+  __CARAPACE_NATIVE_GATEWAYS__?: SidebarNativeGatewayTestSnapshot;
 };
 
 type MutableControlUiBuildInfo = {
@@ -36,14 +36,14 @@ function setControlUiBuildInfo(overrides: Partial<ControlUiBuildInfo>): void {
 
 function setNativeGatewayTestState(snapshot: SidebarNativeGatewayTestSnapshot): void {
   const nativeWindow = window as SidebarNativeGatewayTestWindow;
-  nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-  nativeWindow["__OPENCLAW_NATIVE_GATEWAYS__"] = snapshot;
+  nativeWindow["__CARAPACE_NATIVE_WEB_CHROME__"] = true;
+  nativeWindow["__CARAPACE_NATIVE_GATEWAYS__"] = snapshot;
 }
 
 afterEach(() => {
   const nativeWindow = window as SidebarNativeGatewayTestWindow;
-  Reflect.deleteProperty(nativeWindow, "__OPENCLAW_NATIVE_WEB_CHROME__");
-  Reflect.deleteProperty(nativeWindow, "__OPENCLAW_NATIVE_GATEWAYS__");
+  Reflect.deleteProperty(nativeWindow, "__CARAPACE_NATIVE_WEB_CHROME__");
+  Reflect.deleteProperty(nativeWindow, "__CARAPACE_NATIVE_GATEWAYS__");
   Object.assign(CONTROL_UI_BUILD_INFO as MutableControlUiBuildInfo, ORIGINAL_CONTROL_UI_BUILD_INFO);
   vi.useRealTimers();
 });
@@ -91,7 +91,7 @@ describe("AppSidebar gateway footer subtitle", () => {
 
   it("stays hidden outside native chrome", async () => {
     const nativeWindow = window as SidebarNativeGatewayTestWindow;
-    nativeWindow["__OPENCLAW_NATIVE_GATEWAYS__"] = twoGateways;
+    nativeWindow["__CARAPACE_NATIVE_GATEWAYS__"] = twoGateways;
     const gateway = createGateway({} as GatewayBrowserClient);
     const { sidebar } = await mountSidebar(gateway, createSessions("main", ["agent:main:main"]));
 
@@ -141,7 +141,7 @@ describe("AppSidebar gateway footer subtitle", () => {
     expect(status?.textContent).toContain("Reconnecting…");
     expect(status?.textContent).toContain("3 queued");
     expect(
-      (status?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
+      (status?.closest("carapace-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
     ).toBe("connection refused?[redacted-credential]");
     status?.click();
     expect(onRetryConnect).toHaveBeenCalledOnce();
@@ -177,7 +177,7 @@ describe("AppSidebar gateway footer subtitle", () => {
       ],
       currentId: "remote",
     });
-    window.dispatchEvent(new CustomEvent("openclaw:native-gateways-changed"));
+    window.dispatchEvent(new CustomEvent("carapace:native-gateways-changed"));
     await sidebar.updateComplete;
 
     const ariaLabel = sidebar.querySelector(".sidebar-identity-card")?.getAttribute("aria-label");

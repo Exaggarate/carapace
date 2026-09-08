@@ -2,7 +2,7 @@ import { readConfigFileSnapshot } from "../../config/config.js";
 import { resolveFutureConfigActionBlock } from "../../config/future-version-guard.js";
 import { renderConfigValidationIssueLines } from "../../config/issue-location.js";
 import { isPluginPackagingRuntimeOutputInvalidConfigSnapshot } from "../../config/recovery-policy.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.carapace.js";
 import { formatPluginPackagingRuntimeOutputRecoveryHint } from "../config-recovery-hints.js";
 
 /** Service lifecycle actions; only start/restart bring the gateway up. */

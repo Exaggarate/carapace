@@ -1,10 +1,10 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveActiveEmbeddedRunSessionId } from "../../agents/embedded-agent-runner/active-run-projections.js";
 import {
   resolveInternalSessionKey,
   resolveMainSessionAlias,
 } from "../../agents/tools/sessions-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   isAuthorizedTextSlashCommandTurn,
   isNativeCommandTurn,
@@ -35,7 +35,7 @@ function listSteerCandidateSessionKeys(targetSessionKey: string): string[] {
 }
 
 function resolveSteerSourceSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   sessionKey?: string;
 }): string | undefined {
@@ -58,7 +58,7 @@ function resolveSteerSourceSessionKey(params: {
  * whether to retarget session preparation or continue as an ordinary prompt.
  */
 export function resolveActiveExplicitSteerSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   sessionKey?: string;
   commandBody?: string;

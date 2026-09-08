@@ -1,15 +1,15 @@
 import { join } from "node:path";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { buildClawAddPlan } from "./lifecycle.js";
 import { parseClawManifest } from "./schema.js";
-import type { ClawOpenClawProfile, ClawSourceIdentity } from "./types.js";
+import type { ClawCarapaceProfile, ClawSourceIdentity } from "./types.js";
 
 export async function makeProvenancePlan(
   root: string,
   manifestValue: unknown,
   options: {
     workspace?: string;
-    openClawProfile?: ClawOpenClawProfile;
+    carapaceProfile?: ClawCarapaceProfile;
     packagePreflight?: NonNullable<
       Parameters<typeof buildClawAddPlan>[0]["context"]
     >["packagePreflight"];
@@ -24,14 +24,14 @@ export async function makeProvenancePlan(
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 123,
   };
   const plan = await buildClawAddPlan({
     manifest: parsed.manifest,
-    openClawProfile: options.openClawProfile,
+    carapaceProfile: options.carapaceProfile,
     source,
     context: {
       workspace: options.workspace ?? join(root, "workspace-worker"),
@@ -42,11 +42,11 @@ export async function makeProvenancePlan(
 }
 
 export function stateEnv(root: string) {
-  return { OPENCLAW_STATE_DIR: join(root, "state") };
+  return { CARAPACE_STATE_DIR: join(root, "state") };
 }
 
 export function readInstallRow(agentId: string, root: string) {
-  return openOpenClawStateDatabase({ env: stateEnv(root) })
+  return openCarapaceStateDatabase({ env: stateEnv(root) })
     .db.prepare(
       `SELECT agent_id, schema_version, claw_name, claw_version, integrity, plan_integrity,
               workspace, agent_config_digest, agent_owned_paths_json, status, added_at_ms

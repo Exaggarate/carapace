@@ -1,6 +1,6 @@
 import Foundation
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 @preconcurrency import UserNotifications
 
 private struct ApprovalNotificationUTF8Key: Hashable {
@@ -282,7 +282,7 @@ enum ApprovalNotificationBridge {
     }
 
     private static func approvalID(from userInfo: [AnyHashable: Any]) -> String? {
-        let raw = self.openClawPayload(userInfo: userInfo)?["approvalId"] as? String
+        let raw = self.carapacePayload(userInfo: userInfo)?["approvalId"] as? String
         return ApprovalNotificationID.validated(raw)
     }
 
@@ -291,7 +291,7 @@ enum ApprovalNotificationBridge {
         expectedKind: String,
         configuration: ApprovalNotificationConfiguration) -> ApprovalNotificationPrompt?
     {
-        guard let payload = openClawPayload(userInfo: userInfo),
+        guard let payload = carapacePayload(userInfo: userInfo),
               payloadKind(userInfo: userInfo) == expectedKind,
               let approvalId = approvalID(from: userInfo)
         else {
@@ -326,16 +326,16 @@ enum ApprovalNotificationBridge {
     }
 
     private static func payloadKind(userInfo: [AnyHashable: Any]) -> String {
-        let raw = self.openClawPayload(userInfo: userInfo)?["kind"] as? String
+        let raw = self.carapacePayload(userInfo: userInfo)?["kind"] as? String
         let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmed.isEmpty ? "unknown" : trimmed
     }
 
-    private static func openClawPayload(userInfo: [AnyHashable: Any]) -> [String: Any]? {
-        if let payload = userInfo["openclaw"] as? [String: Any] {
+    private static func carapacePayload(userInfo: [AnyHashable: Any]) -> [String: Any]? {
+        if let payload = userInfo["carapace"] as? [String: Any] {
             return payload
         }
-        if let payload = userInfo["openclaw"] as? [AnyHashable: Any] {
+        if let payload = userInfo["carapace"] as? [AnyHashable: Any] {
             return payload.reduce(into: [String: Any]()) { partialResult, pair in
                 guard let key = pair.key as? String else { return }
                 partialResult[key] = pair.value
@@ -348,8 +348,8 @@ enum ApprovalNotificationBridge {
 enum ExecApprovalNotificationBridge {
     static let requestedKind = "exec.approval.requested"
     static let resolvedKind = "exec.approval.resolved"
-    static let categoryIdentifier = "openclaw.exec-approval"
-    static let reviewActionIdentifier = "openclaw.exec-approval.review"
+    static let categoryIdentifier = "carapace.exec-approval"
+    static let reviewActionIdentifier = "carapace.exec-approval.review"
 
     fileprivate static let configuration = ApprovalNotificationConfiguration(
         kind: .exec,
@@ -399,8 +399,8 @@ enum ExecApprovalNotificationBridge {
 enum PluginApprovalNotificationBridge {
     static let requestedKind = "plugin.approval.requested"
     static let resolvedKind = "plugin.approval.resolved"
-    static let categoryIdentifier = "openclaw.plugin-approval"
-    static let reviewActionIdentifier = "openclaw.plugin-approval.review"
+    static let categoryIdentifier = "carapace.plugin-approval"
+    static let reviewActionIdentifier = "carapace.plugin-approval.review"
 
     fileprivate static let configuration = ApprovalNotificationConfiguration(
         kind: .plugin,

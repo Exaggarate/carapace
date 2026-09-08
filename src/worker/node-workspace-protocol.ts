@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { SpawnResult } from "../process/exec.js";
 import type { NodeWorkerWorkspaceTransferInput } from "./node-workspace-transfer-protocol.js";
 import { hasExactOwnKeys } from "./protocol-record.js";
@@ -20,7 +20,7 @@ const ARGV_MAX_ITEMS = 128;
 // REQUEST_MAX_BYTES; the canonical manifest script is larger than an ordinary argv item.
 const ARG_MAX_BYTES = 128 * 1024;
 const TIMEOUT_MAX_MS = 10 * 60 * 1000;
-export const NODE_WORKSPACE_DRAIN_COMMAND = "openclaw-internal-workspace-drain";
+export const NODE_WORKSPACE_DRAIN_COMMAND = "carapace-internal-workspace-drain";
 
 export type NodeWorkerWorkspaceSeedInput =
   | { action: "apply"; key: string }

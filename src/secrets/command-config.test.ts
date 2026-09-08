@@ -1,6 +1,6 @@
 /** Tests command-specific secret assignment collection from config snapshots. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveConfigForRead } from "../config/io.read-helpers.js";
 import {
   cloneConfigWithResolutionFacts,
@@ -72,7 +72,7 @@ describe("analyzeCommandSecretAssignmentsFromSnapshot", () => {
     { name: "escaped template literal", authored: "$${OTHER}", env: {}, expected: "${OTHER}" },
   ])("keeps command assignments source-authoritative: $name", ({ authored, env, expected }) => {
     const read = resolveConfigForRead(buildTalkTestProviderConfig(authored), env);
-    const sourceConfig = read.resolvedConfigRaw as OpenClawConfig;
+    const sourceConfig = read.resolvedConfigRaw as CarapaceConfig;
     setConfigResolutionFacts(sourceConfig, read.resolutionFacts);
     const resolvedConfig = cloneConfigWithResolutionFacts(sourceConfig);
 
@@ -97,7 +97,7 @@ describe("analyzeCommandSecretAssignmentsFromSnapshot", () => {
 
   it("accepts a materialized shorthand whose literal still resembles a reference", () => {
     const read = resolveConfigForRead(buildTalkTestProviderConfig("$SOURCE"), {});
-    const sourceConfig = read.resolvedConfigRaw as OpenClawConfig;
+    const sourceConfig = read.resolvedConfigRaw as CarapaceConfig;
     setConfigResolutionFacts(sourceConfig, read.resolutionFacts);
     const resolvedConfig = buildTalkTestProviderConfig("${OTHER}");
     copyConfigResolutionFactsExcept(sourceConfig, resolvedConfig, [
@@ -129,7 +129,7 @@ describe("analyzeCommandSecretAssignmentsFromSnapshot", () => {
       agents: {
         defaults: {},
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const resolvedConfig = {
       memory: {
         search: {
@@ -142,7 +142,7 @@ describe("analyzeCommandSecretAssignmentsFromSnapshot", () => {
       agents: {
         defaults: {},
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = analyzeCommandSecretAssignmentsFromSnapshot({
       sourceConfig,

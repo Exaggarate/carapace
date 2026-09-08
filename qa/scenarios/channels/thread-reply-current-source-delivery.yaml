@@ -94,7 +94,7 @@ flow:
             senderId: alice
             senderName: Alice
             text:
-              expr: "`@openclaw ${config.promptSnippet}. Use the native reply path. channel id: \\`${config.conversationId}\\`; thread id: \\`${threadId}\\`; exact marker: \\`${config.expectedMarker}\\``"
+              expr: "`@carapace ${config.promptSnippet}. Use the native reply path. channel id: \\`${config.conversationId}\\`; thread id: \\`${threadId}\\`; exact marker: \\`${config.expectedMarker}\\``"
             threadId:
               ref: threadId
         - call: waitForCondition
@@ -160,7 +160,7 @@ flow:
             senderId: alice
             senderName: Alice
             text:
-              expr: "`@openclaw ${config.promptSnippet}. Use the native reply path. channel id: \\`${config.conversationId}\\`; thread id: \\`${threadId}\\`; exact marker: \\`${divergentToolMarker}\\`; divergent final: \\`${divergentFinalMarker}\\``"
+              expr: "`@carapace ${config.promptSnippet}. Use the native reply path. channel id: \\`${config.conversationId}\\`; thread id: \\`${threadId}\\`; exact marker: \\`${divergentToolMarker}\\`; divergent final: \\`${divergentFinalMarker}\\``"
             threadId:
               ref: threadId
         - call: waitForCondition

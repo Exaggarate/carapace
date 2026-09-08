@@ -1,6 +1,6 @@
-import type { ResolvedChannelImplicitMentions } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import type { ResolvedChannelImplicitMentions } from "carapace/plugin-sdk/channel-ingress-runtime";
 // Mattermost type declarations define plugin contracts.
-import type { ChannelPreviewStreamingConfig } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelPreviewStreamingConfig } from "carapace/plugin-sdk/channel-outbound";
 import type { ContextVisibilityMode, DmPolicy, GroupPolicy } from "../runtime-api.js";
 import type { SecretInput } from "./secret-input.js";
 

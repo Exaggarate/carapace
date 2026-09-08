@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { WorkerSessionPlacementRecord } from "../worker-environments/placement-store.js";
 import {
   flushPendingSessionsChangedEvents,
@@ -23,7 +23,7 @@ describe("sessions.reclaim", () => {
     dispatchTestMocks.resolveTarget.mockReturnValue(
       makeSessionTarget({
         sessionId: dispatchTestSessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     dispatchTestMocks.findLiveByOwner.mockReturnValue({
@@ -211,7 +211,7 @@ describe("sessions.reclaim", () => {
   it.each(["success", "persisted failure"] as const)(
     "publishes a %s placement change to another session subscriber",
     async (outcome) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         let placement: WorkerSessionPlacementRecord = {
           ...makeReclaimedPlacement(),
           state: "active",

@@ -36,7 +36,7 @@ describe("CLI config producer lifetime", () => {
       const root = fs.realpathSync(makePluginLoaderTempDir());
       const bundledDir = path.join(root, "bundled");
       const actionPath = path.join(root, "action.txt");
-      const configPath = path.join(root, "openclaw.json");
+      const configPath = path.join(root, "carapace.json");
       const descriptor =
         '{ name: "prepared", description: "Prepared command", hasSubcommands: false }';
       const plugin = writePlugin({
@@ -53,7 +53,7 @@ describe("CLI config producer lifetime", () => {
         api.registerCli(() => {}, { descriptors: [{ ...${descriptor}, machineOutput: () => true }] });
       } };`,
       );
-      const manifestPath = path.join(plugin.dir, "openclaw.plugin.json");
+      const manifestPath = path.join(plugin.dir, "carapace.plugin.json");
       const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
       fs.writeFileSync(
         manifestPath,
@@ -76,7 +76,7 @@ describe("CLI config producer lifetime", () => {
           body: 'throw new Error("provider runtime must not load for config defaults");',
         });
         fs.writeFileSync(
-          path.join(owner.dir, "openclaw.plugin.json"),
+          path.join(owner.dir, "carapace.plugin.json"),
           JSON.stringify({
             id: owner.id,
             providers: ["anthropic"],
@@ -93,16 +93,16 @@ describe("CLI config producer lifetime", () => {
       }
       await withEnvAsync(
         {
-          OPENCLAW_HOME: root,
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_HOME: root,
+          CARAPACE_STATE_DIR: path.join(root, "state"),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
           ANTHROPIC_API_KEY: kind.includes("provider") ? "synthetic-token" : undefined,
           ANTHROPIC_OAUTH_TOKEN: undefined,
         },
         async () => {
-          const discover = vi.spyOn(discovery, "discoverOpenClawPlugins");
+          const discover = vi.spyOn(discovery, "discoverCarapacePlugins");
           const session = createPluginCliLoadSession();
           const read = await session.readConfig(() =>
             readBestEffortConfigSnapshot({
@@ -183,7 +183,7 @@ describe("CLI config producer lifetime", () => {
       path.join(plugin.dir, "doctor-contract-api.cjs"),
       `module.exports = { legacyConfigRules: [${JSON.stringify(rule)}] };`,
     );
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     fs.writeFileSync(
       configPath,
       JSON.stringify({
@@ -196,13 +196,13 @@ describe("CLI config producer lifetime", () => {
     );
     await withEnvAsync(
       {
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
       async () => {
-        const discover = vi.spyOn(discovery, "discoverOpenClawPlugins");
+        const discover = vi.spyOn(discovery, "discoverCarapacePlugins");
         const session = createPluginCliLoadSession();
         const read = await session.readConfig(() =>
           readBestEffortConfigSnapshot({ observe: false, skipPluginValidation: true }),

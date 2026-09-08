@@ -1,6 +1,6 @@
 /** Browser tool screenshot capture, private vision output, and explicit sharing hints. */
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { BrowserProxyRequest } from "./browser-node-proxy.js";
 import {
   browserScreenshotAction,

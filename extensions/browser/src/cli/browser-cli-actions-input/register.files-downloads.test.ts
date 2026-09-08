@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => ({
     ) => Promise<Record<string, unknown>>
   >(async (_opts: unknown, req: { path?: string }) =>
     req.path === "/wait/download" || req.path === "/download"
-      ? { download: { path: "/tmp/openclaw/downloads/file.txt" } }
+      ? { download: { path: "/tmp/carapace/downloads/file.txt" } }
       : { ok: true },
   ),
 }));
@@ -34,7 +34,7 @@ vi.spyOn(cliCoreApiModule.defaultRuntime, "error").mockImplementation(browserCli
 vi.spyOn(cliCoreApiModule.defaultRuntime, "exit").mockImplementation(browserCliRuntime.exit);
 vi.spyOn(browserPathsModule, "resolveExistingUploadPaths").mockResolvedValue({
   ok: true,
-  paths: ["/tmp/openclaw/uploads/a.pdf", "/tmp/openclaw/uploads/b.pdf"],
+  paths: ["/tmp/carapace/uploads/a.pdf", "/tmp/carapace/uploads/b.pdf"],
 });
 
 const { registerBrowserActionInputCommands } = await import("./register.js");
@@ -64,7 +64,7 @@ describe("browser action input file/download commands", () => {
       [
         "browser",
         "upload",
-        "/tmp/openclaw/uploads/a.pdf",
+        "/tmp/carapace/uploads/a.pdf",
         "media://inbound/b",
         "--input-ref",
         "file-input",
@@ -79,7 +79,7 @@ describe("browser action input file/download commands", () => {
     );
 
     expect(browserPathsModule.resolveExistingUploadPaths).toHaveBeenCalledWith({
-      requestedPaths: ["/tmp/openclaw/uploads/a.pdf", "media://inbound/b"],
+      requestedPaths: ["/tmp/carapace/uploads/a.pdf", "media://inbound/b"],
     });
     const request = mocks.callBrowserRequest.mock.calls.at(-1)?.[1] as
       | { path?: string; body?: Record<string, unknown> }
@@ -87,7 +87,7 @@ describe("browser action input file/download commands", () => {
     expect(request).toMatchObject({
       path: "/hooks/file-chooser",
       body: {
-        paths: ["/tmp/openclaw/uploads/a.pdf", "/tmp/openclaw/uploads/b.pdf"],
+        paths: ["/tmp/carapace/uploads/a.pdf", "/tmp/carapace/uploads/b.pdf"],
         inputRef: "file-input",
         element: "input[type=file]",
         targetId: "tab-1",

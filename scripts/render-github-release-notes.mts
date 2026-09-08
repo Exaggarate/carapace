@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import {
   compactReleaseNotes,
-  OPENCLAW_RELEASE_TAG_PATTERN,
+  CARAPACE_RELEASE_TAG_PATTERN,
   validateReleaseNotesRepository as validateRepository,
   validateReleaseNotesTag as validateTag,
 } from "./lib/release-notes-compaction.mjs";
@@ -185,7 +185,7 @@ export function releaseNotesVersionForTag(tag: unknown) {
 }
 
 function validateShippedBaselineRef(ref: string) {
-  if (!OPENCLAW_RELEASE_TAG_PATTERN.test(ref)) {
+  if (!CARAPACE_RELEASE_TAG_PATTERN.test(ref)) {
     fail(`invalid shipped release tag: ${ref}`);
   }
 }

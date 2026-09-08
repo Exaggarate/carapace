@@ -1,6 +1,6 @@
 // Matrix setup module handles plugin onboarding behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
 import {
   type ChannelSetupWizardAdapter,
   formatDocsLink,
@@ -11,14 +11,14 @@ import {
   promptChannelAccessConfig,
   splitSetupEntries,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-policy";
+} from "carapace/plugin-sdk/setup";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-policy";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
   normalizeUniqueStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { requiresExplicitMatrixDefaultAccount } from "./account-selection.js";
 import {
   listMatrixAccountIds,
@@ -195,7 +195,7 @@ async function configureMatrixInviteAutoJoin(params: {
   await params.prompter.note(
     [
       "WARNING: Matrix invite auto-join defaults to off.",
-      "OpenClaw agents will not join invited rooms or fresh DM-style invites unless you set autoJoin.",
+      "Carapace agents will not join invited rooms or fresh DM-style invites unless you set autoJoin.",
       'Choose "allowlist" to restrict joins or "always" to join every invite.',
     ].join("\n"),
     "Matrix invite auto-join",
@@ -570,7 +570,7 @@ async function runMatrixConfigure(params: {
     normalizeStringifiedOptionalString(
       await params.prompter.text({
         message: "Matrix device name (optional)",
-        initialValue: existing.deviceName ?? "OpenClaw Gateway",
+        initialValue: existing.deviceName ?? "Carapace Gateway",
       }),
     ) ?? "";
 

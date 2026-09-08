@@ -1,6 +1,6 @@
 import fs from "node:fs";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "carapace/plugin-sdk/qa-runner-runtime";
 import {
   assertQaGatewayCredentialLeaseQuarantine,
   shouldRetainQaGatewayCredentialLease,
@@ -51,7 +51,7 @@ function renderTelegramQaInboundText(
   botUsername: string,
 ) {
   const commandName = input.nativeCommand?.name.trim().toLowerCase();
-  const renderedText = input.text.replaceAll("@openclaw", `@${botUsername}`);
+  const renderedText = input.text.replaceAll("@carapace", `@${botUsername}`);
   const commandToken = renderedText.match(/^\S+/u)?.[0];
   return commandName && commandToken?.toLowerCase() === `/${commandName}`
     ? `/${commandName}@${botUsername}${renderedText.slice(commandToken.length)}`
@@ -279,7 +279,7 @@ export async function createTelegramQaTransportAdapter(
       };
     },
     createGatewayConfig: () =>
-      buildTelegramQaConfig({} as OpenClawConfig, {
+      buildTelegramQaConfig({} as CarapaceConfig, {
         apiRoot: activeApiProxy.apiRoot,
         directMessageOnly,
         groupId: credentialLease.payload.groupId,

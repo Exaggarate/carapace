@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   loadTranscriptEvents,
@@ -8,15 +8,15 @@ import { withOwnedSessionTranscriptWrites } from "../config/sessions/transcript-
 import { createUpdateRun, getUpdateRun } from "../infra/update-run-ledger.js";
 import { renderUpdateRunNotice } from "../infra/update-run-report.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createUpdateRunNotifier } from "./update-run-notice.runtime.js";
 
 describe("host-owned update notices", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "openclaw-update-notice-" });
+    state = await createCarapaceTestState({ prefix: "carapace-update-notice-" });
   });
   afterEach(async () => {
     await state.cleanup();

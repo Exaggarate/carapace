@@ -1,10 +1,10 @@
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import { resolveProviderEntryApiKeyProfileReference } from "../../agents/model-auth.js";
 import type { ProviderAuthAliasLookupParams } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 
 export function resolveConfigBoundProfileIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   store: AuthProfileStore,
   authAliasLookupParams?: ProviderAuthAliasLookupParams,
 ): Set<string> {

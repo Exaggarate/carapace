@@ -1,9 +1,9 @@
 import CoreMotion
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 final class MotionService: MotionServicing {
-    func activities(params: OpenClawMotionActivityParams) async throws -> OpenClawMotionActivityPayload {
+    func activities(params: CarapaceMotionActivityParams) async throws -> CarapaceMotionActivityPayload {
         guard CMMotionActivityManager.isActivityAvailable() else {
             throw NSError(domain: "Motion", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "MOTION_UNAVAILABLE: activity not supported on this device",
@@ -19,7 +19,7 @@ final class MotionService: MotionServicing {
         let limit = max(1, min(params.limit ?? 200, 1000))
 
         let manager = CMMotionActivityManager()
-        let mapped: [OpenClawMotionActivityEntry] = try await withCheckedThrowingContinuation { cont in
+        let mapped: [CarapaceMotionActivityEntry] = try await withCheckedThrowingContinuation { cont in
             manager.queryActivityStarting(from: start, to: end, to: OperationQueue()) { activity, error in
                 if let error {
                     cont.resume(throwing: error)
@@ -27,7 +27,7 @@ final class MotionService: MotionServicing {
                     let formatter = ISO8601DateFormatter()
                     let sliced = Array((activity ?? []).suffix(limit))
                     let entries = sliced.map { entry in
-                        OpenClawMotionActivityEntry(
+                        CarapaceMotionActivityEntry(
                             startISO: formatter.string(from: entry.startDate),
                             endISO: formatter.string(from: end),
                             confidence: Self.confidenceString(entry.confidence),
@@ -43,10 +43,10 @@ final class MotionService: MotionServicing {
             }
         }
 
-        return OpenClawMotionActivityPayload(activities: mapped)
+        return CarapaceMotionActivityPayload(activities: mapped)
     }
 
-    func pedometer(params: OpenClawPedometerParams) async throws -> OpenClawPedometerPayload {
+    func pedometer(params: CarapacePedometerParams) async throws -> CarapacePedometerPayload {
         guard CMPedometer.isStepCountingAvailable() else {
             throw NSError(domain: "Motion", code: 2, userInfo: [
                 NSLocalizedDescriptionKey: "PEDOMETER_UNAVAILABLE: step counting not supported",
@@ -66,7 +66,7 @@ final class MotionService: MotionServicing {
                     cont.resume(throwing: error)
                 } else {
                     let formatter = ISO8601DateFormatter()
-                    let payload = OpenClawPedometerPayload(
+                    let payload = CarapacePedometerPayload(
                         startISO: formatter.string(from: start),
                         endISO: formatter.string(from: end),
                         steps: data?.numberOfSteps.intValue,

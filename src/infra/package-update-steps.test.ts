@@ -40,7 +40,7 @@ function createPnpmTarget(globalRoot: string): ResolvedGlobalInstallTarget {
     manager: "pnpm",
     command: "pnpm",
     globalRoot,
-    packageRoot: path.join(globalRoot, "openclaw"),
+    packageRoot: path.join(globalRoot, "carapace"),
   };
 }
 
@@ -131,17 +131,17 @@ describe("runGlobalPackageUpdateSteps", () => {
   it.runIf(process.platform !== "win32")(
     "swaps npm package roots that contain package-manager hardlinks",
     async () => {
-      await withTestDir({ prefix: "openclaw-package-update-hardlinks-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-hardlinks-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot = path.join(prefix, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         await addHardlinkedPackageFile(packageRoot, path.join(base, "cache", "existing"));
 
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv, cwd }): Promise<PackageUpdateStepResult> => {
@@ -153,7 +153,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             if (!stagePrefix) {
               throw new Error("missing staged prefix");
             }
-            const stagedPackageRoot = path.join(stagePrefix, "lib", "node_modules", "openclaw");
+            const stagedPackageRoot = path.join(stagePrefix, "lib", "node_modules", "carapace");
             await writePackageRoot(stagedPackageRoot, "2.0.0");
             await addHardlinkedPackageFile(stagedPackageRoot, path.join(base, "cache", "staged"));
             return {
@@ -184,10 +184,10 @@ describe("runGlobalPackageUpdateSteps", () => {
   );
 
   it("swaps staged npm updates into an explicitly selected direct node_modules root", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-direct-root-" }, async (base) => {
-      const managedRoot = path.join(base, ".openclaw", "npm", "node_modules");
-      const packageRoot = path.join(managedRoot, "openclaw");
-      const staleRenameDir = path.join(managedRoot, ".openclaw-stale");
+    await withTestDir({ prefix: "carapace-package-update-direct-root-" }, async (base) => {
+      const managedRoot = path.join(base, ".carapace", "npm", "node_modules");
+      const packageRoot = path.join(managedRoot, "carapace");
+      const staleRenameDir = path.join(managedRoot, ".carapace-stale");
       await writePackageRoot(packageRoot, "1.0.0");
       await fs.mkdir(staleRenameDir);
 
@@ -203,11 +203,11 @@ describe("runGlobalPackageUpdateSteps", () => {
           throw new Error("missing staged prefix");
         }
         expect(path.dirname(stagePrefix)).toBe(managedRoot);
-        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "openclaw"), "2.0.0");
+        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "carapace"), "2.0.0");
         await fs.mkdir(path.join(stagePrefix, "bin"), { recursive: true });
         await fs.symlink(
-          "../lib/node_modules/openclaw/dist/index.js",
-          path.join(stagePrefix, "bin", "openclaw"),
+          "../lib/node_modules/carapace/dist/index.js",
+          path.join(stagePrefix, "bin", "carapace"),
         );
         return {
           name,
@@ -223,8 +223,8 @@ describe("runGlobalPackageUpdateSteps", () => {
           ...createNpmTarget(managedRoot),
           directNodeModulesRoot: true,
         },
-        installSpec: "openclaw@2.0.0",
-        packageName: "openclaw",
+        installSpec: "carapace@2.0.0",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(path.join(base, "shell", "lib", "node_modules")),
         runStep,
@@ -237,32 +237,32 @@ describe("runGlobalPackageUpdateSteps", () => {
       await expect(fs.readFile(path.join(packageRoot, "package.json"), "utf8")).resolves.toContain(
         '"version":"2.0.0"',
       );
-      await expectPathMissing(path.join(managedRoot, ".bin", "openclaw"));
+      await expectPathMissing(path.join(managedRoot, ".bin", "carapace"));
     });
   });
 
   it("accepts v-prefixed exact npm specs when verifying staged installs", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-v-prefix-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-v-prefix-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
 
       const runStep = vi.fn(async ({ name, argv, cwd }): Promise<PackageUpdateStepResult> => {
         if (name !== "global update") {
           throw new Error(`unexpected step ${name}`);
         }
-        expect(argv).toContain("openclaw@v2.0.0");
+        expect(argv).toContain("carapace@v2.0.0");
         const prefixIndex = argv.indexOf("--prefix");
         const stagePrefix = argv[prefixIndex + 1];
         if (!stagePrefix) {
           throw new Error("missing staged prefix");
         }
-        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "openclaw"), "2.0.0");
+        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "carapace"), "2.0.0");
         await fs.mkdir(path.join(stagePrefix, "bin"), { recursive: true });
         await fs.symlink(
-          "../lib/node_modules/openclaw/dist/index.js",
-          path.join(stagePrefix, "bin", "openclaw"),
+          "../lib/node_modules/carapace/dist/index.js",
+          path.join(stagePrefix, "bin", "carapace"),
         );
         return {
           name,
@@ -275,8 +275,8 @@ describe("runGlobalPackageUpdateSteps", () => {
 
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createNpmTarget(globalRoot),
-        installSpec: "openclaw@v2.0.0",
-        packageName: "openclaw",
+        installSpec: "carapace@v2.0.0",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(globalRoot),
         runStep,
@@ -293,15 +293,15 @@ describe("runGlobalPackageUpdateSteps", () => {
   });
 
   it.each([
-    { installSpec: "openclaw@^2.0.0", installedVersion: "2.4.1" },
-    { installSpec: "openclaw@nightly", installedVersion: "3.0.0-beta.2" },
+    { installSpec: "carapace@^2.0.0", installedVersion: "2.4.1" },
+    { installSpec: "carapace@nightly", installedVersion: "3.0.0-beta.2" },
   ])(
     "accepts concrete version $installedVersion staged from $installSpec",
     async ({ installSpec, installedVersion }) => {
-      await withTestDir({ prefix: "openclaw-package-update-moving-spec-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-moving-spec-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot = path.join(prefix, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
         const postVerifyStep = vi.fn(async (root: string) => ({
           name: "candidate validation",
@@ -314,7 +314,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
           installSpec,
-          packageName: "openclaw",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv, cwd }) => {
@@ -326,7 +326,7 @@ describe("runGlobalPackageUpdateSteps", () => {
               throw new Error("missing staged prefix");
             }
             await writePackageRoot(
-              path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+              path.join(stagePrefix, "lib", "node_modules", "carapace"),
               installedVersion,
             );
             return {
@@ -358,11 +358,11 @@ describe("runGlobalPackageUpdateSteps", () => {
   );
 
   it("packs npm GitHub specs before installing into the staged prefix", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-npm-pack-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-npm-pack-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
-      const sourceSpec = "OpenClaw@github:openclaw/openclaw#release/2026.5.12";
+      const packageRoot = path.join(globalRoot, "carapace");
+      const sourceSpec = "Carapace@github:carapace/carapace#release/2026.5.12";
       await writePackageRoot(packageRoot, "1.0.0");
 
       let packDir: string | undefined;
@@ -382,7 +382,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             throw new Error("missing pack destination");
           }
           packDir = destination;
-          await fs.writeFile(path.join(destination, "openclaw-2.0.0.tgz"), "packed\n", "utf8");
+          await fs.writeFile(path.join(destination, "carapace-2.0.0.tgz"), "packed\n", "utf8");
           return {
             name,
             command: argv.join(" "),
@@ -403,21 +403,21 @@ describe("runGlobalPackageUpdateSteps", () => {
           "npm",
           "i",
           "-g",
-          `--allow-scripts=${path.join(packDir, "openclaw-2.0.0.tgz")}`,
+          `--allow-scripts=${path.join(packDir, "carapace-2.0.0.tgz")}`,
           "--prefix",
           stagePrefix,
-          path.join(packDir, "openclaw-2.0.0.tgz"),
+          path.join(packDir, "carapace-2.0.0.tgz"),
           "--no-fund",
           "--no-audit",
           "--loglevel=error",
           "--min-release-age=0",
         ]);
         expect(cwd).toBe(packDir);
-        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "openclaw"), "2.0.0");
+        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "carapace"), "2.0.0");
         await fs.mkdir(path.join(stagePrefix, "bin"), { recursive: true });
         await fs.symlink(
-          "../lib/node_modules/openclaw/dist/index.js",
-          path.join(stagePrefix, "bin", "openclaw"),
+          "../lib/node_modules/carapace/dist/index.js",
+          path.join(stagePrefix, "bin", "carapace"),
         );
         return {
           name,
@@ -431,7 +431,7 @@ describe("runGlobalPackageUpdateSteps", () => {
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createNpmTarget(globalRoot),
         installSpec: sourceSpec,
-        packageName: "openclaw",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(globalRoot),
         runStep,
@@ -455,30 +455,30 @@ describe("runGlobalPackageUpdateSteps", () => {
   it.each([
     {
       name: "full git url",
-      sourceSpec: "https://github.com/openclaw/openclaw.git#main",
+      sourceSpec: "https://github.com/Exaggarate/carapace.git#main",
     },
     {
       name: "hosted GitHub URL without git suffix",
-      sourceSpec: "https://github.com/openclaw/openclaw#main",
+      sourceSpec: "https://github.com/Exaggarate/carapace#main",
     },
     {
       name: "aliased hosted GitHub URL without git suffix",
-      sourceSpec: "openclaw@https://github.com/openclaw/openclaw#main",
+      sourceSpec: "carapace@https://github.com/Exaggarate/carapace#main",
     },
     {
       name: "GitHub shorthand",
-      sourceSpec: "openclaw/openclaw#main",
+      sourceSpec: "carapace/carapace#main",
     },
     {
       name: "SCP-style SSH",
-      sourceSpec: "git@github.com:openclaw/openclaw.git#main",
+      sourceSpec: "git@github.com:Exaggarate/carapace.git#main",
     },
   ] as const)(
     "packs additional npm git source spec forms before install: $name",
     async ({ sourceSpec }) => {
-      await withTestDir({ prefix: "openclaw-package-update-npm-pack-variant-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-npm-pack-variant-" }, async (base) => {
         const globalRoot = path.join(base, "prefix", "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
 
         let tarball: string | undefined;
@@ -489,7 +489,7 @@ describe("runGlobalPackageUpdateSteps", () => {
               throw new Error("missing pack destination");
             }
             expect(argv.slice(0, 3)).toEqual(["npm", "pack", sourceSpec]);
-            tarball = path.join(destination, "openclaw-2.0.0.tgz");
+            tarball = path.join(destination, "carapace-2.0.0.tgz");
             await fs.writeFile(tarball, "packed\n", "utf8");
             return {
               name,
@@ -508,7 +508,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             throw new Error("missing staged prefix");
           }
           await writePackageRoot(
-            path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+            path.join(stagePrefix, "lib", "node_modules", "carapace"),
             "2.0.0",
           );
           return {
@@ -523,7 +523,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
           installSpec: sourceSpec,
-          packageName: "openclaw",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep,
@@ -541,10 +541,10 @@ describe("runGlobalPackageUpdateSteps", () => {
   );
 
   it("swaps staged npm package roots through the copy fallback when rename crosses devices", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-exdev-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-exdev-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
 
       const realRename = fs.rename.bind(fs);
       let stagedPackageRoot: string | undefined;
@@ -567,8 +567,8 @@ describe("runGlobalPackageUpdateSteps", () => {
       try {
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv, cwd }) => {
@@ -578,7 +578,7 @@ describe("runGlobalPackageUpdateSteps", () => {
               throw new Error("missing staged prefix");
             }
             const stageLayout = resolveNpmGlobalPrefixLayoutFromPrefix(stagePrefix);
-            stagedPackageRoot = path.join(stageLayout.globalRoot, "openclaw");
+            stagedPackageRoot = path.join(stageLayout.globalRoot, "carapace");
             await writePackageRoot(stagedPackageRoot, "2.0.0");
             return {
               name,
@@ -604,10 +604,10 @@ describe("runGlobalPackageUpdateSteps", () => {
   });
 
   it("stages pnpm-detected updates through npm when the global root has npm prefix layout", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-pnpm-staged-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-pnpm-staged-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       const staleChunk = path.join(packageRoot, "dist", "install-C_GuuNz6.js");
       await writePackageRoot(packageRoot, "1.0.0");
       await fs.writeFile(staleChunk, 'import "./install.runtime-Xom5hOHq.js";\n', "utf8");
@@ -620,14 +620,14 @@ describe("runGlobalPackageUpdateSteps", () => {
         expect(argv).toContain("i");
         expect(argv).toContain("-g");
         expect(argv).toContain("--prefix");
-        expect(argv).toContain("openclaw@2.0.0");
+        expect(argv).toContain("carapace@2.0.0");
         expect(argv).not.toContain("pnpm");
         const prefixIndex = argv.indexOf("--prefix");
         const stagePrefix = argv[prefixIndex + 1];
         if (!stagePrefix) {
           throw new Error("missing staged prefix");
         }
-        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "openclaw"), "2.0.0");
+        await writePackageRoot(path.join(stagePrefix, "lib", "node_modules", "carapace"), "2.0.0");
         return {
           name,
           command: argv.join(" "),
@@ -639,8 +639,8 @@ describe("runGlobalPackageUpdateSteps", () => {
 
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createPnpmTarget(globalRoot),
-        installSpec: "openclaw@2.0.0",
-        packageName: "openclaw",
+        installSpec: "carapace@2.0.0",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(globalRoot),
         runStep,
@@ -660,10 +660,10 @@ describe("runGlobalPackageUpdateSteps", () => {
   it("keeps Windows pnpm global roots on the pnpm update path", async () => {
     const platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     try {
-      await withTestDir({ prefix: "openclaw-package-update-win32-pnpm-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-win32-pnpm-" }, async (base) => {
         const globalDir = path.join(base, "pnpm", "global");
         const globalRoot = path.join(globalDir, "5", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
 
         const runStep = vi.fn(
@@ -671,7 +671,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             if (name !== "global update") {
               throw new Error(`unexpected step ${name}`);
             }
-            expect(argv).toEqual(["pnpm", "add", "-g", "--allow-build=openclaw", "openclaw@2.0.0"]);
+            expect(argv).toEqual(["pnpm", "add", "-g", "--allow-build=carapace", "carapace@2.0.0"]);
             expect(env).toMatchObject({
               pnpm_config_global_dir: globalDir,
               PNPM_CONFIG_GLOBAL_DIR: globalDir,
@@ -689,8 +689,8 @@ describe("runGlobalPackageUpdateSteps", () => {
 
         const result = await runGlobalPackageUpdateSteps({
           installTarget: createPnpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep,
@@ -709,10 +709,10 @@ describe("runGlobalPackageUpdateSteps", () => {
   it.each(["delayed", "manual"] as const)(
     "keeps a successful staged swap with %s cleanup after a Windows native module error",
     async (cleanupMode) => {
-      await withTestDir({ prefix: "openclaw-package-update-staged-cleanup-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-update-staged-cleanup-" }, async (base) => {
         const prefix = path.join(base, "prefix");
         const globalRoot = path.join(prefix, "lib", "node_modules");
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         await writePackageRoot(packageRoot, "1.0.0");
 
         const realRm = fs.rm;
@@ -720,7 +720,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         const renameSpy = vi.spyOn(fs, "rename").mockImplementation(async (...args) => {
           if (
             cleanupMode === "manual" &&
-            path.basename(String(args[1])).startsWith(".openclaw-package-backup-")
+            path.basename(String(args[1])).startsWith(".carapace-package-backup-")
           ) {
             throw Object.assign(new Error("backup retirement failed"), { code: "EACCES" });
           }
@@ -728,7 +728,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         });
         const rmSpy = vi.spyOn(fs, "rm").mockImplementation(async (target, options) => {
           const targetPath = String(target);
-          if (path.basename(targetPath).startsWith(".openclaw.package-backup-")) {
+          if (path.basename(targetPath).startsWith(".carapace.package-backup-")) {
             throw Object.assign(new Error("EPERM: operation not permitted, unlink native.node"), {
               code: "EPERM",
             });
@@ -739,8 +739,8 @@ describe("runGlobalPackageUpdateSteps", () => {
         try {
           const result = await runGlobalPackageUpdateSteps({
             installTarget: createNpmTarget(globalRoot),
-            installSpec: "openclaw@2.0.0",
-            packageName: "openclaw",
+            installSpec: "carapace@2.0.0",
+            packageName: "carapace",
             packageRoot,
             runCommand: createRootRunner(globalRoot),
             runStep: async ({ name, argv, cwd }) => {
@@ -750,7 +750,7 @@ describe("runGlobalPackageUpdateSteps", () => {
                 throw new Error("missing staged prefix");
               }
               const stageLayout = resolveNpmGlobalPrefixLayoutFromPrefix(stagePrefix);
-              await writePackageRoot(path.join(stageLayout.globalRoot, "openclaw"), "2.0.0");
+              await writePackageRoot(path.join(stageLayout.globalRoot, "carapace"), "2.0.0");
               return {
                 name,
                 command: argv.join(" "),
@@ -771,7 +771,7 @@ describe("runGlobalPackageUpdateSteps", () => {
           );
           const delayedCleanupDirs = (await fs.readdir(globalRoot)).filter((entry) =>
             entry.startsWith(
-              cleanupMode === "manual" ? ".openclaw.package-backup-" : ".openclaw-package-backup-",
+              cleanupMode === "manual" ? ".carapace.package-backup-" : ".carapace-package-backup-",
             ),
           );
           expect(delayedCleanupDirs).toHaveLength(1);
@@ -787,17 +787,17 @@ describe("runGlobalPackageUpdateSteps", () => {
   );
 
   it("does not run post-verify work when staged npm verification fails", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-verify-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-verify-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
       const postVerifyStep = vi.fn();
 
       const result = await runGlobalPackageUpdateSteps({
         installTarget: createNpmTarget(globalRoot),
-        installSpec: "openclaw@2.0.0",
-        packageName: "openclaw",
+        installSpec: "carapace@2.0.0",
+        packageName: "carapace",
         packageRoot,
         runCommand: createRootRunner(globalRoot),
         runStep: async ({ name, argv, cwd }) => {
@@ -807,7 +807,7 @@ describe("runGlobalPackageUpdateSteps", () => {
             throw new Error("missing staged prefix");
           }
           await writePackageRoot(
-            path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+            path.join(stagePrefix, "lib", "node_modules", "carapace"),
             "1.5.0",
           );
           return {
@@ -850,13 +850,13 @@ describe("runGlobalPackageUpdateSteps", () => {
       "mode restore",
       "package restore",
     ] as const)("preserves staged swap rollback safety after %s failure", async (failure) => {
-    await withTestDir({ prefix: "openclaw-package-update-shim-rollback-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-shim-rollback-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
-      const targetShim = path.join(prefix, "bin", "openclaw");
-      const oldLink = "../lib/node_modules/openclaw/dist/legacy.js";
-      const newLink = "../lib/node_modules/openclaw/dist/index.js";
+      const packageRoot = path.join(globalRoot, "carapace");
+      const targetShim = path.join(prefix, "bin", "carapace");
+      const oldLink = "../lib/node_modules/carapace/dist/legacy.js";
+      const newLink = "../lib/node_modules/carapace/dist/index.js";
       await writePackageRoot(packageRoot, "1.0.0");
       await fs.mkdir(path.dirname(targetShim), { recursive: true });
       if (failure === "symlink copy") {
@@ -886,7 +886,7 @@ describe("runGlobalPackageUpdateSteps", () => {
           (failure !== "backup copy" && source === stagedShimForFailure) ||
           (failure === "shim restore" &&
             destination === targetShim &&
-            path.basename(path.dirname(source)).startsWith(".openclaw.shim-backup-"))
+            path.basename(path.dirname(source)).startsWith(".carapace.shim-backup-"))
         ) {
           throw createFsError("EACCES", `${failure} failed`);
         }
@@ -902,7 +902,7 @@ describe("runGlobalPackageUpdateSteps", () => {
         if (
           failure === "package restore" &&
           String(args[1]) === packageRoot &&
-          path.basename(String(args[0])).startsWith(".openclaw.package-backup-")
+          path.basename(String(args[0])).startsWith(".carapace.package-backup-")
         ) {
           throw createFsError("EACCES", "package restoration failed");
         }
@@ -914,8 +914,8 @@ describe("runGlobalPackageUpdateSteps", () => {
       try {
         result = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           beforeActivate,
@@ -925,10 +925,10 @@ describe("runGlobalPackageUpdateSteps", () => {
               throw new Error("missing staged prefix");
             }
             await writePackageRoot(
-              path.join(stagePrefix, "lib", "node_modules", "openclaw"),
+              path.join(stagePrefix, "lib", "node_modules", "carapace"),
               "2.0.0",
             );
-            const stagedShim = path.join(stagePrefix, "bin", "openclaw");
+            const stagedShim = path.join(stagePrefix, "bin", "carapace");
             stagedShimForFailure = stagedShim;
             await fs.mkdir(path.dirname(stagedShim), { recursive: true });
             if (failure === "symlink copy") {
@@ -968,11 +968,11 @@ describe("runGlobalPackageUpdateSteps", () => {
           await expectPathMissing(targetShim);
         }
         const backups = (await fs.readdir(globalRoot)).filter((entry) =>
-          entry.startsWith(".openclaw.shim-backup-"),
+          entry.startsWith(".carapace.shim-backup-"),
         );
         expect(backups).toHaveLength(1);
         await expect(
-          fs.readFile(path.join(globalRoot, backups[0] ?? "", "openclaw"), "utf8"),
+          fs.readFile(path.join(globalRoot, backups[0] ?? "", "carapace"), "utf8"),
         ).resolves.toBe("old shim\n");
       } else {
         await expect(fs.readFile(targetShim, "utf8")).resolves.toBe("old shim\n");
@@ -991,8 +991,8 @@ describe("runGlobalPackageUpdateSteps", () => {
         expect(backups.length).toBeGreaterThan(0);
         const retry = await runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ name, argv, cwd }) => ({
@@ -1021,18 +1021,18 @@ describe("runGlobalPackageUpdateSteps", () => {
   });
 
   it("cleans the staged npm prefix when the install command throws", async () => {
-    await withTestDir({ prefix: "openclaw-package-update-cleanup-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-package-update-cleanup-" }, async (base) => {
       const prefix = path.join(base, "prefix");
       const globalRoot = path.join(prefix, "lib", "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await writePackageRoot(packageRoot, "1.0.0");
 
       let stagePrefix: string | undefined;
       await expect(
         runGlobalPackageUpdateSteps({
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           runStep: async ({ argv }) => {

@@ -1,4 +1,4 @@
-import { asNullableObjectRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableObjectRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixReplacement, resolveMatrixReplacementContent } from "../media-text.js";
 import type { MatrixClient, MatrixRawEvent } from "../sdk.js";
 import { getMatrixEventProjection } from "../sdk/event-helpers.js";

@@ -186,7 +186,7 @@ export async function installPluginFromNpmSpec(
     npmResolution,
   });
 
-  const policyTempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-npm-policy-"));
+  const policyTempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-npm-policy-"));
   try {
     const policyMetadataPath = path.join(policyTempDir, "npm-package-metadata.json");
     await fs.writeFile(

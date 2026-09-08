@@ -1,5 +1,5 @@
 // Text-end delivery, snapshot reconciliation, and replay de-duplication.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   createSubscribedSessionHarness,

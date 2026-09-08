@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 import { isPathInside } from "../infra/path-guards.js";
 
 const GATEWAY_NAMESPACE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;

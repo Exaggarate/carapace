@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   isRealtimeVoiceWakeNameRequired,
   resolveRealtimeVoiceBargeIn,
@@ -10,7 +10,7 @@ import {
 
 const cfg = {
   agents: { list: [{ id: "agent-1", identity: { name: "Molty" } }] },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 describe("realtime voice session policy", () => {
   it("defaults agent-proxy sessions to owner consults and adaptive wake names", () => {
@@ -30,7 +30,7 @@ describe("realtime voice session policy", () => {
       consultToolsAllow: undefined,
       consultPolicy: "always",
       wakeNamePolicy: "automatic",
-      wakeNames: ["openclaw", "molty"],
+      wakeNames: ["carapace", "molty"],
       autoRespondToAudio: false,
     });
   });

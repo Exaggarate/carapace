@@ -77,7 +77,7 @@ function createDispatchFixture(
     targetSource?: Record<string, string>;
   } = {},
 ) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-release-dispatch-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-release-dispatch-"));
   const origin = join(root, "origin.git");
   const checkout = join(root, "checkout");
   const binDir = join(root, "bin");
@@ -115,8 +115,8 @@ Atomics.wait = (array, index, value, timeout) => {
 
   execFileSync("git", ["init", "--bare", origin], { stdio: "ignore" });
   execFileSync("git", ["init", "-b", "main"], { cwd: checkout, stdio: "ignore" });
-  runGit(checkout, ["config", "user.email", "release-test@openclaw.invalid"]);
-  runGit(checkout, ["config", "user.name", "OpenClaw Release Test"]);
+  runGit(checkout, ["config", "user.email", "release-test@carapace.invalid"]);
+  runGit(checkout, ["config", "user.name", "Carapace Release Test"]);
   mkdirSync(join(checkout, ".github", "workflows"), { recursive: true });
   mkdirSync(join(checkout, "scripts"), { recursive: true });
   writeFileSync(join(checkout, "package.json"), '{"version":"2026.7.9"}\n');
@@ -222,7 +222,7 @@ fs.appendFileSync(process.env.MOCK_GH_CALLS, JSON.stringify(args) + "\\n");
 const parentRunStates = ${JSON.stringify(options.parentRunStates ?? [{ conclusion: "success", status: "completed" }])};
 const parentRunIndexPath = ${JSON.stringify(parentRunIndexPath)};
 const runDiscoveryIndexPath = ${JSON.stringify(runDiscoveryIndexPath)};
-const endpoint = args.find((arg) => arg.startsWith("repos/openclaw/openclaw/")) || "";
+const endpoint = args.find((arg) => arg.startsWith("repos/carapace/carapace/")) || "";
 const methodIndex = args.indexOf("--method");
 const method = methodIndex >= 0 ? args[methodIndex + 1] : "GET";
 const fields = new Map();
@@ -294,7 +294,7 @@ if (args[0] === "api" && method === "POST" && endpoint.endsWith("/git/refs")) {
     process.exit(21);
   }
   if (${JSON.stringify(options.dispatchReturnsRunUrl ?? true)}) {
-    console.log("https://github.com/openclaw/openclaw/actions/runs/123");
+    console.log("https://github.com/Exaggarate/carapace/actions/runs/123");
   }
 } else if (args[0] === "api" && endpoint.endsWith("/actions/workflows/full-release-validation.yml/runs")) {
   const index = Number(fs.readFileSync(runDiscoveryIndexPath, "utf8"));
@@ -325,7 +325,7 @@ if (args[0] === "api" && method === "POST" && endpoint.endsWith("/git/refs")) {
   if (state.decisionState) {
     const dir = args[args.indexOf("--dir") + 1];
     fs.writeFileSync(dir + "/full-release-decision.json", JSON.stringify({
-      kind: "openclaw.full-release-decision", mode: "decision", version: 2,
+      kind: "carapace.full-release-decision", mode: "decision", version: 2,
       parentRunAttempt: state.decisionAttempt ?? state.attempt ?? 1,
       sourceParentRunAttempt: 1, parentRunId: "123", activeRunIds: ["101"],
       blockers: [{ child: "normalCi", job: "test", runId: "101" }],
@@ -380,7 +380,7 @@ if (args[0] === "api" && method === "POST" && endpoint.endsWith("/git/refs")) {
           MOCK_WORKFLOW_INPUTS: JSON.stringify(declaredWorkflowInputs),
           MOCK_WORKFLOW_SHA: workflowSha,
           GH_TOKEN: "fixture-token",
-          OPENCLAW_GH_BIN: selectedGhPath,
+          CARAPACE_GH_BIN: selectedGhPath,
           PATH: `${binDir}:${process.env.PATH}`,
         },
       },
@@ -415,7 +415,7 @@ if (args[0] === "api" && method === "POST" && endpoint.endsWith("/git/refs")) {
 }
 
 function ghApiEndpoint(args: string[]): string {
-  return args.find((arg) => arg.startsWith("repos/openclaw/openclaw/")) ?? "";
+  return args.find((arg) => arg.startsWith("repos/carapace/carapace/")) ?? "";
 }
 
 function ghApiMethod(args: string[]): string {
@@ -538,7 +538,7 @@ describe("full-release-validation-at-sha", () => {
       "refs/heads/v2026.7.1",
     ]) {
       expect(() => parseArgs(["--target-ref", ref])).toThrow(
-        "canonical OpenClaw release branch or tag",
+        "canonical Carapace release branch or tag",
       );
     }
     expect(() => parseArgs(["--target-ref", "release/2026.7.1"])).toThrow(
@@ -884,7 +884,7 @@ describe("full-release-validation-at-sha", () => {
 
   it("binds release decisions to the exact parent attempt and tooling SHA", () => {
     const payload = {
-      kind: "openclaw.full-release-decision",
+      kind: "carapace.full-release-decision",
       mode: "decision",
       parentRunAttempt: 2,
       sourceParentRunAttempt: 1,
@@ -1094,7 +1094,7 @@ describe("full-release-validation-at-sha", () => {
       source: {
         "package.json": JSON.stringify({
           version: "2026.8.1",
-          dependencies: { "@openclaw/ai": "workspace:*" },
+          dependencies: { "@carapace/ai": "workspace:*" },
         }),
         "packages/ai/package.json": '{"version":"2026.7.9"}',
       },
@@ -1205,7 +1205,7 @@ describe("full-release-validation-at-sha", () => {
             "api",
             "--method",
             "POST",
-            "repos/openclaw/openclaw/git/refs",
+            "repos/carapace/carapace/git/refs",
             "-f",
             `ref=refs/heads/${targetBranch}`,
             "-f",
@@ -1215,7 +1215,7 @@ describe("full-release-validation-at-sha", () => {
             "api",
             "--method",
             "POST",
-            "repos/openclaw/openclaw/git/refs",
+            "repos/carapace/carapace/git/refs",
             "-f",
             `ref=refs/heads/${workflowBranch}`,
             "-f",
@@ -1273,7 +1273,7 @@ describe("full-release-validation-at-sha", () => {
           `Frozen validation tuple: candidate=${fixture.targetSha} tooling=${fixture.workflowSha} rerun_group=all`,
         );
         expect(result.stdout).toContain(
-          "Parent run: https://github.com/openclaw/openclaw/actions/runs/123",
+          "Parent run: https://github.com/Exaggarate/carapace/actions/runs/123",
         );
         expect(result.stdout.indexOf("Parent run:")).toBeLessThan(
           result.stdout.indexOf("Parent run status:"),
@@ -1281,8 +1281,8 @@ describe("full-release-validation-at-sha", () => {
         expect(
           ghCalls.filter((args) => args[0] === "api" && ghApiMethod(args) === "DELETE"),
         ).toEqual([
-          ["api", "--method", "DELETE", `repos/openclaw/openclaw/git/refs/heads/${workflowBranch}`],
-          ["api", "--method", "DELETE", `repos/openclaw/openclaw/git/refs/heads/${targetBranch}`],
+          ["api", "--method", "DELETE", `repos/carapace/carapace/git/refs/heads/${workflowBranch}`],
+          ["api", "--method", "DELETE", `repos/carapace/carapace/git/refs/heads/${targetBranch}`],
         ]);
         expect(runGit(fixture.origin, ["for-each-ref", "--format=%(refname)", "refs/heads"])).toBe(
           [
@@ -1324,7 +1324,7 @@ describe("full-release-validation-at-sha", () => {
               "api",
               "--method",
               "DELETE",
-              `repos/openclaw/openclaw/git/refs/${targetRef.slice("refs/".length)}`,
+              `repos/carapace/carapace/git/refs/${targetRef.slice("refs/".length)}`,
             ],
           ]);
         }
@@ -1850,7 +1850,7 @@ describe("full-release-validation-at-sha", () => {
             MOCK_REAL_PATH: process.env.PATH,
             MOCK_WORKFLOW_SHA: fixture.workflowSha,
             GH_TOKEN: "fixture-token",
-            OPENCLAW_GH_BIN: fixture.selectedGhPath,
+            CARAPACE_GH_BIN: fixture.selectedGhPath,
             PATH: `${join(fixture.checkout, "..", "bin")}:${process.env.PATH}`,
           },
         },
@@ -1873,13 +1873,13 @@ describe("full-release-validation-at-sha", () => {
   });
 
   it("supports current and legacy verifier locations in trusted workflow checkouts", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-release-verifier-path-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-release-verifier-path-"));
     try {
       const legacy = join(
         root,
         ".agents",
         "skills",
-        "release-openclaw-ci",
+        "release-carapace-ci",
         "scripts",
         "release-ci-summary.mjs",
       );

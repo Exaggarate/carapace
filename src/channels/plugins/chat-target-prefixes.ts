@@ -1,4 +1,4 @@
-import { parseStrictInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictInteger } from "@carapace/normalization-core/number-coercion";
 /**
  * Chat target prefix parsers.
  *
@@ -7,8 +7,8 @@ import { parseStrictInteger } from "@openclaw/normalization-core/number-coercion
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveAllowlistMatchByCandidates } from "../allowlist-match.js";
 
 /**

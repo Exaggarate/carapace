@@ -1,9 +1,9 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   applyAnthropicEphemeralCacheControlMarkers,
   applyCompletionsAnthropicCacheControl,
   createPayloadPatchStreamWrapper,
-} from "openclaw/plugin-sdk/provider-stream-shared";
+} from "carapace/plugin-sdk/provider-stream-shared";
 
 export function createDeepInfraAnthropicCacheWrapper(
   baseStreamFn: StreamFn,

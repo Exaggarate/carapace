@@ -19,7 +19,7 @@ import {
   runExclusiveSessionLifecycleMutation,
 } from "../../sessions/session-lifecycle-admission.js";
 import type { UserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { makeIsolatedAgentJobFixture, makeIsolatedAgentParamsFixture } from "./job-fixtures.js";
 import {
   dispatchCronDeliveryMock,
@@ -49,7 +49,7 @@ const runCronIsolatedAgentTurn = await loadRunCronIsolatedAgentTurn();
 const inMemoryStorePath = "/tmp/store.json";
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     cleanup();
   }),
 );
@@ -84,12 +84,12 @@ describe("runCronIsolatedAgentTurn session lifecycle", () => {
     const accessor = await vi.importActual<
       typeof import("../../config/sessions/session-accessor.js")
     >("../../config/sessions/session-accessor.js");
-    const dir = tempDirs.make("openclaw-cron-turn-candidate-");
+    const dir = tempDirs.make("carapace-cron-turn-candidate-");
     const target = {
       agentId: "main",
       sessionId: "cron-candidate",
       sessionKey: "agent:main:cron:candidate",
-      storePath: path.join(dir, "openclaw-agent.sqlite"),
+      storePath: path.join(dir, "carapace-agent.sqlite"),
     };
     await accessor.replaceSessionEntry(target, {
       sessionId: target.sessionId,
@@ -255,12 +255,12 @@ describe("runCronIsolatedAgentTurn session lifecycle", () => {
       const accessor = await vi.importActual<
         typeof import("../../config/sessions/session-accessor.js")
       >("../../config/sessions/session-accessor.js");
-      const dir = tempDirs.make("openclaw-cron-binding-settlement-");
+      const dir = tempDirs.make("carapace-cron-binding-settlement-");
       const target = {
         agentId: "main",
         sessionId: `binding-${failurePoint}`,
         sessionKey: "agent:main:cron:binding-settlement",
-        storePath: path.join(dir, "openclaw-agent.sqlite"),
+        storePath: path.join(dir, "carapace-agent.sqlite"),
       };
       const previousBinding = { sessionId: "previous-native", authProfileId: "anthropic:cli" };
       const nextBinding = { ...previousBinding, sessionId: "next-native" };
@@ -576,7 +576,7 @@ describe("runCronIsolatedAgentTurn session lifecycle", () => {
     expect(result).toEqual(
       expect.objectContaining({
         status: "error",
-        error: "agent run aborted for restart | OPENCLAW_RESTART_ABORT",
+        error: "agent run aborted for restart | CARAPACE_RESTART_ABORT",
       }),
     );
     expect(mutationCommitted).toBe(true);

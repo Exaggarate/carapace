@@ -17,7 +17,7 @@ describe("apply_patch unrestricted host writes", () => {
   });
 
   async function createHostFile(content: string) {
-    const tempDir = tempDirs.make("openclaw-patch-host-write-");
+    const tempDir = tempDirs.make("carapace-patch-host-write-");
     const filePath = path.join(tempDir, "important.txt");
     await fs.writeFile(filePath, content);
     return filePath;

@@ -4,12 +4,12 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import { githubAuthenticationSubject } from "./user-profile-github-identity.js";
 import { ensureUserProfilesSchema, type UserProfilesDatabase } from "./user-profiles-schema.js";
 import { classifyTailscaleLogin } from "./user-profiles-tailscale-login.js";
@@ -20,9 +20,9 @@ type UserProfileIdentityMigrationResult = {
 };
 
 export function migrateLegacyTailscaleProfileIdentities(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileIdentityMigrationResult {
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   if (!tableExists(database.db, "user_profile_emails")) {
     return { changes: [], warnings: [] };
   }
@@ -44,7 +44,7 @@ export function migrateLegacyTailscaleProfileIdentities(
   }
 
   ensureUserProfilesSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const transactionKysely = getNodeSqliteKysely<UserProfilesDatabase>(db);
       let migrated = 0;

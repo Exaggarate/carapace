@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasNodeErrorCode, isPathInside } from "../infra/path-guards.js";
 import { normalizePluginsConfig } from "./config-state.js";
 import { resolveDefaultPluginExtensionsDir } from "./install-paths.js";
@@ -35,7 +35,7 @@ function listPluginInstallRoots(env: NodeJS.ProcessEnv | undefined): string[] {
 
 /** Resolves effective plugin-owned backup policy without importing or activating plugin runtime. */
 export function resolveActivatedPluginBackupInventory(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   stateDir?: string;
   workspaceDirs?: readonly string[];

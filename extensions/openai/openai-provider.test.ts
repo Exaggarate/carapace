@@ -1,17 +1,17 @@
 // Openai tests cover openai provider plugin behavior.
 import fs from "node:fs";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model, SimpleStreamOptions } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { Context, Model, SimpleStreamOptions } from "carapace/plugin-sdk/llm";
 import {
   clearLiveCatalogCacheForTests,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+} from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OPENAI_API_BASE_URL, OPENAI_CODEX_RESPONSES_BASE_URL } from "./base-url.js";
 import { OPENAI_DEFAULT_MODEL } from "./default-models.js";
 import { buildOpenAIProvider } from "./openai-provider.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { resolveModelRoutes } from "./provider-policy-api.js";
 
 const mocks = vi.hoisted(() => ({
@@ -120,14 +120,14 @@ vi.mock("./openai-chatgpt-provider.runtime.js", () => ({
   refreshOpenAICodexToken: mocks.refreshOpenAICodexToken,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: mocks.resolveApiKeyForProvider,
   resolveProviderAuthProfileMetadata: mocks.resolveProviderAuthProfileMetadata,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-stream-family", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/provider-stream-family", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/provider-stream-family")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/provider-stream-family")>();
   const wrapStreamFn: NonNullable<typeof actual.OPENAI_RESPONSES_STREAM_HOOKS.wrapStreamFn> = (
     ctx,
   ) => {
@@ -208,8 +208,8 @@ async function runWrappedPayloadCase(params: {
   payload?: Record<string, unknown>;
   context?: Context;
   streamOptions?: SimpleStreamOptions & {
-    openclawCodeModeToolSurface?: boolean;
-    openclawCodeModeAllowedHostedToolTypes?: Set<string>;
+    carapaceCodeModeToolSurface?: boolean;
+    carapaceCodeModeAllowedHostedToolTypes?: Set<string>;
   };
 }) {
   const payload = params.payload ?? { store: false };
@@ -2307,10 +2307,10 @@ describe("buildOpenAIProvider", () => {
 
   it("passes the selected runtime into GPT-5.6 thinking policy", () => {
     const provider = buildOpenAIProvider();
-    const openClawLuna = provider.resolveThinkingProfile?.({
+    const carapaceLuna = provider.resolveThinkingProfile?.({
       provider: "openai",
       modelId: "gpt-5.6-luna",
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
     } as never);
     const codexLuna = provider.resolveThinkingProfile?.({
       provider: "openai",
@@ -2340,7 +2340,7 @@ describe("buildOpenAIProvider", () => {
       },
     } as never);
 
-    expect(openClawLuna?.levels.map((level) => level.id)).toContain("ultra");
+    expect(carapaceLuna?.levels.map((level) => level.id)).toContain("ultra");
     expect(codexLuna?.levels.map((level) => level.id)).not.toContain("ultra");
     expect(codexLuna?.levels.map((level) => level.id)).toContain("max");
     expect(codexSolFromDirectCatalog?.levels.map((level) => level.id)).toContain("ultra");
@@ -2668,8 +2668,8 @@ describe("buildOpenAIProvider", () => {
         ],
       },
       streamOptions: {
-        openclawCodeModeToolSurface: true,
-        openclawCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
+        carapaceCodeModeToolSurface: true,
+        carapaceCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
       },
       payload: {
         tools: [
@@ -2732,8 +2732,8 @@ describe("buildOpenAIProvider", () => {
       agentId: "main",
       nativeWebSearchAllowedByToolPolicy: false,
       streamOptions: {
-        openclawCodeModeToolSurface: true,
-        openclawCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
+        carapaceCodeModeToolSurface: true,
+        carapaceCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
       },
       cfg: {
         agents: {
@@ -2808,7 +2808,7 @@ describe("buildOpenAIProvider", () => {
       modelId: "gpt-5.4",
       cfg: { tools: { web: { search: { enabled: false } } } },
       streamOptions: {
-        openclawCodeModeAllowedHostedToolTypes: disabledAllowedHostedToolTypes,
+        carapaceCodeModeAllowedHostedToolTypes: disabledAllowedHostedToolTypes,
       },
       model: {
         api: "openai-responses",
@@ -2830,7 +2830,7 @@ describe("buildOpenAIProvider", () => {
         baseUrl: "https://example-proxy.invalid/v1",
       } as Model<"openai-responses">,
       streamOptions: {
-        openclawCodeModeAllowedHostedToolTypes: proxiedAllowedHostedToolTypes,
+        carapaceCodeModeAllowedHostedToolTypes: proxiedAllowedHostedToolTypes,
       },
       payload: { tools: [{ type: "function", name: "web_search" }] },
     });
@@ -2856,7 +2856,7 @@ describe("buildOpenAIProvider", () => {
       modelId: "gpt-5.4",
       cfg: { tools: { web: { search: { enabled: true, provider: "brave" } } } },
       streamOptions: {
-        openclawCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
+        carapaceCodeModeAllowedHostedToolTypes: allowedHostedToolTypes,
       },
       model: {
         api: "openai-responses",

@@ -1,14 +1,14 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { deferSqlitePostCommitPublication } from "../../infra/sqlite-post-commit.js";
 import { emitSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
-import type { OpenClawAgentDatabaseClaim } from "../../state/openclaw-agent-db-identity.js";
+import type { CarapaceAgentDatabaseClaim } from "../../state/carapace-agent-db-identity.js";
 import type {
   ProjectedLifecycleMutation,
   SessionEntryRemovalPlan,
 } from "./session-accessor.sqlite-lifecycle-types.js";
 import type { SessionEntry } from "./types.js";
 
-type SessionIdentityDatabase = OpenClawAgentDatabaseClaim["database"];
+type SessionIdentityDatabase = CarapaceAgentDatabaseClaim["database"];
 
 function toSessionIdentityTarget(entry: SessionEntry | undefined, sessionKeys: readonly string[]) {
   const sessionId = normalizeOptionalString(entry?.sessionId);

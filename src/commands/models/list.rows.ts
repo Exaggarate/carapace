@@ -1,6 +1,6 @@
-/** Row builders used by `openclaw models list` source orchestration. */
-import { normalizeProviderIdForAuth } from "@openclaw/model-catalog-core/provider-id";
-import { stripSelfProviderModelPrefix } from "@openclaw/model-catalog-core/provider-model-id-normalization";
+/** Row builders used by `carapace models list` source orchestration. */
+import { normalizeProviderIdForAuth } from "@carapace/model-catalog-core/provider-id";
+import { stripSelfProviderModelPrefix } from "@carapace/model-catalog-core/provider-model-id-normalization";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import {
   projectModelCatalogEntryForRoute,
@@ -17,7 +17,7 @@ import {
   resolveModelCatalogIdentityKey,
 } from "../../agents/openai-model-routes.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "../../config/types.models.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ModelRegistry } from "../../llm/model-registry.js";
 import type { Model } from "../../llm/types.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
@@ -124,7 +124,7 @@ function hasSameCatalogRoute(left: ListRowModel, right: ListRowModel): boolean {
 function projectListRowModel(params: {
   model: ListRowModel;
   evaluation: ModelListAuthEvaluation;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   routeIndex?: ModelCatalogLogicalRouteIndex;
 }): ListRowModel {
   const projection =
@@ -313,7 +313,7 @@ function shouldListConfiguredProviderModel(params: {
 }
 
 function findConfiguredProviderModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   modelId: string;
 }): ListRowModel | undefined {
@@ -331,7 +331,7 @@ function findConfiguredProviderModel(params: {
 
 function toFallbackConfiguredListModel(
   entry: ConfiguredEntry,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   catalogEntry?: ModelCatalogEntry,
 ): ListRowModel {
   // Explicit models.providers definitions stay authoritative; the prepared

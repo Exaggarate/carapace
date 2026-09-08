@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { CarapaceConfig } from "../../../config/config.js";
 import { replaceSessionEntry } from "../../../config/sessions/session-accessor.js";
 import { withEnvAsync } from "../../../test-utils/env.js";
 import { cleanupSessionStateForTest } from "../../../test-utils/session-state-cleanup.js";
@@ -21,7 +21,7 @@ const STALE_UNENDED_SUBAGENT_RUN_MS = 2 * 60 * 60 * 1_000;
 let testWorkspaceDir = os.tmpdir();
 
 beforeAll(async () => {
-  testWorkspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-list-"));
+  testWorkspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-list-"));
 });
 
 afterAll(async () => {
@@ -40,7 +40,7 @@ beforeEach(() => {
 describe("buildSubagentList", () => {
   it("builds the subagent list without decoding unrelated saved prompts", async () => {
     const stateDir = await fs.mkdtemp(path.join(testWorkspaceDir, "metadata-"));
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       try {
         const storePath = path.join(stateDir, "agents/main/sessions/sessions.json");
         const childSessionKey = "agent:main:subagent:target";
@@ -115,7 +115,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const list = buildSubagentList({
       cfg,
       runs: [],
@@ -143,7 +143,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const list = buildSubagentList({
       cfg,
       runs: [run],
@@ -172,7 +172,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const list = buildSubagentList({
       cfg,
@@ -235,7 +235,7 @@ describe("buildSubagentList", () => {
       addSubagentRunForTests(run);
 
       const list = buildSubagentList({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         runs: [run],
         recentMinutes: 30,
       });
@@ -278,7 +278,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const list = buildSubagentList({
       cfg,
       runs: [orchestratorRun],
@@ -370,7 +370,7 @@ describe("buildSubagentList", () => {
       }
 
       const list = buildSubagentList({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         runs: [parentRun],
         recentMinutes: 30,
       });
@@ -415,7 +415,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const list = buildSubagentList({
       cfg,
@@ -460,7 +460,7 @@ describe("buildSubagentList", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: storePath },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     // Prompt/cache usage is separate from visible IO so operators can spot
     // cache-heavy sessions without misreading it as assistant output.
     const list = buildSubagentList({
@@ -494,7 +494,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const list = buildSubagentList({
       cfg,
@@ -540,7 +540,7 @@ describe("buildSubagentList", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const list = buildSubagentList({
       cfg,

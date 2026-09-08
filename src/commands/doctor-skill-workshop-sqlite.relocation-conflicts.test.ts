@@ -20,11 +20,11 @@ import {
   type SkillProposalRecord,
   type SkillProposalRollback,
 } from "../skills/workshop/types.js";
-import { repairOpenClawStateDatabaseSchemaIfNeeded } from "../state/openclaw-state-db.js";
+import { repairCarapaceStateDatabaseSchemaIfNeeded } from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { planWorkshopRelocation } from "./doctor-skill-workshop-relocation.js";
 import {
@@ -40,12 +40,12 @@ import {
 } from "./doctor-skill-workshop-sqlite.test-support.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-doctor-workshop-sqlite-",
+    prefix: "carapace-doctor-workshop-sqlite-",
   });
 });
 
@@ -181,7 +181,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
 
   it("stales an applied legacy directory without a loadable skill file", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-invalid-relocation-workspace-"),
+      await tempDirs.make("carapace-workshop-invalid-relocation-workspace-"),
     );
     const skillDir = path.join(workspaceDir, "skills", "invalid-relocation");
     const record = createAppliedLegacyProposal({
@@ -227,10 +227,10 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
       "workspace root",
     ] as const)("preserves relocation ownership through a linked %s", async (linkedComponent) => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-symlink-workspace-"),
+      await tempDirs.make("carapace-workshop-symlink-workspace-"),
     );
     const externalRoot = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-symlink-target-"),
+      await tempDirs.make("carapace-workshop-symlink-target-"),
     );
     const rootAlias = linkedComponent === "workspace root";
     const configuredWorkspace = rootAlias
@@ -291,7 +291,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
         target: {
           skillKey: skillName,
           skillDir,
-          source: skillName === normalSkillName ? "agents-skills-project" : "openclaw-workspace",
+          source: skillName === normalSkillName ? "agents-skills-project" : "carapace-workspace",
         },
       }),
       workspaceDir,
@@ -355,7 +355,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
       target: {
         skillDir: rootAlias ? preservedSkillDir : symlinkedSkillDir,
         skillFile: rootAlias ? path.join(preservedSkillDir, "SKILL.md") : symlinkedSkillFile,
-        source: rootAlias ? "openclaw-workshop" : "openclaw-workspace",
+        source: rootAlias ? "carapace-workshop" : "carapace-workspace",
       },
     });
     await expect(
@@ -374,7 +374,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
 
   it("stales an adoption when the destination is a different skill", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-unverified-adoption-workspace-"),
+      await tempDirs.make("carapace-workshop-unverified-adoption-workspace-"),
     );
     const legacySkillDir = path.join(workspaceDir, "skills", "verified-adoption");
     const destination = path.join(
@@ -417,7 +417,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
     "shares adoption proof across historical creates (matching first: %s)",
     async (matchingFirst) => {
       const workspaceDir = await fs.realpath(
-        await tempDirs.make("openclaw-workshop-repeated-adoption-workspace-"),
+        await tempDirs.make("carapace-workshop-repeated-adoption-workspace-"),
       );
       const workshopRoot = resolveWorkshopSkillsDir({}, "main", testState.env);
       const now = "2026-09-01T00:00:00.000Z";
@@ -486,7 +486,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
     "recovers a real applied proposal with %s after an interrupted relocation",
     async (sourceState) => {
       const workspaceDir = await fs.realpath(
-        await tempDirs.make("openclaw-workshop-real-adoption-workspace-"),
+        await tempDirs.make("carapace-workshop-real-adoption-workspace-"),
       );
       const proposal = await proposeCreateSkill({
         workspaceDir,
@@ -513,7 +513,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
           ...applied.record.target,
           skillDir: legacySkillDir,
           skillFile: path.join(legacySkillDir, "SKILL.md"),
-          source: "openclaw-workspace",
+          source: "carapace-workspace",
         },
       } satisfies SkillProposalRecord;
       await workshopStore.updateSkillProposalRecord({
@@ -556,7 +556,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
         status: "applied",
         target: {
           skillFile: applied.record.target.skillFile,
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       });
       await expect(fs.access(legacySkillDir)).rejects.toMatchObject({ code: "ENOENT" });
@@ -568,7 +568,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
 
   it("adopts a skill moved before its proposal persistence and converges on rerun", async () => {
     const workspaceDir = await fs.realpath(
-      await tempDirs.make("openclaw-workshop-relocation-failure-workspace-"),
+      await tempDirs.make("carapace-workshop-relocation-failure-workspace-"),
     );
     const records = ["first-relocation", "second-relocation"].map((name) => {
       const skillDir = path.join(workspaceDir, "skills", name);
@@ -595,7 +595,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
     );
 
     const workshopRoot = resolveWorkshopSkillsDir({}, "main", testState.env);
-    repairOpenClawStateDatabaseSchemaIfNeeded({ env: testState.env });
+    repairCarapaceStateDatabaseSchemaIfNeeded({ env: testState.env });
     await expectRelocationWriteFailure({
       env: testState.env,
       proposalId: records[0]!.record.id,
@@ -613,7 +613,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
       target: {
         skillDir: records[0]!.record.target.skillDir,
         skillFile: records[0]!.record.target.skillFile,
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
     });
 
@@ -640,7 +640,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
         target: {
           skillDir: targetDir,
           skillFile: path.join(targetDir, "SKILL.md"),
-          source: "openclaw-workshop",
+          source: "carapace-workshop",
         },
       });
     }
@@ -648,7 +648,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
   });
 
   it("quarantines a non-empty legacy directory missing proposal.json so Doctor converges", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-missing-json-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-missing-json-");
     const proposalId = "missing-json-workshop-20260829-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     await fs.mkdir(path.join(proposalDir, "references"), { recursive: true });
@@ -707,7 +707,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
   });
 
   it("quarantines a legacy directory with proposal.json but no PROPOSAL.md", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-missing-draft-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-missing-draft-");
     const proposalId = "missing-draft-workshop-20260829-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     const targetDir = path.join(workspaceDir, "skills", "missing-draft");
@@ -734,7 +734,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
         skillKey: "missing-draft",
         skillDir: targetDir,
         skillFile: path.join(targetDir, "SKILL.md"),
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       },
       scan: {
         state: "clean",
@@ -802,7 +802,7 @@ describe("doctor Skill Workshop SQLite relocation conflicts and recovery", () =>
   });
 
   it("removes an empty orphaned legacy proposal directory directly", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-empty-dir-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-empty-dir-");
     const proposalId = "empty-dir-workshop-20260829-1234567890";
     const proposalDir = path.join(testState.stateDir, "skill-workshop", "proposals", proposalId);
     await fs.mkdir(proposalDir, { recursive: true });

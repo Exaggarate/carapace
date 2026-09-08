@@ -1,10 +1,10 @@
 // Detects plugin version drift between config, manifests, and installs.
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import {
   parseRegistryNpmSpec,
-  resolveOpenClawReleaseCohortVersion,
+  resolveCarapaceReleaseCohortVersion,
 } from "../infra/npm-registry-spec.js";
 import { fetchNpmPackageTargetStatus } from "../infra/update-check-package-target.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "./config-state.js";
@@ -66,17 +66,17 @@ export function resolvePluginVersionDriftUpdateCommand(
       entry.targetResolution?.status !== "resolved" ||
       entry.targetResolution.packageName !== exactNpmPackageName ||
       entry.targetResolution.requestedTarget !==
-        resolveOpenClawReleaseCohortVersion(entry.gatewayVersion)
+        resolveCarapaceReleaseCohortVersion(entry.gatewayVersion)
     ) {
       return undefined;
     }
     const exactNpmTarget = `${exactNpmPackageName}@${entry.targetResolution.version}`;
     if (parseRegistryNpmSpec(exactNpmTarget)?.selectorKind === "exact-version") {
-      return `openclaw plugins update ${exactNpmTarget}`;
+      return `carapace plugins update ${exactNpmTarget}`;
     }
     return undefined;
   }
-  return `openclaw plugins update ${entry.pluginId}`;
+  return `carapace plugins update ${entry.pluginId}`;
 }
 
 async function resolveEntryTarget(
@@ -86,7 +86,7 @@ async function resolveEntryTarget(
   if (!packageName) {
     return entry;
   }
-  const requestedTarget = resolveOpenClawReleaseCohortVersion(entry.gatewayVersion);
+  const requestedTarget = resolveCarapaceReleaseCohortVersion(entry.gatewayVersion);
   const requestedSpec = `${packageName}@${requestedTarget}`;
   // The registry helper owns request deadlines and converts lookup failures to data.
   // Only its exact requested version can authorize a pinned repair command.
@@ -113,7 +113,7 @@ export async function resolvePluginVersionDriftTargets(
   return { ...report, drifts: await Promise.all(report.drifts.map(resolveEntryTarget)) };
 }
 
-function isPluginEnabled(config: OpenClawConfig | undefined, pluginId: string): boolean {
+function isPluginEnabled(config: CarapaceConfig | undefined, pluginId: string): boolean {
   const normalizedPluginConfig = normalizePluginsConfig(config?.plugins);
   return resolveEffectiveEnableState({
     id: pluginId,
@@ -145,7 +145,7 @@ function shouldCompareOfficialInstallToGateway(params: {
 
 export function hasOfficialPluginVersionCandidates(params: {
   installRecords: Record<string, PluginInstallRecord>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): boolean {
   return Object.entries(params.installRecords).some(
     ([pluginId, record]) =>
@@ -156,13 +156,13 @@ export function hasOfficialPluginVersionCandidates(params: {
 }
 
 /**
- * Compare active official external plugin installs against an OpenClaw host
+ * Compare active official external plugin installs against an Carapace host
  * version and return any mismatches.
  *
  * @param params.gatewayVersion The host version the plugins must match.
  * @param params.installRecords The full set of recorded plugin installs (as
  *   produced by `loadInstalledPluginIndexInstallRecords`).
- * @param params.config The merged daemon-side OpenClawConfig (optional).
+ * @param params.config The merged daemon-side CarapaceConfig (optional).
  *   Plugins inactive under the effective activation policy are skipped.
  *
  * The returned `drifts` list is sorted by `pluginId` for stable output.
@@ -170,10 +170,10 @@ export function hasOfficialPluginVersionCandidates(params: {
 export function detectPluginVersionDrift(params: {
   gatewayVersion: string;
   installRecords: Record<string, PluginInstallRecord>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): PluginVersionDriftReport {
   const { gatewayVersion, installRecords, config } = params;
-  const normalizedGateway = resolveOpenClawReleaseCohortVersion(gatewayVersion);
+  const normalizedGateway = resolveCarapaceReleaseCohortVersion(gatewayVersion);
   const drifts: PluginVersionDriftEntry[] = [];
 
   for (const [pluginId, record] of Object.entries(installRecords)) {
@@ -198,7 +198,7 @@ export function detectPluginVersionDrift(params: {
       // separately if desired.
       continue;
     }
-    if (resolveOpenClawReleaseCohortVersion(installedVersion) === normalizedGateway) {
+    if (resolveCarapaceReleaseCohortVersion(installedVersion) === normalizedGateway) {
       continue;
     }
     drifts.push({

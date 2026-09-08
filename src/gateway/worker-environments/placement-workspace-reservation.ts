@@ -1,7 +1,7 @@
 import type { DatabaseSync } from "node:sqlite";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB } from "../../state/openclaw-state-db.generated.js";
-import { withOpenClawStateLease } from "../../state/openclaw-state-lease.js";
+import type { DB } from "../../state/carapace-state-db.generated.js";
+import { withCarapaceStateLease } from "../../state/carapace-state-lease.js";
 import type { WorkerSessionPlacementIdentity } from "./placement-record.js";
 import { find } from "./placement-row-codec.js";
 import type { PlacementStoreRuntime } from "./placement-runtime.js";
@@ -91,7 +91,7 @@ export function createPlacementWorkspaceReservationOps(runtime: PlacementStoreRu
     sessionId: string,
     run: (assertOwned: () => void) => Promise<T>,
   ): Promise<T> =>
-    await withOpenClawStateLease(
+    await withCarapaceStateLease(
       {
         scope,
         key: sessionId,

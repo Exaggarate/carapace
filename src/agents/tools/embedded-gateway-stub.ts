@@ -3,7 +3,7 @@
  *
  * Implements only the Gateway calls needed by session tools and rejects unsupported methods.
  */
-import { normalizeFastMode, type FastMode } from "@openclaw/normalization-core/string-coerce";
+import { normalizeFastMode, type FastMode } from "@carapace/normalization-core/string-coerce";
 import type {
   SessionsListParams,
   SessionsResolveParams,

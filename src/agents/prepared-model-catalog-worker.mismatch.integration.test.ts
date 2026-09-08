@@ -2,9 +2,9 @@ import { channel } from "node:diagnostics_channel";
 import fs from "node:fs";
 import path from "node:path";
 import { Worker } from "node:worker_threads";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { preparePublishedModelCatalogOwnerIdentity } from "./prepared-model-catalog-owner.js";
 import {
@@ -53,7 +53,7 @@ vi.mock("node:worker_threads", async (importOriginal) => {
 
 /** A prepared generation whose owner hands its worker a real lifecycle plan. */
 async function createMismatchFixture() {
-  const root = makeTempDir("openclaw-model-catalog-mismatch-");
+  const root = makeTempDir("carapace-model-catalog-mismatch-");
   const stateDir = path.join(root, "state");
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   const workspaceDir = path.join(root, "workspace");
@@ -65,9 +65,9 @@ async function createMismatchFixture() {
   fs.writeFileSync(externalAuthPath, "A", "utf8");
   const env = {
     ...process.env,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_WORKER_CATALOG_MARKER: marker,
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_WORKER_CATALOG_MARKER: marker,
     [EXTERNAL_AUTH_PATH_ENV]: externalAuthPath,
   };
   const config = {
@@ -82,7 +82,7 @@ async function createMismatchFixture() {
       load: { paths: [pluginFile] },
       entries: { [PLUGIN_ID]: { enabled: true } },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const input = {
     agentId: "main",
     agentDir,
@@ -152,7 +152,7 @@ function trackSpawnedWorkers(
 describe("prepared model catalog worker generation mismatch", () => {
   beforeEach(() => {
     workerBoundary.fingerprint = undefined;
-    vi.stubEnv("CODEX_HOME", makeTempDir("openclaw-worker-empty-codex-"));
+    vi.stubEnv("CODEX_HOME", makeTempDir("carapace-worker-empty-codex-"));
   });
 
   it("retires a worker that reconstructs another generation instead of publishing its facts", async () => {

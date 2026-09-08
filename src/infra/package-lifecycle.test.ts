@@ -20,7 +20,7 @@ async function markModernLifecyclePending(packageRoot: string): Promise<string> 
 
 describe("package lifecycle completion", () => {
   it("runs preinstall and postinstall once before releasing concurrent callers", async () => {
-    await withTestDir({ prefix: "openclaw-package-lifecycle-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-package-lifecycle-" }, async (packageRoot) => {
       const markerPath = await markModernLifecyclePending(packageRoot);
       const calls: string[] = [];
       let releasePreinstall: (() => void) | undefined;
@@ -56,7 +56,7 @@ describe("package lifecycle completion", () => {
   it.each(["throws", "leaves the marker"])(
     "retains pending state when modern postinstall %s",
     async (failure) => {
-      await withTestDir({ prefix: "openclaw-package-lifecycle-failure-" }, async (packageRoot) => {
+      await withTestDir({ prefix: "carapace-package-lifecycle-failure-" }, async (packageRoot) => {
         const markerPath = await markModernLifecyclePending(packageRoot);
 
         await expect(
@@ -83,7 +83,7 @@ describe("package lifecycle completion", () => {
     ["automatic update", 45 * 60_000],
     ["explicit longer update", 75 * 60_000],
   ])("records the %s lifecycle budget on its lock", async (_name, scriptTimeoutMs) => {
-    await withTestDir({ prefix: "openclaw-package-lifecycle-lock-" }, async (packageRoot) => {
+    await withTestDir({ prefix: "carapace-package-lifecycle-lock-" }, async (packageRoot) => {
       const markerPath = await markModernLifecyclePending(packageRoot);
       let releasePreinstall: (() => void) | undefined;
       let preinstallCalls = 0;
@@ -114,7 +114,7 @@ describe("package lifecycle completion", () => {
         timeoutMs: scriptTimeoutMs,
       });
       await firstPreinstall;
-      const lockStat = await fs.stat(path.join(packageRoot, ".openclaw-lifecycle-lock"));
+      const lockStat = await fs.stat(path.join(packageRoot, ".carapace-lifecycle-lock"));
       expect(lockStat.mtimeMs).toBeGreaterThanOrEqual(startedAt + scriptTimeoutMs * 2 - 1_000);
       const second = completePendingPackageLifecycle({
         packageRoot,
@@ -139,7 +139,7 @@ describe("package lifecycle completion", () => {
   it.each(["none", "preinstall", "postinstall"])(
     "completes the shipped dist guard after %s interruption",
     async (failedScript) => {
-      await withTestDir({ prefix: "openclaw-package-lifecycle-legacy-" }, async (packageRoot) => {
+      await withTestDir({ prefix: "carapace-package-lifecycle-legacy-" }, async (packageRoot) => {
         const markerPath = path.join(packageRoot, PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH);
         const legacyGuardPath = path.join(packageRoot, LEGACY_PACKAGE_INSTALL_GUARD_RELATIVE_PATH);
         await fs.mkdir(path.dirname(legacyGuardPath), { recursive: true });

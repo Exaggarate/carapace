@@ -5,9 +5,9 @@ import path from "node:path";
 import {
   normalizeSessionDeliveryState,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { CarapaceConfig } from "../../runtime-api.js";
 import {
   buildMattermostAllowedModelRefs,
   parseMattermostModelPickerContext,
@@ -176,7 +176,7 @@ describe("Mattermost model picker", () => {
   it("falls back to the routed agent default model when no override is stored", () => {
     const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "mm-model-picker-"));
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
           store: path.join(testDir, "{agentId}.json"),
         },
@@ -269,7 +269,7 @@ describe("Mattermost model picker", () => {
           updatedAt: 3,
         },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: {
           store: storePath,
         },

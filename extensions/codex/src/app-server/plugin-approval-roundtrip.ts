@@ -1,10 +1,10 @@
 /**
- * Routes Codex app-server plugin approval prompts through OpenClaw's gateway
+ * Routes Codex app-server plugin approval prompts through Carapace's gateway
  * approval tool and maps gateway decisions back to Codex outcomes.
  */
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isApprovalNotFoundError, toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
+import { isApprovalNotFoundError, toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { resolveCodexGatewayTimeoutWithGraceMs } from "./attempt-timeouts.js";
 
 type AgentHarnessHostCapabilities = EmbeddedRunAttemptParams["hostCapabilities"];
@@ -60,7 +60,7 @@ type ApprovalRequestResult = {
   decision?: ExecApprovalDecision | null;
 };
 
-/** Starts a two-phase plugin approval request through the OpenClaw gateway. */
+/** Starts a two-phase plugin approval request through the Carapace gateway. */
 export async function requestPluginApproval(params: {
   hostCapabilities: AgentHarnessHostCapabilities;
   signal?: AbortSignal;

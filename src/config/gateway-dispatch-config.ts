@@ -1,17 +1,17 @@
 // Loads gateway dispatch config from runtime state and files.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { parseJsonWithJson5Fallback } from "../utils/parse-json-compat.js";
 import { applyConfigEnvVars } from "./config-env-vars.js";
 import { resolveConfigEnvVars } from "./env-substitution.js";
 import { readConfigIncludeFileWithGuards, resolveConfigIncludes } from "./includes.js";
 import { resolveConfigPath, resolveIncludeRoots } from "./paths.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 const GATEWAY_DISPATCH_SHELL_ENV_EXPECTED_KEYS = [
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PASSWORD",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_GATEWAY_PASSWORD",
 ] as const;
 
 const GATEWAY_DISPATCH_TOP_LEVEL_KEYS = [
@@ -30,12 +30,12 @@ type GatewayDispatchConfigReadOptions = {
   logger?: Pick<Console, "warn" | "error">;
 };
 
-function resolveGatewayDispatchConfig(value: unknown, env: NodeJS.ProcessEnv): OpenClawConfig {
+function resolveGatewayDispatchConfig(value: unknown, env: NodeJS.ProcessEnv): CarapaceConfig {
   if (!isRecord(value)) {
     return {};
   }
   if (Object.hasOwn(value, "env")) {
-    applyConfigEnvVars(value as OpenClawConfig, env);
+    applyConfigEnvVars(value as CarapaceConfig, env);
   }
   const projected: Record<string, unknown> = {};
   for (const key of GATEWAY_DISPATCH_TOP_LEVEL_KEYS) {
@@ -45,11 +45,11 @@ function resolveGatewayDispatchConfig(value: unknown, env: NodeJS.ProcessEnv): O
   }
   // Substitution owns the fresh nested containers; discarded branches need neither
   // substitution nor another deep copy after the complete include graph is resolved.
-  return resolveConfigEnvVars(projected, env, { onMissing: () => undefined }) as OpenClawConfig;
+  return resolveConfigEnvVars(projected, env, { onMissing: () => undefined }) as CarapaceConfig;
 }
 
 // Main session keys are process-local; Gateway dispatch always sees the canonical main key.
-function applyGatewayDispatchSessionDefaults(config: OpenClawConfig): OpenClawConfig {
+function applyGatewayDispatchSessionDefaults(config: CarapaceConfig): CarapaceConfig {
   if (config.session?.mainKey === undefined) {
     return config;
   }
@@ -83,7 +83,7 @@ function resolveIncludesForGatewayDispatch(
 }
 
 function readRawGatewayDispatchConfig(options: GatewayDispatchConfigReadOptions = {}): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configPath: string;
 } {
   const env = options.env ?? process.env;
@@ -104,13 +104,13 @@ function readRawGatewayDispatchConfig(options: GatewayDispatchConfigReadOptions 
 
 export function readGatewayDispatchConfig(
   options: GatewayDispatchConfigReadOptions = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return readRawGatewayDispatchConfig(options).config;
 }
 
 export async function readGatewayDispatchConfigWithShellEnvFallback(
   options: GatewayDispatchConfigReadOptions = {},
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const env = options.env ?? process.env;
   const firstRead = readRawGatewayDispatchConfig(options);
   const {

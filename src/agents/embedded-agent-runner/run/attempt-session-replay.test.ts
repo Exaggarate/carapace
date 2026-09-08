@@ -14,8 +14,8 @@ import type { ImageContent } from "../../../llm/types.js";
 import { finalizeRuntimePromptImages } from "../../../media/runtime-prompt-image-provenance.js";
 import { createUserTurnTranscriptRecorder } from "../../../sessions/user-turn-transcript.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { createAgentRunRestartAbortError } from "../../run-termination.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
 import {
@@ -60,13 +60,13 @@ async function withInterruptedTurn(
   }) => Promise<void>,
   interruptedTurn = true,
 ) {
-  await withOpenClawTestState({ label: "interrupted-keyed-replay" }, async (state) => {
+  await withCarapaceTestState({ label: "interrupted-keyed-replay" }, async (state) => {
     const runId = "interrupted-keyed-replay";
     const target = {
       agentId: "main",
       sessionId: runId,
       sessionKey: `agent:main:${runId}`,
-      storePath: path.join(state.agentDir("main"), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir("main"), "carapace-agent.sqlite"),
     };
     await upsertSessionEntryCore(target, {
       sessionId: target.sessionId,
@@ -114,7 +114,7 @@ async function withInterruptedTurn(
     }
     previous.finishPendingInput!("interrupted");
     rotateAgentEventLifecycleGeneration();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const recorder = makeRecorder();
     await recorder.stageApproved!({ runId, assertCurrent: () => {} });
     const attempt = {
@@ -349,7 +349,7 @@ describe("interrupted canonical user replay", () => {
       content: "Describe the current image",
       timestamp: 1,
       idempotencyKey: "image-turn:user",
-      __openclaw: {
+      __carapace: {
         senderName: "Synthetic sender",
         media: [{ path: "/synthetic/image.png", contentType: "image/png" }],
       },
@@ -373,7 +373,7 @@ describe("interrupted canonical user replay", () => {
       );
       expect(runtimeUser).toMatchObject({
         timestamp: user.timestamp,
-        __openclaw: { ...user["__openclaw"], mediaImageBlockFactIndexes: [0] },
+        __carapace: { ...user["__carapace"], mediaImageBlockFactIndexes: [0] },
       });
       expect(manager.getBranch()[0]).toMatchObject({ message: user });
       const messages = streamMocks.streamSimple.mock.calls[0]![1].messages;
@@ -523,7 +523,7 @@ describe("interrupted canonical user replay", () => {
           message.stopReason = "stop";
           message.content = [{ type: "text", text: "NO_REPLY" }];
         } else if (tail === "coded-abort") {
-          Object.assign(message, { errorCode: "OPENCLAW_DIRECT_ABORT" });
+          Object.assign(message, { errorCode: "CARAPACE_DIRECT_ABORT" });
         }
         original.appendMessage(message);
         await withReplaySession(fixture, false, async (_session, submit) => {

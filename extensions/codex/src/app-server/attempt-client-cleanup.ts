@@ -1,8 +1,8 @@
 /**
  * Best-effort cleanup helpers for Codex app-server startup attempts and turns.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { unsubscribeCodexAppServerLiveThread } from "./client-runtime.js";
 import { CodexAppServerRpcError, type CodexAppServerClient } from "./client.js";
 import { retireSharedCodexAppServerClientIfCurrent } from "./shared-client.js";
@@ -24,7 +24,7 @@ export function isCodexNoActiveTurnInterruptError(error: unknown): error is Code
   );
 }
 
-/** Raised when a thread subscription may be live on a client OpenClaw no longer controls. */
+/** Raised when a thread subscription may be live on a client Carapace no longer controls. */
 export class CodexAppServerUnsafeSubscriptionError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);

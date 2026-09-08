@@ -189,8 +189,8 @@ describe("session message cache", () => {
   it("claims a shared gateway event only once across retained panes", () => {
     const { host, cache } = createCacheContext();
     const target = { sessionKey: "agent:ops:background" };
-    const cached = { role: "user", content: "cached", __openclaw: { id: "cached", seq: 1 } };
-    const final = { role: "assistant", content: "final", __openclaw: { id: "final", seq: 2 } };
+    const cached = { role: "user", content: "cached", __carapace: { id: "cached", seq: 1 } };
+    const final = { role: "assistant", content: "final", __carapace: { id: "final", seq: 2 } };
     const event = { messageId: "final", messageSeq: 2 };
     cacheChatMessages(cache, host, target, [cached]);
 
@@ -203,11 +203,11 @@ describe("session message cache", () => {
   it("does not retain history across backing session changes", () => {
     const { host, cache } = createCacheContext();
     cacheHomeSnapshot(cache, host, {
-      messages: [{ content: "old", __openclaw: { seq: 1 } }],
+      messages: [{ content: "old", __carapace: { seq: 1 } }],
       pagination: { hasMore: false, totalMessages: 1 },
       sessionId: "session-1",
     });
-    const replacement = [{ content: "new", __openclaw: { seq: 1 } }];
+    const replacement = [{ content: "new", __carapace: { seq: 1 } }];
 
     cacheHomeSnapshot(cache, host, {
       messages: replacement,
@@ -257,9 +257,9 @@ describe("session message cache", () => {
     const content = "x".repeat(4 * 1024 * 1024);
     cacheHomeSnapshot(cache, host, {
       messages: [
-        { content, __openclaw: { seq: 1 } },
-        { content, projection: "sibling", __openclaw: { seq: 1 } },
-        { content, __openclaw: { seq: 2 } },
+        { content, __carapace: { seq: 1 } },
+        { content, projection: "sibling", __carapace: { seq: 1 } },
+        { content, __carapace: { seq: 2 } },
       ],
       pagination: { hasMore: false, totalMessages: 2 },
       sessionId: "session-1",
@@ -283,7 +283,7 @@ describe("session message cache", () => {
         host,
         { sessionKey },
         {
-          messages: [{ content, __openclaw: { seq: 1 } }],
+          messages: [{ content, __carapace: { seq: 1 } }],
           pagination: { hasMore: false, totalMessages: 1 },
           sessionId: sessionKey,
         },

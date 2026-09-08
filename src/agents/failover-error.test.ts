@@ -52,7 +52,7 @@ const MOONSHOT_INSUFFICIENT_BALANCE_429_PAYLOAD =
 const OPENROUTER_MODEL_NOT_FOUND_PAYLOAD =
   '{"error":{"message":"Healer Alpha was a stealth model revealed on March 18th as an early testing version of MiMo-V2-Omni. Find it here: https://openrouter.ai/xiaomi/mimo-v2-omni","code":404},"user_id":"user_33GTyP8uDSYYbaeBO48AGHXyuMC"}';
 // Issue-backed Anthropic/OpenAI-compatible insufficient_quota payload under HTTP 400:
-// https://github.com/openclaw/openclaw/issues/23440
+// https://github.com/Exaggarate/carapace/issues/23440
 const INSUFFICIENT_QUOTA_PAYLOAD =
   '{"type":"error","error":{"type":"insufficient_quota","message":"Your account has insufficient quota balance to run this request."}}';
 // Structured OpenAI-compatible server_error payload shape seen in Codex/OpenAI runs.
@@ -909,7 +909,7 @@ describe("failover-error", () => {
 
     it("returns true for Codex missing tool-result local execution failures", () => {
       const missingToolResultMessage =
-        "OpenClaw recorded a native Codex tool.call without a matching tool.result before the turn completed.";
+        "Carapace recorded a native Codex tool.call without a matching tool.result before the turn completed.";
       expect(isNonProviderRuntimeCoordinationError({ reason: "missing_tool_result" })).toBe(true);
       expect(
         isNonProviderRuntimeCoordinationError({
@@ -955,7 +955,7 @@ describe("buildFailoverRemediationHint", () => {
       model: "claude-opus-4-7",
     });
     expect(buildFailoverRemediationHint(err)).toBe(
-      "Re-authenticate with: openclaw models auth login --provider 'anthropic' --force",
+      "Re-authenticate with: carapace models auth login --provider 'anthropic' --force",
     );
   });
 
@@ -966,16 +966,16 @@ describe("buildFailoverRemediationHint", () => {
       model: "gemini-3.1-pro-preview",
     });
     expect(buildFailoverRemediationHint(err)).toBe(
-      "Authenticate in Gemini CLI directly, or configure a supported Google API key with: openclaw configure",
+      "Authenticate in Gemini CLI directly, or configure a supported Google API key with: carapace configure",
     );
   });
 
   it("quotes provider ids that contain shell metacharacters", () => {
     expect(buildProviderReauthCommand("custom;touch /tmp/pwned")).toBe(
-      "openclaw models auth login --provider 'custom;touch /tmp/pwned' --force",
+      "carapace models auth login --provider 'custom;touch /tmp/pwned' --force",
     );
     expect(buildProviderReauthCommand("custom'provider")).toBe(
-      "openclaw models auth login --provider 'custom'\\''provider' --force",
+      "carapace models auth login --provider 'custom'\\''provider' --force",
     );
   });
 
@@ -984,11 +984,11 @@ describe("buildFailoverRemediationHint", () => {
   });
 
   it("wraps rendered provider commands in the standard CLI formatter", () => {
-    expect(buildProviderReauthCommand("anthropic", { OPENCLAW_PROFILE: "work" })).toBe(
-      "openclaw --profile work models auth login --provider 'anthropic' --force",
+    expect(buildProviderReauthCommand("anthropic", { CARAPACE_PROFILE: "work" })).toBe(
+      "carapace --profile work models auth login --provider 'anthropic' --force",
     );
-    expect(buildProviderReauthCommand("anthropic", { OPENCLAW_CONTAINER_HINT: "dev" })).toBe(
-      "openclaw --container dev models auth login --provider 'anthropic' --force",
+    expect(buildProviderReauthCommand("anthropic", { CARAPACE_CONTAINER_HINT: "dev" })).toBe(
+      "carapace --container dev models auth login --provider 'anthropic' --force",
     );
   });
 

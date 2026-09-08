@@ -31,7 +31,7 @@ Before stopping writers, identify the exact incumbent/candidate reader contracts
 
 Transactions may commit per database, leaving mixed schemas or stale registry metadata after interruption. Once any database advances beyond the old reader's contract, never automatically restart that old reader, even when candidate verification fails. Preserve the journal and backups; continue through the canonical forward-recovery owner until every store is ready. Before mutation, a safe refusal leaves the incumbent serving. No custom schema SQL, version-marker edits, downgrade, or wholesale backup restoration.
 
-Read [database contracts](https://docs.openclaw.ai/reference/database-schemas) and [backup semantics](https://docs.openclaw.ai/cli/backup); their general recovery examples do not expand this workflow's authority.
+Read [database contracts](../../../docs/reference/database-schemas.md) and [backup semantics](../../../docs/cli/backup.md); their general recovery examples do not expand this workflow's authority.
 
 ## Verify and recover
 
@@ -39,6 +39,6 @@ Require the exact invocation's successful deployment receipt, matching new servi
 
 Bracket live checks with generation and owner-phase checks; never run ordinary RPCs across an active fence or pause the timer for a quiet proof window. Preserve failed outcomes and unresolved journals; do not delete evidence or retry blindly. Use only the owner's compatibility-checked recovery and cleanup, preserving referenced releases, backups, ordinary sessions, unrelated state, and dirty workspaces.
 
-Let [Gateway restart recovery](https://docs.openclaw.ai/gateway/restart-recovery) resume eligible work; do not duplicate it manually. PTYs end, unsaved work may be lost, and recovery budgets/quarantine remain: neither universal recovery nor exactly-once execution is promised.
+Let [Gateway restart recovery](../../../docs/gateway/restart-recovery.md) resume eligible work; do not duplicate it manually. PTYs end, unsaved work may be lost, and recovery budgets/quarantine remain: neither universal recovery nor exactly-once execution is promised.
 
 Report the invocation outcome, observed serving SHA, migration/readiness and continuity proof, recovery phase, and any exact blocker privately. No credential rotation, release publication, security-policy weakening, or unrelated mutations are authorized.

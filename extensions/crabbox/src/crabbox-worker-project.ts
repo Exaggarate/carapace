@@ -1,4 +1,4 @@
-import type { WorkerProvider } from "openclaw/plugin-sdk/plugin-entry";
+import type { WorkerProvider } from "carapace/plugin-sdk/plugin-entry";
 import { crabboxCommandError } from "./crabbox-worker-command-error.js";
 import { runCrabboxCommand, type CrabboxCommandRunner } from "./crabbox-worker-command.js";
 

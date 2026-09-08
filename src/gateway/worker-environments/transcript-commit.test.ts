@@ -17,12 +17,12 @@ import {
   updateSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { prepareAgentRunUserTurn } from "../agent-turn/agent-run-user-turn.js";
 import type { AgentTurnContext } from "../agent-turn/types.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
@@ -172,13 +172,13 @@ describe("worker transcript commit application", () => {
   let sessionsDir: string;
   let storePath: string;
   let sessionTarget: Awaited<ReturnType<typeof resolveSessionTranscriptRuntimeTarget>>;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   let committer: WorkerTranscriptCommitter;
   let ledgerStore: WorkerTranscriptCommitStore;
   let unsubscribe: (() => void) | undefined;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-turn-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "carapace-worker-turn-"));
     sessionsDir = path.join(root, "agents", "main", "sessions");
     storePath = path.join(sessionsDir, "sessions.json");
     cfg = {
@@ -202,8 +202,8 @@ describe("worker transcript commit application", () => {
       sessionKey: SESSION_KEY,
       storePath,
     });
-    const database = openOpenClawStateDatabase({
-      env: { OPENCLAW_STATE_DIR: path.join(root, "state") },
+    const database = openCarapaceStateDatabase({
+      env: { CARAPACE_STATE_DIR: path.join(root, "state") },
     });
     ledgerStore = createWorkerTranscriptCommitStore({ database });
     committer = createWorkerTranscriptCommitter({
@@ -215,7 +215,7 @@ describe("worker transcript commit application", () => {
   afterEach(async () => {
     unsubscribe?.();
     clearRuntimeConfigSnapshot();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -955,9 +955,9 @@ describe("worker transcript commit application", () => {
         .map((entry) => entry.message),
     ).toMatchObject([
       { role: "user" },
-      { role: "assistant", __openclaw: { runId: IDENTITY.runId } },
-      { role: "toolResult", __openclaw: { runId: IDENTITY.runId } },
-      { role: "assistant", __openclaw: { runId: IDENTITY.runId } },
+      { role: "assistant", __carapace: { runId: IDENTITY.runId } },
+      { role: "toolResult", __carapace: { runId: IDENTITY.runId } },
+      { role: "assistant", __carapace: { runId: IDENTITY.runId } },
     ]);
     expect(reopened.getEntries().at(-1)).toMatchObject({
       id: second.result.newLeafId,

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
 import {
   type ExecPolicyOverrides,
@@ -11,7 +11,7 @@ import {
   resolveNodeExecEligibility,
 } from "../../agents/exec-defaults.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 import { loadBundledSkillEntryByName } from "../loading/workspace-skill-loader.js";
@@ -29,7 +29,7 @@ export {
 
 export function listSkillCommandsForWorkspace(params: {
   workspaceDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   skillFilter?: string[];
   sessionEntry?: ExecSessionDefaults &
@@ -65,7 +65,7 @@ export function listSkillCommandsForWorkspace(params: {
 /** Resolves one eligible bundled skill before normal workspace precedence is applied. */
 export function findBundledSkillCommandForWorkspace(params: {
   workspaceDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   skillName: string;
   agentId?: string;
   skillFilter?: string[];
@@ -124,7 +124,7 @@ function dedupeBySkillName(commands: SkillCommandSpec[]): SkillCommandSpec[] {
 }
 
 export function listSkillCommandsForAgents(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentIds?: string[];
   sessionEntry?: ExecSessionDefaults &
     Pick<SessionEntry, "skillLibrarySelections" | "skillsSnapshot">;

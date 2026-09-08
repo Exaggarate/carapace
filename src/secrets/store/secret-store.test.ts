@@ -4,11 +4,11 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { requireNodeSqlite } from "../../infra/node-sqlite.js";
 import { isSecretValueRegisteredForRedaction } from "../../logging/secret-redaction-registry.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../state/openclaw-state-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { looksLikeSecretSentinel, resolveSecretSentinel } from "../sentinel.js";
 import {
   consumeGitHubSetupHandoff,
@@ -29,13 +29,13 @@ const roots: string[] = [];
 const team = { kind: "team" } as const;
 
 function createDatabaseOptions() {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-secret-store-")));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-secret-store-")));
   roots.push(root);
   return { path: path.join(root, "state.sqlite") };
 }
 
 function countStoredRows(database: ReturnType<typeof createDatabaseOptions>, name: string): number {
-  const row = openOpenClawStateDatabase(database)
+  const row = openCarapaceStateDatabase(database)
     .db.prepare("SELECT COUNT(*) AS count FROM secret_store_entries WHERE name = ?")
     .get(name) as { count: number };
   return row.count;
@@ -44,7 +44,7 @@ function countStoredRows(database: ReturnType<typeof createDatabaseOptions>, nam
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllEnvs();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const root of roots.splice(0)) {
     fs.rmSync(root, { recursive: true, force: true });
   }
@@ -141,7 +141,7 @@ describe("secret store", () => {
   it.each(["off", "0", "false"])(
     "seals protected exec values when provider sentinels are %s",
     (mode) => {
-      vi.stubEnv("OPENCLAW_SECRET_SENTINELS", mode);
+      vi.stubEnv("CARAPACE_SECRET_SENTINELS", mode);
       const database = createDatabaseOptions();
       const secret = "protected-store-fixture-value";
       writeSecretStoreEntry({
@@ -413,7 +413,7 @@ describe("secret store", () => {
       updatedBy: null,
       database,
     });
-    const state = openOpenClawStateDatabase(database);
+    const state = openCarapaceStateDatabase(database);
     expect(() =>
       state.db
         .prepare(
@@ -503,12 +503,12 @@ describe("secret store", () => {
 
   it("treats a missing lazy table as empty and preserves the current schema version", () => {
     const database = createDatabaseOptions();
-    openOpenClawStateDatabase(database);
-    closeOpenClawStateDatabaseForTest();
+    openCarapaceStateDatabase(database);
+    closeCarapaceStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const before = new DatabaseSync(database.path);
     expect(before.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     before.exec("DROP TABLE secret_store_entries;");
     before.close();
@@ -534,10 +534,10 @@ describe("secret store", () => {
       updatedBy: null,
       database,
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const after = new DatabaseSync(database.path, { readOnly: true });
     expect(after.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(
       after

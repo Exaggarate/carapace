@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Control UI tests cover skills behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { gatewayHelloForMethods } from "../../test-helpers/gateway-methods.ts";
@@ -166,7 +166,7 @@ describe("loadSkills", () => {
       }
       if (method === "skills.securityVerdicts") {
         return {
-          schema: "openclaw.skills.security-verdicts.v1",
+          schema: "carapace.skills.security-verdicts.v1",
           items: [
             {
               registry: "https://clawhub.ai",
@@ -248,7 +248,7 @@ describe("loadSkills", () => {
       }
       if (method === "skills.securityVerdicts") {
         return {
-          schema: "openclaw.skills.security-verdicts.v1",
+          schema: "carapace.skills.security-verdicts.v1",
           items: [
             {
               registry: "https://clawhub.ai",
@@ -327,7 +327,7 @@ describe("loadSkills", () => {
       }
       if (method === "skills.securityVerdicts") {
         return {
-          schema: "openclaw.skills.security-verdicts.v1",
+          schema: "carapace.skills.security-verdicts.v1",
           items: [],
         };
       }
@@ -488,7 +488,7 @@ describe("loadSkills", () => {
     expect(state.skillsLoading).toBe(false);
     expect(state.clawhubVerdictsLoading).toBe(true);
 
-    resolveVerdicts({ schema: "openclaw.skills.security-verdicts.v1", items: [] });
+    resolveVerdicts({ schema: "carapace.skills.security-verdicts.v1", items: [] });
     await Promise.resolve();
     await Promise.resolve();
 
@@ -539,7 +539,7 @@ describe("loadSkillCard", () => {
     const { state, request } = createState();
     state.skillsAgentId = "research";
     request.mockResolvedValueOnce({
-      schema: "openclaw.skills.skill-card.v1",
+      schema: "carapace.skills.skill-card.v1",
       skillKey: "agentreceipt",
       path: "/tmp/workspace/skills/agentreceipt/skill-card.md",
       sizeBytes: 34,
@@ -668,7 +668,7 @@ describe("loadSkillCard", () => {
       ],
     };
     resolveCard({
-      schema: "openclaw.skills.skill-card.v1",
+      schema: "carapace.skills.skill-card.v1",
       skillKey: "agentreceipt",
       path: "/tmp/workspace/skills/agentreceipt/skill-card.md",
       sizeBytes: 34,
@@ -845,7 +845,7 @@ describe("skill mutations", () => {
         await saveSkillApiKey(state, "github");
       },
       expectedRequest: ["skills.update", { skillKey: "github", apiKey: "sk-test" }],
-      expectedMessage: "API key saved — stored in openclaw.json (skills.entries.github)",
+      expectedMessage: "API key saved — stored in carapace.json (skills.entries.github)",
     },
     {
       name: "installs skills and uses server success messages",

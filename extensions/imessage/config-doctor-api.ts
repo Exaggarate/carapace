@@ -2,10 +2,10 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { defineChannelAliasMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { defineChannelAliasMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 // Disabled `channels.imessage.catchup` blocks are retired. Enabled blocks stay
 // as a compatibility contract: older configs that opted into replay still get
@@ -44,7 +44,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
     path: ["channels", "imessage"],
     message:
       "disabled channels.imessage.catchup config is retired; iMessage now recovers via always-on inbound dedupe and a stale-backlog age fence. " +
-      'Run "openclaw doctor --fix" to remove disabled catchup blocks.',
+      'Run "carapace doctor --fix" to remove disabled catchup blocks.',
     match: (value) => imessageEntryHasRetiredCatchup(value),
   },
   ...streamingAliasMigration.legacyConfigRules,
@@ -53,7 +53,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   // SAFETY: doctor inspects legacy channel keys before schema validation.
   const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -95,7 +95,7 @@ export function normalizeCompatibilityConfig({
     cfg:
       nextImessage === imessage
         ? cfg
-        : ({ ...cfg, channels: { ...channels, imessage: nextImessage } } as OpenClawConfig), // SAFETY: only retired catchup keys are removed.
+        : ({ ...cfg, channels: { ...channels, imessage: nextImessage } } as CarapaceConfig), // SAFETY: only retired catchup keys are removed.
     changes,
   });
   if (changes.length === 0) {

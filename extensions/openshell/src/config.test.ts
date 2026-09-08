@@ -11,7 +11,7 @@ describe("openshell plugin config", () => {
       gateway: undefined,
       gatewayEndpoint: undefined,
       workspace: undefined,
-      from: "openclaw",
+      from: "carapace",
       policy: undefined,
       providers: [],
       gpu: false,
@@ -85,7 +85,7 @@ describe("openshell plugin config", () => {
       gateway: undefined,
       gatewayEndpoint: undefined,
       workspace: undefined,
-      from: "openclaw",
+      from: "carapace",
       policy: undefined,
       providers: [],
       gpu: false,
@@ -125,7 +125,7 @@ describe("openshell plugin config", () => {
 
   it("keeps the runtime json schema in sync with the manifest config schema", () => {
     const manifest = JSON.parse(
-      fsSync.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf8"),
+      fsSync.readFileSync(new URL("../carapace.plugin.json", import.meta.url), "utf8"),
     ) as { configSchema?: unknown };
 
     expect(createOpenShellPluginConfigSchema().jsonSchema).toEqual(manifest.configSchema);

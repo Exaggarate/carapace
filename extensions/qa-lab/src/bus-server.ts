@@ -1,13 +1,13 @@
 // Qa Lab plugin module implements bus server behavior.
 import { once } from "node:events";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "openclaw/plugin-sdk/webhook-ingress";
-import { sendHttpRequestRejection } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-ingress";
+import { sendHttpRequestRejection } from "carapace/plugin-sdk/webhook-request-guards";
 import { z } from "zod";
 import { normalizeAccountId, resolveQaBusPollStartCursor } from "./bus-queries.js";
 import type { QaBusState } from "./bus-state.js";

@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 
 export type TelegramTestCredential = {
   environment: "test";
@@ -130,7 +130,7 @@ export async function loadTelegramUserbotSkillRuntime(params?: {
   return {
     userDriverPath,
     createStateRoot: () =>
-      fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-qa-telegram-")),
+      fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-qa-telegram-")),
     parseCredential(value) {
       return parseCredentialResult(Reflect.apply(parseCredential, undefined, [value]));
     },

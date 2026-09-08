@@ -1,5 +1,5 @@
 // Handles native slash commands before full get-reply pipeline execution.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { QueueMode } from "../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import type { ModelCatalogSnapshot } from "../../agents/model-catalog.types.js";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../agents/model-selection.js";
 import { loadPreparedModelCatalog } from "../../agents/prepared-model-catalog.js";
 import { resolveChannelModelOverride } from "../../channels/model-overrides.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { isModelSelectionLocked } from "../../sessions/model-overrides.js";
 import { recordSessionCreated } from "../../sessions/session-state-events.js";
 import { resolveStoredModelOverride } from "../../sessions/stored-model-overrides.js";
@@ -45,7 +45,7 @@ import { persistReplySessionEntry } from "./session-entry-persistence.js";
 import { createSkillCommandLoaders } from "./skill-command-loaders.js";
 import type { createTypingController } from "./typing.js";
 
-type AgentDefaults = NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]> | undefined;
+type AgentDefaults = NonNullable<NonNullable<CarapaceConfig["agents"]>["defaults"]> | undefined;
 type SkillCommandsRuntime = typeof import("../../skills/discovery/chat-commands.runtime.js");
 type InternalGetReplyOptions = GetReplyOptions & {
   onSessionMetadataChanges?: (changes: CommandSessionMetadataChange[]) => void;
@@ -99,7 +99,7 @@ function shouldRunInternalTextSlashCommandFastPath(
 }
 
 async function resolveNativeSlashDefaultThinkingLevel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   provider: string;
   model: string;
@@ -123,7 +123,7 @@ async function resolveNativeSlashDefaultThinkingLevel(params: {
 
 export async function maybeResolveNativeSlashCommandFastReply(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir: string;
   agentCfg: AgentDefaults;

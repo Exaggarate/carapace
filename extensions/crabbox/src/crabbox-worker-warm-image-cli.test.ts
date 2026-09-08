@@ -2,8 +2,8 @@ import { Command } from "commander";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerCrabboxWarmImageCommands } from "./crabbox-worker-warm-image-cli.js";
 import {
@@ -17,7 +17,7 @@ let output = "";
 
 beforeEach(() => {
   resetPluginStateStoreForTests();
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-crabbox-warm-cli-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-crabbox-warm-cli-"));
   output = "";
   vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
     output += String(chunk);
@@ -199,7 +199,7 @@ describe("Crabbox warm-image CLI", () => {
     await runCli();
 
     expect(output).toContain(
-      `openclaw crabbox warm-images --recover ${SELECTOR} --acknowledge-provider-cleanup`,
+      `carapace crabbox warm-images --recover ${SELECTOR} --acknowledge-provider-cleanup`,
     );
     expect(output).toContain("Stop the owning Gateway and capture processes");
     expect(output).toContain("Checkpoint deletion pending: chk_predecessor");

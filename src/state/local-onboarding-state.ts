@@ -1,11 +1,11 @@
 // Durable local onboarding ownership; inference configuration alone does not prove setup finished.
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { sha256Hex } from "../infra/crypto-digest.js";
 import { updateConfigMachineState } from "./config-machine-state-write.js";
 import { readConfigMachineState } from "./config-machine-state.js";
-import type { OpenClawStateDatabaseOptions } from "./openclaw-state-db.js";
+import type { CarapaceStateDatabaseOptions } from "./carapace-state-db.js";
 
 export type LocalOnboardingState = {
   version: 1;
@@ -46,7 +46,7 @@ function normalizeState(value: unknown, configPath: string): LocalOnboardingStat
 
 export function readLocalOnboardingState(
   configPath: string,
-  database: OpenClawStateDatabaseOptions = {},
+  database: CarapaceStateDatabaseOptions = {},
 ): LocalOnboardingState | undefined {
   return normalizeState(readConfigMachineState(stateKey(configPath), database), configPath);
 }
@@ -54,8 +54,8 @@ export function readLocalOnboardingState(
 /** A replaced config at the same path must never inherit another installation's receipt. */
 export function readLocalOnboardingStateForConfig(
   configPath: string,
-  config: Pick<OpenClawConfig, "wizard">,
-  database: OpenClawStateDatabaseOptions = {},
+  config: Pick<CarapaceConfig, "wizard">,
+  database: CarapaceStateDatabaseOptions = {},
 ): LocalOnboardingState | undefined {
   const securityAcknowledgedAt = config.wizard?.securityAcknowledgedAt?.trim();
   if (!securityAcknowledgedAt) {
@@ -74,7 +74,7 @@ export function beginLocalOnboarding(params: {
   expectedRunId?: string;
   runId: string;
   nowMs?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): LocalOnboardingState {
   const securityAcknowledgedAt = params.securityAcknowledgedAt.trim();
   if (!securityAcknowledgedAt) {
@@ -109,7 +109,7 @@ export function completeLocalOnboarding(params: {
   configPath: string;
   runId: string;
   nowMs?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): boolean {
   const current = readLocalOnboardingState(params.configPath, params.database);
   if (current?.runId !== params.runId) {

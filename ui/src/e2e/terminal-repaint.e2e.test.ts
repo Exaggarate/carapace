@@ -18,7 +18,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
 
-const requestedScreenshotPath = process.env.OPENCLAW_TERMINAL_REPAINT_SCREENSHOT?.trim();
+const requestedScreenshotPath = process.env.CARAPACE_TERMINAL_REPAINT_SCREENSHOT?.trim();
 let screenshotPath: string | undefined;
 beforeEach(() => {
   screenshotPath = requestedScreenshotPath
@@ -48,9 +48,9 @@ suite.define(() => {
         await page.addInitScript(() => {
           (
             window as Window & {
-              ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+              ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
             }
-          )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+          )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
             gatewayUrl: "ws://gateway.example.test",
             token: "test",
           };

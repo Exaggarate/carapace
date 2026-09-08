@@ -1,7 +1,7 @@
 // Provides a lightweight ServerResponse mock for HTTP handler tests.
 import { IncomingMessage, type ServerResponse } from "node:http";
 import { Socket } from "node:net";
-import { lowercasePreservingWhitespace } from "@openclaw/normalization-core/string-coerce";
+import { lowercasePreservingWhitespace } from "@carapace/normalization-core/string-coerce";
 
 /** Minimal ServerResponse double for route tests that inspect headers and body. */
 export function createMockServerResponse(): ServerResponse & { body?: string } {

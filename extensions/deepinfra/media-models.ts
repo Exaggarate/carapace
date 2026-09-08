@@ -1,6 +1,6 @@
 // Deepinfra plugin module implements media models behavior.
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 export interface DeepInfraSurfaceModel {
   id: string;

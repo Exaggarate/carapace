@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import YAML from "yaml";
 import { classifyDependencySpec } from "./lib/dependency-spec-policy.mts";
 

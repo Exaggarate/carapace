@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
+import { runExec } from "carapace/plugin-sdk/process-runtime";
 import { seedQaAgentWorkspace } from "./qa-agent-workspace.js";
 import {
   createQaChannelGatewayConfig,
@@ -11,7 +11,7 @@ import {
 import { buildQaGatewayConfig } from "./qa-gateway-config.js";
 
 const QA_LAB_INTERNAL_PORT = 43123;
-const QA_LAB_UI_OVERLAY_DIR = "/opt/openclaw-qa-lab-ui";
+const QA_LAB_UI_OVERLAY_DIR = "/opt/carapace-qa-lab-ui";
 // The QA config enables ACPX. Bake the external plugin so ephemeral Gateways do
 // not block startup on a network install before their health deadline.
 const QA_DOCKER_PLUGIN_SELECTION = "acpx qa-channel qa-lab";
@@ -34,7 +34,7 @@ function renderImageBlock(params: {
     return `    image: ${params.imageName}\n`;
   }
   const context = toPosixRelative(params.outputDir, params.repoRoot) || ".";
-  return `    build:\n      context: ${yamlDoubleQuoted(context)}\n      dockerfile: Dockerfile\n      args:\n        OPENCLAW_EXTENSIONS: "${QA_DOCKER_PLUGIN_SELECTION}"\n`;
+  return `    build:\n      context: ${yamlDoubleQuoted(context)}\n      dockerfile: Dockerfile\n      args:\n        CARAPACE_EXTENSIONS: "${QA_DOCKER_PLUGIN_SELECTION}"\n`;
 }
 
 function renderCompose(params: {
@@ -72,8 +72,8 @@ ${imageBlock}    pull_policy: never
       retries: 6
       start_period: 3s
     environment:
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1"
-      OPENCLAW_PROFILE: ""
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "1"
+      CARAPACE_PROFILE: ""
     command:
       - node
       - dist/index.js
@@ -90,7 +90,7 @@ ${imageBlock}    pull_policy: never
     ports:
       - "127.0.0.1:${params.qaLabPort}:${QA_LAB_INTERNAL_PORT}"
     volumes:
-      - ./state:/opt/openclaw-scaffold:ro
+      - ./state:/opt/carapace-scaffold:ro
       - ${yamlDoubleQuoted(`${taxonomyMount}:/app/taxonomy.yaml:ro`)}
 ${params.bindUiDist ? `      - ${yamlDoubleQuoted(`${qaLabUiMount}:${QA_LAB_UI_OVERLAY_DIR}:ro`)}\n` : ""}    healthcheck:
       test:
@@ -103,39 +103,39 @@ ${params.bindUiDist ? `      - ${yamlDoubleQuoted(`${qaLabUiMount}:${QA_LAB_UI_O
       retries: 6
       start_period: 5s
     environment:
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1"
-      OPENCLAW_CONFIG_PATH: /opt/openclaw-scaffold/openclaw.json
-      OPENCLAW_STATE_DIR: /tmp/openclaw/state
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1"
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1"
-      OPENCLAW_SKIP_CANVAS_HOST: "1"
-      OPENCLAW_PROFILE: ""
+      CARAPACE_ENABLE_PRIVATE_QA_CLI: "1"
+      CARAPACE_CONFIG_PATH: /opt/carapace-scaffold/carapace.json
+      CARAPACE_STATE_DIR: /tmp/carapace/state
+      CARAPACE_SKIP_GMAIL_WATCHER: "1"
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1"
+      CARAPACE_SKIP_CANVAS_HOST: "1"
+      CARAPACE_PROFILE: ""
     command:
       - sh
       - -lc
-      - OPENCLAW_QA_CONTROL_UI_PROXY_TOKEN="$(node -e 'const fs=require("node:fs");const cfg=JSON.parse(fs.readFileSync("/opt/openclaw-scaffold/openclaw.json","utf8"));process.stdout.write(cfg.gateway?.auth?.token ?? "")')" exec node dist/index.js qa ui --host 0.0.0.0 --port ${QA_LAB_INTERNAL_PORT} --advertise-host 127.0.0.1 --advertise-port ${params.qaLabPort} --control-ui-url http://127.0.0.1:${params.gatewayPort}/ --control-ui-proxy-target http://openclaw-qa-gateway:18789/${params.bindUiDist ? ` --ui-dist-dir ${QA_LAB_UI_OVERLAY_DIR}` : ""} --auto-kickoff-target direct --send-kickoff-on-start --embedded-gateway disabled
+      - CARAPACE_QA_CONTROL_UI_PROXY_TOKEN="$(node -e 'const fs=require("node:fs");const cfg=JSON.parse(fs.readFileSync("/opt/carapace-scaffold/carapace.json","utf8"));process.stdout.write(cfg.gateway?.auth?.token ?? "")')" exec node dist/index.js qa ui --host 0.0.0.0 --port ${QA_LAB_INTERNAL_PORT} --advertise-host 127.0.0.1 --advertise-port ${params.qaLabPort} --control-ui-url http://127.0.0.1:${params.gatewayPort}/ --control-ui-proxy-target http://carapace-qa-gateway:18789/${params.bindUiDist ? ` --ui-dist-dir ${QA_LAB_UI_OVERLAY_DIR}` : ""} --auto-kickoff-target direct --send-kickoff-on-start --embedded-gateway disabled
     depends_on:
       qa-mock-openai:
         condition: service_healthy
 `
     : ""
-}  openclaw-qa-gateway:
+}  carapace-qa-gateway:
 ${imageBlock}    pull_policy: never
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "127.0.0.1:${params.gatewayPort}:18789"
     environment:
-      OPENCLAW_CONFIG_PATH: /tmp/openclaw/openclaw.json
-      OPENCLAW_STATE_DIR: /tmp/openclaw/state
-      OPENCLAW_NO_RESPAWN: "1"
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1"
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1"
-      OPENCLAW_SKIP_CANVAS_HOST: "1"
-      OPENCLAW_PROFILE: ""
+      CARAPACE_CONFIG_PATH: /tmp/carapace/carapace.json
+      CARAPACE_STATE_DIR: /tmp/carapace/state
+      CARAPACE_NO_RESPAWN: "1"
+      CARAPACE_SKIP_GMAIL_WATCHER: "1"
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1"
+      CARAPACE_SKIP_CANVAS_HOST: "1"
+      CARAPACE_PROFILE: ""
     volumes:
-      - ./state:/opt/openclaw-scaffold:ro
-      - ${yamlDoubleQuoted(`${repoMount}:/opt/openclaw-repo:ro`)}
+      - ./state:/opt/carapace-scaffold:ro
+      - ${yamlDoubleQuoted(`${repoMount}:/opt/carapace-repo:ro`)}
     healthcheck:
       test:
         - CMD
@@ -158,7 +158,7 @@ ${
     command:
       - sh
       - -lc
-      - mkdir -p /tmp/openclaw/workspace /tmp/openclaw/state && cp /opt/openclaw-scaffold/openclaw.json /tmp/openclaw/openclaw.json && cp -R /opt/openclaw-scaffold/seed-workspace/. /tmp/openclaw/workspace/ && rm -rf /tmp/openclaw/workspace/repo && ln -s /opt/openclaw-repo /tmp/openclaw/workspace/repo && exec node dist/index.js gateway run --port 18789 --bind lan --allow-unconfigured
+      - mkdir -p /tmp/carapace/workspace /tmp/carapace/state && cp /opt/carapace-scaffold/carapace.json /tmp/carapace/carapace.json && cp -R /opt/carapace-scaffold/seed-workspace/. /tmp/carapace/workspace/ && rm -rf /tmp/carapace/workspace/repo && ln -s /opt/carapace-repo /tmp/carapace/workspace/repo && exec node dist/index.js gateway run --port 18789 --bind lan --allow-unconfigured
 `;
 }
 
@@ -171,7 +171,7 @@ function renderEnvExample(params: {
   includeQaLabUi: boolean;
 }) {
   return `# QA Docker harness example env
-OPENCLAW_GATEWAY_TOKEN=${params.gatewayToken}
+CARAPACE_GATEWAY_TOKEN=${params.gatewayToken}
 QA_GATEWAY_PORT=${params.gatewayPort}
 QA_BUS_BASE_URL=${params.qaBusBaseUrl}
 QA_PROVIDER_BASE_URL=${params.providerBaseUrl}
@@ -193,12 +193,12 @@ Files:
 
 - \`docker-compose.qa.yml\`
 - \`.env.example\`
-- \`state/openclaw.json\`
+- \`state/carapace.json\`
 
 Suggested flow:
 
 1. Build the prebaked image once:
-   - \`docker build -t openclaw:qa-local-prebaked --build-arg OPENCLAW_EXTENSIONS="${QA_DOCKER_PLUGIN_SELECTION}" -f Dockerfile .\`
+   - \`docker build -t carapace:qa-local-prebaked --build-arg CARAPACE_EXTENSIONS="${QA_DOCKER_PLUGIN_SELECTION}" -f Dockerfile .\`
 2. Start the stack:
    - \`docker compose -f docker-compose.qa.yml up${params.usePrebuiltImage ? "" : " --build"} -d\`
 3. Open the QA dashboard:
@@ -246,7 +246,7 @@ export async function writeQaDockerHarnessFiles(params: {
   const gatewayToken = params.gatewayToken ?? `qa-token-${randomUUID()}`;
   const providerBaseUrl = params.providerBaseUrl ?? "http://qa-mock-openai:44080/v1";
   const qaBusBaseUrl = params.qaBusBaseUrl ?? "http://qa-lab:43123";
-  const imageName = params.imageName ?? "openclaw:qa-local-prebaked";
+  const imageName = params.imageName ?? "carapace:qa-local-prebaked";
   const usePrebuiltImage = params.usePrebuiltImage ?? false;
   const bindUiDist = params.bindUiDist ?? false;
   const includeQaLabUi = params.includeQaLabUi ?? true;
@@ -262,7 +262,7 @@ export async function writeQaDockerHarnessFiles(params: {
     gatewayPort: 18789,
     gatewayToken,
     providerBaseUrl,
-    workspaceDir: "/tmp/openclaw/workspace",
+    workspaceDir: "/tmp/carapace/workspace",
     controlUiRoot: "/app/dist/control-ui",
     enabledPluginIds: ["acpx"],
     transportPluginIds: QA_CHANNEL_REQUIRED_PLUGIN_IDS,
@@ -275,7 +275,7 @@ export async function writeQaDockerHarnessFiles(params: {
     path.join(params.outputDir, "docker-compose.qa.yml"),
     path.join(params.outputDir, ".env.example"),
     path.join(params.outputDir, "README.md"),
-    path.join(params.outputDir, "state", "openclaw.json"),
+    path.join(params.outputDir, "state", "carapace.json"),
   ];
 
   await Promise.all([
@@ -317,7 +317,7 @@ export async function writeQaDockerHarnessFiles(params: {
       "utf8",
     ),
     fs.writeFile(
-      path.join(params.outputDir, "state", "openclaw.json"),
+      path.join(params.outputDir, "state", "carapace.json"),
       `${JSON.stringify(config, null, 2)}\n`,
       "utf8",
     ),
@@ -349,7 +349,7 @@ export async function buildQaDockerHarnessImage(
     ) => Promise<{ stdout: string; stderr: string }>;
   },
 ) {
-  const imageName = params.imageName ?? "openclaw:qa-local-prebaked";
+  const imageName = params.imageName ?? "carapace:qa-local-prebaked";
   const runCommand =
     deps?.runCommand ??
     (async (command: string, args: string[], cwd: string) => {
@@ -363,7 +363,7 @@ export async function buildQaDockerHarnessImage(
       "-t",
       imageName,
       "--build-arg",
-      `OPENCLAW_EXTENSIONS=${QA_DOCKER_PLUGIN_SELECTION}`,
+      `CARAPACE_EXTENSIONS=${QA_DOCKER_PLUGIN_SELECTION}`,
       "-f",
       "Dockerfile",
       ".",

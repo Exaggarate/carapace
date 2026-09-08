@@ -3,7 +3,7 @@
  *
  * Compatible providers can support strict schemas without inheriting OpenAI's required default.
  */
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { resolveProviderRequestCapabilities } from "./provider-attribution.js";
 import { getModelProviderRequestRouteFacts } from "./provider-request-config.js";
 

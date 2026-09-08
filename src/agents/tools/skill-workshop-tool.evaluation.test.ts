@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { createSkillWorkshopTool as createSkillWorkshopToolImpl } from "./skill-workshop-tool.js";
 
@@ -18,18 +18,18 @@ const tempDirs = createTrackedTempDirs();
 const cleanups: Array<() => Promise<void>> = [];
 const createSkillWorkshopTool = (
   options: Omit<Parameters<typeof createSkillWorkshopToolImpl>[0], "config" | "agentId"> & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
   },
 ) => createSkillWorkshopToolImpl({ config: {}, agentId: "main", ...options });
 
 async function createEvaluationFixture(name: string) {
-  const testState = await createOpenClawTestState({
+  const testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-evaluation-state-",
+    prefix: "carapace-skill-workshop-evaluation-state-",
   });
   cleanups.push(async () => await testState.cleanup());
-  const workspaceDir = await tempDirs.make("openclaw-skill-workshop-evaluation-");
+  const workspaceDir = await tempDirs.make("carapace-skill-workshop-evaluation-");
   const tool = createSkillWorkshopTool({ workspaceDir, agentId: "main", env: testState.env });
   const created = await tool.execute("create", {
     action: "create",

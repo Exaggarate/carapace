@@ -1,13 +1,13 @@
-# Signal OpenClaw channel
+# Signal Carapace channel
 
-Official OpenClaw channel plugin for Signal.
+Official Carapace channel plugin for Signal.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/signal
+carapace plugins install @carapace/signal
 ```
 
 ## Docs
 
-See `docs/channels/signal.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/signal`.
+See `docs/channels/signal.md` in the Carapace repository, or the published docs at `../../docs/channels/signal.md`.

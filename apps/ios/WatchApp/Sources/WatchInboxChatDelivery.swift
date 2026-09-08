@@ -1,24 +1,24 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import OSLog
 
 extension WatchInboxStore {
-    var chatDeliveryContext: OpenClawWatchChatDeliveryContext? {
+    var chatDeliveryContext: CarapaceWatchChatDeliveryContext? {
         self.appSnapshot?.validatedChatDeliveryContext
     }
 
-    var savedChatDeliveryReceipt: OpenClawWatchChatDeliveryReceipt? {
+    var savedChatDeliveryReceipt: CarapaceWatchChatDeliveryReceipt? {
         self.chatDeliveryEntries.last(where: { $0.receipt?.isFinal == true })?.receipt
     }
 
-    var savedPromptDeliveryReceipt: OpenClawWatchChatDeliveryReceipt? {
+    var savedPromptDeliveryReceipt: CarapaceWatchChatDeliveryReceipt? {
         self.promptChatDeliveryEntries.last(where: { $0.receipt?.isFinal == true })?.receipt
     }
 
     /// Capture the prompt owner at the button tap, before any asynchronous admission work.
-    func makeQuickReplyCommand(action: WatchPromptAction) -> OpenClawWatchChatDeliveryCommand? {
+    func makeQuickReplyCommand(action: WatchPromptAction) -> CarapaceWatchChatDeliveryCommand? {
         guard let context = self.promptChatDeliveryContext,
-              (try? OpenClawWatchChatDeliveryCodec.validateContext(context)) != nil,
+              (try? CarapaceWatchChatDeliveryCodec.validateContext(context)) != nil,
               self.gatewayStableID?.utf8.elementsEqual(context.gatewayStableID.utf8) == true,
               self.sessionKey?.utf8.elementsEqual(context.sessionKey.utf8) == true,
               let promptId = self.promptId,
@@ -32,7 +32,7 @@ extension WatchInboxStore {
             self.persistState()
             return nil
         }
-        return OpenClawWatchChatDeliveryCommand(
+        return CarapaceWatchChatDeliveryCommand(
             context: context,
             commandId: UUID().uuidString,
             submittedAtMs: WatchVoiceTurnState.nowMs(),
@@ -46,7 +46,7 @@ extension WatchInboxStore {
             return nil
         }
         let attempt = self.markAppCommandSending(.sendChat)
-        let command = OpenClawWatchChatDeliveryCommand(
+        let command = CarapaceWatchChatDeliveryCommand(
             context: context,
             commandId: attempt.uuidString,
             submittedAtMs: WatchVoiceTurnState.nowMs(),
@@ -71,7 +71,7 @@ extension WatchInboxStore {
         return accepted ? command.commandId : nil
     }
 
-    func enqueueQuickReply(_ command: OpenClawWatchChatDeliveryCommand) async -> Bool {
+    func enqueueQuickReply(_ command: CarapaceWatchChatDeliveryCommand) async -> Bool {
         guard case let .quickReply(promptId, actionId, actionLabel, _) = command.body else { return false }
         let isCurrent = command.context == self.promptChatDeliveryContext
             && promptId.utf8.elementsEqual((self.promptId ?? "").utf8)
@@ -112,12 +112,12 @@ extension WatchInboxStore {
         let replyWasSending = self.isReplySending
         let expired = try await self.chatDeliveryJournal.expiredEntries(nowMs: nowMs)
         guard !expired.isEmpty else { return }
-        let chatEntries: [OpenClawWatchChatDeliveryStore.Entry] = if let context {
+        let chatEntries: [CarapaceWatchChatDeliveryStore.Entry] = if let context {
             try await self.chatDeliveryJournal.entries(context: context, nowMs: nowMs)
         } else {
             []
         }
-        let promptEntries: [OpenClawWatchChatDeliveryStore.Entry] = if promptContext == context {
+        let promptEntries: [CarapaceWatchChatDeliveryStore.Entry] = if promptContext == context {
             chatEntries
         } else if let promptContext {
             try await self.chatDeliveryJournal.entries(context: promptContext, nowMs: nowMs)
@@ -130,11 +130,11 @@ extension WatchInboxStore {
               self.chatDeliveryContext == context, self.promptChatDeliveryContext == promptContext,
               self.promptId?.utf8.elementsEqual((promptID ?? "").utf8) ?? (promptID == nil)
         else { return }
-        func matchesPrompt(_ entry: OpenClawWatchChatDeliveryStore.Entry) -> Bool {
+        func matchesPrompt(_ entry: CarapaceWatchChatDeliveryStore.Entry) -> Bool {
             guard case let .quickReply(id, _, _, _) = entry.command.body else { return false }
             return entry.command.context == promptContext && id.utf8.elementsEqual((promptID ?? "").utf8)
         }
-        var projections: [OpenClawWatchChatDeliveryStore.Entry] = []
+        var projections: [CarapaceWatchChatDeliveryStore.Entry] = []
         if !chatWasSending, self.appCommandStatus?.code != .sending,
            self.appCommandStatus == nil || self.appCommandStatus?.command == .sendChat,
            !chatEntries.contains(where: { $0.command.kind == .chat }),
@@ -166,7 +166,7 @@ extension WatchInboxStore {
             }
         }
         self.persistState()
-        Logger(subsystem: "ai.openclaw.watch", category: "chat-delivery")
+        Logger(subsystem: "ai.carapace.watch", category: "chat-delivery")
             .notice("Expired \(expired.count) saved Watch messages at their original deadline")
         // No receipt or duplicate command extends this deadline. Display state is not replay authority.
         self.chatDeliveryReloadID = nil
@@ -182,12 +182,12 @@ extension WatchInboxStore {
         let promptID = self.promptId
         let chatWasSending = self.appCommandStatus?.code == .sending
         let replyWasSending = self.isReplySending
-        let entries: [OpenClawWatchChatDeliveryStore.Entry] = if let context {
+        let entries: [CarapaceWatchChatDeliveryStore.Entry] = if let context {
             try await self.chatDeliveryJournal.entries(context: context, nowMs: nowMs)
         } else {
             []
         }
-        let promptEntries: [OpenClawWatchChatDeliveryStore.Entry] = if promptContext == context {
+        let promptEntries: [CarapaceWatchChatDeliveryStore.Entry] = if promptContext == context {
             entries
         } else if let promptContext {
             try await self.chatDeliveryJournal.entries(context: promptContext, nowMs: nowMs)
@@ -204,7 +204,7 @@ extension WatchInboxStore {
             guard case let .quickReply(id, _, _, _) = entry.command.body else { return false }
             return id.utf8.elementsEqual((promptID ?? "").utf8)
         }
-        func status(_ entry: OpenClawWatchChatDeliveryStore.Entry) -> (WatchDeliveryStatusCode, String?) {
+        func status(_ entry: CarapaceWatchChatDeliveryStore.Entry) -> (WatchDeliveryStatusCode, String?) {
             if let outcome = entry.receipt?.outcome {
                 switch outcome {
                 case let .failed(_, message), let .uncertain(message): return (.failed, message)
@@ -233,15 +233,15 @@ extension WatchInboxStore {
     }
 
     func recordChatDeliveryReceipt(
-        _ receipt: OpenClawWatchChatDeliveryReceipt,
-        nowMs: Int64 = WatchVoiceTurnState.nowMs()) async throws -> OpenClawWatchChatDeliveryReceiptAck?
+        _ receipt: CarapaceWatchChatDeliveryReceipt,
+        nowMs: Int64 = WatchVoiceTurnState.nowMs()) async throws -> CarapaceWatchChatDeliveryReceiptAck?
     {
         self.chatDeliveryReloadID = nil
-        let acknowledgment: OpenClawWatchChatDeliveryReceiptAck?
+        let acknowledgment: CarapaceWatchChatDeliveryReceiptAck?
         do {
             acknowledgment = try await self.chatDeliveryJournal.record(receipt, nowMs: nowMs)
         } catch {
-            if let deliveryError = error as? OpenClawWatchChatDeliveryError, deliveryError.code == "expired" {
+            if let deliveryError = error as? CarapaceWatchChatDeliveryError, deliveryError.code == "expired" {
                 try await self.maintainChatDeliveryJournal(nowMs: nowMs)
             }
             await self.refreshChatDeliveryAfterAttempt(nowMs: nowMs)
@@ -249,7 +249,7 @@ extension WatchInboxStore {
         }
         self.chatDeliveryReloadID = nil
         if case let .rejected(code, message) = receipt.state,
-           code == OpenClawWatchChatDeliveryCodec.staleRouteCode
+           code == CarapaceWatchChatDeliveryCodec.staleRouteCode
         {
             self.chatDeliveryMaintenanceID = nil
             if let current = self.chatDeliveryContext,
@@ -305,7 +305,7 @@ extension WatchInboxStore {
             try await self.reloadChatDeliveryEntries(nowMs: nowMs)
         } catch {
             // Admission is already settled; a failed read must not relabel saved input as Not sent.
-            Logger(subsystem: "ai.openclaw.watch", category: "chat-delivery")
+            Logger(subsystem: "ai.carapace.watch", category: "chat-delivery")
                 .notice("Saved Watch message projection will refresh when storage is available")
         }
     }
@@ -319,7 +319,7 @@ extension WatchInboxStore {
     }
 
     private static func failedDeliveryResult(_ error: any Error) -> WatchReplySendResult {
-        let message = (error as? OpenClawWatchChatDeliveryError)?.message
+        let message = (error as? CarapaceWatchChatDeliveryError)?.message
             ?? String(localized: "Couldn't save this Watch message. Try again when storage is available.")
         return WatchReplySendResult(
             delivery: .notSent, transport: "none", errorMessage: message, requiresCanonicalReadback: false)

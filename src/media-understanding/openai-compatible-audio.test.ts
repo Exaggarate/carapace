@@ -26,9 +26,9 @@ describe("transcribeOpenAiCompatibleAudio", () => {
     });
 
     const headers = new Headers(getRequest().init?.headers);
-    expect(headers.get("originator")).toBe("openclaw");
+    expect(headers.get("originator")).toBe("carapace");
     expect(headers.get("version")).toBe(VERSION);
-    expect(headers.get("user-agent")).toBe(`openclaw/${VERSION}`);
+    expect(headers.get("user-agent")).toBe(`carapace/${VERSION}`);
   });
 
   it("does not add hidden attribution headers on custom OpenAI-compatible hosts", async () => {

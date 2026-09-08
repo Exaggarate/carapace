@@ -6,10 +6,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 const roots: string[] = [];
 const footer =
-  '<p><a href="https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md">View full changelog</a></p>';
+  '<p><a href="https://github.com/Exaggarate/carapace/blob/main/CHANGELOG.md">View full changelog</a></p>';
 
 function render(section: string, version = "2026.8.2") {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-changelog-html-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-changelog-html-"));
   roots.push(root);
   const file = path.join(root, "CHANGELOG.md");
   writeFileSync(file, section);
@@ -48,7 +48,7 @@ describe("changelog release HTML", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toBe(
       [
-        "<h2>OpenClaw 2026.8.2</h2>",
+        "<h2>Carapace 2026.8.2</h2>",
         "<h3>Highlights</h3>",
         "<ul>",
         "<li><strong>Fast</strong> & reliable <code>path\\file</code></li>",
@@ -77,7 +77,7 @@ describe("changelog release HTML", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toBe(
       [
-        "<h2>OpenClaw 2026.8.2</h2>",
+        "<h2>Carapace 2026.8.2</h2>",
         "<h3>Contributions</h3>",
         "<ul>",
         ...entries.map(
@@ -95,7 +95,7 @@ describe("changelog release HTML", () => {
     const result = render("## 2026.8.1\n- Previous release\n");
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout).toBe(
-      `<h2>OpenClaw 2026.8.2</h2>\n<p>Latest OpenClaw update.</p>\n${footer}\n`,
+      `<h2>Carapace 2026.8.2</h2>\n<p>Latest Carapace update.</p>\n${footer}\n`,
     );
   });
 });

@@ -1,4 +1,4 @@
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleDynamicToolCallWithTimeout } from "./dynamic-tool-execution.js";
 
@@ -40,7 +40,7 @@ describe("dynamic tool timeout logging", () => {
       contentItems: [
         {
           type: "inputText",
-          text: "OpenClaw dynamic tool call timed out after 1ms while waiting for process action=poll sessionId=process-session. This is a tool RPC timeout, not a session idle timeout.",
+          text: "Carapace dynamic tool call timed out after 1ms while waiting for process action=poll sessionId=process-session. This is a tool RPC timeout, not a session idle timeout.",
         },
       ],
     });

@@ -32,7 +32,7 @@ async function openKeyboard(page: Page, beforeReady?: (panel: Locator) => Promis
   await gateway.resolveDeferred("environments.list", {
     environments: [{ id: "gateway", type: "local", status: "available", desktop: true }],
   });
-  const panel = page.locator("openclaw-desktop-panel");
+  const panel = page.locator("carapace-desktop-panel");
   await gateway.waitForRequest("desktop.observe");
   await beforeReady?.(panel);
   await gateway.resolveDeferred("desktop.observe");

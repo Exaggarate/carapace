@@ -163,7 +163,7 @@ function validateTrustedWorkflow() {
   const expectedPath = expectedWorkflowPath();
   const expectedFullRef = `${repository}/${expectedPath}@refs/heads/main`;
   if (
-    repository !== "openclaw/openclaw" ||
+    repository !== "carapace/carapace" ||
     workflowPath !== expectedPath ||
     workflowFullRef !== expectedFullRef
   ) {
@@ -777,7 +777,7 @@ function readReceipt() {
 
 function validateReceiptTuple(receipt) {
   if (
-    receipt.kind !== "openclaw-mobile-release-authority" ||
+    receipt.kind !== "carapace-mobile-release-authority" ||
     receipt.schemaVersion !== 2 ||
     receipt.platform !== platform ||
     receipt.repository !== repository ||
@@ -858,7 +858,7 @@ async function authorize() {
     actor,
     ...candidate,
     buildTimestamp: timestamp,
-    kind: "openclaw-mobile-release-authority",
+    kind: "carapace-mobile-release-authority",
     platform,
     repository,
     runAttempt: 1,

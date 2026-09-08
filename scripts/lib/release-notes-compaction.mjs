@@ -1,5 +1,5 @@
 // Shared plain-JavaScript rendering also runs in package preflight before dependency setup.
-export const OPENCLAW_RELEASE_TAG_PATTERN =
+export const CARAPACE_RELEASE_TAG_PATTERN =
   /^v[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(?:-(?:(?:alpha|beta)\.[1-9][0-9]*|[1-9][0-9]*))?$/u;
 
 const CONTRIBUTION_RECORD_HEADING = "### Complete contribution record";
@@ -11,7 +11,7 @@ export function validateReleaseNotesRepository(repository) {
 }
 
 export function validateReleaseNotesTag(tag) {
-  if (!OPENCLAW_RELEASE_TAG_PATTERN.test(tag)) {
+  if (!CARAPACE_RELEASE_TAG_PATTERN.test(tag)) {
     throw new Error(`invalid release tag: ${tag}`);
   }
 }

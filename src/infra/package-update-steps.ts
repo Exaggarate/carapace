@@ -187,7 +187,7 @@ async function validatePnpmIsolatedUpdate(params: {
         durationMs: 0,
         exitCode: 1,
         stdoutTail: null,
-        stderrTail: `OpenClaw shares a pnpm ${owner.layoutVersion} global install group with ${siblingPackages.join(", ")}. Automatic update stopped before mutation; update the group manually to preserve its sibling packages.`,
+        stderrTail: `Carapace shares a pnpm ${owner.layoutVersion} global install group with ${siblingPackages.join(", ")}. Automatic update stopped before mutation; update the group manually to preserve its sibling packages.`,
       },
     };
   }
@@ -210,7 +210,7 @@ async function validatePnpmIsolatedUpdate(params: {
         durationMs: 0,
         exitCode: 1,
         stdoutTail: null,
-        stderrTail: `Expected exactly one active pnpm ${owner.layoutVersion} OpenClaw install owned by the invoking project; found ${activePackageRoots.length} active installs and ${ownerMatchCount} owner matches. Automatic update stopped before mutation.`,
+        stderrTail: `Expected exactly one active pnpm ${owner.layoutVersion} Carapace install owned by the invoking project; found ${activePackageRoots.length} active installs and ${ownerMatchCount} owner matches. Automatic update stopped before mutation.`,
       },
     };
   }
@@ -239,7 +239,7 @@ async function validatePnpmIsolatedUpdate(params: {
         durationMs: 0,
         exitCode: 1,
         stdoutTail: rootProbe.result.stdout || null,
-        stderrTail: `The active pnpm command owns ${reportedGlobalRoot || "an unknown global root"}, not the invoking OpenClaw install at ${expectedGlobalRoot ?? "an unknown root"}. Automatic update stopped before mutation.`,
+        stderrTail: `The active pnpm command owns ${reportedGlobalRoot || "an unknown global root"}, not the invoking Carapace install at ${expectedGlobalRoot ?? "an unknown root"}. Automatic update stopped before mutation.`,
       },
     };
   }
@@ -467,8 +467,8 @@ async function createStagedPackageInstall(
     return null;
   }
   await fs.mkdir(targetLayout.globalRoot, { recursive: true });
-  // Active stages must stay outside cleanupGlobalRenameDirs' disposable ".openclaw-" namespace.
-  const prefix = await fs.mkdtemp(path.join(targetLayout.globalRoot, ".openclaw.update-stage-"));
+  // Active stages must stay outside cleanupGlobalRenameDirs' disposable ".carapace-" namespace.
+  const prefix = await fs.mkdtemp(path.join(targetLayout.globalRoot, ".carapace.update-stage-"));
   const layout = resolveNpmGlobalPrefixLayoutFromPrefix(prefix);
   const command = installTarget.manager === "npm" ? installTarget.command : "npm";
   return {
@@ -521,7 +521,7 @@ async function prepareNpmGitSourceInstallSpec(params: {
     };
   }
 
-  const packDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-pack-"));
+  const packDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-pack-"));
   const packStep = await params.runStep({
     name: "global update pack",
     argv: [
@@ -1081,7 +1081,7 @@ export async function runGlobalPackageUpdateSteps(params: {
       // v2026.8.1 alone shipped this pending marker inside the closed dist inventory.
       const blockingVerificationErrors = verificationErrors.filter(
         (error) =>
-          params.installSpec !== "openclaw@2026.8.1" ||
+          params.installSpec !== "carapace@2026.8.1" ||
           error !== `unexpected packaged dist file ${LEGACY_PACKAGE_INSTALL_GUARD_RELATIVE_PATH}`,
       );
       if (blockingVerificationErrors.length === 0) {

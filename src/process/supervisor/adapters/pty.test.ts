@@ -114,14 +114,14 @@ describe("createPtyAdapter", () => {
     Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     try {
       vi.stubEnv("TERM", "   ");
-      vi.stubEnv("OPENCLAW_PTY_TEST_SENTINEL", "ambient");
+      vi.stubEnv("CARAPACE_PTY_TEST_SENTINEL", "ambient");
       spawnMock.mockReturnValue(createStubPty());
 
       await createPtyAdapter({ shell: "powershell.exe", args: ["-NoLogo"] });
 
       expect(expectSpawnOptions()).toMatchObject({
         name: "xterm-256color",
-        env: { OPENCLAW_PTY_TEST_SENTINEL: "ambient", TERM: "xterm-256color" },
+        env: { CARAPACE_PTY_TEST_SENTINEL: "ambient", TERM: "xterm-256color" },
       });
     } finally {
       if (originalPlatform) {
@@ -135,7 +135,7 @@ describe("createPtyAdapter", () => {
     Object.defineProperty(process, "platform", { value: "win32", configurable: true });
     try {
       vi.stubEnv("TERM", "ambient-term");
-      vi.stubEnv("OPENCLAW_PTY_TEST_SENTINEL", "ambient");
+      vi.stubEnv("CARAPACE_PTY_TEST_SENTINEL", "ambient");
       spawnMock.mockReturnValue(createStubPty());
 
       await createPtyAdapter({
@@ -149,7 +149,7 @@ describe("createPtyAdapter", () => {
         env: { TERM: "screen-256color", ONLY_CHILD: "yes" },
       });
       expect(expectSpawnEnv()).not.toHaveProperty("Term");
-      expect(expectSpawnEnv()).not.toHaveProperty("OPENCLAW_PTY_TEST_SENTINEL");
+      expect(expectSpawnEnv()).not.toHaveProperty("CARAPACE_PTY_TEST_SENTINEL");
     } finally {
       if (originalPlatform) {
         Object.defineProperty(process, "platform", originalPlatform);

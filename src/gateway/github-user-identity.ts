@@ -1,9 +1,9 @@
 import type { IncomingHttpHeaders } from "node:http";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   readNonBlankString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import { createLazyPromise, getOrCreatePromise } from "../shared/lazy-promise.js";

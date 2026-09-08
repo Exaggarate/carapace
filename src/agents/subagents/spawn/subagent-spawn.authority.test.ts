@@ -62,7 +62,7 @@ describe("pending spawn invocation authority", () => {
     async (slowBranch) => {
       const originalConfig = getRuntimeConfig();
       await writeFile(
-        path.join(fixture.stateDir, "openclaw.json"),
+        path.join(fixture.stateDir, "carapace.json"),
         JSON.stringify({
           ...originalConfig,
           agents: {

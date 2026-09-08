@@ -14,7 +14,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 let artifactDir: string;
 beforeEach(() => {
@@ -79,10 +79,10 @@ describeControlUiE2e("Control UI Custodian channel onboarding mocked Gateway E2E
         "chat.startup",
         "channels.pairing.list",
         "channels.status",
-        "openclaw.setup.detect",
-        "openclaw.setup.activate.start",
+        "carapace.setup.detect",
+        "carapace.setup.activate.start",
         "wizard.next",
-        "openclaw.chat",
+        "carapace.chat",
       ],
       methodResponses: {
         "channels.pairing.list": {
@@ -92,7 +92,7 @@ describeControlUiE2e("Control UI Custodian channel onboarding mocked Gateway E2E
           limits: { pendingPerAccount: 3, ttlMs: 3_600_000 },
         },
         "channels.status": emptyChannelSnapshot,
-        "openclaw.setup.detect": {
+        "carapace.setup.detect": {
           candidates: [
             {
               kind: "openai-api-key",
@@ -105,10 +105,10 @@ describeControlUiE2e("Control UI Custodian channel onboarding mocked Gateway E2E
             },
           ],
           manualProviders: [{ id: "openai", label: "OpenAI" }],
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         },
-        "openclaw.setup.activate.start": {
+        "carapace.setup.activate.start": {
           sessionId: "activation-session",
           done: false,
           status: "running",
@@ -118,7 +118,7 @@ describeControlUiE2e("Control UI Custodian channel onboarding mocked Gateway E2E
           status: "done",
           modelActivation: { modelRef: "openai/gpt-5" },
         },
-        "openclaw.chat": {
+        "carapace.chat": {
           sessionId: "e2e-channel-onboarding",
           reply: "Your AI is ready. The web app works now.",
           action: "none",
@@ -133,9 +133,9 @@ describeControlUiE2e("Control UI Custodian channel onboarding mocked Gateway E2E
         .locator('[data-candidate-kind="openai-api-key"]')
         .getByRole("button", { name: "Test & use", exact: true });
       await providerChoice.waitFor();
-      expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+      expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
       await providerChoice.click();
-      await gateway.waitForRequest("openclaw.setup.activate.start");
+      await gateway.waitForRequest("carapace.setup.activate.start");
       await waitForControlUiRoute(page, {
         pathname: "/custodian",
         routeId: "custodian",

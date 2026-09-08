@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { RelationType, type MatrixRelation } from "./send/types.js";
 
 type MatrixRelationContent = { "m.relates_to"?: unknown };

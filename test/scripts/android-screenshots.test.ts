@@ -29,8 +29,8 @@ describe("android screenshots script", () => {
     expect(result.stdout).toContain(".artifacts/android-screenshots/latest/wear");
     expect(result.stdout).toContain("Android screenshot size: 1440x2560");
     expect(result.stdout).toContain("Android screenshot size: 454x454");
-    expect(result.stdout).toContain("Screenshot AVD: OpenClaw_Screenshots_API36");
-    expect(result.stdout).toContain("Screenshot AVD: OpenClaw_Wear_Screenshots_API34");
+    expect(result.stdout).toContain("Screenshot AVD: Carapace_Screenshots_API36");
+    expect(result.stdout).toContain("Screenshot AVD: Carapace_Wear_Screenshots_API34");
     expect(result.stdout).toContain("Screenshot device profile: pixel_2");
     expect(result.stdout).toContain("Screenshot device profile: wearos_large_round");
     expect(result.stdout).toContain("Scenes: home chat settings gateway voice-wake");
@@ -52,7 +52,7 @@ describe("android screenshots script", () => {
   it("keeps fixture readiness and device restoration aligned", () => {
     const script = readFileSync(SCRIPT, "utf8");
     const fixture = readFileSync(
-      "apps/android/app/src/main/java/ai/openclaw/app/AndroidScreenshotFixture.kt",
+      "apps/android/app/src/main/java/ai/carapace/app/AndroidScreenshotFixture.kt",
       "utf8",
     );
     const chatReady = "The Android release is close.";
@@ -72,7 +72,7 @@ describe("android screenshots script", () => {
   });
 
   it("rejects a physical device selected during screenshot discovery", () => {
-    const root = tempDirs.make("openclaw-android-screenshot-adb-");
+    const root = tempDirs.make("carapace-android-screenshot-adb-");
     const adb = path.join(root, "adb");
     writeFileSync(
       adb,

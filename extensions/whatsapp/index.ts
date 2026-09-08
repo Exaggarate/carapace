@@ -1,12 +1,12 @@
-// Whatsapp plugin entrypoint registers its OpenClaw integration.
+// Whatsapp plugin entrypoint registers its Carapace integration.
 import {
   defineBundledChannelEntry,
   loadBundledEntryExportSync,
-} from "openclaw/plugin-sdk/channel-entry-contract";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/channel-entry-contract";
+} from "carapace/plugin-sdk/channel-entry-contract";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/channel-entry-contract";
 
-function registerWhatsAppAgentTools(api: OpenClawPluginApi): void {
-  const registerTool = loadBundledEntryExportSync<(api: OpenClawPluginApi) => void>(
+function registerWhatsAppAgentTools(api: CarapacePluginApi): void {
+  const registerTool = loadBundledEntryExportSync<(api: CarapacePluginApi) => void>(
     import.meta.url,
     {
       specifier: "./agent-tools-api.js",

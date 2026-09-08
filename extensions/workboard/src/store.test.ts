@@ -3,9 +3,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { type WorkboardCard, WORKBOARD_STATUSES } from "@openclaw/workboard-contract";
-import { MAX_DATE_TIMESTAMP_MS } from "openclaw/plugin-sdk/number-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { type WorkboardCard, WORKBOARD_STATUSES } from "@carapace/workboard-contract";
+import { MAX_DATE_TIMESTAMP_MS } from "carapace/plugin-sdk/number-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   PersistedWorkboardAttachment,
@@ -288,7 +288,7 @@ describe("WorkboardStore", () => {
   });
 
   it("emits when another sqlite connection commits", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-change-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-change-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const readerStores = createWorkboardSqliteStores({ dbPath });
     const writerStores = createWorkboardSqliteStores({ dbPath });
@@ -324,7 +324,7 @@ describe("WorkboardStore", () => {
   });
 
   it("rejects stale card edits across sqlite connections", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-cas-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-cas-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const firstStores = createWorkboardSqliteStores({ dbPath });
     const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -364,7 +364,7 @@ describe("WorkboardStore", () => {
   });
 
   it("deletes a sqlite card only at its exact updatedAt version", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-delete-cas-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-delete-cas-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const firstStores = createWorkboardSqliteStores({ dbPath });
     const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -394,7 +394,7 @@ describe("WorkboardStore", () => {
   it.each(["move", "lifecycle"] as const)(
     "recomputes a %s write after a concurrent editor commit",
     async (owner) => {
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), `openclaw-workboard-${owner}-race-`));
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), `carapace-workboard-${owner}-race-`));
       const dbPath = path.join(dir, "workboard.sqlite");
       const firstStores = createWorkboardSqliteStores({ dbPath });
       const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -472,7 +472,7 @@ describe("WorkboardStore", () => {
   );
 
   it("converges concurrent session captures from independent sqlite hosts", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-capture-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-capture-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const firstStores = createWorkboardSqliteStores({ dbPath });
     const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -500,7 +500,7 @@ describe("WorkboardStore", () => {
   });
 
   it("converges concurrent archived session restores across sqlite hosts", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-capture-restore-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-capture-restore-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const firstStores = createWorkboardSqliteStores({ dbPath });
     const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -530,7 +530,7 @@ describe("WorkboardStore", () => {
   });
 
   it("allows only one cross-host claim per owner", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-claim-race-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-claim-race-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const firstStores = createWorkboardSqliteStores({ dbPath });
     const secondStores = createWorkboardSqliteStores({ dbPath });
@@ -583,7 +583,7 @@ describe("WorkboardStore", () => {
   });
 
   it("uses card child indexes for per-card ordered reads", () => {
-    withWorkboardSqliteDatabase("openclaw-workboard-index-read-", (db) => {
+    withWorkboardSqliteDatabase("carapace-workboard-index-read-", (db) => {
       for (const [table, index] of WORKBOARD_CARD_CHILD_INDEXES) {
         const plan = explainWorkboardQueryPlan(
           db,
@@ -597,7 +597,7 @@ describe("WorkboardStore", () => {
   });
 
   it("uses card child indexes for whole-board ordered scans", () => {
-    withWorkboardSqliteDatabase("openclaw-workboard-index-scan-", (db) => {
+    withWorkboardSqliteDatabase("carapace-workboard-index-scan-", (db) => {
       for (const [table, index] of WORKBOARD_CARD_CHILD_INDEXES) {
         const plan = explainWorkboardQueryPlan(
           db,
@@ -610,7 +610,7 @@ describe("WorkboardStore", () => {
   });
 
   it("uses card child indexes for parent-card cascades", () => {
-    withWorkboardSqliteDatabase("openclaw-workboard-index-cascade-", (db) => {
+    withWorkboardSqliteDatabase("carapace-workboard-index-cascade-", (db) => {
       db.exec("PRAGMA foreign_keys = ON");
       const plan = explainWorkboardQueryPlan(db, "DELETE FROM workboard_cards WHERE id = ?", [
         "card-1",
@@ -622,7 +622,7 @@ describe("WorkboardStore", () => {
   });
 
   it("restores dropped card child indexes without changing the schema version", () => {
-    const dir = tempDirs.make("openclaw-workboard-index-reopen-");
+    const dir = tempDirs.make("carapace-workboard-index-reopen-");
     const dbPath = path.join(dir, "workboard.sqlite");
     const initialized = createWorkboardSqliteStores({ dbPath });
     initialized.close();
@@ -662,7 +662,7 @@ describe("WorkboardStore", () => {
   });
 
   it("persists boards, cards, subscriptions, and attachment blobs in sqlite", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-sqlite-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-sqlite-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     if (process.platform !== "win32") {
       fs.chmodSync(dir, 0o755);
@@ -813,7 +813,7 @@ describe("WorkboardStore", () => {
   });
 
   it("lists sqlite board summaries without hydrating card child rows", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-summary-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-summary-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     try {
       let cardId = "";
@@ -874,7 +874,7 @@ describe("WorkboardStore", () => {
   });
 
   it("migrates a version 2 workboard table to STRICT without losing rows", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-strict-migration-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-strict-migration-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const initialized = createWorkboardSqliteStores({ dbPath });
     initialized.close();
@@ -944,7 +944,7 @@ describe("WorkboardStore", () => {
   });
 
   it("uses rollback journaling on network-backed volumes", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-sqlite-network-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-sqlite-network-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const statfs = vi.spyOn(fs, "statfsSync").mockReturnValue(statfsFixture(0xff534d42));
     try {
@@ -2876,7 +2876,7 @@ describe("WorkboardStore", () => {
   });
 
   it("heals oversized persisted notifications and keeps dispatching sibling cards", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-notification-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-notification-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const stores = createWorkboardSqliteStores({ dbPath });
     try {
@@ -3715,7 +3715,7 @@ describe("WorkboardStore", () => {
       id: "ops",
       name: "Ops",
       description: "Operational work",
-      defaultWorkspace: { kind: "dir", path: "/tmp/openclaw-ops" },
+      defaultWorkspace: { kind: "dir", path: "/tmp/carapace-ops" },
     });
     const card = await store.create({ title: "Ops card", boardId: "ops" });
     const subscription = await store.subscribeNotifications({
@@ -3740,7 +3740,7 @@ describe("WorkboardStore", () => {
       },
     });
     await expect(cards.lookup("ops")).resolves.toBeUndefined();
-    expect(board.defaultWorkspace).toEqual({ kind: "dir", path: "/tmp/openclaw-ops" });
+    expect(board.defaultWorkspace).toEqual({ kind: "dir", path: "/tmp/carapace-ops" });
     expect((await store.listBoards()).boards.find((item) => item.id === "ops")).toMatchObject({
       name: "Ops",
       total: 1,
@@ -4516,7 +4516,7 @@ describe("WorkboardStore", () => {
   });
 
   it("rolls back every task-owned decomposition write in sqlite when uncontended", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-workboard-decompose-control-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-workboard-decompose-control-"));
     const dbPath = path.join(dir, "workboard.sqlite");
     const stores = createWorkboardSqliteStores({ dbPath });
     const store = new WorkboardStore(stores.cards);
@@ -4550,7 +4550,7 @@ describe("WorkboardStore", () => {
   });
 
   it("reverts completed parent state while preserving a concurrent parent edit", async () => {
-    const harness = createConcurrentSqliteHarness("openclaw-workboard-parent-rollback-");
+    const harness = createConcurrentSqliteHarness("carapace-workboard-parent-rollback-");
     const { operation, host, paused } = harness;
     try {
       const createdParent = await operation.create({ title: "Parent", status: "ready" });
@@ -4595,7 +4595,7 @@ describe("WorkboardStore", () => {
   it.each(["reused child", "new child"] as const)(
     "reverts decomposition-owned links while preserving a concurrent %s edit",
     async (target) => {
-      const harness = createConcurrentSqliteHarness("openclaw-workboard-child-rollback-");
+      const harness = createConcurrentSqliteHarness("carapace-workboard-child-rollback-");
       const { operation, host, paused } = harness;
       try {
         const parent = await operation.create({ title: "Parent" });
@@ -4650,7 +4650,7 @@ describe("WorkboardStore", () => {
   );
 
   it("reverts a partial link while preserving a concurrent child edit", async () => {
-    const harness = createConcurrentSqliteHarness("openclaw-workboard-link-rollback-");
+    const harness = createConcurrentSqliteHarness("carapace-workboard-link-rollback-");
     const { operation, host, paused } = harness;
     try {
       const parent = await operation.create({ title: "Parent" });
@@ -4686,7 +4686,7 @@ describe("WorkboardStore", () => {
   });
 
   it("reverts task-owned links while preserving a concurrently adopted child", async () => {
-    const harness = createConcurrentSqliteHarness("openclaw-workboard-create-rollback-");
+    const harness = createConcurrentSqliteHarness("carapace-workboard-create-rollback-");
     const { operation, host, paused } = harness;
     try {
       const firstParent = await operation.create({ title: "First parent" });

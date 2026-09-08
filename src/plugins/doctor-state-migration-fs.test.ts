@@ -8,7 +8,7 @@ describe("archiveLegacyStateSource", () => {
   let dir: string;
 
   beforeEach(async () => {
-    dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-fs-")));
+    dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-doctor-fs-")));
   });
 
   afterEach(async () => {

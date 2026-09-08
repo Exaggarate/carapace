@@ -17,7 +17,7 @@ import type { prepareSimpleCompletionModel } from "../../agents/simple-completio
 import { createEmptyPluginMetadataSnapshot } from "../../agents/test-helpers/embedded-agent-runner-e2e-mocks.js";
 import { makeZeroUsageSnapshot } from "../../agents/usage.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { onTrustedInternalDiagnosticEvent } from "../../infra/diagnostic-events.js";
 import { bindModelLlmRuntime } from "../../llm/model-runtime-binding.js";
 import type { AssistantMessage, Model, StreamFn, Usage } from "../../llm/types.js";
@@ -77,13 +77,13 @@ const config = {
       {
         id: "runtime-agent",
         models: {
-          [`${PROVIDER}/${MODEL}`]: { alias: ALIAS, agentRuntime: { id: "openclaw" } },
+          [`${PROVIDER}/${MODEL}`]: { alias: ALIAS, agentRuntime: { id: "carapace" } },
         },
         params: { temperature: 0.1 },
       },
     ],
   },
-} satisfies OpenClawConfig;
+} satisfies CarapaceConfig;
 const sessionEntry: SessionEntry = {
   sessionId: SESSION_ID,
   updatedAt: 1,
@@ -339,7 +339,7 @@ function setup(
 function params(
   inferenceRequest: WorkerInferenceStartParams,
   emit: Execution["emit"],
-  runtimeConfig: OpenClawConfig = config,
+  runtimeConfig: CarapaceConfig = config,
 ): Execution {
   return {
     identity,
@@ -517,7 +517,7 @@ describe("worker inference provider runtime", () => {
     const prepared = runtime.prepareModel.mock.calls[0]?.[0];
     expect(runtime.scope).toEqual({
       agentDir: prepared?.agentDir,
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
       authProfile: PROFILE,
       preparedModelRuntime: true,
       prepareWorkspace: WORKSPACE,

@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/opencode-go-provider",
+  "name": "@carapace/opencode-go-provider",
   "version": "2026.9.2",
-  "description": "OpenClaw OpenCode Go provider plugin",
+  "description": "Carapace OpenCode Go provider plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/opencode-go-provider",
-      "npmSpec": "@openclaw/opencode-go-provider",
+      "clawhubSpec": "clawhub:@carapace/opencode-go-provider",
+      "npmSpec": "@carapace/opencode-go-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2",
+      "carapaceVersion": "2026.9.2",
       "bundledDist": true
     },
     "release": {

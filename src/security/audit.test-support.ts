@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { runSecurityAuditCore } from "./audit.js";
 import type { SecurityAuditFinding } from "./audit.types.js";
 
 type AuditOverrides = Omit<Parameters<typeof runSecurityAuditCore>[0], "config">;
 
 export async function collectSecurityAuditFindings(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   overrides: AuditOverrides = {},
 ): Promise<SecurityAuditFinding[]> {
   const report = await runSecurityAuditCore({

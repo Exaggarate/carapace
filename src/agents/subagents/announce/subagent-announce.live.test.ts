@@ -3,9 +3,9 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
 import { afterEach, describe, expect, it } from "vitest";
-import { clearRuntimeConfigSnapshot, type OpenClawConfig } from "../../../config/config.js";
+import { clearRuntimeConfigSnapshot, type CarapaceConfig } from "../../../config/config.js";
 import { loadSessionEntry } from "../../../config/sessions/session-accessor.js";
 import { GatewayClient } from "../../../gateway/client.js";
 import { startGatewayServer, type GatewayServer } from "../../../gateway/server.js";
@@ -15,15 +15,15 @@ import { isTruthyEnvValue } from "../../../infra/env.js";
 import { resetPluginRuntimeStateForTest } from "../../../plugins/runtime.js";
 import { normalizeInputProvenance } from "../../../sessions/input-provenance.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../test-utils/carapace-test-state.js";
 import { getFreePort } from "../../../test-utils/ports.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../../../utils/message-channel.js";
 import { isLiveTestEnabled } from "../../live-test-helpers.js";
 import { listSubagentRunsForRequester } from "../registry/subagent-registry.test-helpers.js";
 
-const LIVE = isLiveTestEnabled() && isTruthyEnvValue(process.env.OPENCLAW_LIVE_SUBAGENT_E2E);
+const LIVE = isLiveTestEnabled() && isTruthyEnvValue(process.env.CARAPACE_LIVE_SUBAGENT_E2E);
 const describeLive = LIVE ? describe : describe.skip;
 
 type AgentPayload = {
@@ -48,10 +48,10 @@ type LiveSubagentModelConfig =
       provider: "google";
       requiredEnv: "GEMINI_API_KEY" | "GOOGLE_API_KEY";
     };
-type LiveSubagentModelProviders = NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>;
+type LiveSubagentModelProviders = NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>;
 
 function resolveLiveSubagentModelConfig(): LiveSubagentModelConfig {
-  const modelKey = process.env.OPENCLAW_LIVE_SUBAGENT_E2E_MODEL?.trim() || "openai/gpt-5.6-luna";
+  const modelKey = process.env.CARAPACE_LIVE_SUBAGENT_E2E_MODEL?.trim() || "openai/gpt-5.6-luna";
   if (modelKey.startsWith("ollama/")) {
     return { modelKey, provider: "ollama" };
   }
@@ -79,19 +79,19 @@ function liveSubagentConfig(
   port: number,
   token: string,
   options?: {
-    queue?: NonNullable<OpenClawConfig["messages"]>["queue"];
+    queue?: NonNullable<CarapaceConfig["messages"]>["queue"];
     toolAllow?: string[];
   },
-): OpenClawConfig {
+): CarapaceConfig {
   const providerConfig = resolveLiveSubagentModelConfig();
   const modelId = modelKey.replace(/^(openai|google|ollama)\//u, "");
   const providers: LiveSubagentModelProviders = {};
   if (providerConfig.provider === "ollama") {
     providers.ollama = {
       api: "ollama" as const,
-      agentRuntime: { id: "openclaw" },
+      agentRuntime: { id: "carapace" },
       baseUrl:
-        process.env.OPENCLAW_LIVE_SUBAGENT_E2E_OLLAMA_BASE_URL?.trim() || "http://127.0.0.1:11434",
+        process.env.CARAPACE_LIVE_SUBAGENT_E2E_OLLAMA_BASE_URL?.trim() || "http://127.0.0.1:11434",
       apiKey: "ollama-local",
       timeoutSeconds: 300,
       models: [
@@ -99,7 +99,7 @@ function liveSubagentConfig(
           id: modelId,
           name: modelId,
           api: "ollama" as const,
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           input: ["text" as const],
           reasoning: false,
           contextWindow: 32_768,
@@ -112,7 +112,7 @@ function liveSubagentConfig(
   } else if (providerConfig.provider === "google") {
     providers.google = {
       api: "google-generative-ai" as const,
-      agentRuntime: { id: "openclaw" },
+      agentRuntime: { id: "carapace" },
       baseUrl: "https://generativelanguage.googleapis.com/v1beta",
       apiKey: {
         source: "env" as const,
@@ -125,7 +125,7 @@ function liveSubagentConfig(
           id: modelId,
           name: modelId,
           api: "google-generative-ai" as const,
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           input: ["text" as const],
           reasoning: true,
           contextWindow: 1_048_576,
@@ -137,7 +137,7 @@ function liveSubagentConfig(
   } else {
     providers.openai = {
       api: "openai-responses" as const,
-      agentRuntime: { id: "openclaw" },
+      agentRuntime: { id: "carapace" },
       apiKey: {
         source: "env" as const,
         provider: "default" as const,
@@ -150,7 +150,7 @@ function liveSubagentConfig(
           id: modelId,
           name: modelId,
           api: "openai-responses" as const,
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           input: ["text" as const],
           reasoning: true,
           contextWindow: 1_047_576,
@@ -177,7 +177,7 @@ function liveSubagentConfig(
       defaults: {
         workspace,
         model: { primary: modelKey },
-        models: { [modelKey]: { agentRuntime: { id: "openclaw" }, params: { maxTokens: 1024 } } },
+        models: { [modelKey]: { agentRuntime: { id: "carapace" }, params: { maxTokens: 1024 } } },
         sandbox: { mode: "off" },
         subagents: {
           allowAgents: ["*"],
@@ -258,7 +258,7 @@ async function readCompletionProvenance(sessionKey: string, agentId: string) {
 }
 
 describeLive("subagent announce live", () => {
-  let state: OpenClawTestState | undefined;
+  let state: CarapaceTestState | undefined;
   let server: GatewayServer | undefined;
   let client: GatewayClient | undefined;
 
@@ -285,20 +285,20 @@ describeLive("subagent announce live", () => {
       const childToken = `PROVENANCE_CHILD_${nonce}`;
       const sessionKey = `agent:main:live-subagent-provenance-${nonce.toLowerCase()}`;
 
-      state = await createOpenClawTestState({
+      state = await createCarapaceTestState({
         label: "subagent-provenance-live",
         layout: "split",
         env: {
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_PLUGIN_CATALOG_PATHS: undefined,
-          OPENCLAW_PLUGINS_PATHS: undefined,
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_PLUGIN_CATALOG_PATHS: undefined,
+          CARAPACE_PLUGINS_PATHS: undefined,
         },
       });
       await state.writeConfig(
@@ -323,7 +323,7 @@ describeLive("subagent announce live", () => {
           deliver: false,
           timeout: 300,
           message: [
-            "Run this exact OpenClaw subagent scenario. Use tool calls, not prose.",
+            "Run this exact Carapace subagent scenario. Use tool calls, not prose.",
             `Call sessions_spawn once with exactly this JSON input: ${JSON.stringify({
               task: `Reply exactly ${childToken} and nothing else.`,
               taskName: "provenance_child",
@@ -351,9 +351,9 @@ describeLive("subagent announce live", () => {
   it(
     "keeps issue 82913 busy-parent completion announce pending until transcript delivery",
     async ({ skip }) => {
-      if (!isTruthyEnvValue(process.env.OPENCLAW_SUBAGENT_ISSUE_82913_REPRO)) {
+      if (!isTruthyEnvValue(process.env.CARAPACE_SUBAGENT_ISSUE_82913_REPRO)) {
         skip(
-          "[issue-82913] skip: set OPENCLAW_SUBAGENT_ISSUE_82913_REPRO=1 to run this focused repro",
+          "[issue-82913] skip: set CARAPACE_SUBAGENT_ISSUE_82913_REPRO=1 to run this focused repro",
         );
         return;
       }
@@ -368,21 +368,21 @@ describeLive("subagent announce live", () => {
       const parentToken = `ISSUE_82913_PARENT_SAW_${nonce}`;
       const sessionKey = `agent:main:issue-82913-${nonce.toLowerCase()}`;
 
-      state = await createOpenClawTestState({
+      state = await createCarapaceTestState({
         label: "subagent-issue-82913-live",
         layout: "split",
         env: {
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
           // Agent admission needs the reply runtime published by normal startup.
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_PLUGIN_CATALOG_PATHS: undefined,
-          OPENCLAW_PLUGINS_PATHS: undefined,
+          CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_PLUGIN_CATALOG_PATHS: undefined,
+          CARAPACE_PLUGINS_PATHS: undefined,
         },
       });
       await state.writeConfig(
@@ -413,7 +413,7 @@ describeLive("subagent announce live", () => {
           deliver: false,
           timeout: 240,
           message: [
-            "Run this exact OpenClaw busy-parent subagent scenario. Use tool calls, not prose.",
+            "Run this exact Carapace busy-parent subagent scenario. Use tool calls, not prose.",
             `Use nonce ${nonce}.`,
             `Step 1: call sessions_spawn with exactly this JSON input: ${JSON.stringify({
               task: `Reply exactly ${childToken} and nothing else.`,
@@ -496,7 +496,7 @@ describeLive("subagent announce live", () => {
       const modelConfig = resolveLiveSubagentModelConfig();
       if (!modelConfig.modelKey.startsWith("google/")) {
         skip(
-          "[subagent-stress] skip: set OPENCLAW_LIVE_SUBAGENT_E2E_MODEL=google/gemini-3.1-pro-preview",
+          "[subagent-stress] skip: set CARAPACE_LIVE_SUBAGENT_E2E_MODEL=google/gemini-3.1-pro-preview",
         );
         return;
       }
@@ -509,33 +509,33 @@ describeLive("subagent announce live", () => {
       const childTokens = [1, 2, 3].map((index) => `GEMINI_STRESS_${nonce}_${index}`);
       const parentToken = `GEMINI_STRESS_PARENT_${nonce}`;
 
-      state = await createOpenClawTestState({
+      state = await createCarapaceTestState({
         label: "subagent-gemini-stress-live",
         layout: "split",
         env: {
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_PLUGIN_CATALOG_PATHS: undefined,
-          OPENCLAW_PLUGINS_PATHS: undefined,
-          OPENCLAW_DEBUG_MODEL_TRANSPORT: "1",
-          OPENCLAW_DEBUG_MODEL_PAYLOAD: "tools",
-          OPENCLAW_DEBUG_SSE: "events",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_PLUGIN_CATALOG_PATHS: undefined,
+          CARAPACE_PLUGINS_PATHS: undefined,
+          CARAPACE_DEBUG_MODEL_TRANSPORT: "1",
+          CARAPACE_DEBUG_MODEL_PAYLOAD: "tools",
+          CARAPACE_DEBUG_SSE: "events",
         },
       });
       await fs.writeFile(
         path.join(state.workspaceDir, "package.json"),
-        `${JSON.stringify({ name: "openclaw-gemini-stress-live", private: true }, null, 2)}\n`,
+        `${JSON.stringify({ name: "carapace-gemini-stress-live", private: true }, null, 2)}\n`,
         "utf8",
       );
       await fs.writeFile(
         path.join(state.workspaceDir, "AGENTS.md"),
-        "OpenClaw live stress test workspace. Keep responses concise.\n",
+        "Carapace live stress test workspace. Keep responses concise.\n",
         "utf8",
       );
       await state.writeConfig(
@@ -571,7 +571,7 @@ describeLive("subagent announce live", () => {
           deliver: false,
           timeout: 420,
           message: [
-            "Run this exact OpenClaw Gemini subagent stress scenario. Use tool calls, not prose.",
+            "Run this exact Carapace Gemini subagent stress scenario. Use tool calls, not prose.",
             `Use nonce ${nonce}.`,
             "Spawn all three children before waiting for any child result.",
             ...childTokens.map((childToken, index) => {
@@ -582,7 +582,7 @@ describeLive("subagent announce live", () => {
                     `You are stress child ${childNumber}.`,
                     "Use available tools for a tiny multi-tool check.",
                     "First read package.json if the read tool is available.",
-                    "Then run a tiny shell command if the bash tool is available: printf openclaw.",
+                    "Then run a tiny shell command if the bash tool is available: printf carapace.",
                     "If web_search or memory_search is available, use at most one small query.",
                     `After the tool work, reply exactly ${childToken}.`,
                   ].join(" "),

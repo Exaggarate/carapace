@@ -1,11 +1,11 @@
-// Opencode Go plugin entrypoint registers its OpenClaw integration.
-import { runLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { resolveFirstProviderCatalogAuth } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
+// Opencode Go plugin entrypoint registers its Carapace integration.
+import { runLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import { resolveFirstProviderCatalogAuth } from "carapace/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "carapace/plugin-sdk/provider-model-shared";
 import { opencodeGoMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import { OPENCODE_GO_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import {
   buildOpencodeGoLiveProviderConfig,
   buildStaticOpencodeGoProviderConfig,

@@ -40,13 +40,13 @@ function hashFile(file, algorithm, blob = false) {
 try {
   if (process.argv[2] && (cwd === syncRoot || cwd.startsWith(syncRoot + path.sep) || syncRoot.startsWith(cwd + path.sep)))
     fail("Testbox execution and sync workspaces overlap; stop this lease and warm a fresh one");
-  const capsule = path.join(syncRoot, ".openclaw-crabbox-changed-gate.bundle");
+  const capsule = path.join(syncRoot, ".carapace-crabbox-changed-gate.bundle");
   if (!stat(capsule)?.isFile() || hashFile(capsule, "sha256") !== expected.digest)
     fail("missing or mismatched source capsule; rerun from the local candidate");
   // Native cleanup owns only syncRoot. Source application and the payload share
   // the prepared workspace, so ignored runtime never enters the native delete walk.
   process.chdir(cwd);
-  temporary = fs.mkdtempSync(path.join(cwd, ".openclaw-source-"));
+  temporary = fs.mkdtempSync(path.join(cwd, ".carapace-source-"));
   const bundle = path.join(temporary, "source.bundle");
   fs.copyFileSync(capsule, bundle);
   if (hashFile(bundle, "sha256") !== expected.digest) fail("source capsule changed during import");
@@ -68,15 +68,15 @@ try {
     return result.stdout.toString("utf8");
   }
   git(["init", "-q"]);
-  git(["remote", "add", "origin", "https://github.com/openclaw/openclaw.git"]);
+  git(["remote", "add", "origin", "https://github.com/Exaggarate/carapace.git"]);
   git(["fetch", "-q", "--depth=2", "origin", expected.baseSha + ":refs/remotes/origin/main"]);
   if (git(["rev-parse", "refs/remotes/origin/main"]).trim() !== expected.baseSha)
     fail("source base mismatch");
-  git(["fetch", "-q", bundle, "refs/openclaw/source-capsule:refs/heads/openclaw-source"]);
+  git(["fetch", "-q", bundle, "refs/carapace/source-capsule:refs/heads/carapace-source"]);
   for (const [ref, value] of [
-    ["refs/heads/openclaw-source", expected.carrier],
-    ["refs/heads/openclaw-source^{tree}", expected.tree],
-    ["refs/heads/openclaw-source^", expected.baseSha],
+    ["refs/heads/carapace-source", expected.carrier],
+    ["refs/heads/carapace-source^{tree}", expected.tree],
+    ["refs/heads/carapace-source^", expected.baseSha],
   ]) if (git(["rev-parse", ref]).trim() !== value) fail("source capsule identity mismatch");
   function entries(tree, directory = gitDir) {
     const output = git(["ls-tree", "-r", "-z", tree], { encoding: "buffer",
@@ -220,7 +220,7 @@ try {
   }
   for (const entry of files) verify(entry);
   if (expected.alias) git(["update-ref", expected.alias, expected.baseSha]);
-  git(["symbolic-ref", "HEAD", "refs/heads/openclaw-source"]);
+  git(["symbolic-ref", "HEAD", "refs/heads/carapace-source"]);
   const sourceIndex = git(["ls-files", "--stage", "-v", "-z"], { encoding: "buffer" });
   fs.rmSync(".git", { recursive: true, force: true });
   fs.renameSync(gitDir, path.join(cwd, ".git"));
@@ -240,7 +240,7 @@ try {
     }
     if (!git(["ls-files", "--stage", "-v", "-z"], { encoding: "buffer" }).equals(sourceIndex))
       fail("source index mismatch");
-    if (git(["symbolic-ref", "HEAD"]).trim() !== "refs/heads/openclaw-source")
+    if (git(["symbolic-ref", "HEAD"]).trim() !== "refs/heads/carapace-source")
       fail("source HEAD mismatch");
     for (const [ref, value] of [
       ["HEAD", expected.carrier], ["refs/remotes/origin/main", expected.baseSha],
@@ -287,7 +287,7 @@ export function remoteSourceBootstrap(
     return command;
   }
   return [
-    'openclaw_source_root="$(cd ./.git/crabbox-artifact-root && pwd -P)" || { echo "[crabbox] missing prepared Testbox execution workspace; stop this lease and warm a fresh one" >&2; exit 2; };',
-    `${command} "$openclaw_source_root" && cd "$openclaw_source_root"`,
+    'carapace_source_root="$(cd ./.git/crabbox-artifact-root && pwd -P)" || { echo "[crabbox] missing prepared Testbox execution workspace; stop this lease and warm a fresh one" >&2; exit 2; };',
+    `${command} "$carapace_source_root" && cd "$carapace_source_root"`,
   ].join(" ");
 }

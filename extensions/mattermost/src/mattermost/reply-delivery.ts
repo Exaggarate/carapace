@@ -3,16 +3,16 @@ import {
   createAcceptedChannelDeliveryResult,
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig, PluginRuntime } from "openclaw/plugin-sdk/core";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import type { MessageReceipt } from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig, PluginRuntime } from "carapace/plugin-sdk/core";
+import { getAgentScopedMediaLocalRoots } from "carapace/plugin-sdk/media-runtime";
 import {
   deliverTextOrMediaReply,
   isReasoningReplyPayload,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { requiresMattermostMediaUpload, resolveMattermostPresentation } from "../normalize.js";
 import type { MattermostSendResult } from "./send.js";
 
@@ -22,7 +22,7 @@ type SendMattermostMessage = (
   to: string,
   text: string,
   opts: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string;
     mediaUrl?: string;
     mediaLocalRoots?: readonly string[];
@@ -56,7 +56,7 @@ export function joinMattermostVisibleContent(contents: readonly (string | undefi
 
 export async function deliverMattermostReplyPayload(params: {
   core: PluginRuntime;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   payload: ReplyPayload;
   channelId: string;
   accountId: string;

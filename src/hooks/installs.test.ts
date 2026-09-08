@@ -12,7 +12,7 @@ import {
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { stageHookInstall } from "./install-record-transaction.js";
 import { readHookInstalls, recordHookInstall } from "./installs.js";
@@ -20,13 +20,13 @@ import { readHookInstalls, recordHookInstall } from "./installs.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("hook install machine state", () => {
   it("merges independently recorded hook packs", () => {
-    const stateDir = tempDirs.make("openclaw-hook-installs-");
-    const options = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-hook-installs-");
+    const options = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 
     recordHookInstall({ hookId: "alpha", source: "npm" }, options);
     recordHookInstall({ hookId: "beta", source: "path" }, options);
@@ -47,9 +47,9 @@ async function withHookInstallFixture(
     payloadTransaction: ReturnType<typeof resolvePackageDirInstallTransaction>;
   }) => Promise<void>,
 ) {
-  const root = tempDirs.make("openclaw-hook-commit-");
+  const root = tempDirs.make("carapace-hook-commit-");
   const stateDir = join(root, "state");
-  const configPath = join(stateDir, "openclaw.json");
+  const configPath = join(stateDir, "carapace.json");
   const sourceDir = join(root, "source");
   const targetDir = mode === "link" ? sourceDir : join(stateDir, "hooks", "alpha");
   fs.mkdirSync(sourceDir, { recursive: true });
@@ -57,7 +57,7 @@ async function withHookInstallFixture(
   fs.writeFileSync(join(sourceDir, "payload.txt"), "candidate");
   fs.writeFileSync(configPath, "{}\n");
   await withEnvAsync(
-    { OPENCLAW_HOME: root, OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+    { CARAPACE_HOME: root, CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath },
     async () => {
       await withPluginLifecycleLease({}, async () => {
         if (mode === "update") {
@@ -162,10 +162,10 @@ describe("hook install commit ownership", () => {
   );
 
   it("refuses compensation after its lifecycle lease has been replaced", async () => {
-    const root = tempDirs.make("openclaw-hook-lease-");
+    const root = tempDirs.make("carapace-hook-lease-");
     const payload = join(root, "payload.txt");
     fs.writeFileSync(payload, "successor payload");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: join(root, "state") }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: join(root, "state") }, async () => {
       const transaction = await withPluginLifecycleLease({}, async (lease) => {
         return await stageHookInstall({
           update: { hookId: "alpha", source: "path", installPath: root },

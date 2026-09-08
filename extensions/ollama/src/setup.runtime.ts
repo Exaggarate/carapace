@@ -1,23 +1,23 @@
 // Ollama setup runtime handles plugin onboarding behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import type { ProviderAuthMethod } from "openclaw/plugin-sdk/plugin-entry";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import type { ProviderAuthMethod } from "carapace/plugin-sdk/plugin-entry";
 import type {
-  OpenClawConfig,
+  CarapaceConfig,
   SecretInput,
   SecretInputMode,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   ensureApiKeyFromOptionEnvOrPrompt,
   isNonSecretApiKeyMarker,
   normalizeApiKeyInput,
   normalizeOptionalSecretInput,
   validateApiKeyInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { applyAgentDefaultModelPrimary } from "openclaw/plugin-sdk/provider-onboard";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { WizardCancelledError, type WizardPrompter } from "openclaw/plugin-sdk/setup";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-auth";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
+import { applyAgentDefaultModelPrimary } from "carapace/plugin-sdk/provider-onboard";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { WizardCancelledError, type WizardPrompter } from "carapace/plugin-sdk/setup";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   OLLAMA_CLOUD_BASE_URL,
   OLLAMA_CLOUD_DEFAULT_MODELS,
@@ -69,7 +69,7 @@ type OllamaSetupOptions = {
 };
 
 type OllamaSetupResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   credential?: SecretInput;
   credentialMode?: SecretInputMode;
   defaultModel?: string;
@@ -97,7 +97,7 @@ function buildOllamaUnreachableLines(baseUrl: string, retry: boolean): string[] 
     `Ollama could not be reached at ${baseUrl}.`,
     "Start or restart the Ollama server for this address.",
     "If Ollama is not installed on that machine, download it at https://ollama.com/download",
-    ...(retry ? ["", "Continue when it is running. OpenClaw will retry this address."] : []),
+    ...(retry ? ["", "Continue when it is running. Carapace will retry this address."] : []),
   ];
 }
 
@@ -149,7 +149,7 @@ export async function checkOllamaCloudAuth(
 }
 
 async function promptForOllamaCloudCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   opts?: Record<string, unknown>;
@@ -204,13 +204,13 @@ async function promptForOllamaCloudCredential(params: {
 }
 
 function applyOllamaProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   baseUrl: string,
   modelNames: string[],
   discoveredModelsByName?: Map<string, OllamaModelWithContext>,
   apiKey: SecretInput = OLLAMA_DEFAULT_API_KEY,
   defaultModels: readonly OllamaCloudDefaultModel[] = [],
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     ...cfg,
     models: {
@@ -269,7 +269,7 @@ async function resolveHostBackedSuggestedModelNames(params: {
 }
 
 async function promptAndConfigureHostBackedOllama(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   mode: HostBackedOllamaInteractiveMode;
   prompter: WizardPrompter;
   env?: NodeJS.ProcessEnv;
@@ -389,7 +389,7 @@ async function promptAndConfigureHostBackedOllama(params: {
 }
 
 export async function promptAndConfigureOllama(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   opts?: Record<string, unknown>;
@@ -529,11 +529,11 @@ export async function validateOllamaNonInteractive(
 }
 
 export async function configureOllamaNonInteractive(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
   opts: OllamaSetupOptions;
   runtime: RuntimeEnv;
   agentDir?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const baseUrl = resolveOllamaApiBase(
     (params.opts.customBaseUrl?.trim() || resolveOllamaSetupDefaultBaseUrl()).replace(/\/+$/, ""),
   );
@@ -659,7 +659,7 @@ export async function configureOllamaNonInteractive(params: {
 }
 
 export async function ensureOllamaModelPulled(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   model: string;
   prompter: WizardPrompter;
 }): Promise<void> {

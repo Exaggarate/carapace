@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Whatsapp tests cover channel react action plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleWhatsAppMessageAction } from "./channel-react-action.js";
@@ -92,7 +92,7 @@ vi.mock("./channel-react-action.runtime.js", async () => {
 describe("whatsapp react action messageId resolution", () => {
   const baseCfg = {
     channels: { whatsapp: { actions: { reactions: true }, allowFrom: ["*"] } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   beforeEach(() => {
     hoisted.handleWhatsAppAction.mockClear();

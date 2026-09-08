@@ -1,4 +1,4 @@
-import type { AgentHarnessRuntimeArtifactBinding } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentHarnessRuntimeArtifactBinding } from "carapace/plugin-sdk/agent-harness-runtime";
 import type { CodexAppServerClient } from "./client.js";
 import { retireSharedCodexAppServerClientIfCurrent } from "./shared-client.js";
 

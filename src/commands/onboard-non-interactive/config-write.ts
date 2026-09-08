@@ -1,15 +1,15 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 /** Commits a non-interactive onboard config update with pending plugin records handled first. */
 export async function commitNonInteractiveOnboardConfig(params: {
-  nextConfig: OpenClawConfig;
-  baseConfig: OpenClawConfig;
+  nextConfig: CarapaceConfig;
+  baseConfig: CarapaceConfig;
   baseHash?: string;
   reset?: boolean;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   const { writeWizardConfigFile } = await import("../../wizard/setup.shared.js");
   // Ordinary onboard reruns must preserve existing agents.list / bindings.
-  // Only explicit --reset may allow a config size drop; see openclaw#84692.
+  // Only explicit --reset may allow a config size drop; see carapace#84692.
   return await writeWizardConfigFile(params.nextConfig, {
     mergeBase: params.baseConfig,
     allowConfigSizeDrop: params.reset === true,

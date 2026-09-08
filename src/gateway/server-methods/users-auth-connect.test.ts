@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
   UsersAuthConnectStartResult,
@@ -7,7 +7,7 @@ import type {
 } from "../../../packages/gateway-protocol/src/schema/users.js";
 import type { AuthProfileCredential, OAuthCredential } from "../../agents/auth-profiles/types.js";
 import type { GatewayOperatorRoleDefinition } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import type {
   ProviderAuthContext,
@@ -105,7 +105,7 @@ const broadcast = vi.fn();
 const warn = vi.fn();
 let service: ReturnType<typeof createModelAccountConnectService>;
 let context: ConnectTestContext;
-let config: OpenClawConfig;
+let config: CarapaceConfig;
 let clients: Set<TestClient>;
 let self: TestClient;
 let writes: AuthProfileCredential[];
@@ -537,7 +537,7 @@ describe("users model-account connection lifecycle", () => {
       undefined,
       expect.objectContaining({
         code: "INVALID_REQUEST",
-        message: expect.stringContaining("openclaw models auth login"),
+        message: expect.stringContaining("carapace models auth login"),
       }),
     );
     expect(

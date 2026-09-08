@@ -4,7 +4,7 @@
     {
       "identity" : "axorcist",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/openclaw/AXorcist.git",
+      "location" : "https://github.com/Exaggarate/carapace/AXorcist.git",
       "state" : {
         "revision" : "37d7ae82ff1443b4b36344ca6f3bf0ad33f13b12",
         "version" : "0.1.9"
@@ -49,7 +49,7 @@
     {
       "identity" : "peekaboo",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/openclaw/Peekaboo.git",
+      "location" : "https://github.com/Exaggarate/carapace/Peekaboo.git",
       "state" : {
         "revision" : "44eff916c3330739108cc1d73683338d4250503a"
       }

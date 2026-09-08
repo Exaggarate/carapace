@@ -38,7 +38,7 @@ function redactDiagnosticLines(value: string): string {
   // indistinguishable. Treat only the physical line containing a path as
   // private instead of guessing at a filename boundary.
   const privatePathLine =
-    /\$OPENCLAW_STATE_DIR[\\/]|(?:^|[^\p{L}\p{N}._~-])(?:\/+|\\+|[A-Za-z]:[\\/]|~[\\/])/u;
+    /\$CARAPACE_STATE_DIR[\\/]|(?:^|[^\p{L}\p{N}._~-])(?:\/+|\\+|[A-Za-z]:[\\/]|~[\\/])/u;
   return value
     .split(/(\r\n|[\n\r\u2028\u2029])/u)
     .map((line) => {
@@ -204,11 +204,11 @@ export async function prepareUpdateFailureReport(
   const phase = resolveFailedPhase(input.result, context);
   const rollback = resolveRollbackOutcome(input.result, context);
   const bodyWithoutMarker = [
-    "# OpenClaw update failure report",
+    "# Carapace update failure report",
     "",
-    "This report was explicitly reviewed and confirmed in OpenClaw.",
+    "This report was explicitly reviewed and confirmed in Carapace.",
     "",
-    `- OpenClaw version: ${version}`,
+    `- Carapace version: ${version}`,
     `- Platform: ${platform}`,
     `- Update target: ${target}`,
     `- Failed phase: ${phase}`,
@@ -219,13 +219,13 @@ export async function prepareUpdateFailureReport(
     ...renderBoundedDiagnostics(input, context).map((line) => `- ${line}`),
     "",
   ].join("\n");
-  const reconciliationMarker = `openclaw-update-report:${createHash("sha256")
+  const reconciliationMarker = `carapace-update-report:${createHash("sha256")
     .update(`${input.attemptId}\0${bodyWithoutMarker}`)
     .digest("hex")}`;
   const body = truncateUtf8Prefix(
     bodyWithoutMarker.replace(
-      "This report was explicitly reviewed and confirmed in OpenClaw.\n",
-      `This report was explicitly reviewed and confirmed in OpenClaw.\n\n<!-- ${reconciliationMarker} -->\n`,
+      "This report was explicitly reviewed and confirmed in Carapace.\n",
+      `This report was explicitly reviewed and confirmed in Carapace.\n\n<!-- ${reconciliationMarker} -->\n`,
     ),
     UPDATE_REPORT_BODY_MAX_BYTES,
   );

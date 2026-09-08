@@ -1,5 +1,5 @@
 ---
-summary: "Adds Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan, Bailian Token Plan model provider support to OpenClaw."
+summary: "Adds Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan, Bailian Token Plan model provider support to Carapace."
 read_when:
   - You are installing, configuring, or auditing the qwen plugin
 title: "Qwen plugin reference"
@@ -7,15 +7,15 @@ title: "Qwen plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan, Bailian Token Plan model provider support to OpenClaw.
+Adds Qwen, Qwen Cloud, Model Studio, DashScope, Qwen Token Plan, Bailian Token Plan model provider support to Carapace.
 
 ## Distribution
 
-- Package: `@openclaw/qwen-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/qwen-provider`
+- Package: `@carapace/qwen-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/qwen-provider`
 
 ## Surface
 

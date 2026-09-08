@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { describe, expect, test, vi } from "vitest";
 import { WebSocket } from "ws";
 import { writeConfigFile } from "../config/config.js";

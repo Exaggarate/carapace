@@ -3,13 +3,13 @@ import "fake-indexeddb/auto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resetFileLockStateForTest } from "openclaw/plugin-sdk/file-lock";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resetFileLockStateForTest } from "carapace/plugin-sdk/file-lock";
 import {
   createPluginStateKeyedStoreForTests,
-  openOpenClawStateDatabase,
+  openCarapaceStateDatabase,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMatrixRuntime } from "../../runtime.js";
 import { installMatrixTestRuntime } from "../../test-runtime.js";
@@ -28,8 +28,8 @@ import {
 } from "./idb-persistence.test-helpers.js";
 import { LogService } from "./logger.js";
 
-const DATABASE_PREFIX = "openclaw-matrix-persistence-test";
-const OTHER_DATABASE_PREFIX = "openclaw-matrix-persistence-other-test";
+const DATABASE_PREFIX = "carapace-matrix-persistence-test";
+const OTHER_DATABASE_PREFIX = "carapace-matrix-persistence-other-test";
 const cryptoDatabaseName = `${DATABASE_PREFIX}::matrix-sdk-crypto`;
 const otherCryptoDatabaseName = `${OTHER_DATABASE_PREFIX}::matrix-sdk-crypto`;
 
@@ -123,7 +123,7 @@ describe("Matrix IndexedDB persistence", () => {
       if (!laterChunk) {
         throw new Error("expected snapshot chunk 11");
       }
-      const { db } = openOpenClawStateDatabase({
+      const { db } = openCarapaceStateDatabase({
         env: openMatrixIdbSnapshotStoreOptions(tmpDir).env,
       });
       db.prepare("UPDATE plugin_state_entries SET value_json = ? WHERE entry_key = ?").run(
@@ -154,13 +154,13 @@ describe("Matrix IndexedDB persistence", () => {
     await expect(restoreIdbFromDisk(snapshotPath)).rejects.toMatchObject({
       name: "MatrixIdbSnapshotMigrationRequiredError",
       code: "matrix-idb-snapshot-requires-doctor",
-      remediation: "openclaw doctor --fix",
+      remediation: "carapace doctor --fix",
     });
     expect(warnSpy).toHaveBeenCalledWith(
       "IdbPersistence",
       expect.objectContaining({
         code: "matrix-idb-snapshot-requires-doctor",
-        remediation: "openclaw doctor --fix",
+        remediation: "carapace doctor --fix",
       }),
     );
     expect(JSON.stringify(warnSpy.mock.calls)).not.toContain(snapshotPath);

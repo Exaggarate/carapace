@@ -4,12 +4,12 @@ import nodePath from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDoctorConfigSnapshot } from "../commands/doctor-config-snapshot.test-helpers.js";
 import type { DoctorPrompter } from "../commands/doctor-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { LEGACY_SECRETREF_ENV_MARKER_PREFIX } from "../config/types.secrets.js";
 import { fetchNpmPackageTargetStatus } from "../infra/update-check-package-target.js";
 import { migrateLegacySecretRefEnvMarkers } from "../secrets/legacy-secretref-env-marker.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { CORE_HEALTH_CHECKS } from "./doctor-core-checks.js";
 import { createDoctorHealthContribution } from "./doctor-health-contribution.js";
 import { resolveDoctorContributionHealthChecks } from "./doctor-health-contributions.js";
@@ -102,7 +102,7 @@ const mocks = vi.hoisted(() => ({
   noteMacLaunchAgentOverrides: vi.fn(),
   noteMacDisabledGatewayLaunchAgent: vi.fn(),
   noteMacLaunchctlGatewayEnvOverrides: vi.fn(),
-  noteMacStaleOpenClawUpdateLaunchdJobs: vi.fn(),
+  noteMacStaleCarapaceUpdateLaunchdJobs: vi.fn(),
   gatewaySecretInputPathCanWin: vi.fn(),
   readGatewaySecretInputValue: vi.fn((..._args: unknown[]) => undefined as string | undefined),
   checkGatewayHealth: vi.fn(async () => ({
@@ -122,7 +122,7 @@ const mocks = vi.hoisted(() => ({
       checkId: "core/doctor/legacy-plugin-manifests",
       severity: "warning" as const,
       message: `Plugin manifest ${migration.pluginId} uses legacy top-level capability keys.`,
-      path: "/tmp/openclaw-plugin/openclaw.plugin.json",
+      path: "/tmp/carapace-plugin/carapace.plugin.json",
       target: migration.pluginId,
       requirement: "contracts-capability-keys",
     }),
@@ -134,15 +134,15 @@ const mocks = vi.hoisted(() => ({
     changes: [],
     warnings: [],
   }),
-  listAgentIds: vi.fn<(_cfg: OpenClawConfig) => string[]>(() => ["default"]),
+  listAgentIds: vi.fn<(_cfg: CarapaceConfig) => string[]>(() => ["default"]),
   listAgentEntries: vi.fn(() => [{ id: "default" }]),
-  tryResolveSoleAgentId: vi.fn<(_cfg: OpenClawConfig) => string | undefined>(() => "default"),
-  resolveAgentWorkspaceDir: vi.fn<(_cfg: OpenClawConfig, agentId: string) => string>(
-    () => "/tmp/openclaw-workspace",
+  tryResolveSoleAgentId: vi.fn<(_cfg: CarapaceConfig) => string | undefined>(() => "default"),
+  resolveAgentWorkspaceDir: vi.fn<(_cfg: CarapaceConfig, agentId: string) => string>(
+    () => "/tmp/carapace-workspace",
   ),
-  tryResolveConfiguredAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-workspace"),
-  tryResolveSystemAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-workspace"),
-  resolveDefaultAgentId: vi.fn<(_cfg: OpenClawConfig) => string>(() => "default"),
+  tryResolveConfiguredAgentWorkspaceDir: vi.fn(() => "/tmp/carapace-workspace"),
+  tryResolveSystemAgentWorkspaceDir: vi.fn(() => "/tmp/carapace-workspace"),
+  resolveDefaultAgentId: vi.fn<(_cfg: CarapaceConfig) => string>(() => "default"),
   resolveAgentContextLimits: vi.fn(
     (cfg: { agents?: { defaults?: { contextLimits?: unknown } } }) =>
       cfg.agents?.defaults?.contextLimits ?? {},
@@ -220,8 +220,8 @@ const mocks = vi.hoisted(() => ({
     (typeof import("../daemon/systemd.js"))["findInstalledSystemdGatewayScope"]
   >(async () => ({
     scope: "user",
-    unitName: "openclaw-gateway.service",
-    unitPath: "/home/alice/.config/systemd/user/openclaw-gateway.service",
+    unitName: "carapace-gateway.service",
+    unitPath: "/home/alice/.config/systemd/user/carapace-gateway.service",
   })),
   isSystemdUserServiceAvailable: vi.fn(async () => true),
   readSystemdUserLingerStatus: vi.fn(
@@ -395,7 +395,7 @@ vi.mock("../commands/doctor-platform-notes.js", () => ({
   noteMacLaunchAgentOverrides: mocks.noteMacLaunchAgentOverrides,
   noteMacDisabledGatewayLaunchAgent: mocks.noteMacDisabledGatewayLaunchAgent,
   noteMacLaunchctlGatewayEnvOverrides: mocks.noteMacLaunchctlGatewayEnvOverrides,
-  noteMacStaleOpenClawUpdateLaunchdJobs: mocks.noteMacStaleOpenClawUpdateLaunchdJobs,
+  noteMacStaleCarapaceUpdateLaunchdJobs: mocks.noteMacStaleCarapaceUpdateLaunchdJobs,
 }));
 
 vi.mock("../gateway/credentials-secret-inputs.js", async (importOriginal) => {
@@ -500,11 +500,11 @@ vi.mock("../version.js", async () => ({
 }));
 
 vi.mock("../commands/doctor/shared/config-flow-steps.js", () => ({
-  restoreDoctorConfigEnvRefs: (cfg: OpenClawConfig) => cfg,
+  restoreDoctorConfigEnvRefs: (cfg: CarapaceConfig) => cfg,
 }));
 
 vi.mock("../config/config.js", () => ({
-  CONFIG_PATH: "/tmp/fake-openclaw.json",
+  CONFIG_PATH: "/tmp/fake-carapace.json",
   transformConfigFile: async ({
     transform,
     ...options
@@ -621,7 +621,7 @@ vi.mock("../utils.js", async (importOriginal) => {
   return {
     ...actual,
     isRecord: mocks.isRecord,
-    resolveConfigDir: vi.fn(() => "/tmp/openclaw-config"),
+    resolveConfigDir: vi.fn(() => "/tmp/carapace-config"),
     resolveUserPath: vi.fn((value: string) => value),
     shortenHomePath: mocks.shortenHomePath,
   };
@@ -667,18 +667,18 @@ function createDoctorContext({
   ...overrides
 }: Parameters<typeof createDoctorHealthFlowContext>[0] & { shouldRepair?: boolean } = {}) {
   return createDoctorHealthFlowContext({
-    configPath: "/tmp/fake-openclaw.json",
+    configPath: "/tmp/fake-carapace.json",
     prompter: buildDoctorPrompter(shouldRepair),
     ...overrides,
   });
 }
 
 function createDoctorLintFixture(
-  cfg: OpenClawConfig | Record<string, unknown> = {},
+  cfg: CarapaceConfig | Record<string, unknown> = {},
   overrides: Omit<Parameters<typeof createDoctorLintContext>[0], "cfg"> = {},
 ) {
   return createDoctorLintContext({
-    cfg: cfg as OpenClawConfig,
+    cfg: cfg as CarapaceConfig,
     mode: "lint",
     runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
     ...overrides,
@@ -753,7 +753,7 @@ describe("doctor health contributions", () => {
     mocks.maybeResolveDuelingSystemdGatewayScopes.mockClear();
     mocks.noteMacLaunchAgentOverrides.mockClear();
     mocks.noteMacLaunchctlGatewayEnvOverrides.mockClear();
-    mocks.noteMacStaleOpenClawUpdateLaunchdJobs.mockClear();
+    mocks.noteMacStaleCarapaceUpdateLaunchdJobs.mockClear();
     mocks.gatewaySecretInputPathCanWin.mockClear().mockReset();
     mocks.readGatewaySecretInputValue.mockClear().mockReset();
     mocks.checkGatewayHealth.mockClear().mockResolvedValue({
@@ -795,11 +795,11 @@ describe("doctor health contributions", () => {
       changes: [],
       warnings: [],
     });
-    mocks.resolveAgentWorkspaceDir.mockReset().mockReturnValue("/tmp/openclaw-workspace");
+    mocks.resolveAgentWorkspaceDir.mockReset().mockReturnValue("/tmp/carapace-workspace");
     mocks.tryResolveConfiguredAgentWorkspaceDir
       .mockReset()
-      .mockReturnValue("/tmp/openclaw-workspace");
-    mocks.tryResolveSystemAgentWorkspaceDir.mockReset().mockReturnValue("/tmp/openclaw-workspace");
+      .mockReturnValue("/tmp/carapace-workspace");
+    mocks.tryResolveSystemAgentWorkspaceDir.mockReset().mockReturnValue("/tmp/carapace-workspace");
     mocks.listAgentIds.mockReset().mockReturnValue(["default"]);
     mocks.listAgentEntries.mockReset().mockReturnValue([{ id: "default" }]);
     mocks.tryResolveSoleAgentId.mockReset().mockReturnValue("default");
@@ -880,8 +880,8 @@ describe("doctor health contributions", () => {
     mocks.collectChannelPreviewWarningHealthFindings.mockReset().mockResolvedValue([]);
     mocks.findInstalledSystemdGatewayScope.mockReset().mockResolvedValue({
       scope: "user",
-      unitName: "openclaw-gateway.service",
-      unitPath: "/home/alice/.config/systemd/user/openclaw-gateway.service",
+      unitName: "carapace-gateway.service",
+      unitPath: "/home/alice/.config/systemd/user/carapace-gateway.service",
     });
     mocks.isSystemdUserServiceAvailable.mockReset().mockResolvedValue(true);
     mocks.readSystemdUserLingerStatus
@@ -896,7 +896,7 @@ describe("doctor health contributions", () => {
     mocks.maybeScanExtraGatewayServices.mockReset().mockResolvedValue(undefined);
     mocks.noteMacLaunchAgentOverrides.mockReset().mockResolvedValue(undefined);
     mocks.noteMacLaunchctlGatewayEnvOverrides.mockReset().mockResolvedValue(undefined);
-    mocks.noteMacStaleOpenClawUpdateLaunchdJobs.mockReset().mockResolvedValue(undefined);
+    mocks.noteMacStaleCarapaceUpdateLaunchdJobs.mockReset().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -939,7 +939,7 @@ describe("doctor health contributions", () => {
 
   it("rejects a failed initial config write before later work runs", async () => {
     const laterRun = vi.fn(async () => undefined);
-    const cfg = { gateway: { mode: "invalid" } } as unknown as OpenClawConfig;
+    const cfg = { gateway: { mode: "invalid" } } as unknown as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -972,13 +972,13 @@ describe("doctor health contributions", () => {
     expect(check.defaultEnabled).toBe(false);
 
     const migration = {
-      manifestPath: "/tmp/openclaw-plugin/openclaw.plugin.json",
+      manifestPath: "/tmp/carapace-plugin/carapace.plugin.json",
       pluginId: "legacy-plugin",
       nextRaw: {},
       changeLines: ["- moved tools to contracts.tools"],
     };
     mocks.collectLegacyPluginManifestContractMigrations.mockReturnValueOnce([migration]);
-    const ctx = createDoctorLintFixture({ plugins: { load: { paths: ["/tmp/openclaw-plugin"] } } });
+    const ctx = createDoctorLintFixture({ plugins: { load: { paths: ["/tmp/carapace-plugin"] } } });
 
     await expect(runDoctorLintChecks(ctx, { checks: [check] })).resolves.toMatchObject({
       checksRun: 0,
@@ -1069,7 +1069,7 @@ describe("doctor health contributions", () => {
   });
 
   it("keeps a late runtime publication failure after committing config migrations", async () => {
-    const cfg = { hooks: { gmail: { model: "openai/gpt-5.5" } } } as OpenClawConfig;
+    const cfg = { hooks: { gmail: { model: "openai/gpt-5.5" } } } as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1100,7 +1100,7 @@ describe("doctor health contributions", () => {
   it("persists migrated Discord config once across both write phases", async () => {
     const cfg = {
       channels: { discord: { streaming: { mode: "partial" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1121,7 +1121,7 @@ describe("doctor health contributions", () => {
   });
 
   it("does not mark an invalid migration durable when validation rejects the write", async () => {
-    const cfg = { gateway: { mode: "invalid" } } as unknown as OpenClawConfig;
+    const cfg = { gateway: { mode: "invalid" } } as unknown as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1150,7 +1150,7 @@ describe("doctor health contributions", () => {
     // print "Doctor changes — gatway", then crash with a raw Error and persist nothing.
     const cfg = {
       agents: { defaults: { heartbeat: { every: 5 } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1241,7 +1241,7 @@ describe("doctor health contributions", () => {
   it("describes only the failed later write after an earlier pass committed", async () => {
     // First write pass commits; a later health repair then produces a candidate the
     // writer refuses. The warning must not claim the whole run wrote nothing.
-    const cfg = { gateway: { mode: "local" } } as OpenClawConfig;
+    const cfg = { gateway: { mode: "local" } } as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1257,7 +1257,7 @@ describe("doctor health contributions", () => {
     ctx.cfg = {
       ...ctx.cfg,
       agents: { defaults: { heartbeat: { every: 5 } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mocks.note.mockClear();
     mocks.replaceConfigFile.mockRejectedValueOnce(
       Object.assign(new Error("Config validation failed: agents.defaults.heartbeat.every"), {
@@ -1284,7 +1284,7 @@ describe("doctor health contributions", () => {
   });
 
   it("prints held change panels as Doctor changes only after the write commits", async () => {
-    const cfg = { gateway: { mode: "local" } } as OpenClawConfig;
+    const cfg = { gateway: { mode: "local" } } as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1312,7 +1312,7 @@ describe("doctor health contributions", () => {
     const laterRun = vi.fn(async () => undefined);
     const cfg = {
       agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const ctx = createDoctorContext({
       cfg,
       cfgForPersistence: structuredClone(cfg),
@@ -1329,7 +1329,7 @@ describe("doctor health contributions", () => {
     mocks.replaceConfigFile.mockRejectedValueOnce(
       Object.assign(
         new Error(
-          'Config write refused: cannot inspect cron ownership. Run "openclaw doctor --fix", then retry.',
+          'Config write refused: cannot inspect cron ownership. Run "carapace doctor --fix", then retry.',
         ),
         { code: "CONFIG_WRITE_REJECTED", refusal: "cron-owner-safety" },
       ),
@@ -1386,7 +1386,7 @@ describe("doctor health contributions", () => {
       const laterRun = vi.fn(async () => undefined);
       const cfg = {
         agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const ctx = createDoctorContext({
         cfg,
         cfgForPersistence: structuredClone(cfg),
@@ -1612,8 +1612,8 @@ describe("doctor health contributions", () => {
       cfgForPersistence: {},
       shouldRepair: true,
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       },
     });
 
@@ -1775,7 +1775,7 @@ describe("doctor health contributions", () => {
           installedVersion: "2026.5.30-beta.1",
           gatewayVersion: "2026.6.1",
           source: "npm",
-          spec: "@openclaw/codex@2026.5.30-beta.1",
+          spec: "@carapace/codex@2026.5.30-beta.1",
         },
       ],
     };
@@ -1810,7 +1810,7 @@ describe("doctor health contributions", () => {
       pluginVersionTarget: "restart",
     });
     expect(fetchNpmPackageTargetStatus).toHaveBeenCalledWith({
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
       target: "2026.6.1",
     });
     expect(mocks.noteWorkspaceStatus).toHaveBeenCalledWith(cfg, {
@@ -2075,14 +2075,14 @@ describe("doctor health contributions", () => {
       createDoctorHealthFlowContext({
         cfg,
         prompter: buildDoctorPrompter(true),
-        env: { OPENCLAW_STATE_DIR: "/tmp/openclaw-state" },
+        env: { CARAPACE_STATE_DIR: "/tmp/carapace-state" },
       }),
     );
 
     expect(mocks.maybeMigrateHeartbeatCadenceToCron).toHaveBeenCalledWith({
       cfg,
       shouldRepair: true,
-      env: { OPENCLAW_STATE_DIR: "/tmp/openclaw-state" },
+      env: { CARAPACE_STATE_DIR: "/tmp/carapace-state" },
     });
   });
 
@@ -2093,7 +2093,7 @@ describe("doctor health contributions", () => {
     );
     expect(check).toBeDefined();
     const cfg = { agents: { defaults: { heartbeat: { every: "15m" } } } };
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-detector-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/carapace-detector-state" };
 
     await check!.detect(createDoctorLintFixture(cfg, { env }));
 
@@ -2120,7 +2120,7 @@ describe("doctor health contributions", () => {
     );
     expect(check).toBeDefined();
     const cfg = { agents: { defaults: { heartbeat: { every: "15m" } } } };
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-task-detector-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/carapace-task-detector-state" };
 
     await check!.detect(createDoctorLintFixture(cfg, { env }));
 
@@ -2185,8 +2185,8 @@ describe("doctor health contributions", () => {
         },
       },
       options: { allowExec: true, nonInteractive: true },
-      env: { OPENCLAW_TEST_GATEWAY_TOKEN: "1" },
-      configPath: "/tmp/openclaw.json",
+      env: { CARAPACE_TEST_GATEWAY_TOKEN: "1" },
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2221,7 +2221,7 @@ describe("doctor health contributions", () => {
           },
         },
         options: { generateGatewayToken: true, nonInteractive: true },
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       });
 
       await contribution.run(ctx);
@@ -2259,7 +2259,7 @@ describe("doctor health contributions", () => {
       configResult: {},
       shouldRepair: true,
       options: { allowExec: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2281,8 +2281,8 @@ describe("doctor health contributions", () => {
         cfg: { gateway: { mode: "local" } },
         shouldRepair: true,
         env: {
-          OPENCLAW_UPDATE_IN_PROGRESS: "1",
-          OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: "1",
+          CARAPACE_UPDATE_IN_PROGRESS: "1",
+          CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: "1",
         },
       });
 
@@ -2292,7 +2292,7 @@ describe("doctor health contributions", () => {
     });
   });
 
-  it("silently skips the host-service contribution in a container without an OpenClaw service", async () => {
+  it("silently skips the host-service contribution in a container without an Carapace service", async () => {
     mocks.isContainerEnvironment.mockReturnValue(true);
     mocks.findInstalledSystemdGatewayScope.mockResolvedValue(null);
     const contribution = requireDoctorContribution("doctor:gateway-services");
@@ -2319,7 +2319,7 @@ describe("doctor health contributions", () => {
       cfg: {},
       configResult: {},
       env: {},
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2362,7 +2362,7 @@ describe("doctor health contributions", () => {
       configResult: {},
       shouldRepair: true,
       options: { nonInteractive: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2396,7 +2396,7 @@ describe("doctor health contributions", () => {
           severity: "warning",
           message: "Retired Workspaces plugin state remains at /tmp/workspaces.",
           path: "/tmp/workspaces",
-          fixHint: "Run openclaw doctor --fix.",
+          fixHint: "Run carapace doctor --fix.",
         },
       ],
       remainingFindings: [],
@@ -2469,7 +2469,7 @@ describe("doctor health contributions", () => {
       configResult: {},
       shouldRepair: true,
       options: { nonInteractive: true, repair: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2533,7 +2533,7 @@ describe("doctor health contributions", () => {
       configResult: {},
       shouldRepair: true,
       options: { nonInteractive: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2558,7 +2558,7 @@ describe("doctor health contributions", () => {
         },
       },
       options: { nonInteractive: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2578,7 +2578,7 @@ describe("doctor health contributions", () => {
       cfg: {},
       shouldRepair: true,
       options: { nonInteractive: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     await contribution.run(ctx);
@@ -2635,7 +2635,7 @@ describe("doctor health contributions", () => {
       config: repairedCfg,
       retiredProfileCleanupPlans: [
         {
-          agentDir: "/tmp/openclaw/agents/main",
+          agentDir: "/tmp/carapace/agents/main",
           profileIds: ["anthropic:claude-cli"],
         },
       ],
@@ -2655,7 +2655,7 @@ describe("doctor health contributions", () => {
       expect.objectContaining({ nextConfig: repairedCfg }),
     );
     expect(mocks.removeAuthProfilesAcrossOwnerStores).toHaveBeenCalledWith({
-      agentDir: "/tmp/openclaw/agents/main",
+      agentDir: "/tmp/carapace/agents/main",
       profileIds: ["anthropic:claude-cli"],
     });
     expect(mocks.replaceConfigFile.mock.invocationCallOrder[0]).toBeLessThan(
@@ -2674,7 +2674,7 @@ describe("doctor health contributions", () => {
       config: { agents: { defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } } } },
       retiredProfileCleanupPlans: [
         {
-          agentDir: "/tmp/openclaw/agents/main",
+          agentDir: "/tmp/carapace/agents/main",
           profileIds: ["anthropic:claude-cli"],
         },
       ],
@@ -2682,7 +2682,7 @@ describe("doctor health contributions", () => {
     const ctx = createDoctorHealthFlowContext({
       cfg,
       cfgForPersistence: cfg,
-      env: { OPENCLAW_UPDATE_IN_PROGRESS: "1" },
+      env: { CARAPACE_UPDATE_IN_PROGRESS: "1" },
       prompter: buildDoctorPrompter(true),
     });
 
@@ -2755,7 +2755,7 @@ describe("doctor health contributions", () => {
       healthOk: false,
       shouldRepair: true,
       options: { nonInteractive: true },
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     } as unknown as Parameters<typeof createDoctorContext>[0]);
 
     await contribution.run(ctx);
@@ -2884,8 +2884,8 @@ describe("doctor health contributions", () => {
     mocks.isContainerEnvironment.mockReturnValue(true);
     mocks.findInstalledSystemdGatewayScope.mockResolvedValue({
       scope: "system",
-      unitName: "openclaw-gateway.service",
-      unitPath: "/etc/systemd/system/openclaw-gateway.service",
+      unitName: "carapace-gateway.service",
+      unitPath: "/etc/systemd/system/carapace-gateway.service",
     });
     const contribution = requireDoctorContribution("doctor:systemd-linger");
     const checks = await resolveDoctorContributionHealthChecks();
@@ -2911,7 +2911,7 @@ describe("doctor health contributions", () => {
     expect(JSON.stringify(lintResult)).not.toContain("loginctl enable-linger");
   });
 
-  it("never probes systemd linger inside a container without an OpenClaw service", async () => {
+  it("never probes systemd linger inside a container without an Carapace service", async () => {
     mocks.isContainerEnvironment.mockReturnValue(true);
     mocks.findInstalledSystemdGatewayScope.mockResolvedValue(null);
     const checks = await resolveDoctorContributionHealthChecks();
@@ -3008,11 +3008,11 @@ describe("doctor health contributions", () => {
   });
 
   it("preserves the shipped legacy dependency selector as a non-destructive deprecation", async () => {
-    const openClawState = await createOpenClawTestState({
+    const carapaceState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-legacy-plugin-deps-lint-",
+      prefix: "carapace-legacy-plugin-deps-lint-",
     });
-    const stateDir = openClawState.stateDir;
+    const stateDir = carapaceState.stateDir;
     const legacyRuntimeRoot = nodePath.join(stateDir, "plugin-runtime-deps");
     fs.mkdirSync(legacyRuntimeRoot, { recursive: true });
     try {
@@ -3048,7 +3048,7 @@ describe("doctor health contributions", () => {
       });
       expect(fs.existsSync(legacyRuntimeRoot)).toBe(true);
     } finally {
-      await openClawState.cleanup();
+      await carapaceState.cleanup();
     }
   });
 
@@ -3089,7 +3089,7 @@ describe("doctor health contributions", () => {
   it("collects memory-search notes as structured findings", async () => {
     const contribution = requireDoctorContribution("doctor:memory-search");
     const check = contribution.healthChecks[0] as HealthCheck;
-    const env = { OPENCLAW_STATE_DIR: "/isolated-memory-state" };
+    const env = { CARAPACE_STATE_DIR: "/isolated-memory-state" };
     mocks.noteMemorySearchHealth.mockImplementationOnce(async (_cfg, opts) => {
       opts.noteFn(
         [
@@ -3129,7 +3129,7 @@ describe("doctor health contributions", () => {
 
   it("forwards the interactive Doctor environment to memory provider discovery", async () => {
     const contribution = requireDoctorContribution("doctor:memory-search");
-    const env = { OPENCLAW_STATE_DIR: "/interactive-memory-state" };
+    const env = { CARAPACE_STATE_DIR: "/interactive-memory-state" };
 
     await contribution.run(createDoctorContext({ env }));
 
@@ -3181,12 +3181,12 @@ describe("doctor health contributions", () => {
         }),
       ],
     });
-    expect(mocks.collectWorkspaceBackupTip).toHaveBeenCalledWith("/tmp/openclaw-workspace");
+    expect(mocks.collectWorkspaceBackupTip).toHaveBeenCalledWith("/tmp/carapace-workspace");
   });
 
   it("labels normal workspace suggestions for secondary agents", async () => {
     const contribution = requireDoctorContribution("doctor:workspace-suggestions");
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const ctx = createDoctorContext({ cfg, env: {} });
     mocks.listAgentIds.mockReturnValue(["default", "secondary"]);
     mocks.resolveAgentWorkspaceDir.mockImplementation((_cfg, agentId) => `/tmp/${agentId}`);
@@ -3212,7 +3212,7 @@ describe("doctor health contributions", () => {
 
   it("keeps single-agent workspace suggestion wording unchanged", async () => {
     const contribution = requireDoctorContribution("doctor:workspace-suggestions");
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as CarapaceConfig;
     const ctx = createDoctorContext({ cfg, env: {} });
     mocks.collectWorkspaceBackupTip.mockReturnValue("- Back up this workspace.");
     mocks.shouldSuggestMemorySystem.mockResolvedValue(true);
@@ -3248,8 +3248,8 @@ describe("doctor health contributions", () => {
       {
         checkId: "core/doctor/disk-space",
         severity: "warning",
-        message: "Low disk space: 300 MB free on the partition containing ~/.openclaw.",
-        path: "/home/test/.openclaw",
+        message: "Low disk space: 300 MB free on the partition containing ~/.carapace.",
+        path: "/home/test/.carapace",
         requirement: "low-free-space",
       },
     ]);
@@ -3421,7 +3421,7 @@ describe("doctor health contributions", () => {
     expect(cronStoreCheck).toMatchObject({ defaultEnabled: false });
     expect(cronStoreCheck).toBeDefined();
 
-    const ctx = createDoctorLintFixture({ cron: { store: "/tmp/openclaw-cron/jobs.json" } });
+    const ctx = createDoctorLintFixture({ cron: { store: "/tmp/carapace-cron/jobs.json" } });
     const checks = [cronStoreCheck!];
 
     await expect(runDoctorLintChecks(ctx, { checks })).resolves.toMatchObject({
@@ -3435,7 +3435,7 @@ describe("doctor health contributions", () => {
         checkId: "core/doctor/legacy-cron-store",
         severity: "warning",
         message: "Legacy JSON cron store was found.",
-        path: "/tmp/openclaw-cron/jobs.json",
+        path: "/tmp/carapace-cron/jobs.json",
         requirement: "legacy-cron-store",
       },
     ]);
@@ -3576,15 +3576,15 @@ describe("doctor health contributions", () => {
         checksValidated: 0,
       };
     });
-    vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", "1");
-    vi.stubEnv("OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR", "1");
+    vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", "1");
+    vi.stubEnv("CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR", "1");
     const ctx = createDoctorContext();
 
     await contribution.run(ctx);
 
     expect(mocks.collectBundledChannelPackageStateLoadFailures).not.toHaveBeenCalled();
 
-    vi.stubEnv("OPENCLAW_UPDATE_POST_CORE_CONVERGENCE", "1");
+    vi.stubEnv("CARAPACE_UPDATE_POST_CORE_CONVERGENCE", "1");
 
     await contribution.run(ctx);
 
@@ -3726,8 +3726,8 @@ describe("doctor health contributions", () => {
 
     expect(mocks.runDoctorHealthRepairs).toHaveBeenCalledWith(
       expect.objectContaining({
-        cwd: "/tmp/openclaw-workspace",
-        configPath: "/tmp/fake-openclaw.json",
+        cwd: "/tmp/carapace-workspace",
+        configPath: "/tmp/fake-carapace.json",
       }),
       {
         checks: contribution.healthChecks,
@@ -3742,7 +3742,7 @@ describe("doctor health contributions", () => {
 
   it.each([
     ["explicit multi-agent config", undefined, undefined],
-    ["sole-agent config", "default", "/tmp/openclaw-workspace"],
+    ["sole-agent config", "default", "/tmp/carapace-workspace"],
   ])("uses %s workspace scope for metadata and structured health", async (_, soleAgentId, cwd) => {
     mocks.tryResolveSoleAgentId.mockReturnValue(soleAgentId);
     const runWithPluginMetadataSnapshot = vi.fn((_scope: unknown, run: () => unknown) =>
@@ -3794,9 +3794,9 @@ describe("doctor health contributions", () => {
           checkId: "core/doctor/test-structured-findings",
           severity: "warning",
           message: "structured finding needs attention",
-          path: "openclaw.json",
+          path: "carapace.json",
           line: 12,
-          fixHint: "run openclaw doctor --fix",
+          fixHint: "run carapace doctor --fix",
         },
       ],
       remainingFindings: [],
@@ -3822,9 +3822,9 @@ describe("doctor health contributions", () => {
     await contribution.run(ctx);
 
     expect(ctx.runtime.log).toHaveBeenCalledWith(
-      "[warning] core/doctor/test-structured-findings openclaw.json:12 - structured finding needs attention",
+      "[warning] core/doctor/test-structured-findings carapace.json:12 - structured finding needs attention",
     );
-    expect(ctx.runtime.log).toHaveBeenCalledWith("  fix: run openclaw doctor --fix");
+    expect(ctx.runtime.log).toHaveBeenCalledWith("  fix: run carapace doctor --fix");
   });
 
   it("runs structured-only contributions in dry-run mode when doctor is not repairing", async () => {
@@ -3846,7 +3846,7 @@ describe("doctor health contributions", () => {
     await contribution.run(ctx);
 
     expect(mocks.runDoctorHealthRepairs).toHaveBeenCalledWith(
-      expect.objectContaining({ cwd: "/tmp/openclaw-workspace" }),
+      expect.objectContaining({ cwd: "/tmp/carapace-workspace" }),
       {
         checks: contribution.healthChecks,
         dryRun: true,
@@ -4040,7 +4040,7 @@ describe("doctor health contributions", () => {
       expect(writeConfigContribution.healthCheckIds).toEqual(["core/doctor/write-config"]);
       expect(check.defaultEnabled).toBe(false);
 
-      const ctx = createDoctorLintFixture({}, { configPath: "/tmp/fake-openclaw.json" });
+      const ctx = createDoctorLintFixture({}, { configPath: "/tmp/fake-carapace.json" });
 
       await expect(runDoctorLintChecks(ctx, { checks: [check] })).resolves.toMatchObject({
         checksRun: 0,
@@ -4050,7 +4050,7 @@ describe("doctor health contributions", () => {
     });
 
     it("reports Nix immutable config mode when selected", async () => {
-      vi.stubEnv("OPENCLAW_NIX_MODE", "1");
+      vi.stubEnv("CARAPACE_NIX_MODE", "1");
 
       await expect(
         runDoctorLintChecks(
@@ -4058,7 +4058,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/fake-openclaw.json",
+            configPath: "/tmp/fake-carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4068,7 +4068,7 @@ describe("doctor health contributions", () => {
         findings: [
           expect.objectContaining({
             checkId: "core/doctor/write-config",
-            path: "/tmp/fake-openclaw.json",
+            path: "/tmp/fake-carapace.json",
             requirement: "mutable-config-write-path",
           }),
         ],
@@ -4076,7 +4076,7 @@ describe("doctor health contributions", () => {
     });
 
     it("skips a read-only existing config when its directory is writable", async () => {
-      const configPath = "/tmp/openclaw-home/openclaw.json";
+      const configPath = "/tmp/carapace-home/carapace.json";
       vi.spyOn(fs, "existsSync").mockImplementation((path) => path === configPath);
       vi.spyOn(fs, "statSync").mockReturnValue({
         isDirectory: () => true,
@@ -4097,13 +4097,13 @@ describe("doctor health contributions", () => {
         findings: [],
       });
       expect(accessSpy).toHaveBeenCalledWith(
-        "/tmp/openclaw-home",
+        "/tmp/carapace-home",
         fs.constants.W_OK | fs.constants.X_OK,
       );
     });
 
     it("reports an unwritable config directory for an existing config", async () => {
-      const configPath = "/tmp/openclaw-home/openclaw.json";
+      const configPath = "/tmp/carapace-home/carapace.json";
       vi.spyOn(fs, "existsSync").mockImplementation((path) => path === configPath);
       vi.spyOn(fs, "statSync").mockReturnValue({
         isDirectory: () => true,
@@ -4126,7 +4126,7 @@ describe("doctor health contributions", () => {
         findings: [
           expect.objectContaining({
             checkId: "core/doctor/write-config",
-            path: "/tmp/openclaw-home",
+            path: "/tmp/carapace-home",
             target: configPath,
             requirement: "writable-config-directory",
           }),
@@ -4144,7 +4144,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/openclaw-home/openclaw.json",
+            configPath: "/tmp/carapace-home/carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4166,7 +4166,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/openclaw-home/openclaw.json",
+            configPath: "/tmp/carapace-home/carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4175,7 +4175,7 @@ describe("doctor health contributions", () => {
           expect.objectContaining({
             checkId: "core/doctor/write-config",
             path: "/tmp",
-            target: "/tmp/openclaw-home",
+            target: "/tmp/carapace-home",
             requirement: "writable-config-directory",
           }),
         ],
@@ -4196,7 +4196,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/openclaw-home/openclaw.json",
+            configPath: "/tmp/carapace-home/carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4205,7 +4205,7 @@ describe("doctor health contributions", () => {
           expect.objectContaining({
             checkId: "core/doctor/write-config",
             path: "/tmp",
-            target: "/tmp/openclaw-home",
+            target: "/tmp/carapace-home",
             requirement: "writable-config-directory",
           }),
         ],
@@ -4213,7 +4213,7 @@ describe("doctor health contributions", () => {
     });
 
     it("reports an existing file that blocks the config directory path", async () => {
-      vi.spyOn(fs, "existsSync").mockImplementation((path) => path === "/tmp/openclaw-home");
+      vi.spyOn(fs, "existsSync").mockImplementation((path) => path === "/tmp/carapace-home");
       vi.spyOn(fs, "statSync").mockReturnValue({
         isDirectory: () => false,
       } as fs.Stats);
@@ -4225,7 +4225,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/openclaw-home/openclaw.json",
+            configPath: "/tmp/carapace-home/carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4233,8 +4233,8 @@ describe("doctor health contributions", () => {
         findings: [
           expect.objectContaining({
             checkId: "core/doctor/write-config",
-            path: "/tmp/openclaw-home",
-            target: "/tmp/openclaw-home",
+            path: "/tmp/carapace-home",
+            target: "/tmp/carapace-home",
             requirement: "config-directory-path",
           }),
         ],
@@ -4245,7 +4245,7 @@ describe("doctor health contributions", () => {
     it("reports a dangling symlink that blocks the config directory path", async () => {
       vi.spyOn(fs, "existsSync").mockImplementation((path) => path === "/tmp");
       vi.spyOn(fs, "lstatSync").mockImplementation((path) => {
-        if (path === "/tmp/openclaw-home") {
+        if (path === "/tmp/carapace-home") {
           return { isDirectory: () => false } as fs.Stats;
         }
         throw Object.assign(new Error("ENOENT"), { code: "ENOENT" });
@@ -4261,7 +4261,7 @@ describe("doctor health contributions", () => {
             cfg: {},
             mode: "lint" as const,
             runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
-            configPath: "/tmp/openclaw-home/openclaw.json",
+            configPath: "/tmp/carapace-home/carapace.json",
           },
           { checks: [check], onlyIds: ["core/doctor/write-config"] },
         ),
@@ -4269,8 +4269,8 @@ describe("doctor health contributions", () => {
         findings: [
           expect.objectContaining({
             checkId: "core/doctor/write-config",
-            path: "/tmp/openclaw-home",
-            target: "/tmp/openclaw-home",
+            path: "/tmp/carapace-home",
+            target: "/tmp/carapace-home",
             requirement: "config-directory-path",
           }),
         ],
@@ -4378,7 +4378,7 @@ describe("doctor health contributions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const migrated = migrateLegacySecretRefEnvMarkers(legacyConfig);
     expect(migrated.changes).toEqual([
       `Moved models.providers.clawrouter.apiKey ${legacyMarker} marker → structured env SecretRef.`,
@@ -4413,7 +4413,7 @@ describe("doctor health contributions", () => {
   });
 
   it("does not commit deferred cron migration when the config write fails", async () => {
-    const cfg = { agents: { defaults: { models: {} } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { models: {} } } } as CarapaceConfig;
     mocks.replaceConfigFile.mockRejectedValueOnce(new Error("config write failed"));
     const ctx = {
       cfg,
@@ -4424,7 +4424,7 @@ describe("doctor health contributions", () => {
         shouldRepairCronCodexModelRefsAfterConfigWrite: true,
         blockedCodexModelIdentities: ["codex\u0000gpt-5.6-sol"],
       },
-      configPath: "/tmp/fake-openclaw.json",
+      configPath: "/tmp/fake-carapace.json",
       sourceConfigValid: true,
       prompter: buildDoctorPrompter(true),
       runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
@@ -4444,7 +4444,7 @@ describe("doctor health contributions", () => {
   ])(
     "keeps deferred cron migration after the early write ($legacy legacy, $repair repair)",
     async ({ legacy, repair }) => {
-      const cfg = { agents: { defaults: { models: {} } } } as OpenClawConfig;
+      const cfg = { agents: { defaults: { models: {} } } } as CarapaceConfig;
       const retiredModelRefConfig = { agents: { defaults: { model: "openai/retired-model" } } };
       const ctx = {
         cfg,
@@ -4456,7 +4456,7 @@ describe("doctor health contributions", () => {
           retiredModelRefConfig,
           blockedCodexModelIdentities: ["codex\u0000gpt-5.6-sol"],
         },
-        configPath: "/tmp/fake-openclaw.json",
+        configPath: "/tmp/fake-carapace.json",
         sourceConfigValid: true,
         prompter: buildDoctorPrompter(repair),
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() },
@@ -4515,7 +4515,7 @@ describe("doctor health contributions", () => {
     });
 
     function buildWriteConfigCtx(env: Record<string, string | undefined>) {
-      const cfg: OpenClawConfig = { gateway: { mode: "local" } };
+      const cfg: CarapaceConfig = { gateway: { mode: "local" } };
       return createDoctorContext({
         cfg,
         cfgForPersistence: { gateway: { mode: "remote" } },
@@ -4536,29 +4536,29 @@ describe("doctor health contributions", () => {
     it.each([
       {
         name: "legacy update parents",
-        env: { OPENCLAW_UPDATE_IN_PROGRESS: "1" },
+        env: { CARAPACE_UPDATE_IN_PROGRESS: "1" },
         shouldWrite: false,
       },
       { name: "ordinary doctor runs", env: {}, shouldWrite: true },
       {
         name: "current update parents",
         env: {
-          OPENCLAW_UPDATE_IN_PROGRESS: "1",
-          OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+          CARAPACE_UPDATE_IN_PROGRESS: "1",
+          CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
         },
         shouldWrite: true,
       },
       {
         name: "legacy protocol's broad parent opt-in",
         env: {
-          OPENCLAW_UPDATE_IN_PROGRESS: "enabled",
-          OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "supported",
+          CARAPACE_UPDATE_IN_PROGRESS: "enabled",
+          CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "supported",
         },
         shouldWrite: true,
       },
       {
         name: "falsey update env values",
-        env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" },
+        env: { CARAPACE_UPDATE_IN_PROGRESS: "0" },
         shouldWrite: true,
       },
     ])("handles config writes for $name", async ({ env, shouldWrite }) => {
@@ -4576,10 +4576,10 @@ describe("doctor health contributions", () => {
       }
     });
 
-    it("allows config size drops when OPENCLAW_UPDATE_IN_PROGRESS=1", async () => {
+    it("allows config size drops when CARAPACE_UPDATE_IN_PROGRESS=1", async () => {
       const ctx = buildWriteConfigCtx({
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       });
       await writeConfigContribution.run(ctx);
       expect(mocks.replaceConfigFile).toHaveBeenCalledWith(
@@ -4594,8 +4594,8 @@ describe("doctor health contributions", () => {
 
     it("skips plugin schema validation during update doctor writes", async () => {
       const ctx = buildWriteConfigCtx({
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       });
       await writeConfigContribution.run(ctx);
       expect(mocks.replaceConfigFile).toHaveBeenCalledWith(
@@ -4609,8 +4609,8 @@ describe("doctor health contributions", () => {
 
     it("preserves source config version for legacy parent writable update doctor writes", async () => {
       const ctx = buildWriteConfigCtx({
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       });
       ctx.configResult.sourceLastTouchedVersion = "2026.5.16-beta.4";
 
@@ -4627,9 +4627,9 @@ describe("doctor health contributions", () => {
 
     it("does not preserve source config version for explicit deferral update doctors", async () => {
       const ctx = buildWriteConfigCtx({
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       });
       ctx.configResult.sourceLastTouchedVersion = "2026.5.16-beta.4";
 
@@ -4695,14 +4695,14 @@ describe("doctor health contributions", () => {
     it("points update-time config rewrites at the pre-update backup", async () => {
       vi.mocked(fs.existsSync).mockImplementation((value) => String(value).endsWith(".pre-update"));
       const ctx = buildWriteConfigCtx({
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       });
 
       await writeConfigContribution.run(ctx);
 
       expect(ctx.runtime.log).toHaveBeenCalledWith(
-        "Update changed config; pre-update backup: /tmp/fake-openclaw.json.pre-update",
+        "Update changed config; pre-update backup: /tmp/fake-carapace.json.pre-update",
       );
     });
 
@@ -4716,7 +4716,7 @@ describe("doctor health contributions", () => {
           configResult: { cfg: {} },
           shouldRepair: true,
           env: {
-            OPENCLAW_UPDATE_IN_PROGRESS: "1",
+            CARAPACE_UPDATE_IN_PROGRESS: "1",
           },
         }),
       );

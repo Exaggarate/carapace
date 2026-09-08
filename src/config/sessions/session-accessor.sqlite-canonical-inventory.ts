@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import type { Selectable } from "kysely";
 import { iterateSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import {
   deliveryContextFromSession,
   normalizeSessionDeliveryState,
@@ -22,7 +22,7 @@ import { scanCanonicalSqliteSessionEntries } from "./session-canonical-key.js";
 import { projectCanonicalSessionEntryShape } from "./store-entry-shape.js";
 import type { SessionEntry } from "./types.js";
 
-type CanonicalRepairRow = Selectable<OpenClawAgentKyselyDatabase["session_nodes"]> & {
+type CanonicalRepairRow = Selectable<CarapaceAgentKyselyDatabase["session_nodes"]> & {
   current_agent_harness_id: string | null;
   current_chat_type: string | null;
   current_ended_at: number | null;
@@ -146,7 +146,7 @@ function hydrateCanonicalRepairEntry(row: CanonicalRepairRow): SessionEntry {
   return projectSqliteSessionOwner(entry, row);
 }
 
-function canonicalRepairQuery(database: Pick<OpenClawAgentDatabase, "db">) {
+function canonicalRepairQuery(database: Pick<CarapaceAgentDatabase, "db">) {
   const db = getSessionKysely(database.db);
   return db
     .selectFrom("session_nodes")
@@ -184,7 +184,7 @@ function canonicalRepairQuery(database: Pick<OpenClawAgentDatabase, "db">) {
 }
 
 function scanCanonicalSessionFactsFromDatabase(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   selectedKeys?: ReadonlySet<string>,
 ): {
   facts: CanonicalSessionRepairFact[];
@@ -290,7 +290,7 @@ function scanCanonicalSessionFactsFromDatabase(
 }
 
 function loadCanonicalRepairEntriesFromDatabase(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   facts: readonly CanonicalSessionRepairFact[],
 ): Array<SessionEntrySummary & { rawEntryJson?: string }> {
   const current = scanCanonicalSessionFactsFromDatabase(
@@ -324,7 +324,7 @@ export function listCanonicalSessionRepairFacts(
   scope: DoctorSessionScanScope,
 ): CanonicalSessionRepairFact[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => scanCanonicalSessionFactsFromDatabase(database).facts,
     toDatabaseOptions(resolved),
   );
@@ -339,7 +339,7 @@ export function loadCanonicalSessionRepairEntries(
     return [];
   }
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => loadCanonicalRepairEntriesFromDatabase(database, facts),
     toDatabaseOptions(resolved),
   );
@@ -355,7 +355,7 @@ export function scanDoctorSessionEntriesStrict(
   visit: (summary: DoctorSessionEntrySummary) => void,
 ): number {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     let count = 0;
     scanCanonicalSqliteSessionEntries(database, ({ entry, sessionKey }) => {
       if (isInternalSessionEffectsKey(sessionKey)) {
@@ -375,7 +375,7 @@ export function scanDoctorSessionEntriesTolerant(
   visit: (summary: DoctorSessionEntrySummary) => void,
 ): number {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const eligible = new Set(
       scanCanonicalSessionFactsFromDatabase(database).facts.map((fact) => fact.sessionKey),
     );

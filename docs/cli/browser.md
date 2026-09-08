@@ -1,15 +1,15 @@
 ---
-summary: "CLI reference for `openclaw browser` (lifecycle, profiles, tabs, actions, state, and debugging)"
+summary: "CLI reference for `carapace browser` (lifecycle, profiles, tabs, actions, state, and debugging)"
 read_when:
-  - You use `openclaw browser` and want examples for common tasks
+  - You use `carapace browser` and want examples for common tasks
   - You want to control a browser running on another machine via a node host
   - You want to attach to your local signed-in Chrome via Chrome MCP
 title: "Browser"
 ---
 
-# `openclaw browser`
+# `carapace browser`
 
-Manage OpenClaw's browser control surface and run browser actions: lifecycle, profiles, tabs, snapshots, screenshots, navigation, input, state emulation, and debugging.
+Manage Carapace's browser control surface and run browser actions: lifecycle, profiles, tabs, snapshots, screenshots, navigation, input, state emulation, and debugging.
 
 Related: [Browser tool](/tools/browser)
 
@@ -19,20 +19,20 @@ Related: [Browser tool](/tools/browser)
 - `--token <token>`: Gateway token (if required).
 - `--timeout <ms>`: request timeout in ms (default: `30000`).
 - `--expect-final`: wait for a final Gateway response.
-- `--browser-profile <name>`: choose a browser profile (default: `openclaw`, or `browser.defaultProfile`).
+- `--browser-profile <name>`: choose a browser profile (default: `carapace`, or `browser.defaultProfile`).
 - `--json`: machine-readable output (where supported). This is a browser-level option, so
   place it before the subcommand for an unambiguous form, such as
-  `openclaw browser --json status`. Trailing placement such as
-  `openclaw browser status --json` also works when the selected child command does not
+  `carapace browser --json status`. Trailing placement such as
+  `carapace browser status --json` also works when the selected child command does not
   define its own `--json`.
 
 ## Quick start (local)
 
 ```bash
-openclaw browser profiles
-openclaw browser --browser-profile openclaw start
-openclaw browser --browser-profile openclaw open https://example.com
-openclaw browser --browser-profile openclaw snapshot
+carapace browser profiles
+carapace browser --browser-profile carapace start
+carapace browser --browser-profile carapace open https://example.com
+carapace browser --browser-profile carapace snapshot
 ```
 
 Agents can run the same readiness check with `browser({ action: "doctor" })`.
@@ -44,10 +44,10 @@ If `start` fails with `not reachable after start`, troubleshoot CDP readiness fi
 Minimal sequence:
 
 ```bash
-openclaw browser --browser-profile openclaw doctor
-openclaw browser --browser-profile openclaw start
-openclaw browser --browser-profile openclaw tabs
-openclaw browser --browser-profile openclaw open https://example.com
+carapace browser --browser-profile carapace doctor
+carapace browser --browser-profile carapace start
+carapace browser --browser-profile carapace tabs
+carapace browser --browser-profile carapace open https://example.com
 ```
 
 Detailed guidance: [Browser troubleshooting](/tools/browser#cdp-startup-failure-vs-navigation-ssrf-block)
@@ -55,28 +55,28 @@ Detailed guidance: [Browser troubleshooting](/tools/browser#cdp-startup-failure-
 ## Lifecycle
 
 ```bash
-openclaw browser status
-openclaw browser doctor
-openclaw browser doctor --deep
-openclaw browser start
-openclaw browser start --headless
-openclaw browser stop
-openclaw browser --browser-profile openclaw reset-profile
+carapace browser status
+carapace browser doctor
+carapace browser doctor --deep
+carapace browser start
+carapace browser start --headless
+carapace browser stop
+carapace browser --browser-profile carapace reset-profile
 ```
 
 - `doctor --deep` adds a live snapshot probe: useful when basic CDP readiness is green but you want proof the current tab can be inspected.
 - For a running local managed profile, `status` and `doctor` report cached
   graphics diagnostics from Chrome: hardware/software classification, renderer,
   backend, device/driver, feature and disabled-status details, and accelerated
-  video capabilities. `openclaw browser --json status` returns the full structured payload.
+  video capabilities. `carapace browser --json status` returns the full structured payload.
   Passive status never launches Chrome just to collect these facts.
-- `stop` closes the active control session and clears temporary emulation overrides even for `attachOnly` and remote CDP profiles where OpenClaw did not launch the browser process itself. For local managed profiles, `stop` also stops the spawned browser process.
-- `start --headless` applies only to that start request, and only when OpenClaw launches a local managed browser. It does not rewrite `browser.headless` or profile config, and is a no-op for an already-running browser.
-- On Linux hosts without `DISPLAY` or `WAYLAND_DISPLAY`, local managed profiles run headless automatically unless `OPENCLAW_BROWSER_HEADLESS=0`, `browser.headless=false`, or `browser.profiles.<name>.headless=false` explicitly requests a visible browser.
+- `stop` closes the active control session and clears temporary emulation overrides even for `attachOnly` and remote CDP profiles where Carapace did not launch the browser process itself. For local managed profiles, `stop` also stops the spawned browser process.
+- `start --headless` applies only to that start request, and only when Carapace launches a local managed browser. It does not rewrite `browser.headless` or profile config, and is a no-op for an already-running browser.
+- On Linux hosts without `DISPLAY` or `WAYLAND_DISPLAY`, local managed profiles run headless automatically unless `CARAPACE_BROWSER_HEADLESS=0`, `browser.headless=false`, or `browser.profiles.<name>.headless=false` explicitly requests a visible browser.
 
 ## If the command is missing
 
-If `openclaw browser` is an unknown command, check `plugins.allow` in `~/.openclaw/openclaw.json`. When `plugins.allow` is present, list the bundled browser plugin explicitly unless the config already has a root `browser` block:
+If `carapace browser` is an unknown command, check `plugins.allow` in `~/.carapace/carapace.json`. When `plugins.allow` is present, list the bundled browser plugin explicitly unless the config already has a root `browser` block:
 
 ```json5
 {
@@ -94,25 +94,25 @@ Related: [Browser tool](/tools/browser#missing-browser-command-or-tool)
 
 Profiles are named browser routing configs:
 
-- `openclaw` (default): launches or attaches to a dedicated OpenClaw-managed Chrome instance (isolated user data dir).
+- `carapace` (default): launches or attaches to a dedicated Carapace-managed Chrome instance (isolated user data dir).
 - `user`: controls your existing signed-in Chrome session via Chrome DevTools MCP.
 - custom CDP profiles: point at a local or remote CDP endpoint.
 
 ```bash
-openclaw browser profiles
-openclaw browser system-profiles
-openclaw browser system-profiles --browser brave
-openclaw browser import-profile --browser chrome --system Default --into imported
-openclaw browser import-profile --system "Profile 1" --into work --domains google.com,youtube.com
-openclaw browser create-profile --name work --color "#FF5A36"
-openclaw browser create-profile --name chrome-live --driver existing-session
-openclaw browser create-profile --name remote --cdp-url https://browser-host.example.com
-openclaw browser delete-profile --name work
+carapace browser profiles
+carapace browser system-profiles
+carapace browser system-profiles --browser brave
+carapace browser import-profile --browser chrome --system Default --into imported
+carapace browser import-profile --system "Profile 1" --into work --domains google.com,youtube.com
+carapace browser create-profile --name work --color "#FF5A36"
+carapace browser create-profile --name chrome-live --driver existing-session
+carapace browser create-profile --name remote --cdp-url https://browser-host.example.com
+carapace browser delete-profile --name work
 ```
 
-Use a specific profile with `--browser-profile <name>` on any subcommand, for example `openclaw browser --browser-profile work tabs`.
+Use a specific profile with `--browser-profile <name>` on any subcommand, for example `carapace browser --browser-profile work tabs`.
 
-On macOS, `system-profiles` lists real Chrome, Brave, Edge, or Chromium profiles available on the host. `import-profile` decrypts their cookies after one macOS Keychain/Touch ID consent prompt and injects them into a fresh OpenClaw-managed profile. It imports cookies only; local storage and IndexedDB are unchanged. Some Google sessions use device-bound session credentials (DBSC) and can still require re-authentication after import.
+On macOS, `system-profiles` lists real Chrome, Brave, Edge, or Chromium profiles available on the host. `import-profile` decrypts their cookies after one macOS Keychain/Touch ID consent prompt and injects them into a fresh Carapace-managed profile. It imports cookies only; local storage and IndexedDB are unchanged. Some Google sessions use device-bound session credentials (DBSC) and can still require re-authentication after import.
 
 When the macOS app uses a local Gateway, it can offer this import once and make the isolated imported profile the default for agent browsing. Import always requires an explicit click; successful import or dismissal suppresses later automatic prompts, and **Settings → General → Browser login** remains available for re-import.
 
@@ -120,11 +120,11 @@ System-profile import is enabled by default. Set `browser.allowSystemProfileImpo
 
 ### Cookie sync to a remote Gateway
 
-`import-profile` targets a managed profile on the same host. When your OpenClaw Gateway and agent browser run on a separate computer, use `cookie-sync` to decrypt cookies on this Mac and push them into a managed profile on that remote Gateway over the operator connection:
+`import-profile` targets a managed profile on the same host. When your Carapace Gateway and agent browser run on a separate computer, use `cookie-sync` to decrypt cookies on this Mac and push them into a managed profile on that remote Gateway over the operator connection:
 
 ```bash
-openclaw browser cookie-sync --domains github.com,news.ycombinator.com --into work
-openclaw browser --url wss://gateway.example.com cookie-sync --domains github.com --into work --watch
+carapace browser cookie-sync --domains github.com,news.ycombinator.com --into work
+carapace browser --url wss://gateway.example.com cookie-sync --domains github.com --into work --watch
 ```
 
 - `--domains` is required. Cookie sync copies live session cookies, so it never sends an unrestricted cookie jar; a missing or empty allowlist is a hard error.
@@ -138,27 +138,27 @@ The macOS app exposes the same capability under **Dashboard → Settings → Thi
 ## Chrome extension relay
 
 ```bash
-openclaw browser extension path
-openclaw browser extension install
-openclaw browser extension install --no-store
-openclaw browser extension install --json --wait-ms 60000
-openclaw browser extension status
-openclaw browser extension status --json
-openclaw browser extension uninstall-host
-openclaw browser extension uninstall-store
-openclaw browser extension pair
-openclaw browser extension pair --gateway-url wss://gateway.example.com
-openclaw browser extension cdp
-openclaw browser extension cdp --json
+carapace browser extension path
+carapace browser extension install
+carapace browser extension install --no-store
+carapace browser extension install --json --wait-ms 60000
+carapace browser extension status
+carapace browser extension status --json
+carapace browser extension uninstall-host
+carapace browser extension uninstall-store
+carapace browser extension pair
+carapace browser extension pair --gateway-url wss://gateway.example.com
+carapace browser extension cdp
+carapace browser extension cdp --json
 ```
 
 - `extension install` pre-registers the origin-locked native bootstrap host in
   existing Chrome-family user-data roots. On macOS, it then requests the official
   Store installation in Google Chrome for all profiles in its user-data directory.
   Chrome discovers this at startup; fully quit and reopen Chrome when convenient,
-  then approve or enable OpenClaw. The command never restarts Chrome or bypasses
+  then approve or enable Carapace. The command never restarts Chrome or bypasses
   approval. For other browsers and platforms,
-  [add OpenClaw from the Chrome Web Store](https://chromewebstore.google.com/detail/openclaw/kcdjddhmeafeomebliikmbpblkmkfoig).
+  [add Carapace from the Chrome Web Store](https://chromewebstore.google.com/detail/carapace/kcdjddhmeafeomebliikmbpblkmkfoig).
   Linux supports automatic native pairing; Windows retains manual pairing.
 - `extension install --no-store` copies the stable development extension and
   registers the native host without creating a Store request. Existing requests
@@ -168,9 +168,9 @@ openclaw browser extension cdp --json
   fields (`enabled`, `awaitingApproval`), approved unpacked IDs and paths, and
   native-host registration health. Local installation status does not prove a
   live relay connection. JSON output never includes a pairing string or relay key.
-- `extension uninstall-host` removes only verified OpenClaw-owned native-host
+- `extension uninstall-host` removes only verified Carapace-owned native-host
   manifests and launchers. It does not remove the extension from Chrome.
-- `extension uninstall-store` removes only OpenClaw-owned macOS Chrome Store
+- `extension uninstall-store` removes only Carapace-owned macOS Chrome Store
   requests. Chrome may remove an externally installed extension at its next
   startup. Native-host registration and the development copy remain intact.
 - `extension path` is read-only. It prints the stable installed copy when
@@ -184,9 +184,9 @@ openclaw browser extension cdp --json
 
 Automatic local bootstrap connects through the local Gateway's exact
 `/browser/extension` route so the first authenticated extension connection
-starts the lazy browser-control service. Keep `openclaw gateway run` or the
+starts the lazy browser-control service. Keep `carapace gateway run` or the
 managed Gateway service running; no separate browser request or prewarm is
-needed. Local OpenClaw and mcporter calls still use the profile relay port
+needed. Local Carapace and mcporter calls still use the profile relay port
 reported by `extension pair` or `extension cdp` after that wakeup. Browser-node
 pairings continue to use the relay on the browser-node host, while explicit
 `--gateway-url` pairings remain direct-remote and manual-only.
@@ -196,9 +196,9 @@ the host-local `/extension` relay URL. With the native host installed,
 **Automatic local setup** enabled, and an extension build that supports relay
 wake-up, reconnecting can start a standalone relay on the saved pairing's
 configured port. This does not start Gateway browser control: authenticated CDP
-clients can use the standalone relay without a Gateway, but `openclaw browser`
+clients can use the standalone relay without a Gateway, but `carapace browser`
 actions still require one. For source-checkout testing, load the managed unpacked
-copy from the same OpenClaw installation.
+copy from the same Carapace installation.
 
 `extension cdp --legacy-bearer` is a temporary migration escape hatch. It
 prints the old Bearer header with a warning only while
@@ -221,36 +221,36 @@ retries alone cannot recover that existing process.
 ## Tabs
 
 ```bash
-openclaw browser tabs
-openclaw browser tab new --label docs
-openclaw browser tab label t1 docs
-openclaw browser tab select 2
-openclaw browser tab close 2
-openclaw browser open https://docs.openclaw.ai --label docs
-openclaw browser focus docs
-openclaw browser close t1
+carapace browser tabs
+carapace browser tab new --label docs
+carapace browser tab label t1 docs
+carapace browser tab select 2
+carapace browser tab close 2
+carapace browser open https://github.com/Exaggarate/carapace --label docs
+carapace browser focus docs
+carapace browser close t1
 ```
 
 `tabs` returns `suggestedTargetId` first, then the stable `tabId` (such as `t1`), the optional label, and the raw `targetId`. Pass `suggestedTargetId` back into `focus`, `close`, snapshots, and actions. Assign a label with `open --label`, `tab new --label`, or `tab label`; labels, tab ids, raw target ids, and unique target-id prefixes are all accepted. The request field is still named `targetId` for compatibility, but it accepts any of these tab references.
 
-Raw target ids are volatile diagnostic handles, not durable agent memory: when Chromium replaces the underlying raw target during a navigation or form submit, OpenClaw keeps the stable `tabId`/label attached to the replacement tab when it can prove the match. Prefer `suggestedTargetId`.
+Raw target ids are volatile diagnostic handles, not durable agent memory: when Chromium replaces the underlying raw target during a navigation or form submit, Carapace keeps the stable `tabId`/label attached to the replacement tab when it can prove the match. Prefer `suggestedTargetId`.
 
 ## Snapshot / screenshot / actions
 
 Snapshot:
 
 ```bash
-openclaw browser snapshot
-openclaw browser snapshot --urls
+carapace browser snapshot
+carapace browser snapshot --urls
 ```
 
 Screenshot:
 
 ```bash
-openclaw browser screenshot
-openclaw browser screenshot --full-page
-openclaw browser screenshot --ref e12
-openclaw browser screenshot --labels
+carapace browser screenshot
+carapace browser screenshot --full-page
+carapace browser screenshot --ref e12
+carapace browser screenshot --labels
 ```
 
 - `--full-page` is for page captures only; it cannot be combined with `--ref` or `--element`.
@@ -262,98 +262,98 @@ openclaw browser screenshot --labels
 Navigate/click/type (ref-based UI automation):
 
 ```bash
-openclaw browser navigate https://example.com
-openclaw browser click <ref>
-openclaw browser click-coords 120 340
-openclaw browser type <ref> "hello"
-openclaw browser press Enter
-openclaw browser hover <ref>
-openclaw browser scrollintoview <ref>
-openclaw browser drag <startRef> <endRef>
-openclaw browser select <ref> OptionA OptionB
-openclaw browser fill --fields '[{"ref":"1","value":"Ada"}]'
-openclaw browser wait --text "Done"
-openclaw browser evaluate --fn '(el) => el.textContent' --ref <ref>
-openclaw browser evaluate --fn 'const title = document.title; return title;'
-openclaw browser evaluate --timeout-ms 30000 --fn 'async () => { await window.ready; return true; }'
+carapace browser navigate https://example.com
+carapace browser click <ref>
+carapace browser click-coords 120 340
+carapace browser type <ref> "hello"
+carapace browser press Enter
+carapace browser hover <ref>
+carapace browser scrollintoview <ref>
+carapace browser drag <startRef> <endRef>
+carapace browser select <ref> OptionA OptionB
+carapace browser fill --fields '[{"ref":"1","value":"Ada"}]'
+carapace browser wait --text "Done"
+carapace browser evaluate --fn '(el) => el.textContent' --ref <ref>
+carapace browser evaluate --fn 'const title = document.title; return title;'
+carapace browser evaluate --timeout-ms 30000 --fn 'async () => { await window.ready; return true; }'
 ```
 
 `press` accepts named keys and shortcuts such as `Escape`, `Control+Shift+T`, and `Control++`; common `Esc`, `Return`, `Del`, `Ctrl`, and `Cmd` aliases are normalized.
 
-For managed browser profiles, `select` preserves option values exactly. Quote empty or whitespace-sensitive values, such as `openclaw browser select <ref> ""` or `openclaw browser select <ref> " padded "`.
+For managed browser profiles, `select` preserves option values exactly. Quote empty or whitespace-sensitive values, such as `carapace browser select <ref> ""` or `carapace browser select <ref> " padded "`.
 
 `evaluate --fn` accepts a function source, an expression, or a statement body. Statement bodies are wrapped as async functions, so use `return` for the value you want back. Use `--timeout-ms` when the page-side function may need longer than the default evaluate timeout. `browser.evaluateEnabled=false` (default: `true`) disables both `evaluate` and `wait --fn`.
 
-Action responses return the current raw `targetId` after action-triggered page replacement when OpenClaw can prove the replacement tab. Scripts should still store and pass `suggestedTargetId`/labels for long-lived workflows.
+Action responses return the current raw `targetId` after action-triggered page replacement when Carapace can prove the replacement tab. Scripts should still store and pass `suggestedTargetId`/labels for long-lived workflows.
 
 File + dialog helpers:
 
 ```bash
-openclaw browser upload /tmp/openclaw/uploads/file.pdf --ref <ref>
-openclaw browser upload media://inbound/file.pdf --ref <ref>
-openclaw browser waitfordownload
-openclaw browser download <ref> report.pdf
-openclaw browser dialog --accept
-openclaw browser dialog --dismiss --dialog-id d1
+carapace browser upload /tmp/carapace/uploads/file.pdf --ref <ref>
+carapace browser upload media://inbound/file.pdf --ref <ref>
+carapace browser waitfordownload
+carapace browser download <ref> report.pdf
+carapace browser dialog --accept
+carapace browser dialog --dismiss --dialog-id d1
 ```
 
-Managed Chrome profiles save ordinary click-triggered downloads into the OpenClaw downloads directory (`/tmp/openclaw/downloads` by default, or the configured temp root). Use `waitfordownload` or `download` when the agent needs to wait for a specific file and return its path; those explicit waiters own the next download. Uploads accept files from the OpenClaw temp uploads root and OpenClaw-managed inbound media, including `media://inbound/<id>` and sandbox-relative `media/inbound/<id>` references. Nested media refs, traversal, and arbitrary local paths are rejected.
+Managed Chrome profiles save ordinary click-triggered downloads into the Carapace downloads directory (`/tmp/carapace/downloads` by default, or the configured temp root). Use `waitfordownload` or `download` when the agent needs to wait for a specific file and return its path; those explicit waiters own the next download. Uploads accept files from the Carapace temp uploads root and Carapace-managed inbound media, including `media://inbound/<id>` and sandbox-relative `media/inbound/<id>` references. Nested media refs, traversal, and arbitrary local paths are rejected.
 
-If saving a download fails, OpenClaw requests cancellation of the transfer and reports the original save error. Correct the output path or filesystem problem before starting a new download.
+If saving a download fails, Carapace requests cancellation of the transfer and reports the original save error. Correct the output path or filesystem problem before starting a new download.
 
-When an action opens a modal dialog, the action response returns `blockedByDialog` with `browserState.dialogs.pending`; pass `--dialog-id` to answer it directly. Dialogs handled outside OpenClaw appear under `browserState.dialogs.recent`.
+When an action opens a modal dialog, the action response returns `blockedByDialog` with `browserState.dialogs.pending`; pass `--dialog-id` to answer it directly. Dialogs handled outside Carapace appear under `browserState.dialogs.recent`.
 
 Batch actions:
 
 ```bash
-openclaw browser batch --actions '[{"kind":"wait","timeMs":500},{"kind":"click","ref":"12"},{"kind":"type","ref":"23","text":"hello"}]'
-openclaw browser batch --actions-file plan.json
-openclaw browser batch --actions-file - --continue
+carapace browser batch --actions '[{"kind":"wait","timeMs":500},{"kind":"click","ref":"12"},{"kind":"type","ref":"23","text":"hello"}]'
+carapace browser batch --actions-file plan.json
+carapace browser batch --actions-file - --continue
 ```
 
-`openclaw browser batch` sends a `kind="batch"` `/act` request with nested `BrowserActRequest` actions (`wait`, `click`, `type`, `evaluate`, ...) — not `open`/`navigate`/`snapshot`/`screenshot`, which are CLI subcommands, not `/act` kinds. `--continue` sets `stopOnError=false` (default stops on first error); `--target-id` scopes the whole batch to one tab. A failed nested action makes the command exit nonzero; use `--json` to retain the ordered `results` response. See [Browser batch CLI](/tools/browser-control#browser-batch-cli) for the full contract (ref lifecycle, target id conflicts, error summary). `batch` is not supported on `profile="user"` / existing-session profiles.
+`carapace browser batch` sends a `kind="batch"` `/act` request with nested `BrowserActRequest` actions (`wait`, `click`, `type`, `evaluate`, ...) — not `open`/`navigate`/`snapshot`/`screenshot`, which are CLI subcommands, not `/act` kinds. `--continue` sets `stopOnError=false` (default stops on first error); `--target-id` scopes the whole batch to one tab. A failed nested action makes the command exit nonzero; use `--json` to retain the ordered `results` response. See [Browser batch CLI](/tools/browser-control#browser-batch-cli) for the full contract (ref lifecycle, target id conflicts, error summary). `batch` is not supported on `profile="user"` / existing-session profiles.
 
-`--actions-file` and `--actions-file -` stdin input are capped at 1,000,000 bytes. Split larger plans into multiple `openclaw browser batch` commands.
+`--actions-file` and `--actions-file -` stdin input are capped at 1,000,000 bytes. Split larger plans into multiple `carapace browser batch` commands.
 
 ## State and storage
 
 Viewport + emulation:
 
 ```bash
-openclaw browser resize 1280 720
-openclaw browser set viewport 1280 720
-openclaw browser set offline on
-openclaw browser set media dark
-openclaw browser set timezone Europe/London
-openclaw browser set locale en-GB
-openclaw browser set geo 51.5074 -0.1278 --accuracy 25
-openclaw browser set device "iPhone 14"
-openclaw browser set headers '{"x-test":"1"}'
-openclaw browser set credentials myuser mypass
+carapace browser resize 1280 720
+carapace browser set viewport 1280 720
+carapace browser set offline on
+carapace browser set media dark
+carapace browser set timezone Europe/London
+carapace browser set locale en-GB
+carapace browser set geo 51.5074 -0.1278 --accuracy 25
+carapace browser set device "iPhone 14"
+carapace browser set headers '{"x-test":"1"}'
+carapace browser set credentials myuser mypass
 ```
 
 Cookies + storage:
 
 ```bash
-openclaw browser cookies
-openclaw browser cookies set session abc123 --url https://example.com
-openclaw browser cookies clear
-openclaw browser storage local get
-openclaw browser storage local set token abc123
-openclaw browser storage session clear
+carapace browser cookies
+carapace browser cookies set session abc123 --url https://example.com
+carapace browser cookies clear
+carapace browser storage local get
+carapace browser storage local set token abc123
+carapace browser storage session clear
 ```
 
 ## Debugging
 
 ```bash
-openclaw browser console --level error
-openclaw browser pdf
-openclaw browser responsebody "**/api"
-openclaw browser highlight <ref>
-openclaw browser errors --clear
-openclaw browser requests --filter api
-openclaw browser trace start
-openclaw browser trace stop --out trace.zip
+carapace browser console --level error
+carapace browser pdf
+carapace browser responsebody "**/api"
+carapace browser highlight <ref>
+carapace browser errors --clear
+carapace browser requests --filter api
+carapace browser trace start
+carapace browser trace stop --out trace.zip
 ```
 
 ## Existing Chrome via MCP
@@ -361,11 +361,11 @@ openclaw browser trace stop --out trace.zip
 Use the built-in `user` profile, or create your own `existing-session` profile:
 
 ```bash
-openclaw browser --browser-profile user tabs
-openclaw browser create-profile --name chrome-live --driver existing-session
-openclaw browser create-profile --name brave-live --driver existing-session --user-data-dir "~/Library/Application Support/BraveSoftware/Brave-Browser"
-openclaw browser create-profile --name chrome-port --driver existing-session --cdp-url http://127.0.0.1:9222
-openclaw browser --browser-profile chrome-live tabs
+carapace browser --browser-profile user tabs
+carapace browser create-profile --name chrome-live --driver existing-session
+carapace browser create-profile --name brave-live --driver existing-session --user-data-dir "~/Library/Application Support/BraveSoftware/Brave-Browser"
+carapace browser create-profile --name chrome-port --driver existing-session --cdp-url http://127.0.0.1:9222
+carapace browser --browser-profile chrome-live tabs
 ```
 
 The default existing-session path is host-only Chrome MCP auto-connect. If the browser is already running with a DevTools endpoint, pass `--cdp-url` so Chrome MCP attaches to that endpoint instead. For Docker, Browserless, or other remote setups where Chrome MCP semantics are not needed, use a CDP profile instead.

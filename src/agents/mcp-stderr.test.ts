@@ -4,7 +4,7 @@ import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { disposeMcpClient } from "./mcp-client-lifecycle.js";
-import { OpenClawStdioClientTransport } from "./mcp-stdio-transport.js";
+import { CarapaceStdioClientTransport } from "./mcp-stdio-transport.js";
 import { resolveMcpTransport } from "./mcp-transport.js";
 
 const { logDebug } = vi.hoisted(() => ({ logDebug: vi.fn() }));
@@ -12,7 +12,7 @@ vi.mock("../logger.js", () => ({ logDebug }));
 
 function createStderrProbe(args?: string[]) {
   const resolved = resolveMcpTransport("probe", { command: process.execPath, args });
-  if (!resolved || !(resolved.transport instanceof OpenClawStdioClientTransport)) {
+  if (!resolved || !(resolved.transport instanceof CarapaceStdioClientTransport)) {
     throw new Error("Expected a stdio transport");
   }
   const stderr = resolved.transport.stderr;

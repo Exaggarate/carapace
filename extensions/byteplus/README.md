@@ -1,17 +1,17 @@
-# OpenClaw BytePlus Provider
+# Carapace BytePlus Provider
 
-Official OpenClaw provider plugin for BytePlus model inference and Seedance
+Official Carapace provider plugin for BytePlus model inference and Seedance
 video generation.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/byteplus-provider
-openclaw gateway restart
+carapace plugins install @carapace/byteplus-provider
+carapace gateway restart
 ```
 
 Set `BYTEPLUS_API_KEY`, then select a `byteplus/*` or `byteplus-plan/*` model.
 
-See <https://docs.openclaw.ai/concepts/model-providers#byteplus-international>
-for model setup and <https://docs.openclaw.ai/tools/video-generation> for
+See <../../docs/concepts/model-providers.md#byteplus-international>
+for model setup and <../../docs/tools/video-generation.md> for
 Seedance video generation.

@@ -2,11 +2,11 @@
  * Brave Search request normalization and result mapping. It validates Brave
  * country/language params and converts LLM-context responses into web results.
  */
-import { resolveSiteName } from "openclaw/plugin-sdk/provider-web-search";
+import { resolveSiteName } from "carapace/plugin-sdk/provider-web-search";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 type BraveConfig = {
   baseUrl?: unknown;
@@ -14,7 +14,7 @@ type BraveConfig = {
 };
 
 type BraveLlmContextResult = { url: string; title: string; snippets: string[] };
-/** Brave LLM Context API response subset used by OpenClaw. */
+/** Brave LLM Context API response subset used by Carapace. */
 export type BraveLlmContextResponse = {
   grounding: { generic?: BraveLlmContextResult[] };
   sources?: Record<string, { age?: string[] }>;

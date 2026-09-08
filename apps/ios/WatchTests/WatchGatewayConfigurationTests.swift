@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClawWatchApp
+@testable import CarapaceWatchApp
 
 struct WatchGatewayConfigurationTests {
     @Test func `direct Watch setup retains the endpoint prefix across credential handoff`() throws {

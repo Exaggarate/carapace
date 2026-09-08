@@ -1,7 +1,7 @@
 import { inject, TestRunner, type SerializedConfig } from "vitest";
 import { finishVitestWorkerProfile } from "./vitest-profiler.mts";
 
-const originalRunner = inject("openclawVitestProfileRunner");
+const originalRunner = inject("carapaceVitestProfileRunner");
 const BaseRunner: typeof TestRunner = originalRunner
   ? (await import(originalRunner)).default
   : TestRunner;

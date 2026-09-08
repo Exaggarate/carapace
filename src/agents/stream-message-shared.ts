@@ -3,7 +3,7 @@
  *
  * Centralizes zero-cost usage records and assistant message construction for simple stream transports.
  */
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import type { AssistantMessage, StopReason, Usage } from "../llm/types.js";
 
 type StreamModelDescriptor = {

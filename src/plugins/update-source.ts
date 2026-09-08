@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { ClawHubTrustErrorCode } from "../infra/clawhub-install-trust.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
@@ -71,7 +71,7 @@ export type PluginUpdateOutcome =
     });
 
 export type PluginUpdateSummary = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changed: boolean;
   outcomes: PluginUpdateOutcome[];
 };
@@ -278,7 +278,7 @@ export async function resolveTrustedOfficialPrereleaseFallbackMetadataForUpdate(
   const parsedSpec = parseRegistryNpmSpec(params.spec);
   if (
     !parsedSpec ||
-    !parsedSpec.name.startsWith("@openclaw/") ||
+    !parsedSpec.name.startsWith("@carapace/") ||
     !params.metadata.version ||
     isPrereleaseResolutionAllowed({
       spec: parsedSpec,
@@ -324,7 +324,7 @@ export async function resolveTrustedOfficialPrereleaseFallbackMetadataForUpdate(
 
 export function isNpmMetadataCompatibleWithCurrentHost(metadata: NpmSpecResolution): boolean {
   const hostVersion = resolveCompatibilityHostVersion();
-  const installMetadata = metadata.packageOpenClaw?.install;
+  const installMetadata = metadata.packageCarapace?.install;
   const minHostVersionCheck = checkMinHostVersion({
     currentVersion: hostVersion,
     minHostVersion: isRecord(installMetadata) ? installMetadata.minHostVersion : undefined,
@@ -332,7 +332,7 @@ export function isNpmMetadataCompatibleWithCurrentHost(metadata: NpmSpecResoluti
   if (!minHostVersionCheck.ok) {
     return false;
   }
-  const pluginApiRangeCheck = resolvePackagePluginApiRange(metadata.packageOpenClaw);
+  const pluginApiRangeCheck = resolvePackagePluginApiRange(metadata.packageCarapace);
   if (!pluginApiRangeCheck.ok) {
     return false;
   }

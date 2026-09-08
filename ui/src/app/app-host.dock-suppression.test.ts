@@ -27,7 +27,7 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw shell dock suppression", () => {
+describe("Carapace shell dock suppression", () => {
   it("applies route ownership to shell panels without session-gating desktop", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal(
@@ -49,7 +49,7 @@ describe("OpenClaw shell dock suppression", () => {
               methods: [
                 "terminal.open",
                 "browser.request",
-                "openclaw.chat",
+                "carapace.chat",
                 "desktop.observe",
                 "chat.history",
                 "chat.send",
@@ -122,13 +122,13 @@ describe("OpenClaw shell dock suppression", () => {
       theme: { mode: "dark", settings: loadSettings() },
       preload: vi.fn(),
     } as unknown as ApplicationContext;
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellRenderState;
+    const shell = document.createElement("carapace-app-shell") as unknown as ShellRenderState;
     shell.runtime = { context, router: {} } as unknown as ApplicationRuntime;
     shell.activeSessionKey = "agent:main:main";
     const container = document.createElement("div");
     const desktopAvailable = () =>
       (
-        container.querySelector("openclaw-desktop-panel") as
+        container.querySelector("carapace-desktop-panel") as
           | (HTMLElement & {
               available: boolean;
             })
@@ -138,26 +138,26 @@ describe("OpenClaw shell dock suppression", () => {
     shell.routeState = { routeId: "appearance" };
     renderLit(shell.render(), container);
     expect(
-      container.querySelector<HTMLElement & { pageRouteId: RouteId }>("openclaw-assistant-panel")
+      container.querySelector<HTMLElement & { pageRouteId: RouteId }>("carapace-assistant-panel")
         ?.pageRouteId,
     ).toBe("appearance");
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("carapace-terminal-panel") as HTMLElement & {
           agentId: string | null;
         }
       ).agentId,
     ).toBe("research");
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("carapace-terminal-panel") as HTMLElement & {
           suppressed: boolean;
         }
       ).suppressed,
     ).toBe(true);
     expect(
       (
-        container.querySelector("openclaw-assistant-panel") as HTMLElement & {
+        container.querySelector("carapace-assistant-panel") as HTMLElement & {
           custodianSuppressed: boolean;
         }
       ).custodianSuppressed,
@@ -167,7 +167,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       (
-        container.querySelector("openclaw-assistant-panel") as HTMLElement & {
+        container.querySelector("carapace-assistant-panel") as HTMLElement & {
           custodianSuppressed: boolean;
         }
       ).custodianSuppressed,
@@ -176,18 +176,18 @@ describe("OpenClaw shell dock suppression", () => {
     shell.routeState = { routeId: "chat" };
     renderLit(shell.render(), container);
     expect(
-      container.querySelector<HTMLElement & { pageRouteId: RouteId }>("openclaw-assistant-panel")
+      container.querySelector<HTMLElement & { pageRouteId: RouteId }>("carapace-assistant-panel")
         ?.pageRouteId,
     ).toBe("chat");
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("carapace-terminal-panel") as HTMLElement & {
           sessionKey: string | null;
         }
       ).sessionKey,
     ).toBe("agent:main:main");
-    expect(container.querySelector("openclaw-browser-panel")).toBeNull();
-    expect(container.querySelector("openclaw-desktop-panel")).toBeNull();
+    expect(container.querySelector("carapace-browser-panel")).toBeNull();
+    expect(container.querySelector("carapace-desktop-panel")).toBeNull();
 
     const failedLocation = { pathname: "/chat/main/missing", search: "", hash: "" };
     shell.routeState = selectShellRouteState({
@@ -204,7 +204,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       container.querySelector<HTMLElement & { pageRouteFailed: boolean }>(
-        "openclaw-assistant-panel",
+        "carapace-assistant-panel",
       )?.pageRouteFailed,
     ).toBe(true);
 
@@ -215,7 +215,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("carapace-terminal-panel") as HTMLElement & {
           agentId: string | null;
         }
       ).agentId,
@@ -228,7 +228,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("carapace-terminal-panel") as HTMLElement & {
           agentId: string | null;
         }
       ).agentId,
@@ -255,7 +255,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(desktopAvailable()).toBe(true);
 
-    // Collapsed-nav fallback: the Ask OpenClaw toggle joins the chrome strip
+    // Collapsed-nav fallback: the Ask Carapace toggle joins the chrome strip
     // only while the sidebar (its footer home) is hidden, and stays admin-gated.
     expect(container.querySelector(".shell-chrome-controls__custodian")).toBeNull();
     context.navigation.snapshot.navCollapsed = true;

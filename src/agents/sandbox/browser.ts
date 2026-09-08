@@ -7,7 +7,7 @@ import crypto from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { deriveDefaultBrowserCdpPortRange } from "../../config/port-defaults.js";
 import { withContainerEnvFile } from "../../infra/container-env-file.js";
 import { isSameSsrFPolicy, type SsrFPolicy } from "../../infra/net/ssrf.js";
@@ -15,8 +15,8 @@ import { startBrowserBridgeServer } from "../../plugin-sdk/browser-bridge.js";
 import {
   DEFAULT_BROWSER_ACTION_TIMEOUT_MS,
   DEFAULT_BROWSER_EVALUATE_ENABLED,
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_CARAPACE_BROWSER_COLOR,
+  DEFAULT_CARAPACE_BROWSER_PROFILE_NAME,
   resolveProfile,
   type ResolvedBrowserConfig,
 } from "../../plugin-sdk/browser-profiles.js";
@@ -70,19 +70,19 @@ import {
 } from "./workspace-mounts.js";
 
 const HOT_BROWSER_WINDOW_MS = 5 * 60 * 1000;
-const CDP_SOURCE_RANGE_ENV_KEY = "OPENCLAW_BROWSER_CDP_SOURCE_RANGE";
-const CDP_AUTH_TOKEN_ENV_KEY = "OPENCLAW_BROWSER_CDP_AUTH_TOKEN";
-const SANDBOX_BROWSER_IMAGE_CONTRACT_LABEL = "org.openclaw.sandbox-browser.contract";
+const CDP_SOURCE_RANGE_ENV_KEY = "CARAPACE_BROWSER_CDP_SOURCE_RANGE";
+const CDP_AUTH_TOKEN_ENV_KEY = "CARAPACE_BROWSER_CDP_AUTH_TOKEN";
+const SANDBOX_BROWSER_IMAGE_CONTRACT_LABEL = "org.carapace.sandbox-browser.contract";
 const browserContainerLifecycleQueue = new KeyedAsyncQueue();
 const browserNetworkLifecycleQueue = new KeyedAsyncQueue();
 
 function buildSandboxCdpAuthHeader(token: string): string {
-  return `Basic ${Buffer.from(`openclaw:${token}`).toString("base64")}`;
+  return `Basic ${Buffer.from(`carapace:${token}`).toString("base64")}`;
 }
 
 function buildSandboxCdpUrl(params: { cdpPort: number; authToken: string }): string {
   const url = new URL(`http://127.0.0.1:${params.cdpPort}`);
-  url.username = "openclaw";
+  url.username = "carapace";
   url.password = params.authToken;
   return url.toString().replace(/\/$/, "");
 }
@@ -150,12 +150,12 @@ function buildSandboxBrowserResolvedConfig(params: {
     localLaunchTimeoutMs: 15_000,
     localCdpReadyTimeoutMs: 8_000,
     actionTimeoutMs: DEFAULT_BROWSER_ACTION_TIMEOUT_MS,
-    color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+    color: DEFAULT_CARAPACE_BROWSER_COLOR,
     executablePath: undefined,
     headless: params.headless,
     noSandbox: false,
     attachOnly: true,
-    defaultProfile: DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+    defaultProfile: DEFAULT_CARAPACE_BROWSER_PROFILE_NAME,
     extraArgs: [],
     tabCleanup: {
       enabled: true,
@@ -164,13 +164,13 @@ function buildSandboxBrowserResolvedConfig(params: {
       sweepMinutes: 5,
     },
     profiles: {
-      [DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]: {
+      [DEFAULT_CARAPACE_BROWSER_PROFILE_NAME]: {
         cdpPort: params.cdpPort,
         cdpUrl: buildSandboxCdpUrl({
           cdpPort: params.cdpPort,
           authToken: params.cdpAuthToken,
         }),
-        color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+        color: DEFAULT_CARAPACE_BROWSER_COLOR,
       },
     },
     ssrfPolicy: params.ssrfPolicy,
@@ -340,7 +340,7 @@ async function ensureSandboxBrowserContainer(
   if (hasContainer) {
     const registry = await readBrowserRegistry();
     const registryEntry = registry.entries.find((entry) => entry.containerName === containerName);
-    currentHash = await readDockerContainerLabel(containerName, "openclaw.configHash");
+    currentHash = await readDockerContainerLabel(containerName, "carapace.configHash");
     hashMismatch = !currentHash || currentHash !== expectedHash;
     if (!currentHash) {
       currentHash = registryEntry?.configHash ?? null;
@@ -353,13 +353,13 @@ async function ensureSandboxBrowserContainer(
       if (isHot) {
         const hint = (() => {
           if (params.cfg.scope === "session") {
-            return `openclaw sandbox recreate --browser --session ${params.scopeKey}`;
+            return `carapace sandbox recreate --browser --session ${params.scopeKey}`;
           }
           if (params.cfg.scope === "agent") {
             const agentId = resolveSandboxAgentId(params.scopeKey) ?? "main";
-            return `openclaw sandbox recreate --browser --agent ${agentId}`;
+            return `carapace sandbox recreate --browser --agent ${agentId}`;
           }
-          return "openclaw sandbox recreate --browser --all";
+          return "carapace sandbox recreate --browser --all";
         })();
         defaultRuntime.log(
           `Sandbox browser config changed for ${containerName} (recently used). Recreate to apply: ${hint}`,
@@ -387,8 +387,8 @@ async function ensureSandboxBrowserContainer(
       cfg: browserDockerCfg,
       scopeKey: params.scopeKey,
       labels: {
-        "openclaw.sandboxBrowser": "1",
-        "openclaw.browserConfigEpoch": SANDBOX_BROWSER_SECURITY_HASH_EPOCH,
+        "carapace.sandboxBrowser": "1",
+        "carapace.browserConfigEpoch": SANDBOX_BROWSER_SECURITY_HASH_EPOCH,
       },
       configHash: expectedHash,
       includeBinds: false,
@@ -432,14 +432,14 @@ async function ensureSandboxBrowserContainer(
       args.push("-p", `127.0.0.1::${params.cfg.browser.noVncPort}`);
     }
     Object.assign(env, {
-      OPENCLAW_BROWSER_HEADLESS: params.cfg.browser.headless ? "1" : "0",
-      OPENCLAW_BROWSER_ENABLE_NOVNC: params.cfg.browser.noVncEnabled ? "1" : "0",
-      OPENCLAW_BROWSER_CDP_PORT: String(params.cfg.browser.cdpPort),
+      CARAPACE_BROWSER_HEADLESS: params.cfg.browser.headless ? "1" : "0",
+      CARAPACE_BROWSER_ENABLE_NOVNC: params.cfg.browser.noVncEnabled ? "1" : "0",
+      CARAPACE_BROWSER_CDP_PORT: String(params.cfg.browser.cdpPort),
       [CDP_AUTH_TOKEN_ENV_KEY]: cdpAuthToken,
-      OPENCLAW_BROWSER_AUTO_START_TIMEOUT_MS: String(params.cfg.browser.autoStartTimeoutMs),
-      OPENCLAW_BROWSER_VNC_PORT: String(params.cfg.browser.vncPort),
-      OPENCLAW_BROWSER_NOVNC_PORT: String(params.cfg.browser.noVncPort),
-      OPENCLAW_BROWSER_NO_SANDBOX: "1",
+      CARAPACE_BROWSER_AUTO_START_TIMEOUT_MS: String(params.cfg.browser.autoStartTimeoutMs),
+      CARAPACE_BROWSER_VNC_PORT: String(params.cfg.browser.vncPort),
+      CARAPACE_BROWSER_NOVNC_PORT: String(params.cfg.browser.noVncPort),
+      CARAPACE_BROWSER_NO_SANDBOX: "1",
     });
     if (cdpSourceRange) {
       env[CDP_SOURCE_RANGE_ENV_KEY] = cdpSourceRange;
@@ -474,7 +474,7 @@ async function ensureSandboxBrowserContainer(
   }
 
   const existingProfile = existing
-    ? resolveProfile(existing.bridge.state.resolved, DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME)
+    ? resolveProfile(existing.bridge.state.resolved, DEFAULT_CARAPACE_BROWSER_PROFILE_NAME)
     : null;
   const desiredEvaluateEnabled = params.evaluateEnabled ?? DEFAULT_BROWSER_EVALUATE_ENABLED;
 

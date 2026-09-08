@@ -1,6 +1,6 @@
 // Msteams plugin module implements conversation store state behavior.
 import crypto from "node:crypto";
-import { parseDateStringTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+import { parseDateStringTimestampMs } from "carapace/plugin-sdk/number-runtime";
 import {
   findPreferredDmConversationByUserId,
   mergeStoredConversationReference,

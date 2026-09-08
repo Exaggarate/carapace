@@ -8,10 +8,10 @@ import {
 } from "../agents/admitted-run-context.js";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   claimHeartbeatContextForUserRun,
   claimHeartbeatOutcomeForRun,
@@ -21,9 +21,9 @@ import {
 const tempDirs: string[] = [];
 
 async function createEnv(): Promise<NodeJS.ProcessEnv> {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-heartbeat-outcome-"));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-heartbeat-outcome-"));
   tempDirs.push(stateDir);
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+  const env = { CARAPACE_STATE_DIR: stateDir };
   await upsertSessionEntryCore(
     { agentId: "main", env, sessionKey: "agent:main:main" },
     { sessionId: "heartbeat-outcome-test", updatedAt: 1 },
@@ -32,8 +32,8 @@ async function createEnv(): Promise<NodeJS.ProcessEnv> {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -144,7 +144,7 @@ describe("heartbeat outcome store", () => {
       }),
     ).toMatchObject({ outcome: "blocked", summary: "Waiting for build", occurredAt: 200 });
     expect(
-      openOpenClawAgentDatabase({ agentId: "main", env })
+      openCarapaceAgentDatabase({ agentId: "main", env })
         .db.prepare("SELECT COUNT(*) AS count FROM heartbeat_outcomes")
         .get(),
     ).toEqual({ count: 1 });
@@ -158,7 +158,7 @@ describe("heartbeat outcome store", () => {
       { agentId: "main", env, sessionKey: runSessionKey },
       { sessionId: "transient-heartbeat", updatedAt: 1 },
     );
-    const db = openOpenClawAgentDatabase({ agentId: "main", env }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main", env }).db;
     expect(
       db.prepare("SELECT session_key FROM session_nodes WHERE session_key = ?").get(sessionKey),
     ).toBeUndefined();

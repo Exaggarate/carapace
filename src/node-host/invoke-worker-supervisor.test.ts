@@ -199,7 +199,7 @@ describe("node-host worker supervisor commands", () => {
     if (method === "launch") {
       expect(supervisor.launch.mock.calls[0]?.[1]).toEqual({
         kind: "websocket",
-        url: "wss://gateway.example/tenant/__openclaw__/worker",
+        url: "wss://gateway.example/tenant/__carapace__/worker",
       });
     }
     if (method === "cancel") {
@@ -257,7 +257,7 @@ describe("node-host worker supervisor commands", () => {
   it.each([
     {
       name: "relative executable",
-      descriptor: { id: "terminal", executablePath: "openclaw-worker-terminal" },
+      descriptor: { id: "terminal", executablePath: "carapace-worker-terminal" },
     },
     {
       name: "terminal arguments",
@@ -354,7 +354,7 @@ describe("node-host worker supervisor commands", () => {
   it("dispatches bundle installation before a colliding plugin command", async () => {
     const build = {
       bundleHash: "a".repeat(64),
-      openclawVersion: "2026.8.1",
+      carapaceVersion: "2026.8.1",
       protocolFeatures: [],
     };
     const input = {
@@ -581,7 +581,7 @@ describe("node-host worker supervisor commands", () => {
 
     expect(supervisor.launch.mock.calls[0]?.[1]).toEqual({
       kind: "websocket",
-      url: "wss://gateway.example/tenant/__openclaw__/worker",
+      url: "wss://gateway.example/tenant/__carapace__/worker",
       tlsFingerprint: "aa".repeat(32),
       cloudflareAccess: {
         clientId: "cf-worker-id",
@@ -861,7 +861,7 @@ describe("node-host worker supervisor commands", () => {
         environmentId: "environment-1",
         sessionId: "session-1",
         generation: 4,
-        argv: ["openclaw-internal-workspace-transfer"],
+        argv: ["carapace-internal-workspace-transfer"],
       }),
       workspace,
     });

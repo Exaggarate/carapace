@@ -22,7 +22,7 @@ import { createReplyOperation } from "./reply-run-registry.js";
 import { testing } from "./reply-run-registry.test-support.js";
 import { buildTestCtx } from "./test-ctx.js";
 
-const dirs = createSuiteTempRootTracker({ prefix: "openclaw-stop-owner-" });
+const dirs = createSuiteTempRootTracker({ prefix: "carapace-stop-owner-" });
 const sessionKey = "agent:main:slack:group:g12345678";
 
 beforeAll(() => dirs.setup());

@@ -138,7 +138,7 @@ const os = require("node:os");
 const path = require("node:path");
 const root = fs.realpathSync(process.argv[1]);
 const sleeper = new Int32Array(new SharedArrayBuffer(4));
-const leaseDirectory = path.join(os.homedir(), ".openclaw-worker", "quiescence");
+const leaseDirectory = path.join(os.homedir(), ".carapace-worker", "quiescence");
 fs.mkdirSync(leaseDirectory, { recursive: true, mode: 0o700 });
 fs.chmodSync(leaseDirectory, 0o700);
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
@@ -415,7 +415,7 @@ if (validationMode !== "heartbeat" && validationMode !== "final") throw new Erro
 if (isolationMode !== "dedicated" && isolationMode !== "shared-host") throw new Error("invalid workspace quiescence isolation mode");
 const sharedHost = isolationMode === "shared-host";
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
-const leaseDirectory = path.join(os.homedir(), ".openclaw-worker", "quiescence");
+const leaseDirectory = path.join(os.homedir(), ".carapace-worker", "quiescence");
 const windowsLeaseDatabasePath = path.join(leaseDirectory, "windows-shared-host.sqlite");
 const leasePath = path.join(leaseDirectory, workspaceKey + "." + nonce + ".json");
 ${REMOTE_QUIESCENCE_LEASE_JS}
@@ -541,7 +541,7 @@ const root = fs.realpathSync(process.argv[1]);
 const nonce = process.argv[2];
 if (!/^[a-f0-9]{32}$/.test(nonce || "")) throw new Error("invalid workspace quiescence nonce");
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
-const leaseDirectory = path.join(os.homedir(), ".openclaw-worker", "quiescence");
+const leaseDirectory = path.join(os.homedir(), ".carapace-worker", "quiescence");
 const windowsLeaseDatabasePath = path.join(leaseDirectory, "windows-shared-host.sqlite");
 const leasePath = path.join(leaseDirectory, workspaceKey + "." + nonce + ".json");
 ${REMOTE_QUIESCENCE_LEASE_JS}

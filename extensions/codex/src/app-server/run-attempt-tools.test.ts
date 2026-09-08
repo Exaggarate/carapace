@@ -1,5 +1,5 @@
-import type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AnyAgentTool } from "carapace/plugin-sdk/agent-harness";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness-runtime";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import { createCodexDynamicToolSpecs, projectCodexDynamicTools } from "./dynamic-tool-catalog.js";
@@ -19,14 +19,14 @@ describe("Codex direct tool loading", () => {
     ]).tools;
 
   it("keeps the available ring-zero tool directly callable", () => {
-    const params = createAttemptParams({ toolsAllow: ["openclaw"] });
+    const params = createAttemptParams({ toolsAllow: ["carapace"] });
     expect(
       createCodexDynamicToolSpecs({
-        entries: projectTool("openclaw"),
+        entries: projectTool("carapace"),
         loading: "searchable",
-        directToolNames: resolveCodexDynamicToolDirectNames(params, projectTool("openclaw"), true),
+        directToolNames: resolveCodexDynamicToolDirectNames(params, projectTool("carapace"), true),
       }),
-    ).toEqual([expect.objectContaining({ type: "function", name: "openclaw" })]);
+    ).toEqual([expect.objectContaining({ type: "function", name: "carapace" })]);
   });
 
   it.each([false, true])(
@@ -69,7 +69,7 @@ describe("Codex direct tool loading", () => {
             threadId: "thread-1",
             turnId: "turn-1",
             callId: "disabled-message",
-            namespace: "openclaw",
+            namespace: "carapace",
             tool: "message",
             arguments: {},
           });

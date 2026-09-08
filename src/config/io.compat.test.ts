@@ -22,14 +22,14 @@ vi.mock("../plugins/plugin-metadata-snapshot.js", async (importOriginal) => ({
 }));
 
 function withTempHome<T>(run: (home: string) => Promise<T>): Promise<T> {
-  return withTempDir("openclaw-config-compat-", run);
+  return withTempDir("carapace-config-compat-", run);
 }
 
 async function writeConfig(
   home: string,
-  dirname: ".openclaw",
+  dirname: ".carapace",
   port: number,
-  filename = "openclaw.json",
+  filename = "carapace.json",
 ) {
   const dir = path.join(home, dirname);
   await fs.mkdir(dir, { recursive: true });
@@ -46,42 +46,42 @@ function createIoForHome(home: string, env: NodeJS.ProcessEnv = {} as NodeJS.Pro
 }
 
 describe("config io paths", () => {
-  it("uses ~/.openclaw/openclaw.json when config exists", async () => {
+  it("uses ~/.carapace/carapace.json when config exists", async () => {
     await withTempHome(async (home) => {
-      const configPath = await writeConfig(home, ".openclaw", 19001);
+      const configPath = await writeConfig(home, ".carapace", 19001);
       const io = createIoForHome(home);
       expect(io.configPath).toBe(configPath);
     });
   });
 
-  it("defaults to ~/.openclaw/openclaw.json when config is missing", async () => {
+  it("defaults to ~/.carapace/carapace.json when config is missing", async () => {
     await withTempHome(async (home) => {
       const io = createIoForHome(home);
-      expect(io.configPath).toBe(path.join(home, ".openclaw", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, ".carapace", "carapace.json"));
     });
   });
 
-  it("uses OPENCLAW_HOME for default config path", async () => {
+  it("uses CARAPACE_HOME for default config path", async () => {
     await withTempHome(async (home) => {
       const io = createConfigIO({
-        env: { OPENCLAW_HOME: path.join(home, "svc-home") } as NodeJS.ProcessEnv,
+        env: { CARAPACE_HOME: path.join(home, "svc-home") } as NodeJS.ProcessEnv,
         homedir: () => path.join(home, "ignored-home"),
       });
-      expect(io.configPath).toBe(path.join(home, "svc-home", ".openclaw", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, "svc-home", ".carapace", "carapace.json"));
     });
   });
 
-  it("honors explicit OPENCLAW_CONFIG_PATH override", async () => {
+  it("honors explicit CARAPACE_CONFIG_PATH override", async () => {
     await withTempHome(async (home) => {
-      const customPath = await writeConfig(home, ".openclaw", 20002, "custom.json");
-      const io = createIoForHome(home, { OPENCLAW_CONFIG_PATH: customPath } as NodeJS.ProcessEnv);
+      const customPath = await writeConfig(home, ".carapace", 20002, "custom.json");
+      const io = createIoForHome(home, { CARAPACE_CONFIG_PATH: customPath } as NodeJS.ProcessEnv);
       expect(io.configPath).toBe(customPath);
     });
   });
 
   it("keeps canonical custom gateway bind byte-identical during load", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const gateway = {
         mode: "local" as const,
@@ -105,7 +105,7 @@ describe("config io paths", () => {
 
   it("loads retired context-budget shapes and surfaces migration guidance without rewriting", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const authored = {
         models: {
@@ -171,7 +171,7 @@ describe("config io paths", () => {
 
   it("logs each warning payload once until warnings clear", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const logger = {
         error: vi.fn(),
@@ -241,9 +241,9 @@ describe("config io paths", () => {
     });
   });
 
-  it("explains what to check when config was written by a newer OpenClaw", async () => {
+  it("explains what to check when config was written by a newer Carapace", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         configPath,
@@ -271,9 +271,9 @@ describe("config io paths", () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         [
-          `Your OpenClaw config was written by version 9999.1.1, but this command is running ${VERSION}.`,
-          "Check: `openclaw --version`, `which openclaw`, and `openclaw gateway status --deep`.",
-          "If unexpected, update PATH so `openclaw` points to the version you want, or reinstall the Gateway service from that same OpenClaw install.",
+          `Your Carapace config was written by version 9999.1.1, but this command is running ${VERSION}.`,
+          "Check: `carapace --version`, `which carapace`, and `carapace gateway status --deep`.",
+          "If unexpected, update PATH so `carapace` points to the version you want, or reinstall the Gateway service from that same Carapace install.",
         ].join("\n"),
       );
     });
@@ -281,7 +281,7 @@ describe("config io paths", () => {
 
   it("does not warn about newer config during internal update handoff reads", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".carapace", "carapace.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         configPath,
@@ -301,7 +301,7 @@ describe("config io paths", () => {
 
       const io = createConfigIO({
         configPath,
-        env: { HOME: home, OPENCLAW_UPDATE_POST_CORE: "1" } as NodeJS.ProcessEnv,
+        env: { HOME: home, CARAPACE_UPDATE_POST_CORE: "1" } as NodeJS.ProcessEnv,
         homedir: () => home,
         logger,
       });

@@ -94,7 +94,7 @@ flow:
               params:
                 - task
               async: true
-              expr: "(await env.gateway.call('chat.history', { agentId: 'qa', sessionKey: task.sessionKey, limit: 100, maxChars: 20000 }, { timeoutMs: 10000 })).messages?.filter((message) => message.role === 'assistant' && message.provider === 'openclaw' && message.model === 'delivery-mirror' && message.__openclaw?.idempotencyKey === `announce:v1:${task.childSessionKey}:${task.runId}:text-direct`) ?? []"
+              expr: "(await env.gateway.call('chat.history', { agentId: 'qa', sessionKey: task.sessionKey, limit: 100, maxChars: 20000 }, { timeoutMs: 10000 })).messages?.filter((message) => message.role === 'assistant' && message.provider === 'carapace' && message.model === 'delivery-mirror' && message.__carapace?.idempotencyKey === `announce:v1:${task.childSessionKey}:${task.runId}:text-direct`) ?? []"
         - forEach:
             items:
               expr: config.cases
@@ -150,13 +150,13 @@ flow:
                     expr: "`terminal ${terminalCase.name}: spawning parent did not acknowledge its completed turn`"
               - set: appendDirectFallbackProof
                 value:
-                  expr: "directFallbackProofs.push({ case: terminalCase.name, taskId: terminalTask.taskId, receiptKeys: directFallbackReceipts.map((message) => message.__openclaw.idempotencyKey) })"
+                  expr: "directFallbackProofs.push({ case: terminalCase.name, taskId: terminalTask.taskId, receiptKeys: directFallbackReceipts.map((message) => message.__carapace.idempotencyKey) })"
               - assert:
                   expr: "matchingOutbound.length === terminalCase.expectedSendCount"
                   message:
                     expr: "`terminal ${terminalCase.name}: expected ${terminalCase.expectedSendCount} outbound, got ${matchingOutbound.length}; messages=${JSON.stringify(state.getSnapshot().messages.slice(-10))} requests=${JSON.stringify(caseRequests)} logs=${JSON.stringify((env.gateway.logs?.().split('\\n') ?? []).filter((line) => /qa-channel|subagent|announce|completion|requester/i.test(line)).slice(-30))}`"
               - assert:
-                  expr: "caseOutbound.every((candidate) => !String(candidate.text ?? '').includes(config.metadataSentinel) && !String(candidate.text ?? '').includes('BEGIN_OPENCLAW_INTERNAL_CONTEXT'))"
+                  expr: "caseOutbound.every((candidate) => !String(candidate.text ?? '').includes(config.metadataSentinel) && !String(candidate.text ?? '').includes('BEGIN_CARAPACE_INTERNAL_CONTEXT'))"
                   message:
                     expr: "`terminal ${terminalCase.name}: protected internal metadata leaked; outbound=${recentOutboundSummary(state)}`"
               - assert:
@@ -247,7 +247,7 @@ flow:
               expr: "`restart completion did not use its exact direct-fallback owner: ${JSON.stringify(restartFallbackReceipts)}`"
         - set: appendRestartFallbackProof
           value:
-            expr: "directFallbackProofs.push({ case: 'restart', taskId: restartTask.taskId, receiptKeys: restartFallbackReceipts.map((message) => message.__openclaw.idempotencyKey) })"
+            expr: "directFallbackProofs.push({ case: 'restart', taskId: restartTask.taskId, receiptKeys: restartFallbackReceipts.map((message) => message.__carapace.idempotencyKey) })"
         - assert:
             expr: "restartMatches.length === 1"
             message:

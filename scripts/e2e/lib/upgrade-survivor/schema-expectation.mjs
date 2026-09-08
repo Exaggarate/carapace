@@ -34,12 +34,12 @@ function readContentVersion(database, kind, published) {
 }
 
 function readSchemas(stateDir) {
-  const paths = [{ kind: "state", relative: "state/openclaw.sqlite" }];
+  const paths = [{ kind: "state", relative: "state/carapace.sqlite" }];
   const agentsDir = path.join(stateDir, "agents");
   if (fs.existsSync(agentsDir)) {
     for (const agent of fs.readdirSync(agentsDir, { withFileTypes: true })) {
       if (agent.isDirectory()) {
-        const relative = `agents/${agent.name}/agent/openclaw-agent.sqlite`;
+        const relative = `agents/${agent.name}/agent/carapace-agent.sqlite`;
         if (fs.existsSync(path.join(stateDir, relative))) {
           paths.push({ kind: "agent", relative });
         }
@@ -175,14 +175,14 @@ function readSeededAgents(stateDir, configFile) {
     if (fs.existsSync(runtimeDir)) {
       for (const entry of fs.readdirSync(runtimeDir, { withFileTypes: true })) {
         // WAL, shared memory, and reindex scratch belong to the existing SQLite owner.
-        if (!entry.name.startsWith("openclaw-agent.sqlite")) {
+        if (!entry.name.startsWith("carapace-agent.sqlite")) {
           continue;
         }
         assert(entry.isFile(), `non-file baseline SQLite specimen: ${entry.name}`);
         files.push({ relative: `agents/${agentId}/agent/${entry.name}`, kind: "sqlite-runtime" });
       }
     }
-    const databaseRelative = `agents/${agentId}/agent/openclaw-agent.sqlite`;
+    const databaseRelative = `agents/${agentId}/agent/carapace-agent.sqlite`;
     return {
       agentId,
       databaseRelative,
@@ -314,18 +314,18 @@ function prepare(baselineVersion, candidateTarball, stateDir, snapshotFile, conf
       maxBuffer: 1024 * 1024,
     }),
   );
-  assert.equal(manifest.name, "openclaw", "candidate is not an OpenClaw package");
+  assert.equal(manifest.name, "carapace", "candidate is not an Carapace package");
   for (const kind of ["state", "agent"]) {
     assert(
-      Number.isInteger(manifest.openclaw?.schemaVersions?.[kind]) &&
-        manifest.openclaw.schemaVersions[kind] >= 0,
+      Number.isInteger(manifest.carapace?.schemaVersions?.[kind]) &&
+        manifest.carapace.schemaVersions[kind] >= 0,
       `candidate package is missing its ${kind} schema version`,
     );
   }
   const snapshot = {
     baselineVersion,
     candidateVersion: manifest.version,
-    candidateSchemaVersions: manifest.openclaw.schemaVersions,
+    candidateSchemaVersions: manifest.carapace.schemaVersions,
     stateDir,
     databases: readSchemas(stateDir),
     agents: readSeededAgents(stateDir, configFile),

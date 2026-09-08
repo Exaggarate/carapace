@@ -20,13 +20,13 @@ describe("loadExtensionsCached", () => {
     clearExtensionCache();
     // Extensions import public SDK helpers through package subpaths; the loader
     // must route those aliases without package-manager involvement.
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-extension-sdk-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-extension-sdk-"));
     tempDirs.push(dir);
     const extensionPath = join(dir, "extension.ts");
     await writeFile(
       extensionPath,
       `
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export default async function(api) {
   if (normalizeLowercaseStringOrEmpty("  MIXED  ") !== "mixed") {
@@ -50,10 +50,10 @@ export default async function(api) {
   });
 
   it.each([
-    { sdk: "openclaw/plugin-sdk/agent-sessions", typebox: "typebox" },
-    { sdk: "@openclaw/plugin-sdk/agent-sessions", typebox: "@sinclair/typebox" },
+    { sdk: "carapace/plugin-sdk/agent-sessions", typebox: "typebox" },
+    { sdk: "@carapace/plugin-sdk/agent-sessions", typebox: "@sinclair/typebox" },
   ])("loads the host session SDK and schema helpers through $sdk", async ({ sdk, typebox }) => {
-    const dir = await mkdtemp(join(tmpdir(), "openclaw-extension-session-sdk-"));
+    const dir = await mkdtemp(join(tmpdir(), "carapace-extension-session-sdk-"));
     tempDirs.push(dir);
     const extensionPath = join(dir, "extension.ts");
     await writeFile(

@@ -23,9 +23,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -110,15 +110,15 @@ async function traceLoginGateMounts(page: Page): Promise<() => Promise<boolean>>
     const trace = { mounted: false };
     (
       window as Window & {
-        openclawLoginGateMountTrace?: typeof trace;
+        carapaceLoginGateMountTrace?: typeof trace;
       }
-    ).openclawLoginGateMountTrace = trace;
+    ).carapaceLoginGateMountTrace = trace;
     new MutationObserver((records) => {
       for (const record of records) {
         for (const node of record.addedNodes) {
           if (
             node instanceof Element &&
-            (node.localName === "openclaw-login-gate" || node.querySelector("openclaw-login-gate"))
+            (node.localName === "carapace-login-gate" || node.querySelector("carapace-login-gate"))
           ) {
             trace.mounted = true;
           }
@@ -131,9 +131,9 @@ async function traceLoginGateMounts(page: Page): Promise<() => Promise<boolean>>
       () =>
         (
           window as Window & {
-            openclawLoginGateMountTrace?: { mounted: boolean };
+            carapaceLoginGateMountTrace?: { mounted: boolean };
           }
-        ).openclawLoginGateMountTrace?.mounted ?? false,
+        ).carapaceLoginGateMountTrace?.mounted ?? false,
     );
 }
 
@@ -177,10 +177,10 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     const skeleton = splash.locator(".loading-skeleton");
     await skeleton.waitFor();
     expect(await splash.getAttribute("aria-busy")).toBeNull();
-    expect(await splash.locator("openclaw-mascot").count()).toBe(0);
+    expect(await splash.locator("carapace-mascot").count()).toBe(0);
     expect(await page.getByText("Loading panel", { exact: true }).count()).toBe(0);
-    expect(await page.locator("openclaw-app-sidebar").count()).toBe(0);
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("carapace-app-sidebar").count()).toBe(0);
+    expect(await page.locator("carapace-login-gate").count()).toBe(0);
     const proof = await takeProofScreenshot(page, "01-connecting-shimmer", [
       skeleton.locator(".loading-skeleton__composer"),
     ]);
@@ -206,7 +206,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
 
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
     expect(await loginGateMounted()).toBe(false);
     expect(loginModuleRequests).toEqual([]);
@@ -236,7 +236,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       await page.goto(`${server.baseUrl}chat?session=main`, {
         waitUntil: "domcontentloaded",
       });
-      await page.locator("openclaw-app-shell").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
       await expect.poll(() => chatModuleRequested).toBe(true);
 
       const loadingState = page.locator(".lazy-view-state--loading");
@@ -249,13 +249,13 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       const skeleton = loadingState.locator(".loading-skeleton");
       await skeleton.waitFor();
       expect(await loadingState.getAttribute("aria-busy")).toBeNull();
-      expect(await loadingState.locator("openclaw-mascot").count()).toBe(0);
+      expect(await loadingState.locator("carapace-mascot").count()).toBe(0);
       await captureProof(page, "03-pending-chat-shimmer", [
         skeleton.locator(".loading-skeleton__composer"),
       ]);
 
       releaseChatModule();
-      await page.locator("openclaw-chat-page").waitFor();
+      await page.locator("carapace-chat-page").waitFor();
       expect(await loadingState.count()).toBe(0);
       await captureProof(page, "04-loaded-chat-content", [
         page.locator(".sidebar-brand"),
@@ -274,14 +274,14 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await page.goto(server.baseUrl);
     await gateway.waitForRequest("connect");
     await page.locator(".connect-splash").waitFor();
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("carapace-login-gate").count()).toBe(0);
     expect(await loginGateMounted()).toBe(false);
     await captureProof(page, "05-credentialless-connecting-shimmer", [
       page.locator(".connect-splash .loading-skeleton__composer"),
     ]);
 
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
     expect(await loginGateMounted()).toBe(false);
   });
@@ -306,13 +306,13 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     });
     const gateway = await installMockGateway(page, {
       agentModel: null,
-      deferredMethods: ["openclaw.setup.detect"],
+      deferredMethods: ["carapace.setup.detect"],
       featureMethods: [
         "browser.request",
         "desktop.observe",
-        "openclaw.chat",
-        "openclaw.setup.detect",
-        "openclaw.setup.prepare.start",
+        "carapace.chat",
+        "carapace.setup.detect",
+        "carapace.setup.prepare.start",
         "terminal.open",
       ],
       terminalEnabled: true,
@@ -321,8 +321,8 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await page.goto(server.baseUrl);
     await page.waitForURL("**/settings/model-setup?firstRun=1");
     expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-    await gateway.waitForRequest("openclaw.setup.detect");
-    expect(await gateway.getRequests("openclaw.setup.detect")).toHaveLength(1);
+    await gateway.waitForRequest("carapace.setup.detect");
+    expect(await gateway.getRequests("carapace.setup.detect")).toHaveLength(1);
     const loading = page.getByText("Checking this Gateway for available AI access…", {
       exact: true,
     });
@@ -362,7 +362,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await captureProof(page, "06b-first-run-routed-before-detection-mobile", [loadingSections]);
     await page.setViewportSize(viewport);
 
-    await gateway.resolveDeferred("openclaw.setup.detect", {
+    await gateway.resolveDeferred("carapace.setup.detect", {
       candidates: [
         {
           kind: "claude-cli",
@@ -389,7 +389,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
         { id: "lmstudio", brandId: "lmstudio", label: "LM Studio" },
       ],
       setupComplete: false,
-      workspace: "/tmp/openclaw-e2e",
+      workspace: "/tmp/carapace-e2e",
     });
     await loading.waitFor({ state: "detached" });
     await page.getByRole("heading", { name: "Connect a verified AI model" }).waitFor();
@@ -467,7 +467,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
         }
         const text = title.textContent!;
         const height = title.getBoundingClientRect().height;
-        const lazyHost = document.createElement("openclaw-proof-recovery-title");
+        const lazyHost = document.createElement("carapace-proof-recovery-title");
         lazyHost.style.display = "block";
         lazyHost.style.minHeight = `${height}px`;
         // Keep Lit's marker and text nodes intact for reconnect-driven renders.
@@ -482,7 +482,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
         const loading = lazyHost.animate([{ opacity: 1 }, { opacity: 1 }], { duration: 1_000 });
         void loading.finished.then(() => {
           customElements.define(
-            "openclaw-proof-recovery-title",
+            "carapace-proof-recovery-title",
             class extends HTMLElement {
               connectedCallback() {
                 const label = document.createElement("span");
@@ -765,7 +765,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       message: "unauthorized: gateway token mismatch",
       details: { code: ConnectErrorDetailCodes.AUTH_TOKEN_MISMATCH },
     });
-    await page.locator("openclaw-login-gate").waitFor();
+    await page.locator("carapace-login-gate").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
   });
 
@@ -787,7 +787,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
 
     const splash = page.locator(".connect-splash");
     await splash.getByText("Gateway starting…", { exact: true }).waitFor();
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("carapace-login-gate").count()).toBe(0);
     expect(await loginGateMounted()).toBe(false);
     await expect
       .poll(async () => await splash.evaluate((element) => getComputedStyle(element).opacity))
@@ -800,7 +800,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       .poll(async () => (await gateway.getRequests("connect")).length)
       .toBeGreaterThan(initialConnectCount);
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
   });
 
   it("uses the splash for a stored device token on reload", async () => {
@@ -812,16 +812,16 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await gateway.waitForRequest("connect");
     await page.locator(".connect-splash").waitFor();
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
 
     // The hello stored a device token, so the reload connect is authenticated
     // and must paint the splash instead of flashing the gate.
     await page.reload();
     await gateway.waitForRequest("connect");
     await page.locator(".connect-splash").waitFor();
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("carapace-login-gate").count()).toBe(0);
 
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("carapace-app-shell").waitFor();
   });
 });

@@ -19,13 +19,13 @@ type ExtensionCacheTestState = {
 
 function extensionCacheTestState(): ExtensionCacheTestState {
   return (
-    globalThis as typeof globalThis & { openclawExtensionCacheTestState: ExtensionCacheTestState }
-  ).openclawExtensionCacheTestState;
+    globalThis as typeof globalThis & { carapaceExtensionCacheTestState: ExtensionCacheTestState }
+  ).carapaceExtensionCacheTestState;
 }
 
 function extensionSource(command: string): string {
   return `
-const state = (globalThis.openclawExtensionCacheTestState ??= { factoryRuns: 0, moduleLoads: 0 });
+const state = (globalThis.carapaceExtensionCacheTestState ??= { factoryRuns: 0, moduleLoads: 0 });
 state.moduleLoads += 1;
 
 export default function extension(api) {
@@ -44,12 +44,12 @@ function sourceMetadata(path: string, source: string, scope: SourceScope) {
 
 afterEach(() => {
   clearExtensionCache();
-  Reflect.deleteProperty(globalThis, "openclawExtensionCacheTestState");
+  Reflect.deleteProperty(globalThis, "carapaceExtensionCacheTestState");
 });
 
 describe("DefaultResourceLoader", () => {
   it("does not load a direct local extension disabled by its package filter", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-filter-");
+    const root = tempDirs.make("carapace-resource-loader-filter-");
     const extensionPath = join(root, "extension.ts");
     await writeFile(extensionPath, "export default function extension() {}\n");
     const loader = new DefaultResourceLoader({
@@ -70,7 +70,7 @@ describe("DefaultResourceLoader", () => {
   });
 
   it("skips ambient package resolution while preserving explicit resource paths", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-explicit-");
+    const root = tempDirs.make("carapace-resource-loader-explicit-");
     const promptDir = join(root, "explicit-prompts");
     const promptPath = join(promptDir, "explicit.md");
     await mkdir(promptDir);
@@ -101,7 +101,7 @@ describe("DefaultResourceLoader", () => {
   });
 
   it("reuses extension modules between loaders and refreshes them on reload", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-extension-");
+    const root = tempDirs.make("carapace-resource-loader-extension-");
     const extensionPath = join(root, "extension.ts");
     await writeFile(extensionPath, extensionSource("before-reload"));
     const createLoader = () =>
@@ -132,7 +132,7 @@ describe("DefaultResourceLoader", () => {
   });
 
   it("does not use unreadable prompt file paths as prompt content", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-");
+    const root = tempDirs.make("carapace-resource-loader-");
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const loader = new DefaultResourceLoader({
@@ -158,7 +158,7 @@ describe("DefaultResourceLoader", () => {
   });
 
   it("inherits Windows source metadata across case-variant resource roots", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-scope-");
+    const root = tempDirs.make("carapace-resource-loader-scope-");
     const variantAgentDir = join(root, "AGENT");
     const variantPackageDir = join(root, "PACKAGE-SOURCE");
     const defaultSkillDir = join(root, "agent", "skills", "default");

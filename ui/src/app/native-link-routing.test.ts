@@ -11,7 +11,7 @@ import {
 } from "../components/panel-toggle-contract.ts";
 import { postNativeUpdate, startNativeLinkRouting } from "./native-link-routing.ts";
 
-const NATIVE_UPDATE_DECLINED_EVENT = "openclaw:native-update-declined";
+const NATIVE_UPDATE_DECLINED_EVENT = "carapace:native-update-declined";
 
 type NativeLinkRouting = ReturnType<typeof startNativeLinkRouting>;
 
@@ -33,7 +33,7 @@ function installBridge() {
   const messages: NativeMessage[] = [];
   const postMessage = vi.fn((message: NativeMessage) => messages.push(message));
   vi.stubGlobal("webkit", {
-    messageHandlers: { openclawLink: { postMessage }, openclawBrowser: { postMessage: vi.fn() } },
+    messageHandlers: { carapaceLink: { postMessage }, carapaceBrowser: { postMessage: vi.fn() } },
   });
   const browserRequests: BrowserPanelToggleDetail[] = [];
   const listener = (event: Event) =>
@@ -97,7 +97,7 @@ function contextMenu(anchor: HTMLAnchorElement) {
 
 async function waitForMenu() {
   await vi.waitFor(() =>
-    expect(document.querySelector("openclaw-native-link-menu")).not.toBeNull(),
+    expect(document.querySelector("carapace-native-link-menu")).not.toBeNull(),
   );
 }
 
@@ -129,7 +129,7 @@ describe("native link routing", () => {
 
       expect(clickWithoutNavigation(anchor)).toBe(false);
       expect(contextMenu(anchor).defaultPrevented).toBe(false);
-      expect(document.querySelector("openclaw-native-link-menu")).toBeNull();
+      expect(document.querySelector("carapace-native-link-menu")).toBeNull();
       expect(bridge.messages).toEqual([]);
       expect(bridge.browserRequests).toEqual([]);
     },
@@ -138,7 +138,7 @@ describe("native link routing", () => {
   it("delivers each native update decline once across route changes", async () => {
     const onNativeUpdateDeclined = vi.fn();
     const postMessage = vi.fn();
-    vi.stubGlobal("webkit", { messageHandlers: { openclawUpdate: { postMessage } } });
+    vi.stubGlobal("webkit", { messageHandlers: { carapaceUpdate: { postMessage } } });
     routing = startNativeLinkRouting({ onNativeUpdateDeclined });
 
     expect(postNativeUpdate()).toBe(true);
@@ -159,7 +159,7 @@ describe("native link routing", () => {
     const event = contextMenu(anchor);
 
     expect(event.defaultPrevented).toBe(false);
-    expect(document.querySelector("openclaw-native-link-menu")).toBeNull();
+    expect(document.querySelector("carapace-native-link-menu")).toBeNull();
   });
 
   it("routes an unmodified external click to the native panel and preserves page-level cleanup", async () => {
@@ -222,7 +222,7 @@ describe("native link routing", () => {
     await import("../components/github-link-hovercard-registration.ts");
     const define = vi.spyOn(customElements, "define");
     const provider = document.createElement(
-      "openclaw-github-link-hovercard-provider",
+      "carapace-github-link-hovercard-provider",
     ) as GitHubLinkHovercardProvider;
     provider.client = {
       request: vi.fn().mockResolvedValue({
@@ -231,22 +231,22 @@ describe("native link routing", () => {
         kind: "issue",
         login: "octocat",
         number: 102691,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         state: "open",
         title: "Open links in a sidebar browser",
         updatedAt: "2026-07-09T10:00:00Z",
       }),
     } as unknown as GatewayBrowserClient;
     const anchor = document.createElement("a");
-    anchor.href = "https://github.com/openclaw/openclaw/issues/102691";
+    anchor.href = "https://github.com/Exaggarate/carapace/issues/102691";
     anchor.textContent = "#102691";
     provider.append(anchor);
     document.body.append(provider);
     anchor.focus();
     await vi.waitFor(() => expect(document.querySelector(".github-link-hovercard")).not.toBeNull());
     const hovercardDefines = define.mock.calls.filter(
-      ([tag]) => tag === "openclaw-github-link-hovercard-provider",
+      ([tag]) => tag === "carapace-github-link-hovercard-provider",
     );
     expect(hovercardDefines).toHaveLength(1);
     define.mockRestore();
@@ -256,7 +256,7 @@ describe("native link routing", () => {
     const bridge = installBridge();
     routing = startNativeLinkRouting();
     const provider = document.createElement(
-      "openclaw-github-link-hovercard-provider",
+      "carapace-github-link-hovercard-provider",
     ) as GitHubLinkHovercardProvider;
     provider.client = {
       request: vi.fn().mockResolvedValue({
@@ -265,15 +265,15 @@ describe("native link routing", () => {
         kind: "issue",
         login: "octocat",
         number: 102691,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         state: "open",
         title: "Open links in a sidebar browser",
         updatedAt: "2026-07-09T10:00:00Z",
       }),
     } as unknown as GatewayBrowserClient;
     const anchor = document.createElement("a");
-    anchor.href = "https://github.com/openclaw/openclaw/issues/102691";
+    anchor.href = "https://github.com/Exaggarate/carapace/issues/102691";
     anchor.textContent = "#102691";
     provider.append(anchor);
     document.body.append(provider);
@@ -288,7 +288,7 @@ describe("native link routing", () => {
     expect(bridge.browserRequests).toEqual([
       {
         open: true,
-        url: "https://github.com/openclaw/openclaw/issues/102691",
+        url: "https://github.com/Exaggarate/carapace/issues/102691",
         native: true,
       },
     ]);
@@ -321,7 +321,7 @@ describe("native link routing", () => {
 
     expect(contextMenu(anchor).defaultPrevented).toBe(true);
     await waitForMenu();
-    const firstMenu = document.querySelector("openclaw-native-link-menu");
+    const firstMenu = document.querySelector("carapace-native-link-menu");
     await (firstMenu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
     expect(
       [...firstMenu!.querySelectorAll('[role="menuitem"]')].map((item) =>
@@ -337,7 +337,7 @@ describe("native link routing", () => {
 
     contextMenu(anchor);
     await waitForMenu();
-    const panelMenu = document.querySelector("openclaw-native-link-menu");
+    const panelMenu = document.querySelector("carapace-native-link-menu");
     await (panelMenu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
     menuItem("Open in Browser Panel").click();
     expect(bridge.browserRequests).toEqual([
@@ -347,7 +347,7 @@ describe("native link routing", () => {
 
     contextMenu(anchor);
     await waitForMenu();
-    const secondMenu = document.querySelector("openclaw-native-link-menu");
+    const secondMenu = document.querySelector("carapace-native-link-menu");
     await (secondMenu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
     menuItem("Copy Link").click();
     await vi.waitFor(() =>
@@ -367,7 +367,7 @@ describe("native link routing", () => {
       canPresentBrowserPanel = available;
       contextMenu(anchor);
       await waitForMenu();
-      const menu = document.querySelector("openclaw-native-link-menu");
+      const menu = document.querySelector("carapace-native-link-menu");
       await (menu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
       menuItem("Open in Browser Panel").click();
       expect(bridge.messages).toEqual([
@@ -388,7 +388,7 @@ describe("native link routing", () => {
     contextMenu(firstAnchor);
     await waitForMenu();
     const firstMenu = document.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-native-link-menu",
+      "carapace-native-link-menu",
     );
     expect(firstMenu).not.toBeNull();
     await firstMenu?.updateComplete;
@@ -397,14 +397,14 @@ describe("native link routing", () => {
 
     contextMenu(secondAnchor);
     await waitForMenu();
-    const secondMenu = document.querySelector("openclaw-native-link-menu");
+    const secondMenu = document.querySelector("carapace-native-link-menu");
     expect(secondMenu).not.toBe(firstMenu);
 
     firstDropdown?.dispatchEvent(
       new CustomEvent("wa-after-hide", { bubbles: true, composed: true }),
     );
 
-    expect(document.querySelector("openclaw-native-link-menu")).toBe(secondMenu);
+    expect(document.querySelector("carapace-native-link-menu")).toBe(secondMenu);
   });
 
   it("mounts a fallback menu inside an active dialog", async () => {
@@ -420,7 +420,7 @@ describe("native link routing", () => {
     contextMenu(anchor);
     await waitForMenu();
 
-    const menu = dialog.querySelector("openclaw-native-link-menu");
+    const menu = dialog.querySelector("carapace-native-link-menu");
     expect(menu).not.toBeNull();
     await (menu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
     expect(menuItem("Open in Browser Panel")).not.toBeNull();
@@ -429,7 +429,7 @@ describe("native link routing", () => {
   it("keeps modal menus in the styled light-DOM slot", async () => {
     installBridge();
     routing = startNativeLinkRouting();
-    const modal = document.createElement("openclaw-modal-dialog");
+    const modal = document.createElement("carapace-modal-dialog");
     const anchor = document.createElement("a");
     anchor.href = "https://example.com/modal-link";
     modal.append(anchor);
@@ -439,7 +439,7 @@ describe("native link routing", () => {
     contextMenu(anchor);
     await waitForMenu();
 
-    const menu = modal.querySelector("openclaw-native-link-menu");
+    const menu = modal.querySelector("carapace-native-link-menu");
     expect(menu).not.toBeNull();
     expect(menu?.getRootNode()).toBe(document);
     await (menu as HTMLElement & { updateComplete: Promise<boolean> }).updateComplete;
@@ -452,15 +452,15 @@ describe("native link routing", () => {
     const anchor = appendLink("https://example.com/report");
     contextMenu(anchor);
     await waitForMenu();
-    expect(document.querySelector("openclaw-native-link-menu")).not.toBeNull();
+    expect(document.querySelector("carapace-native-link-menu")).not.toBeNull();
 
     routing.dispose();
     routing = undefined;
 
-    expect(document.querySelector("openclaw-native-link-menu")).toBeNull();
+    expect(document.querySelector("carapace-native-link-menu")).toBeNull();
     expect(clickWithoutNavigation(anchor)).toBe(false);
     expect(contextMenu(anchor).defaultPrevented).toBe(false);
-    expect(document.querySelector("openclaw-native-link-menu")).toBeNull();
+    expect(document.querySelector("carapace-native-link-menu")).toBeNull();
     expect(bridge.messages).toEqual([]);
   });
 });

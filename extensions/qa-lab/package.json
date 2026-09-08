@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/qa-lab",
+  "name": "@carapace/qa-lab",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw QA lab plugin with private debugger UI and scenario runner",
+  "description": "Carapace QA lab plugin with private debugger UI and scenario runner",
   "type": "module",
   "dependencies": {
     "@copilotkit/aimock": "1.39.0",
@@ -15,23 +15,23 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/discord": "workspace:*",
-    "@openclaw/matrix": "workspace:*",
-    "@openclaw/plugin-sdk": "workspace:*",
-    "@openclaw/slack": "workspace:*",
-    "@openclaw/whatsapp": "workspace:*",
-    "openclaw": "workspace:*",
+    "@carapace/discord": "workspace:*",
+    "@carapace/matrix": "workspace:*",
+    "@carapace/plugin-sdk": "workspace:*",
+    "@carapace/slack": "workspace:*",
+    "@carapace/whatsapp": "workspace:*",
+    "carapace": "workspace:*",
     "vite": "8.2.2"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.9.2"
+    "carapace": ">=2026.9.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "carapace": {
       "optional": true
     }
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],

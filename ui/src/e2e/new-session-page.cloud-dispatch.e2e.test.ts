@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { CLOUD_PROFILE_RETRY_DELAYS_MS } from "../pages/new-session/cloud-profile-discovery.ts";
@@ -154,8 +154,8 @@ suite.define(() => {
         "projects.list": {
           projects: [
             {
-              id: "openclaw",
-              displayName: "OpenClaw",
+              id: "carapace",
+              displayName: "Carapace",
               repoRoot: TARGET_REPO,
               source: "registered",
             },
@@ -326,8 +326,8 @@ suite.define(() => {
           project.evaluate((element) => (element as HTMLElement & { open: boolean }).open),
         )
         .toBe(true);
-      await project.getByRole("button", { name: "OpenClaw", exact: true }).click();
-      await expect.poll(() => projectTrigger.getAttribute("data-project-id")).toBe("openclaw");
+      await project.getByRole("button", { name: "Carapace", exact: true }).click();
+      await expect.poll(() => projectTrigger.getAttribute("data-project-id")).toBe("carapace");
       await expect.poll(() => trigger.getAttribute("data-cloud-profile")).toBe("aws");
       await checkoutTrigger.click();
       await expect
@@ -337,7 +337,7 @@ suite.define(() => {
         .toBe(true);
       await checkout.getByLabel("Name", { exact: true }).fill("cloud-e2e");
       await pollLocatorText(checkout.locator(".new-session-page__menu-note").last()).toContain(
-        "Syncs OpenClaw to the selected runner",
+        "Syncs Carapace to the selected runner",
       );
       await captureUiProof(suite, page, "01-cloud-worker-target.png", {
         surface: checkout.locator('wa-popup [part="popup"]'),
@@ -450,7 +450,7 @@ suite.define(() => {
       expect(create.params).toMatchObject({
         agentId: "cloud",
         message: "",
-        projectId: "openclaw",
+        projectId: "carapace",
         worktree: true,
         worktreeBaseRef: "main",
         worktreeName: "cloud-e2e",
@@ -564,7 +564,7 @@ suite.define(() => {
       await neutralRow.click();
       await expect.poll(() => page.url()).toContain("neutral-e2e");
       await page.evaluate((pathname) => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               navigate: (routeId: string, options: { pathname: string }) => void;
@@ -626,7 +626,7 @@ suite.define(() => {
             sessionId: "session-cloud-e2e",
             status: "running",
             updatedAt: Date.now(),
-            worktree: { id: "worktree-1", branch: "openclaw/cloud-e2e", repoRoot: WORKSPACE },
+            worktree: { id: "worktree-1", branch: "carapace/cloud-e2e", repoRoot: WORKSPACE },
             placement: {
               state: "active",
               generation: 5,
@@ -676,11 +676,11 @@ suite.define(() => {
       await sessionRow.hover();
       await sessionRow.getByRole("button", { name: "Open session menu" }).click();
       const stopWorker = page
-        .locator("openclaw-session-menu")
+        .locator("carapace-session-menu")
         .getByRole("menuitem", { name: "Stop cloud worker…" });
       await stopWorker.waitFor();
       await captureUiProof(suite, page, "02-active-cloud-worker-stop.png", {
-        surface: page.locator('openclaw-session-menu wa-dropdown [part="menu"]'),
+        surface: page.locator('carapace-session-menu wa-dropdown [part="menu"]'),
         content: [stopWorker],
       });
       expect(await localSessionRow.locator(".session-row-badge--cloud").count()).toBe(0);

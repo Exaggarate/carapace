@@ -1,7 +1,7 @@
 /**
  * Durable channel ingress queue.
  *
- * Stores, claims, completes, and tombstones inbound channel events in OpenClaw state.
+ * Stores, claims, completes, and tombstones inbound channel events in Carapace state.
  */
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
@@ -13,13 +13,13 @@ import {
 } from "../../infra/kysely-sync.js";
 import type {
   ChannelIngressEvents,
-  DB as OpenClawStateKyselyDatabase,
-} from "../../state/openclaw-state-db.generated.js";
+  DB as CarapaceStateKyselyDatabase,
+} from "../../state/carapace-state-db.generated.js";
 import {
-  openExistingOpenClawStateDatabaseReadOnly,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openExistingCarapaceStateDatabaseReadOnly,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 
 /** Pending or retryable inbound channel event stored in the durable ingress queue. */
 export type ChannelIngressQueueRecord<TPayload, TMetadata = unknown> = {
@@ -261,12 +261,12 @@ export type CreateChannelIngressQueueOptions = {
   access?: "read-write" | "read-only";
 };
 
-type ChannelIngressDatabase = Pick<OpenClawStateKyselyDatabase, "channel_ingress_events">;
+type ChannelIngressDatabase = Pick<CarapaceStateKyselyDatabase, "channel_ingress_events">;
 type ChannelIngressRow = Selectable<ChannelIngressEvents>;
 
 // Failed rows need to distinguish a retained JSON null payload from the "null"
 // scrub marker written by older versions. Invalid JSON cannot collide with enqueue output.
-const FAILED_NULL_PAYLOAD_SENTINEL = "OPENCLAW_CHANNEL_INGRESS_FAILED_NULL_V1";
+const FAILED_NULL_PAYLOAD_SENTINEL = "CARAPACE_CHANNEL_INGRESS_FAILED_NULL_V1";
 
 function normalizePart(value: string | undefined, fallback: string): string {
   const normalized = value?.trim();
@@ -279,12 +279,12 @@ function createStateDirEnv(
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
   const env = Object.create(baseEnv) as NodeJS.ProcessEnv;
-  env.OPENCLAW_STATE_DIR = stateDir;
+  env.CARAPACE_STATE_DIR = stateDir;
   return env;
 }
 
 export function openChannelIngressDatabase(stateDir?: string) {
-  return openOpenClawStateDatabase({
+  return openCarapaceStateDatabase({
     env: stateDir ? createStateDirEnv(stateDir) : process.env,
   });
 }
@@ -306,7 +306,7 @@ async function openChannelIngressDatabaseForListing(
     return { db: openChannelIngressDatabase(stateDir).db, release: () => {} };
   }
   const env = stateDir ? createStateDirEnv(stateDir) : process.env;
-  const database = await openExistingOpenClawStateDatabaseReadOnly({ env });
+  const database = await openExistingCarapaceStateDatabaseReadOnly({ env });
   if (!database) {
     return undefined;
   }
@@ -627,7 +627,7 @@ export async function listChannelIngressQueueAccountIdsReadOnly(params: {
   }
 }
 
-/** Creates a durable channel/account-scoped ingress queue backed by the OpenClaw state database. */
+/** Creates a durable channel/account-scoped ingress queue backed by the Carapace state database. */
 export function createChannelIngressQueue<
   TPayload,
   TMetadata = unknown,
@@ -653,7 +653,7 @@ export function createChannelIngressQueue<
     const receivedAt = enqueueOptions?.receivedAt ?? now();
     const updatedAt = now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const insert = executeSqliteQuerySync(
@@ -884,7 +884,7 @@ export function createChannelIngressQueue<
         : storedLaneKey;
     };
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         let effectiveBlocked = blocked;
@@ -1014,7 +1014,7 @@ export function createChannelIngressQueue<
       throw new Error("Channel ingress event id cannot be empty");
     }
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const transitionAt = now();
@@ -1065,7 +1065,7 @@ export function createChannelIngressQueue<
     const eventId = idFrom(claimRef);
     const refreshedAt = refreshOptions?.refreshedAt ?? now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const result = executeSqliteQuerySync(
@@ -1093,7 +1093,7 @@ export function createChannelIngressQueue<
   ): Promise<boolean> => {
     const eventId = idFrom(claimRef);
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const result = executeSqliteQuerySync(
@@ -1171,7 +1171,7 @@ export function createChannelIngressQueue<
         }
         // claimColumns === null: no reachable owner can exist, so no policy
         // consult — tombstone unconditionally to keep the queue recoverable.
-        const tombstoned = runOpenClawStateWriteTransaction(
+        const tombstoned = runCarapaceStateWriteTransaction(
           (tx) =>
             tombstoneCorruptRow({
               db: tx.db,
@@ -1208,7 +1208,7 @@ export function createChannelIngressQueue<
     const token = claimTokenFrom(idOrClaim);
     const completedAt = completeOptions?.completedAt ?? now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const baseUpdate = kysely
@@ -1280,7 +1280,7 @@ export function createChannelIngressQueue<
     const token = claimTokenFrom(idOrClaim);
     const releasedAt = releaseOptions?.releasedAt ?? now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const baseUpdate = kysely
@@ -1323,7 +1323,7 @@ export function createChannelIngressQueue<
     const token = claimTokenFrom(idOrClaim);
     const failedAt = failOptions.failedAt ?? now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const baseUpdate = kysely
@@ -1362,7 +1362,7 @@ export function createChannelIngressQueue<
     const eventId = idFrom(id);
     const resubmittedAt = resubmitOptions?.resubmittedAt ?? now();
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const row = selectRow(tx.db, queueName, eventId);
         if (!row) {
@@ -1432,7 +1432,7 @@ export function createChannelIngressQueue<
     const eventId = idFrom(idOrRecord);
     const token = claimTokenFrom(idOrRecord);
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         const baseDelete = kysely
@@ -1474,7 +1474,7 @@ export function createChannelIngressQueue<
       return 0;
     }
     const database = openChannelIngressDatabase(options.stateDir);
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       (tx) => {
         const kysely = getChannelIngressKysely(tx.db);
         let deleted = 0;

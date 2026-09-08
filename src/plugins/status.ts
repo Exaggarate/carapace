@@ -1,7 +1,7 @@
 // Builds plugin status snapshots for CLI and diagnostics.
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { normalizeOpenClawVersionBase } from "../config/version.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { normalizeCarapaceVersionBase } from "../config/version.js";
 import { listImportedBundledPluginFacadeIds } from "../plugin-sdk/facade-runtime.js";
 import { resolveCompatibilityHostVersion } from "../version.js";
 import { inspectBundleLspRuntimeSupport } from "./bundle-lsp.js";
@@ -187,14 +187,14 @@ function resolveReportedPluginVersion(
     return plugin.version;
   }
   return (
-    normalizeOpenClawVersionBase(resolveCompatibilityHostVersion(env)) ??
-    normalizeOpenClawVersionBase(plugin.version) ??
+    normalizeCarapaceVersionBase(resolveCompatibilityHostVersion(env)) ??
+    normalizeCarapaceVersionBase(plugin.version) ??
     plugin.version
   );
 }
 
 type PluginReportParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   effectiveOnly?: boolean;
   onlyPluginIds?: readonly string[];
   /** Capture full registrations without starting channel runtime sidecars. */
@@ -597,7 +597,7 @@ export function buildPluginCompatibilityNotices(
 }
 
 export function buildPluginCompatibilitySnapshotNotices(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): PluginCompatibilityNotice[] {

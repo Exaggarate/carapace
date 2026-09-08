@@ -109,10 +109,10 @@ async function runScheduler(options: ProducerOptions, appendLog: (chunk: unknown
   const dockerRunDir = path.join(options.artifactBase, "docker-run");
   const identityPath = path.join(options.artifactBase, "artifact-identities.json");
   await fs.mkdir(dockerRunDir, { recursive: true });
-  let packageTgz = process.env.OPENCLAW_CURRENT_PACKAGE_TGZ;
+  let packageTgz = process.env.CARAPACE_CURRENT_PACKAGE_TGZ;
   if (packageTgz) {
-    const packageDir = path.join(dockerRunDir, "openclaw-package");
-    const evidencePackageTgz = path.join(packageDir, "openclaw-current.tgz");
+    const packageDir = path.join(dockerRunDir, "carapace-package");
+    const evidencePackageTgz = path.join(packageDir, "carapace-current.tgz");
     const sourcePackageTgz = path.resolve(packageTgz);
     await fs.mkdir(packageDir, { recursive: true });
     if (sourcePackageTgz !== evidencePackageTgz) {
@@ -129,15 +129,15 @@ async function runScheduler(options: ProducerOptions, appendLog: (chunk: unknown
       cwd: options.repoRoot,
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_BUILD: "1",
-        OPENCLAW_DOCKER_ALL_DRY_RUN: "0",
-        OPENCLAW_DOCKER_ALL_LANES: options.lane,
-        OPENCLAW_DOCKER_ALL_LOG_DIR: dockerRunDir,
-        OPENCLAW_DOCKER_ALL_PARALLELISM: "1",
-        OPENCLAW_DOCKER_ALL_PREFLIGHT: "1",
-        OPENCLAW_DOCKER_ALL_TIMINGS_FILE: path.join(dockerRunDir, "lane-timings.json"),
-        OPENCLAW_DOCKER_ARTIFACT_IDENTITY_PATH: identityPath,
-        ...(packageTgz ? { OPENCLAW_CURRENT_PACKAGE_TGZ: packageTgz } : {}),
+        CARAPACE_DOCKER_ALL_BUILD: "1",
+        CARAPACE_DOCKER_ALL_DRY_RUN: "0",
+        CARAPACE_DOCKER_ALL_LANES: options.lane,
+        CARAPACE_DOCKER_ALL_LOG_DIR: dockerRunDir,
+        CARAPACE_DOCKER_ALL_PARALLELISM: "1",
+        CARAPACE_DOCKER_ALL_PREFLIGHT: "1",
+        CARAPACE_DOCKER_ALL_TIMINGS_FILE: path.join(dockerRunDir, "lane-timings.json"),
+        CARAPACE_DOCKER_ARTIFACT_IDENTITY_PATH: identityPath,
+        ...(packageTgz ? { CARAPACE_CURRENT_PACKAGE_TGZ: packageTgz } : {}),
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -170,7 +170,7 @@ async function runDockerArtifactProofProducer(
         "scripts/test-docker-all.mjs",
         "scripts/lib/docker-e2e-plan.mts",
         "scripts/lib/docker-e2e-scenarios.mts",
-        "scripts/package-openclaw-for-docker.mts",
+        "scripts/package-carapace-for-docker.mts",
       ],
       docsRefs: ["docs/install/docker.md", "docs/help/testing.md"],
       id: options.lane,
@@ -188,7 +188,7 @@ async function runDockerArtifactProofProducer(
     }
     const identity = JSON.parse(await fs.readFile(result.identityPath, "utf8")) as ArtifactIdentity;
     assertIdentity(identity, options.lane);
-    const packagePath = path.join("docker-run", "openclaw-package", "openclaw-current.tgz");
+    const packagePath = path.join("docker-run", "carapace-package", "carapace-current.tgz");
     return await writer.write({
       artifacts: [
         { kind: "identity", filePath: "artifact-identities.json" },

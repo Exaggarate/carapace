@@ -66,9 +66,9 @@ suite.define(() => {
     });
     try {
       await page.goto(`${suite.server.baseUrl}new`);
-      const badge = page.locator("openclaw-app-sidebar .sidebar-issues-button__count");
+      const badge = page.locator("carapace-app-sidebar .sidebar-issues-button__count");
       await expect.poll(() => badge.textContent()).toBe("2");
-      await page.locator("openclaw-app-sidebar .sidebar-issues-button").click();
+      await page.locator("carapace-app-sidebar .sidebar-issues-button").click();
       await page.getByText("Failed settings transition", { exact: true }).waitFor();
       await captureSidebarUiProof(suite, page, "inbox-before-hidden-events.png");
       await page.evaluate(() => {
@@ -157,7 +157,7 @@ suite.define(() => {
     });
     try {
       await page.goto(`${suite.server.baseUrl}new`);
-      const badge = page.locator("openclaw-app-sidebar .sidebar-issues-button__count");
+      const badge = page.locator("carapace-app-sidebar .sidebar-issues-button__count");
       await expect.poll(() => badge.textContent()).toBe("1");
       await gateway.waitForRequest("models.authStatus");
       await page.clock.setFixedTime(now + 60_001);
@@ -171,7 +171,7 @@ suite.define(() => {
       await gateway.resolveDeferred("models.authStatus", MISSING_AUTH_RESPONSE);
       await gateway.waitForRequest("models.authStatus", { after: 1 });
       await expect.poll(() => badge.textContent()).toBe("2");
-      await page.locator("openclaw-app-sidebar .sidebar-issues-button").click();
+      await page.locator("carapace-app-sidebar .sidebar-issues-button").click();
       const authWarning = page.locator('[data-attention-kind="modelAuthExpired"]');
       await authWarning.waitFor({ state: "visible" });
       await gateway.resolveDeferred("models.authStatus", { ts: now + 60_001, providers: [] });
@@ -226,7 +226,7 @@ suite.define(() => {
       }
 
       await gateway.resolveDeferred("models.authStatus");
-      const badge = page.locator("openclaw-app-sidebar .sidebar-issues-button__count");
+      const badge = page.locator("carapace-app-sidebar .sidebar-issues-button__count");
       await expect.poll(() => badge.textContent()).toBe("1");
       await gateway.resolveDeferred("cron.list");
       expect(await gateway.getRequests("cron.list")).toHaveLength(1);
@@ -237,7 +237,7 @@ suite.define(() => {
       for (const method of ["cron.list", "cron.status"]) {
         expect(await gateway.getRequests(method)).toHaveLength(2);
       }
-      await page.locator("openclaw-app-sidebar .sidebar-issues-button").click();
+      await page.locator("carapace-app-sidebar .sidebar-issues-button").click();
       await page.getByText("Failed settings transition", { exact: true }).waitFor();
       await gateway.setMethodResponse("cron.list", {
         ...FAILED_CRON_RESPONSE,
@@ -316,7 +316,7 @@ suite.define(() => {
       const chatInbox = page.locator(
         testCase.collapseSidebar
           ? ".sidebar-attention--floating .sidebar-issues-button"
-          : "openclaw-app-sidebar .sidebar-issues-button",
+          : "carapace-app-sidebar .sidebar-issues-button",
       );
       await chatInbox.waitFor({ state: "visible" });
 
@@ -358,7 +358,7 @@ suite.define(() => {
 
       await page.keyboard.press("Control+Shift+,");
       await waitForControlUiSettingsTakeover(page);
-      expect(await page.locator("openclaw-sidebar-attention").count()).toBe(0);
+      expect(await page.locator("carapace-sidebar-attention").count()).toBe(0);
 
       await page.keyboard.press("Escape");
       await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
@@ -383,7 +383,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -419,13 +419,13 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}new`);
       await gateway.waitForRequest("cron.list");
       await expect
-        .poll(() => page.locator("openclaw-app-sidebar .sidebar-issues-button__count").count())
+        .poll(() => page.locator("carapace-app-sidebar .sidebar-issues-button__count").count())
         .toBe(0);
 
       await page.locator(".sidebar-brand__collapse").click();
       await page.locator(".sidebar-attention--floating .sidebar-issues-button").waitFor();
       await page.locator(".shell-chrome-controls__nav-toggle").click();
-      await page.locator("openclaw-app-sidebar .sidebar-issues-button").waitFor();
+      await page.locator("carapace-app-sidebar .sidebar-issues-button").waitFor();
 
       await gateway.setMethodResponse("cron.list", FAILED_CRON_RESPONSE);
       await gateway.emitGatewayEvent("cron", {
@@ -437,7 +437,7 @@ suite.define(() => {
       });
       await expect
         .poll(() =>
-          page.locator("openclaw-app-sidebar .sidebar-issues-button__count").textContent(),
+          page.locator("carapace-app-sidebar .sidebar-issues-button__count").textContent(),
         )
         .toBe("1");
 
@@ -514,7 +514,7 @@ suite.define(() => {
         expect(await input.inputValue()).toBe(value);
         expect(await input.isEditable()).toBe(true);
       }
-      if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+      if (process.env.CARAPACE_CAPTURE_UI_PROOF === "1") {
         await page.screenshot({
           animations: "disabled",
           path: path.join(suite.artifactDir, "gateway-draft-reconnected.png"),
@@ -538,18 +538,18 @@ suite.define(() => {
     if (webChrome) {
       await page.addInitScript(() => {
         const nativeWindow = window as Window & {
-          __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-          __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+          __CARAPACE_NATIVE_WEB_CHROME__?: boolean;
+          __CARAPACE_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
         };
-        nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-        nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+        nativeWindow["__CARAPACE_NATIVE_WEB_CHROME__"] = true;
+        nativeWindow["__CARAPACE_NATIVE_HISTORY__"] = {
           canGoBack: false,
           canGoForward: false,
         };
         const stamp = () =>
           document.documentElement.classList.add(
-            "openclaw-native-macos",
-            "openclaw-native-web-chrome",
+            "carapace-native-macos",
+            "carapace-native-web-chrome",
           );
         if (document.documentElement) {
           stamp();
@@ -571,7 +571,7 @@ suite.define(() => {
         .poll(() =>
           page
             .locator("html")
-            .evaluate((element) => element.classList.contains("openclaw-native-web-chrome")),
+            .evaluate((element) => element.classList.contains("carapace-native-web-chrome")),
         )
         .toBe(webChrome);
       await captureSettingsSidebarUiProof(

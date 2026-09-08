@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { disposeMcpClient } from "./mcp-client-lifecycle.js";
 import { redactMcpDiagnosticError } from "./mcp-error.js";
 import {
-  OpenClawSSEClientTransport,
-  OpenClawStreamableHTTPClientTransport,
+  CarapaceSSEClientTransport,
+  CarapaceStreamableHTTPClientTransport,
 } from "./mcp-http-transport.js";
 
 function jsonResponse(value: unknown, init?: ResponseInit): Response {
@@ -71,7 +71,7 @@ function mcpResultResponse(
   });
 }
 
-describe("OpenClaw MCP HTTP lifecycle adapters", () => {
+describe("Carapace MCP HTTP lifecycle adapters", () => {
   it.each([
     "Streamable HTTP error: Error POSTing to endpoint: bearer=body-secret",
     "Error POSTing to endpoint (HTTP 500): bearer=body-secret",
@@ -95,7 +95,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         );
       },
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
     });
     const client = new Client({ name: "test", version: "1" });
@@ -129,7 +129,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         });
       },
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
     });
     const client = new Client({ name: "test", version: "1" });
@@ -170,7 +170,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
             )
           : new Response(null, { status: 202 }),
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
     });
     const client = new Client({ name: "test", version: "1" });
@@ -201,7 +201,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         { headers: { "content-type": "text/event-stream" } },
       );
     });
-    const transport = new OpenClawSSEClientTransport(new URL("http://mcp.invalid/sse"), {
+    const transport = new CarapaceSSEClientTransport(new URL("http://mcp.invalid/sse"), {
       fetch: fetchMock,
       eventSourceInit: { fetch: fetchMock },
     });
@@ -256,7 +256,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         { headers: { "content-type": "text/event-stream" } },
       );
     });
-    const transport = new OpenClawSSEClientTransport(new URL("http://mcp.invalid/sse"), {
+    const transport = new CarapaceSSEClientTransport(new URL("http://mcp.invalid/sse"), {
       fetch: fetchMock,
       eventSourceInit: { fetch: fetchMock },
     });
@@ -286,7 +286,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
   });
 
   it("turns legacy SSE HTTP 204 into owner-visible closure", async () => {
-    const transport = new OpenClawSSEClientTransport(new URL("http://mcp.invalid/sse"), {
+    const transport = new CarapaceSSEClientTransport(new URL("http://mcp.invalid/sse"), {
       eventSourceInit: {
         fetch: async () => new Response(null, { status: 204, statusText: "No Content" }),
       },
@@ -323,7 +323,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
       }
       return new Response(null, { status: 503, statusText: "Unavailable" });
     });
-    const transport = new OpenClawSSEClientTransport(new URL("http://mcp.invalid/sse"), {
+    const transport = new CarapaceSSEClientTransport(new URL("http://mcp.invalid/sse"), {
       fetch: fetchMock,
       eventSourceInit: { fetch: fetchMock },
     });
@@ -358,7 +358,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
           : new Response(null, { status: 503, statusText: "Unavailable" });
       },
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
       reconnectionOptions: {
         initialReconnectionDelay: 1,
@@ -382,7 +382,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
     const fetchMock = initializedFetch({
       onGet: () => new Response("Session not found", { status: 404, statusText: "Not Found" }),
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
     });
     const client = new Client({ name: "test", version: "1" });
@@ -414,7 +414,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         headers: { "mcp-session-id": "allocated-before-failure" },
       });
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
     });
     const client = new Client({ name: "test", version: "1" });
@@ -439,7 +439,7 @@ describe("OpenClaw MCP HTTP lifecycle adapters", () => {
         });
       },
     });
-    const transport = new OpenClawStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
+    const transport = new CarapaceStreamableHTTPClientTransport(new URL("http://mcp.invalid/mcp"), {
       fetch: fetchMock,
       reconnectionOptions: {
         initialReconnectionDelay: 20,

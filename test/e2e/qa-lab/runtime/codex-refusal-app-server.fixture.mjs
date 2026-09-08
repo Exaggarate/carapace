@@ -6,9 +6,9 @@ import {
   runFakeCodexAppServer,
 } from "../../../../scripts/e2e/lib/codex-app-server-fixture.mjs";
 
-const requestLog = process.env.OPENCLAW_QA_CODEX_REFUSAL_APP_SERVER_LOG;
-const appServerVersion = process.env.OPENCLAW_QA_CODEX_APP_SERVER_VERSION;
-const failureKind = process.env.OPENCLAW_QA_CODEX_FAILURE_KIND;
+const requestLog = process.env.CARAPACE_QA_CODEX_REFUSAL_APP_SERVER_LOG;
+const appServerVersion = process.env.CARAPACE_QA_CODEX_APP_SERVER_VERSION;
+const failureKind = process.env.CARAPACE_QA_CODEX_FAILURE_KIND;
 const failures = {
   bio: {
     message: "This content was flagged for possible biological risk. Synthetic detail.",
@@ -41,9 +41,9 @@ runFakeCodexAppServer({
     initialize: ({ sendResult }) =>
       sendResult(
         createFakeInitializeResponse({
-          name: "openclaw-qa-codex-refusal",
+          name: "carapace-qa-codex-refusal",
           version: appServerVersion,
-          userAgent: `openclaw/${appServerVersion} (test)`,
+          userAgent: `carapace/${appServerVersion} (test)`,
         }),
       ),
     "account/login/start": ({ params, sendResult }) => sendResult({ type: params?.type }),

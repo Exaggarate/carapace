@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { parse as parseYaml } from "yaml";
 import { requireOptionArgument } from "./lib/arg-utils.mts";
 import { pnpmLockfileDocuments } from "./lib/pnpm-lockfile-documents.mjs";

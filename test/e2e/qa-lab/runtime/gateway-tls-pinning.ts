@@ -5,8 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import tls from "node:tls";
 import { pathToFileURL } from "node:url";
-import { GatewayClient } from "@openclaw/gateway-client";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { GatewayClient } from "@carapace/gateway-client";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   QA_EVIDENCE_FILENAME,
   type QaEvidenceSummaryJson,
@@ -28,19 +28,19 @@ const ENV_KEYS = [
   "HOME",
   ...GATEWAY_STARTUP_MUTATED_ENV_KEYS,
   "NODE_ENV",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BONJOUR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
-  "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_PROVIDERS",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BONJOUR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_PROVIDERS",
   "VITEST",
 ] as const;
 
@@ -95,7 +95,7 @@ async function writeDiscoveryProbePlugin(
   await fs.mkdir(pluginDir, { recursive: true });
   await Promise.all([
     fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       `${JSON.stringify(
         {
           id: DISCOVERY_PLUGIN_ID,
@@ -286,9 +286,9 @@ async function proveCleartextMismatch(port: number, tlsFingerprint: string): Pro
 
 export async function runGatewayTlsPinningProof(): Promise<GatewayTlsPinningProof> {
   const restoreEnvironment = captureEnvironment();
-  const runtimeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-tls-pinning-"));
+  const runtimeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-gateway-tls-pinning-"));
   const stateDir = path.join(runtimeRoot, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "carapace.json");
   const certPath = path.join(runtimeRoot, "tls", "gateway-cert.pem");
   const keyPath = path.join(runtimeRoot, "tls", "gateway-key.pem");
   const pluginDir = path.join(runtimeRoot, "discovery-plugin");
@@ -297,20 +297,20 @@ export async function runGatewayTlsPinningProof(): Promise<GatewayTlsPinningProo
 
   try {
     process.env.HOME = runtimeRoot;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
-    delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
-    process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = "1";
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
-    process.env.OPENCLAW_SKIP_CHANNELS = "1";
-    process.env.OPENCLAW_SKIP_CRON = "1";
-    process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-    process.env.OPENCLAW_SKIP_PROVIDERS = "1";
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+    process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS = "1";
+    delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_TEST_MINIMAL_GATEWAY;
+    process.env.CARAPACE_SKIP_BROWSER_CONTROL_SERVER = "1";
+    process.env.CARAPACE_SKIP_CANVAS_HOST = "1";
+    process.env.CARAPACE_SKIP_CHANNELS = "1";
+    process.env.CARAPACE_SKIP_CRON = "1";
+    process.env.CARAPACE_SKIP_GMAIL_WATCHER = "1";
+    process.env.CARAPACE_SKIP_PROVIDERS = "1";
     delete process.env.NODE_ENV;
-    delete process.env.OPENCLAW_DISABLE_BONJOUR;
+    delete process.env.CARAPACE_DISABLE_BONJOUR;
     delete process.env.VITEST;
     await writeDiscoveryProbePlugin(pluginDir, advertisementPath);
 

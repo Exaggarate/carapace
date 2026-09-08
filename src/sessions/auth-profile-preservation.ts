@@ -1,7 +1,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   findPersistedAuthProfileCredential,
   getRuntimeAuthProfileStoreSnapshot,
@@ -10,7 +10,7 @@ import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { resolveCollapsedSessionAuthPinSource } from "../config/sessions/auth-profile-override-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { isUserModelAuthProfileId } from "../state/user-model-account-id.js";
 import { applyModelOverrideToSessionEntry } from "./model-overrides.js";
@@ -22,7 +22,7 @@ type ModelOverrideSelection = {
 };
 
 function resolvePinnedAuthProfileProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir: string;
   profileId: string;
 }): string | undefined {
@@ -36,7 +36,7 @@ function resolvePinnedAuthProfileProvider(params: {
 }
 
 type SessionAuthProfilePreservationParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir: string;
   entry: SessionEntry;
   currentProvider: string;
@@ -96,7 +96,7 @@ export function shouldPreserveUnavailableSessionAuthProfileOverride(
 
 /** Applies a user model selection without dropping a compatible pinned auth profile. */
 export function applyModelOverrideWithAuthProfileCompatibility(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir: string;
   entry: SessionEntry;
   currentProvider: string;

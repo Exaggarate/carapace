@@ -1,24 +1,24 @@
 // Signal plugin module implements approval handler behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID } from "carapace/plugin-sdk/account-id";
 import {
   buildChannelApprovalExpiredText,
   buildChannelApprovalResolvedText,
   createChannelApprovalNativeRuntimeAdapter,
   type PendingApprovalView,
   resolvePreparedApprovalAccountId,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "carapace/plugin-sdk/approval-native-runtime";
 import {
   buildApprovalReactionPendingContent,
   type ApprovalReactionPendingContent,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
+} from "carapace/plugin-sdk/approval-reaction-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
   SystemAgentApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultSignalAccountId } from "./accounts.js";
 import { resolveSignalTarget } from "./aliases.js";
 import {

@@ -1,6 +1,6 @@
 // Zalouser tests cover accounts plugin behavior.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { CarapaceConfig } from "../runtime-api.js";
 import {
   listZalouserAccountIds,
   resolveDefaultZalouserAccountId,
@@ -9,8 +9,8 @@ import {
 const originalZalouserProfile = process.env.ZALOUSER_PROFILE;
 const originalZcaProfile = process.env.ZCA_PROFILE;
 
-function asConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asConfig(value: unknown): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
 describe("zalouser account resolution", () => {

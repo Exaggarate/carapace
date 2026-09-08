@@ -28,7 +28,7 @@ function resolveSelection({ modelRef, useUtilityModel, agentDir }: Record<string
     provider: model.slice(0, slash),
     modelId: model.slice(slash + 1),
     profileId,
-    agentDir: typeof agentDir === "string" ? agentDir : "/tmp/openclaw-agent",
+    agentDir: typeof agentDir === "string" ? agentDir : "/tmp/carapace-agent",
   };
 }
 
@@ -157,7 +157,7 @@ describe("generateConversationLabel", () => {
       provider: "openai",
       modelId: "same-model",
       profileId: "work",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/carapace-agent",
     });
     runIsolatedCompletion.mockResolvedValue({ text: "" });
 

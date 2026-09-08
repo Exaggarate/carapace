@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { crc32, inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { persistSessionTranscriptTurn } from "../../config/sessions/session-accessor.js";
 import { resolveSessionStorePathForScope } from "../../config/sessions/session-store-path.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { buildContextReply } from "./commands-context-report.js";
 import { buildCommandContext } from "./commands-context.js";
 import type { HandleCommandsParams } from "./commands-types.js";
@@ -122,7 +122,7 @@ async function withTranscript(
   }) => Promise<void>,
   options: { agentId?: string; sessionKey?: string } = {},
 ): Promise<void> {
-  const dir = await mkdtemp(join(tmpdir(), "openclaw-context-report-"));
+  const dir = await mkdtemp(join(tmpdir(), "carapace-context-report-"));
   try {
     const agentId = options.agentId ?? "default";
     const target = {
@@ -144,7 +144,7 @@ async function withTranscript(
     );
     await run(target);
   } finally {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await rm(dir, { recursive: true, force: true });
   }
 }
@@ -171,7 +171,7 @@ describe("buildContextReply", () => {
     expect(result.text).not.toContain("Bootstrap context is over configured limits");
   });
 
-  it("reports native Codex project docs as unverified without OpenClaw limit advice", async () => {
+  it("reports native Codex project docs as unverified without Carapace limit advice", async () => {
     const result = await buildContextReply(
       makeParams("/context detail", false, { nativeUnverified: true }),
     );
@@ -522,7 +522,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       isGroup: false,
       triggerBodyNormalized: "/id",
       commandAuthorized: true,
@@ -545,7 +545,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       isGroup: false,
       triggerBodyNormalized: stripStructuralPrefixes("/reset soft\nre-read persona files"),
       commandAuthorized: true,
@@ -569,7 +569,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       isGroup: false,
       triggerBodyNormalized: stripStructuralPrefixes(body),
       commandAuthorized: true,
@@ -595,7 +595,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       isGroup: false,
       triggerBodyNormalized: "/codex bind",
       commandAuthorized: true,

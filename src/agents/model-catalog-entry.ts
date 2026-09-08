@@ -1,4 +1,4 @@
-import type { NormalizedModelCatalogRow } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { NormalizedModelCatalogRow } from "@carapace/model-catalog-core/model-catalog-types";
 import type { ModelCatalogEntry } from "./model-catalog.types.js";
 
 /** Shared metadata projection; keep transport headers and authoring fields out of catalog entries. */

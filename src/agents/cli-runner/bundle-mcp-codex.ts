@@ -3,7 +3,7 @@
  */
 import { normalizeConfiguredMcpServers } from "../../config/mcp-config-normalize.js";
 import type { SessionToolOverrides } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { loadMcpToolGrants } from "../../infra/exec-approvals-mcp.js";
 import type { BundleMcpConfig, BundleMcpServerConfig } from "../../plugins/bundle-mcp.js";
 import { isValidAgentId, normalizeAgentId } from "../../routing/session-key.js";
@@ -82,11 +82,11 @@ function isCodexMcpServerAllowedForAgent(
 }
 
 /**
- * Applies Codex-only agent scoping before OpenClaw resolves credentials or opens transports.
+ * Applies Codex-only agent scoping before Carapace resolves credentials or opens transports.
  * Session overrides may narrow this result, but cannot widen `codex.agents`.
  */
 export function resolveCodexMcpToolOverridesForAgent(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   options: Pick<CodexUserMcpServersProjectionOptions, "agentId" | "toolOverrides">,
 ): Pick<SessionToolOverrides, "mcpServers" | "mcpToolsDeny"> | undefined {
   const deniedServerNames = Object.entries(normalizeConfiguredMcpServers(cfg?.mcp?.servers))
@@ -111,7 +111,7 @@ function readSessionMcpServerOverride(
 }
 
 function selectCodexProjectableMcpServers(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   options: CodexUserMcpServersProjectionOptions | undefined,
 ): BundleMcpConfig["mcpServers"] {
   const userServers = normalizeConfiguredMcpServers(cfg?.mcp?.servers);
@@ -127,7 +127,7 @@ function selectCodexProjectableMcpServers(
       if (!allowed) {
         return false;
       }
-      // Remote app servers cannot receive OpenClaw-managed bearer credentials.
+      // Remote app servers cannot receive Carapace-managed bearer credentials.
       // Omit these servers before catalog discovery can use that credential.
       if (options?.allowLiteralOAuthProjection === false && requiresMcpBearerProjection(server)) {
         options.onServerUnavailable?.(
@@ -165,7 +165,7 @@ export function injectCodexMcpConfigArgs(
  * plugin thread-config `apps` patch, so they must not be re-projected here.
  */
 export function buildCodexUserMcpServersThreadConfigPatch(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   options?: CodexUserMcpServersProjectionOptions,
 ): { mcp_servers: CodexThreadConfigObject } | undefined {
   const entries = Object.entries(selectCodexProjectableMcpServers(cfg, options));
@@ -193,9 +193,9 @@ export function buildCodexUserMcpServersThreadConfigPatch(
   return { mcp_servers };
 }
 
-/** Async runtime projection that resolves OpenClaw-managed MCP bearer tokens. */
+/** Async runtime projection that resolves Carapace-managed MCP bearer tokens. */
 export async function buildCodexUserMcpServersThreadConfigPatchForRuntime(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   options?: CodexUserMcpServersProjectionOptions,
 ): Promise<{ mcp_servers: CodexThreadConfigObject } | undefined> {
   let allowedServers = selectCodexProjectableMcpServers(cfg, options);
@@ -316,7 +316,7 @@ export async function buildCodexUserMcpServersThreadConfigPatchForRun(params: {
   if (Object.keys(configuredMcpServers).length === 0) {
     return undefined;
   }
-  const projectionConfig: OpenClawConfig = {
+  const projectionConfig: CarapaceConfig = {
     ...run.config,
     mcp: { ...run.config?.mcp, servers: configuredMcpServers },
   };

@@ -19,7 +19,7 @@ type CronActiveJobState = {
   emptyWaiters: Set<() => void>;
 };
 
-const CRON_ACTIVE_JOB_STATE_KEY = Symbol.for("openclaw.cron.activeJobs");
+const CRON_ACTIVE_JOB_STATE_KEY = Symbol.for("carapace.cron.activeJobs");
 
 export function bindCronJobAdmittedRun(
   marker: CronActiveJobMarker | undefined,

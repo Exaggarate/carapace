@@ -1,11 +1,11 @@
-import { isSensitiveUrlQueryParamName } from "@openclaw/net-policy/redact-sensitive-url";
+import { isSensitiveUrlQueryParamName } from "@carapace/net-policy/redact-sensitive-url";
 // Redaction helpers scrub secrets and sensitive identifiers from log output.
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import {
   findStructuredAuthParamRanges,
   redactStructuredAuthHeaders,
 } from "../../packages/acp-core/src/structured-auth-redaction.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { compileConfigRegex } from "../security/config-regex.js";
 import { readLoggingConfig } from "./config.js";
 import { replacePatternBounded } from "./redact-bounded.js";
@@ -37,7 +37,7 @@ import { redactRegisteredSecretValues } from "./secret-redaction-registry.js";
 
 type RedactSensitiveMode = "off" | "tools";
 type RedactPattern = string | RegExp;
-type LoggingConfig = OpenClawConfig["logging"];
+type LoggingConfig = CarapaceConfig["logging"];
 
 const DEFAULT_REDACT_MODE: RedactSensitiveMode = "tools";
 const DEFAULT_REDACT_MIN_LENGTH = 18;

@@ -1,7 +1,7 @@
 import { resolveCommandAuthorization } from "../auto-reply/command-auth.js";
 import { resolveInboundReplyToolAuthorityOverlay } from "../auto-reply/reply/reply-tool-authority.js";
 import { normalizeTalkSection } from "../config/talk.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginRuntime } from "../plugins/runtime/index.js";
 import {
   GatewayDrainingError,
@@ -46,7 +46,7 @@ const loadTalkAgentExecution = createLazyRuntimeModule(async () => {
   };
 });
 
-function createTalkClientAgentRuntime(params: { config: OpenClawConfig; rawSourceRef?: string }) {
+function createTalkClientAgentRuntime(params: { config: CarapaceConfig; rawSourceRef?: string }) {
   const agentRuntime = createPluginRuntime().agent;
   const runEmbeddedAgent: typeof agentRuntime.runEmbeddedAgent = async (runParams) => {
     runParams.abortSignal?.throwIfAborted();
@@ -123,7 +123,7 @@ function createTalkClientAgentRuntime(params: { config: OpenClawConfig; rawSourc
 }
 
 export function prepareTalkClientControlAuthority(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   sessionTarget: PreparedTalkSessionTarget;
   authority: TalkAgentConsultAuthority;
   source?: "reply" | "attempt";
@@ -161,7 +161,7 @@ export function prepareTalkClientControlAuthority(params: {
 }
 
 export function createTalkClientAgentConsultRunner(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   context: Pick<GatewayRequestContext, "chatAbortControllers" | "logGateway">;
   sessionTarget: PreparedTalkSessionTarget;
   ownerConnId?: string;

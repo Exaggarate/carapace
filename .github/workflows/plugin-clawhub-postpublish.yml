@@ -2,7 +2,7 @@ name: Plugin ClawHub Postpublish
 
 on:
   workflow_run: # zizmor: ignore[dangerous-triggers] read-only verifier; authenticates exact successful parent/child attempts and immutable receipt/artifact tuples; never executes downloaded content
-    workflows: [OpenClaw Release Publish]
+    workflows: [Carapace Release Publish]
     types: [completed]
 
 permissions:
@@ -19,8 +19,8 @@ env:
 jobs:
   verify:
     if: >-
-      github.repository == 'openclaw/openclaw' &&
-      github.event.workflow_run.repository.full_name == 'openclaw/openclaw' &&
+      github.repository == 'carapace/carapace' &&
+      github.event.workflow_run.repository.full_name == 'carapace/carapace' &&
       github.event.workflow_run.event == 'workflow_dispatch' &&
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest

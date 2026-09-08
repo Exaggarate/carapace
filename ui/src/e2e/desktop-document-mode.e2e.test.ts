@@ -92,22 +92,22 @@ async function startDesktopDocument(
   await page.setViewportSize({ width: 390, height: 844 });
   const gateway = await installMockGateway(page, {
     deferredMethods: ["environments.list"],
-    featureMethods: ["desktop.observe", "environments.list", "openclaw.setup.detect"],
+    featureMethods: ["desktop.observe", "environments.list", "carapace.setup.detect"],
     methodResponses: {
       "desktop.observe": desktopObserve,
       ...(describedSession === undefined
         ? {}
         : { "sessions.describe": { session: describedSession } }),
-      "openclaw.setup.detect": {
+      "carapace.setup.detect": {
         candidates: [],
         manualProviders: [],
-        workspace: "/tmp/openclaw-desktop-document",
+        workspace: "/tmp/carapace-desktop-document",
         setupComplete: false,
       },
     },
   });
   await page.goto(`${suite.server.baseUrl}${route}`);
-  const panel = page.locator("openclaw-desktop-panel");
+  const panel = page.locator("carapace-desktop-panel");
   await panel.waitFor({ state: "attached" });
   await gateway.waitForRequest("environments.list");
   await installDesktopClientFake(panel);
@@ -166,7 +166,7 @@ suite.define(() => {
         } else {
           await activateChatHeaderPanelAction(page, "Desktop");
         }
-        const panel = page.locator("openclaw-desktop-panel");
+        const panel = page.locator("carapace-desktop-panel");
         await panel.waitFor({ state: "attached" });
         await gateway.waitForRequest("environments.list");
         await installDesktopClientFake(panel);
@@ -316,26 +316,26 @@ suite.define(() => {
         try {
           await popup.waitForLoadState("domcontentloaded");
           expect(new URL(popup.url()).pathname).toBe(focusPath);
-          const focusedPanel = popup.locator("openclaw-desktop-panel");
+          const focusedPanel = popup.locator("carapace-desktop-panel");
           await focusedPanel.waitFor({ state: "attached" });
           await popup.waitForFunction(
             () =>
               (
-                window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway }
-              ).openclawControlUiE2eGateway?.findRequests("environments.list").length,
+                window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway }
+              ).carapaceControlUiE2eGateway?.findRequests("environments.list").length,
           );
           await installDesktopClientFake(focusedPanel);
           await popup.evaluate((environments) => {
             (
-              window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway }
-            ).openclawControlUiE2eGateway?.resolveDeferred("environments.list", environments);
+              window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway }
+            ).carapaceControlUiE2eGateway?.resolveDeferred("environments.list", environments);
           }, inventory);
           await focusedPanel.locator("[data-test-remote-desktop='true']").waitFor();
           expect(
             await popup.evaluate(() =>
               (
-                window as Window & { openclawControlUiE2eGateway?: ControlUiMockGateway }
-              ).openclawControlUiE2eGateway
+                window as Window & { carapaceControlUiE2eGateway?: ControlUiMockGateway }
+              ).carapaceControlUiE2eGateway
                 ?.findRequests("desktop.observe")
                 .map((request) => request.params),
             ),
@@ -358,7 +358,7 @@ suite.define(() => {
     await suite.withPage({ serviceWorkers: "block" }, async ({ page }) => {
       await installMockGateway(page);
       await page.goto(`${suite.server.baseUrl}dashboards`);
-      await page.locator("openclaw-app-shell").waitFor();
+      await page.locator("carapace-app-shell").waitFor();
       await page.goto(`${suite.server.baseUrl}focus/desktop`);
 
       await page
@@ -378,7 +378,7 @@ suite.define(() => {
       await viewer.waitFor();
       await panel.getByText("Desktop sources", { exact: true }).waitFor();
 
-      expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+      expect(await page.locator("carapace-app-shell").count()).toBe(0);
       expect(page.url()).not.toContain("model-setup");
       const bounds = await viewer.boundingBox();
       expect(bounds?.width).toBeGreaterThanOrEqual(389);

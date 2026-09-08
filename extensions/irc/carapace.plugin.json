@@ -1,0 +1,17 @@
+{
+  "id": "irc",
+  "name": "IRC",
+  "description": "Carapace IRC channel plugin.",
+  "doctorContract": {
+    "configRepair": true
+  },
+  "activation": {
+    "onStartup": false
+  },
+  "channels": ["irc"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

@@ -1,4 +1,4 @@
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 
 export type SandboxHostCsp = {
   connectDomains?: string[];
@@ -286,7 +286,7 @@ export function buildSandboxHostProxyHtml(csp?: SandboxHostCsp): string {
     }
     if (event.source === inner.contentWindow) {
       if (typeof event.data?.method === "string" && event.data.method.startsWith("ui/notifications/sandbox-")) return;
-      if (event.data?.type === "openclaw:widget-bridge-port-offer" || event.data?.type === "openclaw:widget-prompt-offer") {
+      if (event.data?.type === "carapace:widget-bridge-port-offer" || event.data?.type === "carapace:widget-prompt-offer") {
         const port = event.ports[0];
         // Each wrapper offers its private channels before untrusted code runs.
         // Only the first offer of each kind belongs to this document instance.

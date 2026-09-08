@@ -1,5 +1,5 @@
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   emitBenchmarkReport,
   parseBenchmarkInteger,
@@ -121,7 +121,7 @@ type BenchmarkRuntime = {
 };
 
 function usage(): string {
-  return `OpenClaw agent concurrency benchmark
+  return `Carapace agent concurrency benchmark
 
 Usage:
   node --import tsx scripts/bench-agent-concurrency.ts [options]

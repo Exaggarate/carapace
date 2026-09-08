@@ -42,11 +42,11 @@ export async function writeHotReloadTerminalCatalog(root: string): Promise<strin
       name: "qa-hot-reload-shell",
       version: "1.0.0",
       type: "module",
-      openclaw: { extensions: ["./index.mjs"] },
+      carapace: { extensions: ["./index.mjs"] },
     }),
   );
   await fs.writeFile(
-    path.join(directory, "openclaw.plugin.json"),
+    path.join(directory, "carapace.plugin.json"),
     JSON.stringify({
       id: "qa-hot-reload-shell",
       name: "Hot reload synthetic CLI catalog",
@@ -173,7 +173,7 @@ export async function proveHotReloadTerminalLifecycle({
   });
   await context.addInitScript(
     ({ gatewayUrl, token }) => {
-      Object.assign(window, { __OPENCLAW_NATIVE_CONTROL_AUTH__: { gatewayUrl, token } });
+      Object.assign(window, { __CARAPACE_NATIVE_CONTROL_AUTH__: { gatewayUrl, token } });
     },
     { gatewayUrl: gateway.wsUrl, token: gateway.token },
   );
@@ -202,7 +202,7 @@ export async function proveHotReloadTerminalLifecycle({
     const bootstrap = JSON.parse(bootstrapResponse.text) as ControlUiBootstrapConfig;
     assert.equal(bootstrap.terminalEnabled, enabled);
   };
-  const terminalPanel = page.locator(".sidebar-region__right-runtime openclaw-terminal-panel");
+  const terminalPanel = page.locator(".sidebar-region__right-runtime carapace-terminal-panel");
 
   await proveGroup("gateway.terminal.enabled", async () => {
     await runQaGatewayFixture(

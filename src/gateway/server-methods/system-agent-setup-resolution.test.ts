@@ -1,5 +1,5 @@
-// OpenClaw setup resolution tests cover terminal provider guidance.
-import { expectDefined } from "@openclaw/normalization-core";
+// Carapace setup resolution tests cover terminal provider guidance.
+import { expectDefined } from "@carapace/normalization-core";
 import { Compile } from "typebox/compile";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -8,7 +8,7 @@ import type {
 } from "../../../packages/gateway-protocol/src/index.js";
 import { WizardNextResultSchema } from "../../../packages/gateway-protocol/src/schema/wizard.js";
 import { createRuntimeConfigWriteApplication } from "../../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { buildPluginCapabilityConsentReview } from "../../plugins/capability-summary.js";
 import { resetCommandQueueStateForTest } from "../../process/command-queue.test-support.js";
 import { createDeferredCore } from "../../shared/deferred.js";
@@ -42,7 +42,7 @@ vi.mock("../../wizard/setup.shared.js", () => ({
   writeWizardConfigFile: setupSharedMocks.writeWizardConfigFile,
 }));
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: { defaults: { model: "openai/gpt-5.6-luna" } },
 };
 const validateWizardResult = Compile(WizardNextResultSchema);
@@ -95,12 +95,12 @@ async function callWizardNext(
   return payload;
 }
 
-describe("openclaw.setup provider resolution", () => {
+describe("carapace.setup provider resolution", () => {
   beforeEach(() => {
     setupSharedMocks.readSetupConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       hash: "setup-resolution-config",
       sourceConfig: config,
       config,
@@ -118,11 +118,11 @@ describe("openclaw.setup provider resolution", () => {
 
   it.each([
     [
-      "openclaw.setup.activate.start",
+      "carapace.setup.activate.start",
       { sessionId: "retained-session", kind: "codex-cli", modelRef: "example/model" },
     ],
-    ["openclaw.setup.auth.start", { sessionId: "retained-session", authChoice: "github-copilot" }],
-    ["openclaw.setup.prepare.start", { sessionId: "retained-session", authChoice: "ollama" }],
+    ["carapace.setup.auth.start", { sessionId: "retained-session", authChoice: "github-copilot" }],
+    ["carapace.setup.prepare.start", { sessionId: "retained-session", authChoice: "ollama" }],
   ] as const)("does not replace a retained wizard session through %s", async (method, params) => {
     const { wizardSessions, context } = makeContext();
     const retained = new WizardSession(async () => {});
@@ -174,7 +174,7 @@ describe("openclaw.setup provider resolution", () => {
         };
       });
       const { calls, respond } = makeRespond();
-      await systemAgentHandler("openclaw.setup.activate.start")({
+      await systemAgentHandler("carapace.setup.activate.start")({
         params: { sessionId, kind: "codex-cli", modelRef: "example/model" },
         respond,
         context,
@@ -251,7 +251,7 @@ describe("openclaw.setup provider resolution", () => {
       await installReleased;
       return { ok: true, modelRef: "example/model", latencyMs: 1, lines: [] };
     });
-    await systemAgentHandler("openclaw.setup.activate.start")({
+    await systemAgentHandler("carapace.setup.activate.start")({
       params: { sessionId, kind: "codex-cli", modelRef: "example/model" },
       respond: () => undefined,
       context,
@@ -366,7 +366,7 @@ describe("openclaw.setup provider resolution", () => {
       return calls[0]?.payload;
     };
     try {
-      await systemAgentHandler("openclaw.setup.auth.start")({
+      await systemAgentHandler("carapace.setup.auth.start")({
         params: { sessionId, authChoice: "fixture-provider" },
         respond: () => undefined,
         context,
@@ -455,7 +455,7 @@ describe("openclaw.setup provider resolution", () => {
         return { ok: true, modelRef: "fixture/demo-model", latencyMs: 1, lines: [] };
       },
     );
-    await systemAgentHandler("openclaw.setup.activate.start")({
+    await systemAgentHandler("carapace.setup.activate.start")({
       params: { sessionId, kind: "codex-cli", modelRef: "fixture/demo-model" },
       respond: () => undefined,
       context,
@@ -496,8 +496,8 @@ describe("openclaw.setup provider resolution", () => {
     providerAuthChoiceMocks.prepareAuthChoiceLoadedPluginProvider.mockResolvedValueOnce(result);
     const { wizardSessions, context } = makeContext();
     const handler = expectDefined(
-      systemAgentHandlers["openclaw.setup.prepare.start"],
-      "openclaw.setup.prepare.start handler",
+      systemAgentHandlers["carapace.setup.prepare.start"],
+      "carapace.setup.prepare.start handler",
     );
 
     await handler({
@@ -514,7 +514,7 @@ describe("openclaw.setup provider resolution", () => {
       done: true,
       status: "error",
       error:
-        'Error: Provider setup resolution failed for "ollama". Run `openclaw doctor --fix`, restart the Gateway, and try again.',
+        'Error: Provider setup resolution failed for "ollama". Run `carapace doctor --fix`, restart the Gateway, and try again.',
     });
     await whenAdmittedWizardSessionSettled(session);
     expect(setupSharedMocks.writeWizardConfigFile).not.toHaveBeenCalled();
@@ -535,7 +535,7 @@ describe("openclaw.setup provider resolution", () => {
       });
       const { calls, respond } = makeRespond();
 
-      await systemAgentHandler("openclaw.setup.auth.start")({
+      await systemAgentHandler("carapace.setup.auth.start")({
         params: { sessionId: "auth-session-1", agentId: "research", authChoice: "github-copilot" },
         respond,
         context,
@@ -621,7 +621,7 @@ describe("openclaw.setup provider resolution", () => {
         },
       );
       const { calls, respond } = makeRespond();
-      await systemAgentHandler("openclaw.setup.activate.start")({
+      await systemAgentHandler("carapace.setup.activate.start")({
         params: { sessionId, kind: "codex-cli", modelRef: "example/model" },
         respond,
         context,
@@ -707,7 +707,7 @@ describe("openclaw.setup provider resolution", () => {
           return { ok: true, modelRef: "fixture/demo-model", latencyMs: 1, lines: [] };
         },
       );
-      await systemAgentHandler("openclaw.setup.activate.start")({
+      await systemAgentHandler("carapace.setup.activate.start")({
         params: { sessionId, kind: "codex-cli", modelRef: "fixture/demo-model" },
         respond: () => undefined,
         context,
@@ -760,7 +760,7 @@ describe("openclaw.setup provider resolution", () => {
         };
       },
     );
-    await systemAgentHandler("openclaw.setup.activate.start")({
+    await systemAgentHandler("carapace.setup.activate.start")({
       params: { sessionId, kind: "codex-cli", modelRef: "example/model" },
       respond: () => undefined,
       context,
@@ -819,7 +819,7 @@ describe("openclaw.setup provider resolution", () => {
           };
         },
       );
-      await systemAgentHandler("openclaw.setup.auth.start")({
+      await systemAgentHandler("carapace.setup.auth.start")({
         params: { sessionId, authChoice: "github-copilot" },
         respond: () => undefined,
         context,

@@ -131,8 +131,8 @@ describe("subagent registry lifecycle error grace", () => {
   let previousFastTestEnv: string | undefined;
 
   beforeEach(async () => {
-    previousFastTestEnv = process.env.OPENCLAW_TEST_FAST;
-    process.env.OPENCLAW_TEST_FAST = "1";
+    previousFastTestEnv = process.env.CARAPACE_TEST_FAST;
+    process.env.CARAPACE_TEST_FAST = "1";
     vi.useFakeTimers();
     callGatewayMock.mockClear();
     onAgentEventMock.mockClear();
@@ -221,9 +221,9 @@ describe("subagent registry lifecycle error grace", () => {
     mod.resetSubagentRegistryForTests({ persist: false });
     vi.useRealTimers();
     if (previousFastTestEnv === undefined) {
-      delete process.env.OPENCLAW_TEST_FAST;
+      delete process.env.CARAPACE_TEST_FAST;
     } else {
-      process.env.OPENCLAW_TEST_FAST = previousFastTestEnv;
+      process.env.CARAPACE_TEST_FAST = previousFastTestEnv;
     }
   });
 

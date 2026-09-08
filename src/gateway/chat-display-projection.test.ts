@@ -93,7 +93,7 @@ describe("managed document chat history", () => {
     const message = {
       role: "assistant",
       content: canonical,
-      openclawDisplayContent: [...canonical, attachment],
+      carapaceDisplayContent: [...canonical, attachment],
     };
 
     for (const messages of projectHistoryTransports(message)) {
@@ -290,7 +290,7 @@ describe("oversized multimodal chat history", () => {
           blob: encoded,
           path: "/private/short-circuit-video.mp4",
           url: "https://media-user@media.example/video.mp4?signature=private-signature#private-fragment",
-          openclawReasoningReplay: { private: true },
+          carapaceReasoningReplay: { private: true },
         },
       ],
     };
@@ -318,7 +318,7 @@ describe("oversized multimodal chat history", () => {
       "media-user",
       "private-signature",
       "private-fragment",
-      "openclawReasoningReplay",
+      "carapaceReasoningReplay",
     ]) {
       expect(serialized).not.toContain(privateValue);
     }
@@ -409,7 +409,7 @@ describe("oversized multimodal chat history", () => {
         audio_url: "media://inbound/audio.wav",
         source: { type: "url", url: "/api/chat/media/outgoing/audio.wav" },
       },
-      { type: "audio", url: "/media/audio.wav", openUrl: "/__openclaw__/audio/clip.wav" },
+      { type: "audio", url: "/media/audio.wav", openUrl: "/__carapace__/audio/clip.wav" },
     ];
     const message = {
       role: "user",
@@ -501,7 +501,7 @@ describe("transcript metadata projection", () => {
     const message = {
       role: "user",
       content: "Keep this visible user message.",
-      __openclaw: {
+      __carapace: {
         id: "message-1",
         mirrorIdentity: "turn-1:prompt",
         replyToId: "message-0",
@@ -513,7 +513,7 @@ describe("transcript metadata projection", () => {
         {
           role: "user",
           content: "Keep this visible user message.",
-          __openclaw: {
+          __carapace: {
             id: "message-1",
             mirrorIdentity: "turn-1:prompt",
             replyToId: "message-0",
@@ -533,7 +533,7 @@ describe("transcript metadata projection", () => {
       expect(JSON.stringify(projected.content)).toContain("...(truncated)...");
       // Structured fact, so consumers fetch the full row via chat.message.get
       // instead of sniffing the in-band sentinel.
-      expect(projected["__openclaw"]).toEqual({ truncated: true, reason: "display-cap" });
+      expect(projected["__carapace"]).toEqual({ truncated: true, reason: "display-cap" });
     }
   });
 
@@ -543,12 +543,12 @@ describe("transcript metadata projection", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "block text ".repeat(20) }],
-          __openclaw: { id: "message-9", senderId: "assistant-1" },
+          __carapace: { id: "message-9", senderId: "assistant-1" },
         },
       ],
       16,
     ) as Record<string, unknown>[];
-    expect(projected?.["__openclaw"]).toEqual({
+    expect(projected?.["__carapace"]).toEqual({
       id: "message-9",
       senderId: "assistant-1",
       truncated: true,
@@ -561,7 +561,7 @@ describe("transcript metadata projection", () => {
       [{ role: "assistant", content: "short", timestamp: 1 }],
       16,
     ) as Record<string, unknown>[];
-    expect(projected?.["__openclaw"]).toBeUndefined();
+    expect(projected?.["__carapace"]).toBeUndefined();
   });
 
   it("marks display-cap truncation of a tool-result diff on both tool-result shapes", () => {
@@ -580,7 +580,7 @@ describe("transcript metadata projection", () => {
     ) as Record<string, unknown>[];
     for (const projected of [blockShaped, messageShaped]) {
       expect(JSON.stringify(projected)).toContain("...(truncated)...");
-      expect(projected?.["__openclaw"]).toMatchObject({ truncated: true, reason: "display-cap" });
+      expect(projected?.["__carapace"]).toMatchObject({ truncated: true, reason: "display-cap" });
     }
   });
 
@@ -589,7 +589,7 @@ describe("transcript metadata projection", () => {
       [{ role: "toolResult", toolName: "edit", details: { changed: true, diff: "+ok" } }],
       32,
     ) as Record<string, unknown>[];
-    expect(projected?.["__openclaw"]).toBeUndefined();
+    expect(projected?.["__carapace"]).toBeUndefined();
   });
 
   it("does not overwrite an upstream oversized reason with display-cap", () => {
@@ -598,12 +598,12 @@ describe("transcript metadata projection", () => {
         {
           role: "assistant",
           content: "still long enough to cap ".repeat(4),
-          __openclaw: { truncated: true, reason: "oversized" },
+          __carapace: { truncated: true, reason: "oversized" },
         },
       ],
       16,
     ) as Record<string, unknown>[];
-    expect(projected?.["__openclaw"]).toEqual({ truncated: true, reason: "oversized" });
+    expect(projected?.["__carapace"]).toEqual({ truncated: true, reason: "oversized" });
   });
 });
 
@@ -611,20 +611,20 @@ describe("managed inbound media fact projection", () => {
   const inboundMediaId = "photo---11111111-2222-3333-4444-555555555555.png";
   const managedInboundPath = path.join(getMediaDir(), "inbound", inboundMediaId);
 
-  function projectedOpenClawMeta(message: Record<string, unknown>) {
+  function projectedCarapaceMeta(message: Record<string, unknown>) {
     const projected = sanitizeChatHistoryMessages([message]);
-    return (projected[0] as Record<string, unknown> | undefined)?.["__openclaw"];
+    return (projected[0] as Record<string, unknown> | undefined)?.["__carapace"];
   }
 
   it("rewrites a configured-store managed inbound path to a canonical media URI", () => {
     const message = {
       role: "user",
       content: "first message with an image",
-      __openclaw: {
+      __carapace: {
         media: [{ path: managedInboundPath, contentType: "image/png" }],
       },
     };
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [
         {
           path: `media://inbound/${inboundMediaId}`,
@@ -641,11 +641,11 @@ describe("managed inbound media fact projection", () => {
     const message = {
       role: "user",
       content: "lookalike inbound path",
-      __openclaw: {
+      __carapace: {
         media: [{ path: lookalike, contentType: "image/png" }],
       },
     };
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [{ contentType: "image/png" }],
     });
   });
@@ -654,7 +654,7 @@ describe("managed inbound media fact projection", () => {
     const message = {
       role: "user",
       content: "private local image",
-      __openclaw: {
+      __carapace: {
         media: [
           { path: "/tmp/private-image.png", contentType: "image/png" },
           {
@@ -664,7 +664,7 @@ describe("managed inbound media fact projection", () => {
         ],
       },
     };
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [{ contentType: "image/png" }, { contentType: "image/png" }],
     });
   });
@@ -673,7 +673,7 @@ describe("managed inbound media fact projection", () => {
     const message = {
       role: "user",
       content: "traversal attempt",
-      __openclaw: {
+      __carapace: {
         media: [
           {
             path: path.join(getMediaDir(), "inbound", "..", "..", "etc", "passwd"),
@@ -682,7 +682,7 @@ describe("managed inbound media fact projection", () => {
         ],
       },
     };
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [{ contentType: "image/png" }],
     });
   });
@@ -693,12 +693,12 @@ describe("managed inbound media fact projection", () => {
     const message = {
       role: "user",
       content: "malformed percent escape",
-      __openclaw: {
+      __carapace: {
         media: [{ path: path.join(getMediaDir(), "inbound", "%"), contentType: "image/png" }],
       },
     };
     expect(() => sanitizeChatHistoryMessages([message])).not.toThrow();
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [{ contentType: "image/png" }],
     });
   });
@@ -707,7 +707,7 @@ describe("managed inbound media fact projection", () => {
     const message = {
       role: "user",
       content: "canonical inbound image",
-      __openclaw: {
+      __carapace: {
         media: [
           {
             path: `media://inbound/${inboundMediaId}`,
@@ -716,7 +716,7 @@ describe("managed inbound media fact projection", () => {
         ],
       },
     };
-    expect(projectedOpenClawMeta(message)).toEqual({
+    expect(projectedCarapaceMeta(message)).toEqual({
       media: [
         {
           path: `media://inbound/${inboundMediaId}`,
@@ -744,7 +744,7 @@ describe("current user profile display projection", () => {
       role: "user",
       content: `row ${index}`,
       timestamp: index + 1,
-      __openclaw: {
+      __carapace: {
         senderId: "shared-id",
         senderName: "Same label",
         ...(senderIdentity ? { senderIdentity } : {}),
@@ -759,7 +759,7 @@ describe("current user profile display projection", () => {
     }));
     const projected = projectChatDisplayMessages(rows, { resolveCurrentUserProfileDisplay });
     expect(resolveCurrentUserProfileDisplay).toHaveBeenCalledTimes(1);
-    expect(projected[0]?.["__openclaw"]).toMatchObject({
+    expect(projected[0]?.["__carapace"]).toMatchObject({
       senderIdentity: { type: "profile", id: "canonical-id" },
       senderProfileAvatarUrl: "/api/users/canonical-id/avatar?v=2",
     });
@@ -772,7 +772,7 @@ describe("current user profile display projection", () => {
       {
         role: "user",
         content: "first",
-        __openclaw: {
+        __carapace: {
           senderIdentity: { type: "profile", id: "profile-ada" },
           senderId: "profile-ada",
           senderName: "Historical Ada",
@@ -782,7 +782,7 @@ describe("current user profile display projection", () => {
       {
         role: "user",
         content: "second",
-        __openclaw: {
+        __carapace: {
           senderIdentity: { type: "profile", id: "profile-ada" },
           senderId: "profile-ada",
           senderName: "Earlier Ada",
@@ -791,7 +791,7 @@ describe("current user profile display projection", () => {
       {
         role: "user",
         content: "third",
-        __openclaw: {
+        __carapace: {
           senderIdentity: { type: "profile", id: "profile-bob" },
           senderId: "profile-bob",
         },
@@ -799,7 +799,7 @@ describe("current user profile display projection", () => {
       {
         role: "user",
         content: "unknown",
-        __openclaw: {
+        __carapace: {
           senderId: "channel-sender",
           senderProfileAvatarUrl: "/channel/avatar",
         },
@@ -808,14 +808,14 @@ describe("current user profile display projection", () => {
       {
         role: "assistant",
         content: [{ type: "text", text: "hostile assistant metadata" }],
-        __openclaw: { senderId: "hostile-assistant" },
+        __carapace: { senderId: "hostile-assistant" },
       },
       {
         role: "toolResult",
         toolCallId: "hostile-tool-call",
         toolName: "read",
         content: [{ type: "text", text: "hostile tool metadata" }],
-        __openclaw: { senderId: "hostile-tool" },
+        __carapace: { senderId: "hostile-tool" },
       },
     ];
     const originalMessages = structuredClone(messages);
@@ -848,7 +848,7 @@ describe("current user profile display projection", () => {
       "profile-ada",
       "profile-bob",
     ]);
-    expect(projected.map((message) => message["__openclaw"])).toEqual([
+    expect(projected.map((message) => message["__carapace"])).toEqual([
       {
         senderIdentity: { type: "profile", id: "profile-ada" },
         senderId: "profile-ada",
@@ -886,7 +886,7 @@ describe("current user profile display projection", () => {
     const staleAvatar = {
       role: "user",
       content: "stale avatar",
-      __openclaw: {
+      __carapace: {
         senderIdentity: { type: "profile", id: "with-avatar" },
         senderId: "with-avatar",
         senderName: "Historical Name",
@@ -896,7 +896,7 @@ describe("current user profile display projection", () => {
     const noUploadAvatar = {
       role: "user",
       content: "removed avatar",
-      __openclaw: {
+      __carapace: {
         senderIdentity: { type: "profile", id: "without-avatar" },
         senderId: "without-avatar",
         senderProfileAvatarUrl: "/api/users/without-avatar/avatar?v=10",
@@ -905,7 +905,7 @@ describe("current user profile display projection", () => {
     const failedLookup = {
       role: "user",
       content: "lookup failed",
-      __openclaw: {
+      __carapace: {
         senderIdentity: { type: "profile", id: "lookup-failed" },
         senderId: "lookup-failed",
         senderProfileAvatarUrl: "/existing/projected/avatar",
@@ -934,13 +934,13 @@ describe("current user profile display projection", () => {
       },
     });
 
-    expect(projected[0]?.["__openclaw"]).toEqual({
+    expect(projected[0]?.["__carapace"]).toEqual({
       senderIdentity: { type: "profile", id: "with-avatar" },
       senderId: "with-avatar",
       senderName: "Historical Name",
       senderProfileAvatarUrl: "/api/users/with-avatar/avatar?v=20",
     });
-    expect(projected[1]?.["__openclaw"]).toEqual({
+    expect(projected[1]?.["__carapace"]).toEqual({
       senderIdentity: { type: "profile", id: "without-avatar" },
       senderId: "without-avatar",
       senderProfileAvatarUrl: "/api/users/without-avatar/avatar?v=20",
@@ -952,7 +952,7 @@ describe("current user profile display projection", () => {
     const message = {
       role: "user",
       content: "unchanged",
-      __openclaw: {
+      __carapace: {
         senderIdentity: { type: "profile", id: "profile-ada" },
         senderId: "profile-ada",
         senderProfileAvatarUrl: "/api/users/profile-ada/avatar?v=old",
@@ -1001,7 +1001,7 @@ describe("chat display message-tool projection", () => {
       expect.objectContaining({
         role: "assistant",
         content: [{ type: "text", text: sourceReply }],
-        openclawMessageToolMirror: expect.objectContaining({
+        carapaceMessageToolMirror: expect.objectContaining({
           toolCallId: "call-message-current-source",
         }),
       }),
@@ -1021,9 +1021,9 @@ describe("TTS supplement matching", () => {
       {
         role: "assistant",
         content: [caption, firstAudio],
-        openclawTtsSupplement: marker,
+        carapaceTtsSupplement: marker,
       },
-      { role: "assistant", content: [secondAudio], openclawTtsSupplement: marker },
+      { role: "assistant", content: [secondAudio], carapaceTtsSupplement: marker },
     ];
     const original = structuredClone(messages);
 

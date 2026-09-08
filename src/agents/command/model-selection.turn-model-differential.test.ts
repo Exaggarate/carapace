@@ -2,7 +2,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   TURN_MODEL_DEFAULT_REF,
   TURN_MODEL_DIFFERENTIAL_FIXTURES,
@@ -28,7 +28,7 @@ vi.mock("../../auto-reply/thinking.js", () => ({
 }));
 vi.mock("../../channels/model-overrides.js", () => ({
   resolveChannelModelOverride: (params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     channel?: string | null;
     groupId?: string | null;
     groupChatType?: string | null;
@@ -70,12 +70,12 @@ vi.mock("../harness/runtime-plugin.js", () => ({
   ensureSelectedAgentHarnessPlugin: vi.fn(async () => undefined),
 }));
 vi.mock("../harness/selection.js", () => ({
-  resolveAvailableAgentHarnessPolicy: () => ({ runtime: "openclaw" }),
+  resolveAvailableAgentHarnessPolicy: () => ({ runtime: "carapace" }),
 }));
 vi.mock("../model-catalog.js", () => ({ loadManifestModelCatalog: () => [] }));
 vi.mock("../model-selection.js", () => ({
   modelKey: (provider: string, model: string) => `${provider}/${model}`,
-  resolveDefaultModelForAgent: ({ cfg }: { cfg: OpenClawConfig }) => {
+  resolveDefaultModelForAgent: ({ cfg }: { cfg: CarapaceConfig }) => {
     const configured = cfg.agents?.defaults?.model;
     const raw =
       typeof configured === "string"
@@ -130,16 +130,16 @@ vi.mock("./attempt-execution.shared.js", () => ({
 }));
 vi.mock("./model-ref.js", () => ({
   normalizeAgentCommandDefaultModelRef: (
-    _cfg: OpenClawConfig,
+    _cfg: CarapaceConfig,
     provider: string,
     model: string,
   ) => ({ provider, model }),
-  normalizeAgentCommandModelRef: (_cfg: OpenClawConfig, provider: string, model: string) => ({
+  normalizeAgentCommandModelRef: (_cfg: CarapaceConfig, provider: string, model: string) => ({
     provider,
     model,
   }),
   parseAgentCommandModelRef: (
-    _cfg: OpenClawConfig,
+    _cfg: CarapaceConfig,
     _agentId: string,
     raw: string,
     defaultProvider: string,
@@ -171,11 +171,11 @@ beforeAll(() => {
   suiteTempRoot = tempDirs.make("turn-model-command-");
 });
 
-function createConfig(fixture: TurnModelDifferentialFixture): OpenClawConfig {
+function createConfig(fixture: TurnModelDifferentialFixture): CarapaceConfig {
   return {
     agents: { defaults: { model: { primary: turnModelRefLabel(TURN_MODEL_DEFAULT_REF) } } },
     channels: fixture.modelByChannel ? { modelByChannel: fixture.modelByChannel } : undefined,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 async function observeCommandSelection(fixture: TurnModelDifferentialFixture) {

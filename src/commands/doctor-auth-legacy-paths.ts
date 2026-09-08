@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import { listAgentIds, resolveAgentDir } from "../agents/agent-scope.js";
 import { resolveSharedMainAuthAgentDir } from "../agents/auth-profiles/shared-main-dir.js";
 import { resolveLegacyInheritedAuthAgentDir } from "../agents/legacy-inherited-auth-dir.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveUserPath } from "../utils.js";
 
 function resolveLegacyAuthAgentDir(agentDir?: string): string {
@@ -46,7 +46,7 @@ function listExistingAgentDirsFromState(env: NodeJS.ProcessEnv): string[] {
  * decryptable sidecar secrets get imported as credential-less profiles.
  */
 export function listAuthProfileRepairCandidates(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): AuthProfileRepairCandidate[] {
   const candidates = new Map<string, AuthProfileRepairCandidate>();
@@ -67,7 +67,7 @@ export function listAuthProfileRepairCandidates(
   addCandidate(undefined);
   addCandidate(resolveLegacyInheritedAuthAgentDir(cfg, env));
   const envAgentDir =
-    readNonBlankString(env.OPENCLAW_AGENT_DIR) ?? readNonBlankString(env.PI_CODING_AGENT_DIR);
+    readNonBlankString(env.CARAPACE_AGENT_DIR) ?? readNonBlankString(env.PI_CODING_AGENT_DIR);
   if (envAgentDir) {
     addCandidate(envAgentDir);
   }

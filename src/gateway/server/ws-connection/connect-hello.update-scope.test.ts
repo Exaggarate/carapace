@@ -5,7 +5,7 @@ import {
   GATEWAY_SERVER_CAPS,
   type HelloOk,
 } from "../../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
 import { resolveGatewayAuth } from "../../auth-resolve.js";
 import { startGatewayTailscaleExposure } from "../../server-tailscale.js";
@@ -195,7 +195,7 @@ describe("sendGatewayHello update detail scope", () => {
           mode: tailscale,
         });
       }
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         gateway: {
           publicOrigin:
             "publicOrigin" in options ? options.publicOrigin : "https://team.example.test",

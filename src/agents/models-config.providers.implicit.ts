@@ -6,8 +6,8 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@carapace/model-catalog-core/provider-id";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { ManifestModelIdNormalizationSource } from "../plugins/manifest-model-id-normalization.js";
@@ -69,10 +69,10 @@ const PLUGIN_DISCOVERY_ORDERS = ["simple", "profile", "paired", "late"] as const
 type ImplicitProviderParams = {
   agentDir: string;
   authStore?: AuthProfileStore;
-  config?: OpenClawConfig;
-  discoveryAuthConfig?: OpenClawConfig;
+  config?: CarapaceConfig;
+  discoveryAuthConfig?: CarapaceConfig;
   discoveryAuthEnv?: NodeJS.ProcessEnv;
-  sourceConfigForSecrets?: OpenClawConfig;
+  sourceConfigForSecrets?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   explicitProviders?: Record<string, ProviderConfig> | null;
@@ -96,11 +96,11 @@ type ImplicitProviderContext = ImplicitProviderParams & {
 
 function resolveLiveProviderCatalogTimeoutMs(env: NodeJS.ProcessEnv): number | null {
   const live =
-    env.OPENCLAW_LIVE_TEST === "1" || env.OPENCLAW_LIVE_GATEWAY === "1" || env.LIVE === "1";
+    env.CARAPACE_LIVE_TEST === "1" || env.CARAPACE_LIVE_GATEWAY === "1" || env.LIVE === "1";
   if (!live) {
     return null;
   }
-  const raw = env.OPENCLAW_LIVE_PROVIDER_DISCOVERY_TIMEOUT_MS?.trim();
+  const raw = env.CARAPACE_LIVE_PROVIDER_DISCOVERY_TIMEOUT_MS?.trim();
   if (!raw) {
     return 15_000;
   }
@@ -191,7 +191,7 @@ function resolveExistingImplicitProviderFromContext(params: {
 }
 
 function hasProviderWildcardVisibility(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   providerId: string;
 }): boolean {
   return parseConfiguredModelVisibilityEntries({ cfg: params.config }).providerWildcards.has(
@@ -486,7 +486,7 @@ export async function prepareImplicitProviderStaticCatalog(
 /** Resolve all implicit provider configs contributed by runtime plugin discovery. */
 export async function resolveImplicitProviders(
   params: ImplicitProviderParams,
-): Promise<NonNullable<OpenClawConfig["models"]>["providers"]> {
+): Promise<NonNullable<CarapaceConfig["models"]>["providers"]> {
   const providers: Record<string, ProviderConfig> = {};
   const env = params.env ?? process.env;
   let authStore = params.authStore;

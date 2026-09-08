@@ -29,7 +29,7 @@ describe("resolveReadOnlyChannelCommandDefaults", () => {
     { name: "process", env: process.env, stateDir: STATE_DIR },
     {
       name: "custom",
-      env: { HOME: "/home/demo", OPENCLAW_STATE_DIR: "/state" },
+      env: { HOME: "/home/demo", CARAPACE_STATE_DIR: "/state" },
       stateDir: "/state",
     },
   ])("reuses published metadata for the $name state root without scanning", ({ env, stateDir }) => {

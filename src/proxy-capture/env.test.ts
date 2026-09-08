@@ -3,13 +3,13 @@ import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveDebugProxySettings, resolveEffectiveDebugProxyUrl } from "./env.js";
 
-const OPENCLAW_DEBUG_PROXY_ENABLED = "OPENCLAW_DEBUG_PROXY_ENABLED";
-const OPENCLAW_DEBUG_PROXY_SESSION_ID = "OPENCLAW_DEBUG_PROXY_SESSION_ID";
+const CARAPACE_DEBUG_PROXY_ENABLED = "CARAPACE_DEBUG_PROXY_ENABLED";
+const CARAPACE_DEBUG_PROXY_SESSION_ID = "CARAPACE_DEBUG_PROXY_SESSION_ID";
 
 describe("resolveDebugProxySettings", () => {
   it("keeps an implicit debug proxy session id stable within one process", () => {
     const env = {
-      [OPENCLAW_DEBUG_PROXY_ENABLED]: "1",
+      [CARAPACE_DEBUG_PROXY_ENABLED]: "1",
     } satisfies NodeJS.ProcessEnv;
 
     const first = resolveDebugProxySettings(env);
@@ -20,8 +20,8 @@ describe("resolveDebugProxySettings", () => {
 
   it("prefers an explicit session id from the environment", () => {
     const settings = resolveDebugProxySettings({
-      [OPENCLAW_DEBUG_PROXY_ENABLED]: "1",
-      [OPENCLAW_DEBUG_PROXY_SESSION_ID]: "session-explicit",
+      [CARAPACE_DEBUG_PROXY_ENABLED]: "1",
+      [CARAPACE_DEBUG_PROXY_SESSION_ID]: "session-explicit",
     });
 
     expect(settings.sessionId).toBe("session-explicit");
@@ -35,10 +35,10 @@ describe("resolveEffectiveDebugProxyUrl", () => {
   });
 
   it("does not discover capture paths while disabled and retains configured URL precedence", () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
-    vi.stubEnv("OPENCLAW_STATE_DIR", undefined);
-    vi.stubEnv(OPENCLAW_DEBUG_PROXY_ENABLED, "0");
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_URL", "http://ambient.example.test:8080");
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_STATE_DIR", undefined);
+    vi.stubEnv(CARAPACE_DEBUG_PROXY_ENABLED, "0");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_URL", "http://ambient.example.test:8080");
     const existsSync = vi.spyOn(fs, "existsSync");
 
     expect(resolveEffectiveDebugProxyUrl()).toBeUndefined();
@@ -47,12 +47,12 @@ describe("resolveEffectiveDebugProxyUrl", () => {
     );
     expect(existsSync).not.toHaveBeenCalled();
 
-    vi.stubEnv(OPENCLAW_DEBUG_PROXY_ENABLED, "1");
+    vi.stubEnv(CARAPACE_DEBUG_PROXY_ENABLED, "1");
     expect(resolveEffectiveDebugProxyUrl()).toBe("http://ambient.example.test:8080");
     expect(resolveEffectiveDebugProxyUrl("http://configured.example.test:8080")).toBe(
       "http://configured.example.test:8080",
     );
-    vi.stubEnv(OPENCLAW_DEBUG_PROXY_ENABLED, "0");
+    vi.stubEnv(CARAPACE_DEBUG_PROXY_ENABLED, "0");
     expect(resolveEffectiveDebugProxyUrl()).toBeUndefined();
   });
 });

@@ -32,7 +32,7 @@ describe("package verification bounds", () => {
   it.each([1024 * 1024 + 1, 1024 * 1024 * 1024 + 1])(
     "rejects manifest growth to %i bytes without attempting an oversized metadata allocation",
     async (size) => {
-      await withTestDir({ prefix: "openclaw-rollback-metadata-bound-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-metadata-bound-" }, async (base) => {
         const { params, packageRoot } = await createPackageSwapFixture(base);
         const manifest = path.join(packageRoot, "package.json");
         const open = fs.open.bind(fs);
@@ -79,7 +79,7 @@ describe("package verification bounds", () => {
   );
 
   it("accepts a valid manifest at the metadata byte limit", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-metadata-valid-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-metadata-valid-" }, async (base) => {
       const { params, packageRoot } = await createPackageSwapFixture(base);
       const manifest = path.join(packageRoot, "package.json");
       const contents = await fs.readFile(manifest, "utf8");
@@ -108,7 +108,7 @@ describe("package verification bounds", () => {
   it.each(["package", "launcher", "launcher directory"] as const)(
     "bounds the initial %s observation",
     async (entry) => {
-      await withTestDir({ prefix: "openclaw-rollback-presence-bound-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-presence-bound-" }, async (base) => {
         const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
         const lstat = fs.lstat.bind(fs);
         const readdir = fs.readdir.bind(fs);
@@ -171,7 +171,7 @@ describe("package verification bounds", () => {
   it.each(["open", "read"] as const)(
     "returns after a stalled %s without continuing the walk",
     async (operation) => {
-      await withTestDir({ prefix: "openclaw-rollback-deadline-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-deadline-" }, async (base) => {
         const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
         const realOpen = fs.open.bind(fs);
         const late = createDeferredCore<Awaited<ReturnType<typeof fs.open>>>();
@@ -241,7 +241,7 @@ describe("package verification bounds", () => {
   );
 
   it("preserves the primary refusal when reader diagnostics fail", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-diagnostics-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-diagnostics-" }, async (base) => {
       const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
       captureReaderLogs();
       const sink = vi.fn(() => {
@@ -266,9 +266,9 @@ describe("package verification bounds", () => {
   });
 
   it("records a cleanup-only deadline without claiming successful reader completion", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-close-deadline-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-close-deadline-" }, async (base) => {
       const { params } = await createPackageSwapFixture(base);
-      await fs.unlink(path.join(params.stage.layout.binDir, "openclaw"));
+      await fs.unlink(path.join(params.stage.layout.binDir, "carapace"));
       const observations = captureReaderLogs();
       const release = createDeferredCore();
       let closing: Promise<void> | undefined;
@@ -306,7 +306,7 @@ describe("package verification bounds", () => {
     { shape: "single directory", width: 50_000 },
     { shape: "nested directories", width: 30_000 },
   ])("bounds the whole-tree inventory across $shape", async ({ width }) => {
-    await withTestDir({ prefix: "openclaw-rollback-entry-bound-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-entry-bound-" }, async (base) => {
       const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
       const nested = path.join(packageRoot, "dist");
       const rootChild = (await fs.readdir(packageRoot, { withFileTypes: true })).find(

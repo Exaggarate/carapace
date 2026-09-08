@@ -1,6 +1,6 @@
 // Resolves whether one sandboxed session is confined to its writable workspace.
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeExecTarget } from "../../infra/exec-approvals.js";
 import { resolveEffectiveSessionToolsVisibility } from "../../plugin-sdk/session-visibility.js";
 import { resolveAgentConfig } from "../agent-scope.js";
@@ -68,7 +68,7 @@ function findUnconfinedAllowedTool(
 }
 
 function resolveWorkspaceToolPolicies(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   sessionKey: string;
   modelProvider: string;
@@ -99,7 +99,7 @@ function resolveWorkspaceToolPolicies(params: {
 }
 
 function resolveWorkspaceAuthorityModel(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   sessionEntry?: Pick<
     SessionEntry,
@@ -136,7 +136,7 @@ type SandboxWorkspaceAuthority = {
 };
 
 export function resolveSandboxWorkspaceAuthority(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   sessionKey: string;
   sessionEntry?: Pick<

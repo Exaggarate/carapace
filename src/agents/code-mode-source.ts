@@ -264,7 +264,7 @@ export async function prepareSource(input: {
           return diagnosticMessage;
         }
         const position = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-        return `openclaw-code-mode:user.ts:${position.line + 1}:${position.character + 1}: ${diagnosticMessage}`;
+        return `carapace-code-mode:user.ts:${position.line + 1}:${position.character + 1}: ${diagnosticMessage}`;
       })
       .join("\n");
     throw new ToolInputError(`typescript transform failed: ${message}`);

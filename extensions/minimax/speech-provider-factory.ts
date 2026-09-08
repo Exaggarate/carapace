@@ -1,22 +1,22 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
 // Minimax provider module implements model/runtime integration.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
+} from "carapace/plugin-sdk/speech-core";
 import {
   parseSpeechDirectiveNumberOverride,
   resolveSpeechProviderApiKey,
-} from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-provider";
 import {
   asFiniteNumberInRange,
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   DEFAULT_MINIMAX_TTS_BASE_URL,
   MINIMAX_TTS_MODELS,
@@ -50,7 +50,7 @@ type MinimaxTtsProviderOverrides = {
   pitch?: number;
 };
 
-function resolveConfiguredPortalTtsBaseUrl(cfg: OpenClawConfig | undefined): string | undefined {
+function resolveConfiguredPortalTtsBaseUrl(cfg: CarapaceConfig | undefined): string | undefined {
   const providers = asOptionalRecord(asOptionalRecord(cfg?.models)?.providers);
   const portalProvider = asOptionalRecord(providers?.[MINIMAX_PORTAL_PROVIDER_ID]);
   const portalBaseUrl = trimToUndefined(portalProvider?.baseUrl);
@@ -64,9 +64,9 @@ function resolveMinimaxTokenPlanEnvKey(): string | undefined {
 }
 
 async function resolveMinimaxPortalProfileToken(
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
 ): Promise<string | undefined> {
-  const { resolveProviderAuthProfileApiKey } = await import("openclaw/plugin-sdk/provider-auth");
+  const { resolveProviderAuthProfileApiKey } = await import("carapace/plugin-sdk/provider-auth");
   return await resolveProviderAuthProfileApiKey({
     cfg,
     provider: MINIMAX_PORTAL_PROVIDER_ID,
@@ -74,7 +74,7 @@ async function resolveMinimaxPortalProfileToken(
 }
 
 async function resolveMinimaxTtsApiKey(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   configApiKey?: string;
 }): Promise<string | undefined> {
   return resolveSpeechProviderApiKey(
@@ -94,7 +94,7 @@ function resolveMinimaxDirectTtsApiKey(configApiKey?: string): string | undefine
 
 function normalizeMinimaxProviderConfig(
   rawConfig: Record<string, unknown>,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): MinimaxTtsProviderConfig {
   const providers = asOptionalRecord(rawConfig.providers);
   const raw = asOptionalRecord(providers?.minimax) ?? asOptionalRecord(rawConfig.minimax);
@@ -138,7 +138,7 @@ function normalizeMinimaxPitch(value: unknown): number | undefined {
 
 function readMinimaxProviderConfig(
   config: SpeechProviderConfig,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): MinimaxTtsProviderConfig {
   const normalized = normalizeMinimaxProviderConfig({}, cfg);
   return {
@@ -309,7 +309,7 @@ export function buildMinimaxSpeechProvider({
         timeoutMs: req.timeoutMs,
       });
       if (req.target === "voice-note") {
-        const { transcodeAudioBufferToOpus } = await import("openclaw/plugin-sdk/media-runtime");
+        const { transcodeAudioBufferToOpus } = await import("carapace/plugin-sdk/media-runtime");
         const opusBuffer = await transcodeAudioBufferToOpus({
           audioBuffer,
           inputExtension: "mp3",

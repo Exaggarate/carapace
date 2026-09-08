@@ -1,6 +1,6 @@
 // Copilot tests cover index plugin behavior.
 import fs from "node:fs";
-import { createTestPluginApi, type TestPluginApiInput } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi, type TestPluginApiInput } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./src/runtime.js", () => ({
@@ -23,7 +23,7 @@ import { createCopilotClientPool } from "./src/runtime.js";
 
 function loadManifest(): Record<string, unknown> {
   return JSON.parse(
-    fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+    fs.readFileSync(new URL("./carapace.plugin.json", import.meta.url), "utf8"),
   ) as Record<string, unknown>;
 }
 

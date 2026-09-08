@@ -1,17 +1,17 @@
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../../state/carapace-agent-db.generated.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../../state/carapace-agent-db.js";
 import type { AcpParentStreamEvent } from "./acp-parent-stream-store.sqlite.js";
 
-type AcpParentStreamDatabase = Pick<OpenClawAgentKyselyDatabase, "acp_parent_stream_events">;
+type AcpParentStreamDatabase = Pick<CarapaceAgentKyselyDatabase, "acp_parent_stream_events">;
 
 export function listAcpParentStreamEventsForTest(
-  options: OpenClawAgentDatabaseOptions & { sessionId: string; runId: string },
+  options: CarapaceAgentDatabaseOptions & { sessionId: string; runId: string },
 ): AcpParentStreamEvent[] {
-  const database = openOpenClawAgentDatabase(options);
+  const database = openCarapaceAgentDatabase(options);
   const db = getNodeSqliteKysely<AcpParentStreamDatabase>(database.db);
   return executeSqliteQuerySync(
     database.db,

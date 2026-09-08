@@ -209,7 +209,7 @@ export class NodeWorkerWorkspaceRuntime {
     this.root = fs.realpathSync.native(configuredRoot);
     // Git artifacts are machine caches, outside the per-lease state scrub boundary.
     const home = env.HOME ?? env.USERPROFILE ?? os.homedir();
-    this.seedsRoot = path.resolve(home, ".openclaw-worker", "git-seeds");
+    this.seedsRoot = path.resolve(home, ".carapace-worker", "git-seeds");
     this.env = {
       ...snapshotNodeWorkerEnv(env),
       GCM_INTERACTIVE: "Never",
@@ -479,7 +479,7 @@ export class NodeWorkerWorkspaceRuntime {
               reachable.add(latest);
             }
           }
-          const manifestRoot = path.join(session.sessionRoot, ".openclaw-worker", "manifests");
+          const manifestRoot = path.join(session.sessionRoot, ".carapace-worker", "manifests");
           for (const entry of await listOwnedEntries(manifestRoot)) {
             if (
               !entry.isFile() ||
@@ -518,7 +518,7 @@ export class NodeWorkerWorkspaceRuntime {
           key.startsWith(sessionPrefix),
         );
         if (!hasGenerationOrArtifact && !hasAuthoritativeRetain && !hasCurrentLocalProtection()) {
-          const metadataRoot = path.join(session.sessionRoot, ".openclaw-worker");
+          const metadataRoot = path.join(session.sessionRoot, ".carapace-worker");
           if (deleted >= WORKSPACE_RETENTION_DELETE_LIMIT) {
             hasMore = true;
             return;

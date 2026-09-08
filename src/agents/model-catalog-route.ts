@@ -1,10 +1,10 @@
 /** Projects physical catalog rows for browse/presentation; never runtime execution. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   resolveMergedModelProviderConfig,
   resolveMergedModelProviderModels,
 } from "../config/model-provider-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ProviderModelRouteCandidate } from "../plugin-sdk/provider-model-types.js";
 import {
   PREPARED_THINKING_POLICY,
@@ -52,7 +52,7 @@ type ModelCatalogLogicalOverrides = Partial<
 
 /** Reads explicit logical capability overrides without re-resolving auth. */
 export function resolveConfiguredModelCatalogOverrides(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: Pick<ModelCatalogEntry, "provider" | "id">;
   policy?: ModelCatalogRoutePolicy;
 }): ModelCatalogLogicalOverrides | undefined {

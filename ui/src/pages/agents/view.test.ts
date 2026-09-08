@@ -231,7 +231,7 @@ describe("renderAgents", () => {
     );
     expect(tabs.slice(-2)).toEqual([t("agents.tabs.cronJobs"), t("agents.tabs.memory")]);
     const panel = container.querySelector<HTMLElement & { agentId: string }>(
-      "openclaw-agent-memory-panel",
+      "carapace-agent-memory-panel",
     );
     expect(panel?.agentId).toBe("beta");
   });
@@ -242,7 +242,7 @@ describe("renderAgents", () => {
 
     try {
       render(renderAgents(createProps()), container);
-      const select = container.querySelector("openclaw-agent-select") as
+      const select = container.querySelector("carapace-agent-select") as
         | (HTMLElement & {
             options: Array<{ value: string }>;
             updateComplete: Promise<boolean>;
@@ -427,7 +427,7 @@ describe("renderAgents", () => {
       container,
     );
 
-    const field = container.querySelector<MultiSelect>("openclaw-multi-select.agent-fallbacks");
+    const field = container.querySelector<MultiSelect>("carapace-multi-select.agent-fallbacks");
     expect(field?.value).toEqual([]);
   });
 
@@ -1001,7 +1001,7 @@ describe("renderAgentFiles", () => {
       container,
     );
 
-    const dialog = container.querySelector("openclaw-modal-dialog");
+    const dialog = container.querySelector("carapace-modal-dialog");
     const panel = container.querySelector<HTMLElement>(".md-preview-dialog__panel");
     const expandButton = container.querySelector<HTMLButtonElement>(".md-preview-expand-btn");
 

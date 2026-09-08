@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 
 @MainActor
 final class GatewayHealthMonitor {

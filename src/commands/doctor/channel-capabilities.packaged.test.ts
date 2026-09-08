@@ -26,9 +26,9 @@ vi.mock("../../plugins/bundled-dir.js", () => ({
   resolveSourceCheckoutDependencyDiagnostic: () => null,
 }));
 
-vi.mock("../../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRootSync: () => packageRootMock.value,
-  resolveOpenClawPackageRoot: async () => packageRootMock.value,
+vi.mock("../../infra/carapace-root.js", () => ({
+  resolveCarapacePackageRootSync: () => packageRootMock.value,
+  resolveCarapacePackageRoot: async () => packageRootMock.value,
 }));
 
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
@@ -39,12 +39,12 @@ const tempDirs: string[] = [];
 beforeEach(() => {
   const root = makeTempRepoRoot(tempDirs, "doctor-channel-packaged-");
   packageRootMock.value = root;
-  writeJsonFile(path.join(root, "package.json"), { name: "openclaw" });
+  writeJsonFile(path.join(root, "package.json"), { name: "carapace" });
   writeJsonFile(path.join(root, "dist", "channel-catalog.json"), {
     entries: [
       {
-        name: "@openclaw/discord",
-        openclaw: {
+        name: "@carapace/discord",
+        carapace: {
           channel: {
             id: "discord",
             label: "Discord",

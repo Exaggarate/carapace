@@ -12,11 +12,11 @@ import {
   startQaMockOpenAiServer,
   type QaGatewayChild,
 } from "../../../../extensions/qa-lab/api.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import { skillCollectionReviewMonitorAgentId } from "../../../../src/cron/skill-collection-review-monitor.js";
 import type { CronJob } from "../../../../src/cron/types.js";
 import { loadOrCreateDeviceIdentity } from "../../../../src/infra/device-identity.js";
-import { closeOpenClawStateDatabaseByPath } from "../../../../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../../../../src/state/carapace-state-db.js";
 import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import { proveHotReloadBrowserSettings } from "./gateway-config-hot-reload-browser.js";
 import { proveHotReloadChannels } from "./gateway-config-hot-reload-channels.js";
@@ -50,7 +50,7 @@ const SOURCE_PATH = "test/e2e/qa-lab/runtime/gateway-config-hot-reload-runtime.t
 const MODEL = "mock-openai/gpt-5.6-luna";
 const SESSION_KEY = "agent:qa:main";
 type Evidence = { prefix: string; observation: string; bootId: string; samePid: boolean };
-type ConfigResult = { hash: string; config: OpenClawConfig };
+type ConfigResult = { hash: string; config: CarapaceConfig };
 class GatewayContinuityError extends Error {}
 
 async function runProof(repoRoot: string, outputDir: string, appendLog: (text: string) => void) {
@@ -60,7 +60,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
   const gatewayOwner = createQaGatewayChild();
   const mock = await startQaMockOpenAiServer();
   const fixture = await startHotReloadUpstreams(mock.baseUrl);
-  const temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hot-reload-"));
+  const temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-hot-reload-"));
   const connections: HotReloadConnection[] = [];
   let gateway: QaGatewayChild | undefined;
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
@@ -99,11 +99,11 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
         transportBaseUrl: fixture.baseUrl,
         runtimeEnvPatch: {
           ...pairingFixture.runtimeEnvPatch,
-          OPENCLAW_NO_RESPAWN: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: undefined,
-          OPENCLAW_APNS_RELAY_ALLOW_HTTP: "true",
-          OPENCLAW_APNS_RELAY_BASE_URL: undefined,
-          OPENCLAW_APNS_RELAY_TIMEOUT_MS: undefined,
+          CARAPACE_NO_RESPAWN: "1",
+          CARAPACE_SKIP_CANVAS_HOST: undefined,
+          CARAPACE_APNS_RELAY_ALLOW_HTTP: "true",
+          CARAPACE_APNS_RELAY_BASE_URL: undefined,
+          CARAPACE_APNS_RELAY_TIMEOUT_MS: undefined,
           GH_TOKEN: undefined,
           GITHUB_TOKEN: undefined,
           SHELL: "/bin/sh",
@@ -131,7 +131,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
             headless: true,
             noSandbox: true,
             executablePath: browserExecutable,
-            defaultProfile: "openclaw",
+            defaultProfile: "carapace",
             ssrfPolicy: { allowedHostnames: [new URL(fixture.baseUrl).hostname] },
             tabCleanup: { enabled: false },
           },
@@ -163,7 +163,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
       });
       const activeGateway = gateway;
       assert.equal(
-        activeGateway.runtimeEnv.OPENCLAW_SKIP_CANVAS_HOST,
+        activeGateway.runtimeEnv.CARAPACE_SKIP_CANVAS_HOST,
         undefined,
         "Canvas hot reload proof requires the Canvas host",
       );
@@ -356,7 +356,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
 
       // Node identities and relay grants are generated for this isolated fixture only.
       const nodeIdentity = loadOrCreateDeviceIdentity({
-        path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+        path: path.join(temporaryRoot, "state/carapace.sqlite"),
         identityKey: "browser-node",
       });
       let node: HotReloadConnection | undefined;
@@ -445,7 +445,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
               sendGrant: randomUUID(),
               installationId: randomUUID(),
               gatewayDeviceId: gatewayIdentity.deviceId,
-              topic: "ai.openclaw.qa",
+              topic: "ai.carapace.qa",
               environment: "sandbox",
               distribution: "official",
               relayOrigin: baseUrl,
@@ -489,7 +489,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
           ["gateway.nodes.pairing.autoApproveCidrs", "gateway.nodes.pairing.sshVerify.cidrs"],
         );
         const pendingIdentity = loadOrCreateDeviceIdentity({
-          path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+          path: path.join(temporaryRoot, "state/carapace.sqlite"),
           identityKey: "pending-node",
         });
         await assert.rejects(
@@ -501,7 +501,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
         assert.equal(node.closes, 0);
         await patch({ gateway: { nodes: { pairing: { autoApproveLocal: true } } } });
         const nextIdentity = loadOrCreateDeviceIdentity({
-          path: path.join(temporaryRoot, "state/openclaw.sqlite"),
+          path: path.join(temporaryRoot, "state/carapace.sqlite"),
           identityKey: "next-node",
         });
         const nextNode = await connectHotReloadClient(activeGateway, { identity: nextIdentity });
@@ -611,7 +611,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
         assert.equal((await http("/v1/models")).status, 200);
         const authored = JSON.parse(
           await fs.readFile(activeGateway.configPath, "utf8"),
-        ) as OpenClawConfig;
+        ) as CarapaceConfig;
         authored.gateway!.http = undefined;
         await fs.writeFile(activeGateway.configPath, JSON.stringify(authored));
         await waitForHotReloadFact("watched HTTP deletion", async () =>
@@ -758,7 +758,7 @@ async function runProof(repoRoot: string, outputDir: string, appendLog: (text: s
     () => mock.stop(),
     async () => {
       // Child cleanup does not own this parent identity store or its live WAL.
-      closeOpenClawStateDatabaseByPath(path.join(temporaryRoot, "state", "openclaw.sqlite"));
+      closeCarapaceStateDatabaseByPath(path.join(temporaryRoot, "state", "carapace.sqlite"));
       await fs.rm(temporaryRoot, { recursive: true, force: true });
     },
   );

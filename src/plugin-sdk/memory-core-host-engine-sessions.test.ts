@@ -10,8 +10,8 @@ import {
   replaceSessionEntry,
   upsertSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   loadArchivedSessions,
   loadMemorySessionMetadata,
@@ -22,7 +22,7 @@ describe("memory source sessions", () => {
   it.each(["default", "custom", "shared"])(
     "resolves metadata and deletion selectors in the %s session store",
     async (layout) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const storePath =
           layout === "default"
             ? resolveDefaultSessionStorePath("main")
@@ -49,7 +49,7 @@ describe("memory source sessions", () => {
           { ...scope, sessionKey },
           { identity: { type: "profile", id: "profile-source" } },
         );
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
 
         expect(loadMemorySessionMetadata({ ...scope, sessionId, sessionKey })).toMatchObject({
           sessionId,
@@ -83,7 +83,7 @@ describe("memory source sessions", () => {
           target: { canonicalKey: sessionKey, storeKeys: [sessionKey] },
           archiveTranscript: true,
         });
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         const archiveName = path.basename(deletion.archivedTranscripts[0]?.archivedPath ?? "");
         expect(loadArchivedSessions({ ...scope, sessionIds: [sessionKey] })).toEqual([
           expect.objectContaining({ sessionId, sessionKey }),
@@ -100,7 +100,7 @@ describe("memory source sessions", () => {
   );
 
   it("keeps another agent's live and archived sources out of a shared store selection", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = path.join(state.root, "shared.sqlite");
       const mainScope = { agentId: "main", storePath };
       for (const agentId of ["main", "other"]) {
@@ -143,14 +143,14 @@ describe("memory source sessions", () => {
   });
 
   it("selects the exact recorded email source without conflating webhooks", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       for (const source of ["email", "webhook"] as const) {
         await upsertSessionEntryCore(
           { agentId: "main", sessionKey: `agent:main:${source}` },
           { sessionId: source, updatedAt: 1_000, hookExternalContentSource: source },
         );
       }
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       for (const source of ["email", "webhook"] as const) {
         expect(loadMemorySessionMetadata({ agentId: "main", sessionId: source })).toMatchObject({
           hookExternalContentSource: source,
@@ -180,7 +180,7 @@ describe("memory source sessions", () => {
   });
 
   it("does not create an absent configured session store while inspecting sources", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = path.join(state.root, "absent", "sessions.json");
       const scope = { agentId: "main", storePath, sessionId: "missing" };
       expect(loadMemorySessionMetadata(scope)).toBeUndefined();

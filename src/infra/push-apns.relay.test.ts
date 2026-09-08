@@ -1,6 +1,6 @@
 // Covers APNs relay request signing, config, and response handling.
 import { generateKeyPairSync } from "node:crypto";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   deriveDeviceIdFromPublicKey,
@@ -74,8 +74,8 @@ describe("push-apns.relay", () => {
     it("lets env overrides win and clamps tiny timeout values", () => {
       const resolved = resolveApnsRelayConfigFromEnv(
         {
-          OPENCLAW_APNS_RELAY_BASE_URL: " https://relay-override.example.com/base/ ",
-          OPENCLAW_APNS_RELAY_TIMEOUT_MS: "999",
+          CARAPACE_APNS_RELAY_BASE_URL: " https://relay-override.example.com/base/ ",
+          CARAPACE_APNS_RELAY_TIMEOUT_MS: "999",
         } as NodeJS.ProcessEnv,
         {
           push: {
@@ -97,8 +97,8 @@ describe("push-apns.relay", () => {
 
     it("caps oversized timeout values before they reach AbortSignal.timeout", () => {
       const resolved = resolveApnsRelayConfigFromEnv({
-        OPENCLAW_APNS_RELAY_BASE_URL: "https://relay.example.com",
-        OPENCLAW_APNS_RELAY_TIMEOUT_MS: String(Number.MAX_SAFE_INTEGER),
+        CARAPACE_APNS_RELAY_BASE_URL: "https://relay.example.com",
+        CARAPACE_APNS_RELAY_TIMEOUT_MS: String(Number.MAX_SAFE_INTEGER),
       } as NodeJS.ProcessEnv);
 
       expectRelayConfig(resolved, {
@@ -111,8 +111,8 @@ describe("push-apns.relay", () => {
       "falls back for non-decimal env timeout %s",
       (timeoutMs) => {
         const resolved = resolveApnsRelayConfigFromEnv({
-          OPENCLAW_APNS_RELAY_BASE_URL: "https://relay.example.com",
-          OPENCLAW_APNS_RELAY_TIMEOUT_MS: timeoutMs,
+          CARAPACE_APNS_RELAY_BASE_URL: "https://relay.example.com",
+          CARAPACE_APNS_RELAY_TIMEOUT_MS: timeoutMs,
         } as NodeJS.ProcessEnv);
 
         expectRelayConfig(resolved, {
@@ -125,7 +125,7 @@ describe("push-apns.relay", () => {
     it("retains numeric timeout config values", () => {
       const resolved = resolveApnsRelayConfigFromEnv(
         {
-          OPENCLAW_APNS_RELAY_BASE_URL: "https://relay.example.com",
+          CARAPACE_APNS_RELAY_BASE_URL: "https://relay.example.com",
         } as NodeJS.ProcessEnv,
         {
           push: {
@@ -147,8 +147,8 @@ describe("push-apns.relay", () => {
     it("uses the configured timeout when the env override is blank", () => {
       const resolved = resolveApnsRelayConfigFromEnv(
         {
-          OPENCLAW_APNS_RELAY_BASE_URL: "https://relay.example.com",
-          OPENCLAW_APNS_RELAY_TIMEOUT_MS: "   ",
+          CARAPACE_APNS_RELAY_BASE_URL: "https://relay.example.com",
+          CARAPACE_APNS_RELAY_TIMEOUT_MS: "   ",
         } as NodeJS.ProcessEnv,
         {
           push: {
@@ -169,9 +169,9 @@ describe("push-apns.relay", () => {
 
     it("allows loopback http URLs for alternate truthy env values", () => {
       const resolved = resolveApnsRelayConfigFromEnv({
-        OPENCLAW_APNS_RELAY_BASE_URL: "http://[::1]:8787",
-        OPENCLAW_APNS_RELAY_ALLOW_HTTP: "yes",
-        OPENCLAW_APNS_RELAY_TIMEOUT_MS: "nope",
+        CARAPACE_APNS_RELAY_BASE_URL: "http://[::1]:8787",
+        CARAPACE_APNS_RELAY_ALLOW_HTTP: "yes",
+        CARAPACE_APNS_RELAY_TIMEOUT_MS: "nope",
       } as NodeJS.ProcessEnv);
 
       expectRelayConfig(resolved, {
@@ -183,25 +183,25 @@ describe("push-apns.relay", () => {
     it.each([
       {
         name: "unsupported protocol",
-        env: { OPENCLAW_APNS_RELAY_BASE_URL: "ftp://relay.example.com" },
+        env: { CARAPACE_APNS_RELAY_BASE_URL: "ftp://relay.example.com" },
         expected: "unsupported protocol",
       },
       {
         name: "http non-loopback host",
         env: {
-          OPENCLAW_APNS_RELAY_BASE_URL: "http://relay.example.com",
-          OPENCLAW_APNS_RELAY_ALLOW_HTTP: "true",
+          CARAPACE_APNS_RELAY_BASE_URL: "http://relay.example.com",
+          CARAPACE_APNS_RELAY_ALLOW_HTTP: "true",
         },
         expected: "loopback hosts",
       },
       {
         name: "query string",
-        env: { OPENCLAW_APNS_RELAY_BASE_URL: "https://relay.example.com/path?debug=1" },
+        env: { CARAPACE_APNS_RELAY_BASE_URL: "https://relay.example.com/path?debug=1" },
         expected: "query and fragment are not allowed",
       },
       {
         name: "userinfo",
-        env: { OPENCLAW_APNS_RELAY_BASE_URL: "https://user:pass@relay.example.com/path" },
+        env: { CARAPACE_APNS_RELAY_BASE_URL: "https://user:pass@relay.example.com/path" },
         expected: "userinfo is not allowed",
       },
     ])("rejects invalid relay URL: $name", ({ env, expected }) => {
@@ -307,7 +307,7 @@ describe("push-apns.relay", () => {
         verifyDeviceSignature(
           relayGatewayIdentity.publicKey,
           [
-            "openclaw-relay-send-v1",
+            "carapace-relay-send-v1",
             sent?.gatewayDeviceId,
             String(sent?.signedAtMs),
             sent?.bodyJson,

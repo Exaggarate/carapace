@@ -3,8 +3,8 @@ import {
   reduceSessionProjection,
   reduceSessionProjectionRunEvent,
   type SessionProjectionScope,
-} from "@openclaw/gateway-client/browser";
-import { expectDefined } from "@openclaw/normalization-core";
+} from "@carapace/gateway-client/browser";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { createChatSubmissions } from "../../app/chat-submissions.ts";
 import {
@@ -30,7 +30,7 @@ function createHistoryMessage(
   return {
     role,
     content: [{ type: "text", text }],
-    ...(metadata === undefined ? {} : { __openclaw: metadata }),
+    ...(metadata === undefined ? {} : { __carapace: metadata }),
   };
 }
 
@@ -94,7 +94,7 @@ function createAuthoritativeInitialMessage(sequence = 1) {
     content: "Inspect this persisted image",
     timestamp: 456,
     serverField: "authoritative",
-    __openclaw: {
+    __carapace: {
       id: "persisted-initial-user",
       idempotencyKey: "initial-run:user",
       runId: "initial-execution",
@@ -174,7 +174,7 @@ describe("pane-owned canonical session projection", () => {
     (type) => {
       const { owner, chatSubmissions, client, sessionKey } = createInitialHandoffFixture();
       const handoff = chatSubmissions.readInitial(sessionKey, client)!;
-      expect(handoff.message["__openclaw"]).toHaveProperty("senderIdentity", {
+      expect(handoff.message["__carapace"]).toHaveProperty("senderIdentity", {
         type: "profile",
         id: "local",
       });
@@ -186,8 +186,8 @@ describe("pane-owned canonical session projection", () => {
           ? { type, message: authoritative }
           : { type, messages: [authoritative] },
       );
-      const metadata = (owner.chatMessages[0] as { __openclaw: Record<string, unknown> })[
-        "__openclaw"
+      const metadata = (owner.chatMessages[0] as { __carapace: Record<string, unknown> })[
+        "__carapace"
       ];
       expect(metadata).not.toHaveProperty("senderIdentity");
       expect(metadata).not.toHaveProperty("senderId");
@@ -720,12 +720,12 @@ describe("pane-owned canonical session projection", () => {
     const pending = {
       role: "user",
       content: "",
-      __openclaw: { idempotencyKey: "attachment-run:user" },
+      __carapace: { idempotencyKey: "attachment-run:user" },
     };
     const persisted = {
       role: "user",
       content: "",
-      __openclaw: {
+      __carapace: {
         id: "attachment-user",
         idempotencyKey: "attachment-run:user",
         seq: 4,

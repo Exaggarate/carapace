@@ -5,9 +5,9 @@
  * redaction/headers, and request/response correlation over WebSocket.
  */
 import { createHash } from "node:crypto";
-import { redactCdpUrl } from "openclaw/plugin-sdk/browser-cdp";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard, isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
+import { redactCdpUrl } from "carapace/plugin-sdk/browser-cdp";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard, isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   SsrFBlockedError,
   type SsrFPolicy,
@@ -488,7 +488,7 @@ export async function fetchCdpChecked(
     const res = await withManagedProxyForCdpUrl(fetchUrl, () =>
       withNoProxyForCdpUrl(fetchUrl, async () => {
         const parsedUrl = new URL(fetchUrl);
-        // Loopback CDP is an OpenClaw control plane, not page navigation. Allow
+        // Loopback CDP is an Carapace control plane, not page navigation. Allow
         // its exact host while preserving the caller's policy for remote hosts.
         const policy = isLoopbackHost(parsedUrl.hostname)
           ? withExactHostnamePolicy(ssrfPolicy, parsedUrl.hostname)

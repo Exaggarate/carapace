@@ -41,7 +41,7 @@ suite.define(() => {
     });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "true");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "true");
     });
     const proofVideo = page.video();
     const firstKey = "agent:main:session-a";
@@ -158,7 +158,7 @@ suite.define(() => {
     });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "true");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "true");
     });
     const key = "agent:main:session-a";
     const runId = "run-sidebar-metadata";
@@ -448,7 +448,7 @@ suite.define(() => {
       ).toBe(false);
       await previewToggle.click();
       await busyRow.locator(".sidebar-recent-session__subtitle").waitFor();
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       expect(await sidebar.getByRole("img", { name: "Dashboard available" }).count()).toBe(0);
       expect(await sidebar.getByRole("img", { name: "Automation attached" }).count()).toBe(0);
       const ordinaryBadge = busyRow.locator(".session-row-badge--incognito svg");
@@ -732,7 +732,7 @@ suite.define(() => {
       methodResponses: {
         "agent.identity.get": {
           agentId: "main",
-          name: "OpenClaw",
+          name: "Carapace",
           avatar: "/avatar/main?v=fixture",
           avatarStatus: "local",
         },
@@ -745,13 +745,13 @@ suite.define(() => {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:session-a"));
       const documentMarker = await page.evaluate(() => {
         const marker = crypto.randomUUID();
-        (window as Window & { __openclawAvatarTestDocument?: string })[
-          "__openclawAvatarTestDocument"
+        (window as Window & { __carapaceAvatarTestDocument?: string })[
+          "__carapaceAvatarTestDocument"
         ] = marker;
         return marker;
       });
       const avatar = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] img.agent-chat__welcome-avatar',
+        'carapace-chat-pane[aria-hidden="false"] img.agent-chat__welcome-avatar',
       );
       await avatar.waitFor({ state: "visible" });
       await expect.poll(() => avatar.getAttribute("src")).toMatch(/^blob:/);
@@ -778,8 +778,8 @@ suite.define(() => {
       expect(
         await page.evaluate(
           () =>
-            (window as Window & { __openclawAvatarTestDocument?: string })[
-              "__openclawAvatarTestDocument"
+            (window as Window & { __carapaceAvatarTestDocument?: string })[
+              "__carapaceAvatarTestDocument"
             ],
         ),
       ).toBe(documentMarker);

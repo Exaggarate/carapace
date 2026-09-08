@@ -1,4 +1,4 @@
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { discardIgnoredResponseBody, readQaJsonResponse } from "./ignored-response-body.js";
 

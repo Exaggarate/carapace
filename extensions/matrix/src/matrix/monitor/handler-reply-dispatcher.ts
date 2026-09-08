@@ -3,13 +3,13 @@ import {
   defineFinalizableLivePreviewAdapter,
   deliverWithFinalizableLivePreviewAdapter,
   type MessageReceipt,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "carapace/plugin-sdk/channel-outbound";
 import {
   buildTtsSupplementMediaPayload,
   getReplyPayloadTtsSupplement,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/reply-payload";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixExtraContent } from "../../outbound.js";
 import type { CoreConfig, MatrixStreamingMode, ReplyToMode } from "../../types.js";
 import type { MatrixClient } from "../sdk.js";
@@ -40,7 +40,7 @@ export function createMatrixReplyDispatcher(config: {
   cfg: CoreConfig;
   prefixOptions: Omit<ReturnType<typeof createReplyPrefixOptions>, "onModelSelected">;
   humanDelay: ReturnType<
-    typeof import("openclaw/plugin-sdk/agent-runtime").resolveHumanDelayConfig
+    typeof import("carapace/plugin-sdk/agent-runtime").resolveHumanDelayConfig
   >;
   typingCallbacks: ReturnType<typeof createTypingCallbacks>;
   streaming: MatrixStreamingMode;

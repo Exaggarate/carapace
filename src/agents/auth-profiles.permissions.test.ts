@@ -30,22 +30,22 @@ const { saveAuthProfileStore, saveAuthProfileStoreIfPersistenceSnapshotMatches }
   await import("./auth-profiles/store-runtime.js");
 const { clearRuntimeAuthProfileStoreSnapshots, replaceRuntimeAuthProfileStoreSnapshots } =
   await import("./auth-profiles/runtime-snapshots.js");
-const { closeOpenClawAgentDatabasesForTest } = await import("../state/openclaw-agent-db.js");
-const { closeOpenClawStateDatabaseForTest } = await import("../state/openclaw-state-db.js");
+const { closeCarapaceAgentDatabasesForTest } = await import("../state/carapace-agent-db.js");
+const { closeCarapaceStateDatabaseForTest } = await import("../state/carapace-state-db.js");
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("auth-profile database permission repair", () => {
   afterEach(() => {
     chmodFailHook.error = undefined;
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
   });
 
   it("keeps captured auth rows when pre-commit permission repair fails", () => {
-    const stateDir = tempDirs.make("openclaw-auth-chmod-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-auth-chmod-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const agentDir = join(stateDir, "agents", "main", "agent");
     const initial: AuthProfileStore = {
       version: 1,
@@ -91,8 +91,8 @@ describe("auth-profile database permission repair", () => {
   });
 
   it("does not publish a caller-owned save before permission repair commits", () => {
-    const stateDir = tempDirs.make("openclaw-auth-overload-chmod-");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("carapace-auth-overload-chmod-");
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const agentDir = join(stateDir, "agents", "main", "agent");
     const initial: AuthProfileStore = {
       version: 1,

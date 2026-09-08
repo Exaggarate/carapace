@@ -1,6 +1,6 @@
 import path from "node:path";
 import { expect } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import {
   hashSkillProposalContent,
@@ -8,9 +8,9 @@ import {
 } from "../skills/workshop/store.js";
 import { SKILL_WORKSHOP_SCHEMA, type SkillProposalRecord } from "../skills/workshop/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { migrateLegacySkillWorkshopProposals } from "./doctor-skill-workshop-sqlite.js";
 
 export const readSkillProposalRecord = (
@@ -44,7 +44,7 @@ export function createAppliedLegacyProposal(
     target: {
       skillName: params.target.skillKey,
       skillFile: path.join(params.target.skillDir, "SKILL.md"),
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
       ...params.target,
     },
     scan: { state: "clean", scannedAt: now, critical: 0, warn: 0, info: 0, findings: [] },
@@ -54,7 +54,7 @@ export function createAppliedLegacyProposal(
 
 export async function expectWorkshopMigrationConverged(params: {
   env: NodeJS.ProcessEnv;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 }): Promise<void> {
   await expect(
     migrateLegacySkillWorkshopProposals({ config: params.config ?? {}, env: params.env }),
@@ -63,19 +63,19 @@ export async function expectWorkshopMigrationConverged(params: {
 
 export async function expectRelocationWriteFailure(params: {
   env: NodeJS.ProcessEnv;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   proposalId: string;
   status?: SkillProposalRecord["status"];
   message: string;
 }): Promise<void> {
-  const database = openOpenClawStateDatabase({ env: params.env });
+  const database = openCarapaceStateDatabase({ env: params.env });
   const statusClause = params.status ? `AND NEW.status = '${params.status}'` : "";
   database.db.exec(`
     CREATE TEMP TRIGGER reject_workshop_relocation
     BEFORE UPDATE OF record_json ON main.skill_workshop_proposals
     WHEN OLD.proposal_id = '${params.proposalId}'
       ${statusClause}
-      AND json_extract(NEW.record_json, '$.target.source') = 'openclaw-workshop'
+      AND json_extract(NEW.record_json, '$.target.source') = 'carapace-workshop'
     BEGIN
       SELECT RAISE(ABORT, '${params.message}');
     END;
@@ -98,8 +98,8 @@ export function seedLegacyV15ProposalRows(
     ownerAgentId?: string | null;
   }[],
 ): void {
-  const databasePath = openOpenClawStateDatabase({ env }).path;
-  closeOpenClawStateDatabaseForTest();
+  const databasePath = openCarapaceStateDatabase({ env }).path;
+  closeCarapaceStateDatabaseForTest();
   const legacy = openNodeSqliteDatabase(databasePath);
   legacy.exec(`
     ALTER TABLE skill_workshop_proposals ADD COLUMN workspace_dir TEXT NOT NULL DEFAULT '';

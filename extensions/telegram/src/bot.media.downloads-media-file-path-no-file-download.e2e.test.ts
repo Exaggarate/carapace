@@ -1,5 +1,5 @@
 // Telegram tests cover bot.mediaownloads media file path no file download plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   readRemoteMediaBufferSpy,
@@ -200,7 +200,7 @@ describe("telegram inbound media", () => {
             photo: [{ file_id: "fid" }],
             date: 1736380800, // 2025-01-09T00:00:00Z
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: scenario.getFile,
         });
 
@@ -237,7 +237,7 @@ describe("telegram inbound media", () => {
             photo: [{ file_id: "fid" }],
             date: 1736380800,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({ file_path: "photos/1.jpg" }),
         });
 
@@ -279,7 +279,7 @@ describe("telegram inbound media", () => {
         chat: { id: 1234, type: "private" },
         photo: [{ file_id: "fid" }],
       },
-      me: { username: "openclaw_bot" },
+      me: { username: "carapace_bot" },
       getFile: async () => ({ file_path: "photos/2.jpg" }),
     });
 
@@ -346,7 +346,7 @@ describe("telegram inbound media", () => {
       await handler({
         update: { update_id: testCase.updateId, message: testCase.message },
         message: testCase.message,
-        me: { username: "openclaw_bot" },
+        me: { username: "carapace_bot" },
         getFile: async () => ({ file_path: "unused" }),
       });
 
@@ -367,7 +367,7 @@ describe("telegram media groups", () => {
   const MEDIA_GROUP_WAIT_TIMEOUT_MS = Math.max(2_000, MEDIA_GROUP_FLUSH_MS * 10);
 
   it.each([
-    ["@openclaw_bot second album details", "mention"],
+    ["@carapace_bot second album details", "mention"],
     ["/status", "bot_command"],
     ["/stop", "bot_command"],
   ] as const)(
@@ -407,7 +407,7 @@ describe("telegram media groups", () => {
               caption: "First album details 💙",
               photo: [{ file_id: "album-caption-1" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/album-caption-1.jpg" }),
           }),
           handler({
@@ -421,7 +421,7 @@ describe("telegram media groups", () => {
               ],
               photo: [{ file_id: "album-caption-2" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/album-caption-2.jpg" }),
           }),
         ]);
@@ -487,7 +487,7 @@ describe("telegram media groups", () => {
             media_group_id: "album-warning-topic",
             photo: [{ file_id: "album-warning" }],
           },
-          me: { username: "openclaw_bot", has_topics_enabled: true },
+          me: { username: "carapace_bot", has_topics_enabled: true },
           getFile: async () => ({ file_path: "photos/album-warning.jpg" }),
         });
 
@@ -537,7 +537,7 @@ describe("telegram media groups", () => {
               media_group_id: "album-custom-api-root",
               photo: [{ file_id: "photo1" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/photo1.jpg" }),
           }),
           handler({
@@ -549,7 +549,7 @@ describe("telegram media groups", () => {
               media_group_id: "album-custom-api-root",
               photo: [{ file_id: "photo2" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/photo2.jpg" }),
           }),
         ]);
@@ -654,7 +654,7 @@ describe("telegram media groups", () => {
             scenario.messages.map((message) =>
               handler({
                 message,
-                me: { username: "openclaw_bot" },
+                me: { username: "carapace_bot" },
                 getFile: async () => ({ file_path: message.filePath }),
               }),
             ),
@@ -740,7 +740,7 @@ describe("telegram media groups", () => {
         ]) {
           await handler({
             message: message.message,
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: message.getFile,
           });
         }
@@ -848,7 +848,7 @@ describe("telegram media groups", () => {
         ]) {
           await handler({
             message: message.message,
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: message.getFile,
           });
         }
@@ -920,12 +920,12 @@ describe("telegram media groups", () => {
               message_id: 131,
               message_thread_id: 101,
               is_topic_message: true,
-              caption: "@openclaw_bot Topic one album",
+              caption: "@carapace_bot Topic one album",
               date: 1736380800,
               media_group_id: "album-shared-by-telegram",
               photo: [{ file_id: "topic1photo" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/topic1.jpg" }),
           }),
           handler({
@@ -935,12 +935,12 @@ describe("telegram media groups", () => {
               message_id: 132,
               message_thread_id: 202,
               is_topic_message: true,
-              caption: "@openclaw_bot Topic two album",
+              caption: "@carapace_bot Topic two album",
               date: 1736380801,
               media_group_id: "album-shared-by-telegram",
               photo: [{ file_id: "topic2photo" }],
             },
-            me: { username: "openclaw_bot" },
+            me: { username: "carapace_bot" },
             getFile: async () => ({ file_path: "photos/topic2.jpg" }),
           }),
         ]);
@@ -1010,7 +1010,7 @@ describe("telegram forwarded bursts", () => {
             date: 1736380800,
             forward_origin: { type: "hidden_user", date: 1736380700, sender_user_name: "A" },
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({}),
         });
 
@@ -1023,7 +1023,7 @@ describe("telegram forwarded bursts", () => {
             photo: [{ file_id: "fwd_photo_1" }],
             forward_origin: { type: "hidden_user", date: 1736380701, sender_user_name: "A" },
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "carapace_bot" },
           getFile: async () => ({ file_path: "photos/fwd1.jpg" }),
         });
 

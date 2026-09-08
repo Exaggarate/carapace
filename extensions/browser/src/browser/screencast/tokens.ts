@@ -1,4 +1,4 @@
-import { createOneTimeTicketStore } from "openclaw/plugin-sdk/websocket-runtime";
+import { createOneTimeTicketStore } from "carapace/plugin-sdk/websocket-runtime";
 import type { SsrFPolicy } from "../../infra/net/ssrf.js";
 
 export type BrowserScreencastTokenParams = {

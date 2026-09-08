@@ -1,4 +1,4 @@
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 /**
  * Android node capability policy-config regression tests.
  */

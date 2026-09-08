@@ -4,13 +4,13 @@
  */
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { dispatchGatewayMethod } from "openclaw/plugin-sdk/gateway-method-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { dispatchGatewayMethod } from "carapace/plugin-sdk/gateway-method-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   readJsonBodyWithLimit,
   sendHttpRequestRejection,
   WEBHOOK_BODY_READ_DEFAULTS,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";
 import { isAdminHttpRpcAllowedMethod, listAdminHttpRpcAllowedMethods } from "./methods.js";
 
 const ErrorCodes = {

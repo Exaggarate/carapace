@@ -5,10 +5,10 @@ import { formatTextCell, shortenText } from "./text-format.js";
 describe("shortenText", () => {
   it.each([
     ["", 1, ""],
-    ["openclaw", 16, "openclaw"],
-    ["openclaw-status-output", 10, "openclaw-…"],
-    ["openclaw", 0, ""],
-    ["openclaw", -1, ""],
+    ["carapace", 16, "carapace"],
+    ["carapace-status-output", 10, "carapace-…"],
+    ["carapace", 0, ""],
+    ["carapace", -1, ""],
     ["hello🙂world", 7, "hello🙂…"],
     ["🙂🙂🙂", 3, "🙂🙂🙂"],
     ["🙂🙂🙂🙂", 3, "🙂🙂…"],

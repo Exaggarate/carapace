@@ -21,7 +21,7 @@ import {
 import { markToolDecisionRecorded } from "./agent-tools.before-tool-call.decision.js";
 import { wrapToolWithBeforeToolCallHook } from "./agent-tools.before-tool-call.js";
 import { createCoreCodingTools } from "./core-coding-tools.js";
-import { createOpenClawTools } from "./openclaw-tools.js";
+import { createCarapaceTools } from "./carapace-tools.js";
 import { getInternalToolExecutionPreparer } from "./runtime/internal-hooks.js";
 import { wrapToolDefinition } from "./sessions/tools/tool-definition-wrapper.js";
 import type { AnyAgentTool } from "./tools/common.js";
@@ -166,7 +166,7 @@ describe("generic tool action decision receipts", () => {
       pluginId: "arbitrary-browser-owner",
       manifestKind: undefined,
       family: "tool",
-      operation: "openclaw",
+      operation: "carapace",
     },
   ] as const)("classifies $label independently of plugin and tool names", async (entry) => {
     const works: ExecutionDecisionWork[] = [];
@@ -189,7 +189,7 @@ describe("generic tool action decision receipts", () => {
   });
 
   it("records a Gateway-shaped tool assembled without its first hook wrapper", async () => {
-    const source = createOpenClawTools({
+    const source = createCarapaceTools({
       disablePluginTools: true,
       wrapBeforeToolCallHook: false,
     }).find((tool) => tool.name === "sessions_list");
@@ -214,7 +214,7 @@ describe("generic tool action decision receipts", () => {
 
     expect(works).toHaveLength(1);
     expect(works[0]?.receipt).toMatchObject({
-      action: { family: "tool", operation: "openclaw" },
+      action: { family: "tool", operation: "carapace" },
       decision: { outcome: "allowed", reasonCode: "generic_action_attributed" },
       enforcement: { coverageState: "attribution-only" },
     });

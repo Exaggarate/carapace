@@ -2,12 +2,12 @@
 import path from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveUnsuffixedSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import type { ApplyMediaUnderstandingResult } from "../../media-understanding/apply.js";
 import { AGENT_HARNESS_SESSION_KEY_RESERVED_MESSAGE } from "../../sessions/agent-harness-session-key.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { MsgContext } from "../templating.js";
 import { withFastReplyConfig } from "./get-reply-fast-path.test-support.js";
 import {
@@ -138,7 +138,7 @@ function verboseMessages(): string[] {
 
 async function resetMessageHookTestState() {
   await loadGetReplyRuntimeForTest();
-  delete process.env.OPENCLAW_TEST_FAST;
+  delete process.env.CARAPACE_TEST_FAST;
   mocks.applyMediaUnderstanding.mockReset();
   mocks.applyLinkUnderstanding.mockReset();
   mocks.createInternalHookEvent.mockReset();
@@ -207,7 +207,7 @@ async function resetMessageHookTestState() {
 
 async function runLocalPathSelfServeCase(params: {
   ctx: Partial<MsgContext>;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   opts?: Parameters<typeof getReplyFromConfig>[1];
   provider?: string;
   model?: string;
@@ -835,11 +835,11 @@ describe("getReplyFromConfig message hooks", () => {
   });
 
   it("stages remaining remote iMessage media in a mixed staged context", async () => {
-    await withOpenClawTestState({ label: "reply-message-hooks-mixed-media" }, async (state) => {
+    await withCarapaceTestState({ label: "reply-message-hooks-mixed-media" }, async (state) => {
       const order: string[] = [];
       const alreadyStagedPath = "/tmp/already-staged.jpg";
       const remotePath = "/Users/demo/Library/Messages/Attachments/ab/cd/photo.jpg";
-      const stagedPath = "/tmp/openclaw-remote-cache/photo.jpg";
+      const stagedPath = "/tmp/carapace-remote-cache/photo.jpg";
       vi.mocked(stageSandboxMediaMock).mockImplementationOnce(async (params) => {
         order.push("stage");
         const stagedFacts = [
@@ -918,8 +918,8 @@ describe("getReplyFromConfig message hooks", () => {
   });
 
   it("skips message hooks in fast test mode", async () => {
-    await withOpenClawTestState(
-      { label: "reply-message-hooks-fast", env: { OPENCLAW_TEST_FAST: "1" } },
+    await withCarapaceTestState(
+      { label: "reply-message-hooks-fast", env: { CARAPACE_TEST_FAST: "1" } },
       async (state) => {
         const storePath = path.join(state.sessionsDir("main"), "sessions.json");
         const cfg = withFastReplyConfig({
@@ -1017,7 +1017,7 @@ describe("getReplyFromConfig message hooks", () => {
 
   it("continues dispatching when media understanding fails before reply routing", async () => {
     mocks.applyMediaUnderstanding.mockRejectedValueOnce(
-      new Error("Cannot find module '/tmp/openclaw/dist/media-understanding/apply.runtime-old.js'"),
+      new Error("Cannot find module '/tmp/carapace/dist/media-understanding/apply.runtime-old.js'"),
     );
 
     const reply = await getReplyFromConfig(buildCtx(), undefined, withFastReplyConfig({}));
@@ -1070,7 +1070,7 @@ describe("getReplyFromConfig message hooks", () => {
       CommandInterpretationSuppressed: suppressed,
     });
     mocks.applyLinkUnderstanding.mockRejectedValueOnce(
-      new Error("Cannot find module '/tmp/openclaw/dist/link-understanding/apply.runtime-old.js'"),
+      new Error("Cannot find module '/tmp/carapace/dist/link-understanding/apply.runtime-old.js'"),
     );
 
     const reply = await getReplyFromConfig(ctx, undefined, withFastReplyConfig({}));

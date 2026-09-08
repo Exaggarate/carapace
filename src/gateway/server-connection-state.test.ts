@@ -1,8 +1,8 @@
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { WebSocket } from "ws";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGatewayConnectionState } from "./server-connection-state.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
 
@@ -44,7 +44,7 @@ function makeClient(
 
 describe("gateway connection state", () => {
   it("advertises online people only through live operator connections", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const state = createGatewayConnectionState({
         bootId: "online-recipients",
         cfg: { agents: { entries: { main: {} } } },
@@ -58,7 +58,7 @@ describe("gateway connection state", () => {
         ["recipient", recipient],
       ] as const) {
         peer.client.connect.client = {
-          id: "openclaw-control-ui",
+          id: "carapace-control-ui",
           version: "test",
           platform: "web",
           mode: "webchat",
@@ -100,7 +100,7 @@ describe("gateway connection state", () => {
   it("bounds targeted delivery and connection lookups to the requested connection", () => {
     const state = createGatewayConnectionState({
       bootId: "targeted-delivery",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
     });
     onTestFinished(() => state.mentionInbox.dispose());
     const reads = { count: 0 };
@@ -148,7 +148,7 @@ describe("gateway connection state", () => {
   it("preserves connection insertion order for targeted fanout", () => {
     const state = createGatewayConnectionState({
       bootId: "ordered-delivery",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
     });
     onTestFinished(() => state.mentionInbox.dispose());
     const reads = { count: 0 };

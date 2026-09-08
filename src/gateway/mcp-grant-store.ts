@@ -95,7 +95,7 @@ export type McpLoopbackRequestContext = {
 interface McpAttachGrant {
   /** Opaque bearer presented as `Authorization: Bearer <token>`. */
   readonly token: string;
-  /** The openclaw session this grant is bound to; tool scope is resolved for this key. */
+  /** The carapace session this grant is bound to; tool scope is resolved for this key. */
   readonly sessionKey: string;
   /** Explicit agent owner for canonical global sessions, whose key cannot encode one. */
   readonly agentId?: string;
@@ -146,11 +146,11 @@ const DEFAULT_TTL_MS = 60 * 60 * 1000; // 1h
 const MAX_TTL_MS = 12 * 60 * 60 * 1000;
 
 const grantsByToken = resolveGlobalMap<string, McpAttachGrant>(
-  Symbol.for("openclaw.mcpAttachGrants"),
+  Symbol.for("carapace.mcpAttachGrants"),
   "close-and-restart",
 );
 const clientGrantsByToken = resolveGlobalMap<string, StoredMcpLoopbackClientGrant>(
-  Symbol.for("openclaw.mcpLoopbackClientGrants"),
+  Symbol.for("carapace.mcpLoopbackClientGrants"),
   "close-and-restart",
 );
 

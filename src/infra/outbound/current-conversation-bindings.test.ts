@@ -5,12 +5,12 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../kysely-sync.js";
 import {
@@ -25,7 +25,7 @@ import {
 import type { SessionBindingRecord } from "./session-binding.types.js";
 
 type CurrentConversationBindingDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "current_conversation_bindings"
 >;
 
@@ -64,7 +64,7 @@ function buildConversationKey(ref: SessionBindingRecord["conversation"]): string
 }
 
 function seedPersistedBinding(record: SessionBindingRecord): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const bindingDb = getNodeSqliteKysely<CurrentConversationBindingDatabase>(db);
     executeSqliteQuerySync(
       db,
@@ -90,7 +90,7 @@ function seedPersistedBinding(record: SessionBindingRecord): void {
 }
 
 function replacePersistedBinding(record: SessionBindingRecord): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     const bindingDb = getNodeSqliteKysely<CurrentConversationBindingDatabase>(db);
     executeSqliteQuerySync(
       db,
@@ -113,7 +113,7 @@ function replacePersistedBinding(record: SessionBindingRecord): void {
 }
 
 function readPersistedBinding(conversationId: string): SessionBindingRecord | null {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const bindingDb = getNodeSqliteKysely<CurrentConversationBindingDatabase>(db);
   const row = executeSqliteQuerySync(
     db,
@@ -166,7 +166,7 @@ function setMinimalCurrentConversationRegistry(): void {
 }
 
 async function withReadOnlyStateDatabase<T>(run: () => T | Promise<T>): Promise<T> {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   db.exec("PRAGMA query_only = ON");
   try {
     return await run();
@@ -209,9 +209,9 @@ describe("generic current-conversation bindings", () => {
   let testStateDir = "";
 
   beforeEach(async () => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-current-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-current-bindings-"));
+    process.env.CARAPACE_STATE_DIR = testStateDir;
     setMinimalCurrentConversationRegistry();
     testing.clearPersistedCurrentConversationBindingsForTests();
   });
@@ -219,11 +219,11 @@ describe("generic current-conversation bindings", () => {
   afterEach(async () => {
     vi.useRealTimers();
     testing.clearPersistedCurrentConversationBindingsForTests();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     if (previousStateDir == null) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
     await fs.rm(testStateDir, { recursive: true, force: true });
   });
@@ -316,7 +316,7 @@ describe("generic current-conversation bindings", () => {
       targetSessionKey: "agent:codex:acp:workspace-dm",
     });
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const resolved = resolveGenericCurrentConversationBinding({
       channel: "workspace",
@@ -350,7 +350,7 @@ describe("generic current-conversation bindings", () => {
         targetSessionKey,
         metadata: { label: "updated" },
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const binding = expectSessionBinding(resolveWorkspaceConversation("user:replacement-owner"));
       expect(binding.targetSessionKey).toBe(targetSessionKey);
@@ -421,7 +421,7 @@ describe("generic current-conversation bindings", () => {
           opaque: { nested: true },
         });
 
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         expect(resolveWorkspaceConversation("user:inserted")?.targetSessionKey).toBe(
           "agent:codex:acp:inserted-target",
         );
@@ -488,7 +488,7 @@ describe("generic current-conversation bindings", () => {
             if (mutation === "rebind") {
               replacePersistedBinding(latest);
             } else {
-              runOpenClawStateWriteTransaction(({ db }) => {
+              runCarapaceStateWriteTransaction(({ db }) => {
                 const bindingDb = getNodeSqliteKysely<CurrentConversationBindingDatabase>(db);
                 executeSqliteQuerySync(
                   db,
@@ -732,7 +732,7 @@ describe("generic current-conversation bindings", () => {
     const targetSessionKey = "agent:codex:acp:workspace-dm";
     const bound = expectSessionBinding(await bindWorkspaceConversation("user:policy-owner"));
     const policy = vi.fn(() => {
-      runOpenClawStateWriteTransaction(() => undefined);
+      runCarapaceStateWriteTransaction(() => undefined);
       return true;
     });
     setActivePluginRegistry(
@@ -856,7 +856,7 @@ describe("generic current-conversation bindings", () => {
       1_234_567_890,
     );
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expectBindingMetadata(
       resolveGenericCurrentConversationBinding({
@@ -888,7 +888,7 @@ describe("generic current-conversation bindings", () => {
       expect(resolveWorkspaceConversation("user:U1")?.targetSessionKey).toBe(
         "agent:codex:acp:session-a",
       );
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(resolveWorkspaceConversation("user:U1")?.targetSessionKey).toBe(
         "agent:codex:acp:session-a",
       );

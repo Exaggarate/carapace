@@ -238,7 +238,7 @@ export class SidebarPeopleRuntime {
     const card =
       existing ??
       createPortaledHovercard(
-        `openclaw-person-activity-${++nextCardId}`,
+        `carapace-person-activity-${++nextCardId}`,
         "session-progress-hovercard person-activity-hovercard",
       );
     const focused = card.contains(document.activeElement) ? document.activeElement : null;

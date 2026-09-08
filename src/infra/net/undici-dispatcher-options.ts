@@ -1,11 +1,11 @@
 import { createRequire } from "node:module";
 import net from "node:net";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isObjectRecord } from "@carapace/normalization-core/record-coerce";
 import { addActiveManagedProxyTlsOptions } from "./proxy/managed-proxy-undici.js";
 import { withUndiciErrorDiagnostics } from "./undici-error-diagnostics.js";
 import { resolveUndiciAutoSelectFamilyConnectOptions } from "./undici-family-policy.js";
 
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__";
 const requireUndici = createRequire(import.meta.url);
 
 type UndiciAgentOptions = ConstructorParameters<typeof import("undici").Agent>[0];

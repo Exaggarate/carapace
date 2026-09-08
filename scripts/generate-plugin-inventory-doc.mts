@@ -41,16 +41,16 @@ const PLUGIN_DOC_ALIASES = new Map([
   ["tokenjuice", "/tools/tokenjuice"],
 ]);
 const SKIPPED_REFERENCE_PAGE_IDS = new Set(["parallel"]);
-const MANUAL_SECTION_START = "<!-- openclaw-plugin-reference:manual-start -->";
-const MANUAL_SECTION_END = "<!-- openclaw-plugin-reference:manual-end -->";
+const MANUAL_SECTION_START = "<!-- carapace-plugin-reference:manual-start -->";
+const MANUAL_SECTION_END = "<!-- carapace-plugin-reference:manual-end -->";
 const GENERATED_NOTICE = `<!-- Generated file. Do not edit by hand.
 Run \`pnpm plugins:inventory:gen\` to rebuild it. -->`;
 // Keep the marker names in this notice unbracketed. A bracketed copy would make
 // extractManualReferenceSections match the notice instead of the real marker.
 const GENERATED_REFERENCE_NOTICE = `<!-- Generated file. Do not edit by hand.
 Run \`pnpm plugins:inventory:gen\` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->`;
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->`;
 // Generated link labels are user-visible product names and translation source.
 const RELATED_DOC_PRODUCT_IDS = new Set([
   "chutes",
@@ -74,7 +74,7 @@ const RELATED_DOC_PRODUCT_IDS = new Set([
 
 type PluginManifest = Partial<RuntimePluginManifest>;
 type PluginPackageJson = Partial<RuntimePackageManifest> & {
-  openclaw?: RuntimePackageManifest["openclaw"] & {
+  carapace?: RuntimePackageManifest["carapace"] & {
     release?: Partial<Record<"publishToClawHub" | "publishToNpm", boolean>>;
   };
 };
@@ -96,7 +96,7 @@ function createPluginRecord(entry: PluginSourceEntry, excludedDirs: Set<string>)
     id,
     installRoute: resolveInstallRoute(packageJson, status),
     name: humanizeId(id),
-    packageName: packageJson.name ?? (status === "core" ? "openclaw" : "-"),
+    packageName: packageJson.name ?? (status === "core" ? "carapace" : "-"),
     status,
     surface: resolvePluginSurface(manifest),
   };
@@ -252,12 +252,12 @@ function resolveDescription({ manifest, packageJson }: PluginSourceEntry) {
   if (channels.length > 0) {
     const channelLabel = displayList(channels);
     const channelNoun = channelLabel.toLowerCase().includes("channel") ? "" : " channel";
-    return `Adds the ${channelLabel}${channelNoun} surface for sending and receiving OpenClaw messages.`;
+    return `Adds the ${channelLabel}${channelNoun} surface for sending and receiving Carapace messages.`;
   }
 
   const providers = Array.isArray(manifest.providers) ? manifest.providers : [];
   if (providers.length > 0) {
-    return `Adds ${displayList(providers)} model provider support to OpenClaw.`;
+    return `Adds ${displayList(providers)} model provider support to Carapace.`;
   }
 
   const contracts = Object.keys(manifest.contracts ?? {}).toSorted((left, right) =>
@@ -289,7 +289,7 @@ function resolveDescription({ manifest, packageJson }: PluginSourceEntry) {
   }
 
   const packageDescription = normalizePackageDescription(packageJson.description);
-  return packageDescription ? `${packageDescription}.` : "Provides an OpenClaw plugin.";
+  return packageDescription ? `${packageDescription}.` : "Provides an Carapace plugin.";
 }
 
 function pushUniqueDocLink(values: DocLink[], value: DocLink | null) {
@@ -310,7 +310,7 @@ function resolveDocs({ dirName, manifest, packageJson }: PluginSourceEntry) {
     pushUniqueDocLink(links, { href: pluginAlias, label: pluginAliasLabel });
   }
 
-  const channelDoc = normalizeDocPath(packageJson.openclaw?.channel?.docsPath);
+  const channelDoc = normalizeDocPath(packageJson.carapace?.channel?.docsPath);
   if (channelDoc) {
     pushUniqueDocLink(links, {
       href: channelDoc,
@@ -379,17 +379,17 @@ function resolveInstallRoute(packageJson: PluginPackageJson, status: PluginStatu
   }
   if (status === "core") {
     // Explicit bundle ownership describes the current install surface; release flags may stage future publication.
-    if (packageJson.openclaw?.build?.bundledDist === true) {
-      return "included in OpenClaw";
+    if (packageJson.carapace?.build?.bundledDist === true) {
+      return "included in Carapace";
     }
-    const release = packageJson.openclaw?.release;
+    const release = packageJson.carapace?.release;
     if (release?.publishToClawHub === true || release?.publishToNpm === true) {
-      return `included in OpenClaw, and also from ${resolveInstallRoute(packageJson, "external")}`;
+      return `included in Carapace, and also from ${resolveInstallRoute(packageJson, "external")}`;
     }
-    return "included in OpenClaw";
+    return "included in Carapace";
   }
-  const install = packageJson.openclaw?.install;
-  const release = packageJson.openclaw?.release;
+  const install = packageJson.carapace?.install;
+  const release = packageJson.carapace?.release;
   const clawhubSpec =
     typeof install?.clawhubSpec === "string" ? `: \`${install.clawhubSpec}\`` : "";
   const npmSpec =
@@ -415,10 +415,10 @@ function resolveStatus(
   { dirName, packageJson }: PluginSourceEntry,
   excludedDirs: Set<string>,
 ): PluginStatus {
-  const release = packageJson.openclaw?.release;
+  const release = packageJson.carapace?.release;
   const hasInstallSpec =
-    typeof packageJson.openclaw?.install?.clawhubSpec === "string" ||
-    typeof packageJson.openclaw?.install?.npmSpec === "string";
+    typeof packageJson.carapace?.install?.clawhubSpec === "string" ||
+    typeof packageJson.carapace?.install?.npmSpec === "string";
   if (!excludedDirs.has(dirName)) {
     return "core";
   }
@@ -542,16 +542,16 @@ ${renderSurface(record.surface)}${manualBlock ? `\n\n${manualBlock}` : ""}${rela
 function renderReferenceIndex(records: PluginRecord[]) {
   const referenceCount = records.filter(hasGeneratedReferencePage).length;
   return `---
-summary: "Generated index of OpenClaw plugin reference pages"
+summary: "Generated index of Carapace plugin reference pages"
 read_when:
-  - You need a reference page for a specific OpenClaw plugin
+  - You need a reference page for a specific Carapace plugin
   - You are auditing plugin docs coverage
 title: "Plugin reference"
 ---
 
 ${GENERATED_NOTICE}
 
-This section holds one reference page for each OpenClaw plugin. Each page states
+This section holds one reference page for each Carapace plugin. Each page states
 the package, the install route, and the surface the plugin adds.
 
 Use [Plugin inventory](/plugins/plugin-inventory) to browse all ${referenceCount}
@@ -559,8 +559,8 @@ generated plugin reference pages by distribution, package, and description.
 
 ## How this page is built
 
-OpenClaw generates this page from the top-level
-\`extensions/*/openclaw.plugin.json\` manifests. Package metadata enriches
+Carapace generates this page from the top-level
+\`extensions/*/carapace.plugin.json\` manifests. Package metadata enriches
 entries when \`package.json\` is present. Regenerate the page with:
 
 \`\`\`bash
@@ -575,7 +575,7 @@ function collectPluginSourceEntries(): PluginSourceEntry[] {
     .readdirSync(EXTENSIONS_DIR)
     .toSorted((left, right) => left.localeCompare(right))) {
     const packagePath = path.join(EXTENSIONS_DIR, dirName, "package.json");
-    const manifestPath = path.join(EXTENSIONS_DIR, dirName, "openclaw.plugin.json");
+    const manifestPath = path.join(EXTENSIONS_DIR, dirName, "carapace.plugin.json");
     if (!fs.existsSync(manifestPath)) {
       continue;
     }
@@ -594,7 +594,7 @@ function enumerateTopLevelPluginManifests() {
     .readdirSync(EXTENSIONS_DIR)
     .toSorted((left, right) => left.localeCompare(right))
     .flatMap((dirName) => {
-      const manifestPath = path.join(EXTENSIONS_DIR, dirName, "openclaw.plugin.json");
+      const manifestPath = path.join(EXTENSIONS_DIR, dirName, "carapace.plugin.json");
       if (!fs.existsSync(manifestPath)) {
         return [];
       }
@@ -605,8 +605,8 @@ function enumerateTopLevelPluginManifests() {
 }
 
 type ExternalPluginDocsInventorySeedEntry = {
-  openclaw?: {
-    channel?: NonNullable<PluginPackageJson["openclaw"]>["channel"];
+  carapace?: {
+    channel?: NonNullable<PluginPackageJson["carapace"]>["channel"];
     channelHostConfig?: {
       docsInventory?: {
         package?: PluginPackageJson;
@@ -622,7 +622,7 @@ function collectExternalPluginDocsInventoryEntries(): PluginSourceEntry[] {
   };
   const entries: PluginSourceEntry[] = [];
   for (const entry of Array.isArray(seed.entries) ? seed.entries : []) {
-    const inventory = entry?.openclaw?.channelHostConfig?.docsInventory;
+    const inventory = entry?.carapace?.channelHostConfig?.docsInventory;
     const packageMetadata = inventory?.package;
     const manifest = inventory?.manifest;
     if (!inventory) {
@@ -631,7 +631,7 @@ function collectExternalPluginDocsInventoryEntries(): PluginSourceEntry[] {
     if (
       typeof packageMetadata?.name !== "string" ||
       typeof manifest?.id !== "string" ||
-      !entry?.openclaw?.channel
+      !entry?.carapace?.channel
     ) {
       throw new Error("external plugin docs inventory metadata is incomplete");
     }
@@ -641,9 +641,9 @@ function collectExternalPluginDocsInventoryEntries(): PluginSourceEntry[] {
       manifest,
       packageJson: {
         ...packageMetadata,
-        openclaw: {
-          ...packageMetadata.openclaw,
-          channel: entry.openclaw.channel,
+        carapace: {
+          ...packageMetadata.carapace,
+          channel: entry.carapace.channel,
         },
       },
     });
@@ -718,7 +718,7 @@ function renderDocument() {
   };
 
   return `---
-summary: "Generated inventory of OpenClaw plugins shipped in core, published externally, or kept source-only"
+summary: "Generated inventory of Carapace plugins shipped in core, published externally, or kept source-only"
 read_when:
   - You are deciding whether a plugin ships in the core npm package or installs separately
   - You are updating bundled plugin package metadata or release automation
@@ -728,15 +728,15 @@ title: "Plugin inventory"
 
 ${GENERATED_NOTICE}
 
-This page lists every OpenClaw plugin with its package, install route, and
+This page lists every Carapace plugin with its package, install route, and
 description. Operators use it to find a plugin and to see whether that plugin
 needs a separate install. Maintainers use it to check bundled plugin metadata
 and release automation.
 
 ## Definitions
 
-- **Core npm package:** built into the \`openclaw\` npm package and available without a separate plugin install.
-- **Official external package:** OpenClaw-maintained plugin omitted from the core npm package, kept in this official inventory, and installed on demand through ClawHub and/or npm.
+- **Core npm package:** built into the \`carapace\` npm package and available without a separate plugin install.
+- **Official external package:** Carapace-maintained plugin omitted from the core npm package, kept in this official inventory, and installed on demand through ClawHub and/or npm.
 - **Source checkout only:** repo-local plugin omitted from published npm artifacts and not advertised as an installable package.
 
 Source checkouts are different from npm installs: after \`pnpm install\`, bundled
@@ -746,19 +746,19 @@ dependencies are available.
 ## Install a plugin
 
 Use the install route in each entry to decide whether install is needed. Plugins
-that say \`included in OpenClaw\` are already present in the core package.
+that say \`included in Carapace\` are already present in the core package.
 Official external packages need one install, then a Gateway restart.
 
 For example, Discord is an official external package:
 
 \`\`\`bash
-openclaw plugins install @openclaw/discord
-openclaw gateway restart
-openclaw plugins inspect discord --runtime --json
+carapace plugins install @carapace/discord
+carapace gateway restart
+carapace plugins inspect discord --runtime --json
 \`\`\`
 
 During the launch cutover, ordinary bare package specs still install from npm.
-Use \`clawhub:@openclaw/discord\` or \`npm:@openclaw/discord\` when you need an
+Use \`clawhub:@carapace/discord\` or \`npm:@carapace/discord\` when you need an
 explicit source. After install, follow the plugin's setup doc, such as
 [Discord](/channels/discord), to add credentials and channel config. See
 [Manage plugins](/plugins/manage-plugins) for update, uninstall, and publishing
@@ -786,8 +786,8 @@ ${renderInventoryList(groups.source)}
 
 ## How this page is built
 
-OpenClaw generates this page from the top-level
-\`extensions/*/openclaw.plugin.json\` manifests and the root npm package
+Carapace generates this page from the top-level
+\`extensions/*/carapace.plugin.json\` manifests and the root npm package
 \`files\` exclusions. Optional \`package.json\` metadata enriches package and
 distribution details. Regenerate the page with:
 

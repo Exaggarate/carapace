@@ -72,7 +72,7 @@ describe.skipIf(process.platform === "win32")("systemd process availability", ()
   }
 
   it.each(["ENOENT", "EACCES"])("rejects unavailable systemctl with %s", async (errorCode) => {
-    await withTempDir("openclaw-systemctl-", async (dir) => {
+    await withTempDir("carapace-systemctl-", async (dir) => {
       if (errorCode === "EACCES") {
         await fs.writeFile(path.join(dir, "systemctl"), "#!/bin/sh\nexit 0\n", { mode: 0o600 });
       }
@@ -93,7 +93,7 @@ describe.skipIf(process.platform === "win32")("systemd process availability", ()
     { output: "degraded", code: 1, available: true },
     { output: "Failed to connect to bus: No medium found", code: 1, available: false },
   ])("preserves manager status $output", async ({ output, code, available }) => {
-    await withTempDir("openclaw-systemctl-", async (dir) => {
+    await withTempDir("carapace-systemctl-", async (dir) => {
       await fs.writeFile(
         path.join(dir, "systemctl"),
         `#!/bin/sh\nprintf '%s\\n' '${output}'\nexit ${code}\n`,
@@ -117,7 +117,7 @@ describe.skipIf(process.platform === "win32")("systemd process availability", ()
   });
 
   it.each(["timeout", "signal"])("rejects partial status after %s", async (termination) => {
-    await withTempDir("openclaw-systemctl-", async (dir) => {
+    await withTempDir("carapace-systemctl-", async (dir) => {
       await fs.writeFile(
         path.join(dir, "systemctl"),
         `#!/bin/sh\nprintf 'Could not find service\\n'\n${termination === "timeout" ? "exec /bin/sleep 10" : "kill -TERM $$"}\n`,
@@ -185,7 +185,7 @@ describe.skipIf(process.platform === "win32")("systemd process availability", ()
 
   describe.each([
     { unitName: "clawdbot-gateway.service", uninstall: uninstallLegacySystemdUnits },
-    { unitName: "openclaw-gateway.service", uninstall: uninstallUserSystemdGatewayUnit },
+    { unitName: "carapace-gateway.service", uninstall: uninstallUserSystemdGatewayUnit },
   ])("$unitName cleanup", ({ unitName, uninstall }) => {
     it.each([
       { availability: "signal", disableFails: true },
@@ -194,7 +194,7 @@ describe.skipIf(process.platform === "win32")("systemd process availability", ()
     ])(
       "handles $availability status with disable failure $disableFails",
       async ({ availability, disableFails }) => {
-        await withTempDir("openclaw-systemctl-cleanup-", async (dir) => {
+        await withTempDir("carapace-systemctl-cleanup-", async (dir) => {
           const env = systemctlEnv(dir);
           const unitPath = path.join(dir, ".config/systemd/user", unitName);
           const definition = "[Unit]\nDescription=Gateway cleanup fixture\n";

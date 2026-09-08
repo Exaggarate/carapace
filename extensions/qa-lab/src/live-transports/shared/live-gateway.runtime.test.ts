@@ -1,5 +1,5 @@
 // Qa Lab tests cover live gateway plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { startQaGatewayChild, startQaProviderServer, gatewayStop } = vi.hoisted(() => ({
@@ -26,7 +26,7 @@ type GatewayOptions = {
   providerBaseUrl?: string;
   providerMode?: string;
   transportBaseUrl?: string;
-  mutateConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  mutateConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
 };
 
 function createStubTransport(baseUrl = "http://127.0.0.1:43123") {
@@ -37,15 +37,15 @@ function createStubTransport(baseUrl = "http://127.0.0.1:43123") {
         "qa-channel": {
           enabled: true,
           baseUrl,
-          botUserId: "openclaw",
-          botDisplayName: "OpenClaw QA",
+          botUserId: "carapace",
+          botDisplayName: "Carapace QA",
           allowFrom: ["*"],
           pollTimeoutMs: 250,
         },
       },
       messages: {
         groupChat: {
-          mentionPatterns: ["\\b@?openclaw\\b"],
+          mentionPatterns: ["\\b@?carapace\\b"],
         },
       },
     }),
@@ -103,7 +103,7 @@ describe("createQaLiveLaneGateway", () => {
     const owner = createQaLiveLaneGateway();
     await expect(
       owner.start({
-        repoRoot: "/tmp/openclaw-repo",
+        repoRoot: "/tmp/carapace-repo",
         transport: createStubTransport(),
         transportBaseUrl: "http://127.0.0.1:43123",
         providerMode: "mock-openai",
@@ -125,7 +125,7 @@ describe("createQaLiveLaneGateway", () => {
     gatewayStop.mockResolvedValue({ process: "never-spawned", errors: [] });
     const owner = createQaLiveLaneGateway();
     const startup = owner.start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -143,7 +143,7 @@ describe("createQaLiveLaneGateway", () => {
 
   it("threads the mock provider base url into the gateway child", async () => {
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -167,7 +167,7 @@ describe("createQaLiveLaneGateway", () => {
 
   it("forwards a scenario-selected agent runtime to the gateway child", async () => {
     await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "live-frontier",
@@ -181,7 +181,7 @@ describe("createQaLiveLaneGateway", () => {
 
   it("disables memory search for transport-only live lanes", async () => {
     await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -227,7 +227,7 @@ describe("createQaLiveLaneGateway", () => {
 
   it("forwards gateway stop options to the child harness", async () => {
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -243,7 +243,7 @@ describe("createQaLiveLaneGateway", () => {
 
   it("skips mock bootstrap for live frontier runs", async () => {
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "live-frontier",
@@ -270,7 +270,7 @@ describe("createQaLiveLaneGateway", () => {
 
     await expect(
       owner.start({
-        repoRoot: "/tmp/openclaw-repo",
+        repoRoot: "/tmp/carapace-repo",
         transport: createStubTransport(),
         transportBaseUrl: "http://127.0.0.1:43123",
         providerMode: "mock-openai",
@@ -296,7 +296,7 @@ describe("createQaLiveLaneGateway", () => {
 
     await expect(
       owner.start({
-        repoRoot: "/tmp/openclaw-repo",
+        repoRoot: "/tmp/carapace-repo",
         transport: createStubTransport(),
         transportBaseUrl: "http://127.0.0.1:43123",
         providerMode: "mock-openai",
@@ -319,7 +319,7 @@ describe("createQaLiveLaneGateway", () => {
       errors: [new Error("gateway down")],
     });
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -342,7 +342,7 @@ describe("createQaLiveLaneGateway", () => {
     });
     mockStop.mockRejectedValueOnce(new Error("mock down"));
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -359,7 +359,7 @@ describe("createQaLiveLaneGateway", () => {
   it("retries only mock cleanup after gateway preservation succeeds", async () => {
     mockStop.mockRejectedValueOnce(new Error("mock down"));
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",
@@ -383,7 +383,7 @@ describe("createQaLiveLaneGateway", () => {
       errors: [new Error("gateway down")],
     });
     const harness = await ownGateway().start({
-      repoRoot: "/tmp/openclaw-repo",
+      repoRoot: "/tmp/carapace-repo",
       transport: createStubTransport(),
       transportBaseUrl: "http://127.0.0.1:43123",
       providerMode: "mock-openai",

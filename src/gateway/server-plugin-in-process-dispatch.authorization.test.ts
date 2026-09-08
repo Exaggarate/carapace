@@ -11,7 +11,7 @@ import { withPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway
 import { trackAsyncWork } from "../shared/async-work-scope.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createInternalAgentTurnFacade } from "./agent-turn/internal-facade.js";
 import { createGatewayMethodRegistry } from "./methods/registry.js";
 import { resolveNodeInvokeRuntimeAuthorityError } from "./server-methods/nodes.invoke-authority.js";
@@ -247,7 +247,7 @@ describe("typed in-process agent authorization", () => {
   ])(
     "keeps operator restrictions for $method (cleanup: $cleanup, scoped: $scopedActor)",
     async ({ method, cleanup, scopedActor }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async () => {
+      await withCarapaceTestState({ scenario: "minimal" }, async () => {
         const ownerProfile = ensureProfileForEmail("cleanup-owner@example.test");
         setUserProfileRole(ownerProfile.id, scopedActor ? "writer" : "limited");
         const owner = createOperatorClient({
@@ -658,7 +658,7 @@ describe("typed in-process agent authorization", () => {
   });
 
   it("rejects tracked agent launches when a scoped operator identity was dropped", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const unidentifiedClient = createOperatorClient({
         profileId: "dropped-spawn-owner",
         scopes: ["operator.write"],
@@ -869,7 +869,7 @@ describe("typed in-process agent authorization", () => {
   });
 
   it("rejects a nonparticipant agent turn before preflight", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:private-draft";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey },

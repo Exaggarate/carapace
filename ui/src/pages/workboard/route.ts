@@ -27,10 +27,10 @@ export const page = definePage({
     import("../plugin/plugin-page.ts").then(() => ({
       header: true,
       render: (data: WorkboardRouteData | undefined) =>
-        html`<openclaw-plugin-page
+        html`<carapace-plugin-page
           .pluginId=${"workboard"}
           .tabId=${"workboard"}
           .params=${{ boardId: data?.boardFilter ?? "__all__" }}
-        ></openclaw-plugin-page>`,
+        ></carapace-plugin-page>`,
     })),
 });

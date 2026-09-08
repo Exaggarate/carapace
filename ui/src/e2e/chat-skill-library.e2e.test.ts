@@ -56,7 +56,7 @@ function projection(
   };
 }
 async function openSkills(page: Page) {
-  const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+  const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
   const menu = pane.locator("wa-dropdown.agent-chat__capability-menu");
   if (!(await menu.evaluate((node) => (node as HTMLElement & { open: boolean }).open))) {
     await pane.getByRole("button", { name: "Add attachment", exact: true }).click();

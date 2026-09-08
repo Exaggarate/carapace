@@ -7,8 +7,8 @@ import type { BoardReport } from "../boards/board-report.js";
 import { createTestBoardStore } from "../boards/board-store.test-support.js";
 import { createBoardHarness } from "../gateway/server-methods/board.test-support.js";
 import { resetPluginRuntimeStateForTest } from "../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { resolveCanvasDocumentsDir } from "./documents.js";
 import { registerTestWidgetContentKind } from "./widget-tool.content-kinds.test-support.js";
 import { createShowWidgetTool } from "./widget-tool.js";
@@ -16,8 +16,8 @@ import { createBoardPutCaller } from "./widget-tool.test-support.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetPluginRuntimeStateForTest();
 });
 
@@ -53,7 +53,7 @@ describe("native report authoring", () => {
     registerTestWidgetContentKind("report");
     const { mock, callGateway } = createBoardPutCaller();
     const tool = createShowWidgetTool({
-      stateDir: tempDirs.make("openclaw-report-plugin-"),
+      stateDir: tempDirs.make("carapace-report-plugin-"),
       agentSessionKey: "agent:main:report-plugin",
       callGateway,
     });
@@ -78,7 +78,7 @@ describe("native report authoring", () => {
   ])(
     "pins, updates and reopens a report for $agentId/$sessionKey without a document",
     async (target) => {
-      const stateDir = tempDirs.make("openclaw-native-report-");
+      const stateDir = tempDirs.make("carapace-native-report-");
       const store = createTestBoardStore({ stateDir });
       const sibling = {
         sessionKey: "global",
@@ -137,7 +137,7 @@ describe("native report authoring", () => {
         pluginKind: "session:report",
         props: updated,
       });
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       expect(store.getSnapshot(target).widgets[0]).toMatchObject({ props: updated, revision: 2 });
       const view = await invoke("board.get", target);
       expect(view.mock.calls[0]?.[0]).toBe(true);

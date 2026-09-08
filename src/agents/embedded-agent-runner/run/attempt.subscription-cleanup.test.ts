@@ -7,8 +7,8 @@ vi.mock("../logger.js", () => ({ log: { warn: mocks.warn } }));
 
 beforeEach(() => {
   vi.useFakeTimers();
-  vi.stubEnv("OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS", "1250");
-  vi.stubEnv("OPENCLAW_TEST_FAST", undefined);
+  vi.stubEnv("CARAPACE_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS", "1250");
+  vi.stubEnv("CARAPACE_TEST_FAST", undefined);
   // Timeout policy is captured at module load, once per cleanup owner lifetime.
   vi.resetModules();
   mocks.warn.mockClear();
@@ -29,8 +29,8 @@ describe("waitForEmbeddedAbortSettle timeout policy", () => {
   ])(
     "waits $timeoutMs ms with override=$override and fast=$fast",
     async ({ override, fast, timeoutMs }) => {
-      vi.stubEnv("OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS", override);
-      vi.stubEnv("OPENCLAW_TEST_FAST", fast);
+      vi.stubEnv("CARAPACE_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS", override);
+      vi.stubEnv("CARAPACE_TEST_FAST", fast);
       const { waitForEmbeddedAbortSettle } = await import("./attempt-subscription-cleanup.js");
       let settled = false;
       const wait = waitForEmbeddedAbortSettle({

@@ -58,15 +58,15 @@ function fixture() {
   const env = {
     HOME: home,
     USERPROFILE: home,
-    OPENCLAW_HOME: home,
-    OPENCLAW_STATE_DIR: state,
-    OPENCLAW_CONFIG_PATH: join(state, "openclaw.json"),
-    OPENCLAW_TEST_WORKSPACE_DIR: join(home, "workspace"),
-    OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "base",
+    CARAPACE_HOME: home,
+    CARAPACE_STATE_DIR: state,
+    CARAPACE_CONFIG_PATH: join(state, "carapace.json"),
+    CARAPACE_TEST_WORKSPACE_DIR: join(home, "workspace"),
+    CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "base",
   };
   const run = (command: string, stage = "survival") =>
     spawnSync(process.execPath, [assertions, command], {
-      env: { ...env, OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: stage },
+      env: { ...env, CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: stage },
       encoding: "utf8",
       timeout: 10_000,
     });
@@ -75,7 +75,7 @@ function fixture() {
   const legacyPath = join(state, "exec-approvals.json");
   const legacyBytes = readFileSync(legacyPath);
   const dbDir = join(state, "state");
-  const dbPath = join(dbDir, "openclaw.sqlite");
+  const dbPath = join(dbDir, "carapace.sqlite");
   function writeCanonical(raw: string | null) {
     mkdirSync(dbDir, { recursive: true });
     const db = new DatabaseSync(dbPath);
@@ -226,7 +226,7 @@ function approvalFixture() {
     join(artifactRoot, "legacy-operator-baseline.json"),
     JSON.stringify({ approvals: policy, approvalsJsonEra: true }),
   );
-  const dbPath = join(state, "state", "openclaw.sqlite");
+  const dbPath = join(state, "state", "carapace.sqlite");
   const legacyPath = join(state, "exec-approvals.json");
   const writeCanonical = (value: unknown) => {
     const db = new DatabaseSync(dbPath);
@@ -245,10 +245,10 @@ function approvalFixture() {
       encoding: "utf8",
       timeout: 10_000,
       env: {
-        OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: "legacy-operator-state",
-        OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifactRoot,
-        OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE: stage,
-        OPENCLAW_STATE_DIR: state,
+        CARAPACE_UPGRADE_SURVIVOR_SCENARIO: "legacy-operator-state",
+        CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT: artifactRoot,
+        CARAPACE_UPGRADE_SURVIVOR_ASSERT_STAGE: stage,
+        CARAPACE_STATE_DIR: state,
       },
     });
     if (dbBefore) {

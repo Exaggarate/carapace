@@ -17,7 +17,7 @@ import {
   registerAgentRunContext,
 } from "../../../src/infra/agent-run-registry.js";
 import { withTimeout } from "../../../src/utils/with-timeout.js";
-import { GatewayClientTransport, OpenClaw } from "./index.js";
+import { GatewayClientTransport, Carapace } from "./index.js";
 
 describe("SDK writer takeover through the Gateway", () => {
   installGatewayTestHooks({ scope: "test" });
@@ -25,7 +25,7 @@ describe("SDK writer takeover through the Gateway", () => {
   it("reports the superseded writer as cancelled in events and waits", async () => {
     const token = "sdk-writer-takeover-token";
     const started = await startServer(token, { controlUiEnabled: false });
-    const oc = new OpenClaw({
+    const oc = new Carapace({
       transport: new GatewayClientTransport({
         url: `ws://127.0.0.1:${started.port}`,
         token,

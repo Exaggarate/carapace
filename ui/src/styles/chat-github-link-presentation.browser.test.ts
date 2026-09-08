@@ -41,7 +41,7 @@ const LINK_FORMS = [
     className: "markdown-github-link markdown-github-item",
     kind: "pull",
     id: "repository-ref",
-    label: "openclaw/openclaw#3434",
+    label: "carapace/carapace#3434",
     lead: "then see ",
   },
   {
@@ -66,7 +66,7 @@ function fixtureDocument(themeMode: "dark" | "light"): string {
   const columns = LINK_FORMS.map(
     ({ className, kind, id, label, lead }) => `
       <div class="chat-text" id="column-${id}">Reproduce the failing run and read the notes
-        first, ${lead}<a id="${id}" class="${className}" ${kind ? `data-github-kind="${kind}"` : ""} href="https://github.com/openclaw/openclaw"
+        first, ${lead}<a id="${id}" class="${className}" ${kind ? `data-github-kind="${kind}"` : ""} href="https://github.com/Exaggarate/carapace"
         >${label}</a> before landing the fix.</div>`,
   ).join("");
   return `<!doctype html><html ${themeAttributes}><head><style>${readChatCss()}</style></head>

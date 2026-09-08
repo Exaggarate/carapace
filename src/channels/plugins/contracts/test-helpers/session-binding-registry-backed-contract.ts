@@ -12,9 +12,9 @@ import {
 import type { SessionBindingCapabilities } from "../../../../infra/outbound/session-binding.types.js";
 import { resetPluginRuntimeStateForTest } from "../../../../plugins/runtime.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../../test-utils/carapace-test-state.js";
 import { getSessionBindingContractRegistry } from "./registry-session-binding.js";
 
 function resolveSessionBindingContractRuntimeConfig(id: string) {
@@ -67,21 +67,21 @@ export function describeSessionBindingRegistryBackedContract(id: string) {
   }
 
   describe(`${entry.id} session binding contract`, () => {
-    let testState: OpenClawTestState | undefined;
+    let testState: CarapaceTestState | undefined;
 
     beforeAll(async () => {
       await entry.preload?.();
     });
 
     beforeEach(async () => {
-      testState = await createOpenClawTestState({
+      testState = await createCarapaceTestState({
         label: `${entry.id}-session-binding-contract`,
         layout: "state-only",
       });
       resetPluginRuntimeStateForTest();
       clearRuntimeConfigSnapshot();
       // Keep the suite hermetic; some contract helpers resolve runtime artifacts through config-aware
-      // plugin boundaries, so never fall back to the developer's real ~/.openclaw/openclaw.json here.
+      // plugin boundaries, so never fall back to the developer's real ~/.carapace/carapace.json here.
       const runtimeConfig = resolveSessionBindingContractRuntimeConfig(entry.id);
       // These registry-backed contract suites intentionally exercise bundled runtime facades.
       // Opt the bundled-runtime cases in so the activation boundary behaves like real runtime usage.

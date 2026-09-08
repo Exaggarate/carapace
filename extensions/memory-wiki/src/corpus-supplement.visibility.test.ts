@@ -1,15 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
-import type { AnyAgentTool, OpenClawPluginToolFactory } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "carapace/plugin-sdk/memory-host-core";
+import type { AnyAgentTool, CarapacePluginToolFactory } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { describe, expect, it } from "vitest";
 import memoryCorePlugin from "../../memory-core/index.js";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import { resolveMemoryWikiAgentConfig } from "./config.js";
 import { createWikiCorpusSupplement } from "./corpus-supplement.js";
 import { renderWikiMarkdown } from "./markdown.js";
@@ -21,7 +21,7 @@ const appConfig = {
   // This suite registers memory-core directly; runtime discovery would load unrelated plugins.
   plugins: { enabled: false },
   agents: { list: [{ id: "main", default: true }, { id: "secondary" }] },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 async function writeBridgePage(params: {
   rootDir: string;
@@ -56,8 +56,8 @@ function assertToolDetailsRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function registerMemoryCoreToolFactories(): Map<string, OpenClawPluginToolFactory> {
-  const factories = new Map<string, OpenClawPluginToolFactory>();
+function registerMemoryCoreToolFactories(): Map<string, CarapacePluginToolFactory> {
+  const factories = new Map<string, CarapacePluginToolFactory>();
   memoryCorePlugin.register(
     createTestPluginApi({
       id: "memory-core",
@@ -77,7 +77,7 @@ function registerMemoryCoreToolFactories(): Map<string, OpenClawPluginToolFactor
 }
 
 function createMemoryCoreTool(params: {
-  factories: Map<string, OpenClawPluginToolFactory>;
+  factories: Map<string, CarapacePluginToolFactory>;
   name: "memory_search" | "memory_get";
   agentId: string;
   sandboxed: boolean;

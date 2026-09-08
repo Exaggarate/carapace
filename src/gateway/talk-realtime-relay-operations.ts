@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createDeferredCore } from "../shared/deferred.js";
 import { buildRealtimeVoiceAgentCancelProviderResult } from "../talk/agent-run-control-shared.js";
 import {
@@ -271,7 +271,7 @@ export function submitTalkRealtimeRelayToolResult(params: {
 
   if (cancelledAgentCall) {
     const providerResult = buildRealtimeVoiceAgentCancelProviderResult(
-      "OpenClaw cancelled this consult before completion. Do not restart it.",
+      "Carapace cancelled this consult before completion. Do not restart it.",
     );
     const submitCancellation = () =>
       submitFinalProviderToolResult({
@@ -532,7 +532,7 @@ export function prepareTalkRealtimeRelayAgentControl(
         type: "tool.progress",
         turnId,
         payload: {
-          name: "openclaw_agent_control",
+          name: "carapace_agent_control",
           phase: finalResult.mode,
           result: finalResult,
         },
@@ -585,7 +585,7 @@ export async function cancelTalkRealtimeRelayTurn(params: {
     session.harness.forcedConsults.markCancelled(handle);
     session.forcedTerminalProviderResults.set(handle.id, {
       result: buildRealtimeVoiceAgentCancelProviderResult(
-        "OpenClaw cancelled this consult before completion. Do not restart it.",
+        "Carapace cancelled this consult before completion. Do not restart it.",
       ),
       options: suppressedToolResultOptions(session),
       turnId,

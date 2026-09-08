@@ -1,5 +1,5 @@
 // Error identity and timeout recognition must not load logging or provider runtime.
-import { readErrorName } from "@openclaw/normalization-core/error-coercion";
+import { readErrorName } from "@carapace/normalization-core/error-coercion";
 import type { AgentRunTerminalOutcome } from "../agent-run-terminal-outcome.types.js";
 import { isProviderRequestSizeCeilingError, isTimeoutErrorMessage } from "./message-patterns.js";
 import type { FailoverReason } from "./signal.js";

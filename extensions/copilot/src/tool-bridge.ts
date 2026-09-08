@@ -9,7 +9,7 @@ import type {
   AnyAgentTool,
   EmbeddedRunAttemptParamsV2,
   SandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   applyEmbeddedAttemptToolsAllow,
   buildEmbeddedAttemptToolRunContext,
@@ -21,17 +21,17 @@ import {
   resolveEmbeddedAttemptToolConstructionPlan,
   resolveModelAuthMode,
   sanitizeToolResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createAgentHarnessToolSurfaceRuntime } from "openclaw/plugin-sdk/agent-harness-tool-runtime";
-import { toStringifiedError as toCopilotToolError } from "openclaw/plugin-sdk/error-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { createAgentHarnessToolSurfaceRuntime } from "carapace/plugin-sdk/agent-harness-tool-runtime";
+import { toStringifiedError as toCopilotToolError } from "carapace/plugin-sdk/error-runtime";
 import { isRawCopilotModelRun } from "./attempt-mode.js";
 
-type CreateOpenClawCodingTools =
-  (typeof import("openclaw/plugin-sdk/agent-harness"))["createOpenClawCodingTools"];
-type OpenClawCodingToolsOptions = NonNullable<Parameters<CreateOpenClawCodingTools>[0]>;
-type CreateOpenClawCodingToolsForBridge = (
-  options?: OpenClawCodingToolsOptions,
-) => ReturnType<CreateOpenClawCodingTools> | Promise<ReturnType<CreateOpenClawCodingTools>>;
+type CreateCarapaceCodingTools =
+  (typeof import("carapace/plugin-sdk/agent-harness"))["createCarapaceCodingTools"];
+type CarapaceCodingToolsOptions = NonNullable<Parameters<CreateCarapaceCodingTools>[0]>;
+type CreateCarapaceCodingToolsForBridge = (
+  options?: CarapaceCodingToolsOptions,
+) => ReturnType<CreateCarapaceCodingTools> | Promise<ReturnType<CreateCarapaceCodingTools>>;
 type AgentHarnessToolSurfaceRuntime = ReturnType<typeof createAgentHarnessToolSurfaceRuntime>;
 type CatalogExecuteParams = Parameters<
   NonNullable<AgentHarnessToolSurfaceRuntime["toolSearchCatalogExecutor"]>
@@ -57,10 +57,10 @@ interface CopilotSessionHolder {
  * Structural subset of `EmbeddedRunAttemptParamsV2` carried into the tool
  * bridge for PI-parity tool context (see
  * `src/agents/pi-embedded-runner/run/attempt.ts:1029-1117` — the
- * authoritative `createOpenClawCodingTools({...})` call shape).
+ * authoritative `createCarapaceCodingTools({...})` call shape).
  *
  * Declared from `EmbeddedRunAttemptParamsV2` (imported from the
- * `openclaw/plugin-sdk/agent-harness-runtime` boundary, *not* from
+ * `carapace/plugin-sdk/agent-harness-runtime` boundary, *not* from
  * `attempt.ts` in this extension) to avoid an `attempt.ts` ↔
  * `tool-bridge.ts` import cycle while keeping the field shapes
  * authoritative. Production callers pass the live attempt params; test
@@ -111,7 +111,7 @@ interface CopilotToolBridgeInput {
   /**
    * Full PI-parity attempt parameters. When set, the bridge forwards
    * identity, channel, owner/policy, auth-profile, message-routing,
-   * model, and run-trace fields to `createOpenClawCodingTools` so the
+   * model, and run-trace fields to `createCarapaceCodingTools` so the
    * wrapped-tool enforcement layer
    * (`src/agents/pi-tools.before-tool-call.ts`) receives the same
    * context the in-tree PI runner provides. See
@@ -137,7 +137,7 @@ interface CopilotToolBridgeInput {
    */
   onYieldDetected?: (message?: string, acknowledgment?: string) => void;
   onToolCompleted?: (completion: CopilotToolCompletion) => void | Promise<void>;
-  createOpenClawCodingTools?: CreateOpenClawCodingToolsForBridge;
+  createCarapaceCodingTools?: CreateCarapaceCodingToolsForBridge;
   beforeExecute?: (ctx: {
     toolName: string;
     toolCallId: string;
@@ -189,9 +189,9 @@ export async function createCopilotToolBridge(
     return { codeModeEngaged: false, promptToolPolicy: EMPTY_PROMPT_TOOL_POLICY, sourceTools: [] };
   }
 
-  const createOpenClawCodingTools =
-    input.createOpenClawCodingTools ??
-    (await import("openclaw/plugin-sdk/agent-harness")).createOpenClawCodingTools;
+  const createCarapaceCodingTools =
+    input.createCarapaceCodingTools ??
+    (await import("carapace/plugin-sdk/agent-harness")).createCarapaceCodingTools;
 
   const toolSurfaceRuntime = createAgentHarnessToolSurfaceRuntime({
     abortSignal: input.abortSignal,
@@ -219,7 +219,7 @@ export async function createCopilotToolBridge(
     sourceReplyDeliveryMode: attemptParams.sourceReplyDeliveryMode,
     toolsAllow: attemptParams.toolsAllow,
   });
-  const toolOptions = buildOpenClawCodingToolsOptions(
+  const toolOptions = buildCarapaceCodingToolsOptions(
     input,
     {
       ...toolPlan,
@@ -237,9 +237,9 @@ export async function createCopilotToolBridge(
   const bindingCwd = toolOptions.cwd ?? toolOptions.workspaceDir;
   const bindingOptions = bindingCwd ? { cwd: bindingCwd } : undefined;
   try {
-    const constructedTools = await createOpenClawCodingTools(toolOptions);
+    const constructedTools = await createCarapaceCodingTools(toolOptions);
     if (!Array.isArray(constructedTools)) {
-      throw new Error("createOpenClawCodingTools must return an array of tools");
+      throw new Error("createCarapaceCodingTools must return an array of tools");
     }
     const boundTools = hostCapabilities.bindToolSurface(constructedTools, bindingOptions);
     sourceTools = boundTools;
@@ -248,7 +248,7 @@ export async function createCopilotToolBridge(
     }
   } catch (error: unknown) {
     throw createError(
-      `[copilot-tool-bridge] createOpenClawCodingTools failed: ${toCopilotToolError(error).message}`,
+      `[copilot-tool-bridge] createCarapaceCodingTools failed: ${toCopilotToolError(error).message}`,
       error,
     );
   }
@@ -310,7 +310,7 @@ export async function createCopilotToolBridge(
     return run;
   };
   const sdkTools = exposedTools.map((sourceTool) =>
-    convertOpenClawToolToSdkTool(sourceTool, input, scheduleToolExecution),
+    convertCarapaceToolToSdkTool(sourceTool, input, scheduleToolExecution),
   );
   return {
     cleanup: toolSurfaceRuntime.cleanup,
@@ -346,11 +346,11 @@ export async function createCopilotToolBridge(
  * attempt context and prepared sandbox/construction policy to enforce access.
  * Missing fields here silently weaken or misapply the native harness contract.
  */
-function buildOpenClawCodingToolsOptions(
+function buildCarapaceCodingToolsOptions(
   input: CopilotToolBridgeInput,
   toolPlan: ReturnType<typeof resolveEmbeddedAttemptToolConstructionPlan>,
   toolSurfaceRuntime?: ReturnType<typeof createAgentHarnessToolSurfaceRuntime>,
-): OpenClawCodingToolsOptions {
+): CarapaceCodingToolsOptions {
   const a = input.attemptParams;
 
   // Mirror PI's `sandboxSessionKey` derivation (attempt.ts:873-874) so
@@ -382,7 +382,7 @@ function buildOpenClawCodingToolsOptions(
     "compat" in model &&
     model.compat &&
     typeof model.compat === "object"
-      ? (model.compat as OpenClawCodingToolsOptions["modelCompat"])
+      ? (model.compat as CarapaceCodingToolsOptions["modelCompat"])
       : undefined;
 
   return {
@@ -471,7 +471,7 @@ function buildOpenClawCodingToolsOptions(
   };
 }
 
-function convertOpenClawToolToSdkTool(
+function convertCarapaceToolToSdkTool(
   sourceTool: AnyAgentTool,
   input: CopilotToolBridgeInput,
   scheduleToolExecution: ScheduleToolExecution,
@@ -638,10 +638,10 @@ function convertOpenClawToolToSdkTool(
       scheduleToolExecution(sourceTool.executionMode, () => executeOnce(args, invocation)),
     name: sourceTool.name,
     // Copilot built-ins share coding-tool names. Explicit overrides keep calls
-    // on OpenClaw's host-bound tools instead of rejecting registration.
+    // on Carapace's host-bound tools instead of rejecting registration.
     overridesBuiltInTool: true,
     parameters: sourceTool.parameters as Record<string, unknown> | undefined,
-    // Host-bound tools enforce OpenClaw policy and approvals; an SDK custom-tool
+    // Host-bound tools enforce Carapace policy and approvals; an SDK custom-tool
     // prompt would apply a second, independent permission decision.
     skipPermission: true,
   };

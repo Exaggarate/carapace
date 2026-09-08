@@ -23,7 +23,7 @@ if (commandPath && statusPath) {
     return id;
   };
   const queueState = (key) => {
-    const queue = globalThis[Symbol.for("openclaw.followupQueues")]?.get(key);
+    const queue = globalThis[Symbol.for("carapace.followupQueues")]?.get(key);
     return {
       queueId: queueId(queue),
       draining: queue?.draining ?? false,
@@ -48,7 +48,7 @@ if (commandPath && statusPath) {
     const command = readCommand();
     if (!command || command.seq <= lastSeq) return;
     if (command.command === "arm") {
-      const callbacks = globalThis[Symbol.for("openclaw.followupDrainCallbacks")];
+      const callbacks = globalThis[Symbol.for("carapace.followupDrainCallbacks")];
       const callback = callbacks?.get(command.sessionKey);
       if (typeof callback !== "function") return;
       lastSeq = command.seq;

@@ -25,7 +25,7 @@ import {
 
 installGatewayTestHooks({ scope: "suite" });
 
-const gatewaySuite = installConnectedSessionStoreGatewaySuite("openclaw-gw-auth-refresh-", {
+const gatewaySuite = installConnectedSessionStoreGatewaySuite("carapace-gw-auth-refresh-", {
   client: {
     id: "gateway-client",
     version: "1.0.0",
@@ -264,13 +264,13 @@ describe("gateway agent auth refresh dispatch", () => {
     const activeWorkBefore = getActiveGatewayRootWorkCount();
     const publicationGate = createDeferred<{ agentDir: string; wrote: false }>();
     const modelsConfig = await import("../agents/models-config.js");
-    const ensureOpenClawModelsJson = modelsConfig.ensureOpenClawModelsJson;
+    const ensureCarapaceModelsJson = modelsConfig.ensureCarapaceModelsJson;
     const ensureSpy = vi
-      .spyOn(modelsConfig, "ensureOpenClawModelsJson")
+      .spyOn(modelsConfig, "ensureCarapaceModelsJson")
       .mockImplementation(async (config, agentDir, options) =>
         agentDir === before.agentDir
           ? await publicationGate.promise
-          : await ensureOpenClawModelsJson(config, agentDir, options),
+          : await ensureCarapaceModelsJson(config, agentDir, options),
       );
     const published = createDeferred();
     const unregister = registerPreparedModelRuntimePublicationListener((event) => {
@@ -375,14 +375,14 @@ describe("gateway agent auth refresh dispatch", () => {
     const runId = "idem-agent-auth-reject";
     const before = await prepareAuthDispatchAgents(affectedAgentId);
     const modelsConfig = await import("../agents/models-config.js");
-    const ensureOpenClawModelsJson = modelsConfig.ensureOpenClawModelsJson;
+    const ensureCarapaceModelsJson = modelsConfig.ensureCarapaceModelsJson;
     const ensureSpy = vi
-      .spyOn(modelsConfig, "ensureOpenClawModelsJson")
+      .spyOn(modelsConfig, "ensureCarapaceModelsJson")
       .mockImplementation(async (config, agentDir, options) => {
         if (agentDir === before.agentDir) {
           throw new Error("auth publication rejected");
         }
-        return await ensureOpenClawModelsJson(config, agentDir, options);
+        return await ensureCarapaceModelsJson(config, agentDir, options);
       });
     const failed = createDeferred();
     const unregister = registerPreparedModelRuntimePublicationListener((event) => {

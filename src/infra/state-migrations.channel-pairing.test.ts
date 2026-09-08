@@ -6,7 +6,7 @@ import {
   readChannelPairingStateSnapshot,
   writeChannelPairingStateSnapshot,
 } from "../pairing/pairing-store-sqlite.test-helpers.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   detectLegacyChannelPairingState,
@@ -16,13 +16,13 @@ import {
 const tempDirs = createTrackedTempDirs();
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 
 async function createFixture() {
-  const stateDir = await tempDirs.make("openclaw-pairing-migration-");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = await tempDirs.make("carapace-pairing-migration-");
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const sourceDir = resolveOAuthDir(env, stateDir);
   fs.mkdirSync(sourceDir, { recursive: true });
   return { env, sourceDir };
@@ -118,7 +118,7 @@ describe("legacy channel pairing state migration", () => {
       ],
       allowFrom: { default: ["1001"], alerts: ["1002"], ops_bot: ["1003"] },
     });
-    expect(fs.existsSync(path.join(path.dirname(sourceDir), "state", "openclaw.sqlite"))).toBe(
+    expect(fs.existsSync(path.join(path.dirname(sourceDir), "state", "carapace.sqlite"))).toBe(
       true,
     );
   });

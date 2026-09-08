@@ -3,19 +3,19 @@ import {
   loadCodexBundleMcpThreadConfig,
   type AgentHarnessSessionForkParams,
   type AgentHarnessSessionDeletionParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
 import {
   buildCodexUserMcpServersThreadConfigPatchForRuntime,
   resolveCodexMcpToolOverridesForAgent,
-} from "openclaw/plugin-sdk/codex-mcp-projection";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { buildNativeHookRelayCommandPlan } from "openclaw/plugin-sdk/native-hook-relay-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/codex-mcp-projection";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { loadExecApprovals } from "carapace/plugin-sdk/exec-approvals-runtime";
+import { buildNativeHookRelayCommandPlan } from "carapace/plugin-sdk/native-hook-relay-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
 import { prepareCodexWorkspaceDeveloperInstructions } from "./attempt-context.js";
-import { resolveOpenClawExecPolicyForCodexAppServer } from "./config-exec-approvals.js";
+import { resolveCarapaceExecPolicyForCodexAppServer } from "./config-exec-approvals.js";
 import { assertCodexModelBackedReviewerEffectiveConfig } from "./config-reviewer.js";
 import { readCodexPluginConfig, resolveCodexSupervisionAppServerRuntimeOptions } from "./config.js";
 import { resolveCodexNativeExecutionPolicy } from "./native-execution-policy.js";
@@ -54,7 +54,7 @@ type Initialization = NonNullable<AgentHarnessSessionDeletionParams["initializat
 export async function prepareCanonicalCodexFork(params: {
   created: Created;
   initialization: Initialization;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   context: NonNullable<CodexSessionCatalogControl["forkContext"]>;
   model: string;
   modelProvider: string;
@@ -94,7 +94,7 @@ export async function prepareCanonicalCodexFork(params: {
     agentDir: context.agentDir,
     model: params.model,
     modelProvider: params.modelProvider,
-    execPolicy: resolveOpenClawExecPolicyForCodexAppServer({
+    execPolicy: resolveCarapaceExecPolicyForCodexAppServer({
       config,
       agentId: created.agentId,
       approvals: loadExecApprovals(),

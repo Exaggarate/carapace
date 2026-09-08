@@ -149,7 +149,7 @@ describe("chat pane keyboard focus", () => {
     pane.append(composer);
     const focus = vi.spyOn(textarea, "focus");
     const container = document.body.appendChild(document.createElement("div"));
-    const modal = container.appendChild(document.createElement("openclaw-modal-dialog"));
+    const modal = container.appendChild(document.createElement("carapace-modal-dialog"));
     const cancel = modal.appendChild(document.createElement("button"));
 
     try {

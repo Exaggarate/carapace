@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { approveDevicePairing } from "./device-pairing-approval.js";
 import { approveNodePairing, requestNodePairing } from "./device-pairing-node.js";
 import {

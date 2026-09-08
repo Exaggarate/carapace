@@ -7,7 +7,7 @@ import { managedWorktrees } from "../agents/worktrees/service.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { SESSION_WORK_ADMISSION_DRAIN_TIMEOUT_MS } from "../sessions/session-lifecycle-admission.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
 import {
   controlUiClient,
@@ -37,7 +37,7 @@ afterEach(() => {
   titleMocks.open.mockReset();
   titleMocks.lookup.mockReset();
   dispatchInboundMessageMock.mockReset();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = undefined;
 });
 
@@ -45,16 +45,16 @@ test("successful naming survives setup failure and is shared with discussion ope
   const naming = createDeferredCore<string>();
   titleMocks.generate.mockReturnValue(naming.promise);
   titleMocks.open.mockResolvedValue({ state: "available" });
-  const root = tempDirs.make("openclaw-session-worktree-retry-scope-");
+  const root = tempDirs.make("carapace-session-worktree-retry-scope-");
   const workspace = await initializeRepository(root, "workspace");
   testState.agentConfig = { workspace };
   const { storePath } = await createSessionStoreDir();
-  const setup = path.join(workspace, ".openclaw");
+  const setup = path.join(workspace, ".carapace");
   await fs.mkdir(setup);
   const starts = path.join(setup, "starts");
   await fs.writeFile(
     path.join(setup, "worktree-setup.sh"),
-    '#!/bin/sh\necho started >> "$OPENCLAW_SOURCE_TREE_PATH/.openclaw/starts"\nexit 1\n',
+    '#!/bin/sh\necho started >> "$CARAPACE_SOURCE_TREE_PATH/.carapace/starts"\nexit 1\n',
     { mode: 0o755 },
   );
   const context = {
@@ -152,7 +152,7 @@ test("successful naming survives setup failure and is shared with discussion ope
 });
 
 test("sessions.create rejects another plugin's session before naming or worktree preparation", async () => {
-  const root = tempDirs.make("openclaw-session-protected-title-");
+  const root = tempDirs.make("carapace-session-protected-title-");
   const workspace = await initializeRepository(root, "workspace");
   testState.agentConfig = { workspace };
   const { storePath } = await createSessionStoreDir();

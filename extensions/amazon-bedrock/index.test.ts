@@ -1,18 +1,18 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
 import {
   buildPluginApi,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 // Amazon Bedrock tests cover index plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { supportsBedrockClaudePromptCaching } from "./bedrock-options.js";
 import amazonBedrockPlugin from "./index.js";
@@ -135,7 +135,7 @@ async function registerWithConfig(
     name: "Amazon Bedrock Provider",
     source: "test",
     registrationMode: "full",
-    config: {} as OpenClawConfig,
+    config: {} as CarapaceConfig,
     pluginConfig,
     runtime: {} as PluginRuntime,
     logger: noopLogger,
@@ -195,7 +195,7 @@ async function callWrappedStream(
   provider: RegisteredProviderPlugin,
   modelId: string,
   modelDescriptor: never,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   extraParams?: Record<string, unknown>,
   payload: Record<string, unknown> = {},
 ): Promise<Record<string, unknown>> {
@@ -225,7 +225,7 @@ async function callWrappedStream(
   return result;
 }
 
-function runtimePluginConfig(config?: Record<string, unknown>): OpenClawConfig {
+function runtimePluginConfig(config?: Record<string, unknown>): CarapaceConfig {
   return {
     plugins: {
       entries: config
@@ -236,7 +236,7 @@ function runtimePluginConfig(config?: Record<string, unknown>): OpenClawConfig {
           }
         : {},
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function buildBedrockCachePayload(
@@ -819,7 +819,7 @@ describe("amazon-bedrock provider plugin", () => {
   describe("guardrail config schema", () => {
     it("defines discovery and guardrail objects with the expected shape", () => {
       const pluginJson = JSON.parse(
-        readFileSync(resolve(import.meta.dirname, "openclaw.plugin.json"), "utf-8"),
+        readFileSync(resolve(import.meta.dirname, "carapace.plugin.json"), "utf-8"),
       );
       const discovery = pluginJson.configSchema?.properties?.discovery;
       const guardrail = pluginJson.configSchema?.properties?.guardrail;

@@ -42,7 +42,7 @@ function exitDoctorError(message: string, json: boolean): never {
   exitCliAfterOutput(defaultRuntime, 2);
 }
 
-/** Register maintenance commands that inspect or mutate local OpenClaw state. */
+/** Register maintenance commands that inspect or mutate local Carapace state. */
 export function registerMaintenanceCommands(program: Command) {
   const doctor = program
     .command("doctor")
@@ -50,7 +50,7 @@ export function registerMaintenanceCommands(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/doctor", "docs.openclaw.ai/cli/doctor")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/doctor", "github.com/Exaggarate/carapace")}\n`,
     )
     .option("--no-workspace-suggestions", "Disable workspace memory system suggestions", true)
     .option("--yes", "Accept defaults without prompting", false)
@@ -89,7 +89,7 @@ export function registerMaintenanceCommands(program: Command) {
     )
     .option(
       "--github-issue",
-      "With --session-sqlite recover: prepare and optionally create an openclaw/openclaw issue",
+      "With --session-sqlite recover: prepare and optionally create an carapace/carapace issue",
       false,
     )
     .option("--json", "Emit JSON; bare --json runs advisory read-only health checks", false)
@@ -122,7 +122,7 @@ export function registerMaintenanceCommands(program: Command) {
       }
       if (hasSessionSqliteOnlyDoctorOptions(opts)) {
         return exitDoctorError(
-          "doctor session SQLite options require --session-sqlite. Use `openclaw doctor --session-sqlite dry-run ...`.",
+          "doctor session SQLite options require --session-sqlite. Use `carapace doctor --session-sqlite dry-run ...`.",
           opts.json === true || (opts.lint === true && !process.stdout.isTTY),
         );
       }
@@ -151,7 +151,7 @@ export function registerMaintenanceCommands(program: Command) {
       }
       if (opts.lint !== true && hasLintOnlyDoctorOptions(opts)) {
         return exitDoctorError(
-          "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+          "doctor lint options require --lint. Use `carapace doctor --lint ...`.",
           opts.json === true,
         );
       }
@@ -218,7 +218,7 @@ export function registerMaintenanceCommands(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/triage", "docs.openclaw.ai/cli/triage")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/triage", "github.com/Exaggarate/carapace")}\n`,
     )
     .option("--json", "Output sanitized handoff paths, finding counts, and commands as JSON", false)
     .option("--no-export", "Skip the sanitized diagnostics archive")
@@ -276,7 +276,7 @@ export function registerMaintenanceCommands(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/dashboard", "docs.openclaw.ai/cli/dashboard")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/dashboard", "github.com/Exaggarate/carapace")}\n`,
     )
     .option("--no-open", "Print URL but do not launch a browser")
     .option("--json", "Output dashboard connection details as JSON", false)
@@ -298,7 +298,7 @@ export function registerMaintenanceCommands(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/reset", "docs.openclaw.ai/cli/reset")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/reset", "github.com/Exaggarate/carapace")}\n`,
     )
     .option("--scope <scope>", "config|config+creds+sessions|full (default: interactive prompt)")
     .option("--yes", "Skip confirmation prompts", false)
@@ -322,7 +322,7 @@ export function registerMaintenanceCommands(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/uninstall", "docs.openclaw.ai/cli/uninstall")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/uninstall", "github.com/Exaggarate/carapace")}\n`,
     )
     .option("--service", "Remove the gateway service", false)
     .option("--state", "Remove state + config", false)

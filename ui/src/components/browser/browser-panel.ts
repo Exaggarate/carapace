@@ -11,7 +11,7 @@ import { property } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { hasNativeBrowserBridge } from "../../app/native-browser-bridge.ts";
 import { t } from "../../i18n/index.ts";
-import { OpenClawLitElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../../lit/carapace-element.ts";
 import { scrollbarShadowStyles } from "../../lit/scrollbar-styles.ts";
 import { DockLayoutController, dockPanelStyles } from "../dock-layout-controller.ts";
 import { browserPanelLayout } from "../dock-panel-layout.ts";
@@ -29,8 +29,8 @@ import { browserPanelStyles } from "./browser-panel.styles.ts";
 import { browserTabKey, readBrowserTabTarget, type BrowserTabSelection } from "./browser-target.ts";
 import { normalizeBrowserUrlDraft } from "./browser-url.ts";
 
-/** `<openclaw-browser-panel>` — the dockable gateway browser surface. */
-class OpenClawBrowserPanel extends OpenClawLitElement implements BrowserPanelControllerHost {
+/** `<carapace-browser-panel>` — the dockable gateway browser surface. */
+class CarapaceBrowserPanel extends CarapaceLitElement implements BrowserPanelControllerHost {
   /** Gateway client used for browser.request RPCs; null until connected. */
   @property({ attribute: false }) client: GatewayBrowserClient | null = null;
   /** Whether the connected gateway advertises browser.request to this operator. */
@@ -318,12 +318,12 @@ class OpenClawBrowserPanel extends OpenClawLitElement implements BrowserPanelCon
 
 // Guarded define (not @customElement) so re-imports under a shared registry —
 // e.g. vitest with isolate=false — don't throw "already registered".
-if (!customElements.get("openclaw-browser-panel")) {
-  customElements.define("openclaw-browser-panel", OpenClawBrowserPanel);
+if (!customElements.get("carapace-browser-panel")) {
+  customElements.define("carapace-browser-panel", CarapaceBrowserPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-browser-panel": OpenClawBrowserPanel;
+    "carapace-browser-panel": CarapaceBrowserPanel;
   }
 }

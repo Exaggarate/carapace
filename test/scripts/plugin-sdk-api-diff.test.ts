@@ -218,7 +218,7 @@ describe("Plugin SDK API diff CLI", () => {
         [latestSha, ...(shared ? [] : [betaSha]), headSha].toSorted(),
       );
       const bundle = JSON.parse(readFileSync(evidencePath, "utf8"));
-      expect(bundle.schema).toBe("openclaw.plugin-sdk-api-release-evidence-set/v1");
+      expect(bundle.schema).toBe("carapace.plugin-sdk-api-release-evidence-set/v1");
       expect(bundle.selectors.beta.baseRef).toBe(bases.beta);
       expect(bundle.selectors.latest.baseRef).toBe(bases.latest);
       expect(bundle.selectors.beta.headSha).toBe(headSha);

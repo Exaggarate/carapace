@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeOpenClawConfigFixture } from "./embedded-agent-runner/model.test-harness.js";
+import { makeCarapaceConfigFixture } from "./embedded-agent-runner/model.test-harness.js";
 
 const runtimeMocks = vi.hoisted(() => {
   const createLease = (owner: string) => {
@@ -74,7 +74,7 @@ describe("resolveEffectiveToolInventoryRuntimeModelContextAsync", () => {
     runtimeMocks.acquire.mockResolvedValueOnce(lease);
     const { resolveEffectiveToolInventoryRuntimeModelContextAsync } =
       await import("./tools-effective-inventory.js");
-    const cfg = makeOpenClawConfigFixture();
+    const cfg = makeCarapaceConfigFixture();
     const agentDir = `/tmp/agents/${agentId}/agent`;
     const workspaceDir = `/tmp/workspace-${agentId}`;
 
@@ -136,7 +136,7 @@ describe("resolveEffectiveToolInventoryRuntimeModelContextAsync", () => {
   it("uses configured model context without acquiring a runtime lease", async () => {
     const { resolveEffectiveToolInventoryRuntimeModelContextAsync } =
       await import("./tools-effective-inventory.js");
-    const cfg = makeOpenClawConfigFixture({
+    const cfg = makeCarapaceConfigFixture({
       models: {
         providers: {
           custom: {

@@ -20,7 +20,7 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({ note: vi.fn() }));
 
 const tempDirs: string[] = [];
 const pluginId = "diagnostics-otel";
-const packageName = "@openclaw/diagnostics-otel";
+const packageName = "@carapace/diagnostics-otel";
 const legacyRecord: PluginInstallRecord = {
   source: "clawhub",
   spec: `clawhub:${packageName}@2026.7.2`,
@@ -35,7 +35,7 @@ describe("doctor official plugin provenance", () => {
   it.each(["persisted", "legacy-config"] as const)(
     "persists missing ClawHub authority from a proven official %s record",
     async (source) => {
-      const stateDir = makeTrackedTempDir("openclaw-doctor-provenance", tempDirs);
+      const stateDir = makeTrackedTempDir("carapace-doctor-provenance", tempDirs);
       const installRecords = { [pluginId]: legacyRecord };
       const config = source === "legacy-config" ? { plugins: { installs: installRecords } } : {};
       if (source === "persisted") {
@@ -44,14 +44,14 @@ describe("doctor official plugin provenance", () => {
           { stateDir },
         );
       } else {
-        const configPath = path.join(stateDir, "openclaw.json");
+        const configPath = path.join(stateDir, "carapace.json");
         fs.writeFileSync(configPath, JSON.stringify(config));
         await withEnvOverride(
           {
             ...hermeticEnv(),
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
           },
           async () => {
             await importShippedPluginInstallConfigForDoctor(await readConfigFileSnapshot());
@@ -103,7 +103,7 @@ describe("doctor official plugin provenance", () => {
     { name: "package identity alone", record: { source: "clawhub", clawhubPackage: packageName } },
     {
       name: "npm-only catalog identity",
-      record: { source: "clawhub", spec: "clawhub:@openclaw/acpx" },
+      record: { source: "clawhub", spec: "clawhub:@carapace/acpx" },
     },
     { name: "unlisted spec", record: { source: "clawhub", spec: "clawhub:@vendor/acpx" } },
     {
@@ -117,7 +117,7 @@ describe("doctor official plugin provenance", () => {
   ] satisfies Array<{ name: string; record: PluginInstallRecord }>)(
     "preserves unproven $name for reinstall instead of inventing authority",
     async ({ record }) => {
-      const stateDir = makeTrackedTempDir("openclaw-doctor-provenance", tempDirs);
+      const stateDir = makeTrackedTempDir("carapace-doctor-provenance", tempDirs);
       const installRecords = { [pluginId]: record };
       await writePersistedInstalledPluginIndex(
         { ...createCurrentIndex(), installRecords },
@@ -137,7 +137,7 @@ describe("doctor official plugin provenance", () => {
   );
 
   it("leaves legacy authority untouched without repair", async () => {
-    const stateDir = makeTrackedTempDir("openclaw-doctor-provenance", tempDirs);
+    const stateDir = makeTrackedTempDir("carapace-doctor-provenance", tempDirs);
     const installRecords = { [pluginId]: legacyRecord };
     await writePersistedInstalledPluginIndex(
       { ...createCurrentIndex(), installRecords },

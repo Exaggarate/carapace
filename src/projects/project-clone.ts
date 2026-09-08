@@ -2,10 +2,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { slugifyWorktreeTitle } from "../agents/worktrees/name.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { sha256HexPrefixCore } from "../infra/crypto-digest.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
+import { withCarapaceStateLease } from "../state/carapace-state-lease.js";
 import {
   cloneProjectCheckout,
   ensureProjectCheckoutCommit,
@@ -24,9 +24,9 @@ const PROJECT_CLONE_LEASE_MS = 30_000;
 const PROJECT_CLONE_WAIT_MS = 30_000;
 
 function existingCanonicalProject(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   canonicalUrl: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
 ): ProjectRegistryRecord | undefined {
   return listProjectRegistry(cfg, options).find((project) => {
     const origin = project.originUrl ? parseProjectGitUrl(project.originUrl) : null;
@@ -36,8 +36,8 @@ function existingCanonicalProject(
 
 /** Materializes and registers a project from an accepted GitHub remote. */
 export async function materializeProjectClone(
-  input: { cfg: OpenClawConfig; gitUrl: string; name?: string; requiredCommit?: string },
-  options: OpenClawStateDatabaseOptions & {
+  input: { cfg: CarapaceConfig; gitUrl: string; name?: string; requiredCommit?: string },
+  options: CarapaceStateDatabaseOptions & {
     signal?: AbortSignal;
     timeoutMs?: number;
     token?: string;
@@ -52,7 +52,7 @@ export async function materializeProjectClone(
   }
   const env = options.env ?? process.env;
   const fingerprint = sha256HexPrefixCore(parsed.url, 16);
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: "projects.clone",
       key: fingerprint,
@@ -157,7 +157,7 @@ async function resolveClonedProjectCheckout(
 export async function removeClonedProjectCheckout(
   project: ProjectRegistryRecord,
   assertUnreferenced: () => void | Promise<void>,
-  options: OpenClawStateDatabaseOptions & { env?: NodeJS.ProcessEnv } = {},
+  options: CarapaceStateDatabaseOptions & { env?: NodeJS.ProcessEnv } = {},
 ): Promise<boolean> {
   return await withProjectCheckoutLifecycle(project.repoRoot, options, async (lease) => {
     const checkout = await resolveClonedProjectCheckout(project, options);

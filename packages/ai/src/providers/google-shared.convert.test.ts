@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { createEmptyTransportUsage } from "../transports/transport-stream-shared.js";
 import type { Context, Tool } from "../types.js";

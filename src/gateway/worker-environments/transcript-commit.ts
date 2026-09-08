@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import type {
   WorkerTranscriptCommitParams,
   WorkerTranscriptMessage,
@@ -13,7 +13,7 @@ import {
   replaceSessionEntrySync,
   withTranscriptWriteTransaction,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { KeyedAsyncQueue } from "../../plugin-sdk/keyed-async-queue.js";
 import {
   attachSessionTranscriptRunId,
@@ -36,7 +36,7 @@ export type WorkerTranscriptCommitApplication = (params: {
 }) => Promise<WorkerTranscriptCommitOutcome>;
 
 type WorkerTranscriptCommitterOptions = {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   store?: WorkerTranscriptCommitStore;
 };
 
@@ -324,7 +324,7 @@ function resolvePersistedCommitAcrossDag(params: {
 
 async function applyWorkerTranscriptCommit(params: {
   assertCurrent: () => undefined;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   identity: WorkerConnectionIdentity;
   messages: readonly CommittedAgentMessage[];
   recoverPersistedBatch: boolean;

@@ -1,5 +1,5 @@
-import { readAssistantThinkingAppend } from "@openclaw/ai/internal/shared";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { readAssistantThinkingAppend } from "@carapace/ai/internal/shared";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { InlineCodeState } from "../../packages/markdown-core/src/code-spans.js";
 import {
   buildCodeSpanIndex,

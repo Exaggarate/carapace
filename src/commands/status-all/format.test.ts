@@ -49,9 +49,9 @@ describe("status-all format", () => {
   it("formats dashboard values consistently", () => {
     expect(
       getStatusOverviewRowValue("Dashboard", {
-        advertisedControlUiLinks: { httpUrl: "https://openclaw.local", wsUrl: "" },
+        advertisedControlUiLinks: { httpUrl: "https://carapace.local", wsUrl: "" },
       }),
-    ).toBe("https://openclaw.local");
+    ).toBe("https://carapace.local");
     expect(
       getStatusOverviewRowValue("Dashboard", {
         advertisedControlUiLinks: { httpUrl: "", wsUrl: "" },
@@ -170,7 +170,7 @@ describe("status-all format", () => {
         gatewayService: {
           label: "LaunchAgent",
           installed: true,
-          managedByOpenClaw: true,
+          managedByCarapace: true,
           loadedText: "loaded",
           runtimeShort: "running",
         },
@@ -201,7 +201,7 @@ describe("status-all format", () => {
     },
     {
       installed: true,
-      managedByOpenClaw: true,
+      managedByCarapace: true,
       loadedText: "unknown",
       runtimeShort: "running (pid 42)",
       expected:
@@ -209,7 +209,7 @@ describe("status-all format", () => {
     },
     {
       installed: true,
-      managedByOpenClaw: false,
+      managedByCarapace: false,
       loadedText: "running (externally managed)",
       runtime: { status: "running", pid: 42 },
       expected:
@@ -305,7 +305,7 @@ describe("status-all format", () => {
         gatewayService: {
           label: "LaunchAgent",
           installed: true,
-          managedByOpenClaw: true,
+          managedByCarapace: true,
           loadedText: "loaded",
           runtimeShort: "running",
         },
@@ -416,7 +416,7 @@ describe("status-all format", () => {
       buildStatusOverviewSurfaceRows({
         ...baseStatusOverviewSurface,
         prefixRows: [{ Item: "Version", Value: "1.0.0" }],
-        advertisedControlUiLinks: { httpUrl: "https://openclaw.local", wsUrl: "" },
+        advertisedControlUiLinks: { httpUrl: "https://carapace.local", wsUrl: "" },
         gatewayMode: "local",
         gatewayConnection: { url: "ws://127.0.0.1:18789" },
         gatewayProbe: { connectLatencyMs: 12 },
@@ -425,13 +425,13 @@ describe("status-all format", () => {
         nodeService: { label: "node", installed: true, loadedText: "loaded" },
         updateValue: "up to date",
         gatewayAuthWarningValue: "warning",
-        middleRows: [{ Item: "Security", Value: "Run: openclaw security audit --deep" }],
+        middleRows: [{ Item: "Security", Value: "Run: carapace security audit --deep" }],
         agentsValue: "2 total",
         suffixRows: [{ Item: "Secrets", Value: "none" }],
       }),
     ).toEqual([
       { Item: "Version", Value: "1.0.0" },
-      { Item: "Dashboard", Value: "https://openclaw.local" },
+      { Item: "Dashboard", Value: "https://carapace.local" },
       { Item: "Tailscale exposure", Value: "serve · box.tail.ts.net · https://box.tail.ts.net" },
       { Item: "Channel", Value: baseStatusExpectedUpdateChannelLabel },
       { Item: "Git", Value: "main · tag v1.2.3" },
@@ -441,7 +441,7 @@ describe("status-all format", () => {
         Value: "local · ws://127.0.0.1:18789 · reachable 12ms · auth token · gateway-host",
       },
       { Item: "Gateway auth warning", Value: "warning" },
-      { Item: "Security", Value: "Run: openclaw security audit --deep" },
+      { Item: "Security", Value: "Run: carapace security audit --deep" },
       { Item: "Gateway self", Value: "gateway-host" },
       { Item: "Gateway service", Value: "launchd loaded" },
       { Item: "Node service", Value: "node loaded" },
@@ -487,7 +487,7 @@ describe("status-all format", () => {
         gatewayService: {
           label: "LaunchAgent",
           installed: true,
-          managedByOpenClaw: true,
+          managedByCarapace: true,
           loadedText: "loaded",
           runtimeShort: "running",
         },

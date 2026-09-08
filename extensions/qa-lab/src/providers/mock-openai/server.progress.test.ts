@@ -25,7 +25,7 @@ const APPROVAL_RESTRICTED_OUTPUT = APPROVAL_OUTPUT.replace(
   "allow-once|deny\nAllow Always is unavailable for this command.\n",
 );
 const APPROVAL_UNAVAILABLE_OUTPUT =
-  "Exec approval is required, but no interactive approval client is currently available.\n\nApprove it from the Web UI or terminal UI. Print the Control UI URL with `openclaw dashboard --no-open`, open it in a browser, then use the approval inbox. Then retry the command. You can usually leave execApprovals.approvers unset when owner config already identifies the approvers.";
+  "Exec approval is required, but no interactive approval client is currently available.\n\nApprove it from the Web UI or terminal UI. Print the Control UI URL with `carapace dashboard --no-open`, open it in a browser, then use the approval inbox. Then retry the command. You can usually leave execApprovals.approvers unset when owner config already identifies the approvers.";
 const UNKNOWN_OUTPUT =
   "Node command outcome is unknown for node-1.\nThe command may have executed. Do not rerun it automatically.\n\nCommand:\ntrue\n\nDetails: node disconnected";
 
@@ -507,9 +507,9 @@ describe.each(["responses", "messages"])("%s tool progress", (route) => {
     `Tool progress error QA check: read "${target}" before answering. After the read fails, reply exactly \`PROGRESS_OK\`.`,
   ].join("\n");
   const carrier = [
-    "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+    "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
     "Runtime: synthetic metadata.",
-    "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+    "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
   ].join("\n");
   it.each([
     {
@@ -565,7 +565,7 @@ describe.each(["responses", "messages"])("%s tool progress", (route) => {
       ),
       APPROVAL_OUTPUT.replaceAll("```", "````"),
       APPROVAL_UNAVAILABLE_OUTPUT.replace(
-        "Print the Control UI URL with `openclaw dashboard --no-open`, open it in a browser, then use the approval inbox. ",
+        "Print the Control UI URL with `carapace dashboard --no-open`, open it in a browser, then use the approval inbox. ",
         "",
       ),
       "Approval required.\nordinary output",

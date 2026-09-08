@@ -1,10 +1,10 @@
 /**
  * Snapshot-aware and synthetic provider-auth availability.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { getRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   prepareProviderSyntheticAuthWithPlugin,
   resolveProviderSyntheticAuthWithPlugin,
@@ -33,7 +33,7 @@ export type RuntimeProviderAuthLookup = {
 
 /** Builds stable env/synthetic auth lookup data for repeated provider checks. */
 export function createRuntimeProviderAuthLookup(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   includePluginSyntheticAuth?: boolean;
@@ -101,7 +101,7 @@ function resolveRuntimeEnvApiKeyLookupOptions(params: {
 }
 
 function listProviderSyntheticAuthRefs(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelApi?: string;
 }): string[] {
@@ -117,7 +117,7 @@ function listProviderSyntheticAuthRefs(params: {
 }
 
 function shouldResolvePluginSyntheticAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelApi?: string;
   runtimeLookup?: RuntimeProviderAuthLookup;
@@ -137,7 +137,7 @@ function shouldResolvePluginSyntheticAuth(params: {
 
 type RuntimeProviderAuthParams = {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   allowPluginSyntheticAuth?: boolean;
@@ -266,7 +266,7 @@ type SyntheticProviderAuthResolution = {
 };
 
 type SyntheticProviderAuthParams = {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   modelApi?: string;
   secretSentinels?: boolean;
@@ -276,12 +276,12 @@ type SyntheticProviderAuthParams = {
 };
 
 type ResolveSyntheticProviderAuth = (
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
 ) => ResolvedProviderAuth | undefined;
 
 function syntheticAuthLookup(
   params: SyntheticProviderAuthParams,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
 ) {
   return {
     provider: params.provider,
@@ -350,7 +350,7 @@ export async function prepareSyntheticLocalProviderAuth(
   ) {
     return resolveSyntheticLocalProviderAuth(params);
   }
-  const prepare = (config: OpenClawConfig | undefined) =>
+  const prepare = (config: CarapaceConfig | undefined) =>
     prepareProviderSyntheticAuthWithPlugin({
       ...syntheticAuthLookup(params, config),
       signal: params.signal,

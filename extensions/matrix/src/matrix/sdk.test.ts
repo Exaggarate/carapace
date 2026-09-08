@@ -10,11 +10,11 @@ import { MatrixError } from "matrix-js-sdk/lib/http-api/errors.js";
 import { type MatrixEvent, MsgType } from "matrix-js-sdk/lib/matrix.js";
 import { EventStatus } from "matrix-js-sdk/lib/models/event-status.js";
 import { SyncApi, SyncState } from "matrix-js-sdk/lib/sync.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 // Matrix tests cover sdk plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installMatrixTestRuntime } from "../test-runtime.js";
 import type { CoreConfig } from "../types.js";
@@ -93,7 +93,7 @@ function readStoredRecoveryKey(recoveryKeyPath: string) {
   return readMatrixRecoveryKeyStateForPath(recoveryKeyPath);
 }
 
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__";
 
 function clearTestUndiciRuntimeDepsOverride(): void {
   Reflect.deleteProperty(globalThis as object, TEST_UNDICI_RUNTIME_DEPS_KEY);
@@ -367,7 +367,7 @@ function createMatrixJsClientStub(): MatrixJsClientStub {
   client.redactEvent = vi.fn(async () => ({ event_id: "$redact" }));
   client.getProfileInfo = vi.fn(async () => ({}));
   client.getDevices = vi.fn(async () => ({
-    devices: [{ device_id: "DEVICE123", display_name: "OpenClaw" }],
+    devices: [{ device_id: "DEVICE123", display_name: "Carapace" }],
   }));
   client.joinRoom = vi.fn(async () => ({}));
   client.mxcUrlToHttp = vi.fn(() => null);
@@ -1435,7 +1435,7 @@ describe("MatrixClient request hardening", () => {
   });
 
   it("wires the sync store into the SDK and flushes it with one SDK stop", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sdk-store-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sdk-store-"));
     clearMatrixSyncApiForNeverStartedClient();
 
     try {
@@ -1459,7 +1459,7 @@ describe("MatrixClient request hardening", () => {
   });
 
   it("persists crypto before marking and flushing the clean sync cursor", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sdk-store-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sdk-store-"));
     clearMatrixSyncApiForNeverStartedClient();
     const cause = new Error("sync store flush failed");
     let resolveDatabases: ((databases: IDBDatabaseInfo[]) => void) | undefined;
@@ -1505,7 +1505,7 @@ describe("MatrixClient request hardening", () => {
   });
 
   it("does not mark or flush the sync cursor when strict crypto persistence fails", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sdk-store-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sdk-store-"));
     clearMatrixSyncApiForNeverStartedClient();
     const cause = new Error("indexeddb unavailable");
     const databasesSpy = vi.spyOn(indexedDB, "databases").mockRejectedValue(cause);
@@ -1536,7 +1536,7 @@ describe("MatrixClient request hardening", () => {
   });
 
   it("falls back to one non-persisting SDK stop when public stop persistence fails", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sdk-stop-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sdk-stop-"));
     clearMatrixSyncApiForNeverStartedClient();
     const cause = new Error("indexeddb unavailable");
     const databasesSpy = vi.spyOn(indexedDB, "databases").mockRejectedValue(cause);
@@ -1578,7 +1578,7 @@ describe("MatrixClient request hardening", () => {
   });
 
   it("single-flights concurrent shutdown after discard starts", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sdk-discard-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sdk-discard-"));
     clearMatrixSyncApiForNeverStartedClient();
 
     try {
@@ -1833,7 +1833,7 @@ describe("MatrixClient request hardening", () => {
     { label: "stale ERROR", state: SyncState.Error },
   ])("times out $label quiesce without public stop and discards its cursor", async ({ state }) => {
     vi.useFakeTimers();
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-matrix-sync-timeout-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-matrix-sync-timeout-"));
     try {
       const client = new MatrixClient("https://matrix.example.org", "token", {
         storageRootDir: tempDir,
@@ -2707,13 +2707,13 @@ describe("MatrixClient crypto bootstrapping", () => {
 
     const client = new MatrixClient("https://matrix.example.org", "token", {
       encryption: true,
-      cryptoDatabasePrefix: "openclaw-matrix-test",
+      cryptoDatabasePrefix: "carapace-matrix-test",
     });
 
     await client.start();
 
     expect(matrixJsClient.initRustCrypto).toHaveBeenCalledWith({
-      cryptoDatabasePrefix: "openclaw-matrix-test",
+      cryptoDatabasePrefix: "carapace-matrix-test",
     });
   });
 
@@ -2721,7 +2721,7 @@ describe("MatrixClient crypto bootstrapping", () => {
     resetPluginStateStoreForTests();
     installMatrixTestRuntime();
     const tempDir = tempDirs.make("matrix-idb-startup-abort-");
-    const databasePrefix = "openclaw-matrix-startup-abort";
+    const databasePrefix = "carapace-matrix-startup-abort";
     const initCrypto = createDeferred<void>();
     matrixJsClient.initRustCrypto.mockReturnValue(initCrypto.promise);
     const databasesSpy = vi.spyOn(indexedDB, "databases");
@@ -3115,7 +3115,7 @@ describe("MatrixClient crypto bootstrapping", () => {
       const client = new MatrixClient("https://matrix.example.org", "token", {
         encryption: true,
         idbSnapshotPath: path.join(tempDir, "crypto-idb-snapshot.json"),
-        cryptoDatabasePrefix: "openclaw-matrix-interval",
+        cryptoDatabasePrefix: "carapace-matrix-interval",
       });
 
       await client.start();

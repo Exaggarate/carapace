@@ -15,7 +15,7 @@ const sessionKey = "agent:main:main";
 
 let proofArtifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
   proofArtifactDir = parent
     ? createControlUiE2eArtifactDir("session-suggestions", parent)
     : undefined;
@@ -140,7 +140,7 @@ suite.define(() => {
       message: {
         role: "user",
         content: "Owner finished typing",
-        __openclaw: { senderId: "owner", senderName: "Owner" },
+        __carapace: { senderId: "owner", senderName: "Owner" },
       },
     });
     await expect(typingIndicator).toHaveCount(0);

@@ -1,6 +1,6 @@
 // Github Copilot plugin module implements usage behavior.
-import { buildCopilotIdeHeaders } from "openclaw/plugin-sdk/provider-auth";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { buildCopilotIdeHeaders } from "carapace/plugin-sdk/provider-auth";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   buildUsageHttpErrorSnapshot,
   fetchJson,
@@ -8,8 +8,8 @@ import {
   PROVIDER_LABELS,
   type ProviderUsageSnapshot,
   type UsageWindow,
-} from "openclaw/plugin-sdk/provider-usage";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-usage";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { PUBLIC_GITHUB_COPILOT_DOMAIN } from "./domain.js";
 
 type CopilotUsageResponse = {

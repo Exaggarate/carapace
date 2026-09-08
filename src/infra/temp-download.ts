@@ -4,11 +4,11 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { tempWorkspace } from "./private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 const logger = createSubsystemLogger("infra:temp-download");
 
-export { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+export { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 // Download targets expose both a default path and a name-safe file builder so
 // callers can keep all transient files inside the same workspace.
@@ -21,7 +21,7 @@ type TempDownloadTarget = {
 };
 
 function resolveTempRoot(tmpDir?: string): string {
-  return tmpDir ?? resolvePreferredOpenClawTmpDir();
+  return tmpDir ?? resolvePreferredCarapaceTmpDir();
 }
 
 function sanitizeTempPrefix(prefix: string): string {

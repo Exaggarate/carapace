@@ -2,14 +2,14 @@
 // This fixture never executes commands or resolves approvals.
 // First terminal, from the repository root: node scripts/test-ios-shell-gateway.mjs
 // Second terminal: pnpm ios:gen, then run the two cases on a fresh owned simulator:
-// TEST_RUNNER_OPENCLAW_IOS_LIVE_GATEWAY=1 \
-// TEST_RUNNER_OPENCLAW_IOS_LIVE_SETUP_CODE='{"url":"ws://127.0.0.1:19876","token":"synthetic-navigation-token"}' \
-// TEST_RUNNER_OPENCLAW_IOS_APPROVAL_FIXTURE_URL=http://127.0.0.1:19876 \
-// xcodebuild test -project apps/ios/OpenClaw.xcodeproj -scheme OpenClawUITests \
+// TEST_RUNNER_CARAPACE_IOS_LIVE_GATEWAY=1 \
+// TEST_RUNNER_CARAPACE_IOS_LIVE_SETUP_CODE='{"url":"ws://127.0.0.1:19876","token":"synthetic-navigation-token"}' \
+// TEST_RUNNER_CARAPACE_IOS_APPROVAL_FIXTURE_URL=http://127.0.0.1:19876 \
+// xcodebuild test -project apps/ios/Carapace.xcodeproj -scheme CarapaceUITests \
 //   -destination 'platform=iOS Simulator,id=<owned-simulator-udid>' \
-//   -derivedDataPath /tmp/openclaw-ios-navigation-proof -jobs 4 -parallel-testing-enabled NO \
-//   -only-testing:OpenClawUITests/OpenClawSnapshotUITests/testLiveGatewayApprovalNotificationsFromOverview \
-//   -only-testing:OpenClawUITests/OpenClawSnapshotUITests/testLiveGatewayApprovalNotificationsFromSettings
+//   -derivedDataPath /tmp/carapace-ios-navigation-proof -jobs 4 -parallel-testing-enabled NO \
+//   -only-testing:CarapaceUITests/CarapaceSnapshotUITests/testLiveGatewayApprovalNotificationsFromOverview \
+//   -only-testing:CarapaceUITests/CarapaceSnapshotUITests/testLiveGatewayApprovalNotificationsFromSettings
 // TEST_RUNNER_ forwards these opt-in settings to XCTest; no real Gateway credentials are used.
 import { createServer } from "node:http";
 import { WebSocketServer, WebSocket } from "ws";

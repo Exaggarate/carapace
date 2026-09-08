@@ -18,7 +18,7 @@ import {
 const sha = "a".repeat(40);
 const ref = `release-publish/${sha.slice(0, 12)}-1`;
 const recoveryEnv = {
-  GITHUB_REPOSITORY: "openclaw/openclaw",
+  GITHUB_REPOSITORY: "carapace/carapace",
   GITHUB_RUN_ID: "30",
   GITHUB_RUN_ATTEMPT: "1",
   GITHUB_ACTOR: "octocat",
@@ -45,25 +45,25 @@ function transactions(count = 1) {
     schemaVersion: 1,
     identity: {
       version: 2,
-      repository: "openclaw/openclaw",
+      repository: "carapace/carapace",
       workflow: ".github/workflows/plugin-clawhub-release.yml",
       runId: "20",
       runAttempt: "1",
       ref,
       fullRef: `refs/tags/${ref}`,
       sha,
-      candidateRepository: "openclaw/openclaw",
+      candidateRepository: "carapace/carapace",
       candidateSha: "b".repeat(40),
       toolingRef: "main",
       toolingFullRef: "refs/heads/main",
       toolingSha: sha,
-      parentRepository: "openclaw/openclaw",
-      parentWorkflow: ".github/workflows/openclaw-release-publish.yml",
+      parentRepository: "carapace/carapace",
+      parentWorkflow: ".github/workflows/carapace-release-publish.yml",
       parentRunId: "10",
       parentRunAttempt: "1",
     },
     packages: Array.from({ length: count }, (_, index) => ({
-      name: `@openclaw/plugin-${String(index).padStart(3, "0")}`,
+      name: `@carapace/plugin-${String(index).padStart(3, "0")}`,
       version: "2026.8.2",
       inventoryDigest: "c".repeat(64),
       artifactName: `clawhub-package-${index}`,
@@ -76,7 +76,7 @@ function transactions(count = 1) {
 describe("ClawHub parent publication authorization", () => {
   it("writes an exact human recovery receipt once for the child and parent attempts", () => {
     const receipt = createClawHubRecoveryApproval(recoveryEnv, noGh);
-    // Mirrors openclaw/clawhub convex/lib/openClawPublishAuthorization.ts RECOVERY_RECEIPT_KEYS.
+    // Mirrors carapace/clawhub convex/lib/carapacePublishAuthorization.ts RECOVERY_RECEIPT_KEYS.
     const recoveryReceiptKeys = [
       "actor",
       "approvalJob",
@@ -96,8 +96,8 @@ describe("ClawHub parent publication authorization", () => {
     expect(Object.keys(receipt).toSorted()).toEqual(recoveryReceiptKeys);
     expect(receipt).toEqual({
       version: 2,
-      kind: "openclaw-clawhub-recovery-approval",
-      repository: "openclaw/openclaw",
+      kind: "carapace-clawhub-recovery-approval",
+      repository: "carapace/carapace",
       workflow: ".github/workflows/plugin-clawhub-release.yml",
       runId: "30",
       runAttempt: "1",
@@ -171,12 +171,12 @@ describe("ClawHub parent publication authorization", () => {
 
   it("discovers the authorized child from the parent attempt's single v2 receipt", () => {
     const env = { ...recoveryEnv, RECOVERED_CLAWHUB_RUN_ID: "", RECOVERED_CLAWHUB_RUN_ATTEMPT: "" };
-    const receiptName = "openclaw-clawhub-parent-authorization-v2-10-2-21-3";
+    const receiptName = "carapace-clawhub-parent-authorization-v2-10-2-21-3";
     const unrelated = [
-      "openclaw-release-children-10-2",
-      "openclaw-clawhub-parent-authorization-v2-10-1-20-1",
-      "openclaw-clawhub-parent-authorization-v2-11-2-22-1",
-      "openclaw-clawhub-transactions-21-3",
+      "carapace-release-children-10-2",
+      "carapace-clawhub-parent-authorization-v2-10-1-20-1",
+      "carapace-clawhub-parent-authorization-v2-11-2-22-1",
+      "carapace-clawhub-transactions-21-3",
     ];
     const discovered = createClawHubRecoveryApproval(
       env,
@@ -194,16 +194,16 @@ describe("ClawHub parent publication authorization", () => {
       createClawHubRecoveryApproval(env, parentArtifacts([...padded, receiptName])),
     ).toMatchObject({ authorizedChildRunId: "21", authorizedChildRunAttempt: "3" });
     expect(() => createClawHubRecoveryApproval(env, parentArtifacts(unrelated))).toThrow(
-      /has no openclaw-clawhub-parent-authorization-v2-10-2-\* receipt; pass recovered_clawhub_run_id and recovered_clawhub_run_attempt/u,
+      /has no carapace-clawhub-parent-authorization-v2-10-2-\* receipt; pass recovered_clawhub_run_id and recovered_clawhub_run_attempt/u,
     );
-    const rival = "openclaw-clawhub-parent-authorization-v2-10-2-25-1";
+    const rival = "carapace-clawhub-parent-authorization-v2-10-2-25-1";
     expect(() => createClawHubRecoveryApproval(env, parentArtifacts([receiptName, rival]))).toThrow(
       new RegExp(`ambiguous receipts \\(${receiptName}, ${rival}\\)`, "u"),
     );
     expect(() =>
       createClawHubRecoveryApproval(
         env,
-        parentArtifacts(["openclaw-clawhub-parent-authorization-v2-10-2-021-3"]),
+        parentArtifacts(["carapace-clawhub-parent-authorization-v2-10-2-021-3"]),
       ),
     ).toThrow(/Malformed parent authorization receipt name/u);
     expect(() => createClawHubRecoveryApproval(env, parentArtifacts([receiptName], 2))).toThrow(
@@ -267,7 +267,7 @@ describe("ClawHub parent publication authorization", () => {
     expect(checkout?.with?.ref).toBe("${{ github.workflow_sha }}");
     const write = approval.steps.find((step) => step.run?.includes("recovery-approval --output"));
     expect(write?.run).toContain(
-      'recovery-approval --output "$RUNNER_TEMP/openclaw-clawhub-recovery-approval/approval.json"',
+      'recovery-approval --output "$RUNNER_TEMP/carapace-clawhub-recovery-approval/approval.json"',
     );
     // Discovery lists the parent run's receipts, so the job needs a token and actions:read.
     expect(approval.permissions).toEqual({ actions: "read", contents: "read" });
@@ -287,10 +287,10 @@ describe("ClawHub parent publication authorization", () => {
     }
     const upload = approval.steps.find((step) => step.uses?.startsWith("actions/upload-artifact@"));
     const artifactName =
-      "openclaw-clawhub-recovery-approval-${{ github.run_id }}-${{ github.run_attempt }}";
+      "carapace-clawhub-recovery-approval-${{ github.run_id }}-${{ github.run_attempt }}";
     expect(upload?.with?.name).toBe(artifactName);
     expect(upload?.with?.path).toBe(
-      "${{ runner.temp }}/openclaw-clawhub-recovery-approval/approval.json",
+      "${{ runner.temp }}/carapace-clawhub-recovery-approval/approval.json",
     );
     expect(upload?.with?.["if-no-files-found"]).toBe("error");
   });
@@ -347,7 +347,7 @@ describe("ClawHub parent publication authorization", () => {
     const sealed = transactions();
     const receipt = createClawHubParentAuthorization(sealed, "automated-awaited");
     for (const patch of [
-      { name: "@openclaw/other" },
+      { name: "@carapace/other" },
       { version: "2026.8.3" },
       { inventoryDigest: "e".repeat(64) },
     ]) {
@@ -440,7 +440,7 @@ describe("packed ClawHub artifact directories", () => {
     expect(
       resolvePackedClawHubArtifactDir({
         directory,
-        artifactName: "clawhub-package-openclaw-arcee-provider-2026.9.1",
+        artifactName: "clawhub-package-carapace-arcee-provider-2026.9.1",
         matrixSize: 1,
       }),
     ).toBe(directory);
@@ -448,11 +448,11 @@ describe("packed ClawHub artifact directories", () => {
 
   it("keeps per-artifact directories for multi-package matrices and nested singles", () => {
     const directory = mkdtempSync(join(tmpdir(), "clawhub-packed-"));
-    const nested = join(directory, "clawhub-package-openclaw-arcee-provider-2026.9.1");
+    const nested = join(directory, "clawhub-package-carapace-arcee-provider-2026.9.1");
     expect(
       resolvePackedClawHubArtifactDir({
         directory,
-        artifactName: "clawhub-package-openclaw-arcee-provider-2026.9.1",
+        artifactName: "clawhub-package-carapace-arcee-provider-2026.9.1",
         matrixSize: 2,
       }),
     ).toBe(nested);
@@ -460,7 +460,7 @@ describe("packed ClawHub artifact directories", () => {
     expect(
       resolvePackedClawHubArtifactDir({
         directory,
-        artifactName: "clawhub-package-openclaw-arcee-provider-2026.9.1",
+        artifactName: "clawhub-package-carapace-arcee-provider-2026.9.1",
         matrixSize: 1,
       }),
     ).toBe(nested);

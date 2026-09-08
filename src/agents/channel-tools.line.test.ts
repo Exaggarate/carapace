@@ -24,7 +24,7 @@ it("offers LINE buttons without prescribing an unsupported config setting", asyn
     );
     const channel = { cfg: {}, channel: "line" };
     const prompt = buildAgentSystemPrompt({
-      workspaceDir: "/tmp/openclaw-line-prompt",
+      workspaceDir: "/tmp/carapace-line-prompt",
       toolNames: ["message"],
       runtimeInfo: {
         channel: "line",

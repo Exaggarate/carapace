@@ -1,20 +1,20 @@
 // Volcengine provider module implements model/runtime integration.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
+} from "carapace/plugin-sdk/speech-core";
 import {
   parseSpeechDirectiveNumberOverride,
   resolveSpeechProviderApiKey,
-} from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-provider";
 import {
   asFiniteNumberInRange,
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { volcengineTTS, type VolcengineTtsEncoding } from "./tts.js";
 
 const DEFAULT_VOICE = "en_female_anna_mars_bigtts";

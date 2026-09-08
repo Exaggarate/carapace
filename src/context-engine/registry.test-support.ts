@@ -17,7 +17,7 @@ type ContextEngineRegistryStateForTests = {
   quarantinedEngines: Map<string, ContextEngineRuntimeQuarantineForTests>;
 };
 
-const CONTEXT_ENGINE_REGISTRY_STATE = Symbol.for("openclaw.contextEngineRegistryState");
+const CONTEXT_ENGINE_REGISTRY_STATE = Symbol.for("carapace.contextEngineRegistryState");
 
 function getContextEngineRegistryStateForTests(): ContextEngineRegistryStateForTests {
   return resolveGlobalSingleton<ContextEngineRegistryStateForTests>(

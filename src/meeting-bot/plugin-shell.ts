@@ -1,6 +1,6 @@
 import type { Command } from "commander";
-import type { OpenClawPluginApi } from "../plugins/plugin-api.types.js";
-import type { OpenClawPluginCliRootCommandDescriptor } from "../plugins/plugin-registration.types.js";
+import type { CarapacePluginApi } from "../plugins/plugin-api.types.js";
+import type { CarapacePluginCliRootCommandDescriptor } from "../plugins/plugin-registration.types.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { createMeetingRealtimeEngineBindings } from "./agent-consult.js";
 import {
@@ -77,7 +77,7 @@ export function createMeetingPluginNodeHostHandler(options: MeetingPluginNodeHos
       buildProfileArgs: (profile) => ["--args", `--profile-directory=${profile}`],
       openedStatus: "chrome-opened",
       openedNotes: [
-        `${options.browserPageName} page control is handled by OpenClaw browser automation when using chrome-node.`,
+        `${options.browserPageName} page control is handled by Carapace browser automation when using chrome-node.`,
       ],
     },
   });
@@ -151,16 +151,16 @@ type MeetingPluginShellEntryOptions<
   | "unknownActionMessage"
 > & {
   cli: {
-    descriptor: OpenClawPluginCliRootCommandDescriptor;
+    descriptor: CarapacePluginCliRootCommandDescriptor;
     load(): Promise<(params: { program: Command; config: Config }) => void>;
   };
   browserGuestLabel: string;
   platform: MeetingPluginShellPlatform;
   runtime: new (params: {
     config: Config;
-    fullConfig: OpenClawPluginApi["config"];
-    logger: OpenClawPluginApi["logger"];
-    runtime: OpenClawPluginApi["runtime"];
+    fullConfig: CarapacePluginApi["config"];
+    logger: CarapacePluginApi["logger"];
+    runtime: CarapacePluginApi["runtime"];
   }) => Runtime;
   transcriptSource: { aliases?: readonly string[]; id: string };
 };
@@ -184,7 +184,7 @@ export function createMeetingPluginShellEntry<
     gatewayMethodPrefix: methodPrefix,
     nodeCommand: options.platform.nodeCommandName,
     normalizeUrl: (value) => options.platform.urls.validateAndNormalize(value),
-    toolDescription: `Join and manage ${options.browserGuestLabel} browser guests. Guest admission, tenant sign-in, and media permissions may require manual action in the OpenClaw Chrome profile.`,
+    toolDescription: `Join and manage ${options.browserGuestLabel} browser guests. Guest admission, tenant sign-in, and media permissions may require manual action in the Carapace Chrome profile.`,
     toolLabel: options.platform.displayName,
     toolName,
     transcriptSource: { ...options.transcriptSource, name: options.platform.displayName },

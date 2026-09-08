@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { chunkMarkdown } from "./internal.js";
-import { estimateStringChars } from "./openclaw-runtime-io.js";
+import { estimateStringChars } from "./carapace-runtime-io.js";
 
 describe("weighted memory chunk budgets", () => {
   it.each([

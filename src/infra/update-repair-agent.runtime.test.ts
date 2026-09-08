@@ -1,23 +1,23 @@
 import { execFileSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { withUpdateRepairEnvironment } from "./update-repair-agent.runtime.js";
 
 describe("repair rehearsal environment", () => {
   it("keeps disposable selectors but rejects hostile overrides before child execution", async () => {
-    await withOpenClawTestState({ layout: "home" }, async (state) => {
+    await withCarapaceTestState({ layout: "home" }, async (state) => {
       const before = { ...process.env };
       const environment = {
         ...process.env,
         HOME: state.home,
         TMPDIR: state.root,
-        OPENCLAW_HOME: state.home,
-        OPENCLAW_UPDATE_RUN_HANDOFF: undefined,
+        CARAPACE_HOME: state.home,
+        CARAPACE_UPDATE_RUN_HANDOFF: undefined,
         NODE_OPTIONS: "--no-warnings",
         PATH: "/synthetic-untrusted-bin",
         LD_PRELOAD: "/synthetic-preload.so",
         DYLD_INSERT_LIBRARIES: "/synthetic-preload.dylib",
-        OPENCLAW_SYNTHETIC_UNTRUSTED: "untrusted",
+        CARAPACE_SYNTHETIC_UNTRUSTED: "untrusted",
       };
       await expect(
         withUpdateRepairEnvironment(
@@ -26,16 +26,16 @@ describe("repair rehearsal environment", () => {
             const keys = [
               "HOME",
               "TMPDIR",
-              "OPENCLAW_HOME",
-              "OPENCLAW_STATE_DIR",
-              "OPENCLAW_CONFIG_PATH",
-              "OPENCLAW_WORKSPACE_DIR",
+              "CARAPACE_HOME",
+              "CARAPACE_STATE_DIR",
+              "CARAPACE_CONFIG_PATH",
+              "CARAPACE_WORKSPACE_DIR",
               "PATH",
               "NODE_OPTIONS",
               "LD_PRELOAD",
               "DYLD_INSERT_LIBRARIES",
-              "OPENCLAW_SYNTHETIC_UNTRUSTED",
-              "OPENCLAW_UPDATE_RUN_HANDOFF",
+              "CARAPACE_SYNTHETIC_UNTRUSTED",
+              "CARAPACE_UPDATE_RUN_HANDOFF",
             ];
             const child = JSON.parse(
               execFileSync(
@@ -50,10 +50,10 @@ describe("repair rehearsal environment", () => {
             expect(child).toEqual({
               HOME: state.home,
               TMPDIR: state.root,
-              OPENCLAW_HOME: state.home,
-              OPENCLAW_STATE_DIR: state.stateDir,
-              OPENCLAW_CONFIG_PATH: state.configPath,
-              OPENCLAW_WORKSPACE_DIR: state.workspaceDir,
+              CARAPACE_HOME: state.home,
+              CARAPACE_STATE_DIR: state.stateDir,
+              CARAPACE_CONFIG_PATH: state.configPath,
+              CARAPACE_WORKSPACE_DIR: state.workspaceDir,
               PATH: before.PATH,
             });
             throw new Error("synthetic repair failure");

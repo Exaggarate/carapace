@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 // Covers approval resolution over the gateway client.
 import type { ApprovalResolveResult } from "../../packages/gateway-protocol/src/index.js";

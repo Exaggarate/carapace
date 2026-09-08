@@ -1,4 +1,4 @@
-import { buildOpenAICompatibleLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { buildOpenAICompatibleLiveModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 // Qwen tests cover provider catalog plugin behavior.
 import { describe, expect, it } from "vitest";
 import {
@@ -16,7 +16,7 @@ import {
   QWEN_TOKEN_PLAN_GLOBAL_BASE_URL,
   resolveQwenTokenPlanBaseUrl,
 } from "./api.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 type QwenProvider = ReturnType<typeof buildQwenProvider>;
 

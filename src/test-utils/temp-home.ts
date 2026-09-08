@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { captureEnv, setTestEnvValue } from "./env.js";
 import { cleanupSessionStateForTest } from "./session-state-cleanup.js";
 
@@ -11,7 +11,7 @@ const HOME_ENV_KEYS = [
   "USERPROFILE",
   "HOMEDRIVE",
   "HOMEPATH",
-  "OPENCLAW_STATE_DIR",
+  "CARAPACE_STATE_DIR",
 ] as const;
 
 export type TempHomeEnv = {
@@ -44,11 +44,11 @@ async function ensurePrefixRoot(prefix: string): Promise<string> {
   }
 }
 
-/** Creates a temporary OpenClaw home and process env override for stateful tests. */
+/** Creates a temporary Carapace home and process env override for stateful tests. */
 export async function createTempHomeEnv(prefix: string): Promise<TempHomeEnv> {
   const prefixRoot = await ensurePrefixRoot(prefix);
   const home = path.join(prefixRoot, `home-${String(nextHomeIndex)}`);
-  const stateDir = path.join(home, ".openclaw");
+  const stateDir = path.join(home, ".carapace");
   nextHomeIndex += 1;
   const snapshot = captureEnv([...HOME_ENV_KEYS]);
   try {
@@ -56,7 +56,7 @@ export async function createTempHomeEnv(prefix: string): Promise<TempHomeEnv> {
     await fs.mkdir(stateDir, { recursive: true });
     setTestEnvValue("HOME", home);
     setTestEnvValue("USERPROFILE", home);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
 
     if (process.platform === "win32") {
       const match = home.match(/^([A-Za-z]:)(.*)$/);

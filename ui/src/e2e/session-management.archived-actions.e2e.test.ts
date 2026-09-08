@@ -56,13 +56,13 @@ suite.define(() => {
             role: "user",
             timestamp: baseTime,
             content: messageText,
-            __openclaw: { id: "archive-action-user", seq: 1 },
+            __carapace: { id: "archive-action-user", seq: 1 },
           },
           {
             role: "assistant",
             timestamp: baseTime + 1,
             content: "Action proof response.",
-            __openclaw: { id: "archive-action-assistant", seq: 2 },
+            __carapace: { id: "archive-action-assistant", seq: 2 },
           },
         ],
         mainSessionKey: "agent:main:main",
@@ -99,7 +99,7 @@ suite.define(() => {
 
       try {
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
-        const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+        const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
         const transcript = activePane.locator(".chat-thread");
         const userBubble = activePane.locator(".chat-group.user .chat-bubble", {
           hasText: messageText,
@@ -118,8 +118,8 @@ suite.define(() => {
                 additions: 4,
                 branch: "fix/archive-actions",
                 deletions: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
               },
               pullRequests: [],
               rateLimited: false,
@@ -267,7 +267,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat?session=${encodeURIComponent(archived.key)}`);
-      const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+      const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
 
       const selectedRow = page.locator(
         `.sidebar-recent-session[data-session-key="${archived.key}"]`,

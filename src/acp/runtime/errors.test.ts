@@ -8,9 +8,9 @@ import { AcpRuntimeError, formatAcpErrorChain } from "./errors.js";
 let tempDirs: string[] = [];
 
 function writeConfig(source: string): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-acp-redact-config-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-acp-redact-config-"));
   tempDirs.push(dir);
-  const configPath = path.join(dir, "openclaw.json");
+  const configPath = path.join(dir, "carapace.json");
   fs.writeFileSync(configPath, source);
   return configPath;
 }
@@ -32,7 +32,7 @@ describe("ACP runtime error redaction", () => {
     const providerToken = `ghp_${"a".repeat(20)}`;
     const customSecret = "internal-ticket-12345";
 
-    const output = withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () =>
+    const output = withEnv({ CARAPACE_CONFIG_PATH: configPath }, () =>
       formatAcpErrorChain(
         new AcpRuntimeError("ACP_TURN_FAILED", `backend failed: ${providerToken} ${customSecret}`),
       ),

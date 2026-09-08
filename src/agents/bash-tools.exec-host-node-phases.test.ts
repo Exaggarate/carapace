@@ -230,7 +230,7 @@ describe("node execution target resolution", () => {
           {
             nodeId: "node-shared-exec",
             displayName: "build-worker",
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             commands: ["system.run"],
             connected: true,
           },

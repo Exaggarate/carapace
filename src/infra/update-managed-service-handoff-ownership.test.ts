@@ -7,13 +7,13 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough, type Readable } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { claimOpenClawStateOwnership } from "../state/openclaw-state-ownership-operations.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { claimCarapaceStateOwnership } from "../state/carapace-state-ownership-operations.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -21,8 +21,8 @@ import {
 } from "./kysely-sync.js";
 import { signalMockManagedUpdateHandoffReady } from "./update-managed-service-handoff.test-support.js";
 
-const { resolvePreferredOpenClawTmpDirMock, spawnMock } = vi.hoisted(() => ({
-  resolvePreferredOpenClawTmpDirMock: vi.fn(),
+const { resolvePreferredCarapaceTmpDirMock, spawnMock } = vi.hoisted(() => ({
+  resolvePreferredCarapaceTmpDirMock: vi.fn(),
   spawnMock: vi.fn(),
 }));
 
@@ -59,22 +59,22 @@ vi.mock("node:child_process", async () => {
   });
 });
 
-vi.mock("./tmp-openclaw-dir.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./tmp-openclaw-dir.js")>()),
-  resolvePreferredOpenClawTmpDir: resolvePreferredOpenClawTmpDirMock,
+vi.mock("./tmp-carapace-dir.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./tmp-carapace-dir.js")>()),
+  resolvePreferredCarapaceTmpDir: resolvePreferredCarapaceTmpDirMock,
 }));
 
 const tempDirs = new Set<string>();
 const mockedHandoffLeaseCleanups = new Set<() => void>();
-type GatewayRestartSentinelDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_sentinel">;
+type GatewayRestartSentinelDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_restart_sentinel">;
 
 beforeEach(async () => {
   // Helpers in one fixture share a coordinator without touching the operator's database.
   const coordinatorDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-coordinator-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-coordinator-")),
   );
   tempDirs.add(coordinatorDir);
-  resolvePreferredOpenClawTmpDirMock.mockReturnValue(coordinatorDir);
+  resolvePreferredCarapaceTmpDirMock.mockReturnValue(coordinatorDir);
   spawnMock.mockReset();
   spawnMock.mockImplementation((_command: string, args: string[]) => {
     const child = createSpawnMock();
@@ -93,14 +93,14 @@ afterEach(async () => {
   for (const cleanup of mockedHandoffLeaseCleanups) {
     cleanup();
   }
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await Promise.all([...tempDirs].map((dir) => fs.rm(dir, { recursive: true, force: true })));
   tempDirs.clear();
   vi.resetModules();
 });
 
 function writeRestartSentinelRow(env: NodeJS.ProcessEnv, sentinel: unknown): void {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   const payload =
     sentinel && typeof sentinel === "object" && (sentinel as { version?: unknown }).version === 1
@@ -154,7 +154,7 @@ function writeRestartSentinelRow(env: NodeJS.ProcessEnv, sentinel: unknown): voi
 }
 
 function replaceRestartSentinelRow(env: NodeJS.ProcessEnv, sentinel: unknown): void {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   executeSqliteQuerySync(
     db,
@@ -164,7 +164,7 @@ function replaceRestartSentinelRow(env: NodeJS.ProcessEnv, sentinel: unknown): v
 }
 
 function readRestartSentinelPayload(env: NodeJS.ProcessEnv, key = "current"): unknown {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartSentinelDatabase>(db);
   const row = executeSqliteQueryTakeFirstSync(
     db,
@@ -180,7 +180,7 @@ function readRestartSentinelPayload(env: NodeJS.ProcessEnv, key = "current"): un
 
 async function createLegacyRestartSentinelTable(env: NodeJS.ProcessEnv): Promise<void> {
   const sqlite = await import("node:sqlite");
-  const stateDatabasePath = resolveOpenClawStateSqlitePath(env);
+  const stateDatabasePath = resolveCarapaceStateSqlitePath(env);
   await fs.mkdir(path.dirname(stateDatabasePath), { recursive: true });
   const db = new sqlite.DatabaseSync(stateDatabasePath);
   try {
@@ -220,16 +220,16 @@ async function runOwnershipHelper(params: {
     await vi.importActual<typeof import("node:child_process")>("node:child_process");
   const { getFileLockProcessStartTime } = await import("../shared/pid-alive.js");
   const { startManagedServiceUpdateHandoff } = await import("./update-managed-service-handoff.js");
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-ownership-test-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-ownership-test-"));
   tempDirs.add(tmpDir);
   let stateDir = tmpDir;
   while (
     params.deepStatePath &&
-    resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: stateDir }).length <= 260
+    resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: stateDir }).length <= 260
   ) {
     stateDir = path.join(stateDir, `segment-${"x".repeat(24)}`);
   }
-  const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+  const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
 
   await startManagedServiceUpdateHandoff({
     root: tmpDir,
@@ -237,7 +237,7 @@ async function runOwnershipHelper(params: {
     restartDrainTimeoutMs: 300_000,
     parentPid: process.pid,
     execPath: "/usr/local/bin/node",
-    argv1: "/opt/openclaw/openclaw.mjs",
+    argv1: "/opt/carapace/carapace.mjs",
     ...(params.handoffId ? { handoffId: params.handoffId } : {}),
     env,
     meta: {
@@ -395,7 +395,7 @@ childProcess.spawn = function(command, args, options) {
       helper.once("close", (code, signal) => resolve({ code, signal }));
     },
   );
-  await waitForHandoffLine(helper.stdout, "OPENCLAW_UPDATE_HANDOFF_READY");
+  await waitForHandoffLine(helper.stdout, "CARAPACE_UPDATE_HANDOFF_READY");
   const parked = waitForHandoffLine(helper.stdout, "parked");
   helperInput.write("park\n");
   await parked;
@@ -433,10 +433,10 @@ describe("managed service update handoff state ownership and sentinel persistenc
     const { result, env, logPath } = await runOwnershipHelper({
       commandExitCode: 7,
       prepareStateDatabase: async (stateEnv) => {
-        const externalEnv = { ...stateEnv, OPENCLAW_SUPERVISOR_MODE: "external" };
-        claimOpenClawStateOwnership("gateway-supervisor", { env: externalEnv });
-        closeOpenClawStateDatabaseForTest();
-        const databasePath = resolveOpenClawStateSqlitePath(stateEnv);
+        const externalEnv = { ...stateEnv, CARAPACE_SUPERVISOR_MODE: "external" };
+        claimCarapaceStateOwnership("gateway-supervisor", { env: externalEnv });
+        closeCarapaceStateDatabaseForTest();
+        const databasePath = resolveCarapaceStateSqlitePath(stateEnv);
         const stat = await fs.stat(databasePath);
         before = {
           bytes: await fs.readFile(databasePath),
@@ -453,7 +453,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
     await expect(fs.readFile(logPath, "utf8")).resolves.toContain(
       "managed update update command exited code=7",
     );
-    const databasePath = resolveOpenClawStateSqlitePath(env);
+    const databasePath = resolveCarapaceStateSqlitePath(env);
     const stat = await fs.stat(databasePath);
     expect({
       bytes: await fs.readFile(databasePath),
@@ -464,7 +464,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
       mtimeMs: stat.mtimeMs,
     }).toEqual(before);
     await expect(fs.readFile(logPath, "utf8")).resolves.toMatch(
-      /gateway-supervisor.*OPENCLAW_SUPERVISOR_MODE=external/u,
+      /gateway-supervisor.*CARAPACE_SUPERVISOR_MODE=external/u,
     );
   });
 
@@ -499,9 +499,9 @@ describe("managed service update handoff state ownership and sentinel persistenc
         metaHandoffId: "handoff-ownership-race",
         prepareStateDatabase: async (stateEnv) => {
           writeRestartSentinelRow(stateEnv, pendingSentinel);
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
           const sqlite = await import("node:sqlite");
-          claimant = new sqlite.DatabaseSync(resolveOpenClawStateSqlitePath(stateEnv));
+          claimant = new sqlite.DatabaseSync(resolveCarapaceStateSqlitePath(stateEnv));
           claimant.exec("BEGIN IMMEDIATE;");
           claimantTransactionOpen = true;
           claimant
@@ -549,7 +549,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
       throw new Error("expected the detached helper to return a result");
     }
     expect(helperResult.result).toEqual({ code: 7, signal: null });
-    const databasePath = resolveOpenClawStateSqlitePath(helperResult.env);
+    const databasePath = resolveCarapaceStateSqlitePath(helperResult.env);
     const sqlite = await import("node:sqlite");
     const verifyDb = new sqlite.DatabaseSync(databasePath, { readOnly: true });
     try {
@@ -566,7 +566,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
       verifyDb.close();
     }
     await expect(fs.readFile(helperResult.logPath, "utf8")).resolves.toMatch(
-      /race-supervisor.*OPENCLAW_SUPERVISOR_MODE=external/u,
+      /race-supervisor.*CARAPACE_SUPERVISOR_MODE=external/u,
     );
   });
 
@@ -590,7 +590,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
       },
     });
     if (process.platform !== "win32") {
-      const mode = (await fs.stat(resolveOpenClawStateSqlitePath(env))).mode & 0o777;
+      const mode = (await fs.stat(resolveCarapaceStateSqlitePath(env))).mode & 0o777;
       expect(mode).toBe(0o600);
     }
   });
@@ -674,7 +674,7 @@ describe("managed service update handoff state ownership and sentinel persistenc
         handoffId: "handoff-windows-long-path",
         metaHandoffId: "handoff-windows-long-path",
       });
-      const statePath = resolveOpenClawStateSqlitePath(env);
+      const statePath = resolveCarapaceStateSqlitePath(env);
       expect(statePath.startsWith("\\\\?\\")).toBe(false);
       expect(statePath.length).toBeGreaterThan(260);
       expect(result).toEqual({ code: 1, signal: null });
@@ -690,10 +690,10 @@ describe("managed service update handoff state ownership and sentinel persistenc
       handoffId: "handoff-locked",
       metaHandoffId: "handoff-locked",
       prepareStateDatabase: async (stateEnv) => {
-        openOpenClawStateDatabase({ env: stateEnv });
-        closeOpenClawStateDatabaseForTest();
+        openCarapaceStateDatabase({ env: stateEnv });
+        closeCarapaceStateDatabaseForTest();
         const sqlite = await import("node:sqlite");
-        const lock = new sqlite.DatabaseSync(resolveOpenClawStateSqlitePath(stateEnv));
+        const lock = new sqlite.DatabaseSync(resolveCarapaceStateSqlitePath(stateEnv));
         lock.exec("BEGIN IMMEDIATE;");
         lockReleased = new Promise((resolve) => {
           setTimeout(() => {

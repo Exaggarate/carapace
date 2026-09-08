@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { OwnedStdioCleanupError, type OwnedStdioProcess } from "../process/owned-stdio.js";
 import { disposeMcpClient } from "./mcp-client-lifecycle.js";
-import { OpenClawStdioClientTransport } from "./mcp-stdio-transport.js";
+import { CarapaceStdioClientTransport } from "./mcp-stdio-transport.js";
 import { createAgentCleanupScope } from "./run-cleanup-timeout.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
@@ -24,9 +24,9 @@ vi.mock("../process/owned-stdio.js", async (importOriginal) => {
   };
 });
 
-const transports: OpenClawStdioClientTransport[] = [];
-function createTransport(params: ConstructorParameters<typeof OpenClawStdioClientTransport>[0]) {
-  const transport = new OpenClawStdioClientTransport(params);
+const transports: CarapaceStdioClientTransport[] = [];
+function createTransport(params: ConstructorParameters<typeof CarapaceStdioClientTransport>[0]) {
+  const transport = new CarapaceStdioClientTransport(params);
   transports.push(transport);
   return transport;
 }
@@ -105,7 +105,7 @@ afterEach(async () => {
   closeMock.mockReset();
 });
 
-describe("OpenClawStdioClientTransport", () => {
+describe("CarapaceStdioClientTransport", () => {
   it("preserves the configured command, target environment and stderr stream", async () => {
     createChild();
     const transport = createTransport({

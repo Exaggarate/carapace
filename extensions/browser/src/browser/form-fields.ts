@@ -4,7 +4,7 @@
  * Converts model/client fill field payloads into the compact field shape used
  * by Playwright and Chrome MCP fill actions.
  */
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { BrowserFormField } from "./client-actions.types.js";
 
 /** Default field type for fill actions when no type is provided. */

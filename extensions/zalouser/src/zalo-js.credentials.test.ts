@@ -2,14 +2,14 @@
 import { access, mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
+import type { OpenKeyedStoreOptions } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withEnvAsync } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import { withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { API, LoginQRCallbackEvent } from "./zca-client.js";
 import { LoginQRCallbackEventType } from "./zca-constants.js";
@@ -44,7 +44,7 @@ async function readStoredCredentials(
   stateDir: string,
   profile: string,
 ): Promise<StoredZaloCredentials> {
-  const stored = loadStoredZaloCredentials(profile, { OPENCLAW_STATE_DIR: stateDir });
+  const stored = loadStoredZaloCredentials(profile, { CARAPACE_STATE_DIR: stateDir });
   if (!stored) {
     throw new Error("Expected stored Zalo credentials");
   }
@@ -56,7 +56,7 @@ function seedStoredCredentials(
   profile: string,
   credentials: Omit<StoredZaloCredentials, "profile">,
 ): void {
-  saveStoredZaloCredentials(profile, credentials, { OPENCLAW_STATE_DIR: stateDir });
+  saveStoredZaloCredentials(profile, credentials, { CARAPACE_STATE_DIR: stateDir });
 }
 
 // Credential reads and writes leave the shared state database open under the temporary
@@ -113,8 +113,8 @@ describe("zalouser credential persistence", () => {
   });
 
   it("does not let a delayed credential refresh undo explicit logout", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const profile = "revoked-refresh";
     const stored = {
       imei: "device",
@@ -140,7 +140,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("persists the final API cookie jar after QR login", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "qr-refresh";
     const callbackCookie = [{ key: "zpsid", value: "callback", domain: "chat.zalo.me" }];
     const refreshedCookie = [{ key: "zpsid", value: "refreshed", domain: "chat.zalo.me" }];
@@ -179,7 +179,7 @@ describe("zalouser credential persistence", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await startZaloQrLogin({ profile, timeoutMs: 1000 });
 
         const loginResult = await waitForZaloQrLogin({ profile, timeoutMs: 1000 });
@@ -197,7 +197,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("revalidates setup ownership immediately before QR credentials are written", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "qr-stale-owner";
     const guardError = new Error("verified inference changed");
     const beforeCredentialPersistence = vi.fn(async () => {
@@ -228,7 +228,7 @@ describe("zalouser credential persistence", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const started = await startZaloQrLogin({
           profile,
           timeoutMs: 1000,
@@ -276,7 +276,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("rewrites restored sessions with cookies refreshed by zca-js login", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "restore-refresh";
     const storedCookie = [{ key: "zpsid", value: "stored", domain: "chat.zalo.me" }];
     const refreshedCookie = [{ key: "zpsid", value: "refreshed", domain: "chat.zalo.me" }];
@@ -297,7 +297,7 @@ describe("zalouser credential persistence", () => {
     createZaloMock.mockResolvedValueOnce({ login });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await expect(checkZaloAuthenticated(profile)).resolves.toBe(true);
 
         expect(login).toHaveBeenCalledWith({
@@ -317,7 +317,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("keeps setup-style read-only API calls from rewriting refreshed credentials", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "read-only-refresh";
     const storedCookie = [{ key: "zpsid", value: "stored", domain: "chat.zalo.me" }];
     const loginCookie = [{ key: "zpsid", value: "login", domain: "chat.zalo.me" }];
@@ -344,7 +344,7 @@ describe("zalouser credential persistence", () => {
     createZaloMock.mockResolvedValueOnce({ login: vi.fn(async () => api) });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await expect(
           listZaloFriends(profile, { credentialPersistence: "read-only" }),
         ).resolves.toStrictEqual([]);
@@ -357,7 +357,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("persists cookie changes after a successful API call", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "api-refresh";
     const storedCookie: unknown[] = [{ key: "zpsid", value: "stored", domain: "chat.zalo.me" }];
     const loginCookie: unknown[] = [{ key: "zpsid", value: "login", domain: "chat.zalo.me" }];
@@ -393,7 +393,7 @@ describe("zalouser credential persistence", () => {
     createZaloMock.mockResolvedValueOnce({ login: vi.fn(async () => api) });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await expect(listZaloFriends(profile)).resolves.toEqual([
           {
             userId: "friend-1",
@@ -413,7 +413,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("does not rewrite credentials when the live cookie jar only reorders cookies", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "api-stable";
     const cookieA: unknown[] = [
       { key: "zpsid", value: "same", domain: "chat.zalo.me" },
@@ -438,7 +438,7 @@ describe("zalouser credential persistence", () => {
     createZaloMock.mockResolvedValueOnce({ login: vi.fn(async () => api) });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await expect(listZaloFriends(profile)).resolves.toStrictEqual([]);
         const firstStored = await readStoredCredentials(stateDir, profile);
 
@@ -458,10 +458,10 @@ describe("zalouser credential persistence", () => {
   }
 
   it("keeps reaction sends non-throwing when session restore fails", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const result = await sendZaloReaction({
           profile: "missing-session",
           threadId: "thread-1",
@@ -477,10 +477,10 @@ describe("zalouser credential persistence", () => {
   });
 
   it("keeps link sends non-throwing when session restore fails", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const result = await sendZaloLink("thread-1", "https://example.com", {
           profile: "missing-session",
         });
@@ -492,7 +492,7 @@ describe("zalouser credential persistence", () => {
   });
 
   it("writes plugin-state SQLite without recreating the retired credential blob", async () => {
-    const stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-zalouser-credentials-"));
+    const stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-zalouser-credentials-"));
     const profile = "sqlite-only";
     seedStoredCredentials(stateDir, profile, {
       imei: "api-imei",
@@ -503,10 +503,10 @@ describe("zalouser credential persistence", () => {
 
     try {
       await expect(
-        access(resolveLegacyZalouserCredentialsPath(profile, { OPENCLAW_STATE_DIR: stateDir })),
+        access(resolveLegacyZalouserCredentialsPath(profile, { CARAPACE_STATE_DIR: stateDir })),
       ).rejects.toMatchObject({ code: "ENOENT" });
       await expect(
-        access(path.join(stateDir, "state", "openclaw.sqlite")),
+        access(path.join(stateDir, "state", "carapace.sqlite")),
       ).resolves.toBeUndefined();
     } finally {
       await removeCredentialStateDir(stateDir);

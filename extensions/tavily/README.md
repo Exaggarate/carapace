@@ -1,13 +1,13 @@
-# Tavily OpenClaw plugin
+# Tavily Carapace plugin
 
-Official OpenClaw plugin for Tavily.
+Official Carapace plugin for Tavily.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/tavily-plugin
+carapace plugins install @carapace/tavily-plugin
 ```
 
 ## Docs
 
-See `docs/tools/tavily.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/tools/tavily`.
+See `docs/tools/tavily.md` in the Carapace repository, or the published docs at `../../docs/tools/tavily.md`.

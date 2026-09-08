@@ -11,8 +11,8 @@ import type {
   RealtimeVoiceProviderPlugin,
 } from "../plugins/types.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { createMeetingRealtimeEngineBindings } from "./agent-consult.js";
 import { startMeetingAgentRealtimeEngine } from "./realtime-agent-engine.js";
@@ -23,7 +23,7 @@ import {
   startMeetingRealtimeEngine,
 } from "./realtime-engine.js";
 
-const environment = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+const environment = captureEnv(["CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
 let stateDir: string;
 const spokenResult = {
   success: true,
@@ -177,17 +177,17 @@ async function createFixture(engine: "transcription" | "voice" = "transcription"
 describe("meeting shutdown", () => {
   beforeEach(async () => {
     stateDir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "meeting-shutdown-")));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    const configPath = path.join(stateDir, "openclaw.json");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    const configPath = path.join(stateDir, "carapace.json");
     await fs.writeFile(configPath, "{}\n");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
     vi.useFakeTimers();
   });
   afterEach(async () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     environment.restore();
     await fs.rm(stateDir, { recursive: true, force: true });
   });

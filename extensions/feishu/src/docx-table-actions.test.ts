@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createToolFactoryHarness } from "./tool-factory-test-harness.js";
 

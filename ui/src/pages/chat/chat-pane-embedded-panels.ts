@@ -1,4 +1,4 @@
-import type { ControlUiFocusBuildTarget } from "@openclaw/session-url-contract";
+import type { ControlUiFocusBuildTarget } from "@carapace/session-url-contract";
 import { html, nothing, type TemplateResult } from "lit";
 import type { SessionObserverDigest } from "../../../../packages/gateway-protocol/src/schema/sessions.js";
 import type { ControlUiSessionPullRequest } from "../../../../src/gateway/control-ui-contract.js";
@@ -121,7 +121,7 @@ export function sidebarPanelDefinitions(
       : undefined,
   });
   const terminal = state?.terminalAvailable
-    ? html`<openclaw-terminal-panel
+    ? html`<carapace-terminal-panel
         embedded
         .client=${state.connected ? state.client : null}
         .available=${state.terminalAvailable}
@@ -129,10 +129,10 @@ export function sidebarPanelDefinitions(
         .sessionKey=${state.sessionKey}
         .themeMode=${params?.themeMode ?? "dark"}
         .basePath=${state.basePath}
-      ></openclaw-terminal-panel>`
+      ></carapace-terminal-panel>`
     : null;
   const browser = state?.browserPanelAvailable
-    ? html`<openclaw-browser-panel
+    ? html`<carapace-browser-panel
         embedded
         data-chat-autotype-exempt
         .client=${state.connected ? state.client : null}
@@ -147,10 +147,10 @@ export function sidebarPanelDefinitions(
         .preferredTab=${params?.preferredBrowserTab}
         .resourceBasePath=${state.resourceBasePath}
         .authToken=${resolveAssistantAttachmentAuthToken(state)}
-      ></openclaw-browser-panel>`
+      ></carapace-browser-panel>`
     : null;
   const companion = params
-    ? html`<openclaw-chat-session-rail
+    ? html`<carapace-chat-session-rail
         embedded
         .sessionKey=${state?.sessionKey}
         .digest=${params.digest}
@@ -164,11 +164,11 @@ export function sidebarPanelDefinitions(
         .onSubmit=${params.onCompanionSubmit}
         .onDraftChange=${params.onCompanionDraftChange}
         .onVisibilityChange=${params.onCompanionVisibilityChange}
-      ></openclaw-chat-session-rail>`
+      ></carapace-chat-session-rail>`
     : null;
   const desktop =
     state && params?.desktopAvailable
-      ? html`<openclaw-desktop-panel
+      ? html`<carapace-desktop-panel
           embedded
           data-chat-autotype-exempt
           .client=${state.connected ? state.client : null}
@@ -178,17 +178,17 @@ export function sidebarPanelDefinitions(
           .requestedSource=${params?.desktopSource ?? null}
           .sessionKey=${state.sessionKey}
           .onFocusTargetChange=${params?.onDesktopFocusTargetChange}
-        ></openclaw-desktop-panel>`
+        ></carapace-desktop-panel>`
       : null;
   const discussion = params?.discussion
-    ? html`<openclaw-session-discussion
+    ? html`<carapace-session-discussion
         .sessionKey=${params.discussion.sessionKey}
         .canOpen=${params.discussion.canOpen}
         .sourceGeneration=${params.discussionSourceGeneration}
         .loadInfo=${params.discussion.loadInfo}
         .openDiscussion=${params.discussion.openDiscussion}
         .onStateChange=${params.discussion.onStateChange}
-      ></openclaw-session-discussion>`
+      ></carapace-session-discussion>`
     : null;
   const attachmentContent = state?.attachmentSidebarContent ?? null;
   // The region owns mounting and visibility. Hidden Review tabs must keep the
@@ -231,7 +231,7 @@ export function sidebarPanelDefinitions(
       icons.messageSquarePlus,
       companion,
       params
-        ? html`<openclaw-tooltip .content=${t("chat.rail.clear")}>
+        ? html`<carapace-tooltip .content=${t("chat.rail.clear")}>
             <button
               class="rail-header__action chat-session-rail__clear"
               type="button"
@@ -241,7 +241,7 @@ export function sidebarPanelDefinitions(
             >
               ${icons.trash}
             </button>
-          </openclaw-tooltip>`
+          </carapace-tooltip>`
         : undefined,
     ),
     definePanel(
@@ -250,7 +250,7 @@ export function sidebarPanelDefinitions(
       icons.listChecks,
       params?.tasks ?? null,
       params
-        ? html`<openclaw-tooltip .content=${t("chat.backgroundTasks.refresh")}>
+        ? html`<carapace-tooltip .content=${t("chat.backgroundTasks.refresh")}>
             <button
               class="rail-header__action chat-tasks-rail__refresh"
               type="button"
@@ -264,7 +264,7 @@ export function sidebarPanelDefinitions(
                   : icons.refresh
               }
             </button>
-          </openclaw-tooltip>`
+          </carapace-tooltip>`
         : undefined,
     ),
     definePanel(

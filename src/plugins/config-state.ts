@@ -1,7 +1,7 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 /** Normalizes plugin config and resolves effective enablement, slots, and activation sources. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveMemorySlotDecisionShared,
   resolvePluginActivationDecisionShared,
@@ -23,8 +23,8 @@ export type PluginActivationState = PluginActivationStateLike;
 
 export type PluginActivationConfigSource = {
   plugins: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
-} & PluginActivationConfigSourceLike<OpenClawConfig>;
+  rootConfig?: CarapaceConfig;
+} & PluginActivationConfigSourceLike<CarapaceConfig>;
 
 export type NormalizedPluginsConfig = SharedNormalizedPluginsConfig;
 
@@ -59,13 +59,13 @@ export function isExplicitPluginDisableMarker(value: unknown): boolean {
 }
 
 export const normalizePluginsConfig = (
-  config?: OpenClawConfig["plugins"],
+  config?: CarapaceConfig["plugins"],
 ): NormalizedPluginsConfig => {
   return normalizePluginsConfigWithResolverCore(config, normalizePluginId);
 };
 
 /** Resolves the enabled plugin selected to own the context-engine slot. */
-export function resolveSelectedContextEnginePluginId(config?: OpenClawConfig): string | undefined {
+export function resolveSelectedContextEnginePluginId(config?: CarapaceConfig): string | undefined {
   const plugins = normalizePluginsConfig(config?.plugins);
   return resolveSelectedContextEnginePluginIdFromConfig(plugins, plugins.slots.contextEngine);
 }
@@ -88,9 +88,9 @@ export function resolveSelectedContextEnginePluginIdFromConfig(
 
 /** Canonicalizes one plugin entry and its policy-list ids before a targeted mutation. */
 export function normalizePluginTargetConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
-): OpenClawConfig {
+): CarapaceConfig {
   const normalizedId = normalizePluginId(pluginId);
   const normalized = normalizePluginsConfig(config.plugins);
   const rawEntries = config.plugins?.entries ?? {};
@@ -119,7 +119,7 @@ export function normalizePluginTargetConfig(
 }
 
 export function createPluginActivationSource(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   plugins?: NormalizedPluginsConfig;
 }): PluginActivationConfigSource {
   return {
@@ -128,13 +128,13 @@ export function createPluginActivationSource(params: {
   };
 }
 
-const hasExplicitMemorySlot = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemorySlot = (plugins?: CarapaceConfig["plugins"]) =>
   Boolean(plugins?.slots && Object.hasOwn(plugins.slots, "memory"));
 
-const hasExplicitMemoryEntry = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemoryEntry = (plugins?: CarapaceConfig["plugins"]) =>
   Boolean(plugins?.entries && Object.hasOwn(plugins.entries, defaultSlotIdForKey("memory")));
 
-export function hasExplicitPluginConfig(plugins?: OpenClawConfig["plugins"]): boolean {
+export function hasExplicitPluginConfig(plugins?: CarapaceConfig["plugins"]): boolean {
   if (!plugins) {
     return false;
   }
@@ -160,9 +160,9 @@ export function hasExplicitPluginConfig(plugins?: OpenClawConfig["plugins"]): bo
 }
 
 export function applyTestPluginDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawConfig {
+): CarapaceConfig {
   if (!env.VITEST) {
     return cfg;
   }
@@ -198,7 +198,7 @@ export function applyTestPluginDefaults(
 }
 
 export function isTestDefaultMemorySlotDisabled(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   if (!env.VITEST) {
@@ -215,7 +215,7 @@ function resolvePluginActivationState(params: {
   id: string;
   origin: PluginOrigin;
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: CarapaceConfig;
   enabledByDefault?: boolean;
   activationSource?: PluginActivationConfigSource;
   autoEnabledReason?: string;
@@ -252,7 +252,7 @@ type EffectiveActivationParams = {
   id: string;
   origin: PluginOrigin;
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: CarapaceConfig;
   enabledByDefault?: boolean;
   activationSource?: PluginActivationConfigSource;
   channelIds?: readonly string[];

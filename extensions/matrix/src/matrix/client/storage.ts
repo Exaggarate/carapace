@@ -2,9 +2,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { loadJsonFile } from "openclaw/plugin-sdk/json-store";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { loadJsonFile } from "carapace/plugin-sdk/json-store";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import { getMatrixRuntime } from "../../runtime.js";
 import {
   isMatrixActiveTokenRootDirectory,
@@ -92,7 +92,7 @@ type PopulatedMatrixStorageRoot = {
 };
 
 function readStoredRootMetadata(rootDir: string): MatrixStorageMetadata {
-  if (fs.existsSync(path.join(rootDir, "state", "openclaw.sqlite"))) {
+  if (fs.existsSync(path.join(rootDir, "state", "carapace.sqlite"))) {
     try {
       const stored = normalizeMatrixStorageMetadata(
         openStorageMetaStore(rootDir).lookup(STORAGE_META_STATE_KEY),

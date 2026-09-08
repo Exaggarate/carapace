@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { setImmediate as nextTurn } from "node:timers/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildModelsListResult } from "../gateway/server-methods/models-list-result.js";
 import type { GatewayRequestContext } from "../gateway/server-methods/types.js";
 import { registerGatewayModelCatalogPrivateAccess } from "../gateway/server-model-catalog-auth.js";
@@ -144,7 +144,7 @@ async function createReadyWorkerFixture(spinMs: number) {
 
 describe("prepared model catalog worker boundary", () => {
   beforeEach(() => {
-    vi.stubEnv("CODEX_HOME", makeTempDir("openclaw-worker-empty-codex-"));
+    vi.stubEnv("CODEX_HOME", makeTempDir("carapace-worker-empty-codex-"));
   });
 
   it.each([
@@ -193,18 +193,18 @@ describe("prepared model catalog worker boundary", () => {
   });
 
   it("preserves prepared catalog ownership across ambient environment changes", async () => {
-    const homeA = makeTempDir("openclaw-catalog-owner-home-a-");
-    const homeB = makeTempDir("openclaw-catalog-owner-home-b-");
-    const codexHome = makeTempDir("openclaw-catalog-owner-empty-codex-");
+    const homeA = makeTempDir("carapace-catalog-owner-home-a-");
+    const homeB = makeTempDir("carapace-catalog-owner-home-b-");
+    const codexHome = makeTempDir("carapace-catalog-owner-empty-codex-");
     vi.stubEnv("HOME", homeA);
-    vi.stubEnv("OPENCLAW_HOME", homeA);
+    vi.stubEnv("CARAPACE_HOME", homeA);
     vi.stubEnv("CODEX_HOME", codexHome);
     const fixture = createCatalogFixture(makeTempDir, 0);
-    vi.stubEnv("OPENCLAW_STATE_DIR", fixture.env.OPENCLAW_STATE_DIR);
+    vi.stubEnv("CARAPACE_STATE_DIR", fixture.env.CARAPACE_STATE_DIR);
     const config = {
       ...fixture.config,
       agents: { ...fixture.config.agents, entries: { main: {} } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const agentDir = resolveAgentDir(config, "main", fixture.env);
     const workspaceDir = resolveAgentWorkspaceDir(config, "main", fixture.env);
     expect(agentDir).toBe(fixture.agentDir);
@@ -253,8 +253,8 @@ describe("prepared model catalog worker boundary", () => {
       await expect(project()).resolves.toMatchObject(expectedOwner);
 
       vi.stubEnv("HOME", homeB);
-      vi.stubEnv("OPENCLAW_HOME", homeB);
-      vi.stubEnv("OPENCLAW_STATE_DIR", path.join(homeB, "state"));
+      vi.stubEnv("CARAPACE_HOME", homeB);
+      vi.stubEnv("CARAPACE_STATE_DIR", path.join(homeB, "state"));
       driftedAgentDir = resolveAgentDir(config, "main");
       expect(driftedAgentDir).not.toBe(agentDir);
       expect(resolveAgentWorkspaceDir(config, "main")).not.toBe(workspaceDir);
@@ -279,9 +279,9 @@ describe("prepared model catalog worker boundary", () => {
     // Configured publication reads the process environment; keep both the parent and worker
     // inside the same synthetic plugin/state fixture, without a supplied liveness predicate.
     for (const name of [
-      "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_WORKER_CATALOG_MARKER",
+      "CARAPACE_DISABLE_BUNDLED_PLUGINS",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_WORKER_CATALOG_MARKER",
       EXTERNAL_AUTH_PATH_ENV,
       REF_ONLY_API_ENV,
       REF_ONLY_TOKEN_ENV,
@@ -302,7 +302,7 @@ describe("prepared model catalog worker boundary", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const buildCounts: number[] = [];
     const options = {
       gatewayLifecycle: true,
@@ -340,7 +340,7 @@ describe("prepared model catalog worker boundary", () => {
             },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await refreshPreparedModelRuntimeSnapshots(nextConfig, {
         ...options,
         agentIds: new Set(["sibling"]),
@@ -621,7 +621,7 @@ describe("prepared model catalog worker boundary", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const owner = Object.freeze({
       ...fixture.snapshot,
       config,
@@ -772,7 +772,7 @@ describe("prepared model catalog worker boundary", () => {
     // A developer's ambient OpenAI key would count as usable openai auth and
     // mark the route available before the staged Codex login exists.
     vi.stubEnv("OPENAI_API_KEY", undefined);
-    const codexHome = makeTempDir("openclaw-models-list-codex-");
+    const codexHome = makeTempDir("carapace-models-list-codex-");
     const fixture = await createStaticSnapshot(0, { CODEX_HOME: codexHome });
     const route = {
       provider: "openai",
@@ -804,7 +804,7 @@ describe("prepared model catalog worker boundary", () => {
           codex: { config: { discovery: { enabled: false } } },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const owner = Object.freeze({
       ...fixture.snapshot,
       config,
@@ -870,7 +870,7 @@ describe("prepared model catalog worker boundary", () => {
   });
 
   it("refreshes and removes a Codex login that existed in the prepared generation", async () => {
-    const codexHome = makeTempDir("openclaw-prepared-codex-");
+    const codexHome = makeTempDir("carapace-prepared-codex-");
     writeCodexAuth(codexHome, "startup");
     const previousCodexHome = process.env.CODEX_HOME;
     process.env.CODEX_HOME = codexHome;

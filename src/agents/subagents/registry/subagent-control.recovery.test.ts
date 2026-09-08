@@ -184,7 +184,7 @@ it.each(
   "$boundary resolves accepted recovery after its control ancestor drains (scenario=$scenario)",
   async ({ boundary, scenario }) => {
     await writeFile(
-      path.join(fixture.stateDir, "openclaw.json"),
+      path.join(fixture.stateDir, "carapace.json"),
       JSON.stringify({
         agents: { defaults: { workspace: fixture.stateDir, subagents: { maxSpawnDepth: 3 } } },
         tools: { swarm: { enabled: true } },

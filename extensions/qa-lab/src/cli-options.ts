@@ -1,5 +1,5 @@
 // Qa Lab plugin module implements cli options behavior.
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
 
 export function invalidQaCliArgument(message: string): Error & { code: string; exitCode: number } {
   return Object.assign(new Error(message), {

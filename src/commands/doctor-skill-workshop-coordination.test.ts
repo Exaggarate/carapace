@@ -7,13 +7,13 @@ import {
   resolveStateDatabaseCoordinatorPath,
   resolveStateLifecycleRuntimeDirectory,
 } from "../infra/state-database-coordinator.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { migrateLegacySkillWorkshopProposals } from "./doctor-skill-workshop-sqlite.js";
 
 it("respects another migration owner even when the state database is already open", async () => {
-  await withOpenClawTestState({ label: "workshop-migration-owner" }, async (state) => {
-    const database = openOpenClawStateDatabase({ env: state.env });
+  await withCarapaceTestState({ label: "workshop-migration-owner" }, async (state) => {
+    const database = openCarapaceStateDatabase({ env: state.env });
     const coordinatorPath = resolveStateDatabaseCoordinatorPath({
       databasePath: database.path,
       runtimeDirectory: resolveStateLifecycleRuntimeDirectory(),
@@ -24,7 +24,7 @@ it("respects another migration owner even when the state database is already ope
     try {
       await expect(
         migrateLegacySkillWorkshopProposals({ config: {}, env: state.env }),
-      ).rejects.toThrow("another OpenClaw process owns state-lifecycle");
+      ).rejects.toThrow("another Carapace process owns state-lifecycle");
     } finally {
       otherOwner?.release();
     }
@@ -35,8 +35,8 @@ it("respects another migration owner even when the state database is already ope
 });
 
 it("preserves Doctor's outer ownership and releases migration ownership after failure", async () => {
-  await withOpenClawTestState({ label: "workshop-migration-release" }, async (state) => {
-    const database = openOpenClawStateDatabase({ env: state.env });
+  await withCarapaceTestState({ label: "workshop-migration-release" }, async (state) => {
+    const database = openCarapaceStateDatabase({ env: state.env });
     const outer = acquireStateDatabaseCoordinator({ databasePath: database.path });
     const backupRoot = path.join(state.stateDir, "skill-workshop", "collection-backups");
     await fs.mkdir(backupRoot, { recursive: true });

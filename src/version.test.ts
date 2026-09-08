@@ -16,7 +16,7 @@ import {
   resolveVersionFromModuleUrl,
 } from "./version.js";
 
-const versionFixtureRoot = createSuiteTempRootTracker({ prefix: "openclaw-version-" });
+const versionFixtureRoot = createSuiteTempRootTracker({ prefix: "carapace-version-" });
 
 beforeAll(async () => {
   await versionFixtureRoot.setup();
@@ -54,7 +54,7 @@ function expectVersionMetadataToBeMissing(moduleUrl: string) {
 describe("version resolution", () => {
   it("resolves package version from nested dist/plugin-sdk module URL", async () => {
     await withVersionFixtureDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "openclaw", version: "1.2.3" });
+      await writeJsonFixture(root, "package.json", { name: "carapace", version: "1.2.3" });
       const moduleUrl = await ensureModuleFixture(root);
       expect(readVersionFromPackageJsonForModuleUrl(moduleUrl)).toBe("1.2.3");
       expect(resolveVersionFromModuleUrl(moduleUrl)).toBe("1.2.3");
@@ -63,7 +63,7 @@ describe("version resolution", () => {
 
   it("ignores unrelated nearby package.json files", async () => {
     await withVersionFixtureDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "openclaw", version: "2.3.4" });
+      await writeJsonFixture(root, "package.json", { name: "carapace", version: "2.3.4" });
       await writeJsonFixture(root, "dist/package.json", {
         name: "other-package",
         version: "9.9.9",
@@ -120,7 +120,7 @@ describe("version resolution", () => {
     });
   });
 
-  it("ignores non-openclaw package and blank build-info versions", async () => {
+  it("ignores non-carapace package and blank build-info versions", async () => {
     await withVersionFixtureDir(async (root) => {
       await writeJsonFixture(root, "package.json", { name: "other-package", version: "9.9.9" });
       await writeJsonFixture(root, "build-info.json", { version: "  " });
@@ -137,7 +137,7 @@ describe("version resolution", () => {
 
   it("resolves binary version with explicit precedence", async () => {
     await withVersionFixtureDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "openclaw", version: "2.3.4" });
+      await writeJsonFixture(root, "package.json", { name: "carapace", version: "2.3.4" });
       const moduleUrl = await ensureModuleFixture(root);
       expect(
         resolveBinaryVersion({
@@ -163,10 +163,10 @@ describe("version resolution", () => {
     });
   });
 
-  it("prefers OPENCLAW_VERSION over package versions", () => {
+  it("prefers CARAPACE_VERSION over package versions", () => {
     expect(
       resolveRuntimeServiceVersion({
-        OPENCLAW_VERSION: "9.9.9",
+        CARAPACE_VERSION: "9.9.9",
         npm_package_version: "1.1.1",
       }),
     ).toBe("9.9.9");
@@ -180,18 +180,18 @@ describe("version resolution", () => {
     process.env[key] = value;
   }
 
-  it("prefers runtime VERSION over stale OPENCLAW_VERSION for compatibility checks", () => {
-    const previousCompatibility = process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
-    const previous = process.env.OPENCLAW_VERSION;
+  it("prefers runtime VERSION over stale CARAPACE_VERSION for compatibility checks", () => {
+    const previousCompatibility = process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
+    const previous = process.env.CARAPACE_VERSION;
     const previousPackage = process.env.npm_package_version;
     try {
-      delete process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION;
-      process.env.OPENCLAW_VERSION = "2026.3.25";
+      delete process.env.CARAPACE_COMPATIBILITY_HOST_VERSION;
+      process.env.CARAPACE_VERSION = "2026.3.25";
       process.env.npm_package_version = "2026.3.25-package";
       expect(resolveCompatibilityHostVersion()).toBe(VERSION);
     } finally {
-      restoreEnvValue("OPENCLAW_COMPATIBILITY_HOST_VERSION", previousCompatibility);
-      restoreEnvValue("OPENCLAW_VERSION", previous);
+      restoreEnvValue("CARAPACE_COMPATIBILITY_HOST_VERSION", previousCompatibility);
+      restoreEnvValue("CARAPACE_VERSION", previous);
       restoreEnvValue("npm_package_version", previousPackage);
     }
   });
@@ -199,7 +199,7 @@ describe("version resolution", () => {
   it("keeps explicit env-object overrides for compatibility checks in tests", () => {
     expect(
       resolveCompatibilityHostVersion({
-        OPENCLAW_VERSION: "2026.3.99",
+        CARAPACE_VERSION: "2026.3.99",
         npm_package_version: "2026.3.97",
       }),
     ).toBe("2026.3.99");
@@ -208,8 +208,8 @@ describe("version resolution", () => {
   it("prefers explicit compatibility host overrides over runtime and stale env versions", () => {
     expect(
       resolveCompatibilityHostVersion({
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.4.8",
-        OPENCLAW_VERSION: "2026.3.99",
+        CARAPACE_COMPATIBILITY_HOST_VERSION: "2026.4.8",
+        CARAPACE_VERSION: "2026.3.99",
         npm_package_version: "2026.3.97",
       }),
     ).toBe("2026.4.8");
@@ -228,14 +228,14 @@ describe("version resolution", () => {
   it("prefers runtime VERSION over package markers and ignores unusable env values", () => {
     expect(
       resolveRuntimeServiceVersion({
-        OPENCLAW_VERSION: "   ",
+        CARAPACE_VERSION: "   ",
         npm_package_version: "1.0.0",
       }),
     ).toBe(VERSION);
 
     expect(
       resolveRuntimeServiceVersion({
-        OPENCLAW_VERSION: " ",
+        CARAPACE_VERSION: " ",
         npm_package_version: " 1.0.0-package ",
       }),
     ).toBe(VERSION);
@@ -243,7 +243,7 @@ describe("version resolution", () => {
     expect(
       resolveRuntimeServiceVersion(
         {
-          OPENCLAW_VERSION: "",
+          CARAPACE_VERSION: "",
           npm_package_version: "",
         },
         "fallback",
@@ -252,7 +252,7 @@ describe("version resolution", () => {
 
     expect(
       resolveRuntimeServiceVersion({
-        OPENCLAW_VERSION: "undefined",
+        CARAPACE_VERSION: "undefined",
         npm_package_version: "1.0.0-package",
       }),
     ).toBe(VERSION);

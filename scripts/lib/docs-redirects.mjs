@@ -2,7 +2,7 @@ import path from "node:path";
 
 // Resolve against published pages, not URLs with a hosting base prefix. Markdown
 // objects are always written at pageMarkdownRoute, even for base-path builds.
-/** @public Consumed by openclaw/docs build.mjs through the docs-sync support contract. */
+/** @public Consumed by carapace/docs build.mjs through the docs-sync support contract. */
 export function resolveRedirects({
   redirects,
   pages,

@@ -40,7 +40,7 @@ import { recoverStuckDiagnosticSession } from "../../logging/diagnostic-stuck-se
 import { diagnosticLogger, startDiagnosticHeartbeat } from "../../logging/diagnostic.js";
 import { resetDiagnosticStateForTest } from "../../logging/diagnostic.test-support.js";
 import { AsyncWorkScope } from "../../shared/async-work-scope.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createAgentRuntimeApprovalAuthorityValidator } from "../agent-runtime-identity-token.js";
 import { QuestionManager } from "../question-manager.js";
 import { createQuestionHandlers } from "./question.js";
@@ -189,7 +189,7 @@ async function request(
 it.each(["secrets", "ask_user"] as const)(
   "keeps an accepted one-hour %s question alive through default diagnostic recovery",
   async (tool) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const recovery = vi.fn(recoverStuckDiagnosticSession);
       startDiagnosticHeartbeat({}, { recoverStuckSession: recovery });
       emitTrustedDiagnosticEvent({
@@ -244,7 +244,7 @@ function recover() {
 it.each(["resumed", "replacement"] as const)(
   "keeps the %s owner alive when a heartbeat expires its pending question",
   async (owner) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const heartbeatAtMs = Date.now() + 900_000;
       const recovery = vi.fn(recoverStuckDiagnosticSession);
       const replacement: EmbeddedAgentQueueHandle = {
@@ -300,7 +300,7 @@ it.each(["resumed", "replacement"] as const)(
 );
 
 it("keeps resumed question work alive when attention logging settles the question", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async () => {
+  await withCarapaceTestState({ scenario: "minimal" }, async () => {
     const recoveryAtMs = Date.now() + 900_000;
     const recovery = vi.fn(recoverStuckDiagnosticSession);
     startDiagnosticHeartbeat({}, { recoverStuckSession: recovery, sampleLiveness: () => null });

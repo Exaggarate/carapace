@@ -1,7 +1,7 @@
 import Foundation
 import Testing
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Carapace
+@testable import CarapaceKit
 
 @Suite(.serialized)
 @MainActor
@@ -120,7 +120,7 @@ struct GatewayOperatorFleetTests {
                     caps: [],
                     commands: [],
                     permissions: [:],
-                    clientId: "openclaw-ios",
+                    clientId: "carapace-ios",
                     clientMode: "node",
                     clientDisplayName: "Fleet Test",
                     includeDeviceIdentity: true,

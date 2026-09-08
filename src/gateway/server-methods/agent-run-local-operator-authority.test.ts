@@ -187,7 +187,7 @@ describe("resolveGatewayChatCronCreatorAuthorityAdmission", () => {
   it("does not derive Control UI authority from a claimed client name or session route", () => {
     const client = createClient({ isLocalClient: undefined });
     client.connect.client = {
-      id: "openclaw-control-ui",
+      id: "carapace-control-ui",
       mode: "webchat",
       version: "test",
       platform: "web",

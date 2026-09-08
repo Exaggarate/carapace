@@ -1,5 +1,5 @@
 // OpenRouter failover tests keep vendor error policy at its owning plugin boundary.
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
 import { beforeAll, describe, expect, it } from "vitest";
 import openrouterPlugin from "./index.js";
 

@@ -273,7 +273,7 @@ export function nativeHistoryMessage(seq: number, text = `message ${seq}`) {
   return {
     role: seq % 2 === 0 ? "assistant" : "user",
     content: [{ type: "text", text }],
-    __openclaw: { seq },
+    __carapace: { seq },
   };
 }
 
@@ -362,7 +362,7 @@ export function createTestChatPane(params: {
   client: GatewayBrowserClient;
   sessions: SessionCapability;
 }) {
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("carapace-chat-pane") as unknown as TestChatPane;
   Object.defineProperty(pane, "isConnected", {
     configurable: true,
     value: true,
@@ -502,8 +502,8 @@ class RenderTestChatPane extends ChatPane {
 }
 
 export function createRenderTestChatPane() {
-  if (!customElements.get("openclaw-chat-render-regression")) {
-    customElements.define("openclaw-chat-render-regression", RenderTestChatPane);
+  if (!customElements.get("carapace-chat-render-regression")) {
+    customElements.define("carapace-chat-render-regression", RenderTestChatPane);
   }
-  return document.createElement("openclaw-chat-render-regression") as RenderTestChatPane;
+  return document.createElement("carapace-chat-render-regression") as RenderTestChatPane;
 }

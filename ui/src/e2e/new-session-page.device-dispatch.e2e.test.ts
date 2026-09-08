@@ -1,5 +1,5 @@
 import path from "node:path";
-import { gatewayOriginScope } from "@openclaw/gateway-client/browser";
+import { gatewayOriginScope } from "@carapace/gateway-client/browser";
 import { expect, it } from "vitest";
 import { CLOUD_PROFILE_RETRY_DELAYS_MS } from "../pages/new-session/cloud-profile-discovery.ts";
 import {
@@ -164,7 +164,7 @@ suite.define(() => {
       const context = await suite.browser.newContext({
         locale: "en-US",
         serviceWorkers: "block",
-        ...(process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+        ...(process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
           ? { recordVideo: { dir: path.join(suite.artifactDir, "device-runtime-gating") } }
           : {}),
       });
@@ -315,7 +315,7 @@ suite.define(() => {
       }
       const appUrl = new URL(suite.server.baseUrl);
       const gatewayUrl = `${appUrl.protocol === "https:" ? "wss:" : "ws:"}//${appUrl.host}`;
-      const storageKey = `openclaw.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
+      const storageKey = `carapace.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
       const sessionKey = "agent:main:restored-remote-destination";
       const catalog = {
         environments: [
@@ -417,7 +417,7 @@ suite.define(() => {
       const page = await context.newPage();
       const appUrl = new URL(suite.server.baseUrl);
       const gatewayUrl = `${appUrl.protocol === "https:" ? "wss:" : "ws:"}//${appUrl.host}`;
-      const storageKey = `openclaw.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
+      const storageKey = `carapace.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
       const sessionKey = "agent:main:explicit-local-choice";
       await page.addInitScript(
         ({ key, workspace, where }) => {
@@ -486,7 +486,7 @@ suite.define(() => {
     const page = await context.newPage();
     const appUrl = new URL(suite.server.baseUrl);
     const gatewayUrl = `${appUrl.protocol === "https:" ? "wss:" : "ws:"}//${appUrl.host}`;
-    const storageKey = `openclaw.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
+    const storageKey = `carapace.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
     const sessionKey = "agent:research:local-after-agent-switch";
     await page.addInitScript(
       ({ key, workspace }) => {
@@ -547,7 +547,7 @@ suite.define(() => {
       await expect.poll(() => where.getAttribute("data-device-id")).toBe("paired-runner");
       await captureDeviceRuntimeUiProof(suite, page, "01-main-agent-paired-node-selected.png");
 
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker.getByRole("menuitemradio", { name: "research", exact: true }).click();
       await expect

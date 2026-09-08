@@ -1,10 +1,10 @@
 // Openai provider module implements model/runtime integration.
-import { resolveExpiresAtMsFromEpochSeconds } from "openclaw/plugin-sdk/number-runtime";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+import { resolveExpiresAtMsFromEpochSeconds } from "carapace/plugin-sdk/number-runtime";
+import type { SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 
 const OPENAI_REALTIME_API_BASE_URL = "https://api.openai.com/v1";
@@ -118,7 +118,7 @@ async function createOpenAIRealtimeSecret(
       if (!response.ok) {
         const error = await createProviderHttpError(response, params.errorMessage);
         // Provider details can echo a masked credential while hiding which
-        // OpenClaw auth source won. Keep the status metadata, but give callers
+        // Carapace auth source won. Keep the status metadata, but give callers
         // a bounded remediation for an explicitly configured key.
         if (response.status === 401 && params.authRejectedMessage) {
           error.message = params.authRejectedMessage;

@@ -8,17 +8,17 @@ import { createDeferred } from "../../../test/helpers/promise.js";
 import { openNodeSqliteDatabase } from "../../infra/node-sqlite.js";
 import * as queue from "../../shared/store-writer-queue.js";
 import {
-  closeOpenClawAgentDatabasesAsync,
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceAgentDatabasesAsync,
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { readSessionArchiveContentSync } from "./archive-compression.js";
 import * as diskBudget from "./disk-budget.js";
 import { appendTranscriptMessage, resetSessionEntryLifecycle } from "./session-accessor.js";
@@ -35,7 +35,7 @@ import {
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
 import { resolveMaintenanceConfigFromInput } from "./store-maintenance.js";
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 const work: Promise<unknown>[] = [];
 const releaseGates: Array<() => void> = [];
 const workers: Worker[] = [];
@@ -48,9 +48,9 @@ afterEach(async () => {
   }
   await Promise.allSettled(work.splice(0));
   vi.restoreAllMocks();
-  await closeOpenClawAgentDatabasesAsync();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  await closeCarapaceAgentDatabasesAsync();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   workerChannel.unsubscribe(trackWorker);
   // Archive/reclamation promises above already joined their Workers; the measurement pool is idle.
   await Promise.all(workers.splice(0).map((worker) => worker.terminate()));
@@ -127,7 +127,7 @@ it.each([
 ] as const)(
   "retains $layout ownership for actual $trigger budget work on $victim",
   async ({ layout, trigger, victim }) => {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       prefix: "budget-owner-",
       layout: "state-only",
       scenario: "minimal",
@@ -143,7 +143,7 @@ it.each([
     fs.mkdirSync(path.dirname(storePath), { recursive: true });
     // The exact shared locator has a main schema owner but secondary logical rows.
     if (layout === "shared") {
-      openOpenClawAgentDatabase({ agentId: "main", path: storePath, env: state.env });
+      openCarapaceAgentDatabase({ agentId: "main", path: storePath, env: state.env });
     }
     const sessionKey =
       victim === "cap-entry"
@@ -204,7 +204,7 @@ it.each([
       ),
     ).toEqual({ current_session_id: currentId });
     // Forget both the handle and process validation, exposing registration as well as lease drift.
-    closeOpenClawAgentDatabasesForTest(state.root);
+    closeCarapaceAgentDatabasesForTest(state.root);
 
     let capEntryCalls = 0;
     const deleteEntry = entryEviction.deleteDiskBudgetArchivedSessionEntry;
@@ -221,7 +221,7 @@ it.each([
           ).toEqual({ current_session_id: originalId });
           // The pass has warmed A while pruning. Clear it before the REAL lazy
           // loader so a missing scope handoff cannot hide behind its cached handle.
-          closeOpenClawAgentDatabasesForTest(state.root);
+          closeCarapaceAgentDatabasesForTest(state.root);
         }
         return await deleteEntry(...args);
       },
@@ -344,7 +344,7 @@ it.each([
       ]);
       // The patch began in A, but its late budget kick occurs while ambient is B.
       // Capturing B inside kick alone is insufficient: the patch must forward A.
-      vi.stubEnv("OPENCLAW_STATE_DIR", successor);
+      vi.stubEnv("CARAPACE_STATE_DIR", successor);
       finishUpdater.resolve();
       await expect(patch).resolves.toMatchObject({
         sessionId: currentId,
@@ -355,7 +355,7 @@ it.each([
       let suppliedEnv: NodeJS.ProcessEnv | undefined;
       if (trigger === "relative-kick") {
         const cwd = vi.spyOn(process, "cwd").mockReturnValue(state.root);
-        suppliedEnv = { ...state.env, OPENCLAW_STATE_DIR: "state" };
+        suppliedEnv = { ...state.env, CARAPACE_STATE_DIR: "state" };
         // state-only layout is <root>/state; the physical store locator stays absolute.
         expect(path.join(state.root, "state")).toBe(state.stateDir);
         expect(path.isAbsolute(storePath)).toBe(true);
@@ -390,11 +390,11 @@ it.each([
         throw new Error("Sweep ended without entering real measurement");
       }),
     ]);
-    vi.stubEnv("OPENCLAW_STATE_DIR", successor);
+    vi.stubEnv("CARAPACE_STATE_DIR", successor);
     moveRelativeCwd?.();
     // Patch commit reopened A. Remove its handle and validation before allowing
     // the REAL first measurement to return to enforcement/preview.
-    closeOpenClawAgentDatabasesForTest(state.root);
+    closeCarapaceAgentDatabasesForTest(state.root);
     release.resolve();
     if (trigger === "inspect") {
       await expect(sweep).resolves.toMatchObject({
@@ -446,8 +446,8 @@ it.each([
 
     // Do not open B to inspect it: that would create the failure under test.
     const successorFiles = fs.readdirSync(successor, { recursive: true }).map(String).toSorted();
-    const successorStatePath = resolveOpenClawStateSqlitePath({
-      OPENCLAW_STATE_DIR: trigger === "relative-kick" ? path.join(successor, "state") : successor,
+    const successorStatePath = resolveCarapaceStateSqlitePath({
+      CARAPACE_STATE_DIR: trigger === "relative-kick" ? path.join(successor, "state") : successor,
     });
     const successorLeases = fs.existsSync(successorStatePath)
       ? readRow(successorStatePath, "SELECT count(*) AS count FROM agent_database_leases")
@@ -469,12 +469,12 @@ it.each([
 );
 
 it("skips an originating incognito budget kick without disk or background work", async () => {
-  const state = await createOpenClawTestState({ layout: "state-only", scenario: "empty" });
+  const state = await createCarapaceTestState({ layout: "state-only", scenario: "empty" });
   states.push(state);
   const successor = state.path("successor-state");
   fs.mkdirSync(successor);
-  const sentinel = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main", env: state.env });
-  const memory = openOpenClawAgentDatabase({ agentId: "main", env: state.env, path: sentinel });
+  const sentinel = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main", env: state.env });
+  const memory = openCarapaceAgentDatabase({ agentId: "main", env: state.env, path: sentinel });
   const queueSpy = vi.spyOn(queue, "runQueuedStoreWrite");
   const measureSpy = vi.spyOn(diskBudget, "measureSessionPhysicalDiskUsage");
   kickSessionHistoryDiskBudgetMaintenance({
@@ -487,7 +487,7 @@ it("skips an originating incognito budget kick without disk or background work",
       highWaterBytes: 1,
     }),
   });
-  vi.stubEnv("OPENCLAW_STATE_DIR", successor);
+  vi.stubEnv("CARAPACE_STATE_DIR", successor);
   await new Promise<void>((resolve) => {
     setImmediate(resolve);
   });

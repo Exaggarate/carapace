@@ -400,9 +400,9 @@ export abstract class ChatPaneLifecycle extends ChatPaneSessionCreation {
       window.removeEventListener(BROWSER_ANNOTATION_EVENT, handleBrowserAnnotation),
     );
     const panelToggleEvents = [
-      [TERMINAL_PANEL_TOGGLE_EVENT, "terminal", "openclaw-terminal-panel"],
-      [BROWSER_PANEL_TOGGLE_EVENT, "browser", "openclaw-browser-panel"],
-      [DESKTOP_PANEL_TOGGLE_EVENT, "desktop", "openclaw-desktop-panel"],
+      [TERMINAL_PANEL_TOGGLE_EVENT, "terminal", "carapace-terminal-panel"],
+      [BROWSER_PANEL_TOGGLE_EVENT, "browser", "carapace-browser-panel"],
+      [DESKTOP_PANEL_TOGGLE_EVENT, "desktop", "carapace-desktop-panel"],
     ] as const;
     const panelToggleCleanups = panelToggleEvents.map(([eventName, slot, tagName]) => {
       const listener = (event: Event) => {

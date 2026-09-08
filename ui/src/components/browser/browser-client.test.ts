@@ -31,7 +31,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
       }),
     ).resolves.toBe("data:image/png;base64,aW1hZ2UtYnl0ZXM=");
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      "/__openclaw__/assistant-media?source=%2Ftmp%2Fbrowser+shot.png",
+      "/__carapace__/assistant-media?source=%2Ftmp%2Fbrowser+shot.png",
     );
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -45,7 +45,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
 
     await expect(
       fetchBrowserScreenshotDataUrl({
-        resourceBasePath: "/openclaw",
+        resourceBasePath: "/carapace",
         authToken: null,
         path: "/tmp/missing.png",
       }),
@@ -64,7 +64,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
 
     await expect(
       fetchBrowserScreenshotDataUrl({
-        resourceBasePath: "/openclaw",
+        resourceBasePath: "/carapace",
         authToken: null,
         path: "/tmp/missing.png",
       }),
@@ -86,7 +86,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
 
     await expect(
       fetchBrowserScreenshotDataUrl({
-        resourceBasePath: "/openclaw",
+        resourceBasePath: "/carapace",
         authToken: null,
         path: "/tmp/missing.png",
       }),
@@ -117,12 +117,12 @@ describe("fetchBrowserScreenshotDataUrl", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const request = fetchBrowserScreenshotDataUrl({
-      resourceBasePath: "/openclaw",
+      resourceBasePath: "/carapace",
       authToken: null,
       path: "/tmp/browser shot.png",
     });
     const [url, init] = fetchMock.mock.calls[0] ?? [];
-    expect(url).toBe("/openclaw/__openclaw__/assistant-media?source=%2Ftmp%2Fbrowser+shot.png");
+    expect(url).toBe("/carapace/__carapace__/assistant-media?source=%2Ftmp%2Fbrowser+shot.png");
     expect(init?.signal?.aborted).toBe(false);
 
     const outcome = expect(request).rejects.toMatchObject({ name: "TimeoutError" });
@@ -160,7 +160,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const request = fetchBrowserScreenshotDataUrl({
-      resourceBasePath: "/openclaw",
+      resourceBasePath: "/carapace",
       authToken: null,
       path: "/tmp/browser shot.png",
     });
@@ -196,7 +196,7 @@ describe("fetchBrowserScreenshotDataUrl", () => {
 
     await expect(
       fetchBrowserScreenshotDataUrl({
-        resourceBasePath: "/openclaw",
+        resourceBasePath: "/carapace",
         authToken: null,
         path: "/tmp/missing.png",
       }),

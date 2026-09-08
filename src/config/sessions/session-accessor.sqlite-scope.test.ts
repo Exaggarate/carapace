@@ -3,11 +3,11 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs/promises";
 import { performance } from "node:perf_hooks";
 import { isMainThread, threadId, Worker } from "node:worker_threads";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, expect, test, vi } from "vitest";
 import * as logging from "../../logging/logger.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { SqliteSessionReclamationDiagnostics } from "./session-accessor.sqlite-contract.js";
 import { runExclusiveSqliteSessionWrite } from "./session-accessor.sqlite-scope.js";
 import { drainSessionStoreWriterQueuesForTest } from "./store-writer-state.js";
@@ -15,8 +15,8 @@ import { drainSessionStoreWriterQueuesForTest } from "./store-writer-state.js";
 afterEach(() => vi.restoreAllMocks());
 
 async function readFailedWriterLog(failure: unknown) {
-  return await withOpenClawTestState(
-    { scenario: "minimal", env: { OPENCLAW_TEST_FILE_LOG: "1" } },
+  return await withCarapaceTestState(
+    { scenario: "minimal", env: { CARAPACE_TEST_FILE_LOG: "1" } },
     async (state) => {
       const logPath = state.path("sqlite-write.log");
       logging.setLoggerOverride({ level: "warn", file: logPath });
@@ -97,7 +97,7 @@ test("failed writer error summaries are bounded without splitting a surrogate pa
 test.each([false, true])(
   "slow writer diagnostics separate waiting and execution without changing failure=%s",
   async (fail) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       let clock = 0;
       const wallStart = Date.now();
       vi.spyOn(performance, "now").mockImplementation(() => clock);
@@ -211,7 +211,7 @@ test.each([false, true])(
 );
 
 test("a queued writer rejected by cleanup never runs after release", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const scope = { agentId: "main", env: state.env };
     const release = createDeferredCore();
     const first = runExclusiveSqliteSessionWrite(scope, async () => await release.promise);

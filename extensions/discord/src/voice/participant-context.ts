@@ -1,5 +1,5 @@
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { APIVoiceState, Client } from "../internal/discord.js";
 import type { GatewayPlugin } from "../internal/gateway.js";
 import type { DiscordLivePolicyReader } from "../monitor/live-policy.js";
@@ -298,7 +298,7 @@ export async function resolveDiscordVoiceIngressContextWithParticipants(params: 
   entry: VoiceSessionEntry;
   userId: string;
   client: Client;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   admissionAllowFrom?: string[];
   botUserId?: string;

@@ -5,7 +5,7 @@
 import type {
   AgentMessage,
   EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import type { CodexSystemPromptReport } from "./attempt-context.js";
 import type { CodexAttemptTimeout } from "./attempt-deadlines.js";
 import { attemptTerminal, type EmbeddedRunAttemptResult } from "./attempt-terminal.js";
@@ -26,7 +26,7 @@ export function buildCodexAppServerPromptTimeoutOutcome(
     message:
       timeout.kind === "execution"
         ? "Codex reached the configured execution time limit. Some work may already have been performed; verify the current state before continuing."
-        : "Codex finished its turn, but OpenClaw could not finish processing the result. Some work may already have been performed; verify the current state before continuing.",
+        : "Codex finished its turn, but Carapace could not finish processing the result. Some work may already have been performed; verify the current state before continuing.",
     replayInvalid: true,
     livenessState: "abandoned",
   };

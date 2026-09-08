@@ -1,9 +1,9 @@
 import { type EventTemplate, finalizeEvent, Relay, type VerifiedEvent } from "nostr-tools";
-import { readProviderJsonObjectResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderJsonObjectResponse } from "carapace/plugin-sdk/provider-http";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedOrigin,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/ssrf-runtime";
 
 const AUTH_CHALLENGE_TIMEOUT_MS = 20_000;
 const AUTH_CHALLENGE_POLL_MS = 25;

@@ -8,13 +8,13 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { registerInternalHook, unregisterInternalHook } from "../../hooks/internal-hooks.js";
 import { trackAsyncWork } from "../../shared/async-work-scope.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { dispatchGatewayMethodInProcess } from "../server-plugins.js";
 import { isSessionPermissionChangePending } from "../session-permission-change.js";
 import {
@@ -29,7 +29,7 @@ import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js
 
 afterEach(() => {
   flushPendingSessionsChangedEvents();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   vi.restoreAllMocks();
 });
 
@@ -39,7 +39,7 @@ function client(profileId?: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -61,7 +61,7 @@ function client(profileId?: string): GatewayClient {
   };
 }
 
-function context(cfg: OpenClawConfig) {
+function context(cfg: CarapaceConfig) {
   return {
     trackExecution: trackAsyncWork,
     getRuntimeConfig: () => cfg,
@@ -72,7 +72,7 @@ function context(cfg: OpenClawConfig) {
 }
 
 async function invoke(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient;
   request: Record<string, unknown>;
 }) {
@@ -100,7 +100,7 @@ describe("sessions.patch", () => {
   it.each(["thinking", "context", "both"] as const)(
     "persists %s preference clears with an agent model rollback marker",
     async (field) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const sessionKey = "agent:main:rollback-preferences";
         const scope = { agentId: "main", env: state.env, sessionKey };
         await upsertSessionEntryCore(scope, {
@@ -151,7 +151,7 @@ describe("sessions.patch", () => {
   );
 
   it("publishes saved settings when applying permissions to the active run fails", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:failed-permission-update";
       const sessionId = "failed-permission-update";
       await upsertSessionEntryCore(
@@ -205,10 +205,10 @@ describe("sessions.patch", () => {
   it.each([false, true])(
     "serializes permission changes through live-runtime acknowledgement (catalog preparation=%s)",
     async (prepareCatalog) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const sessionKey = "agent:main:permission-update";
         const sessionId = "session-permission-update";
-        const cfg: OpenClawConfig = {};
+        const cfg: CarapaceConfig = {};
         const requestContext = context(cfg);
         const requestClient = client();
         requestClient.connect.scopes = ["operator.admin"];
@@ -304,7 +304,7 @@ describe("sessions.patch", () => {
   );
 
   it("refuses unsupported live permission changes before saving a misleading mode", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:unsupported-permissions";
       const sessionId = "unsupported-permissions";
       await upsertSessionEntryCore(
@@ -337,11 +337,11 @@ describe("sessions.patch", () => {
   });
 
   it("keeps a newly created session visible to its identified non-admin creator", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const profileId = ensureProfileForEmail("patch-creator@example.test").id;
       const sessionKey = "agent:main:patch-created";
       const requestClient = client(profileId);
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "member",
@@ -400,7 +400,7 @@ describe("sessions.patch", () => {
 
 describe("sessions.assignOwner", () => {
   it("records the trusted in-process agent tool caller as the assigning agent", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:handoff";
       await upsertSessionEntryCore(
         { agentId: "main", env: state.env, sessionKey },
@@ -418,7 +418,7 @@ describe("sessions.assignOwner", () => {
             { id: "research", identity: { name: "Research" } },
           ],
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const requestContext = context(cfg);
       await expect(
         dispatchGatewayMethodInProcess(
@@ -453,7 +453,7 @@ describe("sessions.assignOwner", () => {
   });
 
   it("lets a write-scoped viewer assign a shared session without changing sharing authority", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:handoff";
       await upsertSessionEntryCore(
         { agentId: "main", env: state.env, sessionKey },
@@ -471,7 +471,7 @@ describe("sessions.assignOwner", () => {
             { id: "research", identity: { name: "Research" } },
           ],
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       vi.spyOn(Date, "now").mockReturnValue(4242);
 
       const result = await invoke({
@@ -538,7 +538,7 @@ describe("sessions.assignOwner", () => {
   });
 
   it("rejects hidden viewers, unidentified callers, and unknown owner targets", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "agent:main:private-handoff";
       await upsertSessionEntryCore(
         { agentId: "main", env: state.env, sessionKey },
@@ -551,7 +551,7 @@ describe("sessions.assignOwner", () => {
       );
       const cfg = {
         agents: { list: [{ id: "main", default: true }, { id: "research" }] },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       const request = { key: sessionKey, owner: { type: "agent", id: "research" } };
       const hidden = await invoke({ cfg, client: client("profile-viewer"), request });
       expect(hidden.responses[0]?.[2]).toMatchObject({

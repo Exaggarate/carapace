@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveThreadBindingSpawnPolicy } from "openclaw/plugin-sdk/conversation-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveThreadBindingSpawnPolicy } from "carapace/plugin-sdk/conversation-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
 import { resolveTelegramAccount } from "./accounts.js";
 import { inspectTelegramConversationRoute } from "./conversation-route.js";
 import { resolveTelegramScopedGroupConfig } from "./group-config-helpers.js";
@@ -38,7 +38,7 @@ function resolveInspectionThread(params: {
 }
 
 export function inspectTelegramConversationRouteOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   conversation: {
     kind: "direct" | "group" | "channel";

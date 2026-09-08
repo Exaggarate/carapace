@@ -2,7 +2,7 @@ import CoreLocation
 import Foundation
 import Testing
 import XCTest
-@testable import OpenClaw
+@testable import Carapace
 
 /// Exercise on a fresh, task-owned iOS simulator with synthetic delegate inputs only.
 @Suite(.serialized)

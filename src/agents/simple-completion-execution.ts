@@ -2,15 +2,15 @@
 import {
   reasoningTagTextPolicy,
   supportsOpenAIReasoningEffort,
-} from "@openclaw/ai/internal/openai";
-import { defaultApiRegistry } from "@openclaw/ai/internal/runtime";
-import { prepareModelForSimpleCompletion } from "@openclaw/ai/transports";
+} from "@carapace/ai/internal/openai";
+import { defaultApiRegistry } from "@carapace/ai/internal/runtime";
+import { prepareModelForSimpleCompletion } from "@carapace/ai/transports";
 import {
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
-} from "@openclaw/llm-core";
+} from "@carapace/llm-core";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   bindModelLlmRuntime,
   getModelCompletionTransport,
@@ -39,7 +39,7 @@ export async function completeWithPreparedSimpleCompletionModel(params: {
   model: Model;
   auth: ResolvedProviderAuth;
   context: Parameters<typeof completeSimple>[1];
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   options?: SimpleCompletionModelOptions;
 }): Promise<AssistantMessage> {
   const runtime = getModelLlmRuntime(params.model);

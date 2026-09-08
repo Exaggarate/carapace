@@ -1,8 +1,8 @@
-# @openclaw/openshell-sandbox
+# @carapace/openshell-sandbox
 
-Official NVIDIA OpenShell sandbox backend for OpenClaw.
+Official NVIDIA OpenShell sandbox backend for Carapace.
 
-This plugin lets OpenClaw use OpenShell-managed local or remote sandboxes with
+This plugin lets Carapace use OpenShell-managed local or remote sandboxes with
 SSH command execution. Choose `mirror` mode for a synchronized local workspace
 or `remote` mode for a remote-canonical workspace.
 
@@ -12,7 +12,7 @@ configured remote workspace, which defaults to `/sandbox`.
 
 Configuring an OpenShell workspace requires OpenShell `v0.0.88` or newer. The
 plugin supports OpenShell control-plane workspaces through
-`plugins.entries.openshell.config.workspace`; this is separate from OpenClaw's
+`plugins.entries.openshell.config.workspace`; this is separate from Carapace's
 local/remote filesystem workspace mode. The setting applies to the whole plugin
 instance, not individual agents or sessions. When unset, the plugin preserves
 the OpenShell CLI's ambient `OPENSHELL_WORKSPACE` selection, or its `default`
@@ -21,7 +21,7 @@ fallback when no ambient selection exists.
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/openshell-sandbox
+carapace plugins install @carapace/openshell-sandbox
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -29,7 +29,7 @@ Restart the Gateway after installing or updating the plugin.
 ## Configure
 
 Install and configure the OpenShell CLI before enabling the backend. As the same
-operating system user that runs the OpenClaw Gateway, verify:
+operating system user that runs the Carapace Gateway, verify:
 
 ```bash
 openshell --version
@@ -38,7 +38,7 @@ openshell sandbox list
 ```
 
 Set `agents.defaults.sandbox.backend` to `"openshell"`, enable
-`plugins.entries.openshell`, and restart the OpenClaw Gateway. OpenShell
+`plugins.entries.openshell`, and restart the Carapace Gateway. OpenShell
 settings belong under `plugins.entries.openshell.config`.
 
 The optional `policy` setting must be the path to a readable OpenShell policy
@@ -47,10 +47,10 @@ path to avoid resolving it relative to an agent workspace.
 
 Use the OpenShell docs for credentials, workspace mirroring, runtime selection, and troubleshooting:
 
-- https://docs.openclaw.ai/gateway/openshell
+- ../../docs/gateway/openshell.md
 
 ## Package
 
 - Plugin id: `openshell`
-- Package: `@openclaw/openshell-sandbox`
-- Minimum OpenClaw host: `2026.5.12-beta.1`
+- Package: `@carapace/openshell-sandbox`
+- Minimum Carapace host: `2026.5.12-beta.1`

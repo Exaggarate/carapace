@@ -138,7 +138,7 @@ async function writeCompletionCache(params: {
     const script = getCompletionScript(shell, params.program);
     await publishOutputFileAtomically({
       filePath: resolveCompletionCachePath(shell, params.binName),
-      tempPrefix: ".openclaw-completion-cache",
+      tempPrefix: ".carapace-completion-cache",
       writeTemp: async (tempPath) => {
         await fs.writeFile(tempPath, script, { encoding: "utf-8", flag: "wx" });
       },
@@ -174,7 +174,7 @@ export function registerCompletionCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/completion", "docs.openclaw.ai/cli/completion")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/completion", "github.com/Exaggarate/carapace")}\n`,
     )
     .addOption(
       new Option(
@@ -185,7 +185,7 @@ export function registerCompletionCli(program: Command) {
     .option("-i, --install", "Install completion script to shell profile")
     .option(
       "--write-state",
-      "Write completion scripts to $OPENCLAW_STATE_DIR/completions (no stdout)",
+      "Write completion scripts to $CARAPACE_STATE_DIR/completions (no stdout)",
     )
     .option("-y, --yes", "Skip confirmation (non-interactive)", false)
     .action(async (options) => {

@@ -14,7 +14,7 @@ import {
 import { collectSecurityWarnings } from "../commands/doctor-security.js";
 import { noteSessionTranscriptHealth } from "../commands/doctor-session-transcripts.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ExecApprovalsMigrationRequiredError } from "../infra/exec-approvals-migration-gate.js";
 import {
   readExecApprovalsConfigRow,
@@ -38,21 +38,21 @@ import {
 } from "../infra/state-migrations.workspace-setup.js";
 import { buildUpdateDoctorEnv } from "../infra/update-runner-doctor.js";
 import {
-  assertNoOpenClawAgentDatabaseLeases,
-  claimOpenClawAgentDatabaseLease,
-  releaseOpenClawAgentDatabaseLease,
-} from "../state/openclaw-agent-db-lease.js";
-import { unregisterOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
+  assertNoCarapaceAgentDatabaseLeases,
+  claimCarapaceAgentDatabaseLease,
+  releaseCarapaceAgentDatabaseLease,
+} from "../state/carapace-agent-db-lease.js";
+import { unregisterCarapaceAgentDatabase } from "../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-} from "../state/openclaw-agent-db.js";
-import { withLegacySessionParticipantsSchema } from "../state/openclaw-agent-participants-migration.js";
-import { sessionParticipantsSchemaSql } from "../state/openclaw-agent-session-participants-schema.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+} from "../state/carapace-agent-db.js";
+import { withLegacySessionParticipantsSchema } from "../state/carapace-agent-participants-migration.js";
+import { sessionParticipantsSchemaSql } from "../state/carapace-agent-session-participants-schema.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { DoctorHealthFlowContext } from "./doctor-health-contributions.js";
 import { runDoctorHealthFlow } from "./doctor-health.js";
 
@@ -136,18 +136,18 @@ describe("runDoctorHealthFlow", () => {
       const windows = kind.startsWith("windows");
       mocks.emulateNativeInstall = kind !== "runtime-only";
       mocks.servicePlatform = windows ? "win32" : undefined;
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const cfg: OpenClawConfig = {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const cfg: CarapaceConfig = {
           agents: { ownership: "explicit", entries: { main: { workspace: state.workspaceDir } } },
         };
         await state.writeConfig(cfg);
         fs.mkdirSync(state.workspaceDir, { recursive: true });
-        const sourcePath = path.join(state.workspaceDir, "openclaw-workspace-state.json");
+        const sourcePath = path.join(state.workspaceDir, "carapace-workspace-state.json");
         const completedAt = "2026-07-15T00:00:00.000Z";
         fs.writeFileSync(sourcePath, JSON.stringify({ version: 1, setupCompletedAt: completedAt }));
         const sourceBefore = fs.readFileSync(sourcePath);
         const configBefore = fs.readFileSync(state.configPath);
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
         const coordinatorPath = resolveStateDatabaseCoordinatorPath({
           databasePath,
           runtimeDirectory: resolveStateLifecycleRuntimeDirectory(),
@@ -160,11 +160,11 @@ describe("runDoctorHealthFlow", () => {
         const foreignRoot = state.path("foreign-install");
         if (foreign) {
           fs.mkdirSync(foreignRoot);
-          fs.writeFileSync(path.join(foreignRoot, "package.json"), '{"name":"openclaw"}');
+          fs.writeFileSync(path.join(foreignRoot, "package.json"), '{"name":"carapace"}');
         }
         const entrypoint = kind.startsWith("unresolved")
           ? "operator-wrapper"
-          : path.join(foreign ? foreignRoot : process.cwd(), "openclaw.mjs");
+          : path.join(foreign ? foreignRoot : process.cwd(), "carapace.mjs");
         const stop = vi.fn();
         const restart = vi.fn();
         mocks.packageRoot.mockReturnValue(process.cwd());
@@ -179,8 +179,8 @@ describe("runDoctorHealthFlow", () => {
               : {
                   programArguments: [process.execPath, entrypoint, "gateway"],
                   environment: {
-                    OPENCLAW_STATE_DIR: foreign ? state.path("foreign-state") : state.stateDir,
-                    OPENCLAW_CONFIG_PATH: foreign ? state.path("foreign.json") : state.configPath,
+                    CARAPACE_STATE_DIR: foreign ? state.path("foreign-state") : state.stateDir,
+                    CARAPACE_CONFIG_PATH: foreign ? state.path("foreign.json") : state.configPath,
                   },
                 };
           },
@@ -266,7 +266,7 @@ describe("runDoctorHealthFlow", () => {
         } else {
           await expect(run).rejects.toThrow("Doctor could not enter maintenance");
           await expect(run).rejects.toThrow("gateway status --deep");
-          await expect(run).rejects.toThrow("openclaw doctor --fix");
+          await expect(run).rejects.toThrow("carapace doctor --fix");
           await expect(run).rejects.not.toThrow(/--no-restart|before the update/);
           expect(mocks.config).not.toHaveBeenCalled();
           expect(mocks.runContributions).not.toHaveBeenCalled();
@@ -316,11 +316,11 @@ describe("runDoctorHealthFlow", () => {
   ] as const)(
     "coordinates the matching managed writer through multi-agent repair: %s",
     async (outcome) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const clean = outcome.startsWith("clean-") || outcome.startsWith("update-");
         const inspectionOnly = outcome === "clean-inspect" || outcome === "clean-force-inspect";
         const force = outcome.startsWith("clean-force-");
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             ownership: "explicit",
             entries: {
@@ -359,7 +359,7 @@ describe("runDoctorHealthFlow", () => {
           fs.writeFileSync(approvalsPath, approvalsBefore);
           if (outcome === "approvals-conflicting") {
             writeExecApprovalsConfigRow({
-              db: openOpenClawStateDatabase({ env: state.env }).db,
+              db: openCarapaceStateDatabase({ env: state.env }).db,
               file: canonicalApprovals,
             });
           }
@@ -367,12 +367,12 @@ describe("runDoctorHealthFlow", () => {
         if (outcome === "workspace-cleanup-failed") {
           fs.mkdirSync(state.workspaceDir, { recursive: true });
           fs.writeFileSync(
-            path.join(state.workspaceDir, "openclaw-workspace-state.json"),
+            path.join(state.workspaceDir, "carapace-workspace-state.json"),
             JSON.stringify({ version: 1, setupCompletedAt: "2026-07-15T00:00:00.000Z" }),
           );
         }
-        const initial = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
-        const secondary = openOpenClawAgentDatabase({ agentId: "research", env: state.env });
+        const initial = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
+        const secondary = openCarapaceAgentDatabase({ agentId: "research", env: state.env });
         if (!clean) {
           secondary.db.exec(
             "DROP TABLE session_participants; PRAGMA user_version = 17; UPDATE schema_meta SET schema_version = 17;",
@@ -381,8 +381,8 @@ describe("runDoctorHealthFlow", () => {
             "DROP TABLE session_participants; PRAGMA user_version = 17; UPDATE schema_meta SET schema_version = 17;",
           );
         }
-        closeOpenClawAgentDatabasesForTest();
-        const leaseId = claimOpenClawAgentDatabaseLease({
+        closeCarapaceAgentDatabasesForTest();
+        const leaseId = claimCarapaceAgentDatabaseLease({
           agentId: "main",
           path: initial.path,
           env: state.env,
@@ -393,34 +393,34 @@ describe("runDoctorHealthFlow", () => {
         const packageRoot = process.cwd();
         mocks.packageRoot.mockReturnValue(packageRoot);
         const command = {
-          programArguments: [process.execPath, path.join(packageRoot, "openclaw.mjs"), "gateway"],
+          programArguments: [process.execPath, path.join(packageRoot, "carapace.mjs"), "gateway"],
           environment: {
-            OPENCLAW_STATE_DIR: state.stateDir,
-            OPENCLAW_CONFIG_PATH: state.configPath,
+            CARAPACE_STATE_DIR: state.stateDir,
+            CARAPACE_CONFIG_PATH: state.configPath,
           },
         };
         const stop = vi.fn(async () => {
           events.push("stop");
           running = false;
-          releaseOpenClawAgentDatabaseLease(leaseId, { env: state.env });
+          releaseCarapaceAgentDatabaseLease(leaseId, { env: state.env });
         });
         const restart = vi.fn(async () => {
           events.push("restart");
           if (outcome === "ready") {
             expect(() =>
-              assertNoOpenClawAgentDatabaseLeases("main", { env: state.env }),
+              assertNoCarapaceAgentDatabaseLeases("main", { env: state.env }),
             ).not.toThrow();
             expect(() =>
-              assertNoOpenClawAgentDatabaseLeases("research", { env: state.env }),
+              assertNoCarapaceAgentDatabaseLeases("research", { env: state.env }),
             ).not.toThrow();
           }
-          const reopened = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+          const reopened = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
           expect(reopened.db.prepare("PRAGMA user_version").get()?.user_version).toBe(
-            OPENCLAW_AGENT_SCHEMA_VERSION,
+            CARAPACE_AGENT_SCHEMA_VERSION,
           );
-          const research = openOpenClawAgentDatabase({ agentId: "research", env: state.env });
+          const research = openCarapaceAgentDatabase({ agentId: "research", env: state.env });
           expect(research.db.prepare("PRAGMA user_version").get()?.user_version).toBe(
-            OPENCLAW_AGENT_SCHEMA_VERSION,
+            CARAPACE_AGENT_SCHEMA_VERSION,
           );
           running = true;
           return { outcome: "completed" as const };
@@ -466,8 +466,8 @@ describe("runDoctorHealthFlow", () => {
           }
           if (outcome === "ready" || outcome === "store-close-failed") {
             // Later diagnostics reopen runtime handles after the migration closes its own.
-            const reopened = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
-            openOpenClawAgentDatabase({ agentId: "research", env: state.env });
+            const reopened = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
+            openCarapaceAgentDatabase({ agentId: "research", env: state.env });
             if (outcome === "store-close-failed") {
               vi.spyOn(reopened.db, "close").mockImplementationOnce(() => {
                 throw new Error("synthetic database close failure");
@@ -498,7 +498,7 @@ describe("runDoctorHealthFlow", () => {
         const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
         const expectCoordinatorReleased = () => {
           const coordinatorPath = resolveStateDatabaseCoordinatorPath({
-            databasePath: resolveOpenClawStateSqlitePath(state.env),
+            databasePath: resolveCarapaceStateSqlitePath(state.env),
             runtimeDirectory: resolveStateLifecycleRuntimeDirectory(),
             uid: process.getuid?.(),
           });
@@ -516,7 +516,7 @@ describe("runDoctorHealthFlow", () => {
           const modernUpdate = outcome.startsWith("update-") && outcome !== "update-legacy";
           if (modernUpdate) {
             if (!running) {
-              releaseOpenClawAgentDatabaseLease(leaseId, { env: state.env });
+              releaseCarapaceAgentDatabaseLease(leaseId, { env: state.env });
             }
             const parentRestarts = outcome === "update-parent-stopped";
             const prepared = await maybeStopManagedServiceBeforeMutableUpdate({
@@ -539,7 +539,7 @@ describe("runDoctorHealthFlow", () => {
               vi.stubEnv(key, value);
             }
           } else if (outcome === "update-legacy") {
-            vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", "1");
+            vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", "1");
           }
           mocks.restartedHealthy = outcome !== "restart-unhealthy";
           const run = runDoctorHealthFlow(runtime, {
@@ -557,9 +557,9 @@ describe("runDoctorHealthFlow", () => {
             return;
           }
           if (outcome === "ancestor-blocked") {
-            await expect(run).rejects.toThrow("openclaw doctor --fix");
+            await expect(run).rejects.toThrow("carapace doctor --fix");
             await expect(run).rejects.toThrow("from a shell outside the gateway service");
-            await expect(run).rejects.not.toThrow("openclaw update");
+            await expect(run).rejects.not.toThrow("carapace update");
             expect(events).toEqual([]);
             expect(stop).not.toHaveBeenCalled();
             expect(restart).not.toHaveBeenCalled();
@@ -626,7 +626,7 @@ describe("runDoctorHealthFlow", () => {
             }
             if (outcome === "approvals-conflicting") {
               expect(
-                readExecApprovalsConfigRow(openOpenClawStateDatabase({ env: state.env }).db)
+                readExecApprovalsConfigRow(openCarapaceStateDatabase({ env: state.env }).db)
                   ?.raw_json,
               ).toBe(serializeExecApprovals(canonicalApprovals));
             }
@@ -637,7 +637,7 @@ describe("runDoctorHealthFlow", () => {
             expect(mocks.outro).not.toHaveBeenCalledWith("Doctor complete.");
           }
         } finally {
-          releaseOpenClawAgentDatabaseLease(leaseId, { env: state.env });
+          releaseCarapaceAgentDatabaseLease(leaseId, { env: state.env });
         }
       });
     },
@@ -656,8 +656,8 @@ describe("runDoctorHealthFlow", () => {
       exit: vi.fn(),
     };
     vi.stubEnv(
-      "OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
-      "/tmp/openclaw-update-doctor-result.json",
+      "CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
+      "/tmp/carapace-update-doctor-result.json",
     );
 
     try {
@@ -671,7 +671,7 @@ describe("runDoctorHealthFlow", () => {
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(runtime.exit).not.toHaveBeenCalledWith(86);
     expect(mocks.writeUpdatePostInstallDoctorResult).toHaveBeenCalledWith({
-      resultPath: "/tmp/openclaw-update-doctor-result.json",
+      resultPath: "/tmp/carapace-update-doctor-result.json",
       result: { status: "error", configHash: "unchanged" },
     });
   });
@@ -679,23 +679,23 @@ describe("runDoctorHealthFlow", () => {
   it.each([{ repair: true }, { yes: true }])(
     "refuses blocked required migration for %j, then completes after the writer releases",
     async (options) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const initial = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const initial = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
         initial.db.exec(
           "DROP TABLE session_participants; PRAGMA user_version = 17; UPDATE schema_meta SET schema_version = 17;",
         );
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         const before = fs.readFileSync(initial.path);
-        const leaseId = claimOpenClawAgentDatabaseLease({
+        const leaseId = claimCarapaceAgentDatabaseLease({
           agentId: "main",
           path: initial.path,
           env: state.env,
         });
-        openOpenClawStateDatabase({ env: state.env }).db.exec(
+        openCarapaceStateDatabase({ env: state.env }).db.exec(
           "INSERT INTO gateway_boot_lifecycle (boot_id, pid, started_at_ms, completed_at_ms, outcome, startup_reason) VALUES ('maintenance', 1, 1, 2, 'startup_failed', 'gateway.maintenance_required')",
         );
         const maintenanceOutcome = () =>
-          openOpenClawStateDatabase({ env: state.env })
+          openCarapaceStateDatabase({ env: state.env })
             .db.prepare("SELECT outcome FROM gateway_boot_lifecycle WHERE boot_id = 'maintenance'")
             .get();
         const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
@@ -712,7 +712,7 @@ describe("runDoctorHealthFlow", () => {
           expect(mocks.outro).toHaveBeenCalledWith("Doctor complete.");
           mocks.outro.mockClear();
           vi.stubEnv(
-            "OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
+            "CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH",
             state.path("advisory.json"),
           );
           await runCommandWithRuntime(runtime, () =>
@@ -732,24 +732,24 @@ describe("runDoctorHealthFlow", () => {
           expect(mocks.outro).not.toHaveBeenCalledWith("Doctor complete.");
           expect(fs.readFileSync(initial.path)).toEqual(before);
           expect(
-            openOpenClawStateDatabase({ env: state.env })
+            openCarapaceStateDatabase({ env: state.env })
               .db.prepare("SELECT lease_id FROM agent_database_leases WHERE lease_id = ?")
               .get(leaseId),
           ).toEqual({ lease_id: leaseId });
         } finally {
           vi.unstubAllEnvs();
-          releaseOpenClawAgentDatabaseLease(leaseId, { env: state.env });
+          releaseCarapaceAgentDatabaseLease(leaseId, { env: state.env });
         }
         runtime.exit.mockClear();
         await runDoctorHealthFlow(runtime, { ...options, nonInteractive: true });
         expect(mocks.outro).toHaveBeenCalledWith("Doctor complete.");
-        const reopened = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+        const reopened = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
         expect(reopened.db.prepare("PRAGMA user_version").get()?.user_version).toBe(
-          OPENCLAW_AGENT_SCHEMA_VERSION,
+          CARAPACE_AGENT_SCHEMA_VERSION,
         );
         expect(
           reopened.db.prepare("SELECT schema_version FROM schema_meta").get()?.schema_version,
-        ).toBe(OPENCLAW_AGENT_SCHEMA_VERSION);
+        ).toBe(CARAPACE_AGENT_SCHEMA_VERSION);
         expect(runtime.exit).not.toHaveBeenCalled();
         expect(maintenanceOutcome()).toEqual({ outcome: "startup_failure_repaired" });
       });
@@ -759,10 +759,10 @@ describe("runDoctorHealthFlow", () => {
   it.each(["default", "configured"])(
     "refuses failed migration of an unregistered %s store",
     async (layout) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const storePath =
           layout === "configured" ? state.path("custom", "sessions.json") : undefined;
-        const cfg: OpenClawConfig = storePath ? { session: { store: storePath } } : {};
+        const cfg: CarapaceConfig = storePath ? { session: { store: storePath } } : {};
         mocks.config.mockReturnValue(cfg);
         const configuredPath = storePath
           ? resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -771,7 +771,7 @@ describe("runDoctorHealthFlow", () => {
               env: state.env,
             }).path
           : undefined;
-        const initial = openOpenClawAgentDatabase({
+        const initial = openCarapaceAgentDatabase({
           agentId: "main",
           env: state.env,
           ...(configuredPath ? { path: configuredPath } : {}),
@@ -783,8 +783,8 @@ describe("runDoctorHealthFlow", () => {
         initial.db.exec(
           "CREATE INDEX unknown_participant_dependency ON session_participants(actor_id);",
         );
-        closeOpenClawAgentDatabasesForTest();
-        unregisterOpenClawAgentDatabase({ agentId: "main", path: initial.path, env: state.env });
+        closeCarapaceAgentDatabasesForTest();
+        unregisterCarapaceAgentDatabase({ agentId: "main", path: initial.path, env: state.env });
         const before = fs.readFileSync(initial.path);
         mocks.runContributions.mockImplementation(async (ctx) => {
           const result = await migrateLegacyMediaPersistence({
@@ -808,7 +808,7 @@ describe("runDoctorHealthFlow", () => {
         expect(mocks.outro).not.toHaveBeenCalledWith("Doctor complete.");
         expect(fs.readFileSync(initial.path)).toEqual(before);
         expect(
-          openOpenClawStateDatabase({ env: state.env })
+          openCarapaceStateDatabase({ env: state.env })
             .db.prepare("SELECT * FROM agent_databases")
             .all(),
         ).toEqual([]);
@@ -817,9 +817,9 @@ describe("runDoctorHealthFlow", () => {
   );
 
   it("keeps archive repair failures advisory after required database migration succeeds", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      openOpenClawAgentDatabase({ agentId: "main", env: state.env });
-      closeOpenClawAgentDatabasesForTest();
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      openCarapaceAgentDatabase({ agentId: "main", env: state.env });
+      closeCarapaceAgentDatabasesForTest();
       const archive = await state.writeText(
         "agents/main/sessions/corrupt.jsonl.deleted.2026-07-24T01-02-04.000Z",
         "invalid JSON\n",
@@ -842,7 +842,7 @@ describe("runDoctorHealthFlow", () => {
   it.each(["default", "configured"] as const)(
     "fails repair when a startup-blocking %s legacy session store remains",
     async (layout) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const storePath =
           layout === "configured"
             ? state.path("custom", "sessions.json")
@@ -870,7 +870,7 @@ describe("runDoctorHealthFlow", () => {
   );
 
   it("fails public repair after the Gateway lock skips session import", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const storePath = await state.writeText(
         "agents/main/sessions/sessions.json",
         JSON.stringify({
@@ -915,9 +915,9 @@ describe("runDoctorHealthFlow", () => {
   it.each(["configured", "sandbox"] as const)(
     "refuses incomplete %s workspace cleanup with current SQLite schemas, then completes on retry",
     async (kind) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const workspaceDir = state.statePath("secondary-workspace");
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             ownership: "explicit",
             entries: {
@@ -939,13 +939,13 @@ describe("runDoctorHealthFlow", () => {
         };
         mocks.config.mockReturnValue(cfg);
         const sourcePath = await state.writeJson(
-          "secondary-workspace/openclaw-workspace-state.json",
+          "secondary-workspace/carapace-workspace-state.json",
           {
             version: 1,
             setupCompletedAt: "2026-07-15T00:00:00.000Z",
           },
         );
-        openOpenClawStateDatabase({ env: state.env });
+        openCarapaceStateDatabase({ env: state.env });
         let failCleanup = true;
         mocks.runContributions.mockImplementation(async (ctx) => {
           const result = await migrateLegacyWorkspaceState({
@@ -1000,11 +1000,11 @@ describe("runDoctorHealthFlow", () => {
   it.each(["missing-state", "missing-agent", "current"])(
     "accepts %s databases without creating or repairing them",
     async (scenario) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         let agentPath: string | undefined;
         if (scenario !== "missing-state") {
-          agentPath = openOpenClawAgentDatabase({ agentId: "main", env: state.env }).path;
-          closeOpenClawAgentDatabasesForTest();
+          agentPath = openCarapaceAgentDatabase({ agentId: "main", env: state.env }).path;
+          closeCarapaceAgentDatabasesForTest();
           if (scenario === "missing-agent") {
             fs.unlinkSync(agentPath);
           }
@@ -1018,7 +1018,7 @@ describe("runDoctorHealthFlow", () => {
         if (agentPath && before) {
           expect(fs.readFileSync(agentPath)).toEqual(before);
         } else {
-          expect(fs.existsSync(agentPath ?? resolveOpenClawStateSqlitePath(state.env))).toBe(false);
+          expect(fs.existsSync(agentPath ?? resolveCarapaceStateSqlitePath(state.env))).toBe(false);
         }
       });
     },

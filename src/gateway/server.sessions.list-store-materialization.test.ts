@@ -8,11 +8,11 @@ import * as sessionsConfig from "../config/sessions.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import * as agentDatabaseRegistry from "../state/openclaw-agent-db-registry.js";
+import * as agentDatabaseRegistry from "../state/carapace-agent-db-registry.js";
 import {
-  OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  CARAPACE_AGENT_DB_OPEN_HANDLE_CAP,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { scheduleGatewayHandlerPrewarm } from "./server-startup-handler-prewarm.js";
 import type { SessionsListResult } from "./session-utils.types.js";
 import { testState, writeSessionStore } from "./test-helpers.js";
@@ -81,12 +81,12 @@ test("sessions.list reuses prepared store targets for sharing", async () => {
 });
 
 test("sessions.list keeps cold and warm transcript title batches valid beyond the database handle cap", async () => {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
   }
   const agentIds = Array.from(
-    { length: OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP + 1 },
+    { length: CARAPACE_AGENT_DB_OPEN_HANDLE_CAP + 1 },
     (_, index) => `batch-agent-${index}`,
   );
   const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json");
@@ -152,9 +152,9 @@ test("sessions.list keeps cold and warm transcript title batches valid beyond th
 });
 
 test("startup prewarm reuses requested durable targets when no incognito store is open", async () => {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("CARAPACE_STATE_DIR is required for gateway session tests");
   }
   const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json");
   const storePath = storeTemplate.replace("{agentId}", "main");
@@ -162,7 +162,7 @@ test("startup prewarm reuses requested durable targets when no incognito store i
     entries: { main: sessionStoreEntry("sess-main") },
     storePath,
   });
-  const matcher = vi.spyOn(agentDatabaseRegistry, "createOpenClawAgentDatabasePathMatcher");
+  const matcher = vi.spyOn(agentDatabaseRegistry, "createCarapaceAgentDatabasePathMatcher");
   try {
     expect(
       sessionsConfig.canPrewarmCombinedSessionStoresForGateway(
@@ -332,7 +332,7 @@ test("sessions.list projects out prompt snapshots without changing full entry re
   });
   const storePath = testState.sessionStorePath!;
   const target = resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" });
-  const database = openOpenClawAgentDatabase({
+  const database = openCarapaceAgentDatabase({
     agentId: target.agentId ?? "main",
     path: target.path,
   });

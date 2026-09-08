@@ -4,7 +4,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { Readable } from "node:stream";
 import { promisify } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanupTempDirs, useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { prepareAgentCommandExecutionIdentity } from "../agents/agent-command-execution-identity.js";
@@ -19,7 +19,7 @@ import {
   getRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
 } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
   buildExecRunConfig,
@@ -71,7 +71,7 @@ describe("agent exec prompt sources", () => {
   });
 
   it("reads a UTF-8 prompt file", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-prompt-");
+    const root = tempDirs.make("carapace-agent-exec-prompt-");
     const promptPath = path.join(root, "prompt.md");
     await fs.writeFile(promptPath, "\uFEFFline one\nline two", "utf8");
 
@@ -229,7 +229,7 @@ describe("agent exec command composition", () => {
       {
         cwd: path.resolve(import.meta.dirname, "../.."),
         encoding: "utf8",
-        env: { ...process.env, OPENCLAW_TEST_RUNTIME_LOG: "1" },
+        env: { ...process.env, CARAPACE_TEST_RUNTIME_LOG: "1" },
       },
     );
 
@@ -308,8 +308,8 @@ describe("agent exec command composition", () => {
     let observedConfig: unknown;
     const result = await agentExecCommand("inspect", { authEnvOnly: true }, runtime, {
       runAgent: vi.fn(async () => {
-        observedStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
-        observedConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+        observedStateDir = process.env.CARAPACE_STATE_DIR ?? "";
+        observedConfigPath = process.env.CARAPACE_CONFIG_PATH;
         // The published snapshot is what the run reads; exec writes no config file.
         observedConfig = getRuntimeConfigSnapshot();
         await expect(fs.stat(observedStateDir)).resolves.toBeDefined();
@@ -320,7 +320,7 @@ describe("agent exec command composition", () => {
     expect(result.exitCode).toBe(0);
     expect(observedConfigPath).toBeUndefined();
     await expect(fs.readdir(observedStateDir).catch(() => [])).resolves.not.toContain(
-      "openclaw.json",
+      "carapace.json",
     );
     expect(observedConfig).toMatchObject({
       agents: { defaults: { skipBootstrap: true, sandbox: { mode: "off" } } },
@@ -350,7 +350,7 @@ describe("agent exec command composition", () => {
           }
         },
         runAgent: async (invocation) => {
-          stateDir = process.env.OPENCLAW_STATE_DIR!;
+          stateDir = process.env.CARAPACE_STATE_DIR!;
           const admission = prepareAgentCommandExecutionIdentity({
             opts: invocation as AgentCommandOpts,
             prepared: {
@@ -413,7 +413,7 @@ describe("agent exec command composition", () => {
     const result = await agentExecCommand("inspect", { authEnvOnly: true }, runtime, {
       abortSignal: controller.signal,
       runAgent: async (invocation) => {
-        stateDir = process.env.OPENCLAW_STATE_DIR!;
+        stateDir = process.env.CARAPACE_STATE_DIR!;
         const signal = invocation.abortSignal as AbortSignal;
         expect(signal.aborted).toBe(false);
         controller.abort(new Error("operator stopped the Gateway"));
@@ -428,7 +428,7 @@ describe("agent exec command composition", () => {
   });
 
   it("flushes opted-in identity evidence through its owned direct-local writer", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-audit-");
+    const root = tempDirs.make("carapace-agent-exec-audit-");
     const admittedAt = Date.now();
     setRuntimeConfigSnapshot({ logging: { audit: { executionIdentity: true } } });
     try {
@@ -461,7 +461,7 @@ describe("agent exec command composition", () => {
       });
 
       expect(result.exitCode).toBe(0);
-      const database = new DatabaseSync(path.join(root, "state", "openclaw.sqlite"), {
+      const database = new DatabaseSync(path.join(root, "state", "carapace.sqlite"), {
         readOnly: true,
       });
       try {
@@ -483,11 +483,11 @@ describe("agent exec command composition", () => {
   });
 
   it("discovers operator-installed plugins while run state stays ephemeral", async () => {
-    const operatorStateDir = tempDirs.make("openclaw-agent-exec-plugin-owner-");
+    const operatorStateDir = tempDirs.make("carapace-agent-exec-plugin-owner-");
     const pluginDir = path.join(operatorStateDir, "extensions", "exec-provider");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.writeFile(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "exec-provider",
         configSchema: { type: "object", additionalProperties: false },
@@ -501,20 +501,20 @@ describe("agent exec command composition", () => {
         name: "exec-provider",
         version: "1.0.0",
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        carapace: { extensions: ["./index.js"] },
       }),
       "utf8",
     );
     await fs.writeFile(path.join(pluginDir, "index.js"), "export default {}\n", "utf8");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = operatorStateDir;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = operatorStateDir;
     const { runtime } = createRuntime();
     let runtimeStateDir = "";
     let discoveredRoot = "";
     try {
       await agentExecCommand("inspect", {}, runtime, {
         runAgent: vi.fn(async () => {
-          runtimeStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+          runtimeStateDir = process.env.CARAPACE_STATE_DIR ?? "";
           const { resolvePluginMetadataSnapshot } =
             await import("../plugins/plugin-metadata-snapshot.js");
           const snapshot = resolvePluginMetadataSnapshot({
@@ -529,9 +529,9 @@ describe("agent exec command composition", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 
@@ -541,9 +541,9 @@ describe("agent exec command composition", () => {
   });
 
   it("keeps operator-installed plugins hidden under --isolated", async () => {
-    const operatorStateDir = tempDirs.make("openclaw-agent-exec-plugin-isolated-");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = operatorStateDir;
+    const operatorStateDir = tempDirs.make("carapace-agent-exec-plugin-isolated-");
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = operatorStateDir;
     const { runtime } = createRuntime();
     let resolvedExtensionsDir = "";
     try {
@@ -556,27 +556,27 @@ describe("agent exec command composition", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 
     expect(resolvedExtensionsDir).not.toBe(path.join(operatorStateDir, "extensions"));
-    expect(path.basename(path.dirname(resolvedExtensionsDir))).toMatch(/^openclaw-agent-exec-/u);
+    expect(path.basename(path.dirname(resolvedExtensionsDir))).toMatch(/^carapace-agent-exec-/u);
   });
 
   it("keeps --state-dir scoped to run state instead of plugin installs", async () => {
-    const operatorStateDir = tempDirs.make("openclaw-agent-exec-plugin-operator-");
-    const retainedRunStateDir = tempDirs.make("openclaw-agent-exec-retained-state-");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = operatorStateDir;
+    const operatorStateDir = tempDirs.make("carapace-agent-exec-plugin-operator-");
+    const retainedRunStateDir = tempDirs.make("carapace-agent-exec-retained-state-");
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = operatorStateDir;
     const { runtime } = createRuntime();
     let resolvedExtensionsDir = "";
     try {
       await agentExecCommand("inspect", { stateDir: retainedRunStateDir }, runtime, {
         runAgent: vi.fn(async () => {
-          expect(process.env.OPENCLAW_STATE_DIR).toBe(retainedRunStateDir);
+          expect(process.env.CARAPACE_STATE_DIR).toBe(retainedRunStateDir);
           const { resolveDefaultPluginExtensionsDir } = await import("../plugins/install-paths.js");
           resolvedExtensionsDir = resolveDefaultPluginExtensionsDir();
           return successResult();
@@ -584,9 +584,9 @@ describe("agent exec command composition", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.CARAPACE_STATE_DIR = previousStateDir;
       }
     }
 
@@ -683,7 +683,7 @@ describe("agent exec command composition", () => {
 
     const result = await agentExecCommand("inspect", { json: true }, runtime, {
       runAgent: async () => {
-        observedStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+        observedStateDir = process.env.CARAPACE_STATE_DIR ?? "";
         if (failure.thrown) {
           throw Object.assign(new Error("original run failure"), {
             name: failure.kind === "timeout" ? "TimeoutError" : "Error",
@@ -719,7 +719,7 @@ describe("agent exec command composition", () => {
 
     const result = await agentExecCommand("inspect", { json: true }, runtime, {
       runAgent: vi.fn(async () => {
-        observedStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+        observedStateDir = process.env.CARAPACE_STATE_DIR ?? "";
         return successResult();
       }),
     });
@@ -742,7 +742,7 @@ describe("agent exec command composition", () => {
   });
 
   it("threads --cwd and --timeout to the agent", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-cwd-");
+    const root = tempDirs.make("carapace-agent-exec-cwd-");
     const { runtime } = createRuntime();
     const runAgent = vi.fn(async () => successResult());
 
@@ -799,11 +799,11 @@ describe("agent exec command composition", () => {
   });
 
   it("undoes environment mutations made by loading the config", async () => {
-    const seedDir = tempDirs.make("openclaw-agent-exec-envseed-");
-    const seedPath = path.join(seedDir, "openclaw.json");
+    const seedDir = tempDirs.make("carapace-agent-exec-envseed-");
+    const seedPath = path.join(seedDir, "carapace.json");
     await fs.writeFile(
       seedPath,
-      JSON.stringify({ env: { vars: { OPENCLAW_EXEC_ENV_PROBE: "from-config" } } }),
+      JSON.stringify({ env: { vars: { CARAPACE_EXEC_ENV_PROBE: "from-config" } } }),
       "utf8",
     );
     const { runtime } = createRuntime();
@@ -811,7 +811,7 @@ describe("agent exec command composition", () => {
 
     await agentExecCommand("inspect", { config: seedPath }, runtime, {
       runAgent: vi.fn(async () => {
-        observedDuringRun = process.env.OPENCLAW_EXEC_ENV_PROBE;
+        observedDuringRun = process.env.CARAPACE_EXEC_ENV_PROBE;
         return successResult();
       }),
     });
@@ -819,7 +819,7 @@ describe("agent exec command composition", () => {
     expect(observedDuringRun).toBe("from-config");
     // Config-applied values must not outlive the command, or a later isolated
     // run in the same process would inherit them.
-    expect(process.env.OPENCLAW_EXEC_ENV_PROBE).toBeUndefined();
+    expect(process.env.CARAPACE_EXEC_ENV_PROBE).toBeUndefined();
   });
 
   it("leaves no runtime config snapshot behind when the caller had none", async () => {
@@ -863,15 +863,15 @@ describe("agent exec command composition", () => {
   });
 
   it("publishes no config env values when the config load fails", async () => {
-    const seedDir = tempDirs.make("openclaw-agent-exec-badenv-");
-    const seedPath = path.join(seedDir, "openclaw.json");
+    const seedDir = tempDirs.make("carapace-agent-exec-badenv-");
+    const seedPath = path.join(seedDir, "carapace.json");
     // The loader owns this: it applies `env.vars` only after validation passes,
     // and restores them from its own catch. Pinned here because the observable
     // contract matters regardless of which layer enforces it.
     await fs.writeFile(
       seedPath,
       JSON.stringify({
-        env: { vars: { OPENCLAW_EXEC_FAILED_PROBE: "from-rejected-config" } },
+        env: { vars: { CARAPACE_EXEC_FAILED_PROBE: "from-rejected-config" } },
         agents: { defaults: { sandbox: { mode: "not-a-real-mode" } } },
       }),
       "utf8",
@@ -883,18 +883,18 @@ describe("agent exec command composition", () => {
     });
 
     expect(result.exitCode).not.toBe(0);
-    expect(process.env.OPENCLAW_EXEC_FAILED_PROBE).toBeUndefined();
+    expect(process.env.CARAPACE_EXEC_FAILED_PROBE).toBeUndefined();
   });
 
   it("leaves an explicit state directory untouched", async () => {
-    const stateDir = tempDirs.make("openclaw-agent-exec-state-");
+    const stateDir = tempDirs.make("carapace-agent-exec-state-");
     const marker = path.join(stateDir, "keep.txt");
     await fs.writeFile(marker, "keep", "utf8");
     const { runtime } = createRuntime();
 
     await agentExecCommand("inspect", { stateDir }, runtime, {
       runAgent: vi.fn(async () => {
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(stateDir);
+        expect(process.env.CARAPACE_STATE_DIR).toBe(stateDir);
         return successResult();
       }),
     });
@@ -1048,17 +1048,17 @@ describe("agent exec base config resolution", () => {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 
   async function writeSeed(body: string): Promise<string> {
-    const dir = tempDirs.make("openclaw-agent-exec-seed-");
-    const seedPath = path.join(dir, "openclaw.json");
+    const dir = tempDirs.make("carapace-agent-exec-seed-");
+    const seedPath = path.join(dir, "carapace.json");
     await fs.writeFile(seedPath, body, "utf8");
     return seedPath;
   }
 
   it("rejects a missing or invalid pinned config instead of falling back", async () => {
-    const missing = path.join(tempDirs.make("openclaw-agent-exec-seed-"), "absent.json");
+    const missing = path.join(tempDirs.make("carapace-agent-exec-seed-"), "absent.json");
     await expect(resolveExecBaseConfig({ config: missing })).rejects.toThrow(
       "--config file not found",
     );

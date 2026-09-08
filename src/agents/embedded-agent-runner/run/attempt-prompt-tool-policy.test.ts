@@ -14,7 +14,7 @@ function catalogEntry(
 ): ToolSearchCatalogEntry {
   return {
     id: name,
-    source: "openclaw",
+    source: "carapace",
     name,
     description: tool.description ?? "",
     tool,

@@ -55,7 +55,7 @@ describe("managed artifact lifecycle", () => {
               url: "/api/chat/media/outgoing/agent%3Amain%3Amain/22222222-2222-4222-8222-222222222222/full",
             },
           ],
-          __openclaw: { seq: 2 },
+          __carapace: { seq: 2 },
         },
         2,
       );
@@ -100,7 +100,7 @@ describe("managed artifact lifecycle", () => {
               },
             },
           ],
-          __openclaw: { seq: 2 },
+          __carapace: { seq: 2 },
         },
         2,
       );

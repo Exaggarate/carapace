@@ -2,25 +2,25 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness";
+import type { EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams } from "carapace/plugin-sdk/agent-harness";
 import {
   embeddedAgentLog,
   formatToolAggregate,
   inferToolMetaFromArgs,
   resetAgentEventsForTest,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { openFileBackedSessionManagerForTest } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { openFileBackedSessionManagerForTest } from "carapace/plugin-sdk/agent-runtime-test-contracts";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
 import {
   onInternalDiagnosticEvent,
   resetDiagnosticEventsForTest,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "carapace/plugin-sdk/diagnostic-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CodexAppServerEventProjector } from "./event-projector.js";
 import { createCodexTestHostCapabilities } from "./host-capability.test-support.js";
@@ -89,7 +89,7 @@ function assistantMessage(text: string, timestamp: number) {
 }
 
 export async function createParams(): Promise<EmbeddedRunAttemptParams> {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-projector-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-projector-"));
   tempDirs.add(tempDir);
   const sessionFile = path.join(tempDir, "session.jsonl");
   openFileBackedSessionManagerForTest(sessionFile, { sessionId: "session-1" }).appendMessage(

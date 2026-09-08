@@ -14,7 +14,7 @@ import type { SessionEntry } from "../../../config/sessions/types.js";
 import { callGateway } from "../../../gateway/call.js";
 import { onAgentEvent } from "../../../infra/agent-events.js";
 import { getActiveGatewayRootWorkCount } from "../../../process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../../state/carapace-state-db.js";
 import { captureEnv, setTestEnvValue, withEnv } from "../../../test-utils/env.js";
 import { createAgentsWaitTool } from "../../tools/agents-wait-tool.js";
 import { subagentRegistryDeps } from "./subagent-registry-deps.js";
@@ -68,7 +68,7 @@ function expectFields(value: unknown, expected: Record<string, unknown>): void {
 }
 
 describe("subagent registry persistence", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
   let tempStateDir: string | null = null;
 
   const resolveAgentIdFromSessionKey = (sessionKey: string) => {
@@ -135,8 +135,8 @@ describe("subagent registry persistence", () => {
   ) => {
     // Each persisted-registry fixture gets its own state dir so session and
     // subagent SQLite stores use the same production paths.
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const runs = (persisted.runs ?? {}) as Record<string, SubagentRunRecord>;
     saveCanonicalRunFixtures(new Map(Object.entries(runs)));
     if (opts?.seedChildSessions !== false) {
@@ -268,8 +268,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("persists completed subagent timing into the child session entry", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
 
     const now = Date.now();
     const startedAt = now;
@@ -307,8 +307,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("rejects a stale timing write after session ownership changes", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
 
     const startedAt = Date.now();
     const storePath = await writeChildSessionEntry({
@@ -348,8 +348,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("does not overwrite durable completion with a provisional killed status", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
 
     const startedAt = Date.now();
     const completedAt = startedAt + 500;
@@ -396,8 +396,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("skips cleanup when cleanupHandled was persisted", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
 
     const persisted = {
       version: 2,
@@ -455,10 +455,10 @@ describe("subagent registry persistence", () => {
       },
       { seedChildSessions: false },
     );
-    const previousFlag = process.env.OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE;
+    const previousFlag = process.env.CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE;
     let cloneSpy: { mockRestore(): void } | undefined;
     try {
-      process.env.OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE = "1";
+      process.env.CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE = "1";
       getSubagentRunsSnapshotForRead(new Map());
       cloneSpy = vi.spyOn(globalThis, "structuredClone");
       const snapshot = getSubagentRunsSnapshotForRead(new Map());
@@ -468,16 +468,16 @@ describe("subagent registry persistence", () => {
     } finally {
       cloneSpy?.mockRestore();
       if (previousFlag === undefined) {
-        delete process.env.OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE;
+        delete process.env.CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE;
       } else {
-        process.env.OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE = previousFlag;
+        process.env.CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE = previousFlag;
       }
     }
   });
 
   it("normalizes newly registered session keys to canonical trimmed values", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
 
     vi.mocked(callGateway).mockResolvedValueOnce({
       status: "pending",
@@ -507,8 +507,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("reloads waitable swarm collector completions after a gateway restart", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const run: SubagentRunRecord = {
       runId: "run-swarm-restart",
       childSessionKey: "agent:worker:subagent:swarm-restart",
@@ -537,7 +537,7 @@ describe("subagent registry persistence", () => {
       updatedAt: run.execution.endedAt,
     });
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const restored = loadSubagentRegistryFromSqlite().get(run.runId);
 
     expect(restored).toMatchObject({
@@ -579,8 +579,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("reloads queued launch and in-flight structured state", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const run: SubagentRunRecord = {
       runId: "run-swarm-in-flight",
       childSessionKey: "agent:worker:subagent:swarm-in-flight",
@@ -607,7 +607,7 @@ describe("subagent registry persistence", () => {
     };
     saveCanonicalRunFixtures(new Map([[run.runId, run]]));
 
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     expect(loadSubagentRegistryFromSqlite().get(run.runId)).toMatchObject({
       swarmRequesterSessionKey: run.swarmRequesterSessionKey,
       structuredOutput: run.structuredOutput,
@@ -919,8 +919,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("removes attachments when pruning orphaned restored runs", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const attachmentsRootDir = path.join(tempStateDir, "attachments");
     const attachmentsDir = path.join(attachmentsRootDir, "ghost");
     await fs.mkdir(attachmentsDir, { recursive: true });
@@ -989,7 +989,7 @@ describe("subagent registry persistence", () => {
 
     resetSubagentRegistryForTests({ persist: false });
 
-    const resolved = withEnv({ OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, () =>
+    const resolved = withEnv({ CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, () =>
       getSubagentRunByChildSessionKey(childSessionKey),
     );
 
@@ -1035,7 +1035,7 @@ describe("subagent registry persistence", () => {
 
     resetSubagentRegistryForTests({ persist: false });
 
-    const resolved = withEnv({ OPENCLAW_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, () =>
+    const resolved = withEnv({ CARAPACE_TEST_READ_SUBAGENT_RUNS_FROM_SQLITE: "1" }, () =>
       getLatestSubagentRunByChildSessionKey(childSessionKey),
     );
 
@@ -1047,8 +1047,8 @@ describe("subagent registry persistence", () => {
   });
 
   it("resume guard prunes orphan runs before announce retry", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-subagent-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempStateDir);
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-subagent-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", tempStateDir);
     const runId = "run-orphan-resume-guard";
     const childSessionKey = "agent:main:subagent:ghost-resume";
     const now = Date.now();

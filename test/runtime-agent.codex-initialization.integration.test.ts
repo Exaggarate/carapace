@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { expectDefined } from "@carapace/normalization-core";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCodexSessionInitializationFixtureForTest } from "../extensions/codex/test-api.js";
 import {
@@ -27,12 +27,12 @@ import {
   upsertSessionUpstreamLink,
 } from "../src/sessions/session-upstream-links.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  deferOpenClawAgentPostCommitPublication,
-} from "../src/state/openclaw-agent-db.js";
-import { openOpenClawStateDatabase } from "../src/state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../src/test-utils/openclaw-test-state.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+  deferCarapaceAgentPostCommitPublication,
+} from "../src/state/carapace-agent-db.js";
+import { openCarapaceStateDatabase } from "../src/state/carapace-state-db.js";
+import { withCarapaceTestState } from "../src/test-utils/carapace-test-state.js";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -62,7 +62,7 @@ describe("Codex initialization through the registered session deletion owner", (
   ])(
     "preserves exactly the committed owner after $flow $failure failure",
     async ({ flow, failure }) => {
-      await withOpenClawTestState({ label: "codex-initialization-owner" }, async (state) => {
+      await withCarapaceTestState({ label: "codex-initialization-owner" }, async (state) => {
         const agent = createRuntimeAgent();
         const runtime = createPluginRuntimeMock({
           agent,
@@ -80,7 +80,7 @@ describe("Codex initialization through the registered session deletion owner", (
         const sourceEntry = loadSessionEntry(params.source);
         let expectedSourceEntry = sourceEntry;
         const replaceSource = () => {
-          runOpenClawAgentWriteTransaction(
+          runCarapaceAgentWriteTransaction(
             (database) =>
               writeSessionEntry(database, params.source.sessionKey, {
                 ...expectDefined(sourceEntry, "source"),
@@ -156,7 +156,7 @@ describe("Codex initialization through the registered session deletion owner", (
               params.targetKey = context.key;
               retained = context.initialization;
               if (failure.startsWith("source successor during link")) {
-                const database = openOpenClawStateDatabase();
+                const database = openCarapaceStateDatabase();
                 database.db.function("replace_initialization_source", () => {
                   replaceSource();
                   return 0;
@@ -185,7 +185,7 @@ describe("Codex initialization through the registered session deletion owner", (
                 successorLink = readSessionUpstreamLink(context.key, context.agentId);
               }
               if (failure === "import") {
-                openOpenClawAgentDatabase({ agentId: "main" }).db.exec(
+                openCarapaceAgentDatabase({ agentId: "main" }).db.exec(
                   "CREATE TEMP TRIGGER reject_import BEFORE INSERT ON transcript_events BEGIN SELECT RAISE(ABORT, 'injected import failure'); END",
                 );
               }
@@ -246,7 +246,7 @@ describe("Codex initialization through the registered session deletion owner", (
             successorLink = readSessionUpstreamLink(params.targetKey, "main");
           }
           if (failure === "rollback commit") {
-            openOpenClawAgentDatabase({ agentId: "main" }).db.exec(
+            openCarapaceAgentDatabase({ agentId: "main" }).db.exec(
               "CREATE TEMP TRIGGER reject_rollback BEFORE DELETE ON session_nodes BEGIN SELECT RAISE(ABORT, 'injected rollback failure'); END",
             );
           }
@@ -263,14 +263,14 @@ describe("Codex initialization through the registered session deletion owner", (
             throw new Error("injected post-write failure");
           }
           if (failure === "final readiness") {
-            openOpenClawAgentDatabase({ agentId: "main" }).db.exec(
+            openCarapaceAgentDatabase({ agentId: "main" }).db.exec(
               "CREATE TEMP TRIGGER reject_readiness BEFORE UPDATE OF entry_json ON session_nodes WHEN json_extract(OLD.entry_json, '$.initializationPending') = 1 AND json_extract(NEW.entry_json, '$.initializationPending') IS NULL BEGIN SELECT RAISE(ABORT, 'injected readiness failure'); END",
             );
           }
           if (failure === "readiness publication") {
-            const database = openOpenClawAgentDatabase({ agentId: "main" });
+            const database = openCarapaceAgentDatabase({ agentId: "main" });
             database.db.function("inject_publication_failure", () => {
-              deferOpenClawAgentPostCommitPublication(database, () => {
+              deferCarapaceAgentPostCommitPublication(database, () => {
                 throw new Error("injected readiness publication failure");
               });
               return 0;

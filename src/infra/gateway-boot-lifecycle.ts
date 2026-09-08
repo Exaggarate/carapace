@@ -2,12 +2,12 @@
 import { randomUUID } from "node:crypto";
 import { formatCliCommand } from "../cli/command-format.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -46,13 +46,13 @@ export function formatGatewayCrashLoopManualChannelStartHint(target?: {
     channel: target?.channelId ?? "<id>",
     ...(target?.accountId ? { accountId: target.accountId } : {}),
   });
-  const command = formatCliCommand("openclaw gateway call channels.start");
+  const command = formatCliCommand("carapace gateway call channels.start");
   return `Start a channel manually with: ${command} --params '${params}'`;
 }
 
 const gatewayLifecycleLog = createSubsystemLogger("gateway/lifecycle");
 
-type GatewayBootLifecycleDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_boot_lifecycle">;
+type GatewayBootLifecycleDatabase = Pick<CarapaceStateKyselyDatabase, "gateway_boot_lifecycle">;
 
 type GatewayBootLifecycleOutcome =
   | "clean_stop"
@@ -104,7 +104,7 @@ export function inspectGatewayCrashLoopBreaker(
   nowMs = Date.now(),
 ): GatewayCrashLoopBreakerDecision {
   try {
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openCarapaceStateDatabase({ env });
     const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
     const windowStartMs = nowMs - GATEWAY_BOOT_LOOP_WINDOW_MS;
     // Unclean means startup_failed by completion time, or an open boot row
@@ -167,7 +167,7 @@ export function recordGatewayBootStart(
 ): string | undefined {
   const bootId = randomUUID();
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         executeSqliteQuerySync(
@@ -210,7 +210,7 @@ export function recordGatewayCrashLoopRecovery(
 ): string | undefined {
   const recoveredBootId = randomUUID();
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         if (bootId) {
@@ -260,7 +260,7 @@ export function completeGatewayBootLifecycle(
     return;
   }
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         executeSqliteQuerySync(
@@ -286,11 +286,11 @@ export function completeGatewayBootLifecycle(
 export function repairGatewayMaintenanceStartupFailures(
   env: NodeJS.ProcessEnv = process.env,
 ): number {
-  if (!pathMayExistSync(resolveOpenClawStateSqlitePath(env))) {
+  if (!pathMayExistSync(resolveCarapaceStateSqlitePath(env))) {
     return 0;
   }
   try {
-    return runOpenClawStateWriteTransaction(
+    return runCarapaceStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         const result = executeSqliteQuerySync(

@@ -1,14 +1,14 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import XCTest
-@testable import OpenClawWatchApp
+@testable import CarapaceWatchApp
 
 @MainActor
 final class WatchSpeechPlaybackTests: XCTestCase {
     func testLiveReplacementAndStopRetainCurrentPlaybackState() async throws {
         try XCTSkipUnless(
-            ProcessInfo.processInfo.environment["OPENCLAW_LIVE_TEST"] == "1",
-            "Requires working native speech/audio services; run with OPENCLAW_LIVE_TEST=1.")
+            ProcessInfo.processInfo.environment["CARAPACE_LIVE_TEST"] == "1",
+            "Requires working native speech/audio services; run with CARAPACE_LIVE_TEST=1.")
         let speaker = TalkSystemSpeechSynthesizer.shared
         defer { speaker.stop() }
         var nativeSpeechStarted = false

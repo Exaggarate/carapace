@@ -28,7 +28,7 @@ function mountHeader(patch: Partial<ChatPaneHeaderProps>) {
 describe("chat pane workspace chip icon", () => {
   async function mountChip(workspaceIcon: ChatPaneHeaderProps["workspaceIcon"]) {
     const { container } = mountHeader({ workspaceIcon });
-    const element = container.querySelector("openclaw-workspace-icon") as
+    const element = container.querySelector("carapace-workspace-icon") as
       | (HTMLElement & { updateComplete: Promise<unknown>; requestUpdate(): void })
       | null;
     await element?.updateComplete;
@@ -44,7 +44,7 @@ describe("chat pane workspace chip icon", () => {
   it("keeps the folder glyph while credentials are not ready", async () => {
     const fetchSpy = mockWorkspaceIconFetch();
     const { container, element } = await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Aone",
       authTokens: [],
       authReady: false,
     });
@@ -59,13 +59,13 @@ describe("chat pane workspace chip icon", () => {
       new Error("workspace icon unavailable"),
     );
     const { container } = await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Aone",
       authTokens: ["token"],
       authReady: true,
     });
     await Promise.resolve();
     expect(fetchSpy).toHaveBeenCalledWith(
-      "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+      "/__carapace__/workspace-icon/agent%3Amain%3Aone",
       expect.objectContaining({ headers: { Authorization: "Bearer token" } }),
     );
     expect(container.querySelector(".workspace-icon")).toBeNull();
@@ -80,7 +80,7 @@ describe("chat pane workspace chip icon", () => {
       headers: new Headers({ "retry-after": "1" }),
     } as Response);
     const { container, element } = await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Adisconnected",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Adisconnected",
       authTokens: ["token"],
       authReady: true,
     });
@@ -91,7 +91,7 @@ describe("chat pane workspace chip icon", () => {
     await element?.updateComplete;
     await vi.advanceTimersByTimeAsync(1_000);
     expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual([
-      "/__openclaw__/workspace-icon/agent%3Amain%3Adisconnected",
+      "/__carapace__/workspace-icon/agent%3Amain%3Adisconnected",
     ]);
     expect(fetchSpy.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
 
@@ -113,7 +113,7 @@ describe("chat pane workspace chip icon", () => {
   it("recovers when a pending 503 settles between disconnect and immediate reconnect", async () => {
     vi.useFakeTimers();
     const pending = createDeferred<Response>();
-    const routeUrl = "/__openclaw__/workspace-icon/agent%3Amain%3Aimmediate-reconnect";
+    const routeUrl = "/__carapace__/workspace-icon/agent%3Amain%3Aimmediate-reconnect";
     const fetchSpy = mockWorkspaceIconFetch()
       .mockReturnValueOnce(pending.promise)
       .mockResolvedValue({
@@ -156,7 +156,7 @@ describe("chat pane workspace chip icon", () => {
       headers: new Headers({ "retry-after": "1" }),
     } as Response);
     const previous = await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Aprevious",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Aprevious",
       authTokens: ["token"],
       authReady: true,
     });
@@ -177,7 +177,7 @@ describe("chat pane workspace chip icon", () => {
       } as unknown as Response);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:recovered-workspace-icon");
     const { container, element } = await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Arecovering",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Arecovering",
       authTokens: ["token"],
       authReady: true,
     });
@@ -191,10 +191,10 @@ describe("chat pane workspace chip icon", () => {
     await element?.updateComplete;
 
     expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual([
-      "/__openclaw__/workspace-icon/agent%3Amain%3Arecovering",
-      "/__openclaw__/workspace-icon/agent%3Amain%3Arecovering",
+      "/__carapace__/workspace-icon/agent%3Amain%3Arecovering",
+      "/__carapace__/workspace-icon/agent%3Amain%3Arecovering",
     ]);
-    expect(container.querySelector("openclaw-workspace-icon")).toBe(element);
+    expect(container.querySelector("carapace-workspace-icon")).toBe(element);
     expect(container.querySelector<HTMLImageElement>(".workspace-icon")?.src).toBe(
       "blob:recovered-workspace-icon",
     );
@@ -206,12 +206,12 @@ describe("chat pane workspace chip icon", () => {
       status: 404,
     } as Response);
     const workspaceIcon = {
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Aone",
       authTokens: ["token"],
       authReady: true,
     };
     const mounted = mountHeader({ workspaceIcon });
-    const element = mounted.container.querySelector("openclaw-workspace-icon") as
+    const element = mounted.container.querySelector("carapace-workspace-icon") as
       | (HTMLElement & { updateComplete?: Promise<unknown> })
       | null;
 
@@ -247,7 +247,7 @@ describe("chat pane workspace chip icon", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:workspace-icon");
 
     await mountChip({
-      routeUrl: "/__openclaw__/workspace-icon/agent%3Amain%3Aone",
+      routeUrl: "/__carapace__/workspace-icon/agent%3Amain%3Aone",
       authTokens: ["stale-token", "session-password"],
       authReady: true,
     });

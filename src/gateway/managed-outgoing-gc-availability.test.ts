@@ -3,10 +3,10 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { cleanupManagedOutgoingMediaRecords } from "./managed-image-attachments.js";
 import {
@@ -52,9 +52,9 @@ function seedManagedRecord(attachmentId: string) {
 }
 
 function dropSessionNodes() {
-  const options = { agentId: "main", env: { OPENCLAW_STATE_DIR: stateDir } };
-  const databasePath = openOpenClawAgentDatabase(options).path;
-  closeOpenClawAgentDatabasesForTest();
+  const options = { agentId: "main", env: { CARAPACE_STATE_DIR: stateDir } };
+  const databasePath = openCarapaceAgentDatabase(options).path;
+  closeCarapaceAgentDatabasesForTest();
   const { DatabaseSync } = requireNodeSqlite();
   const database = new DatabaseSync(databasePath);
   database.exec("DROP TABLE session_nodes;");
@@ -66,19 +66,19 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   fs.rmSync(stateDir, { recursive: true, force: true });
 });
 
 describe("cleanupManagedOutgoingMediaRecords availability fail-safe", () => {
   it("keeps records and bytes when session_nodes is missing", async () => {
-    const options = { agentId: "main", env: { OPENCLAW_STATE_DIR: stateDir } };
-    openOpenClawAgentDatabase(options);
+    const options = { agentId: "main", env: { CARAPACE_STATE_DIR: stateDir } };
+    openCarapaceAgentDatabase(options);
     const originalPath = seedManagedRecord("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
     dropSessionNodes();
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingMediaRecords({ stateDir }),
     );
 
@@ -88,11 +88,11 @@ describe("cleanupManagedOutgoingMediaRecords availability fail-safe", () => {
   });
 
   it("still deletes dereferenced records when the store is healthy", async () => {
-    const options = { agentId: "main", env: { OPENCLAW_STATE_DIR: stateDir } };
-    openOpenClawAgentDatabase(options);
+    const options = { agentId: "main", env: { CARAPACE_STATE_DIR: stateDir } };
+    openCarapaceAgentDatabase(options);
     const originalPath = seedManagedRecord("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb");
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingMediaRecords({ stateDir }),
     );
 

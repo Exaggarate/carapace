@@ -1,6 +1,6 @@
 // Codex supervision tests cover passive listing and safe local session takeover.
 /* oxlint-disable typescript/unbound-method -- assertions inspect vi.fn-backed object methods, not unbound class methods. */
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import {
   nodeHostMocks,
@@ -27,7 +27,7 @@ import {
   listPairedNode,
   CODEX_TERMINAL_RESUME_COMMAND,
   CODEX_LOCAL_SESSION_HOST_ID,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type PluginRuntime,
 } from "./session-catalog.test-helpers.js";
 
@@ -552,7 +552,7 @@ describe("Codex supervision catalog", () => {
     { mode: "app-owned", execHost: "app", boundedReader: false },
     { mode: "standalone", execHost: undefined, boundedReader: true },
   ])("preserves native catalog ownership in $mode workers", ({ execHost, boundedReader }) => {
-    vi.stubEnv("OPENCLAW_NODE_EXEC_HOST", execHost);
+    vi.stubEnv("CARAPACE_NODE_EXEC_HOST", execHost);
     const commands = createCodexSessionCatalogNodeHostCommands(createEligibleControl()).map(
       (command) => command.command,
     );
@@ -655,7 +655,7 @@ describe("Codex supervision catalog", () => {
   });
 
   it("binds paired-node catalog commands to the invocation agent after config reload", async () => {
-    let runtimeConfig = { agents: { list: [{ id: "main" }] } } as OpenClawConfig;
+    let runtimeConfig = { agents: { list: [{ id: "main" }] } } as CarapaceConfig;
     const alphaListPage = vi.fn(async () => {
       throw new Error("alpha control must not serve beta");
     });
@@ -680,7 +680,7 @@ describe("Codex supervision catalog", () => {
     );
     runtimeConfig = {
       agents: { ownership: "explicit", list: [{ id: "alpha" }, { id: "beta" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const listCommand = commands.find(
       (candidate) => candidate.command === CODEX_APP_SERVER_THREADS_LIST_COMMAND,
     );
@@ -734,7 +734,7 @@ describe("Codex supervision catalog", () => {
 
   it("resolves node terminal eligibility and cwd from the node-owned catalog record", async () => {
     const threadId = "123e4567-e89b-12d3-a456-426614174000";
-    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-node-terminal-"));
+    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-codex-node-terminal-"));
     tempDirs.push(binDir);
     const executable = path.join(binDir, process.platform === "win32" ? "codex.cmd" : "codex");
     if (process.platform === "win32") {
@@ -747,7 +747,7 @@ describe("Codex supervision catalog", () => {
     process.env.PATH = binDir;
     const explicitConfig = {
       agents: { ownership: "explicit", list: [{ id: "alpha" }, { id: "beta" }] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const command = createCodexSessionCatalogNodeHostCommands(
       createEligibleControl({
         requireEligibleThread: vi.fn(async () =>

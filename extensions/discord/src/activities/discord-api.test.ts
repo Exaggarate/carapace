@@ -1,4 +1,4 @@
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { fetchDiscordJson } from "./discord-api.js";
 

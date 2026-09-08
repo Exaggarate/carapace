@@ -13,10 +13,10 @@ import { managedServiceStateUpdateScript } from "./update-managed-service-handof
 
 /** A LaunchAgent gateway's own environment; the handoff keeps only the label for its children. */
 export const LAUNCHD_GATEWAY_IDENTITY_ENV = {
-  OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
-  XPC_SERVICE_NAME: "ai.openclaw.gateway",
-  OPENCLAW_SERVICE_MARKER: "openclaw",
-  OPENCLAW_SERVICE_KIND: "gateway",
+  CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
+  XPC_SERVICE_NAME: "ai.carapace.gateway",
+  CARAPACE_SERVICE_MARKER: "carapace",
+  CARAPACE_SERVICE_KIND: "gateway",
 } as const;
 
 /** The pre-fix CLI emulation restarts launchd after it exits; never leave that shell behind. */
@@ -48,12 +48,12 @@ export function createManagedServiceCommandFixture(params: {
   const checksServiceIdentity = kind === "launchd" && options?.recoveryChecksServiceIdentity;
   const recovery =
     kind === "systemd"
-      ? { kind, unit: "openclaw-gateway.service" }
+      ? { kind, unit: "carapace-gateway.service" }
       : {
           kind,
           uid: 501,
-          label: "ai.openclaw.gateway",
-          plistPath: path.join(root, "ai.openclaw.gateway.plist"),
+          label: "ai.carapace.gateway",
+          plistPath: path.join(root, "ai.carapace.gateway.plist"),
         };
   return {
     serviceRecovery: recovery,
@@ -82,16 +82,16 @@ export function createManagedServiceCommandFixture(params: {
         `${managedServiceStateUpdateScript(statePath, "state.guardedRestart = process.argv.slice(1)")};`,
         ...(checksServiceIdentity
           ? [
-              `const recoveryInsideService = await isCurrentProcessInsideLaunchdService("ai.openclaw.gateway", process.env);`,
+              `const recoveryInsideService = await isCurrentProcessInsideLaunchdService("ai.carapace.gateway", process.env);`,
               `${managedServiceStateUpdateScript(
                 statePath,
                 `state.recoveryInsideService = recoveryInsideService;
-                state.recoveryEnv = Object.fromEntries(["LAUNCH_JOB_LABEL", "LAUNCH_JOB_NAME", "XPC_SERVICE_NAME", "OPENCLAW_SERVICE_MARKER", "OPENCLAW_SERVICE_KIND", "OPENCLAW_LAUNCHD_LABEL"].map((key) => [key, process.env[key]]))`,
+                state.recoveryEnv = Object.fromEntries(["LAUNCH_JOB_LABEL", "LAUNCH_JOB_NAME", "XPC_SERVICE_NAME", "CARAPACE_SERVICE_MARKER", "CARAPACE_SERVICE_KIND", "CARAPACE_LAUNCHD_LABEL"].map((key) => [key, process.env[key]]))`,
               )};`,
               // Reproduce the old CLI's early success while its detached restart waits for exit.
               `if (recoveryInsideService) {`,
               `  const { spawn } = require("node:child_process");`,
-              `  const child = spawn("/bin/sh", ["-c", ${JSON.stringify('attempts=0; while kill -0 "$1" 2>/dev/null && [ "$attempts" -lt 100 ]; do attempts=$((attempts + 1)); sleep 0.05; done; launchctl enable gui/501/ai.openclaw.gateway; launchctl bootstrap gui/501 "$2"')}, "openclaw-test-recovery", String(process.pid), ${JSON.stringify(path.join(root, "ai.openclaw.gateway.plist"))}], { detached: true, stdio: "ignore" });`,
+              `  const child = spawn("/bin/sh", ["-c", ${JSON.stringify('attempts=0; while kill -0 "$1" 2>/dev/null && [ "$attempts" -lt 100 ]; do attempts=$((attempts + 1)); sleep 0.05; done; launchctl enable gui/501/ai.carapace.gateway; launchctl bootstrap gui/501 "$2"')}, "carapace-test-recovery", String(process.pid), ${JSON.stringify(path.join(root, "ai.carapace.gateway.plist"))}], { detached: true, stdio: "ignore" });`,
               `  ${managedServiceStateUpdateScript(statePath, "state.recoveryHandoffPid = child.pid")};`,
               `  child.unref();`,
               `  console.log(JSON.stringify({ action: "restart", ok: true, result: "scheduled" }));`,
@@ -99,7 +99,7 @@ export function createManagedServiceCommandFixture(params: {
               `}`,
             ]
           : []),
-        `${managedServiceStateUpdateScript(statePath, "state.recoveryAllowance = process.env.OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS")};`,
+        `${managedServiceStateUpdateScript(statePath, "state.recoveryAllowance = process.env.CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS")};`,
         ...(options?.recoverySentinel
           ? [
               `const { DatabaseSync } = require("node:sqlite");`,
@@ -134,9 +134,9 @@ export function createManagedServiceCommandFixture(params: {
                     ["--user", "show", recovery.unit],
                   ]
                 : [
-                    ["enable", `gui/501/ai.openclaw.gateway`],
-                    ["bootstrap", "gui/501", path.join(root, "ai.openclaw.gateway.plist")],
-                    ["print", "gui/501/ai.openclaw.gateway"],
+                    ["enable", `gui/501/ai.carapace.gateway`],
+                    ["bootstrap", "gui/501", path.join(root, "ai.carapace.gateway.plist")],
+                    ["print", "gui/501/ai.carapace.gateway"],
                   ]
               ).map(
                 (args) =>
@@ -173,7 +173,7 @@ export function createManagedServiceCommandFixture(params: {
               state.triageInputMode = fs.statSync(contextPath).mode & 0o777;
               state.triageObservedRestored = state.restored === true;
               state.triageObservedRecovery = Array.isArray(state.guardedRestart);
-              state.triageRecoveryAllowance = process.env.OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS;
+              state.triageRecoveryAllowance = process.env.CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS;
             `,
             )};`,
             ...(options?.triageHang
@@ -267,7 +267,7 @@ export function registerManagedRecoveryCommandTests(
         },
       });
       // The guarded CLI sees the service identity without launchd's own labels or markers.
-      expect(state.recoveryEnv, log).toEqual({ OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway" });
+      expect(state.recoveryEnv, log).toEqual({ CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway" });
       expect(state.guardedRestart).toEqual([
         "gateway",
         "restart",
@@ -504,7 +504,7 @@ export function registerManagedLaunchdTeardownTests(
         launchdFault: "wrong-parent",
       });
 
-      expect(commands).toEqual(["print gui/501/ai.openclaw.gateway"]);
+      expect(commands).toEqual(["print gui/501/ai.carapace.gateway"]);
       expect(state).toEqual({});
       expect(sentinel).toMatchObject({
         payload: {
@@ -526,9 +526,9 @@ export function registerManagedLaunchdTeardownTests(
 
     expect(commands).toEqual(
       expect.arrayContaining([
-        "disable gui/501/ai.openclaw.gateway",
-        "bootout gui/501/ai.openclaw.gateway",
-        "enable gui/501/ai.openclaw.gateway",
+        "disable gui/501/ai.carapace.gateway",
+        "bootout gui/501/ai.carapace.gateway",
+        "enable gui/501/ai.carapace.gateway",
       ]),
     );
     expect(state).toMatchObject({ disabled: false, parked: true, restored: true });

@@ -1,15 +1,15 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, it } from "vitest";
 import { resolveSessionStorePathCore } from "../../config/sessions/paths.js";
 import {
   loadSessionEntryReadOnly,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createDirectChatContext } from "../../gateway/server-chat.agent-events.test-helpers.js";
 import { respondWithCachedSessionList } from "../../gateway/server-methods/sessions-list-cache.js";
 import { listSessionFixture } from "../../gateway/session-list.test-support.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { handleDirectiveOnly } from "./directive-handling.impl.js";
 import { parseInlineSessionDirectives } from "./directive-handling.parse.js";
 
@@ -21,8 +21,8 @@ it.each([
 ])(
   "keeps the cached session list current after $command (authorized=$authorized)",
   async ({ command, authorized, expected }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
-      const cfg: OpenClawConfig = {};
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
+      const cfg: CarapaceConfig = {};
       const scope = { agentId: "main", sessionKey: "agent:main:main" };
       const storePath = resolveSessionStorePathCore(undefined, { agentId: scope.agentId });
       const context = createDirectChatContext({ getRuntimeConfig: () => cfg });

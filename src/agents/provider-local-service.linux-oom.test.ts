@@ -42,7 +42,7 @@ describe("provider local service Linux OOM scoring", () => {
 
       const port = await getFreePort();
       const healthUrl = `http://127.0.0.1:${port}/v1/models`;
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-provider-oom-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-provider-oom-"));
       const bashEnvPath = path.join(tempDir, "bash-env.sh");
       const startupMarkerPath = path.join(tempDir, "wrapper-startup-marker");
       await fs.writeFile(bashEnvPath, `printf touched > "${startupMarkerPath}"\n`);

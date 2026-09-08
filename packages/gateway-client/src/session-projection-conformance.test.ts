@@ -25,7 +25,7 @@ function persistedUser(params: {
   media?: unknown[];
 }): Record<string, unknown> {
   return {
-    __openclaw: {
+    __carapace: {
       id: params.id,
       idempotencyKey: `${params.runId ?? params.id}:user`,
       seq: params.sequence,
@@ -73,7 +73,7 @@ describe("cross-client session projection conformance", () => {
     {
       name: "producer-owned assistant run wins over its assistant idempotency suffix",
       message: {
-        __openclaw: {
+        __carapace: {
           id: "aborted-assistant",
           idempotencyKey: "producer-run:assistant",
           seq: 3,

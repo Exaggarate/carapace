@@ -1,10 +1,10 @@
-import { recordDroppedChannelInboundHistory } from "openclaw/plugin-sdk/channel-inbound";
+import { recordDroppedChannelInboundHistory } from "carapace/plugin-sdk/channel-inbound";
 import {
   buildHistoryContext,
   createChannelHistoryWindow,
   type HistoryEntry,
-} from "openclaw/plugin-sdk/reply-history";
-import { truncateUtf8Prefix } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/reply-history";
+import { truncateUtf8Prefix } from "carapace/plugin-sdk/text-utility-runtime";
 import type { BuzzDirectoryState } from "./directory-state.js";
 import type { BuzzInboundMessage } from "./message-event.js";
 

@@ -1,5 +1,5 @@
 // Control UI chat module implements export behavior.
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+import { timestampMsToIsoString } from "@carapace/normalization-core/number-coercion";
 import { extractTextCached } from "../../lib/chat/message-extract.ts";
 import { normalizeMessage, normalizeRoleForGrouping } from "../../lib/chat/message-normalizer.ts";
 import { visibleChatHistoryMessages } from "../../lib/chat/message-visibility.ts";

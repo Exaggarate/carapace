@@ -3,7 +3,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { identityEntryAuthenticationClassifier } from "../channels/message-access/runtime-identity.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { collectChannelSecurityFindingsCore } from "./audit-channel.js";
 
 vi.mock("../channels/message-access/store-allow-from.js", () => ({
@@ -101,7 +101,7 @@ describe("channel entry authentication audit", () => {
   const stableId = "123456789012345678";
   const name = "Alice Example";
   const inertCheckId = "channels.whatsapp.allowFrom.mutable_entries_inert";
-  const cfg: OpenClawConfig = { session: { dmScope: "per-account-channel-peer" } };
+  const cfg: CarapaceConfig = { session: { dmScope: "per-account-channel-peer" } };
 
   it.each([
     { caseName: "default policy", allowFrom: [name, stableId], enabled: undefined, count: 1 },

@@ -1,13 +1,13 @@
 import {
   createPluginRuntimeMock,
   createStartAccountContext,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { registerPluginHttpRoute } from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { registerPluginHttpRoute } from "carapace/plugin-sdk/webhook-ingress";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { startA2aGatewayAccount } from "./gateway.js";
 import { setA2aChannelRuntime } from "./runtime.js";

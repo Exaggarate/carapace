@@ -18,7 +18,7 @@ import {
 } from "../config/io.js";
 import { pinRuntimePaths, resolveStateDir } from "../config/paths.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AgentToolsConfig } from "../config/types.tools.js";
 import { sanitizeHostExecEnv } from "../infra/host-env-security.js";
 import {
@@ -30,7 +30,7 @@ import { runUpdateRepairLoop } from "../infra/update-repair-agent.js";
 import * as repairRuntime from "../infra/update-repair-agent.runtime.js";
 import { runUpdateRepairTurn } from "../infra/update-repair-agent.runtime.js";
 import { withEnvAsync } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import * as agentExec from "./agent-exec.js";
 import { renderTriagePrompt } from "./triage-prompt.js";
 import { triageCommand } from "./triage.js";
@@ -102,8 +102,8 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
   it.each([false, true])(
     "scopes prompt-free repair to its target (candidate=%s) while preserving policy and auth",
     async (candidate) => {
-      await withOpenClawTestState({ layout: "split" }, async (state) => {
-        const config: OpenClawConfig = {
+      await withCarapaceTestState({ layout: "split" }, async (state) => {
+        const config: CarapaceConfig = {
           auth: { order: { fixture: ["preferred", "backup"] } },
           tools: {
             profile: candidate ? "minimal" : "coding",
@@ -200,7 +200,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
       });
     },
   );
-  it.each<{ name: string; tools?: OpenClawConfig["tools"]; agentTools?: AgentToolsConfig }>([
+  it.each<{ name: string; tools?: CarapaceConfig["tools"]; agentTools?: AgentToolsConfig }>([
     { name: "global exec mode", tools: { exec: { mode: "deny" as const } } },
     { name: "agent exec mode", agentTools: { exec: { mode: "deny" as const } } },
     { name: "legacy exec security", agentTools: { exec: { security: "deny" as const } } },
@@ -213,8 +213,8 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
     { name: "explicit allow", tools: { allow: ["read"] } },
     { name: "provider deny", tools: { byProvider: { fixture: { deny: ["exec"] } } } },
   ])("reports $name as unavailable without an agent turn", async ({ tools, agentTools }) => {
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
-      const config: OpenClawConfig = {
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
+      const config: CarapaceConfig = {
         tools,
         agents: {
           defaults: { systemAgent: { agentId: "diagnostic" } },
@@ -263,8 +263,8 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
     { name: "node", agent: { tools: { exec: { host: "node" as const } } } },
     { name: "explicit sandbox", agent: { tools: { exec: { host: "sandbox" as const } } } },
   ])("refuses $name before the fixing turn, without changing ordinary exec", async ({ agent }) => {
-    await withOpenClawTestState({ layout: "split" }, async (state) => {
-      const config: OpenClawConfig = {
+    await withCarapaceTestState({ layout: "split" }, async (state) => {
+      const config: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           defaults: { systemAgent: { agentId: "diagnostic" } },
@@ -320,16 +320,16 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
         VITEST: "true",
         NODE_ENV: "test",
         OPENAI_API_KEY: secret,
-        OPENCLAW_WORKSPACE_DIR: undefined,
+        CARAPACE_WORKSPACE_DIR: undefined,
       });
       try {
         await withEnvAsync(syntheticEnv, async () => {
-          await withOpenClawTestState(
+          await withCarapaceTestState(
             {
               layout,
               label: "triage-target",
               ...(layout === "home"
-                ? { env: { OPENCLAW_STATE_DIR: undefined, OPENCLAW_CONFIG_PATH: undefined } }
+                ? { env: { CARAPACE_STATE_DIR: undefined, CARAPACE_CONFIG_PATH: undefined } }
                 : {}),
             },
             async (state) => {
@@ -343,7 +343,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                   ? state.path("custom default workspace")
                   : state.statePath("workspace");
               if (workspaceSelector === "custom") {
-                process.env.OPENCLAW_WORKSPACE_DIR = defaultWorkspaceDir;
+                process.env.CARAPACE_WORKSPACE_DIR = defaultWorkspaceDir;
               }
               await fs.mkdir(defaultWorkspaceDir, { recursive: true });
               const workspaceMarkerPath = path.join(defaultWorkspaceDir, "workspace-probe.txt");
@@ -412,9 +412,9 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                   expect(path.dirname(state.configPath)).not.toBe(state.stateDir);
                 }
                 const originalSelectors = {
-                  stateDir: process.env.OPENCLAW_STATE_DIR,
-                  configPath: process.env.OPENCLAW_CONFIG_PATH,
-                  workspaceDir: process.env.OPENCLAW_WORKSPACE_DIR,
+                  stateDir: process.env.CARAPACE_STATE_DIR,
+                  configPath: process.env.CARAPACE_CONFIG_PATH,
+                  workspaceDir: process.env.CARAPACE_WORKSPACE_DIR,
                 };
 
                 let runStateDir = "";
@@ -428,7 +428,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                   const prompt = String(opts.message);
                   const archiveReference = /^Sanitized ZIP: (.+)$/mu.exec(prompt)?.[1];
                   expect(archiveReference).toBe(
-                    "$OPENCLAW_STATE_DIR/logs/support/installation.zip",
+                    "$CARAPACE_STATE_DIR/logs/support/installation.zip",
                   );
                   expect(prompt).not.toContain(secret);
                   expect(prompt).not.toContain(state.stateDir);
@@ -437,7 +437,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                   runStateDir = await fs.realpath(resolveStateDir());
                   expect(runStateDir).not.toBe(state.stateDir);
                   const runConfig = getRuntimeConfig();
-                  expect(process.env.OPENCLAW_WORKSPACE_DIR).toBe(executionRoot);
+                  expect(process.env.CARAPACE_WORKSPACE_DIR).toBe(executionRoot);
                   expect(runConfig.agents?.entries?.diagnostic?.workspace).toBe(executionRoot);
                   expect(runConfig.agents?.entries?.diagnostic?.model).toBe(
                     "fixture/diagnostic-model",
@@ -478,7 +478,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                     expect(runSignal.aborted).toBe(false);
                     expect(opts.assertSourceCurrent).toBe(assertCurrent);
                     expect(prompt).toContain("## Triggering failure");
-                    expect(prompt).toContain("openclaw health --json");
+                    expect(prompt).toContain("carapace health --json");
                     if (fails) {
                       controller.abort(runFailure);
                       expect(runSignal.aborted).toBe(true);
@@ -541,9 +541,9 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                 expect(execSpy).toHaveBeenCalledOnce();
                 expect(execSpy.mock.calls[0]?.[1].stateDir).toBeUndefined();
                 expect(execSpy.mock.calls[0]?.[1].cwd).toBe(executionRoot);
-                expect(process.env.OPENCLAW_STATE_DIR).toBe(originalSelectors.stateDir);
-                expect(process.env.OPENCLAW_CONFIG_PATH).toBe(originalSelectors.configPath);
-                expect(process.env.OPENCLAW_WORKSPACE_DIR).toBe(originalSelectors.workspaceDir);
+                expect(process.env.CARAPACE_STATE_DIR).toBe(originalSelectors.stateDir);
+                expect(process.env.CARAPACE_CONFIG_PATH).toBe(originalSelectors.configPath);
+                expect(process.env.CARAPACE_WORKSPACE_DIR).toBe(originalSelectors.workspaceDir);
                 expect(getRuntimeConfigSnapshot()).toBeNull();
                 await expect(fs.stat(runStateDir)).rejects.toMatchObject({ code: "ENOENT" });
                 expect(await fs.readFile(state.configPath, "utf8")).toBe(originalConfig);
@@ -559,7 +559,7 @@ describe.skipIf(process.platform === "win32")("embedded triage installation targ
                 expect
                   .soft(
                     childTarget,
-                    "child OpenClaw must select the original config and default workspace",
+                    "child Carapace must select the original config and default workspace",
                   )
                   .toEqual(before);
               } finally {

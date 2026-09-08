@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { redactSensitiveText } from "../logging/redact.js";
 
 type AgentRunTerminalModelRef = { provider: string; model: string };

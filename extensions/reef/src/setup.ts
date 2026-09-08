@@ -1,5 +1,5 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import { defineChannelSetupContract } from "carapace/plugin-sdk/channel-setup";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
 import { fingerprint } from "../protocol/index.js";
 import {
   parseReefRelayUrl,
@@ -43,7 +43,7 @@ const reefSetupAdapter = {
     cfg,
     input,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId: string;
     input: Record<string, unknown>;
   }) =>
@@ -53,7 +53,7 @@ const reefSetupAdapter = {
         ...cfg.channels,
         reef: { ...(cfg.channels?.reef as object), ...input },
       },
-    }) as OpenClawConfig,
+    }) as CarapaceConfig,
 };
 
 export const reefSetupContract = defineChannelSetupContract({
@@ -63,7 +63,7 @@ export const reefSetupContract = defineChannelSetupContract({
 
 export const reefSetupWizard = {
   channel: "reef",
-  getStatus: async ({ cfg }: { cfg: OpenClawConfig }) => {
+  getStatus: async ({ cfg }: { cfg: CarapaceConfig }) => {
     const raw = cfg.channels?.reef as unknown;
     const parsed = ReefChannelConfigSchema.safeParse(raw ?? {});
     const configured =
@@ -74,13 +74,13 @@ export const reefSetupWizard = {
       statusLines: [configured ? `Reef @${parsed.data.handle}` : "Reef not configured"],
     };
   },
-  configure: async ({ cfg }: { cfg: OpenClawConfig }) => ({ cfg }),
+  configure: async ({ cfg }: { cfg: CarapaceConfig }) => ({ cfg }),
   configureInteractive: async ({
     cfg,
     prompter,
     options,
   }: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     prompter: Prompt;
     options?: { beforePersistentEffect?: () => Promise<void> };
   }) => {
@@ -135,7 +135,7 @@ export const reefSetupWizard = {
     const identity = loadReefIdentityBinding(runtime);
     if (identity && (identity.handle !== handle || identity.relayUrl !== relayUrl)) {
       throw new Error(
-        `This OpenClaw state already holds the Reef identity @${identity.handle} on ${identity.relayUrl}. Re-register the same handle and relay.`,
+        `This Carapace state already holds the Reef identity @${identity.handle} on ${identity.relayUrl}. Re-register the same handle and relay.`,
       );
     }
     const configuredStateDir = (cfg.channels?.reef as { stateDir?: unknown } | undefined)?.stateDir;
@@ -237,7 +237,7 @@ export const reefSetupWizard = {
       "Reef safety fingerprint — share out of band",
     );
     return {
-      cfg: { ...cfg, channels: { ...cfg.channels, reef } } as OpenClawConfig,
+      cfg: { ...cfg, channels: { ...cfg.channels, reef } } as CarapaceConfig,
       accountId: "default",
     };
   },

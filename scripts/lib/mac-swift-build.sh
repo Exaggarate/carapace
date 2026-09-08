@@ -9,7 +9,7 @@ bin_for_arch() {
 }
 
 mac_cli_bin_for_arch() {
-  echo "$(build_path_for_arch "$1")/$BUILD_CONFIG/openclaw-mac"
+  echo "$(build_path_for_arch "$1")/$BUILD_CONFIG/carapace-mac"
 }
 
 helper_build_path_for_arch() {
@@ -309,7 +309,7 @@ create_verified_peekaboo_snapshot() {
   # -quiet suppresses failure stderr too; discard only routine stdout.
   hdiutil create -fs APFS -format UDRO \
     -srcfolder "$source_checkout" \
-    -volname OpenClawPeekabooSnapshot \
+    -volname CarapacePeekabooSnapshot \
     "$PEEKABOO_SNAPSHOT_IMAGE" >/dev/null
   hdiutil attach -readonly -nobrowse \
     -mountpoint "$PEEKABOO_SNAPSHOT_MOUNT" \
@@ -476,8 +476,8 @@ build_swift_architecture() {
   verify_snapshot_swift_lock
   swift build -c "$BUILD_CONFIG" --jobs "$SWIFT_BUILD_JOBS" --product "$PRODUCT" --build-path "$BUILD_PATH" --arch "$arch" -Xlinker -rpath -Xlinker @executable_path/../Frameworks
   verify_snapshot_swift_lock
-  echo "🔨 Building openclaw-mac ($BUILD_CONFIG) [$arch]"
-  swift build -c "$BUILD_CONFIG" --jobs "$SWIFT_BUILD_JOBS" --product openclaw-mac --build-path "$BUILD_PATH" --arch "$arch" -Xlinker -rpath -Xlinker @executable_path/../Frameworks
+  echo "🔨 Building carapace-mac ($BUILD_CONFIG) [$arch]"
+  swift build -c "$BUILD_CONFIG" --jobs "$SWIFT_BUILD_JOBS" --product carapace-mac --build-path "$BUILD_PATH" --arch "$arch" -Xlinker -rpath -Xlinker @executable_path/../Frameworks
   verify_snapshot_swift_lock
   arch_peekaboo_commit="$(compiled_peekaboo_commit "$PEEKABOO_SNAPSHOT_MOUNT" "$PEEKABOO_LOCKED_SOURCE_COMMIT")"
   printf '%s\n' "$arch_peekaboo_commit" > "$SWIFT_WORK_ROOT/peekaboo-commit"
@@ -485,7 +485,7 @@ build_swift_architecture() {
   clear_peekaboo_edit "$BUILD_PATH"
   cd "$ROOT_DIR/apps/macos"
   if [[ "$SKIP_MLX_TTS" == "1" ]]; then
-    echo "🔇 Skipping $MLX_TTS_HELPER_PRODUCT (OPENCLAW_SKIP_MLX_TTS=1) — app will lack the local MLX voice helper [$arch]"
+    echo "🔇 Skipping $MLX_TTS_HELPER_PRODUCT (CARAPACE_SKIP_MLX_TTS=1) — app will lack the local MLX voice helper [$arch]"
   else
     echo "🔨 Building $MLX_TTS_HELPER_PRODUCT ($BUILD_CONFIG) [$arch]"
     local helper_lock="$MLX_TTS_HELPER_ROOT/Package.resolved"
@@ -509,8 +509,8 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   PEEKABOO_LOCKED_SOURCE_COMMIT="$6"
   SKIP_MLX_TTS="$7"
   SWIFT_WORK_ROOT="$8"
-  PRODUCT=OpenClaw
-  MLX_TTS_HELPER_PRODUCT=openclaw-mlx-tts
+  PRODUCT=Carapace
+  MLX_TTS_HELPER_PRODUCT=carapace-mlx-tts
   BUILD_ROOT="$ROOT_DIR/apps/macos/.build"
   MLX_TTS_HELPER_BUILD_ROOT="$ROOT_DIR/apps/macos-mlx-tts/.build"
   BUILD_PATH="$(build_path_for_arch "$arch")"

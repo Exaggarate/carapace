@@ -1,6 +1,6 @@
 // Defines runtime model metadata supplied by provider plugins.
-import type { ModelCatalogContextWindowOption } from "@openclaw/model-catalog-core/model-catalog-types";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { ModelCatalogContextWindowOption } from "@carapace/model-catalog-core/model-catalog-types";
+import type { Model } from "carapace/plugin-sdk/llm";
 import type { ModelCompatConfig, ModelMediaInputConfig } from "../config/types.models.js";
 import type { ProviderThinkingProfile } from "./provider-thinking.types.js";
 

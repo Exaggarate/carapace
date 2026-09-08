@@ -5,7 +5,7 @@ import {
   type Context,
   type Model,
   type Tool,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { resolveFirstGithubToken } from "./auth.js";
@@ -13,16 +13,16 @@ import { resolveCopilotRuntimeAuth } from "./runtime-auth.js";
 import { wrapCopilotProviderStream } from "./stream.js";
 
 const LIVE =
-  process.env.OPENCLAW_LIVE_TEST === "1" ||
+  process.env.CARAPACE_LIVE_TEST === "1" ||
   process.env.LIVE === "1" ||
   process.env.GITHUB_COPILOT_LIVE_TEST === "1";
 const ENV_GITHUB_TOKEN =
-  process.env.OPENCLAW_LIVE_GITHUB_COPILOT_TOKEN ??
+  process.env.CARAPACE_LIVE_GITHUB_COPILOT_TOKEN ??
   process.env.COPILOT_GITHUB_TOKEN ??
   process.env.GH_TOKEN ??
   process.env.GITHUB_TOKEN ??
   "";
-const LIVE_MODEL_ID = process.env.OPENCLAW_LIVE_GITHUB_COPILOT_MODEL?.trim() || "gpt-5.4";
+const LIVE_MODEL_ID = process.env.CARAPACE_LIVE_GITHUB_COPILOT_MODEL?.trim() || "gpt-5.4";
 const describeLive = LIVE ? describe : describe.skip;
 const TOOL_ARGUMENT_MARKER = `copilot-stream-arguments-${"x".repeat(128)}`;
 
@@ -141,7 +141,7 @@ describeLive("github-copilot connection-bound Responses IDs live", () => {
     const candidates = await resolveGithubTokenCandidates();
     if (candidates.length === 0) {
       skip(
-        "No GitHub Copilot token found in env vars OPENCLAW_LIVE_GITHUB_COPILOT_TOKEN / COPILOT_GITHUB_TOKEN / GH_TOKEN / GITHUB_TOKEN or the github-copilot auth profile",
+        "No GitHub Copilot token found in env vars CARAPACE_LIVE_GITHUB_COPILOT_TOKEN / COPILOT_GITHUB_TOKEN / GH_TOKEN / GITHUB_TOKEN or the github-copilot auth profile",
       );
       return;
     }

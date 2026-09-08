@@ -1,7 +1,7 @@
 // Agent scope tests cover which per-agent fields may flatten into runtime defaults.
 import { describe, expect, it, vi } from "vitest";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   AgentSelectionRequiredError,
   listAgentEntriesWithSource,
@@ -27,24 +27,24 @@ describe("agent roster resolution", () => {
 
     expect(resolveConfiguredAgentId(cfg, "ops")).toBe("ops");
     expect(() => resolveConfiguredAgentId(cfg, "nope-zzz")).toThrow(
-      'Unknown agent id "nope-zzz". Run openclaw agents list to see configured agents.',
+      'Unknown agent id "nope-zzz". Run carapace agents list to see configured agents.',
     );
   });
 
   it("keeps the guidance runnable under a profile", () => {
     const cfg = { agents: { entries: { main: {}, ops: {} } } };
-    const previous = process.env.OPENCLAW_PROFILE;
-    process.env.OPENCLAW_PROFILE = "testprof";
+    const previous = process.env.CARAPACE_PROFILE;
+    process.env.CARAPACE_PROFILE = "testprof";
     try {
       // A hint the operator cannot paste back is worse than none, so the profile must survive.
       expect(() => resolveConfiguredAgentId(cfg, "nope-zzz")).toThrow(
-        "Run openclaw --profile testprof agents list to see configured agents.",
+        "Run carapace --profile testprof agents list to see configured agents.",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_PROFILE;
+        delete process.env.CARAPACE_PROFILE;
       } else {
-        process.env.OPENCLAW_PROFILE = previous;
+        process.env.CARAPACE_PROFILE = previous;
       }
     }
   });
@@ -94,7 +94,7 @@ describe("agent roster resolution", () => {
 
   const ambientOwnerCases: Array<{
     name: string;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     requestedAgentId?: string;
     expected: string;
   }> = [
@@ -105,7 +105,7 @@ describe("agent roster resolution", () => {
           defaults: { systemAgent: { agentId: "beta" } },
           entries: { alpha: { default: true }, beta: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expected: "beta",
     },
     {
@@ -115,19 +115,19 @@ describe("agent roster resolution", () => {
           defaults: { systemAgent: { agentId: "beta" } },
           entries: { alpha: { default: true }, beta: {} },
         },
-      }).config as OpenClawConfig,
+      }).config as CarapaceConfig,
       expected: "beta",
     },
     {
       name: "legacy marker without a configured system agent",
       config: {
         agents: { entries: { alpha: { default: true }, beta: {} } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       expected: "alpha",
     },
     {
       name: "sole agent",
-      config: { agents: { entries: { solo: {} } } } satisfies OpenClawConfig,
+      config: { agents: { entries: { solo: {} } } } satisfies CarapaceConfig,
       expected: "solo",
     },
     {
@@ -137,7 +137,7 @@ describe("agent roster resolution", () => {
           defaults: { systemAgent: { agentId: "beta" } },
           entries: { alpha: { default: true }, beta: {}, gamma: {} },
         },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       requestedAgentId: " GAMMA ",
       expected: "gamma",
     },
@@ -154,7 +154,7 @@ describe("agent roster resolution", () => {
   it("fails closed with context when an ambient owner is ambiguous", () => {
     const ownerlessFleet = {
       agents: { ownership: "explicit" as const, entries: { ops: {}, research: {} } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(tryResolveAmbientOwnerAgentId(ownerlessFleet)).toBeUndefined();
     expect(() => resolveAmbientOwnerAgentId(ownerlessFleet)).toThrow(AgentSelectionRequiredError);
@@ -176,11 +176,11 @@ describe("agent roster resolution", () => {
     const config = {
       agents: {
         defaults: { systemAgent: { agentId: "beta" } },
-        entries: { alpha: { default: true }, beta: { agentDir: "/tmp/openclaw-beta-agent" } },
+        entries: { alpha: { default: true }, beta: { agentDir: "/tmp/carapace-beta-agent" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
-    expect(resolveDefaultAgentDir(config)).toBe("/tmp/openclaw-beta-agent");
+    expect(resolveDefaultAgentDir(config)).toBe("/tmp/carapace-beta-agent");
   });
 
   it("preserves legacy default ownership for non-explicit CLI operations", () => {
@@ -208,7 +208,7 @@ describe("agent roster resolution", () => {
       agents: {
         entries: { ops: { default: true }, research: {} },
       },
-    }).config as OpenClawConfig;
+    }).config as CarapaceConfig;
 
     expect(cfg.agents?.entries?.ops?.default).toBeUndefined();
     expect(resolveAgentOperationAgentId(cfg)).toBe("ops");
@@ -262,7 +262,7 @@ describe("agent roster resolution", () => {
         defaults: { workspace: "/srv/ops" },
         entries: { ops: { default: true }, research: {} },
       },
-    }).config as OpenClawConfig;
+    }).config as CarapaceConfig;
 
     expect(cfg.agents?.entries?.ops?.default).toBeUndefined();
     expect(cfg.agents?.entries?.ops?.workspace).toBeUndefined();
@@ -271,7 +271,7 @@ describe("agent roster resolution", () => {
   });
 
   it("keeps a raw legacy marker owner on the inherited workspace", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { workspace: "/srv/ops" },
         entries: { ops: { default: true }, research: {} },
@@ -283,12 +283,12 @@ describe("agent roster resolution", () => {
   });
 
   it("keeps the implicit default workspace inside an overridden state directory", () => {
-    const stateDir = "/srv/openclaw-scratch";
+    const stateDir = "/srv/carapace-scratch";
 
     expect(
       resolveAgentWorkspaceDir({}, "main", {
         HOME: "/home/operator",
-        OPENCLAW_STATE_DIR: stateDir,
+        CARAPACE_STATE_DIR: stateDir,
       }),
     ).toBe(`${stateDir}/workspace`);
   });
@@ -299,7 +299,7 @@ describe("agent roster resolution", () => {
       expect(
         tryResolveDefaultAgentId({
           agents: { entries: { alpha: { default: marker } } },
-        } as unknown as OpenClawConfig),
+        } as unknown as CarapaceConfig),
       ).toBe("alpha");
     }
   });
@@ -308,7 +308,7 @@ describe("agent roster resolution", () => {
     const entry = JSON.parse('{"__proto__":{"tools":{"allow":["*"]}}}') as Record<string, unknown>;
     const [listed] = listAgentEntriesWithSource({
       agents: { entries: { ops: entry } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     expect(listed).toBeDefined();
     const listedEntry = listed!.entry;
 
@@ -323,7 +323,7 @@ describe("agent roster resolution", () => {
 
 describe("resolveAgentConfig model policy", () => {
   it("keeps an empty per-agent policy inherited instead of flattening it", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { modelPolicy: { allow: ["openai/gpt-5.5"] } },
         list: [{ id: "main", modelPolicy: {} }],
@@ -334,7 +334,7 @@ describe("resolveAgentConfig model policy", () => {
   });
 
   it("returns an explicit per-agent allowlist override", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { modelPolicy: { allow: ["openai/gpt-5.5"] } },
         list: [{ id: "main", modelPolicy: { allow: ["openai/gpt-5.6-sol"] } }],

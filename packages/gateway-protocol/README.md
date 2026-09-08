@@ -1,22 +1,22 @@
-# `@openclaw/gateway-protocol`
+# `@carapace/gateway-protocol`
 
-Typed schemas, inferred TypeScript types, and runtime validators for the OpenClaw
+Typed schemas, inferred TypeScript types, and runtime validators for the Carapace
 Gateway WebSocket protocol.
 
 The current wire protocol is version 4. General clients must use v4; authenticated
 node clients and lightweight probes may use the N-1 window during rolling upgrades.
-See the [Gateway protocol specification](https://docs.openclaw.ai/gateway/protocol)
+See the [Gateway protocol specification](../../docs/gateway/protocol.md)
 for transport, authentication, roles, scopes, and complete frame examples.
 
 ## Versioning
 
-Package versions follow the OpenClaw calendar release train:
+Package versions follow the Carapace calendar release train:
 `YYYY.M.PATCH`, with the same prerelease suffix when applicable. A package version
-therefore identifies the OpenClaw source release that produced the schemas; it is
+therefore identifies the Carapace source release that produced the schemas; it is
 not the wire protocol number.
 
 The wire protocol integer is versioned separately. Its current value is exported
-as `PROTOCOL_VERSION` from `@openclaw/gateway-protocol/version`. Gateway protocol
+as `PROTOCOL_VERSION` from `@carapace/gateway-protocol/version`. Gateway protocol
 changes are additive first. An incompatible wire change requires an explicit
 protocol-version decision and coordinated client follow-through. See
 [`CHANGELOG.md`](./CHANGELOG.md) for the wire and schema history.
@@ -26,32 +26,32 @@ protocol-version decision and coordinated client follow-through. See
 Use the verified stable release with an exact pin:
 
 ```bash
-npm install --save-exact @openclaw/gateway-protocol@2026.8.1
+npm install --save-exact @carapace/gateway-protocol@2026.8.1
 ```
 
 This release declares Node.js `>=22.19.0`. See the canonical
-[installation guide](https://docs.openclaw.ai/gateway/clients#install-the-packages)
+[installation guide](../../docs/gateway/clients.md#install-the-packages)
 for the matching client package, package/wire-version rules, and recovery from
 reserved `0.0.0` artifacts. Test it with the Gateway version you deploy; the root
-`openclaw` CLI has its own package versions and dist-tags.
+`carapace` CLI has its own package versions and dist-tags.
 
 ## Entry points
 
-- `@openclaw/gateway-protocol` exports runtime validators, selected schemas, error
+- `@carapace/gateway-protocol` exports runtime validators, selected schemas, error
   formatting, and their TypeScript types. This is the main TypeBox-backed entry.
-- `@openclaw/gateway-protocol/schema` exports the TypeBox schema graph, including
+- `@carapace/gateway-protocol/schema` exports the TypeBox schema graph, including
   the `ProtocolSchemas` registry used by generators.
-- `@openclaw/gateway-protocol/frame-guards` exports dependency-free structural
+- `@carapace/gateway-protocol/frame-guards` exports dependency-free structural
   guards for gateway event and response envelopes.
-- `@openclaw/gateway-protocol/client-info` exports client ID, mode, and capability
+- `@carapace/gateway-protocol/client-info` exports client ID, mode, and capability
   registries plus normalization helpers.
-- `@openclaw/gateway-protocol/connect-error-details` exports structured connect
+- `@carapace/gateway-protocol/connect-error-details` exports structured connect
   error readers and recovery metadata.
-- `@openclaw/gateway-protocol/gateway-error-details` exports helpers for reading
+- `@carapace/gateway-protocol/gateway-error-details` exports helpers for reading
   structured details from general gateway errors.
-- `@openclaw/gateway-protocol/startup-unavailable` exports startup retry constants
+- `@carapace/gateway-protocol/startup-unavailable` exports startup retry constants
   and helpers.
-- `@openclaw/gateway-protocol/version` exports the current and minimum accepted
+- `@carapace/gateway-protocol/version` exports the current and minimum accepted
   protocol versions.
 
 The `frame-guards`, `client-info`, `connect-error-details`, `gateway-error-details`,
@@ -66,7 +66,7 @@ The compiled validators are callable type guards. Their `errors` property contai
 the most recent validation errors.
 
 ```ts
-import { formatValidationErrors, validateRequestFrame } from "@openclaw/gateway-protocol";
+import { formatValidationErrors, validateRequestFrame } from "@carapace/gateway-protocol";
 
 const frame: unknown = JSON.parse(inboundText);
 
@@ -88,7 +88,7 @@ check dispatch-critical envelope fields and intentionally allow additive payload
 fields.
 
 ```ts
-import { isGatewayEventFrame } from "@openclaw/gateway-protocol/frame-guards";
+import { isGatewayEventFrame } from "@carapace/gateway-protocol/frame-guards";
 
 const frame: unknown = JSON.parse(inboundText);
 
@@ -102,8 +102,8 @@ if (isGatewayEventFrame(frame)) {
 Protocol levels and client capabilities live in TypeBox-free entry points.
 
 ```ts
-import { GATEWAY_CLIENT_CAPS } from "@openclaw/gateway-protocol/client-info";
-import { MIN_CLIENT_PROTOCOL_VERSION, PROTOCOL_VERSION } from "@openclaw/gateway-protocol/version";
+import { GATEWAY_CLIENT_CAPS } from "@carapace/gateway-protocol/client-info";
+import { MIN_CLIENT_PROTOCOL_VERSION, PROTOCOL_VERSION } from "@carapace/gateway-protocol/version";
 
 const handshake = {
   minProtocol: MIN_CLIENT_PROTOCOL_VERSION,
@@ -152,11 +152,11 @@ boundary before reading nested values.
 
 ### Machine-readable schema
 
-[`protocol.schema.json`](https://unpkg.com/@openclaw/gateway-protocol@2026.8.1/protocol.schema.json)
+[`protocol.schema.json`](https://unpkg.com/@carapace/gateway-protocol@2026.8.1/protocol.schema.json)
 ships in the npm tarball as the generated machine-readable
 contract. It contains the frame union, named schema definitions, and core method
 metadata. It is generated during `prepack` and is not committed to the repository.
-Download it as a file; `@openclaw/gateway-protocol/protocol.schema.json` is not an
+Download it as a file; `@carapace/gateway-protocol/protocol.schema.json` is not an
 exported package import subpath.
 
 ### Method discovery

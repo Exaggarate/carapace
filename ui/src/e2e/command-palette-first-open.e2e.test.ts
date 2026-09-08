@@ -35,7 +35,7 @@ suite.define(() => {
         await paletteModule.request;
         expect(await shell.getAttribute("aria-label")).toBe("Loading…");
         await page
-          .locator("openclaw-router-outlet .lazy-view-state--loading")
+          .locator("carapace-router-outlet .lazy-view-state--loading")
           .waitFor({ state: "attached" });
         expect(await shell.locator(".lazy-view-state--loading").count()).toBe(0);
 

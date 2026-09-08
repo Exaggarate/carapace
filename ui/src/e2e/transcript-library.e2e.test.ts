@@ -44,7 +44,7 @@ suite.define(() => {
         await page.goto(
           `${suite.server.baseUrl}settings/advanced?section=transcripts#config-section-transcripts`,
         );
-        const capture = page.locator("openclaw-meeting-capture-settings");
+        const capture = page.locator("carapace-meeting-capture-settings");
         await capture.getByRole("button", { name: "Add source", exact: true }).click();
         const redirected = new URL(page.url());
         expect(redirected.pathname).toBe("/settings/communications");
@@ -217,7 +217,7 @@ suite.define(() => {
         await reader.getByRole("button", { name: "Download JSONL" }).click();
         await reader.getByRole("alert").filter({ hasText: "Download failed" }).waitFor();
         await page.getByRole("link", { name: "Meeting capture", exact: true }).click();
-        const capture = page.locator("openclaw-meeting-capture-settings");
+        const capture = page.locator("carapace-meeting-capture-settings");
         await capture.getByText("Not active", { exact: true }).waitFor();
         await page.screenshot({
           path: path.join(suite.artifactDir, "meeting-capture-settings.png"),

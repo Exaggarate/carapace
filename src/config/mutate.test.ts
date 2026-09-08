@@ -30,11 +30,11 @@ import {
   setRuntimeConfigSnapshot,
   setRuntimeConfigSnapshotRefreshHandler,
 } from "./runtime-snapshot.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "./types.js";
 
 type MockValidationIssue = { path: string; message: string };
 type MockValidationResult =
-  | { ok: true; config: OpenClawConfig; warnings: MockValidationIssue[] }
+  | { ok: true; config: CarapaceConfig; warnings: MockValidationIssue[] }
   | { ok: false; issues: MockValidationIssue[]; warnings: MockValidationIssue[] };
 type ConfigIOReadForWrite = ReturnType<
   typeof import("./io.js").createConfigIO
@@ -56,7 +56,7 @@ const ioMocks = vi.hoisted(() => {
   };
 });
 const validationMocks = vi.hoisted(() => ({
-  validateConfigObjectWithPlugins: vi.fn((config: OpenClawConfig): MockValidationResult => ({
+  validateConfigObjectWithPlugins: vi.fn((config: CarapaceConfig): MockValidationResult => ({
     ok: true,
     config,
     warnings: [],
@@ -91,15 +91,15 @@ function createSnapshot(params: {
   hash: string;
   path?: string;
   parsed?: unknown;
-  sourceConfig: OpenClawConfig;
-  runtimeConfig?: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  runtimeConfig?: CarapaceConfig;
 }): ConfigFileSnapshot {
   const runtimeConfig = (params.runtimeConfig ??
     params.sourceConfig) as ConfigFileSnapshot["config"];
   const sourceConfig = params.sourceConfig as ConfigFileSnapshot["sourceConfig"];
   const parsed = params.parsed ?? params.sourceConfig;
   return {
-    path: params.path ?? "/tmp/openclaw.json",
+    path: params.path ?? "/tmp/carapace.json",
     exists: true,
     raw: `${JSON.stringify(parsed, null, 2)}\n`,
     parsed,
@@ -116,8 +116,8 @@ function createSnapshot(params: {
 }
 
 async function createPluginIncludeFixture(home: string) {
-  const configPath = path.join(home, ".openclaw", "openclaw.json");
-  const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+  const configPath = path.join(home, ".carapace", "carapace.json");
+  const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
   await fs.mkdir(path.dirname(pluginsPath), { recursive: true });
   await fs.writeFile(
     configPath,
@@ -152,8 +152,8 @@ async function expectPluginIncludeMutationConflict(
 }
 
 describe("config mutate helpers", () => {
-  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-config-mutate-" });
-  const originalNixMode = process.env.OPENCLAW_NIX_MODE;
+  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "carapace-config-mutate-" });
+  const originalNixMode = process.env.CARAPACE_NIX_MODE;
 
   beforeAll(async () => {
     await suiteRootTracker.setup();
@@ -161,9 +161,9 @@ describe("config mutate helpers", () => {
 
   afterAll(async () => {
     if (originalNixMode === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+      delete process.env.CARAPACE_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = originalNixMode;
+      process.env.CARAPACE_NIX_MODE = originalNixMode;
     }
     await suiteRootTracker.cleanup();
   });
@@ -172,7 +172,7 @@ describe("config mutate helpers", () => {
     vi.clearAllMocks();
     resetConfigRuntimeState();
     validationMocks.validateConfigObjectWithPlugins.mockImplementation(
-      (config: OpenClawConfig) => ({
+      (config: CarapaceConfig) => ({
         ok: true,
         config,
         warnings: [],
@@ -182,7 +182,7 @@ describe("config mutate helpers", () => {
       (snapshot: { hash?: string }) => snapshot.hash ?? null,
     );
     fileLockMocks.withFileLock.mockImplementation(async (_filePath, _options, fn) => await fn());
-    delete process.env.OPENCLAW_NIX_MODE;
+    delete process.env.CARAPACE_NIX_MODE;
   });
 
   it("mutates source config with optimistic hash protection", async () => {
@@ -297,12 +297,12 @@ describe("config mutate helpers", () => {
   it("preserves config path ownership across transform retries", async () => {
     const initial = createSnapshot({
       hash: "hash-1",
-      path: "/tmp/first-openclaw.json",
+      path: "/tmp/first-carapace.json",
       sourceConfig: { agents: { list: [] } },
     });
     const fresh = createSnapshot({
       hash: "hash-2",
-      path: "/tmp/second-openclaw.json",
+      path: "/tmp/second-carapace.json",
       sourceConfig: { agents: { list: [] } },
     });
     ioMocks.readConfigFileSnapshotForWrite
@@ -316,7 +316,7 @@ describe("config mutate helpers", () => {
       });
     ioMocks.writeConfigFile.mockRejectedValueOnce(new ConfigMutationConflictError("stale"));
 
-    const transform = vi.fn((config: OpenClawConfig) => ({ nextConfig: config }));
+    const transform = vi.fn((config: CarapaceConfig) => ({ nextConfig: config }));
 
     await expect(
       transformConfigFileWithRetry({
@@ -333,12 +333,12 @@ describe("config mutate helpers", () => {
   it("captures retry ownership before checking a caller base hash", async () => {
     const initial = createSnapshot({
       hash: "hash-1",
-      path: "/tmp/first-openclaw.json",
+      path: "/tmp/first-carapace.json",
       sourceConfig: { agents: { list: [] } },
     });
     const fresh = createSnapshot({
       hash: "hash-2",
-      path: "/tmp/second-openclaw.json",
+      path: "/tmp/second-carapace.json",
       sourceConfig: { agents: { list: [] } },
     });
     ioMocks.readConfigFileSnapshotForWrite
@@ -356,7 +356,7 @@ describe("config mutate helpers", () => {
           ownedConfigPathForWrite: fresh.path,
         },
       });
-    const transform = vi.fn((config: OpenClawConfig) => ({ nextConfig: config }));
+    const transform = vi.fn((config: CarapaceConfig) => ({ nextConfig: config }));
 
     await expect(
       transformConfigFileWithRetry({
@@ -396,7 +396,7 @@ describe("config mutate helpers", () => {
     await expect(
       transformConfigFileWithRetry({
         transform(config) {
-          activeConfigPath = "/tmp/second-openclaw.json";
+          activeConfigPath = "/tmp/second-carapace.json";
           return { nextConfig: config };
         },
       }),
@@ -513,7 +513,7 @@ describe("config mutate helpers", () => {
     "diagnoses %s config lock failures at the config directory",
     async (code) => {
       const configDir = await suiteRootTracker.make(`lock-permission-${code.toLowerCase()}`);
-      const configPath = path.join(configDir, "openclaw.json");
+      const configPath = path.join(configDir, "carapace.json");
       const lockPath = `${configPath}.lock`;
       const failure = Object.assign(new Error(`${code}: permission denied, open '${lockPath}'`), {
         code,
@@ -524,7 +524,7 @@ describe("config mutate helpers", () => {
 
       await expect(replaceConfigFile({ snapshot, nextConfig: {} })).rejects.toMatchObject({
         name: "Error",
-        message: `OpenClaw cannot write to the config directory ${configDir}. Fix its ownership or permissions, then try again. Underlying error: ${failure.message}`,
+        message: `Carapace cannot write to the config directory ${configDir}. Fix its ownership or permissions, then try again. Underlying error: ${failure.message}`,
         cause: failure,
       });
     },
@@ -538,8 +538,8 @@ describe("config mutate helpers", () => {
       const configuredDir = path.join(root, "configured");
       await fs.mkdir(realConfigDir);
       await fs.symlink(realConfigDir, configuredDir);
-      const configPath = path.join(configuredDir, "openclaw.json");
-      const lockPath = path.join(realConfigDir, "openclaw.json.lock");
+      const configPath = path.join(configuredDir, "carapace.json");
+      const lockPath = path.join(realConfigDir, "carapace.json.lock");
       const failure = Object.assign(new Error(`EACCES: permission denied, open '${lockPath}'`), {
         code: "EACCES",
         path: lockPath,
@@ -548,7 +548,7 @@ describe("config mutate helpers", () => {
       const snapshot = createSnapshot({ hash: "hash-1", path: configPath, sourceConfig: {} });
 
       await expect(replaceConfigFile({ snapshot, nextConfig: {} })).rejects.toMatchObject({
-        message: `OpenClaw cannot write to the config directory ${configuredDir}. Fix its ownership or permissions, then try again. Underlying error: ${failure.message}`,
+        message: `Carapace cannot write to the config directory ${configuredDir}. Fix its ownership or permissions, then try again. Underlying error: ${failure.message}`,
         cause: failure,
       });
     },
@@ -556,7 +556,7 @@ describe("config mutate helpers", () => {
 
   it("preserves a permission failure raised outside the config directory", async () => {
     const configDir = await suiteRootTracker.make("lock-unrelated-permission");
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "carapace.json");
     // The caller's mutation runs inside the lock scope, so its own EACCES must not be
     // relabelled as a config-directory permission problem.
     const failure = Object.assign(
@@ -576,12 +576,12 @@ describe("config mutate helpers", () => {
     new ConfigMutationConflictError("stale"),
     Object.assign(new Error("lock timed out"), {
       code: FILE_LOCK_TIMEOUT_ERROR_CODE,
-      lockPath: "/tmp/openclaw.json.lock",
+      lockPath: "/tmp/carapace.json.lock",
     }),
     new Error("unexpected lock failure"),
   ])("preserves non-permission config lock failures", async (failure) => {
     const configDir = await suiteRootTracker.make("lock-error");
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "carapace.json");
     fileLockMocks.withFileLock.mockRejectedValueOnce(failure);
     const snapshot = createSnapshot({ hash: "hash-1", path: configPath, sourceConfig: {} });
 
@@ -608,7 +608,7 @@ describe("config mutate helpers", () => {
 
   it("rejects replace attempts when the active config path changed", async () => {
     const snapshot = createSnapshot({
-      path: "/tmp/second-openclaw.json",
+      path: "/tmp/second-carapace.json",
       hash: "same-hash",
       sourceConfig: { gateway: { port: 18789 } },
     });
@@ -621,14 +621,14 @@ describe("config mutate helpers", () => {
       replaceConfigFile({
         baseHash: snapshot.hash,
         nextConfig: { gateway: { port: 19002 } },
-        writeOptions: { expectedConfigPath: "/tmp/first-openclaw.json" },
+        writeOptions: { expectedConfigPath: "/tmp/first-carapace.json" },
       }),
     ).rejects.toThrow("config path changed since last load");
     expect(ioMocks.writeConfigFile).not.toHaveBeenCalled();
   });
 
   it("refuses replace writes in Nix mode before touching disk", async () => {
-    process.env.OPENCLAW_NIX_MODE = "1";
+    process.env.CARAPACE_NIX_MODE = "1";
     const snapshot = createSnapshot({
       hash: "hash-1",
       sourceConfig: { gateway: { port: 18789 } },
@@ -643,14 +643,14 @@ describe("config mutate helpers", () => {
         nextConfig: { gateway: { port: 19001 } },
       }),
     ).rejects.toThrow(
-      "Agent-first Nix setup: https://github.com/openclaw/nix-openclaw#quick-start",
+      "Agent-first Nix setup: https://github.com/Exaggarate/carapace/nix-carapace#quick-start",
     );
 
     expect(ioMocks.writeConfigFile).not.toHaveBeenCalled();
   });
 
   it("refuses mutate writes in Nix mode before touching disk", async () => {
-    process.env.OPENCLAW_NIX_MODE = "1";
+    process.env.CARAPACE_NIX_MODE = "1";
     const snapshot = createSnapshot({
       hash: "hash-1",
       sourceConfig: { gateway: { port: 18789 } },
@@ -666,7 +666,7 @@ describe("config mutate helpers", () => {
           draft.gateway = { ...draft.gateway, port: 19001 };
         },
       }),
-    ).rejects.toThrow("OpenClaw Nix overview: https://docs.openclaw.ai/install/nix");
+    ).rejects.toThrow("Carapace Nix overview: https://github.com/Exaggarate/carapace");
 
     expect(ioMocks.writeConfigFile).not.toHaveBeenCalled();
   });
@@ -737,7 +737,7 @@ describe("config mutate helpers", () => {
     "refuses a shared fragment target with a %s sibling owner",
     async (ownership) => {
       const home = await suiteRootTracker.make("shared-include-owner");
-      const configPath = path.join(home, "openclaw.json");
+      const configPath = path.join(home, "carapace.json");
       const fragmentPath = path.join(home, "fragment.json5");
       const siblingTarget = ownership === "alias" ? "./alias.json5" : "./fragment.json5";
       if (ownership === "alias") {
@@ -755,7 +755,7 @@ describe("config mutate helpers", () => {
       await fs.writeFile(configPath, rootRaw);
       await fs.writeFile(fragmentPath, fragmentRaw);
       const configIO = createActualConfigIO({
-        env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath },
+        env: { ...process.env, CARAPACE_CONFIG_PATH: configPath },
         observe: false,
         pluginValidation: "skip",
       });
@@ -783,10 +783,10 @@ describe("config mutate helpers", () => {
 
   it("rejects a nested delegate shadowed by a same-path include array", async () => {
     const home = await suiteRootTracker.make("same-path-include-array");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const delegatePath = path.join(home, ".openclaw", "delegate.json5");
-    const nestedPath = path.join(home, ".openclaw", "nested.json5");
-    const overridePath = path.join(home, ".openclaw", "override.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const delegatePath = path.join(home, ".carapace", "delegate.json5");
+    const nestedPath = path.join(home, ".carapace", "nested.json5");
+    const overridePath = path.join(home, ".carapace", "override.json5");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.writeFile(
       configPath,
@@ -797,7 +797,7 @@ describe("config mutate helpers", () => {
     await fs.writeFile(nestedPath, nestedRaw);
     await fs.writeFile(overridePath, JSON.stringify({ entries: { demo: { enabled: false } } }));
     const configIO = createActualConfigIO({
-      env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath },
+      env: { ...process.env, CARAPACE_CONFIG_PATH: configPath },
       observe: false,
       pluginValidation: "skip",
     });
@@ -831,10 +831,10 @@ describe("config mutate helpers", () => {
 
   it("declines a parent include when both changed children are nested includes", async () => {
     const home = await suiteRootTracker.make("nested-sibling-includes");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const entriesPath = path.join(home, ".openclaw", "entries.json5");
-    const alphaPath = path.join(home, ".openclaw", "agent-alpha.json5");
-    const betaPath = path.join(home, ".openclaw", "agent-beta.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const entriesPath = path.join(home, ".carapace", "entries.json5");
+    const alphaPath = path.join(home, ".carapace", "agent-alpha.json5");
+    const betaPath = path.join(home, ".carapace", "agent-beta.json5");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     const rootRaw = JSON.stringify({ agents: { entries: { $include: "./entries.json5" } } });
     await fs.writeFile(configPath, rootRaw);
@@ -848,12 +848,12 @@ describe("config mutate helpers", () => {
     const betaRaw = JSON.stringify({ model: "beta-old" });
     await fs.writeFile(betaPath, betaRaw);
     const configIO = createActualConfigIO({
-      env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath },
+      env: { ...process.env, CARAPACE_CONFIG_PATH: configPath },
       observe: false,
       pluginValidation: "skip",
     });
     const { snapshot, writeOptions } = await configIO.readConfigFileSnapshotForWrite();
-    const nextConfig = structuredClone(snapshot.sourceConfig) as OpenClawConfig;
+    const nextConfig = structuredClone(snapshot.sourceConfig) as CarapaceConfig;
     nextConfig.agents!.entries!.alpha!.model = "alpha-new";
     nextConfig.agents!.entries!.beta!.model = "beta-new";
 
@@ -885,8 +885,8 @@ describe("config mutate helpers", () => {
 
   it("writes through an include beneath a numeric object key", async () => {
     const home = await suiteRootTracker.make("numeric-object-key-include");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const guildPath = path.join(home, ".openclaw", "guild.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const guildPath = path.join(home, ".carapace", "guild.json5");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.writeFile(
       configPath,
@@ -898,12 +898,12 @@ describe("config mutate helpers", () => {
     );
     await fs.writeFile(guildPath, JSON.stringify({ requireMention: true }));
     const configIO = createActualConfigIO({
-      env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath },
+      env: { ...process.env, CARAPACE_CONFIG_PATH: configPath },
       observe: false,
       pluginValidation: "skip",
     });
     const { snapshot, writeOptions } = await configIO.readConfigFileSnapshotForWrite();
-    const nextConfig = structuredClone(snapshot.sourceConfig) as OpenClawConfig;
+    const nextConfig = structuredClone(snapshot.sourceConfig) as CarapaceConfig;
     nextConfig.channels!.discord!.guilds!["123456789"]!.requireMention = false;
 
     await replaceConfigFile({
@@ -1057,7 +1057,7 @@ describe("config mutate helpers", () => {
           entries: {
             old: {
               enabled: true,
-              config: { token: "${OPENCLAW_TEST_PLUGIN_TOKEN}" },
+              config: { token: "${CARAPACE_TEST_PLUGIN_TOKEN}" },
             },
           },
         },
@@ -1104,7 +1104,7 @@ describe("config mutate helpers", () => {
         snapshot,
         writeOptions: {
           expectedConfigPath: configPath,
-          envSnapshotForRestore: { OPENCLAW_TEST_PLUGIN_TOKEN: "plugin-token-runtime" },
+          envSnapshotForRestore: { CARAPACE_TEST_PLUGIN_TOKEN: "plugin-token-runtime" },
           assertConfigPathForWrite: allowConfigPathWrite,
           includeFileTargetsForWrite: { [pluginsPath]: await resolveIncludeTarget(pluginsPath) },
         },
@@ -1142,7 +1142,7 @@ describe("config mutate helpers", () => {
           },
         },
         io: {
-          env: { OPENCLAW_TEST_PLUGIN_TOKEN: "plugin-token-after-read" },
+          env: { CARAPACE_TEST_PLUGIN_TOKEN: "plugin-token-after-read" },
           readConfigFileSnapshotForWrite: ioMocks.readConfigFileSnapshotForWrite,
           writeConfigFile: ioMocks.writeConfigFile,
         },
@@ -1192,15 +1192,15 @@ describe("config mutate helpers", () => {
       entries?: Record<string, { config?: { token?: string } }>;
       installs?: Record<string, unknown>;
     };
-    expect(persistedPlugins.entries?.old?.config?.token).toBe("${OPENCLAW_TEST_PLUGIN_TOKEN}");
+    expect(persistedPlugins.entries?.old?.config?.token).toBe("${CARAPACE_TEST_PLUGIN_TOKEN}");
     expect(persistedPlugins.entries?.demo).toEqual({ enabled: true });
     expect(persistedPlugins.installs).toBeUndefined();
   });
 
   it("writes a nested single-file agent entry include through to its own file", async () => {
     const home = await suiteRootTracker.make("nested-include");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const agentPath = path.join(home, ".openclaw", "config", "agent-alpha.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const agentPath = path.join(home, ".carapace", "config", "agent-alpha.json5");
     await fs.mkdir(path.dirname(agentPath), { recursive: true });
     const authoredRoot = {
       agents: {
@@ -1223,7 +1223,7 @@ describe("config mutate helpers", () => {
           beta: { model: "beta-model" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const nextConfig = {
       agents: {
         entries: {
@@ -1231,7 +1231,7 @@ describe("config mutate helpers", () => {
           beta: { model: "beta-model" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const snapshot: ConfigFileSnapshot = {
       ...createSnapshot({
         hash: "hash-nested-include",
@@ -1293,7 +1293,7 @@ describe("config mutate helpers", () => {
     "preserves delegation ownership when the intermediate file is %s",
     async (changeAt) => {
       const home = await suiteRootTracker.make("nested-include-chain");
-      const configPath = path.join(home, "openclaw.json");
+      const configPath = path.join(home, "carapace.json");
       const delegatePath = path.join(home, "delegate.json5");
       const leafPath = path.join(home, "leaf.json5");
       const otherPath = path.join(home, "other.json5");
@@ -1306,7 +1306,7 @@ describe("config mutate helpers", () => {
       await fs.writeFile(leafPath, leafRaw);
       await fs.writeFile(otherPath, leafRaw);
       const configIO = createActualConfigIO({
-        env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath },
+        env: { ...process.env, CARAPACE_CONFIG_PATH: configPath },
         observe: false,
         pluginValidation: "skip",
       });
@@ -1352,8 +1352,8 @@ describe("config mutate helpers", () => {
 
   it("writes through a nested include when a read-time migration added keys", async () => {
     const home = await suiteRootTracker.make("nested-include-migrated");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const agentPath = path.join(home, ".openclaw", "config", "agent-alpha.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const agentPath = path.join(home, ".carapace", "config", "agent-alpha.json5");
     await fs.mkdir(path.dirname(agentPath), { recursive: true });
     const authoredRoot = {
       agents: { entries: { alpha: { $include: "./config/agent-alpha.json5" } } },
@@ -1366,10 +1366,10 @@ describe("config mutate helpers", () => {
     );
     const migrated = {
       agents: { entries: { alpha: { bootstrapMaxChars: 25000, default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const nextConfig = {
       agents: { entries: { alpha: { bootstrapMaxChars: 40000, default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const snapshot: ConfigFileSnapshot = {
       ...createSnapshot({
         hash: "hash-nested-include-migrated",
@@ -1431,7 +1431,7 @@ describe("config mutate helpers", () => {
 
   it("declines eligibility for a symlinked external include target", async () => {
     const home = await suiteRootTracker.make("boundary-symlink");
-    const configDir = path.join(home, ".openclaw");
+    const configDir = path.join(home, ".carapace");
     const externalDir = path.join(home, "external");
     await fs.mkdir(configDir, { recursive: true });
     await fs.mkdir(externalDir, { recursive: true });
@@ -1443,7 +1443,7 @@ describe("config mutate helpers", () => {
     );
     const linkPath = path.join(configDir, "agent-alpha.json5");
     await fs.symlink(externalTarget, linkPath);
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "carapace.json");
     const authoredRoot = {
       agents: { entries: { alpha: { $include: "./agent-alpha.json5" } } },
     };
@@ -1455,7 +1455,7 @@ describe("config mutate helpers", () => {
         parsed: authoredRoot,
         sourceConfig: {
           agents: { entries: { alpha: { model: "old-model" } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
       includeProvenance: [
         {
@@ -1473,7 +1473,7 @@ describe("config mutate helpers", () => {
         snapshot,
         nextConfig: {
           agents: { entries: { alpha: { model: "new-model" } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
     ).toBe(false);
   });
@@ -1493,7 +1493,7 @@ describe("config mutate helpers", () => {
         parsed: authoredRoot,
         sourceConfig: {
           agents: { entries: { alpha: { model: "old" }, beta: { model: "beta-model" } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
       includeProvenance: [
         {
@@ -1507,7 +1507,7 @@ describe("config mutate helpers", () => {
     };
     const nextConfig = {
       agents: { entries: { alpha: { model: "new" }, beta: { model: "beta-changed" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await replaceConfigFile({
       snapshot,
@@ -1558,7 +1558,7 @@ describe("config mutate helpers", () => {
     };
     const nextConfig = {
       plugins: { entries: { demo: { enabled: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     ioMocks.readConfigFileSnapshotForWrite
       .mockResolvedValueOnce({
         snapshot,
@@ -1601,8 +1601,8 @@ describe("config mutate helpers", () => {
     async () => {
       const home = await suiteRootTracker.make("missing-include-symlink-escape");
       const outside = await suiteRootTracker.make("missing-include-symlink-outside");
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
-      const linkPath = path.join(home, ".openclaw", "link");
+      const configPath = path.join(home, ".carapace", "carapace.json");
+      const linkPath = path.join(home, ".carapace", "link");
       const pluginsPath = path.join(linkPath, "plugins.json5");
       const outsidePluginsPath = path.join(outside, "plugins.json5");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -1655,8 +1655,8 @@ describe("config mutate helpers", () => {
 
   it("does not overwrite a malformed include changed after its snapshot", async () => {
     const home = await suiteRootTracker.make("malformed-include-concurrent");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const snapshotRaw = "{ malformed";
     const concurrentRaw = "{ differently malformed";
     await fs.mkdir(path.dirname(pluginsPath), { recursive: true });
@@ -1709,8 +1709,8 @@ describe("config mutate helpers", () => {
 
   it("prefers mutation-start include hashes over commit-time reread hashes", async () => {
     const home = await suiteRootTracker.make("include-mutation-start-hash");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const initialRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
     const concurrentRaw = `${JSON.stringify(
       { entries: { concurrent: { enabled: true } } },
@@ -1764,8 +1764,8 @@ describe("config mutate helpers", () => {
 
   it("uses a provided mutation-start snapshot even without write options", async () => {
     const home = await suiteRootTracker.make("include-mutation-start-snapshot");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const concurrentRaw = `${JSON.stringify(
       { entries: { concurrent: { enabled: true } } },
       null,
@@ -1830,7 +1830,7 @@ describe("config mutate helpers", () => {
       snapshot: refreshedSnapshot,
       writeOptions: { expectedConfigPath: configPath },
     });
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: CarapaceConfig = {
       plugins: {
         entries: {
           "strict-plugin": { enabled: true },
@@ -1887,7 +1887,7 @@ describe("config mutate helpers", () => {
   it("rejects direct mutations to external include roots", async () => {
     const home = await suiteRootTracker.make("include-allowed-root");
     const sharedRoot = path.join(home, "shared");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".carapace", "carapace.json");
     const pluginsPath = path.join(sharedRoot, "plugins.json5");
     await fs.mkdir(sharedRoot, { recursive: true });
     await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -1905,7 +1905,7 @@ describe("config mutate helpers", () => {
     });
     const nextConfig = {
       plugins: { entries: { demo: { enabled: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     ioMocks.readConfigFileSnapshotForWrite.mockResolvedValue({
       snapshot: createSnapshot({
         hash: "hash-include-allowed-root-refreshed",
@@ -1927,7 +1927,7 @@ describe("config mutate helpers", () => {
         },
         nextConfig,
         io: {
-          env: { OPENCLAW_INCLUDE_ROOTS: "~/shared" },
+          env: { CARAPACE_INCLUDE_ROOTS: "~/shared" },
           readConfigFileSnapshotForWrite: ioMocks.readConfigFileSnapshotForWrite,
           writeConfigFile: ioMocks.writeConfigFile,
         },
@@ -2091,7 +2091,7 @@ describe("config mutate helpers", () => {
     });
     const nextConfig = {
       plugins: { entries: { demo: { enabled: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     ioMocks.readConfigFileSnapshotForWrite.mockResolvedValue({
       snapshot: createSnapshot({
         hash: "hash-include-managed-refresh-scope-written",
@@ -2102,7 +2102,7 @@ describe("config mutate helpers", () => {
       writeOptions: { expectedConfigPath: configPath },
     });
     const preflight = vi.fn(
-      async (sourceConfig: OpenClawConfig, refreshOptions?: { includeAuthStoreRefs?: boolean }) => {
+      async (sourceConfig: CarapaceConfig, refreshOptions?: { includeAuthStoreRefs?: boolean }) => {
         if (refreshOptions?.includeAuthStoreRefs !== false) {
           throw new Error("unavailable auth-profile SecretRef");
         }
@@ -2142,14 +2142,14 @@ describe("config mutate helpers", () => {
     expect(notifications).toEqual([{ includeAuthStoreRefs: false }]);
     const persisted = JSON.parse(
       await fs.readFile(pluginsPath, "utf-8"),
-    ) as OpenClawConfig["plugins"];
+    ) as CarapaceConfig["plugins"];
     expect(persisted?.entries?.demo?.enabled).toBe(true);
   });
 
   it("uses the published restart env source for isolated managed include writes", async () => {
     const home = await suiteRootTracker.make("include-managed-deferred-restart-env");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const envPath = path.join(home, ".openclaw", "config", "env.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const envPath = path.join(home, ".carapace", "config", "env.json5");
     const envKey = "OC";
     await fs.mkdir(path.dirname(envPath), { recursive: true });
     await fs.writeFile(
@@ -2172,15 +2172,15 @@ describe("config mutate helpers", () => {
     const initialConfig = {
       env: { vars: { [envKey]: "old" } },
       gateway: { auth: { mode: "token" as const, token: "old" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const acceptedRestartConfig = {
       env: { vars: { [envKey]: "live" } },
       gateway: { auth: { mode: "token" as const, token: "live" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const nextConfig = {
       env: { vars: { [envKey]: "next" } },
       gateway: { auth: { mode: "token" as const, token: "live" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const snapshot = createSnapshot({
       hash: "hash-include-managed-deferred-restart-env",
       path: configPath,
@@ -2200,7 +2200,7 @@ describe("config mutate helpers", () => {
         gateway: { auth: { mode: "token", token: "next" } },
       },
     });
-    let preflightSource: OpenClawConfig | undefined;
+    let preflightSource: CarapaceConfig | undefined;
     const releaseOwner = registerManagedRuntimeConfigWriteOwner(
       configPath,
       async (sourceConfig) => {
@@ -2298,8 +2298,8 @@ describe("config mutate helpers", () => {
 
   it("does not overwrite concurrent include edits made during backup rotation", async () => {
     const home = await suiteRootTracker.make("include-backup-concurrent");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const rootConfig = { plugins: { $include: "./config/plugins.json5" } };
     const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
     const concurrentPluginsRaw = `${JSON.stringify(
@@ -2327,8 +2327,8 @@ describe("config mutate helpers", () => {
 
   it("does not write an include after its root ownership changes during backup rotation", async () => {
     const home = await suiteRootTracker.make("include-root-backup-concurrent");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const rootConfig = { plugins: { $include: "./config/plugins.json5" } };
     const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
     const concurrentRootRaw = `${JSON.stringify(
@@ -2357,8 +2357,8 @@ describe("config mutate helpers", () => {
 
   it("does not write an include after its root ownership changes during preflight", async () => {
     const home = await suiteRootTracker.make("include-root-preflight-concurrent");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const rootConfig = { plugins: { $include: "./config/plugins.json5" } };
     const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
     const concurrentRootRaw = `${JSON.stringify(
@@ -2395,8 +2395,8 @@ describe("config mutate helpers", () => {
 
   it("does not write an include after the active config path changes during preflight", async () => {
     const home = await suiteRootTracker.make("include-active-path-preflight-concurrent");
-    const firstConfigPath = path.join(home, "first", "openclaw.json");
-    const secondConfigPath = path.join(home, "second", "openclaw.json");
+    const firstConfigPath = path.join(home, "first", "carapace.json");
+    const secondConfigPath = path.join(home, "second", "carapace.json");
     const pluginsPath = path.join(home, "first", "plugins.json5");
     const rootConfig = { plugins: { $include: "./plugins.json5" } };
     const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
@@ -2455,8 +2455,8 @@ describe("config mutate helpers", () => {
 
   it("rolls back an include write when config path ownership changes during commit", async () => {
     const home = await suiteRootTracker.make("include-active-path-commit-concurrent");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "plugins.json5");
     const rootConfig = { plugins: { $include: "./plugins.json5" } };
     const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
     await fs.mkdir(path.dirname(configPath), { recursive: true });
@@ -2471,7 +2471,7 @@ describe("config mutate helpers", () => {
     let activeConfigPath = configPath;
     const assertConfigPathForWrite = () => {
       if (fsNode.readFileSync(pluginsPath, "utf-8") !== initialPluginsRaw) {
-        activeConfigPath = "/tmp/other-openclaw.json";
+        activeConfigPath = "/tmp/other-carapace.json";
       }
       if (activeConfigPath !== configPath) {
         throw new ConfigMutationConflictError("config path changed since last load", {
@@ -2508,8 +2508,8 @@ describe("config mutate helpers", () => {
       const home = await suiteRootTracker.make(
         `include-post-write-${changeKind.replaceAll(" ", "-")}`,
       );
-      const configPath = path.join(home, "first", "openclaw.json");
-      const otherConfigPath = path.join(home, "second", "openclaw.json");
+      const configPath = path.join(home, "first", "carapace.json");
+      const otherConfigPath = path.join(home, "second", "carapace.json");
       const pluginsPath = path.join(home, "first", "plugins.json5");
       const rootConfig = { plugins: { $include: "./plugins.json5" } };
       const initialPluginsRaw = `${JSON.stringify({ entries: {} }, null, 2)}\n`;
@@ -2569,9 +2569,9 @@ describe("config mutate helpers", () => {
     async () => {
       const home = await suiteRootTracker.make("include-preflight-parent-swap");
       const outside = await suiteRootTracker.make("include-preflight-parent-swap-outside");
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
-      const includeDir = path.join(home, ".openclaw", "config");
-      const movedIncludeDir = path.join(home, ".openclaw", "config-original");
+      const configPath = path.join(home, ".carapace", "carapace.json");
+      const includeDir = path.join(home, ".carapace", "config");
+      const movedIncludeDir = path.join(home, ".carapace", "config-original");
       const pluginsPath = path.join(includeDir, "plugins.json5");
       const outsidePluginsPath = path.join(outside, "plugins.json5");
       await fs.mkdir(includeDir, { recursive: true });
@@ -2675,7 +2675,7 @@ describe("config mutate helpers", () => {
     const initialPluginsRaw = `${JSON.stringify(
       {
         entries: {
-          old: { enabled: true, config: { token: "${OPENCLAW_TEST_INCLUDE_TOKEN}" } },
+          old: { enabled: true, config: { token: "${CARAPACE_TEST_INCLUDE_TOKEN}" } },
         },
       },
       null,
@@ -2689,7 +2689,7 @@ describe("config mutate helpers", () => {
       parsed: { plugins: { $include: "./config/plugins.json5" } },
       sourceConfig: { plugins: { entries: { old: oldEntry } } },
     });
-    const observedSources: OpenClawConfig[] = [];
+    const observedSources: CarapaceConfig[] = [];
 
     try {
       setRuntimeConfigSnapshotRefreshHandler({
@@ -2706,7 +2706,7 @@ describe("config mutate helpers", () => {
           snapshot,
           writeOptions: {
             expectedConfigPath: snapshot.path,
-            envSnapshotForRestore: { OPENCLAW_TEST_INCLUDE_TOKEN: "old-token" },
+            envSnapshotForRestore: { CARAPACE_TEST_INCLUDE_TOKEN: "old-token" },
             assertConfigPathForWrite: allowConfigPathWrite,
             includeFileTargetsForWrite: { [pluginsPath]: await resolveIncludeTarget(pluginsPath) },
           },
@@ -2719,7 +2719,7 @@ describe("config mutate helpers", () => {
             },
           },
           io: {
-            env: { OPENCLAW_TEST_INCLUDE_TOKEN: "new-token" },
+            env: { CARAPACE_TEST_INCLUDE_TOKEN: "new-token" },
             readConfigFileSnapshotForWrite: ioMocks.readConfigFileSnapshotForWrite,
             writeConfigFile: ioMocks.writeConfigFile,
           },
@@ -2735,8 +2735,8 @@ describe("config mutate helpers", () => {
 
   it("does not re-substitute resolved root values during include preflight", async () => {
     const home = await suiteRootTracker.make("include-root-escaped-env");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     await fs.mkdir(path.dirname(pluginsPath), { recursive: true });
     await fs.writeFile(
       configPath,
@@ -2763,7 +2763,7 @@ describe("config mutate helpers", () => {
         plugins: { entries: {} },
       },
     });
-    const observedSources: OpenClawConfig[] = [];
+    const observedSources: CarapaceConfig[] = [];
 
     try {
       setRuntimeConfigSnapshotRefreshHandler({
@@ -2859,10 +2859,10 @@ describe("config mutate helpers", () => {
 
   it("rolls back single-file top-level include writes when runtime refresh fails", async () => {
     const home = await suiteRootTracker.make("include-runtime-refresh-rollback");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
-    const pluginsPath = path.join(home, ".openclaw", "config", "plugins.json5");
+    const configPath = path.join(home, ".carapace", "carapace.json");
+    const pluginsPath = path.join(home, ".carapace", "config", "plugins.json5");
     const env = {} as NodeJS.ProcessEnv;
-    const envKey = "OPENCLAW_TEST_INCLUDE_ROLLBACK_ENV";
+    const envKey = "CARAPACE_TEST_INCLUDE_ROLLBACK_ENV";
     await fs.mkdir(path.dirname(pluginsPath), { recursive: true });
     await fs.writeFile(
       configPath,
@@ -3008,7 +3008,7 @@ describe("config mutate helpers", () => {
           "strict-plugin": { enabled: "yes" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     validationMocks.validateConfigObjectWithPlugins.mockReturnValue({
       ok: false,
       issues: [
@@ -3053,7 +3053,7 @@ describe("config mutate helpers", () => {
         gateway: { mode: "local" },
         ...(persistCanonicalAgentRoster ? { agents: { list: [{ id: "main" }] } } : {}),
       };
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: CarapaceConfig = {
         gateway: { mode: "local" },
         plugins: { entries: {} },
         ...(persistCanonicalAgentRoster ? { agents: { entries: { main: {} } } } : {}),
@@ -3072,7 +3072,7 @@ describe("config mutate helpers", () => {
         snapshot,
         writeOptions: { expectedConfigPath: snapshot.path },
       });
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: CarapaceConfig = {
         ...sourceConfig,
         gateway: { mode: "local", ...(persistCanonicalAgentRoster ? {} : { port: 18789 }) },
         plugins: { entries: { demo: { enabled: true } } },
@@ -3101,9 +3101,9 @@ describe("config mutate helpers", () => {
 
   it("preflights injected root writers before persisting", async () => {
     const home = await suiteRootTracker.make("injected-root-runtime-preflight");
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".carapace", "carapace.json");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
-    const initialConfig = { gateway: { mode: "local" } } satisfies OpenClawConfig;
+    const initialConfig = { gateway: { mode: "local" } } satisfies CarapaceConfig;
     const initialRaw = `${JSON.stringify(initialConfig, null, 2)}\n`;
     await fs.writeFile(configPath, initialRaw, "utf-8");
     const snapshot = createSnapshot({
@@ -3119,8 +3119,8 @@ describe("config mutate helpers", () => {
           token: { source: "exec", provider: "execmain", id: "gateway/token" },
         },
       },
-    } as OpenClawConfig;
-    const injectedWrite = vi.fn(async (config: OpenClawConfig, options?: ConfigWriteOptions) => {
+    } as CarapaceConfig;
+    const injectedWrite = vi.fn(async (config: CarapaceConfig, options?: ConfigWriteOptions) => {
       await options?.preCommitRuntimePreflight?.(config);
       await fs.writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf-8");
       return { persistedHash: "hash-written", persistedConfig: config };
@@ -3170,11 +3170,11 @@ describe("configWriteTargetsIncludeBoundary", () => {
   ];
   const sourceConfig = {
     agents: { entries: { alpha: { model: "old-model" } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   const nestedSnapshot: ConfigFileSnapshot = {
     ...createSnapshot({
       hash: "hash-boundary-probe",
-      path: "/cfg/openclaw.json",
+      path: "/cfg/carapace.json",
       parsed: { agents: { entries: { alpha: { $include: "./config/agent-alpha.json5" } } } },
       sourceConfig,
     }),
@@ -3185,7 +3185,7 @@ describe("configWriteTargetsIncludeBoundary", () => {
     expect(
       configWriteTargetsIncludeBoundary({
         snapshot: nestedSnapshot,
-        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as OpenClawConfig,
+        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as CarapaceConfig,
       }),
     ).toBe(true);
   });
@@ -3199,7 +3199,7 @@ describe("configWriteTargetsIncludeBoundary", () => {
         nextConfig: {
           agents: { entries: { alpha: { model: "new-model" } } },
           wizard: { lastRunCommand: "doctor" },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       }),
     ).toBe(false);
   });
@@ -3210,7 +3210,7 @@ describe("configWriteTargetsIncludeBoundary", () => {
     expect(
       configWriteTargetsIncludeBoundary({
         snapshot: nestedSnapshot,
-        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as OpenClawConfig,
+        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as CarapaceConfig,
         persistCanonicalAgentRoster: true,
       }),
     ).toBe(false);
@@ -3222,7 +3222,7 @@ describe("configWriteTargetsIncludeBoundary", () => {
     expect(
       configWriteTargetsIncludeBoundary({
         snapshot: nestedSnapshot,
-        nextConfig: { agents: { entries: {} } } as OpenClawConfig,
+        nextConfig: { agents: { entries: {} } } as CarapaceConfig,
       }),
     ).toBe(false);
   });
@@ -3237,7 +3237,7 @@ describe("configWriteTargetsIncludeBoundary", () => {
           ...nestedSnapshot,
           includeProvenance: [],
         },
-        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as OpenClawConfig,
+        nextConfig: { agents: { entries: { alpha: { model: "new-model" } } } } as CarapaceConfig,
       }),
     ).toBe(false);
   });

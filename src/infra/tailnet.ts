@@ -1,6 +1,6 @@
 // Discovers local Tailscale tailnet addresses.
-import { isIpInCidr } from "@openclaw/net-policy/ip";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { isIpInCidr } from "@carapace/net-policy/ip";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { listExternalInterfaceAddresses, readNetworkInterfaces } from "./network-interfaces.js";
 
 /** Tailnet addresses discovered on external local interfaces. */

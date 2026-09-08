@@ -34,7 +34,7 @@ describe("ModelProvidersPage profile actions", () => {
     const shell = document.createElement("div");
     shell.className = "shell";
     document.body.append(shell);
-    const toast = shell.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = shell.appendChild(document.createElement("carapace-toast-host"));
     const { context, request, snapshot } = createHarness("main");
     snapshot.hello = {
       type: "hello-ok",
@@ -349,7 +349,7 @@ describe("ModelProvidersPage profile actions", () => {
     });
     const shell = document.body.appendChild(document.createElement("div"));
     shell.className = "shell";
-    const toast = shell.appendChild(document.createElement("openclaw-toast-host"));
+    const toast = shell.appendChild(document.createElement("carapace-toast-host"));
     const page = appendPage(context);
     try {
       const openConfirmation = async () => {
@@ -370,7 +370,7 @@ describe("ModelProvidersPage profile actions", () => {
       expect(requestCount(request, "models.authLogout")).toBe(0);
       modal.querySelector<HTMLButtonElement>("button[autofocus]")!.click();
       await page.updateComplete;
-      expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
       expect(requestCount(request, "models.authLogout")).toBe(0);
 
       for (const invalidate of [
@@ -385,7 +385,7 @@ describe("ModelProvidersPage profile actions", () => {
         const confirm = modal.querySelector<HTMLButtonElement>("button.danger")!;
         invalidate();
         await waitForFast(() =>
-          expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull(),
+          expect(document.body.querySelector("carapace-modal-dialog")).toBeNull(),
         );
         confirm.click();
         expect(requestCount(request, "models.authLogout")).toBe(0);
@@ -404,7 +404,7 @@ describe("ModelProvidersPage profile actions", () => {
         expect(toast.textContent).toContain("The account could not be logged out"),
       );
       expect(page.querySelectorAll(".model-providers__profile")).toHaveLength(2);
-      expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
       expect(page.querySelector(".model-providers__row > .callout")).toBeNull();
       expect(page.messages.anthropic).toBeUndefined();
       expect(requestCount(request, "models.authLogout")).toBe(1);
@@ -419,7 +419,7 @@ describe("ModelProvidersPage profile actions", () => {
         profileIds: ["work"],
         agentId: "writer",
       });
-      expect(document.body.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(document.body.querySelector("carapace-modal-dialog")).toBeNull();
       expect(
         [...page.querySelectorAll<HTMLButtonElement>(".model-providers__profile-logout")].every(
           (button) => button.disabled,

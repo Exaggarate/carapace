@@ -1,4 +1,4 @@
-import type { ChannelProgressDraftLine } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelProgressDraftLine } from "carapace/plugin-sdk/channel-outbound";
 import { describe, expect, it } from "vitest";
 import {
   buildSlackProgressStreamChunks,
@@ -215,12 +215,12 @@ describe("native Slack progress stream chunks", () => {
     });
     expect(recovered.chunks).toEqual([
       taskUpdate(
-        expect.stringMatching(/^openclaw-attention-/u),
+        expect.stringMatching(/^carapace-attention-/u),
         "Recovered: Bash — exit 1",
         "complete",
       ),
     ]);
-    expect(recovered.snapshot.tasks.get("openclaw_summary")?.status).toBe("in_progress");
+    expect(recovered.snapshot.tasks.get("carapace_summary")?.status).toBe("in_progress");
   });
 
   it.each([false, true])(
@@ -246,7 +246,7 @@ describe("native Slack progress stream chunks", () => {
       });
       expect(first.chunks).toContainEqual(
         taskUpdate(
-          expect.stringMatching(/^openclaw-attention-/u),
+          expect.stringMatching(/^carapace-attention-/u),
           "Approval required: Run the command",
           "pending",
         ),
@@ -257,7 +257,7 @@ describe("native Slack progress stream chunks", () => {
       });
       expect(resolved.chunks).toEqual([
         taskUpdate(
-          expect.stringMatching(/^openclaw-attention-/u),
+          expect.stringMatching(/^carapace-attention-/u),
           "Approval required: Run the command",
           "complete",
         ),
@@ -268,7 +268,7 @@ describe("native Slack progress stream chunks", () => {
       });
       expect(completed.chunks).toContainEqual(
         taskUpdate(
-          expect.stringMatching(/^openclaw-attention-/u),
+          expect.stringMatching(/^carapace-attention-/u),
           "Approval required: Run the command",
           "complete",
         ),
@@ -293,7 +293,7 @@ describe("native Slack progress stream chunks", () => {
       ).toEqual([
         planUpdate("Checking the workspace"),
         taskUpdate("plan_step_1", "Run checks", "complete"),
-        taskUpdate("openclaw_attention", "Failed", "error"),
+        taskUpdate("carapace_attention", "Failed", "error"),
       ]);
     },
   );
@@ -344,14 +344,14 @@ describe("native Slack progress stream chunks", () => {
       if (activity === "approval") {
         expect(final.chunks).toContainEqual(
           taskUpdate(
-            expect.stringMatching(/^openclaw-attention-/u),
+            expect.stringMatching(/^carapace-attention-/u),
             "Approval required: Deploy",
             "complete",
           ),
         );
       }
       if (finalInProgressStatus === "error" && !summaryRow && activity !== "failed") {
-        expect(final.chunks).toContainEqual(taskUpdate("openclaw_attention", "Failed", "error"));
+        expect(final.chunks).toContainEqual(taskUpdate("carapace_attention", "Failed", "error"));
       }
     },
   );
@@ -386,9 +386,9 @@ describe("native Slack progress stream chunks", () => {
         planUpdate("Checking the workspace"),
         withPlan
           ? taskUpdate("plan_step_1", "Run checks", "in_progress")
-          : taskUpdate("openclaw_summary", "Checking the workspace", "in_progress"),
+          : taskUpdate("carapace_summary", "Checking the workspace", "in_progress"),
         taskUpdate(
-          expect.stringMatching(/^openclaw-attention-/u),
+          expect.stringMatching(/^carapace-attention-/u),
           "Bash — run checks — exit 1",
           "error",
         ),
@@ -678,8 +678,8 @@ describe("native Slack progress stream chunks", () => {
             kind: "tool",
             icon: "🛠️",
             label: "Exec",
-            detail: "run tests in /Users/example/Projects/openclaw/packages/very/deep/path/example",
-            text: "🛠️ Exec: run tests in /Users/example/Projects/openclaw/packages/very/deep/path/example",
+            detail: "run tests in /Users/example/Projects/carapace/packages/very/deep/path/example",
+            text: "🛠️ Exec: run tests in /Users/example/Projects/carapace/packages/very/deep/path/example",
           },
         ],
       }),
@@ -949,7 +949,7 @@ describe("native Slack progress stream chunks", () => {
         finalInProgressStatus: "complete",
         lines: [toolLine("src/native-card.ts", "Write")],
         diffStat: { files: 1, added: 3, removed: 1 },
-        sessionUrl: "https://team.openclaw.ai/openclaw/chat/main",
+        sessionUrl: "https://github.com/Exaggarate/carapace",
       }),
     ).toEqual([
       planUpdate("Write — src/native-card.ts"),
@@ -959,8 +959,8 @@ describe("native Slack progress stream chunks", () => {
         sources: [
           {
             type: "url_source",
-            url: "https://team.openclaw.ai/openclaw/chat/main",
-            text: "Open in OpenClaw",
+            url: "https://github.com/Exaggarate/carapace",
+            text: "Open in Carapace",
           },
         ],
       }),

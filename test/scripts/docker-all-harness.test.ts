@@ -45,28 +45,28 @@ function setupFixture(
   const toolchainMarker = path.join(root, "toolchains.jsonl");
   const version = "2026.8.1";
   const packageDir = path.join(root, "packed", "package");
-  writeJson(path.join(packageDir, "package.json"), { name: "openclaw", version });
+  writeJson(path.join(packageDir, "package.json"), { name: "carapace", version });
   const tarball = path.join(root, "frozen candidate.tgz");
   execFileSync("tar", ["-czf", tarball, "-C", path.dirname(packageDir), "package"]);
   const sha256 = createHash("sha256").update(readFileSync(tarball)).digest("hex");
   const trustedScript = `
 const fs = require('node:fs');
 fs.appendFileSync(${JSON.stringify(marker)}, JSON.stringify({
-  lane: process.env.OPENCLAW_DOCKER_ALL_LANE_NAME,
+  lane: process.env.CARAPACE_DOCKER_ALL_LANE_NAME,
   cwd: process.cwd(),
   phase: process.argv[2],
-  skipDockerBuild: process.env.OPENCLAW_SKIP_DOCKER_BUILD,
-  registry: process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR,
-  registryVersion: process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION,
-  registrySha256: process.env.OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256,
-  target: process.env.OPENCLAW_DOCKER_E2E_REPO_ROOT,
-  harness: process.env.OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR,
-  liveTarget: process.env.OPENCLAW_LIVE_DOCKER_REPO_ROOT,
-  package: process.env.OPENCLAW_CURRENT_PACKAGE_TGZ,
-  sha256: process.env.OPENCLAW_CURRENT_PACKAGE_SHA256,
-  selectedSha: process.env.OPENCLAW_DOCKER_E2E_SELECTED_SHA,
-  cache: process.env.OPENCLAW_DOCKER_CACHE_HOME_DIR,
-  tools: process.env.OPENCLAW_DOCKER_CLI_TOOLS_DIR,
+  skipDockerBuild: process.env.CARAPACE_SKIP_DOCKER_BUILD,
+  registry: process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR,
+  registryVersion: process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION,
+  registrySha256: process.env.CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256,
+  target: process.env.CARAPACE_DOCKER_E2E_REPO_ROOT,
+  harness: process.env.CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR,
+  liveTarget: process.env.CARAPACE_LIVE_DOCKER_REPO_ROOT,
+  package: process.env.CARAPACE_CURRENT_PACKAGE_TGZ,
+  sha256: process.env.CARAPACE_CURRENT_PACKAGE_SHA256,
+  selectedSha: process.env.CARAPACE_DOCKER_E2E_SELECTED_SHA,
+  cache: process.env.CARAPACE_DOCKER_CACHE_HOME_DIR,
+  tools: process.env.CARAPACE_DOCKER_CLI_TOOLS_DIR,
 }) + '\\n');
 `;
   const poisonedScript = `require('node:fs').writeFileSync(${JSON.stringify(poison)}, 'old harness'); process.exit(47);`;
@@ -88,7 +88,7 @@ fs.appendFileSync(${JSON.stringify(marker)}, JSON.stringify({
       );
     }
     writeJson(path.join(dir, "package.json"), {
-      name: "openclaw",
+      name: "carapace",
       version,
       ...(corepack && {
         packageManager: dir === selectedHarness ? "pnpm@11.22.0" : "pnpm@12.0.0",
@@ -120,18 +120,18 @@ fs.appendFileSync(${JSON.stringify(marker)}, JSON.stringify({
   }).trim();
   const registry = path.join(root, "frozen registry");
   mkdirSync(registry);
-  writeJson(path.join(packageDir, "package.json"), { name: "@openclaw/codex", version });
+  writeJson(path.join(packageDir, "package.json"), { name: "@carapace/codex", version });
   const pluginTarball = path.join(registry, "codex.tgz");
   execFileSync("tar", ["-czf", pluginTarball, "-C", path.dirname(packageDir), "package"]);
   const registryManifest = path.join(registry, "prepublish-plugin-registry.json");
   writeJson(registryManifest, {
-    schema: "openclaw.prepublish-plugin-registry/v1",
+    schema: "carapace.prepublish-plugin-registry/v1",
     schemaVersion: 1,
     sourceSha: selectedSha,
     candidateVersion: version,
     packages: [
       {
-        name: "@openclaw/codex",
+        name: "@carapace/codex",
         version,
         tarball: "codex.tgz",
         sha256: createHash("sha256").update(readFileSync(pluginTarball)).digest("hex"),
@@ -200,24 +200,24 @@ function runFixture(
       timeout: 30_000,
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_BUILD: "0",
-        OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-        OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-        OPENCLAW_DOCKER_ALL_START_STAGGER_MS: "0",
-        OPENCLAW_DOCKER_ALL_LIVE_RETRIES: "0",
-        OPENCLAW_DOCKER_ALL_LANES: lanes.join(","),
-        OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-        OPENCLAW_DOCKER_ALL_PNPM_COMMAND: fixture.pinnedPnpm,
-        OPENCLAW_DOCKER_E2E_REPO_ROOT: mode === "local" ? "" : fixture.target,
-        OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:
+        CARAPACE_DOCKER_ALL_BUILD: "0",
+        CARAPACE_DOCKER_ALL_PREFLIGHT: "0",
+        CARAPACE_DOCKER_ALL_TIMINGS: "0",
+        CARAPACE_DOCKER_ALL_START_STAGGER_MS: "0",
+        CARAPACE_DOCKER_ALL_LIVE_RETRIES: "0",
+        CARAPACE_DOCKER_ALL_LANES: lanes.join(","),
+        CARAPACE_DOCKER_ALL_LOG_DIR: logDir,
+        CARAPACE_DOCKER_ALL_PNPM_COMMAND: fixture.pinnedPnpm,
+        CARAPACE_DOCKER_E2E_REPO_ROOT: mode === "local" ? "" : fixture.target,
+        CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:
           mode === "override" ? path.relative(fixture.target, fixture.selectedHarness) : "",
-        OPENCLAW_DOCKER_E2E_SELECTED_SHA: fixture.selectedSha,
-        OPENCLAW_CURRENT_PACKAGE_TGZ: fixture.tarball,
-        OPENCLAW_CURRENT_PACKAGE_VERSION: "2026.8.1",
-        OPENCLAW_CURRENT_PACKAGE_SHA256: fixture.sha256,
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_DIR: fixture.registry,
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: "2026.8.1",
-        OPENCLAW_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: fixture.registrySha256,
+        CARAPACE_DOCKER_E2E_SELECTED_SHA: fixture.selectedSha,
+        CARAPACE_CURRENT_PACKAGE_TGZ: fixture.tarball,
+        CARAPACE_CURRENT_PACKAGE_VERSION: "2026.8.1",
+        CARAPACE_CURRENT_PACKAGE_SHA256: fixture.sha256,
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_DIR: fixture.registry,
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_CANDIDATE_VERSION: "2026.8.1",
+        CARAPACE_PREPUBLISH_PLUGIN_REGISTRY_MANIFEST_SHA256: fixture.registrySha256,
         ...options.env,
       },
     },
@@ -232,9 +232,9 @@ describe("Docker scheduler trusted harness execution", () => {
       const fixture = setupFixture("split", false, true);
       const { result } = runFixture(fixture, "split", ["docker-package-install"], {
         env: {
-          OPENCLAW_CURRENT_PACKAGE_VERSION: "",
-          OPENCLAW_CURRENT_PACKAGE_SHA256: "",
-          OPENCLAW_DOCKER_ALL_BUILD: "1",
+          CARAPACE_CURRENT_PACKAGE_VERSION: "",
+          CARAPACE_CURRENT_PACKAGE_SHA256: "",
+          CARAPACE_DOCKER_ALL_BUILD: "1",
         },
       });
 
@@ -296,9 +296,9 @@ if (${JSON.stringify(failure)} === "timeout") {
       ["live-models", "gateway-concurrency"],
       {
         env: {
-          OPENCLAW_DOCKER_ALL_LIVE_RETRIES: "1",
-          OPENCLAW_DOCKER_ALL_FAIL_FAST: "0",
-          OPENCLAW_DOCKER_ALL_PARALLELISM: "1",
+          CARAPACE_DOCKER_ALL_LIVE_RETRIES: "1",
+          CARAPACE_DOCKER_ALL_FAIL_FAST: "0",
+          CARAPACE_DOCKER_ALL_PARALLELISM: "1",
         },
       },
     );
@@ -319,9 +319,9 @@ if (${JSON.stringify(failure)} === "timeout") {
       const fixture = setupFixture(mode, false, true);
       const { result, logDir } = runFixture(fixture, mode, laneNames, {
         env: {
-          OPENCLAW_DOCKER_ALL_PNPM_COMMAND: path.relative(fixture.target, fixture.pinnedPnpm),
-          OPENCLAW_DOCKER_CACHE_HOME_DIR: "relative cache",
-          OPENCLAW_DOCKER_CLI_TOOLS_DIR: "relative tools",
+          CARAPACE_DOCKER_ALL_PNPM_COMMAND: path.relative(fixture.target, fixture.pinnedPnpm),
+          CARAPACE_DOCKER_CACHE_HOME_DIR: "relative cache",
+          CARAPACE_DOCKER_CLI_TOOLS_DIR: "relative tools",
         },
       });
       expect(result.status, result.stdout + result.stderr).toBe(0);
@@ -375,8 +375,8 @@ if (${JSON.stringify(failure)} === "timeout") {
             timeout: 30_000,
             env: {
               ...process.env,
-              OPENCLAW_DOCKER_ALL_LOG_DIR: path.join(fixture.root, "rerun logs"),
-              OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+              CARAPACE_DOCKER_ALL_LOG_DIR: path.join(fixture.root, "rerun logs"),
+              CARAPACE_DOCKER_ALL_TIMINGS: "0",
             },
           },
         );
@@ -422,9 +422,9 @@ console.log('fixture-docker');
     chmodSync(docker, 0o755);
     const { result } = runFixture(fixture, "split", laneNames, {
       env: {
-        OPENCLAW_DOCKER_ALL_BUILD: "1",
-        OPENCLAW_DOCKER_ALL_PREFLIGHT: "1",
-        OPENCLAW_DOCKER_ALL_PREFLIGHT_CLEANUP: "0",
+        CARAPACE_DOCKER_ALL_BUILD: "1",
+        CARAPACE_DOCKER_ALL_PREFLIGHT: "1",
+        CARAPACE_DOCKER_ALL_PREFLIGHT_CLEANUP: "0",
         PATH: `${bin}${path.delimiter}${process.env.PATH}`,
       },
     });
@@ -458,10 +458,10 @@ console.log('fixture-docker');
   posixIt("prepares target bytes through the trusted packer before any Docker work", () => {
     const fixture = setupFixture("split");
     const packedMarker = path.join(fixture.root, "packed-source");
-    const targetPacker = path.join(fixture.target, "scripts/package-openclaw-for-docker.mjs");
+    const targetPacker = path.join(fixture.target, "scripts/package-carapace-for-docker.mjs");
     writeFileSync(targetPacker, "process.exit(47);\n");
     writeFileSync(
-      path.join(fixture.harness, "scripts/package-openclaw-for-docker.mjs"),
+      path.join(fixture.harness, "scripts/package-carapace-for-docker.mjs"),
       `
 import fs from 'node:fs'; import path from 'node:path';
 const value = (name) => process.argv[process.argv.indexOf(name) + 1];

@@ -1,5 +1,5 @@
 /** Stable public facade for plugin loading and runtime-registry resolution. */
-import { loadOpenClawPlugins } from "./loader-runtime-load.js";
+import { loadCarapacePlugins } from "./loader-runtime-load.js";
 import type { PluginLoadOptions } from "./loader-types.js";
 export { resolveCompatibleRuntimePluginRegistry } from "./active-runtime-registry.js";
 export {
@@ -7,7 +7,7 @@ export {
   isPluginRegistryLoadInFlight,
   resolvePluginRegistryLoadCacheKey,
 } from "./loader-cache.js";
-export { loadOpenClawPluginCliRegistry } from "./loader-cli-registry.js";
+export { loadCarapacePluginCliRegistry } from "./loader-cli-registry.js";
 export {
   resolveRuntimePluginRegistry,
   acquirePluginRegistryForInspection,
@@ -15,13 +15,13 @@ export {
 
 /** Loads a caller-owned registry value without changing the process-wide active registry. */
 export function loadPluginRegistryHandle(options: PluginLoadOptions = {}) {
-  return loadOpenClawPlugins({ ...options, activate: false });
+  return loadCarapacePlugins({ ...options, activate: false });
 }
 
 /** Loads and installs the registry owned by a process composition root. */
 export function loadAndActivateRootPluginRegistry(options: PluginLoadOptions = {}) {
-  return loadOpenClawPlugins({ ...options, activate: true });
+  return loadCarapacePlugins({ ...options, activate: true });
 }
 
-export { loadOpenClawPlugins };
+export { loadCarapacePlugins };
 export type { PluginLoadOptions };

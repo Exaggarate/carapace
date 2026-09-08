@@ -23,7 +23,7 @@ function runCloseout(options: {
   override?: string;
 }) {
   const version = options.version ?? "2026.9.1";
-  const dir = tempDirs.make("openclaw-pr-closeout-");
+  const dir = tempDirs.make("carapace-pr-closeout-");
   const repo = join(dir, "repo");
   mkdirSync(repo);
   const git = (...args: string[]) =>
@@ -68,7 +68,7 @@ if [ "$1 $2" = "pr view" ]; then
   printf '%s\\n' "$*" >> gh-calls.log
   cat metadata.json
 elif [ "$1 $2" = "repo view" ]; then
-  echo openclaw/openclaw
+  echo carapace/carapace
 else
   exit 1
 fi
@@ -99,9 +99,9 @@ prepare_gates 42
         PATH: `${bin}:${process.env.PATH}`,
         SCRIPTS: join(repoRoot, "scripts"),
         MAIN_SHA: mainSha,
-        OPENCLAW_TESTBOX: "1",
-        OPENCLAW_PR_GATES_REMOTE: "",
-        OPENCLAW_ALLOW_ROOT_CHANGELOG_PR: options.override ?? "",
+        CARAPACE_TESTBOX: "1",
+        CARAPACE_PR_GATES_REMOTE: "",
+        CARAPACE_ALLOW_ROOT_CHANGELOG_PR: options.override ?? "",
       },
     },
   );

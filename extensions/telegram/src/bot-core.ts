@@ -3,20 +3,20 @@ import {
   buildChannelGroupsScopeTree,
   resolveChannelGroupPolicy,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-policy";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   resolveThreadBindingIdleTimeoutMsForChannel,
   resolveThreadBindingMaxAgeMsForChannel,
   resolveThreadBindingSpawnPolicy,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { formatErrorMessage, formatUncaughtError } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeGroupActivation } from "openclaw/plugin-sdk/group-activation";
+} from "carapace/plugin-sdk/conversation-runtime";
+import { formatErrorMessage, formatUncaughtError } from "carapace/plugin-sdk/error-runtime";
+import { normalizeGroupActivation } from "carapace/plugin-sdk/group-activation";
 import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
-} from "openclaw/plugin-sdk/native-command-config-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
+} from "carapace/plugin-sdk/native-command-config-runtime";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
 import {
   danger,
   logVerbose,
@@ -25,8 +25,8 @@ import {
   createSubsystemLogger,
   createNonExitingRuntime,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveTelegramAccountOwnerAgentId } from "./account-owner.js";
 import { getOrCreateAccountThrottler } from "./account-throttler.js";
 import { resolveTelegramAccount } from "./accounts.js";
@@ -336,7 +336,7 @@ export function createTelegramBotCore(
   });
   const mediaMaxBytes = (opts.mediaMaxMb ?? telegramCfg.mediaMaxMb ?? 100) * 1024 * 1024;
   const logger = getChildLogger({ module: "telegram-auto-reply" });
-  const resolveGroupPolicy = (chatId: string | number, turnCfg: OpenClawConfig) =>
+  const resolveGroupPolicy = (chatId: string | number, turnCfg: CarapaceConfig) =>
     resolveChannelGroupPolicy({
       cfg: turnCfg,
       channel: "telegram",
@@ -346,7 +346,7 @@ export function createTelegramBotCore(
   const resolveGroupActivation = (params: {
     agentId?: string;
     sessionKey: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   }) => {
     const agentId = params.agentId ?? ownerAgentId;
     const storePath = telegramDeps.resolveStorePath(params.cfg.session?.store, { agentId });
@@ -374,7 +374,7 @@ export function createTelegramBotCore(
     }
     return undefined;
   };
-  const resolveGroupRequireMention = (chatId: string | number, turnCfg: OpenClawConfig) =>
+  const resolveGroupRequireMention = (chatId: string | number, turnCfg: CarapaceConfig) =>
     resolveScopeRequireMention({
       tree: buildChannelGroupsScopeTree(turnCfg, "telegram", account.accountId),
       path: [String(chatId)],
@@ -384,7 +384,7 @@ export function createTelegramBotCore(
   const resolveTelegramGroupConfig = (
     chatId: string | number,
     messageThreadId: number | undefined,
-    turnCfg: OpenClawConfig,
+    turnCfg: CarapaceConfig,
   ) => {
     const turnTelegramCfg = resolveTelegramAccount({
       cfg: turnCfg,

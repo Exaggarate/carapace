@@ -2,7 +2,7 @@
 
 import { PassThrough } from "node:stream";
 import { select as clackSelect } from "@clack/prompts";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { maybeInstallDaemon } from "./configure.daemon.js";
 
@@ -88,7 +88,7 @@ describe("maybeInstallDaemon", () => {
       warnings: [],
     });
     buildGatewayInstallPlan.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "run"],
+      programArguments: ["carapace", "gateway", "run"],
       workingDirectory: "/tmp",
       environment: {},
     });
@@ -187,7 +187,7 @@ describe("maybeInstallDaemon", () => {
         "/usr/bin/node",
         "--max-old-space-size=24576",
         "--require=/tmp/service-preload.js",
-        "/usr/local/bin/openclaw",
+        "/usr/local/bin/carapace",
         "gateway",
       ],
       environment: { NODE_OPTIONS: "--max-heap-size=32768", UNRELATED: "not-persisted" },

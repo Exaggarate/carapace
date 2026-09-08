@@ -1,11 +1,11 @@
 // Slack plugin module implements actions behavior.
 import type { Block, KnownBlock, WebClient } from "@slack/web-api";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import { resolveDefaultSlackAccountId, resolveSlackAccount } from "./accounts.js";
 import { SLACK_PRIVATE_ACTION_DELIVERY_RESULT } from "./action-threading.js";
@@ -38,7 +38,7 @@ import { countSlackTextUtf8Bytes, truncateSlackTextByUtf8Bytes } from "./truncat
 import type { SlackAttachment } from "./types.js";
 
 export type SlackActionClientOpts = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   accountId?: string;
   token?: string;
   teamId?: string;
@@ -80,7 +80,7 @@ export type SlackPin = {
   file?: { id?: string; name?: string };
 };
 
-function resolveToken(explicit?: string, accountId?: string, cfg?: OpenClawConfig): string {
+function resolveToken(explicit?: string, accountId?: string, cfg?: CarapaceConfig): string {
   if (explicit?.trim()) {
     const token = resolveSlackBotToken(explicit);
     if (token) {
@@ -339,7 +339,7 @@ export async function sendSlackMessage(
   to: string,
   content: string,
   opts: Omit<SlackActionClientOpts, "cfg"> & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     mediaUrl?: string;
     forceDocument?: boolean;
     mediaAccess?: {

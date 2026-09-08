@@ -1,12 +1,12 @@
 // Video runner tests cover provider request wiring, auth/config precedence, and
 // provider output handling for video attachments.
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { describe, expect, it, vi } from "vitest";
 import {
   formatAudioTranscripts,
   formatMediaUnderstandingBody,
 } from "../../packages/media-understanding-common/src/format.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { runCapability } from "./runner.js";
@@ -37,7 +37,7 @@ vi.mock("../agents/model-auth.js", async () => {
 
 describe("runCapability video provider wiring", () => {
   it("truncates provider output without splitting a boundary emoji", async () => {
-    await withVideoFixture("openclaw-video-utf16-output", async ({ ctx, media, cache }) => {
+    await withVideoFixture("carapace-video-utf16-output", async ({ ctx, media, cache }) => {
       const prefix = "v".repeat(79);
       const result = await runCapability({
         capability: "video",
@@ -65,7 +65,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as CarapaceConfig,
         ctx,
         attachments: cache,
         media,
@@ -94,8 +94,8 @@ describe("runCapability video provider wiring", () => {
     let seenBaseUrl: string | undefined;
     let seenHeaders: Record<string, string> | undefined;
 
-    await withTestDir({ prefix: "openclaw-video-auth-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-merge", async ({ ctx, media, cache }) => {
+    await withTestDir({ prefix: "carapace-video-auth-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("carapace-video-merge", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -126,7 +126,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -165,16 +165,16 @@ describe("runCapability video provider wiring", () => {
   });
 
   it("auto-selects moonshot for video when google is unavailable", async () => {
-    await withTestDir({ prefix: "openclaw-video-agent-" }, async (isolatedAgentDir) => {
+    await withTestDir({ prefix: "carapace-video-agent-" }, async (isolatedAgentDir) => {
       await withEnvAsync(
         {
           GEMINI_API_KEY: undefined,
           GOOGLE_API_KEY: undefined,
           MOONSHOT_API_KEY: undefined,
-          OPENCLAW_AGENT_DIR: isolatedAgentDir,
+          CARAPACE_AGENT_DIR: isolatedAgentDir,
         },
         async () => {
-          await withVideoFixture("openclaw-video-auto-moonshot", async ({ ctx, media, cache }) => {
+          await withVideoFixture("carapace-video-auto-moonshot", async ({ ctx, media, cache }) => {
             const cfg = {
               models: {
                 providers: {
@@ -192,7 +192,7 @@ describe("runCapability video provider wiring", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig;
+            } as unknown as CarapaceConfig;
 
             const result = await runCapability({
               capability: "video",
@@ -235,8 +235,8 @@ describe("runCapability video provider wiring", () => {
   it("uses the provider video default when the active provider has no model", async () => {
     let seenModel: string | undefined;
 
-    await withTestDir({ prefix: "openclaw-video-active-provider-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-active-default", async ({ ctx, media, cache }) => {
+    await withTestDir({ prefix: "carapace-video-active-provider-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("carapace-video-active-default", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -254,7 +254,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -293,9 +293,9 @@ describe("runCapability video provider wiring", () => {
     let seenModel: string | undefined;
 
     await withTestDir(
-      { prefix: "openclaw-video-no-default-provider-" },
+      { prefix: "carapace-video-no-default-provider-" },
       async (isolatedAgentDir) => {
-        await withVideoFixture("openclaw-video-no-default", async ({ ctx, media, cache }) => {
+        await withVideoFixture("carapace-video-no-default", async ({ ctx, media, cache }) => {
           const cfg = {
             models: {
               providers: {
@@ -313,7 +313,7 @@ describe("runCapability video provider wiring", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig;
+          } as unknown as CarapaceConfig;
 
           const result = await runCapability({
             capability: "video",
@@ -351,8 +351,8 @@ describe("runCapability video provider wiring", () => {
   it("resolves provider registry defaultModels.video when a config entry has no explicit model", async () => {
     let seenModel: string | undefined;
 
-    await withTestDir({ prefix: "openclaw-video-entry-default-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-entry-default", async ({ ctx, media, cache }) => {
+    await withTestDir({ prefix: "carapace-video-entry-default-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("carapace-video-entry-default", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -367,7 +367,7 @@ describe("runCapability video provider wiring", () => {
               models: [{ provider: "moonshot", capabilities: ["video"] }],
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -406,8 +406,8 @@ describe("runCapability video provider wiring", () => {
     const resolveApiKeyForProviderCore = vi.mocked(modelAuth.resolveApiKeyForProviderCore);
     resolveApiKeyForProviderCore.mockClear();
 
-    await withTestDir({ prefix: "openclaw-video-provider-api-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-provider-api", async ({ ctx, media, cache }) => {
+    await withTestDir({ prefix: "carapace-video-provider-api-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("carapace-video-provider-api", async ({ ctx, media, cache }) => {
         let seenApiKey: string | undefined;
         const cfg = {
           models: {
@@ -426,7 +426,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as CarapaceConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -524,7 +524,7 @@ describe("runCapability provider output decisions", () => {
             [capability]: { enabled: true },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
 
       const result = await runCapability({
         capability,
@@ -539,7 +539,7 @@ describe("runCapability provider output decisions", () => {
           }),
         } as unknown as Parameters<typeof runCapability>[0]["attachments"],
         media: [{ index: 0, kind: capability, mime }],
-        agentDir: "/tmp/openclaw-media-provider-output-test",
+        agentDir: "/tmp/carapace-media-provider-output-test",
         providerRegistry: new Map<string, MediaUnderstandingProvider>([
           ["qa-primary", createProvider("qa-primary", primary)],
           ["qa-fallback", createProvider("qa-fallback", fallback)],

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, it } from "vitest";
 import { runCiGitStep, type FetchResult } from "./ci-git-owner.test-support.js";
 
@@ -23,7 +23,7 @@ const resetProfiles = [
     job: "check-docs",
     step: "Checkout ClawHub docs source",
     target: "+refs/heads/main:refs/remotes/origin/checkout",
-    remote: "openclaw/clawhub",
+    remote: "carapace/clawhub",
   },
 ];
 const resetCases: { label: string; fetchResults: FetchResult[]; code: number; attempts: number }[] =
@@ -734,7 +734,7 @@ posixIt.each([
               "remote",
               "add",
               "origin",
-              "https://github.com/openclaw/crabbox.git",
+              "https://github.com/Exaggarate/carapace/crabbox.git",
             ]),
             gitCommand(source, ["fetch", "--depth", "1", "origin", "main"]),
             ...(failure ? [] : [gitCommand(source, ["checkout", "--detach", "FETCH_HEAD"])]),
@@ -744,7 +744,7 @@ posixIt.each([
               "clone",
               "--depth",
               "1",
-              "https://github.com/openclaw/crabbox.git",
+              "https://github.com/Exaggarate/carapace/crabbox.git",
               source,
             ]),
           ],
@@ -908,7 +908,7 @@ posixIt.each([
 );
 
 const newer = "d".repeat(40);
-const sourceObject = "refs/remotes/origin/main:.openclaw-sync/source.json";
+const sourceObject = "refs/remotes/origin/main:.carapace-sync/source.json";
 const fetch = ["fetch", "origin", "main:refs/remotes/origin/main"];
 const show = ["show", sourceObject];
 const rebase = ["rebase", "-X", "theirs", "origin/main"];
@@ -919,7 +919,7 @@ const diff = [
   "--quiet",
   "--",
   "docs",
-  ".openclaw-sync",
+  ".carapace-sync",
   "package.json",
   "package-lock.json",
 ];
@@ -928,9 +928,9 @@ const dependencyReads = [
   ["show", "refs/remotes/origin/main:package-lock.json"],
 ];
 const commit = [
-  ["config", "user.name", "openclaw-docs-sync[bot]"],
-  ["config", "user.email", "openclaw-docs-sync[bot]@users.noreply.github.com"],
-  ["add", "docs", ".openclaw-sync", "package.json", "package-lock.json"],
+  ["config", "user.name", "carapace-docs-sync[bot]"],
+  ["config", "user.email", "carapace-docs-sync[bot]@users.noreply.github.com"],
+  ["add", "docs", ".carapace-sync", "package.json", "package-lock.json"],
   ["commit", "-m", `chore(sync): mirror docs from fixture/checkout@${candidate}`],
 ];
 
@@ -961,7 +961,7 @@ posixIt.each(["directory", "file", "symlink"] as const)(
     expect(gitArgs(report)).toEqual(
       [1, 2].map(() => [
         "clone",
-        "https://x-access-token:fixture-docs-token@github.com/openclaw/docs.git",
+        "https://x-access-token:fixture-docs-token@github.com/Exaggarate/carapace/docs.git",
         path.join(report.workspace, "publish"),
       ]),
     );
@@ -1282,7 +1282,7 @@ posixIt.each([0, 23, "cleanup-failure"] satisfies FetchResult[])(
               "--clawhub-repo",
               path.join(report.workspace, "clawhub-source"),
               "--clawhub-source-repo",
-              "openclaw/clawhub",
+              "carapace/clawhub",
               "--clawhub-source-sha",
               candidate,
             ],
@@ -1328,8 +1328,8 @@ const agentPush = [
 ];
 const agentCommitCommands = [
   ["diff", "--quiet"],
-  ["config", "user.name", "openclaw-docs-agent[bot]"],
-  ["config", "user.email", "openclaw-docs-agent[bot]@users.noreply.github.com"],
+  ["config", "user.name", "carapace-docs-agent[bot]"],
+  ["config", "user.email", "carapace-docs-agent[bot]@users.noreply.github.com"],
   ["add", "docs", "README.md", "CHANGELOG.md"],
   ["commit", "--no-verify", "-m", "docs: refresh documentation"],
 ];

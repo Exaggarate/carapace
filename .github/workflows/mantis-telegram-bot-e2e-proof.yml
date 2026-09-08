@@ -159,7 +159,7 @@ jobs:
           install_dir="$RUNNER_TEMP/mantis-crabbox"
           mkdir -p "$install_dir/bin"
           curl --fail --location --proto '=https' --tlsv1.2 \
-            https://github.com/openclaw/crabbox/releases/download/v0.50.0/crabbox_0.50.0_linux_amd64.tar.gz \
+            https://github.com/Exaggarate/carapace/crabbox/releases/download/v0.50.0/crabbox_0.50.0_linux_amd64.tar.gz \
             --output "$install_dir/crabbox.tar.gz"
           printf '%s  %s\n' 8ab55a0302e7119a45e7522c2fff2d4e295496c33766c87cf619f342824cab75 "$install_dir/crabbox.tar.gz" | sha256sum --check
           tar -xzf "$install_dir/crabbox.tar.gz" -C "$install_dir/bin" crabbox
@@ -184,8 +184,8 @@ jobs:
           TELEGRAM_USER_DRIVER_TDLIB_CACHE_DIR: ${{ runner.temp }}/mantis-tdlib
           PROOF_PLAN: ${{ inputs.proof_plan }}
           PLAN_SHA256: ${{ inputs.plan_sha256 }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
           GH_TOKEN: ${{ github.token }}
         run: >-
           node scripts/mantis/run-request-telegram.mts

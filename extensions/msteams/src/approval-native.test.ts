@@ -1,8 +1,8 @@
-import { isImplicitSameChatApprovalAuthorization } from "openclaw/plugin-sdk/approval-auth-runtime";
-import type { ExecApprovalRequest } from "openclaw/plugin-sdk/approval-runtime";
-import type { ChannelOutboundPayloadHint } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import { isImplicitSameChatApprovalAuthorization } from "carapace/plugin-sdk/approval-auth-runtime";
+import type { ExecApprovalRequest } from "carapace/plugin-sdk/approval-runtime";
+import type { ChannelOutboundPayloadHint } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { describe, expect, it } from "vitest";
 import {
   isMSTeamsNativeApprovalClientEnabled,
@@ -17,10 +17,10 @@ const CONVERSATION_ID = "19:channel@thread.tacv2";
 
 function createConfig(
   overrides: {
-    approvals?: OpenClawConfig["approvals"];
-    teams?: Partial<NonNullable<NonNullable<OpenClawConfig["channels"]>["msteams"]>>;
+    approvals?: CarapaceConfig["approvals"];
+    teams?: Partial<NonNullable<NonNullable<CarapaceConfig["channels"]>["msteams"]>>;
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     approvals: overrides.approvals ?? { exec: { enabled: true } },
     channels: {
@@ -87,7 +87,7 @@ describe("Microsoft Teams native approval capability", () => {
   it.each([
     {
       name: "approval forwarding is absent",
-      cfg: { channels: createConfig().channels } satisfies OpenClawConfig,
+      cfg: { channels: createConfig().channels } satisfies CarapaceConfig,
     },
     {
       name: "exec forwarding is disabled",

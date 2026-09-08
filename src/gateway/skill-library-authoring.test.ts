@@ -5,7 +5,7 @@ import { prepareSystemAgentRunAdmission } from "../agents/admitted-run-context.j
 import { withGatewayToolCallerIdentity } from "../agents/tools/gateway-caller-context.js";
 import { createLibrarySkillWorkshopTool } from "../agents/tools/skill-workshop-tool-library.js";
 import { listSkillLibrary, readSkillLibrary, saveSkillLibrary } from "../skills/library/service.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
 import {
   libraryAuthority,
@@ -18,7 +18,7 @@ import {
 
 const temps = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
     cleanup();
   }),
@@ -26,7 +26,7 @@ const temps = useAutoCleanupTempDirTracker((cleanup) =>
 const content =
   "---\nname: ordinary\ndescription: An ordinary personal procedure\n---\n# Ordinary\nUse this procedure when asked.\n";
 function setup() {
-  vi.stubEnv("OPENCLAW_STATE_DIR", temps.make("personal-authoring-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", temps.make("personal-authoring-"));
   const alice = ensureProfileForEmail("alice@example.test");
   const bob = ensureProfileForEmail("bob@example.test");
   const request = (profileId: string): SkillLibraryRequestOwner => ({

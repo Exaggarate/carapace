@@ -1,6 +1,6 @@
 // QA Lab Slack scenario reply observation and channel readiness.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
 import type { QaGatewayChild } from "../../gateway-child.js";
 import {
   type SlackChannelStatus,
@@ -339,7 +339,7 @@ function resolveSlackChannelReadySince(params: {
 }
 
 function resolveSlackQaReadyTimeoutMs(env: NodeJS.ProcessEnv = process.env) {
-  const raw = env.OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS;
+  const raw = env.CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS;
   if (!raw) {
     return SLACK_QA_DEFAULT_READY_TIMEOUT_MS;
   }

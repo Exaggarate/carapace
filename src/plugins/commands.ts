@@ -3,7 +3,7 @@
  *
  * Compatibility wrappers for plugin command registration, matching, and execution.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { clearPluginCommands, registerPluginCommand } from "./command-registration.js";
 import {
   listRegisteredPluginAgentPromptGuidance,
@@ -51,7 +51,7 @@ export function executePluginCommand(params: {
   sessionFile?: PluginCommandContext["sessionFile"];
   authProfileId?: string;
   commandBody: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   from?: PluginCommandContext["from"];
   to?: PluginCommandContext["to"];
   originatingTo?: string;

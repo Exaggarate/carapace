@@ -1,7 +1,7 @@
 ---
-summary: "OpenClaw capabilities across channels, routing, media, and UX."
+summary: "Carapace capabilities across channels, routing, media, and UX."
 read_when:
-  - You want a full list of what OpenClaw supports
+  - You want a full list of what Carapace supports
 title: "Features"
 ---
 
@@ -33,12 +33,12 @@ title: "Features"
 **Channels:**
 
 - Telegram and WebChat ship with the core install; every other channel is an
-  official plugin installed with `openclaw plugins install @openclaw/<id>` (or on demand
-  during `openclaw onboard` / `openclaw channels add`)
+  official plugin installed with `carapace plugins install @carapace/<id>` (or on demand
+  during `carapace onboard` / `carapace channels add`)
 - Official plugin channels: Discord, Feishu, Google Chat, iMessage, IRC, LINE, Matrix, Mattermost,
   Microsoft Teams, Nextcloud Talk, Nostr, QQ Bot, Raft, Signal, Slack, SMS, Synology Chat,
   Tlon, Twitch, Voice Call, WhatsApp, Zalo, and Zalo Personal
-- External plugin channels maintained outside the OpenClaw repo: WeChat, Yuanbao, and Zalo ClawBot
+- External plugin channels maintained outside the Carapace repo: WeChat, Yuanbao, and Zalo ClawBot
 - Group chat support with mention-based activation
 - DM safety with allowlists and pairing
 
@@ -91,6 +91,6 @@ title: "Features"
     Connect Telegram, WhatsApp, Discord, Slack, and more from one Gateway.
   </Card>
   <Card title="Plugins" href="/tools/plugin" icon="plug">
-    Official and external plugins that extend OpenClaw.
+    Official and external plugins that extend Carapace.
   </Card>
 </CardGroup>

@@ -2,8 +2,8 @@ import { createServer } from "node:http";
 import {
   createAzureOpenAIResponsesTransportStreamFn,
   createOpenAIResponsesTransportStreamFn,
-} from "@openclaw/ai/transports";
-import type { Model } from "openclaw/plugin-sdk/llm";
+} from "@carapace/ai/transports";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 
 describe("incomplete Responses loopback SSE", () => {

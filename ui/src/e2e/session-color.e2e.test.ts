@@ -49,7 +49,7 @@ suite.define(() => {
           await expect
             .poll(() =>
               page
-                .locator("openclaw-chat-header-session-menu > wa-dropdown > wa-dropdown-item:focus")
+                .locator("carapace-chat-header-session-menu > wa-dropdown > wa-dropdown-item:focus")
                 .count(),
             )
             .toBe(1);
@@ -163,7 +163,7 @@ suite.define(() => {
   it("sets and clears session colors through desktop and compact menus", async () => {
     const key = "agent:main:color-proof";
     const now = Date.now();
-    const capture = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+    const capture = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
     const proofDir = capture
       ? createControlUiE2eArtifactDir("session-color-web-proof", "/tmp/session-color-web-proof")
       : "";
@@ -275,7 +275,7 @@ suite.define(() => {
       const darkStripe = await stripe();
       expect(darkStripe).not.toBe("rgba(0, 0, 0, 0)");
       // Both choices persist in the same open picker, without reopening the menu.
-      const picker = page.locator("openclaw-session-menu .session-menu__appearance");
+      const picker = page.locator("carapace-session-menu .session-menu__appearance");
       await picker.getByRole("button", { name: "book", exact: true }).click();
       await waitForPatch(gateway, (params) => params.key === key && params.icon === "book");
       await expect
@@ -323,7 +323,7 @@ suite.define(() => {
       await expect.poll(() => dot.getAttribute("aria-label")).toBe("Session color: Blue");
       await shot(
         "after-compact-menu.png",
-        page.locator('openclaw-chat-header-session-menu > wa-dropdown [part="menu"]'),
+        page.locator('carapace-chat-header-session-menu > wa-dropdown [part="menu"]'),
         [page.getByRole("button", { name: "Blue", exact: true })],
       );
       await page.getByRole("button", { name: "Reset to default", exact: true }).click();

@@ -1,13 +1,13 @@
 import { isIP } from "node:net";
-import type { RemoteModelCatalogPricing } from "@openclaw/model-catalog-core";
-import { MODEL_PRICING_SOURCES } from "@openclaw/model-catalog-core/model-catalog-pricing";
-import { buildModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import type { ModelCatalogCost } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { RemoteModelCatalogPricing } from "@carapace/model-catalog-core";
+import { MODEL_PRICING_SOURCES } from "@carapace/model-catalog-core/model-catalog-pricing";
+import { buildModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
+import type { ModelCatalogCost } from "@carapace/model-catalog-core/model-catalog-types";
 import {
   createStaticProviderModelIdNormalizer,
   normalizeProviderId,
 } from "../agents/model-ref-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isInstalledPluginEnabled } from "../plugins/installed-plugin-index.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import {
@@ -23,7 +23,7 @@ type ExternalPricingPolicy = {
   authoritative: boolean;
 };
 type PricingContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   normalizeKey: (provider: string, model: string) => string;
   catalog: ReadonlyMap<string, PricingValue>;
   hosted: Readonly<Record<string, RemoteModelCatalogPricing>>;
@@ -32,12 +32,12 @@ type PricingContext = {
   fingerprint: string;
 };
 
-const EMPTY_CONFIG: OpenClawConfig = {};
-const pricingContextByConfig = new WeakMap<OpenClawConfig, PricingContext>();
+const EMPTY_CONFIG: CarapaceConfig = {};
+const pricingContextByConfig = new WeakMap<CarapaceConfig, PricingContext>();
 
 function activeManifestRegistry(
   snapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): PluginManifestRegistry {
   if (config.plugins?.enabled === false) {
     return { plugins: [], diagnostics: [] };
@@ -61,7 +61,7 @@ function normalizedHostedKey(
   return normalizeKey(key.slice(0, slash), key.slice(slash + 1));
 }
 
-function buildPricingContext(config: OpenClawConfig): PricingContext {
+function buildPricingContext(config: CarapaceConfig): PricingContext {
   let snapshot: PluginMetadataSnapshot | undefined;
   try {
     snapshot = resolvePluginMetadataSnapshot({
@@ -123,7 +123,7 @@ function buildPricingContext(config: OpenClawConfig): PricingContext {
 }
 
 /** Reuses the static pricing policy captured for this config. */
-export function resolveModelPricingContext(config: OpenClawConfig = EMPTY_CONFIG): PricingContext {
+export function resolveModelPricingContext(config: CarapaceConfig = EMPTY_CONFIG): PricingContext {
   const existing = pricingContextByConfig.get(config);
   if (existing) {
     return existing;

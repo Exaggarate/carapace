@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   createPluginCommandRuntime,
   matchPluginCommandInvocation,
@@ -21,7 +21,7 @@ import { isExplicitSourceReplyCommand } from "./source-reply-delivery-mode.js";
 
 export function shouldBypassPluginOwnedBindingForCommand(
   ctx: FinalizedRuntimeMsgContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   replyOptions?: PluginCommandExecutionReplyOptions,
 ): boolean {
   // Command authorization is a trust boundary. Reject malformed runtime context

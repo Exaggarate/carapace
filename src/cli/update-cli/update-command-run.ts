@@ -1,5 +1,5 @@
 import { assertConfigWriteAllowedInCurrentMode } from "../../config/config.js";
-import { disableCurrentOpenClawUpdateLaunchdJob } from "../../daemon/launchd.js";
+import { disableCurrentCarapaceUpdateLaunchdJob } from "../../daemon/launchd.js";
 import { mergeGatewayServiceEnv } from "../../daemon/service-env-merge.js";
 import { resolveManagedGatewayServiceCommand } from "../../daemon/service-types.js";
 import { resolveGatewayService } from "../../daemon/service.js";
@@ -41,8 +41,8 @@ import {
 } from "../../infra/update-run-ledger.js";
 import { summarizeUpdateStepFailure, type UpdateRunStep } from "../../infra/update-run-record.js";
 import type { UpdateRunResult, UpdateStepProgress } from "../../infra/update-runner.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../../state/openclaw-state-ownership.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../../state/carapace-state-ownership.js";
 import { VERSION } from "../../version.js";
 import { parseUpdateTimeoutMs, resolveUpdateRoot, type UpdateCommandOptions } from "./shared.js";
 import { suppressDeprecations } from "./suppress-deprecations.js";
@@ -81,8 +81,8 @@ export async function admitUpdateCommandRun(params: {
       });
     }
   }
-  await assertOpenClawStateWriteAllowedAtPath({
-    databasePath: resolveOpenClawStateSqlitePath(env),
+  await assertCarapaceStateWriteAllowedAtPath({
+    databasePath: resolveCarapaceStateSqlitePath(env),
     env,
     recoverOrphanedSidecars: false,
   });
@@ -215,7 +215,7 @@ export function completeUpdateCommandRun(
   // Both finalization and outer CLI unwind come here. A verified restored generation
   // stays with its helper until native recovery finishes; neither caller may close it early.
   const helperRecoveryPending =
-    process.env.OPENCLAW_UPDATE_RUN_HANDOFF === "1" &&
+    process.env.CARAPACE_UPDATE_RUN_HANDOFF === "1" &&
     result.recovery?.serviceRestartSafe === true &&
     result.recovery.packageRollbackVerified === true &&
     result.recovery.service === undefined;
@@ -272,8 +272,8 @@ export async function prepareUpdateCommand(opts: UpdateCommandOptions) {
     throw new Error(formatExternalSupervisorUpdateRequired());
   }
   if (opts.dryRun !== true) {
-    await assertOpenClawStateWriteAllowedAtPath({
-      databasePath: resolveOpenClawStateSqlitePath(process.env),
+    await assertCarapaceStateWriteAllowedAtPath({
+      databasePath: resolveCarapaceStateSqlitePath(process.env),
       recoverOrphanedSidecars: false,
     });
   }
@@ -294,7 +294,7 @@ export async function prepareUpdateCommand(opts: UpdateCommandOptions) {
     try {
       assertConfigWriteAllowedInCurrentMode();
     } catch (err) {
-      await disableCurrentOpenClawUpdateLaunchdJob().catch(() => undefined);
+      await disableCurrentCarapaceUpdateLaunchdJob().catch(() => undefined);
       throw err;
     }
   }

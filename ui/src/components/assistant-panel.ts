@@ -1,8 +1,8 @@
 import { consume } from "@lit/context";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
-import "./openclaw-mascot.ts";
+import "./carapace-mascot.ts";
 import type { RouteId } from "../app-route-paths.ts";
 import { chatInputOwnerForContext } from "../app/chat-input-owner.ts";
 import { applicationContext, type ApplicationContext } from "../app/context.ts";
@@ -23,7 +23,7 @@ import {
   resolveUiConversationIdentity,
   resolveUiDefaultAgentId,
 } from "../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import { getSafeLocalStorage } from "../local-storage.ts";
 import { CHAT_TRANSCRIPT_LOADING_CHANGED_EVENT } from "../pages/chat/chat-history-events.ts";
@@ -43,7 +43,7 @@ import "../pages/custodian/custodian-surface.ts";
 import "../styles/assistant-panel.css";
 
 const HOME_SESSION_ELEMENT = {
-  tagName: "openclaw-home-session",
+  tagName: "carapace-home-session",
   get label() {
     return t("assistantPanel.home");
   },
@@ -53,7 +53,7 @@ const HOME_SESSION_ELEMENT = {
 type AssistantDestination = "home" | "custodian";
 type AssistantDock = Exclude<DockPanelSide, "left">;
 
-export class OpenClawAssistantPanel extends OpenClawLightDomElement {
+export class CarapaceAssistantPanel extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   @property({ attribute: false })
   context: ApplicationContext<RouteId> | undefined;
@@ -191,10 +191,10 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
   }
 
   private primaryChatPane(): ChatPaneElement | undefined {
-    const root = this.closest("openclaw-app-shell") ?? this.parentElement;
+    const root = this.closest("carapace-app-shell") ?? this.parentElement;
     return [
       ...(root?.querySelectorAll<ChatPaneElement>(
-        "openclaw-chat-pane.chat-pane-cache__pane--active",
+        "carapace-chat-pane.chat-pane-cache__pane--active",
       ) ?? []),
     ].find(
       (pane) =>
@@ -239,7 +239,7 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
   };
 
   private get targetStorageKey(): string {
-    return `openclaw.assistant.panel.target.v1:${this.targetScope}`;
+    return `carapace.assistant.panel.target.v1:${this.targetScope}`;
   }
 
   private persistTarget(): void {
@@ -274,7 +274,7 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
     };
   }
 
-  /** Ask OpenClaw hydrates lazily; only refresh when it actually becomes visible. */
+  /** Ask Carapace hydrates lazily; only refresh when it actually becomes visible. */
   private refreshCustodianTranscript(becameVisible: boolean): void {
     if (becameVisible && this.destination === "custodian") {
       void this.store.refreshTranscriptIfIdle();
@@ -418,10 +418,10 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
         ${this.dockLayout.renderResizer("assistant-panel", t("assistantPanel.resize"))}
         <header class="rail-header assistant-panel-header" @mousedown=${beginNativeWindowDrag}>
           <div class="assistant-panel-title">
-            <openclaw-mascot
+            <carapace-mascot
               .mood=${this.destination === "custodian" && this.store.sending ? "thinking" : "idle"}
               .size=${16}
-            ></openclaw-mascot>
+            ></carapace-mascot>
             ${(["home", "custodian"] as const).map((destination) =>
               (destination === "home" ? this.homeAvailable : this.custodianAvailable)
                 ? html`<button
@@ -430,7 +430,7 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
                     aria-pressed=${this.destination === destination}
                     @click=${() => this.openDestination(destination)}
                   >
-                    ${t(destination === "home" ? "assistantPanel.home" : "nav.askOpenClaw")}
+                    ${t(destination === "home" ? "assistantPanel.home" : "nav.askCarapace")}
                   </button>`
                 : nothing,
             )}
@@ -474,11 +474,11 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
                 !this.homeStarted
                   ? renderLoadingState()
                   : isOptionalElementDefined(HOME_SESSION_ELEMENT)
-                    ? html`<openclaw-home-session
+                    ? html`<carapace-home-session
                         .sessionKey=${home.sessionKey}
                         .agentId=${home.agentId}
                         .workContext=${workContext}
-                      ></openclaw-home-session>`
+                      ></carapace-home-session>`
                     : homeState
                       ? renderLazyElementState(
                           homeState,
@@ -487,24 +487,24 @@ export class OpenClawAssistantPanel extends OpenClawLightDomElement {
                         )
                       : nothing
               }`
-            : html`<openclaw-custodian-surface
+            : html`<carapace-custodian-surface
                 .store=${this.store}
                 .onboarding=${this.store.activeVariant === "onboarding"}
                 .newAgentIntent=${this.store.activeVariant === "new-agent"}
                 compact
-              ></openclaw-custodian-surface>`
+              ></carapace-custodian-surface>`
         }
       </section>
     `;
   }
 }
 
-if (!customElements.get("openclaw-assistant-panel")) {
-  customElements.define("openclaw-assistant-panel", OpenClawAssistantPanel);
+if (!customElements.get("carapace-assistant-panel")) {
+  customElements.define("carapace-assistant-panel", CarapaceAssistantPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-assistant-panel": OpenClawAssistantPanel;
+    "carapace-assistant-panel": CarapaceAssistantPanel;
   }
 }

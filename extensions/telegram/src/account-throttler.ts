@@ -1,7 +1,7 @@
 // Telegram plugin module implements account throttler behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
-import { logVerbose, sleepWithAbort, waitForAbortSignal } from "openclaw/plugin-sdk/runtime-env";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { parseStrictInteger } from "carapace/plugin-sdk/number-runtime";
+import { logVerbose, sleepWithAbort, waitForAbortSignal } from "carapace/plugin-sdk/runtime-env";
 import { apiThrottler } from "./bot.runtime.js";
 import { TELEGRAM_CHAT_ACTION_INTERVAL_MS } from "./chat-action-timing.js";
 import { createTelegramSendChatActionHandler } from "./sendchataction-401-backoff.js";
@@ -144,7 +144,7 @@ class GroupRequestScheduler {
   }
 }
 
-const TELEGRAM_ACCOUNT_THROTTLERS_KEY = Symbol.for("openclaw.telegram.accountThrottlers");
+const TELEGRAM_ACCOUNT_THROTTLERS_KEY = Symbol.for("carapace.telegram.accountThrottlers");
 
 function getAccountThrottlers(): Map<string, TelegramAccountThrottler> {
   const globalRecord = globalThis as Record<PropertyKey, unknown>;

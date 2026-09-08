@@ -19,11 +19,11 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 const NOW = Date.now();
-const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
 let artifactDir: string;
 let readinessArtifactDir: string;
 beforeEach(() => {
@@ -112,7 +112,7 @@ describeControlUiE2e("Control UI Models mocked Gateway E2E", () => {
     const page = await context.newPage();
     const config = { auth: { profiles: { "openai:chatgpt": { provider: "openai" } } } };
     const gateway = await installMockGateway(page, {
-      featureMethods: ["chat.metadata", "chat.startup", "models.probe", "openclaw.setup.detect"],
+      featureMethods: ["chat.metadata", "chat.startup", "models.probe", "carapace.setup.detect"],
       methodResponses: {
         "config.get": {
           config,
@@ -148,10 +148,10 @@ describeControlUiE2e("Control UI Models mocked Gateway E2E", () => {
             },
           ],
         },
-        "openclaw.setup.detect": {
+        "carapace.setup.detect": {
           candidates: [],
           manualProviders: [{ id: "openai", label: "OpenAI" }],
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         },
         "usage.status": { updatedAt: NOW, providers: [] },
@@ -828,14 +828,14 @@ describeControlUiE2e("Control UI Models mocked Gateway E2E", () => {
       await page.goto(`${server.baseUrl}settings/model-providers`);
       const defaults = page.locator(".model-providers__defaults");
       const utility = page.locator("#model-providers-utility-model");
-      await expect.poll(() => modelPickerValue(utility)).toBe("__openclaw_automatic_utility__");
+      await expect.poll(() => modelPickerValue(utility)).toBe("__carapace_automatic_utility__");
       if (recordVisuals) {
         await captureProviderProof("utility-before.png", utility);
       }
       for (const choice of [
         { label: "GPT-5 Mini", value: "openai/gpt-5-mini", setting: "openai/gpt-5-mini" },
         { label: "Disabled", value: "", setting: "" },
-        { label: "Auto", value: "__openclaw_automatic_utility__", setting: null },
+        { label: "Auto", value: "__carapace_automatic_utility__", setting: null },
       ]) {
         const before = (await gateway.getRequests("config.patch")).length;
         await gateway.deferNext("config.patch");
@@ -951,7 +951,7 @@ describeControlUiE2e("Control UI Models mocked Gateway E2E", () => {
 
     try {
       await page.goto(`${server.baseUrl}settings/model-providers`);
-      const agentPicker = page.locator(".agent-scope-control openclaw-agent-select");
+      const agentPicker = page.locator(".agent-scope-control carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker.locator('wa-dropdown-item[aria-label="Writer"]').click();
       await expect

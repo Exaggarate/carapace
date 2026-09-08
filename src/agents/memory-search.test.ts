@@ -1,6 +1,6 @@
 // Verifies memory-search config resolution across providers, sync, and batching.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveRememberAcrossConversations } from "../memory-host-sdk/host/config-utils.js";
 import {
   clearEmbeddingProviders,
@@ -18,10 +18,10 @@ import {
   setActiveDegradedSecretOwners,
 } from "../secrets/runtime-degraded-state.js";
 import { runtimeMemorySecretOwnerId } from "../secrets/runtime-memory-secret-owner.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.paths.js";
 import { resolveMemorySearchConfig, resolveMemorySearchSyncConfig } from "./memory-search.js";
 
-const asConfig = (cfg: OpenClawConfig): OpenClawConfig => ({
+const asConfig = (cfg: CarapaceConfig): CarapaceConfig => ({
   ...cfg,
   // Provider registries are supplied explicitly below; plugin loading belongs
   // to its integration tests and would turn these pure config cases into cold scans.
@@ -101,7 +101,7 @@ describe("memory search config", () => {
   it("bounds the embedding cache with a built-in default", () => {
     // #111382 purged `memory.search.cache.maxEntries` from the config contract and replaced it
     // with an unset built-in default, so pruneEmbeddingCacheIfNeeded early-returned on
-    // `!max` and memory_embedding_cache grew without limit (openclaw/openclaw#114612).
+    // `!max` and memory_embedding_cache grew without limit (carapace/carapace#114612).
     const resolved = resolveMemorySearchConfig(
       asConfig({ memory: { search: {} }, agents: { defaults: {} } }),
       "main",
@@ -111,7 +111,7 @@ describe("memory search config", () => {
     expect(resolved?.cache.maxEntries).toBeGreaterThan(0);
   });
 
-  function configWithDefaultProvider(provider: string): OpenClawConfig {
+  function configWithDefaultProvider(provider: string): CarapaceConfig {
     return asConfig({
       memory: {
         search: {
@@ -292,7 +292,7 @@ describe("memory search config", () => {
       expected: true,
     },
   ])("resolves remember-across-conversations for $name", ({ cfg, expected }) => {
-    expect(resolveRememberAcrossConversations(asConfig(cfg as OpenClawConfig), "main")).toBe(
+    expect(resolveRememberAcrossConversations(asConfig(cfg as CarapaceConfig), "main")).toBe(
       expected,
     );
   });
@@ -397,7 +397,7 @@ describe("memory search config", () => {
     expect(resolved?.provider).toBe("openai");
     expect(resolved?.model).toBe("text-embedding-3-small");
     expect(resolved?.fallback).toBe("none");
-    expect(resolved?.store.databasePath).toBe(resolveOpenClawAgentSqlitePath({ agentId: "main" }));
+    expect(resolved?.store.databasePath).toBe(resolveCarapaceAgentSqlitePath({ agentId: "main" }));
   });
 
   it("normalizes legacy auto provider config to openai", () => {

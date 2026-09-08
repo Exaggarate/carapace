@@ -267,14 +267,14 @@ describe("renderModelProviders", () => {
     );
     expect(
       (
-        thinkingDefaultHelp?.closest("openclaw-tooltip") as
+        thinkingDefaultHelp?.closest("carapace-tooltip") as
           | (HTMLElement & { content?: string })
           | null
       )?.content,
     ).toContain("model's thinking policy");
     expect(
       (
-        fastModeDefaultHelp?.closest("openclaw-tooltip") as
+        fastModeDefaultHelp?.closest("carapace-tooltip") as
           | (HTMLElement & { content?: string })
           | null
       )?.content,

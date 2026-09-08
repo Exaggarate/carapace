@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/nvidia-provider",
+  "name": "@carapace/nvidia-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw NVIDIA provider plugin",
+  "description": "Carapace NVIDIA provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

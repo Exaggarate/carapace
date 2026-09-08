@@ -6,4 +6,4 @@ export {
   resolveAgentDir,
   resolveDefaultModelForAgent,
   resolveHumanDelayConfig,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";

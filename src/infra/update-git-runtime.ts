@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import { resolveControlUiAssetHealth } from "./control-ui-assets.js";
 import { tryReadJson } from "./json-files.js";
 import { readPackageVersion } from "./package-json.js";

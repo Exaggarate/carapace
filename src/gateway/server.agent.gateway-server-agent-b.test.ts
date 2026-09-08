@@ -15,8 +15,8 @@ import {
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import { emitAgentEvent } from "../infra/agent-events.js";
 import { registerAgentRunContext } from "../infra/agent-run-registry.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
-import { ensureSessionPendingInputsSchema } from "../state/openclaw-agent-pending-inputs-schema.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
+import { ensureSessionPendingInputsSchema } from "../state/carapace-agent-pending-inputs-schema.js";
 import {
   createChannelTestPluginBase,
   createDirectOutboundTestAdapter,
@@ -194,7 +194,7 @@ async function sendAgentWsRequestAndWaitFinal(
 const gwSessionTempDirs: string[] = [];
 
 async function useTempSessionStorePath() {
-  const dir = makeTempDir(gwSessionTempDirs, "openclaw-gw-");
+  const dir = makeTempDir(gwSessionTempDirs, "carapace-gw-");
   testState.sessionStorePath = path.join(dir, "sessions.json");
 }
 
@@ -625,7 +625,7 @@ describe("gateway server agent", () => {
       throw new Error("expected session store path");
     }
     const target = resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" });
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: target.path }).db;
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: target.path }).db;
     ensureSessionPendingInputsSchema(database);
     database.exec(`
       CREATE TEMP TRIGGER fail_agent_turn_admission

@@ -479,12 +479,12 @@ describe("gateway-cli coverage", () => {
 
   it("prints the latest stability bundle without calling Gateway", async () => {
     callGateway.mockClear();
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-cli-bundle-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-cli-bundle-"));
     try {
       const bundleDir = path.join(tempDir, "logs", "stability");
       const bundlePath = path.join(
         bundleDir,
-        "openclaw-stability-2026-04-22T12-00-00-000Z-123-test.json",
+        "carapace-stability-2026-04-22T12-00-00-000Z-123-test.json",
       );
       const bundle = {
         version: 1,
@@ -566,7 +566,7 @@ describe("gateway-cli coverage", () => {
       fs.mkdirSync(bundleDir, { recursive: true });
       fs.writeFileSync(bundlePath, `${JSON.stringify(bundle, null, 2)}\n`, "utf8");
 
-      await withEnvOverride({ OPENCLAW_STATE_DIR: tempDir }, async () => {
+      await withEnvOverride({ CARAPACE_STATE_DIR: tempDir }, async () => {
         await runGatewayCommand([
           "gateway",
           "--port",
@@ -607,11 +607,11 @@ describe("gateway-cli coverage", () => {
     },
   ])("writes $name export with a service-owned health snapshot", async ({ args, timeoutMs }) => {
     callGateway.mockClear();
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-cli-support-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-cli-support-"));
     try {
       const outputPath = path.join(tempDir, "diagnostics.zip");
       await withEnvOverride(
-        { OPENCLAW_STATE_DIR: tempDir, OPENCLAW_TEST_FILE_LOG: undefined },
+        { CARAPACE_STATE_DIR: tempDir, CARAPACE_TEST_FILE_LOG: undefined },
         async () => {
           await runGatewayCommand([...args, "--output", outputPath, "--json"]);
         },
@@ -656,10 +656,10 @@ describe("gateway-cli coverage", () => {
     "rejects an explicitly empty gateway diagnostics export %s",
     async (flag) => {
       callGateway.mockClear();
-      const tempDir = tempDirs.make("openclaw-gateway-cli-empty-");
+      const tempDir = tempDirs.make("carapace-gateway-cli-empty-");
       const outputPath = path.join(tempDir, "diagnostics.zip");
       await withEnvOverride(
-        { OPENCLAW_STATE_DIR: tempDir, OPENCLAW_TEST_FILE_LOG: undefined },
+        { CARAPACE_STATE_DIR: tempDir, CARAPACE_TEST_FILE_LOG: undefined },
         async () => {
           await expectGatewayExit([
             "gateway",
@@ -690,8 +690,8 @@ describe("gateway-cli coverage", () => {
       beacon: {
         instanceName: "Studio gateway",
         displayName: "Studio",
-        domain: "openclaw.internal.",
-        host: "studio.openclaw.internal",
+        domain: "carapace.internal.",
+        host: "studio.carapace.internal",
         port: 18789,
         lanHost: "untrusted.example.test",
         tailnetDns: "untrusted.tailnet.test",
@@ -699,23 +699,23 @@ describe("gateway-cli coverage", () => {
         sshPort: 22,
         txt: { gatewayPort: "12345" },
       } satisfies DiscoveredBeacon,
-      wsUrl: "ws://studio.openclaw.internal:18789",
+      wsUrl: "ws://studio.carapace.internal:18789",
     },
     {
       name: "uses the secure scheme advertised by a TLS gateway",
       beacon: {
         instanceName: "Secure gateway",
-        host: "secure.openclaw.internal",
+        host: "secure.carapace.internal",
         port: 18789,
         gatewayTls: true,
       } satisfies DiscoveredBeacon,
-      wsUrl: "wss://secure.openclaw.internal:18789",
+      wsUrl: "wss://secure.carapace.internal:18789",
     },
     {
       name: "does not construct a URL from unresolved TXT hints",
       beacon: {
         instanceName: "Unresolved gateway",
-        lanHost: "unresolved.openclaw.internal",
+        lanHost: "unresolved.carapace.internal",
         gatewayPort: 18789,
       } satisfies DiscoveredBeacon,
       wsUrl: null,

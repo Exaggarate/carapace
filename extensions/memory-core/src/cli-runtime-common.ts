@@ -1,13 +1,13 @@
 import {
   normalizeExtraMemoryPathEntries,
   type MemoryExtraPath,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   listAgentIds,
   resolveConfiguredAgentId,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/memory-core-host-runtime-core";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   defaultRuntime,
   formatCliJsonFailure,
@@ -19,7 +19,7 @@ import {
   resolveDefaultAgentId,
   shortenHomePath,
   theme,
-  type OpenClawConfig,
+  type CarapaceConfig,
   withManager,
 } from "./cli.host.runtime.js";
 import type { MemoryCoreAcquireLocalService } from "./memory/embedding-local-service.js";
@@ -105,7 +105,7 @@ function emitMemorySecretResolveDiagnostics(
     }
   }
 }
-export function resolveMemoryPluginConfig(cfg: OpenClawConfig): Record<string, unknown> {
+export function resolveMemoryPluginConfig(cfg: CarapaceConfig): Record<string, unknown> {
   const entry = asNullableRecord(cfg.plugins?.entries?.["memory-core"]);
   return asNullableRecord(entry?.config) ?? {};
 }
@@ -131,7 +131,7 @@ export function formatAuditCounts(audit: ShortTermAuditSummary): string {
   const suffix = scriptCoverage ? ` · scripts=${scriptCoverage}` : "";
   return `${audit.entryCount} entries · ${audit.promotedCount} promoted · ${audit.conceptTaggedEntryCount} concept-tagged · ${audit.spacedEntryCount} spaced${suffix}`;
 }
-export function resolveMemoryAgent(cfg: OpenClawConfig, agent?: string) {
+export function resolveMemoryAgent(cfg: CarapaceConfig, agent?: string) {
   const trimmed = agent?.trim();
   if (agent !== undefined && !trimmed) {
     throw new Error("--agent must not be blank");
@@ -146,7 +146,7 @@ export function buildCliMemorySearchSessionKey(agentId: string): string {
     dmScope: "per-channel-peer",
   });
 }
-export function resolveMemoryAgentIds(cfg: OpenClawConfig, agent?: string): string[] {
+export function resolveMemoryAgentIds(cfg: CarapaceConfig, agent?: string): string[] {
   const trimmed = agent?.trim();
   if (agent !== undefined && !trimmed) {
     throw new Error("--agent must not be blank");
@@ -169,8 +169,8 @@ export async function withMemoryCommand(params: {
   purpose?: MemoryManagerPurpose;
   inspectSources?: boolean;
   acquireLocalService?: MemoryCoreAcquireLocalService;
-  run: (context: { manager: MemoryManager; cfg: OpenClawConfig; agentId: string }) => Promise<void>;
-}): Promise<OpenClawConfig> {
+  run: (context: { manager: MemoryManager; cfg: CarapaceConfig; agentId: string }) => Promise<void>;
+}): Promise<CarapaceConfig> {
   const { config: cfg, diagnostics } = await loadMemoryCommandConfig(
     params.commandName,
     params.purpose === "status" ? "read_only_status" : undefined,

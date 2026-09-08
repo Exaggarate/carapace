@@ -1,11 +1,11 @@
-import { resolvePositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { resolvePositiveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { z } from "zod";
 import { createReasoningTagTextPartitioner } from "../../packages/markdown-core/src/reasoning-tags.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { resolveAgentEffectiveModelPrimary } from "../agents/agent-scope.js";
 import { resolveUtilityModelRefForAgent } from "../agents/utility-model.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { TranscriptSessionDescriptor, TranscriptUtterance } from "./provider-types.js";
 import { summarizeTranscripts, type TranscriptsSummary } from "./summary.js";
 
@@ -77,7 +77,7 @@ function buildSummaryPrompt(session: TranscriptSessionDescriptor, summary: Trans
 
 /** Enhance deterministic meeting notes with bounded, tool-free model output. */
 export async function summarizeTranscriptsWithModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   session: TranscriptSessionDescriptor;
   utterances: TranscriptUtterance[];

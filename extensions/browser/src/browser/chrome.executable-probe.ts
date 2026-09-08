@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const CHROME_VERSION_RE = /\b(\d+)(?:\.\d+){1,3}\b/g;
 const BROWSER_VERSION_TIMEOUT_MS = 6000;

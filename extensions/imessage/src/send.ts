@@ -1,40 +1,40 @@
 // Imessage plugin module implements send behavior.
 import { constants, accessSync } from "node:fs";
 import { basename } from "node:path";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { addApprovalReactionHintToText } from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { addApprovalReactionHintToText } from "carapace/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   createChannelPartialDeliveryError,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { PlatformMessageNotDispatchedError } from "carapace/plugin-sdk/error-runtime";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
 import {
   extractOriginalFilename,
   kindFromMime,
   resolveOutboundAttachmentFromUrl,
   type OutboundMediaAccess,
-} from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { sleep as delay } from "openclaw/plugin-sdk/runtime-env";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import { sleep as delay } from "carapace/plugin-sdk/runtime-env";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import {
   asOptionalRecord,
   normalizeOptionalString as stringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir, withTempWorkspace } from "carapace/plugin-sdk/temp-path";
 import {
   convertMarkdownTables,
   stripInlineDirectiveTagsForDelivery,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/text-chunking";
 import {
   hasExclusiveIMessageLocalDatabase,
   resolveIMessageAccount,
@@ -100,7 +100,7 @@ type IMessageSendOpts = {
   timeoutMs?: number;
   chatId?: number;
   client?: IMessageRpcClient;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   account?: ResolvedIMessageAccount;
   approvalPrompt?: IMessageApprovalPromptBinding;
   resolveAttachmentImpl?: (
@@ -477,7 +477,7 @@ async function withOriginalIMessageAttachmentPath<T>(
   // The bridge exposes this basename and copies its bytes before returning;
   // keep the UUID-backed media-store file intact while its private alias is live.
   return await withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-imessage-outbound-" },
+    { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-imessage-outbound-" },
     async (workspace) => await send(await workspace.copyIn(filename, filePath)),
   );
 }

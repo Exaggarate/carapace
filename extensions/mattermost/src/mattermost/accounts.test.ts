@@ -1,6 +1,6 @@
 // Mattermost tests cover accounts plugin behavior.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { CarapaceConfig } from "../../runtime-api.js";
 import {
   inspectMattermostAccount,
   isMattermostConfigured,
@@ -12,7 +12,7 @@ import {
 
 describe("resolveDefaultMattermostAccountId", () => {
   it("prefers channels.mattermost.defaultAccount when it matches a configured account", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           defaultAccount: "alerts",
@@ -28,7 +28,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("normalizes channels.mattermost.defaultAccount before lookup", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           defaultAccount: "Ops Team",
@@ -43,7 +43,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("falls back when channels.mattermost.defaultAccount is missing", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           defaultAccount: "missing",
@@ -59,7 +59,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("keeps the implicit default account when named accounts are added to top-level credentials", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           botToken: "tok-default",
@@ -80,7 +80,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("inherits top-level access policy for named accounts before doctor migration", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           dmPolicy: "open",
@@ -112,7 +112,7 @@ describe("Mattermost account SecretRef inspection", () => {
   const unresolvedRef = {
     source: "env" as const,
     provider: "default",
-    id: "OPENCLAW_TEST_MISSING_MATTERMOST_TOKEN",
+    id: "CARAPACE_TEST_MISSING_MATTERMOST_TOKEN",
   };
 
   it.each([
@@ -121,7 +121,7 @@ describe("Mattermost account SecretRef inspection", () => {
     { botToken: undefined, baseUrl: "https://mm.example.com", configured: false },
     { botToken: "bot-token", baseUrl: undefined, configured: false },
   ])("reports configured=$configured for token $botToken and URL $baseUrl", (entry) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           accounts: {
@@ -171,7 +171,7 @@ describe("Mattermost account SecretRef inspection", () => {
 
 describe("resolveMattermostReplyToMode", () => {
   it("uses configured defaultAccount when accountId is omitted", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           defaultAccount: "alerts",
@@ -192,7 +192,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("uses the configured mode for channel and group messages", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",
@@ -206,7 +206,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("keeps direct messages off by default even when replyToMode is enabled", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",
@@ -219,7 +219,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("uses per-chat-type overrides before the channel and group default", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",

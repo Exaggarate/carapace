@@ -1,6 +1,6 @@
 // Slack plugin module implements preview finalize behavior.
 import type { Block, KnownBlock, WebClient } from "@slack/web-api";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { editSlackRenderedMessage } from "../../actions.js";
 import { buildSlackBlocksFallbackText } from "../../blocks-fallback.js";
 import { buildSlackEditTextPayload } from "../../edit-text.js";

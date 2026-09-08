@@ -4,8 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   inspectSharedAuthStoreOwnership,
   noteCommittedSharedAuthStoreOwnership,
@@ -27,13 +27,13 @@ import {
   closeAuthProfileReadPool,
   resolveAuthProfileDatabaseOwnerId,
 } from "../agents/auth-profiles/sqlite.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  runCarapaceAgentWriteTransaction,
+} from "../state/carapace-agent-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -53,11 +53,11 @@ const SOURCE_STORE_KEY = "primary";
 const TARGET_STORE_KEY = "shared";
 
 type SourceAuthDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "auth_profile_store" | "auth_profile_state"
 >;
 type SharedAuthMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "config_machine_state" | "migration_runs" | "migration_sources"
 >;
 
@@ -88,7 +88,7 @@ function readSourceSnapshot(params: { env: NodeJS.ProcessEnv; sourcePath: string
     return { rows: { store: null, state: null }, size: null };
   }
   try {
-    const rows = runOpenClawAgentWriteTransaction(
+    const rows = runCarapaceAgentWriteTransaction(
       ({ db }) => readSharedAuthLegacyRowsFromDatabase(db),
       {
         agentId: resolveAuthProfileDatabaseOwnerId(path.dirname(params.sourcePath)),
@@ -98,7 +98,7 @@ function readSourceSnapshot(params: { env: NodeJS.ProcessEnv; sourcePath: string
       { operationLabel: "state-migration.shared-auth-source-read" },
     );
     closeAuthProfileReadPool({ kind: "database", databasePath: params.sourcePath });
-    closeOpenClawAgentDatabaseByPath(params.sourcePath);
+    closeCarapaceAgentDatabaseByPath(params.sourcePath);
     return { rows, size: fs.statSync(params.sourcePath).size };
   } catch (error) {
     throw new SharedAuthStoreSourceInspectionError(params.sourcePath, "read", error);
@@ -327,7 +327,7 @@ function rewriteAuthJsonMigrationReceipts(
 }
 
 function copyRowsToState(params: MigrationSnapshot): AuthRows {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db: database, path: targetDatabasePath }) => {
       const db = getNodeSqliteKysely<SharedAuthMigrationDatabase>(database);
       const target = readTargetRows(database);
@@ -349,7 +349,7 @@ function copyRowsToState(params: MigrationSnapshot): AuthRows {
       }
       if (conflicts.length > 0) {
         throw new Error(
-          `shared auth rows conflict with the relocation target: ${conflicts.join("; ")}. Back up source ${JSON.stringify(params.sourcePath)} and target ${JSON.stringify(targetDatabasePath)} with OpenClaw stopped. Preserve target-only profiles, copy missing source profiles into the target, and reconcile differing entries/metadata/state locally; then rerun openclaw doctor --fix. No auth rows were changed.`,
+          `shared auth rows conflict with the relocation target: ${conflicts.join("; ")}. Back up source ${JSON.stringify(params.sourcePath)} and target ${JSON.stringify(targetDatabasePath)} with Carapace stopped. Preserve target-only profiles, copy missing source profiles into the target, and reconcile differing entries/metadata/state locally; then rerun carapace doctor --fix. No auth rows were changed.`,
         );
       }
       if (params.sourceRows.store && !target.store) {
@@ -398,7 +398,7 @@ function advanceMigration(
 ): boolean {
   const flipping = params.stage === "ownership-flipped";
   const flipped = flipping && resolveSharedAuthStoreOwnership(params.env).location !== "state-db";
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: database }) => {
       assertRowsMatch(params.rows, readTargetRows(database), params.stage);
       if (flipping) {
@@ -435,7 +435,7 @@ function cleanupSourceRows(params: { env: NodeJS.ProcessEnv; sourcePath: string 
     return false;
   }
   try {
-    const removed = runOpenClawAgentWriteTransaction(
+    const removed = runCarapaceAgentWriteTransaction(
       ({ db: database }) => {
         const db = getNodeSqliteKysely<SourceAuthDatabase>(database);
         const before = readSharedAuthLegacyRowsFromDatabase(database);
@@ -461,7 +461,7 @@ function cleanupSourceRows(params: { env: NodeJS.ProcessEnv; sourcePath: string 
       { operationLabel: "state-migration.shared-auth-cleanup" },
     );
     closeAuthProfileReadPool({ kind: "database", databasePath: params.sourcePath });
-    closeOpenClawAgentDatabaseByPath(params.sourcePath);
+    closeCarapaceAgentDatabaseByPath(params.sourcePath);
     return removed;
   } catch (error) {
     throw new SharedAuthStoreSourceInspectionError(params.sourcePath, "clean", error);
@@ -475,8 +475,8 @@ export function detectSharedAuthStoreMigration(params: {
   doctorOnlyStateMigrations?: boolean;
   artifactPreservingReadOnly?: boolean;
 }): SharedAuthStoreMigrationDetection {
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
-  const sourcePath = path.join(resolveSharedMainAuthAgentDir(env), "openclaw-agent.sqlite");
+  const env = { ...(params.env ?? process.env), CARAPACE_STATE_DIR: params.stateDir };
+  const sourcePath = path.join(resolveSharedMainAuthAgentDir(env), "carapace-agent.sqlite");
   if (params.doctorOnlyStateMigrations !== true) {
     return { sourcePath, hasLegacy: false };
   }

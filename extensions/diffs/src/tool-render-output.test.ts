@@ -33,7 +33,7 @@ describe("diffs tool rendered output guards", () => {
   beforeEach(async () => {
     renderDiffDocumentMock.mockReset();
     ({ store, cleanup: cleanupRootDir } = await createDiffStoreHarness(
-      "openclaw-diffs-tool-render-output-",
+      "carapace-diffs-tool-render-output-",
     ));
   });
 

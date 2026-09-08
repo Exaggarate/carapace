@@ -2,20 +2,20 @@ import path from "node:path";
 import { resolveSessionStoreCompatibilityAgentId } from "../config/legacy.default-agent-owner.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import { assertNoOpenClawAgentDatabaseLeases } from "../state/openclaw-agent-db-lease.js";
-import { invalidateRegisteredAgentDatabasesMemo } from "../state/openclaw-agent-db-registry-listing.js";
+import { assertNoCarapaceAgentDatabaseLeases } from "../state/carapace-agent-db-lease.js";
+import { invalidateRegisteredAgentDatabasesMemo } from "../state/carapace-agent-db-registry-listing.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  inspectOpenClawAgentDatabaseOwner,
-  listOpenClawRegisteredAgentDatabases,
-  resolveIncognitoOpenClawAgentSqlitePath,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db-contract.js";
+  closeCarapaceAgentDatabaseByPath,
+  inspectCarapaceAgentDatabaseOwner,
+  listCarapaceRegisteredAgentDatabases,
+  resolveIncognitoCarapaceAgentSqlitePath,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db-contract.js";
 import { findOverlappingWorkspaceAgentIds } from "./agent-delete-safety.js";
 import {
   isPathOwnedByAnotherRegisteredAgent,
@@ -30,9 +30,9 @@ export type AgentDeleteDatabasePlan = {
 };
 
 /** Destructive planning includes every registered owner, regardless of runtime schema readiness. */
-export function readAgentDeleteDatabaseRegistry(options: OpenClawStateDatabaseOptions = {}) {
+export function readAgentDeleteDatabaseRegistry(options: CarapaceStateDatabaseOptions = {}) {
   invalidateRegisteredAgentDatabasesMemo(options);
-  return listOpenClawRegisteredAgentDatabases({
+  return listCarapaceRegisteredAgentDatabases({
     ...options,
     includeIncompatibleSchemaVersions: true,
   });
@@ -42,9 +42,9 @@ export class AgentSharedStoreOwnerError extends Error {}
 
 /** Check before journaling: retaining the file alone would still fence its shared owner. */
 export function assertAgentSessionStoreDeletionSafe(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
   if (!cfg.session?.store?.trim()) {
     return;
@@ -66,7 +66,7 @@ export function assertAgentSessionStoreDeletionSafe(
       env: options.env,
       registeredDatabases,
     });
-    const owner = inspectOpenClawAgentDatabaseOwner(target.path);
+    const owner = inspectCarapaceAgentDatabaseOwner(target.path);
     if (owner.status === "owned" && owner.agentId === id) {
       throw new AgentSharedStoreOwnerError(
         `Agent "${id}" owns the session database still used by agent "${survivorId}" and cannot be deleted. Keep this owner configured until shared history can be moved with a supported migration; no such migration is currently available.`,
@@ -76,7 +76,7 @@ export function assertAgentSessionStoreDeletionSafe(
 }
 
 export function resolveSurvivingDatabaseFilePaths(
-  registeredDatabases: ReturnType<typeof listOpenClawRegisteredAgentDatabases>,
+  registeredDatabases: ReturnType<typeof listCarapaceRegisteredAgentDatabases>,
   agentId: string,
   env?: NodeJS.ProcessEnv,
 ): string[] {
@@ -91,7 +91,7 @@ export function resolveSurvivingDatabaseFilePaths(
 }
 
 export function isPathOwnedBySurvivingAgent(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   pathname: string,
   survivingDatabaseFilePaths: readonly string[] = [],
@@ -111,10 +111,10 @@ export function isPathOwnedBySurvivingAgent(
 }
 
 export function prepareAgentDeleteDatabases(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   agentDir: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): AgentDeleteDatabasePlan {
   const registeredDatabases = readAgentDeleteDatabaseRegistry(options);
   const survivingDatabaseFilePaths = resolveSurvivingDatabaseFilePaths(
@@ -123,10 +123,10 @@ export function prepareAgentDeleteDatabases(
     options.env,
   );
   const registeredDatabasePaths = new Set([
-    resolveOpenClawAgentSqlitePath({
+    resolveCarapaceAgentSqlitePath({
       agentId,
       env: options.env,
-      path: path.join(agentDir, "openclaw-agent.sqlite"),
+      path: path.join(agentDir, "carapace-agent.sqlite"),
     }),
     ...registeredDatabases
       .filter((entry) => normalizeAgentId(entry.agentId) === agentId)
@@ -135,11 +135,11 @@ export function prepareAgentDeleteDatabases(
   // A surviving directory retains files, not the deleted agent's connection. Check the
   // actual cached owner so stale registration cannot close a surviving agent's handle.
   for (const databasePath of registeredDatabasePaths) {
-    closeOpenClawAgentDatabaseByPath(databasePath, agentId);
+    closeCarapaceAgentDatabaseByPath(databasePath, agentId);
   }
   // Incognito has no registry row or files, but retained statements must also be retired.
-  closeOpenClawAgentDatabaseByPath(
-    resolveIncognitoOpenClawAgentSqlitePath({ agentId, env: options.env }),
+  closeCarapaceAgentDatabaseByPath(
+    resolveIncognitoCarapaceAgentSqlitePath({ agentId, env: options.env }),
     agentId,
   );
   const databasePaths = [...registeredDatabasePaths].filter((pathname) =>
@@ -154,7 +154,7 @@ export function prepareAgentDeleteDatabases(
         ),
     ),
   );
-  assertNoOpenClawAgentDatabaseLeases(agentId, options);
+  assertNoCarapaceAgentDatabaseLeases(agentId, options);
   const fileGroups = databasePaths.map(resolveSqliteDatabaseFilePaths);
   const relocatedFileGroups = fileGroups.filter((fileGroup) => {
     const relative = path.relative(agentDir, fileGroup[0] ?? agentDir);

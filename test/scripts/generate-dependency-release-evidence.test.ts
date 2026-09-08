@@ -166,7 +166,7 @@ describe("generate-dependency-release-evidence", () => {
       releaseRef: "v2026.5.13-beta.1",
       releaseSha: "abc123",
       npmDistTag: "beta",
-      packageName: "openclaw",
+      packageName: "carapace",
       packageVersion: "2026.5.13-beta.1",
       workflowRunId: "123",
       workflowRunAttempt: "2",
@@ -176,7 +176,7 @@ describe("generate-dependency-release-evidence", () => {
   });
 
   it("runs the npm lock report from tooling and retains it in the manifest and summaries", async () => {
-    const dir = await mkdtemp(path.join(tmpdir(), "openclaw-release-lock-evidence-test-"));
+    const dir = await mkdtemp(path.join(tmpdir(), "carapace-release-lock-evidence-test-"));
     try {
       const source = path.join(dir, "source");
       const outputDir = path.join(dir, "evidence");
@@ -219,7 +219,7 @@ describe("generate-dependency-release-evidence", () => {
         "npm-package-locks.json": {
           packagesWithOmittedWorkspaceDependencies: 1,
           packages: [
-            { bundleRuntimeDependencies: false, omittedWorkspaceDependencies: ["@openclaw/ai"] },
+            { bundleRuntimeDependencies: false, omittedWorkspaceDependencies: ["@carapace/ai"] },
             { bundleRuntimeDependencies: true, omittedWorkspaceDependencies: [] },
           ],
         },
@@ -425,7 +425,7 @@ describe("generate-dependency-release-evidence", () => {
   it.skipIf(process.platform === "win32")(
     "uses trusted report tooling for a separate target and retains blocking evidence",
     async () => {
-      const dir = await mkdtemp(path.join(tmpdir(), "openclaw-release-dependency-failure-test-"));
+      const dir = await mkdtemp(path.join(tmpdir(), "carapace-release-dependency-failure-test-"));
       try {
         const binDir = path.join(dir, "bin");
         const outputDir = path.join(dir, "evidence");
@@ -500,7 +500,7 @@ describe("generate-dependency-release-evidence", () => {
   it.each([true, false])(
     "fetches complete target release history without unrelated refs (shallow=%s)",
     async (shallow) => {
-      const dir = await mkdtemp(path.join(tmpdir(), "openclaw-release-history-test-"));
+      const dir = await mkdtemp(path.join(tmpdir(), "carapace-release-history-test-"));
       const git = (cwd: string, ...args: string[]) =>
         execFileSync(
           "git",
@@ -573,7 +573,7 @@ describe("generate-dependency-release-evidence", () => {
   ])(
     "collects report counts and renders $status upstream coverage in both summaries",
     async (upstream) => {
-      const dir = await mkdtemp(path.join(tmpdir(), "openclaw-release-dependency-evidence-test-"));
+      const dir = await mkdtemp(path.join(tmpdir(), "carapace-release-dependency-evidence-test-"));
       try {
         const coverage = {
           npm: "checked",
@@ -627,10 +627,10 @@ describe("generate-dependency-release-evidence", () => {
         await writeJson(dir, "npm-package-locks.json", {
           packagesWithOmittedWorkspaceDependencies: 2,
           packages: [
-            { bundleRuntimeDependencies: false, omittedWorkspaceDependencies: ["@openclaw/ai"] },
+            { bundleRuntimeDependencies: false, omittedWorkspaceDependencies: ["@carapace/ai"] },
             {
               bundleRuntimeDependencies: true,
-              omittedWorkspaceDependencies: ["@openclaw/gateway-protocol"],
+              omittedWorkspaceDependencies: ["@carapace/gateway-protocol"],
             },
             { bundleRuntimeDependencies: false, omittedWorkspaceDependencies: [] },
           ],
@@ -666,12 +666,12 @@ describe("generate-dependency-release-evidence", () => {
         expect(summary).toContain("- Resolved package changes: +5 -6 changed 7");
 
         const stepSummary = renderDependencyEvidenceStepSummary({
-          evidenceArtifactName: "openclaw-release-dependency-evidence-v2026.5.13",
+          evidenceArtifactName: "carapace-release-dependency-evidence-v2026.5.13",
           baseRef: "v2026.5.1",
           counts,
         });
         expect(stepSummary).toContain(
-          "- Evidence artifact: `openclaw-release-dependency-evidence-v2026.5.13`",
+          "- Evidence artifact: `carapace-release-dependency-evidence-v2026.5.13`",
         );
         expect(summary).toContain("- `npm-package-locks.md`");
         for (const rendered of [summary, stepSummary]) {

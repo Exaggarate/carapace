@@ -1,4 +1,4 @@
-import OpenClawChatUI
+import CarapaceChatUI
 import SwiftUI
 
 struct CommandCenterTab: View {
@@ -7,8 +7,8 @@ struct CommandCenterTab: View {
     @Environment(NodeAppModel.self) private var appModel
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    var headerTitle: String = "OpenClaw"
-    var headerSidebarAction: OpenClawSidebarHeaderAction?
+    var headerTitle: String = "Carapace"
+    var headerSidebarAction: CarapaceSidebarHeaderAction?
     var dashboardModel: RootSidebarModel
     var openChat: () -> Void
     var openSettings: () -> Void
@@ -47,11 +47,11 @@ struct CommandCenterTab: View {
                         self.header
                         self.gatewayCard
                         self.threadTiles
-                            .padding(.horizontal, OpenClawProMetric.pagePadding)
+                            .padding(.horizontal, CarapaceProMetric.pagePadding)
                         self.attentionCard
-                            .padding(.horizontal, OpenClawProMetric.pagePadding)
+                            .padding(.horizontal, CarapaceProMetric.pagePadding)
                         self.usageSummaryCard
-                            .padding(.horizontal, OpenClawProMetric.pagePadding)
+                            .padding(.horizontal, CarapaceProMetric.pagePadding)
                         if Self.usesSplitSectionsLayout(
                             horizontalSizeClass: self.horizontalSizeClass,
                             containerWidth: geometry.size.width)
@@ -62,18 +62,18 @@ struct CommandCenterTab: View {
                                 self.recentSessions
                                     .frame(maxWidth: .infinity, alignment: .topLeading)
                             }
-                            .padding(.horizontal, OpenClawProMetric.pagePadding)
+                            .padding(.horizontal, CarapaceProMetric.pagePadding)
                         } else {
                             self.defaultChatSessionSection
-                                .padding(.horizontal, OpenClawProMetric.pagePadding)
+                                .padding(.horizontal, CarapaceProMetric.pagePadding)
                             self.recentSessions
-                                .padding(.horizontal, OpenClawProMetric.pagePadding)
+                                .padding(.horizontal, CarapaceProMetric.pagePadding)
                         }
                     }
                     .padding(.top, 18)
                     .padding(.bottom, 18)
                 }
-                .safeAreaPadding(.bottom, OpenClawProMetric.bottomScrollInset)
+                .safeAreaPadding(.bottom, CarapaceProMetric.bottomScrollInset)
             }
         }
         .navigationTitle(self.headerTitle)
@@ -105,12 +105,12 @@ struct CommandCenterTab: View {
             ProCard(padding: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(verbatim: value)
-                        .font(OpenClawType.headline)
-                        .foregroundStyle(OpenClawBrand.accent)
+                        .font(CarapaceType.headline)
+                        .foregroundStyle(CarapaceBrand.accent)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                     Text(verbatim: title)
-                        .font(OpenClawType.caption2Medium)
+                        .font(CarapaceType.caption2Medium)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -125,7 +125,7 @@ struct CommandCenterTab: View {
         let approvalCount = self.appModel.pendingExecApprovalCount
         let cronCount = self.dashboardModel.failedCronJobCount + self.dashboardModel.overdueCronJobCount
         if approvalCount > 0 || cronCount > 0 {
-            CommandPanel(tint: OpenClawBrand.warn, padding: 12) {
+            CommandPanel(tint: CarapaceBrand.warn, padding: 12) {
                 VStack(alignment: .leading, spacing: 8) {
                     self.cardHeader(title: String(localized: "Attention"))
                     if approvalCount > 0 {
@@ -155,11 +155,11 @@ struct CommandCenterTab: View {
                     HStack(spacing: 12) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(String(localized: "31-day usage"))
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(CarapaceType.subheadSemiBold)
                                 .foregroundStyle(.primary)
                             Text(self.usageCostText(usage.totalCost))
-                                .font(OpenClawType.title3SemiBold)
-                                .foregroundStyle(OpenClawBrand.accent)
+                                .font(CarapaceType.title3SemiBold)
+                                .foregroundStyle(CarapaceBrand.accent)
                         }
                         Spacer(minLength: 8)
                         self.usageTrend(usage.daily ?? [])
@@ -180,16 +180,16 @@ struct CommandCenterTab: View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: systemImage)
-                    .font(OpenClawType.subheadSemiBold)
-                    .foregroundStyle(OpenClawBrand.warn)
+                    .font(CarapaceType.subheadSemiBold)
+                    .foregroundStyle(CarapaceBrand.warn)
                 Text(verbatim: title)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
                 Spacer(minLength: 8)
                 Text(verbatim: value)
-                    .font(OpenClawType.subheadSemiBold)
-                    .foregroundStyle(OpenClawBrand.warn)
+                    .font(CarapaceType.subheadSemiBold)
+                    .foregroundStyle(CarapaceBrand.warn)
                 Image(systemName: "chevron.right")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(CarapaceType.captionSemiBold)
                     .foregroundStyle(.secondary)
             }
             .frame(minHeight: 44)
@@ -204,7 +204,7 @@ struct CommandCenterTab: View {
         return HStack(alignment: .bottom, spacing: 2) {
             ForEach(Array(values.enumerated()), id: \.offset) { _, value in
                 Capsule()
-                    .fill(OpenClawBrand.accent.opacity(0.75))
+                    .fill(CarapaceBrand.accent.opacity(0.75))
                     .frame(width: 3, height: maximum > 0 ? max(3, 28 * value / maximum) : 3)
             }
         }
@@ -217,12 +217,12 @@ struct CommandCenterTab: View {
         return value.formatted(.currency(code: "USD"))
     }
 
-    private var overviewSessions: [OpenClawChatSessionEntry] {
+    private var overviewSessions: [CarapaceChatSessionEntry] {
         Self.visibleOverviewSessions(self.dashboardModel.sessions)
     }
 
     static func visibleOverviewSessions(
-        _ sessions: [OpenClawChatSessionEntry]) -> [OpenClawChatSessionEntry]
+        _ sessions: [CarapaceChatSessionEntry]) -> [CarapaceChatSessionEntry]
     {
         sessions.filter {
             $0.archived != true && !ChatSessionSidebarModel.isHiddenInternalSession($0.key)
@@ -261,31 +261,31 @@ struct CommandCenterTab: View {
     }
 
     private var header: some View {
-        OpenClawAdaptiveHeaderRow(
+        CarapaceAdaptiveHeaderRow(
             title: .localized(self.headerTitle),
             subtitle: .localized(self.gatewaySubtitle),
-            titleFont: OpenClawType.title3SemiBold,
-            subtitleFont: OpenClawType.caption,
+            titleFont: CarapaceType.title3SemiBold,
+            subtitleFont: CarapaceType.caption,
             subtitleLineLimit: 1)
         {
             if let headerSidebarAction {
-                OpenClawSidebarHeaderLeadingSlot(action: headerSidebarAction)
+                CarapaceSidebarHeaderLeadingSlot(action: headerSidebarAction)
             }
         } accessory: {
             HStack(spacing: 10) {
                 Button(action: self.openSettings) {
                     Image(systemName: "gearshape.fill")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                         .frame(
-                            width: OpenClawProMetric.compactControlSize,
-                            height: OpenClawProMetric.compactControlSize)
+                            width: CarapaceProMetric.compactControlSize,
+                            height: CarapaceProMetric.compactControlSize)
                 }
-                .openClawGlassButton()
+                .carapaceGlassButton()
                 .accessibilityLabel("Gateway settings")
                 .accessibilityHint("Opens gateway settings")
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, CarapaceProMetric.pagePadding)
     }
 
     @ViewBuilder
@@ -319,33 +319,33 @@ struct CommandCenterTab: View {
                         icon: "server.rack",
                         title: "Address",
                         value: self.gatewayAddressText,
-                        color: OpenClawBrand.accentForeground)
+                        color: CarapaceBrand.accentForeground)
                     Divider().frame(height: 38)
                     self.gatewayFact(
                         icon: "person.2.fill",
                         title: "Agents",
                         value: self.gatewayAgentCountText,
-                        color: OpenClawBrand.accentHotForeground)
+                        color: CarapaceBrand.accentHotForeground)
                 }
                 .padding(.vertical, 7)
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, CarapaceProMetric.pagePadding)
     }
 
     private func gatewayFact(icon: String, title: String, value: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 5) {
                 Image(systemName: icon)
-                    .font(OpenClawType.caption2Bold)
+                    .font(CarapaceType.caption2Bold)
                     .foregroundStyle(color)
                 Text(title)
-                    .font(OpenClawType.caption2Medium)
+                    .font(CarapaceType.caption2Medium)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Text(value)
-                .font(OpenClawType.captionSemiBold)
+                .font(CarapaceType.captionSemiBold)
                 .foregroundStyle(title == "Connection" ? color : .primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
@@ -376,8 +376,8 @@ struct CommandCenterTab: View {
 
                 if let sessionErrorText = self.dashboardModel.sessionErrorText {
                     Text(verbatim: sessionErrorText)
-                        .font(OpenClawType.captionMedium)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(CarapaceType.captionMedium)
+                        .foregroundStyle(CarapaceBrand.warn)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 if self.recentSessionPreviewSessions.isEmpty {
@@ -431,7 +431,7 @@ struct CommandCenterTab: View {
     private func cardHeader(title: String) -> some View {
         HStack(spacing: 8) {
             Text(title)
-                .font(OpenClawType.subheadSemiBold)
+                .font(CarapaceType.subheadSemiBold)
                 .foregroundStyle(.secondary)
             Spacer(minLength: 8)
         }
@@ -461,11 +461,11 @@ struct CommandCenterTab: View {
     private var gatewayStatusColor: Color {
         switch self.gatewayDisplayState {
         case .connected:
-            OpenClawBrand.ok
+            CarapaceBrand.ok
         case .connecting:
-            OpenClawBrand.accent
+            CarapaceBrand.accent
         case .error:
-            OpenClawBrand.warn
+            CarapaceBrand.warn
         case .disconnected:
             .secondary
         }
@@ -491,7 +491,7 @@ struct CommandCenterTab: View {
             detail: self.defaultChatActivityText,
             state: isOpen ? "open" : "default",
             trailing: "chat",
-            color: isOpen ? OpenClawBrand.accent : OpenClawBrand.ok,
+            color: isOpen ? CarapaceBrand.accent : CarapaceBrand.ok,
             progress: nil,
             route: .chat(nil),
             isUnread: self.effectiveDefaultChatSessionEntry?.unread == true,
@@ -508,7 +508,7 @@ struct CommandCenterTab: View {
         return Self.relativeTimeText(forMilliseconds: activityAt)
     }
 
-    private var recentSessionPreviewSessions: [OpenClawChatSessionEntry] {
+    private var recentSessionPreviewSessions: [CarapaceChatSessionEntry] {
         CommandSessionGrouping.previewSelection(
             self.effectiveRecentChatSessions,
             currentKey: self.appModel.chatSessionKey)
@@ -524,7 +524,7 @@ struct CommandCenterTab: View {
             knownGroups: SessionGroupStore.load())
     }
 
-    private var effectiveDefaultChatSessionEntry: OpenClawChatSessionEntry? {
+    private var effectiveDefaultChatSessionEntry: CarapaceChatSessionEntry? {
         let sessions = self.dashboardModel.sessions
         let mainKey = ChatSessionSidebarModel.selectedSessionKey(
             sessions: sessions,
@@ -534,7 +534,7 @@ struct CommandCenterTab: View {
         return sessions.first { $0.key == mainKey }
     }
 
-    private var effectiveRecentChatSessions: [OpenClawChatSessionEntry] {
+    private var effectiveRecentChatSessions: [CarapaceChatSessionEntry] {
         Self.sessionChoices(
             self.dashboardModel.sessions,
             defaultSessionKey: self.appModel.defaultChatSessionKey)
@@ -554,7 +554,7 @@ struct CommandCenterTab: View {
         }
     }
 
-    private func open(_ session: OpenClawChatSessionEntry) {
+    private func open(_ session: CarapaceChatSessionEntry) {
         self.open(.chat(session.key))
     }
 
@@ -563,7 +563,7 @@ struct CommandCenterTab: View {
     }
 
     private func patchSession(
-        _ session: OpenClawChatSessionEntry,
+        _ session: CarapaceChatSessionEntry,
         label: String?? = nil,
         category: String?? = nil,
         color: String?? = nil,
@@ -584,13 +584,13 @@ struct CommandCenterTab: View {
         }
     }
 
-    private func deleteSession(_ session: OpenClawChatSessionEntry) {
+    private func deleteSession(_ session: CarapaceChatSessionEntry) {
         self.performSessionMutation(resetActiveSessionKey: session.key) { transport in
             try await transport.deleteSession(key: session.key)
         }
     }
 
-    private func archiveSession(_ session: OpenClawChatSessionEntry) {
+    private func archiveSession(_ session: CarapaceChatSessionEntry) {
         self.performSessionMutation(resetActiveSessionKey: session.key) { transport in
             try await transport.patchSession(
                 key: session.key,
@@ -604,7 +604,7 @@ struct CommandCenterTab: View {
         }
     }
 
-    private func forkSession(_ session: OpenClawChatSessionEntry) {
+    private func forkSession(_ session: CarapaceChatSessionEntry) {
         Task {
             do {
                 let key = try await self.appModel.makeChatTransport().forkSession(
@@ -620,7 +620,7 @@ struct CommandCenterTab: View {
 
     private func performSessionMutation(
         resetActiveSessionKey: String? = nil,
-        _ operation: @escaping (any OpenClawChatTransport) async throws -> Void)
+        _ operation: @escaping (any CarapaceChatTransport) async throws -> Void)
     {
         Task {
             do {
@@ -636,8 +636,8 @@ struct CommandCenterTab: View {
     }
 
     private static func sessionChoices(
-        _ sessions: [OpenClawChatSessionEntry],
-        defaultSessionKey: String) -> [OpenClawChatSessionEntry]
+        _ sessions: [CarapaceChatSessionEntry],
+        defaultSessionKey: String) -> [CarapaceChatSessionEntry]
     {
         sessions.filter {
             self.isRecentChatSession($0.key, defaultSessionKey: defaultSessionKey)
@@ -645,7 +645,7 @@ struct CommandCenterTab: View {
     }
 
     static func sessionWorkItem(
-        for session: OpenClawChatSessionEntry,
+        for session: CarapaceChatSessionEntry,
         currentSessionKey: String) -> WorkItem
     {
         let isCurrent = session.key == currentSessionKey
@@ -656,7 +656,7 @@ struct CommandCenterTab: View {
             detail: Self.sessionDetail(session),
             state: isCurrent ? "open" : "recent",
             trailing: "chat",
-            color: isCurrent ? OpenClawBrand.accent : OpenClawBrand.ok,
+            color: isCurrent ? CarapaceBrand.accent : CarapaceBrand.ok,
             progress: nil,
             route: .chat(session.key),
             isUnread: session.unread == true,
@@ -664,7 +664,7 @@ struct CommandCenterTab: View {
             sessionColor: session.color)
     }
 
-    static func sessionTitle(_ session: OpenClawChatSessionEntry) -> String {
+    static func sessionTitle(_ session: CarapaceChatSessionEntry) -> String {
         let label = session.label?.trimmingCharacters(in: .whitespacesAndNewlines)
         if let label, !label.isEmpty {
             return label
@@ -723,7 +723,7 @@ struct CommandCenterTab: View {
             .joined(separator: " ")
     }
 
-    static func sessionDetail(_ session: OpenClawChatSessionEntry) -> String {
+    static func sessionDetail(_ session: CarapaceChatSessionEntry) -> String {
         let activityAt = session.lastActivityAt ?? session.updatedAt
         if let activityAt, activityAt > 0 {
             return self.relativeTimeText(forMilliseconds: activityAt)
@@ -830,7 +830,7 @@ struct CommandSessionsScreen: View {
     /// Group mutations need the full session store, not a recency window.
     private static let groupMemberFetchLimit = 10000
 
-    @State private var sessions: [OpenClawChatSessionEntry] = []
+    @State private var sessions: [CarapaceChatSessionEntry] = []
     @State private var isLoading = false
     @State private var loadErrorText: String?
     @State private var showArchived = false
@@ -838,12 +838,12 @@ struct CommandSessionsScreen: View {
     @State private var groupEditor: GroupEditor?
     @State private var groupDraftText = ""
     @State private var groupPendingDelete: String?
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: CarapaceSidebarHeaderAction?
     let usesNativeNavigationChrome: Bool
     let openChat: () -> Void
 
     init(
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: CarapaceSidebarHeaderAction? = nil,
         usesNativeNavigationChrome: Bool = false,
         openChat: @escaping () -> Void)
     {
@@ -865,7 +865,7 @@ struct CommandSessionsScreen: View {
                 .padding(.top, 16)
                 .padding(.bottom, 18)
             }
-            .safeAreaPadding(.bottom, OpenClawProMetric.bottomScrollInset)
+            .safeAreaPadding(.bottom, CarapaceProMetric.bottomScrollInset)
         }
         .navigationTitle("Sessions")
         .navigationBarTitleDisplayMode(.inline)
@@ -875,20 +875,20 @@ struct CommandSessionsScreen: View {
         }
         .alert(self.groupEditorTitle, isPresented: self.groupEditorBinding) {
             TextField("Group name", text: self.$groupDraftText)
-                .font(OpenClawType.body)
+                .font(CarapaceType.body)
             Button {
                 self.commitGroupEditor()
             } label: {
                 Text(self.groupEditor == .create
                     ? LocalizedStringKey("Create")
                     : LocalizedStringKey("Save"))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
             Button(role: .cancel) {
                 self.groupEditor = nil
             } label: {
                 Text("Cancel")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
         }
         .alert(
@@ -900,35 +900,35 @@ struct CommandSessionsScreen: View {
                 self.deleteGroup(group)
             } label: {
                 Text("Delete Group")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
             Button(role: .cancel) {} label: {
                 Text("Cancel")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(CarapaceType.subheadSemiBold)
             }
         } message: { group in
             Text(verbatim: String(
                 format: String(
                     localized: "Sessions in \u{201C}%@\u{201D} move back to Ungrouped."),
                 group))
-                .font(OpenClawType.caption)
+                .font(CarapaceType.caption)
         }
     }
 
     private var header: some View {
-        OpenClawAdaptiveHeaderRow(
+        CarapaceAdaptiveHeaderRow(
             title: "Sessions",
             subtitle: .verbatim(self.headerDetail),
-            titleFont: OpenClawType.title2,
-            subtitleFont: OpenClawType.captionMedium)
+            titleFont: CarapaceType.title2,
+            subtitleFont: CarapaceType.captionMedium)
         {
             if let headerSidebarAction {
-                OpenClawSidebarHeaderLeadingSlot(action: headerSidebarAction)
+                CarapaceSidebarHeaderLeadingSlot(action: headerSidebarAction)
             }
         } accessory: {
             EmptyView()
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, CarapaceProMetric.pagePadding)
     }
 
     private var sessionsPanel: some View {
@@ -938,7 +938,7 @@ struct CommandSessionsScreen: View {
                     Text(self.showArchived
                         ? LocalizedStringKey("Archived sessions")
                         : LocalizedStringKey("Recent sessions"))
-                        .font(OpenClawType.subheadBold)
+                        .font(CarapaceType.subheadBold)
                     Spacer(minLength: 8)
                     if self.isLoading {
                         ProgressView()
@@ -947,7 +947,7 @@ struct CommandSessionsScreen: View {
                     if self.sessionControlsAvailable {
                         Toggle(isOn: self.$showArchived) {
                             Text("Show Archived")
-                                .font(OpenClawType.captionMedium)
+                                .font(CarapaceType.captionMedium)
                         }
                         .toggleStyle(.switch)
                         .controlSize(.mini)
@@ -993,7 +993,7 @@ struct CommandSessionsScreen: View {
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, CarapaceProMetric.pagePadding)
     }
 
     private var headerDetail: String {
@@ -1010,7 +1010,7 @@ struct CommandSessionsScreen: View {
             AttributedString(localized: "^[\(count) session](inflect: true)").characters)
     }
 
-    private var visibleSessions: [OpenClawChatSessionEntry] {
+    private var visibleSessions: [CarapaceChatSessionEntry] {
         self.sessions
             .filter { CommandCenterTab.isRecentChatSession(
                 $0.key,
@@ -1054,7 +1054,7 @@ struct CommandSessionsScreen: View {
     @ViewBuilder
     private func sectionHeader(_ section: CommandSessionSection) -> some View {
         let title = Text(section.title)
-            .font(OpenClawType.captionSemiBold)
+            .font(CarapaceType.captionSemiBold)
             .foregroundStyle(.secondary)
             .padding(.horizontal, 4)
         // Group management only applies to custom categories, never the
@@ -1075,20 +1075,20 @@ struct CommandSessionsScreen: View {
             self.groupEditor = .rename(group)
         } label: {
             Label("Rename Group…", systemImage: "pencil")
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
         }
         Button {
             self.groupDraftText = ""
             self.groupEditor = .create
         } label: {
             Label("New Group…", systemImage: "folder.badge.plus")
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
         }
         Button(role: .destructive) {
             self.groupPendingDelete = group
         } label: {
             Label("Delete Group…", systemImage: "trash")
-                .font(OpenClawType.subhead)
+                .font(CarapaceType.subhead)
         }
     }
 
@@ -1180,7 +1180,7 @@ struct CommandSessionsScreen: View {
         }
     }
 
-    private func sessionRow(_ session: OpenClawChatSessionEntry) -> some View {
+    private func sessionRow(_ session: CarapaceChatSessionEntry) -> some View {
         let item = CommandCenterTab.sessionWorkItem(
             for: session,
             currentSessionKey: self.appModel.chatSessionKey)
@@ -1209,7 +1209,7 @@ struct CommandSessionsScreen: View {
                 delete: { self.deleteSession(session) }))
     }
 
-    private func open(_ session: OpenClawChatSessionEntry) {
+    private func open(_ session: CarapaceChatSessionEntry) {
         self.openSessionKey(session.key)
     }
 
@@ -1220,7 +1220,7 @@ struct CommandSessionsScreen: View {
     }
 
     private func patchSession(
-        _ session: OpenClawChatSessionEntry,
+        _ session: CarapaceChatSessionEntry,
         label: String?? = nil,
         category: String?? = nil,
         color: String?? = nil,
@@ -1241,13 +1241,13 @@ struct CommandSessionsScreen: View {
         }
     }
 
-    private func deleteSession(_ session: OpenClawChatSessionEntry) {
+    private func deleteSession(_ session: CarapaceChatSessionEntry) {
         self.performMutation(resetActiveSessionKey: session.key) { transport in
             try await transport.deleteSession(key: session.key)
         }
     }
 
-    private func toggleArchived(_ session: OpenClawChatSessionEntry) {
+    private func toggleArchived(_ session: CarapaceChatSessionEntry) {
         let archivesSession = !self.showArchived && session.archived != true
         self.performMutation(resetActiveSessionKey: archivesSession ? session.key : nil) { transport in
             try await transport.patchSession(
@@ -1262,7 +1262,7 @@ struct CommandSessionsScreen: View {
         }
     }
 
-    private func forkSession(_ session: OpenClawChatSessionEntry) {
+    private func forkSession(_ session: CarapaceChatSessionEntry) {
         Task {
             do {
                 let key = try await self.appModel.makeChatTransport().forkSession(
@@ -1278,7 +1278,7 @@ struct CommandSessionsScreen: View {
 
     private func performMutation(
         resetActiveSessionKey: String? = nil,
-        _ operation: @escaping (any OpenClawChatTransport) async throws -> Void)
+        _ operation: @escaping (any CarapaceChatTransport) async throws -> Void)
     {
         Task {
             do {

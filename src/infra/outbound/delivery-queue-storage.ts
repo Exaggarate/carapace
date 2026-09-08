@@ -1,6 +1,6 @@
 // Delivery queue storage persists replayable outbound send intents and tracks
 // platform-send recovery state in the shared SQLite queue.
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import {
   promoteDeliveryQueueEntryPlatformSend,
   transitionOwnedDeliveryQueueEntry,
@@ -701,8 +701,8 @@ export async function failPendingDelivery(
     params.expectedPlatformSendAttemptId === undefined
       ? prepareDeliveryQueueTerminalEntry(terminal)
       : undefined;
-  const database = openOpenClawStateDatabase({
-    env: stateDir ? { ...process.env, OPENCLAW_STATE_DIR: stateDir } : process.env,
+  const database = openCarapaceStateDatabase({
+    env: stateDir ? { ...process.env, CARAPACE_STATE_DIR: stateDir } : process.env,
   });
   let terminalized = false;
   const terminalize = (): undefined => {

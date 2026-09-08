@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../../config/config.js";
 import * as pdfExtractModule from "../../media/pdf-extract.js";
 import * as webMedia from "../../media/web-media.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { acquireAgentRunPreparedModelRuntime } from "../prepared-model-runtime.js";
 
 const completeMock = vi.hoisted(() => vi.fn());
@@ -25,7 +25,7 @@ describe("PDF tool static prepared runtime", () => {
   });
 
   it("resolves a config-inline model when the static registry is empty", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         label: "pdf-static-inline-model",
         env: { OPENAI_API_KEY: "test-key" },

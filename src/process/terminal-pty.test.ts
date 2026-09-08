@@ -22,7 +22,7 @@ const { spawnTerminalPty } = await import("./terminal-pty.js");
 const tempDirs: string[] = [];
 
 function createWindowsNpmShim(command: string) {
-  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-terminal-pty-shim-"));
+  const binDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-terminal-pty-shim-"));
   tempDirs.push(binDir);
   const entrypoint = path.join(binDir, "node_modules", "@openai", command, "bin", `${command}.js`);
   fs.mkdirSync(path.dirname(entrypoint), { recursive: true });
@@ -245,12 +245,12 @@ describe("terminal PTY invocation", () => {
     "uses PATH node.exe instead of a packaged non-Node host for an npm shim",
     async () => {
       const { entrypoint, shimPath } = createWindowsNpmShim("codex");
-      const nodeDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-terminal-pty-node-"));
+      const nodeDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-terminal-pty-node-"));
       tempDirs.push(nodeDir);
       const nodePath = path.join(nodeDir, "node.exe");
       fs.linkSync(process.execPath, nodePath);
       vi.spyOn(process, "execPath", "get").mockReturnValue(
-        "C:\\Program Files\\OpenClaw\\openclaw.exe",
+        "C:\\Program Files\\Carapace\\carapace.exe",
       );
       mocks.spawn.mockReturnValueOnce(fakePty());
 
@@ -273,7 +273,7 @@ describe("terminal PTY invocation", () => {
     async () => {
       const { shimPath } = createWindowsNpmShim("codex");
       vi.spyOn(process, "execPath", "get").mockReturnValue(
-        "C:\\Program Files\\OpenClaw\\openclaw.exe",
+        "C:\\Program Files\\Carapace\\carapace.exe",
       );
 
       await expect(
@@ -292,7 +292,7 @@ describe("terminal PTY invocation", () => {
   it.runIf(process.platform === "win32")(
     "keeps unknown batch wrappers on the guarded cmd path",
     async () => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-terminal-pty-custom-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-terminal-pty-custom-"));
       tempDirs.push(tempDir);
       const wrapperPath = path.join(tempDir, "custom.cmd");
       fs.writeFileSync(wrapperPath, "@ECHO off\r\necho custom\r\n", "utf8");
@@ -313,7 +313,7 @@ describe("terminal PTY invocation", () => {
   it.runIf(process.platform === "win32")(
     "passes a bare-only native host directly to the PTY spawn owner",
     async () => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-terminal-pty-bare-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-terminal-pty-bare-"));
       tempDirs.push(tempDir);
       const barePath = path.join(tempDir, "bare-host");
       fs.copyFileSync(process.execPath, barePath);
@@ -393,11 +393,11 @@ describe.runIf(process.platform !== "win32")("terminal PTY process-session teard
 
     try {
       handle.write(
-        'sleep 300 & child=$(jobs -p); printf \'__OPENCLAW_PIDS__ %s %s\\n\' "$$" "$child"\r',
+        'sleep 300 & child=$(jobs -p); printf \'__CARAPACE_PIDS__ %s %s\\n\' "$$" "$child"\r',
       );
       await vi.waitFor(
         () => {
-          const match = output.match(/__OPENCLAW_PIDS__\s+(\d+)\s+(\d+)/u);
+          const match = output.match(/__CARAPACE_PIDS__\s+(\d+)\s+(\d+)/u);
           expect(match, output).toBeTruthy();
           shellPid = Number(match?.[1]);
           childPid = Number(match?.[2]);

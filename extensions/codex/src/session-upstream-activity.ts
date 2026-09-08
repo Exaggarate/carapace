@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import type {
   SessionCatalogProvider,
   SessionUpstreamActivity,
   SessionUpstreamProbe,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexTurn, CodexUserInput } from "./app-server/protocol.js";
 import { isCodexThreadReadMissingError } from "./app-server/rpc-error.js";
 import { sessionBindingIdentity } from "./app-server/session-binding-record.js";
@@ -180,10 +180,10 @@ async function checkCodexUpstreamActivity(
 }
 
 export function createChecker(params: {
-  api: OpenClawPluginApi;
+  api: CarapacePluginApi;
   bindingStore: CodexAppServerBindingStore;
   control: CodexSessionCatalogControlFactory;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => CarapaceConfig | undefined;
 }): NonNullable<SessionCatalogProvider["checkUpstreamActivity"]> {
   const resolveThreadId = (probe: SessionUpstreamProbe) => {
     const config = params.getRuntimeConfig();

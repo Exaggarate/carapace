@@ -4,16 +4,16 @@ import {
   findCommandByNativeName,
   listNativeCommandSpecs,
   listNativeCommandSpecsForConfig,
-} from "openclaw/plugin-sdk/command-auth-native";
+} from "carapace/plugin-sdk/command-auth-native";
 import type {
   ChannelGroupPolicy,
-  OpenClawConfig,
+  CarapaceConfig,
   TelegramAccountConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { createPluginCommandRuntime } from "openclaw/plugin-sdk/plugin-command-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { danger, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import { createPluginCommandRuntime } from "carapace/plugin-sdk/plugin-command-runtime";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import { danger, type RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import type {
   TelegramNativeCommandCallbackDispatcher,
   TelegramResolvedGroupConfig,
@@ -47,18 +47,18 @@ type TelegramNativeCommandContext = Context & { match?: string };
 
 type RegisterTelegramNativeCommandsParams = {
   bot: Bot;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   accountId: string;
   telegramCfg: TelegramAccountConfig;
   mediaMaxBytes?: number;
   nativeEnabled: boolean;
   nativeSkillsEnabled: boolean;
-  resolveGroupPolicy: (chatId: string | number, cfg: OpenClawConfig) => ChannelGroupPolicy;
+  resolveGroupPolicy: (chatId: string | number, cfg: CarapaceConfig) => ChannelGroupPolicy;
   resolveTelegramGroupConfig: (
     chatId: string | number,
     messageThreadId: number | undefined,
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
   ) => TelegramResolvedGroupConfig;
   shouldSkipUpdate: (ctx: TelegramUpdateKeyContext) => boolean;
   telegramDeps?: TelegramNativeCommandDeps;

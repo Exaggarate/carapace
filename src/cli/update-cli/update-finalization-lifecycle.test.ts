@@ -9,14 +9,14 @@ import {
 } from "../../infra/update-run-timeouts.js";
 import { defaultRuntime } from "../../runtime.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { UpdateFinalizationLifecycle } from "./update-finalization-lifecycle.js";
 
 const dirs = createTempDirTracker();
 
 beforeEach(() => {
   vi.useFakeTimers();
-  vi.stubEnv("OPENCLAW_STATE_DIR", dirs.make("openclaw-finalize-heartbeat-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", dirs.make("carapace-finalize-heartbeat-"));
   vi.stubEnv(UPDATE_RUN_ID_ENV, undefined);
   vi.spyOn(defaultRuntime, "error").mockImplementation(() => {});
 });
@@ -24,7 +24,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   dirs.cleanup();
 });

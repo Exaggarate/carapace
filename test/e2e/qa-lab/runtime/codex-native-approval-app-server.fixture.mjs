@@ -6,8 +6,8 @@ import {
   createFakeThreadStartResponse,
 } from "../../../../scripts/e2e/lib/codex-app-server-fixture.mjs";
 
-const requestLog = process.env.OPENCLAW_QA_CODEX_NATIVE_APPROVAL_LOG;
-const appServerVersion = process.env.OPENCLAW_QA_CODEX_APP_SERVER_VERSION;
+const requestLog = process.env.CARAPACE_QA_CODEX_NATIVE_APPROVAL_LOG;
+const appServerVersion = process.env.CARAPACE_QA_CODEX_APP_SERVER_VERSION;
 if (!requestLog || !appServerVersion) {
   throw new Error("missing Codex native approval fixture environment");
 }
@@ -83,9 +83,9 @@ input.on("line", (line) => {
       sendResult(
         message.id,
         createFakeInitializeResponse({
-          name: "openclaw-qa-codex-native-approval",
+          name: "carapace-qa-codex-native-approval",
           version: appServerVersion,
-          userAgent: `openclaw/${appServerVersion} (test)`,
+          userAgent: `carapace/${appServerVersion} (test)`,
         }),
       );
       return;

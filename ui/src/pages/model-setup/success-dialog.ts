@@ -25,7 +25,7 @@ export function renderModelSetupSuccessDialog(
       ? t("tabs.chat")
       : t("modelSetup.success.openChat");
   return html`
-    <openclaw-modal-dialog
+    <carapace-modal-dialog
       label=${t("modelSetup.success.title")}
       description=${description}
       @modal-cancel=${onClose}
@@ -77,6 +77,6 @@ export function renderModelSetupSuccessDialog(
           </button>
         </footer>
       </section>
-    </openclaw-modal-dialog>
+    </carapace-modal-dialog>
   `;
 }

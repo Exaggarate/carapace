@@ -23,8 +23,8 @@
   overflow: hidden;
   border: 1px solid var(--chat-composer-hairline);
   border-bottom: 0;
-  border-radius: calc(20px * var(--openclaw-corner-radius-scale))
-    calc(20px * var(--openclaw-corner-radius-scale)) 0 0;
+  border-radius: calc(20px * var(--carapace-corner-radius-scale))
+    calc(20px * var(--carapace-corner-radius-scale)) 0 0;
   corner-shape: superellipse(1.5);
   background: var(--composer-attached-surface, var(--chat-composer-surface));
   -webkit-backdrop-filter: blur(8px);

@@ -14,7 +14,7 @@ import {
   setTtsMachinePrefsPathResolver,
   synthesizeMock,
   textToSpeechCore,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "./tts-runtime.test-support.js";
 
 type Completion =
@@ -64,11 +64,11 @@ function assistant(content: AssistantMessage["content"]): AssistantMessage {
 
 const originalText = "The original reply remains visible. ".repeat(60);
 const persistAudio = vi.fn(async () => "/tmp/synthetic-summary.ogg");
-let cfg: OpenClawConfig;
+let cfg: CarapaceConfig;
 
 beforeEach(() => {
   cfg = {
-    ...createTtsConfig(`openclaw-tts-summary-${randomUUID()}`),
+    ...createTtsConfig(`carapace-tts-summary-${randomUUID()}`),
     agents: { defaults: { model: { primary: "test-provider/test-summary" } } },
     tts: { auto: "always", provider: "mock", summaryModel: "test-provider/test-summary" },
   };

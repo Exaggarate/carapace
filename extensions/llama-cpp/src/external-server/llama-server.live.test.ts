@@ -6,9 +6,9 @@ import {
   type Model,
   type SimpleStreamOptions,
   type Tool,
-} from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { extractNonEmptyAssistantText, isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+} from "carapace/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "carapace/plugin-sdk/plugin-entry";
+import { extractNonEmptyAssistantText, isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { discoverLlamaServer } from "./discovery.js";

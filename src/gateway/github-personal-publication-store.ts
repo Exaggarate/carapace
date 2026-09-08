@@ -6,13 +6,13 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { insertGitHubPublicationSessionLifecycle } from "../state/github-publication-session-lifecycles.js";
-import { ensurePersonalGitHubPublicationSchema } from "../state/openclaw-state-db-schema-additive.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import { ensurePersonalGitHubPublicationSchema } from "../state/carapace-state-db-schema-additive.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { resolvePersonalGitHubOwner } from "../state/user-github-connections.js";
 import { createGitHubPublicationExecutionEffects } from "./github-publication-execution-effects.js";
 import { projectGitHubPublicationResult } from "./github-publication-store.js";
@@ -69,7 +69,7 @@ export function readPersonalGitHubPublication(
     | { sessionKey: string; agentId: string },
 ): PersonalGitHubPublicationRow | undefined {
   assertOwner(owner);
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   if (!tableExists(db, table)) {
     return undefined;
   }
@@ -129,7 +129,7 @@ export function insertPersonalGitHubPublication(
   lifecycleRevision: string | null,
   assertCurrent: () => void,
 ): PersonalGitHubPublicationRow {
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       assertOwner(row.owner_profile_id);
@@ -154,7 +154,7 @@ export function claimPersonalGitHubPublication(
   assertCurrent: () => void,
 ) {
   const executionId = randomUUID();
-  const claimed = runOpenClawStateWriteTransaction(
+  const claimed = runCarapaceStateWriteTransaction(
     ({ db }) => {
       assertCurrent();
       assertOwner(row.owner_profile_id);
@@ -202,7 +202,7 @@ export function claimPersonalGitHubPublication(
     values: Partial<PersonalGitHubPublicationRow>,
     requireAction: boolean,
   ): PersonalGitHubPublicationRow =>
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db }) => {
         if (requireAction) {
           assertCurrent();
@@ -250,11 +250,11 @@ export function claimPersonalGitHubPublication(
 }
 
 export function requirePersonalGitHubPublicationConfirmation(instanceId: string): void {
-  const database = openOpenClawStateDatabase();
+  const database = openCarapaceStateDatabase();
   if (!tableExists(database.db, table)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -276,7 +276,7 @@ export function requirePersonalGitHubPublicationConfirmation(instanceId: string)
 }
 
 export function listUnreportedPersonalGitHubPublications() {
-  const db = openOpenClawStateDatabase().db;
+  const db = openCarapaceStateDatabase().db;
   if (!tableExists(db, table)) {
     return [];
   }
@@ -304,11 +304,11 @@ export function listUnreportedPersonalGitHubPublications() {
 }
 
 export function markPersonalGitHubPublicationReported(requestId: string): void {
-  const database = openOpenClawStateDatabase();
+  const database = openCarapaceStateDatabase();
   if (!tableExists(database.db, table)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,

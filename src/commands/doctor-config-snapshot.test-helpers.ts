@@ -2,7 +2,7 @@ import type {
   ConfigFileSnapshot,
   ConfigValidationIssue,
   LegacyConfigIssue,
-  OpenClawConfig,
+  CarapaceConfig,
 } from "../config/types.js";
 
 export function createDoctorConfigSnapshot(
@@ -14,9 +14,9 @@ export function createDoctorConfigSnapshot(
     legacyIssues?: LegacyConfigIssue[];
   } = {},
 ): ConfigFileSnapshot {
-  const config = (params.config ?? {}) as OpenClawConfig;
+  const config = (params.config ?? {}) as CarapaceConfig;
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     includedPaths: [],
     exists: true,
     raw: "{}",

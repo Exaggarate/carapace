@@ -20,11 +20,11 @@ const suite = createControlUiE2eSuite({
   name: "Control UI sidebar customization mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const hiddenSessionCatalogsStorageKey = "openclaw:sidebar:sessions:hidden-catalogs";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const hiddenSessionCatalogsStorageKey = "carapace:sidebar:sessions:hidden-catalogs";
 
 async function trimmedTextContents(locator: Locator): Promise<string[]> {
   return (await locator.allTextContents()).map((text) => text.trim());
@@ -121,7 +121,7 @@ async function openSidebarTestPage() {
   const page = await context.newPage();
   await installMockGateway(page);
   await page.goto(`${suite.server.baseUrl}chat`);
-  await page.waitForFunction(() => Boolean(customElements.get("openclaw-lobster-pet")));
+  await page.waitForFunction(() => Boolean(customElements.get("carapace-lobster-pet")));
   return { context, page };
 }
 
@@ -257,7 +257,7 @@ suite.define(() => {
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
 
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       const pinnedItems = sidebar.locator(
         '.sidebar-zone-entry[data-sidebar-entry^="route:"] > .nav-item',
       );
@@ -376,7 +376,7 @@ suite.define(() => {
       await expect
         .poll(() => trimmedTextContents(settingsLinks))
         .toEqual([
-          "Ask OpenClaw",
+          "Ask Carapace",
           "Approvals",
           "Infrastructure",
           "Advanced",
@@ -496,7 +496,7 @@ suite.define(() => {
       await expect.poll(() => settingsSearch.inputValue()).toBe("channel");
       await captureSettingsSidebarProof(
         settingsSidebar,
-        `settings-navigation-${process.env.OPENCLAW_UI_PROOF_LABEL ?? "current"}.png`,
+        `settings-navigation-${process.env.CARAPACE_UI_PROOF_LABEL ?? "current"}.png`,
       );
       await expect.poll(() => channelsResult.getAttribute("aria-current")).toBe("page");
       await captureSettingsSidebarProof(settingsSidebar, "01f-settings-search-navigated.png");
@@ -509,12 +509,12 @@ suite.define(() => {
       await expect.poll(() => settingsSearch.inputValue()).toBe("");
       await captureSettingsSidebarProof(settingsSidebar, "01g-settings-search-reset.png");
       await holdUiProof(page);
-      await settingsSidebar.getByRole("link", { name: "Ask OpenClaw" }).click();
+      await settingsSidebar.getByRole("link", { name: "Ask Carapace" }).click();
       await expect.poll(() => new URL(page.url()).pathname).toBe("/custodian");
       await expect
         .poll(() => page.locator(".shell").getAttribute("class"))
         .not.toContain("shell--onboarding");
-      // Ask OpenClaw is a settings-takeover page (#111686): the settings
+      // Ask Carapace is a settings-takeover page (#111686): the settings
       // sidebar owns navigation there, not the app sidebar.
       await expect.poll(() => settingsSidebar.isVisible()).toBe(true);
       await expect.poll(() => sidebar.isVisible()).toBe(false);
@@ -554,10 +554,10 @@ suite.define(() => {
         .not.toContain("Workboard");
       const tasksItem = menu.getByRole("menuitemcheckbox", { name: "Tasks" });
       await expect.poll(() => tasksItem.getAttribute("aria-checked")).toBe("false");
-      // Ask OpenClaw moved to Settings (#111686): custodian is not a sidebar
+      // Ask Carapace moved to Settings (#111686): custodian is not a sidebar
       // nav route anymore, so the pin editor does not offer it.
       await expect
-        .poll(() => menu.getByRole("menuitemcheckbox", { name: "OpenClaw" }).count())
+        .poll(() => menu.getByRole("menuitemcheckbox", { name: "Carapace" }).count())
         .toBe(0);
       await captureUiProof(page, "02-customize-menu.png", menu.locator('[part="menu"]'));
 
@@ -716,7 +716,7 @@ suite.define(() => {
         await installMockGateway(page);
 
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:work"));
-        await page.locator("openclaw-app-sidebar .sidebar-brand__new-thread").click();
+        await page.locator("carapace-app-sidebar .sidebar-brand__new-thread").click();
 
         await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
         await expect.poll(() => new URL(page.url()).searchParams.get("agent")).toBe("main");
@@ -760,7 +760,7 @@ suite.define(() => {
         });
 
         await page.goto(`${suite.server.baseUrl}chat`);
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         const home = sidebar.locator(".nav-item--home");
         await expect.poll(() => home.isVisible()).toBe(true);
         await sidebar.evaluate(async (element) => {
@@ -881,9 +881,9 @@ suite.define(() => {
           },
         });
 
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         const sidebarUpdate = sidebar.locator(
-          'openclaw-sidebar-update-card[data-attention-kind="updateAvailable"]',
+          'carapace-sidebar-update-card[data-attention-kind="updateAvailable"]',
         );
         const sidebarAutomation = sidebar.locator('[data-attention-kind="cronFailed"]');
         await expect.poll(() => sidebar.locator(".sidebar-issues-button__count").count()).toBe(1);
@@ -962,8 +962,8 @@ suite.define(() => {
           );
 
         await page.goto(`${suite.server.baseUrl}chat`);
-        const sidebar = page.locator("openclaw-app-sidebar");
-        const pet = sidebar.locator(".sidebar-shell openclaw-lobster-pet");
+        const sidebar = page.locator("carapace-app-sidebar");
+        const pet = sidebar.locator(".sidebar-shell carapace-lobster-pet");
         await expect.poll(() => pet.count()).toBe(1);
         await expect.poll(() => outcome(pet)).toBe("error");
         await expect.poll(() => page.locator(".topbar").isVisible()).toBe(false);
@@ -983,8 +983,8 @@ suite.define(() => {
     const { context, page } = await openSidebarTestPage();
 
     try {
-      const sidebar = page.locator("openclaw-app-sidebar");
-      const pet = sidebar.locator("openclaw-lobster-pet");
+      const sidebar = page.locator("carapace-app-sidebar");
+      const pet = sidebar.locator("carapace-lobster-pet");
       const movement = await pet.evaluate(async (element) => {
         const lobster = element as HTMLElement & {
           anchor: "bar";

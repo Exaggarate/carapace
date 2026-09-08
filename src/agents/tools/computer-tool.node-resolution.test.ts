@@ -334,7 +334,7 @@ describe("createComputerTool node resolution", () => {
       macComputerNode({
         nodeId: "mac-a",
         displayName: "Shared Desktop",
-        clientId: "openclaw-macos",
+        clientId: "carapace-macos",
       }),
       macComputerNode({ nodeId: "mac-b", displayName: "Shared Desktop", clientId: "node-host" }),
     ]);

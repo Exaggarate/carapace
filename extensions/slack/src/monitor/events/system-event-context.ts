@@ -1,6 +1,6 @@
 // Slack plugin module implements system event context behavior.
 import type { AllMiddlewareArgs } from "@slack/bolt";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { authorizeSlackSystemEventSender } from "../auth.js";
 import { resolveSlackChannelLabel } from "../channel-config.js";
 import type { SlackMonitorContext } from "../context.js";

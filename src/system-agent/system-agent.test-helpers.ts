@@ -2,7 +2,7 @@ import { expect } from "vitest";
 import { resolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
 import { resolveCliBackendConfig } from "../agents/cli-backends.js";
 import { testing as cliBackendsTesting } from "../agents/cli-backends.test-support.js";
-// OpenClaw test helpers build runtime environments for rescue tests.
+// Carapace test helpers build runtime environments for rescue tests.
 import {
   fingerprintAuthProfileOwnerShape,
   fingerprintOpaqueRuntimeOwner,
@@ -11,7 +11,7 @@ import {
 } from "../agents/execution-auth-binding.js";
 import { resolveCliRuntimeExecutionProvider } from "../agents/model-runtime-aliases.js";
 import { resolveSimpleCompletionSelectionForAgent } from "../agents/simple-completion-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPluginMetadataSnapshotScope } from "../plugins/current-plugin-metadata-snapshot.js";
 import { resolveInstalledPluginIndexPolicyHash } from "../plugins/installed-plugin-index-policy.js";
 import {
@@ -42,10 +42,10 @@ export type SystemAgentPluginMetadataTestSnapshot = {
     params: Parameters<typeof resolvePluginMetadataSnapshot>[0],
   ) => ReturnType<typeof resolvePluginMetadataSnapshot>;
   bindForConfig: (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     workspaceDir?: string,
   ) => ReturnType<typeof resolvePluginMetadataSnapshot>;
-  run: <T>(run: () => T, config?: OpenClawConfig) => T;
+  run: <T>(run: () => T, config?: CarapaceConfig) => T;
 };
 
 /** Install the contract-level selectable CLI backend used by core system-agent tests. */
@@ -79,7 +79,7 @@ export function installSystemAgentClaudeCliBackendTestFixture(): () => void {
 
 /** Prepare one inventory; each test operation owns its scoped config and environment. */
 export function createSystemAgentPluginMetadataTestSnapshot(
-  config: OpenClawConfig = {},
+  config: CarapaceConfig = {},
 ): SystemAgentPluginMetadataTestSnapshot {
   const prepared = loadPluginMetadataSnapshot({ config, env: process.env, allowCurrent: false });
   let boundParams: Parameters<typeof resolvePluginMetadataSnapshot>[0] = {
@@ -153,7 +153,7 @@ export function expectSystemAgentAuditRecord(
 
 /** Build exact, revalidatable proof for a test config without reading host credentials. */
 export async function createSystemAgentVerifiedInferenceTestFixture(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): Promise<SystemAgentVerifiedInferenceTestFixture> {
   const routeAgentId = resolveAmbientOwnerAgentId(config);
   const selection = resolveSimpleCompletionSelectionForAgent({
@@ -225,10 +225,10 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
         pluginId,
         origin: "global",
         rootDir: `/plugins/${pluginId}`,
-        manifestPath: `/plugins/${pluginId}/openclaw.plugin.json`,
+        manifestPath: `/plugins/${pluginId}/carapace.plugin.json`,
         manifestHash: `${pluginId}-manifest-v1`,
         source: `/plugins/${pluginId}/index.js`,
-        packageName: `@openclaw/${pluginId}`,
+        packageName: `@carapace/${pluginId}`,
         packageVersion: "1.0.0",
         installRecordHash: `${pluginId}-install-v1`,
         packageJson: {
@@ -246,9 +246,9 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
     const authProfileOwnerFingerprint = profileId
       ? fingerprintAuthProfileOwnerShape({ profileId, credential })
       : undefined;
-    const resolveRuntimeOwnerFingerprint = (currentConfig: OpenClawConfig) => {
+    const resolveRuntimeOwnerFingerprint = (currentConfig: CarapaceConfig) => {
       const backend = resolveCliBackendConfig(configuredRoute.provider, currentConfig, {
-        agentId: "openclaw",
+        agentId: "carapace",
       });
       if (!backend || backend.id !== runtimeArtifactId) {
         return undefined;
@@ -299,10 +299,10 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
 
   const agentHarnessId =
     configuredRoute.agentHarnessRuntimeOverride === "auto"
-      ? "openclaw"
+      ? "carapace"
       : (configuredRoute.agentHarnessRuntimeOverride ?? "codex");
   const authFingerprint =
-    profileId && agentHarnessId !== "openclaw"
+    profileId && agentHarnessId !== "carapace"
       ? fingerprintResolvedAuthProfileCredential({ profileId, credential, resolvedAuth })
       : fingerprintResolvedProviderAuth(resolvedAuth);
   if (!authFingerprint) {
@@ -319,7 +319,7 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
       modelId: configuredRoute.model,
       modelApi:
         configuredRoute.provider === "anthropic" ? "anthropic-messages" : "openai-responses",
-      ...(agentHarnessId === "openclaw"
+      ...(agentHarnessId === "carapace"
         ? {}
         : {
             runtimeOwnerKind: "plugin-harness" as const,

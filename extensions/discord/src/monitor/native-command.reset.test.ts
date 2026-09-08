@@ -2,20 +2,20 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { ChannelType } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import {
   getSessionEntry,
   loadTranscriptEventsSync,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { discordPlugin } from "../channel.js";
 import type { CommandInteraction } from "../internal/discord.js";
@@ -43,7 +43,7 @@ async function runReset(commandName: "new" | "reset", allowFrom: string[]) {
   const storePath = path.join(home, "sessions.json");
   const sessionKey = `agent:main:discord:channel:${channelId}`;
   const scope = { agentId: "main", storePath, sessionKey };
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { defaults: { workspace: home } },
     session: { store: storePath },
     commands: { allowFrom: { discord: allowFrom } },

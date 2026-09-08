@@ -4,7 +4,7 @@ title: "Codex harness runtime"
 read_when:
   - You need the Codex harness runtime support contract
   - You are debugging native Codex tools, hooks, compaction, or feedback upload
-  - You are changing plugin behavior across OpenClaw and Codex harness turns
+  - You are changing plugin behavior across Carapace and Codex harness turns
 ---
 
 Runtime contract for Codex harness turns. For setup and routing, see
@@ -14,8 +14,8 @@ Runtime contract for Codex harness turns. For setup and routing, see
 ## Overview
 
 Codex owns the native model loop, native thread resume, native tool
-continuation, and native compaction. OpenClaw owns channel routing, session
-files, visible message delivery, OpenClaw dynamic tools, approvals, media
+continuation, and native compaction. Carapace owns channel routing, session
+files, visible message delivery, Carapace dynamic tools, approvals, media
 delivery, and a transcript mirror around that boundary.
 
 Successful `/btw` side questions report aggregate usage to reply usage hooks and,
@@ -25,7 +25,7 @@ loop; replayed response IDs are counted once. The visible reply still contains
 only the last answer, and the main session's usage and context snapshot stay unchanged.
 
 For native connected apps, Codex also owns the final per-thread app and tool
-policy. OpenClaw caches a runtime-and-workspace-scoped `plugin/installed`
+policy. Carapace caches a runtime-and-workspace-scoped `plugin/installed`
 snapshot, reads exact configured plugin details, provisionally admits only
 explicitly allowed, ownership-proven apps, and creates a deny-by-default
 native thread. One `app/installed` request verifies the actual thread ID
@@ -33,33 +33,33 @@ without forcing an inventory refresh. Missing, disabled, or non-callable apps
 produce one warning; the conversation continues with the remaining tools.
 Codex still enforces app and tool permissions for the actual thread.
 
-This check finishes before OpenClaw injects history, starts a turn, or commits a
+This check finishes before Carapace injects history, starts a turn, or commits a
 thread binding. If the snapshot request fails, persistent provisional threads
-are deleted and ephemeral threads are unsubscribed. OpenClaw retires the app-server connection when safe
+are deleted and ephemeral threads are unsubscribed. Carapace retires the app-server connection when safe
 cleanup cannot be confirmed. Supervised branches also clean up their temporary
 probe and preserve recovery state if cleanup fails.
 
 Account-wide app access cannot override an explicitly disabled configured
-workspace plugin. OpenClaw uses its installed snapshot and reads only that
+workspace plugin. Carapace uses its installed snapshot and reads only that
 exact plugin's details to identify and deny its apps; it never scans unrelated
 marketplaces or activates the plugin.
 
 Prompt routing follows the selected runtime, not just the provider string. A
 native Codex turn gets Codex app-server developer instructions; an explicit
-OpenClaw compatibility route keeps the normal OpenClaw system prompt even when
+Carapace compatibility route keeps the normal Carapace system prompt even when
 it uses Codex-flavored OpenAI auth or transport.
 
-OpenClaw starts and resumes native Codex threads with Codex's built-in
+Carapace starts and resumes native Codex threads with Codex's built-in
 personality disabled (`personality: "none"`) so workspace personality files
-and OpenClaw agent identity stay authoritative. Native Codex keeps Codex-owned
+and Carapace agent identity stay authoritative. Native Codex keeps Codex-owned
 base/model instructions and project-doc loading otherwise. An ordinary
-policy-restricted turn has no native filesystem environment, so OpenClaw carries
+policy-restricted turn has no native filesystem environment, so Carapace carries
 the bounded workspace `AGENTS.md` snapshot as thread-level developer
 instructions instead. Lightweight, ring-zero, message-only, and tool-disabled
 internal turns suppress project-doc loading and that fallback carrier.
 
-OpenClaw developer instructions cover OpenClaw runtime concerns: source-channel
-delivery, OpenClaw dynamic tools, ACP delegation, adapter context, and the
+Carapace developer instructions cover Carapace runtime concerns: source-channel
+delivery, Carapace dynamic tools, ACP delegation, adapter context, and the
 active agent workspace profile files. Skill catalogs and tool-routed
 `MEMORY.md` pointers are projected as turn-scoped collaboration developer
 instructions. Active `BOOTSTRAP.md` and, when memory tools are unavailable,
@@ -78,40 +78,40 @@ replies keeps the static instructions and message tool definition unchanged.
 If the message tool is unavailable on a message-tool-only turn, final text stays
 private to the invoking workflow; it is not delivered to the source conversation.
 
-When `openclaw_direct.sessions_yield` is available, those instructions also
+When `carapace_direct.sessions_yield` is available, those instructions also
 tell a native Codex parent to end the current turn when a child's result should
 arrive in a later turn. Native `wait_agent` remains for an intentional same-turn
 wait when the immediate next step is blocked on the child; completion polling
 loops are not a substitute.
 
-Most OpenClaw dynamic tools use the searchable `openclaw` namespace. Tools
-marked `catalogMode: "direct-only"` use `openclaw_direct`, which Codex keeps
+Most Carapace dynamic tools use the searchable `carapace` namespace. Tools
+marked `catalogMode: "direct-only"` use `carapace_direct`, which Codex keeps
 directly model-visible as `DirectModelOnly` instead of exposing it to nested
 Code Mode execution.
 
 Tool-schema repairs preserve literal property and definition names, including
 `__proto__`. The schema advertised to Codex and the schema used to validate
-OpenClaw tool calls retain the same required fields and constraints.
+Carapace tool calls retain the same required fields and constraints.
 
-For a [managed GitHub identity](/gateway/config-tools#tools.github), `gateway_exec` uses OpenClaw's private local process-launch credential binding. Native Codex shell instead receives only the non-secret `GH_CONFIG_DIR` and token-clearing overlay; a missing or tokenless profile can still let GitHub CLI fall back to the OS keyring. Status and Gateway-owned publication guarantees do not cover that native shell path. Use `gateway_exec` when launch-bound managed GitHub credentials are required.
+For a [managed GitHub identity](/gateway/config-tools#tools.github), `gateway_exec` uses Carapace's private local process-launch credential binding. Native Codex shell instead receives only the non-secret `GH_CONFIG_DIR` and token-clearing overlay; a missing or tokenless profile can still let GitHub CLI fall back to the OS keyring. Status and Gateway-owned publication guarantees do not cover that native shell path. Use `gateway_exec` when launch-bound managed GitHub credentials are required.
 
 ## Recovery after a hard Gateway stop
 
-On POSIX systems, OpenClaw checks for registered orphaned Codex app-server
+On POSIX systems, Carapace checks for registered orphaned Codex app-server
 processes before spawning each fresh stdio child. Gateway startup also runs a
 best-effort background sweep; the before-spawn check remains authoritative.
-OpenClaw records the parent and child process identities in the current state
+Carapace records the parent and child process identities in the current state
 directory's SQLite plugin store
 before sending Codex `initialize`, so a child cannot start a native turn before
 its registration is durable.
 
-Cleanup only targets a registered child whose original OpenClaw parent is no
+Cleanup only targets a registered child whose original Carapace parent is no
 longer running. It checks process IDs, start times, and process groups before
 terminating the orphan and its discoverable descendants. When recorded, a
 fingerprint of the child command line must also match the live process before
 signaling; the durable registration stores only that digest, never the raw
 arguments. Another live
-OpenClaw instance, processes registered under another state directory, and externally
+Carapace instance, processes registered under another state directory, and externally
 managed WebSocket or Unix-socket app-servers are left alone. These portable
 process checks do not provide an atomic operating-system ownership guarantee
 or discover descendants that independently reparented before inspection.
@@ -139,23 +139,23 @@ stop a verified orphan, inspect and stop that process before retrying. If the
 cleanup budget expires, retry to finish the remaining registrations.
 
 This recovery requires a spawn-time registration. It does not discover
-unregistered children left by an older OpenClaw version or scan command names
+unregistered children left by an older Carapace version or scan command names
 to infer ownership. Windows does not yet have equivalent orphan registration
 and recovery.
 
 ## Thread bindings and model changes
 
-When an OpenClaw session is attached to an existing Codex thread, the next
+When an Carapace session is attached to an existing Codex thread, the next
 turn resends the currently selected model, approval policy, sandbox,
 approvals reviewer, and service tier to app-server. Switching from
 `openai/gpt-5.5` to `openai/gpt-5.2` keeps the thread binding but asks Codex to
 continue with the newly selected model.
 
-Supervised bindings are the exception. The OpenClaw model picker stays locked,
+Supervised bindings are the exception. The Carapace model picker stays locked,
 and resumes omit model and provider overrides so Codex restores the canonical
 thread's persisted model and provider. A separate native Codex control can
 change that persisted pair, and the initial snapshot can produce Codex's normal
-model-difference warning; the outer OpenClaw model and fallback chain never
+model-difference warning; the outer Carapace model and fallback chain never
 substitute for either.
 
 ## Supervision and safe continuation
@@ -165,7 +165,7 @@ native threads through a separate connection and projects only non-archived
 sessions into the Gateway catalog. Without explicit `appServer` connection
 settings, that connection uses managed user-home stdio while the ordinary
 harness remains agent-scoped. Listing and metadata reads are passive: they do
-not resume a thread, subscribe OpenClaw to its live events, or answer its
+not resume a thread, subscribe Carapace to its live events, or answer its
 approvals.
 
 For a stored or idle session on the Gateway computer, **Continue as branch**
@@ -175,12 +175,12 @@ Chat turn installs the real approval handlers and uses an ephemeral native fork
 to pin the snapshot without a model or provider override. Codex App Server uses
 its current native configuration and returns the selected pair; it emits its
 normal warning if that model differs from the source's last recorded model.
-OpenClaw confirms the fork's subscription is released before starting the canonical
+Carapace confirms the fork's subscription is released before starting the canonical
 `appServer`-source Codex harness thread under its cwd and runtime policy with
 exactly the returned model and provider for that initial start. It then injects the
 bounded visible history and commits the binding on the same supervision connection.
 The probe is never persisted or archived. The source is never
-resumed. The canonical thread has the full OpenClaw harness tool surface;
+resumed. The canonical thread has the full Carapace harness tool surface;
 reasoning, tool calls, and tool results from the source are not cloned into it.
 The private connection scope survives pending and committed binding states, so
 every later turn remains on that connection with native auth and provider
@@ -194,11 +194,11 @@ Codex Desktop is not guaranteed.
 
 Active sources cannot start a new branch or be archived; an existing supervised
 Chat can still be opened. `notLoaded` means activity is unknown, not idle;
-OpenClaw allows archive for a local `idle` or `notLoaded` row only after explicit
+Carapace allows archive for a local `idle` or `notLoaded` row only after explicit
 no-other-runner confirmation and a fresh process-local status read. Codex
 serializes thread mutations within one App Server process but does not provide
 an exclusive cross-process runner or approval-owner lease, so that read cannot
-prove that another process is not using the thread. OpenClaw blocks a known
+prove that another process is not using the thread. Carapace blocks a known
 active binding owner for the exact target or any non-archived spawned descendant
 returned by Codex's paginated descendant query. Enumeration errors, cycles, and
 safety-limit exhaustion fail closed. Native archive can still race a new turn
@@ -223,11 +223,11 @@ visible Control UI behavior.
 
 Direct/source chat turns through the Codex harness default to automatic final
 assistant delivery for internal WebChat surfaces, matching the Pi harness
-contract: the agent replies normally and OpenClaw posts the final text to the
+contract: the agent replies normally and Carapace posts the final text to the
 source conversation. Set `messages.visibleReplies: "message_tool"` to keep
 final assistant text private unless the agent calls `message(action="send")`.
 
-Codex heartbeat turns get `heartbeat_respond` in the searchable OpenClaw tool
+Codex heartbeat turns get `heartbeat_respond` in the searchable Carapace tool
 catalog by default so the agent can record whether the wake should stay quiet
 or notify. Heartbeat turns use the same Codex Default collaboration mode as
 ordinary chat turns. The heartbeat monitor's cron scratch is appended to the
@@ -236,7 +236,7 @@ scheduled heartbeat user message when present.
 ## Final answers after settled tool work
 
 For ordinary host-authenticated Codex turns that finish tool work without a
-visible answer, OpenClaw can request a bounded final-answer turn in a private
+visible answer, Carapace can request a bounded final-answer turn in a private
 temporary home. It uses the completed thread's model selection and the original
 host auth route or resolved profile, rather than selecting a model from outer
 request metadata. The existing environment, dynamic-tool, MCP, and native-hook
@@ -246,7 +246,7 @@ finalization.
 
 A Chat created through Codex Sessions is different: its private supervision
 connection owns native authentication. Stock Codex does not expose a generic
-tool-free summary operation that preserves that connection's account. OpenClaw
+tool-free summary operation that preserves that connection's account. Carapace
 marks this finalization context unavailable instead of choosing host credentials,
 copying native credentials, or starting another native turn. If a final reply is
 required, the host delivers its existing fallback:
@@ -261,7 +261,7 @@ see [Auth and environment isolation](/plugins/codex-harness-reference#auth-and-e
 ## Hook boundaries
 
 For ordinary persistent conversations, a `before_prompt_build` result containing
-`systemPrompt` replaces the complete OpenClaw generic developer policy. An explicit
+`systemPrompt` replaces the complete Carapace generic developer policy. An explicit
 empty string withdraws that policy. Unchanged, configuration-proven warm threads
 stay warm, with the retained subscription and host authority rechecked after plugin
 policy awaits. A closed or archived thread cannot be reused merely because its
@@ -275,7 +275,7 @@ proof, the turn stops before inference. A prewrite ownership refusal keeps the
 healthy shared client and its other conversations available. External WebSocket,
 Unix-socket, and stdio-proxy connections do not prove exclusive native-process
 ownership, so ordinary conversations cannot perform this guarded cold refresh on
-those transports. Use OpenClaw-managed local stdio; for lease contention, stop
+those transports. Use Carapace-managed local stdio; for lease contention, stop
 competing native work before reconnecting. Policy refusals and uncertain or
 acknowledged policy-write failures preserve the conversation and stop automatic
 auth-profile, model-fallback, and whole-turn retries.
@@ -301,40 +301,40 @@ promised recoverable.
 
 | Layer                                 | Owner                    | Purpose                                                             |
 | ------------------------------------- | ------------------------ | ------------------------------------------------------------------- |
-| OpenClaw plugin hooks                 | OpenClaw                 | Product/plugin compatibility across OpenClaw and Codex harnesses.   |
-| Codex app-server extension middleware | OpenClaw bundled plugins | Per-turn adapter behavior around OpenClaw dynamic tools.            |
+| Carapace plugin hooks                 | Carapace                 | Product/plugin compatibility across Carapace and Codex harnesses.   |
+| Codex app-server extension middleware | Carapace bundled plugins | Per-turn adapter behavior around Carapace dynamic tools.            |
 | Codex native hooks                    | Codex                    | Low-level Codex lifecycle and native tool policy from Codex config. |
 
-OpenClaw does not use project or global Codex `hooks.json` files to route
-plugin behavior. For the native tool and permission bridge, OpenClaw injects
+Carapace does not use project or global Codex `hooks.json` files to route
+plugin behavior. For the native tool and permission bridge, Carapace injects
 per-thread Codex config for `PreToolUse`, `PostToolUse`, `PermissionRequest`,
 and `Stop`.
 
 When Codex app-server approvals are enabled (`approvalPolicy` is not
 `"never"`), the default injected native hook config omits `PermissionRequest`
-so Codex's app-server reviewer and OpenClaw's approval bridge handle real
+so Codex's app-server reviewer and Carapace's approval bridge handle real
 escalations after review. Add `permission_request` to
 `nativeHookRelay.events` to force the compatibility relay anyway. Other Codex
 hooks such as `SessionStart` and `UserPromptSubmit` remain Codex-level
-controls; they are not exposed as OpenClaw plugin hooks in the v1 contract.
+controls; they are not exposed as Carapace plugin hooks in the v1 contract.
 
-For OpenClaw dynamic tools, OpenClaw executes the tool after Codex asks for
+For Carapace dynamic tools, Carapace executes the tool after Codex asks for
 the call, so plugin and middleware behavior runs in the harness adapter. Codex
 Code Mode receives generic dynamic results as text and serializes nested
 dynamic calls; callers must parse JSON-looking results and cannot rely on
 `Promise.all` for concurrent submission. For Codex-native tools, Codex owns the
-canonical tool record; OpenClaw can mirror selected events but cannot rewrite
+canonical tool record; Carapace can mirror selected events but cannot rewrite
 the native thread unless Codex exposes that through app-server or native hook
 callbacks.
 
 Codex app-server report-mode `PreToolUse` events defer plugin approval to the
-matching app-server approval. If an OpenClaw `before_tool_call` hook returns
-`requireApproval` while the native payload sets `openclaw_approval_mode:
+matching app-server approval. If an Carapace `before_tool_call` hook returns
+`requireApproval` while the native payload sets `carapace_approval_mode:
 "report"`, the native hook relay records the plugin approval requirement and
 returns no native decision. When Codex later sends the app-server approval
-request for the same tool use, OpenClaw opens the plugin approval prompt and
+request for the same tool use, Carapace opens the plugin approval prompt and
 maps the decision back to Codex. Codex `PermissionRequest` events are a
-separate approval path and can still route through OpenClaw approvals when
+separate approval path and can still route through Carapace approvals when
 configured for that bridge.
 
 Codex app-server item notifications also provide async `after_tool_call`
@@ -343,21 +343,21 @@ observations for native tool completions not already covered by the native
 block, delay, or mutate the native tool call.
 
 Compaction and LLM lifecycle projections come from Codex app-server
-notifications and OpenClaw adapter state, not native Codex hook commands.
+notifications and Carapace adapter state, not native Codex hook commands.
 `before_compaction`, `after_compaction`, `llm_input`, and `llm_output` are
 adapter-level observations, not byte-for-byte captures of Codex's internal
 request or compaction payloads.
 
 Codex native `hook/started` and `hook/completed` app-server notifications are
 projected as `codex_app_server.hook` agent events for trajectory and
-debugging. They do not invoke OpenClaw plugin hooks.
+debugging. They do not invoke Carapace plugin hooks.
 
 ## Experimental sandbox process streaming
 
 Native sandbox execution remains opt-in through
 `appServer.experimental.sandboxExecServer`. When enabled for an active
-OpenClaw sandbox, sandboxed processes stream ordered stdout, stderr, or PTY
-output notifications. OpenClaw retains only a bounded recent-output buffer for
+Carapace sandbox, sandboxed processes stream ordered stdout, stderr, or PTY
+output notifications. Carapace retains only a bounded recent-output buffer for
 polling and replay, so long-running processes cannot grow the app-server bridge
 without limit. Process exit and cleanup remain tied to the sandbox-owned
 process. Failed environment registration never falls back to host execution.
@@ -366,14 +366,14 @@ See [Sandboxed native execution](/plugins/codex-harness-reference#sandboxed-nati
 for configuration and local-only transport restrictions.
 
 Node-backed `remote-exec`, whether on a paired device or the same Crabbox cloud
-profile used for OpenClaw worker turns, is separate from the experimental
+profile used for Carapace worker turns, is separate from the experimental
 local sandbox flag. Codex app-server and model auth stay on the Gateway, while
 an explicitly authorized managed exec-server on the enrolled node owns
 process, filesystem, capability, and credential-free HTTP operations. The
 Gateway rejects authentication, cookie, API-key, and other sensitive HTTP
 headers before they reach the node; authenticated HTTP must run on the
 Gateway. The existing duplex node channel carries the Codex JSON-RPC stream
-without starting an OpenClaw worker child or consuming a worker slot. Explicit
+without starting an Carapace worker child or consuming a worker slot. Explicit
 Gateway command allowlisting remains required. Launch needs per-attempt
 allow-once approval or exact admitted session Full access with node-local
 full/off policy. Full access never overrides local deny, ask, or allowlist
@@ -394,31 +394,31 @@ Supported in Codex runtime v1:
 | Surface                                       | Support                                                                          | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | --------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OpenAI model loop through Codex               | Supported                                                                        | Codex app-server owns the OpenAI turn, native thread resume, and native tool continuation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| OpenClaw channel routing and delivery         | Supported                                                                        | Telegram, Discord, Slack, WhatsApp, iMessage, and other channels stay outside the model runtime.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| OpenClaw dynamic tools                        | Supported                                                                        | Codex asks OpenClaw to execute these tools, so OpenClaw stays in the execution path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Prompt and context plugins                    | Supported                                                                        | OpenClaw projects OpenClaw-specific prompt/context into the Codex turn while normally leaving Codex-owned base, model, and configured project-doc prompts in the native Codex lane. For ordinary policy-restricted turns without a native filesystem environment, OpenClaw carries the bounded workspace `AGENTS.md` snapshot as thread-level developer instructions. Ring-zero and other context-restricted internal modes suppress both paths. OpenClaw disables Codex's built-in personality for native threads so agent workspace personality files remain authoritative. Native Codex developer instructions accept only command guidance explicitly scoped to `codex_app_server`; legacy global command hints remain for non-Codex prompt surfaces. |
+| Carapace channel routing and delivery         | Supported                                                                        | Telegram, Discord, Slack, WhatsApp, iMessage, and other channels stay outside the model runtime.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Carapace dynamic tools                        | Supported                                                                        | Codex asks Carapace to execute these tools, so Carapace stays in the execution path.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Prompt and context plugins                    | Supported                                                                        | Carapace projects Carapace-specific prompt/context into the Codex turn while normally leaving Codex-owned base, model, and configured project-doc prompts in the native Codex lane. For ordinary policy-restricted turns without a native filesystem environment, Carapace carries the bounded workspace `AGENTS.md` snapshot as thread-level developer instructions. Ring-zero and other context-restricted internal modes suppress both paths. Carapace disables Codex's built-in personality for native threads so agent workspace personality files remain authoritative. Native Codex developer instructions accept only command guidance explicitly scoped to `codex_app_server`; legacy global command hints remain for non-Codex prompt surfaces. |
 | Context engine lifecycle                      | Supported                                                                        | Assemble, ingest, and after-turn maintenance run around Codex turns. Context engines do not replace native Codex compaction.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Dynamic tool hooks                            | Supported                                                                        | `before_tool_call`, `after_tool_call`, and tool-result middleware run around OpenClaw-owned dynamic tools.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Dynamic tool hooks                            | Supported                                                                        | `before_tool_call`, `after_tool_call`, and tool-result middleware run around Carapace-owned dynamic tools.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | Lifecycle hooks                               | Supported as adapter observations                                                | `llm_input`, `llm_output`, `agent_end`, `before_compaction`, and `after_compaction` fire with honest Codex-mode payloads.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Final-answer revision gate                    | Supported through native hook relay                                              | Codex `Stop` is relayed to `before_agent_finalize`; `revise` asks Codex for one more model pass before finalization.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Native shell, patch, and MCP block or observe | Supported through native hook relay                                              | Codex `PreToolUse` and `PostToolUse` are relayed for committed native tool surfaces, including MCP payloads on the pinned Codex app-server. Blocking is supported; argument rewriting is not.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Native permission policy                      | Supported through Codex app-server approvals and compatibility native hook relay | Codex app-server approval requests route through OpenClaw after Codex review. The `PermissionRequest` native hook relay is opt-in for native approval modes because Codex emits it before guardian review.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| App-server trajectory capture                 | Supported                                                                        | OpenClaw records the request it sent to app-server and the app-server notifications it receives.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Native permission policy                      | Supported through Codex app-server approvals and compatibility native hook relay | Codex app-server approval requests route through Carapace after Codex review. The `PermissionRequest` native hook relay is opt-in for native approval modes because Codex emits it before guardian review.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| App-server trajectory capture                 | Supported                                                                        | Carapace records the request it sent to app-server and the app-server notifications it receives.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Not supported in Codex runtime v1:
 
 | Surface                                             | V1 boundary                                                                                                                                     | Future path                                                                               |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Native tool argument mutation                       | Codex native pre-tool hooks can block, but OpenClaw does not rewrite Codex-native tool arguments.                                               | Requires Codex hook/schema support for replacement tool input.                            |
-| Editable Codex-native transcript history            | Codex owns canonical native thread history. OpenClaw owns a mirror and can project future context, but should not mutate unsupported internals. | Add explicit Codex app-server APIs if native thread surgery is needed.                    |
-| `tool_result_persist` for Codex-native tool records | That hook transforms OpenClaw-owned transcript writes, not Codex-native tool records.                                                           | Could mirror transformed records, but canonical rewrite needs Codex support.              |
-| Rich native compaction metadata                     | OpenClaw can request native compaction, but does not receive a stable kept/dropped list, token delta, completion summary, or summary payload.   | Needs richer Codex compaction events.                                                     |
-| Compaction intervention                             | OpenClaw does not let plugins or context engines veto, rewrite, or replace native Codex compaction.                                             | Add Codex pre/post compaction hooks if plugins need to veto or rewrite native compaction. |
-| Byte-for-byte model API request capture             | OpenClaw can capture app-server requests and notifications, but Codex core builds the final OpenAI API request internally.                      | Needs a Codex model-request tracing event or debug API.                                   |
+| Native tool argument mutation                       | Codex native pre-tool hooks can block, but Carapace does not rewrite Codex-native tool arguments.                                               | Requires Codex hook/schema support for replacement tool input.                            |
+| Editable Codex-native transcript history            | Codex owns canonical native thread history. Carapace owns a mirror and can project future context, but should not mutate unsupported internals. | Add explicit Codex app-server APIs if native thread surgery is needed.                    |
+| `tool_result_persist` for Codex-native tool records | That hook transforms Carapace-owned transcript writes, not Codex-native tool records.                                                           | Could mirror transformed records, but canonical rewrite needs Codex support.              |
+| Rich native compaction metadata                     | Carapace can request native compaction, but does not receive a stable kept/dropped list, token delta, completion summary, or summary payload.   | Needs richer Codex compaction events.                                                     |
+| Compaction intervention                             | Carapace does not let plugins or context engines veto, rewrite, or replace native Codex compaction.                                             | Add Codex pre/post compaction hooks if plugins need to veto or rewrite native compaction. |
+| Byte-for-byte model API request capture             | Carapace can capture app-server requests and notifications, but Codex core builds the final OpenAI API request internally.                      | Needs a Codex model-request tracing event or debug API.                                   |
 
 ## Native permissions and MCP elicitations
 
-For `PermissionRequest`, OpenClaw only returns explicit allow or deny
+For `PermissionRequest`, Carapace only returns explicit allow or deny
 decisions when policy decides. A no-decision result is not an allow: Codex
 treats it as no hook decision and falls through to its own guardian or user
 approval path.
@@ -428,19 +428,19 @@ applies unless `permission_request` is explicitly included in
 `nativeHookRelay.events` or a compatibility runtime installs it.
 
 When an operator chooses `allow-always` for a Codex native permission
-request, OpenClaw remembers that exact provider/session/tool input/cwd
+request, Carapace remembers that exact provider/session/tool input/cwd
 fingerprint for a bounded session window. The remembered decision is
 intentionally exact-match only: a changed command, arguments, tool payload, or
 cwd creates a fresh approval.
 
-Codex MCP tool approval elicitations route through OpenClaw's plugin approval
+Codex MCP tool approval elicitations route through Carapace's plugin approval
 flow when Codex marks `_meta.codex_approval_kind` as `"mcp_tool_call"`.
 Plugin, account, Computer Use, and MCP approval classification runs before
 ordinary input handling. A denied policy or unmappable approval schema returns
 an explicit decline and never becomes a general-purpose form.
 
-OpenClaw supports app-server MCP elicitation modes `form`, `openai/form`, and
-`url`. Standard and extended forms can contain at most 12 fields. OpenClaw
+Carapace supports app-server MCP elicitation modes `form`, `openai/form`, and
+`url`. Standard and extended forms can contain at most 12 fields. Carapace
 normalizes field names to Gateway-safe question IDs, retains the original names
 in accepted content, and presents fields in sequential batches of up to three.
 Each field may offer at most four choices; fields and choices over those limits
@@ -453,13 +453,13 @@ accepted response is returned. Optional fields, required fields, and valid
 defaults retain their schema meaning.
 
 `openai/form` also supports a single-select `openai/imagePicker` field with up
-to four bounded item IDs and titles. OpenClaw uses only those IDs and titles; it
+to four bounded item IDs and titles. Carapace uses only those IDs and titles; it
 does not fetch or render item images. An unknown extended field type produces a
 visible operator message and an explicit decline. This visible fallback is part
 of the `openai/form` capability contract.
 
 URL elicitations are shown as literal text with explicit Continue and Decline
-choices. OpenClaw does not fetch or open the URL. URLs are limited to 2,048
+choices. Carapace does not fetch or open the URL. URLs are limited to 2,048
 characters, must use HTTP or HTTPS, cannot include credentials, and cannot
 contain control or invisible characters. Invalid URLs produce a visible
 explanation and an explicit decline.
@@ -475,7 +475,7 @@ cancel the current owner. Late answers cannot resolve a queued replacement.
 Only an explicit field `isSecret: true` or Codex question
 `isSecret: true` enables secret handling. Secret form fields are requested one
 at a time through the warned ephemeral text-reply path and never create durable
-Gateway question records. OpenClaw does not infer secrecy from field names.
+Gateway question records. Carapace does not infer secrecy from field names.
 
 For the general plugin approval flow that carries these prompts, see
 [Plugin permission requests](/plugins/plugin-permission-requests).
@@ -483,7 +483,7 @@ For the general plugin approval flow that carries these prompts, see
 ## Queue steering
 
 Active-run queue steering maps onto Codex app-server `turn/steer`. With the
-default `messages.queue.mode: "steer"`, OpenClaw batches steer-mode chat
+default `messages.queue.mode: "steer"`, Carapace batches steer-mode chat
 messages for the configured quiet window and sends them as one `turn/steer`
 request in arrival order.
 
@@ -494,30 +494,30 @@ complete message remains queued for a follow-up turn. Preparation and the
 `turn/steer` acknowledgment do not count as consumption; a message sent to
 Codex without confirmed consumption is not replayed automatically.
 
-When Codex confirms consumption, OpenClaw saves completed visible assistant
+When Codex confirms consumption, Carapace saves completed visible assistant
 items before the steered user message, including items before a tool or sleep
 handoff. Each item keeps its own identity so later steers do not duplicate it.
 This history prefix is separate from the turn's final-answer selection.
 
 Codex review and manual compaction turns can reject same-turn steering. In
-that case, OpenClaw waits for the active run to finish before starting the
+that case, Carapace waits for the active run to finish before starting the
 prompt. Use `/queue followup` or `/queue collect` when messages should queue
 by default instead of steering. See [Steering queue](/concepts/queue-steering).
 
 ## Codex feedback upload
 
 When `/diagnostics [note]` is approved for a session on the native Codex
-harness, OpenClaw also calls Codex app-server `feedback/upload` for relevant
+harness, Carapace also calls Codex app-server `feedback/upload` for relevant
 Codex threads, including logs for each listed thread and spawned Codex
 subthreads when available.
 
 The upload goes through Codex's normal feedback path to OpenAI servers. If
 Codex feedback is disabled in that app-server, the command returns the
 app-server error. The completed diagnostics reply lists the channels,
-OpenClaw session ids, Codex thread ids, and local `codex resume <thread-id>`
+Carapace session ids, Codex thread ids, and local `codex resume <thread-id>`
 commands for the threads that were sent.
 
-If you deny or ignore the approval, OpenClaw does not print those Codex ids
+If you deny or ignore the approval, Carapace does not print those Codex ids
 and does not send Codex feedback. The upload does not replace the local
 Gateway diagnostics export. See [Diagnostics export](/gateway/diagnostics) for
 the approval, privacy, local bundle, and group-chat behavior.
@@ -529,35 +529,35 @@ bundle.
 ## Compaction and transcript mirror
 
 When the selected model uses the Codex harness, Codex app-server owns native
-token-pressure and manual thread compaction. OpenClaw separately owns its
+token-pressure and manual thread compaction. Carapace separately owns its
 transcript mirror. When `agents.defaults.compaction.maxActiveTranscriptBytes`
-is set to a positive value, OpenClaw checks that mirror before ordinary and
-heartbeat turns. When the byte guard trips, OpenClaw requires semantic
+is set to a positive value, Carapace checks that mirror before ordinary and
+heartbeat turns. When the byte guard trips, Carapace requires semantic
 compaction through its selected host context engine before admitting the turn.
 This host compaction does not itself replace or rewrite Codex's canonical
 native thread.
 
-After host mirror compaction commits, OpenClaw may request
+After host mirror compaction commits, Carapace may request
 `thread/compact/start` to synchronize an eligible native thread. This request
-is secondary: OpenClaw does not send it for host-isolated operations or
+is secondary: Carapace does not send it for host-isolated operations or
 bindings with restricted native authority, and unavailable or failed native
 synchronization does not roll back committed host compaction.
 
 Explicit compaction requests, such as `/compact` or a plugin-requested manual
 compact operation, start native Codex compaction with `thread/compact/start`.
-OpenClaw keeps the request and shared-client lease open until Codex emits the
+Carapace keeps the request and shared-client lease open until Codex emits the
 matching `contextCompaction` completion item and then reports the compaction
 turn as completed. If that terminal turn exceeds the configured compaction
-timeout, OpenClaw requests a native turn interrupt. The lease and per-thread
+timeout, Carapace requests a native turn interrupt. The lease and per-thread
 compaction fence remain held until Codex reports terminal state or confirms
 the interrupt RPC. If Codex does not confirm within the interrupt grace
-period, OpenClaw retires the connection before releasing the fence. Remote
+period, Carapace retires the connection before releasing the fence. Remote
 connections also detach the matching thread binding so later work cannot
 overlap an unconfirmed remote turn. Other turns on a retired connection fail
 and can retry on a fresh client. Client closure, request cancellation, or a
 failed compaction turn returns a failed operation. Automatic native
 token-pressure compaction remains Codex's job. Outside the secondary
-synchronization described above, OpenClaw starts native compaction only for
+synchronization described above, Carapace starts native compaction only for
 explicit manual requests.
 
 A standalone cold compact operation does not run prompt-build hooks or establish
@@ -566,13 +566,13 @@ the next ordinary turn verifies configuration and refreshes generic policy throu
 the normal resume path. Warm compaction returns only the configuration ownership
 it actually acquired.
 
-If context-engine compaction rotates the OpenClaw session generation, the next
+If context-engine compaction rotates the Carapace session generation, the next
 Codex turn, compaction, or side question continues the same native thread even if the Gateway stopped
 immediately after committing the new generation. Only the recorded predecessor
 under that session key can be adopted. Native tool catalogs, connection ownership,
 and supervision checks still apply before the resumed thread executes.
 
-When OpenClaw projects an existing session's continuity into a fresh Codex
+When Carapace projects an existing session's continuity into a fresh Codex
 thread, it includes saved compaction and branch summaries, even when no
 earlier user messages remain. Context-engine projections preserve those
 summary entries too. Summaries stay quoted as prior context, separate from
@@ -580,34 +580,34 @@ the current request, and remain subject to the projection's size limits;
 oversized summaries or older context can be truncated. This handoff does not
 change native Codex compaction ownership.
 
-When a context engine requests Codex thread-bootstrap projection, OpenClaw
+When a context engine requests Codex thread-bootstrap projection, Carapace
 projects tool-call names and ids, input shapes, and redacted tool-result
 content into the fresh Codex thread. It does not copy raw tool-call argument
 values into that projection.
 
 The mirror includes the user prompt, final assistant text, and lightweight
 Codex reasoning records when the app-server emits them. Reasoning retains
-typed `thinking` content rather than ordinary final-answer text, so OpenClaw's
-existing reasoning visibility and history controls apply. OpenClaw records
+typed `thinking` content rather than ordinary final-answer text, so Carapace's
+existing reasoning visibility and history controls apply. Carapace records
 the native compaction start and terminal status, but it does not
 expose a human-readable compaction summary or an auditable list of which
 entries Codex kept after compaction.
 
 Because Codex owns the canonical native thread, `tool_result_persist` does
-not rewrite Codex-native tool result records. It only applies when OpenClaw
-writes an OpenClaw-owned session transcript tool result.
+not rewrite Codex-native tool result records. It only applies when Carapace
+writes an Carapace-owned session transcript tool result.
 
 ## Media and delivery
 
-OpenClaw continues to own media delivery and media provider selection. Image,
+Carapace continues to own media delivery and media provider selection. Image,
 video, music, PDF, TTS, and media understanding use matching provider/model
 settings such as `agents.defaults.mediaModels.image`,
 `agents.defaults.mediaModels.video`, `pdfModel`, and `tts`.
 
 Text, images, video, music, TTS, approvals, and messaging-tool output continue
-through the normal OpenClaw delivery path; media generation does not require
+through the normal Carapace delivery path; media generation does not require
 the legacy runtime. When Codex emits a native image-generation item with a
-`savedPath`, OpenClaw forwards that exact file through the normal reply-media
+`savedPath`, Carapace forwards that exact file through the normal reply-media
 path even if the Codex turn has no assistant text.
 
 ## Related

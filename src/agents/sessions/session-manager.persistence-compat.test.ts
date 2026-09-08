@@ -16,7 +16,7 @@ import {
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
 import { withOwnedSessionTranscriptWrites } from "../../config/sessions/transcript-write-context.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import { createZeroUsageFixture } from "../test-helpers/usage-fixtures.js";
 import { CURRENT_SESSION_VERSION, SessionManager } from "./session-manager.js";
 
@@ -37,7 +37,7 @@ function buildAssistantMessage(text: string) {
 
 describe("SessionManager persistence compatibility", () => {
   it("persists canonical delivery facts and keeps the live assistant bytes identical", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-directives-");
+    const dir = tempDirs.make("carapace-session-manager-directives-");
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "directive-session";
     const sessionKey = "agent:main:dashboard:directives";
@@ -76,7 +76,7 @@ describe("SessionManager persistence compatibility", () => {
 
     expect(tagged.content).toEqual([{ type: "text", text: "Final answer" }]);
     expect(tagged).toMatchObject({
-      openclawDelivery: {
+      carapaceDelivery: {
         audioAsVoice: true,
         replyToId: "message-7",
         tts: {
@@ -92,15 +92,15 @@ describe("SessionManager persistence compatibility", () => {
       },
     });
     expect(codeExample.content).toEqual([{ type: "text", text: codeExampleText }]);
-    expect(codeExample).not.toHaveProperty("openclawDelivery");
-    expect(indentedCode).not.toHaveProperty("openclawDelivery");
+    expect(codeExample).not.toHaveProperty("carapaceDelivery");
+    expect(indentedCode).not.toHaveProperty("carapaceDelivery");
     expect(malformed.content).toEqual([{ type: "text", text: "Visible reply" }]);
-    expect(malformed).not.toHaveProperty("openclawDelivery");
+    expect(malformed).not.toHaveProperty("carapaceDelivery");
     expect(laterLiteral.content).toEqual([
       { type: "text", text: "Visible reply\n[[reply_to_current] literally" },
     ]);
-    expect(laterLiteral).not.toHaveProperty("openclawDelivery");
-    expect(ordinaryRelativeMedia).not.toHaveProperty("openclawDelivery");
+    expect(laterLiteral).not.toHaveProperty("carapaceDelivery");
+    expect(ordinaryRelativeMedia).not.toHaveProperty("carapaceDelivery");
 
     const persistedMessages = (await loadTranscriptEvents(scope))
       .filter((event) => (event as { type?: unknown }).type === "message")
@@ -124,7 +124,7 @@ describe("SessionManager persistence compatibility", () => {
   });
 
   it("rewrites SQLite transcript rows when removing trailing entries", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-compat-");
+    const dir = tempDirs.make("carapace-session-manager-compat-");
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "sqlite-remove-trailing-session";
     const sessionKey = "agent:main:dashboard:sqlite-remove-trailing";
@@ -193,12 +193,12 @@ describe("SessionManager persistence compatibility", () => {
   it.each(["sqlite", "bounded-sqlite", "identity", "writer", "lifecycle"])(
     "keeps the live tree unchanged after a rejected %s tail rewrite",
     async (failure) => {
-      const dir = tempDirs.make("openclaw-session-manager-tail-");
+      const dir = tempDirs.make("carapace-session-manager-tail-");
       const scope = {
         agentId: "main",
         sessionId: "tail-rewrite",
         sessionKey: "agent:main:tail-rewrite",
-        storePath: path.join(dir, "openclaw-agent.sqlite"),
+        storePath: path.join(dir, "carapace-agent.sqlite"),
       };
       const initialEntry = {
         sessionId: scope.sessionId,
@@ -218,7 +218,7 @@ describe("SessionManager persistence compatibility", () => {
         dir,
         failure === "bounded-sqlite" ? { maxEvents: 3, maxBytes: 4096 } : undefined,
       );
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: scope.agentId,
         path: resolveSessionTranscriptDatabasePath(scope),
       });
@@ -290,7 +290,7 @@ describe("SessionManager persistence compatibility", () => {
   );
 
   it("keeps the default fixture cwd independent from its transcript directory", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-compat-");
+    const dir = tempDirs.make("carapace-session-manager-compat-");
     const manager = openFileBackedSessionManagerForTest(path.join(dir, "session.jsonl"));
 
     expect(manager.getCwd()).toBe(process.cwd());
@@ -298,7 +298,7 @@ describe("SessionManager persistence compatibility", () => {
   });
 
   it("keeps requested file fixture session identities aligned", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-compat-");
+    const dir = tempDirs.make("carapace-session-manager-compat-");
     const sessionFile = path.join(dir, "session.jsonl");
     const manager = openFileBackedSessionManagerForTest(sessionFile, {
       sessionId: "session-1",
@@ -324,7 +324,7 @@ describe("SessionManager persistence compatibility", () => {
   });
 
   it("keeps file fixture appends and rewrites readable after an unterminated record", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-compat-");
+    const dir = tempDirs.make("carapace-session-manager-compat-");
     const sessionFile = path.join(dir, "unterminated.jsonl");
     await fs.writeFile(
       sessionFile,
@@ -352,7 +352,7 @@ describe("SessionManager persistence compatibility", () => {
   });
 
   it("rotates new-session fixtures without rewriting the previous file", async () => {
-    const dir = tempDirs.make("openclaw-session-manager-compat-");
+    const dir = tempDirs.make("carapace-session-manager-compat-");
     const sessionFile = path.join(dir, "original.jsonl");
     const manager = openFileBackedSessionManagerForTest(sessionFile, dir);
     manager.appendMessage({ role: "user", content: "original", timestamp: 1 });

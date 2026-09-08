@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"OpenClaw"</string>
+    <string name="app_name" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Carapace"</string>
     <string name="chat" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Sohbet"</string>
     <string name="session" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Oturum"</string>
     <string name="model" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Model"</string>
@@ -37,7 +37,7 @@
     <string name="agent" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Ajan"</string>
     <string name="system" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Sistem"</string>
     <string name="start_conversation" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Bir konuşma başlatın"</string>
-    <string name="start_conversation_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Saatinizde konuşun veya yazın. Eşleştirilmiş telefon, mesajı kimliği doğrulanmış OpenClaw oturumu üzerinden gönderir."</string>
+    <string name="start_conversation_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Saatinizde konuşun veya yazın. Eşleştirilmiş telefon, mesajı kimliği doğrulanmış Carapace oturumu üzerinden gönderir."</string>
     <string name="current_session" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Mevcut oturum"</string>
     <string name="context_label_value" tools:ignore="MissingTranslation,Typos,TypographyDashes,TypographyEllipsis">"%1$s: %2$s"</string>
     <string name="close" tools:ignore="MissingTranslation,Typos,TypographyDashes,TypographyEllipsis">"Kapat"</string>
@@ -70,28 +70,28 @@
     <string name="phone_ready" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Telefon hazır"</string>
     <string name="gateway_connected" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway bağlandı"</string>
     <string name="gateway_offline" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Gateway çevrimdışı"</string>
-    <string name="gateway_offline_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Eşleştirilmiş telefondaki OpenClaw uygulamasında Gateway bağlantısını yeniden kurun."</string>
-    <string name="open_phone_app" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Telefonda OpenClaw\'u aç"</string>
+    <string name="gateway_offline_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Eşleştirilmiş telefondaki Carapace uygulamasında Gateway bağlantısını yeniden kurun."</string>
+    <string name="open_phone_app" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Telefonda Carapace\'u aç"</string>
     <string name="phone_not_ready_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Saat, Gateway\'i asla kendisi başlatmaz veya Gateway\'de kendisi kimlik doğrulaması yapmaz."</string>
     <string name="phone_unavailable" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Telefona erişilemiyor"</string>
-    <string name="phone_unavailable_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Eşleştirilmiş telefonu yakında tutun ve uyumlu OpenClaw uygulamasını yükleyin."</string>
+    <string name="phone_unavailable_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Eşleştirilmiş telefonu yakında tutun ve uyumlu Carapace uygulamasını yükleyin."</string>
     <string name="selection_not_found" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Seçim artık kullanılamıyor"</string>
     <string name="message_not_sent" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"İşlem kabul edilmedi"</string>
     <string name="something_went_wrong" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Bir sorun oluştu"</string>
     <string name="refresh_and_try_again" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Listeleri yenileyip tekrar deneyin."</string>
     <string name="try_again" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Saatten tekrar deneyin."</string>
     <string name="update_required" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Güncelleme gerekli"</string>
-    <string name="update_required_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Hem telefonda hem de saatte OpenClaw uygulamasını güncelleyin."</string>
+    <string name="update_required_detail" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Hem telefonda hem de saatte Carapace uygulamasını güncelleyin."</string>
     <string name="refresh" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yenile"</string>
     <string name="retry" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yeniden dene"</string>
-    <string name="notification_channel_name" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"OpenClaw yanıtları"</string>
+    <string name="notification_channel_name" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Carapace yanıtları"</string>
     <string name="notification_reply" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yanıtla"</string>
-    <string name="notification_title" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"OpenClaw yanıtı"</string>
+    <string name="notification_title" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Carapace yanıtı"</string>
     <string name="notification_reply_failed_title" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yanıt gönderilmedi"</string>
     <string name="notification_reply_failed_text" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Telefon kullanılamıyor. Tekrar denemek için Yanıtla\'ya dokunun."</string>
-    <string name="notification_phone_changed_title" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yanıtlamak için OpenClaw\'u aç"</string>
+    <string name="notification_phone_changed_title" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Yanıtlamak için Carapace\'u aç"</string>
     <string name="notification_phone_changed_text" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Tercih ettiğiniz telefon değişti. Yanıtlamadan önce oturumu yeniden yüklemek için uygulamayı açın."</string>
-    <string name="tile_label" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"OpenClaw"</string>
+    <string name="tile_label" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Carapace"</string>
     <string name="tile_description" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"Oturumları açın ve eşleştirilmiş telefonunuz üzerinden yanıtlayın"</string>
     <string name="tile_open" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"AÇ"</string>
     <string name="tile_phone_proxy" tools:ignore="Typos,TypographyDashes,TypographyEllipsis">"TELEFON PROXY\'Sİ"</string>

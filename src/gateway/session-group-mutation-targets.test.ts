@@ -2,34 +2,34 @@ import fs from "node:fs";
 import { performance } from "node:perf_hooks";
 import { expect, test, vi } from "vitest";
 import { upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as sqliteIntegrity from "../infra/sqlite-integrity.js";
 import * as sqliteWal from "../infra/sqlite-wal.js";
-import * as agentDatabaseLeases from "../state/openclaw-agent-db-lease.js";
+import * as agentDatabaseLeases from "../state/carapace-agent-db-lease.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawAgentDatabasesForTest,
-  OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceAgentDatabasesForTest,
+  CARAPACE_AGENT_DB_OPEN_HANDLE_CAP,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { setStateDirEnv, withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { resolveSessionGroupMutationTargetsByName } from "./session-groups.js";
 
 test("discovers groups across more than the handle cap without writable database maintenance", async () => {
-  await withStateDirEnv("openclaw-session-group-readonly-", async ({ stateDir }) => {
+  await withStateDirEnv("carapace-session-group-readonly-", async ({ stateDir }) => {
     setStateDirEnv(fs.realpathSync(stateDir));
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const agentIds = Array.from(
-      { length: OPENCLAW_AGENT_DB_OPEN_HANDLE_CAP + 1 },
+      { length: CARAPACE_AGENT_DB_OPEN_HANDLE_CAP + 1 },
       (_, index) => `group-reader-${index}`,
     );
     const config = {
       agents: {
         list: agentIds.map((id, index) => ({ id, ...(index === 0 ? { default: true } : {}) })),
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     for (const [index, agentId] of agentIds.entries()) {
       await upsertSessionEntryCore(
@@ -37,11 +37,11 @@ test("discovers groups across more than the handle cap without writable database
         { category: "Shared work", sessionId: `group-session-${index}`, updatedAt: index + 1 },
       );
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const integritySpy = vi.spyOn(sqliteIntegrity, "assertSqliteIntegrity");
-    const claimSpy = vi.spyOn(agentDatabaseLeases, "claimOpenClawAgentDatabaseLease");
-    const releaseSpy = vi.spyOn(agentDatabaseLeases, "releaseOpenClawAgentDatabaseLease");
+    const claimSpy = vi.spyOn(agentDatabaseLeases, "claimCarapaceAgentDatabaseLease");
+    const releaseSpy = vi.spyOn(agentDatabaseLeases, "releaseCarapaceAgentDatabaseLease");
     const walSpy = vi.spyOn(sqliteWal, "configureSqliteConnectionPragmas");
 
     try {
@@ -57,11 +57,11 @@ test("discovers groups across more than the handle cap without writable database
             elapsedMs: Math.round((performance.now() - startedAt) * 100) / 100,
             integrityScans: integritySpy.mock.calls.length,
             agentWalConfigurations: walSpy.mock.calls.filter(([, options]) =>
-              options?.databaseLabel?.startsWith("openclaw-agent:"),
+              options?.databaseLabel?.startsWith("carapace-agent:"),
             ).length,
             leaseClaims: claimSpy.mock.calls.length,
             leaseReleases: releaseSpy.mock.calls.length,
-            openWriterHandles: listOpenClawAgentDatabasesForTest().length,
+            openWriterHandles: listCarapaceAgentDatabasesForTest().length,
             groupMembers: targets?.get("Shared work")?.length ?? 0,
           }),
         );
@@ -75,17 +75,17 @@ test("discovers groups across more than the handle cap without writable database
       expect(releaseSpy.mock.calls.length).toBe(0);
       expect(
         walSpy.mock.calls.filter(([, options]) =>
-          options?.databaseLabel?.startsWith("openclaw-agent:"),
+          options?.databaseLabel?.startsWith("carapace-agent:"),
         ),
       ).toEqual([]);
-      expect(listOpenClawAgentDatabasesForTest()).toEqual([]);
+      expect(listCarapaceAgentDatabasesForTest()).toEqual([]);
     } finally {
       integritySpy.mockRestore();
       claimSpy.mockRestore();
       releaseSpy.mockRestore();
       walSpy.mockRestore();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceAgentDatabasesForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 });

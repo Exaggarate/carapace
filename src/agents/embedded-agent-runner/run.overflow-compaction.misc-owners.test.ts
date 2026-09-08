@@ -61,7 +61,7 @@ describe("reportEmbeddedRunSuccessfulAuthBinding", () => {
   it("publishes an identical prepared API-key success only once", () => {
     const listener = vi.fn();
     const unregister = registerRuntimeAuthMaterializationMutationListener(listener);
-    const agentDir = "/tmp/openclaw-auth-success-dedup";
+    const agentDir = "/tmp/carapace-auth-success-dedup";
     const input = {
       profileId: "openai:work",
       profileStore,
@@ -135,7 +135,7 @@ describe("reportEmbeddedRunSuccessfulAuthBinding", () => {
       apiKeyInfo,
       attempt: {} as EmbeddedRunAttemptResult,
       provider: "openai",
-      agentDir: "/tmp/openclaw-auth-success-negative",
+      agentDir: "/tmp/carapace-auth-success-negative",
       modelId: "gpt-5.4",
       modelApi: "openai-responses",
       modelBaseUrl: "https://api.openai.com/v1",
@@ -145,7 +145,7 @@ describe("reportEmbeddedRunSuccessfulAuthBinding", () => {
       pluginHarnessOwnsAuthBootstrap: true,
     });
 
-    expect(getPreparedRuntimeAuthMaterializations("/tmp/openclaw-auth-success-negative")).toEqual(
+    expect(getPreparedRuntimeAuthMaterializations("/tmp/carapace-auth-success-negative")).toEqual(
       [],
     );
   });

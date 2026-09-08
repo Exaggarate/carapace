@@ -20,7 +20,7 @@ import type {
   TaskSystemAuditCode,
   TaskSystemAuditSeverity,
 } from "../tasks/task-system-audit.types.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createInMemoryTaskFlowRegistryStore } from "../test-utils/task-registry-store.js";
 import { tasksAuditJsonCommand, tasksListJsonCommand } from "./tasks-json.js";
 import { tasksListCommand, tasksShowCommand } from "./tasks.js";
@@ -65,8 +65,8 @@ function jsonRoundTrip<T>(value: T): T {
 }
 
 async function withTaskJsonStateDir(run: () => Promise<void>): Promise<void> {
-  await withOpenClawTestState(
-    { layout: "state-only", prefix: "openclaw-tasks-json-command-" },
+  await withCarapaceTestState(
+    { layout: "state-only", prefix: "carapace-tasks-json-command-" },
     async () => {
       resetTaskRegistryDeliveryRuntimeForTests();
       resetTaskRegistryForTests({ persist: false });

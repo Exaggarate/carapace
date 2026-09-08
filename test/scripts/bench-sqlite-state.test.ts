@@ -5,8 +5,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { collectSqliteQueryPlanEvidence } from "../../scripts/lib/sqlite-query-plan-evidence.js";
 import { parseSqliteStateBenchmarkCli } from "../../scripts/lib/sqlite-state-benchmark-cli.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../../src/state/openclaw-agent-db-contract.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../../src/state/openclaw-state-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../../src/state/carapace-agent-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../../src/state/carapace-state-db-contract.js";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -59,7 +59,7 @@ describe("scripts/bench-sqlite-state", () => {
   });
 
   it("reports production-shaped SQLite scenarios in the existing smoke benchmark", () => {
-    const outputDir = tempDirs.make("openclaw-sqlite-bench-test-");
+    const outputDir = tempDirs.make("carapace-sqlite-bench-test-");
     const outputPath = path.join(outputDir, "report.json");
     const result = runBench(["--profile", "smoke", "--output", outputPath]);
 
@@ -92,9 +92,9 @@ describe("scripts/bench-sqlite-state", () => {
     };
     expect(report.schemaVersion).toBe(2);
     expect(report.versions).toEqual({
-      agentSchema: OPENCLAW_AGENT_SCHEMA_VERSION,
+      agentSchema: CARAPACE_AGENT_SCHEMA_VERSION,
       sqlite: expect.stringMatching(/^\d+\.\d+\.\d+$/u),
-      stateSchema: OPENCLAW_STATE_SCHEMA_VERSION,
+      stateSchema: CARAPACE_STATE_SCHEMA_VERSION,
     });
 
     const expectedIds = [

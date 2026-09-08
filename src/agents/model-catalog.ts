@@ -1,11 +1,11 @@
 /**
  * Loads bundled, manifest, and discovered model catalog entries.
  */
-import { resolveClaudeFable5ModelIdentity } from "@openclaw/llm-core";
-import { buildModelCatalogMergeKey } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { resolveClaudeFable5ModelIdentity } from "@carapace/llm-core";
+import { buildModelCatalogMergeKey } from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isDiagnosticFlagEnabled } from "../infra/diagnostic-flags.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { planEffectiveModelCatalogRows } from "../model-catalog/index.js";
@@ -61,7 +61,7 @@ type DiscoveredModel = {
 export type BuildPreparedModelCatalogParams = {
   agentDir: string;
   authCredentials: Readonly<AuthStorageData>;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   modelRegistry: ModelRegistry;
   readOnly?: boolean;
   includeProviderPluginAugmentation?: boolean;
@@ -76,7 +76,7 @@ type ManifestModelCatalogCacheEntry = {
   snapshot: PluginMetadataSnapshot;
   rows: ModelCatalogEntry[];
 };
-let manifestModelCatalogCache = new WeakMap<OpenClawConfig, ManifestModelCatalogCacheEntry>();
+let manifestModelCatalogCache = new WeakMap<CarapaceConfig, ManifestModelCatalogCacheEntry>();
 const loadModelSuppression = createLazyPromise(() => import("./model-suppression.js"));
 const loadProviderApiKeyResolver = createLazyPromise(
   () => import("./models-config.providers.secrets.js"),
@@ -331,7 +331,7 @@ function createModelCatalogSnapshot(
 
 function resolveEligibleManifestCatalogPlugins(
   snapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): PluginMetadataSnapshot["plugins"] {
   return snapshot.plugins.filter(
     (plugin) =>
@@ -345,7 +345,7 @@ function resolveEligibleManifestCatalogPlugins(
 }
 
 export function loadManifestModelCatalog(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   fallbackToMetadataScan?: boolean;

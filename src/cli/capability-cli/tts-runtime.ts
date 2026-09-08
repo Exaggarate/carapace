@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isObjectRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveApiKeyForProviderCore } from "../../agents/model-auth.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { callGateway } from "../../gateway/call.js";
 import { buildGatewayConnectionDetailsWithResolvers } from "../../gateway/connection-details.js";
 import { isLoopbackHost } from "../../gateway/net.js";
@@ -165,7 +165,7 @@ export async function runTtsConvert(params: {
 }
 
 function resolveTtsProviderForAuthHydration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
   modelId?: string;
   channelId?: string;
@@ -180,10 +180,10 @@ function resolveTtsProviderForAuthHydration(params: {
 }
 
 async function injectTtsAuthProfileApiKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider?: string;
   channelId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<CarapaceConfig> {
   if (!params.provider) {
     return params.cfg;
   }
@@ -265,7 +265,7 @@ type ExistingTtsProviderConfig =
     });
 
 function resolveExistingTtsProviderConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providerId: string;
   channelId?: string;
 }): ExistingTtsProviderConfig | undefined {
@@ -293,7 +293,7 @@ function resolveExistingTtsProviderConfig(params: {
 }
 
 function resolveExistingTtsProviderConfigInTts(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   tts: unknown;
   providerId: string;
 }): TtsProviderConfigLocation | undefined {
@@ -335,7 +335,7 @@ const TTS_CONFIG_RESERVED_KEYS = new Set([
 ]);
 
 function resolveDirectTtsProviderConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   tts: unknown;
   providerId: string;
 }): TtsProviderConfigLocation | undefined {
@@ -357,7 +357,7 @@ function resolveDirectTtsProviderConfig(params: {
 }
 
 function resolveChannelTtsConfigForAuthHydration(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId?: string;
 }): { channelKey: string; tts: unknown } | undefined {
   const channels = params.cfg.channels;

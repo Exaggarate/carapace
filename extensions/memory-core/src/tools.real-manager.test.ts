@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 // Memory Core integration tests exercise the real SQLite search manager through tools.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
-import { openOpenClawAgentDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/memory-host-core";
+import { openCarapaceAgentDatabase } from "carapace/plugin-sdk/sqlite-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmbeddingProvider } from "./memory/embeddings.js";
 import * as generationLease from "./memory/manager-index-generation-lease.js";
@@ -90,7 +90,7 @@ describe("memory_search real manager", () => {
         ...baseConfig.plugins,
         entries: { "memory-core": { config: { dreaming: { enabled: false } } } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const manager = await fixture.getFreshManager(cfg, "cli");
     await manager.sync({ reason: "cli", force: true });
     const raw = await manager.search(testCase.query, { sources: ["memory"] });
@@ -178,7 +178,7 @@ describe("memory_search real manager", () => {
     }
   });
 
-  it("attributes a persisted provenance mismatch to OpenClaw", async () => {
+  it("attributes a persisted provenance mismatch to Carapace", async () => {
     const cfg = fixture.createConfig({
       provider: "none",
       vectorEnabled: false,
@@ -188,14 +188,14 @@ describe("memory_search real manager", () => {
     await manager.close();
     await closeAllMemorySearchManagers();
 
-    const db = openOpenClawAgentDatabase({ agentId: "main" }).db;
+    const db = openCarapaceAgentDatabase({ agentId: "main" }).db;
     const row = db
       .prepare("SELECT value FROM memory_index_meta WHERE key = 'memory_index_meta_v1'")
       .get() as { value: string };
     db.prepare("UPDATE memory_index_meta SET value = ? WHERE key = 'memory_index_meta_v1'").run(
       JSON.stringify({ ...JSON.parse(row.value), provenanceVersion: 0 }),
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const tool = createMemorySearchTool({ config: cfg, agentId: "main" });
     if (!tool) {
@@ -208,9 +208,9 @@ describe("memory_search real manager", () => {
       unavailable: true,
       error: "index provenance classifier changed",
       warning:
-        "Tell the user: memory search is paused because this OpenClaw version changed the memory index format (index provenance classifier changed); no configuration change is needed.",
+        "Tell the user: memory search is paused because this Carapace version changed the memory index format (index provenance classifier changed); no configuration change is needed.",
       action:
-        "Tell the user to run: openclaw memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.",
+        "Tell the user to run: carapace memory status --index --agent main. Rebuilding uses keyword indexing only and does not call an embedding provider.",
     });
     expect(fixture.provider.embedQueryCalls).toBe(0);
   });
@@ -244,7 +244,7 @@ describe("memory_search real manager", () => {
         throw new Error("memory_search tool missing");
       }
       const action =
-        "Tell the user to run: openclaw memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.";
+        "Tell the user to run: carapace memory status --index --agent main. Rebuilding may call the configured embedding provider and can incur provider cost.";
       const primary = await tool.execute("paused-primary", { query: "alpha" });
       expect(primary.details).toMatchObject({
         disabled: true,
@@ -370,7 +370,7 @@ describe("memory_search real manager", () => {
       ...baseConfig,
       memory: { ...baseConfig.memory, citations: "off" },
       tools: { ...baseConfig.tools, sessions: { visibility: "self" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const anchorSessionKey = "agent:main:telegram:direct:owner";
 
     await fixture.seedSessionTranscript({
@@ -510,7 +510,7 @@ describe("memory_search real manager", () => {
     const cfg = {
       ...baseConfig,
       memory: { ...baseConfig.memory, citations: "off" },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     await fixture.seedSessionTranscript({
       sessionId: "recovery-source",
       sessionKey: "agent:main:telegram:direct:recovery-source",
@@ -527,7 +527,7 @@ describe("memory_search real manager", () => {
     await initializedManager.close();
     await closeAllMemorySearchManagers();
 
-    openOpenClawAgentDatabase({ agentId: "main" })
+    openCarapaceAgentDatabase({ agentId: "main" })
       .db.prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, ?)",
       )
@@ -537,7 +537,7 @@ describe("memory_search real manager", () => {
         JSON.stringify({ sessionId: "legacy-session", updatedAt: 1 }),
         1,
       );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
 
     const tool = createMemorySearchTool({
       config: cfg,
@@ -549,20 +549,20 @@ describe("memory_search real manager", () => {
     }
 
     const first = await tool.execute("migration-first", { query: "operator recovery" });
-    openOpenClawAgentDatabase({ agentId: "main" })
+    openCarapaceAgentDatabase({ agentId: "main" })
       .db.prepare("DELETE FROM session_nodes WHERE session_key = ?")
       .run("Agent:Main:Main");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const replay = await tool.execute("migration-replay", {
       query: "different anti-cheat query",
     });
     const expected = {
       unavailable: true,
-      error: expect.stringContaining("openclaw doctor --fix"),
+      error: expect.stringContaining("carapace doctor --fix"),
       warning:
         "Memory search is unavailable because the session catalog requires canonical-key migration.",
       action:
-        "Stop the Gateway and run openclaw doctor --fix, then restart the Gateway and retry memory_search.",
+        "Stop the Gateway and run carapace doctor --fix, then restart the Gateway and retry memory_search.",
     };
 
     expect(first.details).toMatchObject(expected);

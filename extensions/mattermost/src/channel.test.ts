@@ -1,6 +1,6 @@
 // Mattermost tests cover channel plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, ReplyPayload } from "../runtime-api.js";
+import type { CarapaceConfig, ReplyPayload } from "../runtime-api.js";
 import { createChannelMessageReplyPipeline } from "../runtime-api.js";
 
 const { sendMessageMattermostMock, mockFetchGuard } = vi.hoisted(() => ({
@@ -15,8 +15,8 @@ vi.mock("./mattermost/send.js", () => ({
   sendMessageMattermost: sendMessageMattermostMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const original = (await vi.importActual("openclaw/plugin-sdk/ssrf-runtime")) as Record<
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async () => {
+  const original = (await vi.importActual("carapace/plugin-sdk/ssrf-runtime")) as Record<
     string,
     unknown
   >;
@@ -57,7 +57,7 @@ type MattermostSendPayload = NonNullable<
   NonNullable<typeof mattermostPlugin.outbound>["sendPayload"]
 >;
 
-function getDescribedActions(cfg: OpenClawConfig, accountId?: string): string[] {
+function getDescribedActions(cfg: CarapaceConfig, accountId?: string): string[] {
   return [...(mattermostPlugin.actions?.describeMessageTool?.({ cfg, accountId })?.actions ?? [])];
 }
 
@@ -237,7 +237,7 @@ describe("mattermostPlugin", () => {
   });
 
   it("keeps sibling resolution stable across named-account additions and edits", () => {
-    const before: OpenClawConfig = {
+    const before: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -250,7 +250,7 @@ describe("mattermostPlugin", () => {
         },
       },
     };
-    const afterAdd: OpenClawConfig = {
+    const afterAdd: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -267,7 +267,7 @@ describe("mattermostPlugin", () => {
         },
       },
     };
-    const afterEdit: OpenClawConfig = {
+    const afterEdit: CarapaceConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -619,7 +619,7 @@ describe("mattermostPlugin", () => {
     it("uses replyToMode for channel messages and keeps direct messages off", () => {
       const resolveReplyToMode = requireMattermostReplyToModeResolver();
 
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             replyToMode: "all",
@@ -646,7 +646,7 @@ describe("mattermostPlugin", () => {
     it("uses configured defaultAccount when accountId is omitted", () => {
       const resolveReplyToMode = requireMattermostReplyToModeResolver();
 
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             defaultAccount: "alerts",
@@ -700,7 +700,7 @@ describe("mattermostPlugin", () => {
     };
 
     it("keeps message reads hidden until they are explicitly enabled", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -722,7 +722,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("hides react when mattermost is not configured", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -735,7 +735,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("declares presentation capability for message sends", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -835,7 +835,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("keeps read opt in when reactions are disabled", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -853,7 +853,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("exposes read when actions.messages is true", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -871,7 +871,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("respects per-account actions.messages in message discovery", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -892,7 +892,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("respects per-account actions.reactions in message discovery", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -914,7 +914,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("honors the selected Mattermost account during discovery", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -942,7 +942,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("blocks react when default account disables reactions and accountId is omitted", async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -971,7 +971,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("blocks read when the selected account disables messages", async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -1879,7 +1879,7 @@ describe("mattermostPlugin", () => {
             baseUrl: "https://chat.example.com",
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const params: MattermostSendTextParams = {
         cfg,
@@ -1941,14 +1941,14 @@ describe("mattermostPlugin", () => {
       const formatAllowFrom = mattermostPlugin.config.formatAllowFrom!;
 
       const formatted = formatAllowFrom({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         allowFrom: [" @Alice ", " user:USER123 ", " mattermost:BOT999 "],
       });
       expect(formatted).toEqual(["@alice", "user123", "bot999"]);
     });
 
     it("uses account responsePrefix overrides", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         channels: {
           mattermost: {
             responsePrefix: "[Channel]",

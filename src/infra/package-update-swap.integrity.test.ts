@@ -61,7 +61,7 @@ describe("retained npm package integrity", () => {
   it.each(["changed launcher", "unchanged launcher", "verified activation"] as const)(
     "handles an absent old package with %s",
     async (outcome) => {
-      await withTestDir({ prefix: "openclaw-rollback-absent-package-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-absent-package-" }, async (base) => {
         const { params, packageRoot, launcher, globalRoot } = await createPackageSwapFixture(base);
         await fs.rm(packageRoot, { recursive: true });
         const transaction = await retain(params);
@@ -73,9 +73,9 @@ describe("retained npm package integrity", () => {
         }
         if (outcome === "changed launcher") {
           const backup = (await fs.readdir(globalRoot)).find((name) =>
-            name.startsWith(".openclaw.shim-backup-"),
+            name.startsWith(".carapace.shim-backup-"),
           )!;
-          await fs.writeFile(path.join(globalRoot, backup, "openclaw"), "altered launcher\n");
+          await fs.writeFile(path.join(globalRoot, backup, "carapace"), "altered launcher\n");
           expect(await transaction.rollback()).toMatchObject({
             exitCode: 1,
             activePackageRoot: packageRoot,
@@ -98,7 +98,7 @@ describe("retained npm package integrity", () => {
   it.each([false, true])(
     "activates a package over an owned npm dev link (relative=%s)",
     async (relative) => {
-      await withTestDir({ prefix: "openclaw-linked-package-activate-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-linked-package-activate-" }, async (base) => {
         const fixture = await createLinkedPackageSwapFixture(base, relative);
         const transaction = await retain(fixture.params);
         await expectCandidateIntact(fixture.packageRoot, fixture.launcher);
@@ -124,7 +124,7 @@ describe("retained npm package integrity", () => {
   it.each([false, true])(
     "restores only the owned npm link without granting runtime recovery (relative=%s)",
     async (relative) => {
-      await withTestDir({ prefix: "openclaw-linked-package-rollback-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-linked-package-rollback-" }, async (base) => {
         const fixture = await createLinkedPackageSwapFixture(base, relative);
         const transaction = await retain(fixture.params);
         await fs.writeFile(
@@ -154,7 +154,7 @@ describe("retained npm package integrity", () => {
   it.each(["before observation", "after observation"] as const)(
     "retains a directory substituted for the backup link %s",
     async (when) => {
-      await withTestDir({ prefix: "openclaw-linked-package-retirement-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-linked-package-retirement-" }, async (base) => {
         const fixture = await createLinkedPackageSwapFixture(base);
         const transaction = await retain(fixture.params);
         let replaced = false;
@@ -202,7 +202,7 @@ describe("retained npm package integrity", () => {
   );
 
   it("retains an unexpected backup directory after nonretained activation", async () => {
-    await withTestDir({ prefix: "openclaw-linked-package-direct-cleanup-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-linked-package-direct-cleanup-" }, async (base) => {
       const fixture = await createLinkedPackageSwapFixture(base);
       let backupRoot = "";
       const rename = fs.rename.bind(fs);
@@ -231,7 +231,7 @@ describe("retained npm package integrity", () => {
   });
 
   it("reports failed activation after link restoration as unverified package recovery", async () => {
-    await withTestDir({ prefix: "openclaw-linked-package-rejected-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-linked-package-rejected-" }, async (base) => {
       const fixture = await createLinkedPackageSwapFixture(base);
       const result = await swapStagedPackageInstall({
         ...fixture.params,
@@ -266,7 +266,7 @@ describe("retained npm package integrity", () => {
   it.each(["identity", "target"] as const)(
     "refuses a changed retained npm link %s before displacing the candidate",
     async (change) => {
-      await withTestDir({ prefix: "openclaw-linked-package-tamper-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-linked-package-tamper-" }, async (base) => {
         const fixture = await createLinkedPackageSwapFixture(base);
         const transaction = await retain(fixture.params);
         await fs.rename(transaction.backupRoot, `${transaction.backupRoot}.original`);
@@ -292,7 +292,7 @@ describe("retained npm package integrity", () => {
   it.each([false, true])(
     "retains a substituted backup directory (new live entry=%s)",
     async (blocked) => {
-      await withTestDir({ prefix: "openclaw-linked-package-acquire-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-linked-package-acquire-" }, async (base) => {
         const fixture = await createLinkedPackageSwapFixture(base);
         const rename = fs.rename.bind(fs);
         let movedRoot = "";
@@ -338,7 +338,7 @@ describe("retained npm package integrity", () => {
   );
 
   it("refuses an npm root link replaced during service preparation", async () => {
-    await withTestDir({ prefix: "openclaw-linked-package-preparation-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-linked-package-preparation-" }, async (base) => {
       const fixture = await createLinkedPackageSwapFixture(base);
       const onLiveMutation = vi.fn();
       const result = await swapStagedPackageInstall({
@@ -363,7 +363,7 @@ describe("retained npm package integrity", () => {
   });
 
   it("accepts a hardlinked launcher using copy-preserved metadata", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-linked-launcher-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-linked-launcher-" }, async (base) => {
       const { params, launcher } = await createPackageSwapFixture(base);
       const alias = `${launcher}.alias`;
       await fs.link(launcher, alias);
@@ -386,7 +386,7 @@ describe("retained npm package integrity", () => {
     "symlink",
     "launcher",
   ] as const)("refuses changed %s before replacing the candidate", async (change) => {
-    await withTestDir({ prefix: "openclaw-rollback-integrity-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-integrity-" }, async (base) => {
       const { params, packageRoot, launcher, globalRoot } = await createPackageSwapFixture(base);
       const oldEntry = path.join(packageRoot, "dist", "index.js");
       if (change === "hardlink") {
@@ -427,9 +427,9 @@ describe("retained npm package integrity", () => {
       }
       if (change === "launcher") {
         const shimBackup = (await fs.readdir(globalRoot)).find((name) =>
-          name.startsWith(".openclaw.shim-backup-"),
+          name.startsWith(".carapace.shim-backup-"),
         )!;
-        await fs.writeFile(path.join(globalRoot, shimBackup, "openclaw"), "altered launcher\n");
+        await fs.writeFile(path.join(globalRoot, shimBackup, "carapace"), "altered launcher\n");
       }
       const result = await transaction.rollback();
       expect(result).toMatchObject({ exitCode: 1, activePackageRoot: packageRoot });
@@ -442,7 +442,7 @@ describe("retained npm package integrity", () => {
   });
 
   it("restores exact identity, internal links and launchers, then cleans up", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-unchanged-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-unchanged-" }, async (base) => {
       const { params, packageRoot, launcher, globalRoot } = await createPackageSwapFixture(base);
       const entry = path.join(packageRoot, "dist", "index.js");
       await fs.link(entry, path.join(packageRoot, "peer.js"));
@@ -470,7 +470,7 @@ describe("retained npm package integrity", () => {
   it.each(["EXDEV", "EACCES"])(
     "restores the candidate if exact rollback rename fails with %s",
     async (code) => {
-      await withTestDir({ prefix: "openclaw-rollback-rename-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-rename-" }, async (base) => {
         const { transaction, packageRoot, launcher } = await createRetainedPackageSwap(base);
         const rename = fs.rename.bind(fs);
         const copy = vi.spyOn(fs, "cp");
@@ -495,7 +495,7 @@ describe("retained npm package integrity", () => {
   );
 
   it("reports unverified when a pre-opened writer changes bytes after prevalidation", async () => {
-    await withTestDir({ prefix: "openclaw-rollback-open-fd-" }, async (base) => {
+    await withTestDir({ prefix: "carapace-rollback-open-fd-" }, async (base) => {
       const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
       const entry = path.join(packageRoot, "dist", "index.js");
       const writer = await fs.open(entry, "r+");
@@ -529,7 +529,7 @@ describe("retained npm package integrity", () => {
   it.each(["external link", "oversized file", "unavailable inode"] as const)(
     "refuses an unverifiable %s before service preparation or live mutation",
     async (shape) => {
-      await withTestDir({ prefix: "openclaw-rollback-admission-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-rollback-admission-" }, async (base) => {
         const { params, packageRoot, launcher } = await createPackageSwapFixture(base);
         if (shape === "external link") {
           await fs.symlink(base, path.join(packageRoot, "external"));

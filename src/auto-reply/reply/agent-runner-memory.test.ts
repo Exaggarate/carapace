@@ -441,7 +441,7 @@ describe("runMemoryFlushIfNeeded", () => {
   }
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-unit-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-unit-"));
     registerMemoryFlushPlanResolverForTest(createMemoryFlushPlan);
     runWithModelFallbackMock.mockReset().mockImplementation(async ({ provider, model, run }) => ({
       result: await run(provider, model, {
@@ -822,7 +822,7 @@ describe("runMemoryFlushIfNeeded", () => {
       role: "user" as const,
       content: "Research this",
       timestamp: 1,
-      __openclaw: { senderIsOwner: true },
+      __carapace: { senderIsOwner: true },
     };
     transcript.appendMessage(user);
     const networkResult = {
@@ -832,7 +832,7 @@ describe("runMemoryFlushIfNeeded", () => {
       isError: false,
       content: [{ type: "text" as const, text: "untrusted page" }],
       timestamp: 2,
-      __openclaw: { resultContentSource: "network" as const },
+      __carapace: { resultContentSource: "network" as const },
     };
     transcript.appendMessage(networkResult);
     const answer = {
@@ -841,7 +841,7 @@ describe("runMemoryFlushIfNeeded", () => {
         stopReason: "stop",
         errorMessage: undefined,
       }),
-      __openclaw: { turnTainted: true },
+      __carapace: { turnTainted: true },
     };
     transcript.appendMessage(answer);
     // The bounded taint reader loses the original turn marker across this tail.
@@ -931,7 +931,7 @@ describe("runMemoryFlushIfNeeded", () => {
             defaults: {
               compaction: { memoryFlush: {} },
               models: {
-                "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.6-sol": { agentRuntime: { id: "carapace" } },
               },
             },
           },
@@ -1509,7 +1509,7 @@ describe("runMemoryFlushIfNeeded", () => {
         agentRuntimeOverride: "codex",
         modelSelectionLocked: pluginOwnerId !== undefined,
         pluginOwnerId,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
       };
       const runtimePolicySessionKey = "agent:main:telegram:default:direct:12345";
       runWithModelFallbackMock.mockImplementationOnce(
@@ -1811,7 +1811,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokens: 120,
       totalTokensFresh: true,
       totalTokensVersion: 1,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       modelSelectionLocked: true,
     };
     const onCompactionNotice = vi.fn();
@@ -1837,7 +1837,7 @@ describe("runMemoryFlushIfNeeded", () => {
       preflightCompactionTrigger: "tokens",
       deferOwningContextEngineCompaction: false,
       contextTokenBudget: 100,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       modelSelectionLocked: true,
     });
     expect(incrementCompactionCountMock).not.toHaveBeenCalled();
@@ -2169,56 +2169,56 @@ describe("runMemoryFlushIfNeeded", () => {
       label: "fresh local tool turn in a 32K window",
       totalTokens: 12_824,
       shouldCompact: false,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 32_768,
     },
     {
       label: "below the 32K threshold",
       totalTokens: 24_575,
       shouldCompact: false,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 32_768,
     },
     {
       label: "at the 32K threshold",
       totalTokens: 24_576,
       shouldCompact: true,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 32_768,
     },
     {
       label: "below the capped 8K threshold",
       totalTokens: 5_999,
       shouldCompact: false,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 8_000,
     },
     {
       label: "at the capped 8K threshold",
       totalTokens: 6_000,
       shouldCompact: true,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 8_000,
     },
     {
       label: "below threshold",
       totalTokens: 901_999,
       shouldCompact: false,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 922_000,
     },
     {
       label: "at threshold",
       totalTokens: 902_000,
       shouldCompact: true,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 922_000,
     },
     {
       label: "reported pressure",
       totalTokens: 904_869,
       shouldCompact: true,
-      requestedRuntime: "openclaw",
+      requestedRuntime: "carapace",
       contextWindowTokens: 922_000,
     },
     {
@@ -2279,7 +2279,7 @@ describe("runMemoryFlushIfNeeded", () => {
         modelContextTokens: contextWindowTokens,
         promptForEstimate: "",
         authorize,
-        ...(requestedRuntime === "codex" ? { agentHarnessId: "openclaw" } : {}),
+        ...(requestedRuntime === "codex" ? { agentHarnessId: "carapace" } : {}),
       };
 
       const flush = await runDefaultMemoryFlush(sessionEntry, overrides);
@@ -2290,7 +2290,7 @@ describe("runMemoryFlushIfNeeded", () => {
       expect(compactEmbeddedAgentSessionMock).toHaveBeenCalledTimes(shouldCompact ? 1 : 0);
       if (shouldCompact) {
         expect(requireCompactEmbeddedAgentSessionCall()).toMatchObject({
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokenBudget: contextWindowTokens,
           currentTokenCount: totalTokens,
           force: true,
@@ -3020,7 +3020,7 @@ describe("runMemoryFlushIfNeeded", () => {
     expect(refreshQueuedFollowupSessionMock).not.toHaveBeenCalled();
   });
 
-  it("skips OpenClaw preflight compaction for explicit Codex runtime overrides", async () => {
+  it("skips Carapace preflight compaction for explicit Codex runtime overrides", async () => {
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,
@@ -3035,7 +3035,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokens: 347_000,
       totalTokensFresh: false,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     };
 
     const entry = await runSessionCompactionIfNeeded({
@@ -3082,7 +3082,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokensFresh: true,
       totalTokensVersion: 1,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     };
 
     const entry = await runSessionCompactionIfNeeded({
@@ -3161,7 +3161,7 @@ describe("runMemoryFlushIfNeeded", () => {
     expect(compactEmbeddedAgentSessionMock).not.toHaveBeenCalled();
   });
 
-  it("keeps the OpenAI API context window for persisted OpenClaw runtime overrides", async () => {
+  it("keeps the OpenAI API context window for persisted Carapace runtime overrides", async () => {
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,
@@ -3175,7 +3175,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       totalTokens: 347_000,
       totalTokensFresh: false,
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
     };
 
     const entry = await runSessionCompactionIfNeeded({
@@ -3291,7 +3291,7 @@ describe("runMemoryFlushIfNeeded", () => {
         updatedAt: Date.now(),
         totalTokensFresh: false,
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
       };
       compactEmbeddedAgentSessionMock.mockResolvedValueOnce({
         ok: false,
@@ -3339,7 +3339,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       totalTokensFresh: false,
       agentHarnessId: "codex",
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
     };
 
     await runSessionCompactionIfNeeded({
@@ -3404,7 +3404,7 @@ describe("runMemoryFlushIfNeeded", () => {
         updatedAt: Date.now(),
         totalTokensFresh: false,
         agentHarnessId: "codex",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
       };
 
       await runSessionCompactionIfNeeded({
@@ -3856,7 +3856,7 @@ describe("runMemoryFlushIfNeeded", () => {
 
   it.each([
     ["fresh session selected from the outset", "fresh", "codex"],
-    ["upgraded session with historical embedded ownership", "upgraded", "openclaw"],
+    ["upgraded session with historical embedded ownership", "upgraded", "carapace"],
   ])(
     "latches Codex byte preflight for a %s when the successful mock omits the host callback",
     async (_label, fixtureId, agentHarnessId) => {
@@ -4025,7 +4025,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokensVersion: 1,
       compactionCount: 0,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     };
     const sessionStore = { [sessionKey]: sessionEntry };
     const accountingCommitted = createDeferred();
@@ -4135,7 +4135,7 @@ describe("runMemoryFlushIfNeeded", () => {
     const sessionEntry: SessionEntry = {
       ...fixture.sessionEntry,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     };
     await upsertSessionEntryCore(scope, sessionEntry);
     const run = async (entry: SessionEntry) =>
@@ -4220,7 +4220,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       compactionCount: 1,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       transcriptByteCompactionLatch: {
         activeBytes: activeBytes + 100,
         sessionId: "session",
@@ -4279,7 +4279,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       compactionCount: 1,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
       transcriptByteCompactionLatch: latch,
     };
     await upsertSessionEntryCore(scope, sessionEntry);
@@ -4343,7 +4343,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokensVersion: 1,
       compactionCount: 0,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "carapace",
     };
     const replyOperation = createReplyOperation();
 

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { SKILL_RESOURCE_PROTOCOL_FEATURE } from "../../../packages/gateway-protocol/src/schema/skill-resources.js";
 import { WORKER_SKILL_WORKSHOP_FEATURE } from "../../../packages/gateway-protocol/src/schema/worker-skill-workshop.js";
 import { mapThinkingLevelForProvider } from "../../agents/embedded-agent-runner/utils.js";
@@ -277,8 +277,8 @@ export async function executeWorkerTurn(
           { type: "text" as const, text: turn.transcriptPrompt ?? turn.prompt },
           ...media.images,
         ],
-        __openclaw: {
-          ...canonical["__openclaw"],
+        __carapace: {
+          ...canonical["__carapace"],
           mediaImageBlockFactIndexes: media.imageFactIndexes,
         },
       };
@@ -295,7 +295,7 @@ export async function executeWorkerTurn(
       throw new WorkerTurnExecutionError(WORKER_PROVIDER_REPLAY_LOCAL_RETRY_MESSAGE);
     }
     // Project the wire handshake; the receipt also carries storage-only provenance.
-    const { bundleHash, openclawVersion, protocolFeatures } = bootstrapReceipt;
+    const { bundleHash, carapaceVersion, protocolFeatures } = bootstrapReceipt;
     if (!tunnel.launchTurn) {
       throw new Error("Worker tunnel does not support worker turns");
     }
@@ -312,7 +312,7 @@ export async function executeWorkerTurn(
             sessionId: placement.sessionId,
             ownerEpoch: placement.activeOwnerEpoch,
             rpcSetVersion: credential.rpcSetVersion,
-            handshake: { bundleHash, openclawVersion, protocolFeatures },
+            handshake: { bundleHash, carapaceVersion, protocolFeatures },
           },
           assignment: {
             agentId: placement.agentId,

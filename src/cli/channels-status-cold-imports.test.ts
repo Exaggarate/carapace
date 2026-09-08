@@ -61,7 +61,7 @@ describe("routed channels status cold imports", () => {
       const timeoutMs = probe ? 30000 : 10000;
       const argv = [
         "node",
-        "openclaw",
+        "carapace",
         "channels",
         "status",
         "--json",

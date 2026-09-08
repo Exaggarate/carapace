@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { writeCronJobScratch } from "./scratch-store.js";
 import {
   loadCronJobsStoreSync,
@@ -31,7 +31,7 @@ describe("retired Workshop cron jobs", () => {
   it.each(["async", "sync"])(
     "retires legacy rows on an already-current database through %s load",
     async (mode) => {
-      await withOpenClawTestState({ label: "retired-workshop-cron" }, async (state) => {
+      await withCarapaceTestState({ label: "retired-workshop-cron" }, async (state) => {
         const storePath = state.statePath("cron", "jobs.json");
         const otherStorePath = state.statePath("other-cron", "jobs.json");
         const retired = {
@@ -49,7 +49,7 @@ describe("retired Workshop cron jobs", () => {
             nowMs: 1,
           });
         }
-        const db = openOpenClawStateDatabase().db;
+        const db = openCarapaceStateDatabase().db;
         const version = db.prepare("PRAGMA user_version").get();
         db.prepare("UPDATE cron_jobs SET payload_kind = ?, job_json = ? WHERE job_id = ?").run(
           "skillCollectionReview",

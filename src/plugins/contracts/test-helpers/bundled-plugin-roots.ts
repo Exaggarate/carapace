@@ -8,8 +8,8 @@ const bundledPluginRoots = new Map(
     config: {},
     env: {
       ...process.env,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: sourceExtensionsDir,
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+      CARAPACE_BUNDLED_PLUGINS_DIR: sourceExtensionsDir,
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
     },
   })
     .plugins.filter((plugin) => plugin.origin === "bundled")

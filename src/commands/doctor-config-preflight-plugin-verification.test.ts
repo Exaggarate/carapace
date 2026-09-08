@@ -40,7 +40,7 @@ describe("formatStartupPluginVerificationFailure", () => {
       }),
     ).toBe(
       [
-        "OpenClaw plugin verification failed; refusing to report the gateway ready.",
+        "Carapace plugin verification failed; refusing to report the gateway ready.",
         '- Plugin "discord" has no install path.',
         "Resolve the plugin verification errors above, then restart the Gateway.",
       ].join("\n"),
@@ -70,18 +70,18 @@ describe.each(["startup", "repair"] as const)("%s consent inventory", (first) =>
     "does not install catalog-only plugins or retained bundled records (retained=%s)",
     async (retained) => {
       npmInstall.mockClear();
-      const home = tempDirs.make("openclaw-consent-inventory-");
+      const home = tempDirs.make("carapace-consent-inventory-");
       const bundledRoot = path.join(home, "bundled");
       const pluginId = "bundled-consent-fixture";
-      const packageName = "@openclaw/bundled-consent-fixture";
+      const packageName = "@carapace/bundled-consent-fixture";
       const rootDir = path.join(bundledRoot, pluginId);
       fs.mkdirSync(rootDir, { recursive: true });
       const fixture = createColdPluginFixture({ rootDir, pluginId, packageName });
       const env = {
         HOME: home,
-        OPENCLAW_STATE_DIR: path.join(home, "state"),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_STATE_DIR: path.join(home, "state"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
         VITEST: "true",
       };
       const cfg = { plugins: { allow: ["selected-fixture"] } };
@@ -123,22 +123,22 @@ describe.each(["startup", "repair"] as const)("%s consent inventory", (first) =>
     {
       envVar: "OPENCODE_API_KEY",
       packages: {
-        opencode: "@openclaw/opencode-provider",
-        "opencode-go": "@openclaw/opencode-go-provider",
+        opencode: "@carapace/opencode-provider",
+        "opencode-go": "@carapace/opencode-go-provider",
       },
     },
-    { envVar: "OPENROUTER_API_KEY", packages: { perplexity: "@openclaw/perplexity-plugin" } },
+    { envVar: "OPENROUTER_API_KEY", packages: { perplexity: "@carapace/perplexity-plugin" } },
   ])(
     "converges verified official packages selected only by $envVar",
     async ({ envVar, packages }) => {
-      const home = tempDirs.make("openclaw-consent-env-");
+      const home = tempDirs.make("carapace-consent-env-");
       const bundledRoot = path.join(home, "bundled");
       fs.mkdirSync(bundledRoot, { recursive: true });
       const env = {
         HOME: home,
-        OPENCLAW_STATE_DIR: path.join(home, "state"),
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_STATE_DIR: path.join(home, "state"),
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledRoot,
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
         VITEST: "true",
         [envVar]: "synthetic-credential",
       };

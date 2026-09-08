@@ -8,11 +8,11 @@
  *
  * Byte-fidelity: `emitMd(parse(raw)) === raw`.
  *
- * @module @openclaw/oc-path/parse
+ * @module @carapace/oc-path/parse
  */
 
 import MarkdownIt, { type MarkdownIt as MarkdownItParser } from "markdown-it";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import type { AstBlock, AstItem, Diagnostic, FrontmatterEntry, ParseResult } from "./ast.js";
 import { slugify } from "./slug.js";
 

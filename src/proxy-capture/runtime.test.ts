@@ -18,9 +18,9 @@ type StoreCall = { name: string; args: unknown[] };
 const settings: DebugProxySettings = {
   enabled: true,
   required: false,
-  dbPath: "/tmp/openclaw-proxy-runtime-test.sqlite",
-  blobDir: "/tmp/openclaw-proxy-runtime-test-blobs",
-  certDir: "/tmp/openclaw-proxy-runtime-test-certs",
+  dbPath: "/tmp/carapace-proxy-runtime-test.sqlite",
+  blobDir: "/tmp/carapace-proxy-runtime-test-blobs",
+  certDir: "/tmp/carapace-proxy-runtime-test-certs",
   sessionId: "runtime-test-session",
   sourceProcess: "runtime-test",
 };
@@ -141,9 +141,9 @@ describe("debug proxy runtime", () => {
     ],
   ] as const)("does not discover capture paths for disabled %s", (_name, capture) => {
     // Exercise production path discovery rather than the test-only state-dir shortcut.
-    vi.stubEnv("OPENCLAW_TEST_FAST", "0");
-    vi.stubEnv("OPENCLAW_STATE_DIR", undefined);
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_ENABLED", undefined);
+    vi.stubEnv("CARAPACE_TEST_FAST", "0");
+    vi.stubEnv("CARAPACE_STATE_DIR", undefined);
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_ENABLED", undefined);
     const existsSync = vi.spyOn(fs, "existsSync");
     const originalFetch = fetchTarget.fetch;
 
@@ -163,18 +163,18 @@ describe("debug proxy runtime", () => {
       flowId: "capture-toggle",
       payload: "{}",
     } as const;
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_SESSION_ID", "ambient-capture");
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_ENABLED", "0");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_SESSION_ID", "ambient-capture");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_ENABLED", "0");
     captureWsEvent(frame, undefined, deps);
     expect(events).toEqual([]);
 
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_ENABLED", "1");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_ENABLED", "1");
     captureWsEvent(frame, undefined, deps);
     expect(events.map((event) => event.sessionId)).toEqual(["ambient-capture"]);
     captureWsEvent(frame, { ...settings, enabled: false }, deps);
     expect(events).toHaveLength(1);
 
-    vi.stubEnv("OPENCLAW_DEBUG_PROXY_ENABLED", "0");
+    vi.stubEnv("CARAPACE_DEBUG_PROXY_ENABLED", "0");
     captureWsEvent(frame, undefined, deps);
     expect(events).toHaveLength(1);
     captureWsEvent(frame, settings, deps);

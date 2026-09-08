@@ -3,25 +3,25 @@ import type {
   ProviderAuthContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthResult,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   applyAuthProfileConfig,
   buildApiKeyCredential,
   ensureApiKeyFromEnvOrPrompt,
   normalizeOptionalSecretInput,
   upsertAuthProfileWithLock,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type SecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/provider-auth";
 import {
   removeAuthProfileConfig,
   removeProviderAuthProfilesWithLock,
-} from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "carapace/plugin-sdk/provider-auth-runtime";
 import {
   type ModelProviderConfig,
   selectPreferredLocalModelId,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { applyProviderDefaultModel } from "openclaw/plugin-sdk/provider-setup";
+} from "carapace/plugin-sdk/provider-model-shared";
+import { applyProviderDefaultModel } from "carapace/plugin-sdk/provider-setup";
 import {
   buildLlamaCppAuthProfileRemovalPatch,
   LLAMA_CPP_DEFAULT_PROFILE_ID as PROFILE_ID,
@@ -118,7 +118,7 @@ function hasEndpointChanged(provider: ModelProviderConfig | undefined, baseUrl: 
   );
 }
 
-function stripLlamaServerEndpointAuth(config: OpenClawConfig): OpenClawConfig {
+function stripLlamaServerEndpointAuth(config: CarapaceConfig): CarapaceConfig {
   const withoutProfile = removeAuthProfileConfig(config, PROFILE_ID);
   const provider = withoutProfile.models?.providers?.[LLAMA_CPP_PROVIDER_ID];
   const endpointSafeProvider = stripEndpointCredentials(provider);
@@ -152,7 +152,7 @@ function stripAuthorizationHeader<T>(
 }
 
 function buildExistingProviderConfig(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   discovery: Extract<LlamaServerDiscoveryResult, { kind: "success" }>;
   resetEndpoint: boolean;
   persistence: AuthPersistence<unknown>;
@@ -174,7 +174,7 @@ function buildExistingProviderConfig(params: {
 }
 
 function buildSetupResult(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   discovery: Extract<LlamaServerDiscoveryResult, { kind: "success" }>;
   modelId: string;
   resetEndpoint: boolean;
@@ -487,7 +487,7 @@ export async function validateLlamaServerNonInteractive(
 /** Non-interactive setup with optional API-key persistence. */
 export async function configureLlamaServerNonInteractive(
   ctx: ProviderAuthMethodNonInteractiveContext,
-): Promise<OpenClawConfig | null> {
+): Promise<CarapaceConfig | null> {
   const validated = await validateNonInteractiveDiscovery(ctx);
   if (!validated) {
     return null;
@@ -498,7 +498,7 @@ export async function configureLlamaServerNonInteractive(
     resetEndpoint: validated.resetEndpoint,
     persistence: validated.persistence,
   });
-  let config: OpenClawConfig = {
+  let config: CarapaceConfig = {
     ...ctx.config,
     models: {
       ...ctx.config.models,

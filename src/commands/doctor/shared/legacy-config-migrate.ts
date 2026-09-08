@@ -1,16 +1,16 @@
 // Validating legacy config migration wrapper used by doctor config flow.
 import type { LegacyConfigMigrationContext } from "../../../config/legacy.shared.js";
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { CarapaceConfig } from "../../../config/types.js";
 import { validateConfigObjectRawWithPlugins } from "../../../config/validation.js";
 import { applyLegacyDoctorMigrations } from "./legacy-config-compat.js";
 
-/** Apply legacy migrations and validate the resulting OpenClaw config shape when possible. */
+/** Apply legacy migrations and validate the resulting Carapace config shape when possible. */
 export function migrateLegacyConfig(
   raw: unknown,
   context?: LegacyConfigMigrationContext,
 ): {
-  config: OpenClawConfig | null;
-  sourceConfig?: OpenClawConfig;
+  config: CarapaceConfig | null;
+  sourceConfig?: CarapaceConfig;
   changes: string[];
   partiallyValid?: boolean;
 } {
@@ -26,7 +26,7 @@ export function migrateLegacyConfig(
   const validated = validateConfigObjectRawWithPlugins(resolvedCandidate);
   if (!validated.ok) {
     changes.push("Migration applied; other validation issues remain — run doctor to review.");
-    return { config: next as OpenClawConfig, changes, partiallyValid: true };
+    return { config: next as CarapaceConfig, changes, partiallyValid: true };
   }
-  return { config: validated.config, sourceConfig: next as OpenClawConfig, changes };
+  return { config: validated.config, sourceConfig: next as CarapaceConfig, changes };
 }

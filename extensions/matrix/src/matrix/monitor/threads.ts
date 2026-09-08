@@ -1,5 +1,5 @@
 // Matrix plugin module implements threads behavior.
-import { resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
+import { resolveThreadSessionKeys } from "carapace/plugin-sdk/routing";
 
 type MatrixThreadReplies = "off" | "inbound" | "always";
 

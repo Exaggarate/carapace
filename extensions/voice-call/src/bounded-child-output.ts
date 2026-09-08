@@ -1,5 +1,5 @@
 // Bounded child-process output buffer for voice-call tunnel/process diagnostics.
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 const DEFAULT_MAX_OUTPUT_CHARS = 16_384;
 

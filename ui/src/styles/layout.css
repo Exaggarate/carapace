@@ -187,40 +187,40 @@
   display: none;
 }
 
-html.openclaw-native-macos .shell-chrome-controls {
+html.carapace-native-macos .shell-chrome-controls {
   top: 52px;
 }
 
 /* Newer Mac apps host a native sidebar toggle in the titlebar next to
-   back/forward and add openclaw-native-nav; the in-page nav toggles would
+   back/forward and add carapace-native-nav; the in-page nav toggles would
    duplicate it, so they disappear (⌘B and the accessible titlebar button
    cover keyboard/screen-reader use). Search stays: native-nav-only hosts
    provide native search/new-thread controls only while the rail is
    collapsed, so expanded sidebar search keeps the pointer path to the palette.
-   Older apps only add openclaw-native-macos and keep all web controls. */
-html.openclaw-native-nav .shell-chrome-controls__nav-toggle,
-html.openclaw-native-nav .shell--nav-collapsed .shell-chrome-controls,
-html.openclaw-native-nav .topbar .topbar-nav-toggle {
+   Older apps only add carapace-native-macos and keep all web controls. */
+html.carapace-native-nav .shell-chrome-controls__nav-toggle,
+html.carapace-native-nav .shell--nav-collapsed .shell-chrome-controls,
+html.carapace-native-nav .topbar .topbar-nav-toggle {
   display: none;
 }
 
 /* Native-nav hosts provide the expanded sidebar toggle in AppKit, while the
    in-sidebar search remains the only pointer path to the palette. */
-html.openclaw-native-nav .sidebar-brand__collapse {
+html.carapace-native-nav .sidebar-brand__collapse {
   display: none;
 }
 
 /* Web-chrome hosts provide this entire cluster in the native titlebar. */
-html.openclaw-native-web-chrome .shell-chrome-controls {
+html.carapace-native-web-chrome .shell-chrome-controls {
   display: none;
 }
 
 /* The native titlebar already owns these actions in web-chrome hosts. */
-html.openclaw-native-web-chrome .sidebar-brand__desktop-control {
+html.carapace-native-web-chrome .sidebar-brand__desktop-control {
   display: none;
 }
 
-html:is(.openclaw-native-macos, .openclaw-native-nav, .openclaw-native-web-chrome) .sidebar-brand {
+html:is(.carapace-native-macos, .carapace-native-nav, .carapace-native-web-chrome) .sidebar-brand {
   --sidebar-agent-avatar-size: 32px;
 }
 
@@ -237,7 +237,7 @@ html:is(.openclaw-native-macos, .openclaw-native-nav, .openclaw-native-web-chrom
   gap: 4px;
   width: max-content;
   min-width: var(--shell-native-titlebar-controls-width);
-  height: var(--openclaw-native-titlebar-height, 50px);
+  height: var(--carapace-native-titlebar-height, 50px);
 }
 
 .macos-titlebar-controls__button.topbar-icon-btn {
@@ -707,11 +707,11 @@ html:is(.openclaw-native-macos, .openclaw-native-nav, .openclaw-native-web-chrom
   color: var(--muted);
 }
 
-openclaw-settings-save-indicator {
+carapace-settings-save-indicator {
   min-width: 0;
 }
 
-openclaw-settings-save-indicator:empty {
+carapace-settings-save-indicator:empty {
   display: none;
 }
 
@@ -2072,7 +2072,7 @@ openclaw-settings-save-indicator:empty {
   letter-spacing: -0.02em;
 }
 
-.viewer-facepile > openclaw-tooltip:not(:first-child) .viewer-avatar {
+.viewer-facepile > carapace-tooltip:not(:first-child) .viewer-avatar {
   margin-left: -5px;
 }
 
@@ -2254,7 +2254,7 @@ openclaw-settings-save-indicator:empty {
 .sidebar-recent-session--single-line:not(.sidebar-recent-session--child):is(:hover, :focus-within)
   :is(
     .session-row-badge--pull-request,
-    .session-row-badges:has(> openclaw-tooltip:only-child > .session-row-badge--pull-request)
+    .session-row-badges:has(> carapace-tooltip:only-child > .session-row-badge--pull-request)
   ) {
   display: none;
 }
@@ -2593,9 +2593,9 @@ wa-dropdown.session-menu::part(menu) {
 /* Popover hosts live in the top layer so menus escape in-page stacking
    contexts (e.g. the sidebar resizer above the nav); the host itself must
    stay a zero-size shell around its fixed-position menu. */
-openclaw-menu-surface[popover],
-openclaw-native-link-menu[popover],
-openclaw-session-menu[popover] {
+carapace-menu-surface[popover],
+carapace-native-link-menu[popover],
+carapace-session-menu[popover] {
   width: 0;
   height: 0;
   margin: 0;
@@ -3194,7 +3194,7 @@ a:is(
 
 /* Footer agent chip: identity-first entrance to the active agent. The body
    resumes the latest conversation; trailing actions create/open the menu. */
-.sidebar-brand > openclaw-sidebar-agent-card {
+.sidebar-brand > carapace-sidebar-agent-card {
   display: flex;
   min-width: 0;
   flex: 1 1 auto;
@@ -3462,7 +3462,7 @@ a:is(
   transform: translateY(-50%);
 }
 
-openclaw-sidebar-attention {
+carapace-sidebar-attention {
   display: contents;
 }
 
@@ -3575,11 +3575,11 @@ openclaw-sidebar-attention {
   line-height: 18px;
 }
 
-openclaw-tooltip.sidebar-hover-tooltip {
-  --openclaw-tooltip-max-width: min(340px, calc(100vw - 24px));
-  --openclaw-tooltip-open-animation: openclaw-tooltip-hover-card-in 140ms var(--ease-out);
-  --openclaw-tooltip-popup-show-duration: 0ms;
-  --openclaw-tooltip-popup-hide-duration: 0ms;
+carapace-tooltip.sidebar-hover-tooltip {
+  --carapace-tooltip-max-width: min(340px, calc(100vw - 24px));
+  --carapace-tooltip-open-animation: carapace-tooltip-hover-card-in 140ms var(--ease-out);
+  --carapace-tooltip-popup-show-duration: 0ms;
+  --carapace-tooltip-popup-hide-duration: 0ms;
 }
 
 .sidebar-hover-card {
@@ -4221,7 +4221,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   padding-top: 0;
 }
 
-.shell--settings .content:has(> .connection-action-block) > openclaw-router-outlet {
+.shell--settings .content:has(> .connection-action-block) > carapace-router-outlet {
   display: block;
   margin-top: 0;
   padding-top: var(--settings-content-block-start-padding);
@@ -4268,7 +4268,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   margin-top: 0;
 }
 
-.content--chat > openclaw-router-outlet {
+.content--chat > carapace-router-outlet {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -4294,7 +4294,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   margin-top: 0;
 }
 
-.content--custodian > openclaw-router-outlet {
+.content--custodian > carapace-router-outlet {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -4312,7 +4312,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   margin-top: 14px;
 }
 
-.content--workboard > openclaw-router-outlet {
+.content--workboard > carapace-router-outlet {
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
@@ -4342,7 +4342,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
 
 /* Clear collapsed-sidebar web chrome once, at the reconnect notice or page header.
    Settings, mobile drawers, and native hosts own different chrome. */
-html:not(.openclaw-native-macos):not(.openclaw-native-nav):not(.openclaw-native-web-chrome)
+html:not(.carapace-native-macos):not(.carapace-native-nav):not(.carapace-native-web-chrome)
   .shell.shell--nav-collapsed:not(.shell--mobile-nav):not(.shell--settings)
   .content:not(.content--chat) {
   > .connection-action-block,

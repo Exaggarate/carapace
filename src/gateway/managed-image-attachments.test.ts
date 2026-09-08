@@ -5,7 +5,7 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { maxBytesForKind } from "@openclaw/media-core/constants";
+import { maxBytesForKind } from "@carapace/media-core/constants";
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import {
   createNoisyPngBuffer as createNoisyPngFixtureBuffer,
@@ -25,10 +25,10 @@ import {
 import { readImageProbeFromHeader, resizeToJpeg } from "../media/image-ops.js";
 import { setMediaStoreNetworkDepsForTest } from "../media/store.test-support.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   attachManagedImageRecordToMessage,
@@ -87,7 +87,7 @@ vi.mock("./session-transcript-readers.js", () => ({
   readSessionMessagesAsync: readSessionMessagesMock,
   readSessionMessagesMatchingIdAsync: async (scope: unknown, messageId: string) =>
     (await readSessionMessagesMock(scope)).filter(
-      (message: { __openclaw?: { id?: string } }) => message["__openclaw"]?.id === messageId,
+      (message: { __carapace?: { id?: string } }) => message["__carapace"]?.id === messageId,
     ),
   readSessionMessagesWithSourceAsync: async (...args: unknown[]) => ({
     messages: await readSessionMessagesMock(...args),
@@ -229,14 +229,14 @@ function requireManagedOriginalPath(stateDir: string, attachmentId: string): str
 }
 
 function prepareAgentSessionStore(stateDir: string, agentId: string): void {
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-  openOpenClawAgentDatabase({ agentId, env });
-  closeOpenClawAgentDatabasesForTest();
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+  openCarapaceAgentDatabase({ agentId, env });
+  closeCarapaceAgentDatabasesForTest();
 }
 
 async function prepareManagedSessionStore(stateDir: string): Promise<void> {
-  closeOpenClawAgentDatabasesForTest();
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  closeCarapaceAgentDatabasesForTest();
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   const storePath = path.join(stateDir, "sessions.sqlite");
   await replaceTestSessionEntry(
     {
@@ -247,7 +247,7 @@ async function prepareManagedSessionStore(stateDir: string): Promise<void> {
     },
     { sessionId: "sess-1", updatedAt: Date.now() },
   );
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   const { loadExactSessionEntryReadOnlyResult } =
     await import("../config/sessions/session-accessor.sqlite-entry-availability.js");
   expect(
@@ -350,7 +350,7 @@ async function requestManagedImage(params: {
               openUrl: params.pathName,
             },
           ],
-          __openclaw: { id: "msg-1" },
+          __carapace: { id: "msg-1" },
         },
       ]
     );
@@ -423,7 +423,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     setMediaStoreNetworkDepsForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
@@ -432,7 +432,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
     const { attachmentId, sessionKey } = await createFixture(stateDir);
     expect(
       resolveExistingAgentSessionStoreTargetsReadOnlyResult(getRuntimeConfigMock(), "main", {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       }),
     ).toMatchObject({
       available: true,
@@ -520,7 +520,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
           {
             role: "assistant",
             content: [block],
-            __openclaw: { id: "msg-1" },
+            __carapace: { id: "msg-1" },
           },
         ],
       });
@@ -732,7 +732,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
           {
             role: "assistant",
             content: [{ type: "attachment", attachment: { url: pathName } }],
-            __openclaw: { id: "msg-1" },
+            __carapace: { id: "msg-1" },
           },
         ],
       };
@@ -844,7 +844,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       {
         role: "assistant",
         content: [{ type: "audio", url: canonicalPath, openUrl: canonicalPath }],
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
       },
     ]);
     const download = await resolveManagedOutgoingImageArtifactDownload({
@@ -862,7 +862,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
         {
           role: "assistant",
           content: [{ type: "audio", url: canonicalPath, openUrl: canonicalPath }],
-          __openclaw: { id: "msg-1" },
+          __carapace: { id: "msg-1" },
         },
       ],
     });
@@ -938,7 +938,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
             url: `/api/chat/media/outgoing/${encodeURIComponent(sessionKey)}/${attachmentId}/full`,
           },
         ],
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
       },
     ]);
     resolvePlaybackTranscodeMock.mockRejectedValueOnce(new Error("playback inspection failed"));
@@ -1090,7 +1090,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       {
         role: "assistant",
         content: [{ type: "image", url: canonicalPath, openUrl: canonicalPath }],
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
       },
     ]);
 
@@ -1137,7 +1137,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       {
         role: "assistant",
         content: [{ type: "audio", url: canonicalPath, openUrl: canonicalPath }],
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
       },
     ]);
 
@@ -1158,7 +1158,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       {
         role: "assistant",
         content: [{ type: "image", url: canonicalPath, openUrl: canonicalPath }],
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
       },
     ];
     loadSessionEntryMock.mockReturnValue({
@@ -1212,9 +1212,9 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_CONFIG_PATH: path.join(externalConfigDir, "config.json"),
-          OPENCLAW_HOME: isolatedHome,
-          OPENCLAW_STATE_DIR: undefined,
+          CARAPACE_CONFIG_PATH: path.join(externalConfigDir, "config.json"),
+          CARAPACE_HOME: isolatedHome,
+          CARAPACE_STATE_DIR: undefined,
         },
         async () => {
           const pathName = `/api/chat/media/outgoing/${encodeURIComponent(fixture.sessionKey)}/${fixture.attachmentId}/full`;
@@ -1302,7 +1302,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       stateDir,
       pathName: `/api/chat/media/outgoing/${encodeURIComponent(sessionKey)}/${attachmentId}/full`,
       authResponse: { authMethod: "trusted-proxy", trustDeclaredOperatorScopes: true },
-      headers: { "x-openclaw-requester-session-key": sessionKey },
+      headers: { "x-carapace-requester-session-key": sessionKey },
     });
 
     expect(result.statusCode).toBe(403);
@@ -1315,7 +1315,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       stateDir,
       pathName: `/api/chat/media/outgoing/${encodeURIComponent(sessionKey)}/${attachmentId}/full`,
       authResponse: { authMethod: "device-token" },
-      headers: { "x-openclaw-requester-session-key": sessionKey },
+      headers: { "x-carapace-requester-session-key": sessionKey },
     });
 
     expect(result.statusCode).toBe(403);
@@ -1342,7 +1342,7 @@ describe("handleManagedOutgoingImageHttpRequest", () => {
       stateDir,
       pathName: `/api/chat/media/outgoing/${encodeURIComponent(sessionKey)}/${attachmentId}/full`,
       method: "POST",
-      headers: { "x-openclaw-requester-session-key": sessionKey },
+      headers: { "x-carapace-requester-session-key": sessionKey },
     });
 
     expect(result.statusCode).toBe(405);
@@ -1407,7 +1407,7 @@ describe("createManagedOutgoingImageBlocks", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     setMediaStoreNetworkDepsForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
@@ -1555,7 +1555,7 @@ describe("createManagedOutgoingImageBlocks", () => {
           {
             role: "assistant",
             content: [{ type: kind, url: pathName, openUrl: pathName }],
-            __openclaw: { id: "msg-1" },
+            __carapace: { id: "msg-1" },
           },
         ],
       });
@@ -1797,7 +1797,7 @@ describe("createManagedOutgoingImageBlocks", () => {
       await fs.mkdir(path.dirname(sourcePath), { recursive: true });
       await fs.writeFile(sourcePath, Buffer.from(TINY_PNG_BASE64, "base64"));
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const blocks = await createManagedOutgoingImageBlocks({
           stateDir,
           sessionKey: "agent:main:main",
@@ -1848,7 +1848,7 @@ describe("createManagedOutgoingImageBlocks", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const sourceUrl = `http://127.0.0.1:${address.port}/remote-cat.png?sig=secret`;
         const blocks = await createManagedOutgoingImageBlocks({
           stateDir,
@@ -1883,9 +1883,9 @@ describe("createManagedOutgoingImageBlocks", () => {
   });
 
   it("serves managed originals from a split config-path media root", async () => {
-    const openClawHome = tempDirs.make("managed-image-home-");
+    const carapaceHome = tempDirs.make("managed-image-home-");
     const externalConfigDir = tempDirs.make("managed-image-config-");
-    const splitStateDir = path.join(openClawHome, ".openclaw");
+    const splitStateDir = path.join(carapaceHome, ".carapace");
     const sourcePath = path.join(splitStateDir, "workspace", "fixtures", "dot.png");
     await fs.mkdir(path.dirname(sourcePath), { recursive: true });
     await fs.writeFile(sourcePath, Buffer.from(TINY_PNG_BASE64, "base64"));
@@ -1893,9 +1893,9 @@ describe("createManagedOutgoingImageBlocks", () => {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_HOME: openClawHome,
-          OPENCLAW_CONFIG_PATH: path.join(externalConfigDir, "config.json"),
-          OPENCLAW_STATE_DIR: undefined,
+          CARAPACE_HOME: carapaceHome,
+          CARAPACE_CONFIG_PATH: path.join(externalConfigDir, "config.json"),
+          CARAPACE_STATE_DIR: undefined,
         },
         async () => {
           await prepareManagedSessionStore(splitStateDir);
@@ -1942,8 +1942,8 @@ describe("createManagedOutgoingImageBlocks", () => {
         },
       );
     } finally {
-      closeOpenClawStateDatabaseForTest();
-      await fs.rm(openClawHome, { recursive: true, force: true });
+      closeCarapaceStateDatabaseForTest();
+      await fs.rm(carapaceHome, { recursive: true, force: true });
       await fs.rm(externalConfigDir, { recursive: true, force: true });
     }
   });
@@ -2196,7 +2196,7 @@ describe("createManagedOutgoingImageBlocks", () => {
               },
             },
           ],
-          __openclaw: { id: "msg-1" },
+          __carapace: { id: "msg-1" },
         },
       ],
     });
@@ -2252,7 +2252,7 @@ describe("createManagedOutgoingImageBlocks", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const blocks = await createManagedOutgoingImageBlocks({
           sessionKey: "agent:main:main",
           mediaUrls: [`http://127.0.0.1:${address.port}/large-image.png`],
@@ -2311,7 +2311,7 @@ describe("createManagedOutgoingImageBlocks", () => {
     await fs.mkdir(path.dirname(inboundPath), { recursive: true });
     await fs.writeFile(inboundPath, Buffer.from(TINY_PNG_BASE64, "base64"));
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const blocks = await createManagedOutgoingImageBlocks({
         sessionKey: "agent:main:main",
         mediaUrls: [inboundPath],
@@ -2382,7 +2382,7 @@ describe("createManagedOutgoingImageBlocks", () => {
         {
           role: "assistant",
           content: blocks,
-          __openclaw: { id: "msg-1" },
+          __carapace: { id: "msg-1" },
         },
       ],
     });
@@ -2511,7 +2511,7 @@ describe("attachManagedOutgoingImagesToMessage", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
 
@@ -2546,8 +2546,8 @@ describe("cleanupManagedOutgoingImageRecords", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   });
 
@@ -2755,9 +2755,9 @@ describe("cleanupManagedOutgoingImageRecords", () => {
 
   it("retains history records when the session table is unavailable", async () => {
     const fixture = await createFixture(stateDir);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const databasePath = openOpenClawAgentDatabase({ agentId: "main", env }).path;
-    closeOpenClawAgentDatabasesForTest();
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const databasePath = openCarapaceAgentDatabase({ agentId: "main", env }).path;
+    closeCarapaceAgentDatabasesForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(databasePath);
     database.exec("DROP TABLE session_nodes;");
@@ -2775,19 +2775,19 @@ describe("cleanupManagedOutgoingImageRecords", () => {
 
   it("retains history records when the session row is unreadable", async () => {
     const fixture = await createFixture(stateDir);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     opened.db
       .prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, entry_valid, updated_at) VALUES (?, ?, ?, -1, ?)",
       )
       .run("agent:main:main", "broken-session", "{invalid", Date.now());
     const databasePath = opened.path;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     getRuntimeConfigMock.mockReturnValue({ session: { store: databasePath } });
     loadSessionEntryMock.mockReturnValue({ storePath: databasePath, entry: undefined });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2799,22 +2799,22 @@ describe("cleanupManagedOutgoingImageRecords", () => {
 
   it("does not let a valid fallback mask an unreadable exact row", async () => {
     const fixture = await createFixture(stateDir);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env });
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env });
     opened.db
       .prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, entry_valid, updated_at) VALUES (?, ?, ?, -1, ?)",
       )
       .run("agent:main:main", "broken-session", "{invalid", Date.now());
     const databasePath = opened.path;
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     getRuntimeConfigMock.mockReturnValue({ session: { store: databasePath } });
     loadSessionEntryMock.mockReturnValue({
       storePath: databasePath,
       entry: { sessionId: "fallback-session", sessionFile: "/tmp/fallback.jsonl" },
     });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2832,7 +2832,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     });
     loadSessionEntryMock.mockReturnValue({ storePath, entry: undefined });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2844,17 +2844,17 @@ describe("cleanupManagedOutgoingImageRecords", () => {
 
   it("retains history when a healthy configured store masks an unreadable candidate", async () => {
     const fixture = await createFixture(stateDir);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const storeTemplate = path.join(stateDir, "custom", "{agentId}", "sessions.json");
     const configuredStorePath = storeTemplate.replace("{agentId}", "main");
     const configuredTarget = resolveSqliteTargetFromSessionStorePath(configuredStorePath, {
       agentId: "main",
       env,
     });
-    openOpenClawAgentDatabase({ agentId: "main", env, path: configuredTarget.path });
-    closeOpenClawAgentDatabasesForTest();
-    const discoveredDatabasePath = openOpenClawAgentDatabase({ agentId: "main", env }).path;
-    closeOpenClawAgentDatabasesForTest();
+    openCarapaceAgentDatabase({ agentId: "main", env, path: configuredTarget.path });
+    closeCarapaceAgentDatabasesForTest();
+    const discoveredDatabasePath = openCarapaceAgentDatabase({ agentId: "main", env }).path;
+    closeCarapaceAgentDatabasesForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(discoveredDatabasePath);
     database.exec("DROP TABLE session_nodes;");
@@ -2862,7 +2862,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     getRuntimeConfigMock.mockReturnValue({ session: { store: storeTemplate } });
     loadSessionEntryMock.mockReturnValue({ storePath: configuredStorePath, entry: undefined });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2875,9 +2875,9 @@ describe("cleanupManagedOutgoingImageRecords", () => {
 
   it("retains history when a healthy discovered store masks a missing configured store", async () => {
     const fixture = await createFixture(stateDir);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const storeTemplate = path.join(stateDir, "missing-custom", "{agentId}", "sessions.json");
-    const discovered = openOpenClawAgentDatabase({ agentId: "main", env });
+    const discovered = openCarapaceAgentDatabase({ agentId: "main", env });
     discovered.db
       .prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, entry_valid, updated_at) VALUES (?, ?, ?, 1, ?)",
@@ -2888,14 +2888,14 @@ describe("cleanupManagedOutgoingImageRecords", () => {
         JSON.stringify({ sessionId: "discovered-session" }),
         Date.now(),
       );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     getRuntimeConfigMock.mockReturnValue({ session: { store: storeTemplate } });
     loadSessionEntryMock.mockReturnValue({
       storePath: storeTemplate.replace("{agentId}", "main"),
       entry: undefined,
     });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2912,7 +2912,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     getRuntimeConfigMock.mockReturnValue({ session: { store: storePath } });
     loadSessionEntryMock.mockReturnValue({ storePath, entry: undefined });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2929,19 +2929,19 @@ describe("cleanupManagedOutgoingImageRecords", () => {
       sessionKey: "agent:retired:main",
     });
     const storePath = path.join(stateDir, "current-sessions.json");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const target = resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main", env });
-    const opened = openOpenClawAgentDatabase({ agentId: "main", env, path: target.path });
+    const opened = openCarapaceAgentDatabase({ agentId: "main", env, path: target.path });
     opened.db
       .prepare(
         "INSERT INTO session_nodes (session_key, current_session_id, entry_json, entry_valid, updated_at) VALUES (?, ?, ?, 1, ?)",
       )
       .run("main", "current-session", JSON.stringify({ sessionId: "current-session" }), Date.now());
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     getRuntimeConfigMock.mockReturnValue({ session: { store: storePath } });
     loadSessionEntryMock.mockReturnValue({ storePath, entry: undefined });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2958,12 +2958,12 @@ describe("cleanupManagedOutgoingImageRecords", () => {
       sessionKey: "agent:retired:main",
     });
     const storePath = path.join(stateDir, "retired-readable-sessions.json");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     await replaceTestSessionEntry(
       { agentId: "retired", env, storePath, sessionKey: "agent:retired:main" },
       { sessionId: "retired-session", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const config = { session: { store: storePath } };
     getRuntimeConfigMock.mockReturnValue(config);
     expect(
@@ -2984,7 +2984,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     });
     readSessionMessagesMock.mockReturnValue([]);
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -2999,13 +2999,13 @@ describe("cleanupManagedOutgoingImageRecords", () => {
       sessionKey: "agent:retired:main",
     });
     const storePath = path.join(stateDir, "retired-sessions.json");
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const target = resolveSqliteTargetFromSessionStorePath(storePath, {
       agentId: "retired",
       env,
     });
-    openOpenClawAgentDatabase({ agentId: "retired", env, path: target.path });
-    closeOpenClawAgentDatabasesForTest();
+    openCarapaceAgentDatabase({ agentId: "retired", env, path: target.path });
+    closeCarapaceAgentDatabasesForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const database = new DatabaseSync(target.path);
     database.exec("DROP TABLE schema_meta;");
@@ -3017,7 +3017,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
       resolveExistingAgentSessionStoreTargetsReadOnlyResult(config, "retired", { env }),
     ).toEqual({ available: false, reason: "schema-missing" });
 
-    const result = await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, () =>
+    const result = await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, () =>
       cleanupManagedOutgoingImageRecords({ stateDir }),
     );
 
@@ -3036,7 +3036,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     });
     readSessionMessagesMock.mockReturnValue([
       {
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
         content: [
           {
             type: "image",
@@ -3071,7 +3071,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     });
     readSessionMessagesMock.mockReturnValue([
       {
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
         content: [
           {
             type: "image",
@@ -3133,13 +3133,13 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     await replaceTestSessionEntry(
       {
         agentId: "main",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         sessionKey: "global",
         storePath: path.join(stateDir, "sessions.sqlite"),
       },
       { sessionId: "sess-main-global", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const retainedFixture = await createFixture(stateDir, {
       sessionKey: "global",
       agentId: "work",
@@ -3192,19 +3192,19 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     await replaceTestSessionEntry(
       {
         agentId: "work",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         sessionKey,
       },
       { sessionId: "sess-work", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     loadSessionEntryMock.mockReturnValue({
       storePath: path.join(stateDir, "agents", "work", "sessions", "sessions.json"),
       entry: { sessionId: "sess-work", sessionFile: "/tmp/work.jsonl" },
     });
     readSessionMessagesMock.mockReturnValue([
       {
-        __openclaw: { id: "msg-1" },
+        __carapace: { id: "msg-1" },
         content: [
           {
             type: "image",
@@ -3230,15 +3230,15 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     await replaceTestSessionEntry(
       {
         agentId: "work",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         sessionKey: "global",
       },
       { sessionId: "sess-work-global", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     expect(
       resolveExistingAgentSessionStoreTargetsReadOnlyResult(config, "work", {
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       }),
     ).toMatchObject({ available: true });
     const { loadExactSessionEntryReadOnlyResult } =
@@ -3246,7 +3246,7 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     expect(
       loadExactSessionEntryReadOnlyResult({
         agentId: "work",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         sessionKey: "global",
       }),
     ).toMatchObject({ found: true, value: { sessionKey: "global" } });
@@ -3303,13 +3303,13 @@ describe("cleanupManagedOutgoingImageRecords", () => {
     await replaceTestSessionEntry(
       {
         agentId: "work",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         sessionKey: "global",
         storePath: path.join(stateDir, "sessions.sqlite"),
       },
       { sessionId: "sess-work-global", updatedAt: Date.now() },
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const fixture = await createFixture(stateDir, {
       sessionKey: "global",
       agentId: "work",

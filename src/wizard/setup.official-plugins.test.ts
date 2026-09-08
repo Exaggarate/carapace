@@ -64,22 +64,22 @@ describe("setupOfficialPluginInstalls", () => {
         {
           value: "acpx",
           label: "ACPX Runtime",
-          hint: "OpenClaw ACP runtime backend",
+          hint: "Carapace ACP runtime backend",
         },
         {
           value: "diagnostics-otel",
           label: "Diagnostics OpenTelemetry",
-          hint: "OpenClaw diagnostics OpenTelemetry exporter",
+          hint: "Carapace diagnostics OpenTelemetry exporter",
         },
         {
           value: "diagnostics-prometheus",
           label: "Diagnostics Prometheus",
-          hint: "OpenClaw diagnostics Prometheus exporter",
+          hint: "Carapace diagnostics Prometheus exporter",
         },
         {
           value: "tokenjuice",
           label: "Tokenjuice",
-          hint: "OpenClaw tokenjuice exec output compaction plugin",
+          hint: "Carapace tokenjuice exec output compaction plugin",
         },
       ]),
     );
@@ -88,10 +88,10 @@ describe("setupOfficialPluginInstalls", () => {
       entry: {
         pluginId: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
-        description: "OpenClaw diagnostics OpenTelemetry exporter",
+        description: "Carapace diagnostics OpenTelemetry exporter",
         install: {
-          clawhubSpec: "clawhub:@openclaw/diagnostics-otel",
-          npmSpec: "@openclaw/diagnostics-otel",
+          clawhubSpec: "clawhub:@carapace/diagnostics-otel",
+          npmSpec: "@carapace/diagnostics-otel",
           defaultChoice: "npm",
           minHostVersion: ">=2026.4.25",
         },
@@ -119,7 +119,7 @@ describe("setupOfficialPluginInstalls", () => {
           installs: {
             "diagnostics-otel": {
               source: "npm",
-              spec: "@openclaw/diagnostics-otel",
+              spec: "@carapace/diagnostics-otel",
               installPath: "/tmp/diagnostics-otel",
             },
           },

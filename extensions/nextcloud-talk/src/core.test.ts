@@ -1,5 +1,5 @@
 // Nextcloud Talk tests cover core plugin behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   looksLikeNextcloudTalkTargetId,

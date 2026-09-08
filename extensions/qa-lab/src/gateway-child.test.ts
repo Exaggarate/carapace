@@ -7,8 +7,8 @@ import path from "node:path";
 import { Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import { inspect } from "node:util";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createQaBundledPluginsDir,
@@ -55,13 +55,13 @@ const qaTempPathState = vi.hoisted(() => ({
   preferredTmpDir: process.env.TMPDIR || "/tmp",
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/temp-path", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/temp-path")>()),
-  resolvePreferredOpenClawTmpDir: () => qaTempPathState.preferredTmpDir,
+vi.mock("carapace/plugin-sdk/temp-path", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/temp-path")>()),
+  resolvePreferredCarapaceTmpDir: () => qaTempPathState.preferredTmpDir,
 }));
 
 vi.mock("./node-exec.js", () => ({
@@ -71,8 +71,8 @@ vi.mock("./node-exec.js", () => ({
 const tempDirs = createTempDirHarness();
 const owners: ReturnType<typeof createQaGatewayChild>[] = [];
 beforeEach(() => {
-  vi.stubEnv("OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
-  vi.stubEnv("OPENCLAW_LIVE_SETUP_TOKEN_VALUE", undefined);
+  vi.stubEnv("CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN", undefined);
+  vi.stubEnv("CARAPACE_LIVE_SETUP_TOKEN_VALUE", undefined);
 });
 function ownGateway() {
   const owner = createQaGatewayChild();
@@ -92,18 +92,18 @@ afterEach(async () => {
 
 function createParams(baseEnv?: NodeJS.ProcessEnv) {
   return {
-    configPath: "/tmp/openclaw-qa/openclaw.json",
+    configPath: "/tmp/carapace-qa/carapace.json",
     gatewayToken: "qa-token",
-    homeDir: "/tmp/openclaw-qa/home",
-    stateDir: "/tmp/openclaw-qa/state",
-    tempRoot: "/tmp/openclaw-qa",
-    xdgConfigHome: "/tmp/openclaw-qa/xdg-config",
-    xdgDataHome: "/tmp/openclaw-qa/xdg-data",
-    xdgCacheHome: "/tmp/openclaw-qa/xdg-cache",
-    bundledPluginsDir: "/tmp/openclaw-qa/bundled-plugins",
-    stagedBundledPluginsRoot: "/repo/.artifacts/qa-runtime/openclaw-qa-suite-test",
+    homeDir: "/tmp/carapace-qa/home",
+    stateDir: "/tmp/carapace-qa/state",
+    tempRoot: "/tmp/carapace-qa",
+    xdgConfigHome: "/tmp/carapace-qa/xdg-config",
+    xdgDataHome: "/tmp/carapace-qa/xdg-data",
+    xdgCacheHome: "/tmp/carapace-qa/xdg-cache",
+    bundledPluginsDir: "/tmp/carapace-qa/bundled-plugins",
+    stagedBundledPluginsRoot: "/repo/.artifacts/qa-runtime/carapace-qa-suite-test",
     compatibilityHostVersion: "2026.4.8",
-    developmentSourceRoot: "/repo/openclaw",
+    developmentSourceRoot: "/repo/carapace",
     baseEnv,
   };
 }
@@ -157,7 +157,7 @@ async function writeJsonFixture(filePath: string, value: unknown, space?: number
 }
 
 async function writeTempProviderConfig(value: unknown) {
-  const configPath = path.join(await tempDirs.makeTempDir("qa-provider-config-"), "openclaw.json");
+  const configPath = path.join(await tempDirs.makeTempDir("qa-provider-config-"), "carapace.json");
   await writeJsonFixture(configPath, value);
   return configPath;
 }
@@ -171,8 +171,8 @@ import path from "node:path";
 
 const args = process.argv.slice(2);
 const recordPath = process.env.QA_RECORD_PATH;
-const configPath = process.env.OPENCLAW_CONFIG_PATH;
-const stateDir = process.env.OPENCLAW_STATE_DIR;
+const configPath = process.env.CARAPACE_CONFIG_PATH;
+const stateDir = process.env.CARAPACE_STATE_DIR;
 if (!recordPath || !configPath || !stateDir) {
   throw new Error("missing fixture environment");
 }
@@ -183,7 +183,7 @@ const fail = async (code, message) => {
     "\\nterminal failure: Authorization: Bearer fixture-tail-secret", resolve));
   process.exit(code);
 };
-const authDbPath = path.join(stateDir, "agents", "qa", "agent", "openclaw-agent.sqlite");
+const authDbPath = path.join(stateDir, "agents", "qa", "agent", "carapace-agent.sqlite");
 if (args[0] === "models") {
   let stdin = "";
   process.stdin.setEncoding("utf8");
@@ -202,9 +202,9 @@ if (args[0] === "models") {
     configSymlink: configStat.isSymbolicLink(),
     stateDir,
     env: {
-      OPENCLAW_CLI: process.env.OPENCLAW_CLI,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CLI: process.env.CARAPACE_CLI,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     },
   });
   fs.mkdirSync(path.dirname(authDbPath), { recursive: true });
@@ -221,7 +221,7 @@ if (args[0] === "update") {
   const phase = args.includes("--help") ? "help" : "repair";
   if (phase === "repair" && process.env.QA_ASSERT_AUTH_HANDOFF === "1") {
     const { DatabaseSync } = await import("node:sqlite");
-    const db = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"));
+    const db = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"));
     try {
       const leases = db.prepare("SELECT owner_pid FROM agent_database_leases").all();
       if (leases.length) throw new Error("staged auth database still leased by parent");
@@ -268,7 +268,7 @@ const gatewayAttempts = fs.readFileSync(recordPath, "utf8").trim().split("\\n")
   .map((line) => JSON.parse(line)).filter((entry) => entry.kind === "gateway").length;
 if (gatewayAttempts === 1 && process.env.QA_STARTUP_RETRY) {
   process.stderr.write(process.env.QA_STARTUP_RETRY === "migration"
-    ? "OpenClaw plugin migration inputs changed during startup convergence; refusing readiness."
+    ? "Carapace plugin migration inputs changed during startup convergence; refusing readiness."
     : "listen EADDRINUSE: address already in use");
   process.exit(18);
 }
@@ -296,7 +296,7 @@ describe("runQaGatewayCliCommand", () => {
       executablePath: process.execPath,
       argsPrefix: [
         "--eval",
-        'process.stdout.write(`${process.env.OPENCLAW_CLI}:${process.env.QA_VALUE}:${process.argv.slice(1).join(",")}`)',
+        'process.stdout.write(`${process.env.CARAPACE_CLI}:${process.env.QA_VALUE}:${process.argv.slice(1).join(",")}`)',
       ],
       args: ["voicecall", "start"],
       cwd: process.cwd(),
@@ -316,7 +316,7 @@ describe("runQaGatewayCliCommand", () => {
         cwd: process.cwd(),
         env: process.env,
       }),
-    ).rejects.toThrow("OpenClaw CLI exited 7: fixture failure");
+    ).rejects.toThrow("Carapace CLI exited 7: fixture failure");
   });
 
   it("retains bounded redacted stdout failures alongside stderr panels", async () => {
@@ -344,7 +344,7 @@ describe("runQaGatewayCliCommand", () => {
       if (!(error instanceof Error)) {
         throw new Error("expected CLI failure");
       }
-      expect(error.message).toContain("OpenClaw CLI exited 7: Doctor panel:");
+      expect(error.message).toContain("Carapace CLI exited 7: Doctor panel:");
       expect(error.message).toContain('"reason":"readiness execution failed"');
       expect(error.message.length).toBeLessThanOrEqual(2_048);
       expect(error.message).toContain("Bearer <redacted>");
@@ -531,7 +531,7 @@ describe("Gateway child fixture helpers", () => {
     });
     expect(runtimeEnvPatch).toEqual(
       expect.objectContaining({
-        OPENCLAW_CODEX_APP_SERVER_ARGS: `app-server -c openai_base_url=http://127.0.0.1:44080/v1 -c ${JSON.stringify(`model_catalog_json=${modelCatalogPath}`)} -c sandbox_workspace_write.exclude_tmpdir_env_var=true -c sandbox_workspace_write.exclude_slash_tmp=true --listen stdio://`,
+        CARAPACE_CODEX_APP_SERVER_ARGS: `app-server -c openai_base_url=http://127.0.0.1:44080/v1 -c ${JSON.stringify(`model_catalog_json=${modelCatalogPath}`)} -c sandbox_workspace_write.exclude_tmpdir_env_var=true -c sandbox_workspace_write.exclude_slash_tmp=true --listen stdio://`,
       }),
     );
     expect(runtimeEnvPatch).not.toHaveProperty("OPENAI_API_KEY");
@@ -543,7 +543,7 @@ describe("Gateway child fixture helpers", () => {
     await expect(
       stageQaCodexMockModelCatalog({
         tempRoot,
-        forcedRuntime: "openclaw",
+        forcedRuntime: "carapace",
         providerMode: "mock-openai",
       }),
     ).resolves.toBeUndefined();
@@ -618,7 +618,7 @@ describe("buildQaRuntimeEnv", () => {
         useRepoCli: true,
         transportBaseUrl: "http://127.0.0.1:43123",
       }),
-    ).rejects.toThrow("OpenClaw CLI entry not found");
+    ).rejects.toThrow("Carapace CLI entry not found");
     await expect(owner.stop()).resolves.toMatchObject({ errors: [] });
 
     await expect(readdir(tempParent)).resolves.toStrictEqual([]);
@@ -666,7 +666,7 @@ describe("buildQaRuntimeEnv", () => {
     const preferredTempParent = await tempDirs.makeTempDir("qa-gateway-default-spawn-fail-");
     const commandTempParent = await tempDirs.makeTempDir("qa-gateway-command-spawn-fail-");
     qaTempPathState.preferredTmpDir = preferredTempParent;
-    const missingExecutable = path.join(commandTempParent, "missing-openclaw-node");
+    const missingExecutable = path.join(commandTempParent, "missing-carapace-node");
 
     const owner = ownGateway();
     await expect(
@@ -690,7 +690,7 @@ describe("buildQaRuntimeEnv", () => {
     await expect(readdir(commandTempParent)).resolves.toStrictEqual([]);
   });
 
-  it.each([undefined, { OPENCLAW_BUILD_PRIVATE_QA: "0", OPENCLAW_ENABLE_PRIVATE_QA_CLI: "0" }])(
+  it.each([undefined, { CARAPACE_BUILD_PRIVATE_QA: "0", CARAPACE_ENABLE_PRIVATE_QA_CLI: "0" }])(
     "keeps private-QA and slow-reply controls enabled under fast mode with patch %j",
     (runtimeEnvPatch) => {
       const env = buildQaRuntimeEnv({
@@ -699,20 +699,20 @@ describe("buildQaRuntimeEnv", () => {
         runtimeEnvPatch,
       });
 
-      expect(env.OPENCLAW_TEST_FAST).toBe("1");
-      expect(env.OPENCLAW_SKIP_STARTUP_MODEL_PREWARM).toBe("1");
-      expect(env.OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS).toBe("2000");
-      expect(env.OPENCLAW_QA_PARENT_PID).toBe(String(process.pid));
-      expect(env.OPENCLAW_QA_TEMP_ROOT).toBe("/tmp/openclaw-qa");
-      expect(env.OPENCLAW_QA_STAGED_RUNTIME_ROOT).toBe(
-        "/repo/.artifacts/qa-runtime/openclaw-qa-suite-test",
+      expect(env.CARAPACE_TEST_FAST).toBe("1");
+      expect(env.CARAPACE_SKIP_STARTUP_MODEL_PREWARM).toBe("1");
+      expect(env.CARAPACE_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS).toBe("2000");
+      expect(env.CARAPACE_QA_PARENT_PID).toBe(String(process.pid));
+      expect(env.CARAPACE_QA_TEMP_ROOT).toBe("/tmp/carapace-qa");
+      expect(env.CARAPACE_QA_STAGED_RUNTIME_ROOT).toBe(
+        "/repo/.artifacts/qa-runtime/carapace-qa-suite-test",
       );
-      expect(env.OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER).toBe("1");
-      expect(env.OPENCLAW_BUILD_PRIVATE_QA).toBe("1");
-      expect(env.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-      expect(env.OPENCLAW_ALLOW_SLOW_REPLY_TESTS).toBe("1");
-      expect(env.OPENCLAW_BUNDLED_PLUGINS_DIR).toBe("/tmp/openclaw-qa/bundled-plugins");
-      expect(env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("2026.4.8");
+      expect(env.CARAPACE_QA_ALLOW_LOCAL_IMAGE_PROVIDER).toBe("1");
+      expect(env.CARAPACE_BUILD_PRIVATE_QA).toBe("1");
+      expect(env.CARAPACE_ENABLE_PRIVATE_QA_CLI).toBe("1");
+      expect(env.CARAPACE_ALLOW_SLOW_REPLY_TESTS).toBe("1");
+      expect(env.CARAPACE_BUNDLED_PLUGINS_DIR).toBe("/tmp/carapace-qa/bundled-plugins");
+      expect(env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBe("2026.4.8");
     },
   );
 
@@ -735,8 +735,8 @@ describe("buildQaRuntimeEnv", () => {
     expect(testEnv.VITEST).toBeUndefined();
     expect(testEnv.VITEST_POOL_ID).toBeUndefined();
     expect(testEnv.VITEST_WORKER_ID).toBeUndefined();
-    expect(testEnv.OPENCLAW_TEST_FAST).toBe("1");
-    expect(testEnv.OPENCLAW_ALLOW_SLOW_REPLY_TESTS).toBe("1");
+    expect(testEnv.CARAPACE_TEST_FAST).toBe("1");
+    expect(testEnv.CARAPACE_ALLOW_SLOW_REPLY_TESTS).toBe("1");
 
     const developmentEnv = buildQaRuntimeEnv({
       ...createParams({ NODE_ENV: "development" }),
@@ -747,65 +747,65 @@ describe("buildQaRuntimeEnv", () => {
   it("does not inherit parent channel or provider skip controls", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_SKIP_CHANNELS: "1",
-        OPENCLAW_SKIP_PROVIDERS: "1",
+        CARAPACE_SKIP_CHANNELS: "1",
+        CARAPACE_SKIP_PROVIDERS: "1",
       }),
     });
 
-    expect(env.OPENCLAW_SKIP_CHANNELS).toBeUndefined();
-    expect(env.OPENCLAW_SKIP_PROVIDERS).toBeUndefined();
+    expect(env.CARAPACE_SKIP_CHANNELS).toBeUndefined();
+    expect(env.CARAPACE_SKIP_PROVIDERS).toBeUndefined();
   });
 
   it("honors explicit channel and provider skip controls", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_SKIP_CHANNELS: "inherited",
-        OPENCLAW_SKIP_PROVIDERS: "inherited",
+        CARAPACE_SKIP_CHANNELS: "inherited",
+        CARAPACE_SKIP_PROVIDERS: "inherited",
       }),
       runtimeEnvPatch: {
-        OPENCLAW_SKIP_CHANNELS: "patched-channels",
-        OPENCLAW_SKIP_PROVIDERS: "patched-providers",
+        CARAPACE_SKIP_CHANNELS: "patched-channels",
+        CARAPACE_SKIP_PROVIDERS: "patched-providers",
       },
     });
 
-    expect(env.OPENCLAW_SKIP_CHANNELS).toBe("patched-channels");
-    expect(env.OPENCLAW_SKIP_PROVIDERS).toBe("patched-providers");
+    expect(env.CARAPACE_SKIP_CHANNELS).toBe("patched-channels");
+    expect(env.CARAPACE_SKIP_PROVIDERS).toBe("patched-providers");
   });
 
   it("binds plugin authority to the source candidate after caller environment patches", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_DEV_SOURCE_ROOT: "/repo/current-harness",
+        CARAPACE_DEV_SOURCE_ROOT: "/repo/current-harness",
       }),
       developmentSourceRoot: "/repo/release-candidate",
       runtimeEnvPatch: {
-        OPENCLAW_DEV_SOURCE_ROOT: "/repo/caller-override",
+        CARAPACE_DEV_SOURCE_ROOT: "/repo/caller-override",
       },
     });
 
-    expect(env.OPENCLAW_DEV_SOURCE_ROOT).toBe("/repo/release-candidate");
+    expect(env.CARAPACE_DEV_SOURCE_ROOT).toBe("/repo/release-candidate");
   });
 
   it("clears inherited and patched source roots for packaged candidates", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_DEV_SOURCE_ROOT: "/repo/current-harness",
+        CARAPACE_DEV_SOURCE_ROOT: "/repo/current-harness",
       }),
       developmentSourceRoot: null,
       runtimeEnvPatch: {
-        OPENCLAW_DEV_SOURCE_ROOT: "/repo/caller-override",
+        CARAPACE_DEV_SOURCE_ROOT: "/repo/caller-override",
       },
     });
 
-    expect(env.OPENCLAW_DEV_SOURCE_ROOT).toBeUndefined();
+    expect(env.CARAPACE_DEV_SOURCE_ROOT).toBeUndefined();
   });
 
   it("maps live frontier key aliases into provider env vars", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_LIVE_OPENAI_KEY: "openai-live",
-        OPENCLAW_LIVE_ANTHROPIC_KEY: "anthropic-live",
-        OPENCLAW_LIVE_GEMINI_KEY: "gemini-live",
+        CARAPACE_LIVE_OPENAI_KEY: "openai-live",
+        CARAPACE_LIVE_ANTHROPIC_KEY: "anthropic-live",
+        CARAPACE_LIVE_GEMINI_KEY: "gemini-live",
       }),
       providerMode: "live-frontier",
     });
@@ -819,7 +819,7 @@ describe("buildQaRuntimeEnv", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
         OPENAI_API_KEY: "openai-explicit",
-        OPENCLAW_LIVE_OPENAI_KEY: "openai-live",
+        CARAPACE_LIVE_OPENAI_KEY: "openai-live",
       }),
       providerMode: "live-frontier",
     });
@@ -827,7 +827,7 @@ describe("buildQaRuntimeEnv", () => {
     expect(env.OPENAI_API_KEY).toBe("openai-explicit");
   });
 
-  it("preserves Codex CLI auth home for live frontier runs while sandboxing OpenClaw home", async () => {
+  it("preserves Codex CLI auth home for live frontier runs while sandboxing Carapace home", async () => {
     const hostHome = await tempDirs.makeTempDir("qa-host-home-");
     const codexHome = path.join(hostHome, ".codex");
     await mkdir(codexHome);
@@ -839,12 +839,12 @@ describe("buildQaRuntimeEnv", () => {
       providerMode: "live-frontier",
     });
 
-    expect(env.HOME).toBe("/tmp/openclaw-qa/home");
-    expect(env.OPENCLAW_HOME).toBe("/tmp/openclaw-qa/home");
+    expect(env.HOME).toBe("/tmp/carapace-qa/home");
+    expect(env.CARAPACE_HOME).toBe("/tmp/carapace-qa/home");
     expect(env.CODEX_HOME).toBe(codexHome);
   });
 
-  it("forwards host HOME for live Claude CLI runs while keeping OpenClaw home sandboxed", async () => {
+  it("forwards host HOME for live Claude CLI runs while keeping Carapace home sandboxed", async () => {
     const hostHome = await tempDirs.makeTempDir("qa-host-home-");
 
     const env = buildQaRuntimeEnv({
@@ -856,11 +856,11 @@ describe("buildQaRuntimeEnv", () => {
     });
 
     expect(env.HOME).toBe(hostHome);
-    expect(env.OPENCLAW_HOME).toBe("/tmp/openclaw-qa/home");
-    expect(env.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-qa/state");
+    expect(env.CARAPACE_HOME).toBe("/tmp/carapace-qa/home");
+    expect(env.CARAPACE_STATE_DIR).toBe("/tmp/carapace-qa/state");
   });
 
-  it("can forward host HOME for browser-backed QA runs while keeping OpenClaw home sandboxed", async () => {
+  it("can forward host HOME for browser-backed QA runs while keeping Carapace home sandboxed", async () => {
     const hostHome = await tempDirs.makeTempDir("qa-host-home-");
 
     const env = buildQaRuntimeEnv({
@@ -872,8 +872,8 @@ describe("buildQaRuntimeEnv", () => {
     });
 
     expect(env.HOME).toBe(hostHome);
-    expect(env.OPENCLAW_HOME).toBe("/tmp/openclaw-qa/home");
-    expect(env.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-qa/state");
+    expect(env.CARAPACE_HOME).toBe("/tmp/carapace-qa/home");
+    expect(env.CARAPACE_STATE_DIR).toBe("/tmp/carapace-qa/state");
   });
 
   it("preserves the live Anthropic key for live Claude CLI runs without writing it into config", async () => {
@@ -882,8 +882,8 @@ describe("buildQaRuntimeEnv", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
         HOME: hostHome,
-        OPENCLAW_LIVE_ANTHROPIC_KEY: "anthropic-live",
-        OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV: '["SAFE_KEEP"]',
+        CARAPACE_LIVE_ANTHROPIC_KEY: "anthropic-live",
+        CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV: '["SAFE_KEEP"]',
       }),
       providerMode: "live-frontier",
       forwardHostHomeForClaudeCli: true,
@@ -891,8 +891,8 @@ describe("buildQaRuntimeEnv", () => {
     });
 
     expect(env.ANTHROPIC_API_KEY).toBe("anthropic-live");
-    expect(env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV).toBe('["SAFE_KEEP","ANTHROPIC_API_KEY"]');
-    expect(env.OPENCLAW_LIVE_CLI_BACKEND_AUTH_MODE).toBe("api-key");
+    expect(env.CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV).toBe('["SAFE_KEEP","ANTHROPIC_API_KEY"]');
+    expect(env.CARAPACE_LIVE_CLI_BACKEND_AUTH_MODE).toBe("api-key");
   });
 
   it("removes preserved Anthropic keys for live Claude CLI subscription runs", async () => {
@@ -902,7 +902,7 @@ describe("buildQaRuntimeEnv", () => {
       ...createParams({
         HOME: hostHome,
         ANTHROPIC_API_KEY: "anthropic-live",
-        OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV: '["SAFE_KEEP","ANTHROPIC_API_KEY"]',
+        CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV: '["SAFE_KEEP","ANTHROPIC_API_KEY"]',
       }),
       providerMode: "live-frontier",
       forwardHostHomeForClaudeCli: true,
@@ -910,42 +910,42 @@ describe("buildQaRuntimeEnv", () => {
     });
 
     expect(env.ANTHROPIC_API_KEY).toBe("anthropic-live");
-    expect(env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV).toBe('["SAFE_KEEP"]');
-    expect(env.OPENCLAW_LIVE_CLI_BACKEND_AUTH_MODE).toBe("subscription");
+    expect(env.CARAPACE_LIVE_CLI_BACKEND_PRESERVE_ENV).toBe('["SAFE_KEEP"]');
+    expect(env.CARAPACE_LIVE_CLI_BACKEND_AUTH_MODE).toBe("subscription");
   });
 
   it("does not pass QA setup-token values to the gateway child env", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_LIVE_SETUP_TOKEN_VALUE: `sk-ant-oat01-${"a".repeat(80)}`,
-        OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN: `sk-ant-oat01-${"b".repeat(80)}`,
+        CARAPACE_LIVE_SETUP_TOKEN_VALUE: `sk-ant-oat01-${"a".repeat(80)}`,
+        CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN: `sk-ant-oat01-${"b".repeat(80)}`,
       }),
       providerMode: "live-frontier",
     });
 
-    expect(env.OPENCLAW_LIVE_SETUP_TOKEN_VALUE).toBeUndefined();
-    expect(env.OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_LIVE_SETUP_TOKEN_VALUE).toBeUndefined();
+    expect(env.CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN).toBeUndefined();
   });
 
   it("does not pass credential broker or Telegram harness secrets to the gateway child env", () => {
     const env = buildQaRuntimeEnv({
       ...createParams({
-        OPENCLAW_QA_CONVEX_SECRET_CI: "convex-ci-secret",
-        OPENCLAW_QA_CONVEX_SECRET_MAINTAINER: "convex-maintainer-secret",
-        OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
-        OPENCLAW_QA_TELEGRAM_GROUP_ID: "-1001234567890",
-        OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
-        OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
+        CARAPACE_QA_CONVEX_SECRET_CI: "convex-ci-secret",
+        CARAPACE_QA_CONVEX_SECRET_MAINTAINER: "convex-maintainer-secret",
+        CARAPACE_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
+        CARAPACE_QA_TELEGRAM_GROUP_ID: "-1001234567890",
+        CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
+        CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
       }),
       providerMode: "live-frontier",
     });
 
-    expect(env.OPENCLAW_QA_CONVEX_SECRET_CI).toBeUndefined();
-    expect(env.OPENCLAW_QA_CONVEX_SECRET_MAINTAINER).toBeUndefined();
-    expect(env.OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_GROUP_ID).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_QA_CONVEX_SECRET_CI).toBeUndefined();
+    expect(env.CARAPACE_QA_CONVEX_SECRET_MAINTAINER).toBeUndefined();
+    expect(env.CARAPACE_QA_SUT_FORBIDDEN_SENTINEL).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_GROUP_ID).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN).toBeUndefined();
   });
 
   it("re-scrubs blocked credentials after runtime env patches", () => {
@@ -953,25 +953,25 @@ describe("buildQaRuntimeEnv", () => {
       ...createParams({ SAFE_VALUE: "base" }),
       runtimeEnvPatch: {
         SAFE_VALUE: "patched",
-        OPENCLAW_LIVE_SETUP_TOKEN_VALUE: "setup-token",
-        OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN: "anthropic-setup-token",
-        OPENCLAW_QA_CONVEX_SECRET_CI: "convex-ci-secret",
-        OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
-        OPENCLAW_QA_TELEGRAM_GROUP_ID: "-1001234567890",
-        OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
-        OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
+        CARAPACE_LIVE_SETUP_TOKEN_VALUE: "setup-token",
+        CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN: "anthropic-setup-token",
+        CARAPACE_QA_CONVEX_SECRET_CI: "convex-ci-secret",
+        CARAPACE_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
+        CARAPACE_QA_TELEGRAM_GROUP_ID: "-1001234567890",
+        CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
+        CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
         "BASH_FUNC_sudo%%": "() { printf imported; }",
       },
     });
 
     expect(env.SAFE_VALUE).toBe("patched");
-    expect(env.OPENCLAW_LIVE_SETUP_TOKEN_VALUE).toBeUndefined();
-    expect(env.OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN).toBeUndefined();
-    expect(env.OPENCLAW_QA_CONVEX_SECRET_CI).toBeUndefined();
-    expect(env.OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_GROUP_ID).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN).toBeUndefined();
-    expect(env.OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_LIVE_SETUP_TOKEN_VALUE).toBeUndefined();
+    expect(env.CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_QA_CONVEX_SECRET_CI).toBeUndefined();
+    expect(env.CARAPACE_QA_SUT_FORBIDDEN_SENTINEL).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_GROUP_ID).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN).toBeUndefined();
+    expect(env.CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN).toBeUndefined();
     expect(env["BASH_FUNC_sudo%%"]).toBeUndefined();
   });
 
@@ -1038,14 +1038,14 @@ describe("buildQaRuntimeEnv", () => {
       'const fs = require("node:fs");',
       "const env = {",
       "SAFE_VALUE: process.env.SAFE_VALUE,",
-      "OPENCLAW_LIVE_SETUP_TOKEN_VALUE: process.env.OPENCLAW_LIVE_SETUP_TOKEN_VALUE,",
-      "OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN: process.env.OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN,",
-      "OPENCLAW_QA_CONVEX_SECRET_CI: process.env.OPENCLAW_QA_CONVEX_SECRET_CI,",
-      "OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL: process.env.OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL,",
-      "OPENCLAW_QA_TELEGRAM_GROUP_ID: process.env.OPENCLAW_QA_TELEGRAM_GROUP_ID,",
-      "OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN: process.env.OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN,",
-      "OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: process.env.OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN,",
-      "OPENCLAW_DEV_SOURCE_ROOT: process.env.OPENCLAW_DEV_SOURCE_ROOT,",
+      "CARAPACE_LIVE_SETUP_TOKEN_VALUE: process.env.CARAPACE_LIVE_SETUP_TOKEN_VALUE,",
+      "CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN: process.env.CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN,",
+      "CARAPACE_QA_CONVEX_SECRET_CI: process.env.CARAPACE_QA_CONVEX_SECRET_CI,",
+      "CARAPACE_QA_SUT_FORBIDDEN_SENTINEL: process.env.CARAPACE_QA_SUT_FORBIDDEN_SENTINEL,",
+      "CARAPACE_QA_TELEGRAM_GROUP_ID: process.env.CARAPACE_QA_TELEGRAM_GROUP_ID,",
+      "CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN: process.env.CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN,",
+      "CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN: process.env.CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN,",
+      "CARAPACE_DEV_SOURCE_ROOT: process.env.CARAPACE_DEV_SOURCE_ROOT,",
       "};",
       `fs.writeFileSync(${JSON.stringify(observedEnvPath)}, JSON.stringify(env));`,
     ].join("\n");
@@ -1061,14 +1061,14 @@ describe("buildQaRuntimeEnv", () => {
         },
         runtimeEnvPatch: {
           SAFE_VALUE: "patched",
-          OPENCLAW_DEV_SOURCE_ROOT: "/repo/caller-override",
-          OPENCLAW_LIVE_SETUP_TOKEN_VALUE: "setup-token",
-          OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN: "anthropic-setup-token",
-          OPENCLAW_QA_CONVEX_SECRET_CI: "convex-ci-secret",
-          OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
-          OPENCLAW_QA_TELEGRAM_GROUP_ID: "-1001234567890",
-          OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
-          OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
+          CARAPACE_DEV_SOURCE_ROOT: "/repo/caller-override",
+          CARAPACE_LIVE_SETUP_TOKEN_VALUE: "setup-token",
+          CARAPACE_QA_LIVE_ANTHROPIC_SETUP_TOKEN: "anthropic-setup-token",
+          CARAPACE_QA_CONVEX_SECRET_CI: "convex-ci-secret",
+          CARAPACE_QA_SUT_FORBIDDEN_SENTINEL: "trusted-parent-only",
+          CARAPACE_QA_TELEGRAM_GROUP_ID: "-1001234567890",
+          CARAPACE_QA_TELEGRAM_DRIVER_BOT_TOKEN: "driver-token",
+          CARAPACE_QA_TELEGRAM_SUT_BOT_TOKEN: "sut-token",
         },
         transport: {
           requiredPluginIds: [],
@@ -1095,11 +1095,11 @@ describe("buildQaRuntimeEnv", () => {
       runnerPath,
       [
         'import fs from "node:fs";',
-        `fs.writeFileSync(${JSON.stringify(observedEnvPath)}, process.env.OPENCLAW_DEV_SOURCE_ROOT ?? "");`,
+        `fs.writeFileSync(${JSON.stringify(observedEnvPath)}, process.env.CARAPACE_DEV_SOURCE_ROOT ?? "");`,
       ].join("\n"),
       "utf8",
     );
-    vi.stubEnv("OPENCLAW_DEV_SOURCE_ROOT", "/repo/current-harness");
+    vi.stubEnv("CARAPACE_DEV_SOURCE_ROOT", "/repo/current-harness");
 
     const owner = ownGateway();
     await expect(
@@ -1125,7 +1125,7 @@ describe("buildQaRuntimeEnv", () => {
     const candidateRepoRoot = process.cwd();
     const captureScript = [
       'const fs = require("node:fs");',
-      `fs.writeFileSync(${JSON.stringify(observedEnvPath)}, process.env.OPENCLAW_DEV_SOURCE_ROOT ?? "");`,
+      `fs.writeFileSync(${JSON.stringify(observedEnvPath)}, process.env.CARAPACE_DEV_SOURCE_ROOT ?? "");`,
     ].join("\n");
 
     const owner = ownGateway();
@@ -1137,7 +1137,7 @@ describe("buildQaRuntimeEnv", () => {
           argsPrefix: ["--eval", captureScript],
         },
         runtimeEnvPatch: {
-          OPENCLAW_DEV_SOURCE_ROOT: "/repo/caller-override",
+          CARAPACE_DEV_SOURCE_ROOT: "/repo/caller-override",
         },
         transport: {
           requiredPluginIds: [],
@@ -1192,11 +1192,11 @@ describe("buildQaRuntimeEnv", () => {
           OPENAI_API_KEY: "openai-live",
           OPENAI_API_KEYS: "openai-a,openai-b",
           CODEX_HOME: "/host/.codex",
-          OPENCLAW_LIVE_ANTHROPIC_KEY: "anthropic-live",
-          OPENCLAW_LIVE_ANTHROPIC_KEYS: "anthropic-a,anthropic-b",
-          OPENCLAW_LIVE_CODEX_API_KEY: "codex-live",
-          OPENCLAW_LIVE_GEMINI_KEY: "gemini-live",
-          OPENCLAW_LIVE_OPENAI_KEY: "openai-live",
+          CARAPACE_LIVE_ANTHROPIC_KEY: "anthropic-live",
+          CARAPACE_LIVE_ANTHROPIC_KEYS: "anthropic-a,anthropic-b",
+          CARAPACE_LIVE_CODEX_API_KEY: "codex-live",
+          CARAPACE_LIVE_GEMINI_KEY: "gemini-live",
+          CARAPACE_LIVE_OPENAI_KEY: "openai-live",
         }),
         providerMode,
       });
@@ -1210,11 +1210,11 @@ describe("buildQaRuntimeEnv", () => {
       expect(env.GEMINI_API_KEY).toBeUndefined();
       expect(env.GEMINI_API_KEYS).toBeUndefined();
       expect(env.GOOGLE_API_KEY).toBeUndefined();
-      expect(env.OPENCLAW_LIVE_OPENAI_KEY).toBeUndefined();
-      expect(env.OPENCLAW_LIVE_ANTHROPIC_KEY).toBeUndefined();
-      expect(env.OPENCLAW_LIVE_ANTHROPIC_KEYS).toBeUndefined();
-      expect(env.OPENCLAW_LIVE_CODEX_API_KEY).toBeUndefined();
-      expect(env.OPENCLAW_LIVE_GEMINI_KEY).toBeUndefined();
+      expect(env.CARAPACE_LIVE_OPENAI_KEY).toBeUndefined();
+      expect(env.CARAPACE_LIVE_ANTHROPIC_KEY).toBeUndefined();
+      expect(env.CARAPACE_LIVE_ANTHROPIC_KEYS).toBeUndefined();
+      expect(env.CARAPACE_LIVE_CODEX_API_KEY).toBeUndefined();
+      expect(env.CARAPACE_LIVE_GEMINI_KEY).toBeUndefined();
     },
   );
 
@@ -1355,7 +1355,7 @@ describe("buildQaRuntimeEnv", () => {
       cfg: {},
       stateDir,
       env: {
-        OPENCLAW_LIVE_SETUP_TOKEN_VALUE: token,
+        CARAPACE_LIVE_SETUP_TOKEN_VALUE: token,
       },
     });
 
@@ -1411,7 +1411,7 @@ describe("buildQaRuntimeEnv", () => {
       stateDir,
       providerIds: ["openai"],
       env: {
-        OPENCLAW_LIVE_CODEX_API_KEY: "qa-live-direct-codex-key",
+        CARAPACE_LIVE_CODEX_API_KEY: "qa-live-direct-codex-key",
       },
     });
 
@@ -1428,7 +1428,7 @@ describe("buildQaRuntimeEnv", () => {
         cfg,
         providerIds: ["openai"],
         env: {
-          OPENCLAW_LIVE_CODEX_API_KEY: "qa-live-direct-codex-key",
+          CARAPACE_LIVE_CODEX_API_KEY: "qa-live-direct-codex-key",
         },
         readCodexCredentials: () => null,
       }),
@@ -1441,7 +1441,7 @@ describe("buildQaRuntimeEnv", () => {
         cfg: {},
         providerIds: ["openai"],
         env: {
-          CODEX_HOME: path.join(os.tmpdir(), "missing-openclaw-codex-home"),
+          CODEX_HOME: path.join(os.tmpdir(), "missing-carapace-codex-home"),
         },
         readCodexCredentials: () => null,
       }),
@@ -1463,7 +1463,7 @@ describe("buildQaRuntimeEnv", () => {
         },
         providerIds: ["openai"],
         env: {
-          CODEX_HOME: path.join(os.tmpdir(), "missing-openclaw-codex-home"),
+          CODEX_HOME: path.join(os.tmpdir(), "missing-carapace-codex-home"),
         },
         readCodexCredentials: () => null,
       }),
@@ -1476,8 +1476,8 @@ describe("buildQaRuntimeEnv", () => {
         cfg: {},
         providerIds: ["openai"],
         env: {
-          CODEX_HOME: path.join(os.tmpdir(), "missing-openclaw-codex-home"),
-          OPENCLAW_QA_FORCE_RUNTIME: "codex",
+          CODEX_HOME: path.join(os.tmpdir(), "missing-carapace-codex-home"),
+          CARAPACE_QA_FORCE_RUNTIME: "codex",
         },
         readCodexCredentials: () => null,
       }),
@@ -1490,8 +1490,8 @@ describe("buildQaRuntimeEnv", () => {
         cfg: {},
         providerIds: ["openai"],
         env: {
-          OPENCLAW_LIVE_OPENAI_KEY: "qa-live-codex-fallback-key",
-          OPENCLAW_QA_FORCE_RUNTIME: "codex",
+          CARAPACE_LIVE_OPENAI_KEY: "qa-live-codex-fallback-key",
+          CARAPACE_QA_FORCE_RUNTIME: "codex",
         },
         readCodexCredentials: () => null,
       }),
@@ -1543,7 +1543,7 @@ describe("buildQaRuntimeEnv", () => {
   it("stages configured OpenAI env secret refs for default OpenAI live QA runs", async () => {
     const stateDir = await tempDirs.makeTempDir("qa-live-codex-config-ref-state-");
     const env = {
-      OPENCLAW_LIVE_CODEX_API_KEY: "qa-configured-env-ref-not-a-real-key",
+      CARAPACE_LIVE_CODEX_API_KEY: "qa-configured-env-ref-not-a-real-key",
     };
     const cfg = await stageQaLiveApiKeyProfiles({
       cfg: {
@@ -1555,7 +1555,7 @@ describe("buildQaRuntimeEnv", () => {
               apiKey: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_LIVE_CODEX_API_KEY",
+                id: "CARAPACE_LIVE_CODEX_API_KEY",
               },
             },
           },
@@ -1593,7 +1593,7 @@ describe("buildQaRuntimeEnv", () => {
             openai: {
               baseUrl: "",
               models: [],
-              apiKey: "OPENCLAW_LIVE_CODEX_API_KEY",
+              apiKey: "CARAPACE_LIVE_CODEX_API_KEY",
             },
           },
         },
@@ -1601,7 +1601,7 @@ describe("buildQaRuntimeEnv", () => {
       stateDir,
       providerIds: ["openai"],
       env: {
-        OPENCLAW_LIVE_CODEX_API_KEY: "qa-configured-marker-not-a-real-key",
+        CARAPACE_LIVE_CODEX_API_KEY: "qa-configured-marker-not-a-real-key",
       },
     });
 
@@ -1777,7 +1777,7 @@ describe("buildQaRuntimeEnv", () => {
       for (const record of authRecords) {
         expect(record.stdin).toMatch(/^sk-qa-mock-[a-f0-9]{32}\n$/u);
         expect(record.env).toMatchObject({
-          OPENCLAW_CLI: "1",
+          CARAPACE_CLI: "1",
         });
         expect(record.configMode).toBe(0o600);
         expect(record.configRegular).toBe(true);
@@ -1791,7 +1791,7 @@ describe("buildQaRuntimeEnv", () => {
       const authConfigPaths = authRecords.map((record) => String(record.configPath));
       expect(new Set(authConfigPaths).size).toBe(1);
       expect(authConfigPaths[0]).toBe(
-        path.join(String(authRecords[0]?.stateDir), "qa-auth-bootstrap", "openclaw.json"),
+        path.join(String(authRecords[0]?.stateDir), "qa-auth-bootstrap", "carapace.json"),
       );
       expect(records.at(-1)).toMatchObject({
         kind: "gateway",
@@ -1835,7 +1835,7 @@ describe("buildQaRuntimeEnv", () => {
       const recordPath = path.join(fixtureRoot, "commands.jsonl");
       const fixturePath = await writePackagedGatewayFixture(fixtureRoot);
       await mkdir(tempParentDir);
-      const mutateConfig = vi.fn((cfg: OpenClawConfig) => cfg);
+      const mutateConfig = vi.fn((cfg: CarapaceConfig) => cfg);
       const owner = ownGateway();
       await expect(
         owner.start({
@@ -1918,8 +1918,8 @@ describe("buildQaRuntimeEnv", () => {
         ? `installed package mock auth bootstrap failed for ${provider}: `
         : `installed package plugin setup failed (update repair${phase === "help" ? " --help" : ""}): `;
       const detail = provider
-        ? "OpenClaw CLI exited 9: Authorization: Bearer <redacted>"
-        : "OpenClaw CLI exited 8: plugin fixture rejected: Authorization: Bearer <redacted>";
+        ? "Carapace CLI exited 9: Authorization: Bearer <redacted>"
+        : "Carapace CLI exited 8: plugin fixture rejected: Authorization: Bearer <redacted>";
       expect(error.message).toContain(`${prefix}${detail}\ncontext retained\n`);
       expect(error.cause.message.length).toBeLessThanOrEqual(prefix.length + 2_048);
       expect(error.cause.message).not.toContain("diagnostic ".repeat(400));
@@ -1984,7 +1984,7 @@ describe("buildQaRuntimeEnv", () => {
 
     // The main agent's canonical database should not exist because it was not requested.
     await expect(
-      lstat(path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite")),
+      lstat(path.join(stateDir, "agents", "main", "agent", "carapace-agent.sqlite")),
     ).rejects.toThrow(/ENOENT/);
   });
 
@@ -2187,7 +2187,7 @@ describe("buildQaRuntimeEnv", () => {
       "bind-collision",
     ],
     [
-      "OpenClaw plugin migration inputs changed during startup convergence; refusing to report the gateway ready. Restart OpenClaw so state migrations run against the final config and plugin inventory.",
+      "Carapace plugin migration inputs changed during startup convergence; refusing to report the gateway ready. Restart Carapace so state migrations run against the final config and plugin inventory.",
       "migration-convergence-restart",
     ],
   ] as const)("classifies %s", (details, expectedKind) => {
@@ -2201,9 +2201,9 @@ describe("buildQaRuntimeEnv", () => {
   });
 
   it.each([
-    "OpenClaw startup migrations did not complete cleanly; refusing to report the gateway ready.",
-    "OpenClaw plugin migration inputs changed during startup convergence",
-    "Restart OpenClaw so state migrations can continue.",
+    "Carapace startup migrations did not complete cleanly; refusing to report the gateway ready.",
+    "Carapace plugin migration inputs changed during startup convergence",
+    "Restart Carapace so state migrations can continue.",
     "gateway failed to become healthy",
   ])("does not retry unrelated startup failure: %s", (details) => {
     expect(
@@ -2219,7 +2219,7 @@ describe("buildQaRuntimeEnv", () => {
     const first = resolveQaGatewayStartupRetry({
       attempt: 1,
       details:
-        "OpenClaw plugin migration inputs changed during startup convergence; refusing readiness.",
+        "Carapace plugin migration inputs changed during startup convergence; refusing readiness.",
       migrationConvergenceRestartUsed: false,
     });
 
@@ -2232,7 +2232,7 @@ describe("buildQaRuntimeEnv", () => {
       resolveQaGatewayStartupRetry({
         attempt: 2,
         details:
-          "OpenClaw plugin migration inputs changed during startup convergence; refusing readiness.",
+          "Carapace plugin migration inputs changed during startup convergence; refusing readiness.",
         migrationConvergenceRestartUsed: first?.migrationConvergenceRestartUsed ?? false,
       }),
     ).toBeNull();
@@ -2289,11 +2289,11 @@ describe("buildQaRuntimeEnv", () => {
     await writeFile(
       stdoutLogPath,
       [
-        "OPENCLAW_GATEWAY_TOKEN=qa-suite-token",
+        "CARAPACE_GATEWAY_TOKEN=qa-suite-token",
         'OPENAI_API_KEY="openai-live"',
-        "OPENCLAW_QA_CONVEX_SECRET_CI=convex-ci-secret",
-        "OPENCLAW_QA_CONVEX_SECRET_MAINTAINER=convex-maintainer-secret",
-        "OPENCLAW_LIVE_CODEX_API_KEY=codex-live-secret",
+        "CARAPACE_QA_CONVEX_SECRET_CI=convex-ci-secret",
+        "CARAPACE_QA_CONVEX_SECRET_MAINTAINER=convex-maintainer-secret",
+        "CARAPACE_LIVE_CODEX_API_KEY=codex-live-secret",
         "botToken=12345:AbCdEfGhIjKl",
         "--botToken=12345:flag-secret",
         '"driverToken":"12345:driver-secr3t"',
@@ -2334,11 +2334,11 @@ describe("buildQaRuntimeEnv", () => {
     ]);
     await expect(readFile(path.join(artifactDir, "gateway.stdout.log"), "utf8")).resolves.toBe(
       [
-        "OPENCLAW_GATEWAY_TOKEN=<redacted>",
+        "CARAPACE_GATEWAY_TOKEN=<redacted>",
         "OPENAI_API_KEY=<redacted>",
-        "OPENCLAW_QA_CONVEX_SECRET_CI=<redacted>",
-        "OPENCLAW_QA_CONVEX_SECRET_MAINTAINER=<redacted>",
-        "OPENCLAW_LIVE_CODEX_API_KEY=<redacted>",
+        "CARAPACE_QA_CONVEX_SECRET_CI=<redacted>",
+        "CARAPACE_QA_CONVEX_SECRET_MAINTAINER=<redacted>",
+        "CARAPACE_LIVE_CODEX_API_KEY=<redacted>",
         "botToken=<redacted>",
         "--botToken=<redacted>",
         '"driverToken":"<redacted>"',
@@ -2374,7 +2374,7 @@ describe("qa bundled plugin dir", () => {
       path.join(repoRoot, "package.json"),
       JSON.stringify(
         {
-          name: "openclaw",
+          name: "carapace",
           type: "module",
           exports: {
             "./plugin-sdk/account-id": {
@@ -2401,13 +2401,13 @@ describe("qa bundled plugin dir", () => {
     );
     await writeFile(
       path.join(repoRoot, "dist", "extensions", "qa-channel", "package.json"),
-      JSON.stringify({ name: "@openclaw/qa-channel", type: "module" }, null, 2),
+      JSON.stringify({ name: "@carapace/qa-channel", type: "module" }, null, 2),
       "utf8",
     );
     await writeFile(
       path.join(repoRoot, "dist", "extensions", "qa-channel", "index.js"),
       [
-        'import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";',
+        'import { normalizeAccountId } from "carapace/plugin-sdk/account-id";',
         'export const accountId = normalizeAccountId("QA");',
         "",
       ].join("\n"),
@@ -2415,7 +2415,7 @@ describe("qa bundled plugin dir", () => {
     );
     await mkdir(path.join(repoRoot, "extensions", "qa-channel"), { recursive: true });
     await writeFile(
-      path.join(repoRoot, "extensions", "qa-channel", "openclaw.plugin.json"),
+      path.join(repoRoot, "extensions", "qa-channel", "carapace.plugin.json"),
       JSON.stringify({
         id: "qa-channel",
         toolMetadata: { qa_read: { replaySafe: true } },
@@ -2450,14 +2450,14 @@ describe("qa bundled plugin dir", () => {
       path.join(repoRoot, ".artifacts", "qa-runtime", path.basename(tempRoot)),
     );
     await expect(readFile(path.join(stagedRoot, "package.json"), "utf8")).resolves.toContain(
-      '"name": "openclaw"',
+      '"name": "carapace"',
     );
     const qaChannel = (await import(
       `${pathToFileURL(path.join(bundledPluginsDir, "qa-channel", "index.js")).href}?t=${Date.now()}`
     )) as { accountId: string };
     expect(qaChannel.accountId).toBe("qa");
     await expect(
-      readFile(path.join(bundledPluginsDir, "qa-channel", "openclaw.plugin.json"), "utf8"),
+      readFile(path.join(bundledPluginsDir, "qa-channel", "carapace.plugin.json"), "utf8"),
     ).resolves.toContain('"replaySafe":true');
     expect((await lstat(path.join(bundledPluginsDir, "qa-channel"))).isDirectory()).toBe(true);
     expect((await lstat(path.join(bundledPluginsDir, "memory-core"))).isDirectory()).toBe(true);
@@ -2485,7 +2485,7 @@ describe("qa bundled plugin dir", () => {
     const repoRoot = await tempDirs.makeTempDir("qa-bundled-mixed-runtime-");
     await writeFile(
       path.join(repoRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", type: "module" }, null, 2),
+      JSON.stringify({ name: "carapace", type: "module" }, null, 2),
       "utf8",
     );
     await mkdir(path.join(repoRoot, "dist"), { recursive: true });
@@ -2504,7 +2504,7 @@ describe("qa bundled plugin dir", () => {
     );
     await writeFile(
       path.join(repoRoot, "dist-runtime", "extensions", "runtime-only", "package.json"),
-      JSON.stringify({ name: "@openclaw/runtime-only", type: "module" }, null, 2),
+      JSON.stringify({ name: "@carapace/runtime-only", type: "module" }, null, 2),
       "utf8",
     );
     await writeFile(
@@ -2555,7 +2555,7 @@ describe("qa bundled plugin dir", () => {
     const repoRoot = await tempDirs.makeTempDir("qa-bundled-invalid-id-");
     await writeFile(
       path.join(repoRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", type: "module" }, null, 2),
+      JSON.stringify({ name: "carapace", type: "module" }, null, 2),
       "utf8",
     );
     const tempRoot = await tempDirs.makeTempDir("qa-bundled-invalid-target-");
@@ -2573,7 +2573,7 @@ describe("qa bundled plugin dir", () => {
     const repoRoot = await tempDirs.makeTempDir("qa-bundled-external-id-");
     await writeFile(
       path.join(repoRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", type: "module" }, null, 2),
+      JSON.stringify({ name: "carapace", type: "module" }, null, 2),
       "utf8",
     );
     const tempRoot = await tempDirs.makeTempDir("qa-bundled-external-target-");
@@ -2594,7 +2594,7 @@ describe("qa bundled plugin dir", () => {
       path.join(repoRoot, "package.json"),
       JSON.stringify(
         {
-          name: "openclaw",
+          name: "carapace",
           type: "module",
           exports: {
             "./plugin-sdk/account-id": {
@@ -2616,13 +2616,13 @@ describe("qa bundled plugin dir", () => {
     await mkdir(path.join(repoRoot, "extensions", "qa-channel"), { recursive: true });
     await writeFile(
       path.join(repoRoot, "extensions", "qa-channel", "package.json"),
-      JSON.stringify({ name: "@openclaw/qa-channel", type: "module" }, null, 2),
+      JSON.stringify({ name: "@carapace/qa-channel", type: "module" }, null, 2),
       "utf8",
     );
     await writeFile(
       path.join(repoRoot, "extensions", "qa-channel", "index.ts"),
       [
-        'import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";',
+        'import { normalizeAccountId } from "carapace/plugin-sdk/account-id";',
         'import { marker } from "fake-dep";',
         'export const accountId = `${normalizeAccountId("QA")}:${marker}`;',
         "",
@@ -2681,7 +2681,7 @@ describe("qa bundled plugin dir", () => {
   it("maps cli backend provider ids to their owning bundled plugin ids", async () => {
     const repoRoot = await tempDirs.makeTempDir("qa-plugin-owner-");
     await writeJsonFixture(
-      path.join(repoRoot, "dist", "extensions", "openai", "openclaw.plugin.json"),
+      path.join(repoRoot, "dist", "extensions", "openai", "carapace.plugin.json"),
       {
         id: "openai",
         providers: ["openai", "openai"],
@@ -2700,7 +2700,7 @@ describe("qa bundled plugin dir", () => {
   it("maps configured OpenAI Responses provider aliases to the OpenAI plugin", async () => {
     const repoRoot = await tempDirs.makeTempDir("qa-plugin-owner-");
     await writeJsonFixture(
-      path.join(repoRoot, "dist", "extensions", "openai", "openclaw.plugin.json"),
+      path.join(repoRoot, "dist", "extensions", "openai", "carapace.plugin.json"),
       {
         id: "openai",
         providers: ["openai"],
@@ -2765,7 +2765,7 @@ describe("qa bundled plugin dir", () => {
 
     const overrides = await readQaLiveProviderConfigOverrides({
       providerIds: ["custom-openai"],
-      env: { OPENCLAW_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
+      env: { CARAPACE_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
     });
     expect(Object.keys(overrides)).toEqual(["custom-openai"]);
     expect(overrides["custom-openai"]?.baseUrl).toBe("https://api.example.test/v1");
@@ -2779,7 +2779,7 @@ describe("qa bundled plugin dir", () => {
           openai: {
             apiKey: {
               source: "env",
-              id: "OPENCLAW_LIVE_CODEX_API_KEY",
+              id: "CARAPACE_LIVE_CODEX_API_KEY",
             },
           },
         },
@@ -2788,14 +2788,14 @@ describe("qa bundled plugin dir", () => {
 
     const overrides = await readQaLiveProviderConfigOverrides({
       providerIds: ["openai"],
-      env: { OPENCLAW_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
+      env: { CARAPACE_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
     });
     expect(Object.keys(overrides)).toEqual(["openai"]);
     expect(overrides["openai"]).not.toHaveProperty("baseUrl");
     expect(overrides["openai"]?.models).toEqual([]);
     expect(overrides["openai"]?.apiKey).toEqual({
       source: "env",
-      id: "OPENCLAW_LIVE_CODEX_API_KEY",
+      id: "CARAPACE_LIVE_CODEX_API_KEY",
     });
   });
 
@@ -2814,7 +2814,7 @@ describe("qa bundled plugin dir", () => {
 
     const overrides = await readQaLiveProviderConfigOverrides({
       providerIds: ["openai"],
-      env: { OPENCLAW_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
+      env: { CARAPACE_QA_LIVE_PROVIDER_CONFIG_PATH: configPath },
     });
     expect(Object.keys(overrides)).toEqual(["openai"]);
     expect(overrides["openai"]).not.toHaveProperty("baseUrl");
@@ -2826,11 +2826,11 @@ describe("qa bundled plugin dir", () => {
     await writeJsonFixture(path.join(repoRoot, "package.json"), { version: "2026.4.7-1" });
     const bundledRoot = path.join(repoRoot, "extensions");
     await writeJsonFixture(path.join(bundledRoot, "qa-channel", "package.json"), {
-      openclaw: { install: { minHostVersion: ">=2026.4.8" } },
+      carapace: { install: { minHostVersion: ">=2026.4.8" } },
     });
 
     await writeJsonFixture(path.join(bundledRoot, "memory-core", "package.json"), {
-      openclaw: { install: { minHostVersion: ">=2026.4.7" } },
+      carapace: { install: { minHostVersion: ">=2026.4.7" } },
     });
 
     await expect(
@@ -2846,10 +2846,10 @@ describe("qa bundled plugin dir", () => {
     await writeJsonFixture(path.join(repoRoot, "package.json"), { version: "2026.4.7-1" });
     const bundledRoot = path.join(repoRoot, "extensions");
     await writeJsonFixture(path.join(bundledRoot, "qa-channel", "package.json"), {
-      openclaw: { install: { minHostVersion: ">=2026.4.8" } },
+      carapace: { install: { minHostVersion: ">=2026.4.8" } },
     });
     await writeJsonFixture(path.join(bundledRoot, "image-generation-core", "package.json"), {
-      openclaw: { install: { minHostVersion: ">=2026.4.9" } },
+      carapace: { install: { minHostVersion: ">=2026.4.9" } },
     });
 
     await expect(

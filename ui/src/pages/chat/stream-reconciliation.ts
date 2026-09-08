@@ -1,13 +1,13 @@
 import {
   readAssistantStreamSegmentIdentity,
   readSessionMessageIdentity,
-} from "@openclaw/gateway-client/browser";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@carapace/gateway-client/browser";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   accumulatedStreamText,
   advanceAccumulatedStreamText,
@@ -147,7 +147,7 @@ function buildAssistantStreamMessage(
     role: "assistant",
     content: [{ type: "text", text: stream }],
     timestamp,
-    openclawStreamFallback: {
+    carapaceStreamFallback: {
       replacementText,
       source,
       ...(itemId ? { itemId } : {}),
@@ -158,7 +158,7 @@ function buildAssistantStreamMessage(
 }
 
 function streamFallbackMetadata(message: unknown): Record<string, unknown> | null {
-  const metadata = asNullableRecord(asNullableRecord(message)?.openclawStreamFallback);
+  const metadata = asNullableRecord(asNullableRecord(message)?.carapaceStreamFallback);
   return metadata;
 }
 

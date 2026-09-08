@@ -176,12 +176,12 @@ process.exitCode = result.status ?? 1;
         "--tsBuildInfoFile",
         ".artifacts/should-not-exist.tsbuildinfo",
       ],
-      { env: { ...process.env, OPENCLAW_TSGO_SPARSE_SKIP: "1" } },
+      { env: { ...process.env, CARAPACE_TSGO_SPARSE_SKIP: "1" } },
     );
     expect(result.error).toBeUndefined();
     expect(result.status, result.stdout + result.stderr).toBe(0);
     expect(result.stderr).toContain("skipping sparse-missing project");
-    expect(result.stderr).toContain("OPENCLAW_TSGO_SPARSE_SKIP=1");
+    expect(result.stderr).toContain("CARAPACE_TSGO_SPARSE_SKIP=1");
     expect(
       fs.lstatSync(path.join(root, "node_modules"), { throwIfNoEntry: false }),
     ).toBeUndefined();

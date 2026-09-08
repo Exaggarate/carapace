@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
-import { resolvePreferredOpenClawTmpDir } from "../../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../../infra/tmp-carapace-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabase,
+} from "../../../state/carapace-state-db.js";
 import { getTaskById } from "../../../tasks/runtime-internal.js";
 import type { TaskRecord } from "../../../tasks/task-registry.types.js";
 import { resetTaskRegistryForTests } from "../../../tasks/task-runtime.test-helpers.js";
@@ -24,22 +24,22 @@ vi.mock("../registry/subagent-registry.js", () => ({ resumeSubagentRun }));
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("subagent completion recovery identity", () => {
-  let database: OpenClawStateDatabase;
+  let database: CarapaceStateDatabase;
 
   beforeEach(() => {
     const tempDir = tempDirs.make(
-      "openclaw-completion-recovery-",
-      resolvePreferredOpenClawTmpDir(),
+      "carapace-completion-recovery-",
+      resolvePreferredCarapaceTmpDir(),
     );
-    vi.stubEnv("OPENCLAW_STATE_DIR", tempDir);
-    database = openOpenClawStateDatabase();
+    vi.stubEnv("CARAPACE_STATE_DIR", tempDir);
+    database = openCarapaceStateDatabase();
     resumeSubagentRun.mockClear();
   });
 
   afterEach(() => {
     subagentRuns.clear();
     resetTaskRegistryForTests({ persist: false });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     vi.unstubAllEnvs();
   });
 

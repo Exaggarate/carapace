@@ -1,6 +1,6 @@
-import type { IdentifierAuthentication } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { asNonArrayRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { IdentifierAuthentication } from "carapace/plugin-sdk/channel-ingress-runtime";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
+import { asNonArrayRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const SENDER_STRENGTHS = [
   "mutable",
@@ -8,7 +8,7 @@ const SENDER_STRENGTHS = [
   "asserted",
   "verified",
 ] as const satisfies readonly IdentifierAuthentication[];
-type HookDispatch = OpenClawPluginApi["runtime"]["hooks"]["dispatchHookAgentTurn"];
+type HookDispatch = CarapacePluginApi["runtime"]["hooks"]["dispatchHookAgentTurn"];
 
 export type ImapAccountConfig = {
   host: string;

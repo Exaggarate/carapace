@@ -1,5 +1,5 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveEnvironmentValue } from "../../infra/process-env.js";
 import { createWindowsOutputDecoder } from "../../infra/windows-encoding.js";
 import { getWindowsCmdExePath } from "../../infra/windows-install-roots.js";

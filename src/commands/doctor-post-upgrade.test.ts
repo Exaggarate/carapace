@@ -10,9 +10,9 @@ import { resolveInstalledPluginIndexStorePath } from "../plugins/installed-plugi
 import type { InstalledPluginIndex } from "../plugins/installed-plugin-index.js";
 import { clearPluginMetadataLifecycleCaches } from "../plugins/plugin-metadata-lifecycle.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { VERSION } from "../version.js";
 import { runPostUpgradeProbes } from "./doctor-post-upgrade.js";
 
@@ -22,7 +22,7 @@ async function makeFixtureRoot(prefix: string): Promise<string> {
 
 async function cleanupFixtureRoot(root: string): Promise<void> {
   clearPluginMetadataLifecycleCaches();
-  closeOpenClawStateDatabaseByPath(resolveInstalledPluginIndexStorePath({ stateDir: root }));
+  closeCarapaceStateDatabaseByPath(resolveInstalledPluginIndexStorePath({ stateDir: root }));
   await fs.rm(root, { recursive: true, force: true });
 }
 
@@ -45,14 +45,14 @@ function createIndex(
 
 function writeRawIndexFixture(root: string, valueJson: string): void {
   // Keep malformed JSON bytes intact so the canonical row parser owns rejection.
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       db.prepare(
         `INSERT OR REPLACE INTO config_machine_state (state_key, value_json, updated_at_ms)
          VALUES ('plugins.installedIndex', ?, 1)`,
       ).run(valueJson);
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: root } },
+    { env: { ...process.env, CARAPACE_STATE_DIR: root } },
   );
 }
 
@@ -97,7 +97,7 @@ async function writePluginFixture(
       "utf-8",
     );
   }
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const manifestPath = path.join(pluginDir, "carapace.plugin.json");
   if (params.manifest !== false) {
     await fs.writeFile(manifestPath, JSON.stringify(params.manifest ?? { id: params.id }), "utf-8");
   }
@@ -215,7 +215,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           code: "plugin.entry_unresolved",
           plugin: "broken",
           entry: "missing-package.json",
-          message: expect.stringContaining("openclaw plugins registry --refresh"),
+          message: expect.stringContaining("carapace plugins registry --refresh"),
         }),
       ]);
       const line = stderrSpy.mock.calls.map(([value]) => String(value)).join("");
@@ -245,7 +245,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           code: "plugin.entry_unresolved",
           plugin: "broken",
           entry: "package.json",
-          message: expect.stringContaining("openclaw plugins registry --refresh"),
+          message: expect.stringContaining("carapace plugins registry --refresh"),
         }),
       ]);
       expect(stderrSpy).toHaveBeenCalled();
@@ -286,30 +286,30 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
   it.each([
     {
       label: "non-object metadata",
-      openclaw: "invalid",
-      reason: "package.json openclaw must be an object",
+      carapace: "invalid",
+      reason: "package.json carapace must be an object",
     },
     {
       label: "non-array entries",
-      openclaw: { extensions: "./dist/index.js" },
-      reason: "package.json openclaw.extensions must be an array",
+      carapace: { extensions: "./dist/index.js" },
+      reason: "package.json carapace.extensions must be an array",
     },
     {
       label: "blank entries",
-      openclaw: { extensions: ["  "] },
-      reason: "package.json openclaw.extensions[0] must be a non-empty string",
+      carapace: { extensions: ["  "] },
+      reason: "package.json carapace.extensions[0] must be a non-empty string",
     },
     {
       label: "non-string entries",
-      openclaw: { extensions: [42] },
-      reason: "package.json openclaw.extensions[0] must be a non-empty string",
+      carapace: { extensions: [42] },
+      reason: "package.json carapace.extensions[0] must be a non-empty string",
     },
   ])(
     "reports $label through the canonical package contract",
-    async ({ label, openclaw, reason }) => {
+    async ({ label, carapace, reason }) => {
       const root = await makeFixtureRoot(`entry-invalid-${label.replaceAll(" ", "-")}`);
       try {
-        await writeDeclaredPackageFixture(root, JSON.stringify({ name: "broken", openclaw }));
+        await writeDeclaredPackageFixture(root, JSON.stringify({ name: "broken", carapace }));
         const report = await runPostUpgradeProbes({ stateDir: root });
 
         expect(report.findings).toEqual([
@@ -335,7 +335,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "sqlite-ghost",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          carapace: { extensions: ["./dist/index.js"] },
         },
         manifestHash: "manifest-hash",
       });
@@ -359,7 +359,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ghost",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          carapace: { extensions: ["./dist/index.js"] },
         },
       });
 
@@ -380,7 +380,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "good",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          carapace: { extensions: ["./dist/index.js"] },
         },
         files: { "dist/index.js": "export default {};" },
       });
@@ -412,7 +412,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "legacy-package",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          carapace: { extensions: ["./src/index.ts"] },
         },
         files: { "src/index.ts": "export default {};" },
         includePackageJsonRecord: false,
@@ -438,7 +438,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "escape",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["../outside/leak.js"] },
+          carapace: { extensions: ["../outside/leak.js"] },
         },
       });
 
@@ -460,7 +460,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-dist",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          carapace: { extensions: ["./src/index.ts"] },
         },
         files: {
           "src/index.ts": "export default {};",
@@ -482,7 +482,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-only",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          carapace: { extensions: ["./src/index.ts"] },
         },
         files: { "src/index.ts": "export default {};" },
       });
@@ -509,7 +509,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-source",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          carapace: { extensions: ["./src/index.ts"] },
         },
         files: { "src/index.ts": "export default {};" },
       });
@@ -529,7 +529,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-packaged",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          carapace: { extensions: ["./src/index.ts"] },
         },
         files: { "src/index.ts": "export default {};" },
       });
@@ -550,7 +550,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "len-mismatch",
           version: "0.0.1",
           type: "module",
-          openclaw: {
+          carapace: {
             extensions: ["./dist/a.js", "./dist/b.js"],
             runtimeExtensions: ["./dist/a.js"],
           },
@@ -580,7 +580,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "runtime-only",
           version: "0.0.1",
           type: "module",
-          openclaw: {
+          carapace: {
             extensions: ["./src/index.ts"],
             runtimeExtensions: ["./dist/index.js"],
           },
@@ -606,7 +606,7 @@ describe("runPostUpgradeProbes — plugin.manifest_drift", () => {
           name: "drifted",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          carapace: { extensions: ["./dist/index.js"] },
         },
         files: { "dist/index.js": "export default {};" },
         manifest: { id: "drifted", version: 2 },
@@ -651,12 +651,12 @@ describe("runPostUpgradeProbes — plugin.version_drift", () => {
       await writePluginFixture(root, {
         id,
         enabled,
-        packageJson: { name: `@openclaw/${id}`, version, openclaw: { extensions: ["./index.js"] } },
+        packageJson: { name: `@carapace/${id}`, version, carapace: { extensions: ["./index.js"] } },
         files: { "index.js": "export default {};" },
         installRecord: {
           source: "npm",
-          spec: `@openclaw/${id}@latest`,
-          resolvedName: `@openclaw/${id}`,
+          spec: `@carapace/${id}@latest`,
+          resolvedName: `@carapace/${id}`,
           resolvedVersion: version,
         },
       });
@@ -669,7 +669,7 @@ describe("runPostUpgradeProbes — plugin.version_drift", () => {
                 code: "plugin.version_drift",
                 level: "warn",
                 plugin: id,
-                message: expect.stringContaining(`openclaw plugins update ${id}`),
+                message: expect.stringContaining(`carapace plugins update ${id}`),
               }),
             ]
           : [],

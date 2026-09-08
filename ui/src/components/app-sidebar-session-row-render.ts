@@ -371,7 +371,7 @@ export function renderRecentSession(params: {
           <span class="sidebar-recent-session__details">
             ${renderSidebarSessionSubtitle({ subtitle, narration })}
             <span class="sidebar-recent-session__details-endcap">
-              <openclaw-viewer-facepile
+              <carapace-viewer-facepile
                 .presencePayload=${host.sessionData.presencePayload}
                 .selfUser=${host.sessionDataContext?.gateway.snapshot.selfUser}
                 .selfInstanceId=${host.sessionData.presenceInstanceId}
@@ -379,7 +379,7 @@ export function renderRecentSession(params: {
                 .excludeIdentities=${renderedIdentities ?? []}
                 .maxVisible=${3}
                 variant="session"
-              ></openclaw-viewer-facepile>
+              ></carapace-viewer-facepile>
               ${renderSessionRowBadges({
                 isChild: session.isChild,
                 incognito: session.incognito,
@@ -409,14 +409,14 @@ export function renderRecentSession(params: {
                       >${
                         session.runtimeMs != null
                           ? session.hasActiveRun
-                            ? html`<openclaw-elapsed-time
+                            ? html`<carapace-elapsed-time
                                 .startMs=${session.runtimeSampledAt! - session.runtimeMs}
-                              ></openclaw-elapsed-time>`
+                              ></carapace-elapsed-time>`
                             : (formatDurationCompact(session.runtimeMs) ?? "0ms")
-                          : html`<openclaw-elapsed-time
+                          : html`<carapace-elapsed-time
                               .startMs=${session.startedAt!}
                               .endMs=${session.endedAt ?? null}
-                            ></openclaw-elapsed-time>`
+                            ></carapace-elapsed-time>`
                       }</span
                     >`
                   : nothing
@@ -481,7 +481,7 @@ export function renderRecentSession(params: {
                   ${icons.pin}
                 </button>`
           }
-          <openclaw-tooltip .content=${menuTooltip} .describe=${false} .disabled=${menuOpen}>
+          <carapace-tooltip .content=${menuTooltip} .describe=${false} .disabled=${menuOpen}>
             <button
               class="session-action"
               data-session-menu="true"
@@ -497,7 +497,7 @@ export function renderRecentSession(params: {
             >
               ${icons.moreHorizontal}
             </button>
-          </openclaw-tooltip>
+          </carapace-tooltip>
         </span>
       </span>
     </div>

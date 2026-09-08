@@ -1,4 +1,4 @@
-import { dispatchReplyWithBufferedBlockDispatcher as dispatchReplyWithBufferedBlockDispatcherRuntime } from "openclaw/plugin-sdk/reply-dispatch-runtime";
+import { dispatchReplyWithBufferedBlockDispatcher as dispatchReplyWithBufferedBlockDispatcherRuntime } from "carapace/plugin-sdk/reply-dispatch-runtime";
 import { expect, it, vi } from "vitest";
 import { expectWindowRetiredAfterFinal } from "./bot-message-dispatch.progress-window.test-helpers.js";
 import {
@@ -26,8 +26,8 @@ import { createTestDraftStream } from "./draft-stream.test-helpers.js";
 
 const draftWarn = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     createSubsystemLogger: (subsystem: string) => {

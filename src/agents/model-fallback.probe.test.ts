@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 // Verifies fallback cooldown probe decisions and diagnostic records.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { createDiagnosticLogRecordCapture } from "../logging/test-helpers/diagnostic-log-capture.js";
 import type { AuthProfileStore } from "./auth-profiles.js";
 import type { FailoverReason } from "./failover/signal.js";
@@ -279,7 +279,7 @@ describe("runWithModelFallback – probe logic", () => {
   const NOW = 1_700_000_000_000;
 
   const runPrimaryCandidate = (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     run: (provider: string, model: string) => Promise<unknown>,
   ) =>
     runWithModelFallback({
@@ -504,7 +504,7 @@ describe("runWithModelFallback – probe logic", () => {
     setLoggerOverride({
       level: "trace",
       consoleLevel: "silent",
-      file: path.join(os.tmpdir(), `openclaw-model-fallback-probe-${randomUUID()}.log`),
+      file: path.join(os.tmpdir(), `carapace-model-fallback-probe-${randomUUID()}.log`),
     });
 
     const run = vi.fn().mockResolvedValue("probed-ok");
@@ -784,7 +784,7 @@ describe("runWithModelFallback – probe logic", () => {
           },
         },
       },
-    } as Partial<OpenClawConfig>);
+    } as Partial<CarapaceConfig>);
 
     // Far-future cooldown with no fallback chain: the primary must still be
     // probed so a recovered rolling cap resumes work instead of staying silent

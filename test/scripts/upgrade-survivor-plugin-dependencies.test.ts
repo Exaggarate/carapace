@@ -9,10 +9,10 @@ function runDependencyFixture(
   packagedDir?: string,
   mutation?: "remove-shared" | "keep-package",
 ) {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), "openclaw-upgrade-dependencies-")));
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "carapace-upgrade-dependencies-")));
   const prefix = join(root, "prefix");
   if (packagedDir) {
-    mkdirSync(join(prefix, "lib/node_modules/openclaw", packagedDir, "discord"), {
+    mkdirSync(join(prefix, "lib/node_modules/carapace", packagedDir, "discord"), {
       recursive: true,
     });
   }
@@ -23,7 +23,7 @@ function runDependencyFixture(
         "-c",
         `set -euo pipefail
 source "$1"
-package_root() { printf '%s/lib/node_modules/openclaw\\n' "$npm_config_prefix"; }
+package_root() { printf '%s/lib/node_modules/carapace\\n' "$npm_config_prefix"; }
 SCENARIO=plugin-deps-cleanup
 seed_legacy_plugin_dependency_debris
 assert_legacy_plugin_dependency_debris_present
@@ -32,10 +32,10 @@ if [ "$2" != keep-package ]; then
   mkdir -p "$(package_root)"
 fi
 if [ "$2" = remove-shared ]; then
-  rm "$OPENCLAW_STATE_DIR/plugin-runtime-deps/discord-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
+  rm "$CARAPACE_STATE_DIR/plugin-runtime-deps/discord-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
 fi
 # Later phases use the recorded seed, not the request or replaced package inventory.
-OPENCLAW_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS=absent-after-update
+CARAPACE_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS=absent-after-update
 assert_legacy_plugin_dependency_debris_cleaned
 assert_legacy_plugin_dependency_debris_cleaned
 `,
@@ -48,8 +48,8 @@ assert_legacy_plugin_dependency_debris_cleaned
         env: {
           ...process.env,
           npm_config_prefix: prefix,
-          OPENCLAW_STATE_DIR: join(root, "state"),
-          OPENCLAW_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS: requested,
+          CARAPACE_STATE_DIR: join(root, "state"),
+          CARAPACE_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS: requested,
         },
       },
     );

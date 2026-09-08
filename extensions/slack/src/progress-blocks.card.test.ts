@@ -1,4 +1,4 @@
-import type { ChannelProgressDraftLine } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelProgressDraftLine } from "carapace/plugin-sdk/channel-outbound";
 import { describe, expect, it } from "vitest";
 import { buildSlackProgressCardBlocks } from "./progress-blocks.js";
 import { itemLine, progressLine, toolLine } from "./progress-blocks.test-helpers.js";
@@ -195,7 +195,7 @@ describe("buildSlackProgressCardBlocks", () => {
         title: "Implementing",
         lines: [toolLine("run tests")],
         diffStat: { files: 2, added: 1, removed: 1 },
-        sessionUrl: "https://team.openclaw.ai/openclaw/chat/main",
+        sessionUrl: "https://github.com/Exaggarate/carapace",
       });
 
       expect(blocks[0]).toEqual({
@@ -212,9 +212,9 @@ describe("buildSlackProgressCardBlocks", () => {
         elements: [
           {
             type: "button",
-            action_id: "openclaw:session_link",
-            text: { type: "plain_text", text: "Open in OpenClaw" },
-            url: "https://team.openclaw.ai/openclaw/chat/main",
+            action_id: "carapace:session_link",
+            text: { type: "plain_text", text: "Open in Carapace" },
+            url: "https://github.com/Exaggarate/carapace",
           },
         ],
       });

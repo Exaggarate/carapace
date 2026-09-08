@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as realDelay } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isProcessAlive, waitForDead, waitForPidFile } from "../../test/helpers/process-wait.js";
 import { createDeferred } from "../../test/helpers/promise.js";
@@ -23,9 +23,9 @@ afterEach(() => {
 
 describe("agent exec command composition", () => {
   it("bounds blocked private-input construction through the shipped CLI command", async () => {
-    const root = tempDirs.make("openclaw-agent-exec-service-construction-");
+    const root = tempDirs.make("carapace-agent-exec-service-construction-");
     const pidPath = path.join(root, "command.pid");
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "carapace.json");
     const createSecretData = vi.fn(() => Buffer.alloc(8 * 1024 * 1024, 97));
     // Claude's plugin-owned SDK bypasses the supervisor. A registered process backend
     // keeps the real command route and blocks construction on an unread secret pipe.
@@ -73,7 +73,7 @@ describe("agent exec command composition", () => {
     const completed = await withEnvAsync(
       {
         NODE_DISABLE_COMPILE_CACHE: "1",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
+        CARAPACE_SERVICE_MARKER: "carapace",
       },
       async () => {
         const runtime: RuntimeEnv = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };

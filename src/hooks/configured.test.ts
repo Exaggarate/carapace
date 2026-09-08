@@ -1,6 +1,6 @@
 // Configured hook tests cover the closed allowlist and open discovery decisions.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveInternalHookSelection } from "./configured.js";
 
 const readConfigMachineStateMock = vi.hoisted(() => vi.fn());
@@ -20,7 +20,7 @@ describe("resolveInternalHookSelection", () => {
     [{ hooks: { internal: { entries: { selected: { enabled: true } } } } }, true],
     [{ hooks: { internal: { entries: { selected: { enabled: false } } } } }, false],
     [{ hooks: { internal: { load: { extraDirs: ["/tmp/hooks"] } } } }, true],
-  ] satisfies Array<[OpenClawConfig, boolean]>)(
+  ] satisfies Array<[CarapaceConfig, boolean]>)(
     "reports whether %j selects discovery",
     (config, configured) => {
       expect(resolveInternalHookSelection(config).configured).toBe(configured);
@@ -83,7 +83,7 @@ describe("resolveInternalHookSelection", () => {
           internal: {
             enabled: true,
             entries: { named: { enabled: true } },
-            load: { extraDirs: ["/opt/openclaw/hooks"] },
+            load: { extraDirs: ["/opt/carapace/hooks"] },
           },
         },
       }).names,
@@ -113,10 +113,10 @@ describe("resolveInternalHookSelection", () => {
         internal: {
           enabled: false,
           entries: { named: { enabled: true } },
-          load: { extraDirs: ["/opt/openclaw/hooks"] },
+          load: { extraDirs: ["/opt/carapace/hooks"] },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(resolveInternalHookSelection(config).names).toEqual(new Set());
   });

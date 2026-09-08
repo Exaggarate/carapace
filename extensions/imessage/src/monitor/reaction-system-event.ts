@@ -1,6 +1,6 @@
 // Imessage plugin module implements reaction system event behavior.
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { enqueueSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { enqueueSystemEvent } from "carapace/plugin-sdk/system-event-runtime";
 
 type IMessageReactionSystemEventDecision = {
   text: string;

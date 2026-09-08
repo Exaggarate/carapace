@@ -420,9 +420,9 @@ export function renderPluginConsentDialog(props: PluginConsentDialogProps): Temp
     </button>
   `;
   return html`
-    <openclaw-modal-dialog
+    <carapace-modal-dialog
       label=${name}
-      style="--openclaw-modal-width: min(560px, calc(100vw - 32px));"
+      style="--carapace-modal-width: min(560px, calc(100vw - 32px));"
       @modal-cancel=${props.onCancel}
     >
       <section class="plugins-consent" data-plugin-consent=${consent.intent.kind}>
@@ -462,6 +462,6 @@ export function renderPluginConsentDialog(props: PluginConsentDialogProps): Temp
           ${renderReasonedDisabledControl(props.mutationBlockedReason, confirm)}
         </footer>
       </section>
-    </openclaw-modal-dialog>
+    </carapace-modal-dialog>
   `;
 }

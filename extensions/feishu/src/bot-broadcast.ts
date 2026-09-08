@@ -1,4 +1,4 @@
-import type { ChannelReplayClaimHandle } from "openclaw/plugin-sdk/persistent-dedupe";
+import type { ChannelReplayClaimHandle } from "carapace/plugin-sdk/persistent-dedupe";
 import type { ClawdbotConfig } from "../runtime-api.js";
 import type { FeishuIngressLifecycle } from "./feishu-ingress.js";
 

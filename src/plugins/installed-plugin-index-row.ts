@@ -2,10 +2,10 @@ import type { DatabaseSync } from "node:sqlite";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import type { ConfigMachineStateDatabase } from "../state/config-machine-state.js";
 import {
-  withExistingOpenClawStateDatabaseArtifactPreservingReadOnly,
-  withExistingOpenClawStateDatabaseReadOnly,
-} from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+  withExistingCarapaceStateDatabaseArtifactPreservingReadOnly,
+  withExistingCarapaceStateDatabaseReadOnly,
+} from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
   resolveInstalledPluginIndexStateDatabaseOptions,
   type InstalledPluginIndexStoreOptions,
@@ -34,6 +34,6 @@ export function readPersistedInstalledPluginIndexRowSync(
   };
   const databaseOptions = resolveInstalledPluginIndexStateDatabaseOptions(options);
   return options.artifactPreservingReadOnly
-    ? withExistingOpenClawStateDatabaseArtifactPreservingReadOnly(read, databaseOptions)
-    : withExistingOpenClawStateDatabaseReadOnly(read, databaseOptions);
+    ? withExistingCarapaceStateDatabaseArtifactPreservingReadOnly(read, databaseOptions)
+    : withExistingCarapaceStateDatabaseReadOnly(read, databaseOptions);
 }

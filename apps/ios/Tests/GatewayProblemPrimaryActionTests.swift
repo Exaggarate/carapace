@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct GatewayProblemPrimaryActionTests {
     @Test func `protocol mismatch uses update action instead of retry`() {
@@ -26,14 +26,14 @@ struct GatewayProblemPrimaryActionTests {
             title: "Gateway update required",
             message: "The gateway is older than this app.",
             actionLabel: "Copy update command",
-            actionCommand: "openclaw update",
+            actionCommand: "carapace update",
             retryable: false,
             pauseReconnect: true)
 
         let title = GatewayProblemPrimaryAction.title(for: problem, retryTitle: "Retry connection")
 
         #expect(title == "Copy update command")
-        #expect(problem.actionCommand == "openclaw update")
+        #expect(problem.actionCommand == "carapace update")
     }
 
     @Test func `reset-suggesting problem uses reset title when provided`() {

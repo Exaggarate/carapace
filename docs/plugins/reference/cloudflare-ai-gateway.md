@@ -1,5 +1,5 @@
 ---
-summary: "Adds Cloudflare AI Gateway model provider support to OpenClaw."
+summary: "Adds Cloudflare AI Gateway model provider support to Carapace."
 read_when:
   - You are installing, configuring, or auditing the cloudflare-ai-gateway plugin
 title: "Cloudflare AI Gateway plugin reference"
@@ -7,15 +7,15 @@ title: "Cloudflare AI Gateway plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds Cloudflare AI Gateway model provider support to OpenClaw.
+Adds Cloudflare AI Gateway model provider support to Carapace.
 
 ## Distribution
 
-- Package: `@openclaw/cloudflare-ai-gateway-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/cloudflare-ai-gateway-provider`
+- Package: `@carapace/cloudflare-ai-gateway-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/cloudflare-ai-gateway-provider`
 
 ## Surface
 

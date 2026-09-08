@@ -1,19 +1,19 @@
 // Hook frontmatter helpers parse metadata blocks from hook files.
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@carapace/normalization-core/string-coerce";
 import { parseFrontmatterBlock } from "../../packages/markdown-core/src/frontmatter.js";
 import {
-  applyOpenClawManifestInstallCommonFields,
+  applyCarapaceManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
-  parseOpenClawManifestInstallBase,
+  parseCarapaceManifestInstallBase,
   parseFrontmatterBool,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
+  resolveCarapaceManifestBlock,
+  resolveCarapaceManifestInstall,
+  resolveCarapaceManifestOs,
+  resolveCarapaceManifestRequires,
 } from "../shared/frontmatter.js";
 import type {
-  OpenClawHookMetadata,
+  CarapaceHookMetadata,
   HookEntry,
   HookInstallSpec,
   HookInvocationPolicy,
@@ -26,12 +26,12 @@ export function parseHookFrontmatter(content: string): ParsedHookFrontmatter {
 }
 
 function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
-  const parsed = parseOpenClawManifestInstallBase(input, ["bundled", "npm", "git"]);
+  const parsed = parseCarapaceManifestInstallBase(input, ["bundled", "npm", "git"]);
   if (!parsed) {
     return undefined;
   }
   const { raw } = parsed;
-  const spec = applyOpenClawManifestInstallCommonFields<HookInstallSpec>(
+  const spec = applyCarapaceManifestInstallCommonFields<HookInstallSpec>(
     {
       kind: parsed.kind as HookInstallSpec["kind"],
     },
@@ -47,17 +47,17 @@ function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
   return spec;
 }
 
-/** Resolve OpenClaw hook metadata from the manifest block in HOOK.md frontmatter. */
+/** Resolve Carapace hook metadata from the manifest block in HOOK.md frontmatter. */
 export function resolveHookManifestMetadata(
   frontmatter: ParsedHookFrontmatter,
-): OpenClawHookMetadata | undefined {
-  const metadataObj = resolveOpenClawManifestBlock({ frontmatter });
+): CarapaceHookMetadata | undefined {
+  const metadataObj = resolveCarapaceManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveOpenClawManifestRequires(metadataObj);
-  const install = resolveOpenClawManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveOpenClawManifestOs(metadataObj);
+  const requires = resolveCarapaceManifestRequires(metadataObj);
+  const install = resolveCarapaceManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveCarapaceManifestOs(metadataObj);
   const eventsRaw = normalizeStringList(metadataObj.events);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,

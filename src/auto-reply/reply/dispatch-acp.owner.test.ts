@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, it, vi } from "vitest";
 import { getAcpSessionManager, testing } from "../../acp/control-plane/manager.js";
 import { disposeAcpSessionManagerInstance } from "../../acp/control-plane/manager.lifecycle.js";
@@ -16,7 +16,7 @@ import {
   createUserTurnTranscriptRecorder,
   type UserTurnTranscriptRecorder,
 } from "../../sessions/user-turn-transcript.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { tryDispatchAcpReplyCore } from "./dispatch-acp.js";
 import { createReplyDispatcher } from "./reply-dispatcher.js";
 import { buildTestCtx } from "./test-ctx.js";
@@ -28,7 +28,7 @@ it.each(
 )(
   "preserves ACP target $sessionKey and input ownership (unconfirmed=$unconfirmedQuestion)",
   async ({ sessionKey, unconfirmedQuestion }) => {
-    await withOpenClawTestState({ label: "acp-dispatch-owner" }, async (state) => {
+    await withCarapaceTestState({ label: "acp-dispatch-owner" }, async (state) => {
       const cfg = {
         agents: {
           ownership: "explicit" as const,

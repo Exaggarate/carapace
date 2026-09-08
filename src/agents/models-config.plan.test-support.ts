@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
 import "./models-config.plan.js";
 import type { SourceModelFields } from "./models-config.merge.js";
@@ -7,8 +7,8 @@ import type { ProviderConfig } from "./models-config.providers.secrets.js";
 
 type ResolveImplicitProvidersForModelsJson = (params: {
   agentDir: string;
-  config: OpenClawConfig;
-  discoveryAuthConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  discoveryAuthConfig?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   explicitProviders: Record<string, ProviderConfig>;
@@ -20,24 +20,24 @@ type ResolveImplicitProvidersForModelsJson = (params: {
 }) => Promise<Record<string, ProviderConfig>>;
 
 type PreparedPlanParams = Parameters<
-  typeof import("./models-config.plan.js").planOpenClawModelsJson
+  typeof import("./models-config.plan.js").planCarapaceModelsJson
 >[0];
 type FlatPreparedContext = Omit<
   PreparedModelsConfigContext,
   "discoveryAuthConfig" | "sourceConfigForSecrets" | "envFingerprint"
 > & {
-  discoveryAuthConfig?: OpenClawConfig;
-  sourceConfigForSecrets?: OpenClawConfig;
+  discoveryAuthConfig?: CarapaceConfig;
+  sourceConfigForSecrets?: CarapaceConfig;
 };
 type PlanParams = Omit<PreparedPlanParams, "context"> & FlatPreparedContext;
 type PlanResult = Awaited<
-  ReturnType<typeof import("./models-config.plan.js").planOpenClawModelsJson>
+  ReturnType<typeof import("./models-config.plan.js").planCarapaceModelsJson>
 >;
 type ResolveProvidersParams = FlatPreparedContext & { authStore?: PreparedPlanParams["authStore"] };
 type PlanDeps = { resolveImplicitProviders?: ResolveImplicitProvidersForModelsJson };
 
 type ModelsConfigPlanTestApi = {
-  planOpenClawModelsJsonWithDeps(params: PreparedPlanParams, deps?: PlanDeps): Promise<PlanResult>;
+  planCarapaceModelsJsonWithDeps(params: PreparedPlanParams, deps?: PlanDeps): Promise<PlanResult>;
   resolveProvidersForModelsJsonWithDeps(
     params: Pick<PreparedPlanParams, "context" | "authStore">,
     deps?: PlanDeps,
@@ -46,7 +46,7 @@ type ModelsConfigPlanTestApi = {
 
 function getTestApi(): ModelsConfigPlanTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.modelsConfigPlanTestApi")
+    Symbol.for("carapace.modelsConfigPlanTestApi")
   ] as ModelsConfigPlanTestApi;
 }
 
@@ -59,12 +59,12 @@ function prepareTestContext(params: FlatPreparedContext): PreparedModelsConfigCo
   };
 }
 
-export const planOpenClawModelsJsonWithDeps = async (
+export const planCarapaceModelsJsonWithDeps = async (
   params: PlanParams,
   deps?: PlanDeps,
 ): Promise<PlanResult> => {
   const { authStore, existingRaw, existingParsed, ...contextParams } = params;
-  return await getTestApi().planOpenClawModelsJsonWithDeps(
+  return await getTestApi().planCarapaceModelsJsonWithDeps(
     {
       context: prepareTestContext(contextParams),
       ...(authStore ? { authStore } : {}),

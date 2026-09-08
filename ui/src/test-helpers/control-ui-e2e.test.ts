@@ -24,7 +24,7 @@ describe("shared proof capture", () => {
     "retains each failure capture with its shard provenance ($shardIndex/$shardCount)",
     async ({ shardIndex, shardCount }) => {
       const parent = tempDirs.make("control-ui-failure-proof-");
-      vi.stubEnv("OPENCLAW_UI_E2E_DIAGNOSTIC_DIR", parent);
+      vi.stubEnv("CARAPACE_UI_E2E_DIAGNOSTIC_DIR", parent);
       vi.stubEnv("VITEST_SHARD_INDEX", shardIndex);
       vi.stubEnv("VITEST_SHARD_COUNT", shardCount);
       vi.stubEnv("SHARD_INDEX", shardIndex ? undefined : "unrelated-shard");
@@ -79,8 +79,8 @@ describe("shared proof capture", () => {
 
   it("keeps shared capture disabled until its gate is enabled and uses the supplied owner", async () => {
     const parent = tempDirs.make("control-ui-proof-capture-");
-    vi.stubEnv("OPENCLAW_UI_E2E_ARTIFACT_DIR", parent);
-    vi.stubEnv("OPENCLAW_CAPTURE_UI_PROOF", "0");
+    vi.stubEnv("CARAPACE_UI_E2E_ARTIFACT_DIR", parent);
+    vi.stubEnv("CARAPACE_CAPTURE_UI_PROOF", "0");
     let directory: string | undefined;
     const owner = {
       get artifactDir() {
@@ -102,7 +102,7 @@ describe("shared proof capture", () => {
     expect(screenshot).not.toHaveBeenCalled();
     expect(video).not.toHaveBeenCalled();
 
-    vi.stubEnv("OPENCLAW_CAPTURE_UI_PROOF", "1");
+    vi.stubEnv("CARAPACE_CAPTURE_UI_PROOF", "1");
     await captureSidebarUiProof(owner, page, "state.png");
     expect(readFileSync(path.join(owner.artifactDir, "state.png"), "utf8")).toBe("sidebar-proof");
   });
@@ -145,7 +145,7 @@ describe("waitForControlUiRoute", () => {
         target: { routeId: string },
       ) {
         expect(predicate(target)).toBe(false);
-        const app = document.createElement("openclaw-app");
+        const app = document.createElement("carapace-app");
         Object.assign(app, {
           runtime: {
             router: {

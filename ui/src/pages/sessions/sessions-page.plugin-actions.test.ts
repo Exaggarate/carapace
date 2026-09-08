@@ -59,7 +59,7 @@ async function createPluginSessionMenuPage() {
   const openMenu = async () => {
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu")!;
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu")!;
     expect(menu).not.toBeNull();
     await menu.updateComplete;
     return menu;
@@ -92,7 +92,7 @@ describe("sessions page plugin actions", () => {
     } as SessionsListResult);
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu")!;
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu")!;
     await menu.updateComplete;
     expect(resolve).toHaveBeenCalledWith({ sessionKey: row.key, session: row });
     expect(menu.pluginActions).toEqual([{ id: entry.key, label: "Open review", disabled: true }]);

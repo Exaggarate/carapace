@@ -16,7 +16,7 @@ export type ClientVoiceConfirmationStateSnapshot = {
 
 function getTestApi(): ClientVoiceConfirmationTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.clientVoiceConfirmationTestApi")
+    Symbol.for("carapace.clientVoiceConfirmationTestApi")
   ] as ClientVoiceConfirmationTestApi;
 }
 

@@ -44,17 +44,17 @@ function paginatedChecksFetch(checkRuns: Record<string, unknown>[], laterStatus?
 
 describe("parseGitHubRemoteUrl", () => {
   it("parses https, scp-like, and ssh remotes", () => {
-    const expected = { owner: "openclaw", repo: "openclaw" };
-    expect(parseGitHubRemoteUrl("https://github.com/openclaw/openclaw.git")).toEqual(expected);
-    expect(parseGitHubRemoteUrl("https://github.com/openclaw/openclaw")).toEqual(expected);
-    expect(parseGitHubRemoteUrl("git@github.com:openclaw/openclaw.git")).toEqual(expected);
-    expect(parseGitHubRemoteUrl("ssh://git@github.com/openclaw/openclaw.git")).toEqual(expected);
+    const expected = { owner: "carapace", repo: "carapace" };
+    expect(parseGitHubRemoteUrl("https://github.com/Exaggarate/carapace.git")).toEqual(expected);
+    expect(parseGitHubRemoteUrl("https://github.com/Exaggarate/carapace")).toEqual(expected);
+    expect(parseGitHubRemoteUrl("git@github.com:Exaggarate/carapace.git")).toEqual(expected);
+    expect(parseGitHubRemoteUrl("ssh://git@github.com/Exaggarate/carapace.git")).toEqual(expected);
   });
 
   it("rejects non-GitHub and malformed remotes", () => {
-    expect(parseGitHubRemoteUrl("https://gitlab.com/openclaw/openclaw.git")).toBeNull();
-    expect(parseGitHubRemoteUrl("git@github.com:openclaw")).toBeNull();
-    expect(parseGitHubRemoteUrl("https://github.com/openclaw/openclaw/extra")).toBeNull();
+    expect(parseGitHubRemoteUrl("https://gitlab.com/carapace/carapace.git")).toBeNull();
+    expect(parseGitHubRemoteUrl("git@github.com:carapace")).toBeNull();
+    expect(parseGitHubRemoteUrl("https://github.com/Exaggarate/carapace/extra")).toBeNull();
     expect(parseGitHubRemoteUrl("/local/path/repo.git")).toBeNull();
   });
 });
@@ -100,29 +100,29 @@ describe("loadControlUiSessionPullRequests", () => {
     );
 
     expect(result).toEqual({
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       pullRequests: [
         {
           number: 103469,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "carapace",
+          repo: "carapace",
           branch: context.branch,
           title: "fix(macos): tighten the link-browser tab header",
-          url: "https://github.com/openclaw/openclaw/pull/103469",
+          url: "https://github.com/Exaggarate/carapace/pull/103469",
           state: "open",
           additions: 4,
           deletions: 3,
           changedFiles: 2,
           checks: { state: "passing", passed: 1, failed: 0, skipped: 1, running: 0 },
-          checksUrl: "https://github.com/openclaw/openclaw/pull/103469/checks",
+          checksUrl: "https://github.com/Exaggarate/carapace/pull/103469/checks",
         },
       ],
       branch: {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: context.branch,
         createUrl:
-          "https://github.com/openclaw/openclaw/pull/new/claude/browser-tabs-tighter-header",
+          "https://github.com/Exaggarate/carapace/pull/new/claude/browser-tabs-tighter-header",
       },
       rateLimited: false,
     });
@@ -219,7 +219,7 @@ describe("loadControlUiSessionPullRequests", () => {
         ),
       ).resolves.toEqual({
         pullRequests: [],
-        repository: { owner: "openclaw", repo: "openclaw" },
+        repository: { owner: "carapace", repo: "carapace" },
         rateLimited: false,
         status: "unavailable",
       });
@@ -253,11 +253,11 @@ describe("loadControlUiSessionPullRequests", () => {
     expect(result.pullRequests).toEqual([
       {
         number: 103469,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: context.branch,
         title: "fix(macos): tighten the link-browser tab header",
-        url: "https://github.com/openclaw/openclaw/pull/103469",
+        url: "https://github.com/Exaggarate/carapace/pull/103469",
         state: "merged",
       },
     ]);
@@ -420,19 +420,19 @@ describe("loadControlUiSessionPullRequests", () => {
   it("falls back to the fork parent repo when the origin repo has no PRs", async () => {
     const fetchImpl = routedFetch([
       {
-        match: "/repos/fork-owner/openclaw/pulls?head=",
+        match: "/repos/fork-owner/carapace/pulls?head=",
         response: () => githubJson([]),
       },
       {
-        match: "/repos/fork-owner/openclaw",
+        match: "/repos/fork-owner/carapace",
         response: () =>
           githubJson({
             fork: true,
-            parent: { name: "openclaw", owner: { login: "openclaw" } },
+            parent: { name: "carapace", owner: { login: "carapace" } },
           }),
       },
       {
-        match: "/repos/openclaw/openclaw/pulls?head=",
+        match: "/repos/carapace/carapace/pulls?head=",
         response: () => githubJson([pullListItem({ merged_at: "2026-07-09T10:00:00Z" })]),
       },
     ]);
@@ -477,7 +477,7 @@ describe("loadControlUiSessionPullRequests", () => {
       { fetchImpl, resolveGitContext },
     );
     expect(fresh.rateLimited).toBe(false);
-    expect(fresh.repository).toEqual({ owner: "openclaw", repo: "openclaw" });
+    expect(fresh.repository).toEqual({ owner: "carapace", repo: "carapace" });
 
     limited = true;
     vi.advanceTimersByTime(91_000);
@@ -542,14 +542,14 @@ describe("loadControlUiSessionPullRequests", () => {
     {
       label: "keeps the repository on the default branch with no PRs",
       branch: "main",
-      remote: "git@github.com:openclaw/openclaw.git",
-      repository: { owner: "openclaw", repo: "openclaw" },
+      remote: "git@github.com:Exaggarate/carapace.git",
+      repository: { owner: "carapace", repo: "carapace" },
       probes: 3,
     },
     {
       label: "omits the repository for a non-GitHub remote",
       branch: "feature",
-      remote: "https://gitlab.com/openclaw/openclaw.git",
+      remote: "https://gitlab.com/carapace/carapace.git",
       repository: undefined,
       probes: 2,
     },
@@ -596,7 +596,7 @@ describe("loadControlUiSessionPullRequests", () => {
         return "feature";
       }
       if (args[0] === "remote") {
-        return "git@github.com:openclaw/openclaw.git";
+        return "git@github.com:Exaggarate/carapace.git";
       }
       return "origin/main";
     });
@@ -612,7 +612,7 @@ describe("loadControlUiSessionPullRequests", () => {
 
     await expect(load()).resolves.toEqual({
       pullRequests: [],
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       rateLimited: false,
       status: "unavailable",
     });
@@ -639,7 +639,7 @@ describe("loadControlUiSessionPullRequests", () => {
     let pulls: Record<string, unknown>[] = [];
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson(pulls) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
     const resolveBranchLanding = vi.fn(async () => ({
       pushedSha: "a".repeat(40),
@@ -726,14 +726,14 @@ describe("loadControlUiSessionPullRequests", () => {
     let branch = "feature-a";
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
     const gitOutputImpl = vi.fn(async (_root: string, args: string[]) => {
       if (args[0] === "rev-parse") {
         return branch;
       }
       if (args[0] === "remote") {
-        return "git@github.com:openclaw/openclaw.git";
+        return "git@github.com:Exaggarate/carapace.git";
       }
       if (args[0] === "symbolic-ref") {
         return "origin/main";
@@ -770,7 +770,7 @@ describe("loadControlUiSessionPullRequests", () => {
     let pulls: Record<string, unknown>[] = [];
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson(pulls) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
 
     const initial = await loadControlUiSessionPullRequests(
@@ -833,7 +833,7 @@ describe("loadControlUiSessionPullRequests", () => {
           return githubJson([pullListItem({ merged_at: "2026-07-09T10:00:00Z" })]);
         },
       },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
 
     const initial = loadControlUiSessionPullRequests(
@@ -886,13 +886,13 @@ describe("loadControlUiSessionPullRequests", () => {
 
     expect(result).toEqual({
       pullRequests: [],
-      repository: { owner: "openclaw", repo: "openclaw" },
+      repository: { owner: "carapace", repo: "carapace" },
       branch: {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: context.branch,
         createUrl:
-          "https://github.com/openclaw/openclaw/pull/new/claude/browser-tabs-tighter-header",
+          "https://github.com/Exaggarate/carapace/pull/new/claude/browser-tabs-tighter-header",
       },
       rateLimited: true,
     });
@@ -926,11 +926,11 @@ describe("loadControlUiSessionPullRequests", () => {
     expect(result.pullRequests).toEqual([
       {
         number: 103469,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch: context.branch,
         title: "fix(macos): tighten the link-browser tab header",
-        url: "https://github.com/openclaw/openclaw/pull/103469",
+        url: "https://github.com/Exaggarate/carapace/pull/103469",
         state: "open",
         // The list fetch succeeded, so its author survives the degraded chip.
         author: { login: "octocat" },
@@ -954,7 +954,7 @@ describe("loadControlUiSessionPullRequests", () => {
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
       // Empty PR lists trigger the fork-parent probe; answer "not a fork".
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/carapace/carapace", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -964,7 +964,7 @@ describe("loadControlUiSessionPullRequests", () => {
       },
     );
     expect(result.branch?.createUrl).toBe(
-      "https://github.com/openclaw/openclaw/pull/new/claude/fix%20%231",
+      "https://github.com/Exaggarate/carapace/pull/new/claude/fix%20%231",
     );
   });
 });

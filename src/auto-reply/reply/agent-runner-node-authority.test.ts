@@ -13,7 +13,7 @@ import {
 } from "./agent-runner-execution.test-support.js";
 
 vi.mock("../../agents/agent-tools.js", () => ({
-  createOpenClawCodingTools: vi.fn(() => {
+  createCarapaceCodingTools: vi.fn(() => {
     throw new Error("unexpected coding tool construction");
   }),
 }));

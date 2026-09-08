@@ -1,7 +1,7 @@
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { createCapturedPluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { createCodexAppServerAgentHarness } from "../../harness.js";
 import { continueLocalCodexSession } from "../session-catalog-adoption.js";
 import {

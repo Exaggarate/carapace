@@ -1,11 +1,11 @@
 /**
- * Wire protocol between the extension relay server and the OpenClaw Chrome
+ * Wire protocol between the extension relay server and the Carapace Chrome
  * extension. The extension owns tab eligibility/access, attaches chrome.debugger,
  * and forwards CDP traffic. All CDP target semantics (Target.* synthesis for
  * Playwright) live server-side in the bridge.
  */
 
-/** Tab snapshot reported by the extension for tabs currently accessible to OpenClaw. */
+/** Tab snapshot reported by the extension for tabs currently accessible to Carapace. */
 export type RelayTabInfo = {
   tabId: number;
   url: string;

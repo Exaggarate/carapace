@@ -1,7 +1,7 @@
 // MS Teams plugin module implements action threading behavior.
-import type { ChannelToolSend } from "openclaw/plugin-sdk/channel-contract";
-import { isSingleUseReplyToMode } from "openclaw/plugin-sdk/reply-reference";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ChannelToolSend } from "carapace/plugin-sdk/channel-contract";
+import { isSingleUseReplyToMode } from "carapace/plugin-sdk/reply-reference";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { MSTeamsConfig } from "../runtime-api.js";
 import { extractMSTeamsConversationMessageId, normalizeMSTeamsConversationId } from "./inbound.js";
 import { resolveMSTeamsReplyPolicy, resolveMSTeamsRouteConfig } from "./policy.js";

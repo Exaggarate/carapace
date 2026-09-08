@@ -12,12 +12,12 @@ import {
 import type {
   DB as StateDatabase,
   WorkerInferenceTurns,
-} from "../../state/openclaw-state-db.generated.js";
+} from "../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 
 type InferenceDb = Pick<StateDatabase, "worker_inference_turns">;
 type TurnRow = Selectable<WorkerInferenceTurns>;
@@ -239,16 +239,16 @@ function pruneTerminalTurns(params: {
 
 export function createWorkerInferenceStore(
   options: {
-    database?: OpenClawStateDatabase;
+    database?: CarapaceStateDatabase;
     now?: () => number;
     retention?: Partial<WorkerInferenceRetentionPolicy>;
   } = {},
 ) {
-  const path = (options.database ?? openOpenClawStateDatabase()).path;
+  const path = (options.database ?? openCarapaceStateDatabase()).path;
   const now = options.now ?? Date.now;
   const retention = { ...DEFAULT_RETENTION, ...options.retention };
   const write = <T>(operation: (db: DatabaseSync) => T): T =>
-    runOpenClawStateWriteTransaction(({ db }) => operation(db), { path });
+    runCarapaceStateWriteTransaction(({ db }) => operation(db), { path });
 
   const begin = (rawInput: WorkerInferenceTurnInput): WorkerInferenceTurnBeginResult => {
     const input = normalizeInput(rawInput, now());

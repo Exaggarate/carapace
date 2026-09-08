@@ -1,15 +1,15 @@
 // Telegram plugin module implements account inspect behavior.
-import { resolveAccountWithDefaultFallback } from "openclaw/plugin-sdk/account-core";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+import { resolveAccountWithDefaultFallback } from "carapace/plugin-sdk/account-core";
+import type { CarapaceConfig, TelegramAccountConfig } from "carapace/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/routing";
+import { tryReadSecretFileSync } from "carapace/plugin-sdk/secret-file-runtime";
 import {
   coerceSecretRef,
   hasConfiguredSecretInput,
   normalizeSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import { canResolveEnvSecretRefInReadOnlyPath } from "openclaw/plugin-sdk/secret-ref-readonly";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/secret-input";
+import { canResolveEnvSecretRefInReadOnlyPath } from "carapace/plugin-sdk/secret-ref-readonly";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   listTelegramAccountIds,
   mergeTelegramAccountConfig,
@@ -76,7 +76,7 @@ function inspectTokenFile(
   };
 }
 
-function inspectTokenValue(params: { cfg: OpenClawConfig; value: unknown }): {
+function inspectTokenValue(params: { cfg: CarapaceConfig; value: unknown }): {
   token: string;
   tokenSource: "config" | "env" | "none";
   tokenStatus: TelegramCredentialStatus;
@@ -129,7 +129,7 @@ function inspectTokenValue(params: { cfg: OpenClawConfig; value: unknown }): {
   return null;
 }
 
-function hasConfiguredTelegramAccounts(cfg: OpenClawConfig): boolean {
+function hasConfiguredTelegramAccounts(cfg: CarapaceConfig): boolean {
   const accounts = cfg.channels?.telegram?.accounts;
   return (
     Boolean(accounts) &&
@@ -140,7 +140,7 @@ function hasConfiguredTelegramAccounts(cfg: OpenClawConfig): boolean {
 }
 
 function inspectTelegramAccountPrimary(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   envToken?: string | null;
 }): TelegramAccountInspection {
@@ -261,7 +261,7 @@ function inspectTelegramAccountPrimary(params: {
 }
 
 function readTelegramAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   envToken?: string | null;
 }): TelegramAccountInspection {
@@ -281,7 +281,7 @@ function readTelegramAccount(params: {
 }
 
 export function findTelegramTokenOwnerAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   envToken?: string | null;
 }): string | null {

@@ -2,16 +2,16 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_GROUP_HISTORY_LIMIT } from "openclaw/plugin-sdk/reply-history";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { DEFAULT_GROUP_HISTORY_LIMIT } from "carapace/plugin-sdk/reply-history";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelAccounts,
   type CompatMutationResult,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 
 const streamingAliasMigration = defineChannelAliasMigration({
   channelId: "telegram",
@@ -233,42 +233,42 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "telegram", "groupMentionsOnly"],
     message:
-      'channels.telegram.groupMentionsOnly was removed; use channels.telegram.groups."*".requireMention instead. Run "openclaw doctor --fix".',
+      'channels.telegram.groupMentionsOnly was removed; use channels.telegram.groups."*".requireMention instead. Run "carapace doctor --fix".',
   },
   {
     path: ["channels", "telegram"],
     message:
-      'channels.telegram.dm and direct.<chatId>.threadReplies were removed; DM topic sessions now follow Telegram getMe.has_topics_enabled, so topics-enabled bots may use thread-scoped DM sessions. Run "openclaw doctor --fix".',
+      'channels.telegram.dm and direct.<chatId>.threadReplies were removed; DM topic sessions now follow Telegram getMe.has_topics_enabled, so topics-enabled bots may use thread-scoped DM sessions. Run "carapace doctor --fix".',
     match: hasRetiredTelegramDmConfig,
   },
   {
     path: ["channels", "telegram", "accounts"],
     message:
-      'channels.telegram.accounts.<id>.dm and direct.<chatId>.threadReplies were removed; DM topic sessions now follow Telegram getMe.has_topics_enabled, so topics-enabled bots may use thread-scoped DM sessions. Run "openclaw doctor --fix".',
+      'channels.telegram.accounts.<id>.dm and direct.<chatId>.threadReplies were removed; DM topic sessions now follow Telegram getMe.has_topics_enabled, so topics-enabled bots may use thread-scoped DM sessions. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasRetiredTelegramDmConfig),
   },
   {
     path: ["channels", "telegram"],
     message:
-      'channels.telegram.streaming.preview.nativeToolProgress and nativeToolProgressAllowFrom were removed; Telegram previews now use rich send/edit messages. Run "openclaw doctor --fix".',
+      'channels.telegram.streaming.preview.nativeToolProgress and nativeToolProgressAllowFrom were removed; Telegram previews now use rich send/edit messages. Run "carapace doctor --fix".',
     match: hasRetiredTelegramNativeDraftConfig,
   },
   {
     path: ["channels", "telegram", "accounts"],
     message:
-      'channels.telegram.accounts.<id>.streaming.preview.nativeToolProgress and nativeToolProgressAllowFrom were removed; Telegram previews now use rich send/edit messages. Run "openclaw doctor --fix".',
+      'channels.telegram.accounts.<id>.streaming.preview.nativeToolProgress and nativeToolProgressAllowFrom were removed; Telegram previews now use rich send/edit messages. Run "carapace doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasRetiredTelegramNativeDraftConfig),
   },
   {
     path: ["channels", "telegram"],
     message:
-      'channels.telegram.includeGroupHistoryContext was removed; Telegram group history is always on for groups and bounded by historyLimit. Run "openclaw doctor --fix".',
+      'channels.telegram.includeGroupHistoryContext was removed; Telegram group history is always on for groups and bounded by historyLimit. Run "carapace doctor --fix".',
     match: hasRetiredTelegramGroupHistoryContextConfig,
   },
   {
     path: ["channels", "telegram", "accounts"],
     message:
-      'channels.telegram.accounts.<id>.includeGroupHistoryContext was removed; Telegram group history is always on for groups and bounded by historyLimit. Run "openclaw doctor --fix".',
+      'channels.telegram.accounts.<id>.includeGroupHistoryContext was removed; Telegram group history is always on for groups and bounded by historyLimit. Run "carapace doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(value, hasRetiredTelegramGroupHistoryContextConfig),
   },
@@ -278,7 +278,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const changes: string[] = [];
   const aliases = streamingAliasMigration.normalizeChannelConfig({ cfg, changes });
@@ -391,8 +391,8 @@ export function normalizeCompatibilityConfig({
       ...aliases.config,
       channels: {
         ...aliases.config.channels,
-        telegram: updated as unknown as NonNullable<OpenClawConfig["channels"]>["telegram"],
-      } as OpenClawConfig["channels"],
+        telegram: updated as unknown as NonNullable<CarapaceConfig["channels"]>["telegram"],
+      } as CarapaceConfig["channels"],
     },
     changes,
   };

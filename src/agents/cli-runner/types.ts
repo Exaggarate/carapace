@@ -24,7 +24,7 @@ import type {
 import type { SessionTranscriptRuntimeTarget } from "../../config/sessions/session-accessor.js";
 import type { PrepareAssistantTranscriptMessage } from "../../config/sessions/transcript-assistant-delivery.js";
 import type { SessionSystemPromptReport } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { CronScheduledToolCallerOrigin } from "../../cron/scheduled-tool-policy.js";
 import type { ExecMode } from "../../infra/exec-approvals.js";
@@ -114,7 +114,7 @@ export type RunCliAgentParams = {
   cwd?: string;
   /** Start a fresh CLI process so per-turn MCP authority is reloaded from this run. */
   disableCliLiveSession?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   toolOverrides?: SessionToolOverrides;
   prompt: string;
   transcriptPrompt?: string;
@@ -132,7 +132,7 @@ export type RunCliAgentParams = {
   outputTextPolicy?: AgentHarnessIsolatedCompletionParamsV2["outputTextPolicy"];
   /** Internal backend control command: reuse the native session without recording a conversation turn. */
   controlOperation?: "compact";
-  /** Persist the successful CLI assistant reply into the OpenClaw session transcript. */
+  /** Persist the successful CLI assistant reply into the Carapace session transcript. */
   persistAssistantTranscript?: boolean;
   prepareAssistantTranscriptMessage?: PrepareAssistantTranscriptMessage;
   /** Session store path used when assistant transcript persistence is enabled. */
@@ -281,10 +281,10 @@ export type RunCliAgentParams = {
   scheduledToolPolicy?: ScheduledToolPolicyContext;
   /** Server-authored origin for fresh automation mutations from this CLI run. */
   cronCreatorCallerOrigin?: CronScheduledToolCallerOrigin;
-  /** Exact native plus canonical OpenClaw surface for a selectable CLI backend. */
+  /** Exact native plus canonical Carapace surface for a selectable CLI backend. */
   cliToolAvailability?: {
     native: string[];
-    openClaw: string[];
+    carapace: string[];
   };
   disableTools?: boolean;
   abortSignal?: AbortSignal;
@@ -387,7 +387,7 @@ export type PreparedCliRunContext = {
   /** Resume is safe only while the exact managed Claude stdio child still exists. */
   requiredClaudeLiveSessionGeneration?: string;
   hadSessionFile: boolean;
-  contextEngineConfig: OpenClawConfig;
+  contextEngineConfig: CarapaceConfig;
   contextEngine?: ContextEngine;
   contextEngineTurnPrompt?: string;
   promptContext?: CliBackendPromptContext;
@@ -401,7 +401,7 @@ export type PreparedCliRunContext = {
   claudeSkillsPluginArgs: string[];
   /** Host-held, policy-selected personal Workshop tool for the paired-node adapter. */
   nodeSkillWorkshop?: import("../tools/common.js").AnyAgentTool;
-  openClawHistoryPrompt?: string;
+  carapaceHistoryPrompt?: string;
   /** Live owner of the transcript account-coverage checkpoint, independent of native continuity. */
   cliHistoryWriter?: import("../../config/sessions/cli-history-boundary.js").CliHistoryWriter;
   authEpoch?: string;

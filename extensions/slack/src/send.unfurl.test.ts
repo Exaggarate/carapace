@@ -1,6 +1,6 @@
 // Slack tests cover send.unfurl plugin behavior.
 import type { WebClient } from "@slack/web-api";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { sendMessageSlack } from "./send.js";
 
@@ -20,7 +20,7 @@ function createSlackSendTestClient(): SlackUnfurlTestClient {
   } as unknown as SlackUnfurlTestClient;
 }
 
-function slackConfig(slack: NonNullable<OpenClawConfig["channels"]>["slack"]): OpenClawConfig {
+function slackConfig(slack: NonNullable<CarapaceConfig["channels"]>["slack"]): CarapaceConfig {
   return { channels: { slack } };
 }
 
@@ -159,7 +159,7 @@ describe("sendMessageSlack unfurl controls", () => {
       }),
       client,
       identity: {
-        username: "OpenClaw",
+        username: "Carapace",
       },
     });
 

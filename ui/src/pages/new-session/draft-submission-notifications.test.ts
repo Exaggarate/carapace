@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createNativeNotificationsCapability } from "../../app/native-notifications.ts";
 import { CHAT_ROUTE_READY_EVENT } from "../../app/route-transition.ts";
@@ -27,9 +27,9 @@ function notificationFixture(surface: "web" | "native") {
   });
   if (surface === "native") {
     vi.stubGlobal("webkit", {
-      messageHandlers: { openclawNotifications: { postMessage } },
+      messageHandlers: { carapaceNotifications: { postMessage } },
     });
-    vi.stubGlobal("__OPENCLAW_NATIVE_NOTIFICATIONS__", {
+    vi.stubGlobal("__CARAPACE_NATIVE_NOTIFICATIONS__", {
       permission: "notDetermined",
       test: null,
     });

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AdmittedRunContext, PreparedAgentRunAdmission } from "./admitted-run-context.js";
 import { createOperationalRunInstanceRef } from "./admitted-run-context.js";
 
@@ -17,7 +17,7 @@ export async function withTestRunAdmission<T>(
     admittedRunContext: AdmittedRunContext;
     runId: string;
     agentId?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
   },
   run: (context: AdmittedRunContext) => Promise<T>,
 ): Promise<T> {

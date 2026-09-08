@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   deleteSessionEntryLifecycle,
   listSessionParticipantsReadOnly,
@@ -27,11 +27,11 @@ const remote = (id: string, domain = "workspace"): SessionParticipantIdentity =>
   id,
 });
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 describe("SQLite session participants", () => {
   it("isolates an invalid participant identity to its requested session", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const scope = { agentId: "main", env: state.env };
       const keys = ["agent:main:before", "agent:main:invalid", "agent:main:after"] as const;
       for (const [index, sessionKey] of keys.entries()) {
@@ -49,7 +49,7 @@ describe("SQLite session participants", () => {
           sessionKeys.map((sessionKey) => ({ ...scope, sessionKeys: [sessionKey], projection })),
         );
       expect(read(keys, "list").every((result) => result.ok)).toBe(true);
-      const database = openOpenClawAgentDatabase(scope);
+      const database = openCarapaceAgentDatabase(scope);
       // Model a damaged saved namespace without changing the session row or schema.
       database.db
         .prepare("UPDATE session_participants SET identity_namespace = ? WHERE session_key = ?")
@@ -72,7 +72,7 @@ describe("SQLite session participants", () => {
           {
             ok: false,
             error: expect.objectContaining({
-              message: "Session participant identity is invalid; run openclaw doctor --fix.",
+              message: "Session participant identity is invalid; run carapace doctor --fix.",
             }),
           },
           { ok: true, value: [] },
@@ -87,7 +87,7 @@ describe("SQLite session participants", () => {
   });
 
   it("does not create a missing agent database during participant reads", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       expect(listSessionParticipantsReadOnly({ agentId: "absent", env: state.env }).size).toBe(0);
       expect(existsSync(state.agentDir("absent"))).toBe(false);
     });
@@ -96,7 +96,7 @@ describe("SQLite session participants", () => {
   it.each([false, true])(
     "keeps namespaces and times separate (profile first: %s)",
     async (profileFirst) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const scope = { agentId: "main", env: state.env, sessionKey: "agent:main:collision" };
         await upsertSessionEntryCore(scope, { sessionId: "collision", updatedAt: 1 });
         const inputs = [
@@ -118,7 +118,7 @@ describe("SQLite session participants", () => {
           identity: remote("same-id", "other-workspace"),
           promptedAt: 40,
         });
-        closeOpenClawAgentDatabasesForTest();
+        closeCarapaceAgentDatabasesForTest();
         const records = listSessionParticipantsReadOnly(scope).get(scope.sessionKey) ?? [];
         expect(records).toHaveLength(4);
         expect(records).toEqual(
@@ -156,7 +156,7 @@ describe("SQLite session participants", () => {
   it.each([false, true])(
     "updates a merged profile at the admission bound (canonical row: %s)",
     async (hasCanonicalRow) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
         const scope = { agentId: "main", env: state.env, sessionKey: "agent:main:merged-full" };
         const old = ensureProfileForEmail("old@example.test", { env: state.env });
         const current = ensureProfileForEmail("current@example.test", { env: state.env });
@@ -186,10 +186,10 @@ describe("SQLite session participants", () => {
   );
 
   it("keeps the admission bound, unknown first time, reset history, and deletion ownership", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const scope = { agentId: "main", env: state.env, sessionKey: "agent:main:bounded" };
       await upsertSessionEntryCore(scope, { sessionId: "bounded", updatedAt: 1 });
-      const database = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       database.db.exec("DROP TABLE session_participants");
       expect(listSessionParticipantsReadOnly(scope).get(scope.sessionKey)).toBeUndefined();
       expect(
@@ -241,7 +241,7 @@ describe("SQLite session participants", () => {
   });
 
   it("preserves over-bound repair histories and does not inflate retried cross-store copies", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sourceScope = { agentId: "source", env: state.env, sessionKey: "agent:source:shared" };
       const targetScope = { agentId: "main", env: state.env, sessionKey: "agent:main:shared" };
       await upsertSessionEntryCore(sourceScope, { sessionId: "source", updatedAt: 1 });
@@ -257,8 +257,8 @@ describe("SQLite session participants", () => {
         });
       }
       recordSessionParticipant(sourceScope, { identity: profile("profile-0"), promptedAt: 30 });
-      const source = openOpenClawAgentDatabase({ agentId: "source", env: state.env });
-      const target = openOpenClawAgentDatabase({ agentId: "main", env: state.env });
+      const source = openCarapaceAgentDatabase({ agentId: "source", env: state.env });
+      const target = openCarapaceAgentDatabase({ agentId: "main", env: state.env });
       copySessionNodeArtifactsForRepair(
         source,
         target,

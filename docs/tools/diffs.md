@@ -21,7 +21,7 @@ The [Control UI](/web/control-ui) already highlights inline tool diffs and sessi
 <Steps>
   <Step title="Install the plugin">
     ```bash
-    openclaw plugins install diffs
+    carapace plugins install diffs
     ```
   </Step>
   <Step title="Enable the plugin">
@@ -156,7 +156,7 @@ Common aliases (`js`, `ts`, `bash`, `md`, `yml`, `c++`, `dockerfile`, `rb`, `kt`
 Install the Diff Viewer Language Pack plugin for more languages (Astro, Vue, Svelte, MDX, GraphQL, Terraform/HCL, Nix, Clojure, Elixir, Haskell, OCaml, Scala, Zig, Solidity, Verilog/VHDL, Fortran, MATLAB, LaTeX, Mermaid, Sass/Less/SCSS, Nginx, Apache, CSV, dotenv, INI, diff, and more):
 
 ```bash
-openclaw plugins install clawhub:@openclaw/diffs-language-pack
+carapace plugins install clawhub:@carapace/diffs-language-pack
 ```
 
 Without the pack, unsupported languages still render as readable plain text. See [Diffs Language Pack plugin](/plugins/reference/diffs-language-pack) and [Shiki languages](https://shiki.style/languages) for the upstream catalog.
@@ -210,7 +210,7 @@ Patches that touch more than one file start with a changed-files summary card: t
 
 ## Plugin defaults
 
-Set plugin-wide defaults in `~/.openclaw/openclaw.json`:
+Set plugin-wide defaults in `~/.carapace/carapace.json`:
 
 ```json5
 {
@@ -258,7 +258,7 @@ Supported `defaults` keys: `fontFamily`, `fontSize`, `lineSpacing`, `layout`, `s
       diffs: {
         enabled: true,
         config: {
-          viewerBaseUrl: "https://gateway.example.com/openclaw",
+          viewerBaseUrl: "https://gateway.example.com/carapace",
         },
       },
     },
@@ -291,8 +291,8 @@ Supported `defaults` keys: `fontFamily`, `fontSize`, `lineSpacing`, `layout`, `s
 
 ## Artifact lifecycle and storage
 
-- Viewer HTML and metadata live in the shared `state/openclaw.sqlite` database under the Diffs plugin blob namespace. HTML is gzip-compressed; SQLite stores only a SHA-256 hash of the random URL token, not the token itself.
-- Rendered PNG/PDF files remain temporary materializations under `$TMPDIR/openclaw-diffs` because channel delivery requires a file path. SQLite owns their expiry metadata; no JSON sidecars are written.
+- Viewer HTML and metadata live in the shared `state/carapace.sqlite` database under the Diffs plugin blob namespace. HTML is gzip-compressed; SQLite stores only a SHA-256 hash of the random URL token, not the token itself.
+- Rendered PNG/PDF files remain temporary materializations under `$TMPDIR/carapace-diffs` because channel delivery requires a file path. SQLite owns their expiry metadata; no JSON sidecars are written.
 - Default artifact TTL: 30 minutes. Maximum accepted TTL: 6 hours.
 - Cleanup runs opportunistically after each artifact create call. Expired SQLite rows are deleted first, followed by any corresponding PNG/PDF directory.
 - A fallback sweep removes rowless temporary folders older than 24 hours. Legacy `meta.json`, `file-meta.json`, and `viewer.html` caches are not imported or read.
@@ -339,10 +339,10 @@ Resolution order:
 
 <Steps>
   <Step title="Config">
-    `browser.executablePath` in OpenClaw config.
+    `browser.executablePath` in Carapace config.
   </Step>
   <Step title="Environment variables">
-    - `OPENCLAW_BROWSER_EXECUTABLE_PATH`
+    - `CARAPACE_BROWSER_EXECUTABLE_PATH`
     - `BROWSER_EXECUTABLE_PATH`
     - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
 

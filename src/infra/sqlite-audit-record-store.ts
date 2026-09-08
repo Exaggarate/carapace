@@ -1,12 +1,12 @@
 // Shared SQLite storage for bounded diagnostic audit records.
 import type { DatabaseSync } from "node:sqlite";
 import type { Selectable } from "kysely";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -14,8 +14,8 @@ import {
 } from "./kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "./sqlite-number.js";
 
-type DiagnosticEventsTable = OpenClawStateKyselyDatabase["diagnostic_events"];
-type AuditRecordDatabase = Pick<OpenClawStateKyselyDatabase, "diagnostic_events">;
+type DiagnosticEventsTable = CarapaceStateKyselyDatabase["diagnostic_events"];
+type AuditRecordDatabase = Pick<CarapaceStateKyselyDatabase, "diagnostic_events">;
 type DiagnosticEventRow = Pick<
   Selectable<DiagnosticEventsTable>,
   "event_key" | "payload_json" | "created_at" | "sequence"
@@ -112,7 +112,7 @@ function pruneAuditRecords(params: {
 
 /** Opens one bounded audit-record scope in the shared state database. */
 export function createSqliteAuditRecordStore<T>(
-  options: OpenClawStateDatabaseOptions & { scope: string; maxEntries: number },
+  options: CarapaceStateDatabaseOptions & { scope: string; maxEntries: number },
 ) {
   const scope = options.scope;
   const maxEntries = Math.max(1, Math.floor(options.maxEntries));
@@ -180,7 +180,7 @@ export function createSqliteAuditRecordStore<T>(
   return {
     register(key: string, value: T, createdAt = Date.now()): void {
       const record = prepareRecord({ key, value, createdAt });
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         insertRecord(database.db, {
           ...record,
           sequence: nextAuditSequence({ database: database.db, scope, legacy: false }),
@@ -197,12 +197,12 @@ export function createSqliteAuditRecordStore<T>(
     },
     upsert(key: string, value: T, createdAt = Date.now()): void {
       const record = prepareRecord({ key, value, createdAt });
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         upsertPreparedRecord(database.db, record);
       }, options);
     },
     delete(key: string): void {
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         deleteRecord(database.db, key);
       }, options);
     },
@@ -215,7 +215,7 @@ export function createSqliteAuditRecordStore<T>(
       const expectedPayloadJson = expectedValue === null ? null : JSON.stringify(expectedValue);
       const record = value === null ? null : prepareRecord({ key, value, createdAt });
       let updated = false;
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         const current = executeSqliteQueryTakeFirstSync(
           database.db,
           getAuditRecordKysely(database.db)
@@ -243,7 +243,7 @@ export function createSqliteAuditRecordStore<T>(
       }
       // Legacy imports can contain tens of thousands of rows. Serialize first,
       // then assign ordered negative sequences before runtime audit history.
-      runOpenClawStateWriteTransaction((database) => {
+      runCarapaceStateWriteTransaction((database) => {
         let sequence = nextAuditSequence({ database: database.db, scope, legacy: true });
         for (const record of prepared) {
           insertRecord(database.db, { ...record, sequence });
@@ -253,10 +253,10 @@ export function createSqliteAuditRecordStore<T>(
       }, options);
     },
     size(): number {
-      return countAuditRecords(openOpenClawStateDatabase(options).db, scope);
+      return countAuditRecords(openCarapaceStateDatabase(options).db, scope);
     },
     entries(): SqliteAuditRecordEntry<T>[] {
-      const database = openOpenClawStateDatabase(options);
+      const database = openCarapaceStateDatabase(options);
       return executeSqliteQuerySync(
         database.db,
         getAuditRecordKysely(database.db)
@@ -277,7 +277,7 @@ export function createSqliteAuditRecordStore<T>(
       if (limit === 0) {
         return [];
       }
-      const database = openOpenClawStateDatabase(options);
+      const database = openCarapaceStateDatabase(options);
       const baseQuery = getAuditRecordKysely(database.db)
         .selectFrom("diagnostic_events")
         .select(["event_key", "payload_json", "created_at", "sequence"])

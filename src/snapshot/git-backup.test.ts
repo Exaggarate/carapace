@@ -10,13 +10,13 @@ import { readBackupFreshness } from "../commands/backup-health.js";
 import { createTestRuntime } from "../commands/test-runtime-config-helpers.js";
 import { executeGitCommand, requireGitCommand as requireGit } from "../infra/git-exec.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { createPathResolutionEnv, withEnvAsync } from "../test-utils/env.js";
 import { dumpGitBackupDatabase, restoreGitBackupDirectory } from "./git-backup-codec.js";
 import { createGitBackup, initializeGitBackupRepository, readGitBackupLog } from "./git-backup.js";
@@ -77,7 +77,7 @@ vi.mock("./local-repository.js", async (importOriginal) => {
 const roots: string[] = [];
 
 async function tempRoot(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-git-backup-test-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-git-backup-test-"));
   roots.push(root);
   return root;
 }
@@ -87,7 +87,7 @@ afterEach(async () => {
   mocks.pushDiagnostic = undefined;
   mocks.snapshotRepositoryError = undefined;
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await Promise.all(
     roots.splice(0).map(async (root) => await fs.rm(root, { recursive: true, force: true })),
   );
@@ -98,7 +98,7 @@ async function createFormatFixture(databasePath: string): Promise<void> {
   try {
     await loadSqliteVecExtension({ db: database });
     database.exec(`
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};
+      PRAGMA user_version = ${CARAPACE_STATE_SCHEMA_VERSION};
       CREATE TABLE schema_meta (
         meta_key TEXT NOT NULL PRIMARY KEY,
         role TEXT NOT NULL,
@@ -153,7 +153,7 @@ async function createFormatFixture(databasePath: string): Promise<void> {
            (meta_key, role, schema_version, agent_id, app_version, created_at, updated_at)
          VALUES ('primary', 'global', ?, NULL, NULL, 1, 1)`,
       )
-      .run(OPENCLAW_STATE_SCHEMA_VERSION);
+      .run(CARAPACE_STATE_SCHEMA_VERSION);
     database
       .prepare("INSERT INTO content (id, body, huge, bytes, optional) VALUES (?, ?, ?, ?, ?)")
       .run(1, "hello lobster", 9_007_199_254_740_993n, Buffer.from([0, 1, 254, 255]), "");
@@ -196,7 +196,7 @@ function createAgentFixture(databasePath: string, agentId: string): void {
   const database = new DatabaseSync(databasePath);
   try {
     database.exec(`
-      PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION};
+      PRAGMA user_version = ${CARAPACE_AGENT_SCHEMA_VERSION};
       CREATE TABLE schema_meta (
         meta_key TEXT NOT NULL PRIMARY KEY,
         role TEXT NOT NULL,
@@ -213,7 +213,7 @@ function createAgentFixture(databasePath: string, agentId: string): void {
            (meta_key, role, schema_version, agent_id, app_version, created_at, updated_at)
          VALUES ('primary', 'agent', ?, ?, NULL, 1, 1)`,
       )
-      .run(OPENCLAW_AGENT_SCHEMA_VERSION, agentId);
+      .run(CARAPACE_AGENT_SCHEMA_VERSION, agentId);
   } finally {
     database.close();
   }
@@ -257,13 +257,13 @@ function createStateDatabaseFixture(root: string): {
   database: { path: string; identity: { role: "global" } };
 } {
   const stateDir = path.join(root, "state");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-  openOpenClawStateDatabase({ env });
-  closeOpenClawStateDatabaseForTest();
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+  openCarapaceStateDatabase({ env });
+  closeCarapaceStateDatabaseForTest();
   return {
     stateDir,
     database: {
-      path: resolveOpenClawStateSqlitePath(env),
+      path: resolveCarapaceStateSqlitePath(env),
       identity: { role: "global" },
     },
   };
@@ -283,7 +283,7 @@ describe("Git-backed SQLite snapshots", () => {
       path.join(stateAlias, "backup"),
     ]) {
       await expect(initializeGitBackupRepository({ repositoryPath, stateDir })).rejects.toThrow(
-        `Git backup repository must be outside the OpenClaw state directory: ${stateDir}`,
+        `Git backup repository must be outside the Carapace state directory: ${stateDir}`,
       );
     }
   });
@@ -310,7 +310,7 @@ describe("Git-backed SQLite snapshots", () => {
     const { stateDir, database } = createStateDatabaseFixture(root);
     const repositoryPath = path.join(root, "repository");
     await initializeGitBackupRepository({ repositoryPath, stateDir });
-    await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+    await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
     await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
     const created = await createGitBackup({ repositoryPath, stateDir, databases: [database] });
     const unchanged = await createGitBackup({ repositoryPath, stateDir, databases: [database] });
@@ -324,20 +324,20 @@ describe("Git-backed SQLite snapshots", () => {
     const root = await fs.realpath(await tempRoot());
     const { stateDir } = createStateDatabaseFixture(root);
     const agentDir = path.join(root, "external-agent");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     await fs.mkdir(agentDir, { recursive: true });
-    const { closeOpenClawAgentDatabaseByPath, openOpenClawAgentDatabase } =
-      await import("../state/openclaw-agent-db.js");
-    const agentDatabase = openOpenClawAgentDatabase({
+    const { closeCarapaceAgentDatabaseByPath, openCarapaceAgentDatabase } =
+      await import("../state/carapace-agent-db.js");
+    const agentDatabase = openCarapaceAgentDatabase({
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
-      path: path.join(agentDir, "openclaw-agent.sqlite"),
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
+      path: path.join(agentDir, "carapace-agent.sqlite"),
     });
-    closeOpenClawAgentDatabaseByPath(agentDatabase.path);
+    closeCarapaceAgentDatabaseByPath(agentDatabase.path);
     await fs.writeFile(configPath, JSON.stringify({ agents: { entries: { main: { agentDir } } } }));
 
     await withEnvAsync(
-      { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_CONFIG_PATH: configPath },
+      { CARAPACE_STATE_DIR: stateDir, CARAPACE_CONFIG_PATH: configPath },
       async () => {
         for (const { scope, selection } of [
           { scope: "explicit", selection: { agents: ["main"] } },
@@ -369,7 +369,7 @@ describe("Git-backed SQLite snapshots", () => {
     const { stateDir, database } = createStateDatabaseFixture(root);
     const repositoryPath = path.join(root, "repository");
     await initializeGitBackupRepository({ repositoryPath, stateDir });
-    await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+    await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
     await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
     await fs.writeFile(path.join(repositoryPath, "unrelated.txt"), "operator-owned\n");
     await requireGit(repositoryPath, ["add", "unrelated.txt"]);
@@ -415,7 +415,7 @@ describe("Git-backed SQLite snapshots", () => {
 
     await expect(
       createGitBackup({ repositoryPath, stateDir, databases: [database] }),
-    ).rejects.toThrow(/repository must be dedicated to OpenClaw backups/u);
+    ).rejects.toThrow(/repository must be dedicated to Carapace backups/u);
     await expect(fs.readFile(operatorFile, "utf8")).resolves.toBe("operator-owned\n");
   });
 
@@ -445,7 +445,7 @@ describe("Git-backed SQLite snapshots", () => {
 
     await expect(
       createGitBackup({ repositoryPath, stateDir, databases: [database], all: true }),
-    ).rejects.toThrow(/repository must be dedicated to OpenClaw backups/u);
+    ).rejects.toThrow(/repository must be dedicated to Carapace backups/u);
     await expect(fs.readFile(unownedFile, "utf8")).resolves.toBe("operator-owned\n");
     await expect(
       fs.readFile(path.join(ownedAgentPath, "manifest.json"), "utf8"),
@@ -512,7 +512,7 @@ describe("Git-backed SQLite snapshots", () => {
       await fs.mkdir(stateDir);
 
       await initializeGitBackupRepository({ repositoryPath, stateDir });
-      await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+      await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
       await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
       await fs.writeFile(path.join(repositoryPath, "README.md"), "backup\n");
       await requireGit(repositoryPath, ["add", "README.md"]);
@@ -546,7 +546,7 @@ describe("Git-backed SQLite snapshots", () => {
     expect(result.commit).toMatch(/^[a-f0-9]{40}$/u);
     expect(
       await requireGit(repositoryPath, ["log", "-1", "--format=%an <%ae>"], { env: gitEnv }),
-    ).toBe("OpenClaw <backup@openclaw.local>");
+    ).toBe("Carapace <backup@carapace.local>");
     expect(
       await requireGit(repositoryPath, ["config", "--local", "--get", "user.email"], {
         env: gitEnv,
@@ -573,10 +573,10 @@ describe("Git-backed SQLite snapshots", () => {
       ].join("\n"),
     };
     await initializeGitBackupRepository({ repositoryPath, stateDir, remote });
-    await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+    await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
     await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
 
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const runtime = createTestRuntime();
       const result = await backupGitCreateCommand(runtime, {
         repository: repositoryPath,
@@ -633,13 +633,13 @@ describe("Git-backed SQLite snapshots", () => {
     await requireGit(root, ["init", repositoryPath]);
     await requireGit(repositoryPath, [
       "-c",
-      "user.name=OpenClaw Backup Test",
+      "user.name=Carapace Backup Test",
       "-c",
       "user.email=backup@example.invalid",
       "commit",
       "--allow-empty",
       "-m",
-      "openclaw backup fixture",
+      "carapace backup fixture",
     ]);
     await requireGit(repositoryPath, ["checkout", "--detach", "HEAD"]);
     mocks.logDiagnostic = {
@@ -689,13 +689,13 @@ describe("Git-backed SQLite snapshots", () => {
       repositoryPath,
       [
         "-c",
-        "user.name=OpenClaw Backup Test",
+        "user.name=Carapace Backup Test",
         "-c",
         "user.email=backup@example.invalid",
         "commit-tree",
         tree,
       ],
-      { input: `openclaw backup ${"x".repeat(17 * 1024 * 1024)} ${remote}\n` },
+      { input: `carapace backup ${"x".repeat(17 * 1024 * 1024)} ${remote}\n` },
     );
     await fs.writeFile(path.join(repositoryPath, ".git", "HEAD"), `${commit}\n`);
 
@@ -749,7 +749,7 @@ describe("Git-backed SQLite snapshots", () => {
     const remotePath = path.join(root, "remote.git");
     await requireGit(root, ["init", "--bare", remotePath]);
     await initializeGitBackupRepository({ repositoryPath, stateDir, remote: remotePath });
-    await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+    await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
     await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
     await fs.writeFile(path.join(repositoryPath, "unrelated.txt"), "operator-owned\n");
     await requireGit(repositoryPath, ["add", "unrelated.txt"]);
@@ -757,7 +757,7 @@ describe("Git-backed SQLite snapshots", () => {
 
     const warning =
       "repository history contains non-backup commits; use a dedicated backup repository";
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const result = await backupGitCreateCommand(createTestRuntime(), {
         repository: repositoryPath,
         global: true,
@@ -782,7 +782,7 @@ describe("Git-backed SQLite snapshots", () => {
     const remotePath = path.join(root, "remote.git");
     await requireGit(root, ["init", "--bare", remotePath]);
     await initializeGitBackupRepository({ repositoryPath, stateDir, remote: remotePath });
-    await requireGit(repositoryPath, ["config", "user.name", "OpenClaw Backup Test"]);
+    await requireGit(repositoryPath, ["config", "user.name", "Carapace Backup Test"]);
     await requireGit(repositoryPath, ["config", "user.email", "backup@example.invalid"]);
 
     const result = await createGitBackup({
@@ -935,7 +935,7 @@ describe("Git-backed SQLite snapshots", () => {
   it("redacts secret machine-state keys while retaining ordinary machine state", async () => {
     const root = await tempRoot();
     const { stateDir, database } = createStateDatabaseFixture(root);
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const nodeSecret = "synthetic-node-host-gateway-secret";
     const pushSecret = "synthetic-web-push-private-key";
     writeConfigMachineState("nodeHost.config", { gateway: { token: nodeSecret } }, { env });
@@ -945,7 +945,7 @@ describe("Git-backed SQLite snapshots", () => {
     writeConfigMachineState("authProfiles.store", { profiles: { openai: authSecret } }, { env });
     writeConfigMachineState("authProfiles.state", { active: authSecret }, { env });
     writeConfigMachineState("sidebar.sectionOrder", ["first", "second"], { env });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const outputPath = path.join(root, "dump");
     const manifest = await dumpGitBackupDatabase({

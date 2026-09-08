@@ -1,8 +1,8 @@
 import {
   safeParseJson as safeParseJsonFromRoot,
   safeParseJsonRecord as safeParseJsonRecordFromRoot,
-} from "@openclaw/normalization-core";
-import { safeParseJson, safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
+} from "@carapace/normalization-core";
+import { safeParseJson, safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
 import { describe, expect, it } from "vitest";
 
 describe("json-coercion", () => {

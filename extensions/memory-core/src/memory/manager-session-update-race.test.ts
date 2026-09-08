@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { listSessionTranscriptCorpusEntriesForAgent } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
-import type { MemorySessionSyncTarget } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { deleteSessionEntry, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { resolveOpenClawAgentSqlitePath } from "openclaw/plugin-sdk/sqlite-runtime";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { listSessionTranscriptCorpusEntriesForAgent } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
+import type { MemorySessionSyncTarget } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { deleteSessionEntry, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
+import { resolveCarapaceAgentSqlitePath } from "carapace/plugin-sdk/sqlite-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   recordMemoryEntryOrigins,
@@ -128,7 +128,7 @@ describe("memory session update sync", () => {
       await activeSync;
       await queuedSessionSync;
 
-      const observer = new DatabaseSync(resolveOpenClawAgentSqlitePath({ agentId: "main" }), {
+      const observer = new DatabaseSync(resolveCarapaceAgentSqlitePath({ agentId: "main" }), {
         readOnly: true,
       });
       try {
@@ -236,7 +236,7 @@ describe("memory session update sync", () => {
         role: "assistant",
         timestamp: Date.now(),
         content: [{ type: "text", text: "A narrative derived from that violet fragment." }],
-        __openclaw: { runId: scenario.runId },
+        __carapace: { runId: scenario.runId },
       },
     });
     await expect(
@@ -406,7 +406,7 @@ describe("memory session update sync", () => {
     const memoryPath = path.join(fixture.paths.workspace, "MEMORY.md");
     await fs.writeFile(
       memoryPath,
-      "# Memory\n<!-- openclaw-memory-promotion:private-entry -->\n- Private violet alpha fragment.\n",
+      "# Memory\n<!-- carapace-memory-promotion:private-entry -->\n- Private violet alpha fragment.\n",
     );
     recordMemoryEntryOrigins({
       agentId: "main",
@@ -490,11 +490,11 @@ describe("memory session update sync", () => {
     const userPath = path.join(fixture.paths.workspace, "USER.md");
     await fs.writeFile(
       memoryPath,
-      "# Memory\n<!-- openclaw-memory-promotion:private-first -->\n- Private violet alpha fragment.\n",
+      "# Memory\n<!-- carapace-memory-promotion:private-first -->\n- Private violet alpha fragment.\n",
     );
     await fs.writeFile(
       userPath,
-      "# User\n<!-- openclaw-memory-promotion:private-second -->\n- Private violet beta fragment.\n",
+      "# User\n<!-- carapace-memory-promotion:private-second -->\n- Private violet beta fragment.\n",
     );
     recordMemoryEntryOrigins({
       agentId: "main",
@@ -587,7 +587,7 @@ describe("memory session update sync", () => {
     const memoryPath = path.join(fixture.paths.workspace, "MEMORY.md");
     await fs.writeFile(
       memoryPath,
-      "# Memory\n<!-- openclaw-memory-promotion:shared-private -->\n- Private violet shared fragment.\n",
+      "# Memory\n<!-- carapace-memory-promotion:shared-private -->\n- Private violet shared fragment.\n",
     );
     for (const agentId of ["main", "peer"]) {
       recordMemoryEntryOrigins({
@@ -617,7 +617,7 @@ describe("memory session update sync", () => {
       .all();
     expect(snapshot.some((row) => String(row.text).includes("Private violet"))).toBe(true);
     expect(
-      snapshot.some((row) => String(row.text).includes("openclaw-memory-promotion:shared-private")),
+      snapshot.some((row) => String(row.text).includes("carapace-memory-promotion:shared-private")),
     ).toBe(true);
     const privateHashes = new Set(snapshot.map((row) => row.hash));
     expect(

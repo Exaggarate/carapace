@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import { resolveAgentEntry } from "../agents/agent-scope-config.js";
 import * as configModule from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 
 type ConfigSnapshot = {
@@ -10,31 +10,31 @@ type ConfigSnapshot = {
   path: string;
   hash: string | null;
   parsed: unknown;
-  sourceConfigBeforeMigrations?: OpenClawConfig;
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
-  runtimeConfig?: OpenClawConfig;
+  sourceConfigBeforeMigrations?: CarapaceConfig;
+  config: CarapaceConfig;
+  sourceConfig: CarapaceConfig;
+  runtimeConfig?: CarapaceConfig;
   issues: Array<{ path?: string; message: string }>;
 };
 
 export type CommitTransform = (
-  currentConfig: OpenClawConfig,
+  currentConfig: CarapaceConfig,
   context: {
     previousHash: string | null;
     snapshot: ConfigSnapshot;
     attempt: number;
   },
 ) =>
-  | { nextConfig: OpenClawConfig; result?: unknown }
-  | Promise<{ nextConfig: OpenClawConfig; result?: unknown }>;
+  | { nextConfig: CarapaceConfig; result?: unknown }
+  | Promise<{ nextConfig: CarapaceConfig; result?: unknown }>;
 
 const mocks = vi.hoisted(() => ({
   state: {
     initialSnapshot: {} as ConfigSnapshot,
-    commitConfig: {} as OpenClawConfig,
+    commitConfig: {} as CarapaceConfig,
     commitSnapshot: {} as ConfigSnapshot,
     commitPreviousHash: "probe" as string | null,
-    persistedConfig: undefined as OpenClawConfig | undefined,
+    persistedConfig: undefined as CarapaceConfig | undefined,
   },
   events: [] as string[],
   readSnapshot: vi.fn<() => Promise<ConfigSnapshot>>(),
@@ -72,7 +72,7 @@ vi.mock("../wizard/setup.shared.js", async (importOriginal) => ({
 }));
 
 vi.mock("../commands/onboard-helpers.js", () => ({
-  applyWizardMetadata: (config: OpenClawConfig) => ({
+  applyWizardMetadata: (config: CarapaceConfig) => ({
     ...config,
     wizard: {
       ...config.wizard,
@@ -112,7 +112,7 @@ vi.mock("../infra/exec-approvals.js", () => ({
 
 vi.mock("../agents/agent-scope.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../agents/agent-scope.js")>()),
-  resolveAgentDir: (config: OpenClawConfig, agentId: string) =>
+  resolveAgentDir: (config: CarapaceConfig, agentId: string) =>
     resolveAgentEntry(config, agentId)?.agentDir ?? `/agents/${agentId}`,
 }));
 
@@ -128,13 +128,13 @@ export const runtime: RuntimeEnv = {
 
 export function snapshot(
   hash: string | null,
-  sourceConfig: OpenClawConfig,
-  runtimeConfig: OpenClawConfig = sourceConfig,
+  sourceConfig: CarapaceConfig,
+  runtimeConfig: CarapaceConfig = sourceConfig,
 ): ConfigSnapshot {
   return {
     exists: hash !== null,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     hash,
     parsed: structuredClone(sourceConfig),
     sourceConfigBeforeMigrations: structuredClone(sourceConfig),
@@ -161,7 +161,7 @@ export function codexPluginMetadataSnapshot(homeScope: "agent" | "user") {
           hooks: [],
           rootDir: "/tmp/codex",
           source: "/tmp/codex/index.js",
-          manifestPath: "/tmp/codex/openclaw.plugin.json",
+          manifestPath: "/tmp/codex/carapace.plugin.json",
           configSchema: {
             type: "object",
             additionalProperties: false,
@@ -185,9 +185,9 @@ export function codexPluginMetadataSnapshot(homeScope: "agent" | "user") {
 }
 
 export function materializePluginDefaults(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginMetadataSnapshot: ReturnType<typeof codexPluginMetadataSnapshot>,
-): OpenClawConfig {
+): CarapaceConfig {
   const result = configModule.validateConfigObjectWithPlugins(config, { pluginMetadataSnapshot });
   if (!result.ok) {
     throw new Error(result.issues[0]?.message ?? "test config failed validation");
@@ -199,18 +199,18 @@ export function baseParams(
   overrides: Partial<Parameters<typeof import("./setup-apply.js").applySystemAgentSetup>[0]> = {},
 ) {
   return {
-    workspace: "/tmp/openclaw-workspace",
+    workspace: "/tmp/carapace-workspace",
     surface: "gateway" as const,
     runtime,
     ...overrides,
   };
 }
 
-export function mainAgentModelConfig(model = "openai/gpt-5.5"): OpenClawConfig {
+export function mainAgentModelConfig(model = "openai/gpt-5.5"): CarapaceConfig {
   return { agents: { defaults: { model }, entries: { main: { default: true } } } };
 }
 
-export function setSetupCommitState(config: OpenClawConfig, initialSnapshot: ConfigSnapshot): void {
+export function setSetupCommitState(config: CarapaceConfig, initialSnapshot: ConfigSnapshot): void {
   mocks.state.initialSnapshot = initialSnapshot;
   mocks.state.commitConfig = config;
   mocks.state.commitSnapshot = initialSnapshot;

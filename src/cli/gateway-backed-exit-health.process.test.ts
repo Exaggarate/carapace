@@ -85,7 +85,7 @@ describe("gateway-backed CLI process exit", () => {
         seeded,
       });
       const before = await snapshotSharedStateArtifacts(fixture.stateDir);
-      expect(Object.keys(before).includes("openclaw.sqlite")).toBe(seeded);
+      expect(Object.keys(before).includes("carapace.sqlite")).toBe(seeded);
 
       const result = await runIsolatedGatewayCli({ ...fixture, args });
 
@@ -95,9 +95,9 @@ describe("gateway-backed CLI process exit", () => {
   );
 
   it("keeps gateway auth failures machine-readable through the real health entry point", async () => {
-    const root = tempDirs.make("openclaw-gateway-auth-json-");
+    const root = tempDirs.make("carapace-gateway-auth-json-");
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const port = await getFreePort();
     await fs.mkdir(stateDir, { recursive: true });
 
@@ -106,7 +106,7 @@ describe("gateway-backed CLI process exit", () => {
       root,
       stateDir,
       configPath,
-      env: { OPENCLAW_GATEWAY_PORT: String(port) },
+      env: { CARAPACE_GATEWAY_PORT: String(port) },
     });
 
     expect(result, result.stderr).toMatchObject({ code: 1, signal: null, stderr: "" });
@@ -120,7 +120,7 @@ describe("gateway-backed CLI process exit", () => {
   });
 
   it("preserves pre-hello rate-limit details through the real health entry point", async () => {
-    const root = tempDirs.make("openclaw-gateway-rate-limit-json-");
+    const root = tempDirs.make("carapace-gateway-rate-limit-json-");
     const gateway = await startRateLimitedGateway();
     const { stateDir, configPath } = await prepareGatewayCliFixture(root, {
       mode: "remote",

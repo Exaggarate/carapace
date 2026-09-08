@@ -2,10 +2,10 @@
 import { html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import { formatDurationCompact, formatDurationHuman } from "../lib/format.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { PollController } from "../lit/poll-controller.ts";
 
-class ElapsedTime extends OpenClawLightDomContentsElement {
+class ElapsedTime extends CarapaceLightDomContentsElement {
   @property({ type: Number }) startMs: number | null = null;
   @property({ type: Number }) endMs: number | null = null;
   @property({ type: String }) minimumUnit: "second" | "minute" = "second";
@@ -49,6 +49,6 @@ class ElapsedTime extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-elapsed-time")) {
-  customElements.define("openclaw-elapsed-time", ElapsedTime);
+if (!customElements.get("carapace-elapsed-time")) {
+  customElements.define("carapace-elapsed-time", ElapsedTime);
 }

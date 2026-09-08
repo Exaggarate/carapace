@@ -1,8 +1,8 @@
 import { once } from "node:events";
 import http from "node:http";
 import net from "node:net";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { clearRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { clearRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { afterEach, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import {
@@ -62,7 +62,7 @@ it.each(["peer-close", "preparation-failure", "superseded"] as const)(
       const peer = net.createConnection({ host: "127.0.0.1", port: address.port });
       const candidate = new WebSocket(
         `ws://127.0.0.1:${address.port}/browser/extension?profile=chrome`,
-        ["openclaw-extension-relay", `openclaw-extension-token.${token}`],
+        ["carapace-extension-relay", `carapace-extension-token.${token}`],
         {
           origin: "chrome-extension://legacy-ingress-cleanup",
           createConnection: () => peer,

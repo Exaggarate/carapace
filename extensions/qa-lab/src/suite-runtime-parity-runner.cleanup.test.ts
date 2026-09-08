@@ -18,7 +18,7 @@ const tempDirs = createTempDirHarness();
 
 const mocks = vi.hoisted(() => ({
   captureRuntimeParityCell: vi.fn(
-    async (params: { runtime: "openclaw" | "codex"; wallClockMs: number }) => ({
+    async (params: { runtime: "carapace" | "codex"; wallClockMs: number }) => ({
       runtime: params.runtime,
       transcriptBytes: "",
       toolCalls: [],
@@ -65,10 +65,10 @@ const mocks = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness", () => ({
+vi.mock("carapace/plugin-sdk/agent-harness", () => ({
   disposeRegisteredAgentHarnesses: mocks.disposeRegisteredAgentHarnesses,
 }));
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: mocks.fetchWithSsrFGuard,
 }));
 vi.mock("./crabline-transport.js", () => ({
@@ -196,7 +196,7 @@ function runCleanupTestSuite(params: {
     selectedScenarios: [makeQaSuiteTestScenario("runtime-cleanup")],
     startLab: async () => params.lab,
     progressEnabled: params.progressEnabled ?? false,
-    runtimePair: ["openclaw", "codex"],
+    runtimePair: ["carapace", "codex"],
   });
 }
 
@@ -225,7 +225,7 @@ describe("runtime parity suite transport cleanup", () => {
       startedScenarioIds: ["runtime-cleanup"],
       watchUrl: lab.baseUrl,
       runtimeParityCell: {
-        runtime: params?.forcedRuntime ?? "openclaw",
+        runtime: params?.forcedRuntime ?? "carapace",
         transcriptBytes: "",
         toolCalls: [],
         finalText: "ok",
@@ -276,7 +276,7 @@ describe("runtime parity suite transport cleanup", () => {
       startedScenarioIds: [],
       watchUrl: lab.baseUrl,
       runtimeParityCell: {
-        runtime: params?.forcedRuntime ?? "openclaw",
+        runtime: params?.forcedRuntime ?? "carapace",
         transcriptBytes: "",
         toolCalls: [],
         finalText: "ok",
@@ -295,7 +295,7 @@ describe("runtime parity suite transport cleanup", () => {
   it.each([true, false])(
     "preserves runtime preparation publication ownership with parity=%s",
     async (parity) => {
-      vi.stubEnv("OPENCLAW_QA_SUITE_PROGRESS", "1");
+      vi.stubEnv("CARAPACE_QA_SUITE_PROGRESS", "1");
       mocks.writeQaSuiteArtifacts.mockClear();
       const repoRoot = await tempDirs.makeTempDir("qa-runtime-publication-");
       const scenario = makeQaSuiteTestScenario("runtime-cleanup");
@@ -335,7 +335,7 @@ describe("runtime parity suite transport cleanup", () => {
           concurrency: 1,
           scenarioIds: [scenario.id],
           startLab,
-          ...(parity ? { runtimePair: ["openclaw", "codex"] } : {}),
+          ...(parity ? { runtimePair: ["carapace", "codex"] } : {}),
         });
 
         const completionLines = stderrWrite.mock.calls

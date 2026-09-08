@@ -214,7 +214,7 @@ describe("scripts/profile-extension-memory", () => {
       expected: [{ dir: "internal", file: "dist/extensions/internal/index.js" }],
     },
   ])("profiles $name", ({ files, selected, expected }) => {
-    const root = realpathSync(mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-test-")));
+    const root = realpathSync(mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-test-")));
     try {
       for (const relativeFile of [
         ...files,
@@ -269,7 +269,7 @@ describe("scripts/profile-extension-memory", () => {
   });
 
   it("bounds noisy child output without losing RSS samples", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-test-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-test-"));
     try {
       const extensionDir = path.join(root, "dist", "extensions", "noisy");
       const reportPath = path.join(root, "report.json");
@@ -306,10 +306,10 @@ describe("scripts/profile-extension-memory", () => {
   });
 
   it("preserves split UTF-8 child output through EOF and RSS accounting", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-utf8-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-utf8-"));
     const hookPath = path.join(root, "hook.mjs");
     const stdout = "stdout: café 🦞";
-    const stderr = "stderr: 東京\n__OPENCLAW_MAX_RSS_KB__=2048\nfin: é";
+    const stderr = "stderr: 東京\n__CARAPACE_MAX_RSS_KB__=2048\nfin: é";
     const splitBytes = () =>
       new Transform({
         transform(chunk: Buffer, _encoding, callback) {
@@ -353,7 +353,7 @@ describe("scripts/profile-extension-memory", () => {
   });
 
   it("creates parent directories for nested JSON report paths", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-test-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-test-"));
     try {
       const extensionDir = path.join(root, "dist", "extensions", "simple");
       const reportPath = path.join(root, ".artifacts", "memory", "report.json");
@@ -374,7 +374,7 @@ describe("scripts/profile-extension-memory", () => {
   });
 
   it("uses distinct default JSON report paths for separate runs", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-test-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-test-"));
     const reportPaths: string[] = [];
     try {
       const extensionDir = path.join(root, "dist", "extensions", "simple");
@@ -392,7 +392,7 @@ describe("scripts/profile-extension-memory", () => {
         reportPaths.push(reportPath);
         expect(path.dirname(reportPath)).toBe(tmpdir());
         expect(path.basename(reportPath)).toMatch(
-          /^openclaw-extension-memory-\d+-\d+-[0-9a-f-]+\.json$/u,
+          /^carapace-extension-memory-\d+-\d+-[0-9a-f-]+\.json$/u,
         );
         expect(JSON.parse(readFileSync(reportPath, "utf8")).counts).toMatchObject({
           totalEntries: 1,
@@ -412,7 +412,7 @@ describe("scripts/profile-extension-memory", () => {
   });
 
   it("fails when a profiled plugin import fails", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-test-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-test-"));
     try {
       const extensionDir = path.join(root, "dist", "extensions", "broken");
       const reportPath = path.join(root, "report.json");
@@ -474,7 +474,7 @@ describe("scripts/profile-extension-memory", () => {
   it.runIf(process.platform !== "win32")(
     "cleans timeout descendants before resolving the case",
     async () => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-timeout-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-timeout-"));
       const hookPath = path.join(root, "rss-hook.mjs");
       const descendantPidPath = path.join(root, "descendant.pid");
       let cleanup = async () => rmSync(root, { recursive: true, force: true });
@@ -535,7 +535,7 @@ describe("scripts/profile-extension-memory", () => {
   it.runIf(process.platform !== "win32")(
     "cleans active case descendants on parent signal",
     async () => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-memory-parent-signal-"));
+      const root = mkdtempSync(path.join(tmpdir(), "carapace-extension-memory-parent-signal-"));
       const hookPath = path.join(root, "rss-hook.mjs");
       const runnerPath = path.join(root, "parent-signal-runner.mjs");
       const descendantPidPath = path.join(root, "descendant.pid");

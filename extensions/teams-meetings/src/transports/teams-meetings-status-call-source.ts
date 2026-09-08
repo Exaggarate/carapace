@@ -1,14 +1,14 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "carapace/plugin-sdk/meeting-runtime";
 
 export function teamsMeetingStatusCallSource(): string {
   return MeetingPlatformAdapter.createStatusCallSource({
     platform: {
-      audioOutputElementIdPrefix: "openclaw-teams-audio-output-",
+      audioOutputElementIdPrefix: "carapace-teams-audio-output-",
       displayName: "Teams",
       globals: {
-        audioOutputs: "__openclawTeamsAudioOutputs",
-        captions: "__openclawTeamsCaptions",
-        meeting: "__openclawTeamsMeeting",
+        audioOutputs: "__carapaceTeamsAudioOutputs",
+        captions: "__carapaceTeamsCaptions",
+        meeting: "__carapaceTeamsMeeting",
       },
       manualActionReasonPrefix: "teams",
     },

@@ -16,7 +16,7 @@ import { hasReplyPayloadContent } from "../../interactive/payload.js";
 import { stringifyRouteThreadId } from "../../plugin-sdk/channel-route.js";
 import { isCronSessionKey } from "../../routing/session-key.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
-import { CRON_DIRECT_DELIVERY_CONTEXT_KIND } from "../../shared/transcript-only-openclaw-assistant.js";
+import { CRON_DIRECT_DELIVERY_CONTEXT_KIND } from "../../shared/transcript-only-carapace-assistant.js";
 import { resolveAdmittedCronCompletionStatus } from "../completion-status.js";
 import { normalizeCronRunErrorText } from "../service/execution-errors.js";
 import type { CronResolvedDeliveryState } from "../types.js";
@@ -136,7 +136,7 @@ export async function dispatchCronDelivery(
   };
   const formatDeliveryTargetError = (error: string) =>
     params.sourceDeliveryOutcome.unverifiedMessageToolDelivery
-      ? `${error}; the agent used the message tool, but OpenClaw could not verify that message matched the cron delivery target`
+      ? `${error}; the agent used the message tool, but Carapace could not verify that message matched the cron delivery target`
       : error;
   const failDeliveryTarget = (error: string) =>
     params.withRunSession({

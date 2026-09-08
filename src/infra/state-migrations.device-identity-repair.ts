@@ -32,7 +32,7 @@ export function detectLegacyDeviceIdentity(params: {
   if (doctorAuthorized) {
     try {
       readStoredDeviceIdentityReadOnly({
-        env: { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir },
+        env: { ...(params.env ?? process.env), CARAPACE_STATE_DIR: params.stateDir },
         identityKey: IDENTITY_KEY,
       });
     } catch (error) {

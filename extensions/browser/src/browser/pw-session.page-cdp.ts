@@ -4,7 +4,7 @@
  * Opens a CDP session through Playwright pages and marks backend DOM nodes with
  * temporary browser refs for role-snapshot interactions.
  */
-import { uniqueValues } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { uniqueValues } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CDPSession, Page } from "playwright-core";
 import { readCdpMainFrameDocumentIdentity } from "./cdp-page-session.js";
 import { bindPlaywrightCdpSend } from "./pw-cdp-send.js";
@@ -12,7 +12,7 @@ import { bindPlaywrightCdpSend } from "./pw-cdp-send.js";
 type MarkBackendDomRef = { ref: string; backendDOMNodeId: number };
 
 /** Attribute used to mark DOM nodes that correspond to generated browser refs. */
-export const BROWSER_REF_MARKER_ATTRIBUTE = "data-openclaw-browser-ref";
+export const BROWSER_REF_MARKER_ATTRIBUTE = "data-carapace-browser-ref";
 
 async function withPlaywrightPageCdpSession<T>(
   page: Page,

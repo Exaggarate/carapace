@@ -187,7 +187,7 @@ export async function prepareHostedGatewayStop(
       "systemd does not permit manual stop of this Gateway service. Use its owning supervisor.",
     );
   }
-  const scopeUnit = `openclaw-stop-${randomUUID()}.scope`;
+  const scopeUnit = `carapace-stop-${randomUUID()}.scope`;
   const executor = await prepareHostedStopExecutor({
     command: ["systemctl", scope, "--no-ask-password", "--no-block", "stop", unit],
     scopeArgs: [

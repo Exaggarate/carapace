@@ -8,18 +8,18 @@ import {
   type HealthCheckContext,
   type HealthFinding,
   type HealthRepairContext,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/health";
-import { clearHealthChecksForTest } from "openclaw/plugin-sdk/plugin-test-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/health";
+import { clearHealthChecksForTest } from "carapace/plugin-sdk/plugin-test-runtime";
 import { registerPolicyDoctorChecks } from "./register.js";
 
 export let workspaceDir: string;
 
-let originalOpenClawHome: string | undefined;
+let originalCarapaceHome: string | undefined;
 
-let originalOpenClawStateDir: string | undefined;
+let originalCarapaceStateDir: string | undefined;
 
-export function cfgWithPolicy(settings: Record<string, unknown> = {}): OpenClawConfig {
+export function cfgWithPolicy(settings: Record<string, unknown> = {}): CarapaceConfig {
   return {
     plugins: {
       entries: {
@@ -32,10 +32,10 @@ export function cfgWithPolicy(settings: Record<string, unknown> = {}): OpenClawC
   };
 }
 
-type PolicyConfigFixture = OpenClawConfig & Record<string, unknown>;
+type PolicyConfigFixture = CarapaceConfig & Record<string, unknown>;
 
 export function cfgWithPolicyOverrides(
-  overrides: Partial<OpenClawConfig> = {},
+  overrides: Partial<CarapaceConfig> = {},
 ): PolicyConfigFixture {
   return { ...cfgWithPolicy(), ...overrides };
 }
@@ -48,7 +48,7 @@ export async function writePolicyFixture(
   ...json: Parameters<typeof JSON.stringify>
 ): Promise<string> {
   const [policy] = json;
-  const configPath = join(workspaceDir, "openclaw.jsonc");
+  const configPath = join(workspaceDir, "carapace.jsonc");
   await fs.writeFile(configPath, "{}", "utf-8");
   await fs.writeFile(
     join(workspaceDir, "policy.jsonc"),
@@ -58,7 +58,7 @@ export async function writePolicyFixture(
   return configPath;
 }
 
-export function ctx(configPath: string, cfg: OpenClawConfig = {}): HealthCheckContext {
+export function ctx(configPath: string, cfg: CarapaceConfig = {}): HealthCheckContext {
   return {
     mode: "lint",
     runtime: {
@@ -72,7 +72,7 @@ export function ctx(configPath: string, cfg: OpenClawConfig = {}): HealthCheckCo
   };
 }
 
-export function repairCtx(configPath: string, cfg: OpenClawConfig = {}): HealthRepairContext {
+export function repairCtx(configPath: string, cfg: CarapaceConfig = {}): HealthRepairContext {
   return {
     ...ctx(configPath, cfg),
     mode: "fix",
@@ -102,7 +102,7 @@ export async function runPolicyChecks(checkCtx: HealthCheckContext): Promise<{
 
 export async function runPolicyChecksFixture(
   policy: unknown,
-  cfg: OpenClawConfig = cfgWithPolicy(),
+  cfg: CarapaceConfig = cfgWithPolicy(),
 ) {
   return runPolicyChecks(ctx(await writePolicyFixture(policy), cfg));
 }
@@ -140,36 +140,36 @@ export async function runPolicyRepairCheck(checkId: string, repairCheckCtx: Heal
 
 export const setupPolicyDoctorTest = async () => {
   clearHealthChecksForTest();
-  originalOpenClawHome = process.env.OPENCLAW_HOME;
-  originalOpenClawStateDir = process.env.OPENCLAW_STATE_DIR;
+  originalCarapaceHome = process.env.CARAPACE_HOME;
+  originalCarapaceStateDir = process.env.CARAPACE_STATE_DIR;
   workspaceDir = await fs.mkdtemp(join(tmpdir(), "policy-doctor-"));
-  process.env.OPENCLAW_HOME = workspaceDir;
-  delete process.env.OPENCLAW_STATE_DIR;
-  await fs.mkdir(join(workspaceDir, ".openclaw"), { recursive: true });
+  process.env.CARAPACE_HOME = workspaceDir;
+  delete process.env.CARAPACE_STATE_DIR;
+  await fs.mkdir(join(workspaceDir, ".carapace"), { recursive: true });
   try {
     await fs.symlink(
       "../exec-approvals.json",
-      join(workspaceDir, ".openclaw", "exec-approvals.json"),
+      join(workspaceDir, ".carapace", "exec-approvals.json"),
     );
   } catch (err) {
     if (typeof err !== "object" || err === null || !("code" in err) || err.code !== "EPERM") {
       throw err;
     }
-    await fs.rm(join(workspaceDir, ".openclaw"), { recursive: true, force: true });
-    await fs.symlink(workspaceDir, join(workspaceDir, ".openclaw"), "junction");
+    await fs.rm(join(workspaceDir, ".carapace"), { recursive: true, force: true });
+    await fs.symlink(workspaceDir, join(workspaceDir, ".carapace"), "junction");
   }
 };
 
 export const teardownPolicyDoctorTest = async () => {
-  if (originalOpenClawHome === undefined) {
-    delete process.env.OPENCLAW_HOME;
+  if (originalCarapaceHome === undefined) {
+    delete process.env.CARAPACE_HOME;
   } else {
-    process.env.OPENCLAW_HOME = originalOpenClawHome;
+    process.env.CARAPACE_HOME = originalCarapaceHome;
   }
-  if (originalOpenClawStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+  if (originalCarapaceStateDir === undefined) {
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalOpenClawStateDir;
+    process.env.CARAPACE_STATE_DIR = originalCarapaceStateDir;
   }
   await fs.rm(workspaceDir, { recursive: true, force: true });
   clearHealthChecksForTest();

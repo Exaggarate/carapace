@@ -82,19 +82,19 @@ vi.mock("../../plugins/plugin-lifecycle-lease.js", () => ({
   },
 }));
 
-vi.mock("../../state/openclaw-state-db.paths.js", () => ({
-  resolveOpenClawStateSqlitePath: vi.fn(() => "/tmp/openclaw.sqlite"),
+vi.mock("../../state/carapace-state-db.paths.js", () => ({
+  resolveCarapaceStateSqlitePath: vi.fn(() => "/tmp/carapace.sqlite"),
 }));
 
-vi.mock("../../state/openclaw-state-ownership.js", () => ({
-  assertOpenClawStateWriteAllowedAtPath: vi.fn(async () => undefined),
+vi.mock("../../state/carapace-state-ownership.js", () => ({
+  assertCarapaceStateWriteAllowedAtPath: vi.fn(async () => undefined),
 }));
 
 vi.mock("./shared.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./shared.js")>()),
   parseTimeoutMsOrExit: vi.fn(() => 1_000),
   readPackageVersion: vi.fn(async () => "2026.8.27"),
-  resolveUpdateRoot: vi.fn(async () => "/tmp/openclaw"),
+  resolveUpdateRoot: vi.fn(async () => "/tmp/carapace"),
   tryWriteCompletionCache: vi.fn(async () => "completed"),
 }));
 
@@ -194,7 +194,7 @@ describe("update plugin lifecycle lease boundaries", () => {
   it.each(["copied", "live"] as const)(
     "preserves the %s invocation environment through a failed phase",
     async (source) => {
-      vi.stubEnv("OPENCLAW_STATE_DIR", "/fixture/invocation-state");
+      vi.stubEnv("CARAPACE_STATE_DIR", "/fixture/invocation-state");
       const failure = new Error("phase failed");
       let observedStateDir: string | undefined;
       try {
@@ -202,14 +202,14 @@ describe("update plugin lifecycle lease boundaries", () => {
           withOwnedManagedUpdateEnv(
             source === "live" ? process.env : { ...process.env },
             async () => {
-              observedStateDir = process.env.OPENCLAW_STATE_DIR;
-              process.env.OPENCLAW_STATE_DIR = "/fixture/phase-state";
+              observedStateDir = process.env.CARAPACE_STATE_DIR;
+              process.env.CARAPACE_STATE_DIR = "/fixture/phase-state";
               throw failure;
             },
           ),
         ).rejects.toBe(failure);
         expect(observedStateDir).toBe("/fixture/invocation-state");
-        expect(process.env.OPENCLAW_STATE_DIR).toBe("/fixture/invocation-state");
+        expect(process.env.CARAPACE_STATE_DIR).toBe("/fixture/invocation-state");
       } finally {
         vi.unstubAllEnvs();
       }
@@ -218,7 +218,7 @@ describe("update plugin lifecycle lease boundaries", () => {
 
   it("returns resumed package work without Doctor completion and rereads state under the lease", async () => {
     await resumePostCoreUpdate({
-      root: "/tmp/openclaw",
+      root: "/tmp/carapace",
       channel: "stable",
       opts: { yes: true },
       timeoutMs: 1_000,

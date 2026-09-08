@@ -1,7 +1,7 @@
 // Shared process-test harness: mock Gateway servers used by CLI exit-code proofs.
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { isLoopbackIpAddress, isPrivateOrLoopbackIpAddress } from "@openclaw/net-policy/ip";
+import { isLoopbackIpAddress, isPrivateOrLoopbackIpAddress } from "@carapace/net-policy/ip";
 import { expect } from "vitest";
 import { WebSocketServer } from "ws";
 import {

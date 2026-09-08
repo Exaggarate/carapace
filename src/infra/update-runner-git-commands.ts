@@ -7,10 +7,10 @@ import type { CommandRunner } from "./update-runner-types.js";
 
 const BUILD_MAX_OLD_SPACE_MB = 8192;
 const DEV_PREFLIGHT_LINT_ENV: NodeJS.ProcessEnv = {
-  OPENCLAW_LOCAL_CHECK: "1",
-  OPENCLAW_LOCAL_CHECK_MODE: "throttled",
+  CARAPACE_LOCAL_CHECK: "1",
+  CARAPACE_LOCAL_CHECK_MODE: "throttled",
 };
-const DEV_PREFLIGHT_LINT_OPT_IN_ENV = "OPENCLAW_UPDATE_PREFLIGHT_LINT";
+const DEV_PREFLIGHT_LINT_OPT_IN_ENV = "CARAPACE_UPDATE_PREFLIGHT_LINT";
 
 export function shouldInstallWithoutScriptsOnWindows(manager: "pnpm" | "bun" | "npm"): boolean {
   return process.platform === "win32" && manager === "pnpm";
@@ -36,7 +36,7 @@ export function resolveBuildEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...env,
-    OPENCLAW_UPDATE_IN_PROGRESS: "1",
+    CARAPACE_UPDATE_IN_PROGRESS: "1",
     NODE_OPTIONS: resolveBuildNodeOptions(env.NODE_OPTIONS ?? process.env.NODE_OPTIONS),
     ...(buildCacheRoot ? { BUILD_ALL_CACHE_ROOT: buildCacheRoot } : {}),
   };

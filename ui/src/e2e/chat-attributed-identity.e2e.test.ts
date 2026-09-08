@@ -17,7 +17,7 @@ const suite = createControlUiE2eSuite({
 
 let proofArtifactDir: string | undefined;
 beforeEach(() => {
-  const parent = process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_CONTROL_UI_E2E_ARTIFACT_DIR?.trim();
   proofArtifactDir = parent
     ? createControlUiE2eArtifactDir("chat-attributed-identity", parent)
     : undefined;
@@ -163,7 +163,7 @@ suite.define(() => {
                 role: "user",
                 content: "Keep the phone transcript readable.",
                 timestamp: Date.now() - 20_000,
-                __openclaw: {
+                __carapace: {
                   senderId: identity.id,
                   senderIdentity: identity,
                   senderName: "Morgan",
@@ -246,7 +246,7 @@ suite.define(() => {
               role: "user",
               content: "Riley joined this conversation.",
               timestamp: Date.now(),
-              __openclaw: {
+              __carapace: {
                 senderId: "profile-riley",
                 senderIdentity: { type: "profile", id: "profile-riley" },
                 senderName: "Riley",
@@ -319,7 +319,7 @@ suite.define(() => {
           role: "user",
           content: "Can we keep one clear avatar and show who wrote each message?",
           timestamp: now - 120_000,
-          __openclaw: {
+          __carapace: {
             id: "riley-message",
             senderId: "profile-riley",
             senderIdentity: { type: "profile", id: "profile-riley" },
@@ -336,7 +336,7 @@ suite.define(() => {
           role: "user",
           content: "This is much easier to scan in a team conversation.",
           timestamp: now - 30_000,
-          __openclaw: {
+          __carapace: {
             id: "colin-message",
             senderId: "profile-colin",
             senderIdentity: { type: "profile", id: "profile-colin" },
@@ -353,7 +353,7 @@ suite.define(() => {
           role: "user",
           content: "My longer identity should remain fixed too.",
           timestamp: now - 10_000,
-          __openclaw: {
+          __carapace: {
             id: "alexandria-message",
             senderId: "profile-alexandria",
             senderIdentity: { type: "profile", id: "profile-alexandria" },
@@ -374,7 +374,7 @@ suite.define(() => {
       await expect(avatar).toHaveCount(1);
       await expect(avatar).toHaveText(initials);
     }
-    await expect(page.locator(".sidebar-identity-card openclaw-viewer-avatar")).toContainText("R");
+    await expect(page.locator(".sidebar-identity-card carapace-viewer-avatar")).toContainText("R");
 
     await expect(
       page.locator(".chat-group-footer--persistent-identity .chat-sender-name"),
@@ -530,7 +530,7 @@ suite.define(() => {
     const gateway = await installMockGateway(page, {
       historyMessages: [
         {
-          __openclaw: {
+          __carapace: {
             senderId: localSenderId,
             senderIdentity: { type: "profile", id: localSenderId },
             senderName: "Collin Johnson",
@@ -540,7 +540,7 @@ suite.define(() => {
           timestamp: Date.now() - 3_000,
         },
         {
-          __openclaw: {
+          __carapace: {
             senderId: peerSenderId,
             senderIdentity: { type: "profile", id: peerSenderId },
             senderName: "Riley Chen",
@@ -651,7 +651,7 @@ suite.define(() => {
   });
 
   it("keeps an attributed failed send in the transcript with one-line retry metadata", async () => {
-    const artifactRoot = process.env.OPENCLAW_BUBBLE_DELIVERY_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_BUBBLE_DELIVERY_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("bubble-delivery", artifactRoot)
       : undefined;
@@ -799,7 +799,7 @@ suite.define(() => {
           role: "user",
           content: "Please keep my fallback avatar readable.",
           timestamp: Date.now() - 60_000,
-          __openclaw: {
+          __carapace: {
             senderId: viewer.id,
             senderIdentity: viewer.identity,
             senderName: viewer.name,

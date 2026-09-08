@@ -507,7 +507,7 @@ it.todo("retains todo coverage");
   ])(
     "validates $label before fetching samples and preserves dry-run/unchanged bytes",
     ({ metadata, invalidField }) => {
-      const directory = realpathSync(mkdtempSync(path.join(tmpdir(), "openclaw-ci-refit-")));
+      const directory = realpathSync(mkdtempSync(path.join(tmpdir(), "carapace-ci-refit-")));
       const fakeGh = path.join(directory, "gh");
       const output = path.join(directory, "timings.json");
       const requests = path.join(directory, "requests.json");
@@ -524,8 +524,8 @@ if (args[0] === "api" && args[1] === "--help") {
   if (!args.includes("--jq")) process.exit(2);
   require("node:fs").writeFileSync(${JSON.stringify(requests)}, JSON.stringify(args));
   console.log(JSON.stringify([1, 2, 3].map(id => ({id, created_at: "2026-08-27T23:00:00Z", status: "completed", conclusion: "success", event: "push", head_branch: "main", head_sha: "a".repeat(40), run_attempt: 2, ...${JSON.stringify(metadata)}}))));
-} else if (endpoint.includes("actions/workflows/openclaw-") && endpoint.includes("/runs?event=workflow_dispatch&")) {
-  console.log(JSON.stringify(endpoint.includes("openclaw-release-checks.yml") ? [4, 5, 6].map(id => ({id, created_at: "2026-08-27T23:00:00Z", status: "completed", conclusion: "success", event: "workflow_dispatch", head_branch: "release-ci/frozen", head_sha: "b".repeat(40)})) : []));
+} else if (endpoint.includes("actions/workflows/carapace-") && endpoint.includes("/runs?event=workflow_dispatch&")) {
+  console.log(JSON.stringify(endpoint.includes("carapace-release-checks.yml") ? [4, 5, 6].map(id => ({id, created_at: "2026-08-27T23:00:00Z", status: "completed", conclusion: "success", event: "workflow_dispatch", head_branch: "release-ci/frozen", head_sha: "b".repeat(40)})) : []));
 } else if (endpoint.includes("actions/runs/") && endpoint.includes("/jobs?filter=all&")) {
   if (!args.at(-1).includes("labels")) process.exit(2);
   if (Number(endpoint.split("/actions/runs/")[1].split("/")[0]) >= 4) {
@@ -587,7 +587,7 @@ if (args[0] === "api" && args[1] === "--help") {
           {
             cwd: root,
             encoding: "utf8",
-            env: { ...process.env, OPENCLAW_GH_BIN: fakeGh, GH_TOKEN: "fixture-token" },
+            env: { ...process.env, CARAPACE_GH_BIN: fakeGh, GH_TOKEN: "fixture-token" },
           },
         );
       try {
@@ -725,7 +725,7 @@ describe("committed CI timing loader", () => {
 
   async function readTimings(contents: string | Error) {
     vi.resetModules();
-    vi.stubEnv("OPENCLAW_CI_TEST_TIMINGS", undefined);
+    vi.stubEnv("CARAPACE_CI_TEST_TIMINGS", undefined);
     const original = fs.readFileSync;
     const timingPath = fileURLToPath(new URL("../../config/ci-test-timings.json", import.meta.url));
     const read = vi.spyOn(fs, "readFileSync").mockImplementation((file, options) => {
@@ -769,12 +769,12 @@ describe("committed CI timing loader", () => {
     expect(loader.readRepoE2eFileTimings()).toEqual(data.repoE2eFileSeconds);
     expect(loader.readCompactGroupTimings("blacksmith")).toEqual({ group: 110 });
     expect(loader.readCompactGroupTimings("github")).toEqual({ group: 181 });
-    vi.stubEnv("OPENCLAW_CI_TEST_TIMINGS", "0");
+    vi.stubEnv("CARAPACE_CI_TEST_TIMINGS", "0");
     expect(loader.readUiE2eFileTimings()).toEqual({ fileSeconds: {}, perFileOverheadSeconds: 0 });
     expect(loader.readRepoE2eFileTimings()).toEqual({});
     expect(loader.readCompactGroupTimings("blacksmith")).toEqual({});
     expect(loader.readCompactGroupTimings("github")).toEqual({});
-    vi.stubEnv("OPENCLAW_CI_TEST_TIMINGS", undefined);
+    vi.stubEnv("CARAPACE_CI_TEST_TIMINGS", undefined);
     expect(loader.readCompactGroupTimings("github")).toEqual({ group: 181 });
     expect(
       read.mock.calls.filter(([file]) => file instanceof URL && fileURLToPath(file) === timingPath),

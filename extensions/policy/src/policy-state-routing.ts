@@ -12,7 +12,7 @@ export function scanPolicyRouting(
   return {
     bindings: listPolicyRouteBindings(cfg).map((binding) => ({
       index: binding.index,
-      source: `oc://openclaw.config/bindings/#${binding.index}`,
+      source: `oc://carapace.config/bindings/#${binding.index}`,
       channel: binding.channel,
     })),
     probes: (rules.probes ?? []).map((probe, index) => {

@@ -6,7 +6,7 @@ import { createControlUiE2eArtifactDir } from "../test-helpers/control-ui-e2e-ar
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
 
 export const agentFileProofDir =
-  process.env.OPENCLAW_CAPTURE_UI_PROOF === "1"
+  process.env.CARAPACE_CAPTURE_UI_PROOF === "1"
     ? createControlUiE2eArtifactDir("agent-file-lifecycle")
     : undefined;
 
@@ -31,7 +31,7 @@ export async function captureAgentFileScreenshot(page: Page, name: string) {
 }
 
 export async function selectAgentFileWorkspace(page: Page, name: string) {
-  const select = page.locator(".agents-control-select openclaw-agent-select");
+  const select = page.locator(".agents-control-select carapace-agent-select");
   await select.locator(".agent-select__trigger").click();
   await select.locator("wa-dropdown-item[data-agent-option]").filter({ hasText: name }).click();
   await expect

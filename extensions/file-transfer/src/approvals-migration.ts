@@ -1,4 +1,4 @@
-import { asNullableRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { FILE_TRANSFER_POLICY_VERSION } from "./shared/policy.js";
 
 export type LegacyApprovalItem = {

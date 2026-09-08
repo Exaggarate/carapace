@@ -1,10 +1,10 @@
 // Stores durable delivery queue entries in SQLite.
-import { safeParseJsonRecord } from "@openclaw/normalization-core";
+import { safeParseJsonRecord } from "@carapace/normalization-core";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   bindDeliveryQueueEntry,
   deliveryQueueEntriesQuery,
@@ -42,8 +42,8 @@ type TerminalizePendingDeliveryQueueEntryResult =
   | { status: "not_pending" };
 
 function openStateDatabase(stateDir?: string) {
-  return openOpenClawStateDatabase({
-    env: stateDir ? { ...process.env, OPENCLAW_STATE_DIR: stateDir } : process.env,
+  return openCarapaceStateDatabase({
+    env: stateDir ? { ...process.env, CARAPACE_STATE_DIR: stateDir } : process.env,
   });
 }
 
@@ -57,7 +57,7 @@ function enoent(queueName: string, id: string): Error & { code: string } {
 
 export function upsertDeliveryQueueEntryInDatabase(
   params: Omit<UpsertDeliveryQueueEntryParams, "stateDir">,
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
 ): boolean {
   return upsertBoundDeliveryQueueEntryInDatabase(bindDeliveryQueueEntry(params), database);
 }
@@ -106,7 +106,7 @@ export function expireStagingAndLoadDeliveryQueueEntries(params: {
       };
     },
     {
-      databaseLabel: "openclaw-state",
+      databaseLabel: "carapace-state",
       operationLabel: "expire delivery queue staging entries",
     },
   );
@@ -153,7 +153,7 @@ export function getDeliveryQueueEntryOwners(
 
 /** Keeps namespace reads and receipt pruning on the caller's exact transaction handle. */
 export function getDeliveryQueueEntryOwnersInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   queueNames: readonly string[],
   id: string,
 ): Map<string, { status: QueueStatus; settlementPending?: true }> {
@@ -221,7 +221,7 @@ export function getDeliveryQueueEntryOwnersInDatabase(
       );
     },
     {
-      databaseLabel: "openclaw-state",
+      databaseLabel: "carapace-state",
       operationLabel: "read delivery queue status",
     },
   );
@@ -251,7 +251,7 @@ export function deleteDeliveryQueueEntry(queueName: string, id: string, stateDir
 }
 
 export function deleteDeliveryQueueEntryInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   queueName: string,
   id: string,
 ): void {
@@ -272,7 +272,7 @@ export function completeDeliveryQueueEntry(queueName: string, id: string, stateD
 }
 
 export function completeDeliveryQueueEntryInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   queueName: string,
   id: string,
 ): void {
@@ -343,7 +343,7 @@ export function reserveDeliveryQueueEntryAttempt(params: {
   if (!Number.isInteger(params.maxAttempts) || params.maxAttempts <= 0) {
     throw new Error(`Invalid delivery attempt budget: ${params.maxAttempts}`);
   }
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const current = loadDeliveryQueueEntryInDatabase(
         database,
@@ -385,7 +385,7 @@ export function reserveDeliveryQueueEntryAttempt(params: {
       return { status: "reserved", attemptCount: reservedAttemptCount };
     },
     {
-      env: params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : process.env,
+      env: params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : process.env,
     },
     {
       operationLabel: `reserve ${params.queueName} delivery attempt`,
@@ -446,7 +446,7 @@ export function pruneExpiredDeliveryQueueTombstones(stateDir?: string): void {
   runSqliteImmediateTransactionSync(
     database.db,
     () => pruneDeliveryQueueTombstoneAges(database.db, Date.now()),
-    { databaseLabel: "openclaw-state", operationLabel: "expire delivery queue tombstones" },
+    { databaseLabel: "carapace-state", operationLabel: "expire delivery queue tombstones" },
   );
 }
 
@@ -514,7 +514,7 @@ export function terminalizePendingDeliveryQueueEntry(
 }
 
 export function terminalizePendingDeliveryQueueEntryInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   prepared: ReturnType<typeof prepareDeliveryQueueTerminalEntry>,
 ): TerminalizePendingDeliveryQueueEntryResult {
   const { queueName, id, expectedJson, failedEntry, now, expectedStatus, retention } = prepared;

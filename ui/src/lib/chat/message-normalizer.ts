@@ -2,13 +2,13 @@
  * Message normalization utilities for chat rendering.
  */
 
-import { mediaKindFromMime } from "@openclaw/media-core/constants";
+import { mediaKindFromMime } from "@carapace/media-core/constants";
 import {
   asFiniteNumber,
   asNonNegativeFiniteNumber,
-} from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord, readStringField } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord, readStringField } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { stripInboundMetadata } from "../../../../src/auto-reply/reply/strip-inbound-meta.js";
 import {
   extractCanvasShortcodes,
@@ -444,7 +444,7 @@ export function normalizeMessage(message: unknown): NormalizedMessage {
   const contentRaw = m.content;
   const contentItems = Array.isArray(contentRaw) ? contentRaw : null;
   const isAssistantMessage = role === "assistant";
-  const delivery = isAssistantMessage ? readMessageDelivery(m.openclawDelivery) : undefined;
+  const delivery = isAssistantMessage ? readMessageDelivery(m.carapaceDelivery) : undefined;
   // History's structured blocks retain sandbox and dashboard metadata that
   // an assistant shortcode cannot carry. Keep that representation when both exist.
   const projectedCanvasPreviews = (contentItems ?? []).flatMap((value) => {
@@ -561,22 +561,22 @@ export function normalizeMessage(message: unknown): NormalizedMessage {
 
   const timestamp = asFiniteNumber(m.timestamp) ?? Date.now();
   const id = readStringField(m, "id");
-  const openClawMeta = asOptionalRecord(m["__openclaw"]);
-  const structuredReplyToId = readStringField(openClawMeta, "replyToId")?.trim() ?? "";
+  const carapaceMeta = asOptionalRecord(m["__carapace"]);
+  const structuredReplyToId = readStringField(carapaceMeta, "replyToId")?.trim() ?? "";
   if (structuredReplyToId) {
     replyTarget = { kind: "id", id: structuredReplyToId };
   }
-  const replyPreviewRecord = asOptionalRecord(openClawMeta?.replyToPreview);
+  const replyPreviewRecord = asOptionalRecord(carapaceMeta?.replyToPreview);
   const replyPreviewText = readStringField(replyPreviewRecord, "text")?.trim() ?? "";
   const replyPreviewSender = readStringField(replyPreviewRecord, "senderLabel")?.trim() ?? "";
-  const identity = readTranscriptSenderIdentity(openClawMeta?.senderIdentity);
+  const identity = readTranscriptSenderIdentity(carapaceMeta?.senderIdentity);
   const metaSender = normalizeSenderIdentity({
     identity,
-    id: openClawMeta?.senderId,
-    name: openClawMeta?.senderName,
-    username: openClawMeta?.senderUsername,
+    id: carapaceMeta?.senderId,
+    name: carapaceMeta?.senderName,
+    username: carapaceMeta?.senderUsername,
     profileAvatarUrl:
-      identity?.type === "profile" ? openClawMeta?.senderProfileAvatarUrl : undefined,
+      identity?.type === "profile" ? carapaceMeta?.senderProfileAvatarUrl : undefined,
   });
   const rawLabel = readStringField(m, "senderLabel")?.trim() ?? "";
   const senderLabel = rawLabel

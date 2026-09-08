@@ -1,19 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createBoardViewTicket } from "../board-view-ticket.js";
 import { resolveSessionMutationAuthorization } from "../session-sharing.js";
 import { identifiedClient, sessionSharingTestContext } from "./sessions-sharing.test-support.js";
 import type { GatewayRequestContext } from "./types.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("session sharing board ticket authority", () => {
   it("authorizes tickets against their signed agent and issuing Gateway", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: "global" },
         { sessionId: "session-main-global", updatedAt: 1, visibility: "shared" },

@@ -4,7 +4,7 @@ import {
   loadSessionEntry,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { GatewayClientRequestError } from "../../gateway/client.js";
 import { flushPendingSessionsChangedEvents } from "../../gateway/server-methods/session-change-event.js";
 import { sessionMutationHandlers } from "../../gateway/server-methods/sessions-mutations.js";
@@ -14,7 +14,7 @@ import type {
   RespondFn,
 } from "../../gateway/server-methods/types.js";
 import { isAgentSessionModelPatchOrigin } from "../../gateway/session-model-patch-origin.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { AgentToolGatewayRequestCaller } from "./in-process-gateway.js";
 import { createSessionsTool } from "./sessions-tool.js";
 
@@ -23,7 +23,7 @@ const targetKeys = ["agent:main:dashboard:first", "agent:main:dashboard:second"]
 
 afterEach(() => flushPendingSessionsChangedEvents());
 
-function createStoredSessionTool(config: OpenClawConfig = {}) {
+function createStoredSessionTool(config: CarapaceConfig = {}) {
   const client: GatewayClient = {
     connect: {
       minProtocol: 1,
@@ -100,7 +100,7 @@ describe("sessions tool batch patch", () => {
   });
 
   it("groups the selected sessions through the Gateway and reports a replaced target without touching the current session", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSessions();
       const tool = createStoredSessionTool();
       const targets = targetKeys.map((sessionKey, index) => ({
@@ -147,7 +147,7 @@ describe("sessions tool batch patch", () => {
   });
 
   it("continues valid archives after missing identity and current-session targets", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSessions();
       const tool = createStoredSessionTool();
       const result = await tool.execute("archive-selected", {
@@ -173,7 +173,7 @@ describe("sessions tool batch patch", () => {
   });
 
   it("preserves session visibility while applying allowed targets", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSessions();
       const tool = createStoredSessionTool({ tools: { sessions: { visibility: "self" } } });
       const result = await tool.execute("pin-visible", {
@@ -192,7 +192,7 @@ describe("sessions tool batch patch", () => {
   });
 
   it("returns the child pin error while pinning a root in the same batch", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSessions();
       const childKey = targetKeys[0]!;
       await upsertSessionEntryCore(
@@ -220,7 +220,7 @@ describe("sessions tool batch patch", () => {
   });
 
   it("rejects duplicate aliases before any batch mutation", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await seedSessions();
       const tool = createStoredSessionTool();
       await expect(

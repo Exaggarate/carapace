@@ -28,4 +28,4 @@ scenario:
     args: [--output-dir, "${outputDir}"]
     # The retained proof allows 70 minutes for initial/hourly maintenance, plus setup and cleanup.
     timeoutMs: 4500000
-    summary: Requires a disposable Testbox with OPENCLAW_TESTBOX=1. Owns a real Gateway and synthetic attachment files through initial or hourly maintenance; allow up to 75 minutes. Model upstream is synthetic.
+    summary: Requires a disposable Testbox with CARAPACE_TESTBOX=1. Owns a real Gateway and synthetic attachment files through initial or hourly maintenance; allow up to 75 minutes. Model upstream is synthetic.

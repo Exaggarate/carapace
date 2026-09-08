@@ -1,8 +1,8 @@
-import { defineStableChannelIngressIdentity } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { defineStableChannelIngressIdentity } from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 export function normalizeGoogleChatUserId(raw?: string | null): string {
   const trimmed = normalizeOptionalString(raw) ?? "";

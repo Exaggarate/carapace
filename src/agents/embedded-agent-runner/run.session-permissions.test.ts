@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
   loadRunOverflowCompactionHarness,
@@ -24,8 +24,8 @@ function requestPermissionChange(
 
 // The mocked harness only supports the OpenAI route, so these params keep the
 // plugin harness selected. Falling back to the built-in host harness would drag
-// the whole OpenClaw tool graph into this shard and prove the wrong owner.
-function createPluginHarnessRunParams(state: OpenClawTestState) {
+// the whole Carapace tool graph into this shard and prove the wrong owner.
+function createPluginHarnessRunParams(state: CarapaceTestState) {
   return {
     ...createOverflowRunParams(state),
     provider: "openai",
@@ -34,23 +34,23 @@ function createPluginHarnessRunParams(state: OpenClawTestState) {
   } as const;
 }
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("embedded run session permissions", () => {
   let runEmbeddedAgent: TestRunEmbeddedAgent;
 
   beforeAll(async () => {
     ({ runEmbeddedAgent } = await loadRunOverflowCompactionHarness());
-    const { withOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    await withOpenClawTestState({ label: "session-permissions-warmup" }, async (warmupState) => {
+    const { withCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    await withCarapaceTestState({ label: "session-permissions-warmup" }, async (warmupState) => {
       await warmRunOverflowCompactionHarness(runEmbeddedAgent, warmupState);
     });
   });
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.session-permissions" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.session-permissions" });
     useOpenAIPlatformAuthFixture();
   });
 

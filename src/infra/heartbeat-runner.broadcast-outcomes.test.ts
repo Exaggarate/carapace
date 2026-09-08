@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { getLastHeartbeatEvent, resetHeartbeatEventsForTest } from "./heartbeat-events.js";
 import { startHeartbeatRunner } from "./heartbeat-runner.js";
 import * as heartbeatWake from "./heartbeat-wake.js";
@@ -34,7 +34,7 @@ describe("heartbeat broadcast outcomes", () => {
         defaults: { heartbeat: { every: "30m" } },
         list: [{ id: "main" }, { id: "ops" }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runner = startHeartbeatRunner({ cfg, runOnce });
     onTestFinished(() => runner.stop());
     const run = register.mock.calls[0]?.[0];

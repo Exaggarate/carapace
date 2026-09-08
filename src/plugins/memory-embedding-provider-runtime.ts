@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getEmbeddingProvider, listEmbeddingProviders } from "./embedding-provider-runtime.js";
 import { listRegisteredEmbeddingProviders } from "./embedding-providers.js";
 import type { MemoryEmbeddingProviderAdapter } from "./memory-embedding-providers.js";
@@ -10,7 +10,7 @@ export function listRegisteredMemoryEmbeddingProviderAdapters(): MemoryEmbedding
 
 /** Lists memory embedding providers from runtime config and registered adapters. */
 export function listMemoryEmbeddingProviders(
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): MemoryEmbeddingProviderAdapter[] {
   return listEmbeddingProviders(cfg);
 }
@@ -18,7 +18,7 @@ export function listMemoryEmbeddingProviders(
 /** Resolves one memory embedding provider by id, alias, or configured API owner. */
 export function getMemoryEmbeddingProvider(
   id: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): MemoryEmbeddingProviderAdapter | undefined {
   return getEmbeddingProvider(id, cfg);
 }

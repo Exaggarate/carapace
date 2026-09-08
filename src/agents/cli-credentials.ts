@@ -9,7 +9,7 @@ import path from "node:path";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { resolveOsHomeRelativePath } from "../infra/home-dir.js";
 import { loadJsonFileThroughSymlink } from "../infra/json-file.js";
 import type { OAuthProvider } from "./auth-profiles/types.js";
@@ -79,8 +79,8 @@ type ExecSyncFn = typeof execSync;
 
 export function resolveCodexCliHomePath(codexHome?: string, env: NodeJS.ProcessEnv = process.env) {
   const configured = codexHome ?? env.CODEX_HOME;
-  // External CLI state belongs to the OS user, not OpenClaw's relocatable
-  // home. Otherwise an isolated OPENCLAW_HOME hides an already logged-in CLI.
+  // External CLI state belongs to the OS user, not Carapace's relocatable
+  // home. Otherwise an isolated CARAPACE_HOME hides an already logged-in CLI.
   const home = resolveOsHomeRelativePath(configured || "~/.codex", { env });
   try {
     return fs.realpathSync.native(home);
@@ -538,7 +538,7 @@ export function readGeminiCliCredentialsCached(options?: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cliCredentialsTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.cliCredentialsTestApi")] = {
     readCodexAuth: readCodexCliCredentials,
     resetCaches: resetCliCredentialCachesForTest,
   };

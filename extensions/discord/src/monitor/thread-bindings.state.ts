@@ -1,12 +1,12 @@
 // Discord plugin module implements thread bindings.state behavior.
-import { recordOutboundMessageIdentity } from "openclaw/plugin-sdk/outbound-echo-runtime";
-import { normalizeAccountId, resolveAgentIdFromSessionKey } from "openclaw/plugin-sdk/routing";
+import { recordOutboundMessageIdentity } from "carapace/plugin-sdk/outbound-echo-runtime";
+import { normalizeAccountId, resolveAgentIdFromSessionKey } from "carapace/plugin-sdk/routing";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import * as threadBindingRuntime from "openclaw/plugin-sdk/thread-bindings-session-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import * as threadBindingRuntime from "carapace/plugin-sdk/thread-bindings-session-runtime";
 import { getDiscordRuntime } from "../runtime.js";
 import type {
   PersistedThreadBindingRecord,
@@ -31,7 +31,7 @@ type ThreadBindingsGlobalState = {
 // Plugin hooks can load this module through a separate runtime path while core
 // imports it via ESM. Store mutable state on globalThis so both paths share one
 // registry.
-const THREAD_BINDINGS_STATE_KEY = Symbol.for("openclaw.discordThreadBindingsState");
+const THREAD_BINDINGS_STATE_KEY = Symbol.for("carapace.discordThreadBindingsState");
 let threadBindingsState: ThreadBindingsGlobalState | undefined;
 
 function createThreadBindingsGlobalState(): ThreadBindingsGlobalState {

@@ -97,7 +97,7 @@ describe("buildCompactAnnounceStatsLine", () => {
         totalTokens: 999_999,
       })) as ReadSessionEntry,
       resolveAgentIdFromSessionKey: (() => "main") as ResolveAgentIdFromSessionKey,
-      resolveSessionStorePathCore: (() => "/tmp/openclaw-session-store") as ResolveStorePath,
+      resolveSessionStorePathCore: (() => "/tmp/carapace-session-store") as ResolveStorePath,
     });
 
     await expect(
@@ -116,7 +116,7 @@ describe("buildCompactAnnounceStatsLine", () => {
         updatedAt: 0,
       })) as ReadSessionEntry,
       resolveAgentIdFromSessionKey: (() => "main") as ResolveAgentIdFromSessionKey,
-      resolveSessionStorePathCore: (() => "/tmp/openclaw-session-store") as ResolveStorePath,
+      resolveSessionStorePathCore: (() => "/tmp/carapace-session-store") as ResolveStorePath,
     });
 
     await expect(
@@ -137,7 +137,7 @@ describe("buildCompactAnnounceStatsLine", () => {
         outputTokens: 0,
       })) as ReadSessionEntry,
       resolveAgentIdFromSessionKey: (() => "main") as ResolveAgentIdFromSessionKey,
-      resolveSessionStorePathCore: (() => "/tmp/openclaw-session-store") as ResolveStorePath,
+      resolveSessionStorePathCore: (() => "/tmp/carapace-session-store") as ResolveStorePath,
     });
 
     await expect(
@@ -158,7 +158,7 @@ describe("buildCompactAnnounceStatsLine", () => {
         totalTokensVersion: 1,
       })) as ReadSessionEntry,
       resolveAgentIdFromSessionKey: (() => "main") as ResolveAgentIdFromSessionKey,
-      resolveSessionStorePathCore: (() => "/tmp/openclaw-session-store") as ResolveStorePath,
+      resolveSessionStorePathCore: (() => "/tmp/carapace-session-store") as ResolveStorePath,
     });
 
     await expect(
@@ -283,7 +283,7 @@ describe("readSubagentOutput", () => {
         {
           role: "system",
           content: [{ type: "text", text: "Compaction" }],
-          __openclaw: { kind: "compaction" },
+          __carapace: { kind: "compaction" },
         },
         {
           role: "assistant",
@@ -475,7 +475,7 @@ describe("readSubagentOutput", () => {
           agentId: "main",
           sessionId: "child-session",
           sessionKey: "agent:main:subagent:child",
-          storePath: "/tmp/openclaw/agents/main/sessions/sessions.json",
+          storePath: "/tmp/carapace/agents/main/sessions/sessions.json",
         },
       }),
     ).resolves.toBe("fresh recovered output");
@@ -484,7 +484,7 @@ describe("readSubagentOutput", () => {
         agentId: "main",
         sessionId: "child-session",
         sessionKey: "agent:main:subagent:child",
-        storePath: "/tmp/openclaw/agents/main/sessions/sessions.json",
+        storePath: "/tmp/carapace/agents/main/sessions/sessions.json",
       },
       { mode: "recent", maxMessages: 100, maxBytes: 1024 * 1024 },
     );
@@ -508,7 +508,7 @@ describe("readSubagentOutput", () => {
           agentId: "main",
           sessionId: "child-session",
           sessionKey: "agent:main:subagent:child",
-          storePath: "/tmp/openclaw/agents/main/sessions/sessions.json",
+          storePath: "/tmp/carapace/agents/main/sessions/sessions.json",
         },
       }),
     ).resolves.toBeUndefined();
@@ -1008,7 +1008,7 @@ describe("applySubagentWaitOutcome", () => {
     (stopReason) => {
       // classifySubagentTerminalOutcome must win over the generic classifier
       // here: blocked liveness alone would read as a failure, but an explicit
-      // restart/aborted stop reason owns the outcome (openclaw#125407).
+      // restart/aborted stop reason owns the outcome (carapace#125407).
       const applied = applySubagentWaitOutcome({
         wait: {
           status: "ok",

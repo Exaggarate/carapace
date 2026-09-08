@@ -244,7 +244,7 @@ export async function executeCliProcess(params: {
         ...(params.promptContext ? { promptContext: params.promptContext } : {}),
         useResume: params.useResume,
         forceNewSession:
-          params.cliSessionIdToUse === undefined && context.openClawHistoryPrompt !== undefined,
+          params.cliSessionIdToUse === undefined && context.carapaceHistoryPrompt !== undefined,
         sessionId: params.resolvedSessionId,
         noOutputTimeoutMs: params.noOutputTimeoutMs,
         consumeStdout,
@@ -463,14 +463,14 @@ export async function executeCliProcess(params: {
         retryable &&
         Boolean(params.cliSessionIdToUse) &&
         Boolean(params.resolvedSessionId) &&
-        Boolean(context.openClawHistoryPrompt) &&
+        Boolean(context.carapaceHistoryPrompt) &&
         Boolean(runParams.sessionKey) &&
         runParams.timeoutMs - (Date.now() - context.started) > 0;
       if (runParams.sessionKey && params.events.emitLiveEvents && !deferNotice) {
         const stallNotice = [
           `CLI agent (${runParams.provider}) produced no output for ${timeoutSeconds}s and was terminated.`,
           "It may have been waiting for interactive input or an approval prompt.",
-          "Check CLI permission settings and OpenClaw approval prompts.",
+          "Check CLI permission settings and Carapace approval prompts.",
         ].join(" ");
         const routing = resolveEventSessionRoutingPolicy({
           cfg: runParams.config,

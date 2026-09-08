@@ -12,13 +12,13 @@ import {
   toPinoLikeLogger,
 } from "./logger.js";
 
-const paths = createSuiteLogPathTracker("openclaw-logger-reload-");
+const paths = createSuiteLogPathTracker("carapace-logger-reload-");
 
 beforeAll(async () => await paths.setup());
 beforeEach(() => {
   resetLogger();
-  vi.stubEnv("OPENCLAW_TEST_FILE_LOG", "1");
-  vi.stubEnv("OPENCLAW_LOG_LEVEL", "");
+  vi.stubEnv("CARAPACE_TEST_FILE_LOG", "1");
+  vi.stubEnv("CARAPACE_LOG_LEVEL", "");
 });
 afterEach(async () => {
   await flushLogger();

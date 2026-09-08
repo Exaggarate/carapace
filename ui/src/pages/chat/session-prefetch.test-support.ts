@@ -101,7 +101,7 @@ export function createSessionPrefetchFixture() {
     requestUpdate: () => undefined,
     updateComplete: Promise.resolve(true),
   });
-  const shell = document.createElement("openclaw-app-shell");
+  const shell = document.createElement("carapace-app-shell");
   shell.append(host);
   document.body.append(shell);
   const controller = installSessionPrefetch(host, cache, store, () => context);
@@ -115,7 +115,7 @@ export function createSessionPrefetchFixture() {
     });
     host.replaceChildren(
       ...update.openSessionKeys.map((sessionKey) =>
-        Object.assign(document.createElement("openclaw-chat-pane"), {
+        Object.assign(document.createElement("carapace-chat-pane"), {
           sessionKey,
           conversationPresented:
             update.hiddenConversationSessionKeys?.includes(sessionKey) !== true,

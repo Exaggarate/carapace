@@ -1,6 +1,6 @@
 import path from "node:path";
 import type { RuntimeMsgContext as MsgContext } from "../../auto-reply/templating.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { readPersistedMediaFacts, type MediaFact } from "../../media/media-facts.js";
 import { prepareSessionParticipantInput } from "../../sessions/session-participant-input.js";
 import type { UserTurnInput } from "../../sessions/user-turn-transcript.js";
@@ -101,7 +101,7 @@ export function prepareChatSendUserTurn(params: {
   attachments: PreparedChatSendAttachments;
   client: GatewayRequestHandlerOptions["client"];
   logGateway: GatewayRequestContext["logGateway"];
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => CarapaceConfig;
   userTurn: ChatSendUserTurnInputController;
 }) {
   const { request, session, admission, attachments, client, logGateway, userTurn } = params;

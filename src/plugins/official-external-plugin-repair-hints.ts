@@ -1,5 +1,5 @@
 /** Builds doctor/install repair hints for missing official external plugin owners. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveConfiguredChannelPresencePolicy } from "./channel-plugin-ids.js";
 import type { PluginManifestRecord } from "./manifest-registry.js";
 import {
@@ -87,8 +87,8 @@ function buildOfficialExternalPluginRepairHint(
   const pluginId = resolveOfficialExternalPluginId(entry) ?? pluginIdOrChannelId.trim();
   const channelId = manifest?.channel?.id?.trim();
   const label = resolveOfficialExternalPluginLabel(entry);
-  const installCommand = `openclaw plugins install ${installSpec}`;
-  const doctorFixCommand = "openclaw doctor --fix";
+  const installCommand = `carapace plugins install ${installSpec}`;
+  const doctorFixCommand = "carapace doctor --fix";
   return {
     pluginId,
     ...(channelId ? { channelId } : {}),
@@ -101,8 +101,8 @@ function buildOfficialExternalPluginRepairHint(
 }
 
 type MissingOfficialExternalChannelPluginRepairHintParams = {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  activationSourceConfig?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   /** Prepared manifest facts avoid rebuilding the registry for this resolution. */

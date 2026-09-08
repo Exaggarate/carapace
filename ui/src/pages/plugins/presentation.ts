@@ -1,6 +1,6 @@
 // Presentation data for the plugins catalog: bundled cover art, deterministic
 // fallback gradients, category shelving, and curated connector suggestions.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { inferControlUiPublicAssetPath } from "../../app/public-assets.ts";
 import { t } from "../../i18n/index.ts";
 import { takeGraphemes } from "../../lib/graphemes.ts";
@@ -182,11 +182,11 @@ const PLUGIN_ART_SLUGS: ReadonlySet<string> = new Set([
 ]);
 
 // Only the trusted first-party scope may drop package role suffixes. Broader
-// unscoping would let third-party catalog ids claim bundled OpenClaw art.
-const OPENCLAW_PLUGIN_ART_ID = /^@openclaw\/(.+?)(?:-(?:plugin|provider))?$/u;
+// unscoping would let third-party catalog ids claim bundled Carapace art.
+const CARAPACE_PLUGIN_ART_ID = /^@carapace\/(.+?)(?:-(?:plugin|provider))?$/u;
 
 export function pluginArtPath(id: string): string | null {
-  const scopedSlug = OPENCLAW_PLUGIN_ART_ID.exec(id)?.[1];
+  const scopedSlug = CARAPACE_PLUGIN_ART_ID.exec(id)?.[1];
   const slug = PLUGIN_ART_SLUGS.has(id) ? id : scopedSlug;
   return slug && PLUGIN_ART_SLUGS.has(slug)
     ? inferControlUiPublicAssetPath(`plugin-art/${slug}.webp`)

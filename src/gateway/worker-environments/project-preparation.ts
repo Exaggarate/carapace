@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import type { WorkerProvider } from "../../plugins/types.js";
 import { createProjectSeedScript } from "./project-seed-script.js";
 import {
@@ -81,7 +81,7 @@ export function createWorkerProjectPreparation(params: {
       typeof directory !== "string" ||
       directory.length > 4096 ||
       !path.posix.isAbsolute(directory) ||
-      !directory.includes(`/.openclaw-worker/git-seeds/${params.namespace}/`) ||
+      !directory.includes(`/.carapace-worker/git-seeds/${params.namespace}/`) ||
       path.posix.normalize(directory) !== directory ||
       path.posix.basename(path.posix.dirname(directory)) !== params.namespace ||
       !path.posix.basename(directory).startsWith(`.tmp-${seedKey}-`)
@@ -89,7 +89,7 @@ export function createWorkerProjectPreparation(params: {
       throw new Error("Project preparation returned an invalid staging directory");
     }
     const temporaryRoot = await fsp.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-project-base-"),
+      path.join(resolvePreferredCarapaceTmpDir(), "carapace-project-base-"),
     );
     try {
       requireCurrent();

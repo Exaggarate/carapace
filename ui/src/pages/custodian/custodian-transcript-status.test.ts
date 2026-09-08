@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import type { SystemAgentChatResult } from "@openclaw/gateway-protocol";
+import type { SystemAgentChatResult } from "@carapace/gateway-protocol";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../../api/gateway.ts";
 import * as uuid from "../../lib/uuid.ts";
@@ -36,7 +36,7 @@ describe("custodian transcript status", () => {
       let historyCalls = 0;
       const request = vi.fn(
         async (method: string, _params?: unknown, options?: { timeoutMs?: number }) => {
-          if (method === "openclaw.chat.history") {
+          if (method === "carapace.chat.history") {
             expect(options).toEqual({ timeoutMs: 15_000 });
             historyCalls += 1;
             if (historyCalls === 1) {
@@ -60,8 +60,8 @@ describe("custodian transcript status", () => {
         },
       );
       const { context, setGatewaySnapshot } = createContext(request, [
-        "openclaw.chat",
-        "openclaw.chat.history",
+        "carapace.chat",
+        "carapace.chat.history",
       ]);
       const { page } = await mountPage(context);
 
@@ -80,9 +80,9 @@ describe("custodian transcript status", () => {
       setGatewaySnapshot({ suspensionPhase: "accepting" });
       await waitForFast(() => expect(page.textContent).toContain("Recovered history."));
       expect(request.mock.calls.map(([method]) => method)).toEqual([
-        "openclaw.chat.history",
-        "openclaw.chat",
-        "openclaw.chat.history",
+        "carapace.chat.history",
+        "carapace.chat",
+        "carapace.chat.history",
       ]);
     },
   );
@@ -91,7 +91,7 @@ describe("custodian transcript status", () => {
     const pending = deferred<never>();
     let historyCalls = 0;
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCalls += 1;
         return historyCalls === 2
           ? pending.promise
@@ -108,8 +108,8 @@ describe("custodian transcript status", () => {
       return { sessionId: "custodian-session", reply: "Ready", action: "none" };
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(page.textContent).toContain("Ready"));
@@ -136,7 +136,7 @@ describe("custodian transcript status", () => {
   it("does not retry failed reconnect hydration again on the same availability edge", async () => {
     let historyCalls = 0;
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCalls += 1;
         if (historyCalls === 2) {
           throw new GatewayRequestError({
@@ -151,8 +151,8 @@ describe("custodian transcript status", () => {
       return { sessionId: "custodian-session", reply: "Ready", action: "none" };
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(page.textContent).toContain("Ready"));
@@ -174,7 +174,7 @@ describe("custodian transcript status", () => {
     const reply = deferred<SystemAgentChatResult>();
     let historyCalls = 0;
     const request = vi.fn(async (method: string, params?: { message?: string }) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCalls += 1;
         if (historyCalls === 1) {
           throw new GatewayRequestError({
@@ -191,8 +191,8 @@ describe("custodian transcript status", () => {
         : { sessionId: "custodian-session", reply: "Ready", action: "none" };
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(page.store.canSend).toBe(true));
@@ -231,7 +231,7 @@ describe("custodian transcript status", () => {
     let historyCalls = 0;
     let chatCalls = 0;
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "carapace.chat.history") {
         historyCalls += 1;
         return historyCalls === 1
           ? Promise.reject(new Error("history unavailable"))
@@ -243,8 +243,8 @@ describe("custodian transcript status", () => {
       return chatCalls === 1 ? welcome.promise : answer.promise;
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "carapace.chat",
+      "carapace.chat.history",
     ]);
     const { page } = await mountPage(context);
 
@@ -258,8 +258,8 @@ describe("custodian transcript status", () => {
     setGatewaySnapshot({ suspensionPhase: "accepting" });
     await page.updateComplete;
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
     ]);
 
     welcome.resolve({
@@ -276,8 +276,8 @@ describe("custodian transcript status", () => {
     await page.updateComplete;
     expect(page.querySelector(".custodian__transcript-status button")).toBeNull();
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "carapace.chat.history",
+      "carapace.chat",
     ]);
 
     const wizardMessage = page.store.messages.find((message) => message.step);

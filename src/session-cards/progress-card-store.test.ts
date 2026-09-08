@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { AGENT_SCHEMA_WITHOUT_PROGRESS_CARD_SQL } from "../state/openclaw-agent-progress-card-schema.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
+import { AGENT_SCHEMA_WITHOUT_PROGRESS_CARD_SQL } from "../state/carapace-agent-progress-card-schema.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
 import {
   clearSessionProgressCardForReset,
   readSessionProgressCard,
@@ -20,7 +20,7 @@ describe("session progress card store", () => {
   beforeEach(() => {
     db = new DatabaseSync(":memory:");
     db.exec("PRAGMA foreign_keys = ON;");
-    db.exec(OPENCLAW_AGENT_SCHEMA_SQL);
+    db.exec(CARAPACE_AGENT_SCHEMA_SQL);
     db.prepare(
       "INSERT INTO session_nodes (session_key, current_session_id, entry_json, updated_at) VALUES (?, ?, ?, ?)",
     ).run(SESSION_KEY, "session-1", JSON.stringify({ sessionId: "session-1" }), 1);

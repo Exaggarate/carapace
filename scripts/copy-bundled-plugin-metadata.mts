@@ -240,7 +240,7 @@ export function copyBundledPluginMetadata(params: CopyMetadataParams = {}): void
     }
 
     const pluginDir = path.join(extensionsRoot, dirent.name);
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     const distPluginDir = path.join(distExtensionsRoot, dirent.name);
     const packageJsonPath = path.join(pluginDir, "package.json");
     const parsedPackageJson: unknown = fs.existsSync(packageJsonPath)
@@ -259,7 +259,7 @@ export function copyBundledPluginMetadata(params: CopyMetadataParams = {}): void
 
     sourcePluginDirs.add(dirent.name);
 
-    const distManifestPath = path.join(distPluginDir, "openclaw.plugin.json");
+    const distManifestPath = path.join(distPluginDir, "carapace.plugin.json");
     const distPackageJsonPath = path.join(distPluginDir, "package.json");
 
     if (fs.existsSync(manifestPath)) {
@@ -296,19 +296,19 @@ export function copyBundledPluginMetadata(params: CopyMetadataParams = {}): void
       removeFileIfExists(distPackageJsonPath);
       continue;
     }
-    if (packageJson && isRecord(packageJson.openclaw)) {
+    if (packageJson && isRecord(packageJson.carapace)) {
       const extension = buildEntry.runtimeExtension;
-      const channel = resolvePluginRuntimeChannelMetadata(packageJson.openclaw.channel, {
+      const channel = resolvePluginRuntimeChannelMetadata(packageJson.carapace.channel, {
         pluginDir: dirent.name,
         runtimeBuildOutputs: rewritePackageExtensions(buildEntry.sourceEntries, extension) ?? [],
         runtimeRoot: ".",
       });
-      packageJson.openclaw = {
-        ...packageJson.openclaw,
+      packageJson.carapace = {
+        ...packageJson.carapace,
         ...(channel ? { channel } : {}),
-        extensions: rewritePackageExtensions(packageJson.openclaw.extensions, extension),
-        ...(typeof packageJson.openclaw.setupEntry === "string"
-          ? { setupEntry: rewritePackageEntry(packageJson.openclaw.setupEntry, extension) }
+        extensions: rewritePackageExtensions(packageJson.carapace.extensions, extension),
+        ...(typeof packageJson.carapace.setupEntry === "string"
+          ? { setupEntry: rewritePackageEntry(packageJson.carapace.setupEntry, extension) }
           : {}),
       };
     }

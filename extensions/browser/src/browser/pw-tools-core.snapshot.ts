@@ -2,12 +2,12 @@
  * Snapshot, navigation, viewport, close, and PDF helpers for Playwright-backed
  * browser tools.
  */
-import { parseFiniteNumber, resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
+import { parseFiniteNumber, resolveIntegerOption } from "carapace/plugin-sdk/number-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe, withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe, withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import type { Frame, Page } from "playwright-core";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import { ACT_MAX_VIEWPORT_DIMENSION, resolveBrowserNavigationTimeoutMs } from "./act-policy.js";

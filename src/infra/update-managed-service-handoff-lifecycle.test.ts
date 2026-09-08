@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { SUPERVISOR_HINT_ENV_VARS } from "./supervisor-markers.js";
 import { CONTROL_PLANE_UPDATE_SENTINEL_META_ENV } from "./update-control-plane-sentinel.js";
 import {
@@ -34,14 +34,14 @@ import {
 import { registerManagedUpdateHandoffTriageTests } from "./update-managed-service-handoff-triage.test-support.js";
 import { signalMockManagedUpdateHandoffReady } from "./update-managed-service-handoff.test-support.js";
 
-const { forceKillChildProcessTreeMock, resolvePreferredOpenClawTmpDirMock, spawnMock } = vi.hoisted(
+const { forceKillChildProcessTreeMock, resolvePreferredCarapaceTmpDirMock, spawnMock } = vi.hoisted(
   () => ({
     forceKillChildProcessTreeMock: vi.fn(),
-    resolvePreferredOpenClawTmpDirMock: vi.fn(),
+    resolvePreferredCarapaceTmpDirMock: vi.fn(),
     spawnMock: vi.fn(),
   }),
 );
-const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `openclaw-handoff-lifecycle-${process.pid}`);
+const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `carapace-handoff-lifecycle-${process.pid}`);
 
 function createSpawnMock(params?: { pid?: number }) {
   const child = Object.assign(new EventEmitter(), {
@@ -72,9 +72,9 @@ vi.mock("../process/child-process-tree.js", async () => {
   return { ...actual, forceKillChildProcessTree: forceKillChildProcessTreeMock };
 });
 
-vi.mock("./tmp-openclaw-dir.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./tmp-openclaw-dir.js")>()),
-  resolvePreferredOpenClawTmpDir: resolvePreferredOpenClawTmpDirMock,
+vi.mock("./tmp-carapace-dir.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./tmp-carapace-dir.js")>()),
+  resolvePreferredCarapaceTmpDir: resolvePreferredCarapaceTmpDirMock,
 }));
 
 const tempDirs = new Set<string>();
@@ -83,10 +83,10 @@ const managedProcessCleanups = new Set<() => Promise<void>>();
 beforeEach(async () => {
   // Helpers in one fixture share a coordinator without touching the operator's database.
   const coordinatorDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-coordinator-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-coordinator-")),
   );
   tempDirs.add(coordinatorDir);
-  resolvePreferredOpenClawTmpDirMock.mockReturnValue(coordinatorDir);
+  resolvePreferredCarapaceTmpDirMock.mockReturnValue(coordinatorDir);
   forceKillChildProcessTreeMock.mockReset();
   spawnMock.mockReset();
   spawnMock.mockImplementation((_command: string, args: string[]) => {
@@ -109,7 +109,7 @@ afterEach(async () => {
   for (const cleanup of mockedHandoffLeaseCleanups) {
     cleanup();
   }
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   await Promise.all([...tempDirs].map((dir) => fs.rm(dir, { recursive: true, force: true })));
   tempDirs.clear();
   vi.resetModules();
@@ -135,7 +135,7 @@ describe("managed service update handoff", () => {
         updaterExitCode: 0,
         updaterResult: { status: "ok", mode: "npm" },
       });
-      expect(commands.some((command) => command.includes("stop openclaw-gateway.service"))).toBe(
+      expect(commands.some((command) => command.includes("stop carapace-gateway.service"))).toBe(
         true,
       );
       expect(state).toMatchObject({ parked: true, stopCompleted: true });
@@ -404,10 +404,10 @@ describe("managed service update handoff", () => {
     });
     let env: NodeJS.ProcessEnv | undefined;
     if (failure === "launcher exit") {
-      const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-run-bin-"));
+      const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-systemd-run-bin-"));
       tempDirs.add(binDir);
       await fs.writeFile(path.join(binDir, "systemd-run"), "#!/bin/sh\nexit 0\n", { mode: 0o755 });
-      env = { PATH: binDir, OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" };
+      env = { PATH: binDir, CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" };
     }
     const { startManagedServiceUpdateHandoff } =
       await import("./update-managed-service-handoff.js");
@@ -416,8 +416,8 @@ describe("managed service update handoff", () => {
       restartDrainTimeoutMs: 300_000,
       parentPid: process.pid,
       execPath:
-        failure === "spawn error" ? "/definitely/missing/openclaw-node" : "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+        failure === "spawn error" ? "/definitely/missing/carapace-node" : "/usr/local/bin/node",
+      argv1: "/opt/carapace/carapace.mjs",
       supervisor: failure === "launcher exit" ? "systemd" : undefined,
       env,
       meta: { sessionKey: "agent:test:webchat:dm:user-123" },
@@ -442,9 +442,9 @@ describe("managed service update handoff", () => {
     const { startManagedServiceUpdateHandoff } =
       await import("./update-managed-service-handoff.js");
     const serviceIdentityEnv = {
-      OPENCLAW_LAUNCHD_LABEL: "com.example.openclaw.test",
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-test.service",
-      OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Test Gateway",
+      CARAPACE_LAUNCHD_LABEL: "com.example.carapace.test",
+      CARAPACE_SYSTEMD_UNIT: "carapace-test.service",
+      CARAPACE_WINDOWS_TASK_NAME: "Carapace Test Gateway",
     } satisfies NodeJS.ProcessEnv;
     const supervisorEnv = Object.fromEntries(
       SUPERVISOR_HINT_ENV_VARS.map((key) => [key, "supervised"]),
@@ -457,7 +457,7 @@ describe("managed service update handoff", () => {
       restartDelayMs: 500,
       parentPid: process.pid,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/carapace/carapace.mjs",
       env: {
         ...supervisorEnv,
         ...serviceIdentityEnv,
@@ -490,7 +490,7 @@ describe("managed service update handoff", () => {
     )) {
       expect(options.env[key]).toBeUndefined();
     }
-    expect(options.env.OPENCLAW_UPDATE_RUN_HANDOFF).toBe("1");
+    expect(options.env.CARAPACE_UPDATE_RUN_HANDOFF).toBe("1");
     expect(options.env[CONTROL_PLANE_UPDATE_SENTINEL_META_ENV]).toBe(helperParams.metaPath);
     expect(JSON.parse(await fs.readFile(helperParams.metaPath, "utf8"))).toMatchObject({
       meta: { triageContextPath: helperParams.triageContextPath },
@@ -500,7 +500,7 @@ describe("managed service update handoff", () => {
   it("launches systemd handoffs through a transient user scope", async () => {
     const { startManagedServiceUpdateHandoff } =
       await import("./update-managed-service-handoff.js");
-    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-run-bin-"));
+    const binDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-systemd-run-bin-"));
     tempDirs.add(binDir);
     const systemdRunPath = path.join(binDir, "systemd-run");
     await fs.writeFile(systemdRunPath, "#!/bin/sh\nexit 0\n", { mode: 0o755 });
@@ -512,13 +512,13 @@ describe("managed service update handoff", () => {
       restartDelayMs: 500,
       parentPid: process.pid,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/carapace/carapace.mjs",
       handoffId: "handoff-123",
       channel: "beta",
       supervisor: "systemd",
       env: {
         PATH: binDir,
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
         INVOCATION_ID: "gateway-invocation",
         KEEP_ME: "1",
       },
@@ -541,7 +541,7 @@ describe("managed service update handoff", () => {
       "--user",
       "--scope",
       "--collect",
-      "--unit=openclaw-update-handoff-123.scope",
+      "--unit=carapace-update-handoff-123.scope",
     ]);
     expect(args.slice(4, 7)).toEqual([
       "/usr/local/bin/node",
@@ -556,11 +556,11 @@ describe("managed service update handoff", () => {
     };
     expect(helperParams.serviceRecovery).toEqual({
       kind: "systemd",
-      unit: "openclaw-gateway.service",
+      unit: "carapace-gateway.service",
     });
     expect(helperParams.commandArgv).toEqual([
       "/usr/local/bin/node",
-      "/opt/openclaw/openclaw.mjs",
+      "/opt/carapace/carapace.mjs",
       "update",
       "--yes",
       "--json",
@@ -571,10 +571,10 @@ describe("managed service update handoff", () => {
     ]);
     expect(helperParams.handoffId).toBe("handoff-123");
     expect(options.detached).toBe(true);
-    expect(options.env.OPENCLAW_SYSTEMD_UNIT).toBe("openclaw-gateway.service");
+    expect(options.env.CARAPACE_SYSTEMD_UNIT).toBe("carapace-gateway.service");
     expect(options.env.INVOCATION_ID).toBeUndefined();
     expect(options.env.KEEP_ME).toBe("1");
-    expect(options.env.OPENCLAW_UPDATE_RUN_HANDOFF).toBe("1");
+    expect(options.env.CARAPACE_UPDATE_RUN_HANDOFF).toBe("1");
   });
 
   itUnix("parks and restores the exact user-systemd service from its detached helper", async () => {
@@ -590,7 +590,7 @@ describe("managed service update handoff", () => {
     expect(commands[0]).toContain(
       "--property=Id,LoadState,ActiveState,MainPID,ExecMainStartTimestampMonotonic,InvocationID",
     );
-    expect(commands[1]).toContain("stop openclaw-gateway.service");
+    expect(commands[1]).toContain("stop carapace-gateway.service");
     expect(state).toMatchObject({ parked: true, restored: true });
     expect(state.guardedRestart).toBeUndefined();
     expect(sentinel).toMatchObject({
@@ -630,7 +630,7 @@ describe("managed service update handoff", () => {
       expect(parentSignal).toBeNull();
       expect(commands.filter((command) => command.includes("reset-failed"))).toHaveLength(0);
       expect(
-        commands.filter((command) => command.includes("start openclaw-gateway.service")),
+        commands.filter((command) => command.includes("start carapace-gateway.service")),
       ).toHaveLength(1);
       expect(state).toMatchObject({ parked: true, ...expectedState });
       expect(state.triageCalls).toBe(1);
@@ -659,14 +659,14 @@ describe("managed service update handoff", () => {
     const restart = verbs.findIndex((verb) => verb === "bootstrap" || verb === "kickstart");
 
     expect(disable).toBeGreaterThan(0);
-    expect(commands[0]).toBe("print gui/501/ai.openclaw.gateway");
+    expect(commands[0]).toBe("print gui/501/ai.carapace.gateway");
     expect(bootout).toBeGreaterThan(disable);
     expect(enable).toBeGreaterThan(bootout);
     expect(verbs.slice(bootout + 1, enable)).toContain("print");
     expect(restart).toBeGreaterThan(enable);
     expect(verbs.lastIndexOf("print")).toBeGreaterThan(restart);
-    expect(commands[disable]).toBe("disable gui/501/ai.openclaw.gateway");
-    expect(commands[bootout]).toBe("bootout gui/501/ai.openclaw.gateway");
+    expect(commands[disable]).toBe("disable gui/501/ai.carapace.gateway");
+    expect(commands[bootout]).toBe("bootout gui/501/ai.carapace.gateway");
     expect(commands.every((command) => !command.includes("kickstart -k"))).toBe(true);
     expect(state).toMatchObject({ disabled: false, parked: true, restored: true });
     expect(sentinel).toMatchObject({
@@ -690,7 +690,7 @@ describe("managed service update handoff", () => {
     const cases = [
       {
         supervisor: "launchd" as const,
-        env: { OPENCLAW_LAUNCHD_LABEL: "test.gateway", HOME: "/Users/test" },
+        env: { CARAPACE_LAUNCHD_LABEL: "test.gateway", HOME: "/Users/test" },
         expected: {
           kind: "launchd",
           uid: typeof process.getuid === "function" ? process.getuid() : 501,
@@ -705,8 +705,8 @@ describe("managed service update handoff", () => {
       },
       {
         supervisor: "schtasks" as const,
-        env: { OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Test Gateway" },
-        expected: { kind: "schtasks", taskName: "OpenClaw Test Gateway" },
+        env: { CARAPACE_WINDOWS_TASK_NAME: "Carapace Test Gateway" },
+        expected: { kind: "schtasks", taskName: "Carapace Test Gateway" },
       },
     ];
 
@@ -718,7 +718,7 @@ describe("managed service update handoff", () => {
         restartDelayMs: 500,
         parentPid: process.pid,
         execPath: "/usr/local/bin/node",
-        argv1: "/opt/openclaw/openclaw.mjs",
+        argv1: "/opt/carapace/carapace.mjs",
         supervisor: testCase.supervisor,
         env: testCase.env,
         meta: { sessionKey: "agent:test:webchat:dm:user-123" },
@@ -738,11 +738,11 @@ describe("managed service update handoff", () => {
   });
 
   it("sweeps stale handoff temp directories while keeping fresh handoff logs", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-cleanup-test-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-cleanup-test-"));
     tempDirs.add(tmpDir);
     const staleDir = path.join(tmpDir, `${MANAGED_SERVICE_UPDATE_HANDOFF_TEMP_PREFIX}stale`);
     const freshDir = path.join(tmpDir, `${MANAGED_SERVICE_UPDATE_HANDOFF_TEMP_PREFIX}fresh`);
-    const unrelatedDir = path.join(tmpDir, "openclaw-other-temp");
+    const unrelatedDir = path.join(tmpDir, "carapace-other-temp");
     await fs.mkdir(staleDir, { recursive: true });
     await fs.mkdir(freshDir, { recursive: true });
     await fs.mkdir(unrelatedDir, { recursive: true });

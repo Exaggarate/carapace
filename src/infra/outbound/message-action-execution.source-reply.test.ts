@@ -2,7 +2,7 @@
 // policy after plugin preparation is absent.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { runMessageAction } from "./message-action-runner.js";
@@ -21,7 +21,7 @@ const slackConfig = {
       enabled: true,
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const telegramConfig = {
   channels: {
@@ -29,7 +29,7 @@ const telegramConfig = {
       enabled: true,
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function registerSlackTextPlugin(accountIds: string[] = ["default"]) {
   const sendText = vi.fn().mockResolvedValue({

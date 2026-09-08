@@ -4,24 +4,24 @@ set -Eeuo pipefail
 export DBUS_SESSION_BUS_ADDRESS=/dev/null
 
 export DISPLAY=:1
-export HOME=/tmp/openclaw-home
+export HOME=/tmp/carapace-home
 export XDG_CONFIG_HOME="${HOME}/.config"
 export XDG_CACHE_HOME="${HOME}/.cache"
 
-CDP_PORT="${OPENCLAW_BROWSER_CDP_PORT:-9222}"
-CDP_SOURCE_RANGE="${OPENCLAW_BROWSER_CDP_SOURCE_RANGE:-}"
-CDP_AUTH_TOKEN="${OPENCLAW_BROWSER_CDP_AUTH_TOKEN:-}"
-VNC_PORT="${OPENCLAW_BROWSER_VNC_PORT:-5900}"
-NOVNC_PORT="${OPENCLAW_BROWSER_NOVNC_PORT:-6080}"
-ENABLE_NOVNC="${OPENCLAW_BROWSER_ENABLE_NOVNC:-1}"
-HEADLESS="${OPENCLAW_BROWSER_HEADLESS:-0}"
-ALLOW_NO_SANDBOX="${OPENCLAW_BROWSER_NO_SANDBOX:-0}"
-NOVNC_PASSWORD="${OPENCLAW_BROWSER_NOVNC_PASSWORD:-}"
+CDP_PORT="${CARAPACE_BROWSER_CDP_PORT:-9222}"
+CDP_SOURCE_RANGE="${CARAPACE_BROWSER_CDP_SOURCE_RANGE:-}"
+CDP_AUTH_TOKEN="${CARAPACE_BROWSER_CDP_AUTH_TOKEN:-}"
+VNC_PORT="${CARAPACE_BROWSER_VNC_PORT:-5900}"
+NOVNC_PORT="${CARAPACE_BROWSER_NOVNC_PORT:-6080}"
+ENABLE_NOVNC="${CARAPACE_BROWSER_ENABLE_NOVNC:-1}"
+HEADLESS="${CARAPACE_BROWSER_HEADLESS:-0}"
+ALLOW_NO_SANDBOX="${CARAPACE_BROWSER_NO_SANDBOX:-0}"
+NOVNC_PASSWORD="${CARAPACE_BROWSER_NOVNC_PASSWORD:-}"
 
-DISABLE_GRAPHICS_FLAGS="${OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS:-1}"
-DISABLE_EXTENSIONS="${OPENCLAW_BROWSER_DISABLE_EXTENSIONS:-1}"
-RENDERER_PROCESS_LIMIT="${OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT:-2}"
-AUTO_START_TIMEOUT_MS="${OPENCLAW_BROWSER_AUTO_START_TIMEOUT_MS:-12000}"
+DISABLE_GRAPHICS_FLAGS="${CARAPACE_BROWSER_DISABLE_GRAPHICS_FLAGS:-1}"
+DISABLE_EXTENSIONS="${CARAPACE_BROWSER_DISABLE_EXTENSIONS:-1}"
+RENDERER_PROCESS_LIMIT="${CARAPACE_BROWSER_RENDERER_PROCESS_LIMIT:-2}"
+AUTO_START_TIMEOUT_MS="${CARAPACE_BROWSER_AUTO_START_TIMEOUT_MS:-12000}"
 
 validate_uint() {
   local name="$1"
@@ -178,7 +178,7 @@ echo "[sandbox] CDP ready. Starting relay..."
 if [[ -z "${CDP_AUTH_TOKEN}" ]]; then
   echo "[sandbox-browser] WARNING: CDP auth token unset; CDP relay will not start." >&2
 else
-  OPENCLAW_BROWSER_CHROME_CDP_PORT="${CHROME_CDP_PORT}" python3 - <<'PY' &
+  CARAPACE_BROWSER_CHROME_CDP_PORT="${CHROME_CDP_PORT}" python3 - <<'PY' &
 import base64
 import hmac
 import ipaddress
@@ -189,10 +189,10 @@ import socketserver
 import sys
 import time
 
-LISTEN_PORT = int(os.environ["OPENCLAW_BROWSER_CDP_PORT"])
-UPSTREAM_PORT = int(os.environ["OPENCLAW_BROWSER_CHROME_CDP_PORT"])
-AUTH_TOKEN = os.environ["OPENCLAW_BROWSER_CDP_AUTH_TOKEN"]
-SOURCE_RANGE = os.environ.get("OPENCLAW_BROWSER_CDP_SOURCE_RANGE", "").strip()
+LISTEN_PORT = int(os.environ["CARAPACE_BROWSER_CDP_PORT"])
+UPSTREAM_PORT = int(os.environ["CARAPACE_BROWSER_CHROME_CDP_PORT"])
+AUTH_TOKEN = os.environ["CARAPACE_BROWSER_CDP_AUTH_TOKEN"]
+SOURCE_RANGE = os.environ.get("CARAPACE_BROWSER_CDP_SOURCE_RANGE", "").strip()
 MAX_HEADER_BYTES = 65536
 HEADER_READ_TIMEOUT_SECONDS = 5.0
 
@@ -202,7 +202,7 @@ except ValueError:
     print(f"[sandbox-browser] ERROR: invalid CDP source range: {SOURCE_RANGE}", file=sys.stderr)
     raise SystemExit(1)
 
-EXPECTED_BASIC = "Basic " + base64.b64encode(f"openclaw:{AUTH_TOKEN}".encode()).decode()
+EXPECTED_BASIC = "Basic " + base64.b64encode(f"carapace:{AUTH_TOKEN}".encode()).decode()
 EXPECTED_BEARER = "Bearer " + AUTH_TOKEN
 
 
@@ -284,7 +284,7 @@ class Handler(socketserver.BaseRequestHandler):
         if not has_auth(header_bytes):
             self.request.sendall(
                 b"HTTP/1.1 401 Unauthorized\r\n"
-                b'WWW-Authenticate: Basic realm="OpenClaw CDP"\r\n'
+                b'WWW-Authenticate: Basic realm="Carapace CDP"\r\n'
                 b"Connection: close\r\n"
                 b"Content-Length: 0\r\n\r\n"
             )

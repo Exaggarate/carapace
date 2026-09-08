@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { expect, test, vi } from "vitest";
 import {
   markPreparedModelRuntimeSnapshotsStale,
@@ -17,9 +17,9 @@ import {
 } from "../infra/diagnostic-trace-context.js";
 import { flushLogger, setLoggerOverride } from "../logging/logger.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
 import { captureEnv } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { ADMIN_SCOPE } from "./method-scopes.js";
 import * as modelCatalog from "./server-model-catalog.js";
 import { startGatewayServer } from "./server.js";
@@ -34,7 +34,7 @@ import {
 } from "./test-helpers.manual-gateway-env.js";
 
 test("an authenticated metadata patch completes while another session awaits catalog reload", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const backgroundEnv = captureEnv([...MANUAL_GATEWAY_ENV_KEYS]);
     configureManualGatewayBackgroundEnv(state.home);
     let server: Awaited<ReturnType<typeof startGatewayServer>> | undefined;
@@ -166,7 +166,7 @@ test("an authenticated metadata patch completes while another session awaits cat
       });
       void queuedPatch.catch(() => {});
       try {
-        const storePath = resolveOpenClawAgentSqlitePath(writerScope);
+        const storePath = resolveCarapaceAgentSqlitePath(writerScope);
         await vi.waitFor(() =>
           expect(SQLITE_SESSION_WRITER_QUEUES.get(storePath)?.pending.length).toBeGreaterThan(0),
         );

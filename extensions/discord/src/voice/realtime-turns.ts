@@ -1,16 +1,16 @@
-import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   isRealtimeVoiceWakeNameRequired,
   matchRealtimeVoiceActivationName,
   type RealtimeVoiceActivationNameTranscriptResult,
   type RealtimeVoiceBridgeSession,
   type RealtimeVoiceWakeNamePolicy,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import { convertDiscordPcm48kStereoToRealtimePcm24kMono } from "./audio.js";
 import type { DiscordRealtimePlaybackPort } from "./realtime-playback.js";
 import { mergeRealtimePartialTranscript } from "./realtime-transcript.js";

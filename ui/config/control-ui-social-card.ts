@@ -13,7 +13,7 @@ export function controlUiSocialCardPlugin(): Plugin {
       const images = [canvas];
       try {
         const source = PhotonImage.new_from_byteslice(
-          fs.readFileSync(new URL("../../docs/assets/openclaw-hero-dark.png", import.meta.url)),
+          fs.readFileSync(new URL("../../docs/assets/carapace-hero-dark.png", import.meta.url)),
         );
         images.push(source);
         const logo = resize(source, 1060, 376, SamplingFilter.Lanczos3);

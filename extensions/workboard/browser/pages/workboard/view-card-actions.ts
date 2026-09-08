@@ -1,4 +1,4 @@
-import type { BoardGetParams } from "@openclaw/gateway-protocol";
+import type { BoardGetParams } from "@carapace/gateway-protocol";
 import { html, nothing, type TemplateResult } from "lit";
 import { icons } from "../../components/icons.ts";
 import { t } from "../../i18n/index.ts";

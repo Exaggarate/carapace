@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { readSecretFile } from "openclaw/plugin-sdk/secret-file";
+import { readSecretFile } from "carapace/plugin-sdk/secret-file";
 import type { CodexAppServerStartOptions } from "./config-contracts.js";
 import { resolveCodexAppServerSpawnEnv } from "./transport-stdio.js";
 
@@ -31,7 +31,7 @@ function resolveCodexAppServerEnvApiKeyCacheKey(params: {
     return undefined;
   }
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-env-api-key:v1");
+  hash.update("carapace:codex:app-server-env-api-key:v1");
   hash.update("\0");
   hash.update(apiKey.key);
   hash.update("\0");
@@ -63,7 +63,7 @@ export function resolveCodexAppServerPreparedApiKeyCacheKey(
 
 export function fingerprintApiKeyAuthProfileCacheKey(apiKey: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-auth-profile-api-key:v1");
+  hash.update("carapace:codex:app-server-auth-profile-api-key:v1");
   hash.update("\0");
   hash.update(apiKey);
   return `api_key:sha256:${hash.digest("hex")}`;
@@ -71,7 +71,7 @@ export function fingerprintApiKeyAuthProfileCacheKey(apiKey: string): string {
 
 export function fingerprintTokenAuthProfileCacheKey(accessToken: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-auth-profile-token:v1");
+  hash.update("carapace:codex:app-server-auth-profile-token:v1");
   hash.update("\0");
   hash.update(accessToken);
   return `token:sha256:${hash.digest("hex")}`;
@@ -79,7 +79,7 @@ export function fingerprintTokenAuthProfileCacheKey(accessToken: string): string
 
 function fingerprintCodexCliAuthFileApiKeyCacheKey(apiKey: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-cli-auth-json-api-key:v1");
+  hash.update("carapace:codex:app-server-cli-auth-json-api-key:v1");
   hash.update("\0");
   hash.update(apiKey);
   return `CODEX_AUTH_JSON:sha256:${hash.digest("hex")}`;

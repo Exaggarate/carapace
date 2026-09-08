@@ -56,7 +56,7 @@ weather” still start tasks while idle. Genuine new tasks retain the native
 delegation replacement behavior.
 
 These calls disable provider-generated delegation acknowledgments at creation.
-OpenClaw sends one neutral receipt when it launches a real task; status and
+Carapace sends one neutral receipt when it launches a real task; status and
 cancellation requests wait for the host result instead, without waiting for final
 speech transcription. A full control queue produces a spoken refusal; retry after
 the pending controls finish. A task receipt is not confirmation that a model or
@@ -95,7 +95,7 @@ replies retain their existing visibility.
 Direct provider-owned consultations keep their own final answer visible in Chat.
 Accepted work can outlive a closed or replaced audio connection, so a spoken
 replacement is not guaranteed. If speech also arrives, both records may be visible;
-OpenClaw preserves the answer rather than guessing that the spoken text replaces it.
+Carapace preserves the answer rather than guessing that the spoken text replaces it.
 
 OpenAI GA browser Talk keeps provider conversation order even when an assistant
 reply finishes before the user's transcription or item announcements arrive out
@@ -108,7 +108,7 @@ Google Live saves complete utterances during the call, including Gemini 3.1
 transcriptions that omit an explicit transcription-finished flag. Partial text
 stays provisional until the provider's completion boundary.
 
-Voice-originated consult runs require a new, exact spoken confirmation before high-impact actions such as sending messages, controlling nodes, browser/computer actions, service changes, destructive shell commands, or publication. The gate applies to runs started through `talk.client.toolCall`, the Gateway relay, and GPT-Live sideband delegations. The confirmation applies only to the canonical final execution arguments and is consumed once; if a policy or hook rewrites the approved action, OpenClaw blocks it until the rewritten action is confirmed. Unrelated concurrent runs remain unaffected. When a call closes, OpenClaw can send a compact **Voice call changes** digest for mutating tools to the session's last non-WebChat delivery target.
+Voice-originated consult runs require a new, exact spoken confirmation before high-impact actions such as sending messages, controlling nodes, browser/computer actions, service changes, destructive shell commands, or publication. The gate applies to runs started through `talk.client.toolCall`, the Gateway relay, and GPT-Live sideband delegations. The confirmation applies only to the canonical final execution arguments and is consumed once; if a policy or hook rewrites the approved action, Carapace blocks it until the rewritten action is confirmed. Unrelated concurrent runs remain unaffected. When a call closes, Carapace can send a compact **Voice call changes** digest for mutating tools to the session's last non-WebChat delivery target.
 
 Transcription-only Talk emits the same Talk event envelope as realtime and STT/TTS sessions, but uses `mode: "transcription"` and `brain: "none"`. All Talk sessions broadcast events on the `talk.event` channel; clients subscribe to it for partial/final transcript updates (`transcript.delta`/`transcript.done`) and other session telemetry.
 
@@ -303,7 +303,7 @@ Rules:
 
 Supported keys: `voice` / `voice_id` / `voiceId`, `model` / `model_id` / `modelId`, `speed`, `rate` (WPM), `stability`, `similarity`, `style`, `speakerBoost`, `seed`, `normalize`, `lang`, `output_format`, `latency_tier`, `once`.
 
-## Config (`~/.openclaw/openclaw.json`)
+## Config (`~/.carapace/carapace.json`)
 
 ```json5
 {
@@ -353,7 +353,7 @@ Gateway-owned control. Gateway relay uses Gateway-owned WebRTC for the released
 route with either OAuth or Platform fallback. Unlisted routes and other backend
 consumers use the direct Platform-only transport.
 
-For browser and Gateway-relay Talk, the released route prefers an OpenClaw
+For browser and Gateway-relay Talk, the released route prefers an Carapace
 ChatGPT OAuth profile and falls back to Platform API-key authentication.
 Unlisted routes never use OAuth and require a Platform key. GPT-Live browser
 Talk also requires the bundled `openai` plugin registered in full mode; a
@@ -386,13 +386,13 @@ and [Voice Call tools](/plugins/voice-call#realtime-voice-conversations).
 
 The Gateway-owned WebRTC route keeps OAuth and Platform credentials away from
 relay clients. Backend WebSocket paths keep the Platform key on the Gateway;
-OpenClaw converts telephony G.711 u-law audio to and from GPT-Live's 24 kHz PCM
+Carapace converts telephony G.711 u-law audio to and from GPT-Live's 24 kHz PCM
 contract.
 
 For GA `gpt-realtime-2.1`, `gpt-realtime-2.1-mini`, and `gpt-realtime-2`
 browser sessions, Platform credentials remain preferred in this order: the
 configured realtime API key, an `openai` API-key profile, then
-`OPENAI_API_KEY`. With none configured, browser Talk falls back to an OpenClaw
+`OPENAI_API_KEY`. With none configured, browser Talk falls back to an Carapace
 ChatGPT OAuth profile and exchanges SDP through the Gateway's single-use offer
 broker, so the OAuth token never reaches the browser. A configured Platform
 credential that cannot be resolved fails closed instead of silently falling
@@ -419,16 +419,16 @@ and unlisted GPT-Live routes remain Platform-key-only.
 | `silenceTimeoutMs`                       | `700` ms macOS/Android, `900` ms iOS        | Pause window before Talk sends the transcript.                                                                                                                                                                                                                 |
 | `interruptOnSpeech`                      | `true`                                      |                                                                                                                                                                                                                                                                |
 | `providers.<id>.outputFormat`            | `pcm_44100` macOS/iOS, `pcm_24000` Android  | Set `mp3_*` to force MP3 streaming.                                                                                                                                                                                                                            |
-| `consultThinkingLevel`                   | unset                                       | Thinking level override for the agent run behind realtime `openclaw_agent_consult` calls.                                                                                                                                                                      |
-| `consultFastMode`                        | unset                                       | Fast-mode override for realtime `openclaw_agent_consult` calls.                                                                                                                                                                                                |
+| `consultThinkingLevel`                   | unset                                       | Thinking level override for the agent run behind realtime `carapace_agent_consult` calls.                                                                                                                                                                      |
+| `consultFastMode`                        | unset                                       | Fast-mode override for realtime `carapace_agent_consult` calls.                                                                                                                                                                                                |
 | `realtime.provider`                      | -                                           | `openai` for WebRTC, `google` for provider WebSocket, or a bridge-only provider through Gateway relay.                                                                                                                                                         |
 | `realtime.providers.<id>`                | -                                           | Provider-owned realtime config. Browsers receive only ephemeral/constrained session credentials, never a standard API key.                                                                                                                                     |
 | `realtime.providers.openai.speakerVoice` | `alloy` for GA; route-specific for GPT-Live | Built-in OpenAI realtime voice id (the older `voice` key still works but is deprecated). GA voices: `alloy`, `ash`, `ballad`, `cedar`, `coral`, `echo`, `marin`, `sage`, `shimmer`, `verse`. GPT-Live uses the route-specific voice families documented above. |
 | `realtime.model`                         | provider default                            | Realtime voice model. Overrides `realtime.providers.<id>.model` when both are set — the same precedence `talk.client.create` applies at session time.                                                                                                          |
 | `realtime.transport`                     | -                                           | `webrtc`: OpenAI WebRTC on iOS, in the browser, and on Watch with Gateway control. `provider-websocket`: browser-owned, stays on Gateway relay on iOS. `gateway-relay`: keeps provider audio on the Gateway; Android uses realtime only with this transport.   |
 | `realtime.brain`                         | -                                           | `agent-consult` routes realtime tool calls through Gateway policy; `direct-tools` is legacy direct-tool compatibility; `none` is for transcription/external orchestration.                                                                                     |
-| `realtime.consultRouting`                | -                                           | `provider-direct` preserves the provider's direct reply when it skips `openclaw_agent_consult`; `force-agent-consult` routes finalized user transcripts through OpenClaw instead.                                                                              |
-| `realtime.instructions`                  | -                                           | Appends provider-facing system instructions to OpenClaw's built-in realtime prompt.                                                                                                                                                                            |
+| `realtime.consultRouting`                | -                                           | `provider-direct` preserves the provider's direct reply when it skips `carapace_agent_consult`; `force-agent-consult` routes finalized user transcripts through Carapace instead.                                                                              |
+| `realtime.instructions`                  | -                                           | Appends provider-facing system instructions to Carapace's built-in realtime prompt.                                                                                                                                                                            |
 
 `talk.catalog` exposes canonical provider ids and registry aliases, each provider's valid modes/transports/brain strategies/realtime audio formats/capability flags, and the runtime-selected readiness result. First-party Talk clients should read that catalog instead of maintaining provider aliases locally; treat an older Gateway that omits group readiness as unverified rather than definitively unconfigured. Streaming transcription providers are discovered through `talk.catalog.transcription`; the current Gateway relay uses the Voice Call streaming provider config until a dedicated Talk transcription config surface ships.
 
@@ -479,7 +479,7 @@ Watch background behavior. See [Watch setup and limits](/platforms/ios#standalon
   Talk with an error. Interruption clears queued output before capture resumes;
   stopped sessions cannot acknowledge playback through a replacement Gateway.
 - Realtime **Thinking** follows provider response generation or an accepted
-  OpenClaw consult, not input transcription, which may finish after the answer.
+  Carapace consult, not input transcription, which may finish after the answer.
   Direct replies without a provider or Gateway response-start signal stay
   **Listening** until output arrives. Empty completed responses return to **Listening**;
   buffered audio stays **Speaking** until playback drains.
@@ -493,7 +493,7 @@ Watch background behavior. See [Watch setup and limits](/platforms/ios#standalon
 - Native speech recognition requires the platform's speech and microphone access. Standalone Watch realtime requires microphone access, not local speech recognition.
 - Native Talk uses the active Gateway session and only falls back to history polling when response events are unavailable.
 - The gateway resolves Talk playback through `talk.speak` using the active Talk provider. Android falls back to local system TTS only when that RPC is unavailable.
-- macOS local MLX playback uses the bundled `openclaw-mlx-tts` helper when present, or an executable on `PATH`. Set `OPENCLAW_MLX_TTS_BIN` to point at a custom helper binary during development. The helper streams PCM, keeps one selected model resident, and supports Fish S2 Pro reference audio through `providers.mlx.referenceAudioPath` plus `referenceText`.
+- macOS local MLX playback uses the bundled `carapace-mlx-tts` helper when present, or an executable on `PATH`. Set `CARAPACE_MLX_TTS_BIN` to point at a custom helper binary during development. The helper streams PCM, keeps one selected model resident, and supports Fish S2 Pro reference audio through `providers.mlx.referenceAudioPath` plus `referenceText`.
 - Voice directive value ranges (ElevenLabs): `stability`, `similarity`, and `style` accept `0..1`; `speed` accepts `0.5..2`; `latency_tier` accepts `0..4`.
 
 ## Related

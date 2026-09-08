@@ -1,5 +1,5 @@
 // Slack test API exposes QA runtime operations from the owning plugin.
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 
 export {
   createSlackWebClient,

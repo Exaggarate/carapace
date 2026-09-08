@@ -23,7 +23,7 @@ function withoutAiRuntimeDependency(value) {
   if (!Array.isArray(value)) {
     return value;
   }
-  const next = value.filter((entry) => entry !== "@openclaw/ai");
+  const next = value.filter((entry) => entry !== "@carapace/ai");
   return next.length > 0 ? next : undefined;
 }
 
@@ -36,7 +36,7 @@ function ensureDependencyIgnores(root) {
     "**/node_modules/",
     "pnpm-lock.yaml",
     // Runtime promotion stages destination siblings before its final clean check.
-    "*.openclaw-update-*.tmp/",
+    "*.carapace-update-*.tmp/",
     PACKAGE_LIFECYCLE_PENDING_RELATIVE_PATH,
   ];
   const missing = required.filter((entry) => !lines.has(entry));
@@ -61,17 +61,17 @@ function prepare(root) {
   delete packageJson.devDependencies;
   packageJson.scripts = {
     ...packageJson.scripts,
-    openclaw: "node openclaw.mjs",
+    carapace: "node carapace.mjs",
   };
   delete packageJson.scripts.postinstall;
-  const aiRuntimeSource = path.join(root, "node_modules", "@openclaw", "ai");
+  const aiRuntimeSource = path.join(root, "node_modules", "@carapace", "ai");
   const aiRuntimePackageJson = path.join(aiRuntimeSource, "package.json");
   if (!fs.existsSync(aiRuntimePackageJson)) {
     writeJson(packageJsonPath, packageJson);
     return;
   }
 
-  const aiRuntimeTarget = path.join(root, ".openclaw-fixture", "packages", "ai");
+  const aiRuntimeTarget = path.join(root, ".carapace-fixture", "packages", "ai");
   fs.rmSync(aiRuntimeTarget, { force: true, recursive: true });
   fs.mkdirSync(path.dirname(aiRuntimeTarget), { recursive: true });
   fs.renameSync(aiRuntimeSource, aiRuntimeTarget);
@@ -81,7 +81,7 @@ function prepare(root) {
   writeJson(relocatedAiRuntimePackageJson, relocatedAiRuntimePackage);
 
   packageJson.dependencies ??= {};
-  packageJson.dependencies["@openclaw/ai"] = "file:.openclaw-fixture/packages/ai";
+  packageJson.dependencies["@carapace/ai"] = "file:.carapace-fixture/packages/ai";
   packageJson.bundleDependencies = withoutAiRuntimeDependency(packageJson.bundleDependencies);
   packageJson.bundledDependencies = withoutAiRuntimeDependency(packageJson.bundledDependencies);
   if (packageJson.bundleDependencies === undefined) {

@@ -2,12 +2,12 @@
 import { randomUUID } from "node:crypto";
 import http from "node:http";
 import type { Duplex } from "node:stream";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   buildRealtimeVoiceAgentConsultWorkingResponse,
   buildRealtimeVoiceAgentErrorProviderResult,
@@ -25,10 +25,10 @@ import {
   type RealtimeVoiceProviderPlugin,
   type RealtimeVoiceSessionHarness,
   type TalkEvent,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { sliceUtf16Safe, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import { normalizeWebhookPath } from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
+import { sliceUtf16Safe, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import { normalizeWebhookPath } from "carapace/plugin-sdk/webhook-ingress";
 import { resolveVoiceCallPublicPathPrefix, type VoiceCallRealtimeConfig } from "../config.js";
 import type { CallManager } from "../manager.js";
 import { REALTIME_VOICE_END_CALL_TOOL_NAME } from "../realtime-call-control.js";
@@ -62,7 +62,7 @@ const REALTIME_DISCONNECT_HANGUP_GRACE_MS = 2_000;
 const FORCED_CONSULT_FALLBACK_DELAY_MS = 200;
 const FORCED_CONSULT_NATIVE_DEDUPE_MS = 2_000;
 const FORCED_CONSULT_RESULT_MAX_CHARS = 1800;
-const FORCED_CONSULT_REASON = "provider_final_transcript_without_openclaw_agent_consult";
+const FORCED_CONSULT_REASON = "provider_final_transcript_without_carapace_agent_consult";
 const CONSULT_TRANSCRIPT_SETTLE_MS = 350;
 const CONSULT_TRANSCRIPT_SETTLE_MAX_MS = 1_000;
 const MAX_PARTIAL_USER_TRANSCRIPT_CHARS = 1_200;
@@ -231,7 +231,7 @@ function buildForcedConsultSpeechPrompt(result: string): string {
       ? trimmed
       : `${truncateUtf16Safe(trimmed, FORCED_CONSULT_RESULT_MAX_CHARS - 16).trimEnd()} [truncated]`;
   return [
-    "Internal OpenClaw consult result is ready.",
+    "Internal Carapace consult result is ready.",
     "Do not call tools for this internal result.",
     "Speak the following answer to the caller now, briefly and naturally:",
     bounded,
@@ -400,7 +400,7 @@ export class RealtimeCallHandler {
     private readonly resolveCallRegistration: ResolveRealtimeCallRegistration,
     private readonly servePath: string,
     private readonly streamDisconnectLifecycle: StreamDisconnectLifecycle,
-    private readonly coreConfig?: OpenClawConfig,
+    private readonly coreConfig?: CarapaceConfig,
   ) {}
 
   setPublicUrl(url: string): void {
@@ -1903,7 +1903,7 @@ export class RealtimeCallHandler {
         }
         await submitFinalToolResult({
           status: "cancelled",
-          message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+          message: "Carapace cancelled this consult before completion. Do not restart it.",
         });
         return;
       }
@@ -1911,7 +1911,7 @@ export class RealtimeCallHandler {
         if (forcedConsult.completedAt || forcedMatch.kind === "already_delivered") {
           await submitFinalToolResult({
             status: "already_delivered",
-            message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+            message: "Carapace already delivered this consult result internally. Do not repeat it.",
           });
           return;
         }

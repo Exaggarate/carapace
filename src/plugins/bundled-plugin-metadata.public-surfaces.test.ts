@@ -18,12 +18,12 @@ beforeEach(() => {
 
 describe("bundled plugin public surfaces", () => {
   it("merges runtime channel schema metadata with manifest-owned channel config fields", () => {
-    const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-channel-configs-");
+    const tempRoot = createGeneratedPluginTempRoot("carapace-bundled-plugin-channel-configs-");
 
     writeJson(path.join(tempRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@carapace/alpha",
       version: "0.0.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         channel: {
           id: "alpha",
@@ -33,7 +33,7 @@ describe("bundled plugin public surfaces", () => {
         },
       },
     });
-    writeJson(path.join(tempRoot, "extensions", "alpha", "openclaw.plugin.json"), {
+    writeJson(path.join(tempRoot, "extensions", "alpha", "carapace.plugin.json"), {
       id: "alpha",
       channels: ["alpha"],
       configSchema: { type: "object" },
@@ -93,17 +93,17 @@ describe("bundled plugin public surfaces", () => {
   });
 
   it("captures top-level public surface artifacts without duplicating the primary entrypoints", () => {
-    const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-public-artifacts-");
+    const tempRoot = createGeneratedPluginTempRoot("carapace-bundled-plugin-public-artifacts-");
 
     writeJson(path.join(tempRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@carapace/alpha",
       version: "0.0.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
       },
     });
-    writeJson(path.join(tempRoot, "extensions", "alpha", "openclaw.plugin.json"), {
+    writeJson(path.join(tempRoot, "extensions", "alpha", "carapace.plugin.json"), {
       id: "alpha",
       configSchema: { type: "object" },
     });
@@ -135,13 +135,13 @@ describe("bundled plugin public surfaces", () => {
   });
 
   it("loads channel config metadata from built public surfaces in dist-only roots", () => {
-    const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-dist-config-");
+    const tempRoot = createGeneratedPluginTempRoot("carapace-bundled-plugin-dist-config-");
     const distRoot = path.join(tempRoot, "dist");
 
     writeJson(path.join(distRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@carapace/alpha",
       version: "0.0.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         channel: {
           id: "alpha",
@@ -150,7 +150,7 @@ describe("bundled plugin public surfaces", () => {
         },
       },
     });
-    writeJson(path.join(distRoot, "extensions", "alpha", "openclaw.plugin.json"), {
+    writeJson(path.join(distRoot, "extensions", "alpha", "carapace.plugin.json"), {
       id: "alpha",
       configSchema: {
         type: "object",
@@ -210,14 +210,14 @@ describe("bundled plugin public surfaces", () => {
   });
 
   it("does not probe broad runtime public surfaces for channel config metadata", () => {
-    const tempRoot = createGeneratedPluginTempRoot("openclaw-bundled-plugin-dist-config-runtime-");
+    const tempRoot = createGeneratedPluginTempRoot("carapace-bundled-plugin-dist-config-runtime-");
     const distRoot = path.join(tempRoot, "dist");
     const markerPath = path.join(tempRoot, "runtime-api-loaded");
 
     writeJson(path.join(distRoot, "extensions", "alpha", "package.json"), {
-      name: "@openclaw/alpha",
+      name: "@carapace/alpha",
       version: "0.0.1",
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         channel: {
           id: "alpha",
@@ -226,7 +226,7 @@ describe("bundled plugin public surfaces", () => {
         },
       },
     });
-    writeJson(path.join(distRoot, "extensions", "alpha", "openclaw.plugin.json"), {
+    writeJson(path.join(distRoot, "extensions", "alpha", "carapace.plugin.json"), {
       id: "alpha",
       configSchema: {
         type: "object",

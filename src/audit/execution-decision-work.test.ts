@@ -2,7 +2,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createAuditEventWriter } from "./audit-event-writer.js";
 import { pageExecutionDecisionFactsForContext } from "./execution-decision-facts.js";
 import type { ExecutionDecisionWork } from "./execution-decision-work.js";
@@ -54,7 +54,7 @@ function decisionWork(params: {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
@@ -62,7 +62,7 @@ describe("private execution decision work", () => {
   it.each(["raw ref", "complete envelope"] as const)(
     "rejects an oversized %s before the FIFO clone boundary",
     async (oversizedPart) => {
-      const stateDir = tempDirs.make("openclaw-audit-private-decision-bounds-");
+      const stateDir = tempDirs.make("carapace-audit-private-decision-bounds-");
       const errors: string[] = [];
       const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
       const token = createExecutionIdentityAdmissionToken("bounded-private-decision-run", {
@@ -100,8 +100,8 @@ describe("private execution decision work", () => {
   );
 
   it("projects private refs inside the admission FIFO without retaining raw owners", async () => {
-    const stateDir = tempDirs.make("openclaw-audit-private-decision-");
-    const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+    const stateDir = tempDirs.make("carapace-audit-private-decision-");
+    const database = { env: { CARAPACE_STATE_DIR: stateDir } };
     const errors: string[] = [];
     const writer = createAuditEventWriter({ stateDir, onError: (error) => errors.push(error) });
     const admittedAt = Date.now();
@@ -159,7 +159,7 @@ describe("private execution decision work", () => {
       },
     });
     expect(receipt?.action.resourceRef).not.toBe(receipt?.action.targetRef);
-    const sqlite = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+    const sqlite = new DatabaseSync(path.join(stateDir, "state", "carapace.sqlite"), {
       readOnly: true,
     });
     try {
@@ -177,7 +177,7 @@ describe("private execution decision work", () => {
 
   it("keeps refs restart-stable, namespace-separated, and installation-local", async () => {
     const rawRef = "same-private-owner-ref";
-    const firstStateDir = tempDirs.make("openclaw-audit-private-stability-");
+    const firstStateDir = tempDirs.make("carapace-audit-private-stability-");
     const write = async (params: {
       stateDir: string;
       suffix: string;
@@ -189,7 +189,7 @@ describe("private execution decision work", () => {
         executionId: `execution-${params.suffix}`,
         now,
       });
-      const database = { env: { OPENCLAW_STATE_DIR: params.stateDir } };
+      const database = { env: { CARAPACE_STATE_DIR: params.stateDir } };
       const writer = createAuditEventWriter({ stateDir: params.stateDir });
       const clearAdmissionSink = configureExecutionIdentityAdmissionSink(
         writer.recordExecutionIdentity,
@@ -228,16 +228,16 @@ describe("private execution decision work", () => {
     };
 
     const first = await write({ stateDir: firstStateDir, suffix: "first" });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const restarted = await write({ stateDir: firstStateDir, suffix: "restart" });
     const sessionScoped = await write({
       stateDir: firstStateDir,
       suffix: "session",
       targetNamespace: "session",
     });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const otherInstallation = await write({
-      stateDir: tempDirs.make("openclaw-audit-private-other-installation-"),
+      stateDir: tempDirs.make("carapace-audit-private-other-installation-"),
       suffix: "other",
     });
 

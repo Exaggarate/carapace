@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
@@ -48,7 +48,7 @@ describe("queued delivery dispatch evidence", () => {
     onPayloadDeliveryOutcome: (outcome: OutboundPayloadDeliveryOutcome) => void;
   }) =>
     deliverOutboundPayloads({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       channel: "matrix",
       to: "!room:example",
       payloads: [{ text: "first" }],
@@ -59,7 +59,7 @@ describe("queued delivery dispatch evidence", () => {
     }).catch((caught: unknown) => caught);
 
   it("retains retryable custody when an adapter fails before dispatch", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const sendMatrix = vi.fn();
     const onPayloadDeliveryOutcome = vi.fn();
     const failure = await attemptSend({
@@ -83,7 +83,7 @@ describe("queued delivery dispatch evidence", () => {
   });
 
   it("reports an ambiguous payload when an adapter fails after dispatch", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const sendMatrix = vi.fn().mockRejectedValueOnce(new Error("first payload send failed"));
     const onPayloadDeliveryOutcome = vi.fn();
     const failure = await attemptSend({ sendMatrix, onPayloadDeliveryOutcome });
@@ -104,13 +104,13 @@ describe("queued delivery dispatch evidence", () => {
   });
 
   it("preserves dispatch evidence for an all-failed best-effort batch", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const sendMatrix = vi.fn().mockRejectedValueOnce(new Error("provider result was lost"));
     const onPayloadDeliveryOutcome = vi.fn();
 
     await expect(
       deliverOutboundPayloads({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "matrix",
         to: "!room:example",
         payloads: [{ text: "first" }],
@@ -135,7 +135,7 @@ describe("queued delivery dispatch evidence", () => {
   });
 
   it("preserves an earlier receipt when a later payload is proven not sent", async () => {
-    process.env.OPENCLAW_STATE_DIR = tmpDir;
+    process.env.CARAPACE_STATE_DIR = tmpDir;
     const notDispatched = new PlatformMessageNotDispatchedError("second payload never dispatched", {
       cause: new Error("connect ECONNREFUSED"),
     });
@@ -146,7 +146,7 @@ describe("queued delivery dispatch evidence", () => {
 
     await expect(
       deliverOutboundPayloads({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         channel: "matrix",
         to: "!room:example",
         payloads: [{ text: "first" }, { text: "second" }],

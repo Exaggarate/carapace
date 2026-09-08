@@ -82,14 +82,14 @@ const groupedSessions = [
     worktree: {
       branch: "feat/session-toolbar",
       id: "wt-session-toolbar",
-      repoRoot: "/Users/demo/Projects/openclaw",
+      repoRoot: "/Users/demo/Projects/carapace",
     },
   }),
   sessionRow("agent:main:filter-followup", "Filter menu follow-up", baseTime - 540_000, {
     worktree: {
       branch: "fix/filter-menu",
       id: "wt-filter-menu",
-      repoRoot: "/Users/demo/Projects/openclaw",
+      repoRoot: "/Users/demo/Projects/carapace",
     },
   }),
 ];
@@ -155,7 +155,7 @@ async function openScenario(sessions: unknown[], groups: string[] = []) {
     sessionKey: "agent:main:main",
   });
   await page.goto(`${server.baseUrl}chat`);
-  await page.locator("openclaw-app-sidebar").waitFor({ state: "visible" });
+  await page.locator("carapace-app-sidebar").waitFor({ state: "visible" });
   await page.waitForFunction(() => document.documentElement.dataset.theme === "dark");
   return { context, page };
 }

@@ -62,8 +62,8 @@ vi.mock("../config/paths.js", async () => {
 });
 
 vi.mock("../daemon/constants.js", () => ({
-  resolveGatewayLaunchAgentLabel: vi.fn(() => "ai.openclaw.gateway"),
-  resolveNodeLaunchAgentLabel: vi.fn(() => "ai.openclaw.node"),
+  resolveGatewayLaunchAgentLabel: vi.fn(() => "ai.carapace.gateway"),
+  resolveNodeLaunchAgentLabel: vi.fn(() => "ai.carapace.node"),
 }));
 
 vi.mock("../daemon/diagnostics.js", () => ({
@@ -174,7 +174,7 @@ vi.mock("./health.js", () => ({
 describe("maybeRepairGatewayDaemon", () => {
   let maybeRepairGatewayDaemon: typeof import("./doctor-gateway-daemon-flow.js").maybeRepairGatewayDaemon;
   const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
-  const originalUpdateInProgress = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+  const originalUpdateInProgress = process.env.CARAPACE_UPDATE_IN_PROGRESS;
 
   beforeAll(async () => {
     ({ maybeRepairGatewayDaemon } = await import("./doctor-gateway-daemon-flow.js"));
@@ -222,9 +222,9 @@ describe("maybeRepairGatewayDaemon", () => {
       Object.defineProperty(process, "platform", originalPlatformDescriptor);
     }
     if (originalUpdateInProgress === undefined) {
-      delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+      delete process.env.CARAPACE_UPDATE_IN_PROGRESS;
     } else {
-      process.env.OPENCLAW_UPDATE_IN_PROGRESS = originalUpdateInProgress;
+      process.env.CARAPACE_UPDATE_IN_PROGRESS = originalUpdateInProgress;
     }
   });
 
@@ -258,7 +258,7 @@ describe("maybeRepairGatewayDaemon", () => {
   }
 
   async function runNonInteractiveUpdateRepair() {
-    process.env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
+    process.env.CARAPACE_UPDATE_IN_PROGRESS = "1";
     await runNonInteractiveRepair();
   }
 
@@ -322,8 +322,8 @@ describe("maybeRepairGatewayDaemon", () => {
   it("skips every service-manager seam for a non-default install identity", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-copied-state",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-copied-state/openclaw.json",
+        CARAPACE_STATE_DIR: "/tmp/carapace-copied-state",
+        CARAPACE_CONFIG_PATH: "/tmp/carapace-copied-state/carapace.json",
       },
       async () => {
         isDefaultInstallIdentity.mockReturnValue(false);
@@ -345,7 +345,7 @@ describe("maybeRepairGatewayDaemon", () => {
   });
 
   it.each([
-    { environment: "container without an OpenClaw service", detected: true },
+    { environment: "container without an Carapace service", detected: true },
     { environment: "Kubernetes pod without container markers", kubernetes: true },
     { environment: "globally external supervisor", external: true },
   ])(
@@ -364,7 +364,7 @@ describe("maybeRepairGatewayDaemon", () => {
         {
           KUBERNETES_SERVICE_HOST: scenario.kubernetes ? "10.96.0.1" : undefined,
           KUBERNETES_SERVICE_PORT: scenario.kubernetes ? "443" : undefined,
-          OPENCLAW_SUPERVISOR_MODE: scenario.external ? "external" : undefined,
+          CARAPACE_SUPERVISOR_MODE: scenario.external ? "external" : undefined,
         },
         runNonInteractiveRepair,
       );
@@ -387,8 +387,8 @@ describe("maybeRepairGatewayDaemon", () => {
     isContainerEnvironment.mockReturnValue(true);
     findInstalledSystemdGatewayScope.mockResolvedValue({
       scope: "user",
-      unitName: "openclaw-gateway.service",
-      unitPath: "/home/alice/.config/systemd/user/openclaw-gateway.service",
+      unitName: "carapace-gateway.service",
+      unitPath: "/home/alice/.config/systemd/user/carapace-gateway.service",
     });
     service.readRuntime.mockResolvedValue({ status: "stopped" });
     const prompter = createPrompter(() => true);
@@ -419,8 +419,8 @@ describe("maybeRepairGatewayDaemon", () => {
     service.readCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway"],
       environment: {
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-service",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-service/openclaw.json",
+        CARAPACE_STATE_DIR: "/tmp/carapace-service",
+        CARAPACE_CONFIG_PATH: "/tmp/carapace-service/carapace.json",
       },
     });
     readGatewayRestartHandoffSync.mockReturnValueOnce({
@@ -450,10 +450,10 @@ describe("maybeRepairGatewayDaemon", () => {
 
     expect(readGatewayRestartHandoffSync).toHaveBeenCalledTimes(2);
     const [handoffEnv] = readGatewayRestartHandoffSync.mock.calls[0] as unknown as [
-      { OPENCLAW_STATE_DIR?: string; OPENCLAW_CONFIG_PATH?: string },
+      { CARAPACE_STATE_DIR?: string; CARAPACE_CONFIG_PATH?: string },
     ];
-    expect(handoffEnv?.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-service");
-    expect(handoffEnv?.OPENCLAW_CONFIG_PATH).toBe("/tmp/openclaw-service/openclaw.json");
+    expect(handoffEnv?.CARAPACE_STATE_DIR).toBe("/tmp/carapace-service");
+    expect(handoffEnv?.CARAPACE_CONFIG_PATH).toBe("/tmp/carapace-service/carapace.json");
     expect(note).toHaveBeenCalledWith(
       "Recent restart handoff: full-process via systemd; source=plugin-change; reason=plugin source changed; pid=12345; age=30s; expiresIn=30s",
       "Gateway",
@@ -624,7 +624,7 @@ describe("maybeRepairGatewayDaemon", () => {
         {
           pid: 4242,
           command: "node",
-          commandLine: "/tmp/newer-openclaw/bin/openclaw logs --follow",
+          commandLine: "/tmp/newer-carapace/bin/carapace logs --follow",
           address: "TCP 127.0.0.1:50123->127.0.0.1:18789 (ESTABLISHED)",
           direction: "client",
         },
@@ -656,7 +656,7 @@ describe("maybeRepairGatewayDaemon", () => {
         {
           pid: 5151,
           command: "node",
-          commandLine: "/tmp/newer-openclaw/bin/openclaw logs --follow",
+          commandLine: "/tmp/newer-carapace/bin/carapace logs --follow",
           address: "TCP 127.0.0.1:50123->127.0.0.1:18789 (ESTABLISHED)",
           direction: "client",
         },
@@ -683,7 +683,7 @@ describe("maybeRepairGatewayDaemon", () => {
 
   it("suppresses busy-port note for expected Gateway listeners", async () => {
     setPlatform("linux");
-    const listeners = [{ pid: 5001, commandLine: "openclaw-gateway", address: "0.0.0.0:18789" }];
+    const listeners = [{ pid: 5001, commandLine: "carapace-gateway", address: "0.0.0.0:18789" }];
     inspectPortUsage.mockResolvedValue({
       port: 18789,
       status: "busy",
@@ -709,8 +709,8 @@ describe("maybeRepairGatewayDaemon", () => {
       port: 18789,
       status: "busy",
       listeners: [
-        { pid: 5001, commandLine: "openclaw-gateway", address: "0.0.0.0:18789" },
-        { pid: 5002, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+        { pid: 5001, commandLine: "carapace-gateway", address: "0.0.0.0:18789" },
+        { pid: 5002, commandLine: "carapace-gateway", address: "127.0.0.1:18789" },
       ],
       hints: ["Multiple listeners detected"],
     });
@@ -740,7 +740,7 @@ describe("maybeRepairGatewayDaemon", () => {
     service.isLoaded.mockResolvedValue(false);
     service.readRuntime.mockResolvedValue({ status: "stopped" });
     const managedDefinition = {
-      programArguments: ["node", "/opt/openclaw/dist/index.js", "gateway"],
+      programArguments: ["node", "/opt/carapace/dist/index.js", "gateway"],
       environment: { NODE_OPTIONS: "", UNRELATED: "not-persisted" },
     };
     const existingCommand = {
@@ -787,7 +787,7 @@ describe("maybeRepairGatewayDaemon", () => {
     expect(service.install).not.toHaveBeenCalled();
     expect(service.restart).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(
-      `Run ${formatCliCommand("openclaw gateway install")} when you want to install the gateway service.`,
+      `Run ${formatCliCommand("carapace gateway install")} when you want to install the gateway service.`,
       "Gateway",
     );
   });
@@ -855,23 +855,23 @@ describe("maybeRepairGatewayDaemon", () => {
     service.isLoaded.mockResolvedValue(loaded);
     service.readRuntime.mockResolvedValue({ status: runtime });
 
-    await withEnvAsync({ OPENCLAW_SERVICE_REPAIR_POLICY: "external" }, runAutoRepair);
+    await withEnvAsync({ CARAPACE_SERVICE_REPAIR_POLICY: "external" }, runAutoRepair);
 
     expect(service.install).not.toHaveBeenCalled();
     expect(service.restart).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(EXTERNAL_SERVICE_REPAIR_NOTE, "Gateway");
   });
 
-  it("skips gateway service install when a system OpenClaw gateway service exists", async () => {
+  it("skips gateway service install when a system Carapace gateway service exists", async () => {
     setPlatform("linux");
     service.isLoaded.mockResolvedValue(false);
     findSystemGatewayServices.mockResolvedValue([
       {
         platform: "linux",
-        label: "openclaw-gateway.service",
-        detail: "unit: /etc/systemd/system/openclaw-gateway.service",
+        label: "carapace-gateway.service",
+        detail: "unit: /etc/systemd/system/carapace-gateway.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "carapace",
         legacy: false,
       },
     ]);
@@ -883,10 +883,10 @@ describe("maybeRepairGatewayDaemon", () => {
     expect(service.restart).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(
       [
-        "System-level OpenClaw gateway service detected while the user gateway service is not installed.",
-        "- openclaw-gateway.service (unit: /etc/systemd/system/openclaw-gateway.service)",
-        "OpenClaw will not install a second user-level gateway service automatically.",
-        "Run `openclaw gateway status --deep` or `openclaw doctor --deep` to inspect duplicate services.",
+        "System-level Carapace gateway service detected while the user gateway service is not installed.",
+        "- carapace-gateway.service (unit: /etc/systemd/system/carapace-gateway.service)",
+        "Carapace will not install a second user-level gateway service automatically.",
+        "Run `carapace gateway status --deep` or `carapace doctor --deep` to inspect duplicate services.",
         `Set ${SERVICE_REPAIR_POLICY_ENV}=external if a system supervisor owns the gateway lifecycle.`,
       ].join("\n"),
       "Gateway",
@@ -900,7 +900,7 @@ describe("maybeRepairGatewayDaemon", () => {
     vi.mocked(launchd.isLaunchAgentLoaded).mockResolvedValue(false);
     vi.mocked(launchd.launchAgentPlistExists).mockResolvedValueOnce(true).mockResolvedValue(false);
 
-    await withEnvAsync({ OPENCLAW_SERVICE_REPAIR_POLICY: "external" }, async () => {
+    await withEnvAsync({ CARAPACE_SERVICE_REPAIR_POLICY: "external" }, async () => {
       await runAutoRepair();
     });
 
@@ -964,14 +964,14 @@ describe("maybeRepairGatewayDaemon", () => {
     setPlatform("darwin");
     service.readRuntime.mockResolvedValue({
       status: "unknown",
-      detail: "System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.",
+      detail: "System LaunchDaemon system/ai.carapace.gateway owns this gateway label.",
       systemLaunchDaemon: {
         status: "loaded",
-        serviceTarget: "system/ai.openclaw.gateway",
+        serviceTarget: "system/ai.carapace.gateway",
       },
     });
     formatGatewayRuntimeSummary.mockReturnValue(
-      "unknown (System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.)",
+      "unknown (System LaunchDaemon system/ai.carapace.gateway owns this gateway label.)",
     );
 
     await runAutoRepair();
@@ -979,7 +979,7 @@ describe("maybeRepairGatewayDaemon", () => {
     expect(service.install).not.toHaveBeenCalled();
     expect(service.restart).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(
-      "Runtime: unknown (System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.)",
+      "Runtime: unknown (System LaunchDaemon system/ai.carapace.gateway owns this gateway label.)",
       "Gateway",
     );
     expect(note).not.toHaveBeenCalledWith("Gateway service not installed.", "Gateway");
@@ -994,13 +994,13 @@ describe("maybeRepairGatewayDaemon", () => {
     vi.mocked(launchd.repairLaunchAgentBootstrap).mockResolvedValueOnce({
       ok: false,
       status: "system-launchdaemon-conflict",
-      detail: "System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.",
+      detail: "System LaunchDaemon system/ai.carapace.gateway owns this gateway label.",
     });
 
     await runAutoRepair();
 
     expect(note).toHaveBeenCalledWith(
-      "System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.",
+      "System LaunchDaemon system/ai.carapace.gateway owns this gateway label.",
       "Gateway",
     );
     expect(service.install).not.toHaveBeenCalled();
@@ -1011,13 +1011,13 @@ describe("maybeRepairGatewayDaemon", () => {
     setPlatform("darwin");
     service.readRuntime.mockResolvedValue({ status: "stopped" });
     service.restart.mockRejectedValue(
-      new Error("System LaunchDaemon system/ai.openclaw.gateway owns this gateway label."),
+      new Error("System LaunchDaemon system/ai.carapace.gateway owns this gateway label."),
     );
 
     await expect(runAutoRepair()).resolves.toBeDefined();
 
     expect(note).toHaveBeenCalledWith(
-      "Gateway service restart failed: System LaunchDaemon system/ai.openclaw.gateway owns this gateway label.",
+      "Gateway service restart failed: System LaunchDaemon system/ai.carapace.gateway owns this gateway label.",
       "Gateway",
     );
   });

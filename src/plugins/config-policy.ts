@@ -1,5 +1,5 @@
 // Evaluates plugin config policy without activating plugin runtime code.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolvePluginActivationDecisionShared,
   toPluginActivationState,
@@ -17,10 +17,10 @@ type PolicyEffectiveActivationParams = {
   id: string;
   origin: PluginOrigin;
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: CarapaceConfig;
   enabledByDefault?: boolean;
   sourceConfig?: NormalizedPluginsConfig;
-  sourceRootConfig?: OpenClawConfig;
+  sourceRootConfig?: CarapaceConfig;
   autoEnabledReason?: string;
   channelIds?: readonly string[];
 };

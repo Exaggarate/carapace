@@ -1,10 +1,10 @@
 // Transcript redaction tests cover structured and text transcript fields so
 // secrets do not persist in logs or replay artifacts.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import { expectDefined } from "@carapace/normalization-core";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as loggingConfigModule from "../logging/config.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "../logging/secret-redaction-registry.test-support.js";
@@ -24,13 +24,13 @@ function textMessage(text: string): AgentMessage {
   });
 }
 
-function cfg(_mode: "tools" | "off", patterns?: string[]): OpenClawConfig {
+function cfg(_mode: "tools" | "off", patterns?: string[]): CarapaceConfig {
   return {
     logging: patterns ? { redactPatterns: patterns } : {},
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
-function googleCompatCfg(): OpenClawConfig {
+function googleCompatCfg(): CarapaceConfig {
   return {
     ...cfg("tools"),
     models: {
@@ -42,7 +42,7 @@ function googleCompatCfg(): OpenClawConfig {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
 }
 
 const EMAIL_PATTERN = String.raw`([\w]|[-.])+@([\w]|[-.])+\.\w+`;
@@ -81,12 +81,12 @@ describe("redactTranscriptMessage", () => {
         role: "user",
         content: "private-prefix @Ada",
         timestamp: 1,
-        __openclaw: { humanMentions: mentions },
+        __carapace: { humanMentions: mentions },
       });
       expect(redactTranscriptMessage(message, cfg("tools", []))).toBe(message);
       const redacted = redactTranscriptMessage(message, cfg("tools", [pattern]));
-      expect(redacted).not.toHaveProperty("__openclaw.humanMentions");
-      expect(message).toHaveProperty("__openclaw.humanMentions", mentions);
+      expect(redacted).not.toHaveProperty("__carapace.humanMentions");
+      expect(message).toHaveProperty("__carapace.humanMentions", mentions);
     },
   );
 
@@ -105,18 +105,18 @@ describe("redactTranscriptMessage", () => {
       role: "user",
       content: "private-label",
       timestamp: 1,
-      __openclaw: { senderId: identity.id, senderIdentity: identity, senderName: "private-label" },
+      __carapace: { senderId: identity.id, senderIdentity: identity, senderName: "private-label" },
     });
     expect(redactTranscriptMessage(message, cfg("tools", []))).toBe(message);
     const labelOnly = redactTranscriptMessage(message, cfg("tools", ["private-label"]));
     expect(labelOnly).toMatchObject({
-      __openclaw: { senderIdentity: identity, senderId: "person" },
+      __carapace: { senderIdentity: identity, senderId: "person" },
     });
     expect(JSON.stringify(labelOnly)).not.toContain("private-label");
     const redacted = redactTranscriptMessage(message, cfg("tools", ["person"]));
-    expect(Reflect.get(redacted, "__openclaw")).not.toHaveProperty("senderIdentity");
+    expect(Reflect.get(redacted, "__carapace")).not.toHaveProperty("senderIdentity");
     expect(JSON.stringify(redacted)).not.toContain('"person"');
-    expect(Reflect.get(message, "__openclaw").senderIdentity).toBe(identity);
+    expect(Reflect.get(message, "__carapace").senderIdentity).toBe(identity);
   });
 
   it.each([
@@ -148,12 +148,12 @@ describe("redactTranscriptMessage", () => {
         role: "user",
         content: "visible",
         timestamp: 1,
-        __openclaw: metadata,
+        __carapace: metadata,
       });
       const redacted = redactTranscriptMessage(message, cfg("tools", ["private-[a-z-]+"]));
-      expect(Reflect.get(redacted, "__openclaw")).not.toHaveProperty("senderIdentity");
+      expect(Reflect.get(redacted, "__carapace")).not.toHaveProperty("senderIdentity");
       expect(JSON.stringify(redacted)).not.toContain("private-");
-      expect(Reflect.get(message, "__openclaw")).toBe(metadata);
+      expect(Reflect.get(message, "__carapace")).toBe(metadata);
     },
   );
 
@@ -389,7 +389,7 @@ describe("redactTranscriptMessage", () => {
       encrypted_content: CIPHERTEXT_WITH_TOKEN_SHAPED_BYTES,
       summary: [{ type: "summary_text", text: "secret sk-abcdef1234567890xyz" }],
       content: [{ type: "reasoning_text", text: "secret sk-abcdef1234567890xyz" }],
-      __openclaw_replay: {
+      __carapace_replay: {
         ...OPENAI_REASONING_REPLAY_METADATA,
         secret: "sk-abcdef1234567890xyz",
       },
@@ -404,7 +404,7 @@ describe("redactTranscriptMessage", () => {
           type: "thinking",
           thinking: "secret sk-abcdef1234567890xyz",
           thinkingSignature,
-          openclawReasoningReplay: {
+          carapaceReasoningReplay: {
             ...OPENAI_REASONING_REPLAY_METADATA,
             secret: "sk-abcdef1234567890xyz",
           },
@@ -418,7 +418,7 @@ describe("redactTranscriptMessage", () => {
             encrypted_content: CIPHERTEXT_WITH_TOKEN_SHAPED_BYTES,
             summary: [{ type: "summary_text", text: "secret sk-abcdef1234567890xyz" }],
           }),
-          openclawReasoningReplay: {
+          carapaceReasoningReplay: {
             ...OPENAI_REASONING_REPLAY_METADATA,
             model: "sk-abcdef1234567890xyz",
           },
@@ -440,10 +440,10 @@ describe("redactTranscriptMessage", () => {
       encrypted_content: string;
       summary: unknown[];
       content?: unknown[];
-      __openclaw_replay: Record<string, unknown>;
+      __carapace_replay: Record<string, unknown>;
     };
-    const blockMetadata = (block as unknown as { openclawReasoningReplay: Record<string, unknown> })
-      .openclawReasoningReplay;
+    const blockMetadata = (block as unknown as { carapaceReasoningReplay: Record<string, unknown> })
+      .carapaceReasoningReplay;
     const rejectedSignature = expectDefined(
       (msgContent(result) as Array<{ thinkingSignature: string }>)[1],
       "(msgContent(result) as Array<{ thinkingSignature: string }>)[1] test invariant",
@@ -454,7 +454,7 @@ describe("redactTranscriptMessage", () => {
     expect(replayItem.encrypted_content).toBe(CIPHERTEXT_WITH_TOKEN_SHAPED_BYTES);
     expect(replayItem.summary).toEqual([]);
     expect(replayItem.content).toBeUndefined();
-    expect(replayItem["__openclaw_replay"]).toEqual(OPENAI_REASONING_REPLAY_METADATA);
+    expect(replayItem["__carapace_replay"]).toEqual(OPENAI_REASONING_REPLAY_METADATA);
     expect(blockMetadata).toEqual(OPENAI_REASONING_REPLAY_METADATA);
     expect(block.thinkingSignature).not.toContain("sk-abcdef1234567890xyz");
     expect(JSON.stringify(blockMetadata)).not.toContain("sk-abcdef1234567890xyz");
@@ -504,7 +504,7 @@ describe("redactTranscriptMessage", () => {
       };
       const msg = castAgentMessage({
         role: "assistant",
-        api: "openclaw-openai-responses-transport",
+        api: "carapace-openai-responses-transport",
         model: "gpt-5.6-luna",
         provider: "openai",
         content: [{ type: "text", text: "visible" }],
@@ -624,7 +624,7 @@ describe("redactTranscriptMessage", () => {
   it("preserves validated OpenAI compaction suppression state", () => {
     const msg = castAgentMessage({
       role: "assistant",
-      api: "openclaw-openai-responses-transport",
+      api: "carapace-openai-responses-transport",
       model: "gpt-5.6-luna",
       provider: "openai",
       content: [{ type: "text", text: "visible" }],
@@ -765,7 +765,7 @@ describe("redactTranscriptMessage", () => {
   ])("removes an %s optional OpenAI compaction id while preserving state", (_name, id) => {
     const msg = castAgentMessage({
       role: "assistant",
-      api: "openclaw-openai-responses-transport",
+      api: "carapace-openai-responses-transport",
       model: "gpt-5.6-luna",
       provider: "openai",
       content: [{ type: "text", text: "visible" }],
@@ -818,7 +818,7 @@ describe("redactTranscriptMessage", () => {
     };
     const msg = castAgentMessage({
       role: "assistant",
-      api: "openclaw-openai-responses-transport",
+      api: "carapace-openai-responses-transport",
       model: "gpt-5.6-luna",
       provider: "openai",
       content: [{ type: "text", text: "visible" }],
@@ -842,7 +842,7 @@ describe("redactTranscriptMessage", () => {
     const inputCfg = {
       logging: { redactSensitive: "tools" },
       models: { providers: { openai: { apiKey: "test-key" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = redactTranscriptMessage(msg, inputCfg) as unknown as {
       api: string;
@@ -863,7 +863,7 @@ describe("redactTranscriptMessage", () => {
 
   it.each([
     {
-      api: "openclaw-openai-responses-transport",
+      api: "carapace-openai-responses-transport",
       provider: "openai",
       block: {
         type: "thinking",
@@ -882,7 +882,7 @@ describe("redactTranscriptMessage", () => {
       }),
     },
     {
-      api: "openclaw-anthropic-messages-transport",
+      api: "carapace-anthropic-messages-transport",
       provider: "anthropic",
       block: {
         type: "thinking",
@@ -893,7 +893,7 @@ describe("redactTranscriptMessage", () => {
       expectedSignature: CIPHERTEXT_WITH_TOKEN_SHAPED_BYTES,
     },
     {
-      api: "openclaw-google-generative-ai-transport",
+      api: "carapace-google-generative-ai-transport",
       provider: "google",
       block: {
         type: "toolCall",
@@ -919,7 +919,7 @@ describe("redactTranscriptMessage", () => {
       expectedSignature: SHORT_GOOGLE_THOUGHT_SIGNATURE,
     },
     {
-      api: "openclaw-openai-completions-transport",
+      api: "carapace-openai-completions-transport",
       provider: "google",
       block: {
         type: "toolCall",
@@ -1121,7 +1121,7 @@ describe("redactTranscriptMessage", () => {
     );
   });
 
-  it.each(["openai-responses", "openclaw-openai-responses-transport"])(
+  it.each(["openai-responses", "carapace-openai-responses-transport"])(
     "preserves structured OpenAI text signatures for %s",
     (api) => {
       const textSignature = JSON.stringify({ v: 1, id: COPILOT_CONNECTION_BOUND_ID });
@@ -1273,7 +1273,7 @@ describe("redactTranscriptMessage", () => {
     });
     const googleOpenAICompletionsMsg = castAgentMessage({
       role: "assistant",
-      api: "openclaw-openai-completions-transport",
+      api: "carapace-openai-completions-transport",
       model: "gemini-3.1-pro",
       provider: "google-compatible-proxy",
       content: [
@@ -1601,7 +1601,7 @@ describe("redactTranscriptMessage", () => {
           id: "call_1",
           name: "shell",
           arguments: {
-            command: "OPENAI_API_KEY=sk-abcdef1234567890xyz openclaw health",
+            command: "OPENAI_API_KEY=sk-abcdef1234567890xyz carapace health",
             env: { nested: ["token sk-abcdef1234567890xyz"] },
             count: 1,
           },
@@ -1621,10 +1621,10 @@ describe("redactTranscriptMessage", () => {
     };
     const serializedArguments = JSON.stringify(block.arguments);
     expect(serializedArguments).not.toContain("sk-abcdef1234567890xyz");
-    expect(argumentsValue.command).toBe("OPENAI_API_KEY=sk-abc…0xyz openclaw health");
+    expect(argumentsValue.command).toBe("OPENAI_API_KEY=sk-abc…0xyz carapace health");
     expect(argumentsValue.env.nested[0]).toBe("token sk-abc…0xyz");
     expect(argumentsValue.count).toBe(1);
-    expect(serializedArguments).toContain("openclaw health");
+    expect(serializedArguments).toContain("carapace health");
     expect(block.arguments).not.toBe(
       expectDefined(
         (msgContent(msg) as Array<{ arguments: unknown }>)[0],
@@ -1683,7 +1683,7 @@ describe("redactTranscriptMessage", () => {
           input: {
             apiKey: "plainsecretvalue123",
             nested: { accessToken: ["nestedplainsecret123"] },
-            command: "OPENAI_API_KEY=sk-abcdef1234567890xyz openclaw health",
+            command: "OPENAI_API_KEY=sk-abcdef1234567890xyz carapace health",
             safe: "visible",
           },
         },
@@ -1707,7 +1707,7 @@ describe("redactTranscriptMessage", () => {
     expect(serializedInput).not.toContain("sk-abcdef1234567890xyz");
     expect(inputValue.apiKey).toBe("plains…e123");
     expect(inputValue.nested.accessToken[0]).toBe("nested…t123");
-    expect(inputValue.command).toBe("OPENAI_API_KEY=sk-abc…0xyz openclaw health");
+    expect(inputValue.command).toBe("OPENAI_API_KEY=sk-abc…0xyz carapace health");
     expect(serializedInput).toContain("visible");
   });
 
@@ -2043,7 +2043,7 @@ describe("redactTranscriptMessage", () => {
   it("redacts documented transcript text fields on content-less message types", () => {
     const msg = castAgentMessage({
       role: "bashExecution",
-      command: "OPENAI_API_KEY=sk-abcdef1234567890xyz openclaw health",
+      command: "OPENAI_API_KEY=sk-abcdef1234567890xyz carapace health",
       output: "failed with sk-abcdef1234567890xyz",
       exitCode: 1,
       cancelled: false,

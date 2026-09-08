@@ -135,4 +135,4 @@ export type ApplicationContext<TRouteId extends string = string> = {
 };
 
 export const applicationContext =
-  createContext<ApplicationContext<RouteId>>("openclaw.application");
+  createContext<ApplicationContext<RouteId>>("carapace.application");

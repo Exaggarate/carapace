@@ -31,7 +31,7 @@ import { materializeNativeCompiler } from "./native-boundary-fixture.js";
 const tempRoots = new Set<string>();
 
 function createTempExtensionRoot(extensionId = "demo") {
-  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-boundary-canary-"));
+  const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-boundary-canary-"));
   tempRoots.add(rootDir);
   const extensionRoot = path.join(rootDir, "extensions", extensionId);
   fs.mkdirSync(extensionRoot, { recursive: true });
@@ -68,7 +68,7 @@ describe("check-extension-package-tsc-boundary", () => {
     const config = {
       extends: "../tsconfig.json",
       compilerOptions: {
-        paths: { "openclaw/plugin-sdk/*": ["../packages/plugin-sdk/dist/src/plugin-sdk/*.d.ts"] },
+        paths: { "carapace/plugin-sdk/*": ["../packages/plugin-sdk/dist/src/plugin-sdk/*.d.ts"] },
       },
     };
     write(pathsConfig, JSON.stringify(config));
@@ -86,7 +86,7 @@ describe("check-extension-package-tsc-boundary", () => {
     );
     write(
       "extensions/demo/index.ts",
-      'import type { DemoContract } from "openclaw/plugin-sdk/core";\nexport const demo: DemoContract = { ok: true };\n',
+      'import type { DemoContract } from "carapace/plugin-sdk/core";\nexport const demo: DemoContract = { ok: true };\n',
     );
     // Hold preparation fixed; scheduling, config parsing, and compilation remain real.
     write("scripts/prepare-extension-package-boundary-artifacts.mts", "export {};\n");
@@ -125,7 +125,7 @@ describe("check-extension-package-tsc-boundary", () => {
     expect(warm.status, warm.stdout + warm.stderr).toBe(0);
     expect(warm.stdout).toContain("compiled plugins: 0");
     expect(warm.stdout).toContain("skipped plugins: 1");
-    config.compilerOptions.paths["openclaw/plugin-sdk/*"] = ["../missing-sdk/*.d.ts"];
+    config.compilerOptions.paths["carapace/plugin-sdk/*"] = ["../missing-sdk/*.d.ts"];
     write(pathsConfig, JSON.stringify(config));
     const changed = run();
     expect(changed.error, changed.stderr).toBeUndefined();
@@ -169,7 +169,7 @@ describe("check-extension-package-tsc-boundary", () => {
   });
 
   it("cleans stale artifacts for every extension id passed to the cleanup hook", () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-boundary-canary-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-boundary-canary-"));
     tempRoots.add(rootDir);
     fs.mkdirSync(path.join(rootDir, "extensions", "demo-a"), { recursive: true });
     fs.mkdirSync(path.join(rootDir, "extensions", "demo-b"), { recursive: true });
@@ -191,13 +191,13 @@ describe("check-extension-package-tsc-boundary", () => {
   });
 
   it("parses extension boundary compile concurrency strictly", () => {
-    expect(resolveCompileConcurrency({ OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY: "4" }, 32)).toBe(4);
+    expect(resolveCompileConcurrency({ CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY: "4" }, 32)).toBe(4);
     expect(resolveCompileConcurrency({}, 12)).toBe(6);
     expect(resolveCompileConcurrency({}, 3)).toBe(1);
     for (const value of ["4x", "0", "1e3"]) {
       expect(() =>
-        resolveCompileConcurrency({ OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY: value }, 32),
-      ).toThrow("OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY must be a positive integer");
+        resolveCompileConcurrency({ CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY: value }, 32),
+      ).toThrow("CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY must be a positive integer");
     }
   });
 
@@ -403,7 +403,7 @@ describe("check-extension-package-tsc-boundary", () => {
   it.skipIf(process.platform === "win32")(
     "waits for timed-out async node step process groups",
     async () => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-extension-tsc-timeout-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-extension-tsc-timeout-"));
       tempRoots.add(root);
       const childPidPath = path.join(root, "child.pid");
       let childPid = 0;
@@ -531,7 +531,7 @@ describe("check-extension-package-tsc-boundary", () => {
   it.skipIf(process.platform === "win32")(
     "cleans active async node step descendants before forwarding parent SIGTERM",
     async ({ signal }) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-extension-tsc-signal-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-extension-tsc-signal-"));
       tempRoots.add(root);
       const childPidPath = path.join(root, "child.pid");
       const scriptUrl = pathToFileURL(

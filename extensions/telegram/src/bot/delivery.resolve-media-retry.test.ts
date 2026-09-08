@@ -1,8 +1,8 @@
 import type { Message } from "grammy/types";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 // Telegram tests cover delivery.resolve media retry plugin behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveMedia } from "./delivery.resolve-media.js";
 import type { TelegramContext } from "./types.js";
@@ -31,7 +31,7 @@ const saveRemoteMedia = vi.fn(async (...args: unknown[]) => {
 });
 const rootRead = vi.fn();
 
-vi.mock("openclaw/plugin-sdk/file-access-runtime", () => ({
+vi.mock("carapace/plugin-sdk/file-access-runtime", () => ({
   root: async (rootDir: string) => ({
     read: async (relativePath: string, options?: { maxBytes?: number }) =>
       await rootRead({

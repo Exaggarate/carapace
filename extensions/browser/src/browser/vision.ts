@@ -4,8 +4,8 @@
  */
 
 import { readFile } from "node:fs/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { describeImageFile as DescribeImageFileFn } from "openclaw/plugin-sdk/media-understanding-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { describeImageFile as DescribeImageFileFn } from "carapace/plugin-sdk/media-understanding-runtime";
 import type { saveMediaBuffer as SaveMediaBufferFn } from "../sdk-setup-tools.js";
 import type { normalizeBrowserScreenshot as NormalizeBrowserScreenshotFn } from "./screenshot.js";
 
@@ -15,7 +15,7 @@ const DEFAULT_BROWSER_SCREENSHOT_DESCRIPTION_PROMPT =
 
 /** Input context for browser screenshot image understanding. */
 type BrowserScreenshotDescriptionContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   filePath: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -92,7 +92,7 @@ export async function describeBrowserScreenshot(
   const filePath = await resolveImageUnderstandingFilePath(ctx, deps);
   const agentId = ctx.agentDir
     ? undefined
-    : (await import("openclaw/plugin-sdk/agent-scope-runtime")).resolveSessionAgentIdStrict({
+    : (await import("carapace/plugin-sdk/agent-scope-runtime")).resolveSessionAgentIdStrict({
         agentId: ctx.agentId,
         sessionKey: ctx.mediaScope?.sessionKey,
         config: ctx.cfg,

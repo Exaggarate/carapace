@@ -41,7 +41,7 @@ function makeBundledChannelCatalogEntry(params: {
   return {
     pluginId: params.pluginId,
     origin: "bundled",
-    rootDir: "/tmp/openclaw-channel-plugin",
+    rootDir: "/tmp/carapace-channel-plugin",
     channel: {
       id: params.channelId,
       configuredState: {
@@ -155,7 +155,7 @@ describe("channel package-state probes", () => {
   });
 
   it("prefers built bundled package-state probes when the catalog root is source", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-probe-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-probe-"));
     tempDirs.push(root);
     const sourceRoot = path.join(root, "extensions", "matrix");
     const builtRoot = path.join(root, "dist", "extensions", "matrix");
@@ -197,7 +197,7 @@ describe("channel package-state probes", () => {
   });
 
   it("falls back to source package-state probes when built artifacts are stale", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-fallback-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-fallback-"));
     tempDirs.push(root);
     const sourceRoot = path.join(root, "extensions", "whatsapp");
     const builtRoot = path.join(root, "dist", "extensions", "whatsapp");
@@ -241,7 +241,7 @@ describe("channel package-state probes", () => {
   it.each(["js", "mtsx", "ctsx"])(
     "preserves %s source overlay precedence over packaged package-state probes",
     (extension) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-overlay-"));
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-overlay-"));
       tempDirs.push(root);
       const sourceRoot = path.join(root, "extensions", "matrix");
       const builtRoot = path.join(root, "dist", "extensions", "matrix");
@@ -291,7 +291,7 @@ describe("channel package-state probes", () => {
   );
 
   it("preserves parent-mounted source overlay precedence over packaged package-state probes", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-parent-overlay-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-parent-overlay-"));
     tempDirs.push(root);
     const extensionsRoot = path.join(root, "extensions");
     const sourceRoot = path.join(extensionsRoot, "matrix");
@@ -339,7 +339,7 @@ describe("channel package-state probes", () => {
   it("reports a missing built package-state artifact as not found, not a boundary escape", () => {
     // Reproduces a rebuild window: the catalog root is the built plugin dir while
     // `dist/extensions/<id>` has not been re-emitted yet.
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-missing-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-missing-"));
     tempDirs.push(root);
     const builtRoot = path.join(root, "dist", "extensions", "matrix");
     fs.mkdirSync(builtRoot, { recursive: true });
@@ -380,7 +380,7 @@ describe("channel package-state probes", () => {
   });
 
   it("tries dist-runtime package-state probes before falling back to source", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-package-state-runtime-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-package-state-runtime-"));
     tempDirs.push(root);
     const sourceRoot = path.join(root, "extensions", "matrix");
     const builtRoot = path.join(root, "dist", "extensions", "matrix");

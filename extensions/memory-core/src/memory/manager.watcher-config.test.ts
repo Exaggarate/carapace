@@ -5,10 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import type {
   MemorySearchConfig,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  CarapaceConfig,
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type WatchIgnoredFn = (watchPath: string, stats?: { isDirectory?: () => boolean }) => boolean;
@@ -26,8 +26,8 @@ const {
   // Symbols are also declared at module top-level (CHOKIDAR_FACTORY_KEY,
   // NATIVE_FACTORY_KEY) but vi.hoisted runs before those declarations
   // execute, so we resolve the same Symbol.for keys inline here.
-  const chokidarKey = Symbol.for("openclaw.test.memoryWatchFactory");
-  const nativeKey = Symbol.for("openclaw.test.memoryNativeWatchFactory");
+  const chokidarKey = Symbol.for("carapace.test.memoryWatchFactory");
+  const nativeKey = Symbol.for("carapace.test.memoryNativeWatchFactory");
   type ChokidarEvent = "add" | "change" | "unlink" | "unlinkDir" | "error" | "ready";
   type ChokidarCallback = (...args: unknown[]) => void;
   function createMockChokidarWatcher() {
@@ -123,25 +123,25 @@ const {
   return result;
 });
 
-const CHOKIDAR_FACTORY_KEY = Symbol.for("openclaw.test.memoryWatchFactory");
-const NATIVE_FACTORY_KEY = Symbol.for("openclaw.test.memoryNativeWatchFactory");
-const originalWatcherStateDir = process.env.OPENCLAW_STATE_DIR;
+const CHOKIDAR_FACTORY_KEY = Symbol.for("carapace.test.memoryWatchFactory");
+const NATIVE_FACTORY_KEY = Symbol.for("carapace.test.memoryNativeWatchFactory");
+const originalWatcherStateDir = process.env.CARAPACE_STATE_DIR;
 
 function setWatcherStateDir(stateDir: string): void {
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+  Reflect.set(process.env, "CARAPACE_STATE_DIR", stateDir);
 }
 
 function restoreWatcherStateDir(): void {
   if (originalWatcherStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "CARAPACE_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalWatcherStateDir);
+    Reflect.set(process.env, "CARAPACE_STATE_DIR", originalWatcherStateDir);
   }
 }
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-foundation", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/memory-core-host-engine-foundation", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/memory-core-host-engine-foundation")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/memory-core-host-engine-foundation")>();
   return {
     ...actual,
     createSubsystemLogger: (subsystem: string) => ({
@@ -170,7 +170,7 @@ vi.mock("./embeddings.js", () => ({
   }),
 }));
 
-import { clearEmbeddingProviders as clearRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { clearEmbeddingProviders as clearRegistry } from "carapace/plugin-sdk/plugin-test-runtime";
 import { closeAllMemorySearchManagers, getMemorySearchManager } from "./index.js";
 import type { MemoryIndexManager } from "./manager.js";
 import { isolateMemoryManagerTestConfig } from "./test-config-helpers.js";
@@ -211,7 +211,7 @@ describe("memory watcher config", () => {
     restoreWatcherStateDir();
     // The agent close releases its leases through shared state and reopens it, so the
     // shared handle is released second; otherwise Windows fails the removal with EBUSY.
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     resetPluginStateStoreForTests();
     if (workspaceDir) {
       await fs.rm(workspaceDir, { recursive: true, force: true });
@@ -221,7 +221,7 @@ describe("memory watcher config", () => {
   });
 
   async function setupWatcherWorkspace(seedFile: { name: string; contents: string }) {
-    workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-watch-"));
+    workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-watch-"));
     setWatcherStateDir(path.join(workspaceDir, "state"));
     extraDir = path.join(workspaceDir, "extra");
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
@@ -229,7 +229,7 @@ describe("memory watcher config", () => {
     await fs.writeFile(path.join(extraDir, seedFile.name), seedFile.contents);
   }
 
-  function createWatcherConfig(overrides?: Partial<MemorySearchConfig>): OpenClawConfig {
+  function createWatcherConfig(overrides?: Partial<MemorySearchConfig>): CarapaceConfig {
     return isolateMemoryManagerTestConfig({
       memory: {
         search: {
@@ -245,7 +245,7 @@ describe("memory watcher config", () => {
     });
   }
 
-  async function expectWatcherManager(cfg: OpenClawConfig, agentId = "main") {
+  async function expectWatcherManager(cfg: CarapaceConfig, agentId = "main") {
     const result = await getMemorySearchManager({ cfg, agentId });
     if (!result.manager) {
       throw new Error("manager missing");
@@ -548,7 +548,7 @@ describe("memory watcher config", () => {
 
   it("routes Linux directories through directory-only native watchers", async () => {
     // Node's Linux `fs.watch({ recursive: true })` watches every file via
-    // internal/fs/recursive_watch. OpenClaw watches directories only so
+    // internal/fs/recursive_watch. Carapace watches directories only so
     // large file-heavy memory trees do not allocate per-file watchers.
     const originalPlatformValue = process.platform;
     try {
@@ -616,7 +616,7 @@ describe("memory watcher config", () => {
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(memoryLoggerWarn).toHaveBeenCalledExactlyOnceWith(
-        "Memory file watching is tracking 2002 directories. Large memory folders or extraPaths can make OpenClaw run out of file watchers or open files. Remove unnecessary memory.search.extraPaths entries or narrow their directory roots, including per-agent entries; otherwise review the host's file-watch/open-file limits. After changes, restart the Gateway. To refresh the affected index, run in the Gateway's environment: openclaw memory index --force --agent watch-linux.",
+        "Memory file watching is tracking 2002 directories. Large memory folders or extraPaths can make Carapace run out of file watchers or open files. Remove unnecessary memory.search.extraPaths entries or narrow their directory roots, including per-agent entries; otherwise review the host's file-watch/open-file limits. After changes, restart the Gateway. To refresh the affected index, run in the Gateway's environment: carapace memory index --force --agent watch-linux.",
       );
     } finally {
       Object.defineProperty(process, "platform", {
@@ -1127,7 +1127,7 @@ describe("memory watcher config", () => {
   });
 
   it("warns when chokidar memory watching tracks many paths", async () => {
-    vi.stubEnv("OPENCLAW_PROFILE", "memory-watch");
+    vi.stubEnv("CARAPACE_PROFILE", "memory-watch");
     try {
       await setupWatcherWorkspace({ name: "notes.md", contents: "hello" });
       const cfg = createWatcherConfig();
@@ -1155,7 +1155,7 @@ describe("memory watcher config", () => {
       await vi.advanceTimersByTimeAsync(10_000);
 
       expect(memoryLoggerWarn).toHaveBeenCalledExactlyOnceWith(
-        "Memory file watching is tracking 2002 paths. Large memory folders or extraPaths can make OpenClaw run out of file watchers or open files. Remove unnecessary memory.search.extraPaths entries or narrow their directory roots, including per-agent entries; otherwise review the host's file-watch/open-file limits. After changes, restart the Gateway. To refresh the affected index, run in the Gateway's environment: openclaw --profile memory-watch memory index --force --agent watch-paths.",
+        "Memory file watching is tracking 2002 paths. Large memory folders or extraPaths can make Carapace run out of file watchers or open files. Remove unnecessary memory.search.extraPaths entries or narrow their directory roots, including per-agent entries; otherwise review the host's file-watch/open-file limits. After changes, restart the Gateway. To refresh the affected index, run in the Gateway's environment: carapace --profile memory-watch memory index --force --agent watch-paths.",
       );
     } finally {
       vi.unstubAllEnvs();

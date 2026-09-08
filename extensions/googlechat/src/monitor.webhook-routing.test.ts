@@ -1,14 +1,14 @@
 // Googlechat tests cover monitor.webhook routing plugin behavior.
 import { EventEmitter } from "node:events";
 import type { IncomingMessage } from "node:http";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   createEmptyPluginRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { createMockServerResponse } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { createMockServerResponse } from "carapace/plugin-sdk/test-env";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../runtime-api.js";
+import type { CarapaceConfig, PluginRuntime } from "../runtime-api.js";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { verifyGoogleChatRequest } from "./auth.js";
 import { registerGoogleChatWebhookTarget } from "./monitor-routing.js";
@@ -99,7 +99,7 @@ function registerTwoTargets() {
   const logA = vi.fn();
   const logB = vi.fn();
   const core = {} as PluginRuntime;
-  const config = {} as OpenClawConfig;
+  const config = {} as CarapaceConfig;
   const ingress = { receive: vi.fn(async () => ({ kind: "ignored" as const })) };
 
   const unregisterA = registerGoogleChatWebhookTarget({

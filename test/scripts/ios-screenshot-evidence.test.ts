@@ -21,7 +21,7 @@ const SCREENSHOTS = [
   "04-settings-connected",
 ];
 const ATTEMPT_MODEL = {
-  owner: "openclaw",
+  owner: "carapace",
   unit: "capture_ios_screenshots invocation",
   maxAttempts: 2,
   fastlaneInternalRetries: "workflow-log",

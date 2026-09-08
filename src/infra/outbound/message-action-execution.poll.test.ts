@@ -5,7 +5,7 @@ import type {
   ChannelPlugin,
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { executeMessagePoll } from "./message-action-execution.js";
@@ -16,7 +16,7 @@ const pollerConfig = {
       botToken: "poller-test",
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 type PollerSendPoll = NonNullable<NonNullable<ChannelPlugin["outbound"]>["sendPoll"]>;
 

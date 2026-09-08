@@ -1,15 +1,15 @@
 // Telegram plugin module implements sequential key behavior.
 import type { Message, UserFromGetMe } from "grammy/types";
-import { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   listChatCommands,
   maybeResolveTextAlias,
   normalizeCommandBody,
-} from "openclaw/plugin-sdk/command-auth-native";
+} from "carapace/plugin-sdk/command-auth-native";
 import {
   isAbortRequestText,
   isBtwRequestText,
-} from "openclaw/plugin-sdk/command-primitives-runtime";
+} from "carapace/plugin-sdk/command-primitives-runtime";
 import { hasTelegramApprovalCallbackPrefix } from "./approval-callback-data.js";
 import {
   getCachedTelegramForumFlag,

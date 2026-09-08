@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import * as tar from "tar";
 import { loadSqliteVecExtension } from "../../packages/memory-host-sdk/src/engine-storage.js";
 import {
@@ -18,7 +18,7 @@ import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import { SQLITE_SIDECAR_SUFFIXES } from "../infra/sqlite-files.js";
 import { assertSqliteIntegrity } from "../infra/sqlite-integrity.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
-import { assertOpenClawAgentDatabaseOwner } from "../state/openclaw-agent-db-maintenance.js";
+import { assertCarapaceAgentDatabaseOwner } from "../state/carapace-agent-db-maintenance.js";
 import { resolveUserPath } from "../utils.js";
 import { BACKUP_MAX_DECOMPRESSION_RATIO, buildBackupArchivePath } from "./backup-shared.js";
 import {
@@ -221,16 +221,16 @@ function assertCanonicalSqlitePathCasing(relativePath: string, archivePath: stri
   const segments = relativePath.split("/");
   const portablePath = resolvePortableArchivePathKey(relativePath);
   const isGlobalAlias =
-    portablePath === "state/openclaw.sqlite" && relativePath !== "state/openclaw.sqlite";
+    portablePath === "state/carapace.sqlite" && relativePath !== "state/carapace.sqlite";
   const isAgentAlias =
     segments.length === 4 &&
     segments[0]?.toLowerCase() === "agents" &&
     Boolean(segments[1]) &&
     segments[2]?.toLowerCase() === "agent" &&
-    segments[3]?.toLowerCase() === "openclaw-agent.sqlite" &&
+    segments[3]?.toLowerCase() === "carapace-agent.sqlite" &&
     (segments[0] !== "agents" ||
       segments[2] !== "agent" ||
-      segments[3] !== "openclaw-agent.sqlite");
+      segments[3] !== "carapace-agent.sqlite");
   if (isGlobalAlias || isAgentAlias) {
     throw new Error(`Backup contains a case-mangled canonical SQLite path: ${archivePath}`);
   }
@@ -293,8 +293,8 @@ function listSqliteSnapshotEntries(
     assertCanonicalSqlitePathCasing(relativePath, entry.normalized);
     if (
       sqliteRoot.kind === "agent" &&
-      resolvePortableArchivePathKey(relativePath) === "openclaw-agent.sqlite" &&
-      relativePath !== "openclaw-agent.sqlite"
+      resolvePortableArchivePathKey(relativePath) === "carapace-agent.sqlite" &&
+      relativePath !== "carapace-agent.sqlite"
     ) {
       throw new Error(`Backup contains a case-mangled canonical SQLite path: ${entry.normalized}`);
     }
@@ -326,7 +326,7 @@ function listSqliteSnapshotEntries(
 function resolveExpectedSqliteRole(entry: SqliteSnapshotEntry): ExpectedSqliteRole | undefined {
   const relativePath = path.posix.relative(entry.stateAssetRoot, entry.normalized);
   if (entry.agentId) {
-    return relativePath === "openclaw-agent.sqlite" ? "agent" : undefined;
+    return relativePath === "carapace-agent.sqlite" ? "agent" : undefined;
   }
   return resolveExpectedSqliteRoleFromRelativePath(relativePath);
 }
@@ -334,7 +334,7 @@ function resolveExpectedSqliteRole(entry: SqliteSnapshotEntry): ExpectedSqliteRo
 function resolveExpectedSqliteRoleFromRelativePath(
   relativePath: string,
 ): ExpectedSqliteRole | undefined {
-  if (relativePath === "state/openclaw.sqlite") {
+  if (relativePath === "state/carapace.sqlite") {
     return "global";
   }
   const segments = relativePath.split("/");
@@ -343,7 +343,7 @@ function resolveExpectedSqliteRoleFromRelativePath(
     segments[0] === "agents" &&
     segments[1] &&
     segments[2] === "agent" &&
-    segments[3] === "openclaw-agent.sqlite"
+    segments[3] === "carapace-agent.sqlite"
   ) {
     return "agent";
   }
@@ -464,7 +464,7 @@ async function verifySqliteSnapshots(params: {
 
   const tempRoot = os.tmpdir();
   assertSqliteExtractionBudget({ entries: sqliteEntries, tempRoot });
-  const tempDir = await fs.mkdtemp(path.join(tempRoot, "openclaw-backup-verify-sqlite-"));
+  const tempDir = await fs.mkdtemp(path.join(tempRoot, "carapace-backup-verify-sqlite-"));
   try {
     const sqliteEntriesByRawPath = new Map(sqliteEntries.map((entry) => [entry.raw, entry]));
     await tar.x({
@@ -516,7 +516,7 @@ async function verifySqliteSnapshots(params: {
         await loadSqliteVecExtension({ db: database });
         assertSqliteIntegrity(database, entry.normalized);
         if (entry.agentId) {
-          assertOpenClawAgentDatabaseOwner(database, {
+          assertCarapaceAgentDatabaseOwner(database, {
             agentId: entry.agentId,
             pathname: entry.normalized,
           });
@@ -545,7 +545,7 @@ async function verifyResolvedBackupArchive(archivePath: string): Promise<Prepare
   } catch (error) {
     if (hasErrnoCode(error, "ENOENT")) {
       throw new Error(
-        "Archive does not exist. Check the path and run `openclaw backup verify <archive>` again.",
+        "Archive does not exist. Check the path and run `carapace backup verify <archive>` again.",
         { cause: error },
       );
     }
@@ -556,7 +556,7 @@ async function verifyResolvedBackupArchive(archivePath: string): Promise<Prepare
   }
   if (!archiveStat.isFile()) {
     throw new Error(
-      "Archive must be a regular file. Choose a backup archive created by `openclaw backup create` and try again.",
+      "Archive must be a regular file. Choose a backup archive created by `carapace backup create` and try again.",
     );
   }
 
@@ -567,7 +567,7 @@ async function verifyResolvedBackupArchive(archivePath: string): Promise<Prepare
   });
   if (listing.invalidReason) {
     throw new Error(
-      `Archive is not a valid OpenClaw backup. ${listing.invalidReason.replace(/[.!?]*$/u, ".")} Choose another archive or create a new one with \`openclaw backup create\`.`,
+      `Archive is not a valid Carapace backup. ${listing.invalidReason.replace(/[.!?]*$/u, ".")} Choose another archive or create a new one with \`carapace backup create\`.`,
     );
   }
   const rawEntries = listing.entries;

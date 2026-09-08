@@ -38,11 +38,11 @@ describe("native Codex fixture boundaries", () => {
           {
             HOME: root,
             USERPROFILE: root,
-            OPENCLAW_HOME: root,
-            OPENCLAW_STATE_DIR: path.join(root, "source-state"),
-            OPENCLAW_CONFIG_PATH: path.join(root, "source-config.json"),
-            OPENCLAW_LIVE_TEST: "1",
-            OPENCLAW_LIVE_USE_REAL_HOME: undefined,
+            CARAPACE_HOME: root,
+            CARAPACE_STATE_DIR: path.join(root, "source-state"),
+            CARAPACE_CONFIG_PATH: path.join(root, "source-config.json"),
+            CARAPACE_LIVE_TEST: "1",
+            CARAPACE_LIVE_USE_REAL_HOME: undefined,
             CODEX_HOME: customHome ? nativeHome : undefined,
             OPENAI_API_KEY: "synthetic-fixture-key",
             CODEX_API_KEY: "synthetic-codex-key",
@@ -62,7 +62,7 @@ describe("native Codex fixture boundaries", () => {
                 expect(process.env.HOME).toBe(callerHome);
                 expect(instance.env.HOME).toBe(callerHome);
                 expect(instance.env.USERPROFILE).toBe(process.env.USERPROFILE);
-                expect(instance.env.OPENCLAW_HOME).toBe(process.env.OPENCLAW_HOME);
+                expect(instance.env.CARAPACE_HOME).toBe(process.env.CARAPACE_HOME);
                 expect(instance.env.CODEX_HOME).toBe(customHome ? nativeHome : undefined);
                 const resolvedHome =
                   instance.env.CODEX_HOME ?? path.join(instance.env.HOME!, ".codex");
@@ -86,7 +86,7 @@ describe("native Codex fixture boundaries", () => {
                 expect(instance.stateDir.startsWith(staged.tempHome + path.sep)).toBe(false);
                 instance.state.applyEnv();
                 expect(process.env.HOME).toBe(callerHome);
-                expect(process.env.OPENCLAW_STATE_DIR).toBe(instance.stateDir);
+                expect(process.env.CARAPACE_STATE_DIR).toBe(instance.stateDir);
               } finally {
                 await instance.cleanup();
               }

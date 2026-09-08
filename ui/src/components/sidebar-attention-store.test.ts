@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MentionInboxItem } from "../../../packages/gateway-protocol/src/index.js";
 import type { CronJobsListResult, CronStatus, ModelAuthStatusResult } from "../api/types.ts";

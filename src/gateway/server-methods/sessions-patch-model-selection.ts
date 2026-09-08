@@ -3,12 +3,12 @@ import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { resolveSessionModelRef } from "../../agents/session-model-ref.js";
 import { persistStickyModelSelectionBestEffort } from "../../agents/sticky-model-selection.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveGatewayModelSelectionPolicy } from "./session-model-selection-policy.js";
 
 export function persistSessionPatchModelSelection(params: {
   callerScopes: readonly string[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   patch: SessionsPatchParams;
   sessionKey: string;

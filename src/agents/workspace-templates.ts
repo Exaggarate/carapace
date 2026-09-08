@@ -4,7 +4,7 @@
  */
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveCarapacePackageRoot } from "../infra/carapace-root.js";
 import { pathExists } from "../utils.js";
 
 const FALLBACK_DOCS_TEMPLATE_DIR = path.resolve(
@@ -22,7 +22,7 @@ export async function resolveWorkspaceTemplateSearchDirs(opts?: {
   const argv1 = opts?.argv1 ?? process.argv[1];
   const cwd = opts?.cwd ?? process.cwd();
 
-  const packageRoot = await resolveOpenClawPackageRoot({ moduleUrl, argv1, cwd });
+  const packageRoot = await resolveCarapacePackageRoot({ moduleUrl, argv1, cwd });
   const relativeDir = path.join("docs", "reference", "templates");
   const candidates = [
     packageRoot ? path.join(packageRoot, relativeDir) : undefined,

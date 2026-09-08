@@ -13,7 +13,7 @@ import {
   validateTaskSuggestionsListParams,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { resolveSessionWorkStartError } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { authorizeGatewaySessionCreation, hasOperatorBoundary } from "../operator-role-policy.js";
@@ -73,7 +73,7 @@ function broadcastResolvedTaskSuggestion(
 }
 
 function authorizeSuggestedTaskSource(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   client: GatewayClient | null;
   taskId: string;
 }): { ok: true; agentId: string } | { ok: false; error: ErrorShape } {

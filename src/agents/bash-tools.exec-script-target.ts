@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { splitCommandArgs, splitShellArgs } from "../utils/shell-argv.js";
 
 const PREFLIGHT_ENV_OPTIONS_WITH_VALUES = new Set([

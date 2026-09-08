@@ -1,9 +1,9 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type {
   SessionCatalogHost,
   SessionCatalogTranscriptItem,
-} from "openclaw/plugin-sdk/session-catalog";
-import type { ActiveSessionCatalog } from "openclaw/plugin-sdk/session-catalog-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import type { ActiveSessionCatalog } from "carapace/plugin-sdk/session-catalog-runtime";
 import { createBeamMirrorRunner } from "./mirror.js";
 
 export const beamTestNow = Date.parse("2026-07-27T12:00:00.000Z");

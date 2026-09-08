@@ -5,8 +5,8 @@ import {
   parseStrictFiniteNumber,
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { isRecord as isPlainObject } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { isRecord as isPlainObject } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveQaWindowsPowerShellExePath } from "./windows-system-tools.js";
 
 type ProcessTreeSnapshot = {

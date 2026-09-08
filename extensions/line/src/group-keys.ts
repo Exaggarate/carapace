@@ -1,7 +1,7 @@
 // Line plugin module implements group keys behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/account-resolution";
-import { resolveAccountEntry } from "openclaw/plugin-sdk/account-resolution";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/account-resolution";
+import { resolveAccountEntry } from "carapace/plugin-sdk/account-resolution";
 import type { LineConfig, LineGroupConfig } from "./types.js";
 
 export function resolveLineGroupLookupIds(groupId?: string | null): string[] {
@@ -41,7 +41,7 @@ export function resolveLineGroupConfigEntry<T extends object>(
 }
 
 export function resolveLineGroupsConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId?: string | null,
 ): Record<string, LineGroupConfig | undefined> | undefined {
   const lineConfig = cfg.channels?.line as LineConfig | undefined;

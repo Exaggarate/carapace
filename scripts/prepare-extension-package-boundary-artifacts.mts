@@ -53,9 +53,9 @@ export function parseMode(argv: string[] = process.argv.slice(2)) {
   return mode;
 }
 export function resolveBoundaryRootShimsTimeoutMs(env: NodeJS.ProcessEnv = process.env) {
-  const raw = env.OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS?.trim();
+  const raw = env.CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS?.trim();
   return raw
-    ? parsePositiveInt(raw, "OPENCLAW_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS")
+    ? parsePositiveInt(raw, "CARAPACE_PLUGIN_SDK_BOUNDARY_ROOT_SHIMS_TIMEOUT_MS")
     : 300_000;
 }
 /**

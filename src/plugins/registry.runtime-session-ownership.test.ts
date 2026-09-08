@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { formatSqliteSessionFileMarker } from "../config/sessions/legacy-sqlite-marker.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createPluginRecord } from "./loader-records.js";
 import { createPluginRegistry } from "./registry.js";
 import { getPluginRuntimeGatewayRequestScope } from "./runtime/gateway-request-scope.js";
@@ -34,7 +34,7 @@ describe("plugin registry runtime session ownership", () => {
       modelProvider: "anthropic",
       model: "previous-model",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/default-model" } },
         entries: { worker: { model: { primary: "openai/worker-model" } } },
@@ -85,7 +85,7 @@ describe("plugin registry runtime session ownership", () => {
       request: Partial<Parameters<PluginRuntime["agent"]["runEmbeddedAgent"]>[0]>;
       expected?: string;
     }> = [
-      { name: "stored request", storedRuntime: "openclaw", request: {}, expected: "openclaw" },
+      { name: "stored request", storedRuntime: "carapace", request: {}, expected: "carapace" },
       { name: "agent default provider", storedRuntime: "codex", request: {}, expected: "codex" },
       {
         name: "request config provider",
@@ -97,8 +97,8 @@ describe("plugin registry runtime session ownership", () => {
       {
         name: "explicit runtime",
         storedRuntime: "codex",
-        request: { agentHarnessRuntimeOverride: "openclaw" },
-        expected: "openclaw",
+        request: { agentHarnessRuntimeOverride: "carapace" },
+        expected: "carapace",
       },
       {
         name: "explicit auto",
@@ -256,9 +256,9 @@ describe("plugin registry runtime session ownership", () => {
       enabled: true,
       configSchema: false,
     });
-    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as OpenClawConfig });
-    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as OpenClawConfig });
-    const voiceApi = pluginRegistry.createApi(voiceRecord, { config: {} as OpenClawConfig });
+    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as CarapaceConfig });
+    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as CarapaceConfig });
+    const voiceApi = pluginRegistry.createApi(voiceRecord, { config: {} as CarapaceConfig });
     ownerApi.registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -321,7 +321,7 @@ describe("plugin registry runtime session ownership", () => {
     });
     expect(embeddedRunScope).toMatchObject({ pluginId: "codex-owner" });
     for (const invalidRuntime of [
-      { agentHarnessRuntimeOverride: "openclaw" },
+      { agentHarnessRuntimeOverride: "carapace" },
       { agentHarnessId: undefined },
       { agentHarnessRuntimeOverride: undefined },
     ]) {

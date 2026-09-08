@@ -1,4 +1,4 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
 import { POLICY_CHECK_IDS } from "./check-ids.js";
 
 export function policyEvidenceFinding(
@@ -15,7 +15,7 @@ export function policyEvidenceFinding(
     severity: "error",
     message: params.message,
     source: "policy",
-    path: "openclaw config",
+    path: "carapace config",
     ocPath: entry.source,
     target: entry.source,
     requirement: params.requirement,

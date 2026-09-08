@@ -5,21 +5,21 @@ import {
   formatInboundMediaUnavailableText,
   toInboundMediaFactsWithMetadata,
   type InboundMediaFacts,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { collectErrorGraphCandidates } from "openclaw/plugin-sdk/error-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import { MediaFetchError, unlinkIfExists } from "openclaw/plugin-sdk/media-runtime";
-import { resolveExpiresAtMsFromDurationMs } from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { collectErrorGraphCandidates } from "carapace/plugin-sdk/error-runtime";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import { MediaFetchError, unlinkIfExists } from "carapace/plugin-sdk/media-runtime";
+import { resolveExpiresAtMsFromDurationMs } from "carapace/plugin-sdk/number-runtime";
 import {
   createHostedOutboundMediaStore,
   type HostedOutboundMediaChunkRecord,
   type HostedOutboundMediaMetaRecord,
   type HostedOutboundMediaStore,
   type OutboundMediaLoadOptions,
-} from "openclaw/plugin-sdk/outbound-media";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { isTransientNetworkError } from "openclaw/plugin-sdk/retry-runtime";
-import { safeEqualSecret, SsrFBlockedError } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/outbound-media";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { isTransientNetworkError } from "carapace/plugin-sdk/retry-runtime";
+import { safeEqualSecret, SsrFBlockedError } from "carapace/plugin-sdk/security-runtime";
 import { assertSmsCredentialOwnerAvailable } from "./credential-availability.js";
 import { getSmsRuntime } from "./runtime.js";
 import { TWILIO_MMS_MAX_BYTES } from "./twilio.js";
@@ -92,7 +92,7 @@ const TWILIO_MMS_EXTENSION_BY_TYPE: Readonly<Record<string, string>> = {
 };
 const SMS_OUTBOUND_MEDIA_TTL_MS = 10 * 60_000;
 const SMS_OUTBOUND_MEDIA_ID_RE = /^[a-f0-9]{24}$/;
-const SMS_OUTBOUND_MEDIA_TOKEN_PARAM_PREFIX = "__openclaw_mms_token";
+const SMS_OUTBOUND_MEDIA_TOKEN_PARAM_PREFIX = "__carapace_mms_token";
 const SMS_OUTBOUND_MEDIA_NAMESPACE = "hosted-outbound-media";
 const SMS_OUTBOUND_MEDIA_CHUNKS_NAMESPACE = "hosted-outbound-media-chunks";
 const SMS_OUTBOUND_MEDIA_MAX_ENTRIES = 64;

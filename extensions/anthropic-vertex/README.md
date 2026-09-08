@@ -1,11 +1,11 @@
-# OpenClaw Anthropic Vertex Provider
+# Carapace Anthropic Vertex Provider
 
-Official OpenClaw provider plugin for Claude models hosted through Google Vertex AI.
+Official Carapace provider plugin for Claude models hosted through Google Vertex AI.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/anthropic-vertex-provider
+carapace plugins install @carapace/anthropic-vertex-provider
 ```
 
-Configure Google Cloud credentials and the target Vertex project/region in OpenClaw, then select Claude models with the Anthropic Vertex provider.
+Configure Google Cloud credentials and the target Vertex project/region in Carapace, then select Claude models with the Anthropic Vertex provider.

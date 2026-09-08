@@ -40,7 +40,7 @@ export {
   resolveServicePrefixedOrChatAllowTarget,
   resolveServicePrefixedTarget,
   type ServicePrefix,
-} from "openclaw/plugin-sdk/channel-targets";
+} from "carapace/plugin-sdk/channel-targets";
 export {
   formatIMessageChatTarget,
   type IMessageAllowTarget,

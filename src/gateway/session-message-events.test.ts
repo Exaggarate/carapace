@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 /**
  * Session message event indexing and broadcast tests.
  */
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import type { RawData } from "ws";
 import {
@@ -23,7 +23,7 @@ import {
   persistSessionTranscriptTurn,
 } from "../config/sessions/session-accessor.js";
 import { appendAssistantMessageToSessionTranscript } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveCronDeliveryPlan } from "../cron/delivery-plan.js";
 import { dispatchCronDelivery } from "../cron/isolated-agent/delivery-dispatch.js";
 import type { CronJob } from "../cron/types.js";
@@ -41,9 +41,9 @@ import {
   setDisplayName,
 } from "../state/user-profiles.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { resolveCurrentUserProfileDisplay } from "./current-user-profile-display.js";
 import { testState } from "./test-helpers.runtime-state.js";
 import {
@@ -63,7 +63,7 @@ import { createWorkerTranscriptCommitter } from "./worker-environments/transcrip
 installGatewayTestHooks({ scope: "suite" });
 
 const cleanupDirs: string[] = [];
-const cleanupTestStates: OpenClawTestState[] = [];
+const cleanupTestStates: CarapaceTestState[] = [];
 const SETUP_RPC_TIMEOUT_MS = 30_000;
 let harness: Awaited<ReturnType<typeof createGatewaySuiteHarness>>;
 let subscribedOperatorWs:
@@ -101,7 +101,7 @@ afterEach(async () => {
 });
 
 async function createSessionStoreFile(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-message-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-message-"));
   cleanupDirs.push(dir);
   const storePath = path.join(dir, "sessions.json");
   testState.sessionStorePath = storePath;
@@ -220,11 +220,11 @@ function withMockedDateNow<T>(now: number, run: () => T): T {
 
 function attributedMessageProjection(value: unknown) {
   const message = requireRecord(value, "attributed message");
-  const metadata = requireRecord(message["__openclaw"], "attributed message metadata");
+  const metadata = requireRecord(message["__carapace"], "attributed message metadata");
   return {
     role: message.role,
     content: message.content,
-    __openclaw: {
+    __carapace: {
       senderId: metadata.senderId,
       senderIdentity: metadata.senderIdentity,
       senderName: metadata.senderName,
@@ -962,7 +962,7 @@ describe("session.message websocket events", () => {
             sessionKey,
           });
           expect(requireRecord(delivery.payload, "shared session event").message).toMatchObject({
-            __openclaw: {
+            __carapace: {
               id: messageId,
               idempotencyKey: `${messageId}:user`,
               seq: index + 1,
@@ -1091,13 +1091,13 @@ describe("session.message websocket events", () => {
       const liveEvent = await liveEventPromise;
       const livePayload = requireRecord(liveEvent.payload, "background completion event");
       expect(livePayload.message).toMatchObject({
-        __openclaw: {
+        __carapace: {
           idempotencyKey: "cron-current-completion:cron:job-webchat:3000",
         },
         content: [
           { type: "text", text: "The detached cron finished without another user message." },
         ],
-        openclawAutomation: {
+        carapaceAutomation: {
           kind: "cron",
           jobId: "job-webchat",
           runId: "cron:job-webchat:3000",
@@ -1125,7 +1125,7 @@ describe("session.message websocket events", () => {
       expect(history.ok).toBe(true);
       expect(history.payload?.messages).toContainEqual(
         expect.objectContaining({
-          __openclaw: expect.objectContaining({
+          __carapace: expect.objectContaining({
             id: livePayload.messageId,
             idempotencyKey: "cron-current-completion:cron:job-webchat:3000",
             seq: 1,
@@ -1133,7 +1133,7 @@ describe("session.message websocket events", () => {
           content: [
             { type: "text", text: "The detached cron finished without another user message." },
           ],
-          openclawAutomation: {
+          carapaceAutomation: {
             kind: "cron",
             jobId: "job-webchat",
             runId: "cron:job-webchat:3000",
@@ -1149,7 +1149,7 @@ describe("session.message websocket events", () => {
 
   test("projects current revisioned sender avatars consistently across live events and RPC reads", async () => {
     const SHARED_REV = 1_800_000_000_000;
-    const profileState = await createOpenClawTestState({
+    const profileState = await createCarapaceTestState({
       label: "session-message-current-profile-display",
       layout: "state-only",
     });
@@ -1224,7 +1224,7 @@ describe("session.message websocket events", () => {
         const messages = response.payload?.messages ?? [];
         const message = messages.find((candidate) => {
           const record = requireRecord(candidate, "history message");
-          const metadata = requireRecord(record["__openclaw"], "history message metadata");
+          const metadata = requireRecord(record["__carapace"], "history message metadata");
           return metadata.id === messageId;
         });
         expect(message).toBeDefined();
@@ -1242,7 +1242,7 @@ describe("session.message websocket events", () => {
       const expectedProjection = (text: string, senderName: string, avatarUrl: string) => ({
         role: "user",
         content: text,
-        __openclaw: {
+        __carapace: {
           senderId: profile.id,
           senderIdentity: { type: "profile", id: profile.id },
           senderName,
@@ -1467,7 +1467,7 @@ describe("session.message websocket events", () => {
             throw new Error(`unexpected committed-turn delivery at index ${index}`);
           }
           expect(requireRecord(frame.payload, "committed session event").message).toMatchObject({
-            __openclaw: {
+            __carapace: {
               id: expected.id,
               idempotencyKey: `${expected.id}:user`,
               seq: index + 2,
@@ -1482,7 +1482,7 @@ describe("session.message websocket events", () => {
       expect(history.ok).toBe(true);
       expect((history.payload as { messages?: unknown[] }).messages).toMatchObject(
         [earlierMessage, ...committedMessages].map(({ id, text }, index) => ({
-          __openclaw: { id, idempotencyKey: `${id}:user`, seq: index + 1 },
+          __carapace: { id, idempotencyKey: `${id}:user`, seq: index + 1 },
           content: [{ type: "text", text }],
           role: "user",
         })),
@@ -1736,14 +1736,14 @@ describe("session.message websocket events", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "The agent cannot read this message." }],
-          __openclaw: {
+          __carapace: {
             beforeAgentRunBlocked: { blockedBy: "policy-plugin", blockedAt: 1 },
           },
         },
       });
 
       const payload = messageEvent.payload as {
-        message?: { content?: unknown; __openclaw?: { beforeAgentRunBlocked?: unknown } };
+        message?: { content?: unknown; __carapace?: { beforeAgentRunBlocked?: unknown } };
       };
       expect(payload.message?.content).toEqual([
         { type: "text", text: "The agent cannot read this message." },
@@ -1774,7 +1774,7 @@ describe("session.message websocket events", () => {
         message: {
           role: "user",
           content: [{ type: "text", text: "The agent cannot read this message." }],
-          __openclaw: {
+          __carapace: {
             beforeAgentRunBlocked: {
               blockedBy: "policy-plugin",
               blockedAt: Date.now(),
@@ -1788,7 +1788,7 @@ describe("session.message websocket events", () => {
         message?: {
           role?: unknown;
           content?: unknown;
-          __openclaw?: { beforeAgentRunBlocked?: unknown };
+          __carapace?: { beforeAgentRunBlocked?: unknown };
         };
       };
       expect(payload.message?.role).toBe("user");
@@ -1836,7 +1836,7 @@ describe("session.message websocket events", () => {
             messageSeq: 1,
             message: {
               role: "custom",
-              customType: "openclaw.runtime-context",
+              customType: "carapace.runtime-context",
               content: "secret runtime context",
               display: false,
             },
@@ -1952,7 +1952,7 @@ describe("session.message websocket events", () => {
           modelOverride: "gpt-5.4",
           modelProvider: "openai",
           model: "gpt-5.4",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 123_456,
           contextTokensSource: "runtime",
           totalTokens: 0,
@@ -2039,7 +2039,7 @@ describe("session.message websocket events", () => {
       // The preview is bounded by the display cap and says so structurally, so a
       // non-UI consumer can fetch the full row instead of sniffing the sentinel.
       expect(JSON.stringify(message.content)).toContain("...(truncated)...");
-      expect(message["__openclaw"]).toMatchObject({ truncated: true, reason: "display-cap" });
+      expect(message["__carapace"]).toMatchObject({ truncated: true, reason: "display-cap" });
     });
   });
 
@@ -2075,7 +2075,7 @@ describe("session.message websocket events", () => {
       });
       const payload = requireRecord(messageEvent.payload, "session.message payload");
       const message = requireRecord(payload.message, "session.message payload message");
-      expect((message["__openclaw"] as { seq?: unknown } | undefined)?.seq).toBe(7);
+      expect((message["__carapace"] as { seq?: unknown } | undefined)?.seq).toBe(7);
     });
   });
 
@@ -2141,7 +2141,7 @@ describe("session.message websocket events", () => {
       });
       expect(requireRecord(messageEvent.payload, "selected session event").message).toMatchObject({
         ...transcriptMessage,
-        __openclaw: {
+        __carapace: {
           id: "msg-selected",
           seq: 1,
           transcriptPosition: { source: expect.any(String), rawSeq: expect.any(Number) },
@@ -2730,7 +2730,7 @@ describe("session.message websocket events", () => {
       },
       storePath,
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { list: [{ id: "main", default: true }] },
       session: { mainKey: "main", store: storePath },
     };
@@ -2824,13 +2824,13 @@ describe("session.message websocket events", () => {
       expect(
         payloads.map((payload) => {
           const message = requireRecord(payload.message, "session.message payload message");
-          return requireRecord(message["__openclaw"], "session.message metadata").id;
+          return requireRecord(message["__carapace"], "session.message metadata").id;
         }),
       ).toEqual(outcome.result.entryIds);
       expect(
         payloads.map((payload) => {
           const message = requireRecord(payload.message, "session.message payload message");
-          return requireRecord(message["__openclaw"], "session.message metadata").seq;
+          return requireRecord(message["__carapace"], "session.message metadata").seq;
         }),
       ).toEqual([1, 2, 3]);
 

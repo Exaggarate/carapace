@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("memory-lancedb startup imports", () => {
   afterEach(() => {
-    vi.doUnmock("openclaw/plugin-sdk/agent-runtime");
-    vi.doUnmock("openclaw/plugin-sdk/channel-actions");
+    vi.doUnmock("carapace/plugin-sdk/agent-runtime");
+    vi.doUnmock("carapace/plugin-sdk/channel-actions");
     vi.resetModules();
   });
 
@@ -13,8 +13,8 @@ describe("memory-lancedb startup imports", () => {
       broadImports += 1;
       throw new Error("Memory startup must use focused SDK entrypoints");
     };
-    vi.doMock("openclaw/plugin-sdk/agent-runtime", rejectBroadImport);
-    vi.doMock("openclaw/plugin-sdk/channel-actions", rejectBroadImport);
+    vi.doMock("carapace/plugin-sdk/agent-runtime", rejectBroadImport);
+    vi.doMock("carapace/plugin-sdk/channel-actions", rejectBroadImport);
 
     const pluginModule = await import("./index.js");
 

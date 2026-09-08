@@ -1,10 +1,10 @@
 import { isDeepStrictEqual } from "node:util";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { acknowledgeInternalToolResult } from "openclaw/plugin-sdk/agent-harness-tool-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import { acknowledgeInternalToolResult } from "carapace/plugin-sdk/agent-harness-tool-runtime";
 import { isTerminalCodexTurnNotificationForTurn } from "./attempt-notification-state.js";
 import {
   isCodexTurnAbortMarkerNotification,
-  isPendingOpenClawDynamicToolCompletionNotification,
+  isPendingCarapaceDynamicToolCompletionNotification,
   isRawFunctionToolOutputCompletionNotification,
   readCodexNotificationItem,
   readNotificationItemId,
@@ -36,8 +36,8 @@ export function createCodexAttemptNotificationController(
     userInputBridgeRef,
     steeringQueueRef,
     activeTurnItemIds,
-    pendingOpenClawDynamicToolCompletionIds,
-    openClawDynamicToolExecutions,
+    pendingCarapaceDynamicToolCompletionIds,
+    carapaceDynamicToolExecutions,
     completeTurn,
     noteProgress,
     deadlines,
@@ -92,14 +92,14 @@ export function createCodexAttemptNotificationController(
         noteProgress(`notification:${notification.method}`);
         reportExecutionNotification(notification);
         if (
-          isPendingOpenClawDynamicToolCompletionNotification(
+          isPendingCarapaceDynamicToolCompletionNotification(
             notification,
-            pendingOpenClawDynamicToolCompletionIds,
+            pendingCarapaceDynamicToolCompletionIds,
           )
         ) {
           const itemId = readNotificationItemId(notification);
           if (itemId) {
-            pendingOpenClawDynamicToolCompletionIds.delete(itemId);
+            pendingCarapaceDynamicToolCompletionIds.delete(itemId);
           }
         }
         if (notification.method === "item/completed") {
@@ -108,7 +108,7 @@ export function createCodexAttemptNotificationController(
           }
           const item = readCodexNotificationItem(notification.params);
           if (item?.type === "dynamicToolCall" && typeof item.id === "string") {
-            const response = await openClawDynamicToolExecutions.get({
+            const response = await carapaceDynamicToolExecutions.get({
               threadId: resourceState.thread.threadId,
               turnId,
               callId: item.id,

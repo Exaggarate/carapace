@@ -1,6 +1,6 @@
 // Normalizes model selection directives into provider and model ids.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { modelKey } from "../../agents/model-ref-shared.js";
 import {
   type ModelAliasIndex,
@@ -10,7 +10,7 @@ import {
   createModelVisibilityPolicy,
   type ModelVisibilityPolicy,
 } from "../../agents/model-visibility-policy.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { levenshteinDistance } from "../../shared/levenshtein-distance.js";
 export { modelKey };
 export type { ModelAliasIndex };
@@ -38,7 +38,7 @@ function formatNotAllowedError(params: {
     `Then retry: ${retryCommand}`,
   ];
   if (rawRuntime && normalizeProviderId(rawRuntime) === "codex") {
-    lines.push("If the Codex runtime is missing, run: openclaw plugins enable codex");
+    lines.push("If the Codex runtime is missing, run: carapace plugins enable codex");
   }
   return lines.join("\n");
 }
@@ -170,7 +170,7 @@ export function resolveModelDirectiveSelection(params: {
   aliasIndex: ModelAliasIndex;
   allowedModelKeys: Set<string>;
   modelPolicy?: ModelVisibilityPolicy;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
   rawRuntime?: string | undefined;
 }): { selection?: ModelDirectiveSelection; error?: string } {

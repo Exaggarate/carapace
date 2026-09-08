@@ -1,16 +1,16 @@
 // Lmstudio plugin module implements models.fetch behavior.
-import { createSubsystemLogger, redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { LiveModelCatalogHttpError } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { createSubsystemLogger, redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { resolveTimerTimeoutMs } from "carapace/plugin-sdk/number-runtime";
+import { LiveModelCatalogHttpError } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import {
   readProviderJsonArrayFieldResponse,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { SELF_HOSTED_DEFAULT_COST } from "openclaw/plugin-sdk/provider-setup";
-import { readResponseTextPrefix } from "openclaw/plugin-sdk/response-limit-runtime";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
-import { asPositiveSafeInteger } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { SELF_HOSTED_DEFAULT_COST } from "carapace/plugin-sdk/provider-setup";
+import { readResponseTextPrefix } from "carapace/plugin-sdk/response-limit-runtime";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
+import { asPositiveSafeInteger } from "carapace/plugin-sdk/string-coerce-runtime";
 import { LMSTUDIO_DEFAULT_LOAD_CONTEXT_LENGTH } from "./defaults.js";
 import {
   buildLmstudioModelName,
@@ -194,7 +194,7 @@ export async function fetchLmstudioModels(params: {
   }
 }
 
-/** Discovers LLM models from LM Studio and maps them to OpenClaw model definitions. */
+/** Discovers LLM models from LM Studio and maps them to Carapace model definitions. */
 export async function discoverLmstudioModels(
   params: DiscoverLmstudioModelsParams,
 ): Promise<ModelDefinitionConfig[]> {

@@ -44,8 +44,8 @@ function textMentionsSecurityAuditSuppressions(value: string): boolean {
 
 function isReadOnlySecurityAuditSuppressionInspection(argv: string[]): boolean {
   const command = normalizeCommandName(argv[0]);
-  let offset = command === "pnpm" && argv[1] === "openclaw" ? 1 : 0;
-  if (normalizeCommandName(argv[offset]) !== "openclaw") {
+  let offset = command === "pnpm" && argv[1] === "carapace" ? 1 : 0;
+  if (normalizeCommandName(argv[offset]) !== "carapace") {
     return false;
   }
   offset += 1;

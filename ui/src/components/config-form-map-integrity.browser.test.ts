@@ -27,7 +27,7 @@ describe("config form map integrity", () => {
       const modelSettings = (codeMode?: boolean) => ({
         alias: "test",
         params: { temperature: 0.5 },
-        agentRuntime: { id: "openclaw" },
+        agentRuntime: { id: "carapace" },
         streaming: false,
         ...(codeMode === undefined ? {} : { codeMode }),
       });
@@ -278,7 +278,7 @@ describe("config form map integrity", () => {
 
         const draft = expectElement(
           container.querySelector<ConfigFormCollectionDraft>(
-            "openclaw-config-form-collection-draft",
+            "carapace-config-form-collection-draft",
           ),
           "map draft",
         );
@@ -415,7 +415,7 @@ describe("config form map integrity", () => {
     renderValue(undefined);
     const map = expectElement(container.querySelector<HTMLElement>(".cfg-map"), "unset map");
     const draftHost = expectElement(
-      map.querySelector<ConfigFormCollectionDraft>("openclaw-config-form-collection-draft"),
+      map.querySelector<ConfigFormCollectionDraft>("carapace-config-form-collection-draft"),
       "unset map draft host",
     );
     expectElement(

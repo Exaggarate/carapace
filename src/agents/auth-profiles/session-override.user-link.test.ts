@@ -12,9 +12,9 @@ import {
 } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
 import {
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  type CarapaceTestState,
+  withCarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { resolveSessionAuthSelection } from "./session-override.js";
 
 const DEFAULT_PROFILE_ID = "openai:shared";
@@ -35,7 +35,7 @@ function connectAccount(profileId: string, label: string): string {
 }
 
 async function selectForRequester(
-  state: OpenClawTestState,
+  state: CarapaceTestState,
   sessionEntry: SessionEntry,
   requesterProfileId?: string,
   isNewSession = true,
@@ -67,8 +67,8 @@ async function selectForRequester(
   });
 }
 
-function withAuthState(run: (state: OpenClawTestState) => Promise<void>) {
-  return withOpenClawTestState({ layout: "state-only", prefix: "personal-session-auth-" }, run);
+function withAuthState(run: (state: CarapaceTestState) => Promise<void>) {
+  return withCarapaceTestState({ layout: "state-only", prefix: "personal-session-auth-" }, run);
 }
 
 describe("person-linked session auth", () => {

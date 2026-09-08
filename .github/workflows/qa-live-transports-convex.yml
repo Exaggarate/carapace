@@ -72,10 +72,10 @@ on:
       OPENAI_API_KEY:
         description: OpenAI API key used by live QA scenarios
         required: false
-      OPENCLAW_QA_CONVEX_SITE_URL:
+      CARAPACE_QA_CONVEX_SITE_URL:
         description: Convex credential broker URL
         required: false
-      OPENCLAW_QA_CONVEX_SECRET_CI:
+      CARAPACE_QA_CONVEX_SECRET_CI:
         description: Convex CI credential
         required: false
   workflow_dispatch:
@@ -132,15 +132,15 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_VERSION: "24.x"
-  OPENCLAW_CI_OPENAI_MODEL: ${{ vars.OPENCLAW_CI_OPENAI_MODEL || 'openai/gpt-5.6-luna' }}
-  OPENCLAW_CI_OPENAI_FALLBACK_MODEL: ${{ vars.OPENCLAW_CI_OPENAI_FALLBACK_MODEL || 'openai/gpt-5.4' }}
-  OPENCLAW_BUILD_PRIVATE_QA: "1"
-  OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1"
+  CARAPACE_CI_OPENAI_MODEL: ${{ vars.CARAPACE_CI_OPENAI_MODEL || 'openai/gpt-5.6-luna' }}
+  CARAPACE_CI_OPENAI_FALLBACK_MODEL: ${{ vars.CARAPACE_CI_OPENAI_FALLBACK_MODEL || 'openai/gpt-5.4' }}
+  CARAPACE_BUILD_PRIVATE_QA: "1"
+  CARAPACE_ENABLE_PRIVATE_QA_CLI: "1"
 
 jobs:
   authorize_actor:
     name: Authorize workflow actor
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404' }}
     timeout-minutes: 10
     outputs:
       authorized: ${{ steps.permission.outputs.authorized }}
@@ -179,14 +179,14 @@ jobs:
     name: Validate selected ref
     needs: authorize_actor
     if: needs.authorize_actor.outputs.authorized == 'true'
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-8vcpu-ubuntu-2404' }}
     timeout-minutes: 30
     outputs:
       selected_revision: ${{ steps.validate.outputs.selected_revision }}
       trusted_reason: ${{ steps.validate.outputs.trusted_reason }}
     steps:
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@a8fe1a587bb86ffece5dd20d2b8091c82658030f
+        uses: carapace/carapace/.github/actions/git-owner@a8fe1a587bb86ffece5dd20d2b8091c82658030f
 
       - name: Checkout selected ref
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -271,17 +271,17 @@ jobs:
     name: Run QA Lab mock parity lane
     needs: [validate_selected_ref]
     if: (inputs.expected_sha == '' || inputs.run_mock_parity) && (github.event_name != 'workflow_dispatch' || inputs.scenario == '')
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 30
     env:
       QA_PARITY_CONCURRENCY: "1"
-      OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+      CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
       OPENAI_API_KEY: ""
       ANTHROPIC_API_KEY: ""
-      OPENCLAW_LIVE_OPENAI_KEY: ""
-      OPENCLAW_LIVE_ANTHROPIC_KEY: ""
-      OPENCLAW_LIVE_GEMINI_KEY: ""
-      OPENCLAW_LIVE_SETUP_TOKEN_VALUE: ""
+      CARAPACE_LIVE_OPENAI_KEY: ""
+      CARAPACE_LIVE_ANTHROPIC_KEY: ""
+      CARAPACE_LIVE_GEMINI_KEY: ""
+      CARAPACE_LIVE_SETUP_TOKEN_VALUE: ""
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -304,17 +304,17 @@ jobs:
 
       - name: Run OpenAI candidate lane
         run: |
-          pnpm openclaw qa suite \
+          pnpm carapace qa suite \
             --provider-mode mock-openai \
             --parity-pack agentic \
             --concurrency "${QA_PARITY_CONCURRENCY}" \
-            --model "${OPENCLAW_CI_OPENAI_MODEL}" \
+            --model "${CARAPACE_CI_OPENAI_MODEL}" \
             --alt-model openai/gpt-5.6-luna-alt \
             --output-dir .artifacts/qa-e2e/openai-candidate
 
       - name: Run Opus 4.8 lane
         run: |
-          pnpm openclaw qa suite \
+          pnpm carapace qa suite \
             --provider-mode mock-openai \
             --parity-pack agentic \
             --concurrency "${QA_PARITY_CONCURRENCY}" \
@@ -324,11 +324,11 @@ jobs:
 
       - name: Generate parity report
         run: |
-          pnpm openclaw qa parity-report \
+          pnpm carapace qa parity-report \
             --repo-root . \
             --candidate-summary .artifacts/qa-e2e/openai-candidate/qa-suite-summary.json \
             --baseline-summary .artifacts/qa-e2e/anthropic-baseline/qa-suite-summary.json \
-            --candidate-label "${OPENCLAW_CI_OPENAI_MODEL}" \
+            --candidate-label "${CARAPACE_CI_OPENAI_MODEL}" \
             --baseline-label anthropic/claude-opus-4-8 \
             --output-dir .artifacts/qa-e2e/parity
 
@@ -345,13 +345,13 @@ jobs:
     name: Run live runtime token-efficiency lane
     needs: [authorize_actor, validate_selected_ref]
     if: github.event_name == 'schedule'
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 45
     environment: qa-live-shared
     env:
       QA_PARITY_CONCURRENCY: "1"
-      OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
-      OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
+      CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+      CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
     steps:
       - name: Checkout selected ref
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -389,7 +389,7 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CARAPACE_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
 
@@ -398,14 +398,14 @@ jobs:
           mkdir -p "${output_dir}"
           printf 'Runtime token-efficiency lane started.\n' > "${output_dir}/runtime-lane-started.txt"
 
-          pnpm openclaw qa suite \
+          pnpm carapace qa suite \
             --repo-root . \
             --provider-mode live-frontier \
             --runtime-pair-lane core \
             --concurrency "${QA_PARITY_CONCURRENCY}" \
-            --model "${OPENCLAW_CI_OPENAI_MODEL}" \
-            --alt-model "${OPENCLAW_CI_OPENAI_FALLBACK_MODEL}" \
-            --runtime-pair openclaw,codex \
+            --model "${CARAPACE_CI_OPENAI_MODEL}" \
+            --alt-model "${CARAPACE_CI_OPENAI_FALLBACK_MODEL}" \
+            --runtime-pair carapace,codex \
             --fast \
             --allow-failures \
             --output-dir "${output_dir}/runtime-suite"
@@ -414,18 +414,18 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CARAPACE_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
 
-          pnpm openclaw qa suite \
+          pnpm carapace qa suite \
             --repo-root . \
             --provider-mode live-frontier \
             --scenario gateway-restart-multi-live \
             --concurrency 1 \
             --model openai/gpt-5.4 \
             --alt-model openai/gpt-5.4 \
-            --runtime-pair openclaw,codex \
+            --runtime-pair carapace,codex \
             --fast \
             --output-dir "${{ steps.run_lane.outputs.output_dir }}/gateway-restart-gpt-5.4-runtime-pair"
 
@@ -433,11 +433,11 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CARAPACE_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
 
-          pnpm openclaw qa suite \
+          pnpm carapace qa suite \
             --repo-root . \
             --provider-mode live-frontier \
             --scenario gateway-restart-full-access-live \
@@ -453,7 +453,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          pnpm openclaw qa parity-report \
+          pnpm carapace qa parity-report \
             --repo-root . \
             --runtime-axis \
             --token-efficiency \
@@ -473,7 +473,7 @@ jobs:
     name: Run Matrix live QA lane
     needs: [authorize_actor, validate_selected_ref]
     if: (inputs.expected_sha == '' || inputs.run_matrix) && (github.event_name != 'workflow_dispatch' || inputs.scenario == '')
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 90
     concurrency:
       group: qa-live-matrix-${{ needs.validate_selected_ref.outputs.selected_revision }}
@@ -504,10 +504,10 @@ jobs:
         id: run_lane
         shell: bash
         env:
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
           FAIL_FAST: ${{ inputs.fail_fast }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CARAPACE_LIVE_OPENAI_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           set -euo pipefail
 
@@ -520,10 +520,10 @@ jobs:
             --provider-mode mock-openai \
             --fast
           )
-          if [[ "$FAIL_FAST" == "true" ]] && pnpm openclaw qa matrix --help 2>/dev/null | grep -F -q -- "--fail-fast"; then
+          if [[ "$FAIL_FAST" == "true" ]] && pnpm carapace qa matrix --help 2>/dev/null | grep -F -q -- "--fail-fast"; then
             matrix_args+=(--fail-fast)
           fi
-          pnpm openclaw qa matrix "${matrix_args[@]}"
+          pnpm carapace qa matrix "${matrix_args[@]}"
 
       - name: Upload Matrix QA artifacts
         id: upload_artifacts
@@ -539,7 +539,7 @@ jobs:
     name: Run Buzz live QA lane with Convex leases
     needs: [authorize_actor, validate_selected_ref]
     if: inputs.run_buzz
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 60
     concurrency:
       group: qa-live-buzz-shared
@@ -576,7 +576,7 @@ jobs:
           OUTPUT_DIR="${output_dir}" node --input-type=module <<'NODE'
           import fs from "node:fs";
 
-          const manifestPath = "extensions/buzz/openclaw.plugin.json";
+          const manifestPath = "extensions/buzz/carapace.plugin.json";
           const manifest = fs.existsSync(manifestPath)
             ? JSON.parse(fs.readFileSync(manifestPath, "utf8"))
             : {};
@@ -603,13 +603,13 @@ jobs:
       - name: Validate required Buzz QA credential env
         if: steps.resolve_buzz.outputs.available == 'true'
         env:
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
         shell: bash
         run: |
           set -euo pipefail
 
-          for key in OPENCLAW_QA_CONVEX_SITE_URL OPENCLAW_QA_CONVEX_SECRET_CI; do
+          for key in CARAPACE_QA_CONVEX_SITE_URL CARAPACE_QA_CONVEX_SECRET_CI; do
             if [[ -z "${!key:-}" ]]; then
               echo "Missing required ${key}." >&2
               exit 1
@@ -627,11 +627,11 @@ jobs:
         id: run_lane
         shell: bash
         env:
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
-          OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
           INPUT_SCENARIO: ${{ inputs.buzz_scenario || '' }}
         run: |
           set -euo pipefail
@@ -651,7 +651,7 @@ jobs:
 
           echo "output_dir=${output_dir}" >> "$GITHUB_OUTPUT"
 
-          pnpm openclaw qa buzz \
+          pnpm carapace qa buzz \
             --repo-root . \
             --output-dir "${output_dir}" \
             --provider-mode mock-openai \
@@ -679,7 +679,7 @@ jobs:
     name: Run Telegram live QA lane with Convex leases
     needs: [authorize_actor, validate_selected_ref]
     if: inputs.expected_sha == '' || inputs.run_telegram
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 60
     environment: qa-live-shared
     steps:
@@ -701,8 +701,8 @@ jobs:
         name: Validate required QA credential env
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
         shell: bash
         run: |
           set -euo pipefail
@@ -716,8 +716,8 @@ jobs:
           }
 
           require_var OPENAI_API_KEY
-          require_var OPENCLAW_QA_CONVEX_SITE_URL
-          require_var OPENCLAW_QA_CONVEX_SECRET_CI
+          require_var CARAPACE_QA_CONVEX_SITE_URL
+          require_var CARAPACE_QA_CONVEX_SECRET_CI
 
       - name: Build private QA runtime
         env:
@@ -729,11 +729,11 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
-          OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
           INPUT_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || '' }}
         run: |
           set -euo pipefail
@@ -753,12 +753,12 @@ jobs:
 
           echo "output_dir=${output_dir}" >> "$GITHUB_OUTPUT"
 
-          pnpm openclaw qa telegram \
+          pnpm carapace qa telegram \
             --repo-root . \
             --output-dir "${output_dir}" \
             --provider-mode live-frontier \
-            --model "${OPENCLAW_CI_OPENAI_MODEL}" \
-            --alt-model "${OPENCLAW_CI_OPENAI_FALLBACK_MODEL}" \
+            --model "${CARAPACE_CI_OPENAI_MODEL}" \
+            --alt-model "${CARAPACE_CI_OPENAI_FALLBACK_MODEL}" \
             --fast \
             --credential-source convex \
             --credential-role ci \
@@ -777,7 +777,7 @@ jobs:
     name: Run Discord live QA lane with Convex leases
     needs: [authorize_actor, validate_selected_ref]
     if: (inputs.expected_sha == '' || inputs.run_discord) && (github.event_name != 'workflow_dispatch' || inputs.scenario == '')
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 60
     environment: qa-live-shared
     steps:
@@ -806,10 +806,10 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
           INPUT_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.discord_scenario || '' }}
           PROVIDER_MODE: ${{ inputs.discord_provider_mode || 'live-frontier' }}
         run: |
@@ -822,7 +822,7 @@ jobs:
           if [[ "${PROVIDER_MODE}" == "live-frontier" ]]; then
             provider_args+=(
               --model openai/gpt-5.6-luna
-              --alt-model "${OPENCLAW_CI_OPENAI_FALLBACK_MODEL}"
+              --alt-model "${CARAPACE_CI_OPENAI_FALLBACK_MODEL}"
               --fast
             )
           elif [[ "${PROVIDER_MODE}" != "mock-openai" ]]; then
@@ -842,7 +842,7 @@ jobs:
 
           echo "output_dir=${output_dir}" >> "$GITHUB_OUTPUT"
 
-          pnpm openclaw qa discord \
+          pnpm carapace qa discord \
             --repo-root . \
             --output-dir "${output_dir}" \
             "${provider_args[@]}" \
@@ -863,7 +863,7 @@ jobs:
     name: Run WhatsApp live QA lane with Convex leases
     needs: [authorize_actor, validate_selected_ref]
     if: (inputs.expected_sha == '' || inputs.run_whatsapp) && (github.event_name != 'workflow_dispatch' || inputs.scenario == '')
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 60
     concurrency:
       group: qa-live-whatsapp-shared
@@ -895,10 +895,10 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
           INPUT_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.whatsapp_scenario || '' }}
         run: |
           set -euo pipefail
@@ -918,12 +918,12 @@ jobs:
 
           echo "output_dir=${output_dir}" >> "$GITHUB_OUTPUT"
 
-          pnpm openclaw qa whatsapp \
+          pnpm carapace qa whatsapp \
             --repo-root . \
             --output-dir "${output_dir}" \
             --provider-mode live-frontier \
-            --model "${OPENCLAW_CI_OPENAI_MODEL}" \
-            --alt-model "${OPENCLAW_CI_OPENAI_FALLBACK_MODEL}" \
+            --model "${CARAPACE_CI_OPENAI_MODEL}" \
+            --alt-model "${CARAPACE_CI_OPENAI_FALLBACK_MODEL}" \
             --fast \
             --credential-source convex \
             --credential-role ci \
@@ -942,7 +942,7 @@ jobs:
     name: Run Slack live QA lane with Convex leases
     needs: [authorize_actor, validate_selected_ref]
     if: (inputs.expected_sha == '' || inputs.run_slack) && (github.event_name != 'workflow_dispatch' || inputs.scenario == '')
-    runs-on: ${{ vars.OPENCLAW_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
+    runs-on: ${{ vars.CARAPACE_CI_RUNNER_BACKEND == 'github' && 'ubuntu-24.04' || 'blacksmith-16vcpu-ubuntu-2404' }}
     timeout-minutes: 60
     environment: qa-live-shared
     steps:
@@ -971,11 +971,11 @@ jobs:
         shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
-          OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
-          OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "1800000"
+          CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
+          CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
           INPUT_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.slack_scenario || '' }}
         run: |
           set -euo pipefail
@@ -995,12 +995,12 @@ jobs:
 
           echo "output_dir=${output_dir}" >> "$GITHUB_OUTPUT"
 
-          pnpm openclaw qa slack \
+          pnpm carapace qa slack \
             --repo-root . \
             --output-dir "${output_dir}" \
             --provider-mode live-frontier \
-            --model "${OPENCLAW_CI_OPENAI_MODEL}" \
-            --alt-model "${OPENCLAW_CI_OPENAI_FALLBACK_MODEL}" \
+            --model "${CARAPACE_CI_OPENAI_MODEL}" \
+            --alt-model "${CARAPACE_CI_OPENAI_FALLBACK_MODEL}" \
             --fast \
             --credential-source convex \
             --credential-role ci \

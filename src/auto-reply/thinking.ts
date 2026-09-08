@@ -1,9 +1,9 @@
 // Thinking/reasoning level catalog helpers for auto-reply model controls.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveClaudeThinkingProfile } from "../plugins/provider-claude-thinking.js";
 import { resolveEffectiveThinkingProfile } from "../plugins/provider-thinking.js";
 import type {
@@ -203,8 +203,8 @@ function appendCatalogAdvancedThinkingLevels(
     }
   }
   const runtime = normalizeOptionalLowercaseString(agentRuntime);
-  if (supportsMax && (runtime === "openclaw" || runtime === "auto")) {
-    // Max-only catalogs synthesize Ultra only for OpenClaw; other runtimes must advertise it.
+  if (supportsMax && (runtime === "carapace" || runtime === "auto")) {
+    // Max-only catalogs synthesize Ultra only for Carapace; other runtimes must advertise it.
     appendProfileLevel(profile, "ultra");
   }
 }

@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import {
   acpMocks,
   hookMocks,
@@ -76,7 +76,7 @@ describe("dispatchReplyFromConfig ACP reply privacy", () => {
           stream: { deliveryMode: "live" },
         },
         session: { sendPolicy: { default: "allow" } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       dispatcher,
     });
     dispatcher.markComplete();

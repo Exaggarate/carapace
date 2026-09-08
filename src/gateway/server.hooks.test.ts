@@ -194,8 +194,8 @@ async function waitForSystemEventTexts(sessionKey: string, timeoutMs = 2_000) {
 
 async function writeHookTransformModule(moduleName: string, source: string): Promise<void> {
   const configPath = requireNonEmptyString(
-    process.env.OPENCLAW_CONFIG_PATH,
-    "OPENCLAW_CONFIG_PATH",
+    process.env.CARAPACE_CONFIG_PATH,
+    "CARAPACE_CONFIG_PATH",
   );
   const transformsDir = path.join(path.dirname(configPath), "hooks", "transforms");
   await fs.mkdir(transformsDir, { recursive: true });
@@ -279,7 +279,7 @@ describe("gateway server hooks", () => {
         port,
         "/hooks/wake",
         { text: "Header auth" },
-        { token: null, headers: { "x-openclaw-token": HOOK_TOKEN } },
+        { token: null, headers: { "x-carapace-token": HOOK_TOKEN } },
       );
       expect(resHeader.status).toBe(200);
       const headerEvents = await waitForSystemEvent();
@@ -814,8 +814,8 @@ describe("gateway server hooks", () => {
   test("dedupes hook retries even when trusted-proxy client IP changes", async () => {
     testState.hooksConfig = { enabled: true, token: HOOK_TOKEN };
     const configPath = requireNonEmptyString(
-      process.env.OPENCLAW_CONFIG_PATH,
-      "OPENCLAW_CONFIG_PATH",
+      process.env.CARAPACE_CONFIG_PATH,
+      "CARAPACE_CONFIG_PATH",
     );
     await fs.writeFile(
       configPath,

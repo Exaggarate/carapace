@@ -3,8 +3,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import "./test-helpers/fast-coding-tools.js";
-import "./test-helpers/fast-openclaw-tools.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import "./test-helpers/fast-carapace-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { createApplyPatchTool } from "./apply-patch.js";
 import { expectReadWriteEditTools, getTextContent } from "./test-helpers/agent-tools-fs-helpers.js";
 import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge.js";
@@ -12,7 +12,7 @@ import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function withWorkspace(run: (workspaceDir: string) => Promise<void>): Promise<void> {
-  await run(tempDirs.make("openclaw-at-host-"));
+  await run(tempDirs.make("carapace-at-host-"));
 }
 
 describe("leading-@ host and mounted sandbox paths", () => {
@@ -31,7 +31,7 @@ describe("leading-@ host and mounted sandbox paths", () => {
         await fs.writeFile(path.join(siblingParent, "new.md"), "sibling child", "utf8");
         await fs.writeFile(path.join(workspaceDir, "reference.md"), "reference", "utf8");
         const { readTool, writeTool, editTool } = expectReadWriteEditTools(
-          createOpenClawCodingTools({
+          createCarapaceCodingTools({
             workspaceDir,
             config: { tools: { fs: { workspaceOnly } } },
           }),

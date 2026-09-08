@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   decodeSessionArchiveBytes,
   encodeSessionArchiveContent,
@@ -16,23 +16,23 @@ import {
   canonicalizePersistedUserMessageMedia,
   hasMeaningfulRetiredMediaCarrier,
 } from "../media/media-facts.js";
-import { AGENT_MEDIA_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
-import { assertOpenClawAgentDatabaseOwner } from "../state/openclaw-agent-db-maintenance.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
-import { assertOpenClawAgentSchemaContains } from "../state/openclaw-agent-db-schema-helpers.js";
+import { AGENT_MEDIA_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
+import { assertCarapaceAgentDatabaseOwner } from "../state/carapace-agent-db-maintenance.js";
+import { registerCarapaceAgentDatabase } from "../state/carapace-agent-db-registry.js";
+import { assertCarapaceAgentSchemaContains } from "../state/carapace-agent-db-schema-helpers.js";
 import {
-  ensureOpenClawAgentDatabaseSchema,
-  migrateOpenClawAgentDatabaseToMediaPrerequisiteSchema,
-} from "../state/openclaw-agent-db-schema.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+  ensureCarapaceAgentDatabaseSchema,
+  migrateCarapaceAgentDatabaseToMediaPrerequisiteSchema,
+} from "../state/carapace-agent-db-schema.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  OPENCLAW_AGENT_SCHEMA_VERSION,
+  CARAPACE_AGENT_SCHEMA_VERSION,
   withAgentDatabaseMaintenanceLease,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { withLegacySessionParticipantsSchema } from "../state/openclaw-agent-participants-migration.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
-import { OPENCLAW_SQLITE_BUSY_TIMEOUT_MS } from "../state/openclaw-state-db.js";
+  type CarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { withLegacySessionParticipantsSchema } from "../state/carapace-agent-participants-migration.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
+import { CARAPACE_SQLITE_BUSY_TIMEOUT_MS } from "../state/carapace-state-db.js";
 import { VERSION } from "../version.js";
 import { formatErrorMessage } from "./errors.js";
 import {
@@ -59,7 +59,7 @@ const ARCHIVE_TEMP_MARKER = ".media-retirement";
 const MEDIA_MIGRATION_ROW_BATCH_SIZE = 64;
 
 type MediaMigrationDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "schema_meta" | "session_windows" | "trajectory_runtime_events" | "transcript_events"
 >;
 
@@ -159,7 +159,7 @@ function forEachMediaEventBatch(params: {
 function scanTranscriptRows(params: {
   database: DatabaseSync;
   pathname: string;
-  writer?: OpenClawAgentDatabase;
+  writer?: CarapaceAgentDatabase;
 }): number {
   const { database, pathname, writer } = params;
   const db = getNodeSqliteKysely<MediaMigrationDatabase>(database);
@@ -347,7 +347,7 @@ function createMigrationDatabaseHandle(
   database: DatabaseSync,
   agentId: string,
   pathname: string,
-): OpenClawAgentDatabase {
+): CarapaceAgentDatabase {
   return {
     agentId,
     db: database,
@@ -369,19 +369,19 @@ function migrateAgentDatabase(params: {
 }) {
   const database = openNodeSqliteDatabase(params.pathname);
   try {
-    database.exec(`PRAGMA busy_timeout = ${OPENCLAW_SQLITE_BUSY_TIMEOUT_MS};`);
-    let metadata = assertOpenClawAgentDatabaseOwner(database, {
+    database.exec(`PRAGMA busy_timeout = ${CARAPACE_SQLITE_BUSY_TIMEOUT_MS};`);
+    let metadata = assertCarapaceAgentDatabaseOwner(database, {
       agentId: params.agentId,
       pathname: params.pathname,
     });
     let userVersion = readSqliteUserVersion(database);
     const initialVersion = userVersion;
     if (userVersion <= PREVIOUS_MEDIA_SCHEMA_VERSION) {
-      migrateOpenClawAgentDatabaseToMediaPrerequisiteSchema(database, {
+      migrateCarapaceAgentDatabaseToMediaPrerequisiteSchema(database, {
         agentId: params.agentId,
         path: params.pathname,
       });
-      metadata = assertOpenClawAgentDatabaseOwner(database, {
+      metadata = assertCarapaceAgentDatabaseOwner(database, {
         agentId: params.agentId,
         pathname: params.pathname,
       });
@@ -395,25 +395,25 @@ function migrateAgentDatabase(params: {
     if (userVersion >= AGENT_MEDIA_SCHEMA_VERSION) {
       // The canonical owner admits supported versions and converges additive schema;
       // media must not enumerate later schema revisions independently.
-      ensureOpenClawAgentDatabaseSchema(database, {
+      ensureCarapaceAgentDatabaseSchema(database, {
         agentId: params.agentId,
         path: params.pathname,
       });
       userVersion = readSqliteUserVersion(database);
     }
-    const schemaMode = userVersion < OPENCLAW_AGENT_SCHEMA_VERSION ? "legacy" : "current";
+    const schemaMode = userVersion < CARAPACE_AGENT_SCHEMA_VERSION ? "legacy" : "current";
     const schemaSql =
       schemaMode === "legacy"
-        ? withLegacySessionParticipantsSchema(OPENCLAW_AGENT_SCHEMA_SQL)
-        : OPENCLAW_AGENT_SCHEMA_SQL;
+        ? withLegacySessionParticipantsSchema(CARAPACE_AGENT_SCHEMA_SQL)
+        : CARAPACE_AGENT_SCHEMA_SQL;
     // Remove after 2026-10-12: drop the v15-to-v16 media cutover once schema 16 is the support floor.
     if (userVersion === PREVIOUS_MEDIA_SCHEMA_VERSION) {
       repairCanonicalSqliteIndexes(database, params.pathname, schemaSql, {
         validateAfterRepair: () =>
-          assertOpenClawAgentSchemaContains(database, params.pathname, schemaSql, schemaMode),
+          assertCarapaceAgentSchemaContains(database, params.pathname, schemaSql, schemaMode),
       });
     }
-    assertOpenClawAgentSchemaContains(database, params.pathname, schemaSql, schemaMode);
+    assertCarapaceAgentSchemaContains(database, params.pathname, schemaSql, schemaMode);
     const mediaSchemaUpgrade = userVersion === PREVIOUS_MEDIA_SCHEMA_VERSION;
     if (!mediaSchemaUpgrade) {
       const detected = runSqliteDeferredTransactionSync(
@@ -474,12 +474,12 @@ function migrateAgentDatabase(params: {
         return { rewrittenSessions, rewrittenTrajectoryRows };
       },
       {
-        busyTimeoutMs: OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
+        busyTimeoutMs: CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
         databaseLabel: params.pathname,
         operationLabel: "media-persistence-retirement",
       },
     );
-    ensureOpenClawAgentDatabaseSchema(database, { agentId: params.agentId, path: params.pathname });
+    ensureCarapaceAgentDatabaseSchema(database, { agentId: params.agentId, path: params.pathname });
     refreshAgentDatabasePlannerStatistics(database);
     return {
       ...rewritten,
@@ -656,7 +656,7 @@ export async function migrateLegacyMediaPersistence(
           });
           const schemaAdvanced = result.finalVersion > result.initialVersion;
           if (entry.source !== "registry" || schemaAdvanced) {
-            registerOpenClawAgentDatabase({ agentId: entry.agentId, env, path: pathname });
+            registerCarapaceAgentDatabase({ agentId: entry.agentId, env, path: pathname });
           }
           if (schemaAdvanced) {
             changes.push(
@@ -665,7 +665,7 @@ export async function migrateLegacyMediaPersistence(
           }
           if (result.rewrittenSessions > 0 || result.rewrittenTrajectoryRows > 0) {
             changes.push(
-              `Migrated media persistence in ${pathname}: ${result.rewrittenSessions} transcript session(s), ${result.rewrittenTrajectoryRows} trajectory row(s), schema v${OPENCLAW_AGENT_SCHEMA_VERSION}.`,
+              `Migrated media persistence in ${pathname}: ${result.rewrittenSessions} transcript session(s), ${result.rewrittenTrajectoryRows} trajectory row(s), schema v${CARAPACE_AGENT_SCHEMA_VERSION}.`,
             );
           }
         } catch (error) {

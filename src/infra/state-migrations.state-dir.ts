@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { resolveProfileStateDir } from "../cli/profile-utils.js";
 import { resolveLegacyStateDirs, resolveNewStateDir, resolveStateDir } from "../config/paths.js";
 import { isWithinDir } from "./path-safety.js";
@@ -49,7 +49,7 @@ export function resolveLegacyProfileWorkspaceMigrationPaths(params: {
 }): { source: string; target: string } | undefined {
   const env = params.env ?? process.env;
   const homedir = params.homedir ?? os.homedir;
-  const profile = env.OPENCLAW_PROFILE?.trim();
+  const profile = env.CARAPACE_PROFILE?.trim();
   if (!profile || normalizeLowercaseStringOrEmpty(profile) === "default") {
     return undefined;
   }
@@ -204,7 +204,7 @@ export function resolvePendingLegacyStateDirMigrationPaths(params: {
 }): { source: string; target: string } | undefined {
   const env = params.env ?? process.env;
   const homedir = params.homedir ?? os.homedir;
-  if (env.OPENCLAW_STATE_DIR?.trim()) {
+  if (env.CARAPACE_STATE_DIR?.trim()) {
     return undefined;
   }
   const target = resolveNewStateDir(homedir);
@@ -237,7 +237,7 @@ export async function autoMigrateLegacyStateDir(params: {
   const warnings: string[] = [];
   const changes: string[] = [];
   const notices: string[] = [];
-  const hasCustomStateDir = Boolean(env.OPENCLAW_STATE_DIR?.trim());
+  const hasCustomStateDir = Boolean(env.CARAPACE_STATE_DIR?.trim());
   const targetDir = hasCustomStateDir ? resolveStateDir(env, homedir) : resolveNewStateDir(homedir);
   const migratePluginInstallIndex = async () => {
     const result = await migrateLegacyInstalledPluginIndex({ stateDir: targetDir });
@@ -422,7 +422,7 @@ export async function autoMigrateLegacyStateDir(params: {
           `State dir moved but failed to link legacy path (${legacyDir ?? "unknown"} → ${targetDir}): ${String(fallbackErr)}`,
         );
         warnings.push(
-          `Rollback failed; set OPENCLAW_STATE_DIR=${targetDir} to avoid split state: ${String(rollbackErr)}`,
+          `Rollback failed; set CARAPACE_STATE_DIR=${targetDir} to avoid split state: ${String(rollbackErr)}`,
         );
         changes.push(`State dir: ${legacyDir ?? "unknown"} → ${targetDir}`);
       }

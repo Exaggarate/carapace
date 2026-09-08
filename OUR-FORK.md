@@ -1,6 +1,6 @@
 # OUR-FORK.md — The Fixed Edition
 
-This is **Exaggarate/openclaw** — our standalone edition of [openclaw/openclaw](https://github.com/openclaw/openclaw) (MIT, © OpenClaw Foundation). Not affiliated with upstream; independent repo, **not a GitHub fork**. Upstream main is merged continuously; this repo layers issue-driven fixes on top.
+This is **Exaggarate/carapace** — our standalone edition of [carapace/carapace](https://github.com/Exaggarate/carapace) (MIT, © Carapace Foundation). Not affiliated with upstream; independent repo, **not a GitHub fork**. Upstream main is merged continuously; this repo layers issue-driven fixes on top.
 
 ## Mission
 
@@ -12,7 +12,7 @@ Take **every open upstream issue** (currently ~3,948) and fix it here. Fast path
 
 ## Operating loop
 
-1. **Sync** — upstream `main` merged every 6h by automation (`openclaw-fork-sync`). Upstream's resolution wins on conflicts; batch workers re-validate affected fixes after.
+1. **Sync** — upstream `main` merged every 6h by automation (`carapace-fork-sync`). Upstream's resolution wins on conflicts; batch workers re-validate affected fixes after.
 2. **Enumerate** — all open issues tracked in [our-fork/ISSUES.md](our-fork/ISSUES.md), refreshed by script (label-partitioned search queries to beat the 1000-result cap).
 3. **Fix** — prioritized batches: P0/P1 `bug`/`bug:crash` with `clawsweeper:fix-shape-clear` first, then diamond-lobster rated, then the long tail.
 4. **Verify** — tests + build per batch before push. One commit per issue.

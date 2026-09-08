@@ -20,9 +20,9 @@ import { SecretSurfaceUnavailableError } from "../secrets/runtime-degraded-state
 import { createDeferredCore } from "../shared/deferred.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { MODELS_CONFIG_IMPLICIT_ENV_VARS } from "./models-config.e2e-harness.js";
 
 const mocks = vi.hoisted(() => ({
@@ -151,12 +151,12 @@ function firstMockArg(mock: { mock: { calls: unknown[][] } }, label: string): un
 }
 
 describe("resolveImplicitProviders startup discovery scope", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let ambientHome: MockInstance<typeof os.homedir>;
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       label: "provider-discovery-scope",
       env: Object.fromEntries(
         [...MODELS_CONFIG_IMPLICIT_ENV_VARS, "CODEX_API_KEY", "CODEX_HOME", "GOOGLE_CLOUD_API_KEY"]
@@ -534,37 +534,37 @@ describe("resolveImplicitProviders startup discovery scope", () => {
   it.each([
     {
       name: "maps live provider backend ids to owning plugin ids",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_PROVIDERS: "claude-cli" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_PROVIDERS: "claude-cli" },
       owners: { providers: new Map([["claude-cli", ["anthropic"]]]) },
       expected: ["anthropic"],
     },
     {
       name: "honors gateway live provider filters",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_GATEWAY_PROVIDERS: "claude-cli" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_GATEWAY_PROVIDERS: "claude-cli" },
       owners: { providers: new Map([["claude-cli", ["anthropic"]]]) },
       expected: ["anthropic"],
     },
     {
       name: "keeps explicit plugin-id filters when no owning provider plugin exists",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_PROVIDERS: "openrouter" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_PROVIDERS: "openrouter" },
       owners: {},
       expected: ["openrouter"],
     },
     {
       name: "maps live provider backend ids through plugin metadata cli backend owners",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_PROVIDERS: "claude-cli" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_PROVIDERS: "claude-cli" },
       owners: { cliBackends: new Map([["claude-cli", ["anthropic"]]]) },
       expected: ["anthropic"],
     },
     {
       name: "normalizes mixed-case backend ids through plugin metadata owners",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_PROVIDERS: "Claude-CLI" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_PROVIDERS: "Claude-CLI" },
       owners: { cliBackends: new Map([["claude-cli", ["anthropic"]]]) },
       expected: ["anthropic"],
     },
     {
       name: "does not resolve provider aliases through plugin metadata owners",
-      env: { OPENCLAW_LIVE_TEST: "1", OPENCLAW_LIVE_PROVIDERS: "bytedance" },
+      env: { CARAPACE_LIVE_TEST: "1", CARAPACE_LIVE_PROVIDERS: "bytedance" },
       owners: { providers: new Map([["volcengine", ["volcengine"]]]) },
       expected: ["bytedance"],
     },
@@ -887,8 +887,8 @@ describe("resolveImplicitProviders startup discovery scope", () => {
 
     const providers = await withEnvAsync(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        CARAPACE_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       async () =>
         await resolveImplicitProviders({
@@ -896,8 +896,8 @@ describe("resolveImplicitProviders startup discovery scope", () => {
           config: {},
           env: {
             ...state.env,
-            OPENCLAW_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+            CARAPACE_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
             GOOGLE_APPLICATION_CREDENTIALS: credentialsPath,
             GOOGLE_CLOUD_PROJECT: "vertex-project",
             GOOGLE_CLOUD_LOCATION: "global",

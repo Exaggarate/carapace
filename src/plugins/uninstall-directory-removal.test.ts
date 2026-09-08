@@ -8,7 +8,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("plugin uninstall directory removal", () => {
   it("removes a dangling managed-target symlink", async () => {
-    const root = tempDirs.make("openclaw-plugin-uninstall-");
+    const root = tempDirs.make("carapace-plugin-uninstall-");
     const target = path.join(root, "plugin");
     await fs.symlink(path.join(root, "missing-target"), target, "dir");
 

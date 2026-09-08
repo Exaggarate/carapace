@@ -6,12 +6,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it } from "vitest";
 import { GATEWAY_CLIENT_CAPS } from "../../packages/gateway-protocol/src/client-info.js";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../config/config.js";
 import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-state.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ADMIN_SCOPE } from "../gateway/method-scopes.js";
 import { startGatewayServer } from "../gateway/server.js";
 import {
@@ -23,7 +23,7 @@ import { GATEWAY_STARTUP_MUTATED_ENV_KEYS } from "../gateway/test-helpers.env.js
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { withTimeout } from "../utils/with-timeout.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createCarapaceCodingTools } from "./agent-tools.js";
 import { getFinishedSession } from "./bash-process-registry.js";
 import { resetProcessRegistryForTests } from "./bash-process-registry.test-support.js";
 import type { ExecApprovalFollowupOutcome } from "./bash-tools.exec-types.js";
@@ -31,16 +31,16 @@ import type { ExecApprovalFollowupOutcome } from "./bash-tools.exec-types.js";
 const TEST_ENV_KEYS = [
   "HOME",
   ...GATEWAY_STARTUP_MUTATED_ENV_KEYS,
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_TEST_MINIMAL_GATEWAY",
 ];
 const GATEWAY_CONNECT_TIMEOUT_MS = 120_000;
 const EXEC_APPROVAL_E2E_TIMEOUT_MS = 180_000;
@@ -74,16 +74,16 @@ describe("gateway-hosted exec approvals", () => {
       const envSnapshot = captureEnv(TEST_ENV_KEYS);
       cleanup.push(() => envSnapshot.restore());
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-exec-approval-e2e-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-exec-approval-e2e-"));
       cleanup.push(() => fs.rm(tempHome, { recursive: true, force: true, maxRetries: 5 }));
 
-      const stateDir = path.join(tempHome, ".openclaw");
+      const stateDir = path.join(tempHome, ".carapace");
       const workspaceDir = path.join(tempHome, "workspace");
       await fs.mkdir(workspaceDir, { recursive: true });
 
       const port = await getGatewayE2ePortBlock();
       const token = "exec-approval-e2e-token";
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       await fs.mkdir(stateDir, { recursive: true });
       const config = {
         agents: {
@@ -103,21 +103,21 @@ describe("gateway-hosted exec approvals", () => {
             cleanupMs: 60_000,
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       await fs.writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 
       setTestEnvValue("HOME", tempHome);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-      setTestEnvValue("OPENCLAW_GATEWAY_PORT", String(port));
-      setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-      setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-      setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_PROVIDERS", "1");
-      setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "1");
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_GATEWAY_TOKEN", token);
+      setTestEnvValue("CARAPACE_GATEWAY_PORT", String(port));
+      setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+      setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+      setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+      setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+      setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+      setTestEnvValue("CARAPACE_SKIP_PROVIDERS", "1");
+      setTestEnvValue("CARAPACE_TEST_MINIMAL_GATEWAY", "1");
       clearRuntimeConfigSnapshot();
       clearConfigCache();
       clearSessionStoreCacheForTest();
@@ -146,7 +146,7 @@ describe("gateway-hosted exec approvals", () => {
       let resolveOutcome: (outcome: ExecApprovalFollowupOutcome) => void = () => {};
       let approvedProcessId: string | undefined;
 
-      const tools = createOpenClawCodingTools({
+      const tools = createCarapaceCodingTools({
         agentId: "main",
         workspaceDir,
         cwd: workspaceDir,
@@ -197,7 +197,7 @@ describe("gateway-hosted exec approvals", () => {
       });
       const approvalId = requireApprovalId(pending.details);
 
-      const helperTools = createOpenClawCodingTools({ agentId: "helper", config, workspaceDir });
+      const helperTools = createCarapaceCodingTools({ agentId: "helper", config, workspaceDir });
       const helperProcess = helperTools.find((candidate) => candidate.name === "process");
       if (!helperProcess) {
         throw new Error("expected helper process tool");

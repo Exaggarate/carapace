@@ -1,6 +1,6 @@
 // Metadata contract shared by Doctor migrations and client storage selection.
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { PluginStateKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixSqliteStateEnv } from "../sqlite-state.js";
 
 const STORAGE_META_NAMESPACE = "storage-meta";

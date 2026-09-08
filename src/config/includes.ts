@@ -13,7 +13,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { canUseRootFileOpen, openRootFileSync } from "../infra/boundary-file-read.js";
 import { resolvePathViaExistingAncestorSync } from "../infra/boundary-path.js";
 import { mergeDeep as mergeDeepValues } from "../infra/deep-merge.js";
@@ -71,7 +71,7 @@ export function resolveConfigIncludeWritePath(params: {
 /**
  * Whether an include target canonically resolves inside the config directory.
  * Write eligibility must use the canonical form: a symlink beneath the config
- * directory can point at an external OPENCLAW_INCLUDE_ROOTS file that reads
+ * directory can point at an external CARAPACE_INCLUDE_ROOTS file that reads
  * accept but the guarded include writer rejects.
  */
 export function isInternalIncludeWriteTarget(params: {
@@ -136,7 +136,7 @@ type IncludeBoundary = {
 type ResolveConfigIncludesOptions = {
   /**
    * Additional directories outside the config directory that `$include` paths
-   * may resolve into. Typically populated from `OPENCLAW_INCLUDE_ROOTS`.
+   * may resolve into. Typically populated from `CARAPACE_INCLUDE_ROOTS`.
    * Each entry must be an absolute path; symlinks are resolved before the
    * containment check, consistent with the config-directory boundary check.
    */
@@ -355,7 +355,7 @@ class IncludeProcessor {
 
     // SECURITY: Reject paths outside the config directory and any caller-allowed
     // roots (CWE-22: Path Traversal). Allowed roots come from
-    // OPENCLAW_INCLUDE_ROOTS and let operators opt into shared include trees
+    // CARAPACE_INCLUDE_ROOTS and let operators opt into shared include trees
     // without weakening the default lock-down.
     const lexicalMatch = this.findContainingRoot(normalized, "rootDir");
     if (!lexicalMatch) {

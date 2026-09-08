@@ -1,8 +1,8 @@
 /** Resolves command-scoped secrets, including web provider override credentials. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { cloneConfigWithResolutionFacts } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolveManifestContractOwnerPluginId } from "../plugins/plugin-registry.js";
 import {
@@ -38,9 +38,9 @@ function hasProviderOverrides(overrides: CommandSecretProviderOverrides | undefi
 }
 
 function applyProviderOverridesToConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   overrides: CommandSecretProviderOverrides | undefined,
-): OpenClawConfig {
+): CarapaceConfig {
   if (!hasProviderOverrides(overrides)) {
     return config;
   }
@@ -69,7 +69,7 @@ function isWebCommandSecretPath(path: string): boolean {
 }
 
 function isProviderOverridePath(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   path: string;
   providerOverrides: CommandSecretProviderOverrides | undefined;
 }): boolean {
@@ -113,8 +113,8 @@ function isProviderOverridePath(params: {
 }
 
 function restoreInactiveWebCommandSecretTargets(params: {
-  sourceConfig: OpenClawConfig;
-  resolvedConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  resolvedConfig: CarapaceConfig;
   targetIds: ReadonlySet<string>;
   inactiveRefPaths: string[];
   providerOverrides: CommandSecretProviderOverrides | undefined;
@@ -166,7 +166,7 @@ function restoreInactiveWebCommandSecretTargets(params: {
 }
 
 function filterInactiveRefPaths(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   inactiveRefPaths: readonly string[];
   providerOverrides: CommandSecretProviderOverrides | undefined;
   allowedPaths?: ReadonlySet<string>;
@@ -192,8 +192,8 @@ function filterInactiveRefPaths(params: {
 }
 
 async function resolveForcedActiveCommandSecretTargets(params: {
-  sourceConfig: OpenClawConfig;
-  resolvedConfig: OpenClawConfig;
+  sourceConfig: CarapaceConfig;
+  resolvedConfig: CarapaceConfig;
   targetIds: ReadonlySet<string>;
   allowedPaths?: ReadonlySet<string>;
   forcedActivePaths?: ReadonlySet<string>;

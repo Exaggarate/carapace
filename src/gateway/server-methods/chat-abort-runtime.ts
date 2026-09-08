@@ -1,4 +1,4 @@
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import {
   ErrorCodes,
   errorShape,
@@ -15,7 +15,7 @@ import {
   isSubagentRunQueued,
   listSubagentRunsForController,
 } from "../../agents/subagents/registry/subagent-registry-read.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isAgentEventLifecycleGenerationCurrent } from "../../infra/agent-events.js";
 import { SUBAGENT_KILL_TASK_ERROR } from "../../tasks/detached-task-runtime-contract.js";
 import { createChatAbortOps } from "../chat-abort-ops.js";
@@ -55,7 +55,7 @@ import { emitSessionsChanged } from "./session-change-event.js";
 import type { GatewayRequestContext } from "./types.js";
 
 export async function abortControlledSubagents(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
   requesterTurnRunId?: string;

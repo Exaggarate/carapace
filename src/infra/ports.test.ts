@@ -205,7 +205,7 @@ describe("ports helpers", () => {
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 
-  it("prints an OpenClaw-specific hint when port details look like another OpenClaw instance", async () => {
+  it("prints an Carapace-specific hint when port details look like another Carapace instance", async () => {
     const runtime = {
       error: vi.fn(),
       log: vi.fn(),
@@ -213,14 +213,14 @@ describe("ports helpers", () => {
     };
 
     await handlePortError(
-      new PortInUseError(18789, "node dist/index.js openclaw gateway"),
+      new PortInUseError(18789, "node dist/index.js carapace gateway"),
       18789,
       "gateway start",
       runtime,
     ).catch(() => {});
 
     const messages = runtime.error.mock.calls.map((call) => stripAnsi(String(call[0] ?? "")));
-    expect(messages.join("\n")).toContain("another OpenClaw instance is already running");
+    expect(messages.join("\n")).toContain("another Carapace instance is already running");
   });
 });
 
@@ -241,13 +241,13 @@ describeUnix("inspectPortUsage", () => {
 
     mockUnixCommands({
       lsof: commandOutput(
-        `p111\ncopenclaw-gatewa\nnTCP 127.0.0.1:${port} (LISTEN)\n` +
+        `p111\nccarapace-gatewa\nnTCP 127.0.0.1:${port} (LISTEN)\n` +
           `p222\ncsocat\nnTCP 127.0.0.2:${port} (LISTEN)\n`,
       ),
       commandLine: (pid) =>
         pid === "111"
-          ? "openclaw-gateway --profile socat"
-          : `socat -lpopenclaw TCP-LISTEN:${port},bind=127.0.0.2,fork TCP:127.0.0.1:${port}`,
+          ? "carapace-gateway --profile socat"
+          : `socat -lpcarapace TCP-LISTEN:${port},bind=127.0.0.2,fork TCP:127.0.0.1:${port}`,
     });
 
     try {
@@ -389,7 +389,7 @@ describeUnix("inspectPortUsage", () => {
       ss: commandOutput(
         `LISTEN 0 511 127.0.0.1:${port} 0.0.0.0:* users:(("node",pid=${process.pid},fd=23))`,
       ),
-      commandLine: "node /tmp/openclaw/dist/index.js gateway --port 18789",
+      commandLine: "node /tmp/carapace/dist/index.js gateway --port 18789",
       user: "debian",
       parentPid: "1",
     });
@@ -403,7 +403,7 @@ describeUnix("inspectPortUsage", () => {
       expect(result?.status).toBe("busy");
       expect(result?.listeners.length).toBeGreaterThan(0);
       expect(result?.listeners[0]?.pid).toBe(process.pid);
-      expect(result?.listeners[0]?.commandLine).toContain("openclaw");
+      expect(result?.listeners[0]?.commandLine).toContain("carapace");
       expect(result?.errors).toBeUndefined();
     } finally {
       await closeServer(server);
@@ -597,7 +597,7 @@ describeUnix("inspectPortUsage", () => {
     mockUnixCommands({
       lsof: Object.assign(new Error("spawn lsof ENOENT"), { code: "ENOENT" }),
       ss: commandOutput(
-        'LISTEN 0 4096 127.0.0.1:18789 0.0.0.0:* users:(("openclaw",pid=123,fd=12))',
+        'LISTEN 0 4096 127.0.0.1:18789 0.0.0.0:* users:(("carapace",pid=123,fd=12))',
       ),
     });
 
@@ -612,7 +612,7 @@ describeUnix("inspectPortUsage", () => {
       ss: commandOutput(
         [
           'LISTEN 0 4096 127.0.0.1:8080 0.0.0.0:* users:(("app",pid=100,fd=3))',
-          'LISTEN 0 4096 127.0.0.1:18789 0.0.0.0:* users:(("openclaw",pid=123,fd=12))',
+          'LISTEN 0 4096 127.0.0.1:18789 0.0.0.0:* users:(("carapace",pid=123,fd=12))',
           'LISTEN 0 4096 127.0.0.1:18790 0.0.0.0:* users:(("other",pid=456,fd=7))',
         ].join("\n"),
       ),
@@ -639,9 +639,9 @@ describeUnix("inspectPortUsage", () => {
       ),
       commandLine: (pid) =>
         pid === "111"
-          ? "node /tmp/newer-openclaw/dist/index.js logs --follow"
+          ? "node /tmp/newer-carapace/dist/index.js logs --follow"
           : pid === "222"
-            ? "node /tmp/older-openclaw/dist/index.js gateway run"
+            ? "node /tmp/older-carapace/dist/index.js gateway run"
             : "browser https://example.invalid/",
       user: "tester",
       parentPid: "1",
@@ -653,7 +653,7 @@ describeUnix("inspectPortUsage", () => {
     expect(result.connections[0]).toMatchObject({
       pid: 111,
       direction: "client",
-      commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+      commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
     });
     expect(result.connections[1]).toMatchObject({
       pid: 222,
@@ -668,7 +668,7 @@ describeUnix("inspectPortUsage", () => {
   it("deduplicates repeated lsof listener records for one process address", async () => {
     mockUnixCommands({
       lsof: commandOutput("p111\ncnode\nnTCP *:18789 (LISTEN)\nnTCP *:18789 (LISTEN)\n"),
-      commandLine: "node /tmp/openclaw/dist/index.js gateway run",
+      commandLine: "node /tmp/carapace/dist/index.js gateway run",
       user: "tester",
       parentPid: "1",
     });
@@ -685,7 +685,7 @@ describeUnix("inspectPortUsage", () => {
   it("keeps single-port lsof listener inspection scoped to the requested port", async () => {
     mockUnixCommands({
       lsof: commandOutput("p111\ncnode\nnTCP *:18789 (LISTEN)\n"),
-      commandLine: "node /tmp/openclaw/dist/index.js gateway run",
+      commandLine: "node /tmp/carapace/dist/index.js gateway run",
       user: "tester",
       parentPid: "1",
     });
@@ -711,8 +711,8 @@ describeUnix("inspectPortUsage", () => {
       ),
       commandLine: (pid) =>
         pid === "111"
-          ? "node /tmp/openclaw/dist/index.js gateway run"
-          : "deno run /tmp/openclaw/cli.ts",
+          ? "node /tmp/carapace/dist/index.js gateway run"
+          : "deno run /tmp/carapace/cli.ts",
       user: "tester",
       parentPid: "1",
     });
@@ -735,7 +735,7 @@ describeUnix("inspectPortUsage", () => {
           pid: 111,
           command: "node",
           address: "TCP *:18789 (LISTEN)",
-          commandLine: "node /tmp/openclaw/dist/index.js gateway run",
+          commandLine: "node /tmp/carapace/dist/index.js gateway run",
         }),
       ],
     });
@@ -747,7 +747,7 @@ describeUnix("inspectPortUsage", () => {
           pid: 222,
           command: "deno",
           address: "TCP 127.0.0.1:19001 (LISTEN)",
-          commandLine: "deno run /tmp/openclaw/cli.ts",
+          commandLine: "deno run /tmp/carapace/cli.ts",
         }),
       ],
     });
@@ -760,7 +760,7 @@ describeUnix("inspectPortUsage", () => {
       lsof: commandOutput(
         "p\ncnode\nnTCP *:18789 (LISTEN)\np111\ncbun\nnTCP 127.0.0.1:18789 (LISTEN)\n",
       ),
-      commandLine: "bun /tmp/openclaw/dist/index.js gateway run",
+      commandLine: "bun /tmp/carapace/dist/index.js gateway run",
       user: "tester",
       parentPid: "1",
     });
@@ -807,7 +807,7 @@ describeUnix("inspectPortUsage", () => {
           "nTCP 127.0.0.1:50123->127.0.0.1:18789 (ESTABLISHED)\n" +
           "nTCP 127.0.0.1:50124->127.0.0.1:18789 (ESTABLISHED)\n",
       ),
-      commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+      commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
       user: "tester",
       parentPid: "1",
     });
@@ -819,7 +819,7 @@ describeUnix("inspectPortUsage", () => {
         pid: 111,
         direction: "client",
         address: "TCP 127.0.0.1:50123->127.0.0.1:18789 (ESTABLISHED)",
-        commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+        commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
         user: "tester",
         ppid: 1,
       }),
@@ -827,7 +827,7 @@ describeUnix("inspectPortUsage", () => {
         pid: 111,
         direction: "client",
         address: "TCP 127.0.0.1:50124->127.0.0.1:18789 (ESTABLISHED)",
-        commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+        commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
         user: "tester",
         ppid: 1,
       }),
@@ -862,7 +862,7 @@ describeUnix("inspectPortUsage", () => {
       ),
       commandLine: (pid) =>
         pid === "111"
-          ? "node /tmp/newer-openclaw/dist/index.js logs --follow"
+          ? "node /tmp/newer-carapace/dist/index.js logs --follow"
           : "browser https://example.invalid/",
       user: "tester",
       parentPid: "1",
@@ -874,7 +874,7 @@ describeUnix("inspectPortUsage", () => {
     expect(result.connections[0]).toMatchObject({
       pid: 111,
       direction: "client",
-      commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+      commandLine: "node /tmp/newer-carapace/dist/index.js logs --follow",
     });
   });
 });
@@ -984,7 +984,7 @@ describe("inspectPortUsage on Windows", () => {
       ),
       tasklist: commandOutput('"node.exe","4242","Console","1","10,000 K"\r\n'),
       powershell: commandOutput(
-        '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js logs --follow\r\n',
+        '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js logs --follow\r\n',
       ),
     });
 
@@ -996,15 +996,15 @@ describe("inspectPortUsage on Windows", () => {
       command: "node.exe",
       direction: "client",
     });
-    expect(result.connections[0]?.commandLine).toContain("openclaw");
+    expect(result.connections[0]?.commandLine).toContain("carapace");
   });
 
-  it("uses PowerShell process command lines to classify OpenClaw listeners", async () => {
+  it("uses PowerShell process command lines to classify Carapace listeners", async () => {
     mockWindowsCommands({
       netstat: commandOutput("  TCP    127.0.0.1:18789    0.0.0.0:0    LISTENING    4242\r\n"),
       tasklist: commandOutput('"node.exe","4242","Console","1","10,000 K"\r\n'),
       powershell: commandOutput(
-        '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js gateway run\r\n',
+        '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\carapace\\dist\\index.js gateway run\r\n',
       ),
     });
 
@@ -1013,7 +1013,7 @@ describe("inspectPortUsage on Windows", () => {
     expect(result.status).toBe("busy");
     expect(result.listeners).toHaveLength(1);
     expect(result.listeners[0]?.command).toBe("node.exe");
-    expect(result.listeners[0]?.commandLine).toContain("openclaw");
+    expect(result.listeners[0]?.commandLine).toContain("carapace");
     expect(result.hints.some((hint) => hint.includes("Gateway already running locally"))).toBe(
       false,
     );
@@ -1031,7 +1031,7 @@ describe("inspectPortUsage on Windows", () => {
         '"node.exe","4242","Console","1","10,000 K"\r\n' +
           '"node.exe","4243","Console","1","10,000 K"\r\n',
       ),
-      powershell: commandOutput("node.exe C:\\openclaw\\dist\\index.js gateway run\r\n"),
+      powershell: commandOutput("node.exe C:\\carapace\\dist\\index.js gateway run\r\n"),
     });
 
     const result = await inspectPortUsage(18789);
@@ -1062,12 +1062,12 @@ describe("inspectPortUsage on Windows", () => {
       netstat: commandOutput("  TCP    127.0.0.1:18789    0.0.0.0:0    LISTENING    4242\r\n"),
       tasklist: commandOutput('"node.exe","4242","Console","1","10,000 K"\r\n'),
       powershell: commandOutput("", 1, "access denied"),
-      wmic: commandOutput("CommandLine=node.exe C:\\openclaw\\dist\\index.js gateway run\r\n"),
+      wmic: commandOutput("CommandLine=node.exe C:\\carapace\\dist\\index.js gateway run\r\n"),
     });
 
     const result = await inspectPortUsage(18789);
 
-    expect(result.listeners[0]?.commandLine).toContain("openclaw");
+    expect(result.listeners[0]?.commandLine).toContain("carapace");
     const commandNames = runCommandWithTimeoutMock.mock.calls.map(([argv]) => argv[0]);
     expect(commandNames).toContain(getWindowsWmicExePath());
   });

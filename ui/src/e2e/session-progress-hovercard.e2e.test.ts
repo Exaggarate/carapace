@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import type { SessionParticipant } from "../../../packages/gateway-protocol/src/schema/session-participant.js";
@@ -47,11 +47,11 @@ async function emitPullRequestSnapshot(
             checks: { state: "passing", passed: 24, failed: 0, skipped: 2, running: 0 },
             deletions: 34,
             number: 417,
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             state: "open",
             title: "Restore the session hovercard with compact interactive attribution details",
-            url: "https://github.com/openclaw/openclaw/pull/417",
+            url: "https://github.com/Exaggarate/carapace/pull/417",
             author: { login: "steipete" },
           },
           {
@@ -61,11 +61,11 @@ async function emitPullRequestSnapshot(
             checks: { state: "pending", passed: 8, failed: 0, skipped: 0, running: 5 },
             deletions: 12,
             number: 418,
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             state: "draft",
             title: "Follow-up polish",
-            url: "https://github.com/openclaw/openclaw/pull/418",
+            url: "https://github.com/Exaggarate/carapace/pull/418",
           },
           {
             additions: 14,
@@ -74,11 +74,11 @@ async function emitPullRequestSnapshot(
             checks: { state: "failing", passed: 10, failed: 2, skipped: 0, running: 0 },
             deletions: 21,
             number: 419,
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             state: "closed",
             title: "Accessibility follow-up",
-            url: "https://github.com/openclaw/openclaw/pull/419",
+            url: "https://github.com/Exaggarate/carapace/pull/419",
           },
         ],
         rateLimited: false,
@@ -199,7 +199,7 @@ suite.define(() => {
       },
       async ({ page }) => {
         await page.addInitScript(() => {
-          localStorage.setItem("openclaw:sidebar:sessions:collapsed-sections", "[]");
+          localStorage.setItem("carapace:sidebar:sessions:collapsed-sections", "[]");
         });
         const gateway = await installMockGateway(page, {
           featureMethods: [
@@ -274,7 +274,7 @@ suite.define(() => {
                 worktree: {
                   id: "wt-hovercard-proof",
                   branch: "feature/session-hovercards",
-                  repoRoot: "/work/openclaw",
+                  repoRoot: "/work/carapace",
                 },
               },
             ]),
@@ -369,7 +369,7 @@ suite.define(() => {
           "You",
         );
         expect(await card.locator(".session-hovercard__context-text").allTextContents()).toEqual([
-          "openclaw",
+          "carapace",
         ]);
         expect(await card.textContent()).not.toContain("feature/session-hovercards");
         await expect
@@ -378,12 +378,12 @@ suite.define(() => {
         expect(await card.locator(".session-hovercard__meta").count()).toBe(0);
         expect(await card.locator("time").count()).toBe(0);
         expect(await card.locator(".session-progress-card__heading-actions").count()).toBe(0);
-        const avatar = card.locator("openclaw-viewer-avatar.session-hovercard__creator-avatar");
+        const avatar = card.locator("carapace-viewer-avatar.session-hovercard__creator-avatar");
         await avatar.waitFor({ state: "visible" });
         await expect
           .poll(async () => (await avatar.locator(".viewer-avatar").textContent())?.trim())
           .toBe("AK");
-        expect(await card.locator("openclaw-channel-avatar").count()).toBe(0);
+        expect(await card.locator("carapace-channel-avatar").count()).toBe(0);
         const pullRequest = card.locator(".session-hovercard__pr-row").first();
         expect(
           await pullRequest.locator(".session-hovercard__pr-state-icon").getAttribute("title"),
@@ -572,7 +572,7 @@ suite.define(() => {
         await first.waitFor({ state: "visible" });
         expect(
           await page.evaluate(
-            () => customElements.get("openclaw-session-progress-hovercard-provider") === undefined,
+            () => customElements.get("carapace-session-progress-hovercard-provider") === undefined,
           ),
         ).toBe(true);
         await pauseVirtualClock(page);
@@ -672,7 +672,7 @@ suite.define(() => {
           .dispatchEvent("click");
         await expect.poll(() => card.count()).toBe(0);
         await expect
-          .poll(() => page.locator("openclaw-session-menu").getByRole("menuitem").count())
+          .poll(() => page.locator("carapace-session-menu").getByRole("menuitem").count())
           .toBeGreaterThan(0);
         await second.dispatchEvent("pointerover", { pointerType: "mouse" });
         await page.clock.runFor(500);
@@ -722,7 +722,7 @@ suite.define(() => {
                         {
                           threadId: "thread-1",
                           name: "Catalog release review",
-                          cwd: "/work/openclaw",
+                          cwd: "/work/carapace",
                           gitBranch: "catalog-hovercard",
                           createdAt: nowSeconds - 2 * 60 * 60,
                           updatedAt: nowSeconds - 5 * 60,
@@ -752,14 +752,14 @@ suite.define(() => {
         );
         expect(await card.locator(".session-hovercard__created-age").textContent()).toBe("2h");
         expect(await card.locator(".session-hovercard__context-text").allTextContents()).toEqual([
-          "openclaw",
+          "carapace",
         ]);
         expect(await card.textContent()).not.toContain("catalog-hovercard");
 
         await row.getByRole("button", { name: "Open session menu" }).dispatchEvent("click");
         await expect.poll(() => card.count()).toBe(0);
         await expect
-          .poll(() => page.locator("openclaw-catalog-session-menu").getByRole("menuitem").count())
+          .poll(() => page.locator("carapace-catalog-session-menu").getByRole("menuitem").count())
           .toBeGreaterThan(0);
         await page
           .locator(`[data-session-key="${selectedSessionKey}"]`)
@@ -917,8 +917,8 @@ suite.define(() => {
     const now = Date.now();
     const sessionKey = "agent:main:no-progress-card";
     const avatarSessionKey = "agent:main:channel-avatar";
-    const channelAvatarUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(sessionKey)}`;
-    const successfulChannelAvatarUrl = `/__openclaw__/channel-avatar/${encodeURIComponent(avatarSessionKey)}`;
+    const channelAvatarUrl = `/__carapace__/channel-avatar/${encodeURIComponent(sessionKey)}`;
+    const successfulChannelAvatarUrl = `/__carapace__/channel-avatar/${encodeURIComponent(avatarSessionKey)}`;
     const lastMessagePreview =
       "The final release notes are ready for review, including <strong>plain text</strong>, rollout details, verification notes, compatibility guidance, and a concise operator checklist.";
 
@@ -1001,12 +1001,12 @@ suite.define(() => {
         const card = page.locator(".session-progress-hovercard");
         await card.waitFor({ state: "visible" });
         expect(["left", "right"]).toContain(await card.getAttribute("data-side"));
-        const avatar = card.locator("openclaw-channel-avatar.session-hovercard__creator-avatar");
+        const avatar = card.locator("carapace-channel-avatar.session-hovercard__creator-avatar");
         await expect
           .poll(() => avatar.locator(".session-hovercard__creator-avatar-fallback").textContent())
           .toBe("AK");
         expect(await avatar.locator("img.channel-avatar").count()).toBe(0);
-        expect(await card.locator("openclaw-viewer-avatar").count()).toBe(0);
+        expect(await card.locator("carapace-viewer-avatar").count()).toBe(0);
         await expect
           .poll(() => card.locator(".session-hovercard__excerpt").textContent())
           .toBe(lastMessagePreview);
@@ -1026,7 +1026,7 @@ suite.define(() => {
           .poll(() => card.locator(".session-hovercard__title").textContent())
           .toBe("Channel avatar");
         const successfulAvatar = card.locator(
-          "openclaw-channel-avatar.session-hovercard__creator-avatar",
+          "carapace-channel-avatar.session-hovercard__creator-avatar",
         );
         await expect.poll(() => successfulAvatar.locator("img.channel-avatar").count()).toBe(1);
         expect(

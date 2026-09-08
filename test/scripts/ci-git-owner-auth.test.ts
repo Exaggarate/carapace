@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, it } from "vitest";
 import { parse } from "yaml";
 import { runManagedCommand } from "../../scripts/lib/managed-child-process.mts";
@@ -97,7 +97,7 @@ it.skipIf(process.platform === "win32").each([
   async ({ mode, failures, succeeds, backoffs }) => {
     const report = await runAuthFixture(
       mode,
-      workflowScript("openclaw-performance.yml", "kova", "Install OCM and Kova"),
+      workflowScript("carapace-performance.yml", "kova", "Install OCM and Kova"),
     );
     expect(report.exitCode === 0, report.stderr).toBe(succeeds);
     expect(report).toMatchObject({

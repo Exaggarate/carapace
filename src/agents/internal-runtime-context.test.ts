@@ -3,28 +3,28 @@
  * Verifies protected delimiters, legacy blocks, and custom-message filtering.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   escapeInternalRuntimeContextDelimiters,
   hasInternalRuntimeContext,
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
-  OPENCLAW_RUNTIME_CONTEXT_NOTICE,
-  OPENCLAW_RUNTIME_EVENT_HEADER,
+  CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
+  CARAPACE_RUNTIME_CONTEXT_NOTICE,
+  CARAPACE_RUNTIME_EVENT_HEADER,
   relocateCurrentRuntimeContextCarrierToTail,
   stripInternalRuntimeContext,
 } from "./internal-runtime-context.js";
 
 // Preface of carriers persisted before the stable system prompt explained the markers.
 const LEGACY_NEXT_TURN_RUNTIME_CONTEXT_HEADER =
-  "OpenClaw runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.";
+  "Carapace runtime context for the active user request in this turn. Do not reply to or describe this context. Use it to continue answering the active user request now. Do not wait for another message.";
 
 type TestMessage = { role: string; content: string; customType?: string };
 
 function carrier(content = "runtime ctx"): TestMessage {
-  return { role: "custom", customType: OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE, content };
+  return { role: "custom", customType: CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE, content };
 }
 function user(content: string): TestMessage {
   return { role: "user", content };
@@ -50,7 +50,7 @@ describe("internal runtime context codec", () => {
       "Visible intro",
       "",
       INTERNAL_RUNTIME_CONTEXT_BEGIN,
-      "OpenClaw runtime context (internal):",
+      "Carapace runtime context (internal):",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
       "[Internal task completion event]",
@@ -124,11 +124,11 @@ describe("internal runtime context codec", () => {
     ["current turn", LEGACY_NEXT_TURN_RUNTIME_CONTEXT_HEADER],
     [
       "previous current turn",
-      "OpenClaw runtime context for the immediately preceding user message.",
+      "Carapace runtime context for the immediately preceding user message.",
     ],
-    ["runtime event", OPENCLAW_RUNTIME_EVENT_HEADER],
+    ["runtime event", CARAPACE_RUNTIME_EVENT_HEADER],
   ])("detects and strips the %s prompt preface", (_name, header) => {
-    const preface = [header, OPENCLAW_RUNTIME_CONTEXT_NOTICE].join("\n");
+    const preface = [header, CARAPACE_RUNTIME_CONTEXT_NOTICE].join("\n");
     const input = [
       preface,
       "",
@@ -144,7 +144,7 @@ describe("internal runtime context codec", () => {
     expect(stripInternalRuntimeContext(input)).toBe("Visible reply");
     expect(
       stripInternalRuntimeContext(
-        ` \t${header}\r\n ${OPENCLAW_RUNTIME_CONTEXT_NOTICE} \r\n\r\nVisible reply`,
+        ` \t${header}\r\n ${CARAPACE_RUNTIME_CONTEXT_NOTICE} \r\n\r\nVisible reply`,
       ),
     ).toBe("Visible reply");
   });
@@ -165,7 +165,7 @@ describe("internal runtime context codec", () => {
   });
 
   it("preserves a long nonmatching paragraph containing a runtime notice", () => {
-    const input = "Ordinary visible text.\n".repeat(2_000) + OPENCLAW_RUNTIME_CONTEXT_NOTICE;
+    const input = "Ordinary visible text.\n".repeat(2_000) + CARAPACE_RUNTIME_CONTEXT_NOTICE;
     expect(stripInternalRuntimeContext(input)).toBe(input);
   });
 
@@ -180,8 +180,8 @@ describe("internal runtime context codec", () => {
   it("preserves text when the runtime-context header or notice does not match", () => {
     for (const input of [
       [LEGACY_NEXT_TURN_RUNTIME_CONTEXT_HEADER, "Ordinary user text"].join("\n"),
-      ["OpenClaw runtime context for another message.", OPENCLAW_RUNTIME_CONTEXT_NOTICE].join("\n"),
-      OPENCLAW_RUNTIME_CONTEXT_NOTICE,
+      ["Carapace runtime context for another message.", CARAPACE_RUNTIME_CONTEXT_NOTICE].join("\n"),
+      CARAPACE_RUNTIME_CONTEXT_NOTICE,
     ]) {
       expect(hasInternalRuntimeContext(input)).toBe(false);
       expect(stripInternalRuntimeContext(input)).toBe(input);

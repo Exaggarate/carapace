@@ -13,7 +13,7 @@ const QQBOT_EXPECTED_INTEGRITY =
   "sha512-yngu/2cPeZjJfIfHWCXWB2/6KlDHrb9vpOUjKLdQxePLSp6wCn3CFOALcBIVq/9o6jlYz9WTU9idW6nfX1xpFA==";
 
 describe("official plugin install trust", () => {
-  const packageName = "@openclaw/fish-audio-speech";
+  const packageName = "@carapace/fish-audio-speech";
   const npmRecord: PluginInstallRecord = {
     source: "npm",
     spec: `${packageName}@2026.7.2`,
@@ -34,7 +34,7 @@ describe("official plugin install trust", () => {
     { pluginId: "fish-audio-speech", packageName: undefined },
     { pluginId: "unrelated-plugin", packageName },
     { pluginId: "fish-audio-speech", packageName: "@vendor/fish-audio-speech" },
-    { pluginId: "unlisted", packageName: "@openclaw/unlisted" },
+    { pluginId: "unlisted", packageName: "@carapace/unlisted" },
   ])("rejects an unbound catalog identity $pluginId / $packageName", (identity) => {
     expect(isTrustedOfficialPluginInstallRecord({ ...identity, record: npmRecord })).toBe(false);
   });
@@ -95,14 +95,14 @@ describe("official plugin install trust", () => {
     expect(
       isTrustedOfficialPluginInstallRecord({
         pluginId: "acpx",
-        packageName: "@openclaw/acpx",
+        packageName: "@carapace/acpx",
         record: {
           source: "clawhub",
-          spec: "clawhub:@openclaw/acpx",
-          clawhubPackage: "@openclaw/acpx",
+          spec: "clawhub:@carapace/acpx",
+          clawhubPackage: "@carapace/acpx",
           clawhubUrl: "https://clawhub.ai",
           clawhubChannel: "official",
-          resolvedName: "@openclaw/acpx",
+          resolvedName: "@carapace/acpx",
           ...overrides,
         },
       }),
@@ -114,16 +114,16 @@ describe("trusted official npm install records", () => {
   it("resolves an exact canonical catalog package", () => {
     const record = {
       source: "npm" as const,
-      spec: "@openclaw/acpx@2026.7.2",
-      resolvedName: "@openclaw/acpx",
-      resolvedSpec: "@openclaw/acpx@2026.7.2",
+      spec: "@carapace/acpx@2026.7.2",
+      resolvedName: "@carapace/acpx",
+      resolvedSpec: "@carapace/acpx@2026.7.2",
     };
 
     expect(resolveTrustedSourceLinkedOfficialNpmSpec({ pluginId: "acpx", record })).toBe(
-      "@openclaw/acpx",
+      "@carapace/acpx",
     );
     expect(resolveTrustedSourceLinkedOfficialNpmInstall({ pluginId: "acpx", record })).toEqual({
-      npmSpec: "@openclaw/acpx",
+      npmSpec: "@carapace/acpx",
       pluginId: "acpx",
     });
   });
@@ -133,14 +133,14 @@ describe("trusted official npm install records", () => {
       name: "missing requested spec",
       record: {
         source: "npm" as const,
-        resolvedName: "@openclaw/acpx",
+        resolvedName: "@carapace/acpx",
       },
     },
     {
       name: "resolved-spec-only evidence",
       record: {
         source: "npm" as const,
-        resolvedSpec: "@openclaw/acpx@2026.7.2",
+        resolvedSpec: "@carapace/acpx@2026.7.2",
       },
     },
     {
@@ -148,22 +148,22 @@ describe("trusted official npm install records", () => {
       record: {
         source: "npm" as const,
         spec: "@vendor/acpx@1.0.0",
-        resolvedName: "@openclaw/acpx",
+        resolvedName: "@carapace/acpx",
         resolvedSpec: "@vendor/acpx@1.0.0",
       },
     },
   ])("preserves canonical official updates for $name", ({ record }) => {
     expect(resolveTrustedSourceLinkedOfficialNpmSpec({ pluginId: "acpx", record })).toBe(
-      "@openclaw/acpx",
+      "@carapace/acpx",
     );
   });
 
   it("returns a replacement only for a catalog-declared legacy id", () => {
     const record = {
       source: "npm" as const,
-      spec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
-      resolvedName: "@openclaw/fish-audio-speech",
-      resolvedSpec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+      spec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
+      resolvedName: "@carapace/fish-audio-speech",
+      resolvedSpec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
     };
 
     expect(
@@ -172,7 +172,7 @@ describe("trusted official npm install records", () => {
         record,
       }),
     ).toEqual({
-      npmSpec: "@openclaw/fish-audio-speech",
+      npmSpec: "@carapace/fish-audio-speech",
       pluginId: "fish-audio-speech",
       replacementPluginId: "fish-audio-speech",
     });
@@ -187,20 +187,20 @@ describe("trusted official npm install records", () => {
   it("rewrites a catalog-declared legacy npm package to the current official spec", () => {
     const record = {
       source: "npm" as const,
-      spec: "@openclaw/qqbot@1.9.0",
-      resolvedName: "@openclaw/qqbot",
-      resolvedSpec: "@openclaw/qqbot@1.9.0",
+      spec: "@carapace/qqbot@1.9.0",
+      resolvedName: "@carapace/qqbot",
+      resolvedSpec: "@carapace/qqbot@1.9.0",
     };
 
     expect(
       resolveTrustedSourceLinkedOfficialNpmInstall({
-        pluginId: "openclaw-qqbot",
+        pluginId: "carapace-qqbot",
         record,
       }),
     ).toEqual({
       expectedIntegrity: QQBOT_EXPECTED_INTEGRITY,
-      npmSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
-      pluginId: "openclaw-qqbot",
+      npmSpec: "@tencent-connect/carapace-qqbot@2.0.3",
+      pluginId: "carapace-qqbot",
       replaceNpmPackage: true,
     });
     expect(
@@ -210,15 +210,15 @@ describe("trusted official npm install records", () => {
       }),
     ).toEqual({
       expectedIntegrity: QQBOT_EXPECTED_INTEGRITY,
-      npmSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
-      pluginId: "openclaw-qqbot",
-      replacementPluginId: "openclaw-qqbot",
+      npmSpec: "@tencent-connect/carapace-qqbot@2.0.3",
+      pluginId: "carapace-qqbot",
+      replacementPluginId: "carapace-qqbot",
       replaceNpmPackage: true,
     });
     expect(
       isOfficialCatalogLookupPluginIdReplacement({
         expectedPluginId: "qqbot",
-        expectedReplacementPluginId: "openclaw-qqbot",
+        expectedReplacementPluginId: "carapace-qqbot",
       }),
     ).toBe(true);
     expect(
@@ -232,12 +232,12 @@ describe("trusted official npm install records", () => {
   it("fails closed when a legacy npm package identity is mixed with another package", () => {
     expect(
       resolveTrustedSourceLinkedOfficialNpmInstall({
-        pluginId: "openclaw-qqbot",
+        pluginId: "carapace-qqbot",
         record: {
           source: "npm",
-          spec: "@openclaw/qqbot@1.9.0",
+          spec: "@carapace/qqbot@1.9.0",
           resolvedName: "@vendor/qqbot",
-          resolvedSpec: "@openclaw/qqbot@1.9.0",
+          resolvedSpec: "@carapace/qqbot@1.9.0",
         },
       }),
     ).toBeUndefined();
@@ -245,16 +245,16 @@ describe("trusted official npm install records", () => {
 
   it.each([
     { name: "npm-pack archive", provenance: { artifactKind: "npm-pack" as const } },
-    { name: "local source path", provenance: { sourcePath: "/tmp/openclaw-qqbot" } },
+    { name: "local source path", provenance: { sourcePath: "/tmp/carapace-qqbot" } },
   ])("rejects $name provenance before migrating a legacy npm package", ({ provenance }) => {
     expect(
       resolveTrustedSourceLinkedOfficialNpmInstall({
         pluginId: "qqbot",
         record: {
           source: "npm",
-          spec: "@openclaw/qqbot@1.9.0",
-          resolvedName: "@openclaw/qqbot",
-          resolvedSpec: "@openclaw/qqbot@1.9.0",
+          spec: "@carapace/qqbot@1.9.0",
+          resolvedName: "@carapace/qqbot",
+          resolvedSpec: "@carapace/qqbot@1.9.0",
           ...provenance,
         },
       }),
@@ -265,36 +265,36 @@ describe("trusted official npm install records", () => {
     expect(
       isTrustedOfficialCatalogLookupDuplicate({
         pluginId: "qqbot",
-        replacementPluginId: "openclaw-qqbot",
+        replacementPluginId: "carapace-qqbot",
         replacementRecord: {
           source: "npm",
-          spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-          resolvedName: "@tencent-connect/openclaw-qqbot",
-          resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+          spec: "@tencent-connect/carapace-qqbot@2.0.1",
+          resolvedName: "@tencent-connect/carapace-qqbot",
+          resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.1",
         },
       }),
     ).toBe(true);
     expect(
       isTrustedOfficialCatalogLookupDuplicate({
         pluginId: "qqbot",
-        replacementPluginId: "openclaw-qqbot",
+        replacementPluginId: "carapace-qqbot",
         replacementRecord: {
           source: "npm",
-          spec: "@vendor/openclaw-qqbot@1.0.0",
-          resolvedName: "@tencent-connect/openclaw-qqbot",
-          resolvedSpec: "@vendor/openclaw-qqbot@1.0.0",
+          spec: "@vendor/carapace-qqbot@1.0.0",
+          resolvedName: "@tencent-connect/carapace-qqbot",
+          resolvedSpec: "@vendor/carapace-qqbot@1.0.0",
         },
       }),
     ).toBe(false);
     expect(
       isTrustedOfficialCatalogLookupDuplicate({
         pluginId: "qqbot",
-        replacementPluginId: "openclaw-qqbot",
+        replacementPluginId: "carapace-qqbot",
         replacementRecord: {
           source: "npm",
-          spec: "@tencent-connect/openclaw-qqbot@2.0.1",
-          resolvedName: "@tencent-connect/openclaw-qqbot",
-          resolvedSpec: "@tencent-connect/openclaw-qqbot@2.0.1",
+          spec: "@tencent-connect/carapace-qqbot@2.0.1",
+          resolvedName: "@tencent-connect/carapace-qqbot",
+          resolvedSpec: "@tencent-connect/carapace-qqbot@2.0.1",
           artifactKind: "npm-pack",
         },
       }),
@@ -307,9 +307,9 @@ describe("trusted official npm install records", () => {
         pluginId: "fish-audio",
         record: {
           source: "npm",
-          spec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+          spec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
           resolvedName: "@vendor/fish-audio-speech",
-          resolvedSpec: "@openclaw/fish-audio-speech@2026.7.2-beta.7",
+          resolvedSpec: "@carapace/fish-audio-speech@2026.7.2-beta.7",
         },
       }),
     ).toBeUndefined();
@@ -321,8 +321,8 @@ describe("trusted official npm install records", () => {
         pluginId: "fish-audio",
         record: {
           source: "clawhub",
-          spec: "clawhub:@openclaw/fish-audio-speech",
-          clawhubPackage: "@openclaw/fish-audio-speech",
+          spec: "clawhub:@carapace/fish-audio-speech",
+          clawhubPackage: "@carapace/fish-audio-speech",
           clawhubChannel: "official",
           clawhubUrl: "https://clawhub.ai",
         },

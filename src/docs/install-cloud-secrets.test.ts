@@ -28,10 +28,10 @@ describe("cloud install docs", () => {
   it("keeps cloud install secret guidance safe and centralized", async () => {
     for (const { docName, markdown } of await readInstallDocs()) {
       for (const token of KNOWN_WEAK_GATEWAY_TOKEN_PLACEHOLDERS) {
-        expect(markdown, docName).not.toContain(`OPENCLAW_GATEWAY_TOKEN=${token}`);
+        expect(markdown, docName).not.toContain(`CARAPACE_GATEWAY_TOKEN=${token}`);
       }
       for (const password of KNOWN_WEAK_GATEWAY_PASSWORD_PLACEHOLDERS) {
-        expect(markdown, docName).not.toContain(`OPENCLAW_GATEWAY_PASSWORD=${password}`);
+        expect(markdown, docName).not.toContain(`CARAPACE_GATEWAY_PASSWORD=${password}`);
       }
       expect(markdown, docName).not.toMatch(/^ {4}GOG_KEYRING_PASSWORD=change-me-now$/m);
       if (SHARED_DOCKER_RUNTIME_DELEGATES.has(docName)) {

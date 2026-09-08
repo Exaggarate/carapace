@@ -1,4 +1,4 @@
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { expect, it } from "vitest";
 import { startQaMockOpenAiServer } from "./server.js";
 

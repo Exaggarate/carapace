@@ -1,5 +1,5 @@
 // SearXNG contracts are exercised through the public search boundary.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const endpointMockState = vi.hoisted(() => ({
@@ -14,8 +14,8 @@ const endpointMockState = vi.hoisted(() => ({
 }));
 const ssrfMockState = vi.hoisted(() => ({ addresses: [] as string[] }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     assertHttpUrlTargetsPrivateNetwork: vi.fn(async () => {
@@ -29,8 +29,8 @@ vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/provider-web-search", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/provider-web-search")>();
+vi.mock("carapace/plugin-sdk/provider-web-search", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/provider-web-search")>();
   const runEndpoint = async (
     mode: "selfHosted" | "strict",
     params: { url: string; timeoutSeconds: number; init: RequestInit; signal?: AbortSignal },
@@ -63,22 +63,22 @@ describe("searxng client", () => {
   it.each([
     [
       "http://127.0.0.1:8888/searxng",
-      "http://127.0.0.1:8888/searxng/search?q=openclaw&format=json&categories=general%2Cnews&language=en",
+      "http://127.0.0.1:8888/searxng/search?q=carapace&format=json&categories=general%2Cnews&language=en",
     ],
     [
       "http://127.0.0.1:8888/search/",
-      "http://127.0.0.1:8888/search?q=openclaw&format=json&categories=general%2Cnews&language=en",
+      "http://127.0.0.1:8888/search?q=carapace&format=json&categories=general%2Cnews&language=en",
     ],
     [
       "http://127.0.0.1:8888/search",
-      "http://127.0.0.1:8888/search?q=openclaw&format=json&categories=general%2Cnews&language=en",
+      "http://127.0.0.1:8888/search?q=carapace&format=json&categories=general%2Cnews&language=en",
     ],
   ])("builds the public request URL from %s", async (baseUrl, expectedUrl) => {
     endpointMockState.responses.push(Response.json({ results: [] }));
 
     await runSearxngSearch({
       baseUrl,
-      query: "openclaw",
+      query: "carapace",
       categories: "general,news",
       language: "en",
     });
@@ -183,7 +183,7 @@ describe("searxng client", () => {
 
       const result = await runSearxngSearch({
         baseUrl: "http://127.0.0.1:8888",
-        query: "openclaw",
+        query: "carapace",
         categories,
         count: 5,
       });
@@ -194,7 +194,7 @@ describe("searxng client", () => {
       const { tookMs, ...stableResult } = result;
       expect(typeof tookMs).toBe("number");
       expect(stableResult).toEqual({
-        query: "openclaw",
+        query: "carapace",
         provider: "searxng",
         count: 0,
         externalContent: {
@@ -216,7 +216,7 @@ describe("searxng client", () => {
 
     const result = await runSearxngSearch({
       baseUrl: "http://127.0.0.1:8888",
-      query: "openclaw",
+      query: "carapace",
       categories: "general",
       signal: controller.signal,
     });

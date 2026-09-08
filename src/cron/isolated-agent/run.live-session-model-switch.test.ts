@@ -97,7 +97,7 @@ function requireEmbeddedAgentCall(index: number): {
       }
     | undefined;
   if (!call) {
-    throw new Error(`Expected embedded OpenClaw agent call ${index}`);
+    throw new Error(`Expected embedded Carapace agent call ${index}`);
   }
   return call;
 }
@@ -131,9 +131,9 @@ describe("runCronIsolatedAgentTurn — LiveSessionModelSwitchError retry (#57206
 
   afterEach(() => {
     if (previousFastTestEnv !== undefined) {
-      process.env.OPENCLAW_TEST_FAST = previousFastTestEnv;
+      process.env.CARAPACE_TEST_FAST = previousFastTestEnv;
     } else {
-      delete process.env.OPENCLAW_TEST_FAST;
+      delete process.env.CARAPACE_TEST_FAST;
     }
   });
 
@@ -340,7 +340,7 @@ describe("runCronIsolatedAgentTurn — LiveSessionModelSwitchError retry (#57206
       sessionEntry: makeCronSessionEntry({
         model: "gpt-5.6-luna",
         modelProvider: "openai",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         contextTokens: 272_000,
         contextTokensSource: "runtime",
         contextBudgetStatus: {} as NonNullable<
@@ -388,7 +388,7 @@ describe("runCronIsolatedAgentTurn — LiveSessionModelSwitchError retry (#57206
     );
 
     expect(result.status).toBe("ok");
-    expect(requireEmbeddedAgentCall(0).agentHarnessRuntimeOverride).toBe("openclaw");
+    expect(requireEmbeddedAgentCall(0).agentHarnessRuntimeOverride).toBe("carapace");
     expect(requireEmbeddedAgentCall(1).agentHarnessRuntimeOverride).toBe("codex");
     expect(cronSession.sessionEntry.agentRuntimeOverride).toBe("codex");
     expect(cronSession.sessionEntry.contextTokens).toBe(128_000);

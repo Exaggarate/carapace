@@ -1,6 +1,6 @@
 // Memory Core tests cover dreaming plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { expectDefined } from "@carapace/normalization-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   DEFAULT_MEMORY_DEEP_DREAMING_MAX_PROMOTED_SNIPPET_TOKENS,
   DEFAULT_MEMORY_DEEP_DREAMING_MIN_RECALL_COUNT,
@@ -12,13 +12,13 @@ import {
   MANAGED_MEMORY_DREAMING_CRON_TAG,
   MEMORY_DREAMING_SYSTEM_EVENT_TEXT,
   resolveMemoryDeepDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginServiceContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "carapace/plugin-sdk/memory-core-host-status";
+import type { CarapacePluginServiceContext } from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import {
   enqueueSystemEvent,
   resetSystemEventsForTest,
-} from "openclaw/plugin-sdk/system-event-runtime";
+} from "carapace/plugin-sdk/system-event-runtime";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { registerShortTermPromotionDreaming } from "./dreaming.js";
 import { createMemoryCoreTestHarness } from "./test-helpers.js";
@@ -236,8 +236,8 @@ function createDreamingConfig(
     frequency: "15 4 * * *",
     timezone: "UTC",
   },
-  config: Partial<OpenClawConfig> = {},
-): OpenClawConfig {
+  config: Partial<CarapaceConfig> = {},
+): CarapaceConfig {
   return {
     ...config,
     plugins: {
@@ -245,12 +245,12 @@ function createDreamingConfig(
         "memory-core": { config: { dreaming } },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function createDreamingTestContext(
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     runtime?: { config?: Pick<DreamingPluginApi["runtime"]["config"], "current"> };
     initialJobs?: CronJobLike[];
     cronOptions?: CronHarnessOptions;
@@ -340,13 +340,13 @@ function getDreamingService(api: DreamingPluginApiTestDouble) {
 
 async function triggerDreamingServiceStart(
   api: DreamingPluginApiTestDouble,
-  ctx: { config: OpenClawConfig; workspaceDir?: string; getCron?: () => unknown },
+  ctx: { config: CarapaceConfig; workspaceDir?: string; getCron?: () => unknown },
 ): Promise<void> {
   await getDreamingService(api).start({
     ...ctx,
     stateDir: ".",
     logger: api.logger,
-  } as OpenClawPluginServiceContext);
+  } as CarapacePluginServiceContext);
 }
 
 async function triggerDreamingServiceStop(api: DreamingPluginApiTestDouble): Promise<void> {
@@ -477,7 +477,7 @@ describe("dreaming service reconciliation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       getCron: () => harness.cron,
     });
 
@@ -1088,7 +1088,7 @@ describe("dreaming service reconciliation", () => {
           plugins: {
             entries: {},
           },
-        }) as OpenClawConfig,
+        }) as CarapaceConfig,
     );
     const { api, harness, logger } = createDreamingTestContext({
       runtime: { config: { current: runtimeCurrentConfig } },
@@ -1188,7 +1188,7 @@ describe("dreaming service reconciliation", () => {
             defaults: { workspace: workspaceDir },
             list: [{ id: "main", default: true, workspace: workspaceDir }],
           },
-        }) as OpenClawConfig,
+        }) as CarapaceConfig,
     );
     const { api, harness } = createDreamingTestContext({
       runtime: { config: { current: runtimeCurrentConfig } },
@@ -1245,7 +1245,7 @@ describe("dreaming service reconciliation", () => {
   // Regression: the sweep dropped the agent id entirely, so narrative subagent sessions used
   // unscoped keys that no per-agent SQLite store could resolve and every phase failed.
   it("sweeps each workspace as its owning agent rather than the roster default", async () => {
-    const workspaceDir = await createTempWorkspace("openclaw-dreaming-owner-");
+    const workspaceDir = await createTempWorkspace("carapace-dreaming-owner-");
     runDreamingSweepPhasesMock.mockClear();
     const { api, harness } = createDreamingTestContext({
       config: createDreamingConfig(
@@ -1285,7 +1285,7 @@ describe("dreaming service reconciliation", () => {
   });
 
   it("reports a degraded sweep when narrative cleanup fails", async () => {
-    const workspaceDir = await createTempWorkspace("openclaw-dreaming-cleanup-degraded-");
+    const workspaceDir = await createTempWorkspace("carapace-dreaming-cleanup-degraded-");
     runDreamingSweepPhasesMock.mockResolvedValueOnce({
       degradedPhases: 1,
       pendingNarratives: 0,

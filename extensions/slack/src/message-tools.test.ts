@@ -1,5 +1,5 @@
 // Slack tests cover message tools plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { createSlackActions } from "./channel-actions.js";
 import { listSlackMessageActions } from "./message-actions.js";
@@ -39,7 +39,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "read",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       params: { channelId: "C_CURRENT" },
       requesterAccountId: "work",
       requesterSenderId: "U123",
@@ -71,7 +71,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "react",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       params: {
         channelId: "team:T123:channel:C123",
         messageId: "123.456",
@@ -99,7 +99,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "upload-file",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       params: {
         channelId: "team:T123:channel:C123",
         filePath: "/tmp/report.png",
@@ -136,7 +136,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "member-info",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       params: {},
       requesterAccountId: "default",
       requesterSenderId: "U123",
@@ -167,7 +167,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "read",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       params: { channelId: "C_CURRENT" },
       toolContext: {
         currentChannelProvider: "slack",
@@ -272,7 +272,7 @@ describe("Slack message tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listSlackMessageActions(cfg)).toEqual([
       "send",
@@ -301,7 +301,7 @@ describe("Slack message tools", () => {
           appToken: "test-app-token",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listSlackMessageActions(cfg)).toEqual([
       "send",
@@ -357,7 +357,7 @@ describe("Slack message tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listSlackMessageActions(cfg, "default")).toEqual(["send"]);
     expect(listSlackMessageActions(cfg, "work")).toEqual([
@@ -451,7 +451,7 @@ describe("Slack message tools", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     const schemas = Array.isArray(discovery.schema)
@@ -516,7 +516,7 @@ describe("Slack message tools", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(discovery.actions).toEqual(["send"]);

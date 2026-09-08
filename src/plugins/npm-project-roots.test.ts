@@ -11,7 +11,7 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function makeNpmRoot(): string {
-  const tempDir = tempDirs.make("openclaw-npm-project-roots-");
+  const tempDir = tempDirs.make("carapace-npm-project-roots-");
   return path.join(tempDir, "npm");
 }
 

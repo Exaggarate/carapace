@@ -11,7 +11,7 @@ const defaultArtifactRoot = path.resolve(
 /** Allocate retained proof only when its caller actually captures a scenario. */
 export function createControlUiE2eArtifactDir(scope: string, parentDir?: string): string {
   const parent = path.resolve(
-    parentDir ?? (process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim() || defaultArtifactRoot),
+    parentDir ?? (process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim() || defaultArtifactRoot),
   );
   mkdirSync(parent, { recursive: true });
   // Exclusive directory ownership protects fixed capture names across retries and processes.

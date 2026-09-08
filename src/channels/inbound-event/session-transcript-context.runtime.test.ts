@@ -1,5 +1,5 @@
 import path from "node:path";
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { buildInboundUserContextPrefix } from "../../auto-reply/reply/inbound-meta.js";
@@ -48,7 +48,7 @@ describe("session transcript inbound context", () => {
     await runPreparedChannelTurn({
       channel: "slack",
       routeSessionKey: ctx.SessionKey!,
-      storePath: path.join(tempDirs.make("openclaw-session-transcript-context-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-session-transcript-context-"), "sessions.json"),
       ctxPayload: ctx,
       recordInboundSession: vi.fn(async () => undefined),
       runDispatch: vi.fn(async () => ({ queuedFinal: false })),
@@ -133,7 +133,7 @@ describe("session transcript inbound context", () => {
     const ctx = context({
       SessionTranscriptContext: {
         historyLimit: 3,
-        senderLabels: { assistant: "OpenClaw", user: "User" },
+        senderLabels: { assistant: "Carapace", user: "User" },
       },
       ChannelStructuredContext: [
         {
@@ -146,10 +146,10 @@ describe("session transcript inbound context", () => {
             order: "chronological",
             relation: "selected_for_current_message",
             messages: [
-              { message_id: "42", sender: "OpenClaw (you)", body: "same answer" },
+              { message_id: "42", sender: "Carapace (you)", body: "same answer" },
               {
                 message_id: "43",
-                sender: "OpenClaw (you)",
+                sender: "Carapace (you)",
                 body: "Legacy answer",
                 timestamp_ms: 2_500,
               },
@@ -239,7 +239,7 @@ describe("session transcript inbound context", () => {
     await runPreparedChannelTurn({
       channel: "msteams",
       routeSessionKey: ctx.SessionKey!,
-      storePath: path.join(tempDirs.make("openclaw-teams-transcript-context-"), "sessions.json"),
+      storePath: path.join(tempDirs.make("carapace-teams-transcript-context-"), "sessions.json"),
       ctxPayload: ctx,
       recordInboundSession: vi.fn(async () => undefined),
       runDispatch: vi.fn(async () => {

@@ -3,9 +3,9 @@ import { EventEmitter } from "node:events";
 import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/channel-ingress-test-runtime";
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resetLogger, setLoggerOverride } from "openclaw/plugin-sdk/runtime-env";
+import { createChannelIngressQueueForTests } from "carapace/plugin-sdk/channel-ingress-test-runtime";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { resetLogger, setLoggerOverride } from "carapace/plugin-sdk/runtime-env";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import {
   loadConfigMock,
@@ -65,7 +65,7 @@ const channelActivityMocks = vi.hoisted(() => ({
 const pluginRuntimeMocks = vi.hoisted(() => {
   type StoreEntry = { key: string; value: unknown; createdAt: number };
   const stores = new Map<string, Map<string, StoreEntry>>();
-  let stateDir = `/tmp/openclaw-whatsapp-ingress-${Date.now()}-${Math.random()}`;
+  let stateDir = `/tmp/carapace-whatsapp-ingress-${Date.now()}-${Math.random()}`;
 
   const openKeyedStore = vi.fn((options: { namespace: string }) => {
     let store = stores.get(options.namespace);
@@ -104,7 +104,7 @@ const pluginRuntimeMocks = vi.hoisted(() => {
     reset: () => {
       stores.clear();
       openKeyedStore.mockClear();
-      stateDir = `/tmp/openclaw-whatsapp-ingress-${Date.now()}-${Math.random()}`;
+      stateDir = `/tmp/carapace-whatsapp-ingress-${Date.now()}-${Math.random()}`;
     },
   };
 });
@@ -113,10 +113,10 @@ export function getRecordChannelActivityMock(): AnyMockFn {
   return channelActivityMocks.recordChannelActivity;
 }
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", async () => {
+vi.mock("carapace/plugin-sdk/channel-activity-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-activity-runtime")
-  >("openclaw/plugin-sdk/channel-activity-runtime");
+    typeof import("carapace/plugin-sdk/channel-activity-runtime")
+  >("carapace/plugin-sdk/channel-activity-runtime");
   return {
     ...actual,
     recordChannelActivity: (...args: unknown[]) =>
@@ -388,7 +388,7 @@ export async function waitForPairingPromptSent(sock: MockSock, jid: string, send
   expect(sendCall?.[0]).toBe(jid);
   // The mocked pairing upsert always issues PAIRCODE.
   const text = (sendCall?.[1] as { text?: string } | undefined)?.text ?? "";
-  expect(text).toContain("OpenClaw: access not configured.");
+  expect(text).toContain("Carapace: access not configured.");
   expect(text).toContain(`Your WhatsApp phone number: ${senderE164}`);
   expect(text).toContain("Pairing code:");
   expect(text).toContain("\n```\nPAIRCODE\n```\n");
@@ -430,7 +430,7 @@ export function installWebMonitorInboxUnitTestHooks() {
       resetWebInboundDedupe = inboundModule.resetWebInboundDedupe;
     }
     resetWebInboundDedupe();
-    authDir = fsSync.mkdtempSync(path.join(os.tmpdir(), "openclaw-auth-"));
+    authDir = fsSync.mkdtempSync(path.join(os.tmpdir(), "carapace-auth-"));
   });
 
   afterEach(() => {

@@ -1,5 +1,5 @@
 // QA Lab plugin module implements QA evidence summary behavior.
-import { normalizeSortedUniqueTrimmedStringList } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeSortedUniqueTrimmedStringList } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import { qaCoverageIdSchema } from "./coverage-id.js";
 import { resolveQaEvidenceEnvironment } from "./evidence-environment.js";
@@ -13,7 +13,7 @@ import {
   type QaScorecardEvidenceMode,
 } from "./scorecard-taxonomy.js";
 
-export const QA_EVIDENCE_SUMMARY_KIND = "openclaw.qa.evidence-summary";
+export const QA_EVIDENCE_SUMMARY_KIND = "carapace.qa.evidence-summary";
 export const QA_EVIDENCE_FILENAME = "qa-evidence.json";
 // v2 was introduced on this PR series and has no stable external readers yet.
 // Keep the version while the pre-release evidence shape settles.
@@ -310,8 +310,8 @@ export function resolveQaEvidenceProfile(params: {
   }
 
   const envProfiles = [
-    ["OPENCLAW_E2E_PROFILE", params.env?.OPENCLAW_E2E_PROFILE],
-    ["OPENCLAW_QA_PROFILE", params.env?.OPENCLAW_QA_PROFILE],
+    ["CARAPACE_E2E_PROFILE", params.env?.CARAPACE_E2E_PROFILE],
+    ["CARAPACE_QA_PROFILE", params.env?.CARAPACE_QA_PROFILE],
   ] as const;
   for (const [, value] of envProfiles) {
     const normalized = value?.trim();
@@ -325,9 +325,9 @@ export function resolveQaEvidenceProfile(params: {
 }
 
 function resolveQaEvidencePackageSource(env: NodeJS.ProcessEnv | undefined) {
-  const spec = env?.OPENCLAW_QA_PACKAGE_SOURCE?.trim() || undefined;
-  const sha = env?.OPENCLAW_QA_PACKAGE_SOURCE_SHA?.trim() || undefined;
-  const explicitKind = env?.OPENCLAW_QA_PACKAGE_SOURCE_KIND?.trim();
+  const spec = env?.CARAPACE_QA_PACKAGE_SOURCE?.trim() || undefined;
+  const sha = env?.CARAPACE_QA_PACKAGE_SOURCE_SHA?.trim() || undefined;
+  const explicitKind = env?.CARAPACE_QA_PACKAGE_SOURCE_KIND?.trim();
   const kind =
     explicitKind ||
     (spec && spec.endsWith(".tgz") ? "packed-tarball" : spec ? "npm-package" : "source-checkout");
@@ -373,7 +373,7 @@ function resolveQaEvidenceBuildContext(params: QaEvidenceBuildBase, defaultRunne
   return {
     profile: resolveQaEvidenceProfile({ env: params.env, explicit: params.profile }),
     executionBase: {
-      runner: params.env?.OPENCLAW_QA_RUNNER?.trim() || (params.runner ?? defaultRunner) || "host",
+      runner: params.env?.CARAPACE_QA_RUNNER?.trim() || (params.runner ?? defaultRunner) || "host",
       environment: resolveQaEvidenceEnvironment({ env: params.env, repoRoot: params.repoRoot }),
       provider: buildQaEvidenceProvider(params),
     },

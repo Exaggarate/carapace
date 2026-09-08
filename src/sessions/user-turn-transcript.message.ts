@@ -1,7 +1,7 @@
 // Canonical user input shape and runtime/display projections share the same media metadata.
-import { mimeTypeFromFilePath } from "@openclaw/media-core/mime";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { mimeTypeFromFilePath } from "@carapace/media-core/mime";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import type { AgentMessage } from "../../packages/agent-core/src/types.js";
 import { readPersistedMediaFacts, type MediaFact } from "../media/media-facts.js";
 import { applyInputProvenanceToUserMessage } from "./input-provenance.js";
@@ -82,7 +82,7 @@ export function buildLateMediaAttachedProjection(message: AgentMessage): {
   text?: string;
   media: MediaFact[];
 } {
-  const isLateMedia = readOpenClawMessageMeta(message)?.lateMedia === true;
+  const isLateMedia = readCarapaceMessageMeta(message)?.lateMedia === true;
   const media = isLateMedia ? (readPersistedMediaFacts(message) ?? []) : [];
   const text = media
     .flatMap((fact) => {
@@ -93,8 +93,8 @@ export function buildLateMediaAttachedProjection(message: AgentMessage): {
   return { ...(text ? { text } : {}), media };
 }
 
-function readOpenClawMessageMeta(message: AgentMessage): Record<string, unknown> | undefined {
-  return asOptionalRecord(Reflect.get(message, "__openclaw"));
+function readCarapaceMessageMeta(message: AgentMessage): Record<string, unknown> | undefined {
+  return asOptionalRecord(Reflect.get(message, "__carapace"));
 }
 export function buildPersistedUserTurnMessage(params: UserTurnInput): PersistedUserTurnMessage {
   const normalizedMedia = (params.media ?? []).map(normalizeStructuredMediaEntryForTranscript);
@@ -104,8 +104,8 @@ export function buildPersistedUserTurnMessage(params: UserTurnInput): PersistedU
   // derived from each message's own `timestamp` field, so the current turn and
   // every historical turn serialize identically on the wire. Persisting a stamp
   // here would NOT match the bare-current arrival (the gateway no longer stamps
-  // the live turn) — see https://github.com/openclaw/openclaw/issues/3658.
-  const openClawMeta = buildPersistedUserTurnMetadata(params, normalizedMedia);
+  // the live turn) — see https://github.com/Exaggarate/carapace/issues/3658.
+  const carapaceMeta = buildPersistedUserTurnMetadata(params, normalizedMedia);
   const message: PersistedUserTurnMessage = {
     role: "user",
     ...(params.display === false ? { display: false } : {}),
@@ -113,7 +113,7 @@ export function buildPersistedUserTurnMessage(params: UserTurnInput): PersistedU
     content: text,
     timestamp: params.timestamp ?? Date.now(),
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
-    ...(Object.keys(openClawMeta).length > 0 ? { __openclaw: openClawMeta } : {}),
+    ...(Object.keys(carapaceMeta).length > 0 ? { __carapace: carapaceMeta } : {}),
   };
   // SAFETY: Provenance attachment preserves the input message's user role and content.
   return applyInputProvenanceToUserMessage(message, params.provenance) as PersistedUserTurnMessage;
@@ -159,7 +159,7 @@ export function buildLateResolvedMediaMessage(params: {
       ? `${resolvedIdempotencyKey}:late-media`
       : `late-media:${typeof resolvedTimestamp === "number" ? resolvedTimestamp : Date.now()}`;
   const metadata: Record<string, unknown> = {
-    ...readOpenClawMessageMeta(params.resolvedMessage),
+    ...readCarapaceMessageMeta(params.resolvedMessage),
     lateMedia: true,
   };
   delete metadata.humanMentions;
@@ -168,12 +168,12 @@ export function buildLateResolvedMediaMessage(params: {
     ...params.resolvedMessage,
     content,
     idempotencyKey,
-    __openclaw: metadata,
+    __carapace: metadata,
   };
 }
 
 function isBeforeAgentRunBlockedMessage(message: AgentMessage): boolean {
-  const marker = readOpenClawMessageMeta(message)?.beforeAgentRunBlocked;
+  const marker = readCarapaceMessageMeta(message)?.beforeAgentRunBlocked;
   return marker !== undefined;
 }
 
@@ -198,12 +198,12 @@ export function mergePreparedUserTurnMessageForRuntime(params: {
   ) {
     return params.runtimeMessage;
   }
-  const runtimeMeta = readOpenClawMessageMeta(params.runtimeMessage);
-  const preparedMeta = readOpenClawMessageMeta(params.preparedMessage);
+  const runtimeMeta = readCarapaceMessageMeta(params.runtimeMessage);
+  const preparedMeta = readCarapaceMessageMeta(params.preparedMessage);
   return {
     ...params.runtimeMessage,
     ...params.preparedMessage,
-    ...(preparedMeta ? { __openclaw: { ...runtimeMeta, ...preparedMeta } } : {}),
+    ...(preparedMeta ? { __carapace: { ...runtimeMeta, ...preparedMeta } } : {}),
     ...(userMessageHasImageContent(params.runtimeMessage)
       ? { content: params.runtimeMessage.content }
       : {}),

@@ -101,7 +101,7 @@ export function syncThemePaletteStylesheet(theme: ThemeName, ready: () => void):
   }
   // Retain the six built-in families once visited. Their exclusive selectors
   // leave the previous theme intact during loading and make repeat switches synchronous.
-  const id = `openclaw-theme-palette-${theme}`;
+  const id = `carapace-theme-palette-${theme}`;
   const existing = document.getElementById(id);
   if (existing instanceof HTMLLinkElement && existing.sheet) {
     ready();

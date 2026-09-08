@@ -18,7 +18,7 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { parse as parseYaml } from "yaml";
 import {
   booleanFlag,
@@ -35,7 +35,7 @@ import {
   verifyNpmPreflightProducer,
   validateReleasePreflightTagIdentity,
 } from "./npm-preflight-tooling-identity.mjs";
-import { validateNpmPreflightDistTag } from "./openclaw-npm-extended-stable-release.mjs";
+import { validateNpmPreflightDistTag } from "./carapace-npm-extended-stable-release.mjs";
 import { validatePluginSdkApiReleaseEvidence } from "./plugin-sdk-api-release-evidence.mjs";
 import { verifyReleaseToolingIdentity } from "./release-tooling-identity.mjs";
 import {
@@ -85,7 +85,7 @@ type LocalCheckResult =
   | { status: "passed"; command: string; reason?: never }
   | { status: "skipped"; reason: string; command?: never };
 type PreflightTarballs = Partial<Record<"corePackageTarballs" | "dependencyTarballs", unknown>>;
-const DEFAULT_REPO = "openclaw/openclaw";
+const DEFAULT_REPO = "carapace/carapace";
 const DEFAULT_PROVIDER = "openai";
 const DEFAULT_MODE = "both";
 const DEFAULT_NPM_DIST_TAG = "beta";
@@ -98,16 +98,16 @@ const TOOLING_ROOT = fileURLToPath(new URL("../", import.meta.url));
 const TIDECLAW_ALPHA_WORKFLOW_REF_PATTERN =
   /^tideclaw\/alpha\/[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}Z$/u;
 const WINDOWS_NODE_TAG_PATTERN = /^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$/u;
-const WINDOWS_NODE_REPO = "openclaw/openclaw-windows-node";
+const WINDOWS_NODE_REPO = "carapace/carapace-windows-node";
 const WINDOWS_NODE_REQUIRED_ASSETS = [
-  "OpenClawCompanion-Setup-x64.exe",
-  "OpenClawCompanion-Setup-arm64.exe",
+  "CarapaceCompanion-Setup-x64.exe",
+  "CarapaceCompanion-Setup-arm64.exe",
 ];
 const SHA256_DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const SHA256_HEX_PATTERN = /^[a-f0-9]{64}$/u;
 const RELEASE_CANDIDATE_STATE_VERSION = 2;
 const RELEASE_CANDIDATE_STATE_FILE = "release-candidate-state.json";
-const TRUSTED_TOOLING_SHA_ENV = "OPENCLAW_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA";
+const TRUSTED_TOOLING_SHA_ENV = "CARAPACE_RELEASE_CANDIDATE_TRUSTED_TOOLING_SHA";
 const RELEASE_CANDIDATE_STATE_KEYS = [
   "repo",
   "tag",
@@ -146,7 +146,7 @@ function usage() {
 
 Dispatches or consumes release validation runs, validates the prepared npm tarball,
 builds plugin publish plans, writes a green evidence bundle, then prints the exact
-OpenClaw Release Publish command only after everything is green.
+Carapace Release Publish command only after everything is green.
 
 Options:
   --tag <tag>                         Planned release tag. The tag must not exist yet.
@@ -155,7 +155,7 @@ Options:
   --publish-workflow-ref <tag>         Protected publication tooling tag matching the trusted helper checkout.
   --repo <owner/repo>                 GitHub repo. Default: ${DEFAULT_REPO}
   --full-release-run <id>             Reuse successful Full Release Validation run.
-  --npm-preflight-run <id>            Reuse successful OpenClaw NPM Release preflight run.
+  --npm-preflight-run <id>            Reuse successful Carapace NPM Release preflight run.
   --plugin-sdk-api-acknowledgement <digest>
                                       8-character digest from the Plugin SDK API diff report.
   --windows-node-tag <tag>            Optional exact Windows Node tag for postpublish asset promotion.
@@ -322,7 +322,7 @@ export function parseArgs(argv: string[]) {
   }
   if (options.pluginPublishScope === "selected") {
     throw new Error(
-      "--plugin-publish-scope selected is only for plugin-only repair publishes; release candidates publish OpenClaw with --plugin-publish-scope all-publishable",
+      "--plugin-publish-scope selected is only for plugin-only repair publishes; release candidates publish Carapace with --plugin-publish-scope all-publishable",
     );
   }
   if (options.pluginPublishScope === "all-publishable" && options.plugins.trim()) {
@@ -389,7 +389,7 @@ export function validateParallelsRegistryPackageArtifact(
   const packageName = packageInfo?.name;
   const packageVersion = packageInfo?.version;
   if (
-    manifest.schema !== "openclaw.plugin-publication-artifact/v1" ||
+    manifest.schema !== "carapace.plugin-publication-artifact/v1" ||
     manifest.schemaVersion !== 1 ||
     manifest.targetSha !== params.targetSha ||
     typeof artifactName !== "string" ||
@@ -524,16 +524,16 @@ function updateReleaseCandidateState(
 }
 
 function githubApiTimeoutMs() {
-  const raw = process.env.OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
+  const raw = process.env.CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS;
   if (!raw) {
     return DEFAULT_GITHUB_API_TIMEOUT_MS;
   }
   if (!/^[1-9]\d*$/u.test(raw)) {
-    throw new Error("OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer");
+    throw new Error("CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer");
   }
   const value = Number(raw);
   if (!Number.isSafeInteger(value)) {
-    throw new Error("OPENCLAW_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer");
+    throw new Error("CARAPACE_RELEASE_CANDIDATE_GITHUB_API_TIMEOUT_MS must be a positive integer");
   }
   return value;
 }
@@ -678,7 +678,7 @@ function runFromTrustedTooling(
   { targetRoot, workflowRef }: { targetRoot: string; workflowRef: string },
 ) {
   const trustedToolingSha = fetchTrustedWorkflowSha(workflowRef, targetRoot);
-  const tempRoot = mkdtempSync(join(tmpdir(), "openclaw-release-tooling-"));
+  const tempRoot = mkdtempSync(join(tmpdir(), "carapace-release-tooling-"));
   const toolingRoot = join(tempRoot, "checkout");
   let worktreeAdded = false;
   try {
@@ -896,8 +896,8 @@ export async function validateNpmPreflightRunSource(
     !Number.isSafeInteger(workflowRun.runAttempt) ||
     workflowRun.runAttempt < 1 ||
     workflowRun.repository !== repository ||
-    workflowRun.workflowName !== "OpenClaw NPM Release" ||
-    workflowPath !== ".github/workflows/openclaw-npm-release.yml" ||
+    workflowRun.workflowName !== "Carapace NPM Release" ||
+    workflowPath !== ".github/workflows/carapace-npm-release.yml" ||
     workflowRun.event !== "workflow_dispatch" ||
     workflowRun.status !== "completed" ||
     workflowRun.conclusion !== "success" ||
@@ -1556,7 +1556,7 @@ export function buildPublishCommand(
     ["full_release_validation_run_attempt", options.fullReleaseRunAttempt],
     ["npm_dist_tag", options.npmDistTag],
     ["plugin_publish_scope", options.pluginPublishScope],
-    ["publish_openclaw_npm", "true"],
+    ["publish_carapace_npm", "true"],
     ["release_profile", "from-validation"],
     ["wait_for_clawhub", "false"],
   ];
@@ -1576,7 +1576,7 @@ export function buildPublishCommand(
     "gh",
     "workflow",
     "run",
-    "openclaw-release-publish.yml",
+    "carapace-release-publish.yml",
     "--repo",
     options.repo,
     "--ref",
@@ -1765,11 +1765,11 @@ async function runParallelsIfNeeded(
     timeoutBin,
     dependencyTarballPaths,
     registryPackageTarballPaths,
-    process.env.OPENCLAW_PARALLELS_MACOS_SNAPSHOT_HINT?.trim() ?? "",
+    process.env.CARAPACE_PARALLELS_MACOS_SNAPSHOT_HINT?.trim() ?? "",
   );
   run("bash", ["-lc", command], {
     env: {
-      OPENCLAW_PARALLELS_ARTIFACT_ROOT: join(process.cwd(), ".artifacts", "parallels"),
+      CARAPACE_PARALLELS_ARTIFACT_ROOT: join(process.cwd(), ".artifacts", "parallels"),
     },
   });
   return {
@@ -1848,7 +1848,7 @@ async function runTelegramIfNeeded(
     sourceSha,
   });
   const runId = dispatchWorkflow(options.repo, workflowFile, options.workflowRef, {
-    package_spec: `openclaw@${options.tag.replace(/^v/u, "")}`,
+    package_spec: `carapace@${options.tag.replace(/^v/u, "")}`,
     package_label: options.tag,
     ...artifactInputs,
     harness_ref: options.workflowRef,
@@ -2041,7 +2041,7 @@ async function main() {
         source: { status: "passed", headSha: fullRun.headSha, workflowRef: options.workflowRef },
       }
     : await waitForSuccessfulRun(options.repo, options.npmPreflightRunId, {
-        workflowName: "OpenClaw NPM Release",
+        workflowName: "Carapace NPM Release",
         workflowRef: options.workflowRef,
         validateSource: (workflowRun) =>
           validateNpmPreflightRunSource({
@@ -2115,13 +2115,13 @@ async function main() {
     : await downloadResolvedArtifact(
         options.repo,
         npmProducerRunId,
-        `openclaw-npm-preflight-${options.tag}`,
-        "openclaw-npm-preflight-",
+        `carapace-npm-preflight-${options.tag}`,
+        "carapace-npm-preflight-",
         npmDir,
       );
   const npmArtifactName = npmArtifact.name;
   if (!Number.isInteger(npmRun.runAttempt) || npmRun.runAttempt < 1) {
-    throw new Error(`OpenClaw npm preflight run ${npmProducerRunId} has invalid attempt.`);
+    throw new Error(`Carapace npm preflight run ${npmProducerRunId} has invalid attempt.`);
   }
   downloadArtifact(
     options.repo,

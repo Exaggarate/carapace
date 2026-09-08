@@ -36,7 +36,7 @@ async function injectPartialPublicationFailure(dir: string, fileName: string) {
       const isFinalTarget = target === targetPath;
       const isStagedTarget =
         path.dirname(parent) === resolvedDir &&
-        path.basename(parent).startsWith("openclaw-bootstrap-") &&
+        path.basename(parent).startsWith("carapace-bootstrap-") &&
         path.basename(target) === fileName;
       if (injected && (isFinalTarget || isStagedTarget)) {
         injected = false;
@@ -54,12 +54,12 @@ async function injectPartialPublicationFailure(dir: string, fileName: string) {
 
 async function listTempSiblings(dir: string): Promise<string[]> {
   const names = await fs.readdir(dir);
-  return names.filter((name) => name.startsWith("openclaw-bootstrap-")).toSorted();
+  return names.filter((name) => name.startsWith("carapace-bootstrap-")).toSorted();
 }
 
 describe("bootstrap publication atomicity", () => {
   it("does not publish a partial AGENTS.md when the first write fails", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     const restore = await injectPartialPublicationFailure(tempDir, DEFAULT_AGENTS_FILENAME);
 
@@ -80,7 +80,7 @@ describe("bootstrap publication atomicity", () => {
   });
 
   it("leaves an existing complete AGENTS.md winner unchanged", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     await fs.writeFile(agentsPath, "WINNER\n", "utf-8");
 
@@ -92,7 +92,7 @@ describe("bootstrap publication atomicity", () => {
   it.runIf(process.platform !== "win32" && process.getuid?.() !== 0)(
     "reuses an established read-only workspace without creating bootstrap files",
     async () => {
-      const tempDir = await makeTempWorkspace("openclaw-workspace-readonly-");
+      const tempDir = await makeTempWorkspace("carapace-workspace-readonly-");
       const files = ["AGENTS.md", "SOUL.md", "IDENTITY.md", "USER.md"];
       for (const name of files) {
         await fs.writeFile(path.join(tempDir, name), `Authored ${name}\n`);
@@ -117,7 +117,7 @@ describe("bootstrap publication atomicity", () => {
   it.runIf(process.platform !== "win32" && process.getuid?.() !== 0)(
     "preserves an existing dangling bootstrap symlink in a read-only workspace",
     async () => {
-      const tempDir = await makeTempWorkspace("openclaw-workspace-dangling-");
+      const tempDir = await makeTempWorkspace("carapace-workspace-dangling-");
       const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
       await fs.symlink("missing.md", agentsPath);
       await fs.chmod(tempDir, 0o555);
@@ -136,7 +136,7 @@ describe("bootstrap publication atomicity", () => {
   );
 
   it.runIf(process.platform !== "win32")("publishes through a workspace symlink", async () => {
-    const root = await makeTempWorkspace("openclaw-workspace-alias-");
+    const root = await makeTempWorkspace("carapace-workspace-alias-");
     const workspaceDir = path.join(root, "workspace");
     const workspaceAlias = path.join(root, "workspace-alias");
     await fs.mkdir(workspaceDir);
@@ -149,7 +149,7 @@ describe("bootstrap publication atomicity", () => {
   });
 
   it("publishes one complete winner when bootstrap writers race", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     const contents = ["FIRST-COMPLETE\n", "SECOND-COMPLETE\n"];
 
@@ -164,7 +164,7 @@ describe("bootstrap publication atomicity", () => {
   });
 
   it("keeps a safe reader on the complete single-link file", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     const realLink = syncFs.linkSync.bind(syncFs);
     let concurrentRead: ReturnType<typeof workspace.loadWorkspaceBootstrapFiles> | undefined;
@@ -187,13 +187,13 @@ describe("bootstrap publication atomicity", () => {
   });
 
   it("reports a staging cleanup failure with the publication error", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     const restore = await injectPartialPublicationFailure(tempDir, DEFAULT_AGENTS_FILENAME);
     const realRm = fs.rm.bind(fs);
     const rmSpy = vi.spyOn(fs, "rm").mockImplementation(async (filePath, options) => {
       const target = nodeFilePath(filePath);
-      if (target && path.basename(target).startsWith("openclaw-bootstrap-")) {
+      if (target && path.basename(target).startsWith("carapace-bootstrap-")) {
         throw Object.assign(new Error("permission denied"), { code: "EACCES" });
       }
       await realRm(filePath, options);
@@ -220,7 +220,7 @@ describe("bootstrap publication atomicity", () => {
   });
 
   it("fails closed when the workspace does not support hard links", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const agentsPath = path.join(tempDir, DEFAULT_AGENTS_FILENAME);
     const linkSpy = vi.spyOn(syncFs, "linkSync").mockImplementation(() => {
       throw Object.assign(new Error("not supported"), { code: "ENOTSUP" });
@@ -240,7 +240,7 @@ describe("bootstrap publication atomicity", () => {
     // The Claw bootstrap flow approves raw bytes and later re-verifies them by
     // byte equality. Writing the decoded text (TextDecoder strips a leading
     // BOM) would persist different bytes and trip the existing-winner check.
-    const tempDir = await makeTempWorkspace("openclaw-workspace-");
+    const tempDir = await makeTempWorkspace("carapace-workspace-");
     const bom = Buffer.from([0xef, 0xbb, 0xbf]);
     const content = Buffer.concat([bom, Buffer.from("# BOOTSTRAP\n")]);
 

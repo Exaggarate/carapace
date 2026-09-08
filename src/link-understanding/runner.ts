@@ -1,6 +1,6 @@
 import type { MsgContext } from "../auto-reply/templating.js";
 import { applyTemplate } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { LinkModelConfig, LinkToolsConfig } from "../config/types.tools.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
 // Link-understanding runner fetches allowed URLs and invokes configured commands with bounded content.
@@ -78,7 +78,7 @@ async function fetchLinkContent(params: {
     init: {
       headers: {
         Accept: "text/*,application/json,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "User-Agent": "OpenClaw-LinkUnderstanding/1.0",
+        "User-Agent": "Carapace-LinkUnderstanding/1.0",
       },
     },
   });
@@ -143,8 +143,8 @@ async function runCliEntry(params: {
     // Processor wrappers and their children share the reply's cancellation lifetime.
     killProcessTree: true,
     env: {
-      OPENCLAW_LINK_FINAL_URL: params.finalUrl,
-      OPENCLAW_LINK_URL: params.url,
+      CARAPACE_LINK_FINAL_URL: params.finalUrl,
+      CARAPACE_LINK_URL: params.url,
     },
   });
   if (params.signal?.aborted) {
@@ -204,7 +204,7 @@ async function runLinkEntries(params: {
  * Fetches detected links through the SSRF guard and runs configured CLI processors.
  */
 export async function runLinkUnderstanding(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   ctx: MsgContext;
   message?: string;
   signal?: AbortSignal;

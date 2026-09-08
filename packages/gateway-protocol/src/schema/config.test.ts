@@ -18,7 +18,7 @@ const response = {
   schema: {},
   uiHints: {
     "channels.sms.fromNumber": {
-      docsUrl: "https://docs.openclaw.ai/channels/sms",
+      docsUrl: "https://github.com/Exaggarate/carapace",
       presentation: "phone-number",
     },
   },
@@ -51,7 +51,7 @@ describe("ConfigSchemaLookupResultSchema", () => {
       Value.Check(ConfigSchemaLookupResultSchema, {
         path: "gateway",
         schema: { type: "object" },
-        hint: { docsUrl: "https://docs.openclaw.ai/gateway" },
+        hint: { docsUrl: "https://github.com/Exaggarate/carapace" },
         children: [],
       }),
     ).toBe(true);
@@ -98,7 +98,7 @@ describe("update protocol schemas", () => {
       Value.Check(UpdateReportResultSchema, {
         status: "created",
         message: "Local receipt persistence failed; do not submit again.",
-        url: "https://github.com/openclaw/openclaw/issues/123",
+        url: "https://github.com/Exaggarate/carapace/issues/123",
       }),
     ).toBe(true);
     expect(

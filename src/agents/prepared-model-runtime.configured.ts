@@ -1,15 +1,15 @@
 import {
   collectConfiguredModelRefs,
   type ConfiguredModelRef,
-} from "@openclaw/model-catalog-core/configured-model-refs";
+} from "@carapace/model-catalog-core/configured-model-refs";
 import {
   buildModelCatalogMergeKey,
   parseModelCatalogRef,
   type ModelCatalogRef,
-} from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+} from "@carapace/model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { MODEL_APIS } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import {
   normalizePluginDiscoveryResult,
@@ -39,7 +39,7 @@ export type PreparedRuntimeCapabilityModel = PreparedConfiguredRuntimeModel;
 
 /** Collects defaults, global refs, and only the selected agent's overrides. */
 export function collectPreparedModelRuntimeConfiguredRefs(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string | undefined,
 ): ConfiguredModelRef[] {
   if (!agentId) {
@@ -86,7 +86,7 @@ export function toStaticCatalogEntry(model: ProviderRuntimeModel): ModelCatalogE
 }
 
 export function collectPreparedModelRuntimeProviderIds(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   credentials: Readonly<AuthStorageData>,
   includeCredentialProviders: boolean,
   configuredModelRefs: readonly ConfiguredModelRef[] = collectConfiguredModelRefs(config),
@@ -122,7 +122,7 @@ export function collectPreparedModelRuntimeProviderIds(
 }
 
 function hasConfiguredInlineProviderModel(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: string,
   modelId: string,
   matchesStaticModelId: StaticModelIdMatcher,
@@ -142,7 +142,7 @@ function hasConfiguredInlineProviderModel(
 }
 
 export function collectConfiguredProviderIdsNeedingStaticCatalog(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   configuredModelRefs?: readonly ConfiguredModelRef[];
   resolveStaticCatalogModel: (lookup: {
     provider: string;
@@ -220,7 +220,7 @@ export function prepareConfiguredRuntimeModels(params: {
 
 /** Resolve concrete runtime capabilities once while materializing agent facts. */
 export function prepareRuntimeCapabilityModels(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId?: string;
   candidates: readonly ModelCatalogEntry[];
   resolveRuntimeModel: (lookup: {
@@ -244,7 +244,7 @@ export function prepareRuntimeCapabilityModels(params: {
       modelBaseUrl: candidate.baseUrl,
       agentId: params.agentId,
     });
-    if (runtime === provider || runtime === "openclaw") {
+    if (runtime === provider || runtime === "carapace") {
       continue;
     }
     const key = buildModelCatalogMergeKey(provider, modelId);

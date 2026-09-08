@@ -1,5 +1,5 @@
-import { ConnectErrorDetailCodes } from "@openclaw/gateway-client/browser";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { ConnectErrorDetailCodes } from "@carapace/gateway-client/browser";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type {
   MentionInboxItem,
   MentionsListResult,

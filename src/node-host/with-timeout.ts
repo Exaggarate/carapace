@@ -1,5 +1,5 @@
 /** Timeout wrapper for node-host operations using AbortSignal cancellation. */
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { createDeferredCore } from "../shared/deferred.js";
 
 /** Run bounded work; dynamic labels identify the stage pending at the deadline. */

@@ -1,6 +1,6 @@
-import type { ChannelOutboundPayloadHint } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import type { ChannelOutboundPayloadHint } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { describe, expect, it } from "vitest";
 import {
   googleChatApprovalCapability,
@@ -221,7 +221,7 @@ describe("googleChatApprovalCapability", () => {
   });
 
   it("only handles approvals for the originating Google Chat account", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       approvals: { exec: { enabled: true } },
       channels: {
         googlechat: {
@@ -285,7 +285,7 @@ describe("googleChatApprovalCapability", () => {
   });
 
   it("does not handle exec approvals when only plugin approval forwarding is enabled", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       approvals: { plugin: { enabled: true } },
       channels: {
         googlechat: {

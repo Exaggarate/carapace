@@ -85,15 +85,15 @@ describe("personal publication definitive outcomes", () => {
         requestDigest: pending.confirmation!.requestDigest,
       };
       const headSha = await workspace.git("rev-parse", "HEAD");
-      const marker = `<!-- openclaw-publication:${initial.requestId} -->`;
-      const url = "https://github.com/openclaw/openclaw/pull/125203";
+      const marker = `<!-- carapace-publication:${initial.requestId} -->`;
+      const url = "https://github.com/Exaggarate/carapace/pull/125203";
       const remote = mocks.runCommand.getMockImplementation()!;
       let created = false;
       let lookups = 0;
       mocks.runCommand.mockImplementation(async (argv: string[], options?: { input?: string }) => {
         if (
           outcome === "no-changes" &&
-          argv.some((arg) => arg.startsWith("repos/openclaw/openclaw/git/ref/heads/"))
+          argv.some((arg) => arg.startsWith("repos/carapace/carapace/git/ref/heads/"))
         ) {
           return commandResult(JSON.stringify({ ref: "refs/heads/main", sha: headSha }));
         }
@@ -137,7 +137,7 @@ describe("personal publication definitive outcomes", () => {
               ...(outcome === "closed-with-foreign"
                 ? [
                     {
-                      url: "https://github.com/openclaw/openclaw/pull/125204",
+                      url: "https://github.com/Exaggarate/carapace/pull/125204",
                       userId: 202,
                       state: "open",
                       body: "",

@@ -4,12 +4,12 @@ import {
   mergeScopedSearchConfig,
   resolveProviderWebSearchPluginConfig,
   type WebSearchProviderPlugin,
-} from "openclaw/plugin-sdk/provider-web-search-config-contract";
+} from "carapace/plugin-sdk/provider-web-search-config-contract";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const DEFAULT_PERPLEXITY_BASE_URL = "https://openrouter.ai/api/v1";
 const PERPLEXITY_DIRECT_BASE_URL = "https://api.perplexity.ai";
@@ -41,7 +41,7 @@ export function createPerplexityWebSearchProviderBase() {
     envVars: ["PERPLEXITY_API_KEY", "OPENROUTER_API_KEY"],
     placeholder: "pplx-...",
     signupUrl: "https://www.perplexity.ai/settings/api",
-    docsUrl: "https://docs.openclaw.ai/perplexity",
+    docsUrl: "https://github.com/Exaggarate/carapace",
     autoDetectOrder: 50,
     credentialPath: PERPLEXITY_CREDENTIAL_PATH,
     ...createWebSearchProviderContractFields({

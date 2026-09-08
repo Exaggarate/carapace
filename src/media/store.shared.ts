@@ -1,4 +1,4 @@
-import { formatByteSize } from "@openclaw/normalization-core";
+import { formatByteSize } from "@carapace/normalization-core";
 
 // Media files remain readable by sandbox container UIDs; the private media
 // directory is the trust boundary. Temp and final writes must use one mode.

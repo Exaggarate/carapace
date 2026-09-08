@@ -1,7 +1,7 @@
 /** Keeps automatic auth profiles stable within sessions while rotating at lifecycle boundaries. */
 import { resolveSessionAuthProfileOverrideSource } from "../../config/sessions/auth-profile-override-provenance.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ProviderModelRouteAuthRequirement } from "../../plugin-sdk/provider-model-types.js";
 import { resolveProviderModelRoutes } from "../../plugins/provider-model-routes.js";
 import { shouldPreserveUnavailableSessionAuthProfileOverride } from "../../sessions/auth-profile-preservation.js";
@@ -46,7 +46,7 @@ type SessionAuthProfileOverrideResult = {
 };
 
 function profileAuthRequirement(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   store: ReturnType<typeof ensureAuthProfileStore> | undefined;
   profileId: string;
 }): ProviderModelRouteAuthRequirement | undefined {
@@ -163,7 +163,7 @@ async function persistSessionAuthProfileOverrideState(params: {
 // Current session overrides are only valid when the selected provider can use
 // that profile, including configured aws-sdk profiles without stored secrets.
 function isProfileForProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   providers: readonly string[];
   profileId: string;
   store: ReturnType<typeof ensureAuthProfileStore>;
@@ -206,7 +206,7 @@ function uniqueProviders(provider: string, acceptedProviderIds?: readonly string
 
 /** Resolve a person's new-session default through the canonical credential store. */
 export function resolveUserLinkedAuthProfile(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir: string;
   provider: string;
   requesterProfileId: string;
@@ -273,7 +273,7 @@ export async function clearSessionAuthProfileOverride(params: {
 }
 
 async function resolveSessionAuthProfileOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   modelId: string;
   agentDir: string;
@@ -543,7 +543,7 @@ type SessionAuthSelection = {
 
 /** Resolves the session credential and its prepared route facts. */
 export async function resolveSessionAuthSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   provider: string;
   modelId: string;
   configuredProfileId?: string;

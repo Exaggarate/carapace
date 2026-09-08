@@ -1,5 +1,5 @@
-// Fish Audio provider maps OpenClaw speech contracts to the hosted S2.1 API.
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+// Fish Audio provider maps Carapace speech contracts to the hosted S2.1 API.
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
@@ -7,18 +7,18 @@ import type {
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechSynthesisTarget,
-} from "openclaw/plugin-sdk/speech";
+} from "carapace/plugin-sdk/speech";
 import {
   parseSpeechDirectiveNumberOverride,
   resolveSpeechProviderApiKey,
-} from "openclaw/plugin-sdk/speech-provider";
+} from "carapace/plugin-sdk/speech-provider";
 import {
   asBoolean,
   asFiniteNumberInRange,
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
   parseBooleanValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   FISH_AUDIO_STREAM_MAX_BYTES,
   type FishAudioFormat,
@@ -330,7 +330,7 @@ export function buildFishAudioSpeechProvider(): SpeechProviderPlugin {
     synthesize: async (req) => {
       const params = resolveSynthesisRequest(req);
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       return {
         audioBuffer: await fishAudioTts({
           ...params,
@@ -344,7 +344,7 @@ export function buildFishAudioSpeechProvider(): SpeechProviderPlugin {
     streamSynthesize: async (req) => {
       const params = resolveSynthesisRequest(req);
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       const stream = await fishAudioTtsStream({
         ...params,
         maxBytes: Math.min(
@@ -363,7 +363,7 @@ export function buildFishAudioSpeechProvider(): SpeechProviderPlugin {
     synthesizeTelephony: async (req) => {
       const params = resolveSynthesisRequest({ ...req, target: "telephony" });
       const { resolveGeneratedMediaMaxBytes } =
-        await import("openclaw/plugin-sdk/media-generation-runtime");
+        await import("carapace/plugin-sdk/media-generation-runtime");
       return {
         audioBuffer: await fishAudioTts({
           ...params,

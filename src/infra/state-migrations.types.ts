@@ -184,7 +184,7 @@ export type MigrationMessages = {
 };
 
 export const LEGACY_STATE_MIGRATION_PLAN_SCHEMA_VERSION =
-  "openclaw.legacyStateMigrationPlan.v1" as const;
+  "carapace.legacyStateMigrationPlan.v1" as const;
 
 export type LegacyStateMigrationMode = "automatic" | "doctor";
 

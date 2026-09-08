@@ -3,15 +3,15 @@
  *
  * Fetches HTTP(S) content through SSRF guards, provider config, caching, and bounded extraction.
  */
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveIntegerOption } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { Type } from "typebox";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { sha256Hex } from "../../infra/crypto-digest.js";
 import { SsrFBlockedError, type LookupFn, type SsrFPolicy } from "../../infra/net/ssrf.js";
 import { logDebug, logWarn } from "../../logger.js";
@@ -157,7 +157,7 @@ const WebFetchOutputSchema = Type.Object(
   { additionalProperties: false },
 );
 
-type WebFetchConfig = NonNullable<OpenClawConfig["tools"]>["web"] extends infer Web
+type WebFetchConfig = NonNullable<CarapaceConfig["tools"]>["web"] extends infer Web
   ? Web extends { fetch?: infer Fetch }
     ? Fetch
     : undefined
@@ -191,7 +191,7 @@ async function loadWebGuardedFetch(): Promise<
   return (await webGuardedFetchLoader.load()).fetchWithWebToolsNetworkGuard;
 }
 
-function resolveFetchConfig(cfg?: OpenClawConfig): WebFetchConfig {
+function resolveFetchConfig(cfg?: CarapaceConfig): WebFetchConfig {
   return resolveWebProviderConfig(cfg, "fetch") as NonNullable<WebFetchConfig> | undefined;
 }
 
@@ -452,7 +452,7 @@ async function spillWebFetchContent(
   const content = truncateUtf16Safe(value, WEB_FETCH_SPILL_MAX_CHARS);
   const spillChars = content.length;
   const spillPath = await writePrivateTempFile(
-    "openclaw-web-fetch",
+    "carapace-web-fetch",
     wrapWebContent(content, "web_fetch"),
   );
   const spillCapped = value.length > WEB_FETCH_SPILL_MAX_CHARS;
@@ -512,7 +512,7 @@ type WebFetchRuntimeParams = {
   userAgent: string;
   headers?: Record<string, string>;
   readabilityEnabled: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   useTrustedEnvProxy: boolean;
   ssrfPolicy?: SsrFPolicy;
   providerCacheKey?: string;
@@ -556,7 +556,7 @@ function throwIfFetchAborted(signal: AbortSignal | undefined): void {
  * Sanitize a web_fetch URL parameter that may contain LLM-injected whitespace.
  *
  * Fixes the reported case where a model emits a space between the scheme and
- * authority (e.g. `https:// docs.openclaw.ai`), which causes `new URL()` to
+ * authority (e.g. `https:// github.com/Exaggarate/carapace`), which causes `new URL()` to
  * throw. Path and query whitespace is intentionally preserved — the WHATWG URL
  * parser percent-encodes those characters correctly per RFC 3986.
  */
@@ -571,7 +571,7 @@ function sanitizeWebFetchUrl(raw: string): string {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.webFetchTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.webFetchTestApi")] = {
     sanitizeWebFetchUrl,
   };
 }
@@ -949,7 +949,7 @@ async function fetchWebPayload(params: WebFetchRuntimeParams): Promise<Record<st
 }
 
 export function createWebFetchTool(options?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sandboxed?: boolean;
   runtimeWebFetch?: RuntimeWebFetchMetadata;
   lateBindRuntimeConfig?: boolean;

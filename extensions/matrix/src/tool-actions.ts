@@ -1,5 +1,5 @@
 // Matrix plugin module implements tool actions behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
 import {
   createActionGate,
   jsonResult,
@@ -7,8 +7,8 @@ import {
   readReactionParams,
   readStringArrayParam,
   readStringParam,
-} from "openclaw/plugin-sdk/channel-actions";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import {
   bootstrapMatrixVerification,

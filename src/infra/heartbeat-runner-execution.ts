@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { listActiveEmbeddedRunSessionKeys } from "../agents/embedded-agent-runner/active-run-projections.js";
 import { resolveEmbeddedSessionLane } from "../agents/embedded-agent-runner/lanes.js";
 import { transitionMainSessionRecovery } from "../agents/main-session-recovery/main-session-recovery-state.js";
@@ -16,7 +16,7 @@ import {
   type SessionEntryLifecycleRemoval,
 } from "../config/sessions/session-accessor.js";
 import { mergeSessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   hasActiveCronJobs,
   hasActiveCronJobsExceptMarkers,
@@ -108,7 +108,7 @@ function skippedHeartbeatStage<T extends string>(reason: T, startedAt: number) {
 }
 
 export type HeartbeatRunOptions = {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   heartbeat?: HeartbeatConfig;

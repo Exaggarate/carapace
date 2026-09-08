@@ -39,7 +39,7 @@ export type ResolvedAcpxPluginConfig = {
   permissionMode: AcpxPermissionMode;
   nonInteractivePermissions: AcpxNonInteractivePermissionPolicy;
   pluginToolsMcpBridge: boolean;
-  openClawToolsMcpBridge: boolean;
+  carapaceToolsMcpBridge: boolean;
   timeoutSeconds?: number;
   mcpServers: Record<string, McpServerConfig>;
   agents: Record<string, AcpxAgentCommand>;
@@ -66,7 +66,7 @@ const McpServerConfigSchema = z.object({
     .describe("Environment variables for the MCP server"),
 });
 
-/** Zod schema for validating raw ACPX plugin config from OpenClaw config. */
+/** Zod schema for validating raw ACPX plugin config from Carapace config. */
 export const AcpxPluginConfigSchema = z.strictObject({
   cwd: nonEmptyTrimmedString("cwd must be a non-empty string").optional(),
   stateDir: nonEmptyTrimmedString("stateDir must be a non-empty string").optional(),
@@ -82,8 +82,8 @@ export const AcpxPluginConfigSchema = z.strictObject({
     })
     .optional(),
   pluginToolsMcpBridge: z.boolean({ error: "pluginToolsMcpBridge must be a boolean" }).optional(),
-  openClawToolsMcpBridge: z
-    .boolean({ error: "openClawToolsMcpBridge must be a boolean" })
+  carapaceToolsMcpBridge: z
+    .boolean({ error: "carapaceToolsMcpBridge must be a boolean" })
     .optional(),
   timeoutSeconds: z
     .number({ error: "timeoutSeconds must be a number >= 0.001" })

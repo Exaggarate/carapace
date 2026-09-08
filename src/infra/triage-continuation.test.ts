@@ -59,7 +59,7 @@ async function control(root: string, label: string, command: string): Promise<vo
 async function prepare(root: string, heldHandle: boolean | "stdio" = false) {
   const candidate = path.join(root, "candidate.mjs");
   await fs.mkdir(path.join(root, "dist"), { recursive: true });
-  await fs.writeFile(path.join(root, "package.json"), '{"type":"module","name":"openclaw"}');
+  await fs.writeFile(path.join(root, "package.json"), '{"type":"module","name":"carapace"}');
   await fs.writeFile(
     path.join(root, "dist/index.js"),
     `await import(${JSON.stringify(candidate)});`,
@@ -202,15 +202,15 @@ function foreground(root: string, label: string, kind = "update", defer = false)
       env: {
         ...process.env,
         PATH: `${path.join(root, "bin")}${path.delimiter}${process.env.PATH ?? ""}`,
-        OPENCLAW_SHELL: "",
+        CARAPACE_SHELL: "",
         CODEX_THREAD_ID: "",
-        OPENCLAW_UPDATE_RUN_HANDOFF: "",
-        OPENCLAW_SUPERVISOR_MODE: "",
-        OPENCLAW_LAUNCHD_LABEL: "",
-        OPENCLAW_SYSTEMD_UNIT: "",
-        OPENCLAW_STATE_DIR: path.join(root, ".openclaw"),
-        OPENCLAW_CONFIG_PATH: path.join(root, ".openclaw/openclaw.json"),
-        OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
+        CARAPACE_UPDATE_RUN_HANDOFF: "",
+        CARAPACE_SUPERVISOR_MODE: "",
+        CARAPACE_LAUNCHD_LABEL: "",
+        CARAPACE_SYSTEMD_UNIT: "",
+        CARAPACE_STATE_DIR: path.join(root, ".carapace"),
+        CARAPACE_CONFIG_PATH: path.join(root, ".carapace/carapace.json"),
+        CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
         NODE_OPTIONS: triageRuntimeNodeOptions(),
         TSX_TSCONFIG_PATH: path.resolve("tsconfig.json"),
       },
@@ -388,7 +388,7 @@ unix.each([
       cleanups.push(() => native!.cleanup());
       cleanups.push(() => rescue(root, false));
       const ready = await native.response();
-      if (ready === "OPENCLAW_UPDATE_HANDOFF_READY") {
+      if (ready === "CARAPACE_UPDATE_HANDOFF_READY") {
         expect(await native.control("commit")).toBe("committed");
         await live(root, "native");
       } else {
@@ -614,7 +614,7 @@ unix.each([
       {
         env: {
           ...process.env,
-          OPENCLAW_UPDATE_RUN_HANDOFF: "1",
+          CARAPACE_UPDATE_RUN_HANDOFF: "1",
           NODE_OPTIONS: triageRuntimeNodeOptions(),
           TSX_TSCONFIG_PATH: path.resolve("tsconfig.json"),
         },

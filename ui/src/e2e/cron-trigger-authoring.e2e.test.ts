@@ -13,14 +13,14 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const proofDirectoryParent = process.env.OPENCLAW_TRIGGER_UI_PROOF_DIR;
+const proofDirectoryParent = process.env.CARAPACE_TRIGGER_UI_PROOF_DIR;
 let proofDirectory: string | undefined;
 beforeEach(() => {
   proofDirectory = proofDirectoryParent
     ? createControlUiE2eArtifactDir("cron-trigger-authoring", proofDirectoryParent)
     : undefined;
 });
-const proofStage = process.env.OPENCLAW_TRIGGER_UI_PROOF_STAGE ?? "after";
+const proofStage = process.env.CARAPACE_TRIGGER_UI_PROOF_STAGE ?? "after";
 type CronTriggerTestApp = HTMLElement & { runtime?: { context: ApplicationContext } };
 
 const scriptJob = {
@@ -213,7 +213,7 @@ suite.define(() => {
         await expect.poll(() => triggerToggle.count()).toBe(1);
 
         const unsaved = await page.evaluate(async () => {
-          const config = (document.querySelector("openclaw-app") as CronTriggerTestApp).runtime
+          const config = (document.querySelector("carapace-app") as CronTriggerTestApp).runtime
             ?.context.runtimeConfig;
           if (!config) {
             throw new Error("Runtime config capability is unavailable");
@@ -229,7 +229,7 @@ suite.define(() => {
         await captureTriggerCapabilityProof(page, "05-unsaved-disable-keeps-active-trigger");
 
         await page.evaluate(() => {
-          const config = (document.querySelector("openclaw-app") as CronTriggerTestApp).runtime
+          const config = (document.querySelector("carapace-app") as CronTriggerTestApp).runtime
             ?.context.runtimeConfig;
           if (!config) {
             throw new Error("Runtime config capability is unavailable");
@@ -246,7 +246,7 @@ suite.define(() => {
         await expect
           .poll(() =>
             page.evaluate(() => {
-              const config = (document.querySelector("openclaw-app") as CronTriggerTestApp).runtime
+              const config = (document.querySelector("carapace-app") as CronTriggerTestApp).runtime
                 ?.context.runtimeConfig;
               return {
                 dirty: config?.state.configFormDirty,
@@ -278,7 +278,7 @@ suite.define(() => {
         await captureTriggerCapabilityProof(page, "07-reconnect-refreshes-disabled-trigger");
 
         const oppositeDraft = await page.evaluate(async () => {
-          const config = (document.querySelector("openclaw-app") as CronTriggerTestApp).runtime
+          const config = (document.querySelector("carapace-app") as CronTriggerTestApp).runtime
             ?.context.runtimeConfig;
           if (!config) {
             throw new Error("Runtime config capability is unavailable");
@@ -295,7 +295,7 @@ suite.define(() => {
           "08-unsaved-enable-cannot-author-disabled-trigger",
         );
         await page.evaluate(async () => {
-          const config = (document.querySelector("openclaw-app") as CronTriggerTestApp).runtime
+          const config = (document.querySelector("carapace-app") as CronTriggerTestApp).runtime
             ?.context.runtimeConfig;
           await config?.discardDraft();
           config?.setWritesSuspended(false);

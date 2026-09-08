@@ -189,7 +189,7 @@ suite.define(() => {
           const legacyKey = await page.evaluate(
             ({ item, sessionKey }) => {
               const currentKey = Object.keys(sessionStorage).find((key) =>
-                key.startsWith("openclaw.control.chatComposer.v4:"),
+                key.startsWith("carapace.control.chatComposer.v4:"),
               );
               if (!currentKey) {
                 throw new Error("Missing admitted metadata");
@@ -197,7 +197,7 @@ suite.define(() => {
               const current = JSON.parse(sessionStorage.getItem(currentKey)!) as {
                 gatewayOwner: string;
               };
-              const key = `openclaw.control.chatComposer.v3:${encodeURIComponent(current.gatewayOwner)}`;
+              const key = `carapace.control.chatComposer.v3:${encodeURIComponent(current.gatewayOwner)}`;
               sessionStorage.setItem(
                 key,
                 JSON.stringify({
@@ -243,7 +243,7 @@ suite.define(() => {
               .waitFor();
             await expectRequestCountStable(gateway, "chat.send", 0);
             await notice.getByRole("button", { name: "Restore here for review" }).click();
-            const dialog = page.locator("openclaw-modal-dialog");
+            const dialog = page.locator("carapace-modal-dialog");
             await dialog.getByText(`${destination} (main)`, { exact: true }).waitFor();
             await page.screenshot({
               path: path.join(suite.artifactDir, "v3-global-destination-confirmation.png"),
@@ -420,7 +420,7 @@ suite.define(() => {
       const connection = await blocker.evaluateHandle(
         async () =>
           new Promise<IDBDatabase>((resolve, reject) => {
-            const request = indexedDB.open("openclaw-control-ui", 1);
+            const request = indexedDB.open("carapace-control-ui", 1);
             request.onupgradeneeded = () =>
               request.result
                 .createObjectStore("composerDrafts", { keyPath: "key" })
@@ -579,7 +579,7 @@ suite.define(() => {
         );
         const reference = original.attachmentPayload;
         const runId = original.sendRunId;
-        const sourceLockName = `openclaw-outbox:${reference.tabId}`;
+        const sourceLockName = `carapace-outbox:${reference.tabId}`;
         const sourceOwnsLock = () =>
           page.evaluate(
             async (name) =>
@@ -595,7 +595,7 @@ suite.define(() => {
         const popup = context.waitForEvent("page");
         await page.evaluate(() => window.open("about:blank"));
         const duplicate = await popup;
-        const releaseEvent = "openclaw-test-release-outbox-claim";
+        const releaseEvent = "carapace-test-release-outbox-claim";
         await duplicate.addInitScript((eventName) => {
           const manager = navigator.locks;
           const nativeRequest = manager.request.bind(manager);
@@ -616,7 +616,7 @@ suite.define(() => {
             name: string,
             callback: LockGrantedCallback<T>,
           ): LockGrantedCallback<T | Promise<T>> {
-            if (!name.startsWith("openclaw-outbox:")) {
+            if (!name.startsWith("carapace-outbox:")) {
               return callback;
             }
             return (lock) => {
@@ -661,7 +661,7 @@ suite.define(() => {
             await duplicate.evaluate(() => ({
               name: document.documentElement.dataset.outboxClaimName,
               granted: document.documentElement.dataset.outboxClaimGranted,
-              marker: sessionStorage.getItem("openclaw.control.outboxTab.v1"),
+              marker: sessionStorage.getItem("carapace.control.outboxTab.v1"),
             })),
           ).toEqual({ name: sourceLockName, granted: "false", marker: reference.tabId });
           expect((await readQueue(duplicate))[0]?.attachmentPayload).toEqual(reference);
@@ -682,12 +682,12 @@ suite.define(() => {
           await expect
             .poll(() =>
               duplicate.evaluate(async (sourceTab) => {
-                const tab = sessionStorage.getItem("openclaw.control.outboxTab.v1");
+                const tab = sessionStorage.getItem("carapace.control.outboxTab.v1");
                 return Boolean(
                   tab &&
                   tab !== sourceTab &&
                   (await navigator.locks.query()).held?.some(
-                    (lock) => lock.name === `openclaw-outbox:${tab}`,
+                    (lock) => lock.name === `carapace-outbox:${tab}`,
                   ),
                 );
               }, reference.tabId),
@@ -750,7 +750,7 @@ suite.define(() => {
         const gatewayOwner = `ws://${location.host}`;
         const scopeKey = "agent:main:main\u0000agent:main";
         sessionStorage.setItem(
-          `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayOwner)}`,
+          `carapace.control.chatComposer.v2:${encodeURIComponent(gatewayOwner)}`,
           JSON.stringify({
             version: 2,
             gatewayOwner,
@@ -780,7 +780,7 @@ suite.define(() => {
           }),
         );
         const database = await new Promise<IDBDatabase>((resolve, reject) => {
-          const request = indexedDB.open("openclaw-control-ui", 1);
+          const request = indexedDB.open("carapace-control-ui", 1);
           request.onupgradeneeded = () =>
             request.result
               .createObjectStore("composerDrafts", { keyPath: "key" })
@@ -873,7 +873,7 @@ suite.define(() => {
       await stage(page, "Mock Gateway: captured before storage wait");
       const gate = await page.evaluateHandle(async () => {
         const database = await new Promise<IDBDatabase>((resolve, reject) => {
-          const request = indexedDB.open("openclaw-control-ui", 2);
+          const request = indexedDB.open("carapace-control-ui", 2);
           request.onsuccess = () => resolve(request.result);
           request.addEventListener("error", () =>
             reject(request.error ?? new Error("IndexedDB request failed")),
@@ -934,7 +934,7 @@ suite.define(() => {
       const hello = await page.evaluate(
         () =>
           (
-            document.querySelector("openclaw-app") as unknown as {
+            document.querySelector("carapace-app") as unknown as {
               runtime: {
                 context: { gateway: { snapshot: { hello: { auth: Record<string, unknown> } } } };
               };
@@ -967,7 +967,7 @@ suite.define(() => {
       expect((await readQueue(page))[0]?.sendRunId).toBe(original.sendRunId);
       await page.evaluate(async () => {
         const database = await new Promise<IDBDatabase>((resolve, reject) => {
-          const request = indexedDB.open("openclaw-control-ui");
+          const request = indexedDB.open("carapace-control-ui");
           request.addEventListener("success", () => resolve(request.result));
           request.addEventListener("error", () =>
             reject(request.error ?? new Error("IDB open failed")),

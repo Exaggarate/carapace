@@ -20,14 +20,14 @@ function writeExecutable(filePath: string, contents: string) {
 }
 
 function runPullHelper(binDir: string, env: Record<string, string> = {}) {
-  return spawnSync("/bin/bash", [SCRIPT_PATH, "registry.example/openclaw:test"], {
+  return spawnSync("/bin/bash", [SCRIPT_PATH, "registry.example/carapace:test"], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_DOCKER_PULL_ATTEMPTS: "1",
-      OPENCLAW_DOCKER_PULL_RETRY_DELAY_SECONDS: "0",
-      OPENCLAW_DOCKER_PULL_TIMEOUT_SECONDS: "42",
+      CARAPACE_DOCKER_PULL_ATTEMPTS: "1",
+      CARAPACE_DOCKER_PULL_RETRY_DELAY_SECONDS: "0",
+      CARAPACE_DOCKER_PULL_TIMEOUT_SECONDS: "42",
       ...env,
       PATH: binDir,
     },
@@ -46,7 +46,7 @@ describe("scripts/ci-docker-pull-retry.sh", () => {
     { name: "plain timeout", binary: "timeout", killAfter: false },
     { name: "GNU gtimeout", binary: "gtimeout", killAfter: true },
   ])("bounds Docker pulls with $name", ({ binary, killAfter }) => {
-    const binDir = makeTempBin("openclaw-ci-docker-pull-");
+    const binDir = makeTempBin("carapace-ci-docker-pull-");
     const timeoutArgsPath = path.join(binDir, "timeout-args.txt");
     const dockerArgsPath = path.join(binDir, "docker-args.txt");
 
@@ -73,13 +73,13 @@ describe("scripts/ci-docker-pull-retry.sh", () => {
 
     expect(result.status).toBe(0);
     expect(readFileSync(timeoutArgsPath, "utf8").trim()).toBe(
-      `${killAfter ? "--kill-after=30s " : ""}42s docker pull registry.example/openclaw:test`,
+      `${killAfter ? "--kill-after=30s " : ""}42s docker pull registry.example/carapace:test`,
     );
-    expect(readFileSync(dockerArgsPath, "utf8").trim()).toBe("pull registry.example/openclaw:test");
+    expect(readFileSync(dockerArgsPath, "utf8").trim()).toBe("pull registry.example/carapace:test");
   });
 
   it("fails fast when timeout and gtimeout are unavailable", () => {
-    const binDir = makeTempBin("openclaw-ci-docker-pull-no-timeout-");
+    const binDir = makeTempBin("carapace-ci-docker-pull-no-timeout-");
     const dockerArgsPath = path.join(binDir, "docker-args.txt");
 
     writeExecutable(
@@ -99,7 +99,7 @@ describe("scripts/ci-docker-pull-retry.sh", () => {
   });
 
   it("returns the last pull failure status after retries are exhausted", () => {
-    const binDir = makeTempBin("openclaw-ci-docker-pull-fail-");
+    const binDir = makeTempBin("carapace-ci-docker-pull-fail-");
     const dockerArgsPath = path.join(binDir, "docker-args.txt");
 
     writeExecutable(
@@ -124,12 +124,12 @@ describe("scripts/ci-docker-pull-retry.sh", () => {
       ].join("\n"),
     );
 
-    const result = runPullHelper(binDir, { OPENCLAW_DOCKER_PULL_ATTEMPTS: "2" });
+    const result = runPullHelper(binDir, { CARAPACE_DOCKER_PULL_ATTEMPTS: "2" });
 
     expect(result.status).toBe(42);
     expect(result.stderr).toContain("Docker pull failed or timed out after 42s: status=42");
     expect(readFileSync(dockerArgsPath, "utf8")).toBe(
-      "pull registry.example/openclaw:test\npull registry.example/openclaw:test\n",
+      "pull registry.example/carapace:test\npull registry.example/carapace:test\n",
     );
   });
 });

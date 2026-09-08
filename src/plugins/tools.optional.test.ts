@@ -1,11 +1,11 @@
 // Verifies optional plugin tool registration and absence handling.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { normalizeToolParameters } from "../agents/agent-tools.schema.js";
 import { DEFAULT_PLUGIN_TOOLS_ALLOWLIST_ENTRY } from "../agents/tool-policy.js";
 import { createInvalidConfigError, throwInvalidConfig } from "../config/io.invalid-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretRef } from "../config/types.secrets.js";
 import { createDedupeCache } from "../infra/dedupe.js";
 import { resetLogger, setLoggerOverride } from "../logging/logger.js";
@@ -30,7 +30,7 @@ type MockRegistryToolEntry = {
   factory: (ctx: unknown) => unknown;
 };
 
-const loadOpenClawPluginsMock = vi.fn();
+const loadCarapacePluginsMock = vi.fn();
 const applyPluginAutoEnableMock = vi.fn();
 const loadContextMocks = vi.hoisted(() => ({
   actualResolve: undefined as
@@ -53,9 +53,9 @@ vi.mock("./loader.js", async () => {
     import("./active-runtime-registry.js"),
     import("./loader-cache.js"),
   ]);
-  const loadPluginRegistryHandle = (params: unknown) => loadOpenClawPluginsMock(params);
+  const loadPluginRegistryHandle = (params: unknown) => loadCarapacePluginsMock(params);
   return {
-    loadOpenClawPlugins: loadPluginRegistryHandle,
+    loadCarapacePlugins: loadPluginRegistryHandle,
     loadPluginRegistryHandle,
     resolveCompatibleRuntimePluginRegistry:
       activeRuntimeRegistry.resolveCompatibleRuntimePluginRegistry,
@@ -148,7 +148,7 @@ function createToolManifest(
   };
 }
 
-function createContext(): { config: OpenClawConfig; workspaceDir: string } {
+function createContext(): { config: CarapaceConfig; workspaceDir: string } {
   return {
     config: {
       plugins: {
@@ -243,7 +243,7 @@ function setRegistry(
   config: ReturnType<typeof createContext>["config"] = createContext().config,
 ) {
   const registry = createToolRegistry(entries);
-  loadOpenClawPluginsMock.mockReturnValue(registry);
+  loadCarapacePluginsMock.mockReturnValue(registry);
   setActivePluginRegistry?.(registry as never, "test-tool-registry", "gateway-bindable", "/tmp");
   installToolManifestSnapshots({
     config,
@@ -552,7 +552,7 @@ function expectResolvedToolNames(
 
 function expectLoaderCall(overrides: Record<string, unknown>) {
   void overrides;
-  expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+  expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
 }
 
 function mockCallParams(
@@ -571,7 +571,7 @@ function activeRegistryRequiredPluginIds(index = 0): unknown {
 }
 
 function expectLoaderSelectedOnlyPluginIds(expectedPluginIds: readonly string[]) {
-  const selectedPluginIds = loadOpenClawPluginsMock.mock.calls.map(
+  const selectedPluginIds = loadCarapacePluginsMock.mock.calls.map(
     ([params]) => (params as { onlyPluginIds?: string[] }).onlyPluginIds,
   );
   expect(selectedPluginIds).toStrictEqual([expectedPluginIds]);
@@ -616,7 +616,7 @@ describe("resolvePluginTools optional tools", () => {
   });
 
   beforeEach(() => {
-    loadOpenClawPluginsMock.mockReset();
+    loadCarapacePluginsMock.mockReset();
     activeRegistryMocks.getLoadedRegistry.mockReset();
     activeRegistryMocks.getLoadedRegistry.mockImplementation((...args: unknown[]) => {
       if (!activeRegistryMocks.actualGetLoadedRegistry) {
@@ -864,7 +864,7 @@ describe("resolvePluginTools optional tools", () => {
       plugin: createXaiToolManifest(),
     });
     const factory = vi.fn(() => makeTool("x_search"));
-    loadOpenClawPluginsMock.mockImplementation((params) =>
+    loadCarapacePluginsMock.mockImplementation((params) =>
       Array.isArray((params as { onlyPluginIds?: string[] }).onlyPluginIds) &&
       (params as { onlyPluginIds?: string[] }).onlyPluginIds?.length === 0
         ? { tools: [], diagnostics: [] }
@@ -892,7 +892,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expect(tools).toStrictEqual([]);
     expect(factory).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("loads manifest-gated tools when a named account supplies required config", () => {
@@ -920,7 +920,7 @@ describe("resolvePluginTools optional tools", () => {
       env: {},
       plugin: createFeishuToolManifest(),
     });
-    loadOpenClawPluginsMock.mockReturnValue(
+    loadCarapacePluginsMock.mockReturnValue(
       createToolRegistry([
         {
           pluginId: "feishu",
@@ -994,7 +994,7 @@ describe("resolvePluginTools optional tools", () => {
         },
       },
     });
-    loadOpenClawPluginsMock.mockReturnValue(
+    loadCarapacePluginsMock.mockReturnValue(
       createToolRegistry([
         {
           pluginId: "account-demo",
@@ -1043,7 +1043,7 @@ describe("resolvePluginTools optional tools", () => {
       env: {},
       plugin: createFeishuToolManifest(),
     });
-    loadOpenClawPluginsMock.mockReturnValue(
+    loadCarapacePluginsMock.mockReturnValue(
       createToolRegistry([
         {
           pluginId: "feishu",
@@ -1065,13 +1065,13 @@ describe("resolvePluginTools optional tools", () => {
 
     expect(tools).toStrictEqual([]);
     expect(factory).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("standalone bootstrap retains configured plugin tools through cold and warm resolution", async () => {
     const config = createContext().config;
     const registry = createToolRegistry([createOptionalDemoEntry()]);
-    loadOpenClawPluginsMock.mockReturnValue(registry);
+    loadCarapacePluginsMock.mockReturnValue(registry);
     installToolManifestSnapshot({
       config,
       plugin: createToolManifest("optional-demo", ["optional_tool"]),
@@ -1091,7 +1091,7 @@ describe("resolvePluginTools optional tools", () => {
         content: [{ type: "text", text: "ok" }],
       });
     }
-    expect(loadOpenClawPluginsMock).toHaveBeenCalledOnce();
+    expect(loadCarapacePluginsMock).toHaveBeenCalledOnce();
     expectLoaderSelectedOnlyPluginIds(["optional-demo"]);
   });
 
@@ -1142,7 +1142,7 @@ describe("resolvePluginTools optional tools", () => {
       });
     }
     expect(loadContextMocks.resolve).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("auto-loads cold registry for path-based config-origin plugins without pre-warming (#76598)", () => {
@@ -1160,7 +1160,7 @@ describe("resolvePluginTools optional tools", () => {
     };
     const config = context.config;
     const registry = createToolRegistry([createOptionalDemoEntry()]);
-    loadOpenClawPluginsMock.mockReturnValue(registry);
+    loadCarapacePluginsMock.mockReturnValue(registry);
     installToolManifestSnapshot({
       config,
       plugin: createToolManifest("optional-demo", ["optional_tool"], {
@@ -1208,7 +1208,7 @@ describe("resolvePluginTools optional tools", () => {
       "gateway-bindable",
       "/tmp",
     );
-    loadOpenClawPluginsMock.mockReturnValue(fullRegistry);
+    loadCarapacePluginsMock.mockReturnValue(fullRegistry);
 
     const tools = resolvePluginTools(
       createResolveToolsParams({
@@ -1219,7 +1219,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expectResolvedToolNames(tools, ["other_tool", "optional_tool"]);
     expect(activeRegistryMocks.getLoadedRegistry).toHaveReturnedWith(partialRegistry);
-    const loaderParams = mockCallParams(loadOpenClawPluginsMock) as {
+    const loaderParams = mockCallParams(loadCarapacePluginsMock) as {
       activate?: unknown;
       cache?: unknown;
       onlyPluginIds?: unknown;
@@ -1246,7 +1246,7 @@ describe("resolvePluginTools optional tools", () => {
     };
     const config = context.config;
     const registry = createToolRegistry([]);
-    loadOpenClawPluginsMock.mockReturnValue(registry);
+    loadCarapacePluginsMock.mockReturnValue(registry);
     installToolManifestSnapshot({
       config,
       plugin: createToolManifest("optional-demo", ["optional_tool"], {
@@ -1292,7 +1292,7 @@ describe("resolvePluginTools optional tools", () => {
       "gateway-bindable",
       "/tmp",
     );
-    loadOpenClawPluginsMock.mockReturnValue(freshRegistry);
+    loadCarapacePluginsMock.mockReturnValue(freshRegistry);
 
     const tools = resolvePluginTools(
       createResolveToolsParams({
@@ -1351,20 +1351,20 @@ describe("resolvePluginTools optional tools", () => {
       true,
     );
     expect(factory).toHaveBeenCalledTimes(1);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it.each<{
     name: string;
     apiKey: SecretRef;
-    secrets: OpenClawConfig["secrets"];
+    secrets: CarapaceConfig["secrets"];
   }>([
     {
       name: "explicit file provider",
       apiKey: { source: "file", provider: "vault", id: "/xai/tool-key" },
       secrets: {
         providers: {
-          vault: { source: "file", path: "/tmp/openclaw-secrets.json", mode: "json" },
+          vault: { source: "file", path: "/tmp/carapace-secrets.json", mode: "json" },
         },
       },
     },
@@ -1429,7 +1429,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expectResolvedToolNames(tools, ["x_search"]);
     expect(factory).toHaveBeenCalledTimes(1);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("skips optional tools without explicit allowlist", () => {
@@ -1639,7 +1639,7 @@ describe("resolvePluginTools optional tools", () => {
       declaredNames: ["other_tool"],
       factory: () => makeTool("other_tool"),
     };
-    loadOpenClawPluginsMock.mockReturnValue(
+    loadCarapacePluginsMock.mockReturnValue(
       createToolRegistry([defaultEntry, createOptionalDemoEntry()]),
     );
     installToolManifestSnapshots({
@@ -1683,7 +1683,7 @@ describe("resolvePluginTools optional tools", () => {
     const context = createContext();
     const config = context.config;
     const explicitOptionalEntry = createOptionalDemoEntry();
-    loadOpenClawPluginsMock.mockReturnValue(createToolRegistry([explicitOptionalEntry]));
+    loadCarapacePluginsMock.mockReturnValue(createToolRegistry([explicitOptionalEntry]));
     installToolManifestSnapshots({
       config,
       plugins: [
@@ -1795,7 +1795,7 @@ describe("resolvePluginTools optional tools", () => {
     expectResolvedToolNames(tools, ["optional_tool"]);
     expect(optionalFactory).toHaveBeenCalledTimes(1);
     expect(unavailableFactory).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not materialize manifest-unavailable optional sibling tools under alsoAllow", () => {
@@ -1863,7 +1863,7 @@ describe("resolvePluginTools optional tools", () => {
     expectResolvedToolNames(tools, ["other_tool"]);
     expect(defaultFactory).toHaveBeenCalledTimes(1);
     expect(optionalFactory).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("rechecks cached optional tool availability when provider auth changes", () => {
@@ -1980,7 +1980,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expectResolvedToolNames(tools, ["other_tool"]);
     expect(factory).toHaveBeenCalledTimes(1);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("marks allowlisted manifest-optional sibling tools from non-optional factories as optional", () => {
@@ -2200,11 +2200,11 @@ describe("resolvePluginTools optional tools", () => {
     {
       name: "uses loaded plugin tools with an explicit env",
       params: {
-        env: { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv,
+        env: { CARAPACE_HOME: "/srv/carapace-home" } as NodeJS.ProcessEnv,
         toolAllowlist: ["optional_tool"],
       },
       expectedLoaderCall: {
-        env: { OPENCLAW_HOME: "/srv/openclaw-home" },
+        env: { CARAPACE_HOME: "/srv/carapace-home" },
       },
     },
     {
@@ -2484,7 +2484,7 @@ describe("resolvePluginTools optional tools", () => {
     expect(second[0]?.hideFromChannelProgress).toBe(false);
     expect(second[0]?.description).toBe("current description");
     expect(second[0]?.displaySummary).toBe("Current summary");
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
 
     await expect(second[0]?.execute("call", {}, undefined)).resolves.toEqual({
       content: [{ type: "text", text: "same" }],
@@ -2496,7 +2496,7 @@ describe("resolvePluginTools optional tools", () => {
 
   it("executes prepared plugin tools without rescanning manifests or polling config", async () => {
     const context = createContext();
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       ...context.config,
       channels: { telegram: { enabled: false } },
     };
@@ -3110,7 +3110,7 @@ describe("resolvePluginTools optional tools", () => {
     const replacementRegistry = createToolRegistry([unrelatedEntry]);
     replacementRegistry.plugins.push(createToolRuntimeRecord("cache-lifecycle-test"));
     setActivePluginRegistry?.(replacementRegistry as never, "provider-runtime", "default", "/tmp");
-    loadOpenClawPluginsMock.mockReset();
+    loadCarapacePluginsMock.mockReset();
 
     await expect(tool?.execute("call-1", {}, undefined)).resolves.toEqual({
       content: [{ type: "text", text: "ok" }],
@@ -3118,7 +3118,7 @@ describe("resolvePluginTools optional tools", () => {
     await expect(tool?.execute("call-2", {}, undefined)).resolves.toEqual({
       content: [{ type: "text", text: "ok" }],
     });
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
     expect(getActivePluginRegistry?.()).toBe(replacementRegistry);
     expect(getActivePluginRegistry?.()?.tools.map((entry) => entry.pluginId)).toContain(
       "unrelated-live",
@@ -3348,7 +3348,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expectResolvedToolNames(tools, ["optional_tool"]);
     expect(activeRegistryMocks.getLoadedRegistry).toHaveReturnedWith(activeRegistry);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("reuses the gateway-bindable registry when it covers the tool runtime scope", () => {
@@ -3365,7 +3365,7 @@ describe("resolvePluginTools optional tools", () => {
     expectResolvedToolNames(tools, ["optional_tool"]);
     expect(activeRegistryMocks.getLoadedRegistry).toHaveBeenCalledOnce();
     expect(activeRegistryMocks.getLoadedRegistry).toHaveReturnedWith(activeRegistry);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("filters non-matching plugin tool owners while reusing the active registry", () => {
@@ -3389,7 +3389,7 @@ describe("resolvePluginTools optional tools", () => {
       diagnostics: [],
     };
     setActivePluginRegistry(activeRegistry as never, "gateway-startup", "gateway-bindable", "/tmp");
-    loadOpenClawPluginsMock.mockReturnValue(activeRegistry);
+    loadCarapacePluginsMock.mockReturnValue(activeRegistry);
 
     const tools = resolvePluginTools(
       createResolveToolsParams({
@@ -3402,7 +3402,7 @@ describe("resolvePluginTools optional tools", () => {
     expect(heavyFactory).not.toHaveBeenCalled();
     expect(activeRegistryMocks.getLoadedRegistry).toHaveBeenCalledOnce();
     expect(activeRegistryRequiredPluginIds()).toEqual(["optional-demo"]);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("does not let disabled bundled tool owners poison explicit runtime allowlists", () => {
@@ -3448,7 +3448,7 @@ describe("resolvePluginTools optional tools", () => {
       diagnostics: [],
     };
     setActivePluginRegistry(activeRegistry as never, "gateway-startup", "gateway-bindable", "/tmp");
-    loadOpenClawPluginsMock.mockReturnValue(activeRegistry);
+    loadCarapacePluginsMock.mockReturnValue(activeRegistry);
 
     const tools = resolvePluginTools(
       createResolveToolsParams({
@@ -3464,7 +3464,7 @@ describe("resolvePluginTools optional tools", () => {
     // The disabled owner must never enter the runtime scope: asking the active
     // registry for it would miss and force a pointless cold load.
     expect(activeRegistryRequiredPluginIds()).toEqual(["memory-core"]);
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("keeps a cold-loaded standalone registry scoped through tool callbacks", async () => {
@@ -3520,7 +3520,7 @@ describe("resolvePluginTools optional tools", () => {
       "gateway-bindable",
       "/tmp",
     );
-    loadOpenClawPluginsMock.mockReturnValue(loadedRegistry);
+    loadCarapacePluginsMock.mockReturnValue(loadedRegistry);
 
     const tools = resolvePluginTools(
       createResolveToolsParams({
@@ -3535,8 +3535,8 @@ describe("resolvePluginTools optional tools", () => {
     await expect(tools[0]?.execute("call", {}, undefined)).resolves.toEqual({
       content: [{ type: "text", text: "ok" }],
     });
-    expect(loadOpenClawPluginsMock).toHaveBeenCalledTimes(1);
-    const loaderParams = mockCallParams(loadOpenClawPluginsMock) as {
+    expect(loadCarapacePluginsMock).toHaveBeenCalledTimes(1);
+    const loaderParams = mockCallParams(loadCarapacePluginsMock) as {
       activate?: unknown;
       onlyPluginIds?: unknown;
       toolDiscovery?: unknown;
@@ -3567,7 +3567,7 @@ describe("resolvePluginTools optional tools", () => {
       ],
     });
     setActivePluginRegistry(activeRegistry as never, "gateway-startup", "gateway-bindable", "/tmp");
-    loadOpenClawPluginsMock.mockReturnValue(createToolRegistry([]));
+    loadCarapacePluginsMock.mockReturnValue(createToolRegistry([]));
 
     resolvePluginTools({
       context: {
@@ -3578,7 +3578,7 @@ describe("resolvePluginTools optional tools", () => {
       allowGatewaySubagentBinding: true,
     });
     expect(activeRegistryMocks.getLoadedRegistry).toHaveBeenCalledOnce();
-    const loaderParams = mockCallParams(loadOpenClawPluginsMock) as {
+    const loaderParams = mockCallParams(loadCarapacePluginsMock) as {
       onlyPluginIds?: string[];
       toolDiscovery?: unknown;
     };
@@ -3616,7 +3616,7 @@ describe("resolvePluginTools optional tools", () => {
       toolAllowlist: ["optional_tool"],
     });
 
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -3657,7 +3657,7 @@ describe("resolvePluginTools optional tools", () => {
 
     expectResolvedToolNames(tools, []);
     expect(browserFactory).not.toHaveBeenCalled();
-    expect(loadOpenClawPluginsMock).not.toHaveBeenCalled();
+    expect(loadCarapacePluginsMock).not.toHaveBeenCalled();
   });
 
   it("includes optional tools when wildcard allowlist is active (#76507)", () => {
@@ -3676,7 +3676,7 @@ describe("resolvePluginTools optional tools", () => {
       createNamedToolEntry("memory-wiki", "memory_wiki_tool", {
         factory: () =>
           throwInvalidConfig({
-            configPath: "/tmp/openclaw.json",
+            configPath: "/tmp/carapace.json",
             issues: [{ path: "plugins.entries.owner.config", message }],
             logger,
             loggedConfigPaths,
@@ -3695,14 +3695,14 @@ describe("resolvePluginTools optional tools", () => {
       );
     }
     expect(logger.error.mock.calls).toEqual([
-      ["Invalid config at /tmp/openclaw.json:\n- plugins.entries.owner.config: first error"],
-      ["Invalid config at /tmp/openclaw.json:\n- plugins.entries.owner.config: second error"],
+      ["Invalid config at /tmp/carapace.json:\n- plugins.entries.owner.config: first error"],
+      ["Invalid config at /tmp/carapace.json:\n- plugins.entries.owner.config: second error"],
     ]);
     expect(errorSpy).not.toHaveBeenCalled();
   });
 
   it.each([
-    ["unlogged invalid-config", createInvalidConfigError("/tmp/openclaw.json", "invalid property")],
+    ["unlogged invalid-config", createInvalidConfigError("/tmp/carapace.json", "invalid property")],
     ["ordinary factory", new Error("factory unavailable")],
     [
       "unreadable-message factory",

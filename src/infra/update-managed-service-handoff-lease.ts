@@ -17,7 +17,7 @@ import {
   runSqliteImmediateTransactionSync,
   type SqliteTransactionOptions,
 } from "./sqlite-transaction.js";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 import { canCleanupLegacyManagedHandoff } from "./update-managed-service-handoff-cleanup.js";
 
 const text = z.string().min(1).max(4096);
@@ -97,7 +97,7 @@ function parse(value: string) {
   }
 }
 export function resolveManagedUpdateLeaseDatabasePath(): string {
-  return path.join(resolvePreferredOpenClawTmpDir(), "managed-update-handoffs.sqlite");
+  return path.join(resolvePreferredCarapaceTmpDir(), "managed-update-handoffs.sqlite");
 }
 
 type LeaseRow = { owner: string; payload_json: string; updated_at: number };
@@ -184,7 +184,7 @@ export function createManagedHandoffLeaseStore(
     };
     const parsed = bootSchema.safeParse(boot);
     if (!parsed.success) {
-      throw new Error("OS boot identity unavailable; run openclaw triage manually");
+      throw new Error("OS boot identity unavailable; run carapace triage manually");
     }
     return parsed.data;
   }
@@ -288,7 +288,7 @@ export function createManagedHandoffLeaseStore(
     const payload = parse(value.payload_json);
     if (!payload || !text.safeParse(value.owner).success) {
       throw new Error(
-        "existing managed handoff lease is incompatible; retain diagnostics and run openclaw triage manually",
+        "existing managed handoff lease is incompatible; retain diagnostics and run carapace triage manually",
       );
     }
     return {

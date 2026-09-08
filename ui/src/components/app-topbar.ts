@@ -4,13 +4,13 @@ import type { ControlUiEnvironment } from "../../../src/gateway/control-ui-boots
 import { beginNativeWindowDrag } from "../app/native-window-drag.ts";
 import { controlUiPublicAssetPath } from "../app/public-assets.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomContentsElement } from "../lit/carapace-element.ts";
 import { icons } from "./icons.ts";
 import "./tooltip.ts";
 
 /** Narrow-viewport header: drawer toggle, brand, and command-palette search.
  * Desktop hides it entirely (layout.css) — the sidebar owns navigation there. */
-class AppTopbar extends OpenClawLightDomContentsElement {
+class AppTopbar extends CarapaceLightDomContentsElement {
   @property({ attribute: false }) navDrawerOpen = false;
   @property({ attribute: false }) resourceBasePath = "";
   @property({ attribute: false }) environment: ControlUiEnvironment | null = null;
@@ -23,7 +23,7 @@ class AppTopbar extends OpenClawLightDomContentsElement {
     return html`
       <header class="topbar">
         <div class="topnav-shell">
-          <openclaw-tooltip .content=${drawerLabel}>
+          <carapace-tooltip .content=${drawerLabel}>
             <button
               type="button"
               class="topbar-icon-btn topbar-nav-toggle"
@@ -34,16 +34,16 @@ class AppTopbar extends OpenClawLightDomContentsElement {
             >
               <span class="nav-collapse-toggle__icon" aria-hidden="true">${icons.menu}</span>
             </button>
-          </openclaw-tooltip>
+          </carapace-tooltip>
           <div class="topnav-shell__content" @mousedown=${beginNativeWindowDrag}>
-            <div class="topbar-brand" aria-label="OpenClaw">
+            <div class="topbar-brand" aria-label="Carapace">
               <img
                 class="topbar-brand__logo"
                 src=${controlUiPublicAssetPath("apple-touch-icon.png", this.resourceBasePath)}
                 alt=""
                 aria-hidden="true"
               />
-              <span class="topbar-brand__title">OpenClaw</span>
+              <span class="topbar-brand__title">Carapace</span>
               ${
                 this.environment &&
                 html`<span class="control-ui-environment-pill">${this.environment.label}</span>`
@@ -51,7 +51,7 @@ class AppTopbar extends OpenClawLightDomContentsElement {
             </div>
           </div>
           <div class="topnav-shell__actions">
-            <openclaw-tooltip .content=${t("chat.commandPaletteTitle")}>
+            <carapace-tooltip .content=${t("chat.commandPaletteTitle")}>
               <button
                 class="topbar-search"
                 @click=${this.onOpenPalette}
@@ -59,7 +59,7 @@ class AppTopbar extends OpenClawLightDomContentsElement {
               >
                 ${icons.search}
               </button>
-            </openclaw-tooltip>
+            </carapace-tooltip>
           </div>
         </div>
       </header>
@@ -67,6 +67,6 @@ class AppTopbar extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-app-topbar")) {
-  customElements.define("openclaw-app-topbar", AppTopbar);
+if (!customElements.get("carapace-app-topbar")) {
+  customElements.define("carapace-app-topbar", AppTopbar);
 }

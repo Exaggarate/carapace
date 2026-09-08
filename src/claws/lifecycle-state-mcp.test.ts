@@ -5,17 +5,17 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { readSourceConfigSnapshot } from "../config/io.js";
 import * as configMutate from "../config/mutate.js";
 import { withTempHomeConfig } from "../config/test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   beginAgentDeletionJournal,
   readAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
 import { markClawMcpServerIndependentlyOwned } from "../state/claw-mcp-adoption.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { setTestEnvValue } from "../test-utils/env.js";
 import { applyClawAddPlan } from "./add.js";
 import { quiescentClawMonitorGateway } from "./lifecycle-remove.test-support.js";
@@ -27,8 +27,8 @@ import type { ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 const sourceServer = {
@@ -38,7 +38,7 @@ const sourceServer = {
 };
 
 async function addMcpFixture() {
-  const root = tempDirs.make("openclaw-claw-remove-mcp-");
+  const root = tempDirs.make("carapace-claw-remove-mcp-");
   const parsed = parseClawManifest({
     schemaVersion: 1,
     agent: { id: "worker", name: "Worker" },
@@ -52,7 +52,7 @@ async function addMcpFixture() {
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "carapace.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -62,8 +62,8 @@ async function addMcpFixture() {
     source,
     context: { workspace: join(root, "workspace-worker") },
   });
-  const env = { OPENCLAW_STATE_DIR: join(root, "state") };
-  let config: OpenClawConfig = {};
+  const env = { CARAPACE_STATE_DIR: join(root, "state") };
+  let config: CarapaceConfig = {};
   await applyClawAddPlan(plan, {
     consentPlanIntegrity: plan.planIntegrity,
     env,
@@ -80,7 +80,7 @@ async function addMcpFixture() {
 }
 
 function listedMcpServers(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   mcpServers: Record<string, Record<string, unknown>>,
 ) {
   return {
@@ -187,8 +187,8 @@ describe("Claw MCP removal", () => {
     const current = await addMcpFixture();
     await recordManagedMcp(current);
     const installedConfig = current.getConfig();
-    const storePath = join(current.env.OPENCLAW_STATE_DIR, "shared.sqlite");
-    const config: OpenClawConfig = {
+    const storePath = join(current.env.CARAPACE_STATE_DIR, "shared.sqlite");
+    const config: CarapaceConfig = {
       ...installedConfig,
       agents: {
         ...installedConfig.agents,
@@ -196,7 +196,7 @@ describe("Claw MCP removal", () => {
       },
       session: { store: storePath },
     };
-    openOpenClawAgentDatabase({ agentId: "worker", path: storePath, env: current.env });
+    openCarapaceAgentDatabase({ agentId: "worker", path: storePath, env: current.env });
     const plan = await buildClawRemovePlan("worker", {
       env: current.env,
       config,
@@ -234,7 +234,7 @@ describe("Claw MCP removal", () => {
       setMcpServer: vi.fn(),
       listMcpServers: vi.fn().mockResolvedValue(listedMcpServers({}, { docs: sourceServer })),
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...current.getConfig(),
       mcp: { servers: { docs: sourceServer } },
     };
@@ -242,8 +242,8 @@ describe("Claw MCP removal", () => {
     const unsetMcpServer = vi.fn();
 
     const result = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
       const removed = await applyClawRemovePlan(plan, {
         monitorGateway: quiescentClawMonitorGateway,
         consentPlanIntegrity: plan.planIntegrity,
@@ -270,7 +270,7 @@ describe("Claw MCP removal", () => {
   it("deletes the final unchanged Claw-created MCP server", async () => {
     const current = await addMcpFixture();
     await recordManagedMcp(current);
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       ...current.getConfig(),
       mcp: {
         servers: {
@@ -291,8 +291,8 @@ describe("Claw MCP removal", () => {
       .mockResolvedValue({ ok: true, path: "config", config: {}, mcpServers: {}, removed: true });
 
     const result = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(plan, {
         monitorGateway: quiescentClawMonitorGateway,
         consentPlanIntegrity: plan.planIntegrity,
@@ -328,8 +328,8 @@ describe("Claw MCP removal", () => {
     });
 
     const result = await withTempHomeConfig(config, async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
       return applyClawRemovePlan(plan, {
         monitorGateway: quiescentClawMonitorGateway,
         consentPlanIntegrity: plan.planIntegrity,
@@ -361,8 +361,8 @@ describe("Claw MCP removal", () => {
 
     await expect(
       withTempHomeConfig(config, async ({ configPath }) => {
-        setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-        setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+        setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+        setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
         return applyClawRemovePlan(plan, {
           monitorGateway: quiescentClawMonitorGateway,
           consentPlanIntegrity: plan.planIntegrity,
@@ -382,8 +382,8 @@ describe("Claw MCP removal", () => {
     await recordManagedMcp(current);
 
     await withTempHomeConfig(current.getConfig(), async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
       const missing = listedMcpServers(current.getConfig(), {});
       const restored = listedMcpServers(
         { ...current.getConfig(), mcp: { servers: { docs: sourceServer } } },
@@ -431,8 +431,8 @@ describe("Claw MCP removal", () => {
     await recordManagedMcp(current);
 
     await withTempHomeConfig(current.getConfig(), async ({ configPath }) => {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_STATE_DIR", current.env.OPENCLAW_STATE_DIR);
+      setTestEnvValue("CARAPACE_CONFIG_PATH", configPath);
+      setTestEnvValue("CARAPACE_STATE_DIR", current.env.CARAPACE_STATE_DIR);
       const missing = listedMcpServers(current.getConfig(), {});
       const restored = listedMcpServers(
         { ...current.getConfig(), mcp: { servers: { docs: replacementServer } } },

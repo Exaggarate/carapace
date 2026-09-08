@@ -23,7 +23,7 @@ async function mountOwnerChip(params: {
   participantCount?: number;
 }) {
   // SAFETY: the imported module registers this custom element with these reactive properties.
-  const chip = document.createElement("openclaw-session-owner-chip") as OwnerChipElement;
+  const chip = document.createElement("carapace-session-owner-chip") as OwnerChipElement;
   chip.owner = { type: "human", id: "profile-ada", label: "Ada" };
   chip.size = "row";
   chip.participants = params.participants ?? [];

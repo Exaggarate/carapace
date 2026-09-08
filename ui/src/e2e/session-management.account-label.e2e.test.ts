@@ -86,7 +86,7 @@ suite.define(() => {
       await row.getByRole("button", { name: "Open session menu" }).click();
       await page.getByRole("menuitem", { name: "Rename…" }).click();
       const field = page
-        .locator('openclaw-modal-dialog[label="Rename session"]')
+        .locator('carapace-modal-dialog[label="Rename session"]')
         .getByRole("textbox", { name: "Rename session" });
       await field.waitFor({ state: "visible" });
       // This row has no stored label, so the field starts empty. Submitting the
@@ -163,7 +163,7 @@ suite.define(() => {
         const field = page.locator(
           surface === "header"
             ? ".chat-pane__session-title-input"
-            : 'openclaw-modal-dialog[label="Rename session"] input',
+            : 'carapace-modal-dialog[label="Rename session"] input',
         );
         await openRename();
         await field.waitFor({ state: "visible" });
@@ -198,7 +198,7 @@ suite.define(() => {
         if (surface === "header") {
           await page.keyboard.press("Enter");
         } else {
-          await page.locator("openclaw-modal-dialog").getByRole("button", { name: "Save" }).click();
+          await page.locator("carapace-modal-dialog").getByRole("button", { name: "Save" }).click();
         }
         const patchRequest = await gateway.waitForRequest("sessions.patch");
         expect(patchRequest.params).toMatchObject({

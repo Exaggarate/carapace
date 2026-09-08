@@ -287,7 +287,7 @@ export async function startApplicationRouter(
           void router
             .navigate(dynamicRoute[0], context, { history: "none" }, canonical)
             .catch((error: unknown) => {
-              console.error("[openclaw] Dynamic route navigation failed", error);
+              console.error("[carapace] Dynamic route navigation failed", error);
             });
           return;
         }

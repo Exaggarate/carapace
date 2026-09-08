@@ -13,7 +13,7 @@ import { resolveApiKeyForProviderCore } from "../agents/model-auth.js";
 import { resolveSandboxContext } from "../agents/sandbox/context.js";
 import type { ChannelGatewayContext } from "../channels/plugins/types.adapters.js";
 import type { ChannelAccountSnapshot, ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { tryReadSecretFileSync } from "../infra/secret-file.js";
 import { selectAgentSystemEvents } from "../infra/system-event-ownership.js";
 import {
@@ -60,7 +60,7 @@ const { webSearchProviders } = vi.hoisted(() => {
         setCredentialValue: (config: { apiKey?: unknown }, value: unknown) => {
           config.apiKey = value;
         },
-        getConfiguredCredentialValue: (config: OpenClawConfig | undefined) => {
+        getConfiguredCredentialValue: (config: CarapaceConfig | undefined) => {
           const pluginConfig = config?.plugins?.entries?.google?.config;
           return pluginConfig && typeof pluginConfig === "object"
             ? (pluginConfig as { webSearch?: { apiKey?: unknown } }).webSearch?.apiKey
@@ -100,12 +100,12 @@ vi.mock("../secrets/runtime-web-tools-fallback.runtime.js", () => ({
 installGatewayTestHooks({ scope: "suite" });
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-async function writeConfig(config: OpenClawConfig): Promise<void> {
+async function writeConfig(config: CarapaceConfig): Promise<void> {
   const { writeConfigFile } = await import("../config/config.js");
   await writeConfigFile(config);
 }
 
-function baseConfig(): OpenClawConfig {
+function baseConfig(): CarapaceConfig {
   return {
     gateway: {
       mode: "local",
@@ -192,9 +192,9 @@ describe("Gateway startup SecretRef owner isolation", () => {
 
   it("recovers only a repaired credential-file account through secrets.reload without restarting sibling accounts", async () => {
     await withEnvAsync(
-      { OPENCLAW_SKIP_CHANNELS: undefined, OPENCLAW_SKIP_PROVIDERS: undefined },
+      { CARAPACE_SKIP_CHANNELS: undefined, CARAPACE_SKIP_PROVIDERS: undefined },
       async () => {
-        const credentialPath = path.join(tempDirs.make("openclaw-gateway-credential-"), "token");
+        const credentialPath = path.join(tempDirs.make("carapace-gateway-credential-"), "token");
         const credentialConfigPath = "channels.telegram.accounts.broken.tokenFile";
         const repairedToken = "repaired-test-token-never-public";
         type TestAccount = {
@@ -264,7 +264,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
             },
           },
         });
-        const configPath = process.env.OPENCLAW_CONFIG_PATH;
+        const configPath = process.env.CARAPACE_CONFIG_PATH;
         if (!configPath) {
           throw new Error("Gateway test did not configure a config file path");
         }
@@ -392,7 +392,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
         GEMINI_API_KEY: "test-gemini-api-key",
         HEALTHY_MEMORY_KEY: "healthy-memory-key",
         HEALTHY_SANDBOX_IDENTITY: "healthy-sandbox-identity",
-        OPENCLAW_TEST_ACTIVE_WEB_SEARCH_SECRET: undefined,
+        CARAPACE_TEST_ACTIVE_WEB_SEARCH_SECRET: undefined,
         MISSING_MEMORY_KEY: undefined,
         MISSING_SANDBOX_IDENTITY: undefined,
         MISSING_SKILL_KEY: undefined,
@@ -513,7 +513,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
                     apiKey: {
                       source: "env",
                       provider: "default",
-                      id: "OPENCLAW_TEST_ACTIVE_WEB_SEARCH_SECRET",
+                      id: "CARAPACE_TEST_ACTIVE_WEB_SEARCH_SECRET",
                     },
                   },
                 },
@@ -621,7 +621,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
         ).rejects.toMatchObject({
           code: "sandbox_provisioning",
           backendId: "ssh",
-          message: expect.stringContaining("openclaw secrets reload"),
+          message: expect.stringContaining("carapace secrets reload"),
           cause: {
             code: "SECRET_SURFACE_UNAVAILABLE",
             ownerKind: "capability",
@@ -636,7 +636,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = tempDirs.make("openclaw-gateway-provider-outage-");
+    const root = tempDirs.make("carapace-gateway-provider-outage-");
     const callLogPath = path.join(root, "calls.log");
     const commandPath = path.join(root, "provider.sh");
     const resolverPath = path.resolve("extensions/vault/vault-secret-ref-resolver.js");
@@ -717,7 +717,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = tempDirs.make("openclaw-gateway-vault-acl-");
+    const root = tempDirs.make("carapace-gateway-vault-acl-");
     const commandPath = path.join(root, "provider.sh");
     const resolverPath = path.resolve("extensions/vault/vault-secret-ref-resolver.js");
     writeFileSync(
@@ -802,7 +802,7 @@ describe("Gateway startup SecretRef owner isolation", () => {
       },
       async () => {
         const profileId = "openai:cold";
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           ...baseConfig(),
           agents: {
             defaults: {

@@ -24,7 +24,7 @@ export function createUsageJsonExportRequest(
       if (!connection) {
         throw new Error(t("common.offline"));
       }
-      const filename = `openclaw-usage-${currentLocalDate()}.json`;
+      const filename = `carapace-usage-${currentLocalDate()}.json`;
       let weights = new Map<string, UsageSessionEntry["contextWeight"]>();
       if (data.sessions.some((session) => session.hasContextWeight)) {
         const result = await requestSessionUsage(connection.client, query(), {

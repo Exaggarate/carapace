@@ -1,6 +1,6 @@
 // Imessage plugin module implements approval reactions behavior.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ApprovalResolveResult } from "carapace/plugin-sdk/approval-gateway-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 import {
   addApprovalReactionHintToText,
   approvalReactionDecisionSetsMatch,
@@ -16,13 +16,13 @@ import {
   resolveTypedApprovalReactionTarget,
   type ApprovalReactionDeliveryBinding,
   type ApprovalReactionTargetRecord,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeSurface } from "openclaw/plugin-sdk/lazy-runtime";
-import { createPluginStateErrorReporter } from "openclaw/plugin-sdk/plugin-state-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "carapace/plugin-sdk/approval-reply-runtime";
+import type { OutboundDeliveryResult } from "carapace/plugin-sdk/channel-send-result";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createLazyRuntimeSurface } from "carapace/plugin-sdk/lazy-runtime";
+import { createPluginStateErrorReporter } from "carapace/plugin-sdk/plugin-state-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { getIMessageApprovalApprovers, imessageApprovalAuth } from "./approval-auth.js";
 import type { IMessageApprovalGatewayRuntime } from "./approval-gateway-types.js";
 import {
@@ -67,7 +67,7 @@ type IMessageApprovalReactionTarget = ApprovalReactionTargetRecord & {
 export type { IMessageApprovalConversationKey } from "./approval-target-keys.js";
 
 const loadResolveApprovalOverGateway = createLazyRuntimeSurface(
-  () => import("openclaw/plugin-sdk/approval-gateway-runtime"),
+  () => import("carapace/plugin-sdk/approval-gateway-runtime"),
   (runtime) => runtime.resolveApprovalOverGateway,
 );
 const reportPersistentApprovalReactionError = createPluginStateErrorReporter(
@@ -456,7 +456,7 @@ function readApprovalReactionEvent(
 }
 
 export async function handleIMessageApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   message: IMessagePayload;
   bodyText: string;
@@ -547,7 +547,7 @@ export async function handleIMessageApprovalReaction(params: {
 }
 
 export async function maybeResolveIMessageApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   message: IMessagePayload;
   bodyText: string;

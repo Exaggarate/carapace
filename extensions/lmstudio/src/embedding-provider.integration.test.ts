@@ -24,8 +24,8 @@ describe("LM Studio embedding request headers", () => {
   ])("$name", async ({ providerQuery, remoteQuery, providerOwnsDestination }) => {
     vi.stubEnv("NO_PROXY", "127.0.0.1");
     vi.stubEnv("no_proxy", "127.0.0.1");
-    vi.stubEnv("OPENCLAW_TEST_LMSTUDIO_LITERAL", "ambient-bait");
-    vi.stubEnv("OPENCLAW_TEST_LMSTUDIO_PROVIDER", "resolved-provider-value");
+    vi.stubEnv("CARAPACE_TEST_LMSTUDIO_LITERAL", "ambient-bait");
+    vi.stubEnv("CARAPACE_TEST_LMSTUDIO_PROVIDER", "resolved-provider-value");
 
     const observedRequests: Array<{ url?: string; headers: IncomingHttpHeaders }> = [];
     const server = createServer((request, response) => {
@@ -54,7 +54,7 @@ describe("LM Studio embedding request headers", () => {
                 baseUrl: `${baseUrl}${providerQuery}`,
                 params: { preload: false },
                 headers: {
-                  "X-Provider-Only": "${OPENCLAW_TEST_LMSTUDIO_PROVIDER}",
+                  "X-Provider-Only": "${CARAPACE_TEST_LMSTUDIO_PROVIDER}",
                   "X-Shared": "provider-value",
                 },
                 models: [],
@@ -69,7 +69,7 @@ describe("LM Studio embedding request headers", () => {
           baseUrl: `${baseUrl}${remoteQuery}`,
           apiKey: "synthetic-memory-key",
           headers: {
-            "X-Already-Resolved": "  ${OPENCLAW_TEST_LMSTUDIO_LITERAL}  ",
+            "X-Already-Resolved": "  ${CARAPACE_TEST_LMSTUDIO_LITERAL}  ",
             "X-Shared": "  remote-value  ",
             "X-Empty": "   ",
           },
@@ -83,7 +83,7 @@ describe("LM Studio embedding request headers", () => {
         {
           url: `/v1/embeddings${remoteQuery}`,
           headers: {
-            "x-already-resolved": "${OPENCLAW_TEST_LMSTUDIO_LITERAL}",
+            "x-already-resolved": "${CARAPACE_TEST_LMSTUDIO_LITERAL}",
             "x-shared": "remote-value",
             ...(providerOwnsDestination ? { "x-provider-only": "resolved-provider-value" } : {}),
             authorization: "Bearer synthetic-memory-key",

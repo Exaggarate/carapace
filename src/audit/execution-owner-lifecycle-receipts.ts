@@ -10,18 +10,18 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateDatabase } from "../state/openclaw-state-db.generated.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../state/carapace-state-db-readonly.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateDatabase } from "../state/carapace-state-db.generated.js";
+import type { CarapaceStateDatabaseOptions } from "../state/carapace-state-db.js";
 import { EXECUTION_OWNER_LIFECYCLE_BINDING_TABLE } from "./execution-owner-lifecycle-binding-store.js";
 
 type WithSqliteRowId<Row> = Row & { rowid: number };
 type OwnerLifecycleDatabase = {
-  cron_run_receipts: WithSqliteRowId<OpenClawStateDatabase["cron_run_receipts"]>;
-  execution_owner_lifecycle_bindings: OpenClawStateDatabase["execution_owner_lifecycle_bindings"];
-  flow_runs: WithSqliteRowId<OpenClawStateDatabase["flow_runs"]>;
-  task_runs: WithSqliteRowId<OpenClawStateDatabase["task_runs"]>;
+  cron_run_receipts: WithSqliteRowId<CarapaceStateDatabase["cron_run_receipts"]>;
+  execution_owner_lifecycle_bindings: CarapaceStateDatabase["execution_owner_lifecycle_bindings"];
+  flow_runs: WithSqliteRowId<CarapaceStateDatabase["flow_runs"]>;
+  task_runs: WithSqliteRowId<CarapaceStateDatabase["task_runs"]>;
 };
 export type OwnerLifecycleStage = "cron" | "task" | "flow";
 export type OwnerLifecycleCursor = { occurredAt: number; rowId: number };
@@ -378,10 +378,10 @@ function projectReceipt(
 export function summarizeOwnerLifecycleReceipts(params: {
   stage: OwnerLifecycleStage;
   context: ExecutionIdentityContextV1;
-  options: OpenClawStateDatabaseOptions;
+  options: CarapaceStateDatabaseOptions;
 }): { count: number; coverageState?: "attribution-only" | "unknown"; missingEvidence: string[] } {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       const count = countRows({ db, stage: params.stage, contextId: params.context.contextId });
       const exactCount = countRows({
         db,
@@ -407,9 +407,9 @@ export function pageOwnerLifecycleReceipts(params: {
   after?: OwnerLifecycleCursor;
   offset?: number;
   limit: number;
-  options: OpenClawStateDatabaseOptions;
+  options: CarapaceStateDatabaseOptions;
 }): { entries: OwnerLifecycleReceiptEntry[]; nextCursor?: OwnerLifecycleCursor } {
-  const retainedRows = withExistingOpenClawStateDatabaseReadOnly(
+  const retainedRows = withExistingCarapaceStateDatabaseReadOnly(
     ({ db }) =>
       runSqliteDeferredTransactionSync(
         db,

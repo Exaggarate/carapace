@@ -72,7 +72,7 @@ test.each([false, true])(
     const selected = [...running, ...queued];
     const failedRunId = fault ? running[3] : undefined;
     const sessionKey = (runId: string) => `agent:main:subagent:${runId}`;
-    const stateDir = process.env.OPENCLAW_STATE_DIR!;
+    const stateDir = process.env.CARAPACE_STATE_DIR!;
     const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
     testState.sessionStorePath = storePath;
     await writeSessionStore({

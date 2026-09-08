@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { initializeNativeSessionCatalogPreferences } from "../../../plugins/native-session-catalog-config.js";
 import { collectConfiguredPluginIds } from "./missing-configured-plugin-install.ids.js";
 
@@ -24,7 +24,7 @@ describe("Doctor plugin installation intent", () => {
   });
 
   it("retains a selected runtime even when its native conversations are disabled", () => {
-    const cfg: OpenClawConfig = initializeNativeSessionCatalogPreferences({
+    const cfg: CarapaceConfig = initializeNativeSessionCatalogPreferences({
       agents: { defaults: { models: { "example/starter": { agentRuntime: { id: "codex" } } } } },
     });
     expect(collectConfiguredPluginIds(cfg, {}).has("codex")).toBe(true);

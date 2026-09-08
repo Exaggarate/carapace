@@ -54,7 +54,7 @@ export async function writeTsdownDeclarations(
         new CompilerInputSnapshot(root, {
           toolchainFiles: resolveTsdownCompilerFiles(),
           generatorInputs,
-          isGeneratorInput: (file) => /(?:^|\/)(?:package|openclaw\.plugin)\.json$/u.test(file),
+          isGeneratorInput: (file) => /(?:^|\/)(?:package|carapace\.plugin)\.json$/u.test(file),
         });
       // All groups share the same before/after reads of configuration, topology,
       // tools and overlapping sources. Only compiler membership differs.
@@ -135,13 +135,13 @@ export async function writeTsdownDeclarations(
           artifactRoot: stage,
           env: {
             ...process.env,
-            OPENCLAW_BUILD_PRIVATE_QA: process.env.OPENCLAW_BUILD_PRIVATE_QA === "1" ? "1" : "0",
+            CARAPACE_BUILD_PRIVATE_QA: process.env.CARAPACE_BUILD_PRIVATE_QA === "1" ? "1" : "0",
           },
           inputSignature: (inputs: string[]) =>
             before.signature("tsconfig.json", identity, inputs, liveDist),
         };
         const state =
-          process.env.OPENCLAW_BUILD_CACHE === "0"
+          process.env.CARAPACE_BUILD_CACHE === "0"
             ? undefined
             : resolveBuildStepCacheState(step, params);
         if (!state) {

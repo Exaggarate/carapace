@@ -1,7 +1,7 @@
 // Zalo plugin module implements monitor.webhook behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { readWebhookBodyOrReject } from "openclaw/plugin-sdk/webhook-request-guards";
+import { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
+import { readWebhookBodyOrReject } from "carapace/plugin-sdk/webhook-request-guards";
 import {
   createFixedWindowRateLimiter,
   createWebhookAnomalyTracker,
@@ -15,7 +15,7 @@ import {
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
   resolveClientIp,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../runtime-api.js";
 import type { ResolvedZaloAccount } from "./accounts.js";
 import type { ZaloRuntimeEnv } from "./monitor.types.js";
@@ -23,14 +23,14 @@ import { ZaloWebhookPayloadError } from "./webhook-spool.js";
 
 type ZaloWebhookTarget = {
   account: ResolvedZaloAccount;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: ZaloRuntimeEnv;
   secret: string;
   path: string;
   acceptWebhook: (rawEvent: string) => Promise<void>;
 };
 
-const ZALO_WEBHOOK_ACCEPTED_HEADER = "x-openclaw-delivery-accepted";
+const ZALO_WEBHOOK_ACCEPTED_HEADER = "x-carapace-delivery-accepted";
 const ZALO_WEBHOOK_ACCEPTED_VALUE = "durable";
 
 const webhookTargets = new Map<string, ZaloWebhookTarget[]>();

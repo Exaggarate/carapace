@@ -43,14 +43,14 @@ def verify_app_archive(path):
     with zipfile.ZipFile(path) as archive:
         for item in archive.infolist():
             parts = item.filename.rstrip("/").split("/")
-            if parts[0] not in {"OpenClaw.app", "__MACOSX"} or ".." in parts:
+            if parts[0] not in {"Carapace.app", "__MACOSX"} or ".." in parts:
                 raise ValueError("Recovery app archive contains an unsafe path")
             if stat.S_ISLNK(item.external_attr >> 16):
                 if item.file_size > 4096:
                     raise ValueError("Recovery app archive contains an oversized symlink")
                 target = archive.read(item).decode("utf-8")
                 resolved = posixpath.normpath(posixpath.join(posixpath.dirname(item.filename), target))
-                if not resolved.startswith("OpenClaw.app/"):
+                if not resolved.startswith("Carapace.app/"):
                     raise ValueError("Recovery app symlink escapes its bundle")
 
 

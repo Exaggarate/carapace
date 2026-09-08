@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { isDefaultInstallIdentity } from "../config/paths.js";
 import * as gatewayService from "../daemon/service.js";
 import {
@@ -14,9 +14,9 @@ import { buildSystemdUnit } from "../daemon/systemd-unit.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
 
 const edges = vi.hoisted(() => ({
@@ -57,7 +57,7 @@ const existingToken = "doctor-fixture-config-token";
 const inspectionCanary = "doctor-fixture-private-inspection-detail";
 
 describe.skipIf(process.platform === "win32")("Doctor native repair authority ordering", () => {
-  let state: OpenClawTestState | undefined;
+  let state: CarapaceTestState | undefined;
 
   afterEach(async () => {
     vi.restoreAllMocks();
@@ -74,20 +74,20 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
       blockedTarget,
     }: { tokenPresent?: boolean; update?: boolean; blockedTarget?: "installed" | "planned" } = {},
   ) {
-    state = await createOpenClawTestState({ prefix: "doctor-authority-" });
+    state = await createCarapaceTestState({ prefix: "doctor-authority-" });
     const { root, home, stateDir, configPath } = state;
     await fs.chmod(stateDir, 0o700);
     const installedStateDir = blockedTarget ? path.join(root, "installed-state") : stateDir;
-    const unitPath = path.join(home, ".config/systemd/user/openclaw-gateway.service");
+    const unitPath = path.join(home, ".config/systemd/user/carapace-gateway.service");
     const environmentPath = path.join(stateDir, "gateway.systemd.env");
     const installedEnvironmentPath = path.join(installedStateDir, "gateway.systemd.env");
-    const wrapperPath = path.join(root, "openclaw-fixture");
+    const wrapperPath = path.join(root, "carapace-fixture");
     const systemUnits = path.join(root, "system-units");
     await fs.mkdir(installedStateDir, { recursive: true, mode: 0o700 });
     await fs.mkdir(path.dirname(unitPath), { recursive: true, mode: 0o755 });
     await fs.mkdir(systemUnits, { mode: 0o755 });
     await fs.writeFile(wrapperPath, "#!/bin/sh\nexit 99\n", { mode: 0o700 });
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       gateway: {
         mode: "local",
         auth: { mode: "token", ...(tokenPresent ? { token: existingToken } : {}) },
@@ -98,10 +98,10 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
     const programArguments = [wrapperPath, "gateway", "--port", "18789"];
     const environment = {
       HOME: home,
-      OPENCLAW_STATE_DIR: installedStateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_WRAPPER: wrapperPath,
-      OPENCLAW_GATEWAY_TOKEN: embeddedToken,
+      CARAPACE_STATE_DIR: installedStateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_WRAPPER: wrapperPath,
+      CARAPACE_GATEWAY_TOKEN: embeddedToken,
       PATH: "/usr/local/bin:/usr/bin:/bin",
     };
     const originalUnit = buildSystemdUnit({ programArguments, environment });
@@ -247,21 +247,21 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
       {
         HOME: home,
         USERPROFILE: home,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_SYSTEMD_UNIT: undefined,
-        OPENCLAW_SERVICE_KIND: undefined,
-        OPENCLAW_NIX_MODE: undefined,
-        OPENCLAW_SUPERVISOR_MODE: undefined,
-        OPENCLAW_SERVICE_REPAIR_POLICY: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_PORT: undefined,
-        OPENCLAW_WRAPPER: wrapperPath,
-        OPENCLAW_UPDATE_IN_PROGRESS: update ? "1" : undefined,
-        OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: update ? "1" : undefined,
+        CARAPACE_HOME: undefined,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_SYSTEMD_UNIT: undefined,
+        CARAPACE_SERVICE_KIND: undefined,
+        CARAPACE_NIX_MODE: undefined,
+        CARAPACE_SUPERVISOR_MODE: undefined,
+        CARAPACE_SERVICE_REPAIR_POLICY: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
+        CARAPACE_GATEWAY_PORT: undefined,
+        CARAPACE_WRAPPER: wrapperPath,
+        CARAPACE_UPDATE_IN_PROGRESS: update ? "1" : undefined,
+        CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR: update ? "1" : undefined,
       },
       async () => {
         expect(isDefaultInstallIdentity()).toBe(true);
@@ -273,7 +273,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
         const plannedCapability = blockedTarget
           ? await service.readDefinitionMutationCapability!({
               env: process.env,
-              environment: { ...environment, OPENCLAW_STATE_DIR: stateDir },
+              environment: { ...environment, CARAPACE_STATE_DIR: stateDir },
             })
           : undefined;
         if (scenario === "rejected") {
@@ -287,7 +287,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
         }
         const result = await maybeRepairGatewayServiceConfig(cfg, "local", runtime, prompter);
         const configBytes = await fs.readFile(configPath, "utf8");
-        const persisted: OpenClawConfig = JSON.parse(configBytes);
+        const persisted: CarapaceConfig = JSON.parse(configBytes);
         const diagnostics = [...edges.note.mock.calls.map(([message]) => message), ...errors].join(
           "\n",
         );
@@ -331,7 +331,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
       expect(observations.unitBytesPreserved).toBe(true);
       expect(observations.environmentBytesPreserved).toBe(true);
       expect(observations.installedEnvironmentBytesPreserved).toBe(true);
-      expect(observations.unitDirectoryEntries).toEqual(["openclaw-gateway.service"]);
+      expect(observations.unitDirectoryEntries).toEqual(["carapace-gateway.service"]);
       expect(observations.nativeActions).toEqual([]);
       expect(observations.events).not.toContain("service-published");
       expect
@@ -358,7 +358,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
       expect(observations.returnedConfigPreserved).toBe(true);
       expect(observations.unitBytesPreserved).toBe(true);
       expect(observations.environmentBytesPreserved).toBe(true);
-      expect(observations.unitDirectoryEntries).toEqual(["openclaw-gateway.service"]);
+      expect(observations.unitDirectoryEntries).toEqual(["carapace-gateway.service"]);
       expect(observations.events).not.toContain("service-published");
       expect(observations.nativeActions).toEqual([]);
     },
@@ -384,7 +384,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
         unitBytesPreserved: true,
         environmentBytesPreserved: true,
         installedEnvironmentBytesPreserved: true,
-        unitDirectoryEntries: ["openclaw-gateway.service"],
+        unitDirectoryEntries: ["carapace-gateway.service"],
         nativeActions: [],
       });
       expect(observations.events).not.toContain("service-published");
@@ -402,7 +402,7 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
       unitBytesPreserved: true,
       environmentBytesPreserved: true,
       installedEnvironmentBytesPreserved: true,
-      unitDirectoryEntries: ["openclaw-gateway.service"],
+      unitDirectoryEntries: ["carapace-gateway.service"],
       nativeActions: [],
     });
     expect(observations.events).not.toContain("service-published");
@@ -419,8 +419,8 @@ describe.skipIf(process.platform === "win32")("Doctor native repair authority or
     );
     expect(observations.nativeActions).toEqual(["daemon-reload", "enable", "restart"]);
     expect(observations.unitDirectoryEntries).toEqual([
-      "openclaw-gateway.service",
-      "openclaw-gateway.service.bak",
+      "carapace-gateway.service",
+      "carapace-gateway.service.bak",
     ]);
   });
 });

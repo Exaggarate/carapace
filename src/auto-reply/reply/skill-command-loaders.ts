@@ -1,6 +1,6 @@
 import type { ExecPolicyOverrides } from "../../agents/exec-defaults.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SkillCommandSpec } from "../../skills/types.js";
 import type { HandleCommandsParams } from "./commands-types.js";
 
@@ -10,7 +10,7 @@ export function createSkillCommandLoaders(
   loadRuntime: () => Promise<SkillCommandsRuntime>,
   params: {
     workspaceDir: string;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     skillFilter?: string[];
     sessionEntry?: SessionEntry;

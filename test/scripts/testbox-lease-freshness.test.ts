@@ -122,7 +122,7 @@ describe("Testbox lease freshness", () => {
 });
 
 function createLeaseFixture() {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-testbox-freshness-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-testbox-freshness-"));
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const env = {
     ...process.env,
@@ -155,7 +155,7 @@ function createLeaseFixture() {
         repoRoot: root,
         provider: "blacksmith-testbox",
         args: ["run", "--id", "tbx_fixture", ...extraArgs],
-        env: { VITEST: "1", OPENCLAW_TESTBOX_LEASE_STATE_DIR: stateDir },
+        env: { VITEST: "1", CARAPACE_TESTBOX_LEASE_STATE_DIR: stateDir },
       });
     },
   };

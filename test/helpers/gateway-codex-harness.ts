@@ -1,27 +1,27 @@
 import type { AgentEventPayload } from "../../src/infra/agent-events.js";
 import { listKnownProviderAuthEnvVarNames } from "../../src/secrets/provider-env-vars.js";
 // Native live fixture setup and capture shared with its offline boundary regressions.
-import { createOpenClawTestInstance } from "./openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./carapace-test-instance.js";
 
 export function createCodexHarnessLiveInstance(
   token: string,
   authMode: "codex-auth" | "api-key" = "codex-auth",
 ) {
-  return createOpenClawTestInstance({
+  return createCarapaceTestInstance({
     name: "live-codex-harness",
     // test-env already staged native Codex auth/config in the caller home.
     state: { layout: "state-only" },
     gatewayToken: token,
     env: {
       ...Object.fromEntries(listKnownProviderAuthEnvVarNames().map((name) => [name, undefined])),
-      OPENCLAW_AGENT_RUNTIME: "codex",
-      OPENCLAW_GATEWAY_TOKEN: token,
-      OPENCLAW_ALLOW_SLOW_REPLY_TESTS: "1",
+      CARAPACE_AGENT_RUNTIME: "codex",
+      CARAPACE_GATEWAY_TOKEN: token,
+      CARAPACE_ALLOW_SLOW_REPLY_TESTS: "1",
       // Admission and completion must share the normal, built Gateway lifecycle.
-      OPENCLAW_TEST_MINIMAL_GATEWAY: "0",
-      OPENCLAW_SKIP_PROVIDERS: undefined,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-      OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: "0",
+      CARAPACE_SKIP_PROVIDERS: undefined,
+      CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+      CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: undefined,
       OPENAI_API_KEY: authMode === "api-key" ? process.env.OPENAI_API_KEY : undefined,
       OPENAI_BASE_URL:
         authMode === "api-key" && process.env.OPENAI_BASE_URL?.trim()

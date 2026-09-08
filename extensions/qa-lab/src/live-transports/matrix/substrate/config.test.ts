@@ -1,5 +1,5 @@
 // Qa Lab Matrix tests cover config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { buildMatrixQaConfig } from "./config.js";
 import type { MatrixQaProvisionedTopology } from "./topology.js";
@@ -52,7 +52,7 @@ describe("matrix qa config", () => {
   };
 
   it("builds default Matrix QA config from provisioned topology", () => {
-    const next = buildMatrixQaConfig({} as OpenClawConfig, {
+    const next = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -111,7 +111,7 @@ describe("matrix qa config", () => {
             unrelated: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       {
         driverUserId: "@driver:matrix-qa.test",
         homeserver: "http://127.0.0.1:28008/",
@@ -143,7 +143,7 @@ describe("matrix qa config", () => {
   });
 
   it("honors an explicit DM disable with a provisioned DM room", () => {
-    const next = buildMatrixQaConfig({} as OpenClawConfig, {
+    const next = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -158,7 +158,7 @@ describe("matrix qa config", () => {
   });
 
   it("applies room-keyed Matrix QA config overrides", () => {
-    const next = buildMatrixQaConfig({} as OpenClawConfig, {
+    const next = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -270,7 +270,7 @@ describe("matrix qa config", () => {
   });
 
   it("rewrites the owned Matrix QA account instead of retaining stale override fields", () => {
-    const overridden = buildMatrixQaConfig({} as OpenClawConfig, {
+    const overridden = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -286,7 +286,7 @@ describe("matrix qa config", () => {
       topology,
     });
 
-    const reset = buildMatrixQaConfig({} as OpenClawConfig, {
+    const reset = buildMatrixQaConfig({} as CarapaceConfig, {
       currentConfig: overridden,
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
@@ -383,8 +383,8 @@ describe("matrix qa config", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
-    const current = structuredClone(baseline) as OpenClawConfig & Record<string, unknown>;
+    } as unknown as CarapaceConfig;
+    const current = structuredClone(baseline) as CarapaceConfig & Record<string, unknown>;
     const currentRoot = castRecord(current);
     currentRoot.unrelated = { currentOnly: true };
     castRecord(currentRoot.approvals).exec = {
@@ -583,7 +583,7 @@ describe("matrix qa config", () => {
   });
 
   it("normalizes Matrix QA overrides into the written account config", () => {
-    const config = buildMatrixQaConfig({} as OpenClawConfig, {
+    const config = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -618,7 +618,7 @@ describe("matrix qa config", () => {
   });
 
   it("resets progress and preview overrides when a scalar follows an object", () => {
-    const optedOut = buildMatrixQaConfig({} as OpenClawConfig, {
+    const optedOut = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -634,7 +634,7 @@ describe("matrix qa config", () => {
       sutUserId: "@sut:matrix-qa.test",
       topology,
     });
-    const reset = buildMatrixQaConfig({} as OpenClawConfig, {
+    const reset = buildMatrixQaConfig({} as CarapaceConfig, {
       currentConfig: optedOut,
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
@@ -662,7 +662,7 @@ describe("matrix qa config", () => {
   });
 
   it("applies Matrix approval delivery overrides with gateway forwarding enabled", () => {
-    const next = buildMatrixQaConfig({} as OpenClawConfig, {
+    const next = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -701,7 +701,7 @@ describe("matrix qa config", () => {
   });
 
   it("resolves role-based Matrix sender allowlist overrides", () => {
-    const config = buildMatrixQaConfig({} as OpenClawConfig, {
+    const config = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerUserId: "@observer:matrix-qa.test",
@@ -722,7 +722,7 @@ describe("matrix qa config", () => {
 
   it("rejects configured bot roles without matching side-account auth", () => {
     expect(() =>
-      buildMatrixQaConfig({} as OpenClawConfig, {
+      buildMatrixQaConfig({} as CarapaceConfig, {
         driverUserId: "@driver:matrix-qa.test",
         homeserver: "http://127.0.0.1:28008/",
         observerUserId: "@observer:matrix-qa.test",
@@ -738,7 +738,7 @@ describe("matrix qa config", () => {
   });
 
   it("removes QA bot-source accounts when configured roles are reset", () => {
-    const withObserver = buildMatrixQaConfig({} as OpenClawConfig, {
+    const withObserver = buildMatrixQaConfig({} as CarapaceConfig, {
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
       observerAccessToken: "observer-token",
@@ -749,7 +749,7 @@ describe("matrix qa config", () => {
       sutUserId: "@sut:matrix-qa.test",
       topology,
     });
-    const reset = buildMatrixQaConfig({} as OpenClawConfig, {
+    const reset = buildMatrixQaConfig({} as CarapaceConfig, {
       currentConfig: withObserver,
       driverUserId: "@driver:matrix-qa.test",
       homeserver: "http://127.0.0.1:28008/",
@@ -765,7 +765,7 @@ describe("matrix qa config", () => {
 
   it("rejects the SUT role as a configured bot source", () => {
     expect(() =>
-      buildMatrixQaConfig({} as OpenClawConfig, {
+      buildMatrixQaConfig({} as CarapaceConfig, {
         driverUserId: "@driver:matrix-qa.test",
         homeserver: "http://127.0.0.1:28008/",
         observerUserId: "@observer:matrix-qa.test",
@@ -782,7 +782,7 @@ describe("matrix qa config", () => {
 
   it("rejects unknown room-key overrides", () => {
     expect(() =>
-      buildMatrixQaConfig({} as OpenClawConfig, {
+      buildMatrixQaConfig({} as CarapaceConfig, {
         driverUserId: "@driver:matrix-qa.test",
         homeserver: "http://127.0.0.1:28008/",
         observerUserId: "@observer:matrix-qa.test",

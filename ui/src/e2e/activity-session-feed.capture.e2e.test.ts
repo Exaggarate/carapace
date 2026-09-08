@@ -19,7 +19,7 @@ let outputDir: string;
 beforeEach(() => {
   outputDir = createControlUiE2eArtifactDir("session-activity-feed");
 });
-const proofPhase = process.env.OPENCLAW_MENU_THEME_PROOF_PHASE;
+const proofPhase = process.env.CARAPACE_MENU_THEME_PROOF_PHASE;
 
 suite.define(() => {
   it("captures online, global activity, and person-filtered activity surfaces", async () => {
@@ -323,7 +323,7 @@ suite.define(() => {
 
         expect(
           await page.evaluate(() => {
-            const value = localStorage.getItem("openclaw:sidebar:sessions:collapsed-sections");
+            const value = localStorage.getItem("carapace:sidebar:sessions:collapsed-sections");
             return value ? JSON.parse(value) : [];
           }),
         ).toEqual(expect.arrayContaining(["work", "online"]));
@@ -350,7 +350,7 @@ suite.define(() => {
         await page.evaluate(
           ({ gatewayUrl }) => {
             localStorage.setItem(
-              `openclaw.control.settings.v1:${gatewayUrl}`,
+              `carapace.control.settings.v1:${gatewayUrl}`,
               JSON.stringify({ gatewayUrl, theme: "dash", themeMode: "dark" }),
             );
           },
@@ -360,13 +360,13 @@ suite.define(() => {
         await expect.poll(() => page.locator("html").getAttribute("data-theme")).toBe("dash");
 
         await page.evaluate(() => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("carapace-app") as HTMLElement & {
             runtime?: { context: { navigate: (routeId: string) => void } };
           };
           app.runtime?.context.navigate("activity");
         });
         await waitForControlUiRoute(page, { pathname: "/activity", routeId: "activity" });
-        const activityPage = page.locator("openclaw-activity-page");
+        const activityPage = page.locator("carapace-activity-page");
         await expect.poll(() => activityPage.count()).toBe(1);
         const titleLeft = await activityPage
           .locator(".page-title")

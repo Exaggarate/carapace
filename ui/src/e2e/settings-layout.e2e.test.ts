@@ -12,10 +12,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI settings layout mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const proofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const proofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 const introRoutes = [
   "appearance",
@@ -188,7 +188,7 @@ function createCronLayoutMethodResponses() {
 
 suite.define(() => {
   it("loads provider-settings copy after New Session and Chat without startup errors", async () => {
-    const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
     await suite.withPage(
       createControlUiE2eContextOptions(),
       async ({ context, page: firstPage }) => {
@@ -427,7 +427,7 @@ suite.define(() => {
         .poll(() => page.locator(".shell").getAttribute("class"))
         .toContain("shell--nav-drawer-open");
       const settingsSidebar = page.locator(".settings-sidebar");
-      await settingsSidebar.getByRole("link", { name: "Ask OpenClaw" }).click();
+      await settingsSidebar.getByRole("link", { name: "Ask Carapace" }).click();
       await waitForControlUiRoute(page, { pathname: "/custodian", routeId: "custodian" });
       const custodianInsets = await page.evaluate(() => {
         const content = document.querySelector<HTMLElement>("main.content");
@@ -588,7 +588,7 @@ suite.define(() => {
     });
     const page = await context.newPage();
     const config = {
-      messages: { queueLimit: 5, responsePrefix: "[OpenClaw]" },
+      messages: { queueLimit: 5, responsePrefix: "[Carapace]" },
       tts: { auto: "off" },
     };
     const schema = {
@@ -618,7 +618,7 @@ suite.define(() => {
     await installMockGateway(page, {
       methodResponses: {
         "config.get": {
-          path: "~/.openclaw/openclaw.json",
+          path: "~/.carapace/carapace.json",
           exists: true,
           raw: `${JSON.stringify(config, null, 2)}\n`,
           hash: "communications-config-hash",
@@ -632,11 +632,11 @@ suite.define(() => {
           uiHints: {
             messages: {
               label: "Messages",
-              docsUrl: "https://docs.openclaw.ai/concepts/messages",
+              docsUrl: "https://github.com/Exaggarate/carapace",
             },
             "messages.queueLimit": { advanced: false },
             "messages.responsePrefix": { advanced: true },
-            tts: { label: "Voice", docsUrl: "https://docs.openclaw.ai/tts" },
+            tts: { label: "Voice", docsUrl: "https://github.com/Exaggarate/carapace" },
           },
           version: "communications-layout",
           generatedAt: new Date(0).toISOString(),

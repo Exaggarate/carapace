@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { materializePluginAutoEnableCandidates } from "../config/plugin-auto-enable.apply.js";
 import { makeRegistry } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { runChannelLogin, runChannelLogout } from "./channel-auth.js";
 
 const mocks = vi.hoisted(() => ({
@@ -218,13 +218,13 @@ describe("channel-auth", () => {
   ] as const)(
     "uses source intent and the active runtime snapshot for %s",
     async (_mode, run, action) => {
-      const sourceConfig: OpenClawConfig = { channels: { whatsapp: {} } };
+      const sourceConfig: CarapaceConfig = { channels: { whatsapp: {} } };
       mocks.readConfigFileSnapshot.mockResolvedValue({
         hash: "config-1",
         valid: true,
         sourceConfig,
       });
-      const runtimeConfig: OpenClawConfig = {
+      const runtimeConfig: CarapaceConfig = {
         ...sourceConfig,
         agents: { defaults: { maxConcurrent: 4 } },
         plugins: { entries: { "memory-core": { config: {} } } },
@@ -247,23 +247,23 @@ describe("channel-auth", () => {
     ["login", runChannelLogin, mocks.login],
     ["logout", runChannelLogout, mocks.logoutAccount],
   ] as const)("uses runtime account callbacks when inferring %s", async (_mode, run, action) => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       channels: { whatsapp: { accounts: { work: { authDir: "~/wa-work", enabled: true } } } },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       channels: {
         whatsapp: { accounts: { work: { authDir: "/runtime/wa-work", enabled: true } } },
       },
       agents: { defaults: { maxConcurrent: 4 } },
     };
-    const listAccountIds = vi.fn((cfg: OpenClawConfig) =>
+    const listAccountIds = vi.fn((cfg: CarapaceConfig) =>
       Object.keys(cfg.channels?.whatsapp?.accounts ?? {}),
     );
     const resolveAccount = vi.fn(
-      (cfg: OpenClawConfig, accountId: string) => cfg.channels?.whatsapp?.accounts?.[accountId],
+      (cfg: CarapaceConfig, accountId: string) => cfg.channels?.whatsapp?.accounts?.[accountId],
     );
     const isEnabled = vi.fn(
-      (account: { enabled?: boolean } | undefined, cfg: OpenClawConfig) =>
+      (account: { enabled?: boolean } | undefined, cfg: CarapaceConfig) =>
         cfg.channels?.whatsapp?.enabled !== false && account?.enabled !== false,
     );
     const selectedPlugin = { ...plugin, config: { listAccountIds, resolveAccount, isEnabled } };
@@ -283,12 +283,12 @@ describe("channel-auth", () => {
   });
 
   it("keeps repeated credential-free logout free of runtime-only plugin activation writes", async () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       channels: { whatsapp: { enabled: false } },
       plugins: { allow: ["whatsapp"], entries: { whatsapp: { enabled: true } } },
     };
     mocks.readConfigFileSnapshot.mockResolvedValue({ hash: "config-1", valid: true, sourceConfig });
-    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: OpenClawConfig }) =>
+    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: CarapaceConfig }) =>
       materializePluginAutoEnableCandidates({
         config,
         candidates: [],
@@ -302,7 +302,7 @@ describe("channel-auth", () => {
     await runChannelLogout({ channel: "whatsapp" }, runtime);
 
     // Runtime plugin schema defaults can appear on a later invocation.
-    const laterRuntimeConfig: OpenClawConfig = {
+    const laterRuntimeConfig: CarapaceConfig = {
       ...sourceConfig,
       plugins: {
         ...sourceConfig.plugins,
@@ -371,7 +371,7 @@ describe("channel-auth", () => {
     expect(readFirstLogMessage(runtime)).toContain(`whatsapp/acct-1`);
     expect(readFirstLogMessage(runtime)).toContain(outcome.reason);
     expect(readFirstLogMessage(runtime)).toContain(
-      "openclaw channels status --channel whatsapp --probe",
+      "carapace channels status --channel whatsapp --probe",
     );
   });
 
@@ -478,7 +478,7 @@ describe("channel-auth", () => {
   });
 
   it("auto-picks the single auth-capable channel from the auto-enabled config snapshot", async () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: CarapaceConfig = {
       channels: { whatsapp: {} },
       plugins: { allow: ["whatsapp"] },
     };
@@ -493,7 +493,7 @@ describe("channel-auth", () => {
     };
     mocks.readConfigFileSnapshot.mockResolvedValue({ hash: "config-1", valid: true, sourceConfig });
     mocks.loadConfig.mockReturnValue(runtimeConfig);
-    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: OpenClawConfig }) =>
+    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: CarapaceConfig }) =>
       materializePluginAutoEnableCandidates({
         config,
         candidates: [{ pluginId: "whatsapp", kind: "channel-configured", channelId: "whatsapp" }],
@@ -502,7 +502,7 @@ describe("channel-auth", () => {
         ]),
       }),
     );
-    mocks.resolveAccount.mockImplementation((cfg: OpenClawConfig) => ({
+    mocks.resolveAccount.mockImplementation((cfg: CarapaceConfig) => ({
       enabled: cfg.channels?.whatsapp?.enabled === true,
     }));
     mocks.replaceConfigFile.mockImplementation(async () => {
@@ -573,7 +573,7 @@ describe("channel-auth", () => {
       },
     };
     mocks.loadConfig.mockReturnValue({ channels: { whatsapp: {}, zalouser: {} } });
-    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: OpenClawConfig }) =>
+    mocks.applyPluginAutoEnable.mockImplementation(({ config }: { config: CarapaceConfig }) =>
       materializePluginAutoEnableCandidates({
         config,
         candidates: [{ pluginId: "whatsapp", kind: "channel-configured", channelId: "whatsapp" }],
@@ -634,14 +634,14 @@ describe("channel-auth", () => {
     });
 
     await expect(runChannelLogin({ channel: "whatsapp" }, runtime)).rejects.toThrow(
-      'Channel "whatsapp" does not support login. Run `openclaw channels status --channel whatsapp` to inspect supported actions.',
+      'Channel "whatsapp" does not support login. Run `carapace channels status --channel whatsapp` to inspect supported actions.',
     );
   });
 
   it("installs a catalog-backed channel plugin on demand for login", async () => {
     const catalogEntry = {
       id: "whatsapp",
-      pluginId: "@openclaw/whatsapp",
+      pluginId: "@carapace/whatsapp",
       meta: {
         id: "whatsapp",
         label: "WhatsApp",
@@ -650,7 +650,7 @@ describe("channel-auth", () => {
         blurb: "wa",
       },
       install: {
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@carapace/whatsapp",
       },
     };
     mocks.getLoadedChannelPlugin.mockReturnValueOnce(undefined);
@@ -693,7 +693,7 @@ describe("channel-auth", () => {
   it("strips pending install records before persisting install-on-demand login config", async () => {
     const catalogEntry = {
       id: "whatsapp",
-      pluginId: "@openclaw/whatsapp",
+      pluginId: "@carapace/whatsapp",
       meta: {
         id: "whatsapp",
         label: "WhatsApp",
@@ -702,7 +702,7 @@ describe("channel-auth", () => {
         blurb: "wa",
       },
       install: {
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@carapace/whatsapp",
       },
     };
     mocks.getLoadedChannelPlugin.mockReturnValueOnce(undefined);
@@ -715,7 +715,7 @@ describe("channel-auth", () => {
           installs: {
             whatsapp: {
               source: "npm",
-              spec: "@openclaw/whatsapp",
+              spec: "@carapace/whatsapp",
             },
           },
         },
@@ -761,7 +761,7 @@ describe("channel-auth", () => {
     mocks.listChannelPluginCatalogEntries.mockReturnValueOnce([
       {
         id: "whatsapp",
-        pluginId: "@openclaw/whatsapp",
+        pluginId: "@carapace/whatsapp",
         meta: {
           id: "whatsapp",
           label: "WhatsApp",
@@ -770,7 +770,7 @@ describe("channel-auth", () => {
           blurb: "wa",
         },
         install: {
-          npmSpec: "@openclaw/whatsapp",
+          npmSpec: "@carapace/whatsapp",
         },
       },
     ]);
@@ -888,7 +888,7 @@ describe("channel-auth", () => {
     });
 
     await expect(runChannelLogout({ channel: "whatsapp" }, runtime)).rejects.toThrow(
-      'Channel "whatsapp" does not support logout. Run `openclaw channels status --channel whatsapp` to inspect supported actions.',
+      'Channel "whatsapp" does not support logout. Run `carapace channels status --channel whatsapp` to inspect supported actions.',
     );
   });
 

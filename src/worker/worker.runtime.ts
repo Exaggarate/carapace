@@ -10,8 +10,8 @@ import type { ComputerContextEpoch } from "../agents/tools/computer-tool.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { getProcessSupervisor } from "../process/supervisor/index.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db-cache.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db-cache.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import type { WorkerBrowserRuntime } from "./browser-runtime.js";
 import { buildWorkerConnectParams, type WorkerLaunchDescriptor } from "./launch-descriptor.js";
 import {
@@ -65,18 +65,18 @@ async function assertWorkerDirectory(pathname: string, label: string): Promise<s
 
 /** Holds process-local state until every command owned by this environment has exited. */
 export async function createWorkerRuntimeEnvironment(sessionId: string) {
-  const stateDir = await mkdtemp(path.join(tmpdir(), "openclaw-worker-"));
+  const stateDir = await mkdtemp(path.join(tmpdir(), "carapace-worker-"));
   await chmod(stateDir, 0o700);
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+  const previousStateDir = process.env.CARAPACE_STATE_DIR;
+  const previousConfigPath = process.env.CARAPACE_CONFIG_PATH;
   const scopeKey = `worker:${sessionId}`;
   // Worker state owns command completion and exec finalizers; its parent owns
   // process placement. This lease does not infer remote or PTY tree extinction.
   const cleanupScope = getProcessSupervisor().acquireScopeCleanup(scopeKey, {
     processTree: "transport-only",
   });
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+  process.env.CARAPACE_STATE_DIR = stateDir;
+  process.env.CARAPACE_CONFIG_PATH = path.join(stateDir, "carapace.json");
   let closing: Promise<void> | undefined;
   return {
     stateDir,
@@ -90,20 +90,20 @@ export async function createWorkerRuntimeEnvironment(sessionId: string) {
           throw failed.reason;
         }
         // Exec finalizers can open state; release its handle before Windows removes the file.
-        closeOpenClawStateDatabaseByPath(
-          resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: stateDir }),
+        closeCarapaceStateDatabaseByPath(
+          resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: stateDir }),
         );
         // Process completion writes its task outcome into this environment's state.
         // Restore the ambient directory only after those callbacks have settled.
         if (previousStateDir === undefined) {
-          delete process.env.OPENCLAW_STATE_DIR;
+          delete process.env.CARAPACE_STATE_DIR;
         } else {
-          process.env.OPENCLAW_STATE_DIR = previousStateDir;
+          process.env.CARAPACE_STATE_DIR = previousStateDir;
         }
         if (previousConfigPath === undefined) {
-          delete process.env.OPENCLAW_CONFIG_PATH;
+          delete process.env.CARAPACE_CONFIG_PATH;
         } else {
-          process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+          process.env.CARAPACE_CONFIG_PATH = previousConfigPath;
         }
         await rm(stateDir, { recursive: true, force: true });
       })()),

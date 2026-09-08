@@ -15,7 +15,7 @@ describe("plugin session store maintenance", () => {
   ])(
     "applies model-run retention $modelRunPruneAfterMs through entry patches",
     async ({ modelRunPruneAfterMs, modelRunSessionPresent }) => {
-      const storePath = path.join(tempDirs.make("openclaw-sdk-maintenance-"), "sessions.json");
+      const storePath = path.join(tempDirs.make("carapace-sdk-maintenance-"), "sessions.json");
       const modelRunSessionKey =
         "agent:main:explicit:model-run-123e4567-e89b-12d3-a456-426614174000";
       const oldSessionKey = "agent:main:old";

@@ -1,8 +1,8 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { resolveSessionEntryResetFreshness } from "./entry-freshness.js";
 import {
   appendTranscriptEvent,
@@ -19,13 +19,13 @@ describe("resolveSessionEntryResetFreshness", () => {
 
   beforeEach(() => {
     tempDirs = [];
-    tempDir = makeTempDir(tempDirs, "openclaw-session-entry-freshness-");
+    tempDir = makeTempDir(tempDirs, "carapace-session-entry-freshness-");
     storePath = path.join(tempDir, "sessions.json");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanupTempDirs(tempDirs);
   });
 

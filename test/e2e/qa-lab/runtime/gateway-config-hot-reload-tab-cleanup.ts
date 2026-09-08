@@ -51,11 +51,11 @@ async function runProof(repoRoot: string, appendLog: (text: string) => void) {
   await runQaGatewayFixture(
     async () => {
       assert.equal(
-        process.env.OPENCLAW_TESTBOX,
+        process.env.CARAPACE_TESTBOX,
         "1",
         "Tab cleanup proof requires a disposable Testbox",
       );
-      temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tab-cleanup-reload-"));
+      temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-tab-cleanup-reload-"));
       const mock = (mockOwner = await startQaMockOpenAiServer());
       const fixture = (fixtureOwner = await startHotReloadUpstreams(mock.baseUrl));
       externalOwner = createHotReloadExternalBrowser(temporaryRoot);

@@ -8,14 +8,14 @@ import {
   resolveAdmittedRunActiveAssertion,
 } from "../../agents/admitted-run-context.js";
 import { resetAgentRunRegistryForTest } from "../../infra/agent-run-registry.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  closeCarapaceAgentDatabasesForTest,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { migrateLegacyMainSessionKeys } from "./legacy-main-session-migration.js";
 import { readExactSessionEntryRowForCanonicalRepair } from "./session-accessor.sqlite-canonical-repair.js";
 import { writeSessionEntry } from "./session-accessor.sqlite-entry-store.js";
@@ -66,11 +66,11 @@ vi.mock("./session-accessor.sqlite-lifecycle.js", async (importOriginal) => {
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function databasePath(stateDir: string, agentId: string): string {
-  return path.join(stateDir, "agents", agentId, "agent", "openclaw-agent.sqlite");
+  return path.join(stateDir, "agents", agentId, "agent", "carapace-agent.sqlite");
 }
 
 function seedClaim(databaseAgentId: string, databasePathname: string, key: string): void {
-  runOpenClawAgentWriteTransaction(
+  runCarapaceAgentWriteTransaction(
     (database) => {
       const entry = {
         sessionId: "race-session",
@@ -99,7 +99,7 @@ function seedClaim(databaseAgentId: string, databasePathname: string, key: strin
 }
 
 function readClaim(databaseAgentId: string, databasePathname: string, key: string) {
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => {
       const entry = readExactSessionEntryRowForCanonicalRepair(database, key)?.entry;
       return entry
@@ -119,14 +119,14 @@ afterEach(() => {
   race.afterDelete = undefined;
   race.queued = undefined;
   resetAgentRunRegistryForTest();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it.each(["import queue", "in-place queue", "cleanup queue", "ledger"] as const)(
   "preserves committed work but defers new migration writes after closure at %s",
   async (boundary) => {
-    await withOpenClawTestState({ label: "migration-lifetime" }, async (state) => {
+    await withCarapaceTestState({ label: "migration-lifetime" }, async (state) => {
       const mainPath = databasePath(state.stateDir, "main");
       const opsPath = databasePath(state.stateDir, "ops");
       const inPlace = boundary === "in-place queue";
@@ -149,7 +149,7 @@ it.each(["import queue", "in-place queue", "cleanup queue", "ledger"] as const)(
       let blocker: Promise<void> | undefined;
       let migration: Promise<unknown> | undefined;
       const readLedger = () =>
-        withExistingOpenClawStateDatabaseReadOnly(
+        withExistingCarapaceStateDatabaseReadOnly(
           ({ db }) =>
             db
               .prepare(
@@ -246,12 +246,12 @@ it.each(["import queue", "in-place queue", "cleanup queue", "ledger"] as const)(
 );
 
 async function runCleanupRace(mutateSource: (mainPath: string) => void) {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-legacy-main-race-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-legacy-main-race-"));
   const stateDir = path.join(root, "state");
   fs.mkdirSync(stateDir, { recursive: true });
   const mainPath = databasePath(stateDir, "main");
   const opsPath = databasePath(stateDir, "ops");
-  const env = { ...process.env, OPENCLAW_AGENT_DIR: undefined, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_AGENT_DIR: undefined, CARAPACE_STATE_DIR: stateDir };
   seedClaim("main", mainPath, "agent:main:chat");
   race.beforeDelete = () => mutateSource(mainPath);
 
@@ -266,7 +266,7 @@ async function runCleanupRace(mutateSource: (mainPath: string) => void) {
 
 it("preserves both claims when the source transcript changes before atomic cleanup", async () => {
   const { mainPath, opsPath, result } = await runCleanupRace((sourcePath) => {
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         appendTranscriptEventInTransaction(
           database,
@@ -292,7 +292,7 @@ it("preserves both claims when the source transcript changes before atomic clean
 
 it("preserves both claims when the source entry becomes locked before cleanup", async () => {
   const { mainPath, opsPath, result } = await runCleanupRace((sourcePath) => {
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         const current = readExactSessionEntryRowForCanonicalRepair(
           database,

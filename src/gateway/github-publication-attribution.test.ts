@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import {
   BRANCH,
   SESSION_KEY,
@@ -31,7 +31,7 @@ describe("Gateway GitHub publication attribution", () => {
     });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -40,18 +40,18 @@ describe("Gateway GitHub publication attribution", () => {
       agentId: "main",
       idempotencyKey: "ordered-attribution",
       title: "fix: publish the reconciled fix",
-      body: "Detailed proof\n\n## Worked on by\n\n- @untrusted\n\n### Verification notes\n\nKeep this paragraph.\n\n---\n[View the OpenClaw team session](https://untrusted.example/session)",
+      body: "Detailed proof\n\n## Worked on by\n\n- @untrusted\n\n### Verification notes\n\nKeep this paragraph.\n\n---\n[View the Carapace team session](https://untrusted.example/session)",
     });
 
     expect(result).toMatchObject({ status: "published" });
     expect(commandCalls.find(({ argv }) => argv.includes("commit-tree"))?.input).toBe(
-      `fix: publish the reconciled fix\n\nWorked on by:\n- @alice\n- @grace\n\nCo-authored-by: alice <7+alice@users.noreply.github.com>\nCo-authored-by: grace <9+grace@users.noreply.github.com>\nOpenClaw-Publication: ${result.requestId}\n`,
+      `fix: publish the reconciled fix\n\nWorked on by:\n- @alice\n- @grace\n\nCo-authored-by: alice <7+alice@users.noreply.github.com>\nCo-authored-by: grace <9+grace@users.noreply.github.com>\nCarapace-Publication: ${result.requestId}\n`,
     );
     const post = commandCalls.find(({ argv }) => argv.includes("POST"));
     expect(JSON.parse(post?.input ?? "null")).toEqual({
       title: "fix: publish the reconciled fix",
-      body: `Detailed proof\n\n### Verification notes\n\nKeep this paragraph.\n\n## Worked on by\n\n- @alice\n- @grace\n\n<!-- openclaw-publication:${result.requestId} -->\n\n---\n[View the OpenClaw team session](https://team.example/control/chat/main/dashboard/publication)`,
-      head: `openclaw:${BRANCH}`,
+      body: `Detailed proof\n\n### Verification notes\n\nKeep this paragraph.\n\n## Worked on by\n\n- @alice\n- @grace\n\n<!-- carapace-publication:${result.requestId} -->\n\n---\n[View the Carapace team session](https://team.example/control/chat/main/dashboard/publication)`,
+      head: `carapace:${BRANCH}`,
       base: "main",
       draft: true,
     });
@@ -62,7 +62,7 @@ describe("Gateway GitHub publication attribution", () => {
     mocks.getConfigSnapshot.mockReturnValue({ config, sourceConfig: config });
     const coordinator = createGitHubPublicationCoordinator({
       placements: createWorkerSessionPlacementStore({
-        database: openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } }),
+        database: openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } }),
       }),
     });
 
@@ -75,7 +75,7 @@ describe("Gateway GitHub publication attribution", () => {
     expect(result).toMatchObject({ status: "published" });
     const post = commandCalls.find(({ argv }) => argv.includes("POST"));
     expect(JSON.parse(post?.input ?? "null").body).toBe(
-      `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- openclaw-publication:${result.requestId} -->`,
+      `Published by the Gateway after authoritative workspace reconciliation.\n\n## Worked on by\n\n- @alice\n\n<!-- carapace-publication:${result.requestId} -->`,
     );
   });
 });

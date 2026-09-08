@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../state/carapace-state-db.js";
 import { resolveRequiredHomeDir } from "./home-dir.js";
 import {
   executeSqliteQuerySync,
@@ -17,20 +17,20 @@ import { archiveLegacyImportSource } from "./state-migrations.storage.js";
 import type { LegacyStateDetection, MigrationMessages } from "./state-migrations.types.js";
 import { normalizeVoiceWakeRoutingConfig } from "./voicewake-routing.js";
 
-type LegacyVoiceWakeImportDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
-type LegacyConfigHealthImportDatabase = Pick<OpenClawStateKyselyDatabase, "config_health_entries">;
+type LegacyVoiceWakeImportDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
+type LegacyConfigHealthImportDatabase = Pick<CarapaceStateKyselyDatabase, "config_health_entries">;
 type LegacyPluginBindingApprovalsImportDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "plugin_binding_approvals"
 >;
 type LegacyCurrentConversationBindingsImportDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "current_conversation_bindings"
 >;
 
 const VOICEWAKE_TRIGGERS_STATE_KEY = "voicewake.triggers";
 const VOICEWAKE_ROUTING_STATE_KEY = "voicewake.routing";
-const DEFAULT_VOICEWAKE_TRIGGERS = ["openclaw", "claude", "computer"];
+const DEFAULT_VOICEWAKE_TRIGGERS = ["carapace", "claude", "computer"];
 
 export function resolveLegacyVoiceWakeTriggersPath(stateDir: string): string {
   return path.join(stateDir, "settings", "voicewake.json");
@@ -78,8 +78,8 @@ export function migrateLegacyJsonState<Value>(params: {
 
   let outcome: LegacyJsonImportOutcome;
   try {
-    outcome = runOpenClawStateWriteTransaction(({ db }) => params.migrate(db, value), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir },
+    outcome = runCarapaceStateWriteTransaction(({ db }) => params.migrate(db, value), {
+      env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir },
     });
   } catch (err) {
     warnings.push(`Failed migrating legacy ${params.label}: ${String(err)}`);
@@ -417,7 +417,7 @@ export function resolveLegacyPluginBindingApprovalsPath(
 ): string {
   return path.join(
     resolveRequiredHomeDir(env, homedir),
-    ".openclaw",
+    ".carapace",
     "plugin-binding-approvals.json",
   );
 }

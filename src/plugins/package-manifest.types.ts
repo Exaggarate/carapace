@@ -2,7 +2,7 @@ import type { ChannelSetupMetadata } from "../channels/plugins/setup-contract.js
 import type { MANIFEST_KEY } from "../compat/legacy-names.js";
 import type { PluginManifestChannelCommandDefaults } from "./manifest-types.js";
 
-/** package.json OpenClaw metadata used for plugin setup and catalog discovery. */
+/** package.json Carapace metadata used for plugin setup and catalog discovery. */
 type PluginPackageChannelApprovalFlag = "native";
 
 export type PluginPackageChannel = {
@@ -79,42 +79,42 @@ export type PluginPackageInstall = {
   requiredPlatformPackages?: string[];
 };
 
-type OpenClawPackageSetupFeatures = {
+type CarapacePackageSetupFeatures = {
   configPromotion?: boolean | "preserve-root";
   /**
-   * @deprecated Declare doctorContract.stateMigrations in openclaw.plugin.json instead.
+   * @deprecated Declare doctorContract.stateMigrations in carapace.plugin.json instead.
    * Removal plan: remove the setup-entry adapter after the 2027.1 external-plugin migration window.
    */
   legacyStateMigrations?: boolean;
   legacySessionSurfaces?: boolean;
 };
 
-type OpenClawPackageCompat = {
+type CarapacePackageCompat = {
   pluginApi?: string;
   minGatewayVersion?: string;
 };
 
-export type OpenClawPackageBuild = {
+export type CarapacePackageBuild = {
   bundledDist?: boolean;
-  openclawVersion?: string;
+  carapaceVersion?: string;
   pluginSdkVersion?: string;
 };
 
-export type OpenClawPackageManifest = {
+export type CarapacePackageManifest = {
   extensions?: string[];
   runtimeExtensions?: string[];
   setupEntry?: string;
   runtimeSetupEntry?: string;
   controlUi?: string;
-  setupFeatures?: OpenClawPackageSetupFeatures;
+  setupFeatures?: CarapacePackageSetupFeatures;
   plugin?: {
     id?: string;
     label?: string;
   };
   channel?: PluginPackageChannel;
-  compat?: OpenClawPackageCompat;
+  compat?: CarapacePackageCompat;
   install?: PluginPackageInstall;
-  build?: OpenClawPackageBuild;
+  build?: CarapacePackageBuild;
 };
 
 export type PackageExtensionResolution =
@@ -131,4 +131,4 @@ export type PackageManifest = {
   description?: string;
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
-} & Partial<Record<ManifestKey, OpenClawPackageManifest>>;
+} & Partial<Record<ManifestKey, CarapacePackageManifest>>;

@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { runSystemAgentWithInference } from "../commands/system-agent-with-inference.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as loggingConfig from "../logging/config.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -30,10 +30,10 @@ type Scenario = FailurePhase | "success" | "drift";
 const syntheticToken = "sk-140392syntheticfixturetoken123456789";
 const syntheticStructuredValue = "140392-structured-placeholder";
 const syntheticCustomValue = "PR140392_PRIVATE_SAMPLE";
-const guidance = "Run `openclaw onboard` to connect and live-test AI first.";
+const guidance = "Run `carapace onboard` to connect and live-test AI first.";
 
 async function observeScenario(scenario: Scenario, json: boolean) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-error-reporting-140392-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-error-reporting-140392-"));
   const stdout: string[] = [];
   const stderr: string[] = [];
   const exits: number[] = [];
@@ -63,11 +63,11 @@ async function observeScenario(scenario: Scenario, json: boolean) {
     };
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: path.join(root, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(root, "missing-config.json"),
+        CARAPACE_STATE_DIR: path.join(root, "state"),
+        CARAPACE_CONFIG_PATH: path.join(root, "missing-config.json"),
       },
       async () => {
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           agents: {
             ownership: "explicit",
             entries: {
@@ -75,7 +75,7 @@ async function observeScenario(scenario: Scenario, json: boolean) {
             },
             defaults: {
               model: "openai/gpt-5.5@openai:proof",
-              models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.5": { agentRuntime: { id: "carapace" } } },
             },
           },
           auth: { profiles: { "openai:proof": { provider: "openai", mode: "api_key" } } },
@@ -126,7 +126,7 @@ async function observeScenario(scenario: Scenario, json: boolean) {
             },
             runEmbeddedAgent: async (params) => {
               phases.push("probe");
-              expect(params.agentHarnessRuntimeOverride).toBe("openclaw");
+              expect(params.agentHarnessRuntimeOverride).toBe("carapace");
               expect(params.authProfileId).toBe("openai:proof");
               params.onSuccessfulAuthBinding?.(fixture.binding.auth);
               if (scenario === "drift") {
@@ -228,7 +228,7 @@ async function observeScenario(scenario: Scenario, json: boolean) {
       expect(output.endsWith(`\n${guidance}`)).toBe(true);
       message = output.slice(0, -guidance.length - 1);
     }
-    expect(message.startsWith("OpenClaw requires working inference: ")).toBe(true);
+    expect(message.startsWith("Carapace requires working inference: ")).toBe(true);
     expect(message).not.toContain(syntheticToken);
     expect(message).not.toContain(syntheticStructuredValue);
     expect(message).not.toContain(syntheticCustomValue);
@@ -253,7 +253,7 @@ async function observeScenario(scenario: Scenario, json: boolean) {
     } finally {
       await fs.rm(root, { recursive: true, force: true });
       await expect(fs.stat(root)).rejects.toMatchObject({ code: "ENOENT" });
-      const evidenceDir = process.env.OPENCLAW_SETUP_ERROR_PROOF_DIR;
+      const evidenceDir = process.env.CARAPACE_SETUP_ERROR_PROOF_DIR;
       if (evidenceDir) {
         await fs.writeFile(
           path.join(evidenceDir, `${scenario}-${json ? "json" : "text"}.json`),

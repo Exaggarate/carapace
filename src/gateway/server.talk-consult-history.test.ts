@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { extractText } from "../../ui/src/lib/chat/message-extract.ts";
@@ -25,9 +25,9 @@ import { clearSessionStoreCacheForTest } from "../config/sessions/store-writer-s
 import { getSessionWorkAdmissionRelease } from "../sessions/session-lifecycle-admission.js";
 import { onInternalSessionTranscriptUpdate } from "../sessions/transcript-events.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  resolveCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
 import { REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME } from "../talk/agent-consult-tool.js";
 import { resetClientVoiceConfirmationStateForTest } from "../talk/client-voice-confirmation.test-support.js";
@@ -90,7 +90,7 @@ beforeEach(async () => {
   sessionKey = canonicalKey = "agent:main:main";
   sessionId = randomUUID();
   // Voice transcripts use the canonical agent store, not a custom chat-store locator.
-  storePath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+  storePath = resolveCarapaceAgentSqlitePath({ agentId: "main" });
   testState.sessionStorePath = storePath;
   await writeSessionStore({
     entries: { main: { sessionId, updatedAt: Date.now(), status: "done" } },
@@ -105,7 +105,7 @@ beforeEach(async () => {
       maxProtocol: 1,
       role: "operator",
       scopes: ["operator.read", "operator.write", "operator.admin"],
-      client: { id: "openclaw-control-ui", version: "test", platform: "test", mode: "webchat" },
+      client: { id: "carapace-control-ui", version: "test", platform: "test", mode: "webchat" },
     },
     authenticatedUserProfile: {
       profileId: profile.id,
@@ -297,7 +297,7 @@ describe("Browser Talk consult target handoff", () => {
       sessionKey = entry.key;
       canonicalKey = entry.expected;
       storePath = entry.fixed
-        ? resolveOpenClawAgentSqlitePath({ agentId })
+        ? resolveCarapaceAgentSqlitePath({ agentId })
         : resolveSessionStorePathCore(undefined, { agentId });
       await writeSessionStore({
         storePath,
@@ -444,7 +444,7 @@ describe("Browser Talk consult input custody", () => {
             content: [{ type: "text", text: consultCommentary }],
           }),
           {
-            openclawStreamFallback: {
+            carapaceStreamFallback: {
               replacementText: consultCommentary,
               source: "segment",
               itemId: "consult-commentary",
@@ -562,7 +562,7 @@ describe("Browser Talk consult input custody", () => {
         excludeFromContext: true,
         provenance: { kind: "internal_system" },
       });
-      const metadata = asOptionalRecord(generated[0]?.["__openclaw"]);
+      const metadata = asOptionalRecord(generated[0]?.["__carapace"]);
       expect.soft(metadata?.senderIdentity).toBeUndefined();
       expect.soft(metadata?.senderIsOwner).not.toBe(true);
       expect
@@ -570,10 +570,10 @@ describe("Browser Talk consult input custody", () => {
         .toEqual(participantsBeforeConsult);
 
       // Reopen only this fixture's transcript database after dispatch/publication have drained.
-      const databasePath = resolveOpenClawAgentSqlitePath(
+      const databasePath = resolveCarapaceAgentSqlitePath(
         toDatabaseOptions(resolveSqliteTranscriptReadScope(scope())),
       );
-      expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+      expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
       clearSessionStoreCacheForTest();
       expectVisibleSpeechOnly(await historyMessages(), "reopened chat.history", true);
       for (const manager of [
@@ -713,10 +713,10 @@ describe("Direct Talk consult history after call closure", () => {
           storedMessages.filter((message) => message.role === "assistant").map(extractText),
         ).toEqual([directAnswer]);
         const history = await historyMessages();
-        const databasePath = resolveOpenClawAgentSqlitePath(
+        const databasePath = resolveCarapaceAgentSqlitePath(
           toDatabaseOptions(resolveSqliteTranscriptReadScope(scope())),
         );
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         clearSessionStoreCacheForTest();
         for (const [view, messages] of [
           ["chat.history", history],

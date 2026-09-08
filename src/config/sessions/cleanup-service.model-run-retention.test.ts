@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const maintenanceState = vi.hoisted(() => ({ modelRunPruneAfterMs: 24 * 60 * 60 * 1000 }));
@@ -27,7 +27,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("sessions cleanup model-run preview", () => {
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.each([
@@ -39,7 +39,7 @@ describe("sessions cleanup model-run preview", () => {
     async ({ modelRunPruneAfterMs, modelRunPruned, capped }) => {
       maintenanceState.modelRunPruneAfterMs = modelRunPruneAfterMs;
       const storePath = path.join(
-        tempDirs.make("openclaw-cleanup-model-run-"),
+        tempDirs.make("carapace-cleanup-model-run-"),
         "agents",
         "main",
         "sessions",

@@ -1,5 +1,5 @@
 // `/model` directive parser for auto-reply messages.
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import type { ModelSelectionScope } from "../config/types.agent-defaults.js";
 import { escapeRegExp } from "../utils.js";

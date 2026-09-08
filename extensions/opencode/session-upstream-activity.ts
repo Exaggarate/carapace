@@ -1,12 +1,12 @@
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
 import {
   isExternalUserText,
   normalizeUserText,
   type SessionCatalogContinueProviderResult,
   type SessionUpstreamActivity,
   type SessionUpstreamProbe,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { OPENCODE_SESSION_ID_PATTERN } from "./session-catalog-shared.js";
 import { exportOpenCodeSession, queryOpenCodeDatabase } from "./session-catalog.js";
 

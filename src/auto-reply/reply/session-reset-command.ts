@@ -1,6 +1,6 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { DEFAULT_RESET_TRIGGERS } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { isResetAuthorizedForContext } from "../command-auth.js";
 import { normalizeCommandBody } from "../commands-registry.js";
 import type { MsgContext } from "../templating.js";
@@ -96,7 +96,7 @@ function stripLeadingMention(params: {
   trigger: string;
   commandText: string;
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   isGroup: boolean;
 }): number | undefined {
@@ -143,7 +143,7 @@ function stripLeadingMention(params: {
 function isRecognizedCommandSuffix(params: {
   suffix: string;
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   isGroup: boolean;
 }): boolean {
@@ -165,7 +165,7 @@ function resolveAnchoredResetPayload(params: {
   trigger: string;
   commandText: string;
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   isGroup: boolean;
 }): string | undefined {
@@ -222,7 +222,7 @@ function resolveAnchoredResetPayload(params: {
 function resolveCommandTextForSession(params: {
   commandText: string;
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   isGroup: boolean;
 }): string {
@@ -246,7 +246,7 @@ export function resolveSessionResetCommand(params: {
   rawText: string;
   resetTriggers: readonly string[];
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   isGroup: boolean;
   resetAuthorized: boolean;
@@ -304,7 +304,7 @@ export function resolveSessionResetCommand(params: {
 
 export function resolveAuthorizedSessionResetCommand(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commandAuthorized: boolean;
   ctx: MsgContext;
   isGroup: boolean;

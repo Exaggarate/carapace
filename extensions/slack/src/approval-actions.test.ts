@@ -1,5 +1,5 @@
 // Slack tests cover the transport-private approval callback envelope.
-import { buildApprovalResolutionRef } from "openclaw/plugin-sdk/approval-reference-runtime";
+import { buildApprovalResolutionRef } from "carapace/plugin-sdk/approval-reference-runtime";
 import { describe, expect, it } from "vitest";
 import { decodeSlackApprovalAction, encodeSlackApprovalAction } from "./approval-actions.js";
 import { SLACK_BUTTON_VALUE_MAX } from "./presentation.js";
@@ -39,10 +39,10 @@ describe("Slack approval actions", () => {
 
   it.each([
     "callback",
-    "openclaw:approval:v1:not-json",
-    'openclaw:approval:v1:{"approvalId":"req-1","decision":"allow-once"}',
-    'openclaw:approval:v1:{"approvalId":"req-1","approvalKind":"exec","decision":"accept"}',
-    'openclaw:approval:v1:{"approvalId":"req-1","approvalKind":"exec","decision":"deny","extra":true}',
+    "carapace:approval:v1:not-json",
+    'carapace:approval:v1:{"approvalId":"req-1","decision":"allow-once"}',
+    'carapace:approval:v1:{"approvalId":"req-1","approvalKind":"exec","decision":"accept"}',
+    'carapace:approval:v1:{"approvalId":"req-1","approvalKind":"exec","decision":"deny","extra":true}',
   ])("rejects malformed or non-approval input %#", (value) => {
     expect(decodeSlackApprovalAction(value)).toBeNull();
   });

@@ -2,7 +2,7 @@ import {
   asFiniteNumber,
   normalizeOptionalString,
   readStringField,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { isJsonObject, type CodexThreadItem, type JsonObject, type JsonValue } from "./protocol.js";
 
 const BIO_POLICY_SAFETY_ACCESS_BLOCK_PREFIX =

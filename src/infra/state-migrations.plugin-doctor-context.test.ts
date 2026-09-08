@@ -2,14 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { openCarapaceAgentDatabase } from "../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createPluginDoctorStateMigrationContext } from "./state-migrations.plugin-doctor-context.js";
 
 describe("plugin doctor session identity evidence", () => {
   it("preserves two current keys sharing an identity instead of inventing a main owner", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-doctor-shared-id", applyEnv: false },
       async ({ env }) => {
         for (const sessionKey of ["agent:main:main", "agent:main:other"]) {
@@ -34,13 +34,13 @@ describe("plugin doctor session identity evidence", () => {
   it.each(["per-agent", "fixed"] as const)(
     "proves absence from an initialized empty %s session store",
     async (kind) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: `plugin-doctor-empty-${kind}`, applyEnv: false },
         async ({ env, root }) => {
           const fixedStorePath = path.join(root, "fixed.sqlite");
-          const config: OpenClawConfig =
+          const config: CarapaceConfig =
             kind === "fixed" ? { session: { store: fixedStorePath } } : {};
-          openOpenClawAgentDatabase({
+          openCarapaceAgentDatabase({
             agentId: "main",
             env,
             ...(kind === "fixed" ? { path: fixedStorePath } : {}),
@@ -63,11 +63,11 @@ describe("plugin doctor session identity evidence", () => {
   it.each(["missing", "broken"] as const)(
     "keeps a %s session store unknown rather than proving absence",
     async (kind) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: `plugin-doctor-${kind}`, applyEnv: false },
         async ({ env }) => {
           if (kind === "broken") {
-            openOpenClawAgentDatabase({ agentId: "main", env }).db.exec(
+            openCarapaceAgentDatabase({ agentId: "main", env }).db.exec(
               "PRAGMA user_version = 999",
             );
           }
@@ -88,7 +88,7 @@ describe("plugin doctor session identity evidence", () => {
   it.each(["malformed", "mismatched-identity"] as const)(
     "keeps %s fixed-store rows unknown instead of treating them as empty",
     async (corruption) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: `plugin-doctor-fixed-${corruption}`, applyEnv: false },
         async ({ env, root }) => {
           const storePath = path.join(root, "fixed.sqlite");
@@ -97,7 +97,7 @@ describe("plugin doctor session identity evidence", () => {
             { agentId: "main", env, sessionKey, storePath },
             { sessionId: "broken-session", updatedAt: 1 },
           );
-          const database = openOpenClawAgentDatabase({ agentId: "main", env, path: storePath }).db;
+          const database = openCarapaceAgentDatabase({ agentId: "main", env, path: storePath }).db;
           if (corruption === "malformed") {
             database
               .prepare("UPDATE session_nodes SET entry_json = ? WHERE session_key = ?")
@@ -123,7 +123,7 @@ describe("plugin doctor session identity evidence", () => {
   );
 
   it("resolves the authoritative canonical session key using the Doctor-owned environment", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-doctor-current", applyEnv: false },
       async ({ env, root }) => {
         const storePath = path.join(root, "fixed.sqlite");
@@ -165,11 +165,11 @@ describe("plugin doctor session identity evidence", () => {
   });
 
   it("deduplicates configured SQLite and discovered JSON aliases by physical owner", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-doctor-physical-alias", applyEnv: false },
       async ({ env, stateDir }) => {
         const agentRoot = path.join(stateDir, "agents", "main");
-        const storePath = path.join(agentRoot, "agent", "openclaw-agent.sqlite");
+        const storePath = path.join(agentRoot, "agent", "carapace-agent.sqlite");
         fs.mkdirSync(path.join(agentRoot, "sessions"), { recursive: true });
         const sessionKey = "agent:main:renamed";
         await replaceSessionEntry(
@@ -181,7 +181,7 @@ describe("plugin doctor session identity evidence", () => {
           env,
           config: {
             session: {
-              store: path.join(stateDir, "agents", "{agentId}", "agent", "openclaw-agent.sqlite"),
+              store: path.join(stateDir, "agents", "{agentId}", "agent", "carapace-agent.sqlite"),
             },
           },
         });
@@ -194,7 +194,7 @@ describe("plugin doctor session identity evidence", () => {
   });
 
   it("rejects retained destructive repair callbacks after their owner expires", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-doctor-expired-repair", applyEnv: false },
       async ({ env }) => {
         let active = true;

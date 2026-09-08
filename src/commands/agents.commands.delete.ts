@@ -58,7 +58,7 @@ import { isPathInside } from "../infra/path-guards.js";
 import { normalizeAgentIdStrict } from "../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
-import { unregisterOpenClawAgentDatabases } from "../state/openclaw-agent-db-registry.js";
+import { unregisterCarapaceAgentDatabases } from "../state/carapace-agent-db-registry.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { createClackPrompter } from "../wizard/clack-prompter.js";
 import { createQuietRuntime } from "./agents.command-shared.js";
@@ -146,7 +146,7 @@ export async function agentsDeleteCommand(
     failAgentsDelete(
       opts,
       runtime,
-      `Agent id is required. Run ${formatCliCommand("openclaw agents list")} to choose one.`,
+      `Agent id is required. Run ${formatCliCommand("carapace agents list")} to choose one.`,
     );
     return;
   }
@@ -156,7 +156,7 @@ export async function agentsDeleteCommand(
     failAgentsDelete(
       opts,
       runtime,
-      `Agent "${input}" not found. Run ${formatCliCommand("openclaw agents list")} to see configured agents.`,
+      `Agent "${input}" not found. Run ${formatCliCommand("carapace agents list")} to see configured agents.`,
     );
     return;
   }
@@ -170,7 +170,7 @@ export async function agentsDeleteCommand(
     failAgentsDelete(
       opts,
       runtime,
-      `Agent "${agentId}" not found. Run ${formatCliCommand("openclaw agents list")} to see configured agents.`,
+      `Agent "${agentId}" not found. Run ${formatCliCommand("carapace agents list")} to see configured agents.`,
     );
     return;
   }
@@ -422,7 +422,7 @@ export async function agentsDeleteCommand(
       if (deleteFiles) {
         // Keep registry ownership until every cleanup target is terminal. A crash before journal
         // completion leaves this idempotent deregistration reachable on the next delete attempt.
-        unregisterOpenClawAgentDatabases({ agentId });
+        unregisterCarapaceAgentDatabases({ agentId });
       }
       deletion.finish();
     }

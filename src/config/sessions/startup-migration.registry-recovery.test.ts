@@ -9,23 +9,23 @@ import {
   beginAgentDeletionJournal,
   completeAgentDeletionJournalInDatabase,
 } from "../../state/agent-deletion-journal.js";
-import { invalidateRegisteredAgentDatabasesMemo } from "../../state/openclaw-agent-db-registry-listing.js";
-import { unregisterOpenClawAgentDatabase } from "../../state/openclaw-agent-db-registry.js";
+import { invalidateRegisteredAgentDatabasesMemo } from "../../state/carapace-agent-db-registry-listing.js";
+import { unregisterCarapaceAgentDatabase } from "../../state/carapace-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  getOpenClawAgentDatabaseIfOpen,
-  isOpenClawAgentDatabaseOpen,
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  getCarapaceAgentDatabaseIfOpen,
+  isCarapaceAgentDatabaseOpen,
+  listCarapaceRegisteredAgentDatabases,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabaseOptions,
+} from "../../state/carapace-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  repairOpenClawStateDatabaseSchemaIfNeeded,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  repairCarapaceStateDatabaseSchemaIfNeeded,
+  runCarapaceStateWriteTransaction,
+} from "../../state/carapace-state-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { loadCombinedSessionStoreForGatewayCore } from "./combined-store-gateway.js";
 import { replaceSessionEntry } from "./session-accessor.js";
 import {
@@ -40,20 +40,20 @@ import { resolveAllAgentSessionStoreTargetsSync } from "./targets.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it.each(["cold", "preexisting"] as const)(
   "preserves the %s database lifetime for maintenance without a runtime handoff",
   async (lifetime) => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-startup-handle-lifetime-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-startup-handle-lifetime-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const options = { agentId: "main", env };
-    const initial = openOpenClawAgentDatabase(options);
+    const initial = openCarapaceAgentDatabase(options);
     setCanonicalSqliteSessionMainKey(initial, "previous");
     if (lifetime === "cold") {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
 
     await runSessionStartupMigration({
@@ -63,19 +63,19 @@ it.each(["cold", "preexisting"] as const)(
     });
 
     expect(isCanonicalSqliteSessionMainKeyCurrent(options, undefined)).toBe(true);
-    expect(isOpenClawAgentDatabaseOpen(initial.path)).toBe(lifetime === "preexisting");
+    expect(isCarapaceAgentDatabaseOpen(initial.path)).toBe(lifetime === "preexisting");
     if (lifetime === "preexisting") {
-      expect(getOpenClawAgentDatabaseIfOpen(options)).toBe(initial);
+      expect(getCarapaceAgentDatabaseIfOpen(options)).toBe(initial);
     }
   },
 );
 
 it("does not create a missing configured agent database during startup maintenance", async () => {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-startup-missing-agent-db-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-startup-missing-agent-db-"));
   const stateDir = path.join(root, "state");
   const storePath = path.join(stateDir, "agents", "idle", "sessions", "sessions.json");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-  const cfg: OpenClawConfig = {
+  const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
+  const cfg: CarapaceConfig = {
     agents: { entries: { idle: { default: true } } },
     session: { store: path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json") },
   };
@@ -112,17 +112,17 @@ it("does not create a missing configured agent database during startup maintenan
 it.each([false, true])(
   "reconciles surviving stores while retained deleted stores stay fenced (cleanup completed: %s)",
   async (cleanupCompleted) => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-startup-deleted-agent-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-startup-deleted-agent-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const sharedPath = path.join(stateDir, "shared.sqlite");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { ownership: "explicit", entries: { alpha: {} } },
       session: { store: sharedPath },
     };
     const survivorOptions = { agentId: "alpha", env, path: sharedPath };
-    const survivor = openOpenClawAgentDatabase(survivorOptions);
+    const survivor = openCarapaceAgentDatabase(survivorOptions);
     const deletedOptions = { agentId: "ops", env };
-    const deleted = openOpenClawAgentDatabase(deletedOptions);
+    const deleted = openCarapaceAgentDatabase(deletedOptions);
     for (const agentId of ["alpha", "ops"]) {
       await replaceSessionEntry(
         { agentId, env, storePath: sharedPath, sessionKey: `agent:${agentId}:shared` },
@@ -131,7 +131,7 @@ it.each([false, true])(
     }
     setCanonicalSqliteSessionMainKey(survivor, "previous");
     setCanonicalSqliteSessionMainKey(deleted, "previous");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const deletion = beginAgentDeletionJournal(
       {
         agentId: "ops",
@@ -144,7 +144,7 @@ it.each([false, true])(
       { env },
     );
     if (cleanupCompleted) {
-      runOpenClawStateWriteTransaction(
+      runCarapaceStateWriteTransaction(
         (database) => completeAgentDeletionJournalInDatabase(database, "ops", deletion.operationId),
         { env },
       );
@@ -153,7 +153,7 @@ it.each([false, true])(
       expect.objectContaining({ agentId: "ops" }),
     );
     const log = { info: vi.fn(), warn: vi.fn() };
-    const handoffDatabase = vi.fn(async (options: OpenClawAgentDatabaseOptions) => {
+    const handoffDatabase = vi.fn(async (options: CarapaceAgentDatabaseOptions) => {
       await reconcileSessionTranscriptIndexes(options);
     });
 
@@ -162,8 +162,8 @@ it.each([false, true])(
     expect(handoffDatabase).toHaveBeenCalledExactlyOnceWith(survivorOptions);
     expect(isCanonicalSqliteSessionMainKeyCurrent(survivorOptions, undefined)).toBe(true);
     expect(isCanonicalSqliteSessionMainKeyCurrent(deletedOptions, "previous")).toBe(true);
-    expect(isOpenClawAgentDatabaseOpen(deleted.path)).toBe(false);
-    expect(() => openOpenClawAgentDatabase(deletedOptions)).toThrow("agent ops is deleted");
+    expect(isCarapaceAgentDatabaseOpen(deleted.path)).toBe(false);
+    expect(() => openCarapaceAgentDatabase(deletedOptions)).toThrow("agent ops is deleted");
     expect(log.warn).not.toHaveBeenCalled();
     expect(log.info).toHaveBeenCalledWith(
       expect.stringContaining(cleanupCompleted ? "cleanup complete" : "cleanup pending"),
@@ -172,12 +172,12 @@ it.each([false, true])(
 );
 
 it("re-registers durable lineage children before configured-only runtime reads", async () => {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-startup-registry-recovery-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-startup-registry-recovery-"));
   const stateDir = path.join(root, "state");
-  await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
     const env = { ...process.env };
     const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions", "sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { entries: { ops: { default: true } } },
       session: { store: storeTemplate },
     };
@@ -207,12 +207,12 @@ it("re-registers durable lineage children before configured-only runtime reads",
       agentId: "codex",
       env,
     }).path;
-    closeOpenClawAgentDatabasesForTest();
-    unregisterOpenClawAgentDatabase({ agentId: "codex", env, path: childDatabasePath });
+    closeCarapaceAgentDatabasesForTest();
+    unregisterCarapaceAgentDatabase({ agentId: "codex", env, path: childDatabasePath });
 
     expect(fs.existsSync(childDatabasePath)).toBe(true);
     expect(
-      listOpenClawRegisteredAgentDatabases({ env }).some(
+      listCarapaceRegisteredAgentDatabases({ env }).some(
         (entry) => entry.agentId === "codex" && entry.path === childDatabasePath,
       ),
     ).toBe(false);
@@ -238,7 +238,7 @@ it("re-registers durable lineage children before configured-only runtime reads",
     });
     expect(migrateManagedWorktreeCanonicalWorkspaces).toHaveBeenCalled();
 
-    expect(listOpenClawRegisteredAgentDatabases({ env })).toContainEqual(
+    expect(listCarapaceRegisteredAgentDatabases({ env })).toContainEqual(
       expect.objectContaining({ agentId: "codex", path: childDatabasePath }),
     );
 
@@ -258,40 +258,40 @@ it("re-registers durable lineage children before configured-only runtime reads",
 });
 
 it("keeps copied state directories self-contained for combined gateway reads", async () => {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-copied-state-registry-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-copied-state-registry-"));
   const sourceStateDir = path.join(root, "source");
   fs.mkdirSync(sourceStateDir);
   const canonicalSourceStateDir = fs.realpathSync.native(sourceStateDir);
   const copiedStateDir = path.join(root, "copy");
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { entries: { main: { default: true } } },
   };
   const sessionKey = "agent:main:copied-state";
 
-  await withEnvAsync({ OPENCLAW_STATE_DIR: canonicalSourceStateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: canonicalSourceStateDir }, async () => {
     const env = { ...process.env };
     await replaceSessionEntry(
       { agentId: "main", env, sessionKey },
       { sessionId: "copied-session", updatedAt: 1 },
     );
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     invalidateRegisteredAgentDatabasesMemo({ env });
   });
 
   fs.cpSync(canonicalSourceStateDir, copiedStateDir, { recursive: true });
   const canonicalCopiedStateDir = fs.realpathSync.native(copiedStateDir);
-  await withEnvAsync({ OPENCLAW_STATE_DIR: canonicalCopiedStateDir }, async () => {
+  await withEnvAsync({ CARAPACE_STATE_DIR: canonicalCopiedStateDir }, async () => {
     const env = { ...process.env };
-    expect(repairOpenClawStateDatabaseSchemaIfNeeded({ env }).warnings).toEqual([]);
+    expect(repairCarapaceStateDatabaseSchemaIfNeeded({ env }).warnings).toEqual([]);
     const combined = loadCombinedSessionStoreForGatewayCore(cfg, {
       configuredAgentsOnly: true,
     });
 
     expect(combined.store[sessionKey]?.sessionId).toBe("copied-session");
     expect(Object.keys(combined.store).filter((key) => key === sessionKey)).toHaveLength(1);
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     invalidateRegisteredAgentDatabasesMemo({ env });
   });
 });
@@ -299,18 +299,18 @@ it("keeps copied state directories self-contained for combined gateway reads", a
 it.each(["registry", "main-key"] as const)(
   "keeps the event loop responsive while repairing a cold %s startup contract",
   async (repair) => {
-    const stateDir = fs.realpathSync.native(tempDirs.make("openclaw-startup-admission-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = fs.realpathSync.native(tempDirs.make("carapace-startup-admission-"));
+    const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
     const options = { agentId: "main", env };
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: { entries: { main: {} } },
       session: {},
     };
-    const initial = openOpenClawAgentDatabase(options);
+    const initial = openCarapaceAgentDatabase(options);
     setCanonicalSqliteSessionMainKey(initial, repair === "main-key" ? "previous" : "main");
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     if (repair === "registry") {
-      unregisterOpenClawAgentDatabase({ ...options, path: initial.path });
+      unregisterCarapaceAgentDatabase({ ...options, path: initial.path });
     }
     const originalOpen = nodeSqlite.openNodeSqliteDatabase;
     let yielded = false;
@@ -347,10 +347,10 @@ it.each(["registry", "main-key"] as const)(
       expect(log.warn).not.toHaveBeenCalled();
       expect(maintenanceSawProgress).toBe(true);
       expect(maintenanceSawSelectedKey).toBe(true);
-      expect(listOpenClawRegisteredAgentDatabases({ env })).toContainEqual(
+      expect(listCarapaceRegisteredAgentDatabases({ env })).toContainEqual(
         expect.objectContaining({ agentId: "main", path: initial.path }),
       );
-      expect(isOpenClawAgentDatabaseOpen(initial.path)).toBe(false);
+      expect(isCarapaceAgentDatabaseOpen(initial.path)).toBe(false);
     } finally {
       if (tick) {
         clearImmediate(tick);

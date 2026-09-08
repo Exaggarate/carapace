@@ -10,7 +10,7 @@ describe("ModelSetupWizardRunner", () => {
     async (outcome) => {
       const pending = createDeferred<unknown>();
       const request = vi.fn(async (method: string) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         if (method === "wizard.cancel") {
@@ -49,7 +49,7 @@ describe("ModelSetupWizardRunner", () => {
   it("cancels independently after transport rebind and retries settled cancellation attempts", async () => {
     const oldCancellation = createDeferred<unknown>();
     const originalRequest = vi.fn(async (method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { done: false, status: "running" };
       }
       if (method === "wizard.cancel") {
@@ -117,7 +117,7 @@ describe("ModelSetupWizardRunner", () => {
     const failedCancel = createDeferred<unknown>();
     let cancellations = 0;
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { done: false, status: "running" };
       }
       if (method === "wizard.cancel") {
@@ -156,7 +156,7 @@ describe("ModelSetupWizardRunner", () => {
     async (caseName) => {
       const lateReply = createDeferred<WizardNextResult>();
       const request = vi.fn(async (method: string) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return caseName === "late admission"
             ? await lateReply.promise
             : { done: false, status: "running" };
@@ -216,7 +216,7 @@ describe("ModelSetupWizardRunner", () => {
       const lateNext = createDeferred<unknown>();
       let firstNext = true;
       const originalRequest = vi.fn(async (method: string) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         if (method === "wizard.cancel") {
@@ -229,7 +229,7 @@ describe("ModelSetupWizardRunner", () => {
         return await lateNext.promise;
       });
       const replacementRequest = vi.fn(async (method: string) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         return { done: false, status: "running", step: { id: "replacement", type: "text" } };
@@ -289,7 +289,7 @@ describe("ModelSetupWizardRunner", () => {
     const interrupted = createDeferred<unknown>();
     let nextCalls = 0;
     const originalRequest = vi.fn(async (method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { done: false, status: "running" };
       }
       nextCalls += 1;
@@ -343,7 +343,7 @@ describe("ModelSetupWizardRunner", () => {
     const terminalReply = createDeferred<unknown>();
     let nextCalls = 0;
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { done: false, status: "running" };
       }
       if (++nextCalls === 1) {
@@ -384,7 +384,7 @@ describe("ModelSetupWizardRunner", () => {
   it("starts, advances an unbounded note step, and guards duplicate answers", async () => {
     let resolveDone: ((value: unknown) => void) | null = null;
     const request = vi.fn((method: string, _params?: unknown, _options?: unknown) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return Promise.resolve({ sessionId: "session-1", done: false, status: "running" });
       }
       if (method === "wizard.next" && !resolveDone) {
@@ -415,7 +415,7 @@ describe("ModelSetupWizardRunner", () => {
     await runner.start("openai-oauth");
     expect(request).toHaveBeenNthCalledWith(
       1,
-      "openclaw.setup.auth.start",
+      "carapace.setup.auth.start",
       { sessionId: expect.any(String), agentId: "research", authChoice: "openai-oauth" },
       { timeoutMs: null },
     );
@@ -432,13 +432,13 @@ describe("ModelSetupWizardRunner", () => {
       expect.objectContaining({ timeoutMs: null, signal: expect.any(AbortSignal) }),
     );
     resolveDone!({ done: true, status: "done" });
-    await expect(answer).resolves.toEqual({ startMethod: "openclaw.setup.auth.start" });
+    await expect(answer).resolves.toEqual({ startMethod: "carapace.setup.auth.start" });
     expect(runner.state).toEqual({ phase: "done", authChoice: "openai-oauth" });
   });
 
   it("cancels the gateway wizard when advancing fails", async () => {
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return Promise.resolve({ sessionId: "session-1", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -470,7 +470,7 @@ describe("ModelSetupWizardRunner", () => {
 
   it("uses the prepare start method with the shared wizard transport", async () => {
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return Promise.resolve({ sessionId: "prepare-session", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -491,11 +491,11 @@ describe("ModelSetupWizardRunner", () => {
       sessionExpiredMessage: () => "expired",
     });
 
-    await runner.start("llama-cpp", "openclaw.setup.prepare.start");
+    await runner.start("llama-cpp", "carapace.setup.prepare.start");
 
     expect(request).toHaveBeenNthCalledWith(
       1,
-      "openclaw.setup.prepare.start",
+      "carapace.setup.prepare.start",
       { sessionId: expect.any(String), authChoice: "llama-cpp" },
       { timeoutMs: null },
     );
@@ -507,12 +507,12 @@ describe("ModelSetupWizardRunner", () => {
   });
 
   it.each([
-    ["openclaw.setup.auth.start", "cancel"],
-    ["openclaw.setup.auth.start", "settled cancel"],
-    ["openclaw.setup.auth.start", "close"],
-    ["openclaw.setup.prepare.start", "cancel"],
-    ["openclaw.setup.prepare.start", "settled cancel"],
-    ["openclaw.setup.prepare.start", "close"],
+    ["carapace.setup.auth.start", "cancel"],
+    ["carapace.setup.auth.start", "settled cancel"],
+    ["carapace.setup.auth.start", "close"],
+    ["carapace.setup.prepare.start", "cancel"],
+    ["carapace.setup.prepare.start", "settled cancel"],
+    ["carapace.setup.prepare.start", "close"],
   ] as const)(
     "releases a late %s session after %s so setup can restart",
     async (method, action) => {
@@ -598,16 +598,16 @@ describe("ModelSetupWizardRunner", () => {
   );
 
   it.each([
-    ["openclaw.setup.auth.start", "running"],
-    ["openclaw.setup.prepare.start", "running"],
-    ["openclaw.setup.auth.start", "done"],
-    ["openclaw.setup.prepare.start", "done"],
-    ["openclaw.setup.auth.start", "error"],
-    ["openclaw.setup.prepare.start", "error"],
-    ["openclaw.setup.auth.start", "cancelled"],
-    ["openclaw.setup.prepare.start", "cancelled"],
-    ["openclaw.setup.auth.start", "busy"],
-    ["openclaw.setup.prepare.start", "busy"],
+    ["carapace.setup.auth.start", "running"],
+    ["carapace.setup.prepare.start", "running"],
+    ["carapace.setup.auth.start", "done"],
+    ["carapace.setup.prepare.start", "done"],
+    ["carapace.setup.auth.start", "error"],
+    ["carapace.setup.prepare.start", "error"],
+    ["carapace.setup.auth.start", "cancelled"],
+    ["carapace.setup.prepare.start", "cancelled"],
+    ["carapace.setup.auth.start", "busy"],
+    ["carapace.setup.prepare.start", "busy"],
   ] as const)(
     "retains late %s responses after the local deadline (status: %s)",
     async (method, status) => {
@@ -728,7 +728,7 @@ describe("ModelSetupWizardRunner", () => {
         params?: { sessionId?: string },
         options?: { signal?: AbortSignal },
       ) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           originalSessionId = params?.sessionId ?? "";
           return await new Promise((resolve, reject) => {
             options?.signal?.addEventListener("abort", () => reject(new Error("aborted")), {
@@ -742,7 +742,7 @@ describe("ModelSetupWizardRunner", () => {
       },
     );
     const replacementRequest = vi.fn(async (method: string, params?: { sessionId?: string }) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { sessionId: params?.sessionId, done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -785,7 +785,7 @@ describe("ModelSetupWizardRunner", () => {
   });
 
   it.each(
-    (["openclaw.setup.auth.start", "openclaw.setup.prepare.start"] as const).flatMap((method) =>
+    (["carapace.setup.auth.start", "carapace.setup.prepare.start"] as const).flatMap((method) =>
       ["done", "busy"].flatMap((status) =>
         ["open", "closed"].map((lifecycle) => ({ method, status, lifecycle })),
       ),
@@ -863,7 +863,7 @@ describe("ModelSetupWizardRunner", () => {
     let answerSignal: AbortSignal | undefined;
     const request = vi.fn(
       (method: string, _params?: unknown, options?: { signal?: AbortSignal }) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return Promise.resolve({ sessionId: "session-expired", done: false, status: "running" });
         }
         if (method === "wizard.next" && nextCount++ === 0) {
@@ -906,7 +906,7 @@ describe("ModelSetupWizardRunner", () => {
     expect(answerSignal?.aborted).toBe(true);
     await runner.cancel();
     expect(
-      request.mock.calls.filter(([method]) => method === "openclaw.setup.auth.start"),
+      request.mock.calls.filter(([method]) => method === "carapace.setup.auth.start"),
     ).toHaveLength(1);
     expect(request.mock.calls.filter(([method]) => method === "wizard.next")).toHaveLength(2);
     expect(request.mock.calls.filter(([method]) => method === "wizard.cancel")).toEqual([]);
@@ -919,7 +919,7 @@ describe("ModelSetupWizardRunner", () => {
     const messages = ["Preparing model download…", "Downloading… 7%", "Downloading… 16%"];
     let nextIndex = 0;
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return Promise.resolve({ sessionId: "session-progress", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -955,14 +955,14 @@ describe("ModelSetupWizardRunner", () => {
       sessionExpiredMessage: () => "expired",
     });
 
-    await expect(runner.start("llama-cpp", "openclaw.setup.prepare.start")).resolves.toEqual({
-      startMethod: "openclaw.setup.prepare.start",
+    await expect(runner.start("llama-cpp", "carapace.setup.prepare.start")).resolves.toEqual({
+      startMethod: "carapace.setup.prepare.start",
       preparedModelRef: "llama-cpp/gemma-4-e4b-it-q4_k_m",
     });
 
     expect(seen).toEqual(messages);
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.setup.prepare.start",
+      "carapace.setup.prepare.start",
       "wizard.next",
       "wizard.next",
       "wizard.next",

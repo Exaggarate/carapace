@@ -1,7 +1,7 @@
 /** Gateway system.info method tests. */
 
 import os from "node:os";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { validateSystemInfoResult } from "../../../packages/gateway-protocol/src/index.js";
 import * as diskSpace from "../../infra/disk-space.js";

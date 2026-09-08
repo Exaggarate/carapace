@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { expect, vi } from "vitest";
 
 const runtimeModule = await import("./runtime.js");
@@ -7,10 +7,10 @@ export const handleDiscordActionMock = vi
   .mockResolvedValue({ content: [], details: { ok: true } });
 export const { handleDiscordMessageAction } = await import("./handle-action.js");
 
-export function discordConfig(actions?: Record<string, boolean>): OpenClawConfig {
+export function discordConfig(actions?: Record<string, boolean>): CarapaceConfig {
   return {
     channels: { discord: { token: "tok", ...(actions ? { actions } : {}) } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 export function defaultActionOptions() {
@@ -23,7 +23,7 @@ export function defaultActionOptions() {
 
 export function expectDiscordActionCall(params: {
   payload: unknown;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   options?: unknown;
 }) {
   expect(handleDiscordActionMock).toHaveBeenCalledTimes(1);

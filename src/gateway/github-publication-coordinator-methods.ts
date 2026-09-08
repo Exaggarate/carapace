@@ -6,9 +6,9 @@ import type {
 } from "../../packages/gateway-protocol/src/schema/session-github-publication.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   listUnreportedPersonalGitHubPublications,
   markPersonalGitHubPublicationReported,
@@ -187,7 +187,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
         title: input.title,
         body: input.body,
       });
-      const database = openOpenClawStateDatabase().db;
+      const database = openCarapaceStateDatabase().db;
       const readRequest = () =>
         readGitHubPublicationRequest(database, {
           sessionId,
@@ -225,7 +225,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
         const now = Date.now();
         const requestId = randomUUID();
         input.assertCurrent?.();
-        return runOpenClawStateWriteTransaction(
+        return runCarapaceStateWriteTransaction(
           ({ db }) => {
             return insertGitHubPublicationRequest(db, {
               request: { ...input, sessionKey: loaded.canonicalKey },
@@ -295,7 +295,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
       if (!schemaExists()) {
         return;
       }
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       const rows = executeSqliteQuerySync(
         db,
         publicationDb(db)
@@ -321,7 +321,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
 
     async processClaim(claim: WorkerSessionTurnClaim): Promise<SessionGitHubPublicationResult[]> {
       ensureSchema();
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       const rows = listGitHubPublicationsForClaim(claim);
       const missingSnapshots = rows.filter(
         (row) => !row.source_head_commit || !row.source_index_tree || !row.workspace_tree,
@@ -363,7 +363,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
           .listPendingWorkspaceResults()
           .map((row) => `${row.sessionId}\0${row.claimId}\0${row.runId}`),
       );
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       const rows = executeSqliteQuerySync(
         db,
         publicationDb(db)
@@ -398,7 +398,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
       if (!schemaExists()) {
         return personal;
       }
-      const db = openOpenClawStateDatabase().db;
+      const db = openCarapaceStateDatabase().db;
       return [
         ...personal,
         ...executeSqliteQuerySync(
@@ -426,7 +426,7 @@ export function createGitHubPublicationCoordinatorMethods(params: {
     markReported(requestId: string): void {
       markPersonalGitHubPublicationReported(requestId);
       ensureSchema();
-      runOpenClawStateWriteTransaction(
+      runCarapaceStateWriteTransaction(
         ({ db }) => {
           executeSqliteQuerySync(
             db,

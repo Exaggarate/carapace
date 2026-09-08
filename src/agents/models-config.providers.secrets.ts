@@ -3,9 +3,9 @@
  * The resolvers return env/profile/config marker values so discovery can prove
  * auth availability without writing secret material into generated config.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { resolveConfigSecretRef } from "../config/resolution-facts.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveProviderSyntheticAuthWithPlugin } from "../plugins/provider-runtime.js";
 import type { ProviderAuthEvidence } from "../secrets/provider-env-vars.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
@@ -54,7 +54,7 @@ function resolveAuthProfileStoreInput(input: AuthProfileStoreInput) {
 }
 
 function resolveCatalogAuthProfileOrder(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   provider: string;
   store: AuthProfileStore;
@@ -72,7 +72,7 @@ function resolveCatalogAuthProfileOrder(params: {
   });
 }
 
-function resolveCatalogDirectAuthMode(config: OpenClawConfig | undefined, provider: string) {
+function resolveCatalogDirectAuthMode(config: CarapaceConfig | undefined, provider: string) {
   const mode = resolveDirectProviderCredentialMode({
     cfg: config,
     provider,
@@ -85,7 +85,7 @@ function resolveCatalogDirectAuthMode(config: OpenClawConfig | undefined, provid
 export function createProviderApiKeyResolverFromPreparedCredentials(
   env: NodeJS.ProcessEnv,
   credentials: Readonly<AuthStorageData>,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   workspaceDir?: string,
 ): ProviderApiKeyResolver {
   const resolveConfiguredOrEnvironment = createProviderApiKeyResolver(
@@ -137,7 +137,7 @@ export function createProviderApiKeyResolverFromPreparedCredentials(
 
 function createProviderAuthLookupCaches(
   env: NodeJS.ProcessEnv,
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): () => ProviderAuthLookupCaches {
   let caches: ProviderAuthLookupCaches | undefined;
   return () => {
@@ -170,8 +170,8 @@ function resolveProviderIdForAuthFromCaches(
 export function createProviderApiKeyResolver(
   env: NodeJS.ProcessEnv,
   authStoreInput: AuthProfileStoreInput,
-  config?: OpenClawConfig,
-  sourceConfigForSecrets?: OpenClawConfig,
+  config?: CarapaceConfig,
+  sourceConfigForSecrets?: CarapaceConfig,
   workspaceDir?: string,
   syntheticAuthEnv = env,
 ): ProviderApiKeyResolver {
@@ -235,8 +235,8 @@ export function createProviderApiKeyResolver(
 export function createProviderAuthResolver(
   env: NodeJS.ProcessEnv,
   authStoreInput: AuthProfileStoreInput,
-  config?: OpenClawConfig,
-  sourceConfigForSecrets?: OpenClawConfig,
+  config?: CarapaceConfig,
+  sourceConfigForSecrets?: CarapaceConfig,
   workspaceDir?: string,
   syntheticAuthEnv = env,
 ): ProviderAuthResolver {
@@ -323,9 +323,9 @@ export function createProviderAuthResolver(
 
 function resolveConfigBackedProviderAuth(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
-  sourceConfigForSecrets?: OpenClawConfig;
+  sourceConfigForSecrets?: CarapaceConfig;
   workspaceDir?: string;
   syntheticAuthEnv?: NodeJS.ProcessEnv;
 }):

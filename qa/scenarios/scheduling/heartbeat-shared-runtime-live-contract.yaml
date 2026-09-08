@@ -54,7 +54,7 @@ scenario:
     summary: >-
       Run with --provider-mode live-frontier --scenario
       heartbeat-shared-runtime-live-contract, optionally adding
-      --runtime-pair openclaw,codex. Use source-owned model defaults.
+      --runtime-pair carapace,codex. Use source-owned model defaults.
       Verify structured quiet and alert outcomes, scratch replacement,
       silent-outcome recall through the message tool, empty-scratch suppression,
       natural main-session cron delivery, and transcript mirror diagnostics.

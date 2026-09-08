@@ -77,7 +77,7 @@ export function assertExecApprovalPolicySurvived(stateDir, stage) {
   } else {
     // Observe the canonical owner directly. Runtime readers or an approvals CLI
     // could create default state and conceal an import missed by the first update.
-    const dbPath = path.join(stateDir, "state", "openclaw.sqlite");
+    const dbPath = path.join(stateDir, "state", "carapace.sqlite");
     assert(fs.existsSync(dbPath), "exec approval canonical database missing after update");
     const db = new DatabaseSync(dbPath, { readOnly: true });
     try {

@@ -4,16 +4,16 @@ import { clearNodeSqliteKyselyCacheForDatabase } from "../infra/kysely-sync.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import { prepareSqliteReadOnlyLocation } from "../infra/sqlite-readonly-location.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
+import { CARAPACE_AGENT_SCHEMA_VERSION } from "../state/carapace-agent-db-contract.js";
 import {
-  preflightOpenClawDatabaseSchemas,
-  type OpenClawDatabaseSchemaPreflight,
-} from "../state/openclaw-database-preflight.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { readStateSchemaPublicationBlocker } from "../state/openclaw-state-schema-publication.js";
-import { UpdateSchemaRefusalError } from "../state/openclaw-update-schema-refusal.js";
+  preflightCarapaceDatabaseSchemas,
+  type CarapaceDatabaseSchemaPreflight,
+} from "../state/carapace-database-preflight.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
+import { readStateSchemaPublicationBlocker } from "../state/carapace-state-schema-publication.js";
+import { UpdateSchemaRefusalError } from "../state/carapace-update-schema-refusal.js";
 import { VERSION } from "../version.js";
 
 async function readDrivingUpdater(): Promise<
@@ -21,7 +21,7 @@ async function readDrivingUpdater(): Promise<
 > {
   // The runtime ledger reader consults quarantine state. This diagnostic must
   // not open any live database, including a quarantine store needing recovery.
-  const snapshot = await prepareSqliteReadOnlyLocation(resolveOpenClawStateSqlitePath(), {
+  const snapshot = await prepareSqliteReadOnlyLocation(resolveCarapaceStateSqlitePath(), {
     preserveSourceArtifacts: true,
   });
   try {
@@ -45,20 +45,20 @@ async function readDrivingUpdater(): Promise<
 
 /** Refuse before CLI capture or Doctor maintenance can open writable state. */
 export async function guardUpdateDoctorSchemaUpgrade(options: {
-  schemas?: OpenClawDatabaseSchemaPreflight;
+  schemas?: CarapaceDatabaseSchemaPreflight;
   runtime: RuntimeEnv;
   json?: boolean;
 }): Promise<void> {
-  if (process.env.OPENCLAW_UPDATE_IN_PROGRESS !== "1") {
+  if (process.env.CARAPACE_UPDATE_IN_PROGRESS !== "1") {
     return;
   }
   const schemas =
     options.schemas ??
-    (await preflightOpenClawDatabaseSchemas({
+    (await preflightCarapaceDatabaseSchemas({
       env: process.env,
       supportedVersions: {
-        state: OPENCLAW_STATE_SCHEMA_VERSION,
-        agent: OPENCLAW_AGENT_SCHEMA_VERSION,
+        state: CARAPACE_STATE_SCHEMA_VERSION,
+        agent: CARAPACE_AGENT_SCHEMA_VERSION,
       },
     }));
   if (!schemas.pendingMigrations?.length) {

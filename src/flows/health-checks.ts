@@ -1,5 +1,5 @@
 // Health check types define doctor checks, results, and repair metadata.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 
 // Public doctor health contracts shared by core checks, plugin checks, lint, and repair.
@@ -52,7 +52,7 @@ type HealthCheckMode = "doctor" | "lint" | "fix";
 export interface HealthCheckContext {
   readonly mode: HealthCheckMode;
   readonly runtime: RuntimeEnv;
-  readonly cfg: OpenClawConfig;
+  readonly cfg: CarapaceConfig;
   readonly env?: NodeJS.ProcessEnv;
   readonly cwd?: string;
   readonly configPath?: string;
@@ -87,7 +87,7 @@ export interface HealthRepairEffect {
 export interface HealthRepairResult {
   readonly status?: "repaired" | "skipped" | "failed";
   readonly reason?: string;
-  readonly config?: OpenClawConfig;
+  readonly config?: CarapaceConfig;
   readonly changes: readonly string[];
   readonly warnings?: readonly string[];
   readonly diffs?: readonly HealthRepairDiff[];

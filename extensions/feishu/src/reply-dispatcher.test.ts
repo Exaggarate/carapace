@@ -4,9 +4,9 @@ import path from "node:path";
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { createReplyDispatcher } from "openclaw/plugin-sdk/reply-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-inbound";
+import { createReplyDispatcher } from "carapace/plugin-sdk/reply-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { afterAll, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 
 type StreamingSessionStub = {
@@ -87,7 +87,7 @@ vi.mock("./accounts.js", () => ({
   resolveFeishuRuntimeAccount: resolveFeishuAccountMock,
 }));
 vi.mock("./runtime.js", () => ({ getFeishuRuntime: getFeishuRuntimeMock }));
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/plugin-runtime", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return { ...actual, getGlobalHookRunner: getGlobalHookRunnerMock };
 });
@@ -101,7 +101,7 @@ vi.mock("./media.js", () => ({
   sendMediaFeishu: sendMediaFeishuMock,
   shouldSuppressFeishuTextForVoiceMedia: shouldSuppressFeishuTextForVoiceMediaMock,
 }));
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/ssrf-runtime", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
@@ -177,8 +177,8 @@ afterAll(() => {
   vi.doUnmock("./targets.js");
   vi.doUnmock("./typing.js");
   vi.doUnmock("./streaming-card.js");
-  vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
-  vi.doUnmock("openclaw/plugin-sdk/plugin-runtime");
+  vi.doUnmock("carapace/plugin-sdk/ssrf-runtime");
+  vi.doUnmock("carapace/plugin-sdk/plugin-runtime");
   vi.resetModules();
 });
 
@@ -2436,7 +2436,7 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
     const marker = Object.assign(
       new Error("media load failed", { cause: new Error("blocked local load") }),
       {
-        code: "OPENCLAW_PLATFORM_MESSAGE_NOT_DISPATCHED",
+        code: "CARAPACE_PLATFORM_MESSAGE_NOT_DISPATCHED",
         retryable: true,
       },
     );
@@ -2571,7 +2571,7 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
     const marker = Object.assign(
       new Error("media load failed", { cause: new Error("blocked local load") }),
       {
-        code: "OPENCLAW_PLATFORM_MESSAGE_NOT_DISPATCHED",
+        code: "CARAPACE_PLATFORM_MESSAGE_NOT_DISPATCHED",
         retryable: true,
       },
     );
@@ -3400,7 +3400,7 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
   });
 
   it("does not leak local media paths in the upload failure fallback", async () => {
-    const mediaPath = path.join(os.tmpdir(), "openclaw-feishu-reply-local-voice.mp3");
+    const mediaPath = path.join(os.tmpdir(), "carapace-feishu-reply-local-voice.mp3");
     sendMediaFeishuMock.mockRejectedValueOnce(new Error("media failed"));
 
     const { options } = createDispatcherHarness();

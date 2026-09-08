@@ -7,7 +7,7 @@ import type {
   ChannelThreadingAdapter,
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   OutboundSessionRoute,
   ResolveOutboundSessionRouteParams,
@@ -26,7 +26,7 @@ function suppressesImplicitThreading(actionParams: Record<string, unknown>): boo
 export function resolveAndApplyOutboundThreadId(
   actionParams: Record<string, unknown>,
   context: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     to: string;
     accountId?: string | null;
     toolContext?: ChannelThreadingToolContext;
@@ -166,7 +166,7 @@ export function resolveAndApplyOutboundReplyToId(
 
 /** Prepares outbound session mirroring metadata for message-action sends. */
 export async function prepareOutboundMirrorRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: ChannelId;
   to: string;
   actionParams: Record<string, unknown>;

@@ -62,7 +62,7 @@ const workshopFeatureMethods = [
 
 function proposalManifest(revision: ProposalRevision, status: ProposalStatus = "pending") {
   return {
-    schema: "openclaw.skill-workshop.proposals-manifest.v1",
+    schema: "carapace.skill-workshop.proposals-manifest.v1",
     installedSkills: [],
     updatedAt: revision.updatedAt,
     proposals: [

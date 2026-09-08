@@ -1,4 +1,4 @@
-import { asNullableRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as readRecord } from "@carapace/normalization-core/record-coerce";
 
 export type SessionMessageEnvelope = {
   /** An unsequenced continuation follows this row; null denotes an unsequenced boundary. */
@@ -35,7 +35,7 @@ export function readSessionMessageSequence(
   message: unknown,
   envelope?: SessionMessageEnvelope,
 ): number | null {
-  const metadata = readRecord(readRecord(message)?.["__openclaw"]);
+  const metadata = readRecord(readRecord(message)?.["__carapace"]);
   return readPositiveSafeInteger(metadata?.seq) ?? readPositiveSafeInteger(envelope?.messageSeq);
 }
 
@@ -55,7 +55,7 @@ export function readSessionMessageIdentity(
   if (!record || !role) {
     return null;
   }
-  const metadata = readRecord(record["__openclaw"]);
+  const metadata = readRecord(record["__carapace"]);
   const importedFrom = readSessionProjectionString(metadata?.importedFrom);
   const cliSessionId = readSessionProjectionString(metadata?.cliSessionId);
   const externalId = readSessionProjectionString(metadata?.externalId);
@@ -112,7 +112,7 @@ export function readAssistantStreamSegmentIdentity(
   if (readSessionProjectionString(record?.role)?.toLowerCase() !== "assistant") {
     return undefined;
   }
-  const fallback = readRecord(record?.openclawStreamFallback);
+  const fallback = readRecord(record?.carapaceStreamFallback);
   const itemId = readSessionProjectionString(fallback?.itemId);
   const runId =
     readSessionMessageIdentity(message)?.runId ??

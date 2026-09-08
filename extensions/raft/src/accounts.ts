@@ -1,8 +1,8 @@
 // Raft account resolution keeps CLI profiles scoped to their channel account.
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createAccountListHelpers } from "carapace/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export const RAFT_CHANNEL_ID = "raft" as const;
 
@@ -38,12 +38,12 @@ const {
 export const listRaftAccountIds = listAccountIds;
 export const resolveDefaultRaftAccountId = resolveDefaultAccountId;
 
-function resolveRaftConfig(cfg: OpenClawConfig): RaftAccountConfig | undefined {
+function resolveRaftConfig(cfg: CarapaceConfig): RaftAccountConfig | undefined {
   return cfg.channels?.[RAFT_CHANNEL_ID] as RaftAccountConfig | undefined;
 }
 
 export function resolveRaftAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): ResolvedRaftAccount {
   const accountId = normalizeAccountId(params.accountId ?? resolveDefaultRaftAccountId(params.cfg));

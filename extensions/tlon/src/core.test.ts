@@ -4,10 +4,10 @@ import {
   createPluginSetupWizardStatus,
   createTestWizardPrompter,
   runSetupWizardConfigure,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { WizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { WizardPrompter } from "carapace/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import { tlonPlugin } from "./channel.js";
 import { tlonChannelConfigSchema } from "./config-schema.js";
 import { tlonSetupWizard } from "./setup-surface.js";
@@ -20,7 +20,7 @@ const tlonTestPlugin = {
   setupWizard: tlonSetupWizard,
   config: tlonPlugin.config,
   setup: {
-    resolveAccountId: ({ accountId }: { cfg: OpenClawConfig; accountId?: string | null }) =>
+    resolveAccountId: ({ accountId }: { cfg: CarapaceConfig; accountId?: string | null }) =>
       accountId ?? "default",
   },
 };
@@ -40,7 +40,7 @@ describe("tlon core", () => {
   it("formats dm allowlist entries through the shared hybrid adapter", () => {
     expect(
       tlonTestPlugin.config.formatAllowFrom?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         allowFrom: ["zod", " ~nec "],
       }),
     ).toEqual(["~zod", "~nec"]);
@@ -49,7 +49,7 @@ describe("tlon core", () => {
   it("returns an empty dm allowlist when the default account is unconfigured", () => {
     expect(
       tlonTestPlugin.config.resolveAllowFrom?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         accountId: "default",
       }),
     ).toStrictEqual([]);
@@ -67,7 +67,7 @@ describe("tlon core", () => {
               dmAllowlist: ["~zod"],
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         accountId: "default",
       }),
     ).toEqual(["~zod"]);
@@ -167,7 +167,7 @@ describe("tlon core", () => {
 
     const result = await runSetupWizardConfigure({
       configure: tlonConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       prompter,
       options: {},
     });
@@ -221,7 +221,7 @@ describe("tlon core", () => {
             code: existingCode,
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       prompter,
       options: {},
     });
@@ -259,8 +259,8 @@ describe("tlon core", () => {
   });
 
   it("does not invent an account when the Tlon channel is unconfigured", () => {
-    expect(listTlonAccountIds({} as OpenClawConfig)).toEqual([]);
-    expect(listTlonAccountIds({ channels: { tlon: {} } } as OpenClawConfig)).toEqual([]);
+    expect(listTlonAccountIds({} as CarapaceConfig)).toEqual([]);
+    expect(listTlonAccountIds({ channels: { tlon: {} } } as CarapaceConfig)).toEqual([]);
   });
 
   it("lists named accounts and the implicit default account", () => {
@@ -274,7 +274,7 @@ describe("tlon core", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(listTlonAccountIds(cfg)).toEqual(["alerts", "default", "work"]);
   });
@@ -300,7 +300,7 @@ describe("tlon core", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       "work",
     );
 
@@ -331,7 +331,7 @@ describe("tlon core", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       "default",
     );
 
@@ -352,7 +352,7 @@ describe("tlon core", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountOverrides: { tlon: "work" },
     });
 

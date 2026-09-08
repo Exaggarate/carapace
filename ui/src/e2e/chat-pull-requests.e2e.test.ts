@@ -23,9 +23,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let publicationProofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -150,33 +150,33 @@ describeControlUiE2e("session pull request chips", () => {
           pullRequests: [
             {
               number: 103469,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "claude/browser-tabs-tighter-header",
               title: "fix(macos): tighten the link-browser tab header",
-              url: "https://github.com/openclaw/openclaw/pull/103469",
+              url: "https://github.com/Exaggarate/carapace/pull/103469",
               state: "open",
               additions: 4,
               deletions: 3,
               checks: { state: "passing", passed: 65, failed: 0, skipped: 31, running: 0 },
-              checksUrl: "https://github.com/openclaw/openclaw/pull/103469/checks",
+              checksUrl: "https://github.com/Exaggarate/carapace/pull/103469/checks",
             },
             {
               number: 103438,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "claude/browser-tabs-web-ui-756a64",
               title: "feat(ui): link browser tabs into the web UI",
-              url: "https://github.com/openclaw/openclaw/pull/103438",
+              url: "https://github.com/Exaggarate/carapace/pull/103438",
               state: "merged",
             },
             {
               number: 103200,
-              owner: "openclaw",
-              repo: "openclaw",
+              owner: "carapace",
+              repo: "carapace",
               branch: "claude/browser-tabs-web-ui-756a64",
               title: "feat(ui): earlier landing on the same branch",
-              url: "https://github.com/openclaw/openclaw/pull/103200",
+              url: "https://github.com/Exaggarate/carapace/pull/103200",
               state: "merged",
             },
           ],
@@ -216,7 +216,7 @@ describeControlUiE2e("session pull request chips", () => {
       .toContain("31");
     await expect
       .poll(() => menu.locator("a").getAttribute("href"))
-      .toBe("https://github.com/openclaw/openclaw/pull/103469/checks");
+      .toBe("https://github.com/Exaggarate/carapace/pull/103469/checks");
     // Clicking outside light-dismisses the popover.
     await page.locator(".chat-prs").click({ position: { x: 4, y: 4 } });
     await expect.poll(() => openChip.locator(".chat-pr__checks[open]").count()).toBe(0);
@@ -283,11 +283,11 @@ describeControlUiE2e("session pull request chips", () => {
             pullRequests: [
               {
                 number: 123456,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "carapace",
+                repo: "carapace",
                 branch: "fix/pr-chip-stacking",
                 title: "Keep the PR chip above the transcript",
-                url: "https://github.com/openclaw/openclaw/pull/123456",
+                url: "https://github.com/Exaggarate/carapace/pull/123456",
                 state: "open",
               },
             ],
@@ -329,13 +329,13 @@ describeControlUiE2e("session pull request chips", () => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
+            owner: "carapace",
+            repo: "carapace",
             branch: "claude/cloud-workers-live-events",
             additions: 2819,
             deletions: 205,
             createUrl:
-              "https://github.com/openclaw/openclaw/pull/new/claude/cloud-workers-live-events",
+              "https://github.com/Exaggarate/carapace/pull/new/claude/cloud-workers-live-events",
           },
           rateLimited: true,
           status: "rate-limited",
@@ -345,7 +345,7 @@ describeControlUiE2e("session pull request chips", () => {
 
     const row = page.locator('.chat-pr[data-state="branch"]');
     await expect.poll(() => row.count()).toBe(1);
-    await expect.poll(() => row.locator(".chat-pr__repo").textContent()).toBe("openclaw");
+    await expect.poll(() => row.locator(".chat-pr__repo").textContent()).toBe("carapace");
     await expect
       .poll(() => row.locator(".chat-pr__branch").textContent())
       .toBe("claude/cloud-workers-live-events");
@@ -401,9 +401,9 @@ describeControlUiE2e("session pull request chips", () => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
-            branch: "openclaw/reconciled-publication",
+            owner: "carapace",
+            repo: "carapace",
+            branch: "carapace/reconciled-publication",
             additions: 42,
             deletions: 7,
           },
@@ -447,16 +447,16 @@ describeControlUiE2e("session pull request chips", () => {
       requestId: "publication-1",
       publisher: sharedPublisher,
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/125200",
-      repository: "openclaw/openclaw",
-      branch: "openclaw/reconciled-publication",
+      url: "https://github.com/Exaggarate/carapace/pull/125200",
+      repository: "carapace/carapace",
+      branch: "carapace/reconciled-publication",
       headCommit: "a".repeat(40),
     });
     const open = page.getByRole("link", { name: "Open PR" });
     await open.waitFor();
     await expect
       .poll(() => open.getAttribute("href"))
-      .toBe("https://github.com/openclaw/openclaw/pull/125200");
+      .toBe("https://github.com/Exaggarate/carapace/pull/125200");
     if (captureUiProof) {
       await writeFile(
         path.join(publicationProofDir, "02-publication-published.png"),
@@ -470,22 +470,22 @@ describeControlUiE2e("session pull request chips", () => {
           pullRequests: [
             {
               number: 125200,
-              owner: "openclaw",
-              repo: "openclaw",
-              branch: "openclaw/reconciled-publication",
+              owner: "carapace",
+              repo: "carapace",
+              branch: "carapace/reconciled-publication",
               title: "Publish reconciled work",
-              url: "https://github.com/openclaw/openclaw/pull/125200",
+              url: "https://github.com/Exaggarate/carapace/pull/125200",
               state: "merged",
             },
           ],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
-            branch: "openclaw/reconciled-publication",
+            owner: "carapace",
+            repo: "carapace",
+            branch: "carapace/reconciled-publication",
             additions: 3,
             deletions: 0,
             createUrl:
-              "https://github.com/openclaw/openclaw/pull/new/openclaw/reconciled-publication",
+              "https://github.com/Exaggarate/carapace/pull/new/carapace/reconciled-publication",
           },
           rateLimited: false,
           status: "ok",
@@ -528,8 +528,8 @@ describeControlUiE2e("session pull request chips", () => {
     const publicationState = (branch: string) => ({
       pullRequests: [],
       branch: {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         branch,
         additions: 2,
         deletions: 1,
@@ -538,7 +538,7 @@ describeControlUiE2e("session pull request chips", () => {
       status: "ok",
     });
     await gateway.emitGatewayEvent(CONTROL_UI_SESSION_PULL_REQUESTS_CHANGED_EVENT, {
-      sessions: { [sessionA]: publicationState("openclaw/publication-a") },
+      sessions: { [sessionA]: publicationState("carapace/publication-a") },
     });
 
     await gateway.deferNext("sessions.github.publish", { sessionKey: sessionA });
@@ -560,7 +560,7 @@ describeControlUiE2e("session pull request chips", () => {
       })
       .toBe(true);
     await gateway.emitGatewayEvent(CONTROL_UI_SESSION_PULL_REQUESTS_CHANGED_EVENT, {
-      sessions: { [sessionB]: publicationState("openclaw/publication-b") },
+      sessions: { [sessionB]: publicationState("carapace/publication-b") },
     });
     await gateway.deferNext("sessions.github.publish", { sessionKey: sessionB });
     const requestCountB = (await gateway.getRequests("sessions.github.publish")).length;
@@ -575,14 +575,14 @@ describeControlUiE2e("session pull request chips", () => {
     await gateway.resolveDeferred("sessions.github.publish", {
       requestId: "publication-a",
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/125301",
-      repository: "openclaw/openclaw",
-      branch: "openclaw/publication-a",
+      url: "https://github.com/Exaggarate/carapace/pull/125301",
+      repository: "carapace/carapace",
+      branch: "carapace/publication-a",
       headCommit: "a".repeat(40),
     });
     await expect.poll(() => publishingB.isDisabled()).toBe(true);
     expect(
-      await page.locator('a[href="https://github.com/openclaw/openclaw/pull/125301"]').count(),
+      await page.locator('a[href="https://github.com/Exaggarate/carapace/pull/125301"]').count(),
     ).toBe(0);
     expect(await page.locator('.chat-pr__publication-outcome[data-state="failed"]').count()).toBe(
       0,
@@ -591,14 +591,14 @@ describeControlUiE2e("session pull request chips", () => {
     await gateway.resolveDeferred("sessions.github.publish", {
       requestId: "publication-b",
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/125302",
-      repository: "openclaw/openclaw",
-      branch: "openclaw/publication-b",
+      url: "https://github.com/Exaggarate/carapace/pull/125302",
+      repository: "carapace/carapace",
+      branch: "carapace/publication-b",
       headCommit: "b".repeat(40),
     });
     await expect
       .poll(() => page.getByRole("link", { name: "Open PR" }).getAttribute("href"))
-      .toBe("https://github.com/openclaw/openclaw/pull/125302");
+      .toBe("https://github.com/Exaggarate/carapace/pull/125302");
   });
 
   it("renders a typed publication failure and its next action", async () => {
@@ -630,13 +630,13 @@ describeControlUiE2e("session pull request chips", () => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
-            branch: "openclaw/rejected-publication",
+            owner: "carapace",
+            repo: "carapace",
+            branch: "carapace/rejected-publication",
             additions: 2,
             deletions: 1,
             createUrl:
-              "https://github.com/openclaw/openclaw/pull/new/openclaw/rejected-publication",
+              "https://github.com/Exaggarate/carapace/pull/new/carapace/rejected-publication",
           },
           rateLimited: false,
           status: "ok",
@@ -656,7 +656,7 @@ describeControlUiE2e("session pull request chips", () => {
       .toContain("Publish as @system-bot");
     expect(
       await page
-        .getByRole("link", { name: "Create a pull request for openclaw/rejected-publication" })
+        .getByRole("link", { name: "Create a pull request for carapace/rejected-publication" })
         .count(),
     ).toBe(0);
     if (captureUiProof) {
@@ -698,9 +698,9 @@ describeControlUiE2e("session pull request chips", () => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
-            branch: "openclaw/retry-publication",
+            owner: "carapace",
+            repo: "carapace",
+            branch: "carapace/retry-publication",
             additions: 2,
             deletions: 1,
           },
@@ -792,9 +792,9 @@ describeControlUiE2e("session pull request chips", () => {
         [watchedKey]: {
           pullRequests: [],
           branch: {
-            owner: "openclaw",
-            repo: "openclaw",
-            branch: "openclaw/cloud-idle",
+            owner: "carapace",
+            repo: "carapace",
+            branch: "carapace/cloud-idle",
             additions: 2,
             deletions: 1,
           },

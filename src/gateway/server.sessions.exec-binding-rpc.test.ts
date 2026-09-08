@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, test } from "vitest";
 import { detectNodeClaudePlacement } from "../agents/cli-runner/prepare-claude.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";

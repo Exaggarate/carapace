@@ -19,9 +19,9 @@ const port =
     ? 0
     : process.env.MOCK_PORT != null
       ? readTcpPortEnv("MOCK_PORT")
-      : readTcpPortEnv("OPENCLAW_MOCK_OPENAI_PORT");
+      : readTcpPortEnv("CARAPACE_MOCK_OPENAI_PORT");
 const bindHost = process.env.MOCK_BIND_HOST ?? "127.0.0.1";
-const successMarker = process.env.SUCCESS_MARKER ?? "OPENCLAW_E2E_OK";
+const successMarker = process.env.SUCCESS_MARKER ?? "CARAPACE_E2E_OK";
 const requestLog = process.env.MOCK_REQUEST_LOG;
 // Absolute record ordinal, stamped at the producer: consumers expose a bounded
 // tail of the log, so entries must carry their own position. The server starts
@@ -499,7 +499,7 @@ function preambleThenToolCallEvents(preamble, name, args) {
 /** Two-turn draft scenario: preamble + shell call, then a final answer. */
 function progressDraftEvents(body, bodyText) {
   const allText = collectText(body).join("\n");
-  if (!allText.includes("OPENCLAW_E2E_DRAFTPROOF")) {
+  if (!allText.includes("CARAPACE_E2E_DRAFTPROOF")) {
     return null;
   }
   if (!collectFunctionCallOutputText(body)) {
@@ -507,10 +507,10 @@ function progressDraftEvents(body, bodyText) {
       return null;
     }
     return preambleThenToolCallEvents("Checking the workspace before answering.", "exec", {
-      command: "sleep 3 && echo openclaw-draft-proof",
+      command: "sleep 3 && echo carapace-draft-proof",
     });
   }
-  return responseEvents("OPENCLAW_E2E_DRAFTPROOF");
+  return responseEvents("CARAPACE_E2E_DRAFTPROOF");
 }
 
 function toolCallEvents(name, args) {
@@ -654,7 +654,7 @@ function writeImageGeneration(res) {
         b64_json:
           "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+yf7kAAAAASUVORK5CYII=",
         mime_type: "image/png",
-        revised_prompt: "openclaw mock image",
+        revised_prompt: "carapace mock image",
       },
     ],
   });
@@ -663,13 +663,13 @@ function writeImageGeneration(res) {
 function resolveResponseText(bodyText) {
   const servingChecks = Array.from(
     bodyText.matchAll(
-      /This is an OpenClaw update serving check\. Do not use tools\. Reply with exactly: (update-verified-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/gu,
+      /This is an Carapace update serving check\. Do not use tools\. Reply with exactly: (update-verified-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/gu,
     ),
   );
   if (servingChecks.length > 0) {
     return servingChecks.at(-1)[1];
   }
-  const matches = Array.from(bodyText.matchAll(/\bOPENCLAW_E2E_[A-Z0-9]+(?:_[A-Z0-9]+)*\b/gu));
+  const matches = Array.from(bodyText.matchAll(/\bCARAPACE_E2E_[A-Z0-9]+(?:_[A-Z0-9]+)*\b/gu));
   return matches.at(-1)?.[0] ?? successMarker;
 }
 
@@ -732,7 +732,7 @@ function mcpCodeModeApiFileEvents(body, bodyText) {
       return null;
     }
     const catalogExpression =
-      process.env.OPENCLAW_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE === "legacy"
+      process.env.CARAPACE_FROZEN_TARGET_MCP_CODE_MODE_CATALOG_MODE === "legacy"
         ? "ALL_TOOLS.some((tool) => tool.source === 'mcp')"
         : "catalog.all().some((tool) => tool.source === 'mcp')";
     return toolCallEvents("exec", {
@@ -811,7 +811,7 @@ const server = http.createServer((req, res) => {
     if (req.method === "GET" && url.pathname === "/v1/models") {
       writeJson(res, 200, {
         object: "list",
-        data: [{ id: "gpt-5.6-luna", object: "model", owned_by: "openclaw-e2e" }],
+        data: [{ id: "gpt-5.6-luna", object: "model", owned_by: "carapace-e2e" }],
       });
       return;
     }
@@ -922,7 +922,7 @@ const server = http.createServer((req, res) => {
       // Progress-draft proof needs assistant content followed by a tool call in
       // one streamed turn: the completions transport tags that leading text as
       // commentary, which channels render as the draft status headline.
-      if (!responseControl && bodyText.includes("OPENCLAW_E2E_DRAFTPROOF")) {
+      if (!responseControl && bodyText.includes("CARAPACE_E2E_DRAFTPROOF")) {
         const messages = Array.isArray(body.messages) ? body.messages : [];
         const toolTurnDone = messages.some((message) => message?.role === "tool");
         if (!toolTurnDone) {
@@ -931,7 +931,7 @@ const server = http.createServer((req, res) => {
             body.stream !== false,
             "Checking the workspace before answering.",
             "exec",
-            { command: "sleep 3 && echo openclaw-draft-proof" },
+            { command: "sleep 3 && echo carapace-draft-proof" },
           );
           return;
         }
@@ -939,7 +939,7 @@ const server = http.createServer((req, res) => {
         // gate. Without this the whole turn finishes in well under a second and
         // no draft is created, which is correct behavior but proves nothing.
         await delay(readPositiveIntEnv("MOCK_DRAFTPROOF_FINAL_DELAY_MS", 6000));
-        writeChatCompletion(res, body.stream !== false, "OPENCLAW_E2E_DRAFTPROOF");
+        writeChatCompletion(res, body.stream !== false, "CARAPACE_E2E_DRAFTPROOF");
         return;
       }
       const response = selectedResponse?.response ?? selectCurrentResponse().response;

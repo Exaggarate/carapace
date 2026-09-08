@@ -1,7 +1,7 @@
 // GPT-Live frameless session, call-creation, and sideband event wire contracts.
 import { randomBytes } from "node:crypto";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/realtime-voice-provider";
-import { readResponseTextPrefix } from "openclaw/plugin-sdk/response-limit-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/realtime-voice-provider";
+import { readResponseTextPrefix } from "carapace/plugin-sdk/response-limit-runtime";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {
   buildOpenAIQuicksilverBackgroundContext,
@@ -253,7 +253,7 @@ function buildOpenAIQuicksilverMultipartBody(params: { sdp: string; session: unk
   const sessionJson = JSON.stringify(params.session);
   let boundary: string;
   do {
-    boundary = `openclaw-quicksilver-${randomBytes(18).toString("hex")}`;
+    boundary = `carapace-quicksilver-${randomBytes(18).toString("hex")}`;
   } while (params.sdp.includes(boundary) || sessionJson.includes(boundary));
   return {
     body: [

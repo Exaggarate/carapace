@@ -7,7 +7,7 @@ import {
 } from "../channels/message/runtime.js";
 import type { CliDeps } from "../cli/deps.types.js";
 import { createOutboundSendDeps } from "../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { resolveAgentOutboundIdentity } from "../infra/outbound/identity.js";
 import { buildOutboundSessionContext } from "../infra/outbound/session-context.js";
 import { resolveCronDeliveryPlan } from "./delivery-plan.js";
@@ -37,7 +37,7 @@ type CronAnnounceDeliveryOutcome = Extract<
 >;
 
 async function resolveCronAnnounceDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   jobId: string;
   target: CronAnnounceTarget;
@@ -92,7 +92,7 @@ async function resolveCronAnnounceDelivery(params: {
 /** Sends a cron announce payload and throws if target resolution or delivery fails. */
 export async function sendCronAnnouncePayloadStrict(params: {
   deps: CliDeps;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   jobId: string;
   target: CronAnnounceTarget;

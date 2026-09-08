@@ -1,4 +1,4 @@
-import { createAssistantMessageEventStream, type Message } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream, type Message } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";

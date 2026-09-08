@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import OpenClawKit
+import CarapaceKit
 
 @MainActor
 @Observable

@@ -106,11 +106,11 @@ function elapsed(
     datetime=${date.toISOString()}
     title=${date.toLocaleString(i18n.getLocale())}
     aria-label=${display === "minute-compact" ? nothing : date.toLocaleString(i18n.getLocale())}
-    ><openclaw-elapsed-time
+    ><carapace-elapsed-time
       .startMs=${timestamp}
       .minimumUnit=${display === "minute-compact" ? "minute" : "second"}
       .singleUnit=${display === "single-unit"}
-    ></openclaw-elapsed-time
+    ></carapace-elapsed-time
   ></time>`;
 }
 
@@ -263,12 +263,12 @@ export function renderPersonActivityCard(input: PersonCardInput) {
   const activity = personActivityLink(user.identity?.id, input.routing, user.name);
   return html`<div class="person-activity-card">
     <header class="person-activity-card__header">
-      <openclaw-viewer-avatar
+      <carapace-viewer-avatar
         .user=${user}
         .markAsViewer=${false}
         variant="footer"
         aria-hidden="true"
-      ></openclaw-viewer-avatar>
+      ></carapace-viewer-avatar>
       <div>
         <h2>${user.name ?? user.email ?? t("presence.card.person")}</h2>
         <span

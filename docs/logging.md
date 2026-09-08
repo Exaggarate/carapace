@@ -1,13 +1,13 @@
 ---
 summary: "File logs, console output, CLI tailing, and the Control UI Logs tab"
 read_when:
-  - You need a beginner-friendly overview of OpenClaw logging
+  - You need a beginner-friendly overview of Carapace logging
   - You want to configure log levels, formats, or redaction
   - You are troubleshooting and need to find logs quickly
 title: "Logging"
 ---
 
-OpenClaw has two main log surfaces:
+Carapace has two main log surfaces:
 
 - **File logs** (JSON lines) written by the Gateway.
 - **Console output** in the terminal running the Gateway.
@@ -20,37 +20,37 @@ logs live, how to read them, and how to configure log levels and formats.
 By default, the Gateway writes a rolling log file per day. The default profile
 keeps the historical path:
 
-`/tmp/openclaw/openclaw-YYYY-MM-DD.log`
+`/tmp/carapace/carapace-YYYY-MM-DD.log`
 
 Named profiles use a profile-qualified filename in the same directory:
 
-`/tmp/openclaw/openclaw-<profile>-YYYY-MM-DD.log`
+`/tmp/carapace/carapace-<profile>-YYYY-MM-DD.log`
 
 The filename profile segment is lowercase and limited to letters, numbers, and
 dashes. Simple lowercase names stay readable, so the `--dev` shorthand writes
-`openclaw-dev-YYYY-MM-DD.log`. Case, underscores, and literal dashes use a
+`carapace-dev-YYYY-MM-DD.log`. Case, underscores, and literal dashes use a
 reversible dash escape so distinct profile names never share a log file.
 Oversized values set directly through the environment use a bounded hash suffix
 to stay within filesystem filename limits. An explicit `logging.file` overrides
 these defaults.
 
-The date uses the gateway host's local timezone. When `/tmp/openclaw` is unsafe
-or unavailable (and always on Windows), OpenClaw uses a user-scoped
-`openclaw-<uid>` directory under the OS temp dir instead. Dated log files are
+The date uses the gateway host's local timezone. When `/tmp/carapace` is unsafe
+or unavailable (and always on Windows), Carapace uses a user-scoped
+`carapace-<uid>` directory under the OS temp dir instead. Dated log files are
 pruned after 24 hours.
 
 Each file rotates when the next write would exceed `logging.maxFileBytes`
-(default: 100 MB). OpenClaw keeps up to five numbered archives beside the
-active file, such as `openclaw-YYYY-MM-DD.1.log` or
-`openclaw-dev-YYYY-MM-DD.1.log`, and keeps writing to a fresh active log instead
+(default: 100 MB). Carapace keeps up to five numbered archives beside the
+active file, such as `carapace-YYYY-MM-DD.1.log` or
+`carapace-dev-YYYY-MM-DD.1.log`, and keeps writing to a fresh active log instead
 of suppressing diagnostics.
 
-You can override the path in `~/.openclaw/openclaw.json`:
+You can override the path in `~/.carapace/carapace.json`:
 
 ```json
 {
   "logging": {
-    "file": "/path/to/openclaw.log"
+    "file": "/path/to/carapace.log"
   }
 }
 ```
@@ -62,9 +62,9 @@ You can override the path in `~/.openclaw/openclaw.json`:
 Tail the gateway log file via RPC:
 
 ```bash
-openclaw logs --follow
-openclaw --dev logs --follow
-openclaw --profile work logs --follow
+carapace logs --follow
+carapace --dev logs --follow
+carapace --profile work logs --follow
 ```
 
 The root profile selector resolves the same profile-specific file used by the
@@ -105,9 +105,9 @@ In JSON mode, the CLI emits `type`-tagged objects:
 - `error`: gateway connection failures (written to stderr)
 
 If the implicit local loopback Gateway asks for pairing, closes during connect,
-or times out before `logs.tail` answers, `openclaw logs` falls back to the
+or times out before `logs.tail` answers, `carapace logs` falls back to the
 configured Gateway file log automatically. Explicit `--url` targets do not use
-this fallback. `openclaw logs --follow` is stricter: on Linux it uses the active
+this fallback. `carapace logs --follow` is stricter: on Linux it uses the active
 user-systemd Gateway journal by PID when available, and otherwise retries the
 live Gateway with backoff instead of following a potentially stale side-by-side
 file.
@@ -115,7 +115,7 @@ file.
 If the Gateway is unreachable, the CLI prints a short hint to run:
 
 ```bash
-openclaw doctor
+carapace doctor
 ```
 
 ### Control UI (web)
@@ -128,7 +128,7 @@ See [Control UI](/web/control-ui) for how to open it.
 To filter channel activity (WhatsApp/Telegram/etc), use:
 
 ```bash
-openclaw channels logs --channel whatsapp
+carapace channels logs --channel whatsapp
 ```
 
 `--channel` defaults to `all`; `--lines <n>` (default 200) and `--json` are also
@@ -150,7 +150,7 @@ available:
 - `session_id`: active session id/key when the log call carries session context.
 - `channel`: active channel when the log call carries channel context.
 
-OpenClaw preserves the original structured log arguments alongside these fields
+Carapace preserves the original structured log arguments alongside these fields
 so existing parsers that read numbered tslog argument keys keep working.
 
 Talk, realtime voice, and managed-room activity emits bounded lifecycle log
@@ -170,7 +170,7 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ### Gateway WebSocket logs
 
-`openclaw gateway` also has WebSocket protocol logging for RPC traffic:
+`carapace gateway` also has WebSocket protocol logging for RPC traffic:
 
 - normal mode: only interesting results (errors, parse errors, slow calls)
 - `--verbose`: all request/response traffic
@@ -180,20 +180,20 @@ Console formatting is controlled by `logging.consoleStyle`.
 Examples:
 
 ```bash
-openclaw gateway
-openclaw gateway --verbose --ws-log compact
-openclaw gateway --verbose --ws-log full
+carapace gateway
+carapace gateway --verbose --ws-log compact
+carapace gateway --verbose --ws-log full
 ```
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
+All logging configuration lives under `logging` in `~/.carapace/carapace.json`.
 
 ```json
 {
   "logging": {
     "level": "info",
-    "file": "/path/to/openclaw.log",
+    "file": "/path/to/carapace.log",
     "consoleLevel": "info",
     "consoleStyle": "pretty",
     "redactPatterns": ["sk-.*"]
@@ -208,7 +208,7 @@ Levels: `silent`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`.
 - `logging.level`: **file logs** (JSONL) level (default: `info`).
 - `logging.consoleLevel`: **console** verbosity level.
 
-You can override both via the **`OPENCLAW_LOG_LEVEL`** environment variable (e.g. `OPENCLAW_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `openclaw.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `openclaw --log-level debug gateway run`), which overrides the environment variable for that command.
+You can override both via the **`CARAPACE_LOG_LEVEL`** environment variable (e.g. `CARAPACE_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `carapace.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `carapace --log-level debug gateway run`), which overrides the environment variable for that command.
 
 `--verbose` only affects console output and WS log verbosity; it does not change
 file log levels.
@@ -219,39 +219,39 @@ When debugging provider calls, use targeted environment flags instead of raising
 all logs to `debug`:
 
 ```bash
-OPENCLAW_DEBUG_MODEL_TRANSPORT=1 openclaw gateway
-OPENCLAW_DEBUG_MODEL_PAYLOAD=tools OPENCLAW_DEBUG_SSE=events openclaw gateway
+CARAPACE_DEBUG_MODEL_TRANSPORT=1 carapace gateway
+CARAPACE_DEBUG_MODEL_PAYLOAD=tools CARAPACE_DEBUG_SSE=events carapace gateway
 ```
 
 Available flags:
 
-- `OPENCLAW_DEBUG_MODEL_TRANSPORT=1`: emit request start, fetch response, SDK
+- `CARAPACE_DEBUG_MODEL_TRANSPORT=1`: emit request start, fetch response, SDK
   headers, first streaming event, stream completion, and transport errors at
   `info` level.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=summary`: include a bounded request payload
+- `CARAPACE_DEBUG_MODEL_PAYLOAD=summary`: include a bounded request payload
   summary in model request logs.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=tools`: include all model-facing tool names in
+- `CARAPACE_DEBUG_MODEL_PAYLOAD=tools`: include all model-facing tool names in
   the payload summary.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=full-redacted`: include a redacted, capped JSON
+- `CARAPACE_DEBUG_MODEL_PAYLOAD=full-redacted`: include a redacted, capped JSON
   payload snapshot. Use only while debugging; secrets are redacted but prompts
   and message text may still be present.
-- `OPENCLAW_DEBUG_SSE=events`: emit first-event and stream-completion timing.
-- `OPENCLAW_DEBUG_SSE=peek`: also emit the first five redacted SSE event
+- `CARAPACE_DEBUG_SSE=events`: emit first-event and stream-completion timing.
+- `CARAPACE_DEBUG_SSE=peek`: also emit the first five redacted SSE event
   payloads, capped per event.
-- `OPENCLAW_DEBUG_CODE_MODE=1`: emit code-mode model-surface diagnostics,
+- `CARAPACE_DEBUG_CODE_MODE=1`: emit code-mode model-surface diagnostics,
   including bounded activation facts, the final visible surface, and names of
   provider-native tools filtered because code mode owns the tool surface.
 
-These flags log through normal OpenClaw logging, so `openclaw logs --follow`
+These flags log through normal Carapace logging, so `carapace logs --follow`
 and the Control UI Logs tab show them. For backward compatibility,
-`OPENCLAW_DEBUG_CODE_MODE` also promotes general model-transport diagnostics to
+`CARAPACE_DEBUG_CODE_MODE` also promotes general model-transport diagnostics to
 `info`; dedicated code-mode diagnostics are emitted only when that flag is
 enabled.
 
 `[model-fetch]` start and response metadata (provider, API, model, status,
 latency, and request fields such as method, URL, timeout, proxy, and policy)
 is always emitted at `info` level regardless of
-`OPENCLAW_DEBUG_MODEL_TRANSPORT`, so basic model transport hygiene is visible
+`CARAPACE_DEBUG_MODEL_TRANSPORT`, so basic model transport hygiene is visible
 without debug flags.
 
 `[anthropic] replayed thinking dropped: N block(s)` is a warning when Anthropic
@@ -268,7 +268,7 @@ for the routes and thresholds that enable clearing.
 ### Trace correlation
 
 File logs are JSONL. When a log call carries a valid diagnostic trace context,
-OpenClaw writes the trace fields as top-level JSON keys (`traceId`, `spanId`,
+Carapace writes the trace fields as top-level JSON keys (`traceId`, `spanId`,
 `parentSpanId`, `traceFlags`) so external log processors can correlate the line
 with OTEL spans and provider `traceparent` propagation.
 
@@ -286,7 +286,7 @@ both sinks.
 
 ### Slow agent database opens
 
-The `slow OpenClaw agent database open` warning includes `phaseDurationsMs` when
+The `slow Carapace agent database open` warning includes `phaseDurationsMs` when
 a persistent database open takes at least one second:
 
 | Phase           | Work included                                                                                           |
@@ -303,7 +303,7 @@ are elapsed durations, including asynchronous waits, rather than CPU time or
 proof that the main event loop was blocked for the whole interval.
 
 The structured warning also includes `pid`, Node's `threadId`, and `isMainThread`
-for the opener emitting it. Inspect each `openclaw logs --json` event's original
+for the opener emitting it. Inspect each `carapace logs --json` event's original
 `raw` record; ordinary console text omits structured metadata.
 An opener on the main thread may have awaited an integrity Worker, so these
 fields do not identify the thread performing every phase. `admissionMode` records
@@ -317,7 +317,7 @@ reused after exit.
 When a reply spends a long time preparing, inspect the normal Gateway logs:
 
 ```bash
-openclaw logs --follow --plain | rg 'timings|agent turn milestone|liveness warning'
+carapace logs --follow --plain | rg 'timings|agent turn milestone|liveness warning'
 ```
 
 Reply resolver, dispatch, and agent-turn preparation milestones include stage
@@ -371,12 +371,12 @@ OTEL model-call spans/metrics when diagnostics export is enabled.
 
 A third rendering style, `compact` (tighter output, best for long sessions), is
 applied automatically when stdout is not a TTY. It is no longer a settable
-config value; `openclaw doctor --fix` maps a stored `consoleStyle: "compact"`
+config value; `carapace doctor --fix` maps a stored `consoleStyle: "compact"`
 to `"pretty"`.
 
 ### Redaction
 
-OpenClaw can redact sensitive tokens before they hit console output, file logs,
+Carapace can redact sensitive tokens before they hit console output, file logs,
 OTLP log records, persisted session transcript text, or Control UI tool
 event payloads (tool start args, partial/final result payloads, derived
 exec output, and patch summaries):
@@ -409,7 +409,7 @@ The built-in defaults cover common API credentials and payment-credential field
 names such as card number, CVC/CVV, shared payment token, and payment credential
 when they appear as JSON fields, URL parameters, CLI flags, or assignments.
 
-OpenClaw also redacts safety-boundary payloads shown to UI clients, support
+Carapace also redacts safety-boundary payloads shown to UI clients, support
 bundles, diagnostics observers, approval prompts, or agent tools. Custom
 `logging.redactPatterns` can add project-specific patterns on those surfaces.
 
@@ -436,14 +436,14 @@ Two adjacent surfaces:
 - **Diagnostics flags** — targeted debug-log flags that route extra logs to
   `logging.file` without raising `logging.level`. Flags are case-insensitive
   and support wildcards (`telegram.*`, `*`). Configure under `diagnostics.flags`
-  or via the `OPENCLAW_DIAGNOSTICS=...` env override. Full guide:
+  or via the `CARAPACE_DIAGNOSTICS=...` env override. Full guide:
   [Diagnostics flags](/diagnostics/flags).
 
 For OTLP export to a collector, see [OpenTelemetry export](/gateway/opentelemetry).
 
 ## Troubleshooting tips
 
-- **Gateway not reachable?** Run `openclaw doctor` first.
+- **Gateway not reachable?** Run `carapace doctor` first.
 - **Logs empty?** Check that the Gateway is running and writing to the file path
   in `logging.file`.
 - **Need more detail?** Set `logging.level` to `debug` or `trace` and retry.

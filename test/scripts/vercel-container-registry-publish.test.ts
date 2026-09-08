@@ -8,8 +8,8 @@ import {
   publishVercelContainerRegistryImages,
 } from "../../scripts/vercel-container-registry-publish.mjs";
 
-const sourceImage = "ghcr.io/openclaw/openclaw";
-const targetImage = "vcr.vercel.com/openclaw-foundation/openclaw/openclaw";
+const sourceImage = "ghcr.io/carapace/carapace";
+const targetImage = "vcr.vercel.com/carapace-foundation/carapace/carapace";
 const amd64Digest = `sha256:${"1".repeat(64)}`;
 const arm64Digest = `sha256:${"2".repeat(64)}`;
 const attestationDigest = `sha256:${"3".repeat(64)}`;
@@ -474,7 +474,7 @@ describe("Vercel Container Registry publishing", () => {
 
   it("transports only secret-safe digests across the VCR workflow boundary", () => {
     const dockerRelease = readWorkflow(".github/workflows/docker-release.yml");
-    const releaseWorkflow = readWorkflow(".github/workflows/openclaw-release-publish.yml");
+    const releaseWorkflow = readWorkflow(".github/workflows/carapace-release-publish.yml");
     const reusable = readWorkflow(".github/workflows/vercel-container-registry-publish.yml");
     const dockerPublish = requireJob(dockerRelease, "publish");
     const releasePublish = requireJob(releaseWorkflow, "publish_vcr");
@@ -508,7 +508,7 @@ describe("Vercel Container Registry publishing", () => {
 
   it("keeps direct VCR recovery blocking without exposing an advisory dispatch input", () => {
     const reusable = readWorkflow(".github/workflows/vercel-container-registry-publish.yml");
-    const releaseWorkflow = readWorkflow(".github/workflows/openclaw-release-publish.yml");
+    const releaseWorkflow = readWorkflow(".github/workflows/carapace-release-publish.yml");
 
     expect(reusable.on?.workflow_dispatch?.inputs).not.toHaveProperty("advisory");
     expect(requireJob(reusable, "publish")["continue-on-error"]).toBe(
@@ -520,7 +520,7 @@ describe("Vercel Container Registry publishing", () => {
   it("isolates best-effort VCR publication from Docker and GitHub release finalization", () => {
     const reusable = readWorkflow(".github/workflows/vercel-container-registry-publish.yml");
     const dockerRelease = readWorkflow(".github/workflows/docker-release.yml");
-    const releaseWorkflow = readWorkflow(".github/workflows/openclaw-release-publish.yml");
+    const releaseWorkflow = readWorkflow(".github/workflows/carapace-release-publish.yml");
     const manualPromotion = readWorkflow(".github/workflows/docker-channel-promote.yml");
     const recoveryValidation = requireJob(reusable, "validate_recovery");
     const recoveryApproval = requireJob(reusable, "approve_recovery");
@@ -595,7 +595,7 @@ describe("Vercel Container Registry publishing", () => {
           "uses: ./.github/workflows/vercel-container-registry-publish.yml",
         ),
       );
-    expect(reusableCallers).toEqual(["openclaw-release-publish.yml"]);
+    expect(reusableCallers).toEqual(["carapace-release-publish.yml"]);
     expect(reusable.on?.workflow_call?.inputs?.advisory).toEqual({
       description: "Keep automated release mirroring non-blocking",
       required: true,

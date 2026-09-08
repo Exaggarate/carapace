@@ -173,7 +173,7 @@ suite.define(() => {
       expect(expandedToggle?.description?.value ?? "").toBe("");
       await accessibility.detach();
       for (const child of [staleRunningChild, failedChild]) {
-        expect(await child.locator("openclaw-elapsed-time").count()).toBe(0);
+        expect(await child.locator("carapace-elapsed-time").count()).toBe(0);
         expect((await child.locator(".session-row-trail").textContent())?.trim()).toBeTruthy();
       }
       await captureUiProof(suite, page, "child-sessions-expanded.png");
@@ -236,7 +236,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       const row = sidebar.locator(
         '.sidebar-recent-session[data-session-key="agent:main:research"]',
       );
@@ -274,7 +274,7 @@ suite.define(() => {
           .toBeLessThanOrEqual(0);
       };
       const hiddenActionCounts = async () => ({
-        confirms: await page.locator("openclaw-modal-dialog .exec-approval-actions").count(),
+        confirms: await page.locator("carapace-modal-dialog .exec-approval-actions").count(),
         nativeDialogs: nativeDialogs.length,
         patches: (await gateway.getRequests("sessions.patch")).length,
       });
@@ -408,7 +408,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page
-            .locator("openclaw-session-menu")
+            .locator("carapace-session-menu")
             .getByRole("menuitem", { name: "Pin session" })
             .evaluate((element) => element === document.activeElement),
         )
@@ -430,7 +430,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page
-            .locator("openclaw-session-menu")
+            .locator("carapace-session-menu")
             .getByRole("menuitem", { name: "Pin session" })
             .evaluate((element) => element === document.activeElement),
         )
@@ -804,7 +804,7 @@ suite.define(() => {
         suite,
         page,
         "sidebar-session-dropped-into-pinned.png",
-        page.locator('openclaw-session-menu > wa-dropdown [part="menu"]'),
+        page.locator('carapace-session-menu > wa-dropdown [part="menu"]'),
         [page.getByRole("menuitem", { name: "Unpin session" })],
       );
     } finally {
@@ -835,7 +835,7 @@ suite.define(() => {
           withWork
             ? {
                 execNode: nodeHash,
-                worktree: { branch: "openclaw/wt-1", repoRoot: "/Users/dev/Projects/clawdbot" },
+                worktree: { branch: "carapace/wt-1", repoRoot: "/Users/dev/Projects/clawdbot" },
               }
             : {},
         ),
@@ -845,7 +845,7 @@ suite.define(() => {
     const context = await suite.browser.newContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.setItem("openclaw:sidebar:sessions:show-preview", "true");
+      localStorage.setItem("carapace:sidebar:sessions:show-preview", "true");
     });
     const gateway = await installMockGateway(page, {
       methodResponses: {
@@ -927,7 +927,7 @@ suite.define(() => {
     const rows = [
       ...Array.from({ length: 8 }, (_, index) =>
         sessionRow(`agent:main:work-${index}`, `Work session ${index}`, baseTime - index * 60_000, {
-          worktree: { branch: `openclaw/wt-${index}`, repoRoot: "/Users/dev/Projects/clawdbot" },
+          worktree: { branch: `carapace/wt-${index}`, repoRoot: "/Users/dev/Projects/clawdbot" },
         }),
       ),
       ...Array.from({ length: 30 }, (_, index) =>

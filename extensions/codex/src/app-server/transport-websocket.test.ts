@@ -62,7 +62,7 @@ describe("Codex app-server websocket transport", () => {
           socket.send(
             JSON.stringify({
               id: message.id,
-              result: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION}` },
+              result: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION}` },
             }),
           );
           return;
@@ -296,7 +296,7 @@ describe("Codex app-server websocket transport", () => {
       .mockRejectedValue(new Error("local inspection unavailable"));
     // macOS socket paths must fit sockaddr_un even when the runner nests TMPDIR.
     const tempRoot = process.platform === "darwin" ? "/tmp" : os.tmpdir();
-    const tempDir = await mkdtemp(path.join(tempRoot, "openclaw-codex-unix-"));
+    const tempDir = await mkdtemp(path.join(tempRoot, "carapace-codex-unix-"));
     tempDirs.push(tempDir);
     const socketPath = path.join(tempDir, "app-server.sock");
     const httpServer = http.createServer();
@@ -317,7 +317,7 @@ describe("Codex app-server websocket transport", () => {
           socket.send(
             JSON.stringify({
               id: message.id,
-              result: { userAgent: `openclaw/${CODEX_APP_SERVER_VERSION}` },
+              result: { userAgent: `carapace/${CODEX_APP_SERVER_VERSION}` },
             }),
           );
           return;

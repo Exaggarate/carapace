@@ -43,7 +43,7 @@ describe("critical session observer notice", () => {
       visible: true,
     },
   ])("configured-global observer notice: $name", async (testCase) => {
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
 
     showCriticalSessionObserverNotice({
@@ -96,7 +96,7 @@ describe("critical session observer notice", () => {
   it("notices critical health only for a non-selected session", async () => {
     const onOpen = vi.fn();
     const tracker = new CriticalObserverNoticeTracker();
-    const toastHost = document.createElement("openclaw-toast-host");
+    const toastHost = document.createElement("carapace-toast-host");
     document.body.append(toastHost);
     const show = (sessionKey: string, health: string, revision: number) =>
       showCriticalSessionObserverNotice({
@@ -154,7 +154,7 @@ describe("critical session observer notice", () => {
   ])("$name", ({ before, after }) => {
     it.each([1, 11])("announces unchanged critical health at revision %i", async (revision) => {
       const tracker = new CriticalObserverNoticeTracker();
-      const toastHost = document.createElement("openclaw-toast-host");
+      const toastHost = document.createElement("carapace-toast-host");
       document.body.append(toastHost);
       const show = (identity: typeof before, nextRevision: number, runId: string) =>
         showCriticalSessionObserverNotice({
@@ -199,7 +199,7 @@ describe("critical session observer notice", () => {
     "rejects malformed %s before tracking",
     async (field) => {
       const tracker = new CriticalObserverNoticeTracker();
-      const toastHost = document.createElement("openclaw-toast-host");
+      const toastHost = document.createElement("carapace-toast-host");
       document.body.append(toastHost);
       const show = (value: unknown) =>
         showCriticalSessionObserverNotice({

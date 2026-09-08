@@ -115,7 +115,7 @@ describe("precomputed help metadata output", () => {
   });
 
   it("retains a help miss when the real reader advances from null to parent metadata", async () => {
-    const parentDir = tempDirs.make("openclaw-help-metadata-");
+    const parentDir = tempDirs.make("carapace-help-metadata-");
     const moduleDir = path.join(parentDir, "chunks");
     fs.mkdirSync(moduleDir);
     fs.writeFileSync(path.join(moduleDir, "cli-startup-metadata.json"), "null");

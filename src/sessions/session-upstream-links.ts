@@ -1,24 +1,24 @@
 /** Best-effort shared-state registry for adopted upstream sessions. */
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
-import { safeParseJson } from "@openclaw/normalization-core";
+import { safeParseJson } from "@carapace/normalization-core";
 import type { Selectable } from "kysely";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { SessionUpstreamJsonValue, SessionUpstreamKind } from "../plugins/session-catalog.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 
 type SessionUpstreamDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "session_upstream_links" | "session_watch_cursors"
 >;
-type SessionUpstreamLinkRow = Selectable<OpenClawStateKyselyDatabase["session_upstream_links"]>;
+type SessionUpstreamLinkRow = Selectable<CarapaceStateKyselyDatabase["session_upstream_links"]>;
 
 export type SessionUpstreamLink = {
   sessionKey: string;
@@ -76,7 +76,7 @@ export function upsertSessionUpstreamLink(
     upstreamRef: SessionUpstreamJsonValue;
     marker: SessionUpstreamJsonValue;
   },
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     now?: number;
     ifAbsent?: true;
     assertCommitAllowed?: () => void;
@@ -84,7 +84,7 @@ export function upsertSessionUpstreamLink(
 ): boolean {
   const now = options.now ?? Date.now();
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       options.assertCommitAllowed?.();
       const written =
         executeSqliteQuerySync(
@@ -166,10 +166,10 @@ export function upsertSessionUpstreamLink(
 export function readSessionUpstreamLink(
   sessionKey: string,
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): SessionUpstreamLink | undefined {
   try {
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     const row = executeSqliteQuerySync(
       db,
       getSessionUpstreamKysely(db)
@@ -189,12 +189,12 @@ export function updateSessionUpstreamLinkMarker(
   sessionKey: string,
   agentId: string,
   marker: SessionUpstreamJsonValue,
-  options: OpenClawStateDatabaseOptions & { now?: number; expectedUpdatedAt?: number } = {},
+  options: CarapaceStateDatabaseOptions & { now?: number; expectedUpdatedAt?: number } = {},
 ): boolean {
   const now = options.now ?? Date.now();
   try {
     let updated = false;
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       let query = getSessionUpstreamKysely(db)
         .updateTable("session_upstream_links")
         .set({
@@ -221,13 +221,13 @@ export function updateSessionUpstreamLinkMarker(
 export function deleteSessionUpstreamLink(
   sessionKey: string,
   agentId: string,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     expected?: SessionUpstreamLink;
     assertCommitAllowed?: () => void;
   } = {},
 ): "deleted" | "absent" | "changed" | undefined {
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       options.assertCommitAllowed?.();
       const kysely = getSessionUpstreamKysely(db);
       if (options.expected) {
@@ -267,11 +267,11 @@ export function deleteSessionUpstreamLink(
 }
 
 export function listWatchedSessionUpstreamLinks(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Map<string, SessionUpstreamLink[]> {
   const grouped = new Map<string, SessionUpstreamLink[]>();
   try {
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     // Watch cursors own demand. Their key-only join relies on one owning agent per
     // adopted session key, not one agent per native thread. Agent-qualified keys
     // keep separate adoptions of the same thread distinct.

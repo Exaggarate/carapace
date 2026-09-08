@@ -5,36 +5,36 @@ export type {
   ChannelDirectoryEntry,
   ChatType,
   HistoryEntry,
-  OpenClawConfig,
-  OpenClawPluginApi,
+  CarapaceConfig,
+  CarapacePluginApi,
   ReplyPayload,
-} from "openclaw/plugin-sdk/core";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-export { resolveAllowlistMatchSimple } from "openclaw/plugin-sdk/allow-from";
-export { logInboundDrop } from "openclaw/plugin-sdk/channel-inbound";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createChannelMessageReplyPipeline } from "openclaw/plugin-sdk/channel-outbound";
-export { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
-export { listSkillCommandsForAgents } from "openclaw/plugin-sdk/command-auth-native";
-export { buildPreparedModelsProviderData } from "openclaw/plugin-sdk/models-provider-runtime";
-export { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+} from "carapace/plugin-sdk/core";
+export type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+export { resolveAllowlistMatchSimple } from "carapace/plugin-sdk/allow-from";
+export { logInboundDrop } from "carapace/plugin-sdk/channel-inbound";
+export { createChannelPairingController } from "carapace/plugin-sdk/channel-pairing";
+export { createChannelMessageReplyPipeline } from "carapace/plugin-sdk/channel-outbound";
+export { logTypingFailure } from "carapace/plugin-sdk/channel-feedback";
+export { listSkillCommandsForAgents } from "carapace/plugin-sdk/command-auth-native";
+export { buildPreparedModelsProviderData } from "carapace/plugin-sdk/models-provider-runtime";
+export { isDangerousNameMatchingEnabled } from "carapace/plugin-sdk/dangerous-name-runtime";
 export {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-export { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
-export { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
+} from "carapace/plugin-sdk/runtime-group-policy";
+export { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
+export { loadOutboundMediaFromUrl } from "carapace/plugin-sdk/outbound-media";
 // Legacy map-helper exports stay for older plugin consumers. New message-turn
 // code should use createChannelHistoryWindow.
 export {
   DEFAULT_GROUP_HISTORY_LIMIT,
   createChannelHistoryWindow,
-} from "openclaw/plugin-sdk/reply-history";
-export { registerPluginHttpRoute } from "openclaw/plugin-sdk/webhook-targets";
-export { isRequestBodyLimitError } from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/reply-history";
+export { registerPluginHttpRoute } from "carapace/plugin-sdk/webhook-targets";
+export { isRequestBodyLimitError } from "carapace/plugin-sdk/webhook-ingress";
 export {
   readRequestBodyWithLimit,
   sendHttpRequestRejection,
-} from "openclaw/plugin-sdk/webhook-request-guards";
-export { isTrustedProxyAddress, resolveClientIp } from "openclaw/plugin-sdk/core";
+} from "carapace/plugin-sdk/webhook-request-guards";
+export { isTrustedProxyAddress, resolveClientIp } from "carapace/plugin-sdk/core";

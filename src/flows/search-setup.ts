@@ -1,12 +1,12 @@
 // Search setup flow configures web search providers and defaults.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveDefaultAgentDir } from "../agents/agent-scope-config.js";
 import { resolveAgentHarnessPolicy } from "../agents/harness/policy.js";
 import { resolveDefaultModelForAgent } from "../agents/model-selection.js";
 import { hasAuthProfileForProvider } from "../agents/tools/model-config.helpers.js";
 import type { SecretInputMode } from "../commands/onboard-types.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   DEFAULT_SECRET_PROVIDER_ALIAS,
   type SecretInput,
@@ -30,7 +30,7 @@ import { createPluginCapabilityConsentPrompter } from "../wizard/plugin-capabili
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { sortFlowContributionsByLabel, type FlowContribution } from "./types.js";
 
-type SearchConfig = NonNullable<NonNullable<NonNullable<OpenClawConfig["tools"]>["web"]>["search"]>;
+type SearchConfig = NonNullable<NonNullable<NonNullable<CarapaceConfig["tools"]>["web"]>["search"]>;
 type SearchProvider = NonNullable<SearchConfig["provider"]>;
 type MutableSearchConfig = SearchConfig & Record<string, unknown>;
 
@@ -42,7 +42,7 @@ type SearchProviderSetupContribution = FlowContribution & {
 };
 
 const SEARCH_INSTALL_CATALOG_ENTRY = Symbol("search-install-catalog-entry");
-const WEB_SEARCH_DOCS_URL = "https://docs.openclaw.ai/tools/web";
+const WEB_SEARCH_DOCS_URL = "https://github.com/Exaggarate/carapace";
 const CODEX_HOSTED_SEARCH_PROVIDER_ID = "codex";
 
 type SearchProviderEntryWithInstall = PluginWebSearchProviderEntry & {
@@ -59,7 +59,7 @@ function resolveSearchProviderCredentialLabel(
 }
 
 export function listSearchProviderOptions(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): readonly PluginWebSearchProviderEntry[] {
   return resolveSearchProviderOptions(config);
 }
@@ -71,7 +71,7 @@ function showsSearchProviderInSetup(
 }
 
 export function resolveSearchProviderOptions(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): readonly PluginWebSearchProviderEntry[] {
   return resolveSearchProviderSetupContributions(config).map(
     (contribution) => contribution.provider,
@@ -98,7 +98,7 @@ function buildSearchProviderSetupContribution(params: {
 }
 
 function resolveSearchProviderSetupContributions(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
 ): SearchProviderSetupContribution[] {
   const runtimeProviders = sortPluginEntriesById(
     resolvePluginWebSearchProviders({
@@ -137,7 +137,7 @@ function resolveSearchProviderSetupContributions(
   );
 }
 
-function defaultModelUsesCodexRuntime(config: OpenClawConfig): boolean {
+function defaultModelUsesCodexRuntime(config: CarapaceConfig): boolean {
   const configuredPrimary = resolveAgentModelPrimaryValue(config.agents?.defaults?.model);
   if (!configuredPrimary) {
     return false;
@@ -170,7 +170,7 @@ function prioritizeSearchProvider(
 }
 
 function resolveSearchProviderEntry(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SearchProvider,
 ): PluginWebSearchProviderEntry | undefined {
   return resolveSearchProviderOptions(config).find((entry) => entry.id === provider);
@@ -191,7 +191,7 @@ function formatAuthProviderLabel(providerId: string): string {
 }
 
 function providerIsReady(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   entry: Pick<
     PluginWebSearchProviderEntry,
     "id" | "authProviderId" | "envVars" | "requiresCredential"
@@ -217,23 +217,23 @@ function formatSearchProviderOptionLabel(label: string, note: string): string {
   return normalizedNote ? `${label} (${normalizedNote})` : label;
 }
 
-function rawKeyValue(config: OpenClawConfig, provider: SearchProvider): unknown {
+function rawKeyValue(config: CarapaceConfig, provider: SearchProvider): unknown {
   const entry = resolveSearchProviderEntry(config, provider);
   return entry?.getConfiguredCredentialValue?.(config);
 }
 
 export function resolveExistingKey(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SearchProvider,
 ): string | undefined {
   return normalizeSecretInputString(rawKeyValue(config, provider));
 }
 
-export function hasExistingKey(config: OpenClawConfig, provider: SearchProvider): boolean {
+export function hasExistingKey(config: CarapaceConfig, provider: SearchProvider): boolean {
   return hasConfiguredSecretInput(rawKeyValue(config, provider));
 }
 
-function buildSearchEnvRef(config: OpenClawConfig, provider: SearchProvider): SecretRef {
+function buildSearchEnvRef(config: CarapaceConfig, provider: SearchProvider): SecretRef {
   const entry =
     resolveSearchProviderEntry(config, provider) ??
     listSearchProviderOptions(config).find((candidate) => candidate.id === provider) ??
@@ -250,7 +250,7 @@ function buildSearchEnvRef(config: OpenClawConfig, provider: SearchProvider): Se
 }
 
 function resolveSearchSecretInput(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SearchProvider,
   key: string,
   secretInputMode?: SecretInputMode,
@@ -263,16 +263,16 @@ function resolveSearchSecretInput(
 }
 
 export function applySearchKey(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SearchProvider,
   key: SecretInput,
-): OpenClawConfig {
+): CarapaceConfig {
   const providerEntry = resolveSearchProviderEntry(config, provider);
   if (!providerEntry) {
     return config;
   }
   const search: MutableSearchConfig = { ...config.tools?.web?.search, provider, enabled: true };
-  const nextBase: OpenClawConfig = {
+  const nextBase: CarapaceConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -285,9 +285,9 @@ export function applySearchKey(
 }
 
 function applySearchProviderSelectionConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   providerEntry: Pick<PluginWebSearchProviderEntry, "pluginId" | "applySelectionConfig">,
-): OpenClawConfig {
+): CarapaceConfig {
   if (providerEntry.applySelectionConfig) {
     return providerEntry.applySelectionConfig(config);
   }
@@ -298,9 +298,9 @@ function applySearchProviderSelectionConfig(
 }
 
 export function applySearchProviderSelection(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   provider: SearchProvider,
-): OpenClawConfig {
+): CarapaceConfig {
   const providerEntry = resolveSearchProviderEntry(config, provider);
   if (!providerEntry) {
     return config;
@@ -310,7 +310,7 @@ export function applySearchProviderSelection(
     provider,
     enabled: true,
   };
-  const nextBase: OpenClawConfig = {
+  const nextBase: CarapaceConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -323,12 +323,12 @@ export function applySearchProviderSelection(
   return applySearchProviderSelectionConfig(nextBase, providerEntry);
 }
 
-function preserveDisabledState(original: OpenClawConfig, result: OpenClawConfig): OpenClawConfig {
+function preserveDisabledState(original: CarapaceConfig, result: CarapaceConfig): CarapaceConfig {
   if (original.tools?.web?.search?.enabled !== false) {
     return result;
   }
 
-  const next: OpenClawConfig = {
+  const next: CarapaceConfig = {
     ...result,
     tools: {
       ...result.tools,
@@ -377,7 +377,7 @@ function preserveDisabledState(original: OpenClawConfig, result: OpenClawConfig)
 
   return {
     ...next,
-    plugins: nextPlugins as OpenClawConfig["plugins"],
+    plugins: nextPlugins as CarapaceConfig["plugins"],
   };
 }
 
@@ -389,32 +389,32 @@ type SetupSearchOptions = {
 };
 
 type SearchSetupResult =
-  | { outcome: "completed"; config: OpenClawConfig }
+  | { outcome: "completed"; config: CarapaceConfig }
   | {
       outcome: "kept-current";
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       reason: "no-providers" | "user-skipped";
     }
   | {
       outcome: "kept-current";
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       reason: "provider-unavailable" | "provider-install-skipped";
       providerId: string;
     }
   | {
       outcome: "install-failed";
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       providerId: string;
       reason: "failed" | "timed-out";
     };
 
-function completedSearchSetup(config: OpenClawConfig): SearchSetupResult {
+function completedSearchSetup(config: CarapaceConfig): SearchSetupResult {
   return { outcome: "completed", config };
 }
 
 async function finalizeSearchProviderSetup(params: {
-  originalConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  originalConfig: CarapaceConfig;
+  nextConfig: CarapaceConfig;
   entry: SearchProviderEntryWithInstall;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
@@ -481,7 +481,7 @@ async function finalizeSearchProviderSetup(params: {
 }
 
 export async function runSearchSetupFlow(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
   opts?: SetupSearchOptions,
@@ -619,7 +619,7 @@ export async function runSearchSetupFlow(
       };
     }
   }
-  const finalizeSelection = (nextConfig: OpenClawConfig) =>
+  const finalizeSelection = (nextConfig: CarapaceConfig) =>
     finalizeSearchProviderSetup({
       originalConfig: config,
       nextConfig,
@@ -658,8 +658,8 @@ export async function runSearchSetupFlow(
     await prompter.note(
       [
         `${entry.label} works without an API key.`,
-        "OpenClaw will enable the plugin and use it as your web_search provider.",
-        `Docs: ${entry.docsUrl ?? "https://docs.openclaw.ai/tools/web"}`,
+        "Carapace will enable the plugin and use it as your web_search provider.",
+        `Docs: ${entry.docsUrl ?? "https://github.com/Exaggarate/carapace"}`,
       ].join("\n"),
       "Web search",
     );
@@ -704,10 +704,10 @@ export async function runSearchSetupFlow(
     const ref = buildSearchEnvRef(config, choice);
     await prompter.note(
       [
-        "Secret references enabled — OpenClaw will store a reference instead of the API key.",
+        "Secret references enabled — Carapace will store a reference instead of the API key.",
         `Env var: ${ref.id}${envAvailable ? " (detected)" : ""}.`,
         ...(envAvailable ? [] : [`Set ${ref.id} in the Gateway environment.`]),
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://github.com/Exaggarate/carapace",
       ].join("\n"),
       "Web search",
     );
@@ -742,7 +742,7 @@ export async function runSearchSetupFlow(
     [
       `No ${credentialLabel} stored — web_search won't work until a key is available.`,
       `Get your key at: ${entry.signupUrl}`,
-      "Docs: https://docs.openclaw.ai/tools/web",
+      "Docs: https://github.com/Exaggarate/carapace",
     ].join("\n"),
     "Web search",
   );

@@ -1,8 +1,8 @@
 /** Resolves SecretRef values from env, file, exec, and store secret providers. */
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { expectDefined } from "@carapace/normalization-core";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   FileSecretProviderConfig,
   ManualExecSecretProviderConfig,
@@ -67,7 +67,7 @@ const SAFE_EXEC_ERROR_CODES = new Set(["AMBIGUOUS_DUPLICATE_KEY", "NOT_FOUND"]);
 export type { SecretRefResolveCache } from "./resolve-types.js";
 
 type ResolveSecretRefOptions = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   cache?: SecretRefResolveCache;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
@@ -129,7 +129,7 @@ function toProviderKey(source: SecretRefSource, provider: string): string {
 
 function resolveConfiguredProvider(params: {
   ref: SecretRef;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
 }): SecretProviderConfig {

@@ -1,4 +1,4 @@
-import { toStringifiedError } from "@openclaw/normalization-core/error-coercion";
+import { toStringifiedError } from "@carapace/normalization-core/error-coercion";
 import type {
   WorkerInferenceCancelParams,
   WorkerInferenceCancelResult,

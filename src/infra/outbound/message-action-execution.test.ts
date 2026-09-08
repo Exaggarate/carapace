@@ -1,11 +1,11 @@
 // Covers plugin-dispatched message actions, target resolution, dry-run behavior,
 // and plugin tool-result extraction.
 import path from "node:path";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { jsonResult } from "../../agents/tools/common.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { withEnvAsync } from "../../test-utils/env.js";
@@ -93,7 +93,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "pin",
         params: {
           channel: "actionhub",
@@ -115,7 +115,7 @@ describe("runMessageAction plugin dispatch", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "list-pins",
         params: {
           channel: "actionhub",
@@ -153,7 +153,7 @@ describe("runMessageAction plugin dispatch", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       await runMessageAction({
         cfg,
@@ -219,10 +219,10 @@ describe("runMessageAction plugin dispatch", () => {
     });
 
     it("routes execution context ids into plugin handleAction", async () => {
-      const stateDir = path.join("/tmp", "openclaw-plugin-dispatch-media-roots");
+      const stateDir = path.join("/tmp", "carapace-plugin-dispatch-media-roots");
       const expectedWorkspaceRoot = path.resolve(stateDir, "workspace-alpha");
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         await runMessageAction({
           cfg: {
             channels: {
@@ -230,7 +230,7 @@ describe("runMessageAction plugin dispatch", () => {
                 enabled: true,
               },
             },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
           action: "pin",
           params: {
             channel: "actionhub",
@@ -288,7 +288,7 @@ describe("runMessageAction plugin dispatch", () => {
     const handleAction = vi.fn(async ({ params }: { params: Record<string, unknown> }) =>
       jsonResult({ ok: true, params }),
     );
-    const cfg = { channels: { forumchat: { enabled: true } } } as OpenClawConfig;
+    const cfg = { channels: { forumchat: { enabled: true } } } as CarapaceConfig;
     const threading: ChannelPlugin["threading"] = {
       resolveAutoThreadId: ({ toolContext, to }) =>
         toolContext?.currentChannelId === to ? toolContext.currentThreadTs : undefined,
@@ -471,7 +471,7 @@ describe("runMessageAction plugin dispatch", () => {
               botToken: "tok",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "poll",
         params: {
           channel: "pollchat",
@@ -564,7 +564,7 @@ describe("runMessageAction plugin dispatch", () => {
               token: "tok",
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         action: "poll",
         params: {
           channel: "guildchat",

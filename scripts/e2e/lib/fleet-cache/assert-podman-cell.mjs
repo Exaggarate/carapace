@@ -19,16 +19,16 @@ assert.match(image, /@sha256:[a-f0-9]{64}$/u);
 assert.equal(cell.ImageName, image);
 assert.equal(cell.Image, selectedImage.Id);
 assert.equal(cell.ImageDigest, selectedImage.Digest);
-assert.equal(environment.XDG_CACHE_HOME, "/home/node/.openclaw/cache");
+assert.equal(environment.XDG_CACHE_HOME, "/home/node/.carapace/cache");
 assert.equal(Object.hasOwn(environment, "TMPDIR"), false);
 assert.equal(environment.HOME, "/home/node");
-assert.equal(environment.OPENCLAW_STATE_DIR, "/home/node/.openclaw");
-assert.equal(cell.Config.Labels["openclaw.fleet.env-keys"], "");
-assert.equal(cell.Config.Labels["openclaw.fleet.tenant"], tenant);
+assert.equal(environment.CARAPACE_STATE_DIR, "/home/node/.carapace");
+assert.equal(cell.Config.Labels["carapace.fleet.env-keys"], "");
+assert.equal(cell.Config.Labels["carapace.fleet.tenant"], tenant);
 assert.equal(cell.Mounts.length, 2);
 for (const [directory, destination] of [
-  ["cells", "/home/node/.openclaw"],
-  ["auth-profile-secrets", "/home/node/.config/openclaw"],
+  ["cells", "/home/node/.carapace"],
+  ["auth-profile-secrets", "/home/node/.config/carapace"],
 ]) {
   const mount = cell.Mounts.find((entry) => entry.Destination === destination);
   assert.ok(mount);
@@ -54,7 +54,7 @@ assert.equal(cell.HostConfig.Privileged, false);
 assert.ok(cell.HostConfig.SecurityOpt.includes("no-new-privileges"));
 assert.ok(cell.HostConfig.SecurityOpt.every((option) => !option.includes("unconfined")));
 assert.equal(cell.HostConfig.NetworkMode, "bridge");
-assert.deepEqual(Object.keys(cell.NetworkSettings.Networks), [`openclaw-cell-${tenant}-net`]);
+assert.deepEqual(Object.keys(cell.NetworkSettings.Networks), [`carapace-cell-${tenant}-net`]);
 assert.deepEqual(Object.keys(cell.HostConfig.PortBindings), ["18789/tcp"]);
 assert.ok(cell.HostConfig.PortBindings["18789/tcp"].length > 0);
 assert.ok(
@@ -90,8 +90,8 @@ console.log(
     control: "podman",
     containerId: cell.Id,
     startedAt: cell.State.StartedAt,
-    environmentKeys: cell.Config.Labels["openclaw.fleet.env-keys"],
-    environment: cell.Config.Env.filter((entry) => !entry.startsWith("OPENCLAW_GATEWAY_TOKEN=")),
+    environmentKeys: cell.Config.Labels["carapace.fleet.env-keys"],
+    environment: cell.Config.Env.filter((entry) => !entry.startsWith("CARAPACE_GATEWAY_TOKEN=")),
     mounts: cell.Mounts,
     requestedImage: image,
     imageId: cell.Image,

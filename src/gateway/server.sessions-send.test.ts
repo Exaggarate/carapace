@@ -23,7 +23,7 @@ import {
   loadSessionEntry,
   persistSessionTranscriptTurn,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { emitAgentEvent } from "../infra/agent-events.js";
 import { waitForGatewayActiveWork } from "../infra/gateway-active-work.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
@@ -40,7 +40,7 @@ import {
   writeSessionStore,
 } from "./test-helpers.js";
 
-const { createOpenClawTools } = await import("../agents/openclaw-tools.js");
+const { createCarapaceTools } = await import("../agents/carapace-tools.js");
 
 installGatewayTestHooks({ scope: "suite" });
 
@@ -50,7 +50,7 @@ const gatewayToken = "test-gateway-token-1234567890";
 let envSnapshot: ReturnType<typeof captureEnv>;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-type SessionSendTool = ReturnType<typeof createOpenClawTools>[number];
+type SessionSendTool = ReturnType<typeof createCarapaceTools>[number];
 const SESSION_SEND_E2E_TIMEOUT_MS = 10_000;
 const SESSION_SEND_DM_ROUTING_E2E_TIMEOUT_MS = 30_000;
 let cachedSessionsSendTool: SessionSendTool | null = null;
@@ -59,7 +59,7 @@ function getSessionsSendTool(): SessionSendTool {
   if (cachedSessionsSendTool) {
     return cachedSessionsSendTool;
   }
-  const tool = createOpenClawTools().find((candidate) => candidate.name === "sessions_send");
+  const tool = createCarapaceTools().find((candidate) => candidate.name === "sessions_send");
   if (!tool) {
     throw new Error("missing sessions_send tool");
   }
@@ -138,7 +138,7 @@ async function emitLifecycleAssistantReply(params: {
 }
 
 beforeAll(async () => {
-  envSnapshot = captureEnv(["OPENCLAW_GATEWAY_PORT", "OPENCLAW_GATEWAY_TOKEN"]);
+  envSnapshot = captureEnv(["CARAPACE_GATEWAY_PORT", "CARAPACE_GATEWAY_TOKEN"]);
   gatewayPort = await getGatewayTestPort();
   const { approveDevicePairing } = await import("../infra/device-pairing-approval.js");
   const { requestDevicePairing } = await import("../infra/device-pairing.js");
@@ -148,7 +148,7 @@ beforeAll(async () => {
   const pending = await requestDevicePairing({
     deviceId: identity.deviceId,
     publicKey: publicKeyRawBase64UrlFromPem(identity.publicKeyPem),
-    clientId: "openclaw-cli",
+    clientId: "carapace-cli",
     clientMode: "cli",
     role: "operator",
     scopes: ["operator.admin", "operator.read", "operator.write", "operator.approvals"],
@@ -158,8 +158,8 @@ beforeAll(async () => {
     callerScopes: pending.request.scopes ?? ["operator.admin"],
   });
   testState.gatewayAuth = { mode: "token", token: gatewayToken };
-  process.env.OPENCLAW_GATEWAY_PORT = String(gatewayPort);
-  process.env.OPENCLAW_GATEWAY_TOKEN = gatewayToken;
+  process.env.CARAPACE_GATEWAY_PORT = String(gatewayPort);
+  process.env.CARAPACE_GATEWAY_TOKEN = gatewayToken;
   server = await startTestGatewayServer(gatewayPort);
   // Prepare the real history handler before the RPC deadline starts.
   await import("./server-methods/chat.js");
@@ -167,8 +167,8 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   testState.gatewayAuth = { mode: "token", token: gatewayToken };
-  process.env.OPENCLAW_GATEWAY_PORT = String(gatewayPort);
-  process.env.OPENCLAW_GATEWAY_TOKEN = gatewayToken;
+  process.env.CARAPACE_GATEWAY_PORT = String(gatewayPort);
+  process.env.CARAPACE_GATEWAY_TOKEN = gatewayToken;
   await prepareGatewayReplyRuntimeForTest();
 });
 
@@ -179,7 +179,7 @@ afterAll(async () => {
 
 describe("sessions_send gateway loopback", () => {
   it("rejects a missing explicit key without creating or running a session", async () => {
-    const dir = tempDirs.make("openclaw-sessions-send-missing-");
+    const dir = tempDirs.make("carapace-sessions-send-missing-");
     const missingKey = "agent:main:missing";
     const spy = agentCommandMock as unknown as Mock<(opts: unknown) => Promise<void>>;
     testState.sessionStorePath = path.join(dir, "sessions.json");
@@ -193,7 +193,7 @@ describe("sessions_send gateway loopback", () => {
         },
       });
       spy.mockClear();
-      const tool = createOpenClawTools({
+      const tool = createCarapaceTools({
         agentSessionKey: "agent:main:main",
         config: { tools: { sessions: { visibility: "all" } } },
       }).find((candidate) => candidate.name === "sessions_send");
@@ -314,7 +314,7 @@ describe("sessions_send gateway loopback", () => {
     "announces through gateway send using external deliveryContext over stale webchat session fields",
     { timeout: SESSION_SEND_E2E_TIMEOUT_MS },
     async () => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-send-route-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-send-route-"));
       const sendCalls: Array<{
         to?: string;
         text?: string;
@@ -429,7 +429,7 @@ describe("sessions_send gateway loopback", () => {
     "honors source delivery from agent.wait when the transcript has no tool result",
     { timeout: SESSION_SEND_E2E_TIMEOUT_MS },
     async () => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-send-mirror-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-send-mirror-"));
       const sessionKey = "agent:main:whatsapp:direct:peer-1";
       const sessionId = "sess-whatsapp-mirror";
       const runId = `run-message-tool-mirror-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -537,7 +537,7 @@ describe("sessions_send gateway loopback", () => {
           expect.objectContaining({ role: "toolResult" }),
         );
         expect(history.messages).not.toContainEqual(
-          expect.objectContaining({ openclawMessageToolMirror: expect.anything() }),
+          expect.objectContaining({ carapaceMessageToolMirror: expect.anything() }),
         );
 
         const startedAt = Date.now();
@@ -608,9 +608,9 @@ describe("sessions_send label lookup", () => {
     { timeout: SESSION_SEND_E2E_TIMEOUT_MS },
     async () => {
       // This is an operator feature; enable broader session tool targeting for this test.
-      const configPath = process.env.OPENCLAW_CONFIG_PATH;
+      const configPath = process.env.CARAPACE_CONFIG_PATH;
       if (!configPath) {
-        throw new Error("OPENCLAW_CONFIG_PATH missing in gateway test environment");
+        throw new Error("CARAPACE_CONFIG_PATH missing in gateway test environment");
       }
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
@@ -636,7 +636,7 @@ describe("sessions_send label lookup", () => {
         timeoutMs: 5000,
       });
 
-      const tool = createOpenClawTools({
+      const tool = createCarapaceTools({
         config: {
           tools: {
             sessions: {
@@ -690,16 +690,16 @@ describe("sessions_send agent targeting", () => {
       tools: { agentToAgent: { allow: ["main"] } },
       error: "denied by tools.agentToAgent.allow",
     },
-  ] satisfies Array<{ name: string; tools: OpenClawConfig["tools"]; error?: string }>)(
+  ] satisfies Array<{ name: string; tools: CarapaceConfig["tools"]; error?: string }>)(
     "enforces $name when targeting a configured agent main session by agentId",
     { timeout: SESSION_SEND_E2E_TIMEOUT_MS },
     async ({ tools, error }) => {
-      const configPath = process.env.OPENCLAW_CONFIG_PATH;
+      const configPath = process.env.CARAPACE_CONFIG_PATH;
       if (!configPath) {
-        throw new Error("OPENCLAW_CONFIG_PATH missing in gateway test environment");
+        throw new Error("CARAPACE_CONFIG_PATH missing in gateway test environment");
       }
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-send-agent-"));
-      const config: OpenClawConfig = {
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-send-agent-"));
+      const config: CarapaceConfig = {
         ...(tools ? { tools } : {}),
         agents: {
           list: [{ id: "main", default: true }, { id: "orion" }],
@@ -742,7 +742,7 @@ describe("sessions_send agent targeting", () => {
         );
         spy.mockClear();
 
-        const tool = createOpenClawTools({
+        const tool = createCarapaceTools({
           agentSessionKey: "agent:main:main",
           config,
         }).find((candidate) => candidate.name === "sessions_send");
@@ -834,16 +834,16 @@ describe("sessions_send direct-message requester routing", () => {
       bindingAgentId,
       expectedReplySessionKey,
     }) => {
-      const configPath = process.env.OPENCLAW_CONFIG_PATH;
+      const configPath = process.env.CARAPACE_CONFIG_PATH;
       if (!configPath) {
-        throw new Error("OPENCLAW_CONFIG_PATH missing in gateway test environment");
+        throw new Error("CARAPACE_CONFIG_PATH missing in gateway test environment");
       }
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-send-dm-scope-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-sessions-send-dm-scope-"));
       // A2A follow-ups outlive tool.execute. Give every real Gateway case its
       // own agent so a preceding case can never satisfy this case's spy.
       const targetAgentId = `orion-${label.toLowerCase().replaceAll(" ", "-")}`;
       const targetSessionKey = `agent:${targetAgentId}:main`;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         ...(bindingAccountId || bindingAgentId
           ? {
               bindings: [
@@ -906,7 +906,7 @@ describe("sessions_send direct-message requester routing", () => {
           }),
         );
 
-        const tool = createOpenClawTools({
+        const tool = createCarapaceTools({
           agentSessionKey: requesterSessionKey,
           agentChannel: "feishu",
           config,

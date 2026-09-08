@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { loadSkillRootRecords } from "../loading/skill-root-loader.js";
 import { proposeUpdateSkill } from "./service.js";
@@ -15,12 +15,12 @@ import {
 } from "./workspace-skill-read.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workshop-skill-read-",
+    prefix: "carapace-workshop-skill-read-",
   });
 });
 
@@ -98,7 +98,7 @@ describe("listWritableWorkshopSkillSummaries", () => {
         ),
       ).toEqual(names);
       expect(
-        loadSkillRootRecords({ dir: workshopDir, source: "openclaw-workshop" }).map(
+        loadSkillRootRecords({ dir: workshopDir, source: "carapace-workshop" }).map(
           ({ skill }) => skill.name,
         ),
       ).toEqual(names);
@@ -133,7 +133,7 @@ describe("listWritableWorkshopSkillSummaries", () => {
     });
     await expect(
       proposeUpdateSkill({
-        workspaceDir: await tempDirs.make("openclaw-workshop-declared-name-workspace-"),
+        workspaceDir: await tempDirs.make("carapace-workshop-declared-name-workspace-"),
         agentId: "main",
         config: {},
         env: testState.env,
@@ -191,7 +191,7 @@ describe("listWritableWorkshopSkillSummaries", () => {
   it("ignores a symlinked skill directory that leaves the Workshop root", async () => {
     const workshopDir = resolveWorkshopSkillsDir({}, "main", testState.env);
     await writeSkill(path.join(workshopDir, "inside"), "inside");
-    const outsideDir = path.join(await tempDirs.make("openclaw-workshop-outside-"), "outside");
+    const outsideDir = path.join(await tempDirs.make("carapace-workshop-outside-"), "outside");
     await writeSkill(outsideDir, "outside");
     await fs.symlink(outsideDir, path.join(workshopDir, "outside"), "dir");
 

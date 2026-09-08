@@ -21,7 +21,7 @@ export async function checkCodeModeTypes(
     }
     files.set(name, text);
   };
-  add("user.ts", "async function __openclawPreflight() {\n" + code + "\n}");
+  add("user.ts", "async function __carapacePreflight() {\n" + code + "\n}");
   add("guest.d.ts", options.declarations);
   const libDir = dirname(createRequire(import.meta.url).resolve("typescript"));
   const loadLib = async (name: string): Promise<void> => {
@@ -78,7 +78,7 @@ export async function checkCodeModeTypes(
         : undefined;
     const location =
       failure.file?.fileName === "user.ts" && point
-        ? "openclaw-code-mode:user.ts:" +
+        ? "carapace-code-mode:user.ts:" +
           Math.max(1, point.line) +
           ":" +
           (point.character + 1) +

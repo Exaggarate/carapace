@@ -1,5 +1,5 @@
 // Model/auth provider selection step shared by the classic wizard and bootstrap onboarding.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   applyOnboardingPrimaryModel,
   prepareAgentModelDefaults,
@@ -7,7 +7,7 @@ import {
   resolveOnboardingSetupTarget,
 } from "../commands/onboard-agent-target.js";
 import type { AuthChoice, OnboardOptions } from "../commands/onboard-types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
@@ -19,7 +19,7 @@ type PreparedAuthChoiceResult = Awaited<
 >;
 
 export type SetupModelAuthCandidate = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   authProfiles: PreparedAuthChoiceResult["authProfiles"];
   persistAuthProfiles: PreparedAuthChoiceResult["persistAuthProfiles"];
 };
@@ -30,12 +30,12 @@ const loadModelPickerModule = createLazyRuntimeModule(() => import("../commands/
 
 async function resolveAuthChoiceModelSelectionPolicy(params: {
   authChoice: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   resolvePreferredProviderForAuthChoice: (params: {
     choice: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
   }) => Promise<string | undefined>;
@@ -121,7 +121,7 @@ async function resolveAuthChoiceModelSelectionPolicy(params: {
  * (public onboarding automation contract).
  */
 export async function runSetupModelAuthStep(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   stagedCandidate?: SetupModelAuthCandidate;
   opts: OnboardOptions;
   prompter: WizardPrompter;
@@ -132,7 +132,7 @@ export async function runSetupModelAuthStep(params: {
   preserveExistingModelSelection?: boolean;
 }): Promise<SetupModelAuthCandidate> {
   const { opts, prompter, runtime } = params;
-  const env = params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : undefined;
+  const env = params.stateDir ? { ...process.env, CARAPACE_STATE_DIR: params.stateDir } : undefined;
   let nextConfig = params.stagedCandidate?.config ?? params.config;
   let replacementBaseConfig = params.config;
   let authProfiles: PreparedAuthChoiceResult["authProfiles"] =

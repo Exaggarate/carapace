@@ -1,12 +1,12 @@
-# OpenClaw Cloudflare AI Gateway Provider
+# Carapace Cloudflare AI Gateway Provider
 
-Official OpenClaw provider plugin for Cloudflare AI Gateway.
+Official Carapace provider plugin for Cloudflare AI Gateway.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/cloudflare-ai-gateway-provider
-openclaw gateway restart
+carapace plugins install @carapace/cloudflare-ai-gateway-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/cloudflare-ai-gateway> for setup and configuration.
+See <../../docs/providers/cloudflare-ai-gateway.md> for setup and configuration.

@@ -1,7 +1,7 @@
 [
   {
-    "source": "OpenClaw",
-    "target": "OpenClaw"
+    "source": "Carapace",
+    "target": "Carapace"
   },
   {
     "source": "macOS platform notes",
@@ -172,8 +172,8 @@
     "target": "构建 Gateway 客户端"
   },
   {
-    "source": "Embedding OpenClaw",
-    "target": "嵌入 OpenClaw"
+    "source": "Embedding Carapace",
+    "target": "嵌入 Carapace"
   },
   {
     "source": "Secure file operations",
@@ -1432,12 +1432,12 @@
     "target": "Agent runtime architecture"
   },
   {
-    "source": "OpenClaw agent runtime workflow",
-    "target": "OpenClaw agent runtime workflow"
+    "source": "Carapace agent runtime workflow",
+    "target": "Carapace agent runtime workflow"
   },
   {
-    "source": "OpenClaw agent runtime architecture",
-    "target": "OpenClaw agent runtime architecture"
+    "source": "Carapace agent runtime architecture",
+    "target": "Carapace agent runtime architecture"
   },
   {
     "source": "Install and Configure Plugins",
@@ -1736,20 +1736,20 @@
     "target": "待处理的设备配对请求"
   },
   {
-    "source": "openclaw devices list",
-    "target": "openclaw devices list"
+    "source": "carapace devices list",
+    "target": "carapace devices list"
   },
   {
-    "source": "openclaw devices approve",
-    "target": "openclaw devices approve"
+    "source": "carapace devices approve",
+    "target": "carapace devices approve"
   },
   {
-    "source": "openclaw nodes pending",
-    "target": "openclaw nodes pending"
+    "source": "carapace nodes pending",
+    "target": "carapace nodes pending"
   },
   {
-    "source": "openclaw nodes approve",
-    "target": "openclaw nodes approve"
+    "source": "carapace nodes approve",
+    "target": "carapace nodes approve"
   },
   {
     "source": "Cloud workers plan",
@@ -1780,8 +1780,8 @@
     "target": "Gateway 配置参考"
   },
   {
-    "source": "v2026.8.1 (AKA OpenClaw 2.0)",
-    "target": "v2026.8.1 (AKA OpenClaw 2.0)"
+    "source": "v2026.8.1 (AKA Carapace 2.0)",
+    "target": "v2026.8.1 (AKA Carapace 2.0)"
   },
   {
     "source": "v2026.8.2",
@@ -1892,8 +1892,8 @@
     "target": "Gateway 远程访问"
   },
   {
-    "source": "Updating OpenClaw",
-    "target": "更新 OpenClaw"
+    "source": "Updating Carapace",
+    "target": "更新 Carapace"
   },
   {
     "source": "Connect a machine",

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { TranscriptSourceProvider } from "../../transcripts/provider-types.js";
 import { createTranscriptsTool } from "./transcripts-tool.js";
 
@@ -16,7 +16,7 @@ const tempDirs = createTempDirTracker();
 describe("transcripts status display", () => {
   afterEach(() => {
     getTranscriptSourceProviderMock.mockReset();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     tempDirs.cleanup();
   });
 
@@ -35,7 +35,7 @@ describe("transcripts status display", () => {
         stop: async (request) => ({ ok: true, sessionId: request.sessionId }),
       } satisfies TranscriptSourceProvider);
       const tool = createTranscriptsTool({
-        stateDir: tempDirs.make("openclaw-transcripts-status-"),
+        stateDir: tempDirs.make("carapace-transcripts-status-"),
         caller: { kind: "operator", source: "local" },
       });
       const sessionIds = [

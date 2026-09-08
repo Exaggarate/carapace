@@ -1,4 +1,4 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { isTransientNetworkError } from "../../infra/retryable-network-errors.js";
 import {
   extractLeadingHttpStatus,

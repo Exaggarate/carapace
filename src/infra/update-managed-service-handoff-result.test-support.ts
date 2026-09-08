@@ -66,7 +66,7 @@ export function registerManagedTerminalResultTests(
       let root: string | undefined;
       if (rootKind !== "same") {
         const replacement = await fs.realpath(
-          await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-replacement-")),
+          await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-replacement-")),
         );
         tempDirs.add(replacement);
         root = path.join(replacement, "checkout");
@@ -123,7 +123,7 @@ export function registerManagedTerminalResultTests(
     "$kind rejects foreign-root $status recovery despite positive runtime proof",
     async ({ kind, status }) => {
       const root = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-handoff-foreign-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-handoff-foreign-")),
       );
       tempDirs.add(root);
       const { commands, state, sentinel } = await runManagedServiceManagerBoundary(kind, {

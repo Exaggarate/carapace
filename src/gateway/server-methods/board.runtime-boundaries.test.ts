@@ -1,4 +1,4 @@
-import { rawDataToString } from "@openclaw/gateway-client/websocket-data";
+import { rawDataToString } from "@carapace/gateway-client/websocket-data";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import { GatewayClient } from "../../../packages/gateway-client/src/index.js";
@@ -23,10 +23,10 @@ import { withPluginRuntimeGatewayRequestScope } from "../../plugins/runtime/gate
 import { resetGatewayWorkAdmission } from "../../process/gateway-work-admission.js";
 import { runWithGatewayRootWorkAdmissionForTest } from "../../process/gateway-work-admission.test-helpers.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import {
   createCoreGatewayMethodDescriptors,
   createGatewayMethodRegistry,
@@ -66,8 +66,8 @@ describe("board gateway runtime boundaries", () => {
 
   afterEach(() => {
     resetGatewayWorkAdmission();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("enforces data bindings against the granted tool set", async () => {
@@ -539,9 +539,9 @@ describe("board gateway runtime boundaries", () => {
 
   it("keeps board state across the real sessions.reset handler", async () => {
     const sessionKey = "agent:main:board-reset-proof";
-    const stateDir = tempDirs.make("openclaw-board-reset-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = tempDirs.make("carapace-board-reset-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     replaceSessionEntrySync(
       { agentId: "main", sessionKey, storePath: database.path },
       { sessionId: "board-reset-proof", updatedAt: Date.now() },
@@ -573,9 +573,9 @@ describe("board gateway runtime boundaries", () => {
 
   it("replaces a dashboard widget through Gateway while preserving layout patches", async () => {
     const sessionKey = "agent:main:board-put-proof";
-    const stateDir = tempDirs.make("openclaw-board-put-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = tempDirs.make("carapace-board-put-");
+    const env = { CARAPACE_STATE_DIR: stateDir };
+    const database = openCarapaceAgentDatabase({ agentId: "main", env });
     replaceSessionEntrySync(
       { agentId: "main", sessionKey, storePath: database.path },
       { sessionId: "board-put-proof", updatedAt: Date.now() },
@@ -631,8 +631,8 @@ describe("board gateway runtime boundaries", () => {
     );
     expect(descriptor).not.toHaveProperty("props");
 
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     tool = createTool();
     const reopened = (await tool.execute("reopen", { action: "read" })).details as BoardSnapshot;
     expect(reopened.widgets).toEqual(read.widgets);

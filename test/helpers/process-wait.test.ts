@@ -29,7 +29,7 @@ describe.each([
 ])("$name readiness", ({ wait, expected }) => {
   it("observes readiness after a delayed wake crosses the deadline", async () => {
     vi.useFakeTimers();
-    const file = path.join(tempDirs.make("openclaw-process-wait-"), "ready");
+    const file = path.join(tempDirs.make("carapace-process-wait-"), "ready");
     const result = wait(file, 20).catch((error: unknown) => error);
 
     // The producer finishes while the waiting worker cannot run its pending poll.
@@ -42,7 +42,7 @@ describe.each([
 
   it("rejects a file still missing when the deadline passes", async () => {
     vi.useFakeTimers();
-    const file = path.join(tempDirs.make("openclaw-process-wait-"), "missing");
+    const file = path.join(tempDirs.make("carapace-process-wait-"), "missing");
     const result = wait(file, 20).catch((error: unknown) => error);
     await vi.advanceTimersByTimeAsync(20);
     expect(await result).toMatchObject({ message: expect.stringContaining("timeout waiting for") });
@@ -52,7 +52,7 @@ describe.each([
 
 it.each(["", "invalid", "0", "-1"])("rejects PID contents %j at the deadline", async (contents) => {
   vi.useFakeTimers();
-  const file = path.join(tempDirs.make("openclaw-process-wait-"), "pid");
+  const file = path.join(tempDirs.make("carapace-process-wait-"), "pid");
   fsSync.writeFileSync(file, contents);
   const result = waitForPidFile(file, 20).catch((error: unknown) => error);
   await vi.advanceTimersByTimeAsync(20);
@@ -62,7 +62,7 @@ it.each(["", "invalid", "0", "-1"])("rejects PID contents %j at the deadline", a
 
 it("waits through an open-truncate window for valid PID contents", async () => {
   vi.useFakeTimers();
-  const file = path.join(tempDirs.make("openclaw-process-wait-"), "pid");
+  const file = path.join(tempDirs.make("carapace-process-wait-"), "pid");
   fsSync.writeFileSync(file, "");
   let settled = false;
   const result = waitForPidFile(file, 20)
@@ -173,7 +173,7 @@ child.once('close', (_code, signal) => {
 it.each(["borrower completion", "persistent file"] as const)(
   "observes readiness from %s without a file-watch event",
   async (observation) => {
-    const filename = path.join(tempDirs.make("openclaw-process-receipt-"), "ready");
+    const filename = path.join(tempDirs.make("carapace-process-receipt-"), "ready");
     const { promise: completion, resolve: finish } = createDeferred();
     const watchFile = fsSync.watchFile;
     // A successful initial stat establishes a baseline without notifying Node's

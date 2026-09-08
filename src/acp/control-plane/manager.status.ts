@@ -1,7 +1,7 @@
 /** Reads ACP session status from the runtime and reconciles persisted identity metadata. */
-import { resolveSessionIdentityFromMeta } from "@openclaw/acp-core/runtime/session-identity";
-import type { AcpRuntimeStatus } from "@openclaw/acp-core/runtime/types";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { resolveSessionIdentityFromMeta } from "@carapace/acp-core/runtime/session-identity";
+import type { AcpRuntimeStatus } from "@carapace/acp-core/runtime/types";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { withAcpRuntimeErrorBoundary } from "../runtime/errors.js";
 import { resolveManagerRuntimeCapabilities } from "./manager.runtime-controls.js";
 import type {
@@ -15,7 +15,7 @@ import { resolveRuntimeOptionsFromMeta } from "./runtime-options.js";
 
 /** Reads a fresh ACP session status and reconciles runtime identifiers from the status response. */
 export async function runManagerGetSessionStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId: string;
   signal?: AbortSignal;

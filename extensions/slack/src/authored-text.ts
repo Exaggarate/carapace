@@ -1,6 +1,6 @@
 // Slack-private authored text placement after block compilation.
-import type { LegacyInteractiveReply } from "openclaw/plugin-sdk/interactive-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { LegacyInteractiveReply } from "carapace/plugin-sdk/interactive-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 export type SlackAuthoredTextPlacement = "none" | "blocks" | "outside-blocks";
 

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
@@ -12,7 +12,7 @@ describe("cli json stdout contract", () => {
       context: "automation with an explicit endpoint",
       env: {
         CI: "1",
-        OPENCLAW_TELEMETRY_ENDPOINT: "https://telemetry.example.invalid/api/latest-version",
+        CARAPACE_TELEMETRY_ENDPOINT: "https://telemetry.example.invalid/api/latest-version",
       },
       reason: "never-asked",
     },
@@ -46,8 +46,8 @@ describe("cli json stdout contract", () => {
             {
               ...env,
               NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-              OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-              OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+              CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+              CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
               ...(tty ? { FORCE_COLOR: "1" } : {}),
             },
             { inheritEnvironment: false },
@@ -55,7 +55,7 @@ describe("cli json stdout contract", () => {
 
           expect(result.status, result.stderr).toBe(0);
           const endpoint =
-            env.OPENCLAW_TELEMETRY_ENDPOINT ?? "https://telemetry.openclaw.ai/api/latest-version";
+            env.CARAPACE_TELEMETRY_ENDPOINT ?? "https://github.com/Exaggarate/carapace";
           if (format === "JSON") {
             expect(result.stdout, result.stderr).not.toContain("\u001B");
             expect(result.stdout, result.stderr).not.toContain("\u0007");
@@ -70,7 +70,7 @@ describe("cli json stdout contract", () => {
                   ? null
                   : {
                       method: "GET",
-                      userAgent: expect.stringMatching(/^openclaw\/[^ ]+ \(.+; gateway\)$/u),
+                      userAgent: expect.stringMatching(/^carapace\/[^ ]+ \(.+; gateway\)$/u),
                     },
             });
             expect(result.stdout).toBe(`${JSON.stringify(payload)}\n`);
@@ -87,19 +87,19 @@ describe("cli json stdout contract", () => {
                 ? ["Request: none (disabled in an automated environment (CI is set))"]
                 : [
                     `Request: GET ${endpoint}`,
-                    expect.stringMatching(/^User-Agent: openclaw\/[^ ]+ \(.+; gateway\)$/u),
+                    expect.stringMatching(/^User-Agent: carapace\/[^ ]+ \(.+; gateway\)$/u),
                   ]),
             ]);
           }
           if (tty && format === "text") {
-            expect(result.stdout).toContain("OpenClaw");
+            expect(result.stdout).toContain("Carapace");
             expect(result.stderr).toContain("\u001B[?25h");
             expect(result.stderr).not.toContain("TELEMETRY_NETWORK_FORBIDDEN");
           } else {
             expect(result.stderr).toBe("");
           }
         },
-        { prefix: "openclaw-telemetry-json-success-e2e-" },
+        { prefix: "carapace-telemetry-json-success-e2e-" },
       );
     });
   });
@@ -129,7 +129,7 @@ describe("cli json stdout contract", () => {
         expect(stdout).not.toContain("Doctor changes");
         expect(stdout).not.toContain("Config invalid");
       },
-      { prefix: "openclaw-json-e2e-" },
+      { prefix: "carapace-json-e2e-" },
     );
   });
 
@@ -148,7 +148,7 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stderr).toContain("--timeout must be a positive integer (seconds)");
       },
-      { prefix: "openclaw-update-empty-timeout-e2e-" },
+      { prefix: "carapace-update-empty-timeout-e2e-" },
     );
   });
 
@@ -156,30 +156,30 @@ describe("cli json stdout contract", () => {
     {
       name: "account validation in human mode",
       args: ["channels", "capabilities", "--account", "ghost"],
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
       human: true,
     },
     {
       name: "account validation with JSON before its option",
       args: ["channels", "capabilities", "--json", "--account", "ghost"],
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
     },
     {
       name: "target validation with JSON after its option and explicit Commander routing",
       args: ["channels", "capabilities", "--target", "channel:1", "--json"],
-      message: "--target requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--target requires a specific --channel. Run carapace channels list to choose one.",
       commander: true,
     },
     {
       name: "unknown channel validation with JSON before its option",
       args: ["channels", "capabilities", "--json", "--channel", "definitely-not-a-channel"],
       message:
-        'Unknown channel "definitely-not-a-channel". Run `openclaw channels list --all` to see configured and installable channels.',
+        'Unknown channel "definitely-not-a-channel". Run `carapace channels list --all` to see configured and installable channels.',
     },
     {
       name: "account validation through dual-TTY finalization",
       args: ["channels", "capabilities", "--account", "ghost", "--json"],
-      message: "--account requires a specific --channel. Run openclaw channels list to choose one.",
+      message: "--account requires a specific --channel. Run carapace channels list to choose one.",
       tty: true,
     },
   ])(
@@ -202,10 +202,10 @@ describe("cli json stdout contract", () => {
           ).toString("base64");
           const result = runBuiltCli(tempHome, testCase.args, {
             NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-            OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-            OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-            OPENCLAW_GATEWAY_PORT: "29871",
-            ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+            CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+            CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+            CARAPACE_GATEWAY_PORT: "29871",
+            ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
             ...("tty" in testCase ? { FORCE_COLOR: "1" } : {}),
           });
 
@@ -226,7 +226,7 @@ describe("cli json stdout contract", () => {
             expect(result.stderr).toContain("\u001B[?25h");
           }
         },
-        { prefix: "openclaw-channels-capabilities-failure-e2e-" },
+        { prefix: "carapace-channels-capabilities-failure-e2e-" },
       );
     },
   );
@@ -259,7 +259,7 @@ describe("cli json stdout contract", () => {
               name: id,
               version: "1.0.0",
               type: "module",
-              openclaw: {
+              carapace: {
                 extensions: ["./index.js"],
                 setupEntry: "./index.js",
                 channel: meta,
@@ -267,7 +267,7 @@ describe("cli json stdout contract", () => {
             }),
           );
           await fs.writeFile(
-            path.join(pluginDir, "openclaw.plugin.json"),
+            path.join(pluginDir, "carapace.plugin.json"),
             JSON.stringify({
               id,
               channels: [id],
@@ -293,7 +293,7 @@ describe("cli json stdout contract", () => {
             };
             export default { id: plugin.id, register(api) { api.registerChannel({ plugin }); } };`,
           );
-          const configPath = path.join(tempHome, "openclaw.json");
+          const configPath = path.join(tempHome, "carapace.json");
           await fs.writeFile(
             configPath,
             JSON.stringify({
@@ -308,9 +308,9 @@ describe("cli json stdout contract", () => {
             tempHome,
             ["channels", "capabilities", "--json", "--timeout", "20"],
             {
-              OPENCLAW_CONFIG_PATH: configPath,
-              OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-              OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+              CARAPACE_CONFIG_PATH: configPath,
+              CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+              CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
             },
             { inheritEnvironment: false },
           );
@@ -332,7 +332,7 @@ describe("cli json stdout contract", () => {
             });
           }
         },
-        { prefix: "openclaw-capabilities-timeout-e2e-" },
+        { prefix: "carapace-capabilities-timeout-e2e-" },
       );
     },
   );
@@ -352,7 +352,7 @@ describe("cli json stdout contract", () => {
           },
         });
       },
-      { prefix: "openclaw-json-failure-e2e-" },
+      { prefix: "carapace-json-failure-e2e-" },
     );
   });
 
@@ -380,7 +380,7 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const result = runBuiltCli(tempHome, testCase.args(tempHome), {
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
         });
 
         expect(result.status, result.stderr).toBe(testCase.status);
@@ -388,9 +388,9 @@ describe("cli json stdout contract", () => {
           ok: false,
           error: { type: "cli_error", message: testCase.message(tempHome) },
         });
-        expect(result.stdout).not.toContain("[openclaw]");
+        expect(result.stdout).not.toContain("[carapace]");
       },
-      { prefix: "openclaw-secrets-json-failure-e2e-" },
+      { prefix: "carapace-secrets-json-failure-e2e-" },
     );
   });
 
@@ -411,8 +411,8 @@ describe("cli json stdout contract", () => {
           },
         ]) {
           const result = runBuiltCli(tempHome, [...testCase.command, "--json", ...conflict.args], {
-            OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-            OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+            CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+            CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
           });
 
           expect(result.status, result.stderr).toBe(1);
@@ -420,11 +420,11 @@ describe("cli json stdout contract", () => {
             ok: false,
             error: { type: "cli_error", message: conflict.message },
           });
-          expect(result.stdout).not.toContain("[openclaw]");
+          expect(result.stdout).not.toContain("[carapace]");
           expect(result.stderr).toContain(conflict.message);
         }
       },
-      { prefix: "openclaw-qr-json-failure-e2e-" },
+      { prefix: "carapace-qr-json-failure-e2e-" },
     );
   });
 
@@ -434,7 +434,7 @@ describe("cli json stdout contract", () => {
   ])("keeps combined $name output flags as one JSON document on stdout", async ({ command }) => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "carapace.json");
         await fs.writeFile(
           configPath,
           JSON.stringify({
@@ -454,8 +454,8 @@ describe("cli json stdout contract", () => {
             tempHome,
             [...command, ...flags],
             {
-              OPENCLAW_CONFIG_PATH: configPath,
-              OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+              CARAPACE_CONFIG_PATH: configPath,
+              CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
             },
             { inheritEnvironment: false },
           );
@@ -467,7 +467,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).not.toContain(payload.setupCode);
         }
       },
-      { prefix: "openclaw-qr-setup-code-json-e2e-" },
+      { prefix: "carapace-qr-setup-code-json-e2e-" },
     );
   });
 
@@ -496,7 +496,7 @@ describe("cli json stdout contract", () => {
           'Sandbox explain agent "alpha" does not match session agent "beta".',
         );
       },
-      { prefix: "openclaw-sandbox-json-failure-e2e-" },
+      { prefix: "carapace-sandbox-json-failure-e2e-" },
     );
   });
 
@@ -520,7 +520,7 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stderr).toContain("Docs search failed: offline fixture");
       },
-      { prefix: "openclaw-docs-json-failure-e2e-" },
+      { prefix: "carapace-docs-json-failure-e2e-" },
     );
   });
 
@@ -550,7 +550,7 @@ describe("cli json stdout contract", () => {
         expect(payload.error.message).not.toMatch(/^error:/i);
         expect(result.stderr).toContain("--not-a-real-option");
       },
-      { prefix: "openclaw-json-parse-failure-e2e-" },
+      { prefix: "carapace-json-parse-failure-e2e-" },
     );
   });
 
@@ -558,26 +558,26 @@ describe("cli json stdout contract", () => {
     {
       name: "unknown root",
       args: ["pairng"],
-      diagnostic: 'OpenClaw does not know the command "pairng".',
-      suggestion: "openclaw pairing",
+      diagnostic: 'Carapace does not know the command "pairng".',
+      suggestion: "carapace pairing",
     },
     {
       name: "unknown nested command",
       args: ["sessions", "lst"],
-      diagnostic: 'OpenClaw sessions has no command "lst".',
-      suggestion: "openclaw sessions list",
+      diagnostic: 'Carapace sessions has no command "lst".',
+      suggestion: "carapace sessions list",
     },
     {
       name: "unknown nested command with a later argument",
       args: ["config", "gett", "gateway.port"],
-      diagnostic: 'OpenClaw config has no command "gett".',
-      suggestion: "openclaw config get",
+      diagnostic: 'Carapace config has no command "gett".',
+      suggestion: "carapace config get",
     },
     {
       name: "unknown root before help",
       args: ["pairng", "--help"],
-      diagnostic: 'OpenClaw does not know the command "pairng".',
-      suggestion: "openclaw pairing",
+      diagnostic: 'Carapace does not know the command "pairng".',
+      suggestion: "carapace pairing",
     },
   ])("renders $name as actionable guidance", async (testCase) => {
     await withTempHome(
@@ -592,13 +592,13 @@ describe("cli json stdout contract", () => {
         expect(result.stderr.split(testCase.suggestion)).toHaveLength(2);
         expect(result.stderr).not.toContain("The CLI command failed.");
         expect(result.stderr).not.toContain("Could not start the CLI.");
-        expect(result.stderr).not.toContain("OPENCLAW_DEBUG");
-        expect(result.stderr).not.toContain("openclaw doctor");
+        expect(result.stderr).not.toContain("CARAPACE_DEBUG");
+        expect(result.stderr).not.toContain("carapace doctor");
         if (testCase.args.includes("--help")) {
-          expect(result.stdout).not.toContain("Usage: openclaw [options] [command]");
+          expect(result.stdout).not.toContain("Usage: carapace [options] [command]");
         }
       },
-      { prefix: "openclaw-unknown-command-e2e-" },
+      { prefix: "carapace-unknown-command-e2e-" },
     );
   });
 
@@ -606,14 +606,14 @@ describe("cli json stdout contract", () => {
     {
       name: "unknown root",
       args: ["pairng", "--json"],
-      diagnostic: 'OpenClaw does not know the command "pairng".',
-      suggestion: "openclaw pairing",
+      diagnostic: 'Carapace does not know the command "pairng".',
+      suggestion: "carapace pairing",
     },
     {
       name: "unknown nested command",
       args: ["sessions", "lst", "--json"],
-      diagnostic: 'OpenClaw sessions has no command "lst".',
-      suggestion: "openclaw sessions list",
+      diagnostic: 'Carapace sessions has no command "lst".',
+      suggestion: "carapace sessions list",
     },
   ])("reports $name once with structured JSON guidance", async (testCase) => {
     await withTempHome(
@@ -630,18 +630,18 @@ describe("cli json stdout contract", () => {
         expect(payload.error.message).toContain(testCase.diagnostic);
         expect(payload.error.message).not.toMatch(/^error:/i);
         expect(payload.error.message).toContain(`Did you mean this?\n  ${testCase.suggestion}`);
-        expect(payload.error.message).not.toContain("OPENCLAW_DEBUG");
-        expect(payload.error.message).not.toContain("openclaw doctor");
+        expect(payload.error.message).not.toContain("CARAPACE_DEBUG");
+        expect(payload.error.message).not.toContain("carapace doctor");
         expect(result.stderr).toContain(testCase.diagnostic);
         expect(result.stderr).toContain(`Did you mean this?\n  ${testCase.suggestion}`);
         expect(result.stderr.split(testCase.diagnostic)).toHaveLength(2);
         expect(result.stderr.split(testCase.suggestion)).toHaveLength(2);
         expect(result.stderr).not.toContain("The CLI command failed.");
         expect(result.stderr).not.toContain("Could not start the CLI.");
-        expect(result.stderr).not.toContain("OPENCLAW_DEBUG");
-        expect(result.stderr).not.toContain("openclaw doctor");
+        expect(result.stderr).not.toContain("CARAPACE_DEBUG");
+        expect(result.stderr).not.toContain("carapace doctor");
       },
-      { prefix: "openclaw-unknown-command-json-e2e-" },
+      { prefix: "carapace-unknown-command-json-e2e-" },
     );
   });
 
@@ -657,14 +657,14 @@ describe("cli json stdout contract", () => {
           error: { message: string };
         };
         expect(payload.error.message).toBe(
-          'OpenClaw sessions has no command "lst".\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: https://docs.openclaw.ai/cli',
+          'Carapace sessions has no command "lst".\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: https://github.com/Exaggarate/carapace',
         );
         expect(payload.error.message).not.toContain("\u001B");
         expect(payload.error.message).not.toContain("\u0007");
         expect(result.stdout).not.toContain("\\u001b");
         expect(result.stderr).toContain("\u001B[");
       },
-      { prefix: "openclaw-unknown-command-color-json-e2e-" },
+      { prefix: "carapace-unknown-command-color-json-e2e-" },
     );
   });
 
@@ -703,8 +703,8 @@ describe("cli json stdout contract", () => {
             "--json",
           ],
           {
-            OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-            OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+            CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+            CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
           },
         );
 
@@ -715,7 +715,7 @@ describe("cli json stdout contract", () => {
           findings: [],
         });
       },
-      { prefix: "openclaw-doctor-packaged-json-e2e-" },
+      { prefix: "carapace-doctor-packaged-json-e2e-" },
     );
   });
 });

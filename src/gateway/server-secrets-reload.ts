@@ -3,7 +3,7 @@ import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import {
   isTrustedSecretSurfaceUnavailableError,
@@ -55,7 +55,7 @@ export type GatewaySecretsReloaderParams = {
   activateRuntimeSecrets: ActivateRuntimeSecrets;
   buildReloadPlan?: (changedPaths: string[]) => GatewayReloadPlan;
   sharedGatewaySessionGenerationState: SharedGatewaySessionGenerationState;
-  resolveSharedGatewaySessionGenerationForConfig: (config: OpenClawConfig) => string | undefined;
+  resolveSharedGatewaySessionGenerationForConfig: (config: CarapaceConfig) => string | undefined;
   clients: Iterable<SharedGatewayAuthClient>;
   channelManager: Pick<
     ReturnType<typeof createChannelManager>,
@@ -71,7 +71,7 @@ async function activateSnapshotIfCurrent(
   options: {
     canActivate: () => boolean;
     onActivated: () => void;
-    runtimeSourceConfig: OpenClawConfig | undefined;
+    runtimeSourceConfig: CarapaceConfig | undefined;
   },
 ): Promise<number | null> {
   const runtime = await import("../secrets/runtime.js");
@@ -92,7 +92,7 @@ async function restoreSnapshotIfCurrent(
   expectedRevision: number,
   ownedSnapshot: PreparedSecretsRuntimeSnapshot,
   onActivated: () => void,
-  runtimeSourceConfig: OpenClawConfig | undefined,
+  runtimeSourceConfig: CarapaceConfig | undefined,
 ): Promise<void> {
   const runtime = await import("../secrets/runtime.js");
   if (
@@ -160,7 +160,7 @@ export function createGatewaySecretsReloader(params: GatewaySecretsReloaderParam
       let transaction:
         | (SecretsReloadPublication & {
             previousSnapshot: PreparedSecretsRuntimeSnapshot;
-            previousRuntimeSourceConfig: OpenClawConfig | undefined;
+            previousRuntimeSourceConfig: CarapaceConfig | undefined;
             previousGeneration: string | undefined;
             previousRequiredGeneration: string | undefined | null;
             prepared: PreparedSecretsRuntimeSnapshot;
@@ -338,8 +338,8 @@ export function createGatewaySecretsReloader(params: GatewaySecretsReloaderParam
         if (restartTargets.length > 0) {
           const restartChannels = [...new Set(restartTargets.map(({ channel }) => channel))];
           if (
-            isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-            isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS)
+            isTruthyEnvValue(process.env.CARAPACE_SKIP_CHANNELS) ||
+            isTruthyEnvValue(process.env.CARAPACE_SKIP_PROVIDERS)
           ) {
             throw new Error(
               `secrets.reload requires restarting channels: ${restartChannels.join(", ")}`,

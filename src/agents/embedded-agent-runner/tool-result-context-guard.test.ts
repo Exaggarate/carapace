@@ -1,9 +1,9 @@
 // Tool-result context guard tests cover live replay truncation, mid-turn
 // prechecks, and context-engine loop hooks for oversized tool outputs.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { Agent, type AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { createAssistantMessageEventStream, type Message } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@carapace/normalization-core";
+import { Agent, type AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { createAssistantMessageEventStream, type Message } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it, vi } from "vitest";
 import type { ContextEngine, ContextEngineRuntimeSettings } from "../../context-engine/types.js";
@@ -160,7 +160,7 @@ async function applyMidTurnPrecheckGuardToContext(
   return await agent.transformContext?.(contextForNextCall, new AbortController().signal);
 }
 
-function expectOpenClawTruncation(text: string): void {
+function expectCarapaceTruncation(text: string): void {
   expect(text).toContain(CONTEXT_LIMIT_TRUNCATION_NOTICE);
   expect(text).toMatch(
     /\[\.\.\. \d+ more characters truncated; rerun with narrower args if needed\]$/,
@@ -425,7 +425,7 @@ describe("installToolResultContextGuard", () => {
       expectDefined(transformed[0], "transformed[0] test invariant"),
     );
     expect(newResultText.length).toBeLessThan(5_000);
-    expectOpenClawTruncation(newResultText);
+    expectCarapaceTruncation(newResultText);
     expect(
       getToolResultText(
         expectDefined(contextForNextCall[0], "contextForNextCall[0] test invariant"),
@@ -447,7 +447,7 @@ describe("installToolResultContextGuard", () => {
     expect(
       estimateToolResultTextChars(transformedText, { minimumRawWeight: 2 }),
     ).toBeLessThanOrEqual(1_024);
-    expectOpenClawTruncation(transformedText);
+    expectCarapaceTruncation(transformedText);
     expect(getToolResultText(contextForNextCall[0]!)).toBe(cjk);
   });
 
@@ -464,7 +464,7 @@ describe("installToolResultContextGuard", () => {
     const transformed = (await applyGuardToContext(agent, contextForNextCall)) as AgentMessage[];
 
     expect(transformed).not.toBe(contextForNextCall);
-    expectOpenClawTruncation(
+    expectCarapaceTruncation(
       getToolResultText(expectDefined(transformed[0], "transformed[0] test invariant")),
     );
   });
@@ -479,7 +479,7 @@ describe("installToolResultContextGuard", () => {
     );
 
     expect(typeof (transformed[0] as { content?: unknown }).content).toBe("string");
-    expectOpenClawTruncation(newResultText);
+    expectCarapaceTruncation(newResultText);
   });
 
   it("drops oversized tool-result details when truncating once", async () => {
@@ -494,7 +494,7 @@ describe("installToolResultContextGuard", () => {
       expectDefined(transformed[0], "transformed[0] test invariant"),
     );
 
-    expectOpenClawTruncation(newResultText);
+    expectCarapaceTruncation(newResultText);
     expect(result.details).toBeUndefined();
     const originalDetails = (contextForNextCall[0] as { details?: { truncation?: unknown } })
       .details;
@@ -516,7 +516,7 @@ describe("installToolResultContextGuard", () => {
 
     expect(transformed).not.toBe(contextForNextCall);
     expect((transformed[0] as { content?: unknown }).content).toBe("u".repeat(50_000));
-    expectOpenClawTruncation(
+    expectCarapaceTruncation(
       getToolResultText(expectDefined(transformed[1], "transformed[1] test invariant")),
     );
     expect(
@@ -588,7 +588,7 @@ describe("installToolResultContextGuard", () => {
       100_000,
     )) as AgentMessage[];
 
-    expectOpenClawTruncation(
+    expectCarapaceTruncation(
       getToolResultText(expectDefined(transformed[0], "transformed[0] test invariant")),
     );
   });
@@ -1087,7 +1087,7 @@ describe("installContextEngineLoopHook", () => {
       agentId: "main",
       sessionId,
       sessionKey,
-      storePath: "/tmp/state/openclaw.sqlite",
+      storePath: "/tmp/state/carapace.sqlite",
     };
     installContextEngineLoopHook({
       agent,
@@ -1163,17 +1163,17 @@ describe("installContextEngineLoopHook", () => {
     const transformedMessage = (transformed as AgentMessage[])[0];
 
     expect(afterTurnMessage).toMatchObject({ role: "user", content: "visible prompt" });
-    expect(JSON.stringify(afterTurnMessage)).not.toContain("__openclawTranscriptPromptText");
+    expect(JSON.stringify(afterTurnMessage)).not.toContain("__carapaceTranscriptPromptText");
     expect(assembleMessage).toMatchObject({
       role: "user",
       content: "model-only hook context\n\nvisible prompt",
     });
-    expect(JSON.stringify(assembleMessage)).not.toContain("__openclawTranscriptPromptText");
+    expect(JSON.stringify(assembleMessage)).not.toContain("__carapaceTranscriptPromptText");
     expect(transformedMessage).toMatchObject({
       role: "user",
       content: "model-only hook context\n\nvisible prompt",
     });
-    expect(JSON.stringify(transformedMessage)).not.toContain("__openclawTranscriptPromptText");
+    expect(JSON.stringify(transformedMessage)).not.toContain("__carapaceTranscriptPromptText");
   });
 
   it("calls afterTurn and assemble when new messages are appended after the first call", async () => {

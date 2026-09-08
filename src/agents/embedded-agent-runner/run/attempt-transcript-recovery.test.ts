@@ -1,7 +1,7 @@
 import path from "node:path";
 import { expect, it } from "vitest";
-import { openOpenClawAgentDatabase } from "../../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { openCarapaceAgentDatabase } from "../../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
 import { SessionManager } from "../../sessions/session-manager.js";
@@ -25,12 +25,12 @@ const MID_TURN_PRECHECK_ERROR_MESSAGE = new MidTurnPrecheckSignal({
 it.each(["yield", "precheck", "compaction"])(
   "publishes %s recovery only after the transcript rewrite commits",
   async (recovery) => {
-    await withOpenClawTestState({ label: "transcript-recovery" }, async (state) => {
+    await withCarapaceTestState({ label: "transcript-recovery" }, async (state) => {
       const target = {
         agentId: "main",
         sessionId: "recovery",
         sessionKey: "agent:main:recovery",
-        storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+        storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
       };
       const sessionManager = SessionManager.open(target, state.workspaceDir);
       const user: AgentMessage = { role: "user", content: "continue", timestamp: 1 };
@@ -59,7 +59,7 @@ it.each(["yield", "precheck", "compaction"])(
           normalizeCompactionRecoveryTranscriptTail({ activeSession, sessionManager });
         }
       };
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: target.storePath });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: target.storePath });
       database.db.exec(`CREATE TRIGGER reject_recovery BEFORE INSERT ON transcript_events
         BEGIN SELECT RAISE(ABORT, 'recovery write failed'); END;`);
 
@@ -79,12 +79,12 @@ it.each(["yield", "precheck", "compaction"])(
 );
 
 it("keeps a mid-turn routing error out of durable history and resumes without a rewrite", async () => {
-  await withOpenClawTestState({ label: "precheck-no-rewrite" }, async (state) => {
+  await withCarapaceTestState({ label: "precheck-no-rewrite" }, async (state) => {
     const target = {
       agentId: "main",
       sessionId: "precheck-no-rewrite",
       sessionKey: "agent:main:precheck-no-rewrite",
-      storePath: path.join(state.agentDir(), "openclaw-agent.sqlite"),
+      storePath: path.join(state.agentDir(), "carapace-agent.sqlite"),
     };
     const sessionManager = guardSessionManager(SessionManager.open(target, state.workspaceDir));
     const user: AgentMessage = { role: "user", content: "continue", timestamp: 1 };
@@ -103,7 +103,7 @@ it("keeps a mid-turn routing error out of durable history and resumes without a 
     };
     sessionManager.appendMessage(error);
     expect(SessionManager.open(target).getEntries()).toEqual(before);
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: target.storePath });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: target.storePath });
     database.db.exec(`CREATE TRIGGER reject_recovery BEFORE INSERT ON transcript_events
       BEGIN SELECT RAISE(ABORT, 'unexpected recovery write'); END;`);
     const activeSession = { agent: { state: { messages: [user, error] } } };

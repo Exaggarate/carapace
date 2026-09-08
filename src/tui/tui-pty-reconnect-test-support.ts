@@ -33,9 +33,9 @@ export function registerTuiReconnectTests(timeouts: {
     async ({ recovery, membership, activity }) => {
       const fixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
-          OPENCLAW_TUI_PTY_RECONNECT_OUTCOME: recovery === "gap" ? "gap" : "replacement",
-          OPENCLAW_TUI_PTY_RECONNECT_MEMBERSHIP: membership,
+          CARAPACE_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
+          CARAPACE_TUI_PTY_RECONNECT_OUTCOME: recovery === "gap" ? "gap" : "replacement",
+          CARAPACE_TUI_PTY_RECONNECT_MEMBERSHIP: membership,
         },
       });
       try {
@@ -65,8 +65,8 @@ async function exerciseTuiReconnectOutcomes(timeoutMs: number): Promise<void> {
     ...RECONNECT_CASES.map(async ({ outcome, marker, activity }) => {
       const fixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
-          OPENCLAW_TUI_PTY_RECONNECT_OUTCOME: outcome,
+          CARAPACE_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
+          CARAPACE_TUI_PTY_RECONNECT_OUTCOME: outcome,
         },
       });
       try {
@@ -103,8 +103,8 @@ async function exerciseTuiReplacementReconnectRecovery(timeoutMs: number): Promi
     ["replacement", "appeared"].map(async (outcome) => {
       const fixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
-          OPENCLAW_TUI_PTY_RECONNECT_OUTCOME: outcome,
+          CARAPACE_TUI_PTY_DISCONNECT_REASON: "fixture transport loss",
+          CARAPACE_TUI_PTY_RECONNECT_OUTCOME: outcome,
         },
       });
       try {

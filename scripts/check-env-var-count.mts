@@ -14,7 +14,7 @@ import {
 const BUDGET_PATH = "config/env-var-count-budget.txt";
 const SOURCE_ROOTS = ["src", "packages", "extensions"];
 const SOURCE_EXTENSIONS = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
-const ENV_VAR_PATTERN = /OPENCLAW_[A-Z0-9_]+/gu;
+const ENV_VAR_PATTERN = /CARAPACE_[A-Z0-9_]+/gu;
 
 export function isCountedSourcePath(filePath: string) {
   const normalized = filePath.replaceAll("\\", "/");
@@ -111,15 +111,15 @@ export function main(argv: string[] = process.argv.slice(2), root = process.cwd(
   const baseBudget = readBaseBudget(root, baseRef);
   if (baseBudget !== null) {
     enforceRatchetScalar(budget, baseBudget, {
-      increased: `OPENCLAW_* budget grew from ${baseBudget} to ${budget}`,
+      increased: `CARAPACE_* budget grew from ${baseBudget} to ${budget}`,
     });
   }
   const names = collectEnvVarNames(root, { staged });
   enforceRatchetScalar(names.length, budget, {
-    decreased: `OPENCLAW_* count ${names.length} is below budget ${budget}; update ${BUDGET_PATH}`,
-    increased: `OPENCLAW_* count ${names.length} exceeds budget ${budget}; update ${BUDGET_PATH}`,
+    decreased: `CARAPACE_* count ${names.length} is below budget ${budget}; update ${BUDGET_PATH}`,
+    increased: `CARAPACE_* count ${names.length} exceeds budget ${budget}; update ${BUDGET_PATH}`,
   });
-  reportRatchetSuccess(`OPENCLAW_* count ${names.length}/${budget}`);
+  reportRatchetSuccess(`CARAPACE_* count ${names.length}/${budget}`);
   return names.length;
 }
 

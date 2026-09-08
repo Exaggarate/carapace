@@ -70,18 +70,18 @@ it.each([
       HOME: home,
       USERPROFILE: home,
       APPDATA: path.join(home, "AppData"),
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_STATE_DIR: undefined,
-      OPENCLAW_CONFIG_PATH: undefined,
-      OPENCLAW_PROFILE: undefined,
-      OPENCLAW_SUPERVISOR_MODE: undefined,
-      OPENCLAW_SERVICE_MARKER: undefined,
-      OPENCLAW_SERVICE_KIND: undefined,
+      CARAPACE_HOME: undefined,
+      CARAPACE_STATE_DIR: undefined,
+      CARAPACE_CONFIG_PATH: undefined,
+      CARAPACE_PROFILE: undefined,
+      CARAPACE_SUPERVISOR_MODE: undefined,
+      CARAPACE_SERVICE_MARKER: undefined,
+      CARAPACE_SERVICE_KIND: undefined,
     },
     async () => {
       mockProcessPlatform("win32");
       const root = process.cwd();
-      let programArguments = [process.execPath, path.join(root, "openclaw.mjs"), "gateway"];
+      let programArguments = [process.execPath, path.join(root, "carapace.mjs"), "gateway"];
       mocks.service.mockReturnValue(
         createMockGatewayService({
           readCommand: async () => ({
@@ -114,7 +114,7 @@ it.each([
           mocks.enabled = true;
           programArguments =
             outcome === "replaced task"
-              ? [process.execPath, path.join(home, "other-install", "openclaw.mjs"), "gateway"]
+              ? [process.execPath, path.join(home, "other-install", "carapace.mjs"), "gateway"]
               : [...programArguments, "--port", "20000"];
           throw new Error("candidate finalizer disappeared");
         }
@@ -153,7 +153,7 @@ it.each([
           result: { status: "ok", mode: "npm", root, runId, steps: [], durationMs: 0 },
           installKindChanged: false,
           configSnapshot: {
-            path: path.join(home, "openclaw.json"),
+            path: path.join(home, "carapace.json"),
             exists: false,
             raw: null,
             parsed: {},

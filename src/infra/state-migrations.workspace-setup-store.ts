@@ -1,6 +1,6 @@
 // SQLite import and receipt semantics for retired workspace state.
 import { createHash } from "node:crypto";
-import { safeParseJsonRecord } from "@openclaw/normalization-core/json-coercion";
+import { safeParseJsonRecord } from "@carapace/normalization-core/json-coercion";
 import { LEGACY_WORKSPACE_ATTESTATION_HEADER } from "../agents/workspace-legacy-state.js";
 import {
   WORKSPACE_LEGACY_STATE_MIGRATION_KIND,
@@ -8,11 +8,11 @@ import {
   isSafeWorkspaceAttestationFilename,
   registerWorkspaceStateAliasesInTransaction,
 } from "../agents/workspace-state-store.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -32,7 +32,7 @@ import type { LegacyWorkspaceStateSource } from "./state-migrations.workspace-se
 const MIGRATION_KIND = WORKSPACE_LEGACY_STATE_MIGRATION_KIND;
 
 type WorkspaceMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   | "workspace_setup_state"
   | "workspace_path_aliases"
   | "workspace_generated_bootstrap_hashes"
@@ -214,7 +214,7 @@ function receiptPreservesAuthority(
 }
 
 function findMigrationAuthority(params: {
-  db: ReturnType<typeof openOpenClawStateDatabase>["db"];
+  db: ReturnType<typeof openCarapaceStateDatabase>["db"];
   kysely: ReturnType<typeof getNodeSqliteKysely<WorkspaceMigrationDatabase>>;
   source: LegacyWorkspaceStateSource;
   fingerprint: string;
@@ -268,7 +268,7 @@ export function canonicalCoversParsedSource(params: {
   parsed: ParsedSource;
   env: NodeJS.ProcessEnv;
 }): boolean {
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openCarapaceStateDatabase({ env: params.env });
   return runSqliteDeferredTransactionSync(db, () => {
     const kysely = getNodeSqliteKysely<WorkspaceMigrationDatabase>(db);
     if (params.source.kind === "setup" && params.parsed.kind === "setup") {
@@ -336,7 +336,7 @@ export function importAndRecordReceipt(params: {
   const key = resolveWorkspaceMigrationSourceKey(params.source);
   const runId = `${key}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     (database) => {
       const { db } = database;
       const kysely = getNodeSqliteKysely<WorkspaceMigrationDatabase>(db);

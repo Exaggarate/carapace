@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   dispatchCommittedSkillChangeBestEffort,
   hasCommittedSkillChangeHooks,
@@ -79,7 +79,7 @@ export type SkillProposalApplyTransitionDependencies = {
     env: NodeJS.ProcessEnv | undefined,
     agentId: string | undefined,
     readOptions: {
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       reconcile?: boolean;
     },
   ) => Promise<SkillProposalReadResult>;
@@ -601,7 +601,7 @@ async function recoverAfterApplyCommitFailure(params: {
   mutation: PreparedWorkspaceSkillMutation;
   env?: NodeJS.ProcessEnv;
   agentId?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<SkillProposalEvent | null> {
   const committed = readCommittedSkillProposalTransition({
     record: params.applied,
@@ -661,7 +661,7 @@ function requiredApplyStatus(outcome: SkillProposalApplyOutcome): SkillProposalS
 function storeOptions(
   env: NodeJS.ProcessEnv | undefined,
   agentId: string | undefined,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): SkillWorkshopStoreOptions {
   return {
     ...(env ? { env } : {}),

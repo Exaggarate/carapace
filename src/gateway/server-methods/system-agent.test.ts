@@ -1,8 +1,8 @@
-// OpenClaw gateway tests cover activation serialization and chat sessions.
+// Carapace gateway tests cover activation serialization and chat sessions.
 import "./system-agent.mocks.test-support.js";
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
@@ -60,10 +60,10 @@ const waitOneTask = () =>
   });
 
 async function makeVerificationContext() {
-  const stateDir = systemAgentTempDirs.make("openclaw-setup-verification-");
-  const configPath = path.join(stateDir, "openclaw.json");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+  const stateDir = systemAgentTempDirs.make("carapace-setup-verification-");
+  const configPath = path.join(stateDir, "carapace.json");
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
   fs.writeFileSync(configPath, "{}\n");
   const snapshot = await readConfigFileSnapshot();
   setRuntimeConfigAppliedHash(hashRuntimeConfigValue(snapshot.sourceConfig));
@@ -80,7 +80,7 @@ async function runSensitiveChannelSetup(_channel: string, prompter: WizardPrompt
 
 function stubEngineOverview() {
   return vi.spyOn(SystemAgentChatEngine.prototype, "loadOverview").mockResolvedValue({
-    config: { path: "/tmp/openclaw.json", exists: true, valid: true, issues: [], hash: null },
+    config: { path: "/tmp/carapace.json", exists: true, valid: true, issues: [], hash: null },
     agents: [],
     defaultAgentId: "main",
     defaultModel: "openai/gpt-5.5",
@@ -92,13 +92,13 @@ function stubEngineOverview() {
     },
     gateway: { url: "ws://127.0.0.1:18789", source: "test", reachable: true },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://github.com/Exaggarate/carapace",
+      sourceUrl: "https://github.com/Exaggarate/carapace",
     },
   } as never);
 }
 
-describe("openclaw.setup", () => {
+describe("carapace.setup", () => {
   it.each([undefined, false, true])(
     "uses verified client locality for custom auth (%s)",
     async (isLocalClient) => {
@@ -110,7 +110,7 @@ describe("openclaw.setup", () => {
       const { wizardSessions, context } = makeWizardContext();
       const { calls, respond } = makeRespond();
       const sessionId = `custom-auth-${String(isLocalClient)}`;
-      await systemAgentHandler("openclaw.setup.auth.start")({
+      await systemAgentHandler("carapace.setup.auth.start")({
         params: {
           sessionId,
           authChoice: "custom-api-key",
@@ -142,7 +142,7 @@ describe("openclaw.setup", () => {
 
     try {
       const { calls, respond } = makeRespond();
-      await systemAgentHandler("openclaw.setup.activate")({
+      await systemAgentHandler("carapace.setup.activate")({
         params: { kind: "claude-cli" },
         respond,
       } as never);
@@ -153,7 +153,7 @@ describe("openclaw.setup", () => {
           payload: undefined,
           error: {
             code: "UNAVAILABLE",
-            message: "OpenClaw setup is already in progress; try again when it finishes.",
+            message: "Carapace setup is already in progress; try again when it finishes.",
             details: { code: "SETUP_ADMISSION_BUSY" },
             retryable: true,
           },
@@ -166,12 +166,12 @@ describe("openclaw.setup", () => {
   });
 
   it.each([
-    ["openclaw.setup.activate.start" as const, { sessionId: "busy-activation", kind: "codex-cli" }],
+    ["carapace.setup.activate.start" as const, { sessionId: "busy-activation", kind: "codex-cli" }],
     [
-      "openclaw.setup.auth.start" as const,
+      "carapace.setup.auth.start" as const,
       { sessionId: "busy-auth", authChoice: "github-copilot" },
     ],
-    ["openclaw.setup.prepare.start" as const, { sessionId: "busy-prepare", authChoice: "ollama" }],
+    ["carapace.setup.prepare.start" as const, { sessionId: "busy-prepare", authChoice: "ollama" }],
   ])("rejects %s before creating a wizard session when setup is busy", async (method, params) => {
     const ownerStarted = createDeferred();
     const releaseOwner = createDeferred();
@@ -192,7 +192,7 @@ describe("openclaw.setup", () => {
           payload: undefined,
           error: {
             code: "UNAVAILABLE",
-            message: "OpenClaw setup is already in progress; try again when it finishes.",
+            message: "Carapace setup is already in progress; try again when it finishes.",
             details: { code: "SETUP_ADMISSION_BUSY" },
             retryable: true,
           },
@@ -206,7 +206,7 @@ describe("openclaw.setup", () => {
   });
 });
 
-describe("openclaw.chat", () => {
+describe("carapace.chat", () => {
   it("refuses to create a session before inference is available", async () => {
     inferenceFallbackMocks.verify.mockResolvedValueOnce({
       ok: false,
@@ -221,7 +221,7 @@ describe("openclaw.chat", () => {
       ok: false,
       error: {
         code: "UNAVAILABLE",
-        message: "OpenClaw requires working inference: no configured model",
+        message: "Carapace requires working inference: no configured model",
         details: {
           code: "system_agent_inference_unavailable",
         },
@@ -265,13 +265,13 @@ describe("openclaw.chat", () => {
   it.each(["none", "doctor"])(
     "returns unchecked discovery through selected-agent detection after %s metadata",
     async (metadataCommand) => {
-      const stateDir = systemAgentTempDirs.make("openclaw-native-catalog-consent-");
-      const configPath = path.join(stateDir, "openclaw.json");
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-      vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+      const stateDir = systemAgentTempDirs.make("carapace-native-catalog-consent-");
+      const configPath = path.join(stateDir, "carapace.json");
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_CONFIG_PATH", configPath);
       const { createConfigIO } = await import("../../config/io.factory.js");
       const io = createConfigIO({
-        env: { ...process.env, OPENCLAW_CONFIG_PATH: configPath, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_CONFIG_PATH: configPath, CARAPACE_STATE_DIR: stateDir },
         homedir: () => stateDir,
       });
       const { applyWizardMetadata } = await import("../../commands/onboard-helpers.js");
@@ -294,7 +294,7 @@ describe("openclaw.chat", () => {
         ),
       );
       const { calls, respond } = makeRespond();
-      await systemAgentHandler("openclaw.setup.detect")({
+      await systemAgentHandler("carapace.setup.detect")({
         params: { agentId: "research" },
         respond,
       } as never);
@@ -325,7 +325,7 @@ describe("openclaw.chat", () => {
     });
     const activeAtResponse: number[] = [];
 
-    const pending = systemAgentHandler("openclaw.setup.detect")({
+    const pending = systemAgentHandler("carapace.setup.detect")({
       params: { agentId: "research" },
       respond: () => {
         activeAtResponse.push(systemAgentLane().activeCount);
@@ -360,7 +360,7 @@ describe("openclaw.chat", () => {
     setupInferenceMocks.verifySetupInference.mockResolvedValueOnce(result);
     const { calls, respond } = makeRespond();
 
-    const verify = systemAgentHandler("openclaw.setup.verify");
+    const verify = systemAgentHandler("carapace.setup.verify");
     await verify({
       params: { agentId: "research" },
       respond,
@@ -404,7 +404,7 @@ describe("openclaw.chat", () => {
     }
     const { calls, respond } = makeRespond();
 
-    await systemAgentHandler("openclaw.setup.verify")({ params: {}, respond, context } as never);
+    await systemAgentHandler("carapace.setup.verify")({ params: {}, respond, context } as never);
 
     expect(calls).toEqual([
       {
@@ -425,7 +425,7 @@ describe("openclaw.chat", () => {
   it("rejects unknown setup verification params without running inference", async () => {
     const { calls, respond } = makeRespond();
 
-    await systemAgentHandler("openclaw.setup.verify")({
+    await systemAgentHandler("carapace.setup.verify")({
       params: { modelRef: "openai/gpt-5.5" },
       respond,
     } as never);
@@ -459,7 +459,7 @@ describe("openclaw.chat", () => {
         },
       );
       const { calls, respond } = makeRespond();
-      const pending = systemAgentHandler("openclaw.setup.activate")({
+      const pending = systemAgentHandler("carapace.setup.activate")({
         params: { kind: "codex-cli" },
         respond,
       } as never);
@@ -470,7 +470,7 @@ describe("openclaw.chat", () => {
         await waitOneTask();
         expect(calls).toEqual([]);
         expect(systemAgentLane().activeCount).toBe(0);
-        await systemAgentHandler("openclaw.setup.verify")({
+        await systemAgentHandler("carapace.setup.verify")({
           params: {},
           respond: () => {},
           context: await makeVerificationContext(),
@@ -518,7 +518,7 @@ describe("openclaw.chat", () => {
     );
     const { calls, respond } = makeRespond();
     await expect(
-      systemAgentHandler("openclaw.setup.activate")({
+      systemAgentHandler("carapace.setup.activate")({
         params: { kind: "codex-cli" },
         respond,
       } as never),
@@ -549,7 +549,7 @@ describe("openclaw.chat", () => {
       const { calls, respond } = makeRespond();
       const activeAtResponse: number[] = [];
 
-      const pending = systemAgentHandler("openclaw.setup.activate")({
+      const pending = systemAgentHandler("carapace.setup.activate")({
         params: {
           kind: "api-key",
           agentId: "research",
@@ -740,7 +740,7 @@ describe("openclaw.chat", () => {
     );
     const invoke = async (params: Record<string, unknown>) => {
       const { calls, respond } = makeRespond();
-      await systemAgentHandler("openclaw.chat.history")({ params, respond } as never);
+      await systemAgentHandler("carapace.chat.history")({ params, respond } as never);
       return calls[0];
     };
 
@@ -760,7 +760,7 @@ describe("openclaw.chat", () => {
       verifiedInference: requireVerifiedInferenceFixture(),
       runAgentTurn: async () => {
         throw new SystemAgentInferenceUnavailableError("agent-turn", [
-          new Error("workspace owner openclaw is missing from the roster"),
+          new Error("workspace owner carapace is missing from the roster"),
         ]);
       },
       deps: requireVerifiedInferenceDeps(),
@@ -775,7 +775,7 @@ describe("openclaw.chat", () => {
       ok: false,
       error: {
         code: "UNAVAILABLE",
-        message: expect.stringContaining("workspace owner openclaw is missing from the roster"),
+        message: expect.stringContaining("workspace owner carapace is missing from the roster"),
         details: { code: "system_agent_session_invalidated" },
       },
     });

@@ -1,6 +1,6 @@
 import type { ApiClientOptions } from "grammy";
-import { responseWithRelease } from "openclaw/plugin-sdk/fetch-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { responseWithRelease } from "carapace/plugin-sdk/fetch-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { TelegramTransport } from "./fetch.js";
 import {
   isTelegramMisdirectedRequestError,

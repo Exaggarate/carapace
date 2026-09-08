@@ -1,9 +1,9 @@
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type {
   SessionTranscriptWriteScope,
   TranscriptMessageAppendResult,
@@ -27,7 +27,7 @@ export function readCommittedTranscriptMessageSequence(
 
 /** Captures atomic turn cursors from the final projection before SQLite commits. */
 export function rememberCommittedTranscriptMessageSequencesInTransaction(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   sessionId: string,
   messages: readonly TranscriptMessageAppendResult<unknown>[],
 ): void {
@@ -40,7 +40,7 @@ export function rememberCommittedTranscriptMessageSequencesInTransaction(
   }
   const db = getNodeSqliteKysely<
     Pick<
-      OpenClawAgentKyselyDatabase,
+      CarapaceAgentKyselyDatabase,
       "session_transcript_active_events" | "session_transcript_index_state"
     >
   >(database.db);
@@ -91,7 +91,7 @@ export function rememberCommittedTranscriptMessageSequences(
     ...(scope.storePath ? { storePath: scope.storePath } : {}),
   });
   rememberCommittedTranscriptMessageSequencesInTransaction(
-    openOpenClawAgentDatabase(toDatabaseOptions(resolved)),
+    openCarapaceAgentDatabase(toDatabaseOptions(resolved)),
     resolved.sessionId,
     messages,
   );

@@ -28,7 +28,7 @@ describe("e2e vitest config", () => {
     expect(normalizeConfigPath(e2eConfig.test?.runner)).toBe("test/non-isolated-runner.ts");
     expect(normalizeConfigPaths(e2eConfig.test?.setupFiles)).toEqual([
       "test/setup.ts",
-      "test/setup-openclaw-runtime.ts",
+      "test/setup-carapace-runtime.ts",
     ]);
   });
 
@@ -58,9 +58,9 @@ describe("e2e vitest config", () => {
 
   it("serializes default e2e runs while preserving explicit worker overrides", () => {
     expect(createE2EVitestConfig({}).test?.maxWorkers).toBe(1);
-    expect(createE2EVitestConfig({ OPENCLAW_E2E_WORKERS: "4" }).test?.maxWorkers).toBe(4);
-    expect(createE2EVitestConfig({ OPENCLAW_E2E_WORKERS: "99" }).test?.maxWorkers).toBe(16);
-    expect(createE2EVitestConfig({ OPENCLAW_E2E_WORKERS: "0" }).test?.maxWorkers).toBe(1);
-    expect(createE2EVitestConfig({ OPENCLAW_E2E_WORKERS: "invalid" }).test?.maxWorkers).toBe(1);
+    expect(createE2EVitestConfig({ CARAPACE_E2E_WORKERS: "4" }).test?.maxWorkers).toBe(4);
+    expect(createE2EVitestConfig({ CARAPACE_E2E_WORKERS: "99" }).test?.maxWorkers).toBe(16);
+    expect(createE2EVitestConfig({ CARAPACE_E2E_WORKERS: "0" }).test?.maxWorkers).toBe(1);
+    expect(createE2EVitestConfig({ CARAPACE_E2E_WORKERS: "invalid" }).test?.maxWorkers).toBe(1);
   });
 });

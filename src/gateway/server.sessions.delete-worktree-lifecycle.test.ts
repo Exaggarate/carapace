@@ -25,9 +25,9 @@ import { SQLITE_SESSION_WRITER_QUEUES } from "../config/sessions/store-writer-st
 import { isSessionLifecycleMutationActive } from "../sessions/session-lifecycle-admission.js";
 import { listSessionStateEventsSince } from "../sessions/session-state-events.js";
 import { createDeferredCore } from "../shared/deferred.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { resolveCarapaceAgentSqlitePath } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { testState, writeSessionStore } from "./test-helpers.js";
 import {
   directSessionReq,
@@ -108,7 +108,7 @@ test.each(["none", "restore-failed", "placement-changed"] as const)(
     const worktreeLifecycle = await import("../sessions/session-worktree-lifecycle.js");
     const synchronize = worktreeLifecycle.synchronizeSessionWorktreeArchive;
     const sqliteScope = resolveSqliteScope({ storePath, sessionKey: key });
-    const writerQueuePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(sqliteScope));
+    const writerQueuePath = resolveCarapaceAgentSqlitePath(toDatabaseOptions(sqliteScope));
     const writerStarted = createDeferredCore();
     const releaseWriter = createDeferredCore();
     let heldWriter: Promise<void> | undefined;
@@ -180,12 +180,12 @@ test.each(["none", "restore-failed", "placement-changed"] as const)(
 );
 
 test("sessions.create only allocates worktrees for lifecycle-manageable agent owners", async () => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-create-worktree-agent-owner-",
+    prefix: "carapace-create-worktree-agent-owner-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   testState.agentsConfig = { list: [{ id: "ops", default: true }] };
   const { storePath } = await createSessionStoreDir();
@@ -241,20 +241,20 @@ test("sessions.create only allocates worktrees for lifecycle-manageable agent ow
         await managedWorktrees.remove({ id, reason: "test-cleanup", allowSnapshotLoss: true });
       }
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
     testState.agentsConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });
 
 test("sessions.delete snapshots and removes session worktrees", async () => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-",
+    prefix: "carapace-delete-worktree-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   await createSessionStoreDir();
   let dirtyWorktreeId: string | undefined;
@@ -281,7 +281,7 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
     await expect(fs.access(cleanWorktree!.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, cleanWorktree!.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/carapace\/snapshots\//),
     });
     const registered = await execFileAsync("git", [
       "-C",
@@ -318,7 +318,7 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
     await expect(fs.access(dirtyWorktree!.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, dirtyWorktree!.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/carapace\/snapshots\//),
     });
     dirtyWorktreeId = undefined;
   } finally {
@@ -332,19 +332,19 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
         allowSnapshotLoss: true,
       });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });
 
 test("sessions.delete keeps same-key successor worktree creation behind exact cleanup", async () => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-successor-",
+    prefix: "carapace-delete-worktree-successor-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   const { storePath } = await createSessionStoreDir();
   const key = "agent:main:dashboard:delete-worktree-successor";
@@ -463,9 +463,9 @@ test("sessions.delete keeps same-key successor worktree creation behind exact cl
         allowSnapshotLoss: true,
       });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });
 
@@ -489,12 +489,12 @@ test.each([
     finalized: true,
   },
 ])("sessions.delete reports preserved worktree truth after $name", async (scenario) => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-preserved-",
+    prefix: "carapace-delete-worktree-preserved-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   const { storePath } = await createSessionStoreDir();
   const key = "agent:main:dashboard:delete-worktree-preserved";
@@ -555,19 +555,19 @@ test.each([
         allowSnapshotLoss: true,
       });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });
 
 test("sessions.delete reports a busy preserved worktree while a live run lease exists", async () => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-busy-",
+    prefix: "carapace-delete-worktree-busy-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   await createSessionStoreDir();
   const key = "agent:main:dashboard:delete-worktree-busy";
@@ -608,19 +608,19 @@ test("sessions.delete reports a busy preserved worktree while a live run lease e
         allowSnapshotLoss: true,
       });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });
 
 test("sessions.delete preserves an entry-bound worktree owned by another principal", async () => {
-  const openClawState = await createOpenClawTestState({
+  const carapaceState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-owner-mismatch-",
+    prefix: "carapace-delete-worktree-owner-mismatch-",
   });
-  const workspace = await initializeRemoteBackedGitWorkspace(openClawState.root);
-  closeOpenClawStateDatabaseForTest();
+  const workspace = await initializeRemoteBackedGitWorkspace(carapaceState.root);
+  closeCarapaceStateDatabaseForTest();
   testState.agentConfig = { workspace };
   await createSessionStoreDir();
   const key = "agent:main:dashboard:delete-worktree-owner-mismatch";
@@ -677,8 +677,8 @@ test("sessions.delete preserves an entry-bound worktree owned by another princip
         allowSnapshotLoss: true,
       });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await carapaceState.cleanup();
   }
 });

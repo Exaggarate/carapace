@@ -50,7 +50,7 @@ describe("Windows command helpers", () => {
   });
 
   it("resolves relative executables against the child cwd", async () => {
-    await withTempDir("openclaw-windows-command-cwd-", async (cwd) => {
+    await withTempDir("carapace-windows-command-cwd-", async (cwd) => {
       const binDir = path.join(cwd, "bin");
       const executable = path.join(binDir, "tool.exe");
       await mkdir(binDir);
@@ -69,7 +69,7 @@ describe("Windows command helpers", () => {
   });
 
   it("resolves bare executables from PATH without allowing child-cwd shadowing", async () => {
-    await withTempDir("openclaw-windows-command-bare-path-", async (base) => {
+    await withTempDir("carapace-windows-command-bare-path-", async (base) => {
       const cwd = path.join(base, "cwd");
       const binDir = path.join(base, "bin");
       const cwdExecutable = path.join(cwd, "tool.exe");
@@ -94,7 +94,7 @@ describe("Windows command helpers", () => {
   it.each([".EXE;.CMD;", ";;"])(
     "reports an unresolved command for a bare file with PATHEXT %j",
     async (pathext) => {
-      await withTempDir("openclaw-windows-command-bare-file-", async (binDir) => {
+      await withTempDir("carapace-windows-command-bare-file-", async (binDir) => {
         await writeFile(path.join(binDir, "runner"), "bare file\n");
 
         await withMockedWindowsPlatform(async () => {
@@ -110,7 +110,7 @@ describe("Windows command helpers", () => {
   );
 
   it("requires an explicit relative path for executables in the child cwd", async () => {
-    await withTempDir("openclaw-windows-command-bare-cwd-", async (cwd) => {
+    await withTempDir("carapace-windows-command-bare-cwd-", async (cwd) => {
       await writeFile(path.join(cwd, "tool.exe"), "");
 
       await withMockedWindowsPlatform(async () => {
@@ -126,7 +126,7 @@ describe("Windows command helpers", () => {
   });
 
   it("accepts explicit executable paths independently of PATHEXT", async () => {
-    await withTempDir("openclaw-windows-command-explicit-", async (cwd) => {
+    await withTempDir("carapace-windows-command-explicit-", async (cwd) => {
       const executable = path.join(cwd, "tool.exe");
       await writeFile(executable, "");
 
@@ -143,7 +143,7 @@ describe("Windows command helpers", () => {
   });
 
   it("resolves PATH and PATHEXT keys case-insensitively", async () => {
-    await withTempDir("openclaw-windows-command-env-case-", async (binDir) => {
+    await withTempDir("carapace-windows-command-env-case-", async (binDir) => {
       const executable = path.join(binDir, "tool.exe");
       await writeFile(executable, "");
 
@@ -159,7 +159,7 @@ describe("Windows command helpers", () => {
   });
 
   it("accepts PATH executables with explicit extensions independently of PATHEXT", async () => {
-    await withTempDir("openclaw-windows-command-path-extension-", async (binDir) => {
+    await withTempDir("carapace-windows-command-path-extension-", async (binDir) => {
       const executable = path.join(binDir, "tool.exe");
       await writeFile(executable, "");
 
@@ -175,7 +175,7 @@ describe("Windows command helpers", () => {
   });
 
   it("honors PATHEXT precedence before package-manager shim fallback", async () => {
-    await withTempDir("openclaw-windows-command-pathext-", async (binDir) => {
+    await withTempDir("carapace-windows-command-pathext-", async (binDir) => {
       const exePath = path.join(binDir, "pnpm.exe");
       await writeFile(exePath, "");
       await writeFile(path.join(binDir, "pnpm.cmd"), "");
@@ -224,7 +224,7 @@ describe.runIf(process.platform === "win32")("Windows batch argv preservation", 
   )(
     "preserves $name through $file",
     async ({ args, file }) => {
-      await withTempDir("openclaw-batch-argv-", async (cwd) => {
+      await withTempDir("carapace-batch-argv-", async (cwd) => {
         const command = path.join(cwd, file);
         await writeFile(
           path.join(cwd, "argv.cjs"),
@@ -243,7 +243,7 @@ describe.runIf(process.platform === "win32")("Windows batch argv preservation", 
   it.each(["argv.cmd", "argv with spaces.cmd", "argv^caret.cmd", "node.exe"])(
     "preserves literal arguments through a real PTY running %s",
     async (file) => {
-      await withTempDir("openclaw-batch-argv-pty-", async (cwd) => {
+      await withTempDir("carapace-batch-argv-pty-", async (cwd) => {
         const args =
           file === "node.exe"
             ? ["alpha", "", "two words", "two\twords", "A&B", "100%", "left|right", "<in", ">out"]
@@ -290,7 +290,7 @@ describe.runIf(process.platform === "win32")("Windows batch argv preservation", 
   it.each(["&", "|", "<", ">", "%", "\r", "\n"])(
     "continues to reject unsafe batch argument character %j before launch",
     async (character) => {
-      await withTempDir("openclaw-batch-argv-reject-", async (cwd) => {
+      await withTempDir("carapace-batch-argv-reject-", async (cwd) => {
         const command = path.join(cwd, "argv.cmd");
         await writeFile(command, "@exit /b 99\r\n");
         await expect(

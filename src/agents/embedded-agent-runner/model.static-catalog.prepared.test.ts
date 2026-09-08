@@ -23,7 +23,7 @@ vi.mock("../../plugins/current-plugin-metadata-snapshot.js", async (importOrigin
 }));
 
 vi.mock("../../plugins/manifest-metadata-scan.js", () => ({
-  listOpenClawPluginManifestMetadata: () => [],
+  listCarapacePluginManifestMetadata: () => [],
 }));
 
 vi.mock("../../plugins/manifest-owner-policy.js", () => ({

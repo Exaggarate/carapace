@@ -1,11 +1,11 @@
-import type { BaseProbeResult } from "openclaw/plugin-sdk/channel-contract";
+import type { BaseProbeResult } from "carapace/plugin-sdk/channel-contract";
 // Matrix plugin module implements probe behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { PinnedDispatcherPolicy } from "openclaw/plugin-sdk/ssrf-dispatcher";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
+import type { PinnedDispatcherPolicy } from "carapace/plugin-sdk/ssrf-dispatcher";
+import type { SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { runChannelProbe } from "carapace/plugin-sdk/text-utility-runtime";
 
 const loadMatrixProbeRuntimeDeps = createLazyRuntimeModule(() =>
   import("./probe.runtime.js").then((runtimeModule) => ({

@@ -5,7 +5,7 @@
  * answered-then-released contract is only observable over a real socket.
  */
 import { createServer, type Server } from "node:http";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OPENAI_QUICKSILVER_OFFER_PATH } from "./realtime-quicksilver-session.js";
 import { createBroker } from "./realtime-quicksilver.test-helpers.js";

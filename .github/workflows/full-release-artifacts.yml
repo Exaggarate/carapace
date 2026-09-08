@@ -84,7 +84,7 @@ jobs:
     name: Prepare npm artifacts
     needs: admit
     if: inputs.stage == 'npm'
-    uses: ./.github/workflows/openclaw-npm-preflight.yml
+    uses: ./.github/workflows/carapace-npm-preflight.yml
     with:
       tag: ${{ inputs.source_sha }}
       release_tag: ${{ inputs.release_tag }}

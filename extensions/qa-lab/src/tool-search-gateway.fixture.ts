@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   countSessionLogMentions,
   countSystemPromptChars,
@@ -99,11 +99,11 @@ export function readToolSearchGatewayFetchLimits(
 ): ToolSearchGatewayFetchLimits {
   return {
     bodyMaxBytes: readPositiveIntEnv(
-      "OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES",
+      "CARAPACE_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES",
       1024 * 1024,
       env,
     ),
-    timeoutMs: readPositiveIntEnv("OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS", 5_000, env),
+    timeoutMs: readPositiveIntEnv("CARAPACE_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS", 5_000, env),
   };
 }
 
@@ -171,10 +171,10 @@ async function writeFakePlugin(params: {
     path.join(pluginDir, "package.json"),
     `${JSON.stringify(
       {
-        name: "@openclaw/tool-search-e2e-fixture",
+        name: "@carapace/tool-search-e2e-fixture",
         version: "0.0.0",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./index.js"],
         },
       },
@@ -184,7 +184,7 @@ async function writeFakePlugin(params: {
     "utf8",
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     `${JSON.stringify(
       {
         id: FAKE_PLUGIN_ID,
@@ -412,7 +412,7 @@ export async function runToolSearchGatewayLane(params: {
 }): Promise<LaneResult> {
   const providerBaseUrl = params.env.mock?.baseUrl;
   assert(providerBaseUrl, "Tool Search gateway fixture requires mock-openai provider mode");
-  const gatewayToken = params.env.gateway.runtimeEnv.OPENCLAW_GATEWAY_TOKEN;
+  const gatewayToken = params.env.gateway.runtimeEnv.CARAPACE_GATEWAY_TOKEN;
   assert(gatewayToken, "Tool Search gateway fixture requires QA gateway token");
   await configureLane(params);
   const stateDir = path.join(params.env.gateway.tempRoot, "state");
@@ -431,12 +431,12 @@ export async function runToolSearchGatewayLane(params: {
       headers: {
         authorization: `Bearer ${gatewayToken}`,
         "content-type": "application/json",
-        "x-openclaw-scopes": "operator.write",
-        "x-openclaw-agent": "qa",
-        "x-openclaw-session-key": sessionKey,
+        "x-carapace-scopes": "operator.write",
+        "x-carapace-agent": "qa",
+        "x-carapace-session-key": sessionKey,
       },
       body: JSON.stringify({
-        model: "openclaw/qa",
+        model: "carapace/qa",
         input: [
           {
             type: "message",

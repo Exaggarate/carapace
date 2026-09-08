@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { withEnvOverride } from "../../../config/test-helpers.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../../../config/types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../../../config/types.js";
 import { validateConfigObjectWithPlugins } from "../../../config/validation.js";
 import { VERSION } from "../../../version.js";
 import {
@@ -13,12 +13,12 @@ import {
 } from "./automatic-startup-config-repair.js";
 
 function invalidSnapshot(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   issuePaths: string[];
   includedPaths?: string[];
 }): ConfigFileSnapshot {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     includedPaths: params.includedPaths ?? [],
     exists: true,
     raw: JSON.stringify(params.config),
@@ -37,7 +37,7 @@ function invalidSnapshot(params: {
 describe("automatic startup config repair", () => {
   it("plans a deterministic, fully valid migration of retired session keys", () => {
     const snapshot = invalidSnapshot({
-      config: { session: { idleMinutes: 45 } } as OpenClawConfig,
+      config: { session: { idleMinutes: 45 } } as CarapaceConfig,
       issuePaths: ["session.idleMinutes"],
     });
 
@@ -61,7 +61,7 @@ describe("automatic startup config repair", () => {
           entries: { main: {} },
         },
         gateway: { mode: "local" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       issuePaths: ["meta", "agents.defaults.heartbeat"],
     });
 
@@ -89,7 +89,7 @@ describe("automatic startup config repair", () => {
           entries: { main: {} },
         },
         gateway: { mode: "local" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       issuePaths: ["meta", "agents.defaults.heartbeat"],
     });
     const repaired = {
@@ -99,7 +99,7 @@ describe("automatic startup config repair", () => {
       },
       agents: { defaults: { workspace: "/tmp/workspace" }, entries: { main: {} } },
       gateway: { mode: "local" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const after: ConfigFileSnapshot = {
       ...before,
       raw: JSON.stringify(repaired),
@@ -134,7 +134,7 @@ describe("automatic startup config repair", () => {
     const snapshot = invalidSnapshot({
       config: {
         plugins: { entries: { "active-memory": { config: { qmd: { enabled: true } } } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       issuePaths: ["plugins.entries.active-memory.config.qmd"],
     });
 
@@ -147,12 +147,12 @@ describe("automatic startup config repair", () => {
   it("previews repairable snapshots without touching the shared state database", async () => {
     // Backup discovery and gateway pre-bootstrap resolve before state-database admission;
     // a broken store (here: a directory at the canonical path) must not break the preview.
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-startup-repair-preview-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-startup-repair-preview-"));
     try {
-      await fs.mkdir(path.join(root, "state", "openclaw.sqlite"), { recursive: true });
-      await withEnvOverride({ OPENCLAW_STATE_DIR: root }, async () => {
+      await fs.mkdir(path.join(root, "state", "carapace.sqlite"), { recursive: true });
+      await withEnvOverride({ CARAPACE_STATE_DIR: root }, async () => {
         const snapshot = invalidSnapshot({
-          config: { session: { idleMinutes: 45 } } as OpenClawConfig,
+          config: { session: { idleMinutes: 45 } } as CarapaceConfig,
           issuePaths: ["session.idleMinutes"],
         });
         const resolved = resolveStartupConfigSnapshot(snapshot);
@@ -201,7 +201,7 @@ describe("automatic startup config repair", () => {
     },
   ])("refuses $name", ({ config, includedPaths }) => {
     const snapshot = invalidSnapshot({
-      config: config as OpenClawConfig,
+      config: config as CarapaceConfig,
       issuePaths: [],
       includedPaths,
     });

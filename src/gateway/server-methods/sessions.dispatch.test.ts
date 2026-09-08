@@ -126,7 +126,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -165,7 +165,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -210,7 +210,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -259,7 +259,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -297,7 +297,7 @@ describe("sessions.dispatch", () => {
   });
 
   it.each([
-    ["openclaw", "anthropic", "worker-turn"],
+    ["carapace", "anthropic", "worker-turn"],
     ["codex", "openai", "remote-exec"],
   ] as const)(
     "rejects %s before allocation when its profile does not support the selected mode",
@@ -308,7 +308,7 @@ describe("sessions.dispatch", () => {
           agentRuntimeOverride: runtime,
           providerOverride: provider,
           modelOverride: "model-test",
-          worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+          worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
         }),
       );
       const dispatch = vi.fn();
@@ -329,7 +329,7 @@ describe("sessions.dispatch", () => {
         undefined,
         expect.objectContaining({
           code: ErrorCodes.INVALID_REQUEST,
-          message: `runtime ${runtime} requires a cloud worker provider that supports ${executionMode}; choose a compatible provider, or select an agent/model route with agentRuntime.id "openclaw"`,
+          message: `runtime ${runtime} requires a cloud worker provider that supports ${executionMode}; choose a compatible provider, or select an agent/model route with agentRuntime.id "carapace"`,
         }),
       );
     },
@@ -382,7 +382,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -418,7 +418,7 @@ describe("sessions.dispatch", () => {
         agentRuntimeOverride: "codex",
         providerOverride: "openai",
         modelOverride: "gpt-test",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -463,7 +463,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -492,7 +492,7 @@ describe("sessions.dispatch", () => {
       targetWithEntry({
         sessionId,
         archivedAt: 2,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     const dispatch = vi.fn();
@@ -520,7 +520,7 @@ describe("sessions.dispatch", () => {
         sessionId,
         permissionMode: "workspace",
         sessionRoot: "/repo/worktree",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -553,7 +553,7 @@ describe("sessions.dispatch", () => {
       mocks.resolveTarget.mockReturnValue(
         targetWithEntry({
           sessionId,
-          worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+          worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
         }),
       );
       mocks.findLiveByOwner.mockReturnValue({
@@ -614,7 +614,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -689,7 +689,7 @@ describe("sessions.dispatch", () => {
       mocks.resolveTarget.mockReturnValue(
         targetWithEntry({
           sessionId,
-          worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+          worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
         }),
       );
       mocks.findLiveByOwner.mockReturnValue({
@@ -765,7 +765,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -867,7 +867,7 @@ describe("sessions.dispatch", () => {
         sessionId,
         providerOverride: "anthropic",
         modelOverride: "claude-test",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     const dispatch = vi.fn();
@@ -907,7 +907,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -942,7 +942,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -976,8 +976,8 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        agentRuntimeOverride: "openclaw",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        agentRuntimeOverride: "carapace",
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({

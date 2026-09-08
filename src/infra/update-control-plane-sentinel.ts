@@ -1,7 +1,7 @@
 // Persists update-control-plane sentinel files used by updater coordination.
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import {
   markUpdateRestartSentinelFailure,
   writeRestartSentinel,
@@ -15,9 +15,9 @@ import type { UpdateRunResult } from "./update-runner.js";
 
 // Control-plane update sentinel helpers preserve update metadata while a
 // managed service handoff waits for restart health to complete.
-export const CONTROL_PLANE_UPDATE_SENTINEL_META_ENV = "OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META";
+export const CONTROL_PLANE_UPDATE_SENTINEL_META_ENV = "CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META";
 // Internal helper/orchestrator correlation; never persisted as an operator setting.
-export const UPDATE_RUN_ID_ENV = "OPENCLAW_UPDATE_RUN_ID";
+export const UPDATE_RUN_ID_ENV = "CARAPACE_UPDATE_RUN_ID";
 export const CONTROL_PLANE_UPDATE_HANDOFF_STARTED_REASON = "managed-service-handoff-started";
 const CONTROL_PLANE_UPDATE_RESTART_HEALTH_PENDING_REASON = "restart-health-pending";
 
@@ -26,7 +26,7 @@ const CONTROL_PLANE_UPDATE_RESTART_HEALTH_PENDING_REASON = "restart-health-pendi
 export const MANAGED_SERVICE_UPDATE_UNSAFE_EXIT_CODE = 79;
 
 export function resolveManagedServiceUpdateFailureExitCode(result: UpdateRunResult): number {
-  return process.env.OPENCLAW_UPDATE_RUN_HANDOFF === "1" &&
+  return process.env.CARAPACE_UPDATE_RUN_HANDOFF === "1" &&
     result.recovery?.serviceRestartSafe === false
     ? MANAGED_SERVICE_UPDATE_UNSAFE_EXIT_CODE
     : 1;

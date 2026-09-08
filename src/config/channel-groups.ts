@@ -1,7 +1,7 @@
 import type { ChannelId } from "../channels/plugins/channel-id.types.js";
 import { normalizeAccountId } from "../routing/session-key.js";
 import { resolveMergedAccountConfig } from "./channel-account-config.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import type { GroupToolPolicyBySenderConfig, GroupToolPolicyConfig } from "./types.tools.js";
 
 export type ChannelGroupConfig = {
@@ -14,7 +14,7 @@ export type ChannelGroupConfig = {
 export type ChannelGroups = Record<string, ChannelGroupConfig>;
 
 export function resolveChannelGroups(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   channel: ChannelId,
   accountId?: string | null,
 ): ChannelGroups | undefined {

@@ -208,13 +208,13 @@ describe("extractApplyPatchTargetPaths", () => {
   });
 
   it("can resolve paths with the same cwd semantics as apply_patch execution", () => {
-    const cwd = path.join(os.tmpdir(), "openclaw-derived-paths");
+    const cwd = path.join(os.tmpdir(), "carapace-derived-paths");
     const patch = [
       "*** Begin Patch",
       "*** Add File: @src/../resolved.ts",
       "+x",
       "*** Update File: ~/renamed-source.ts",
-      "*** Move to: /tmp/openclaw-target.ts",
+      "*** Move to: /tmp/carapace-target.ts",
       "@@",
       "+y",
       "*** End Patch",
@@ -222,14 +222,14 @@ describe("extractApplyPatchTargetPaths", () => {
     expect(extractApplyPatchTargetPaths(patch, { cwd })).toEqual([
       path.join(cwd, "resolved.ts"),
       path.join(os.homedir(), "renamed-source.ts"),
-      path.join("/tmp", "openclaw-target.ts"),
+      path.join("/tmp", "carapace-target.ts"),
     ]);
   });
 
   it.each(["host", "mounted sandbox"])(
     "derives literal @ files and new descendants through the %s path owner",
     async (runtime) => {
-      const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-patch-at-path-"));
+      const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-patch-at-path-"));
       try {
         const literalParent = path.join(cwd, "@notes");
         const siblingParent = path.join(cwd, "notes");

@@ -1,8 +1,8 @@
 import { ChannelType, PermissionFlagsBits } from "discord-api-types/v10";
-import { reportChannelRoomJoin } from "openclaw/plugin-sdk/channel-join-intro-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import type { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+import { reportChannelRoomJoin } from "carapace/plugin-sdk/channel-join-intro-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import type { createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import { Guild, GuildCreateListener, type Client } from "../internal/discord.js";
 import { readMessagesDiscord } from "../send.messages.js";
 import { canViewDiscordGuildChannel, hasAnyChannelPermissionDiscord } from "../send.permissions.js";
@@ -22,7 +22,7 @@ export class DiscordGuildJoinIntroductionListener extends GuildCreateListener {
   constructor(
     private readonly params: {
       readPolicy?: DiscordLivePolicyReader;
-      cfg: OpenClawConfig;
+      cfg: CarapaceConfig;
       accountId: string;
       botUserId?: string;
       groupPolicy: "open" | "allowlist" | "disabled";

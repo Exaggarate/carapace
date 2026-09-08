@@ -3,7 +3,7 @@ import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 
 // Carry exact local-turn cleanup to its reply and backend owners; never recover by session id.
 const forcedTerminalSettlement = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPlacementForcedTerminalSettlement"),
+  Symbol.for("carapace.sessionPlacementForcedTerminalSettlement"),
   () => new AsyncLocalStorage<{ settle: () => Promise<void>; assertCurrent: () => void }>(),
 );
 

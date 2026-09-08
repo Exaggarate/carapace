@@ -1,5 +1,5 @@
 /**
- * Smoke tests for the `openclaw path` CLI handlers.
+ * Smoke tests for the `carapace path` CLI handlers.
  *
  * Tests invoke each subcommand through the retained Commander registration.
  * Assertions inspect captured process output and the resulting exit code.
@@ -16,7 +16,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { Command, CommanderError } from "commander";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { registerOcPathCli } from "../cli-registration.js";
 import { registerPathCli } from "./cli.js";
@@ -131,7 +131,7 @@ async function invokePathCli(args: string[], runtime: TestRuntime): Promise<void
       writeErr: (value) => runtime.error(value),
     });
     registerPathCli(program);
-    await program.parseAsync(["node", "openclaw", "path", ...args]);
+    await program.parseAsync(["node", "carapace", "path", ...args]);
     runtime.exitCode = process.exitCode ?? 0;
   } catch (error) {
     if (!(error instanceof CommanderError)) {
@@ -206,11 +206,11 @@ async function pathEmitCommand(
   );
 }
 
-describe("openclaw path CLI", () => {
+describe("carapace path CLI", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("reports its TTY-aware machine-output mode to the CLI", () => {
-    const argv = ["node", "openclaw", "path", "validate", "oc://AGENTS.md"];
+    const argv = ["node", "carapace", "path", "validate", "oc://AGENTS.md"];
     expect(isPathMachineOutput({ argv, stdoutIsTTY: false })).toBe(true);
     expect(isPathMachineOutput({ argv, stdoutIsTTY: true })).toBe(false);
     expect(isPathMachineOutput({ argv: [...argv, "--json"], stdoutIsTTY: true })).toBe(true);
@@ -546,7 +546,7 @@ describe("openclaw path CLI", () => {
 
     it("CLI-S08 sets slash-deep JSONC paths and parsed JSON values", async () => {
       const workspaceDir = tempDirs.make("oc-path-cli-");
-      const filePath = join(workspaceDir, "openclaw.json");
+      const filePath = join(workspaceDir, "carapace.json");
       writeFileSync(
         filePath,
         '{ "agents": { "list": [{ "tools": { "exec": { "security": "deny" } } }] }, "gateway": { "auth": { "token": "${TOKEN}" } } }\n',
@@ -555,7 +555,7 @@ describe("openclaw path CLI", () => {
       const rt = createTestRuntime();
 
       await pathSetCommand(
-        "oc://openclaw.json/gateway/auth/token",
+        "oc://carapace.json/gateway/auth/token",
         '{"source":"file","provider":"secrets","id":"/test"}',
         { cwd: workspaceDir, json: true, valueJson: true },
         rt,
@@ -570,7 +570,7 @@ describe("openclaw path CLI", () => {
 
       const rt2 = createTestRuntime();
       await pathSetCommand(
-        "oc://openclaw.json/agents/list/0/tools/exec/security",
+        "oc://carapace.json/agents/list/0/tools/exec/security",
         "allowlist",
         { cwd: workspaceDir, json: true },
         rt2,
@@ -613,7 +613,7 @@ describe("openclaw path CLI", () => {
 
         await pathSetCommand(
           "oc://AGENTS.md/[frontmatter]/+note",
-          "before__OPENCLAW_REDACTED__after",
+          "before__CARAPACE_REDACTED__after",
           { cwd: workspaceDir, json: true, dryRun },
           rt,
         );
@@ -634,7 +634,7 @@ describe("openclaw path CLI", () => {
       // the structured CLI error boundary instead of escaping Commander.
       await pathSetCommand(
         "oc://gateway.jsonc/token",
-        "__OPENCLAW_REDACTED__",
+        "__CARAPACE_REDACTED__",
         { cwd: workspaceDir, json: true },
         rt,
       );

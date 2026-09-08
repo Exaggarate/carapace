@@ -2,7 +2,7 @@
  * Tags Code Mode exec/wait control tools and normalizes hook params for the
  * exec-compatible before-tool-call surface.
  */
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import { isPlainObject } from "../utils.js";
 import { normalizeToolPolicyName } from "./tool-policy.js";
 import type { AnyAgentTool } from "./tools/common.js";

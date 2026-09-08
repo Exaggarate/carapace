@@ -28,8 +28,8 @@ import {
 
 const SOURCE_SHA = "a".repeat(40);
 const VERSION = "2026.8.1-beta.1";
-const PACKAGE_NAME = "@openclaw/discord";
-const TARBALL = "openclaw-discord-2026.8.1-beta.1.tgz";
+const PACKAGE_NAME = "@carapace/discord";
+const TARBALL = "carapace-discord-2026.8.1-beta.1.tgz";
 const SCRIPT = path.resolve("scripts/prepublish-plugin-registry-artifact.mjs");
 const tempDirs: string[] = [];
 const packageTarballs = new Map<string, Buffer>();
@@ -74,7 +74,7 @@ function writeFixtureTarball(root: string, tarballPath: string, name: string) {
 }
 
 function fixture(packageName = PACKAGE_NAME) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-prepublish-plugin-registry-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-prepublish-plugin-registry-"));
   tempDirs.push(root);
   const artifactDir = path.join(root, "artifact");
   mkdirSync(artifactDir);
@@ -82,7 +82,7 @@ function fixture(packageName = PACKAGE_NAME) {
   writeFixtureTarball(root, tarballPath, packageName);
   const manifestPath = path.join(artifactDir, PREPUBLISH_PLUGIN_REGISTRY_MANIFEST);
   const manifest = {
-    schema: "openclaw.prepublish-plugin-registry/v1",
+    schema: "carapace.prepublish-plugin-registry/v1",
     schemaVersion: 1,
     sourceSha: SOURCE_SHA,
     candidateVersion: VERSION,
@@ -122,8 +122,8 @@ function firstPackage(paths: ReturnType<typeof fixture>) {
 }
 
 function addCompanionPackage(paths: ReturnType<typeof fixture>) {
-  const name = "@openclaw/feishu";
-  const tarball = "openclaw-feishu-2026.8.1-beta.1.tgz";
+  const name = "@carapace/feishu";
+  const tarball = "carapace-feishu-2026.8.1-beta.1.tgz";
   const archiveRoot = path.join(path.dirname(paths.artifactDir), "feishu-package");
   const tarballPath = path.join(paths.artifactDir, tarball);
   writeFixtureTarball(archiveRoot, tarballPath, name);
@@ -137,20 +137,20 @@ function addCompanionPackage(paths: ReturnType<typeof fixture>) {
 }
 
 function cliFixture(packageNames = [PACKAGE_NAME]) {
-  const repoRoot = mkdtempSync(path.join(tmpdir(), "openclaw-prepublish-plugin-cli-"));
+  const repoRoot = mkdtempSync(path.join(tmpdir(), "carapace-prepublish-plugin-cli-"));
   tempDirs.push(repoRoot);
   const scriptsDir = path.join(repoRoot, "scripts", "lib");
   mkdirSync(scriptsDir, { recursive: true });
   writeFileSync(
     path.join(repoRoot, "package.json"),
-    `${JSON.stringify({ name: "openclaw", version: VERSION })}\n`,
+    `${JSON.stringify({ name: "carapace", version: VERSION })}\n`,
   );
   for (const name of packageNames) {
     const packageDir = path.join(repoRoot, "extensions", name.split("/")[1]!);
     mkdirSync(packageDir, { recursive: true });
     writeFileSync(
       path.join(packageDir, "package.json"),
-      `${JSON.stringify({ name, version: VERSION, openclaw: { release: { publishToNpm: true } } })}\n`,
+      `${JSON.stringify({ name, version: VERSION, carapace: { release: { publishToNpm: true } } })}\n`,
     );
   }
   writeFileSync(
@@ -187,7 +187,7 @@ console.log("package manifest stdout");
 function preparedBundleFixture(repoRoot: string, sourceSha: string) {
   const preparedBundleDir = path.join(repoRoot, "prepared-bundle");
   mkdirSync(preparedBundleDir);
-  const entries = ["openclaw", "@openclaw/ai", "@openclaw/gateway-protocol"].map((name) => {
+  const entries = ["carapace", "@carapace/ai", "@carapace/gateway-protocol"].map((name) => {
     const tarballName = `${name.replace(/^@/u, "").replace("/", "-")}.tgz`;
     const tarballPath = path.join(preparedBundleDir, tarballName);
     writeFixtureTarball(path.join(repoRoot, "prepared-staging"), tarballPath, name);
@@ -199,7 +199,7 @@ function preparedBundleFixture(repoRoot: string, sourceSha: string) {
     };
   });
   const bundle = {
-    schema: "openclaw.npm-package-bundle/v1",
+    schema: "carapace.npm-package-bundle/v1",
     releaseSha: sourceSha,
     ...entries[0],
     corePackageTarballs: entries.slice(1),
@@ -213,7 +213,7 @@ function preparedBundleFixture(repoRoot: string, sourceSha: string) {
 
 describe("prepublish plugin registry artifact", () => {
   it("reuses prepared root and core bytes while packing only selected plugins", () => {
-    const { repoRoot, sourceSha } = cliFixture([PACKAGE_NAME, "@openclaw/slack"]);
+    const { repoRoot, sourceSha } = cliFixture([PACKAGE_NAME, "@carapace/slack"]);
     const { preparedBundleDir, entries } = preparedBundleFixture(repoRoot, sourceSha);
     const artifactDir = path.join(repoRoot, "artifact");
     const result = spawnSync(
@@ -240,10 +240,10 @@ describe("prepublish plugin registry artifact", () => {
     expect(result.status, result.stderr).toBe(0);
     const output = JSON.parse(result.stdout);
     expect(output.packages).toEqual([
-      "@openclaw/ai",
+      "@carapace/ai",
       PACKAGE_NAME,
-      "@openclaw/gateway-protocol",
-      "openclaw",
+      "@carapace/gateway-protocol",
+      "carapace",
     ]);
     for (const entry of entries) {
       expect(readFileSync(path.join(artifactDir, entry.tarballName))).toEqual(
@@ -256,7 +256,7 @@ describe("prepublish plugin registry artifact", () => {
         expectedSourceSha: sourceSha,
         expectedCandidateVersion: VERSION,
         expectedManifestSha256: output.manifestSha256,
-        requiredPackages: ["openclaw", "@openclaw/ai", PACKAGE_NAME],
+        requiredPackages: ["carapace", "@carapace/ai", PACKAGE_NAME],
       }).manifest.packages,
     ).toHaveLength(4);
     const crossOs = resolveCrossOsPackageSet({
@@ -267,9 +267,9 @@ describe("prepublish plugin registry artifact", () => {
       requiredPackages: [PACKAGE_NAME],
     });
     expect(crossOs.packages.map((entry) => entry.name)).toEqual([
-      "@openclaw/ai",
+      "@carapace/ai",
       PACKAGE_NAME,
-      "@openclaw/gateway-protocol",
+      "@carapace/gateway-protocol",
     ]);
     expect(crossOs.companions.map((entry) => entry.name)).toEqual([PACKAGE_NAME]);
   });
@@ -318,7 +318,7 @@ describe("prepublish plugin registry artifact", () => {
       const lane = findLaneByName(`npm-onboard-${channel}-candidate-channel-agent`);
       expect(lane).toBeDefined();
       const requiredPackages = requiredPrepublishPluginPackagesForLanes([lane!]);
-      const expectedPackages = ["@openclaw/codex", `@openclaw/${channel}`];
+      const expectedPackages = ["@carapace/codex", `@carapace/${channel}`];
       const { repoRoot, sourceSha } = cliFixture(expectedPackages);
       const artifactDir = path.join(repoRoot, "artifact");
       const result = createPrepublishPluginRegistryArtifact({
@@ -354,9 +354,9 @@ describe("prepublish plugin registry artifact", () => {
   it.runIf(process.platform !== "win32")(
     "serves a Parallels candidate with its companion packages and closes both endpoints",
     async () => {
-      const core = fixture("openclaw");
+      const core = fixture("carapace");
       const companion = fixture();
-      vi.spyOn(packageArtifact, "packOpenClaw").mockResolvedValue({
+      vi.spyOn(packageArtifact, "packCarapace").mockResolvedValue({
         path: core.tarballPath,
         version: VERSION,
         registryPackages: [
@@ -378,7 +378,7 @@ describe("prepublish plugin registry artifact", () => {
         expect(server.registry).toBeDefined();
         registryUrl = server.registry!.url;
         for (const [name, tarball] of [
-          ["openclaw", core.tarballPath],
+          ["carapace", core.tarballPath],
           [PACKAGE_NAME, companion.tarballPath],
         ] as const) {
           const response = await fetch(`${registryUrl}/${encodeURIComponent(name)}`);
@@ -430,8 +430,8 @@ describe("prepublish plugin registry artifact", () => {
     addCompanionPackage(paths);
 
     expect(validate(paths).manifest.packages.map((entry) => entry.name)).toEqual([
-      "@openclaw/discord",
-      "@openclaw/feishu",
+      "@carapace/discord",
+      "@carapace/feishu",
     ]);
   });
 
@@ -444,13 +444,13 @@ describe("prepublish plugin registry artifact", () => {
         artifactDir: paths.artifactDir,
         candidateVersion: VERSION,
         manifestSha256: sha256(paths.manifestPath),
-        requiredPackages: ["@openclaw/feishu"],
+        requiredPackages: ["@carapace/feishu"],
         sourceSha: SOURCE_SHA,
       }).companions,
     ).toEqual([
       {
-        name: "@openclaw/feishu",
-        tarballPath: path.join(paths.artifactDir, "openclaw-feishu-2026.8.1-beta.1.tgz"),
+        name: "@carapace/feishu",
+        tarballPath: path.join(paths.artifactDir, "carapace-feishu-2026.8.1-beta.1.tgz"),
       },
     ]);
   });
@@ -480,11 +480,11 @@ describe("prepublish plugin registry artifact", () => {
   });
 
   it("refuses to create an artifact from tracked changes under the same HEAD", () => {
-    const repoRoot = mkdtempSync(path.join(tmpdir(), "openclaw-prepublish-plugin-source-"));
+    const repoRoot = mkdtempSync(path.join(tmpdir(), "carapace-prepublish-plugin-source-"));
     tempDirs.push(repoRoot);
     writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw", version: VERSION })}\n`,
+      `${JSON.stringify({ name: "carapace", version: VERSION })}\n`,
     );
     execFileSync("git", ["init"], { cwd: repoRoot });
     execFileSync("git", ["add", "package.json"], { cwd: repoRoot });
@@ -495,7 +495,7 @@ describe("prepublish plugin registry artifact", () => {
     }).trim();
     writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw", version: `${VERSION}-dirty` })}\n`,
+      `${JSON.stringify({ name: "carapace", version: `${VERSION}-dirty` })}\n`,
     );
 
     expect(() =>
@@ -557,7 +557,7 @@ describe("prepublish plugin registry artifact", () => {
     duplicate.manifest.packages.push({ ...firstPackage(duplicate) });
     duplicate.writeManifest();
     expect(() =>
-      validate(duplicate, { requiredPackages: [PACKAGE_NAME, "@openclaw/feishu"] }),
+      validate(duplicate, { requiredPackages: [PACKAGE_NAME, "@carapace/feishu"] }),
     ).toThrow("duplicate package");
   });
 
@@ -577,9 +577,9 @@ describe("prepublish plugin registry artifact", () => {
     expect(() => validate(hash)).toThrow("tarball SHA-256 mismatch");
 
     const identity = fixture();
-    firstPackage(identity).name = "@openclaw/feishu";
+    firstPackage(identity).name = "@carapace/feishu";
     identity.writeManifest();
-    expect(() => validate(identity, { requiredPackages: ["@openclaw/feishu"] })).toThrow(
+    expect(() => validate(identity, { requiredPackages: ["@carapace/feishu"] })).toThrow(
       "tarball identity mismatch",
     );
 
@@ -594,7 +594,7 @@ describe("prepublish plugin registry artifact", () => {
     );
 
     const required = fixture();
-    expect(() => validate(required, { requiredPackages: ["@openclaw/feishu"] })).toThrow(
+    expect(() => validate(required, { requiredPackages: ["@carapace/feishu"] })).toThrow(
       "missing Docker-plan package",
     );
   });

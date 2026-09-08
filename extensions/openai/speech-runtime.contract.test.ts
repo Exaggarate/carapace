@@ -2,13 +2,13 @@
 import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createEmptyPluginRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withEnv, withServer } from "openclaw/plugin-sdk/test-env";
-import * as ttsRuntime from "openclaw/plugin-sdk/tts-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { withEnv, withServer } from "carapace/plugin-sdk/test-env";
+import * as ttsRuntime from "carapace/plugin-sdk/tts-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAISpeechProvider } from "./speech-provider.js";
 
@@ -16,8 +16,8 @@ const { resolveTtsConfig, getTtsProvider } = ttsRuntime;
 const { parseTtsDirectives, resolveModelOverridePolicy, getResolvedSpeechProviderConfig } =
   ttsRuntime.testApi;
 
-function asLegacyTtsConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asLegacyTtsConfig(value: unknown): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
 function mockCallAt(mock: { mock: { calls: Array<Array<unknown>> } }, index: number): unknown[] {
@@ -28,7 +28,7 @@ function mockCallAt(mock: { mock: { calls: Array<Array<unknown>> } }, index: num
   return call;
 }
 
-function createOpenAiSpeechCfg(model: "tts-1" | "gpt-4o-mini-tts"): OpenClawConfig {
+function createOpenAiSpeechCfg(model: "tts-1" | "gpt-4o-mini-tts"): CarapaceConfig {
   return asLegacyTtsConfig({
     tts: {
       provider: "openai",
@@ -95,8 +95,8 @@ describe("OpenAI speech public runtime contract", () => {
   let prefsPath: string;
 
   beforeEach(() => {
-    prefsPath = path.join(tmpdir(), `openclaw-openai-tts-${randomUUID()}.json`);
-    vi.stubEnv("OPENCLAW_TTS_PREFS", prefsPath);
+    prefsPath = path.join(tmpdir(), `carapace-openai-tts-${randomUUID()}.json`);
+    vi.stubEnv("CARAPACE_TTS_PREFS", prefsPath);
     vi.stubEnv("OPENAI_API_KEY", "");
     vi.stubEnv("OPENAI_TTS_BASE_URL", "");
     const registry = createEmptyPluginRegistry();
@@ -155,7 +155,7 @@ describe("OpenAI speech public runtime contract", () => {
   });
 
   describe("resolveTtsConfig – openai.baseUrl", () => {
-    const baseCfg: OpenClawConfig = {
+    const baseCfg: CarapaceConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       tts: {},
     };
@@ -276,7 +276,7 @@ describe("OpenAI speech public runtime contract", () => {
     [
       {
         name: "ordinary synthesis",
-        run: async (cfg: OpenClawConfig, timeoutMs: number) =>
+        run: async (cfg: CarapaceConfig, timeoutMs: number) =>
           await ttsRuntime.textToSpeech({
             text: "Hello from the timeout contract.",
             cfg,
@@ -286,7 +286,7 @@ describe("OpenAI speech public runtime contract", () => {
       },
       {
         name: "telephony synthesis",
-        run: async (cfg: OpenClawConfig, timeoutMs: number) =>
+        run: async (cfg: CarapaceConfig, timeoutMs: number) =>
           await ttsRuntime.textToSpeechTelephony({
             text: "Hello from the telephony timeout contract.",
             cfg,

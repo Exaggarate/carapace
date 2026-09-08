@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import {
   resolveAcpSessionCwd,
   resolveAcpThreadSessionDetailLines,
-} from "@openclaw/acp-core/runtime/session-identifiers";
-import type { AcpRuntimeSessionMode } from "@openclaw/acp-core/runtime/types";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/acp-core/runtime/session-identifiers";
+import type { AcpRuntimeSessionMode } from "@carapace/acp-core/runtime/types";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { getAcpSessionManager } from "../../../acp/control-plane/manager.js";
 import { formatThinkingLevels } from "../../../auto-reply/thinking.js";
 import {
@@ -18,7 +18,7 @@ import {
 import { resolveSessionStorePathCore } from "../../../config/sessions/paths.js";
 import { loadSessionEntry } from "../../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { isMissingPathError } from "../../../infra/errors.js";
 import {
   getSessionBindingService,
@@ -87,7 +87,7 @@ function resolveAcpRuntimeTimeoutSeconds(runTimeoutSeconds?: number): number | u
 }
 
 export function resolveAcpSpawnRuntimeOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetAgentId: string;
   configAgentId?: string;
   model?: string;
@@ -108,7 +108,7 @@ export function resolveAcpSpawnRuntimeOptions(params: {
     return {
       ok: false,
       error:
-        "ACP model overrides cannot select OpenClaw auth profiles; configure credentials in the ACP runtime instead.",
+        "ACP model overrides cannot select Carapace auth profiles; configure credentials in the ACP runtime instead.",
     };
   }
   const model = modelSelection.model || undefined;
@@ -152,7 +152,7 @@ export function resolveAcpSpawnRuntimeOptions(params: {
 
 export async function initializeAcpSpawnRuntime(params: {
   assertActive?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   targetAgentId: string;
   runtimeMode: AcpRuntimeSessionMode;
@@ -208,7 +208,7 @@ export async function initializeAcpSpawnRuntime(params: {
 
 export async function bindPreparedAcpThread(params: {
   assertActive?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   targetAgentId: string;
   label?: string;

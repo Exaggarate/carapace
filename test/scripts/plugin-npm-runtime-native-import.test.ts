@@ -15,7 +15,7 @@ function writeFile(root: string, relative: string, content: string) {
 }
 
 function fixture(format = "esm", declaration = "peerDependencies") {
-  const root = tempDirs.make("openclaw-native-import-");
+  const root = tempDirs.make("carapace-native-import-");
   fs.mkdirSync(path.join(root, "src"));
   writeFile(root, "pnpm-workspace.yaml", "packages:\n  - extensions/*\n");
   // Setup runs source tooling with workspace aliases; native children below do not load tsx.
@@ -28,7 +28,7 @@ function fixture(format = "esm", declaration = "peerDependencies") {
     root,
     "package.json",
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version: "1.0.0",
       type: "module",
       exports: { "./plugin-sdk/fixture": "./dist/plugin-sdk/fixture.js" },
@@ -46,12 +46,12 @@ function fixture(format = "esm", declaration = "peerDependencies") {
     packageDir,
     "package.json",
     JSON.stringify({
-      name: "@openclaw/demo",
+      name: "@carapace/demo",
       version: "1.0.0",
       type: "module",
       optionalDependencies: { "fixture-dep": "1.0.0" },
-      [declaration]: { openclaw: "*" },
-      openclaw: {
+      [declaration]: { carapace: "*" },
+      carapace: {
         extensions: ["./index.ts"],
         build: { runtimeFormat: format },
         release: { publishToNpm: true },
@@ -62,7 +62,7 @@ function fixture(format = "esm", declaration = "peerDependencies") {
     packageDir,
     "index.ts",
     [
-      'import { host } from "openclaw/plugin-sdk/fixture";',
+      'import { host } from "carapace/plugin-sdk/fixture";',
       'import { thirdParty } from "fixture-dep";',
       'import { writeFileSync } from "node:fs";',
       'writeFileSync("executed", "yes");',
@@ -136,7 +136,7 @@ describe("explicit source native-import preparation", () => {
     expect(fs.existsSync(path.join(packageDir, "node_modules"))).toBe(false);
     const missing = nativeImport(root, entry, format);
     expect(missing.status).not.toBe(0);
-    expect(missing.stderr).toMatch(/Cannot find (?:package|module) 'openclaw/u);
+    expect(missing.stderr).toMatch(/Cannot find (?:package|module) 'carapace/u);
 
     writeFile(packageDir, "node_modules/keep/marker", "unrelated local contents");
     const directories = [
@@ -149,7 +149,7 @@ describe("explicit source native-import preparation", () => {
     const prepared = runCli(root, ["--prepare-native-import", "extensions/demo"]);
     expect(prepared.status, prepared.stderr).toBe(0);
     expect(fs.existsSync(path.join(root, "executed"))).toBe(false);
-    const link = path.join(packageDir, "node_modules/openclaw");
+    const link = path.join(packageDir, "node_modules/carapace");
     expect(fs.realpathSync(link)).toBe(root);
     const linkBefore = fs.lstatSync(link, { bigint: true });
     const repeated = runCli(root, ["extensions/demo", "--prepare-native-import"]);
@@ -170,7 +170,7 @@ describe("explicit source native-import preparation", () => {
       const { root, packageDir } = fixture("esm", declaration);
       const result = runCli(root, ["--prepare-native-import", "extensions/demo"]);
       expect(result.status).toBe(1);
-      expect(result.stderr).toMatch(/does not declare openclaw/u);
+      expect(result.stderr).toMatch(/does not declare carapace/u);
       expect(fs.existsSync(path.join(packageDir, "node_modules"))).toBe(false);
     },
   );
@@ -190,7 +190,7 @@ describe("explicit source native-import preparation", () => {
     "unrelated host directory",
   ])("rejects %s without changing artifacts or unrelated contents", (scenario) => {
     const { root, packageDir } = fixture();
-    const outside = tempDirs.make("openclaw-native-import-outside-");
+    const outside = tempDirs.make("carapace-native-import-outside-");
     writeFile(outside, "marker", "keep");
     let selected = "extensions/demo";
     let expected = /real immediate extensions/u;
@@ -241,10 +241,10 @@ describe("explicit source native-import preparation", () => {
       case "unrelated host directory":
         writeFile(
           packageDir,
-          "node_modules/openclaw/package.json",
+          "node_modules/carapace/package.json",
           JSON.stringify({ name: "unrelated" }),
         );
-        writeFile(packageDir, "node_modules/openclaw/marker", "keep");
+        writeFile(packageDir, "node_modules/carapace/marker", "keep");
         expected = /already exists and is not a symlink/u;
         break;
     }

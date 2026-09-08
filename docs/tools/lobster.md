@@ -1,5 +1,5 @@
 ---
-summary: "Typed workflow runtime for OpenClaw with resumable approval gates."
+summary: "Typed workflow runtime for Carapace with resumable approval gates."
 title: Lobster
 read_when:
   - You want deterministic multi-step workflows with explicit approvals
@@ -9,7 +9,7 @@ read_when:
 Lobster runs multi-step tool pipelines as one deterministic tool call, with
 explicit approval checkpoints and resume tokens. It sits one layer above
 detached background work: for orchestrating flows across many detached tasks,
-see [Task Flow](/automation/taskflow) (`openclaw tasks flow`); for the task
+see [Task Flow](/automation/taskflow) (`carapace tasks flow`); for the task
 activity ledger, see [Background Tasks](/automation/tasks).
 
 ## Why
@@ -37,12 +37,12 @@ Without Lobster, a recurring email triage looks like:
 
 ```text
 User: "Check my email and draft replies"
-→ openclaw calls gmail.list
+→ carapace calls gmail.list
 → LLM summarizes
 → User: "draft replies to #2 and #5"
 → LLM drafts
 → User: "send #2"
-→ openclaw calls gmail.send
+→ carapace calls gmail.send
 (repeat daily, no memory of what was triaged)
 ```
 
@@ -68,7 +68,7 @@ With Lobster, the same job is one call that halts for approval and resumes:
 
 ## How it works
 
-The separately installed official `@openclaw/lobster` plugin runs Lobster
+The separately installed official `@carapace/lobster` plugin runs Lobster
 workflows **in-process** using its embedded `@clawdbot/lobster` runtime. No
 external `lobster` subprocess is spawned; the tool call returns a JSON envelope
 directly. If the pipeline halts for approval, the envelope carries a resume
@@ -80,8 +80,8 @@ Lobster is an **optional** plugin tool, not installed or enabled by default.
 Install the official plugin, then restart the Gateway:
 
 ```bash
-openclaw plugins install @openclaw/lobster
-openclaw gateway restart
+carapace plugins install @carapace/lobster
+carapace gateway restart
 ```
 
 After the Gateway restarts, allow the tool globally:
@@ -121,7 +121,7 @@ The tool is disabled entirely for sandboxed tool contexts.
 
 If you need the standalone Lobster CLI for development or external pipelines
 (outside the embedded gateway runner), install it from the
-[Lobster repo](https://github.com/openclaw/lobster) and put `lobster` on
+[Lobster repo](https://github.com/Exaggarate/carapace/lobster) and put `lobster` on
 `PATH`.
 
 ## Pattern: small CLI + JSON pipes + approvals
@@ -157,7 +157,7 @@ Example: map input items into tool calls:
 
 ```bash
 gog.gmail.search --query 'newer_than:1d' \
-  | openclaw.invoke --tool message --action send --each --item-key message --args-json '{"provider":"telegram","to":"..."}'
+  | carapace.invoke --tool message --action send --each --item-key message --args-json '{"provider":"telegram","to":"..."}'
 ```
 
 ## JSON-only LLM steps (llm-task)
@@ -183,24 +183,24 @@ For a **structured LLM step** inside a workflow, enable the optional
 }
 ```
 
-### Important limitation: embedded Lobster vs `openclaw.invoke`
+### Important limitation: embedded Lobster vs `carapace.invoke`
 
 The installed Lobster plugin runs workflows **in-process** inside the gateway.
-In that embedded mode, `openclaw.invoke` does **not** automatically inherit a
-gateway URL/auth context for nested OpenClaw CLI tool calls.
+In that embedded mode, `carapace.invoke` does **not** automatically inherit a
+gateway URL/auth context for nested Carapace CLI tool calls.
 
 That means this pattern is **not currently reliable in the embedded runner**:
 
 ```lobster
-openclaw.invoke --tool llm-task --action json --args-json '{ ... }'
+carapace.invoke --tool llm-task --action json --args-json '{ ... }'
 ```
 
 Use the example below only when running the **standalone Lobster CLI** in an
-environment where `openclaw.invoke` is already configured with the correct
+environment where `carapace.invoke` is already configured with the correct
 gateway/auth context.
 
 ```lobster
-openclaw.invoke --tool llm-task --action json --args-json '{
+carapace.invoke --tool llm-task --action json --args-json '{
   "prompt": "Given the input email, return intent and draft.",
   "thinking": "low",
   "input": { "subject": "Hello", "body": "Can you help?" },
@@ -219,7 +219,7 @@ openclaw.invoke --tool llm-task --action json --args-json '{
 If you are using the embedded Lobster plugin today, prefer either:
 
 - a direct `llm-task` tool call outside Lobster, or
-- non-`openclaw.invoke` steps inside the Lobster pipeline until a supported
+- non-`carapace.invoke` steps inside the Lobster pipeline until a supported
   embedded bridge is added.
 
 See [LLM Task](/tools/llm-task) for details and configuration options.
@@ -326,7 +326,7 @@ run returned. `approve` is required.
 Passing `flowControllerId` and `flowGoal` on `run` (or `flowId` and
 `flowExpectedRevision` on `resume`) drives the call through the plugin
 runtime's managed [Task Flow](/automation/taskflow) API instead of returning
-a bare envelope: OpenClaw creates or resumes a durable flow record and applies
+a bare envelope: Carapace creates or resumes a durable flow record and applies
 the Lobster outcome to it (`waiting` on approval, `succeeded`/`failed`/`cancelled`
 on completion). The tool returns the envelope fields at the top level, alongside
 `flow` and `mutation`. Check `mutation.applied` for a successful state transition
@@ -337,7 +337,7 @@ inspect the persisted flow rather than assuming the failure write succeeded.
 
 This mode requires a non-sandboxed tool context with a bound session. It records
 a managed flow, not detached ACP/subagent tasks for each shell step. Flow state
-persists in OpenClaw SQLite; Lobster's approval checkpoint is separate and must
+persists in Carapace SQLite; Lobster's approval checkpoint is separate and must
 also remain available for resume. After a restart, the controller must inspect
 the latest flow and explicitly resume it with the matching approval token or ID.
 Neither Task Flow nor a skill automatically replays arbitrary JavaScript. See
@@ -373,7 +373,7 @@ pointer to that state, not the full pipeline state.
 
 - **Local in-process only** - workflows execute inside the gateway process; no
   network calls from the plugin itself.
-- **No secrets** - Lobster doesn't manage OAuth; it calls OpenClaw tools that
+- **No secrets** - Lobster doesn't manage OAuth; it calls Carapace tools that
   do.
 - **Sandbox-aware** - disabled when the tool context is sandboxed.
 - **Hardened** - timeouts and output caps enforced by the embedded runner.

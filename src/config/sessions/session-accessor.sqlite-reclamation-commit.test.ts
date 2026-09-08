@@ -29,7 +29,7 @@ function createCommitFixture(
     outcome?: "rollback" | "exit-before-commit" | "exit-after-commit";
   } = {},
 ) {
-  const directory = fs.realpathSync(tempDirs.make("openclaw-reclamation-commit-"));
+  const directory = fs.realpathSync(tempDirs.make("carapace-reclamation-commit-"));
   const databasePath = path.join(directory, "proof.sqlite");
   const database = openNodeSqliteDatabase(databasePath);
   database.exec(

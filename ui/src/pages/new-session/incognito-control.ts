@@ -39,7 +39,7 @@ export function renderNewSessionIncognitoControl(
       ${
         draftAvailable
           ? html`
-              <openclaw-tooltip
+              <carapace-tooltip
                 class="new-session-page__draft-tooltip"
                 .content=${t("newSession.draftDescription")}
               >
@@ -66,11 +66,11 @@ export function renderNewSessionIncognitoControl(
                       : nothing
                   }
                 </button>
-              </openclaw-tooltip>
+              </carapace-tooltip>
             `
           : nothing
       }
-      <openclaw-tooltip .content=${description}>
+      <carapace-tooltip .content=${description}>
         <button
           type="button"
           class="shell-chrome-controls__button new-session-page__incognito-toggle ${
@@ -89,7 +89,7 @@ export function renderNewSessionIncognitoControl(
         >
           ${shredderIcon}
         </button>
-      </openclaw-tooltip>
+      </carapace-tooltip>
     </div>
   `;
 }

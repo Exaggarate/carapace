@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope-config.js";
 import { readConfigFileSnapshot } from "../config/config.js";
-import { withEnvOverride, withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withEnvOverride, withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { makeCronJob } from "../cron/delivery.test-helpers.js";
 import { cronStoreKey } from "../cron/store/key.js";
 import { loadCronRows } from "../cron/store/row-codec.js";
@@ -12,20 +12,20 @@ import {
   runWriteConfigHealth,
 } from "../flows/doctor-health-contribution-runners.config.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 import { normalizeCompatibilityConfigValues } from "./doctor/shared/legacy-config-core-migrate.js";
 
 describe("Doctor workspace persistence", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("persists legacy channel command owners once and reports each rewritten entry", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         const preserved = [
           "discord:100000000000000002",
           "matrix:@owner:example.org",
@@ -38,7 +38,7 @@ describe("Doctor workspace persistence", () => {
           456,
         ];
         const canonical = ["discord:100000000000000001", "telegram:123", "slack:U123"];
-        const configPath = await writeOpenClawConfig(home, {
+        const configPath = await writeCarapaceConfig(home, {
           meta: { lastTouchedVersion: "2026.7.1-2" },
           agents: { list: [{ id: "main" }] },
           commands: {
@@ -82,8 +82,8 @@ describe("Doctor workspace persistence", () => {
       await withTempHome(async (home) => {
         await withEnvOverride(
           {
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-            OPENCLAW_UPDATE_IN_PROGRESS: updateInProgress ? "1" : undefined,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_UPDATE_IN_PROGRESS: updateInProgress ? "1" : undefined,
           },
           async () => {
             const entries = {
@@ -94,7 +94,7 @@ describe("Doctor workspace persistence", () => {
               },
               research: { memory: { search: { provider: "auto" } } },
             };
-            const configPath = await writeOpenClawConfig(home, {
+            const configPath = await writeCarapaceConfig(home, {
               agents: {
                 ownership: "explicit",
                 ...(shape === "entries"
@@ -138,12 +138,12 @@ describe("Doctor workspace persistence", () => {
     "persists explicit ownership for a markerless multi-agent %s roster",
     async (shape) => {
       await withTempHome(async (home) => {
-        await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
           const entries = {
             ops: { workspace: path.join(home, "ops") },
             research: { workspace: path.join(home, "research") },
           };
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             agents:
               shape === "entries"
                 ? { entries }
@@ -182,11 +182,11 @@ describe("Doctor workspace persistence", () => {
     async ({ kind, legacyId }) => {
       await withTempHome(async (home) => {
         await withEnvOverride(
-          { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_WORKSPACE_DIR: undefined },
+          { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_WORKSPACE_DIR: undefined },
           async () => {
             const workspace = path.join(
               home,
-              kind === "shared" ? "shared-workspace" : ".openclaw/workspace",
+              kind === "shared" ? "shared-workspace" : ".carapace/workspace",
             );
             await fs.mkdir(path.join(workspace, "memory"), { recursive: true });
             const originals = {
@@ -200,7 +200,7 @@ describe("Doctor workspace persistence", () => {
             for (const [name, content] of Object.entries(originals)) {
               await fs.writeFile(path.join(workspace, name), content);
             }
-            const configPath = await writeOpenClawConfig(home, {
+            const configPath = await writeCarapaceConfig(home, {
               agents: {
                 ...(kind === "shared" ? { defaults: { workspace } } : {}),
                 list: [{ id: legacyId }, { id: "other" }],
@@ -242,12 +242,12 @@ describe("Doctor workspace persistence", () => {
     "repairs workspace and heartbeat values from %s through snapshot, doctor, and write",
     async (shape) => {
       await withTempHome(async (home) => {
-        await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
           const agent = {
             workspace: null,
             heartbeat: { every: "30m", activeHours: { start: "99:99", end: "17:00" } },
           };
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             agents:
               shape === "entries"
                 ? { entries: { ops: agent } }
@@ -283,8 +283,8 @@ describe("Doctor workspace persistence", () => {
 
   it("refuses a legacy candidate that mixes an include-owned repair with root changes", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
-        const configPath = await writeOpenClawConfig(home, {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+        const configPath = await writeCarapaceConfig(home, {
           agents: {
             list: [
               { id: " Ops ", workspace: null, heartbeat: { activeHours: { start: "99:99" } } },
@@ -318,9 +318,9 @@ describe("Doctor workspace persistence", () => {
 
   it("keeps the legacy owner on the shared workspace across later health writes", async () => {
     await withTempHome(async (home) => {
-      await withEnvOverride({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+      await withEnvOverride({ CARAPACE_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
         const workspace = path.join(home, "shared-workspace");
-        const configPath = await writeOpenClawConfig(home, {
+        const configPath = await writeCarapaceConfig(home, {
           agents: {
             defaults: { workspace },
             entries: {
@@ -354,11 +354,11 @@ describe("Doctor workspace persistence", () => {
 
   it("persists cron runtime policy on the retained owner before rewriting its model", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       await withEnvOverride(
-        { OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1", OPENCLAW_STATE_DIR: stateDir },
+        { CARAPACE_DISABLE_BUNDLED_PLUGINS: "1", CARAPACE_STATE_DIR: stateDir },
         async () => {
-          const configPath = await writeOpenClawConfig(home, {
+          const configPath = await writeCarapaceConfig(home, {
             agents: {
               defaults: { systemAgent: { agentId: "ops" } },
               entries: { main: { default: true }, ops: {} },
@@ -397,7 +397,7 @@ describe("Doctor workspace persistence", () => {
               main: snapshot.config.agents?.entries?.main?.models,
               ops: snapshot.config.agents?.entries?.ops?.models,
             };
-            const rows = loadCronRows(openOpenClawStateDatabase().db, cronStoreKey(storePath));
+            const rows = loadCronRows(openCarapaceStateDatabase().db, cronStoreKey(storePath));
             expect.soft(snapshot.valid, `pass ${pass}`).toBe(true);
             expect.soft(snapshot.config.agents?.defaults?.systemAgent?.agentId).toBe("ops");
             expect.soft(policies, `pass ${pass}`).toEqual({

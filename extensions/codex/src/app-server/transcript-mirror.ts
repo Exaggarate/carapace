@@ -7,15 +7,15 @@ import {
   runAgentHarnessBeforeMessageWriteHook,
   type AgentMessage,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { withCodexSessionTranscriptMirrorWriteLock } from "openclaw/plugin-sdk/codex-session-transcript-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { withCodexSessionTranscriptMirrorWriteLock } from "carapace/plugin-sdk/codex-session-transcript-runtime";
 import {
   publishSessionTranscriptUpdateByIdentity,
   type TranscriptEntryAnchor,
   type SessionTranscriptTargetParams,
   type SessionTranscriptWriteLockParams,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { AttemptSettlementWarning, EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import type { CodexAsyncDeliverySettlement } from "./event-projector-options.js";
 import type { CodexThread } from "./protocol.js";
@@ -68,7 +68,7 @@ function readMirroredAssistantText(message: MirroredAgentMessage | undefined): s
     : undefined;
 }
 
-/** Imports a bounded, user-visible Codex history tail into a new OpenClaw transcript. */
+/** Imports a bounded, user-visible Codex history tail into a new Carapace transcript. */
 export async function importCodexThreadHistoryToTranscript(params: {
   assertCurrent?: () => void;
   thread: CodexThread;
@@ -439,14 +439,14 @@ async function mirror(params: {
           transcriptMessage.role === "user"
             ? {
                 ...transcriptMessage,
-                __openclaw: { ...Reflect.get(transcriptMessage, "__openclaw") },
+                __carapace: { ...Reflect.get(transcriptMessage, "__carapace") },
               }
             : undefined;
-        if (preparedUserMessage?.["__openclaw"].humanMentions !== undefined) {
+        if (preparedUserMessage?.["__carapace"].humanMentions !== undefined) {
           // Hooks cannot move a selection by mutating the original text or spans in place.
           preparedUserMessage.content = structuredClone(preparedUserMessage.content);
-          preparedUserMessage["__openclaw"].humanMentions = structuredClone(
-            preparedUserMessage["__openclaw"].humanMentions,
+          preparedUserMessage["__carapace"].humanMentions = structuredClone(
+            preparedUserMessage["__carapace"].humanMentions,
           );
         }
         const nextMessage = runAgentHarnessBeforeMessageWriteHook({
@@ -493,11 +493,11 @@ async function mirror(params: {
             terminalOwner?.settlementWarning,
           );
         }
-        if (message.role === "assistant" && message.openclawAsyncDelivery) {
+        if (message.role === "assistant" && message.carapaceAsyncDelivery) {
           // Async delivery ownership is provider-authored. Whole-message hooks may
           // rewrite content, but must not turn the durable row into a terminal answer.
           messageToAppend = Object.assign(messageToAppend, {
-            openclawAsyncDelivery: { itemId: message.openclawAsyncDelivery.itemId },
+            carapaceAsyncDelivery: { itemId: message.carapaceAsyncDelivery.itemId },
           });
         }
         // Whole-message hooks can replace metadata, but cannot erase source-owned taint.

@@ -3,11 +3,11 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { AgentSelectionRequiredError, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { getRuntimeConfig } from "../config/io.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { getAgentRunContext } from "../infra/agent-run-registry.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
 import {
@@ -69,7 +69,7 @@ function setResolvedSessionKeyCache(
 
 // Keep global run matching scoped and reject malformed qualified keys before
 // normalizing aliases; the prepared owner must survive a main alias becoming global.
-function sessionKeyMatchesAgent(sessionKey: string, agentId: string, cfg: OpenClawConfig): boolean {
+function sessionKeyMatchesAgent(sessionKey: string, agentId: string, cfg: CarapaceConfig): boolean {
   if (cfg.session?.scope === "global" && sessionKey.trim().toLowerCase() === "global") {
     return true;
   }

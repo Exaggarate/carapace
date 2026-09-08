@@ -1,5 +1,5 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/core";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import type { ClickClackDiscussionBinding } from "./binding-store.js";
 
 type RevokedDiscussionChannel = {

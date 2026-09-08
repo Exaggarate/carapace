@@ -1,6 +1,6 @@
 // Line plugin module implements channel shared behavior.
-import { describeWebhookAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
+import { describeWebhookAccountSnapshot } from "carapace/plugin-sdk/account-helpers";
+import type { ChannelPlugin } from "carapace/plugin-sdk/core";
 import { hasLineCredentials } from "./account-helpers.js";
 import { lineConfigAdapter } from "./config-adapter.js";
 import { LineChannelConfigSchema } from "./config-schema.js";

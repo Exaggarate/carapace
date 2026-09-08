@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { vi } from "vitest";
 import * as responsesEgress from "../../../packages/ai/src/transports/openai-responses-prompt-observer-internal.js";
 import { SessionManager } from "../../agents/sessions/session-manager.js";

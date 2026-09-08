@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { TranscriptSessionSummary, TranscriptsGetResult } from "@openclaw/gateway-protocol";
+import type { TranscriptSessionSummary, TranscriptsGetResult } from "@carapace/gateway-protocol";
 import { expect, it } from "vitest";
 import { installMockGateway } from "../test-helpers/control-ui-e2e.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
@@ -82,7 +82,7 @@ suite.define(() => {
           },
         });
         await page.goto(`${suite.server.baseUrl}meetings`);
-        const view = page.locator("openclaw-meetings-page");
+        const view = page.locator("carapace-meetings-page");
         await view.getByRole("link", { name: /Design review/ }).waitFor();
         expect(await view.locator(".meetings-day h2").allTextContents()).toEqual([
           "August 12, 2026",
@@ -157,11 +157,11 @@ suite.define(() => {
         methodResponses: { "transcripts.list": { sessions: [], nextCursor: null } },
       });
       await page.goto(`${suite.server.baseUrl}meetings`);
-      const view = page.locator("openclaw-meetings-page");
+      const view = page.locator("carapace-meetings-page");
       await view.getByRole("heading", { name: "Your meeting notes, together" }).waitFor();
       expect(
         await view.getByRole("link", { name: "Set up meeting transcripts" }).getAttribute("href"),
-      ).toBe("https://docs.openclaw.ai/cli/transcripts");
+      ).toBe("https://github.com/Exaggarate/carapace");
       await gateway.setMethodResponse("transcripts.list", {
         __mockError: { code: "UNAVAILABLE", message: "Meetings temporarily unavailable" },
       });

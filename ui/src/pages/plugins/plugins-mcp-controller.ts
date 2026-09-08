@@ -220,7 +220,7 @@ export class PluginsMcpController {
       mcp.followUp === "oauth"
         ? t("pluginsPage.connectorAddedOauth", {
             name: connector.name,
-            command: `openclaw mcp login ${mcp.serverName}`,
+            command: `carapace mcp login ${mcp.serverName}`,
           })
         : mcp.followUp === "endpoint"
           ? t("pluginsPage.connectorAddedEndpoint", { name: connector.name })

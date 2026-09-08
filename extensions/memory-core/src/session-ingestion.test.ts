@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   foreignSessionIngestionSource,
@@ -18,8 +18,8 @@ import {
 const tempDirs: string[] = [];
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.unstubAllEnvs();
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
@@ -29,10 +29,10 @@ describe("session ingestion", () => {
     "applies exact %s admission policy using the corpus session store",
     async (hookExternalContentSource) => {
       const dir = await fs.realpath(
-        await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-admission-")),
+        await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-admission-")),
       );
       tempDirs.push(dir);
-      vi.stubEnv("OPENCLAW_STATE_DIR", dir);
+      vi.stubEnv("CARAPACE_STATE_DIR", dir);
       const storePath = path.join(dir, "custom", "sessions.json");
       await fs.mkdir(path.dirname(storePath), { recursive: true });
       const sessionId = "source-session";
@@ -96,7 +96,7 @@ describe("session ingestion", () => {
   });
 
   it("verifies backfill content despite an unchanged size and mtime", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-ingestion-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-ingestion-"));
     tempDirs.push(dir);
     const archiveFile = path.join(dir, "archive.jsonl");
     const record = (content: string) =>
@@ -148,7 +148,7 @@ describe("session ingestion", () => {
   ])(
     "resumes an append after consuming $maxCandidates snapshot lines",
     async ({ maxCandidates, expected }) => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-ingestion-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-ingestion-"));
       tempDirs.push(dir);
       const archiveFile = path.join(dir, "archive.jsonl");
       const record = (id: string, content: string) =>
@@ -205,7 +205,7 @@ describe("session ingestion", () => {
   it.each(["text", "timestamp", "provenance", "ordinal", "truncation"] as const)(
     "rescans when the previous snapshot changes by %s",
     async (change) => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-ingestion-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-session-ingestion-"));
       tempDirs.push(dir);
       const archiveFile = path.join(dir, "archive.jsonl");
       const record = (id: string, content: string) => ({

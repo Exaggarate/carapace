@@ -1,8 +1,8 @@
 // Agent job tracking owns terminal run state and `agent.wait` resolution.
 // Gateway dedupe retains response payloads only for idempotent RPC replay.
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { readNonBlankString } from "@openclaw/normalization-core/string-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { readNonBlankString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeAgentRunTerminalDeliverySnapshot,
   type AgentRunTerminalDeliverySnapshot,
@@ -84,7 +84,7 @@ type AgentJobState = {
 };
 
 const agentJobState = resolveGlobalSingleton<AgentJobState>(
-  Symbol.for("openclaw.agentJobState"),
+  Symbol.for("carapace.agentJobState"),
   () => ({
     jobs: new Map(),
     runStarts: new Map(),

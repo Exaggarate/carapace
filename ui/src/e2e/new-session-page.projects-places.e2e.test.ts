@@ -23,12 +23,12 @@ suite.define(() => {
   it("registers a Git checkout from Browse and selects the refreshed project", async () => {
     const context = await suite.browser.newContext({ locale: "en-US", serviceWorkers: "block" });
     const page = await context.newPage();
-    const repoRoot = "/recorded/openclaw";
+    const repoRoot = "/recorded/carapace";
     const registeredProject = {
-      id: "recorded-openclaw",
-      displayName: "openclaw",
+      id: "recorded-carapace",
+      displayName: "carapace",
       repoRoot,
-      originUrl: "https://github.com/openclaw/openclaw.git",
+      originUrl: "https://github.com/Exaggarate/carapace.git",
       source: "registered",
     };
     const gateway = await installMockGateway(page, {
@@ -85,8 +85,8 @@ suite.define(() => {
 
       const request = await gateway.waitForRequest("projects.register");
       expect(request.params).toEqual({ path: repoRoot });
-      await pollLocatorText(trigger.locator(".new-session-page__trigger-label")).toBe("openclaw");
-      await expect.poll(() => trigger.getAttribute("data-project-id")).toBe("recorded-openclaw");
+      await pollLocatorText(trigger.locator(".new-session-page__trigger-label")).toBe("carapace");
+      await expect.poll(() => trigger.getAttribute("data-project-id")).toBe("recorded-carapace");
     } finally {
       await context.close();
     }
@@ -261,8 +261,8 @@ suite.define(() => {
           defaults: SESSION_LIST_DEFAULTS,
           path: "",
           sessions: [
-            { key: "agent:main:a", kind: "direct", updatedAt: 2, execCwd: "/a/openclaw" },
-            { key: "agent:main:b", kind: "direct", updatedAt: 1, execCwd: "/b/openclaw" },
+            { key: "agent:main:a", kind: "direct", updatedAt: 2, execCwd: "/a/carapace" },
+            { key: "agent:main:b", kind: "direct", updatedAt: 1, execCwd: "/b/carapace" },
           ],
           ts: Date.now(),
         },
@@ -275,8 +275,8 @@ suite.define(() => {
       await gateway.waitForRequest("environments.list");
       const trigger = page.locator("#new-session-project-trigger");
       await trigger.click();
-      const first = page.locator('[data-value="recent:/a/openclaw"]');
-      const second = page.locator('[data-value="recent:/b/openclaw"]');
+      const first = page.locator('[data-value="recent:/a/carapace"]');
+      const second = page.locator('[data-value="recent:/b/carapace"]');
       await first.waitFor();
       await second.waitFor();
       await pollLocatorText(first.locator(".session-menu__sub")).toBe("a");
@@ -284,13 +284,13 @@ suite.define(() => {
       const recentValues = await page
         .locator('[data-value^="recent:"]')
         .evaluateAll((items) => items.map((item) => item.getAttribute("data-value")));
-      expect(recentValues).toEqual(["recent:/a/openclaw", "recent:/b/openclaw"]);
+      expect(recentValues).toEqual(["recent:/a/carapace", "recent:/b/carapace"]);
       await second.click();
       await page.locator(".new-session-page__message").fill("continue in work checkout");
       await page.getByRole("button", { name: "Start session" }).click();
       const create = await gateway.waitForRequest("sessions.create");
       expect(create.params).toMatchObject({
-        cwd: "/b/openclaw",
+        cwd: "/b/carapace",
         message: "continue in work checkout",
       });
     } finally {

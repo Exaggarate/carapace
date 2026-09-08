@@ -7,13 +7,13 @@ import type {
   APIVoiceState,
   RESTPostAPIGuildScheduledEventJSONBody,
 } from "discord-api-types/v10";
-import { buildOutboundMediaLoadOptions } from "openclaw/plugin-sdk/media-runtime";
+import { buildOutboundMediaLoadOptions } from "carapace/plugin-sdk/media-runtime";
 import {
   resolveExpiresAtMsFromDurationMs,
   timestampMsToIsoString,
-} from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { loadWebMediaRaw } from "openclaw/plugin-sdk/web-media";
+} from "carapace/plugin-sdk/number-runtime";
+import { normalizeOptionalLowercaseString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { loadWebMediaRaw } from "carapace/plugin-sdk/web-media";
 import {
   addGuildMemberRole,
   createGuildBan,

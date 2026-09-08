@@ -1,9 +1,9 @@
 // Openai plugin module implements native web search behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
+import { createPayloadPatchStreamWrapper } from "carapace/plugin-sdk/provider-stream-shared";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isOpenAIApiBaseUrl } from "./base-url.js";
 
 const OPENAI_WEB_SEARCH_TOOL = { type: "web_search" } as const;
@@ -26,7 +26,7 @@ function isOpenAINativeWebSearchEligibleModel(model: {
   return !baseUrl || isOpenAIApiBaseUrl(baseUrl);
 }
 
-function shouldUseOpenAINativeWebSearchProvider(config: OpenClawConfig | undefined): boolean {
+function shouldUseOpenAINativeWebSearchProvider(config: CarapaceConfig | undefined): boolean {
   const provider = config?.tools?.web?.search?.provider;
   if (typeof provider !== "string") {
     return true;
@@ -36,7 +36,7 @@ function shouldUseOpenAINativeWebSearchProvider(config: OpenClawConfig | undefin
 }
 
 function shouldEnableOpenAINativeWebSearch(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   model: { api?: unknown; provider?: unknown; baseUrl?: unknown };
 }): boolean {
   return (
@@ -85,7 +85,7 @@ function patchOpenAINativeWebSearchPayload(payload: unknown): OpenAINativeWebSea
 export function createOpenAINativeWebSearchWrapper(
   baseStreamFn: StreamFn | undefined,
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId?: string;
     nativeWebSearchAllowedByToolPolicy?: boolean;
   },
@@ -94,8 +94,8 @@ export function createOpenAINativeWebSearchWrapper(
     baseStreamFn,
     ({ payload, options }) => {
       (
-        options as { openclawCodeModeAllowedHostedToolTypes?: Set<string> } | undefined
-      )?.openclawCodeModeAllowedHostedToolTypes?.add(OPENAI_WEB_SEARCH_TOOL.type);
+        options as { carapaceCodeModeAllowedHostedToolTypes?: Set<string> } | undefined
+      )?.carapaceCodeModeAllowedHostedToolTypes?.add(OPENAI_WEB_SEARCH_TOOL.type);
       patchOpenAINativeWebSearchPayload(payload);
     },
     {

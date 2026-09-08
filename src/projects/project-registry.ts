@@ -4,23 +4,23 @@ import type { Selectable } from "kysely";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { insideGitCheckout, runGit } from "../agents/worktrees/git.js";
 import { slugifyWorktreeTitle } from "../agents/worktrees/name.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "../state/openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "../state/carapace-state-feature-schema.js";
 import {
-  type OpenClawStateLeaseContext,
-  withOpenClawStateLease,
-} from "../state/openclaw-state-lease.js";
+  type CarapaceStateLeaseContext,
+  withCarapaceStateLease,
+} from "../state/carapace-state-lease.js";
 
 export type ProjectRegistryRecord = {
   id: string;
@@ -31,13 +31,13 @@ export type ProjectRegistryRecord = {
   agentId?: string;
 };
 
-type ProjectsDatabase = Pick<OpenClawStateKyselyDatabase, "projects">;
-type ProjectRow = Selectable<OpenClawStateKyselyDatabase["projects"]>;
+type ProjectsDatabase = Pick<CarapaceStateKyselyDatabase, "projects">;
+type ProjectRow = Selectable<CarapaceStateKyselyDatabase["projects"]>;
 
 const PROJECT_ID_MAX_LENGTH = 64;
 const PROJECT_CHECKOUT_LEASE_MS = 30_000;
 const PROJECT_CHECKOUT_WAIT_MS = 30_000;
-const ensureProjectRegistrySchema = createOpenClawStateSchemaEnsurer({
+const ensureProjectRegistrySchema = createCarapaceStateSchemaEnsurer({
   table: "projects",
   operationLabel: "projects.registry.schema.ensure",
 });
@@ -49,9 +49,9 @@ export class ProjectCheckoutError extends Error {
   }
 }
 
-function openProjectsDatabase(options: OpenClawStateDatabaseOptions = {}) {
+function openProjectsDatabase(options: CarapaceStateDatabaseOptions = {}) {
   ensureProjectRegistrySchema(options);
-  const state = openOpenClawStateDatabase(options);
+  const state = openCarapaceStateDatabase(options);
   return { sqlite: state.db, kysely: getNodeSqliteKysely<ProjectsDatabase>(state.db) };
 }
 
@@ -72,11 +72,11 @@ function insertProjectRegistry(
     originUrl?: string;
     source: "registered" | "cloned";
   },
-  options: OpenClawStateDatabaseOptions,
-  lease: OpenClawStateLeaseContext,
+  options: CarapaceStateDatabaseOptions,
+  lease: CarapaceStateLeaseContext,
 ): ProjectRegistryRecord {
   ensureProjectRegistrySchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       lease.assertOwnedInTransaction(sqlite);
       const db = getNodeSqliteKysely<ProjectsDatabase>(sqlite);
@@ -123,10 +123,10 @@ function insertProjectRegistry(
 
 export async function withProjectCheckoutLifecycle<T>(
   repoRoot: string,
-  options: OpenClawStateDatabaseOptions,
-  run: (lease: OpenClawStateLeaseContext) => Promise<T>,
+  options: CarapaceStateDatabaseOptions,
+  run: (lease: CarapaceStateLeaseContext) => Promise<T>,
 ): Promise<T> {
-  return await withOpenClawStateLease(
+  return await withCarapaceStateLease(
     {
       scope: "projects.checkout",
       key: repoRoot,
@@ -140,7 +140,7 @@ export async function withProjectCheckoutLifecycle<T>(
   );
 }
 
-function workspaceProject(cfg: OpenClawConfig, agentId: string): ProjectRegistryRecord {
+function workspaceProject(cfg: CarapaceConfig, agentId: string): ProjectRegistryRecord {
   const repoRoot = resolveAgentWorkspaceDir(cfg, agentId);
   return {
     id: `workspace:${agentId}`,
@@ -216,7 +216,7 @@ async function registerResolvedProject(
     originUrl?: string;
     source: "registered" | "cloned";
   },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<ProjectRegistryRecord> {
   const checkout = await resolveProjectCheckout(input.path);
   const displayName = input.name?.trim() || path.basename(checkout.repoRoot) || "Project";
@@ -242,21 +242,21 @@ async function registerResolvedProject(
 
 export async function registerProjectRegistry(
   input: { path: string; name?: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<ProjectRegistryRecord> {
   return await registerResolvedProject({ ...input, source: "registered" }, options);
 }
 
 export async function registerClonedProjectRegistry(
   input: { path: string; name: string; originUrl: string },
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<ProjectRegistryRecord> {
   return await registerResolvedProject({ ...input, source: "cloned" }, options);
 }
 
 export function listProjectRegistry(
-  cfg: OpenClawConfig,
-  options: OpenClawStateDatabaseOptions = {},
+  cfg: CarapaceConfig,
+  options: CarapaceStateDatabaseOptions = {},
 ): ProjectRegistryRecord[] {
   const { sqlite, kysely } = openProjectsDatabase(options);
   const stored = executeSqliteQuerySync(sqlite, kysely.selectFrom("projects").selectAll()).rows.map(
@@ -267,9 +267,9 @@ export function listProjectRegistry(
 }
 
 export function resolveProjectRegistry(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   id: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): ProjectRegistryRecord | undefined {
   if (id.startsWith("workspace:")) {
     const agentId = id.slice("workspace:".length);
@@ -285,11 +285,11 @@ export function resolveProjectRegistry(
 
 export function removeProjectCheckoutReference(
   project: ProjectRegistryRecord,
-  lease: OpenClawStateLeaseContext,
-  options: OpenClawStateDatabaseOptions = {},
+  lease: CarapaceStateLeaseContext,
+  options: CarapaceStateDatabaseOptions = {},
 ): "missing" | "changed" | "remaining" | "final" {
   ensureProjectRegistrySchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       lease.assertOwnedInTransaction(sqlite);
       const db = getNodeSqliteKysely<ProjectsDatabase>(sqlite);
@@ -337,7 +337,7 @@ export function removeProjectCheckoutReference(
 
 export async function resolveRecordedProjectRoot(
   projectPath: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<string | undefined> {
   const repoRoot = await fs.realpath(projectPath).catch(() => undefined);
   if (!repoRoot) {
@@ -353,10 +353,10 @@ export async function resolveRecordedProjectRoot(
 
 export function removeProjectRegistry(
   id: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   ensureProjectRegistrySchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       const db = getNodeSqliteKysely<ProjectsDatabase>(sqlite);
       return (

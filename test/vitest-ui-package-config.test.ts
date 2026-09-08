@@ -74,7 +74,7 @@ describe("ui package vitest config", () => {
   });
 
   it("gives module-mock fixtures the same isolated ownership in both entry points", async () => {
-    vi.stubEnv("OPENCLAW_VITEST_INCLUDE_FILE", "");
+    vi.stubEnv("CARAPACE_VITEST_INCLUDE_FILE", "");
     vi.resetModules();
     const config = (await import("../ui/vitest.config.ts")).default;
     const projects = (requireTestConfig(config).projects ?? []).map(requireTestConfig);
@@ -126,7 +126,7 @@ describe("ui package vitest config", () => {
         XDG_DATA_HOME: path.join(home, ".local", "share"),
         XDG_CACHE_HOME: path.join(home, ".cache"),
         CI: "1",
-        OPENCLAW_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "transforms"),
+        CARAPACE_VITEST_FS_MODULE_CACHE_PATH: path.join(root, "transforms"),
       },
     });
     expect(result.code, result.stderr).toBe(0);
@@ -170,7 +170,7 @@ describe("ui package vitest config", () => {
   it("keeps native Chromium files out of root jsdom without dropping Node-driven Playwright files", async () => {
     const includeFile = path.join(tempDirs.make("ui-node-selection-"), "include.json");
     writeFileSync(includeFile, JSON.stringify(["ui/src/**/*.test.ts"]));
-    vi.stubEnv("OPENCLAW_VITEST_INCLUDE_FILE", includeFile);
+    vi.stubEnv("CARAPACE_VITEST_INCLUDE_FILE", includeFile);
     vi.resetModules();
     const config = (await import("../ui/vitest.config.ts")).default;
     const uiRoot = path.join(process.cwd(), "ui");
@@ -198,7 +198,7 @@ describe("ui package vitest config", () => {
     );
     writeFileSync(includeFile, JSON.stringify([...nativeFiles, ...nodeFiles]));
     const scopedRoot = requireTestConfig(
-      createUiVitestConfig({ OPENCLAW_VITEST_INCLUDE_FILE: includeFile }),
+      createUiVitestConfig({ CARAPACE_VITEST_INCLUDE_FILE: includeFile }),
     );
     expect(globSync(scopedRoot.include ?? [], { exclude: scopedRoot.exclude }).toSorted()).toEqual(
       nodeFiles.toSorted(),
@@ -229,7 +229,7 @@ describe("ui package vitest config", () => {
   ])("intersects a repository include list with every project: %j", async (requested, expected) => {
     const includeFile = path.join(tempDirs.make("ui-package-selection-"), "include.json");
     writeFileSync(includeFile, JSON.stringify(requested));
-    vi.stubEnv("OPENCLAW_VITEST_INCLUDE_FILE", includeFile);
+    vi.stubEnv("CARAPACE_VITEST_INCLUDE_FILE", includeFile);
     vi.resetModules();
     const config = (await import("../ui/vitest.config.ts")).default;
     const uiRoot = path.join(process.cwd(), "ui");
@@ -318,11 +318,11 @@ describe("ui package vitest config", () => {
   });
 
   it.each([
-    ["@openclaw/gateway-client/scope-upgrade", "packages/gateway-client/src/scope-upgrade.ts"],
-    ["openclaw/plugin-sdk/control-ui", "src/plugin-sdk/control-ui.ts"],
-    ["openclaw/plugin-sdk/extension-shared", "src/plugin-sdk/extension-shared.ts"],
-    ["openclaw/plugin-sdk/string-coerce-runtime", "src/plugin-sdk/string-coerce-runtime.ts"],
-    ["openclaw/plugin-sdk/test-fixtures", "src/plugin-sdk/test-fixtures.ts"],
+    ["@carapace/gateway-client/scope-upgrade", "packages/gateway-client/src/scope-upgrade.ts"],
+    ["carapace/plugin-sdk/control-ui", "src/plugin-sdk/control-ui.ts"],
+    ["carapace/plugin-sdk/extension-shared", "src/plugin-sdk/extension-shared.ts"],
+    ["carapace/plugin-sdk/string-coerce-runtime", "src/plugin-sdk/string-coerce-runtime.ts"],
+    ["carapace/plugin-sdk/test-fixtures", "src/plugin-sdk/test-fixtures.ts"],
   ])("aliases %s from source in every standalone UI project", (specifier, source) => {
     const projects = requireTestConfig(uiConfig).projects ?? [];
     for (const config of [uiConfig, ...projects]) {

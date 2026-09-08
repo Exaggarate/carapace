@@ -3,27 +3,27 @@ import path from "node:path";
 import { cloneEnvWithPlatformSemantics } from "../../config/env-vars.js";
 import { createConfigIO } from "../../config/io.js";
 import { resolveConfiguredAgentDatabaseCandidatePaths } from "../../config/sessions/targets.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
-  OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
-  preflightOpenClawDatabaseSchemas,
-  type IncompatibleOpenClawDatabase,
-  type IndeterminateOpenClawDatabase,
-  type OpenClawDatabaseSchemaPreflight,
-} from "../../state/openclaw-database-preflight.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
+  CARAPACE_DATABASE_SCHEMA_DOCS_URL,
+  preflightCarapaceDatabaseSchemas,
+  type IncompatibleCarapaceDatabase,
+  type IndeterminateCarapaceDatabase,
+  type CarapaceDatabaseSchemaPreflight,
+} from "../../state/carapace-database-preflight.js";
+import type { CarapaceSchemaVersions } from "../../state/carapace-schema-versions.js";
 import { UpdatePreMutationError } from "./shared.js";
 
 type TargetDatabaseSchemaContext = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 };
 
 export function formatSchemaRefusalLines(
   schemas: {
-    incompatible: readonly IncompatibleOpenClawDatabase[];
-    indeterminate: readonly IndeterminateOpenClawDatabase[];
+    incompatible: readonly IncompatibleCarapaceDatabase[];
+    indeterminate: readonly IndeterminateCarapaceDatabase[];
   },
   dryRun = false,
 ): string[] {
@@ -37,15 +37,15 @@ export function formatSchemaRefusalLines(
       (database) =>
         `${prefix}: could not inspect ${database.kind} database ${database.path}: ${database.reason}; retry once the gateway releases it.`,
     ),
-    OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+    CARAPACE_DATABASE_SCHEMA_DOCS_URL,
     "Installing manually via npm bypasses this guard; back up first and verify compatibility.",
   ];
 }
 
 async function checkTargetDatabaseSchemas(
-  supportedVersions: OpenClawSchemaVersions,
+  supportedVersions: CarapaceSchemaVersions,
   context: TargetDatabaseSchemaContext,
-): Promise<OpenClawDatabaseSchemaPreflight> {
+): Promise<CarapaceDatabaseSchemaPreflight> {
   let configuredAgentDatabaseCandidatePaths: string[];
   try {
     configuredAgentDatabaseCandidatePaths = resolveConfiguredAgentDatabaseCandidatePaths(
@@ -58,7 +58,7 @@ async function checkTargetDatabaseSchemas(
       `Update refused: could not inspect configured database paths: ${formatErrorMessage(error)}`,
     );
   }
-  return preflightOpenClawDatabaseSchemas({
+  return preflightCarapaceDatabaseSchemas({
     env: context.env,
     supportedVersions,
     // Include default on-disk stores that update-time Doctor can later touch,
@@ -108,14 +108,14 @@ function canonicalDatabaseIdentity(database: { kind: "agent" | "state"; path: st
 
 /** Inspect the union of caller/service stores without granting migration ownership. */
 export async function checkTargetDatabaseSchemasForContexts(
-  supportedVersions: OpenClawSchemaVersions | undefined,
+  supportedVersions: CarapaceSchemaVersions | undefined,
   contexts: readonly TargetDatabaseSchemaContext[],
-): Promise<OpenClawDatabaseSchemaPreflight> {
+): Promise<CarapaceDatabaseSchemaPreflight> {
   if (!supportedVersions) {
     return { incompatible: [], indeterminate: [] };
   }
-  const incompatible = new Map<string, IncompatibleOpenClawDatabase>();
-  const indeterminate = new Map<string, IndeterminateOpenClawDatabase>();
+  const incompatible = new Map<string, IncompatibleCarapaceDatabase>();
+  const indeterminate = new Map<string, IndeterminateCarapaceDatabase>();
   for (const context of contexts) {
     const result = await checkTargetDatabaseSchemas(supportedVersions, context);
     for (const database of result.incompatible) {
@@ -133,6 +133,6 @@ export async function checkTargetDatabaseSchemasForContexts(
   return { incompatible: [...incompatible.values()], indeterminate: [...indeterminate.values()] };
 }
 
-export function hasSchemaRefusal(schemas: OpenClawDatabaseSchemaPreflight): boolean {
+export function hasSchemaRefusal(schemas: CarapaceDatabaseSchemaPreflight): boolean {
   return schemas.incompatible.length > 0 || schemas.indeterminate.length > 0;
 }

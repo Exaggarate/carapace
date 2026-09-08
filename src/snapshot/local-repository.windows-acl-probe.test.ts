@@ -75,7 +75,7 @@ function mockWindowsPathSecurity(
 
 describe("fail-closed Windows ACL probe", () => {
   it("budgets for cold PowerShell startup and sanitizes the spawn failure", async () => {
-    const tempDir = tempDirs.make("openclaw-snapshot-windows-acl-probe-");
+    const tempDir = tempDirs.make("carapace-snapshot-windows-acl-probe-");
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     const encodedPayload = Buffer.from("private PowerShell script bytes").toString("base64");
     const command = `powershell.exe -EncodedCommand ${encodedPayload}`;
@@ -125,7 +125,7 @@ describe("fail-closed Windows ACL probe", () => {
   });
 
   it("names the untrusted root principal and rights without weakening rejection", async () => {
-    const tempDir = tempDirs.make("openclaw-snapshot-windows-acl-detail-");
+    const tempDir = tempDirs.make("carapace-snapshot-windows-acl-detail-");
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     mockWindowsPathSecurity({
       rootEntries: [
@@ -145,7 +145,7 @@ describe("fail-closed Windows ACL probe", () => {
   });
 
   it("accepts a private local Windows repository root", async () => {
-    const tempDir = tempDirs.make("openclaw-snapshot-windows-acl-private-");
+    const tempDir = tempDirs.make("carapace-snapshot-windows-acl-private-");
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     mockWindowsPathSecurity();
 
@@ -190,7 +190,7 @@ describe("fail-closed Windows ACL probe", () => {
       expected: /ancestor: path=.*principal=S-1-1-0 rights=.*shared or synced root/u,
     },
   ])("rejects $label", async ({ params, expected }) => {
-    const tempDir = tempDirs.make("openclaw-snapshot-windows-acl-matrix-");
+    const tempDir = tempDirs.make("carapace-snapshot-windows-acl-matrix-");
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     mockWindowsPathSecurity(params);
 

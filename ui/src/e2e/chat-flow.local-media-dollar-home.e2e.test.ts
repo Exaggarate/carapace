@@ -22,7 +22,7 @@ suite.define(() => {
       source: "C:\\workspace\\project\\..\\media\\report-voice.mp3",
     },
   ])("allows $name", async ({ source }) => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.local-media-dollar-home", artifactDirParent)
       : undefined;
@@ -30,7 +30,7 @@ suite.define(() => {
     const page = await context.newPage();
     const requestedMediaUrls: URL[] = [];
 
-    await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+    await page.route("**/__carapace__/assistant-media?**", async (route) => {
       const url = new URL(route.request().url());
       requestedMediaUrls.push(url);
       if (url.searchParams.get("meta") === "1") {
@@ -75,7 +75,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
-      const attachment = page.locator("openclaw-chat-audio-player");
+      const attachment = page.locator("carapace-chat-audio-player");
       await attachment.waitFor({ state: "visible", timeout: 10_000 });
       await expect
         .poll(() => requestedMediaUrls.length, { timeout: 10_000 })

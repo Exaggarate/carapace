@@ -7,15 +7,15 @@ import {
   resolveReleaseValidationIntent,
 } from "./release-validation-intent.mjs";
 
-export const RELEASE_PLAN_SCHEMA = "openclaw.release-plan.v1";
-const RELEASE_PLAN_LOCK_SCHEMA = "openclaw.release-plan-lock.v1";
+export const RELEASE_PLAN_SCHEMA = "carapace.release-plan.v1";
+const RELEASE_PLAN_LOCK_SCHEMA = "carapace.release-plan-lock.v1";
 export const RELEASE_PLAN_CANONICALIZATION = "ascii-sorted-compact-json-trailing-newline-v1";
 const RELEASE_PLAN_MAX_BYTES = 32 * 1024;
 
 const SHA_PATTERN = /^[a-f0-9]{40}$/u;
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const ASCII_PATTERN = /^[\x20-\x7e]+$/u;
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const WORKFLOW_PATH = ".github/workflows/full-release-validation.yml";
 const PACKAGE_TARGETS = new Set(["clawhub", "npm"]);
 function fail(message) {

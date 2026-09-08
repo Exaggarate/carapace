@@ -1,12 +1,12 @@
 ---
 summary: "Plugin manifest + JSON schema requirements (strict config validation)"
 read_when:
-  - You are building an OpenClaw plugin
+  - You are building an Carapace plugin
   - You need to ship a plugin config schema or debug plugin validation errors
 title: "Plugin manifest"
 ---
 
-This page covers the **native OpenClaw plugin manifest**, `openclaw.plugin.json`. For compatible bundle layouts (Agent Plugins, Codex, Claude, Cursor), see [Plugin bundles](/plugins/bundles).
+This page covers the **native Carapace plugin manifest**, `carapace.plugin.json`. For compatible bundle layouts (Agent Plugins, Codex, Claude, Cursor), see [Plugin bundles](/plugins/bundles).
 
 Compatible bundle formats use their own manifest files instead:
 
@@ -15,15 +15,15 @@ Compatible bundle formats use their own manifest files instead:
 - Claude bundle: `.claude-plugin/plugin.json`, or the default Claude component layout with no manifest
 - Cursor bundle: `.cursor-plugin/plugin.json`
 
-OpenClaw auto-detects those layouts but does not validate them against the `openclaw.plugin.json` schema below. For a compatible bundle, OpenClaw reads bundle metadata, declared skill roots, Claude command roots, Claude `settings.json` defaults, Claude LSP defaults, and supported hook packs, when the layout matches OpenClaw's runtime expectations.
+Carapace auto-detects those layouts but does not validate them against the `carapace.plugin.json` schema below. For a compatible bundle, Carapace reads bundle metadata, declared skill roots, Claude command roots, Claude `settings.json` defaults, Claude LSP defaults, and supported hook packs, when the layout matches Carapace's runtime expectations.
 
-Every native OpenClaw plugin **must** ship `openclaw.plugin.json` in the **plugin root**. OpenClaw reads it to validate configuration **without executing plugin code**. A missing or invalid manifest blocks config validation and is treated as a plugin error.
+Every native Carapace plugin **must** ship `carapace.plugin.json` in the **plugin root**. Carapace reads it to validate configuration **without executing plugin code**. A missing or invalid manifest blocks config validation and is treated as a plugin error.
 
 See [Plugins](/tools/plugin) for the full plugin system guide, and [Capability model](/plugins/architecture#public-capability-model) for the native capability model and current external-compatibility guidance.
 
 ## What this file does
 
-`openclaw.plugin.json` is metadata OpenClaw reads **before loading your plugin code**. Everything in it must be cheap enough to inspect without booting plugin runtime.
+`carapace.plugin.json` is metadata Carapace reads **before loading your plugin code**. Everything in it must be cheap enough to inspect without booting plugin runtime.
 
 **Use it for:**
 
@@ -36,7 +36,7 @@ See [Plugins](/tools/plugin) for the full plugin system guide, and [Capability m
 - dashboard widget data bindings and action verbs
 - static MCP servers that should exist while the plugin is enabled
 - durable and regenerable state- or agent-relative backup resources
-- QA runner metadata the shared `openclaw qa` host can inspect
+- QA runner metadata the shared `carapace qa` host can inspect
 - channel-specific config metadata merged into catalog and validation surfaces
 
 **Do not use it for:** registering native runtime hooks, declaring the full plugin runtime entrypoint, or npm install metadata. Those belong in your plugin code and `package.json`.
@@ -54,7 +54,7 @@ The anchors from the single-page version still resolve here.
 - <a id="modelcatalog-reference"></a>[`modelCatalog`](/plugins/manifest/models#modelcatalog-reference)
 - <a id="modelidnormalization-reference"></a>[`modelIdNormalization`](/plugins/manifest/models#modelidnormalization-reference)
 - <a id="modelpricing-reference"></a>[`modelPricing`](/plugins/manifest/models#modelpricing-reference)
-- <a id="openclaw-provider-index"></a>[OpenClaw Provider Index](/plugins/manifest/models#openclaw-provider-index)
+- <a id="carapace-provider-index"></a>[Carapace Provider Index](/plugins/manifest/models#carapace-provider-index)
 
 ### Provider fields
 
@@ -113,7 +113,7 @@ The anchors from the single-page version still resolve here.
 [Manifest versus package.json](/plugins/manifest/package-json) — Which pre-runtime metadata lives in package.json, and which duplicate plugin id wins.
 
 - <a id="manifest-versus-package.json"></a><a id="manifest-versus-package-json"></a>[Manifest versus `package.json`](/plugins/manifest/package-json#manifest-versus-package-json)
-- <a id="package.json-fields-that-affect-discovery"></a><a id="package-json-fields-that-affect-discovery"></a>[`package.json#openclaw` fields](/plugins/manifest/package-json#package-json-fields-that-affect-discovery)
+- <a id="package.json-fields-that-affect-discovery"></a><a id="package-json-fields-that-affect-discovery"></a>[`package.json#carapace` fields](/plugins/manifest/package-json#package-json-fields-that-affect-discovery)
 - <a id="discovery-precedence-(duplicate-plugin-ids)"></a><a id="discovery-precedence-duplicate-plugin-ids"></a>[Discovery precedence](/plugins/manifest/package-json#discovery-precedence-duplicate-plugin-ids)
 
 ## Minimal example
@@ -235,8 +235,8 @@ The anchors from the single-page version still resolve here.
 | `syntheticAuthRefs`                  | No       | `string[]`                   | Provider or CLI backend refs whose plugin-owned synthetic auth hook should be probed during cold model discovery before runtime loads.                                                                                                                                                                                                                                                           |
 | `nonSecretAuthMarkers`               | No       | `string[]`                   | Bundled-plugin-owned placeholder API key values that represent non-secret local, OAuth, or ambient credential state.                                                                                                                                                                                                                                                                             |
 | `commandAliases`                     | No       | `object[]`                   | Command names owned by this plugin that should produce plugin-aware config and CLI diagnostics before runtime loads.                                                                                                                                                                                                                                                                             |
-| `cliCommands`                        | No       | `object[]`                   | Root CLI commands shown in `openclaw --help` before plugin code loads. Each row requires `name`, `description`, and `hasSubcommands`.                                                                                                                                                                                                                                                            |
-| `providerUsageAuthEnvVars`           | No       | `Record<string, string[]>`   | Usage/billing-only provider credentials. OpenClaw uses these names for usage discovery and secret scrubbing but never for inference auth.                                                                                                                                                                                                                                                        |
+| `cliCommands`                        | No       | `object[]`                   | Root CLI commands shown in `carapace --help` before plugin code loads. Each row requires `name`, `description`, and `hasSubcommands`.                                                                                                                                                                                                                                                            |
+| `providerUsageAuthEnvVars`           | No       | `Record<string, string[]>`   | Usage/billing-only provider credentials. Carapace uses these names for usage discovery and secret scrubbing but never for inference auth.                                                                                                                                                                                                                                                        |
 | `providerAuthAliases`                | No       | `Record<string, string>`     | Provider ids that should reuse another provider id for auth lookup, for example a coding provider that shares the base provider API key and auth profiles.                                                                                                                                                                                                                                       |
 | `providerAuthChoices`                | No       | `object[]`                   | Cheap auth-choice metadata for onboarding pickers, preferred-provider resolution, and simple CLI flag wiring.                                                                                                                                                                                                                                                                                    |
 | `activation`                         | No       | `object`                     | Cheap activation planner metadata for startup, provider, command, channel, route, and capability-triggered loading. Metadata only; plugin runtime still owns actual behavior.                                                                                                                                                                                                                    |
@@ -245,7 +245,7 @@ The anchors from the single-page version still resolve here.
 | `doctorContract`                     | No       | `object`                     | Declares which dynamic doctor-contract surfaces the plugin artifact exports so doctor loads only relevant modules.                                                                                                                                                                                                                                                                               |
 | `doctorHealthChecks`                 | No       | `boolean`                    | Declares health-check registration in the selected plugin's public API. Currently used for the Codex health API.                                                                                                                                                                                                                                                                                 |
 | `sessionRouteStateOwners`            | No       | `object[]`                   | Static session-route ownership for doctor cleanup. Each entry declares an `id`, `label`, and optional `providerIds`, `runtimeIds`, `cliSessionKeys`, and `authProfilePrefixes`.                                                                                                                                                                                                                  |
-| `qaRunners`                          | No       | `object[]`                   | Cheap QA runner descriptors used by the shared `openclaw qa` host before plugin runtime loads.                                                                                                                                                                                                                                                                                                   |
+| `qaRunners`                          | No       | `object[]`                   | Cheap QA runner descriptors used by the shared `carapace qa` host before plugin runtime loads.                                                                                                                                                                                                                                                                                                   |
 | `dashboard`                          | No       | `object`                     | Dashboard widget data bindings and action verbs. Each entry is validated against a Gateway method registered by this plugin with the required read or write scope. See [dashboard reference](/plugins/manifest/surfaces#dashboard-reference).                                                                                                                                                    |
 | `mcpServers`                         | No       | `Record<string, object>`     | Static MCP server definitions contributed while this plugin is enabled. Relative command arguments and working directories resolve from the plugin root. Operator `mcp.servers` entries override or disable definitions with the same name. See [MCP server reference](/plugins/manifest/surfaces#mcp-server-reference).                                                                         |
 | `contracts`                          | No       | `object`                     | Static capability ownership snapshot for external auth hooks, embeddings, speech, realtime transcription, realtime voice, media-understanding, image/video/music generation, web fetch, web search, worker providers, document/web-content extraction, and tool ownership.                                                                                                                       |
@@ -269,7 +269,7 @@ The anchors from the single-page version still resolve here.
 - **Every plugin must ship a JSON Schema**, even if it accepts no config.
 - An empty schema is acceptable (for example, `{ "type": "object", "additionalProperties": false }`).
 - Config is validated against the manifest schema at config read/write time and before the plugin loads.
-- When extending or forking a bundled plugin with new config keys, update that plugin's `openclaw.plugin.json` `configSchema` at the same time. Bundled plugin schemas are strict, so adding `plugins.entries.<id>.config.myNewKey` in user config without adding `myNewKey` to `configSchema.properties` will be rejected before the plugin runtime loads.
+- When extending or forking a bundled plugin with new config keys, update that plugin's `carapace.plugin.json` `configSchema` at the same time. Bundled plugin schemas are strict, so adding `plugins.entries.<id>.config.myNewKey` in user config without adding `myNewKey` to `configSchema.properties` will be rejected before the plugin runtime loads.
 
 Example schema extension:
 
@@ -312,7 +312,7 @@ catalog requests do not poll files for changes.
 ### Configuration validation
 
 - Required-field errors identify every missing field after schema defaults are applied. For dependencies on multiple fields, the error reports the dependency condition without claiming that fields already present are missing.
-- Unknown `channels.*` keys are **errors**, unless the channel id is declared by a plugin manifest. If the same id also appears in `plugins.allow`, `plugins.entries`, or `plugins.installs` (a plugin that is referenced but not currently discoverable), OpenClaw downgrades this to a **warning** instead.
+- Unknown `channels.*` keys are **errors**, unless the channel id is declared by a plugin manifest. If the same id also appears in `plugins.allow`, `plugins.entries`, or `plugins.installs` (a plugin that is referenced but not currently discoverable), Carapace downgrades this to a **warning** instead.
 - `plugins.entries.<id>`, `plugins.allow`, and `plugins.deny` referencing unknown plugin ids are **warnings** ("stale config entry ignored"), not errors, so upgrades and removed/renamed plugins do not block gateway startup. An exact `{ enabled: false }` plugin entry is an intentional uninstall marker, so validation and Doctor keep it without a stale-config warning.
 - `plugins.slots.memory` referencing an unknown plugin id is an **error**, except for the known `memory-lancedb` official external plugin, which warns instead.
 - If a plugin is installed but has a broken or missing manifest or schema, validation fails and Doctor reports the plugin error.
@@ -322,13 +322,13 @@ See [Configuration reference](/gateway/configuration) for the full `plugins.*` s
 
 ## Notes
 
-- The manifest is **required for native OpenClaw plugins**, including local filesystem loads. Runtime still loads the plugin module separately; the manifest is only for discovery + validation.
+- The manifest is **required for native Carapace plugins**, including local filesystem loads. Runtime still loads the plugin module separately; the manifest is only for discovery + validation.
 - Native manifests are parsed with JSON5, so comments, trailing commas, and unquoted keys are accepted as long as the final value is still an object.
 - Only documented manifest fields are read by the manifest loader. Avoid custom top-level keys.
 - `channels`, `providers`, `cliBackends`, and `skills` can all be omitted when a plugin does not need them.
 - `providerCatalogEntry` must stay lightweight and should not import broad runtime code; use it for static provider catalog metadata or narrow discovery descriptors, not request-time execution.
 - Exclusive plugin kinds are selected through `plugins.slots.*`: `kind: "memory"` via `plugins.slots.memory` (default `memory-core`), `kind: "context-engine"` via `plugins.slots.contextEngine` (default `legacy`).
-- Declare exclusive plugin kind in this manifest. Bundled plugins use manifest kinds without loading their runtime during enablement. Runtime-entry `OpenClawPluginDefinition.kind` is deprecated and remains only as a compatibility fallback for older external plugins.
+- Declare exclusive plugin kind in this manifest. Bundled plugins use manifest kinds without loading their runtime during enablement. Runtime-entry `CarapacePluginDefinition.kind` is deprecated and remains only as a compatibility fallback for older external plugins.
 - Env-var metadata in `setup.providers[].envVars` is declarative only. Status, audit, cron delivery validation, and other read-only surfaces still apply plugin trust and effective activation policy before treating an env var as configured.
 - For runtime wizard metadata that requires provider code, see [Provider runtime hooks](/plugins/architecture-internals#provider-runtime-hooks).
 - If your plugin depends on native modules, document the build steps and any package-manager allowlist requirements (for example, pnpm `allow-build-scripts` + `pnpm rebuild <package>`).

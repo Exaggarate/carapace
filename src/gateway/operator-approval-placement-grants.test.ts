@@ -7,13 +7,13 @@ import { resolveCanonicalPluginApprovalRequestAllowedDecisions } from "../infra/
 import type { PluginApprovalRequestPayload } from "../infra/plugin-approvals.js";
 import { resetPluginRuntimeStateForTest } from "../plugins/runtime.js";
 import { withPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { applyPluginNodeInvokePolicy } from "./node-invoke-plugin-policy.js";
 import {
@@ -34,7 +34,7 @@ import {
 import { insertOperatorApproval, resolveOperatorApproval } from "./operator-approval-store.js";
 
 type PlacementTestDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "operator_approvals" | "worker_environments" | "worker_session_placements"
 >;
 type NewOperatorApproval = Parameters<typeof insertOperatorApproval>[0]["approval"];
@@ -48,20 +48,20 @@ const PAIRING_GENERATION = "pairing-1";
 const CWD = "/worker/workspace";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-function createDatabaseOptions(): OpenClawStateDatabaseOptions {
-  const stateDir = tempDirs.make("openclaw-placement-grant-");
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+function createDatabaseOptions(): CarapaceStateDatabaseOptions {
+  const stateDir = tempDirs.make("carapace-placement-grant-");
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
 beforeEach(resetPluginRuntimeStateForTest);
 
 afterEach(() => {
   resetPluginRuntimeStateForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
-function seedActivePlacement(databaseOptions: OpenClawStateDatabaseOptions): void {
-  const database = openOpenClawStateDatabase(databaseOptions);
+function seedActivePlacement(databaseOptions: CarapaceStateDatabaseOptions): void {
+  const database = openCarapaceStateDatabase(databaseOptions);
   const stateDb = getNodeSqliteKysely<PlacementTestDatabase>(database.db);
   executeSqliteQuerySync(
     database.db,
@@ -82,7 +82,7 @@ function seedActivePlacement(databaseOptions: OpenClawStateDatabaseOptions): voi
       desktop_json: null,
       state: "attached",
       bootstrap_bundle_hash: "bundle-1",
-      bootstrap_openclaw_version: "test",
+      bootstrap_carapace_version: "test",
       bootstrap_protocol_features_json: "[]",
       bootstrap_install_kind: "test",
       owner_epoch: 7,
@@ -160,7 +160,7 @@ function approval(id: string): NewOperatorApproval {
 }
 
 function resolveBinding(
-  databaseOptions: OpenClawStateDatabaseOptions,
+  databaseOptions: CarapaceStateDatabaseOptions,
   runtime = createPlacementStandingGrantRuntime({
     runtimeEpoch: "runtime-1",
     databaseOptions,
@@ -181,7 +181,7 @@ function resolveBinding(
 }
 
 function mintGrant(
-  databaseOptions: OpenClawStateDatabaseOptions,
+  databaseOptions: CarapaceStateDatabaseOptions,
   now: () => number = () => NOW_MS + 2_000,
 ): {
   binding: PlacementStandingGrantMintSpec;
@@ -219,7 +219,7 @@ describe("placement standing grants", () => {
   it("retains the exact binding only for the current Gateway runtime", () => {
     const databaseOptions = createDatabaseOptions();
     seedActivePlacement(databaseOptions);
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const versionBefore = database.db.prepare("PRAGMA user_version").get();
     const metadataBefore = database.db
       .prepare("SELECT schema_version, updated_at FROM schema_meta WHERE meta_key = 'primary'")
@@ -345,7 +345,7 @@ describe("placement standing grants", () => {
   ] as const)("fails closed after %s", (_name, update) => {
     const databaseOptions = createDatabaseOptions();
     const { binding, runtime } = mintGrant(databaseOptions);
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const stateDb = getNodeSqliteKysely<PlacementTestDatabase>(database.db);
     executeSqliteQuerySync(
       database.db,
@@ -363,7 +363,7 @@ describe("placement standing grants", () => {
       let nowMs = NOW_MS + 2_000;
       const databaseOptions = createDatabaseOptions();
       const { binding, runtime } = mintGrant(databaseOptions, () => nowMs);
-      const database = openOpenClawStateDatabase(databaseOptions);
+      const database = openCarapaceStateDatabase(databaseOptions);
       const stateDb = getNodeSqliteKysely<PlacementTestDatabase>(database.db);
       if (scenario === "parent-missing") {
         executeSqliteQuerySync(
@@ -393,7 +393,7 @@ describe("placement standing grants", () => {
               ? "approval-not-allow-always"
               : "placement-missing",
       );
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
     }
   });
 
@@ -532,7 +532,7 @@ describe("placement standing grants", () => {
     expect(manager.listPendingRecords()).toEqual([]);
     expect(invoke).toHaveBeenCalledTimes(2);
 
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openCarapaceStateDatabase(databaseOptions);
     const stateDb = getNodeSqliteKysely<PlacementTestDatabase>(database.db);
     executeSqliteQuerySync(
       database.db,

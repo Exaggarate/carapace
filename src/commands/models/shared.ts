@@ -1,7 +1,7 @@
 /** Shared helpers for model commands that read or mutate model config. */
 
-import { expectDefined } from "@openclaw/normalization-core";
-import { asNonArrayRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asNonArrayRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveAmbientOwnerAgentId } from "../../agents/agent-scope-config.js";
 import { listAgentIds, resolveAgentDir, resolveSoleAgentId } from "../../agents/agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../../agents/defaults.js";
@@ -14,7 +14,7 @@ import {
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import {
-  type OpenClawConfig,
+  type CarapaceConfig,
   readConfigFileSnapshot,
   transformConfigFile,
 } from "../../config/config.js";
@@ -54,7 +54,7 @@ export const formatMs = (value?: number | null) => {
 };
 
 /** Loads config from disk and throws a formatted error when validation fails. */
-export async function loadValidConfigOrThrow(): Promise<OpenClawConfig> {
+export async function loadValidConfigOrThrow(): Promise<CarapaceConfig> {
   const snapshot = await readConfigFileSnapshot();
   if (!snapshot.valid) {
     const issues = formatConfigIssueLines(snapshot.issues, "-").join("\n");
@@ -65,7 +65,7 @@ export async function loadValidConfigOrThrow(): Promise<OpenClawConfig> {
 
 /** Runtime config snapshot supplied to model config mutators. */
 type UpdateConfigContext = {
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
   canonicalModelKeys?: ReadonlyMap<string, string | undefined>;
   restoreSourceEntry: (
     from: string,
@@ -81,14 +81,14 @@ type ModelEntryMergeOptions = Partial<
 /** Reads source config, applies a mutator, and writes only the source-form config. */
 export async function updateConfig(
   mutator: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     context: UpdateConfigContext,
-  ) => OpenClawConfig | Promise<OpenClawConfig>,
+  ) => CarapaceConfig | Promise<CarapaceConfig>,
   selectModelRefs?: (
-    cfg: OpenClawConfig,
+    cfg: CarapaceConfig,
     context: UpdateConfigContext,
   ) => readonly (ModelRef | undefined)[],
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const explicitSetPaths: string[][] = [];
   const result = await transformConfigFile({
     base: "source",
@@ -158,7 +158,7 @@ export async function updateConfig(
   return expectDefined(result.result, "model config mutation result");
 }
 
-function resolveModelInput(params: { raw: string; cfg: OpenClawConfig }) {
+function resolveModelInput(params: { raw: string; cfg: CarapaceConfig }) {
   const aliasIndex = buildModelAliasIndex({
     cfg: params.cfg,
     defaultProvider: DEFAULT_PROVIDER,
@@ -172,7 +172,7 @@ function resolveModelInput(params: { raw: string; cfg: OpenClawConfig }) {
 }
 
 /** Resolves a CLI model reference through aliases and catalog provider aliases. */
-export function resolveModelTarget(params: { raw: string; cfg: OpenClawConfig }): {
+export function resolveModelTarget(params: { raw: string; cfg: CarapaceConfig }): {
   provider: string;
   model: string;
 } {
@@ -185,7 +185,7 @@ export function resolveModelTarget(params: { raw: string; cfg: OpenClawConfig })
 
 function resolveAuthoredModelAliasTarget(params: {
   raw: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): { provider: string; model: string } | undefined {
   const resolved = resolveModelInput(params);
   return resolved?.alias ? resolved.ref : undefined;
@@ -193,7 +193,7 @@ function resolveAuthoredModelAliasTarget(params: {
 
 /** Resolves model reference strings to index-aligned canonical refs. */
 export function resolveModelRefsFromEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entries: readonly string[];
 }): Array<ModelRef | undefined> {
   const aliasIndex = buildModelAliasIndex({
@@ -221,11 +221,11 @@ export function resolveModelKeysFromEntries(
   );
 }
 
-function resolveKnownAgentId(cfg: OpenClawConfig, rawAgentId: string): string {
+function resolveKnownAgentId(cfg: CarapaceConfig, rawAgentId: string): string {
   const agentId = normalizeAgentId(rawAgentId);
   if (!listAgentIds(cfg).includes(agentId)) {
     throw new Error(
-      `Unknown agent id "${rawAgentId}". Use "${formatCliCommand("openclaw agents list")}" to see configured agents.`,
+      `Unknown agent id "${rawAgentId}". Use "${formatCliCommand("carapace agents list")}" to see configured agents.`,
     );
   }
   return agentId;
@@ -235,7 +235,7 @@ type ModelsTargetMode = { kind: "read"; agentDirOverride?: string } | { kind: "m
 
 /** Resolves model-command scope and retains configured auth ownership through read overrides. */
 export function resolveModelsTargetAgent(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   rawAgentId: string | undefined,
   mode: ModelsTargetMode,
 ): {
@@ -322,13 +322,13 @@ export function mergePrimaryFallbackConfig(
 
 /** Applies a default text/image primary-model update and ensures the model entry exists. */
 export function applyDefaultModelPrimaryUpdate(params: {
-  cfg: OpenClawConfig;
-  resolveCfg?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  resolveCfg?: CarapaceConfig;
   modelRaw: string;
   field: "model" | "imageModel";
   resolvedTarget?: { provider: string; model: string };
   modelEntryMerge?: ModelEntryMergeOptions;
-}): OpenClawConfig {
+}): CarapaceConfig {
   const resolved = params.resolvedTarget ?? resolveDefaultModelPrimaryTarget(params);
   const nextModels = {
     ...params.cfg.agents?.defaults?.models,
@@ -354,8 +354,8 @@ export function applyDefaultModelPrimaryUpdate(params: {
 }
 
 function resolveDefaultModelPrimaryTarget(params: {
-  cfg: OpenClawConfig;
-  resolveCfg?: OpenClawConfig;
+  cfg: CarapaceConfig;
+  resolveCfg?: CarapaceConfig;
   modelRaw: string;
 }): { provider: string; model: string } {
   return params.resolveCfg && params.resolveCfg !== params.cfg
@@ -368,7 +368,7 @@ function resolveDefaultModelPrimaryTarget(params: {
 export async function updateDefaultModelPrimaryConfig(params: {
   modelRaw: string;
   field: "model" | "imageModel";
-}): Promise<{ updated: OpenClawConfig; warning?: string }> {
+}): Promise<{ updated: CarapaceConfig; warning?: string }> {
   let warning: string | undefined;
   const updated = await updateConfig(
     (cfg, context) => {

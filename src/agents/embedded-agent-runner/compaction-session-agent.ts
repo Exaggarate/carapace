@@ -1,6 +1,6 @@
-import type { LlmRuntime } from "@openclaw/ai";
+import type { LlmRuntime } from "@carapace/ai";
 import type { ThinkLevel } from "../../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getModelProviderRuntimePluginHandle } from "../../plugins/provider-hook-runtime.js";
 import type { ProviderRuntimeModel } from "../../plugins/provider-runtime-model.types.js";
 import { resolveProviderTextTransforms } from "../../plugins/provider-runtime.js";
@@ -23,7 +23,7 @@ export async function prepareCompactionSessionAgent(params: {
   effectiveModel: ProviderRuntimeModel;
   resolvedApiKey?: string;
   authStorage: unknown;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   modelId: string;
   thinkLevel: ThinkLevel;

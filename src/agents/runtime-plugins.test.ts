@@ -54,7 +54,7 @@ import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   bindPluginRuntimeArtifactSelection,
   resolvePluginRuntimeArtifactSelection,
@@ -169,7 +169,7 @@ describe("agent runtime plugin registries", () => {
     const base = createEmptyPluginRegistry();
     base.plugins.push(
       createPluginRecord({ id: "memory-core" }),
-      createPluginRecord({ id: "codex", format: "openclaw", imported }),
+      createPluginRecord({ id: "codex", format: "carapace", imported }),
     );
     const selected = loadAgentRuntimePluginRegistryHandle({
       config: {},
@@ -202,7 +202,7 @@ describe("agent runtime plugin registries", () => {
     activeRegistry.plugins.push(
       createPluginRecord({ id: "startup-channel" }),
       createPluginRecord({ id: "startup-provider" }),
-      createPluginRecord({ id: "deferred-plugin", format: "openclaw", imported: false }),
+      createPluginRecord({ id: "deferred-plugin", format: "carapace", imported: false }),
     );
     hoisted.resolveAgentRuntimePluginLoadPlan.mockImplementation(({ config, basePluginIds }) => ({
       config,
@@ -252,7 +252,7 @@ describe("agent runtime plugin registries", () => {
         rootDir: manifest.rootDir,
         source: manifest.source,
         origin: manifest.origin,
-        format: "openclaw",
+        format: "carapace",
         imported: manifest.id !== "deferred",
       });
       bindPluginRuntimeArtifactSelection(record, {
@@ -303,7 +303,7 @@ describe("agent runtime plugin registries", () => {
   it.each([
     {
       name: "custom environment",
-      input: { env: { OPENCLAW_STATE_DIR: "/tmp/custom-state" } },
+      input: { env: { CARAPACE_STATE_DIR: "/tmp/custom-state" } },
     },
     {
       name: "non-bindable mode",
@@ -373,7 +373,7 @@ describe("agent runtime plugin registries", () => {
 
   it("keeps direct no-current loads on the requested workspace", () => {
     const config = {} as never;
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/carapace-state" };
     const selections = [{ provider: "openai", modelId: "gpt-5.5", runtime: "codex" }];
 
     expect(
@@ -428,7 +428,7 @@ describe("agent runtime plugin registries", () => {
   });
 
   it("carries low-level reply policy without rebinding the loader's cached registry", async () => {
-    const config = { plugins: { enabled: false } } satisfies OpenClawConfig;
+    const config = { plugins: { enabled: false } } satisfies CarapaceConfig;
     const cachedRegistry = createEmptyPluginRegistry();
     hoisted.loadPluginRegistryHandle.mockReturnValue(cachedRegistry);
     const pluginRegistry = loadAgentRuntimePluginRegistryHandle({
@@ -488,7 +488,7 @@ describe("agent runtime plugin registries", () => {
     const requestRegistry = {
       plugins: [
         { id: "memory-core", status: "loaded" },
-        { id: "deferred", status: "loaded", format: "openclaw", imported: false },
+        { id: "deferred", status: "loaded", format: "carapace", imported: false },
       ],
     } as never;
 
@@ -530,7 +530,7 @@ describe("agent runtime plugin registries", () => {
 
   it("loads selected runtimes from the Gateway metadata workspace", () => {
     const config = {} as never;
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-state" };
+    const env = { CARAPACE_STATE_DIR: "/tmp/carapace-state" };
     const snapshot = createMetadataSnapshot();
 
     loadAgentRuntimePluginRegistryHandle({
@@ -621,7 +621,7 @@ describe("agent runtime plugin registries", () => {
   it.each([
     {
       name: "globally disabled plugins",
-      config: { plugins: { enabled: false } } satisfies OpenClawConfig,
+      config: { plugins: { enabled: false } } satisfies CarapaceConfig,
       runtime: "codex",
       expectedOwner: 'Owner plugin "codex" is not activatable',
       expectedReason: "plugins disabled",
@@ -629,7 +629,7 @@ describe("agent runtime plugin registries", () => {
     },
     {
       name: "globally disabled plugins with an unknown owner",
-      config: { plugins: { enabled: false } } satisfies OpenClawConfig,
+      config: { plugins: { enabled: false } } satisfies CarapaceConfig,
       runtime: "custom-harness",
       expectedOwner: "no plugin can register agent harness",
       expectedReason: "Plugins are disabled",
@@ -639,7 +639,7 @@ describe("agent runtime plugin registries", () => {
       name: "a restrictive allowlist",
       config: {
         plugins: { allow: ["openai", "memory-core"] },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       runtime: "codex",
       expectedOwner: 'Owner plugin "codex" is not activatable',
       expectedReason: "not in allowlist",
@@ -695,7 +695,7 @@ describe("agent runtime plugin registries", () => {
     const gatewayRegistry = createEmptyPluginRegistry();
     gatewayRegistry.plugins.push(
       createPluginRecord({ id: "request-provider" }),
-      createPluginRecord({ id: "deferred", format: "openclaw", imported: false }),
+      createPluginRecord({ id: "deferred", format: "carapace", imported: false }),
     );
     hoisted.resolveAgentRuntimePluginLoadPlan.mockImplementation(({ config, basePluginIds }) => ({
       config,

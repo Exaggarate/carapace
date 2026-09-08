@@ -1,5 +1,5 @@
 // Matrix tests cover shared plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMatrixMonitorTaskRunner } from "../monitor/task-runner.js";
 import { authFor, createMockClient } from "./shared.test-support.js";

@@ -1,6 +1,6 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
+import CarapaceChatUI
+import CarapaceKit
 
 /// Three recovery sources represent the same gateway-owned approval readback.
 /// Preserve their source so cached cards, migration rows, and held Watch actions
@@ -26,7 +26,7 @@ enum WatchMessageLegacyDefaults {
     }
 
     struct Snapshot {
-        let legacyImport: OpenClawWatchMessageLegacyImport
+        let legacyImport: CarapaceWatchMessageLegacyImport
         fileprivate let queueData: Data?
         fileprivate let metadataData: Data?
 
@@ -46,7 +46,7 @@ enum WatchMessageLegacyDefaults {
         let metadataData = try self.data(self.metadataKey, defaults: defaults)
         let queued = try queueData.map { try JSONDecoder().decode([Queued].self, from: $0) } ?? []
         let metadata = try metadataData.map { try JSONDecoder().decode(Metadata.self, from: $0) }
-        let legacyImport = OpenClawWatchMessageLegacyImport(
+        let legacyImport = CarapaceWatchMessageLegacyImport(
             messages: queued.map {
                 .init(
                     id: $0.event.commandId,
@@ -78,10 +78,10 @@ enum WatchMessageLegacyDefaults {
 @MainActor
 final class WatchReplyCoordinator {
     private struct CommandKey: Hashable {
-        let context: OpenClawWatchChatDeliveryContext
+        let context: CarapaceWatchChatDeliveryContext
         let id: Data
 
-        init(context: OpenClawWatchChatDeliveryContext, id: String) {
+        init(context: CarapaceWatchChatDeliveryContext, id: String) {
             self.context = context
             self.id = Data(id.utf8)
         }
@@ -92,7 +92,7 @@ final class WatchReplyCoordinator {
         let receiptID: Data?
     }
 
-    private let journal: OpenClawWatchMessageJournal
+    private let journal: CarapaceWatchMessageJournal
     private let gateway: GatewayNodeSession
     private let messaging: any WatchMessagingServicing
     private let reportStorageWarning: @MainActor (String?) -> Void
@@ -104,7 +104,7 @@ final class WatchReplyCoordinator {
     private var stopped = false
 
     init(
-        journal: OpenClawWatchMessageJournal,
+        journal: CarapaceWatchMessageJournal,
         gateway: GatewayNodeSession,
         messaging: any WatchMessagingServicing,
         reportStorageWarning: @escaping @MainActor (String?) -> Void)
@@ -117,8 +117,8 @@ final class WatchReplyCoordinator {
 
     @discardableResult
     func admit(
-        _ command: OpenClawWatchChatDeliveryCommand,
-        destination: OpenClawWatchMessageReceiptDestination = .watch) async throws -> OpenClawWatchMessageEntry
+        _ command: CarapaceWatchChatDeliveryCommand,
+        destination: CarapaceWatchMessageReceiptDestination = .watch) async throws -> CarapaceWatchMessageEntry
     {
         guard !self.stopped else { throw WatchMessagingError.admissionUnavailable }
         try await self.journal.recoverInterruptedWork(nowMs: Self.nowMs())
@@ -132,11 +132,11 @@ final class WatchReplyCoordinator {
         return entry
     }
 
-    func acknowledge(_ acknowledgment: OpenClawWatchChatDeliveryReceiptAck) async throws {
+    func acknowledge(_ acknowledgment: CarapaceWatchChatDeliveryReceiptAck) async throws {
         guard !self.stopped else { throw WatchMessagingError.admissionUnavailable }
         let result = try await self.journal.acknowledge(acknowledgment)
         guard result == .applied else {
-            throw OpenClawWatchChatDeliveryError(code: "receipt_mismatch", message: "Watch receipt was not accepted.")
+            throw CarapaceWatchChatDeliveryError(code: "receipt_mismatch", message: "Watch receipt was not accepted.")
         }
         self.updateStorageWarning(nil)
     }
@@ -193,7 +193,7 @@ final class WatchReplyCoordinator {
         }
     }
 
-    private func start(_ entry: OpenClawWatchMessageEntry) {
+    private func start(_ entry: CarapaceWatchMessageEntry) {
         guard [.queued, .accepted].contains(entry.phase), let command = entry.command else { return }
         self.start(CommandKey(context: command.context, id: command.commandId))
     }
@@ -230,7 +230,7 @@ final class WatchReplyCoordinator {
         }
     }
 
-    private func process(_ entry: OpenClawWatchMessageEntry) async -> Bool {
+    private func process(_ entry: CarapaceWatchMessageEntry) async -> Bool {
         guard let command = entry.command, let owner = entry.owner, !Task.isCancelled else { return false }
         let transport = IOSGatewayChatTransport(
             gateway: self.gateway,
@@ -254,7 +254,7 @@ final class WatchReplyCoordinator {
                     message: String(localized: "The Gateway delivery target changed. Review this message on iPhone.")))
                 return false
             }
-            let response: OpenClawChatSendResponse
+            let response: CarapaceChatSendResponse
             do {
                 response = try await lease.sendMessage(
                     sessionKey: command.context.deliverySessionKey,
@@ -264,7 +264,7 @@ final class WatchReplyCoordinator {
                     thinking: NodeAppModel.watchThinkingOverride(for: command.kind) ?? "",
                     idempotencyKey: command.commandId,
                     attachments: [])
-            } catch OpenClawChatTransportSendError.notDispatched {
+            } catch CarapaceChatTransportSendError.notDispatched {
                 return try await self.journal.releaseNotDispatched(claim) == .applied
             } catch {
                 // The Gateway's native dedupe is not a durable 48-hour replay contract.
@@ -293,7 +293,7 @@ final class WatchReplyCoordinator {
         return false
     }
 
-    private func observe(_ entry: OpenClawWatchMessageEntry, transport: IOSGatewayChatTransport) async {
+    private func observe(_ entry: CarapaceWatchMessageEntry, transport: IOSGatewayChatTransport) async {
         guard let command = entry.command, let runID = entry.acceptedRunID else { return }
         // Persisted acceptance completes quick replies, including recovery without assistant history.
         if command.kind == .quickReply {
@@ -306,7 +306,7 @@ final class WatchReplyCoordinator {
         if case let .terminal(.failed(message)) = observation {
             await self.finish(entry, outcome: .failed(
                 code: "gateway_run_failed",
-                message: OpenClawWatchChatDeliveryCodec.boundedReplyText(message)))
+                message: CarapaceWatchChatDeliveryCodec.boundedReplyText(message)))
             return
         }
         var inputRunIDs: [String]? = [runID]
@@ -318,14 +318,14 @@ final class WatchReplyCoordinator {
                     agentID: command.context.agentId,
                     inputRunIDs: inputRunIDs,
                     ifCurrentRoute: route)
-                if let text = OpenClawChatHistoryPresentation.replyText(
+                if let text = CarapaceChatHistoryPresentation.replyText(
                     from: history.messages ?? [],
                     runID: runID,
                     inputConsumptions: history.inputConsumptions)
                 {
                     await self.finish(
                         entry,
-                        outcome: .reply(text: OpenClawWatchChatDeliveryCodec.boundedReplyText(text)))
+                        outcome: .reply(text: CarapaceWatchChatDeliveryCodec.boundedReplyText(text)))
                     return
                 }
             } catch {
@@ -340,7 +340,7 @@ final class WatchReplyCoordinator {
         // No observed reply is not failure or permission to execute the accepted command again.
     }
 
-    private func finish(_ entry: OpenClawWatchMessageEntry, outcome: OpenClawWatchChatDeliveryOutcome) async {
+    private func finish(_ entry: CarapaceWatchMessageEntry, outcome: CarapaceWatchChatDeliveryOutcome) async {
         do {
             guard try await self.journal.recordTerminal(entry, outcome: outcome, nowMs: Self.nowMs()) == .applied else {
                 return
@@ -359,7 +359,7 @@ final class WatchReplyCoordinator {
         }
     }
 
-    private func sendReceipt(_ entry: OpenClawWatchMessageEntry) {
+    private func sendReceipt(_ entry: CarapaceWatchMessageEntry) {
         guard !self.stopped, entry.destination == .watch, let receipt = entry.receipt else {
             return
         }

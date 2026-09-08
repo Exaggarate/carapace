@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createExecutionIdentityAdmissionToken } from "../../../audit/execution-identity-admission.js";
 import {
@@ -60,7 +60,7 @@ import { callSubagentGateway } from "./subagent-spawn-gateway.js";
 import { spawnSubagentDirect } from "./subagent-spawn.js";
 import { testing as subagentSpawnTesting } from "./subagent-spawn.test-support.js";
 
-const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH", "OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["CARAPACE_CONFIG_PATH", "CARAPACE_STATE_DIR"]);
 let stateDir = "";
 
 function makeGatewayContext(): GatewayRequestContext {
@@ -171,11 +171,11 @@ describe("spawnSubagentDirect in-process Gateway collector launch", () => {
       restoreSubagentRunsFromDisk: () => 0,
     });
 
-    stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-swarm-gateway-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+    stateDir = await mkdtemp(path.join(os.tmpdir(), "carapace-swarm-gateway-"));
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
     await writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       `${JSON.stringify({
         logging: { audit: { enabled: true, executionIdentity: true } },
         session: { mainKey: "main", scope: "per-sender" },
@@ -316,7 +316,7 @@ describe("spawnSubagentDirect in-process Gateway collector launch", () => {
 
   it("gives each selected global agent its own collector capacity", async () => {
     await writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       JSON.stringify({
         session: { scope: "global" },
         tools: { swarm: { enabled: true, maxConcurrent: 1 } },

@@ -1,11 +1,11 @@
 // Normalizes talk-mode config for voice and channel interactions.
-import { findNormalizedProviderKey } from "@openclaw/model-catalog-core/provider-id";
-import { asFiniteNumberInRange } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { findNormalizedProviderKey } from "@carapace/model-catalog-core/provider-id";
+import { asFiniteNumberInRange } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeFastMode,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { normalizeThinkLevel } from "../auto-reply/thinking.shared.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import type {
@@ -15,7 +15,7 @@ import type {
   TalkProviderConfig,
   TalkRealtimeConfig,
 } from "./types.gateway.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 import { coerceSecretRef } from "./types.secrets.js";
 
 function normalizeTalkSecretInput(value: unknown): TalkProviderConfig["apiKey"] | undefined {
@@ -172,14 +172,14 @@ function activeProviderFromTalk(talk: TalkConfig): string | undefined {
 
 /** Resolve the explicitly selected or sole authored Talk speech provider. */
 export function resolveConfiguredTalkSpeechProviderId(
-  config: Pick<OpenClawConfig, "talk">,
+  config: Pick<CarapaceConfig, "talk">,
 ): string | undefined {
   return config.talk ? activeProviderFromTalk(config.talk) : undefined;
 }
 
 /** Resolve the explicitly selected or sole authored Talk realtime provider. */
 export function resolveConfiguredTalkRealtimeProviderId(
-  config: Pick<OpenClawConfig, "talk">,
+  config: Pick<CarapaceConfig, "talk">,
 ): string | undefined {
   return config.talk?.realtime ? activeProviderFromTalk(config.talk.realtime) : undefined;
 }
@@ -241,7 +241,7 @@ export function normalizeTalkSection(value: TalkConfig | undefined): TalkConfig 
 }
 
 /** Return a config copy with `talk` normalized when a valid Talk section is present. */
-export function normalizeTalkConfig(config: OpenClawConfig): OpenClawConfig {
+export function normalizeTalkConfig(config: CarapaceConfig): CarapaceConfig {
   if (!config.talk) {
     return config;
   }

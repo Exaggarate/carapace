@@ -3,7 +3,7 @@ import {
   startMeetingRealtimeEngine,
   type MeetingRealtimeAudioEngineHandle,
   type MeetingRealtimeAudioTransport,
-} from "openclaw/plugin-sdk/meeting-runtime";
+} from "carapace/plugin-sdk/meeting-runtime";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildGoogleRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 

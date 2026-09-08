@@ -1,4 +1,4 @@
-import { asOptionalObjectRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalObjectRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 
 const eventEnvelopeSchema = z.object({ type: z.string() }).passthrough();

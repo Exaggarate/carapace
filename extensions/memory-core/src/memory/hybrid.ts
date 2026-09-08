@@ -1,5 +1,5 @@
-import type { MemoryEntryProvenance } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { MemoryEntryProvenance } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import { applyImportanceMultiplier } from "./importance.js";
 import { applyMMRToHybridResults, type MMRConfig, DEFAULT_MMR_CONFIG } from "./mmr.js";
 import { applyProjectRanking, projectScoreMultiplier } from "./project-ranking.js";

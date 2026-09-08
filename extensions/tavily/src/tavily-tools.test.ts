@@ -1,7 +1,7 @@
 // Tavily tests cover tavily tools plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-runtime";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_TAVILY_BASE_URL,
@@ -36,10 +36,10 @@ function requireFirstMockArg(mock: ReturnType<typeof vi.fn>, label: string): unk
   return call[0];
 }
 
-function fakeApi(): OpenClawPluginApi {
+function fakeApi(): CarapacePluginApi {
   return {
     config: {},
-  } as OpenClawPluginApi;
+  } as CarapacePluginApi;
 }
 
 describe("tavily tools", () => {
@@ -203,7 +203,7 @@ describe("tavily tools", () => {
       max_results: 5,
       include_answer: true,
       time_range: "week",
-      include_domains: [" docs.openclaw.ai ", "   ", "openclaw.ai"],
+      include_domains: [" github.com/Exaggarate/carapace ", "   ", "github.com/Exaggarate/carapace"],
       exclude_domains: [" bad.example ", ""],
     });
 
@@ -215,7 +215,7 @@ describe("tavily tools", () => {
       maxResults: 5,
       includeAnswer: true,
       timeRange: "week",
-      includeDomains: ["docs.openclaw.ai", "openclaw.ai"],
+      includeDomains: ["github.com/Exaggarate/carapace", "github.com/Exaggarate/carapace"],
       excludeDomains: ["bad.example"],
     });
     const expectedResult = {
@@ -228,7 +228,7 @@ describe("tavily tools", () => {
         maxResults: 5,
         includeAnswer: true,
         timeRange: "week",
-        includeDomains: ["docs.openclaw.ai", "openclaw.ai"],
+        includeDomains: ["github.com/Exaggarate/carapace", "github.com/Exaggarate/carapace"],
         excludeDomains: ["bad.example"],
       },
     };
@@ -279,7 +279,7 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeConfig = {
       plugins: {
         entries: {
@@ -292,9 +292,9 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
-    const registeredTools: Array<Parameters<OpenClawPluginApi["registerTool"]>[0]> = [];
-    const registeredOptions: Array<Parameters<OpenClawPluginApi["registerTool"]>[1]> = [];
+    } as CarapaceConfig;
+    const registeredTools: Array<Parameters<CarapacePluginApi["registerTool"]>[0]> = [];
+    const registeredOptions: Array<Parameters<CarapacePluginApi["registerTool"]>[1]> = [];
     const api = createTestPluginApi({
       config: rawConfig,
       registerTool(tool, opts) {
@@ -330,7 +330,7 @@ describe("tavily tools", () => {
     expect(searchTool.resultContentSource).toBe("network");
     expect(extractTool.resultContentSource).toBe("network");
 
-    await searchTool.execute("search-call", { query: "openclaw" });
+    await searchTool.execute("search-call", { query: "carapace" });
     await extractTool.execute("extract-call", { urls: ["https://example.com"] });
 
     const searchParams = requireFirstMockArg(runTavilySearch, "Tavily search params") as Record<
@@ -338,7 +338,7 @@ describe("tavily tools", () => {
       unknown
     >;
     expect(searchParams.cfg).toBe(runtimeConfig);
-    expect(searchParams.query).toBe("openclaw");
+    expect(searchParams.query).toBe("carapace");
     const extractParams = requireFirstMockArg(
       runTavilyExtract,
       "Tavily extract params",
@@ -431,13 +431,13 @@ describe("tavily tools", () => {
     const searchTool = createTavilySearchTool(fakeApi());
     await expect(
       searchTool.execute("search-call", {
-        query: "openclaw",
+        query: "carapace",
         max_results: 5.5,
       }),
     ).rejects.toThrow("max_results must be an integer from 1 to 20.");
     await expect(
       searchTool.execute("search-call", {
-        query: "openclaw",
+        query: "carapace",
         max_results: 21,
       }),
     ).rejects.toThrow("max_results must be an integer from 1 to 20.");
@@ -479,7 +479,7 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveTavilyApiKey(cfg)).toBe("plugin-key");
     expect(resolveTavilyBaseUrl(cfg)).toBe("https://plugin.tavily.test");
@@ -491,7 +491,7 @@ describe("tavily tools", () => {
 
     expect(resolveTavilyApiKey()).toBe("env-key");
     expect(resolveTavilyBaseUrl()).toBe("https://env.tavily.test");
-    expect(resolveTavilyBaseUrl({} as OpenClawConfig)).not.toBe(DEFAULT_TAVILY_BASE_URL);
+    expect(resolveTavilyBaseUrl({} as CarapaceConfig)).not.toBe(DEFAULT_TAVILY_BASE_URL);
     expect(resolveTavilySearchTimeoutSeconds()).toBe(30);
     expect(resolveTavilyExtractTimeoutSeconds()).toBe(60);
   });

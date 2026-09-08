@@ -1,6 +1,6 @@
 // Public model-catalog facade. Keep exports here curated so callers use the
 // normalized planning APIs instead of reaching into catalog internals.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   planManifestModelCatalogRows,
   type ManifestModelCatalogRowSelection,
@@ -10,7 +10,7 @@ export { planManifestModelCatalogSuppressions } from "./manifest-planner.js";
 
 export function planEffectiveModelCatalogRows(params: {
   registry: Parameters<typeof planManifestModelCatalogRows>[0]["registry"];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   providerFilter?: string;
   providerFilters?: readonly string[];
   mergeKeyFilter?: ReadonlySet<string>;

@@ -4,12 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { AuthProfileCredential } from "../agents/auth-profiles/types.js";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB } from "./openclaw-state-db.generated.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB } from "./carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "./carapace-state-db.js";
 import {
   clearUserProfileAuthLink,
   connectUserModelAccount,
@@ -28,7 +28,7 @@ const tempDirs = createTempDirTracker();
 const statePaths: string[] = [];
 
 function stateOptions() {
-  const path = join(tempDirs.make("user-model-accounts-"), "openclaw.sqlite");
+  const path = join(tempDirs.make("user-model-accounts-"), "carapace.sqlite");
   statePaths.push(path);
   return { path };
 }
@@ -37,7 +37,7 @@ function hasPrivateAccountState(
   profileId: string,
   options: ReturnType<typeof stateOptions>,
 ): boolean {
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   return (
     tableExists(db, "secret_store_entries") &&
     executeSqliteQueryTakeFirstSync(
@@ -56,7 +56,7 @@ function hasPrivateAccountState(
 
 afterEach(() => {
   for (const path of statePaths.splice(0)) {
-    closeOpenClawStateDatabaseByPath(path);
+    closeCarapaceStateDatabaseByPath(path);
   }
   tempDirs.cleanup();
 });
@@ -131,7 +131,7 @@ describe("personal model accounts", () => {
       options,
     );
 
-    closeOpenClawStateDatabaseByPath(options.path);
+    closeCarapaceStateDatabaseByPath(options.path);
 
     expect(readUserModelAuthProfile(authProfileId, options)?.credential).toEqual({
       type: "api_key",
@@ -256,7 +256,7 @@ describe("personal model accounts", () => {
     ).toBe(false);
 
     clearUserProfileAuthLink({ profileId: alice.id, provider: "openai" }, options);
-    closeOpenClawStateDatabaseByPath(options.path);
+    closeCarapaceStateDatabaseByPath(options.path);
     expect(
       readUserModelAccountSummary(
         { profileId: alice.id, authProfileId: first.authProfileId },
@@ -470,7 +470,7 @@ describe("personal model accounts", () => {
         options,
       ),
     ).toBe(false);
-    closeOpenClawStateDatabaseByPath(options.path);
+    closeCarapaceStateDatabaseByPath(options.path);
     expect(readUserModelAuthProfile(authProfileId, options)).toMatchObject({
       credential: { token: "synthetic-rotated-token" },
       usageStats: { lastUsed: 42, cooldownUntil: 99, cooldownReason: "rate_limit" },
@@ -494,7 +494,7 @@ describe("personal model accounts", () => {
     expect(readUserModelAuthProfile(authProfileId, options)?.credential).toMatchObject({
       token: "synthetic-personal-token",
     });
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     const stranded = executeSqliteQueryTakeFirstSync(
       db,
       getNodeSqliteKysely<Pick<DB, "secret_store_entries">>(db)

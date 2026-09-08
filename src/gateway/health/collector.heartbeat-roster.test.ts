@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveHeartbeatSummaryForAgent } from "../../infra/heartbeat-summary.js";
 import { buildHealthAgentSummaries, resolveHealthAgentOrder } from "./collector.js";
 
@@ -12,7 +12,7 @@ vi.mock("../../channels/plugins/read-only.js", () => ({
 const AGENT_COUNT = 200;
 
 /** Fleet with heartbeat defaults and one explicit per-agent override. */
-function makeFleetConfig(storePath: string): OpenClawConfig {
+function makeFleetConfig(storePath: string): CarapaceConfig {
   const entries: Record<string, { heartbeat?: { every?: string } }> = {};
   for (let index = 0; index < AGENT_COUNT; index += 1) {
     entries[`agent-${index}`] = {};
@@ -29,7 +29,7 @@ function makeFleetConfig(storePath: string): OpenClawConfig {
 }
 
 /** Counts how often the roster is read: every walk starts at `agents.entries`. */
-function countRosterReads(cfg: OpenClawConfig): { cfg: OpenClawConfig; reads: () => number } {
+function countRosterReads(cfg: CarapaceConfig): { cfg: CarapaceConfig; reads: () => number } {
   let reads = 0;
   const agents = new Proxy(cfg.agents as object, {
     get(target, property, receiver) {
@@ -39,7 +39,7 @@ function countRosterReads(cfg: OpenClawConfig): { cfg: OpenClawConfig; reads: ()
       return Reflect.get(target, property, receiver);
     },
   });
-  return { cfg: { ...cfg, agents: agents as OpenClawConfig["agents"] }, reads: () => reads };
+  return { cfg: { ...cfg, agents: agents as CarapaceConfig["agents"] }, reads: () => reads };
 }
 
 describe("health agent summaries heartbeat roster", () => {
@@ -48,7 +48,7 @@ describe("health agent summaries heartbeat roster", () => {
   it("resolves heartbeat enrollment for the whole fleet without re-walking the roster per agent", async () => {
     // An absent store keeps the read-only session reader empty; only enrollment is under test.
     const storePath = path.join(
-      tempDirs.make("openclaw-health-heartbeat-roster-"),
+      tempDirs.make("carapace-health-heartbeat-roster-"),
       "sessions.json",
     );
     const plain = makeFleetConfig(storePath);

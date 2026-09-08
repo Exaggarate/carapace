@@ -24,7 +24,7 @@ if (!runtimeArg || !expectedInfoPath) {
 }
 const runtime = fs.realpathSync(runtimeArg);
 const node = path.join(runtime, "bin/node");
-const packageRoot = path.join(runtime, "lib/node_modules/openclaw");
+const packageRoot = path.join(runtime, "lib/node_modules/carapace");
 const expected = JSON.parse(fs.readFileSync(expectedInfoPath, "utf8"));
 const actual = JSON.parse(fs.readFileSync(path.join(packageRoot, "dist/build-info.json"), "utf8"));
 for (const key of ["version", "commit", "builtAt", "buildId"]) {
@@ -38,13 +38,13 @@ if (fs.realpathSync(process.execPath) !== node) {
 
 const nativeFiles = auditMacWorkerPortability(runtime, node);
 
-const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-worker-proof-")));
+const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-worker-proof-")));
 try {
   // Ready manifests do not load lazy native capabilities. Exercise their real
   // package loaders so omitted optional packages and wrong slices fail staging.
   const require = createRequire(path.join(packageRoot, "package.json"));
   // Keep required native mode and bundled module identity in a fresh process;
-  // worker readiness below must still use OpenClaw's normal defaults.
+  // worker readiness below must still use Carapace's normal defaults.
   execFileSync(
     node,
     [fileURLToPath(new URL("./verify-mac-node-worker-fs.mjs", import.meta.url)), packageRoot, home],
@@ -96,7 +96,7 @@ try {
   for (const nativeFirst of [false, true]) {
     const proofHome = path.join(home, nativeFirst ? "native-first" : "absent");
     const stateDir = path.join(proofHome, "state");
-    const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    const databasePath = path.join(stateDir, "state", "carapace.sqlite");
     fs.mkdirSync(proofHome, { recursive: true });
     // State lifecycle coordination lives outside removable state. Only remove
     // this fresh fixture's exact hashes after the complete worker tree exits.
@@ -104,7 +104,7 @@ try {
     const coordinatorFiles = ["state-lifecycle", "gateway-lifecycle"].flatMap((family) => {
       const file = path.join(
         fs.realpathSync("/tmp"),
-        `openclaw-state-locks-${process.getuid()}`,
+        `carapace-state-locks-${process.getuid()}`,
         `${family}.${coordinatorHash}.lock.sqlite`,
       );
       return [file, `${file}-journal`, `${file}-wal`, `${file}-shm`];
@@ -124,14 +124,14 @@ try {
       env: {
         HOME: proofHome,
         TMPDIR: proofHome,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: path.join(proofHome, "openclaw.json"),
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: path.join(proofHome, "carapace.json"),
         PATH: `${path.dirname(node)}:/usr/bin:/bin:/usr/sbin:/sbin`,
-        OPENCLAW_NODE_EXEC_HOST: "app",
-        OPENCLAW_NODE_EXEC_FALLBACK: "0",
+        CARAPACE_NODE_EXEC_HOST: "app",
+        CARAPACE_NODE_EXEC_FALLBACK: "0",
         // Same launch shape as MacNodeHostWorker: the worker must stay in the owned
         // process group, or requireProcessTreeExit only proves the respawn wrapper died.
-        OPENCLAW_NO_RESPAWN: "1",
+        CARAPACE_NO_RESPAWN: "1",
       },
       stdio: ["pipe", "pipe", "pipe"],
       timeoutMs: 300_000,

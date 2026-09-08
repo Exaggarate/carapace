@@ -118,12 +118,12 @@ describe("verified package rollback", () => {
   ])(
     "records refused project rollback (reachable=$reachable, during stop=$duringStop)",
     async ({ reachable, duringStop }) => {
-      const env = { OPENCLAW_STATE_DIR: dirs.make("rollback-project-changed-") };
+      const env = { CARAPACE_STATE_DIR: dirs.make("rollback-project-changed-") };
       const configSnapshot = await readPreviousConfig(env);
       const config = configSnapshot.sourceConfigBeforeMigrations ?? configSnapshot.sourceConfig;
       const run = { runId: createUpdateRun({ trigger: "cli" }, { env }).runId, env };
       const schemaVersions = await readUpdateStateSchemaVersions({
-        stateDir: env.OPENCLAW_STATE_DIR,
+        stateDir: env.CARAPACE_STATE_DIR,
         config,
         env,
       });
@@ -207,7 +207,7 @@ describe("verified package rollback", () => {
     "retains Windows suspension through rollback (activated=$activated, healthy=$healthy)",
     async ({ activated, healthy }) => {
       const stateDir = dirs.make("rollback-windows-owner-");
-      const env = { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_WINDOWS_TASK_NAME: "rollback-fixture" };
+      const env = { CARAPACE_STATE_DIR: stateDir, CARAPACE_WINDOWS_TASK_NAME: "rollback-fixture" };
       const configSnapshot = await readPreviousConfig(env);
       const config = configSnapshot.sourceConfigBeforeMigrations ?? configSnapshot.sourceConfig;
       const schemaVersions = await readUpdateStateSchemaVersions({ stateDir, config, env });
@@ -355,8 +355,8 @@ describe("verified package rollback", () => {
     "$change schema change; previous verified=$previousVerified; service=$service",
     async ({ change, previousVerified, restored, service }) => {
       const stateDir = dirs.make("update-schema-rollback-");
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-      const configPath = path.join(stateDir, "openclaw.json");
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+      const configPath = path.join(stateDir, "carapace.json");
       const includePath = path.join(stateDir, "logging.json");
       const authored = {
         gateway: { mode: "local" },
@@ -376,8 +376,8 @@ describe("verified package rollback", () => {
       }).readConfigFileSnapshot();
       const config = configSnapshot.sourceConfigBeforeMigrations ?? configSnapshot.sourceConfig;
       let activationConfig: { path: string; raw: string | null; hash: string } | undefined;
-      const shared = path.join(stateDir, "state/openclaw.sqlite");
-      const agent = path.join(stateDir, "agents/main/agent/openclaw-agent.sqlite");
+      const shared = path.join(stateDir, "state/carapace.sqlite");
+      const agent = path.join(stateDir, "agents/main/agent/carapace-agent.sqlite");
       if (change !== "new-shared-deferred") {
         setVersion(shared, 7);
       }
@@ -464,7 +464,7 @@ describe("verified package rollback", () => {
               operatorEdit();
             }
             await writeUpdatePostInstallDoctorResult({
-              resultPath: step.env!.OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH!,
+              resultPath: step.env!.CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH!,
               result: {
                 status: "ok",
                 configHash: capture.hash,
@@ -475,7 +475,7 @@ describe("verified package rollback", () => {
             });
           });
           return {
-            name: "openclaw doctor",
+            name: "carapace doctor",
             command: "doctor",
             cwd: candidateRoot,
             durationMs: 1,
@@ -624,7 +624,7 @@ describe("verified package rollback", () => {
                   inspected: true,
                   runtimeInspected: true,
                   running: true,
-                  serviceEnv: { OPENCLAW_STATE_DIR: stateDir },
+                  serviceEnv: { CARAPACE_STATE_DIR: stateDir },
                   serviceNodeRunner: "/previous/node",
                   serviceUpdateVerdict: {
                     kind: "owned",
@@ -755,7 +755,7 @@ describe("verified package rollback", () => {
       previousRoot,
       rollbackBlockedReason: "state-migrated-no-rollback",
       configSnapshot: await readPreviousConfig({
-        OPENCLAW_STATE_DIR: dirs.make("rollback-blocked-config-"),
+        CARAPACE_STATE_DIR: dirs.make("rollback-blocked-config-"),
       }),
       opts: { json: true },
       timeoutMs: 1_000,
@@ -764,7 +764,7 @@ describe("verified package rollback", () => {
         inspected: true,
         runtimeInspected: true,
         running: true,
-        serviceEnv: { OPENCLAW_STATE_DIR: dirs.make("rollback-finalization-") },
+        serviceEnv: { CARAPACE_STATE_DIR: dirs.make("rollback-finalization-") },
       },
     });
     expect(outcome).toMatchObject({ rolledBack: false, stoppedForRollback: stopped });
@@ -785,7 +785,7 @@ describe("verified package rollback", () => {
     const activePackageRoot =
       failure === "partial-restore" ? null : restoredPackage ? previousRoot : candidateRoot;
     const stateDir = dirs.make("rollback-source-failed-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { CARAPACE_STATE_DIR: stateDir };
     const configSnapshot = await readPreviousConfig(env);
     const config = configSnapshot.sourceConfigBeforeMigrations ?? configSnapshot.sourceConfig;
     const schemaVersions = await readUpdateStateSchemaVersions({ stateDir, config, env });

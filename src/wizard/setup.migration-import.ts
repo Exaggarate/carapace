@@ -1,7 +1,7 @@
 import { formatCliCommand } from "../cli/command-format.js";
 import type { OnboardOptions } from "../commands/onboard-types.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   listAvailableManifestContractPlugins,
@@ -67,7 +67,7 @@ const loadMigrationContextModule = createLazyRuntimeModule(
 const loadConfigPathsModule = createLazyRuntimeModule(() => import("../config/paths.js"));
 
 export async function detectSetupMigrationSources(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runtime: RuntimeEnv;
 }): Promise<SetupMigrationDetection[]> {
   const [
@@ -142,7 +142,7 @@ function resolveManifestMigrationProviderLabel(params: {
 }
 
 function resolveManifestSetupMigrationProviders(
-  baseConfig: OpenClawConfig,
+  baseConfig: CarapaceConfig,
 ): ManifestSetupMigrationProvider[] {
   const snapshot = loadManifestContractSnapshot({ config: baseConfig });
   return listAvailableManifestContractPlugins({
@@ -164,7 +164,7 @@ function resolveManifestSetupMigrationProviders(
 }
 
 export async function listSetupMigrationOptions(params: {
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   detections: readonly SetupMigrationDetection[];
 }): Promise<SetupMigrationOption[]> {
   const { resolvePluginMigrationProviders } = await loadMigrationProviderRuntimeModule();
@@ -208,7 +208,7 @@ export async function listSetupMigrationOptions(params: {
 
 async function selectSetupMigrationProvider(params: {
   opts: OnboardOptions;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   detections: readonly SetupMigrationDetection[];
   prompter: WizardPrompter;
   allowBack: boolean;
@@ -249,7 +249,7 @@ async function selectSetupMigrationProvider(params: {
 
 /**
  * Rejects a provider id that is absent from the listed options, naming the ids that are present.
- * `openclaw migrate` already answers an unknown provider this way; onboarding has to match, because
+ * `carapace migrate` already answers an unknown provider this way; onboarding has to match, because
  * a typed id is far likelier to be a typo here than a genuinely missing plugin. An undefined id
  * means the operator dismissed the prompt, which is a cancellation rather than a bad choice.
  */
@@ -265,7 +265,7 @@ function assertListedMigrationProvider(
     available.length > 0
       ? ` Available providers: ${available.join(", ")}.`
       : " No migration providers are installed.";
-  const listCommand = formatCliCommand("openclaw migrate list");
+  const listCommand = formatCliCommand("carapace migrate list");
   throw new Error(
     `Unknown migration provider "${providerId}".${suffix} Run ${listCommand} to see the current list.`,
   );
@@ -273,8 +273,8 @@ function assertListedMigrationProvider(
 
 async function resolveSetupMigrationProvider(params: {
   providerId: string;
-  baseConfig: OpenClawConfig;
-}): Promise<{ provider: MigrationProviderPlugin; baseConfig: OpenClawConfig }> {
+  baseConfig: CarapaceConfig;
+}): Promise<{ provider: MigrationProviderPlugin; baseConfig: CarapaceConfig }> {
   const { ensureStandaloneMigrationProviderRegistryLoaded, resolvePluginMigrationProvider } =
     await loadMigrationProviderRuntimeModule();
   ensureStandaloneMigrationProviderRegistryLoaded({
@@ -323,15 +323,15 @@ async function createSetupMigrationPlan(params: {
 
 export async function runSetupMigrationImport(params: {
   opts: OnboardOptions;
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   detections: readonly SetupMigrationDetection[];
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
-  readConfigFile: () => Promise<OpenClawConfig>;
+  readConfigFile: () => Promise<CarapaceConfig>;
   commitConfigFile: (
-    config: OpenClawConfig,
-    expectedConfig: OpenClawConfig,
-  ) => Promise<OpenClawConfig>;
+    config: CarapaceConfig,
+    expectedConfig: CarapaceConfig,
+  ) => Promise<CarapaceConfig>;
   allowProviderBack?: boolean;
   continueOnboarding?: boolean;
 }): Promise<{ kind: "back" } | Awaited<ReturnType<typeof finalizeSetupMigrationPromotion>>> {

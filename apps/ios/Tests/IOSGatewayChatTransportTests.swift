@@ -1,9 +1,9 @@
 import Foundation
-import OpenClawKit
-import OpenClawProtocol
+import CarapaceKit
+import CarapaceProtocol
 import Testing
-@testable import OpenClaw
-@testable import OpenClawChatUI
+@testable import Carapace
+@testable import CarapaceChatUI
 
 struct IOSGatewayChatTransportTests {
     private actor ProgressRequestRecorder {
@@ -38,7 +38,7 @@ struct IOSGatewayChatTransportTests {
                     // A released server's closed schema rejects the extra owner field.
                     #expect(supportsOwner == true || params["agentId"] == nil)
                     let owner = params["agentId"] as? String ??
-                        OpenClawChatSessionKey.agentID(from: params["sessionKey"] as? String) ?? "main"
+                        CarapaceChatSessionKey.agentID(from: params["sessionKey"] as? String) ?? "main"
                     payload = #"{"card":{"sessionKey":"agent:\#(owner):global","revision":1,"updatedAt":10,"markdown":"\#(owner)","steps":[]}}"#
                 }
                 socket
@@ -85,7 +85,7 @@ struct IOSGatewayChatTransportTests {
                     _ = try await transport.fetchProgressCard(sessionKey: "global", agentID: "research")
                     Issue.record("Unadvertised owner-scoped progress must not dispatch")
                 } catch let error as NSError {
-                    #expect(error.localizedDescription == OpenClawChatTransportUpgradeMessage.progressCardAgentScope)
+                    #expect(error.localizedDescription == CarapaceChatTransportUpgradeMessage.progressCardAgentScope)
                 }
             }
             let params = try await recorder.snapshot().map {
@@ -183,12 +183,12 @@ struct IOSGatewayChatTransportTests {
         try await self.withSessionTransport { transport, recorder in
             let lease = try #require(await transport.acquireNewSessionRouteLease())
             let roster = try await lease.listAgents()
-            #expect(roster == OpenClawChatAgentsListResponse(
+            #expect(roster == CarapaceChatAgentsListResponse(
                 defaultId: "system",
                 agents: [
-                    OpenClawChatAgentChoice(id: "zeta", name: " Zeta ", workspaceGit: true),
-                    OpenClawChatAgentChoice(id: "legacy"),
-                    OpenClawChatAgentChoice(id: "alpha", workspaceGit: false),
+                    CarapaceChatAgentChoice(id: "zeta", name: " Zeta ", workspaceGit: true),
+                    CarapaceChatAgentChoice(id: "legacy"),
+                    CarapaceChatAgentChoice(id: "alpha", workspaceGit: false),
                 ]))
             await transport.gateway.disconnect()
             await #expect(throws: Error.self) {
@@ -283,7 +283,7 @@ struct IOSGatewayChatTransportTests {
         let skill = SkillStatus(
             name: "Weather",
             description: "Forecasts",
-            source: "openclaw-managed",
+            source: "carapace-managed",
             filePath: "/tmp/weather/SKILL.md",
             baseDir: "/tmp/weather",
             skillKey: "weather",
@@ -363,23 +363,23 @@ struct IOSGatewayChatTransportTests {
     }
 
     @Test func `live routing guard permits an identity still loading`() {
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(CarapaceChatSessionRoutingContract.expectedValue(
             nil,
             serverSupportsGuard: true) == nil)
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(CarapaceChatSessionRoutingContract.expectedValue(
             " per-sender|main|reviewer ",
             serverSupportsGuard: true) == "per-sender|main|reviewer")
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(CarapaceChatSessionRoutingContract.expectedValue(
             "per-sender|main|reviewer",
             serverSupportsGuard: false) == nil)
     }
 
     @Test func `routing contract round trips a delimited legacy main key`() throws {
-        let contract = try #require(OpenClawChatSessionRoutingContract.make(
+        let contract = try #require(CarapaceChatSessionRoutingContract.make(
             scope: "per-sender",
             mainKey: "team|primary",
             defaultAgentID: "main"))
-        let components = try #require(OpenClawChatSessionRoutingContract.parse(contract))
+        let components = try #require(CarapaceChatSessionRoutingContract.parse(contract))
         #expect(components.scope == "per-sender")
         #expect(components.mainKey == "team|primary")
         #expect(components.defaultAgentID == "main")
@@ -517,11 +517,11 @@ struct IOSGatewayChatTransportTests {
             _ = try await transport.patchSessionSettings(
                 sessionKey: "global",
                 agentID: nil,
-                patch: OpenClawChatSessionSettingsPatch(verboseLevel: .some("full")))
+                patch: CarapaceChatSessionSettingsPatch(verboseLevel: .some("full")))
             _ = try await transport.patchSessionSettings(
                 sessionKey: "global",
                 agentID: nil,
-                patch: OpenClawChatSessionSettingsPatch(verboseLevel: .some(nil)))
+                patch: CarapaceChatSessionSettingsPatch(verboseLevel: .some(nil)))
 
             let requests = await recorder.all()
             #expect(requests.count == 2)
@@ -540,11 +540,11 @@ struct IOSGatewayChatTransportTests {
             _ = try await transport.patchSessionSettings(
                 sessionKey: "global",
                 agentID: nil,
-                patch: OpenClawChatSessionSettingsPatch(fastMode: .some(.on)))
+                patch: CarapaceChatSessionSettingsPatch(fastMode: .some(.on)))
             _ = try await transport.patchSessionSettings(
                 sessionKey: "global",
                 agentID: nil,
-                patch: OpenClawChatSessionSettingsPatch(fastMode: .some(nil)))
+                patch: CarapaceChatSessionSettingsPatch(fastMode: .some(nil)))
 
             let requests = await recorder.all()
             #expect(requests.count == 2)
@@ -633,7 +633,7 @@ struct IOSGatewayChatTransportTests {
                 idempotencyKey: "guarded-idempotency",
                 attachments: [])
             Issue.record("Expected guarded sendMessage to fail before dispatch")
-        } catch is OpenClawChatTransportSendError {
+        } catch is CarapaceChatTransportSendError {
             // Expected: a missing route never reached chat.send.
         } catch {
             Issue.record("Expected a typed pre-dispatch failure, got \(error)")
@@ -678,7 +678,7 @@ struct IOSGatewayChatTransportTests {
             payload: payload,
             seq: 1,
             stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = CarapaceChatGatewayPayloadCodec.event(from: frame)
 
         switch mapped {
         case let .sessionMessage(message):
@@ -698,7 +698,7 @@ struct IOSGatewayChatTransportTests {
         let original = Self.canonicalAssistantMessage(timestamp: 1234.5)
         let replay = Self.canonicalAssistantMessage(timestamp: 5678.5)
 
-        let messages = OpenClawChatViewModel.dedupeMessages([original, replay])
+        let messages = CarapaceChatViewModel.dedupeMessages([original, replay])
 
         #expect(messages.count == 1)
         #expect(messages.first?.transcriptMessageID == "canonical-assistant-1")
@@ -710,7 +710,7 @@ struct IOSGatewayChatTransportTests {
             timestamp: 1234.5,
             transcriptMessageID: "canonical-assistant-2")
 
-        let messages = OpenClawChatViewModel.dedupeMessages([first, second])
+        let messages = CarapaceChatViewModel.dedupeMessages([first, second])
 
         #expect(messages.count == 2)
         #expect(messages.map(\.transcriptMessageID) == ["canonical-assistant-1", "canonical-assistant-2"])
@@ -720,7 +720,7 @@ struct IOSGatewayChatTransportTests {
         let original = Self.canonicalAssistantMessage(timestamp: 1234.5)
         let replay = Self.canonicalAssistantMessage(timestamp: 5678.5)
 
-        let messages = OpenClawChatViewModel.reconcileMessageIDs(
+        let messages = CarapaceChatViewModel.reconcileMessageIDs(
             previous: [original],
             incoming: [replay])
 
@@ -731,13 +731,13 @@ struct IOSGatewayChatTransportTests {
     }
 
     @Test @MainActor func `canonical adoption keeps the durable transcript identity`() {
-        let existing = OpenClawChatMessage(
+        let existing = CarapaceChatMessage(
             role: "assistant",
             content: [Self.assistantText],
             timestamp: 1234.5)
         let incoming = Self.canonicalAssistantMessage(timestamp: 5678.5)
 
-        let adopted = OpenClawChatViewModel.adoptingCanonicalMessage(incoming, over: existing)
+        let adopted = CarapaceChatViewModel.adoptingCanonicalMessage(incoming, over: existing)
 
         #expect(adopted.id == existing.id)
         #expect(adopted.timestamp == incoming.timestamp)
@@ -745,19 +745,19 @@ struct IOSGatewayChatTransportTests {
     }
 
     @Test @MainActor func `user idempotency still reconciles an optimistic canonical echo`() {
-        let original = OpenClawChatMessage(
+        let original = CarapaceChatMessage(
             role: "user",
             content: [Self.assistantText],
             timestamp: 1234.5,
             idempotencyKey: "run-1:user")
-        let echo = OpenClawChatMessage(
+        let echo = CarapaceChatMessage(
             role: "user",
             content: [Self.assistantText],
             timestamp: 5678.5,
             transcriptMessageID: "canonical-user-1",
             idempotencyKey: "run-1:user")
 
-        let messages = OpenClawChatViewModel.reconcileMessageIDs(
+        let messages = CarapaceChatViewModel.reconcileMessageIDs(
             previous: [original],
             incoming: [echo])
 
@@ -766,8 +766,8 @@ struct IOSGatewayChatTransportTests {
         #expect(messages.first?.transcriptMessageID == "canonical-user-1")
     }
 
-    private static var assistantText: OpenClawChatMessageContent {
-        OpenClawChatMessageContent(
+    private static var assistantText: CarapaceChatMessageContent {
+        CarapaceChatMessageContent(
             type: "text",
             text: "agent reply",
             mimeType: nil,
@@ -777,9 +777,9 @@ struct IOSGatewayChatTransportTests {
 
     private static func canonicalAssistantMessage(
         timestamp: Double,
-        transcriptMessageID: String = "canonical-assistant-1") -> OpenClawChatMessage
+        transcriptMessageID: String = "canonical-assistant-1") -> CarapaceChatMessage
     {
-        OpenClawChatMessage(
+        CarapaceChatMessage(
             role: "assistant",
             content: [self.assistantText],
             timestamp: timestamp,
@@ -799,7 +799,7 @@ struct IOSGatewayChatTransportTests {
             seq: 1,
             stateversion: nil)
 
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = CarapaceChatGatewayPayloadCodec.event(from: frame)
         guard case let .sessionsChanged(change) = mapped else {
             Issue.record("expected .sessionsChanged, got \(String(describing: mapped))")
             return
@@ -817,7 +817,7 @@ struct IOSGatewayChatTransportTests {
             "state": AnyCodable("final"),
         ])
         let frame = EventFrame(type: "event", event: "chat", payload: payload, seq: 1, stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = CarapaceChatGatewayPayloadCodec.event(from: frame)
 
         switch mapped {
         case let .chat(chat):
@@ -836,7 +836,7 @@ struct IOSGatewayChatTransportTests {
             payload: AnyCodable(["a": AnyCodable(1)]),
             seq: 1,
             stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = CarapaceChatGatewayPayloadCodec.event(from: frame)
         #expect(mapped == nil)
     }
 }
@@ -902,9 +902,9 @@ struct LocalFixtureChatTransportTests {
             idempotencyKey: "fixture-run",
             attachments: [])
         let history = try await transport.requestHistory(sessionKey: "main")
-        let decoded = try #require(history.messages).compactMap { payload -> OpenClawChatMessage? in
+        let decoded = try #require(history.messages).compactMap { payload -> CarapaceChatMessage? in
             guard let data = try? JSONEncoder().encode(payload) else { return nil }
-            return try? JSONDecoder().decode(OpenClawChatMessage.self, from: data)
+            return try? JSONDecoder().decode(CarapaceChatMessage.self, from: data)
         }
 
         #expect(decoded.last(where: { $0.role == "user" })?.idempotencyKey == "fixture-run:user")
@@ -916,7 +916,7 @@ struct LocalFixtureChatTransportTests {
         let catalog = await transport.loadComposerCapabilityCatalog(sessionKey: "main", agentID: "main")
         #expect(catalog.permissionMutationAvailable)
         #expect(catalog.toolOverrideMutationAvailable)
-        let overrides = OpenClawChatSessionToolOverrides(
+        let overrides = CarapaceChatSessionToolOverrides(
             webSearch: false,
             skills: ["autoreview": false],
             mcpServers: ["GitHub": false])
@@ -924,7 +924,7 @@ struct LocalFixtureChatTransportTests {
         _ = try await transport.patchSessionSettings(
             sessionKey: "main",
             agentID: "main",
-            patch: OpenClawChatSessionSettingsPatch(
+            patch: CarapaceChatSessionSettingsPatch(
                 expectedSessionID: "apple-review-demo-main",
                 permissionMode: .some(.workspace),
                 toolOverrides: .some(overrides)))

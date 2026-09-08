@@ -1,5 +1,5 @@
 // Slack tests cover shared interactive plugin behavior.
-import type { MessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
+import type { MessagePresentation } from "carapace/plugin-sdk/interactive-runtime";
 import { describe, expect, it } from "vitest";
 import {
   buildSlackInteractiveBlocks,
@@ -27,11 +27,11 @@ describe("buildSlackInteractiveBlocks", () => {
     ).toEqual([
       {
         type: "actions",
-        block_id: "openclaw_reply_select_1",
+        block_id: "carapace_reply_select_1",
         elements: [
           {
             type: "static_select",
-            action_id: "openclaw:reply_select:1",
+            action_id: "carapace:reply_select:1",
             placeholder: {
               type: "plain_text",
               text: "Pick one",
@@ -59,11 +59,11 @@ describe("buildSlackInteractiveBlocks", () => {
       },
       {
         type: "actions",
-        block_id: "openclaw_reply_buttons_1",
+        block_id: "carapace_reply_buttons_1",
         elements: [
           {
             type: "button",
-            action_id: "openclaw:reply_button:1:1",
+            action_id: "carapace:reply_button:1:1",
             text: {
               type: "plain_text",
               text: "Retry",
@@ -106,12 +106,12 @@ describe("buildSlackInteractiveBlocks", () => {
         : [],
     );
     const selectBlock = blocks.find(
-      (block) => block.type === "actions" && block.block_id === "openclaw_reply_select_1",
+      (block) => block.type === "actions" && block.block_id === "carapace_reply_select_1",
     ) as {
       elements?: Array<{ placeholder?: { text?: string } }>;
     };
     const buttonBlock = blocks.find(
-      (block) => block.type === "actions" && block.block_id === "openclaw_reply_buttons_1",
+      (block) => block.type === "actions" && block.block_id === "carapace_reply_buttons_1",
     ) as {
       elements?: Array<{ value?: string }>;
     };
@@ -171,9 +171,9 @@ describe("buildSlackInteractiveBlocks", () => {
       }>;
     };
 
-    expect(buttonBlock.elements?.[0]?.action_id).toBe("openclaw:reply_button:1:1");
+    expect(buttonBlock.elements?.[0]?.action_id).toBe("carapace:reply_button:1:1");
     expect(buttonBlock.elements?.[0]?.value).toBe("pluginbind:approval-123:o");
-    expect(selectBlock.elements?.[0]?.action_id).toBe("openclaw:reply_select:1");
+    expect(selectBlock.elements?.[0]?.action_id).toBe("carapace:reply_select:1");
     expect(selectBlock.elements?.[0]?.options?.[0]?.value).toBe("codex:approve:thread-1");
   });
 
@@ -254,7 +254,7 @@ describe("buildSlackInteractiveBlocks", () => {
     expect(buttonBlock.elements?.[0]?.value).toBe("a".repeat(2000));
     expect(buttonBlock.elements?.[1]).toEqual({
       type: "button",
-      action_id: "openclaw:reply_link:1:3",
+      action_id: "carapace:reply_link:1:3",
       text: {
         type: "plain_text",
         text: "Docs",
@@ -329,7 +329,7 @@ describe("buildSlackInteractiveBlocks", () => {
 
     expect(buttonBlock.elements?.[0]).toEqual({
       type: "button",
-      action_id: "openclaw:reply_link:1:1",
+      action_id: "carapace:reply_link:1:1",
       text: {
         type: "plain_text",
         text: "Docs",
@@ -373,14 +373,14 @@ describe("buildSlackInteractiveBlocks", () => {
         approvalKind: "exec" as const,
         decision: "allow-once" as const,
       },
-      actionId: "openclaw:approval_button:5:1",
+      actionId: "carapace:approval_button:5:1",
       value:
-        'openclaw:approval:v1:{"approvalId":"request-1","approvalKind":"exec","decision":"allow-once"}',
+        'carapace:approval:v1:{"approvalId":"request-1","approvalKind":"exec","decision":"allow-once"}',
     },
     {
       name: "callback",
       action: { type: "callback" as const, value: "plugin:opaque|value" },
-      actionId: "openclaw:callback_button:5:1",
+      actionId: "carapace:callback_button:5:1",
       value: "plugin:opaque|value",
     },
     {
@@ -390,7 +390,7 @@ describe("buildSlackInteractiveBlocks", () => {
         questionId: "ask_0123456789abcdef0123456789abcdef",
         optionValue: "Production",
       },
-      actionId: "openclaw:question_button:5:1",
+      actionId: "carapace:question_button:5:1",
       value: "slq1:ask_0123456789abcdef0123456789abcdef:0",
     },
   ])(
@@ -409,7 +409,7 @@ describe("buildSlackInteractiveBlocks", () => {
         ),
       ).toMatchObject([
         {
-          block_id: "openclaw_reply_buttons_5",
+          block_id: "carapace_reply_buttons_5",
           elements: [{ action_id: actionId, value }],
         },
       ]);
@@ -473,14 +473,14 @@ describe("buildSlackPresentationBlocks", () => {
     ).toEqual([
       {
         type: "actions",
-        block_id: "openclaw_reply_buttons_1",
+        block_id: "carapace_reply_buttons_1",
         elements: [
           expect.objectContaining({
-            action_id: "openclaw:question_button:1:1",
+            action_id: "carapace:question_button:1:1",
             value: `slq1:${questionId}:0`,
           }),
           expect.objectContaining({
-            action_id: "openclaw:question_button:1:2",
+            action_id: "carapace:question_button:1:2",
             value: `slq1:${questionId}:1`,
           }),
         ],
@@ -530,8 +530,8 @@ describe("buildSlackPresentationBlocks", () => {
       {
         type: "actions",
         elements: [
-          { action_id: "openclaw:question_button:1:1", value: `slq1:${questionId}:1` },
-          { action_id: "openclaw:question_button:1:3", value: `slq1:${questionId}:0` },
+          { action_id: "carapace:question_button:1:1", value: `slq1:${questionId}:1` },
+          { action_id: "carapace:question_button:1:3", value: `slq1:${questionId}:0` },
         ],
       },
     ]);
@@ -584,11 +584,11 @@ describe("buildSlackPresentationBlocks", () => {
       },
       {
         type: "actions",
-        block_id: "openclaw_reply_buttons_1",
+        block_id: "carapace_reply_buttons_1",
         elements: [
           {
             type: "button",
-            action_id: "openclaw:callback_button:1:1",
+            action_id: "carapace:callback_button:1:1",
             text: {
               type: "plain_text",
               text: "Approve",
@@ -625,18 +625,18 @@ describe("buildSlackPresentationBlocks", () => {
     expect(blocks).toEqual([
       {
         type: "actions",
-        block_id: "openclaw_reply_buttons_1",
+        block_id: "carapace_reply_buttons_1",
         elements: [
           {
             type: "button",
-            action_id: "openclaw:approval_button:1:1",
+            action_id: "carapace:approval_button:1:1",
             text: {
               type: "plain_text",
               text: "Allow once",
               emoji: true,
             },
             value:
-              'openclaw:approval:v1:{"approvalId":"plugin:req/😀","approvalKind":"plugin","decision":"allow-once"}',
+              'carapace:approval:v1:{"approvalId":"plugin:req/😀","approvalKind":"plugin","decision":"allow-once"}',
           },
         ],
       },
@@ -704,11 +704,11 @@ describe("buildSlackPresentationBlocks", () => {
     expect(blocks).toEqual([
       {
         type: "actions",
-        block_id: "openclaw_reply_buttons_1",
+        block_id: "carapace_reply_buttons_1",
         elements: [
           {
             type: "button",
-            action_id: "openclaw:reply_button:1:1",
+            action_id: "carapace:reply_button:1:1",
             text: {
               type: "plain_text",
               text: "Approve",
@@ -966,7 +966,7 @@ describe("resolveSlackReplyBlocks", () => {
           blocks: [
             {
               type: "actions",
-              block_id: "openclaw_reply_buttons_1",
+              block_id: "carapace_reply_buttons_1",
               elements: [],
             },
           ],
@@ -996,10 +996,10 @@ describe("resolveSlackReplyBlocks", () => {
     const legacyButtonBlock = blocks?.[2] as
       | { elements?: Array<{ action_id?: string }> }
       | undefined;
-    expect(blocks?.[0]?.block_id).toBe("openclaw_reply_buttons_1");
-    expect(blocks?.[1]?.block_id).toBe("openclaw_reply_buttons_2");
-    expect(presentationButtonBlock?.elements?.[0]?.action_id).toBe("openclaw:reply_button:2:1");
-    expect(blocks?.[2]?.block_id).toBe("openclaw_reply_buttons_3");
-    expect(legacyButtonBlock?.elements?.[0]?.action_id).toBe("openclaw:reply_button:3:1");
+    expect(blocks?.[0]?.block_id).toBe("carapace_reply_buttons_1");
+    expect(blocks?.[1]?.block_id).toBe("carapace_reply_buttons_2");
+    expect(presentationButtonBlock?.elements?.[0]?.action_id).toBe("carapace:reply_button:2:1");
+    expect(blocks?.[2]?.block_id).toBe("carapace_reply_buttons_3");
+    expect(legacyButtonBlock?.elements?.[0]?.action_id).toBe("carapace:reply_button:3:1");
   });
 });

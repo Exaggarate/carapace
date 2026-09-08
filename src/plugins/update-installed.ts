@@ -1,5 +1,5 @@
 import { PLUGIN_CAPABILITY_CONSENT_REQUIRED } from "../../packages/gateway-protocol/src/capability-consent-error-details.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveNpmSpecMetadata } from "../infra/install-source-utils.js";
 import { parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
 import {
@@ -29,7 +29,7 @@ import {
   resolveTrustedSourceLinkedOfficialClawHubInstall as resolveOfficialClawHubInstall,
   resolveTrustedSourceLinkedOfficialNpmInstall as resolveOfficialNpmInstall,
 } from "./official-external-install-records.js";
-import { auditDeclaredOpenClawHostDependency } from "./plugin-peer-link.js";
+import { auditDeclaredCarapaceHostDependency } from "./plugin-peer-link.js";
 import {
   buildClawHubTrustSkippedOutcome,
   buildDryRunPluginUpdateOutcome,
@@ -55,7 +55,7 @@ import {
 import {
   hasRunnableInstalledNpmPayload,
   migratePluginConfigId,
-  repairRegisteredOpenClawHostLink,
+  repairRegisteredCarapaceHostLink,
   resolveRecordedExtensionsDir,
 } from "./update-config.js";
 import {
@@ -88,7 +88,7 @@ import {
 import { reconcileUnchangedUpdate } from "./update-unchanged.js";
 
 export async function updateNpmInstalledPlugins(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   logger?: PluginUpdateLogger;
   pluginIds?: string[];
   skipIds?: Set<string>;
@@ -343,7 +343,7 @@ export async function updateNpmInstalledPlugins(params: {
       continue;
     }
     if (!params.dryRun && record.source === "npm" && currentVersion) {
-      changed = (await repairRegisteredOpenClawHostLink({ pluginId, record, logger })) || changed;
+      changed = (await repairRegisteredCarapaceHostLink({ pluginId, record, logger })) || changed;
     }
     // Payload validation is filesystem work needed only to preserve state after metadata failures.
     // Every failure path below ends this plugin iteration, so the result cannot be reused.
@@ -415,7 +415,7 @@ export async function updateNpmInstalledPlugins(params: {
           currentVersion &&
           !bypassTrustedOfficialUnchangedNpmCheck &&
           isNpmMetadataCompatibleWithCurrentHost(metadataResult.metadata) &&
-          !(await auditDeclaredOpenClawHostDependency({
+          !(await auditDeclaredCarapaceHostDependency({
             packageDir: installPath,
             packageName: pluginId,
           })) &&

@@ -1,7 +1,7 @@
 // Msteams plugin module implements bot framework behavior.
-import { coerceErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { parseMediaContentLength } from "openclaw/plugin-sdk/media-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { coerceErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { parseMediaContentLength } from "carapace/plugin-sdk/media-runtime";
+import { readProviderJsonResponse } from "carapace/plugin-sdk/provider-http";
 import {
   resolveMSTeamsRequestTimeoutMs,
   type MSTeamsRequestDeadline,

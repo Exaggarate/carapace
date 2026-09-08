@@ -87,7 +87,7 @@ export function spawnOwnedVitestProcess(spec: {
       childEnv.USERPROFILE = nativeHome;
     }
     if (policy.hermetic) {
-      for (const key of [...LIVE_TEST_TRIGGER_ENV_KEYS, "OPENCLAW_LIVE_USE_REAL_HOME"]) {
+      for (const key of [...LIVE_TEST_TRIGGER_ENV_KEYS, "CARAPACE_LIVE_USE_REAL_HOME"]) {
         delete childEnv[key];
       }
     }

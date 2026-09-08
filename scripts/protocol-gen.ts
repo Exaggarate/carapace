@@ -1,4 +1,4 @@
-// Protocol Gen script supports OpenClaw repository automation.
+// Protocol Gen script supports Carapace repository automation.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ProtocolSchemas } from "../packages/gateway-protocol/src/schema/protocol-schemas.js";

@@ -1,14 +1,14 @@
 // Memory Wiki doctor contract owns legacy state cleanup and migrations.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/plugin-entry";
 import {
   archiveLegacyStateSource,
   legacyStateFileExists,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { FsSafeError, root as fsRoot } from "carapace/plugin-sdk/security-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   resolveMemoryWikiAgentConfig,
   resolveMemoryWikiConfig,
@@ -37,8 +37,8 @@ import {
 export { legacyConfigRules, normalizeCompatibilityConfig } from "./src/config-compat.js";
 
 const LEGACY_MEMORY_WIKI_COMPILED_CACHE_PATHS = [
-  ".openclaw-wiki/cache/agent-digest.json",
-  ".openclaw-wiki/cache/claims.jsonl",
+  ".carapace-wiki/cache/agent-digest.json",
+  ".carapace-wiki/cache/claims.jsonl",
 ] as const;
 
 function resolveHomeDir(env: NodeJS.ProcessEnv): string | undefined {
@@ -78,7 +78,7 @@ async function openExistingVaultRoot(vaultRoot: string) {
   }
 }
 
-function readConfiguredPluginConfig(config: OpenClawConfig): MemoryWikiPluginConfig | undefined {
+function readConfiguredPluginConfig(config: CarapaceConfig): MemoryWikiPluginConfig | undefined {
   const entries = config.plugins?.entries;
   const pluginEntry = isRecord(entries) ? entries["memory-wiki"] : undefined;
   if (!isRecord(pluginEntry) || !isRecord(pluginEntry.config)) {
@@ -88,7 +88,7 @@ function readConfiguredPluginConfig(config: OpenClawConfig): MemoryWikiPluginCon
 }
 
 function resolveConfiguredVaultRoots(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
 }): string[] {
   const homeDir = resolveHomeDir(params.env);

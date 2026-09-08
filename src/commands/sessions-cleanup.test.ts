@@ -166,7 +166,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/carapace-agent.sqlite",
       mode: "enforce",
       dryRun: false,
       beforeCount: 3,
@@ -231,7 +231,7 @@ describe("sessionsCleanupCommand", () => {
   });
 
   it("delegates non-store enforcing cleanup through the Gateway writer when reachable", async () => {
-    const remoteStorePath = "C:\\Users\\gateway\\.openclaw\\agents\\main\\sessions\\sessions.json";
+    const remoteStorePath = "C:\\Users\\gateway\\.carapace\\agents\\main\\sessions\\sessions.json";
     mocks.callGateway.mockResolvedValue(gatewayCleanupResult(remoteStorePath));
 
     const { runtime, logs } = makeRuntime();
@@ -277,7 +277,7 @@ describe("sessionsCleanupCommand", () => {
       stores: [
         {
           agentId: "main",
-          storePath: "/gateway/main/openclaw-agent.sqlite",
+          storePath: "/gateway/main/carapace-agent.sqlite",
           mode: "enforce",
           dryRun: false,
           beforeCount: 1,
@@ -301,7 +301,7 @@ describe("sessionsCleanupCommand", () => {
       ],
       partialError: {
         failingAgentId: "work",
-        failingStorePath: "/gateway/work/openclaw-agent.sqlite",
+        failingStorePath: "/gateway/work/carapace-agent.sqlite",
         message: "Session cleanup failed for agent 'work': injected failure",
         lifecycleCommitted: false,
       },
@@ -331,7 +331,7 @@ describe("sessionsCleanupCommand", () => {
   });
 
   it("preserves a Gateway-owned store path in human output", async () => {
-    const remoteStorePath = "C:\\Users\\gateway\\.openclaw\\openclaw-agent.sqlite";
+    const remoteStorePath = "C:\\Users\\gateway\\.carapace\\carapace-agent.sqlite";
     mocks.callGateway.mockResolvedValue(gatewayCleanupResult(remoteStorePath));
 
     const { runtime, logs } = makeRuntime();
@@ -392,7 +392,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/carapace-agent.sqlite",
       mode: "warn",
       dryRun: true,
       beforeCount: 2,
@@ -463,7 +463,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/carapace-agent.sqlite",
       mode: "warn",
       dryRun: true,
       beforeCount: 1,
@@ -532,7 +532,7 @@ describe("sessionsCleanupCommand", () => {
       runtime,
     );
 
-    expectLogsToInclude(logs, "Session store: /resolved/openclaw-agent.sqlite");
+    expectLogsToInclude(logs, "Session store: /resolved/carapace-agent.sqlite");
     expectLogsToInclude(logs, "Planned session actions:");
     expectLogsToInclude(logs, "Would prune unreferenced artifacts: 2");
     expectLogsToInclude(logs, "Would archive cap overflow: 1");

@@ -29,9 +29,9 @@ describe("config io invalid config formatting", () => {
   });
 
   it("creates INVALID_CONFIG errors with inline details", () => {
-    const err = createInvalidConfigError("/tmp/openclaw.json", "- gateway.port: bad");
+    const err = createInvalidConfigError("/tmp/carapace.json", "- gateway.port: bad");
 
-    expect(err.message).toBe("Invalid config at /tmp/openclaw.json:\n- gateway.port: bad");
+    expect(err.message).toBe("Invalid config at /tmp/carapace.json:\n- gateway.port: bad");
     expect(err.name).toBe("InvalidConfigError");
     expect(err.code).toBe("INVALID_CONFIG");
     expect(err.details).toBe("- gateway.port: bad");
@@ -39,7 +39,7 @@ describe("config io invalid config formatting", () => {
     expect(isDoctorRecoverableInvalidConfigError(err)).toBe(true);
     expect(
       isDoctorRecoverableInvalidConfigError(
-        createInvalidConfigError("/tmp/openclaw.json", "manual repair", {
+        createInvalidConfigError("/tmp/carapace.json", "manual repair", {
           recovery: "manual",
         }),
       ),
@@ -55,7 +55,7 @@ describe("config io invalid config formatting", () => {
     const loggedConfigPaths = createDedupeCache({ ttlMs: 0, maxSize: 4096 });
     const throwInvalid = (message: string) =>
       throwInvalidConfig({
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
         issues: [{ path: "nope", message }],
         logger,
         loggedConfigPaths,
@@ -63,12 +63,12 @@ describe("config io invalid config formatting", () => {
 
     for (const message of ["first error", "first error", "second error", "second error"]) {
       expect(() => throwInvalid(message)).toThrowError(
-        `Invalid config at /tmp/openclaw.json:\n- nope: ${message}`,
+        `Invalid config at /tmp/carapace.json:\n- nope: ${message}`,
       );
     }
     expect(logger.error.mock.calls).toEqual([
-      ["Invalid config at /tmp/openclaw.json:\n- nope: first error"],
-      ["Invalid config at /tmp/openclaw.json:\n- nope: second error"],
+      ["Invalid config at /tmp/carapace.json:\n- nope: first error"],
+      ["Invalid config at /tmp/carapace.json:\n- nope: second error"],
     ]);
   });
 
@@ -80,13 +80,13 @@ describe("config io invalid config formatting", () => {
     const loggedConfigPaths = createDedupeCache({ ttlMs: 0, maxSize: 4096 });
     const throwInvalid = () =>
       throwInvalidConfig({
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
         issues: [{ path: "nope", message: "invalid" }],
         logger,
         loggedConfigPaths,
       });
     expect(throwInvalid).toThrow("logger unavailable");
-    expect(throwInvalid).toThrow("Invalid config at /tmp/openclaw.json:");
+    expect(throwInvalid).toThrow("Invalid config at /tmp/carapace.json:");
     expect(logger.error).toHaveBeenCalledTimes(2);
   });
 });

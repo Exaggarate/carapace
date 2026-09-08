@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { recordInstalledPluginIndexInstallOwner } from "./installed-plugin-index-install-owner.js";
 import { recordPluginManifestInstallOwner } from "./manifest-install-owner.js";
 import { resolvePluginPackageUninstallPlan } from "./uninstall-package-plan.js";
@@ -80,7 +80,7 @@ describe("plugin management uninstall channel ownership", () => {
     "preserves manifest channel ownership when uninstalling $label",
     async ({ enabled, channelIds }) => {
       const pluginId = "custom-plugin";
-      const installPath = "/tmp/openclaw-managed-linked-custom-plugin";
+      const installPath = "/tmp/carapace-managed-linked-custom-plugin";
       const installRecord = { source: "path", sourcePath: installPath, installPath } as const;
       const channels = {
         [pluginId]: { enabled: true },
@@ -92,11 +92,11 @@ describe("plugin management uninstall channel ownership", () => {
         snapshot: {
           valid: true,
           parsed: {},
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           sourceConfig: { plugins: { entries: { [pluginId]: { enabled } } }, channels },
           hash: "base-hash",
         },
-        writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+        writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
       });
       mocks.installRecords.mockResolvedValue({ [pluginId]: installRecord });
       const manifest = recordPluginManifestInstallOwner(
@@ -148,17 +148,17 @@ describe("plugin management uninstall channel ownership", () => {
 
   it("fails closed when an owner record has no authoritative child metadata", async () => {
     const pluginId = "custom-plugin";
-    const installPath = "/tmp/openclaw-managed-missing-children";
+    const installPath = "/tmp/carapace-managed-missing-children";
     const installRecord = { source: "path", sourcePath: installPath, installPath } as const;
     mocks.readConfig.mockResolvedValue({
       snapshot: {
         valid: true,
         parsed: {},
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: { plugins: { entries: { [pluginId]: { enabled: true } } } },
         hash: "base-hash",
       },
-      writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+      writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
     });
     mocks.installRecords.mockResolvedValue({ [pluginId]: installRecord });
     mocks.metadata.mockReturnValue({
@@ -178,17 +178,17 @@ describe("plugin management uninstall channel ownership", () => {
 
   it("fails closed when an orphan record path overlaps a discovered plugin", async () => {
     const pluginId = "orphaned-plugin";
-    const installPath = "/tmp/openclaw-managed-conflicting-orphan";
+    const installPath = "/tmp/carapace-managed-conflicting-orphan";
     const installRecord = { source: "path", sourcePath: installPath, installPath } as const;
     mocks.readConfig.mockResolvedValue({
       snapshot: {
         valid: true,
         parsed: {},
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: {},
         hash: "base-hash",
       },
-      writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+      writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
     });
     mocks.installRecords.mockResolvedValue({ [pluginId]: installRecord });
     mocks.metadata.mockReturnValue({
@@ -224,14 +224,14 @@ describe("plugin management uninstall channel ownership", () => {
         snapshot: {
           valid: true,
           parsed: {},
-          path: "/tmp/openclaw.json",
+          path: "/tmp/carapace.json",
           sourceConfig: {
             plugins: { entries: { [pluginId]: { enabled: true } } },
             channels: { [pluginId]: { enabled: true }, unknown: { enabled: true } },
           },
           hash: "base-hash",
         },
-        writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+        writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
       });
       mocks.installRecords.mockResolvedValue({ [pluginId]: installRecord });
       mocks.metadata.mockReturnValue({
@@ -276,13 +276,13 @@ describe("plugin management uninstall channel ownership", () => {
   );
 
   it("resolves a child request to one package owner and removes every sibling policy", async () => {
-    const installPath = "/tmp/openclaw-managed-linked-pack";
+    const installPath = "/tmp/carapace-managed-linked-pack";
     const installRecord = { source: "path", sourcePath: installPath, installPath } as const;
     mocks.readConfig.mockResolvedValue({
       snapshot: {
         valid: true,
         parsed: {},
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         sourceConfig: {
           plugins: {
             allow: ["pack/one", "pack/two", "other"],
@@ -295,7 +295,7 @@ describe("plugin management uninstall channel ownership", () => {
         },
         hash: "pack-hash",
       },
-      writeOptions: { expectedConfigPath: "/tmp/openclaw.json" },
+      writeOptions: { expectedConfigPath: "/tmp/carapace.json" },
     });
     mocks.installRecords.mockResolvedValue({ pack: installRecord });
     const manifests: Array<[string, { id: string; channels: string[] }]> = [
@@ -381,7 +381,7 @@ describe("plugin management uninstall channel ownership", () => {
       origin: "global",
       rootDir: "/tmp/pack",
       source: `/tmp/pack/${id.endsWith("one") ? "one" : "two"}.js`,
-      manifestPath: "/tmp/pack/openclaw.plugin.json",
+      manifestPath: "/tmp/pack/carapace.plugin.json",
     }));
     mocks.metadata.mockReturnValue({
       index: {
@@ -417,7 +417,7 @@ describe("plugin management uninstall channel ownership", () => {
   });
 
   it("keeps config readable after removing an aliased package and preserves intervening edits", async () => {
-    const root = await fs.realpath(tempDirs.make("openclaw-managed-uninstall-alias-"));
+    const root = await fs.realpath(tempDirs.make("carapace-managed-uninstall-alias-"));
     const sourcePath = path.join(root, "source");
     const installPath = path.join(root, "extensions", "demo");
     const aliasPath = path.join(root, "alias");
@@ -430,7 +430,7 @@ describe("plugin management uninstall channel ownership", () => {
     );
     await fs.symlink(installPath, aliasPath, "dir");
     const installRecord = { source: "path" as const, sourcePath, installPath };
-    let currentConfig: OpenClawConfig = {
+    let currentConfig: CarapaceConfig = {
       plugins: {
         entries: { demo: { enabled: true } },
         load: { paths: [aliasPath, unrelatedPath] },
@@ -444,15 +444,15 @@ describe("plugin management uninstall channel ownership", () => {
         snapshot: {
           valid: true,
           parsed: currentConfig,
-          path: path.join(root, "openclaw.json"),
+          path: path.join(root, "carapace.json"),
           sourceConfig: currentConfig,
           hash: "current-hash",
         },
-        writeOptions: { expectedConfigPath: path.join(root, "openclaw.json") },
+        writeOptions: { expectedConfigPath: path.join(root, "carapace.json") },
       };
     });
     mocks.replaceConfig.mockImplementation(
-      async ({ sourceConfig }: { sourceConfig: OpenClawConfig }) => {
+      async ({ sourceConfig }: { sourceConfig: CarapaceConfig }) => {
         expect(sourceConfig.plugins?.load?.paths).toEqual([unrelatedPath]);
         currentConfig = {
           ...sourceConfig,
@@ -486,7 +486,7 @@ describe("plugin management uninstall channel ownership", () => {
 
     const result = await uninstallManagedPlugin({
       pluginId: "demo",
-      env: { OPENCLAW_STATE_DIR: root },
+      env: { CARAPACE_STATE_DIR: root },
     });
 
     expect(result.removed).toContain("load path");

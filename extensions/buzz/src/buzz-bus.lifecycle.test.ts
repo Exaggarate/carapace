@@ -1,6 +1,6 @@
 import { finalizeEvent, getPublicKey, verifyEvent, type Event } from "nostr-tools";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("nostr-tools", async (importOriginal) => {
@@ -217,7 +217,7 @@ describe("Buzz bus lifecycle", () => {
       setBuzzRuntime(runtime);
       const account: ResolvedBuzzAccount = {
         accountId: ACCOUNT_ID,
-        name: "OpenClaw",
+        name: "Carapace",
         enabled: true,
         configured: true,
         relayUrl: "wss://buzz.example.com",
@@ -712,7 +712,7 @@ describe("Buzz bus lifecycle", () => {
     ];
 
     const bus = await startTestBus({
-      profileName: "OpenClaw",
+      profileName: "Carapace",
     });
 
     await vi.waitFor(() =>
@@ -853,7 +853,7 @@ describe("Buzz bus lifecycle", () => {
       content: "@@ -1 +1 @@\n-old\n+new",
       tags: [
         ["h", CHANNEL_ID],
-        ["repo", "https://github.com/openclaw/openclaw"],
+        ["repo", "https://github.com/Exaggarate/carapace"],
         ["commit", "abcdef1"],
       ],
     });

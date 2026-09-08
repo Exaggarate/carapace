@@ -11,7 +11,7 @@ export function registerTabAccessEvents({
   scheduleTabsSync,
   detachDebugger,
   pauseTab,
-  removeTabFromOpenClawGroup,
+  removeTabFromCarapaceGroup,
   runAccessMutation,
 }) {
   let groupEventRevision = 0;
@@ -55,7 +55,7 @@ export function registerTabAccessEvents({
           await pauseTab(source.tabId);
         } else {
           policy.invalidateTab(source.tabId);
-          await removeTabFromOpenClawGroup(source.tabId);
+          await removeTabFromCarapaceGroup(source.tabId);
           scheduleTabsSync();
         }
       } finally {

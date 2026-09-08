@@ -1,14 +1,14 @@
 // Audits gateway config for bind, auth, and exposure risks.
 import { isIP } from "node:net";
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { hasUnresolvedConfigPath, resolveConfigSecretRef } from "../config/resolution-facts.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveGatewayAuthForConfig } from "../gateway/auth-resolve.js";
 import { resolveGatewayAuthTokenSourceConflict } from "../gateway/auth-token-source-conflict.js";
 import { createGatewayCredentialPlan } from "../gateway/credential-planner.js";
@@ -17,7 +17,7 @@ import type { SecurityAuditFinding } from "./audit.types.js";
 import { collectCoreInsecureOrDangerousFlags } from "./core-dangerous-config-flags.js";
 import { DEFAULT_GATEWAY_HTTP_TOOL_DENY } from "./dangerous-tools.js";
 
-type CollectDangerousConfigFlags = (cfg: OpenClawConfig) => string[];
+type CollectDangerousConfigFlags = (cfg: CarapaceConfig) => string[];
 
 type CollectGatewayConfigFindingsOptions = {
   collectDangerousConfigFlags?: CollectDangerousConfigFlags;
@@ -25,8 +25,8 @@ type CollectGatewayConfigFindingsOptions = {
 };
 
 export function collectGatewayConfigFindings(
-  cfg: OpenClawConfig,
-  sourceConfig: OpenClawConfig,
+  cfg: CarapaceConfig,
+  sourceConfig: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   options: CollectGatewayConfigFindingsOptions = {},
 ): SecurityAuditFinding[] {
@@ -264,7 +264,7 @@ export function collectGatewayConfigFindings(
       detail:
         "mcp.apps.enabled=true allows configured MCP servers to provide interactive HTML. Views are CSP-restricted and origin-isolated, but they can call app-visible tools on their owning MCP server while the session runtime remains active.",
       remediation:
-        "Keep this enabled only for MCP servers you trust. Disable with `openclaw config set mcp.apps.enabled false --strict-json` when it is not needed.",
+        "Keep this enabled only for MCP servers you trust. Disable with `carapace config set mcp.apps.enabled false --strict-json` when it is not needed.",
     });
   }
 
@@ -311,8 +311,8 @@ export function collectGatewayConfigFindings(
         detail: `The selected Gateway ${credential} is a known non-secret value. Gateway startup rejects it.`,
         remediation:
           credential === "token"
-            ? "Run `openclaw doctor --fix --generate-gateway-token` for an inline token; otherwise rotate its external secret source. Restart the Gateway afterward."
-            : "Generate a real secret (for example, `openssl rand -hex 32`) and update OPENCLAW_GATEWAY_PASSWORD or gateway.auth.password (or its external source). Restart the Gateway afterward.",
+            ? "Run `carapace doctor --fix --generate-gateway-token` for an inline token; otherwise rotate its external secret source. Restart the Gateway afterward."
+            : "Generate a real secret (for example, `openssl rand -hex 32`) and update CARAPACE_GATEWAY_PASSWORD or gateway.auth.password (or its external source). Restart the Gateway afterward.",
       });
     } else if (value && value.length < 24) {
       findings.push({

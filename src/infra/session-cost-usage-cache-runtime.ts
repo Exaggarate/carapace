@@ -1,5 +1,5 @@
 import { resolveSessionTranscriptsDirForAgent } from "../config/sessions/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getAsyncWorkSignal, trackAsyncWork } from "../shared/async-work-scope.js";
 import { runTasksWithConcurrency } from "../utils/run-with-concurrency.js";
@@ -39,7 +39,7 @@ const logger = createSubsystemLogger("usage-cost-cache");
 
 type UsageCostRefreshState = {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   databasePath: string;
   fullRefreshRequested: boolean;
   pendingSessionFiles: Set<string>;
@@ -57,7 +57,7 @@ export async function loadCostUsageSummary(params: {
   startMs?: number;
   endMs?: number;
   dayBucket?: UsageDailyBucket;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
 }): Promise<CostUsageSummary> {
   const now = Date.now();
@@ -93,7 +93,7 @@ export async function loadCostUsageSummaryFromCache(params: {
   startMs: number;
   endMs: number;
   dayBucket?: UsageDailyBucket;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
   requestRefresh?: boolean;
   refreshMode?: "background" | "sync-when-empty";
@@ -136,7 +136,7 @@ export async function loadCostUsageSummaryFromCache(params: {
 
 export async function loadSessionCostSummariesFromCache(params: {
   sessions: Array<{ sessionId?: string; sessionFile: string }>;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
   startMs?: number;
   endMs?: number;
@@ -210,7 +210,7 @@ export async function loadSessionCostSummariesFromCache(params: {
 }
 
 function requestCostUsageCacheRefresh(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
   sessionFiles?: string[];
 }): void {
@@ -244,7 +244,7 @@ function requestCostUsageCacheRefresh(params: {
 function mergeUsageCostRefreshRequest(
   state: UsageCostRefreshState,
   params: {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     agentId: string;
     sessionFiles?: string[];
   },

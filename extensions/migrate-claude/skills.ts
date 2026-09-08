@@ -7,10 +7,10 @@ import {
   markMigrationItemError,
   MIGRATION_REASON_MISSING_SOURCE_OR_TARGET,
   MIGRATION_REASON_TARGET_EXISTS,
-} from "openclaw/plugin-sdk/migration";
-import { backupMigrationItemTarget } from "openclaw/plugin-sdk/migration-runtime";
-import type { MigrationItem } from "openclaw/plugin-sdk/plugin-entry";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/migration";
+import { backupMigrationItemTarget } from "carapace/plugin-sdk/migration-runtime";
+import type { MigrationItem } from "carapace/plugin-sdk/plugin-entry";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { exists, sanitizeName } from "./helpers.js";
 import type { ClaudeSource } from "./source.js";
 import type { PlannedTargets } from "./targets.js";

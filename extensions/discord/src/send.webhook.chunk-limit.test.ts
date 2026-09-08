@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { chunkDiscordTextWithMode } from "./chunk.js";
 import { maybeSendBindingMessage } from "./monitor/thread-bindings.discord-api.js";
@@ -56,7 +56,7 @@ async function withWebhookServer(
   );
 }
 
-const cfg: OpenClawConfig = { channels: { discord: { token: "Bot test-token" } } };
+const cfg: CarapaceConfig = { channels: { discord: { token: "Bot test-token" } } };
 
 describe("Discord webhook delivery", () => {
   beforeEach(() => {

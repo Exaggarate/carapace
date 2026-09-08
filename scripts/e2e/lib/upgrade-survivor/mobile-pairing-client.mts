@@ -12,7 +12,7 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 type JsonRecord = Record<string, unknown>;
 type MobileClientMetadata = {
@@ -81,7 +81,7 @@ type ConnectResult = {
 };
 
 export const MOBILE_PAIRING_CLIENT: MobileClientMetadata = Object.freeze({
-  id: "openclaw-ios",
+  id: "carapace-ios",
   displayName: "Upgrade Survivor iPhone",
   version: "2026.8.10",
   platform: "iOS 26.6.1",
@@ -467,7 +467,7 @@ function loadWebSocket(packageRoot: string): WebSocketConstructor {
       ? loaded
       : (loaded as { WebSocket?: WebSocketConstructor }).WebSocket;
   if (!WebSocket) {
-    throw new Error("installed OpenClaw WebSocket runtime missing");
+    throw new Error("installed Carapace WebSocket runtime missing");
   }
   return WebSocket;
 }

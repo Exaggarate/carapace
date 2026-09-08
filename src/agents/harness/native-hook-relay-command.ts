@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { resolveOpenClawPackageRootSync } from "../../infra/openclaw-root.js";
+import { resolveCarapacePackageRootSync } from "../../infra/carapace-root.js";
 import { DEFAULT_RELAY_TIMEOUT_MS } from "./native-hook-relay-constants.js";
 import type { NativeHookRelayEvent, NativeHookRelayProvider } from "./native-hook-relay-types.js";
 import {
@@ -64,8 +64,8 @@ export function buildNativeHookRelayCommandWithStateDatabase(params: {
   const timeoutMs = normalizePositiveInteger(params.timeoutMs, DEFAULT_RELAY_TIMEOUT_MS);
   const executable = params.executable ?? resolveNativeHookRelayExecutable();
   const argv =
-    executable === "openclaw"
-      ? ["openclaw"]
+    executable === "carapace"
+      ? ["carapace"]
       : [params.nodeExecutable ?? process.execPath, executable];
   const nicePrefix = resolveNativeHookRelayNicePrefix(params.nice);
   const command = shellQuoteArgs([
@@ -93,11 +93,11 @@ export function buildNativeHookRelayCommandWithStateDatabase(params: {
 }
 
 function resolveNativeHookRelayExecutable(): string {
-  const envPath = process.env.OPENCLAW_CLI_PATH?.trim();
+  const envPath = process.env.CARAPACE_CLI_PATH?.trim();
   if (envPath && existsSync(envPath)) {
     return envPath;
   }
-  const packageRoot = resolveOpenClawPackageRootSync({
+  const packageRoot = resolveCarapacePackageRootSync({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -105,7 +105,7 @@ function resolveNativeHookRelayExecutable(): string {
   if (packageRoot) {
     for (const candidate of [
       path.join(packageRoot, "dist", "native-hook-relay", "entry.js"),
-      path.join(packageRoot, "openclaw.mjs"),
+      path.join(packageRoot, "carapace.mjs"),
       path.join(packageRoot, "dist", "entry.js"),
       path.join(packageRoot, "scripts", "run-node.mjs"),
     ]) {
@@ -121,5 +121,5 @@ function resolveNativeHookRelayExecutable(): string {
       return resolved;
     }
   }
-  throw new Error("Cannot resolve OpenClaw CLI executable path for native hook relay");
+  throw new Error("Cannot resolve Carapace CLI executable path for native hook relay");
 }

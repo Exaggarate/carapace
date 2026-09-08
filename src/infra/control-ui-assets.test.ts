@@ -71,9 +71,9 @@ vi.mock("./control-ui-assets.fs.runtime.js", async () => {
   return wrapped;
 });
 
-vi.mock("./openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: vi.fn(async () => null),
-  resolveOpenClawPackageRootSync: vi.fn(() => null),
+vi.mock("./carapace-root.js", () => ({
+  resolveCarapacePackageRoot: vi.fn(async () => null),
+  resolveCarapacePackageRootSync: vi.fn(() => null),
 }));
 vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: state.runCommandWithTimeout,
@@ -85,7 +85,7 @@ let resolveControlUiAssetHealth: typeof import("./control-ui-assets.js").resolve
 let isPackageProvenControlUiRootSync: typeof import("./control-ui-assets.js").isPackageProvenControlUiRootSync;
 let resolveControlUiRootOverrideSync: typeof import("./control-ui-assets.js").resolveControlUiRootOverrideSync;
 let resolveControlUiRootSync: typeof import("./control-ui-assets.js").resolveControlUiRootSync;
-let openclawRoot: typeof import("./openclaw-root.js");
+let carapaceRoot: typeof import("./carapace-root.js");
 
 describe("control UI assets helpers (fs-mocked)", () => {
   beforeAll(async () => {
@@ -97,7 +97,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
       resolveControlUiRootOverrideSync,
       resolveControlUiRootSync,
     } = await import("./control-ui-assets.js"));
-    openclawRoot = await import("./openclaw-root.js");
+    carapaceRoot = await import("./carapace-root.js");
   });
 
   beforeEach(() => {
@@ -105,7 +105,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
     state.realpaths.clear();
     state.runCommandWithTimeout.mockReset();
     vi.clearAllMocks();
-    vi.mocked(openclawRoot.resolveOpenClawPackageRootSync).mockReset().mockReturnValue(null);
+    vi.mocked(carapaceRoot.resolveCarapacePackageRootSync).mockReset().mockReturnValue(null);
   });
 
   it("distinguishes unresolved, missing, incomplete, and ready startup bundles", async () => {
@@ -164,7 +164,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
       const assetRoot = path.join(root, "dist", "control-ui");
       setFile(
         path.join(assetRoot, "index.html"),
-        `<html data-openclaw-control-ui-build-id="${marker}"></html>`,
+        `<html data-carapace-control-ui-build-id="${marker}"></html>`,
       );
       expect(inspectControlUiRootAssets(assetRoot, "runtime-b").kind).toBe(kind);
       await expect(
@@ -214,10 +214,10 @@ describe("control UI assets helpers (fs-mocked)", () => {
     const root = abs("fixtures/build-failure");
     const argv1 = path.join(root, "src", "index.ts");
     const originalArgv1 = process.argv[1];
-    setFile(path.join(root, "package.json"), '{"name":"openclaw"}\n');
+    setFile(path.join(root, "package.json"), '{"name":"carapace"}\n');
     setFile(path.join(root, "ui", "vite.config.ts"), "export {};\n");
     setFile(path.join(root, "scripts", "ui.js"), "");
-    vi.mocked(openclawRoot.resolveOpenClawPackageRootSync).mockReturnValue(root);
+    vi.mocked(carapaceRoot.resolveCarapacePackageRootSync).mockReturnValue(root);
     state.runCommandWithTimeout.mockResolvedValueOnce({
       stdout: "",
       stderr: `${"y".repeat(238)}🚀xx`,
@@ -257,11 +257,11 @@ describe("control UI assets helpers (fs-mocked)", () => {
     "checks %s macOS Resources ahead of a healthy unused dist root",
     async (kind) => {
       const root = abs("fixtures/packaged-app");
-      const execPath = path.join(root, "OpenClaw.app", "Contents", "MacOS", "OpenClaw");
-      const bundledUiDir = path.join(root, "OpenClaw.app", "Contents", "Resources", "control-ui");
+      const execPath = path.join(root, "Carapace.app", "Contents", "MacOS", "Carapace");
+      const bundledUiDir = path.join(root, "Carapace.app", "Contents", "Resources", "control-ui");
       const indexPath = path.join(bundledUiDir, "index.html");
       const document = (buildId: string) =>
-        `<html data-openclaw-control-ui-build-id="${buildId}-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`;
+        `<html data-carapace-control-ui-build-id="${buildId}-${"a".repeat(64)}"><script src="./assets/startup.js"></script></html>`;
       state.realpaths.set(execPath, execPath);
       setFile(indexPath, document(kind === "stale" ? "runtime-a" : "runtime-b"));
       if (kind !== "incomplete") {
@@ -271,7 +271,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
       setFile(path.join(root, "dist", "control-ui", "assets", "startup.js"));
       setFile(path.join(root, "ui", "vite.config.ts"));
       setFile(path.join(root, "scripts", "ui.js"));
-      vi.mocked(openclawRoot.resolveOpenClawPackageRootSync).mockReturnValue(root);
+      vi.mocked(carapaceRoot.resolveCarapacePackageRootSync).mockReturnValue(root);
 
       const result = await ensureControlUiAssetsBuilt(undefined, {
         argv1: path.join(root, "entry.js"),
@@ -284,7 +284,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
         expect(result.assets.indexPath).toBe(indexPath);
       } else {
         expect(result.message).toContain(indexPath);
-        expect(result.message).toContain("Reinstall OpenClaw");
+        expect(result.message).toContain("Reinstall Carapace");
       }
       expect(state.runCommandWithTimeout).not.toHaveBeenCalled();
     },
@@ -299,7 +299,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
     ).resolves.toEqual({
       ok: false,
       built: false,
-      message: `Missing Control UI assets at ${indexPath}. Reinstall OpenClaw to restore bundled Control UI assets.`,
+      message: `Missing Control UI assets at ${indexPath}. Reinstall Carapace to restore bundled Control UI assets.`,
     });
   });
 
@@ -311,7 +311,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
     await expect(ensureControlUiAssetsBuilt(undefined, { root })).resolves.toEqual({
       ok: false,
       built: false,
-      message: `Incomplete Control UI assets at ${indexPath} (missing assets/startup.js). Reinstall OpenClaw to restore bundled Control UI assets.`,
+      message: `Incomplete Control UI assets at ${indexPath} (missing assets/startup.js). Reinstall Carapace to restore bundled Control UI assets.`,
     });
     expect(state.runCommandWithTimeout).not.toHaveBeenCalled();
   });
@@ -356,7 +356,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
     const indexPath = path.join(checkoutRoot, "dist", "control-ui", "index.html");
     setFile(path.join(checkoutRoot, "ui", "vite.config.ts"));
     setFile(path.join(checkoutRoot, "scripts", "ui.js"));
-    vi.mocked(openclawRoot.resolveOpenClawPackageRootSync).mockImplementation((options) =>
+    vi.mocked(carapaceRoot.resolveCarapacePackageRootSync).mockImplementation((options) =>
       options.moduleUrl ? packagedRoot : checkoutRoot,
     );
     state.runCommandWithTimeout.mockImplementationOnce(async () => {
@@ -537,9 +537,9 @@ describe("control UI assets helpers (fs-mocked)", () => {
   });
 
   it("resolves control-ui root for dist bundle argv1 and moduleUrl candidates", () => {
-    const pkgRoot = abs("fixtures/openclaw-bundle");
+    const pkgRoot = abs("fixtures/carapace-bundle");
     (
-      openclawRoot.resolveOpenClawPackageRootSync as unknown as ReturnType<typeof vi.fn>
+      carapaceRoot.resolveCarapacePackageRootSync as unknown as ReturnType<typeof vi.fn>
     ).mockReturnValueOnce(pkgRoot);
 
     const uiDir = path.join(pkgRoot, "dist", "control-ui");
@@ -556,8 +556,8 @@ describe("control UI assets helpers (fs-mocked)", () => {
   });
 
   it("prefers packaged app Control UI assets in Contents/Resources", () => {
-    const execPath = abs("fixtures/OpenClaw.app/Contents/MacOS/OpenClaw");
-    const bundledUiDir = abs("fixtures/OpenClaw.app/Contents/Resources/control-ui");
+    const execPath = abs("fixtures/Carapace.app/Contents/MacOS/Carapace");
+    const bundledUiDir = abs("fixtures/Carapace.app/Contents/Resources/control-ui");
     setFile(path.join(bundledUiDir, "index.html"), "<html></html>\n");
 
     state.realpaths.set(execPath, execPath);
@@ -566,8 +566,8 @@ describe("control UI assets helpers (fs-mocked)", () => {
   });
 
   it("resolves control-ui root for symlinked argv1 via realpath", () => {
-    const pkgRoot = abs("fixtures/bun-global/openclaw");
-    const wrapperArgv1 = abs("fixtures/bin/openclaw");
+    const pkgRoot = abs("fixtures/bun-global/carapace");
+    const wrapperArgv1 = abs("fixtures/bin/carapace");
     const realEntrypoint = path.join(pkgRoot, "dist", "index.js");
     const uiDir = path.join(pkgRoot, "dist", "control-ui");
 
@@ -578,12 +578,12 @@ describe("control UI assets helpers (fs-mocked)", () => {
   });
 
   it("detects package-proven control-ui roots", () => {
-    const pkgRoot = abs("fixtures/openclaw-package-root");
+    const pkgRoot = abs("fixtures/carapace-package-root");
     const uiDir = path.join(pkgRoot, "dist", "control-ui");
     setDir(uiDir);
     setFile(path.join(uiDir, "index.html"), "<html></html>\n");
     (
-      openclawRoot.resolveOpenClawPackageRootSync as unknown as ReturnType<typeof vi.fn>
+      carapaceRoot.resolveCarapacePackageRootSync as unknown as ReturnType<typeof vi.fn>
     ).mockReturnValueOnce(pkgRoot);
 
     expect(
@@ -594,12 +594,12 @@ describe("control UI assets helpers (fs-mocked)", () => {
   });
 
   it("does not treat fallback roots as package-proven", () => {
-    const pkgRoot = abs("fixtures/openclaw-package-root");
+    const pkgRoot = abs("fixtures/carapace-package-root");
     const fallbackRoot = abs("fixtures/fallback-root/dist/control-ui");
     setDir(fallbackRoot);
     setFile(path.join(fallbackRoot, "index.html"), "<html></html>\n");
     (
-      openclawRoot.resolveOpenClawPackageRootSync as unknown as ReturnType<typeof vi.fn>
+      carapaceRoot.resolveCarapacePackageRootSync as unknown as ReturnType<typeof vi.fn>
     ).mockReturnValueOnce(pkgRoot);
 
     expect(

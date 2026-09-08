@@ -1,7 +1,7 @@
 /** Detects system-domain launchd ownership before mutating a user LaunchAgent. */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { isMissingPathError } from "../infra/errors.js";
 import { execFileUtf8 } from "./exec-file.js";
@@ -39,74 +39,74 @@ function quotePosixArgument(value: string): string {
 
 /**
  * Renders the package-independent ownership probe used by detached restart helpers.
- * The caller must refuse activation when `openclaw_system_launchd_conflict` is non-empty.
+ * The caller must refuse activation when `carapace_system_launchd_conflict` is non-empty.
  */
 export function renderSystemLaunchDaemonOwnershipShellProbe(label: string): string {
   const serviceTarget = `system/${label}`;
-  return `openclaw_system_launchd_conflict=""
-openclaw_system_launchd_detail=""
-openclaw_system_launchd_target=${quotePosixArgument(serviceTarget)}
-openclaw_system_launchd_dir=${quotePosixArgument(SYSTEM_LAUNCH_DAEMON_DIR)}
-openclaw_system_launchd_label=${quotePosixArgument(label)}
-openclaw_query_system_launchd() {
-  openclaw_system_launchd_probe=$(launchctl print "$openclaw_system_launchd_target" 2>&1)
-  openclaw_system_launchd_probe_status=$?
+  return `carapace_system_launchd_conflict=""
+carapace_system_launchd_detail=""
+carapace_system_launchd_target=${quotePosixArgument(serviceTarget)}
+carapace_system_launchd_dir=${quotePosixArgument(SYSTEM_LAUNCH_DAEMON_DIR)}
+carapace_system_launchd_label=${quotePosixArgument(label)}
+carapace_query_system_launchd() {
+  carapace_system_launchd_probe=$(launchctl print "$carapace_system_launchd_target" 2>&1)
+  carapace_system_launchd_probe_status=$?
   # POSIX shell status 126/127 means execution failed; >128 can represent a signal.
   # Partial absence output cannot establish that the ownership query completed.
-  if [ "$openclaw_system_launchd_probe_status" -eq 0 ]; then
-    openclaw_system_launchd_conflict="$openclaw_system_launchd_target"
-    openclaw_system_launchd_detail="loaded system LaunchDaemon $openclaw_system_launchd_target"
-  elif [ "$openclaw_system_launchd_probe_status" -eq 126 ] || [ "$openclaw_system_launchd_probe_status" -eq 127 ] || [ "$openclaw_system_launchd_probe_status" -gt 128 ] ||
-       ! printf '%s' "$openclaw_system_launchd_probe" | /usr/bin/grep -Eiq 'could not find service|no such process|not found'; then
-    openclaw_system_launchd_conflict="$openclaw_system_launchd_target"
-    openclaw_system_launchd_detail="could not verify $openclaw_system_launchd_target (exit $openclaw_system_launchd_probe_status): $openclaw_system_launchd_probe"
+  if [ "$carapace_system_launchd_probe_status" -eq 0 ]; then
+    carapace_system_launchd_conflict="$carapace_system_launchd_target"
+    carapace_system_launchd_detail="loaded system LaunchDaemon $carapace_system_launchd_target"
+  elif [ "$carapace_system_launchd_probe_status" -eq 126 ] || [ "$carapace_system_launchd_probe_status" -eq 127 ] || [ "$carapace_system_launchd_probe_status" -gt 128 ] ||
+       ! printf '%s' "$carapace_system_launchd_probe" | /usr/bin/grep -Eiq 'could not find service|no such process|not found'; then
+    carapace_system_launchd_conflict="$carapace_system_launchd_target"
+    carapace_system_launchd_detail="could not verify $carapace_system_launchd_target (exit $carapace_system_launchd_probe_status): $carapace_system_launchd_probe"
   fi
 }
-openclaw_query_system_launchd
-if [ -z "$openclaw_system_launchd_conflict" ]; then
-  if [ ! -e "$openclaw_system_launchd_dir" ]; then
+carapace_query_system_launchd
+if [ -z "$carapace_system_launchd_conflict" ]; then
+  if [ ! -e "$carapace_system_launchd_dir" ]; then
     :
-  elif [ ! -r "$openclaw_system_launchd_dir" ] || [ ! -x "$openclaw_system_launchd_dir" ]; then
-    openclaw_system_launchd_conflict="$openclaw_system_launchd_dir"
-    openclaw_system_launchd_detail="could not inspect $openclaw_system_launchd_dir"
+  elif [ ! -r "$carapace_system_launchd_dir" ] || [ ! -x "$carapace_system_launchd_dir" ]; then
+    carapace_system_launchd_conflict="$carapace_system_launchd_dir"
+    carapace_system_launchd_detail="could not inspect $carapace_system_launchd_dir"
   else
-    openclaw_system_launchd_entries=""
-    if openclaw_system_launchd_entries=$(/usr/bin/mktemp "\${TMPDIR:-/tmp}/openclaw-launchd-scan.XXXXXX" 2>&1); then
-      if /usr/bin/find "$openclaw_system_launchd_dir" -mindepth 1 -maxdepth 1 -name '*.plist' -print0 >"$openclaw_system_launchd_entries"; then
-        while IFS= read -r -d '' openclaw_system_launchd_plist; do
+    carapace_system_launchd_entries=""
+    if carapace_system_launchd_entries=$(/usr/bin/mktemp "\${TMPDIR:-/tmp}/carapace-launchd-scan.XXXXXX" 2>&1); then
+      if /usr/bin/find "$carapace_system_launchd_dir" -mindepth 1 -maxdepth 1 -name '*.plist' -print0 >"$carapace_system_launchd_entries"; then
+        while IFS= read -r -d '' carapace_system_launchd_plist; do
           # Unreadable plists are treated as foreign: loaded same-label daemons are caught by the
           # bracketing launchctl probes; an unloaded unreadable same-label plist is an accepted operator-created edge (#120481).
-          if [ ! -r "$openclaw_system_launchd_plist" ]; then
+          if [ ! -r "$carapace_system_launchd_plist" ]; then
             continue
           fi
-          if openclaw_system_launchd_plist_label=$(/usr/bin/plutil -extract Label raw -o - -- "$openclaw_system_launchd_plist" 2>&1); then
-            if [ "$openclaw_system_launchd_plist_label" != "$openclaw_system_launchd_label" ]; then
+          if carapace_system_launchd_plist_label=$(/usr/bin/plutil -extract Label raw -o - -- "$carapace_system_launchd_plist" 2>&1); then
+            if [ "$carapace_system_launchd_plist_label" != "$carapace_system_launchd_label" ]; then
               continue
             fi
-            openclaw_system_launchd_conflict="$openclaw_system_launchd_plist"
-            openclaw_system_launchd_detail="installed same-label system LaunchDaemon plist $openclaw_system_launchd_plist"
+            carapace_system_launchd_conflict="$carapace_system_launchd_plist"
+            carapace_system_launchd_detail="installed same-label system LaunchDaemon plist $carapace_system_launchd_plist"
             break
-          elif /usr/bin/plutil -lint -- "$openclaw_system_launchd_plist" >/dev/null 2>&1; then
+          elif /usr/bin/plutil -lint -- "$carapace_system_launchd_plist" >/dev/null 2>&1; then
             continue
           else
-            openclaw_system_launchd_conflict="$openclaw_system_launchd_plist"
-            openclaw_system_launchd_detail="could not inspect system LaunchDaemon plist $openclaw_system_launchd_plist: $openclaw_system_launchd_plist_label"
+            carapace_system_launchd_conflict="$carapace_system_launchd_plist"
+            carapace_system_launchd_detail="could not inspect system LaunchDaemon plist $carapace_system_launchd_plist: $carapace_system_launchd_plist_label"
             break
           fi
-        done <"$openclaw_system_launchd_entries"
+        done <"$carapace_system_launchd_entries"
       else
-        openclaw_system_launchd_conflict="$openclaw_system_launchd_dir"
-        openclaw_system_launchd_detail="could not enumerate $openclaw_system_launchd_dir"
+        carapace_system_launchd_conflict="$carapace_system_launchd_dir"
+        carapace_system_launchd_detail="could not enumerate $carapace_system_launchd_dir"
       fi
-      /bin/rm -f "$openclaw_system_launchd_entries"
+      /bin/rm -f "$carapace_system_launchd_entries"
     else
-      openclaw_system_launchd_conflict="$openclaw_system_launchd_dir"
-      openclaw_system_launchd_detail="could not create a secure system LaunchDaemon scan snapshot: $openclaw_system_launchd_entries"
+      carapace_system_launchd_conflict="$carapace_system_launchd_dir"
+      carapace_system_launchd_detail="could not create a secure system LaunchDaemon scan snapshot: $carapace_system_launchd_entries"
     fi
   fi
 fi
-if [ -z "$openclaw_system_launchd_conflict" ]; then
-  openclaw_query_system_launchd
+if [ -z "$carapace_system_launchd_conflict" ]; then
+  carapace_query_system_launchd
 fi
 `;
 }
@@ -280,7 +280,7 @@ function formatSystemLaunchDaemonOwnershipError(ownership: SystemLaunchDaemonCon
   return [
     formatSystemLaunchDaemonOwnershipSummary(ownership),
     "Refusing to create or activate a user LaunchAgent for the same label because duplicate KeepAlive managers can restart-loop the gateway.",
-    "OpenClaw does not manage system LaunchDaemons, and --force does not override system ownership.",
+    "Carapace does not manage system LaunchDaemons, and --force does not override system ownership.",
     recovery,
   ].join("\n");
 }

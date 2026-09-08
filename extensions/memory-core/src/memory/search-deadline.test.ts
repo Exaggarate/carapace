@@ -60,7 +60,7 @@ describe("runMemorySearchWithDeadline", () => {
     // The brand must not live in the global symbol registry: anything in the
     // process could then mark its own failure as this tool's deadline.
     const forged = new Error("openai-compatible embeddings query failed");
-    for (const key of ["openclaw.memory-core.search-deadline", "memory-core.search-deadline"]) {
+    for (const key of ["carapace.memory-core.search-deadline", "memory-core.search-deadline"]) {
       Object.defineProperty(forged, Symbol.for(key), { value: true });
     }
 

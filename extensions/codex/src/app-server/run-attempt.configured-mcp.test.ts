@@ -1,12 +1,12 @@
 import { getEventListeners } from "node:events";
 import path from "node:path";
-import { openFileBackedSessionManagerForTest } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
+import { openFileBackedSessionManagerForTest } from "carapace/plugin-sdk/agent-runtime-test-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { initializeGlobalHookRunner } from "carapace/plugin-sdk/hook-runtime";
 import {
   createMockPluginRegistry,
   createPluginMetadataSnapshotFixture,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mcpMocks = vi.hoisted(() => ({
@@ -40,8 +40,8 @@ const mcpMocks = vi.hoisted(() => ({
   threadConfigCalls: [] as Array<Record<string, unknown>>,
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>();
   return {
     ...actual,
     materializeRequesterScopedMcpToolsForHarnessRun: async (
@@ -93,8 +93,8 @@ vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/codex-mcp-projection", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/codex-mcp-projection")>();
+vi.mock("carapace/plugin-sdk/codex-mcp-projection", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/codex-mcp-projection")>();
   return {
     ...actual,
     runWithCronCreatorAuthorityCapabilityResolver: (
@@ -566,7 +566,7 @@ describe("runCodexAppServerAttempt configured MCP ownership", () => {
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
     expect(inputText.length).toBeLessThanOrEqual(1 << 20);
-    expect(inputText).toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).toContain("Carapace assembled context for this turn:");
     expect(inputText).toContain("new scheduled ownership question");
     expect(inputText).toContain("recent scheduled ownership answer");
     expect(inputText).toContain("Current user request:");
@@ -691,7 +691,7 @@ describe("runCodexAppServerAttempt configured MCP ownership", () => {
       // Codex drops decline meta, so the remedy must reach the operator via the card.
       if (testCase.delegate) {
         expect(requestApproval.mock.calls[0]?.[0]?.description).toContain(
-          `openclaw mcp configure ${testCase.source === "bundle" ? "bundled" : "fake"} --approval approve`,
+          `carapace mcp configure ${testCase.source === "bundle" ? "bundled" : "fake"} --approval approve`,
         );
       }
       const expectedApprovalPolicy = testCase.delegate

@@ -11,9 +11,9 @@ import { createSuiteLogPathTracker } from "./log-test-helpers.js";
 import { loggingState } from "./state.js";
 
 const defaultMaxFileBytes = 100 * 1024 * 1024;
-const logPathTracker = createSuiteLogPathTracker("openclaw-test-env-log-level-");
+const logPathTracker = createSuiteLogPathTracker("carapace-test-env-log-level-");
 
-describe("OPENCLAW_LOG_LEVEL", () => {
+describe("CARAPACE_LOG_LEVEL", () => {
   let envSnapshot: ReturnType<typeof captureEnv> | undefined;
   let testLogPath = "";
 
@@ -22,9 +22,9 @@ describe("OPENCLAW_LOG_LEVEL", () => {
   });
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_LOG_LEVEL"]);
+    envSnapshot = captureEnv(["CARAPACE_LOG_LEVEL"]);
     testLogPath = logPathTracker.nextPath();
-    delete process.env.OPENCLAW_LOG_LEVEL;
+    delete process.env.CARAPACE_LOG_LEVEL;
     loggingState.invalidEnvLogLevelValue = null;
     resetLogger();
     setLoggerOverride(null);
@@ -51,7 +51,7 @@ describe("OPENCLAW_LOG_LEVEL", () => {
       consoleStyle: "json",
       file: testLogPath,
     });
-    process.env.OPENCLAW_LOG_LEVEL = "debug";
+    process.env.CARAPACE_LOG_LEVEL = "debug";
 
     expect(getResolvedLoggerSettings()).toEqual({
       level: "debug",
@@ -71,7 +71,7 @@ describe("OPENCLAW_LOG_LEVEL", () => {
       consoleStyle: "compact",
       file: testLogPath,
     });
-    process.env.OPENCLAW_LOG_LEVEL = "nope";
+    process.env.CARAPACE_LOG_LEVEL = "nope";
     const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     expect(getResolvedLoggerSettings().level).toBe("error");
@@ -81,9 +81,9 @@ describe("OPENCLAW_LOG_LEVEL", () => {
 
     const warnings = stderrSpy.mock.calls
       .map(([firstArg]) => String(firstArg))
-      .filter((line) => line.includes("OPENCLAW_LOG_LEVEL"));
+      .filter((line) => line.includes("CARAPACE_LOG_LEVEL"));
     expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toContain('Ignoring invalid OPENCLAW_LOG_LEVEL="nope"');
+    expect(warnings[0]).toContain('Ignoring invalid CARAPACE_LOG_LEVEL="nope"');
   });
 
   it("structures invalid env warnings for JSON console output", () => {
@@ -93,17 +93,17 @@ describe("OPENCLAW_LOG_LEVEL", () => {
       consoleStyle: "json",
       file: testLogPath,
     });
-    process.env.OPENCLAW_LOG_LEVEL = "nope";
+    process.env.CARAPACE_LOG_LEVEL = "nope";
     const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     expect(getResolvedConsoleSettings().level).toBe("info");
 
     const warning = stderrSpy.mock.calls
       .map(([firstArg]) => String(firstArg))
-      .find((line) => line.includes("OPENCLAW_LOG_LEVEL"));
+      .find((line) => line.includes("CARAPACE_LOG_LEVEL"));
     expect(JSON.parse(warning ?? "")).toMatchObject({
       level: "warn",
-      message: expect.stringContaining('Ignoring invalid OPENCLAW_LOG_LEVEL="nope"'),
+      message: expect.stringContaining('Ignoring invalid CARAPACE_LOG_LEVEL="nope"'),
     });
   });
 });

@@ -2,8 +2,8 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { buildControlUiSessionPath } from "@openclaw/session-url-contract";
-import type { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
+import { buildControlUiSessionPath } from "@carapace/session-url-contract";
+import type { GatewayClient } from "carapace/plugin-sdk/gateway-runtime";
 import type { Browser, BrowserContext, Page } from "playwright";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -28,11 +28,11 @@ import {
 } from "./paired-node-worker-wire-fixture.js";
 
 const execFileAsync = promisify(execFile);
-const CONTAINER_WIRE_ENABLED = process.env.OPENCLAW_DOCKER_NODE_WORKER_E2E === "1";
-const CONTROL_UI_PROOF_ENABLED = process.env.OPENCLAW_DOCKER_NODE_WORKER_UI_PROOF === "1";
-const CONTAINER_IMAGE = process.env.OPENCLAW_DOCKER_NODE_WORKER_IMAGE ?? "node:24-bookworm";
+const CONTAINER_WIRE_ENABLED = process.env.CARAPACE_DOCKER_NODE_WORKER_E2E === "1";
+const CONTROL_UI_PROOF_ENABLED = process.env.CARAPACE_DOCKER_NODE_WORKER_UI_PROOF === "1";
+const CONTAINER_IMAGE = process.env.CARAPACE_DOCKER_NODE_WORKER_IMAGE ?? "node:24-bookworm";
 const CONTAINER_GATEWAY_HOST =
-  process.env.OPENCLAW_DOCKER_NODE_WORKER_GATEWAY_HOST ?? "host.docker.internal";
+  process.env.CARAPACE_DOCKER_NODE_WORKER_GATEWAY_HOST ?? "host.docker.internal";
 const SESSION_KEY = "agent:qa:node-worker-container-wire";
 const INITIAL_MARKER = "NODE_WORKER_CONTAINER_UI_START_OK";
 const INITIAL_PROMPT = `Reply with only this exact marker: ${INITIAL_MARKER}`;
@@ -102,7 +102,7 @@ async function observeWorkerContainer(launchId: string): Promise<ObservedWorkerC
         "--all",
         "--no-trunc",
         "--filter",
-        `label=openclaw.node-worker.launch=${encodedLaunch}`,
+        `label=carapace.node-worker.launch=${encodedLaunch}`,
         "--format",
         "{{.ID}}",
       ]);
@@ -133,7 +133,7 @@ async function startControlUiProof(gateway: WireGateway): Promise<ControlUiProof
   );
   const { chromium } = await import("playwright");
   const artifactDir = path.resolve(
-    process.env.OPENCLAW_DOCKER_NODE_WORKER_ARTIFACT_DIR ??
+    process.env.CARAPACE_DOCKER_NODE_WORKER_ARTIFACT_DIR ??
       ".artifacts/control-ui-e2e/node-worker-container-wire",
   );
   await fs.mkdir(artifactDir, { recursive: true });
@@ -146,7 +146,7 @@ async function startControlUiProof(gateway: WireGateway): Promise<ControlUiProof
   });
   await context.addInitScript(
     ({ gatewayUrl, token }) => {
-      Object.defineProperty(globalThis, "__OPENCLAW_NATIVE_CONTROL_AUTH__", {
+      Object.defineProperty(globalThis, "__CARAPACE_NATIVE_CONTROL_AUTH__", {
         configurable: true,
         value: { gatewayUrl, token },
       });
@@ -246,7 +246,7 @@ describe.runIf(CONTAINER_WIRE_ENABLED)("node worker real Docker wire", () => {
     "runs a full-access remote turn in Docker without producing approval requests",
     { timeout: PROOF_TIMEOUT_MS + 120_000 },
     async () => {
-      const root = tempDirs.make("openclaw-node-worker-container-wire-");
+      const root = tempDirs.make("carapace-node-worker-container-wire-");
       const provider = await startQaMockOpenAiServer({ modelRefs: [MODEL_REF] });
       const published = await createPublishedWireWorkspace(root);
       const engine = await resolveNodeWorkerContainerEngine();
@@ -312,7 +312,7 @@ describe.runIf(CONTAINER_WIRE_ENABLED)("node worker real Docker wire", () => {
           containerEngine: engine,
           containerImage: CONTAINER_IMAGE,
           workerGatewayUrl: workerGatewayUrl.toString(),
-          workerEnv: { OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1" },
+          workerEnv: { CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1" },
           onInvoke: (frame) => {
             if (frame.command !== NODE_WORKER_SUPERVISOR_LAUNCH_COMMAND || !frame.paramsJSON) {
               return;
@@ -388,7 +388,7 @@ describe.runIf(CONTAINER_WIRE_ENABLED)("node worker real Docker wire", () => {
               "ps",
               "--all",
               "--filter",
-              `label=openclaw.node-worker.launch=${Buffer.from(firstLaunchId!).toString("base64url")}`,
+              `label=carapace.node-worker.launch=${Buffer.from(firstLaunchId!).toString("base64url")}`,
               "--format",
               "{{.ID}}",
             ]),
@@ -538,7 +538,7 @@ describe.runIf(CONTAINER_WIRE_ENABLED)("node worker real Docker wire", () => {
           }),
         );
         expect(container.mounts.filter((mount) => !mount.RW)).toHaveLength(1);
-        expect(container.labels["openclaw.node-worker.launch"]).toBe(
+        expect(container.labels["carapace.node-worker.launch"]).toBe(
           Buffer.from(launchId!).toString("base64url"),
         );
         await expect(fs.readFile(path.join(remoteWorkspaceDir!, EXEC_FILE), "utf8")).resolves.toBe(

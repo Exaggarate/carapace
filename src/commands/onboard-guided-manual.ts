@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withConsoleSubsystemsSuppressed } from "../logging/console.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type {
@@ -41,7 +41,7 @@ async function noteActivationFailure(params: {
 
 export async function runManualStage(params: {
   detection: SetupInferenceDetection;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspace: string;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;

@@ -13,8 +13,8 @@ import {
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { appendSqliteTrajectoryRuntimeEvents } from "../trajectory/runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "../trajectory/types.js";
 import { sessionsTailCommand } from "./sessions-tail.js";
@@ -41,7 +41,7 @@ function makeEvent(
   params: Partial<TrajectoryEvent> & { type: string; ts: string },
 ): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "carapace-trajectory",
     schemaVersion: 1,
     traceId: "trace-1",
     source: "runtime",
@@ -65,9 +65,9 @@ describe("sessionsTailCommand", () => {
   let previousStateDir: string | undefined;
 
   beforeEach(() => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sessions-tail-"));
-    process.env.OPENCLAW_STATE_DIR = path.join(tmpDir, "state");
+    previousStateDir = process.env.CARAPACE_STATE_DIR;
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sessions-tail-"));
+    process.env.CARAPACE_STATE_DIR = path.join(tmpDir, "state");
     mocks.getRuntimeConfig.mockReturnValue({
       agents: {
         list: [{ id: "main" }, { id: "ops" }],
@@ -79,12 +79,12 @@ describe("sessionsTailCommand", () => {
   afterEach(() => {
     vi.useRealTimers();
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.CARAPACE_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.CARAPACE_STATE_DIR = previousStateDir;
     }
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -343,7 +343,7 @@ describe("sessionsTailCommand", () => {
     "selects %s sessions without decoding unrelated saved prompts",
     async (selection) => {
       const runtime = makeRuntime();
-      storePath = path.join(tmpDir, "state", "agents", "main", "agent", "openclaw-agent.sqlite");
+      storePath = path.join(tmpDir, "state", "agents", "main", "agent", "carapace-agent.sqlite");
       replaceSessionEntrySync(
         { sessionKey, storePath },
         {
@@ -518,7 +518,7 @@ describe("sessionsTailCommand", () => {
       { agent: "main", store: storePath, sessionKey, tail: "0", follow: true },
       runtime,
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     fs.writeFileSync(storePath, "not a SQLite database");
     try {
       await vi.advanceTimersByTimeAsync(1_000);
@@ -555,7 +555,7 @@ describe("sessionsTailCommand", () => {
   it("resolves the target store from a fully qualified non-default agent session key", async () => {
     const runtime = makeRuntime();
     const opsSessionKey = "agent:ops:telegram:direct:owner";
-    const opsSessionsDir = path.join(process.env.OPENCLAW_STATE_DIR!, "agents", "ops", "sessions");
+    const opsSessionsDir = path.join(process.env.CARAPACE_STATE_DIR!, "agents", "ops", "sessions");
     const opsStorePath = path.join(opsSessionsDir, "sessions.json");
     await upsertSessionEntryCore(
       { sessionKey: opsSessionKey, storePath: opsStorePath },

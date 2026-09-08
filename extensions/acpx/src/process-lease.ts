@@ -1,28 +1,28 @@
 /**
- * Persistent lease store for ACPX wrapper processes. Leases let OpenClaw attach
+ * Persistent lease store for ACPX wrapper processes. Leases let Carapace attach
  * gateway/session identity to spawned ACP processes and clean them up later.
  */
 import { createHash } from "node:crypto";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import { renderAgentCommand, splitCommandParts, type AcpxAgentCommand } from "./command-line.js";
 import { ACPX_PROCESS_LEASE_MAX_ENTRIES, ACPX_PROCESS_LEASE_NAMESPACE } from "./state.js";
 
 /** CLI argument carrying the ACPX process lease id. */
-export const OPENCLAW_ACPX_LEASE_ID_ARG = "--openclaw-acpx-lease-id";
+export const CARAPACE_ACPX_LEASE_ID_ARG = "--carapace-acpx-lease-id";
 /** CLI argument carrying the owning gateway instance id. */
-export const OPENCLAW_GATEWAY_INSTANCE_ID_ARG = "--openclaw-gateway-instance-id";
+export const CARAPACE_GATEWAY_INSTANCE_ID_ARG = "--carapace-gateway-instance-id";
 /** Synthetic session identity for generated-wrapper health probes. */
-export const ACPX_PROBE_LEASE_SESSION_KEY = "openclaw:acpx:probe";
+export const ACPX_PROBE_LEASE_SESSION_KEY = "carapace:acpx:probe";
 
 export type AcpxProcessLeaseIdentity = {
   leaseId: string;
   gatewayInstanceId: string;
 };
 
-/** Read OpenClaw lease identity from a generated wrapper command. */
+/** Read Carapace lease identity from a generated wrapper command. */
 export function readAcpxProcessLeaseIdentity(
   command: AcpxAgentCommand | undefined,
 ): AcpxProcessLeaseIdentity | undefined {
@@ -32,12 +32,12 @@ export function readAcpxProcessLeaseIdentity(
     typeof command === "string"
       ? Array.from(
           command.matchAll(
-            /(?:^|\s)(--openclaw-(?:acpx-lease-id|gateway-instance-id))\s+(?:"([^"]*)"|'([^']*)'|(\S+))(?=\s|$)/g,
+            /(?:^|\s)(--carapace-(?:acpx-lease-id|gateway-instance-id))\s+(?:"([^"]*)"|'([^']*)'|(\S+))(?=\s|$)/g,
           ),
         ).flatMap((match) => [match[1]!, match[2] ?? match[3] ?? match[4]!])
       : (command ?? []);
-  const leaseIndex = parts.lastIndexOf(OPENCLAW_ACPX_LEASE_ID_ARG);
-  const gatewayIndex = parts.lastIndexOf(OPENCLAW_GATEWAY_INSTANCE_ID_ARG);
+  const leaseIndex = parts.lastIndexOf(CARAPACE_ACPX_LEASE_ID_ARG);
+  const gatewayIndex = parts.lastIndexOf(CARAPACE_GATEWAY_INSTANCE_ID_ARG);
   const leaseId = leaseIndex >= 0 ? parts[leaseIndex + 1]?.trim() : "";
   const gatewayInstanceId = gatewayIndex >= 0 ? parts[gatewayIndex + 1]?.trim() : "";
   if (!leaseId || !gatewayInstanceId) {
@@ -197,9 +197,9 @@ export function withAcpxLeaseArgs(params: {
 }): string[] {
   return [
     ...splitCommandParts(params.command),
-    OPENCLAW_ACPX_LEASE_ID_ARG,
+    CARAPACE_ACPX_LEASE_ID_ARG,
     params.leaseId,
-    OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+    CARAPACE_GATEWAY_INSTANCE_ID_ARG,
     params.gatewayInstanceId,
   ];
 }

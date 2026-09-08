@@ -1,9 +1,9 @@
 /** Resolves plugin config contract metadata for scanners and secret/config policy checks. */
-import { normalizeSortedUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeSortedUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { findBundledPluginMetadataById } from "./bundled-plugin-metadata.js";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { discoverCarapacePlugins, type PluginDiscoveryResult } from "./discovery.js";
 import {
   loadPluginManifestRegistryCore,
   type PluginManifestRegistry,
@@ -22,7 +22,7 @@ type PluginConfigContractMetadata = {
 
 /** Resolve config contract metadata for plugin ids through the runtime registry and bundled fallback. */
 export function resolvePluginConfigContractsById(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   fallbackToBundledMetadata?: boolean;
@@ -54,7 +54,7 @@ export function resolvePluginConfigContractsById(params: {
     }
     const discovery =
       params.discovery ??
-      discoverOpenClawPlugins({
+      discoverCarapacePlugins({
         workspaceDir: params.workspaceDir,
         env: params.env,
       });

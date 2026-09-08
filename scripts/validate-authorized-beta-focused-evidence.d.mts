@@ -67,7 +67,7 @@ export type AuthorizedBetaFocusedProducerIdentity = {
 };
 
 export type AuthorizedBetaFocusedEvidence = {
-  schema: "openclaw.authorized-beta-focused-evidence.v1";
+  schema: "carapace.authorized-beta-focused-evidence.v1";
   mode: "authorized-beta-focused-v1";
   policySha256: string;
   releaseTag: string;

@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Testing
 import WebKit
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct IOSDeviceSettingsBridgeTests {
@@ -75,7 +75,7 @@ struct IOSDeviceSettingsBridgeTests {
     @Test func `changed control UI authentication rejects ownership and recreates the browser`() throws {
         let original = try Self.controlUIConfig()
         var replacements = try [
-            Self.controlUIConfig(url: "wss://replacement.example/openclaw"),
+            Self.controlUIConfig(url: "wss://replacement.example/carapace"),
             Self.controlUIConfig(stableID: "gateway-e\u{301}"),
             Self.controlUIConfig(tls: nil),
             Self.controlUIConfig(tls: GatewayTLSParams(
@@ -124,7 +124,7 @@ struct IOSDeviceSettingsBridgeTests {
     }
 
     private static func controlUIConfig(
-        url: String = "wss://gateway.example/openclaw",
+        url: String = "wss://gateway.example/carapace",
         stableID: String = "gateway-\u{e9}",
         tls: GatewayTLSParams? = GatewayTLSParams(
             required: true, expectedFingerprint: "pin-a", allowTOFU: false, storeKey: "gateway"),
@@ -146,14 +146,14 @@ struct IOSDeviceSettingsBridgeTests {
                 caps: [],
                 commands: [],
                 permissions: [:],
-                clientId: "openclaw-ios",
+                clientId: "carapace-ios",
                 clientMode: "node",
                 clientDisplayName: "Synthetic device"))
     }
 
     @Test func `device settings trust requires the hosting main frame and gateway authority`() throws {
-        let gateway = try #require(URL(string: "https://gateway.example:8443/openclaw/"))
-        let settings = try #require(URL(string: "https://gateway.example:8443/openclaw/settings/device"))
+        let gateway = try #require(URL(string: "https://gateway.example:8443/carapace/"))
+        let settings = try #require(URL(string: "https://gateway.example:8443/carapace/settings/device"))
         func trusted(_ source: URL?, mainFrame: Bool = true, hostingView: Bool = true) -> Bool {
             IOSDeviceSettingsBridge.isTrustedSource(
                 source, webViewURL: settings, gatewayURL: gateway,
@@ -164,11 +164,11 @@ struct IOSDeviceSettingsBridgeTests {
         #expect(!trusted(settings, hostingView: false))
         #expect(!trusted(nil))
         for value in [
-            "https://other.example:8443/openclaw/settings",
-            "http://gateway.example:8443/openclaw/settings",
-            "https://gateway.example/openclaw/settings",
-            "https://gateway.example:8443/openclaw-other/settings",
-            "https://gateway.example:8443/openclaw%2Fsettings",
+            "https://other.example:8443/carapace/settings",
+            "http://gateway.example:8443/carapace/settings",
+            "https://gateway.example/carapace/settings",
+            "https://gateway.example:8443/carapace-other/settings",
+            "https://gateway.example:8443/carapace%2Fsettings",
             "about:blank",
         ] {
             #expect(!trusted(URL(string: value)))
@@ -215,7 +215,7 @@ struct IOSDeviceSettingsBridgeTests {
         let script = try #require(controller.userScripts.first)
         #expect(script.injectionTime == .atDocumentStart)
         #expect(script.isForMainFrameOnly)
-        #expect(script.source.contains("__OPENCLAW_NATIVE_EMBED__"))
+        #expect(script.source.contains("__CARAPACE_NATIVE_EMBED__"))
         #expect(script.source.contains("location.origin"))
         #expect(AuthenticatedControlUIWebViewCoordinator.embedScript(url: url, isPad: false)?
             .contains("'phone'") == true)

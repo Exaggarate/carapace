@@ -1,9 +1,9 @@
-import type { EventFrame, HelloOk } from "@openclaw/gateway-protocol";
+import type { EventFrame, HelloOk } from "@carapace/gateway-protocol";
 import {
   isGatewayEventFrame,
   isGatewayResponseFrame,
-} from "@openclaw/gateway-protocol/frame-guards";
-import { RetrySupervisor, sleepWithAbort } from "@openclaw/retry";
+} from "@carapace/gateway-protocol/frame-guards";
+import { RetrySupervisor, sleepWithAbort } from "@carapace/retry";
 import { GatewayEventListeners } from "./event-listeners.js";
 import { GatewayPendingRequests, type GatewayProtocolRequestTiming } from "./pending-request.js";
 import type {

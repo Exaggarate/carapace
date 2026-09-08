@@ -7,10 +7,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { UPDATE_RUN_PHASES } from "../../packages/gateway-protocol/src/update-run-vocabulary.js";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { assertSqliteSchemaContains } from "./sqlite-schema-contract.js";
 import {
   createUpdateRun,
@@ -29,7 +29,7 @@ import { UpdateRunRecordSchema } from "./update-run-schema.js";
 const tempDirs = createTempDirTracker();
 
 function isolatedOptions() {
-  return { env: { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-update-ledger-") } };
+  return { env: { CARAPACE_STATE_DIR: tempDirs.make("carapace-update-ledger-") } };
 }
 
 function snapshotDatabaseFiles(filename: string) {
@@ -65,7 +65,7 @@ function snapshotDatabaseFiles(filename: string) {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -73,14 +73,14 @@ describe("update run ledger", () => {
   it("keeps reads non-creating and adds the table on first write without changing the older schema", () => {
     const options = isolatedOptions();
     const runId = randomUUID();
-    const filename = resolveOpenClawStateSqlitePath(options.env);
+    const filename = resolveCarapaceStateSqlitePath(options.env);
     expect(getUpdateRun(runId, options)).toBeUndefined();
     expect(listUpdateRuns({}, options)).toEqual([]);
     expect(findActiveUpdateRun(options)).toBeUndefined();
     expect(fs.existsSync(filename)).toBe(false);
-    expect(fs.readdirSync(options.env.OPENCLAW_STATE_DIR)).toEqual([]);
+    expect(fs.readdirSync(options.env.CARAPACE_STATE_DIR)).toEqual([]);
 
-    const initial = openOpenClawStateDatabase(options);
+    const initial = openCarapaceStateDatabase(options);
     const hasLedger = () =>
       initial.db.prepare("SELECT 1 FROM sqlite_schema WHERE name = 'update_runs'").get();
     expect(hasLedger()).toBeUndefined();
@@ -100,7 +100,7 @@ describe("update run ledger", () => {
 
     const created = createUpdateRun({ runId, trigger: "cli" }, options);
     expect(created).toMatchObject({ runId, phase: "requested", status: "running" });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const olderReader = new DatabaseSync(filename);
     try {
       assertSqliteSchemaContains(olderReader, filename, previousSchema);
@@ -124,21 +124,21 @@ describe("update run ledger", () => {
     ({ reader, retainedWal }) => {
       const sourceOptions = isolatedOptions();
       const created = createUpdateRun({ trigger: "cli" }, sourceOptions);
-      const sourcePath = resolveOpenClawStateSqlitePath(sourceOptions.env);
+      const sourcePath = resolveCarapaceStateSqlitePath(sourceOptions.env);
       let options = sourceOptions;
       let expected = created;
       if (retainedWal) {
-        const { db } = openOpenClawStateDatabase(sourceOptions);
+        const { db } = openCarapaceStateDatabase(sourceOptions);
         db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
         expected = recordUpdateRunPhase(created.runId, "staging", {}, sourceOptions);
         options = isolatedOptions();
-        const filename = resolveOpenClawStateSqlitePath(options.env);
+        const filename = resolveCarapaceStateSqlitePath(options.env);
         fs.mkdirSync(path.dirname(filename), { recursive: true });
         // Capture committed WAL bytes while the only producer is idle, then close
         // it before observing the copy. Omitting WAL must not return stale history.
         fs.copyFileSync(sourcePath, filename);
         fs.copyFileSync(`${sourcePath}-wal`, `${filename}-wal`);
-        const mainOnly = path.join(tempDirs.make("openclaw-update-main-only-"), "main.sqlite");
+        const mainOnly = path.join(tempDirs.make("carapace-update-main-only-"), "main.sqlite");
         fs.copyFileSync(sourcePath, mainOnly);
         const control = new DatabaseSync(mainOnly, { readOnly: true });
         try {
@@ -149,8 +149,8 @@ describe("update run ledger", () => {
           control.close();
         }
       }
-      closeOpenClawStateDatabaseForTest();
-      const filename = resolveOpenClawStateSqlitePath(options.env);
+      closeCarapaceStateDatabaseForTest();
+      const filename = resolveCarapaceStateSqlitePath(options.env);
       expect(fs.existsSync(`${filename}-shm`)).toBe(false);
       expect(fs.existsSync(`${filename}-wal`)).toBe(retainedWal);
       const before = snapshotDatabaseFiles(filename);
@@ -171,7 +171,7 @@ describe("update run ledger", () => {
     recordUpdateRunVerification(run.runId, { serviceRunning: true }, options);
     // Rows written before verification stopped recording inference keep the key;
     // the non-strict record schema drops it instead of rejecting the run.
-    openOpenClawStateDatabase(options)
+    openCarapaceStateDatabase(options)
       .db.prepare("UPDATE update_runs SET verification_json = ? WHERE run_id = ?")
       .run(JSON.stringify({ serviceRunning: true, inferenceProbe: "passed" }), run.runId);
 
@@ -180,12 +180,12 @@ describe("update run ledger", () => {
 
   it("leaves a cold store without the history table unchanged", () => {
     const options = isolatedOptions();
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     expect(
       db.prepare("SELECT 1 FROM sqlite_schema WHERE name = 'update_runs'").get(),
     ).toBeUndefined();
-    closeOpenClawStateDatabaseForTest();
-    const filename = resolveOpenClawStateSqlitePath(options.env);
+    closeCarapaceStateDatabaseForTest();
+    const filename = resolveCarapaceStateSqlitePath(options.env);
     const before = snapshotDatabaseFiles(filename);
     expect(getUpdateRun(randomUUID(), options)).toBeUndefined();
     expect(listUpdateRuns({}, options)).toEqual([]);
@@ -196,8 +196,8 @@ describe("update run ledger", () => {
   it("keeps the idle cached writer usable after history reads", () => {
     const options = isolatedOptions();
     const created = createUpdateRun({ trigger: "cli" }, options);
-    const { db } = openOpenClawStateDatabase(options);
-    const filename = resolveOpenClawStateSqlitePath(options.env);
+    const { db } = openCarapaceStateDatabase(options);
+    const filename = resolveCarapaceStateSqlitePath(options.env);
     const before = snapshotDatabaseFiles(filename);
     expect(getUpdateRun(created.runId, options)).toEqual(created);
     expect(listUpdateRuns({}, options)).toEqual([created]);
@@ -210,7 +210,7 @@ describe("update run ledger", () => {
   it("reads committed history without consuming the cached writer's transaction", () => {
     const options = isolatedOptions();
     const created = createUpdateRun({ trigger: "cli" }, options);
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     db.exec("BEGIN IMMEDIATE");
     try {
       db.prepare("UPDATE update_runs SET phase = 'staging' WHERE run_id = ?").run(created.runId);
@@ -357,7 +357,7 @@ describe("update run ledger", () => {
       recordUpdateRunStep(
         run.runId,
         {
-          step: "openclaw doctor",
+          step: "carapace doctor",
           status: "in_progress",
           startedAtMs: 1_000,
         },
@@ -365,12 +365,12 @@ describe("update run ledger", () => {
       );
       clock.mockReturnValue(2_000);
       finishUpdateRun(run.runId, { status }, options);
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
 
       const persisted = getUpdateRun(run.runId, options);
       expect(persisted?.steps.some((step) => step.status === "in_progress")).toBe(false);
-      expect(persisted?.steps.find((step) => step.step === "openclaw doctor")).toEqual({
-        step: "openclaw doctor",
+      expect(persisted?.steps.find((step) => step.step === "carapace doctor")).toEqual({
+        step: "carapace doctor",
         status: stepStatus,
         startedAtMs: 1_000,
         endedAtMs: 2_000,
@@ -457,7 +457,7 @@ describe("update run ledger", () => {
           options,
         );
       }
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const persisted = getUpdateRun(run.runId, options)!;
       expect(persisted.steps.map((step) => step.step)).toEqual(
         expect.arrayContaining([...UPDATE_RUN_PHASES, ...notices]),
@@ -538,7 +538,7 @@ describe("update run ledger", () => {
       { attempt: 20, status: "succeeded", startedAtMs: 20 },
     ]);
     expect(persisted?.verification.pluginErrors?.at(-1)).toContain("39:");
-    const { db } = openOpenClawStateDatabase(options);
+    const { db } = openCarapaceStateDatabase(options);
     const row = db.prepare("SELECT * FROM update_runs WHERE run_id = ?").get(run.runId);
     const columns = Object.entries(row ?? {}).filter(([key]) => key.endsWith("_json"));
     expect(columns).toHaveLength(7);
@@ -622,34 +622,34 @@ describe("update run ledger", () => {
   it("preserves model refs, slash commands, URLs, and usable home-relative recovery selectors", () => {
     const options = {
       env: { ...isolatedOptions().env, HOME: "/home/operator" },
-      redactPaths: ["/opt/openclaw-candidate", "\\\\host\\share"],
+      redactPaths: ["/opt/carapace-candidate", "\\\\host\\share"],
     };
     const run = createUpdateRun(
       {
         trigger: "cli",
         origin: {
-          nextAction: "Run openclaw update cleanup --dry-run for state /home/operator/.openclaw.",
+          nextAction: "Run carapace update cleanup --dry-run for state /home/operator/.carapace.",
         },
       },
       options,
     );
-    const summary = `openai/gpt-5.6-luna: use /update; see https://docs.openclaw.ai/cli/update, http://host/share/x and https://host/share/x. Read config:${options.env.OPENCLAW_STATE_DIR}/state/openclaw.sqlite and file:///home/operator/module.js and /opt/openclaw-candidate/config.json and \\\\host\\share\\x; token=synthetic-test-token`;
+    const summary = `openai/gpt-5.6-luna: use /update; see https://github.com/Exaggarate/carapace, http://host/share/x and https://host/share/x. Read config:${options.env.CARAPACE_STATE_DIR}/state/carapace.sqlite and file:///home/operator/module.js and /opt/carapace-candidate/config.json and \\\\host\\share\\x; token=synthetic-test-token`;
     recordUpdateRunRepairAttempt(
       run.runId,
       { attempt: 1, status: "failed", startedAtMs: 1, summary },
       options,
     );
     const persisted = getUpdateRun(run.runId, options)!;
-    expect(persisted.origin.nextAction).toContain("~/.openclaw");
+    expect(persisted.origin.nextAction).toContain("~/.carapace");
     expect(persisted.repair[0]?.summary).toContain("openai/gpt-5.6-luna: use /update");
-    expect(persisted.repair[0]?.summary).toContain("https://docs.openclaw.ai/cli/update");
+    expect(persisted.repair[0]?.summary).toContain("https://github.com/Exaggarate/carapace");
     expect(persisted.repair[0]?.summary).toContain("http://host/share/x");
     expect(persisted.repair[0]?.summary).toContain("https://host/share/x");
     expect(persisted.repair[0]?.summary).not.toContain("\\\\host\\share");
     for (const privateValue of [
       "/home/operator",
-      options.env.OPENCLAW_STATE_DIR,
-      "/opt/openclaw-candidate",
+      options.env.CARAPACE_STATE_DIR,
+      "/opt/carapace-candidate",
       "synthetic-test-token",
     ]) {
       expect(JSON.stringify(persisted)).not.toContain(privateValue);
@@ -674,7 +674,7 @@ describe("update run ledger", () => {
   it("merges independent CLI and gateway process writes into the same WAL run", async () => {
     const options = isolatedOptions();
     const run = createUpdateRun({ trigger: "cli" }, options);
-    const database = openOpenClawStateDatabase(options);
+    const database = openCarapaceStateDatabase(options);
     expect(database.db.prepare("PRAGMA journal_mode").get()).toEqual({ journal_mode: "wal" });
     const children = ["cli", "gateway"].map((role) => {
       const child = fork(

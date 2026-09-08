@@ -2,10 +2,10 @@
 export {
   registerSessionBindingAdapter,
   testing,
-} from "openclaw/plugin-sdk/session-binding-runtime";
-export { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
+} from "carapace/plugin-sdk/session-binding-runtime";
+export { resolveAgentRoute } from "carapace/plugin-sdk/routing";
 export {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+export type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";

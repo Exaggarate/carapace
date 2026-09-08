@@ -3,9 +3,9 @@ import type { Page } from "playwright";
 import { expect, it } from "vitest";
 import type { GatewayServer } from "../../../src/gateway/server-public.ts";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../src/test-utils/openclaw-test-state.ts";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../src/test-utils/carapace-test-state.ts";
 import { getFreePort } from "../../../src/test-utils/ports.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
@@ -16,7 +16,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const viewport = { height: 900, width: 1_440 };
 
 const PROOF_SESSION_ID = "tg-dm-owner-attribution-proof";
@@ -38,7 +38,7 @@ suite.define(() => {
   it.for([false, true])(
     "keeps same-id owners separate with an empty current session: %s",
     async (resetCurrentSession, context) => {
-      let fixture: OpenClawTestState | undefined;
+      let fixture: CarapaceTestState | undefined;
       let gateway: Promise<GatewayServer> | undefined;
       await suite.runScenario(context, {
         retainedState: () => fixture?.root,
@@ -52,16 +52,16 @@ suite.define(() => {
         run: async (signal) => {
           const port = await getFreePort();
           signal.throwIfAborted();
-          const state = await createOpenClawTestState({
+          const state = await createCarapaceTestState({
             label: "usage-sessions-owner-attribution",
             env: {
-              OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-              OPENCLAW_SKIP_CANVAS_HOST: "1",
-              OPENCLAW_SKIP_CHANNELS: "1",
-              OPENCLAW_SKIP_CRON: "1",
-              OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-              OPENCLAW_SKIP_PROVIDERS: "1",
-              OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+              CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+              CARAPACE_SKIP_CANVAS_HOST: "1",
+              CARAPACE_SKIP_CHANNELS: "1",
+              CARAPACE_SKIP_CRON: "1",
+              CARAPACE_SKIP_GMAIL_WATCHER: "1",
+              CARAPACE_SKIP_PROVIDERS: "1",
+              CARAPACE_TEST_MINIMAL_GATEWAY: "1",
               VITEST: "1",
             },
           });
@@ -162,7 +162,7 @@ suite.define(() => {
               const url = new URL("usage", suite.server.baseUrl);
               url.searchParams.set("gatewayUrl", `ws://127.0.0.1:${port}`);
               await page.goto(url.toString());
-              const confirmation = page.locator("openclaw-gateway-url-confirmation");
+              const confirmation = page.locator("carapace-gateway-url-confirmation");
               await confirmation.waitFor();
               await confirmation
                 .getByRole("button", { name: `Switch to 127.0.0.1:${port}`, exact: true })

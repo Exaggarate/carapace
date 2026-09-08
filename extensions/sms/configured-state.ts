@@ -1,5 +1,5 @@
-import { DEFAULT_ACCOUNT_ID, hasConfiguredAccountValue } from "openclaw/plugin-sdk/account-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, hasConfiguredAccountValue } from "carapace/plugin-sdk/account-core";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { SmsChannelConfig } from "./src/types.js";
 
 function hasConfiguredSmsAccount(account: SmsChannelConfig | undefined, env: NodeJS.ProcessEnv) {
@@ -16,7 +16,7 @@ function hasConfiguredSmsAccount(account: SmsChannelConfig | undefined, env: Nod
 
 /** Require a complete Twilio identity and sender, scoped to each enabled account. */
 export function hasConfiguredSmsChannelState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): boolean {
   // SAFETY: The SMS plugin's registered schema owns the shape of its config entry.

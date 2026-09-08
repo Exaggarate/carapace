@@ -1,4 +1,4 @@
-import type { MemorySessionTarget } from "openclaw/plugin-sdk/memory-core-host-engine-sessions";
+import type { MemorySessionTarget } from "carapace/plugin-sdk/memory-core-host-engine-sessions";
 
 export type MemoryForgetReport = {
   agentId: string;

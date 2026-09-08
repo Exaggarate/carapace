@@ -205,7 +205,7 @@ async function writeIpaFixture(root: string): Promise<string> {
   }
 
   addTree(path.join(root, "Payload"), "Payload");
-  const ipaPath = path.join(root, "OpenClaw.ipa");
+  const ipaPath = path.join(root, "Carapace.ipa");
   const buffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
   writeFileSync(ipaPath, buffer);
   return ipaPath;
@@ -232,22 +232,22 @@ async function writeValidFixture(
 }> {
   const binDir = path.join(root, "bin");
   const payloadDir = path.join(root, "Payload");
-  const appDir = path.join(payloadDir, "OpenClaw.app");
+  const appDir = path.join(payloadDir, "Carapace.app");
   const fixturesDir = path.join(root, "fixtures");
   mkdirSync(appDir, { recursive: true });
   mkdirSync(binDir, { recursive: true });
   mkdirSync(fixturesDir, { recursive: true });
 
   const infoBody = [
-    plistString("CFBundleIdentifier", "ai.openclawfoundation.app"),
-    plistString("CFBundleDisplayName", options.displayName ?? "OpenClaw"),
-    plistString("OpenClawGitCommit", options.buildCommit ?? BUILD_COMMIT),
-    plistString("OpenClawBuildTimestamp", options.buildTimestamp ?? BUILD_TIMESTAMP),
-    plistString("OpenClawPushMode", options.pushMode ?? "appStore"),
-    plistString("OpenClawPushRelayBaseURL", ""),
+    plistString("CFBundleIdentifier", "ai.carapacefoundation.app"),
+    plistString("CFBundleDisplayName", options.displayName ?? "Carapace"),
+    plistString("CarapaceGitCommit", options.buildCommit ?? BUILD_COMMIT),
+    plistString("CarapaceBuildTimestamp", options.buildTimestamp ?? BUILD_TIMESTAMP),
+    plistString("CarapacePushMode", options.pushMode ?? "appStore"),
+    plistString("CarapacePushRelayBaseURL", ""),
     plistString(
       "NSHealthShareUsageDescription",
-      "OpenClaw reads Health data for Health Summaries.",
+      "Carapace reads Health data for Health Summaries.",
     ),
     options.healthUpdateUsage === null
       ? ""
@@ -255,9 +255,9 @@ async function writeValidFixture(
         ? plistBool("NSHealthUpdateUsageDescription", options.healthUpdateUsage)
         : plistString(
             "NSHealthUpdateUsageDescription",
-            options.healthUpdateUsage ?? "OpenClaw reads Health data for Health Summaries.",
+            options.healthUpdateUsage ?? "Carapace reads Health data for Health Summaries.",
           ),
-    options.legacyKey ? plistString("OpenClawPushRelayProfile", "production") : "",
+    options.legacyKey ? plistString("CarapacePushRelayProfile", "production") : "",
   ].join("");
   writeFileSync(path.join(appDir, "Info.plist"), plist(infoBody), "utf8");
   const localizedDir = path.join(appDir, "de.lproj");
@@ -266,7 +266,7 @@ async function writeValidFixture(
     path.join(localizedDir, "InfoPlist.strings"),
     plist(
       options.localizedDisplayName === undefined
-        ? plistString("NSCameraUsageDescription", "OpenClaw verwendet die Kamera.")
+        ? plistString("NSCameraUsageDescription", "Carapace verwendet die Kamera.")
         : plistString("CFBundleDisplayName", options.localizedDisplayName),
     ),
     "utf8",
@@ -278,13 +278,13 @@ async function writeValidFixture(
     entitlementsPath,
     plist(
       [
-        plistString("application-identifier", "FWJYW4S8P8.ai.openclawfoundation.app"),
+        plistString("application-identifier", "FWJYW4S8P8.ai.carapacefoundation.app"),
         plistString("com.apple.developer.team-identifier", "FWJYW4S8P8"),
         plistString("aps-environment", "production"),
         plistString("com.apple.developer.devicecheck.appattest-environment", "production"),
         plistBool("com.apple.developer.healthkit", true),
         plistArray("com.apple.security.application-groups", [
-          "group.ai.openclawfoundation.app.shared",
+          "group.ai.carapacefoundation.app.shared",
         ]),
       ].join(""),
     ),
@@ -296,17 +296,17 @@ async function writeValidFixture(
     profilePath,
     plist(
       [
-        plistString("Name", "OpenClaw App Store ai.openclawfoundation.app"),
+        plistString("Name", "Carapace App Store ai.carapacefoundation.app"),
         plistArray("TeamIdentifier", ["FWJYW4S8P8"]),
         plistDict(
           "Entitlements",
           [
-            plistString("application-identifier", "FWJYW4S8P8.ai.openclawfoundation.app"),
+            plistString("application-identifier", "FWJYW4S8P8.ai.carapacefoundation.app"),
             plistString("aps-environment", "production"),
             plistArray("com.apple.developer.devicecheck.appattest-environment", ["production"]),
             plistBool("com.apple.developer.healthkit", true),
             plistArray("com.apple.security.application-groups", [
-              "group.ai.openclawfoundation.app.shared",
+              "group.ai.carapacefoundation.app.shared",
             ]),
           ].join(""),
         ),
@@ -392,7 +392,7 @@ function runValidator(
 describe("scripts/ios-validate-app-store-ipa.sh", () => {
   beforeAll(() => {
     // Interpreters read fixture paths from argv; signing inputs remain case-owned.
-    toolsDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-tools-"));
+    toolsDir = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-tools-"));
     writeFakePlistBuddy(path.join(toolsDir, "plistbuddy"));
     writeFakePlutil(path.join(toolsDir, "plutil"));
     writeFakeUnzip(path.join(toolsDir, "unzip"));
@@ -411,7 +411,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("fake plutil escapes regex-metacharacter keys before matching", () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const plutil = path.join(toolsDir, "plutil");
     const plistPath = path.join(root, "meta.plist");
@@ -441,7 +441,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("accepts an App Store IPA with appStore mode and production entitlements", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root);
 
@@ -452,7 +452,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects an IPA that was exported with a non-App-Store push mode", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root, { pushMode: "localProduction" });
 
@@ -463,7 +463,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects an IPA without the Health update purpose string required by App Store Connect", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root, { healthUpdateUsage: null });
 
@@ -474,9 +474,9 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects an IPA with the wrong canonical display name", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
-    const fixture = await writeValidFixture(root, { displayName: "OpenClaw Debug" });
+    const fixture = await writeValidFixture(root, { displayName: "Carapace Debug" });
 
     const result = runValidator(fixture);
 
@@ -485,10 +485,10 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects unresolved build settings in localized plist resources", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root, {
-      localizedDisplayName: "$(OPENCLAW_APP_DISPLAY_NAME)",
+      localizedDisplayName: "$(CARAPACE_APP_DISPLAY_NAME)",
     });
 
     const result = runValidator(fixture);
@@ -498,7 +498,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects a non-string Health update purpose value", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root, { healthUpdateUsage: true });
 
@@ -509,7 +509,7 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects legacy independently selectable production push keys", async () => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(root);
     const fixture = await writeValidFixture(root, { legacyKey: true });
 
@@ -520,8 +520,8 @@ describe("scripts/ios-validate-app-store-ipa.sh", () => {
   });
 
   it("rejects malformed or mismatched embedded build provenance", async () => {
-    const malformedRoot = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
-    const mismatchRoot = mkdtempSync(path.join(os.tmpdir(), "openclaw-ios-ipa-"));
+    const malformedRoot = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
+    const mismatchRoot = mkdtempSync(path.join(os.tmpdir(), "carapace-ios-ipa-"));
     tempDirs.push(malformedRoot, mismatchRoot);
     const malformed = await writeValidFixture(malformedRoot, { buildCommit: "deadbeef" });
     const mismatch = await writeValidFixture(mismatchRoot);

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createDeferredCore } from "../shared/deferred.js";
 import { ensureProfileForEmail, getUserProfileListItem } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createGatewayMethodRegistry } from "./methods/registry.js";
 import { handleGatewayRequest } from "./server-methods.js";
 import type { GatewayRequestHandler } from "./server-methods/types.js";
@@ -135,7 +135,7 @@ describe("Gateway pending-profile authorization", () => {
       "mentions.dismiss",
       "message.action",
       "models.list",
-      "openclaw.chat",
+      "carapace.chat",
       "plugin.approval.resolve",
       "projects.list",
       "secrets.store.set",
@@ -281,7 +281,7 @@ describe("Gateway pending-profile authorization", () => {
 
 describe("Gateway self-profile scope", () => {
   it("allows read-only users.self without anonymous access or profile writes", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const email = "reader@example.com";
       const profile = ensureProfileForEmail(email);
       const before = getUserProfileListItem(profile.id);

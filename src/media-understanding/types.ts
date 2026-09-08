@@ -1,16 +1,16 @@
 // Shared media-understanding types for attachments, provider hooks, request
 // auth, decisions, and structured extraction inputs.
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import type { MediaUnderstandingCapability } from "../../packages/media-understanding-common/src/types.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
 import type { ModelProviderConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 /** Agent-owned runtime handle carried opaquely through media provider requests. */
 type MediaPreparedModelRuntime = Readonly<{
   agentDir: string;
   workspaceDir?: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   createStores: () => unknown;
 }>;
 
@@ -127,7 +127,7 @@ export type AudioTranscriptionResult = {
 };
 
 type AudioTranscriptionContext = Omit<AudioTranscriptionRequest, "apiKey" | "auth"> & {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   profile?: string;
@@ -171,7 +171,7 @@ export type ImageDescriptionRequest = {
   agentDir: string;
   workspaceDir?: string;
   preparedModelRuntime?: MediaPreparedModelRuntime;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model: string;
   provider: string;
 };
@@ -197,7 +197,7 @@ export type ImagesDescriptionRequest = {
   agentDir: string;
   workspaceDir?: string;
   preparedModelRuntime?: MediaPreparedModelRuntime;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 };
 
 export type ImageDescriptionResult = {
@@ -239,7 +239,7 @@ export type StructuredExtractionRequest = {
   preferredProfile?: string;
   authStore?: AuthProfileStore;
   agentDir: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   model: string;
   provider: string;
 };
@@ -258,7 +258,7 @@ type MediaUnderstandingDocumentModelDefaults = {
 };
 
 export type MediaUnderstandingProviderAuthContext = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   provider: string;
   providerConfig?: ModelProviderConfig;
 };

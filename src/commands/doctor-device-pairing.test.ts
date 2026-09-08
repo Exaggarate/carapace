@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { __setFsSafeTestHooksForTest } from "@openclaw/fs-safe/test-hooks";
 // Doctor device pairing tests cover device-pairing checks, repair prompts, and diagnostics.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadDeviceAuthToken, storeDeviceAuthToken } from "../infra/device-auth-store.js";
 import {
@@ -16,9 +16,9 @@ import {
   detectLegacyDeviceAuth,
   migrateLegacyDeviceAuth,
 } from "../infra/state-migrations.device-auth.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { withTempDir } from "../test-utils/temp-dir.js";
 
 const callGatewayMock = vi.hoisted(() => vi.fn());
@@ -83,11 +83,11 @@ describe("noteDevicePairingHealth", () => {
       initial: Awaited<ReturnType<typeof requestDevicePairing>>;
     }) => Promise<void>,
   ): Promise<void> {
-    await withTempDir("openclaw-doctor-device-pairing-", async (stateDir) => {
+    await withTempDir("carapace-doctor-device-pairing-", async (stateDir) => {
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         },
         async () => {
           const identity = loadOrCreateDeviceIdentity();
@@ -129,11 +129,11 @@ describe("noteDevicePairingHealth", () => {
   });
 
   it("does not create shared state while collecting local pairing findings", async () => {
-    await withTempDir("openclaw-doctor-device-pairing-readonly-", async (stateDir) => {
+    await withTempDir("carapace-doctor-device-pairing-readonly-", async (stateDir) => {
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_TEST_FAST: "1",
         },
         async () => {
           await expect(
@@ -143,7 +143,7 @@ describe("noteDevicePairingHealth", () => {
             }),
           ).resolves.toEqual([]);
           await expect(
-            fs.stat(path.join(stateDir, "state", "openclaw.sqlite")),
+            fs.stat(path.join(stateDir, "state", "carapace.sqlite")),
           ).rejects.toMatchObject({ code: "ENOENT" });
         },
       );
@@ -172,7 +172,7 @@ describe("noteDevicePairingHealth", () => {
       expect(requireNoteTitle()).toBe("Device pairing");
       expect(message).toContain("Pending scope upgrade");
       expect(message).toContain("operator.admin");
-      expect(message).toContain("openclaw devices approve");
+      expect(message).toContain("carapace devices approve");
       expect(callGatewayMock).not.toHaveBeenCalled();
 
       const findings = await collectDevicePairingHealthFindings({
@@ -186,7 +186,7 @@ describe("noteDevicePairingHealth", () => {
           target: identity.deviceId + ":" + pending.request.requestId,
           requirement: "scope-upgrade",
           message: expect.stringContaining("Pending scope upgrade"),
-          fixHint: expect.stringContaining("openclaw devices approve"),
+          fixHint: expect.stringContaining("carapace devices approve"),
         }),
       ]);
       expect(callGatewayMock).not.toHaveBeenCalled();
@@ -206,13 +206,13 @@ describe("noteDevicePairingHealth", () => {
       mode,
       findingPath: "identity.device-auth",
       requirement: "device-auth-store-legacy-file",
-      fixHint: "openclaw doctor --fix",
+      fixHint: "carapace doctor --fix",
     })),
   ] as const)(
     "warns about unimported $file in $mode mode without changing it",
     async (testCase) => {
-      await withOpenClawTestState(
-        { prefix: "openclaw-doctor-device-pairing-", env: { OPENCLAW_TEST_FAST: "1" } },
+      await withCarapaceTestState(
+        { prefix: "carapace-doctor-device-pairing-", env: { CARAPACE_TEST_FAST: "1" } },
         async (state) => {
           const content =
             testCase.file === "devices/paired.json" ? "{not-json}" : legacyDeviceAuthContents;
@@ -242,7 +242,7 @@ describe("noteDevicePairingHealth", () => {
           );
           expect(requireNoteMessage()).not.toContain("synthetic-legacy-token");
           expect(await fs.readFile(sourcePath, "utf8")).toBe(content);
-          await expect(fs.stat(state.statePath("state", "openclaw.sqlite"))).rejects.toMatchObject({
+          await expect(fs.stat(state.statePath("state", "carapace.sqlite"))).rejects.toMatchObject({
             code: "ENOENT",
           });
         },
@@ -253,10 +253,10 @@ describe("noteDevicePairingHealth", () => {
   it.each(["canonical rows coexist", "import committed before source removal failed"] as const)(
     "describes remaining device-auth files when %s",
     async (scenario) => {
-      await withOpenClawTestState(
-        { prefix: "openclaw-doctor-device-auth-debt-", env: { OPENCLAW_TEST_FAST: "1" } },
+      await withCarapaceTestState(
+        { prefix: "carapace-doctor-device-auth-debt-", env: { CARAPACE_TEST_FAST: "1" } },
         async (state) => {
-          const { db } = openOpenClawStateDatabase({ env: state.env });
+          const { db } = openCarapaceStateDatabase({ env: state.env });
           const expectedToken =
             scenario === "canonical rows coexist"
               ? "synthetic-canonical-token"
@@ -354,7 +354,7 @@ describe("noteDevicePairingHealth", () => {
       expect(noteMock).toHaveBeenCalledTimes(1);
       const message = requireNoteMessage();
       expect(message).toContain("stale device-token pattern");
-      expect(message).toContain("openclaw devices rotate");
+      expect(message).toContain("carapace devices rotate");
     });
   });
 
@@ -486,9 +486,9 @@ describe("noteDevicePairingHealth", () => {
     });
 
     const message = requireNoteMessage();
-    expect(message).toContain("openclaw devices remove 'device; echo pwn'");
+    expect(message).toContain("carapace devices remove 'device; echo pwn'");
     expect(message).toContain(
-      "openclaw devices rotate --device 'device; echo pwn' --role 'operator; touch /tmp/pwn'",
+      "carapace devices rotate --device 'device; echo pwn' --role 'operator; touch /tmp/pwn'",
     );
   });
 

@@ -1,7 +1,7 @@
 // Cold plugin fixture helpers create plugin packages for cold import and loader tests.
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 type ColdPluginFixture = {
   authChoiceId: string;
@@ -38,10 +38,10 @@ export function createColdPluginFixture(options: ColdPluginFixtureOptions): Cold
     path.join(options.rootDir, "package.json"),
     JSON.stringify(
       {
-        name: options.packageName ?? "@example/openclaw-cold-control-plane",
+        name: options.packageName ?? "@example/carapace-cold-control-plane",
         version: options.packageVersion ?? "1.0.0",
         ...options.packageJson,
-        openclaw: {
+        carapace: {
           extensions: ["./index.cjs"],
           ...(options.setupEntrySource !== undefined ? { setupEntry: "./setup-entry.cjs" } : {}),
         },
@@ -52,7 +52,7 @@ export function createColdPluginFixture(options: ColdPluginFixtureOptions): Cold
     "utf8",
   );
   fs.writeFileSync(
-    path.join(options.rootDir, "openclaw.plugin.json"),
+    path.join(options.rootDir, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: pluginId,
@@ -109,7 +109,7 @@ export function createColdPluginFixture(options: ColdPluginFixtureOptions): Cold
   };
 }
 
-export function createColdPluginConfig(pluginDir: string, pluginId: string): OpenClawConfig {
+export function createColdPluginConfig(pluginDir: string, pluginId: string): CarapaceConfig {
   return {
     plugins: {
       load: { paths: [pluginDir] },
@@ -126,9 +126,9 @@ export function createColdPluginHermeticEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...process.env,
-    OPENCLAW_HOME: path.join(homeDir, "home"),
-    OPENCLAW_BUNDLED_PLUGINS_DIR: options.bundledPluginsDir,
-    OPENCLAW_VERSION: "2026.4.25",
+    CARAPACE_HOME: path.join(homeDir, "home"),
+    CARAPACE_BUNDLED_PLUGINS_DIR: options.bundledPluginsDir,
+    CARAPACE_VERSION: "2026.4.25",
     VITEST: "true",
   };
 }

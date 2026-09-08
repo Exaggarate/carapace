@@ -30,7 +30,7 @@ vi.mock("../process/supervisor/index.js", () => ({
 const isWin = process.platform === "win32";
 const defaultShell = isWin
   ? undefined
-  : process.env.OPENCLAW_TEST_SHELL || getBashShellConfig().shell;
+  : process.env.CARAPACE_TEST_SHELL || getBashShellConfig().shell;
 const tempDirs = createTempDirTracker();
 
 function requireTextContent(
@@ -221,7 +221,7 @@ describe("exec foreground failures", () => {
     expect(text).toContain("known to be safe to retry");
     expect(text).not.toMatch(/process|background|yieldMs|poll|trailing &/i);
     expect(text).not.toContain("OOM-score wrapper");
-    expect(text).not.toContain("OPENCLAW_CHILD_OOM_SCORE_ADJ");
+    expect(text).not.toContain("CARAPACE_CHILD_OOM_SCORE_ADJ");
     const details = requireFailedDetails(result.details);
     expect(details.exitCode).toBeNull();
     expect(details.exitSignal).toBe("SIGKILL");
@@ -260,7 +260,7 @@ describe("exec foreground failures", () => {
     const text = requireTextContent(result);
     for (const fragment of [
       `Command aborted by signal ${exitSignal}`,
-      "OpenClaw selected its Linux OOM-score wrapper",
+      "Carapace selected its Linux OOM-score wrapper",
       "attempts to set this child's oom_score_adj to 1000",
       "SIGKILL alone does not identify whether the Linux OOM killer",
       "Check cgroup memory events or kernel logs",
@@ -269,7 +269,7 @@ describe("exec foreground failures", () => {
     ]) {
       expect(text).toContain(fragment);
     }
-    expect(text).not.toContain("OPENCLAW_CHILD_OOM_SCORE_ADJ");
+    expect(text).not.toContain("CARAPACE_CHILD_OOM_SCORE_ADJ");
   });
 
   it("keeps wrapped SIGKILL process outcomes generic for non-foreground consumers", async () => {
@@ -336,7 +336,7 @@ describe("exec foreground failures", () => {
       const text = requireTextContent(result);
       expect(text).toContain(`Command aborted by signal ${exitSignal}`);
       expect(text).not.toContain("OOM-score wrapper");
-      expect(text).not.toContain("OPENCLAW_CHILD_OOM_SCORE_ADJ");
+      expect(text).not.toContain("CARAPACE_CHILD_OOM_SCORE_ADJ");
     },
   );
 
@@ -371,13 +371,13 @@ describe("exec foreground failures", () => {
   it("returns a failed result for unavailable explicit host workdirs before launching", async () => {
     const missingWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-missing-workdir-${process.pid}-${Date.now()}`,
+      `carapace-missing-workdir-${process.pid}-${Date.now()}`,
     );
     fs.rmSync(missingWorkdir, { recursive: true, force: true });
 
     const fileWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-file-workdir-${process.pid}-${Date.now()}`,
+      `carapace-file-workdir-${process.pid}-${Date.now()}`,
     );
     fs.writeFileSync(fileWorkdir, "not a directory");
 
@@ -394,7 +394,7 @@ describe("exec foreground failures", () => {
   it("returns a failed result for unavailable configured host workdirs before launching", async () => {
     const missingDefaultWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-missing-default-workdir-${process.pid}-${Date.now()}`,
+      `carapace-missing-default-workdir-${process.pid}-${Date.now()}`,
     );
     fs.rmSync(missingDefaultWorkdir, { recursive: true, force: true });
 
@@ -420,7 +420,7 @@ describe("exec foreground failures", () => {
   });
 
   it("returns a failed result for unavailable configured sandbox workdirs before launching", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     try {
       await expectUnavailableWorkdir({
         workdir: "/workspace/missing",
@@ -441,7 +441,7 @@ describe("exec foreground failures", () => {
   });
 
   it("defaults omitted sandbox workdirs to the sandbox workspace", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     mockSpawn();
 
     const tool = createExecTool({
@@ -482,7 +482,7 @@ describe("exec foreground failures", () => {
   });
 
   it("lets backend-validated sandbox workdirs reach the backend without host stat fallback", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({ workspaceDir });
     mockSpawn();
 
@@ -505,7 +505,7 @@ describe("exec foreground failures", () => {
   });
 
   it("finalizes backend sandbox exec tokens when process spawn fails", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     const finalizeToken = { session: "remote-session" };
     const finalizeExec = vi.fn<NonNullable<BashSandboxConfig["finalizeExec"]>>(async () => {});
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({
@@ -539,7 +539,7 @@ describe("exec foreground failures", () => {
   });
 
   it("rejects unsafe commands before backend workdir validation", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     const discardPreparedWorkdir =
       vi.fn<NonNullable<BashSandboxConfig["discardPreparedWorkdir"]>>();
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({
@@ -565,7 +565,7 @@ describe("exec foreground failures", () => {
   });
 
   it("does not preflight remote-only backend workdirs from the local workspace root", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     fs.writeFileSync(path.join(workspaceDir, "script.py"), "print($TOKEN)\n");
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({ workspaceDir });
     mockSpawn();
@@ -587,7 +587,7 @@ describe("exec foreground failures", () => {
   });
 
   it("uses the mapped host cwd for existing relative backend-validated sandbox workdirs", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     const srcDir = path.join(workspaceDir, "src");
     fs.mkdirSync(srcDir);
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({ workspaceDir });
@@ -612,7 +612,7 @@ describe("exec foreground failures", () => {
   });
 
   it("fails backend-validated sandbox workdirs before launch when backend validation rejects", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
     const { buildExecSpec, tool, validateWorkdir } = createBackendSandboxTool({
       workspaceDir,
       validateWorkdir: async () => null,
@@ -638,8 +638,8 @@ describe("exec foreground failures", () => {
   });
 
   it("returns a failed result for unavailable explicit sandbox workdirs before launching a command", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
-    const outsideDir = tempDirs.make("openclaw-outside-workdir-");
+    const workspaceDir = tempDirs.make("carapace-sandbox-workdir-");
+    const outsideDir = tempDirs.make("carapace-outside-workdir-");
     fs.writeFileSync(path.join(workspaceDir, "not-dir"), "not a directory");
     try {
       for (const workdir of ["/workspace/missing", "   ", "/workspace/not-dir", outsideDir]) {

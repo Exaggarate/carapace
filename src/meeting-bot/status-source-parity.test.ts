@@ -8,20 +8,20 @@ const platforms = [
     name: "Teams",
     token: "teams",
     globals: {
-      audioOutputs: "__openclawTeamsAudioOutputs",
-      captionArchive: "__openclawTeamsCaptionArchive",
-      captions: "__openclawTeamsCaptions",
-      meeting: "__openclawTeamsMeeting",
+      audioOutputs: "__carapaceTeamsAudioOutputs",
+      captionArchive: "__carapaceTeamsCaptionArchive",
+      captions: "__carapaceTeamsCaptions",
+      meeting: "__carapaceTeamsMeeting",
     },
   },
   {
     name: "Zoom",
     token: "zoom",
     globals: {
-      audioOutputs: "__openclawZoomAudioOutputs",
-      captionArchive: "__openclawZoomCaptionArchive",
-      captions: "__openclawZoomCaptions",
-      meeting: "__openclawZoomMeeting",
+      audioOutputs: "__carapaceZoomAudioOutputs",
+      captionArchive: "__carapaceZoomCaptionArchive",
+      captions: "__carapaceZoomCaptions",
+      meeting: "__carapaceZoomMeeting",
     },
   },
 ] as const;
@@ -45,7 +45,7 @@ describe.each(platforms)("$name meeting status source parity", (platform) => {
     autoJoin: false,
     captureCaptions: false,
     expectedIdentity: `${platform.token}:meeting`,
-    guestName: "OpenClaw",
+    guestName: "Carapace",
     pageIdentitySource: "const meetingIdentity = () => undefined;",
     selectors: "{}",
     toggleStateFunction: "() => undefined",
@@ -56,7 +56,7 @@ describe.each(platforms)("$name meeting status source parity", (platform) => {
     const callOptions = {
       captionEnableSource: "captionsEnabledNow = true;",
       platform: {
-        audioOutputElementIdPrefix: `openclaw-${platform.token}-audio-output-`,
+        audioOutputElementIdPrefix: `carapace-${platform.token}-audio-output-`,
         displayName: platform.name,
         globals: {
           audioOutputs: platform.globals.audioOutputs,

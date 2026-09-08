@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getRuntimeConfigWriteApplication } from "../../config/runtime-write-application.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 const configMocks = vi.hoisted(() => ({
   replaceConfigFile: vi.fn(),
@@ -8,8 +8,8 @@ const configMocks = vi.hoisted(() => ({
 }));
 const secretsMocks = vi.hoisted(() => ({
   activeSnapshot: null as {
-    sourceConfig: OpenClawConfig;
-    config: OpenClawConfig;
+    sourceConfig: CarapaceConfig;
+    config: CarapaceConfig;
   } | null,
 }));
 
@@ -37,10 +37,10 @@ import {
 } from "./config-write-flow.js";
 
 it("awaits title application only with authoritative identity and an enabled reload owner", () => {
-  const previousConfig: OpenClawConfig = {
+  const previousConfig: CarapaceConfig = {
     transcripts: { autoStart: [{ providerId: "fixture", sessionId: "daily", title: "Before" }] },
   };
-  const nextConfig: OpenClawConfig = {
+  const nextConfig: CarapaceConfig = {
     transcripts: { autoStart: [{ providerId: "fixture", sessionId: "daily", title: "After" }] },
   };
   const params = { previousConfig, nextConfig, changedPaths: ["transcripts.autoStart"] };
@@ -73,7 +73,7 @@ describe("commitGatewayConfigWrite", () => {
 
   it("carries a missing file revision into the lock-time compare-and-swap", async () => {
     const snapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: false,
       raw: null,
       hash: "missing-config-revision",
@@ -82,7 +82,7 @@ describe("commitGatewayConfigWrite", () => {
     await commitGatewayConfigWrite({
       snapshot: snapshot as never,
       writeOptions: {},
-      nextConfig: {} satisfies OpenClawConfig,
+      nextConfig: {} satisfies CarapaceConfig,
     });
 
     expect(configMocks.replaceConfigFile).toHaveBeenCalledWith(
@@ -106,7 +106,7 @@ describe("commitGatewayConfigWrite", () => {
 
     const result = await commitGatewayConfigWrite({
       snapshot: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         hash: "base-hash",
@@ -122,7 +122,7 @@ describe("commitGatewayConfigWrite", () => {
   it("returns an unclaimed required application when no managed reloader is installed", async () => {
     const result = await commitGatewayConfigWrite({
       snapshot: {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         exists: true,
         raw: "{}",
         hash: "base-hash",
@@ -142,7 +142,7 @@ describe("didActiveSharedGatewayAuthChange", () => {
   });
 
   it("preserves runtime-only auth fields absent from the active secrets source", () => {
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       gateway: { auth: { mode: "token", token: "runtime-token" } },
     };
     secretsMocks.activeSnapshot = {
@@ -160,7 +160,7 @@ describe("didActiveSharedGatewayAuthChange", () => {
       sourceConfig: { gateway: { auth: { mode: "token", token: "token-a" } } },
       config: { gateway: { auth: { mode: "token", token: "token-a" } } },
     };
-    const current: OpenClawConfig = {
+    const current: CarapaceConfig = {
       gateway: { auth: { mode: "token", token: "token-b" } },
     };
 
@@ -178,7 +178,7 @@ describe("didActiveSharedGatewayAuthChange", () => {
       sourceConfig: { gateway: { auth: { mode: "token" } } },
       config: { gateway: { auth: { mode: "token" } } },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: CarapaceConfig = {
       gateway: { auth: { mode: "token", token: "runtime-token" } },
     };
 

@@ -56,7 +56,7 @@ vi.mock("../plugins/config-state.js", async (importOriginal) => {
   };
 });
 
-vi.mock("../agents/openclaw-tools.js", () => {
+vi.mock("../agents/carapace-tools.js", () => {
   const tools = [
     {
       name: "automations",
@@ -70,7 +70,7 @@ vi.mock("../agents/openclaw-tools.js", () => {
     },
   ];
   return {
-    createOpenClawTools: () => tools,
+    createCarapaceTools: () => tools,
   };
 });
 
@@ -125,7 +125,7 @@ async function invoke(tool: string, scopes = "operator.write") {
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${TEST_GATEWAY_TOKEN}`,
-      "x-openclaw-scopes": scopes,
+      "x-carapace-scopes": scopes,
     },
     body: JSON.stringify({ tool, action: "status", args: {}, sessionKey: "main" }),
   });

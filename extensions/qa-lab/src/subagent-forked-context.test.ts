@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { describe, expect, it } from "vitest";
 import { createQaBusState } from "./bus-state.js";
 import { buildAssistantText } from "./providers/mock-openai/mock-openai-assistant-text.js";
@@ -26,14 +26,14 @@ function userInput(text: string) {
 // Mirror the runtime-owned projection, not a helper shared with the mock oracle.
 function projectedInput(history: string, current = childTask) {
   return userInput(
-    `OpenClaw assembled context for this turn:\n<conversation_context>\n${history}\n</conversation_context>\n\nCurrent user request:\n${current}`,
+    `Carapace assembled context for this turn:\n<conversation_context>\n${history}\n</conversation_context>\n\nCurrent user request:\n${current}`,
   );
 }
 
 function completionInput(result: string, status = "completed; ready for parent review") {
   return userInput(
     [
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
       "[Internal task completion event]",
       "source: subagent",
       "task: qa-fork-context",
@@ -42,7 +42,7 @@ function completionInput(result: string, status = "completed; ready for parent r
       "<prompt-data>",
       result,
       "</prompt-data>",
-      "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
     ].join("\n"),
   );
 }
@@ -96,7 +96,7 @@ async function runForkEvidence(evidence: EvidenceCase) {
     api: {
       env: {
         providerMode: "mock-openai",
-        runtimeId: evidence.startsWith("projected") ? "codex" : "openclaw",
+        runtimeId: evidence.startsWith("projected") ? "codex" : "carapace",
         mock: { baseUrl: "http://mock.test" },
       },
       normalizeLowercaseStringOrEmpty,

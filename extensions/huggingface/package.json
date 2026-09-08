@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/huggingface-provider",
+  "name": "@carapace/huggingface-provider",
   "version": "2026.9.2",
   "private": true,
-  "description": "OpenClaw Hugging Face provider plugin",
+  "description": "Carapace Hugging Face provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ]

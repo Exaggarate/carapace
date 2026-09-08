@@ -49,7 +49,7 @@ describe("native extension bootstrap", () => {
       });
     });
 
-    harness.alarmListener({ name: "openclaw-relay-watchdog" });
+    harness.alarmListener({ name: "carapace-relay-watchdog" });
 
     await vi.waitFor(() => expect(harness.sendNativeMessage).toHaveBeenCalledTimes(2));
     expect(harness.storageValues).not.toHaveProperty("relayUrl");
@@ -69,7 +69,7 @@ describe("native extension bootstrap", () => {
       }),
     );
     repaired = true;
-    harness.alarmListener({ name: "openclaw-relay-watchdog" });
+    harness.alarmListener({ name: "carapace-relay-watchdog" });
     await sendRuntimeMessage(harness, { type: "getStatus" });
     expect(harness.sendNativeMessage).toHaveBeenCalledOnce();
     expect(harness.relaySockets).toHaveLength(0);
@@ -94,7 +94,7 @@ describe("native extension bootstrap", () => {
         return response ?? nativeSuccess(request);
       },
     });
-    harness.alarmListener({ name: "openclaw-relay-watchdog" });
+    harness.alarmListener({ name: "carapace-relay-watchdog" });
     const status = sendRuntimeMessage(harness, { type: "getStatus" });
 
     expect(harness.sendNativeMessage).toHaveBeenCalledOnce();
@@ -207,7 +207,7 @@ describe("native extension bootstrap", () => {
       },
     });
 
-    harness.alarmListener({ name: "openclaw-relay-watchdog" });
+    harness.alarmListener({ name: "carapace-relay-watchdog" });
     harness.startupListener();
     harness.installedListener();
     await Promise.resolve();
@@ -396,7 +396,7 @@ describe("relay pairing and authentication", () => {
 
   it("offers only the non-secret v2 relay subprotocol", async () => {
     const harness = await loadBackground();
-    expect(harness.relaySockets[0]?.protocols).toEqual(["openclaw-extension-relay.v2"]);
+    expect(harness.relaySockets[0]?.protocols).toEqual(["carapace-extension-relay.v2"]);
     expect(JSON.stringify(harness.relaySockets[0]?.protocols)).not.toContain(TEST_RELAY_KEY);
   });
 
@@ -479,7 +479,7 @@ describe("standalone relay wake-up", () => {
       harness.relaySockets.at(-1)?.close();
       await vi.advanceTimersByTimeAsync(1000);
       expect(harness.sendNativeMessage).toHaveBeenCalledExactlyOnceWith(
-        "ai.openclaw.browser_bootstrap",
+        "ai.carapace.browser_bootstrap",
         { v: 1, op: "ensure_relay", nonce: expect.any(String), relayPort },
       );
       harness.relaySockets.at(-1)?.close();

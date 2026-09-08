@@ -20,57 +20,57 @@ function writeRepoFile(repoRoot: string, relativePath: string, value: string): v
 }
 
 function makeEnvMutationFixture(): string {
-  const repoRoot = createTempDir("openclaw-test-env-mutations-");
+  const repoRoot = createTempDir("carapace-test-env-mutations-");
   writeRepoFile(
     repoRoot,
     "src/runtime.ts",
     `
-process.env.OPENCLAW_STATE_DIR = "ignored because this is not a test file";
+process.env.CARAPACE_STATE_DIR = "ignored because this is not a test file";
 `,
   );
   writeRepoFile(
     repoRoot,
     "src/example.test.ts",
     `
-process.env.OPENCLAW_STATE_DIR = "state";
-delete process.env["OPENCLAW_CONFIG_PATH"];
+process.env.CARAPACE_STATE_DIR = "state";
+delete process.env["CARAPACE_CONFIG_PATH"];
 vi.stubEnv("HOME", "home");
-vi.stubEnv("OPENCLAW_WORKSPACE_DIR", "workspace");
-process.env = { ...process.env, OPENCLAW_HOME: "home", OTHER_KEY: "ignored" };
-const dynamicEnvKey = "OPENCLAW_STATE_DIR";
+vi.stubEnv("CARAPACE_WORKSPACE_DIR", "workspace");
+process.env = { ...process.env, CARAPACE_HOME: "home", OTHER_KEY: "ignored" };
+const dynamicEnvKey = "CARAPACE_STATE_DIR";
 process.env[dynamicEnvKey] = "dynamic";
 delete process.env[dynamicEnvKey];
-const fixture = 'process.env.OPENCLAW_HOME = "not code"';
-process.env.NOT_OPENCLAW = "ignored";
+const fixture = 'process.env.CARAPACE_HOME = "not code"';
+process.env.NOT_CARAPACE = "ignored";
 `,
   );
   writeRepoFile(
     repoRoot,
     "scripts/mcp-code-mode-gateway-e2e.ts",
     `
-process.env.OPENCLAW_CONFIG_PATH = "script-harness";
+process.env.CARAPACE_CONFIG_PATH = "script-harness";
 `,
   );
   writeRepoFile(
     repoRoot,
     "src/agents/auth-profiles/oauth-test-utils.ts",
     `
-process.env.OPENCLAW_AGENT_DIR = "agent";
+process.env.CARAPACE_AGENT_DIR = "agent";
 `,
   );
   writeRepoFile(
     repoRoot,
-    "src/test-utils/openclaw-test-state.ts",
+    "src/test-utils/carapace-test-state.ts",
     `
 process.env.HOME = "allowed";
-delete process.env.OPENCLAW_STATE_DIR;
+delete process.env.CARAPACE_STATE_DIR;
 `,
   );
   return repoRoot;
 }
 
 describe("collectTestEnvMutationReport", () => {
-  it("reports active OpenClaw env mutations while ignoring strings and non-test files", () => {
+  it("reports active Carapace env mutations while ignoring strings and non-test files", () => {
     const report = collectTestEnvMutationReport({ repoRoot: makeEnvMutationFixture() });
 
     expect(
@@ -82,19 +82,19 @@ describe("collectTestEnvMutationReport", () => {
     ).toEqual([
       {
         file: "scripts/mcp-code-mode-gateway-e2e.ts",
-        key: "OPENCLAW_CONFIG_PATH",
+        key: "CARAPACE_CONFIG_PATH",
         operation: "assign",
       },
       {
         file: "src/agents/auth-profiles/oauth-test-utils.ts",
-        key: "OPENCLAW_AGENT_DIR",
+        key: "CARAPACE_AGENT_DIR",
         operation: "assign",
       },
-      { file: "src/example.test.ts", key: "OPENCLAW_STATE_DIR", operation: "assign" },
-      { file: "src/example.test.ts", key: "OPENCLAW_CONFIG_PATH", operation: "delete" },
+      { file: "src/example.test.ts", key: "CARAPACE_STATE_DIR", operation: "assign" },
+      { file: "src/example.test.ts", key: "CARAPACE_CONFIG_PATH", operation: "delete" },
       { file: "src/example.test.ts", key: "HOME", operation: "stubEnv" },
-      { file: "src/example.test.ts", key: "OPENCLAW_WORKSPACE_DIR", operation: "stubEnv" },
-      { file: "src/example.test.ts", key: "OPENCLAW_HOME", operation: "replace" },
+      { file: "src/example.test.ts", key: "CARAPACE_WORKSPACE_DIR", operation: "stubEnv" },
+      { file: "src/example.test.ts", key: "CARAPACE_HOME", operation: "replace" },
       { file: "src/example.test.ts", key: "<dynamic>", operation: "assign" },
       { file: "src/example.test.ts", key: "<dynamic>", operation: "delete" },
     ]);
@@ -112,10 +112,10 @@ describe("collectTestEnvMutationReport", () => {
 
     const rendered = renderTestEnvMutationReport(report, { includeAllowed: true });
 
-    expect(rendered).toContain("OpenClaw test env mutation report");
+    expect(rendered).toContain("Carapace test env mutation report");
     expect(rendered).toContain("Findings: 9 active in 3 file(s), 2 allowed in 1 file(s)");
     expect(rendered).toContain("- src/example.test.ts (7)");
-    expect(rendered).toContain("L2 OPENCLAW_STATE_DIR assign process.env");
+    expect(rendered).toContain("L2 CARAPACE_STATE_DIR assign process.env");
     expect(rendered).toContain("Allowed harness findings:");
   });
 
@@ -195,7 +195,7 @@ describe("collectTestEnvMutationReport", () => {
           "--limit",
           limit,
           "--repo-root",
-          createTempDir("openclaw-env-limit-"),
+          createTempDir("carapace-env-limit-"),
         ]),
       ).toThrow("--limit expects a non-negative integer");
     }

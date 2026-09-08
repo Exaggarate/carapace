@@ -39,7 +39,7 @@ function createEntry(name: string): SkillEntry {
       description: name,
       filePath: `/app/skills/${name}/SKILL.md`,
       baseDir: `/app/skills/${name}`,
-      source: "openclaw-workspace",
+      source: "carapace-workspace",
     }),
     frontmatter: {},
   };
@@ -56,10 +56,10 @@ describe("resolveSkillsPrompt", () => {
         entry.skill.readContent = `${"Complete instruction body. ".repeat(300)}END_${index}`;
         return entry;
       });
-      const snapshot = buildSkillSnapshot("/tmp/openclaw", { entries });
+      const snapshot = buildSkillSnapshot("/tmp/carapace", { entries });
       const original = snapshot.prompt.trim();
       const projected = resolveSkillsPrompt({
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         skillsSnapshot: snapshot,
         contextTokenBudget,
       });
@@ -69,7 +69,7 @@ describe("resolveSkillsPrompt", () => {
       expect(omitDescriptions(projected)).toBe(omitDescriptions(original));
       expect(projected).toContain("&amp; preserve &lt;identifiers&gt;");
       expect(snapshot.prompt.trim()).toBe(original);
-      expect(resolveSkillsPrompt({ workspaceDir: "/tmp/openclaw", skillsSnapshot: snapshot })).toBe(
+      expect(resolveSkillsPrompt({ workspaceDir: "/tmp/carapace", skillsSnapshot: snapshot })).toBe(
         original,
       );
       const resources = resolveCodeModeSkills({
@@ -90,7 +90,7 @@ describe("resolveSkillsPrompt", () => {
   it("prefers snapshot prompt when available", () => {
     const prompt = resolveSkillsPrompt({
       skillsSnapshot: { prompt: "SNAPSHOT", skills: [] },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
     expect(prompt).toBe("SNAPSHOT");
   });
@@ -101,13 +101,13 @@ describe("resolveSkillsPrompt", () => {
         description: "Demo",
         filePath: "/app/skills/demo-skill/SKILL.md",
         baseDir: "/app/skills/demo-skill",
-        source: "openclaw-bundled",
+        source: "carapace-bundled",
       }),
       frontmatter: {},
     };
     const prompt = resolveSkillsPrompt({
       entries: [entry],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
     expect(prompt).toContain("<available_skills>");
     expect(prompt).toContain("/app/skills/demo-skill/SKILL.md");
@@ -120,7 +120,7 @@ describe("resolveSkillsPrompt", () => {
         description: "New",
         filePath: "/app/skills/new-skill/SKILL.md",
         baseDir: "/app/skills/new-skill",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
@@ -129,7 +129,7 @@ describe("resolveSkillsPrompt", () => {
       resolveSkillsPrompt({
         skillsSnapshot: { prompt: "", skills: [] },
         entries: [entry],
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
       }),
     ).toBe("");
   });
@@ -154,7 +154,7 @@ describe("resolveSkillsPrompt", () => {
           skills: [{ name: "cold-skill", skillKey: "cold-skill" }],
           promptFormatVersion: WORKSPACE_SKILLS_PROMPT_FORMAT_VERSION - 1,
         },
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
       }),
     ).toBe("");
   });
@@ -176,7 +176,7 @@ describe("resolveSkillsPrompt", () => {
         prompt: "LEGACY SKILL PROMPT",
         skills: [{ name: "cold-skill" }, { name: "healthy-skill" }],
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
 
     expect(prompt).toBe("");
@@ -203,7 +203,7 @@ describe("resolveSkillsPrompt", () => {
     "lazily rebuilds healthy entries for a degraded modern $name snapshot",
     ({ reason, mutate }) => {
       const entries = [createEntry("cold-skill"), createEntry("healthy-skill")];
-      const snapshot = mutate(buildSkillSnapshot("/tmp/openclaw", { entries }));
+      const snapshot = mutate(buildSkillSnapshot("/tmp/carapace", { entries }));
       const loadEntries = vi.fn(() => entries);
       setActiveDegradedSecretOwners([
         {
@@ -219,7 +219,7 @@ describe("resolveSkillsPrompt", () => {
       const prompt = resolveSkillsPrompt({
         skillsSnapshot: snapshot,
         loadEntries,
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
       });
 
       expect(loadEntries).toHaveBeenCalledOnce();
@@ -234,14 +234,14 @@ describe("resolveSkillsPrompt", () => {
 
   it("does not load entries while reusing a valid modern snapshot", () => {
     const entries = [createEntry("healthy-skill")];
-    const snapshot = buildSkillSnapshot("/tmp/openclaw", { entries });
+    const snapshot = buildSkillSnapshot("/tmp/carapace", { entries });
     const loadEntries = vi.fn(() => entries);
 
     expect(
       resolveSkillsPrompt({
         skillsSnapshot: snapshot,
         loadEntries,
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
       }),
     ).toBe(snapshot.prompt.trim());
     expect(loadEntries).not.toHaveBeenCalled();
@@ -254,7 +254,7 @@ describe("resolveSkillsPrompt", () => {
         description: "Cold",
         filePath: "/app/skills/cold-skill/SKILL.md",
         baseDir: "/app/skills/cold-skill",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
       metadata: { skillKey: "cold-alias" },
@@ -265,11 +265,11 @@ describe("resolveSkillsPrompt", () => {
         description: "Healthy",
         filePath: "/app/skills/healthy-skill/SKILL.md",
         baseDir: "/app/skills/healthy-skill",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
-    const snapshot = buildSkillSnapshot("/tmp/openclaw", {
+    const snapshot = buildSkillSnapshot("/tmp/carapace", {
       entries: [cold, healthy],
     });
     setActiveDegradedSecretOwners([
@@ -286,7 +286,7 @@ describe("resolveSkillsPrompt", () => {
     const prompt = resolveSkillsPrompt({
       skillsSnapshot: snapshot,
       entries: [cold, healthy],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
 
     expect(prompt).not.toContain("/app/skills/cold-skill/SKILL.md");
@@ -295,7 +295,7 @@ describe("resolveSkillsPrompt", () => {
 
   it("does not add supplied skills outside the saved snapshot during a degraded rebuild", () => {
     const capturedEntries = [createEntry("cold-skill"), createEntry("healthy-skill")];
-    const snapshot = buildSkillSnapshot("/tmp/openclaw", {
+    const snapshot = buildSkillSnapshot("/tmp/carapace", {
       entries: capturedEntries,
     });
     setActiveDegradedSecretOwners([
@@ -312,7 +312,7 @@ describe("resolveSkillsPrompt", () => {
     const prompt = resolveSkillsPrompt({
       skillsSnapshot: snapshot,
       entries: [...capturedEntries, createEntry("new-skill")],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
 
     expect(prompt).not.toContain("/app/skills/cold-skill/SKILL.md");
@@ -321,7 +321,7 @@ describe("resolveSkillsPrompt", () => {
   });
 
   it("preserves captured skill content during degraded prompt filtering", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-prompt-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-skill-prompt-"));
     await writeSkill({
       dir: path.join(workspaceDir, "skills", "cold-skill"),
       name: "cold-skill",
@@ -377,7 +377,7 @@ describe("resolveSkillsPrompt", () => {
         description: "Hidden",
         filePath: "/app/skills/hidden-skill/SKILL.md",
         baseDir: "/app/skills/hidden-skill",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
         disableModelInvocation: true,
       }),
       frontmatter: {},
@@ -385,7 +385,7 @@ describe("resolveSkillsPrompt", () => {
 
     const prompt = resolveSkillsPrompt({
       entries: [hidden],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
     });
 
     expect(prompt).not.toContain("/app/skills/hidden-skill/SKILL.md");
@@ -398,7 +398,7 @@ describe("resolveSkillsPrompt", () => {
         description: "GitHub",
         filePath: "/app/skills/github/SKILL.md",
         baseDir: "/app/skills/github",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
@@ -408,7 +408,7 @@ describe("resolveSkillsPrompt", () => {
         description: "Hidden",
         filePath: "/app/skills/hidden-skill/SKILL.md",
         baseDir: "/app/skills/hidden-skill",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
@@ -423,7 +423,7 @@ describe("resolveSkillsPrompt", () => {
           list: [{ id: "writer" }],
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       agentId: "writer",
     });
 
@@ -438,7 +438,7 @@ describe("resolveSkillsPrompt", () => {
         description: "Weather",
         filePath: "/app/skills/weather/SKILL.md",
         baseDir: "/app/skills/weather",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
@@ -448,7 +448,7 @@ describe("resolveSkillsPrompt", () => {
         description: "Docs",
         filePath: "/app/skills/docs-search/SKILL.md",
         baseDir: "/app/skills/docs-search",
-        source: "openclaw-workspace",
+        source: "carapace-workspace",
       }),
       frontmatter: {},
     };
@@ -463,7 +463,7 @@ describe("resolveSkillsPrompt", () => {
           list: [{ id: "writer", skills: ["docs-search"] }],
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       agentId: "writer",
     });
 

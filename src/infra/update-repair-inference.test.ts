@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveAgentEntry } from "../agents/agent-scope-config.js";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { SystemAgentConfiguredRoute } from "../system-agent/inference-route.js";
 import { selectUpdateRepairInference } from "./update-repair-inference.js";
@@ -34,7 +34,7 @@ vi.mock("../system-agent/setup-inference-persist.js", () => ({
 }));
 vi.mock("../system-agent/inference-route.js", () => ({
   resolveSystemAgentConfiguredRouteFromConfig: async (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     agentId: string,
   ): Promise<SystemAgentConfiguredRoute | null> => {
     const configured = resolveAgentEntry(config, agentId)?.model ?? config.agents?.defaults?.model;
@@ -60,7 +60,7 @@ vi.mock("../system-agent/inference-route.js", () => ({
 }));
 
 const runtime: RuntimeEnv = { log() {}, error() {}, exit() {} };
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: {
     defaults: {
       systemAgent: { agentId: "owner" },
@@ -138,7 +138,7 @@ describe("update repair inference", () => {
   });
 
   it("skips unauthenticated, CLI, manifest non-tool and custom non-tool routes before probing", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { systemAgent: { agentId: "owner" } },
         entries: {

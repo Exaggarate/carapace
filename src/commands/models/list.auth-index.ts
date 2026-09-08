@@ -1,4 +1,4 @@
-/** Auth availability index for `openclaw models list` rows. */
+/** Auth availability index for `carapace models list` rows. */
 import type { PreparedAgentCredentialModes } from "../../agents/agent-auth-credential-modes.js";
 import type { AuthProfileStore } from "../../agents/auth-profiles/types.js";
 import {
@@ -7,7 +7,7 @@ import {
   type ModelAuthAvailabilityRef,
 } from "../../agents/model-auth-availability.js";
 import type { createOpenAIModelRoutesResolver } from "../../agents/openai-model-routes.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
 
 export type ModelListAuthRef = ModelAuthAvailabilityRef;
@@ -19,7 +19,7 @@ export type ModelListAuthIndex = {
 };
 
 type CreateModelListAuthIndexParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   authStore: AuthProfileStore;
   agentId?: string;
   agentDir?: string;

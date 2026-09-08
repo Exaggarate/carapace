@@ -1,21 +1,21 @@
 import type { DatabaseSync } from "node:sqlite";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import {
   USER_PREFS_ENTRY_LIMIT,
   USER_PREFS_PROFILE_KEY_LIMIT,
   USER_PREFS_VALUE_BYTES,
 } from "../../packages/gateway-protocol/src/schema/users.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "./openclaw-state-db.generated.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "./carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { createOpenClawStateSchemaEnsurer } from "./openclaw-state-feature-schema.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
+import { createCarapaceStateSchemaEnsurer } from "./carapace-state-feature-schema.js";
 
-type UserPreferencesDatabase = Pick<OpenClawStateKyselyDatabase, "user_preferences">;
+type UserPreferencesDatabase = Pick<CarapaceStateKyselyDatabase, "user_preferences">;
 
 type UserPreferenceError =
   | { code: "invalid-entry-count" }
@@ -26,7 +26,7 @@ type UserPreferenceError =
       currentCount: number;
     };
 
-export const ensureUserPreferencesSchema = createOpenClawStateSchemaEnsurer({
+export const ensureUserPreferencesSchema = createCarapaceStateSchemaEnsurer({
   table: "user_preferences",
   operationLabel: "users.preferences.schema.ensure",
 });
@@ -92,9 +92,9 @@ export function selectUserPreferenceValues(
   );
 }
 
-function openUserPreferencesDatabase(options: OpenClawStateDatabaseOptions = {}) {
+function openUserPreferencesDatabase(options: CarapaceStateDatabaseOptions = {}) {
   ensureUserPreferencesSchema(options);
-  const state = openOpenClawStateDatabase(options);
+  const state = openCarapaceStateDatabase(options);
   return { sqlite: state.db, kysely: getNodeSqliteKysely<UserPreferencesDatabase>(state.db) };
 }
 
@@ -152,7 +152,7 @@ export function mergeUserPreferences(
 export function getUserPreferences(
   profileId: string,
   keys?: readonly string[],
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Record<string, unknown> {
   if (keys?.length === 0) {
     return {};
@@ -177,7 +177,7 @@ export function getUserPreferences(
 export function setUserPreferences(
   profileId: string,
   entries: Record<string, unknown>,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Result<void, UserPreferenceError> {
   const rawEntries = Object.entries(entries);
   if (rawEntries.length > USER_PREFS_ENTRY_LIMIT) {
@@ -212,7 +212,7 @@ export function setUserPreferences(
     return ok(undefined);
   }
   ensureUserPreferencesSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       const db = getNodeSqliteKysely<UserPreferencesDatabase>(sqlite);
       const currentKeys = readPreferenceKeys(sqlite, profileId);

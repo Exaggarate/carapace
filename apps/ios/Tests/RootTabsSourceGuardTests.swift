@@ -4,7 +4,7 @@ import Testing
 struct RootTabsSourceGuardTests {
     @Test func `initial scene phase reaches the model before gateway admission`() throws {
         let startup = try Self.extract(
-            Self.source("Sources/OpenClawApp.swift"),
+            Self.source("Sources/CarapaceApp.swift"),
             from: ".task {",
             to: ".onReceive(")
         let modelPhase = try #require(startup.range(of: "self.appModel.setScenePhase(self.scenePhase)"))

@@ -10,8 +10,8 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const collapsedSessionSectionsStorageKey = "openclaw:sidebar:sessions:collapsed-sections";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const collapsedSessionSectionsStorageKey = "carapace:sidebar:sessions:collapsed-sections";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -48,7 +48,7 @@ suite.define(() => {
                     {
                       threadId: "thread-shared",
                       name: "Shared gateway session",
-                      cwd: "/workspace/openclaw",
+                      cwd: "/workspace/carapace",
                       status: "idle",
                       archived: false,
                       canContinue: true,

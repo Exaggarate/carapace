@@ -26,10 +26,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI profile page mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -369,9 +369,9 @@ suite.define(() => {
         await page.addInitScript((sameOriginGatewayUrl) => {
           (
             window as Window & {
-              ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+              ["__CARAPACE_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
             }
-          )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+          )["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
             gatewayUrl: sameOriginGatewayUrl,
             token: "test",
           };
@@ -425,7 +425,7 @@ suite.define(() => {
           "img-src 'self' data: blob:",
         );
 
-        const profileAvatar = page.locator("#settings-profile-identity openclaw-viewer-avatar img");
+        const profileAvatar = page.locator("#settings-profile-identity carapace-viewer-avatar img");
         await profileAvatar.waitFor({ timeout: 10_000 });
         const imageUrl = await profileAvatar.getAttribute("src");
         expect(imageUrl).toMatch(/^blob:/u);
@@ -445,7 +445,7 @@ suite.define(() => {
         }
 
         await page.getByRole("button", { name: "Back to app" }).click();
-        const sidebarAvatar = page.locator(".sidebar-identity-card openclaw-viewer-avatar img");
+        const sidebarAvatar = page.locator(".sidebar-identity-card carapace-viewer-avatar img");
         await sidebarAvatar.waitFor({ timeout: 10_000 });
         await expect.poll(() => avatarRequests.length).toBe(1);
         expect(avatarRequests[0]).toEqual({
@@ -1006,7 +1006,7 @@ suite.define(() => {
       await gateway.deferNext("users.setAvatar");
       await upload("second-content-hash-png");
 
-      const profileAvatar = page.locator("#settings-profile-identity openclaw-viewer-avatar");
+      const profileAvatar = page.locator("#settings-profile-identity carapace-viewer-avatar");
       await expect
         .poll(() =>
           profileAvatar.evaluate(

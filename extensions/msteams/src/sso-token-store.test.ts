@@ -1,8 +1,8 @@
 // Msteams tests cover sso token store plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { setMSTeamsRuntime } from "./runtime.js";
 import { createMSTeamsSsoTokenStoreFs } from "./sso-token-store.js";
@@ -22,7 +22,7 @@ describe("msteams sso token store (plugin state)", () => {
   });
 
   it("keeps distinct tokens when connectionName and userId contain the legacy delimiter", async () => {
-    const stateDir = tempDirs.make("openclaw-msteams-sso-");
+    const stateDir = tempDirs.make("carapace-msteams-sso-");
     const storePath = path.join(stateDir, "msteams-sso-tokens.json");
     const store = createMSTeamsSsoTokenStoreFs({ storePath });
 
@@ -46,11 +46,11 @@ describe("msteams sso token store (plugin state)", () => {
     expect(await store.get(second)).toEqual(second);
 
     await expect(fs.access(storePath)).rejects.toThrow();
-    await fs.access(path.join(stateDir, "state", "openclaw.sqlite"));
+    await fs.access(path.join(stateDir, "state", "carapace.sqlite"));
   });
 
   it("ignores legacy flat-key token files at runtime", async () => {
-    const stateDir = tempDirs.make("openclaw-msteams-sso-legacy-");
+    const stateDir = tempDirs.make("carapace-msteams-sso-legacy-");
     const storePath = path.join(stateDir, "msteams-sso-tokens.json");
     await fs.writeFile(
       storePath,
@@ -83,7 +83,7 @@ describe("msteams sso token store (plugin state)", () => {
   });
 
   it("keeps plugin-state keys bounded for long Teams identifiers", async () => {
-    const stateDir = tempDirs.make("openclaw-msteams-sso-long-");
+    const stateDir = tempDirs.make("carapace-msteams-sso-long-");
     const store = createMSTeamsSsoTokenStoreFs({ stateDir });
     const token = {
       connectionName: `conn-${"c".repeat(1000)}`,

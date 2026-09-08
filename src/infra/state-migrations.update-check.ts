@@ -53,7 +53,7 @@ export function migrateLegacyUpdateCheckState(params: {
     label: "update-check state",
     normalize: normalizeLegacyUpdateCheckState,
     migrate(_db, state) {
-      const options = { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } };
+      const options = { env: { ...process.env, CARAPACE_STATE_DIR: params.stateDir } };
       const result = importConfigMachineState([[UPDATE_CHECK_STATE_KEY, state]], options);
       if (result.kept.length > 0) {
         const existing = readConfigMachineState<LegacyUpdateCheckState>(

@@ -5,12 +5,12 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../state/carapace-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   appendSqliteTrajectoryRuntimeEvents,
   loadSqliteTrajectoryRuntimeEventRowsSync,
@@ -18,14 +18,14 @@ import {
 } from "./runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "./types.js";
 
-type TrajectoryRuntimeTestDatabase = Pick<OpenClawAgentKyselyDatabase, "trajectory_runtime_events">;
+type TrajectoryRuntimeTestDatabase = Pick<CarapaceAgentKyselyDatabase, "trajectory_runtime_events">;
 
 describe("SQLite trajectory runtime store", () => {
   let tempDir: string;
   let storePath: string;
 
   beforeEach(async () => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-trajectory-sqlite-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-trajectory-sqlite-"));
     storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
     await replaceSessionEntry(
       { sessionKey: "agent:main:main", storePath },
@@ -35,8 +35,8 @@ describe("SQLite trajectory runtime store", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
@@ -53,7 +53,7 @@ describe("SQLite trajectory runtime store", () => {
       expect.objectContaining({ seq: 1, type: "model.completed" }),
     ]);
 
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath() });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath() });
     const db = getNodeSqliteKysely<TrajectoryRuntimeTestDatabase>(database.db);
     const rows = executeSqliteQuerySync(
       database.db,
@@ -76,7 +76,7 @@ describe("SQLite trajectory runtime store", () => {
         createTrajectoryEvent({ ts: timestamp, type: "timestamp-contract" }),
       ]);
 
-      const database = openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath() });
+      const database = openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath() });
       const db = getNodeSqliteKysely<TrajectoryRuntimeTestDatabase>(database.db);
       const rows = executeSqliteQuerySync(
         database.db,
@@ -132,7 +132,7 @@ describe("SQLite trajectory runtime store", () => {
       (bytes, event) => bytes + Buffer.byteLength(JSON.stringify(event), "utf8") + 1,
       0,
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath() });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath() });
     const prepare = database.db.prepare.bind(database.db);
     let materializedEvents = 0;
     const prepareSpy = vi.spyOn(database.db, "prepare").mockImplementation((sql) => {
@@ -207,7 +207,7 @@ describe("SQLite trajectory runtime store", () => {
       "agents",
       "missing",
       "agent",
-      "openclaw-agent.sqlite",
+      "carapace-agent.sqlite",
     );
 
     expect(
@@ -347,7 +347,7 @@ describe("SQLite trajectory runtime store", () => {
       createTrajectoryEvent({ type: "model.started" }),
     ]);
 
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath() });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath() });
     database.db.prepare("DELETE FROM session_windows WHERE session_id = ?").run("session-1");
 
     await expect(
@@ -356,7 +356,7 @@ describe("SQLite trajectory runtime store", () => {
   });
 
   function sqlitePath(): string {
-    return path.join(tempDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+    return path.join(tempDir, "agents", "main", "agent", "carapace-agent.sqlite");
   }
 
   async function addSession(sessionId: string): Promise<void> {
@@ -372,7 +372,7 @@ describe("SQLite trajectory runtime store", () => {
   }
 
   function runtimeBytesBySession(): Map<string, number> {
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: sqlitePath() });
+    const database = openCarapaceAgentDatabase({ agentId: "main", path: sqlitePath() });
     const db = getNodeSqliteKysely<TrajectoryRuntimeTestDatabase>(database.db);
     const rows = executeSqliteQuerySync(
       database.db,
@@ -399,7 +399,7 @@ function createTrajectoryEvent(options: {
 }): TrajectoryEvent {
   const sessionId = options.sessionId ?? "session-1";
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "carapace-trajectory",
     schemaVersion: 1,
     traceId: sessionId,
     source: "runtime",

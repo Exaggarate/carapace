@@ -1,10 +1,10 @@
 // Mattermost plugin module implements target resolution behavior.
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMattermostAccount } from "./accounts.js";
 import {
   createMattermostClient,
@@ -15,7 +15,7 @@ import {
   type MattermostClient,
 } from "./client.js";
 import { resolveMattermostTrustedChatKind } from "./monitor-auth.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { CarapaceConfig } from "./runtime-api.js";
 
 type MattermostOpaqueTargetResolution = {
   kind: "user" | "channel" | "group";
@@ -142,7 +142,7 @@ function isExplicitMattermostTarget(raw: string): boolean {
 
 export async function resolveMattermostOpaqueTarget(
   params: { input: string } & (
-    | { cfg: OpenClawConfig; accountId?: string | null }
+    | { cfg: CarapaceConfig; accountId?: string | null }
     | { client: MattermostClient }
   ),
 ): Promise<MattermostOpaqueTargetResolution | null> {

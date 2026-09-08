@@ -16,7 +16,7 @@ describe("sidebar preference persistence", () => {
   it("persists sidebar width without leaking tab-local visibility across reloads", () => {
     setTestLocation({ protocol: "https:", host: "gateway.example:8443", pathname: "/" });
     const gatewayUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gatewayUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gatewayUrl}`;
 
     saveSettings(makeUiSettings(gatewayUrl, { navCollapsed: true, navWidth: 320 }));
 
@@ -51,7 +51,7 @@ describe("sidebar preference persistence", () => {
     expect(loadSettings().navWidth).toBe(258);
 
     // Corrupt the persisted list; load falls back to the default pinned set.
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     const persisted = JSON.parse(localStorage.getItem(scopedKey) ?? "{}") as Record<
       string,
       unknown
@@ -75,7 +75,7 @@ describe("sidebar preference persistence", () => {
       pathname: "/",
     });
     const gwUrl = expectedGatewayUrl("");
-    const scopedKey = `openclaw.control.settings.v1:${gwUrl}`;
+    const scopedKey = `carapace.control.settings.v1:${gwUrl}`;
     const legacy = makeUiSettings(gwUrl) as unknown as Record<string, unknown>;
     delete legacy.sidebarEntries;
     legacy.sidebarPinnedRoutes = ["workboard", "usage", "tasks", "usage", "worktrees", 7];

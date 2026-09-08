@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AuthProfileStore } from "openclaw/plugin-sdk/agent-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { readVisibleSessionTranscriptMessageEntries } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
+import type { AuthProfileStore } from "carapace/plugin-sdk/agent-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { readVisibleSessionTranscriptMessageEntries } from "carapace/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi, type MockInstance } from "vitest";
 import * as authBridge from "./auth-bridge.js";
 import { runBoundedCodexAppServerTurn } from "./bounded-turn.js";
@@ -339,7 +339,7 @@ async function createRunParams(fixture: NativeFixture) {
   params.permissionMode = "full";
   params.timeoutMs = 20_000;
   params.config = { tools: { web: { search: { enabled: false } } } };
-  dynamicToolBuildState.openClawCodingToolsFactory = () => [];
+  dynamicToolBuildState.carapaceCodingToolsFactory = () => [];
   registerCodexTestSessionIdentity(params.sessionFile, params.sessionId, params.sessionKey);
   return params;
 }

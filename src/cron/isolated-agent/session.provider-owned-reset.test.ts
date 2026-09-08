@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getCliSessionBinding } from "../../config/sessions/cli-session-binding.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveCronSession } from "./session.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -26,7 +26,7 @@ describe("resolveCronSession provider-owned daily reset", () => {
     const entry = providerOwnedEntry();
 
     const result = resolveCronSession({
-      cfg: { session: {} } as OpenClawConfig,
+      cfg: { session: {} } as CarapaceConfig,
       sessionKey,
       agentId: "main",
       nowMs: NOW_MS,
@@ -52,7 +52,7 @@ describe("resolveCronSession provider-owned daily reset", () => {
     };
 
     const result = resolveCronSession({
-      cfg: { session: { reset: { mode: "daily" } } } as OpenClawConfig,
+      cfg: { session: { reset: { mode: "daily" } } } as CarapaceConfig,
       sessionKey,
       agentId: "main",
       nowMs: NOW_MS,
@@ -69,7 +69,7 @@ describe("resolveCronSession provider-owned daily reset", () => {
     const entry = providerOwnedEntry();
 
     const result = resolveCronSession({
-      cfg: { session: { reset: { mode: "daily" } } } as OpenClawConfig,
+      cfg: { session: { reset: { mode: "daily" } } } as CarapaceConfig,
       sessionKey,
       agentId: "main",
       nowMs: NOW_MS,

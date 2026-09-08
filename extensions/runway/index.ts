@@ -1,6 +1,6 @@
-// Runway plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-entry";
+// Runway plugin entrypoint registers its Carapace integration.
+import { definePluginEntry } from "carapace/plugin-sdk/plugin-entry";
+import { createProviderApiKeyAuthMethod } from "carapace/plugin-sdk/provider-entry";
 import { buildRunwayVideoGenerationProvider } from "./video-generation-provider.js";
 
 export default definePluginEntry({

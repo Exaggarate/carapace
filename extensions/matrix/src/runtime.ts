@@ -1,6 +1,6 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 // Matrix plugin module implements runtime behavior.
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
 
 const {
   setRuntime: setMatrixRuntime,

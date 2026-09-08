@@ -1,5 +1,5 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "carapace/plugin-sdk/health";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { PolicyEvidence, PolicyIngressEvidence } from "../policy-state.js";
 import { ingressPolicyShapeFinding } from "./access-shapes.js";
 import { CHECK_IDS } from "./check-ids.js";
@@ -201,7 +201,7 @@ function isGroupIngressDisabled(
   groupPolicies: readonly PolicyIngressEvidence[],
 ): boolean {
   const entryParent = ocPathParent(entry.source);
-  const channelDefaultsParent = "oc://openclaw.config/channels/defaults";
+  const channelDefaultsParent = "oc://carapace.config/channels/defaults";
   const matches = groupPolicies
     .filter((candidate) => {
       const candidateParent = ocPathParent(candidate.source);

@@ -31,7 +31,7 @@ vi.mock("./status-runtime-shared.ts", () => ({
 
 function createScan() {
   return createStatusScanResultFixture({
-    env: { OPENCLAW_STATE_DIR: "/tmp/status-json-runtime-state" },
+    env: { CARAPACE_STATE_DIR: "/tmp/status-json-runtime-state" },
     cfg: { update: { channel: "stable" }, gateway: {} },
     sourceConfig: { gateway: {} },
     summary: { ok: true } as never,

@@ -161,7 +161,7 @@ describe("worker turn launcher remote handoff", () => {
         expect(Value.Check(WorkerConnectRequestFrameSchema, connectFrame)).toBe(true);
         expect(descriptor.admission.handshake).toEqual({
           bundleHash: bootstrapReceipt.bundleHash,
-          openclawVersion: bootstrapReceipt.openclawVersion,
+          carapaceVersion: bootstrapReceipt.carapaceVersion,
           protocolFeatures: bootstrapReceipt.protocolFeatures,
         });
         expect(descriptor.admission.handshake).not.toHaveProperty("installKind");
@@ -258,14 +258,14 @@ describe("worker turn launcher remote handoff", () => {
       expect.objectContaining({ source: expect.objectContaining({ kind: "local", path: root }) }),
     );
     const conflictSummary =
-      "Cloud result applied with 1 conflict(s); kept local versions: src/local.ts. Cloud versions staged at refs/openclaw/worker-results/";
+      "Cloud result applied with 1 conflict(s); kept local versions: src/local.ts. Cloud versions staged at refs/carapace/worker-results/";
     expect(result.payloads).toEqual([
       { text: expect.stringContaining(`Worker reply\n\n${conflictSummary}`) },
     ]);
     expect(placements.get(SESSION_ID)?.turnClaim).toBeNull();
     expect(placements.get(SESSION_ID)?.workspaceResultConflict).toMatchObject({
       paths: ["src/local.ts"],
-      stagedResultRef: expect.stringMatching(/^refs\/openclaw\/worker-results\//u),
+      stagedResultRef: expect.stringMatching(/^refs\/carapace\/worker-results\//u),
     });
     expect(onAgentEvent).toHaveBeenCalledWith({
       stream: "assistant",
@@ -315,7 +315,7 @@ describe("worker turn launcher remote handoff", () => {
     expect(descriptor?.assignment.toolAuthority.allowedToolNames).toEqual(["browser"]);
     expect(descriptor?.assignment.browser).toEqual({
       cdpUrl: "http://127.0.0.1:9222",
-      launcherPath: "/usr/local/bin/openclaw-worker-browser",
+      launcherPath: "/usr/local/bin/carapace-worker-browser",
     });
     expect(descriptor?.assignment.initialMessages).toEqual([
       {
@@ -528,7 +528,7 @@ describe("worker turn launcher remote handoff", () => {
       image,
     ]);
     expect(JSON.stringify(descriptor?.assignment.prompt)).toContain(
-      "media/inbound/openclaw-staged-",
+      "media/inbound/carapace-staged-",
     );
     expect(tunnel.stageAttachments).toHaveBeenCalledOnce();
     const verifiedRuntimeIdentity = await verifyAgentRuntimeIdentityToken(

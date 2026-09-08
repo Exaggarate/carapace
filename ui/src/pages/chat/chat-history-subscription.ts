@@ -1,4 +1,4 @@
-import { normalizeNullableString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeNullableString } from "@carapace/normalization-core/string-coerce";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { hasOperatorApprovalsAccess } from "../../app/operator-access.ts";
 import { formatUiError } from "../../lib/format-error.ts";

@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setRuntimeConfigSnapshot } from "../../config/runtime-snapshot.js";
 import {
@@ -6,15 +6,15 @@ import {
   appendTranscriptMessage,
   replaceSessionEntrySync,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import * as serverConstants from "../../gateway/server-constants.js";
 import { readChatHistoryMessageId } from "../../gateway/session-history-tail.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createEmbeddedCallGateway } from "./embedded-gateway-stub.js";
 import { createSessionsHistoryTool } from "./sessions-history-tool.js";
 import { createSessionsSearchTool } from "./sessions-search-tool.js";
 
-const config: OpenClawConfig = {
+const config: CarapaceConfig = {
   agents: { entries: { main: { default: true }, work: {} } },
   tools: { sessions: { visibility: "agent" } },
 };
@@ -44,10 +44,10 @@ async function history(params: Record<string, unknown>) {
 }
 
 describe("embedded session history anchors", () => {
-  let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+  let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "embedded-anchor-test-" });
+    state = await createCarapaceTestState({ prefix: "embedded-anchor-test-" });
     setRuntimeConfigSnapshot(config);
     replaceSessionEntrySync(scope, { sessionId: scope.sessionId, updatedAt: Date.now() });
     for (const [index, id] of ["old", "middle", "newest"].entries()) {
@@ -198,7 +198,7 @@ describe("embedded session history anchors", () => {
   it.each(["self", "sandbox", "cross-agent"])(
     "keeps %s access restrictions intact",
     async (restriction) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         ...config,
         tools: {
           sessions: {

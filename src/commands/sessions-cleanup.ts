@@ -4,7 +4,7 @@
  * It can delegate cleanup to a live gateway or run local store maintenance,
  * with dry-run tables that explain every planned pruning action.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { visibleWidth } from "../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { getTerminalTableWidth, renderTable } from "../../packages/terminal-core/src/table.js";
@@ -20,7 +20,7 @@ import {
   type SessionsCleanupResult,
 } from "../config/sessions.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { callGateway, isGatewayTransportError } from "../gateway/call.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -165,7 +165,7 @@ function toDisplayedCleanupSummary(summary: SessionCleanupSummary): SessionClean
 }
 
 function renderStoreDryRunPlan(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   summary: SessionCleanupSummary;
   actionRows: SessionCleanupActionRow[];
   runtime: RuntimeEnv;

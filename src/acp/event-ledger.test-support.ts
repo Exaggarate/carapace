@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { afterEach, expect } from "vitest";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { createSqliteAcpEventLedger, type AcpEventLedger } from "./event-ledger.js";
 import type { AcpLedgerOptions } from "./event-ledger.types.js";
@@ -17,8 +17,8 @@ const testLedgerHandles: TestAcpLedgerHandle[] = [];
 
 /** Creates a test-owned SQLite ACP ledger and registers its DB/tempdir cleanup. */
 export function createTestAcpEventLedger(options: AcpLedgerOptions = {}): AcpEventLedger {
-  const tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-acp-ledger-")));
-  const databasePath = path.join(tempDir, "openclaw.sqlite");
+  const tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-acp-ledger-")));
+  const databasePath = path.join(tempDir, "carapace.sqlite");
   testLedgerHandles.push({ databasePath, tempDir });
   return createSqliteAcpEventLedger({ ...options, path: databasePath });
 }
@@ -26,12 +26,12 @@ export function createTestAcpEventLedger(options: AcpLedgerOptions = {}): AcpEve
 export async function withTestAcpEventLedgerDatabase<T>(
   fn: (paths: { databasePath: string }) => T | Promise<T>,
 ): Promise<T> {
-  return await withTestDir({ prefix: "openclaw-acp-ledger-" }, async (dir) => {
-    const databasePath = path.join(dir, "openclaw.sqlite");
+  return await withTestDir({ prefix: "carapace-acp-ledger-" }, async (dir) => {
+    const databasePath = path.join(dir, "carapace.sqlite");
     try {
       return await fn({ databasePath });
     } finally {
-      closeOpenClawStateDatabaseByPath(databasePath);
+      closeCarapaceStateDatabaseByPath(databasePath);
     }
   });
 }
@@ -41,7 +41,7 @@ function closeTestAcpEventLedgers(): void {
   const errors: unknown[] = [];
   for (const { databasePath, tempDir } of handles) {
     try {
-      closeOpenClawStateDatabaseByPath(databasePath);
+      closeCarapaceStateDatabaseByPath(databasePath);
     } catch (error) {
       errors.push(error);
     }

@@ -1,5 +1,5 @@
 import { sanitizeForLog } from "../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   evaluateContextEngineHostSupport,
   supportsContextEngineDurableTurnAdvancement,
@@ -65,7 +65,7 @@ export function selectContextEngineForTranscriptHost(params: {
 
 export async function createContextEngineLogicalTurnLease(params: {
   identity: { runId: string; sessionId: string };
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   workspaceDir?: string;
   warn?: (message: string) => void;

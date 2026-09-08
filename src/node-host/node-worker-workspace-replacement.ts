@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 
 async function removeTransferArtifact(target: string): Promise<void> {
   await fsp.rm(target, {

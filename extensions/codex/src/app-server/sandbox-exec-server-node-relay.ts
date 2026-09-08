@@ -1,9 +1,9 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { sanitizeEnvVars } from "openclaw/plugin-sdk/sandbox";
-import { formatErrorMessage, redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { sanitizeEnvVars } from "carapace/plugin-sdk/sandbox";
+import { formatErrorMessage, redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import type { RawData, WebSocket } from "ws";
 import type { CodexNodeExecServerLease } from "./sandbox-exec-server/types.js";
 

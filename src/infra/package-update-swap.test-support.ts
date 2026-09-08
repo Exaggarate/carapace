@@ -6,14 +6,14 @@ import { swapStagedPackageInstall, type PackageUpdateTransaction } from "./packa
 export async function createPackageSwapFixture(base: string) {
   const prefix = path.join(base, "live");
   const globalRoot = path.join(prefix, "lib", "node_modules");
-  const packageRoot = path.join(globalRoot, "openclaw");
+  const packageRoot = path.join(globalRoot, "carapace");
   const stagePrefix = path.join(base, "stage");
   const stageGlobalRoot = path.join(stagePrefix, "lib", "node_modules");
-  const stagePackageRoot = path.join(stageGlobalRoot, "openclaw");
+  const stagePackageRoot = path.join(stageGlobalRoot, "carapace");
   await writePackageRoot(packageRoot, "1.0.0");
   await writePackageRoot(stagePackageRoot, "2.0.0");
-  const launcher = path.join(prefix, "bin", "openclaw");
-  const stagedLauncher = path.join(stagePrefix, "bin", "openclaw");
+  const launcher = path.join(prefix, "bin", "carapace");
+  const stagedLauncher = path.join(stagePrefix, "bin", "carapace");
   for (const entry of [launcher, stagedLauncher]) {
     await fs.mkdir(path.dirname(entry), { recursive: true });
   }
@@ -21,7 +21,7 @@ export async function createPackageSwapFixture(base: string) {
   await fs.writeFile(stagedLauncher, "candidate launcher\n");
   const params = {
     installTarget: createNpmTarget(globalRoot),
-    packageName: "openclaw",
+    packageName: "carapace",
     stage: {
       prefix: stagePrefix,
       layout: {

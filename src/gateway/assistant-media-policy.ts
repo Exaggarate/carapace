@@ -2,7 +2,7 @@ import { isCloudWorkerPlacementState } from "../../packages/gateway-protocol/src
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import { resolveSessionPermissionCoreToolPolicy } from "../agents/session-permission-exec-mode.js";
 import { resolveEffectiveToolFsWorkspaceOnly } from "../agents/tool-fs-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getAgentScopedMediaLocalRoots, getDefaultMediaLocalRoots } from "../media/local-roots.js";
 import { isIncognitoSessionKey } from "../routing/session-key.js";
 import { getUserProfileListItem } from "../state/user-profiles.js";
@@ -33,7 +33,7 @@ export type AssistantMediaReader = Pick<
 
 function resolveAssistantMediaReaderAuth(
   reader: AssistantMediaReader,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): AuthorizedControlUiReadRequest | undefined {
   try {
     const profile = reader.profileId ? getUserProfileListItem(reader.profileId) : undefined;
@@ -51,7 +51,7 @@ function resolveAssistantMediaReaderAuth(
 }
 
 export function resolveAssistantMediaPolicy(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
   requestAuth?: AuthorizedControlUiReadRequest;

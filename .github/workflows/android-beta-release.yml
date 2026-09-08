@@ -100,7 +100,7 @@ jobs:
     timeout-minutes: 120
     environment: android-beta-release
     concurrency:
-      group: android-beta-release-ai.openclaw.app
+      group: android-beta-release-ai.carapace.app
       cancel-in-progress: false
     env:
       BUILD_TIMESTAMP: ${{ needs.authorize.outputs.build_timestamp }}
@@ -181,7 +181,7 @@ jobs:
         with:
           app-id: "2729701"
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: openclaw
+          owner: carapace
           repositories: apps-signing
           permission-contents: read
 
@@ -200,7 +200,7 @@ jobs:
       - name: Checkout encrypted Android signing assets
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/apps-signing
+          repository: carapace/apps-signing
           ref: main
           path: apps/android/build/release-signing/apps-signing
           token: ${{ steps.apps-signing-token.outputs.token }}
@@ -254,15 +254,15 @@ jobs:
       - name: Upload Android beta
         env:
           GOOGLE_PLAY_JSON_KEY_DATA: ${{ secrets.GOOGLE_PLAY_JSON_KEY_DATA }}
-          GOOGLE_PLAY_PACKAGE_NAME: ai.openclaw.app
+          GOOGLE_PLAY_PACKAGE_NAME: ai.carapace.app
           GOOGLE_PLAY_RELEASE_STATUS: completed
           GOOGLE_PLAY_TRACK: internal
           GOOGLE_PLAY_VALIDATE_ONLY: "0"
-          OPENCLAW_BUILD_TIMESTAMP: ${{ env.BUILD_TIMESTAMP }}
-          OPENCLAW_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST: ${{ needs.authorize.outputs.receipt_digest }}
-          OPENCLAW_MOBILE_RELEASE_INTENT_PATH: ${{ runner.temp }}/mobile-release-intent-android/intent.json
-          OPENCLAW_MOBILE_RELEASE_REF_MODE: intent
-          OPENCLAW_MOBILE_RELEASE_TARGET_REF: ${{ needs.authorize.outputs.target_ref }}
+          CARAPACE_BUILD_TIMESTAMP: ${{ env.BUILD_TIMESTAMP }}
+          CARAPACE_MOBILE_RELEASE_AUTHORITY_RECEIPT_DIGEST: ${{ needs.authorize.outputs.receipt_digest }}
+          CARAPACE_MOBILE_RELEASE_INTENT_PATH: ${{ runner.temp }}/mobile-release-intent-android/intent.json
+          CARAPACE_MOBILE_RELEASE_REF_MODE: intent
+          CARAPACE_MOBILE_RELEASE_TARGET_REF: ${{ needs.authorize.outputs.target_ref }}
           SUPPLY_CHANGES_NOT_SENT_FOR_REVIEW: "true"
           SUPPLY_RESCUE_CHANGES_NOT_SENT_FOR_REVIEW: "false"
         run: |
@@ -320,7 +320,7 @@ jobs:
     timeout-minutes: 20
     environment: android-beta-release
     concurrency:
-      group: android-beta-release-ai.openclaw.app
+      group: android-beta-release-ai.carapace.app
       cancel-in-progress: false
     steps:
       - name: Checkout trusted mobile release recorder

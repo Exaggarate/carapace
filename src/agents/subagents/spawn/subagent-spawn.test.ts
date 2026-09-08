@@ -1,13 +1,13 @@
 import os from "node:os";
 // Subagent spawn tests cover target policy, session patching, runtime model
 // persistence, registry registration, and lifecycle event emission.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ThinkLevel } from "../../../auto-reply/thinking.shared.js";
 import { upsertSessionEntryCore } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../../../state/openclaw-agent-db.paths.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
+import { resolveIncognitoCarapaceAgentSqlitePath } from "../../../state/carapace-agent-db.paths.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 import { resolveUserPath } from "../../../utils.js";
 import { resolveSandboxRuntimeStatus } from "../../sandbox/runtime-status.js";
 import { installAcceptedSubagentGatewayMock } from "../../test-helpers/subagent-gateway.js";
@@ -423,7 +423,7 @@ describe("spawnSubagentDirect seam flow", () => {
     expect(result.childSessionKey).toMatch(/^agent:main:subagent:incognito-/u);
     expect(sessionPatches).toContainEqual(expect.objectContaining({ incognito: true }));
     expect(sessionStorePaths).toContain(
-      resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" }),
+      resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" }),
     );
   });
 
@@ -841,7 +841,7 @@ describe("spawnSubagentDirect seam flow", () => {
   });
 
   it("holds the collector slot until an accepted run is confirmed stopped", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     hoisted.configOverride = createConfigOverride({
       tools: { swarm: { enabled: true, maxConcurrent: 1 } },
     });
@@ -1306,7 +1306,7 @@ describe("spawnSubagentDirect seam flow", () => {
       options: {
         agentSessionKey: controllerSessionKey,
         completionOwnerKey: "agent:main:main",
-        config: hoisted.configOverride as OpenClawConfig,
+        config: hoisted.configOverride as CarapaceConfig,
         callGateway: visibleGateway,
         countActiveRuns: hoisted.countActiveRunsForSessionMock,
       },
@@ -1641,7 +1641,7 @@ describe("spawnSubagentDirect seam flow", () => {
   ] as const)(
     "inherits native child $source provenance from a required parent ($required) with sandbox=$sandbox",
     async ({ required, source, sandbox }) => {
-      await withOpenClawTestState({ prefix: "openclaw-spawn-required-parent-" }, async (state) => {
+      await withCarapaceTestState({ prefix: "carapace-spawn-required-parent-" }, async (state) => {
         const storePath = state.statePath("agents", "main", "sessions", "sessions.json");
         const parentSessionKey = "agent:main:main";
         const actor = { type: "human", source, id: "profile-native-creator" } as const;

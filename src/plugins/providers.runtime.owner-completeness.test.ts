@@ -5,7 +5,7 @@ import {
   cleanupPluginLoaderFixturesForTest,
   clearPluginLoaderCache,
   EMPTY_PLUGIN_SCHEMA,
-  loadOpenClawPlugins,
+  loadCarapacePlugins,
   makePluginLoaderTempDir,
   writePlugin,
 } from "./loader.test-fixtures.js";
@@ -71,7 +71,7 @@ function fixture(
     configSchema: EMPTY_PLUGIN_SCHEMA,
   };
   for (const manifest of [helperManifest, otherManifest]) {
-    writeFileSync(path.join(manifest.rootDir, "openclaw.plugin.json"), JSON.stringify(manifest));
+    writeFileSync(path.join(manifest.rootDir, "carapace.plugin.json"), JSON.stringify(manifest));
   }
   const snapshot = createPluginMetadataSnapshotFixture({
     plugins: [helperManifest, otherManifest],
@@ -96,7 +96,7 @@ function fixture(
     otherSource: other.file,
     registrations: () => (existsSync(marker) ? readFileSync(marker, "utf8") : ""),
     load: (channelPluginLoadIntent: "setup" | "full", onlyPluginIds = query.onlyPluginIds) =>
-      loadOpenClawPlugins({
+      loadCarapacePlugins({
         config,
         env: {},
         installRecords: {},

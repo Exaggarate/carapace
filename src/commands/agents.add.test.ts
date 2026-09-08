@@ -11,8 +11,8 @@ import type { AuthProfileCredential, AuthProfileStore } from "../agents/auth-pro
 import type { ChannelOnboardingPostWriteHook } from "../channels/plugins/setup-wizard-types.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { createQueuedWizardPrompter } from "../test-utils/plugin-setup-wizard.js";
@@ -62,7 +62,7 @@ const transformConfigWithPendingPluginInstallsMock = vi.hoisted(() =>
       });
       await writeConfigFileMock(transformed.nextConfig);
       return {
-        path: snapshot.path ?? "/tmp/openclaw.json",
+        path: snapshot.path ?? "/tmp/carapace.json",
         previousHash: snapshot.hash ?? null,
         persistedHash: "persisted-hash",
         snapshot,
@@ -187,18 +187,18 @@ const { persistAuthProfileBatch } = await vi.importActual<
 >("../agents/auth-profiles/upsert-with-lock.js");
 
 const runtime = createTestRuntime();
-const RESERVED_SYSTEM_AGENT_IDS_FOR_TEST = ["openclaw", "crestodian"] as const; // reserved ids
+const RESERVED_SYSTEM_AGENT_IDS_FOR_TEST = ["carapace", "crestodian"] as const; // reserved ids
 
 describe("agents add command", () => {
-  const suiteTempDirs = createSuiteTempRootTracker({ prefix: "openclaw-agents-add-" });
+  const suiteTempDirs = createSuiteTempRootTracker({ prefix: "carapace-agents-add-" });
 
   beforeAll(async () => {
     await suiteTempDirs.setup();
   });
 
   afterAll(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceAgentDatabasesForTest();
+    closeCarapaceStateDatabaseForTest();
     await suiteTempDirs.cleanup();
   });
 
@@ -221,7 +221,7 @@ describe("agents add command", () => {
       }) => {
         const name = params.name ?? params.entry?.name ?? params.entry?.id ?? "";
         const agentId = (params.entry?.id ?? name).toLowerCase();
-        if (agentId === "openclaw" || agentId === "crestodian") {
+        if (agentId === "carapace" || agentId === "crestodian") {
           return { status: "error", reason: "reserved-id", agentId };
         }
         const binding = params.bindingSpecs?.[0]
@@ -274,7 +274,7 @@ describe("agents add command", () => {
     run: (root: string) => Promise<void>,
   ): Promise<void> {
     const root = await suiteTempDirs.make(prefix);
-    await withEnvAsync({ OPENCLAW_STATE_DIR: root }, async () => await run(root));
+    await withEnvAsync({ CARAPACE_STATE_DIR: root }, async () => await run(root));
   }
 
   async function seedAgentAuthStore(
@@ -346,19 +346,19 @@ describe("agents add command", () => {
       name: "a missing workspace with automation flags",
       options: { name: "Work" },
       flags: { hasAutomationFlags: true },
-      message: `Non-interactive agent creation requires --workspace. Re-run ${formatCliCommand("openclaw agents add <id> --workspace <path>")} or omit flags to use the wizard.`,
+      message: `Non-interactive agent creation requires --workspace. Re-run ${formatCliCommand("carapace agents add <id> --workspace <path>")} or omit flags to use the wizard.`,
     },
     {
       name: "a missing workspace with explicit non-interactive mode",
       options: { name: "Work", nonInteractive: true },
       flags: { hasAutomationFlags: false },
-      message: `Non-interactive agent creation requires --workspace. Re-run ${formatCliCommand("openclaw agents add <id> --workspace <path>")} or omit flags to use the wizard.`,
+      message: `Non-interactive agent creation requires --workspace. Re-run ${formatCliCommand("carapace agents add <id> --workspace <path>")} or omit flags to use the wizard.`,
     },
     {
       name: "a missing name after a valid workspace",
       options: { workspace: "/tmp/work" },
       flags: { hasAutomationFlags: true },
-      message: `Agent name is required in non-interactive mode. Run ${formatCliCommand("openclaw agents add <id> --workspace <path>")}.`,
+      message: `Agent name is required in non-interactive mode. Run ${formatCliCommand("carapace agents add <id> --workspace <path>")}.`,
     },
     {
       name: "an unrepresentable non-interactive name",
@@ -371,7 +371,7 @@ describe("agents add command", () => {
       name: `reserved system-agent id ${agentId}`,
       options: { name: agentId, workspace: "/tmp/reserved" },
       flags: { hasAutomationFlags: true },
-      message: `"${agentId}" is reserved. Choose another name, or run ${formatCliCommand("openclaw agents list")} to inspect configured agents.`,
+      message: `"${agentId}" is reserved. Choose another name, or run ${formatCliCommand("carapace agents list")} to inspect configured agents.`,
     })),
   ])("rejects $name through the root failure owner before mutation", async (testCase) => {
     readConfigFileSnapshotMock.mockResolvedValue({ ...baseConfigSnapshot });
@@ -468,7 +468,7 @@ describe("agents add command", () => {
       });
 
       const message =
-        "Agent creation needs an interactive TTY. Use `openclaw agents add <id> --non-interactive --workspace <dir>` for automation.";
+        "Agent creation needs an interactive TTY. Use `carapace agents add <id> --non-interactive --workspace <dir>` for automation.";
       await expect(agentsAddCommand({ json }, runtime)).rejects.toMatchObject({
         name: "ExpectedCliError",
         message,
@@ -491,7 +491,7 @@ describe("agents add command", () => {
     setConfigSnapshot({ agents: { list: [{ id: "main", default: true }] } });
     const prompter = {
       intro: vi.fn(),
-      text: vi.fn().mockResolvedValueOnce("Jon").mockResolvedValueOnce("/tmp/openclaw-jon"),
+      text: vi.fn().mockResolvedValueOnce("Jon").mockResolvedValueOnce("/tmp/carapace-jon"),
       confirm: vi.fn().mockResolvedValue(false),
       note: vi.fn(),
       outro: vi.fn(),
@@ -503,7 +503,7 @@ describe("agents add command", () => {
     expect(terminalMocks.isTerminalInteractive).toHaveBeenCalledOnce();
     expect(terminalMocks.isTerminalInteractive).toHaveBeenCalledWith(process.stdout);
     expect(wizardMocks.createClackPrompter).toHaveBeenCalledWith(process.stdout);
-    expect(prompter.intro).toHaveBeenCalledWith("Add OpenClaw agent");
+    expect(prompter.intro).toHaveBeenCalledWith("Add Carapace agent");
     expect(authChoiceMocks.warnIfModelConfigLooksOff).toHaveBeenCalledOnce();
     expect(authChoiceMocks.warnIfModelConfigLooksOff).toHaveBeenCalledWith(
       expect.objectContaining({ agents: expect.any(Object) }),
@@ -516,7 +516,7 @@ describe("agents add command", () => {
     expect(checkAgentCreationGateMock).toHaveBeenCalledWith("jon");
     expect(createAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        entry: expect.objectContaining({ id: "jon", workspace: "/tmp/openclaw-jon" }),
+        entry: expect.objectContaining({ id: "jon", workspace: "/tmp/carapace-jon" }),
         stagedConfig: expect.any(Object),
         transformConfig: transformConfigWithPendingPluginInstallsMock,
       }),
@@ -577,13 +577,13 @@ describe("agents add command", () => {
       status: "error",
       reason: "legacy-session-migration-required",
       agentId: "main",
-      message: "Run openclaw doctor --fix, then retry.",
+      message: "Run carapace doctor --fix, then retry.",
     });
 
     await agentsAddCommand({ name: "main" }, runtime);
 
     expect(checkAgentCreationGateMock).toHaveBeenCalledWith("main");
-    expect(prompter.outro).toHaveBeenCalledWith("Run openclaw doctor --fix, then retry.");
+    expect(prompter.outro).toHaveBeenCalledWith("Run carapace doctor --fix, then retry.");
     expect(prompter.text).not.toHaveBeenCalled();
     expect(authChoiceMocks.prepareAuthChoice).not.toHaveBeenCalled();
     expect(createAgentMock).not.toHaveBeenCalled();
@@ -592,7 +592,7 @@ describe("agents add command", () => {
   it.each(["legacy-main", "state-db"] as const)(
     "reports only auth profiles persisted to the new agent store with %s shared auth",
     async (location) => {
-      await withAgentsAddStateRoot("openclaw-agents-add-auth-copy-", async (root) => {
+      await withAgentsAddStateRoot("carapace-agents-add-auth-copy-", async (root) => {
         const destAgentDir = path.join(root, "agents", "work", "agent");
         const workspaceDir = path.join(root, "workspace-work");
         const sourceStore: AuthProfileStore = {
@@ -640,7 +640,7 @@ describe("agents add command", () => {
     { source: "ops", copy: true, systemAgent: { agentId: "main" } },
     { source: "ops", copy: false, systemAgent: undefined },
   ])("adds to an explicit fleet with optional auth copy: %j", async (testCase) => {
-    await withAgentsAddStateRoot("openclaw-agents-add-explicit-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-explicit-", async (root) => {
       const workspaceDir = path.join(root, "workspace-work");
       const sourceAgentDir = await seedAgentAuthStore(root, "ops", {
         version: AUTH_STORE_VERSION,
@@ -677,7 +677,7 @@ describe("agents add command", () => {
   });
 
   it("fails before config mutation when the source auth store is unreadable", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-unreadable-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-unreadable-", async (root) => {
       const sourceAgentDir = path.join(root, "agents", "main", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       await fs.mkdir(sourceAgentDir, { recursive: true });
@@ -699,7 +699,7 @@ describe("agents add command", () => {
   });
 
   it("does not copy accepted portable auth when the guided wizard is cancelled", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-cancel-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-cancel-", async (root) => {
       const destAgentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       await seedAgentAuthStore(root, "main", {
@@ -721,7 +721,7 @@ describe("agents add command", () => {
   });
 
   it("does not persist prepared provider auth when a later prompt is cancelled", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-cancel-provider-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-cancel-provider-", async (root) => {
       const agentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       setConfigSnapshot({ agents: { list: [{ id: "main", default: true }] } });
@@ -739,7 +739,7 @@ describe("agents add command", () => {
   });
 
   it("keeps guided auth while applying portable profiles without overwriting", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-guided-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-guided-", async (root) => {
       const destAgentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       await seedAgentAuthStore(root, "main", {
@@ -793,7 +793,7 @@ describe("agents add command", () => {
   });
 
   it("persists staged provider auth only at the agent config commit edge", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-create-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-create-", async (root) => {
       const agentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       setConfigSnapshot({ agents: { list: [{ id: "main", default: true }] } });
@@ -832,7 +832,7 @@ describe("agents add command", () => {
   });
 
   it("publishes no agent when staged provider auth cannot persist atomically", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-persist-failure-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-persist-failure-", async (root) => {
       const agentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       const profiles = ["first", "second"].map((name) => ({
@@ -858,7 +858,7 @@ describe("agents add command", () => {
   });
 
   it("retains existing-agent auth after config publication when later output fails", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-existing-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-existing-", async (root) => {
       const agentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       setConfigSnapshot({
@@ -889,7 +889,7 @@ describe("agents add command", () => {
   });
 
   it("rolls existing-agent auth back when config publication fails", async () => {
-    await withAgentsAddStateRoot("openclaw-agents-add-auth-existing-rollback-", async (root) => {
+    await withAgentsAddStateRoot("carapace-agents-add-auth-existing-rollback-", async (root) => {
       const agentDir = path.join(root, "agents", "work", "agent");
       const workspaceDir = path.join(root, "workspace-work");
       setConfigSnapshot({

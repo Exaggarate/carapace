@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createRuntimeAgent } from "./runtime-agent.js";
 
 describe("plugin runtime session creation colors", () => {
@@ -10,7 +10,7 @@ describe("plugin runtime session creation colors", () => {
   ])(
     "creates a plugin-owned CLI fork with canonical color $color",
     async ({ color, expectedColor }) => {
-      await withOpenClawTestState({ label: "plugin-runtime-cli-session-create" }, async () => {
+      await withCarapaceTestState({ label: "plugin-runtime-cli-session-create" }, async () => {
         const runtime = createRuntimeAgent();
         const key = "agent:main:catalog-adopt:claude:source";
         const created = await runtime.session.createSessionEntry({

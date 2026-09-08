@@ -13,12 +13,12 @@ describe("changed path facts", () => {
       ["packages/gateway-client/src/client.ts", "package"],
       ["extensions/slack/src/index.ts", "extension"],
       ["ui/src/app.ts", "ui"],
-      ["apps/macos/Sources/OpenClaw/AppDelegate.swift", "app"],
+      ["apps/macos/Sources/Carapace/AppDelegate.swift", "app"],
       ["test/scripts/changed-lanes.test.ts", "rootTest"],
       ["test-fixtures/sample.ts", "testFixture"],
       ["scripts/check-changed.mjs", "rootTooling"],
-      [".agents/skills/openclaw-pr-maintainer/scripts/github-activity.sh", "rootTooling"],
-      [".agents/skills/openclaw-pr-maintainer/SKILL.md", "docs"],
+      [".agents/skills/carapace-pr-maintainer/scripts/github-activity.sh", "rootTooling"],
+      [".agents/skills/carapace-pr-maintainer/SKILL.md", "docs"],
       ["test/scripts/github-activity-helper.test.ts", "rootTest"],
       [".github/workflows/ci.yml", "rootTooling"],
       ["package.json", "rootGlobal"],
@@ -52,7 +52,7 @@ describe("changed path facts", () => {
       isTestOnly: true,
       isNativeOnly: false,
     });
-    expect(getChangedPathFacts("apps/shared/OpenClawKit/Sources/Foo.swift")).toMatchObject({
+    expect(getChangedPathFacts("apps/shared/CarapaceKit/Sources/Foo.swift")).toMatchObject({
       surface: "app",
       isChangedLaneTest: false,
       isTestOnly: false,

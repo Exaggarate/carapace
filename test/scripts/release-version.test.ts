@@ -23,8 +23,8 @@ function writeFixture(params?: {
   androidVersionCode?: number;
   packageVersion?: string;
 }): string {
-  const root = makeTempDir(tempDirs, "openclaw-release-version-");
-  fs.mkdirSync(path.join(root, "apps", "macos", "Sources", "OpenClaw", "Resources"), {
+  const root = makeTempDir(tempDirs, "carapace-release-version-");
+  fs.mkdirSync(path.join(root, "apps", "macos", "Sources", "Carapace", "Resources"), {
     recursive: true,
   });
   fs.mkdirSync(path.join(root, "apps", "android", "Config"), { recursive: true });
@@ -42,7 +42,7 @@ function writeFixture(params?: {
     path.join(root, "package.json"),
     `${JSON.stringify(
       {
-        name: "openclaw",
+        name: "carapace",
         version: params?.packageVersion ?? "2026.6.11",
         private: true,
       },
@@ -51,7 +51,7 @@ function writeFixture(params?: {
     )}\n`,
   );
   fs.writeFileSync(
-    path.join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist"),
+    path.join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist"),
     [
       "<plist>",
       "<dict>",
@@ -131,18 +131,18 @@ describe("release version planning", () => {
 
     expect(plan.changes.map((change) => path.relative(root, change.path))).toEqual([
       "package.json",
-      "apps/macos/Sources/OpenClaw/Resources/Info.plist",
+      "apps/macos/Sources/Carapace/Resources/Info.plist",
     ]);
     applyReleaseVersionPlan(plan);
 
     expect(readJson(path.join(root, "package.json"))).toMatchObject({
-      name: "openclaw",
+      name: "carapace",
       private: true,
       version: "2026.7.2-beta.1",
     });
     expect(
       fs.readFileSync(
-        path.join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist"),
+        path.join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist"),
         "utf8",
       ),
     ).toContain("<string>2026070200</string>");
@@ -166,7 +166,7 @@ describe("release version planning", () => {
     });
     expect(
       fs.readFileSync(
-        path.join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist"),
+        path.join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist"),
         "utf8",
       ),
     ).toContain("<string>2026.7.2</string>");
@@ -187,7 +187,7 @@ describe("release version planning", () => {
     });
     expect(
       fs.readFileSync(path.join(root, "apps", "android", "Config", "Version.properties"), "utf8"),
-    ).toContain("OPENCLAW_ANDROID_VERSION_CODE=2026070102");
+    ).toContain("CARAPACE_ANDROID_VERSION_CODE=2026070102");
     expect(
       fs.readFileSync(
         path.join(
@@ -246,7 +246,7 @@ describe("release version planning", () => {
     const packagePath = path.join(root, "package.json");
     const before = fs.readFileSync(packagePath, "utf8");
     fs.writeFileSync(
-      path.join(root, "apps", "macos", "Sources", "OpenClaw", "Resources", "Info.plist"),
+      path.join(root, "apps", "macos", "Sources", "Carapace", "Resources", "Info.plist"),
       "<plist><dict></dict></plist>\n",
     );
 

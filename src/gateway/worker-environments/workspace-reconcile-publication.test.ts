@@ -60,8 +60,8 @@ describe("worker workspace reconciliation publication", () => {
       vi.stubEnv("GIT_CONFIG_VALUE_1", "crlf");
       vi.stubEnv("GIT_CONFIG_KEY_2", "core.safecrlf");
       vi.stubEnv("GIT_CONFIG_VALUE_2", "true");
-      const local = tempDirs.make("openclaw-workspace-indeterminate-publication-");
-      const staged = tempDirs.make("openclaw-workspace-indeterminate-publication-staged-");
+      const local = tempDirs.make("carapace-workspace-indeterminate-publication-");
+      const staged = tempDirs.make("carapace-workspace-indeterminate-publication-staged-");
       const baseBytes = Buffer.from(`base${eol}`);
       const workerBytes = Buffer.from(`worker${eol}`);
       const addedBytes = Buffer.from(`added${eol}`);
@@ -122,8 +122,8 @@ describe("worker workspace reconciliation publication", () => {
   );
 
   it("rolls local bytes back immediately when accepted publication fails definitively", async () => {
-    const local = tempDirs.make("openclaw-workspace-definitive-publication-failure-");
-    const staged = tempDirs.make("openclaw-workspace-definitive-publication-failure-staged-");
+    const local = tempDirs.make("carapace-workspace-definitive-publication-failure-");
+    const staged = tempDirs.make("carapace-workspace-definitive-publication-failure-staged-");
     await fs.writeFile(path.join(local, "result.txt"), "base\n");
     const base = await manifestFor(local);
     await fs.writeFile(path.join(staged, "result.txt"), "worker\n");
@@ -167,8 +167,8 @@ describe("worker workspace reconciliation publication", () => {
     ["preserves publication failures and rollback when scratch cleanup fails", true, true],
     ["removes disposable scratch without warning when cleanup succeeds", false, false],
   ])("%s", async (_name, cleanupFails, publicationFails) => {
-    const local = tempDirs.make("openclaw-workspace-result-cleanup-local-");
-    const payload = tempDirs.make("openclaw-workspace-result-cleanup-payload-");
+    const local = tempDirs.make("carapace-workspace-result-cleanup-local-");
+    const payload = tempDirs.make("carapace-workspace-result-cleanup-payload-");
     await fs.writeFile(path.join(local, "result.txt"), "base\n");
     await fs.writeFile(path.join(payload, "result.txt"), "worker\n");
     const base = await readActualWorkspaceManifest({ root: local, baseCommit: null });
@@ -198,7 +198,7 @@ describe("worker workspace reconciliation publication", () => {
       },
     });
     const remove = fs.rm;
-    const scratch = tempDirs.make("openclaw-workspace-result-cleanup-scratch-");
+    const scratch = tempDirs.make("carapace-workspace-result-cleanup-scratch-");
     const makeScratch = vi.spyOn(fs, "mkdtemp").mockResolvedValueOnce(scratch);
     const removeSpy = vi.spyOn(fs, "rm").mockImplementation(async (target, options) => {
       if (target === scratch) {

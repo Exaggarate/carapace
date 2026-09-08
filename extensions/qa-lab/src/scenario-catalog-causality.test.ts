@@ -90,7 +90,7 @@ describe("qa scenario catalog causality", () => {
       readFlowAssertExpression(action).includes("finalMatches.length === 1"),
     );
     expect(liveMultiRestart.execution.retryCount).toBe(0);
-    expect(liveMultiRestart.execution.runtime).toBe("openclaw");
+    expect(liveMultiRestart.execution.runtime).toBe("carapace");
     expect(liveMultiRestart.runtimePairLane).toBeUndefined();
     expect(JSON.stringify(liveMultiRestart.gatewayConfigPatch)).toContain(
       '"alsoAllow":["qa_restart_wait","qa_restart_unsafe_probe"]',
@@ -527,7 +527,7 @@ describe("qa scenario catalog causality", () => {
     }
 
     const marker = String(scenario.execution.config?.turnMarker);
-    const heartbeat = { allInputText: "[OpenClaw heartbeat poll]" };
+    const heartbeat = { allInputText: "[Carapace heartbeat poll]" };
     const scenarioRequest = (suffix: string) => ({ allInputText: `${marker} ${suffix}` });
     const traces = new Map<string, unknown[]>([
       ["10", [heartbeat, scenarioRequest("baseline main")]],

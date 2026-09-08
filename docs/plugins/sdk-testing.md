@@ -1,5 +1,5 @@
 ---
-summary: "Testing utilities and patterns for OpenClaw plugins"
+summary: "Testing utilities and patterns for Carapace plugins"
 title: "Plugin testing"
 sidebarTitle: "Testing"
 read_when:
@@ -8,7 +8,7 @@ read_when:
   - You want to understand contract tests for bundled plugins
 ---
 
-Reference for test utilities, patterns, and lint enforcement for OpenClaw
+Reference for test utilities, patterns, and lint enforcement for Carapace
 plugins.
 
 <Tip>
@@ -19,7 +19,7 @@ plugins.
 
 ## Test utilities
 
-These subpaths are repo-local source entrypoints for OpenClaw's own bundled
+These subpaths are repo-local source entrypoints for Carapace's own bundled
 plugin tests. They are not published `package.json` exports for third-party
 plugins, and they may import Vitest or other repo-only test dependencies.
 
@@ -27,32 +27,32 @@ plugins, and they may import Vitest or other repo-only test dependencies.
 import {
   shouldAckReaction,
   removeAckReactionAfterReply,
-} from "openclaw/plugin-sdk/channel-feedback";
-import { installCommonResolveTargetErrorCases } from "openclaw/plugin-sdk/channel-target-testing";
-import { AUTH_PROFILE_RUNTIME_CONTRACT } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { expectChannelInboundContextContract } from "openclaw/plugin-sdk/channel-contract-testing";
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
-import { describePluginRegistrationContract } from "openclaw/plugin-sdk/plugin-test-contracts";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { describeOpenAIProviderRuntimeContract } from "openclaw/plugin-sdk/provider-test-contracts";
-import { getProviderHttpMocks } from "openclaw/plugin-sdk/provider-http-test-mocks";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
-import { withEnv, withFetchPreconnect, withServer } from "openclaw/plugin-sdk/test-env";
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
-import { createRequestCaptureJsonFetch } from "openclaw/plugin-sdk/test-media-understanding";
+} from "carapace/plugin-sdk/channel-feedback";
+import { installCommonResolveTargetErrorCases } from "carapace/plugin-sdk/channel-target-testing";
+import { AUTH_PROFILE_RUNTIME_CONTRACT } from "carapace/plugin-sdk/agent-runtime-test-contracts";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { expectChannelInboundContextContract } from "carapace/plugin-sdk/channel-contract-testing";
+import { createStartAccountContext } from "carapace/plugin-sdk/channel-test-helpers";
+import { describePluginRegistrationContract } from "carapace/plugin-sdk/plugin-test-contracts";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
+import { describeOpenAIProviderRuntimeContract } from "carapace/plugin-sdk/provider-test-contracts";
+import { getProviderHttpMocks } from "carapace/plugin-sdk/provider-http-test-mocks";
+import { createCarapaceTestState } from "carapace/plugin-sdk/test-state";
+import { withEnv, withFetchPreconnect, withServer } from "carapace/plugin-sdk/test-env";
+import { isLiveTestEnabled } from "carapace/plugin-sdk/test-live";
+import { createRequestCaptureJsonFetch } from "carapace/plugin-sdk/test-media-understanding";
 import {
   bundledPluginRoot,
   createCliRuntimeCapture,
   runDirectImportSmoke,
   typedCases,
-} from "openclaw/plugin-sdk/test-fixtures";
-import { mockNodeBuiltinModule } from "openclaw/plugin-sdk/test-node-mocks";
+} from "carapace/plugin-sdk/test-fixtures";
+import { mockNodeBuiltinModule } from "carapace/plugin-sdk/test-node-mocks";
 ```
 
 Use these focused subpaths for bundled plugin tests. The former
-`openclaw/plugin-sdk/testing` barrel was repo-local, excluded from shipped
-packages, and has been removed. The former `openclaw/plugin-sdk/test-utils`
+`carapace/plugin-sdk/testing` barrel was repo-local, excluded from shipped
+packages, and has been removed. The former `carapace/plugin-sdk/test-utils`
 alias was removed with it. `pnpm run lint:plugins:no-extension-test-core-imports`
 (`scripts/check-no-extension-test-core-imports.ts`) keeps extension tests on
 the focused test subpaths above.
@@ -99,7 +99,7 @@ the focused test subpaths above.
 | `mockSuccessfulDashscopeVideoTask`                                        | Install a successful DashScope-compatible video task response. Import from `plugin-sdk/provider-test-contracts`                             |
 | `getProviderHttpMocks`                                                    | Access opt-in provider HTTP/auth Vitest mocks. Import from `plugin-sdk/provider-http-test-mocks`                                            |
 | `installProviderHttpMockCleanup`                                          | Reset provider HTTP/auth mocks after each test. Import from `plugin-sdk/provider-http-test-mocks`                                           |
-| `createOpenClawTestState` / `withOpenClawTestState` / `OpenClawTestState` | Create and clean up isolated OpenClaw state, config, workspace, environment, and auth-profile fixtures. Import from `plugin-sdk/test-state` |
+| `createCarapaceTestState` / `withCarapaceTestState` / `CarapaceTestState` | Create and clean up isolated Carapace state, config, workspace, environment, and auth-profile fixtures. Import from `plugin-sdk/test-state` |
 | `installCommonResolveTargetErrorCases`                                    | Shared test cases for target resolution error handling. Import from `plugin-sdk/channel-target-testing`                                     |
 | `shouldAckReaction`                                                       | Check whether a channel should add an ack reaction. Import from `plugin-sdk/channel-feedback`                                               |
 | `removeAckReactionAfterReply`                                             | Remove ack reaction after reply delivery. Import from `plugin-sdk/channel-feedback`                                                         |
@@ -135,11 +135,11 @@ the focused test subpaths above.
 
 Bundled-plugin contract suites also use these SDK testing subpaths for
 test-only registry, manifest, public-artifact, and runtime fixture helpers.
-Core-only suites that depend on bundled OpenClaw inventory stay under
+Core-only suites that depend on bundled Carapace inventory stay under
 `src/plugins/contracts` instead.
 
 For channel account-policy tests, `createAccountPolicyInheritanceCases()` from
-`openclaw/plugin-sdk/channel-test-helpers` returns four literal inheritance rows
+`carapace/plugin-sdk/channel-test-helpers` returns four literal inheritance rows
 with fresh objects and arrays on each call, preserving omitted policy fields.
 Use it alongside `validateTestChannelConfig(channelId, channelConfig)`, which
 validates schema-parsed channel data through the host config boundary. Each
@@ -147,7 +147,7 @@ plugin test still owns its schema parsing, account resolver, and assertions,
 including checks that omitted account policies remain absent.
 
 For complete zero-usage inputs, `createZeroUsageFixture()` from
-`openclaw/plugin-sdk/test-fixtures` returns fresh usage and nested cost objects
+`carapace/plugin-sdk/test-fixtures` returns fresh usage and nested cost objects
 without optional telemetry fields. Keep expected usage values explicit.
 
 ### Types
@@ -158,9 +158,9 @@ Focused testing subpaths also re-export types useful in test files:
 import type {
   ChannelAccountSnapshot,
   ChannelGatewayContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { MockFn, PluginRuntime, RuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { MockFn, PluginRuntime, RuntimeEnv } from "carapace/plugin-sdk/plugin-test-runtime";
 ```
 
 ## Testing target resolution
@@ -170,7 +170,7 @@ channel target resolution:
 
 ```typescript
 import { describe } from "vitest";
-import { installCommonResolveTargetErrorCases } from "openclaw/plugin-sdk/channel-target-testing";
+import { installCommonResolveTargetErrorCases } from "carapace/plugin-sdk/channel-target-testing";
 
 describe("my-channel target resolution", () => {
   installCommonResolveTargetErrorCases({
@@ -193,7 +193,7 @@ describe("my-channel target resolution", () => {
 ### Testing registration contracts
 
 Unit tests that pass a hand-written `api` mock to `register(api)` do not
-exercise OpenClaw's loader acceptance gates. Add at least one loader-backed
+exercise Carapace's loader acceptance gates. Add at least one loader-backed
 smoke test for each registration surface your plugin depends on, especially
 hooks and exclusive capabilities such as memory.
 
@@ -206,7 +206,7 @@ entry to declare `kind: "memory"`.
 ### Testing runtime config access
 
 Prefer the shared plugin runtime mock from
-`openclaw/plugin-sdk/plugin-test-runtime`. Its runtime config helpers model the
+`carapace/plugin-sdk/plugin-test-runtime`. Its runtime config helpers model the
 current snapshot and mutation APIs.
 
 ### Unit testing a channel plugin
@@ -278,8 +278,8 @@ describe("my-provider plugin", () => {
 For code that uses `createPluginRuntimeStore`, mock the runtime in tests:
 
 ```typescript
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+import { createPluginRuntimeStore } from "carapace/plugin-sdk/runtime-store";
+import type { PluginRuntime } from "carapace/plugin-sdk/runtime-store";
 
 const store = createPluginRuntimeStore<PluginRuntime>({
   pluginId: "test-plugin",
@@ -357,7 +357,7 @@ import-boundary checks in CI; each can also be run standalone locally:
 
 | Command                                                        | Enforces                                                                                     |
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `pnpm run lint:plugins:no-monolithic-plugin-sdk-entry-imports` | Bundled plugins cannot import the monolithic `openclaw/plugin-sdk` root barrel.              |
+| `pnpm run lint:plugins:no-monolithic-plugin-sdk-entry-imports` | Bundled plugins cannot import the monolithic `carapace/plugin-sdk` root barrel.              |
 | `pnpm run lint:plugins:no-extension-src-imports`               | Production extension files cannot import the repo `src/**` tree directly (`../../src/...`).  |
 | `pnpm run lint:plugins:no-extension-test-core-imports`         | Extension test files cannot import removed SDK test aliases or other core-only test helpers. |
 
@@ -366,7 +366,7 @@ patterns is recommended.
 
 ## Test configuration
 
-OpenClaw uses Vitest 5 with informational V8 coverage reporting. For plugin tests:
+Carapace uses Vitest 5 with informational V8 coverage reporting. For plugin tests:
 
 ```bash
 # Run all tests
@@ -385,7 +385,7 @@ pnpm test:coverage
 If local runs cause memory pressure:
 
 ```bash
-OPENCLAW_VITEST_MAX_WORKERS=1 pnpm test
+CARAPACE_VITEST_MAX_WORKERS=1 pnpm test
 ```
 
 ## Related

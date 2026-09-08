@@ -1,5 +1,5 @@
 /** Builds unified text-inference provider catalog metadata from plugin providers. */
-import type { UnifiedModelCatalogEntry } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { UnifiedModelCatalogEntry } from "@carapace/model-catalog-core/model-catalog-types";
 import { copyProviderCatalogResultEntries } from "./provider-catalog-result.js";
 import type { ProviderCatalogResult } from "./types.js";
 

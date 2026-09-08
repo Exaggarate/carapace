@@ -1,17 +1,17 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMemoryDreamingConfig } from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginApi, PluginCommandContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveMemoryDreamingConfig } from "carapace/plugin-sdk/memory-core-host-status";
+import type { CarapacePluginApi, PluginCommandContext } from "carapace/plugin-sdk/plugin-entry";
 import {
   asNullableRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
-function resolveDreamingPluginConfig(cfg: OpenClawConfig): Record<string, unknown> {
+function resolveDreamingPluginConfig(cfg: CarapaceConfig): Record<string, unknown> {
   const entry = asNullableRecord(cfg.plugins?.entries?.["memory-core"]);
   return asNullableRecord(entry?.config) ?? {};
 }
 
-function updateDreamingEnabledInConfig(cfg: OpenClawConfig, enabled: boolean): OpenClawConfig {
+function updateDreamingEnabledInConfig(cfg: CarapaceConfig, enabled: boolean): CarapaceConfig {
   const entries = { ...cfg.plugins?.entries };
   const existingEntry = asNullableRecord(entries["memory-core"]) ?? {};
   const existingConfig = asNullableRecord(existingEntry.config) ?? {};
@@ -48,7 +48,7 @@ function formatPhaseGuide(): string {
   ].join("\n");
 }
 
-function formatStatus(cfg: OpenClawConfig): string {
+function formatStatus(cfg: CarapaceConfig): string {
   const pluginConfig = resolveDreamingPluginConfig(cfg);
   const dreaming = resolveMemoryDreamingConfig({
     pluginConfig,
@@ -87,7 +87,7 @@ function lacksAdminOrOwnerForDreamingMutation(params: {
   return params.senderIsOwner !== true;
 }
 
-export async function handleDreamingCommand(api: OpenClawPluginApi, ctx: PluginCommandContext) {
+export async function handleDreamingCommand(api: CarapacePluginApi, ctx: PluginCommandContext) {
   const args = ctx.args?.trim() ?? "";
   const [firstToken = ""] = args
     .split(/\s+/)

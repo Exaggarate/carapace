@@ -2,11 +2,11 @@ import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getLogger } from "../../logging/logger.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { purgeAgentSessionStoreEntries } from "./cleanup-service.js";
 import {
   appendTranscriptEventSync,
@@ -19,23 +19,23 @@ import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target
 describe("purgeAgentSessionStoreEntries", () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it.each(["fixed selector", "exact database", "retired schema owner"])(
     "purges only the deleted agent's state with a %s",
     async (kind) => {
-      await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+      await withCarapaceTestState({ layout: "state-only" }, async (state) => {
         const storePath = state.statePath(
           kind === "fixed selector" ? "shared.json" : "shared.sqlite",
         );
         const cfg = {
           agents: { ownership: "explicit", entries: { main: {}, ops: {} } },
           session: { store: storePath },
-        } satisfies OpenClawConfig;
+        } satisfies CarapaceConfig;
         await state.writeConfig(cfg);
         if (kind === "retired schema owner") {
-          openOpenClawAgentDatabase({ agentId: "retired", path: storePath });
+          openCarapaceAgentDatabase({ agentId: "retired", path: storePath });
         }
         const scopes = ["main", "ops"].map((agentId) => ({
           agentId,
@@ -62,9 +62,9 @@ describe("purgeAgentSessionStoreEntries", () => {
   );
 
   it("treats an absent store as an already successful purge", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const storePath = state.statePath("absent.json");
-      const cfg = { session: { store: storePath } } satisfies OpenClawConfig;
+      const cfg = { session: { store: storePath } } satisfies CarapaceConfig;
       await expect(purgeAgentSessionStoreEntries(cfg, "ops")).resolves.toBe(false);
       expect(
         fs.existsSync(resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "ops" }).path),
@@ -74,10 +74,10 @@ describe("purgeAgentSessionStoreEntries", () => {
   });
 
   it("records a bounded warning and failure fact when storage purge fails", async () => {
-    await withOpenClawTestState({ layout: "state-only" }, async (state) => {
+    await withCarapaceTestState({ layout: "state-only" }, async (state) => {
       const storePath = state.statePath("corrupt.sqlite");
       fs.writeFileSync(storePath, "not a sqlite database");
-      const cfg = { session: { store: storePath } } satisfies OpenClawConfig;
+      const cfg = { session: { store: storePath } } satisfies CarapaceConfig;
       const warn = vi.spyOn(getLogger(), "warn").mockImplementation(() => {});
 
       await expect(purgeAgentSessionStoreEntries(cfg, "ops")).resolves.toBe(true);

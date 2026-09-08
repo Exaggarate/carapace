@@ -2,7 +2,7 @@
 import { modelKey } from "../../agents/model-ref-shared.js";
 import { shouldSuppressBuiltInModelCore } from "../../agents/model-suppression.js";
 import { loadPreparedAgentModelRegistry as loadAgentModelRegistry } from "../../agents/prepared-model-registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { Model } from "../../llm/types.js";
 import { formatErrorWithStack } from "./list.errors.js";
 import type { ConfiguredEntry } from "./list.types.js";
@@ -37,7 +37,7 @@ function validateAvailableModels(availableModels: unknown): Model[] {
 }
 
 /** Loads the full registry, discovered keys, and model-level availability. */
-export async function loadModelRegistry(cfg: OpenClawConfig, opts?: ModelListRegistryOptions) {
+export async function loadModelRegistry(cfg: CarapaceConfig, opts?: ModelListRegistryOptions) {
   const { authModes, config: runtimeConfig, registry } = await loadAgentModelRegistry(cfg, opts);
   const isVisible = (model: Model) =>
     !shouldSuppressBuiltInModelCore({
@@ -63,7 +63,7 @@ export async function loadModelRegistry(cfg: OpenClawConfig, opts?: ModelListReg
 
 /** Loads only configured registry entries and their auth availability. */
 export async function loadConfiguredListModelRegistry(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   entries: ConfiguredEntry[],
   opts?: Omit<ModelListRegistryOptions, "normalizeModels">,
 ) {

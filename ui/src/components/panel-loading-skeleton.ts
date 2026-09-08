@@ -1,6 +1,6 @@
 import { css, html, type TemplateResult } from "lit";
 import { property } from "lit/decorators.js";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 
 export type PanelLoadingSkeletonVariant =
   | "board"
@@ -13,7 +13,7 @@ export type PanelLoadingSkeletonVariant =
   | "tasks"
   | "terminal";
 
-class PanelLoadingSkeleton extends OpenClawLitElement {
+class PanelLoadingSkeleton extends CarapaceLitElement {
   @property({ reflect: true, attribute: "data-panel-skeleton" })
   variant: PanelLoadingSkeletonVariant = "files";
 
@@ -411,23 +411,23 @@ export function renderPanelLoadingSkeleton(
   overlay = false,
 ): TemplateResult {
   return html`
-    <openclaw-panel-loading-skeleton
+    <carapace-panel-loading-skeleton
       .variant=${variant}
       ?compact=${compact}
       ?overlay=${overlay}
       role="status"
       aria-busy="true"
       aria-label=${label}
-    ></openclaw-panel-loading-skeleton>
+    ></carapace-panel-loading-skeleton>
   `;
 }
 
-if (!customElements.get("openclaw-panel-loading-skeleton")) {
-  customElements.define("openclaw-panel-loading-skeleton", PanelLoadingSkeleton);
+if (!customElements.get("carapace-panel-loading-skeleton")) {
+  customElements.define("carapace-panel-loading-skeleton", PanelLoadingSkeleton);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-panel-loading-skeleton": PanelLoadingSkeleton;
+    "carapace-panel-loading-skeleton": PanelLoadingSkeleton;
   }
 }

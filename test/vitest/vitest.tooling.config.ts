@@ -9,7 +9,7 @@ export function createToolingVitestConfig(env?: Record<string, string | undefine
     env,
     exclude: [...boundaryTestFiles, ...toolingDockerTestFiles, ...toolingIsolatedTestFiles],
     fileParallelism: false,
-    includeOpenClawRuntimeSetup: false,
+    includeCarapaceRuntimeSetup: false,
     name: "tooling",
     passWithNoTests: true,
   });

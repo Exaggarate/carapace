@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   type ApprovalHistoryResult,
@@ -11,7 +11,7 @@ import {
   validateApprovalResolveResult,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { upsertSessionEntryCore } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ExecApprovalForwarder } from "../../infra/exec-approval-forwarder.js";
 import {
   resolveExecApprovalRequestAllowedDecisions,
@@ -23,15 +23,15 @@ import {
   type PluginApprovalRequestPayload,
 } from "../../infra/plugin-approvals.js";
 import type { SystemAgentApprovalRequestPayload } from "../../infra/system-agent-approvals.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../../state/user-profiles.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { ExecApprovalManager } from "../exec-approval-manager.js";
@@ -58,21 +58,21 @@ vi.mock("../approval-channel-custody.js", () => ({
 }));
 
 const tempDirs: string[] = [];
-type OperatorApprovalDatabase = Pick<OpenClawStateKyselyDatabase, "operator_approvals">;
+type OperatorApprovalDatabase = Pick<CarapaceStateKyselyDatabase, "operator_approvals">;
 const managersForCleanup: Array<{
   listPendingRecords(): Array<{ id: string }>;
   expire(id: string, resolvedBy?: string | null): boolean;
 }> = [];
 
-function createDatabaseOptions(): OpenClawStateDatabaseOptions {
+function createDatabaseOptions(): CarapaceStateDatabaseOptions {
   const stateDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-handler-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-handler-")),
   );
   tempDirs.push(stateDir);
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
-function createManagers(databaseOptions: OpenClawStateDatabaseOptions) {
+function createManagers(databaseOptions: CarapaceStateDatabaseOptions) {
   const persistence = { runtimeEpoch: "approval-handler-test", databaseOptions };
   const execOptions: ExecApprovalManagerOptions<ExecApprovalRequestPayload> = {
     approvalKind: "exec",
@@ -99,8 +99,8 @@ function createManagers(databaseOptions: OpenClawStateDatabaseOptions) {
   return managers;
 }
 
-function deleteDurableApproval(databaseOptions: OpenClawStateDatabaseOptions, id: string): void {
-  const database = openOpenClawStateDatabase(databaseOptions);
+function deleteDurableApproval(databaseOptions: CarapaceStateDatabaseOptions, id: string): void {
+  const database = openCarapaceStateDatabase(databaseOptions);
   const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
   executeSqliteQuerySync(
     database.db,
@@ -109,10 +109,10 @@ function deleteDurableApproval(databaseOptions: OpenClawStateDatabaseOptions, id
 }
 
 function corruptDurableApprovalPresentation(
-  databaseOptions: OpenClawStateDatabaseOptions,
+  databaseOptions: CarapaceStateDatabaseOptions,
   id: string,
 ): void {
-  const database = openOpenClawStateDatabase(databaseOptions);
+  const database = openCarapaceStateDatabase(databaseOptions);
   const stateDb = getNodeSqliteKysely<OperatorApprovalDatabase>(database.db);
   executeSqliteQuerySync(
     database.db,
@@ -202,7 +202,7 @@ function registerSystemAgent(
 ) {
   const record = manager.create(
     {
-      title: "OpenClaw change",
+      title: "Carapace change",
       description: "Set gateway.port to 19001",
       command: "Set gateway.port to 19001",
       proposalHash: "a".repeat(64),
@@ -295,10 +295,10 @@ describe("unified approval handlers", () => {
         manager.expire(record.id, "test-cleanup");
       }
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     for (const dir of tempDirs.splice(0)) {
-      closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: dir }));
-      closeOpenClawStateDatabaseByPath(path.join(dir, "state.sqlite"));
+      closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: dir }));
+      closeCarapaceStateDatabaseByPath(path.join(dir, "state.sqlite"));
       fs.rmSync(dir, { force: true, recursive: true });
     }
   });
@@ -477,11 +477,11 @@ describe("unified approval handlers", () => {
 
   it("hides foreign pending and terminal approvals from roles without foreign-session access", async () => {
     const databaseOptions = createDatabaseOptions();
-    const stateDir = databaseOptions.env?.OPENCLAW_STATE_DIR;
+    const stateDir = databaseOptions.env?.CARAPACE_STATE_DIR;
     if (!stateDir) {
       throw new Error("expected isolated approval state directory");
     }
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
       const profile = ensureProfileForEmail("approval-guest@example.test", databaseOptions);
       setUserProfileRole(profile.id, "guest", databaseOptions);
       const ownerKey = "agent:main:approval-owned";
@@ -508,7 +508,7 @@ describe("unified approval handlers", () => {
         id: "approval:foreign",
         request: { sessionKey: foreignKey },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         gateway: {
           roles: {
             default: "guest",
@@ -832,7 +832,7 @@ describe("unified approval handlers", () => {
     ["approval.get", "."],
     ["approval.resolve", ".."],
   ] as const)("rejects unsafe approval id through %s: %s", async ([method, id], testContext) => {
-    const databasePath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-unsafe-approval-id-"));
+    const databasePath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-unsafe-approval-id-"));
     tempDirs.push(databasePath);
     const handlers = createApprovalHandlers({
       execApprovalManager: createTestApprovalManager(testContext),
@@ -859,7 +859,7 @@ describe("unified approval handlers", () => {
   it.for(["approval.get", "approval.resolve"] as const)(
     "returns sanitized UNAVAILABLE when %s cannot read durable state",
     async (method, testContext) => {
-      const databasePath = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-broken-db-"));
+      const databasePath = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-broken-db-"));
       tempDirs.push(databasePath);
       const context = createContext();
       const handlers = createApprovalHandlers({
@@ -1231,14 +1231,14 @@ describe("unified approval handlers", () => {
   });
 
   it("repairs durable pending state after a transient local storage failure", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-reconcile-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-approval-reconcile-"));
     tempDirs.push(stateDir);
     const databasePath = path.join(stateDir, "state.sqlite");
     const backupPath = path.join(stateDir, "state.backup.sqlite");
-    const databaseOptions = { path: databasePath } satisfies OpenClawStateDatabaseOptions;
+    const databaseOptions = { path: databasePath } satisfies CarapaceStateDatabaseOptions;
     const managers = createManagers(databaseOptions);
     const pending = registerExec(managers.exec, { id: "transient-storage-repair" });
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     fs.renameSync(databasePath, backupPath);
     fs.mkdirSync(databasePath);
     expect(() =>

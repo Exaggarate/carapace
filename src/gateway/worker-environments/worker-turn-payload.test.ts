@@ -105,7 +105,7 @@ function buildDescriptor(
       rpcSetVersion: 1,
       handshake: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "test",
+        carapaceVersion: "test",
         protocolFeatures: [],
       },
     },
@@ -177,7 +177,7 @@ describe("assertSupportedTurn", () => {
         config: {
           agents: {
             defaults: {
-              models: { "openai/gpt-5.4": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.4": { agentRuntime: { id: "carapace" } } },
             },
           },
         },
@@ -420,7 +420,7 @@ describe("fitLaunchDescriptor", () => {
           idempotencyKey: candidate.assignment.turnId,
         }),
       );
-      const suffix = "/__openclaw__/worker";
+      const suffix = "/__carapace__/worker";
       const prefix = "wss://worker.invalid/";
       const descriptor = completeWorkerLaunchDescriptor(candidate, {
         kind: "websocket",

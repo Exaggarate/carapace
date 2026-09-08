@@ -3,15 +3,15 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { captureEnv, mockPinnedHostnameResolution } from "openclaw/plugin-sdk/test-env";
+import { resolveStateDir } from "carapace/plugin-sdk/state-paths";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
+import { captureEnv, mockPinnedHostnameResolution } from "carapace/plugin-sdk/test-env";
 import {
   createGrayscaleAlphaPngBuffer,
   createSolidPngBuffer,
-} from "openclaw/plugin-sdk/test-fixtures";
-import { withMockedWindowsPlatform, withRestoredMocks } from "openclaw/plugin-sdk/test-node-mocks";
-import { optimizeImageToPng } from "openclaw/plugin-sdk/web-media";
+} from "carapace/plugin-sdk/test-fixtures";
+import { withMockedWindowsPlatform, withRestoredMocks } from "carapace/plugin-sdk/test-node-mocks";
+import { optimizeImageToPng } from "carapace/plugin-sdk/web-media";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   LocalMediaAccessError,
@@ -56,7 +56,7 @@ async function expectLocalMediaAccessCode(promise: Promise<unknown>, code: strin
 
 beforeAll(async () => {
   fixtureRoot = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-media-test-"),
+    path.join(resolvePreferredCarapaceTmpDir(), "carapace-media-test-"),
   );
   largeJpegBuffer = await fs.readFile("docs/assets/showcase/roof-camera-sky.jpg");
   largeJpegFile = await writeTempFile(largeJpegBuffer, ".jpg");
@@ -91,14 +91,14 @@ afterEach(() => {
 
 describe("web media loading", () => {
   beforeAll(() => {
-    // Ensure state dir is stable and not influenced by other tests that stub OPENCLAW_STATE_DIR.
-    // Also keep it outside the OpenClaw temp root so default localRoots doesn't accidentally make all state readable.
-    stateDirSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    process.env.OPENCLAW_STATE_DIR = path.join(
+    // Ensure state dir is stable and not influenced by other tests that stub CARAPACE_STATE_DIR.
+    // Also keep it outside the Carapace temp root so default localRoots doesn't accidentally make all state readable.
+    stateDirSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    process.env.CARAPACE_STATE_DIR = path.join(
       path.parse(os.tmpdir()).root,
       "var",
       "lib",
-      "openclaw-media-state-test",
+      "carapace-media-state-test",
     );
   });
 
@@ -283,7 +283,7 @@ describe("local media root guard", () => {
 
   it("allows local paths under an explicit root", async () => {
     const result = await loadWebMedia(tinyPngFile, 1024 * 1024, {
-      localRoots: [resolvePreferredOpenClawTmpDir()],
+      localRoots: [resolvePreferredCarapaceTmpDir()],
     });
     expect(result.kind).toBe("image");
   });
@@ -294,7 +294,7 @@ describe("local media root guard", () => {
     try {
       await expectLocalMediaAccessCode(
         loadWebMedia("file://attacker/share/evil.png", 1024 * 1024, {
-          localRoots: [resolvePreferredOpenClawTmpDir()],
+          localRoots: [resolvePreferredCarapaceTmpDir()],
         }),
         "invalid-file-url",
       );
@@ -311,7 +311,7 @@ describe("local media root guard", () => {
     const file = await fs.realpath(tinyPngFile);
     const actualLstatSync = fsSync.lstatSync;
     // Keep the fixture's real root before the Windows platform mock changes temp-path resolution.
-    const realTmpRoot = resolvePreferredOpenClawTmpDir();
+    const realTmpRoot = resolvePreferredCarapaceTmpDir();
     let unknownInspections = 0;
 
     await withMockedWindowsPlatform(async () => {
@@ -349,7 +349,7 @@ describe("local media root guard", () => {
   });
 
   it("rejects Windows network paths before filesystem checks", async () => {
-    const realTmpRoot = resolvePreferredOpenClawTmpDir();
+    const realTmpRoot = resolvePreferredCarapaceTmpDir();
 
     await withMockedWindowsPlatform(async () => {
       const realpathSpy = vi.spyOn(fs, "realpath");
@@ -394,7 +394,7 @@ describe("local media root guard", () => {
     );
   });
 
-  it("allows default OpenClaw state workspace and sandbox roots", async () => {
+  it("allows default Carapace state workspace and sandbox roots", async () => {
     const stateDir = resolveStateDir();
     const readFile = vi.fn(async () => Buffer.from("generated-media"));
 
@@ -417,7 +417,7 @@ describe("local media root guard", () => {
     expect(sandboxResult.kind).toBeUndefined();
   });
 
-  it("rejects default OpenClaw state per-agent workspace-* roots without explicit local roots", async () => {
+  it("rejects default Carapace state per-agent workspace-* roots without explicit local roots", async () => {
     const stateDir = resolveStateDir();
     const readFile = vi.fn(async () => Buffer.from("generated-media"));
 

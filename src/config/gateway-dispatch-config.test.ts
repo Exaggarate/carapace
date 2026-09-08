@@ -20,12 +20,12 @@ vi.mock("../infra/shell-env.js", () => shellEnvMocks);
 const tempDirs: string[] = [];
 
 function createTempConfig(files: Record<string, string>): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-dispatch-config-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-gateway-dispatch-config-"));
   tempDirs.push(dir);
   for (const [name, contents] of Object.entries(files)) {
     fs.writeFileSync(path.join(dir, name), contents);
   }
-  return path.join(dir, "openclaw.json5");
+  return path.join(dir, "carapace.json5");
 }
 
 afterEach(() => {
@@ -41,13 +41,13 @@ describe("readGatewayDispatchConfig", () => {
       "gateway-base.json5": `{
         gateway: {
           port: 18888,
-          auth: { mode: "token", token: "\${OPENCLAW_GATEWAY_TOKEN}" },
+          auth: { mode: "token", token: "\${CARAPACE_GATEWAY_TOKEN}" },
         },
         models: { providers: { expensive: { apiKey: "\${MISSING_MODEL_KEY}" } } },
       }`,
-      "openclaw.json5": `{
+      "carapace.json5": `{
         $include: "./gateway-base.json5",
-        env: { vars: { OPENCLAW_GATEWAY_TOKEN: "inline-token" } },
+        env: { vars: { CARAPACE_GATEWAY_TOKEN: "inline-token" } },
         agents: {
           defaults: { timeoutSeconds: 42 },
           list: [{ id: "ops", default: true }],
@@ -60,7 +60,7 @@ describe("readGatewayDispatchConfig", () => {
         session: { mainKey: "main-ops", store: "./sessions.json" },
       }`,
     });
-    const env = { OPENCLAW_CONFIG_PATH: configPath };
+    const env = { CARAPACE_CONFIG_PATH: configPath };
 
     const config = readGatewayDispatchConfig({ env });
 
@@ -80,7 +80,7 @@ describe("readGatewayDispatchConfig", () => {
 
   it("still reports broken includes in discarded config branches", () => {
     const configPath = createTempConfig({
-      "openclaw.json5": `{
+      "carapace.json5": `{
         gateway: { port: 18888 },
         models: { $include: "./missing-models.json5" },
       }`,
@@ -93,14 +93,14 @@ describe("readGatewayDispatchConfig", () => {
 
   it("loads only gateway credential shell env keys on explicit fallback", async () => {
     const configPath = createTempConfig({
-      "openclaw.json5": `{
+      "carapace.json5": `{
         env: { shellEnv: { enabled: true, timeoutMs: 123 } },
-        gateway: { auth: { mode: "token", token: "\${OPENCLAW_GATEWAY_TOKEN}" } },
+        gateway: { auth: { mode: "token", token: "\${CARAPACE_GATEWAY_TOKEN}" } },
       }`,
     });
-    const env: NodeJS.ProcessEnv = { OPENCLAW_CONFIG_PATH: configPath };
+    const env: NodeJS.ProcessEnv = { CARAPACE_CONFIG_PATH: configPath };
     shellEnvMocks.loadShellEnvFallback.mockImplementation(({ env: targetEnv }) => {
-      targetEnv.OPENCLAW_GATEWAY_TOKEN = "shell-token";
+      targetEnv.CARAPACE_GATEWAY_TOKEN = "shell-token";
     });
 
     const config = await readGatewayDispatchConfigWithShellEnvFallback({ env });
@@ -108,7 +108,7 @@ describe("readGatewayDispatchConfig", () => {
     expect(shellEnvMocks.loadShellEnvFallback).toHaveBeenCalledWith({
       enabled: true,
       env,
-      expectedKeys: ["OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD"],
+      expectedKeys: ["CARAPACE_GATEWAY_TOKEN", "CARAPACE_GATEWAY_PASSWORD"],
       logger: console,
       timeoutMs: 123,
     });

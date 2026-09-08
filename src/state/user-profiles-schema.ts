@@ -1,10 +1,10 @@
 import type { DatabaseSync } from "node:sqlite";
-import { ensureColumn, tableHasColumn } from "./openclaw-state-db-schema-helpers.js";
+import { ensureColumn, tableHasColumn } from "./carapace-state-db-schema-helpers.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 
 // Canonical additive schema for durable user profiles. Kept feature-local so
 // ordinary shared-state opens do not create identity tables until they are used.
@@ -76,7 +76,7 @@ export class UserProfileOwnerError extends Error {
   constructor(readonly code: "merge" | "role" | "repair-required") {
     super(
       code === "repair-required"
-        ? "the shared owner profile requires repair; run openclaw doctor --fix and reconnect"
+        ? "the shared owner profile requires repair; run carapace doctor --fix and reconnect"
         : code === "merge"
           ? "the shared owner profile cannot be merged; sign in with a personal identity instead"
           : "the shared owner profile is not governed by operator roles",
@@ -89,14 +89,14 @@ const ensuredDatabases = new WeakSet<DatabaseSync>();
 const roleEnsuredDatabases = new WeakSet<DatabaseSync>();
 
 export function ensureUserProfilesSchema(
-  options: OpenClawStateDatabaseOptions,
-  database = openOpenClawStateDatabase(options),
+  options: CarapaceStateDatabaseOptions,
+  database = openCarapaceStateDatabase(options),
 ): void {
   if (ensuredDatabases.has(database.db)) {
     return;
   }
   let hasRoleColumn = false;
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       db.exec(USER_PROFILES_SCHEMA_SQL); // sqlite-allow-raw -- Canonical feature-local additive DDL.
       ensureColumn(db, "user_profile_identities", "canonical_login TEXT");
@@ -113,8 +113,8 @@ export function ensureUserProfilesSchema(
 }
 
 export function ensureUserProfileRoleSchema(
-  options: OpenClawStateDatabaseOptions,
-  database = openOpenClawStateDatabase(options),
+  options: CarapaceStateDatabaseOptions,
+  database = openCarapaceStateDatabase(options),
 ): void {
   if (roleEnsuredDatabases.has(database.db)) {
     return;
@@ -123,7 +123,7 @@ export function ensureUserProfileRoleSchema(
   if (roleEnsuredDatabases.has(database.db)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => ensureColumn(db, "user_profiles", "role TEXT"),
     options,
     { operationLabel: "user-profiles.role.schema.ensure" },

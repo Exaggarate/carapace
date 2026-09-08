@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
 import * as tar from "tar";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { DIR_FETCH_HARD_MAX_BYTES } from "../shared/dir-fetch-limits.js";
@@ -19,7 +19,7 @@ let tmpRoot: string;
 beforeAll(async () => {
   // Keep the real archive runtime stable; only the node payload and saved path vary per case.
   vi.resetModules();
-  vi.doMock("openclaw/plugin-sdk/media-store", () => ({ saveMediaBuffer }));
+  vi.doMock("carapace/plugin-sdk/media-store", () => ({ saveMediaBuffer }));
   vi.doMock("../shared/audit.js", () => ({ appendFileTransferAudit }));
   vi.doMock("./node-tool-invoke.js", () => ({
     readRequiredNodePath: (params: Record<string, unknown>) => ({
@@ -43,7 +43,7 @@ afterEach(async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/media-store");
+  vi.doUnmock("carapace/plugin-sdk/media-store");
   vi.doUnmock("../shared/audit.js");
   vi.doUnmock("./node-tool-invoke.js");
   vi.resetModules();

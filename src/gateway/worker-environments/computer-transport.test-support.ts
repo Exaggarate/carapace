@@ -2,14 +2,14 @@ import { Value } from "typebox/value";
 import { vi } from "vitest";
 import { GATEWAY_CLIENT_IDS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { createOperationalRunInstanceRef } from "../../agents/admitted-run-context.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { claimAgentRunDelegatedAuthority } from "../../infra/agent-run-registry.js";
 import { NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE } from "../../infra/node-runner-inventory.js";
 import type { ComputerUseCapabilityDescriptor } from "../../plugins/computer-use-contract.js";
 import { createPluginRecord } from "../../plugins/loader-records.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
-import type { OpenClawPluginNodeInvokePolicyContext } from "../../plugins/types.js";
+import type { CarapacePluginNodeInvokePolicyContext } from "../../plugins/types.js";
 import {
   NodeWorkerComputerCloseParamsSchema,
   parseNodeWorkerComputerInput,
@@ -131,7 +131,7 @@ export function createHarness(sharedHost = false, withPolicy = true) {
     privateCurrent: boolean;
     context?: GatewayRequestContext;
     nodeTransport?: NodeWorkerSupervisorTransport;
-    config: OpenClawConfig;
+    config: CarapaceConfig;
     beforePolicy?: () => Promise<void>;
     beforeDispatch?: () => Promise<void>;
     afterDispatch?: () => Promise<void>;
@@ -212,7 +212,7 @@ export function createHarness(sharedHost = false, withPolicy = true) {
     invoke: privateInvoke,
   } satisfies NodeWorkerSupervisorTransport;
   state.nodeTransport = nodeTransport;
-  const policyHandle = vi.fn(async (policy: OpenClawPluginNodeInvokePolicyContext) => {
+  const policyHandle = vi.fn(async (policy: CarapacePluginNodeInvokePolicyContext) => {
     await state.beforePolicy?.();
     return await policy.invokeNode();
   });

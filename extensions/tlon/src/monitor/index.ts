@@ -1,28 +1,28 @@
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
 import {
   createChannelInboundEnvelopeBuilder,
   formatInboundMediaUnavailableText,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import type {
   ChannelIngressContextBinding,
   ResolvedChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 import {
   bindIngressLifecycleToReplyOptions,
   waitUntilAbort,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { GetReplyOptions, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { GetReplyOptions, ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
+import { retryAsync } from "carapace/plugin-sdk/retry-runtime";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
 import {
   asFiniteNumber,
   asNullableRecord as asRecord,
   readStringField as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
-import type { OpenClawConfig } from "../../runtime-api.js";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
+import type { CarapaceConfig } from "../../runtime-api.js";
 import { createLoggerBackedRuntime } from "../../runtime-api.js";
 import { getTlonRuntime } from "../runtime.js";
 import { createSettingsManager, type TlonSettingsStore } from "../settings.js";
@@ -76,7 +76,7 @@ type MonitorTlonOpts = {
 
 export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<void> {
   const core = getTlonRuntime();
-  const cfg = core.config.current() as OpenClawConfig;
+  const cfg = core.config.current() as CarapaceConfig;
   if (cfg.channels?.tlon?.enabled === false) {
     return;
   }
@@ -475,7 +475,7 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<v
       if (senders.size > 0 && !senders.has(senderShip)) {
         runtime.log?.(
           `[tlon] ⚠️ SECURITY: Multiple users sharing DM session. ` +
-            `Configure "session.dmScope: per-channel-peer" in OpenClaw config.`,
+            `Configure "session.dmScope: per-channel-peer" in Carapace config.`,
         );
 
         if (!sharedSessionWarningSent && effectiveOwnerShip) {
@@ -483,9 +483,9 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<v
           const warningMsg =
             `⚠️ Security Warning: Multiple users are sharing a DM session with this bot. ` +
             `This can leak conversation context between users.\n\n` +
-            `Fix: Add to your OpenClaw config:\n` +
+            `Fix: Add to your Carapace config:\n` +
             `session:\n  dmScope: "per-channel-peer"\n\n` +
-            `Docs: https://docs.openclaw.ai/concepts/session#secure-dm-mode`;
+            `Docs: https://github.com/Exaggarate/carapace#secure-dm-mode`;
 
           sendDm({
             api,

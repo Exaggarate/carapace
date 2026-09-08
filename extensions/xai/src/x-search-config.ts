@@ -1,11 +1,11 @@
 // Xai helper module supports x search config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type JsonRecord = Record<string, unknown>;
 
 function resolvePluginSearchConfig(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   key: "webSearch" | "xSearch",
 ): JsonRecord | undefined {
   const pluginConfig = config?.plugins?.entries?.xai?.config;
@@ -18,7 +18,7 @@ function baseUrlFallback(config?: JsonRecord): JsonRecord | undefined {
     : undefined;
 }
 
-export function resolveEffectiveXSearchConfig(config?: OpenClawConfig): JsonRecord | undefined {
+export function resolveEffectiveXSearchConfig(config?: CarapaceConfig): JsonRecord | undefined {
   const pluginWebSearchBaseUrl = baseUrlFallback(resolvePluginSearchConfig(config, "webSearch"));
   const pluginOwned = resolvePluginSearchConfig(config, "xSearch");
   const merged = {
@@ -32,7 +32,7 @@ export function resolveEffectiveXSearchConfig(config?: OpenClawConfig): JsonReco
 }
 
 export function setPluginXSearchConfigValue(
-  configTarget: OpenClawConfig,
+  configTarget: CarapaceConfig,
   key: string,
   value: unknown,
 ): void {

@@ -157,7 +157,7 @@ describe("config-eval helpers", () => {
   ] as const)(
     "finds a newly installed binary on unchanged $platform PATH",
     ({ platform, suffix }) => {
-      withTempDirSync({ prefix: "openclaw-binary-probe-" }, (binDir) => {
+      withTempDirSync({ prefix: "carapace-binary-probe-" }, (binDir) => {
         setPlatform(platform);
         vi.stubEnv("PATH", binDir);
         vi.stubEnv("PATHEXT", ".EXE;.CMD");

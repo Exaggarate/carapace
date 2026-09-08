@@ -8,8 +8,8 @@ import {
   markPluginRegistryRetired,
 } from "../../plugins/registry-lifecycle.js";
 import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { loadSessionEntry, replaceSessionEntry } from "./session-accessor.js";
 import { runSessionStartupMigration } from "./startup-migration.js";
@@ -17,16 +17,16 @@ import { runSessionStartupMigration } from "./startup-migration.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 it("rejects startup when session-store discovery fails", async () => {
-  const stateDir = tempDirs.make("openclaw-startup-discovery-");
+  const stateDir = tempDirs.make("carapace-startup-discovery-");
   await expect(
     runSessionStartupMigration({
       cfg: {},
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { CARAPACE_STATE_DIR: stateDir },
       log: { info: vi.fn(), warn: vi.fn() },
       deps: {
         resolveAllAgentSessionStoreTargetsSync() {
@@ -67,11 +67,11 @@ it("runs from startup in automatic mode and surfaces unresolved warnings", async
 });
 
 it("runs the armed startup engine even when no legacy session directory remains", async () => {
-  const root = fs.realpathSync.native(tempDirs.make("openclaw-legacy-main-startup-"));
+  const root = fs.realpathSync.native(tempDirs.make("carapace-legacy-main-startup-"));
   const stateDir = path.join(root, "state");
   fs.mkdirSync(stateDir, { recursive: true });
   const cfg = { agents: { entries: { ops: {} } } };
-  const env = { ...process.env, OPENCLAW_AGENT_DIR: undefined, OPENCLAW_STATE_DIR: stateDir };
+  const env = { ...process.env, CARAPACE_AGENT_DIR: undefined, CARAPACE_STATE_DIR: stateDir };
   const migrate = vi.fn(async () => ({
     armed: true,
     changes: [],
@@ -102,12 +102,12 @@ it("runs the armed startup engine even when no legacy session directory remains"
 it.each([false, true])(
   "includes a newly migrated database and preserves retryable claims (source cleanup fails: %s)",
   async (sourceCleanupFails) => {
-    const root = fs.realpathSync.native(tempDirs.make("openclaw-startup-new-agent-store-"));
+    const root = fs.realpathSync.native(tempDirs.make("carapace-startup-new-agent-store-"));
     const stateDir = path.join(root, "state");
     const workspace = path.join(root, "ops-workspace");
     fs.mkdirSync(workspace, { recursive: true });
     await withEnvAsync(
-      { OPENCLAW_AGENT_DIR: undefined, OPENCLAW_STATE_DIR: stateDir },
+      { CARAPACE_AGENT_DIR: undefined, CARAPACE_STATE_DIR: stateDir },
       async () => {
         const env = { ...process.env };
         const cfg = { agents: { entries: { ops: { workspace } } } };
@@ -118,12 +118,12 @@ it.each([false, true])(
           "agents",
           "ops",
           "agent",
-          "openclaw-agent.sqlite",
+          "carapace-agent.sqlite",
         );
         const input = {
           sessionId: "transferred-session",
           updatedAt: 10,
-          worktree: { id: "legacy", branch: "openclaw/legacy", repoRoot: workspace },
+          worktree: { id: "legacy", branch: "carapace/legacy", repoRoot: workspace },
         };
         await replaceSessionEntry(sourceScope, input);
         const original = loadSessionEntry(sourceScope);

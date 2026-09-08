@@ -76,7 +76,7 @@ vi.mock("../status/summary.runtime.js", () => ({
       provider: "openai",
       model: "gpt-5.5",
     })),
-    resolveSessionRuntime: vi.fn(() => ({ id: "openclaw", label: "OpenClaw Default" })),
+    resolveSessionRuntime: vi.fn(() => ({ id: "carapace", label: "Carapace Default" })),
     resolveStatusModelLookupRef: vi.fn(({ provider, model }) =>
       typeof model === "string" && model.length > 0
         ? {
@@ -282,8 +282,8 @@ describe("getStatusSummary", () => {
     vi.mocked(statusSummaryRuntime.resolveAuthoredModelContextTokens).mockReturnValue(undefined);
     vi.mocked(statusSummaryRuntime.resolveContextTokensForModel).mockReturnValue(200_000);
     vi.mocked(statusSummaryRuntime.resolveSessionRuntime).mockReturnValue({
-      id: "openclaw",
-      label: "OpenClaw Default",
+      id: "carapace",
+      label: "Carapace Default",
     });
     vi.mocked(resolveSessionStorePathCore).mockReturnValue("/tmp/sessions.json");
     vi.mocked(listGatewayAgentsBasic).mockReturnValue({
@@ -545,9 +545,9 @@ describe("getStatusSummary", () => {
         state: "configured-unavailable",
         diagnostic: {
           kind: "plugin-verification",
-          reason: "missing-openclaw-peer-link",
+          reason: "missing-carapace-peer-link",
           detail:
-            "/private/plugins/peer-plugin/node_modules/openclaw points to /private/other/openclaw instead of /private/host/openclaw",
+            "/private/plugins/peer-plugin/node_modules/carapace points to /private/other/carapace instead of /private/host/carapace",
           installPath: "/private/plugins/peer-plugin",
         },
       },
@@ -579,9 +579,9 @@ describe("getStatusSummary", () => {
         state: "configured-unavailable",
         diagnostic: {
           kind: "plugin-verification",
-          reason: "missing-openclaw-peer-link",
+          reason: "missing-carapace-peer-link",
           detail:
-            'Plugin declares peerDependency "openclaw", but its host peer link is missing or invalid.',
+            'Plugin declares peerDependency "carapace", but its host peer link is missing or invalid.',
         },
       },
     ]);
@@ -611,7 +611,7 @@ describe("getStatusSummary", () => {
 
     expect(summary.tasks.total).toBe(0);
     expect(summary.tasks.warning).toBe(
-      "Task history is unavailable until Gateway startup or openclaw doctor --fix repairs the state database.",
+      "Task history is unavailable until Gateway startup or carapace doctor --fix repairs the state database.",
     );
   });
 
@@ -935,7 +935,7 @@ describe("getStatusSummary", () => {
           modelOverrideFallbackOriginModel: "glm-4.5-air",
           modelProvider: "deepseek",
           model: "deepseek-v4-flash",
-          agentHarnessId: "openclaw",
+          agentHarnessId: "carapace",
           contextTokens: 128_000,
           contextTokensSource: "runtime",
         },

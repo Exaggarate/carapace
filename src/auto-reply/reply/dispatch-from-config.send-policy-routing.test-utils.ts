@@ -5,7 +5,7 @@ import {
   buildAgentHarnessQuestionPromptPayload,
   deliverAgentHarnessUserInputPrompt,
 } from "../../agents/harness/user-input-bridge.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { settleReplyDispatcher } from "../dispatch-dispatcher.js";
 import { getReplyPayloadMetadata, setReplyPayloadMetadata } from "../reply-payload.js";
 import type { MsgContext } from "../templating.js";
@@ -745,7 +745,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
     supportsProvider?: string;
     currentEntry: typeof sessionStoreMocks.currentEntry;
     ctx: Partial<MsgContext>;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     replyOptions?: GetReplyOptions;
     expectedMode: "automatic" | "message_tool_only";
     text: string;
@@ -813,7 +813,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
   } as const;
   const channelModelConfig = {
     channels: { modelByChannel: { telegram: { "*": "anthropic/claude-sonnet-4.6" } } },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 
   it.each([
     {
@@ -875,7 +875,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
       ctx: telegramDirectCtx,
       cfg: {
         agents: { defaults: { model: { primary: "anthropic/claude-sonnet-4.6" } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       expectedMode: "automatic",
       text: "visible configured-default reply",
     },
@@ -883,7 +883,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
       name: "lets config restore automatic Codex direct source delivery",
       currentEntry: codexEntry,
       ctx: directCtx,
-      cfg: { messages: { visibleReplies: "automatic" } } as OpenClawConfig,
+      cfg: { messages: { visibleReplies: "automatic" } } as CarapaceConfig,
       expectedMode: "automatic",
       text: "visible final reply",
     },
@@ -1037,7 +1037,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
 
   async function expectAutomaticDelivery(params: {
     ctx: Partial<MsgContext>;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     text: string;
     replyOptions?: GetReplyOptions;
     checkTyping?: boolean;
@@ -1075,7 +1075,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
           groupChat: { visibleReplies: "message_tool" },
         },
         tools: { allow: ["read"] },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       text: "visible fallback",
     });
   });
@@ -1100,7 +1100,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       text: "group policy fallback",
     });
   });
@@ -1111,7 +1111,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
         ChatType: "channel",
         SessionKey: "test:discord:channel:C1",
       },
-      cfg: { tools: { allow: ["read"] } } as OpenClawConfig,
+      cfg: { tools: { allow: ["read"] } } as CarapaceConfig,
       replyOptions: {
         sourceReplyDeliveryMode: "message_tool_only",
       },

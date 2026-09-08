@@ -62,9 +62,9 @@ describe("scripts/test-live", () => {
 
     expect(env).toMatchObject({
       CI: "1",
-      OPENCLAW_LIVE_CODEX_HARNESS: "1",
-      OPENCLAW_LIVE_TEST: "1",
-      OPENCLAW_LIVE_TEST_QUIET: "1",
+      CARAPACE_LIVE_CODEX_HARNESS: "1",
+      CARAPACE_LIVE_TEST: "1",
+      CARAPACE_LIVE_TEST_QUIET: "1",
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
       pnpm_config_verify_deps_before_run: "false",
     });
@@ -86,7 +86,7 @@ describe("scripts/test-live", () => {
   posixIt.for(["SIGINT", "SIGTERM"] as const)(
     "signals the live pnpm child on %s and removes its joined namespace",
     async (stopSignal, { signal }) => {
-      const root = mkdtempSync(join(tmpdir(), "openclaw-test-live-signal-"));
+      const root = mkdtempSync(join(tmpdir(), "carapace-test-live-signal-"));
       const fakePnpmPath = join(root, "pnpm");
       const signaledPath = join(root, "signaled");
 
@@ -97,7 +97,7 @@ describe("scripts/test-live", () => {
         {
           env: {
             ...process.env,
-            OPENCLAW_FAKE_PNPM_SIGNALED_PATH: signaledPath,
+            CARAPACE_FAKE_PNPM_SIGNALED_PATH: signaledPath,
             npm_execpath: fakePnpmPath,
           },
           stdio: ["ignore", "pipe", "ignore"],
@@ -128,7 +128,7 @@ describe("scripts/test-live", () => {
   );
 
   posixIt("kills the live pnpm process group after the no-output timeout", async ({ signal }) => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-test-live-timeout-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-test-live-timeout-"));
     const fakePnpmPath = join(root, "pnpm");
     const stderr: Buffer[] = [];
 
@@ -156,8 +156,8 @@ describe("scripts/test-live", () => {
       {
         env: {
           ...process.env,
-          OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: "25",
-          OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS: "100",
+          CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: "25",
+          CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS: "100",
           npm_execpath: fakePnpmPath,
         },
         stdio: ["ignore", "pipe", "pipe", "ipc"],
@@ -188,15 +188,15 @@ describe("scripts/test-live", () => {
 
   it("rejects loose heartbeat intervals instead of parsing prefixes", () => {
     expect(resolveTestLiveHeartbeatMs({})).toBe(20_000);
-    expect(resolveTestLiveHeartbeatMs({ OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: "2500" })).toBe(2500);
-    expect(() => resolveTestLiveHeartbeatMs({ OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: "1e3" })).toThrow(
-      "invalid OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: 1e3",
+    expect(resolveTestLiveHeartbeatMs({ CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: "2500" })).toBe(2500);
+    expect(() => resolveTestLiveHeartbeatMs({ CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: "1e3" })).toThrow(
+      "invalid CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: 1e3",
     );
     expect(() =>
-      resolveTestLiveHeartbeatMs({ OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: "1000ms" }),
-    ).toThrow("invalid OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: 1000ms");
-    expect(() => resolveTestLiveHeartbeatMs({ OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: "0" })).toThrow(
-      "invalid OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: 0",
+      resolveTestLiveHeartbeatMs({ CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: "1000ms" }),
+    ).toThrow("invalid CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: 1000ms");
+    expect(() => resolveTestLiveHeartbeatMs({ CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: "0" })).toThrow(
+      "invalid CARAPACE_LIVE_WRAPPER_HEARTBEAT_MS: 0",
     );
   });
 
@@ -230,7 +230,7 @@ function writeFakePnpm(filePath: string): void {
       'fs.writeFileSync(require("node:path").join(__dirname, "namespace"), tmp);',
       'fs.writeFileSync(require("node:path").join(tmp, "owned-marker"), "owned");',
       'for (const signal of ["SIGINT", "SIGTERM"]) process.on(signal, () => {',
-      "  fs.writeFileSync(process.env.OPENCLAW_FAKE_PNPM_SIGNALED_PATH, signal);",
+      "  fs.writeFileSync(process.env.CARAPACE_FAKE_PNPM_SIGNALED_PATH, signal);",
       "  process.exit(0);",
       "});",
       "const child = spawn(process.execPath, [",

@@ -1,12 +1,12 @@
 // Firecrawl plugin module implements firecrawl scrape tool behavior.
-import { optionalStringEnum } from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
+import { optionalStringEnum } from "carapace/plugin-sdk/channel-actions";
+import type { CarapacePluginApi } from "carapace/plugin-sdk/plugin-runtime";
 import {
   jsonResult,
   readNonNegativeIntegerParam,
   readPositiveIntegerParam,
   readStringParam,
-} from "openclaw/plugin-sdk/provider-web-search";
+} from "carapace/plugin-sdk/provider-web-search";
 import { Type } from "typebox";
 import { runFirecrawlScrape } from "./firecrawl-client.js";
 
@@ -51,7 +51,7 @@ const FirecrawlScrapeToolSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export function createFirecrawlScrapeTool(api: OpenClawPluginApi) {
+export function createFirecrawlScrapeTool(api: CarapacePluginApi) {
   return {
     name: "firecrawl_scrape",
     label: "Firecrawl Scrape",

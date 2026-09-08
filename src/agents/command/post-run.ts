@@ -1,4 +1,4 @@
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import { getReplyPayloadMetadata } from "../../auto-reply/reply-payload.js";
 import { recordAgentRunTerminalOutcome } from "../../channels/turn/agent-run-terminal-outcome.js";
 import type { CliDeps } from "../../cli/deps.types.js";
@@ -23,7 +23,7 @@ import {
   classifyAgentRunTerminalOutcome,
   mergeAgentRunTerminalOutcome,
 } from "../agent-run-terminal-outcome.js";
-import { OPENCLAW_AGENT_RUNTIME_ID } from "../agent-runtime-id.js";
+import { CARAPACE_AGENT_RUNTIME_ID } from "../agent-runtime-id.js";
 import { isHeartbeatLifecycleRunKind } from "../bootstrap-mode.js";
 import type { AcceptedCompactionSuccessor } from "../embedded-agent-runner/compaction-successor.js";
 import { buildMainSessionRecoveryClearPatch } from "../main-session-recovery/main-session-recovery-clear.js";
@@ -373,7 +373,7 @@ export async function finalizeEmbeddedAgentCommand(params: {
     const agentMeta = result.meta.agentMeta;
     const embeddedMaintenance =
       transcriptPersistenceRunner === "embedded" &&
-      agentMeta?.agentHarnessId === OPENCLAW_AGENT_RUNTIME_ID &&
+      agentMeta?.agentHarnessId === CARAPACE_AGENT_RUNTIME_ID &&
       params.attempt.maintenanceAuthProfile !== undefined &&
       !fallbackExhausted &&
       terminal.outcome.status === "ok" &&

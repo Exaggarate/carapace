@@ -1,5 +1,5 @@
-import * as providerAuthRuntime from "openclaw/plugin-sdk/provider-auth-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import * as providerAuthRuntime from "carapace/plugin-sdk/provider-auth-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import chutesPlugin from "../extensions/chutes/index.js";
 import { buildOpenAIProvider } from "../extensions/openai/api.js";
@@ -9,12 +9,12 @@ import {
   readAuthProfileStoreForTest,
 } from "../src/agents/auth-profiles/oauth-test-utils.js";
 import type { AuthProfileStore, OAuthCredential } from "../src/agents/auth-profiles/types.js";
-import { planOpenClawModelsJson } from "../src/agents/models-config.plan.js";
+import { planCarapaceModelsJson } from "../src/agents/models-config.plan.js";
 import * as catalogContext from "../src/agents/models-config.providers.catalog-context.js";
 import { resolveImplicitProviders } from "../src/agents/models-config.providers.implicit.js";
 import { prepareModelCatalogPublication } from "../src/agents/prepared-model-runtime.full-catalog.js";
 import type { ModelProviderConfig } from "../src/config/types.models.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../src/config/types.carapace.js";
 import { createTestPluginApi } from "../src/plugin-sdk/plugin-test-api.js";
 import type { ProviderCatalogOutcome } from "../src/plugins/provider-catalog.types.js";
 import * as providerDiscovery from "../src/plugins/provider-discovery.js";
@@ -24,9 +24,9 @@ import { withPluginRuntimeRegistryScope } from "../src/plugins/runtime/gateway-r
 import type { ProviderPlugin } from "../src/plugins/types.js";
 import { createDeferredCore } from "../src/shared/deferred.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../src/test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../src/test-utils/carapace-test-state.js";
 
 const discovery = vi.hoisted(() => ({
   providers: new Array<ProviderPlugin>(),
@@ -48,11 +48,11 @@ function withCatalogProviders<T>(run: () => T): T {
 }
 
 describe("Provider model discovery auth preparation", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let agentDir: string;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "catalog-auth-order-", agentEnv: "main" });
+    state = await createCarapaceTestState({ prefix: "catalog-auth-order-", agentEnv: "main" });
     agentDir = state.agentDir();
     discovery.providers = [buildOpenAIProvider()];
   });
@@ -66,7 +66,7 @@ describe("Provider model discovery auth preparation", () => {
   });
 
   function planCatalog(
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     store: AuthProfileStore,
     options: {
       providerId?: string;
@@ -76,7 +76,7 @@ describe("Provider model discovery auth preparation", () => {
     } = {},
   ) {
     return withCatalogProviders(() =>
-      planOpenClawModelsJson({
+      planCarapaceModelsJson({
         context: {
           cfg: config,
           discoveryAuthConfig: config,
@@ -104,7 +104,7 @@ describe("Provider model discovery auth preparation", () => {
       }),
     );
     const profileId = "chutes:oauth";
-    const config: OpenClawConfig = { auth: { order: { chutes: [profileId] } } };
+    const config: CarapaceConfig = { auth: { order: { chutes: [profileId] } } };
     const store = createExpiredOauthStore({
       profileId,
       provider: "chutes",
@@ -124,7 +124,7 @@ describe("Provider model discovery auth preparation", () => {
   }
 
   function readPlannedProvider(
-    plan: Awaited<ReturnType<typeof planOpenClawModelsJson>>,
+    plan: Awaited<ReturnType<typeof planCarapaceModelsJson>>,
     providerId: string,
   ): ModelProviderConfig | undefined {
     expect(plan.action).toBe("write");
@@ -139,7 +139,7 @@ describe("Provider model discovery auth preparation", () => {
     const profileB = "openai:profile-b";
     const keyA = "rejected-profile-a";
     const keyB = "selected-profile-b";
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       auth: {
         order: {
           openai: [profileB, profileA],
@@ -198,7 +198,7 @@ describe("Provider model discovery auth preparation", () => {
       const profileA = `${providerId}:oauth-a`;
       const profileB = `${providerId}:api-key-b`;
       const keyB = "selected-profile-b";
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         auth: {
           order: {
             [providerId]: [profileA, profileB],
@@ -305,7 +305,7 @@ describe("Provider model discovery auth preparation", () => {
     "uses subscription discovery for configured literal %s credentials without a profile",
     async (auth) => {
       const accessToken = `configured-${auth}-access`;
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
           providers: {
             openai: {
@@ -448,7 +448,7 @@ describe("Provider model discovery auth preparation", () => {
         ]),
       );
       const store: AuthProfileStore = { version: 1, profiles };
-      const config: OpenClawConfig = { auth: { order: { [providerId]: profileIds } } };
+      const config: CarapaceConfig = { auth: { order: { [providerId]: profileIds } } };
       await state.writeAuthProfiles(store);
       vi.spyOn(providerRuntime, "buildProviderAuthDoctorHintWithPlugin").mockResolvedValue(
         undefined,
@@ -738,11 +738,11 @@ describe("provider catalog late-result finalization", () => {
     maxTokens: 8_192,
   };
 
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let store: AuthProfileStore;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ prefix: "catalog-late-result-", agentEnv: "main" });
+    state = await createCarapaceTestState({ prefix: "catalog-late-result-", agentEnv: "main" });
     store = {
       version: 1,
       profiles: {

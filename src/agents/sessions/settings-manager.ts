@@ -5,8 +5,8 @@
  */
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalObjectRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { resolveIntegerOption } from "@carapace/normalization-core/number-coercion";
+import { asOptionalObjectRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import { mergeDeep } from "../../infra/deep-merge.js";
 import { getAgentDir } from "../config.js";
 import { DEFAULT_HTTP_IDLE_TIMEOUT_MS, parseHttpIdleTimeoutMs } from "./http-dispatcher.js";

@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Pure helpers for parsing, adding, removing, and generating agent route bindings.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeSortedUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { normalizeSortedUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { getBundledChannelSetupPlugin } from "../channels/plugins/bundled.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import { getLoadedChannelPlugin } from "../channels/plugins/index.js";
@@ -10,7 +10,7 @@ import { normalizeChatChannelId as normalizeBundledChannelId } from "../channels
 import { formatUnknownChannelMessage } from "../cli/error-format.js";
 import { isRouteBinding, listRouteBindings } from "../config/bindings.js";
 import type { AgentRouteBinding } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { listPluginContributionIds } from "../plugins/plugin-registry.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAgentId } from "../routing/session-key.js";
 import type { ChannelChoice } from "./onboard-types.js";
@@ -57,10 +57,10 @@ function canUpgradeBindingAccountScope(params: {
 
 /** Merge new route bindings into config while reporting adds, upgrades, skips, and conflicts. */
 export function applyAgentBindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   bindings: AgentRouteBinding[],
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   added: AgentRouteBinding[];
   updated: AgentRouteBinding[];
   skipped: AgentRouteBinding[];
@@ -144,10 +144,10 @@ export function applyAgentBindings(
 
 /** Remove matching route bindings from config without disturbing non-route binding entries. */
 export function removeAgentBindings(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   bindings: AgentRouteBinding[],
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   removed: AgentRouteBinding[];
   missing: AgentRouteBinding[];
   conflicts: Array<{ binding: AgentRouteBinding; existingAgentId: string }>;
@@ -211,7 +211,7 @@ export function removeAgentBindings(
   };
 }
 
-function resolveDefaultAccountId(cfg: OpenClawConfig, provider: ChannelId): string {
+function resolveDefaultAccountId(cfg: CarapaceConfig, provider: ChannelId): string {
   const plugin = getBindingChannelPlugin(provider);
   if (!plugin) {
     return DEFAULT_ACCOUNT_ID;
@@ -225,7 +225,7 @@ function getBindingChannelPlugin(channel: ChannelId) {
 
 function resolveBindingAccountId(params: {
   channel: ChannelId;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   agentId: string;
   explicitAccountId?: string;
 }): string | undefined {
@@ -259,7 +259,7 @@ function resolveBindingAccountId(params: {
 export function buildChannelBindings(params: {
   agentId: string;
   selection: ChannelChoice[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   accountIds?: Partial<Record<ChannelChoice, string>>;
 }): AgentRouteBinding[] {
   const bindings: AgentRouteBinding[] = [];
@@ -283,7 +283,7 @@ export function buildChannelBindings(params: {
 export function parseBindingSpecs(params: {
   agentId: string;
   specs?: string[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): { bindings: AgentRouteBinding[]; errors: string[] } {
   const bindings: AgentRouteBinding[] = [];
   const errors: string[] = [];

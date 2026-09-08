@@ -4,14 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readCronJobScratchState, writeCronJobScratch } from "../cron/scratch-store.js";
 import {
   loadCronJobsStore,
   resolveCronJobsStorePath,
   resolveCronJobsStorePathFromConfig,
 } from "../cron/store.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   collectHeartbeatScratchMigrationFindings,
   maybeMigrateHeartbeatFilesToScratch,
@@ -24,11 +24,11 @@ let originalStateDir: string | undefined;
 
 beforeEach(() => {
   originalHome = process.env.HOME;
-  originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  originalStateDir = process.env.CARAPACE_STATE_DIR;
 });
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   if (originalHome === undefined) {
     delete process.env.HOME;
@@ -36,32 +36,32 @@ afterEach(async () => {
     process.env.HOME = originalHome;
   }
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.CARAPACE_STATE_DIR = originalStateDir;
   }
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
 
 async function createFixture() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-heartbeat-migration-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-heartbeat-migration-"));
   tempDirs.push(root);
   const home = path.join(root, "home");
   const stateDir = path.join(root, "state");
   const workspace = path.join(root, "workspace");
   await fs.mkdir(workspace, { recursive: true });
   process.env.HOME = home;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  process.env.CARAPACE_STATE_DIR = stateDir;
   const cfg = {
     agents: {
       defaults: { heartbeat: { every: "30m" } },
       list: [{ id: "main", workspace }],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
   return { root, stateDir, workspace, cfg, heartbeatPath: path.join(workspace, "HEARTBEAT.md") };
 }
 
-async function loadMonitor(cfg?: OpenClawConfig) {
+async function loadMonitor(cfg?: CarapaceConfig) {
   const storePath = cfg ? resolveCronJobsStorePathFromConfig(cfg) : resolveCronJobsStorePath();
   const store = await loadCronJobsStore(storePath);
   const monitor = store.jobs.find(
@@ -82,7 +82,7 @@ function sharedHeartbeatConfig(workspace: string, ollamaEvery = "0m") {
         { id: "ollama", workspace, heartbeat: { every: ollamaEvery } },
       ],
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("HEARTBEAT.md cron scratch migration", () => {
@@ -176,7 +176,7 @@ describe("HEARTBEAT.md cron scratch migration", () => {
             { id: "ops", workspace: fixture.workspace },
           ],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       "main",
     );
     await fs.writeFile(fixture.heartbeatPath, "shared checklist\n", "utf8");
@@ -209,7 +209,7 @@ describe("HEARTBEAT.md cron scratch migration", () => {
           { id: "ollama", workspace: fixture.workspace, heartbeat: { every: "0m" } },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     await fs.writeFile(fixture.heartbeatPath, "shared checklist\n", "utf8");
 
     await expect(collectHeartbeatScratchMigrationFindings(cfg)).resolves.toEqual([]);
@@ -381,7 +381,7 @@ describe("HEARTBEAT.md cron scratch migration", () => {
   it("respects a configured cron store partition", async () => {
     const fixture = await createFixture();
     const customStore = path.join(fixture.root, "custom-cron", "jobs.json");
-    const cfg = { ...fixture.cfg, cron: { store: customStore } } as unknown as OpenClawConfig;
+    const cfg = { ...fixture.cfg, cron: { store: customStore } } as unknown as CarapaceConfig;
     await fs.writeFile(fixture.heartbeatPath, "custom store scratch\n", "utf8");
 
     const result = await maybeMigrateHeartbeatFilesToScratch({ cfg, shouldRepair: true });

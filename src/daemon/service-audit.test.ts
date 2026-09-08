@@ -82,7 +82,7 @@ function createGatewayAudit({
       programArguments: ["/usr/bin/node", "gateway"],
       environment: {
         PATH: pathLocal,
-        ...(serviceToken ? { OPENCLAW_GATEWAY_TOKEN: serviceToken } : {}),
+        ...(serviceToken ? { CARAPACE_GATEWAY_TOKEN: serviceToken } : {}),
         ...extraEnvironment,
       },
       ...(environmentValueSources ? { environmentValueSources } : {}),
@@ -93,7 +93,7 @@ function createGatewayAudit({
 async function writeSystemdUnitForAudit(
   home: string,
   lines: string[],
-  unitName = "openclaw-gateway.service",
+  unitName = "carapace-gateway.service",
 ) {
   const unitDir = path.join(home, ".config", "systemd", "user");
   const unitPath = path.join(unitDir, unitName);
@@ -102,7 +102,7 @@ async function writeSystemdUnitForAudit(
     unitPath,
     [
       "[Unit]",
-      "Description=OpenClaw Gateway",
+      "Description=Carapace Gateway",
       "[Service]",
       ...lines,
       "ExecStart=/usr/bin/node gateway",
@@ -225,7 +225,7 @@ describe("auditGatewayServiceConfig", () => {
   });
 
   it("accepts Linux minimal PATH with user directories", async () => {
-    const env = { HOME: "/tmp/openclaw-testuser", PNPM_HOME: "/opt/pnpm" };
+    const env = { HOME: "/tmp/carapace-testuser", PNPM_HOME: "/opt/pnpm" };
     const minimalPath = buildMinimalServicePath({ platform: "linux", env });
     const audit = await auditGatewayServiceConfig({
       env,
@@ -245,7 +245,7 @@ describe("auditGatewayServiceConfig", () => {
   });
 
   it("accepts canonical macOS gateway service PATH without user-bin defaults", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-home-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-home-"));
     try {
       const servicePath = buildMinimalServicePath({ platform: "darwin", env: { HOME: home } });
       expect(servicePath).toBe(
@@ -268,7 +268,7 @@ describe("auditGatewayServiceConfig", () => {
   });
 
   it("requires Homebrew directories in canonical macOS gateway service PATH", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-home-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-home-"));
     try {
       const audit = await auditGatewayServiceConfig({
         env: { HOME: home },
@@ -291,7 +291,7 @@ describe("auditGatewayServiceConfig", () => {
 
   it("still requires explicit env-configured tool roots in gateway service PATH", async () => {
     const audit = await auditGatewayServiceConfig({
-      env: { HOME: "/tmp/openclaw-testuser", PNPM_HOME: "/opt/pnpm" },
+      env: { HOME: "/tmp/carapace-testuser", PNPM_HOME: "/opt/pnpm" },
       platform: "linux",
       command: {
         programArguments: ["/usr/bin/node", "gateway"],
@@ -306,7 +306,7 @@ describe("auditGatewayServiceConfig", () => {
   });
 
   it("flags stale Linux version-manager and package-manager PATH entries", async () => {
-    const env = { HOME: "/tmp/openclaw-testuser-nonminimal" };
+    const env = { HOME: "/tmp/carapace-testuser-nonminimal" };
     const minimalPath = buildMinimalServicePath({ platform: "linux", env });
     const staleEntries = [
       `${env.HOME}/.volta/bin`,
@@ -335,7 +335,7 @@ describe("auditGatewayServiceConfig", () => {
     expect(issue?.detail).toContain("/opt/pnpm/bin");
   });
 
-  it("accepts an expected active OpenClaw bin even when it looks package-managed", async () => {
+  it("accepts an expected active Carapace bin even when it looks package-managed", async () => {
     const expectedServicePath = [
       "/opt/homebrew/opt/node/bin",
       "/Users/testuser/Library/pnpm",
@@ -355,7 +355,7 @@ describe("auditGatewayServiceConfig", () => {
       command: {
         programArguments: [
           "/opt/homebrew/opt/node/bin/node",
-          "/opt/openclaw/dist/index.js",
+          "/opt/carapace/dist/index.js",
           "gateway",
         ],
         environment: { PATH: expectedServicePath },
@@ -386,7 +386,7 @@ describe("auditGatewayServiceConfig", () => {
       command: {
         programArguments: [
           "/opt/homebrew/opt/node/bin/node",
-          "/opt/openclaw/dist/index.js",
+          "/opt/carapace/dist/index.js",
           "gateway",
         ],
         environment: { PATH: `${expectedServicePath}:/Users/testuser/.asdf/shims` },
@@ -402,8 +402,8 @@ describe("auditGatewayServiceConfig", () => {
 
   it("accepts Linux fnm aliases/default without requiring the legacy current symlink", async () => {
     const env = {
-      HOME: "/tmp/openclaw-testuser",
-      FNM_DIR: "/tmp/openclaw-testuser/.local/share/fnm",
+      HOME: "/tmp/carapace-testuser",
+      FNM_DIR: "/tmp/carapace-testuser/.local/share/fnm",
     };
     const pathParts = buildMinimalServicePath({ platform: "linux", env })
       .split(":")
@@ -424,8 +424,8 @@ describe("auditGatewayServiceConfig", () => {
 
   it("accepts Linux fnm current symlink without requiring aliases/default", async () => {
     const env = {
-      HOME: "/tmp/openclaw-testuser",
-      FNM_DIR: "/tmp/openclaw-testuser/.local/share/fnm",
+      HOME: "/tmp/carapace-testuser",
+      FNM_DIR: "/tmp/carapace-testuser/.local/share/fnm",
     };
     const pathParts = buildMinimalServicePath({ platform: "linux", env })
       .split(":")
@@ -453,7 +453,7 @@ describe("auditGatewayServiceConfig", () => {
         programArguments: [
           "/bin/zsh",
           "-lc",
-          "exec /usr/bin/node /opt/openclaw/dist/index.js gateway --port 18890",
+          "exec /usr/bin/node /opt/carapace/dist/index.js gateway --port 18890",
         ],
         environment: {},
       },
@@ -681,10 +681,10 @@ describe("auditGatewayServiceConfig", () => {
       expected: true,
     },
   ])("respects systemd manager authority: $name", async ({ unit, manager, code, expected }) => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-manager-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-manager-"));
     try {
-      const unitName = "openclaw-audit.service";
-      const env = { HOME: home, OPENCLAW_SYSTEMD_UNIT: unitName };
+      const unitName = "carapace-audit.service";
+      const env = { HOME: home, CARAPACE_SYSTEMD_UNIT: unitName };
       await writeSystemdUnitForAudit(home, unit, unitName);
       execSystemctlUser.mockResolvedValueOnce({
         stdout: manager.join("\n"),
@@ -716,7 +716,7 @@ describe("auditGatewayServiceConfig", () => {
   it.each(["process", "none", "control-group", ""])(
     `warns when KillMode is %s in explicit unit file`,
     async (killMode) => {
-      const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-killmode-"));
+      const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-killmode-"));
       try {
         for (const continuation of SYSTEMD_CONTINUATIONS) {
           await writeSystemdUnitForAudit(home, [
@@ -750,7 +750,7 @@ describe("auditGatewayServiceConfig", () => {
   it.each(SYSTEMD_CONTINUATIONS)(
     "accepts resilient unit settings with continuation %j when the manager is unavailable",
     async (continuation) => {
-      const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-settings-"));
+      const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-settings-"));
       try {
         await writeSystemdUnitForAudit(home, [
           `After=basic.target ${continuation}network-online.target`,
@@ -777,9 +777,9 @@ describe("auditGatewayServiceConfig", () => {
     {
       name: "embedded credentials",
       content:
-        'Environment = "OPENCLAW_GATEWAY_TOKEN=audit-token" SAFE=kept \\\n  "OPENCLAW_GATEWAY_PASSWORD=audit-password"\n',
+        'Environment = "CARAPACE_GATEWAY_TOKEN=audit-token" SAFE=kept \\\n  "CARAPACE_GATEWAY_PASSWORD=audit-password"\n',
       mode: 0o600,
-      expectedDetail: "OPENCLAW_GATEWAY_PASSWORD, OPENCLAW_GATEWAY_TOKEN",
+      expectedDetail: "CARAPACE_GATEWAY_PASSWORD, CARAPACE_GATEWAY_TOKEN",
     },
     {
       name: "permissive mode",
@@ -788,7 +788,7 @@ describe("auditGatewayServiceConfig", () => {
       expectedDetail: "mode: 644",
     },
   ])("flags systemd unit backups with $name without revealing values", async (fixture) => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-backup-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-backup-"));
     try {
       await writeSystemdUnitForAudit(home, [
         "After=network-online.target",
@@ -801,7 +801,7 @@ describe("auditGatewayServiceConfig", () => {
         ".config",
         "systemd",
         "user",
-        "openclaw-gateway.service.bak",
+        "carapace-gateway.service.bak",
       );
       await fs.writeFile(backupPath, fixture.content, { mode: fixture.mode });
       await fs.chmod(backupPath, fixture.mode);
@@ -829,17 +829,17 @@ describe("auditGatewayServiceConfig", () => {
   });
 
   it("audits an orphaned systemd backup without an active command", async () => {
-    const home = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-service-audit-orphan-"));
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-service-audit-orphan-"));
     try {
       const backupPath = path.join(
         home,
         ".config",
         "systemd",
         "user",
-        "openclaw-gateway.service.bak",
+        "carapace-gateway.service.bak",
       );
       await fs.mkdir(path.dirname(backupPath), { recursive: true });
-      await fs.writeFile(backupPath, "Environment=OPENCLAW_GATEWAY_TOKEN=orphan-token\n", {
+      await fs.writeFile(backupPath, "Environment=CARAPACE_GATEWAY_TOKEN=orphan-token\n", {
         mode: 0o600,
       });
 
@@ -866,7 +866,7 @@ describe("auditGatewayServiceConfig", () => {
 
   it("flags an embedded service password without revealing it", async () => {
     const audit = await createGatewayAudit({
-      extraEnvironment: { OPENCLAW_GATEWAY_PASSWORD: "active-password" },
+      extraEnvironment: { CARAPACE_GATEWAY_PASSWORD: "active-password" },
     });
     expect(hasIssue(audit, SERVICE_AUDIT_CODES.gatewayPasswordEmbedded)).toBe(true);
     expect(JSON.stringify(audit.issues)).not.toContain("active-password");
@@ -884,7 +884,7 @@ describe("auditGatewayServiceConfig", () => {
       expectedGatewayToken: "new-token",
       serviceToken: "old-token",
       environmentValueSources: {
-        OPENCLAW_GATEWAY_TOKEN: "file",
+        CARAPACE_GATEWAY_TOKEN: "file",
       },
     });
     expectTokenAudit(audit, { embedded: false, mismatch: false });
@@ -895,7 +895,7 @@ describe("auditGatewayServiceConfig", () => {
       expectedGatewayToken: "new-token",
       serviceToken: "old-token",
       environmentValueSources: {
-        OPENCLAW_GATEWAY_TOKEN: "inline-and-file",
+        CARAPACE_GATEWAY_TOKEN: "inline-and-file",
       },
     });
     expectTokenAudit(audit, { embedded: true, mismatch: true });
@@ -904,7 +904,7 @@ describe("auditGatewayServiceConfig", () => {
   it("flags inline managed service env values from the service key list", async () => {
     const audit = await createGatewayAudit({
       extraEnvironment: {
-        OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY,OPENROUTER_API_KEY",
+        CARAPACE_SERVICE_MANAGED_ENV_KEYS: "TAVILY_API_KEY,OPENROUTER_API_KEY",
         TAVILY_API_KEY: "tvly-test",
         OPENROUTER_API_KEY: "or-test",
       },
@@ -1092,7 +1092,7 @@ describe("checkTokenDrift", () => {
 describe("legacy gateway service version metadata", () => {
   it("does not treat install-time version metadata as runtime truth", async () => {
     const legacyAudit = await createGatewayAudit({
-      extraEnvironment: { OPENCLAW_SERVICE_VERSION: "2026.4.15-beta.1" },
+      extraEnvironment: { CARAPACE_SERVICE_VERSION: "2026.4.15-beta.1" },
     });
     const canonicalAudit = await createGatewayAudit();
 

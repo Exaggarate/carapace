@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { readSessionSubmittedInput } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setGatewayDedupeEntry } from "../agent-turn/agent-job.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { pendingChatSendDedupeKey } from "../server-shared.js";
@@ -61,7 +61,7 @@ beforeEach(() => {
 
 describe("chat send stop ownership", () => {
   it("keeps the selected filter separate from the compatibility run fallback", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       session: { scope: "global", store: "/tmp/shared.sqlite" },
       agents: {
         ownership: "explicit",
@@ -208,7 +208,7 @@ describe("chat send retry identity", () => {
         role: "user" as const,
         timestamp: 100,
         content: params.request.rawMessage,
-        __openclaw: { humanMentions: params.request.mentions },
+        __carapace: { humanMentions: params.request.mentions },
       };
       vi.mocked(readSessionSubmittedInput).mockReturnValue(original);
       params.context.dedupe.set(`chat:${params.session.clientRunId}`, {
@@ -286,7 +286,7 @@ describe("chat send retry identity", () => {
       role: "user",
       timestamp: 100,
       content: params.request.rawMessage,
-      __openclaw: { humanMentions: params.request.mentions },
+      __carapace: { humanMentions: params.request.mentions },
     });
     params.request.mentions = undefined;
     expect(resolveChatSendRequestConflict(params)).toMatchObject({

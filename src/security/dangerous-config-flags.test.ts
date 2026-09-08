@@ -3,23 +3,23 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { collectEnabledInsecureOrDangerousFlagsFromContracts } from "./dangerous-config-flags-core.js";
 import { collectEnabledInsecureOrDangerousFlags } from "./dangerous-config-flags.js";
 
-function asConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asConfig(value: unknown): CarapaceConfig {
+  return value as CarapaceConfig;
 }
 
 describe("collectEnabledInsecureOrDangerousFlags", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   it("keeps plugin contract checks enabled for a malformed roster", () => {
-    const inheritedWorkspaceDir = tempDirs.make("openclaw-dangerous-inherited-workspace-");
-    const explicitWorkspaceDir = tempDirs.make("openclaw-dangerous-explicit-workspace-");
+    const inheritedWorkspaceDir = tempDirs.make("carapace-dangerous-inherited-workspace-");
+    const explicitWorkspaceDir = tempDirs.make("carapace-dangerous-explicit-workspace-");
     const pluginDir = path.join(
       inheritedWorkspaceDir,
-      ".openclaw",
+      ".carapace",
       "extensions",
       "workspace-danger",
     );
@@ -29,7 +29,7 @@ describe("collectEnabledInsecureOrDangerousFlags", () => {
       "export default { id: 'workspace-danger' };\n",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "workspace-danger",
         configSchema: { type: "object", additionalProperties: true },
@@ -56,12 +56,12 @@ describe("collectEnabledInsecureOrDangerousFlags", () => {
   });
 
   it("does not scan an unused defaults workspace when every malformed-roster entry is explicit", () => {
-    const defaultsWorkspaceDir = tempDirs.make("openclaw-dangerous-unused-defaults-");
-    const alphaWorkspaceDir = tempDirs.make("openclaw-dangerous-alpha-");
-    const betaWorkspaceDir = tempDirs.make("openclaw-dangerous-beta-");
+    const defaultsWorkspaceDir = tempDirs.make("carapace-dangerous-unused-defaults-");
+    const alphaWorkspaceDir = tempDirs.make("carapace-dangerous-alpha-");
+    const betaWorkspaceDir = tempDirs.make("carapace-dangerous-beta-");
     const pluginDir = path.join(
       defaultsWorkspaceDir,
-      ".openclaw",
+      ".carapace",
       "extensions",
       "workspace-danger",
     );
@@ -71,7 +71,7 @@ describe("collectEnabledInsecureOrDangerousFlags", () => {
       "export default { id: 'workspace-danger' };\n",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "workspace-danger",
         configSchema: { type: "object", additionalProperties: true },
@@ -98,15 +98,15 @@ describe("collectEnabledInsecureOrDangerousFlags", () => {
   });
 
   it("uses the implicit main workspace for a rosterless compatibility config", () => {
-    const workspaceDir = tempDirs.make("openclaw-dangerous-rosterless-");
-    const pluginDir = path.join(workspaceDir, ".openclaw", "extensions", "workspace-danger");
+    const workspaceDir = tempDirs.make("carapace-dangerous-rosterless-");
+    const pluginDir = path.join(workspaceDir, ".carapace", "extensions", "workspace-danger");
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(
       path.join(pluginDir, "index.js"),
       "export default { id: 'workspace-danger' };\n",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "carapace.plugin.json"),
       JSON.stringify({
         id: "workspace-danger",
         configSchema: { type: "object", additionalProperties: true },

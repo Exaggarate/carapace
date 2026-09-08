@@ -1,6 +1,6 @@
 // Checks package compatibility metadata for plugin manifests.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { prerelease as parseSemverPrerelease, satisfies as satisfiesSemver } from "semver";
 
 function normalizePartialComparableVersion(version: string): {
@@ -18,13 +18,13 @@ function shouldPreservePluginApiPrereleaseFloor(target: string): boolean {
 }
 
 function normalizePluginApiVersionForComparator(version: string, target: string): string {
-  const normalizedCorrection = normalizeOpenClawNumericCorrectionForPluginApi(version);
+  const normalizedCorrection = normalizeCarapaceNumericCorrectionForPluginApi(version);
   if (normalizedCorrection) {
     return normalizedCorrection;
   }
   return shouldPreservePluginApiPrereleaseFloor(target)
     ? version
-    : normalizeOpenClawReleaseSuffixForPluginApi(version);
+    : normalizeCarapaceReleaseSuffixForPluginApi(version);
 }
 
 function satisfiesComparator(version: string, token: string): boolean {
@@ -61,22 +61,22 @@ function satisfiesSemverRange(version: string, range: string): boolean {
   return tokens.every((token) => satisfiesComparator(version, token));
 }
 
-const OPENCLAW_RELEASE_SUFFIX_PATTERN =
+const CARAPACE_RELEASE_SUFFIX_PATTERN =
   /^[vV]?(\d{4}\.[1-9]\d?\.[1-9]\d*)(?:-\d+|-(?:alpha|beta|rc)\.\d+)$/i;
-const OPENCLAW_NUMERIC_CORRECTION_PATTERN = /^[vV]?(\d{4}\.[1-9]\d?\.[1-9]\d*)-\d+$/;
+const CARAPACE_NUMERIC_CORRECTION_PATTERN = /^[vV]?(\d{4}\.[1-9]\d?\.[1-9]\d*)-\d+$/;
 
-function normalizeOpenClawNumericCorrectionForPluginApi(
+function normalizeCarapaceNumericCorrectionForPluginApi(
   pluginApiVersion: string,
 ): string | undefined {
-  return OPENCLAW_NUMERIC_CORRECTION_PATTERN.exec(pluginApiVersion.trim())?.[1];
+  return CARAPACE_NUMERIC_CORRECTION_PATTERN.exec(pluginApiVersion.trim())?.[1];
 }
 
-function normalizeOpenClawReleaseSuffixForPluginApi(pluginApiVersion: string): string {
-  const match = OPENCLAW_RELEASE_SUFFIX_PATTERN.exec(pluginApiVersion.trim());
+function normalizeCarapaceReleaseSuffixForPluginApi(pluginApiVersion: string): string {
+  const match = CARAPACE_RELEASE_SUFFIX_PATTERN.exec(pluginApiVersion.trim());
   return match?.[1] ?? pluginApiVersion;
 }
 
-/** Result of reading package.json openclaw.compat.pluginApi metadata. */
+/** Result of reading package.json carapace.compat.pluginApi metadata. */
 type PackagePluginApiRangeResult = { ok: true; range?: string } | { ok: false; error: string };
 
 /** Resolves the plugin API compatibility range declared by package metadata. */
@@ -97,18 +97,18 @@ export function resolvePackagePluginApiRange(
     return { ok: true };
   }
   if (!isRecord(compat)) {
-    return { ok: false, error: "package.json openclaw.compat must be an object" };
+    return { ok: false, error: "package.json carapace.compat must be an object" };
   }
   if (!("pluginApi" in compat)) {
     return { ok: true };
   }
   const pluginApi = compat.pluginApi;
   if (typeof pluginApi !== "string") {
-    return { ok: false, error: "package.json openclaw.compat.pluginApi must be a string" };
+    return { ok: false, error: "package.json carapace.compat.pluginApi must be a string" };
   }
   const range = pluginApi.trim();
   if (!range) {
-    return { ok: false, error: "package.json openclaw.compat.pluginApi must not be empty" };
+    return { ok: false, error: "package.json carapace.compat.pluginApi must not be empty" };
   }
   return { ok: true, range };
 }

@@ -96,7 +96,7 @@ export async function runQaFlowSuiteFromRuntime(params?: QaSuiteRunParams): Prom
     ...new Set([
       ...collectQaSuitePluginIds(selectedScenarios),
       ...(params?.enabledPluginIds ?? []).map((pluginId) => pluginId.trim()).filter(Boolean),
-      ...(params?.forcedRuntime && params.forcedRuntime !== "openclaw"
+      ...(params?.forcedRuntime && params.forcedRuntime !== "carapace"
         ? [params.forcedRuntime]
         : []),
     ]),
@@ -177,7 +177,7 @@ export async function runQaFlowSuiteFromRuntime(params?: QaSuiteRunParams): Prom
       progressEnabled,
       scenarioIds: params.scenarioIds,
       runtimePair: params.runtimePair,
-      sutOpenClawCommand: params.sutOpenClawCommand,
+      sutCarapaceCommand: params.sutCarapaceCommand,
       mutateConfig: params.mutateConfig,
       writeEvidenceFile: params.writeEvidenceFile,
     });

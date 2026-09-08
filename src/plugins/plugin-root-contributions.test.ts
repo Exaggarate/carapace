@@ -13,7 +13,7 @@ function plugin(id: string, overrides: Partial<PluginManifestRecord> = {}): Plug
     origin: "global",
     rootDir: `/plugins/${id}`,
     source: `/plugins/${id}/index.js`,
-    manifestPath: `/plugins/${id}/openclaw.plugin.json`,
+    manifestPath: `/plugins/${id}/carapace.plugin.json`,
     ...overrides,
   };
 }

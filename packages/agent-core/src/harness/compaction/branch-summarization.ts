@@ -1,4 +1,4 @@
-import type { Model, StreamFn } from "@openclaw/llm-core";
+import type { Model, StreamFn } from "@carapace/llm-core";
 import {
   type AgentCoreCompletionRuntimeDeps,
   consumeAgentCoreStream,

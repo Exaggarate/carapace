@@ -4,10 +4,10 @@ import {
   createEmptyPluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getRealtimeTranscriptionProvider } from "openclaw/plugin-sdk/realtime-transcription";
-import { useAutoCleanupTempDirTracker, withEnvAsync } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { getRealtimeTranscriptionProvider } from "carapace/plugin-sdk/realtime-transcription";
+import { useAutoCleanupTempDirTracker, withEnvAsync } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it } from "vitest";
 import { CallManager } from "./manager.js";
 import { MockProvider } from "./providers/mock.js";
@@ -42,7 +42,7 @@ describe("VoiceCallWebhookServer transcription provider discovery", () => {
           } };`,
         );
         fs.writeFileSync(
-          path.join(pluginDir, "openclaw.plugin.json"),
+          path.join(pluginDir, "carapace.plugin.json"),
           JSON.stringify({
             id,
             configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -51,10 +51,10 @@ describe("VoiceCallWebhookServer transcription provider discovery", () => {
         );
         fs.writeFileSync(
           path.join(pluginDir, "package.json"),
-          JSON.stringify({ openclaw: { extensions: ["./index.cjs"] } }),
+          JSON.stringify({ carapace: { extensions: ["./index.cjs"] } }),
         );
       }
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: { defaults: { workspace } },
         plugins: {
           allow: ["active-stt", "configured-stt"],
@@ -66,10 +66,10 @@ describe("VoiceCallWebhookServer transcription provider discovery", () => {
       };
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: path.join(root, "state"),
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "extensions"),
-          OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CARAPACE_STATE_DIR: path.join(root, "state"),
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "extensions"),
+          CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
         },
         async () => {
           const activeProvider = getRealtimeTranscriptionProvider("active-stt", cfg);

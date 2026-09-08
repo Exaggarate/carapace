@@ -4,7 +4,7 @@ import type {
   PluginFormat,
   PluginManifest,
 } from "./manifest-types.js";
-import type { OpenClawPackageManifest, PackageManifest } from "./package-manifest.types.js";
+import type { CarapacePackageManifest, PackageManifest } from "./package-manifest.types.js";
 import type { PluginOrigin } from "./plugin-origin.types.js";
 import type { PluginDependencySpecMap } from "./status-dependencies-core.js";
 
@@ -29,7 +29,7 @@ export type PluginCandidate = {
   packageVersion?: string;
   packageDescription?: string;
   packageDir?: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   packageDependencies?: PluginDependencySpecMap;
   packageOptionalDependencies?: PluginDependencySpecMap;
   bundledManifestId?: string;

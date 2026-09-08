@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import {
   ErrorCodes,
   SESSION_CREATE_IDEMPOTENCY_RETENTION_MS,

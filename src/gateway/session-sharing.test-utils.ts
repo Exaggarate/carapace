@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { ensureProfileForEmail, setUserProfileRole } from "../state/user-profiles.js";
 import type { GatewayClient } from "./server-methods/types.js";
 
@@ -14,7 +14,7 @@ export function sharingPolicyClient(params: {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -53,7 +53,7 @@ export function sharingPolicyClient(params: {
   };
 }
 
-export function rolePolicyConfig(writeAgents: "*" | string[] = "*"): OpenClawConfig {
+export function rolePolicyConfig(writeAgents: "*" | string[] = "*"): CarapaceConfig {
   return {
     gateway: {
       roles: {

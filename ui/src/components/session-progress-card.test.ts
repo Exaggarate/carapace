@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 
-import type { ProgressCard } from "@openclaw/gateway-protocol";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import type { ProgressCard } from "@carapace/gateway-protocol";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderSessionProgressCard } from "./session-progress-card.ts";

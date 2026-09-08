@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Cron store tests cover persisted scheduled job state and run metadata.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../test/helpers/sqlite-statement-execution-counter.js";
 import { loadLegacyCronQuarantineForMigration } from "../commands/doctor/cron/legacy-quarantine-migration.js";
@@ -13,10 +13,10 @@ import {
   archiveLegacyCronStoreForMigration,
   loadLegacyCronStoreForMigration,
 } from "../commands/doctor/cron/legacy-store-migration.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { openCarapaceStateDatabase } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import {
   assertCronJobsStoreUnchanged,
   CronJobsStoreChangedError,
@@ -37,7 +37,7 @@ let fixtureRoot = "";
 let caseId = 0;
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-store-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-store-"));
 });
 
 afterAll(async () => {
@@ -123,18 +123,18 @@ async function expectPathMissing(targetPath: string): Promise<void> {
 const requireRecord = createRequireRecord("record", "expected-label");
 
 describe("resolveCronStorePath", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_HOME", "HOME"]);
+  const envSnapshot = captureEnv(["CARAPACE_HOME", "HOME"]);
 
   afterEach(() => {
     envSnapshot.restore();
   });
 
-  it("uses OPENCLAW_HOME for tilde expansion", () => {
-    setTestEnvValue("OPENCLAW_HOME", "/srv/openclaw-home");
+  it("uses CARAPACE_HOME for tilde expansion", () => {
+    setTestEnvValue("CARAPACE_HOME", "/srv/carapace-home");
     setTestEnvValue("HOME", "/home/other");
 
     const result = resolveCronStorePath("~/cron/jobs.json");
-    expect(result).toBe(path.resolve("/srv/openclaw-home", "cron", "jobs.json"));
+    expect(result).toBe(path.resolve("/srv/carapace-home", "cron", "jobs.json"));
   });
 });
 
@@ -436,7 +436,7 @@ describe("cron store", () => {
     const { storePath } = await makeStorePath();
     const store = makeStore("atomic-quarantine-job", true);
     await saveCronStore(storePath, store);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(
       "CREATE TEMP TRIGGER fail_cron_quarantine_update BEFORE UPDATE ON cron_jobs BEGIN SELECT RAISE(ABORT, 'cron update rejected'); END",
     );
@@ -468,7 +468,7 @@ describe("cron store", () => {
       job: { id: "atomic-recovery-job" },
     };
     saveCronQuarantinedJobs({ storePath, nowMs: 123, entries: [entry] });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(
       "CREATE TEMP TRIGGER fail_cron_recovery_update BEFORE UPDATE ON cron_jobs BEGIN SELECT RAISE(ABORT, 'cron recovery rejected'); END",
     );
@@ -495,7 +495,7 @@ describe("cron store", () => {
     await saveCronJobsStore(storePath, store, { transactionHooks: { afterCommit } });
     expect(afterCommit).toHaveBeenCalledOnce();
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(
       "CREATE TEMP TRIGGER reject_cron_post_commit BEFORE UPDATE ON cron_jobs BEGIN SELECT RAISE(ABORT, 'cron update rejected'); END",
     );
@@ -521,7 +521,7 @@ describe("cron store", () => {
     );
     surviving.state = { nextRunAtMs: 987_654 };
     await saveCronStore(storePath, { version: 1, jobs: [malformed, surviving] });
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare(
         "UPDATE cron_jobs SET job_json = json_set(job_json, '$.schedule.kind', ?) WHERE store_key = ? AND job_id = ?",
       )
@@ -762,7 +762,7 @@ describe("cron store", () => {
 
     await saveCronStore(store.storePath, payload);
 
-    const queuedRow = openOpenClawStateDatabase()
+    const queuedRow = openCarapaceStateDatabase()
       .db.prepare("SELECT state_json FROM cron_jobs WHERE job_id = ?")
       .get(job.id) as { state_json: string };
     const queuedState = JSON.parse(queuedRow.state_json) as Record<string, unknown>;
@@ -873,7 +873,7 @@ describe("cron store", () => {
 
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const row = database.prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?").get(job.id) as {
       job_json: string;
     };
@@ -898,7 +898,7 @@ describe("cron store", () => {
 
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const parent = database
       .prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?")
       .get(job.id) as { job_json: string };
@@ -956,7 +956,7 @@ describe("cron store", () => {
     });
 
     // A damaged target cannot rehydrate the private exec grant.
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const row = database.prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?").get(job.id) as {
       job_json: string;
     };
@@ -1022,7 +1022,7 @@ describe("cron store", () => {
 
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const row = database.prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?").get(job.id) as {
       job_json: string;
     };
@@ -1042,7 +1042,7 @@ describe("cron store", () => {
     const job = expectDefined(authorityStore.jobs[0], "authority job test invariant");
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database
       .prepare(
         "UPDATE cron_jobs SET job_json = json_set(job_json, '$.payload.toolsAllow', json(?), '$.payload.toolsAllowIsDefault', json('false')) WHERE job_id = ?",
@@ -1075,7 +1075,7 @@ describe("cron store", () => {
     const job = expectDefined(authorityStore.jobs[0], "authority job test invariant");
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database
       .prepare("UPDATE cron_job_runtime_authorities SET authority_json = ? WHERE job_id = ?")
       .run("{not-json", job.id);
@@ -1102,7 +1102,7 @@ describe("cron store", () => {
     const job = expectDefined(authorityStore.jobs[0], "authority job test invariant");
     await saveCronStore(storePath, authorityStore);
 
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.exec(`
       CREATE TRIGGER reject_cron_runtime_authority_update
       BEFORE UPDATE ON cron_job_runtime_authorities
@@ -1152,7 +1152,7 @@ describe("cron store", () => {
 
     await saveCronStore(storePath, { version: 1, jobs: [] });
     expect(
-      openOpenClawStateDatabase()
+      openCarapaceStateDatabase()
         .db.prepare("SELECT job_id FROM cron_job_runtime_authorities WHERE job_id = ?")
         .get(job.id),
     ).toBeUndefined();
@@ -1384,7 +1384,7 @@ describe("cron store", () => {
 
     await saveCronStore(storePath, { version: 1, jobs: [job] });
 
-    const row = openOpenClawStateDatabase()
+    const row = openCarapaceStateDatabase()
       .db.prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?")
       .get(job.id) as { job_json: string };
     expect(JSON.parse(row.job_json).delivery.failureDestination).toEqual({
@@ -1791,8 +1791,8 @@ describe("cron jobs fingerprint guard", () => {
   it.each(["UTF-8", "UTF-16le", "UTF-16be"])(
     "fingerprints one raw definition snapshot independently of %s storage",
     async (encoding) => {
-      await withOpenClawTestState({ label: "cron-fingerprint" }, async (state) => {
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+      await withCarapaceTestState({ label: "cron-fingerprint" }, async (state) => {
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
         await fs.mkdir(path.dirname(databasePath), { recursive: true });
         const initial = new DatabaseSync(databasePath);
         try {
@@ -1808,7 +1808,7 @@ describe("cron jobs fingerprint guard", () => {
           expectDefined(makeStore(id, true).jobs[0], "fingerprint fixture"),
         );
         await saveCronStore(storePath, { version: 1, jobs });
-        const db = openOpenClawStateDatabase().db;
+        const db = openCarapaceStateDatabase().db;
         expect(db.prepare("PRAGMA encoding").get()).toEqual({ encoding });
         const storeKey = cronStoreKey(storePath);
         db.prepare(
@@ -2017,7 +2017,7 @@ describe("cron jobs fingerprint guard", () => {
     const store = makeAuthorityStore("legacy-authority-job");
     const job = expectDefined(store.jobs[0], "authority job");
     await saveCronStore(storePath, store);
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     const row = database.prepare("SELECT job_json FROM cron_jobs WHERE job_id = ?").get(job.id) as {
       job_json: string;
     };

@@ -1,7 +1,7 @@
 // Together plugin module implements models behavior.
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildManifestModelProviderConfig } from "carapace/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const TOGETHER_MANIFEST_CATALOG = manifest.modelCatalog.providers.together;
 export const TOGETHER_BASE_URL = TOGETHER_MANIFEST_CATALOG.baseUrl;

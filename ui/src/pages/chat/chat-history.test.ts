@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { reduceSessionProjection } from "@openclaw/gateway-client/browser";
+import { reduceSessionProjection } from "@carapace/gateway-client/browser";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import { GatewayRequestError, type GatewayBrowserClient } from "../../api/gateway.ts";
@@ -597,7 +597,7 @@ describe("canonical history snapshot projection", () => {
     return {
       role,
       content: [{ type: "text", text }],
-      ...(metadata ? { __openclaw: metadata } : {}),
+      ...(metadata ? { __carapace: metadata } : {}),
     };
   }
 
@@ -953,7 +953,7 @@ describe("active-run commentary reconciliation", () => {
     expect(
       state.chatMessages.some(
         (message) =>
-          (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+          (message as { carapaceStreamFallback?: { itemId?: unknown } }).carapaceStreamFallback
             ?.itemId === "preamble-live",
       ),
     ).toBe(true);

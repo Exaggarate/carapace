@@ -3,7 +3,7 @@ import {
   type AssistantMessage,
   type Context,
   type Model,
-} from "openclaw/plugin-sdk/llm";
+} from "carapace/plugin-sdk/llm";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { readNestedToolActivity } from "../../../sessions/nested-tool-activity.js";
 import {
@@ -91,7 +91,7 @@ describe("runEmbeddedAttempt Code Mode recovery boundary", () => {
       appliedChanges.push((input as { value: string }).value);
       return jsonResult({ written: true });
     });
-    hoisted.createOpenClawCodingToolsMock.mockReturnValue([read, shell, applyPatch, write]);
+    hoisted.createCarapaceCodingToolsMock.mockReturnValue([read, shell, applyPatch, write]);
 
     const programs = [
       "return await apply_patch({});",

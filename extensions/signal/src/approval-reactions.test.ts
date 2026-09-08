@@ -1,8 +1,8 @@
-import { addApprovalReactionHintToText } from "openclaw/plugin-sdk/approval-reaction-runtime";
+import { addApprovalReactionHintToText } from "carapace/plugin-sdk/approval-reaction-runtime";
 import {
   buildExecApprovalPendingReplyPayload,
   buildPluginApprovalPendingReplyPayload,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "carapace/plugin-sdk/approval-reply-runtime";
 // Signal tests cover approval reactions plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -20,12 +20,12 @@ const resolverMocks = vi.hoisted(() => ({
   isApprovalNotFoundError: vi.fn(() => false),
 }));
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("carapace/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: resolverMocks.resolveSignalApproval,
 }));
-vi.mock("openclaw/plugin-sdk/error-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/error-runtime")>(
-    "openclaw/plugin-sdk/error-runtime",
+vi.mock("carapace/plugin-sdk/error-runtime", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/error-runtime")>(
+    "carapace/plugin-sdk/error-runtime",
   );
   return {
     ...actual,

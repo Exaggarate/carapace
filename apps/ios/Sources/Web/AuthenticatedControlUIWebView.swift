@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 import WebKit
 
@@ -110,20 +110,20 @@ enum AuthenticatedControlUI {
                 : gateway.pathname.replace(/\\/+$/, "") || gateway.pathname;
               const scope = `${gateway.protocol}//${gateway.host}${path}${gateway.search}`;
               localStorage.setItem(
-                "openclaw-device-identity-v1",
+                "carapace-device-identity-v1",
                 JSON.stringify(deviceAuthSeed.identity));
               localStorage.setItem(
-                `openclaw.device.auth.v1:${scope}`,
+                `carapace.device.auth.v1:${scope}`,
                 JSON.stringify(deviceAuthSeed.authorization));
-              localStorage.removeItem("openclaw.device.auth.v1");
+              localStorage.removeItem("carapace.device.auth.v1");
             }
             if (\(usesNativeNavigationChrome)) {
-              Object.defineProperty(window, "__OPENCLAW_NATIVE_WEB_CHROME__", {
+              Object.defineProperty(window, "__CARAPACE_NATIVE_WEB_CHROME__", {
                 value: true,
                 configurable: true,
               });
             }
-            Object.defineProperty(window, "__OPENCLAW_NATIVE_CONTROL_AUTH__", {
+            Object.defineProperty(window, "__CARAPACE_NATIVE_CONTROL_AUTH__", {
               value: \(json),
               configurable: true,
             });
@@ -314,7 +314,7 @@ final class DashboardEmbedCompatibility {
         self.markerTask = Task { [weak self, weak webView] in
             guard let webView else { return }
             let marker = try? await webView.evaluateJavaScript(
-                "document.querySelector('.openclaw-native-embed') !== null")
+                "document.querySelector('.carapace-native-embed') !== null")
             guard !Task.isCancelled, let self, self.documentID == documentID else { return }
             self.hasEmbedMarker = marker as? Bool == true
         }
@@ -380,7 +380,7 @@ final class AuthenticatedControlUIWebViewCoordinator: NSObject, WKNavigationDele
     static func embedScript(url: URL, isPad: Bool = UIDevice.current.userInterfaceIdiom == .pad) -> String? {
         let formFactor = isPad ? "pad" : "phone"
         return IOSDeviceSettingsBridge.originGatedScript(
-            "window.__OPENCLAW_NATIVE_EMBED__ = { platform: 'ios', formFactor: '\(formFactor)' };", url: url)
+            "window.__CARAPACE_NATIVE_EMBED__ = { platform: 'ios', formFactor: '\(formFactor)' };", url: url)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {

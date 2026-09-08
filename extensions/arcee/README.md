@@ -1,12 +1,12 @@
-# OpenClaw Arcee AI Provider
+# Carapace Arcee AI Provider
 
-Official OpenClaw provider plugin for Arcee AI.
+Official Carapace provider plugin for Arcee AI.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/arcee-provider
-openclaw gateway restart
+carapace plugins install @carapace/arcee-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/arcee> for setup and configuration.
+See <../../docs/providers/arcee.md> for setup and configuration.

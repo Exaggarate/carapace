@@ -1,5 +1,5 @@
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { escapeHtml, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { parseStrictNonNegativeInteger } from "carapace/plugin-sdk/number-runtime";
+import { escapeHtml, truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { normalizeFeishuExternalKey } from "./external-keys.js";
 import { parseInteractiveCardContent } from "./interactive-message-content.js";
 import { parsePostContent } from "./post.js";

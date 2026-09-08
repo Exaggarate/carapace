@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Microsoft Teams channel plugin for bot conversations."
+summary: "Carapace Microsoft Teams channel plugin for bot conversations."
 read_when:
   - You are installing, configuring, or auditing the msteams plugin
 title: "Microsoft Teams plugin reference"
@@ -7,14 +7,14 @@ title: "Microsoft Teams plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Microsoft Teams channel plugin for bot conversations.
+Carapace Microsoft Teams channel plugin for bot conversations.
 
 ## Distribution
 
-- Package: `@openclaw/msteams`
+- Package: `@carapace/msteams`
 - Install route: npm or ClawHub
 
 ## Surface

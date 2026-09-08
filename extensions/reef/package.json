@@ -1,7 +1,7 @@
 {
-  "name": "@openclaw/reef",
+  "name": "@carapace/reef",
   "version": "2026.9.2",
-  "description": "OpenClaw Reef channel plugin — guarded end-to-end encrypted claw-to-claw messaging",
+  "description": "Carapace Reef channel plugin — guarded end-to-end encrypted claw-to-claw messaging",
   "type": "module",
   "dependencies": {
     "@noble/ciphers": "2.4.0",
@@ -10,7 +10,7 @@
     "ws": "8.21.3",
     "zod": "4.4.3"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
@@ -33,6 +33,6 @@
     }
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   }
 }

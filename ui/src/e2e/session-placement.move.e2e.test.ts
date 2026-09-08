@@ -11,8 +11,8 @@ import {
 import { tooltipTitleText } from "./control-ui-e2e-suite.test-support.ts";
 
 const suite = createChatFlowE2eSuite();
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
-const runnerOfflineProofName = process.env.OPENCLAW_RUNNER_OFFLINE_SCREENSHOT;
+const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
+const runnerOfflineProofName = process.env.CARAPACE_RUNNER_OFFLINE_SCREENSHOT;
 
 async function capture(page: Page, name: string): Promise<void> {
   if (captureProof) {
@@ -288,7 +288,7 @@ suite.define(() => {
         status: "running",
       };
       const originalPrompt = {
-        __openclaw: {
+        __carapace: {
           id: `placement-user-${attempt}`,
           idempotencyKey: `${abandonedRunId}:user`,
           seq: 1,
@@ -302,10 +302,10 @@ suite.define(() => {
         seq: 2,
       };
       const abandonedPartial = {
-        __openclaw: abandonedPartialIdentity,
+        __carapace: abandonedPartialIdentity,
         content: [{ text: partialText, type: "text" }],
         idempotencyKey: `${abandonedRunId}:assistant`,
-        openclawAbort: { aborted: true, origin: "placement-abandon", runId: abandonedRunId },
+        carapaceAbort: { aborted: true, origin: "placement-abandon", runId: abandonedRunId },
         role: "assistant",
         stopReason: "stop",
         timestamp: 1_700_000_000_001,
@@ -326,7 +326,7 @@ suite.define(() => {
         await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
         await page.getByRole("button", { name: "Device offline" }).waitFor();
         await page.getByRole("button", { name: "Open split view" }).click();
-        const panes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+        const panes = page.locator("carapace-chat-pane.chat-split-view__pane");
         await expect.poll(() => panes.count()).toBe(2);
         for (const pane of await panes.all()) {
           await expect
@@ -415,7 +415,7 @@ suite.define(() => {
           "local placement run id",
         );
         const localUser = {
-          __openclaw: {
+          __carapace: {
             id: `placement-local-user-${attempt}`,
             idempotencyKey: `${localRunId}:user`,
             seq: 3,
@@ -426,7 +426,7 @@ suite.define(() => {
         };
         const localFinalIdentity = { id: `placement-local-final-${attempt}`, seq: 4 };
         const localFinal = {
-          __openclaw: localFinalIdentity,
+          __carapace: localFinalIdentity,
           content: [{ text: finalText, type: "text" }],
           role: "assistant",
           timestamp: 1_700_000_000_003,
@@ -495,7 +495,7 @@ suite.define(() => {
           thinkingLevel: null,
         });
         await page.reload();
-        const reloadedPanes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+        const reloadedPanes = page.locator("carapace-chat-pane.chat-split-view__pane");
         await expect.poll(() => reloadedPanes.count()).toBe(2);
         for (const pane of await reloadedPanes.all()) {
           await assertSettledPane(pane);
@@ -562,7 +562,7 @@ suite.define(() => {
                   >;
                 };
               }
-            >("openclaw-app-sidebar");
+            >("carapace-app-sidebar");
             return sidebar?.sessionData?.childSessionRowsByParent[parentKey]?.[0]?.placement?.runner
               ?.status;
           }, parent.key),
@@ -610,14 +610,14 @@ suite.define(() => {
                 };
               };
             }
-          >("openclaw-app-sidebar");
+          >("carapace-app-sidebar");
           return sidebar?.sessionData?.activeSessionLineageSelectedRow?.placement?.runner?.status;
         }),
       ).toBe("offline");
       expect(await gateway.getSocketCount()).toBe(1);
 
       await page.getByRole("button", { name: "Open split view" }).click();
-      const panes = page.locator("openclaw-chat-pane.chat-split-view__pane");
+      const panes = page.locator("carapace-chat-pane.chat-split-view__pane");
       await expect.poll(() => panes.count()).toBe(2);
       expect(await gateway.getRequests("chat.startup")).toHaveLength(1);
 
@@ -701,7 +701,7 @@ suite.define(() => {
         if (machineId) {
           await page.locator(`[data-value="machine:${machineId}"]`).click();
         } else {
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           expect(await dialog.getByText("Machine", { exact: true }).count()).toBe(0);
           expect(await dialog.locator('[data-value^="machine:"]').count()).toBe(0);
           await capture(page, "optionless-cloud-move.png");

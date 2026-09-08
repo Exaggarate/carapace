@@ -1,9 +1,9 @@
 // Line tests cover webhook body-limit answers as the sender receives them on the wire.
 import crypto from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { monitorLineProvider } from "./monitor.js";
 
@@ -16,9 +16,9 @@ const { createLineBotMock, registerWebhookTargetWithPluginRouteMock } = vi.hoist
 
 vi.mock("./bot.js", () => ({ createLineBot: createLineBotMock }));
 
-vi.mock("openclaw/plugin-sdk/webhook-ingress", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/webhook-ingress")>(
-    "openclaw/plugin-sdk/webhook-ingress",
+vi.mock("carapace/plugin-sdk/webhook-ingress", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/webhook-ingress")>(
+    "carapace/plugin-sdk/webhook-ingress",
   );
   return {
     ...actual,
@@ -64,7 +64,7 @@ describe("monitorLineProvider webhook body limits over a real connection", () =>
 
   afterAll(() => {
     vi.doUnmock("./bot.js");
-    vi.doUnmock("openclaw/plugin-sdk/webhook-ingress");
+    vi.doUnmock("carapace/plugin-sdk/webhook-ingress");
     vi.resetModules();
   });
 
@@ -75,7 +75,7 @@ describe("monitorLineProvider webhook body limits over a real connection", () =>
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
       accountId: "default",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const handler = requireRegisteredHandler();

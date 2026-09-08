@@ -596,11 +596,11 @@ describe("renderUpdates", () => {
       document.body.append(container);
       try {
         const view = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-          "openclaw-update-run-view",
+          "carapace-update-run-view",
         )!;
         await view.updateComplete;
         expect(view.querySelector(".update-run-view__report")?.textContent).toContain(
-          status === "succeeded" ? "OpenClaw updated to 2026.9.2" : `OpenClaw update ${status}`,
+          status === "succeeded" ? "Carapace updated to 2026.9.2" : `Carapace update ${status}`,
         );
         if (status !== "succeeded") {
           const recovery = row("Recovery");
@@ -608,7 +608,7 @@ describe("renderUpdates", () => {
           recovery.querySelectorAll<HTMLButtonElement>("button")[1]?.click();
           expect(onCheckStatus).toHaveBeenCalledOnce();
           expect(onUpdateNow).toHaveBeenCalledOnce();
-          expect(row("CLI fallback").querySelector("code")?.textContent).toBe("openclaw triage");
+          expect(row("CLI fallback").querySelector("code")?.textContent).toBe("carapace triage");
         } else {
           expect(container.textContent).not.toContain("Retry update");
         }
@@ -661,7 +661,7 @@ describe("renderUpdates", () => {
             attemptId: run.runId,
             result: {
               status: "fallback",
-              fallbackUrl: "https://github.com/openclaw/openclaw/issues/new?title=update",
+              fallbackUrl: "https://github.com/Exaggarate/carapace/issues/new?title=update",
               message: "gh is not authenticated",
             },
           },

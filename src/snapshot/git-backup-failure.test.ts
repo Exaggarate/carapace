@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import { expect, it } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { dumpGitBackupDatabase, restoreGitBackupDirectory } from "./git-backup-codec.js";
 
 it.each(["invalid-json", "hash-mismatch", "read-error"] as const)(
@@ -17,10 +17,10 @@ it.each(["invalid-json", "hash-mismatch", "read-error"] as const)(
     const outputPath = path.join(root, "dump");
     const targetPath = path.join(root, "restored.sqlite");
     try {
-      const database = openOpenClawStateDatabase({ path: sourcePath }).db;
+      const database = openCarapaceStateDatabase({ path: sourcePath }).db;
       database.exec("CREATE TABLE content (id INTEGER PRIMARY KEY, body TEXT NOT NULL)");
       database.prepare("INSERT INTO content VALUES (?, ?)").run(1, "original");
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       const manifest = await dumpGitBackupDatabase({
         snapshotPath: sourcePath,
         outputPath,
@@ -49,7 +49,7 @@ it.each(["invalid-json", "hash-mismatch", "read-error"] as const)(
         (await fs.readdir(root)).filter((name) => name.startsWith(".git-backup-restore-")),
       ).toEqual([]);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await fs.rm(root, { recursive: true, force: true });
     }
   },

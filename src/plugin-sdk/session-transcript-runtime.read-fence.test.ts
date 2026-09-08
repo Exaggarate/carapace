@@ -24,7 +24,7 @@ describe("session transcript runtime read fence", () => {
   let storePath: string;
 
   beforeEach(() => {
-    storePath = path.join(tempDirs.make("openclaw-sdk-transcript-fence-"), "sessions.json");
+    storePath = path.join(tempDirs.make("carapace-sdk-transcript-fence-"), "sessions.json");
   });
 
   it("fences full and raw reads before the exact admitted row and resumes from its cursor", async () => {

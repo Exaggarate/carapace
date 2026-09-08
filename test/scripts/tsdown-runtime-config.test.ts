@@ -1,10 +1,10 @@
 // Covers bundling rules encoded in the root tsdown config.
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { bundledPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../../src/state/openclaw-agent-schema.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../../src/state/openclaw-state-schema.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../../src/state/carapace-agent-schema.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../../src/state/carapace-state-schema.js";
 import tsdownConfig, {
   createStateSchemaInlinePlugin,
   STATE_SCHEMA_INLINE_PLUGIN_NAME,
@@ -117,16 +117,16 @@ describe("tsdown config", () => {
 
   it.each([
     {
-      exportName: "OPENCLAW_STATE_SCHEMA_SQL",
-      modulePath: "src/state/openclaw-state-schema.ts",
-      schemaPath: "src/state/openclaw-state-schema.sql",
-      sourceValue: OPENCLAW_STATE_SCHEMA_SQL,
+      exportName: "CARAPACE_STATE_SCHEMA_SQL",
+      modulePath: "src/state/carapace-state-schema.ts",
+      schemaPath: "src/state/carapace-state-schema.sql",
+      sourceValue: CARAPACE_STATE_SCHEMA_SQL,
     },
     {
-      exportName: "OPENCLAW_AGENT_SCHEMA_SQL",
-      modulePath: "src/state/openclaw-agent-schema.ts",
-      schemaPath: "src/state/openclaw-agent-schema.sql",
-      sourceValue: OPENCLAW_AGENT_SCHEMA_SQL,
+      exportName: "CARAPACE_AGENT_SCHEMA_SQL",
+      modulePath: "src/state/carapace-agent-schema.ts",
+      schemaPath: "src/state/carapace-agent-schema.sql",
+      sourceValue: CARAPACE_AGENT_SCHEMA_SQL,
     },
   ])("inlines canonical schema bytes for $modulePath", (schema) => {
     const rootDir = process.cwd();
@@ -202,7 +202,7 @@ describe("tsdown config", () => {
       "agents/model-provider-auth.worker",
       "config/sessions/session-accessor.sqlite-archive.worker",
       "infra/sqlite-readonly-location.worker",
-      "state/openclaw-database-verify.worker",
+      "state/carapace-database-verify.worker",
       "system-agent/setup-inference-detection.worker",
       "plugins/memory-state",
       "subagent-registry.runtime",
@@ -219,7 +219,7 @@ describe("tsdown config", () => {
       "plugins/runtime/index",
       "plugins/synthetic-auth.runtime",
       "web-fetch/runtime",
-      "mcp/openclaw-tools-serve",
+      "mcp/carapace-tools-serve",
       "mcp/plugin-tools-serve",
       bundledEntry("active-memory"),
       "bundled/boot-md/handler",
@@ -344,8 +344,8 @@ describe("tsdown config", () => {
 
     expect(alwaysBundle("@openclaw/fs-safe")).toBe(false);
     expect(alwaysBundle("@openclaw/fs-safe/path")).toBe(false);
-    expect(alwaysBundle("openclaw/plugin-sdk/ssrf-runtime-internal")).toBe(true);
-    expect(alwaysBundle("openclaw/plugin-sdk/ssrf-runtime")).toBe(false);
+    expect(alwaysBundle("carapace/plugin-sdk/ssrf-runtime-internal")).toBe(true);
+    expect(alwaysBundle("carapace/plugin-sdk/ssrf-runtime")).toBe(false);
     expect(alwaysBundle("zod")).toBe(true);
     expect(alwaysBundle("zod/v4/core")).toBe(true);
     expect(alwaysBundle("not-a-runtime-dependency")).toBe(false);

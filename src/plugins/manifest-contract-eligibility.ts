@@ -1,10 +1,10 @@
 // Determines which manifest contracts are eligible for plugin activation.
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   hasMeaningfulChannelConfigShallow,
   resolveChannelConfigRecord,
 } from "../config/channel-configured-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { readBundledDiscoveryModeMemoized } from "./bundled-discovery-state.js";
 import { isBundledProviderCompatContract } from "./bundled-provider-compat.js";
 import { normalizePluginsConfig, type NormalizedPluginsConfig } from "./config-state.js";
@@ -26,7 +26,7 @@ export function isManifestPluginOwnerAllowedByControlPlanePolicy(params: {
   plugin: Pick<PluginManifestRecord, "id" | "origin"> & {
     channels?: readonly string[];
   };
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   /** Batch callers carry the policy normalized from this same config. */
   normalizedConfig?: NormalizedPluginsConfig;
   allowRestrictiveAllowlistBypass?: boolean;
@@ -74,7 +74,7 @@ export function isManifestPluginAvailableForControlPlane(params: {
     PluginManifestRecord,
     "id" | "origin" | "enabledByDefault" | "enabledByDefaultOnPlatforms"
   > & { channels?: readonly string[] };
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   normalizedConfig?: NormalizedPluginsConfig;
   allowRestrictiveAllowlistBypass?: boolean;
   allowBundledProviderCompat?: boolean;
@@ -112,7 +112,7 @@ export function listAvailableManifestContractPlugins(params: {
   snapshot: Pick<PluginMetadataSnapshot, "index" | "plugins">;
   contract: PluginManifestContractListKey;
   value?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): PluginManifestRecord[] {
   const normalizedConfig = normalizePluginsConfig(params.config?.plugins);
@@ -143,7 +143,7 @@ export function listAvailableManifestContractPlugins(params: {
 export function listAvailableManifestContractValues(params: {
   snapshot: Pick<PluginMetadataSnapshot, "index" | "plugins">;
   contract: PluginManifestContractListKey;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): string[] {
   const values = new Set<string>();
@@ -156,7 +156,7 @@ export function listAvailableManifestContractValues(params: {
 }
 
 export function loadManifestContractSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataManifestView {
@@ -168,7 +168,7 @@ export function loadManifestContractSnapshot(params: {
 }
 
 export function loadManifestMetadataRegistry(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataRegistryView {
@@ -180,7 +180,7 @@ export function loadManifestMetadataRegistry(params: {
 }
 
 export function loadManifestMetadataSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataSnapshot {

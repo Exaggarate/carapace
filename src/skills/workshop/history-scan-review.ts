@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { SessionManager } from "../../agents/sessions/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildSkillHistoryScanPrompt,
   type SkillHistoryScanPromptSession,
@@ -20,7 +20,7 @@ const HISTORY_SCAN_TIMEOUT_MS = 10 * 60_000;
 
 export async function runSkillHistoryScanReview(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   modelRef: { model: string; provider: string };
   onComplete: (ideasFound: number) => Promise<void>;

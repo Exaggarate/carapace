@@ -1,10 +1,10 @@
 // Owner-authorized import for the retired primary device identity JSON.
 import { root, type Root } from "@openclaw/fs-safe";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { acquireDeviceIdentityCoordinator } from "./device-identity-coordinator.js";
 import {
   normalizeLegacyDeviceIdentity,
@@ -69,7 +69,7 @@ function deviceIdentityKeyMaterialMatches(left: DeviceIdentity, right: DeviceIde
   }
 }
 
-type DeviceIdentityMigrationDatabase = Pick<OpenClawStateKyselyDatabase, "device_identities">;
+type DeviceIdentityMigrationDatabase = Pick<CarapaceStateKyselyDatabase, "device_identities">;
 
 type LegacySourceSnapshot = LegacyMigrationSourceSnapshot & {
   identity: NormalizedLegacyDeviceIdentity;
@@ -144,7 +144,7 @@ function classifyCanonicalRow(
 }
 
 function readCanonicalIdentity(
-  db: ReturnType<typeof openOpenClawStateDatabase>["db"],
+  db: ReturnType<typeof openCarapaceStateDatabase>["db"],
 ): CanonicalIdentityRow | undefined {
   return executeSqliteQueryTakeFirstSync(
     db,
@@ -159,7 +159,7 @@ function verifyCanonicalIdentity(
   identity: NormalizedLegacyDeviceIdentity,
   env: NodeJS.ProcessEnv,
 ): void {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openCarapaceStateDatabase({ env });
   const row = readCanonicalIdentity(db);
   if (!row || classifyCanonicalRow(row, identity) !== "same") {
     throw new Error("canonical SQLite device identity no longer matches the legacy source");
@@ -174,7 +174,7 @@ function importAndRecordReceipt(params: {
   const sourceKey = resolveLegacyMigrationSourceKey("device-identity-json", params.sourcePath);
   const runId = `${sourceKey}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runCarapaceStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<DeviceIdentityMigrationDatabase>(db);
       const existingReceipt = readLegacyMigrationReceiptFromDatabase(db, sourceKey);

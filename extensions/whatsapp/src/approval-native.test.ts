@@ -1,21 +1,21 @@
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 // Whatsapp tests cover approval native plugin behavior.
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/approval-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { whatsappApprovalCapability } from "./approval-native.js";
 
-type WhatsAppConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["whatsapp"]>;
+type WhatsAppConfig = NonNullable<NonNullable<CarapaceConfig["channels"]>["whatsapp"]>;
 
 function buildConfig(
   params: {
     whatsapp?: Partial<WhatsAppConfig>;
-    approvals?: OpenClawConfig["approvals"];
+    approvals?: CarapaceConfig["approvals"];
   } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   return {
     channels: {
       whatsapp: {
@@ -24,7 +24,7 @@ function buildConfig(
       },
     },
     approvals: params.approvals,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function buildExecRequest(
@@ -69,7 +69,7 @@ function buildPluginRequest(
 }
 
 function nativeShouldHandle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   approvalKind: ChannelApprovalKind;
   request: ExecApprovalRequest | PluginApprovalRequest;
   accountId?: string | null;

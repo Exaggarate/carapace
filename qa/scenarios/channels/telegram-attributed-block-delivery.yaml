@@ -90,7 +90,7 @@ flow:
                   senderId: { ref: config.senderId }
                   senderName: QA Delivery Operator
                   text:
-                    expr: "`@openclaw qa group visible reply tool check. Reply exactly: ${fixture.text}`"
+                    expr: "`@carapace qa group visible reply tool check. Reply exactly: ${fixture.text}`"
               - call: waitForCondition
                 saveAs: toolRequest
                 args:

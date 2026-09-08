@@ -6,9 +6,9 @@ import {
   formatErrorMessage,
   resolveAttemptFsWorkspaceOnly,
   setActiveEmbeddedRun,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-local-roots";
-import { hasPromptImageInput } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { getAgentScopedMediaLocalRoots } from "carapace/plugin-sdk/media-local-roots";
+import { hasPromptImageInput } from "carapace/plugin-sdk/session-transcript-runtime";
 import { terminateCodexBackgroundTerminals } from "./attempt-client-cleanup.js";
 import { isTerminalTurnStatus } from "./attempt-notifications.js";
 import {

@@ -1,5 +1,5 @@
 import { resolveConfigWidePluginManifestRegistry } from "../../../config/io.plugin-metadata.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   withPluginMetadataSnapshotScope,
   type PluginMetadataSnapshotScopeRunner,
@@ -31,7 +31,7 @@ const configWideDoctorSnapshots = new WeakSet<PluginMetadataSnapshot>();
 /** Aligns Doctor's immutable snapshot view with config-wide agent workspace discovery. */
 export function resolveConfigWideDoctorPluginMetadataSnapshot(params: {
   snapshot: PluginMetadataSnapshot;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataSnapshot {
   if (configWideDoctorSnapshots.has(params.snapshot)) {
@@ -52,7 +52,7 @@ export function resolveConfigWideDoctorPluginMetadataSnapshot(params: {
 /** Promotes validation-scoped metadata to a complete immutable Doctor snapshot. */
 export function completeDoctorPluginMetadataSnapshot(params: {
   snapshot?: PluginMetadataSnapshot;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): PluginMetadataSnapshot | undefined {
   const snapshot = completePluginMetadataSnapshot(params);
@@ -92,7 +92,7 @@ export function createDoctorPluginMetadataSnapshotScope(params: {
     }
   };
 
-  const resolveSnapshot = (config: OpenClawConfig, workspaceDir: string | undefined) => {
+  const resolveSnapshot = (config: CarapaceConfig, workspaceDir: string | undefined) => {
     // An unqualified operation inherits compatible prepared context, not the system workspace.
     // Explicit workspace requests and narrower bases must retain their exact scope.
     const inheritedBase =

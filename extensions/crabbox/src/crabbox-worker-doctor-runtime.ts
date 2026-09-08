@@ -1,4 +1,4 @@
-import { runCommandWithTimeout, type SpawnResult } from "openclaw/plugin-sdk/process-runtime";
+import { runCommandWithTimeout, type SpawnResult } from "carapace/plugin-sdk/process-runtime";
 
 const CRABBOX_VERSION_TIMEOUT_MS = 2_000;
 const CRABBOX_VERSION_MAX_OUTPUT_BYTES = 64 * 1024;

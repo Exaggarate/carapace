@@ -214,7 +214,7 @@ describe("node workspace retain coordinator", () => {
         environment({
           bootstrapReceipt: {
             bundleHash: "b".repeat(64),
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -243,7 +243,7 @@ describe("node workspace retain coordinator", () => {
         environment({
           bootstrapReceipt: {
             bundleHash,
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -277,7 +277,7 @@ describe("node workspace retain coordinator", () => {
         environment({
           bootstrapReceipt: {
             bundleHash,
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -321,7 +321,7 @@ describe("node workspace retain coordinator", () => {
         environment({
           bootstrapReceipt: {
             bundleHash: currentHash,
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -343,7 +343,7 @@ describe("node workspace retain coordinator", () => {
       environment({
         bootstrapReceipt: {
           bundleHash,
-          openclawVersion: "2026.8.9",
+          carapaceVersion: "2026.8.9",
           protocolFeatures: [],
           installKind: "bundle",
         },
@@ -377,7 +377,7 @@ describe("node workspace retain coordinator", () => {
             createdAtMs: 3,
             bootstrapReceipt: {
               bundleHash: "c".repeat(64),
-              openclawVersion: "2026.8.10",
+              carapaceVersion: "2026.8.10",
               protocolFeatures: [],
               installKind: "bundle",
             },
@@ -400,7 +400,7 @@ describe("node workspace retain coordinator", () => {
         environment({
           bootstrapReceipt: {
             bundleHash,
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -445,7 +445,7 @@ describe("node workspace retain coordinator", () => {
           attachedSessionIds: [],
           bootstrapReceipt: {
             bundleHash: index.toString(16).padStart(64, "0"),
-            openclawVersion: "2026.8.1",
+            carapaceVersion: "2026.8.1",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -479,7 +479,7 @@ describe("node workspace retain coordinator", () => {
           createdAtMs: index === NODE_WORKER_BUNDLE_RETAIN_MAX_HASHES - 1 ? 10 : 1,
           bootstrapReceipt: {
             bundleHash: index.toString(16).padStart(64, "0"),
-            openclawVersion: "2026.8.9",
+            carapaceVersion: "2026.8.9",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -529,7 +529,7 @@ describe("node workspace retain coordinator", () => {
           attachedSessionIds: attached ? [`session-${"s".repeat(224)}-${suffix}`] : [],
           bootstrapReceipt: {
             bundleHash: index.toString(16).padStart(64, "0"),
-            openclawVersion: "2026.8.1",
+            carapaceVersion: "2026.8.1",
             protocolFeatures: [],
             installKind: "bundle",
           },
@@ -693,7 +693,7 @@ describe("node workspace retain coordinator", () => {
   it("retains the current build without installing it or keeping unreferenced older builds", async () => {
     const artifact = {
       bundleHash: "c".repeat(64),
-      openclawVersion: "2026.8.10",
+      carapaceVersion: "2026.8.10",
       protocolFeatures: [],
     };
     const input = {
@@ -794,7 +794,7 @@ describe("node workspace retain coordinator", () => {
   it("rechecks environment ownership after resolving the current build before retaining it", async () => {
     const artifact = {
       bundleHash: "c".repeat(64),
-      openclawVersion: "2026.8.10",
+      carapaceVersion: "2026.8.10",
       protocolFeatures: [],
     };
     const held = createDeferredCore<typeof artifact>();

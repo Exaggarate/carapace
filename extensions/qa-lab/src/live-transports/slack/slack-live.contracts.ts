@@ -1,11 +1,11 @@
 // QA Lab Slack live domain contracts and wire schemas.
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { z } from "zod";
 import type { QaGatewayChild } from "../../gateway-child.js";
 import { splitQaModelRef } from "../../model-selection.js";
 
-type SlackQaRuntime = typeof import("@openclaw/slack/test-api.js");
+type SlackQaRuntime = typeof import("@carapace/slack/test-api.js");
 type CreateSlackWebClient = SlackQaRuntime["createSlackWebClient"];
 
 export type SlackQaWebClient = ReturnType<CreateSlackWebClient>;
@@ -94,7 +94,7 @@ export const SLACK_QA_NATIVE_TABLE = {
 const SLACK_QA_CODEX_PROVIDER_IDS = new Set(["codex", "openai"]);
 
 export type SlackQaApprovalDecision = "allow-always" | "allow-once" | "deny";
-export const SLACK_QA_APPROVAL_ACTION_PREFIX = "openclaw:approval:v1:";
+export const SLACK_QA_APPROVAL_ACTION_PREFIX = "carapace:approval:v1:";
 export const SlackQaApprovalActionValueSchema = z
   .object({
     approvalId: z.string().min(1),
@@ -142,7 +142,7 @@ type SlackQaDirectTransportScenarioRun = {
 };
 
 export type SlackQaDirectTransportScenarioContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channelId: string;
   sutAccountId: string;
   sutIdentity: SlackAuthIdentity;
@@ -285,15 +285,15 @@ export type SlackApprovalCheckpointMessage = {
   text: string;
 };
 
-export const SLACK_QA_APPROVAL_CHECKPOINT_DIR_ENV = "OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_DIR";
+export const SLACK_QA_APPROVAL_CHECKPOINT_DIR_ENV = "CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_DIR";
 export const SLACK_QA_APPROVAL_CHECKPOINT_TIMEOUT_MS_ENV =
-  "OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS";
+  "CARAPACE_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS";
 export const SLACK_QA_WEB_API_TIMEOUT_MS = 45_000;
 export const SLACK_QA_ENV_KEYS = [
-  "OPENCLAW_QA_SLACK_CHANNEL_ID",
-  "OPENCLAW_QA_SLACK_DRIVER_BOT_TOKEN",
-  "OPENCLAW_QA_SLACK_SUT_BOT_TOKEN",
-  "OPENCLAW_QA_SLACK_SUT_APP_TOKEN",
+  "CARAPACE_QA_SLACK_CHANNEL_ID",
+  "CARAPACE_QA_SLACK_DRIVER_BOT_TOKEN",
+  "CARAPACE_QA_SLACK_SUT_BOT_TOKEN",
+  "CARAPACE_QA_SLACK_SUT_APP_TOKEN",
 ] as const;
 
 export const slackQaCredentialPayloadSchema = z.object({

@@ -1,4 +1,4 @@
-const CAMPAIGN_SCHEMA = "openclaw.release-validation-campaign/v1";
+const CAMPAIGN_SCHEMA = "carapace.release-validation-campaign/v1";
 const CAMPAIGN_LABEL = "release-validation";
 const FINDING_LABEL = "release-validation-finding";
 const CAMPAIGN_LABEL_COLOR = "0E8A16";
@@ -8,7 +8,7 @@ const BETA_TAG_PATTERN = /^v(\d{4})\.(\d+)\.(\d+)-beta\.([1-9]\d*)$/u;
 const STABLE_TAG_PATTERN = /^v(\d{4})\.(\d+)\.(\d+)$/u;
 const FULL_SHA_PATTERN = /^[0-9a-f]{40}$/u;
 const PLACEHOLDER_PATTERN = /\{\{([A-Z0-9_]+)\}\}/gu;
-const ALLOWED_PLACEHOLDERS = new Set(["OPENCLAW", "RESTART_GATEWAY"]);
+const ALLOWED_PLACEHOLDERS = new Set(["CARAPACE", "RESTART_GATEWAY"]);
 
 function labelName(label) {
   return typeof label === "string" ? label : label?.name;
@@ -51,7 +51,7 @@ function validateBetaBody(body, { tag, stableTrain, releaseUrl, releaseCommit, g
     throw new Error("Release-validation campaign body exceeds the issue-body safety limit");
   }
 
-  const marker = `<!-- openclaw-release-validation:${stableTrain} -->`;
+  const marker = `<!-- carapace-release-validation:${stableTrain} -->`;
   const requiredOnce = [
     marker,
     `- Current beta: [${tag}](${releaseUrl})`,
@@ -114,7 +114,7 @@ export function validateReleaseValidationCampaignArtifact(
     throw new Error(`Campaign artifact stable train ${stableTrain} does not match ${tag}`);
   }
   const releaseUrl = requireString(artifact.releaseUrl, "releaseUrl");
-  const expectedReleaseUrl = `https://github.com/openclaw/openclaw/releases/tag/${tag}`;
+  const expectedReleaseUrl = `https://github.com/Exaggarate/carapace/releases/tag/${tag}`;
   if (releaseUrl !== expectedReleaseUrl) {
     throw new Error(`Campaign artifact release URL must be ${expectedReleaseUrl}`);
   }
@@ -157,7 +157,7 @@ export function validateReleaseValidationCampaignArtifact(
     throw new Error("Campaign artifact guidance main SHA does not match the workflow checkout");
   }
   const title = requireString(artifact.title, "title");
-  const expectedTitle = `OpenClaw ${parsedTag.displayVersion} beta feedback`;
+  const expectedTitle = `Carapace ${parsedTag.displayVersion} beta feedback`;
   if (title !== expectedTitle) {
     throw new Error(`Campaign artifact title must be ${expectedTitle}`);
   }
@@ -188,13 +188,13 @@ async function ensureLabel({ github, owner, repo, name, color, description }) {
 }
 
 function hasMarker(issue, stableTrain) {
-  return issue.body?.includes(`<!-- openclaw-release-validation:${stableTrain} -->`);
+  return issue.body?.includes(`<!-- carapace-release-validation:${stableTrain} -->`);
 }
 
 function hasLegacyMarker(issue, stableTrain) {
   const escapedTrain = stableTrain.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   return new RegExp(
-    `<!-- openclaw-release-validation:${escapedTrain}-beta\\.[1-9]\\d* -->`,
+    `<!-- carapace-release-validation:${escapedTrain}-beta\\.[1-9]\\d* -->`,
     "u",
   ).test(issue.body ?? "");
 }
@@ -308,7 +308,7 @@ export async function runReleaseValidationCampaignPublish({
     repo,
     name: CAMPAIGN_LABEL,
     color: CAMPAIGN_LABEL_COLOR,
-    description: "Canonical OpenClaw release-validation campaign",
+    description: "Canonical Carapace release-validation campaign",
   });
   await ensureLabel({
     github,

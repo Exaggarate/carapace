@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -14,7 +14,7 @@ function gitOkResult(overrides: Partial<UpdateRunResult> = {}): UpdateRunResult 
   return {
     status: "ok",
     mode: "git",
-    root: "/srv/openclaw",
+    root: "/srv/carapace",
     before: { sha: "aaa", version: "2026.5.3" },
     after: { sha: "bbb", version: "2026.6.1" },
     steps: [],
@@ -23,7 +23,7 @@ function gitOkResult(overrides: Partial<UpdateRunResult> = {}): UpdateRunResult 
   };
 }
 
-const ENTRYPOINT = "/srv/openclaw/dist/index.mjs";
+const ENTRYPOINT = "/srv/carapace/dist/index.mjs";
 const resolveEntrypointOk = async () => ENTRYPOINT;
 type PostCoreFinalizeSpawner = NonNullable<
   Parameters<typeof runPostCoreFinalizeAfterGatewayUpdate>[0]["spawnFinalize"]
@@ -104,9 +104,9 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
     ]);
     expect(call.argv).not.toContain("--channel");
     // Configured channel is carried as the effective convergence channel via env.
-    expect(call.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL).toBe("stable");
+    expect(call.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL).toBe("stable");
     // Host-compat resolution is pinned to the just-installed core version.
-    expect(call.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("2026.6.1");
+    expect(call.env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBe("2026.6.1");
     // Outer whole-process timeout is decoupled from the per-step --timeout (120s):
     // a generous floor so a valid multi-step finalize is not killed prematurely.
     expect(call.timeoutMs).toBe(30 * 60_000);
@@ -120,9 +120,9 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
       spawnFinalize,
       env: {
         PATH: "/usr/bin",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
-        OPENCLAW_GATEWAY_SERVICE_PID: "4242",
+        CARAPACE_SERVICE_MARKER: "carapace",
+        CARAPACE_SERVICE_KIND: "gateway",
+        CARAPACE_GATEWAY_SERVICE_PID: "4242",
       },
     });
     const { env } = expectDefined(
@@ -130,19 +130,19 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
       "spawnFinalize.mock.calls[0] test invariant",
     )[0];
     expect(env.PATH).toBe("/usr/bin");
-    expect(env.OPENCLAW_SERVICE_MARKER).toBeUndefined();
-    expect(env.OPENCLAW_SERVICE_KIND).toBeUndefined();
-    expect(env.OPENCLAW_GATEWAY_SERVICE_PID).toBeUndefined();
+    expect(env.CARAPACE_SERVICE_MARKER).toBeUndefined();
+    expect(env.CARAPACE_SERVICE_KIND).toBeUndefined();
+    expect(env.CARAPACE_GATEWAY_SERVICE_PID).toBeUndefined();
   });
 
   it("isolates stale handoff values at the RPC finalizer boundary", async () => {
     const spawnFinalize = vi.fn<PostCoreFinalizeSpawner>(async () => ({ code: 0 }));
     const baseEnv: NodeJS.ProcessEnv = {
       PATH: "/usr/bin",
-      OPENCLAW_COMPATIBILITY_HOST_VERSION: "stale-version",
-      OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
-      OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
-      OPENCLAW_UNRELATED: "preserved",
+      CARAPACE_COMPATIBILITY_HOST_VERSION: "stale-version",
+      CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: "dev",
+      CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
+      CARAPACE_UNRELATED: "preserved",
     };
     await runPostCoreFinalizeAfterGatewayUpdate({
       result: gitOkResult({ after: undefined }),
@@ -155,36 +155,36 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
       spawnFinalize.mock.calls[0],
       "spawnFinalize.mock.calls[0] test invariant",
     )[0];
-    expect(env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBeUndefined();
-    expect(env.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBeUndefined();
-    expect(env.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBeUndefined();
-    expect(env.OPENCLAW_UNRELATED).toBe("preserved");
-    expect(baseEnv.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("stale-version");
-    expect(baseEnv.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("dev");
-    expect(baseEnv.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBe("/tmp/stale-config.json");
+    expect(env.CARAPACE_COMPATIBILITY_HOST_VERSION).toBeUndefined();
+    expect(env.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBeUndefined();
+    expect(env.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBeUndefined();
+    expect(env.CARAPACE_UNRELATED).toBe("preserved");
+    expect(baseEnv.CARAPACE_COMPATIBILITY_HOST_VERSION).toBe("stale-version");
+    expect(baseEnv.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL).toBe("dev");
+    expect(baseEnv.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH).toBe("/tmp/stale-config.json");
   });
 
   it("keeps the default process wrapper from restoring ambient handoff values", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-post-core-finalize-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-post-core-finalize-"));
     const entrypoint = path.join(root, "capture-env.mjs");
     const outputPath = path.join(root, "child-env.json");
     await fs.writeFile(
       entrypoint,
       `import fs from "node:fs";
-fs.writeFileSync(process.env.OPENCLAW_TEST_OUTPUT_PATH, JSON.stringify({
-  compatibilityHostVersion: process.env.OPENCLAW_COMPATIBILITY_HOST_VERSION ?? null,
-  requestedChannel: process.env.OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL ?? null,
-  sourceConfigPath: process.env.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH ?? null,
+fs.writeFileSync(process.env.CARAPACE_TEST_OUTPUT_PATH, JSON.stringify({
+  compatibilityHostVersion: process.env.CARAPACE_COMPATIBILITY_HOST_VERSION ?? null,
+  requestedChannel: process.env.CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL ?? null,
+  sourceConfigPath: process.env.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH ?? null,
 }));`,
       "utf8",
     );
     try {
       await withEnvAsync(
         {
-          OPENCLAW_COMPATIBILITY_HOST_VERSION: "stale-version",
-          OPENCLAW_TEST_OUTPUT_PATH: outputPath,
-          OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL: "beta",
-          OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
+          CARAPACE_COMPATIBILITY_HOST_VERSION: "stale-version",
+          CARAPACE_TEST_OUTPUT_PATH: outputPath,
+          CARAPACE_UPDATE_POST_CORE_REQUESTED_CHANNEL: "beta",
+          CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH: "/tmp/stale-config.json",
         },
         async () => {
           const outcome = await runPostCoreFinalizeAfterGatewayUpdate({
@@ -215,7 +215,7 @@ fs.writeFileSync(process.env.OPENCLAW_TEST_OUTPUT_PATH, JSON.stringify({
 
     expect(
       expectDefined(spawnFinalize.mock.calls[0], "spawnFinalize.mock.calls[0] test invariant")[0]
-        .env.OPENCLAW_SERVICE_REPAIR_POLICY,
+        .env.CARAPACE_SERVICE_REPAIR_POLICY,
     ).toBe("external");
   });
 
@@ -232,8 +232,8 @@ fs.writeFileSync(process.env.OPENCLAW_TEST_OUTPUT_PATH, JSON.stringify({
     )[0];
     // No configured channel → effective channel defaults to the git/dev channel
     // the core update ran on, carried via env (convergence-only, not persisted),
-    // never as `--channel` (which `update finalize` would persist to openclaw.json).
-    expect(call.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL).toBe("dev");
+    // never as `--channel` (which `update finalize` would persist to carapace.json).
+    expect(call.env.CARAPACE_UPDATE_EFFECTIVE_CHANNEL).toBe("dev");
     expect(call.argv).not.toContain("--channel");
     expect(call.argv).not.toContain("--timeout");
     // No per-step timeout requested → outer backstop is the floor.
@@ -255,7 +255,7 @@ fs.writeFileSync(process.env.OPENCLAW_TEST_OUTPUT_PATH, JSON.stringify({
     };
     let sourceConfigPath: string | undefined;
     const spawnFinalize = vi.fn<PostCoreFinalizeSpawner>(async ({ env }) => {
-      sourceConfigPath = env.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
+      sourceConfigPath = env.CARAPACE_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
       expect(sourceConfigPath).toEqual(expect.any(String));
       await expect(fs.readFile(sourceConfigPath!, "utf-8")).resolves.toBe(
         `${JSON.stringify(preUpdateConfig)}\n`,

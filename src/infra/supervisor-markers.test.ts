@@ -1,4 +1,4 @@
-// Covers supervisor marker files used to identify managed OpenClaw processes.
+// Covers supervisor marker files used to identify managed Carapace processes.
 import { describe, expect, it } from "vitest";
 import {
   detectGatewayRespawnSupervisor,
@@ -9,39 +9,39 @@ import {
 describe("SUPERVISOR_HINT_ENV_VARS", () => {
   it("includes the cross-platform supervisor hint env vars", () => {
     const envVars = new Set(SUPERVISOR_HINT_ENV_VARS);
-    expect(envVars.has("OPENCLAW_SUPERVISOR_MODE")).toBe(true);
+    expect(envVars.has("CARAPACE_SUPERVISOR_MODE")).toBe(true);
     expect(envVars.has("LAUNCH_JOB_LABEL")).toBe(true);
     expect(envVars.has("INVOCATION_ID")).toBe(true);
-    expect(envVars.has("OPENCLAW_WINDOWS_TASK_NAME")).toBe(true);
-    expect(envVars.has("OPENCLAW_SERVICE_MARKER")).toBe(true);
-    expect(envVars.has("OPENCLAW_SERVICE_KIND")).toBe(true);
+    expect(envVars.has("CARAPACE_WINDOWS_TASK_NAME")).toBe(true);
+    expect(envVars.has("CARAPACE_SERVICE_MARKER")).toBe(true);
+    expect(envVars.has("CARAPACE_SERVICE_KIND")).toBe(true);
   });
 });
 
 describe("detectRespawnSupervisor", () => {
-  it("detects launchd from OpenClaw's explicit marker or current gateway launchd job", () => {
+  it("detects launchd from Carapace's explicit marker or current gateway launchd job", () => {
     expect(
-      detectRespawnSupervisor({ OPENCLAW_LAUNCHD_LABEL: " ai.openclaw.gateway " }, "darwin"),
+      detectRespawnSupervisor({ CARAPACE_LAUNCHD_LABEL: " ai.carapace.gateway " }, "darwin"),
     ).toBe("launchd");
-    expect(detectRespawnSupervisor({ OPENCLAW_LAUNCHD_LABEL: "   " }, "darwin")).toBeNull();
-    expect(detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.openclaw.gateway" }, "darwin")).toBe(
+    expect(detectRespawnSupervisor({ CARAPACE_LAUNCHD_LABEL: "   " }, "darwin")).toBeNull();
+    expect(detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.carapace.gateway" }, "darwin")).toBe(
       "launchd",
     );
     expect(
       detectRespawnSupervisor(
-        { LAUNCH_JOB_NAME: "ai.openclaw.work", OPENCLAW_PROFILE: "work" },
+        { LAUNCH_JOB_NAME: "ai.carapace.work", CARAPACE_PROFILE: "work" },
         "darwin",
       ),
     ).toBe("launchd");
-    expect(detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.openclaw.mac" }, "darwin")).toBeNull();
-    expect(detectRespawnSupervisor({ XPC_SERVICE_NAME: "ai.openclaw.mac" }, "darwin")).toBeNull();
+    expect(detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.carapace.mac" }, "darwin")).toBeNull();
+    expect(detectRespawnSupervisor({ XPC_SERVICE_NAME: "ai.carapace.mac" }, "darwin")).toBeNull();
     expect(
       detectRespawnSupervisor(
-        { XPC_SERVICE_NAME: "ai.openclaw.mac", OPENCLAW_PROFILE: "mac" },
+        { XPC_SERVICE_NAME: "ai.carapace.mac", CARAPACE_PROFILE: "mac" },
         "darwin",
       ),
     ).toBeNull();
-    expect(detectRespawnSupervisor({ XPC_SERVICE_NAME: "ai.openclaw.gateway" }, "darwin")).toBe(
+    expect(detectRespawnSupervisor({ XPC_SERVICE_NAME: "ai.carapace.gateway" }, "darwin")).toBe(
       "launchd",
     );
   });
@@ -51,48 +51,48 @@ describe("detectRespawnSupervisor", () => {
     expect(detectRespawnSupervisor({ JOURNAL_STREAM: "" }, "linux")).toBeNull();
   });
 
-  it("detects Linux OpenClaw gateway service markers only for opt-in callers", () => {
+  it("detects Linux Carapace gateway service markers only for opt-in callers", () => {
     const gatewayServiceEnv = {
-      OPENCLAW_SERVICE_MARKER: " openclaw ",
-      OPENCLAW_SERVICE_KIND: " gateway ",
+      CARAPACE_SERVICE_MARKER: " carapace ",
+      CARAPACE_SERVICE_KIND: " gateway ",
     };
     expect(detectRespawnSupervisor(gatewayServiceEnv, "linux")).toBeNull();
     expect(
       detectRespawnSupervisor(gatewayServiceEnv, "linux", {
-        includeLinuxOpenClawGatewayServiceMarker: true,
+        includeLinuxCarapaceGatewayServiceMarker: true,
       }),
     ).toBe("systemd");
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "worker",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "worker",
         },
         "linux",
-        { includeLinuxOpenClawGatewayServiceMarker: true },
+        { includeLinuxCarapaceGatewayServiceMarker: true },
       ),
     ).toBeNull();
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "other",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_SERVICE_MARKER: "other",
+          CARAPACE_SERVICE_KIND: "gateway",
         },
         "linux",
-        { includeLinuxOpenClawGatewayServiceMarker: true },
+        { includeLinuxCarapaceGatewayServiceMarker: true },
       ),
     ).toBeNull();
   });
 
   it("detects scheduled-task supervision on Windows from either hint family", () => {
     expect(
-      detectRespawnSupervisor({ OPENCLAW_WINDOWS_TASK_NAME: "OpenClaw Gateway" }, "win32"),
+      detectRespawnSupervisor({ CARAPACE_WINDOWS_TASK_NAME: "Carapace Gateway" }, "win32"),
     ).toBe("schtasks");
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "gateway",
         },
         "win32",
       ),
@@ -100,8 +100,8 @@ describe("detectRespawnSupervisor", () => {
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "worker",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "worker",
         },
         "win32",
       ),
@@ -109,8 +109,8 @@ describe("detectRespawnSupervisor", () => {
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "other",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_SERVICE_MARKER: "other",
+          CARAPACE_SERVICE_KIND: "gateway",
         },
         "win32",
       ),
@@ -121,14 +121,14 @@ describe("detectRespawnSupervisor", () => {
     expect(
       detectRespawnSupervisor(
         {
-          OPENCLAW_SERVICE_MARKER: "openclaw",
-          OPENCLAW_SERVICE_KIND: "gateway",
+          CARAPACE_SERVICE_MARKER: "carapace",
+          CARAPACE_SERVICE_KIND: "gateway",
         },
         "linux",
       ),
     ).toBeNull();
     expect(
-      detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.openclaw.gateway" }, "freebsd"),
+      detectRespawnSupervisor({ LAUNCH_JOB_LABEL: "ai.carapace.gateway" }, "freebsd"),
     ).toBeNull();
   });
 });
@@ -136,8 +136,8 @@ describe("detectRespawnSupervisor", () => {
 describe("detectGatewayRespawnSupervisor", () => {
   it("keeps external ownership separate from native supervisor detection", () => {
     const env = {
-      OPENCLAW_SUPERVISOR_MODE: "external",
-      OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.gateway",
+      CARAPACE_SUPERVISOR_MODE: "external",
+      CARAPACE_LAUNCHD_LABEL: "ai.carapace.gateway",
     };
 
     expect(detectGatewayRespawnSupervisor(env, "darwin")).toBe("external");

@@ -1,7 +1,7 @@
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/status-helpers";
 import { DEFAULT_ACCOUNT_ID } from "./accounts.js";
 import type { ResolvedA2aChannelAccount } from "./types.js";
 

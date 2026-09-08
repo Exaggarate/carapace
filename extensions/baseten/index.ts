@@ -1,11 +1,11 @@
 /** Baseten provider plugin entrypoint. */
-import { buildOpenAICompatibleLiveProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
+import { buildOpenAICompatibleLiveProviderCatalog } from "carapace/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogContext } from "carapace/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "carapace/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "carapace/plugin-sdk/provider-model-shared";
 import { projectBasetenLiveModels, resolveBasetenDynamicModel } from "./models.js";
 import { applyBasetenSetupConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 import { buildStaticBasetenProvider } from "./provider-catalog.js";
 import { createBasetenThinkingWrapper } from "./stream.js";
 import { resolveBasetenThinkingProfile } from "./thinking.js";

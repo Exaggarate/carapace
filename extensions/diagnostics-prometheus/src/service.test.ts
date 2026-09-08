@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 // Diagnostics Prometheus tests cover service plugin behavior.
-import type { DiagnosticEventPrivateData } from "openclaw/plugin-sdk/diagnostic-runtime";
+import type { DiagnosticEventPrivateData } from "carapace/plugin-sdk/diagnostic-runtime";
 // Diagnostics Prometheus tests cover service plugin behavior.
 import { describe, expect, it, vi } from "vitest";
 import type { DiagnosticEventMetadata, DiagnosticEventPayload } from "../api.js";
@@ -17,7 +17,7 @@ import {
 
 // HTTP scrapes here exercise an authorized operator; the exporter's scope guard is covered by
 // service.http-scope.test.ts.
-vi.mock("openclaw/plugin-sdk/plugin-runtime", () => ({
+vi.mock("carapace/plugin-sdk/plugin-runtime", () => ({
   getPluginRuntimeGatewayRequestScope: () => ({
     client: { connect: { scopes: ["operator.read"] } },
   }),
@@ -51,7 +51,7 @@ describe("diagnostics-prometheus service", () => {
     }
 
     const rendered = metrics.render();
-    expect(rendered).toContain('openclaw_gateway_rpc_requests_total{method="sessions.list"} 1');
+    expect(rendered).toContain('carapace_gateway_rpc_requests_total{method="sessions.list"} 1');
     for (const [method, metric, sum, count] of [
       ["sessions.list", "first_response", 0.25, 1],
       ["sessions.list", "handler", 0.4, 1],
@@ -60,17 +60,17 @@ describe("diagnostics-prometheus service", () => {
       ["health", "first_response", 0.03, 2],
     ]) {
       expect(rendered).toContain(
-        `openclaw_gateway_rpc_${metric}_seconds_sum{method="${method}"} ${sum}`,
+        `carapace_gateway_rpc_${metric}_seconds_sum{method="${method}"} ${sum}`,
       );
       expect(rendered).toContain(
-        `openclaw_gateway_rpc_${metric}_seconds_count{method="${method}"} ${count}`,
+        `carapace_gateway_rpc_${metric}_seconds_count{method="${method}"} ${count}`,
       );
     }
     expect(rendered).toContain(
-      'openclaw_gateway_rpc_outcomes_total{outcome="ok",phase="response"} 2',
+      'carapace_gateway_rpc_outcomes_total{outcome="ok",phase="response"} 2',
     );
     expect(rendered).not.toContain(base.trace.traceId);
-    expect(rendered).not.toMatch(/openclaw_gateway_rpc_outcomes_total\{[^\n]*method=/);
+    expect(rendered).not.toMatch(/carapace_gateway_rpc_outcomes_total\{[^\n]*method=/);
     metrics.stop();
   });
 
@@ -93,17 +93,17 @@ describe("diagnostics-prometheus service", () => {
     }
     metrics.record({ ...base, phase: "response", outcome: "ok", durationMs: 50 }, untrusted);
     const rendered = metrics.render();
-    expect(rendered).toContain('openclaw_gateway_rpc_requests_total{method="unknown"} 1');
+    expect(rendered).toContain('carapace_gateway_rpc_requests_total{method="unknown"} 1');
     for (const outcome of ["unavailable", "suppressed"]) {
       expect(rendered).toContain(
-        `openclaw_gateway_rpc_outcomes_total{outcome="${outcome}",phase="response"} 1`,
+        `carapace_gateway_rpc_outcomes_total{outcome="${outcome}",phase="response"} 1`,
       );
     }
     expect(rendered).toContain(
-      'openclaw_gateway_rpc_outcomes_total{outcome="rejected",phase="dispatch"} 1',
+      'carapace_gateway_rpc_outcomes_total{outcome="rejected",phase="dispatch"} 1',
     );
     for (const metric of ["first_response", "handler", "admission", "queue_wait"]) {
-      expect(rendered).not.toContain(`openclaw_gateway_rpc_${metric}_seconds`);
+      expect(rendered).not.toContain(`carapace_gateway_rpc_${metric}_seconds`);
     }
     metrics.stop();
   });
@@ -129,12 +129,12 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
 
-    expect(rendered).toContain("# TYPE openclaw_run_completed_total counter");
+    expect(rendered).toContain("# TYPE carapace_run_completed_total counter");
     expect(rendered).toContain(
-      'openclaw_run_completed_total{channel="discord",model="gpt-5.4",outcome="completed",provider="openai",trigger="message"} 1',
+      'carapace_run_completed_total{channel="discord",model="gpt-5.4",outcome="completed",provider="openai",trigger="message"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_run_duration_seconds_sum{channel="discord",model="gpt-5.4",outcome="completed",provider="openai",trigger="message"} 1.5',
+      'carapace_run_duration_seconds_sum{channel="discord",model="gpt-5.4",outcome="completed",provider="openai",trigger="message"} 1.5',
     );
     expect(rendered).not.toContain("run-should-not-export");
     expect(rendered).not.toContain("session-should-not-export");
@@ -163,7 +163,7 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_run_completed_total{blocked_by="policy-plugin",channel="slack",model="gpt-5.4",outcome="blocked",provider="openai",trigger="message"} 1',
+      'carapace_run_completed_total{blocked_by="policy-plugin",channel="slack",model="gpt-5.4",outcome="blocked",provider="openai",trigger="message"} 1',
     );
     expect(rendered).not.toContain("run-should-not-export");
     expect(rendered).not.toContain("session-should-not-export");
@@ -224,10 +224,10 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
     expect(rendered).toContain(
-      'openclaw_model_call_total{api="openai-responses",error_category="none",model="gpt-5.4",observation_unit="request",outcome="completed",provider="openai",transport="http"} 1',
+      'carapace_model_call_total{api="openai-responses",error_category="none",model="gpt-5.4",observation_unit="request",outcome="completed",provider="openai",transport="http"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_model_call_duration_seconds_sum{api="claude-code",error_category="none",model="claude-opus-4-7",observation_unit="turn",outcome="completed",provider="anthropic",transport="stdio-live"} 2.5',
+      'carapace_model_call_duration_seconds_sum{api="claude-code",error_category="none",model="claude-opus-4-7",observation_unit="turn",outcome="completed",provider="anthropic",transport="stdio-live"} 2.5',
     );
   });
 
@@ -282,15 +282,15 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_diagnostic_async_queue_dropped_total{drop_class="total"} 3',
+      'carapace_diagnostic_async_queue_dropped_total{drop_class="total"} 3',
     );
     expect(rendered).toContain(
-      'openclaw_diagnostic_async_queue_dropped_total{drop_class="trusted"} 1',
+      'carapace_diagnostic_async_queue_dropped_total{drop_class="trusted"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_diagnostic_async_queue_dropped_total{drop_class="untrusted"} 2',
+      'carapace_diagnostic_async_queue_dropped_total{drop_class="untrusted"} 2',
     );
-    expect(rendered).toContain("openclaw_diagnostic_async_queue_length 0");
+    expect(rendered).toContain("carapace_diagnostic_async_queue_length 0");
   });
 
   it("records one metric for one signal-level exporter lifecycle fact", () => {
@@ -310,10 +310,10 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
     expect(rendered).toContain(
-      'openclaw_telemetry_exporter_total{exporter="diagnostics-otel",reason="configured",signal="logs",status="started"} 1',
+      'carapace_telemetry_exporter_total{exporter="diagnostics-otel",reason="configured",signal="logs",status="started"} 1',
     );
     expect(rendered).not.toContain(
-      'openclaw_telemetry_exporter_total{exporter="diagnostics-otel",reason="configured",signal="logs",status="started"} 2',
+      'carapace_telemetry_exporter_total{exporter="diagnostics-otel",reason="configured",signal="logs",status="started"} 2',
     );
   });
 
@@ -334,7 +334,7 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_tool_execution_total{error_category="other",outcome="error",params_kind="unknown",tool="tool",tool_owner="none",tool_source="core"} 1',
+      'carapace_tool_execution_total{error_category="other",outcome="error",params_kind="unknown",tool="tool",tool_owner="none",tool_source="core"} 1',
     );
     expect(rendered).not.toContain("Bearer");
     expect(rendered).not.toContain("sk-secret");
@@ -397,22 +397,22 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_tool_execution_blocked_total{denied_reason="tools.deny",params_kind="object",tool="browser",tool_owner="browser-tools",tool_source="mcp"} 1',
+      'carapace_tool_execution_blocked_total{denied_reason="tools.deny",params_kind="object",tool="browser",tool_owner="browser-tools",tool_source="mcp"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_model_failover_total{from_model="claude-opus-4-6",from_provider="anthropic",lane="session",reason="overloaded",suspended="true",to_model="gpt-5.4",to_provider="openai"} 1',
+      'carapace_model_failover_total{from_model="claude-opus-4-6",from_provider="anthropic",lane="session",reason="overloaded",suspended="true",to_model="gpt-5.4",to_provider="openai"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_session_stuck_total{reason="startup-sweep",state="processing"} 1',
+      'carapace_session_stuck_total{reason="startup-sweep",state="processing"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_session_stuck_age_seconds_sum{reason="startup-sweep",state="processing"} 12',
+      'carapace_session_stuck_age_seconds_sum{reason="startup-sweep",state="processing"} 12',
     );
     expect(rendered).toContain(
-      'openclaw_payload_large_total{action="rejected",channel="web",plugin="none",reason="body-too-large",surface="gateway.frame"} 1',
+      'carapace_payload_large_total{action="rejected",channel="web",plugin="none",reason="body-too-large",surface="gateway.frame"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_payload_large_bytes_sum{action="rejected",channel="web",plugin="none",reason="body-too-large",surface="gateway.frame"} 2048',
+      'carapace_payload_large_bytes_sum{action="rejected",channel="web",plugin="none",reason="body-too-large",surface="gateway.frame"} 2048',
     );
     expect(rendered).not.toContain("session-should-not-export");
     expect(rendered).not.toContain("key-should-not-export");
@@ -474,21 +474,21 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_webhook_received_total{channel="telegram",webhook="message"} 1',
+      'carapace_webhook_received_total{channel="telegram",webhook="message"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_webhook_error_total{channel="telegram",webhook="message"} 1',
+      'carapace_webhook_error_total{channel="telegram",webhook="message"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_webhook_duration_seconds_sum{channel="telegram",webhook="message"} 0.25',
+      'carapace_webhook_duration_seconds_sum{channel="telegram",webhook="message"} 0.25',
     );
-    expect(rendered).toContain('openclaw_liveness_warning_total{reason="event_loop_delay:cpu"} 1');
-    expect(rendered).toContain('openclaw_liveness_sessions{state="active"} 2');
+    expect(rendered).toContain('carapace_liveness_warning_total{reason="event_loop_delay:cpu"} 1');
+    expect(rendered).toContain('carapace_liveness_sessions{state="active"} 2');
     expect(rendered).toContain(
-      'openclaw_liveness_event_loop_delay_p99_seconds_sum{reason="event_loop_delay:cpu"} 0.25',
+      'carapace_liveness_event_loop_delay_p99_seconds_sum{reason="event_loop_delay:cpu"} 0.25',
     );
     expect(rendered).toContain(
-      'openclaw_liveness_cpu_core_ratio_sum{reason="event_loop_delay:cpu"} 1.4',
+      'carapace_liveness_cpu_core_ratio_sum{reason="event_loop_delay:cpu"} 1.4',
     );
     expect(rendered).not.toContain("chat-should-not-export");
     expect(rendered).not.toContain("sk-secret");
@@ -512,7 +512,7 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_model_tokens_total{agent="unknown",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 12',
+      'carapace_model_tokens_total{agent="unknown",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 12',
     );
     expect(rendered).not.toContain("Agent:qa:otel-trace-smoke");
   });
@@ -537,10 +537,10 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_model_tokens_total{agent="main",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 20',
+      'carapace_model_tokens_total{agent="main",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 20',
     );
     expect(rendered).toContain(
-      'openclaw_model_tokens_total{agent="main",channel="unknown",model="gpt-5.4",provider="openai",token_type="total"} 20',
+      'carapace_model_tokens_total{agent="main",channel="unknown",model="gpt-5.4",provider="openai",token_type="total"} 20',
     );
     expect(rendered).not.toContain("plugin=");
     expect(rendered).not.toContain("llm-task");
@@ -562,7 +562,7 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
 
-    expect(rendered).toContain('openclaw_queue_lane_size{lane="session"} 2');
+    expect(rendered).toContain('carapace_queue_lane_size{lane="session"} 2');
     expect(rendered).not.toContain("Agent:qa:otel-trace-smoke");
   });
 
@@ -581,7 +581,7 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
 
-    expect(rendered).toContain('openclaw_queue_lane_size{lane="dreaming-narrative"} 2');
+    expect(rendered).toContain('carapace_queue_lane_size{lane="dreaming-narrative"} 2');
     expect(rendered).not.toContain("session-main");
   });
 
@@ -605,9 +605,9 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
 
-    expect(rendered).toContain("# TYPE openclaw_skill_used_total counter");
+    expect(rendered).toContain("# TYPE carapace_skill_used_total counter");
     expect(rendered).toContain(
-      'openclaw_skill_used_total{activation="read",agent="main",skill="tiny-llm-brainstorm",source="workspace"} 1',
+      'carapace_skill_used_total{activation="read",agent="main",skill="tiny-llm-brainstorm",source="workspace"} 1',
     );
     expect(rendered).not.toContain("run-should-not-export");
     expect(rendered).not.toContain("session-should-not-export");
@@ -655,13 +655,13 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_message_delivery_started_total{channel="matrix",delivery_kind="text"} 1',
+      'carapace_message_delivery_started_total{channel="matrix",delivery_kind="text"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_processed_total{channel="unknown",outcome="completed",reason="none"} 1',
+      'carapace_message_processed_total{channel="unknown",outcome="completed",reason="none"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_delivery_total{channel="unknown",delivery_kind="other",error_category="TimeoutError",outcome="error"} 1',
+      'carapace_message_delivery_total{channel="unknown",delivery_kind="other",error_category="TimeoutError",outcome="error"} 1',
     );
     expect(rendered).not.toContain("chat-should-not-export");
     expect(rendered).not.toContain("message-should-not-export");
@@ -728,25 +728,25 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_message_received_total{channel="telegram",source="webhook"} 1',
+      'carapace_message_received_total{channel="telegram",source="webhook"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_dispatch_started_total{channel="telegram",source="webhook"} 1',
+      'carapace_message_dispatch_started_total{channel="telegram",source="webhook"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_dispatch_completed_total{channel="telegram",outcome="completed",reason="none",source="webhook"} 1',
+      'carapace_message_dispatch_completed_total{channel="telegram",outcome="completed",reason="none",source="webhook"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_dispatch_duration_seconds_sum{channel="telegram",outcome="completed",reason="none",source="webhook"} 0.25',
+      'carapace_message_dispatch_duration_seconds_sum{channel="telegram",outcome="completed",reason="none",source="webhook"} 0.25',
     );
     expect(rendered).toContain(
-      'openclaw_message_dispatch_completed_total{channel="unknown",outcome="completed",reason="none",source="unknown"} 1',
+      'carapace_message_dispatch_completed_total{channel="unknown",outcome="completed",reason="none",source="unknown"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_message_dispatch_duration_seconds_sum{channel="unknown",outcome="completed",reason="none",source="unknown"} 0.3',
+      'carapace_message_dispatch_duration_seconds_sum{channel="unknown",outcome="completed",reason="none",source="unknown"} 0.3',
     );
     expect(rendered).toContain(
-      'openclaw_session_turn_created_total{agent="agent.default",channel="telegram",trigger="user"} 1',
+      'carapace_session_turn_created_total{agent="agent.default",channel="telegram",trigger="user"} 1',
     );
     expect(rendered).not.toContain("run-should-not-export");
   });
@@ -791,16 +791,16 @@ describe("diagnostics-prometheus service", () => {
     const rendered = metrics.render();
 
     expect(rendered).toContain(
-      'openclaw_session_recovery_total{action="abort-active-run",active_work_kind="tool_call",state="processing",status="released"} 1',
+      'carapace_session_recovery_total{action="abort-active-run",active_work_kind="tool_call",state="processing",status="released"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_session_recovery_age_seconds_sum{action="abort-active-run",active_work_kind="tool_call",state="processing",status="released"} 12',
+      'carapace_session_recovery_age_seconds_sum{action="abort-active-run",active_work_kind="tool_call",state="processing",status="released"} 12',
     );
     expect(rendered).toContain(
-      'openclaw_talk_event_total{brain="agent-consult",event_type="input.audio.delta",mode="realtime",provider="openai",transport="gateway-relay"} 1',
+      'carapace_talk_event_total{brain="agent-consult",event_type="input.audio.delta",mode="realtime",provider="openai",transport="gateway-relay"} 1',
     );
     expect(rendered).toContain(
-      'openclaw_talk_audio_bytes_sum{brain="agent-consult",event_type="input.audio.delta",mode="realtime",provider="openai",transport="gateway-relay"} 320',
+      'carapace_talk_audio_bytes_sum{brain="agent-consult",event_type="input.audio.delta",mode="realtime",provider="openai",transport="gateway-relay"} 320',
     );
     expect(rendered).not.toContain("session-should-not-export");
     expect(rendered).not.toContain("key-should-not-export");
@@ -837,14 +837,14 @@ describe("diagnostics-prometheus service", () => {
         metrics.record(event, trusted);
       }
     }
-    expect(metrics.render()).toContain("openclaw_prometheus_series_dropped_total 87");
+    expect(metrics.render()).toContain("carapace_prometheus_series_dropped_total 87");
     metrics.record({ ...queue, queueSize: 2 }, trusted);
     const existing = metrics.render();
-    expect(existing).toContain('openclaw_queue_lane_size{lane="main"} 2');
-    expect(existing).toContain('openclaw_queue_lane_wait_seconds_count{lane="main"} 2');
-    expect(existing).toContain("openclaw_prometheus_series_dropped_total 87");
+    expect(existing).toContain('carapace_queue_lane_size{lane="main"} 2');
+    expect(existing).toContain('carapace_queue_lane_wait_seconds_count{lane="main"} 2');
+    expect(existing).toContain("carapace_prometheus_series_dropped_total 87");
     metrics.record({ ...queue, lane: "later" }, trusted);
-    expect(metrics.render()).toContain("openclaw_prometheus_series_dropped_total 89");
+    expect(metrics.render()).toContain("carapace_prometheus_series_dropped_total 89");
     expect(metrics.render()).not.toContain('lane="later"');
     metrics.stop();
   });
@@ -869,14 +869,14 @@ describe("diagnostics-prometheus service", () => {
 
     const rendered = metrics.render();
 
-    expect(rendered).toContain("# TYPE openclaw_prometheus_series_dropped_total counter");
-    expect(rendered).toContain("openclaw_prometheus_series_dropped_total ");
+    expect(rendered).toContain("# TYPE carapace_prometheus_series_dropped_total counter");
+    expect(rendered).toContain("carapace_prometheus_series_dropped_total ");
     metrics.record(
       { ...baseEvent(), type: "gateway.rpc", method: "health", phase: "received" },
       trusted,
     );
     const saturated = metrics.render();
-    expect(saturated).not.toContain("openclaw_gateway_rpc_requests_total");
+    expect(saturated).not.toContain("carapace_gateway_rpc_requests_total");
     expect(saturated).not.toBe(rendered);
     metrics.stop();
   });
@@ -897,7 +897,7 @@ describe("diagnostics-prometheus service", () => {
 
     exporter.service.start({
       config: {} as never,
-      stateDir: "/tmp/openclaw-prometheus-test",
+      stateDir: "/tmp/carapace-prometheus-test",
       logger: {
         info: vi.fn(),
         warn: vi.fn(),
@@ -948,7 +948,7 @@ describe("diagnostics-prometheus service", () => {
       },
     ]);
     expect(exporter.render()).toContain(
-      'openclaw_model_tokens_total{agent="unknown",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 12',
+      'carapace_model_tokens_total{agent="unknown",channel="unknown",model="gpt-5.4",provider="openai",token_type="input"} 12',
     );
 
     const prefix = "x".repeat(499);

@@ -5,7 +5,7 @@
  * rules). Byte-fidelity: `emitMd(parse(raw)) === raw`; `raw` on the
  * root preserves the original bytes for round-trip.
  *
- * @module @openclaw/oc-path/ast
+ * @module @carapace/oc-path/ast
  */
 
 /** Parser diagnostic. Severity `warning` for recoverable input; never throws. */

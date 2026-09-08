@@ -18,19 +18,19 @@ import {
   type SessionIdentityMutation,
 } from "../../sessions/session-lifecycle-events.js";
 import {
-  closeOpenClawAgentDatabasesAsync,
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceAgentDatabasesAsync,
+  closeCarapaceAgentDatabasesForTest,
+  listCarapaceRegisteredAgentDatabases,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { appendTranscriptMessage } from "./session-accessor.js";
 import { writeSessionEntry } from "./session-accessor.sqlite-entry-store.js";
 import { replaceSessionEntrySync } from "./session-accessor.sqlite-entry.js";
@@ -46,7 +46,7 @@ import { enforceSqliteSessionHistoryDiskBudget } from "./session-history-evictio
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
 import { resolveMaintenanceConfigFromInput } from "./store-maintenance.js";
 
-const states: OpenClawTestState[] = [];
+const states: CarapaceTestState[] = [];
 const pending: Promise<unknown>[] = [];
 const listeners: Array<() => void> = [];
 const workers: Worker[] = [];
@@ -60,13 +60,13 @@ afterEach(async () => {
   await Promise.allSettled(pending.splice(0));
   try {
     for (const state of states) {
-      await closeOpenClawAgentDatabasesAsync(state.root);
+      await closeCarapaceAgentDatabasesAsync(state.root);
     }
     for (const state of states) {
-      closeOpenClawAgentDatabasesForTest(state.root);
+      closeCarapaceAgentDatabasesForTest(state.root);
     }
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     workerChannel.unsubscribe(recordWorker);
     // Real archive/reclamation calls settle their workers. Only this test's idle
     // measurement pool remains; join termination before removing the fixture.
@@ -154,7 +154,7 @@ function seedReceipt(agentId: string, sessionKey: string, sessionId: string): st
 
 type Fixture = Awaited<ReturnType<typeof fixture>>;
 async function fixture(kind: "shared" | "canonical-nonshared" | "custom-nonshared", bare = false) {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     prefix: "omitted-budget-owner-",
     layout: "state-only",
     scenario: "minimal",
@@ -170,7 +170,7 @@ async function fixture(kind: "shared" | "canonical-nonshared" | "custom-nonshare
       ? storePath
       : resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main", env: state.env })
           .path;
-  openOpenClawAgentDatabase({ agentId: "main", env: state.env, path: databasePath });
+  openCarapaceAgentDatabase({ agentId: "main", env: state.env, path: databasePath });
   const victimKey = bare ? "unknown" : "agent:secondary:explicit:owner-parity";
   const victimAgent = bare ? "main" : "secondary";
   const victimId = "owner-parity-victim";
@@ -199,7 +199,7 @@ async function fixture(kind: "shared" | "canonical-nonshared" | "custom-nonshare
     // Deliberately model a foreign qualified row in a nonshared physical store.
     // Public scope resolution refuses this mismatch. Existing low-level canonical
     // writers construct the fixture without weakening or mocking that validator.
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         writeSessionEntry(database, victimKey, archived);
         const transcript = {
@@ -272,20 +272,20 @@ async function fixture(kind: "shared" | "canonical-nonshared" | "custom-nonshare
       )?.count,
     ),
   ).toBeGreaterThan(0);
-  const secondaryCanonicalPath = resolveOpenClawAgentSqlitePath({
+  const secondaryCanonicalPath = resolveCarapaceAgentSqlitePath({
     agentId: "secondary",
     env: state.env,
   });
   expect(fs.existsSync(secondaryCanonicalPath)).toBe(false);
-  const registryBefore = listOpenClawRegisteredAgentDatabases({ env: state.env }).map(
+  const registryBefore = listCarapaceRegisteredAgentDatabases({ env: state.env }).map(
     ({ agentId, path: registeredPath }) => ({ agentId, path: registeredPath }),
   );
   expect(registryBefore).toContainEqual({ agentId: "main", path: databasePath });
-  await closeOpenClawAgentDatabasesAsync(state.root);
-  closeOpenClawAgentDatabasesForTest(state.root);
+  await closeCarapaceAgentDatabasesAsync(state.root);
+  closeCarapaceAgentDatabasesForTest(state.root);
   expect(
     row(
-      resolveOpenClawStateSqlitePath(state.env),
+      resolveCarapaceStateSqlitePath(state.env),
       "SELECT count(*) AS count FROM agent_database_leases",
     ),
   ).toEqual({ count: 0 });
@@ -331,7 +331,7 @@ function observeVictim(f: Fixture) {
 }
 
 function enforce(f: Fixture, agentId?: string) {
-  expect(process.env.OPENCLAW_STATE_DIR).toBe(f.state.stateDir);
+  expect(process.env.CARAPACE_STATE_DIR).toBe(f.state.stateDir);
   return retain(
     enforceSqliteSessionHistoryDiskBudget({
       ...(agentId !== undefined ? { agentId } : {}),
@@ -347,7 +347,7 @@ function enforce(f: Fixture, agentId?: string) {
 }
 
 async function assertCustody(f: Fixture) {
-  expect(process.env.OPENCLAW_STATE_DIR).toBe(f.state.stateDir);
+  expect(process.env.CARAPACE_STATE_DIR).toBe(f.state.stateDir);
   expect(row(f.databasePath, "SELECT agent_id FROM schema_meta")).toEqual({ agent_id: "main" });
   expect(
     row(
@@ -361,17 +361,17 @@ async function assertCustody(f: Fixture) {
     session_key: f.survivorKey,
   });
   expect(fs.existsSync(f.secondaryCanonicalPath)).toBe(false);
-  const registry = listOpenClawRegisteredAgentDatabases({ env: f.state.env }).map(
+  const registry = listCarapaceRegisteredAgentDatabases({ env: f.state.env }).map(
     ({ agentId, path: registeredPath }) => ({ agentId, path: registeredPath }),
   );
   const sorted = (rows: Array<{ agentId: string; path: string }>) =>
     rows.toSorted((a, b) => a.path.localeCompare(b.path));
   expect(sorted(registry)).toEqual(sorted(f.registryBefore));
-  await closeOpenClawAgentDatabasesAsync(f.state.root);
-  closeOpenClawAgentDatabasesForTest(f.state.root);
+  await closeCarapaceAgentDatabasesAsync(f.state.root);
+  closeCarapaceAgentDatabasesForTest(f.state.root);
   expect(
     row(
-      resolveOpenClawStateSqlitePath(f.state.env),
+      resolveCarapaceStateSqlitePath(f.state.env),
       "SELECT count(*) AS count FROM agent_database_leases",
     ),
   ).toEqual({ count: 0 });

@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { clampTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { clampTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { run } from "./host-command.ts";
 import type { CommandResult, RunOptions } from "./types.ts";
 

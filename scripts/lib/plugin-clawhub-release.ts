@@ -1,4 +1,4 @@
-// Plugin Clawhub Release script supports OpenClaw repository automation.
+// Plugin Clawhub Release script supports Carapace repository automation.
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { truncateUtf16Safe } from "../../packages/normalization-core/src/utf16-slice.js";
@@ -78,8 +78,8 @@ const CLAWHUB_ERROR_BODY_MAX_CHARS = 400;
 // All-publishable releases query dozens of packages. Bound registry pressure while
 // allowing independent package state reads to leave the core publish critical path quickly.
 const CLAWHUB_RELEASE_PLAN_CONCURRENCY = 8;
-const OPENCLAW_PLUGIN_CLAWHUB_REPOSITORY = "openclaw/openclaw";
-const OPENCLAW_PLUGIN_CLAWHUB_WORKFLOW_FILENAME = "plugin-clawhub-release.yml";
+const CARAPACE_PLUGIN_CLAWHUB_REPOSITORY = "carapace/carapace";
+const CARAPACE_PLUGIN_CLAWHUB_WORKFLOW_FILENAME = "plugin-clawhub-release.yml";
 const CLAWHUB_RELEASE_AUTHORITY_PATHS = [
   ".github/workflows/plugin-clawhub-release.yml",
   ".github/actions/setup-node-env",
@@ -91,7 +91,7 @@ const CLAWHUB_RELEASE_AUTHORITY_PATHS = [
   "scripts/lib/bounded-response.mjs",
   "scripts/lib/plugin-npm-release.ts",
   "scripts/lib/plugin-clawhub-release.ts",
-  "scripts/openclaw-npm-release-check.ts",
+  "scripts/carapace-npm-release-check.ts",
   "scripts/plugin-clawhub-publish.sh",
   "scripts/plugin-clawhub-release-check.ts",
   "scripts/plugin-clawhub-release-plan.ts",
@@ -369,7 +369,7 @@ export function collectClawHubVersionGateErrors(params: {
       ref: params.gitRange.baseRef,
       packageDir: plugin.packageDir,
     });
-    if (baseManifest?.openclaw?.release?.publishToClawHub !== true) {
+    if (baseManifest?.carapace?.release?.publishToClawHub !== true) {
       continue;
     }
     const baseVersion =
@@ -489,20 +489,20 @@ async function hasClawHubTrustedPublisher(
       });
     }
 
-    return isOpenClawPluginTrustedPublisher(trustedPublisherDetail.trustedPublisher);
+    return isCarapacePluginTrustedPublisher(trustedPublisherDetail.trustedPublisher);
   } finally {
     request.clearTimeout();
   }
 }
 
-function isOpenClawPluginTrustedPublisher(value: unknown): boolean {
+function isCarapacePluginTrustedPublisher(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }
   const trustedPublisher = value as ClawHubTrustedPublisherConfig;
   return (
-    trustedPublisher.repository === OPENCLAW_PLUGIN_CLAWHUB_REPOSITORY &&
-    trustedPublisher.workflowFilename === OPENCLAW_PLUGIN_CLAWHUB_WORKFLOW_FILENAME &&
+    trustedPublisher.repository === CARAPACE_PLUGIN_CLAWHUB_REPOSITORY &&
+    trustedPublisher.workflowFilename === CARAPACE_PLUGIN_CLAWHUB_WORKFLOW_FILENAME &&
     trustedPublisher.environment == null
   );
 }

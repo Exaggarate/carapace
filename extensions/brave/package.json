@@ -1,21 +1,21 @@
 {
-  "name": "@openclaw/brave-plugin",
+  "name": "@carapace/brave-plugin",
   "version": "2026.9.2",
-  "description": "OpenClaw Brave Search provider plugin for web search.",
+  "description": "Carapace Brave Search provider plugin for web search.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/Exaggarate/carapace"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@carapace/plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "carapace": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/brave-plugin",
+      "npmSpec": "@carapace/brave-plugin",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10",
       "allowInvalidConfigRecovery": true
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.9.2"
     },
     "build": {
-      "openclawVersion": "2026.9.2"
+      "carapaceVersion": "2026.9.2"
     },
     "release": {
       "publishToClawHub": true,

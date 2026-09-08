@@ -1,11 +1,11 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Whatsapp plugin module implements heartbeat behavior.
 import { resolveWhatsAppAccount } from "./accounts.js";
 import { readWebAuthExistsForDecision, WHATSAPP_AUTH_UNSTABLE_CODE } from "./auth-store.js";
 import { loadWhatsAppChannelRuntime } from "./channel-runtime-loader.js";
 
 export async function checkWhatsAppHeartbeatReady(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string;
   deps?: {
     readWebAuthExistsForDecision?: typeof readWebAuthExistsForDecision;

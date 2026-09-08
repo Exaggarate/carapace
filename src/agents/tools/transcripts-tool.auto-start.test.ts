@@ -6,12 +6,12 @@ import { createDeferred } from "../../../test/helpers/promise.js";
 import { createTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../../plugins/runtime/gateway-request-scope.js";
-import { openClawStateDatabaseCache } from "../../state/openclaw-state-db-cache.js";
+import { carapaceStateDatabaseCache } from "../../state/carapace-state-db-cache.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  closeOpenClawStateDatabaseForTest,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  closeCarapaceStateDatabaseForTest,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import { createTranscriptsAutoStartService } from "../../transcripts/auto-start.js";
 import type {
   TranscriptSourceProvider,
@@ -28,7 +28,7 @@ const credential = "fixture-secret-value-1234567890";
 const providerError = `fixture stop failure\n\u001b[31mred\u001b[0m\u0085 token=${credential} ${"🦞".repeat(2_000)}`;
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
@@ -51,9 +51,9 @@ describe("transcripts auto-start stop reporting", () => {
       manual: true,
     },
   ])("$name preserves state and finishes siblings", async ({ blocked, outcome, manual }) => {
-    const stateDir = await fs.realpath(tempDirs.make("openclaw-transcripts-auto-stop-"));
-    const options = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
-    const databasePath = path.resolve(resolveOpenClawStateSqlitePath(options.env));
+    const stateDir = await fs.realpath(tempDirs.make("carapace-transcripts-auto-stop-"));
+    const options = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
+    const databasePath = path.resolve(resolveCarapaceStateSqlitePath(options.env));
     const exportRoot = path.join(stateDir, "transcripts");
     const store = new TranscriptsStore(exportRoot, options);
     const requests = new Map<string, TranscriptStartRequest>();
@@ -151,9 +151,9 @@ describe("transcripts auto-start stop reporting", () => {
         expect(stop.mock.calls.map(([request]) => request.sessionId)).toEqual(ids);
         const warnings = logger.warn.mock.calls.map(([message]) => message);
         const database =
-          openClawStateDatabaseCache.getOpenClawStateDatabaseIfOpenAtPath(databasePath)!;
+          carapaceStateDatabaseCache.getCarapaceStateDatabaseIfOpenAtPath(databasePath)!;
         expect(database.db.isOpen).toBe(true);
-        expect(closeOpenClawStateDatabaseByPath(database.path)).toBe(true);
+        expect(closeCarapaceStateDatabaseByPath(database.path)).toBe(true);
         expect(database.db.isOpen).toBe(false);
         const reopened = new TranscriptsStore(exportRoot, options);
         for (const id of ids) {
@@ -180,7 +180,7 @@ describe("transcripts auto-start stop reporting", () => {
           }
         }
         expect(
-          openClawStateDatabaseCache.getOpenClawStateDatabaseIfOpenAtPath(databasePath),
+          carapaceStateDatabaseCache.getCarapaceStateDatabaseIfOpenAtPath(databasePath),
         ).not.toBe(database);
         await expect(execute("status")).resolves.toMatchObject({
           details: {
@@ -198,7 +198,7 @@ describe("transcripts auto-start stop reporting", () => {
             expect(logged).toMatch(/summary saved.*export failed/i);
             expect(logged).toContain("ENOTDIR");
             expect(logged).toContain(JSON.stringify(summaryPath));
-            expect(logged).toContain("openclaw transcripts path <session>");
+            expect(logged).toContain("carapace transcripts path <session>");
             expect(logged).toMatch(/(?:repair|correct).*destination/i);
           }
           if (outcome !== "ok") {

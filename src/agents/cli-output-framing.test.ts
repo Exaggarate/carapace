@@ -1,4 +1,4 @@
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
+import { estimateBase64DecodedBytes } from "@carapace/media-core/base64";
 import { describe, expect, it, vi } from "vitest";
 import type { CliToolResultDelta, CliToolUseStartDelta } from "./cli-output-contracts.js";
 import { createCliJsonlStreamingParser } from "./cli-output-stream.js";

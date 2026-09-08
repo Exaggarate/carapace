@@ -1,7 +1,7 @@
 /**
  * QuickJS worker for Code Mode guest execution and suspended VM snapshots.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { EvalFlags, JSException, QuickJS, type JSValueHandle, type Snapshot } from "quickjs-wasi";
 import { serveWorkerTasks, type WorkerTaskChannel } from "../infra/worker-task-pool.js";
 import { CODE_MODE_CONTROLLER_SOURCE } from "./code-mode-controller-source.js";
@@ -65,7 +65,7 @@ type BridgeState = {
 // QuickJS error stacks are backtrace frames only ("    at file:line:col"), with
 // no leading "Name: message" header like V8. Returning .stack alone therefore
 // dropped the actual cause, surfacing failures to the model as a bare location
-// (e.g. "at openclaw-code-mode:user.js:2:37"). Lead with name+message so the
+// (e.g. "at carapace-code-mode:user.js:2:37"). Lead with name+message so the
 // model can self-correct, and keep the frames for location.
 function formatQuickJsError(
   name: string,
@@ -98,7 +98,7 @@ function trackPromiseRejection(
 ): void {
   const vm = promise.vm;
   vm.global
-    .getProp("__openclawTrackRejection")
+    .getProp("__carapaceTrackRejection")
     .consume((track) =>
       vm.callFunction(track, vm.undefined, promise, reason, handled ? vm.true : vm.false).dispose(),
     );
@@ -214,8 +214,8 @@ async function createVm(input: CodeModeWorkerPayload, bridge: BridgeState): Prom
       input.snapshot.memory = new Uint8Array();
     }
     const callbacks = [
-      ["__openclawHostRequest", createHostRequestHandler({ vm, bridge, config: input.config })],
-      ["__openclawHostCancelRequest", createHostCancelRequestHandler({ vm, bridge })],
+      ["__carapaceHostRequest", createHostRequestHandler({ vm, bridge, config: input.config })],
+      ["__carapaceHostCancelRequest", createHostCancelRequestHandler({ vm, bridge })],
     ] as const;
     for (const [name, callback] of callbacks) {
       if (input.kind === "resume") {
@@ -228,15 +228,15 @@ async function createVm(input: CodeModeWorkerPayload, bridge: BridgeState): Prom
     }
     if (input.kind === "exec") {
       for (const [name, value] of [
-        ["__openclawCatalog", input.catalog],
-        ["__openclawNamespaces", input.namespaces],
-        ["__openclawApiFiles", input.apiFiles ?? []],
-        ["__openclawSwarmEnabled", input.swarmEnabled === true],
-        ["__openclawMaxPendingToolCalls", input.config.maxPendingToolCalls],
+        ["__carapaceCatalog", input.catalog],
+        ["__carapaceNamespaces", input.namespaces],
+        ["__carapaceApiFiles", input.apiFiles ?? []],
+        ["__carapaceSwarmEnabled", input.swarmEnabled === true],
+        ["__carapaceMaxPendingToolCalls", input.config.maxPendingToolCalls],
       ] as const) {
         vm.hostToHandle(value).consume((handle) => vm.global.setProp(name, handle));
       }
-      vm.evalCode(CODE_MODE_CONTROLLER_SOURCE, "openclaw-code-mode:controller.js").dispose();
+      vm.evalCode(CODE_MODE_CONTROLLER_SOURCE, "carapace-code-mode:controller.js").dispose();
     }
     return {
       vm,
@@ -258,7 +258,7 @@ async function createVm(input: CodeModeWorkerPayload, bridge: BridgeState): Prom
 }
 
 function takeOutput(vm: QuickJS): unknown[] {
-  return vm.global.getProp("__openclawTakeOutput").consume((take) =>
+  return vm.global.getProp("__carapaceTakeOutput").consume((take) =>
     vm.callFunction(take, vm.undefined).consume((output) => {
       const dumped = vm.dump(output);
       return Array.isArray(dumped) ? (dumped as unknown[]) : [];
@@ -363,7 +363,7 @@ async function readCompletedResult(vm: QuickJS, resultHandle: JSValueHandle): Pr
 
 function serializeCompletedCatalogHandles(vm: QuickJS, value: JSValueHandle): unknown {
   return vm.global
-    .getProp("__openclawSerializeCatalogHandles")
+    .getProp("__carapaceSerializeCatalogHandles")
     .consume((serialize) =>
       vm.callFunction(serialize, vm.undefined, value).consume((serialized) => vm.dump(serialized)),
     );
@@ -417,7 +417,7 @@ async function runVmExecution(params: {
         throw params.bridge.admissionFailure;
       }
       const admissionError = params.vm.global
-        .getProp("__openclawAdmissionError")
+        .getProp("__carapaceAdmissionError")
         .consume((read) =>
           params.vm
             .callFunction(read, params.vm.undefined)
@@ -427,10 +427,10 @@ async function runVmExecution(params: {
         throw new CodeModeWorkerFailure("invalid_input", admissionError);
       }
       params.vm.global
-        .getProp("__openclawDrainQueuedRequests")
+        .getProp("__carapaceDrainQueuedRequests")
         .consume((drain) => params.vm.callFunction(drain, params.vm.undefined).dispose());
       output = takeOutput(params.vm);
-      const resultHandle = params.vm.global.getProp("__openclawResult");
+      const resultHandle = params.vm.global.getProp("__carapaceResult");
       try {
         const promisePending = resultHandle.isPromise && resultHandle.promiseState === 0;
         if (promisePending && params.bridge.pendingRequests.length === 0) {
@@ -496,7 +496,7 @@ async function runVmExecution(params: {
         // Check only after all host work and microtasks settle. Catches attached
         // after an await (including a restored snapshot) still own their errors.
         using rejection = params.vm.global
-          .getProp("__openclawUnhandledRejection")
+          .getProp("__carapaceUnhandledRejection")
           .consume((read) => params.vm.callFunction(read, params.vm.undefined));
         await readCompletedResult(params.vm, rejection);
         return { status: "completed", value, output };
@@ -520,7 +520,7 @@ async function runVmExecution(params: {
 
 function settleRequests(vm: QuickJS, requests: SettledBridgeRequest[]): void {
   try {
-    vm.global.getProp("__openclawSettleBridge").consume((settle) => {
+    vm.global.getProp("__carapaceSettleBridge").consume((settle) => {
       for (const request of requests) {
         using id = vm.newString(request.id);
         using payload = vm.newString(request.json);

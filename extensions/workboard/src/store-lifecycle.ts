@@ -1,8 +1,8 @@
-import type { OpenClawPluginApi } from "../api.js";
+import type { CarapacePluginApi } from "../api.js";
 import type { WorkboardStore } from "./store.js";
 
 export function registerWorkboardStoreLifecycle(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   store: WorkboardStore,
   stopServices?: () => void,
 ): void {

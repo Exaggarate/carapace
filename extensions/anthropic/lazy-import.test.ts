@@ -1,18 +1,18 @@
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
   ProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { SessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
+} from "carapace/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "carapace/plugin-sdk/plugin-test-api";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import type { SessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("anthropic session catalog lazy imports", () => {
   afterEach(() => {
     vi.doUnmock("./session-catalog.js");
     vi.doUnmock("./session-catalog-node-commands.js");
-    vi.doUnmock("openclaw/plugin-sdk/provider-auth");
+    vi.doUnmock("carapace/plugin-sdk/provider-auth");
     vi.resetModules();
   });
 
@@ -43,8 +43,8 @@ describe("anthropic session catalog lazy imports", () => {
 
     const { default: anthropicPlugin } = await import("./index.js");
     const catalogs: SessionCatalogProvider[] = [];
-    const nodeCommands: OpenClawPluginNodeHostCommand[] = [];
-    const nodePolicies: OpenClawPluginNodeInvokePolicy[] = [];
+    const nodeCommands: CarapacePluginNodeHostCommand[] = [];
+    const nodePolicies: CarapacePluginNodeInvokePolicy[] = [];
     anthropicPlugin.register(
       createTestPluginApi({
         id: "anthropic",
@@ -73,7 +73,7 @@ describe("anthropic session catalog lazy imports", () => {
   });
 
   it("registers provider hooks before loading auth execution", async () => {
-    vi.doMock("openclaw/plugin-sdk/provider-auth", () => {
+    vi.doMock("carapace/plugin-sdk/provider-auth", () => {
       throw new Error("auth execution loaded");
     });
     const { default: anthropicPlugin } = await import("./index.js");

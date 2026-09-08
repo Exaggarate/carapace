@@ -15,7 +15,7 @@ describe("plugin board widget registry", () => {
     ];
     expect(getPluginWidgetKindContribution("session:progress", active)).toMatchObject({
       kind: "session:progress",
-      tagName: "openclaw-session-progress-widget",
+      tagName: "carapace-session-progress-widget",
       loadModule: expect.any(Function),
     });
     expect(getPluginWidgetKindContribution("session:progress", [])).toBeNull();
@@ -28,7 +28,7 @@ describe("plugin board widget registry", () => {
     expect(getPluginWidgetKindContribution("unknown:card", active)).toBeNull();
     expect(pluginIdForWidgetKind("workboard:card")).toBe("workboard");
     expect(getPluginWidgetKindContribution("session:report", active)).toMatchObject({
-      tagName: "openclaw-report-widget",
+      tagName: "carapace-report-widget",
       previewSafe: true,
     });
   });

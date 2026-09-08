@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import { openNodeSqliteDatabase } from "carapace/plugin-sdk/sqlite-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { githubCounts as counts } from "./reports.fixtures.js";
 import { createTeamReportsStore, type TeamReportsStore } from "./store.js";

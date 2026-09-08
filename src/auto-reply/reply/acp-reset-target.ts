@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import {
   buildConfiguredAcpSessionKey,
   normalizeBindingConfig,
@@ -10,12 +10,12 @@ import {
 } from "../../acp/persistent-bindings.types.js";
 import { resolveConfiguredBindingRecord } from "../../channels/plugins/configured-binding-registry.js";
 import { listAcpBindings } from "../../config/bindings.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
 import { DEFAULT_ACCOUNT_ID, isAcpSessionKey } from "../../routing/session-key.js";
 
 function resolveResetTargetAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId?: string | null;
 }): string {
@@ -32,7 +32,7 @@ function resolveResetTargetAccountId(params: {
 }
 
 function resolveRawConfiguredAcpSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel: string;
   accountId: string;
   conversationId: string;
@@ -80,7 +80,7 @@ function resolveRawConfiguredAcpSessionKey(params: {
 }
 
 export function resolveEffectiveResetTargetSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   channel?: string | null;
   accountId?: string | null;
   conversationId?: string | null;

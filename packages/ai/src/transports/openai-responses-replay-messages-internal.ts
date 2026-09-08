@@ -1,5 +1,5 @@
-import type { Api, AssistantMessage, Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { Api, AssistantMessage, Context, Model } from "@carapace/llm-core";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type {
   ResponseFunctionCallOutputItemList,
   ResponseInput,

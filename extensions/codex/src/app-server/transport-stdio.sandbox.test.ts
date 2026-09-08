@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { createInterface } from "node:readline";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import { resolveCodexAppServerRuntimeOptions } from "./config.js";
 import { createCodexNativeTestState } from "./native-app-server.test-support.js";
@@ -230,7 +230,7 @@ describe.skipIf(process.platform !== "darwin")("native Codex turn sandbox", () =
         }
       });
       const initialized = await request("initialize", {
-        clientInfo: { name: "openclaw_sandbox_test", version: "1.0.0" },
+        clientInfo: { name: "carapace_sandbox_test", version: "1.0.0" },
         capabilities: { experimentalApi: true },
       });
       expect(initialized).toMatchObject({

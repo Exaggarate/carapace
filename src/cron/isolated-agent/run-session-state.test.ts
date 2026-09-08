@@ -14,9 +14,9 @@ import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/s
 import { CURRENT_SESSION_VERSION } from "../../config/sessions/version.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 
 const resetBoundaryMocks = vi.hoisted(() => ({
   clearBootstrap: vi.fn(),
@@ -113,7 +113,7 @@ describe("syncCronSessionLiveSelection", () => {
     const entry = makeSessionEntry({
       modelProvider: "openai",
       model: "gpt-5.6-luna",
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "carapace",
       contextTokens: 272_000,
       contextTokensSource: "runtime",
       contextBudgetStatus: {} as NonNullable<SessionEntry["contextBudgetStatus"]>,
@@ -286,7 +286,7 @@ describe("createPersistCronSessionEntry", () => {
   // transcript used to create the header from process.cwd(), so the window
   // persisted the gateway process directory as its workspace.
   it("records the cron workspace in the header when a stale reset lands on an empty window", async () => {
-    const dir = makeTempDir(cronSessionTempDirs, "openclaw-cron-session-");
+    const dir = makeTempDir(cronSessionTempDirs, "carapace-cron-session-");
     const storePath = path.join(dir, "sessions.json");
     const agentSessionKey = "agent:main:cron:stale-empty-window";
     const lifecycleRevision = crypto.randomUUID();
@@ -344,7 +344,7 @@ describe("createPersistCronSessionEntry", () => {
     if (!target.path) {
       throw new Error("expected SQLite database path");
     }
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: target.agentId ?? "main",
       path: target.path,
     });
@@ -358,7 +358,7 @@ describe("createPersistCronSessionEntry", () => {
       expect(events[1]?.type).toBe("reset");
       expect(events).toHaveLength(2);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
     expect(cronSession.store[agentSessionKey]?.sessionId).toBe("cron-next-window");
   });
@@ -631,7 +631,7 @@ describe("createPersistCronSessionEntry", () => {
   });
 
   it("restores resumable cron fields once the transcript exists", async () => {
-    const dir = makeTempDir(cronSessionTempDirs, "openclaw-cron-session-");
+    const dir = makeTempDir(cronSessionTempDirs, "carapace-cron-session-");
     const storePath = path.join(dir, "sessions.json");
     await appendTranscriptMessage(
       {

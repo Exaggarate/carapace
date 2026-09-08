@@ -1,21 +1,21 @@
 // Plugin state store tests cover per-plugin persisted state reads and writes.
 import { chmodSync, existsSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@carapace/normalization-core/number-coercion";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { trackSqliteStatementExecutions } from "../../test/helpers/sqlite-statement-execution-counter.js";
 import { getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  isOpenClawStateDatabaseOpen,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  isCarapaceStateDatabaseOpen,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import {
-  createOpenClawTestState,
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  withCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import {
   closePluginStateDatabase,
   countPluginStateLiveEntries,
@@ -35,11 +35,11 @@ import {
 } from "./plugin-state-store.test-helpers.js";
 import { PluginStateStoreError } from "./plugin-state-store.types.js";
 
-let testState: OpenClawTestState | undefined;
+let testState: CarapaceTestState | undefined;
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({ label: "plugin-state-store" });
-  rmSync(path.dirname(resolveOpenClawStateSqlitePath()), { recursive: true, force: true });
+  testState = await createCarapaceTestState({ label: "plugin-state-store" });
+  rmSync(path.dirname(resolveCarapaceStateSqlitePath()), { recursive: true, force: true });
 });
 
 beforeEach(() => {
@@ -136,7 +136,7 @@ describe("plugin state keyed store", () => {
     try {
       for (let connection = 0; connection < 2; connection++) {
         closePluginStateDatabase();
-        const { db } = openOpenClawStateDatabase();
+        const { db } = openCarapaceStateDatabase();
         const compile = vi.spyOn(getNodeSqliteKysely(db).getExecutor(), "compileQuery");
         try {
           clock.mockReturnValue(now);
@@ -216,10 +216,10 @@ describe("plugin state keyed store", () => {
   });
 
   it("honors explicit store env without mutating process state", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-explicit-env-a", applyEnv: false },
       async (stateA) => {
-        await withOpenClawTestState(
+        await withCarapaceTestState(
           { label: "plugin-state-explicit-env-b", applyEnv: false },
           async (stateB) => {
             const storeA = createPluginStateKeyedStore<{ owner: string }>("discord", {
@@ -238,8 +238,8 @@ describe("plugin state keyed store", () => {
 
             await expect(storeA.lookup("shared")).resolves.toEqual({ owner: "a" });
             await expect(storeB.lookup("shared")).resolves.toEqual({ owner: "b" });
-            expect(resolveOpenClawStateSqlitePath(stateA.env)).not.toBe(
-              resolveOpenClawStateSqlitePath(stateB.env),
+            expect(resolveCarapaceStateSqlitePath(stateA.env)).not.toBe(
+              resolveCarapaceStateSqlitePath(stateB.env),
             );
           },
         );
@@ -568,7 +568,7 @@ describe("plugin state keyed store", () => {
       );
       const store = createPluginStateKeyedStore("discord", { namespace: "evict", maxEntries: 3 });
       const statements = trackSqliteStatementExecutions(
-        openOpenClawStateDatabase().db,
+        openCarapaceStateDatabase().db,
         ["delete"],
         (sql) => (sql.startsWith('delete from "plugin_state_entries"') ? "delete" : null),
       );
@@ -929,7 +929,7 @@ describe("plugin state keyed store", () => {
     await withPluginStateTestState(async () => {
       const store = createPluginStateKeyedStore("discord", { namespace: "close", maxEntries: 10 });
       await store.register("k", { ok: true });
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       closePluginStateDatabase();
       expect(() => database.db.exec("SELECT 1")).toThrow();
       await expect(store.lookup("k")).resolves.toEqual({ ok: true });
@@ -945,7 +945,7 @@ describe("plugin state keyed store", () => {
       await store.register("k", { ok: true });
       resetPluginStateStoreForTests();
 
-      expect(isOpenClawStateDatabaseOpen()).toBe(false);
+      expect(isCarapaceStateDatabaseOpen()).toBe(false);
       await expect(store.lookup("k")).resolves.toEqual({ ok: true });
       await expect(store.entries()).resolves.toMatchObject([{ key: "k", value: { ok: true } }]);
       expect(
@@ -958,12 +958,12 @@ describe("plugin state keyed store", () => {
         }),
       ).toMatchObject([{ key: "k", value: { ok: true } }]);
       expect(countPluginStateLiveEntries("discord")).toBe(1);
-      expect(isOpenClawStateDatabaseOpen()).toBe(false);
+      expect(isCarapaceStateDatabaseOpen()).toBe(false);
     });
   });
 
   it("treats a missing plugin-state database as empty without creating it", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "plugin-state-read-only-missing", applyEnv: false },
       async (state) => {
         const store = createPluginStateKeyedStore("discord", {
@@ -971,7 +971,7 @@ describe("plugin state keyed store", () => {
           maxEntries: 10,
           env: state.env,
         });
-        const databasePath = resolveOpenClawStateSqlitePath(state.env);
+        const databasePath = resolveCarapaceStateSqlitePath(state.env);
 
         expect(existsSync(databasePath)).toBe(false);
         await expect(store.lookup("k")).resolves.toBeUndefined();
@@ -996,7 +996,7 @@ describe("plugin state keyed store", () => {
           maxEntries: 10,
         });
         await store.register("k", { ok: true });
-        const databasePath = resolveOpenClawStateSqlitePath(testState?.env);
+        const databasePath = resolveCarapaceStateSqlitePath(testState?.env);
         closePluginStateDatabase();
         chmodSync(testState?.stateDir ?? "", 0o000);
         try {
@@ -1020,7 +1020,7 @@ describe("plugin state keyed store", () => {
           maxEntries: 10,
         });
         await store.register("k", { ok: true });
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         chmodSync(testState?.stateDir ?? "", 0o000);
         try {
           await expect(store.lookup("k")).resolves.toEqual({ ok: true });
@@ -1034,7 +1034,7 @@ describe("plugin state keyed store", () => {
 
   it("does not close a shared state database opened before the plugin-state probe", async () => {
     await withPluginStateTestState(async () => {
-      const database = openOpenClawStateDatabase();
+      const database = openCarapaceStateDatabase();
       const result = probePluginStateStore();
 
       expect(result.ok).toBe(true);
@@ -1054,12 +1054,12 @@ describe("plugin state keyed store", () => {
         namespace: "cache-switch",
         maxEntries: 10,
       });
-      const databasePath = resolveOpenClawStateSqlitePath();
-      expect(closeOpenClawStateDatabaseByPath(databasePath)).toBe(true);
+      const databasePath = resolveCarapaceStateSqlitePath();
+      expect(closeCarapaceStateDatabaseByPath(databasePath)).toBe(true);
       await store.register("k", { version: 2 });
       expect(syncStore.lookup("k")).toEqual({ version: 2 });
 
-      expect(closeOpenClawStateDatabaseByPath(databasePath)).toBe(true);
+      expect(closeCarapaceStateDatabaseByPath(databasePath)).toBe(true);
       syncStore.register("k", { version: 3 });
       await expect(store.lookup("k")).resolves.toEqual({ version: 3 });
     });
@@ -1070,7 +1070,7 @@ describe("plugin state keyed store", () => {
       const store = createPluginStateKeyedStore("discord", { namespace: "perms", maxEntries: 10 });
       await store.register("k", { ok: true });
 
-      const databasePath = resolveOpenClawStateSqlitePath();
+      const databasePath = resolveCarapaceStateSqlitePath();
       expect(statSync(path.dirname(databasePath)).mode & 0o777).toBe(0o700);
       expect(statSync(databasePath).mode & 0o777).toBe(0o600);
     });

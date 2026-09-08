@@ -3,7 +3,7 @@ import path from "node:path";
 import { expect, vi } from "vitest";
 import { listAgentEntries } from "../agents/agent-scope-config.js";
 import { createConfigFileSnapshot } from "../config/io.snapshot-shared.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 // Non-interactive onboarding test helpers build runtime stubs that throw instead of exiting.
 import type { RuntimeEnv } from "../runtime.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
@@ -44,7 +44,7 @@ export type OnboardGatewayHealthCall = {
 };
 
 export type OnboardHealthCommandCall = OnboardGatewayHealthCall & {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
 };
 
 export function createThrowingRuntime(): NonInteractiveRuntime {
@@ -102,21 +102,21 @@ export function readOnboardFirstMockCall(mock: unknown, label: string): unknown[
 }
 
 export function createOnboardTestConfigStore() {
-  const configStore = new Map<string, OpenClawConfig>();
+  const configStore = new Map<string, CarapaceConfig>();
 
   function resolveConfigPath() {
-    const override = process.env.OPENCLAW_CONFIG_PATH?.trim();
+    const override = process.env.CARAPACE_CONFIG_PATH?.trim();
     if (override) {
       return override;
     }
-    const stateDir = process.env.OPENCLAW_STATE_DIR?.trim();
+    const stateDir = process.env.CARAPACE_STATE_DIR?.trim();
     if (!stateDir) {
-      throw new Error("OPENCLAW_STATE_DIR must be set before config IO in this test");
+      throw new Error("CARAPACE_STATE_DIR must be set before config IO in this test");
     }
-    return path.join(stateDir, "openclaw.json");
+    return path.join(stateDir, "carapace.json");
   }
 
-  function readConfig(): OpenClawConfig {
+  function readConfig(): CarapaceConfig {
     return configStore.get(resolveConfigPath()) ?? {};
   }
 
@@ -152,8 +152,8 @@ export function createOnboardStateDirHarness(getTempHome: () => string | undefin
       throw new Error("temp home not initialized");
     }
     const stateDir = await fs.realpath(await fs.mkdtemp(path.join(tempHome, prefix)));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    deleteTestEnvValue("CARAPACE_CONFIG_PATH");
     try {
       await run(stateDir);
     } finally {
@@ -167,23 +167,23 @@ export function createOnboardStateDirHarness(getTempHome: () => string | undefin
 export function prepareOnboardGatewayTestEnv() {
   const snapshot = captureEnv([
     "HOME",
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_SKIP_CHANNELS",
-    "OPENCLAW_SKIP_GMAIL_WATCHER",
-    "OPENCLAW_SKIP_CRON",
-    "OPENCLAW_SKIP_CANVAS_HOST",
-    "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-    "OPENCLAW_GATEWAY_TOKEN",
-    "OPENCLAW_GATEWAY_PASSWORD",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_SKIP_CHANNELS",
+    "CARAPACE_SKIP_GMAIL_WATCHER",
+    "CARAPACE_SKIP_CRON",
+    "CARAPACE_SKIP_CANVAS_HOST",
+    "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+    "CARAPACE_GATEWAY_TOKEN",
+    "CARAPACE_GATEWAY_PASSWORD",
   ]);
-  setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-  setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-  setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-  setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-  setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-  deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
-  deleteTestEnvValue("OPENCLAW_GATEWAY_PASSWORD");
+  setTestEnvValue("CARAPACE_SKIP_CHANNELS", "1");
+  setTestEnvValue("CARAPACE_SKIP_GMAIL_WATCHER", "1");
+  setTestEnvValue("CARAPACE_SKIP_CRON", "1");
+  setTestEnvValue("CARAPACE_SKIP_CANVAS_HOST", "1");
+  setTestEnvValue("CARAPACE_SKIP_BROWSER_CONTROL_SERVER", "1");
+  deleteTestEnvValue("CARAPACE_GATEWAY_TOKEN");
+  deleteTestEnvValue("CARAPACE_GATEWAY_PASSWORD");
   return snapshot;
 }
 
@@ -191,7 +191,7 @@ export function createOnboardLocalDaemonOptions(stateDir: string) {
   return {
     nonInteractive: true,
     mode: "local" as const,
-    workspace: path.join(stateDir, "openclaw"),
+    workspace: path.join(stateDir, "carapace"),
     authChoice: "skip" as const,
     skipSkills: true,
     skipHealth: false,
@@ -252,8 +252,8 @@ export function createOnboardGatewayTimeoutCapture() {
 }
 
 export async function mockOnboardingAgent(params: {
-  config: OpenClawConfig;
-  baseConfig?: OpenClawConfig;
+  config: CarapaceConfig;
+  baseConfig?: CarapaceConfig;
   workspace: string;
 }) {
   const roster = listAgentEntries(params.config);

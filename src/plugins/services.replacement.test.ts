@@ -24,7 +24,7 @@ import {
   startPluginServices,
   type PluginServicesHandle,
 } from "./services.js";
-import type { OpenClawPluginService, OpenClawPluginServiceContext } from "./types.js";
+import type { CarapacePluginService, CarapacePluginServiceContext } from "./types.js";
 
 const mockedLogger = vi.hoisted(() => ({
   info: vi.fn(),
@@ -39,7 +39,7 @@ vi.mock("../logging/subsystem.js", () => ({
 }));
 
 function createRegistry(
-  services: OpenClawPluginService[],
+  services: CarapacePluginService[],
   pluginId = "plugin:test",
   origin: PluginOrigin = "workspace",
 ) {
@@ -387,7 +387,7 @@ describe("plugin service replacement", () => {
     const broadcastPluginEvent = vi.fn();
     const lateFailures: unknown[] = [];
     const nestedRegistry = createEmptyPluginRegistry();
-    let context: OpenClawPluginServiceContext | undefined;
+    let context: CarapacePluginServiceContext | undefined;
     const registry = createRegistry([
       { id: "sibling", start: () => {}, stop: siblingStop },
       {
@@ -491,7 +491,7 @@ describe("plugin service replacement", () => {
     const stop = vi.fn(() => cleanup.promise);
     const broadcastPluginEvent = vi.fn();
     const siblingStart = vi.fn();
-    let context: OpenClawPluginServiceContext | undefined;
+    let context: CarapacePluginServiceContext | undefined;
     const registry = createRegistry([
       {
         id: "failed-start-hung-stop",
@@ -554,7 +554,7 @@ describe("plugin service replacement", () => {
     const cleanupReleased = new Promise<void>((resolve) => {
       releaseCleanup = resolve;
     });
-    let context: OpenClawPluginServiceContext | undefined;
+    let context: CarapacePluginServiceContext | undefined;
     const registry = createRegistry([
       {
         id: "late-owner",
@@ -744,7 +744,7 @@ describe("plugin service replacement", () => {
       traceId: "1234567890abcdef1234567890abcdef",
       spanId: "1234567890abcdef",
     };
-    let context: OpenClawPluginServiceContext | undefined;
+    let context: CarapacePluginServiceContext | undefined;
     const registry = createRegistry(
       [
         {
@@ -778,7 +778,7 @@ describe("plugin service replacement", () => {
     ).toThrow("no longer active");
     (
       context?.internalDiagnostics as
-        | (NonNullable<OpenClawPluginServiceContext["internalDiagnostics"]> & {
+        | (NonNullable<CarapacePluginServiceContext["internalDiagnostics"]> & {
             reportExporterHealth?: (update: DiagnosticExporterHealthUpdate) => void;
           })
         | undefined

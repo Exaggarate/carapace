@@ -3,7 +3,7 @@ import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveAgentConfig } from "./agent-scope-config.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import { type ModelManifestNormalizationContext, modelKey } from "./model-ref-shared.js";
@@ -26,7 +26,7 @@ type ConfiguredModelEntry = {
 
 export function resolveConfiguredModelEntries(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     agentId?: string;
     defaultProvider?: string;
     defaultModel?: string;

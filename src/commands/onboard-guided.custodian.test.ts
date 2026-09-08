@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { WizardCancelledError } from "../wizard/prompts.js";
 import { setupGuidedCustodianTestSuite } from "./onboard-guided.custodian.test-support.js";
 import type { GuidedOnboardingDeps } from "./onboard-guided.js";
@@ -124,7 +124,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     const activate = vi.fn<NonNullable<GuidedOnboardingDeps["activate"]>>(async (params) => {
       expect(localOnboarding.begin).not.toHaveBeenCalled();
       params.onCommitStarted?.(localOnboarding.persisted.config ?? {});
-      expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("pending");
+      expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("pending");
       return {
         ok: true,
         modelRef: "claude-cli/opus",
@@ -135,7 +135,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     const runSetupMemoryImportStep = vi.fn<
       NonNullable<GuidedOnboardingDeps["runSetupMemoryImportStep"]>
     >(async () => {
-      expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("completed");
+      expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("completed");
       return { status: "skipped", providers: [] };
     });
     const deps = setupDeps({ prompter, activate, runSetupMemoryImportStep });
@@ -159,7 +159,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       deps,
     );
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")).toMatchObject({
+    expect(localOnboarding.states.get("/tmp/carapace.json")).toMatchObject({
       status: "completed",
       workspace: "/tmp/approved-workspace",
     });
@@ -211,14 +211,14 @@ describe("runGuidedOnboarding custodian flow", () => {
       first,
     );
 
-    const pending = localOnboarding.states.get("/tmp/openclaw.json");
+    const pending = localOnboarding.states.get("/tmp/carapace.json");
     expect(pending).toMatchObject({ status: "pending", workspace: "/tmp/approved-workspace" });
     expect(first.runSystemAgentChat).toHaveBeenCalledOnce();
 
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       issues: [],
       config: {
         agents: {
@@ -248,7 +248,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       expect.objectContaining({ workspace: "/tmp/approved-workspace", resume: true }),
       { beforePersistentApply: expect.any(Function) },
     );
-    expect(localOnboarding.states.get("/tmp/openclaw.json")).toMatchObject({
+    expect(localOnboarding.states.get("/tmp/carapace.json")).toMatchObject({
       status: "completed",
       runId: pending?.runId,
     });
@@ -263,7 +263,7 @@ describe("runGuidedOnboarding custodian flow", () => {
 
     await runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, makeRuntime(), deps);
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("pending");
+    expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("pending");
     expect(localOnboarding.complete).not.toHaveBeenCalled();
     expect(deps.runSystemAgentChat).toHaveBeenCalledOnce();
   });
@@ -279,7 +279,7 @@ describe("runGuidedOnboarding custodian flow", () => {
 
     await runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, makeRuntime(), deps);
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("completed");
+    expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("completed");
   });
 
   it.each(["pending", "completed"] as const)(
@@ -311,7 +311,7 @@ describe("runGuidedOnboarding custodian flow", () => {
           workspace: "/tmp/new-workspace",
         }),
       );
-      expect(localOnboarding.states.get("/tmp/openclaw.json")).toMatchObject({
+      expect(localOnboarding.states.get("/tmp/carapace.json")).toMatchObject({
         status: "completed",
         workspace: "/tmp/new-workspace",
       });
@@ -438,14 +438,14 @@ describe("runGuidedOnboarding custodian flow", () => {
     expect(localOnboarding.begin).toHaveBeenCalledWith(
       expect.objectContaining({ securityAcknowledgedAt: committedAcknowledgement }),
     );
-    expect(localOnboarding.states.get("/tmp/openclaw.json")).toMatchObject({
+    expect(localOnboarding.states.get("/tmp/carapace.json")).toMatchObject({
       status: "completed",
       securityAcknowledgedAt: committedAcknowledgement,
     });
   });
 
   it("rejects a replaced config before recording inference setup ownership", async () => {
-    const replacementConfig: OpenClawConfig = {
+    const replacementConfig: CarapaceConfig = {
       wizard: { securityAcknowledgedAt: "2026-08-03T00:00:00.000Z" },
     };
     const activate = vi.fn<NonNullable<GuidedOnboardingDeps["activate"]>>(async (params) => {
@@ -544,7 +544,7 @@ describe("runGuidedOnboarding custodian flow", () => {
   it("rejects replacement config identity at the setup config-write boundary", async () => {
     const setupEffects = vi.fn();
     const applySetup = vi.fn<NonNullable<GuidedOnboardingDeps["applySetup"]>>(async (params) => {
-      const replacementConfig: OpenClawConfig = {
+      const replacementConfig: CarapaceConfig = {
         agents: { defaults: { workspace: params.workspace } },
         wizard: { securityAcknowledgedAt: "2026-08-03T00:00:00.000Z" },
       };
@@ -574,7 +574,7 @@ describe("runGuidedOnboarding custodian flow", () => {
 
     await runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, makeRuntime(), deps);
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("pending");
+    expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("pending");
     expect(localOnboarding.complete).not.toHaveBeenCalled();
     expect(deps.runSystemAgentChat).toHaveBeenCalledOnce();
   });
@@ -583,7 +583,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     const deps = setupDeps({
       prompter: createWizardPrompter(),
       applySetup: vi.fn(async () => {
-        const owner = localOnboarding.states.get("/tmp/openclaw.json");
+        const owner = localOnboarding.states.get("/tmp/carapace.json");
         localOnboarding.persisted.config = {
           agents: { defaults: { workspace: "/tmp/different-workspace" } },
           wizard: { securityAcknowledgedAt: owner?.securityAcknowledgedAt },
@@ -601,14 +601,14 @@ describe("runGuidedOnboarding custodian flow", () => {
   it.each([
     {
       label: "installation identity",
-      replace: (config: OpenClawConfig): OpenClawConfig => ({
+      replace: (config: CarapaceConfig): CarapaceConfig => ({
         ...config,
         wizard: { ...config.wizard, securityAcknowledgedAt: "2026-08-03T00:00:00.000Z" },
       }),
     },
     {
       label: "effective workspace",
-      replace: (config: OpenClawConfig): OpenClawConfig => ({
+      replace: (config: CarapaceConfig): CarapaceConfig => ({
         ...config,
         agents: {
           ...config.agents,
@@ -628,7 +628,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       await runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, makeRuntime(), deps);
 
       expect(withConfigMutationExclusive).toHaveBeenCalledOnce();
-      expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("pending");
+      expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("pending");
       expect(localOnboarding.complete).not.toHaveBeenCalled();
       expect(deps.runSystemAgentChat).toHaveBeenCalledOnce();
     },
@@ -644,7 +644,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       prompter: createWizardPrompter(),
       persistRiskAcknowledgement: async (config) => {
         localOnboarding.persisted.config = config;
-        localOnboarding.states.set("/tmp/openclaw.json", competing);
+        localOnboarding.states.set("/tmp/carapace.json", competing);
       },
     });
 
@@ -652,7 +652,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, makeRuntime(), deps),
     ).rejects.toThrow("already owns this installation");
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")).toEqual(competing);
+    expect(localOnboarding.states.get("/tmp/carapace.json")).toEqual(competing);
     expect(localOnboarding.complete).not.toHaveBeenCalled();
     expect(deps.applySetup).not.toHaveBeenCalled();
   });
@@ -668,7 +668,7 @@ describe("runGuidedOnboarding custodian flow", () => {
 
     await runGuidedOnboarding({ acceptRisk: true, workspace: "/tmp/work" }, runtime, deps);
 
-    expect(localOnboarding.states.get("/tmp/openclaw.json")?.status).toBe("completed");
+    expect(localOnboarding.states.get("/tmp/carapace.json")?.status).toBe("completed");
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(deps.launchHatchTui).not.toHaveBeenCalled();
   });
@@ -683,7 +683,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       listManualOptions: vi.fn(async () => ({
         manualProviders: [{ id: "openai-api-key", label: "OpenAI" }],
         authOptions: [],
-        workspace: "/tmp/openclaw-workspace",
+        workspace: "/tmp/carapace-workspace",
         setupComplete: false,
       })),
     };
@@ -708,7 +708,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       listManualOptions: vi.fn(async () => ({
         manualProviders: [{ id: "openai-api-key", label: "OpenAI" }],
         authOptions: [],
-        workspace: "/tmp/openclaw-workspace",
+        workspace: "/tmp/carapace-workspace",
         setupComplete: false,
       })),
     };
@@ -877,7 +877,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       issues: [],
       config: {
         gateway: { mode: "local" },
@@ -894,7 +894,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     );
     expect(deps.applySetup).not.toHaveBeenCalled();
     // Configured reruns hatch the persisted default workspace, not the probe context.
-    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/openclaw-workspace");
+    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/carapace-workspace");
     expect(prompter.note).toHaveBeenCalledWith(
       expect.stringContaining("already set up"),
       expect.anything(),
@@ -905,7 +905,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       issues: [],
       config: {
         agents: { defaults: { workspace: "/tmp/authored" } },
@@ -930,7 +930,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/authored");
   });
 
-  it("falls back to the OpenClaw chat when applying setup fails", async () => {
+  it("falls back to the Carapace chat when applying setup fails", async () => {
     const prompter = createWizardPrompter();
     const applySetup = vi.fn(async () => {
       throw new Error("config write raced");

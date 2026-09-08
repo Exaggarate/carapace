@@ -2,14 +2,14 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolveStorePath, upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolveStorePath, upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
   appendSqliteTrajectoryRuntimeEvents,
-  closeOpenClawAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesForTest,
   formatSqliteSessionFileMarker,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { stableHash } from "./parity-shared.js";
 import {
@@ -30,7 +30,7 @@ afterEach(async () => {
   // Fixtures point a state dir at these temp workspaces, so the shared and per-agent
   // SQLite handles stay cached and Windows fails the removal with EBUSY. The agent close
   // releases its leases through shared state and reopens it, so the store is released second.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await tempDirs.cleanup();
 });
@@ -47,8 +47,8 @@ async function seedRuntimeParityTranscript(params: {
   }>;
   updatedAt?: number;
 }) {
-  const tempRoot = params.tempRoot ?? (await tempDirs.makeTempDir("openclaw-qa-runtime-parity-"));
-  const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(tempRoot, "state") };
+  const tempRoot = params.tempRoot ?? (await tempDirs.makeTempDir("carapace-qa-runtime-parity-"));
+  const env = { ...process.env, CARAPACE_STATE_DIR: path.join(tempRoot, "state") };
   const storePath = resolveStorePath(undefined, { agentId: "qa", env });
   await upsertSessionEntry({
     agentId: "qa",
@@ -83,7 +83,7 @@ async function seedRuntimeParityTranscript(params: {
     appendSqliteTrajectoryRuntimeEvents(
       { agentId: "qa", env, sessionId: params.sessionId, storePath },
       params.trajectoryEvents.map((event, index) => ({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "carapace-trajectory",
         schemaVersion: 1,
         traceId: params.sessionId,
         source: "runtime",
@@ -136,7 +136,7 @@ async function captureRuntimeParityWithMockRequests(params: {
   const address = server.address() as AddressInfo;
   try {
     return await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       mockBaseUrl: `http://127.0.0.1:${address.port}`,
       scenarioResult: params.scenarioResult ?? { status: "pass" },
@@ -190,7 +190,7 @@ describe("runtime parity", () => {
     );
 
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       mockBaseUrl: "http://127.0.0.1:43123",
       scenarioResult: { status: "pass" },
@@ -231,7 +231,7 @@ describe("runtime parity", () => {
     });
 
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: { tempRoot },
       scenarioResult: { status: "pass" },
       wallClockMs: 10,
@@ -253,7 +253,7 @@ describe("runtime parity", () => {
           data: {
             toolCallId: "search-1",
             name: "web_search",
-            arguments: { query: "OpenClaw runtime parity fixed query" },
+            arguments: { query: "Carapace runtime parity fixed query" },
           },
         },
         {
@@ -265,7 +265,7 @@ describe("runtime parity", () => {
             isError: false,
             result: {
               status: "completed",
-              query: "OpenClaw runtime parity fixed query",
+              query: "Carapace runtime parity fixed query",
             },
           },
         },
@@ -322,7 +322,7 @@ describe("runtime parity", () => {
           data: {
             toolCallId: "search-1",
             name: "web_search",
-            arguments: { query: "OpenClaw runtime parity fixed query" },
+            arguments: { query: "Carapace runtime parity fixed query" },
           },
         },
         {
@@ -593,9 +593,9 @@ describe("runtime parity", () => {
 
   it("keeps a retry pass diagnostic from failing the captured cell", async () => {
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: {
-        tempRoot: `/tmp/openclaw-qa-runtime-parity-missing-${process.pid}`,
+        tempRoot: `/tmp/carapace-qa-runtime-parity-missing-${process.pid}`,
       },
       scenarioResult: {
         status: "pass",
@@ -609,9 +609,9 @@ describe("runtime parity", () => {
 
   it("still classifies terminal scenario failure diagnostics", async () => {
     const cell = await captureRuntimeParityCell({
-      runtime: "openclaw",
+      runtime: "carapace",
       gateway: {
-        tempRoot: `/tmp/openclaw-qa-runtime-parity-missing-${process.pid}`,
+        tempRoot: `/tmp/carapace-qa-runtime-parity-missing-${process.pid}`,
       },
       scenarioResult: {
         status: "fail",
@@ -717,7 +717,7 @@ describe("runtime parity", () => {
             {
               tool: "web_search",
               argsHash: "same-args",
-              resultHash: runtime === "openclaw" ? "validation-error" : "provider-error",
+              resultHash: runtime === "carapace" ? "validation-error" : "provider-error",
               errorClass: "tool-result-error",
             },
           ]),

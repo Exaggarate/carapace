@@ -1,7 +1,7 @@
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import { notifyListeners, registerListener } from "../shared/listeners.js";
 
-const changes = resolveGlobalSingleton(Symbol.for("openclaw.userProfileChanges"), () => ({
+const changes = resolveGlobalSingleton(Symbol.for("carapace.userProfileChanges"), () => ({
   version: 0,
   aliasRevision: 0,
   listeners: new Set<() => void>(),

@@ -1,14 +1,14 @@
 // Core legacy config normalizers for shipped keys retired outside the rule table.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { resolveDiscoveredChannelSetupPromotionSurface } from "../../../channels/plugins/setup-promotion-discovery.js";
 import { resolveSingleAccountPromotion } from "../../../channels/plugins/setup-promotion-helpers.js";
 import { resolveNormalizedProviderModelMaxTokens } from "../../../config/defaults.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { DEFAULT_GOOGLE_API_BASE_URL } from "../../../infra/google-api-base-url.js";
 import { createSubsystemLogger } from "../../../logging/subsystem.js";
 import { DEFAULT_ACCOUNT_ID } from "../../../routing/session-key.js";
@@ -34,9 +34,9 @@ const log = createSubsystemLogger("doctor");
 
 /** Migrate legacy browser/Chrome relay config to current browser profile settings. */
 export function normalizeLegacyBrowserConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const rawBrowser = cfg.browser;
   if (!isRecord(rawBrowser)) {
     return cfg;
@@ -117,15 +117,15 @@ export function normalizeLegacyBrowserConfig(
 
   return {
     ...cfg,
-    browser: browser as OpenClawConfig["browser"],
+    browser: browser as CarapaceConfig["browser"],
   };
 }
 
 /** Move single-account channel fields into accounts.default when account maps exist. */
 export function seedMissingDefaultAccountsFromSingleAccountBase(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   if (!channels) {
     return cfg;
@@ -225,14 +225,14 @@ export function seedMissingDefaultAccountsFromSingleAccountBase(
 
   return {
     ...cfg,
-    channels: nextChannels as OpenClawConfig["channels"],
+    channels: nextChannels as CarapaceConfig["channels"],
   };
 }
 
 type ModelProviderEntry = Partial<
-  NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>[string]
+  NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>[string]
 >;
-type ModelsConfigPatch = Partial<NonNullable<OpenClawConfig["models"]>>;
+type ModelsConfigPatch = Partial<NonNullable<CarapaceConfig["models"]>>;
 type ModelDefinitionEntry = NonNullable<ModelProviderEntry["models"]>[number];
 type SelectedRuntimeRef = {
   ref: string;
@@ -254,7 +254,7 @@ function resolveLegacyWholeAgentRuntimePolicy(raw: unknown):
     return undefined;
   }
   const runtime = normalizeOptionalLowercaseString(raw.id);
-  if (!runtime || runtime === "auto" || runtime === "openclaw") {
+  if (!runtime || runtime === "auto" || runtime === "carapace") {
     return undefined;
   }
   const alias = listLegacyRuntimeModelProviderAliases().find(
@@ -650,9 +650,9 @@ function normalizeLegacyRuntimeAgentContainer(
 }
 
 function normalizeLegacyCodexCliProviderRuntimePins(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): { config: OpenClawConfig; changed: boolean } {
+): { config: CarapaceConfig; changed: boolean } {
   const rawModels = cfg.models;
   if (!isRecord(rawModels) || !isRecord(rawModels.providers)) {
     return { config: cfg, changed: false };
@@ -708,7 +708,7 @@ function normalizeLegacyCodexCliProviderRuntimePins(
           ...cfg,
           models: {
             ...rawModels,
-            providers: nextProviders as NonNullable<OpenClawConfig["models"]>["providers"],
+            providers: nextProviders as NonNullable<CarapaceConfig["models"]>["providers"],
           },
         },
         changed: true,
@@ -718,10 +718,10 @@ function normalizeLegacyCodexCliProviderRuntimePins(
 
 /** Move legacy runtime-tagged model/provider refs onto current agentRuntime policy fields. */
 export function normalizeLegacyRuntimeModelRefs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>,
-): OpenClawConfig {
+): CarapaceConfig {
   const providerPinned = normalizeLegacyCodexCliProviderRuntimePins(cfg, changes);
   const cfgWithProviders = providerPinned.config;
   const rawAgents = cfgWithProviders.agents;
@@ -793,7 +793,7 @@ export function normalizeLegacyRuntimeModelRefs(
   const nextCfg = changed
     ? {
         ...cfgWithProviders,
-        agents: nextAgents as OpenClawConfig["agents"],
+        agents: nextAgents as CarapaceConfig["agents"],
       }
     : cfgWithProviders;
   return nextCfg;
@@ -801,9 +801,9 @@ export function normalizeLegacyRuntimeModelRefs(
 
 /** Add missing metadata source markers to legacy OpenAI Codex model catalog entries. */
 export function normalizeLegacyOpenAICodexModelsAddMetadata(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const rawModels = cfg.models;
   if (!isRecord(rawModels) || !isRecord(rawModels.providers)) {
     return cfg;
@@ -861,16 +861,16 @@ export function normalizeLegacyOpenAICodexModelsAddMetadata(
     ...cfg,
     models: {
       ...rawModels,
-      providers: nextProviders as NonNullable<OpenClawConfig["models"]>["providers"],
+      providers: nextProviders as NonNullable<CarapaceConfig["models"]>["providers"],
     },
   };
 }
 
 /** Rename legacy OpenAI API identifiers to the current completion/chat API ids. */
 export function normalizeLegacyOpenAIModelProviderApi(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const rawModels = cfg.models;
   if (!isRecord(rawModels) || !isRecord(rawModels.providers)) {
     return cfg;
@@ -933,16 +933,16 @@ export function normalizeLegacyOpenAIModelProviderApi(
     ...cfg,
     models: {
       ...rawModels,
-      providers: nextProviders as NonNullable<OpenClawConfig["models"]>["providers"],
+      providers: nextProviders as NonNullable<CarapaceConfig["models"]>["providers"],
     },
   };
 }
 
 /** Remove retired bundled nano-banana skill config after migrating image generation models. */
 export function normalizeLegacyNanoBananaSkill(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const NANO_BANANA_SKILL_KEY = "nano-banana-pro";
   const NANO_BANANA_MODEL = "google/gemini-3-pro-image-preview";
   const rawSkills = cfg.skills;
@@ -1042,10 +1042,10 @@ export function normalizeLegacyNanoBananaSkill(
       rawGoogle.models = [];
     }
     rawProviders.google = rawGoogle;
-    rawModels.providers = rawProviders as NonNullable<OpenClawConfig["models"]>["providers"];
+    rawModels.providers = rawProviders as NonNullable<CarapaceConfig["models"]>["providers"];
     next = {
       ...next,
-      models: rawModels as OpenClawConfig["models"],
+      models: rawModels as CarapaceConfig["models"],
     };
     changes.push(
       `Moved skills.entries.${NANO_BANANA_SKILL_KEY}.${legacyEnvApiKey ? "env.GEMINI_API_KEY" : "apiKey"} → models.providers.google.apiKey.`,
@@ -1168,9 +1168,9 @@ function applyLegacyOllamaProviderNumCtxParams(params: {
 
 /** Seed native Ollama num_ctx params from legacy context-token budgets. */
 export function normalizeLegacyOllamaNativeNumCtxParams(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const rawProviders = cfg.models?.providers;
   if (!isRecord(rawProviders)) {
     return cfg;
@@ -1178,7 +1178,7 @@ export function normalizeLegacyOllamaNativeNumCtxParams(
 
   let providersChanged = false;
   const nextProviders = { ...rawProviders };
-  type ProviderConfigMap = NonNullable<NonNullable<OpenClawConfig["models"]>["providers"]>;
+  type ProviderConfigMap = NonNullable<NonNullable<CarapaceConfig["models"]>["providers"]>;
   for (const [providerId, rawProvider] of Object.entries(rawProviders)) {
     if (!isRecord(rawProvider)) {
       continue;
@@ -1262,7 +1262,7 @@ export function normalizeLegacyOllamaNativeNumCtxParams(
     ...cfg,
     models: {
       ...cfg.models,
-      providers: nextProviders as NonNullable<OpenClawConfig["models"]>["providers"],
+      providers: nextProviders as NonNullable<CarapaceConfig["models"]>["providers"],
     },
   };
 }
@@ -1309,9 +1309,9 @@ function normalizeLegacyMistralModelCost<T extends Record<string, unknown>>(para
 
 /** Normalize stale Mistral model defaults such as prompt-cache read cost. */
 export function normalizeLegacyMistralModelDefaults(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   const rawProviders = cfg.models?.providers;
   if (!isRecord(rawProviders)) {
     return cfg;
@@ -1402,7 +1402,7 @@ export function normalizeLegacyMistralModelDefaults(
     ...cfg,
     models: {
       ...cfg.models,
-      providers: nextProviders as NonNullable<OpenClawConfig["models"]>["providers"],
+      providers: nextProviders as NonNullable<CarapaceConfig["models"]>["providers"],
     },
   };
 }

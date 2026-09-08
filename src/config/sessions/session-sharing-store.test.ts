@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  isOpenClawAgentDatabaseOpen,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  isCarapaceAgentDatabaseOpen,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+} from "../../state/carapace-agent-db.js";
 import { withTestDir } from "../../test-helpers/temp-dir.js";
 import {
   deleteSessionEntryLifecycle,
@@ -20,19 +20,19 @@ import {
   removeSessionMember,
 } from "./session-sharing-store.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 describe("session sharing store", () => {
   it("reads existing and missing memberships without opening or creating writable databases", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-readonly-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-readonly-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       const missingScope = { agentId: "missing", env, sessionKey: "agent:missing:main" };
       await upsertSessionEntryCore(scope, { sessionId: "session-main", updatedAt: 1 });
       addSessionMember(scope, { identityId: "guest", addedBy: "owner", addedAt: 2 });
-      const databasePath = resolveOpenClawAgentSqlitePath({ agentId: scope.agentId, env });
-      const missingPath = resolveOpenClawAgentSqlitePath({ agentId: missingScope.agentId, env });
-      closeOpenClawAgentDatabasesForTest();
+      const databasePath = resolveCarapaceAgentSqlitePath({ agentId: scope.agentId, env });
+      const missingPath = resolveCarapaceAgentSqlitePath({ agentId: missingScope.agentId, env });
+      closeCarapaceAgentDatabasesForTest();
 
       expect(listSessionMembers(scope)).toEqual([
         { identityId: "guest", addedBy: "owner", addedAt: 2 },
@@ -41,7 +41,7 @@ describe("session sharing store", () => {
         new Set([scope.sessionKey]),
       );
       expect(isSessionMember(scope, "guest")).toBe(true);
-      expect(isOpenClawAgentDatabaseOpen(databasePath)).toBe(false);
+      expect(isCarapaceAgentDatabaseOpen(databasePath)).toBe(false);
       expect(listSessionMembers(missingScope)).toEqual([]);
       expect(listSessionMembershipKeys(missingScope, [missingScope.sessionKey], "guest")).toEqual(
         new Set(),
@@ -52,8 +52,8 @@ describe("session sharing store", () => {
   });
 
   it("keeps deterministic membership rows", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntryCore(scope, {
         sessionId: "session-main",
@@ -92,11 +92,11 @@ describe("session sharing store", () => {
   });
 
   it("does not recreate a missing canonical membership table", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-missing-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-missing-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntryCore(scope, { sessionId: "session-main", updatedAt: 1 });
-      const database = openOpenClawAgentDatabase({ agentId: "main", env });
+      const database = openCarapaceAgentDatabase({ agentId: "main", env });
       database.db.exec("DROP TABLE session_members;");
 
       expect(() => listSessionMembers(scope)).toThrow(/no such table: session_members/);
@@ -109,8 +109,8 @@ describe("session sharing store", () => {
   });
 
   it("refuses member writes whose expected session instance no longer matches", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-instance-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-instance-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntryCore(scope, { sessionId: "session-b", updatedAt: 1 });
 
@@ -153,12 +153,12 @@ describe("session sharing store", () => {
   ] as const)(
     "preserves membership identity checks for %s",
     async (_, sessionId, entryJson, valid) => {
-      await withTestDir({ prefix: "openclaw-session-sharing-identity-" }, async (dir) => {
-        const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+      await withTestDir({ prefix: "carapace-session-sharing-identity-" }, async (dir) => {
+        const env = { ...process.env, CARAPACE_STATE_DIR: dir };
         const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
         await upsertSessionEntryCore(scope, { sessionId: "session-a", updatedAt: 1 });
         addSessionMember(scope, { identityId: "existing", addedBy: "owner", addedAt: 2 });
-        const database = openOpenClawAgentDatabase({ agentId: "main", env });
+        const database = openCarapaceAgentDatabase({ agentId: "main", env });
         database.db
           .prepare(
             "UPDATE session_nodes SET current_session_id = ?, entry_json = ? WHERE session_key = ?",
@@ -183,8 +183,8 @@ describe("session sharing store", () => {
   );
 
   it("drops members when the session instance is replaced under the same key", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-recreate-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-recreate-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntryCore(scope, {
         sessionId: "session-a",
@@ -220,8 +220,8 @@ describe("session sharing store", () => {
   });
 
   it("rejects stale member writes after entry-only deletion leaves a placeholder", async () => {
-    await withTestDir({ prefix: "openclaw-session-sharing-placeholder-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTestDir({ prefix: "carapace-session-sharing-placeholder-" }, async (dir) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntryCore(scope, { sessionId: "session-a", updatedAt: 1 });
       expect(
@@ -231,7 +231,7 @@ describe("session sharing store", () => {
       await deleteSessionEntryLifecycle({
         agentId: "main",
         archiveTranscript: false,
-        storePath: openOpenClawAgentDatabase({ agentId: "main", env }).path,
+        storePath: openCarapaceAgentDatabase({ agentId: "main", env }).path,
         target: { canonicalKey: scope.sessionKey, storeKeys: [scope.sessionKey] },
       });
 

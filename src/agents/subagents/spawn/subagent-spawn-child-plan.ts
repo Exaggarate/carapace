@@ -1,6 +1,6 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { inheritSessionCreationPolicy } from "../../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { isIncognitoSessionKey } from "../../../routing/session-key.js";
 import { resolveUserPath } from "../../../utils.js";
 import { resolveAgentDir } from "../../agent-scope-config.js";
@@ -53,7 +53,7 @@ function buildResolvedSubagentModelMetadata(resolvedModel?: string): {
 }
 
 async function resolveSpawnModelError(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targetAgentId: string;
   targetAgentDir: string;
   workspaceDir?: string;
@@ -151,7 +151,7 @@ type ResolveSubagentChildPlanResult =
 export async function resolveSubagentChildPlan(params: {
   request: SpawnSubagentParams;
   ctx: SpawnSubagentContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requesterInternalKey: string;
   requesterAgentId: string;
   targetAgentId: string;

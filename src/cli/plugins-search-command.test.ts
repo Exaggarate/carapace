@@ -56,25 +56,25 @@ describe("plugins search command", () => {
       context: "default",
       profile: undefined,
       container: undefined,
-      command: "openclaw plugins install clawhub:openclaw-calendar",
+      command: "carapace plugins install clawhub:carapace-calendar",
     },
     {
       context: "profile",
       profile: "work",
       container: undefined,
-      command: "openclaw --profile work plugins install clawhub:openclaw-calendar",
+      command: "carapace --profile work plugins install clawhub:carapace-calendar",
     },
     {
       context: "container",
       profile: undefined,
       container: "staging",
-      command: "openclaw --container staging plugins install clawhub:openclaw-calendar",
+      command: "carapace --container staging plugins install clawhub:carapace-calendar",
     },
     {
       context: "container over profile",
       profile: "work",
       container: "staging",
-      command: "openclaw --container staging plugins install clawhub:openclaw-calendar",
+      command: "carapace --container staging plugins install clawhub:carapace-calendar",
     },
   ])("searches ClawHub plugin families with the $context install context", async (scenario) => {
     mocks.searchClawHubPackages
@@ -82,7 +82,7 @@ describe("plugins search command", () => {
         {
           score: 12,
           package: {
-            name: "openclaw-calendar",
+            name: "carapace-calendar",
             displayName: "Calendar",
             family: "code-plugin",
             channel: "community",
@@ -98,7 +98,7 @@ describe("plugins search command", () => {
         {
           score: 10,
           package: {
-            name: "openclaw-calendar-bundle",
+            name: "carapace-calendar-bundle",
             displayName: "Calendar Bundle",
             family: "bundle-plugin",
             channel: "official",
@@ -113,8 +113,8 @@ describe("plugins search command", () => {
 
     await withEnvAsync(
       {
-        OPENCLAW_PROFILE: scenario.profile,
-        OPENCLAW_CONTAINER_HINT: scenario.container,
+        CARAPACE_PROFILE: scenario.profile,
+        CARAPACE_CONTAINER_HINT: scenario.container,
       },
       () => runPluginsSearchCommand(["calendar"], { limit: 5 }, mocks.runtime),
     );
@@ -129,7 +129,7 @@ describe("plugins search command", () => {
       family: "bundle-plugin",
       limit: 5,
     });
-    expect(mocks.logs.join("\n")).toContain("openclaw-calendar");
+    expect(mocks.logs.join("\n")).toContain("carapace-calendar");
     expect(mocks.logs.join("\n")).toContain(`Install: ${scenario.command}`);
   });
 
@@ -143,7 +143,7 @@ describe("plugins search command", () => {
 
   it("leaves missing-query JSON failures to the root renderer", async () => {
     await expect(runPluginsSearchCommand([], { json: true }, mocks.runtime)).rejects.toThrow(
-      "Usage: openclaw plugins search <query>",
+      "Usage: carapace plugins search <query>",
     );
 
     expect(mocks.runtime.error).not.toHaveBeenCalled();

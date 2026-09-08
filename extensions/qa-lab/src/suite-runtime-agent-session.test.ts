@@ -1,16 +1,16 @@
 // Qa Lab tests cover suite runtime agent session plugin behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
   loadTranscriptEventsSync,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "carapace/plugin-sdk/session-transcript-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
+  closeCarapaceAgentDatabasesForTest,
   appendSqliteSessionTranscriptEventForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createSession,
@@ -30,7 +30,7 @@ afterEach(async () => {
   // Fixtures point a state dir at these temp workspaces, so the shared and per-agent
   // SQLite handles stay cached and Windows fails the removal with EBUSY. The agent close
   // releases its leases through shared state and reopens it, so the store is released second.
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
   resetPluginStateStoreForTests();
   await cleanup();
 });
@@ -51,7 +51,7 @@ describe("qa suite runtime agent session helpers", () => {
   function qaSessionEnv(tempRoot: string): NodeJS.ProcessEnv {
     return {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
+      CARAPACE_STATE_DIR: path.join(tempRoot, "state"),
     };
   }
 
@@ -270,7 +270,7 @@ describe("qa suite runtime agent session helpers", () => {
     ]);
 
     await expect(
-      fs.stat(path.join(tempRoot, "state", "agents", "qa", "agent", "openclaw-agent.sqlite")),
+      fs.stat(path.join(tempRoot, "state", "agents", "qa", "agent", "carapace-agent.sqlite")),
     ).resolves.toBeDefined();
     await expect(
       fs.stat(path.join(tempRoot, "state", "agents", "qa", "sessions", "sessions.json")),
@@ -547,7 +547,7 @@ describe("qa suite runtime agent session helpers", () => {
       message: {
         role: "assistant",
         content: "Checking the workspace.",
-        __openclaw: { mirrorIdentity: "turn-123:commentary:message-1" },
+        __carapace: { mirrorIdentity: "turn-123:commentary:message-1" },
       },
     });
 
@@ -916,7 +916,7 @@ describe("qa suite runtime agent session helpers", () => {
       {
         role: "assistant",
         content: "same visible reply",
-        __openclaw: { mirrorIdentity: "old-turn:assistant" },
+        __carapace: { mirrorIdentity: "old-turn:assistant" },
       },
     ]) {
       await appendQaTranscriptMessage({ tempRoot, sessionKey, sessionId, message });
@@ -935,7 +935,7 @@ describe("qa suite runtime agent session helpers", () => {
       message: {
         role: "assistant",
         content: "same visible reply",
-        __openclaw: { mirrorIdentity: "current-turn:assistant" },
+        __carapace: { mirrorIdentity: "current-turn:assistant" },
       },
     });
 

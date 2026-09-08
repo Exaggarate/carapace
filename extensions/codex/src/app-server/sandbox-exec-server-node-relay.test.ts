@@ -1,6 +1,6 @@
 import { once } from "node:events";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { useIsolatedStateGuard } from "openclaw/plugin-sdk/test-env";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
+import { useIsolatedStateGuard } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sandboxExecServerRegistry } from "./sandbox-exec-server-registry.js";
 import {
@@ -16,8 +16,8 @@ import {
 } from "./sandbox-exec-server.test-helpers.js";
 
 const customLoggingPattern = vi.hoisted(() => ({ value: "" }));
-vi.mock("openclaw/plugin-sdk/logging-core", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/logging-core")>();
+vi.mock("carapace/plugin-sdk/logging-core", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/logging-core")>();
   return {
     ...actual,
     redactToolPayloadText: (text: string) => {
@@ -179,7 +179,7 @@ describe("Codex paired-device exec-server relay", () => {
     });
 
     expect(environment).toEqual({
-      environmentId: expect.stringMatching(/^openclaw-node-/),
+      environmentId: expect.stringMatching(/^carapace-node-/),
       cwd: "/remote/managed-workspace",
     });
     expect(environment?.environmentId.length).toBeLessThanOrEqual(64);
@@ -202,7 +202,7 @@ describe("Codex paired-device exec-server relay", () => {
     expect(openDuplex.mock.invocationCallOrder[0]).toBeLessThan(
       client.request.mock.invocationCallOrder[0] ?? Infinity,
     );
-    expect(execServerUrlFromClient(client)).toMatch(/^ws:\/\/127\.0\.0\.1:\d+\/openclaw-/);
+    expect(execServerUrlFromClient(client)).toMatch(/^ws:\/\/127\.0\.0\.1:\d+\/carapace-/);
   });
 
   it.each([

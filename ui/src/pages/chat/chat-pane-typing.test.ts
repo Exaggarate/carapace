@@ -69,20 +69,20 @@ describe("chat pane typing presence", () => {
       event({ role: "user", senderLabel: `Alice (${aliceId})` }),
     );
     pane.clearTypingActorForSessionMessage(
-      event({ role: "assistant", __openclaw: { senderId: aliceId } }),
+      event({ role: "assistant", __carapace: { senderId: aliceId } }),
     );
     pane.clearTypingActorForSessionMessage(
-      event({ role: "user", __openclaw: { senderId: aliceId } }, "agent:work:other"),
+      event({ role: "user", __carapace: { senderId: aliceId } }, "agent:work:other"),
     );
     expect([...pane.typingActors.keys()]).toEqual([aliceId, "bob"]);
 
     pane.clearTypingActorForSessionMessage(
-      event({ role: "user", __openclaw: { senderId: aliceId } }),
+      event({ role: "user", __carapace: { senderId: aliceId } }),
     );
     pane.clearTypingActorForSessionMessage(
       event({
         role: "user",
-        __openclaw: {
+        __carapace: {
           senderId: aliceId,
           senderIdentity: {
             type: "observation",
@@ -98,7 +98,7 @@ describe("chat pane typing presence", () => {
     pane.clearTypingActorForSessionMessage(
       event({
         role: "user",
-        __openclaw: { senderId: aliceId, senderIdentity: { type: "profile", id: aliceId } },
+        __carapace: { senderId: aliceId, senderIdentity: { type: "profile", id: aliceId } },
       }),
     );
     expect([...pane.typingActors.keys()]).toEqual(["bob"]);

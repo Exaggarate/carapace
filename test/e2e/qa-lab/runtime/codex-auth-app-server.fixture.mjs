@@ -5,13 +5,13 @@ import {
   runFakeCodexAppServer,
 } from "../../../../scripts/e2e/lib/codex-app-server-fixture.mjs";
 
-const requestLog = process.env.OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG;
+const requestLog = process.env.CARAPACE_QA_CODEX_AUTH_APP_SERVER_LOG;
 if (!requestLog) {
-  throw new Error("missing OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG");
+  throw new Error("missing CARAPACE_QA_CODEX_AUTH_APP_SERVER_LOG");
 }
-const appServerVersion = process.env.OPENCLAW_QA_CODEX_APP_SERVER_VERSION;
+const appServerVersion = process.env.CARAPACE_QA_CODEX_APP_SERVER_VERSION;
 if (!appServerVersion) {
-  throw new Error("missing OPENCLAW_QA_CODEX_APP_SERVER_VERSION");
+  throw new Error("missing CARAPACE_QA_CODEX_APP_SERVER_VERSION");
 }
 
 let turnCount = 0;
@@ -30,9 +30,9 @@ runFakeCodexAppServer({
     initialize: ({ sendResult }) =>
       sendResult(
         createFakeInitializeResponse({
-          name: "openclaw-qa-codex-auth",
+          name: "carapace-qa-codex-auth",
           version: appServerVersion,
-          userAgent: `openclaw/${appServerVersion} (test)`,
+          userAgent: `carapace/${appServerVersion} (test)`,
         }),
       ),
     "account/login/start": ({ params, sendResult }) => sendResult({ type: params?.type }),

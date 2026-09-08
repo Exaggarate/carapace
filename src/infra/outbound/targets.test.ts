@@ -2,7 +2,7 @@
 // heartbeat sender context, and route-aware heartbeat refinements.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import type { ChannelRouteRef } from "../../plugin-sdk/channel-route.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -143,7 +143,7 @@ beforeEach(() => {
 
 describe("resolveOutboundTarget defaultTo config fallback", () => {
   installResolveOutboundTargetPluginRegistryHooks();
-  const alphaDefaultCfg: OpenClawConfig = {
+  const alphaDefaultCfg: CarapaceConfig = {
     channels: { alpha: { defaultTo: "Alpha:Room One", allowFrom: ["*"] } },
   };
 
@@ -158,7 +158,7 @@ describe("resolveOutboundTarget defaultTo config fallback", () => {
   });
 
   it("uses a second plugin defaultTo when no explicit target is provided", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { beta: { defaultTo: "Beta:Default Room" } },
     };
     const res = resolveOutboundTarget({
@@ -171,7 +171,7 @@ describe("resolveOutboundTarget defaultTo config fallback", () => {
   });
 
   it("passes bootstrap opt-in to channel plugin resolution", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { alpha: { defaultTo: "Alpha:Room One" } },
     };
 
@@ -202,7 +202,7 @@ describe("resolveOutboundTarget defaultTo config fallback", () => {
   });
 
   it("still errors when no defaultTo and no explicit target", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       channels: { alpha: { allowFrom: ["room-one"] } },
     };
     const res = resolveOutboundTarget({
@@ -580,7 +580,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([forum]));
 
     const resolved = resolveHeartbeatDeliveryTarget({
-      cfg: { channels: { forum: { allowFrom: ["dm:operator"] } } } as OpenClawConfig,
+      cfg: { channels: { forum: { allowFrom: ["dm:operator"] } } } as CarapaceConfig,
       entry: {
         sessionId: "sess-owner-group",
         updatedAt: 1,
@@ -604,7 +604,7 @@ describe("resolveSessionDeliveryTarget", () => {
       cfg: {
         commands: { ownerAllowFrom: ["user:global-owner"] },
         channels: { alpha: { allowFrom: ["user:channel-owner"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       heartbeat: { target: "owner" },
     });
 
@@ -628,7 +628,7 @@ describe("resolveSessionDeliveryTarget", () => {
       cfg: {
         commands: { ownerAllowFrom: ["discord:123", "456"] },
         channels: { telegram: { allowFrom: ["789"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       heartbeat: { target: "owner" },
     });
 
@@ -641,7 +641,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([alpha]));
 
     const resolved = resolveHeartbeatDeliveryTarget({
-      cfg: { channels: { alpha: { allowFrom: ["user:channel-owner"] } } } as OpenClawConfig,
+      cfg: { channels: { alpha: { allowFrom: ["user:channel-owner"] } } } as CarapaceConfig,
       heartbeat: { target: "owner" },
     });
 
@@ -661,7 +661,7 @@ describe("resolveSessionDeliveryTarget", () => {
       cfg: {
         commands: { ownerAllowFrom: ["", "*"] },
         channels: { alpha: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(resolved).toMatchObject({ channel: "none", reason: "no-route" });
@@ -680,7 +680,7 @@ describe("resolveSessionDeliveryTarget", () => {
       cfg: {
         commands: { ownerAllowFrom: ["telegram:*"] },
         channels: { telegram: { allowFrom: ["telegram:*"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       heartbeat: { target: "owner" },
     });
 
@@ -700,7 +700,7 @@ describe("resolveSessionDeliveryTarget", () => {
           alpha: { allowFrom: ["user:alpha-owner"] },
           beta: { allowFrom: ["user:beta-owner"] },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(resolved).toMatchObject({ channel: "alpha", to: "user:alpha-owner" });
@@ -753,7 +753,7 @@ describe("resolveSessionDeliveryTarget", () => {
           },
         ]);
       }
-      const cfg = { channels: { alpha: {}, beta: {} } } as OpenClawConfig;
+      const cfg = { channels: { alpha: {}, beta: {} } } as CarapaceConfig;
 
       expect(hasResolvableHeartbeatOwnerRoute({ cfg, heartbeat: { accountId: "work" } })).toBe(
         true,
@@ -783,7 +783,7 @@ describe("resolveSessionDeliveryTarget", () => {
     telegram.config = {
       ...telegram.config,
       listAccountIds: () => ["default"],
-      inspectAccount: (cfg: OpenClawConfig) => {
+      inspectAccount: (cfg: CarapaceConfig) => {
         const botToken = cfg.channels?.telegram?.botToken;
         return typeof botToken === "string" && botToken.trim()
           ? { enabled: true, configured: true, token: botToken, tokenStatus: "available" }
@@ -794,7 +794,7 @@ describe("resolveSessionDeliveryTarget", () => {
 
     // A store-backed SecretRef that this command path could not resolve must keep
     // owner discovery fail-closed instead of reporting a phantom route.
-    const unresolvedCfg: OpenClawConfig = {
+    const unresolvedCfg: CarapaceConfig = {
       commands: { ownerAllowFrom: ["telegram:123456789"] },
       channels: {
         telegram: {
@@ -807,7 +807,7 @@ describe("resolveSessionDeliveryTarget", () => {
 
     // Once the read-only resolution contract materializes the credential, the
     // configured owner route resolves without any other config change (#137217).
-    const resolvedCfg: OpenClawConfig = {
+    const resolvedCfg: CarapaceConfig = {
       commands: { ownerAllowFrom: ["telegram:123456789"] },
       channels: { telegram: { enabled: true, botToken: "8905123456:AAF-example-bDTs" } },
     };
@@ -846,7 +846,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([forum]));
 
     const resolved = resolveHeartbeatDeliveryTarget({
-      cfg: { channels: { forum: { allowFrom: ["room:operators"] } } } as OpenClawConfig,
+      cfg: { channels: { forum: { allowFrom: ["room:operators"] } } } as CarapaceConfig,
       heartbeat: { target: "owner" },
     });
 
@@ -877,7 +877,7 @@ describe("resolveSessionDeliveryTarget", () => {
     const heartbeat = { ...(target ? { target } : {}), to: "group:wrong" };
 
     const resolved = resolveHeartbeatDeliveryTarget({
-      cfg: { channels: { alpha: { allowFrom: ["user:owner"] } } } as OpenClawConfig,
+      cfg: { channels: { alpha: { allowFrom: ["user:owner"] } } } as CarapaceConfig,
       heartbeat,
     });
 
@@ -1049,7 +1049,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("allows heartbeat delivery to core direct target prefixes by default", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       entry: {
@@ -1068,7 +1068,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("keeps heartbeat delivery to core channel target prefixes", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       entry: {
@@ -1106,7 +1106,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("keeps explicit heartbeat plugin targets raw for modern route resolution", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       heartbeat: {
@@ -1177,7 +1177,7 @@ describe("resolveSessionDeliveryTarget", () => {
         allowBootstrap?: boolean;
       }) => (channel === "forum" && agentId === "ops" && allowBootstrap === true ? runtime : setup),
     );
-    const cfg = { channels: { forum: {} } } as OpenClawConfig;
+    const cfg = { channels: { forum: {} } } as CarapaceConfig;
 
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
@@ -1285,7 +1285,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("resolves explicit heartbeat plugin targets through the outbound session route", async () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
       cfg,
       agentId: "main",
@@ -1479,7 +1479,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([alpha]));
 
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
-      cfg: { channels: { alpha: { allowFrom: ["operator"] } } } as OpenClawConfig,
+      cfg: { channels: { alpha: { allowFrom: ["operator"] } } } as CarapaceConfig,
       agentId: "main",
       heartbeat: { target: "owner" },
     });
@@ -1497,7 +1497,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([googlechat]));
 
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
-      cfg: { channels: { googlechat: { allowFrom: ["users/abc"] } } } as OpenClawConfig,
+      cfg: { channels: { googlechat: { allowFrom: ["users/abc"] } } } as CarapaceConfig,
       agentId: "main",
       heartbeat: { target: "owner" },
     });
@@ -1515,7 +1515,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([googlechat]));
 
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
-      cfg: { channels: { googlechat: { allowFrom: ["spaces/xyz"] } } } as OpenClawConfig,
+      cfg: { channels: { googlechat: { allowFrom: ["spaces/xyz"] } } } as CarapaceConfig,
       agentId: "main",
       heartbeat: { target: "owner" },
     });
@@ -1535,7 +1535,7 @@ describe("resolveSessionDeliveryTarget", () => {
       setActivePluginRegistry(createTargetsTestRegistry([telegram]));
 
       const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
-        cfg: { channels: { telegram: { allowFrom: [ownerId] } } } as OpenClawConfig,
+        cfg: { channels: { telegram: { allowFrom: [ownerId] } } } as CarapaceConfig,
         agentId: "main",
         heartbeat: { target: "owner" },
       });
@@ -1555,7 +1555,7 @@ describe("resolveSessionDeliveryTarget", () => {
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
       cfg: {
         channels: { "external-channel": { allowFrom: ["opaque-owner-id"] } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       heartbeat: { target: "owner" },
     });
@@ -1572,7 +1572,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([external]));
 
     const resolved = await resolveHeartbeatDeliveryTargetWithSessionRoute({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       agentId: "main",
       heartbeat: { target: "owner" },
     });
@@ -1602,7 +1602,7 @@ describe("resolveSessionDeliveryTarget", () => {
           slack: { allowFrom: ["user:slack-local"] },
           telegram: { allowFrom: ["999"] },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       entry: {
         sessionId: "sess-slack-first",
         updatedAt: 1,
@@ -1631,7 +1631,7 @@ describe("resolveSessionDeliveryTarget", () => {
     setActivePluginRegistry(createTargetsTestRegistry([whatsapp]));
     const cfg = {
       channels: { whatsapp: { allowFrom: ["+15555550166"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(hasResolvableHeartbeatOwnerRoute({ cfg })).toBe(true);
 
@@ -2020,7 +2020,7 @@ describe("resolveSessionDeliveryTarget", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       agentId: "main",
       entry: {
         sessionId: "sess-heartbeat-default-routed-direct",
@@ -2035,7 +2035,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("preserves route threadId for heartbeat target=last on plugin-owned group sessions", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       entry: {
@@ -2057,7 +2057,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("reuses route threadId when only deliveryContext carries it", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       entry: {
@@ -2081,7 +2081,7 @@ describe("resolveSessionDeliveryTarget", () => {
   });
 
   it("does not inherit stale threadId for direct-chat heartbeat routes", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const resolved = resolveHeartbeatDeliveryTarget({
       cfg,
       entry: {

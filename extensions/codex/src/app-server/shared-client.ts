@@ -7,10 +7,10 @@ import path from "node:path";
 import {
   AgentHarnessPreflightError,
   resolveDefaultAgentDir,
-} from "openclaw/plugin-sdk/agent-harness-registration";
-import type { AgentHarnessRuntimeArtifactBinding } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { AuthProfileStore } from "openclaw/plugin-sdk/provider-auth";
+} from "carapace/plugin-sdk/agent-harness-registration";
+import type { AgentHarnessRuntimeArtifactBinding } from "carapace/plugin-sdk/agent-harness-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { AuthProfileStore } from "carapace/plugin-sdk/provider-auth";
 import { codexBuildSymbol } from "../build-state.js";
 import { CodexAppServerStartupError } from "./attempt-timeouts.js";
 import {
@@ -74,7 +74,7 @@ export { retireSharedCodexAppServerClientIfCurrent } from "./shared-client-lifec
 // Keep disposal preloaded and build-scoped: shutdown must close the old clients
 // even if another module copy has loaded replacement code.
 const SHARED_CODEX_APP_SERVER_CLIENT_DISPOSER = codexBuildSymbol(
-  "openclaw.codexAppServerClientDisposer",
+  "carapace.codexAppServerClientDisposer",
 );
 
 type CodexAppServerClientStartupOptions = {
@@ -373,7 +373,7 @@ async function resolveCodexAppServerClientStartContext(
   }
   if (preparedAuth?.kind === "profile" && !preparedAuth.store.profiles[preparedAuth.profileId]) {
     throw new Error(
-      `Prepared Codex auth profile "${preparedAuth.profileId}" was not found. Select an existing OpenAI profile or sign in again with OpenClaw, then retry.`,
+      `Prepared Codex auth profile "${preparedAuth.profileId}" was not found. Select an existing OpenAI profile or sign in again with Carapace, then retry.`,
     );
   }
   if (preparedAuth?.kind === "api-key" && !preparedApiKey) {
@@ -1328,7 +1328,7 @@ export function captureCodexAppServerClientLifetime(
     (start?.transport !== "stdio" || isCodexAppServerProxyLaunch(start.args))
   ) {
     throw new AgentHarnessPreflightError(
-      "Codex ordinary configuration refresh requires an OpenClaw-managed local stdio process, not an external socket or app-server proxy. No turn was sent; reconnect through managed local stdio before continuing.",
+      "Codex ordinary configuration refresh requires an Carapace-managed local stdio process, not an external socket or app-server proxy. No turn was sent; reconnect through managed local stdio before continuing.",
     );
   }
   const isolated = requiredOwnership === "native-process" && state.isolatedClients.has(client);

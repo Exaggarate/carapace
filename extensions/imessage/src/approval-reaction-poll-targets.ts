@@ -1,17 +1,17 @@
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
 // Imessage plugin module owns persisted approval reaction poll targets.
-import { readApprovalReactionDecisionList } from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { readApprovalReactionDecisionList } from "carapace/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "carapace/plugin-sdk/number-runtime";
 import {
   createPluginStateErrorReporter,
   type PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   normalizeConversationKey,
   type IMessageApprovalConversationKey,

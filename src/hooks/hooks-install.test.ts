@@ -7,9 +7,9 @@ import { tryInstallHookPackFromLocalPath } from "../cli/plugins-install-hook-fal
 import { readConfigFileSnapshot } from "../config/config.js";
 import { withPluginLifecycleLease } from "../plugins/plugin-lifecycle-lease.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { pinConfigDir } from "../utils.js";
 import { readHookInstalls } from "./installs.js";
 import {
@@ -29,7 +29,7 @@ async function writeHook(hookDir: string, name: string): Promise<void> {
       "---",
       `name: ${name}`,
       'description: "Test hook"',
-      'metadata: {"openclaw":{"events":["command:new"]}}',
+      'metadata: {"carapace":{"events":["command:new"]}}',
       "---",
       "",
     ].join("\n"),
@@ -46,10 +46,10 @@ describe.each([
   { mode: "copied", link: false },
   { mode: "linked", link: true },
 ])("hooks install ($mode)", ({ link }) => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "hooks-install", layout: "split" });
+    state = await createCarapaceTestState({ label: "hooks-install", layout: "split" });
     pinConfigDir();
     clearInternalHooks();
     await state.writeConfig({
@@ -89,7 +89,7 @@ describe.each([
           JSON.stringify({
             name: "@acme/hello-hooks",
             version: "0.0.0",
-            openclaw: { hooks: [hookPath] },
+            carapace: { hooks: [hookPath] },
           }),
           "utf-8",
         );

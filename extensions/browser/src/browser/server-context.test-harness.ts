@@ -12,13 +12,13 @@ export function makeBrowserProfile(
   overrides: Partial<ResolvedBrowserProfile> = {},
 ): ResolvedBrowserProfile {
   return {
-    name: "openclaw",
+    name: "carapace",
     cdpUrl: "http://127.0.0.1:18800",
     cdpHost: "127.0.0.1",
     cdpIsLoopback: true,
     cdpPort: 18800,
     color: "#FF4500",
-    driver: "openclaw",
+    driver: "carapace",
     headless: false,
     attachOnly: false,
     ...overrides,
@@ -78,20 +78,20 @@ export function makeBrowserServerState(params?: {
   };
 }
 
-/** Mocks a launched OpenClaw Chrome process with the supplied pid. */
+/** Mocks a launched Carapace Chrome process with the supplied pid. */
 export function mockLaunchedChrome(
-  launchOpenClawChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
+  launchCarapaceChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
   pid: number,
 ) {
   const proc = new EventEmitter() as unknown as ChildProcessWithoutNullStreams;
   const running: RunningChrome = {
     pid,
     exe: { kind: "chromium", path: "/usr/bin/chromium" },
-    userDataDir: "/tmp/openclaw-test",
+    userDataDir: "/tmp/carapace-test",
     cdpPort: 18800,
     startedAt: Date.now(),
     proc,
   };
-  launchOpenClawChrome.mockResolvedValue(running);
+  launchCarapaceChrome.mockResolvedValue(running);
   return running;
 }

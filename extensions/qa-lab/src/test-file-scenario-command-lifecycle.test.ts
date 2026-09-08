@@ -61,7 +61,7 @@ function runCommand(
     command: "/usr/local/bin/scenario-command",
     args: ["--run"],
     cwd: "/tmp/qa",
-    env: { OPENCLAW_QA_REF: "test" },
+    env: { CARAPACE_QA_REF: "test" },
     ...(onOutput ? { onOutput } : {}),
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
   });
@@ -183,7 +183,7 @@ describe.skipIf(process.platform === "win32")("qa scenario command real POSIX li
     // The bundle needs only the UTF-16 helper behind this SDK import, not the full plugin runtime.
     await esbuild({
       alias: {
-        "openclaw/plugin-sdk/text-utility-runtime": fileURLToPath(
+        "carapace/plugin-sdk/text-utility-runtime": fileURLToPath(
           new URL("../../../packages/normalization-core/src/utf16-slice.ts", import.meta.url),
         ),
       },
@@ -308,7 +308,7 @@ describe.skipIf(process.platform === "win32")("qa scenario command lifecycle", (
     expect(spawnMock).toHaveBeenCalledWith("/usr/local/bin/scenario-command", ["--run"], {
       cwd: "/tmp/qa",
       detached: true,
-      env: { OPENCLAW_QA_REF: "test" },
+      env: { CARAPACE_QA_REF: "test" },
       stdio: ["ignore", "pipe", "pipe"],
     });
     expect(parentHandlers.size).toBe(0);

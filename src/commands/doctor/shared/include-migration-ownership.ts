@@ -1,6 +1,6 @@
 import { resolveIncludeWriteBoundary } from "../../../config/include-write-boundary.js";
 import { INCLUDE_KEY, isInternalIncludeWriteTarget } from "../../../config/includes.js";
-import type { ConfigFileSnapshot } from "../../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../../config/types.carapace.js";
 import { isRecord } from "../../../utils.js";
 
 export function containsAuthoredInclude(value: unknown): boolean {

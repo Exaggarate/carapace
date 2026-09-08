@@ -67,7 +67,7 @@ function createQueuedSendRecoveryFixture() {
         messages.push({
           role: "user",
           content: params.message,
-          __openclaw: {
+          __carapace: {
             id: "queued-user",
             seq: 1,
             idempotencyKey: `${params.idempotencyKey}:user`,

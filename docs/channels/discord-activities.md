@@ -1,5 +1,5 @@
 ---
-summary: "Launch self-contained OpenClaw HTML widgets inside Discord Activities"
+summary: "Launch self-contained Carapace HTML widgets inside Discord Activities"
 read_when:
   - Setting up or troubleshooting Discord Activity widgets
 title: "Discord Activities"
@@ -11,27 +11,27 @@ The feature is off by default. `show_widget` remains one core-owned tool. When `
 
 ## Prerequisites
 
-- an existing [OpenClaw Discord bot](/channels/discord)
-- a public HTTPS hostname that reaches the OpenClaw gateway
+- an existing [Carapace Discord bot](/channels/discord)
+- a public HTTPS hostname that reaches the Carapace gateway
 - permission to configure Activities and OAuth2 for the bot's Discord application
 
 Any HTTPS reverse proxy or tunnel works. A named Cloudflare Tunnel provides a stable hostname without exposing the gateway port directly.
 
 ```yaml
 # ~/.cloudflared/config.yml
-tunnel: openclaw-discord
+tunnel: carapace-discord
 credentials-file: /home/you/.cloudflared/TUNNEL-ID.json
 ingress:
-  - hostname: openclaw.example.com
+  - hostname: carapace.example.com
     service: http://127.0.0.1:18789
   - service: http_status:404
 ```
 
 ```bash
 cloudflared tunnel login
-cloudflared tunnel create openclaw-discord
-cloudflared tunnel route dns openclaw-discord openclaw.example.com
-cloudflared tunnel run openclaw-discord
+cloudflared tunnel create carapace-discord
+cloudflared tunnel route dns carapace-discord carapace.example.com
+cloudflared tunnel run carapace-discord
 ```
 
 Keep normal gateway authentication enabled. Only the Activity prefix is public, and the plugin validates OAuth, Activity instance membership, channel binding, sessions, and one-time document capabilities itself.
@@ -40,14 +40,14 @@ Keep normal gateway authentication enabled. Only the Activity prefix is public, 
 
 <Steps>
   <Step title="Expose the gateway over HTTPS">
-    Start your tunnel or reverse proxy and verify that `https://openclaw.example.com/discord/activity/` reaches the gateway after Activities configuration is added. Replace the example hostname with your own.
+    Start your tunnel or reverse proxy and verify that `https://carapace.example.com/discord/activity/` reaches the gateway after Activities configuration is added. Replace the example hostname with your own.
   </Step>
 
   <Step title="Enable Activities in Discord">
     Open the existing bot application in the [Discord Developer Portal](https://discord.com/developers/applications). Open **Activities**, enable Activities, and create a URL mapping:
 
     - prefix: `ROOT` (`/`)
-    - target: `openclaw.example.com/discord/activity`
+    - target: `carapace.example.com/discord/activity`
 
     The target is the public hostname plus `/discord/activity`, without a trailing slash.
 
@@ -57,7 +57,7 @@ Keep normal gateway authentication enabled. Only the Activity prefix is public, 
     Open **OAuth2** in the Developer Portal. Discord requires at least one redirect URI, so add a local placeholder such as the loopback address if the application has none yet; the Embedded App SDK handles the Activity return flow. Copy or reset the application client secret. Treat it as a credential: do not paste it into chat, logs, or a committed configuration file.
   </Step>
 
-  <Step title="Configure OpenClaw">
+  <Step title="Configure Carapace">
     Add one block to the Discord account that should offer widgets:
 
     ```json5
@@ -92,7 +92,7 @@ Core validates and wraps the widget document before handing it to Discord. The p
 
 - OAuth identifies the Discord user before widget metadata is returned.
 - Discord's Get Activity Instance API must confirm that the OAuth user is present in the current Activity instance. The instance channel must match the channel where the widget was posted.
-- Everyone who Discord permits into that channel can open its widgets. To narrow the audience, use Discord channel permissions. OpenClaw command and DM allowlists do not grant or remove access to already-posted channel content.
+- Everyone who Discord permits into that channel can open its widgets. To narrow the audience, use Discord channel permissions. Carapace command and DM allowlists do not grant or remove access to already-posted channel content.
 - OAuth sessions expire after 15 minutes. Widget document capabilities expire after 60 seconds and work once.
 - Widgets expire after seven days, with at most 64 retained per Discord plugin instance.
 - Widget HTML is authored by your agent and should be treated as trusted content. Do not embed secrets you would not want a buggy widget to expose.
@@ -107,7 +107,7 @@ The public Activity shell and token-exchange route become reachable through your
 
 - confirm the tunnel is running and routes to the gateway's actual bind port
 - confirm the Developer Portal target includes `/discord/activity`
-- restart the gateway after changing Discord or OpenClaw configuration
+- restart the gateway after changing Discord or Carapace configuration
 - confirm the Discord bot token and Activities client secret both resolve in the running gateway; incomplete credentials keep `/discord/activity` externally hidden behind the normal 404
 
 ### Discord opens a blank page or reports `blocked:csp`
@@ -120,8 +120,8 @@ Widget network requests are intentionally blocked. Inline all CSS, JavaScript, i
 
 ### “Widget unavailable”
 
-Launch the button from the channel where the agent posted it. OpenClaw tracks launches server-side when clicked, so a fresh launch record can resolve the exact widget even when Discord omits or mangles the button's custom ID. When neither the custom ID nor a launch record resolves, OpenClaw opens the most recently posted live widget in that channel. Older widgets remain addressable through buttons that preserve their custom ID.
+Launch the button from the channel where the agent posted it. Carapace tracks launches server-side when clicked, so a fresh launch record can resolve the exact widget even when Discord omits or mangles the button's custom ID. When neither the custom ID nor a launch record resolves, Carapace opens the most recently posted live widget in that channel. Older widgets remain addressable through buttons that preserve their custom ID.
 
 ### “You cannot launch Activities in this channel”
 
-Discord does not launch Activities from forum-style channels. OpenClaw rejects the Activity component delivery there instead of posting a button that cannot work. Ask for the widget from a regular text channel instead.
+Discord does not launch Activities from forum-style channels. Carapace rejects the Activity component delivery there instead of posting a button that cannot work. Ask for the widget from a regular text channel instead.

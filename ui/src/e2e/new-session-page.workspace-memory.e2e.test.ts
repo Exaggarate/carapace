@@ -1,5 +1,5 @@
 import path from "node:path";
-import { gatewayOriginScope } from "@openclaw/gateway-client/browser";
+import { gatewayOriginScope } from "@carapace/gateway-client/browser";
 import type { BrowserContextOptions, Page } from "playwright";
 import { expect, it } from "vitest";
 import { finishElementAnimations } from "../test-helpers/animations.ts";
@@ -80,7 +80,7 @@ async function readMainPreference(page: Page): Promise<Record<string, unknown> |
   return page.evaluate(() => {
     const key = Array.from({ length: localStorage.length }, (_, index) =>
       localStorage.key(index),
-    ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+    ).find((candidate) => candidate?.startsWith("carapace.new-session.preferences.v1:"));
     const value = key
       ? (JSON.parse(localStorage.getItem(key) ?? "null") as {
           agents?: Record<string, Record<string, unknown>>;
@@ -526,7 +526,7 @@ suite.define(() => {
       await page.evaluate((workspace) => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("carapace.new-session.preferences.v1:"));
         if (!key) {
           throw new Error("missing new-session preference");
         }
@@ -629,7 +629,7 @@ suite.define(() => {
       async (page) => {
         const appUrl = new URL(suite.server.baseUrl);
         const gatewayUrl = `${appUrl.protocol === "https:" ? "wss:" : "ws:"}//${appUrl.host}`;
-        const storageKey = `openclaw.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
+        const storageKey = `carapace.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
         await page.addInitScript(
           ({ key, folder, workspace }) => {
             localStorage.setItem(
@@ -716,7 +716,7 @@ suite.define(() => {
           .toBe(1);
 
         await gateway.deferNext("users.prefs.set");
-        const newSession = page.locator("openclaw-new-session-page");
+        const newSession = page.locator("carapace-new-session-page");
         const modelSelect = newSession.locator('[data-chat-model-select="true"]');
         await modelSelect.click();
         await newSession.locator('[data-chat-model-option="openai/gpt-5.5"]').click();
@@ -737,7 +737,7 @@ suite.define(() => {
     await withNewSessionPage(BASE_CONTEXT, async (page) => {
       const appUrl = new URL(suite.server.baseUrl);
       const gatewayUrl = `${appUrl.protocol === "https:" ? "wss:" : "ws:"}//${appUrl.host}`;
-      const storageKey = `openclaw.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
+      const storageKey = `carapace.new-session.preferences.v1:${gatewayOriginScope(gatewayUrl)}`;
       const agentIds = ["main", ...Array.from({ length: 32 }, (_, index) => `agent${index + 1}`)];
       const browserAgents = Object.fromEntries(
         agentIds.map((agentId) => [agentId, { workspace: WORKSPACE, folder: WORKSPACE }]),
@@ -803,7 +803,7 @@ suite.define(() => {
         .getByRole("button", { name: "New worktree Isolated copy of the repo", exact: true })
         .click();
       await page.keyboard.press("Escape");
-      const newSession = page.locator("openclaw-new-session-page");
+      const newSession = page.locator("carapace-new-session-page");
       const modelSelect = newSession.locator('[data-chat-model-select="true"]');
       await modelSelect.click();
       await newSession.locator('[data-chat-model-option="anthropic/claude-sonnet-4-6"]').click();
@@ -891,10 +891,10 @@ suite.define(() => {
       await page.reload();
       await navigateInApp(page, "new-session");
       await pollLocatorText(placeTrigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw-next",
+        "carapace-next",
       );
 
-      const newSession = page.locator("openclaw-new-session-page");
+      const newSession = page.locator("carapace-new-session-page");
       await newSession.locator('[data-chat-model-select="true"]').click();
       await newSession.locator('[data-chat-model-option="anthropic/claude-sonnet-4-6"]').click();
       const storedPreference = await readMainPreference(page);
@@ -949,7 +949,7 @@ suite.define(() => {
       });
       const placeTrigger = page.locator("#new-session-project-trigger");
       await pollLocatorText(placeTrigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw",
+        "carapace",
       );
 
       const pickedListRequests = (await gateway.getRequests("fs.listDir")).filter(
@@ -963,7 +963,7 @@ suite.define(() => {
       await waitForCommittedChatRoute(page);
       await navigateInApp(page, "new-session");
       await pollLocatorText(placeTrigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw",
+        "carapace",
       );
       await expect
         .poll(() => page.locator("#new-session-checkout-trigger").getAttribute("data-worktree"))
@@ -1027,7 +1027,7 @@ suite.define(() => {
         entries: [],
       });
       await pollLocatorText(placeTrigger.locator(".new-session-page__trigger-label")).toBe(
-        "openclaw",
+        "carapace",
       );
 
       await page.locator(".new-session-page__message").fill("keep the newer choice");

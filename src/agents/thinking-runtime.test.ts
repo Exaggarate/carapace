@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   clearAgentHarnesses,
   listRegisteredAgentHarnesses,
@@ -37,7 +37,7 @@ describe("hasResolvedThinkingCatalogEntry", () => {
   });
 });
 
-function openAIConfig(runtime: string): OpenClawConfig {
+function openAIConfig(runtime: string): CarapaceConfig {
   return {
     agents: {
       defaults: {
@@ -69,7 +69,7 @@ describe("resolveEffectiveAgentRuntime", () => {
     (explicit) => {
       const supports = vi.fn<AgentHarness["supports"]>(({ modelProvider }) =>
         modelProvider?.requestTransportOverrides === "present"
-          ? { supported: false, fallbackRuntime: "openclaw" }
+          ? { supported: false, fallbackRuntime: "carapace" }
           : { supported: true },
       );
       registerAgentHarness({
@@ -80,7 +80,7 @@ describe("resolveEffectiveAgentRuntime", () => {
           throw new Error("projection must not execute");
         },
       });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         session: { store: "/synthetic/shared.sqlite" },
         agents: {
           ownership: "explicit",
@@ -101,7 +101,7 @@ describe("resolveEffectiveAgentRuntime", () => {
           sessionKey: "global",
           agentScope: { kind: "prepared", agentId: "main" },
         }),
-      ).toBe("openclaw");
+      ).toBe("carapace");
       if (explicit) {
         expect(supports).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -124,7 +124,7 @@ describe("resolveEffectiveAgentRuntime", () => {
     ).toBe("codex");
   });
 
-  it("resolves residual auto to OpenClaw when no plugin harness is registered", () => {
+  it("resolves residual auto to Carapace when no plugin harness is registered", () => {
     expect(
       resolveEffectiveAgentRuntime({
         cfg: {
@@ -140,7 +140,7 @@ describe("resolveEffectiveAgentRuntime", () => {
         provider: "openai",
         modelId: "gpt-5.6-luna",
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("uses static auto-selection facts before resolving provider routes", () => {
@@ -161,11 +161,11 @@ describe("resolveEffectiveAgentRuntime", () => {
         provider: "deepseek",
         modelId: "deepseek-v4-pro",
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
     expect(supports).not.toHaveBeenCalled();
   });
 
-  it("keeps an authored custom route on OpenClaw before registered harness selection", () => {
+  it("keeps an authored custom route on Carapace before registered harness selection", () => {
     const supports = vi.fn<AgentHarness["supports"]>(({ provider }) =>
       provider === "openai" ? { supported: true, priority: 100 } : { supported: false },
     );
@@ -194,7 +194,7 @@ describe("resolveEffectiveAgentRuntime", () => {
         provider: "openai",
         modelId: "gpt-5.6-luna",
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
     expect(supports).not.toHaveBeenCalled();
   });
 
@@ -205,25 +205,25 @@ describe("resolveEffectiveAgentRuntime", () => {
         id: "codex",
         label: "Codex",
         supports: () =>
-          fallback ? { supported: false, fallbackRuntime: "openclaw" } : { supported: true },
+          fallback ? { supported: false, fallbackRuntime: "carapace" } : { supported: true },
         runAttempt: async () => {
           throw new Error("projection must not execute");
         },
       });
-      const cfg = openAIConfig("openclaw");
+      const cfg = openAIConfig("carapace");
       expect(
         resolveEffectiveAgentRuntime({
           cfg,
           provider: "openai",
           modelId: "gpt-5.6-luna",
-          sessionEntry: { agentRuntimeOverride: "codex", agentHarnessId: "openclaw" },
+          sessionEntry: { agentRuntimeOverride: "codex", agentHarnessId: "carapace" },
         }),
-      ).toBe(fallback ? "openclaw" : "codex");
+      ).toBe(fallback ? "carapace" : "codex");
     },
   );
 
   it("ignores legacy harness ids when choosing a runtime", () => {
-    const cfg = openAIConfig("openclaw");
+    const cfg = openAIConfig("carapace");
     expect(
       resolveEffectiveAgentRuntime({
         cfg,
@@ -231,29 +231,29 @@ describe("resolveEffectiveAgentRuntime", () => {
         modelId: "gpt-5.6-luna",
         sessionEntry: { agentHarnessId: "codex" },
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("uses configured runtime policy without session hints", () => {
-    const cfg = openAIConfig("openclaw");
+    const cfg = openAIConfig("carapace");
     expect(
       resolveEffectiveAgentRuntime({
         cfg,
         provider: "openai",
         modelId: "gpt-5.6-luna",
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
-  it("lets an explicit OpenClaw override replace configured Codex policy", () => {
+  it("lets an explicit Carapace override replace configured Codex policy", () => {
     expect(
       resolveEffectiveAgentRuntime({
         cfg: openAIConfig("codex"),
         provider: "openai",
         modelId: "gpt-5.6-luna",
-        sessionEntry: { agentRuntimeOverride: "openclaw", agentHarnessId: "codex" },
+        sessionEntry: { agentRuntimeOverride: "carapace", agentHarnessId: "codex" },
       }),
-    ).toBe("openclaw");
+    ).toBe("carapace");
   });
 
   it("keeps a supported candidate level unchanged", () => {
@@ -282,7 +282,7 @@ describe("resolveEffectiveAgentRuntime", () => {
   });
 
   it("re-evaluates every candidate from the immutable request so later support can upgrade", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           models: {

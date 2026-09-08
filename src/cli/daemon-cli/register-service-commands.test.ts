@@ -14,14 +14,14 @@ const runDaemonStop = vi.fn(async (_opts: unknown) => {});
 const runDaemonUninstall = vi.fn(async (_opts: unknown) => {});
 
 const RESTART_ROUTE_ENV_KEYS = [
-  "OPENCLAW_SERVICE_MARKER",
-  "OPENCLAW_SERVICE_KIND",
-  "OPENCLAW_SUPERVISOR_MODE",
+  "CARAPACE_SERVICE_MARKER",
+  "CARAPACE_SERVICE_KIND",
+  "CARAPACE_SUPERVISOR_MODE",
 ];
 
 const gatewayServiceEnv = {
-  OPENCLAW_SERVICE_MARKER: "openclaw",
-  OPENCLAW_SERVICE_KIND: "gateway",
+  CARAPACE_SERVICE_MARKER: "carapace",
+  CARAPACE_SERVICE_KIND: "gateway",
 };
 
 vi.mock("./install.runtime.js", () => ({
@@ -175,7 +175,7 @@ describe("addGatewayServiceCommands", () => {
     {
       name: "keeps a plain restart non-safe inside a node service",
       platform: "win32" as const,
-      env: { OPENCLAW_SERVICE_MARKER: "openclaw", OPENCLAW_SERVICE_KIND: "node" },
+      env: { CARAPACE_SERVICE_MARKER: "carapace", CARAPACE_SERVICE_KIND: "node" },
       argv: ["restart"],
       expected: { safe: false },
     },
@@ -189,21 +189,21 @@ describe("addGatewayServiceCommands", () => {
     {
       name: "keeps an externally supervised plain restart non-safe",
       platform: "win32" as const,
-      env: { ...gatewayServiceEnv, OPENCLAW_SUPERVISOR_MODE: "external" },
+      env: { ...gatewayServiceEnv, CARAPACE_SUPERVISOR_MODE: "external" },
       argv: ["restart"],
       expected: { safe: false },
     },
     {
       name: "honors normalized external supervisor mode before routing",
       platform: "win32" as const,
-      env: { ...gatewayServiceEnv, OPENCLAW_SUPERVISOR_MODE: "  ExTeRnAl  " },
+      env: { ...gatewayServiceEnv, CARAPACE_SUPERVISOR_MODE: "  ExTeRnAl  " },
       argv: ["restart"],
       expected: { safe: false },
     },
     {
       name: "preserves explicit safe restart under external supervision",
       platform: "win32" as const,
-      env: { ...gatewayServiceEnv, OPENCLAW_SUPERVISOR_MODE: "external" },
+      env: { ...gatewayServiceEnv, CARAPACE_SUPERVISOR_MODE: "external" },
       argv: ["restart", "--safe"],
       expected: { safe: true },
     },

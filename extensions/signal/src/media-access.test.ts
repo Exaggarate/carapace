@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OutboundMediaAccess } from "openclaw/plugin-sdk/media-runtime";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { OutboundMediaAccess } from "carapace/plugin-sdk/media-runtime";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearSignalApprovalReactionTargetsForTest } from "./approval-reactions.js";
 import { signalPlugin } from "./channel.js";
@@ -16,7 +16,7 @@ const SIGNAL_IMAGE = Buffer.from(
 );
 
 type SignalMediaContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   to: string;
   text: string;
   mediaUrl: string;
@@ -75,15 +75,15 @@ const SIGNAL_MEDIA_ADAPTERS = [
 ] as const;
 
 describe("Signal host-owned outbound media access", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
   let server: http.Server;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   let requests: Array<{ envelope: SignalRpcEnvelope; attachment: Buffer | undefined }>;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({
+    state = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-signal-media-access-",
+      prefix: "carapace-signal-media-access-",
     });
     requests = [];
     server = http.createServer((request, response) => {

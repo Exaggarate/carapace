@@ -1,8 +1,8 @@
 /**
  * Projects provider assistant messages into ordered visible stream state.
  */
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { createInlineCodeState } from "../../packages/markdown-core/src/code-spans.js";
 import {
   parseReplyDirectives,
@@ -49,7 +49,7 @@ export function extractAssistantStreamSnapshot(
   return { text, rawText, state, parts };
 }
 
-export function isSubscribeTranscriptOnlyOpenClawAssistantMessage(
+export function isSubscribeTranscriptOnlyCarapaceAssistantMessage(
   message: AgentMessage | undefined,
 ): boolean {
   if (!message || message.role !== "assistant") {
@@ -57,16 +57,16 @@ export function isSubscribeTranscriptOnlyOpenClawAssistantMessage(
   }
   const provider = normalizeOptionalString(message.provider) ?? "";
   const model = normalizeOptionalString(message.model) ?? "";
-  return provider === "openclaw" && (model === "delivery-mirror" || model === "gateway-injected");
+  return provider === "carapace" && (model === "delivery-mirror" || model === "gateway-injected");
 }
 
 const RESPONSES_API_IDS = new Set([
   "openai-responses",
   "openai-chatgpt-responses",
   "azure-openai-responses",
-  "openclaw-openai-responses-transport",
-  "openclaw-openai-chatgpt-responses-transport",
-  "openclaw-azure-openai-responses-transport",
+  "carapace-openai-responses-transport",
+  "carapace-openai-chatgpt-responses-transport",
+  "carapace-azure-openai-responses-transport",
 ]);
 
 export function isResponsesApiAssistantMessage(message: AgentMessage | undefined): boolean {
@@ -90,7 +90,7 @@ export function isOpenAiCompletionsAssistantMessage(message: AgentMessage | unde
     return false;
   }
   const api = normalizeOptionalString((message as { api?: unknown }).api) ?? "";
-  return api === "openai-completions" || api === "openclaw-openai-completions-transport";
+  return api === "openai-completions" || api === "carapace-openai-completions-transport";
 }
 
 export function extractStandaloneMessageToolText(

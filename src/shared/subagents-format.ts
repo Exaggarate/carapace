@@ -1,6 +1,6 @@
 // Subagent formatting helpers expose compact durations and status text.
-import { formatCompactTokenCount } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { formatCompactTokenCount } from "@carapace/normalization-core";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 
 /** Formats token counts using compact k/m suffixes for subagent summaries. */
 function formatTokenShort(value?: number) {

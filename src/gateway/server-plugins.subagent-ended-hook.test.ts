@@ -2,7 +2,7 @@
  * Tests plugin hook delivery when subagent sessions end.
  */
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.test-fixtures.js";
 import { trackAsyncWork } from "../shared/async-work-scope.js";
 import type { GatewayRequestContext, GatewayRequestOptions } from "./server-methods/types.js";
@@ -34,13 +34,13 @@ type GatewayRequestScopeModule = typeof import("../plugins/runtime/gateway-reque
 type SubagentRequesterContextModule =
   typeof import("../plugins/runtime/subagent-requester-context.js");
 
-function createTestCfg(): OpenClawConfig {
+function createTestCfg(): CarapaceConfig {
   return {
     session: { mainKey: "agent:main:main", scope: "per-sender" },
-  } as unknown as OpenClawConfig;
+  } as unknown as CarapaceConfig;
 }
 
-function createTestContext(label: string, cfg: OpenClawConfig): GatewayRequestContext {
+function createTestContext(label: string, cfg: CarapaceConfig): GatewayRequestContext {
   return {
     label,
     trackExecution: trackAsyncWork,

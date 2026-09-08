@@ -1,5 +1,5 @@
 ---
-summary: "Adds the openclaw path CLI for oc:// workspace file addressing."
+summary: "Adds the carapace path CLI for oc:// workspace file addressing."
 read_when:
   - You are installing, configuring, or auditing the oc-path plugin
 title: "Oc Path plugin reference"
@@ -7,19 +7,19 @@ title: "Oc Path plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-Adds the openclaw path CLI for oc:// workspace file addressing.
+Adds the carapace path CLI for oc:// workspace file addressing.
 
 ## Distribution
 
-- Package: `@openclaw/oc-path`
-- Install route: included in OpenClaw
+- Package: `@carapace/oc-path`
+- Install route: included in Carapace
 
 ## Surface
 
-- CLI commands: `openclaw path`
+- CLI commands: `carapace path`
 
 ## Related docs
 

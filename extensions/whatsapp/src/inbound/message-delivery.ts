@@ -1,12 +1,12 @@
 // Whatsapp plugin module owns inbound message admission and delivery.
 import { createHash } from "node:crypto";
 import type { AnyMessageContent, MiscMessageGenerationOptions, WAMessage, WASocket } from "baileys";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import { resolveInboundDebounceMs } from "openclaw/plugin-sdk/channel-inbound-debounce";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getChildLogger } from "openclaw/plugin-sdk/logging-core";
-import { parseStrictFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
-import { defaultRuntime, createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+import { recordChannelActivity } from "carapace/plugin-sdk/channel-activity-runtime";
+import { resolveInboundDebounceMs } from "carapace/plugin-sdk/channel-inbound-debounce";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { getChildLogger } from "carapace/plugin-sdk/logging-core";
+import { parseStrictFiniteNumber } from "carapace/plugin-sdk/number-runtime";
+import { defaultRuntime, createSubsystemLogger } from "carapace/plugin-sdk/runtime-env";
 import { maybeResolveWhatsAppApprovalReaction } from "../approval-reactions.js";
 import { resolveComparableIdentity } from "../identity.js";
 import { addWhatsAppImagePreviewFields } from "../image-preview.js";
@@ -76,8 +76,8 @@ export type WhatsAppAppendReplyWindow = {
 };
 
 type WhatsAppMessageDeliveryOptions = {
-  cfg: OpenClawConfig;
-  loadConfig?: () => OpenClawConfig;
+  cfg: CarapaceConfig;
+  loadConfig?: () => CarapaceConfig;
   verbose: boolean;
   accountId: string;
   sock: WASocket;

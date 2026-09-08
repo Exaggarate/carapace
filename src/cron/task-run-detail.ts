@@ -4,9 +4,9 @@
 import {
   asSafeIntegerInRange,
   MAX_DATE_TIMESTAMP_MS,
-} from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { z } from "zod";
 import {
   FAILOVER_REASONS,

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-// Check Codex App Server Protocol script supports OpenClaw repository automation.
+// Check Codex App Server Protocol script supports Carapace repository automation.
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
@@ -311,14 +311,14 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    `Codex app-server generated protocol matches OpenClaw bridge assumptions: ${source.codexRepo}`,
+    `Codex app-server generated protocol matches Carapace bridge assumptions: ${source.codexRepo}`,
   );
 }
 
 async function checkMaintainedProtocolTypes(sourceRoot: string): Promise<void> {
-  // Raw requests go to Codex; raw responses flow into OpenClaw. Keep the
+  // Raw requests go to Codex; raw responses flow into Carapace. Keep the
   // assignability direction explicit so the probe permits deliberate projections.
-  const probePath = path.join(sourceRoot, "openclaw-protocol-compatibility.ts");
+  const probePath = path.join(sourceRoot, "carapace-protocol-compatibility.ts");
   const protocolPath = path.resolve(process.cwd(), "extensions/codex/src/app-server/protocol.ts");
   const protocolImport = relativeTypeScriptImport(probePath, protocolPath);
   const generatedImport = (file: string) =>
@@ -385,51 +385,51 @@ import type { TurnStartParams } from ${JSON.stringify(generatedImport("v2/TurnSt
 import type { TurnSteerParams } from ${JSON.stringify(generatedImport("v2/TurnSteerParams.ts"))};
 import type { TurnSteerResponse } from ${JSON.stringify(generatedImport("v2/TurnSteerResponse.ts"))};
 
-declare const openClawAppsInstalledParams: CodexAppServerRequestParams<"app/installed">;
-const generatedAppsInstalledParams: AppsInstalledParams = openClawAppsInstalledParams;
-declare const openClawAppsListParams: CodexAppServerRequestParams<"app/list">;
-const generatedAppsListParams: AppsListParams = openClawAppsListParams;
-declare const openClawAppsReadParams: CodexAppServerRequestParams<"app/read">;
-const generatedAppsReadParams: AppsReadParams = openClawAppsReadParams;
-declare const openClawAppSummary: v2.AppSummary;
-const generatedAppSummary: AppSummary = openClawAppSummary;
-declare const openClawCommandExecParams: CodexAppServerRequestParams<"command/exec">;
-const generatedCommandExecParams: CommandExecParams = openClawCommandExecParams;
+declare const carapaceAppsInstalledParams: CodexAppServerRequestParams<"app/installed">;
+const generatedAppsInstalledParams: AppsInstalledParams = carapaceAppsInstalledParams;
+declare const carapaceAppsListParams: CodexAppServerRequestParams<"app/list">;
+const generatedAppsListParams: AppsListParams = carapaceAppsListParams;
+declare const carapaceAppsReadParams: CodexAppServerRequestParams<"app/read">;
+const generatedAppsReadParams: AppsReadParams = carapaceAppsReadParams;
+declare const carapaceAppSummary: v2.AppSummary;
+const generatedAppSummary: AppSummary = carapaceAppSummary;
+declare const carapaceCommandExecParams: CodexAppServerRequestParams<"command/exec">;
+const generatedCommandExecParams: CommandExecParams = carapaceCommandExecParams;
 declare const generatedNullableCommandExecParams: CommandExecParams;
-const openClawNullableCommandExecParams: CodexAppServerRequestParams<"command/exec"> =
+const carapaceNullableCommandExecParams: CodexAppServerRequestParams<"command/exec"> =
   generatedNullableCommandExecParams;
-declare const openClawConfigBatchWriteParams: CodexAppServerRequestParams<"config/batchWrite">;
-const generatedConfigBatchWriteParams: ConfigBatchWriteParams = openClawConfigBatchWriteParams;
-declare const openClawConfigEdit: CodexConfigEdit;
-const generatedConfigEdit: ConfigEdit = openClawConfigEdit;
-declare const openClawConfigValueWriteParams: CodexAppServerRequestParams<"config/value/write">;
-const generatedConfigValueWriteParams: ConfigValueWriteParams = openClawConfigValueWriteParams;
-declare const openClawPluginInstalledParams: CodexAppServerRequestParams<"plugin/installed">;
-const generatedPluginInstalledParams: PluginInstalledParams = openClawPluginInstalledParams;
-declare const openClawPluginInstallParams: CodexAppServerRequestParams<"plugin/install">;
-const generatedPluginInstallParams: PluginInstallParams = openClawPluginInstallParams;
-declare const openClawPluginListParams: CodexAppServerRequestParams<"plugin/list">;
-const generatedPluginListParams: PluginListParams = openClawPluginListParams;
-declare const openClawPluginReadParams: CodexAppServerRequestParams<"plugin/read">;
-const generatedPluginReadParams: PluginReadParams = openClawPluginReadParams;
-declare const openClawDynamicToolSpec: CodexDynamicToolSpec;
-const generatedDynamicToolSpec: DynamicToolSpec = openClawDynamicToolSpec;
-declare const openClawTurnEnvironmentParams: CodexTurnEnvironmentParams;
-const generatedTurnEnvironmentParams: TurnEnvironmentParams = openClawTurnEnvironmentParams;
-declare const openClawThreadStartParams: CodexAppServerRequestParams<"thread/start">;
-const generatedThreadStartParams: ThreadStartParams = openClawThreadStartParams;
-declare const openClawThreadResumeParams: CodexAppServerRequestParams<"thread/resume">;
-const generatedThreadResumeParams: ThreadResumeParams = openClawThreadResumeParams;
-declare const openClawThreadForkParams: CodexAppServerRequestParams<"thread/fork">;
-const generatedThreadForkParams: ThreadForkParams = openClawThreadForkParams;
-declare const openClawThreadDeleteParams: CodexAppServerRequestParams<"thread/delete">;
-const generatedThreadDeleteParams: ThreadDeleteParams = openClawThreadDeleteParams;
-declare const openClawTurnInterruptParams: CodexAppServerRequestParams<"turn/interrupt">;
-const generatedTurnInterruptParams: TurnInterruptParams = openClawTurnInterruptParams;
-declare const openClawTurnStartParams: CodexAppServerRequestParams<"turn/start">;
-const generatedTurnStartParams: TurnStartParams = openClawTurnStartParams;
-declare const openClawTurnSteerParams: CodexAppServerRequestParams<"turn/steer">;
-const generatedTurnSteerParams: TurnSteerParams = openClawTurnSteerParams;
+declare const carapaceConfigBatchWriteParams: CodexAppServerRequestParams<"config/batchWrite">;
+const generatedConfigBatchWriteParams: ConfigBatchWriteParams = carapaceConfigBatchWriteParams;
+declare const carapaceConfigEdit: CodexConfigEdit;
+const generatedConfigEdit: ConfigEdit = carapaceConfigEdit;
+declare const carapaceConfigValueWriteParams: CodexAppServerRequestParams<"config/value/write">;
+const generatedConfigValueWriteParams: ConfigValueWriteParams = carapaceConfigValueWriteParams;
+declare const carapacePluginInstalledParams: CodexAppServerRequestParams<"plugin/installed">;
+const generatedPluginInstalledParams: PluginInstalledParams = carapacePluginInstalledParams;
+declare const carapacePluginInstallParams: CodexAppServerRequestParams<"plugin/install">;
+const generatedPluginInstallParams: PluginInstallParams = carapacePluginInstallParams;
+declare const carapacePluginListParams: CodexAppServerRequestParams<"plugin/list">;
+const generatedPluginListParams: PluginListParams = carapacePluginListParams;
+declare const carapacePluginReadParams: CodexAppServerRequestParams<"plugin/read">;
+const generatedPluginReadParams: PluginReadParams = carapacePluginReadParams;
+declare const carapaceDynamicToolSpec: CodexDynamicToolSpec;
+const generatedDynamicToolSpec: DynamicToolSpec = carapaceDynamicToolSpec;
+declare const carapaceTurnEnvironmentParams: CodexTurnEnvironmentParams;
+const generatedTurnEnvironmentParams: TurnEnvironmentParams = carapaceTurnEnvironmentParams;
+declare const carapaceThreadStartParams: CodexAppServerRequestParams<"thread/start">;
+const generatedThreadStartParams: ThreadStartParams = carapaceThreadStartParams;
+declare const carapaceThreadResumeParams: CodexAppServerRequestParams<"thread/resume">;
+const generatedThreadResumeParams: ThreadResumeParams = carapaceThreadResumeParams;
+declare const carapaceThreadForkParams: CodexAppServerRequestParams<"thread/fork">;
+const generatedThreadForkParams: ThreadForkParams = carapaceThreadForkParams;
+declare const carapaceThreadDeleteParams: CodexAppServerRequestParams<"thread/delete">;
+const generatedThreadDeleteParams: ThreadDeleteParams = carapaceThreadDeleteParams;
+declare const carapaceTurnInterruptParams: CodexAppServerRequestParams<"turn/interrupt">;
+const generatedTurnInterruptParams: TurnInterruptParams = carapaceTurnInterruptParams;
+declare const carapaceTurnStartParams: CodexAppServerRequestParams<"turn/start">;
+const generatedTurnStartParams: TurnStartParams = carapaceTurnStartParams;
+declare const carapaceTurnSteerParams: CodexAppServerRequestParams<"turn/steer">;
+const generatedTurnSteerParams: TurnSteerParams = carapaceTurnSteerParams;
 // Method-map omissions must not silently weaken required wire fields to unknown.
 // @ts-expect-error Thread resume requires its target thread.
 const threadResumeWithoutThread: CodexAppServerRequestParams<"thread/resume"> = {};
@@ -437,100 +437,100 @@ const threadResumeWithoutThread: CodexAppServerRequestParams<"thread/resume"> = 
 const turnStartWithoutInput: CodexAppServerRequestParams<"turn/start"> = { threadId: "thread" };
 // @ts-expect-error Steering requires the active-turn precondition.
 const turnSteerWithoutExpectedTurn: CodexAppServerRequestParams<"turn/steer"> = { threadId: "thread", input: [] };
-declare const openClawMcpResourceReadParams: CodexAppServerRequestParams<"mcpServer/resource/read">;
-const generatedMcpResourceReadParams: McpResourceReadParams = openClawMcpResourceReadParams;
-declare const openClawConfigReadParams: CodexAppServerRequestParams<"config/read">;
-const generatedConfigReadParams: ConfigReadParams = openClawConfigReadParams;
+declare const carapaceMcpResourceReadParams: CodexAppServerRequestParams<"mcpServer/resource/read">;
+const generatedMcpResourceReadParams: McpResourceReadParams = carapaceMcpResourceReadParams;
+declare const carapaceConfigReadParams: CodexAppServerRequestParams<"config/read">;
+const generatedConfigReadParams: ConfigReadParams = carapaceConfigReadParams;
 
 declare const generatedAppsInstalledResponse: AppsInstalledResponse;
-const openClawAppsInstalledResponse: CodexAppServerRequestResult<"app/installed"> =
+const carapaceAppsInstalledResponse: CodexAppServerRequestResult<"app/installed"> =
   generatedAppsInstalledResponse;
 declare const generatedAppsListResponse: AppsListResponse;
-const openClawAppsListResponse: CodexAppServerRequestResult<"app/list"> =
+const carapaceAppsListResponse: CodexAppServerRequestResult<"app/list"> =
   generatedAppsListResponse;
 declare const generatedAppsReadResponse: AppsReadResponse;
-const openClawAppsReadResponse: CodexAppServerRequestResult<"app/read"> =
+const carapaceAppsReadResponse: CodexAppServerRequestResult<"app/read"> =
   generatedAppsReadResponse;
 declare const generatedAppSummaryResponse: AppSummary;
-const openClawAppSummaryResponse: v2.AppSummary = generatedAppSummaryResponse;
+const carapaceAppSummaryResponse: v2.AppSummary = generatedAppSummaryResponse;
 declare const generatedCommandExecResponse: CommandExecResponse;
-const openClawCommandExecResponse: CodexAppServerRequestResult<"command/exec"> =
+const carapaceCommandExecResponse: CodexAppServerRequestResult<"command/exec"> =
   generatedCommandExecResponse;
 declare const generatedConfigWriteResponse: ConfigWriteResponse;
-const openClawConfigBatchWriteResponse: CodexAppServerRequestResult<"config/batchWrite"> =
+const carapaceConfigBatchWriteResponse: CodexAppServerRequestResult<"config/batchWrite"> =
   generatedConfigWriteResponse;
-const openClawConfigValueWriteResponse: CodexAppServerRequestResult<"config/value/write"> =
+const carapaceConfigValueWriteResponse: CodexAppServerRequestResult<"config/value/write"> =
   generatedConfigWriteResponse;
 const generatedExactConfigBatchWriteResponse: ConfigWriteResponse =
-  openClawConfigBatchWriteResponse;
+  carapaceConfigBatchWriteResponse;
 const generatedExactConfigValueWriteResponse: ConfigWriteResponse =
-  openClawConfigValueWriteResponse;
+  carapaceConfigValueWriteResponse;
 declare const generatedPluginInstalledResponse: PluginInstalledResponse;
-const openClawPluginInstalledResponse: CodexAppServerRequestResult<"plugin/installed"> =
+const carapacePluginInstalledResponse: CodexAppServerRequestResult<"plugin/installed"> =
   generatedPluginInstalledResponse;
 const generatedPluginInstalledMarketplaceLoadErrors: MarketplaceLoadErrorInfo[] =
-  openClawPluginInstalledResponse.marketplaceLoadErrors;
+  carapacePluginInstalledResponse.marketplaceLoadErrors;
 type InstalledPluginResponseHasNoFeaturedCatalog =
   "featuredPluginIds" extends keyof v2.PluginInstalledResponse ? never : true;
 const installedPluginResponseHasNoFeaturedCatalog: InstalledPluginResponseHasNoFeaturedCatalog =
   true;
 declare const generatedPluginInstallResponse: PluginInstallResponse;
-const openClawPluginInstallResponse: CodexAppServerRequestResult<"plugin/install"> =
+const carapacePluginInstallResponse: CodexAppServerRequestResult<"plugin/install"> =
   generatedPluginInstallResponse;
 declare const generatedPluginListResponse: PluginListResponse;
-const openClawPluginListResponse: CodexAppServerRequestResult<"plugin/list"> =
+const carapacePluginListResponse: CodexAppServerRequestResult<"plugin/list"> =
   generatedPluginListResponse;
 const generatedPluginListMarketplaceLoadErrors: MarketplaceLoadErrorInfo[] =
-  openClawPluginListResponse.marketplaceLoadErrors;
-const generatedPluginListFeaturedPluginIds: string[] = openClawPluginListResponse.featuredPluginIds;
+  carapacePluginListResponse.marketplaceLoadErrors;
+const generatedPluginListFeaturedPluginIds: string[] = carapacePluginListResponse.featuredPluginIds;
 declare const generatedPluginReadResponse: PluginReadResponse;
-const openClawPluginReadResponse: CodexAppServerRequestResult<"plugin/read"> =
+const carapacePluginReadResponse: CodexAppServerRequestResult<"plugin/read"> =
   generatedPluginReadResponse;
 declare const generatedDynamicToolCallParams: Omit<DynamicToolCallParams, "arguments">;
-const openClawDynamicToolCallParams: Omit<CodexDynamicToolCallParams, "arguments"> =
+const carapaceDynamicToolCallParams: Omit<CodexDynamicToolCallParams, "arguments"> =
   generatedDynamicToolCallParams;
 declare const generatedErrorNotification: ErrorNotification;
-const openClawErrorNotification: CodexErrorNotification = generatedErrorNotification;
+const carapaceErrorNotification: CodexErrorNotification = generatedErrorNotification;
 declare const generatedGetAccountResponse: GetAccountResponse;
-const openClawGetAccountResponse: CodexGetAccountResponse = generatedGetAccountResponse;
+const carapaceGetAccountResponse: CodexGetAccountResponse = generatedGetAccountResponse;
 declare const generatedModelListResponse: ModelListResponse;
-const openClawModelListResponse: CodexModelListResponse = generatedModelListResponse;
+const carapaceModelListResponse: CodexModelListResponse = generatedModelListResponse;
 declare const generatedMcpResourceReadResponse: McpResourceReadResponse;
-const openClawMcpResourceReadResponse: CodexAppServerRequestResult<"mcpServer/resource/read"> =
+const carapaceMcpResourceReadResponse: CodexAppServerRequestResult<"mcpServer/resource/read"> =
   generatedMcpResourceReadResponse;
 declare const generatedStrictReviewRequiredNotification: StrictReviewRequiredNotification;
-type OpenClawStrictReviewRequiredNotification = Extract<
+type CarapaceStrictReviewRequiredNotification = Extract<
   CodexServerNotification,
   { method: "autoApprovalReview/strictReviewRequired" }
 >;
-const openClawStrictReviewRequiredNotification: OpenClawStrictReviewRequiredNotification = {
+const carapaceStrictReviewRequiredNotification: CarapaceStrictReviewRequiredNotification = {
   method: "autoApprovalReview/strictReviewRequired",
   params: generatedStrictReviewRequiredNotification,
 };
 declare const generatedThreadDeleteResponse: ThreadDeleteResponse;
-const openClawThreadDeleteResponse: CodexAppServerRequestResult<"thread/delete"> =
+const carapaceThreadDeleteResponse: CodexAppServerRequestResult<"thread/delete"> =
   generatedThreadDeleteResponse;
 declare const generatedTurnSteerResponse: TurnSteerResponse;
-const openClawTurnSteerResponse: CodexAppServerRequestResult<"turn/steer"> =
+const carapaceTurnSteerResponse: CodexAppServerRequestResult<"turn/steer"> =
   generatedTurnSteerResponse;
-const generatedExactTurnSteerResponse: TurnSteerResponse = openClawTurnSteerResponse;
+const generatedExactTurnSteerResponse: TurnSteerResponse = carapaceTurnSteerResponse;
 
 // Thread and turn bodies are normalized behind checked-in JSON schemas. Their
 // raw generated shapes must not be confused with the projector-facing types.
 declare const generatedThreadForkResponse: Omit<ThreadForkResponse, "thread">;
-const openClawThreadForkResponse: Omit<CodexThreadForkResponse, "thread"> =
+const carapaceThreadForkResponse: Omit<CodexThreadForkResponse, "thread"> =
   generatedThreadForkResponse;
 declare const generatedThreadResumeResponse: Omit<ThreadResumeResponse, "thread">;
-const openClawThreadResumeResponse: Omit<CodexThreadResumeResponse, "thread"> =
+const carapaceThreadResumeResponse: Omit<CodexThreadResumeResponse, "thread"> =
   generatedThreadResumeResponse;
 declare const generatedThreadStartResponse: Omit<ThreadStartResponse, "thread">;
-const openClawThreadStartResponse: Omit<CodexThreadStartResponse, "thread"> =
+const carapaceThreadStartResponse: Omit<CodexThreadStartResponse, "thread"> =
   generatedThreadStartResponse;
 
 export {};
 `;
   await fs.writeFile(probePath, probe);
-  const probeConfigPath = path.join(sourceRoot, "openclaw-protocol-compatibility.tsconfig.json");
+  const probeConfigPath = path.join(sourceRoot, "carapace-protocol-compatibility.tsconfig.json");
   await fs.writeFile(
     probeConfigPath,
     JSON.stringify({

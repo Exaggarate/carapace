@@ -7,22 +7,22 @@ import {
   loadExactSessionEntryReadOnly,
 } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../state/carapace-agent-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import { repairCanonicalSessionKeys } from "./doctor-session-canonical-keys.js";
 import { insertLegacySession } from "./doctor-session-canonical-keys.test-support.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeCarapaceAgentDatabasesForTest());
 
 describe("doctor canonical session decision races", () => {
   it("rejects stale canonical facts after delivery evidence changes", async () => {
-    await withStateDirEnv("openclaw-doctor-canonical-stale-fact-", async ({ stateDir }) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withStateDirEnv("carapace-doctor-canonical-stale-fact-", async ({ stateDir }) => {
+      const env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
       const storeTemplate = path.join(stateDir, "agents", "{agentId}", "sessions.json");
       const storePath = resolveSessionStorePathCore(storeTemplate, { agentId: "main", env });
       const sessionKey = "agent:main:matrix:channel:!mixedcase:example.org";
@@ -40,7 +40,7 @@ describe("doctor canonical session decision races", () => {
         storePath,
       });
       const facts = listCanonicalSessionRepairFacts({ agentId: "main", env, storePath });
-      const database = openOpenClawAgentDatabase({
+      const database = openCarapaceAgentDatabase({
         agentId: "main",
         env,
         path: resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main", env }).path,
@@ -75,7 +75,7 @@ describe("doctor canonical session decision races", () => {
       const cfg = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storeTemplate },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       expect(await repairCanonicalSessionKeys({ apply: true, cfg, env })).toMatchObject({
         foundGroups: 1,
         repairedGroups: 1,

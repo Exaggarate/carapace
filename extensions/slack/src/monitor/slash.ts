@@ -11,7 +11,7 @@ import {
   loadPreparedModelCatalog,
   resolveAgentDir,
   resolveDefaultModelForAgent,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
 import {
   formatCommandArgMenuTitle,
   resolveEffectiveAgentRuntime,
@@ -19,32 +19,32 @@ import {
   type ChatCommandDefinition,
   type CommandArgs,
   resolveNativeCommandSessionTargets,
-} from "openclaw/plugin-sdk/command-auth-native";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "carapace/plugin-sdk/command-auth-native";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
-} from "openclaw/plugin-sdk/native-command-config-runtime";
+} from "carapace/plugin-sdk/native-command-config-runtime";
 import {
   mergeNativeCommandSpecs,
   type NativeCommandSpec,
-} from "openclaw/plugin-sdk/native-command-registry";
+} from "carapace/plugin-sdk/native-command-registry";
 import type {
   PluginCommandCatalogDecision,
   PluginCommandNativeCandidate,
   PluginCommandReplyOptions,
-} from "openclaw/plugin-sdk/plugin-command-runtime";
-import type { ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
-import { getRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { danger, logVerbose, warn } from "openclaw/plugin-sdk/runtime-env";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/plugin-command-runtime";
+import type { ResolvedAgentRoute } from "carapace/plugin-sdk/routing";
+import { getRuntimeConfigSnapshot } from "carapace/plugin-sdk/runtime-config-snapshot";
+import { danger, logVerbose, warn } from "carapace/plugin-sdk/runtime-env";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { chunkItems } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { chunkItems } from "carapace/plugin-sdk/text-chunking";
 import type { ResolvedSlackAccount } from "../accounts.js";
 import { SLACK_MAX_BLOCKS } from "../blocks-input.js";
 import { requireSlackPostMessageTimestamp } from "../client-delivery.js";
@@ -76,8 +76,8 @@ import {
 import { resolveSlackRoomContextHints } from "./room-context.js";
 import { captureSlackSessionTargetGuard } from "./session-run-targets.js";
 
-const SLACK_COMMAND_ARG_ACTION_ID = "openclaw_cmdarg";
-const SLACK_COMMAND_ARG_ACTION_LISTENER = /^openclaw_cmdarg/;
+const SLACK_COMMAND_ARG_ACTION_ID = "carapace_cmdarg";
+const SLACK_COMMAND_ARG_ACTION_LISTENER = /^carapace_cmdarg/;
 const SLACK_COMMAND_ARG_VALUE_PREFIX = "cmdarg";
 const SLACK_COMMAND_ARG_BUTTON_ROW_SIZE = 5;
 const SLACK_COMMAND_ARG_OVERFLOW_MIN = 3;
@@ -111,7 +111,7 @@ const loadSlashSkillCommandsRuntime = createLazyRuntimeModule(
   () => import("./slash-skill-commands.runtime.js"),
 );
 const loadPluginCommandRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/plugin-command-runtime"),
+  () => import("carapace/plugin-sdk/plugin-command-runtime"),
 );
 
 function resolveSlackCommandMenuModelContext(params: {
@@ -1026,10 +1026,10 @@ export async function registerSlackMonitorSlashCommands(params: {
   let nativeCommands: SlackNativeCommandSpec[] = [];
   let slashCommandsRuntime: typeof import("./slash-commands.runtime.js") | null = null;
   let pluginCommandRuntimeModule:
-    | typeof import("openclaw/plugin-sdk/plugin-command-runtime")
+    | typeof import("carapace/plugin-sdk/plugin-command-runtime")
     | null = null;
   let pluginCommandRuntime:
-    | import("openclaw/plugin-sdk/plugin-command-runtime").PluginCommandRuntime
+    | import("carapace/plugin-sdk/plugin-command-runtime").PluginCommandRuntime
     | null = null;
   if (
     registration.mode === "disabled" &&

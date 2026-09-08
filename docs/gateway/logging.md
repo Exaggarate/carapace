@@ -10,7 +10,7 @@ title: "Gateway logging"
 
 For a user-facing overview (CLI + Control UI + config), see [/logging](/logging).
 
-OpenClaw has two log surfaces:
+Carapace has two log surfaces:
 
 - **Console output** - what you see in the terminal / Debug UI.
 - **File logs** - JSON lines written by the gateway logger.
@@ -27,9 +27,9 @@ If a plugin reload supersedes startup plugin loading, the model line, loaded-plu
 
 ## File-based logger
 
-- Default rolling log files are under `/tmp/openclaw/` (one file per day), dated by the gateway host's local timezone. The default profile uses `openclaw-YYYY-MM-DD.log`; named profiles use `openclaw-<profile>-YYYY-MM-DD.log` (for example, `openclaw-dev-YYYY-MM-DD.log`). If that directory is unsafe or unwritable (wrong owner, world-writable, a symlink), OpenClaw falls back to a user-scoped `os.tmpdir()/openclaw-<uid>` path instead; on Windows it always uses that OS-tmpdir fallback.
+- Default rolling log files are under `/tmp/carapace/` (one file per day), dated by the gateway host's local timezone. The default profile uses `carapace-YYYY-MM-DD.log`; named profiles use `carapace-<profile>-YYYY-MM-DD.log` (for example, `carapace-dev-YYYY-MM-DD.log`). If that directory is unsafe or unwritable (wrong owner, world-writable, a symlink), Carapace falls back to a user-scoped `os.tmpdir()/carapace-<uid>` path instead; on Windows it always uses that OS-tmpdir fallback.
 - Active log files rotate at `logging.maxFileBytes` (default: 100 MB), keeping up to five numbered archives (`.1` through `.5`) and continuing to write a fresh active file.
-- Configure the log file path and level via `~/.openclaw/openclaw.json`: `logging.file`, `logging.level`.
+- Configure the log file path and level via `~/.carapace/carapace.json`: `logging.file`, `logging.level`.
 - The file format is one JSON object per line.
 
 With config hot reload enabled, changes to `logging.level`, `logging.file`, and
@@ -42,7 +42,7 @@ Talk, realtime voice, and managed-room code paths use the shared file logger for
 The Control UI Logs tab tails this file via the gateway (`logs.tail`). The CLI does the same:
 
 ```bash
-openclaw logs --follow
+carapace logs --follow
 ```
 
 ### Verbose vs. log levels
@@ -63,7 +63,7 @@ and store fields.
 ### Slow agent database opens
 
 A completed physical agent-database open taking at least one second emits
-`slow OpenClaw agent database open`. The record retains total elapsed time and
+`slow Carapace agent database open`. The record retains total elapsed time and
 the `open`, `validation`, `configuration`, `schema`, and `registration` phases.
 For a yielded integrity check, it also includes `integrityGateMs` and
 `integrityGateOutcome` (`healthy` or `failed`). The gate includes the check plus
@@ -110,11 +110,11 @@ the configured file log level.
 Tune console verbosity independently:
 
 - `logging.consoleLevel` (default `info`)
-- `logging.consoleStyle` (`pretty` | `json`). When unset, output is `pretty` on a TTY and the automatic `compact` style otherwise. `compact` is no longer a settable value; `openclaw doctor --fix` maps a stored one to `pretty`.
+- `logging.consoleStyle` (`pretty` | `json`). When unset, output is `pretty` on a TTY and the automatic `compact` style otherwise. `compact` is no longer a settable value; `carapace doctor --fix` maps a stored one to `pretty`.
 
 ## Redaction
 
-OpenClaw masks sensitive tokens before log or transcript output leaves the process. This redaction policy applies at console, file-log, OTLP log-record, and session transcript text sinks, so matching secret values are masked before JSONL lines or messages are written to disk.
+Carapace masks sensitive tokens before log or transcript output leaves the process. This redaction policy applies at console, file-log, OTLP log-record, and session transcript text sinks, so matching secret values are masked before JSONL lines or messages are written to disk.
 
 Model-visible tool-result text preserves ambiguous source assignments such as
 `token = timeObserverToken`. Registered secrets and explicit credential forms,
@@ -142,7 +142,7 @@ The gateway prints WebSocket protocol logs in two modes:
 
 ### WS log style
 
-`openclaw gateway` supports a per-gateway style switch:
+`carapace gateway` supports a per-gateway style switch:
 
 - `--ws-log auto` (default): normal mode is optimized; verbose mode uses compact output.
 - `--ws-log compact`: compact output (paired request/response) when verbose.
@@ -151,13 +151,13 @@ The gateway prints WebSocket protocol logs in two modes:
 
 ```bash
 # optimized (only errors/slow)
-openclaw gateway
+carapace gateway
 
 # show all WS traffic (paired)
-openclaw gateway --verbose --ws-log compact
+carapace gateway --verbose --ws-log compact
 
 # show all WS traffic (full meta)
-openclaw gateway --verbose --ws-log full
+carapace gateway --verbose --ws-log full
 ```
 
 ## Console formatting (subsystem logging)

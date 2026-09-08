@@ -5,9 +5,9 @@ import { createPlaybackMediaFixture } from "../test/fixtures/media-playback.js";
 
 const CHAT_ATTACHMENT_FIXTURE_PATH = "/__fixtures/chat-attachments/";
 const MANAGED_IMAGE_FIXTURE_PATH = "/api/chat/media/outgoing/chat-attachment-fixture/";
-const ASSISTANT_MEDIA_FIXTURE_PATH = "/__openclaw__/assistant-media";
+const ASSISTANT_MEDIA_FIXTURE_PATH = "/__carapace__/assistant-media";
 const FIXTURE_MEDIA_TICKET = "chat-attachment-fixture";
-const RENEWING_MEDIA_FIXTURE_ROOT = "/tmp/openclaw-ticket/";
+const RENEWING_MEDIA_FIXTURE_ROOT = "/tmp/carapace-ticket/";
 let renewingMediaTicketGeneration = 0;
 
 type FixtureAsset = {
@@ -565,6 +565,6 @@ export function createChatAttachmentFixturePlugin(): Plugin {
       });
     },
     enforce: "pre",
-    name: "openclaw-control-ui-chat-attachment-fixture",
+    name: "carapace-control-ui-chat-attachment-fixture",
   };
 }

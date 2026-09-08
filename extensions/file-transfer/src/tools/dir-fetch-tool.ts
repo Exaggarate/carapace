@@ -2,14 +2,14 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AnyAgentTool } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   ARCHIVE_LIMIT_ERROR_CODE,
   ArchiveLimitError,
   extractArchive,
-} from "openclaw/plugin-sdk/archive";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
-import { wrapExternalContent } from "openclaw/plugin-sdk/security-runtime";
+} from "carapace/plugin-sdk/archive";
+import { saveMediaBuffer } from "carapace/plugin-sdk/media-store";
+import { wrapExternalContent } from "carapace/plugin-sdk/security-runtime";
 import { appendFileTransferAudit } from "../shared/audit.js";
 import { DIR_FETCH_ARCHIVE_POLICY } from "../shared/dir-fetch-archive.js";
 import {

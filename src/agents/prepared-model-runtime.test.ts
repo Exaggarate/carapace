@@ -7,14 +7,14 @@ import {
 } from "./prepared-model-runtime.test-harness.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { requireActivePluginRegistry } from "../plugins/runtime.js";
 import { getPluginRuntimeLoadContext } from "../plugins/runtime/load-context.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import * as harnessRuntimes from "./harness-runtimes.js";
 import { getPreparedModelRuntimeAuthStore } from "./prepared-model-runtime-auth.js";
 import { prepareWorkspacePluginRegistries } from "./prepared-model-runtime.inbound-registry.js";
@@ -32,11 +32,11 @@ import {
 } from "./prepared-model-runtime.js";
 
 const mocks = getPreparedModelRuntimeMocks();
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 
 describe("prepared model runtime snapshots", () => {
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "prepared-model-runtime" });
+    state = await createCarapaceTestState({ label: "prepared-model-runtime" });
     await resetPreparedModelRuntimeHarness(state);
   });
 
@@ -92,7 +92,7 @@ describe("prepared model runtime snapshots", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const snapshot = await publishPreparedModelRuntimeSnapshot({
       agentId: "main",
       config,
@@ -156,7 +156,7 @@ describe("prepared model runtime snapshots", () => {
       waitForReplacement: true,
     });
     const leasePending = acquireReadOnlyPreparedModelRuntime({
-      agentId: "openclaw",
+      agentId: "carapace",
       config: stagedConfig,
       agentDir: state.agentDir("setup-probe-agent"),
       inheritedAuthDir: state.agentDir("setup-probe-agent"),
@@ -164,14 +164,14 @@ describe("prepared model runtime snapshots", () => {
       runtimePluginSelections: [{ provider: "openai", modelId: "gpt-5.6", runtime: "codex" }],
     });
     await Promise.resolve();
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(1);
 
     await refreshPreparedModelRuntimeSnapshots({
       agents: { defaults: { model: "openai/gpt-5.5" } },
     });
     const lease = await leasePending;
     expect(lease.snapshot).toMatchObject({
-      agentId: "openclaw",
+      agentId: "carapace",
       config: stagedConfig,
       agentDir: state.agentDir("setup-probe-agent"),
       workspaceDir: "/tmp/setup-probe-workspace",
@@ -223,7 +223,7 @@ describe("prepared model runtime snapshots", () => {
       config: input.config,
     });
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(2);
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 
   it("never returns a standalone generation invalidated while it is building", async () => {
@@ -233,7 +233,7 @@ describe("prepared model runtime snapshots", () => {
     };
     const finishFirstBuildGate = createDeferred();
     let finishFirstBuild!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       finishFirstBuild = () => finishFirstBuildGate.resolve();
       await finishFirstBuildGate.promise;
       return { agentDir: String(targetDir), wrote: false };
@@ -242,13 +242,13 @@ describe("prepared model runtime snapshots", () => {
     let activation: ReturnType<typeof activateStandalonePreparedModelRuntime> | undefined;
     try {
       activation = activateStandalonePreparedModelRuntime(input);
-      await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce());
       markPreparedModelRuntimeSnapshotsStale("test in-flight standalone publication");
       finishFirstBuild();
 
       const published = await activation;
       expect(published).toBeDefined();
-      expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+      expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
       await expect(prepareModelRuntimeSnapshot(input)).resolves.toBe(published);
     } finally {
       finishFirstBuildGate.resolve();
@@ -296,7 +296,7 @@ describe("prepared model runtime snapshots", () => {
       env,
     });
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledWith(
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledWith(
       config,
       state.agentDir("explicit-env"),
       expect.objectContaining({ env }),
@@ -311,7 +311,7 @@ describe("prepared model runtime snapshots", () => {
   });
 
   it("keeps provider catalog outcomes on the published live snapshot", async () => {
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (...args: unknown[]) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (...args: unknown[]) => {
       const options = args[2] as {
         onProviderCatalogOutcome?: (outcome: {
           provider: string;
@@ -359,7 +359,7 @@ describe("prepared model runtime snapshots", () => {
           vllm: { baseUrl: "https://vllm.example/v1", models: [] },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     mocks.runtimeSyntheticAuthProviderRefs = ["selected-runtime", "sibling-runtime"];
 
     await publishPreparedModelRuntimeSnapshot({
@@ -368,7 +368,7 @@ describe("prepared model runtime snapshots", () => {
       agentDir: state.agentDir("selected-provider-scope"),
     });
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledWith(
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledWith(
       config,
       state.agentDir("selected-provider-scope"),
       expect.objectContaining({
@@ -742,8 +742,8 @@ describe("prepared model runtime snapshots", () => {
       expect.objectContaining({ readOnly: true }),
     );
     expect(mocks.discoverModels).toHaveBeenCalledOnce();
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
-    expect(mocks.planOpenClawModelsJsonSource).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
+    expect(mocks.planCarapaceModelsJsonSource).not.toHaveBeenCalled();
     expect(mocks.loadAgentRuntimePluginRegistryHandle).not.toHaveBeenCalled();
     expect(collectHarnessRuntimes).not.toHaveBeenCalled();
   });
@@ -776,7 +776,7 @@ describe("prepared model runtime snapshots", () => {
     expect(Object.isFrozen(first)).toBe(true);
     expect(first.authModes).toEqual({ custom: "api_key" });
     expect(Object.isFrozen(first.authModes)).toBe(true);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(1);
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(1);
     expect(mocks.resolveAmbientCredentials).toHaveBeenCalledTimes(1);
     expect(mocks.discoverModels).toHaveBeenCalledTimes(1);
@@ -834,7 +834,7 @@ describe("prepared model runtime snapshots", () => {
     const fromEquivalentClone = await prepareModelRuntimeSnapshot({ config: {}, agentDir });
 
     expect(fromEquivalentClone).toBe(first);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(1);
   });
 
   it("reuses read-only owners for equivalent config clones but rejects projections", async () => {
@@ -921,7 +921,7 @@ describe("prepared model runtime snapshots", () => {
     });
 
     expect(snapshot.config).toBe(explicitConfig);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledWith(
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledWith(
       explicitConfig,
       expect.any(String),
       expect.any(Object),
@@ -938,8 +938,8 @@ describe("prepared model runtime snapshots", () => {
     const snapshot = await prepareModelRuntimeSnapshot({ config: secondConfig, agentDir });
 
     expect(snapshot.config).toBe(secondConfig);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenLastCalledWith(
       secondConfig,
       agentDir,
       expect.any(Object),
@@ -966,7 +966,7 @@ describe("prepared model runtime snapshots", () => {
         agentDir: "/tmp/prepared-model-runtime-missing-owner",
       }),
     ).rejects.toThrow("prepared model runtime owner was not published");
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 
   it("deduplicates standalone activation while publishing later owners", async () => {
@@ -991,7 +991,7 @@ describe("prepared model runtime snapshots", () => {
     await expect(prepareModelRuntimeSnapshot(input)).resolves.toMatchObject({
       workspaceDir: input.workspaceDir,
     });
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3);
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledTimes(3);
   });
 
   it("skips a queued config generation superseded before its build starts", async () => {
@@ -1003,7 +1003,7 @@ describe("prepared model runtime snapshots", () => {
     const latest = refreshPreparedModelRuntimeSnapshots(latestConfig);
     await Promise.all([first, latest]);
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureCarapaceModelsJson).toHaveBeenCalledOnce();
     await expect(
       prepareModelRuntimeSnapshot({
         agentDir: state.agentDir("default"),
@@ -1022,7 +1022,7 @@ describe("prepared model runtime snapshots", () => {
     await refreshPreparedModelRuntimeSnapshots(initialConfig);
     const finishLatestBuildGate = createDeferred();
     let finishLatestBuild: (() => void) | undefined;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(async (_config, targetDir) => {
+    mocks.ensureCarapaceModelsJson.mockImplementationOnce(async (_config, targetDir) => {
       finishLatestBuild = () => finishLatestBuildGate.resolve();
       await finishLatestBuildGate.promise;
       return { agentDir: String(targetDir), wrote: false };
@@ -1072,7 +1072,7 @@ describe("prepared model runtime snapshots", () => {
     markPreparedModelRuntimeSnapshotsStale("plugin publication boundary");
     await queued;
 
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureCarapaceModelsJson).not.toHaveBeenCalled();
   });
 });
 

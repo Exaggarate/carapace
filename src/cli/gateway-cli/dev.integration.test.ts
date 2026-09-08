@@ -19,17 +19,17 @@ describe("ensureDevGatewayConfig integration", () => {
   });
 
   it("writes the dedicated dev roster into a fresh state directory", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-dev-config-integration-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-dev-config-integration-"));
     tempDirs.push(root);
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const workspace = path.join(root, "workspace");
 
     await withEnvAsync(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_WORKSPACE_DIR: workspace,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_WORKSPACE_DIR: workspace,
       },
       async () => {
         resetConfigRuntimeState();
@@ -46,18 +46,18 @@ describe("ensureDevGatewayConfig integration", () => {
   });
 
   it("can retry after a partial dev workspace write fails", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-dev-config-integration-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-dev-config-integration-"));
     tempDirs.push(root);
     const stateDir = path.join(root, "state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const workspace = path.join(root, "workspace");
     const devWorkspace = `${workspace}-dev`;
 
     await withEnvAsync(
       {
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_WORKSPACE_DIR: workspace,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_WORKSPACE_DIR: workspace,
       },
       async () => {
         resetConfigRuntimeState();
@@ -73,7 +73,7 @@ describe("ensureDevGatewayConfig integration", () => {
             const parent = path.dirname(target);
             const isStagedAgents =
               path.dirname(parent) === devWorkspace &&
-              path.basename(parent).startsWith("openclaw-bootstrap-") &&
+              path.basename(parent).startsWith("carapace-bootstrap-") &&
               path.basename(target) === "AGENTS.md";
             if (isStagedAgents) {
               await realWriteFile(filePath, "# PARTIAL\n", options);

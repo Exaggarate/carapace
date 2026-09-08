@@ -32,14 +32,14 @@ suite.define(() => {
         async ({ page }) => {
           const gateway = await installMockGateway(page, { sessionKey: initialSessionKey });
           await page.goto(controlUiSessionUrl(suite.server.baseUrl, initialSessionKey));
-          await page.locator("openclaw-chat-pane").waitFor();
+          await page.locator("carapace-chat-pane").waitFor();
 
           await gateway.setMethodResponse("sessions.resolve", {
             __mockError: { code: "UNAVAILABLE", message: gatewayError },
           });
           const pathname = controlUiSessionPath(failedSessionKey);
           await page.evaluate((targetPathname) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: {
                 context: {
                   navigate: (routeId: string, options: { pathname: string }) => void;
@@ -47,7 +47,7 @@ suite.define(() => {
               };
             };
             if (!app.runtime) {
-              throw new Error("OpenClaw application runtime is unavailable");
+              throw new Error("Carapace application runtime is unavailable");
             }
             app.runtime.context.navigate("chat", { pathname: targetPathname });
           }, pathname);

@@ -1,5 +1,5 @@
 // File Transfer plugin module creates canonical directory archives.
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
+import { runCommandBuffered } from "carapace/plugin-sdk/process-runtime";
 
 const CANONICAL_PATH_CHANGED_EXIT_CODE = 78;
 const CANONICAL_TAR_WORKER = [

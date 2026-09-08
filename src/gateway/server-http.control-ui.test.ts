@@ -20,8 +20,8 @@ describe("Gateway Control UI identity", () => {
         const base = basePath.replace(/\/$/, "");
         for (const [method, path] of [
           ["GET", `${base}/avatar/main?meta=1`],
-          ["GET", `${base}/__openclaw__/assistant-media?source=missing.png`],
-          ["POST", `${base}/__openclaw__/assistant-media?meta=1&allow=1&source=missing.png`],
+          ["GET", `${base}/__carapace__/assistant-media?source=missing.png`],
+          ["POST", `${base}/__carapace__/assistant-media?meta=1&allow=1&source=missing.png`],
         ] as const) {
           const response = await sendRequest(server, { path, method });
           expect(response.res.statusCode, path).toBe(401);
@@ -67,7 +67,7 @@ describe("Gateway Control UI identity", () => {
           for (const query of ["meta=1", "allow=1", "meta=1&allow=0"]) {
             const response = await sendRequest(server, {
               method: "POST",
-              path: `${base}/__openclaw__/assistant-media?${query}&source=missing.png`,
+              path: `${base}/__carapace__/assistant-media?${query}&source=missing.png`,
             });
             expect(response.res.statusCode, query).toBe(503);
             expect(response.getBody()).toBe("Plugin runtime is starting");
@@ -78,7 +78,7 @@ describe("Gateway Control UI identity", () => {
   );
 
   it("applies dashboard enablement to subsequent requests without replacing the listener", async () => {
-    await withTempDir("openclaw-http-toggle-", async (controlUiRoot) => {
+    await withTempDir("carapace-http-toggle-", async (controlUiRoot) => {
       await fs.writeFile(nodePath.join(controlUiRoot, "index.html"), "<html>synthetic UI</html>\n");
       await fs.mkdir(nodePath.join(controlUiRoot, "assets"));
       await fs.writeFile(nodePath.join(controlUiRoot, "assets", "app.js"), "// synthetic asset\n");
@@ -110,7 +110,7 @@ describe("Gateway Control UI identity", () => {
   });
 
   it("keeps static requests independent of workspace identity reads while bootstrap resolves identity", async () => {
-    await withTempDir("openclaw-http-identity-", async (controlUiRoot) => {
+    await withTempDir("carapace-http-identity-", async (controlUiRoot) => {
       await fs.writeFile(nodePath.join(controlUiRoot, "index.html"), "<html>synthetic UI</html>\n");
       const workspace = await fs.realpath(controlUiRoot);
       await fs.writeFile(

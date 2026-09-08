@@ -4,7 +4,7 @@ import type { TaskRecord } from "./task-registry.types.js";
 export const CONTEXT_ENGINE_TURN_MAINTENANCE_TASK_KIND = "context_engine_turn_maintenance";
 
 const ACTIVE_CONTEXT_ENGINE_MAINTENANCE_TASK_IDS = Symbol.for(
-  "openclaw.contextEngineMaintenanceTaskIds",
+  "carapace.contextEngineMaintenanceTaskIds",
 );
 
 function getActiveContextEngineMaintenanceTaskIds(): Set<string> {

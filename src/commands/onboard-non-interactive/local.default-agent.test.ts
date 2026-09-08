@@ -1,13 +1,13 @@
 // Non-interactive setup tests keep provisioning and output on the configured default agent.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readConfigFileSnapshot, resetConfigRuntimeState } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { RuntimeEnv } from "../../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { OnboardOptions } from "../onboard-types.js";
 
 const mocks = vi.hoisted(() => ({
@@ -27,7 +27,7 @@ vi.mock("../../config/logging.js", () => ({
 
 vi.mock("../onboard-helpers.js", () => ({
   DEFAULT_WORKSPACE: "/tmp/default-workspace",
-  applyWizardMetadata: (config: OpenClawConfig) => config,
+  applyWizardMetadata: (config: CarapaceConfig) => config,
   ensureWorkspaceAndSessions: mocks.ensureWorkspaceAndSessions,
   resolveLocalControlUiProbeLinks: vi.fn(),
   waitForGatewayReachable: vi.fn(),
@@ -59,15 +59,15 @@ vi.mock("./local/output.js", () => ({
 }));
 
 vi.mock("./local/skills-config.js", () => ({
-  applyNonInteractiveSkillsConfig: ({ nextConfig }: { nextConfig: OpenClawConfig }) => nextConfig,
+  applyNonInteractiveSkillsConfig: ({ nextConfig }: { nextConfig: CarapaceConfig }) => nextConfig,
 }));
 
 import { runNonInteractiveSetup } from "../onboard-non-interactive.js";
 import { runNonInteractiveLocalSetup } from "./local.js";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetConfigRuntimeState();
 });
 
@@ -89,10 +89,10 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.applyAuthChoice.mockImplementation(
-      async ({ nextConfig }: { nextConfig: OpenClawConfig }) => nextConfig,
+      async ({ nextConfig }: { nextConfig: CarapaceConfig }) => nextConfig,
     );
     mocks.applyGatewayConfig.mockImplementation(
-      ({ nextConfig }: { nextConfig: OpenClawConfig }) => ({
+      ({ nextConfig }: { nextConfig: CarapaceConfig }) => ({
         nextConfig,
         port: 18789,
         bind: "loopback",
@@ -101,10 +101,10 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
       }),
     );
     mocks.commitConfig.mockImplementation(
-      async ({ nextConfig }: { nextConfig: OpenClawConfig }) => nextConfig,
+      async ({ nextConfig }: { nextConfig: CarapaceConfig }) => nextConfig,
     );
     mocks.ensureOnboardingAgent.mockImplementation(
-      async ({ config }: { config: OpenClawConfig }) => ({
+      async ({ config }: { config: CarapaceConfig }) => ({
         config,
         agentId: "ops",
         bootstrapPending: false,
@@ -193,13 +193,13 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
         const expectedWorkspace = legacyState ? oldWorkspace : workspace;
         if (!legacyState) {
           // withTempHome seeds main sessions; this branch models no existing installation.
-          await fs.rm(path.join(home, ".openclaw", "agents"), { recursive: true });
+          await fs.rm(path.join(home, ".carapace", "agents"), { recursive: true });
         }
         if (agents) {
-          const configDir = path.join(home, ".openclaw");
+          const configDir = path.join(home, ".carapace");
           await fs.mkdir(configDir, { recursive: true });
           await fs.writeFile(
-            path.join(configDir, "openclaw.json"),
+            path.join(configDir, "carapace.json"),
             JSON.stringify({
               agents: { ...agents, defaults: { workspace: oldWorkspace } },
             }),
@@ -217,7 +217,7 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
           expect(snapshot.sourceConfig?.agents?.entries).toEqual({ main: {} });
         }
         mocks.ensureOnboardingAgent.mockImplementationOnce(
-          async ({ config }: { config: OpenClawConfig }) => ({
+          async ({ config }: { config: CarapaceConfig }) => ({
             config: {
               ...config,
               agents: {
@@ -250,7 +250,7 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
           expect.objectContaining({
             target: {
               agentId,
-              agentDir: path.join(home, ".openclaw", "agents", agentId, "agent"),
+              agentDir: path.join(home, ".carapace", "agents", agentId, "agent"),
               workspaceDir: expectedWorkspace,
             },
             nextConfig: expect.objectContaining({
@@ -311,8 +311,8 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
         await vi.importActual<typeof import("./config-write.js")>("./config-write.js");
       await withTempHome(async (rawHome) => {
         const home = await fs.realpath(rawHome);
-        const configDir = path.join(home, ".openclaw");
-        const configPath = path.join(configDir, "openclaw.json");
+        const configDir = path.join(home, ".carapace");
+        const configPath = path.join(configDir, "carapace.json");
         const workspace = path.join(home, "workspace");
         // Remove the helper's legacy main sessions to exercise first-install admission.
         await fs.rm(path.join(configDir, "agents"), { recursive: true });
@@ -332,7 +332,7 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
           expect(before.sourceConfig?.agents?.entries).toEqual({ main: {} });
         }
         let foreignRaw: string | undefined;
-        const writeForeignConfig = async (config: OpenClawConfig) => {
+        const writeForeignConfig = async (config: CarapaceConfig) => {
           foreignRaw = JSON.stringify({
             ...config,
             agents: {
@@ -464,20 +464,20 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
       await withTempHome(async (rawHome) => {
         const home = await fs.realpath(rawHome);
         const globalWorkspace = path.join(home, "global-workspace");
-        const agentDir = path.join(home, ".openclaw", "agents", agentId, "agent");
+        const agentDir = path.join(home, ".carapace", "agents", agentId, "agent");
         const workspaceDir =
           agentId === "main" ? globalWorkspace : path.join(home, "ops-workspace");
         const entries = {
           ...(explicit ? { main: {} } : {}),
           [agentId]: agentId === "main" ? {} : { agentDir, workspace: workspaceDir },
         };
-        const configDir = path.join(home, ".openclaw");
+        const configDir = path.join(home, ".carapace");
         const roster = { agents: { entries } };
         if (include) {
           await fs.writeFile(path.join(configDir, "roster.json"), JSON.stringify(roster));
         }
         await fs.writeFile(
-          path.join(configDir, "openclaw.json"),
+          path.join(configDir, "carapace.json"),
           JSON.stringify({
             ...(include ? { $include: "./roster.json" } : {}),
             agents: {
@@ -492,7 +492,7 @@ describe("runNonInteractiveLocalSetup default-agent ownership", () => {
         );
         resetConfigRuntimeState();
         mocks.ensureOnboardingAgent.mockImplementationOnce(
-          async ({ config }: { config: OpenClawConfig }) => ({
+          async ({ config }: { config: CarapaceConfig }) => ({
             config,
             agentId,
             bootstrapPending: false,

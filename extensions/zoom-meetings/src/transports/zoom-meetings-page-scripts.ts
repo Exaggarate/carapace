@@ -1,7 +1,7 @@
 import {
   createMeetingLeaveSource,
   createMeetingTranscriptSource,
-} from "openclaw/plugin-sdk/meeting-page-script-runtime";
+} from "carapace/plugin-sdk/meeting-page-script-runtime";
 import { ZOOM_MEETING_SELECTORS } from "./zoom-meetings-selectors.js";
 import { zoomMeetingStatusCallSource } from "./zoom-meetings-status-call-source.js";
 import { zoomMeetingStatusPreludeSource } from "./zoom-meetings-status-prejoin-source.js";
@@ -88,9 +88,9 @@ export function zoomMeetingTranscriptScript(
     expectedIdentity,
     finalize,
     globals: {
-      captionArchive: "__openclawZoomCaptionArchive",
-      captions: "__openclawZoomCaptions",
-      meeting: "__openclawZoomMeeting",
+      captionArchive: "__carapaceZoomCaptionArchive",
+      captions: "__carapaceZoomCaptions",
+      meeting: "__carapaceZoomMeeting",
     },
     meetingSessionId,
     pageIdentitySource: pageIdentityFunctionSource(),
@@ -142,8 +142,8 @@ export function zoomMeetingLeaveScript(params: {
     platform: {
       displayName: "Zoom",
       globals: {
-        audioOutputs: "__openclawZoomAudioOutputs",
-        meeting: "__openclawZoomMeeting",
+        audioOutputs: "__carapaceZoomAudioOutputs",
+        meeting: "__carapaceZoomMeeting",
       },
     },
     selectors,

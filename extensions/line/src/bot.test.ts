@@ -1,6 +1,6 @@
 // Line tests cover how the bot resolves the inbound media cap it hands to the handlers.
 import type { webhook } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type DeliverFn = (
@@ -31,7 +31,7 @@ const { createLineBot } = await import("./bot.js");
 
 const MB = 1024 * 1024;
 
-function configWith(mediaMaxMb?: number): OpenClawConfig {
+function configWith(mediaMaxMb?: number): CarapaceConfig {
   return {
     channels: {
       line: {
@@ -41,7 +41,7 @@ function configWith(mediaMaxMb?: number): OpenClawConfig {
         ...(mediaMaxMb === undefined ? {} : { mediaMaxMb }),
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 // The bot only reveals the resolved cap by handing it to the handlers, so drive
@@ -138,7 +138,7 @@ describe("createLineBot pending history cap", () => {
       config: {
         messages: { groupChat: { historyLimit: 7 } },
         channels: { line },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
     });
 
     await deliver?.({ type: "message" } as webhook.Event, "destination", {});

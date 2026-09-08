@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { autonomousSkillSizeError } from "../../skills/workshop/collection-contracts.js";
 import {
   readProposalFrontmatter,
@@ -160,7 +160,7 @@ export function readLifecycleProposalIdParam(params: Record<string, unknown>): s
 export async function readProposalForInspect(
   params: Record<string, unknown>,
   workspaceDir: string,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   env: NodeJS.ProcessEnv | undefined,
   agentId: string,
 ): Promise<SkillProposalReadResult> {

@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import "../../../styles.css";
 import "../../../styles/chat.ts";
@@ -47,7 +47,7 @@ type DetailPanel = HTMLElement & {
 const mounted: HTMLElement[] = [];
 
 async function mountFile(content: FileSidebarContent, width?: number): Promise<DetailPanel> {
-  const panel = document.createElement("openclaw-chat-detail-panel") as DetailPanel;
+  const panel = document.createElement("carapace-chat-detail-panel") as DetailPanel;
   panel.content = content;
   if (width === undefined) {
     document.body.append(panel);

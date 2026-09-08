@@ -1,26 +1,26 @@
 // Feishu plugin module implements reply dispatcher behavior.
-import { formatReasoningMessage, resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
+import { formatReasoningMessage, resolveHumanDelayConfig } from "carapace/plugin-sdk/agent-runtime";
+import { logTypingFailure } from "carapace/plugin-sdk/channel-feedback";
 import {
   isChannelPartialDeliveryError,
   type ChannelInboundTurnPlan,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createChannelMessageReplyPipeline,
   formatChannelProgressDraftLineForEntry,
   isChannelProgressDraftWorkToolName,
   resolveChannelPreviewStreamMode,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { toStringifiedError as toFeishuError } from "openclaw/plugin-sdk/error-runtime";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { toStringifiedError as toFeishuError } from "carapace/plugin-sdk/error-runtime";
+import { getGlobalHookRunner } from "carapace/plugin-sdk/plugin-runtime";
 import {
   getReplyPayloadTtsSupplement,
   resolveSendableOutboundReplyParts,
   resolveTextChunksWithFallback,
   sendMediaWithLeadingCaption,
-} from "openclaw/plugin-sdk/reply-payload";
-import { stripReasoningTagsFromText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/reply-payload";
+import { stripReasoningTagsFromText } from "carapace/plugin-sdk/text-chunking";
 import type { ClawdbotConfig, OutboundIdentity, ReplyPayload, RuntimeEnv } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { resolveConfiguredHttpTimeoutMs } from "./client-timeout.js";

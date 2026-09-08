@@ -5,8 +5,8 @@ import {
   type SessionCatalogContinueProviderResult,
   type SessionUpstreamActivity,
   type SessionUpstreamProbe,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-catalog";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { readPiSessionFileBaseline } from "./pi-session-store.js";
 import { parsePiSessionTimestampMs } from "./pi-session-timestamp.js";
 

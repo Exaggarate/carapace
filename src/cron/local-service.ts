@@ -1,7 +1,7 @@
 import { isAgentDeletionBlocked } from "../agents/agent-lifecycle-registry.js";
 import { listAgentIds, tryResolveAmbientOwnerAgentId } from "../agents/agent-scope.js";
 import { tryGetLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { getChildLogger } from "../logging/logger.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { CronService } from "./service.js";
@@ -9,7 +9,7 @@ import { resolveCronJobsStorePath } from "./store.js";
 
 export async function withLocalAgentCronJobsRemoved<T>(
   agentId: string,
-  getRuntimeConfig: () => OpenClawConfig,
+  getRuntimeConfig: () => CarapaceConfig,
   commit: () => Promise<T>,
 ): Promise<T> {
   const cfg = getRuntimeConfig();

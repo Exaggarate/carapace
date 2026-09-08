@@ -1,18 +1,18 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   createEmptyPluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   getSessionBindingService,
   resolveRuntimeConversationBindingRoute,
-} from "openclaw/plugin-sdk/conversation-binding-runtime";
-import { resolvePluginConversationBindingApproval } from "openclaw/plugin-sdk/conversation-runtime";
-import { createInteractiveConversationBindingHelpers } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { withStateDirEnv } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/conversation-binding-runtime";
+import { resolvePluginConversationBindingApproval } from "carapace/plugin-sdk/conversation-runtime";
+import { createInteractiveConversationBindingHelpers } from "carapace/plugin-sdk/plugin-runtime";
+import { resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import { withStateDirEnv } from "carapace/plugin-sdk/test-env";
 import { afterEach, beforeEach, expect, it } from "vitest";
 import { createFeishuThreadBindingManager } from "./thread-bindings.js";
 
@@ -29,7 +29,7 @@ it("approves, routes, and detaches an opaque Feishu plugin target without invent
     const cfg = {
       agents: { entries: { alpha: {}, beta: {} } },
       bindings: [{ agentId: "alpha", match: { channel: "feishu" } }],
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const manager = createFeishuThreadBindingManager({ cfg, accountId: "default" });
     const owner = { pluginId: "fixture-runtime", pluginRoot: tempRoot };
     const conversation = {

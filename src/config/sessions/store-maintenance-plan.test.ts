@@ -3,14 +3,14 @@ import {
   loadLegacySessionStore,
   saveLegacySessionStore,
 } from "../../infra/state-migrations.legacy-session-store.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { SessionMaintenanceApplyReport } from "./store-maintenance-operations.js";
 import type { ResolvedSessionMaintenanceConfig } from "./store-maintenance.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 it("preserves the legacy read pressure gates separately from write maintenance", async () => {
-  await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+  await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
     const now = Date.now();
     const probeKey = "agent:main:explicit:model-run-123e4567-e89b-12d3-a456-426614174000";
     const dashboardKey = "agent:main:dashboard:stale";

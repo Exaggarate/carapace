@@ -1,7 +1,7 @@
 // Official channel catalog tests validate catalog metadata and entries.
 import fs from "node:fs";
 import path from "node:path";
-import { bundledPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledPluginRoot } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildOfficialChannelDocsCatalog,
@@ -29,7 +29,7 @@ type OfficialChannelCatalogEntry = ReturnType<
   typeof buildOfficialChannelCatalog
 >["entries"][number];
 type OfficialChannelInstall = NonNullable<
-  NonNullable<OfficialChannelCatalogEntry["openclaw"]>["install"]
+  NonNullable<OfficialChannelCatalogEntry["carapace"]>["install"]
 >;
 
 function makeRepoRoot(prefix: string): string {
@@ -60,15 +60,15 @@ function writeExternalChannelDocs(repoRoot: string): void {
     fs.readFileSync(path.resolve("scripts/lib/official-external-channel-seed.json"), "utf8"),
   ) as {
     entries: Array<{
-      openclaw?: { channel?: { docsPath?: string; id?: string; label?: string } };
+      carapace?: { channel?: { docsPath?: string; id?: string; label?: string } };
     }>;
   };
   for (const entry of seed.entries) {
-    const channel = entry.openclaw?.channel;
+    const channel = entry.carapace?.channel;
     if (!channel?.docsPath || !channel.label) {
       continue;
     }
-    const title = channel.id === "openclaw-weixin" ? "WeChat" : channel.label;
+    const title = channel.id === "carapace-weixin" ? "WeChat" : channel.label;
     writeChannelDoc(repoRoot, channel.docsPath, title, `${title} test summary`);
   }
   writeChannelDoc(repoRoot, "/web/webchat", "WebChat", "Gateway WebChat UI over WebSocket");
@@ -101,7 +101,7 @@ function writeEnglishDocsNavigation(
 }
 
 function requireInstall(entry: OfficialChannelCatalogEntry | undefined): OfficialChannelInstall {
-  const install = entry?.openclaw?.install;
+  const install = entry?.carapace?.install;
   if (!install) {
     throw new Error("expected official channel install config");
   }
@@ -131,13 +131,13 @@ function summarizeCatalogEntry(entry: OfficialChannelCatalogEntry) {
     name: entry.name,
     description: entry.description,
     source: entry.source,
-    plugin: entry.openclaw?.plugin,
-    catalog: entry.openclaw?.catalog,
-    contracts: entry.openclaw?.contracts,
-    channel: entry.openclaw?.channel,
-    channelConfigs: entry.openclaw?.channelConfigs,
-    providerEndpoints: entry.openclaw?.providerEndpoints,
-    install: entry.openclaw?.install,
+    plugin: entry.carapace?.plugin,
+    catalog: entry.carapace?.catalog,
+    contracts: entry.carapace?.contracts,
+    channel: entry.carapace?.channel,
+    channelConfigs: entry.carapace?.channelConfigs,
+    providerEndpoints: entry.carapace?.providerEndpoints,
+    install: entry.carapace?.install,
   };
 }
 
@@ -170,9 +170,9 @@ describe("buildOfficialChannelCatalog", () => {
     expect(findDuplicateOfficialChannelDocsNavRoutes({ repoRoot: process.cwd() })).toEqual([]);
 
     const entries = buildOfficialChannelDocsCatalog({ repoRoot: process.cwd() }).entries;
-    expect(entries.find((entry) => entry.id === "openclaw-weixin")).toMatchObject({
+    expect(entries.find((entry) => entry.id === "carapace-weixin")).toMatchObject({
       label: "WeChat",
-      summary: "WeChat channel setup through the external openclaw-weixin plugin",
+      summary: "WeChat channel setup through the external carapace-weixin plugin",
     });
     expect(entries.map((entry) => entry.id)).toEqual(
       expect.arrayContaining(["reef", "telegram", "webchat"]),
@@ -189,12 +189,12 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("lets publishable package metadata override same-id seeds and skips non-publishable entries", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-");
     writeJson(path.join(repoRoot, "extensions", "wecom", "package.json"), {
-      name: "@openclaw/wecom",
+      name: "@carapace/wecom",
       version: "2026.8.1",
       description: "Repository-owned WeCom channel",
-      openclaw: {
+      carapace: {
         channel: {
           id: "wecom",
           label: "Repository WeCom",
@@ -208,7 +208,7 @@ describe("buildOfficialChannelCatalog", () => {
           },
         },
         install: {
-          npmSpec: "@openclaw/wecom",
+          npmSpec: "@carapace/wecom",
           defaultChoice: "npm",
         },
         release: {
@@ -216,7 +216,7 @@ describe("buildOfficialChannelCatalog", () => {
         },
       },
     });
-    writeJson(path.join(repoRoot, "extensions", "wecom", "openclaw.plugin.json"), {
+    writeJson(path.join(repoRoot, "extensions", "wecom", "carapace.plugin.json"), {
       id: "wecom",
       catalog: {
         featured: true,
@@ -248,8 +248,8 @@ describe("buildOfficialChannelCatalog", () => {
       },
     });
     writeJson(path.join(repoRoot, "extensions", "local-only", "package.json"), {
-      name: "@openclaw/local-only",
-      openclaw: {
+      name: "@carapace/local-only",
+      carapace: {
         channel: {
           id: "local-only",
           label: "Local Only",
@@ -270,10 +270,10 @@ describe("buildOfficialChannelCatalog", () => {
 
     expect(
       summarizeCatalogEntry(
-        findCatalogEntry(entries, (entry) => entry.openclaw?.channel?.id === "wecom"),
+        findCatalogEntry(entries, (entry) => entry.carapace?.channel?.id === "wecom"),
       ),
     ).toEqual({
-      name: "@openclaw/wecom",
+      name: "@carapace/wecom",
       description: "Repository-owned WeCom channel",
       source: "official",
       plugin: undefined,
@@ -313,20 +313,20 @@ describe("buildOfficialChannelCatalog", () => {
         },
       ],
       install: {
-        npmSpec: "@openclaw/wecom",
+        npmSpec: "@carapace/wecom",
         defaultChoice: "npm",
       },
     });
     expect(
       summarizeCatalogEntry(
-        findCatalogEntry(entries, (entry) => entry.name === "openclaw-plugin-yuanbao"),
+        findCatalogEntry(entries, (entry) => entry.name === "carapace-plugin-yuanbao"),
       ),
     ).toEqual({
-      name: "openclaw-plugin-yuanbao",
-      description: "OpenClaw Yuanbao channel plugin by the Tencent Yuanbao team.",
+      name: "carapace-plugin-yuanbao",
+      description: "Carapace Yuanbao channel plugin by the Tencent Yuanbao team.",
       source: "external",
       plugin: {
-        id: "openclaw-plugin-yuanbao",
+        id: "carapace-plugin-yuanbao",
         label: "Yuanbao",
       },
       catalog: undefined,
@@ -356,7 +356,7 @@ describe("buildOfficialChannelCatalog", () => {
       },
       providerEndpoints: undefined,
       install: {
-        npmSpec: "openclaw-plugin-yuanbao@2.18.2",
+        npmSpec: "carapace-plugin-yuanbao@2.18.2",
         defaultChoice: "npm",
         expectedIntegrity:
           "sha512-cL85zWLePhi/GWRsXL8ogS4tejNuCE/J0V/OYhDFJzElF2TmndVCUAXaJdssgv/ULJ9sBaic88wAzRllIgZIwA==",
@@ -364,13 +364,13 @@ describe("buildOfficialChannelCatalog", () => {
     });
     expect(
       summarizeCatalogEntry(
-        findCatalogEntry(entries, (entry) => entry.name === "@tencent-connect/openclaw-qqbot"),
+        findCatalogEntry(entries, (entry) => entry.name === "@tencent-connect/carapace-qqbot"),
       ),
     ).toMatchObject({
-      name: "@tencent-connect/openclaw-qqbot",
+      name: "@tencent-connect/carapace-qqbot",
       source: "external",
       plugin: {
-        id: "openclaw-qqbot",
+        id: "carapace-qqbot",
         label: "QQ Bot",
       },
       contracts: {
@@ -382,50 +382,50 @@ describe("buildOfficialChannelCatalog", () => {
         approvalFlags: ["native"],
       },
       install: {
-        npmSpec: "@tencent-connect/openclaw-qqbot@2.0.3",
+        npmSpec: "@tencent-connect/carapace-qqbot@2.0.3",
         defaultChoice: "npm",
         expectedIntegrity:
           "sha512-yngu/2cPeZjJfIfHWCXWB2/6KlDHrb9vpOUjKLdQxePLSp6wCn3CFOALcBIVq/9o6jlYz9WTU9idW6nfX1xpFA==",
       },
     });
     expect(
-      findCatalogEntry(entries, (entry) => entry.name === "@tencent-connect/openclaw-qqbot")
-        .openclaw?.legacyNpmPackageNames,
-    ).toEqual(["@openclaw/qqbot"]);
-    expect(entries.some((entry) => entry.openclaw?.channel?.id === "local-only")).toBe(false);
+      findCatalogEntry(entries, (entry) => entry.name === "@tencent-connect/carapace-qqbot")
+        .carapace?.legacyNpmPackageNames,
+    ).toEqual(["@carapace/qqbot"]);
+    expect(entries.some((entry) => entry.carapace?.channel?.id === "local-only")).toBe(false);
   });
 
   it("preserves manifest-owned metadata without duplicating channel schemas", () => {
     const entries = buildOfficialChannelCatalog({ repoRoot: process.cwd() }).entries;
-    const slack = findCatalogEntry(entries, (entry) => entry.openclaw?.channel?.id === "slack");
-    const raft = findCatalogEntry(entries, (entry) => entry.openclaw?.channel?.id === "raft");
+    const slack = findCatalogEntry(entries, (entry) => entry.carapace?.channel?.id === "slack");
+    const raft = findCatalogEntry(entries, (entry) => entry.carapace?.channel?.id === "raft");
     const clickclack = findCatalogEntry(
       entries,
-      (entry) => entry.openclaw?.channel?.id === "clickclack",
+      (entry) => entry.carapace?.channel?.id === "clickclack",
     );
 
     // Channel schemas are single-sourced from the zod-derived generated bundled
     // channel metadata (compiled into core by channelId); manifest and catalog
     // copies drifted and silently overrode it in validation (see #131292).
-    expect(slack.openclaw.channelConfigs?.slack?.schema).toBeUndefined();
-    expect(slack.openclaw.channelConfigs?.slack?.label).toBe("Slack");
-    expect(raft.openclaw.channelConfigs?.raft?.schema).toBeUndefined();
-    expect(raft.openclaw.channelConfigs?.raft?.label).toBeTruthy();
-    expect(clickclack.openclaw.contracts?.tools).toEqual(["discussion"]);
+    expect(slack.carapace.channelConfigs?.slack?.schema).toBeUndefined();
+    expect(slack.carapace.channelConfigs?.slack?.label).toBe("Slack");
+    expect(raft.carapace.channelConfigs?.raft?.schema).toBeUndefined();
+    expect(raft.carapace.channelConfigs?.raft?.label).toBeTruthy();
+    expect(clickclack.carapace.contracts?.tools).toEqual(["discussion"]);
   });
 
   it("rejects duplicate channel ids from repository packages", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-duplicate-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-duplicate-");
     for (const dirName of ["first", "second"]) {
       writeJson(path.join(repoRoot, "extensions", dirName, "package.json"), {
-        name: `@openclaw/${dirName}`,
-        openclaw: {
+        name: `@carapace/${dirName}`,
+        carapace: {
           channel: {
             id: "duplicate",
             label: dirName,
           },
           install: {
-            npmSpec: `@openclaw/${dirName}`,
+            npmSpec: `@carapace/${dirName}`,
           },
           release: {
             publishToNpm: true,
@@ -446,7 +446,7 @@ describe("buildOfficialChannelCatalog", () => {
       entries: Array<{
         name?: string;
         source?: string;
-        openclaw?: { channel?: { id?: string } };
+        carapace?: { channel?: { id?: string } };
       }>;
     };
     const publishableChannelIds = new Set(
@@ -456,36 +456,36 @@ describe("buildOfficialChannelCatalog", () => {
           return [];
         }
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-          openclaw?: {
+          carapace?: {
             channel?: { id?: string };
             release?: { publishToNpm?: boolean };
           };
         };
-        const channelId = packageJson.openclaw?.channel?.id;
-        return channelId && packageJson.openclaw?.release?.publishToNpm === true ? [channelId] : [];
+        const channelId = packageJson.carapace?.channel?.id;
+        return channelId && packageJson.carapace?.release?.publishToNpm === true ? [channelId] : [];
       }),
     );
-    const seedChannelIds = seed.entries.map((entry) => entry.openclaw?.channel?.id?.toLowerCase());
+    const seedChannelIds = seed.entries.map((entry) => entry.carapace?.channel?.id?.toLowerCase());
 
     expect(seed.entries.every((entry) => entry.source === "external")).toBe(true);
-    expect(seed.entries.some((entry) => entry.name?.startsWith("@openclaw/"))).toBe(false);
+    expect(seed.entries.some((entry) => entry.name?.startsWith("@carapace/"))).toBe(false);
     expect(new Set(seedChannelIds).size).toBe(seedChannelIds.length);
     expect(
       seed.entries.some((entry) => {
-        const channelId = entry.openclaw?.channel?.id;
+        const channelId = entry.carapace?.channel?.id;
         return channelId ? publishableChannelIds.has(channelId) : false;
       }),
     ).toBe(false);
   });
 
   it("projects bundled, external, and built-in channels into docs while hiding source-only channels", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-docs-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-docs-");
     writeJson(path.join(repoRoot, "package.json"), {
       files: ["dist/extensions/**", "!dist/extensions/hidden/**"],
     });
     writeJson(path.join(repoRoot, "extensions", "bundled", "package.json"), {
-      name: "@openclaw/bundled",
-      openclaw: {
+      name: "@carapace/bundled",
+      carapace: {
         channel: {
           id: "bundled",
           label: "Bundled",
@@ -495,8 +495,8 @@ describe("buildOfficialChannelCatalog", () => {
       },
     });
     writeJson(path.join(repoRoot, "extensions", "hidden", "package.json"), {
-      name: "@openclaw/hidden",
-      openclaw: {
+      name: "@carapace/hidden",
+      carapace: {
         channel: {
           id: "hidden",
           label: "Hidden",
@@ -534,10 +534,10 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("uses the canonical channel docs route when a manifest omits docsPath", () => {
-    const repoRoot = makeRepoRoot("openclaw-default-channel-docs-route-");
+    const repoRoot = makeRepoRoot("carapace-default-channel-docs-route-");
     writeJson(path.join(repoRoot, "extensions", "defaulted", "package.json"), {
-      name: "@openclaw/defaulted",
-      openclaw: {
+      name: "@carapace/defaulted",
+      carapace: {
         channel: {
           id: "defaulted",
           label: "Defaulted",
@@ -561,13 +561,13 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("rejects docs-visible source-only channels", () => {
-    const repoRoot = makeRepoRoot("openclaw-source-only-channel-docs-");
+    const repoRoot = makeRepoRoot("carapace-source-only-channel-docs-");
     writeJson(path.join(repoRoot, "package.json"), {
       files: ["dist/extensions/**", "!dist/extensions/source-only/**"],
     });
     writeJson(path.join(repoRoot, "extensions", "source-only", "package.json"), {
-      name: "@openclaw/source-only",
-      openclaw: {
+      name: "@carapace/source-only",
+      carapace: {
         channel: {
           id: "source-only",
           label: "Source Only",
@@ -603,10 +603,10 @@ describe("buildOfficialChannelCatalog", () => {
       error: "docs/channels/frontmatter-test.md must define title and summary",
     },
   ])("rejects channel docs with $name", ({ content, error }) => {
-    const repoRoot = makeRepoRoot("openclaw-channel-docs-frontmatter-");
+    const repoRoot = makeRepoRoot("carapace-channel-docs-frontmatter-");
     writeJson(path.join(repoRoot, "extensions", "frontmatter-test", "package.json"), {
-      name: "@openclaw/frontmatter-test",
-      openclaw: {
+      name: "@carapace/frontmatter-test",
+      carapace: {
         channel: {
           id: "frontmatter-test",
           label: "Manifest label",
@@ -624,10 +624,10 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("writes the generated docs block and reports missing or hidden navigation routes", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-docs-write-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-docs-write-");
     writeJson(path.join(repoRoot, "extensions", "bundled", "package.json"), {
-      name: "@openclaw/bundled",
-      openclaw: {
+      name: "@carapace/bundled",
+      carapace: {
         channel: {
           id: "bundled",
           label: "Bundled",
@@ -637,8 +637,8 @@ describe("buildOfficialChannelCatalog", () => {
       },
     });
     writeJson(path.join(repoRoot, "extensions", "hidden", "package.json"), {
-      name: "@openclaw/hidden",
-      openclaw: {
+      name: "@carapace/hidden",
+      carapace: {
         channel: {
           id: "hidden",
           label: "Hidden",
@@ -688,7 +688,7 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("rejects missing or duplicate generated docs markers", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-docs-markers-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-docs-markers-");
     writeExternalChannelDocs(repoRoot);
     const docsIndexPath = path.join(repoRoot, OFFICIAL_CHANNEL_DOCS_INDEX_RELATIVE_PATH);
     fs.mkdirSync(path.dirname(docsIndexPath), { recursive: true });
@@ -713,9 +713,9 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("keeps third-party official external catalog npm sources pinned unless they track latest", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-policy-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-policy-");
     const entries = buildOfficialChannelCatalog({ repoRoot }).entries.filter(
-      (entry) => entry.source === "external" && !entry.name?.startsWith("@openclaw/"),
+      (entry) => entry.source === "external" && !entry.name?.startsWith("@carapace/"),
     );
 
     expect(entries.length).toBeGreaterThan(0);
@@ -726,18 +726,18 @@ describe("buildOfficialChannelCatalog", () => {
     }
   });
 
-  it("allows official OpenClaw channel npm specs without integrity during launch", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-openclaw-policy-");
+  it("allows official Carapace channel npm specs without integrity during launch", () => {
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-carapace-policy-");
     writeJson(path.join(repoRoot, "extensions", "twitch", "package.json"), {
-      name: "@openclaw/twitch",
-      openclaw: {
+      name: "@carapace/twitch",
+      carapace: {
         channel: {
           id: "twitch",
           label: "Twitch",
           docsPath: "/channels/twitch",
         },
         install: {
-          npmSpec: "@openclaw/twitch",
+          npmSpec: "@carapace/twitch",
           defaultChoice: "npm",
           minHostVersion: ">=2026.4.10",
         },
@@ -747,16 +747,16 @@ describe("buildOfficialChannelCatalog", () => {
       },
     });
     const twitch = buildOfficialChannelCatalog({ repoRoot }).entries.find(
-      (entry) => entry.openclaw?.channel?.id === "twitch",
+      (entry) => entry.carapace?.channel?.id === "twitch",
     );
 
     expect({
       name: twitch?.name,
-      install: twitch?.openclaw?.install,
+      install: twitch?.carapace?.install,
     }).toEqual({
-      name: "@openclaw/twitch",
+      name: "@carapace/twitch",
       install: {
-        npmSpec: "@openclaw/twitch",
+        npmSpec: "@carapace/twitch",
         defaultChoice: "npm",
         minHostVersion: ">=2026.4.10",
       },
@@ -767,10 +767,10 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("keeps iMessage available for cold install after core package externalization", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-imessage-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-imessage-");
     writeJson(path.join(repoRoot, "extensions", "imessage", "package.json"), {
-      name: "@openclaw/imessage",
-      openclaw: {
+      name: "@carapace/imessage",
+      carapace: {
         channel: {
           id: "imessage",
           label: "iMessage",
@@ -778,8 +778,8 @@ describe("buildOfficialChannelCatalog", () => {
           docsPath: "/channels/imessage",
         },
         install: {
-          clawhubSpec: "clawhub:@openclaw/imessage",
-          npmSpec: "@openclaw/imessage",
+          clawhubSpec: "clawhub:@carapace/imessage",
+          npmSpec: "@carapace/imessage",
           defaultChoice: "npm",
           minHostVersion: ">=2026.7.2",
           allowInvalidConfigRecovery: true,
@@ -790,19 +790,19 @@ describe("buildOfficialChannelCatalog", () => {
       },
     });
     const imessage = buildOfficialChannelCatalog({ repoRoot }).entries.find(
-      (entry) => entry.openclaw?.channel?.id === "imessage",
+      (entry) => entry.carapace?.channel?.id === "imessage",
     );
 
     expect({
       name: imessage?.name,
-      aliases: imessage?.openclaw?.channel?.aliases,
-      install: imessage?.openclaw?.install,
+      aliases: imessage?.carapace?.channel?.aliases,
+      install: imessage?.carapace?.install,
     }).toEqual({
-      name: "@openclaw/imessage",
+      name: "@carapace/imessage",
       aliases: ["imsg"],
       install: {
-        clawhubSpec: "clawhub:@openclaw/imessage",
-        npmSpec: "@openclaw/imessage",
+        clawhubSpec: "clawhub:@carapace/imessage",
+        npmSpec: "@carapace/imessage",
         defaultChoice: "npm",
         minHostVersion: ">=2026.7.2",
         allowInvalidConfigRecovery: true,
@@ -811,10 +811,10 @@ describe("buildOfficialChannelCatalog", () => {
   });
 
   it("preserves ClawHub specs when generating publishable channel catalog entries", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-clawhub-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-clawhub-");
     writeJson(path.join(repoRoot, "extensions", "storepack-chat", "package.json"), {
-      name: "@openclaw/storepack-chat",
-      openclaw: {
+      name: "@carapace/storepack-chat",
+      carapace: {
         channel: {
           id: "storepack-chat",
           label: "Storepack Chat",
@@ -823,8 +823,8 @@ describe("buildOfficialChannelCatalog", () => {
           blurb: "storepack-first channel",
         },
         install: {
-          clawhubSpec: "clawhub:@openclaw/storepack-chat",
-          npmSpec: "@openclaw/storepack-chat",
+          clawhubSpec: "clawhub:@carapace/storepack-chat",
+          npmSpec: "@carapace/storepack-chat",
           defaultChoice: "clawhub",
         },
         release: {
@@ -834,21 +834,21 @@ describe("buildOfficialChannelCatalog", () => {
     });
 
     const entry = buildOfficialChannelCatalog({ repoRoot }).entries.find(
-      (candidate) => candidate.openclaw?.channel?.id === "storepack-chat",
+      (candidate) => candidate.carapace?.channel?.id === "storepack-chat",
     );
 
     expect(requireInstall(entry)).toEqual({
-      clawhubSpec: "clawhub:@openclaw/storepack-chat",
-      npmSpec: "@openclaw/storepack-chat",
+      clawhubSpec: "clawhub:@carapace/storepack-chat",
+      npmSpec: "@carapace/storepack-chat",
       defaultChoice: "clawhub",
     });
   });
 
   it("writes the official catalog under dist", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-write-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-write-");
     writeJson(path.join(repoRoot, "extensions", "whatsapp", "package.json"), {
-      name: "@openclaw/whatsapp",
-      openclaw: {
+      name: "@carapace/whatsapp",
+      carapace: {
         channel: {
           id: "whatsapp",
           label: "WhatsApp",
@@ -857,7 +857,7 @@ describe("buildOfficialChannelCatalog", () => {
           blurb: "wa",
         },
         install: {
-          npmSpec: "@openclaw/whatsapp",
+          npmSpec: "@carapace/whatsapp",
         },
         release: {
           publishToNpm: true,
@@ -871,18 +871,18 @@ describe("buildOfficialChannelCatalog", () => {
     expect(fs.existsSync(outputPath)).toBe(true);
     const entries = JSON.parse(fs.readFileSync(outputPath, "utf8")).entries;
     expect(entries.map((entry: { name?: string }) => entry.name)).toContain(
-      "@wecom/wecom-openclaw-plugin",
+      "@wecom/wecom-carapace-plugin",
     );
     expect(entries.map((entry: { name?: string }) => entry.name)).toContain(
-      "openclaw-plugin-yuanbao",
+      "carapace-plugin-yuanbao",
     );
     const whatsappEntry = findCatalogEntry(
       entries,
-      (entry: { openclaw?: { channel?: { id?: string } } }) =>
-        entry.openclaw?.channel?.id === "whatsapp",
+      (entry: { carapace?: { channel?: { id?: string } } }) =>
+        entry.carapace?.channel?.id === "whatsapp",
     );
     expect(summarizeCatalogEntry(whatsappEntry)).toEqual({
-      name: "@openclaw/whatsapp",
+      name: "@carapace/whatsapp",
       description: undefined,
       source: "official",
       plugin: undefined,
@@ -898,28 +898,28 @@ describe("buildOfficialChannelCatalog", () => {
       channelConfigs: undefined,
       providerEndpoints: undefined,
       install: {
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@carapace/whatsapp",
       },
     });
     const whatsappEntries = entries.filter(
-      (entry: { openclaw?: { channel?: { id?: string } } }) =>
-        entry.openclaw?.channel?.id === "whatsapp",
+      (entry: { carapace?: { channel?: { id?: string } } }) =>
+        entry.carapace?.channel?.id === "whatsapp",
     );
     expect(whatsappEntries).toHaveLength(1);
   });
 
   it("writes and checks the committed official catalog", () => {
-    const repoRoot = makeRepoRoot("openclaw-official-channel-catalog-source-");
+    const repoRoot = makeRepoRoot("carapace-official-channel-catalog-source-");
     writeJson(path.join(repoRoot, "extensions", "demo", "package.json"), {
-      name: "@openclaw/demo",
-      openclaw: {
+      name: "@carapace/demo",
+      carapace: {
         channel: {
           id: "demo",
           label: "Demo",
           docsPath: "/channels/demo",
         },
         install: {
-          npmSpec: "@openclaw/demo",
+          npmSpec: "@carapace/demo",
         },
         release: {
           publishToNpm: true,

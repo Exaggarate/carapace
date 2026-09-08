@@ -1,18 +1,18 @@
 import path from "node:path";
 import { resolveAgentDir } from "../../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 export function resolveWorkshopSkillsDir(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
   env: NodeJS.ProcessEnv = process.env,
 ): string {
   return path.join(resolveAgentDir(config, agentId, env), "workshop-skills");
 }
 
-export function resolveWorkshopWatchRoots(config?: OpenClawConfig, agentId?: string) {
+export function resolveWorkshopWatchRoots(config?: CarapaceConfig, agentId?: string) {
   return config && agentId
-    ? [{ path: resolveWorkshopSkillsDir(config, agentId), source: "openclaw-workshop" }]
+    ? [{ path: resolveWorkshopSkillsDir(config, agentId), source: "carapace-workshop" }]
     : [];
 }
 

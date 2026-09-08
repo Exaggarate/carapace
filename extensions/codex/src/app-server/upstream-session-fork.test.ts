@@ -4,11 +4,11 @@ import path from "node:path";
 import {
   createPluginRuntimeMock,
   resetPluginRuntimeStateForTest,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeCarapaceAgentDatabasesForTest,
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CodexAppServerBindingStore } from "./session-binding.js";
 import { createCodexTestBindingStore } from "./session-binding.test-helpers.js";
@@ -36,7 +36,7 @@ const boundary = {
   lastRetainedTurnId: "turn-1",
 } as const;
 
-vi.mock("openclaw/plugin-sdk/session-catalog", async (importOriginal) => ({
+vi.mock("carapace/plugin-sdk/session-catalog", async (importOriginal) => ({
   ...(await importOriginal()),
   deleteSessionUpstreamLink: linkMocks.delete,
   upsertSessionUpstreamLink: linkMocks.upsert,
@@ -62,7 +62,7 @@ import { forkCodexUpstreamSession } from "./upstream-session-fork.js";
 let stateDir: string;
 beforeEach(() => {
   stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "codex-fork-owner-"));
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
   boundaryMocks.listTurns.mockReset();
   linkMocks.delete.mockReset();
   linkMocks.upsert.mockReset().mockReturnValue(true);
@@ -73,8 +73,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   resetPluginRuntimeStateForTest();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();

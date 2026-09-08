@@ -82,20 +82,20 @@ describe("ConnectionPage credentials", () => {
       request: vi.fn().mockResolvedValue(deviceSystemInfo),
     } as unknown as GatewayBrowserClient);
     Object.assign(current.gateway.connection, {
-      gatewayUrl: "wss://gateway.example/openclaw",
+      gatewayUrl: "wss://gateway.example/carapace",
       token: "old-token",
       password: "old-password",
     });
     const connect = vi.spyOn(current.gateway, "connect");
     const { page } = await mount(current.gateway);
 
-    editInput(page, "Gateway URL", "wss://other-gateway.example/openclaw");
+    editInput(page, "Gateway URL", "wss://other-gateway.example/carapace");
     await settleLitElement(page);
     expect(control(page, 'input[aria-label="Gateway secret"]').value).toBe("");
     control(page, "button.btn.primary").click();
     expect(connect).toHaveBeenCalledWith(
       expect.objectContaining({
-        gatewayUrl: "wss://other-gateway.example/openclaw",
+        gatewayUrl: "wss://other-gateway.example/carapace",
         token: "",
         password: "",
       }),

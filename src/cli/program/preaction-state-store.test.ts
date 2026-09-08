@@ -31,7 +31,7 @@ let originalArgv: string[];
 
 beforeAll(async () => {
   const { registerPreActionHooks } = await import("./preaction.js");
-  program = new Command().name("openclaw");
+  program = new Command().name("carapace");
   program.command("configure").action(mocks.action);
   registerPreActionHooks(program, "test");
 });
@@ -39,7 +39,7 @@ beforeAll(async () => {
 beforeEach(() => {
   originalArgv = [...process.argv];
   vi.clearAllMocks();
-  process.argv = ["node", "openclaw", "configure"];
+  process.argv = ["node", "carapace", "configure"];
 });
 
 afterEach(() => {
@@ -52,7 +52,7 @@ describe("state-store preAction guard", () => {
 
     await expect(program.parseAsync(process.argv)).rejects.toThrow("state stores differ");
 
-    expect(mocks.check).toHaveBeenCalledWith({ command: "openclaw configure" });
+    expect(mocks.check).toHaveBeenCalledWith({ command: "carapace configure" });
     expect(mocks.ensureBootstrap).not.toHaveBeenCalled();
     expect(mocks.action).not.toHaveBeenCalled();
   });

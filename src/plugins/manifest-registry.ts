@@ -1,12 +1,12 @@
 // Maintains plugin manifest lookup tables for discovery and runtime planning.
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   normalizeOptionalTrimmedStringList,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@carapace/normalization-core/string-normalization";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import { redactSensitiveText } from "../logging/redact.js";
@@ -21,7 +21,7 @@ import { normalizePluginsConfigWithResolver } from "./config-policy.js";
 import { getGatewayPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
 import { isBundledPluginInsideDevSourceRoot } from "./dev-source-root.js";
 import {
-  discoverOpenClawPlugins,
+  discoverCarapacePlugins,
   type PluginCandidate,
   type PluginDiscoveryResult,
 } from "./discovery.js";
@@ -40,7 +40,7 @@ import {
   isCoreReservedPluginId,
   loadPluginManifest,
   PLUGIN_MANIFEST_FILENAME,
-  type OpenClawPackageManifest,
+  type CarapacePackageManifest,
   type PluginManifestCatalog,
   type PluginManifest,
   type PluginManifestChannelConfig,
@@ -245,7 +245,7 @@ function normalizePreferredPluginIds(raw: unknown): string[] | undefined {
 
 function mergePackageChannelMetaIntoChannelConfigs(params: {
   channelConfigs?: Record<string, PluginManifestChannelConfig>;
-  packageChannel?: OpenClawPackageManifest["channel"];
+  packageChannel?: CarapacePackageManifest["channel"];
 }): Record<string, PluginManifestChannelConfig> | undefined {
   const channelId = params.packageChannel?.id?.trim();
   if (
@@ -450,7 +450,7 @@ function buildRecord(params: {
     enabledByDefaultOnPlatforms: params.manifest.enabledByDefaultOnPlatforms,
     autoEnableWhenConfiguredProviders: params.manifest.autoEnableWhenConfiguredProviders,
     legacyPluginIds: params.manifest.legacyPluginIds,
-    format: params.candidate.format ?? "openclaw",
+    format: params.candidate.format ?? "carapace",
     bundleFormat: params.candidate.bundleFormat,
     kind: params.manifest.kind,
     channels: params.manifest.channels ?? [],
@@ -643,7 +643,7 @@ function pushNonBundledChannelConfigDescriptorDiagnostic(params: {
     level: "warn",
     pluginId: sanitizeForLog(params.record.id),
     source: sanitizeForLog(params.record.manifestPath),
-    message: `channel plugin manifest declares ${safeMissingChannels.join(", ")} without channelConfigs metadata; add openclaw.plugin.json#channelConfigs so config schema and setup surfaces work before runtime loads. Channels without channelConfigs still appear in channel listings, but setup UI may be limited.`,
+    message: `channel plugin manifest declares ${safeMissingChannels.join(", ")} without channelConfigs metadata; add carapace.plugin.json#channelConfigs so config schema and setup surfaces work before runtime loads. Channels without channelConfigs still appear in channel listings, but setup UI may be limited.`,
   });
 }
 
@@ -698,7 +698,7 @@ function resolveCandidateInstallOwner(params: {
 function matchesInstalledPluginRecord(params: {
   pluginId: string;
   candidate: PluginCandidate;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   installRecords: Record<string, PluginInstallRecord>;
   installPathOnly?: boolean;
@@ -813,7 +813,7 @@ function resolvePluginTrust(params: {
 function resolveDuplicatePrecedenceRank(params: {
   pluginId: string;
   candidate: PluginCandidate;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   installRecords: Record<string, PluginInstallRecord>;
 }): number {
@@ -855,7 +855,7 @@ function isIntentionalInstalledBundledDuplicate(params: {
   pluginId: string;
   left: PluginCandidate;
   right: PluginCandidate;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   installRecords: Record<string, PluginInstallRecord>;
 }): boolean {
@@ -902,7 +902,7 @@ function isSameGlobalPackageDuplicate(left: PluginCandidate, right: PluginCandid
 export function loadPluginManifestRegistryCore(
   params: {
     registryPath?: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
     candidates?: PluginCandidate[];
@@ -940,7 +940,7 @@ export function loadPluginManifestRegistryCore(
         diagnostics: params.diagnostics ?? [],
       }
     : (params.discovery ??
-      discoverOpenClawPlugins({
+      discoverCarapacePlugins({
         workspaceDir: params.workspaceDir,
         extraPaths: normalized.loadPaths,
         env,
@@ -964,7 +964,7 @@ export function loadPluginManifestRegistryCore(
       rootDir: candidate.rootDir,
       env,
     });
-    const isBundleRecord = (candidate.format ?? "openclaw") === "bundle";
+    const isBundleRecord = (candidate.format ?? "carapace") === "bundle";
     const isManifestlessConfiguredFile =
       candidate.origin === "config" &&
       explicitConfiguredFileSources.has(path.resolve(candidate.source)) &&
@@ -974,7 +974,7 @@ export function loadPluginManifestRegistryCore(
         level: "error",
         pluginId: candidate.idHint,
         source: candidate.source,
-        message: `plugin manifest id "${candidate.idHint}" is reserved by OpenClaw core`,
+        message: `plugin manifest id "${candidate.idHint}" is reserved by Carapace core`,
       });
       continue;
     }
@@ -1046,8 +1046,8 @@ export function loadPluginManifestRegistryCore(
             minHostVersionCheck.kind === "invalid"
               ? `plugin manifest invalid | ${minHostVersionCheck.error}`
               : minHostVersionCheck.kind === "unknown_host_version"
-                ? `plugin requires OpenClaw >=${minHostVersionCheck.requirement.minimumLabel}, but this host version could not be determined; skipping load`
-                : `plugin requires OpenClaw >=${minHostVersionCheck.requirement.minimumLabel}, but this host is ${minHostVersionCheck.currentVersion}; skipping load`,
+                ? `plugin requires Carapace >=${minHostVersionCheck.requirement.minimumLabel}, but this host version could not be determined; skipping load`
+                : `plugin requires Carapace >=${minHostVersionCheck.requirement.minimumLabel}, but this host is ${minHostVersionCheck.currentVersion}; skipping load`,
         });
         continue;
       }
@@ -1070,7 +1070,7 @@ export function loadPluginManifestRegistryCore(
           level: "warn",
           pluginId: effectivePluginId,
           source: packageManifestSource,
-          message: `plugin requires plugin API ${packagePluginApiRange}, but this host is ${currentHostVersion}; skipping load (check "openclaw --version", OPENCLAW_COMPATIBILITY_HOST_VERSION, or run "openclaw doctor")`,
+          message: `plugin requires plugin API ${packagePluginApiRange}, but this host is ${currentHostVersion}; skipping load (check "carapace --version", CARAPACE_COMPATIBILITY_HOST_VERSION, or run "carapace doctor")`,
         });
         continue;
       }
@@ -1219,7 +1219,7 @@ export function loadBundledPluginManifestRegistry(
   return loadPluginManifestRegistryCore({
     env,
     installRecords,
-    discovery: discoverOpenClawPlugins({
+    discovery: discoverCarapacePlugins({
       env,
       installRecords,
       rootScope: "bundled",

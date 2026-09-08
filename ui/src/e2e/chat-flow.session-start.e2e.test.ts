@@ -17,7 +17,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
-      const newSessionButton = page.locator("openclaw-app-sidebar .sidebar-brand__new-thread");
+      const newSessionButton = page.locator("carapace-app-sidebar .sidebar-brand__new-thread");
       await newSessionButton.waitFor({ state: "visible", timeout: 10_000 });
       await newSessionButton.click();
 
@@ -184,7 +184,7 @@ suite.define(() => {
       expect(await gateway.getRequests("agents.list")).toHaveLength(1);
 
       await gateway.resolveDeferred("agents.list", {
-        agents: [{ id: "main", model: { primary: "openai/hydrated-model" }, name: "OpenClaw" }],
+        agents: [{ id: "main", model: { primary: "openai/hydrated-model" }, name: "Carapace" }],
         defaultId: "main",
         mainKey: "main",
         scope: "agent",
@@ -202,7 +202,7 @@ suite.define(() => {
       });
       await expect
         .poll(() =>
-          page.locator("openclaw-chat-pane").evaluate((pane) => {
+          page.locator("carapace-chat-pane").evaluate((pane) => {
             const state = (
               pane as HTMLElement & { state?: { chatModelCatalog?: Array<{ id?: string }> } }
             ).state;

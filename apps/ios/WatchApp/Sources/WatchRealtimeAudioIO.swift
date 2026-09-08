@@ -20,7 +20,7 @@ final class WatchRealtimeAudioIO: @unchecked Sendable {
 
     private static let lease = Mutex<UUID?>(nil)
     private let id = UUID()
-    private let queue = DispatchQueue(label: "ai.openclaw.watch.realtime.audio", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "ai.carapace.watch.realtime.audio", qos: .userInitiated)
     private let gate = Mutex(AudioGate())
     private var onPacket: (@Sendable (Data, UInt64) -> Void)?
     private let onLevel: @Sendable (Float) -> Void

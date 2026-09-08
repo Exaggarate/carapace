@@ -3,15 +3,15 @@ import path from "node:path";
 import { afterEach, beforeEach, vi } from "vitest";
 import { resolveIdentityPathViaExistingAncestorSync } from "../infra/boundary-path.js";
 import * as nodeSqlite from "../infra/node-sqlite.js";
-import * as statePaths from "../state/openclaw-state-db.paths.js";
+import * as statePaths from "../state/carapace-state-db.paths.js";
 
 /** Fail before host metadata discovery can read state outside the worker's owned home. */
 export function useIsolatedStateGuard(): void {
-  const resolveStatePath = statePaths.resolveOpenClawStateSqlitePath;
+  const resolveStatePath = statePaths.resolveCarapaceStateSqlitePath;
   const openDatabase = nodeSqlite.openNodeSqliteDatabase;
   let restore = () => {};
   beforeEach(() => {
-    const testHome = process.env.OPENCLAW_TEST_HOME;
+    const testHome = process.env.CARAPACE_TEST_HOME;
     if (!testHome) {
       throw new Error("State isolation checks require the shared isolated test home.");
     }
@@ -24,12 +24,12 @@ export function useIsolatedStateGuard(): void {
         resolveIdentityPathViaExistingAncestorSync(pathname),
       );
       if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
-        throw new Error(`OpenClaw state escaped the isolated test home: ${pathname}`);
+        throw new Error(`Carapace state escaped the isolated test home: ${pathname}`);
       }
     };
     // Check resolution too: a missing foreign DB would otherwise make the leak silently pass.
     const pathSpy = vi
-      .spyOn(statePaths, "resolveOpenClawStateSqlitePath")
+      .spyOn(statePaths, "resolveCarapaceStateSqlitePath")
       .mockImplementation((env) => {
         const pathname = resolveStatePath(env);
         assertOwnedPath(pathname);

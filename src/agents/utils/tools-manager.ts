@@ -54,7 +54,7 @@ const TOOL_INSTALL_LOCK_OPTIONS: FileLockOptions = {
 };
 
 function isOfflineModeEnabled(): boolean {
-  return isTruthyEnvValue(process.env.OPENCLAW_OFFLINE);
+  return isTruthyEnvValue(process.env.CARAPACE_OFFLINE);
 }
 
 interface ToolConfig {
@@ -456,7 +456,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.toolsManagerTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.toolsManagerTestApi")] = {
     testing,
   };
 }

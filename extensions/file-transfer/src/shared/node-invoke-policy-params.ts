@@ -1,4 +1,4 @@
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
+import { readPositiveIntegerParam } from "carapace/plugin-sdk/param-readers";
 import { DIR_FETCH_DEFAULT_MAX_BYTES, DIR_FETCH_HARD_MAX_BYTES } from "./dir-fetch-limits.js";
 import type { FileTransferNodeInvokeCommand } from "./node-invoke-policy-commands.js";
 

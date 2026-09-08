@@ -15,7 +15,7 @@ import { getRuntimeConfig } from "../../config/config.js";
 import { resolveInternalSessionEffectsIdentity } from "../../config/sessions/internal-session-key.js";
 import { loadSessionEntryReadOnly } from "../../config/sessions/session-accessor.js";
 import { validateSessionTranscriptContextAnchor } from "../../config/sessions/session-accessor.sqlite-model-context.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { clearAgentRunContext, registerAgentRunContext } from "../../infra/agent-run-registry.js";
 import {
   getGatewayRestartDrainSignal,
@@ -34,7 +34,7 @@ import type { SkillWorkshopProposalMutationBudget } from "./types.js";
 
 export async function prepareSkillExperienceReviewCandidate(
   candidate: ExperienceReviewCandidate,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): Promise<ExperienceReviewCandidate | undefined> {
   if (resolveSkillWorkshopConfig(config).autonomous.mode === "off") {
     return undefined;

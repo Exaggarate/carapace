@@ -1,28 +1,28 @@
 ---
-summary: "Recover from failed OpenClaw updates in the Control UI or CLI"
+summary: "Recover from failed Carapace updates in the Control UI or CLI"
 read_when:
-  - An OpenClaw update failed
+  - An Carapace update failed
   - The Gateway did not report a final update result
 title: "Update troubleshooting"
 ---
 
 Failed updates enter built-in triage after update recovery settles. In an
-interactive terminal, OpenClaw collects sanitized diagnostics and opens the
+interactive terminal, Carapace collects sanitized diagnostics and opens the
 [triage agent picker](/cli/triage). With `--yes`, `--json`, or no interactive
 terminal, it prepares diagnostics and handoff commands without launching an
 agent. The original update failure and exit status remain authoritative;
 diagnostics do not turn a failed update into a successful one.
 
-In the Control UI, a failed attempt opens **Ask OpenClaw** with its recorded
+In the Control UI, a failed attempt opens **Ask Carapace** with its recorded
 details and asks it to investigate before retrying. A lost connection or
 verification timeout is presented as an unknown outcome. The tab remembers the
 latest 32 investigated attempt identities, scoped to their Gateway and profile.
 Status checks, switching between those scopes, and reloading the same tab do not
 automatically send those investigations again. If the browser cannot read or
 save that history, the failure details remain visible without an automatic
-diagnostic request. Ask OpenClaw manually or run `openclaw triage` on the host.
+diagnostic request. Ask Carapace manually or run `carapace triage` on the host.
 If the Gateway or agent is
-unavailable, use `openclaw triage` on the Gateway host. Automatic diagnosis keeps
+unavailable, use `carapace triage` on the Gateway host. Automatic diagnosis keeps
 your unsent composer draft, including when its conversation session must restart.
 
 **Control UI → Settings → Updates** keeps the latest recorded attempt visible,
@@ -35,13 +35,13 @@ can also replace it. Intentional cancellations, already-current installs, and
 updates still in progress do not start triage.
 
 For a final failed attempt, **Report update failure** is separate from **Retry**
-and **Ask OpenClaw**. It previews a bounded report containing the OpenClaw
+and **Ask Carapace**. It previews a bounded report containing the Carapace
 version, platform, update target, failed phase, sanitized diagnostics, and
 verified rollback outcome. The report excludes secrets, tokens, chat content,
 raw logs, private absolute paths, and recovery commands. Nothing is submitted
-until an administrator confirms that preview. OpenClaw then uses the existing
+until an administrator confirms that preview. Carapace then uses the existing
 GitHub CLI issue flow. Fallback and pending outcomes retain the sanitized report
-locally; a confirmed issue keeps only its durable issue URL. OpenClaw first makes
+locally; a confirmed issue keeps only its durable issue URL. Carapace first makes
 a silent, read-only request with the active `github.com` account. A missing CLI
 or a failed, unavailable, or timed-out authentication check returns a prefilled
 issue link without starting issue creation. In the Control UI, an interrupted
@@ -84,7 +84,7 @@ the CLI fallback on the Gateway host.
   target for the selected core, or its registry metadata could not be read. The
   refusal identifies the plugin, package target, and registry error before the
   serving Gateway stops or the core package changes. Retry after publication or
-  registry recovery, use `openclaw update --tag <older-version>`, or disable the
+  registry recovery, use `carapace update --tag <older-version>`, or disable the
   affected plugin and retry. If the core version is unknown, select an exact
   registry version. Extended-stable rejects `--tag`; retry later or explicitly
   switch channels. `--dry-run` performs the same availability check.
@@ -116,17 +116,17 @@ Run these commands on the Gateway host, not on the computer that merely has the
 Control UI open:
 
 ```bash
-openclaw update status --json
-openclaw triage
+carapace update status --json
+carapace triage
 ```
 
-Use `openclaw update --dry-run` to preview a new attempt. If a package update
+Use `carapace update --dry-run` to preview a new attempt. If a package update
 failed after installation began, follow the installer recovery steps in
 [Updating](/install/updating#alternative-re-run-the-installer).
 
 If the installed CLI is damaged or the filesystem cannot write diagnostics,
 automatic triage reports that failure and preserves the original update error.
-Repair the installed command, then run `openclaw triage`. Managed updates retain
+Repair the installed command, then run `carapace triage`. Managed updates retain
 their detached helper log even when the Gateway cannot start; the recorded
 outcome points to the available diagnostics or the failed collection attempt.
 Restart notices summarize the diagnostic outcome. Saved artifact paths and exact,
@@ -135,8 +135,8 @@ managed update helper log rather than the notice sent to an agent or channel.
 
 If the updater crashes or is killed after the Gateway stops, the Gateway stays
 stopped unless the updater completed and verified recovery. Inspect
-`openclaw gateway status --deep`, repair the reported dependency or installation
-failure, and rerun `openclaw update`. A failed Git dependency install restores
+`carapace gateway status --deep`, repair the reported dependency or installation
+failure, and rerun `carapace update`. A failed Git dependency install restores
 and rebuilds the previous runtime before allowing an automatic restart. Restarts
 after verified recovery still check the installed configuration, service ownership,
 and Gateway health.
@@ -153,9 +153,9 @@ See [Rollback](/install/updating#rollback).
 Collect the following without posting credentials, raw config, or unredacted
 process output:
 
-- OpenClaw version and install type;
+- Carapace version and install type;
 - update timestamp, target, phase, and reason code from Settings → Updates;
 - the bounded failure detail shown by **View details**;
-- `openclaw update status --json`;
-- `openclaw gateway status --deep --json`;
+- `carapace update status --json`;
+- `carapace gateway status --deep --json`;
 - relevant redacted Gateway log lines.

@@ -5,9 +5,9 @@ import {
   describePluginRegistrationContract,
   pluginRegistrationContractCases,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
-import { typedCases } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/plugin-test-contracts";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
+import { typedCases } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 
 const echoCases = typedCases([
@@ -20,15 +20,15 @@ describePluginRegistrationContract(pluginRegistrationContractCases.brave);
 describe("plugin testing harness contracts", () => {
   it("executes declared tools and reports missing tool contracts", async () => {
     const previousHome = process.env.HOME;
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
 
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".carapace");
       await expect(
         fs.stat(path.join(stateDir, "agents", "main", "sessions")),
       ).resolves.toBeDefined();
       expect(process.env.HOME).toBe(home);
-      expect(process.env.OPENCLAW_STATE_DIR).toBe(stateDir);
+      expect(process.env.CARAPACE_STATE_DIR).toBe(stateDir);
 
       const { config, registry } = createPluginRegistryFixture({
         plugins: {
@@ -112,6 +112,6 @@ describe("plugin testing harness contracts", () => {
     });
 
     expect(process.env.HOME).toBe(previousHome);
-    expect(process.env.OPENCLAW_STATE_DIR).toBe(previousStateDir);
+    expect(process.env.CARAPACE_STATE_DIR).toBe(previousStateDir);
   });
 });

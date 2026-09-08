@@ -28,14 +28,14 @@ import { resetAgentRunRegistryForTest } from "../../infra/agent-run-registry.js"
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { appendSqliteTrajectoryRuntimeEvents } from "../../trajectory/runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "../../trajectory/types.js";
 import { measureSessionPhysicalDiskUsage } from "./disk-budget.js";
@@ -57,13 +57,13 @@ import {
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
 
 describe("SQLite historical session disk budget", () => {
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
   let tempDir: string;
   let storePath: string;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
-      prefix: "openclaw-session-history-budget-",
+    testState = await createCarapaceTestState({
+      prefix: "carapace-session-history-budget-",
       layout: "state-only",
     });
     tempDir = testState.sessionsDir();
@@ -79,7 +79,7 @@ describe("SQLite historical session disk budget", () => {
       mode: "warn",
       maintenance: { maxDiskBytes: null, highWaterBytes: null },
     });
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     await testState.cleanup();
   });
 
@@ -466,7 +466,7 @@ describe("SQLite historical session disk budget", () => {
     const rm = fs.promises.rm.bind(fs.promises);
     const removeArchive = vi.spyOn(fs.promises, "rm").mockImplementation(async (...args) => {
       if (args[0] === archivePath) {
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
       }
       return await rm(...args);
     });
@@ -654,7 +654,7 @@ describe("SQLite historical session disk budget", () => {
       expect(sessionExists("recent-live")).toBe(true);
       expect(sessionExists("stale-old")).toBe(false);
       expect(sessionExists("stale-live")).toBe(true);
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       const repeated = {
         storePath,
         mode: "enforce" as const,
@@ -861,7 +861,7 @@ describe("SQLite historical session disk budget", () => {
       .spyOn(diskBudget, "hasRetainedSessionTranscriptArchives")
       .mockImplementation(async (pathname) => {
         const retained = await probe(pathname);
-        expect(closeOpenClawAgentDatabaseByPath(databasePath)).toBe(true);
+        expect(closeCarapaceAgentDatabaseByPath(databasePath)).toBe(true);
         return retained;
       });
 
@@ -932,7 +932,7 @@ describe("SQLite historical session disk budget", () => {
     if (!target.path) {
       throw new Error("expected SQLite database path");
     }
-    return openOpenClawAgentDatabase({ agentId: target.agentId ?? "main", path: target.path });
+    return openCarapaceAgentDatabase({ agentId: target.agentId ?? "main", path: target.path });
   }
 
   function settlePhysicalUsage(): void {
@@ -992,7 +992,7 @@ describe("SQLite historical session disk budget", () => {
 
 function createTrajectoryEvent(sessionId: string, sessionKey: string): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "carapace-trajectory",
     schemaVersion: 1,
     traceId: sessionId,
     source: "runtime",

@@ -6,14 +6,14 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { makeDiscordRest } from "./send.test-harness.js";
 
 const loadWebMediaRawMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/web-media", () => ({
+vi.mock("carapace/plugin-sdk/web-media", () => ({
   loadWebMediaRaw: loadWebMediaRawMock,
 }));
 
 const tempPathMocks = vi.hoisted(() => ({ rootDir: "" }));
-vi.mock("openclaw/plugin-sdk/temp-path", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/temp-path")>()),
-  resolvePreferredOpenClawTmpDir: () => tempPathMocks.rootDir,
+vi.mock("carapace/plugin-sdk/temp-path", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/temp-path")>()),
+  resolvePreferredCarapaceTmpDir: () => tempPathMocks.rootDir,
 }));
 
 const voiceMocks = vi.hoisted(() => ({
@@ -32,7 +32,7 @@ let sendVoiceMessageDiscord: typeof import("./send.voice.js").sendVoiceMessageDi
 describe("sendVoiceMessageDiscord", () => {
   beforeAll(async () => {
     tempPathMocks.rootDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-discord-voice-send-"),
+      path.join(os.tmpdir(), "carapace-discord-voice-send-"),
     );
     ({ sendVoiceMessageDiscord } = await import("./send.voice.js"));
   });
@@ -125,7 +125,7 @@ describe("sendVoiceMessageDiscord", () => {
 
   it("reads relative voice files from the trusted reader-free workspace without widening its roots", async () => {
     const fixtureRoot = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-discord-voice-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-discord-voice-")),
     );
     const workspaceDir = path.join(fixtureRoot, "workspace");
     await fs.mkdir(workspaceDir);
@@ -133,8 +133,8 @@ describe("sendVoiceMessageDiscord", () => {
     await fs.writeFile(path.join(fixtureRoot, "outside.ogg"), Buffer.from("OggS outside voice"));
     const mediaAccess = { localRoots: [workspaceDir], workspaceDir };
     const { loadWebMediaRaw } = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/web-media")
-    >("openclaw/plugin-sdk/web-media");
+      typeof import("carapace/plugin-sdk/web-media")
+    >("carapace/plugin-sdk/web-media");
     loadWebMediaRawMock.mockImplementation(loadWebMediaRaw);
     const { rest } = makeDiscordRest();
 

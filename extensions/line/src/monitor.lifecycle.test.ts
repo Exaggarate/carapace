@@ -3,11 +3,11 @@ import crypto from "node:crypto";
 import { createServer, IncomingMessage, type ServerResponse } from "node:http";
 import { Socket } from "node:net";
 import type { webhook } from "@line/bot-sdk";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { createMockIncomingRequest } from "openclaw/plugin-sdk/test-env";
-import { WEBHOOK_IN_FLIGHT_DEFAULTS } from "openclaw/plugin-sdk/webhook-request-guards";
+import type { ChannelInboundTurnPlan } from "carapace/plugin-sdk/channel-inbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
+import { createMockIncomingRequest } from "carapace/plugin-sdk/test-env";
+import { WEBHOOK_IN_FLIGHT_DEFAULTS } from "carapace/plugin-sdk/webhook-request-guards";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createLineWebhookSpool } from "./webhook-spool.js";
 import { createEvent, withQueue } from "./webhook-spool.test-support.js";
@@ -82,14 +82,14 @@ vi.mock("./bot.js", () => ({
   createLineBot: createLineBotMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", () => ({
+vi.mock("carapace/plugin-sdk/reply-runtime", () => ({
   chunkMarkdownText: vi.fn(),
   dispatchReplyWithBufferedBlockDispatcher: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -98,9 +98,9 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/webhook-ingress", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/webhook-ingress")>(
-    "openclaw/plugin-sdk/webhook-ingress",
+vi.mock("carapace/plugin-sdk/webhook-ingress", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/webhook-ingress")>(
+    "carapace/plugin-sdk/webhook-ingress",
   );
   return {
     ...actual,
@@ -109,9 +109,9 @@ vi.mock("openclaw/plugin-sdk/webhook-ingress", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/webhook-request-guards", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/webhook-request-guards")>(
-    "openclaw/plugin-sdk/webhook-request-guards",
+vi.mock("carapace/plugin-sdk/webhook-request-guards", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/webhook-request-guards")>(
+    "carapace/plugin-sdk/webhook-request-guards",
   );
   runDetachedWebhookWorkMock.mockImplementation(actual.runDetachedWebhookWork);
   return {
@@ -157,10 +157,10 @@ describe("monitorLineProvider lifecycle", () => {
 
   afterAll(() => {
     vi.doUnmock("./bot.js");
-    vi.doUnmock("openclaw/plugin-sdk/reply-runtime");
-    vi.doUnmock("openclaw/plugin-sdk/runtime-env");
-    vi.doUnmock("openclaw/plugin-sdk/webhook-ingress");
-    vi.doUnmock("openclaw/plugin-sdk/webhook-request-guards");
+    vi.doUnmock("carapace/plugin-sdk/reply-runtime");
+    vi.doUnmock("carapace/plugin-sdk/runtime-env");
+    vi.doUnmock("carapace/plugin-sdk/webhook-ingress");
+    vi.doUnmock("carapace/plugin-sdk/webhook-request-guards");
     vi.doUnmock("./webhook-node.js");
     vi.doUnmock("./auto-reply-delivery.js");
     vi.doUnmock("./markdown-to-line.js");
@@ -233,7 +233,7 @@ describe("monitorLineProvider lifecycle", () => {
     const task = monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       abortSignal: abort.signal,
       statusSink,
@@ -264,7 +264,7 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
       accountId: "work",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -288,7 +288,7 @@ describe("monitorLineProvider lifecycle", () => {
     await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
       abortSignal: abort.signal,
     });
@@ -300,7 +300,7 @@ describe("monitorLineProvider lifecycle", () => {
     const monitor = await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -326,7 +326,7 @@ describe("monitorLineProvider lifecycle", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -346,7 +346,7 @@ describe("monitorLineProvider lifecycle", () => {
       monitorLineProvider({
         channelAccessToken: "token",
         channelSecret: "secret", // pragma: allowlist secret
-        config: {} as OpenClawConfig,
+        config: {} as CarapaceConfig,
         runtime: {} as RuntimeEnv,
       }),
     ).rejects.toThrow("line bot startup failed");
@@ -364,7 +364,7 @@ describe("monitorLineProvider lifecycle", () => {
       monitorLineProvider({
         channelAccessToken: "token",
         channelSecret: "secret", // pragma: allowlist secret
-        config: {} as OpenClawConfig,
+        config: {} as CarapaceConfig,
         runtime: {} as RuntimeEnv,
         statusSink,
       }),
@@ -393,7 +393,7 @@ describe("monitorLineProvider lifecycle", () => {
     const monitor = await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const onMessage = createLineBotMock.mock.calls[0]?.[0]?.onMessage;
@@ -457,7 +457,7 @@ describe("monitorLineProvider lifecycle", () => {
     const monitor = await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const onMessage = createLineBotMock.mock.calls[0]?.[0]?.onMessage;
@@ -515,7 +515,7 @@ describe("monitorLineProvider lifecycle", () => {
     const monitor = await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const onMessage = createLineBotMock.mock.calls[0]?.[0]?.onMessage;
@@ -549,14 +549,14 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "first-token",
       channelSecret: "first-secret", // pragma: allowlist secret
       accountId: "first",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const secondMonitor = await monitorLineProvider({
       channelAccessToken: "second-token",
       channelSecret: "second-secret", // pragma: allowlist secret
       accountId: "second",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -597,7 +597,7 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
       accountId: "default",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime,
     });
     const route = requireRegisteredRoute();
@@ -629,7 +629,7 @@ describe("monitorLineProvider lifecycle", () => {
         body: payload,
       });
       expect(rejected.status).toBe(401);
-      expect(rejected.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+      expect(rejected.headers.get("x-carapace-delivery-accepted")).toBeNull();
       expect(await rejected.json()).toEqual({ error: "Invalid signature" });
 
       const bot = createLineBotMock.mock.results[0]?.value;
@@ -652,7 +652,7 @@ describe("monitorLineProvider lifecycle", () => {
         body: verificationPayload,
       });
       expect(verification.status).toBe(200);
-      expect(verification.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+      expect(verification.headers.get("x-carapace-delivery-accepted")).toBeNull();
       expect(await verification.json()).toEqual({ status: "ok" });
       expect(bot.handleWebhook).not.toHaveBeenCalled();
 
@@ -686,7 +686,7 @@ describe("monitorLineProvider lifecycle", () => {
       releaseAdmission();
       const accepted = await acceptedRequest;
       expect(accepted.status).toBe(200);
-      expect(accepted.headers.get("x-openclaw-delivery-accepted")).toBe("durable");
+      expect(accepted.headers.get("x-carapace-delivery-accepted")).toBe("durable");
       expect(await accepted.json()).toEqual({ status: "ok" });
 
       const bearerToken = "test_line_access_token_1234567890";
@@ -705,7 +705,7 @@ describe("monitorLineProvider lifecycle", () => {
       });
 
       expect(response.status).toBe(500);
-      expect(response.headers.get("x-openclaw-delivery-accepted")).toBeNull();
+      expect(response.headers.get("x-carapace-delivery-accepted")).toBeNull();
       expect(await response.json()).toEqual({ error: "Internal server error" });
       expect(bot.handleWebhook).toHaveBeenCalledTimes(2);
       expect(runtimeError).toHaveBeenCalledTimes(1);
@@ -769,7 +769,7 @@ describe("monitorLineProvider lifecycle", () => {
             });
             expect(admittedResponse.status).toBe(200);
             expect((await queue.listPending()).map((entry) => entry.id)).toEqual(expectedIds);
-            expect(admittedResponse.headers.get("x-openclaw-delivery-accepted")).toBe(marker);
+            expect(admittedResponse.headers.get("x-carapace-delivery-accepted")).toBe(marker);
             expect(await admittedResponse.json()).toEqual({ status: "ok" });
           }
           spool.start();
@@ -803,7 +803,7 @@ describe("monitorLineProvider lifecycle", () => {
       channelSecret: "secret", // pragma: allowlist secret
       webhookPath: "/Line//Webhook/",
       accountId: "default",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -835,7 +835,7 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
       accountId: "default",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -865,7 +865,7 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
       accountId: "default",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -910,14 +910,14 @@ describe("monitorLineProvider lifecycle", () => {
       channelAccessToken: "first-token",
       channelSecret: "shared-secret", // pragma: allowlist secret
       accountId: "first",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
     const secondMonitor = await monitorLineProvider({
       channelAccessToken: "second-token",
       channelSecret: "shared-secret", // pragma: allowlist secret
       accountId: "second",
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 
@@ -955,7 +955,7 @@ describe("monitorLineProvider lifecycle", () => {
     const monitor = await monitorLineProvider({
       channelAccessToken: "token",
       channelSecret: "secret", // pragma: allowlist secret
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       runtime: {} as RuntimeEnv,
     });
 

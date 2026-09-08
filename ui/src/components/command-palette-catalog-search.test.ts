@@ -73,7 +73,7 @@ describe("command palette catalog search", () => {
                 id: "weather-helper",
                 name: "Weather helper",
                 description: "Adds forecast tools",
-                packageName: "@openclaw/weather-helper",
+                packageName: "@carapace/weather-helper",
               },
             ],
           };

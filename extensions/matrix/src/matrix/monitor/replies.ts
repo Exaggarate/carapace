@@ -3,17 +3,17 @@ import {
   createAcceptedChannelDeliveryResult,
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { stripReasoningTagsFromText } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/channel-inbound";
+import type { MessageReceipt } from "carapace/plugin-sdk/channel-outbound";
+import { resolveSendableOutboundReplyParts } from "carapace/plugin-sdk/reply-payload";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
+import { stripReasoningTagsFromText } from "carapace/plugin-sdk/text-chunking";
 import { resolveMatrixExtraContent } from "../../outbound.js";
 import { getMatrixRuntime } from "../../runtime.js";
 import type { MatrixClient } from "../sdk.js";
 import { sendMessageMatrix } from "../send.js";
 import type { MatrixSendResult } from "../send/types.js";
-import type { OpenClawConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
+import type { CarapaceConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
 
 export type MatrixReplyDeliveryResult = {
   messageIds?: string[];
@@ -91,7 +91,7 @@ function resolveVisibleMatrixReplyText(text?: string): string | undefined {
 }
 
 export async function deliverMatrixReplies(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   replies: ReplyPayload[];
   roomId: string;
   client: MatrixClient;

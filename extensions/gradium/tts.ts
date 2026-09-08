@@ -24,8 +24,8 @@ export async function gradiumTTS(params: {
   const normalizedBaseUrl = normalizeGradiumBaseUrl(baseUrl);
   const url = `${normalizedBaseUrl}/api/post/speech/tts`;
   const { assertOkOrThrowProviderError, readProviderBinaryResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
-  const { fetchWithSsrFGuard } = await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/provider-http");
+  const { fetchWithSsrFGuard } = await import("carapace/plugin-sdk/ssrf-runtime");
 
   const { response, release } = await fetchWithSsrFGuard({
     url,

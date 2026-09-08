@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveNpmJsonEntries } from "./npm-json-output.mts";
 
 // Both bundled fs-safe loader layouts need all native targets (~31 MiB),

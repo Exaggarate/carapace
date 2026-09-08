@@ -1,21 +1,21 @@
 // Matrix plugin module implements exec approvals behavior.
-import { resolveApprovalApprovers } from "openclaw/plugin-sdk/approval-auth-runtime";
+import { resolveApprovalApprovers } from "carapace/plugin-sdk/approval-auth-runtime";
 import {
   createChannelExecApprovalProfile,
   getExecApprovalReplyMetadata,
   isChannelExecApprovalClientEnabledFromConfig,
   isChannelExecApprovalTargetRecipient,
   matchesApprovalRequestFilters,
-} from "openclaw/plugin-sdk/approval-client-runtime";
-import type { ChannelApprovalKind } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { doesApprovalRequestSelectChannelAccount } from "openclaw/plugin-sdk/approval-native-runtime";
+} from "carapace/plugin-sdk/approval-client-runtime";
+import type { ChannelApprovalKind } from "carapace/plugin-sdk/approval-handler-runtime";
+import { doesApprovalRequestSelectChannelAccount } from "carapace/plugin-sdk/approval-native-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
   SystemAgentApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/approval-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-runtime";
 import { getMatrixApprovalAuthApprovers } from "./approval-auth.js";
 import { normalizeMatrixApproverId } from "./approval-ids.js";
 import { resolveDefaultMatrixAccountId, resolveMatrixAccount } from "./matrix/accounts.js";
@@ -28,7 +28,7 @@ function normalizeMatrixExecApproverId(value: string | number): string | undefin
 }
 
 function resolveMatrixExecApprovalConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }) {
   const account = resolveMatrixAccount(params);
@@ -43,7 +43,7 @@ function resolveMatrixExecApprovalConfig(params: {
 }
 
 function isMatrixExecApprovalAccountEligible(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   request: ApprovalRequest;
   approvalKind: ChannelApprovalKind;
@@ -70,7 +70,7 @@ function isMatrixExecApprovalAccountEligible(params: {
 }
 
 function matchesMatrixRequestAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   request: ApprovalRequest;
   approvalKind: ChannelApprovalKind;
@@ -87,7 +87,7 @@ function matchesMatrixRequestAccount(params: {
 }
 
 export function getMatrixExecApprovalApprovers(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): string[] {
   const account = resolveMatrixAccount(params).config;
@@ -99,7 +99,7 @@ export function getMatrixExecApprovalApprovers(params: {
 }
 
 export function getMatrixApprovalApprovers(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   approvalKind: ChannelApprovalKind;
 }): string[] {
@@ -113,7 +113,7 @@ export function getMatrixApprovalApprovers(params: {
 }
 
 function isMatrixExecApprovalTargetRecipient(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   senderId?: string | null;
   accountId?: string | null;
 }): boolean {
@@ -143,7 +143,7 @@ export const isMatrixExecApprovalAuthorizedSender = matrixExecApprovalProfile.is
 export const resolveMatrixExecApprovalTarget = matrixExecApprovalProfile.resolveTarget;
 
 export function isMatrixApprovalClientEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   approvalKind: ChannelApprovalKind;
 }): boolean {
@@ -158,7 +158,7 @@ export function isMatrixApprovalClientEnabled(params: {
 }
 
 export function isMatrixAnyApprovalClientEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
 }): boolean {
   return (
@@ -178,7 +178,7 @@ export function isMatrixAnyApprovalClientEnabled(params: {
 }
 
 export function shouldHandleMatrixApprovalRequest(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   approvalKind: ChannelApprovalKind;
   request: ApprovalRequest;
@@ -248,7 +248,7 @@ function buildFilterCheckRequest(params: {
 }
 
 export function shouldSuppressLocalMatrixExecApprovalPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId?: string | null;
   payload: ReplyPayload;
 }): boolean {

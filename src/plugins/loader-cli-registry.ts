@@ -34,9 +34,9 @@ import { createPluginIdScopeSet } from "./plugin-scope.js";
 import { pluginLoaderCacheState } from "./registry-lifecycle.js";
 import { createPluginRegistry, type PluginRecord, type PluginRegistry } from "./registry.js";
 import { hasKind, kindsEqual } from "./slots.js";
-import type { OpenClawPluginModule } from "./types.js";
+import type { CarapacePluginModule } from "./types.js";
 
-export async function loadOpenClawPluginCliRegistry(
+export async function loadCarapacePluginCliRegistry(
   options: PluginLoadOptions = {},
 ): Promise<PluginRegistry> {
   const context = resolvePluginLoadCacheContext({ ...options, activate: false });
@@ -187,12 +187,12 @@ export async function loadOpenClawPluginCliRegistry(
       packageName: candidate.packageName,
       packageBuild: candidate.packageManifest?.build,
     });
-    let mod: OpenClawPluginModule | null;
+    let mod: CarapacePluginModule | null;
     try {
       mod = withProfile(
         { pluginId: record.id, source: safeSource },
         "cli-metadata",
-        () => loadPluginModule(safeSource) as OpenClawPluginModule,
+        () => loadPluginModule(safeSource) as CarapacePluginModule,
       );
     } catch (error) {
       recordPluginError({

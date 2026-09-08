@@ -3,10 +3,10 @@ import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import net from "node:net";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { closeQaRuntimeStores } from "openclaw/plugin-sdk/qa-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { closeQaRuntimeStores } from "carapace/plugin-sdk/qa-runtime";
+import { uniqueStrings } from "carapace/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import {
   createQaBundledPluginsDir,
   resolveQaOwnerPluginIdsForProviderIds,
@@ -85,7 +85,7 @@ export type QaGatewayChildParams = {
   forwardHostHome?: boolean;
   mockAuthAgentIds?: readonly string[];
   onListening?: (context: QaGatewayChildListeningContext) => Promise<void> | void;
-  mutateConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  mutateConfig?: (cfg: CarapaceConfig) => CarapaceConfig;
   runtimeEnvPatch?: NodeJS.ProcessEnv;
 };
 
@@ -151,7 +151,7 @@ async function stageQaPackagedMockAuthProfiles(params: {
             buildQaMockProfileId(provider),
           ],
           cwd: params.command.cwd ?? params.cwd,
-          env: { ...params.env, OPENCLAW_CONFIG_PATH: params.configPath },
+          env: { ...params.env, CARAPACE_CONFIG_PATH: params.configPath },
           stdin: `${createQaPackagedMockApiKey()}\n`,
         }),
     );
@@ -162,8 +162,8 @@ export async function prepareQaGatewayChild(
   params: QaGatewayChildParams,
   lifetime: QaGatewayChildLifecycle,
 ) {
-  const tempParentDir = params.command?.tempParentDir ?? resolvePreferredOpenClawTmpDir();
-  const tempRoot = await fs.mkdtemp(path.join(tempParentDir, "openclaw-qa-suite-"));
+  const tempParentDir = params.command?.tempParentDir ?? resolvePreferredCarapaceTmpDir();
+  const tempRoot = await fs.mkdtemp(path.join(tempParentDir, "carapace-qa-suite-"));
   lifetime.tempRoot = tempRoot;
   const runtimeCwd = tempRoot;
   const distEntryPath = path.join(params.repoRoot, "dist", "index.js");
@@ -181,8 +181,8 @@ export async function prepareQaGatewayChild(
   const xdgConfigHome = path.join(tempRoot, "xdg-config");
   const xdgDataHome = path.join(tempRoot, "xdg-data");
   const xdgCacheHome = path.join(tempRoot, "xdg-cache");
-  const configPath = path.join(tempRoot, "openclaw.json");
-  const packagedAuthConfigPath = path.join(stateDir, "qa-auth-bootstrap", "openclaw.json");
+  const configPath = path.join(tempRoot, "carapace.json");
+  const packagedAuthConfigPath = path.join(stateDir, "qa-auth-bootstrap", "carapace.json");
   const gatewayToken = `qa-suite-${randomUUID()}`;
   const transport = params.transport ?? createQaGatewayEmptyTransport();
   await seedQaAgentWorkspace({
@@ -291,7 +291,7 @@ export async function prepareQaGatewayChild(
   let gatewayPort = 0;
   let baseUrl = "";
   let wsUrl = "";
-  let cfg!: OpenClawConfig;
+  let cfg!: CarapaceConfig;
   let env: NodeJS.ProcessEnv | null = null;
   let packagedMockAuthStaged = false;
 
@@ -389,8 +389,8 @@ export async function prepareQaGatewayChild(
                 providerBaseUrl: params.providerBaseUrl,
                 codexModelCatalogPath,
                 nativeAppServerArgs:
-                  params.runtimeEnvPatch?.OPENCLAW_CODEX_APP_SERVER_ARGS ??
-                  process.env.OPENCLAW_CODEX_APP_SERVER_ARGS,
+                  params.runtimeEnvPatch?.CARAPACE_CODEX_APP_SERVER_ARGS ??
+                  process.env.CARAPACE_CODEX_APP_SERVER_ARGS,
               }),
             },
             forwardHostHomeForClaudeCli: liveProviderIds.includes("claude-cli"),

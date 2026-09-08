@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { lookupSessionGoalOperation, mutateSessionGoal } from "./goals-operations.js";
 import type {
   SessionGoalOperation,
@@ -22,7 +22,7 @@ import { useTempSessionsFixture } from "./test-helpers.js";
 // These tests exercise the durable owner, including rollback and process reopen; existing
 // textual Goal tests protect the shared policy but cannot catch a split Goal/turn commit.
 describe("typed Goal operation persistence", () => {
-  const fixture = useTempSessionsFixture("openclaw-goal-operations-");
+  const fixture = useTempSessionsFixture("carapace-goal-operations-");
   const sessionKey = "agent:main:goal-operations";
   const sessionId = "goal-session-1";
   const now = 1_800_000_000_000;
@@ -37,7 +37,7 @@ describe("typed Goal operation persistence", () => {
     action: "start",
     objective: "  clear the backlog 🦞\n/with literal café text\n\t",
   });
-  const database = () => openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
+  const database = () => openCarapaceAgentDatabase(toDatabaseOptions(resolveSqliteScope(scope())));
   const admit = (operation = startOperation(), extra: { shouldAppend?: () => boolean } = {}) =>
     persistSessionTranscriptTurn(scope(), {
       expectedSessionId: sessionId,
@@ -70,7 +70,7 @@ describe("typed Goal operation persistence", () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
   });
 
   it("commits the literal objective, exact intent identity, lifecycle and receipt together", async () => {
@@ -89,7 +89,7 @@ describe("typed Goal operation persistence", () => {
     });
     expect(turn.messages[0]?.message).toMatchObject({
       content: startOperation().objective,
-      __openclaw: {
+      __carapace: {
         intent: {
           kind: "session-goal-start",
           version: 1,
@@ -124,7 +124,7 @@ describe("typed Goal operation persistence", () => {
     const first = await admit();
     await clearSessionGoal(scope());
     const eventsBefore = await loadTranscriptEvents(scope());
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const replay = await admit();
     expect(replay.sessionTurnMutationResult).toEqual({
       result: first.sessionTurnMutationResult?.result,
@@ -228,7 +228,7 @@ describe("typed Goal operation persistence", () => {
             role: "user",
             content: "Continue the current Goal.",
             inputProvenance: { kind: "internal_system" },
-            __openclaw: { visibility: { display: false } },
+            __carapace: { visibility: { display: false } },
           },
         },
       ],
@@ -243,7 +243,7 @@ describe("typed Goal operation persistence", () => {
     });
     expect(resumed.messages[0]?.message).toMatchObject({
       inputProvenance: { kind: "internal_system" },
-      __openclaw: {
+      __carapace: {
         visibility: { display: false },
         intent: { kind: "session-goal-resume", goalId: goal.id },
       },

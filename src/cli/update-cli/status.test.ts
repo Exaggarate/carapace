@@ -7,7 +7,7 @@ import {
   recordUpdateRunPhase,
 } from "../../infra/update-run-ledger.js";
 import { ABANDONED_UPDATE_RUN_MS } from "../../infra/update-run-timeouts.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { updateStatusCommand } from "./status.js";
 
 const runtime = vi.hoisted(() => ({
@@ -27,7 +27,7 @@ vi.mock("../../config/config.js", () => ({
 vi.mock("../../infra/update-check.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../infra/update-check.js")>()),
   checkUpdateStatus: async () => ({
-    root: "/fixture/openclaw",
+    root: "/fixture/carapace",
     installKind: "package",
     packageManager: "npm",
     registry: { latestVersion: "2026.9.2" },
@@ -35,18 +35,18 @@ vi.mock("../../infra/update-check.js", async (importOriginal) => ({
 }));
 vi.mock("./shared.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./shared.js")>()),
-  resolveUpdateRoot: async () => "/fixture/openclaw",
+  resolveUpdateRoot: async () => "/fixture/carapace",
 }));
 
 const tempDirs = createTempDirTracker();
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-update-status-"));
+  vi.stubEnv("CARAPACE_STATE_DIR", tempDirs.make("carapace-update-status-"));
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
   tempDirs.cleanup();
@@ -64,7 +64,7 @@ describe("update status abandoned-run reporting", () => {
 
       await updateStatusCommand({ json });
 
-      const guidance = `no activity since ${new Date(lastActivity).toISOString()}; if no update is running, run \`openclaw update repair\` or start a new \`openclaw update\``;
+      const guidance = `no activity since ${new Date(lastActivity).toISOString()}; if no update is running, run \`carapace update repair\` or start a new \`carapace update\``;
       expect(getUpdateRun(recorded.runId)).toEqual(recorded);
       if (json) {
         expect(runtime.writeJson).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe("update status abandoned-run reporting", () => {
     } else {
       const output = runtime.log.mock.calls.map(([line]) => String(line)).join("\n");
       expect(output).toContain("Abandoned update detected;");
-      expect(output).toContain("openclaw update repair");
+      expect(output).toContain("carapace update repair");
       expect(output).not.toContain("update in progress:");
       expect(output).not.toContain("update failed:");
     }

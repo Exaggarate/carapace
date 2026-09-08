@@ -1,6 +1,6 @@
 import { Command } from "commander";
 // Devices CLI tests cover device command registration and output behavior.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { registerDevicesCli } from "./devices-cli.js";
@@ -148,7 +148,7 @@ function mockReplacementPairing(
     publicKey: "pk",
     ...(Object.hasOwn(overrides, "roles") ? {} : { role: "operator" }),
     scopes: requestId === "req-old" ? ["operator.read"] : ["operator.read", "operator.pairing"],
-    clientId: "openclaw-macos",
+    clientId: "carapace-macos",
     clientMode: "cli",
     isRepair: true,
     ts: requestId === "req-old" ? 1 : 2,
@@ -178,9 +178,9 @@ function mockApprovedReplacement() {
 
 const requireRecord = createRequireRecord("object", "label-not-object");
 const approvalCommandContexts = [
-  ["default", undefined, undefined, "openclaw"],
-  ["profile", "work", undefined, "openclaw --profile work"],
-  ["container", "work", "demo", "openclaw --container demo"],
+  ["default", undefined, undefined, "carapace"],
+  ["profile", "work", undefined, "carapace --profile work"],
+  ["container", "work", "demo", "carapace --container demo"],
 ] as const;
 
 const nodeApprovalLabelCases = [
@@ -390,7 +390,7 @@ describe("devices cli approve", () => {
     expect(logOutput).toContain("Device Nine");
     expect(logOutput).toContain("Approved: roles: operator; scopes: operator.read");
     expect(logOutput).toContain("Requested scopes exceed the current approval");
-    expect(readRuntimeErrorOutput()).toContain("openclaw devices approve req-abc");
+    expect(readRuntimeErrorOutput()).toContain("carapace devices approve req-abc");
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(hasGatewayMethod("device.pair.approve")).toBe(false);
   });
@@ -453,7 +453,7 @@ describe("devices cli approve", () => {
 
     expectGatewayCall(0, { method: "device.pair.list" });
     expect(hasGatewayMethod("device.pair.approve")).toBe(false);
-    expect(readRuntimeErrorOutput()).toContain(`openclaw devices approve ${expectedRequestId}`);
+    expect(readRuntimeErrorOutput()).toContain(`carapace devices approve ${expectedRequestId}`);
   });
 
   it("falls back to device id when selected pending display name is blank", async () => {
@@ -472,15 +472,15 @@ describe("devices cli approve", () => {
 
     const logOutput = runtime.log.mock.calls.map((c) => readRuntimeCallText(c)).join("\n");
     expect(logOutput).toContain("device-9");
-    expect(readRuntimeErrorOutput()).toContain("openclaw devices approve req-blank");
+    expect(readRuntimeErrorOutput()).toContain("carapace devices approve req-blank");
     expect(hasGatewayMethod("device.pair.approve")).toBe(false);
   });
 
   it.each(approvalCommandContexts)(
     "includes explicit gateway flags in the %s approval command",
     async (_context, profile, container, prefix) => {
-      vi.stubEnv("OPENCLAW_PROFILE", profile);
-      vi.stubEnv("OPENCLAW_CONTAINER_HINT", container);
+      vi.stubEnv("CARAPACE_PROFILE", profile);
+      vi.stubEnv("CARAPACE_CONTAINER_HINT", container);
       callGateway.mockResolvedValueOnce({
         pending: [{ requestId: "req-url", deviceId: "device-9", ts: 1000 }],
       });
@@ -488,7 +488,7 @@ describe("devices cli approve", () => {
       await runDevicesApprove([
         "--latest",
         "--url",
-        "ws://gateway.example:18789/openclaw?cluster=qa lab",
+        "ws://gateway.example:18789/carapace?cluster=qa lab",
         "--timeout",
         "3000",
         "--token",
@@ -499,7 +499,7 @@ describe("devices cli approve", () => {
 
       const errorOutput = runtime.error.mock.calls.map((c) => readRuntimeCallText(c)).join("\n");
       expect(errorOutput).toContain(
-        `${prefix} devices approve req-url --url 'ws://gateway.example:18789/openclaw?cluster=qa lab' --timeout 3000`,
+        `${prefix} devices approve req-url --url 'ws://gateway.example:18789/carapace?cluster=qa lab' --timeout 3000`,
       );
       expect(errorOutput).toContain("Reuse the same --token/--password options when rerunning.");
       expect(errorOutput).not.toContain("secret-token");
@@ -512,8 +512,8 @@ describe("devices cli approve", () => {
   it.each(approvalCommandContexts)(
     "returns JSON for the %s implicit approval preview",
     async (_context, profile, container, prefix) => {
-      vi.stubEnv("OPENCLAW_PROFILE", profile);
-      vi.stubEnv("OPENCLAW_CONTAINER_HINT", container);
+      vi.stubEnv("CARAPACE_PROFILE", profile);
+      vi.stubEnv("CARAPACE_CONTAINER_HINT", container);
       callGateway.mockResolvedValueOnce({
         pending: [{ requestId: "req-json", deviceId: "device-json", ts: 1000 }],
         paired: [],
@@ -587,7 +587,7 @@ describe("devices cli approve", () => {
       await runDevicesApprove([
         "192.168.0.202",
         "--url",
-        "ws://gateway-user:url-secret@gateway.example:18789/openclaw?cluster=qa",
+        "ws://gateway-user:url-secret@gateway.example:18789/carapace?cluster=qa",
         "--token",
         "secret-token",
         ...(json ? ["--json"] : []),
@@ -597,7 +597,7 @@ describe("devices cli approve", () => {
       const errorOutput = readRuntimeErrorOutput();
       expect(errorOutput).toContain("No pending device request matches");
       expect(errorOutput).toContain(`Node reapproval pending for ${expectedName}. Run`);
-      expect(errorOutput).toContain("openclaw nodes approve node-req-1");
+      expect(errorOutput).toContain("carapace nodes approve node-req-1");
       expect(errorOutput).toContain(
         "Reuse the same connection options when rerunning: --url, --token.",
       );
@@ -632,7 +632,7 @@ describe("devices cli approve", () => {
     const errorOutput = readRuntimeErrorOutput();
     expect(errorOutput).toContain("No pending device request matches");
     expect(errorOutput).not.toContain("node-req-unrelated");
-    expect(errorOutput).not.toContain("openclaw nodes approve");
+    expect(errorOutput).not.toContain("carapace nodes approve");
   });
 
   it("does not suggest node approval when the query only matches a paired device display name", async () => {
@@ -661,7 +661,7 @@ describe("devices cli approve", () => {
     const errorOutput = readRuntimeErrorOutput();
     expect(errorOutput).toContain("No pending device request matches");
     expect(errorOutput).not.toContain("node-req-display-name");
-    expect(errorOutput).not.toContain("openclaw nodes approve");
+    expect(errorOutput).not.toContain("carapace nodes approve");
   });
 
   it("does not suggest node approval when a JSON-mode query only matches an operator label", async () => {
@@ -687,7 +687,7 @@ describe("devices cli approve", () => {
     const errorOutput = readRuntimeErrorOutput();
     expect(errorOutput).toContain("No pending device request matches Kitchen Mac");
     expect(errorOutput).not.toContain("node-req-alias");
-    expect(errorOutput).not.toContain("openclaw nodes approve");
+    expect(errorOutput).not.toContain("carapace nodes approve");
     expect(runtime.writeJson).not.toHaveBeenCalled();
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
@@ -725,7 +725,7 @@ describe("devices cli reject", () => {
 
     expect(callGateway).not.toHaveBeenCalled();
     expect(readRuntimeErrorOutput()).toContain("requestId is required.");
-    expect(readRuntimeErrorOutput()).toContain("openclaw devices list");
+    expect(readRuntimeErrorOutput()).toContain("carapace devices list");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 });
@@ -928,7 +928,7 @@ describe("devices cli local fallback", () => {
     },
     {
       name: "the replacement request conflicts with client metadata",
-      replacement: { clientId: "openclaw-ios", clientMode: "agent" },
+      replacement: { clientId: "carapace-ios", clientMode: "agent" },
     },
   ])("fails closed when $name", async ({ original, replacement }) => {
     mockReplacementPairing({ original, replacement });
@@ -951,7 +951,7 @@ describe("devices cli local fallback", () => {
             publicKey: "pk",
             role: "operator",
             scopes: ["operator.read"],
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             clientMode: "cli",
             isRepair: true,
             ts: 1,
@@ -962,7 +962,7 @@ describe("devices cli local fallback", () => {
             publicKey: "pk",
             role: "operator",
             scopes: ["operator.read", "operator.pairing"],
-            clientId: "openclaw-macos",
+            clientId: "carapace-macos",
             clientMode: "cli",
             isRepair: true,
             ts: 2,
@@ -979,7 +979,7 @@ describe("devices cli local fallback", () => {
 
     const errorOutput = stripAnsi(readRuntimeErrorOutput());
     expect(errorOutput).toContain("No pending device request matches req-old");
-    expect(errorOutput).toContain("openclaw devices list");
+    expect(errorOutput).toContain("carapace devices list");
     expect(errorOutput).not.toContain("unknown requestId");
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(approveDevicePairing).not.toHaveBeenCalled();
@@ -1014,7 +1014,7 @@ describe("devices cli local fallback", () => {
   });
 
   it("points at the current pending request when the gateway request id went stale", async () => {
-    vi.stubEnv("OPENCLAW_PROFILE", "work");
+    vi.stubEnv("CARAPACE_PROFILE", "work");
     rejectGatewayForLocalFallback("scope upgrade pending approval (requestId: req-profile)");
     listDevicePairing.mockResolvedValueOnce({
       pending: [{ requestId: "req-default", deviceId: "device-1", publicKey: "pk", ts: 1 }],
@@ -1031,8 +1031,8 @@ describe("devices cli local fallback", () => {
       (error: unknown) => String(error),
     );
     expect(failure).toContain("superseded by a newer pending request");
-    expect(failure).toContain("openclaw --profile work devices approve req-default");
-    expect(failure).not.toContain("OPENCLAW_PROFILE");
+    expect(failure).toContain("carapace --profile work devices approve req-default");
+    expect(failure).not.toContain("CARAPACE_PROFILE");
     expect(failure).not.toContain("--token");
     expect(readRuntimeOutput()).not.toContain(fallbackNotice);
   });
@@ -1057,7 +1057,7 @@ describe("devices cli local fallback", () => {
     expect(approveDevicePairing).not.toHaveBeenCalled();
     const errorOutput = stripAnsi(readRuntimeErrorOutput());
     expect(errorOutput).toContain("No pending device request matches req-default");
-    expect(errorOutput).toContain("openclaw devices list");
+    expect(errorOutput).toContain("carapace devices list");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 
@@ -1098,7 +1098,7 @@ describe("devices cli list", () => {
   it.each(nodeApprovalLabelCases)(
     "shows pending node approval commands for paired node devices: $labelKind",
     async ({ operatorLabel, expectedName }) => {
-      vi.stubEnv("OPENCLAW_PROFILE", "work");
+      vi.stubEnv("CARAPACE_PROFILE", "work");
       callGateway.mockResolvedValueOnce({
         pending: [],
         paired: [
@@ -1128,7 +1128,7 @@ describe("devices cli list", () => {
       await runDevicesCommand([
         "list",
         "--url",
-        "ws://gateway-user:url-secret@gateway.example:18789/openclaw?cluster=qa",
+        "ws://gateway-user:url-secret@gateway.example:18789/carapace?cluster=qa",
         "--token",
         "secret-token",
       ]);
@@ -1139,7 +1139,7 @@ describe("devices cli list", () => {
       if (operatorLabel?.trim()) {
         expect(output.split("\n")).toContain(`  android-node  ${expectedName}`);
       }
-      expect(output).toContain("openclaw --profile work nodes approve node-req-1");
+      expect(output).toContain("carapace --profile work nodes approve node-req-1");
       expect(output).toContain("Reuse the same connection options when rerunning: --url, --token.");
       expect(output).not.toContain("gateway-user");
       expect(output).not.toContain("url-secret");
@@ -1167,7 +1167,7 @@ describe("devices cli list", () => {
     expect(callGateway).toHaveBeenCalledOnce();
     const output = readRuntimeOutput();
     expect(output).not.toContain("node-req-unrelated");
-    expect(output).not.toContain("openclaw nodes approve");
+    expect(output).not.toContain("carapace nodes approve");
   });
 
   it("does not show upgrade context for key-mismatched pending requests", async () => {
@@ -1247,16 +1247,16 @@ describe("devices cli list", () => {
           deviceId: "dev-label",
           operatorLabel: "Kitchen Mac",
           displayName: "MacBook Pro",
-          clientId: "openclaw-macos",
+          clientId: "carapace-macos",
         }),
         pairedDevice({
           deviceId: "dev-display",
           displayName: "Living Room iPad",
-          clientId: "openclaw-ios",
+          clientId: "carapace-ios",
         }),
         pairedDevice({
           deviceId: "dev-client",
-          clientId: "openclaw-control-ui",
+          clientId: "carapace-control-ui",
           displayName: undefined,
         }),
         pairedDevice({
@@ -1271,11 +1271,11 @@ describe("devices cli list", () => {
     const output = stripAnsi(readRuntimeOutput());
     expect(output).toContain("Kitchen Mac");
     expect(output).toContain("Living Room iPad");
-    expect(output).toContain("openclaw-control-ui");
+    expect(output).toContain("carapace-control-ui");
     expect(output).toContain("dev-id-only");
     expect(output).not.toContain("MacBook Pro");
-    expect(output).not.toContain("openclaw-macos");
-    expect(output).not.toContain("openclaw-ios");
+    expect(output).not.toContain("carapace-macos");
+    expect(output).not.toContain("carapace-ios");
   });
 
   it("shows a deviceId column so identical display names are distinguishable for remove", async () => {
@@ -1286,13 +1286,13 @@ describe("devices cli list", () => {
       paired: [
         pairedDevice({
           deviceId: deviceIdA,
-          displayName: "OpenClaw Desktop",
-          clientId: "openclaw-macos",
+          displayName: "Carapace Desktop",
+          clientId: "carapace-macos",
         }),
         pairedDevice({
           deviceId: deviceIdB,
-          displayName: "OpenClaw Desktop",
-          clientId: "openclaw-macos",
+          displayName: "Carapace Desktop",
+          clientId: "carapace-macos",
         }),
       ],
     });
@@ -1302,8 +1302,8 @@ describe("devices cli list", () => {
     const output = stripAnsi(readRuntimeOutput());
     expect(output).toContain("Device ID");
     expect(output).toContain("Full device IDs");
-    expect(output.split("\n")).toContain(`  ${deviceIdA}  OpenClaw Desktop`);
-    expect(output.split("\n")).toContain(`  ${deviceIdB}  OpenClaw Desktop`);
+    expect(output.split("\n")).toContain(`  ${deviceIdA}  Carapace Desktop`);
+    expect(output.split("\n")).toContain(`  ${deviceIdB}  Carapace Desktop`);
   });
 });
 
@@ -1334,7 +1334,7 @@ describe("devices cli join-code", () => {
       scopes: ["operator.admin"],
     });
     expect(readRuntimeOutput()).toContain(joinUrl);
-    expect(readRuntimeOutput()).toContain(`npx openclaw connect ${joinUrl}`);
+    expect(readRuntimeOutput()).toContain(`npx carapace connect ${joinUrl}`);
     expect(readRuntimeOutput()).not.toContain("opaque");
   });
 });

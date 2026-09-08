@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AssistantMessage, Context, Model, StreamFn } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model, StreamFn } from "@carapace/llm-core";
 import OpenAI, { AzureOpenAI } from "openai";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { getAiTransportHost } from "../host.js";
@@ -252,7 +252,7 @@ function createResponsesTransportExecutor(config: ResponsesTransportExecutorOpti
         const asyncToolExecutionEligible =
           nativeAstra &&
           options?.asyncToolExecution === true &&
-          !responsesOptions?.openclawCodeModeToolSurface;
+          !responsesOptions?.carapaceCodeModeToolSurface;
         const prepareRequest = async (request: ReturnType<typeof config.buildRequest>) => {
           let params = request;
           const nextParams = await options?.onPayload?.(params, model);
@@ -270,11 +270,11 @@ function createResponsesTransportExecutor(config: ResponsesTransportExecutorOpti
             params as Record<string, unknown>,
           ) as typeof params;
           if (
-            (options as { openclawCodeModeToolSurface?: unknown } | undefined)
-              ?.openclawCodeModeToolSurface === true
+            (options as { carapaceCodeModeToolSurface?: unknown } | undefined)
+              ?.carapaceCodeModeToolSurface === true
           ) {
             const visibleToolNames = resolveCodeModeResponsesVisibleToolNames(context);
-            const allowedHostedToolTypes = responsesOptions?.openclawCodeModeAllowedHostedToolTypes;
+            const allowedHostedToolTypes = responsesOptions?.carapaceCodeModeAllowedHostedToolTypes;
             enforceCodeModeResponsesToolSurface(
               params,
               visibleToolNames,

@@ -1,11 +1,11 @@
 // Shared ACP command helpers for session identity and reply formatting.
 import { randomUUID } from "node:crypto";
-import type { AcpRuntimeSessionMode } from "@openclaw/acp-core/runtime/types";
-import type { Result } from "@openclaw/normalization-core/result";
+import type { AcpRuntimeSessionMode } from "@carapace/acp-core/runtime/types";
+import type { Result } from "@carapace/normalization-core/result";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { type AcpRuntimeError, toAcpRuntimeErrorText } from "../../../acp/runtime/errors.js";
 import { supportsAutomaticThreadBindingSpawn } from "../../../channels/thread-bindings-policy.js";
 import type { AcpSessionRuntimeOptions } from "../../../config/sessions/types.js";
@@ -443,7 +443,7 @@ export function resolveAcpHelpText(): string {
     "/acp sessions",
     "",
     "Notes:",
-    "- /acp spawn harness-id is an ACP runtime harness alias (for example codex), not an OpenClaw agents.list id.",
+    "- /acp spawn harness-id is an ACP runtime harness alias (for example codex), not an Carapace agents.list id.",
     "- Use --bind here to pin the current conversation to the ACP session without creating a child thread.",
     "- /session unbind detaches this conversation without closing its ACP session.",
     "- ACP dispatch of normal thread messages is controlled by acp.dispatch.enabled.",

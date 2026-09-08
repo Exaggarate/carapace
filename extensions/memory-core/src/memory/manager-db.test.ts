@@ -6,8 +6,8 @@ import { DatabaseSync } from "node:sqlite";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import * as storage from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import * as storage from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   configureMemoryCoreDreamingStateForTests,
@@ -45,7 +45,7 @@ describe("memory manager database publication", () => {
   afterAll(() => resetMemoryCoreDreamingStateForTests());
 
   beforeEach(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-db-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-memory-db-"));
   });
 
   afterEach(async () => {

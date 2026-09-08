@@ -1,15 +1,15 @@
 /* @vitest-environment jsdom */
-import type { CanvasDocumentViewResult } from "@openclaw/gateway-protocol";
+import type { CanvasDocumentViewResult } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   bumpCanvasWidgetFrameConnectionGeneration,
   getCanvasWidgetFrameConnectionGeneration,
 } from "../lib/chat/canvas-widget-frame-generation.ts";
-import { OpenClawCanvasWidgetView } from "./canvas-widget-view.ts";
+import { CarapaceCanvasWidgetView } from "./canvas-widget-view.ts";
 import { WIDGET_PROMPT_EVENT } from "./mcp-app-security.ts";
 
 const elementName = `test-canvas-widget-${crypto.randomUUID()}`;
-customElements.define(elementName, class extends OpenClawCanvasWidgetView {});
+customElements.define(elementName, class extends CarapaceCanvasWidgetView {});
 const documentView: CanvasDocumentViewResult = {
   html: "<p>Widget ready</p>",
   sandboxUrl: "/mcp-app-sandbox?frames=none",
@@ -21,7 +21,7 @@ function mount(
   docId = "cv_inline",
   parent: Element | ShadowRoot = document.body,
 ) {
-  const view = document.createElement(elementName) as OpenClawCanvasWidgetView;
+  const view = document.createElement(elementName) as CarapaceCanvasWidgetView;
   Reflect.set(view, "context", {
     gateway: {
       snapshot: { client },
@@ -35,7 +35,7 @@ function mount(
   return view;
 }
 
-async function frameFor(view: OpenClawCanvasWidgetView) {
+async function frameFor(view: CarapaceCanvasWidgetView) {
   await expect.poll(() => view.querySelector("iframe")).not.toBeNull();
   return view.querySelector("iframe")!;
 }
@@ -106,7 +106,7 @@ describe("Canvas widget view", () => {
       "http://gateway.example:8444",
     );
     expect(first.documentHtml).toBe(documentView.html);
-    message(frame, { type: "openclaw:widget-size", height: 3000 });
+    message(frame, { type: "carapace:widget-size", height: 3000 });
     await first.updateComplete;
     expect(frame.style.height).toBe("3000px");
     first.title = "Updated title";
@@ -205,7 +205,7 @@ describe("Canvas widget view", () => {
     await expect
       .poll(() =>
         post.mock.calls.some(
-          ([data]) => data.type === "openclaw:widget-theme" && data.mode === "light",
+          ([data]) => data.type === "carapace:widget-theme" && data.mode === "light",
         ),
       )
       .toBe(true);
@@ -242,21 +242,21 @@ describe("Canvas widget view", () => {
       } as unknown as MessagePort;
       const received = vi.fn();
       view.addEventListener(WIDGET_PROMPT_EVENT, received);
-      message(frame, { type: "openclaw:widget-prompt-offer" }, [port]);
-      expect(postMessage).toHaveBeenCalledWith({ type: "openclaw:widget-prompt-host-ready" });
+      message(frame, { type: "carapace:widget-prompt-offer" }, [port]);
+      expect(postMessage).toHaveBeenCalledWith({ type: "carapace:widget-prompt-host-ready" });
       onMessage(
         new MessageEvent("message", {
-          data: { type: "openclaw:widget-prompt", prompt: "Background" },
+          data: { type: "carapace:widget-prompt", prompt: "Background" },
         }),
       );
       expect(received).not.toHaveBeenCalled();
       Object.defineProperty(document, "activeElement", { get: () => frame, configurable: true });
       Object.defineProperty(frame, "checkVisibility", { value: () => true });
-      message(frame, { type: "openclaw:widget-prompt", prompt: "Forged window message" });
+      message(frame, { type: "carapace:widget-prompt", prompt: "Forged window message" });
       expect(received).not.toHaveBeenCalled();
       onMessage(
         new MessageEvent("message", {
-          data: { type: "openclaw:widget-prompt", prompt: "Show details" },
+          data: { type: "carapace:widget-prompt", prompt: "Show details" },
         }),
       );
       expect(received).toHaveBeenCalledOnce();
@@ -269,7 +269,7 @@ describe("Canvas widget view", () => {
       expect(close).toHaveBeenCalledOnce();
       onMessage(
         new MessageEvent("message", {
-          data: { type: "openclaw:widget-prompt", prompt: "Stale port" },
+          data: { type: "carapace:widget-prompt", prompt: "Stale port" },
         }),
       );
       expect(received).toHaveBeenCalledOnce();

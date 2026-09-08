@@ -193,10 +193,10 @@ export function registerManagedSystemdHandoffConvergenceTests(
 
     expect(parentSignal).toBeNull();
     expect(
-      commands.filter((command) => command.includes("stop openclaw-gateway.service")),
+      commands.filter((command) => command.includes("stop carapace-gateway.service")),
     ).toHaveLength(0);
     expect(
-      commands.filter((command) => command.includes("start openclaw-gateway.service")),
+      commands.filter((command) => command.includes("start carapace-gateway.service")),
     ).toHaveLength(0);
     expect(state).toEqual({});
     expect(sentinel).toMatchObject({
@@ -292,7 +292,7 @@ if (${JSON.stringify(kind)} === "systemd") {
             ? "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
             : "";
     process.stdout.write([
-      "Id=" + (observation?.id || "openclaw-gateway.service"),
+      "Id=" + (observation?.id || "carapace-gateway.service"),
       "LoadState=" + (observation?.loadState || "loaded"),
       "ActiveState=" + (observation?.activeState || (active ? "active" : "inactive")),
       "MainPID=" + observedPid,

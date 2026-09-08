@@ -247,7 +247,7 @@ export function readPostCoreSnapshot(artifactRoot) {
 
 function armUpgradeProcessCapture() {
   const command = process.argv[2];
-  const artifactRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
+  const artifactRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
   if (!isMainThread || !artifactRoot || !["update", "doctor"].includes(command)) {
     return;
   }
@@ -260,7 +260,7 @@ function armUpgradeProcessCapture() {
       try {
         const raw = readOwned(directory, "package.json", "process identity");
         const manifest = JSON.parse(raw);
-        if (manifest?.name === "openclaw") {
+        if (manifest?.name === "carapace") {
           version = manifest.version;
           break;
         }
@@ -275,7 +275,7 @@ function armUpgradeProcessCapture() {
     }
     const identity = {
       role:
-        command === "update" && process.env.OPENCLAW_UPDATE_POST_CORE === "1"
+        command === "update" && process.env.CARAPACE_UPDATE_POST_CORE === "1"
           ? "post-core"
           : command,
       packageVersion: version,
@@ -312,14 +312,14 @@ function armPostCoreCapture() {
   if (
     !isMainThread ||
     process.argv[2] !== "update" ||
-    process.env.OPENCLAW_UPDATE_POST_CORE !== "1"
+    process.env.CARAPACE_UPDATE_POST_CORE !== "1"
   ) {
     return;
   }
   try {
     const tmp = process.env.TMPDIR;
-    const resultPath = process.env.OPENCLAW_UPDATE_POST_CORE_RESULT_PATH;
-    const artifactRoot = process.env.OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
+    const resultPath = process.env.CARAPACE_UPDATE_POST_CORE_RESULT_PATH;
+    const artifactRoot = process.env.CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_ROOT;
     if (
       !tmp ||
       !resultPath ||
@@ -330,7 +330,7 @@ function armPostCoreCapture() {
       return;
     }
     const relative = path.relative(tmp, resultPath);
-    if (!/^openclaw-update-post-core-[A-Za-z0-9_-]+\/plugins\.json$/.test(relative)) {
+    if (!/^carapace-update-post-core-[A-Za-z0-9_-]+\/plugins\.json$/.test(relative)) {
       return;
     }
     ownedPath(tmp, path.dirname(relative));
@@ -375,9 +375,9 @@ async function pluginIdentities(stateRoot, artifactRoot) {
     // The existing reader opens SQLite read-only. Fence every file it may read;
     // disable its config fallback rather than consulting failed-state CLI/config.
     for (const relative of [
-      "state/openclaw.sqlite",
-      "state/openclaw.sqlite-wal",
-      "state/openclaw.sqlite-shm",
+      "state/carapace.sqlite",
+      "state/carapace.sqlite-wal",
+      "state/carapace.sqlite-shm",
       "plugins/installs.json",
     ]) {
       try {
@@ -467,7 +467,7 @@ async function pluginIdentities(stateRoot, artifactRoot) {
           return result;
         };
         const packagePathMatches = entry.packageJson?.path === "package.json";
-        const manifestPathMatches = entry.manifestPath === path.join(root, "openclaw.plugin.json");
+        const manifestPathMatches = entry.manifestPath === path.join(root, "carapace.plugin.json");
         identity.package = fingerprint(
           "package.json",
           packagePathMatches ? entry.packageJson.hash : undefined,
@@ -475,7 +475,7 @@ async function pluginIdentities(stateRoot, artifactRoot) {
         );
         identity.package.recordedPathMatches = entry.packageJson?.path ? packagePathMatches : null;
         identity.manifest = fingerprint(
-          "openclaw.plugin.json",
+          "carapace.plugin.json",
           manifestPathMatches ? entry.manifestHash : undefined,
           ["id", "version"],
         );
@@ -615,7 +615,7 @@ async function capture(artifactRoot, phase, exitStatus, signal = "", observation
   for (const name of logNames) {
     report.logs[name] =
       name === "gateway-restart.log"
-        ? readOwned(process.env.OPENCLAW_STATE_DIR, "logs/gateway-restart.log", name)
+        ? readOwned(process.env.CARAPACE_STATE_DIR, "logs/gateway-restart.log", name)
         : readOwned(artifactRoot, name, name);
   }
   const rpcName = readOwned(artifactRoot, "diagnostics/last-rpc", "last RPC")?.trim();
@@ -632,7 +632,7 @@ async function capture(artifactRoot, phase, exitStatus, signal = "", observation
   } else if (rpcName) {
     omissions["last RPC"] = reasons[3];
   }
-  const stateRoot = process.env.OPENCLAW_STATE_DIR;
+  const stateRoot = process.env.CARAPACE_STATE_DIR;
   report.pluginIdentity = await pluginIdentities(stateRoot, artifactRoot);
   report.postCore = {
     availability: "unavailable",
@@ -646,7 +646,7 @@ async function capture(artifactRoot, phase, exitStatus, signal = "", observation
   } catch {
     omissions["post-core"] = reasons[3];
   }
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.CARAPACE_CONFIG_PATH;
   if (stateRoot && configPath) {
     const config = readOwned(stateRoot, path.relative(stateRoot, configPath), "config");
     if (config !== null) {
@@ -655,7 +655,7 @@ async function capture(artifactRoot, phase, exitStatus, signal = "", observation
   }
   const unit = readOwned(
     process.env.HOME,
-    ".config/systemd/user/openclaw-gateway.service",
+    ".config/systemd/user/carapace-gateway.service",
     "service unit",
   );
   if (unit !== null) {

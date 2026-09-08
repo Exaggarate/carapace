@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { monitorTelegramProvider } from "./monitor.js";
 import type { MonitorTelegramOpts } from "./monitor.types.js";
@@ -12,7 +12,7 @@ type SessionOptions = ConstructorParameters<
 const mocks = vi.hoisted(() => ({
   sessions: [] as SessionOptions[],
   runSession: vi.fn<(options: SessionOptions) => Promise<void>>(),
-  config: vi.fn<() => OpenClawConfig>(() => ({ channels: { telegram: {} } })),
+  config: vi.fn<() => CarapaceConfig>(() => ({ channels: { telegram: {} } })),
   readOffset: vi.fn(async () => 41 as number | null),
   writeOffset: vi.fn(async (_params: unknown) => {}),
   deleteOffset: vi.fn(async () => {}),
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   closeTransport: vi.fn(async () => {}),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", () => ({
+vi.mock("carapace/plugin-sdk/runtime-config-snapshot", () => ({
   getRuntimeConfig: mocks.config,
 }));
 vi.mock("./polling-session.js", () => ({

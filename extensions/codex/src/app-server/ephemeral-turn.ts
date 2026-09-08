@@ -1,6 +1,6 @@
-import { toStringifiedError } from "openclaw/plugin-sdk/error-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { readStringField as readString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { toStringifiedError } from "carapace/plugin-sdk/error-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { readStringField as readString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isTerminalTurnStatus, readCodexNotificationItem } from "./attempt-notifications.js";
 import type { CodexAppServerClient } from "./client.js";
 import { CodexUsageProjection } from "./event-projector-usage.js";

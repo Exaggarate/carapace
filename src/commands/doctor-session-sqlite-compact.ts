@@ -2,14 +2,14 @@
 import fs from "node:fs";
 import type { SessionStoreTarget } from "../config/sessions/targets.js";
 import {
-  assertOpenClawAgentDatabaseForMaintenance,
-  clearOpenClawAgentDatabaseOpenFailure,
-  ensureOpenClawAgentDatabasePermissions,
-  isOpenClawAgentDatabaseOpen,
-  migrateOpenClawAgentDatabaseForMaintenance,
-  resolveOpenClawAgentSqlitePath,
+  assertCarapaceAgentDatabaseForMaintenance,
+  clearCarapaceAgentDatabaseOpenFailure,
+  ensureCarapaceAgentDatabasePermissions,
+  isCarapaceAgentDatabaseOpen,
+  migrateCarapaceAgentDatabaseForMaintenance,
+  resolveCarapaceAgentSqlitePath,
   withAgentDatabaseMaintenanceLease,
-} from "../state/openclaw-agent-db.js";
+} from "../state/carapace-agent-db.js";
 import { resolveTargetSqliteOptions } from "./doctor-session-sqlite-readers.js";
 import type { DoctorSessionSqliteCompactReport } from "./doctor-session-sqlite-types.js";
 import { compactDoctorSqliteFile } from "./doctor-sqlite-compact.js";
@@ -20,7 +20,7 @@ export async function compactDoctorSessionSqliteTarget(
   options: { env?: NodeJS.ProcessEnv; operation?: "import-finalize" } = {},
 ): Promise<DoctorSessionSqliteCompactReport> {
   const databaseOptions = resolveTargetSqliteOptions(target, options.env);
-  const sqlitePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+  const sqlitePath = resolveCarapaceAgentSqlitePath(databaseOptions);
   const beforeFileSizes = readSqliteFileSizes(sqlitePath);
   const stat = readSessionDatabaseStat(sqlitePath);
   if (!stat) {
@@ -37,17 +37,17 @@ export async function compactDoctorSessionSqliteTarget(
     };
   }
   if (!stat.isFile()) {
-    throw new Error(`OpenClaw agent database is not a regular file: ${sqlitePath}`);
+    throw new Error(`Carapace agent database is not a regular file: ${sqlitePath}`);
   }
-  if (isOpenClawAgentDatabaseOpen(sqlitePath)) {
+  if (isCarapaceAgentDatabaseOpen(sqlitePath)) {
     throw new Error(
-      `OpenClaw agent database ${sqlitePath} is already open in this process. Stop OpenClaw and retry.`,
+      `Carapace agent database ${sqlitePath} is already open in this process. Stop Carapace and retry.`,
     );
   }
   const requireQuarantineCleared = () => {
-    if (!clearOpenClawAgentDatabaseOpenFailure(sqlitePath, { env: options.env })) {
+    if (!clearCarapaceAgentDatabaseOpenFailure(sqlitePath, { env: options.env })) {
       throw new Error(
-        `OpenClaw agent database ${sqlitePath} was repaired, but its persisted quarantine record could not be cleared. Rerun openclaw doctor --fix so the database is not refused again.`,
+        `Carapace agent database ${sqlitePath} was repaired, but its persisted quarantine record could not be cleared. Rerun carapace doctor --fix so the database is not refused again.`,
       );
     }
   };
@@ -56,11 +56,11 @@ export async function compactDoctorSessionSqliteTarget(
       operation: options.operation,
       afterSuccess: () => {
         requireQuarantineCleared();
-        ensureOpenClawAgentDatabasePermissions(sqlitePath, databaseOptions);
+        ensureCarapaceAgentDatabasePermissions(sqlitePath, databaseOptions);
       },
       sqlitePath,
       validateBeforeMutation: (database) =>
-        assertOpenClawAgentDatabaseForMaintenance(database, {
+        assertCarapaceAgentDatabaseForMaintenance(database, {
           agentId: databaseOptions.agentId,
           pathname: sqlitePath,
         }),
@@ -80,7 +80,7 @@ export async function compactDoctorSessionSqliteTarget(
   // The maintenance lease lives in shared state; never forward the agent database path.
   return options.operation === "import-finalize"
     ? withAgentDatabaseMaintenanceLease({ env: databaseOptions.env }, async (maintenance) => {
-        await migrateOpenClawAgentDatabaseForMaintenance(
+        await migrateCarapaceAgentDatabaseForMaintenance(
           { agentId: databaseOptions.agentId, pathname: sqlitePath },
           maintenance,
         );

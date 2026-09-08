@@ -2,7 +2,7 @@
 import { spawnSync } from "node:child_process";
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createPackageManagerWarningMessage,
@@ -63,7 +63,7 @@ describe("install runtime enforcement", () => {
       ),
     ).toBe(false);
     expect(reportError).toHaveBeenCalledWith(
-      expect.stringContaining("this OpenClaw release requires Node"),
+      expect.stringContaining("this Carapace release requires Node"),
     );
     expect(reportError).toHaveBeenCalledWith(expect.stringContaining("detected Node 24.14.1"));
   });
@@ -84,7 +84,7 @@ describe("install runtime enforcement", () => {
   });
 
   it("exits nonzero when the packed entrypoint sees an unsupported runtime", () => {
-    const root = tempDirs.make("openclaw-preinstall-");
+    const root = tempDirs.make("carapace-preinstall-");
     const scriptsDir = join(root, "scripts");
     mkdirSync(join(scriptsDir, "lib"), { recursive: true });
     const scriptPath = join(scriptsDir, "preinstall-package-manager-warning.mjs");
@@ -166,9 +166,9 @@ describe("install runtime enforcement", () => {
   it("strips only Bun's cwd-to-root lifecycle PATH prefix", () => {
     const candidates: string[] = [];
     const runtime = probePackageCliNodeRuntime({
-      cwd: "/work/openclaw",
+      cwd: "/work/carapace",
       pathEnv: [
-        "/work/openclaw/node_modules/.bin",
+        "/work/carapace/node_modules/.bin",
         "/work/node_modules/.bin",
         "/node_modules/.bin",
         "/opt/node/bin",
@@ -198,9 +198,9 @@ describe("install runtime enforcement", () => {
   it("checks an inherited node_modules/.bin entry after Bun's prefix", () => {
     const candidates: string[] = [];
     const runtime = probePackageCliNodeRuntime({
-      cwd: "/work/openclaw",
+      cwd: "/work/carapace",
       pathEnv: [
-        "/work/openclaw/node_modules/.bin",
+        "/work/carapace/node_modules/.bin",
         "/work/node_modules/.bin",
         "/node_modules/.bin",
         "/opt/tools/node_modules/.bin",
@@ -227,12 +227,12 @@ describe("install runtime enforcement", () => {
   it("checks a duplicate lifecycle-looking entry inherited in the original PATH", () => {
     const candidates: string[] = [];
     const runtime = probePackageCliNodeRuntime({
-      cwd: "/work/openclaw",
+      cwd: "/work/carapace",
       pathEnv: [
-        "/work/openclaw/node_modules/.bin",
+        "/work/carapace/node_modules/.bin",
         "/work/node_modules/.bin",
         "/node_modules/.bin",
-        "/work/openclaw/node_modules/.bin",
+        "/work/carapace/node_modules/.bin",
         "/opt/node/bin",
       ].join(":"),
       platform: "linux",
@@ -249,7 +249,7 @@ describe("install runtime enforcement", () => {
       },
     });
 
-    expect(candidates).toEqual(["/work/openclaw/node_modules/.bin/node"]);
+    expect(candidates).toEqual(["/work/carapace/node_modules/.bin/node"]);
     expect(runtime?.version).toBe("24.14.1");
   });
 
@@ -257,7 +257,7 @@ describe("install runtime enforcement", () => {
     const run = vi.fn();
     expect(
       probePackageCliNodeRuntime({
-        cwd: "/work/openclaw",
+        cwd: "/work/carapace",
         pathEnv: ["/unproven/node_modules/.bin", "/opt/node/bin"].join(":"),
         platform: "linux",
         run,
@@ -270,9 +270,9 @@ describe("install runtime enforcement", () => {
     const candidates: string[] = [];
     expect(
       probePackageCliNodeRuntime({
-        cwd: "/work/openclaw",
+        cwd: "/work/carapace",
         pathEnv: [
-          "/work/openclaw/node_modules/.bin",
+          "/work/carapace/node_modules/.bin",
           "/work/node_modules/.bin",
           "/node_modules/.bin",
           "/opt/bun-wrapper",
@@ -301,9 +301,9 @@ describe("install runtime enforcement", () => {
       const run = vi.fn();
       expect(
         probePackageCliNodeRuntime({
-          cwd: "/work/openclaw",
+          cwd: "/work/carapace",
           pathEnv: [
-            "/work/openclaw/node_modules/.bin",
+            "/work/carapace/node_modules/.bin",
             "/work/node_modules/.bin",
             "/node_modules/.bin",
             relativeEntry,
@@ -323,9 +323,9 @@ describe("install runtime enforcement", () => {
       const run = vi.fn();
       expect(
         probePackageCliNodeRuntime({
-          cwd: "C:\\work\\openclaw",
+          cwd: "C:\\work\\carapace",
           pathEnv: [
-            "C:\\work\\openclaw\\node_modules\\.bin",
+            "C:\\work\\carapace\\node_modules\\.bin",
             "C:\\work\\node_modules\\.bin",
             "C:\\node_modules\\.bin",
             relativeEntry,
@@ -343,17 +343,17 @@ describe("install runtime enforcement", () => {
     let childEnv: NodeJS.ProcessEnv | undefined;
     expect(
       probePackageCliNodeRuntime({
-        cwd: "C:\\work\\openclaw",
+        cwd: "C:\\work\\carapace",
         env: {
           PATH: [
-            "C:\\work\\openclaw\\node_modules\\.bin",
+            "C:\\work\\carapace\\node_modules\\.bin",
             "C:\\work\\node_modules\\.bin",
             "C:\\node_modules\\.bin",
             "C:\\node",
           ].join(";"),
           NODE_OPTIONS: "--require=first.cjs",
           Node_Options: "--require=second.cjs",
-          OPENCLAW_PROBE_SENTINEL: "preserved",
+          CARAPACE_PROBE_SENTINEL: "preserved",
         },
         platform: "win32",
         run: (_command, _args, options) => {
@@ -375,17 +375,17 @@ describe("install runtime enforcement", () => {
     });
     expect(childEnv).toEqual({
       PATH: [
-        "C:\\work\\openclaw\\node_modules\\.bin",
+        "C:\\work\\carapace\\node_modules\\.bin",
         "C:\\work\\node_modules\\.bin",
         "C:\\node_modules\\.bin",
         "C:\\node",
       ].join(";"),
-      OPENCLAW_PROBE_SENTINEL: "preserved",
+      CARAPACE_PROBE_SENTINEL: "preserved",
     });
   });
 
   it("removes the legacy install guard after runtime validation", () => {
-    const markerUrl = new URL("file:///tmp/openclaw-install-guard");
+    const markerUrl = new URL("file:///tmp/carapace-install-guard");
     const remove = vi.fn();
     const reportError = vi.fn();
 

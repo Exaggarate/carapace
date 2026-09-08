@@ -24,7 +24,7 @@ export function createUiVitestConfig(env?: Record<string, string | undefined>): 
     env,
     exclude,
     excludeUnitFastTests: false,
-    includeOpenClawRuntimeSetup: false,
+    includeCarapaceRuntimeSetup: false,
     intersectIncludeFile: true,
     isolate: false,
     name: "ui",

@@ -7,21 +7,21 @@ import {
   isGatewayClientRequestError,
   resolveNodeFromNodeList,
   type NodeMatchCandidate,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "carapace/plugin-sdk/gateway-runtime";
 import {
   buildNodeInvokeParams,
   getNodesTheme,
   nodesCallOpts,
   runNodesCommand,
-} from "openclaw/plugin-sdk/node-cli-runtime";
+} from "carapace/plugin-sdk/node-cli-runtime";
 import {
   addTimerTimeoutGraceMs,
   clampPositiveTimerTimeoutMs,
   parseStrictFiniteNumber,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/number-runtime";
+import { defaultRuntime } from "carapace/plugin-sdk/runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 /** Runtime output surface used by Canvas CLI commands. */
 type CanvasCliRuntime = {
@@ -136,7 +136,7 @@ function parseNodeCandidates(raw: unknown): CanvasNodeCandidate[] {
     .filter((entry): entry is CanvasNodeCandidate => entry !== null);
 }
 
-/** Creates the default Canvas CLI dependency bundle backed by the OpenClaw gateway CLI. */
+/** Creates the default Canvas CLI dependency bundle backed by the Carapace gateway CLI. */
 export function createDefaultCanvasCliDependencies(): CanvasCliDependencies {
   const callGatewayCli: CanvasCliDependencies["callGatewayCli"] = async (
     method,

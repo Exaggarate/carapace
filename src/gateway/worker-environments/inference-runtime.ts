@@ -1,5 +1,5 @@
-import { normalizeCodexResponsesBaseUrlForOpenAISdk } from "@openclaw/ai/transports";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeCodexResponsesBaseUrlForOpenAISdk } from "@carapace/ai/transports";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { TSchema } from "typebox";
 import type {
   WorkerInferenceContext,
@@ -44,7 +44,7 @@ import {
 } from "../../agents/simple-completion-runtime.js";
 import { normalizeUsage, hasObservedModelUsage } from "../../agents/usage.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { emitTrustedDiagnosticEvent, isDiagnosticsEnabled } from "../../infra/diagnostic-events.js";
 import { resolveDiagnosticModelContentCapturePolicy } from "../../infra/diagnostic-llm-content.js";
 import {
@@ -84,7 +84,7 @@ type WorkerInferenceSessionTarget = Pick<
 > & { agentId: string };
 
 type WorkerInferenceUsageParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   target: WorkerInferenceSessionTarget;
   request: WorkerInferenceStartParams;
   model: Model;
@@ -96,7 +96,7 @@ type WorkerInferenceUsageParams = {
 type WorkerInferenceRuntimeDependencies = {
   now: () => number;
   resolveSessionTarget: (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     sessionId: string,
   ) => WorkerInferenceSessionTarget | undefined;
   acquireRuntimeLease: typeof acquireAgentRunPreparedModelRuntime;
@@ -331,7 +331,7 @@ const DEFAULT_DEPENDENCIES: WorkerInferenceRuntimeDependencies = {
 };
 
 async function resolveApprovedModel(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   target: WorkerInferenceSessionTarget;
   request: WorkerInferenceStartParams;
   dependencies: WorkerInferenceRuntimeDependencies;
@@ -339,7 +339,7 @@ async function resolveApprovedModel(params: {
   | {
       provider: string;
       model: string;
-      config: OpenClawConfig;
+      config: CarapaceConfig;
       agentDir: string;
       workspaceDir: string;
       prepared: PreparedSimpleCompletionModel;

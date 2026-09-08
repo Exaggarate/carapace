@@ -52,7 +52,7 @@ type ReleasePlan = {
 };
 type ReleasePlanLock = Record<"schema" | "digest", string> & { plan: ReleasePlan };
 
-const REPOSITORY = "openclaw/openclaw";
+const REPOSITORY = "carapace/carapace";
 const EXECUTION_ROOT = fileURLToPath(new URL("..", import.meta.url));
 const BOOTSTRAP_PATH = "scripts/release-plan-producer.mts",
   CORE_PATH = "scripts/release-plan-producer-core.mts";
@@ -96,8 +96,8 @@ const CHILD_RUNNER = String.raw`
 import { createHash } from "node:crypto"; import { readFileSync } from "node:fs";
 import { createRequire, isBuiltin, registerHooks } from "node:module";
 import { deserialize, serialize } from "node:v8";
-const TOOLING_ROOT = "file:///__openclaw_verified_tooling__/", YAML_ROOT = "file:///__openclaw_verified_yaml__/";
-const YAML_ABSOLUTE_ROOT = "/__openclaw_verified_yaml__", CORE_PATH = ${JSON.stringify(CORE_PATH)};
+const TOOLING_ROOT = "file:///__carapace_verified_tooling__/", YAML_ROOT = "file:///__carapace_verified_yaml__/";
+const YAML_ABSOLUTE_ROOT = "/__carapace_verified_yaml__", CORE_PATH = ${JSON.stringify(CORE_PATH)};
 const EXPECTED_TOOLING_PATHS = ${JSON.stringify(TOOLING_MODULE_PATHS)};
 const compareAscii = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 const fail = message => { throw new Error(message); };

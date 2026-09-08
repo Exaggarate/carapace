@@ -8,7 +8,7 @@ import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelMeta } from "../../channels/plugins/types.public.js";
 import { isStaticallyChannelConfigured } from "../../config/channel-configured-shared.js";
 import { applyPluginAutoEnable } from "../../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { InstalledPluginIndex } from "../../plugins/installed-plugin-index.js";
 import { listPluginContributionIds } from "../../plugins/plugin-registry.js";
 import type { ChannelChoice } from "../onboard-types.js";
@@ -35,13 +35,13 @@ type ResolvedChannelSetupEntries = {
   installableCatalogById: Map<ChannelChoice, ChannelPluginCatalogEntry>;
 };
 
-function resolveWorkspaceDir(cfg: OpenClawConfig, workspaceDir?: string): string | undefined {
+function resolveWorkspaceDir(cfg: CarapaceConfig, workspaceDir?: string): string | undefined {
   return workspaceDir ?? resolveAgentWorkspaceDir(cfg, resolveDefaultAgentId(cfg));
 }
 
 /** List channel ids contributed by currently installed manifest-backed plugins. */
 export function listManifestInstalledChannelIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   index?: InstalledPluginIndex;
@@ -64,7 +64,7 @@ export function listManifestInstalledChannelIds(params: {
 
 /** Return true when a trusted catalog channel is already installed through plugin manifests. */
 export function isCatalogChannelInstalled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: ChannelPluginCatalogEntry;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
@@ -74,7 +74,7 @@ export function isCatalogChannelInstalled(params: {
 
 /** Merge configured channels and installable catalog channels into setup display buckets. */
 export function resolveChannelSetupEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   installedPlugins: ChannelPlugin[];
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

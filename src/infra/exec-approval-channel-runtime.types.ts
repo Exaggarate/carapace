@@ -1,5 +1,5 @@
 // Defines channel-native approval runtime contracts.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   ApprovalRequestInput,
   ChannelApprovalKind,
@@ -23,7 +23,7 @@ export type ExecApprovalChannelRuntimeAdapter<
 > = {
   label: string;
   clientDisplayName: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   gatewayUrl?: string;
   /** Defaults to exec-only; include plugin when the adapter can handle plugin approvals. */
   eventKinds?: readonly ChannelApprovalKind[];

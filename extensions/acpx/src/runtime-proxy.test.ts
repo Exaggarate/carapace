@@ -1,7 +1,7 @@
 // ACPX tests protect the lazy proxy contract: every hook forwards to the
 // resolved runtime, and an absent hook fails loudly instead of fabricating
 // success (regression for silently no-op doctor/status/prepareFreshSession).
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import type { AcpRuntimeEvent } from "../runtime-api.js";
 import { createLazyAcpRuntimeProxy, type CompleteAcpRuntime } from "./runtime-proxy.js";

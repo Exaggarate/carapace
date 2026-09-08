@@ -595,7 +595,7 @@ Options:
 }
 
 export function parseCliArgs(args: string[], env: NodeJS.ProcessEnv = process.env) {
-  let shardSpec = env.OPENCLAW_ADDITIONAL_BOUNDARY_SHARD ?? "";
+  let shardSpec = env.CARAPACE_ADDITIONAL_BOUNDARY_SHARD ?? "";
   let help = false;
   let coreTestBoundaryOwner: "additional" | "test-types" = "additional";
   for (let index = 0; index < args.length; index += 1) {
@@ -638,22 +638,22 @@ if (isDirectRunUrl(process.argv[1], import.meta.url)) {
       process.exitCode = 0;
     } else {
       const concurrencyRaw =
-        process.env.OPENCLAW_ADDITIONAL_BOUNDARY_CONCURRENCY ??
-        process.env.OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY;
+        process.env.CARAPACE_ADDITIONAL_BOUNDARY_CONCURRENCY ??
+        process.env.CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY;
       const concurrencyLabel =
-        process.env.OPENCLAW_ADDITIONAL_BOUNDARY_CONCURRENCY === undefined
-          ? "OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY"
-          : "OPENCLAW_ADDITIONAL_BOUNDARY_CONCURRENCY";
+        process.env.CARAPACE_ADDITIONAL_BOUNDARY_CONCURRENCY === undefined
+          ? "CARAPACE_EXTENSION_BOUNDARY_CONCURRENCY"
+          : "CARAPACE_ADDITIONAL_BOUNDARY_CONCURRENCY";
       const concurrency = resolveConcurrency(concurrencyRaw, 4, concurrencyLabel);
       const checkTimeoutMs = resolvePositiveInteger(
-        process.env.OPENCLAW_ADDITIONAL_BOUNDARY_TIMEOUT_MS,
+        process.env.CARAPACE_ADDITIONAL_BOUNDARY_TIMEOUT_MS,
         DEFAULT_CHECK_TIMEOUT_MS,
-        "OPENCLAW_ADDITIONAL_BOUNDARY_TIMEOUT_MS",
+        "CARAPACE_ADDITIONAL_BOUNDARY_TIMEOUT_MS",
       );
       const outputMaxBytes = resolvePositiveInteger(
-        process.env.OPENCLAW_ADDITIONAL_BOUNDARY_OUTPUT_MAX_BYTES,
+        process.env.CARAPACE_ADDITIONAL_BOUNDARY_OUTPUT_MAX_BYTES,
         DEFAULT_OUTPUT_MAX_BYTES,
-        "OPENCLAW_ADDITIONAL_BOUNDARY_OUTPUT_MAX_BYTES",
+        "CARAPACE_ADDITIONAL_BOUNDARY_OUTPUT_MAX_BYTES",
       );
       const shards = parseShardSelection(cliArgs.shardSpec);
       const checks = selectChecksForShard(BOUNDARY_CHECKS, shards, cliArgs.coreTestBoundaryOwner);

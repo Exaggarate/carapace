@@ -8,7 +8,7 @@
 // setup codes are reissued.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { withPairedDeviceRecords, type PairedDevice } from "./device-pairing.js";
 import {
   coercePairingStateRecord,

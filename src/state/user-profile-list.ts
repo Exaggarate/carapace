@@ -1,16 +1,16 @@
 import type { DatabaseSync } from "node:sqlite";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
-import { openClawStateDatabaseCache } from "./openclaw-state-db-cache.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "./openclaw-state-db-readonly.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { carapaceStateDatabaseCache } from "./carapace-state-db-cache.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "./carapace-state-db-readonly.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "./carapace-state-db.paths.js";
 import { readUserProfileVersion } from "./user-profile-events.js";
 import { selectUserProfileGitHubIdentities } from "./user-profile-github-identity.js";
 import {
@@ -26,9 +26,9 @@ import {
   hasEnsuredUserProfileRoleSchema,
 } from "./user-profiles-schema.js";
 
-export function listProfiles(options: OpenClawStateDatabaseOptions = {}) {
+export function listProfiles(options: CarapaceStateDatabaseOptions = {}) {
   ensureUserProfilesSchema(options);
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   return runSqliteDeferredTransactionSync(
     database.db,
     () => {
@@ -87,10 +87,10 @@ export function listProfiles(options: OpenClawStateDatabaseOptions = {}) {
 
 /** True when session-sharing policy can distinguish at least two durable people. */
 export function hasMultipleSessionSharingIdentities(
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): boolean {
   ensureUserProfilesSchema(options);
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openCarapaceStateDatabase(options);
   const profiles = executeSqliteQuerySync(
     db,
     userProfilesDb(db)
@@ -123,10 +123,10 @@ const profileAliasSnapshots = new WeakMap<
 /** Existing one-hop aliases are identity facts; this read never creates profile storage. */
 export function readUserProfileAliases(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): ReadonlySet<string> {
-  const opened = openClawStateDatabaseCache.getOpenClawStateDatabaseIfOpenAtPath(
-    options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env),
+  const opened = carapaceStateDatabaseCache.getCarapaceStateDatabaseIfOpenAtPath(
+    options.path ?? resolveCarapaceStateSqlitePath(options.env ?? process.env),
   );
   const version = readUserProfileVersion();
   let snapshot =
@@ -139,7 +139,7 @@ export function readUserProfileAliases(
     return cached;
   }
   const aliases =
-    withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
       if (!tableExists(db, "user_profiles")) {
         return new Set([profileId]);
       }
@@ -187,9 +187,9 @@ const userProfileDisplaySelection = [
 /** Reads merge-aware display data without loading avatar bytes. */
 export function getUserProfileDisplay(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileDisplay {
-  const profile = withExistingOpenClawStateDatabaseReadOnly(({ db }) => {
+  const profile = withExistingCarapaceStateDatabaseReadOnly(({ db }) => {
     if (!tableExists(db, "user_profiles")) {
       return undefined;
     }
@@ -218,14 +218,14 @@ export function getUserProfileDisplay(
 /** Activity references are display navigation, never authentication identifiers. */
 export function resolveUserProfileReference(
   reference: string,
-  options: OpenClawStateDatabaseOptions & { allowedProfileIds?: ReadonlySet<string> } = {},
+  options: CarapaceStateDatabaseOptions & { allowedProfileIds?: ReadonlySet<string> } = {},
 ): Result<string | undefined, "ambiguous"> {
   const { allowedProfileIds } = options;
   if (allowedProfileIds?.size === 0) {
     return ok(undefined);
   }
   return (
-    withExistingOpenClawStateDatabaseReadOnly(({ db }): Result<string | undefined, "ambiguous"> => {
+    withExistingCarapaceStateDatabaseReadOnly(({ db }): Result<string | undefined, "ambiguous"> => {
       if (!tableExists(db, "user_profiles")) {
         return ok(undefined);
       }

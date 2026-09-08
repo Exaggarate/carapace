@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createStorageMock } from "../test-helpers/storage.ts";
 import { createUpdateRunReceipts } from "./update-run-receipts.ts";
 
-const TRIAGED_KEY = "openclaw:control-ui:update:v1";
+const TRIAGED_KEY = "carapace:control-ui:update:v1";
 beforeEach(() => {
   vi.stubGlobal("sessionStorage", createStorageMock());
   vi.stubGlobal("localStorage", createStorageMock());
@@ -85,7 +85,7 @@ describe("update browser receipts", () => {
       }
       if (version !== "2026.9.1") {
         sessionStorage.setItem(
-          "openclaw:control-ui:update-triaged:v1",
+          "carapace:control-ui:update-triaged:v1",
           JSON.stringify([receipt("newer")]),
         );
         previous.push("newer");
@@ -102,17 +102,17 @@ describe("update browser receipts", () => {
       for (const run of [...previous, "new-run"]) {
         expect(reloaded.triaged("ws://gateway.test", null, run)).toBe(true);
       }
-      expect(sessionStorage.getItem("openclaw:control-ui:update-triaged:v1")).toBeNull();
+      expect(sessionStorage.getItem("carapace:control-ui:update-triaged:v1")).toBeNull();
     },
   );
 
   it.each(["not-json", JSON.stringify([42]), "x".repeat(32_768)])(
     "does not admit triage over unreadable 2026.9.2 receipts (%#)",
     (raw) => {
-      sessionStorage.setItem("openclaw:control-ui:update-triaged:v1", raw);
+      sessionStorage.setItem("carapace:control-ui:update-triaged:v1", raw);
       const receipts = createUpdateRunReceipts();
       expect(receipts.recordTriage("ws://gateway.test", null, "new-run")).toBe(false);
-      expect(sessionStorage.getItem("openclaw:control-ui:update-triaged:v1")).toBe(raw);
+      expect(sessionStorage.getItem("carapace:control-ui:update-triaged:v1")).toBe(raw);
       expect(sessionStorage.getItem(TRIAGED_KEY)).toBeNull();
     },
   );

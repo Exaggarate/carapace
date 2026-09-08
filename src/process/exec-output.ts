@@ -1,7 +1,7 @@
 import { isUtf8 } from "node:buffer";
 import process from "node:process";
 import { StringDecoder } from "node:string_decoder";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { truncateUtf8Suffix } from "../utils/utf8-truncate.js";
 
 export type CommandOutputCaptureMode = "head" | "tail" | "discard";

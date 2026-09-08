@@ -16,7 +16,7 @@ parent=$(dirname "$output")
 mkdir -p "$parent"
 parent=$(cd "$parent" && pwd -P)
 output="$parent/$(basename "$output")"
-staging=$(mktemp -d "$parent/.openclaw-gstreamer.XXXXXX")
+staging=$(mktemp -d "$parent/.carapace-gstreamer.XXXXXX")
 trap 'rm -rf "$staging"' EXIT
 
 # linuxdeploy's GStreamer plugin recursively bundles the dependency closure of

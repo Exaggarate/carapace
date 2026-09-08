@@ -9,7 +9,7 @@ const workflowSha = "b".repeat(40);
 const releaseTag = "v2026.8.1";
 const alphaBranch = "tideclaw/alpha/2026-08-30-1200Z";
 const packageDir = "extensions/fixture";
-const packageJson = '{"name":"@openclaw/fixture","version":"2026.8.33"}\n';
+const packageJson = '{"name":"@carapace/fixture","version":"2026.8.33"}\n';
 
 type PluginMode =
   | "clawhub-resolve"

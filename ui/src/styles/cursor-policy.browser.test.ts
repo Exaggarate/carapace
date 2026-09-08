@@ -17,7 +17,7 @@ const describeCursorPolicy = canRunPlaywrightChromium(chromiumExecutablePath)
   : describe.skip;
 
 // What `DashboardWindowController.installNativeChromeScript` stamps on <html>.
-const NATIVE_HOST_MARKERS = ["openclaw-native-macos", "openclaw-native-web-chrome"] as const;
+const NATIVE_HOST_MARKERS = ["carapace-native-macos", "carapace-native-web-chrome"] as const;
 
 type CursorCase = {
   readonly expected: string;
@@ -136,7 +136,7 @@ function fixtureDocument(): string {
       <div class="session-tokens"><span class="session-tokens__value">12k</span></div>
       <span class="agent-tools-runtime-chip--more">+3</span>
       <div class="chat-text"><a class="markdown-file-link">src/index.ts</a></div>
-      <div class="chat-text"><a class="markdown-github-link markdown-github-item" data-github-kind="pull" href="https://github.com/openclaw/openclaw/pull/3434" target="_blank">#3434</a></div>
+      <div class="chat-text"><a class="markdown-github-link markdown-github-item" data-github-kind="pull" href="https://github.com/Exaggarate/carapace/pull/3434" target="_blank">#3434</a></div>
       <div id="shadow-policy-host"><template shadowrootmode="open">
         <style>${dockPanelStyles.cssText}</style>
         <button id="shadow-new-tab-button" class="rail-header__action" type="button" data-new-tab-action>New tab</button>

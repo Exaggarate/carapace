@@ -2,7 +2,7 @@ import type {
   TranscriptSessionSummary,
   TranscriptsGetResult,
   TranscriptsStatusResult,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 
 export const meetingEntry = {
   selector: "2026-08-27/design-review",

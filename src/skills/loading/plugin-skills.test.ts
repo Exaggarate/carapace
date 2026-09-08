@@ -7,7 +7,7 @@ import {
   testing as acpRuntimeTesting,
   registerAcpRuntimeBackend,
 } from "../../acp/runtime/registry.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { PluginManifestRegistry } from "../../plugins/manifest-registry.js";
 import { createPluginCache, withPluginCache } from "../../plugins/plugin-cache.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
@@ -84,7 +84,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
         origin: "workspace",
         rootDir: params.acpxRoot,
         source: params.acpxRoot,
-        manifestPath: path.join(params.acpxRoot, "openclaw.plugin.json"),
+        manifestPath: path.join(params.acpxRoot, "carapace.plugin.json"),
       },
       {
         id: "helper",
@@ -97,7 +97,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
         origin: "workspace",
         rootDir: params.helperRoot,
         source: params.helperRoot,
-        manifestPath: path.join(params.helperRoot, "openclaw.plugin.json"),
+        manifestPath: path.join(params.helperRoot, "carapace.plugin.json"),
       },
     ],
   };
@@ -106,7 +106,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
 function createSinglePluginRegistry(params: {
   pluginRoot: string;
   skills: string[];
-  format?: "openclaw" | "bundle";
+  format?: "carapace" | "bundle";
   bundleFormat?: "agent" | "codex" | "claude" | "cursor";
   legacyPluginIds?: string[];
   origin?: PluginOrigin;
@@ -128,16 +128,16 @@ function createSinglePluginRegistry(params: {
         origin: params.origin ?? "workspace",
         rootDir: params.pluginRoot,
         source: params.pluginRoot,
-        manifestPath: path.join(params.pluginRoot, "openclaw.plugin.json"),
+        manifestPath: path.join(params.pluginRoot, "carapace.plugin.json"),
       },
     ],
   };
 }
 
 async function setupAcpxAndHelperRegistry() {
-  const workspaceDir = await tempDirs.make("openclaw-");
-  const acpxRoot = await tempDirs.make("openclaw-acpx-plugin-");
-  const helperRoot = await tempDirs.make("openclaw-helper-plugin-");
+  const workspaceDir = await tempDirs.make("carapace-");
+  const acpxRoot = await tempDirs.make("carapace-acpx-plugin-");
+  const helperRoot = await tempDirs.make("carapace-helper-plugin-");
   await fs.mkdir(path.join(acpxRoot, "skills"), { recursive: true });
   await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
   hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue(
@@ -161,9 +161,9 @@ function useStableMetadataSnapshot(manifestRegistry: PluginManifestRegistry): vo
 }
 
 async function setupPluginOutsideSkills() {
-  const workspaceDir = await tempDirs.make("openclaw-");
-  const pluginRoot = await tempDirs.make("openclaw-plugin-");
-  const outsideDir = await tempDirs.make("openclaw-outside-");
+  const workspaceDir = await tempDirs.make("carapace-");
+  const pluginRoot = await tempDirs.make("carapace-plugin-");
+  const outsideDir = await tempDirs.make("carapace-outside-");
   const outsideSkills = path.join(outsideDir, "skills");
   return { workspaceDir, pluginRoot, outsideSkills };
 }
@@ -214,7 +214,7 @@ describe("resolvePluginSkillRoots", () => {
       config: {
         acp: { enabled: true },
         plugins: { entries: { acpx: { enabled: true }, helper: { enabled: true } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       metadataSnapshot: {
         manifestRegistry,
         normalizePluginId: (pluginId: string) => pluginId,
@@ -241,8 +241,8 @@ describe("resolvePluginSkillRoots", () => {
   });
 
   it("keeps package skill targets stable across config changes while publishing live selection", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-workspace-");
-    const pluginRoot = await tempDirs.make("openclaw-plugin-");
+    const workspaceDir = await tempDirs.make("carapace-workspace-");
+    const pluginRoot = await tempDirs.make("carapace-plugin-");
     const pluginSkillsDir = await tempDirs.make("managed-plugin-skills-");
     const skillsRoot = path.join(pluginRoot, "skills");
     const original = path.join(skillsRoot, "original");
@@ -252,7 +252,7 @@ describe("resolvePluginSkillRoots", () => {
     hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue(
       createSinglePluginRegistry({ pluginRoot, skills: ["./skills"] }),
     );
-    const config: OpenClawConfig = { plugins: { entries: { helper: { enabled: true } } } };
+    const config: CarapaceConfig = { plugins: { entries: { helper: { enabled: true } } } };
     const resolve = (nextConfig = config) =>
       resolvePluginSkillRoots({ workspaceDir, config: nextConfig, pluginSkillsDir });
     resolve();
@@ -280,8 +280,8 @@ describe("resolvePluginSkillRoots", () => {
   ])(
     "preserves authoritative $origin plugin hardlink policy on skill roots",
     async ({ origin, rejectHardlinks }) => {
-      const workspaceDir = await tempDirs.make("openclaw-");
-      const pluginRoot = await tempDirs.make("openclaw-plugin-");
+      const workspaceDir = await tempDirs.make("carapace-");
+      const pluginRoot = await tempDirs.make("carapace-plugin-");
       const skillDir = path.join(pluginRoot, "skills");
       await fs.mkdir(skillDir, { recursive: true });
       hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue(
@@ -293,7 +293,7 @@ describe("resolvePluginSkillRoots", () => {
           workspaceDir,
           config: {
             plugins: { entries: { helper: { enabled: true } } },
-          } as OpenClawConfig,
+          } as CarapaceConfig,
         }),
       ).toEqual([{ dir: skillDir, rejectHardlinks }]);
     },
@@ -305,16 +305,16 @@ describe("resolvePluginSkillRoots", () => {
   ])(
     "honors channels.<id>.enabled=$channelEnabled through the manifest channel id when it differs from the plugin id",
     async ({ channelEnabled, expectsSkills }) => {
-      const workspaceDir = await tempDirs.make("openclaw-");
-      const pluginRoot = await tempDirs.make("openclaw-demo-plugin-");
+      const workspaceDir = await tempDirs.make("carapace-");
+      const pluginRoot = await tempDirs.make("carapace-demo-plugin-");
       await fs.mkdir(path.join(pluginRoot, "skills"), { recursive: true });
-      // QQ Bot style: plugin `openclaw-demo` owns `channels.demo`; the plugin id alone
+      // QQ Bot style: plugin `carapace-demo` owns `channels.demo`; the plugin id alone
       // cannot resolve that channel key.
       hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue({
         diagnostics: [],
         plugins: [
           {
-            id: "openclaw-demo",
+            id: "carapace-demo",
             name: "Demo",
             channels: ["demo"],
             providers: [],
@@ -324,7 +324,7 @@ describe("resolvePluginSkillRoots", () => {
             origin: "bundled",
             rootDir: pluginRoot,
             source: pluginRoot,
-            manifestPath: path.join(pluginRoot, "openclaw.plugin.json"),
+            manifestPath: path.join(pluginRoot, "carapace.plugin.json"),
           },
         ],
       });
@@ -333,8 +333,8 @@ describe("resolvePluginSkillRoots", () => {
         workspaceDir,
         config: {
           channels: { demo: { enabled: channelEnabled } },
-          plugins: { entries: { "openclaw-demo": { enabled: true } } },
-        } as OpenClawConfig,
+          plugins: { entries: { "carapace-demo": { enabled: true } } },
+        } as CarapaceConfig,
       });
 
       expect(roots.map((root) => root.dir)).toEqual(
@@ -385,7 +385,7 @@ describe("resolvePluginSkillRoots", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots.map((root) => root.dir)).toEqual(expectedDirs({ acpxRoot, helperRoot }));
@@ -406,7 +406,7 @@ describe("resolvePluginSkillRoots", () => {
       config: {
         acp: { enabled: true },
         plugins: { entries: { acpx: { enabled: true }, helper: { enabled: true } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots.map((root) => root.dir)).toEqual([
@@ -418,7 +418,7 @@ describe("resolvePluginSkillRoots", () => {
   });
 
   it("preserves absent config when resolving current lifecycle metadata", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
+    const workspaceDir = await tempDirs.make("carapace-");
     const manifestRegistry: PluginManifestRegistry = { diagnostics: [], plugins: [] };
     const metadataSnapshot = {
       manifestRegistry,
@@ -426,7 +426,7 @@ describe("resolvePluginSkillRoots", () => {
       normalizePluginId: (pluginId: string) => pluginId,
     };
     hoisted.resolvePluginMetadataSnapshot.mockImplementationOnce((params: unknown) =>
-      (params as { config?: OpenClawConfig }).config === undefined
+      (params as { config?: CarapaceConfig }).config === undefined
         ? metadataSnapshot
         : hoisted.loadPluginMetadataSnapshot(params),
     );
@@ -462,7 +462,7 @@ describe("resolvePluginSkillRoots", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
       if (initiallyAvailable) {
         registerHealthyAcpBackend();
       }
@@ -507,7 +507,7 @@ describe("resolvePluginSkillRoots", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots).toEqual([{ dir: path.resolve(pluginRoot, "skills"), rejectHardlinks: true }]);
@@ -534,14 +534,14 @@ describe("resolvePluginSkillRoots", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots).toStrictEqual([]);
   });
 
   it("cleans up generated plugin skill links when the plugin registry is empty", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
+    const workspaceDir = await tempDirs.make("carapace-");
     const pluginSkillsDir = await tempDirs.make("managed-plugin-skills-");
     const staleRoot = await tempDirs.make("stale-plugin-skills-");
     const staleSkill = path.join(staleRoot, "stale-skill");
@@ -555,7 +555,7 @@ describe("resolvePluginSkillRoots", () => {
 
     const roots = resolvePluginSkillRoots({
       workspaceDir,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       pluginSkillsDir,
     });
 
@@ -572,7 +572,7 @@ describe("resolvePluginSkillRoots", () => {
 
     const roots = resolvePluginSkillRoots({
       workspaceDir: undefined,
-      config: {} as OpenClawConfig,
+      config: {} as CarapaceConfig,
       pluginSkillsDir,
     });
 
@@ -581,8 +581,8 @@ describe("resolvePluginSkillRoots", () => {
   });
 
   it("resolves Claude bundle command roots through the normal plugin skill path", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const pluginRoot = await tempDirs.make("openclaw-claude-bundle-");
+    const workspaceDir = await tempDirs.make("carapace-");
+    const pluginRoot = await tempDirs.make("carapace-claude-bundle-");
     await fs.mkdir(path.join(pluginRoot, "commands"), { recursive: true });
     await fs.mkdir(path.join(pluginRoot, "skills"), { recursive: true });
 
@@ -602,7 +602,7 @@ describe("resolvePluginSkillRoots", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots.map((root) => root.dir)).toEqual([
@@ -612,8 +612,8 @@ describe("resolvePluginSkillRoots", () => {
   });
 
   it("limits Agent Plugins skills to valid immediate child directories", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const pluginRoot = await tempDirs.make("openclaw-agent-bundle-");
+    const workspaceDir = await tempDirs.make("carapace-");
+    const pluginRoot = await tempDirs.make("carapace-agent-bundle-");
     const pluginSkillsDir = await tempDirs.make("managed-plugin-skills-");
     const skillsRoot = path.join(pluginRoot, "skills");
     const validSkill = path.join(skillsRoot, "valid");
@@ -639,7 +639,7 @@ describe("resolvePluginSkillRoots", () => {
       pluginSkillsDir,
       config: {
         plugins: { entries: { helper: { enabled: true } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots).toEqual([{ dir: validSkill, rejectHardlinks: true }]);
@@ -649,8 +649,8 @@ describe("resolvePluginSkillRoots", () => {
   });
 
   it("resolves enabled plugin skills through legacy manifest aliases", async () => {
-    const workspaceDir = await tempDirs.make("openclaw-");
-    const pluginRoot = await tempDirs.make("openclaw-legacy-plugin-");
+    const workspaceDir = await tempDirs.make("carapace-");
+    const pluginRoot = await tempDirs.make("carapace-legacy-plugin-");
     await fs.mkdir(path.join(pluginRoot, "skills"), { recursive: true });
 
     hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue(
@@ -669,7 +669,7 @@ describe("resolvePluginSkillRoots", () => {
             "helper-legacy": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(roots).toEqual([{ dir: path.resolve(pluginRoot, "skills"), rejectHardlinks: true }]);
@@ -693,7 +693,7 @@ describe("publishPluginSkills", () => {
       origin: "workspace" as const,
       rootDir,
       source: rootDir,
-      manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+      manifestPath: path.join(rootDir, "carapace.plugin.json"),
     }));
     hoisted.loadPluginManifestRegistryForInstalledIndex.mockReturnValue({
       diagnostics: [],

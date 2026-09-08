@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -16,7 +16,7 @@ import {
   type SessionCreatedActor,
 } from "../config/sessions/session-entry-provenance.js";
 import type { InternalSessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   closeSessionWorkAdmissions,
@@ -45,7 +45,7 @@ import {
 export type SessionRecoveryContinuationOutcome = SessionsRecoverResult["continuation"];
 
 const recoveryQueues = resolveGlobalMap<string, StoreWriterQueue>(
-  Symbol.for("openclaw.sessionRecoveryQueues"),
+  Symbol.for("carapace.sessionRecoveryQueues"),
 );
 
 type RecoverGatewaySessionResult =
@@ -76,7 +76,7 @@ export async function recoverGatewaySession(params: {
   actor?: SessionCreatedActor;
   agentId?: string;
   authorizedPluginId?: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   commitGuard?: () => void;
   key: string;
   requestingOperatorProfileId?: string;

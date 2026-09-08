@@ -3,7 +3,7 @@
  * Combines provider plugin auth profiles with scoped external CLI credentials
  * and decides which runtime profiles may be persisted back to the store.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type {
   ProviderExternalAuthProfile,
   ProviderExternalAuthProfileResolver,
@@ -27,7 +27,7 @@ import type { AuthProfileStore } from "./types.js";
 type ExternalAuthProfileMap = Map<string, ProviderExternalAuthProfile>;
 type ExternalCliOverlayOptions = {
   allowKeychainPrompt?: boolean;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   externalCliProviderIds?: Iterable<string>;
   externalCliProfileIds?: Iterable<string>;
 };
@@ -44,7 +44,7 @@ const testing = {
   },
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.externalAuthTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.externalAuthTestApi")] =
     testing;
 }
 
@@ -70,7 +70,7 @@ function resolveExplicitProfileIds(values: Iterable<string> | undefined): Set<st
 function isExternalAuthProfileAllowed(
   profile: ProviderExternalAuthProfile,
   store: AuthProfileStore,
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   explicitProfileIds: ReadonlySet<string> | undefined,
   env: NodeJS.ProcessEnv,
 ): boolean {

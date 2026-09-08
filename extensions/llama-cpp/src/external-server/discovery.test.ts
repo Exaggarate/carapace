@@ -1,12 +1,12 @@
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-shared";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { discoverLlamaServer } from "./discovery.js";
 
 const discoverRowsMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/provider-setup", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/provider-setup")>()),
+vi.mock("carapace/plugin-sdk/provider-setup", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/provider-setup")>()),
   discoverOpenAICompatibleLocalModels: discoverRowsMock,
 }));
 
@@ -93,8 +93,8 @@ describe("llama-server discovery projection", () => {
     { name: "HTML app shell", body: "<!doctype html><html><body>Local model app</body></html>" },
     { name: "non-model JSON", body: JSON.stringify({ app: "local-models" }) },
   ])("discovers an existing server behind a root $name response", async ({ body }) => {
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-setup")>(
-      "openclaw/plugin-sdk/provider-setup",
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/provider-setup")>(
+      "carapace/plugin-sdk/provider-setup",
     );
     discoverRowsMock.mockImplementation(actual.discoverOpenAICompatibleLocalModels);
     const requests: string[] = [];
@@ -125,8 +125,8 @@ describe("llama-server discovery projection", () => {
     { name: "authorization header", access: { headers: { Authorization: "Bearer endpoint-key" } } },
     { name: "explicit refresh", access: { cacheTtlMs: 0 } },
   ])("fetches $name discovery after an anonymous catalog was cached", async ({ access }) => {
-    const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-setup")>(
-      "openclaw/plugin-sdk/provider-setup",
+    const actual = await vi.importActual<typeof import("carapace/plugin-sdk/provider-setup")>(
+      "carapace/plugin-sdk/provider-setup",
     );
     discoverRowsMock.mockImplementation(actual.discoverOpenAICompatibleLocalModels);
     let modelId = "anonymous-model";

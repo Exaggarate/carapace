@@ -9,7 +9,7 @@ import { onTimer } from "../../cron/service/timer.test-support.js";
 import { loadCronStore } from "../../cron/store.js";
 import type { CronJob } from "../../cron/types.js";
 import { getActiveGatewayRootWorkCount } from "../../process/gateway-work-admission.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 import * as taskExecutor from "../../tasks/task-executor.js";
 import { findTaskByRunId, listTaskRecordsUnsorted } from "../../tasks/task-registry.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
@@ -281,7 +281,7 @@ describe("cron service timer seam coverage", () => {
         }
       },
     });
-    const database = openOpenClawStateDatabase().db;
+    const database = openCarapaceStateDatabase().db;
     database.function("observe_timer_reservation", (stateJson) => {
       if (typeof stateJson === "string") {
         const marker = (JSON.parse(stateJson) as CronJob["state"]).queuedAtMs;

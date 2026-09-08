@@ -1,5 +1,5 @@
 import type { SQLInputValue } from "node:sqlite";
-import { coerceErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { coerceErrorMessage } from "@carapace/normalization-core/error-coercion";
 import type { Selectable } from "kysely";
 import { resolveCronJobConfigRevision } from "../cron/config-revision.js";
 import { cronJobDefinitionFromReadView } from "../cron/job-read-view.js";
@@ -9,15 +9,15 @@ import { applyDefaultCronToolsAllow } from "../cron/tools-allow.js";
 import type { CronJob } from "../cron/types.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../infra/sqlite-number.js";
-import type { DB } from "../state/openclaw-state-db.generated.js";
+import type { DB } from "../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import type { ClawAddPlan, ClawCronJob } from "./types.js";
 
-export const CLAW_CRON_REF_SCHEMA_VERSION = "openclaw.clawCronRef.v1" as const;
+export const CLAW_CRON_REF_SCHEMA_VERSION = "carapace.clawCronRef.v1" as const;
 
 export type PersistedClawCronRef = {
   schemaVersion: typeof CLAW_CRON_REF_SCHEMA_VERSION;
@@ -88,11 +88,11 @@ function refToRow(ref: PersistedClawCronRef): CronRefRow {
 function persistPendingRef(
   plan: ClawAddPlan,
   job: ClawCronJob,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number },
+  options: CarapaceStateDatabaseOptions & { nowMs?: number },
 ): PersistedClawCronRef {
   const nowMs = options.nowMs ?? Date.now();
   const declarationKey = `claw:${plan.agent.finalId}:${job.id}`;
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   const query = getNodeSqliteKysely<CronRefDatabase>(database.db)
     .selectFrom("claw_cron_refs")
     .selectAll()
@@ -128,7 +128,7 @@ function persistPendingRef(
     createdAtMs: nowMs,
     updatedAtMs: nowMs,
   };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<CronRefDatabase>(db)
@@ -142,7 +142,7 @@ function persistPendingRef(
 function updateRef(
   ref: PersistedClawCronRef,
   update: { schedulerJobId?: string; status: PersistedClawCronRef["status"]; error?: string },
-  options: OpenClawStateDatabaseOptions & { nowMs?: number },
+  options: CarapaceStateDatabaseOptions & { nowMs?: number },
 ): PersistedClawCronRef {
   // Omitted fields are cleared in SQLite and must not survive in the returned result.
   const { schedulerJobId: _schedulerJobId, error: _error, ...retained } = ref;
@@ -151,7 +151,7 @@ function updateRef(
     ...update,
     updatedAtMs: options.nowMs ?? Date.now(),
   };
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<CronRefDatabase>(db)
@@ -288,7 +288,7 @@ export function clawCronGatewayJobMatchesRef(
 
 export async function installClawCronJobs(
   plan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: CarapaceStateDatabaseOptions & {
     gateway?: Pick<ClawCronGateway, "add" | "list" | "waitUntilAgentAvailable">;
     nowMs?: number;
   } = {},
@@ -404,9 +404,9 @@ export async function installClawCronJobs(
 
 export function readClawCronRefs(
   agentId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): PersistedClawCronRef[] {
-  const database = openOpenClawStateDatabase(options);
+  const database = openCarapaceStateDatabase(options);
   if (
     options.readOnly &&
     !database.db /* sqlite-allow-raw: read-only Claw cron table-existence probe. */
@@ -432,9 +432,9 @@ export function readClawCronRefs(
 export function deleteClawCronRef(
   agentId: string,
   manifestId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<CronRefDatabase>(db)
@@ -448,7 +448,7 @@ export function deleteClawCronRef(
 export function markClawCronRefRemoved(
   agentId: string,
   manifestId: string,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: CarapaceStateDatabaseOptions & { nowMs?: number } = {},
 ): PersistedClawCronRef | undefined {
   const ref = readClawCronRefs(agentId, options).find(
     (candidate) => candidate.manifestId === manifestId,
@@ -458,9 +458,9 @@ export function markClawCronRefRemoved(
 
 export function upsertClawCronRef(
   ref: PersistedClawCronRef,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runCarapaceStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getNodeSqliteKysely<CronRefDatabase>(db)

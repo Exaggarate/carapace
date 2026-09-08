@@ -1,10 +1,10 @@
 // Verifies guarded session managers emit transcript update events with stable sequence ids.
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import type { AgentMessage } from "carapace/plugin-sdk/agent-core";
+import { SessionManager } from "carapace/plugin-sdk/agent-sessions";
+import { upsertSessionEntry } from "carapace/plugin-sdk/session-store-runtime";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { transformMessages } from "../../packages/ai/src/transcript-transform.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -49,13 +49,13 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let fixtureId = 0;
 
 async function openPersistedSessionManager() {
-  const root = tempDirs.make("openclaw-transcript-events-");
+  const root = tempDirs.make("carapace-transcript-events-");
   const sessionId = `session-${fixtureId++}`;
   const target = {
     agentId: "main",
     sessionId,
     sessionKey: `agent:main:${sessionId}`,
-    storePath: path.join(root, "agents", "main", "agent", "openclaw-agent.sqlite"),
+    storePath: path.join(root, "agents", "main", "agent", "carapace-agent.sqlite"),
   };
   const sessionEntry = { sessionId, updatedAt: Date.now() };
   await upsertSessionEntry({
@@ -70,7 +70,7 @@ afterEach(() => {
   while (listeners.length > 0) {
     listeners.pop()?.();
   }
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 describe("guardSessionManager transcript updates", () => {
@@ -91,7 +91,7 @@ describe("guardSessionManager transcript updates", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]?.message).toMatchObject({
       stopReason: "error",
-      __openclaw: { runId: "run-second" },
+      __carapace: { runId: "run-second" },
     });
   });
 
@@ -109,12 +109,12 @@ describe("guardSessionManager transcript updates", () => {
       .filter((entry) => entry.type === "compaction");
     expect(compactions).toMatchObject([
       {
-        __openclaw: { runId: "run-first", itemId: "compaction-run-first" },
+        __carapace: { runId: "run-first", itemId: "compaction-run-first" },
         details: { source: "hook" },
         fromHook: true,
       },
       {
-        __openclaw: { runId: "run-second", itemId: "compaction-run-second" },
+        __carapace: { runId: "run-second", itemId: "compaction-run-second" },
         details: { source: "hook" },
         fromHook: true,
       },
@@ -455,7 +455,7 @@ describe("guardSessionManager transcript updates", () => {
       role: "user" as const,
       content: [{ type: "text" as const, text: "Hi @Taylor" }],
       timestamp: 1,
-      __openclaw: {
+      __carapace: {
         humanMentions: [{ profileId: "profile-taylor", start: 3, end: 10 }],
       },
     };
@@ -482,7 +482,7 @@ describe("guardSessionManager transcript updates", () => {
       expect(guarded.getEntry(entryId)).toMatchObject({
         message: { role: "user", content: [{ type: "text", text: "Hi @Morgan" }] },
       });
-      expect(guarded.getEntry(entryId)).not.toHaveProperty("message.__openclaw.humanMentions");
+      expect(guarded.getEntry(entryId)).not.toHaveProperty("message.__carapace.humanMentions");
     } finally {
       resetGlobalHookRunner();
     }
@@ -653,7 +653,7 @@ describe("guardSessionManager transcript updates", () => {
         .filter((entry) => entry.type === "message")
         .map((entry) => ({
           role: entry.message.role,
-          runId: asNullableRecord(asNullableRecord(entry.message)?.["__openclaw"])?.runId,
+          runId: asNullableRecord(asNullableRecord(entry.message)?.["__carapace"])?.runId,
         })),
     ).toEqual([
       { role: "user", runId: undefined },
@@ -665,7 +665,7 @@ describe("guardSessionManager transcript updates", () => {
     expect(updates.map((update) => update.messageSeq)).toEqual([2, 4]);
     expect(
       updates.map(
-        (update) => asNullableRecord(asNullableRecord(update.message)?.["__openclaw"])?.runId,
+        (update) => asNullableRecord(asNullableRecord(update.message)?.["__carapace"])?.runId,
       ),
     ).toEqual(["run-owning-final", "run-owning-final"]);
     expect(updates.map((update) => update.runId)).toEqual([undefined, "run-owning-final"]);
@@ -715,10 +715,10 @@ describe("guardSessionManager transcript updates", () => {
       expect(unknownRun).toBe(firstRun);
       expect(updates[0]?.message).toMatchObject({
         content: [{ type: "text", text: "first reply\nMEDIA:./first.json" }],
-        openclawDelivery: { mediaUrls: ["./first.json"] },
+        carapaceDelivery: { mediaUrls: ["./first.json"] },
       });
       expect(
-        updates.slice(1).some(({ message }) => Reflect.has(message as object, "openclawDelivery")),
+        updates.slice(1).some(({ message }) => Reflect.has(message as object, "carapaceDelivery")),
       ).toBe(false);
       expect(
         updates.map(({ messageId, messageSeq, runId }) => ({ messageId, messageSeq, runId })),
@@ -818,7 +818,7 @@ describe("deferred assistant error transcript", () => {
       }),
     );
     await owner.settle(false);
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const messages = SessionManager.open(target).buildSessionContext().messages;
     expect(messages).toMatchObject([
       { role: "assistant", content: [toolCall], stopReason: "toolUse" },
@@ -845,16 +845,16 @@ describe("deferred assistant error transcript", () => {
     {
       label: "canonical media",
       facts: {
-        __openclaw: {
+        __carapace: {
           media: [{ url: "https://example.invalid/report.pdf", contentType: "application/pdf" }],
         },
       },
     },
-    { label: "managed attachment", facts: { openclawDelivery: { mediaUrls: ["./report.pdf"] } } },
+    { label: "managed attachment", facts: { carapaceDelivery: { mediaUrls: ["./report.pdf"] } } },
     {
       label: "display override",
       facts: {
-        openclawDisplayContent: [
+        carapaceDisplayContent: [
           { type: "text", text: "Here" },
           { type: "attachment", url: "https://example.invalid/report.pdf" },
         ],
@@ -883,8 +883,8 @@ describe("deferred assistant error transcript", () => {
         content: [],
         stopReason: "stop",
         ...facts,
-        ...(facts.openclawDisplayContent
-          ? { openclawDisplayContent: [facts.openclawDisplayContent[1]] }
+        ...(facts.carapaceDisplayContent
+          ? { carapaceDisplayContent: [facts.carapaceDisplayContent[1]] }
           : {}),
       },
       { role: "assistant", content: [{ type: "text", text: "Recovered" }] },
@@ -904,7 +904,7 @@ describe("deferred assistant error transcript", () => {
         stopReason: "error",
         errorMessage: "terminal failure",
       }),
-      openclawDisplayContent: [displayText, attachment],
+      carapaceDisplayContent: [displayText, attachment],
     };
     failed.usage = { ...failed.usage, output: 7, totalTokens: 7 };
     manager.appendMessage(failed);
@@ -922,14 +922,14 @@ describe("deferred assistant error transcript", () => {
       {
         role: "assistant",
         content: [{ type: "toolCall", id: "call-terminal" }],
-        openclawDisplayContent: [attachment],
+        carapaceDisplayContent: [attachment],
         usage: { output: 7 },
       },
       { role: "toolResult", toolCallId: "call-terminal" },
       {
         role: "assistant",
         content: [{ type: "text", text: "Partial answer" }],
-        openclawDisplayContent: [displayText],
+        carapaceDisplayContent: [displayText],
         stopReason: "error",
         errorMessage: "terminal failure",
         usage: { output: 0 },

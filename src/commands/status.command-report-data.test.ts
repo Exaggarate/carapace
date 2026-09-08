@@ -1,5 +1,5 @@
 // Status command report data tests cover report data assembly from shared status fixtures.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 import { buildStatusCommandReportData } from "./status.command-report-data.ts";
@@ -7,8 +7,8 @@ import { createStatusCommandReportDataParams } from "./status.test-support.ts";
 
 describe("buildStatusCommandReportData", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_PROFILE", undefined);
-    vi.stubEnv("OPENCLAW_CONTAINER_HINT", undefined);
+    vi.stubEnv("CARAPACE_PROFILE", undefined);
+    vi.stubEnv("CARAPACE_CONTAINER_HINT", undefined);
   });
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -89,7 +89,7 @@ describe("buildStatusCommandReportData", () => {
       Item: "OS",
       Value: "macOS · node " + process.versions.node,
     });
-    expect(result.taskMaintenanceHint).toBe("Task maintenance: openclaw tasks maintenance --apply");
+    expect(result.taskMaintenanceHint).toBe("Task maintenance: carapace tasks maintenance --apply");
     expect(result.pluginCompatibilityLines.map(stripAnsi)).toEqual(["  WARN a legacy"]);
     const pairingTitle = expectDefined(result.pairingRecoveryLines[0], "pairing recovery title");
     expect(stripAnsi(pairingTitle)).toBe("Gateway pairing approval required.");
@@ -102,7 +102,7 @@ describe("buildStatusCommandReportData", () => {
       Status: "reachable",
       Detail: "42ms",
     });
-    expect(result.footerLines.at(-1)).toBe("  Need to test channels? openclaw status --deep");
+    expect(result.footerLines.at(-1)).toBe("  Need to test channels? carapace status --deep");
   });
 
   it("shows skipped audit text when fast status omits the security audit", async () => {
@@ -113,8 +113,8 @@ describe("buildStatusCommandReportData", () => {
     );
 
     expect(result.securityAuditLines.map(stripAnsi)).toEqual([
-      "Skipped in fast status. Full report: openclaw security audit",
-      "Deep probe: openclaw status --deep",
+      "Skipped in fast status. Full report: carapace security audit",
+      "Deep probe: carapace status --deep",
     ]);
   });
 

@@ -1,9 +1,9 @@
 // Discord provider module implements model/runtime integration.
-import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { registerChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "carapace/plugin-sdk/approval-handler-adapter-runtime";
+import type { PluginRuntime } from "carapace/plugin-sdk/channel-core";
+import { registerChannelRuntimeContext } from "carapace/plugin-sdk/channel-runtime-context";
+import type { DiscordAccountConfig, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "carapace/plugin-sdk/runtime-env";
 import { createDiscordActivityButton } from "../activities/interaction.js";
 import {
   getDiscordExecApprovalApprovers,
@@ -39,7 +39,7 @@ type DiscordVoiceManager = import("../voice/voice-runtime.js").DiscordVoiceManag
 
 export function createDiscordProviderInteractionSurface(params: {
   readPolicy?: DiscordLivePolicyReader;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   discordConfig: DiscordAccountConfig;
   accountId: string;
   applicationId?: string;

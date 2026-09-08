@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { UPDATE_POST_CORE_CONVERGENCE_ENV } from "../../commands/doctor/shared/update-phase.js";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import { runExec } from "../../process/exec.js";
@@ -67,7 +67,7 @@ function createPostPluginReadinessExecutionFailure(
       {
         reason,
         message: "Updated plugin readiness checks could not be completed before restart.",
-        guidance: ["Run `openclaw update repair` to retry post-update readiness checks."],
+        guidance: ["Run `carapace update repair` to retry post-update readiness checks."],
       },
     ],
   };
@@ -91,7 +91,7 @@ export async function applyPostPluginUpdateReadiness(params: {
   if (!entryPath) {
     return createPostPluginReadinessExecutionFailure(
       params.pluginUpdate,
-      "Updated OpenClaw entrypoint not found for post-plugin readiness checks",
+      "Updated Carapace entrypoint not found for post-plugin readiness checks",
     );
   }
   const args = [entryPath, "doctor", "--lint", "--json", "--severity-min", "error"];
@@ -108,7 +108,7 @@ export async function applyPostPluginUpdateReadiness(params: {
         logOutput: false,
         baseEnv,
         env: {
-          OPENCLAW_UPDATE_IN_PROGRESS: "1",
+          CARAPACE_UPDATE_IN_PROGRESS: "1",
           [UPDATE_POST_CORE_CONVERGENCE_ENV]: "1",
         },
       })
@@ -150,7 +150,7 @@ export async function applyPostPluginUpdateReadiness(params: {
           message: finding.message,
           guidance: [
             finding.fixHint ??
-              `Resolve this finding, then rerun \`openclaw doctor --lint --only ${finding.checkId}\`.`,
+              `Resolve this finding, then rerun \`carapace doctor --lint --only ${finding.checkId}\`.`,
           ],
         };
         if (finding.source) {

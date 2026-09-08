@@ -68,7 +68,7 @@ suite.define(() => {
       await expect.poll(async () => (await gateway.getRequests("board.get")).length).toBe(2);
       await gateway.resolveDeferred("board.get");
       await dashboard.locator('[data-test-id="board-empty"]').waitFor();
-      const board = await dashboard.locator("openclaw-board-view").elementHandle();
+      const board = await dashboard.locator("carapace-board-view").elementHandle();
 
       for (let attempt = 0; attempt < 3; attempt += 1) {
         await page.locator(".chat-side-panel-toggle").click();
@@ -86,7 +86,7 @@ suite.define(() => {
       expect(await composer.isVisible()).toBe(false);
       expect(
         await dashboard
-          .locator("openclaw-board-view")
+          .locator("carapace-board-view")
           .evaluate((element, previous) => element === previous, board),
       ).toBe(true);
       await page.getByRole("button", { name: "Restore split", exact: true }).click();
@@ -142,7 +142,7 @@ suite.define(() => {
       );
       await page.goto(new URL(controlUiSessionPath(alphaKey), suite.server.baseUrl).href);
       await openChatSidePanelType(page, "Browser");
-      const alphaRegion = await page.locator("openclaw-chat-sidebar-region").elementHandle();
+      const alphaRegion = await page.locator("carapace-chat-sidebar-region").elementHandle();
       expect(alphaRegion).not.toBeNull();
       await page
         .locator(
@@ -155,8 +155,8 @@ suite.define(() => {
         .toContainEqual(
           expect.objectContaining({ params: expect.objectContaining({ sessionKey: betaKey }) }),
         );
-      const betaPane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--visible");
-      const betaRegion = betaPane.locator("openclaw-chat-sidebar-region");
+      const betaPane = page.locator("carapace-chat-pane.chat-pane-cache__pane--visible");
+      const betaRegion = betaPane.locator("carapace-chat-sidebar-region");
       await betaRegion.waitFor({ state: "attached" });
       expect(
         await betaRegion.evaluate((element, previous) => element === previous, alphaRegion),
@@ -168,14 +168,14 @@ suite.define(() => {
           }),
       );
       expect(await betaPane.locator('[data-region-header="side"]').isVisible()).toBe(false);
-      expect(await betaPane.locator("openclaw-board-view").count()).toBe(0);
+      expect(await betaPane.locator("carapace-board-view").count()).toBe(0);
       await betaPane.getByRole("button", { name: "Side panel", exact: true }).click();
       await betaPane.locator('[data-board-tab-id="beta-main"]').waitFor();
     });
   });
 
   it("shows a warmed dashboard immediately while its refresh is pending", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.CARAPACE_UI_E2E_RECORD === "1";
     if (recordProof) {
       await mkdir(path.join(suite.artifactDir, "dashboard-session-retention"), { recursive: true });
     }
@@ -244,11 +244,11 @@ suite.define(() => {
           `.sidebar-recent-session[data-session-key="${key}"] a.sidebar-recent-session__link`,
         );
       const dashboardActive = (key: string) =>
-        page.locator("openclaw-chat-pane").evaluateAll((panes, sessionKey) => {
+        page.locator("carapace-chat-pane").evaluateAll((panes, sessionKey) => {
           const pane = panes.find(
             (candidate) => Reflect.get(candidate, "sessionKey") === sessionKey,
           );
-          const board = pane?.querySelector("openclaw-board-view");
+          const board = pane?.querySelector("carapace-board-view");
           return board ? Reflect.get(board, "active") : null;
         }, key);
       await sessionLink(betaKey).click();

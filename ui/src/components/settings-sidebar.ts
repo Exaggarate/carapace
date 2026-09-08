@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 // Dedicated sidebar for the full-page settings takeover (see app-host.ts).
 import { html, nothing } from "lit";
 import type { UpdateAvailable, UpdateScheduleState } from "../api/types.ts";
@@ -283,9 +283,9 @@ function renderEmbeddedSettingsHeader(props: SettingsSidebarProps) {
               : t("connection.reconnecting"),
             onRetry: props.onRetryConnect,
           })
-        : html`<openclaw-settings-save-indicator
+        : html`<carapace-settings-save-indicator
             .props=${props.saveIndicator}
-          ></openclaw-settings-save-indicator>`
+          ></carapace-settings-save-indicator>`
     }
   </header>`;
 }
@@ -404,16 +404,16 @@ export function renderSettingsSidebar(props: SettingsSidebarProps) {
                 title: props.lastError ? redactLoginFailureError(props.lastError) : reconnecting,
                 onRetry: props.onRetryConnect,
               })
-            : html`<openclaw-settings-save-indicator
+            : html`<carapace-settings-save-indicator
                 .props=${props.saveIndicator}
-              ></openclaw-settings-save-indicator>`
+              ></carapace-settings-save-indicator>`
         }
-        <openclaw-sidebar-build-chip
+        <carapace-sidebar-build-chip
           .basePath=${props.basePath}
           .gatewayVersion=${props.gatewayVersion || null}
           .variant=${"settings"}
           .onNavigate=${() => props.onNavigate("about")}
-        ></openclaw-sidebar-build-chip>
+        ></carapace-sidebar-build-chip>
       </footer>
     </aside>
   `;

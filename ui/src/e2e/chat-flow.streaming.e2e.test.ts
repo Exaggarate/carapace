@@ -20,7 +20,7 @@ suite.define(() => {
     { label: "desktop hover", mobile: false, viewport: { height: 900, width: 1280 } },
     { label: "mobile tap", mobile: true, viewport: { height: 844, width: 390 } },
   ])("shows turn metadata only after completion on $label", async ({ mobile, viewport }) => {
-    const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactDirParent
       ? createControlUiE2eArtifactDir("chat-flow.streaming", artifactDirParent)
       : undefined;
@@ -173,7 +173,7 @@ suite.define(() => {
       await expect
         .poll(() => footer.evaluate((element) => getComputedStyle(element).opacity))
         .toBe("1");
-      expect(await footer.locator(".chat-sender-name").textContent()).toBe("OpenClaw");
+      expect(await footer.locator(".chat-sender-name").textContent()).toBe("Carapace");
       expect(await footer.locator(".chat-group-timestamp").count()).toBe(1);
     } finally {
       await suite.closeBrowserContext(context);
@@ -298,7 +298,7 @@ suite.define(() => {
   ])(
     "keeps streamed text visible when a chat error terminates the turn on $label",
     async ({ label, viewport }) => {
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-flow.streaming", artifactDirParent)
         : undefined;
@@ -362,7 +362,7 @@ suite.define(() => {
         });
 
         const gatewayErrorText =
-          "Agent failed before reply: Session became active in another runner; wait for it to finish before continuing.\nTo view logs, run `openclaw logs --follow` in a terminal.";
+          "Agent failed before reply: Session became active in another runner; wait for it to finish before continuing.\nTo view logs, run `carapace logs --follow` in a terminal.";
         const errorText = `Error: ${gatewayErrorText}`;
         await gateway.emitGatewayEvent("chat", {
           errorMessage: gatewayErrorText,
@@ -504,7 +504,7 @@ suite.define(() => {
       }
       const pendingLayout = await pendingRow.evaluate((row) => {
         const rect = row.getBoundingClientRect();
-        Reflect.set(window, "__openclawPendingWorkingRow", row);
+        Reflect.set(window, "__carapacePendingWorkingRow", row);
         return {
           height: rect.height,
           key: row.getAttribute("data-virtual-row-key"),
@@ -519,10 +519,10 @@ suite.define(() => {
           sameRow: boolean;
           top: number | null;
         }> = [];
-        Reflect.set(window, "__openclawWorkingRowSamples", samples);
+        Reflect.set(window, "__carapaceWorkingRowSamples", samples);
         let remaining = 20;
         const sample = () => {
-          const originalRow = Reflect.get(window, "__openclawPendingWorkingRow");
+          const originalRow = Reflect.get(window, "__carapacePendingWorkingRow");
           const currentRow = document
             .querySelector(".chat-reading-indicator")
             ?.closest<HTMLElement>(".chat-virtual-row");
@@ -556,7 +556,7 @@ suite.define(() => {
             }>
           >((resolve) => {
             const read = () => {
-              const current = Reflect.get(window, "__openclawWorkingRowSamples");
+              const current = Reflect.get(window, "__carapaceWorkingRowSamples");
               if (Array.isArray(current) && current.length >= 20) {
                 resolve(current);
                 return;
@@ -667,7 +667,7 @@ suite.define(() => {
         page,
         ({ runId: expectedRunId }) => {
           const state = document.querySelector<HTMLElement & { state: ChatHost }>(
-            "openclaw-chat-pane",
+            "carapace-chat-pane",
           )?.state;
           return state !== undefined && state.chatRunId === expectedRunId && !state.chatSending;
         },
@@ -678,7 +678,7 @@ suite.define(() => {
         page,
         ({ runId: expectedRunId }) => {
           const state = document.querySelector<HTMLElement & { state: ChatHost }>(
-            "openclaw-chat-pane",
+            "carapace-chat-pane",
           )?.state;
           return (
             state !== undefined && state.chatRunId === expectedRunId && state.chatQueue.length === 0
@@ -703,7 +703,7 @@ suite.define(() => {
       });
       await gateway.setHistoryMessages([
         {
-          __openclaw: { idempotencyKey: `${runId}:user` },
+          __carapace: { idempotencyKey: `${runId}:user` },
           content: [{ text: prompt, type: "text" }],
           role: "user",
           timestamp: Date.now(),

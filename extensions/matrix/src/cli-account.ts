@@ -1,12 +1,12 @@
 import type { Command } from "commander";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-id";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import * as cli from "./cli-shared.js";
 import { resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import { listMatrixOwnDevices } from "./matrix/actions/devices.js";
 import { updateMatrixOwnProfile } from "./matrix/actions/profile.js";
 import { resolveMatrixConfigPath, updateMatrixAccountConfig } from "./matrix/config-update.js";
-import { isOpenClawManagedMatrixDevice } from "./matrix/device-health.js";
+import { isCarapaceManagedMatrixDevice } from "./matrix/device-health.js";
 import { getMatrixRuntime } from "./runtime.js";
 import type { MatrixSetupInput } from "./setup-config.js";
 import { matrixSetupAdapter } from "./setup-core.js";
@@ -19,7 +19,7 @@ type MatrixCliAccountAddResult = {
   encryptionEnabled: boolean;
   deviceHealth: {
     currentDeviceId: string | null;
-    staleOpenClawDeviceIds: string[];
+    staleCarapaceDeviceIds: string[];
     error?: string;
   };
   verificationBootstrap: {
@@ -165,14 +165,14 @@ async function addMatrixAccount(params: {
       const addedDevices = await listMatrixOwnDevices({ accountId, cfg: updated });
       deviceHealth = {
         currentDeviceId: addedDevices.find((device) => device.current)?.deviceId ?? null,
-        staleOpenClawDeviceIds: addedDevices
-          .filter((device) => !device.current && isOpenClawManagedMatrixDevice(device.displayName))
+        staleCarapaceDeviceIds: addedDevices
+          .filter((device) => !device.current && isCarapaceManagedMatrixDevice(device.displayName))
           .map((device) => device.deviceId),
       };
     } catch (err) {
       deviceHealth = {
         currentDeviceId: null,
-        staleOpenClawDeviceIds: [],
+        staleCarapaceDeviceIds: [],
         error: formatErrorMessage(err),
       };
     }
@@ -292,12 +292,12 @@ export function registerMatrixAccountCommands(root: Command): void {
               console.error(
                 `Matrix device health warning: ${cli.formatMatrixCliText(result.deviceHealth.error)}`,
               );
-            } else if (result.deviceHealth.staleOpenClawDeviceIds.length > 0) {
-              const staleDeviceIds = result.deviceHealth.staleOpenClawDeviceIds
+            } else if (result.deviceHealth.staleCarapaceDeviceIds.length > 0) {
+              const staleDeviceIds = result.deviceHealth.staleCarapaceDeviceIds
                 .map((deviceId) => cli.formatMatrixCliText(deviceId))
                 .join(", ");
               console.log(
-                `Matrix device hygiene warning: stale OpenClaw devices detected (${staleDeviceIds}). Run ${cli.formatMatrixCliCommand("devices prune-stale", result.accountId)}.`,
+                `Matrix device hygiene warning: stale Carapace devices detected (${staleDeviceIds}). Run ${cli.formatMatrixCliCommand("devices prune-stale", result.accountId)}.`,
               );
             }
             if (result.profile.attempted) {
@@ -316,7 +316,7 @@ export function registerMatrixAccountCommands(root: Command): void {
                 }
               }
             }
-            const bindHint = `openclaw agents bind --agent <id> --bind matrix:${result.accountId}`;
+            const bindHint = `carapace agents bind --agent <id> --bind matrix:${result.accountId}`;
             console.log(`Bind this account to an agent: ${bindHint}`);
           },
           errorPrefix: "Account setup failed",

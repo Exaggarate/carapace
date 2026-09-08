@@ -1,8 +1,8 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   listNativeCommandSpecsForConfig,
   type NativeCommandSpec,
-} from "openclaw/plugin-sdk/native-command-registry";
+} from "carapace/plugin-sdk/native-command-registry";
 import type { createClickClackClient } from "./http-client.js";
 import type { CoreConfig } from "./types.js";
 

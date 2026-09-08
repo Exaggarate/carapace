@@ -62,7 +62,7 @@ function createSkill(
   return {
     name,
     description: `${name} skill`,
-    source: options.source ?? "openclaw-managed",
+    source: options.source ?? "carapace-managed",
     bundled: options.bundled ?? false,
     filePath: `/tmp/skills/${name}/SKILL.md`,
     baseDir: `/tmp/skills/${name}`,
@@ -866,7 +866,7 @@ describe("agents skills panel (browser)", () => {
         agentId: "main",
         skills: [
           createSkill("Unique Built In Match", {
-            source: "openclaw-bundled",
+            source: "carapace-bundled",
             bundled: true,
           }),
           createSkill("Installed Distractor"),
@@ -997,7 +997,7 @@ describe("agents skills panel (browser)", () => {
   it("explains an unsatisfied one-of binary requirement", async () => {
     const container = document.createElement("div");
     const skill: SkillStatusEntry = {
-      ...createSkill("coding-agent", { source: "openclaw-bundled", bundled: true }),
+      ...createSkill("coding-agent", { source: "carapace-bundled", bundled: true }),
       name: "Coding Agent",
       description: "Delegate coding work to an available coding CLI.",
       eligible: false,

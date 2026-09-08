@@ -76,7 +76,7 @@ describe("cua-computer browser actions", () => {
         action: "browser_prepare",
         windowRef,
         profile: "isolated_named",
-        profileName: "openclaw-test",
+        profileName: "carapace-test",
       }),
     );
     const boundJson = await computer.act(
@@ -178,8 +178,8 @@ describe("cua-computer browser actions", () => {
     const download = JSON.parse(downloadJson) as {
       details: { fileResourceHandles: string[]; resourceHandle: string };
     };
-    expect(download.details.resourceHandle).toMatch(/^openclaw:computer-resource:v1:/u);
-    expect(download.details.fileResourceHandles[0]).toMatch(/^openclaw:computer-resource:v1:/u);
+    expect(download.details.resourceHandle).toMatch(/^carapace:computer-resource:v1:/u);
+    expect(download.details.fileResourceHandles[0]).toMatch(/^carapace:computer-resource:v1:/u);
     await computer.act(
       JSON.stringify({
         action: "browser_set_input_files",
@@ -218,7 +218,7 @@ describe("cua-computer browser actions", () => {
         {
           pid: 4242,
           allow_launch: true,
-          profile: { mode: "isolated_named", name: "openclaw-test" },
+          profile: { mode: "isolated_named", name: "carapace-test" },
         },
         undefined,
       ],

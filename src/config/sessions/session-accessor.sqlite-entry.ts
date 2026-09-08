@@ -7,20 +7,20 @@ import {
 import { coerceRequiredSqliteNumber as sqliteNumber } from "../../infra/sqlite-number.js";
 import type { ChannelRouteRef } from "../../plugin-sdk/channel-route.js";
 import {
-  createOpenClawAgentDatabaseClaim,
-  type OpenClawAgentDatabaseClaim,
-} from "../../state/openclaw-agent-db-identity.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+  createCarapaceAgentDatabaseClaim,
+  type CarapaceAgentDatabaseClaim,
+} from "../../state/carapace-agent-db-identity.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  borrowOpenClawAgentDatabase,
-  getOpenClawAgentDatabaseIfOpen,
-  isIncognitoOpenClawAgentSqlitePath,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  withOpenClawAgentDatabaseAsync,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  borrowCarapaceAgentDatabase,
+  getCarapaceAgentDatabaseIfOpen,
+  isIncognitoCarapaceAgentSqlitePath,
+  openCarapaceAgentDatabase,
+  resolveCarapaceAgentSqlitePath,
+  runCarapaceAgentWriteTransaction,
+  withCarapaceAgentDatabaseAsync,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { DeliveryContext } from "../../utils/delivery-context.types.js";
 import { resolveStateDir } from "../paths.js";
 import { isInternalSessionEffectsKey } from "./internal-session-key.js";
@@ -124,7 +124,7 @@ export function resolveSessionEntry(
 ): ResolvedSqliteSessionEntry {
   const resolved = resolveSqliteScope(scope);
   const read = (
-    database: Pick<OpenClawAgentDatabase, "agentId" | "db" | "path">,
+    database: Pick<CarapaceAgentDatabase, "agentId" | "db" | "path">,
   ): ResolvedSqliteSessionEntry => {
     const selected = readSessionEntryRow(database, resolved.sessionKey);
     return {
@@ -134,12 +134,12 @@ export function resolveSessionEntry(
     };
   };
   if (options.readOnly) {
-    const result = withOpenClawAgentDatabaseReadOnly(read, toDatabaseOptions(resolved));
+    const result = withCarapaceAgentDatabaseReadOnly(read, toDatabaseOptions(resolved));
     return result.found
       ? result.value
       : { existing: undefined, legacyKeys: [], normalizedKey: resolved.sessionKey };
   }
-  return read(openOpenClawAgentDatabase(toDatabaseOptions(resolved)));
+  return read(openCarapaceAgentDatabase(toDatabaseOptions(resolved)));
 }
 
 /** Loads one session entry from the additive SQLite session store. */
@@ -150,13 +150,13 @@ export function loadSessionEntry(scope: SessionAccessScope): SessionEntry | unde
 /** Admission retains the exact owner that supplied its row across asynchronous policy work. */
 export function loadSessionEntryWithDatabase(scope: SessionAccessScope): {
   entry: SessionEntry | undefined;
-  databaseClaim: OpenClawAgentDatabaseClaim;
+  databaseClaim: CarapaceAgentDatabaseClaim;
 } {
   const resolved = resolveSqliteScope(scope);
   const options = toDatabaseOptions(resolved);
-  const database = openOpenClawAgentDatabase(options);
-  const borrowed = borrowOpenClawAgentDatabase(options);
-  const databaseClaim = createOpenClawAgentDatabaseClaim(database, borrowed.release);
+  const database = openCarapaceAgentDatabase(options);
+  const borrowed = borrowCarapaceAgentDatabase(options);
+  const databaseClaim = createCarapaceAgentDatabaseClaim(database, borrowed.release);
   try {
     return { entry: readSessionEntryRow(database, resolved.sessionKey)?.entry, databaseClaim };
   } catch (error) {
@@ -175,7 +175,7 @@ export function listSessionEntryKeysReadOnly(
   scope: Partial<Omit<SessionAccessScope, "sessionKey">> = {},
 ): string[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getSessionKysely(database.db);
     return executeSqliteQuerySync(
       database.db,
@@ -190,7 +190,7 @@ export function listSessionChildEntriesReadOnly(
   scope: SessionEntryReadScope,
 ): SessionEntrySummary[] {
   const resolved = resolveSqliteScope(scope);
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     assertCanonicalSqliteSessionKeysCurrent(database);
     const db = getSessionKysely(database.db);
     const query =
@@ -229,7 +229,7 @@ export function resolveSessionKeyBySessionId(
 ): string | undefined {
   const resolved = resolveSqliteTranscriptReadScope(scope);
   // session_windows.session_id is the primary key; the indexed lookup cannot be ambiguous.
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getSessionKysely(database.db);
     return executeSqliteQueryTakeFirstSync(
       database.db,
@@ -246,7 +246,7 @@ export function resolveSessionKeyBySessionId(
 /** Lists session entries from the additive SQLite session store. */
 export function listSessionEntryRows(scope: SessionEntryListScope = {}): SessionEntrySummary[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return listSqliteSessionEntriesFromDatabase(database, resolved, scope);
 }
 
@@ -259,7 +259,7 @@ export function listSessionEntriesReadOnly(
   scope: SessionEntryListScope = {},
 ): SessionEntrySummary[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly(
+  const result = withCarapaceAgentDatabaseReadOnly(
     (database) => listSqliteSessionEntriesFromDatabase(database, resolved, scope),
     toDatabaseOptions(resolved),
   );
@@ -269,7 +269,7 @@ export function listSessionEntriesReadOnly(
 /** Counts durable session rows without materializing entry JSON or warming the entry cache. */
 export function countSessionEntryRowsReadOnly(scope: SessionEntryListScope = {}): number {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getSessionKysely(database.db);
     const row = executeSqliteQueryTakeFirstSync(
       database.db,
@@ -295,7 +295,7 @@ export function hasSessionEntriesByStatusReadOnly(
     return false;
   }
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getSessionKysely(database.db);
     return Boolean(
       executeSqliteQueryTakeFirstSync(
@@ -312,12 +312,12 @@ export function hasSessionEntriesByStatusReadOnly(
 }
 
 function listSqliteSessionEntriesFromDatabase(
-  database: Pick<OpenClawAgentDatabase, "agentId" | "db" | "path">,
+  database: Pick<CarapaceAgentDatabase, "agentId" | "db" | "path">,
   resolved: ResolvedSqliteScope,
   scope: SessionEntryListScope,
 ): SessionEntrySummary[] {
   const projection = scope.projection ?? "full";
-  const cache = !isIncognitoOpenClawAgentSqlitePath(database.path, {
+  const cache = !isIncognitoCarapaceAgentSqlitePath(database.path, {
     agentId: database.agentId,
     env: resolved.env,
   });
@@ -364,7 +364,7 @@ export function listSessionEntriesByStatus(
   statuses: readonly SessionEntryStatus[],
 ): SessionEntrySummary[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   return readSessionEntriesByStatus(database, statuses).filter(
     ({ sessionKey }) => !isInternalSessionEffectsKey(sessionKey),
   );
@@ -376,7 +376,7 @@ export function listSessionTranscriptInstances(
   options: SessionTranscriptInstanceListOptions = {},
 ): SessionTranscriptInstance[] {
   const resolved = resolveSqliteScope({ ...scope, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const currentEntries =
       options.sessionId !== undefined
         ? {
@@ -397,7 +397,7 @@ export function listSessionTranscriptInstances(
 /** Reads a session activity timestamp from the additive SQLite session store. */
 export function readSessionUpdatedAtCore(scope: SessionAccessScope): number | undefined {
   const resolved = resolveSqliteScope(scope);
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
   const row = readSessionEntryRow(database, resolved.sessionKey)?.row;
   return row ? sqliteNumber(row.updated_at) : undefined;
 }
@@ -429,7 +429,7 @@ export async function replaceSessionEntry(
 export function replaceSessionEntrySync(scope: SessionAccessScope, entry: SessionEntry): void {
   const resolved = resolveSqliteScope(scope);
   assertCanonicalSessionWriteScope(resolved);
-  const publish = runOpenClawAgentWriteTransaction((database) => {
+  const publish = runCarapaceAgentWriteTransaction((database) => {
     const identityKeys = collectSessionEntryLookupKeys(database, resolved.sessionKey);
     const previous = readSessionIdentitySnapshot(database, identityKeys);
     writeSessionEntry(database, resolved.sessionKey, entry);
@@ -494,7 +494,7 @@ export async function patchSessionEntryTarget(
 type SqliteSessionEntrySnapshotPatchParams = {
   operationLabel: string;
   options: SqliteSessionEntryPatchOptions;
-  readSnapshot: (database: OpenClawAgentDatabase) => SqliteLifecycleTargetSnapshot;
+  readSnapshot: (database: CarapaceAgentDatabase) => SqliteLifecycleTargetSnapshot;
   resolved: ResolvedSqliteScope;
   sessionKey: string;
   storePath: string;
@@ -511,20 +511,20 @@ async function patchSqliteSessionEntrySnapshot(
   const { options, sessionKey } = params;
   // Queueing and either cold open must retain the same registration and lease owner.
   const resolved = { ...params.resolved, env: { ...(params.resolved.env ?? process.env) } };
-  resolved.env.OPENCLAW_STATE_DIR = resolveStateDir(resolved.env);
+  resolved.env.CARAPACE_STATE_DIR = resolveStateDir(resolved.env);
   const databaseOptions = toDatabaseOptions(resolved);
-  const databasePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+  const databasePath = resolveCarapaceAgentSqlitePath(databaseOptions);
   resolved.path = databasePath;
   databaseOptions.path = databasePath;
-  const incognito = isIncognitoOpenClawAgentSqlitePath(databasePath, databaseOptions);
+  const incognito = isIncognitoCarapaceAgentSqlitePath(databasePath, databaseOptions);
   const withDatabase = <T>(operation: () => T | Promise<T>) =>
-    !incognito && !getOpenClawAgentDatabaseIfOpen(databaseOptions)
-      ? withOpenClawAgentDatabaseAsync(databaseOptions, operation)
+    !incognito && !getCarapaceAgentDatabaseIfOpen(databaseOptions)
+      ? withCarapaceAgentDatabaseAsync(databaseOptions, operation)
       : operation();
   let wrote = false;
   const committed = await runExclusiveSqliteSessionWrite(resolved, async () =>
     withDatabase(async () => {
-      const database = openOpenClawAgentDatabase(databaseOptions);
+      const database = openCarapaceAgentDatabase(databaseOptions);
       const prepared = params.readSnapshot(database);
       const existing = prepared[0]?.entry;
       const writeBase = existing ?? options.fallbackEntry;
@@ -556,7 +556,7 @@ async function patchSqliteSessionEntrySnapshot(
       // The updater may dispose the prepared handle; re-admit before the synchronous commit.
       return withDatabase(() => {
         let result: SessionEntry | null = null;
-        const publish = runOpenClawAgentWriteTransaction((writeDatabase) => {
+        const publish = runCarapaceAgentWriteTransaction((writeDatabase) => {
           if (options.shouldCommit?.() === false) {
             return undefined;
           }

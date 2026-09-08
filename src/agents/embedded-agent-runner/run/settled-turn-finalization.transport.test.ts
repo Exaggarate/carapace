@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
-import { createOpenAIResponsesTransportStreamFn } from "@openclaw/ai/transports";
+import { createOpenAIResponsesTransportStreamFn } from "@carapace/ai/transports";
 import { Type } from "typebox";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
@@ -252,7 +252,7 @@ it.each(["HTTP", "WebSocket"])("finalizes after %s failure", async (failure) => 
     );
     expect(attempt).toMatchObject({
       terminal: { kind: "ok" },
-      settledTurnFinalizationContext: { source: "openclaw-transcript" },
+      settledTurnFinalizationContext: { source: "carapace-transcript" },
     });
     const input = createSettledFinalizationTestInput(attempt, await admission.admit("embedded"));
     input.terminalBase.runParams.trigger = "user";

@@ -1,4 +1,4 @@
-import OpenClawKit
+import CarapaceKit
 import SwiftUI
 
 struct SettingsHubScreen: View {
@@ -7,7 +7,7 @@ struct SettingsHubScreen: View {
     @Environment(GatewayConnectionController.self) private var gatewayController
     @State private var embedCompatibility = DashboardEmbedCompatibility()
     @Binding var navigationPath: [SettingsRoute]
-    var headerSidebarAction: OpenClawSidebarHeaderAction?
+    var headerSidebarAction: CarapaceSidebarHeaderAction?
     var onRouteChange: ((SettingsRoute?) -> Void)?
     var onApprovalNotificationsRoute: ((String?) -> Void)?
 
@@ -26,7 +26,7 @@ struct SettingsHubScreen: View {
             isOperatorConnected: self.appModel.isOperatorGatewayConnected,
             hasOperatorAdminScope: self.appModel.hasOperatorAdminScope,
             isDemoMode: self.appModel.isAppleReviewDemoModeEnabled,
-            isScreenshotMode: ProcessInfo.processInfo.arguments.contains("--openclaw-screenshot-mode")),
+            isScreenshotMode: ProcessInfo.processInfo.arguments.contains("--carapace-screenshot-mode")),
             let url = AuthenticatedControlUI.pageURL(
                 config: config,
                 path: DashboardRouteMap.settingsPath,
@@ -45,14 +45,14 @@ struct SettingsHubScreen: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     if let headerSidebarAction {
-                        OpenClawSidebarToolbarItem(action: headerSidebarAction, placement: .topBarLeading)
+                        CarapaceSidebarToolbarItem(action: headerSidebarAction, placement: .topBarLeading)
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             self.push(.gateway)
                         } label: {
                             Text("Gateway")
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(CarapaceType.subheadSemiBold)
                         }
                         .accessibilityIdentifier("SettingsHub.Gateway")
                     }
@@ -63,16 +63,16 @@ struct SettingsHubScreen: View {
                             HStack(spacing: 4) {
                                 Label {
                                     Text("Approvals")
-                                        .font(OpenClawType.subheadSemiBold)
+                                        .font(CarapaceType.subheadSemiBold)
                                 } icon: {
                                     Image(systemName: "checkmark.shield")
                                 }
                                 .labelStyle(.iconOnly)
                                 if self.appModel.pendingExecApprovalCount > 0 {
                                     Text(self.appModel.pendingExecApprovalCount.formatted())
-                                        .font(OpenClawType.captionSemiBold)
+                                        .font(CarapaceType.captionSemiBold)
                                         .padding(.horizontal, 5)
-                                        .background(OpenClawBrand.warn.opacity(0.2), in: Capsule())
+                                        .background(CarapaceBrand.warn.opacity(0.2), in: Capsule())
                                 }
                             }
                         }
@@ -184,17 +184,17 @@ struct EmbeddedDashboardContent: View {
         if let openGateway, self.embedCompatibility?.needsGatewayUpgrade == true {
             VStack(alignment: .leading, spacing: 8) {
                 Text("This Gateway's Dashboard is older than the app; update the Gateway to manage app settings here")
-                    .font(OpenClawType.footnote)
+                    .font(CarapaceType.footnote)
                     .accessibilityIdentifier("SettingsHub.GatewayUpgradeWarning")
                 Button(action: openGateway) {
                     Text("Open Gateway")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(CarapaceType.subheadSemiBold)
                 }
                 .accessibilityIdentifier("SettingsHub.UpgradeGateway")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(OpenClawBrand.warn.opacity(0.12))
+            .background(CarapaceBrand.warn.opacity(0.12))
         }
     }
 }

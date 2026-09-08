@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from "node:timers/promises";
-import type { MatrixVerificationSummary } from "@openclaw/matrix/test-api.js";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { MatrixVerificationSummary } from "@carapace/matrix/test-api.js";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createMatrixQaE2eeScenarioClient,

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync } from "node:fs";
-// Re-exports the OpenClaw CLI entry point for package execution.
+// Re-exports the Carapace CLI entry point for package execution.
 // Package executable entrypoint that forwards to the CLI bootstrap.
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -8,15 +8,15 @@ import { fileURLToPath } from "node:url";
 const packageRootUrl = new URL("../", import.meta.url);
 if (
   !existsSync(new URL("entry.ts", import.meta.url)) &&
-  (existsSync(new URL(".openclaw-lifecycle-pending", packageRootUrl)) ||
-    existsSync(new URL("dist/openclaw-install-guard", packageRootUrl)))
+  (existsSync(new URL(".carapace-lifecycle-pending", packageRootUrl)) ||
+    existsSync(new URL("dist/carapace-install-guard", packageRootUrl)))
 ) {
   const { completePendingPackageLifecycle } = await import("./infra/package-lifecycle.js");
   try {
     await completePendingPackageLifecycle({ packageRoot: fileURLToPath(packageRootUrl) });
   } catch (error) {
     throw new Error(
-      `OpenClaw package lifecycle is incomplete. Reinstall with package scripts enabled, then retry. ${error instanceof Error ? error.message : String(error)}`,
+      `Carapace package lifecycle is incomplete. Reinstall with package scripts enabled, then retry. ${error instanceof Error ? error.message : String(error)}`,
       { cause: error },
     );
   }
@@ -145,7 +145,7 @@ if (isMain && !handledRootVersion) {
     }
     if (isBenignUncaughtExceptionError(error)) {
       console.warn(
-        "[openclaw] Non-fatal uncaught exception (continuing):",
+        "[carapace] Non-fatal uncaught exception (continuing):",
         formatUncaughtError(error),
       );
       return;
@@ -154,14 +154,14 @@ if (isMain && !handledRootVersion) {
       defaultRuntime.writeJson(formatCliJsonFailure(error));
     }
     for (const line of formatCliFailureLines({
-      title: "OpenClaw hit an unexpected runtime error.",
+      title: "Carapace hit an unexpected runtime error.",
       error,
       argv: process.argv,
     })) {
       console.error(line);
     }
     for (const message of runFatalErrorHooks({ reason: "uncaught_exception", error })) {
-      console.error("[openclaw]", message);
+      console.error("[carapace]", message);
     }
     restoreRuntimeTerminalState("uncaught exception", { resumeStdinIfPaused: false });
     process.exit(1);
@@ -188,7 +188,7 @@ if (isMain && !handledRootVersion) {
       }
       if (!isExpectedCliError(err)) {
         for (const message of runFatalErrorHooks({ reason: "legacy_cli_failure", error: err })) {
-          console.error("[openclaw]", message);
+          console.error("[carapace]", message);
         }
       }
       restoreRuntimeTerminalState("legacy cli failure", { resumeStdinIfPaused: false });

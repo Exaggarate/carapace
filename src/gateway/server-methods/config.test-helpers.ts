@@ -2,7 +2,7 @@
  * Shared harness builders for gateway config method tests.
  */
 import { vi, type Mock } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 type UnknownMock = Mock<(...args: unknown[]) => unknown>;
@@ -29,10 +29,10 @@ function createGatewayLog(): GatewayLogMocks {
 }
 
 /** Creates a complete config snapshot shape for tests that exercise config writes. */
-export function createConfigWriteSnapshot(config: OpenClawConfig) {
+export function createConfigWriteSnapshot(config: CarapaceConfig) {
   return {
     snapshot: {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       exists: true,
       raw: JSON.stringify(config, null, 2),
       parsed: config,

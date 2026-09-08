@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { SecretRef } from "../config/types.secrets.js";
 import type { ProviderModelRouteCandidate } from "../plugin-sdk/provider-model-types.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
@@ -393,7 +393,7 @@ describe("createModelAuthAvailabilityResolver", () => {
       baseUrl: "https://openai-compatible.example/v1",
     } satisfies ProviderModelRouteCandidate;
     const result = evaluate({
-      resolution: { kind: "routes", defaultRuntimeId: "openclaw", routes: [customRoute] },
+      resolution: { kind: "routes", defaultRuntimeId: "carapace", routes: [customRoute] },
       store: authStore({
         "openai:chatgpt": {
           type: "oauth",
@@ -432,7 +432,7 @@ describe("createModelAuthAvailabilityResolver", () => {
       const result = evaluate({
         cfg: {
           models: { providers: { openai: { auth, baseUrl: "", models: [] } } },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         store: authStore({ "openai:wrong-route": profile }),
       });
 
@@ -457,7 +457,7 @@ describe("createModelAuthAvailabilityResolver", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       evaluate({
@@ -497,7 +497,7 @@ describe("createModelAuthAvailabilityResolver", () => {
               openai: { apiKey: "openai:bound", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         store: authStore({
           "openai:bound": {
             type: "api_key",
@@ -526,7 +526,7 @@ describe("createModelAuthAvailabilityResolver", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       evaluate({
@@ -675,7 +675,7 @@ describe("createModelAuthAvailabilityResolver", () => {
               openai: { apiKey: "configured-platform-key", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
         env: { OPENAI_API_KEY: "environment-key" },
       }),
     ).toMatchObject({
@@ -699,7 +699,7 @@ describe("createModelAuthAvailabilityResolver", () => {
       label: "OAuth environment after unavailable Platform auth",
       cfg: {
         models: { providers: { openai: { auth: "oauth", baseUrl: "", models: [] } } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: { OPENAI_API_KEY: "environment-token" },
       profileId: "openai:platform-missing",
       profile: { type: "api_key" as const, provider: "openai", key: "" },
@@ -753,7 +753,7 @@ describe("createModelAuthAvailabilityResolver", () => {
             refresh: "",
             expires: 0,
             oauthRef: {
-              source: "openclaw-credentials",
+              source: "carapace-credentials",
               provider: "openai-codex",
               id: "00000000000000000000000000000000",
             },
@@ -771,7 +771,7 @@ describe("createModelAuthAvailabilityResolver", () => {
 
   it("does not grant refresh authority to an unsupported external CLI id", () => {
     const resolver = createModelAuthAvailabilityResolver({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       authStore: authStore({
         "acme:cli": {
           type: "oauth",
@@ -809,7 +809,7 @@ describe("createModelAuthAvailabilityResolver", () => {
       },
     });
     const resolver = createModelAuthAvailabilityResolver({
-      cfg: { auth: { order: { "claude-cli": [manualProfileId] } } } as OpenClawConfig,
+      cfg: { auth: { order: { "claude-cli": [manualProfileId] } } } as CarapaceConfig,
       authStore: store,
       preparedRuntimeAuthStore: Object.assign({}, store, {
         runtimeExternalCliProfileIds: [cliProfileId],
@@ -948,23 +948,23 @@ describe("createModelAuthAvailabilityResolver", () => {
     });
   });
 
-  it("does not let Codex synthetic auth own an OpenClaw-only route", () => {
-    const openClawOnlyRoute = {
+  it("does not let Codex synthetic auth own an Carapace-only route", () => {
+    const carapaceOnlyRoute = {
       ...platformRoute,
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["carapace"] },
     } satisfies ProviderModelRouteCandidate;
     expect(
       evaluate({
         resolution: {
           kind: "routes",
-          defaultRuntimeId: "openclaw",
-          routes: [openClawOnlyRoute],
+          defaultRuntimeId: "carapace",
+          routes: [carapaceOnlyRoute],
         },
         syntheticAuthProviderRefs: ["codex"],
       }),
     ).toMatchObject({
       availability: false,
-      selectedRoute: openClawOnlyRoute,
+      selectedRoute: carapaceOnlyRoute,
     });
   });
 
@@ -982,7 +982,7 @@ describe("createModelAuthAvailabilityResolver", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     },
     { label: "implicit", cfg: {} },
   ])("keeps an $label Bedrock AWS SDK route ready", ({ cfg }) => {
@@ -1003,7 +1003,7 @@ describe("createModelAuthAvailabilityResolver", () => {
   it.each<{
     name: string;
     apiKey: SecretRef;
-    secrets: OpenClawConfig["secrets"];
+    secrets: CarapaceConfig["secrets"];
   }>([
     {
       name: "env",

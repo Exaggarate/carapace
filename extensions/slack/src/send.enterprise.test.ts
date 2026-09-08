@@ -1,6 +1,6 @@
 // Slack tests cover listener-scoped Enterprise Grid delivery through the canonical sender.
 import type { WebClient } from "@slack/web-api";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerSlackInstallationState } from "./installation-identity-state.js";
 import {
@@ -18,13 +18,13 @@ const loadOutboundMediaFromUrl = vi.hoisted(() =>
 const fetchWithSsrFGuard = vi.hoisted(() => vi.fn());
 const getSlackWriteClientMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/fetch-runtime", () => ({
+vi.mock("carapace/plugin-sdk/fetch-runtime", () => ({
   withTrustedEnvProxyGuardedFetchMode: (value: unknown) => value,
 }));
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({ fetchWithSsrFGuard }));
-vi.mock("openclaw/plugin-sdk/outbound-media", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/outbound-media")>(
-    "openclaw/plugin-sdk/outbound-media",
+vi.mock("carapace/plugin-sdk/ssrf-runtime", () => ({ fetchWithSsrFGuard }));
+vi.mock("carapace/plugin-sdk/outbound-media", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/outbound-media")>(
+    "carapace/plugin-sdk/outbound-media",
   );
   return { ...actual, loadOutboundMediaFromUrl };
 });
@@ -44,7 +44,7 @@ type EnterpriseTestClient = WebClient & {
   };
 };
 
-const ENTERPRISE_CFG: OpenClawConfig = {
+const ENTERPRISE_CFG: CarapaceConfig = {
   channels: {
     slack: {},
   },

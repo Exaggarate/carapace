@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { parseDateStringTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { parseDateStringTimestampMs } from "@carapace/normalization-core/number-coercion";
 import { expressionBuilder, type Expression, type SqlBool } from "kysely";
 import {
   TRANSCRIPTS_EXPORT_MAX_BYTES,
@@ -252,7 +252,7 @@ function registerTranscriptDateReader(database: DatabaseSync): void {
   // Canonical database reopen creates a new handle. Date parsing is not
   // deterministic because timezone-free strings depend on the process timezone.
   database.function(
-    "openclaw_transcript_date_ms",
+    "carapace_transcript_date_ms",
     (value) => parseDateStringTimestampMs(value) ?? null,
   );
   dateReaders.add(database);
@@ -264,7 +264,7 @@ function transcriptStartTime(startedAt: Expression<string>) {
   return eb
     .case()
     .when(eb.fn<number>("octet_length", [startedAt]), "<=", TRANSCRIPTS_RESULT_MAX_BYTES)
-    .then(eb.fn<number | null>("openclaw_transcript_date_ms", [startedAt]))
+    .then(eb.fn<number | null>("carapace_transcript_date_ms", [startedAt]))
     .end();
 }
 

@@ -1,16 +1,16 @@
-import { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
+import { logTypingFailure } from "carapace/plugin-sdk/channel-feedback";
 import {
   readAgentRunTerminalOutcome,
   hasFinalInboundReplyDispatch,
   runChannelInboundEvent,
   type ChannelInboundTurnPlan,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "carapace/plugin-sdk/channel-inbound";
 import {
   createChannelMessageReplyPipeline,
   resolveChannelStreamingPreviewToolProgress,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { isFastModeAutoProgressPayload } from "openclaw/plugin-sdk/reply-payload";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "carapace/plugin-sdk/channel-outbound";
+import { isFastModeAutoProgressPayload } from "carapace/plugin-sdk/reply-payload";
+import { logVerbose } from "carapace/plugin-sdk/runtime-env";
 import { sendPayload } from "./bot-message-dispatch-delivery.js";
 import {
   beginDraftQueuedFollowup,
@@ -287,7 +287,7 @@ export async function runTelegramDispatchTurn(turn: Turn) {
               if (!text) {
                 return false;
               }
-              const progressId = payload.channelData?.openclawToolProgressId;
+              const progressId = payload.channelData?.carapaceToolProgressId;
               const updatedDraft = await pushToolProgress(turn, text, {
                 startImmediately: true,
                 id: typeof progressId === "string" ? progressId : undefined,

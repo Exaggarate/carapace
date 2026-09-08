@@ -26,7 +26,7 @@ function runWatcher(
   options: string[] = [],
   clock: "poll" | "wall" = "poll",
 ) {
-  return withTempDir("openclaw-watch-pr-ci-", async (binDir) => {
+  return withTempDir("carapace-watch-pr-ci-", async (binDir) => {
     const ghPath = join(binDir, "gh");
     writeFileSync(ghPath, ghScript);
     chmodSync(ghPath, 0o755);
@@ -104,7 +104,7 @@ function replayPlaceholder(
     afterAliasScan?: unknown;
   } = {},
 ) {
-  return withTempDir("openclaw-watch-pr-ci-replay-", async (root) => {
+  return withTempDir("carapace-watch-pr-ci-replay-", async (root) => {
     const payload = join(root, "payload.json");
     const calls = join(root, "calls.jsonl");
     // The live capture is merged. Only lifecycle is reopened for the historical watch.
@@ -120,8 +120,8 @@ const fixture = JSON.parse(fs.readFileSync(${JSON.stringify(payload)}, "utf8"));
 const args = process.argv.slice(2);
 const calls = fs.readFileSync(${JSON.stringify(calls)}, "utf8").trim().split("\\n").filter(Boolean).map(JSON.parse);
 fs.appendFileSync(${JSON.stringify(calls)}, JSON.stringify(args) + "\\n");
-const runPath = "repos/openclaw/openclaw/actions/runs/33155056361";
-const scanned = calls.some((call) => call[1]?.startsWith("repos/openclaw/openclaw/actions/jobs/"));
+const runPath = "repos/carapace/carapace/actions/runs/33155056361";
+const scanned = calls.some((call) => call[1]?.startsWith("repos/carapace/carapace/actions/jobs/"));
 const currentGraphql = scanned && fixture.afterAliasScan !== undefined ? fixture.afterAliasScan : fixture.graphql;
 let value;
 if (args[0] === "pr" && args[1] === "view") value = currentGraphql.data.repository.pullRequest;
@@ -130,7 +130,7 @@ else if (args[0] === "run" && args[1] === "view") {
   value = fixture.runViewSnapshots?.[Math.min(reads, fixture.runViewSnapshots.length - 1)] ?? fixture.run;
 }
 else if (args[0] === "api" && args[1] === "graphql") value = currentGraphql;
-else if (args.includes("repos/openclaw/openclaw/actions/workflows/ci.yml/runs")) value = { workflow_runs: [fixture.run] };
+else if (args.includes("repos/carapace/carapace/actions/workflows/ci.yml/runs")) value = { workflow_runs: [fixture.run] };
 else if (args[1] === runPath) {
   const reads = calls.filter((call) => call[1] === runPath).length;
   value = fixture.runSnapshots?.[Math.min(reads, fixture.runSnapshots.length - 1)] ?? fixture.run;
@@ -140,7 +140,7 @@ else if (args[1]?.startsWith(runPath + "/attempts/3/jobs?per_page=100&page=")) {
   value = (fixture.jobPages ?? [fixture.jobs])[page - 1];
   if (value === undefined) throw new Error("missing attempt jobs page");
 }
-else if (args[1]?.startsWith("repos/openclaw/openclaw/actions/jobs/")) {
+else if (args[1]?.startsWith("repos/carapace/carapace/actions/jobs/")) {
   const jobIds = ${JSON.stringify(fixture.directJobs.map((job) => job.id))};
   const jobId = Number(args[1].split("/").at(-1));
   if (fixture.delayFirstAlias && jobId === jobIds[0]) {
@@ -168,7 +168,7 @@ describe("watch-pr-ci", () => {
     expect(parseArgs(["42", sha])).toEqual({
       pr: 42,
       headSha: sha,
-      repo: "openclaw/openclaw",
+      repo: "carapace/carapace",
       attachTimeout: 900,
       timeout: 3600,
       interval: 120,
@@ -217,11 +217,11 @@ describe("watch-pr-ci", () => {
   });
 
   it("builds a pull-request-only run attachment query", () => {
-    expect(buildFindRunArgs("openclaw/openclaw", sha)).toEqual([
+    expect(buildFindRunArgs("carapace/carapace", sha)).toEqual([
       "api",
       "--method",
       "GET",
-      "repos/openclaw/openclaw/actions/workflows/ci.yml/runs",
+      "repos/carapace/carapace/actions/workflows/ci.yml/runs",
       "-f",
       "event=pull_request",
       "-f",
@@ -770,7 +770,7 @@ esac
           });
           pr.statusCheckRollup.contexts.totalCount += 1;
         }
-        const result = await withTempDir("openclaw-watch-pr-ci-ownership-", async (root) => {
+        const result = await withTempDir("carapace-watch-pr-ci-ownership-", async (root) => {
           const calls = join(root, "calls.jsonl");
           writeFileSync(calls, "");
           const watched = await runWatcher(
@@ -779,7 +779,7 @@ const fs = require("node:fs");
 const args = process.argv.slice(2);
 const calls = fs.readFileSync(${JSON.stringify(calls)}, "utf8").trim().split("\\n").filter(Boolean).map(JSON.parse);
 fs.appendFileSync(${JSON.stringify(calls)}, JSON.stringify(args) + "\\n");
-const metadataRead = calls.some((call) => call[1] === "repos/openclaw/openclaw/actions/runs/100");
+const metadataRead = calls.some((call) => call[1] === "repos/carapace/carapace/actions/runs/100");
 const pr = { ...${JSON.stringify(pr)}, ...(metadataRead ? ${JSON.stringify(afterMetadata ?? {})} : {}) };
 if (metadataRead && ${Boolean(afterMetadataState)}) pr.statusCheckRollup.state = ${JSON.stringify(afterMetadataState)};
 const runs = ${JSON.stringify(listedRuns)};
@@ -794,8 +794,8 @@ else if (args[0] === "run" && args[1] === "view") {
   value = runs.find((run) => String(run.id) === args[2]);
 }
 else if (args[0] === "api" && args[1] === "graphql") value = { data: { repository: { pullRequest: pr } } };
-else if (args.includes("repos/openclaw/openclaw/actions/workflows/ci.yml/runs")) value = { total_count: ${olderRunOutsidePage ? 21 : 2}, workflow_runs: runs };
-else if (args[1]?.startsWith("repos/openclaw/openclaw/actions/runs/")) {
+else if (args.includes("repos/carapace/carapace/actions/workflows/ci.yml/runs")) value = { total_count: ${olderRunOutsidePage ? 21 : 2}, workflow_runs: runs };
+else if (args[1]?.startsWith("repos/carapace/carapace/actions/runs/")) {
   if (${slowMetadata}) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2_000);
   value = previousRuns[100 - Number(args[1].split("/").at(-1))];
 }
@@ -819,10 +819,10 @@ console.log(JSON.stringify(value));
         expect(result.stdout).toContain(`ATTACHED run=${expectedRun}`);
         expect(result.stdout).toContain(output);
         expect(
-          result.calls.filter((call) => call[1] === "repos/openclaw/openclaw/actions/runs/100"),
+          result.calls.filter((call) => call[1] === "repos/carapace/carapace/actions/runs/100"),
         ).toHaveLength(olderRunOutsidePage && expectedMetadataReads > 0 ? 1 : 0);
         const metadataReads = result.calls.filter((call) =>
-          call[1]?.startsWith("repos/openclaw/openclaw/actions/runs/"),
+          call[1]?.startsWith("repos/carapace/carapace/actions/runs/"),
         );
         expect(metadataReads).toHaveLength(olderRunOutsidePage ? expectedMetadataReads : 0);
         let readsThisPoll = 0;
@@ -830,7 +830,7 @@ console.log(JSON.stringify(value));
           if (call[0] === "run" && call[1] === "view") {
             readsThisPoll = 0;
           }
-          if (call[1]?.startsWith("repos/openclaw/openclaw/actions/runs/")) {
+          if (call[1]?.startsWith("repos/carapace/carapace/actions/runs/")) {
             readsThisPoll += 1;
           }
           expect(readsThisPoll).toBeLessThanOrEqual(32);
@@ -877,7 +877,7 @@ console.log(JSON.stringify(value));
             .toSorted((left, right) => left - right),
         ).toEqual(fixture.directJobs.map((job) => job.id).toSorted((left, right) => left - right));
         const finalEvidenceRead = calls.findLastIndex(
-          (call) => call[1] === "repos/openclaw/openclaw/actions/runs/33155056361",
+          (call) => call[1] === "repos/carapace/carapace/actions/runs/33155056361",
         );
         expect(finalEvidenceRead).toBeGreaterThan(
           calls.findLastIndex((call) => call[1]?.includes("/actions/jobs/")),
@@ -1127,7 +1127,7 @@ console.log(JSON.stringify(value));
       });
       expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(16);
       expect(result.stdout).not.toContain("GREEN");
-      expect(result.calls).toContain('"repos/openclaw/openclaw/actions/jobs/98802098786"');
+      expect(result.calls).toContain('"repos/carapace/carapace/actions/jobs/98802098786"');
     });
 
     it.each([
@@ -1144,7 +1144,7 @@ console.log(JSON.stringify(value));
       });
       expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(16);
       expect(result.stdout).not.toContain("GREEN");
-      expect(result.calls).toContain('"repos/openclaw/openclaw/actions/jobs/98802098559"');
+      expect(result.calls).toContain('"repos/carapace/carapace/actions/jobs/98802098559"');
     });
 
     it.concurrent.each([
@@ -1170,7 +1170,7 @@ console.log(JSON.stringify(value));
       expect(result.stdout).not.toContain("GREEN");
       const runReads = result.calls
         .split("\n")
-        .filter((call) => call.includes('"repos/openclaw/openclaw/actions/runs/33155056361"'));
+        .filter((call) => call.includes('"repos/carapace/carapace/actions/runs/33155056361"'));
       expect(runReads.length).toBeGreaterThanOrEqual(2);
     });
 

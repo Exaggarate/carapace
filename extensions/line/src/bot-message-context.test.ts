@@ -3,15 +3,15 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { webhook } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   getSessionBindingService,
   testing as sessionBindingTesting,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { lineBindingsAdapter } from "./bindings.js";
 import { buildLineMessageContext, buildLinePostbackContext } from "./bot-message-context.js";
@@ -24,8 +24,8 @@ const getUserProfileMock = vi.hoisted(() =>
 const getLineGroupNameMock = vi.hoisted(() => vi.fn(async () => undefined as string | undefined));
 const toInboundMediaFactsWithMetadataMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   toInboundMediaFactsWithMetadataMock.mockImplementation(actual.toInboundMediaFactsWithMetadata);
   return {
     ...actual,
@@ -41,9 +41,9 @@ vi.mock("./send.js", () => ({
   getLineGroupName: getLineGroupNameMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("carapace/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/runtime-env")>(
+    "carapace/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -67,7 +67,7 @@ const lineBindingsPlugin = {
 describe("buildLineMessageContext", () => {
   let tmpDir: string;
   let storePath: string;
-  let cfg: OpenClawConfig;
+  let cfg: CarapaceConfig;
   const account: ResolvedLineAccount = {
     accountId: "default",
     enabled: true,
@@ -124,7 +124,7 @@ describe("buildLineMessageContext", () => {
       ]),
     );
     sessionBindingTesting.resetSessionBindingAdaptersForTests();
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-line-context-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-line-context-"));
     storePath = path.join(tmpDir, "sessions.json");
     cfg = { session: { store: storePath } };
   });
@@ -284,7 +284,7 @@ describe("buildLineMessageContext", () => {
       message: {
         id: "m-mention",
         type: "text",
-        text: "@openclaw3 /status",
+        text: "@carapace3 /status",
         quoteToken: "quote-token",
         mention: {
           mentionees: [{ type: "user", index: 0, length: 10, userId: "Ubot", isSelf: true }],
@@ -302,8 +302,8 @@ describe("buildLineMessageContext", () => {
 
     expect(context?.ctxPayload.CommandBody).toBe("/status");
     expect(context?.ctxPayload.BodyForCommands).toBe("/status");
-    expect(context?.ctxPayload.RawBody).toBe("@openclaw3 /status");
-    expect(context?.ctxPayload.BodyForAgent).toBe("@openclaw3 /status");
+    expect(context?.ctxPayload.RawBody).toBe("@carapace3 /status");
+    expect(context?.ctxPayload.BodyForAgent).toBe("@carapace3 /status");
   });
 
   it("keeps the command body when a message carries only another member's mention", async () => {
@@ -364,7 +364,7 @@ describe("buildLineMessageContext", () => {
 
   it("keeps inbound log previews UTF-16 well-formed at the limit", async () => {
     const timestamp = 1_700_000_000_000;
-    const logCfg: OpenClawConfig = {
+    const logCfg: CarapaceConfig = {
       ...cfg,
       agents: { defaults: { envelopeTimestamp: "off" } },
     };
@@ -699,7 +699,7 @@ describe("buildLineMessageContext", () => {
 
   it("keeps per-channel-peer direct-message last-route writes on the isolated session", async () => {
     const event = createMessageEvent({ type: "user", userId: "user-1" });
-    const directCfg: OpenClawConfig = {
+    const directCfg: CarapaceConfig = {
       session: { store: storePath, dmScope: "per-channel-peer" },
     };
 
@@ -738,7 +738,7 @@ describe("buildLineMessageContext", () => {
 
   it("group peer binding matches raw groupId without prefix (#21907)", async () => {
     const groupId = "Cc7e3bece1234567890abcdef"; // pragma: allowlist secret
-    const bindingCfg: OpenClawConfig = {
+    const bindingCfg: CarapaceConfig = {
       session: { store: storePath },
       agents: {
         list: [{ id: "main" }, { id: "line-group-agent" }],
@@ -775,7 +775,7 @@ describe("buildLineMessageContext", () => {
 
   it("room peer binding matches raw roomId without prefix (#21907)", async () => {
     const roomId = "Rr1234567890abcdef";
-    const bindingCfg: OpenClawConfig = {
+    const bindingCfg: CarapaceConfig = {
       session: { store: storePath },
       agents: {
         list: [{ id: "main" }, { id: "line-room-agent" }],
@@ -975,9 +975,9 @@ describe("buildLineMessageContext", () => {
     },
     { text: "call foo() now ()", spans: [[15, 2]], expected: "call foo() now [emoji]" },
     {
-      text: "@openclaw3 ()",
+      text: "@carapace3 ()",
       spans: [[11, 2]],
-      expected: "@openclaw3 [emoji]",
+      expected: "@carapace3 [emoji]",
       mention: { mentionees: [{ type: "user" as const, index: 0, length: 10, isSelf: true }] },
     },
   ])(

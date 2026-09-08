@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
 import type {
   OpenAICompatibleRealtimeAudioFormat,
   RealtimeVoiceAudioFormat,
@@ -8,22 +8,22 @@ import type {
   RealtimeVoiceProviderCapabilities,
   RealtimeVoiceProviderConfig,
   RealtimeVoiceTool,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_G711_ULAW_8KHZ,
   REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
   toOpenAICompatibleRealtimeAudioFormat,
-} from "openclaw/plugin-sdk/realtime-voice-provider";
+} from "carapace/plugin-sdk/realtime-voice-provider";
 import {
   normalizeResolvedSecretInputString,
   normalizeSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
+} from "carapace/plugin-sdk/secret-input";
 import {
   asFiniteNumber,
   asFiniteNumberInRange,
   asSafeIntegerInRange,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveOpenAIChatGptSubscriptionAuth } from "./realtime-auth.js";
 import type { OpenAIRealtimeHost } from "./realtime-host.js";
 import {
@@ -80,7 +80,7 @@ export type OpenAIRealtimeVoiceBridgeConfig = RealtimeVoiceBridgeCreateRequest &
   azureEndpoint?: string;
   azureDeployment?: string;
   azureApiVersion?: string;
-  logger: Pick<import("openclaw/plugin-sdk/plugin-entry").PluginLogger, "warn">;
+  logger: Pick<import("carapace/plugin-sdk/plugin-entry").PluginLogger, "warn">;
 };
 
 export const OPENAI_REALTIME_DEFAULT_MODEL = "gpt-realtime-2.1";

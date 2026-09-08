@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { resolveAgentEffectiveModelPrimary } from "../agents/agent-scope.js";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import { resolveSessionModelRef } from "../agents/session-model-ref.js";
@@ -8,7 +8,7 @@ import { generateConversationLabelWithFallback } from "../auto-reply/reply/conve
 import { stripInboundMetadata } from "../auto-reply/reply/strip-inbound-meta.js";
 import { loadSessionEntry, patchSessionEntryCore } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withTimeout } from "../infra/fs-safe.js";
 import { parseAgentSessionKey } from "../sessions/session-key-utils.js";
 import { getOrCreatePromise } from "../shared/lazy-promise.js";
@@ -123,7 +123,7 @@ export function isDashboardSessionTitleCandidate(params: {
 }
 
 function resolveDashboardTitleAuthProfile(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   entry: DashboardSessionTitleModelEntry | undefined;
   regularProvider: string;
@@ -158,7 +158,7 @@ function normalizeDashboardSessionTitle(raw: string): string | null {
 }
 
 async function generateDashboardSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   entry?: DashboardSessionTitleModelEntry;
   userMessage: string;
@@ -217,7 +217,7 @@ async function generateDashboardSessionTitle(params: {
 
 /** Prepares a creation draft's title without creating or updating a session. */
 export async function prepareDashboardSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   entry?: DashboardSessionTitleModelEntry;
   userMessage: string;
@@ -266,7 +266,7 @@ export async function generateWorktreeSessionTitle(
 }
 
 export async function maybeGenerateDashboardSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   entry: SessionEntry | undefined;
   sessionId: string;
@@ -291,7 +291,7 @@ export async function maybeGenerateDashboardSessionTitle(params: {
 }
 
 export async function maybeGenerateSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   entry: SessionEntry | undefined;
   sessionId: string;

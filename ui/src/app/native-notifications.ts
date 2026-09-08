@@ -19,11 +19,11 @@ type NativeBackgroundSessionCompletion = {
 };
 
 type NativeNotificationsWindow = Window & {
-  __OPENCLAW_NATIVE_NOTIFICATIONS__?: unknown;
+  __CARAPACE_NATIVE_NOTIFICATIONS__?: unknown;
 };
 
 // Wire contract with the Mac app's dashboard bridge (DashboardWindowController+Notifications.swift).
-const NATIVE_NOTIFICATIONS_STATUS_EVENT = "openclaw:native-notifications-status";
+const NATIVE_NOTIFICATIONS_STATUS_EVENT = "carapace:native-notifications-status";
 
 export type NativeNotificationsCapability = {
   readonly snapshot: NativeNotificationsSnapshot;
@@ -65,7 +65,7 @@ function snapshotFrom(value: unknown): NativeNotificationsSnapshot | null {
 }
 
 function getNativeNotificationsPoster() {
-  const handler = webKitHostWindow()?.webkit?.messageHandlers?.openclawNotifications;
+  const handler = webKitHostWindow()?.webkit?.messageHandlers?.carapaceNotifications;
   return handler?.postMessage.bind(handler);
 }
 
@@ -76,7 +76,7 @@ export function createNativeNotificationsCapability(): NativeNotificationsCapabi
   }
 
   const nativeWindow = window as NativeNotificationsWindow;
-  let snapshot = snapshotFrom(nativeWindow["__OPENCLAW_NATIVE_NOTIFICATIONS__"]) ?? {
+  let snapshot = snapshotFrom(nativeWindow["__CARAPACE_NATIVE_NOTIFICATIONS__"]) ?? {
     permission: "unknown" as const,
     test: null,
   };

@@ -2,7 +2,7 @@
  * Test helpers for standing up fake sandbox contexts and driving the Codex
  * sandbox exec-server JSON-RPC/WebSocket protocol.
  */
-import type { SandboxContext } from "openclaw/plugin-sdk/sandbox";
+import type { SandboxContext } from "carapace/plugin-sdk/sandbox";
 import { vi } from "vitest";
 import type { RawData, WebSocket } from "ws";
 import { websocket } from "./sandbox-exec-server.websocket.js";
@@ -33,17 +33,17 @@ export function createSandboxContext(overrides: {
     workspaceDir: "/host/workspace",
     agentWorkspaceDir: "/host/workspace",
     workspaceAccess: "rw",
-    runtimeId: "openclaw-test-runtime",
-    runtimeLabel: "openclaw-test-runtime",
-    containerName: "openclaw-test-runtime",
+    runtimeId: "carapace-test-runtime",
+    runtimeLabel: "carapace-test-runtime",
+    containerName: "carapace-test-runtime",
     containerWorkdir: "/workspace",
     docker: { binds: [], image: "test", workdir: "/workspace", env: {}, network: "none" },
     tools: {},
     browserAllowHostControl: false,
     backend: {
       id: "docker",
-      runtimeId: "openclaw-test-runtime",
-      runtimeLabel: "openclaw-test-runtime",
+      runtimeId: "carapace-test-runtime",
+      runtimeLabel: "carapace-test-runtime",
       workdir: "/workspace",
       buildExecSpec:
         overrides.buildExecSpec ??

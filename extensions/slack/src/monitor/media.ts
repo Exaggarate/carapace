@@ -1,16 +1,16 @@
 // Slack plugin module implements media behavior.
 import fs from "node:fs/promises";
 import type { WebClient as SlackWebClient } from "@slack/web-api";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeHostname } from "openclaw/plugin-sdk/host-runtime";
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
-import { resolveRequestUrl } from "openclaw/plugin-sdk/request-url";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { normalizeHostname } from "carapace/plugin-sdk/host-runtime";
+import { redactToolPayloadText } from "carapace/plugin-sdk/logging-core";
+import { resolveRequestUrl } from "carapace/plugin-sdk/request-url";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatSlackFileReference } from "../file-reference.js";
 import type { SlackAttachment, SlackFile } from "../types.js";
 import { MAX_SLACK_MEDIA_FILES, type SlackMediaResult } from "./media-types.js";

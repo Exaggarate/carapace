@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { sanitizeApprovalScope } from "../infra/approval-scope.js";
 import {
   sanitizeExecApprovalDisplayText,
@@ -9,7 +9,7 @@ import {
 import { resolveCanonicalPluginApprovalRequestAllowedDecisions } from "../infra/plugin-approval-canonical-decisions.js";
 import type { PluginApprovalRequestPayload } from "../infra/plugin-approvals.js";
 import { resolvePluginApprovalTimeoutMs } from "../infra/plugin-approvals.js";
-import type { OpenClawPluginNodeInvokePolicyContext } from "../plugins/types.js";
+import type { CarapacePluginNodeInvokePolicyContext } from "../plugins/types.js";
 import type { AgentRuntimeIdentity } from "./agent-runtime-identity-token.js";
 import {
   resolveNodeInvokePlacementGrant,
@@ -63,7 +63,7 @@ export function createPluginNodeInvokeApprovalRuntime(params: {
   command: string;
   approvalScope?: string;
   nodeSession: NodeSession;
-  risk: OpenClawPluginNodeInvokePolicyContext["risk"];
+  risk: CarapacePluginNodeInvokePolicyContext["risk"];
   standingGrantAuthorization: NodeInvokePlacementGrantAuthorization;
   placementGrantAuthority?: {
     agentId: string;
@@ -89,7 +89,7 @@ export function createPluginNodeInvokeApprovalRuntime(params: {
     threadId?: unknown;
   };
   isCurrent: () => boolean;
-}): OpenClawPluginNodeInvokePolicyContext["approvals"] | undefined {
+}): CarapacePluginNodeInvokePolicyContext["approvals"] | undefined {
   const manager = params.context.pluginApprovalManager;
   if (!manager) {
     return undefined;

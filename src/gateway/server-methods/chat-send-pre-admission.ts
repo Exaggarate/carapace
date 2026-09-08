@@ -200,7 +200,7 @@ export function resolveChatSendRequestConflict({
   if (!submitted) {
     return request.mentions?.length ? conflict(true) : undefined;
   }
-  const storedMentions = submitted["__openclaw"]?.humanMentions;
+  const storedMentions = submitted["__carapace"]?.humanMentions;
   if (!request.mentions?.length && !storedMentions?.length) {
     return undefined;
   }

@@ -12,7 +12,7 @@ import { createControlUiE2eContextOptions } from "./control-ui-e2e-suite.test-su
 
 const suite = createChatFlowE2eSuite();
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
 async function screenshot(page: Page, name: string) {
   if (!captureUiProof) {
@@ -74,7 +74,7 @@ suite.define(() => {
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
       let picker = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
+        'carapace-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
       );
       await picker.locator('[data-chat-model-select="true"]').tap();
       await picker.getByRole("option", { name: "GPT-5.6 Terra", exact: true }).waitFor();
@@ -115,7 +115,7 @@ suite.define(() => {
       });
 
       await page.reload();
-      picker = page.locator('openclaw-chat-pane[aria-hidden="false"] .chat-controls__model-picker');
+      picker = page.locator('carapace-chat-pane[aria-hidden="false"] .chat-controls__model-picker');
       await picker.locator('[data-chat-model-select="true"]').tap();
       await picker.getByRole("button", { name: "Reset session model", exact: true }).waitFor();
       await expect.poll(() => picker.locator("[data-chat-model-selection-target]").count()).toBe(0);
@@ -174,7 +174,7 @@ suite.define(() => {
       await screenshot(page, "09-configure-models-no-tooltip.png");
       await configureModels.tap();
       await expect.poll(() => page.url()).toContain("model-setup");
-      await page.locator("openclaw-model-setup-page .model-setup").waitFor({ state: "visible" });
+      await page.locator("carapace-model-setup-page .model-setup").waitFor({ state: "visible" });
       await screenshot(page, "10-model-setup-navigation.png");
     } finally {
       await context.close();
@@ -222,7 +222,7 @@ suite.define(() => {
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
       const picker = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
+        'carapace-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
       );
       await picker.locator('[data-chat-model-select="true"]').click();
       await picker.getByRole("button", { name: "Reset session model", exact: true }).waitFor();
@@ -257,7 +257,7 @@ suite.define(() => {
 
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const picker = pane.locator(".chat-controls__model-picker");
       await picker.locator("[data-chat-model-option]").first().waitFor({ state: "attached" });
 
@@ -310,7 +310,7 @@ suite.define(() => {
   it("reconciles the current model search when an open catalog replaces its results", async () => {
     const context = await suite.newBrowserContext(createControlUiE2eContextOptions());
     const page = await context.newPage();
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("model-search-refresh", artifactRoot)
       : undefined;
@@ -324,7 +324,7 @@ suite.define(() => {
     try {
       await page.goto(`${suite.server.baseUrl}chat`);
       const picker = page.locator(
-        'openclaw-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
+        'carapace-chat-pane[aria-hidden="false"] .chat-controls__model-picker',
       );
       const previous = picker.locator('[data-chat-model-option="anthropic/claude-haiku-4-5"]');
       await previous.waitFor({ state: "attached" });

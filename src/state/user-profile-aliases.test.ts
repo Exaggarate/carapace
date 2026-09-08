@@ -3,12 +3,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { withPathResolutionEnv } from "../test-utils/env.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { tableExists } from "./carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "./carapace-state-db.js";
 import {
   onUserProfilesChanged,
   readUserProfileAliasRevision,
@@ -28,13 +28,13 @@ import {
 const roots = createTempDirTracker();
 const statePaths: string[] = [];
 function stateOptions() {
-  const pathname = path.join(roots.make("profile-aliases-"), "state", "openclaw.sqlite");
+  const pathname = path.join(roots.make("profile-aliases-"), "state", "carapace.sqlite");
   statePaths.push(pathname);
   return { path: pathname };
 }
 afterEach(() => {
   for (const pathname of statePaths.splice(0)) {
-    closeOpenClawStateDatabaseByPath(pathname);
+    closeCarapaceStateDatabaseByPath(pathname);
   }
   roots.cleanup();
 });
@@ -76,7 +76,7 @@ describe("profile alias reader lifecycle", () => {
       const stop = onUserProfilesChanged(published);
       try {
         expect(() =>
-          runOpenClawStateWriteTransaction(() => {
+          runCarapaceStateWriteTransaction(() => {
             merge();
             expect(read()).toEqual(new Set([target.id]));
             expect(readUserProfileAliasRevision()).toBe(aliasRevision);
@@ -87,9 +87,9 @@ describe("profile alias reader lifecycle", () => {
         expect(read()).toEqual(new Set([target.id]));
         expect(readUserProfileAliasRevision()).toBe(aliasRevision);
         expect(published).not.toHaveBeenCalled();
-        runOpenClawStateWriteTransaction(() => {
+        runCarapaceStateWriteTransaction(() => {
           expect(() =>
-            runOpenClawStateWriteTransaction(() => {
+            runCarapaceStateWriteTransaction(() => {
               merge();
               throw new Error("nested rollback");
             }, options),
@@ -98,7 +98,7 @@ describe("profile alias reader lifecycle", () => {
         expect(read()).toEqual(new Set([target.id]));
         expect(readUserProfileAliasRevision()).toBe(aliasRevision);
         expect(published).not.toHaveBeenCalled();
-        runOpenClawStateWriteTransaction(() => {
+        runCarapaceStateWriteTransaction(() => {
           merge();
           expect(read()).toEqual(new Set([target.id]));
           expect(readUserProfileAliasRevision()).toBe(aliasRevision);
@@ -225,7 +225,7 @@ describe("profile alias reader lifecycle", () => {
     "leaves absent storage untouched and observes its later creation (database=%s)",
     (exists) => {
       const options = stateOptions();
-      const db = exists ? openOpenClawStateDatabase(options).db : undefined;
+      const db = exists ? openCarapaceStateDatabase(options).db : undefined;
       expect(readUserProfileAliases("missing", options)).toEqual(new Set(["missing"]));
       if (db) {
         expect(tableExists(db, "user_profiles")).toBe(false);
@@ -245,15 +245,15 @@ describe("profile alias reader lifecycle", () => {
     const source = ensureProfileForEmail("source@aliases.test", options);
     const target = ensureProfileForEmail("target@aliases.test", options);
     linkEmail("source@aliases.test", target.id, options);
-    const env = { OPENCLAW_STATE_DIR: path.dirname(path.dirname(other.path)) };
+    const env = { CARAPACE_STATE_DIR: path.dirname(path.dirname(other.path)) };
     expect(readUserProfileAliases(target.id, { ...options, env })).toEqual(
       new Set([source.id, target.id]),
     );
     expect(readUserProfileAliases(target.id, { env })).toEqual(new Set([target.id]));
     expect(fs.existsSync(other.path)).toBe(false);
-    closeOpenClawStateDatabaseByPath(options.path);
+    closeCarapaceStateDatabaseByPath(options.path);
     // Fixture-only external change while closed; this does not promise external-process polling.
-    const reopened = openOpenClawStateDatabase(options).db;
+    const reopened = openCarapaceStateDatabase(options).db;
     reopened.prepare("DELETE FROM user_profiles WHERE id = ?").run(source.id);
     expect(readUserProfileAliases(target.id, options)).toEqual(new Set([target.id]));
   });
@@ -261,9 +261,9 @@ describe("profile alias reader lifecycle", () => {
   it("reselects a newly created default state root instead of retaining legacy-root aliases", () => {
     const home = roots.make("profile-alias-home-");
     const legacyRoot = path.join(home, ".clawdbot");
-    const newRoot = path.join(home, ".openclaw");
-    const legacyPath = path.join(legacyRoot, "state", "openclaw.sqlite");
-    statePaths.push(legacyPath, path.join(newRoot, "state", "openclaw.sqlite"));
+    const newRoot = path.join(home, ".carapace");
+    const legacyPath = path.join(legacyRoot, "state", "carapace.sqlite");
+    statePaths.push(legacyPath, path.join(newRoot, "state", "carapace.sqlite"));
     fs.mkdirSync(legacyRoot);
     withPathResolutionEnv(
       home,
@@ -282,7 +282,7 @@ describe("profile alias reader lifecycle", () => {
         expect(readUserProfileAliases(target.id)).toEqual(new Set([target.id]));
         expect(fs.existsSync(path.join(newRoot, "state"))).toBe(false);
         expect(
-          readUserProfileAliases(target.id, { env: { OPENCLAW_STATE_DIR: legacyRoot } }),
+          readUserProfileAliases(target.id, { env: { CARAPACE_STATE_DIR: legacyRoot } }),
         ).toEqual(new Set([source.id, target.id]));
       },
     );

@@ -1,13 +1,13 @@
 // Tests entrypoint respawn behavior for compile cache and process flags.
 import type { ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
-import { expectDefined } from "@openclaw/normalization-core/expect";
+import { expectDefined } from "@carapace/normalization-core/expect";
 import { describe, expect, it, vi } from "vitest";
 import { buildCliRespawnPlan, runCliRespawnPlan } from "./entry.respawn.js";
 
 const EXPERIMENTAL_WARNING_FLAG = "--disable-warning=ExperimentalWarning";
-const OPENCLAW_NODE_EXTRA_CA_CERTS_READY = "OPENCLAW_NODE_EXTRA_CA_CERTS_READY";
-const OPENCLAW_NODE_OPTIONS_READY = "OPENCLAW_NODE_OPTIONS_READY";
+const CARAPACE_NODE_EXTRA_CA_CERTS_READY = "CARAPACE_NODE_EXTRA_CA_CERTS_READY";
+const CARAPACE_NODE_OPTIONS_READY = "CARAPACE_NODE_OPTIONS_READY";
 
 type CliRespawnPlan = NonNullable<ReturnType<typeof buildCliRespawnPlan>>;
 
@@ -22,7 +22,7 @@ describe("buildCliRespawnPlan", () => {
   it("returns null when respawn policy skips the argv", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "--help"],
+        argv: ["node", "carapace", "--help"],
         env: {},
         execArgv: [],
         autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -38,7 +38,7 @@ describe("buildCliRespawnPlan", () => {
     for (const platform of ["darwin", "linux", "win32"] as const) {
       expect(
         buildCliRespawnPlan({
-          argv: ["node", "openclaw", ...args],
+          argv: ["node", "carapace", ...args],
           env: {},
           execArgv: [],
           autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -51,7 +51,7 @@ describe("buildCliRespawnPlan", () => {
   it("does not detach native hook relays through a startup respawn", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "hooks", "relay", "--relay-id", "relay-1"],
+        argv: ["node", "carapace", "hooks", "relay", "--relay-id", "relay-1"],
         env: {},
         execArgv: [],
         autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -69,7 +69,7 @@ describe("buildCliRespawnPlan", () => {
       ]) {
         expect(
           buildCliRespawnPlan({
-            argv: ["node", "openclaw", ...args],
+            argv: ["node", "carapace", ...args],
             env: {},
             execArgv: [],
             autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -79,7 +79,7 @@ describe("buildCliRespawnPlan", () => {
       }
       expect(
         buildCliRespawnPlan({
-          argv: ["node", "openclaw", "webhooks", "gmail", "setup"],
+          argv: ["node", "carapace", "webhooks", "gmail", "setup"],
           env: {},
           execArgv: [],
           platform,
@@ -90,7 +90,7 @@ describe("buildCliRespawnPlan", () => {
 
   it("adds NODE_EXTRA_CA_CERTS and warning suppression in one respawn", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
       env: {},
       execArgv: [],
       autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -101,15 +101,15 @@ describe("buildCliRespawnPlan", () => {
     expect(respawnPlan.command).toBe(process.execPath);
     expect(respawnPlan.argv[0]).toBe(EXPERIMENTAL_WARNING_FLAG);
     expect(respawnPlan.env.NODE_EXTRA_CA_CERTS).toBe("/etc/ssl/certs/ca-certificates.crt");
-    expect(respawnPlan.env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
-    expect(respawnPlan.env[OPENCLAW_NODE_OPTIONS_READY]).toBe("1");
+    expect(respawnPlan.env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
+    expect(respawnPlan.env[CARAPACE_NODE_OPTIONS_READY]).toBe("1");
     expect(respawnPlan.detachForProcessTree).toBe(true);
   });
 
   it("does not respawn gateway status only to suppress warnings", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "gateway", "status", "--json"],
+        argv: ["node", "carapace", "gateway", "status", "--json"],
         env: {},
         execArgv: [],
         autoNodeExtraCaCerts: undefined,
@@ -120,7 +120,7 @@ describe("buildCliRespawnPlan", () => {
 
   it("preserves NODE_EXTRA_CA_CERTS respawn for gateway status", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw", "gateway", "status", "--json"],
+      argv: ["node", "carapace", "gateway", "status", "--json"],
       env: {},
       execArgv: [],
       autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -128,10 +128,10 @@ describe("buildCliRespawnPlan", () => {
     });
 
     const respawnPlan = expectCliRespawnPlan(plan);
-    expect(respawnPlan.argv).toEqual(["openclaw", "gateway", "status", "--json"]);
+    expect(respawnPlan.argv).toEqual(["carapace", "gateway", "status", "--json"]);
     expect(respawnPlan.env.NODE_EXTRA_CA_CERTS).toBe("/etc/ssl/certs/ca-certificates.crt");
-    expect(respawnPlan.env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
-    expect(respawnPlan.env[OPENCLAW_NODE_OPTIONS_READY]).toBeUndefined();
+    expect(respawnPlan.env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
+    expect(respawnPlan.env[CARAPACE_NODE_OPTIONS_READY]).toBeUndefined();
     expect(respawnPlan.detachForProcessTree).toBe(true);
   });
 
@@ -139,7 +139,7 @@ describe("buildCliRespawnPlan", () => {
     "preserves NODE_EXTRA_CA_CERTS respawn for interactive %s",
     (command) => {
       const plan = buildCliRespawnPlan({
-        argv: ["node", "openclaw", command],
+        argv: ["node", "carapace", command],
         env: {},
         execArgv: [],
         autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -147,17 +147,17 @@ describe("buildCliRespawnPlan", () => {
       });
 
       const respawnPlan = expectCliRespawnPlan(plan);
-      expect(respawnPlan.argv).toEqual(["openclaw", command]);
+      expect(respawnPlan.argv).toEqual(["carapace", command]);
       expect(respawnPlan.env.NODE_EXTRA_CA_CERTS).toBe("/etc/ssl/certs/ca-certificates.crt");
-      expect(respawnPlan.env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
-      expect(respawnPlan.env[OPENCLAW_NODE_OPTIONS_READY]).toBeUndefined();
+      expect(respawnPlan.env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]).toBe("1");
+      expect(respawnPlan.env[CARAPACE_NODE_OPTIONS_READY]).toBeUndefined();
       expect(respawnPlan.detachForProcessTree).toBe(false);
     },
   );
 
   it("keeps bare-root startup respawns attached to the terminal", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw"],
+      argv: ["node", "carapace"],
       env: {},
       execArgv: [],
       autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -165,13 +165,13 @@ describe("buildCliRespawnPlan", () => {
     });
 
     const respawnPlan = expectCliRespawnPlan(plan);
-    expect(respawnPlan.argv).toEqual([EXPERIMENTAL_WARNING_FLAG, "openclaw"]);
+    expect(respawnPlan.argv).toEqual([EXPERIMENTAL_WARNING_FLAG, "carapace"]);
     expect(respawnPlan.detachForProcessTree).toBe(false);
   });
 
   it("preserves macOS system CA trust through one-shot warning respawns", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw", "cron", "list", "--json"],
+      argv: ["node", "carapace", "cron", "list", "--json"],
       env: { NODE_USE_SYSTEM_CA: "1" },
       execArgv: [],
       autoNodeExtraCaCerts: undefined,
@@ -181,7 +181,7 @@ describe("buildCliRespawnPlan", () => {
     const respawnPlan = expectCliRespawnPlan(plan);
     expect(respawnPlan.argv).toEqual([
       EXPERIMENTAL_WARNING_FLAG,
-      "openclaw",
+      "carapace",
       "cron",
       "list",
       "--json",
@@ -190,8 +190,8 @@ describe("buildCliRespawnPlan", () => {
   });
 
   it.each([
-    ["interactive commands", ["node", "openclaw", "tui"]],
-    ["the foreground Gateway", ["node", "openclaw", "gateway", "run"]],
+    ["interactive commands", ["node", "carapace", "tui"]],
+    ["the foreground Gateway", ["node", "carapace", "gateway", "run"]],
   ] as const)("keeps macOS system CA loading for %s", (_label, argv) => {
     expect(
       buildCliRespawnPlan({
@@ -207,10 +207,10 @@ describe("buildCliRespawnPlan", () => {
   it("does not respawn one-shot commands only to change CA trust", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "cron", "list", "--json"],
+        argv: ["node", "carapace", "cron", "list", "--json"],
         env: {
           NODE_USE_SYSTEM_CA: "1",
-          [OPENCLAW_NODE_OPTIONS_READY]: "1",
+          [CARAPACE_NODE_OPTIONS_READY]: "1",
         },
         execArgv: [EXPERIMENTAL_WARNING_FLAG],
         autoNodeExtraCaCerts: undefined,
@@ -222,8 +222,8 @@ describe("buildCliRespawnPlan", () => {
   it("does not respawn interactive commands for warning suppression only", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "tui"],
-        env: { [OPENCLAW_NODE_EXTRA_CA_CERTS_READY]: "1" },
+        argv: ["node", "carapace", "tui"],
+        env: { [CARAPACE_NODE_EXTRA_CA_CERTS_READY]: "1" },
         execArgv: [],
         autoNodeExtraCaCerts: undefined,
         platform: "linux",
@@ -233,7 +233,7 @@ describe("buildCliRespawnPlan", () => {
 
   it("does not overwrite an existing NODE_EXTRA_CA_CERTS value", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
       env: { NODE_EXTRA_CA_CERTS: "/custom/ca.pem" },
       execArgv: [],
       autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -251,7 +251,7 @@ describe("buildCliRespawnPlan", () => {
     ["drops whitespace on Windows", "win32", " ", undefined, undefined, undefined],
   ] as const)("%s", (_label, platform, inherited, discovered, expected, expectedReady) => {
     const plan = buildCliRespawnPlan({
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
       env: { NODE_EXTRA_CA_CERTS: inherited },
       execArgv: [],
       autoNodeExtraCaCerts: discovered,
@@ -260,16 +260,16 @@ describe("buildCliRespawnPlan", () => {
 
     const respawnPlan = expectCliRespawnPlan(plan);
     expect(respawnPlan.env.NODE_EXTRA_CA_CERTS).toBe(expected);
-    expect(respawnPlan.env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]).toBe(expectedReady);
+    expect(respawnPlan.env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]).toBe(expectedReady);
   });
 
   it("returns null when both respawn guards are already satisfied", () => {
     expect(
       buildCliRespawnPlan({
-        argv: ["node", "openclaw", "status"],
+        argv: ["node", "carapace", "status"],
         env: {
-          [OPENCLAW_NODE_EXTRA_CA_CERTS_READY]: "1",
-          [OPENCLAW_NODE_OPTIONS_READY]: "1",
+          [CARAPACE_NODE_EXTRA_CA_CERTS_READY]: "1",
+          [CARAPACE_NODE_OPTIONS_READY]: "1",
         },
         execArgv: [EXPERIMENTAL_WARNING_FLAG],
         autoNodeExtraCaCerts: "/etc/ssl/certs/ca-certificates.crt",
@@ -282,7 +282,7 @@ describe("buildCliRespawnPlan", () => {
     const plan = buildCliRespawnPlan({
       argv: [
         "node",
-        "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs",
+        "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs",
         "dashboard",
       ],
       env: {},
@@ -294,18 +294,18 @@ describe("buildCliRespawnPlan", () => {
     const respawnPlan = expectCliRespawnPlan(plan);
     expect(respawnPlan.argv).toEqual([
       "--stack-size=8192",
-      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs",
+      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs",
       "dashboard",
     ]);
     expect(respawnPlan.env.NODE_EXTRA_CA_CERTS).toBeUndefined();
-    expect(respawnPlan.env[OPENCLAW_NODE_EXTRA_CA_CERTS_READY]).toBeUndefined();
-    expect(respawnPlan.env[OPENCLAW_NODE_OPTIONS_READY]).toBeUndefined();
+    expect(respawnPlan.env[CARAPACE_NODE_EXTRA_CA_CERTS_READY]).toBeUndefined();
+    expect(respawnPlan.env[CARAPACE_NODE_OPTIONS_READY]).toBeUndefined();
     expect(respawnPlan.detachForProcessTree).toBe(false);
   });
 
   it("normalizes a duplicated Windows node.exe launcher prefix before respawning", () => {
     const scriptPath =
-      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs";
+      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs";
     const plan = buildCliRespawnPlan({
       argv: [
         "C:\\Program Files\\nodejs\\node.exe",
@@ -326,7 +326,7 @@ describe("buildCliRespawnPlan", () => {
 
   it("preserves post-script node.exe arguments after normalizing the launcher prefix", () => {
     const scriptPath =
-      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs";
+      "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs";
     const plan = buildCliRespawnPlan({
       argv: [
         "C:\\Program Files\\nodejs\\node.exe",
@@ -350,7 +350,7 @@ describe("buildCliRespawnPlan", () => {
       buildCliRespawnPlan({
         argv: [
           "node",
-          "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs",
+          "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs",
           "dashboard",
         ],
         env: {},
@@ -366,7 +366,7 @@ describe("buildCliRespawnPlan", () => {
       buildCliRespawnPlan({
         argv: [
           "node",
-          "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\openclaw\\openclaw.mjs",
+          "C:\\Users\\alice\\AppData\\Roaming\\npm\\node_modules\\carapace\\carapace.mjs",
           "dashboard",
         ],
         env: {},
@@ -379,7 +379,7 @@ describe("buildCliRespawnPlan", () => {
 
   it("respawns Volta shims through node so the shim is not called directly", () => {
     const plan = buildCliRespawnPlan({
-      argv: ["/home/alice/.volta/bin/volta-shim", "/usr/local/bin/openclaw", "status"],
+      argv: ["/home/alice/.volta/bin/volta-shim", "/usr/local/bin/carapace", "status"],
       env: { PATH: "/home/alice/.volta/bin:/usr/bin:/bin" },
       execArgv: [],
       execPath: "/home/alice/.volta/bin/volta-shim",
@@ -391,7 +391,7 @@ describe("buildCliRespawnPlan", () => {
     expect(respawnPlan.command).toBe("node");
     expect(respawnPlan.argv).toEqual([
       EXPERIMENTAL_WARNING_FLAG,
-      "/usr/local/bin/openclaw",
+      "/usr/local/bin/carapace",
       "status",
     ]);
     expect(respawnPlan.detachForProcessTree).toBe(true);
@@ -409,8 +409,8 @@ describe("runCliRespawnPlan", () => {
     runCliRespawnPlan(
       {
         command: "/usr/bin/node",
-        argv: ["/repo/openclaw/dist/entry.js", "status"],
-        env: { OPENCLAW_NODE_OPTIONS_READY: "1" },
+        argv: ["/repo/carapace/dist/entry.js", "status"],
+        env: { CARAPACE_NODE_OPTIONS_READY: "1" },
         detachForProcessTree: true,
       },
       {
@@ -423,10 +423,10 @@ describe("runCliRespawnPlan", () => {
 
     expect(spawn).toHaveBeenCalledWith(
       "/usr/bin/node",
-      ["/repo/openclaw/dist/entry.js", "status"],
+      ["/repo/carapace/dist/entry.js", "status"],
       {
         stdio: "inherit",
-        env: { OPENCLAW_NODE_OPTIONS_READY: "1" },
+        env: { CARAPACE_NODE_OPTIONS_READY: "1" },
         detached: process.platform !== "win32" && !(process.stdin.isTTY || process.stdout.isTTY),
       },
     );

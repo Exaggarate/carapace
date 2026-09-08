@@ -49,7 +49,7 @@ async function prepareArchive(
 
 describe("backup archive publication", () => {
   it("publishes a complete archive and removes its private staging directory", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-publish-");
+    const { outputPath, plan } = await createPublication("carapace-backup-publish-");
     const prepared = await prepareArchive(plan);
     const originalOpen = fs.open.bind(fs);
     const openedPaths: string[] = [];
@@ -71,7 +71,7 @@ describe("backup archive publication", () => {
   });
 
   it("removes its staging directory when private setup fails", async () => {
-    const root = tempDirs.make("openclaw-backup-setup-failure-");
+    const root = tempDirs.make("carapace-backup-setup-failure-");
     const outputDir = path.join(root, "backups");
     await fs.mkdir(outputDir);
     const chmodSpy = vi
@@ -90,7 +90,7 @@ describe("backup archive publication", () => {
   it.each(["EPERM", "EXDEV", "ENOTSUP", "EOPNOTSUPP", "ENOSYS"])(
     "fails closed when hard-link publication returns %s",
     async (code) => {
-      const { outputPath, plan } = await createPublication("openclaw-backup-no-link-");
+      const { outputPath, plan } = await createPublication("carapace-backup-no-link-");
       const prepared = await prepareArchive(plan);
       const linkSpy = vi
         .spyOn(fs, "link")
@@ -108,7 +108,7 @@ describe("backup archive publication", () => {
   );
 
   it("preserves a destination raced in before publication", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-destination-race-");
+    const { outputPath, plan } = await createPublication("carapace-backup-destination-race-");
     const prepared = await prepareArchive(plan);
     await fs.writeFile(outputPath, "racer", "utf8");
 
@@ -121,7 +121,7 @@ describe("backup archive publication", () => {
   it.runIf(process.platform !== "win32")(
     "preserves a concurrently published hard link to the prepared archive",
     async () => {
-      const { outputPath, plan } = await createPublication("openclaw-backup-hardlink-race-");
+      const { outputPath, plan } = await createPublication("carapace-backup-hardlink-race-");
       const prepared = await prepareArchive(plan);
       await fs.link(prepared.archivePath, outputPath);
 
@@ -134,7 +134,7 @@ describe("backup archive publication", () => {
   );
 
   it("rejects a replaced staging pathname without publishing replacement bytes", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-staging-race-");
+    const { outputPath, plan } = await createPublication("carapace-backup-staging-race-");
     const prepared = await prepareArchive(plan);
     const originalPath = `${prepared.archivePath}.original`;
     await fs.rename(prepared.archivePath, originalPath);
@@ -150,7 +150,7 @@ describe("backup archive publication", () => {
   it.runIf(process.platform !== "win32")(
     "rejects a requested output-parent symlink retarget",
     async () => {
-      const root = tempDirs.make("openclaw-backup-parent-retarget-");
+      const root = tempDirs.make("carapace-backup-parent-retarget-");
       const firstDir = path.join(root, "first");
       const secondDir = path.join(root, "second");
       const requestedDir = path.join(root, "current");
@@ -177,7 +177,7 @@ describe("backup archive publication", () => {
     "rejects a canonical output-parent directory replacement",
     async () => {
       const { outputDir, outputPath, plan } = await createPublication(
-        "openclaw-backup-parent-replace-",
+        "carapace-backup-parent-replace-",
       );
       const prepared = await prepareArchive(plan);
       const movedOutputDir = `${outputDir}.moved`;
@@ -197,7 +197,7 @@ describe("backup archive publication", () => {
   it.runIf(process.platform !== "win32").each(["EIO", "EINVAL", "ENOTSUP"])(
     "preserves the complete final archive when commit directory sync fails with %s",
     async (code) => {
-      const { outputPath, plan } = await createPublication("openclaw-backup-sync-failure-");
+      const { outputPath, plan } = await createPublication("carapace-backup-sync-failure-");
       const prepared = await prepareArchive(plan);
       const log = vi.fn();
       const originalOpen = fs.open.bind(fs);
@@ -230,7 +230,7 @@ describe("backup archive publication", () => {
   );
 
   it("preserves a destination that replaces the linked archive before validation", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-linked-race-");
+    const { outputPath, plan } = await createPublication("carapace-backup-linked-race-");
     const prepared = await prepareArchive(plan);
     const displacedPath = `${outputPath}.displaced`;
     __setFsSafeTestHooksForTest({
@@ -254,7 +254,7 @@ describe("backup archive publication", () => {
   });
 
   it("keeps the committed final archive when staging cleanup fails", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-cleanup-failure-");
+    const { outputPath, plan } = await createPublication("carapace-backup-cleanup-failure-");
     const prepared = await prepareArchive(plan);
     const log = vi.fn();
     const originalUnlinkSync = fsSync.unlinkSync.bind(fsSync);
@@ -279,7 +279,7 @@ describe("backup archive publication", () => {
   });
 
   it("retries cleanup when descriptor and pathname identity reads initially fail", async () => {
-    const { plan } = await createPublication("openclaw-backup-unidentified-partial-");
+    const { plan } = await createPublication("carapace-backup-unidentified-partial-");
     const archiveStream = new PassThrough();
     const originalLstatSync = fsSync.lstatSync.bind(fsSync);
     const fstatSpy = vi.spyOn(fsSync, "fstatSync").mockImplementationOnce(() => {
@@ -318,7 +318,7 @@ describe("backup archive publication", () => {
   });
 
   it("preserves a final-path replacement after the commit point", async () => {
-    const { outputPath, plan } = await createPublication("openclaw-backup-final-race-");
+    const { outputPath, plan } = await createPublication("carapace-backup-final-race-");
     const prepared = await prepareArchive(plan);
     const displacedPath = `${outputPath}.displaced`;
     const originalUnlinkSync = fsSync.unlinkSync.bind(fsSync);

@@ -26,13 +26,13 @@ it.for(["resolve", "reject"] as const)(
     ] as const;
     const gateway = (
       window as typeof window & {
-        openclawControlUiE2eGateway?: {
+        carapaceControlUiE2eGateway?: {
           resolveDeferred: (method: string) => void;
           rejectDeferred: (method: string, error: { message: string }) => void;
           deferNext: (method: string) => void;
         };
       }
-    ).openclawControlUiE2eGateway;
+    ).carapaceControlUiE2eGateway;
     if (!gateway) {
       throw new Error("Mock Gateway was not installed");
     }
@@ -88,8 +88,8 @@ it("separates canonical roster capture and deferrals from child session queries"
 }) => {
   const { window, execute, responses: frames } = gatewayPage;
   execute(createControlUiMockGatewayInitScript());
-  const gateway = (window as typeof window & { openclawControlUiE2eGateway?: ControlUiMockGateway })
-    .openclawControlUiE2eGateway;
+  const gateway = (window as typeof window & { carapaceControlUiE2eGateway?: ControlUiMockGateway })
+    .carapaceControlUiE2eGateway;
   if (!gateway) {
     throw new Error("Mock Gateway was not installed");
   }

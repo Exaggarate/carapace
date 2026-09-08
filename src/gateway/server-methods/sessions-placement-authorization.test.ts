@@ -32,8 +32,8 @@ describe("placement session authorization", () => {
     mocks.resolveTarget.mockReturnValue(
       makeSessionTarget({
         sessionId,
-        agentRuntimeOverride: "openclaw",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        agentRuntimeOverride: "carapace",
+        worktree: { id: "worktree-1", branch: "carapace/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({

@@ -521,7 +521,7 @@ describe("SidebarSessionProjection running subtitle hold", () => {
       hasActiveRun: true,
       activeRunIds: ["run-one"],
       workSession: true,
-      subtitle: "~/Projects/openclaw",
+      subtitle: "~/Projects/carapace",
     });
     projection.project(projectionInput([running]));
     const missingSubtitle = { ...running, subtitle: undefined };
@@ -539,7 +539,7 @@ describe("SidebarSessionProjection running subtitle hold", () => {
 
     expect(
       projection.resolveSubtitle(subtitleParams(missingSubtitle, { sidebarLiveActivity: false })),
-    ).toEqual({ subtitle: "~/Projects/openclaw", narration: undefined });
+    ).toEqual({ subtitle: "~/Projects/carapace", narration: undefined });
   });
 
   it("holds shared running narration across a catalog display override", () => {
@@ -569,7 +569,7 @@ describe("SidebarSessionProjection running subtitle hold", () => {
       hasActiveRun: true,
       activeRunIds: ["run-one"],
       workSession: true,
-      subtitle: "~/Projects/openclaw",
+      subtitle: "~/Projects/carapace",
     });
     projection.project(projectionInput([running]));
 

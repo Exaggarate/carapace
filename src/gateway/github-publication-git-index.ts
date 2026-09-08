@@ -89,7 +89,7 @@ async function writeDurableFile(file: string, contents: Buffer): Promise<void> {
 
 function publicationRecoveryPath(indexPath: string, requestId: string): string {
   const recoveryId = createHash("sha256").update(requestId).digest("hex");
-  return `${indexPath}.openclaw-${recoveryId}`;
+  return `${indexPath}.carapace-${recoveryId}`;
 }
 
 export async function recoverGitHubPublicationBranchAndIndex(params: {
@@ -169,7 +169,7 @@ async function publicationCommitMatches(
     params.run(["git", "rev-parse", `${headCommit}^{tree}`], { cwd: params.cwd }),
   ]);
   return (
-    message.split(/\r?\n/u).includes(`OpenClaw-Publication: ${params.requestId}`) &&
+    message.split(/\r?\n/u).includes(`Carapace-Publication: ${params.requestId}`) &&
     parent === params.sourceHeadCommit &&
     tree === params.workspaceTree
   );
@@ -189,7 +189,7 @@ export async function updateGitHubPublicationBranchAndIndex(params: {
   run: (argv: string[], options?: GitCommandOptions) => Promise<string>;
   updateRef?: () => Promise<void>;
 }): Promise<void> {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-github-index-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-github-index-"));
   const replacementIndex = path.join(tempDir, "replacement-index");
   const observedIndex = path.join(tempDir, "observed-index");
   let lockPath: string | undefined;

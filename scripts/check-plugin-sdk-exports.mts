@@ -46,7 +46,7 @@ if (!nativePreviewTsgoBin) {
   throw new Error("@typescript/native-preview does not declare the tsgo binary");
 }
 const tsgoPath = resolve(dirname(nativePreviewPackageJsonPath), nativePreviewTsgoBin);
-const forbiddenPublicDeclarationSpecifiers = ["@openclaw/llm-core"];
+const forbiddenPublicDeclarationSpecifiers = ["@carapace/llm-core"];
 const FORBIDDEN_PUBLIC_PROTOCOL_REGISTRY_RE = /\bdeclare\s+const\s+ProtocolSchemas(?:\$\d+)?\b/u;
 const RELATIVE_DECLARATION_SPECIFIER_RE = /\b(?:from|import)\s*(?:\(\s*)?["']([^"']+)["']/gu;
 const requiredSubpathExports: Record<string, string[]> = {
@@ -65,29 +65,29 @@ const requiredSubpathExports: Record<string, string[]> = {
 let missing = 0;
 
 {
-  const tempRoot = mkdtempSync(join(tmpdir(), "openclaw-plugin-sdk-consumer-"));
+  const tempRoot = mkdtempSync(join(tmpdir(), "carapace-plugin-sdk-consumer-"));
   const consumerRoot = join(tempRoot, "consumer");
   try {
     mkdirSync(consumerRoot, { recursive: true });
     writeFileSync(
       join(consumerRoot, "index.ts"),
-      `import { buildChannelConfigSchema, DmPolicySchema } from "openclaw/plugin-sdk/channel-config-schema";
-import { defineChannelPluginEntry } from "openclaw/plugin-sdk/core";
-import { defineToolPlugin } from "openclaw/plugin-sdk/tool-plugin";
-import { identityEntryAuthenticationClassifier, meetsIdentifierAuthentication } from "openclaw/plugin-sdk/channel-ingress-runtime";
+      `import { buildChannelConfigSchema, DmPolicySchema } from "carapace/plugin-sdk/channel-config-schema";
+import { defineChannelPluginEntry } from "carapace/plugin-sdk/core";
+import { defineToolPlugin } from "carapace/plugin-sdk/tool-plugin";
+import { identityEntryAuthenticationClassifier, meetsIdentifierAuthentication } from "carapace/plugin-sdk/channel-ingress-runtime";
 import type {
   ChannelIngressIdentitySubjectInput,
   IdentifierAuthentication,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "carapace/plugin-sdk/channel-ingress-runtime";
 // @ts-expect-error Host admission evidence is intentionally private to core.
-import type { ChannelAdmissionEvidence } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import type { ChannelAdmissionEvidence } from "carapace/plugin-sdk/channel-ingress-runtime";
 // @ts-expect-error Plugins cannot mint host admission evidence.
-import { prepareHostChannelContextAdmissionEvidence } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { prepareHostChannelContextAdmissionEvidence } from "carapace/plugin-sdk/channel-ingress-runtime";
 // @ts-expect-error Plugins cannot register host evidence owners.
-import { registerChannelAdmissionEvidenceOwner } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { createPluginRuntimeStore, type PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
-import type { buildModelsProviderData, buildPreparedModelsProviderData, ModelsProviderData } from "openclaw/plugin-sdk/models-provider-runtime";
-import type { buildModelsProviderData as buildCommandAuthModelsProviderData } from "openclaw/plugin-sdk/command-auth";
+import { registerChannelAdmissionEvidenceOwner } from "carapace/plugin-sdk/channel-ingress-runtime";
+import { createPluginRuntimeStore, type PluginRuntime } from "carapace/plugin-sdk/runtime-store";
+import type { buildModelsProviderData, buildPreparedModelsProviderData, ModelsProviderData } from "carapace/plugin-sdk/models-provider-runtime";
+import type { buildModelsProviderData as buildCommandAuthModelsProviderData } from "carapace/plugin-sdk/command-auth";
 import { z } from "zod";
 
 // Stable v2026.7.1-2 consumers construct these results and supply typed adapters.
@@ -143,7 +143,7 @@ export default defineChannelPluginEntry({
 `,
     );
     writeFileSync(join(consumerRoot, "package.json"), '{"private":true,"type":"module"}\n');
-    // Keep skipLibCheck on for this in-tree consumer: workspace @openclaw/ai
+    // Keep skipLibCheck on for this in-tree consumer: workspace @carapace/ai
     // declaration caches can omit .d.mts while still shipping .mjs, which makes
     // skipLibCheck:false fail with TS7016 before the helper scan below. Packed
     // release-check still uses skipLibCheck:false against a complete tarball.
@@ -163,9 +163,9 @@ export default defineChannelPluginEntry({
 }
 `,
     );
-    const openclawPackagePath = join(consumerRoot, "node_modules", "openclaw");
-    mkdirSync(dirname(openclawPackagePath), { recursive: true });
-    symlinkSync(repoRoot, openclawPackagePath, process.platform === "win32" ? "junction" : "dir");
+    const carapacePackagePath = join(consumerRoot, "node_modules", "carapace");
+    mkdirSync(dirname(carapacePackagePath), { recursive: true });
+    symlinkSync(repoRoot, carapacePackagePath, process.platform === "win32" ? "junction" : "dir");
     symlinkSync(
       join(repoRoot, "node_modules", "zod"),
       join(consumerRoot, "node_modules", "zod"),

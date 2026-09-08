@@ -1,10 +1,10 @@
 // Pinned dispatcher tests cover undici family policy, pinned lookup injection,
 // timeout propagation, and proxy dispatcher construction.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Dispatcher } from "undici";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__CARAPACE_TEST_UNDICI_RUNTIME_DEPS__";
 
 const { agentCtor, envHttpProxyAgentCtor, proxyAgentCtor } = vi.hoisted(() => {
   function createMockDispatcher(

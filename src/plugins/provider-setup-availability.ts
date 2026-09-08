@@ -1,6 +1,6 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { enablePluginInConfig, enablePluginWithCapabilityConsent } from "./enable.js";
@@ -19,7 +19,7 @@ function supportsTextInference(choice: ProviderAuthChoiceMetadata): boolean {
 
 /** Detect reachable provider-owned services for the classic setup picker. */
 export async function detectAvailableSetupProviderIds(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<ReadonlySet<string>> {

@@ -39,7 +39,7 @@ const detection: SystemAgentSetupDetectResult = {
       id: "llama-cpp",
       brandId: "llama-cpp",
       label: "llama.cpp",
-      hint: "Install a verified llama.cpp server and run a private GGUF model managed by OpenClaw",
+      hint: "Install a verified llama.cpp server and run a private GGUF model managed by Carapace",
     },
     {
       id: "lmstudio",
@@ -77,10 +77,10 @@ function createContext() {
       features: {
         methods: [
           "config.set",
-          "openclaw.setup.detect",
-          "openclaw.setup.verify",
-          "openclaw.setup.activate.start",
-          "openclaw.setup.prepare.start",
+          "carapace.setup.detect",
+          "carapace.setup.verify",
+          "carapace.setup.activate.start",
+          "carapace.setup.prepare.start",
         ],
       },
     },
@@ -118,8 +118,8 @@ function createContext() {
         state: { selectedId: "main", scopeId: "main" },
         subscribe: () => () => undefined,
       },
-      basePath: "/openclaw",
-      resourceBasePath: "/openclaw",
+      basePath: "/carapace",
+      resourceBasePath: "/carapace",
       navigate: vi.fn(),
       runtimeConfig,
     } as unknown as ApplicationContext,
@@ -134,7 +134,7 @@ async function mountPage(
   },
 ): Promise<{ page: TestModelSetupPage; provider: ApplicationContextProvider }> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-model-setup-page") as TestModelSetupPage;
+  const page = document.createElement("carapace-model-setup-page") as TestModelSetupPage;
   vi.spyOn(fixture.client, "request").mockResolvedValueOnce(fixture.state.result);
   page.routeData = { firstRun: fixture.firstRun };
   provider.append(page);
@@ -179,7 +179,7 @@ describe("ModelSetupPage catalog icons", () => {
     request.mockRejectedValueOnce(new Error("OPENAI_API_KEY=sk-1234567890abcdef"));
     request.mockResolvedValue(detection);
     const provider = createApplicationContextProvider(context);
-    const page = document.createElement("openclaw-model-setup-page") as TestModelSetupPage;
+    const page = document.createElement("carapace-model-setup-page") as TestModelSetupPage;
     page.routeData = { firstRun: false };
     provider.append(page);
     document.body.append(provider);
@@ -244,7 +244,7 @@ describe("ModelSetupPage catalog icons", () => {
       ).toBe("blob:acme-icon");
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      `/openclaw/__openclaw__/catalog-icon/${encodeURIComponent(customIconUrl)}`,
+      `/carapace/__carapace__/catalog-icon/${encodeURIComponent(customIconUrl)}`,
       expect.objectContaining({ credentials: "same-origin" }),
     );
     expect(page.innerHTML).not.toContain(customIconUrl);
@@ -294,7 +294,7 @@ describe("ModelSetupPage catalog icons", () => {
       ).toBe("blob:legacy-ollama");
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      `/openclaw/__openclaw__/catalog-icon/${encodeURIComponent(recommendedIconUrl)}`,
+      `/carapace/__carapace__/catalog-icon/${encodeURIComponent(recommendedIconUrl)}`,
       expect.objectContaining({ credentials: "same-origin" }),
     );
     expect(page.querySelector(".model-setup__recommendation [data-provider-icon]")).toBeNull();
@@ -303,7 +303,7 @@ describe("ModelSetupPage catalog icons", () => {
   it("starts a prepare wizard from the download affordance", async () => {
     const { context, client, request } = createContext();
     request.mockImplementation(async (method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return { sessionId: "prepare-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -329,11 +329,11 @@ describe("ModelSetupPage catalog icons", () => {
 
     await waitForFast(() => {
       expect(request).toHaveBeenCalledWith(
-        "openclaw.setup.prepare.start",
+        "carapace.setup.prepare.start",
         { sessionId: expect.any(String), agentId: "main", authChoice: "llama-cpp" },
         { timeoutMs: null },
       );
-      expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).not.toBeNull();
       expect(page.textContent).toContain("Downloading model: 25%");
     });
   });
@@ -347,7 +347,7 @@ describe("ModelSetupPage catalog icons", () => {
           id: choiceId,
           brandId: "llama-cpp",
           label: "llama.cpp",
-          hint: "Install a verified llama.cpp server and run a private GGUF model managed by OpenClaw",
+          hint: "Install a verified llama.cpp server and run a private GGUF model managed by Carapace",
         },
       ],
     };
@@ -361,7 +361,7 @@ describe("ModelSetupPage catalog icons", () => {
     } as unknown as ApplicationContext["runtimeConfig"];
     const context = { ...baseContext, runtimeConfig } as ApplicationContext;
     request.mockImplementation(async (method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return { sessionId: "prepare-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -371,7 +371,7 @@ describe("ModelSetupPage catalog icons", () => {
           preparedModelRef: "llama-cpp/gemma-4-e4b-it-q4_k_m",
         };
       }
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return {
           ...preparedDetection,
           candidates: [
@@ -395,7 +395,7 @@ describe("ModelSetupPage catalog icons", () => {
           ],
         };
       }
-      if (method === "openclaw.setup.activate.start") {
+      if (method === "carapace.setup.activate.start") {
         return {
           done: true,
           status: "done",
@@ -414,7 +414,7 @@ describe("ModelSetupPage catalog icons", () => {
 
     await waitForFast(() => {
       expect(request).toHaveBeenCalledWith(
-        "openclaw.setup.activate.start",
+        "carapace.setup.activate.start",
         {
           sessionId: expect.any(String),
           agentId: "main",
@@ -427,7 +427,7 @@ describe("ModelSetupPage catalog icons", () => {
       expect(page.textContent).toContain("llama-cpp/gemma-4-e4b-it-q4_k_m");
     });
     expect(request).not.toHaveBeenCalledWith(
-      "openclaw.setup.detect",
+      "carapace.setup.detect",
       expect.anything(),
       expect.anything(),
     );
@@ -436,13 +436,13 @@ describe("ModelSetupPage catalog icons", () => {
   it("keeps an incomplete provider setup visible instead of claiming success", async () => {
     const { context, client, request } = createContext();
     request.mockImplementation(async (method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "carapace.setup.prepare.start") {
         return { sessionId: "prepare-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
         return { done: true, status: "done" };
       }
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return {
           ...detection,
           configuredModel: "llama-cpp/persisted-before-verification",
@@ -467,7 +467,7 @@ describe("ModelSetupPage catalog icons", () => {
     expect(page.textContent).not.toContain("llama-cpp/persisted-before-verification");
     expect(page.textContent).not.toContain("Connection verified");
     expect(request).not.toHaveBeenCalledWith(
-      "openclaw.setup.activate.start",
+      "carapace.setup.activate.start",
       expect.anything(),
       expect.anything(),
     );
@@ -497,7 +497,7 @@ describe("ModelSetupPage catalog icons", () => {
         hash = "hash-2";
         return { hash };
       }
-      if (method === "openclaw.setup.activate.start") {
+      if (method === "carapace.setup.activate.start") {
         order.push(method);
         config = { ...config, configuredModel: "openai/gpt-5" };
         hash = "hash-3";
@@ -533,7 +533,7 @@ describe("ModelSetupPage catalog icons", () => {
     page.querySelector<HTMLButtonElement>('[data-candidate-kind="codex-cli"] button')?.click();
 
     await vi.waitFor(() => {
-      expect(order).toEqual(["config.set", "openclaw.setup.activate.start", "config.get"]);
+      expect(order).toEqual(["config.set", "carapace.setup.activate.start", "config.get"]);
     });
     expect(runtimeConfig.state.configSnapshot?.hash).toBe("hash-3");
     expect(runtimeConfig.state.configForm).toMatchObject({
@@ -565,7 +565,7 @@ describe("ModelSetupPage catalog icons", () => {
         hash = "hash-2";
         return { hash };
       }
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { sessionId: "wizard-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -573,7 +573,7 @@ describe("ModelSetupPage catalog icons", () => {
         hash = "hash-3";
         return { done: true, status: "done", modelActivation: { modelRef: "provider/model" } };
       }
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return {
           ...detection,
           configuredModel: "provider/model",
@@ -602,7 +602,7 @@ describe("ModelSetupPage catalog icons", () => {
     await waitForFast(() => {
       expect(order).toEqual([
         "config.set",
-        "openclaw.setup.auth.start",
+        "carapace.setup.auth.start",
         "wizard.next",
         "config.get",
       ]);
@@ -654,7 +654,7 @@ describe("ModelSetupPage catalog icons", () => {
 
     await waitForFast(() => expect(page.textContent).toContain("Model setup request failed."));
     expect(request).not.toHaveBeenCalledWith(
-      "openclaw.setup.auth.start",
+      "carapace.setup.auth.start",
       expect.anything(),
       expect.anything(),
     );
@@ -679,7 +679,7 @@ describe("ModelSetupPage catalog icons", () => {
         };
       }
       order.push(method);
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { sessionId: "wizard-session", done: false, status: "running" };
       }
       if (method === "wizard.next" && nextCount++ === 0) {
@@ -697,7 +697,7 @@ describe("ModelSetupPage catalog icons", () => {
       if (method === "wizard.cancel") {
         return {};
       }
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return { ...detection, configuredModel: "provider/model", setupComplete: true };
       }
       throw new Error(`Unexpected method ${method}`);
@@ -724,7 +724,7 @@ describe("ModelSetupPage catalog icons", () => {
     await Promise.resolve();
     expect(order).not.toContain("competing-mutation");
 
-    page.querySelector<HTMLButtonElement>("openclaw-modal-dialog .btn")?.click();
+    page.querySelector<HTMLButtonElement>("carapace-modal-dialog .btn")?.click();
     await page.updateComplete;
     await Promise.resolve();
     expect(order).not.toContain("competing-mutation");
@@ -819,10 +819,10 @@ describe("ModelSetupPage catalog icons", () => {
         ...(restart ? { gatewayRestartRequired: true as const } : {}),
       };
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.activate.start") {
+        if (method === "carapace.setup.activate.start") {
           return { done: true, status: "done", modelActivation };
         }
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { sessionId: "warning-auth", done: false, status: "running" };
         }
         if (method === "wizard.next") {
@@ -904,7 +904,7 @@ describe("ModelSetupPage catalog icons", () => {
     } as ApplicationContext;
     let cancellationAttempt = 0;
     request.mockImplementation(async (method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "carapace.setup.auth.start") {
         return { sessionId: "wizard-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -945,16 +945,16 @@ describe("ModelSetupPage catalog icons", () => {
       expect(page.textContent).toContain("config.get failed after wizard commit");
       expect(page.textContent).toContain("Paste token");
     });
-    page.querySelector<HTMLButtonElement>("openclaw-modal-dialog .btn")?.click();
+    page.querySelector<HTMLButtonElement>("carapace-modal-dialog .btn")?.click();
     await waitForFast(() => {
-      const modal = page.querySelector("openclaw-modal-dialog");
+      const modal = page.querySelector("carapace-modal-dialog");
       expect(modal?.textContent).toContain("config.get failed after wizard commit");
       expect(modal?.textContent).toContain("Setup is finishing the current step.");
     });
 
-    page.querySelector<HTMLButtonElement>("openclaw-modal-dialog .btn")?.click();
+    page.querySelector<HTMLButtonElement>("carapace-modal-dialog .btn")?.click();
     await waitForFast(() => {
-      const modal = page.querySelector("openclaw-modal-dialog");
+      const modal = page.querySelector("carapace-modal-dialog");
       expect(modal?.textContent).toContain("config.get failed after wizard commit");
       expect(modal?.textContent).toContain(
         "Could not confirm cancellation: Cancellation request disconnected",
@@ -963,9 +963,9 @@ describe("ModelSetupPage catalog icons", () => {
     });
     expect(cancellationAttempt).toBe(2);
 
-    page.querySelector<HTMLButtonElement>("openclaw-modal-dialog .btn")?.click();
+    page.querySelector<HTMLButtonElement>("carapace-modal-dialog .btn")?.click();
     await waitForFast(() => {
-      expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).toBeNull();
       expect(page.textContent).toContain("config.get failed after wizard commit");
     });
     expect(cancellationAttempt).toBe(3);

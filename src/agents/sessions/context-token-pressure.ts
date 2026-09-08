@@ -1,6 +1,6 @@
 /** Shared fresh-request estimates for admission and compaction replacement. */
-import { estimateStringChars } from "@openclaw/normalization-core/cjk-chars";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { estimateStringChars } from "@carapace/normalization-core/cjk-chars";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { SAFETY_MARGIN } from "../compaction-planning.js";
 import type { AgentMessage, BashExecutionMessage } from "../runtime/index.js";
 import {

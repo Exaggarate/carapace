@@ -4,13 +4,13 @@ import { GatewayProtocolRequestTimeoutError } from "../../packages/gateway-clien
 import { GatewayClientRequestError } from "../../packages/gateway-client/src/request-error.js";
 import { GatewayTransportError } from "../gateway/transport-error.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: CarapaceTestState;
 let gatewaySnapshots: typeof import("../skills/runtime/session-snapshot.js");
 let gatewayRefreshState: typeof import("../skills/runtime/refresh-state.js");
 let gatewayWorkshop: typeof import("../skills/workshop/service.js");
@@ -50,7 +50,7 @@ vi.mock("../gateway/call.js", () => ({
   isGatewayCredentialsRequiredError: (error: unknown) =>
     error instanceof Error && error.name === "GatewayCredentialsRequiredError",
   isImplicitLocalGatewayTarget: async ({ config }: { config?: { gateway?: { mode?: string } } }) =>
-    !process.env.OPENCLAW_GATEWAY_URL && config?.gateway?.mode !== "remote",
+    !process.env.CARAPACE_GATEWAY_URL && config?.gateway?.mode !== "remote",
 }));
 vi.mock("../infra/gateway-lock.js", () => ({
   acquireGatewayLock: mocks.acquireGatewayLock,
@@ -93,11 +93,11 @@ describe("skills workshop CLI gateway snapshot invalidation", () => {
   });
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-skills-cli-workshop-cache-",
+      prefix: "carapace-skills-cli-workshop-cache-",
     });
-    mocks.workspaceDir = await tempDirs.make("openclaw-skills-cli-workshop-cache-");
+    mocks.workspaceDir = await tempDirs.make("carapace-skills-cli-workshop-cache-");
     delete mocks.config.gateway;
     mocks.gatewayApply = undefined;
     mocks.releaseGatewayLock.mockReset();
@@ -228,7 +228,7 @@ describe("skills workshop CLI gateway snapshot invalidation", () => {
       error: Object.assign(new Error("gateway proposal inspection requires credentials"), {
         name: "GatewayCredentialsRequiredError",
         method: "skills.proposals.inspect",
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/carapace.json",
       }),
     },
     { label: "a local transport close", error: createGatewayTransportError("closed") },
@@ -366,7 +366,7 @@ describe("skills workshop CLI gateway snapshot invalidation", () => {
     const authError = Object.assign(new Error("gateway proposal inspection requires credentials"), {
       name: "GatewayCredentialsRequiredError",
       method: "skills.proposals.inspect",
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
     mocks.callGateway.mockRejectedValueOnce(authError);
     mocks.acquireGatewayLock.mockRejectedValueOnce(new Error("gateway lock is owned"));
@@ -399,13 +399,13 @@ describe("skills workshop CLI gateway snapshot invalidation", () => {
       if (target === "configured remote") {
         mocks.config.gateway = { mode: "remote" };
       } else {
-        vi.stubEnv("OPENCLAW_GATEWAY_URL", "ws://127.0.0.1:9");
+        vi.stubEnv("CARAPACE_GATEWAY_URL", "ws://127.0.0.1:9");
       }
       mocks.callGateway.mockRejectedValueOnce(
         Object.assign(new Error("selected gateway requires credentials"), {
           name: "GatewayCredentialsRequiredError",
           method: "skills.proposals.inspect",
-          configPath: "/tmp/openclaw.json",
+          configPath: "/tmp/carapace.json",
         }),
       );
 

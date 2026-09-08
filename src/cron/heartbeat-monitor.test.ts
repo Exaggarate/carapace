@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveHeartbeatMonitorPlan } from "./heartbeat-monitor.js";
 import type { CronJob, CronJobCreate } from "./types.js";
 
@@ -17,7 +17,7 @@ describe("heartbeat monitor desired-state planning", () => {
   it("creates no monitor jobs for an ownerless explicit multi-agent roster", () => {
     const cfg = {
       agents: { ownership: "explicit", entries: { main: {}, ops: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(resolveHeartbeatMonitorPlan(cfg, [], { schedulerSeed: "test-seed" }).specs).toEqual([]);
   });
@@ -28,7 +28,7 @@ describe("heartbeat monitor desired-state planning", () => {
         defaults: { heartbeat: { every: "15m" } },
         list: [{ id: "main" }, { id: "ops" }, { id: "new" }],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const options = { schedulerSeed: "test-seed" };
     const initial = resolveHeartbeatMonitorPlan(cfg, [], options).specs;
     const main = initial.find((spec) => spec.agentId === "main");
@@ -60,7 +60,7 @@ describe("heartbeat monitor desired-state planning", () => {
   it("retains a disabled monitor and its existing cadence", () => {
     const cfg = {
       agents: { defaults: { heartbeat: { every: "0m" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const input = resolveHeartbeatMonitorPlan(cfg, [], { schedulerSeed: "test-seed" }).specs[0]
       ?.input;
     if (!input) {
@@ -89,7 +89,7 @@ describe("heartbeat monitor desired-state planning", () => {
   it("removes duplicate monitors before updating the retained row", () => {
     const cfg = {
       agents: { defaults: { heartbeat: { every: "15m" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const options = { schedulerSeed: "test-seed" };
     const input = resolveHeartbeatMonitorPlan(cfg, [], options).specs[0]?.input;
     if (!input) {
@@ -118,7 +118,7 @@ describe("heartbeat monitor desired-state planning", () => {
   ] as const)("repairs a monitor with drifted $field", ({ field, value, changes }) => {
     const cfg = {
       agents: { defaults: { heartbeat: { every: "15m" } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const options = { schedulerSeed: "test-seed" };
     const input = resolveHeartbeatMonitorPlan(cfg, [], options).specs[0]?.input;
     if (!input) {

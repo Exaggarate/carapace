@@ -94,7 +94,7 @@ describe("general Doctor browser profile permission boundary", () => {
         }
         if (installed) {
           expect(notes).toContain("native bootstrap was not inspected");
-          expect(notes).toContain("openclaw browser extension status --json");
+          expect(notes).toContain("carapace browser extension status --json");
           expect(notes).not.toContain("not fully registered");
         }
       }
@@ -107,7 +107,7 @@ describe("general Doctor browser profile permission boundary", () => {
     for (const [key, entry] of Object.entries(value.deps.env)) {
       vi.stubEnv(key, entry);
     }
-    vi.stubEnv("OPENCLAW_STATE_DIR", value.stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", value.stateDir);
     vi.stubEnv("CHROME_CONFIG_HOME", path.join(value.homeDir, ".config"));
     vi.stubEnv("XDG_CONFIG_HOME", path.join(value.homeDir, ".config"));
     const result = await maybeRepairOwnedChromeExtensionNativeHosts();
@@ -116,6 +116,6 @@ describe("general Doctor browser profile permission boundary", () => {
     expect(result.status).toBe("skipped");
     expect(result.reason).toContain("Doctor does not inspect personal browser profiles");
     expect(result.warnings.join("\n")).toContain("native-host repair skipped");
-    expect(result.warnings.join("\n")).toContain("openclaw browser extension install");
+    expect(result.warnings.join("\n")).toContain("carapace browser extension install");
   });
 });

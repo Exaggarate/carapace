@@ -1,15 +1,15 @@
 // Discord plugin module implements send.webhook behavior.
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import { recordOutboundMessageIdentity } from "openclaw/plugin-sdk/channel-outbound";
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { buildTimeoutAbortSignal } from "openclaw/plugin-sdk/extension-shared";
+import { recordChannelActivity } from "carapace/plugin-sdk/channel-activity-runtime";
+import { recordOutboundMessageIdentity } from "carapace/plugin-sdk/channel-outbound";
+import type { MarkdownTableMode, CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { buildTimeoutAbortSignal } from "carapace/plugin-sdk/extension-shared";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import { chunkDiscordTextWithMode } from "./chunk.js";
 import { resolveDiscordClientAccountContext } from "./client.js";
 import {
@@ -33,7 +33,7 @@ const DISCORD_WEBHOOK_ERROR_BODY_LIMIT_BYTES = 8 * 1024;
 const DISCORD_WEBHOOK_TIMEOUT_MS = DISCORD_REST_TIMEOUT_MS;
 
 type DiscordWebhookSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   webhookId: string;
   webhookToken: string;
   accountId?: string;

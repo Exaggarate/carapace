@@ -5,9 +5,9 @@ import { requestNodePairing } from "../infra/device-pairing-node.js";
 import { listDevicePairing } from "../infra/device-pairing.js";
 import { configureSqliteConnectionPragmas } from "../infra/sqlite-wal.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { openTrackedWs } from "./device-authz.test-helpers.js";
 import {
   createNodePairingTestState,
@@ -22,7 +22,7 @@ const {
   makeStateDir: makeNodePairingStateDir,
   seedNodeDevice,
   setup: setupNodePairingTestState,
-} = createNodePairingTestState("openclaw-node-pair-memo-");
+} = createNodePairingTestState("carapace-node-pair-memo-");
 
 describe("gateway node pairing memoization", () => {
   beforeAll(async () => {
@@ -30,7 +30,7 @@ describe("gateway node pairing memoization", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await cleanupNodePairingTestState();
   });
 
@@ -44,7 +44,7 @@ describe("gateway node pairing memoization", () => {
           deviceIdentityPath: `${await makeNodePairingStateDir()}/memo-scan-count.sqlite`,
         });
         await seedNodeDevice("node-list-memo-scan-count");
-        const database = openOpenClawStateDatabase();
+        const database = openCarapaceStateDatabase();
         const { counts: tableSelects, restore } = trackSqliteStatementExecutions(
           database.db,
           ["paired", "pending"],
@@ -116,8 +116,8 @@ describe("gateway node pairing memoization", () => {
         ?.displayName,
     ).toBeUndefined();
 
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+    const database = openCarapaceStateDatabase({
+      env: { ...process.env, CARAPACE_STATE_DIR: baseDir },
     });
     const external = new DatabaseSync(database.path);
     const maintenance = configureSqliteConnectionPragmas(external, {

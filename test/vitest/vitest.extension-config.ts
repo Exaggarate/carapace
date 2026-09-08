@@ -5,7 +5,7 @@ import { pluginControlUiPathGlob } from "./vitest.ui-paths.mjs";
 
 type ExtensionVitestConfigOptions = {
   fileParallelism?: boolean;
-  includeOpenClawRuntimeSetup?: boolean;
+  includeCarapaceRuntimeSetup?: boolean;
   isolate?: boolean;
 };
 

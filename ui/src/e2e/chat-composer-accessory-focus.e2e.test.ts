@@ -70,7 +70,7 @@ suite.define(() => {
         await outside.focus();
         await trigger.click();
         expect(await outside.evaluate((element) => document.activeElement === element)).toBe(true);
-        const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+        const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
         const artifactDir = artifactRoot
           ? createControlUiE2eArtifactDir("chat-composer-accessory-focus", artifactRoot)
           : undefined;

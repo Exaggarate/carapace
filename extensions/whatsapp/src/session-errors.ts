@@ -1,5 +1,5 @@
 // Whatsapp plugin module implements session errors behavior.
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 
 function safeStringify(value: unknown, limit = 800): string {
   try {

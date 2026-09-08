@@ -10,11 +10,11 @@ import {
   loadAuthProfileStoreWithoutExternalProfiles,
   saveAuthProfileStore,
 } from "../agents/auth-profiles/store-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { pluginLoaderCacheState } from "../plugins/registry-lifecycle.js";
 import { resetPluginRuntimeStateForTest } from "../plugins/runtime.js";
 import type { ProviderPlugin } from "../plugins/types.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { resolveRequestedLoginProviderOrThrow, runModelsAuthLoginFlowCore } from "./models/auth.js";
 
@@ -56,23 +56,23 @@ describe("resolveRequestedLoginProviderOrThrow", () => {
     expect(() =>
       resolveRequestedLoginProviderOrThrow(loadedProviders, "google-antigravity"),
     ).toThrowError(
-      'Unknown provider "google-antigravity". Loaded providers: google-gemini-cli, minimax-portal. Verify plugins via `openclaw plugins list --json`.',
+      'Unknown provider "google-antigravity". Loaded providers: google-gemini-cli, minimax-portal. Verify plugins via `carapace plugins list --json`.',
     );
   });
 });
 
 describe("models auth login --force", () => {
   it("replaces expired shared and main-local profiles with the gateway stopped", async () => {
-    const state = await createOpenClawTestState({
+    const state = await createCarapaceTestState({
       label: "auth-force-login",
       env: {
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_OAUTH_DIR: undefined,
-        OPENCLAW_GATEWAY_URL: undefined,
-        OPENCLAW_GATEWAY_PORT: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: undefined,
+        CARAPACE_OAUTH_DIR: undefined,
+        CARAPACE_GATEWAY_URL: undefined,
+        CARAPACE_GATEWAY_PORT: undefined,
+        CARAPACE_GATEWAY_TOKEN: undefined,
+        CARAPACE_GATEWAY_PASSWORD: undefined,
       },
     });
     try {
@@ -83,10 +83,10 @@ describe("models auth login --force", () => {
       const fresh = { type: "token" as const, provider, token: "fixture-fresh-token" };
       const expired = { ...fresh, token: "fixture-expired-token", expires: 1 };
       const unrelated = { type: "token" as const, provider: "other-proof", token: "fixture-other" };
-      const pluginDir = path.join(state.workspaceDir, ".openclaw", "extensions", provider);
+      const pluginDir = path.join(state.workspaceDir, ".carapace", "extensions", provider);
       await fs.mkdir(pluginDir, { recursive: true, mode: 0o755 });
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "carapace.plugin.json"),
         JSON.stringify({
           id: provider,
           providers: [provider],
@@ -109,7 +109,7 @@ describe("models auth login --force", () => {
           }
         };`,
       );
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         agents: { list: [{ id: "main", workspace: state.workspaceDir }] },
         plugins: { allow: [provider], entries: { [provider]: { enabled: true } } },
         gateway: {

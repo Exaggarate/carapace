@@ -1,11 +1,11 @@
 // Slack plugin module implements blocks render behavior.
 import type { Block, KnownBlock } from "@slack/web-api";
-import { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { parseExecApprovalCommandText } from "carapace/plugin-sdk/approval-reply-runtime";
 import {
   legacyInteractiveReplyToPresentation,
   resolveMessagePresentationButtonAction,
   resolveMessagePresentationOptionAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import type {
   LegacyInteractiveReply,
   MessagePresentation,
@@ -13,13 +13,13 @@ import type {
   MessagePresentationButtonsBlock,
   MessagePresentationChartBlock,
   MessagePresentationSelectBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "carapace/plugin-sdk/interactive-runtime";
 import {
   resolveAskUserQuestionOptionIndex,
   type AskUserQuestionOptionIndices,
-} from "openclaw/plugin-sdk/reply-payload";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/reply-payload";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
+import { chunkTextForOutbound } from "carapace/plugin-sdk/text-chunking";
 import { encodeSlackApprovalAction } from "./approval-actions.js";
 import {
   buildSlackDataTableBlock,
@@ -224,7 +224,7 @@ function readSlackBlockId(block: SlackBlock): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function readSlackOpenClawBlockIndex(blockId: string, prefix: string): number | undefined {
+function readSlackCarapaceBlockIndex(blockId: string, prefix: string): number | undefined {
   if (!blockId.startsWith(prefix)) {
     return undefined;
   }
@@ -250,11 +250,11 @@ export function resolveSlackBlockOffsets(blocks?: readonly SlackBlock[]): SlackB
     }
     buttonIndexOffset = Math.max(
       buttonIndexOffset,
-      readSlackOpenClawBlockIndex(blockId, "openclaw_reply_buttons_") ?? 0,
+      readSlackCarapaceBlockIndex(blockId, "carapace_reply_buttons_") ?? 0,
     );
     selectIndexOffset = Math.max(
       selectIndexOffset,
-      readSlackOpenClawBlockIndex(blockId, "openclaw_reply_select_") ?? 0,
+      readSlackCarapaceBlockIndex(blockId, "carapace_reply_select_") ?? 0,
     );
   }
   return {
@@ -427,7 +427,7 @@ function buildSlackPresentationButtonBlock(
   return elements.length > 0
     ? {
         type: "actions",
-        block_id: `openclaw_reply_buttons_${buttonIndex}`,
+        block_id: `carapace_reply_buttons_${buttonIndex}`,
         elements,
       }
     : undefined;
@@ -544,7 +544,7 @@ function buildSlackPresentationSelectBlock(
   return options.length > 0 && optionKinds.size === 1
     ? {
         type: "actions",
-        block_id: `openclaw_reply_select_${selectIndex}`,
+        block_id: `carapace_reply_select_${selectIndex}`,
         elements: [
           {
             type: "static_select",

@@ -17,7 +17,7 @@ func TestDocChunkRejectedBodyDiagnostics(t *testing.T) {
 	const rejection = "placeholder duplicated: __OC_I18N_900000__ count=2"
 	for _, enabled := range []string{"", "0", "1"} {
 		t.Run("enabled="+enabled, func(t *testing.T) {
-			t.Setenv("OPENCLAW_DOCS_I18N_LOG_REJECTED_BODY", enabled)
+			t.Setenv("CARAPACE_DOCS_I18N_LOG_REJECTED_BODY", enabled)
 			var logs bytes.Buffer
 			previousOutput := log.Writer()
 			log.SetOutput(&logs)

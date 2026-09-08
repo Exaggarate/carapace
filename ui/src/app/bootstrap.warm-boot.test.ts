@@ -1,4 +1,4 @@
-import { gatewayCredentialScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope } from "@carapace/gateway-client/browser";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearCachedBootState } from "../lib/sessions/session-roster-cache.runtime.ts";
 import * as snapshots from "../pages/chat/session-snapshot-invalidation.runtime.ts";
@@ -9,7 +9,7 @@ import * as gatewayStore from "./gateway-store.ts";
 import type { ApplicationGatewaySnapshot } from "./gateway.ts";
 import { loadSettings, persistSessionToken } from "./settings.ts";
 
-const BOOT_RECORD_PREFIX = "openclaw.control.bootRecord.v1:";
+const BOOT_RECORD_PREFIX = "carapace.control.bootRecord.v1:";
 
 vi.mock("../lib/sessions/session-roster-cache.runtime.ts", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../lib/sessions/session-roster-cache.runtime.ts")>()),

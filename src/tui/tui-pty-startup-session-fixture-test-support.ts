@@ -9,13 +9,13 @@ import {
 // Injects delayed session restore and history controls into the real-runTui PTY fixture.
 export const TUI_PTY_STARTUP_SESSION_FIXTURE = {
   variables: `
-      const restoreDelayMs = Number(process.env.OPENCLAW_TUI_PTY_RESTORE_DELAY_MS ?? 0);
-      const restoreFailures = Number(process.env.OPENCLAW_TUI_PTY_RESTORE_FAILURES ?? 0);
+      const restoreDelayMs = Number(process.env.CARAPACE_TUI_PTY_RESTORE_DELAY_MS ?? 0);
+      const restoreFailures = Number(process.env.CARAPACE_TUI_PTY_RESTORE_FAILURES ?? 0);
       const reconnectHistoryDelayMs = Number(
-        process.env.OPENCLAW_TUI_PTY_RECONNECT_HISTORY_DELAY_MS ?? 0,
+        process.env.CARAPACE_TUI_PTY_RECONNECT_HISTORY_DELAY_MS ?? 0,
       );
       let restoreAttempts = 0;
-      let reconnectDuringRestore = process.env.OPENCLAW_TUI_PTY_RECONNECT_DURING_RESTORE === "1";
+      let reconnectDuringRestore = process.env.CARAPACE_TUI_PTY_RECONNECT_DURING_RESTORE === "1";
   `,
   loadHistory: `
           if (reconnectHistoryReady && reconnectHistoryDelayMs > 0) {
@@ -24,7 +24,7 @@ export const TUI_PTY_STARTUP_SESSION_FIXTURE = {
             await new Promise((resolve) => setTimeout(resolve, reconnectHistoryDelayMs));
           }
   `,
-  historyBarrier: `const startupReleasePath = process.env.OPENCLAW_TUI_PTY_STARTUP_RELEASE_PATH;
+  historyBarrier: `const startupReleasePath = process.env.CARAPACE_TUI_PTY_STARTUP_RELEASE_PATH;
           if (startupReleasePath) {
             record("startupHistoryPending", { sessionKey });
             while (!existsSync(startupReleasePath)) {

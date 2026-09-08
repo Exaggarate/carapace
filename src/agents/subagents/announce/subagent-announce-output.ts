@@ -3,9 +3,9 @@
  *
  * Reads child session output, detects waiting states, and formats completion findings for announcements.
  */
-import { formatCompactTokenCount } from "@openclaw/normalization-core";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { formatCompactTokenCount } from "@carapace/normalization-core";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../../../auto-reply/tokens.js";
 import type { SessionTranscriptRuntimeTarget } from "../../../config/sessions/session-accessor.js";
 import { resolveFreshSessionTotalTokens } from "../../../config/sessions/types.js";
@@ -340,7 +340,7 @@ export function applySubagentWaitOutcome(params: {
   if (terminalOutcome) {
     // Keep main's subagent-specific classifier: it preserves explicit
     // restart/aborted stop reasons as cancellation while still letting real
-    // provider timeouts through (openclaw#125407).
+    // provider timeouts through (carapace#125407).
     switch (classifySubagentTerminalOutcome(terminalOutcome)) {
       case "timeout": {
         // A run that failed inside the lifecycle error retry grace window is
@@ -667,6 +667,6 @@ const testing = {
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.subagentAnnounceOutputTestApi")
+    Symbol.for("carapace.subagentAnnounceOutputTestApi")
   ] = testing;
 }

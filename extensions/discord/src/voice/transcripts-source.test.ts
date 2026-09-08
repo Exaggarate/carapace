@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Discord tests cover transcripts source plugin behavior.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Guild, RequestClient } from "../internal/discord.js";
@@ -79,7 +79,7 @@ describe("discordVoiceTranscriptsSourceProvider", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await expect(
       discordVoiceTranscriptsSourceProvider.accessControl?.authorize({
@@ -365,7 +365,7 @@ describe("discordVoiceTranscriptsSourceProvider", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const source = { providerId: "discord-voice", guildId: "g1", channelId: "c1" };
 
     expect(
@@ -403,7 +403,7 @@ describe("discordVoiceTranscriptsSourceProvider", () => {
 
     const unavailableOnly = {
       channels: { discord: { accounts: { work: unavailableAccount } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     expect(
       discordVoiceTranscriptsSourceProvider.accessControl?.resolveAccountId({
         cfg: unavailableOnly,

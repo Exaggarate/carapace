@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Featherless AI provider plugin."
+summary: "Carapace Featherless AI provider plugin."
 read_when:
   - You are installing, configuring, or auditing the featherless plugin
 title: "Featherless plugin reference"
@@ -7,15 +7,15 @@ title: "Featherless plugin reference"
 
 <!-- Generated file. Do not edit by hand.
 Run `pnpm plugins:inventory:gen` to rebuild it. Hand-written text survives only
-between the openclaw-plugin-reference:manual-start and
-openclaw-plugin-reference:manual-end comment markers. -->
+between the carapace-plugin-reference:manual-start and
+carapace-plugin-reference:manual-end comment markers. -->
 
-OpenClaw Featherless AI provider plugin.
+Carapace Featherless AI provider plugin.
 
 ## Distribution
 
-- Package: `@openclaw/featherless-provider`
-- Install route: npm or ClawHub: `clawhub:@openclaw/featherless-provider`
+- Package: `@carapace/featherless-provider`
+- Install route: npm or ClawHub: `clawhub:@carapace/featherless-provider`
 
 ## Surface
 

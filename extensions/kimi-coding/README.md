@@ -1,19 +1,19 @@
-# OpenClaw Kimi Coding Provider
+# Carapace Kimi Coding Provider
 
-Official OpenClaw provider plugin for Kimi Coding.
+Official Carapace provider plugin for Kimi Coding.
 
-Install from OpenClaw:
+Install from Carapace:
 
 ```bash
-openclaw plugins install @openclaw/kimi-provider
-openclaw gateway restart
+carapace plugins install @carapace/kimi-provider
+carapace gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/moonshot> for setup and configuration.
+See <../../docs/providers/moonshot.md> for setup and configuration.
 
 ## Catalog notes
 
-Model rows live in `openclaw.plugin.json` under `modelCatalog.providers.kimi`.
+Model rows live in `carapace.plugin.json` under `modelCatalog.providers.kimi`.
 
 - `k3` serves up to 1M context, tier-gated server-side; `k3-256k` is the cheaper
   256K variant of the same weights. Both point at `moonshot/kimi-k3` through

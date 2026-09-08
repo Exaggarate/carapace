@@ -40,7 +40,7 @@ it.each([
     await fs.writeFile(path.join(localPath, "project.txt"), "existing project file\n");
     await fs.writeFile(
       path.join(localPath, ".gitignore"),
-      "unrelated-private.txt\nmedia/inbound/openclaw-staged-*/\n",
+      "unrelated-private.txt\nmedia/inbound/carapace-staged-*/\n",
     );
     const explicitlyIncluded = `${stagedInputDirectory("d".repeat(64))}/input-secret.txt`;
     if (mode.startsWith("git-with-")) {

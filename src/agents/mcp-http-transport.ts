@@ -172,7 +172,7 @@ function limitMcpEventSourceResponse(response: EventSourceResponse): Response {
   return limitedResponse;
 }
 
-abstract class OpenClawMcpHttpTransport implements Transport {
+abstract class CarapaceMcpHttpTransport implements Transport {
   onclose?: () => void;
   onerror?: (error: Error) => void;
   onmessage?: (message: JSONRPCMessage) => void;
@@ -199,7 +199,7 @@ abstract class OpenClawMcpHttpTransport implements Transport {
 }
 
 /** Converts legacy SSE terminal HTTP failures into the lifecycle close the SDK omits. */
-export class OpenClawSSEClientTransport extends OpenClawMcpHttpTransport {
+export class CarapaceSSEClientTransport extends CarapaceMcpHttpTransport {
   private readonly transport: SSEClientTransport;
 
   constructor(url: URL, options?: SSEClientTransportOptions) {
@@ -266,13 +266,13 @@ export class OpenClawSSEClientTransport extends OpenClawMcpHttpTransport {
   }
 }
 
-type OpenClawStreamableHttpOptions = StreamableHTTPClientTransportOptions & {
+type CarapaceStreamableHttpOptions = StreamableHTTPClientTransportOptions & {
   fetch?: FetchLike;
   requestInit?: RequestInit;
 };
 
 /** Owns Streamable HTTP notification recovery and stateful cleanup around SDK 1.30.0. */
-export class OpenClawStreamableHTTPClientTransport extends OpenClawMcpHttpTransport {
+export class CarapaceStreamableHTTPClientTransport extends CarapaceMcpHttpTransport {
   private readonly transport: StreamableHTTPClientTransport;
   private readonly url: URL;
   private readonly cleanupFetch: FetchLike;
@@ -280,7 +280,7 @@ export class OpenClawStreamableHTTPClientTransport extends OpenClawMcpHttpTransp
   private pendingExpiredNotificationGet = false;
   private terminatedSessionId?: string;
 
-  constructor(url: URL, options: OpenClawStreamableHttpOptions = {}) {
+  constructor(url: URL, options: CarapaceStreamableHttpOptions = {}) {
     super();
     this.url = url;
     this.cleanupFetch = options.fetch ?? fetch;

@@ -3,9 +3,9 @@ import { constants } from "node:sqlite";
 import { SqliteQueryCompiler } from "kysely";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { createSqliteAcpEventLedger } from "./event-ledger.js";
 import { expectAcpReplayUtf8Accounting } from "./event-ledger.test-support.js";
@@ -18,11 +18,11 @@ const update = (text: string) => ({
 describe("ACP prepared queries", () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   it("reuses warm append queries while binding fresh metadata, sequence and payload values", async () => {
-    await withTestDir({ prefix: "openclaw-acp-prepared-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-prepared-" }, async (dir) => {
       const options = { path: path.join(dir, "state.sqlite") };
       let now = 100;
       const ledger = createSqliteAcpEventLedger({ ...options, now: () => now++ });
@@ -31,7 +31,7 @@ describe("ACP prepared queries", () => {
       for (let index = 0; index < 3; index++) {
         await ledger.recordUpdate({ ...session, update: update(`warm-${index}`) });
       }
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       const prepare = vi.spyOn(db, "prepare");
       const compile = vi.spyOn(SqliteQueryCompiler.prototype, "compileQuery");
       try {
@@ -74,16 +74,16 @@ describe("ACP prepared queries", () => {
       expect(replay.events.slice(3).map((event) => event.at)).toEqual([108, 110, 112, 114]);
       expectAcpReplayUtf8Accounting(db);
 
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       await ledger.recordUpdate({ ...session, update: update("after reopen") });
       const reopened = await ledger.readReplayBySessionId(session);
       expect(reopened.events.at(-1)).toMatchObject({ seq: 8, update: update("after reopen") });
-      expectAcpReplayUtf8Accounting(openOpenClawStateDatabase(options).db);
+      expectAcpReplayUtf8Accounting(openCarapaceStateDatabase(options).db);
     });
   });
 
   it("keeps oversized bindings fresh and honors authorization after statements warm", async () => {
-    await withTestDir({ prefix: "openclaw-acp-prepared-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-prepared-" }, async (dir) => {
       const options = { path: path.join(dir, "state.sqlite") };
       const ledger = createSqliteAcpEventLedger(options);
       const session = { sessionId: "session", sessionKey: "key", cwd: "/work", complete: true };
@@ -94,7 +94,7 @@ describe("ACP prepared queries", () => {
       const large = "漢".repeat(32 * 1024);
       await ledger.recordUpdate({ ...session, update: update(large) });
       await ledger.recordUpdate({ ...session, update: update("small after large") });
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       db.setAuthorizer((action, table) =>
         action === constants.SQLITE_INSERT && table === "acp_replay_events"
           ? constants.SQLITE_DENY
@@ -119,7 +119,7 @@ describe("ACP prepared queries", () => {
   });
 
   it("retains the later prompt block after an earlier block exhausts the byte budget", async () => {
-    await withTestDir({ prefix: "openclaw-acp-prepared-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-prepared-" }, async (dir) => {
       const options = { path: path.join(dir, "state.sqlite") };
       const ledger = createSqliteAcpEventLedger({ ...options, maxSerializedBytes: 1024 });
       const session = { sessionId: "s", sessionKey: "k", cwd: "", complete: true };
@@ -132,7 +132,7 @@ describe("ACP prepared queries", () => {
           { type: "text", text: "tail" },
         ],
       });
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       expect(db.prepare("SELECT seq, update_json FROM acp_replay_events").all()).toEqual([
         {
           seq: 2,
@@ -151,7 +151,7 @@ describe("ACP prepared queries", () => {
   });
 
   it("uses each ledger's current caps when sharing a connection with gapped event sequences", async () => {
-    await withTestDir({ prefix: "openclaw-acp-prepared-" }, async (dir) => {
+    await withTestDir({ prefix: "carapace-acp-prepared-" }, async (dir) => {
       const options = { path: path.join(dir, "state.sqlite"), now: () => 100 };
       const roomy = createSqliteAcpEventLedger({
         ...options,
@@ -170,7 +170,7 @@ describe("ACP prepared queries", () => {
           await roomy.recordUpdate({ ...session, update: update(`${sessionId}-${index}`) });
         }
       }
-      const { db } = openOpenClawStateDatabase(options);
+      const { db } = openCarapaceStateDatabase(options);
       // Imported/retained history can have gaps; next_seq is not an event count.
       db.exec(
         "UPDATE acp_replay_events SET seq = seq * 10; UPDATE acp_replay_sessions SET next_seq = 31",

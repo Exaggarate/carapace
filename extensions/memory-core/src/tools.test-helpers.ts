@@ -1,28 +1,28 @@
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginToolContext } from "carapace/plugin-sdk/plugin-entry";
 // Memory Core helper module supports tools helpers behavior.
 import { expect } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { CarapaceConfig } from "../api.js";
 import { isolateMemoryManagerTestConfig } from "./memory/test-config-helpers.js";
 import { createMemoryGetTool, createMemorySearchTool } from "./tools.js";
 
-export function asOpenClawConfig(config: Partial<OpenClawConfig>): OpenClawConfig {
-  return isolateMemoryManagerTestConfig(config as OpenClawConfig);
+export function asCarapaceConfig(config: Partial<CarapaceConfig>): CarapaceConfig {
+  return isolateMemoryManagerTestConfig(config as CarapaceConfig);
 }
 
-export function createDefaultMemoryToolConfig(): OpenClawConfig {
-  return asOpenClawConfig({ agents: { list: [{ id: "main", default: true }] } });
+export function createDefaultMemoryToolConfig(): CarapaceConfig {
+  return asCarapaceConfig({ agents: { list: [{ id: "main", default: true }] } });
 }
 
 export function createMemorySearchToolOrThrow(params?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   agentSessionKey?: string;
   oneShotCliRun?: boolean;
-  conversationRecall?: OpenClawPluginToolContext["conversationRecall"];
+  conversationRecall?: CarapacePluginToolContext["conversationRecall"];
   activeProjectKeys?: readonly string[];
 }) {
   const tool = createMemorySearchTool({
-    config: params?.config ? asOpenClawConfig(params.config) : createDefaultMemoryToolConfig(),
+    config: params?.config ? asCarapaceConfig(params.config) : createDefaultMemoryToolConfig(),
     ...(params?.agentId ? { agentId: params.agentId } : {}),
     ...(params?.agentSessionKey ? { agentSessionKey: params.agentSessionKey } : {}),
     ...(params?.oneShotCliRun ? { oneShotCliRun: params.oneShotCliRun } : {}),
@@ -36,7 +36,7 @@ export function createMemorySearchToolOrThrow(params?: {
 }
 
 export function createMemoryGetToolOrThrow(
-  config: OpenClawConfig = createDefaultMemoryToolConfig(),
+  config: CarapaceConfig = createDefaultMemoryToolConfig(),
 ) {
   const tool = createMemoryGetTool({ config });
   if (!tool) {
@@ -47,7 +47,7 @@ export function createMemoryGetToolOrThrow(
 
 export function createAutoCitationsMemorySearchTool(agentSessionKey: string) {
   return createMemorySearchToolOrThrow({
-    config: asOpenClawConfig({
+    config: asCarapaceConfig({
       memory: { citations: "auto" },
       agents: { list: [{ id: "main", default: true }] },
     }),

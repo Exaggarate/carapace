@@ -1,4 +1,4 @@
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { AgentHarnessPreflightError } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   isCodexAppServerOverloadError,
   isCodexAppServerPrewriteRequestCancellationError,
@@ -45,11 +45,11 @@ export async function refreshCodexThreadPolicy(params: {
   assertCurrent: () => void;
 }): Promise<void> {
   const notice =
-    "The following is the complete current OpenClaw-supplied generic instruction policy. It replaces earlier OpenClaw-supplied generic policy, including OpenClaw-carried workspace text and sections now absent. Independently supplied native managed, guardian, security, collaboration, and project instructions retain their authority. User requests retain their own authority.\n\n";
+    "The following is the complete current Carapace-supplied generic instruction policy. It replaces earlier Carapace-supplied generic policy, including Carapace-carried workspace text and sections now absent. Independently supplied native managed, guardian, security, collaboration, and project instructions retain their authority. User requests retain their own authority.\n\n";
   const text =
     notice +
     (params.developerInstructions === ""
-      ? "The current OpenClaw generic policy is empty; earlier OpenClaw generic policy is withdrawn."
+      ? "The current Carapace generic policy is empty; earlier Carapace generic policy is withdrawn."
       : params.developerInstructions);
   let outcome: CodexThreadPolicyHandoffError["outcome"] = "unknown";
   try {

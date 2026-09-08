@@ -1,5 +1,5 @@
 // Runs post-plugin convergence checks without retaining pre-update plugin modules.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV,
   UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV,
@@ -7,7 +7,7 @@ import {
 } from "../../commands/doctor/shared/update-phase.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
 import { resolveStateDir } from "../../config/paths.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.carapace.js";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import { buildUpdateDoctorEnv } from "../../infra/update-runner-doctor.js";
 import { redactSupportString } from "../../logging/diagnostic-support-redaction.js";
@@ -31,12 +31,12 @@ type UpdateDoctorPhase = "pre-plugin" | "post-plugin";
 
 export async function withPrePluginUpdateDoctorEnv<T>(run: () => Promise<T>): Promise<T> {
   const previousValues = [
-    "OPENCLAW_UPDATE_IN_PROGRESS",
+    "CARAPACE_UPDATE_IN_PROGRESS",
     UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV,
     UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV,
     UPDATE_POST_CORE_CONVERGENCE_ENV,
   ].map((key) => [key, process.env[key]] as const);
-  process.env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
+  process.env.CARAPACE_UPDATE_IN_PROGRESS = "1";
   process.env[UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV] = "1";
   process.env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV] = "1";
   delete process.env[UPDATE_POST_CORE_CONVERGENCE_ENV];
@@ -54,15 +54,15 @@ export async function withPrePluginUpdateDoctorEnv<T>(run: () => Promise<T>): Pr
 }
 
 async function withNormalConfigValidation<T>(run: () => Promise<T>): Promise<T> {
-  const previousUpdateInProgress = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
-  process.env.OPENCLAW_UPDATE_IN_PROGRESS = "0";
+  const previousUpdateInProgress = process.env.CARAPACE_UPDATE_IN_PROGRESS;
+  process.env.CARAPACE_UPDATE_IN_PROGRESS = "0";
   try {
     return await run();
   } finally {
     if (previousUpdateInProgress === undefined) {
-      delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+      delete process.env.CARAPACE_UPDATE_IN_PROGRESS;
     } else {
-      process.env.OPENCLAW_UPDATE_IN_PROGRESS = previousUpdateInProgress;
+      process.env.CARAPACE_UPDATE_IN_PROGRESS = previousUpdateInProgress;
     }
   }
 }
@@ -80,7 +80,7 @@ function createPostPluginDoctorExecutionFailure(
       {
         reason,
         message: "Updated plugin migrations could not be run in a fresh process.",
-        guidance: ["Run `openclaw update repair` to retry post-update plugin repair."],
+        guidance: ["Run `carapace update repair` to retry post-update plugin repair."],
       },
     ],
   };
@@ -98,7 +98,7 @@ export async function runUpdateFinalizationDoctorInFreshProcess(params: {
 }): Promise<void> {
   const entryPath = params.entryPath ?? (await resolveGatewayInstallEntrypoint(params.root));
   if (!entryPath) {
-    throw new Error("Updated OpenClaw entrypoint not found for post-plugin doctor");
+    throw new Error("Updated Carapace entrypoint not found for post-plugin doctor");
   }
   const args = [
     entryPath,
@@ -186,7 +186,7 @@ async function validatePostPluginConfigInFreshProcess(params: {
         maxBuffer: 4 * 1024 * 1024,
         logOutput: false,
         baseEnv: stripGatewayServiceMarkerEnv(disableUpdatedPackageCompileCacheEnv(process.env)),
-        env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" },
+        env: { CARAPACE_UPDATE_IN_PROGRESS: "0" },
       },
     );
     return true;
@@ -218,7 +218,7 @@ async function completePostPluginInFreshProcess(params: {
     return {
       pluginUpdate: createPostPluginDoctorExecutionFailure(
         params.pluginUpdate,
-        "Updated OpenClaw entrypoint not found for post-plugin doctor",
+        "Updated Carapace entrypoint not found for post-plugin doctor",
       ),
       configValid: false,
     };

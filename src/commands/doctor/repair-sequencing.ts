@@ -5,7 +5,7 @@ import {
   applyPluginAutoEnable,
   materializePluginAutoEnableCandidates,
 } from "../../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginCapabilityConsentHandler } from "../../plugins/capability-consent.js";
 import type { PluginMetadataSnapshotScopeRunner } from "../../plugins/current-plugin-metadata-snapshot.js";
 import { loadInstalledPluginIndex } from "../../plugins/installed-plugin-index.js";
@@ -21,7 +21,7 @@ import {
   maybeRepairOpenAICodexAuthConfig,
 } from "../doctor-auth-flat-profiles.js";
 import { maybeRepairLegacyOAuthSidecarProfiles } from "../doctor-auth-oauth-sidecar.js";
-import { maybeRepairPluginOpenClawHostLinks } from "../doctor-plugin-host-links.js";
+import { maybeRepairPluginCarapaceHostLinks } from "../doctor-plugin-host-links.js";
 import { maybeRepairStaleManagedNpmBundledPlugins } from "../doctor-plugin-registry.js";
 import { maybeRepairGroupAllowFromFallback } from "./shared/allowfrom-fallback-migration.js";
 import { maybeRepairAllowlistPolicyAllowFrom } from "./shared/allowlist-policy-repair.js";
@@ -75,7 +75,7 @@ export async function runDoctorRepairSequence(params: {
   warningNotes: string[];
   authProfilesRepaired: boolean;
   openAICodexAuthProfileIdMap?: ReadonlyMap<string, string>;
-  retiredModelRefConfig?: Pick<OpenClawConfig, "agents" | "models">;
+  retiredModelRefConfig?: Pick<CarapaceConfig, "agents" | "models">;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
 }> {
   let state = params.state;
@@ -84,7 +84,7 @@ export async function runDoctorRepairSequence(params: {
   const configChangeNotes: string[] = [];
   const warningNotes: string[] = [];
   const env = params.env ?? process.env;
-  let retiredModelRefConfig: Pick<OpenClawConfig, "agents" | "models"> | undefined;
+  let retiredModelRefConfig: Pick<CarapaceConfig, "agents" | "models"> | undefined;
   const resolveCurrentPluginMetadataScope = () => {
     const config = state.candidate;
     const soleAgentId = tryResolveSoleAgentId(config);
@@ -166,7 +166,7 @@ export async function runDoctorRepairSequence(params: {
     env,
     prompter: { shouldRepair: true },
   });
-  const repairedPluginOpenClawHostLinks = await maybeRepairPluginOpenClawHostLinks({
+  const repairedPluginCarapaceHostLinks = await maybeRepairPluginCarapaceHostLinks({
     env,
     prompter: { shouldRepair: true },
   });
@@ -216,7 +216,7 @@ export async function runDoctorRepairSequence(params: {
   const repairedPluginIds = missingConfiguredPluginInstallRepair.repairedPluginIds ?? [];
   if (
     staleManagedNpmBundledPluginRepair ||
-    repairedPluginOpenClawHostLinks ||
+    repairedPluginCarapaceHostLinks ||
     missingConfiguredPluginInstallRepair.pluginInventoryChanged
   ) {
     // Inventory repair changes the authoritative plugin generation. Replace the

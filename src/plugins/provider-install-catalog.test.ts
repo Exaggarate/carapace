@@ -77,9 +77,9 @@ function vllmPluginWithPackageInstall(): InstalledPluginIndexRecord {
   return {
     pluginId: "vllm",
     origin: "global",
-    manifestPath: "/Users/test/.openclaw/plugins/vllm/openclaw.plugin.json",
+    manifestPath: "/Users/test/.carapace/plugins/vllm/carapace.plugin.json",
     manifestHash: "hash",
-    rootDir: "/Users/test/.openclaw/plugins/vllm",
+    rootDir: "/Users/test/.carapace/plugins/vllm",
     enabled: true,
     startup: {
       sidecar: false,
@@ -87,11 +87,11 @@ function vllmPluginWithPackageInstall(): InstalledPluginIndexRecord {
       agentHarnesses: [],
     },
     compat: [],
-    packageName: "@openclaw/vllm",
+    packageName: "@carapace/vllm",
     packageInstall: {
       npm: {
-        spec: "@openclaw/vllm-fork@1.0.0",
-        packageName: "@openclaw/vllm-fork",
+        spec: "@carapace/vllm-fork@1.0.0",
+        packageName: "@carapace/vllm-fork",
         selector: "1.0.0",
         selectorKind: "exact-version",
         exactVersion: true,
@@ -147,7 +147,7 @@ describe("provider install catalog", () => {
         {
           pluginId: "openai",
           origin: "bundled",
-          manifestPath: "/repo/extensions/openai/openclaw.plugin.json",
+          manifestPath: "/repo/extensions/openai/carapace.plugin.json",
           manifestHash: "hash",
           rootDir: "/repo/extensions/openai",
           enabled: true,
@@ -157,12 +157,12 @@ describe("provider install catalog", () => {
             agentHarnesses: [],
           },
           compat: [],
-          packageName: "@openclaw/openai",
+          packageName: "@carapace/openai",
           packageInstall: {
             defaultChoice: "npm",
             npm: {
-              spec: "@openclaw/openai@1.2.3",
-              packageName: "@openclaw/openai",
+              spec: "@carapace/openai@1.2.3",
+              packageName: "@carapace/openai",
               selector: "1.2.3",
               selectorKind: "exact-version",
               exactVersion: true,
@@ -202,7 +202,7 @@ describe("provider install catalog", () => {
         label: "OpenAI",
         origin: "bundled",
         install: {
-          npmSpec: "@openclaw/openai@1.2.3",
+          npmSpec: "@carapace/openai@1.2.3",
           localPath: "extensions/openai",
           defaultChoice: "npm",
           expectedIntegrity: "sha512-openai",
@@ -210,8 +210,8 @@ describe("provider install catalog", () => {
         installSource: {
           defaultChoice: "npm",
           npm: {
-            spec: "@openclaw/openai@1.2.3",
-            packageName: "@openclaw/openai",
+            spec: "@carapace/openai@1.2.3",
+            packageName: "@carapace/openai",
             selector: "1.2.3",
             selectorKind: "exact-version",
             exactVersion: true,
@@ -233,8 +233,8 @@ describe("provider install catalog", () => {
         installRecords: {
           vllm: {
             source: "npm",
-            spec: "@openclaw/vllm",
-            resolvedSpec: "@openclaw/vllm@2.0.0",
+            spec: "@carapace/vllm",
+            resolvedSpec: "@carapace/vllm@2.0.0",
             integrity: "sha512-vllm",
           },
         },
@@ -253,15 +253,15 @@ describe("provider install catalog", () => {
       label: "vLLM",
       origin: "global",
       install: {
-        npmSpec: "@openclaw/vllm@2.0.0",
+        npmSpec: "@carapace/vllm@2.0.0",
         expectedIntegrity: "sha512-vllm",
         defaultChoice: "npm",
       },
       installSource: {
         defaultChoice: "npm",
         npm: {
-          spec: "@openclaw/vllm@2.0.0",
-          packageName: "@openclaw/vllm",
+          spec: "@carapace/vllm@2.0.0",
+          packageName: "@carapace/vllm",
           selector: "2.0.0",
           selectorKind: "exact-version",
           exactVersion: true,
@@ -279,9 +279,9 @@ describe("provider install catalog", () => {
         installRecords: {
           vllm: {
             source: "clawhub",
-            spec: "clawhub:openclaw/vllm@2026.5.2",
+            spec: "clawhub:carapace/vllm@2026.5.2",
             integrity: "sha256-clawpack",
-            clawhubPackage: "openclaw/vllm",
+            clawhubPackage: "carapace/vllm",
           },
         },
         plugins: [vllmPluginWithPackageInstall()],
@@ -299,14 +299,14 @@ describe("provider install catalog", () => {
       label: "vLLM",
       origin: "global",
       install: {
-        clawhubSpec: "clawhub:openclaw/vllm@2026.5.2",
+        clawhubSpec: "clawhub:carapace/vllm@2026.5.2",
         defaultChoice: "clawhub",
       },
       installSource: {
         defaultChoice: "clawhub",
         clawhub: {
-          spec: "clawhub:openclaw/vllm@2026.5.2",
-          packageName: "openclaw/vllm",
+          spec: "clawhub:carapace/vllm@2026.5.2",
+          packageName: "carapace/vllm",
           version: "2026.5.2",
           exactVersion: true,
         },
@@ -328,9 +328,9 @@ describe("provider install catalog", () => {
         {
           pluginId: "demo-provider",
           origin: "global",
-          manifestPath: "/Users/test/.openclaw/plugins/demo-provider/openclaw.plugin.json",
+          manifestPath: "/Users/test/.carapace/plugins/demo-provider/carapace.plugin.json",
           manifestHash: "hash",
-          rootDir: "/Users/test/.openclaw/plugins/demo-provider",
+          rootDir: "/Users/test/.carapace/plugins/demo-provider",
           enabled: true,
           startup: {
             sidecar: false,
@@ -381,7 +381,7 @@ describe("provider install catalog", () => {
         {
           pluginId: "openai",
           origin: "bundled",
-          manifestPath: "/repo/extensions/openai/openclaw.plugin.json",
+          manifestPath: "/repo/extensions/openai/carapace.plugin.json",
           manifestHash: "hash",
           rootDir: "/repo/extensions/openai",
           enabled: true,
@@ -391,12 +391,12 @@ describe("provider install catalog", () => {
             agentHarnesses: [],
           },
           compat: [],
-          packageName: "@openclaw/openai",
+          packageName: "@carapace/openai",
           packageInstall: {
             defaultChoice: "npm",
             npm: {
               spec: 12,
-              packageName: "@openclaw/openai",
+              packageName: "@carapace/openai",
               selectorKind: "exact-version",
               exactVersion: true,
               pinState: "exact-with-integrity",
@@ -433,7 +433,7 @@ describe("provider install catalog", () => {
         {
           pluginId: "demo-provider",
           origin: "workspace",
-          manifestPath: "/repo/extensions/demo-provider/openclaw.plugin.json",
+          manifestPath: "/repo/extensions/demo-provider/carapace.plugin.json",
           manifestHash: "hash",
           rootDir: "/repo/extensions/demo-provider",
           enabled: false,
@@ -478,10 +478,10 @@ describe("provider install catalog", () => {
   it("surfaces official external provider install metadata when the provider plugin is not installed", () => {
     listOfficialExternalProviderCatalogEntries.mockReturnValue([
       {
-        name: "@openclaw/codex",
+        name: "@carapace/codex",
         source: "official",
         kind: "provider",
-        openclaw: {
+        carapace: {
           plugin: { id: "codex", label: "Codex" },
           providers: [
             {
@@ -501,7 +501,7 @@ describe("provider install catalog", () => {
             },
           ],
           install: {
-            npmSpec: "@openclaw/codex",
+            npmSpec: "@carapace/codex",
             defaultChoice: "npm",
           },
         },
@@ -521,14 +521,14 @@ describe("provider install catalog", () => {
       label: "Codex",
       origin: "bundled",
       install: {
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@carapace/codex",
         defaultChoice: "npm",
       },
       installSource: {
         defaultChoice: "npm",
         npm: {
-          spec: "@openclaw/codex",
-          packageName: "@openclaw/codex",
+          spec: "@carapace/codex",
+          packageName: "@carapace/codex",
           selectorKind: "none",
           exactVersion: false,
           pinState: "floating-without-integrity",
@@ -541,10 +541,10 @@ describe("provider install catalog", () => {
   it("preserves official external provider aliases for configured-plugin repair", () => {
     listOfficialExternalProviderCatalogEntries.mockReturnValue([
       {
-        name: "@openclaw/gmi-provider",
+        name: "@carapace/gmi-provider",
         source: "official",
         kind: "provider",
-        openclaw: {
+        carapace: {
           plugin: { id: "gmi", label: "GMI Cloud" },
           providers: [
             {
@@ -561,7 +561,7 @@ describe("provider install catalog", () => {
             },
           ],
           install: {
-            npmSpec: "@openclaw/gmi-provider",
+            npmSpec: "@carapace/gmi-provider",
             defaultChoice: "npm",
           },
         },
@@ -578,10 +578,10 @@ describe("provider install catalog", () => {
   it("resolves deprecated official external auth choices before their plugin is installed", () => {
     listOfficialExternalProviderCatalogEntries.mockReturnValue([
       {
-        name: "@openclaw/qwen-provider",
+        name: "@carapace/qwen-provider",
         source: "official",
         kind: "provider",
-        openclaw: {
+        carapace: {
           plugin: { id: "qwen", label: "Qwen Cloud" },
           providers: [
             {
@@ -598,7 +598,7 @@ describe("provider install catalog", () => {
             },
           ],
           install: {
-            npmSpec: "@openclaw/qwen-provider",
+            npmSpec: "@carapace/qwen-provider",
             defaultChoice: "npm",
           },
         },

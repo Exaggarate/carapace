@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { applyPatch } from "./apply-patch.test-support.js";
 
 async function withTempDir<T>(run: (dir: string) => Promise<T>): Promise<T> {
-  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-patch-eof-")));
+  const dir = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-patch-eof-")));
   try {
     return await run(dir);
   } finally {

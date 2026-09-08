@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isBundledManifestOwner } from "./manifest-owner-policy.js";
 import type { PluginKind } from "./plugin-kind.types.js";
 import {
@@ -37,11 +37,11 @@ function mergeRuntimeKinds(
 }
 
 export async function applySlotSelectionForPlugin(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginId: string,
   preparedMetadata?: PluginMetadataSnapshot,
   beforeRuntimeInspection?: () => void,
-): Promise<{ config: OpenClawConfig; warnings: string[] }> {
+): Promise<{ config: CarapaceConfig; warnings: string[] }> {
   // Selection inspects the install candidate, never the running Gateway's inventory.
   const metadataSnapshot =
     preparedMetadata ??

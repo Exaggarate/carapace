@@ -75,7 +75,7 @@ function commit(root: string, message: string, options: { allowEmpty?: boolean }
     "git",
     [
       "-c",
-      "user.name=OpenClaw Test",
+      "user.name=Carapace Test",
       "-c",
       "user.email=test@example.invalid",
       "commit",
@@ -104,12 +104,12 @@ type FixtureOptions = {
 };
 
 function createFixtureRepo(version = "2026.8.1-beta.2", options: FixtureOptions = {}) {
-  const root = tempDirs.make("openclaw-release-plan-");
+  const root = tempDirs.make("carapace-release-plan-");
   if (version !== "2026.8.1-beta.2" || Object.keys(options).length > 0) {
     return buildFixtureRepo(root, version, options);
   }
   const template = (defaultFixture ??= buildFixtureRepo(
-    templateDirs.make("openclaw-release-plan-template-"),
+    templateDirs.make("carapace-release-plan-template-"),
     version,
     options,
   ));
@@ -126,15 +126,15 @@ function buildFixtureRepo(root: string, version: string, options: FixtureOptions
     root,
     "package.json",
     JSON.stringify({
-      name: "openclaw",
+      name: "carapace",
       version,
-      dependencies: { "@openclaw/ai": "workspace:*" },
+      dependencies: { "@carapace/ai": "workspace:*" },
     }),
   );
   for (const [path, name] of [
-    ["packages/ai", "@openclaw/ai"],
-    ["packages/gateway-client", "@openclaw/gateway-client"],
-    ["packages/gateway-protocol", "@openclaw/gateway-protocol"],
+    ["packages/ai", "@carapace/ai"],
+    ["packages/gateway-client", "@carapace/gateway-client"],
+    ["packages/gateway-protocol", "@carapace/gateway-protocol"],
   ]) {
     writeFixture(
       root,
@@ -142,27 +142,27 @@ function buildFixtureRepo(root: string, version: string, options: FixtureOptions
       JSON.stringify({
         name,
         version,
-        openclaw: { release: { publishToNpm: true } },
+        carapace: { release: { publishToNpm: true } },
       }),
     );
   }
   if (options.corePackageNameCollision) {
     writePublishablePluginFixture(root, {
       extensionId: "shadow-ai",
-      packageName: "@openclaw/ai",
+      packageName: "@carapace/ai",
       version,
       publishTo: "both",
     });
   } else if (options.duplicateCrossTargetPackageName) {
     writePublishablePluginFixture(root, {
       extensionId: "duplicate-npm",
-      packageName: "@openclaw/duplicate",
+      packageName: "@carapace/duplicate",
       version,
       publishTo: "npm",
     });
     writePublishablePluginFixture(root, {
       extensionId: "duplicate-clawhub",
-      packageName: "@openclaw/duplicate",
+      packageName: "@carapace/duplicate",
       version,
       publishTo: "clawhub",
     });
@@ -173,16 +173,16 @@ function buildFixtureRepo(root: string, version: string, options: FixtureOptions
       root,
       "extensions/broken/package.json",
       JSON.stringify({
-        name: "@openclaw/broken",
+        name: "@carapace/broken",
         version,
         type: "commonjs",
         private: true,
-        repository: { type: "git", url: "https://github.com/openclaw/openclaw" },
-        openclaw: {
+        repository: { type: "git", url: "https://github.com/Exaggarate/carapace" },
+        carapace: {
           extensions: ["./index.ts"],
           compat: { pluginApi: `>=${version}` },
-          build: { openclawVersion: version },
-          install: { npmSpec: "@openclaw/broken" },
+          build: { carapaceVersion: version },
+          install: { npmSpec: "@carapace/broken" },
           release: { publishToNpm: true },
         },
       }),
@@ -208,7 +208,7 @@ function buildFixtureRepo(root: string, version: string, options: FixtureOptions
   );
   writeFixture(
     root,
-    ".github/workflows/openclaw-release-publish.yml",
+    ".github/workflows/carapace-release-publish.yml",
     [
       "name: Release Publish",
       "jobs:",
@@ -276,7 +276,7 @@ function trustedToolingGh(toolingFullRef: string, toolingSha: string) {
     const endpoint = args[1];
     if (
       endpoint ===
-      `repos/openclaw/openclaw/git/ref/tags/${toolingFullRef.slice("refs/tags/".length)}`
+      `repos/carapace/carapace/git/ref/tags/${toolingFullRef.slice("refs/tags/".length)}`
     ) {
       return JSON.stringify({
         ref: toolingFullRef,
@@ -385,7 +385,7 @@ process.stdout.write(JSON.stringify(plan));
 const moduleApi = await import("node:module");
 const harnessRequire = moduleApi.createRequire(import.meta.url);
 const leakedSnapshotCache = Object.keys(harnessRequire.cache).filter(path =>
-  path.includes("openclaw-release-yaml-")
+  path.includes("carapace-release-yaml-")
 );
 if (leakedSnapshotCache.length > 0) {
   throw new Error("verified yaml snapshot leaked into parent require.cache");
@@ -415,7 +415,7 @@ if (leakedSnapshotCache.length > 0) {
 }
 
 function yamlTempEntries(root: string) {
-  return readdirSync(root).filter((name) => name.startsWith("openclaw-release-yaml-"));
+  return readdirSync(root).filter((name) => name.startsWith("carapace-release-yaml-"));
 }
 
 describe("release plan producer", () => {
@@ -554,10 +554,10 @@ describe("release plan producer", () => {
       soak: false,
     });
     expect(plan.inventory.packages).toEqual([
-      { name: "@openclaw/ai", targets: ["npm"], version: "2026.8.1-beta.2" },
-      { name: "@openclaw/gateway-client", targets: ["npm"], version: "2026.8.1-beta.2" },
-      { name: "@openclaw/gateway-protocol", targets: ["npm"], version: "2026.8.1-beta.2" },
-      { name: "openclaw", targets: ["npm"], version: "2026.8.1-beta.2" },
+      { name: "@carapace/ai", targets: ["npm"], version: "2026.8.1-beta.2" },
+      { name: "@carapace/gateway-client", targets: ["npm"], version: "2026.8.1-beta.2" },
+      { name: "@carapace/gateway-protocol", targets: ["npm"], version: "2026.8.1-beta.2" },
+      { name: "carapace", targets: ["npm"], version: "2026.8.1-beta.2" },
     ]);
     expect(plan.inventory.platforms).toEqual([
       { id: "android", source: ".github/workflows/android-release.yml" },
@@ -577,7 +577,7 @@ describe("release plan producer", () => {
     const git = (args: string[], input?: string) =>
       execFileSync(
         "git",
-        ["-c", "user.name=OpenClaw Test", "-c", "user.email=test@example.invalid", ...args],
+        ["-c", "user.name=Carapace Test", "-c", "user.email=test@example.invalid", ...args],
         { cwd: fixture.root, encoding: "utf8", input },
       ).trim();
     const blob = git(["hash-object", "-w", "--stdin"], "");
@@ -668,7 +668,7 @@ describe("release plan producer", () => {
         "git",
         [
           "-c",
-          "user.name=OpenClaw Test",
+          "user.name=Carapace Test",
           "-c",
           "user.email=test@example.invalid",
           "commit-tree",
@@ -784,7 +784,7 @@ describe("release plan producer", () => {
           corePath,
           readFileSync(corePath, "utf8").replace(
             "const params = { ...request.params, runGh: runtime.runGh };",
-            'runtime.runGh(["api", "repos/openclaw/openclaw"]);\nconst params = { ...request.params, runGh: runtime.runGh };',
+            'runtime.runGh(["api", "repos/carapace/carapace"]);\nconst params = { ...request.params, runGh: runtime.runGh };',
           ),
         );
       },
@@ -1159,7 +1159,7 @@ const hookModule = (await import("node:module")).createRequire(import.meta.url)(
 const hookFs = await import("node:fs");
 const originalJsLoader = hookModule._extensions[".js"];
 hookModule._extensions[".js"] = function(module, filename) {
-  if (filename.includes("/yaml/") || filename.includes("openclaw-release-yaml-")) {
+  if (filename.includes("/yaml/") || filename.includes("carapace-release-yaml-")) {
     hookFs.writeFileSync(${JSON.stringify(sentinel)}, "extension-hook");
   }
   return originalJsLoader(module, filename);
@@ -1177,7 +1177,7 @@ hookModule._extensions[".js"] = function(module, filename) {
           fixture.root,
           "yaml-preload.cjs",
           `
-if (process.argv.some(value => value.includes("__openclaw_verified_yaml__"))) {
+if (process.argv.some(value => value.includes("__carapace_verified_yaml__"))) {
   require("node:fs").writeFileSync(${JSON.stringify(sentinel)}, "node-options");
 }
 `,
@@ -1275,7 +1275,7 @@ mutateModule.syncBuiltinESMExports();
     });
 
     expect(() => produceReleasePlan(sourceParams(fixture))).toThrow(
-      "package @openclaw/duplicate is declared by multiple plugin sources",
+      "package @carapace/duplicate is declared by multiple plugin sources",
     );
   });
 
@@ -1285,7 +1285,7 @@ mutateModule.syncBuiltinESMExports();
     });
 
     expect(() => produceReleasePlan(sourceParams(fixture))).toThrow(
-      "package inventory source mismatch for @openclaw/ai: extensions/shadow-ai/package.json and packages/ai/package.json",
+      "package inventory source mismatch for @carapace/ai: extensions/shadow-ai/package.json and packages/ai/package.json",
     );
   });
 
@@ -1300,7 +1300,7 @@ mutateModule.syncBuiltinESMExports();
   });
 
   it("matches the exact current publisher inventory: 94 npm and 90 ClawHub packages", () => {
-    const root = tempDirs.make("openclaw-release-plan-current-");
+    const root = tempDirs.make("carapace-release-plan-current-");
     const candidateSha = execFileSync("git", ["rev-parse", "HEAD"], {
       cwd: resolve("."),
       encoding: "utf8",
@@ -1355,10 +1355,10 @@ mutateModule.syncBuiltinESMExports();
     expect(npmPackages).toHaveLength(94);
     expect(clawHubPackages).toHaveLength(90);
     const coreNpmPackages = new Set([
-      "@openclaw/ai",
-      "@openclaw/gateway-client",
-      "@openclaw/gateway-protocol",
-      "openclaw",
+      "@carapace/ai",
+      "@carapace/gateway-client",
+      "@carapace/gateway-protocol",
+      "carapace",
     ]);
     expect(
       npmPackages
@@ -1377,10 +1377,10 @@ mutateModule.syncBuiltinESMExports();
     );
     expect(npmPackages.map((entry) => entry.name)).toEqual(
       expect.arrayContaining([
-        "@openclaw/ai",
-        "@openclaw/gateway-client",
-        "@openclaw/gateway-protocol",
-        "openclaw",
+        "@carapace/ai",
+        "@carapace/gateway-client",
+        "@carapace/gateway-protocol",
+        "carapace",
       ]),
     );
   });

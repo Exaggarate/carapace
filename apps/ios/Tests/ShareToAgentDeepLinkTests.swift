@@ -1,10 +1,10 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Testing
 
 @Suite(.serialized) struct ShareToAgentDeepLinkTests {
     @Test func `build message ignores retired default instruction`() throws {
-        let defaults = try #require(UserDefaults(suiteName: OpenClawAppGroup.identifier))
+        let defaults = try #require(UserDefaults(suiteName: CarapaceAppGroup.identifier))
         let previous = defaults.object(forKey: "share.defaultInstruction")
         defaults.set("Use the stale saved instruction.", forKey: "share.defaultInstruction")
         defer {
@@ -25,7 +25,7 @@ import Testing
     }
 
     @Test func `app group identifier uses canonical open claw group`() {
-        #expect(OpenClawAppGroup.canonicalIdentifier == "group.ai.openclawfoundation.app.shared")
+        #expect(CarapaceAppGroup.canonicalIdentifier == "group.ai.carapacefoundation.app.shared")
     }
 
     @Test func `build message includes shared fields`() throws {
@@ -53,7 +53,7 @@ import Testing
         let url = ShareToAgentDeepLink.buildURL(from: payload)
         let parsed = url.flatMap { DeepLinkParser.parse($0) }
         guard case let .agent(agent)? = parsed else {
-            Issue.record("Expected openclaw://agent deep link")
+            Issue.record("Expected carapace://agent deep link")
             return
         }
 

@@ -80,7 +80,7 @@ export async function planTrackedClawHubSkillState(params: {
       ok: false,
       code: "ambiguous",
       error: link.valid
-        ? `Skill ${JSON.stringify(slug)} was installed before OpenClaw recorded file fingerprints, so local changes cannot be detected.`
+        ? `Skill ${JSON.stringify(slug)} was installed before Carapace recorded file fingerprints, so local changes cannot be detected.`
         : link.reason,
     };
   }
@@ -210,7 +210,7 @@ export async function applyClawHubSkillUninstall(
         sourceVersion: plan.version,
       })
     : undefined;
-  const stagedDir = `${plan.targetDir}.openclaw-skill-remove-${randomUUID()}`;
+  const stagedDir = `${plan.targetDir}.carapace-skill-remove-${randomUUID()}`;
   let staged = false;
   let restoreTracking: (() => Promise<void>) | undefined;
   const rename = deps.rename ?? fs.rename;

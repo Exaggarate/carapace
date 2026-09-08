@@ -1,4 +1,4 @@
-import type { AgentRunTerminalFacts } from "@openclaw/normalization-core/agent-run-terminal-outcome";
+import type { AgentRunTerminalFacts } from "@carapace/normalization-core/agent-run-terminal-outcome";
 
 /** Normalized terminal outcome for an agent run. */
 export type AgentRunTerminalOutcome = AgentRunTerminalFacts & {

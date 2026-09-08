@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { PassThrough } from "node:stream";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { defineDiscordVoiceTests } from "./voice-test-harness.test-support.js";
 
 const voiceAudio = await import("./audio.js");

@@ -90,7 +90,7 @@ export function showSessionPlacementTargetDialog(
       const restart = options.mode === "restart";
       render(() => {
         return html`
-          <openclaw-modal-dialog
+          <carapace-modal-dialog
             label=${t(
               restart ? "sessionsView.restartSessionTitle" : "sessionsView.moveSessionTitle",
             )}
@@ -250,7 +250,7 @@ export function showSessionPlacementTargetDialog(
                 </button>
               </div>
             </form>
-          </openclaw-modal-dialog>
+          </carapace-modal-dialog>
         `;
       });
     }

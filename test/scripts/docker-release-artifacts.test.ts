@@ -17,7 +17,7 @@ import {
 
 const sourceSha = "a".repeat(40);
 const toolingSha = "b".repeat(40);
-const repository = "openclaw/openclaw";
+const repository = "carapace/carapace";
 const runId = "100";
 const runAttempt = "2";
 const roots: string[] = [];
@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 function temporaryDirectory() {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-docker-artifacts-"));
+  const root = mkdtempSync(path.join(tmpdir(), "carapace-docker-artifacts-"));
   roots.push(root);
   return root;
 }
@@ -236,7 +236,7 @@ async function createPreparedRelease(includeBrowser = true, version = "2026.8.1-
 
 async function createPublicationRetry(conclusion = "failure") {
   const fixture = await createPreparedRelease(false);
-  const workflow = ".github/workflows/openclaw-release-publish.yml";
+  const workflow = ".github/workflows/carapace-release-publish.yml";
   fixture.manifest.producer.workflowRef = `${repository}/${workflow}@refs/heads/main`;
   fixture.run.path = fixture.attemptRun.path = workflow;
   fixture.attemptRun.status = "completed";
@@ -427,7 +427,7 @@ describe("prepared Docker publication", () => {
       publishDockerRelease({
         manifest,
         payloadDirectory: path.join(root, "payloads"),
-        images: ["ghcr.io/openclaw/openclaw"],
+        images: ["ghcr.io/carapace/carapace"],
         execFileSyncImpl: execute,
         verifyTag: vi.fn(),
       }),
@@ -509,7 +509,7 @@ describe("prepared Docker publication", () => {
     const output = await publishDockerRelease({
       manifest,
       payloadDirectory: path.join(root, "payloads"),
-      images: ["ghcr.io/openclaw/openclaw", "docker.io/openclaw/openclaw"],
+      images: ["ghcr.io/carapace/carapace", "docker.io/carapace/carapace"],
       execFileSyncImpl: execute,
       verifyTag,
       promote,
@@ -526,7 +526,7 @@ describe("prepared Docker publication", () => {
     expect(output.split("\n")).toEqual(
       ["default", "slim", "browser"].map(
         (variant) =>
-          `${variant}=${tags.get(`ghcr.io/openclaw/openclaw:2026.8.1-beta.2-r20260901${variant === "default" ? "" : `-${variant}`}`)}`,
+          `${variant}=${tags.get(`ghcr.io/carapace/carapace:2026.8.1-beta.2-r20260901${variant === "default" ? "" : `-${variant}`}`)}`,
       ),
     );
     expect(promote).not.toHaveBeenCalled();
@@ -541,7 +541,7 @@ describe("prepared Docker publication", () => {
       publishDockerRelease({
         manifest,
         payloadDirectory: path.join(root, "payloads"),
-        images: ["ghcr.io/openclaw/openclaw"],
+        images: ["ghcr.io/carapace/carapace"],
         execFileSyncImpl: execute,
         verifyTag: vi.fn(),
       }),
@@ -716,9 +716,9 @@ describe("prepared Docker publication", () => {
       expect(String(step.with?.["build-args"]).split("\n")).toEqual(
         expect.arrayContaining([
           "GIT_COMMIT=${{ inputs.release_sha }}",
-          "OPENCLAW_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}",
-          "OPENCLAW_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}",
-          "OPENCLAW_EXTENSIONS=diagnostics-otel,codex",
+          "CARAPACE_BUILD_TIMESTAMP=${{ needs.resolve.outputs.built_at }}",
+          "CARAPACE_DOCKER_BUILD_VERSION=${{ needs.resolve.outputs.version }}",
+          "CARAPACE_EXTENSIONS=diagnostics-otel,codex",
         ]),
       );
       expect(String(step.with?.labels).split("\n")).toEqual(
@@ -732,7 +732,7 @@ describe("prepared Docker publication", () => {
     const browser = steps.find((step) => step.id === "build-browser");
     expect(browser?.if).toBe("${{ needs.resolve.outputs.include_browser == 'true' }}");
     expect(String(browser?.with?.["build-args"]).split("\n")).toContain(
-      "OPENCLAW_INSTALL_BROWSER=1",
+      "CARAPACE_INSTALL_BROWSER=1",
     );
     const smoke = steps.findIndex((step) =>
       step.run?.includes("docker-release-artifacts.mjs prepare"),

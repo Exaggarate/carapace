@@ -5,17 +5,17 @@ import { resolveConfiguredAgentId } from "../../agents/agent-scope-config.js";
 import { listAgentEntries, listAgentIds, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { resolveAgentSessionDirsFromAgentsDirSync } from "../../agents/session-dirs.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  createOpenClawAgentDatabasePathMatcher,
-  listOpenClawRegisteredAgentDatabases,
-} from "../../state/openclaw-agent-db-registry.js";
+  createCarapaceAgentDatabasePathMatcher,
+  listCarapaceRegisteredAgentDatabases,
+} from "../../state/carapace-agent-db-registry.js";
 import {
   resolveSessionStoreCompatibilityAgentId,
   tryResolveLegacyCompatibilityAgentId,
 } from "../legacy.default-agent-owner.js";
 import { resolveStateDir } from "../paths.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { resolveAgentsDirFromSessionStorePath, resolveSessionStorePathCore } from "./paths.js";
 import { iterateSessionEntryKeys } from "./session-accessor.sqlite-entry-store.js";
 import {
@@ -54,7 +54,7 @@ export type SessionStoreSelectionOptions = {
 };
 
 /** Lists agent ids whose session stores should be considered configured. */
-export function listConfiguredSessionStoreAgentIds(cfg: OpenClawConfig): string[] {
+export function listConfiguredSessionStoreAgentIds(cfg: CarapaceConfig): string[] {
   const ids = new Set(listAgentIds(cfg).map((agentId) => normalizeAgentId(agentId)));
   const addAcpAgentId = (agentId: string | undefined) => {
     const raw = agentId?.trim() ?? "";
@@ -80,12 +80,12 @@ export function listConfiguredSessionStoreAgentIds(cfg: OpenClawConfig): string[
 
 /** Lists configured owners plus persisted owners whose registered DB still matches this store. */
 export function listKnownSessionStoreAgentIds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: { env?: NodeJS.ProcessEnv } = {},
 ): string[] {
   const env = params.env ?? process.env;
   const defaultAgentId = resolveSessionStoreCompatibilityAgentId(cfg);
-  const isSameDatabasePath = createOpenClawAgentDatabasePathMatcher();
+  const isSameDatabasePath = createCarapaceAgentDatabasePathMatcher();
   const ids = new Set(listConfiguredSessionStoreAgentIds(cfg));
   if (!isPerAgentSessionStoreConfig(cfg.session?.store)) {
     const storePath = resolveSessionStorePathCore(cfg.session?.store, {
@@ -112,7 +112,7 @@ export function listKnownSessionStoreAgentIds(
     }
     if (durableTarget.shared && durableTarget.agentId && fsSync.existsSync(durableTarget.path)) {
       try {
-        const logicalOwners = withOpenClawAgentDatabaseReadOnly(
+        const logicalOwners = withCarapaceAgentDatabaseReadOnly(
           (database) =>
             Array.from(iterateSessionEntryKeys(database)).flatMap((sessionKey) => {
               const parsed = parseAgentSessionKey(sessionKey);
@@ -130,7 +130,7 @@ export function listKnownSessionStoreAgentIds(
       }
     }
   }
-  for (const registered of listOpenClawRegisteredAgentDatabases({ env })) {
+  for (const registered of listCarapaceRegisteredAgentDatabases({ env })) {
     const agentId = normalizeAgentId(registered.agentId);
     const storePath = resolveSessionStorePathCore(cfg.session?.store, { agentId, env });
     const expectedPath = resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -147,13 +147,13 @@ export function listKnownSessionStoreAgentIds(
 }
 
 /** Checks whether an agent is configured to own a session store. */
-export function isConfiguredSessionStoreAgentId(cfg: OpenClawConfig, agentId: string): boolean {
+export function isConfiguredSessionStoreAgentId(cfg: CarapaceConfig, agentId: string): boolean {
   const normalizedAgentId = normalizeAgentId(agentId);
   return listConfiguredSessionStoreAgentIds(cfg).includes(normalizedAgentId);
 }
 
 function resolveSessionStoreDiscoveryState(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
   registeredDatabases?: readonly { agentId: string; path: string }[],
 ): {
@@ -218,7 +218,7 @@ function resolveExplicitSessionStoreTarget(params: {
 
 /** Resolves all configured and discoverable agent session stores synchronously. */
 export function resolveAllAgentSessionStoreTargetsSync(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     env?: NodeJS.ProcessEnv;
     onResolvedTarget?: (selected: SessionStoreTarget, physical: SessionStoreTarget) => void;
@@ -297,7 +297,7 @@ export function resolveAllAgentSessionStoreTargetsSync(
 
 /** Resolves only already-existing stores for one configured, retired, or manual agent. */
 export function resolveExistingAgentSessionStoreTargetsSync(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   params: { env?: NodeJS.ProcessEnv } = {},
 ): SessionStoreTarget[] {
@@ -337,7 +337,7 @@ export function resolveExistingAgentSessionStoreTargetsSync(
         const databaseAgentId = resolvedTarget.shared
           ? normalizeAgentId(resolvedTarget.agentId ?? defaultAgentId)
           : requested;
-        const result = withOpenClawAgentDatabaseReadOnly(
+        const result = withCarapaceAgentDatabaseReadOnly(
           (database) => {
             for (const sessionKey of iterateSessionEntryKeys(database)) {
               const parsed = parseAgentSessionKey(sessionKey);
@@ -377,7 +377,7 @@ export function resolveExistingAgentSessionStoreTargetsSync(
  * Callers must validate the selected artifact before performing filesystem mutations.
  */
 export function resolveAllAgentSessionStoreCandidateTargetsSync(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     env?: NodeJS.ProcessEnv;
     registeredDatabases?: readonly { agentId: string; path: string }[];
@@ -448,7 +448,7 @@ export function resolveAllAgentSessionStoreCandidateTargetsSync(
 
 /** Resolves session store targets for one agent, including retired/manual stores. */
 export function resolveAgentSessionStoreTargetsSync(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   params: { env?: NodeJS.ProcessEnv } = {},
 ): SessionStoreTarget[] {
@@ -456,7 +456,7 @@ export function resolveAgentSessionStoreTargetsSync(
 }
 
 function resolveAgentSessionStoreTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   agentId: string,
   params: { env?: NodeJS.ProcessEnv; sqliteOnly?: boolean },
 ): SessionStoreTarget[] {
@@ -545,7 +545,7 @@ function resolveAgentSessionStoreTargets(
 
 /** Candidate files for version inspection only; this does not assign migration ownership. */
 export function resolveConfiguredAgentDatabaseCandidatePaths(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: { env: NodeJS.ProcessEnv },
 ): string[] {
   return [
@@ -561,7 +561,7 @@ export function resolveConfiguredAgentDatabaseCandidatePaths(
 
 /** Project configured session-store selection to the exact database migration owners. */
 export function resolveConfiguredAgentDatabaseTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   params: {
     env: NodeJS.ProcessEnv;
     registeredDatabases?: readonly { agentId: string; path: string }[];
@@ -583,7 +583,7 @@ export function resolveConfiguredAgentDatabaseTargets(
 
 /** Resolves session store targets from explicit CLI-style selection options. */
 export function resolveSessionStoreTargets(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: SessionStoreSelectionOptions,
   params: {
     env?: NodeJS.ProcessEnv;

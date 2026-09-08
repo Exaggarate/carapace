@@ -7,7 +7,7 @@ import {
 import { createTranscriptsTool } from "../src/agents/tools/transcripts-tool.js";
 import { createEmptyPluginRegistry } from "../src/plugins/registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "../src/plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../src/state/carapace-state-db.js";
 import { TranscriptsStore } from "../src/transcripts/store.js";
 import { createTempDirTracker } from "./helpers/temp-dir.js";
 
@@ -64,7 +64,7 @@ defineDiscordVoiceTests(
         const execute = (params: Record<string, unknown>) =>
           withPluginRuntimeRegistryScope(registry, () => tool.execute("transcripts", params));
         const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
         });
         const source = { providerId: "discord-voice", accountId, guildId: "g1", channelId: "1001" };
         const providerStop = vi.spyOn(discordVoiceTranscriptsSourceProvider, "stop");
@@ -237,7 +237,7 @@ defineDiscordVoiceTests(
               expectedManager: manager,
             });
             providerStop.mockRestore();
-            closeOpenClawStateDatabaseForTest();
+            closeCarapaceStateDatabaseForTest();
             tempDirs.cleanup();
           }
         }

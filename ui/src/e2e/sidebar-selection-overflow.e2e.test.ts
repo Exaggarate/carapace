@@ -14,7 +14,7 @@ const suite = createControlUiE2eSuite({
 
 suite.define(() => {
   it("keeps the active session pill and fade clear of a classic scrollbar", async () => {
-    const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+    const captureProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
     if (captureProof) {
       await fs.mkdir(path.join(suite.artifactDir, "sidebar-selection-overflow"), {
         recursive: true,

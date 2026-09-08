@@ -20,13 +20,13 @@ describe("assistant media directive display projection", () => {
         role: "assistant",
         stopReason: "stop",
         content: [{ type: "text", text: "I agree with that product direction." }],
-        __openclaw: { runId: "run-retry" },
+        __carapace: { runId: "run-retry" },
       };
       const mediaReply = {
         role: "assistant",
         content,
         stopReason: "error",
-        __openclaw: {
+        __carapace: {
           runId: "run-retry",
           media: [{ path: "media://inbound/synthetic-image", contentType: "image/png" }],
         },
@@ -43,7 +43,7 @@ describe("assistant media directive display projection", () => {
       sessionKey: "agent:main:main",
       message: {
         role: "assistant",
-        openclawDelivery: {
+        carapaceDelivery: {
           mediaUrls: ["./attachment-catalog-tiny/demo.jpg", "./attachment-catalog-tiny/demo.mp3"],
         },
         content: [
@@ -70,7 +70,7 @@ describe("assistant media directive display projection", () => {
       sessionKey: "agent:main:main",
       message: {
         role: "assistant",
-        openclawDelivery: { mediaUrls: ["./attachment-catalog-tiny/demo.jpg"] },
+        carapaceDelivery: { mediaUrls: ["./attachment-catalog-tiny/demo.jpg"] },
         content: [{ type: "text", text: "MEDIA:./attachment-catalog-tiny/demo.jpg" }],
       },
     });
@@ -126,7 +126,7 @@ describe("assistant media directive display projection", () => {
       sessionKey: "agent:main:main",
       message: {
         role: "assistant",
-        openclawDelivery: { mediaUrls: ["./attachment-catalog-tiny/demo.jpg"] },
+        carapaceDelivery: { mediaUrls: ["./attachment-catalog-tiny/demo.jpg"] },
         content: [
           {
             type: "text",

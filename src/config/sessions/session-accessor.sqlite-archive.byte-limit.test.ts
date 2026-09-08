@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import { replaceSessionEntry } from "./session-accessor.js";
 import { planSessionStateDeleteIfUnreferenced } from "./session-accessor.sqlite-lifecycle-state.js";
 import { replaceTranscriptEvents } from "./session-accessor.sqlite-transcript-write.js";
@@ -22,12 +22,12 @@ describe("SQLite transcript archive byte limit", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-archive-byte-limit-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-archive-byte-limit-"));
     storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
@@ -47,7 +47,7 @@ describe("SQLite transcript archive byte limit", () => {
     if (!target.path) {
       throw new Error("expected SQLite target path");
     }
-    const database = openOpenClawAgentDatabase({
+    const database = openCarapaceAgentDatabase({
       agentId: target.agentId ?? "main",
       path: target.path,
     });
@@ -60,7 +60,7 @@ describe("SQLite transcript archive byte limit", () => {
     if (!plan) {
       throw new Error("expected archive plan");
     }
-    closeOpenClawAgentDatabasesForTest();
+    closeCarapaceAgentDatabasesForTest();
     const { materializeTranscriptArchiveInWorker } =
       await import("./session-accessor.sqlite-archive.worker.js");
 

@@ -1,4 +1,4 @@
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { describe, expect, it, onTestFinished } from "vitest";
 import { ExtensionRelayBridge } from "./relay-bridge.js";
 import {

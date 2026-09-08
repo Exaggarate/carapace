@@ -4,9 +4,9 @@ import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.
 import { css, html, type PropertyValues } from "lit";
 import { property, query } from "lit/decorators.js";
 import { acquireNativeOverlayOcclusion } from "../lib/native-overlay-occlusion.ts";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { CarapaceLitElement } from "../lit/carapace-element.ts";
 
-const modalLayers = (document.openClawModalLayers ??= new Set<HTMLElement>());
+const modalLayers = (document.carapaceModalLayers ??= new Set<HTMLElement>());
 
 function setModalLayer(modal: HTMLElement, open: boolean) {
   modalLayers.delete(modal);
@@ -15,7 +15,7 @@ function setModalLayer(modal: HTMLElement, open: boolean) {
   }
 }
 
-export class OpenClawModalDialog extends OpenClawLitElement {
+export class CarapaceModalDialog extends CarapaceLitElement {
   @property({ type: Boolean }) open = true;
   @property({ type: Boolean, reflect: true }) manual = false;
   @property() label = "";
@@ -35,14 +35,14 @@ export class OpenClawModalDialog extends OpenClawLitElement {
     }
 
     wa-dialog {
-      --width: min(var(--openclaw-modal-width, 540px), calc(100vw - 48px));
+      --width: min(var(--carapace-modal-width, 540px), calc(100vw - 48px));
       --spacing: 0;
-      --backdrop-filter: var(--openclaw-modal-backdrop-filter, blur(4px));
+      --backdrop-filter: var(--carapace-modal-backdrop-filter, blur(4px));
     }
 
     wa-dialog::part(dialog) {
-      max-width: var(--openclaw-modal-max-width, calc(100vw - 48px));
-      max-height: var(--openclaw-modal-max-height, calc(100dvh - 48px));
+      max-width: var(--carapace-modal-max-width, calc(100vw - 48px));
+      max-height: var(--carapace-modal-max-height, calc(100dvh - 48px));
       padding: 0;
       border: 0;
       background: transparent;
@@ -94,7 +94,7 @@ export class OpenClawModalDialog extends OpenClawLitElement {
     }
 
     :host(.drawer) wa-dialog {
-      --width: min(var(--openclaw-modal-width, 100vw), 100vw);
+      --width: min(var(--carapace-modal-width, 100vw), 100vw);
       --show-duration: 200ms;
       --hide-duration: 0ms;
     }
@@ -108,10 +108,10 @@ export class OpenClawModalDialog extends OpenClawLitElement {
     }
 
     :host(.drawer) wa-dialog[open]::part(dialog) {
-      animation: openclaw-drawer-in 200ms cubic-bezier(0.32, 0.72, 0, 1);
+      animation: carapace-drawer-in 200ms cubic-bezier(0.32, 0.72, 0, 1);
     }
 
-    @keyframes openclaw-drawer-in {
+    @keyframes carapace-drawer-in {
       from {
         transform: translateX(100%);
       }
@@ -131,11 +131,11 @@ export class OpenClawModalDialog extends OpenClawLitElement {
     }
     @media (max-width: 640px) {
       wa-dialog {
-        --width: min(var(--openclaw-modal-width, 540px), calc(100vw - 24px));
+        --width: min(var(--carapace-modal-width, 540px), calc(100vw - 24px));
       }
 
       wa-dialog::part(dialog) {
-        max-width: var(--openclaw-modal-max-width, calc(100vw - 24px));
+        max-width: var(--carapace-modal-max-width, calc(100vw - 24px));
         max-height: 90dvh;
       }
     }
@@ -362,16 +362,16 @@ export class OpenClawModalDialog extends OpenClawLitElement {
   }
 }
 
-if (!customElements.get("openclaw-modal-dialog")) {
-  customElements.define("openclaw-modal-dialog", OpenClawModalDialog);
+if (!customElements.get("carapace-modal-dialog")) {
+  customElements.define("carapace-modal-dialog", CarapaceModalDialog);
 }
 
 declare global {
   interface Document {
-    openClawModalLayers?: Set<HTMLElement>;
+    carapaceModalLayers?: Set<HTMLElement>;
   }
 
   interface HTMLElementTagNameMap {
-    "openclaw-modal-dialog": OpenClawModalDialog;
+    "carapace-modal-dialog": CarapaceModalDialog;
   }
 }

@@ -1,4 +1,4 @@
-import { renderMermaidSvg, type MermaidTheme } from "@openclaw/mermaid-renderer";
+import { renderMermaidSvg, type MermaidTheme } from "@carapace/mermaid-renderer";
 import { afterAll, describe, expect, it } from "vitest";
 
 const theme: MermaidTheme = {

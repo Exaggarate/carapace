@@ -1,6 +1,6 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { MemoryReadResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { jsonResult } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import type { MemoryReadResult } from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { jsonResult } from "carapace/plugin-sdk/memory-core-host-runtime-core";
 import {
   attemptMemoryCorpus,
   composeMemoryCorpusMetadata,

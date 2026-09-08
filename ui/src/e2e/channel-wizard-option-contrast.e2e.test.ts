@@ -12,7 +12,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is required for channel wizard contrast proof at ${executablePath}`,
 });
 
-const proofVariant = process.env.OPENCLAW_PICKER_PROOF_VARIANT;
+const proofVariant = process.env.CARAPACE_PICKER_PROOF_VARIANT;
 let proofDirectory: string;
 beforeEach(() => {
   if (proofVariant) {
@@ -61,7 +61,7 @@ suite.define(() => {
                   {
                     value: "primary",
                     label: "Primary iMessage connection",
-                    hint: "The main iMessage connection for this OpenClaw gateway",
+                    hint: "The main iMessage connection for this Carapace gateway",
                   },
                   {
                     value: "another",

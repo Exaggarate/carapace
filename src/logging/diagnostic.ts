@@ -3,7 +3,7 @@ import { monitorEventLoopDelay, performance } from "node:perf_hooks";
 import { resolveCompactionTimeoutMs } from "../agents/embedded-agent-runner/compaction-safety-timeout.js";
 import { resolveActiveEmbeddedRunRecoveryBlocker } from "../agents/embedded-agent-runner/run-state.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   areDiagnosticsEnabledForProcess,
   emitInternalDiagnosticEvent as emitDiagnosticEvent,
@@ -140,7 +140,7 @@ type SampleDiagnosticLiveness = (
 ) => DiagnosticLivenessSample | null;
 
 type StartDiagnosticHeartbeatOptions = {
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => CarapaceConfig;
   emitMemorySample?: EmitDiagnosticMemorySample;
   sampleLiveness?: SampleDiagnosticLiveness;
   recoverStuckSession?: RecoverStuckSession;
@@ -1114,7 +1114,7 @@ let heartbeatInterval: NodeJS.Timeout | null = null;
 let lastDiagnosticHeartbeatTickAt: number | undefined;
 
 export function startDiagnosticHeartbeat(
-  config?: OpenClawConfig,
+  config?: CarapaceConfig,
   opts?: StartDiagnosticHeartbeatOptions,
 ) {
   if (!areDiagnosticsEnabledForProcess() || !isDiagnosticsEnabled(config)) {
@@ -1326,6 +1326,6 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.diagnosticTestApi")] = testing;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.diagnosticTestApi")] = testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

@@ -1,7 +1,7 @@
 // Clickclack tests cover gateway plugin behavior.
 import { EventEmitter } from "node:events";
-import type { ChannelGatewayContext } from "openclaw/plugin-sdk/channel-contract";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import type { ChannelGatewayContext } from "carapace/plugin-sdk/channel-contract";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedClickClackAccount } from "./types.js";
 
@@ -53,7 +53,7 @@ vi.mock("./inbound.js", () => ({
   handleClickClackInbound: mocks.handleClickClackInbound,
 }));
 
-vi.mock("openclaw/plugin-sdk/native-command-registry", () => ({
+vi.mock("carapace/plugin-sdk/native-command-registry", () => ({
   listNativeCommandSpecsForConfig: () => [],
 }));
 

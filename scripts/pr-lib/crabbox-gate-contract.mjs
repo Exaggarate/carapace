@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 
-export const CRABBOX_GATE_CHECK_NAME = "openclaw/crabbox-gate";
+export const CRABBOX_GATE_CHECK_NAME = "carapace/crabbox-gate";
 const CRABBOX_GATE_TEST_ENV =
-  "CI=1 NODE_OPTIONS=--max-old-space-size=4096 OPENCLAW_VITEST_MAX_WORKERS=1";
+  "CI=1 NODE_OPTIONS=--max-old-space-size=4096 CARAPACE_VITEST_MAX_WORKERS=1";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/u;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
@@ -83,14 +83,14 @@ export function buildCrabboxGateCommand(plan, bootstrapSha256) {
   return [
     "set -euo pipefail",
     "umask 022",
-    `printf '%s\\n' 'OPENCLAW_CRABBOX_GATE_VERSION=1' 'OPENCLAW_CRABBOX_GATE_MODE=remote_crabbox_aws' 'OPENCLAW_CRABBOX_GATE_BASE=${validated.baseSha}' 'OPENCLAW_CRABBOX_GATE_HEAD=${validated.headSha}' 'OPENCLAW_CRABBOX_GATE_PLAN_SHA256=${planDigest}' 'OPENCLAW_CRABBOX_GATE_TARGET_COUNT=${validated.targets.length}' 'OPENCLAW_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}'`,
-    "printf '%s\\n' 'OPENCLAW_CRABBOX_GATE_STAGE=build:start'",
+    `printf '%s\\n' 'CARAPACE_CRABBOX_GATE_VERSION=1' 'CARAPACE_CRABBOX_GATE_MODE=remote_crabbox_aws' 'CARAPACE_CRABBOX_GATE_BASE=${validated.baseSha}' 'CARAPACE_CRABBOX_GATE_HEAD=${validated.headSha}' 'CARAPACE_CRABBOX_GATE_PLAN_SHA256=${planDigest}' 'CARAPACE_CRABBOX_GATE_TARGET_COUNT=${validated.targets.length}' 'CARAPACE_CRABBOX_BOOTSTRAP_SHA256=${bootstrapSha256}'`,
+    "printf '%s\\n' 'CARAPACE_CRABBOX_GATE_STAGE=build:start'",
     "pnpm build",
-    "printf '%s\\n' 'OPENCLAW_CRABBOX_GATE_STAGE=build:ok' 'OPENCLAW_CRABBOX_GATE_STAGE=check:start'",
+    "printf '%s\\n' 'CARAPACE_CRABBOX_GATE_STAGE=build:ok' 'CARAPACE_CRABBOX_GATE_STAGE=check:start'",
     "pnpm check",
-    "printf '%s\\n' 'OPENCLAW_CRABBOX_GATE_STAGE=check:ok' 'OPENCLAW_CRABBOX_GATE_STAGE=test:start'",
+    "printf '%s\\n' 'CARAPACE_CRABBOX_GATE_STAGE=check:ok' 'CARAPACE_CRABBOX_GATE_STAGE=test:start'",
     testCommand,
-    "printf '%s\\n' 'OPENCLAW_CRABBOX_GATE_STAGE=test:ok' 'OPENCLAW_CRABBOX_GATE_RESULT=success'",
+    "printf '%s\\n' 'CARAPACE_CRABBOX_GATE_STAGE=test:ok' 'CARAPACE_CRABBOX_GATE_RESULT=success'",
   ].join("; ");
 }
 
@@ -121,7 +121,7 @@ export function parseCrabboxGateCheckSummary(summary) {
     /^Trusted Crabbox AWS proof (run_[a-z0-9]+) \/ (cbx_[a-z0-9]+); build, check, and PR-derived tests passed for base ([0-9a-f]{40}), head ([0-9a-f]{40}), workflow ([0-9a-f]{40}), plan ([0-9a-f]{64}) \((\d+) targets\)\.$/u,
   );
   if (!match) {
-    throw new Error("openclaw/crabbox-gate summary binding is malformed");
+    throw new Error("carapace/crabbox-gate summary binding is malformed");
   }
   const targetCount = Number(match[7]);
   const binding = {
@@ -134,7 +134,7 @@ export function parseCrabboxGateCheckSummary(summary) {
     workflowSha: match[5],
   };
   if (formatCrabboxGateCheckSummary(binding) !== summary) {
-    throw new Error("openclaw/crabbox-gate summary binding is not canonical");
+    throw new Error("carapace/crabbox-gate summary binding is not canonical");
   }
   return binding;
 }

@@ -82,7 +82,7 @@ suite.define(() => {
     try {
       await installMockGateway(page, sessionsMock());
       await page.goto(`${suite.server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.waitFor({ state: "visible", timeout: 10_000 });
       // The general chat surface is the app's main view; collapsing it here
       // would be a default-path regression, so this is the guard for it.
@@ -104,8 +104,8 @@ suite.define(() => {
     try {
       await installMockGateway(page, sessionsMock());
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, RESEARCH_KEY));
-      const sidebar = page.locator("openclaw-app-sidebar");
-      const composer = page.getByPlaceholder("Message OpenClaw");
+      const sidebar = page.locator("carapace-app-sidebar");
+      const composer = page.getByPlaceholder("Message Carapace");
       await sidebar.waitFor({ state: "visible", timeout: 10_000 });
       await composer.waitFor({ state: "visible", timeout: 10_000 });
       await expect.poll(() => sidebar.isVisible()).toBe(true);
@@ -130,9 +130,9 @@ suite.define(() => {
         SIDEBAR_SESSION_NAV_COLLAPSE_QUERY.value,
       );
       await page.goto(sessionUrl.href);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       const expandButton = page.locator(".shell-chrome-controls__nav-toggle");
-      const composer = page.getByPlaceholder("Message OpenClaw");
+      const composer = page.getByPlaceholder("Message Carapace");
       await expandButton.waitFor({ state: "visible", timeout: 10_000 });
       // Wait for the conversation itself, not just the missing sidebar: the
       // collapsed chrome paints before the chat pane, so asserting visibility
@@ -185,7 +185,7 @@ suite.define(() => {
       const composer = catalogTab.locator(".agent-chat__composer-combobox > textarea");
       await composer.waitFor({ state: "visible", timeout: 10_000 });
       await catalogTab.getByText("Catalog transcript loaded", { exact: true }).waitFor();
-      await expect.poll(() => catalogTab.locator("openclaw-app-sidebar").isVisible()).toBe(false);
+      await expect.poll(() => catalogTab.locator("carapace-app-sidebar").isVisible()).toBe(false);
       expect(
         new URL(catalogTab.url()).searchParams.has(SIDEBAR_SESSION_NAV_COLLAPSE_QUERY.name),
       ).toBe(false);

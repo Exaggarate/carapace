@@ -1,15 +1,15 @@
-import { ensureSystemPromptCacheBoundary } from "@openclaw/ai/internal/shared";
+import { ensureSystemPromptCacheBoundary } from "@carapace/ai/internal/shared";
 /**
  * Prepares CLI backend run context: backend config, prompts, bootstrap context,
  * MCP, auth epoch, and reusable session metadata.
  */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { prepareReplyToolAuthority } from "../../auto-reply/reply/reply-tool-authority.js";
 import { messageToolOwnsVisibleReply } from "../../auto-reply/source-reply-delivery-mode.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { canonicalizeMainSessionAlias } from "../../config/sessions/main-session.js";
 import { runWithSessionTranscriptReadFence } from "../../config/sessions/session-transcript-read-fence.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   assertContextEngineHostSupport,
   buildGenericCliContextEngineHostSupport,
@@ -34,7 +34,7 @@ import {
   resolveMcpLoopbackScopedTools,
 } from "../../gateway/mcp-http.runtime.js";
 import { claimHeartbeatContextForUserRun } from "../../infra/heartbeat-outcome-store.js";
-import { buildSystemAgentToolsMcpServerConfig } from "../../mcp/openclaw-tools-serve-config.js";
+import { buildSystemAgentToolsMcpServerConfig } from "../../mcp/carapace-tools-serve-config.js";
 import { CliBackendAuthProfilePreparationError } from "../../plugins/cli-backend-errors.js";
 import type {
   CliBackendConfig,
@@ -180,7 +180,7 @@ const CLAUDE_MANAGED_MCP_TIMEOUT_MS = resolveQuestionTimeoutMs(3_600);
 
 function unsupportedIsolatedCompletionError(backendId: string): Error & { code: "unsupported" } {
   const error = new Error(
-    `CLI backend "${backendId}" does not support isolated completion; OpenClaw did not start the run.`,
+    `CLI backend "${backendId}" does not support isolated completion; Carapace did not start the run.`,
   ) as Error & { code: "unsupported" };
   error.name = "IsolatedCompletionUnsupportedError";
   error.code = "unsupported";
@@ -193,7 +193,7 @@ function resolveClaudeCliContextModelId(modelId: string): string {
   return CLAUDE_CLI_CONTEXT_MODEL_ALIASES[lower] ?? trimmed;
 }
 type RunCliAgentPrepareParams = RunCliAgentParams & {
-  /** Ring-zero tool transport supplied only by the OpenClaw orchestrator. */
+  /** Ring-zero tool transport supplied only by the Carapace orchestrator. */
   systemAgentTool?: import("../tools/system-agent-tool.js").SystemAgentToolOptions;
 };
 
@@ -212,9 +212,9 @@ const defaultPrepareDeps = {
   transferMcpLoopbackClientGrant,
   resolveMcpLoopbackPolicyTools,
   resolveMcpLoopbackScopedTools,
-  resolveOpenClawReferencePaths: async (
-    params: Parameters<typeof import("../docs-path.js").resolveOpenClawReferencePaths>[0],
-  ) => (await import("../docs-path.js")).resolveOpenClawReferencePaths(params),
+  resolveCarapaceReferencePaths: async (
+    params: Parameters<typeof import("../docs-path.js").resolveCarapaceReferencePaths>[0],
+  ) => (await import("../docs-path.js")).resolveCarapaceReferencePaths(params),
   prepareClaudeCliSkillsPlugin,
   claudeCliSessionTranscriptHasContent,
   claudeCliSessionTranscriptHasOrphanedToolUse,
@@ -270,7 +270,7 @@ function prependCliSessionDriftUserContext(
   if (reusableCliSession.mode !== "reuse-with-drift") {
     return context;
   }
-  const note = `OpenClaw resumed this CLI session after prompt content changed. Follow the current turn's instructions; changed=${reusableCliSession.drift.reasons.join(",")}.`;
+  const note = `Carapace resumed this CLI session after prompt content changed. Follow the current turn's instructions; changed=${reusableCliSession.drift.reasons.join(",")}.`;
   if (!context) {
     return { text: note };
   }
@@ -402,7 +402,7 @@ function shouldSkipLocalCliCredentialEpoch(params: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cliRunnerPrepareTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.cliRunnerPrepareTestApi")] = {
     resetCliRunnerPrepareTestDeps,
     setCliRunnerPrepareTestDeps: (overrides: Record<string, unknown>) => {
       setCliRunnerPrepareTestDeps(overrides as Partial<typeof prepareDeps>);
@@ -455,7 +455,7 @@ function buildCliAuthProfileResolutionError(params: {
   });
   const reason = describeCliAuthProfileResolutionFailure(params.profileId, params.failure);
   return new CliAuthProfilePreparationError({
-    message: `CLI backend "${params.backendId}" ${reason}. Re-authenticate with: ${loginCommand}. OpenClaw did not start the run.`,
+    message: `CLI backend "${params.backendId}" ${reason}. Re-authenticate with: ${loginCommand}. Carapace did not start the run.`,
     profileId: params.profileId,
     provider: params.provider,
     agentDir: params.agentDir,
@@ -513,7 +513,7 @@ async function prepareCliRunContextWithinReadFence(
           ...runConfig.agents,
           entries: { [sessionOwner]: { default: true } },
         },
-      } satisfies OpenClawConfig);
+      } satisfies CarapaceConfig);
   const started = Date.now();
   const executionMode = params.executionMode ?? "agent";
   const isSideQuestion = executionMode === "side-question";
@@ -633,7 +633,7 @@ async function prepareCliRunContextWithinReadFence(
       });
   let runtimeToolsAllowPolicy: string[] | undefined;
   const rootedToolsAllow = params.rootedExecution
-    ? params.cliToolAvailability?.openClaw
+    ? params.cliToolAvailability?.carapace
     : undefined;
   if (params.toolsAllow !== undefined) {
     if (params.cliToolAvailability !== undefined) {
@@ -645,16 +645,16 @@ async function prepareCliRunContextWithinReadFence(
       params = { ...params, toolsAllow: undefined };
     } else {
       runtimeToolsAllowPolicy = [...params.toolsAllow];
-      const fallbackOpenClawTools = uniqueStrings(
+      const fallbackCarapaceTools = uniqueStrings(
         expandToolGroups(params.toolsAllow)
           .map((toolName) => normalizeToolPolicyName(toolName))
           .filter(Boolean),
       );
       if (
-        fallbackOpenClawTools.includes("write") &&
-        !fallbackOpenClawTools.includes("apply_patch")
+        fallbackCarapaceTools.includes("write") &&
+        !fallbackCarapaceTools.includes("apply_patch")
       ) {
-        fallbackOpenClawTools.push("apply_patch");
+        fallbackCarapaceTools.push("apply_patch");
       }
       params = {
         ...params,
@@ -663,7 +663,7 @@ async function prepareCliRunContextWithinReadFence(
           native: [],
           // Preserve the prior normalized fallback for modes without a catalog;
           // catalog-backed paths replace it with exact names below.
-          openClaw: fallbackOpenClawTools,
+          carapace: fallbackCarapaceTools,
         },
       };
     }
@@ -675,7 +675,7 @@ async function prepareCliRunContextWithinReadFence(
     params = {
       ...params,
       toolsAllow: undefined,
-      cliToolAvailability: { native: [], openClaw: [] },
+      cliToolAvailability: { native: [], carapace: [] },
     };
   }
   const internalParams = params as RunCliAgentPrepareParams;
@@ -708,7 +708,7 @@ async function prepareCliRunContextWithinReadFence(
       workspaceDir,
       cwd,
       disableCliLiveSession: true,
-      cliToolAvailability: { native: [], openClaw: params.cliToolAvailability?.openClaw ?? [] },
+      cliToolAvailability: { native: [], carapace: params.cliToolAvailability?.carapace ?? [] },
     };
     const admittedParams = await admitPreparedParams(params);
     const assertRootedCurrent = resolveAdmittedRunActiveAssertion(
@@ -749,7 +749,7 @@ async function prepareCliRunContextWithinReadFence(
       ...params,
       cliToolAvailability: {
         native: params.cliToolAvailability.native,
-        openClaw: params.cliToolAvailability.openClaw.filter((name) => name === "skill_workshop"),
+        carapace: params.cliToolAvailability.carapace.filter((name) => name === "skill_workshop"),
       },
     };
   }
@@ -757,7 +757,7 @@ async function prepareCliRunContextWithinReadFence(
     // Cron persists this verbatim and failure alerts truncate at 200 characters,
     // so keep the upgrade recovery and fail-closed outcome compact.
     throw new Error(
-      `CLI backend "${backendResolved.id}" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. OpenClaw did not start the run.`,
+      `CLI backend "${backendResolved.id}" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. Carapace did not start the run.`,
     );
   }
   const sideQuestionDisablesNativeTools =
@@ -816,7 +816,7 @@ async function prepareCliRunContextWithinReadFence(
     }
   }
   // Claude owns its native login and single-use refresh-token family. Never
-  // preflight, refresh, or forward OpenClaw's snapshot; the installed Claude
+  // preflight, refresh, or forward Carapace's snapshot; the installed Claude
   // process validates and refreshes its own current login.
   const usesNativeAuthProfile =
     backendAuthPolicy?.nativeAuthProfileIds !== undefined &&
@@ -980,10 +980,10 @@ async function prepareCliRunContextWithinReadFence(
     PreparedCliRunContext["bindQuestionAnswerAuthority"]
   > = (assertActive) => bindQuestionAnswerAuthorityForSession(questionSessionKey, assertActive);
   const modelDisplay = `${params.provider}/${modelId}`;
-  let openClawHistoryMessages: unknown[] | undefined;
-  const loadOpenClawHistoryMessages = async () => {
-    openClawHistoryMessages ??= await loadCliSessionHistoryMessages(params);
-    return openClawHistoryMessages;
+  let carapaceHistoryMessages: unknown[] | undefined;
+  const loadCarapaceHistoryMessages = async () => {
+    carapaceHistoryMessages ??= await loadCliSessionHistoryMessages(params);
+    return carapaceHistoryMessages;
   };
   const promptBuildHookContext = {
     runId: params.runId,
@@ -1005,7 +1005,7 @@ async function prepareCliRunContextWithinReadFence(
       return await resolvePromptBuildHookResult({
         config: runConfig,
         prompt: params.prompt,
-        messages: await loadOpenClawHistoryMessages(),
+        messages: await loadCarapaceHistoryMessages(),
         hookCtx: promptBuildHookContext,
         hookRunner: promptBuildHookRunner,
         bootstrapContextRunKind: params.bootstrapContextRunKind,
@@ -1123,7 +1123,7 @@ async function prepareCliRunContextWithinReadFence(
         }),
       });
   // Mirror the embedded runner's bootstrap routing for backends that transport
-  // OpenClaw's system prompt. Only a declared native-tool backend can complete
+  // Carapace's system prompt. Only a declared native-tool backend can complete
   // the file-based ritual; other backends receive limited guidance.
   const canonicalWorkspace = resolveUserPath(
     resolveAgentWorkspaceDir(params.config ?? {}, workspaceResolution.agentId),
@@ -1177,9 +1177,9 @@ async function prepareCliRunContextWithinReadFence(
     previousSignature: params.bootstrapPromptWarningSignature,
   });
   const bootstrapTruncationNotice = buildBootstrapPromptWarningNotice(bootstrapPromptWarning.lines);
-  // Ring-zero OpenClaw runs replace the bundle MCP surface entirely: no
+  // Ring-zero Carapace runs replace the bundle MCP surface entirely: no
   // loopback server, no plugin/user servers. A selectable backend also removes
-  // its native tools, leaving only this openclaw stdio server.
+  // its native tools, leaving only this carapace stdio server.
   const systemAgentMcpConfig = internalParams.systemAgentTool
     ? buildSystemAgentToolsMcpServerConfig(internalParams.systemAgentTool)
     : undefined;
@@ -1195,7 +1195,7 @@ async function prepareCliRunContextWithinReadFence(
       await prepareDeps.ensureMcpLoopbackServer();
     } catch (error) {
       throw new Error(
-        `Bundled MCP is enabled, but the OpenClaw MCP loopback server failed to start: ${String(error)}`,
+        `Bundled MCP is enabled, but the Carapace MCP loopback server failed to start: ${String(error)}`,
         { cause: error },
       );
     }
@@ -1203,7 +1203,7 @@ async function prepareCliRunContextWithinReadFence(
   }
   if (bundleMcpEnabled && !mcpLoopbackRuntime) {
     throw new Error(
-      "Bundled MCP is enabled, but the OpenClaw MCP loopback server did not publish a runtime after startup.",
+      "Bundled MCP is enabled, but the Carapace MCP loopback server did not publish a runtime after startup.",
     );
   }
   const mcpDeliveryCaptureEnabled = bundleMcpEnabled && Boolean(mcpLoopbackRuntime);
@@ -1245,7 +1245,7 @@ async function prepareCliRunContextWithinReadFence(
     : undefined;
   const requestedLoopbackToolsAllow =
     runtimeToolsAllowPolicy ??
-    (rootedExecution ? rootedToolsAllow : params.cliToolAvailability?.openClaw);
+    (rootedExecution ? rootedToolsAllow : params.cliToolAvailability?.carapace);
   const mcpProjectionContext =
     mcpContextBase && requestedLoopbackToolsAllow !== undefined
       ? { ...mcpContextBase, toolsAllow: [...requestedLoopbackToolsAllow] }
@@ -1281,7 +1281,7 @@ async function prepareCliRunContextWithinReadFence(
       (backendResolved.nativeToolMode === "selectable" && !canEnforceExactToolAvailability))
   ) {
     throw new Error(
-      `CLI backend "${backendResolved.id}" cannot enforce before_prompt_build tool restrictions. Use a backend with exact tool availability or remove the hook restriction. OpenClaw did not start the run.`,
+      `CLI backend "${backendResolved.id}" cannot enforce before_prompt_build tool restrictions. Use a backend with exact tool availability or remove the hook restriction. Carapace did not start the run.`,
     );
   }
   if (
@@ -1295,7 +1295,7 @@ async function prepareCliRunContextWithinReadFence(
       ...params,
       cliToolAvailability: {
         native: [],
-        openClaw: hookFilteredProjectedTools.map((tool) => tool.name),
+        carapace: hookFilteredProjectedTools.map((tool) => tool.name),
       },
     };
   }
@@ -1309,14 +1309,14 @@ async function prepareCliRunContextWithinReadFence(
       ...params,
       cliToolAvailability: {
         native: filterToolNames(params.cliToolAvailability.native),
-        openClaw: filterToolNames(params.cliToolAvailability.openClaw),
+        carapace: filterToolNames(params.cliToolAvailability.carapace),
       },
     };
   }
   const projectedTools = params.cliToolAvailability
     ? applyEmbeddedAttemptToolsAllow(
         hookFilteredProjectedTools,
-        params.cliToolAvailability.openClaw,
+        params.cliToolAvailability.carapace,
       )
     : hookFilteredProjectedTools;
   const nodeSkillWorkshop = nodeWorkshopEnabled
@@ -1345,7 +1345,7 @@ async function prepareCliRunContextWithinReadFence(
       return await promptBuildHookRunner.runAuthorizedPromptBuild(
         {
           prompt: params.prompt,
-          messages: await loadOpenClawHistoryMessages(),
+          messages: await loadCarapaceHistoryMessages(),
         },
         promptBuildHookContext,
         {
@@ -1374,7 +1374,7 @@ async function prepareCliRunContextWithinReadFence(
   // The loopback server (scoped by the grant allowlist) becomes the complete
   // tool universe for the run.
   const restrictedLoopbackToolsAllow =
-    params.cliToolAvailability?.openClaw ??
+    params.cliToolAvailability?.carapace ??
     (promptBuildRestrictsTools ? projectedTools.map((tool) => tool.name) : undefined);
   // Native settings can remove tools after argv selection. Only a parent runtime
   // initialization may fill this turn's pending authority; node tools stay local.
@@ -1396,7 +1396,7 @@ async function prepareCliRunContextWithinReadFence(
         JSON.stringify([
           baseExtraSystemPromptHash ?? null,
           params.cliToolAvailability.native.toSorted(),
-          params.cliToolAvailability.openClaw.toSorted(),
+          params.cliToolAvailability.carapace.toSorted(),
         ]),
       )
     : baseExtraSystemPromptHash;
@@ -1546,8 +1546,8 @@ async function prepareCliRunContextWithinReadFence(
             ...rawLoopbackServerConfig,
             mcpServers: {
               ...rawLoopbackServerConfig.mcpServers,
-              openclaw: {
-                ...rawLoopbackServerConfig.mcpServers.openclaw,
+              carapace: {
+                ...rawLoopbackServerConfig.mcpServers.carapace,
                 timeout: CLAUDE_MANAGED_MCP_TIMEOUT_MS,
               },
             },
@@ -1614,8 +1614,8 @@ async function prepareCliRunContextWithinReadFence(
       env:
         mcpLoopbackRuntime && mcpClientGrant
           ? {
-              OPENCLAW_MCP_TOKEN: mcpClientGrant.token,
-              OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+              CARAPACE_MCP_TOKEN: mcpClientGrant.token,
+              CARAPACE_MCP_CLI_CAPTURE_KEY: "",
             }
           : undefined,
       warn: (message) => cliBackendLog.warn(message),
@@ -1922,9 +1922,9 @@ async function prepareCliRunContextWithinReadFence(
         `cli session reset: provider=${params.provider} reason=${invalidatedReason}`,
       );
     }
-    const openClawReferences = skipsTurnPreparation
+    const carapaceReferences = skipsTurnPreparation
       ? { docsPath: null, sourcePath: null }
-      : await prepareDeps.resolveOpenClawReferencePaths({
+      : await prepareDeps.resolveCarapaceReferencePaths({
           workspaceDir,
           argv1: process.argv[1],
           cwd,
@@ -1968,8 +1968,8 @@ async function prepareCliRunContextWithinReadFence(
             runtimeChatType,
             runtimeCapabilities,
             ownerNumbers: params.ownerNumbers,
-            docsPath: openClawReferences.docsPath ?? undefined,
-            sourcePath: openClawReferences.sourcePath ?? undefined,
+            docsPath: carapaceReferences.docsPath ?? undefined,
+            sourcePath: carapaceReferences.sourcePath ?? undefined,
             skillsPrompt: systemPromptSkillsPrompt,
             tools: promptTools,
             contextFiles,
@@ -2107,11 +2107,11 @@ async function prepareCliRunContextWithinReadFence(
       }
     }
     // Node placement keeps this: the history prompt is built from the
-    // gateway-side OpenClaw transcript, so a fresh remote CLI session still
+    // gateway-side Carapace transcript, so a fresh remote CLI session still
     // receives prior conversation context via stdin.
-    const shouldPrepareOpenClawHistoryPrompt =
+    const shouldPrepareCarapaceHistoryPrompt =
       !skipsTurnPreparation && (!reusableCliSessionId || allowRawTranscriptReseed);
-    let openClawHistoryPrompt = shouldPrepareOpenClawHistoryPrompt
+    let carapaceHistoryPrompt = shouldPrepareCarapaceHistoryPrompt
       ? buildCliSessionHistoryPrompt({
           messages: sessionPromptContext?.reseedMessages ?? [],
           prompt: historyPromptCurrentTurn,
@@ -2311,8 +2311,8 @@ async function prepareCliRunContextWithinReadFence(
         promptForHooks = append(promptForHooks ?? preparedParams.prompt);
       } else {
         preparedParams.prompt = append(preparedParams.prompt);
-        if (openClawHistoryPrompt) {
-          openClawHistoryPrompt = append(openClawHistoryPrompt);
+        if (carapaceHistoryPrompt) {
+          carapaceHistoryPrompt = append(carapaceHistoryPrompt);
         }
       }
     }
@@ -2344,7 +2344,7 @@ async function prepareCliRunContextWithinReadFence(
       systemPromptReport,
       claudeSkillsPluginArgs: claudeSkillsPlugin.args,
       ...(nodeSkillWorkshop ? { nodeSkillWorkshop } : {}),
-      ...(openClawHistoryPrompt ? { openClawHistoryPrompt } : {}),
+      ...(carapaceHistoryPrompt ? { carapaceHistoryPrompt } : {}),
       ...(cliHistoryWriter ? { cliHistoryWriter } : {}),
       authEpoch,
       authBindingFingerprint,

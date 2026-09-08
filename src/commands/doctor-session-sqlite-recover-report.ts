@@ -9,15 +9,15 @@ import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
 import { assertSqliteIntegrity } from "../infra/sqlite-integrity.js";
 import { getCanonicalSqliteNamedIndexContracts } from "../infra/sqlite-schema-contract.js";
 import {
-  clearOpenClawAgentDatabaseOpenFailure,
-  migrateOpenClawAgentDatabaseForMaintenance,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabaseOptions,
+  clearCarapaceAgentDatabaseOpenFailure,
+  migrateCarapaceAgentDatabaseForMaintenance,
+  resolveCarapaceAgentSqlitePath,
+  type CarapaceAgentDatabaseOptions,
   withAgentDatabaseMaintenanceLease,
-} from "../state/openclaw-agent-db.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.js";
-import { OPENCLAW_SQLITE_BUSY_TIMEOUT_MS } from "../state/openclaw-state-db.js";
-import type { OpenClawStateLeaseContext } from "../state/openclaw-state-lease.js";
+} from "../state/carapace-agent-db.js";
+import { CARAPACE_AGENT_SCHEMA_SQL } from "../state/carapace-agent-schema.js";
+import { CARAPACE_SQLITE_BUSY_TIMEOUT_MS } from "../state/carapace-state-db.js";
+import type { CarapaceStateLeaseContext } from "../state/carapace-state-lease.js";
 import {
   createSessionSqliteMigrationFailureIssue,
   writeSessionSqliteMigrationFailureReports,
@@ -46,7 +46,7 @@ type SessionSqliteRecoverTargetValidator = (
 ) => Promise<DoctorSessionSqliteTargetReport>;
 
 const CANONICAL_AGENT_INDEX_NAMES = getCanonicalSqliteNamedIndexContracts(
-  OPENCLAW_AGENT_SCHEMA_SQL,
+  CARAPACE_AGENT_SCHEMA_SQL,
 ).map((index) => index.name);
 
 /** Restores the latest failed migration run and validates only selected manifest targets. */
@@ -118,14 +118,14 @@ export async function recoverDoctorSessionSqliteTargets(params: {
 async function recoverCorruptSqliteTargets(
   targets: readonly SessionStoreTarget[],
   env: NodeJS.ProcessEnv,
-  maintenance: OpenClawStateLeaseContext,
+  maintenance: CarapaceStateLeaseContext,
 ): Promise<DoctorSessionSqliteTargetReport[]> {
   const reports: DoctorSessionSqliteTargetReport[] = [];
   for (const target of targets) {
     // A prior repair may have yielded or lost its lease; later targets can rename files.
     maintenance.assertOwned();
     const databaseOptions = resolveTargetSqliteOptions(target, env);
-    const sqlitePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+    const sqlitePath = resolveCarapaceAgentSqlitePath(databaseOptions);
     let recoveryFiles: ReturnType<typeof inspectSqliteRecoveryFiles>;
     try {
       recoveryFiles = inspectSqliteRecoveryFiles(sqlitePath);
@@ -175,12 +175,12 @@ async function recoverCorruptSqliteTargets(
 }
 
 async function repairCanonicalIndexesForRecovery(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: CarapaceAgentDatabaseOptions,
   sqlitePath: string,
-  maintenance: OpenClawStateLeaseContext,
+  maintenance: CarapaceStateLeaseContext,
 ): Promise<{ ok: true } | { error: unknown; ok: false }> {
   try {
-    await migrateOpenClawAgentDatabaseForMaintenance(
+    await migrateCarapaceAgentDatabaseForMaintenance(
       { agentId: databaseOptions.agentId, pathname: sqlitePath },
       maintenance,
     );
@@ -190,7 +190,7 @@ async function repairCanonicalIndexesForRecovery(
     if (!inspection.ok) {
       return inspection;
     }
-    if (!clearOpenClawAgentDatabaseOpenFailure(sqlitePath, { env: databaseOptions.env })) {
+    if (!clearCarapaceAgentDatabaseOpenFailure(sqlitePath, { env: databaseOptions.env })) {
       throw new Error(
         `Repaired canonical SQLite indexes, but could not clear the quarantine for ${sqlitePath}.`,
       );
@@ -211,7 +211,7 @@ function inspectSqliteForRecovery(
   let database: DatabaseSync | undefined;
   let inspectionError: unknown;
   try {
-    inspectionDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sqlite-recovery-"));
+    inspectionDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-sqlite-recovery-"));
     const inspectionPath = path.join(inspectionDir, path.basename(sqlitePath));
     for (const sourcePath of sourcePaths) {
       const suffix = sourcePath.slice(sqlitePath.length);
@@ -222,7 +222,7 @@ function inspectSqliteForRecovery(
     // Writable inspection of the disposable copy lets SQLite roll back a hot
     // journal without changing the original forensic file set.
     database = openNodeSqliteDatabase(inspectionPath);
-    database.exec(`PRAGMA busy_timeout = ${OPENCLAW_SQLITE_BUSY_TIMEOUT_MS};`);
+    database.exec(`PRAGMA busy_timeout = ${CARAPACE_SQLITE_BUSY_TIMEOUT_MS};`);
     database.exec("PRAGMA trusted_schema = OFF;");
     assertSqliteIntegrity(database, inspectionPath);
   } catch (error) {

@@ -1,7 +1,7 @@
 // Remote skill runtime helpers send skill refresh and snapshot state across remotes.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { NodeRegistry, NodeSession } from "../../gateway/node-registry.js";
 import { updatePairedNodeBins } from "../../infra/device-pairing-node-facts.js";
 import { listNodePairing } from "../../infra/device-pairing-node.js";
@@ -426,7 +426,7 @@ export async function refreshRemoteNodeBins(params: {
   platform?: string;
   deviceFamily?: string;
   commands?: string[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs?: number;
   readinessDelayMs?: number;
 }): Promise<void> {
@@ -470,7 +470,7 @@ async function refreshRemoteNodeBinsUncoalesced(params: {
   platform?: string;
   deviceFamily?: string;
   commands?: string[];
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   timeoutMs?: number;
   readinessDelayMs?: number;
 }) {
@@ -716,7 +716,7 @@ export function getRemoteSkillEligibility(options?: {
   };
 }
 
-export async function refreshRemoteBinsForConnectedNodes(cfg: OpenClawConfig) {
+export async function refreshRemoteBinsForConnectedNodes(cfg: CarapaceConfig) {
   if (!remoteRegistry) {
     return;
   }

@@ -3,8 +3,8 @@ import crypto from "node:crypto";
 import {
   hasNonEmptyString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+} from "@carapace/normalization-core/string-coerce";
+import { hasOutboundReplyContent } from "carapace/plugin-sdk/reply-payload";
 import type { ChatRunStartupPhase } from "../../../packages/gateway-protocol/src/index.js";
 import type {
   AdmittedRunContext,

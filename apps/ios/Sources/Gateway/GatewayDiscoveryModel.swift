@@ -1,7 +1,7 @@
 import Foundation
 import Network
 import Observation
-import OpenClawKit
+import CarapaceKit
 
 @MainActor
 @Observable
@@ -67,7 +67,7 @@ final class GatewayDiscoveryModel {
         self.appendDebugLog("start()")
 
         self.browserSession.start(
-            queueLabelPrefix: "ai.openclawfoundation.app.gateway-discovery",
+            queueLabelPrefix: "ai.carapacefoundation.app.gateway-discovery",
             onState: { [weak self] domain, state, status in
                 guard let self else { return }
                 self.statusText = status

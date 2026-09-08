@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: OpenClaw branch, tag, or SHA to run
+        description: Carapace branch, tag, or SHA to run
         required: true
         default: main
         type: string
@@ -33,7 +33,7 @@ on:
   workflow_call:
     inputs:
       ref:
-        description: OpenClaw branch, tag, or SHA to run
+        description: Carapace branch, tag, or SHA to run
         required: true
         type: string
       trusted_ref:
@@ -59,10 +59,10 @@ on:
       OPENAI_API_KEY:
         description: OpenAI API key used by live QA profile scenarios
         required: true
-      OPENCLAW_QA_CONVEX_SITE_URL:
+      CARAPACE_QA_CONVEX_SITE_URL:
         description: Optional Convex credential broker URL supplied by qa-live-shared
         required: false
-      OPENCLAW_QA_CONVEX_SECRET_CI:
+      CARAPACE_QA_CONVEX_SECRET_CI:
         description: Optional Convex CI credential supplied by qa-live-shared
         required: false
     outputs:
@@ -79,7 +79,7 @@ on:
         description: Whether the QA profile command exited successfully
         value: ${{ jobs.aggregate_qa_profile.outputs.qa_passed }}
       target_sha:
-        description: Resolved OpenClaw SHA that produced the evidence
+        description: Resolved Carapace SHA that produced the evidence
         value: ${{ jobs.aggregate_qa_profile.outputs.target_sha }}
       trusted_reason:
         description: Trust reason accepted before the secret-bearing QA job
@@ -98,10 +98,10 @@ concurrency:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_VERSION: "24.x"
-  OPENCLAW_BUILD_PRIVATE_QA: "1"
-  OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1"
-  OPENCLAW_QA_REDACT_PUBLIC_METADATA: "1"
-  OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
+  CARAPACE_BUILD_PRIVATE_QA: "1"
+  CARAPACE_ENABLE_PRIVATE_QA_CLI: "1"
+  CARAPACE_QA_REDACT_PUBLIC_METADATA: "1"
+  CARAPACE_QA_TRANSPORT_READY_TIMEOUT_MS: "180000"
 
 jobs:
   authorize_actor:
@@ -121,13 +121,13 @@ jobs:
             const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
             const callerWorkflowRef = process.env.CALLER_WORKFLOW_REF ?? "";
             const calledWorkflowRef =
-              "openclaw/openclaw/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
+              "carapace/carapace/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
             const trustedMainCaller =
               callerWorkflowRef !== calledWorkflowRef &&
-              /^openclaw\/openclaw\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
+              /^carapace\/carapace\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
                 callerWorkflowRef,
               ) &&
-              job.workflow_repository === "openclaw/openclaw" &&
+              job.workflow_repository === "carapace/carapace" &&
               job.workflow_ref === calledWorkflowRef;
             if (context.actor === "github-actions[bot]") {
               core.setOutput("authorized", trustedMainCaller ? "true" : "false");
@@ -196,7 +196,7 @@ jobs:
           NODE
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout selected ref
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -309,13 +309,13 @@ jobs:
             const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
             const callerWorkflowRef = process.env.CALLER_WORKFLOW_REF ?? "";
             const calledWorkflowRef =
-              "openclaw/openclaw/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
+              "carapace/carapace/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
             const trustedMainCaller =
               callerWorkflowRef !== calledWorkflowRef &&
-              /^openclaw\/openclaw\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
+              /^carapace\/carapace\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
                 callerWorkflowRef,
               ) &&
-              job.workflow_repository === "openclaw/openclaw" &&
+              job.workflow_repository === "carapace/carapace" &&
               job.workflow_ref === calledWorkflowRef;
             if (context.actor === "github-actions[bot]") {
               if (!trustedMainCaller) {
@@ -337,12 +337,12 @@ jobs:
             }
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout trusted QA harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/openclaw
+          repository: carapace/carapace
           ref: main
           fetch-depth: 1
           persist-credentials: false
@@ -392,7 +392,7 @@ jobs:
         working-directory: selected
         run: |
           set -euo pipefail
-          selected_home="${RUNNER_TEMP}/openclaw-qa-selected-home"
+          selected_home="${RUNNER_TEMP}/carapace-qa-selected-home"
           mkdir -p "$selected_home"
           # Native pnpm reads this policy from env; the config flag also covers older targets.
           env -i \
@@ -405,7 +405,7 @@ jobs:
             PNPM_CONFIG_PACKAGE_IMPORT_METHOD=copy \
             RUNNER_TEMP="$RUNNER_TEMP" \
             pnpm install \
-              --store-dir "$RUNNER_TEMP/openclaw-qa-selected-pnpm-store" \
+              --store-dir "$RUNNER_TEMP/carapace-qa-selected-pnpm-store" \
               --prefer-offline \
               --frozen-lockfile \
               --config.ignore-scripts=false \
@@ -477,13 +477,13 @@ jobs:
             const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
             const callerWorkflowRef = process.env.CALLER_WORKFLOW_REF ?? "";
             const calledWorkflowRef =
-              "openclaw/openclaw/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
+              "carapace/carapace/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
             const trustedMainCaller =
               callerWorkflowRef !== calledWorkflowRef &&
-              /^openclaw\/openclaw\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
+              /^carapace\/carapace\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
                 callerWorkflowRef,
               ) &&
-              job.workflow_repository === "openclaw/openclaw" &&
+              job.workflow_repository === "carapace/carapace" &&
               job.workflow_ref === calledWorkflowRef;
             if (context.actor === "github-actions[bot]") {
               if (!trustedMainCaller) {
@@ -505,12 +505,12 @@ jobs:
             }
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout trusted QA harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/openclaw
+          repository: carapace/carapace
           ref: main
           fetch-depth: 1
           persist-credentials: false
@@ -560,7 +560,7 @@ jobs:
         working-directory: selected
         run: |
           set -euo pipefail
-          selected_home="${RUNNER_TEMP}/openclaw-qa-selected-home"
+          selected_home="${RUNNER_TEMP}/carapace-qa-selected-home"
           mkdir -p "$selected_home"
           env -i \
             CI=true \
@@ -572,7 +572,7 @@ jobs:
             PNPM_CONFIG_PACKAGE_IMPORT_METHOD=copy \
             RUNNER_TEMP="$RUNNER_TEMP" \
             pnpm install \
-              --store-dir "$RUNNER_TEMP/openclaw-qa-selected-pnpm-store" \
+              --store-dir "$RUNNER_TEMP/carapace-qa-selected-pnpm-store" \
               --prefer-offline \
               --frozen-lockfile \
               --config.ignore-scripts=false \
@@ -598,12 +598,12 @@ jobs:
       - name: Require live profile credentials
         if: needs.plan_qa_profile.outputs.channel_driver == 'live'
         env:
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
         run: |
           set -euo pipefail
-          [[ -n "${OPENCLAW_QA_CONVEX_SITE_URL:-}" ]] || { echo "Missing required qa-live-shared secret: OPENCLAW_QA_CONVEX_SITE_URL" >&2; exit 1; }
-          [[ -n "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ]] || { echo "Missing required qa-live-shared secret: OPENCLAW_QA_CONVEX_SECRET_CI" >&2; exit 1; }
+          [[ -n "${CARAPACE_QA_CONVEX_SITE_URL:-}" ]] || { echo "Missing required qa-live-shared secret: CARAPACE_QA_CONVEX_SITE_URL" >&2; exit 1; }
+          [[ -n "${CARAPACE_QA_CONVEX_SECRET_CI:-}" ]] || { echo "Missing required qa-live-shared secret: CARAPACE_QA_CONVEX_SECRET_CI" >&2; exit 1; }
 
       - name: Build private QA runtime
         env:
@@ -629,12 +629,12 @@ jobs:
           TARGET_SHA: ${{ needs.validate_selected_ref.outputs.selected_revision }}
           PROTOCOL_SINCE_BASE_SHA: ${{ needs.validate_selected_ref.outputs.protocol_base_revision }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENCLAW_QA_CONVEX_SITE_URL: ${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}
-          OPENCLAW_QA_CONVEX_SECRET_CI: ${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}
-          OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "120000"
-          OPENCLAW_QA_CREDENTIAL_ROLE: ci
-          OPENCLAW_QA_CREDENTIAL_SOURCE: convex
-          OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF: "1"
+          CARAPACE_QA_CONVEX_SITE_URL: ${{ secrets.CARAPACE_QA_CONVEX_SITE_URL }}
+          CARAPACE_QA_CONVEX_SECRET_CI: ${{ secrets.CARAPACE_QA_CONVEX_SECRET_CI }}
+          CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS: "120000"
+          CARAPACE_QA_CREDENTIAL_ROLE: ci
+          CARAPACE_QA_CREDENTIAL_SOURCE: convex
+          CARAPACE_QA_ALLOW_UPDATE_RUN_SELF: "1"
         working-directory: selected
         run: |
           set -euo pipefail
@@ -674,7 +674,7 @@ jobs:
           qa_exit_code=0
           LC_ALL=C timeout --verbose --signal=TERM --kill-after=30s 110m \
             "${timeout_child_env[@]}" bash -c 'exec "$@" 2>&3' bash \
-            pnpm openclaw qa run \
+            pnpm carapace qa run \
               --repo-root . \
               --qa-profile "$QA_PROFILE" \
               --concurrency 3 \
@@ -787,13 +787,13 @@ jobs:
             const job = JSON.parse(process.env.JOB_CONTEXT ?? "{}");
             const callerWorkflowRef = process.env.CALLER_WORKFLOW_REF ?? "";
             const calledWorkflowRef =
-              "openclaw/openclaw/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
+              "carapace/carapace/.github/workflows/qa-profile-evidence.yml@refs/heads/main";
             const trustedMainCaller =
               callerWorkflowRef !== calledWorkflowRef &&
-              /^openclaw\/openclaw\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
+              /^carapace\/carapace\/.github\/workflows\/[A-Za-z0-9_.-]+\.yml@refs\/heads\/main$/u.test(
                 callerWorkflowRef,
               ) &&
-              job.workflow_repository === "openclaw/openclaw" &&
+              job.workflow_repository === "carapace/carapace" &&
               job.workflow_ref === calledWorkflowRef;
             if (context.actor === "github-actions[bot]") {
               if (!trustedMainCaller) {
@@ -815,12 +815,12 @@ jobs:
             }
 
       - name: Prepare Git owner
-        uses: openclaw/openclaw/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
+        uses: carapace/carapace/.github/actions/git-owner@dd4528b6393e7d00063067a080ca7241b48ce475
 
       - name: Checkout trusted QA harness
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: openclaw/openclaw
+          repository: carapace/carapace
           ref: main
           fetch-depth: 1
           persist-credentials: false
@@ -870,7 +870,7 @@ jobs:
         working-directory: selected
         run: |
           set -euo pipefail
-          selected_home="${RUNNER_TEMP}/openclaw-qa-selected-home"
+          selected_home="${RUNNER_TEMP}/carapace-qa-selected-home"
           mkdir -p "$selected_home"
           env -i \
             CI=true \
@@ -882,7 +882,7 @@ jobs:
             PNPM_CONFIG_PACKAGE_IMPORT_METHOD=copy \
             RUNNER_TEMP="$RUNNER_TEMP" \
             pnpm install \
-              --store-dir "$RUNNER_TEMP/openclaw-qa-selected-pnpm-store" \
+              --store-dir "$RUNNER_TEMP/carapace-qa-selected-pnpm-store" \
               --prefer-offline \
               --frozen-lockfile \
               --config.ignore-scripts=false \

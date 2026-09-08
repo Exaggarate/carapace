@@ -17,14 +17,14 @@ describe("loadSkills", () => {
   it.each(["user", "project", "path"] as const)(
     "preserves %s session provenance and its untrimmed fallback name beside local loading",
     async (source) => {
-      const root = tempDirs.make("openclaw-skill-materialization-");
+      const root = tempDirs.make("carapace-skill-materialization-");
       const agentDir = path.join(root, "agent");
       const cwd = path.join(root, "project");
       const skillRoot =
         source === "user"
           ? path.join(agentDir, "skills")
           : source === "project"
-            ? path.join(cwd, ".openclaw", "skills")
+            ? path.join(cwd, ".carapace", "skills")
             : path.join(root, "selected");
       const skillDir = path.join(skillRoot, " padded-name");
       const filePath = path.join(skillDir, "SKILL.md");
@@ -89,7 +89,7 @@ describe("loadSkills", () => {
   );
 
   it("reports directory scan failures as diagnostics", async () => {
-    const tempDir = tempDirs.make("openclaw-skill-scan-");
+    const tempDir = tempDirs.make("carapace-skill-scan-");
     const regularFile = path.join(tempDir, "not-a-directory");
     await fs.writeFile(regularFile, "not a skill directory");
 
@@ -102,7 +102,7 @@ describe("loadSkills", () => {
   });
 
   it("does not load dash-prefixed Markdown as frontmatter", async () => {
-    const tempDir = tempDirs.make("openclaw-skill-scan-");
+    const tempDir = tempDirs.make("carapace-skill-scan-");
     const skillDir = path.join(tempDir, "dash-prefix");
     await fs.mkdir(skillDir);
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -123,7 +123,7 @@ describe("loadSkills", () => {
   });
 
   it("loads skills with JSON5-style trailing commas in metadata frontmatter", async () => {
-    const tempDir = tempDirs.make("openclaw-skill-scan-");
+    const tempDir = tempDirs.make("carapace-skill-scan-");
     const skillDir = path.join(tempDir, "json5-metadata");
     await fs.mkdir(skillDir);
     const skillFile = path.join(skillDir, "SKILL.md");
@@ -134,7 +134,7 @@ name: json5-metadata
 description: Skill with JSON5-style metadata.
 metadata:
   {
-    "openclaw":
+    "carapace":
       {
         "requires":
           {
@@ -166,7 +166,7 @@ disable-model-invocation: true
   });
 
   it("reports malformed frontmatter by file and keeps loading sibling skills", async () => {
-    const tempDir = tempDirs.make("openclaw-skill-scan-");
+    const tempDir = tempDirs.make("carapace-skill-scan-");
     const brokenDir = path.join(tempDir, "broken");
     const validDir = path.join(tempDir, "valid");
     await fs.mkdir(brokenDir);
@@ -204,9 +204,9 @@ description: Valid sibling
   });
 
   it("keeps case-variant Windows project skill paths in project scope", async () => {
-    const root = tempDirs.make("openclaw-skill-scan-");
+    const root = tempDirs.make("carapace-skill-scan-");
     const projectDir = path.join(root, "project");
-    const skillDir = path.join(projectDir, ".openclaw", "skills", "project-skill");
+    const skillDir = path.join(projectDir, ".carapace", "skills", "project-skill");
     const skillFile = path.join(skillDir, "SKILL.md");
     await fs.mkdir(skillDir, { recursive: true });
     await fs.writeFile(skillFile, "---\nname: project-skill\ndescription: Project skill.\n---\n");

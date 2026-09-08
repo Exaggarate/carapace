@@ -52,7 +52,7 @@ Client replies with `connect`:
     "permissions": {},
     "auth": { "token": "…" },
     "locale": "en-US",
-    "userAgent": "openclaw-cli/1.2.3",
+    "userAgent": "carapace-cli/1.2.3",
     "device": {
       "id": "device_fingerprint",
       "publicKey": "…",
@@ -147,7 +147,7 @@ hello snapshot and discard it when that connection closes. If the managed Serve
 route exits or is replaced, the Gateway closes connections that received its
 identity URL with code `1012`; reconnect to discover the current route.
 
-`openclaw.setup.verify` additionally checks the Gateway's current application and
+`carapace.setup.verify` additionally checks the Gateway's current application and
 restart state before and after its live inference probe. It returns
 `{ ok: false, status: "unavailable", error }` while saved settings are not active,
 restart work remains, or the verified runtime changes during the probe. Clients
@@ -215,7 +215,7 @@ existing token's role and scopes before any local-backend pairing exception.
 ### Worker role and closed protocol
 
 Workers use a closed protocol through either the public
-`/__openclaw__/worker` WebSocket path on the main TLS endpoint or the dedicated
+`/__carapace__/worker` WebSocket path on the main TLS endpoint or the dedicated
 loopback ingress reached through the gateway-owned, host-key-pinned SSH tunnel.
 The route selects worker mode before reading frames, so it never dispatches
 general auth, node events, operator RPCs, or plugin methods. Public admission
@@ -275,7 +275,7 @@ Client capabilities describe the connected client, not authorization. Agent tool
     "permissions": { "camera.capture": true, "screen.record": false },
     "auth": { "token": "…" },
     "locale": "en-US",
-    "userAgent": "openclaw-ios/1.2.3",
+    "userAgent": "carapace-ios/1.2.3",
     "device": {
       "id": "device_fingerprint",
       "publicKey": "…",

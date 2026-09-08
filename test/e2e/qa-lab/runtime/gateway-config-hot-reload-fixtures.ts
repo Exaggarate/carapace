@@ -66,7 +66,7 @@ export async function connectHotReloadClient(
       env: gateway.runtimeEnv,
       deviceIdentity: options.identity ?? null,
       role: node ? "node" : "operator",
-      clientName: node ? "openclaw-ios" : "gateway-client",
+      clientName: node ? "carapace-ios" : "gateway-client",
       clientDisplayName: node ? "Hot reload synthetic node" : "Hot reload proof",
       clientVersion: "1.0.0",
       platform: node ? "iOS" : process.platform,
@@ -164,7 +164,7 @@ export async function startHotReloadUpstreams(mockBaseUrl: string) {
         }
         relayRequests.push({
           route: url.pathname,
-          signed: Boolean(req.headers["x-openclaw-gateway-signature"]),
+          signed: Boolean(req.headers["x-carapace-gateway-signature"]),
         });
         if (relayDelayMs) {
           await delay(relayDelayMs);

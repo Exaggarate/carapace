@@ -22,7 +22,7 @@ type TempWorkspace = Omit<FsSafeTempWorkspace, "cleanup"> & {
 };
 
 async function observeTempWorkspace(params: { cleanupFailure?: Error } = {}) {
-  const root = await tempDirs.make("openclaw-clawhub-archive-");
+  const root = await tempDirs.make("carapace-clawhub-archive-");
   const createWorkspace = privateTempWorkspace.tempWorkspace;
   let workspace: TempWorkspace | undefined;
   vi.spyOn(privateTempWorkspace, "tempWorkspace").mockImplementation(async (options) => {

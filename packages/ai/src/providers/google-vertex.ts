@@ -4,7 +4,7 @@ import {
   type HttpOptions,
   ResourceScope,
 } from "@google/genai";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { getAiTransportHost, resolveAiTransportHeaderSentinels } from "../host.js";
 // Google Vertex provider wires Google shared streaming through Vertex credentials.
 import { createAssistantOutput } from "../transports/assistant-output.js";

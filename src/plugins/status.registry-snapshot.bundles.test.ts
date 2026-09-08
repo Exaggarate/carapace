@@ -11,7 +11,7 @@ import { createBundleInstallFixtureFactory } from "./test-helpers/install-fixtur
 const tempDirs: string[] = [];
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugin-status", tempDirs);
+  return makeTrackedTempDir("carapace-plugin-status", tempDirs);
 }
 
 const setupBundleInstallFixture = createBundleInstallFixtureFactory(makeTempDir);
@@ -58,7 +58,7 @@ describe("buildPluginRegistrySnapshotReport", () => {
         workspaceDir,
         env: {
           ...createColdPluginHermeticEnv(workspaceDir, { bundledPluginsDir: makeTempDir() }),
-          OPENCLAW_STATE_DIR: stateDir,
+          CARAPACE_STATE_DIR: stateDir,
         },
       };
       if (registrySource === "persisted") {

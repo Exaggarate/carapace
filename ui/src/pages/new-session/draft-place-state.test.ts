@@ -11,8 +11,8 @@ import type { NewSessionPreference } from "./preferences.ts";
 import { TestReactiveControllerHost } from "./reactive-controller-host.test-support.ts";
 
 const REMOTE_PROJECT = {
-  identity: "openclaw/openclaw",
-  cloneUrl: "https://github.com/openclaw/openclaw.git",
+  identity: "carapace/carapace",
+  cloneUrl: "https://github.com/Exaggarate/carapace.git",
 };
 
 function createRepositoryFixture(
@@ -492,7 +492,7 @@ describe("DraftPlaceState cloud machine selection", () => {
     );
     const resolveRuntime = vi.spyOn(state.modelControl, "resolveAgentRuntime");
     resolveRuntime.mockReturnValue({
-      id: "openclaw",
+      id: "carapace",
       cloudPlacementSupported: true,
       cloudPlacementExecutionMode: "worker-turn",
       source: "model",

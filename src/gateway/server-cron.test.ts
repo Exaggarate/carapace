@@ -4,12 +4,12 @@ import os from "node:os";
 import path from "node:path";
 // Gateway cron tests cover isolated agent turns, heartbeat wakeups, completion
 // delivery, lifecycle cleanup, hook emission, and SSRF-guarded webhooks.
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { AgentDeletionCommitUncertainError } from "../agents/agent-lifecycle-registry.js";
 import type { CliDeps } from "../cli/deps.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { retainLegacyDefaultAgentId } from "../config/legacy.default-agent-owner.js";
 import { resolveSkillCollectionReviewMonitorSpecs } from "../cron/skill-collection-review-monitor.js";
 import { resolveHeartbeatSession } from "../infra/heartbeat-runner-session.js";
@@ -262,15 +262,15 @@ function buildGatewayCronService(params: Parameters<typeof buildGatewayCronServi
   }
   const env = {
     ...process.env,
-    OPENCLAW_SKIP_CRON: "0",
-    OPENCLAW_STATE_DIR: path.dirname(legacyStore),
+    CARAPACE_SKIP_CRON: "0",
+    CARAPACE_STATE_DIR: path.dirname(legacyStore),
   };
   // These fixtures predate the config-to-SQLite move; seed the canonical machine-state owner.
   writeConfigMachineState("cron.store", legacyStore, { env });
   return buildGatewayCronServiceRuntime({ ...params, env });
 }
 
-function createCronConfig(name: string): OpenClawConfig {
+function createCronConfig(name: string): CarapaceConfig {
   const tmpDir = path.join(os.tmpdir(), `${name}-${Date.now()}`);
   return {
     session: {
@@ -279,14 +279,14 @@ function createCronConfig(name: string): OpenClawConfig {
     cron: {
       store: path.join(tmpDir, "cron.json"),
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 type CronServiceOverrides = Partial<
   Omit<Parameters<typeof buildGatewayCronService>[0], "cfg" | "deps">
 >;
 
-function createCronService(cfg: OpenClawConfig, overrides: CronServiceOverrides = {}) {
+function createCronService(cfg: CarapaceConfig, overrides: CronServiceOverrides = {}) {
   return buildGatewayCronService({
     cfg,
     deps: {} as CliDeps,
@@ -295,7 +295,7 @@ function createCronService(cfg: OpenClawConfig, overrides: CronServiceOverrides 
   });
 }
 
-function loadCronService(cfg: OpenClawConfig, overrides: CronServiceOverrides = {}) {
+function loadCronService(cfg: CarapaceConfig, overrides: CronServiceOverrides = {}) {
   loadConfigMock.mockReturnValue(cfg);
   return createCronService(cfg, overrides);
 }
@@ -494,7 +494,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-accepted-replacement"),
       agents: { entries: { main: { heartbeat: { every: "1h" } } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const state = loadCronService(cfg);
     const inventoryStarted = createDeferred();
     const releaseInventory = createDeferred();
@@ -532,7 +532,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-skill-review-delivery"),
       skills: { workshop: { autonomous: { mode: "auto" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const state = loadCronService(cfg);
     const [spec] = resolveSkillCollectionReviewMonitorSpecs(cfg, { schedulerSeed: "test-seed" });
 
@@ -568,7 +568,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-skill-review-forwarding"),
       skills: { workshop: { autonomous: { mode: "auto" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const state = loadCronService(cfg);
     const abortController = new AbortController();
     const onExecutionStarted = vi.fn();
@@ -620,11 +620,11 @@ describe("buildGatewayCronService", () => {
       const autoConfig = {
         ...createCronConfig("server-cron-monitor-reconcile-auto"),
         skills: { workshop: { autonomous: { mode: "auto" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const offConfig = {
         ...autoConfig,
         skills: { workshop: { autonomous: { mode: "off" } } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const state = loadCronService(autoConfig);
 
       try {
@@ -679,12 +679,12 @@ describe("buildGatewayCronService", () => {
         entries: { a: {}, b: {} },
       },
       skills: { workshop: { autonomous: { mode: "off" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const replacement = {
       ...cfg,
       agents: { ...cfg.agents, defaults: { heartbeat: { every: "2h" } } },
       skills: { workshop: { autonomous: { mode: "auto" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const state = loadCronService(cfg);
     const addJob = state.cron.add.bind(state.cron);
     let checkpoint: Promise<void> | undefined;
@@ -759,7 +759,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-monitor-partial-failure"),
       skills: { workshop: { autonomous: { mode: "auto" } } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const state = loadCronService(cfg);
     const listJobs = state.cron.list.bind(state.cron);
     const inventory = vi
@@ -849,7 +849,7 @@ describe("buildGatewayCronService", () => {
     const opsCfg = {
       cron: { store },
       agents: { entries: { ops: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadConfigMock.mockReturnValue(opsCfg);
     const initial = createCronService(opsCfg);
     await initial.cron.start();
@@ -904,7 +904,7 @@ describe("buildGatewayCronService", () => {
           defaults: { systemAgent: { agentId: "main" } },
           entries: { main: {}, helper: {} },
         },
-      } satisfies OpenClawConfig);
+      } satisfies CarapaceConfig);
 
       await vi.advanceTimersByTimeAsync(60_000);
 
@@ -929,7 +929,7 @@ describe("buildGatewayCronService", () => {
           ownership: "explicit",
           entries: { ops: {}, research: {} },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       "ops",
     );
     loadConfigMock.mockReturnValue(cfg);
@@ -997,7 +997,7 @@ describe("buildGatewayCronService", () => {
   });
 
   it("stops on-exit watcher children when the direct cron service stops", async () => {
-    vi.stubEnv("OPENCLAW_SKIP_CRON", "0");
+    vi.stubEnv("CARAPACE_SKIP_CRON", "0");
     const cancelRun = vi.fn();
     const cancelScope = vi.fn();
     const spawn = vi.fn(async () => ({
@@ -2041,7 +2041,7 @@ describe("buildGatewayCronService", () => {
   it.each(["command", "script"] as const)(
     "runs the full retry schedule for typed adapter-resolution failure before delivering one-shot %s cron output",
     async (payloadKind) => {
-      vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+      vi.stubEnv("CARAPACE_TEST_FAST", "1");
       const cfg = createCronConfig(`server-cron-${payloadKind}-announce-retry`);
       cfg.cron = { ...cfg.cron, triggers: { enabled: true } };
       loadConfigMock.mockReturnValue(cfg);
@@ -2211,7 +2211,7 @@ describe("buildGatewayCronService", () => {
   ] as const)(
     "never resends accepted $payloadKind output after a $errorKind partial-delivery failure",
     async ({ payloadKind, errorKind }) => {
-      vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+      vi.stubEnv("CARAPACE_TEST_FAST", "1");
       const cfg = createCronConfig(`server-cron-${payloadKind}-${errorKind}-partial`);
       cfg.cron = { ...cfg.cron, triggers: { enabled: true } };
       loadConfigMock.mockReturnValue(cfg);
@@ -2288,7 +2288,7 @@ describe("buildGatewayCronService", () => {
       }),
     },
   ])("does not duplicate a command announcement after $name", async ({ error }) => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     const cfg = createCronConfig("server-cron-command-no-unsafe-retry");
     loadConfigMock.mockReturnValue(cfg);
     sendCronAnnouncePayloadStrictMock.mockRejectedValueOnce(error);
@@ -2320,7 +2320,7 @@ describe("buildGatewayCronService", () => {
   });
 
   it("does not retry a command announcement after its cron run is cancelled", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
     const cfg = createCronConfig("server-cron-command-cancelled-retry");
     loadConfigMock.mockReturnValue(cfg);
     let deliverySignal: AbortSignal | undefined;
@@ -2986,7 +2986,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-global-queued"),
       session: { mainKey: "main", scope: "global" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const job = await addSystemEventJob(state, "global-queued", "hello global", {
@@ -3017,7 +3017,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       ...createCronConfig("server-cron-global-now"),
       session: { mainKey: "main", scope: "global" },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const job = await addSystemEventJob(state, "global-now", "hello now", {
@@ -3132,7 +3132,7 @@ describe("buildGatewayCronService", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const cronDeps = getCronDeps(state);
@@ -3181,7 +3181,7 @@ describe("buildGatewayCronService", () => {
           heartbeat: { every: "1h" },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       expect(
@@ -3213,7 +3213,7 @@ describe("buildGatewayCronService", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const job = await addSystemEventJob(state, "queued-heartbeat-route", "hello", {
@@ -3249,7 +3249,7 @@ describe("buildGatewayCronService", () => {
           ops: { model: "test/ops" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const cronDeps = getCronDeps(state);
@@ -3287,7 +3287,7 @@ describe("buildGatewayCronService", () => {
           primary: { default: true },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const cronDeps = getCronDeps(state);
@@ -3376,7 +3376,7 @@ describe("buildGatewayCronService", () => {
           ops: { model: "test/ops" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const cronDeps = getCronDeps(state);
@@ -3489,7 +3489,7 @@ describe("buildGatewayCronService", () => {
           ops: { model: "test/ops" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const sessionKey = "agent:ops:cron:nightly:run:abc-123";
@@ -3533,7 +3533,7 @@ describe("buildGatewayCronService", () => {
         defaults: { systemAgent: { agentId: "ops" } },
         entries: { main: { default: true }, ops: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       expect(state.cron.wake({ mode: "now", text: "system wake" })).toEqual({ ok: true });
@@ -3708,7 +3708,7 @@ describe("buildGatewayCronService", () => {
     const reloadedCfg = {
       ...startupCfg,
       agents: { ...startupCfg.agents, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(startupCfg);
     try {
       const job = await addAgentTurnJob(state, "isolated-subagent-workspace", "read SOW.md", {
@@ -3737,7 +3737,7 @@ describe("buildGatewayCronService", () => {
         defaults: { workspace: path.join(tmpDir, "workspace") },
         entries: { main: { default: true }, yinze: {}, other: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     const addJob = async (agentId: string, name: string) =>
       await addAgentTurnJob(state, name, name, {
@@ -3772,7 +3772,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       cron: { store: path.join(tmpDir, "cron.json") },
       agents: { entries: { main: { default: true }, yinze: {}, other: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       for (const [agentId, name] of [
@@ -3803,11 +3803,11 @@ describe("buildGatewayCronService", () => {
     const startupCfg = {
       cron: { store: path.join(tmpDir, "cron.json") },
       agents: { entries: { yinze: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const runtimeCfg = {
       ...startupCfg,
       agents: { entries: { other: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(startupCfg);
     try {
       await addAgentTurnJob(state, "follows-runtime-default", "keep", {
@@ -3840,7 +3840,7 @@ describe("buildGatewayCronService", () => {
     const cfg = {
       cron: { store: path.join(tmpDir, "cron.json") },
       agents: { entries: { main: { default: true }, yinze: {} } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     try {
       const job = await addAgentTurnJob(state, "fenced-job", "must not run", {
@@ -3869,11 +3869,11 @@ describe("buildGatewayCronService", () => {
         defaults: { workspace: path.join(tmpDir, "workspace") },
         entries: { main: { default: true }, yinze: {} },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const deletedCfg = {
       ...cfg,
       agents: { ...cfg.agents, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = loadCronService(cfg);
     const commitStarted = createDeferred();
     const releaseCommit = createDeferred();
@@ -3939,7 +3939,7 @@ describe("buildGatewayCronService", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const reloadedCfg = {
       session: {
         mainKey: "main",
@@ -3957,7 +3957,7 @@ describe("buildGatewayCronService", () => {
         },
         entries: { main: { default: true } },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     loadConfigMock.mockReturnValue(reloadedCfg);
 
     const state = createCronService(startupCfg);

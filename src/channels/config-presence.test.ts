@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { isChannelConfigMetadataKey } from "./config-metadata.js";
 import {
   hasMeaningfulChannelConfig,
@@ -23,18 +23,18 @@ beforeEach(() => {
   ]);
   vi.spyOn(persistedAuthState, "hasBundledChannelPersistedAuthState").mockImplementation(
     ({ channelId, env }) =>
-      channelId === "matrix" && Boolean(env?.OPENCLAW_STATE_DIR?.includes("persisted-matrix")),
+      channelId === "matrix" && Boolean(env?.CARAPACE_STATE_DIR?.includes("persisted-matrix")),
   );
 });
 
 function makeTempStateDir() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-config-presence-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-channel-config-presence-"));
   tempDirs.push(dir);
   return dir;
 }
 
 function expectPotentialConfiguredChannelCase(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   expectedIds: string[];
   options?: Parameters<typeof listPotentialConfiguredChannelIds>[2];
@@ -71,7 +71,7 @@ describe("config presence", () => {
         "  ": { token: "dummy" },
         " matrix ": { homeserver: "https://matrix.example.org" },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(isChannelConfigMetadataKey(" modelByChannel ")).toBe(true);
     expectPotentialConfiguredChannelCase({
@@ -104,7 +104,7 @@ describe("config presence", () => {
         modelByChannel: { enabled: false },
         " ": { enabled: false },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expect(listExplicitlyDisabledChannelIdsForConfig(cfg)).toEqual(["matrix"]);
   });
@@ -148,12 +148,12 @@ describe("config presence", () => {
 
   it("detects persisted Matrix credentials without config or env", () => {
     const stateDir = makeTempStateDir().replace(
-      "openclaw-channel-config-presence-",
+      "carapace-channel-config-presence-",
       "persisted-matrix-",
     );
     fs.mkdirSync(stateDir, { recursive: true });
     tempDirs.push(stateDir);
-    const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+    const env = { CARAPACE_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
 
     expectPotentialConfiguredChannelCase({
       cfg: {},

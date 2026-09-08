@@ -8,8 +8,8 @@ import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import type { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { withTimeout } from "@openclaw/fs-safe/advanced";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord as asRecord } from "@carapace/normalization-core/record-coerce";
 import {
   readSessionArchiveContentSync,
   stripSessionArchiveCompressionSuffix,
@@ -27,12 +27,12 @@ import {
 } from "../../src/gateway/test-helpers.e2e.js";
 import { listKnownProviderAuthEnvVarNames } from "../../src/secrets/provider-env-vars.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  closeOpenClawAgentDatabasesForTest,
-} from "../../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../src/state/openclaw-state-db.js";
+  closeCarapaceAgentDatabaseByPath,
+  closeCarapaceAgentDatabasesForTest,
+} from "../../src/state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../src/state/carapace-state-db.js";
 import { sleep } from "../../src/utils.js";
-import { createOpenClawTestInstance } from "./openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./carapace-test-instance.js";
 import { runQaGatewayFixture } from "./qa-gateway-cleanup.js";
 import { stopChildProcess } from "./stop-child-process.js";
 
@@ -56,7 +56,7 @@ type StartupRefusalEvidence = Awaited<ReturnType<typeof requireLegacyStartupRefu
 
 type ProofContext = ReturnType<typeof buildProofContext>;
 type GatewayClient = Awaited<ReturnType<typeof connectGatewayClient>>;
-type OpenClawTestInstance = Awaited<ReturnType<typeof createOpenClawTestInstance>>;
+type CarapaceTestInstance = Awaited<ReturnType<typeof createCarapaceTestInstance>>;
 
 type RunOptions = {
   print?: boolean;
@@ -71,7 +71,7 @@ const CONCURRENT_RESET_SESSION_KEY = "agent:main:dashboard:sqlite-concurrent-res
 const CONCURRENT_DELETE_SESSION_KEY = "agent:main:dashboard:sqlite-concurrent-delete";
 const CONCURRENT_SEND_TEXT = "sqlite concurrent send history reset";
 const CONCURRENT_DELETE_TEXT = "sqlite concurrent delete while send is active";
-const FULL_TURN_ASSISTANT_TEXT = "OPENCLAW_E2E_OK_12";
+const FULL_TURN_ASSISTANT_TEXT = "CARAPACE_E2E_OK_12";
 const FULL_TURN_SESSION_KEY = "agent:main:sqlite-full-turn";
 const DOWNGRADE_REUPGRADE_SESSION_ID = "sqlite-downgrade-reupgrade";
 const DOWNGRADE_REUPGRADE_SESSION_KEY = "agent:main:dashboard:sqlite-downgrade-reupgrade";
@@ -99,7 +99,7 @@ const OLD_STATE_SESSION_KEYS = [
 /** Runs the isolated live gateway SQLite flip proof and returns structured evidence. */
 export async function runSqliteSessionsTranscriptsFlipProof(options: RunOptions = {}) {
   const print = options.print ?? false;
-  const inst = await createOpenClawTestInstance({
+  const inst = await createCarapaceTestInstance({
     name: `sqlite-sessions-transcripts-flip-${randomUUID()}`,
     env: {
       ...Object.fromEntries(listKnownProviderAuthEnvVarNames().map((name) => [name, undefined])),
@@ -109,12 +109,12 @@ export async function runSqliteSessionsTranscriptsFlipProof(options: RunOptions 
       NO_PROXY: "127.0.0.1,localhost",
       ...(options.requireBuiltCli !== true
         ? {
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
           }
         : {}),
-      OPENAI_API_KEY: "sk-openclaw-e2e-mock",
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_SKIP_PROVIDERS: undefined,
+      OPENAI_API_KEY: "sk-carapace-e2e-mock",
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_PROVIDERS: undefined,
       no_proxy: "127.0.0.1,localhost",
     },
     startTimeoutMs: 90_000,
@@ -352,8 +352,8 @@ export async function runSqliteSessionsTranscriptsFlipProof(options: RunOptions 
     () => inst.stopGateway(),
     async () => {
       await runQaGatewayFixture(
-        async () => closeOpenClawAgentDatabasesForTest(),
-        () => closeOpenClawStateDatabaseForTest(),
+        async () => closeCarapaceAgentDatabasesForTest(),
+        () => closeCarapaceStateDatabaseForTest(),
       );
       databasesClosed = true;
     },
@@ -416,7 +416,7 @@ function buildProofContext(stateDir: string) {
   return {
     activeSessionsDir,
     cleanups: new Set<ProofCleanup>(),
-    agentDbPath: path.join(agentDir, "agent", "openclaw-agent.sqlite"),
+    agentDbPath: path.join(agentDir, "agent", "carapace-agent.sqlite"),
     agentId: AGENT_ID,
     archiveRoots: [path.join(agentDir, "session-sqlite-import-archive"), activeSessionsDir],
     concurrentDeleteSessionKey: CONCURRENT_DELETE_SESSION_KEY,
@@ -460,7 +460,7 @@ function buildMockOpenAiConfig(mockPort: number) {
         modelPolicy: { allow: [modelRef] },
         models: {
           [modelRef]: {
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "carapace" },
             params: { openaiWsWarmup: false, transport: "sse" },
           },
         },
@@ -472,13 +472,13 @@ function buildMockOpenAiConfig(mockPort: number) {
       mode: "merge",
       providers: {
         openai: {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "carapace" },
           api: "openai-responses",
           apiKey: { source: "env", provider: "default", id: "OPENAI_API_KEY" },
           baseUrl: `http://127.0.0.1:${mockPort}/v1`,
           models: [
             {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               api: "openai-responses",
               contextTokens: 96_000,
               contextWindow: 128_000,
@@ -499,7 +499,7 @@ function buildMockOpenAiConfig(mockPort: number) {
 }
 
 async function connectProofClient(
-  inst: OpenClawTestInstance,
+  inst: CarapaceTestInstance,
   context: ProofContext,
   clientDisplayName: string,
 ) {
@@ -818,11 +818,11 @@ async function importProofSession(
     });
   } finally {
     // The fixture's writer lease must not outlive its import into child maintenance.
-    closeOpenClawAgentDatabaseByPath(context.agentDbPath);
+    closeCarapaceAgentDatabaseByPath(context.agentDbPath);
   }
 }
 
-async function requireLegacyStartupRefusal(inst: OpenClawTestInstance, context: ProofContext) {
+async function requireLegacyStartupRefusal(inst: CarapaceTestInstance, context: ProofContext) {
   const sources = new Map<string, Buffer>();
   for (const directory of [context.activeSessionsDir, context.legacySessionsDir]) {
     await walkFiles(directory, async (filePath) => {
@@ -842,7 +842,7 @@ async function requireLegacyStartupRefusal(inst: OpenClawTestInstance, context: 
     !message.startsWith("gateway exited before readiness (code=78 signal=null)") ||
     !message.includes("Gateway failed to start: Legacy session store requires migration:") ||
     !message.includes(path.join(context.legacySessionsDir, "sessions.json")) ||
-    !message.includes('Run "openclaw doctor --fix"')
+    !message.includes('Run "carapace doctor --fix"')
   ) {
     throw new Error(
       `expected legacy session migration refusal, got: ${message || "ready Gateway"}`,
@@ -861,7 +861,7 @@ async function requireLegacyStartupRefusal(inst: OpenClawTestInstance, context: 
   };
 }
 
-async function runDoctor(inst: OpenClawTestInstance, mode: DoctorMode, storePath: string) {
+async function runDoctor(inst: CarapaceTestInstance, mode: DoctorMode, storePath: string) {
   const result = await inst.cli(
     mode === "fix"
       ? ["doctor", "--fix", "--non-interactive"]
@@ -921,13 +921,13 @@ function parseDoctorRestore(parsed: Record<string, unknown>) {
   };
 }
 
-async function runRollbackRestoreProof(inst: OpenClawTestInstance, context: ProofContext) {
+async function runRollbackRestoreProof(inst: CarapaceTestInstance, context: ProofContext) {
   const drillDir = path.join(context.stateDir, "rollback-drill");
   const storePath = path.join(drillDir, "sessions.json");
   const sessionId = "sqlite-rollback-restore";
   const sessionKey = "agent:main:rollback-restore";
   const sourcePath = path.join(drillDir, `${sessionId}.jsonl`);
-  const sqlitePath = path.join(drillDir, "openclaw-agent.sqlite");
+  const sqlitePath = path.join(drillDir, "carapace-agent.sqlite");
   await fs.mkdir(drillDir, { recursive: true });
   await writeJsonFile(storePath, { [sessionKey]: legacyEntry(sessionId, Date.now()) }, 2);
   await writeMessageTranscript(
@@ -1089,7 +1089,7 @@ async function appendProofMessage(
       throw new Error(`appendTranscriptMessage failed for ${sessionKey}`);
     }
   } finally {
-    closeOpenClawAgentDatabaseByPath(context.agentDbPath);
+    closeCarapaceAgentDatabaseByPath(context.agentDbPath);
   }
 }
 
@@ -1103,7 +1103,7 @@ function sessionArtifactPaths(sessionsDir: string, sessionId: string) {
 }
 
 async function runDoctorIdempotenceProof(
-  inst: OpenClawTestInstance,
+  inst: CarapaceTestInstance,
   context: ProofContext,
 ): Promise<DoctorCommandEvidence> {
   const before = readSqliteEvidence(context.agentDbPath, context.trackedSessionKeys);
@@ -1155,7 +1155,7 @@ function requireScaleMigrationProof(context: ProofContext, doctorImportElapsedMs
   };
 }
 
-async function runDowngradeReupgradeProof(inst: OpenClawTestInstance, context: ProofContext) {
+async function runDowngradeReupgradeProof(inst: CarapaceTestInstance, context: ProofContext) {
   await fs.mkdir(context.activeSessionsDir, { recursive: true });
   await writeJsonFile(
     context.storePath,
@@ -1180,7 +1180,7 @@ async function runDowngradeReupgradeProof(inst: OpenClawTestInstance, context: P
     sessionId: DOWNGRADE_REUPGRADE_SESSION_ID,
   });
   await writeJsonFile(trajectoryPointerPath, {
-    traceSchema: "openclaw-trajectory-pointer",
+    traceSchema: "carapace-trajectory-pointer",
     schemaVersion: 1,
     sessionId: DOWNGRADE_REUPGRADE_SESSION_ID,
     runtimeFile: trajectoryPath,
@@ -1253,22 +1253,22 @@ async function runSqliteBusyContentionProof(context: ProofContext) {
       `
         import fs from "node:fs";
         import { DatabaseSync } from "node:sqlite";
-        const db = new DatabaseSync(process.env.OPENCLAW_E2E_BUSY_DB_PATH);
+        const db = new DatabaseSync(process.env.CARAPACE_E2E_BUSY_DB_PATH);
         db.exec("PRAGMA busy_timeout = 30000; BEGIN IMMEDIATE;");
-        fs.writeFileSync(process.env.OPENCLAW_E2E_BUSY_READY_PATH, "ready");
+        fs.writeFileSync(process.env.CARAPACE_E2E_BUSY_READY_PATH, "ready");
         setTimeout(() => {
           db.exec("COMMIT");
           db.close();
-        }, Number(process.env.OPENCLAW_E2E_BUSY_HOLD_MS));
+        }, Number(process.env.CARAPACE_E2E_BUSY_HOLD_MS));
       `,
     ],
     {
       cwd: process.cwd(),
       env: {
         ...process.env,
-        OPENCLAW_E2E_BUSY_DB_PATH: context.agentDbPath,
-        OPENCLAW_E2E_BUSY_HOLD_MS: String(holdMs),
-        OPENCLAW_E2E_BUSY_READY_PATH: readyPath,
+        CARAPACE_E2E_BUSY_DB_PATH: context.agentDbPath,
+        CARAPACE_E2E_BUSY_HOLD_MS: String(holdMs),
+        CARAPACE_E2E_BUSY_READY_PATH: readyPath,
       },
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -1354,7 +1354,7 @@ async function runSecondStartupAfterResetProof(
 }
 
 async function runConcurrentMultiClientLifecycle(
-  inst: OpenClawTestInstance,
+  inst: CarapaceTestInstance,
   context: ProofContext,
   primaryClient: GatewayClient,
 ): Promise<void> {

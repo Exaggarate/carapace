@@ -72,7 +72,7 @@ describe("resolveIrcAccount", () => {
   let fixturePasswordFile: string;
 
   beforeAll(() => {
-    fixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-irc-password-"));
+    fixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-irc-password-"));
     fixturePasswordFile = path.join(fixtureDirectory, "password.txt");
     fs.writeFileSync(fixturePasswordFile, "file\n", "utf8");
   });
@@ -139,7 +139,7 @@ describe("resolveIrcAccount", () => {
               accounts: {
                 [accountId]: {
                   host: "irc.example.com",
-                  nick: "openclaw",
+                  nick: "carapace",
                   ...(credential === "password"
                     ? { password: ref, passwordFile: fixturePasswordFile }
                     : { nickserv: { enabled, password: ref, passwordFile: fixturePasswordFile } }),
@@ -189,7 +189,7 @@ describe("resolveIrcAccount", () => {
               accounts: {
                 [accountId]: {
                   host: "irc.example.com",
-                  nick: "openclaw",
+                  nick: "carapace",
                   ...(credential === "password"
                     ? credentialConfig
                     : { nickserv: { ...credentialConfig, ...(enabled === false && { enabled }) } }),
@@ -209,7 +209,7 @@ describe("resolveIrcAccount", () => {
   );
 
   it.runIf(process.platform !== "win32")("isolates symlinked password files", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-irc-account-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-irc-account-"));
     const passwordFile = path.join(dir, "password.txt");
     const passwordLink = path.join(dir, "password-link.txt");
     fs.writeFileSync(passwordFile, "secret-pass\n", "utf8");
@@ -241,7 +241,7 @@ describe("resolveIrcAccount", () => {
   });
 
   it.runIf(process.platform !== "win32")("isolates symlinked NickServ password files", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-irc-nickserv-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-irc-nickserv-"));
     const passwordFile = path.join(dir, "nickserv-password.txt");
     const passwordLink = path.join(dir, "nickserv-password-link.txt");
     fs.writeFileSync(passwordFile, "nickserv-pass\n", "utf8");
@@ -274,7 +274,7 @@ describe("resolveIrcAccount", () => {
   });
 
   it("does not fall through from a missing explicit password file", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-irc-missing-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-irc-missing-"));
     const passwordFile = path.join(dir, "missing-password.txt");
     const account = resolveIrcAccount({
       cfg: asConfig({

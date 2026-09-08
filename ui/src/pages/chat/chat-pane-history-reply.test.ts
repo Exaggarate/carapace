@@ -11,7 +11,7 @@ describe("chat pane reply-source history navigation", () => {
     const message = {
       role: "assistant",
       content: "Original answer",
-      __openclaw: { id: "source-message" },
+      __carapace: { id: "source-message" },
     };
     const request = vi.fn().mockResolvedValue({ ok: true, message });
     const client = { request } as unknown as GatewayBrowserClient;
@@ -112,7 +112,7 @@ describe("chat pane reply-source history navigation", () => {
   it("pages backward until a clicked reply target is loaded, then reveals it", async () => {
     const target = {
       ...nativeHistoryMessage(1, "Original answer"),
-      __openclaw: { id: "source-message", seq: 1 },
+      __carapace: { id: "source-message", seq: 1 },
     };
     const request = vi
       .fn()

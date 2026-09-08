@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { DEFAULT_AGENT_ID } from "../routing/session-key.js";
 import { isIncognitoSessionKey } from "../shared/incognito-session-key.js";
 import { resolveAuthorizedBoardViewTicketClaims } from "./board-view-ticket.js";
@@ -64,7 +64,7 @@ function readSessionSharingStringParam(params: unknown, key: string): string | u
 }
 
 function resolveSessionGroupMutationTargets(params: {
-  getCfg: () => OpenClawConfig;
+  getCfg: () => CarapaceConfig;
   requestParams: unknown;
 }): SessionMutationTarget[] | undefined {
   const groupName = readSessionSharingStringParam(params.requestParams, "name");
@@ -74,7 +74,7 @@ function resolveSessionGroupMutationTargets(params: {
 }
 
 function resolveSessionGroupsPutMutationTargets(
-  getCfg: () => OpenClawConfig,
+  getCfg: () => CarapaceConfig,
   requestParams: unknown,
 ): SessionMutationTarget[] | undefined {
   const names =
@@ -170,7 +170,7 @@ export function resolveSessionMutationTargets(params: {
   method: string;
   requestParams: unknown;
   context: GatewayRequestContext;
-  getCfg: () => OpenClawConfig;
+  getCfg: () => CarapaceConfig;
 }): SessionMutationTarget[] | undefined {
   if (params.method === "sessions.patchMany") {
     const targets =

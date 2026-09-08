@@ -151,8 +151,8 @@
   pointer-events: none;
 }
 
-.dashboard-preview > openclaw-dashboard-preview,
-.dashboard-preview openclaw-board-document {
+.dashboard-preview > carapace-dashboard-preview,
+.dashboard-preview carapace-board-document {
   position: absolute;
   inset: 0;
   display: block;
@@ -162,7 +162,7 @@
   background: var(--bg);
 }
 
-.dashboard-preview .board-document__content > openclaw-board-view {
+.dashboard-preview .board-document__content > carapace-board-view {
   padding: 0;
   overflow: hidden;
 }

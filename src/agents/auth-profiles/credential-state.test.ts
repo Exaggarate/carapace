@@ -85,11 +85,11 @@ describe("evaluateStoredCredentialEligibility", () => {
   });
 
   it.each([
-    "openclaw onboard --auth-choice zai-coding-global",
-    "openclaw onboard --auth-choice=zai-coding-global",
-    "openclaw onboard --non-interactive --auth-choice zai-coding-global --zai-api-key $ZAI_API_KEY",
-    "openclaw onboard --non-interactive --auth-choice=zai-coding-global --zai-api-key $ZAI_API_KEY",
-  ])("marks pasted OpenClaw onboarding command %p as a malformed api key", (key) => {
+    "carapace onboard --auth-choice zai-coding-global",
+    "carapace onboard --auth-choice=zai-coding-global",
+    "carapace onboard --non-interactive --auth-choice zai-coding-global --zai-api-key $ZAI_API_KEY",
+    "carapace onboard --non-interactive --auth-choice=zai-coding-global --zai-api-key $ZAI_API_KEY",
+  ])("marks pasted Carapace onboarding command %p as a malformed api key", (key) => {
     const result = evaluateStoredCredentialEligibility({
       credential: {
         type: "api_key",

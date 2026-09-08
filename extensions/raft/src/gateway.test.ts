@@ -1,15 +1,15 @@
 import { EventEmitter } from "node:events";
-import type { ChannelGatewayContext } from "openclaw/plugin-sdk/channel-contract";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createChannelReplayGuard } from "openclaw/plugin-sdk/persistent-dedupe";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import type { ChannelGatewayContext } from "carapace/plugin-sdk/channel-contract";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createChannelReplayGuard } from "carapace/plugin-sdk/persistent-dedupe";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   tempWorkspaceSync,
   type TempWorkspaceSync,
-} from "openclaw/plugin-sdk/temp-path";
-import { postRawWebhook } from "openclaw/plugin-sdk/test-env";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "carapace/plugin-sdk/temp-path";
+import { postRawWebhook } from "carapace/plugin-sdk/test-env";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedRaftAccount } from "./accounts.js";
 import { startRaftGatewayAccount } from "./gateway.js";
@@ -19,8 +19,8 @@ const processRuntimeMocks = vi.hoisted(() => ({
   killProcessTree: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/process-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/process-runtime")>()),
+vi.mock("carapace/plugin-sdk/process-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/process-runtime")>()),
   killProcessTree: processRuntimeMocks.killProcessTree,
 }));
 
@@ -82,7 +82,7 @@ function createContext(accountId = "default") {
       name: null,
       enabled: true,
       configured: true,
-      profile: "openclaw",
+      profile: "carapace",
     },
     runtime: {},
     abortSignal: new AbortController().signal,
@@ -107,7 +107,7 @@ function createContext(accountId = "default") {
         buildContext,
       },
       session: {
-        resolveStorePath: vi.fn(() => "/tmp/openclaw-agent.sqlite"),
+        resolveStorePath: vi.fn(() => "/tmp/carapace-agent.sqlite"),
         recordInboundSession: vi.fn(),
       },
       reply: {
@@ -136,7 +136,7 @@ function createPersistentWakeDedupe(stateDir: string) {
       pluginId: "raft",
       namespacePrefix: "raft-wake-dedupe",
       stateMaxEntries: 10_000,
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     },
     buildReplayKey: (event) => event.key,
     namespace: (event) => event.accountId,
@@ -471,8 +471,8 @@ describe("Raft wake gateway", () => {
 
   it("persists accepted wake dedupe across restarts without crossing accounts", async () => {
     const workspace = tempWorkspaceSync({
-      rootDir: resolvePreferredOpenClawTmpDir(),
-      prefix: "openclaw-raft-wake-dedupe-",
+      rootDir: resolvePreferredCarapaceTmpDir(),
+      prefix: "carapace-raft-wake-dedupe-",
     });
     tempWorkspaces.push(workspace);
     const stateDir = workspace.dir;

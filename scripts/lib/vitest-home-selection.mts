@@ -106,7 +106,7 @@ export function resolveVitestHomeSelection(
     }
     candidates = [...leafConfigs];
   } else if (relative === "test/vitest/vitest.gateway.config.ts") {
-    if (options.env?.OPENCLAW_GATEWAY_PROJECT_SHARDS === "0") {
+    if (options.env?.CARAPACE_GATEWAY_PROJECT_SHARDS === "0") {
       return "live-aware";
     }
     candidates = [...leafConfigs].filter((entry) => projectName(entry).startsWith("gateway-"));

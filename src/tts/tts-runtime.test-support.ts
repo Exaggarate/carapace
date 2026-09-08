@@ -3,20 +3,20 @@ import crypto from "node:crypto";
 import { mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig, TtsConfig } from "openclaw/plugin-sdk/config-contracts";
-import { MAX_TIMER_TIMEOUT_MS as MAX_TIMER_TIMEOUT_MS_CORE } from "openclaw/plugin-sdk/number-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
+import type { CarapaceConfig, TtsConfig } from "carapace/plugin-sdk/config-contracts";
+import { MAX_TIMER_TIMEOUT_MS as MAX_TIMER_TIMEOUT_MS_CORE } from "carapace/plugin-sdk/number-runtime";
+import type { ReplyPayload } from "carapace/plugin-sdk/reply-payload";
 import {
   clearRuntimeConfigSnapshot as clearRuntimeConfigSnapshotCore,
   setRuntimeConfigSnapshot as setRuntimeConfigSnapshotCore,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+} from "carapace/plugin-sdk/runtime-config-snapshot";
 import type {
   SpeechListVoicesRequest,
   SpeechProviderPlugin,
   SpeechProviderPrepareSynthesisContext,
   SpeechSynthesisRequest,
   SpeechTelephonySynthesisRequest,
-} from "openclaw/plugin-sdk/speech-core";
+} from "carapace/plugin-sdk/speech-core";
 import { expect, vi } from "vitest";
 import { CODE_HEAVY_SPOKEN_FALLBACK as CODE_HEAVY_SPOKEN_FALLBACK_CORE } from "./speech-text.js";
 import type { TtsAudioPersistence } from "./tts-synthesis.js";
@@ -183,7 +183,7 @@ async function persistTestTtsAudio({
   audioBuffer,
   fileExtension,
 }: Parameters<TtsAudioPersistence>[0]): Promise<string> {
-  const dir = path.join(PREFS_TMP_DIR, `openclaw-speech-core-media-${crypto.randomUUID()}`);
+  const dir = path.join(PREFS_TMP_DIR, `carapace-speech-core-media-${crypto.randomUUID()}`);
   mkdirSync(dir, { recursive: true });
   const audioPath = path.join(dir, `voice---${crypto.randomUUID()}${fileExtension}`);
   writeFileSync(audioPath, audioBuffer);
@@ -202,7 +202,7 @@ export function prefsPathFor(prefsName: string): string {
   return path.join(PREFS_TMP_DIR, `${prefsName}.json`);
 }
 
-export function createTtsConfig(prefsName: string): OpenClawConfig {
+export function createTtsConfig(prefsName: string): CarapaceConfig {
   setTtsMachinePrefsPathResolver(() => prefsPathFor(prefsName));
   return {
     tts: {
@@ -285,7 +285,7 @@ export async function expectTtsPayloadResult(params: {
 
 export { prepareSynthesisMock, synthesizeMock, transcodeAudioBufferMock };
 export type {
-  OpenClawConfig,
+  CarapaceConfig,
   ReplyPayload,
   SpeechListVoicesRequest,
   SpeechSynthesisRequest,

@@ -1,5 +1,5 @@
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString as toOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
+import { normalizeOptionalString as toOptionalString } from "@carapace/normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import {
   readAcpSessionMetaForEntry,

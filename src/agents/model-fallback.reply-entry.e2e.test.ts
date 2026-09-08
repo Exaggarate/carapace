@@ -5,7 +5,7 @@ import type { MsgContext } from "../auto-reply/templating.js";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../config/config.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
@@ -41,7 +41,7 @@ const { computeBackoffMock, sleepWithAbortMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: vi.fn(async () => ({ wrote: false })),
+  ensureCarapaceModelsJson: vi.fn(async () => ({ wrote: false })),
 }));
 
 function installReplyEntryMocks() {
@@ -84,7 +84,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  vi.stubEnv("OPENCLAW_ALLOW_SLOW_REPLY_TESTS", "1");
+  vi.stubEnv("CARAPACE_ALLOW_SLOW_REPLY_TESTS", "1");
   resetFallbackSkipCacheForTest();
   runEmbeddedAttemptMock.mockReset();
   suspendSessionMock.mockClear();
@@ -112,7 +112,7 @@ describe("getReplyFromConfig fallback availability", () => {
       }
       const sessionKey = "agent:test:telegram:111";
       const storePath = path.join(path.dirname(agentDir), "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         ...baseConfig,
         agents: {
           ...baseConfig.agents,

@@ -1,5 +1,5 @@
 import type { Direction } from "matrix-js-sdk/lib/models/event-timeline.js";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixReplacementContent } from "../media-text.js";
 import { fetchMatrixPollMessageSummary, resolveMatrixPollRootEventId } from "../poll-summary.js";
 import { isPollEventType, isPollStartType } from "../poll-types.js";
@@ -14,7 +14,7 @@ import {
   type MatrixRawEvent,
 } from "./types.js";
 
-const MATRIX_THREAD_RELATIONS_START_CURSOR_PREFIX = "openclaw.matrix.thread-relations-start:";
+const MATRIX_THREAD_RELATIONS_START_CURSOR_PREFIX = "carapace.matrix.thread-relations-start:";
 
 function resolveMatrixReplacementTarget(event: MatrixRawEvent): string | undefined {
   const relation = event.content["m.relates_to"];

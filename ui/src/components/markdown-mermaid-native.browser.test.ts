@@ -1,4 +1,4 @@
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "../../../packages/mermaid-renderer/src/native.ts";
 

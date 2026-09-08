@@ -1,8 +1,8 @@
 /**
  * Resolves and persists live-session model switch requests.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveCollapsedSessionAuthPinSource } from "../config/sessions/auth-profile-override-provenance.js";
 import { resolveSessionStorePathCore } from "../config/sessions/paths.js";
 import {
@@ -10,7 +10,7 @@ import {
   patchSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveSessionAgentId } from "./agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import {
@@ -36,7 +36,7 @@ const OPENAI_CODEX_PROVIDER_ID = "openai";
  * can evaluate the persisted selection against the exact row they may rewrite.
  */
 function resolveSelectionFromSessionEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry | undefined;
   agentId?: string;
   defaultProvider: string;
@@ -139,7 +139,7 @@ function hasDifferentLiveSessionModelSelection(
  * user-initiated `/model` switches and system-initiated fallback rotations.
  */
 export function shouldSwitchToLiveModel(params: {
-  cfg?: OpenClawConfig | undefined;
+  cfg?: CarapaceConfig | undefined;
   sessionKey?: string;
   agentId?: string;
   sessionPersistence?: "durable" | "detached";
@@ -216,7 +216,7 @@ export function shouldSwitchToLiveModel(params: {
  * a newer selection is never consumed by this run's result.
  */
 export async function consolidateLiveModelSwitchAfterRun(params: {
-  cfg?: OpenClawConfig | undefined;
+  cfg?: CarapaceConfig | undefined;
   sessionKey?: string;
   agentId?: string;
   providerUsed?: string;

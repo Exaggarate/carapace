@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { createNextAcpTaskBackingDetail } from "./task-backing-authority.js";
 import { createAcpTaskBackingDetailForTest } from "./task-backing-authority.test-support.js";
 import { createTaskFlowForTask } from "./task-flow-registry.js";
@@ -20,9 +20,9 @@ import {
   resetTaskRegistryForTests,
 } from "./task-runtime.test-helpers.js";
 
-let state: Awaited<ReturnType<typeof createOpenClawTestState>>;
+let state: Awaited<ReturnType<typeof createCarapaceTestState>>;
 beforeEach(async () => {
-  state = await createOpenClawTestState({ scenario: "minimal" });
+  state = await createCarapaceTestState({ scenario: "minimal" });
   resetTaskRegistryForTests({ persist: false });
   resetTaskFlowRegistryForTests({ persist: false });
 });
@@ -116,7 +116,7 @@ it("keeps requester-only bare keys bound to their agent", async () => {
   const cfg = {
     session: { scope: "global" },
     agents: { ownership: "explicit", entries: { ops: {}, research: {} } },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const tasks = ["ops", "research"].map((requesterAgentId) =>
     createTask({ requesterSessionKey: "global", requesterAgentId }),
   );

@@ -26,7 +26,7 @@ const { installHooksFromPath, installHooksFromNpmSpec } = await import("./instal
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function makeHookInstallFixture() {
-  const root = tempDirs.make("openclaw-hook-policy-");
+  const root = tempDirs.make("carapace-hook-policy-");
   const pkgDir = path.join(root, "source");
   const hookDir = path.join(pkgDir, "hooks", "one-hook");
   const hooksDir = path.join(root, "hooks");
@@ -36,7 +36,7 @@ function makeHookInstallFixture() {
     JSON.stringify({
       name: "@acme/canonical-hooks",
       version: "1.0.0",
-      openclaw: { hooks: ["./hooks/one-hook"] },
+      carapace: { hooks: ["./hooks/one-hook"] },
     }),
   );
   fs.writeFileSync(path.join(hookDir, "HOOK.md"), "---\nname: one-hook\n---\n");
@@ -52,7 +52,7 @@ describe("hook install policy warnings", () => {
   });
 
   it("passes acknowledgement through both scan stages", async () => {
-    const root = tempDirs.make("openclaw-hook-policy-");
+    const root = tempDirs.make("carapace-hook-policy-");
     const source = path.join(root, "source");
     fs.mkdirSync(source);
     fs.writeFileSync(path.join(source, "HOOK.md"), "---\nname: my-hook\n---\n");

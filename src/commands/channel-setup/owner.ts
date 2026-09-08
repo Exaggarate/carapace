@@ -3,10 +3,10 @@ import {
   resolveConfiguredAgentId,
 } from "../../agents/agent-scope-config.js";
 import { resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 
 /** Validate the selected operation owner before using its workspace for discovery. */
-export function resolveChannelSetupOwner(cfg: OpenClawConfig, requestedAgentId?: string) {
+export function resolveChannelSetupOwner(cfg: CarapaceConfig, requestedAgentId?: string) {
   const requested = requestedAgentId?.trim();
   if (requestedAgentId !== undefined && !requested) {
     throw new Error("--agent must not be blank");

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUTPUT_DIR="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/AppIcons"
+OUTPUT_DIR="$ROOT_DIR/apps/macos/Sources/Carapace/Resources/AppIcons"
 MODE="${1:---write}"
 if [[ "$MODE" != "--write" && "$MODE" != "--check" ]]; then
   echo "Usage: bash scripts/generate-mac-app-icons.sh [--write|--check]" >&2
@@ -64,7 +64,7 @@ for style in paper-light paper-dark heritage-light heritage-dark clawmark-light 
 done
 
 if [[ "$MODE" == "--check" ]]; then
-  cmp "$OUTPUT_DIR/paper-light.icns" "$OUTPUT_DIR/../OpenClaw.icns"
+  cmp "$OUTPUT_DIR/paper-light.icns" "$OUTPUT_DIR/../Carapace.icns"
 else
-  cp "$OUTPUT_DIR/paper-light.icns" "$OUTPUT_DIR/../OpenClaw.icns"
+  cp "$OUTPUT_DIR/paper-light.icns" "$OUTPUT_DIR/../Carapace.icns"
 fi

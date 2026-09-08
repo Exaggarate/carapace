@@ -34,7 +34,7 @@ async function runFastAutoProgressCase(params: {
     params.payload ??
     ({
       text: "💨Fast: auto-on",
-      channelData: { openclawProgressKind: "fast-mode-auto" },
+      channelData: { carapaceProgressKind: "fast-mode-auto" },
     } satisfies ReplyPayload);
   const onChannelToolResult = vi.fn(() => params.callbackResult);
   const onDurableToolResult = vi.fn(async () => {});
@@ -532,7 +532,7 @@ describe("executeFollowupTurn", () => {
   it("routes queued visible fast auto progress through the channel once", async () => {
     const payload = {
       text: "💨Fast: auto-off(75s>=60s)",
-      channelData: { openclawProgressKind: "fast-mode-auto" },
+      channelData: { carapaceProgressKind: "fast-mode-auto" },
     } satisfies ReplyPayload;
     const { onChannelToolResult, onDurableToolResult } = await runFastAutoProgressCase({
       callbackResult: true,
@@ -546,7 +546,7 @@ describe("executeFollowupTurn", () => {
   it("requires source-suppression opt-in before a queued fast auto callback owns delivery", async () => {
     const payload = {
       text: "💨Fast: auto-off(75s>=60s)",
-      channelData: { openclawProgressKind: "fast-mode-auto" },
+      channelData: { carapaceProgressKind: "fast-mode-auto" },
     } satisfies ReplyPayload;
     const { onChannelToolResult, onDurableToolResult } = await runFastAutoProgressCase({
       callbackResult: false,
@@ -562,7 +562,7 @@ describe("executeFollowupTurn", () => {
   it("lets an opted-in queued fast auto callback own source-suppressed delivery", async () => {
     const payload = {
       text: "💨Fast: auto-off(75s>=60s)",
-      channelData: { openclawProgressKind: "fast-mode-auto" },
+      channelData: { carapaceProgressKind: "fast-mode-auto" },
     } satisfies ReplyPayload;
     const { onChannelToolResult, onDurableToolResult } = await runFastAutoProgressCase({
       callbackResult: true,

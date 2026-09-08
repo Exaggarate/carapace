@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 
 type PermissionId =
   | "notifications"
@@ -23,7 +23,7 @@ export type NativeDeviceSettingsSnapshot = {
     modelName?: string;
     appVersion: string; // CFBundleShortVersionString
     appBuild: string; // CFBundleVersion
-    profileName: string | null; // OPENCLAW_PROFILE name when active, else null
+    profileName: string | null; // CARAPACE_PROFILE name when active, else null
   };
   app?: {
     appearance?: "system" | "light" | "dark";
@@ -176,17 +176,17 @@ export type NativeDeviceSettingsCapability = {
 };
 
 type NativeDeviceSettingsWindow = Window & {
-  __OPENCLAW_NATIVE_DEVICE_SETTINGS__?: unknown;
+  __CARAPACE_NATIVE_DEVICE_SETTINGS__?: unknown;
   webkit?: {
     messageHandlers?: {
-      openclawDeviceSettings?: {
+      carapaceDeviceSettings?: {
         postMessage(message: NativeDeviceSettingsMessage): Promise<unknown>;
       };
     };
   };
 };
 
-const CHANGE_EVENT = "openclaw:native-device-settings-changed";
+const CHANGE_EVENT = "carapace:native-device-settings-changed";
 const PERMISSION_IDS = [
   "notifications",
   "accessibility",
@@ -361,12 +361,12 @@ export function createNativeDeviceSettingsCapability(): NativeDeviceSettingsCapa
   }
   // SAFETY: the host adds optional WebKit fields; the handler and snapshot are validated below.
   const nativeWindow = window as NativeDeviceSettingsWindow;
-  const handler = nativeWindow.webkit?.messageHandlers?.openclawDeviceSettings;
+  const handler = nativeWindow.webkit?.messageHandlers?.carapaceDeviceSettings;
   if (typeof handler?.postMessage !== "function") {
     return null;
   }
   const post = handler.postMessage.bind(handler);
-  const initial = nativeWindow["__OPENCLAW_NATIVE_DEVICE_SETTINGS__"];
+  const initial = nativeWindow["__CARAPACE_NATIVE_DEVICE_SETTINGS__"];
   let snapshot = isSnapshot(initial) ? initial : null;
   let disposed = false;
   const listeners = new Set<(snapshot: NativeDeviceSettingsSnapshot) => void>();

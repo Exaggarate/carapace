@@ -23,7 +23,7 @@ const flushMicrotasks = async () => {
 describe("swarm scheduler", () => {
   beforeEach(() => {
     testing.reset();
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("CARAPACE_TEST_FAST", "1");
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 /** Runs the ordered model fallback execution state machine. */
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { emitFailoverEvent } from "../infra/diagnostic-events.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -89,7 +89,7 @@ const modelFallbackAuthRuntimeLoader = createLazyImportLoader<ModelFallbackAuthR
 );
 
 type RunWithModelFallbackParams<T> = {
-  cfg: OpenClawConfig | undefined;
+  cfg: CarapaceConfig | undefined;
   provider: string;
   model: string;
   runId?: string;

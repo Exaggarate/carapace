@@ -190,20 +190,20 @@ describe("Codex usage after runtime fallback", () => {
     }));
   });
 
-  async function renderFallbackStatus(agentHarnessId: "codex" | "openclaw"): Promise<string> {
+  async function renderFallbackStatus(agentHarnessId: "codex" | "carapace"): Promise<string> {
     return await buildStatusText({
       cfg: {},
       sessionEntry: {
         sessionId: `fallback-${agentHarnessId}`,
         updatedAt: 0,
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "carapace",
         agentHarnessId,
       },
       sessionKey: "agent:main:main",
       statusChannel: "mobilechat",
       provider: "openai",
       model: "gpt-5.4-mini",
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
       resolvedVerboseLevel: "off",
       resolvedReasoningLevel: "off",
       resolveDefaultThinkingLevel: async () => undefined,
@@ -219,7 +219,7 @@ describe("Codex usage after runtime fallback", () => {
     });
   }
 
-  it("shows Codex rate-limit usage for a Codex-bound session on OpenClaw Default", async () => {
+  it("shows Codex rate-limit usage for a Codex-bound session on Carapace Default", async () => {
     const text = await renderFallbackStatus("codex");
 
     expect(text).toContain("📊 Usage: 5h 75% left");
@@ -232,7 +232,7 @@ describe("Codex usage after runtime fallback", () => {
   });
 
   it("omits Codex rate-limit usage for a never-Codex session", async () => {
-    const text = await renderFallbackStatus("openclaw");
+    const text = await renderFallbackStatus("carapace");
 
     expect(text).not.toContain("📊 Usage:");
     expect(mocks.loadProviderUsageSummary).toHaveBeenCalledWith(
@@ -248,7 +248,7 @@ describe("session status cost line", () => {
     sessionFile: formatSqliteSessionFileMarker({
       agentId: "main",
       sessionId: "cost-session",
-      storePath: "/tmp/openclaw-status-cost/sessions.json",
+      storePath: "/tmp/carapace-status-cost/sessions.json",
     }),
   };
 
@@ -385,7 +385,7 @@ describe("buildStatusText thinking facts", () => {
           reasoning: true,
         },
       ],
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
       resolvedThinkLevel: "high",
       resolvedVerboseLevel: "off",
       resolvedReasoningLevel: "on",
@@ -446,7 +446,7 @@ describe("buildStatusText prepared context windows", () => {
       provider: "deepseek",
       model: "deepseek-v4-flash",
       thinkingCatalog: catalog,
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
       resolvedVerboseLevel: "off",
       resolvedReasoningLevel: "off",
       resolveDefaultThinkingLevel: async () => undefined,
@@ -620,7 +620,7 @@ describe("buildStatusText lazy loader retry", () => {
       statusChannel: "mobilechat",
       provider: "openai",
       model: "gpt-5.4-mini",
-      resolvedHarness: "openclaw",
+      resolvedHarness: "carapace",
       resolvedVerboseLevel: "off",
       resolvedReasoningLevel: "off",
       resolveDefaultThinkingLevel: async () => undefined,

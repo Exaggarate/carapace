@@ -14,7 +14,7 @@ The macOS app logs through swift-log (unified logging by default) and can also w
 
 - Enable: **Debug pane -> Logs -> App logging -> "Write rolling diagnostics log (JSONL)"** (off by default).
 - Verbosity: **Debug pane -> Logs -> App logging -> Verbosity** picker.
-- Location: `~/Library/Logs/OpenClaw/diagnostics.jsonl`.
+- Location: `~/Library/Logs/Carapace/diagnostics.jsonl`.
 - Rotation: rotates at 5 MB; up to 5 backups suffixed `.1`...`.5` (oldest dropped).
 - Clear: **Debug pane -> Logs -> App logging -> "Clear"** deletes the active file and all backups.
 
@@ -40,12 +40,12 @@ This also protects private interpolations in strings that are concatenated befor
 
 Some shared components use native OSLog directly rather than the app's swift-log bridge. Native OSLog normally redacts private values; explicitly public values remain visible. For those native events, a subsystem plist in `/Library/Preferences/Logging/Subsystems/` can enable private-data capture. This is not a way to reveal the bridge's `<private>` placeholders or hashes. Background: [macOS logging privacy shenanigans](https://steipete.me/posts/2025/logging-privacy-shenanigans).
 
-## Enable for OpenClaw (`ai.openclaw`)
+## Enable for Carapace (`ai.carapace`)
 
-Use this only when you need private values from **native OSLog** events. Check for an existing `ai.openclaw.plist` first and preserve it so you can restore the prior settings afterward. Write the plist to a temp file, then install it atomically as root:
+Use this only when you need private values from **native OSLog** events. Check for an existing `ai.carapace.plist` first and preserve it so you can restore the prior settings afterward. Write the plist to a temp file, then install it atomically as root:
 
 ```bash
-cat <<'EOF' >/tmp/ai.openclaw.plist
+cat <<'EOF' >/tmp/ai.carapace.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -58,14 +58,14 @@ cat <<'EOF' >/tmp/ai.openclaw.plist
 </dict>
 </plist>
 EOF
-sudo install -m 644 -o root -g wheel /tmp/ai.openclaw.plist /Library/Preferences/Logging/Subsystems/ai.openclaw.plist
+sudo install -m 644 -o root -g wheel /tmp/ai.carapace.plist /Library/Preferences/Logging/Subsystems/ai.carapace.plist
 ```
 
 Enable the override before reproducing the issue: it affects new native OSLog events, not entries already collected. Inspect the output with `./scripts/clawlog.sh --category WebChat --last 5m` (`--last`/`-l` sets the time range, default `5m`; `--category`/`-c` filters by category).
 
 ## Disable after debugging
 
-- If you created the plist for this capture, remove it: `sudo rm /Library/Preferences/Logging/Subsystems/ai.openclaw.plist`. If it existed beforehand, restore the saved version instead.
+- If you created the plist for this capture, remove it: `sudo rm /Library/Preferences/Logging/Subsystems/ai.carapace.plist`. If it existed beforehand, restore the saved version instead.
 - The override can expose phone numbers and message bodies in native events. Keep it enabled only while needed; removing it does not erase data already captured.
 - Turn off rolling file capture separately if you enabled it. The macOS override does not control that sink.
 

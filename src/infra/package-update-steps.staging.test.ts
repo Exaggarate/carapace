@@ -29,9 +29,9 @@ describe("runGlobalPackageUpdateSteps staging ownership", () => {
   ])(
     "preserves an active $stage candidate through another owner's cleanup",
     async ({ omitOptional }) => {
-      await withTestDir({ prefix: "openclaw-package-stage-interleaving-" }, async (base) => {
+      await withTestDir({ prefix: "carapace-package-stage-interleaving-" }, async (base) => {
         const { globalRoot } = resolveNpmGlobalPrefixLayoutFromPrefix(path.join(base, "prefix"));
-        const packageRoot = path.join(globalRoot, "openclaw");
+        const packageRoot = path.join(globalRoot, "carapace");
         const packageFiles = [
           "package.json",
           "dist/index.js",
@@ -43,15 +43,15 @@ describe("runGlobalPackageUpdateSteps staging ownership", () => {
         const originalBytes = await Promise.all(readPackageBytes(packageRoot));
         const params = {
           installTarget: createNpmTarget(globalRoot),
-          installSpec: "openclaw@2.0.0",
-          packageName: "openclaw",
+          installSpec: "carapace@2.0.0",
+          packageName: "carapace",
           packageRoot,
           runCommand: createRootRunner(globalRoot),
           timeoutMs: 1000,
         };
         const aPrefixes: string[] = [];
         let candidateBytes: string[] = [];
-        const protectedBackup = path.join(globalRoot, ".openclaw.package-backup-recovery");
+        const protectedBackup = path.join(globalRoot, ".carapace.package-backup-recovery");
 
         const result = await runGlobalPackageUpdateSteps({
           ...params,
@@ -60,7 +60,7 @@ describe("runGlobalPackageUpdateSteps staging ownership", () => {
             expect((await fs.stat(stagePrefix)).isDirectory()).toBe(true);
             aPrefixes.push(stagePrefix);
             const stageLayout = resolveNpmGlobalPrefixLayoutFromPrefix(stagePrefix);
-            const candidateRoot = path.join(stageLayout.globalRoot, "openclaw");
+            const candidateRoot = path.join(stageLayout.globalRoot, "carapace");
             await writePackageRoot(candidateRoot, "2.0.0");
             const step = { name, command: argv.join(" "), cwd: cwd ?? base, durationMs: 0 };
             if (omitOptional && aPrefixes.length === 1) {
@@ -76,9 +76,9 @@ describe("runGlobalPackageUpdateSteps staging ownership", () => {
 
             // Seed after A's initial cleanup so only the nested B can remove these.
             const obsoleteDirs = [
-              ".openclaw-a1b2c3d4",
-              ".openclaw-package-backup-retired",
-              ".openclaw-shim-backup-retired",
+              ".carapace-a1b2c3d4",
+              ".carapace-package-backup-retired",
+              ".carapace-shim-backup-retired",
             ].map((entry) => path.join(globalRoot, entry));
             for (const directory of [...obsoleteDirs, protectedBackup]) {
               await fs.mkdir(directory);
@@ -124,7 +124,7 @@ describe("runGlobalPackageUpdateSteps staging ownership", () => {
           await expect(fs.access(prefix)).rejects.toMatchObject({ code: "ENOENT" });
         }
         expect((await fs.readdir(globalRoot)).toSorted()).toEqual(
-          [path.basename(protectedBackup), "openclaw"].toSorted(),
+          [path.basename(protectedBackup), "carapace"].toSorted(),
         );
         expect(result).toMatchObject({
           failedStep: null,

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { isRuntimeToolAllowed } from "../agents/tool-policy-match.js";
 
 type UnknownRecord = Record<string, unknown>;

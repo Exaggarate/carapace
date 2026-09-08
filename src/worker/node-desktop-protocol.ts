@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { WorkerDesktopApp } from "../plugins/capability-provider.types.js";
 import { NODE_DESKTOP_ATTACH_PATH } from "../shared/node-desktop-stream.js";
 import { hasExactOwnKeys } from "./protocol-record.js";

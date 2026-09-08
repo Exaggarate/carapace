@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import * as imageGenerationRuntime from "../../image-generation/runtime.js";
 import * as mediaStore from "../../media/store.js";
-import { createOpenClawTools } from "../openclaw-tools.js";
+import { createCarapaceTools } from "../carapace-tools.js";
 import { createImageGenerateTool } from "./image-generate-tool.js";
 import * as pdfNativeProviders from "./pdf-native-providers.js";
 import {
@@ -28,8 +28,8 @@ vi.mock("../provider-stream.js", () => ({
   registerProviderStreamForModel: vi.fn(),
 }));
 
-vi.mock("../openclaw-plugin-tools.js", () => ({
-  resolveOpenClawPluginToolsForOptions: () => [],
+vi.mock("../carapace-plugin-tools.js", () => ({
+  resolveCarapacePluginToolsForOptions: () => [],
 }));
 
 const { stubPdfToolInfra } = createPdfToolInfraStub(completeMock);
@@ -38,7 +38,7 @@ const ONE_PIXEL_PNG = Buffer.from(
   "base64",
 );
 
-function requireTool(tools: ReturnType<typeof createOpenClawTools>, name: "view_image" | "pdf") {
+function requireTool(tools: ReturnType<typeof createCarapaceTools>, name: "view_image" | "pdf") {
   const tool = tools.find((candidate) => candidate.name === name);
   expect(tool, `${name} tool registration`).toBeDefined();
   if (!tool) {
@@ -60,7 +60,7 @@ describe.runIf(process.platform === "win32")("host-local media tool file URLs", 
 
   it("loads Unicode and space file URLs through registered image and PDF tools", async () => {
     await withTempPdfAgentDir(async (agentDir) => {
-      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-file-url-Å "));
+      const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-media-file-url-Å "));
       try {
         const imagePath = path.join(workspaceDir, "café image.png");
         const pdfPath = path.join(workspaceDir, "résumé document.pdf");
@@ -73,13 +73,13 @@ describe.runIf(process.platform === "win32")("host-local media tool file URLs", 
         });
         vi.spyOn(pdfNativeProviders, "anthropicAnalyzePdf").mockResolvedValue("native summary");
 
-        const config: OpenClawConfig = {
+        const config: CarapaceConfig = {
           agents: {
             entries: { main: { default: true } },
             defaults: { pdfModel: { primary: "anthropic/claude-opus-4-6" } },
           },
-        } as OpenClawConfig;
-        const tools = createOpenClawTools({
+        } as CarapaceConfig;
+        const tools = createCarapaceTools({
           agentDir,
           workspaceDir,
           config,

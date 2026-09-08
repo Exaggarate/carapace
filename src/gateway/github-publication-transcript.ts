@@ -64,7 +64,7 @@ export function createGitHubPublicationTranscriptReporter(
           role: "assistant",
           content: [{ type: "text", text: formatGitHubPublicationResult(params.result) }],
           api: "openai-responses",
-          provider: "openclaw",
+          provider: "carapace",
           model: "gateway-publication",
           responseId: `${GITHUB_PUBLICATION_RESPONSE_PREFIX}${params.result.requestId}`,
           usage: {

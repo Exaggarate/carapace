@@ -1,43 +1,43 @@
 ---
-summary: "Set up Codex Computer Use for Codex-mode OpenClaw agents"
+summary: "Set up Codex Computer Use for Codex-mode Carapace agents"
 title: "Codex Computer Use"
 read_when:
-  - You want Codex-mode OpenClaw agents to use Codex Computer Use
+  - You want Codex-mode Carapace agents to use Codex Computer Use
   - You are deciding between Codex Computer Use, PeekabooBridge, and direct cua-driver MCP
   - You are configuring computerUse for the bundled Codex plugin
   - You are troubleshooting /codex computer-use status or install
 ---
 
-Computer Use is a Codex-native MCP plugin for local desktop control. OpenClaw
+Computer Use is a Codex-native MCP plugin for local desktop control. Carapace
 does not vendor the desktop app, execute desktop actions itself, or bypass
 Codex permissions. The bundled `codex` plugin only prepares Codex app-server:
 it enables Codex plugin support, finds or installs the configured Computer Use
 plugin, checks that the `computer-use` MCP server is available, and then lets
 Codex own the native MCP tool calls during Codex-mode turns.
 
-Use this page when OpenClaw is already using the native Codex harness. For the
+Use this page when Carapace is already using the native Codex harness. For the
 runtime setup itself, see [Codex harness](/plugins/codex-harness).
 
-This is distinct from OpenClaw's built-in [node-backed computer tool](/nodes/computer-use). Use the built-in tool when the same agent contract should control a paired Mac whether the agent runs on the Gateway or another node. Use Codex Computer Use when Codex app-server should own local MCP installation, permissions, and native tool calls.
+This is distinct from Carapace's built-in [node-backed computer tool](/nodes/computer-use). Use the built-in tool when the same agent contract should control a paired Mac whether the agent runs on the Gateway or another node. Use Codex Computer Use when Codex app-server should own local MCP installation, permissions, and native tool calls.
 
-## OpenClaw.app and Peekaboo
+## Carapace.app and Peekaboo
 
-OpenClaw.app's Peekaboo integration is separate from Codex Computer Use. The
+Carapace.app's Peekaboo integration is separate from Codex Computer Use. The
 macOS app can host a PeekabooBridge socket so the `peekaboo` CLI can reuse the
 app's local Accessibility and Screen Recording grants for Peekaboo's own
 automation tools. That bridge does not install or proxy Codex Computer Use, and
 Codex Computer Use does not call through the PeekabooBridge socket.
 
-Use [Peekaboo bridge](/platforms/mac/peekaboo) when you want OpenClaw.app to be
+Use [Peekaboo bridge](/platforms/mac/peekaboo) when you want Carapace.app to be
 a permission-aware host for Peekaboo CLI automation. Use this page when a
-Codex-mode OpenClaw agent should have Codex's native `computer-use` MCP plugin
+Codex-mode Carapace agent should have Codex's native `computer-use` MCP plugin
 available before the turn starts.
 
 ## iOS app
 
 The iOS app is separate from Codex Computer Use. It does not install or proxy
 the Codex `computer-use` MCP server and it is not a desktop-control backend.
-Instead, the iOS app connects as an OpenClaw node and exposes mobile
+Instead, the iOS app connects as an Carapace node and exposes mobile
 capabilities through node commands such as `camera.*`, `screen.*`,
 `location.*`, and `talk.*`.
 
@@ -48,39 +48,39 @@ local macOS desktop through Codex's native Computer Use plugin.
 ## Direct cua-driver MCP
 
 Codex Computer Use is not the only way to expose desktop control. If you want
-OpenClaw-managed runtimes to call TryCua's driver directly, use the upstream
-`cua-driver mcp` server through OpenClaw's MCP registry instead of the
+Carapace-managed runtimes to call TryCua's driver directly, use the upstream
+`cua-driver mcp` server through Carapace's MCP registry instead of the
 Codex-specific marketplace flow.
 
-After installing `cua-driver`, either ask it for the OpenClaw command:
+After installing `cua-driver`, either ask it for the Carapace command:
 
 ```bash
-cua-driver mcp-config --client openclaw
+cua-driver mcp-config --client carapace
 ```
 
 or register the stdio server directly:
 
 ```bash
-openclaw mcp set cua-driver '{"command":"cua-driver","args":["mcp"]}'
+carapace mcp set cua-driver '{"command":"cua-driver","args":["mcp"]}'
 ```
 
 That path keeps the upstream MCP tool surface intact, including the driver
 schemas and structured MCP responses. Use it when you want the CUA driver
-available as a normal OpenClaw MCP server. Use the Codex Computer Use setup on
+available as a normal Carapace MCP server. Use the Codex Computer Use setup on
 this page when Codex app-server should own plugin installation, MCP reloads,
 and native tool calls inside Codex-mode turns.
 
 CUA's driver ships prerelease builds for macOS, Windows (x64 and ARM64), and
 Linux (x64 and ARM64, preview tier). It still requires the local OS
 permissions its app prompts for, such as Accessibility and Screen Recording on
-macOS. OpenClaw does not install `cua-driver`, grant those permissions, or
+macOS. Carapace does not install `cua-driver`, grant those permissions, or
 bypass the upstream driver's safety model.
 
 ## Quick setup
 
 Set `plugins.entries.codex.config.computerUse` when Codex-mode turns must have
 Computer Use available before a thread starts. `autoInstall: true` opts
-Computer Use in and lets OpenClaw install or re-enable it before the turn:
+Computer Use in and lets Carapace install or re-enable it before the turn:
 
 ```json5
 {
@@ -104,28 +104,28 @@ Computer Use in and lets OpenClaw install or re-enable it before the turn:
 }
 ```
 
-With this config, OpenClaw checks Codex app-server before each Codex-mode
+With this config, Carapace checks Codex app-server before each Codex-mode
 turn. If Computer Use is missing but Codex app-server has already discovered
-an installable marketplace, OpenClaw asks Codex app-server to install or
+an installable marketplace, Carapace asks Codex app-server to install or
 re-enable the plugin and reload MCP servers. Before starting an isolated
 Codex app-server on macOS, auto-install also provisions the official signed
 Computer Use service app from the selected desktop app bundle into that
-Codex home's `computer-use` directory. OpenClaw verifies the outer service and
+Codex home's `computer-use` directory. Carapace verifies the outer service and
 nested client signatures, bundle identities, versions, builds, and code hashes.
 It installs a missing or incomplete copy, or stages and verifies a replacement
 before swapping out a complete copy whose signed identity no longer matches the
 selected desktop distribution. Failed swaps roll back without changing the
 rest of the isolated Codex home. This native-app synchronization runs only for
-OpenClaw-owned isolated agent homes. User-scoped homes and explicit
+Carapace-owned isolated agent homes. User-scoped homes and explicit
 `CODEX_HOME` overrides retain their existing native bundle ownership.
 The agent directory is the trusted ownership boundary. Within it, native-service
 provisioning rejects symlinked Codex-home, `computer-use`, and service-app paths,
 and revalidates the owned parent around each staged swap.
-On macOS, OpenClaw exposes the selected desktop app's bundled marketplace
+On macOS, Carapace exposes the selected desktop app's bundled marketplace
 through a real, isolated-home-owned wrapper at
 `$CODEX_HOME/.tmp/bundled-marketplaces/openai-bundled`. Codex reserves that
 path for the `openai-bundled` marketplace; the wrapper links only the manifest
-and plugin directory from the selected standard desktop app. OpenClaw then asks
+and plugin directory from the selected standard desktop app. Carapace then asks
 Codex app-server to register the wrapper. If setup still cannot make the MCP
 server available, the turn fails before the thread starts.
 Strict readiness failures are harness preflight failures, so model fallback
@@ -142,16 +142,16 @@ back to `/Applications/Codex.app/Contents/Resources/codex` for legacy
 standalone installs. This also applies to one-off Computer Use status and
 install commands that start their own client. It keeps desktop control under
 the app bundle that owns the local macOS permissions. If the desktop app is not
-installed, OpenClaw falls back to the managed Codex binary installed beside the
+installed, Carapace falls back to the managed Codex binary installed beside the
 plugin. Ordinary managed Codex turns with the default isolated agent home prefer
 that pinned package first so an older desktop app cannot shadow current model
 support. User-scoped homes stay desktop-first because they can load native
 Computer Use state. An isolated agent home whose effective Codex config enables
 Computer Use also stays desktop-first. Explicit
-`appServer.command` config or `OPENCLAW_CODEX_APP_SERVER_BIN` still overrides
+`appServer.command` config or `CARAPACE_CODEX_APP_SERVER_BIN` still overrides
 this managed selection.
 
-OpenClaw serializes native Codex config reads and Computer Use installation
+Carapace serializes native Codex config reads and Computer Use installation
 inside one running Gateway. A separate Codex process or another Gateway is not
 part of that fence. After changing native Codex plugin config outside the
 Gateway, restart the Gateway and start a new chat before relying on the new
@@ -161,14 +161,14 @@ The Gateway watches all standard ChatGPT and Codex desktop candidates that can
 supply the app-server or Computer Use artifacts. It does not poll the request
 path. After a detected update settles, existing turns continue on their current
 app-server generation and new acquisitions stop using it. For each eligible
-isolated home, OpenClaw waits for the last old-generation turn to release its
+isolated home, Carapace waits for the last old-generation turn to release its
 client before refreshing the signed Computer Use service, shared cache, and
 managed marketplace wrapper. Queued new turns then start on the replacement; an
 active turn for another home does not block them. If the bundle changes again
-during startup, OpenClaw fences the stale client before login or `thread/start`
+during startup, Carapace fences the stale client before login or `thread/start`
 and uses the normal bounded startup retry.
 
-Explicit `appServer.command` and `OPENCLAW_CODEX_APP_SERVER_BIN` clients remain
+Explicit `appServer.command` and `CARAPACE_CODEX_APP_SERVER_BIN` clients remain
 operator-owned and are not retired by standard desktop update events. Restart
 the Gateway after replacing a custom executable.
 
@@ -184,8 +184,8 @@ generation convergence.
 ## Commands
 
 Use the `/codex computer-use` commands from any chat surface where the
-`codex` plugin command surface is available. These are OpenClaw chat/runtime
-commands, not `openclaw codex ...` CLI subcommands:
+`codex` plugin command surface is available. These are Carapace chat/runtime
+commands, not `carapace codex ...` CLI subcommands:
 
 ```text
 /codex computer-use status
@@ -216,7 +216,7 @@ requested action plus any supported marketplace flags in its migration guidance.
 
 ## Marketplace choices
 
-OpenClaw uses the same app-server API that Codex itself exposes. The
+Carapace uses the same app-server API that Codex itself exposes. The
 marketplace fields choose where Codex should find `computer-use`.
 
 | Field                | Use when                                                        | Install support                                        |
@@ -227,10 +227,10 @@ marketplace fields choose where Codex should find `computer-use`.
 | `marketplaceName`    | You want to select one already registered marketplace by name.  | Yes, from the selected local or remote marketplace.    |
 
 Fresh Codex homes may need a short moment to seed their official
-marketplaces. During install, OpenClaw polls `plugin/list` for up to
+marketplaces. During install, Carapace polls `plugin/list` for up to
 `marketplaceDiscoveryTimeoutMs` milliseconds (default 60 seconds).
 
-If multiple known marketplaces contain Computer Use, OpenClaw prefers
+If multiple known marketplaces contain Computer Use, Carapace prefers
 `openai-bundled`, then `openai-curated`, then `local`. Unknown ambiguous
 matches fail closed and ask you to set `marketplaceName` or
 `marketplacePath`.
@@ -246,7 +246,7 @@ Codex desktop builds use the same layout under `Codex.app`:
 ```
 
 When `computerUse.autoInstall` is true and no marketplace containing
-`computer-use` is registered, OpenClaw selects the first valid standard desktop
+`computer-use` is registered, Carapace selects the first valid standard desktop
 bundle in the same ChatGPT-then-Codex order and creates this reserved local wrapper:
 
 ```text
@@ -255,7 +255,7 @@ $CODEX_HOME/.tmp/bundled-marketplaces/openai-bundled
 
 Do not add the `/Applications/.../openai-bundled` root directly under the
 reserved `openai-bundled` name. Codex accepts that reserved marketplace only
-from its managed path under `CODEX_HOME`; OpenClaw owns the wrapper lifecycle
+from its managed path under `CODEX_HOME`; Carapace owns the wrapper lifecycle
 for isolated homes.
 
 If you use a nonstandard Codex app path, run `/codex computer-use install
@@ -272,12 +272,12 @@ before app-server startup. Shared mode preserves older cached versions because
 running Codex clients can still reference their versioned plugin directories; a
 failed replacement copy also preserves the active cache. Explicit
 `marketplaceName` or `marketplacePath` configuration disables this
-reconciliation so OpenClaw does not override that selection.
+reconciliation so Carapace does not override that selection.
 
 ## Remote marketplaces
 
 Remote marketplace support was introduced in Codex 0.146.1 and remains
-available in OpenClaw's pinned Codex 0.153.4. OpenClaw passes the opaque remote
+available in Carapace's pinned Codex 0.153.4. Carapace passes the opaque remote
 plugin ID returned by Codex to `plugin/read` and `plugin/install`; a
 human-readable plugin name is not a valid substitute.
 
@@ -319,25 +319,25 @@ matching config key is unset:
 
 | Field                           | Env var                                                        |
 | ------------------------------- | -------------------------------------------------------------- |
-| `enabled`                       | `OPENCLAW_CODEX_COMPUTER_USE`                                  |
-| `autoInstall`                   | `OPENCLAW_CODEX_COMPUTER_USE_AUTO_INSTALL`                     |
-| `marketplaceDiscoveryTimeoutMs` | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS` |
-| `liveTestTimeoutMs`             | `OPENCLAW_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS`             |
-| `toolCallTimeoutMs`             | `OPENCLAW_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS`             |
-| `healthCheckEnabled`            | `OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_ENABLED`             |
-| `healthCheckIntervalMinutes`    | `OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES`    |
-| `pluginCacheMode`               | `OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_CACHE_MODE`                |
-| `strictReadiness`               | `OPENCLAW_CODEX_COMPUTER_USE_STRICT_READINESS`                 |
-| `autoRepair`                    | `OPENCLAW_CODEX_COMPUTER_USE_AUTO_REPAIR`                      |
-| `marketplaceSource`             | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_SOURCE`               |
-| `marketplacePath`               | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_PATH`                 |
-| `marketplaceName`               | `OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_NAME`                 |
-| `pluginName`                    | `OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_NAME`                      |
-| `mcpServerName`                 | `OPENCLAW_CODEX_COMPUTER_USE_MCP_SERVER_NAME`                  |
+| `enabled`                       | `CARAPACE_CODEX_COMPUTER_USE`                                  |
+| `autoInstall`                   | `CARAPACE_CODEX_COMPUTER_USE_AUTO_INSTALL`                     |
+| `marketplaceDiscoveryTimeoutMs` | `CARAPACE_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS` |
+| `liveTestTimeoutMs`             | `CARAPACE_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS`             |
+| `toolCallTimeoutMs`             | `CARAPACE_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS`             |
+| `healthCheckEnabled`            | `CARAPACE_CODEX_COMPUTER_USE_HEALTH_CHECK_ENABLED`             |
+| `healthCheckIntervalMinutes`    | `CARAPACE_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES`    |
+| `pluginCacheMode`               | `CARAPACE_CODEX_COMPUTER_USE_PLUGIN_CACHE_MODE`                |
+| `strictReadiness`               | `CARAPACE_CODEX_COMPUTER_USE_STRICT_READINESS`                 |
+| `autoRepair`                    | `CARAPACE_CODEX_COMPUTER_USE_AUTO_REPAIR`                      |
+| `marketplaceSource`             | `CARAPACE_CODEX_COMPUTER_USE_MARKETPLACE_SOURCE`               |
+| `marketplacePath`               | `CARAPACE_CODEX_COMPUTER_USE_MARKETPLACE_PATH`                 |
+| `marketplaceName`               | `CARAPACE_CODEX_COMPUTER_USE_MARKETPLACE_NAME`                 |
+| `pluginName`                    | `CARAPACE_CODEX_COMPUTER_USE_PLUGIN_NAME`                      |
+| `mcpServerName`                 | `CARAPACE_CODEX_COMPUTER_USE_MCP_SERVER_NAME`                  |
 
-## What OpenClaw checks
+## What Carapace checks
 
-OpenClaw reports a stable setup reason internally and formats the
+Carapace reports a stable setup reason internally and formats the
 user-facing status for chat:
 
 | Reason                 | Meaning                                                | Next step                                    |
@@ -360,7 +360,7 @@ This Codex-owned Computer Use path runs on macOS, where the MCP server may need
 local OS permissions before it can inspect or control apps. (For cross-platform
 desktop control on Windows and Linux node hosts, see the
 [cua-computer fulfiller](/nodes/computer-use#windows-and-linux-experimental-direct-sdk).)
-If OpenClaw says Computer Use is installed but the MCP server is unavailable,
+If Carapace says Computer Use is installed but the MCP server is unavailable,
 verify the Codex-side Computer Use setup first:
 
 - Codex app-server is running on the same host where desktop control should
@@ -370,7 +370,7 @@ verify the Codex-side Computer Use setup first:
 - macOS has granted the required permissions for the desktop-control app.
 - The current host session can access the desktop being controlled.
 
-OpenClaw intentionally fails closed when `computerUse.enabled` is true. A
+Carapace intentionally fails closed when `computerUse.enabled` is true. A
 Codex-mode turn should not silently proceed without the native desktop tools
 that the config required.
 
@@ -394,7 +394,7 @@ Codex app-server MCP status, or macOS permissions.
 **Status or a probe times out on `computer-use.list_apps`.** The plugin and
 MCP server are present, but the local Computer Use bridge did not answer.
 Quit or restart Codex Computer Use, relaunch Codex Desktop if needed, then
-retry in a fresh OpenClaw session. If the host previously ran Computer Use
+retry in a fresh Carapace session. If the host previously ran Computer Use
 through an older managed Codex app-server, refresh the installed plugin from
 the desktop bundled marketplace (use the `Codex.app` path for standalone
 Codex desktop installs):
@@ -404,11 +404,11 @@ Codex desktop installs):
 ```
 
 **A Computer Use tool says `Native hook relay unavailable`.** The
-Codex-native tool hook could not reach an active OpenClaw relay through the
-local bridge or Gateway fallback. Start a fresh OpenClaw session with `/new`
+Codex-native tool hook could not reach an active Carapace relay through the
+local bridge or Gateway fallback. Start a fresh Carapace session with `/new`
 or `/reset`. If it works once and then fails again on a later tool call,
 `/new` is only clearing the current attempt; restart the Codex app-server or
-OpenClaw Gateway so old threads and hook registrations are dropped, then
+Carapace Gateway so old threads and hook registrations are dropped, then
 retry in a fresh session.
 
 **Turn-start auto-install refuses a source.** This is intentional. Add the

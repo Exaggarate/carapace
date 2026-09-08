@@ -1,7 +1,7 @@
 // Failure output tests cover CLI error formatting and failure summaries.
 import { describe, expect, it } from "vitest";
 import { GatewayCredentialsRequiredError, GatewayTransportError } from "../gateway/call.js";
-import { UpdateSchemaRefusalError } from "../state/openclaw-update-schema-refusal.js";
+import { UpdateSchemaRefusalError } from "../state/carapace-update-schema-refusal.js";
 import {
   ExpectedCliError,
   formatCliFailureLines,
@@ -10,14 +10,14 @@ import {
 } from "./failure-output.js";
 
 const PLUGIN_POLICY_MESSAGE =
-  'The `openclaw workboard` command is provided by the "workboard" plugin, but that bundled plugin is disabled by default. Run `openclaw plugins enable workboard` to enable that CLI surface.';
+  'The `carapace workboard` command is provided by the "workboard" plugin, but that bundled plugin is disabled by default. Run `carapace plugins enable workboard` to enable that CLI surface.';
 
 describe("formatCliJsonFailure", () => {
   it("preserves the typed schema refusal when a runner migration fails before Doctor starts", () => {
     const databases = [
       {
         kind: "state" as const,
-        path: "/state/openclaw.sqlite",
+        path: "/state/carapace.sqlite",
         foundVersion: 15,
         supportedVersion: 16,
       },
@@ -34,7 +34,7 @@ describe("formatCliJsonFailure", () => {
         updaterVersion: "2026.9.2",
         message: expect.stringContaining("Deferral failed: content migration failed"),
         databases,
-        commands: expect.arrayContaining(["openclaw gateway stop", "openclaw doctor --fix"]),
+        commands: expect.arrayContaining(["carapace gateway stop", "carapace doctor --fix"]),
       },
     });
   });
@@ -60,22 +60,22 @@ describe("formatCliJsonFailure", () => {
     expect(formatCliJsonFailure(error, { env: {} }).error.message).toBe(
       "Promotion is not available.",
     );
-    expect(formatCliJsonFailure(error, { env: { OPENCLAW_DEBUG: "1" } }).error.message).toBe(
+    expect(formatCliJsonFailure(error, { env: { CARAPACE_DEBUG: "1" } }).error.message).toBe(
       "Promotion is not available. | ClawHub /api/v1/promotions/nope failed (404)",
     );
   });
 
   it.each([
     { label: "default output", env: {} },
-    { label: "debug output", env: { OPENCLAW_DEBUG: "1" } },
+    { label: "debug output", env: { CARAPACE_DEBUG: "1" } },
   ])("keeps the full parse guidance unchanged in $label", ({ env }) => {
     const error = Object.assign(
       new ExpectedCliError({
-        message: 'OpenClaw sessions has no command "lst".',
+        message: 'Carapace sessions has no command "lst".',
         humanOutput:
-          '\u001B[31mOpenClaw sessions has no command "lst".\u001B[39m\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: \u001B]8;;https://docs.openclaw.ai/cli\u0007docs.openclaw.ai/cli\u001B]8;;\u0007\n',
+          '\u001B[31mCarapace sessions has no command "lst".\u001B[39m\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: \u001B]8;;https://github.com/Exaggarate/carapace\github.com/Exaggarate/carapace/cli\u001B]8;;\u0007\n',
         machineOutput:
-          'OpenClaw sessions has no command "lst".\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: https://docs.openclaw.ai/cli\n',
+          'Carapace sessions has no command "lst".\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: https://github.com/Exaggarate/carapace\n',
       }),
       { cause: new Error("internal parse cause") },
     );
@@ -86,7 +86,7 @@ describe("formatCliJsonFailure", () => {
       error: {
         type: "cli_error",
         message:
-          'OpenClaw sessions has no command "lst".\nDid you mean this?\n  openclaw sessions list\nTry: openclaw sessions --help\nDocs: https://docs.openclaw.ai/cli',
+          'Carapace sessions has no command "lst".\nDid you mean this?\n  carapace sessions list\nTry: carapace sessions --help\nDocs: https://github.com/Exaggarate/carapace',
       },
     });
     expect(payload.error.message).not.toContain("internal parse cause");
@@ -106,11 +106,11 @@ describe("formatCliJsonFailure", () => {
 
   it.each([
     { label: "default output", env: {} },
-    { label: "debug output", env: { OPENCLAW_DEBUG: "1" } },
+    { label: "debug output", env: { CARAPACE_DEBUG: "1" } },
   ])("keeps gateway credential guidance unchanged in $label", ({ env }) => {
     const error = new GatewayCredentialsRequiredError({
       method: "device.pair.list",
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
     });
 
     expect(formatCliJsonFailure(error, { env })).toEqual({
@@ -126,7 +126,7 @@ describe("formatCliJsonFailure", () => {
 describe("formatCliFailureLines", () => {
   it.each([
     { label: "default output", env: {} },
-    { label: "debug output", env: { OPENCLAW_DEBUG: "1" } },
+    { label: "debug output", env: { CARAPACE_DEBUG: "1" } },
   ])("emits expected guidance only when not already written in $label", ({ env }) => {
     const pending = new ExpectedCliError({
       message: "bad input",
@@ -153,16 +153,16 @@ describe("formatCliFailureLines", () => {
       error: new Error("config file is invalid", {
         cause: new Error("unexpected token at /internal/config.json:12"),
       }),
-      argv: ["node", "openclaw", "status"],
+      argv: ["node", "carapace", "status"],
       env: {},
     });
 
     expect(lines).toEqual([
-      "[openclaw] Could not start the CLI.",
-      "[openclaw] Reason: config file is invalid",
-      "[openclaw] Debug: set OPENCLAW_DEBUG=1 to include the stack trace.",
-      "[openclaw] Try: openclaw doctor",
-      "[openclaw] Help: openclaw --help",
+      "[carapace] Could not start the CLI.",
+      "[carapace] Reason: config file is invalid",
+      "[carapace] Debug: set CARAPACE_DEBUG=1 to include the stack trace.",
+      "[carapace] Try: carapace doctor",
+      "[carapace] Help: carapace --help",
     ]);
   });
 
@@ -181,7 +181,7 @@ describe("formatCliFailureLines", () => {
       createError: () =>
         new GatewayCredentialsRequiredError({
           method: "device.pair.list",
-          configPath: "/tmp/openclaw.json",
+          configPath: "/tmp/carapace.json",
         }),
     },
     {
@@ -190,7 +190,7 @@ describe("formatCliFailureLines", () => {
         new GatewayTransportError({
           kind: "closed",
           message:
-            "Gateway not reachable at ws://127.0.0.1:51078 (ECONNREFUSED).\nStart it with `openclaw gateway run` or check `openclaw gateway status`.",
+            "Gateway not reachable at ws://127.0.0.1:51078 (ECONNREFUSED).\nStart it with `carapace gateway run` or check `carapace gateway status`.",
           connectionDetails: {
             url: "ws://127.0.0.1:51078",
             urlSource: "local loopback",
@@ -207,16 +207,16 @@ describe("formatCliFailureLines", () => {
       const lines = formatCliFailureLines({
         title: "The CLI command failed.",
         error,
-        env: { OPENCLAW_DEBUG: "1" },
+        env: { CARAPACE_DEBUG: "1" },
       });
 
       expect(lines).toEqual(error.message.split("\n"));
       const output = lines.join("\n");
-      expect(output).not.toContain("[openclaw] The CLI command failed.");
-      expect(output).not.toContain("[openclaw] Reason:");
-      expect(output).not.toContain("OPENCLAW_DEBUG");
+      expect(output).not.toContain("[carapace] The CLI command failed.");
+      expect(output).not.toContain("[carapace] Reason:");
+      expect(output).not.toContain("CARAPACE_DEBUG");
       expect(output).not.toContain("Stack:");
-      expect(output).not.toContain("openclaw doctor");
+      expect(output).not.toContain("carapace doctor");
     },
   );
 
@@ -224,14 +224,14 @@ describe("formatCliFailureLines", () => {
     const lines = formatCliFailureLines({
       title: "The CLI command failed.",
       error: new Error("boom"),
-      env: { OPENCLAW_DEBUG: "1" },
+      env: { CARAPACE_DEBUG: "1" },
     });
 
     expect(lines.slice(0, 4)).toEqual([
-      "[openclaw] The CLI command failed.",
-      "[openclaw] Reason: boom",
-      "[openclaw] Stack:",
-      "[openclaw] Error: boom",
+      "[carapace] The CLI command failed.",
+      "[carapace] Reason: boom",
+      "[carapace] Stack:",
+      "[carapace] Error: boom",
     ]);
     expect(lines.join("\n")).toContain("Error: boom");
   });
@@ -240,13 +240,13 @@ describe("formatCliFailureLines", () => {
     const lines = formatCliFailureLines({
       title: "The CLI command failed.",
       error: new Error("boom", { cause: new Error("transport detail") }),
-      argv: ["node", "openclaw", "proxy", "run", debugFlag],
+      argv: ["node", "carapace", "proxy", "run", debugFlag],
       env: {},
     });
 
-    expect(lines).toContain("[openclaw] Reason: boom | transport detail");
-    expect(lines).toContain("[openclaw] Stack:");
-    expect(lines).toContain("[openclaw] Error: boom");
+    expect(lines).toContain("[carapace] Reason: boom | transport detail");
+    expect(lines).toContain("[carapace] Stack:");
+    expect(lines).toContain("[carapace] Error: boom");
   });
 
   it.each(["--debug", "--verbose"])(
@@ -255,12 +255,12 @@ describe("formatCliFailureLines", () => {
       const lines = formatCliFailureLines({
         title: "The CLI command failed.",
         error: new Error("boom"),
-        argv: ["node", "openclaw", "proxy", "run", "--", "child", debugFlag],
+        argv: ["node", "carapace", "proxy", "run", "--", "child", debugFlag],
         env: {},
       });
 
-      expect(lines).not.toContain("[openclaw] Stack:");
-      expect(lines).toContain("[openclaw] Debug: set OPENCLAW_DEBUG=1 to include the stack trace.");
+      expect(lines).not.toContain("[carapace] Stack:");
+      expect(lines).toContain("[carapace] Debug: set CARAPACE_DEBUG=1 to include the stack trace.");
     },
   );
 });

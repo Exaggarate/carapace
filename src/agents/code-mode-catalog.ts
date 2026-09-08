@@ -39,7 +39,7 @@ const RESERVED_WORDS = new Set([
 
 function normalizedCallableBase(name: string): string {
   const normalized = name.replace(/[^A-Za-z0-9_$]/g, "_");
-  return /^[A-Za-z_$]/.test(normalized) && !normalized.startsWith("__openclaw")
+  return /^[A-Za-z_$]/.test(normalized) && !normalized.startsWith("__carapace")
     ? normalized
     : `tool_${normalized}`;
 }

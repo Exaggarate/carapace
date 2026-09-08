@@ -1,19 +1,19 @@
 // Slack plugin module implements message action dispatch behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
-import { resolveReactionMessageId } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+import { normalizeAccountId } from "carapace/plugin-sdk/account-resolution";
+import type { AgentToolResult } from "carapace/plugin-sdk/agent-core";
+import { readBooleanParam } from "carapace/plugin-sdk/boolean-param";
+import { resolveReactionMessageId } from "carapace/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
 import {
   normalizeLegacyInteractiveReply,
   normalizeMessagePresentation,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { readPositiveIntegerParam, readStringParam } from "openclaw/plugin-sdk/param-readers";
+} from "carapace/plugin-sdk/interactive-runtime";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { readPositiveIntegerParam, readStringParam } from "carapace/plugin-sdk/param-readers";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultSlackAccountId } from "./accounts.js";
 import { SLACK_MAX_BLOCKS } from "./blocks-input.js";
 import { buildSlackPresentationBlocks, canRenderSlackPresentation } from "./blocks-render.js";

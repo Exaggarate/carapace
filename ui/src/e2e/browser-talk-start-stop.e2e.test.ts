@@ -69,9 +69,9 @@ suite.define(() => {
             () =>
               (
                 window as Window & {
-                  openclawTalkE2eState?: { constraints: unknown[] };
+                  carapaceTalkE2eState?: { constraints: unknown[] };
                 }
-              ).openclawTalkE2eState?.constraints,
+              ).carapaceTalkE2eState?.constraints,
           ),
         )
         .toEqual([
@@ -138,7 +138,7 @@ suite.define(() => {
       await page.evaluate(() => {
         const state = (
           window as Window & {
-            openclawTalkE2eState?: {
+            carapaceTalkE2eState?: {
               inputProcessor?: {
                 onaudioprocess?: (event: {
                   inputBuffer: { getChannelData: () => Float32Array };
@@ -147,7 +147,7 @@ suite.define(() => {
               meterLevel?: number;
             };
           }
-        ).openclawTalkE2eState;
+        ).carapaceTalkE2eState;
         if (state) {
           state.meterLevel = 0.25;
         }
@@ -179,9 +179,9 @@ suite.define(() => {
           page.evaluate(() => {
             const state = (
               window as Window & {
-                openclawTalkE2eState?: { audioContextsClosed: number; tracksStopped: number };
+                carapaceTalkE2eState?: { audioContextsClosed: number; tracksStopped: number };
               }
-            ).openclawTalkE2eState;
+            ).carapaceTalkE2eState;
             return state
               ? {
                   audioContextsClosed: state.audioContextsClosed,
@@ -236,7 +236,7 @@ suite.define(() => {
       await page.evaluate(() => {
         const state = (
           window as Window & {
-            openclawTalkE2eState?: {
+            carapaceTalkE2eState?: {
               inputProcessor?: {
                 onaudioprocess?: (event: {
                   inputBuffer: { getChannelData: () => Float32Array };
@@ -245,7 +245,7 @@ suite.define(() => {
               meterLevel?: number;
             };
           }
-        ).openclawTalkE2eState;
+        ).carapaceTalkE2eState;
         if (state) {
           state.meterLevel = 0.25;
         }
@@ -347,9 +347,9 @@ suite.define(() => {
             Boolean(
               (
                 window as Window & {
-                  openclawVideoTalkE2e?: { dataChannelCreated: boolean };
+                  carapaceVideoTalkE2e?: { dataChannelCreated: boolean };
                 }
-              ).openclawVideoTalkE2e?.dataChannelCreated,
+              ).carapaceVideoTalkE2e?.dataChannelCreated,
             ),
           ),
         )
@@ -357,9 +357,9 @@ suite.define(() => {
       await page.evaluate(() => {
         const channel = (
           window as Window & {
-            openclawVideoTalkE2e?: { peer: { channel: EventTarget } };
+            carapaceVideoTalkE2e?: { peer: { channel: EventTarget } };
           }
-        ).openclawVideoTalkE2e?.peer.channel;
+        ).carapaceVideoTalkE2e?.peer.channel;
         channel?.dispatchEvent(new Event("open"));
       });
       await dispatchOpenAiTalkEvent(page, {
@@ -433,9 +433,9 @@ suite.define(() => {
           page.evaluate(() => {
             const sent = (
               window as Window & {
-                openclawVideoTalkE2e?: { peer: { channel: { sent: unknown[] } } };
+                carapaceVideoTalkE2e?: { peer: { channel: { sent: unknown[] } } };
               }
-            ).openclawVideoTalkE2e?.peer.channel.sent;
+            ).carapaceVideoTalkE2e?.peer.channel.sent;
             return {
               image: sent?.some(
                 (event) =>
@@ -470,9 +470,9 @@ suite.define(() => {
       const trackStates = await page.evaluate(() =>
         (
           window as Window & {
-            openclawVideoTalkTracks?: MediaStreamTrack[];
+            carapaceVideoTalkTracks?: MediaStreamTrack[];
           }
-        ).openclawVideoTalkTracks?.map((track) => track.readyState),
+        ).carapaceVideoTalkTracks?.map((track) => track.readyState),
       );
       expect(trackStates).toHaveLength(2);
       expect(trackStates?.every((state) => state === "ended")).toBe(true);
@@ -596,9 +596,9 @@ suite.define(() => {
       const trackStates = await page.evaluate(() =>
         (
           window as Window & {
-            openclawVideoTalkTracks?: MediaStreamTrack[];
+            carapaceVideoTalkTracks?: MediaStreamTrack[];
           }
-        ).openclawVideoTalkTracks?.map((track) => track.readyState),
+        ).carapaceVideoTalkTracks?.map((track) => track.readyState),
       );
       expect(trackStates).toHaveLength(2);
       expect(trackStates?.every((state) => state === "ended")).toBe(true);
@@ -660,9 +660,9 @@ suite.define(() => {
       const trackStates = await page.evaluate(() =>
         (
           window as Window & {
-            openclawVideoTalkTracks?: MediaStreamTrack[];
+            carapaceVideoTalkTracks?: MediaStreamTrack[];
           }
-        ).openclawVideoTalkTracks?.map((track) => track.readyState),
+        ).carapaceVideoTalkTracks?.map((track) => track.readyState),
       );
       expect(trackStates).toEqual(["ended"]);
       console.info("[video-talk-e2e] camera_denial=actionable,audio_track:ended");
@@ -703,9 +703,9 @@ suite.define(() => {
             () =>
               (
                 window as Window & {
-                  openclawTalkE2eState?: { constraints: unknown[] };
+                  carapaceTalkE2eState?: { constraints: unknown[] };
                 }
-              ).openclawTalkE2eState?.constraints.length,
+              ).carapaceTalkE2eState?.constraints.length,
           ),
         )
         .toBe(1);
@@ -787,9 +787,9 @@ suite.define(() => {
             () =>
               (
                 window as Window & {
-                  openclawTalkE2eState?: { inputProcessor?: unknown };
+                  carapaceTalkE2eState?: { inputProcessor?: unknown };
                 }
-              ).openclawTalkE2eState?.inputProcessor != null,
+              ).carapaceTalkE2eState?.inputProcessor != null,
           ),
         )
         .toBe(true);
@@ -798,7 +798,7 @@ suite.define(() => {
       await page.evaluate(() => {
         const processor = (
           window as Window & {
-            openclawTalkE2eState?: {
+            carapaceTalkE2eState?: {
               inputProcessor?: {
                 onaudioprocess?: (event: {
                   inputBuffer: { getChannelData: () => Float32Array };
@@ -806,7 +806,7 @@ suite.define(() => {
               };
             };
           }
-        ).openclawTalkE2eState?.inputProcessor;
+        ).carapaceTalkE2eState?.inputProcessor;
         for (let index = 0; index < 5; index += 1) {
           processor?.onaudioprocess?.({
             inputBuffer: { getChannelData: () => new Float32Array(4096).fill(0.1) },
@@ -870,13 +870,13 @@ suite.define(() => {
           page.evaluate(() => {
             const state = (
               window as Window & {
-                openclawTalkE2eState?: {
+                carapaceTalkE2eState?: {
                   constraints: unknown[];
                   tracksStopped: number;
                   inputProcessor?: unknown;
                 };
               }
-            ).openclawTalkE2eState;
+            ).carapaceTalkE2eState;
             return {
               captures: state?.constraints.length,
               stopped: state?.tracksStopped,
@@ -915,7 +915,7 @@ suite.define(() => {
       await page.evaluate(() => {
         const state = (
           window as Window & {
-            openclawTalkE2eState?: {
+            carapaceTalkE2eState?: {
               inputProcessor?: {
                 onaudioprocess?: (event: {
                   inputBuffer: { getChannelData: () => Float32Array };
@@ -923,7 +923,7 @@ suite.define(() => {
               };
             };
           }
-        ).openclawTalkE2eState;
+        ).carapaceTalkE2eState;
         state?.inputProcessor?.onaudioprocess?.({
           inputBuffer: { getChannelData: () => new Float32Array(4096).fill(0.1) },
         });

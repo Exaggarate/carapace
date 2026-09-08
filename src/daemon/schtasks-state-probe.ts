@@ -1,6 +1,6 @@
 /** Locale-independent Task Scheduler registration and runtime facts. */
 import { spawnSync } from "node:child_process";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { getWindowsPowerShellExePath } from "../infra/windows-install-roots.js";
 import { resolveServiceManagerEnv } from "./service-process-env.js";
 

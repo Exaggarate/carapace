@@ -12,12 +12,12 @@ import {
 import { withExtractedArchiveRoot } from "../../infra/install-flow.js";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { withTempWorkspace } from "../../infra/private-temp-workspace.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import { installSkillFromClawHub } from "../lifecycle/clawhub.js";
 import {
   prepareSkillLibraryBundle,
@@ -45,7 +45,7 @@ async function publishDirectory(
   authority: SkillLibraryAuthority,
   slug: string,
   directory: string,
-  options: OpenClawStateDatabaseOptions,
+  options: CarapaceStateDatabaseOptions,
   uploadId?: string,
 ) {
   const files = await readSkillLibraryTree(directory);
@@ -70,11 +70,11 @@ async function publishDirectory(
 export async function importSkillLibrary(
   authority: SkillLibraryAuthority,
   params: SkillsLibraryImportParams,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ) {
-  requireSkillLibraryProfile(openOpenClawStateDatabase(options).db, authority);
+  requireSkillLibraryProfile(openCarapaceStateDatabase(options).db, authority);
   return withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-library-source-" },
+    { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-library-source-" },
     async ({ dir }) => {
       const installed = await installSkillFromClawHub({
         workspaceDir: dir,
@@ -95,15 +95,15 @@ export async function importSkillLibrary(
 export async function uploadSkillLibrary(
   authority: SkillLibraryAuthority,
   params: SkillsLibraryUploadParams,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): Promise<SkillsLibraryUploadResult> {
   if (!validateSkillsLibraryUploadParams(params)) {
     throw new SkillLibraryError("INVALID_BUNDLE", "Invalid library upload parameters.");
   }
-  requireSkillLibraryProfile(openOpenClawStateDatabase(options).db, authority);
+  requireSkillLibraryProfile(openCarapaceStateDatabase(options).db, authority);
   ensureSkillLibrarySchema(options);
   if (params.action === "begin") {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       const actor = requireSkillLibraryProfile(db, authority);
       const kysely = skillLibraryDb(db);
       executeSqliteQuerySync(
@@ -150,7 +150,7 @@ export async function uploadSkillLibrary(
     }, options);
   }
   const readOwned = () =>
-    requireSkillLibraryUpload(openOpenClawStateDatabase(options).db, params.uploadId, authority);
+    requireSkillLibraryUpload(openCarapaceStateDatabase(options).db, params.uploadId, authority);
   if (params.action === "chunk") {
     const bytes = Buffer.from(params.data, "base64");
     if (
@@ -163,7 +163,7 @@ export async function uploadSkillLibrary(
         "Invalid upload chunk; send canonical base64, at most 256 KiB decoded.",
       );
     }
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runCarapaceStateWriteTransaction(({ db }) => {
       const upload = readOwned();
       const current = Buffer.from(upload.archive_blob);
       if (
@@ -191,7 +191,7 @@ export async function uploadSkillLibrary(
   if (upload.published_skill_id) {
     return skillLibraryReceipt(
       requireSkillLibraryEntry(
-        openOpenClawStateDatabase(options).db,
+        openCarapaceStateDatabase(options).db,
         upload.published_skill_id,
         authority,
       ),
@@ -209,13 +209,13 @@ export async function uploadSkillLibrary(
     );
   }
   return withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-library-import-" },
+    { rootDir: resolvePreferredCarapaceTmpDir(), prefix: "carapace-library-import-" },
     async ({ dir }) => {
       const archivePath = path.join(dir, "skill.zip");
       await fs.writeFile(archivePath, bytes, { mode: 0o600, flag: "wx" });
       const result = await withExtractedArchiveRoot({
         archivePath,
-        tempDirPrefix: "openclaw-library-extract-",
+        tempDirPrefix: "carapace-library-extract-",
         timeoutMs: 120_000,
         rootMarkers: ["SKILL.md"],
         limits: {
@@ -233,7 +233,7 @@ export async function uploadSkillLibrary(
               ...authority,
               assertCurrent: () =>
                 requireSkillLibraryUploadMetadata(
-                  openOpenClawStateDatabase(options).db,
+                  openCarapaceStateDatabase(options).db,
                   params.uploadId,
                   authority,
                 ),

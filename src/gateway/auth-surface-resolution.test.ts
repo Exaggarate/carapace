@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveGatewayInteractiveSurfaceAuth,
   resolveGatewayProbeSurfaceAuth,
 } from "./auth-surface-resolution.js";
 
 const ambientAuth = {
-  OPENCLAW_GATEWAY_TOKEN: "ambient-token",
-  OPENCLAW_GATEWAY_PASSWORD: "ambient-password", // pragma: allowlist secret
+  CARAPACE_GATEWAY_TOKEN: "ambient-token",
+  CARAPACE_GATEWAY_PASSWORD: "ambient-password", // pragma: allowlist secret
 } as NodeJS.ProcessEnv;
 
 function missingSecretRef(id: string) {
   return { source: "env", provider: "default", id } as const;
 }
 
-function configWithSecretProvider(gateway: NonNullable<OpenClawConfig["gateway"]>): OpenClawConfig {
+function configWithSecretProvider(gateway: NonNullable<CarapaceConfig["gateway"]>): CarapaceConfig {
   return {
     gateway,
     secrets: { providers: { default: { source: "env" } } },

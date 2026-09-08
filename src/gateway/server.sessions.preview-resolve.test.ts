@@ -33,11 +33,11 @@ test("lists and previews the selected aggregate global owner over WebSocket", as
     sessionStorePath: testState.sessionStorePath,
   };
   const configPaths = new Set([config.CONFIG_PATH]);
-  if (process.env.OPENCLAW_CONFIG_PATH) {
-    configPaths.add(process.env.OPENCLAW_CONFIG_PATH);
+  if (process.env.CARAPACE_CONFIG_PATH) {
+    configPaths.add(process.env.CARAPACE_CONFIG_PATH);
   }
-  if (process.env.OPENCLAW_STATE_DIR) {
-    configPaths.add(path.join(process.env.OPENCLAW_STATE_DIR, "openclaw.json"));
+  if (process.env.CARAPACE_STATE_DIR) {
+    configPaths.add(path.join(process.env.CARAPACE_STATE_DIR, "carapace.json"));
   }
   const files = new Map<string, Buffer | undefined>();
   for (const configPath of configPaths) {
@@ -154,7 +154,7 @@ function identifiedClient(profileId: string, scopes: string[] = ["operator.read"
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",

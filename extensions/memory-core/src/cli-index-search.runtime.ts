@@ -1,10 +1,10 @@
 import path from "node:path";
-import { resolveMemorySearchStaleness } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { resolveMemorySearchStaleness } from "carapace/plugin-sdk/memory-core-host-engine-storage";
 import {
   resolveMemoryDreamingConfig,
   resolveMemoryDreamingWorkspaces,
   resolveMemoryDeepDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
+} from "carapace/plugin-sdk/memory-core-host-status";
 import {
   buildCliMemorySearchSessionKey,
   formatAuditCounts,

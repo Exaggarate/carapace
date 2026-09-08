@@ -19,8 +19,8 @@ describe("flattenMarkdownToPlainText", () => {
     ["emphasis", "**bold** _italic_ ~~struck~~", "bold italic struck"],
     [
       "literal underscores and tildes",
-      "Use foo_bar_baz from ~/.openclaw",
-      "Use foo_bar_baz from ~/.openclaw",
+      "Use foo_bar_baz from ~/.carapace",
+      "Use foo_bar_baz from ~/.carapace",
     ],
     ["multiline whitespace", "First\n\n  second\t third", "First second third"],
     ["plain text", "Already plain text.", "Already plain text."],

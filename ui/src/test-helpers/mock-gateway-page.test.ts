@@ -9,8 +9,8 @@ it("keeps serialized Gateway globals and storage out of the host realm", ({ gate
   const keys = [
     "WebSocket",
     "JSON5",
-    "__OPENCLAW_CONTROL_UI_BASE_PATH__",
-    "openclawControlUiE2eGateway",
+    "__CARAPACE_CONTROL_UI_BASE_PATH__",
+    "carapaceControlUiE2eGateway",
   ];
   const descriptors = () => keys.map((key) => Object.getOwnPropertyDescriptor(globalThis, key));
   const before = descriptors();
@@ -20,7 +20,7 @@ it("keeps serialized Gateway globals and storage out of the host realm", ({ gate
 
   expect(gatewayPage.window).not.toBe(globalThis.window);
   expect(
-    Object.getOwnPropertyDescriptor(gatewayPage.window, "openclawControlUiE2eGateway")?.value,
+    Object.getOwnPropertyDescriptor(gatewayPage.window, "carapaceControlUiE2eGateway")?.value,
   ).toBeDefined();
   expect(descriptors()).toEqual(before);
   expect(Object.entries(sessionStorage)).toEqual(hostStorage);
@@ -29,7 +29,7 @@ it("keeps serialized Gateway globals and storage out of the host realm", ({ gate
 it("binds standalone mock pages to their serving Gateway", ({ gatewayPage }) => {
   gatewayPage.execute(createControlUiMockSameOriginGatewayScript());
 
-  expect(gatewayPage.window["__OPENCLAW_NATIVE_CONTROL_AUTH__"]).toEqual({
+  expect(gatewayPage.window["__CARAPACE_NATIVE_CONTROL_AUTH__"]).toEqual({
     gatewayUrl: "ws://mock-control-ui",
   });
 });
@@ -75,7 +75,7 @@ it("retires queued Gateway work and listeners when its page closes", async ({ ga
     setTimeout(resolve, 0);
   });
 
-  expect(storage.getItem("openclaw.control-ui-e2e.configState")).toBeNull();
+  expect(storage.getItem("carapace.control-ui-e2e.configState")).toBeNull();
   expect(responses).toEqual([]);
   expect(listenerCalls).toBe(0);
 });

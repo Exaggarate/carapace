@@ -1,6 +1,6 @@
 // Browser tests cover cdp.helpers.fuzz plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { parseBrowserHttpUrl } from "openclaw/plugin-sdk/browser-cdp";
+import { expectDefined } from "@carapace/normalization-core";
+import { parseBrowserHttpUrl } from "carapace/plugin-sdk/browser-cdp";
 import { describe, expect, it } from "vitest";
 import {
   appendCdpPath,

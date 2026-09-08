@@ -34,7 +34,7 @@ export type CommandLaneGroupSpec = {
 
 /** Shared across fresh module instances so one group cannot re-enter its arbiter. */
 const DRAINING_GROUPS = resolveGlobalSingleton(
-  Symbol.for("openclaw.commandQueueDrainingGroups"),
+  Symbol.for("carapace.commandQueueDrainingGroups"),
   () => new WeakSet<LaneGroupState>(),
 );
 

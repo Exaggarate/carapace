@@ -11,7 +11,7 @@ import {
 import { connectMcpClient, disposeMcpClient } from "./mcp-client-lifecycle.js";
 import { isMcpRequestTimeoutError } from "./mcp-error.js";
 import { McpStdioFrameDecoder, McpStdioFrameError } from "./mcp-stdio-frame-decoder.js";
-import { OpenClawStdioClientTransport } from "./mcp-stdio-transport.js";
+import { CarapaceStdioClientTransport } from "./mcp-stdio-transport.js";
 
 const MAX_STDERR_BYTES = 32 * 1024;
 
@@ -102,14 +102,14 @@ export function createMcpStdioClient(params: McpStdioClientParams): McpStdioClie
     }
   }
 
-  class StdioTransport extends OpenClawStdioClientTransport {
-    override onerror: OpenClawStdioClientTransport["onerror"] = (error) =>
+  class StdioTransport extends CarapaceStdioClientTransport {
+    override onerror: CarapaceStdioClientTransport["onerror"] = (error) =>
       fail(
         error instanceof McpStdioFrameError
           ? errors.protocol(error.message, error.cause)
           : errors.unavailable("proxy failed to start", error),
       );
-    override onexit: OpenClawStdioClientTransport["onexit"] = ({ code, signal }) => {
+    override onexit: CarapaceStdioClientTransport["onexit"] = ({ code, signal }) => {
       if (!stopped && !failure) {
         const tail = stderr.toString("utf8").trim();
         fail(

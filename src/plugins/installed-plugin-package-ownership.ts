@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@carapace/normalization-core/result";
 import { isPathInside } from "../infra/path-guards.js";
 import { resolveUserPath } from "../utils.js";
 import {
@@ -60,7 +60,7 @@ function ownershipError(pluginId: string, detail: string): InstalledPluginPackag
     ok: false,
     error:
       `Plugin "${pluginId}" ${detail}. ` +
-      "Refresh the plugin registry, then reinstall the package or run openclaw doctor before retrying.",
+      "Refresh the plugin registry, then reinstall the package or run carapace doctor before retrying.",
   };
 }
 

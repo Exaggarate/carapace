@@ -46,7 +46,7 @@ async function withNewSessionPage(run: (page: Page) => Promise<void>): Promise<v
 
 suite.define(() => {
   it("restores a prompt and image in a fresh page, then clears them after creation", async () => {
-    const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim()
+    const artifactDir = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim()
       ? suite.artifactDir
       : undefined;
     const context = await suite.browser.newContext({
@@ -285,7 +285,7 @@ suite.define(() => {
       await expect.poll(() => preview.getAttribute("src")).toMatch(/^data:image\/png;base64,/u);
       await captureUiProof(suite, page, "new-session-picked-image-preview.png");
       await previewButton.click();
-      const lightbox = page.locator("openclaw-image-lightbox");
+      const lightbox = page.locator("carapace-image-lightbox");
       const dialog = page.getByRole("dialog", { name: "Image preview: favicon-32.png" });
       await dialog.waitFor({ state: "visible" });
       await expect(lightbox.getAttribute("title")).resolves.toBeNull();
@@ -323,7 +323,7 @@ suite.define(() => {
       await previewButton.click();
       await page.getByRole("dialog", { name: "Image preview: untrusted.svg" }).waitFor();
       await expect(page.getByRole("link", { name: "Open in new tab" }).count()).resolves.toBe(0);
-      const lightbox = page.locator("openclaw-image-lightbox");
+      const lightbox = page.locator("carapace-image-lightbox");
       await captureUiProof(suite, page, "new-session-svg-lightbox.png", {
         surface: lightbox.locator("dialog"),
         content: [lightbox.locator("img.image")],
@@ -358,7 +358,7 @@ suite.define(() => {
                   },
                 ],
                 timestamp: activeOutputTimestamp,
-                __openclaw: { id: "active-assistant", seq: 2 },
+                __carapace: { id: "active-assistant", seq: 2 },
               },
               {
                 role: "toolResult",
@@ -366,7 +366,7 @@ suite.define(() => {
                 toolName: "read",
                 content: [{ type: "text", text: "working" }],
                 timestamp: activeOutputTimestamp + 1,
-                __openclaw: { id: "active-tool-result", seq: 3 },
+                __carapace: { id: "active-tool-result", seq: 3 },
               },
             ],
             sessionId: "visible-initial-prompt",
@@ -433,7 +433,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -466,7 +466,7 @@ suite.define(() => {
         releaseMedia = resolve;
       });
       let metadataRequested = false;
-      await page.route("**/__openclaw__/assistant-media?**", async (route) => {
+      await page.route("**/__carapace__/assistant-media?**", async (route) => {
         const url = new URL(route.request().url());
         expect(url.searchParams.get("source")).toBe(source);
         const metadata = url.searchParams.get("meta") === "1";
@@ -488,7 +488,7 @@ suite.define(() => {
         role: "user",
         content: [{ type: "text", text: message }],
         timestamp: Date.now(),
-        __openclaw: {
+        __carapace: {
           id: "persisted-image-prompt",
           idempotencyKey: `${runId}:user`,
           seq: 1,
@@ -829,7 +829,7 @@ suite.define(() => {
         const setItem = Object.getOwnPropertyDescriptor(Storage.prototype, "setItem")
           ?.value as Storage["setItem"];
         Storage.prototype.setItem = function (key: string, value: string) {
-          if (key.startsWith("openclaw.control.chatComposer.v2:")) {
+          if (key.startsWith("carapace.control.chatComposer.v2:")) {
             throw new DOMException("Quota exceeded", "QuotaExceededError");
           }
           return setItem.call(this, key, value);

@@ -1,13 +1,13 @@
 /** Non-blocking process-owned queue for audit metadata persistence. */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import type { DecisionReceiptV1 } from "../../packages/gateway-protocol/src/index.js";
 import { resolveStateDir } from "../config/paths.js";
 import { redactSensitiveText } from "../logging/redact.js";
 import {
-  OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
-  runWithOpenClawStateBusyTimeout,
-} from "../state/openclaw-state-db.js";
-import { isOpenClawStateWriteContentionError } from "../state/openclaw-state-ownership.js";
+  CARAPACE_SQLITE_BUSY_TIMEOUT_MS,
+  runWithCarapaceStateBusyTimeout,
+} from "../state/carapace-state-db.js";
+import { isCarapaceStateWriteContentionError } from "../state/carapace-state-ownership.js";
 import { pruneExpiredAuditEvents, recordAuditEvent } from "./audit-event-store.js";
 import { isOutboundMessageProgressInput, type AuditEventInput } from "./audit-event-types.js";
 import {
@@ -34,7 +34,7 @@ const AUDIT_MAINTENANCE_INTERVAL_MS = 60 * 60_000;
 const AUDIT_LOCK_RETRY_DELAY_MS = 25;
 const AUDIT_LOCK_RETRY_MAX_DELAY_MS = 1_000;
 const AUDIT_LOCK_CONTENTION_REPORT_MS = 1_000;
-const AUDIT_WRITER_SHUTDOWN_TIMEOUT_MS = OPENCLAW_SQLITE_BUSY_TIMEOUT_MS + 5_000;
+const AUDIT_WRITER_SHUTDOWN_TIMEOUT_MS = CARAPACE_SQLITE_BUSY_TIMEOUT_MS + 5_000;
 
 type AuditWriterAttempt = "settled" | "retry";
 type AuditMaintenanceAttempt = "settled" | "more" | "retry";
@@ -98,7 +98,7 @@ export function createAuditEventWriter(
   } = {},
 ): AuditEventWriter {
   const database = {
-    env: { ...process.env, OPENCLAW_STATE_DIR: options.stateDir ?? resolveStateDir(process.env) },
+    env: { ...process.env, CARAPACE_STATE_DIR: options.stateDir ?? resolveStateDir(process.env) },
   };
   const maxPending = Math.max(1, Math.floor(options.maxPending ?? MAX_PENDING_AUDIT_EVENTS));
   const queue: AuditWriterRequest[] = [];
@@ -126,7 +126,7 @@ export function createAuditEventWriter(
     options.onContention?.(formatAuditWriterError(message));
   };
   const runWithoutBusyWait = <T>(operation: () => T): T =>
-    runWithOpenClawStateBusyTimeout(() => operation(), database, 0);
+    runWithCarapaceStateBusyTimeout(() => operation(), database, 0);
   const observeLockContention = () => {
     lockRetryAttempt += 1;
   };
@@ -146,7 +146,7 @@ export function createAuditEventWriter(
       try {
         more = runWithoutBusyWait(maintenance) > 0 || more;
       } catch (error) {
-        if (isOpenClawStateWriteContentionError(error)) {
+        if (isCarapaceStateWriteContentionError(error)) {
           observeLockContention();
           return "retry";
         }
@@ -178,7 +178,7 @@ export function createAuditEventWriter(
       });
       return "settled";
     } catch (error) {
-      if (isOpenClawStateWriteContentionError(error)) {
+      if (isCarapaceStateWriteContentionError(error)) {
         observeLockContention();
         return "retry";
       }

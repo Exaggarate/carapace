@@ -8,10 +8,10 @@ import { createBackupArchive } from "../infra/backup-create.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabase,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { backupRestoreCommand } from "./backup-restore.js";
 import { buildBackupArchivePath } from "./backup-shared.js";
 import { verifyBackupArchive } from "./backup-verify.js";
@@ -96,7 +96,7 @@ async function writeArchive(params: {
       assets: [
         {
           kind: "config",
-          sourcePath: "/tmp/openclaw.json",
+          sourcePath: "/tmp/carapace.json",
           archivePath: params.payloadPath,
         },
       ],
@@ -126,13 +126,13 @@ describe("backupRestoreCommand", () => {
       if (suffix && process.platform === "win32") {
         ctx.skip(); // Windows cannot preserve a trailing space in a filename.
       }
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-backup-restore-hardlink-", scenario: "minimal" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-backup-restore-hardlink-", scenario: "minimal" },
         async (state) => {
           const archivePath = state.path("backup.tar.gz");
           const targetPath = state.path("restored");
-          const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-          const payloadPath = `${buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json")}${suffix}`;
+          const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+          const payloadPath = `${buildBackupArchivePath(archiveRoot, "/tmp/carapace.json")}${suffix}`;
           const hardlinkPath = `${archiveRoot}/payload/config-link${suffix}`;
           await writeArchive({
             archivePath,
@@ -164,10 +164,10 @@ describe("backupRestoreCommand", () => {
   );
 
   it("round-trips a backup into a fresh target with matching inventory and readable databases", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-roundtrip-",
+        prefix: "carapace-backup-restore-roundtrip-",
         scenario: "minimal",
       },
       async (state) => {
@@ -187,7 +187,7 @@ describe("backupRestoreCommand", () => {
             "dir",
           );
         }
-        openOpenClawStateDatabase({ env: state.env });
+        openCarapaceStateDatabase({ env: state.env });
 
         try {
           const backup = await createBackupArchive({
@@ -213,7 +213,7 @@ describe("backupRestoreCommand", () => {
           expect(restored.warnings.join("\n")).toMatch(/WhatsApp/iu);
           expect(restored.warnings.join("\n")).toMatch(/pending approvals/iu);
           expect(restored.warnings.join("\n")).toMatch(/plugins install <spec> --force/iu);
-          expect(restored.warnings.join("\n")).toMatch(/openclaw skills list/iu);
+          expect(restored.warnings.join("\n")).toMatch(/carapace skills list/iu);
           expect(runtime.log).toHaveBeenCalledOnce();
           expect(JSON.parse(String(vi.mocked(runtime.log).mock.calls[0]?.[0]))).toEqual(restored);
           if (process.platform !== "win32") {
@@ -241,7 +241,7 @@ describe("backupRestoreCommand", () => {
             await listArchiveLeafEntries(backup.archivePath),
           );
           const databaseEntry = (await listArchiveLeafEntries(backup.archivePath)).find((entry) =>
-            entry.endsWith("/state/openclaw.sqlite"),
+            entry.endsWith("/state/carapace.sqlite"),
           );
           expect(databaseEntry).toBeDefined();
           const sqlite = requireNodeSqlite();
@@ -256,7 +256,7 @@ describe("backupRestoreCommand", () => {
             database.close();
           }
         } finally {
-          closeOpenClawStateDatabase();
+          closeCarapaceStateDatabase();
         }
       },
     );
@@ -267,10 +267,10 @@ describe("backupRestoreCommand", () => {
       return;
     }
 
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-agent-temporary-",
+        prefix: "carapace-backup-restore-agent-temporary-",
         scenario: "minimal",
       },
       async (state) => {
@@ -377,18 +377,18 @@ describe("backupRestoreCommand", () => {
   });
 
   it("accepts an empty directory and refuses a non-empty target", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-target-",
+        prefix: "carapace-backup-restore-target-",
         scenario: "minimal",
       },
       async (state) => {
         const archivePath = state.path("backup.tar.gz");
         const emptyTarget = state.path("empty-target");
         const nonEmptyTarget = state.path("non-empty-target");
-        const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+        const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
         await writeArchive({ archivePath, archiveRoot, payloadPath });
         await fs.mkdir(emptyTarget);
         await fs.mkdir(nonEmptyTarget);
@@ -408,10 +408,10 @@ describe("backupRestoreCommand", () => {
   });
 
   it("rejects a staging target inside a configured external live agent directory", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-external-agent-",
+        prefix: "carapace-backup-restore-external-agent-",
         scenario: "minimal",
       },
       async (state) => {
@@ -425,24 +425,24 @@ describe("backupRestoreCommand", () => {
             archive: state.path("missing-backup.tar.gz"),
             target: targetPath,
           }),
-        ).rejects.toThrow(/outside the live OpenClaw agent directory/iu);
+        ).rejects.toThrow(/outside the live Carapace agent directory/iu);
         await expect(fs.lstat(targetPath)).rejects.toMatchObject({ code: "ENOENT" });
       },
     );
   });
 
   it("keeps restore available when the live config is malformed", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-invalid-config-",
+        prefix: "carapace-backup-restore-invalid-config-",
         scenario: "minimal",
       },
       async (state) => {
         const archivePath = state.path("backup.tar.gz");
         const targetPath = state.path("restore-target");
-        const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+        const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
         await writeArchive({ archivePath, archiveRoot, payloadPath });
         await fs.writeFile(state.configPath, '{"agents":{"entries":', "utf8");
 
@@ -454,17 +454,17 @@ describe("backupRestoreCommand", () => {
   });
 
   it("verifies a corrupt archive before touching an empty target", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-corrupt-",
+        prefix: "carapace-backup-restore-corrupt-",
         scenario: "minimal",
       },
       async (state) => {
         const archivePath = state.path("corrupt.tar.gz");
         const targetPath = state.path("restore-target");
-        const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+        const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+        const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
         await writeArchive({
           archivePath,
           archiveRoot,
@@ -511,17 +511,17 @@ describe("backupRestoreCommand", () => {
   ])(
     "rejects $label symlink targets before touching the restore target",
     async ({ linkpath, error, insideDeclaredAsset }) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-backup-restore-absolute-symlink-",
+          prefix: "carapace-backup-restore-absolute-symlink-",
           scenario: "minimal",
         },
         async (state) => {
           const archivePath = state.path("absolute-symlink.tar.gz");
           const targetPath = state.path("restore-target");
-          const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-          const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+          const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+          const payloadPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
           const declaredAssetRoot = path.posix.dirname(payloadPath);
           await writeArchive({
             archivePath,
@@ -568,17 +568,17 @@ describe("backupRestoreCommand", () => {
   );
 
   it("cleans an incomplete fresh target when extraction fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-cleanup-",
+        prefix: "carapace-backup-restore-cleanup-",
         scenario: "minimal",
       },
       async (state) => {
         const archivePath = state.path("unextractable.tar.gz");
         const targetPath = state.path("restore-target");
-        const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-        const assetPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+        const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+        const assetPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
         const directoryPath = `${archiveRoot}/payload/invalid-hardlink-target`;
         await writeArchive({
           archivePath,
@@ -607,17 +607,17 @@ describe("backupRestoreCommand", () => {
   });
 
   it("preserves the extraction error when cleanup also fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-restore-double-failure-",
+        prefix: "carapace-backup-restore-double-failure-",
         scenario: "minimal",
       },
       async (state) => {
         const archivePath = state.path("unextractable.tar.gz");
         const targetPath = state.path("restore-target");
-        const archiveRoot = "2026-08-12T00-00-00.000Z-openclaw-backup";
-        const assetPath = buildBackupArchivePath(archiveRoot, "/tmp/openclaw.json");
+        const archiveRoot = "2026-08-12T00-00-00.000Z-carapace-backup";
+        const assetPath = buildBackupArchivePath(archiveRoot, "/tmp/carapace.json");
         const directoryPath = `${archiveRoot}/payload/invalid-hardlink-target`;
         await writeArchive({
           archivePath,

@@ -1,6 +1,6 @@
 // Ollama helper module supports config compat behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
   OLLAMA_CLOUD_BASE_URL,
   OLLAMA_CLOUD_PROVIDER_ID,
@@ -60,21 +60,21 @@ export const legacyConfigRules: LegacyConfigRule[] = [
   {
     path: ["models", "providers", OLLAMA_CLOUD_PROVIDER_ID],
     message:
-      'models.providers.ollama-cloud.baseUrl="https://ai.ollama.com" is retired; use "https://ollama.com". Run "openclaw doctor --fix".',
+      'models.providers.ollama-cloud.baseUrl="https://ai.ollama.com" is retired; use "https://ollama.com". Run "carapace doctor --fix".',
     match: (value) => findRetiredOllamaCloudBaseUrl(value) !== null,
   },
   {
     path: ["models", "providers", OLLAMA_PROVIDER_ID],
     message:
-      'Legacy local Ollama authentication markers must be migrated. Run "openclaw doctor --fix".',
+      'Legacy local Ollama authentication markers must be migrated. Run "carapace doctor --fix".',
     match: isLegacyOllamaLocalConfig,
   },
 ];
 
-function cloneProviderConfig(config: OpenClawConfig, providerId: string) {
+function cloneProviderConfig(config: CarapaceConfig, providerId: string) {
   const nextConfig = structuredClone(config);
   const nextModels = asObjectRecord(nextConfig.models) ?? {};
-  nextConfig.models = nextModels as OpenClawConfig["models"];
+  nextConfig.models = nextModels as CarapaceConfig["models"];
   const nextProviders = asObjectRecord(nextModels.providers) ?? {};
   nextModels.providers = nextProviders;
   const nextProvider = asObjectRecord(nextProviders[providerId]) ?? {};
@@ -82,8 +82,8 @@ function cloneProviderConfig(config: OpenClawConfig, providerId: string) {
   return { nextConfig, nextProvider };
 }
 
-function migrateLegacyOllamaLocalConfig(config: OpenClawConfig): {
-  config: OpenClawConfig;
+function migrateLegacyOllamaLocalConfig(config: CarapaceConfig): {
+  config: CarapaceConfig;
   changes: string[];
 } | null {
   const provider = config.models?.providers?.[OLLAMA_PROVIDER_ID];
@@ -112,8 +112,8 @@ function migrateLegacyOllamaLocalConfig(config: OpenClawConfig): {
   };
 }
 
-function migrateOllamaCloudRetiredBaseUrl(config: OpenClawConfig): {
-  config: OpenClawConfig;
+function migrateOllamaCloudRetiredBaseUrl(config: CarapaceConfig): {
+  config: CarapaceConfig;
   changes: string[];
 } | null {
   const provider = config.models?.providers?.[OLLAMA_CLOUD_PROVIDER_ID];
@@ -153,8 +153,8 @@ function migrateOllamaCloudRetiredBaseUrl(config: OpenClawConfig): {
   };
 }
 
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: CarapaceConfig }): {
+  config: CarapaceConfig;
   changes: string[];
 } {
   let config = cfg;

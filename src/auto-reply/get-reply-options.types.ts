@@ -1,4 +1,4 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@carapace/normalization-core/string-coerce";
 import type { AgentRunTerminalOutcome } from "../agents/agent-run-terminal-outcome.js";
 /** Public option types for reply generation callbacks, streaming, and delivery policy. */
 import type { ExecutionIdentityAdmissionToken } from "../audit/execution-identity-admission.js";
@@ -191,7 +191,7 @@ export type GetReplyOptions = {
   fastModeAutoOnSecondsOverride?: number;
   /** Controls bootstrap workspace context injection (default: full). */
   bootstrapContextMode?: "full" | "lightweight";
-  /** If true, run the model without OpenClaw tools for this turn. */
+  /** If true, run the model without Carapace tools for this turn. */
   disableTools?: boolean;
   /** Runtime tool allow-list for this turn. Empty means no tools. */
   toolsAllow?: string[];

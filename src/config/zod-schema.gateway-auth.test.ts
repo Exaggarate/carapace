@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { OpenClawSchema } from "./zod-schema.js";
+import { CarapaceSchema } from "./zod-schema.js";
 
 describe("gateway trusted-proxy device auto-approval config", () => {
   test("accepts bounded non-admin scopes", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         auth: {
           mode: "trusted-proxy",
@@ -24,7 +24,7 @@ describe("gateway trusted-proxy device auto-approval config", () => {
   test.each(["operator.admin", " operator.admin "])(
     "accepts %j as an explicit admin opt-in",
     (adminScope) => {
-      const result = OpenClawSchema.safeParse({
+      const result = CarapaceSchema.safeParse({
         gateway: {
           auth: {
             mode: "trusted-proxy",
@@ -49,7 +49,7 @@ describe("gateway identity scope grants config", () => {
     { scope: "operator.admin", success: true },
     { scope: "operator.superuser", success: false },
   ])("validates configured scope $scope", ({ scope, success }) => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         auth: {
           identityScopes: {
@@ -73,7 +73,7 @@ describe("gateway operator role config", () => {
   test.each(["none", "view", "suggest", "write"])(
     "accepts the closed foreign-session access level %s",
     (others) => {
-      const result = OpenClawSchema.safeParse({
+      const result = CarapaceSchema.safeParse({
         gateway: {
           roles: {
             default: "guest",
@@ -87,7 +87,7 @@ describe("gateway operator role config", () => {
   );
 
   test.each(["inherit", "required"])("accepts the closed sandbox policy %s", (sandbox) => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         roles: { default: "guest", definitions: { guest: { ...validRole, sandbox } } },
       },
@@ -100,7 +100,7 @@ describe("gateway operator role config", () => {
     { name: "all agents and explicit admin scope", agents: "*", scopes: ["operator.admin"] },
     { name: "an empty agent allowlist", agents: [], scopes: ["operator.read"] },
   ])("accepts $name", ({ agents, scopes }) => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         roles: { default: "guest", definitions: { guest: { ...validRole, agents, scopes } } },
       },
@@ -119,7 +119,7 @@ describe("gateway operator role config", () => {
     { name: "missing session policy", role: { agents: "*", scopes: ["operator.read"] } },
     { name: "freeform capability", role: { ...validRole, capability: "sessions.delete" } },
   ])("rejects $name", ({ role }) => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         roles: { default: "guest", definitions: { guest: role } },
       },
@@ -129,7 +129,7 @@ describe("gateway operator role config", () => {
   });
 
   test("rejects a default role that has no definition", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         roles: { default: "missing", definitions: { guest: validRole } },
       },
@@ -157,7 +157,7 @@ describe("gateway operator role config", () => {
       issuePath: ["gateway", "roles", "definitions"],
     },
   ])("rejects $name", ({ roles, issuePath }) => {
-    const result = OpenClawSchema.safeParse({ gateway: { roles } });
+    const result = CarapaceSchema.safeParse({ gateway: { roles } });
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -168,7 +168,7 @@ describe("gateway operator role config", () => {
   });
 
   test("normalizes and deduplicates configured agent and operator-scope allowlists", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = CarapaceSchema.safeParse({
       gateway: {
         roles: {
           default: "guest",
@@ -193,6 +193,6 @@ describe("gateway operator role config", () => {
   });
 
   test("keeps roles optional for existing solo and shared-secret configurations", () => {
-    expect(OpenClawSchema.safeParse({ gateway: { auth: { mode: "token" } } }).success).toBe(true);
+    expect(CarapaceSchema.safeParse({ gateway: { auth: { mode: "token" } } }).success).toBe(true);
   });
 });

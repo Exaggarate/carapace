@@ -1,6 +1,6 @@
 /** Pure, non-resolving credential availability checks shared by status and route selection. */
-import { hasNonEmptyString as hasSecret } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { hasNonEmptyString as hasSecret } from "@carapace/normalization-core/string-coerce";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   isSecretRef,
   LEGACY_DOUBLE_UNDERSCORE_ENV_MARKER_PREFIX,
@@ -36,7 +36,7 @@ export function hasMalformedSecretInputSyntax(value: unknown): boolean {
 
 export function resolveSecretRefReadOnlyAvailability(
   value: unknown,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): ReadOnlyCredentialAvailability {
   if (!isSecretRef(value) || !isValidSecretRef(value)) {
@@ -71,7 +71,7 @@ export function resolveSecretRefReadOnlyAvailability(
 function resolveSecretInputReadOnlyAvailability(
   value: unknown,
   refValue: unknown,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   env: NodeJS.ProcessEnv,
 ): ReadOnlyCredentialAvailability {
   const { ref } = resolveSecretInputRef({
@@ -97,7 +97,7 @@ function resolveSecretInputReadOnlyAvailability(
 
 export function resolveStoredCredentialReadOnlyAvailability(params: {
   credential: AuthProfileCredential;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   now?: number;
   canRefreshOAuth?: boolean;

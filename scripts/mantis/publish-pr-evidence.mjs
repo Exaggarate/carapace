@@ -688,7 +688,7 @@ function upsertPrComment({ body, createMissing, marker, prNumber, repo }) {
     "--paginate",
     `repos/${repo}/issues/${prNumber}/comments`,
     "--jq",
-    `.[] | select(.user.login == "openclaw-mantis[bot]" and (.body | contains("${marker}"))) | .id`,
+    `.[] | select(.user.login == "carapace-mantis[bot]" and (.body | contains("${marker}"))) | .id`,
   ])
     .trim()
     .split("\n")

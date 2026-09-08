@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { DiscordError } from "../internal/discord.js";
 import {
   discordVoiceTranscriptsSourceProvider,

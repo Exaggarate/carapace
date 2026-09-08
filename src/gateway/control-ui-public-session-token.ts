@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { CONTROL_UI_PUBLIC_SESSION_SHARE_TOKEN_MAX_LENGTH } from "@openclaw/session-url-contract/public-share";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { CONTROL_UI_PUBLIC_SESSION_SHARE_TOKEN_MAX_LENGTH } from "@carapace/session-url-contract/public-share";
 import { resolveDeviceIdentityStore } from "../infra/device-identity-store.js";
 import {
   loadDeviceIdentityIfPresent,
@@ -16,15 +16,15 @@ const PUBLIC_SESSION_TOKEN_CIPHER = "aes-256-gcm";
 const PUBLIC_SESSION_TOKEN_NONCE_BYTES = 12;
 const PUBLIC_SESSION_TOKEN_TAG_BYTES = 16;
 const PUBLIC_SESSION_TOKEN_AAD = Buffer.from(
-  "openclaw.public-session-share-locator.aad.v1",
+  "carapace.public-session-share-locator.aad.v1",
   "utf8",
 );
 const PUBLIC_SESSION_TOKEN_KEY_SALT = Buffer.from(
-  "openclaw.public-session-share-locator.salt.v1",
+  "carapace.public-session-share-locator.salt.v1",
   "utf8",
 );
 const PUBLIC_SESSION_TOKEN_KEY_INFO = Buffer.from(
-  "openclaw.public-session-share-locator.key.v1",
+  "carapace.public-session-share-locator.key.v1",
   "utf8",
 );
 const PUBLIC_SESSION_TOKEN_MAX_PLAINTEXT_BYTES = 5_000;

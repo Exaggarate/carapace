@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import type { RealtimeVoiceResponseOutcome } from "openclaw/plugin-sdk/realtime-voice";
-import { withTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import type { RealtimeVoiceResponseOutcome } from "carapace/plugin-sdk/realtime-voice";
+import { withTimeout } from "carapace/plugin-sdk/text-utility-runtime";
 import { describe, expect, it } from "vitest";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";

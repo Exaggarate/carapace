@@ -1,18 +1,18 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { readConfigMachineState } from "../src/state/config-machine-state.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../src/state/openclaw-state-schema.js";
+import { CARAPACE_STATE_SCHEMA_SQL } from "../src/state/carapace-state-schema.js";
 import { runBuiltCli } from "./cli-json-stdout.test-support.js";
 
 async function seedPendingStateMigration(stateDir: string) {
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   await fs.mkdir(path.dirname(databasePath), { recursive: true });
   const database = new DatabaseSync(databasePath);
   try {
-    database.exec(OPENCLAW_STATE_SCHEMA_SQL);
+    database.exec(CARAPACE_STATE_SCHEMA_SQL);
     database.exec("PRAGMA user_version = 0;");
   } finally {
     database.close();
@@ -53,9 +53,9 @@ describe("cli json stdout contract", () => {
         ).toString("base64");
         const result = runBuiltCli(tempHome, testCase.args, {
           NODE_OPTIONS: `--import=data:text/javascript;base64,${preload}`,
-          OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-          OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
-          ...("commander" in testCase ? { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } : {}),
+          CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+          CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
+          ...("commander" in testCase ? { CARAPACE_DISABLE_ROUTE_FIRST: "1" } : {}),
           ...("tty" in testCase ? { FORCE_COLOR: "1" } : {}),
         });
         const message = "Remote catalog refresh failed: Error: offline fixture";
@@ -77,7 +77,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).toContain("\u001B[?25h");
         }
       },
-      { prefix: "openclaw-models-refresh-json-failure-e2e-" },
+      { prefix: "carapace-models-refresh-json-failure-e2e-" },
     );
   });
 
@@ -126,7 +126,7 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "isolated-state");
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "carapace.json");
         const migrationDiagnostic = "state database schema migration pending";
         await seedPendingStateMigration(stateDir);
         await fs.writeFile(
@@ -151,8 +151,8 @@ describe("cli json stdout contract", () => {
           {
             CI: "1",
             NO_COLOR: "1",
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
           },
           { inheritEnvironment: false },
         );
@@ -164,7 +164,7 @@ describe("cli json stdout contract", () => {
           testCase.opensStateDatabase,
         );
       },
-      { prefix: "openclaw-models-plain-stdout-e2e-" },
+      { prefix: "carapace-models-plain-stdout-e2e-" },
     );
   });
 
@@ -176,8 +176,8 @@ describe("cli json stdout contract", () => {
           const result = runBuiltCli(tempHome, ["models", "auth", "list", "--provider", provider], {
             CI: "1",
             NO_COLOR: "1",
-            OPENCLAW_CONFIG_PATH: path.join(tempHome, "missing-openclaw.json"),
-            OPENCLAW_STATE_DIR: path.join(tempHome, "isolated-state"),
+            CARAPACE_CONFIG_PATH: path.join(tempHome, "missing-carapace.json"),
+            CARAPACE_STATE_DIR: path.join(tempHome, "isolated-state"),
           });
 
           expect(result.status, result.stderr).toBe(0);
@@ -187,7 +187,7 @@ describe("cli json stdout contract", () => {
           expect(result.stderr).not.toContain("Agent: main");
           expect(result.stderr).not.toContain(`Provider: ${provider}`);
         },
-        { prefix: "openclaw-models-output-option-value-e2e-" },
+        { prefix: "carapace-models-output-option-value-e2e-" },
       );
     },
   );
@@ -196,8 +196,8 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const stateDir = path.join(tempHome, "isolated-state");
-        const configPath = path.join(tempHome, "openclaw.json");
-        const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+        const configPath = path.join(tempHome, "carapace.json");
+        const databasePath = path.join(stateDir, "state", "carapace.sqlite");
         const generatedAt = Date.now() + 60_000;
         const bundle = {
           schemaVersion: 1,
@@ -233,8 +233,8 @@ describe("cli json stdout contract", () => {
         ) =>
           runBuiltCli(tempHome, ["models", ...args], {
             NODE_OPTIONS: `--import=data:text/javascript;base64,${preloadFor(response)}`,
-            OPENCLAW_CONFIG_PATH: configPath,
-            OPENCLAW_STATE_DIR: stateDir,
+            CARAPACE_CONFIG_PATH: configPath,
+            CARAPACE_STATE_DIR: stateDir,
           });
         const readCatalogRow = () =>
           readConfigMachineState<{ generated_at: number; bundle_json: string }>(
@@ -297,7 +297,7 @@ describe("cli json stdout contract", () => {
         });
         expect(readCatalogRow()).toEqual(persistedRow);
       },
-      { prefix: "openclaw-models-refresh-persistence-e2e-" },
+      { prefix: "carapace-models-refresh-persistence-e2e-" },
     );
   });
 });

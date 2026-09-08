@@ -11,7 +11,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -34,18 +34,18 @@ suite.define(() => {
         },
         async ({ page }) => {
           const gateway = await installMockGateway(page, {
-            featureMethods: ["openclaw.setup.detect", "openclaw.setup.auth.start", "wizard.next"],
+            featureMethods: ["carapace.setup.detect", "carapace.setup.auth.start", "wizard.next"],
             methodResponses: {
-              "openclaw.setup.detect": {
+              "carapace.setup.detect": {
                 candidates: [],
                 manualProviders: [],
                 authOptions: [
                   { id: "provider-login", label: "Provider login", kind: "oauth", featured: true },
                 ],
-                workspace: "/tmp/openclaw-e2e",
+                workspace: "/tmp/carapace-e2e",
                 setupComplete: false,
               },
-              "openclaw.setup.auth.start": { done: false, status: "running" },
+              "carapace.setup.auth.start": { done: false, status: "running" },
               "wizard.next": {
                 done: true,
                 status: "error",
@@ -71,29 +71,29 @@ suite.define(() => {
             });
           }
           await signIn.click();
-          const dialog = page.locator("openclaw-modal-dialog");
+          const dialog = page.locator("carapace-modal-dialog");
           await dialog.getByText("The model could not finish setup", { exact: true }).waitFor();
           await dialog.getByRole("button", { name: "Close", exact: true }).click();
           await expect.poll(() => dialog.count()).toBe(0);
           await expect.poll(() => signIn.isDisabled()).toBe(outcome === "uncertain");
-          const receiptKey = "openclaw.modelSetup.pendingActivation.v1";
+          const receiptKey = "carapace.modelSetup.pendingActivation.v1";
           const receipt = await page.evaluate((key) => localStorage.getItem(key), receiptKey);
           expect(receipt === null).toBe(outcome === "rejected");
           expect(new URL(page.url()).pathname).toBe("/settings/model-setup");
-          expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
-          expect(await gateway.getRequests("openclaw.setup.activate.start")).toHaveLength(0);
+          expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
+          expect(await gateway.getRequests("carapace.setup.activate.start")).toHaveLength(0);
           if (outcome === "uncertain") {
             const recovery = page.locator(".model-setup__recovery");
             await recovery.getByRole("button", { name: "Check again", exact: true }).click();
             await page.getByText("may still be running", { exact: false }).waitFor();
-            expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(1);
+            expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(1);
             expect(await page.evaluate((key) => localStorage.getItem(key), receiptKey)).toBe(
               receipt,
             );
           } else {
             await signIn.click();
             await dialog.getByText("The model could not finish setup", { exact: true }).waitFor();
-            expect(await gateway.getRequests("openclaw.setup.auth.start")).toHaveLength(2);
+            expect(await gateway.getRequests("carapace.setup.auth.start")).toHaveLength(2);
           }
           if (artifactDir) {
             await page.screenshot({
@@ -120,13 +120,13 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.verify",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.verify",
+            "carapace.setup.prepare.start",
             "wizard.next",
           ],
           methodResponses: {
-            "openclaw.setup.detect": {
+            "carapace.setup.detect": {
               candidates: [
                 {
                   kind: "provider-auto:lmstudio",
@@ -148,16 +148,16 @@ suite.define(() => {
                   actionLabel: "Connect server",
                 },
               ],
-              workspace: "/tmp/openclaw-e2e",
+              workspace: "/tmp/carapace-e2e",
               configuredModel: modelRef,
               setupComplete: true,
             },
-            "openclaw.setup.verify": {
+            "carapace.setup.verify": {
               ok: false,
               status: "unavailable",
               error: "connect ECONNREFUSED 127.0.0.1:1234",
             },
-            "openclaw.setup.prepare.start": {
+            "carapace.setup.prepare.start": {
               sessionId: "lmstudio-recovery-session",
               done: false,
               status: "running",
@@ -204,7 +204,7 @@ suite.define(() => {
           });
         }
 
-        const verify = await gateway.waitForRequest("openclaw.setup.verify");
+        const verify = await gateway.waitForRequest("carapace.setup.verify");
         expect(verify.params).toEqual({ agentId: "main" });
       },
     );

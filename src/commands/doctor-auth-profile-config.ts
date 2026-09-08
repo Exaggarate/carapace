@@ -1,12 +1,12 @@
 /** Protects active auth profile metadata while doctor repairs broader config state. */
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
+import { collectConfiguredModelRefs } from "@carapace/model-catalog-core/configured-model-refs";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import type { AuthProfileConfig } from "../config/types.auth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isRecord } from "../utils.js";
 
 const AUTH_PROFILE_MODES = new Set<AuthProfileConfig["mode"]>([
@@ -17,7 +17,7 @@ const AUTH_PROFILE_MODES = new Set<AuthProfileConfig["mode"]>([
 ]);
 
 type AuthProfileConfigProtectionResult = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   repairs: string[];
   warnings: string[];
 };
@@ -53,7 +53,7 @@ function extractProviderFromProfileId(profileId: string): string | null {
   return normalizeProviderId(profileId.slice(0, colon)) || null;
 }
 
-function collectActiveAuthHints(config: OpenClawConfig): {
+function collectActiveAuthHints(config: CarapaceConfig): {
   activeProviders: Set<string>;
   explicitProfileIds: Set<string>;
   explicitProfileProviders: Map<string, Set<string>>;
@@ -142,7 +142,7 @@ function buildProfileMetadata(params: {
   return repaired;
 }
 
-function ensureAuthProfiles(config: OpenClawConfig): Record<string, AuthProfileConfig> {
+function ensureAuthProfiles(config: CarapaceConfig): Record<string, AuthProfileConfig> {
   const root = config as Record<string, unknown>;
   const auth: Record<string, unknown> = isRecord(root.auth) ? root.auth : {};
   if (root.auth !== auth) {
@@ -161,8 +161,8 @@ function ensureAuthProfiles(config: OpenClawConfig): Record<string, AuthProfileC
  * provider/mode metadata can be inferred from the before/after config or profile id.
  */
 export function protectActiveAuthProfileConfig(params: {
-  before: OpenClawConfig;
-  after: OpenClawConfig;
+  before: CarapaceConfig;
+  after: CarapaceConfig;
 }): AuthProfileConfigProtectionResult {
   const { activeProviders, explicitProfileIds, explicitProfileProviders } = collectActiveAuthHints(
     params.before,

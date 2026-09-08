@@ -14,7 +14,7 @@ import {
 } from "../../src/agents/auth-profiles/store-runtime.js";
 import { withAuthProfileStoreAgentDir } from "../../src/agents/auth-profiles/store.js";
 import { DEFAULT_AGENT_ID } from "../../src/routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../src/state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../src/state/carapace-agent-db-readonly.js";
 
 export function stageLiveAuthProfiles(realStateDir: string, tempStateDir: string): void {
   const agentsDir = path.join(realStateDir, "agents");
@@ -30,7 +30,7 @@ export function stageLiveAuthProfiles(realStateDir: string, tempStateDir: string
   for (const agentId of agentIds) {
     const sourceAgentDir = path.join(agentsDir, agentId, "agent");
     const sourceDatabasePath = resolveAuthProfileDatabasePath(sourceAgentDir);
-    const sourceSnapshot = withOpenClawAgentDatabaseReadOnly(
+    const sourceSnapshot = withCarapaceAgentDatabaseReadOnly(
       (database) => {
         database.db.exec("BEGIN");
         try {

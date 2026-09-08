@@ -22,7 +22,7 @@ const loaderState = vi.hoisted(() => ({
 
 vi.mock("./loader.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./loader.js")>()),
-  loadOpenClawPlugins: () => loaderState.registry,
+  loadCarapacePlugins: () => loaderState.registry,
   loadPluginRegistryHandle: () => loaderState.registry,
 }));
 
@@ -58,7 +58,7 @@ function createDependencyHealthRegistry(
 function createDependencyHealthFixture(
   identity: { pluginId?: string; packageName?: string; bundledDist?: false } = {},
 ) {
-  const rootDir = makeTrackedTempDir("openclaw-plugin-dependency-health", tempDirs);
+  const rootDir = makeTrackedTempDir("carapace-plugin-dependency-health", tempDirs);
   const pluginRoot = path.join(rootDir, "plugin");
   const bundledRoot = path.join(rootDir, "bundled");
   fs.mkdirSync(pluginRoot);
@@ -75,9 +75,9 @@ function createDependencyHealthFixture(
   if (identity.bundledDist === false) {
     const packageJsonPath = path.join(pluginRoot, "package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as {
-      openclaw: Record<string, unknown>;
+      carapace: Record<string, unknown>;
     };
-    packageJson.openclaw.build = { bundledDist: false };
+    packageJson.carapace.build = { bundledDist: false };
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), "utf8");
   }
   return {
@@ -165,12 +165,12 @@ describe("plugin dependency health projection", () => {
   it("projects dependency health onto bundled official plugins distributed externally", () => {
     const { fixture, reportParams } = createDependencyHealthFixture({
       pluginId: "discord",
-      packageName: "@openclaw/discord",
+      packageName: "@carapace/discord",
     });
     loaderState.registry = createDependencyHealthRegistry(fixture.pluginId, {
       dependencyStatus: undefined,
       origin: "bundled",
-      packageName: "@openclaw/discord",
+      packageName: "@carapace/discord",
     });
 
     const report = buildPluginDiagnosticsReport(reportParams);

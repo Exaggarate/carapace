@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { MsgContext } from "../../auto-reply/templating.js";
 
 const MAX_ROUTE_CONTEXT_ID_LENGTH = 512;

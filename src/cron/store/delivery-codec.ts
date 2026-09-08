@@ -1,5 +1,5 @@
 /** JSON codec for cron delivery configuration and explicit destination clears. */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { CronDelivery } from "../types.js";
 
 const FAILURE_DESTINATION_FIELDS = ["channel", "to", "accountId", "mode"] as const;

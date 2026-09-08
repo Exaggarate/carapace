@@ -1,5 +1,5 @@
 import { generateKeyPairSync } from "node:crypto";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import {
   sendApnsAlert,
@@ -47,7 +47,7 @@ const senderOptionKeys = {
 function createApnsTransportFixture(transport: "direct" | "relay") {
   const registration = {
     nodeId: "ios-dispatch",
-    topic: "ai.openclaw.ios",
+    topic: "ai.carapace.ios",
     environment: "sandbox" as const,
     updatedAtMs: 1,
   };

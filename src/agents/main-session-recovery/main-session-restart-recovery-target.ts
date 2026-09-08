@@ -5,7 +5,7 @@ import {
   resolveUnsuffixedSqliteTargetFromSessionStorePath,
 } from "../../config/sessions/session-sqlite-target.js";
 import { isPerAgentSessionStoreConfig } from "../../config/sessions/session-store-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveGatewaySessionStoreTarget } from "../../gateway/session-utils-store-lookup.js";
 import {
   LEGACY_IMPLICIT_AGENT_ID,
@@ -21,7 +21,7 @@ import {
 export function resolveRestartRecoveryDispatchTarget(params: {
   agentId?: string;
   storeAgentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   sessionKey: string;
   storePath: string;
 }): { agentId: string; sessionKey: string } | undefined {

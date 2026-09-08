@@ -1,6 +1,6 @@
-import { WORKBOARD_STATUSES, type WorkboardCard } from "@openclaw/workboard-contract";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
-import type { AgentToolResult } from "openclaw/plugin-sdk/tool-results";
+import { WORKBOARD_STATUSES, type WorkboardCard } from "@carapace/workboard-contract";
+import type { AnyAgentTool } from "carapace/plugin-sdk/plugin-entry";
+import type { AgentToolResult } from "carapace/plugin-sdk/tool-results";
 import { Type, type TProperties } from "typebox";
 import type { WorkboardMutationScope } from "./store-inputs.js";
 import type { WorkboardStore } from "./store.js";

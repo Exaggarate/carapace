@@ -26,7 +26,7 @@ import { listGitTrackedFiles } from "../../src/test-utils/repo-files.js";
 import { isGatewayServerTestFile } from "../vitest/vitest.gateway-server-paths.mjs";
 
 const CODEX_TEST_PROCESS_FILE_LIMIT = 12;
-const githubActivityHelper = ".agents/skills/openclaw-pr-maintainer/scripts/github-activity.sh";
+const githubActivityHelper = ".agents/skills/carapace-pr-maintainer/scripts/github-activity.sh";
 
 function expectBoundedCodexFallback(
   shards: ReturnType<typeof createChangedExtensionFallbackShards>,
@@ -129,8 +129,8 @@ it.each([
 });
 
 it.each([
-  ["src/state/openclaw-state-db-contract.ts", "OPENCLAW_STATE_SCHEMA_VERSION"],
-  ["src/state/openclaw-agent-db-contract.ts", "OPENCLAW_AGENT_SCHEMA_VERSION"],
+  ["src/state/carapace-state-db-contract.ts", "CARAPACE_STATE_SCHEMA_VERSION"],
+  ["src/state/carapace-agent-db-contract.ts", "CARAPACE_AGENT_SCHEMA_VERSION"],
 ])("always gates schema-version changes in %s with a published upgrade", (owner, constant) => {
   // A moved constant must update this independent owner guarantee, not silently lose the gate.
   expect(readFileSync(owner, "utf8")).toMatch(new RegExp(`export const ${constant} = \\d+;`));
@@ -171,7 +171,7 @@ describe("CI changed Node test plan", () => {
   it.each([
     "extensions/copilot/index.ts",
     "extensions/copilot/harness.ts",
-    "extensions/copilot/openclaw.plugin.json",
+    "extensions/copilot/carapace.plugin.json",
   ])("keeps host discovery proof when only %s changes", (changedPath) => {
     const hostTest = "src/agents/prepared-model-runtime.copilot.integration.test.ts";
     const shards = createChangedNodeTestShards([changedPath]);
@@ -328,7 +328,7 @@ describe("CI changed Node test plan", () => {
   });
 
   it("requires dedicated config ownership and preserves an empty precise build plan", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "openclaw-contract-coverage-"));
+    const cwd = mkdtempSync(path.join(tmpdir(), "carapace-contract-coverage-"));
     const target = "src/plugins/contracts/fixture.test.ts";
     const source = "src/fixture.ts";
     const unrelated = [
@@ -582,7 +582,7 @@ describe("CI changed Node test plan", () => {
     "src/plugins/contracts/gone.test.ts",
     "src/channels/plugins/gone.test.ts",
   ])("runs only the boundary shard when a diff deletes %s", (target) => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "openclaw-ci-deleted-test-"));
+    const cwd = mkdtempSync(path.join(tmpdir(), "carapace-ci-deleted-test-"));
     try {
       expect(createChangedExtensionFallbackShards([target], { cwd })).toEqual([]);
       expect(createChangedNodeTestShards([target], { cwd })).toEqual([
@@ -655,7 +655,7 @@ describe("CI changed Node test plan", () => {
   it("covers every extension config when core changes can impact extension consumers", () => {
     const shards = createChangedExtensionFallbackShards([
       "src/gateway/tool-resolution.ts",
-      "src/agents/openclaw-tools.ts",
+      "src/agents/carapace-tools.ts",
       "extensions/discord/src/channel.ts",
     ]);
 
@@ -719,7 +719,7 @@ describe("CI changed Node test plan", () => {
   });
 
   it("classifies core and fallback-gate extension impact", () => {
-    expect(hasCoreExtensionImpact(["src/agents/openclaw-tools.ts"])).toBe(true);
+    expect(hasCoreExtensionImpact(["src/agents/carapace-tools.ts"])).toBe(true);
     expect(hasCoreExtensionImpact(["scripts/lib/changed-extensions.mts"])).toBe(true);
     expect(hasCoreExtensionImpact(["scripts/lib/ci-changed-node-test-plan.mts"])).toBe(true);
     expect(hasCoreExtensionImpact(["scripts/lib/extension-test-plan.mts"])).toBe(true);
@@ -751,7 +751,7 @@ describe("CI changed Node test plan", () => {
       name: "helper trio",
       changedPaths: [
         githubActivityHelper,
-        ".agents/skills/openclaw-pr-maintainer/SKILL.md",
+        ".agents/skills/carapace-pr-maintainer/SKILL.md",
         "test/scripts/github-activity-helper.test.ts",
       ],
     },
@@ -770,7 +770,7 @@ describe("CI changed Node test plan", () => {
 
   it.each([
     "src/plugin-sdk/core.ts",
-    ".agents/skills/openclaw-pr-maintainer/scripts/unknown-helper.sh",
+    ".agents/skills/carapace-pr-maintainer/scripts/unknown-helper.sh",
   ])(
     "retains all extension configs for the hidden maintainer helper mixed with %s",
     (changedPath) => {
@@ -850,7 +850,7 @@ describe("CI changed Node test plan", () => {
       expect(sortArgs(groups.map((group) => group.env))).toEqual(
         sortArgs(
           groups.map((_, index) => ({
-            OPENCLAW_NODE_TEST_VITEST_ARGS_JSON: JSON.stringify([
+            CARAPACE_NODE_TEST_VITEST_ARGS_JSON: JSON.stringify([
               `--shard=${index + 1}/${groups.length}`,
             ]),
           })),
@@ -886,7 +886,7 @@ describe("CI changed Node test plan", () => {
   });
 
   it("falls back to bounded Codex config shards for deleted sources", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "openclaw-ci-extension-fallback-"));
+    const cwd = mkdtempSync(path.join(tmpdir(), "carapace-ci-extension-fallback-"));
     try {
       expectBoundedCodexFallback(
         createChangedExtensionFallbackShards(["extensions/codex/src/deleted-session-runtime.ts"], {
@@ -982,7 +982,7 @@ describe("CI changed Node test plan", () => {
   });
 
   it("fails safe when an unresolved source only finds an unrelated directory test", () => {
-    const cwd = mkdtempSync(path.join(tmpdir(), "openclaw-ci-target-"));
+    const cwd = mkdtempSync(path.join(tmpdir(), "carapace-ci-target-"));
     try {
       mkdirSync(path.join(cwd, "src"));
       writeFileSync(path.join(cwd, "src/value.ts"), "export const value = 1;\n");

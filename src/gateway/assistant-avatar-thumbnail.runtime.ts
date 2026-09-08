@@ -1,4 +1,4 @@
-import { normalizeMimeType } from "@openclaw/media-core/mime";
+import { normalizeMimeType } from "@carapace/media-core/mime";
 import { fileTypeFromBuffer } from "file-type";
 import { readFileDescriptorBounded } from "../infra/boundary-file-read.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";

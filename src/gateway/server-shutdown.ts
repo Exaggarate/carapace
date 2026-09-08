@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { markGatewayRestartTrace, measureGatewayRestartTrace } from "./restart-trace.js";

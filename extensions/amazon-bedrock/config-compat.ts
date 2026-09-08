@@ -2,8 +2,8 @@
  * Legacy config migration for Amazon Bedrock discovery settings. It moves
  * old `models.bedrockDiscovery` config into plugin-local config shape.
  */
-import { mergeMissing } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { mergeMissing } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 
 type JsonRecord = Record<string, unknown>;
 

@@ -1,4 +1,4 @@
-export const NATIVE_HISTORY_STATE_EVENT = "openclaw:native-history-state";
+export const NATIVE_HISTORY_STATE_EVENT = "carapace:native-history-state";
 
 export type NativeHistoryState = {
   canGoBack: boolean;
@@ -11,18 +11,18 @@ type NativeEmbedHost = {
 };
 
 type NativeWebChromeWindow = Window & {
-  __OPENCLAW_NATIVE_EMBED__?: unknown;
-  __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-  __OPENCLAW_NATIVE_HISTORY__?: NativeHistoryState;
+  __CARAPACE_NATIVE_EMBED__?: unknown;
+  __CARAPACE_NATIVE_WEB_CHROME__?: boolean;
+  __CARAPACE_NATIVE_HISTORY__?: NativeHistoryState;
 };
 
 export function isNativeWebChromeHost(): boolean {
-  return (window as NativeWebChromeWindow)["__OPENCLAW_NATIVE_WEB_CHROME__"] === true;
+  return (window as NativeWebChromeWindow)["__CARAPACE_NATIVE_WEB_CHROME__"] === true;
 }
 
 export function nativeEmbedHost(): NativeEmbedHost | null {
   // SAFETY: the host adds this optional document-start value; its shape is validated below.
-  const host = (window as NativeWebChromeWindow)["__OPENCLAW_NATIVE_EMBED__"];
+  const host = (window as NativeWebChromeWindow)["__CARAPACE_NATIVE_EMBED__"];
   if (!host || typeof host !== "object" || Array.isArray(host)) {
     return null;
   }
@@ -39,7 +39,7 @@ export function isNativeEmbedHost(): boolean {
 }
 
 export function readNativeHistoryState(): NativeHistoryState {
-  const state = (window as NativeWebChromeWindow)["__OPENCLAW_NATIVE_HISTORY__"];
+  const state = (window as NativeWebChromeWindow)["__CARAPACE_NATIVE_HISTORY__"];
   return state && typeof state.canGoBack === "boolean" && typeof state.canGoForward === "boolean"
     ? state
     : { canGoBack: false, canGoForward: false };

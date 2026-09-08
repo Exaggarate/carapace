@@ -38,9 +38,9 @@ function isolatedWrapperEnv(root: string) {
   const home = join(root, "home");
   mkdirSync(home, { recursive: true });
   return {
-    GIT_AUTHOR_NAME: "OpenClaw Test",
+    GIT_AUTHOR_NAME: "Carapace Test",
     GIT_AUTHOR_EMAIL: "test@example.invalid",
-    GIT_COMMITTER_NAME: "OpenClaw Test",
+    GIT_COMMITTER_NAME: "Carapace Test",
     GIT_COMMITTER_EMAIL: "test@example.invalid",
     GIT_CONFIG_GLOBAL: "/dev/null",
     GIT_CONFIG_NOSYSTEM: "1",
@@ -56,7 +56,7 @@ function makeMismatchedWrapperRepo({
   realModules = false,
   dispatchBody = 'echo "canonical wrapper executed";',
 } = {}) {
-  const root = tempDirs.make("openclaw-pr-dev-wrapper-");
+  const root = tempDirs.make("carapace-pr-dev-wrapper-");
   const bin = join(root, "bin");
   const canonicalPath = join(root, "canonical");
   const linkedPath = join(root, "linked");
@@ -208,7 +208,7 @@ describe("scripts/pr wrappers", () => {
     expect(script).toContain("scripts/pr prepare-run <PR>");
     expect(script).toContain("scripts/pr ci-dispatch <PR>");
     expect(script).toContain("scripts/pr merge-run <PR> [--auto-merge]");
-    expect(script).toContain("OPENCLAW_PR_AUTO_MERGE=1 is equivalent");
+    expect(script).toContain("CARAPACE_PR_AUTO_MERGE=1 is equivalent");
     expect(script).toContain("Required commands: git, gh, jq, rg (ripgrep), pnpm, node.");
     expect(script).toContain('review_init "$pr"');
     expect(script).toContain('prepare_run "$pr"');
@@ -232,13 +232,13 @@ describe("scripts/pr wrappers", () => {
     cpSync("scripts/lib/plain-gh.sh", join(fixture.canonical, "scripts/lib/plain-gh.sh"));
     writeFileSync(
       join(fixture.canonical, "scripts/pr-lib/worktree.sh"),
-      `list_pr_worktrees() { /bin/sh -c 'printf "%s\\n" "\${OPENCLAW_GH_BIN-absent}"'; }\n`,
+      `list_pr_worktrees() { /bin/sh -c 'printf "%s\\n" "\${CARAPACE_GH_BIN-absent}"'; }\n`,
     );
     for (const override of [undefined, "", join(fixture.bin, "gh")]) {
       const result = spawnSync(join(fixture.canonical, "scripts/pr"), ["ls"], {
         cwd: fixture.canonical,
         encoding: "utf8",
-        env: { ...fixture.env, OPENCLAW_GH_BIN: override },
+        env: { ...fixture.env, CARAPACE_GH_BIN: override },
       });
       expect(result.status, result.stderr).toBe(0);
       expect(result.stdout).toBe(`${override ?? "absent"}\n`);
@@ -479,7 +479,7 @@ describe("scripts/pr wrappers", () => {
     const envResult = spawnSync(join(fixture.linked, "scripts", "pr"), ["ci-dispatch", "123"], {
       cwd: fixture.linked,
       encoding: "utf8",
-      env: { ...fixture.env, OPENCLAW_PR_DEV_WRAPPER: "1" },
+      env: { ...fixture.env, CARAPACE_PR_DEV_WRAPPER: "1" },
     });
     expect(envResult.status, `${envResult.stderr}\n${envResult.stdout}`).toBe(0);
     expect(envResult.stdout).toContain("local wrapper executed");
@@ -577,7 +577,7 @@ describe("scripts/pr wrappers", () => {
     expect(materialized.status, materialized.stderr).toBe(2);
     expect(materialized.stderr).toContain("running wrapper code materialized from");
     const anchors = readdirSync(fixture.root).filter((name) =>
-      name.startsWith("openclaw-pr-anchor."),
+      name.startsWith("carapace-pr-anchor."),
     );
     expect(anchors).toHaveLength(1);
     const anchor = join(fixture.root, anchors[0]!);
@@ -635,7 +635,7 @@ describe("scripts/pr wrappers", () => {
     writeFileSync(
       git,
       `#!/bin/sh
-"$OPENCLAW_TEST_GIT" "$@" || exit
+"$CARAPACE_TEST_GIT" "$@" || exit
 if [ "$3" = archive ]; then
   # Valid zero padding exceeds a pipe buffer even when tar has read every entry.
   dd if=/dev/zero bs=65536 count=32 2>/dev/null
@@ -646,7 +646,7 @@ fi
     const result = spawnSync(join(fixture.linked, "scripts/pr"), ["unknown-command"], {
       cwd: fixture.linked,
       encoding: "utf8",
-      env: { ...fixture.env, OPENCLAW_TEST_GIT: resolveCommand("git") },
+      env: { ...fixture.env, CARAPACE_TEST_GIT: resolveCommand("git") },
     });
     expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(2);
     expect(result.stderr).toContain("running wrapper code materialized from");
@@ -664,18 +664,18 @@ fi
         git,
         `#!/bin/sh
 if [ "$3" = archive ]; then
-  if [ "$OPENCLAW_TEST_FAILURE" = 'truncated archive' ]; then
-    "$OPENCLAW_TEST_GIT" "$@" > "$OPENCLAW_TEST_ARCHIVE" || exit
-    dd if="$OPENCLAW_TEST_ARCHIVE" bs=512 count=3 2>/dev/null
+  if [ "$CARAPACE_TEST_FAILURE" = 'truncated archive' ]; then
+    "$CARAPACE_TEST_GIT" "$@" > "$CARAPACE_TEST_ARCHIVE" || exit
+    dd if="$CARAPACE_TEST_ARCHIVE" bs=512 count=3 2>/dev/null
     exit
   fi
-  "$OPENCLAW_TEST_GIT" "$@" || exit
-  if [ "$OPENCLAW_TEST_FAILURE" = 'producer failure' ]; then
+  "$CARAPACE_TEST_GIT" "$@" || exit
+  if [ "$CARAPACE_TEST_FAILURE" = 'producer failure' ]; then
     exit 42
   fi
   exit 0
 fi
-exec "$OPENCLAW_TEST_GIT" "$@"
+exec "$CARAPACE_TEST_GIT" "$@"
 `,
       );
       chmodSync(git, 0o755);
@@ -683,9 +683,9 @@ exec "$OPENCLAW_TEST_GIT" "$@"
       writeFileSync(
         tar,
         `#!/bin/sh
-printf 'started\\n' >> "$OPENCLAW_TEST_READER_LOG"
-"$OPENCLAW_TEST_TAR" "$@" || exit
-if [ "$OPENCLAW_TEST_FAILURE" = 'reader failure' ]; then
+printf 'started\\n' >> "$CARAPACE_TEST_READER_LOG"
+"$CARAPACE_TEST_TAR" "$@" || exit
+if [ "$CARAPACE_TEST_FAILURE" = 'reader failure' ]; then
   exit 42
 fi
 `,
@@ -697,11 +697,11 @@ fi
         encoding: "utf8",
         env: {
           ...fixture.env,
-          OPENCLAW_TEST_GIT: resolveCommand("git"),
-          OPENCLAW_TEST_TAR: resolveCommand("tar"),
-          OPENCLAW_TEST_FAILURE: failure,
-          OPENCLAW_TEST_ARCHIVE: join(fixture.root, "complete.tar"),
-          OPENCLAW_TEST_READER_LOG: readerLog,
+          CARAPACE_TEST_GIT: resolveCommand("git"),
+          CARAPACE_TEST_TAR: resolveCommand("tar"),
+          CARAPACE_TEST_FAILURE: failure,
+          CARAPACE_TEST_ARCHIVE: join(fixture.root, "complete.tar"),
+          CARAPACE_TEST_READER_LOG: readerLog,
         },
       });
       expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(1);
@@ -709,7 +709,7 @@ fi
       expect(result.stderr).not.toContain("running wrapper code materialized from");
       expect(existsSync(readerLog)).toBe(failure !== "producer failure");
       expect(
-        readdirSync(fixture.root).filter((name) => name.startsWith("openclaw-pr-anchor.")),
+        readdirSync(fixture.root).filter((name) => name.startsWith("carapace-pr-anchor.")),
       ).toEqual([]);
     },
   );
@@ -865,8 +865,8 @@ fi
         "c".repeat(64),
       ]);
       expect.soft(publisher.status, publisher.stderr).toBe(0);
-      expect.soft(publisher.stdout).toContain(`OPENCLAW_CRABBOX_GATE_HEAD=${REVIEWED_HEAD}`);
-      expect.soft(publisher.stdout).toContain("OPENCLAW_CRABBOX_GATE_TARGET_COUNT=0");
+      expect.soft(publisher.stdout).toContain(`CARAPACE_CRABBOX_GATE_HEAD=${REVIEWED_HEAD}`);
+      expect.soft(publisher.stdout).toContain("CARAPACE_CRABBOX_GATE_TARGET_COUNT=0");
       expect.soft(publisher.stdout).toContain("pnpm build");
       expect.soft(publisher.stdout).toContain("pnpm check");
 
@@ -915,10 +915,10 @@ fi
       writeFileSync(
         tar,
         `#!/bin/sh
-"$OPENCLAW_TEST_TAR" "$@" || exit
+"$CARAPACE_TEST_TAR" "$@" || exit
 while [ "$#" -gt 0 ]; do
   if [ "$1" = "-C" ]; then
-    if [ "$OPENCLAW_TEST_FAULT" = missing ]; then
+    if [ "$CARAPACE_TEST_FAULT" = missing ]; then
       rm "$2/scripts/lib/anchor-review-record.mjs"
     else
       printf '\\n// tampered\\n' >> "$2/scripts/lib/anchor-review-record.mjs"
@@ -936,15 +936,15 @@ exit 99
         encoding: "utf8",
         env: {
           ...fixture.env,
-          OPENCLAW_TEST_TAR: resolveCommand("tar"),
-          OPENCLAW_TEST_FAULT: fault,
+          CARAPACE_TEST_TAR: resolveCommand("tar"),
+          CARAPACE_TEST_FAULT: fault,
         },
       });
       expect(result.status, `${result.stdout}\n${result.stderr}`).toBe(1);
       expect(result.stderr).toContain("Refusing to silently substitute");
       expect(result.stderr).not.toContain("running wrapper code materialized from");
       expect(
-        readdirSync(fixture.root).filter((name) => name.startsWith("openclaw-pr-anchor.")),
+        readdirSync(fixture.root).filter((name) => name.startsWith("carapace-pr-anchor.")),
       ).toEqual([]);
     },
   );
@@ -1059,7 +1059,7 @@ exit 99
             compilerOptions: {
               paths: {
                 [dependency]: ["./caller-dependency.mts"],
-                "@openclaw/normalization-core/record-coerce": [
+                "@carapace/normalization-core/record-coerce": [
                   "./packages/normalization-core/src/record-coerce.ts",
                 ],
               },
@@ -1119,9 +1119,9 @@ exit 99
       expect(result.stderr).not.toContain("running wrapper code materialized from");
       expect(existsSync(join(fixture.root, "installed"))).toBe(false);
       expect(existsSync(installedDependency)).toBe(false);
-      expect(fixture.git(fixture.canonical, ["for-each-ref", "refs/openclaw"]).stdout).toBe("");
+      expect(fixture.git(fixture.canonical, ["for-each-ref", "refs/carapace"]).stdout).toBe("");
       expect(
-        readdirSync(fixture.root).filter((name) => name.startsWith("openclaw-pr-anchor.")),
+        readdirSync(fixture.root).filter((name) => name.startsWith("carapace-pr-anchor.")),
       ).toEqual([]);
     },
   );
@@ -1133,8 +1133,8 @@ exit 99
       fixture.git(fixture.canonical, ["checkout", "main"]);
       if (contract === "handoff") {
         const legacy = readScript(join(fixture.canonical, "scripts/pr")).replaceAll(
-          "OPENCLAW_PR_ANCHOR_REPO_ROOT",
-          "OPENCLAW_PR_LEGACY_UNSUPPORTED",
+          "CARAPACE_PR_ANCHOR_REPO_ROOT",
+          "CARAPACE_PR_LEGACY_UNSUPPORTED",
         );
         writeFileSync(join(fixture.canonical, "scripts/pr"), legacy);
       } else {
@@ -1169,7 +1169,7 @@ exit 99
   it("defaults to squash and allows commit-preserving merge methods", () => {
     const script = readScript("scripts/pr-lib/merge.sh");
 
-    expect(script).toContain("OPENCLAW_PR_MERGE_METHOD:-squash");
+    expect(script).toContain("CARAPACE_PR_MERGE_METHOD:-squash");
     expect(script).toContain("--squash");
     expect(script).toContain("--merge");
     expect(script).toContain("--rebase");
@@ -1199,7 +1199,7 @@ exit 99
   });
 
   it("refuses to substitute a different canonical wrapper implementation", () => {
-    const dir = tempDirs.make("openclaw-pr-wrapper-revision-");
+    const dir = tempDirs.make("carapace-pr-wrapper-revision-");
     const repo = join(dir, "repo");
     const linked = join(dir, "linked");
     copyPrWrapperSources(repo);
@@ -1279,7 +1279,7 @@ exit 99
   });
 
   it("runs the local wrapper when it matches origin/main and the canonical checkout is parked elsewhere", () => {
-    const dir = tempDirs.make("openclaw-pr-wrapper-anchor-");
+    const dir = tempDirs.make("carapace-pr-wrapper-anchor-");
     const repo = join(dir, "repo");
     const linked = join(dir, "linked");
     copyPrWrapperSources(repo);
@@ -1511,7 +1511,7 @@ exit 99
     ...preflightCases.map((scenario) => ({ ...scenario, route: "default" })),
     { ...preflightCases[0]!, route: "override" },
   ])("GitHub API preflight: $name ($route)", ({ route, ...scenario }) => {
-    const dir = tempDirs.make("openclaw-pr-auth-");
+    const dir = tempDirs.make("carapace-pr-auth-");
     const env = isolatedWrapperEnv(dir);
     const bin = join(dir, "bin");
     mkdirSync(bin);
@@ -1563,7 +1563,7 @@ process.exit(${scenario.code});
         encoding: "utf8",
         env: {
           ...env,
-          OPENCLAW_GH_BIN: route === "override" ? gh : "",
+          CARAPACE_GH_BIN: route === "override" ? gh : "",
           GH_TOKEN: "synthetic-token",
         },
       },
@@ -1604,12 +1604,12 @@ process.exit(${scenario.code});
   it.each(["default", "override"])(
     "resolves review writer identity through the selected protected gh (%s)",
     (route) => {
-      const dir = tempDirs.make("openclaw-pr-review-writer-");
+      const dir = tempDirs.make("carapace-pr-review-writer-");
       const bin = join(dir, "bin");
       const calls = join(dir, "calls.log");
       mkdirSync(bin);
       const protectedGh = `#!/bin/sh
-printf '%s\\n' "$*" >> "$OPENCLAW_TEST_CALLS"
+printf '%s\\n' "$*" >> "$CARAPACE_TEST_CALLS"
 case "$1 $2" in
   "api user") printf 'relay-reader\\n' ;;
   "api graphql") printf 'writer-maintainer\\n' ;;
@@ -1631,7 +1631,7 @@ esac
             "source scripts/lib/plain-gh.sh",
             "source scripts/pr-lib/common.sh",
             "source scripts/pr-lib/review.sh",
-            'enter_worktree() { cd "$OPENCLAW_TEST_ROOT"; mkdir -p .local; }',
+            'enter_worktree() { cd "$CARAPACE_TEST_ROOT"; mkdir -p .local; }',
             "review_claim 42",
           ].join("\n"),
         ],
@@ -1641,9 +1641,9 @@ esac
           env: {
             HOME: dir,
             GH_TOKEN: "synthetic-writer-token",
-            OPENCLAW_GH_BIN: route === "override" ? overrideGh : "",
-            OPENCLAW_TEST_CALLS: calls,
-            OPENCLAW_TEST_ROOT: dir,
+            CARAPACE_GH_BIN: route === "override" ? overrideGh : "",
+            CARAPACE_TEST_CALLS: calls,
+            CARAPACE_TEST_ROOT: dir,
             PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
           },
         },

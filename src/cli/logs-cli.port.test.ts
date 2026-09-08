@@ -11,7 +11,7 @@ import {
 } from "../gateway/minimal-gateway.test-helpers.js";
 import { defaultRuntime, ExitError } from "../runtime.js";
 import { runRegisteredCli } from "../test-utils/command-runner.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { registerLogsCli } from "./logs-cli.js";
 
 afterEach(() => vi.restoreAllMocks());
@@ -30,13 +30,13 @@ async function withLogsGateway(
     stderr: string[];
   }) => Promise<void>,
 ) {
-  await withOpenClawTestState(
+  await withCarapaceTestState(
     {
       label: "logs-port",
       env: {
-        OPENCLAW_GATEWAY_URL:
+        CARAPACE_GATEWAY_URL:
           options.source === "environment" ? "ws://remote.example:19001" : undefined,
-        OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: undefined,
+        CARAPACE_ALLOW_INSECURE_PRIVATE_WS: undefined,
       },
     },
     async (state) => {

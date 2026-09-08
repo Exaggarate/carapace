@@ -1,8 +1,8 @@
-import { gatewayCredentialScope, gatewayOriginScope } from "@openclaw/gateway-client/browser";
+import { gatewayCredentialScope, gatewayOriginScope } from "@carapace/gateway-client/browser";
 import {
   parseControlUiFocusLocation,
   type ControlUiFocusLocation,
-} from "@openclaw/session-url-contract";
+} from "@carapace/session-url-contract";
 import type { RouteLocation } from "@openclaw/uirouter";
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
@@ -356,7 +356,7 @@ export function bootstrapApplication(): ApplicationRuntime {
     signal: startupLifecycle.signal,
     canPresentBrowserPanel: () => {
       const shell = document.querySelector<HTMLElement & { routeState: ShellRouteState }>(
-        "openclaw-app-shell",
+        "carapace-app-shell",
       );
       return shell?.isConnected === true && !isSettingsTakeover(shell.routeState.routeId);
     },
@@ -374,7 +374,7 @@ export function bootstrapApplication(): ApplicationRuntime {
     shouldOpenInControlUiBrowser: () =>
       loadSettings().openLinksInControlUiBrowser === true &&
       isBrowserPanelAvailable(gateway.snapshot) &&
-      document.querySelector("openclaw-app-shell")?.isConnected === true,
+      document.querySelector("carapace-app-shell")?.isConnected === true,
   });
   let nativeDeviceSettings: ApplicationContext["nativeDeviceSettings"] = null;
   let nativeNotifications: ApplicationContext["nativeNotifications"] = null;
@@ -514,7 +514,7 @@ export function bootstrapApplication(): ApplicationRuntime {
     const historyMode = samePage ? "replace" : requested;
     const navigationPromise = router.navigate(routeId, context, { history: historyMode }, location);
     void navigationPromise.catch((error: unknown) => {
-      console.error("[openclaw] route navigation failed", error);
+      console.error("[carapace] route navigation failed", error);
     });
     return navigationPromise;
   };
@@ -601,13 +601,13 @@ export function bootstrapApplication(): ApplicationRuntime {
       const nativeWindow = window as Window & {
         webkit?: {
           messageHandlers?: {
-            openclawDeviceSettings?: { postMessage?: unknown };
-            openclawNotifications?: { postMessage?: unknown };
+            carapaceDeviceSettings?: { postMessage?: unknown };
+            carapaceNotifications?: { postMessage?: unknown };
           };
         };
       };
       if (
-        typeof nativeWindow.webkit?.messageHandlers?.openclawNotifications?.postMessage ===
+        typeof nativeWindow.webkit?.messageHandlers?.carapaceNotifications?.postMessage ===
         "function"
       ) {
         steps.unshift(async () => {
@@ -620,7 +620,7 @@ export function bootstrapApplication(): ApplicationRuntime {
         });
       }
       if (
-        typeof nativeWindow.webkit?.messageHandlers?.openclawDeviceSettings?.postMessage ===
+        typeof nativeWindow.webkit?.messageHandlers?.carapaceDeviceSettings?.postMessage ===
         "function"
       ) {
         steps.unshift(async () => {
@@ -695,7 +695,7 @@ export function bootstrapApplication(): ApplicationRuntime {
                   : isDefaultChatLanding(history.location(), basePath, routeIdFromPath),
             }),
             (error) => {
-              console.error("[openclaw] initial session location failed", error);
+              console.error("[carapace] initial session location failed", error);
             },
           );
         });

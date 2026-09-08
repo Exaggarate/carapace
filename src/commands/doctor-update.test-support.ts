@@ -134,11 +134,11 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({
 }));
 
 export function createManagedDoctorEnvironment(): NodeJS.ProcessEnv {
-  const stateDir = path.join(os.homedir(), ".openclaw-work");
+  const stateDir = path.join(os.homedir(), ".carapace-work");
   return {
-    OPENCLAW_PROFILE: "work",
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
+    CARAPACE_PROFILE: "work",
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
   };
 }
 
@@ -232,17 +232,17 @@ export function mockUpdateResult(result: Omit<UpdateRunResult, "steps" | "durati
 export function installDoctorUpdateTestHooks(): void {
   const originalStdinIsTtyDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
   const originalStdoutIsTtyDescriptor = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
-  const originalServiceRepairPolicy = process.env.OPENCLAW_SERVICE_REPAIR_POLICY;
+  const originalServiceRepairPolicy = process.env.CARAPACE_SERVICE_REPAIR_POLICY;
 
   beforeEach(async () => {
     // These controls exercise the canonical host install, not the test launcher's profile.
     for (const key of [
-      "OPENCLAW_HOME",
-      "OPENCLAW_PROFILE",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_SUPERVISOR_MODE",
-      "OPENCLAW_SERVICE_REPAIR_POLICY",
+      "CARAPACE_HOME",
+      "CARAPACE_PROFILE",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_CONFIG_PATH",
+      "CARAPACE_SUPERVISOR_MODE",
+      "CARAPACE_SERVICE_REPAIR_POLICY",
     ]) {
       vi.stubEnv(key, undefined);
     }
@@ -264,7 +264,7 @@ export function installDoctorUpdateTestHooks(): void {
     }));
     mocks.readUpdateStateSchemaVersions.mockReset().mockResolvedValue([]);
     mocks.readConfigFileSnapshot.mockReset().mockResolvedValue({
-      path: createManagedDoctorEnvironment().OPENCLAW_CONFIG_PATH!,
+      path: createManagedDoctorEnvironment().CARAPACE_CONFIG_PATH!,
       exists: true,
       raw: "{}",
       parsed: {},
@@ -345,9 +345,9 @@ export function installDoctorUpdateTestHooks(): void {
       delete (process.stdout as Partial<typeof process.stdout>).isTTY;
     }
     if (originalServiceRepairPolicy === undefined) {
-      delete process.env.OPENCLAW_SERVICE_REPAIR_POLICY;
+      delete process.env.CARAPACE_SERVICE_REPAIR_POLICY;
     } else {
-      process.env.OPENCLAW_SERVICE_REPAIR_POLICY = originalServiceRepairPolicy;
+      process.env.CARAPACE_SERVICE_REPAIR_POLICY = originalServiceRepairPolicy;
     }
   });
 }

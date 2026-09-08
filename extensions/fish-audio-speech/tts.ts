@@ -1,10 +1,10 @@
-import type { SpeechVoiceOption } from "openclaw/plugin-sdk/speech";
+import type { SpeechVoiceOption } from "carapace/plugin-sdk/speech";
 // Fish Audio HTTP client for buffered and streaming TTS plus voice discovery.
-import { MAX_AUDIO_BYTES } from "openclaw/plugin-sdk/speech-provider";
+import { MAX_AUDIO_BYTES } from "carapace/plugin-sdk/speech-provider";
 import {
   asOptionalRecord,
   normalizeOptionalString as trimToUndefined,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const FISH_AUDIO_BASE_URL = "https://api.fish.audio";
 const FISH_AUDIO_VOICES_MAX_BYTES = 2 * 1024 * 1024;
@@ -57,7 +57,7 @@ async function requestFishAudioTts(params: FishAudioTtsRequest): Promise<{
 }> {
   const baseUrl = normalizeFishAudioBaseUrl(params.baseUrl);
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   return await fetchWithSsrFGuard({
     url: `${baseUrl}/v1/tts`,
     init: {
@@ -77,7 +77,7 @@ async function requestFishAudioTts(params: FishAudioTtsRequest): Promise<{
 
 export async function fishAudioTts(params: FishAudioTtsRequest): Promise<Buffer> {
   const { assertOkOrThrowProviderError, readProviderBinaryResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { response, release } = await requestFishAudioTts(params);
   try {
     await assertOkOrThrowProviderError(response, "Fish Audio TTS API error");
@@ -94,9 +94,9 @@ export async function fishAudioTtsStream(params: FishAudioTtsRequest): Promise<{
   release: () => Promise<void>;
 }> {
   const { createBoundedProviderBinaryStream } =
-    await import("openclaw/plugin-sdk/provider-binary-stream");
+    await import("carapace/plugin-sdk/provider-binary-stream");
   const { assertOkOrThrowProviderError, assertProviderBinaryResponseContent } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { response, release } = await requestFishAudioTts(params);
   let handedOff = false;
   try {
@@ -169,9 +169,9 @@ async function requestVoicePage(params: {
     url.searchParams.set("sort_by", "score");
   }
   const { assertOkOrThrowProviderError, readProviderJsonResponse } =
-    await import("openclaw/plugin-sdk/provider-http");
+    await import("carapace/plugin-sdk/provider-http");
   const { fetchWithSsrFGuard, ssrfPolicyFromHttpBaseUrlAllowedHostname } =
-    await import("openclaw/plugin-sdk/ssrf-runtime");
+    await import("carapace/plugin-sdk/ssrf-runtime");
   const { response, release } = await fetchWithSsrFGuard({
     url: url.toString(),
     init: { headers: { Authorization: `Bearer ${params.apiKey}` } },

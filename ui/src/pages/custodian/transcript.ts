@@ -2,7 +2,7 @@ import type {
   SystemAgentChatHistoryResult,
   SystemAgentChatHistoryTurn,
   SystemAgentChatResult,
-} from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-protocol";
 import { html, nothing } from "lit";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import type { WizardStep } from "../../api/types.ts";
@@ -122,7 +122,7 @@ async function readCustodianTranscript(
 ): Promise<CustodianTranscriptResult> {
   try {
     const result = await client.request<SystemAgentChatHistoryResult>(
-      "openclaw.chat.history",
+      "carapace.chat.history",
       {},
       { timeoutMs: CUSTODIAN_TRANSCRIPT_TIMEOUT_MS },
     );

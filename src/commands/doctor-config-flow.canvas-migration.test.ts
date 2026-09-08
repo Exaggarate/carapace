@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readConfigFileSnapshot } from "../config/config.js";
-import { withTempHome, writeOpenClawConfig } from "../config/test-helpers.js";
+import { withTempHome, writeCarapaceConfig } from "../config/test-helpers.js";
 import { runInitialConfigWriteHealth } from "../flows/doctor-health-contribution-runners.config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { prepareDoctorContext } from "./doctor-config-flow.test-support.js";
 
 const note = vi.hoisted(() => vi.fn<(message: string, title?: string) => void>());
@@ -18,7 +18,7 @@ async function repairConfig(configPath: string) {
 
 function writeCanvasConfig(home: string, root: string, legacy = false, port?: number) {
   const host = { enabled: false, root, ...(port ? { port } : {}) };
-  return writeOpenClawConfig(home, {
+  return writeCarapaceConfig(home, {
     gateway: { mode: "local" },
     ...(legacy
       ? { canvasHost: host }
@@ -29,7 +29,7 @@ function writeCanvasConfig(home: string, root: string, legacy = false, port?: nu
 describe("Canvas document migration through doctor config persistence", () => {
   afterEach(() => {
     note.mockClear();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   });
 
   // POSIX permissions exercise real read/copy failures; Windows and root ignore chmod(0).
@@ -41,7 +41,7 @@ describe("Canvas document migration through doctor config persistence", () => {
       await withTempHome(async (home) => {
         const customRoot = path.join(home, "custom-canvas");
         const documents = path.join(customRoot, "documents");
-        const coreDocuments = path.join(home, ".openclaw", "canvas", "documents");
+        const coreDocuments = path.join(home, ".carapace", "canvas", "documents");
         for (const id of ["cv_first", "cv_retry"]) {
           await fs.mkdir(path.join(documents, id), { recursive: true });
           await fs.writeFile(path.join(documents, id, "index.html"), id);
@@ -70,7 +70,7 @@ describe("Canvas document migration through doctor config persistence", () => {
             .map(([message]) => message)
             .join("\n");
           expect.soft(warnings).toContain("Canvas");
-          expect.soft(warnings).toContain("openclaw doctor --fix");
+          expect.soft(warnings).toContain("carapace doctor --fix");
           if (failure === "blind") {
             expect.soft(warnings).toContain("EACCES");
           } else {
@@ -102,7 +102,7 @@ describe("Canvas document migration through doctor config persistence", () => {
     "retires a %s root without losing canonical documents",
     async (scenario) => {
       await withTempHome(async (home) => {
-        const coreRoot = path.join(home, ".openclaw", "canvas");
+        const coreRoot = path.join(home, ".carapace", "canvas");
         const customRoot = scenario === "canonical" ? coreRoot : path.join(home, "custom-canvas");
         if (scenario === "canonical-alias") {
           await fs.mkdir(coreRoot, { recursive: true });

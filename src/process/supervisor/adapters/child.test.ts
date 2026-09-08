@@ -83,7 +83,7 @@ function expectedTrustedCmdExe(): string {
 }
 
 describe("createChildAdapter", () => {
-  const originalServiceMarker = process.env.OPENCLAW_SERVICE_MARKER;
+  const originalServiceMarker = process.env.CARAPACE_SERVICE_MARKER;
   const originalPlatformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
 
   const setPlatform = (platform: NodeJS.Platform) => {
@@ -120,15 +120,15 @@ describe("createChildAdapter", () => {
       kill: vi.fn(),
       dispose: vi.fn(),
     });
-    delete process.env.OPENCLAW_SERVICE_MARKER;
+    delete process.env.CARAPACE_SERVICE_MARKER;
     vi.useRealTimers();
   });
 
   afterAll(() => {
     if (originalServiceMarker === undefined) {
-      delete process.env.OPENCLAW_SERVICE_MARKER;
+      delete process.env.CARAPACE_SERVICE_MARKER;
     } else {
-      process.env.OPENCLAW_SERVICE_MARKER = originalServiceMarker;
+      process.env.CARAPACE_SERVICE_MARKER = originalServiceMarker;
     }
   });
 
@@ -159,7 +159,7 @@ describe("createChildAdapter", () => {
 
     // Detachment flag is now passed to signalProcessTree so it knows whether
     // it can safely group-kill via -pid. (#71662)
-    const expectedDetached = process.platform !== "win32" && !process.env.OPENCLAW_SERVICE_MARKER;
+    const expectedDetached = process.platform !== "win32" && !process.env.CARAPACE_SERVICE_MARKER;
     expect(signalProcessTreeMock).toHaveBeenCalledWith(
       4321,
       "SIGKILL",
@@ -169,7 +169,7 @@ describe("createChildAdapter", () => {
   });
 
   it("creates owned worker trees in a dedicated POSIX process group without fallback", async () => {
-    process.env.OPENCLAW_SERVICE_MARKER = "service-managed";
+    process.env.CARAPACE_SERVICE_MARKER = "service-managed";
     const { child, disconnectMock, sendMock } = createStubChild();
     spawnWithFallbackMock.mockResolvedValue({ child, usedFallback: false });
 
@@ -186,7 +186,7 @@ describe("createChildAdapter", () => {
 
     await adapter.openStartGate?.();
     expect(sendMock).toHaveBeenCalledWith(
-      { type: "openclaw-worker-start-v1" },
+      { type: "carapace-worker-start-v1" },
       expect.any(Function),
     );
     adapter.closeStartGate?.();
@@ -487,7 +487,7 @@ describe("createChildAdapter", () => {
   });
 
   it("selects the exact service relay instead of direct shared-group signaling", async () => {
-    process.env.OPENCLAW_SERVICE_MARKER = "1";
+    process.env.CARAPACE_SERVICE_MARKER = "1";
     try {
       await createChildAdapter({
         argv: ["node", "-e", "setTimeout(() => {}, 1000)"],
@@ -504,7 +504,7 @@ describe("createChildAdapter", () => {
       expect(spawnWithFallbackMock).not.toHaveBeenCalled();
       expect(signalProcessTreeMock).not.toHaveBeenCalled();
     } finally {
-      delete process.env.OPENCLAW_SERVICE_MARKER;
+      delete process.env.CARAPACE_SERVICE_MARKER;
     }
   });
 
@@ -513,7 +513,7 @@ describe("createChildAdapter", () => {
 
     adapter.kill("SIGTERM");
 
-    const expectedDetached = process.platform !== "win32" && !process.env.OPENCLAW_SERVICE_MARKER;
+    const expectedDetached = process.platform !== "win32" && !process.env.CARAPACE_SERVICE_MARKER;
     expect(signalProcessTreeMock).toHaveBeenCalledWith(7654, "SIGTERM", {
       detached: expectedDetached,
     });
@@ -772,7 +772,7 @@ describe("createChildAdapter", () => {
 
     const { adapter, emitExit, child } = await createAdapterHarness({
       pid: 8642,
-      argv: ["openclaw", "version"],
+      argv: ["carapace", "version"],
       stdinMode: "pipe-closed",
     });
     const stdout = vi.fn();
@@ -824,7 +824,7 @@ describe("createChildAdapter", () => {
 
   it("keeps the service relay out of Windows child mode", async () => {
     setPlatform("win32");
-    process.env.OPENCLAW_SERVICE_MARKER = "openclaw";
+    process.env.CARAPACE_SERVICE_MARKER = "carapace";
 
     await createAdapterHarness({ pid: 7777 });
 
@@ -873,7 +873,7 @@ describe("createChildAdapter", () => {
   it("unwraps Gemini's npm shim and preserves prompt argv on Windows", async () => {
     setPlatform("win32");
     const { binDir, entrypoint } = await createWindowsNpmShim({
-      binDir: tempDirs.make("openclaw-child-shim-"),
+      binDir: tempDirs.make("carapace-child-shim-"),
       command: "gemini",
       packagePath: ["@google", "gemini-cli", "bundle", "gemini.js"],
     });
@@ -897,7 +897,7 @@ describe("createChildAdapter", () => {
   it("unwraps Claude's npm shim to its native executable on Windows", async () => {
     setPlatform("win32");
     const { binDir, entrypoint } = await createWindowsNpmShim({
-      binDir: tempDirs.make("openclaw-child-shim-"),
+      binDir: tempDirs.make("carapace-child-shim-"),
       command: "claude",
       packagePath: ["@anthropic-ai", "claude-code", "bin", "claude.exe"],
     });

@@ -1,13 +1,13 @@
 // Proves when a new state root cannot contain legacy state migration work.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord, isStringRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord, isStringRecord } from "@carapace/normalization-core/record-coerce";
 import {
   resolveConfigPath,
   resolveLegacyStateDirs,
   resolveStateDir,
 } from "../../../config/paths.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { resolveEffectiveHomeDir } from "../../../infra/home-dir.js";
 import { tryReadJsonSync } from "../../../infra/json-files.js";
 import {
@@ -139,7 +139,7 @@ function hasOnlyMigrationSafePluginEntries(
       // Discovery alone cannot prove host compatibility or rule out a fallback
       // doctor owner; use the same candidate acceptance as normal plugin startup.
       const registry = loadPluginManifestRegistryCore({
-        config: config as OpenClawConfig,
+        config: config as CarapaceConfig,
         discovery,
         env,
         installRecords: {},
@@ -211,7 +211,7 @@ export function planPristineStartupConfigMigrations(
     skipAllStateMigrations:
       skipCoreStateMigrations &&
       hasOnlyMigrationSafePluginEntries(config, env) &&
-      !configMayRequireStartupPluginConvergence({ config: config as OpenClawConfig, env }),
+      !configMayRequireStartupPluginConvergence({ config: config as CarapaceConfig, env }),
     skipCoreStateMigrations,
   };
 }
@@ -243,7 +243,7 @@ export function planPristineStartupStateMigrations(
   if (!homeDir) {
     return { skipAllStateMigrations: false, skipCoreStateMigrations: false };
   }
-  const explicitStateDir = env.OPENCLAW_STATE_DIR?.trim();
+  const explicitStateDir = env.CARAPACE_STATE_DIR?.trim();
   const legacyStateAbsent =
     Boolean(explicitStateDir) ||
     resolveLegacyStateDirs(() => homeDir).every((legacyDir) => {

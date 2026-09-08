@@ -3,14 +3,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import * as bundledHealthChecks from "../flows/bundled-health-checks.js";
 import { CORE_HEALTH_CHECKS } from "../flows/doctor-core-checks.js";
 import { clearHealthChecksForTest, registerHealthCheck } from "../flows/health-check-registry.js";
 import { clearLoadInstalledPluginIndexInstallRecordsCache } from "../plugins/installed-plugin-index-record-cache.js";
 import { writePersistedInstalledPluginIndexInstallRecords } from "../plugins/installed-plugin-index-records.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeCarapaceStateDatabaseByPath } from "../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../state/carapace-state-db.paths.js";
 import { runDoctorLintCli } from "./doctor-lint.js";
 import {
   createDoctorLintSemanticIndex,
@@ -111,7 +111,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
 
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -160,7 +160,7 @@ describe("runDoctorLintCli", () => {
           auth: { mode: "token", token: "SYNTHETIC_GATEWAY_SECRET" },
         },
       },
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     mocks.callGateway.mockResolvedValue({
       secretEgressProxy: {
@@ -217,7 +217,7 @@ describe("runDoctorLintCli", () => {
       expect(output).toContain("cold account:discord:ops");
       expect(output).toContain("Secret egress proxy: Check OpenSSL, then retry the request.");
       expect(output).toContain("channels.discord.accounts.ops.token");
-      expect(output).toContain("openclaw secrets reload");
+      expect(output).toContain("carapace secrets reload");
       expect(output).not.toContain("SYNTHETIC_GATEWAY_SECRET");
       expect(output).not.toContain("SYNTHETIC_OWNER_SECRET");
       expect(output).not.toContain("PRIVATE_REF_ID");
@@ -260,7 +260,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     const detect = vi.fn(async (_ctx: unknown) => []);
     registerHealthCheck({
@@ -293,7 +293,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: false,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       issues: [{ path: "gateway.mode", message: "Required" }],
     });
 
@@ -326,7 +326,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
 
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -371,8 +371,8 @@ describe("runDoctorLintCli", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
-      path: "/tmp/openclaw.json",
+      } as unknown as CarapaceConfig,
+      path: "/tmp/carapace.json",
     });
 
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -410,7 +410,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     registerHealthCheck({
       id: "plugin/example/lint",
@@ -462,7 +462,7 @@ describe("runDoctorLintCli", () => {
           },
         },
       },
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     try {
@@ -498,7 +498,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     registerHealthCheck({
       id: "plugin/example/lint",
@@ -542,11 +542,11 @@ describe("runDoctorLintCli", () => {
   });
 
   it("does not require shared state inspection for an unrelated selected check", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-state-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-state-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const originalStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    const databasePath = resolveOpenClawStateSqlitePath(process.env);
+    const originalStateDir = process.env.CARAPACE_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    const databasePath = resolveCarapaceStateSqlitePath(process.env);
     fs.mkdirSync(path.dirname(databasePath), { recursive: true });
     fs.writeFileSync(databasePath, "not a sqlite database");
     const sourceContents = fs.readFileSync(databasePath);
@@ -555,7 +555,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
 
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -577,37 +577,37 @@ describe("runDoctorLintCli", () => {
     } finally {
       stdout.mockRestore();
       if (originalStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.CARAPACE_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = originalStateDir;
+        process.env.CARAPACE_STATE_DIR = originalStateDir;
       }
       fs.rmSync(rootDir, { recursive: true, force: true });
     }
   });
 
   it("keeps mixed selected checks on an isolated plugin metadata view", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-private-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-private-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const config = {
       gateway: { mode: "local" },
-      agents: { defaults: { workspace: "${OPENCLAW_STATE_DIR}/workspace" } },
+      agents: { defaults: { workspace: "${CARAPACE_STATE_DIR}/workspace" } },
       memory: { search: { provider: "local", fallback: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config)}\n`);
     const env = {
       ...process.env,
       HOME: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writePersistedInstalledPluginIndexInstallRecords(
       {},
       { config, env, stateDir, workspaceDir: rootDir },
     );
-    const databasePath = resolveOpenClawStateSqlitePath(env);
-    closeOpenClawStateDatabaseByPath(databasePath);
+    const databasePath = resolveCarapaceStateSqlitePath(env);
+    closeCarapaceStateDatabaseByPath(databasePath);
     const before = snapshotDoctorLintSqliteFamily(databasePath);
     mocks.openNodeSqliteDatabase.mockClear();
     const sourceOpenStacks: string[] = [];
@@ -619,16 +619,16 @@ describe("runDoctorLintCli", () => {
     });
     const originalEnv = {
       HOME: process.env.HOME,
-      OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-      OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+      CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+      CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
     };
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     mocks.readConfigFileSnapshot.mockImplementation((...args: unknown[]) =>
       mocks.actualReadConfigFileSnapshot(...args),
     );
-    const inspectSourceConfig = vi.fn(async (ctx: { cfg: OpenClawConfig }) => {
+    const inspectSourceConfig = vi.fn(async (ctx: { cfg: CarapaceConfig }) => {
       expect(ctx.cfg.agents?.defaults?.workspace).toBe(path.join(stateDir, "workspace"));
       return [];
     });
@@ -668,36 +668,36 @@ describe("runDoctorLintCli", () => {
   });
 
   it("does not inspect plugin state when no semantic index exists", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-no-index-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-no-index-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const config = {
       gateway: { mode: "local" },
       memory: { search: { provider: "local", fallback: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config)}\n`);
     const env = {
       ...process.env,
       HOME: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writePersistedInstalledPluginIndexInstallRecords(
       {},
       { config, env, stateDir, workspaceDir: rootDir },
     );
-    const databasePath = resolveOpenClawStateSqlitePath(env);
-    closeOpenClawStateDatabaseByPath(databasePath);
+    const databasePath = resolveCarapaceStateSqlitePath(env);
+    closeCarapaceStateDatabaseByPath(databasePath);
     const before = snapshotDoctorLintSqliteFamily(databasePath);
     const originalEnv = {
       HOME: process.env.HOME,
-      OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-      OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+      CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+      CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
     };
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     mocks.readConfigFileSnapshot.mockImplementation((...args: unknown[]) =>
       mocks.actualReadConfigFileSnapshot(...args),
     );
@@ -730,28 +730,28 @@ describe("runDoctorLintCli", () => {
   });
 
   it("runs post-plugin readiness against an isolated state snapshot", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-relevant-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-relevant-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const config = {
       gateway: { mode: "local" },
       agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
       memory: { search: { provider: "local", fallback: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config)}\n`);
     const env = {
       ...process.env,
       HOME: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writePersistedInstalledPluginIndexInstallRecords(
       {},
       { config, env, stateDir, workspaceDir: rootDir },
     );
-    const databasePath = resolveOpenClawStateSqlitePath(env);
-    closeOpenClawStateDatabaseByPath(databasePath);
+    const databasePath = resolveCarapaceStateSqlitePath(env);
+    closeCarapaceStateDatabaseByPath(databasePath);
     clearLoadInstalledPluginIndexInstallRecordsCache();
     createDoctorLintSemanticIndex(stateDir);
     const before = snapshotDoctorLintSqliteFamily(databasePath);
@@ -765,14 +765,14 @@ describe("runDoctorLintCli", () => {
     });
     const originalEnv = {
       HOME: process.env.HOME,
-      OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-      OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
-      OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE,
+      CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+      CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
+      CARAPACE_UPDATE_POST_CORE_CONVERGENCE: process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE,
     };
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE = "1";
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
+    process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE = "1";
     mocks.readConfigFileSnapshot.mockImplementation((...args: unknown[]) =>
       mocks.actualReadConfigFileSnapshot(...args),
     );
@@ -806,36 +806,36 @@ describe("runDoctorLintCli", () => {
   });
 
   it("fails closed when a semantic index needs plugin state that cannot be prepared", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-failure-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-failure-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const config = {
       gateway: { mode: "local" },
       memory: { search: { provider: "local", fallback: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config)}\n`);
     const env = {
       ...process.env,
       HOME: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writePersistedInstalledPluginIndexInstallRecords(
       {},
       { config, env, stateDir, workspaceDir: rootDir },
     );
-    const pluginDatabasePath = resolveOpenClawStateSqlitePath(env);
-    closeOpenClawStateDatabaseByPath(pluginDatabasePath);
+    const pluginDatabasePath = resolveCarapaceStateSqlitePath(env);
+    closeCarapaceStateDatabaseByPath(pluginDatabasePath);
     createDoctorLintSemanticIndex(stateDir);
     const originalEnv = {
       HOME: process.env.HOME,
-      OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-      OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+      CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+      CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
     };
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     mocks.readConfigFileSnapshot.mockImplementation((...args: unknown[]) =>
       mocks.actualReadConfigFileSnapshot(...args),
     );
@@ -878,36 +878,36 @@ describe("runDoctorLintCli", () => {
   });
 
   it("emits one structured failure when relevant plugin state cleanup does not complete", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-lint-cleanup-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-lint-cleanup-"));
     const stateDir = path.join(rootDir, "operator-state");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "carapace.json");
     const config = {
       gateway: { mode: "local" },
       memory: { search: { provider: "local", fallback: "none" } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     fs.mkdirSync(stateDir, { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(config)}\n`);
     const env = {
       ...process.env,
       HOME: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      CARAPACE_CONFIG_PATH: configPath,
+      CARAPACE_STATE_DIR: stateDir,
     };
     await writePersistedInstalledPluginIndexInstallRecords(
       {},
       { config, env, stateDir, workspaceDir: rootDir },
     );
-    const pluginDatabasePath = resolveOpenClawStateSqlitePath(env);
-    closeOpenClawStateDatabaseByPath(pluginDatabasePath);
+    const pluginDatabasePath = resolveCarapaceStateSqlitePath(env);
+    closeCarapaceStateDatabaseByPath(pluginDatabasePath);
     createDoctorLintSemanticIndex(stateDir);
     const originalEnv = {
       HOME: process.env.HOME,
-      OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-      OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+      CARAPACE_CONFIG_PATH: process.env.CARAPACE_CONFIG_PATH,
+      CARAPACE_STATE_DIR: process.env.CARAPACE_STATE_DIR,
     };
     process.env.HOME = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.CARAPACE_CONFIG_PATH = configPath;
+    process.env.CARAPACE_STATE_DIR = stateDir;
     mocks.readConfigFileSnapshot.mockImplementation((...args: unknown[]) =>
       mocks.actualReadConfigFileSnapshot(...args),
     );
@@ -989,7 +989,7 @@ describe("runDoctorLintCli", () => {
       exists: true,
       valid: true,
       config: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
     });
     registerHealthCheck({
       id: checkId,
@@ -1012,29 +1012,29 @@ describe("runDoctorLintCli", () => {
 
 function restoreDoctorLintTestEnv(values: {
   HOME: string | undefined;
-  OPENCLAW_CONFIG_PATH: string | undefined;
-  OPENCLAW_STATE_DIR: string | undefined;
-  OPENCLAW_UPDATE_POST_CORE_CONVERGENCE?: string | undefined;
+  CARAPACE_CONFIG_PATH: string | undefined;
+  CARAPACE_STATE_DIR: string | undefined;
+  CARAPACE_UPDATE_POST_CORE_CONVERGENCE?: string | undefined;
 }): void {
   if (values.HOME === undefined) {
     delete process.env.HOME;
   } else {
     process.env.HOME = values.HOME;
   }
-  if (values.OPENCLAW_CONFIG_PATH === undefined) {
-    delete process.env.OPENCLAW_CONFIG_PATH;
+  if (values.CARAPACE_CONFIG_PATH === undefined) {
+    delete process.env.CARAPACE_CONFIG_PATH;
   } else {
-    process.env.OPENCLAW_CONFIG_PATH = values.OPENCLAW_CONFIG_PATH;
+    process.env.CARAPACE_CONFIG_PATH = values.CARAPACE_CONFIG_PATH;
   }
-  if (values.OPENCLAW_STATE_DIR === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+  if (values.CARAPACE_STATE_DIR === undefined) {
+    delete process.env.CARAPACE_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = values.OPENCLAW_STATE_DIR;
+    process.env.CARAPACE_STATE_DIR = values.CARAPACE_STATE_DIR;
   }
-  if (values.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE === undefined) {
-    delete process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE;
+  if (values.CARAPACE_UPDATE_POST_CORE_CONVERGENCE === undefined) {
+    delete process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE;
   } else {
-    process.env.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE =
-      values.OPENCLAW_UPDATE_POST_CORE_CONVERGENCE;
+    process.env.CARAPACE_UPDATE_POST_CORE_CONVERGENCE =
+      values.CARAPACE_UPDATE_POST_CORE_CONVERGENCE;
   }
 }

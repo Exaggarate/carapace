@@ -1,6 +1,6 @@
 // Guarded fetch runtime enforces SSRF checks, DNS pinning, redirect policy, and
 // trusted proxy modes around provider/network requests.
-import { isPromiseLike } from "@openclaw/normalization-core/promise-like";
+import { isPromiseLike } from "@carapace/normalization-core/promise-like";
 import type { Dispatcher } from "undici";
 import { logWarn } from "../../logger.js";
 import { buildTimeoutAbortSignal } from "../../utils/fetch-timeout.js";
@@ -136,7 +136,7 @@ type GuardedFetchPresetOptions = Omit<
 >;
 
 const DEFAULT_MAX_REDIRECTS = 3;
-const OPENCLAW_DEBUG_PROXY_ENABLED = "OPENCLAW_DEBUG_PROXY_ENABLED";
+const CARAPACE_DEBUG_PROXY_ENABLED = "CARAPACE_DEBUG_PROXY_ENABLED";
 
 function getRedirectVisitKey(url: string, init: RequestInit | undefined): string {
   return `${init?.method?.toUpperCase() ?? "GET"} ${url}`;
@@ -177,7 +177,7 @@ function resolveGuardedFetchMode(params: GuardedFetchOptions): GuardedFetchMode 
 }
 
 function isManagedProxyActive(): boolean {
-  return process.env["OPENCLAW_PROXY_ACTIVE"] === "1";
+  return process.env["CARAPACE_PROXY_ACTIVE"] === "1";
 }
 
 function assertExplicitProxySupportsPinnedDns(
@@ -303,7 +303,7 @@ async function captureGuardedFetchExchange(params: {
   auditContext?: string;
   capturedByGlobalFetchPatch?: boolean;
 }): Promise<void> {
-  if (params.capture === false || !isTruthyEnvValue(process.env[OPENCLAW_DEBUG_PROXY_ENABLED])) {
+  if (params.capture === false || !isTruthyEnvValue(process.env[CARAPACE_DEBUG_PROXY_ENABLED])) {
     return;
   }
   const { captureHttpExchange, isDebugProxyGlobalFetchPatchInstalled } =

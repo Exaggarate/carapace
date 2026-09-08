@@ -1,9 +1,9 @@
 // Mattermost plugin module implements draft stream behavior.
-import { isChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import { createFinalizableDraftLifecycle } from "openclaw/plugin-sdk/channel-outbound";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { chunkMarkdownTextWithMode } from "openclaw/plugin-sdk/reply-chunking";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { isChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
+import { createFinalizableDraftLifecycle } from "carapace/plugin-sdk/channel-outbound";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { chunkMarkdownTextWithMode } from "carapace/plugin-sdk/reply-chunking";
+import { sliceUtf16Safe } from "carapace/plugin-sdk/text-utility-runtime";
 import {
   createMattermostPost,
   deleteMattermostPost,

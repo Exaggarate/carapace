@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { createSessionRepositoryWorkspaceStore } from "../../state/session-repository-workspaces.js";
 import {
   forkSessionRepositoryWorkspace,
@@ -31,15 +31,15 @@ const hash = (bytes: string) => `sha256:${createHash("sha256").update(bytes).dig
 afterEach(async () => {
   vi.restoreAllMocks();
   for (const root of roots.splice(0)) {
-    closeOpenClawStateDatabaseByPath(path.join(root, "openclaw.sqlite"));
+    closeCarapaceStateDatabaseByPath(path.join(root, "carapace.sqlite"));
     await fs.rm(root, { recursive: true, force: true });
   }
 });
 
 async function fixture() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-repository-checkpoint-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-repository-checkpoint-"));
   roots.push(root);
-  const database = openOpenClawStateDatabase({ path: path.join(root, "openclaw.sqlite") });
+  const database = openCarapaceStateDatabase({ path: path.join(root, "carapace.sqlite") });
   const store = createSessionRepositoryWorkspaceStore({ database });
   const remote = path.join(root, "remote");
   await fs.mkdir(remote);
@@ -156,9 +156,9 @@ it("recovers a published artifact after the acceptance transaction fails, withou
   await expect(prepared.publish()).rejects.toThrow("transaction interrupted");
   acceptance.mockRestore();
   await prepared.discard();
-  closeOpenClawStateDatabaseByPath(database.path);
+  closeCarapaceStateDatabaseByPath(database.path);
   const reopened = createSessionRepositoryWorkspaceStore({
-    database: openOpenClawStateDatabase({ path: database.path }),
+    database: openCarapaceStateDatabase({ path: database.path }),
   });
   const recovered = await recoverSessionRepositoryCheckpoint({
     store: reopened,
@@ -223,7 +223,7 @@ it.each([false, true])(
       const companion = await requireWorkspaceResultGit(artifact, [
         "for-each-ref",
         "--format=%(refname)",
-        "refs/openclaw/worker-results/publication-*",
+        "refs/carapace/worker-results/publication-*",
       ]);
       expect(companion).not.toBe("");
       await requireWorkspaceResultGit(artifact, ["update-ref", companion, fork.checkpointRef!]);
@@ -297,7 +297,7 @@ it("accepts raw recovery files when a publication blob fails validation", async 
     await requireWorkspaceResultGit(store.artifactPath(workspace.workspaceId), [
       "for-each-ref",
       "--format=%(refname)",
-      "refs/openclaw/worker-result-candidates/",
+      "refs/carapace/worker-result-candidates/",
     ]),
   ).toBe("");
 });

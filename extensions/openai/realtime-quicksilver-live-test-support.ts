@@ -1,4 +1,4 @@
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { getRuntimeConfig } from "carapace/plugin-sdk/runtime-config-snapshot";
 import { isOpenAIGptLiveModel } from "./realtime-quicksilver.js";
 
 export function resolveConfiguredLiveQuicksilverModel(): string | undefined {

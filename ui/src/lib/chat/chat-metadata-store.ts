@@ -1,7 +1,7 @@
 import {
   DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS,
   resolveGatewayStartupRetryAfterMs,
-} from "@openclaw/gateway-client/browser";
+} from "@carapace/gateway-client/browser";
 import type {
   ChatAccountSelection,
   ChatMetadataParams,

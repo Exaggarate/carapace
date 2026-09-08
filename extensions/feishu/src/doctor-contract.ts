@@ -2,8 +2,8 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
@@ -11,7 +11,7 @@ import {
   defineStrayPluginEntryConfigMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelConfigEntries,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { FeishuConfigSchema } from "./config-schema.js";
 import { DEFAULT_FEISHU_WEBHOOK_PATH, normalizeFeishuWebhookPath } from "./webhook-path.js";
 
@@ -122,9 +122,9 @@ function normalizeLegacyWebhookPath(params: {
 }
 
 function normalizeFeishuLegacyConfigEntries(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   changes: string[],
-): OpenClawConfig {
+): CarapaceConfig {
   return normalizeChannelConfigEntries({
     cfg,
     channelId: "feishu",
@@ -156,7 +156,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "feishu"],
     message:
-      'channels.feishu[.accounts.<id>].webhookPath must be a canonical HTTP request path; run "openclaw doctor --fix".',
+      'channels.feishu[.accounts.<id>].webhookPath must be a canonical HTTP request path; run "carapace doctor --fix".',
     match: (value) => {
       const entry = asObjectRecord(value);
       return (
@@ -168,7 +168,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "feishu"],
     message:
-      'channels.feishu[.accounts.<id>].tools.base is legacy; use tools.bitable. Run "openclaw doctor --fix".',
+      'channels.feishu[.accounts.<id>].tools.base is legacy; use tools.bitable. Run "carapace doctor --fix".',
     match: (value) => {
       const entry = asObjectRecord(value);
       return (
@@ -182,7 +182,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): ChannelDoctorConfigMutation {
   const aliases = streamingAliasMigration.normalizeChannelConfig({ cfg });
   const entries = normalizeFeishuLegacyConfigEntries(aliases.config, aliases.changes);

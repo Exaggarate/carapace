@@ -13,7 +13,7 @@ export { runMissedJobs } from "./timer-catchup.js";
 export { stopTimer } from "./timer-execution.js";
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cronTimerTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("carapace.cronTimerTestApi")] = {
     onTimer,
   };
 }

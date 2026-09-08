@@ -1,18 +1,18 @@
 // Runs startup update checks and optional auto-update handoff.
 import { createHash, randomUUID } from "node:crypto";
-import { extractErrorCode } from "@openclaw/normalization-core/error-coercion";
+import { extractErrorCode } from "@carapace/normalization-core/error-coercion";
 import {
   asDateTimestampMs,
   timestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
-import { sleepWithAbort } from "@openclaw/retry";
+} from "@carapace/normalization-core/number-coercion";
+import { sleepWithAbort } from "@carapace/retry";
 import type {
   UpdateAvailable,
   UpdateScheduleState,
 } from "../../packages/gateway-protocol/src/index.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   refreshRemoteModelCatalog,
   REMOTE_MODEL_CATALOG_TTL_MS,
@@ -29,7 +29,7 @@ import {
 } from "./gateway-supervision.js";
 import { gitCommitPrefixesMatch } from "./git-commit.js";
 import { executeGitCommand } from "./git-exec.js";
-import { resolveOpenClawPackageRoot } from "./openclaw-root.js";
+import { resolveCarapacePackageRoot } from "./carapace-root.js";
 import {
   readRestartSentinelSnapshot,
   readVerifiedGitUpdateReceipt,
@@ -116,7 +116,7 @@ let updateAvailableCache: UpdateAvailable | null = null;
 let updateScheduleCache: UpdateScheduleState | null = null;
 type UpdateCheckLifecycle = {
   signal: AbortSignal;
-  refreshes: WeakMap<OpenClawConfig, Promise<void>>;
+  refreshes: WeakMap<CarapaceConfig, Promise<void>>;
   run: <T>(work: (signal: AbortSignal) => Promise<T>) => Promise<T>;
   initialize: () => ReturnType<typeof resolveStartupInstallStatus>;
   schedule: (work: () => Promise<number>, unref?: boolean) => void;
@@ -231,7 +231,7 @@ function shouldSkipCheck(allowInTests: boolean): boolean {
 }
 
 function resolveCheckIntervalMs(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   installKind?: "package" | "git" | "unknown",
 ): number {
   const channel = normalizeUpdateChannel(cfg.update?.channel) ?? DEFAULT_PACKAGE_CHANNEL;
@@ -450,7 +450,7 @@ async function runAutoUpdateCommand(
     );
   }
   const supervisor = detectRespawnSupervisor(process.env, process.platform, {
-    includeLinuxOpenClawGatewayServiceMarker: true,
+    includeLinuxCarapaceGatewayServiceMarker: true,
   });
   if (!supervisor) {
     return failure(
@@ -561,7 +561,7 @@ function clearAutoState(nextState: UpdateCheckState): void {
 
 async function resolveStartupInstallStatus(fetchRemoteGit: boolean, signal: AbortSignal) {
   const [root, installReceipt] = await Promise.all([
-    resolveOpenClawPackageRoot({
+    resolveCarapacePackageRoot({
       moduleUrl: import.meta.url,
       argv1: process.argv[1],
       cwd: process.cwd(),
@@ -673,7 +673,7 @@ function withInstallStatus(
 }
 
 /** Refreshes the read-only Dev checkout comparison used by update.status. */
-export function refreshGatewayUpdateStatus(cfg: OpenClawConfig): Promise<void> {
+export function refreshGatewayUpdateStatus(cfg: CarapaceConfig): Promise<void> {
   const lifecycle = currentUpdateCheckLifecycle();
   const pending = lifecycle.refreshes.get(cfg);
   if (pending) {
@@ -936,7 +936,7 @@ async function runCampaignUpdate(params: {
 
 export async function runGatewayUpdateCheck(
   params: {
-    getConfig: () => OpenClawConfig;
+    getConfig: () => CarapaceConfig;
     log: { info: (msg: string, meta?: Record<string, unknown>) => void };
     isNixMode: boolean;
     allowInTests?: boolean;
@@ -979,7 +979,7 @@ async function runGatewayUpdateCheckOwned(
   const runAuto: AutoUpdateRunner =
     params.runAutoUpdate ?? ((runParams) => runAutoUpdateCommand(runParams, params.log));
   const autoEnabled = Boolean(cfg.update?.auto?.enabled);
-  const autoDisabledByEnv = isTruthyEnvValue(process.env.OPENCLAW_NO_AUTO_UPDATE);
+  const autoDisabledByEnv = isTruthyEnvValue(process.env.CARAPACE_NO_AUTO_UPDATE);
   if (cfg.update?.checkOnStart === false || autoDisabledByEnv) {
     updateCampaign.clear();
     setUpdateAvailableCache({
@@ -1032,7 +1032,7 @@ async function runGatewayUpdateCheckOwned(
     return (
       current.update?.auto?.enabled === true &&
       current.update?.checkOnStart !== false &&
-      !isTruthyEnvValue(process.env.OPENCLAW_NO_AUTO_UPDATE) &&
+      !isTruthyEnvValue(process.env.CARAPACE_NO_AUTO_UPDATE) &&
       !isGatewayExternallySupervised() &&
       resolveEffectiveUpdateChannel({
         configChannel: normalizeUpdateChannel(current.update?.channel),
@@ -1372,7 +1372,7 @@ async function runGatewayUpdateCheckOwned(
     const shouldNotify =
       state.lastNotifiedVersion !== resolved.version || state.lastNotifiedTag !== tag;
     if (shouldNotify) {
-      const updateNotice = `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("openclaw update")}`;
+      const updateNotice = `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("carapace update")}`;
       const note = telemetryUpdate?.note
         ? sanitizeTerminalText(telemetryUpdate.note).trim().slice(0, 500)
         : undefined;
@@ -1468,7 +1468,7 @@ async function runGatewayUpdateCheckOwned(
 }
 
 export function createGatewayUpdateCheck(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   log: { info: (msg: string, meta?: Record<string, unknown>) => void };
   isNixMode: boolean;
   onUpdateAvailableChange?: (updateAvailable: UpdateAvailable | null) => void;

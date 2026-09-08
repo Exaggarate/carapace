@@ -1,12 +1,12 @@
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
 import { getFileLockProcessStartTime, isPidDefinitelyDead } from "../../shared/pid-alive.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
-import type { DB } from "../../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../../state/openclaw-state-db.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
+import type { DB } from "../../state/carapace-state-db.generated.js";
+import { openCarapaceStateDatabase } from "../../state/carapace-state-db.js";
 
 /** A serving process cannot attest drainage while another receipt owner remains active. */
 export function hasActiveCronRunReceiptsForAgent(agentId: string): boolean {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   if (!tableExists(db, "cron_run_receipts")) {
     return false;
   }

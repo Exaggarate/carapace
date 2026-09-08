@@ -104,7 +104,7 @@ function writeTsxFixture(modulesDir: string, marker: string) {
   );
   writeFileSync(
     path.join(packageDir, "loader.mjs"),
-    `process.env.OPENCLAW_TSX_FIXTURE_LOADER = ${JSON.stringify(marker)};\n`,
+    `process.env.CARAPACE_TSX_FIXTURE_LOADER = ${JSON.stringify(marker)};\n`,
   );
   const dependencyDir = path.join(modulesDir, "shim-dependency");
   mkdirSync(dependencyDir, { recursive: true });
@@ -127,7 +127,7 @@ function runShimFixture(
     ({ checkoutRoot, fixtureRoot, implementationPath, wrapperPath, runNode }) => {
       writeFileSync(
         implementationPath,
-        'import { value } from "shim-dependency";\nprocess.stdout.write(JSON.stringify({ loader: process.env.OPENCLAW_TSX_FIXTURE_LOADER, dependency: value, args: process.argv.slice(2) }));\n',
+        'import { value } from "shim-dependency";\nprocess.stdout.write(JSON.stringify({ loader: process.env.CARAPACE_TSX_FIXTURE_LOADER, dependency: value, args: process.argv.slice(2) }));\n',
       );
       writeTsxFixture(path.join(checkoutRoot, "node_modules"), "checkout");
       const modulesEnv = configureModules({ checkoutRoot, fixtureRoot });
@@ -300,7 +300,7 @@ fs.readdirSync = function (directory, ...args) {
             "TEMP",
             "XDG_CACHE_HOME",
             "NODE_COMPILE_CACHE",
-            "OPENCLAW_VITEST_FS_MODULE_CACHE_PATH",
+            "CARAPACE_VITEST_FS_MODULE_CACHE_PATH",
           ].map((key) => [
             key,
             key === "TMPDIR" || key === "TEMP" ? tempRoot : path.join(fixtureRoot, key),
@@ -580,7 +580,7 @@ it.each(["callback", "command"])(
 );
 
 it("joins owned descendants and captures timeout output before deleting a rejected fixture", async () => {
-  const evidence = mkdtempSync(path.join(tmpdir(), "openclaw-shim-owned-pids-"));
+  const evidence = mkdtempSync(path.join(tmpdir(), "carapace-shim-owned-pids-"));
   const pidPaths = ["wrapper", "implementation", "descendant"].map((role) =>
     path.join(evidence, `${role}.pid`),
   );

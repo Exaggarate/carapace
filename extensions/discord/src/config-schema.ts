@@ -1,4 +1,4 @@
-import { normalizeLegacyDmAliases } from "openclaw/plugin-sdk/channel-config-helpers";
+import { normalizeLegacyDmAliases } from "carapace/plugin-sdk/channel-config-helpers";
 // Discord helper module supports config schema behavior.
 import {
   buildChannelAllowBotsSchema,
@@ -15,14 +15,14 @@ import {
   requireAllowlistAllowFrom,
   requireOpenAllowFrom,
   TtsConfigSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import * as channelConfigSchema from "openclaw/plugin-sdk/channel-config-schema";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/channel-config-schema";
+import * as channelConfigSchema from "carapace/plugin-sdk/channel-config-schema";
+import { asObjectRecord } from "carapace/plugin-sdk/runtime-doctor-migrations";
 import {
   buildSecretInputSchema,
   registerSensitiveConfigSchema,
-} from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import { discordChannelConfigUiHints } from "./config-ui-hints.js";
 

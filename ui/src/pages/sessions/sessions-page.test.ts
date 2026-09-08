@@ -38,7 +38,7 @@ type TestSessionMenu = HTMLElement & {
 };
 
 async function createPage(context: ApplicationContext): Promise<TestSessionsPage> {
-  const page = document.createElement("openclaw-sessions-page") as TestSessionsPage;
+  const page = document.createElement("carapace-sessions-page") as TestSessionsPage;
   page.context = context;
   page.render = () => nothing;
   document.body.append(page);
@@ -107,7 +107,7 @@ describe("sessions page lifecycle", () => {
 
     const docsLink = page.querySelector<HTMLAnchorElement>(".page-subtitle a");
     expect(docsLink?.textContent?.trim()).toBe("Learn more");
-    expect(docsLink?.href).toBe("https://docs.openclaw.ai/concepts/session");
+    expect(docsLink?.href).toBe("https://github.com/Exaggarate/carapace");
 
     const archived = [
       ...page.querySelectorAll<HTMLElement & { checked: boolean }>(
@@ -142,7 +142,7 @@ describe("sessions page lifecycle", () => {
     const mutableGateway = createGateway({} as GatewayBrowserClient);
     mutableGateway.emit({ sessionKey: key });
     const page = await createPage(createContext(mutableGateway.gateway, sessions));
-    const toast = document.createElement("openclaw-toast-host");
+    const toast = document.createElement("carapace-toast-host");
     document.body.append(toast);
     await toast.updateComplete;
 
@@ -182,7 +182,7 @@ describe("sessions page lifecycle", () => {
     const mutableGateway = createGateway({} as GatewayBrowserClient);
     mutableGateway.emit({ sessionKey: key });
     const page = await createPage(createContext(mutableGateway.gateway, sessions));
-    const toast = document.createElement("openclaw-toast-host");
+    const toast = document.createElement("carapace-toast-host");
     document.body.append(toast);
     await toast.updateComplete;
 
@@ -272,7 +272,7 @@ describe("sessions page lifecycle", () => {
     const page = await createRenderedPage(createContext(gateway, sessions), result);
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu");
     await menu?.updateComplete;
     const item = menu?.querySelector<HTMLButtonElement>(
       `.session-menu__color-choice[aria-label="${label}"]`,
@@ -297,7 +297,7 @@ describe("sessions page lifecycle", () => {
     );
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu");
     expect(menu).not.toBeNull();
     await menu?.updateComplete;
     expect(menu?.querySelector('[value="toggle-pin"]')).toBeNull();
@@ -316,7 +316,7 @@ describe("sessions page lifecycle", () => {
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
 
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu");
     if (!menu) {
       throw new Error("Expected sessions page menu");
     }
@@ -339,7 +339,7 @@ describe("sessions page lifecycle", () => {
     page.openSessionMenu(row, { x: 10, y: 20 }, document.createElement("button"));
     await page.updateComplete;
 
-    const menu = page.querySelector<TestSessionMenu>("openclaw-session-menu");
+    const menu = page.querySelector<TestSessionMenu>("carapace-session-menu");
     if (!menu) {
       throw new Error("Expected sessions page menu");
     }

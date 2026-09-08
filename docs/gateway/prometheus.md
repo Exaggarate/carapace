@@ -1,14 +1,14 @@
 ---
-summary: "Expose OpenClaw diagnostics as Prometheus text metrics through the diagnostics-prometheus plugin"
+summary: "Expose Carapace diagnostics as Prometheus text metrics through the diagnostics-prometheus plugin"
 title: "Prometheus metrics"
 sidebarTitle: "Prometheus"
 read_when:
-  - You want Prometheus, Grafana, VictoriaMetrics, or another scraper to collect OpenClaw Gateway metrics
+  - You want Prometheus, Grafana, VictoriaMetrics, or another scraper to collect Carapace Gateway metrics
   - You need the Prometheus metric names and label policy for dashboards or alerts
   - You want metrics without running an OpenTelemetry collector
 ---
 
-OpenClaw can expose diagnostics metrics through the official
+Carapace can expose diagnostics metrics through the official
 `diagnostics-prometheus` plugin. It listens to trusted diagnostics plus
 internally tagged, dispatcher-owned diagnostic events (queue, memory, and
 session-recovery signals), and renders a Prometheus text endpoint at:
@@ -31,7 +31,7 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
 <Steps>
   <Step title="Install the plugin">
     ```bash
-    openclaw plugins install clawhub:@openclaw/diagnostics-prometheus
+    carapace plugins install clawhub:@carapace/diagnostics-prometheus
     ```
   </Step>
   <Step title="Enable the plugin">
@@ -53,7 +53,7 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
       </Tab>
       <Tab title="CLI">
         ```bash
-        openclaw plugins enable diagnostics-prometheus
+        carapace plugins enable diagnostics-prometheus
         ```
       </Tab>
     </Tabs>
@@ -65,7 +65,7 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
     Send the same gateway auth your operator clients use:
 
     ```bash
-    curl -H "Authorization: Bearer $OPENCLAW_GATEWAY_TOKEN" \
+    curl -H "Authorization: Bearer $CARAPACE_GATEWAY_TOKEN" \
       http://127.0.0.1:18789/api/diagnostics/prometheus
     ```
 
@@ -74,13 +74,13 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
     ```yaml
     # prometheus.yml
     scrape_configs:
-      - job_name: openclaw
+      - job_name: carapace
         scrape_interval: 30s
         metrics_path: /api/diagnostics/prometheus
         authorization:
-          credentials_file: /etc/prometheus/openclaw-gateway-token
+          credentials_file: /etc/prometheus/carapace-gateway-token
         static_configs:
-          - targets: ["openclaw-gateway:18789"]
+          - targets: ["carapace-gateway:18789"]
     ```
   </Step>
 </Steps>
@@ -93,70 +93,70 @@ For traces, logs, OTLP push, and OpenTelemetry GenAI semantic attributes, see [O
 
 | Metric                                               | Type      | Labels                                                                                    |
 | ---------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
-| `openclaw_gateway_build_info`                        | gauge     | `process_instance_id`, optional `build_id`                                                |
-| `openclaw_gc_duration_seconds`                       | histogram | none                                                                                      |
-| `openclaw_gateway_rpc_requests_total`                | counter   | `method`                                                                                  |
-| `openclaw_gateway_rpc_first_response_seconds`        | histogram | `method`                                                                                  |
-| `openclaw_gateway_rpc_handler_seconds`               | histogram | `method`                                                                                  |
-| `openclaw_gateway_rpc_admission_seconds`             | histogram | `method`                                                                                  |
-| `openclaw_gateway_rpc_queue_wait_seconds`            | histogram | `method`                                                                                  |
-| `openclaw_gateway_rpc_outcomes_total`                | counter   | `phase`, `outcome`                                                                        |
-| `openclaw_run_completed_total`                       | counter   | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
-| `openclaw_run_duration_seconds`                      | histogram | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
-| `openclaw_model_call_total`                          | counter   | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
-| `openclaw_model_call_duration_seconds`               | histogram | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
-| `openclaw_model_failover_total`                      | counter   | `from_model`, `from_provider`, `lane`, `reason`, `suspended`, `to_model`, `to_provider`   |
-| `openclaw_model_tokens_total`                        | counter   | `agent`, `channel`, `model`, `provider`, `token_type`                                     |
-| `openclaw_gen_ai_client_token_usage`                 | histogram | `model`, `provider`, `token_type`                                                         |
-| `openclaw_model_cost_usd_total`                      | counter   | `agent`, `channel`, `model`, `provider`                                                   |
-| `openclaw_model_usage_duration_seconds`              | histogram | `agent`, `channel`, `model`, `provider`                                                   |
-| `openclaw_skill_used_total`                          | counter   | `activation`, `agent`, `skill`, `source`                                                  |
-| `openclaw_tool_execution_total`                      | counter   | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
-| `openclaw_tool_execution_duration_seconds`           | histogram | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
-| `openclaw_tool_execution_blocked_total`              | counter   | `denied_reason`, `params_kind`, `tool`, `tool_owner`, `tool_source`                       |
-| `openclaw_harness_run_total`                         | counter   | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
-| `openclaw_harness_run_duration_seconds`              | histogram | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
-| `openclaw_webhook_received_total`                    | counter   | `channel`, `webhook`                                                                      |
-| `openclaw_webhook_error_total`                       | counter   | `channel`, `webhook`                                                                      |
-| `openclaw_webhook_duration_seconds`                  | histogram | `channel`, `webhook`                                                                      |
-| `openclaw_message_received_total`                    | counter   | `channel`, `source`                                                                       |
-| `openclaw_message_dispatch_started_total`            | counter   | `channel`, `source`                                                                       |
-| `openclaw_message_dispatch_completed_total`          | counter   | `channel`, `outcome`, `reason`, `source`                                                  |
-| `openclaw_message_dispatch_duration_seconds`         | histogram | `channel`, `outcome`, `reason`, `source`                                                  |
-| `openclaw_message_processed_total`                   | counter   | `channel`, `outcome`, `reason`                                                            |
-| `openclaw_message_processed_duration_seconds`        | histogram | `channel`, `outcome`, `reason`                                                            |
-| `openclaw_message_delivery_started_total`            | counter   | `channel`, `delivery_kind`                                                                |
-| `openclaw_message_delivery_total`                    | counter   | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
-| `openclaw_message_delivery_duration_seconds`         | histogram | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
-| `openclaw_talk_event_total`                          | counter   | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_talk_event_duration_seconds`               | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_talk_audio_bytes`                          | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
-| `openclaw_queue_lane_size`                           | gauge     | `lane`                                                                                    |
-| `openclaw_queue_lane_wait_seconds`                   | histogram | `lane`                                                                                    |
-| `openclaw_session_state_total`                       | counter   | `reason`, `state`                                                                         |
-| `openclaw_session_queue_depth`                       | gauge     | `state`                                                                                   |
-| `openclaw_session_turn_created_total`                | counter   | `agent`, `channel`, `trigger`                                                             |
-| `openclaw_session_stuck_total`                       | counter   | `reason`, `state`                                                                         |
-| `openclaw_session_stuck_age_seconds`                 | histogram | `reason`, `state`                                                                         |
-| `openclaw_session_recovery_total`                    | counter   | `action`, `active_work_kind`, `state`, `status`                                           |
-| `openclaw_session_recovery_age_seconds`              | histogram | `action`, `active_work_kind`, `state`, `status`                                           |
-| `openclaw_gateway_event_loop_delay_max_seconds`      | histogram | none                                                                                      |
-| `openclaw_gateway_event_loop_observed_seconds_total` | counter   | none                                                                                      |
-| `openclaw_liveness_warning_total`                    | counter   | `reason`                                                                                  |
-| `openclaw_liveness_sessions`                         | gauge     | `state`                                                                                   |
-| `openclaw_liveness_event_loop_delay_p99_seconds`     | histogram | `reason`                                                                                  |
-| `openclaw_liveness_event_loop_delay_max_seconds`     | histogram | `reason`                                                                                  |
-| `openclaw_liveness_event_loop_utilization_ratio`     | histogram | `reason`                                                                                  |
-| `openclaw_liveness_cpu_core_ratio`                   | histogram | `reason`                                                                                  |
-| `openclaw_payload_large_total`                       | counter   | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
-| `openclaw_payload_large_bytes`                       | histogram | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
-| `openclaw_memory_bytes`                              | gauge     | `kind`                                                                                    |
-| `openclaw_memory_rss_bytes`                          | histogram | none                                                                                      |
-| `openclaw_memory_pressure_total`                     | counter   | `level`, `reason`                                                                         |
-| `openclaw_telemetry_exporter_total`                  | counter   | `exporter`, `reason`, `signal`, `status`                                                  |
-| `openclaw_prometheus_series_dropped_total`           | counter   | none                                                                                      |
-| `openclaw_diagnostic_async_queue_dropped_total`      | counter   | `drop_class`                                                                              |
-| `openclaw_diagnostic_async_queue_length`             | gauge     | none                                                                                      |
+| `carapace_gateway_build_info`                        | gauge     | `process_instance_id`, optional `build_id`                                                |
+| `carapace_gc_duration_seconds`                       | histogram | none                                                                                      |
+| `carapace_gateway_rpc_requests_total`                | counter   | `method`                                                                                  |
+| `carapace_gateway_rpc_first_response_seconds`        | histogram | `method`                                                                                  |
+| `carapace_gateway_rpc_handler_seconds`               | histogram | `method`                                                                                  |
+| `carapace_gateway_rpc_admission_seconds`             | histogram | `method`                                                                                  |
+| `carapace_gateway_rpc_queue_wait_seconds`            | histogram | `method`                                                                                  |
+| `carapace_gateway_rpc_outcomes_total`                | counter   | `phase`, `outcome`                                                                        |
+| `carapace_run_completed_total`                       | counter   | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
+| `carapace_run_duration_seconds`                      | histogram | `channel`, `model`, `outcome`, `provider`, `trigger`                                      |
+| `carapace_model_call_total`                          | counter   | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
+| `carapace_model_call_duration_seconds`               | histogram | `api`, `error_category`, `model`, `observation_unit`, `outcome`, `provider`, `transport`  |
+| `carapace_model_failover_total`                      | counter   | `from_model`, `from_provider`, `lane`, `reason`, `suspended`, `to_model`, `to_provider`   |
+| `carapace_model_tokens_total`                        | counter   | `agent`, `channel`, `model`, `provider`, `token_type`                                     |
+| `carapace_gen_ai_client_token_usage`                 | histogram | `model`, `provider`, `token_type`                                                         |
+| `carapace_model_cost_usd_total`                      | counter   | `agent`, `channel`, `model`, `provider`                                                   |
+| `carapace_model_usage_duration_seconds`              | histogram | `agent`, `channel`, `model`, `provider`                                                   |
+| `carapace_skill_used_total`                          | counter   | `activation`, `agent`, `skill`, `source`                                                  |
+| `carapace_tool_execution_total`                      | counter   | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
+| `carapace_tool_execution_duration_seconds`           | histogram | `error_category`, `outcome`, `params_kind`, `tool`, `tool_owner`, `tool_source`           |
+| `carapace_tool_execution_blocked_total`              | counter   | `denied_reason`, `params_kind`, `tool`, `tool_owner`, `tool_source`                       |
+| `carapace_harness_run_total`                         | counter   | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
+| `carapace_harness_run_duration_seconds`              | histogram | `channel`, `error_category`, `harness`, `model`, `outcome`, `phase`, `plugin`, `provider` |
+| `carapace_webhook_received_total`                    | counter   | `channel`, `webhook`                                                                      |
+| `carapace_webhook_error_total`                       | counter   | `channel`, `webhook`                                                                      |
+| `carapace_webhook_duration_seconds`                  | histogram | `channel`, `webhook`                                                                      |
+| `carapace_message_received_total`                    | counter   | `channel`, `source`                                                                       |
+| `carapace_message_dispatch_started_total`            | counter   | `channel`, `source`                                                                       |
+| `carapace_message_dispatch_completed_total`          | counter   | `channel`, `outcome`, `reason`, `source`                                                  |
+| `carapace_message_dispatch_duration_seconds`         | histogram | `channel`, `outcome`, `reason`, `source`                                                  |
+| `carapace_message_processed_total`                   | counter   | `channel`, `outcome`, `reason`                                                            |
+| `carapace_message_processed_duration_seconds`        | histogram | `channel`, `outcome`, `reason`                                                            |
+| `carapace_message_delivery_started_total`            | counter   | `channel`, `delivery_kind`                                                                |
+| `carapace_message_delivery_total`                    | counter   | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
+| `carapace_message_delivery_duration_seconds`         | histogram | `channel`, `delivery_kind`, `error_category`, `outcome`                                   |
+| `carapace_talk_event_total`                          | counter   | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `carapace_talk_event_duration_seconds`               | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `carapace_talk_audio_bytes`                          | histogram | `brain`, `event_type`, `mode`, `provider`, `transport`                                    |
+| `carapace_queue_lane_size`                           | gauge     | `lane`                                                                                    |
+| `carapace_queue_lane_wait_seconds`                   | histogram | `lane`                                                                                    |
+| `carapace_session_state_total`                       | counter   | `reason`, `state`                                                                         |
+| `carapace_session_queue_depth`                       | gauge     | `state`                                                                                   |
+| `carapace_session_turn_created_total`                | counter   | `agent`, `channel`, `trigger`                                                             |
+| `carapace_session_stuck_total`                       | counter   | `reason`, `state`                                                                         |
+| `carapace_session_stuck_age_seconds`                 | histogram | `reason`, `state`                                                                         |
+| `carapace_session_recovery_total`                    | counter   | `action`, `active_work_kind`, `state`, `status`                                           |
+| `carapace_session_recovery_age_seconds`              | histogram | `action`, `active_work_kind`, `state`, `status`                                           |
+| `carapace_gateway_event_loop_delay_max_seconds`      | histogram | none                                                                                      |
+| `carapace_gateway_event_loop_observed_seconds_total` | counter   | none                                                                                      |
+| `carapace_liveness_warning_total`                    | counter   | `reason`                                                                                  |
+| `carapace_liveness_sessions`                         | gauge     | `state`                                                                                   |
+| `carapace_liveness_event_loop_delay_p99_seconds`     | histogram | `reason`                                                                                  |
+| `carapace_liveness_event_loop_delay_max_seconds`     | histogram | `reason`                                                                                  |
+| `carapace_liveness_event_loop_utilization_ratio`     | histogram | `reason`                                                                                  |
+| `carapace_liveness_cpu_core_ratio`                   | histogram | `reason`                                                                                  |
+| `carapace_payload_large_total`                       | counter   | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
+| `carapace_payload_large_bytes`                       | histogram | `action`, `channel`, `plugin`, `reason`, `surface`                                        |
+| `carapace_memory_bytes`                              | gauge     | `kind`                                                                                    |
+| `carapace_memory_rss_bytes`                          | histogram | none                                                                                      |
+| `carapace_memory_pressure_total`                     | counter   | `level`, `reason`                                                                         |
+| `carapace_telemetry_exporter_total`                  | counter   | `exporter`, `reason`, `signal`, `status`                                                  |
+| `carapace_prometheus_series_dropped_total`           | counter   | none                                                                                      |
+| `carapace_diagnostic_async_queue_dropped_total`      | counter   | `drop_class`                                                                              |
+| `carapace_diagnostic_async_queue_length`             | gauge     | none                                                                                      |
 
 For model-call metrics, `observation_unit="request"` measures one observable
 provider request. `observation_unit="turn"` measures a synthetic Claude Code
@@ -179,14 +179,14 @@ method dimension. Each method with all four timings occupies five aggregate
 samples in the shared 2,048-sample cap. A duration histogram occupies one sample
 but expands into 19 scrape series (buckets, sum, and count). Existing samples keep
 updating when the cap fills; unseen RPC or other operational samples are refused
-and increment `openclaw_prometheus_series_dropped_total`. Monitor that counter:
+and increment `carapace_prometheus_series_dropped_total`. Monitor that counter:
 coverage of every core method can fill the cap, so a zero value matters when
 interpreting totals or latency percentiles. Async diagnostic queue saturation can
-also drop observations, reported by `openclaw_diagnostic_async_queue_dropped_total`.
+also drop observations, reported by `carapace_diagnostic_async_queue_dropped_total`.
 
 ### Runtime identity
 
-`openclaw_gateway_build_info` has value `1` and identifies the process serving
+`carapace_gateway_build_info` has value `1` and identifies the process serving
 the scrape. Its `process_instance_id` is the same process-owned UUID returned by
 `system.info`; it changes when the process restarts, including when a PID is
 reused. `build_id` matches the loaded build reported by `hello.server.buildId`
@@ -207,7 +207,7 @@ or establish complete diagnostic-loss coverage.
 
 ### Event-loop observation windows
 
-`openclaw_liveness_cpu_core_ratio` measures whole-process CPU usage in core
+`carapace_liveness_cpu_core_ratio` measures whole-process CPU usage in core
 equivalents, including worker and native threads, and can exceed `1`. Interpret
 it alongside main-thread delay and utilization; see
 [CPU pressure and event-loop delay](/gateway/health#cpu-pressure-and-event-loop-delay).
@@ -235,7 +235,7 @@ coverage. Readiness decisions and persistent liveness-warning thresholds are unc
 
 ### Garbage collection duration
 
-`openclaw_gc_duration_seconds` records elapsed garbage collection (GC) duration
+`carapace_gc_duration_seconds` records elapsed garbage collection (GC) duration
 reported by Node.js for the hosting JavaScript isolate. Each observation is one
 GC entry, not CPU time, allocated bytes, or a guaranteed stop-the-world pause.
 Compare its bucket counts with event-loop window maxima to investigate GC as a
@@ -262,11 +262,11 @@ trigger, trace attribution or application payload is collected.
   <Accordion title="Bounded, low-cardinality labels">
     Prometheus labels stay bounded and low-cardinality. The exporter does not emit raw diagnostic identifiers such as `runId`, `sessionKey`, `sessionId`, `callId`, `toolCallId`, message IDs, chat IDs, or provider request IDs.
 
-    Label values are redacted and must match OpenClaw's low-cardinality character policy. Values that fail the policy are replaced with `unknown`, `other`, or `none`, depending on the metric. Labels that look like scoped agent session keys are also replaced with `unknown`.
+    Label values are redacted and must match Carapace's low-cardinality character policy. Values that fail the policy are replaced with `unknown`, `other`, or `none`, depending on the metric. Labels that look like scoped agent session keys are also replaced with `unknown`.
 
   </Accordion>
   <Accordion title="Series cap and overflow accounting">
-    The exporter caps retained time series in memory at **2048** series across counters, gauges, and histograms combined. New series beyond that cap are dropped, and `openclaw_prometheus_series_dropped_total` increments by one each time.
+    The exporter caps retained time series in memory at **2048** series across counters, gauges, and histograms combined. New series beyond that cap are dropped, and `carapace_prometheus_series_dropped_total` increments by one each time.
 
     Watch this counter as a hard signal that an attribute upstream is leaking high-cardinality values. The exporter never lifts the cap automatically; if it climbs, fix the source rather than disabling the cap.
 
@@ -285,64 +285,64 @@ trigger, trace attribution or application payload is collected.
 
 ```promql
 # Gateway RPC requests per second by method
-sum by (method) (rate(openclaw_gateway_rpc_requests_total[5m]))
+sum by (method) (rate(carapace_gateway_rpc_requests_total[5m]))
 
 # 95th percentile first-response latency by method
 histogram_quantile(
   0.95,
-  sum by (le, method) (rate(openclaw_gateway_rpc_first_response_seconds_bucket[5m]))
+  sum by (le, method) (rate(carapace_gateway_rpc_first_response_seconds_bucket[5m]))
 )
 
 # 95th percentile operator request start-queue wait by method
 histogram_quantile(
   0.95,
-  sum by (le, method) (rate(openclaw_gateway_rpc_queue_wait_seconds_bucket[5m]))
+  sum by (le, method) (rate(carapace_gateway_rpc_queue_wait_seconds_bucket[5m]))
 )
 
 # Tokens per minute, split by provider
-sum by (provider) (rate(openclaw_model_tokens_total[1m]))
+sum by (provider) (rate(carapace_model_tokens_total[1m]))
 
 # Spend (USD) over the last hour, by model
-sum by (model) (increase(openclaw_model_cost_usd_total[1h]))
+sum by (model) (increase(carapace_model_cost_usd_total[1h]))
 
 # 95th percentile model run duration
 histogram_quantile(
   0.95,
   sum by (le, provider, model)
-    (rate(openclaw_run_duration_seconds_bucket[5m]))
+    (rate(carapace_run_duration_seconds_bucket[5m]))
 )
 
 # Queue wait time SLO (95p under 2s)
 histogram_quantile(
   0.95,
-  sum by (le, lane) (rate(openclaw_queue_lane_wait_seconds_bucket[5m]))
+  sum by (le, lane) (rate(carapace_queue_lane_wait_seconds_bucket[5m]))
 ) < 2
 
 # Skill usage, split by bounded source
-sum by (skill, source) (increase(openclaw_skill_used_total[24h]))
+sum by (skill, source) (increase(carapace_skill_used_total[24h]))
 
 # Dropped Prometheus series (cardinality alarm)
-increase(openclaw_prometheus_series_dropped_total[15m]) > 0
+increase(carapace_prometheus_series_dropped_total[15m]) > 0
 
 # Completed windows whose maximum delay exceeded one second
-increase(openclaw_gateway_event_loop_delay_max_seconds_count[5m])
-  - increase(openclaw_gateway_event_loop_delay_max_seconds_bucket{le="1"}[5m])
+increase(carapace_gateway_event_loop_delay_max_seconds_count[5m])
+  - increase(carapace_gateway_event_loop_delay_max_seconds_bucket{le="1"}[5m])
 
 # Seconds represented by exported event-loop windows
-increase(openclaw_gateway_event_loop_observed_seconds_total[5m])
+increase(carapace_gateway_event_loop_observed_seconds_total[5m])
 
 # Observed GC entries whose elapsed duration exceeded one second
-increase(openclaw_gc_duration_seconds_count[5m])
-  - increase(openclaw_gc_duration_seconds_bucket{le="1"}[5m])
+increase(carapace_gc_duration_seconds_count[5m])
+  - increase(carapace_gc_duration_seconds_bucket{le="1"}[5m])
 ```
 
 <Tip>
-Prefer `gen_ai_client_token_usage` for cross-provider dashboards: it follows the OpenTelemetry GenAI semantic conventions and is consistent with metrics from non-OpenClaw GenAI services.
+Prefer `gen_ai_client_token_usage` for cross-provider dashboards: it follows the OpenTelemetry GenAI semantic conventions and is consistent with metrics from non-Carapace GenAI services.
 </Tip>
 
 ## Choosing between Prometheus and OpenTelemetry export
 
-OpenClaw supports both surfaces independently. You can run either, both, or neither.
+Carapace supports both surfaces independently. You can run either, both, or neither.
 
 <Tabs>
   <Tab title="diagnostics-prometheus">
@@ -354,7 +354,7 @@ OpenClaw supports both surfaces independently. You can run either, both, or neit
 
   </Tab>
   <Tab title="diagnostics-otel">
-    - **Push** model: OpenClaw sends OTLP/HTTP to a collector or OTLP-compatible backend.
+    - **Push** model: Carapace sends OTLP/HTTP to a collector or OTLP-compatible backend.
     - Surface includes metrics, traces, and logs.
     - Bridges to Prometheus through an OpenTelemetry Collector (`prometheus` or `prometheusremotewrite` exporter) when you need both.
     - See [OpenTelemetry export](/gateway/opentelemetry) for the full catalog.
@@ -367,7 +367,7 @@ OpenClaw supports both surfaces independently. You can run either, both, or neit
 <AccordionGroup>
   <Accordion title="Empty response body">
     - Check that `diagnostics.enabled` is not set to `false` in config (it defaults to `true`).
-    - Confirm the plugin is enabled and loaded with `openclaw plugins list --enabled`.
+    - Confirm the plugin is enabled and loaded with `carapace plugins list --enabled`.
     - Generate some traffic; counters and histograms only emit lines after at least one event.
 
   </Accordion>
@@ -377,7 +377,7 @@ OpenClaw supports both surfaces independently. You can run either, both, or neit
   <Accordion title="403 `missing scope: operator.read`">
     The caller authenticated, but its effective operator scopes do not include `operator.read`. This happens when an identity-bearing auth mode such as `trusted-proxy` maps the scraper to a [named role](/gateway/operator-scopes) whose scope ceiling excludes reads. Grant the scraper role `operator.read` (or `operator.write` / `operator.admin`, which imply it).
   </Accordion>
-  <Accordion title="`openclaw_prometheus_series_dropped_total` is climbing">
+  <Accordion title="`carapace_prometheus_series_dropped_total` is climbing">
     A new attribute is exceeding the **2048**-series cap. Inspect recent metrics for an unexpectedly high-cardinality label and fix it at the source. The exporter intentionally drops new series instead of silently rewriting labels.
   </Accordion>
   <Accordion title="Prometheus shows stale series after a restart">

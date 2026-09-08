@@ -11,7 +11,7 @@ import {
   type MockOpenAiRequestSnapshot,
 } from "../../../../extensions/qa-lab/api.js";
 import type { ChannelAccountSnapshot } from "../../../../src/channels/plugins/types.core.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../../src/config/types.carapace.js";
 import type { HeartbeatEventPayload } from "../../../../src/infra/heartbeat-events.js";
 import { runQaGatewayFixture, stopQaGatewayFixture } from "../../../helpers/qa-gateway-cleanup.js";
 import {
@@ -59,7 +59,7 @@ export async function proveHotReloadChannels({
           usePackagedPlugins: true,
         },
         providerMode: "mock-openai",
-        forcedRuntime: "openclaw",
+        forcedRuntime: "carapace",
         providerBaseUrl: `${mock.baseUrl}/v1`,
         primaryModel: MODELS[0],
         alternateModel: MODELS[1],
@@ -161,7 +161,7 @@ export async function proveHotReloadChannels({
       };
       const patch = async (change: unknown, replacePaths?: string[], refreshChannel = true) => {
         const previous = await ready("default");
-        const snapshot = await rpc<{ hash: string; config: OpenClawConfig }>("config.get");
+        const snapshot = await rpc<{ hash: string; config: CarapaceConfig }>("config.get");
         const result = await rpc<{
           sentinel: { payload: { stats: { requiresRestart: boolean } } };
         }>("config.patch", { baseHash: snapshot.hash, raw: JSON.stringify(change), replacePaths });

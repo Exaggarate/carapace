@@ -3,17 +3,17 @@ import { createHash } from "node:crypto";
 import {
   resolveStoredModelOverride,
   type ModelsProviderData,
-} from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/command-auth-native";
+import type { CarapaceConfig } from "carapace/plugin-sdk/core";
+import { parseStrictInteger } from "carapace/plugin-sdk/number-runtime";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
 import {
   asFiniteNumber,
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
   readStringField,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import type { MattermostInteractiveButtonInput } from "./interactions.js";
 
 const MATTERMOST_MODEL_PICKER_CONTEXT_KEY = "oc_model_picker";
@@ -233,7 +233,7 @@ export function buildMattermostAllowedModelRefs(data: ModelsProviderData): Set<s
 }
 
 export function resolveMattermostModelPickerCurrentModel(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   route: { agentId: string; sessionKey: string };
   data: ModelsProviderData;
   readConsistency?: "latest";

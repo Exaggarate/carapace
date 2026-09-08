@@ -1,7 +1,7 @@
 // Discord tests cover channel actions plugin behavior.
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withEnv } from "openclaw/plugin-sdk/test-env";
+import type { ChannelMessageActionContext } from "carapace/plugin-sdk/channel-contract";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { withEnv } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 
 const handleDiscordMessageActionMock = vi.hoisted(() =>
@@ -32,7 +32,7 @@ describe("discordMessageActions", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as CarapaceConfig,
       });
 
       expect(discovery).toEqual({
@@ -58,7 +58,7 @@ describe("discordMessageActions", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(discovery?.capabilities).toEqual(["presentation"]);
@@ -105,7 +105,7 @@ describe("discordMessageActions", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
     });
 
     expect(discovery?.capabilities).toEqual(["presentation"]);
@@ -195,7 +195,7 @@ describe("discordMessageActions", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as CarapaceConfig,
       accountId: "ops",
     });
 
@@ -256,7 +256,7 @@ describe("discordMessageActions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const defaultDiscovery = discordMessageActions.describeMessageTool?.({
       cfg,
@@ -367,7 +367,7 @@ describe("discordMessageActions", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
 
     expect(discovery?.actions).toContain("send");
@@ -390,7 +390,7 @@ describe("discordMessageActions", () => {
             token: "Bot token-main",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     });
     expect(schemaForAction(discovery, "react")).toMatchObject({
       actions: ["react", "reactions"],
@@ -533,7 +533,7 @@ describe("discordMessageActions", () => {
       ctx: {
         channel: "discord",
         action: "send",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         params: {
           components: JSON.stringify({
             text: "Choose",
@@ -577,7 +577,7 @@ describe("discordMessageActions", () => {
       ctx: {
         channel: "discord",
         action: "send",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         params: {},
         sessionKey: "agent:main:discord:channel:c1",
         inboundEventKind: "room_event",
@@ -590,7 +590,7 @@ describe("discordMessageActions", () => {
       text: "hello",
       channelData: {
         discord: {
-          __openclawInboundEventDelivery: {
+          __carapaceInboundEventDelivery: {
             sessionKey: "agent:main:discord:channel:c1",
             inboundEventKind: "room_event",
           },
@@ -604,7 +604,7 @@ describe("discordMessageActions", () => {
       ctx: {
         channel: "discord",
         action: "send",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         params: {
           components: () => [],
         },
@@ -623,7 +623,7 @@ describe("discordMessageActions", () => {
           token: "Bot token-main",
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const toolContext: ChannelMessageActionContext["toolContext"] = {
       currentChannelProvider: "discord",
     };

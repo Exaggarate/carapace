@@ -11,7 +11,7 @@
         <activity
             android:name="androidx.activity.ComponentActivity"
             android:exported="false"
-            android:theme="@style/Theme.OpenClawNode" />
+            android:theme="@style/Theme.CarapaceNode" />
         <receiver
             android:name=".VoiceE2eReceiver"
             android:permission="${applicationId}.permission.RUN_VOICE_E2E"

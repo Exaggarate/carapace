@@ -1,10 +1,10 @@
 import { performance } from "node:perf_hooks";
 import { setImmediate as yieldToEventLoop } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { SessionsListParams } from "../../packages/gateway-protocol/src/index.js";
 import { listAgentIds } from "../agents/agent-scope-config.js";
 import type { ModelCatalogEntry } from "../agents/model-catalog.js";
@@ -17,7 +17,7 @@ import { tryResolveLegacyCompatibilityAgentId } from "../config/legacy.default-a
 import type { SessionEntry } from "../config/sessions.js";
 import type { GatewayStoredSessionTargets } from "../config/sessions/combined-store-gateway.js";
 import { MAX_SESSION_PARTICIPANTS } from "../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { withPinnedActivePluginRegistryWorkspaceDir } from "../plugins/runtime-workspace-state.js";
 import {
   isIncognitoSessionKey,
@@ -83,7 +83,7 @@ type SessionSelectionScope =
     };
 
 type ListSessionsFromStoreParams = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   durableStorePath?: string;
   entryFilter?: (key: string, entry: SessionEntry) => boolean;
   storePath: string;
@@ -138,7 +138,7 @@ function resolveSessionsListWindowLimit(limit: number | undefined, offset: numbe
 }
 
 function filterSessionEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   store: Record<string, SessionEntry>;
   targetsBySessionKey?: GatewayStoredSessionTargets;
   opts: SessionsListParams;
@@ -377,7 +377,7 @@ function isPhantomAgentStoreListEntry(key: string, entry: SessionEntry | undefin
 }
 
 function selectSessionEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   store: Record<string, SessionEntry>;
   targetsBySessionKey?: GatewayStoredSessionTargets;
   opts: SessionsListParams;
@@ -552,7 +552,7 @@ function buildSessionsListResult(
 }
 
 function resolveSessionsListDefaultsAgentId(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   requestedAgentId?: string,
 ): string {
   return requestedAgentId
@@ -562,7 +562,7 @@ function resolveSessionsListDefaultsAgentId(
 
 export function filterAndSortSessionEntries(
   params: {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     entryFilter?: (key: string, entry: SessionEntry) => boolean;
     store: Record<string, SessionEntry>;
     now: number;

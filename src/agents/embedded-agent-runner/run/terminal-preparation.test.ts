@@ -1,4 +1,4 @@
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getReplyPayloadMetadata } from "../../../auto-reply/reply-payload.js";
 import { createTestAdmittedRunContext } from "../../admitted-run-context.test-support.js";
@@ -82,7 +82,7 @@ async function prepareAttempt(input: {
       admittedRunContext: input.admittedRunContext ?? createTestAdmittedRunContext("run-focused"),
       sessionId: "session-focused",
       runId: "run-focused",
-      workspaceDir: "/tmp/openclaw-test",
+      workspaceDir: "/tmp/carapace-test",
       prompt: "hi",
       trigger: "user",
       timeoutMs: 60_000,
@@ -240,7 +240,7 @@ describe("prepareEmbeddedRunTerminal", () => {
           admittedRunContext: createTestAdmittedRunContext("run-1"),
           sessionId: "session-1",
           runId: "run-1",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/carapace-test",
           prompt: "hi",
           trigger: "user",
           timeoutMs: 60_000,
@@ -301,7 +301,7 @@ describe("prepareEmbeddedRunTerminal", () => {
           admittedRunContext: createTestAdmittedRunContext("run-current"),
           sessionId: "session-current",
           runId: "run-current",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/carapace-test",
           prompt: "hi",
           trigger: "user",
           timeoutMs: 60_000,
@@ -362,7 +362,7 @@ describe("prepareEmbeddedRunTerminal", () => {
         admittedRunContext: createTestAdmittedRunContext("run-1"),
         sessionId: "session-1",
         runId: "run-1",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
         prompt: "hi",
         trigger: "cron",
         timeoutMs: 60_000,
@@ -373,7 +373,7 @@ describe("prepareEmbeddedRunTerminal", () => {
           toolName: "exec",
           errorCode: "invalid_input",
           error:
-            "Unknown tool id: MCP.notes.read. Use openclaw.tools.search to find a tool, openclaw.tools.describe to inspect it, then openclaw.tools.call with the exact id or name.",
+            "Unknown tool id: MCP.notes.read. Use carapace.tools.search to find a tool, carapace.tools.describe to inspect it, then carapace.tools.call with the exact id or name.",
         },
         lastAssistant: assistant,
         currentAttemptAssistant: assistant,
@@ -513,7 +513,7 @@ describe("prepareEmbeddedRunTerminal", () => {
       attempt: attemptResult({
         lastToolError: {
           toolName: "gateway_exec",
-          error: "OpenClaw dynamic tool call aborted.",
+          error: "Carapace dynamic tool call aborted.",
         },
       }),
       terminalState: {
@@ -567,7 +567,7 @@ describe("prepareEmbeddedRunTerminal run stats", () => {
         admittedRunContext: createTestAdmittedRunContext("run-1"),
         sessionId: "session-1",
         runId: "run-1",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/carapace-test",
         prompt: "hi",
         trigger: "user",
         timeoutMs: 60_000,

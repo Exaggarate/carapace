@@ -1,5 +1,5 @@
 // Voice Call plugin module implements timers behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import { TerminalStates, type CallId, type CallRecord } from "../types.js";
 import type { CallEndResult, CallManagerContext } from "./context.js";
 import {

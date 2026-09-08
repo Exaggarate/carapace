@@ -8,7 +8,7 @@ import {
   type SlackSystemEventTestOverrides,
 } from "./system-event-test-harness.js";
 
-const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "openclawIngressLifecycle";
+const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "carapaceIngressLifecycle";
 
 const { messageQueueMock, messageAllowMock, inboundInfoSpy, noteConversationMessageMock } =
   vi.hoisted(() => ({
@@ -22,8 +22,8 @@ vi.mock("../../draft-message-boundaries.js", () => ({
   noteSlackDraftConversationMessage: (...args: unknown[]) => noteConversationMessageMock(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("carapace/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/runtime-env")>();
   const makeLogger = () => {
     const logger = {
       subsystem: "test",
@@ -42,21 +42,21 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
   return { ...actual, createSubsystemLogger: () => makeLogger() };
 });
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("carapace/plugin-sdk/system-event-runtime", () => ({
   enqueueRoutedSystemEvent: (
     text: unknown,
     route: { sessionKey: unknown },
     options: Record<string, unknown>,
   ) => messageQueueMock(text, { ...options, sessionKey: route.sessionKey }),
 }));
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/conversation-runtime")>();
+vi.mock("carapace/plugin-sdk/conversation-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/conversation-runtime")>();
   return {
     ...actual,
     readChannelAllowFromStore: (...args: unknown[]) => messageAllowMock(...args),
   };
 });
-vi.mock("openclaw/plugin-sdk/text-chunking", () => ({
+vi.mock("carapace/plugin-sdk/text-chunking", () => ({
   chunkItems: <T>(items: T[]) => [items],
   markdownToIR: (text: string) => text,
   renderMarkdownIRChunksWithinLimit: (text: string) => [text],
@@ -782,8 +782,8 @@ describe("registerSlackMessageEvents", () => {
     "routes $channelType $subtype events to their actual conversation",
     async ({ channelType, subtype, threadSession, ...scenario }) => {
       const actualSystemEvents = await vi.importActual<
-        typeof import("openclaw/plugin-sdk/system-event-runtime")
-      >("openclaw/plugin-sdk/system-event-runtime");
+        typeof import("carapace/plugin-sdk/system-event-runtime")
+      >("carapace/plugin-sdk/system-event-runtime");
       actualSystemEvents.resetSystemEventsForTest();
       messageQueueMock.mockImplementation(
         (text: string, { sessionKey, ...options }: { sessionKey: string }) =>

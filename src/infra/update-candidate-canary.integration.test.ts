@@ -42,7 +42,7 @@ it(
         process.kill(process.platform === "win32" ? gateway.pid! : -gateway.pid!, 0),
       ).toThrow();
       const options = spawned.mock.calls[callIndex]?.[2] as childProcess.SpawnOptions;
-      await expect(fs.access(options.env!.OPENCLAW_STATE_DIR!)).rejects.toMatchObject({
+      await expect(fs.access(options.env!.CARAPACE_STATE_DIR!)).rejects.toMatchObject({
         code: "ENOENT",
       });
     } finally {

@@ -2,16 +2,16 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import {
   getSessionEntry,
   patchSessionEntry,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "carapace/plugin-sdk/session-store-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLazyCodexAppServerBindingStore } from "./session-binding-store.js";
 import {
@@ -106,7 +106,7 @@ describe("Codex app-server binding store", () => {
         namespace: "deletion-test",
         maxEntries: CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
         overflowPolicy: "reject-new",
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
       });
       const store = createCodexAppServerBindingStore(state);
       const base = {
@@ -743,12 +743,12 @@ describe("Codex app-server binding store", () => {
   });
 
   it("canonicalizes undefined fields before writing to JSON-only plugin state", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-binding-state-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-binding-state-"));
     try {
       const state = createPluginStateSyncKeyedStoreForTests<StoredCodexAppServerBinding>("codex", {
         namespace: "app-server-thread-bindings-json-test",
         maxEntries: CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const store = createCodexAppServerBindingStore(state);
       const identity = { kind: "conversation" as const, bindingId: "binding-json" };
@@ -829,12 +829,12 @@ describe("Codex app-server binding store", () => {
   it("retains cleared legacy conversation provenance after normal tombstones expire", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-13T00:00:00.000Z"));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-binding-state-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-binding-state-"));
     try {
       const state = createPluginStateSyncKeyedStoreForTests<StoredCodexAppServerBinding>("codex", {
         namespace: "app-server-thread-bindings-clear-test",
         maxEntries: CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const store = createCodexAppServerBindingStore(state);
       const normal = { kind: "conversation" as const, bindingId: "normal" };
@@ -978,7 +978,7 @@ describe("Codex app-server binding store", () => {
             namespace: "predecessor-reopen",
             maxEntries: CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
             overflowPolicy: "reject-new",
-            env: { ...process.env, OPENCLAW_STATE_DIR: root },
+            env: { ...process.env, CARAPACE_STATE_DIR: root },
           },
         );
         return { state, store: createLazyCodexAppServerBindingStore(state) };
@@ -1346,13 +1346,13 @@ describe("Codex app-server binding store", () => {
   it("expires physical-session retirement fences but retains stable-key fences", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-13T00:00:00.000Z"));
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-binding-state-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-binding-state-"));
     try {
       const state = createPluginStateSyncKeyedStoreForTests<StoredCodexAppServerBinding>("codex", {
         namespace: "app-server-thread-bindings-retirement-test",
         maxEntries: CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
         overflowPolicy: "reject-new",
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
       });
       const store = createCodexAppServerBindingStore(state);
       const physical = {
@@ -1455,7 +1455,7 @@ describe("Codex app-server binding store", () => {
     expect(values.size).toBe(1);
   });
 
-  it("reclaims a stale stable generation only for the current OpenClaw session", async () => {
+  it("reclaims a stale stable generation only for the current Carapace session", async () => {
     const { state, values } = createStateStore();
     const store = createCodexAppServerBindingStore(state);
     const previous = {
@@ -1706,7 +1706,7 @@ describe("Codex app-server binding store", () => {
   });
 
   it("recovers a retired in-place generation through the authoritative session store", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-reset-reclaim-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-codex-reset-reclaim-"));
     const storePath = path.join(root, "sessions.json");
     const { state } = createStateStore();
     const store = createCodexAppServerBindingStore(state);

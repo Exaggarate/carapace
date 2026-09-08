@@ -4,10 +4,10 @@
  * This wraps a small reviewer prompt around pending exec requests and converts
  * the model response into conservative allow-once or ask decisions.
  */
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import { z } from "zod";
 import type { AgentModelConfig } from "../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   buildExecAutoReviewFailureDecision,
   defaultExecAutoReviewer,
@@ -354,7 +354,7 @@ async function raceWithReviewerTimeout<T>(
 
 /** Creates an exec auto-reviewer that uses a configured model when available. */
 export function createModelExecAutoReviewer(params: {
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   agentId?: string;
   reviewer?: ExecReviewerConfig;
   deps?: ExecReviewerDeps;

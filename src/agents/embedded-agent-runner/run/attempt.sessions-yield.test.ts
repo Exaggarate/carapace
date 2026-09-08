@@ -5,7 +5,7 @@ import { SessionManager } from "../../sessions/session-manager.js";
 import { createZeroUsageFixture } from "../../test-helpers/usage-fixtures.js";
 import { stripSessionsYieldArtifacts } from "./attempt-sessions-yield.js";
 
-const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "openclaw.sessions_yield_interrupt";
+const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "carapace.sessions_yield_interrupt";
 
 function makeAssistantMessage(overrides: Partial<AssistantMessage> = {}): AssistantMessage {
   return {

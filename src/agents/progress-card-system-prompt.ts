@@ -2,9 +2,9 @@ import {
   canonicalizeMainSessionAlias,
   resolveAgentMainSessionKey,
 } from "../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { hasPairedCardRenderer } from "../infra/device-pairing.js";
-import { shouldIncludeProgressCardToolForOpenClawTools } from "./openclaw-tools.registration.js";
+import { shouldIncludeProgressCardToolForCarapaceTools } from "./carapace-tools.registration.js";
 import { resolveUtilityModelRefForAgent } from "./utility-model.js";
 
 const PROGRESS_CARD_SYSTEM_PROMPT =
@@ -12,7 +12,7 @@ const PROGRESS_CARD_SYSTEM_PROMPT =
 
 function isAgentMainSession(params: {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
 }): boolean {
   if (!params.sessionKey) {
@@ -39,7 +39,7 @@ function isAgentMainSession(params: {
 export async function appendProgressCardSystemPrompt(params: {
   agentId: string;
   authProfileId?: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   extraSystemPrompt?: string;
   modelId: string;
   provider: string;
@@ -47,7 +47,7 @@ export async function appendProgressCardSystemPrompt(params: {
   toolsAllow?: string[];
 }): Promise<string | undefined> {
   // Registration includes subagent policy; group, sender, sandbox, and inherited layers resolve later.
-  const progressCardToolAvailable = shouldIncludeProgressCardToolForOpenClawTools({
+  const progressCardToolAvailable = shouldIncludeProgressCardToolForCarapaceTools({
     agentId: params.agentId,
     agentSessionKey: params.sessionKey,
     config: params.config,

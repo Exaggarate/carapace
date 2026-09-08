@@ -1,5 +1,5 @@
 // Diagnostic stability helpers compare diagnostic outputs across runs.
-import { parseStrictNonNegativeInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictNonNegativeInteger } from "@carapace/normalization-core/number-coercion";
 import {
   onInternalDiagnosticEvent,
   type DiagnosticEventPayload,
@@ -184,10 +184,10 @@ function createState(capacity = DEFAULT_DIAGNOSTIC_STABILITY_CAPACITY): Diagnost
 
 function getDiagnosticStabilityState(): DiagnosticStabilityState {
   const globalStore = globalThis as typeof globalThis & {
-    __openclawDiagnosticStabilityState?: DiagnosticStabilityState;
+    __carapaceDiagnosticStabilityState?: DiagnosticStabilityState;
   };
-  globalStore["__openclawDiagnosticStabilityState"] ??= createState();
-  return globalStore["__openclawDiagnosticStabilityState"];
+  globalStore["__carapaceDiagnosticStabilityState"] ??= createState();
+  return globalStore["__carapaceDiagnosticStabilityState"];
 }
 
 function copyMemory(memory: DiagnosticMemoryUsage): DiagnosticMemoryUsage {
@@ -935,8 +935,8 @@ export function resetDiagnosticStabilityRecorderForTest(): void {
   state.unsubscribe?.();
   const next = createState(state.capacity);
   const globalStore = globalThis as typeof globalThis & {
-    __openclawDiagnosticStabilityState?: DiagnosticStabilityState;
+    __carapaceDiagnosticStabilityState?: DiagnosticStabilityState;
   };
-  globalStore["__openclawDiagnosticStabilityState"] = next;
+  globalStore["__carapaceDiagnosticStabilityState"] = next;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

@@ -1,7 +1,7 @@
 import "../../test/dom.setup.ts";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { ControlUiSessionListResult } from "openclaw/plugin-sdk/control-ui";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { expectDefined } from "@carapace/normalization-core";
+import type { ControlUiSessionListResult } from "carapace/plugin-sdk/control-ui";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AgentsListResult } from "../../api/types.ts";
 import { createWorkboardCapability } from "../../lib/workboard/capability.ts";

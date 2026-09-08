@@ -1,13 +1,13 @@
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
 // Xai provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-auth";
 import type {
   RealtimeTranscriptionProviderPlugin,
   RealtimeTranscriptionSession,
   RealtimeTranscriptionSessionCreateRequest,
   RealtimeTranscriptionWebSocketTransport,
-} from "openclaw/plugin-sdk/realtime-transcription-session";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/realtime-transcription-session";
+import { isRecord, normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   createXaiRealtimeTranscriptionProviderMetadata,
   normalizeXaiRealtimeTranscriptionProviderConfig,
@@ -212,7 +212,7 @@ export function buildXaiRealtimeTranscriptionProvider(
 // 3. xAI OAuth auth profile (cfg-scoped)
 async function resolveXaiRealtimeApiKey(
   configApiKey: string | undefined,
-  cfg: OpenClawConfig | undefined,
+  cfg: CarapaceConfig | undefined,
   resolveApiKeyForProvider: XaiTranscriptionRuntime["resolveApiKeyForProvider"],
 ): Promise<string> {
   const direct =
@@ -226,6 +226,6 @@ async function resolveXaiRealtimeApiKey(
     return oauthKey;
   }
   throw new Error(
-    "xAI credentials missing for realtime STT. Sign in with `openclaw onboard --auth-choice xai-oauth`, or run `openclaw onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
+    "xAI credentials missing for realtime STT. Sign in with `carapace onboard --auth-choice xai-oauth`, or run `carapace onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
   );
 }

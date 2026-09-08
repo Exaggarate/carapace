@@ -5,9 +5,9 @@ import {
 } from "../../config/sessions/session-accessor.js";
 import { addSessionMember } from "../../config/sessions/session-sharing-store.js";
 import { addSessionSuggestion } from "../../config/sessions/session-suggestion-store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { ensureProfileForEmail } from "../../state/user-profiles.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { getSessionSuggestionTestMocks } from "./sessions-suggestions.test-mocks.js";
 import {
   call,
@@ -23,7 +23,7 @@ registerSessionSuggestionTestLifecycle(mocks);
 
 describe("session suggestion visibility and role ceilings", () => {
   it("lets a suggest viewer add and list only their own suggestion", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await upsertDefaultSuggestionSession();
       const alice = client("alice", "Alice");
       const add = await call(
@@ -62,7 +62,7 @@ describe("session suggestion visibility and role ceilings", () => {
   });
 
   it("enforces view, suggest, and hidden role ceilings while honoring explicit membership", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const ownerProfile = ensureProfileForEmail("suggestion-owner@example.test");
       const guestProfile = ensureProfileForEmail("suggestion-guest@example.test");
       await upsertSessionEntryCore(
@@ -75,7 +75,7 @@ describe("session suggestion visibility and role ceilings", () => {
         },
       );
       const guest = client(guestProfile.id, "Guest");
-      const roleConfig = (others: "none" | "view" | "suggest"): OpenClawConfig => ({
+      const roleConfig = (others: "none" | "view" | "suggest"): CarapaceConfig => ({
         gateway: {
           roles: {
             default: "guest",
@@ -139,7 +139,7 @@ describe("session suggestion visibility and role ceilings", () => {
   });
 
   it("hides draft suggestions from members while owner and admin can list", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const draftKey = "agent:main:draft-suggestions";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: draftKey },
@@ -221,7 +221,7 @@ describe("session suggestion visibility and role ceilings", () => {
   });
 
   it("keeps incognito suggestion and typing surfaces admin-only", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const incognitoKey = "agent:main:dashboard:incognito-suggestions";
       await upsertSessionEntryCore(
         { agentId: "main", sessionKey: incognitoKey },

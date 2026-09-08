@@ -1,7 +1,7 @@
 /**
- * openclaw built-in tool: ring-zero setup/repair actions for the OpenClaw
+ * carapace built-in tool: ring-zero setup/repair actions for the Carapace
  * agent. Never exposed to normal agents — construction is bound to a host-owned
- * per-run scope, and every action funnels through OpenClaw's typed operation
+ * per-run scope, and every action funnels through Carapace's typed operation
  * union with approval assertions and the audit log.
  */
 import path from "node:path";
@@ -28,7 +28,7 @@ import { stringEnum } from "../schema/typebox.js";
 import { textResult, ToolInputError, readToolStringParam, type AnyAgentTool } from "./common.js";
 
 export type SystemAgentToolOptions = {
-  /** Verified inference owner, distinct from the internal OpenClaw execution agent. */
+  /** Verified inference owner, distinct from the internal Carapace execution agent. */
   agentId?: string;
   /** Where setup side effects run; the gateway surface never manages its own daemon. */
   surface: "cli" | "gateway";
@@ -187,7 +187,7 @@ const SystemAgentToolSchema = Type.Object({
   sha256: Type.Optional(
     Type.String({
       pattern: "^[a-fA-F0-9]{64}$",
-      description: "Exact SHA256 from openclaw plugins pack for plugin_activate_artifact",
+      description: "Exact SHA256 from carapace plugins pack for plugin_activate_artifact",
     }),
   ),
   value: Type.Optional(Type.String({ description: "Value for config_set (JSON5 or string)" })),
@@ -205,7 +205,7 @@ const SystemAgentToolSchema = Type.Object({
   target: Type.Optional(
     stringEnum(["guided", "classic", "channels", "search", "gateway"], {
       description:
-        "Setup target for open_setup. channels/search/gateway open masked terminal flows; guided/classic require exiting OpenClaw and running openclaw onboard.",
+        "Setup target for open_setup. channels/search/gateway open masked terminal flows; guided/classic require exiting Carapace and running carapace onboard.",
     }),
   ),
   query: Type.Optional(Type.String({ description: "Search query for plugin_search" })),
@@ -225,7 +225,7 @@ function createCaptureRuntime(): RuntimeEnv & { read: () => string } {
     log: (...args) => lines.push(args.join(" ")),
     error: (...args) => lines.push(args.join(" ")),
     exit: (code) => {
-      throw new Error(`openclaw operation exited with code ${String(code)}`);
+      throw new Error(`carapace operation exited with code ${String(code)}`);
     },
     read: () => lines.join("\n").trim(),
   };
@@ -234,7 +234,7 @@ function createCaptureRuntime(): RuntimeEnv & { read: () => string } {
 function requireParam(params: Record<string, unknown>, name: string): string {
   const value = readToolStringParam(params, name);
   if (!value?.trim()) {
-    throw new ToolInputError(`openclaw: "${name}" is required for this action`);
+    throw new ToolInputError(`carapace: "${name}" is required for this action`);
   }
   return value.trim();
 }
@@ -252,7 +252,7 @@ function readSetupTarget(
   ) {
     return target;
   }
-  throw new ToolInputError(`openclaw: unknown setup target "${target}"`);
+  throw new ToolInputError(`carapace: unknown setup target "${target}"`);
 }
 
 function operationForAction(params: Record<string, unknown>): SystemAgentOperation {
@@ -330,7 +330,7 @@ function operationForAction(params: Record<string, unknown>): SystemAgentOperati
       const spec = requireParam(params, "spec");
       const validationError = validateSystemAgentPluginInstallSpec(spec);
       if (validationError) {
-        throw new ToolInputError(`openclaw: ${validationError}`);
+        throw new ToolInputError(`carapace: ${validationError}`);
       }
       return { kind: "plugin-install", spec };
     }
@@ -346,7 +346,7 @@ function operationForAction(params: Record<string, unknown>): SystemAgentOperati
         !/^[a-f0-9]{64}$/u.test(sha256)
       ) {
         throw new ToolInputError(
-          "openclaw: plugin_activate_artifact requires an absolute packed .tgz path and its exact SHA256 from openclaw plugins pack",
+          "carapace: plugin_activate_artifact requires an absolute packed .tgz path and its exact SHA256 from carapace plugins pack",
         );
       }
       return { kind: "plugin-activate-artifact", path: artifactPath, sha256 };
@@ -392,14 +392,14 @@ function operationForAction(params: Record<string, unknown>): SystemAgentOperati
         id: requireParam(params, "envVar"),
       };
     default:
-      throw new ToolInputError(`openclaw: unknown action "${action}"`);
+      throw new ToolInputError(`carapace: unknown action "${action}"`);
   }
 }
 
 export function createSystemAgentTool(options: SystemAgentToolOptions): AnyAgentTool {
   return {
-    name: "openclaw",
-    label: "OpenClaw",
+    name: "carapace",
+    label: "Carapace",
     // Setup authority is never discoverable through tool catalogs: the host
     // scopes it to this run and the model must receive it directly.
     catalogMode: "direct-only",
@@ -407,10 +407,10 @@ export function createSystemAgentTool(options: SystemAgentToolOptions): AnyAgent
       "System agent. Setup, config, channels, plugins, agents, repair.",
       "Read now: status, models, agents, channels, channel_info, config_get, config_schema, gateway_status, plugin_list, plugin_search, validate_config, doctor, audit.",
       "Handoff: connect_channel, configure_skills, configure_search, configure_gateway, import_memory; open_setup target=channels|search|gateway; open_agent.",
-      "Personal model accounts: manage_model_accounts opens the human-owned account controls; no change is made by the handoff. Shared provider/auth setup: exit; run `openclaw onboard`. Never request credentials.",
+      "Personal model accounts: manage_model_accounts opens the human-owned account controls; no change is made by the handoff. Shared provider/auth setup: exit; run `carapace onboard`. Never request credentials.",
       "Write: setup, set_default_model (agentId optional; live-tested), config_set, config_set_ref, create_agent, gateway_*, plugin_install, plugin_activate_artifact, plugin_uninstall. Submit the exact proposal first. Direct chat: exact user approval, then approved=true. Delegated requests: host applies session permission policy and returns the final outcome. Host applies after turn; rechecks inference owner.",
       "plugin_install: ClawHub/bundled/official only. Arbitrary source: exit, trusted shell.",
-      "plugin_activate_artifact: for a task-authored plugin built with openclaw plugins pack, pass its absolute archive path and sha256. Copies and reviews exact bytes before proposing; approval includes trusted backend code, declared capabilities, and native UI. No dependency fetching. Backend activation requires Gateway restart. Native UI separately requires enabling Settings > Labs > Custom plugin UI, then Gateway restart and browser reload; artifact approval does not enable Labs.",
+      "plugin_activate_artifact: for a task-authored plugin built with carapace plugins pack, pass its absolute archive path and sha256. Copies and reviews exact bytes before proposing; approval includes trusted backend code, declared capabilities, and native UI. No dependency fetching. Backend activation requires Gateway restart. Native UI separately requires enabling Settings > Labs > Custom plugin UI, then Gateway restart and browser reload; artifact approval does not enable Labs.",
       "Unknown config: config_schema first. Secrets: config_set_ref env. No plaintext. No raw auth/models/env/secrets/$include, plugin install/load policy, default-route model/runtime/params, or agent identity/topology; use set_default_model / onboard.",
       "No doctor repair. Writes validated, audited. Invalid config: fix now.",
     ].join(" "),
@@ -446,7 +446,7 @@ export function createSystemAgentTool(options: SystemAgentToolOptions): AnyAgent
                   : directive.kind === "memory-import"
                     ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the host chat now starts guided copy-only memory import with the user. Tell the user the detected local-agent memory choices come next; do not describe steps yourself.`
                     : directive.kind === "model-setup"
-                      ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the active inference route cannot be changed inside OpenClaw. Tell the user to exit OpenClaw and run \`openclaw onboard\`; do not ask for provider credentials here.`
+                      ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the active inference route cannot be changed inside Carapace. Tell the user to exit Carapace and run \`carapace onboard\`; do not ask for provider credentials here.`
                       : directive.kind === "open-tui"
                         ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the host now hands the user over to their normal agent. Say goodbye briefly.`
                         : directive.target === "channels"
@@ -455,7 +455,7 @@ export function createSystemAgentTool(options: SystemAgentToolOptions): AnyAgent
                             ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the host now opens masked terminal web search setup. Tell the user the terminal wizard comes next.`
                             : directive.target === "gateway"
                               ? `${SYSTEM_AGENT_DIRECTIVE_PREFIX} the host now opens masked terminal Gateway setup. Tell the user the terminal wizard comes next.`
-                              : `${SYSTEM_AGENT_DIRECTIVE_PREFIX} ${directive.target} setup cannot run inside OpenClaw because it may change the active inference route. Tell the user to exit OpenClaw and run \`openclaw onboard\`.`,
+                              : `${SYSTEM_AGENT_DIRECTIVE_PREFIX} ${directive.target} setup cannot run inside Carapace because it may change the active inference route. Tell the user to exit Carapace and run \`carapace onboard\`.`,
           {},
         );
       }

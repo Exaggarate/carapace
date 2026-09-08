@@ -4,7 +4,7 @@ import {
   updateUserModelAuthProfile,
 } from "../state/user-model-accounts.js";
 import { ensureProfileForEmail } from "../state/user-profiles.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { ensureAuthProfileStore } from "./auth-profiles/store-runtime.js";
 import { runWithModelFallback } from "./model-fallback-runner.js";
 
@@ -12,7 +12,7 @@ describe("personal account fallback admission", () => {
   it.each(["shared-blocked", "personal-blocked"] as const)(
     "checks the selected credential's cooldown with %s",
     async (scenario) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { layout: "home", prefix: "fallback-personal-" },
         async (state) => {
           const profile = ensureProfileForEmail("alice@example.test");

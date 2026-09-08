@@ -1,10 +1,10 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "carapace/plugin-sdk/lazy-runtime";
 import type {
   AnyAgentTool,
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeInvokePolicy,
+} from "carapace/plugin-sdk/plugin-entry";
 import {
   OLLAMA_CHAT_COMMAND,
   OLLAMA_MODELS_COMMAND,
@@ -18,8 +18,8 @@ const loadOllamaNodeInference = createLazyRuntimeModule(() => import("./node-inf
 
 function createLazyNodeHostCommand(
   command: (typeof OLLAMA_NODE_INFERENCE_COMMANDS)[number],
-): OpenClawPluginNodeHostCommand {
-  let runtimeCommandPromise: Promise<OpenClawPluginNodeHostCommand> | undefined;
+): CarapacePluginNodeHostCommand {
+  let runtimeCommandPromise: Promise<CarapacePluginNodeHostCommand> | undefined;
   const loadRuntimeCommand = () =>
     (runtimeCommandPromise ??= loadOllamaNodeInference().then((runtime) => {
       const runtimeCommand = runtime
@@ -40,14 +40,14 @@ function createLazyNodeHostCommand(
   };
 }
 
-export function createLazyOllamaNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+export function createLazyOllamaNodeHostCommands(): CarapacePluginNodeHostCommand[] {
   return [
     createLazyNodeHostCommand(OLLAMA_MODELS_COMMAND),
     createLazyNodeHostCommand(OLLAMA_CHAT_COMMAND),
   ];
 }
 
-export function createOllamaNodeInvokePolicy(): OpenClawPluginNodeInvokePolicy {
+export function createOllamaNodeInvokePolicy(): CarapacePluginNodeInvokePolicy {
   return {
     commands: [...OLLAMA_NODE_INFERENCE_COMMANDS],
     defaultPlatforms: [...OLLAMA_NODE_INFERENCE_DEFAULT_PLATFORMS],
@@ -55,7 +55,7 @@ export function createOllamaNodeInvokePolicy(): OpenClawPluginNodeInvokePolicy {
   };
 }
 
-export function createLazyOllamaNodeInferenceTool(api: OpenClawPluginApi): AnyAgentTool {
+export function createLazyOllamaNodeInferenceTool(api: CarapacePluginApi): AnyAgentTool {
   let toolPromise: Promise<AnyAgentTool> | undefined;
   const loadTool = () =>
     (toolPromise ??= loadOllamaNodeInference().then((runtime) =>

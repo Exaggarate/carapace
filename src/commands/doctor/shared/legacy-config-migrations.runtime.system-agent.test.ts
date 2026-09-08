@@ -5,7 +5,7 @@ import { findLegacyConfigIssues } from "../../../config/legacy.js";
 import type {
   AgentDefaultsConfig,
   AgentEntryConfig,
-  OpenClawConfig,
+  CarapaceConfig,
 } from "../../../config/types.js";
 import { resolveHeartbeatAgents } from "../../../infra/heartbeat-config.js";
 import { applyLegacyDoctorMigrations } from "./legacy-config-compat.js";
@@ -52,7 +52,7 @@ describe("legacy ambient owner migration", () => {
   it.each(["entries", "list"])(
     "restores ambient ownership from a markerless %s roster",
     (shape) => {
-      const raw: OpenClawConfig = {
+      const raw: CarapaceConfig = {
         agents:
           shape === "entries"
             ? { entries: { ops: {}, main: {} } }
@@ -88,7 +88,7 @@ describe("legacy ambient owner migration", () => {
         owner: "ops",
       },
     ])("keeps $label quiet", ({ entries, owner }) => {
-      const raw: OpenClawConfig = {
+      const raw: CarapaceConfig = {
         agents:
           shape === "entries"
             ? { entries }
@@ -99,7 +99,7 @@ describe("legacy ambient owner migration", () => {
       expect(resolveAmbientOwnerAgentId(raw)).toBe(owner);
       expect(findLegacySystemAgentOwnerIssue(raw)).toBeUndefined();
       const result = applyLegacyDoctorMigrations(raw);
-      const migrated = (result.next ?? raw) as OpenClawConfig;
+      const migrated = (result.next ?? raw) as CarapaceConfig;
       expect(migrated.agents?.defaults?.systemAgent).toBeUndefined();
       expect(migrated.agents?.defaults?.heartbeat).toBeUndefined();
       expect(resolveAmbientOwnerAgentId(migrated)).toBe(owner);
@@ -110,7 +110,7 @@ describe("legacy ambient owner migration", () => {
   it.each(["entries", "list"])(
     "seeds a marked default ignored by explicit %s ownership",
     (shape) => {
-      const raw: OpenClawConfig = {
+      const raw: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           ...(shape === "entries"
@@ -149,10 +149,10 @@ describe("legacy ambient owner migration", () => {
       owners: ["ops"],
     },
   ])("preserves heartbeat $label", ({ defaults, entries, owners }) => {
-    const raw: OpenClawConfig = { agents: { defaults, entries } };
+    const raw: CarapaceConfig = { agents: { defaults, entries } };
     expect(resolveHeartbeatAgents(raw).map(({ agentId }) => agentId)).toEqual(owners);
     const result = applyLegacyDoctorMigrations(raw);
-    const migrated = result.next as OpenClawConfig;
+    const migrated = result.next as CarapaceConfig;
     expect(migrated.agents?.defaults?.systemAgent?.agentId).toBe("main");
     expect(migrated.agents?.defaults?.heartbeat).toEqual(defaults.heartbeat);
     expect(resolveHeartbeatAgents(migrated).map(({ agentId }) => agentId)).toEqual(owners);

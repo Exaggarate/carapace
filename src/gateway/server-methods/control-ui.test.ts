@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import * as githubIdentity from "../../agents/github-tool-identity.js";
@@ -10,9 +10,9 @@ import {
   persistSessionTranscriptTurn,
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { CarapaceConfig } from "../../config/types.js";
 import { SecretSurfaceUnavailableError } from "../../secrets/runtime-degraded-state.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import type { ControlUiGitHubPreview, ControlUiSessionPreview } from "../control-ui-contract.js";
 import { ControlUiGitHubError } from "../control-ui-github-api.js";
 import { createControlUiHandlers } from "./control-ui.js";
@@ -70,7 +70,7 @@ describe("controlUi.githubPreview", () => {
               ? {
                   created_at: "2026-09-01T08:00:00Z",
                   updated_at: "2026-09-01T09:00:00Z",
-                  repository_url: "https://api.github.com/repos/openclaw/openclaw",
+                  repository_url: "https://api.github.com/repos/carapace/carapace",
                   state: "open",
                   title: "Use the selected GitHub identity",
                   user: { login: "octocat" },
@@ -99,7 +99,7 @@ describe("controlUi.githubPreview", () => {
 
     await handler(
       requestOptions(
-        { kind: "issue", number: 88120, owner: "openclaw", repo: "openclaw", agentId: "alternate" },
+        { kind: "issue", number: 88120, owner: "carapace", repo: "carapace", agentId: "alternate" },
         respond,
         { context: { getRuntimeConfig: () => cfg } },
       ),
@@ -144,7 +144,7 @@ describe("controlUi.githubPreview", () => {
 
     await handler(
       requestOptions(
-        { kind: "issue", number: 88121, owner: "openclaw", repo: "openclaw", agentId: "main" },
+        { kind: "issue", number: 88121, owner: "carapace", repo: "carapace", agentId: "main" },
         respond,
         { context: { getRuntimeConfig: () => cfg } },
       ),
@@ -177,7 +177,7 @@ describe("controlUi.githubPreview", () => {
 
     await handler(
       requestOptions(
-        { kind: "issue", number: 88125, owner: "openclaw", repo: "openclaw", agentId: "main" },
+        { kind: "issue", number: 88125, owner: "carapace", repo: "carapace", agentId: "main" },
         respond,
         { context: { getRuntimeConfig: () => cfg } },
       ),
@@ -201,13 +201,13 @@ describe("controlUi.githubPreview", () => {
         kind: "issue",
         login: "octocat",
         number: 99815,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "carapace",
+        repo: "carapace",
         state: "open",
         title: "Keep hover previews compact",
         updatedAt: "2026-07-05T09:55:00Z",
       };
-      let cfg: OpenClawConfig = { agents: { entries: { main: {} } } };
+      let cfg: CarapaceConfig = { agents: { entries: { main: {} } } };
       const started = createDeferred();
       const pending = createDeferred<ControlUiGitHubPreview>();
       const loadPreview = vi.fn(() => {
@@ -222,7 +222,7 @@ describe("controlUi.githubPreview", () => {
         'handlers["controlUi.githubPreview"] test invariant',
       )(
         requestOptions(
-          { kind: "issue", number: 99815, owner: "openclaw", repo: "openclaw" },
+          { kind: "issue", number: 99815, owner: "carapace", repo: "carapace" },
           respond,
           { context: { getRuntimeConfig: () => cfg } },
         ),
@@ -238,7 +238,7 @@ describe("controlUi.githubPreview", () => {
       await request;
 
       expect(loadPreview).toHaveBeenCalledWith(
-        { kind: "issue", number: 99815, owner: "openclaw", repo: "openclaw" },
+        { kind: "issue", number: 99815, owner: "carapace", repo: "carapace" },
         undefined,
       );
       if (selection === "unchanged") {
@@ -263,7 +263,7 @@ describe("controlUi.githubPreview", () => {
       'handlers["controlUi.githubPreview"] test invariant',
     )(
       requestOptions(
-        { kind: "issue", number: 1, owner: "openclaw/evil", repo: "openclaw" },
+        { kind: "issue", number: 1, owner: "carapace/evil", repo: "carapace" },
         respond,
       ),
     );
@@ -307,7 +307,7 @@ describe("controlUi.githubPreview", () => {
         'handlers["controlUi.githubPreview"] test invariant',
       )(
         requestOptions(
-          { kind: "pull", number: 99816, owner: "openclaw", repo: "openclaw" },
+          { kind: "pull", number: 99816, owner: "carapace", repo: "carapace" },
           respond,
         ),
       );
@@ -323,8 +323,8 @@ describe("controlUi.githubPreview", () => {
 
 describe("controlUi.sessionPreview", () => {
   it("keeps the resolved owner when previewing a qualified global main alias", async () => {
-    await withOpenClawTestState({ label: "hover-global-owner" }, async () => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ label: "hover-global-owner" }, async () => {
+      const cfg: CarapaceConfig = {
         session: { scope: "global" },
         agents: { entries: { main: { default: true }, research: {} } },
       };

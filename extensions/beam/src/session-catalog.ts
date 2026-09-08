@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import type { SessionCatalogProvider } from "openclaw/plugin-sdk/session-catalog";
-import { isControlUiCatalogShareId } from "openclaw/plugin-sdk/session-catalog-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { SessionCatalogProvider } from "carapace/plugin-sdk/session-catalog";
+import { isControlUiCatalogShareId } from "carapace/plugin-sdk/session-catalog-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { BeamStore } from "./store.js";
 import { BEAM_HOST_ID, BEAM_SESSION_SHARE_ROUTE, type BeamStoredSession } from "./types.js";
 

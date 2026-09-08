@@ -1,17 +1,17 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
 import type {
   OpenKeyedStoreOptions,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor-migrations";
+} from "carapace/plugin-sdk/runtime-doctor-migrations";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   legacyConfigRules,
@@ -108,7 +108,7 @@ function reefKeys(): ReefKeys {
   };
 }
 
-function legacyConfig(): OpenClawConfig {
+function legacyConfig(): CarapaceConfig {
   const identity = generateIdentity();
   return {
     channels: {
@@ -130,7 +130,7 @@ function legacyConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 describe("Reef doctor contract", () => {
@@ -139,9 +139,9 @@ describe("Reef doctor contract", () => {
 
   beforeEach(() => {
     resetPluginStateStoreForTests();
-    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reef-doctor-"));
+    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-reef-doctor-"));
     vi.spyOn(os, "homedir").mockReturnValue(stateDir);
-    env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    env = { ...process.env, CARAPACE_STATE_DIR: stateDir };
   });
 
   afterEach(() => {
@@ -221,7 +221,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("imports identity keys into SQLite before archiving keys.json", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const filePath = path.join(legacyDir, "keys.json");
     const keys = reefKeys();
     fs.mkdirSync(legacyDir, { recursive: true });
@@ -258,12 +258,12 @@ describe("Reef doctor contract", () => {
   it("does not import the default home's Reef identity into an isolated state", async () => {
     const homeDir = path.join(stateDir, "home");
     const isolatedStateDir = path.join(stateDir, "isolated");
-    const homeKeysPath = path.join(homeDir, ".openclaw", "data", "reef", "keys.json");
+    const homeKeysPath = path.join(homeDir, ".carapace", "data", "reef", "keys.json");
     fs.mkdirSync(path.dirname(homeKeysPath), { recursive: true });
     fs.mkdirSync(isolatedStateDir, { recursive: true });
     fs.writeFileSync(homeKeysPath, JSON.stringify(reefKeys()));
     vi.mocked(os.homedir).mockReturnValue(homeDir);
-    const isolatedEnv = { ...env, OPENCLAW_STATE_DIR: isolatedStateDir };
+    const isolatedEnv = { ...env, CARAPACE_STATE_DIR: isolatedStateDir };
     const migration = migrationById("reef-keys-json-to-plugin-state");
     const params = {
       config: {},
@@ -284,14 +284,14 @@ describe("Reef doctor contract", () => {
   it("imports an explicitly configured default-home Reef identity into isolated state", async () => {
     const homeDir = path.join(stateDir, "explicit-home");
     const isolatedStateDir = path.join(stateDir, "explicit-isolated");
-    const legacyDir = path.join(homeDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(homeDir, ".carapace", "data", "reef");
     const homeKeysPath = path.join(legacyDir, "keys.json");
     const keys = reefKeys();
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.mkdirSync(isolatedStateDir, { recursive: true });
     fs.writeFileSync(homeKeysPath, JSON.stringify(keys));
     vi.mocked(os.homedir).mockReturnValue(homeDir);
-    const isolatedEnv = { ...env, OPENCLAW_STATE_DIR: isolatedStateDir };
+    const isolatedEnv = { ...env, CARAPACE_STATE_DIR: isolatedStateDir };
     const context = createDoctorContext(isolatedEnv);
     const migration = migrationById("reef-keys-json-to-plugin-state");
     const params = {
@@ -320,7 +320,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("blocks identity regeneration after a failed keys.json import", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const filePath = path.join(legacyDir, "keys.json");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(filePath, "{broken");
@@ -349,7 +349,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("keeps legacy identity keys blocked until their handle binding is canonical", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const keys = reefKeys();
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(path.join(legacyDir, "keys.json"), JSON.stringify(keys));
@@ -401,7 +401,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("binds wizard-created legacy keys when unrelated Reef config is invalid", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const keys = reefKeys();
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(path.join(legacyDir, "keys.json"), JSON.stringify(keys));
@@ -460,7 +460,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("keeps identity migration blocked when config conflicts with the imported binding", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(path.join(legacyDir, "keys.json"), JSON.stringify(reefKeys()));
     fs.writeFileSync(
@@ -501,7 +501,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("imports and verifies the append-only audit chain", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const filePath = path.join(legacyDir, "audit.jsonl");
     const audit = new MemoryAuditStore(new Uint8Array(32).fill(1));
     await audit.appendEvent("one", { id: 1 }, 10);
@@ -551,7 +551,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("finishes an interrupted migration of an empty audit trail", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const filePath = path.join(legacyDir, "audit.jsonl");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(filePath, "");
@@ -592,7 +592,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("blocks runtime audit writes until a failed legacy import is repaired", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const filePath = path.join(legacyDir, "audit.jsonl");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(filePath, "{broken\n");
@@ -635,7 +635,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("imports registration and durable runtime state before archiving files", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(
       path.join(legacyDir, "identity.json"),
@@ -753,7 +753,7 @@ describe("Reef doctor contract", () => {
   });
 
   it("leaves oversized replay and delivered sources blocked and unarchived", async () => {
-    const legacyDir = path.join(stateDir, ".openclaw", "data", "reef");
+    const legacyDir = path.join(stateDir, ".carapace", "data", "reef");
     const replayPath = path.join(legacyDir, "replay.jsonl");
     const deliveredPath = path.join(legacyDir, "delivered.json");
     fs.mkdirSync(legacyDir, { recursive: true });

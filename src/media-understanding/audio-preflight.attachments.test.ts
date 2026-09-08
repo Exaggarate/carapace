@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { formatAudioTranscriptForAgent } from "../plugin-sdk/media-understanding-runtime.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { applyMediaUnderstanding } from "./apply.js";
@@ -50,7 +50,7 @@ describe("audio preflight attachment handoff", () => {
   ])(
     "keeps first-only preflight separate from $name",
     async ({ attachments, emptyFirst, textField }) => {
-      await withTestDir({ prefix: "openclaw-audio-preflight-" }, async (dir) => {
+      await withTestDir({ prefix: "carapace-audio-preflight-" }, async (dir) => {
         const callsPath = path.join(dir, "calls.txt");
         const media = await Promise.all(
           ["previous.wav", "first.wav", "second.wav"].map(async (name) => {
@@ -59,7 +59,7 @@ describe("audio preflight attachment handoff", () => {
             return { path: filePath, contentType: "audio/wav", workspaceDir: dir };
           }),
         );
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           plugins: { enabled: false },
           tools: {
             media: {

@@ -25,10 +25,10 @@ installGatewayTestHooks({ scope: "suite" });
 
 describe("subagent completion blocked Gateway E2E", () => {
   it("publishes one no-crash system event after ordinary delivery exhaustion", async () => {
-    process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "0";
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
-      throw new Error("OPENCLAW_STATE_DIR is required for Gateway E2E fixtures");
+      throw new Error("CARAPACE_STATE_DIR is required for Gateway E2E fixtures");
     }
     testState.sessionStorePath = path.join(stateDir, "sessions.sqlite");
     try {
@@ -113,7 +113,7 @@ describe("subagent completion blocked Gateway E2E", () => {
     } finally {
       testing.setDepsForTest();
       resetSubagentRegistryForTests({ persist: false });
-      process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "1";
+      process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "1";
     }
   });
 });

@@ -1,9 +1,9 @@
 // Mattermost tests cover slash state plugin behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createMockIncomingRequest, withServer } from "openclaw/plugin-sdk/test-env";
+import { createMockIncomingRequest, withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedMattermostAccount } from "./accounts.js";
-import type { OpenClawConfig, RuntimeEnv } from "./runtime-api.js";
+import type { CarapaceConfig, RuntimeEnv } from "./runtime-api.js";
 import type { MattermostRegisteredCommand } from "./slash-commands.js";
 import {
   activateSlashCommands,
@@ -45,11 +45,11 @@ const slashApi = {
     exit: () => {},
   },
 } satisfies {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
 };
 
-const ACCOUNT_STATES_KEY = Symbol.for("openclaw.mattermost.slash-account-states");
+const ACCOUNT_STATES_KEY = Symbol.for("carapace.mattermost.slash-account-states");
 
 type AccountState = {
   handler: ((req: IncomingMessage, res: ServerResponse) => Promise<void>) | null;

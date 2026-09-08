@@ -1,6 +1,6 @@
 // Covers diagnostic flag matching and normalization.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import {
   isDiagnosticFlagEnabled,
   matchesDiagnosticFlag,
@@ -11,9 +11,9 @@ describe("resolveDiagnosticFlags", () => {
   it("normalizes and dedupes config and env flags", () => {
     const cfg = {
       diagnostics: { flags: [" Telegram.Http ", "cache.*", "CACHE.*"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const env = {
-      OPENCLAW_DIAGNOSTICS: " foo, Cache.*  telegram.http  ",
+      CARAPACE_DIAGNOSTICS: " foo, Cache.*  telegram.http  ",
     } as NodeJS.ProcessEnv;
 
     expect(resolveDiagnosticFlags(cfg, env)).toEqual(["telegram.http", "cache.*", "foo"]);
@@ -22,11 +22,11 @@ describe("resolveDiagnosticFlags", () => {
   it("treats blank env values as no extra flags", () => {
     const cfg = {
       diagnostics: { flags: ["telegram.http"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveDiagnosticFlags(cfg, {
-        OPENCLAW_DIAGNOSTICS: "   ",
+        CARAPACE_DIAGNOSTICS: "   ",
       } as NodeJS.ProcessEnv),
     ).toEqual(["telegram.http"]);
   });
@@ -34,12 +34,12 @@ describe("resolveDiagnosticFlags", () => {
   it("treats false-like env values as disable overrides", () => {
     const cfg = {
       diagnostics: { flags: ["telegram.http"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     for (const raw of ["0", "false", "off", "none"]) {
       expect(
         resolveDiagnosticFlags(cfg, {
-          OPENCLAW_DIAGNOSTICS: raw,
+          CARAPACE_DIAGNOSTICS: raw,
         } as NodeJS.ProcessEnv),
       ).toStrictEqual([]);
     }
@@ -66,9 +66,9 @@ describe("isDiagnosticFlagEnabled", () => {
   it("resolves config and env together before matching", () => {
     const cfg = {
       diagnostics: { flags: ["gateway.*"] },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const env = {
-      OPENCLAW_DIAGNOSTICS: "telegram.http",
+      CARAPACE_DIAGNOSTICS: "telegram.http",
     } as NodeJS.ProcessEnv;
 
     expect(isDiagnosticFlagEnabled("gateway.ws", cfg, env)).toBe(true);

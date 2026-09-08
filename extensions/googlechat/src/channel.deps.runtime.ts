@@ -7,7 +7,7 @@ export {
   PAIRING_APPROVED_MESSAGE,
   type ChannelMessageActionAdapter,
   type ChannelStatusIssue,
-  type OpenClawConfig,
+  type CarapaceConfig,
 } from "../runtime-api.js";
 export { resolveGoogleChatAccount, type ResolvedGoogleChatAccount } from "./accounts.js";
 export {

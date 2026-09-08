@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import {
   configureExecutionIdentityAdmissionSink,
   enqueueExecutionIdentityContextAtAdmission,
@@ -11,7 +11,7 @@ import { processExecutionIdentityAdmissionWork } from "./execution-identity-cont
 import { executionIdentitySpawnAdmission } from "./execution-identity-spawn-admission.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
@@ -71,7 +71,7 @@ function prepareContext(
   return processExecutionIdentityAdmissionWork(
     { kind: "capture", envelope },
     {
-      env: { OPENCLAW_STATE_DIR: tempDirs.make("openclaw-lineage-") },
+      env: { CARAPACE_STATE_DIR: tempDirs.make("carapace-lineage-") },
       ...(ids.now !== undefined ? { now: ids.now } : {}),
     },
   );

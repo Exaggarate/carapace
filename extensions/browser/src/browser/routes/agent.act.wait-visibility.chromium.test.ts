@@ -23,7 +23,7 @@ vi.mock("./agent.shared.js", () => createExistingSessionAgentSharedModule());
 
 const { registerBrowserAgentActRoutes } = await import("./agent.act.js");
 
-describe.runIf(process.env.OPENCLAW_BROWSER_WAIT_E2E === "1")(
+describe.runIf(process.env.CARAPACE_BROWSER_WAIT_E2E === "1")(
   "existing-session selector wait visibility in Chromium",
   () => {
     let browser: Browser;

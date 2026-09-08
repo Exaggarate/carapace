@@ -1,4 +1,4 @@
-import { asDateTimestampMs, truncateUtf16Safe } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asDateTimestampMs, truncateUtf16Safe } from "carapace/plugin-sdk/string-coerce-runtime";
 import { workboardLocale } from "../host.ts";
 import { t } from "../i18n/index.ts";
 function formatUnit(

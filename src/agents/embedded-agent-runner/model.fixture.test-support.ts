@@ -22,14 +22,14 @@ export function guardModelFixtureAuth(root: string) {
 
 export function guardModelFixtureWorkspace(root: string) {
   const violations: string[] = [];
-  const discoverOpenClawPlugins = pluginDiscovery.discoverOpenClawPlugins;
-  const spy = vi.spyOn(pluginDiscovery, "discoverOpenClawPlugins").mockImplementation((params) => {
+  const discoverCarapacePlugins = pluginDiscovery.discoverCarapacePlugins;
+  const spy = vi.spyOn(pluginDiscovery, "discoverCarapacePlugins").mockImplementation((params) => {
     // This is before discovery's realpath/stat probes; bundled roots remain real.
     if (params.workspaceDir && !isPathInside(root, params.workspaceDir)) {
       violations.push(params.workspaceDir);
       throw new Error("Workspace discovery escaped the model fixture");
     }
-    return discoverOpenClawPlugins(params);
+    return discoverCarapacePlugins(params);
   });
   return { spy, verify: () => expect(violations).toEqual([]) };
 }

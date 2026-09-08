@@ -15,7 +15,7 @@ describe("check-no-random-messaging-tmp", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("allows plugin test support while rejecting runtime tmpdir calls through the guard", async () => {
-    const root = tempDirs.make("openclaw-messaging-tmp-guard-");
+    const root = tempDirs.make("carapace-messaging-tmp-guard-");
     vi.spyOn(repoRoot, "resolveRepoRoot").mockReturnValue(root);
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
     const exitError = new Error("guard exit");
@@ -53,7 +53,7 @@ describe("check-no-random-messaging-tmp", () => {
         .toSorted(),
     ).toEqual(runtimePaths.map((relativePath) => `- ${relativePath}:2`).toSorted());
     expect(errorLog).toHaveBeenLastCalledWith(
-      "Use resolvePreferredOpenClawTmpDir() or plugin-sdk temp helpers instead of host tmp defaults.",
+      "Use resolvePreferredCarapaceTmpDir() or plugin-sdk temp helpers instead of host tmp defaults.",
     );
   });
 

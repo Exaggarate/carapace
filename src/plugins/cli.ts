@@ -5,7 +5,7 @@ import {
   createInvalidConfigError,
   formatInvalidConfigDetails,
 } from "../config/io.invalid-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   createPluginCliLogger,
   createPluginCliLoadSession,
@@ -30,7 +30,7 @@ const logger = createPluginCliLogger();
 
 export async function registerPluginCliCommands(
   program: Command,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
   env?: NodeJS.ProcessEnv,
   loaderOptions?: PluginCliLoaderOptions,
   options?: RegisterPluginCliOptions,
@@ -108,7 +108,7 @@ export async function registerPluginCliCommandsFromValidatedConfig(
   env?: NodeJS.ProcessEnv,
   loaderOptions?: PluginCliLoaderOptions,
   options?: RegisterPluginCliOptions,
-): Promise<OpenClawConfig> {
+): Promise<CarapaceConfig> {
   const session = options?.session ?? createPluginCliLoadSession(getPluginCache());
   try {
     const snapshot = await session.readConfig(() =>

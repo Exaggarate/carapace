@@ -40,7 +40,7 @@ describe("make_appcast cleanup", () => {
     ["2026.8.33", "extended-stable"],
     ["2026.8.2-alpha.1", "refused"],
   ])("generates the correct Sparkle channel for %s with system Bash", (version, channel) => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-appcast-"));
+    const root = mkdtempSync(path.join(tmpdir(), "carapace-appcast-"));
     try {
       const scripts = path.join(root, "scripts");
       mkdirSync(scripts);
@@ -50,7 +50,7 @@ describe("make_appcast cleanup", () => {
         "#!/bin/sh\necho '<p>Release notes</p>'\n",
         { mode: 0o755 },
       );
-      const zip = path.join(root, `OpenClaw-${version}.zip`);
+      const zip = path.join(root, `Carapace-${version}.zip`);
       writeFileSync(zip, "fixture archive");
       writeFileSync(path.join(root, "appcast.xml"), "previous feed");
       const generator = path.join(root, "generate-appcast");
@@ -98,7 +98,7 @@ fs.writeFileSync(path.join(args.at(-1), "appcast.xml"), '<rss><channel><item><sp
       expect(readFileSync(path.join(root, "appcast.xml"), "utf8")).toContain(
         `<sparkle:shortVersionString>${version}</sparkle:shortVersionString>`,
       );
-      expect(existsSync(path.join(root, `OpenClaw-${version}.html`))).toBe(false);
+      expect(existsSync(path.join(root, `Carapace-${version}.html`))).toBe(false);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

@@ -1,5 +1,5 @@
 // Owns managed plugin install, policy and uninstall mutations under the lifecycle lease.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { collectChangedPaths } from "../config/config-change-paths.js";
 import {
   assertConfigWriteAllowedInCurrentMode,

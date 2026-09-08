@@ -12,7 +12,7 @@ import type {
 import { resolveSharedMainAuthAgentDir } from "../agents/auth-profiles/shared-main-dir.js";
 import { ensureAuthProfileStoreWithoutExternalProfiles } from "../agents/auth-profiles/store-runtime.js";
 import type { AuthProfileCredential } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import {
   listPersonalAccountAuthChoices,
@@ -83,7 +83,7 @@ function resolveOwnedAccountProvider(owner: string, authProfileId: string): stri
 }
 
 function resolveLinkableAuthProfileProvider(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   owner: string,
   authProfileId: string,
 ): string | undefined {
@@ -100,7 +100,7 @@ function resolveLinkableAuthProfileProvider(
 
 /** One Gateway lifetime owns sign-in steps and authority; provider methods only stage credentials. */
 export function createModelAccountConnectService(options: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   onChanged?: () => void;
 }) {
   const operations = new Map<string, ConnectOperation>();
@@ -197,7 +197,7 @@ export function createModelAccountConnectService(options: {
       );
       if (!provider) {
         throw new ModelAccountConnectInputError(
-          `unknown auth profile "${authProfileId}"; sign the account in first with "openclaw models auth login --provider <id> --profile-id ${authProfileId}", then link it`,
+          `unknown auth profile "${authProfileId}"; sign the account in first with "carapace models auth login --provider <id> --profile-id ${authProfileId}", then link it`,
         );
       }
       return setLink(action, provider, authProfileId);

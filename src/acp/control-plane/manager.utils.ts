@@ -1,6 +1,6 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { SessionAcpMeta } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { toErrorObject } from "../../infra/errors.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 /** Shared ACP manager normalization, resolution, and error helpers. */
@@ -49,7 +49,7 @@ export function requireReadySessionMeta(resolution: AcpSessionResolution): Sessi
 
 /** Resolve ownership before main aliases can erase the encoded agent namespace. */
 export function resolveAcpSessionTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   sessionKey: string;
   agentId?: string;
 }): AcpSessionTarget {

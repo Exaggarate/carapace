@@ -1,5 +1,5 @@
 /** Runtime resolver for plugin-contributed embedding providers. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveConfiguredGenericEmbeddingProviderId } from "./embedding-provider-config.js";
 import {
   getRuntimeEmbeddingProviderAdapter,
@@ -18,7 +18,7 @@ function listRegisteredEmbeddingProviderAdapters(): EmbeddingProviderAdapter[] {
 }
 
 /** Lists embedding providers from registered adapters and plugin capabilities. */
-export function listEmbeddingProviders(cfg?: OpenClawConfig): EmbeddingProviderAdapter[] {
+export function listEmbeddingProviders(cfg?: CarapaceConfig): EmbeddingProviderAdapter[] {
   return listRuntimeEmbeddingProviderAdapters({
     key: "embeddingProviders",
     cfg,
@@ -28,12 +28,12 @@ export function listEmbeddingProviders(cfg?: OpenClawConfig): EmbeddingProviderA
 
 function resolveConfiguredEmbeddingProviderId(
   providerId: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): string | undefined {
   return resolveConfiguredGenericEmbeddingProviderId(providerId, cfg);
 }
 
-function resolveEmbeddingProviderLookupIds(id: string, cfg?: OpenClawConfig): string[] {
+function resolveEmbeddingProviderLookupIds(id: string, cfg?: CarapaceConfig): string[] {
   return resolveRuntimeEmbeddingProviderLookupIds({
     id,
     cfg,
@@ -44,7 +44,7 @@ function resolveEmbeddingProviderLookupIds(id: string, cfg?: OpenClawConfig): st
 /** Resolves one embedding provider adapter by id, including configured API aliases. */
 export function getEmbeddingProvider(
   id: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ): EmbeddingProviderAdapter | undefined {
   return getRuntimeEmbeddingProviderAdapter({
     key: "embeddingProviders",

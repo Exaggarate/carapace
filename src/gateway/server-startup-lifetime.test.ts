@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { getActiveSecretsRuntimeConfigSnapshot } from "../secrets/runtime-state.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { getFreePort } from "../test-utils/ports.js";
 import { createGatewayKernel } from "./server-kernel.js";
 import type { GatewayServer } from "./server-public.js";
@@ -36,19 +36,19 @@ vi.mock("node:perf_hooks", async (importOriginal) => {
 });
 
 function createStartupTestState(label: string) {
-  return createOpenClawTestState({
+  return createCarapaceTestState({
     label,
     layout: "home",
     env: {
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+      CARAPACE_GATEWAY_PASSWORD: undefined,
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_TEST_MINIMAL_GATEWAY: "1",
       VITEST: "1",
     },
   });
@@ -58,7 +58,7 @@ describe("Gateway startup lifetime", () => {
   it("closes startup tracing when invalid config prevents bootstrap from returning", async () => {
     startupTraceEventLoopDelay.instances.length = 0;
     const state = await createStartupTestState("gateway-invalid-config-startup-trace");
-    state.envVars.OPENCLAW_GATEWAY_STARTUP_TRACE = "1";
+    state.envVars.CARAPACE_GATEWAY_STARTUP_TRACE = "1";
     await state.writeConfig({ gateway: { mode: 42 } });
     state.applyEnv();
     try {
@@ -73,7 +73,7 @@ describe("Gateway startup lifetime", () => {
     startupTraceEventLoopDelay.instances.length = 0;
     const port = await getFreePort();
     const state = await createStartupTestState("gateway-tls-startup-trace");
-    state.envVars.OPENCLAW_GATEWAY_STARTUP_TRACE = "1";
+    state.envVars.CARAPACE_GATEWAY_STARTUP_TRACE = "1";
     const token = "gateway-tls-startup-trace-token";
     await state.writeConfig({
       gateway: {
@@ -116,7 +116,7 @@ describe("Gateway startup lifetime", () => {
       });
     });
     const state = await createStartupTestState("gateway-public-startup-trace");
-    state.envVars.OPENCLAW_GATEWAY_STARTUP_TRACE = "1";
+    state.envVars.CARAPACE_GATEWAY_STARTUP_TRACE = "1";
     const token = "gateway-public-startup-trace-token";
     await state.writeConfig({
       gateway: { auth: { mode: "token", token }, controlUi: { enabled: false }, port },

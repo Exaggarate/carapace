@@ -1,4 +1,4 @@
-// Plugin Npm Release script supports OpenClaw repository automation.
+// Plugin Npm Release script supports Carapace repository automation.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -24,7 +24,7 @@ import { collectReleaseVersionFloorErrors } from "./release-version.mjs";
 
 export {
   collectPublishablePluginPackageErrors,
-  OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+  CARAPACE_PLUGIN_NPM_REPOSITORY_URL,
 } from "./plugin-publication-collector.ts";
 export type { PublishablePluginPackage } from "./plugin-publication-collector.ts";
 
@@ -390,7 +390,7 @@ function isNpmViewTimeoutError(error: unknown): error is Error & { code: "ETIMED
 }
 
 function runNpmView(args: string[]): string {
-  const tempDir = mkdtempSync(join(tmpdir(), "openclaw-plugin-npm-view-"));
+  const tempDir = mkdtempSync(join(tmpdir(), "carapace-plugin-npm-view-"));
   const userconfigPath = join(tempDir, "npmrc");
   writeFileSync(userconfigPath, "");
 

@@ -373,7 +373,7 @@ describe("runReplyAgent runtime config", () => {
           params.currentProfileId === "profile-ada" ? attribution : undefined,
       );
       runSessionCompactionIfNeededMock.mockResolvedValue(undefined);
-      await withTestDir({ prefix: "openclaw-coauthor-input-" }, async (tempDir) => {
+      await withTestDir({ prefix: "carapace-coauthor-input-" }, async (tempDir) => {
         const storePath = join(tempDir, "sessions.json");
         const sessionKey = "agent:main:chat:attribution";
         const sessionEntry: SessionEntry = { sessionId: "session-1", updatedAt: 1 };
@@ -467,7 +467,7 @@ describe("runReplyAgent runtime config", () => {
       }),
     });
     try {
-      await withTestDir({ prefix: "openclaw-direct-runtime-" }, async (tempDir) => {
+      await withTestDir({ prefix: "carapace-direct-runtime-" }, async (tempDir) => {
         const { replyParams, followupRun } = createDirectRuntimeReplyParams({
           shouldFollowup: false,
           isActive: false,

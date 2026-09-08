@@ -1,9 +1,9 @@
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
+import { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
 // Zalouser plugin module implements tool behavior.
-import { stringEnum } from "openclaw/plugin-sdk/channel-actions";
-import type { AnyAgentTool, OpenClawPluginToolContext } from "openclaw/plugin-sdk/core";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { jsonResult as json, type AgentToolResult } from "openclaw/plugin-sdk/tool-results";
+import { stringEnum } from "carapace/plugin-sdk/channel-actions";
+import type { AnyAgentTool, CarapacePluginToolContext } from "carapace/plugin-sdk/core";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { jsonResult as json, type AgentToolResult } from "carapace/plugin-sdk/tool-results";
 import { Type } from "typebox";
 import { resolveZalouserAccountSync } from "./accounts.js";
 import { sendImageZalouser, sendLinkZalouser, sendMessageZalouser } from "./send.js";
@@ -43,7 +43,7 @@ type ToolParams = {
 };
 
 type ZalouserToolContext = Pick<
-  OpenClawPluginToolContext,
+  CarapacePluginToolContext,
   "deliveryContext" | "config" | "runtimeConfig" | "getRuntimeConfig"
 >;
 

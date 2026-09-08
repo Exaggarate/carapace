@@ -1,8 +1,8 @@
-import { calculateCost } from "openclaw/plugin-sdk/llm";
+import { calculateCost } from "carapace/plugin-sdk/llm";
 import type {
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildOpenAIProvider } from "./openai-provider.js";
 
@@ -101,7 +101,7 @@ describe("OpenAI dynamic model capabilities", () => {
       const model = buildOpenAIProvider().resolveDynamicModel?.({
         provider: "openai",
         modelId: id,
-        agentRuntimeId: "openclaw",
+        agentRuntimeId: "carapace",
         modelRegistry: modelRegistry(),
       });
 

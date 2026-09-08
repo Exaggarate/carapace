@@ -249,7 +249,7 @@ export function validateReleasePublishParentRun({
     repository: normalizedRepository,
     runAttempt: Number(runAttempt),
     runId: Number(runId),
-    workflowPath: ".github/workflows/openclaw-release-publish.yml",
+    workflowPath: ".github/workflows/carapace-release-publish.yml",
   };
   const actual = {
     event: run?.event,

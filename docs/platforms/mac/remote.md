@@ -1,12 +1,12 @@
 ---
-summary: "macOS app flow for controlling a remote OpenClaw gateway"
+summary: "macOS app flow for controlling a remote Carapace gateway"
 read_when:
   - Setting up or debugging remote mac control
   - Signing in to a Gateway from the Mac app or opening it from a website
 title: "Remote control"
 ---
 
-This flow lets the macOS app act as a full remote control for an OpenClaw gateway running on another host (desktop/server). The app connects directly to trusted LAN/Tailnet gateway URLs, or manages an SSH tunnel when the remote gateway is loopback-only. Health checks, Voice Wake forwarding, and Web Chat reuse the same remote configuration from the native **Connection** window.
+This flow lets the macOS app act as a full remote control for an Carapace gateway running on another host (desktop/server). The app connects directly to trusted LAN/Tailnet gateway URLs, or manages an SSH tunnel when the remote gateway is loopback-only. Health checks, Voice Wake forwarding, and Web Chat reuse the same remote configuration from the native **Connection** window.
 
 ## Connect with your browser
 
@@ -23,7 +23,7 @@ Mac node capabilities and Talk Mode.
 3. Click **Connect**. For a Gateway protected by Cloudflare Access, the app
    opens your default browser. Continue with the account you use for that
    Gateway and complete any sign-in prompts there.
-4. Return to OpenClaw. The saved Gateway's dashboard opens; check the account
+4. Return to Carapace. The saved Gateway's dashboard opens; check the account
    name in its sidebar footer. You can open more windows from
    **File → New Gateway Window…** or the **Gateways** menu. The app reopens your selected Gateway after
    restart, including when a separate primary Gateway supplies Mac capabilities.
@@ -61,13 +61,13 @@ session controls to revoke account access more broadly.
 
 In the browser dashboard, open **Get the apps** from the account menu, then
 choose **Open in Mac app** on the macOS card. The link uses the connected
-Gateway's HTTPS address. OpenClaw shows **Add Gateway** with that address filled
+Gateway's HTTPS address. Carapace shows **Add Gateway** with that address filled
 in; review it and click **Connect** to complete the same sign-in flow.
 
-Websites can launch this editor with the registered `openclaw` URL scheme:
+Websites can launch this editor with the registered `carapace` URL scheme:
 
 ```text
-openclaw://gateway/add?url=https%3A%2F%2Fgateway.example.com%2Foperator%2F&name=Research
+carapace://gateway/add?url=https%3A%2F%2Fgateway.example.com%2Foperator%2F&name=Research
 ```
 
 `url` is required and contains the percent-encoded full HTTPS Gateway base URL,
@@ -76,14 +76,14 @@ label. The link carries connection intent only: it accepts no token, password,
 URL user information, query, or fragment in the Gateway address, and it does
 not authorize access. Credentials are obtained separately during sign-in.
 
-The existing `openclaw://gateway?host=…` setup route retains its primary-Gateway
-setup behavior. Use `openclaw://gateway/add` to add a saved Gateway without replacing
+The existing `carapace://gateway?host=…` setup route retains its primary-Gateway
+setup behavior. Use `carapace://gateway/add` to add a saved Gateway without replacing
 the primary connection.
 
 ## Modes
 
 - **Local (this Mac)**: everything runs on the laptop; no SSH involved.
-- **Remote over SSH (default)**: OpenClaw commands run on the remote host. The app opens an SSH connection with `-o BatchMode`, your chosen identity/key, and a local port-forward.
+- **Remote over SSH (default)**: Carapace commands run on the remote host. The app opens an SSH connection with `-o BatchMode`, your chosen identity/key, and a local port-forward.
 - **Remote direct (ws/wss)**: no SSH tunnel; the app connects to the gateway URL directly (LAN, Tailscale, Tailscale Serve, or a public HTTPS reverse proxy).
 
 ## Remote transports
@@ -93,7 +93,7 @@ the primary connection.
 
 The app disables SSH connection multiplexing and post-authentication backgrounding for its own SSH processes so it can monitor and restart the exact process, even if the selected alias enables `ControlMaster` or `ForkAfterAuthentication`.
 
-SSH host-key verification is strict by default because gateway credentials travel through this tunnel. To opt into a managed SSH alias's own trust behavior, set `--ssh-host-key-policy openssh` via `openclaw-mac primary set`, or set `gateway.remote.sshHostKeyPolicy` to `"openssh"` directly. Review the alias and any matching `Host *` or system configuration before opting in. Changing the SSH target (in the app or via `openclaw-mac`) resets the policy back to `strict` unless you explicitly opt in again for the new target.
+SSH host-key verification is strict by default because gateway credentials travel through this tunnel. To opt into a managed SSH alias's own trust behavior, set `--ssh-host-key-policy openssh` via `carapace-mac primary set`, or set `gateway.remote.sshHostKeyPolicy` to `"openssh"` directly. Review the alias and any matching `Host *` or system configuration before opting in. Changing the SSH target (in the app or via `carapace-mac`) resets the policy back to `strict` unless you explicitly opt in again for the new target.
 
 In SSH tunnel mode, discovered LAN/tailnet hostnames save as `gateway.remote.sshTarget`. The app keeps `gateway.remote.url` on the local tunnel endpoint (for example `ws://127.0.0.1:18789`) so CLI, Web Chat, and the local node-host service all use the same loopback transport. When discovery returns both raw Tailnet IPs and stable hostnames, the app prefers Tailscale MagicDNS or LAN names so connections survive address changes better. If the local tunnel port differs from the remote gateway port, set `gateway.remote.remotePort` to the port on the remote host.
 
@@ -101,29 +101,29 @@ The Mac app's node combines native capabilities with system, browser, plugin, sk
 
 ## Prereqs on the remote host
 
-1. Install Node + pnpm, then build/install the OpenClaw CLI from its checkout (`pnpm install && pnpm build && pnpm add --global "openclaw@link:$PWD"`).
-2. Ensure `openclaw` is on PATH for non-interactive shells (symlink into `/usr/local/bin` or `/opt/homebrew/bin` if needed).
+1. Install Node + pnpm, then build/install the Carapace CLI from its checkout (`pnpm install && pnpm build && pnpm add --global "carapace@link:$PWD"`).
+2. Ensure `carapace` is on PATH for non-interactive shells (symlink into `/usr/local/bin` or `/opt/homebrew/bin` if needed).
 3. For SSH transport: set up key-based SSH auth. Tailscale IPs are recommended for stable reachability off-LAN.
 
 ## macOS app setup
 
-Use the bundled `openclaw-mac` command to inspect or change the running app's
+Use the bundled `carapace-mac` command to inspect or change the running app's
 connections from Terminal or over SSH. The app's CLI installer links it beside
-its profile-managed `openclaw` command. You can also call it directly at
-`/Applications/OpenClaw.app/Contents/MacOS/openclaw-mac`.
+its profile-managed `carapace` command. You can also call it directly at
+`/Applications/Carapace.app/Contents/MacOS/carapace-mac`.
 
 Inspect the primary connection, saved Gateways, and app version:
 
 ```bash
-openclaw-mac status --json
-openclaw-mac primary show
-openclaw-mac gateway list
+carapace-mac status --json
+carapace-mac primary show
+carapace-mac gateway list
 ```
 
 Configure the primary Gateway over SSH:
 
 ```bash
-openclaw-mac primary set \
+carapace-mac primary set \
   --ssh-target user@gateway-host \
   --local-port 18789 \
   --remote-port 18789 \
@@ -133,7 +133,7 @@ openclaw-mac primary set \
 Or connect directly to a trusted LAN or Tailnet endpoint:
 
 ```bash
-openclaw-mac primary set \
+carapace-mac primary set \
   --direct-url ws://192.168.0.202:18789 \
   --token-file /path/to/gateway-token
 ```
@@ -152,7 +152,7 @@ Saved Gateways remain separate from this primary connection.
 For a Gateway protected by Cloudflare Access:
 
 ```bash
-openclaw-mac gateway add Research \
+carapace-mac gateway add Research \
   --url https://gateway.example.com/operator/ \
   --browser
 ```
@@ -171,8 +171,8 @@ Gateways tab applies, including secure `wss://` for public hosts.
 Token/password adds wait for a connection attempt within the request timeout; if it fails, the profile remains saved and the command exits with code `0`, reporting `disconnected` with a sanitized error.
 
 ```bash
-openclaw-mac gateway reconnect Research
-openclaw-mac gateway remove Research --yes
+carapace-mac gateway reconnect Research
+carapace-mac gateway remove Research --yes
 ```
 
 Reconnect renews browser authentication for browser profiles and reconnects
@@ -190,23 +190,23 @@ read once and trailing newlines are removed. Keep credential files private.
 The new commands reject `--token` and `--password` to keep secrets out of
 process arguments. Status and saved-Gateway output never contain credentials.
 
-Use `--profile <name>` or `OPENCLAW_PROFILE` to select the app profile. For
+Use `--profile <name>` or `CARAPACE_PROFILE` to select the app profile. For
 example:
 
 ```bash
-openclaw-mac --profile research status --json
-openclaw-mac --no-launch status --json
+carapace-mac --profile research status --json
+carapace-mac --no-launch status --json
 ```
 
 The CLI starts its containing app bundle in the background when needed,
-falling back to `/Applications/OpenClaw.app`. Use `--no-launch` to require an
+falling back to `/Applications/Carapace.app`. Use `--no-launch` to require an
 already-running app. `--timeout <ms>` bounds waiting for the app and operation.
 The default is 15 seconds, or 310 seconds for `gateway add` and
 `gateway reconnect` to allow browser sign-in to finish. Global flags can appear
 before or after the command; `--profile` takes precedence over the environment.
-The control socket follows the app profile: `~/.openclaw/mac-control.sock`
-for the default profile and `~/.openclaw-<name>/mac-control.sock` for a named
-profile. `OPENCLAW_STATE_DIR` and `OPENCLAW_CONFIG_PATH` do not relocate it.
+The control socket follows the app profile: `~/.carapace/mac-control.sock`
+for the default profile and `~/.carapace-<name>/mac-control.sock` for a named
+profile. `CARAPACE_STATE_DIR` and `CARAPACE_CONFIG_PATH` do not relocate it.
 
 With `--json`, successful commands print the requested result to stdout.
 Failures print `{ "ok": false, "error": { "code": "…", "message": "…" } }`
@@ -221,15 +221,15 @@ saved Gateways or restart a running app's connection. Prefer `primary set`
 when the app is running.
 
 ```bash
-openclaw-mac configure-remote \
+carapace-mac configure-remote \
   --ssh-target user@gateway-host \
   --local-port 18789 \
   --remote-port 18789
 ```
 
 The legacy `connect`, `wizard`, and `configure-remote` commands resolve config
-in this order: `OPENCLAW_CONFIG_PATH`, then
-`$OPENCLAW_STATE_DIR/openclaw.json`, then `~/.openclaw/openclaw.json`.
+in this order: `CARAPACE_CONFIG_PATH`, then
+`$CARAPACE_STATE_DIR/carapace.json`, then `~/.carapace/carapace.json`.
 `configure-remote` supports SSH and `--direct-url` transports, marks onboarding
 complete, and leaves the app to use the selected transport on its next start.
 Its ports default to `18789`. Additional options include `--identity`,
@@ -244,13 +244,13 @@ reference.
 To configure from the UI instead:
 
 1. Choose **Connection…** from the menu bar and select the **Connection** tab.
-2. Under **OpenClaw runs**, pick **Remote** and set:
+2. Under **Carapace runs**, pick **Remote** and set:
    - **Transport**: **SSH tunnel** or **Direct (ws/wss)**.
    - **SSH target**: `user@host` (optional `:port`). If the gateway is on the same LAN and advertises Bonjour, pick it from the discovered list to auto-fill this field.
    - **Gateway URL** (Direct only): `wss://gateway.example.ts.net` (or `ws://...` for local/LAN).
    - **Identity file** (advanced): path to your key.
    - **Project root** (advanced): remote checkout path used for commands.
-   - **CLI path** (advanced): optional path to a runnable `openclaw` entrypoint/binary (auto-filled when advertised).
+   - **CLI path** (advanced): optional path to a runnable `carapace` entrypoint/binary (auto-filled when advertised).
 3. Hit **Test remote**. The app checks SSH reachability when applicable, then authenticates and calls the Gateway health RPC. Connection, authentication, and pairing errors appear here; this check does not require a CLI on this Mac.
 4. Health checks and Web Chat now run through the selected transport automatically.
 
@@ -275,7 +275,7 @@ To configure from the UI instead:
 
 ## WhatsApp login flow (remote)
 
-- Run `openclaw channels login --channel whatsapp --verbose` **on the remote host**. Scan the QR with WhatsApp on your phone.
+- Run `carapace channels login --channel whatsapp --verbose` **on the remote host**. Scan the QR with WhatsApp on your phone.
 - Re-run login on that host if auth expires. The health check surfaces link problems.
 
 ## Troubleshooting
@@ -284,8 +284,8 @@ The Dashboard error page shows the attempted address without embedded credential
 
 | Symptom                                          | Cause / fix                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exit 127` / not found                           | `openclaw` is not on PATH for non-login shells. Add it to `/etc/paths`, your shell rc, or symlink into `/usr/local/bin`/`/opt/homebrew/bin`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Health probe failed                              | Check SSH reachability, PATH, and that Baileys (WhatsApp) is logged in (`openclaw status --json`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `exit 127` / not found                           | `carapace` is not on PATH for non-login shells. Add it to `/etc/paths`, your shell rc, or symlink into `/usr/local/bin`/`/opt/homebrew/bin`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Health probe failed                              | Check SSH reachability, PATH, and that Baileys (WhatsApp) is logged in (`carapace status --json`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Web Chat stuck                                   | Confirm the gateway is running on the remote host and the forwarded port matches the gateway WS port; the UI requires a healthy WS connection.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Node IP shows `127.0.0.1`                        | Expected with the SSH tunnel. Switch **Transport** to **Direct (ws/wss)** if you want the gateway to see the real client IP.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Dashboard works but Mac capabilities are offline | The operator/control connection is healthy, but the companion node connection is not connected or is missing its command surface. Open the menu bar device section and check whether the Mac is `paired · disconnected`. Direct `wss://` operator and node connections use the same configured or stored certificate policy. For trusted `wss://*.ts.net` Tailscale Serve endpoints, stale stored leaf pins are replaced after certificate rotation and retried automatically. Configured pins never rotate automatically; update `gateway.remote.tlsFingerprint` after reviewing the new certificate, or switch to **Remote over SSH**. |
@@ -293,10 +293,10 @@ The Dashboard error page shows the attempted address without embedded credential
 
 ## Notification sounds
 
-Pick sounds per notification from scripts with `openclaw nodes notify`, for example:
+Pick sounds per notification from scripts with `carapace nodes notify`, for example:
 
 ```bash
-openclaw nodes notify --node <id> --title "Ping" --body "Remote gateway ready" --sound Glass
+carapace nodes notify --node <id> --title "Ping" --body "Remote gateway ready" --sound Glass
 ```
 
 There is no global default-sound toggle in the app; callers choose a sound (or none) per request.

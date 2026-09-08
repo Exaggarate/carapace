@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { resolveStateDir } from "../config/paths.js";
 import {
   executeSqliteQuerySync,
@@ -10,11 +10,11 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { readConfigMachineStateWithMetadata } from "../state/config-machine-state.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../state/carapace-state-db.js";
 import {
   normalizeNodeHostCloudflareAccessConfig,
   type NodeHostCloudflareAccessConfig,
@@ -26,7 +26,7 @@ export type NodeHostGatewayConfig = {
   port?: number;
   tls?: boolean;
   tlsFingerprint?: string;
-  /** Gateway WebSocket context path (e.g. "/openclaw-gw"). */
+  /** Gateway WebSocket context path (e.g. "/carapace-gw"). */
   contextPath?: string;
   /** Cloudflare Access service-token inputs bound to this exact Gateway origin. */
   cloudflareAccess?: NodeHostCloudflareAccessConfig;
@@ -45,9 +45,9 @@ export const NODE_HOST_CONFIG_KEY = "nodeHost.config";
 export const LEGACY_NODE_HOST_CONFIG_FILE = "node.json";
 export const LEGACY_NODE_HOST_CONFIG_CLAIM_SUFFIX = ".doctor-importing";
 
-type NodeHostConfigDatabase = Pick<OpenClawStateKyselyDatabase, "config_machine_state">;
+type NodeHostConfigDatabase = Pick<CarapaceStateKyselyDatabase, "config_machine_state">;
 
-function databaseOptions(env: NodeJS.ProcessEnv): OpenClawStateDatabaseOptions {
+function databaseOptions(env: NodeJS.ProcessEnv): CarapaceStateDatabaseOptions {
   return { env };
 }
 
@@ -81,7 +81,7 @@ function assertNodeHostLegacyStateMigrated(env: NodeJS.ProcessEnv = process.env)
     return;
   }
   throw new Error(
-    `retired node-host state remains at ${sourcePath}; stop the node host and run \`openclaw doctor --fix\``,
+    `retired node-host state remains at ${sourcePath}; stop the node host and run \`carapace doctor --fix\``,
   );
 }
 
@@ -236,7 +236,7 @@ export async function configureNodeHost(params: {
     throw new Error("invalid node-host updatedAtMs: expected a non-negative integer");
   }
 
-  const config = runOpenClawStateWriteTransaction(({ db }) => {
+  const config = runCarapaceStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<NodeHostConfigDatabase>(db);
     const stored = executeSqliteQueryTakeFirstSync(
       db,

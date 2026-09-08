@@ -1,13 +1,13 @@
-import { resolveGatewayPort } from "openclaw/plugin-sdk/gateway-config-runtime";
+import { resolveGatewayPort } from "carapace/plugin-sdk/gateway-config-runtime";
 // Mattermost plugin module implements monitor slash behavior.
-import { isLoopbackHost } from "openclaw/plugin-sdk/gateway-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/gateway-runtime";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import {
   fetchMattermostUserTeams,
   normalizeMattermostBaseUrl,
   type MattermostClient,
 } from "./client.js";
-import { listSkillCommandsForAgents, type OpenClawConfig, type RuntimeEnv } from "./runtime-api.js";
+import { listSkillCommandsForAgents, type CarapaceConfig, type RuntimeEnv } from "./runtime-api.js";
 import {
   DEFAULT_COMMAND_SPECS,
   isSlashCommandsEnabled,
@@ -21,7 +21,7 @@ import {
 import { activateSlashCommands } from "./slash-state.js";
 
 function buildSlashCommands(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   nativeSkills: boolean;
 }): MattermostCommandSpec[] {
@@ -130,7 +130,7 @@ async function registerSlashCommandsAcrossTeams(params: {
 
 export async function registerMattermostMonitorSlashCommands(params: {
   client: MattermostClient;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: RuntimeEnv;
   account: ResolvedMattermostAccount;
   baseUrl: string;

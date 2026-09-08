@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { transferMcpCodeModeGuestResult } from "./mcp-content.js";
 import type { AgentToolResult } from "./runtime/index.js";
 import { copyInternalToolResultState } from "./runtime/internal-hooks.js";

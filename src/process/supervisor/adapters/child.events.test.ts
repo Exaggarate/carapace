@@ -6,7 +6,7 @@ const { spawnWithFallback } = vi.hoisted(() => ({ spawnWithFallback: vi.fn() }))
 vi.mock("../../spawn-utils.js", () => ({ spawnWithFallback }));
 
 beforeEach(() => {
-  vi.stubEnv("OPENCLAW_SERVICE_MARKER", "");
+  vi.stubEnv("CARAPACE_SERVICE_MARKER", "");
   spawnWithFallback.mockReset();
 });
 afterEach(() => vi.unstubAllEnvs());

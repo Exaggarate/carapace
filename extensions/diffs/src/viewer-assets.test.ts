@@ -32,7 +32,7 @@ async function loadViewerWithRuntimeAt(runtimePath: string) {
     throw missingFile(candidate);
   });
   vi.spyOn(fs, "readFile").mockResolvedValue(
-    Buffer.from("window.openclawDiffsReady = true;\n") as never,
+    Buffer.from("window.carapaceDiffsReady = true;\n") as never,
   );
   const { getServedViewerAsset } = await import("./viewer-assets.js");
   const loader = await getServedViewerAsset(VIEWER_LOADER_PATH);
@@ -50,7 +50,7 @@ async function loadLanguagePackViewerWithRuntimeAt(runtimePath: string) {
     throw missingFile(candidate);
   });
   vi.spyOn(fs, "readFile").mockResolvedValue(
-    Buffer.from("window.openclawDiffsReady = true;\n") as never,
+    Buffer.from("window.carapaceDiffsReady = true;\n") as never,
   );
   const { getServedLanguagePackViewerAsset } = await import("./viewer-assets.js");
   const loader = await getServedLanguagePackViewerAsset(LANGUAGE_PACK_VIEWER_LOADER_PATH);

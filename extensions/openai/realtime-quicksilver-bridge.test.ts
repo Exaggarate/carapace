@@ -7,8 +7,8 @@ const { captureWsEventMock, webSocketConstructorMock } = vi.hoisted(() => ({
   webSocketConstructorMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/proxy-capture", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/proxy-capture")>();
+vi.mock("carapace/plugin-sdk/proxy-capture", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/proxy-capture")>();
   return { ...actual, captureWsEvent: captureWsEventMock };
 });
 
@@ -450,7 +450,7 @@ describe("OpenAIQuicksilverVoiceBridge", () => {
     expect(harness.onToolCall).toHaveBeenCalledWith({
       itemId: "delegation-1",
       callId: "delegation-1",
-      name: "openclaw_agent_consult",
+      name: "carapace_agent_consult",
       args: { question: "check the repository" },
     });
 

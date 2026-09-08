@@ -4,17 +4,17 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../test-utils/carapace-test-state.js";
 import type { GatewayActiveWorkInspectors } from "./gateway-active-work.js";
 import { writeUpdateInstallReceiptRowSync } from "./restart-sentinel-store.js";
 import { readRestartSentinel, writeRestartSentinel } from "./restart-sentinel.js";
@@ -58,10 +58,10 @@ const {
   >(async () => ({
     status: "started" as const,
     pid: 12345,
-    command: "openclaw update --yes --channel beta --timeout 2700",
-    logPath: "/tmp/openclaw-handoff.log",
+    command: "carapace update --yes --channel beta --timeout 2700",
+    logPath: "/tmp/carapace-handoff.log",
     handoffId: "auto-handoff-id",
-    installRoot: "/opt/openclaw",
+    installRoot: "/opt/carapace",
   })),
   transferManagedServiceUpdateHandoffMock: vi.fn<
     typeof import("./update-managed-service-handoff.js").transferManagedServiceUpdateHandoff
@@ -82,11 +82,11 @@ vi.mock("../model-catalog/remote-refresh.js", async () => {
   return { ...actual, refreshRemoteModelCatalog: refreshRemoteModelCatalogMock };
 });
 
-vi.mock("./openclaw-root.js", async () => {
-  const actual = await vi.importActual<typeof import("./openclaw-root.js")>("./openclaw-root.js");
+vi.mock("./carapace-root.js", async () => {
+  const actual = await vi.importActual<typeof import("./carapace-root.js")>("./carapace-root.js");
   return {
     ...actual,
-    resolveOpenClawPackageRoot: vi.fn(),
+    resolveCarapacePackageRoot: vi.fn(),
   };
 });
 
@@ -173,13 +173,13 @@ type PersistedUpdateCheckState = {
 
 describe("update-startup", () => {
   let tempDir: string;
-  let testState: OpenClawTestState;
+  let testState: CarapaceTestState;
   let triageResult: Extract<
     Awaited<ReturnType<typeof runUpdateFailureTriageMock>>,
     { status: "completed" }
   >;
 
-  let resolveOpenClawPackageRoot: (typeof import("./openclaw-root.js"))["resolveOpenClawPackageRoot"];
+  let resolveCarapacePackageRoot: (typeof import("./carapace-root.js"))["resolveCarapacePackageRoot"];
   let checkUpdateStatus: (typeof import("./update-check.js"))["checkUpdateStatus"];
   let resolveNpmChannelTag: (typeof import("./update-check.js"))["resolveNpmChannelTag"];
   let runCommandWithTimeout: (typeof import("../process/exec.js"))["runCommandWithTimeout"];
@@ -197,7 +197,7 @@ describe("update-startup", () => {
     Parameters<typeof createGatewayUpdateCheck>[0],
     "getConfig"
   > & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   };
 
   function createTestUpdateCheck({ cfg, ...params }: UpdateCheckFixtureParams) {
@@ -216,7 +216,7 @@ describe("update-startup", () => {
     cfg,
     ...params
   }: Omit<Parameters<typeof runGatewayUpdateCheckOwner>[0], "getConfig"> & {
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
   }) {
     return runGatewayUpdateCheckOwner({ ...params, getConfig: () => cfg });
   }
@@ -233,19 +233,19 @@ describe("update-startup", () => {
     versionMock.value = "1.0.0";
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-17T10:00:00Z"));
-    testState = await createOpenClawTestState({
+    testState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-update-check-suite-",
+      prefix: "carapace-update-check-suite-",
       env: {
-        OPENCLAW_PROFILE: undefined,
-        OPENCLAW_NO_AUTO_UPDATE: undefined,
-        OPENCLAW_SUPERVISOR_MODE: undefined,
-        OPENCLAW_SERVICE_KIND: undefined,
-        OPENCLAW_SERVICE_MARKER: undefined,
-        OPENCLAW_GATEWAY_SERVICE_PID: undefined,
-        OPENCLAW_LAUNCHD_LABEL: undefined,
-        OPENCLAW_SYSTEMD_UNIT: undefined,
-        OPENCLAW_WINDOWS_TASK_NAME: undefined,
+        CARAPACE_PROFILE: undefined,
+        CARAPACE_NO_AUTO_UPDATE: undefined,
+        CARAPACE_SUPERVISOR_MODE: undefined,
+        CARAPACE_SERVICE_KIND: undefined,
+        CARAPACE_SERVICE_MARKER: undefined,
+        CARAPACE_GATEWAY_SERVICE_PID: undefined,
+        CARAPACE_LAUNCHD_LABEL: undefined,
+        CARAPACE_SYSTEMD_UNIT: undefined,
+        CARAPACE_WINDOWS_TASK_NAME: undefined,
         INVOCATION_ID: undefined,
         NODE_ENV: "test",
         VITEST: undefined,
@@ -261,7 +261,7 @@ describe("update-startup", () => {
 
     // Perf: load mocked modules once (after timers/env are set up).
     if (!loaded) {
-      ({ resolveOpenClawPackageRoot } = await import("./openclaw-root.js"));
+      ({ resolveCarapacePackageRoot } = await import("./carapace-root.js"));
       ({ checkUpdateStatus, resolveNpmChannelTag } = await import("./update-check.js"));
       ({ runCommandWithTimeout } = await import("../process/exec.js"));
       ({
@@ -275,7 +275,7 @@ describe("update-startup", () => {
       } = await import("./update-startup.js"));
       loaded = true;
     }
-    vi.mocked(resolveOpenClawPackageRoot).mockClear();
+    vi.mocked(resolveCarapacePackageRoot).mockClear();
     vi.mocked(checkUpdateStatus).mockClear();
     checkTelemetryUpdateMock.mockReset().mockResolvedValue(null);
     vi.mocked(resolveNpmChannelTag).mockClear();
@@ -302,10 +302,10 @@ describe("update-startup", () => {
     startManagedServiceUpdateHandoffMock.mockResolvedValue({
       status: "started",
       pid: 12345,
-      command: "openclaw update --yes --channel beta --timeout 2700",
-      logPath: "/tmp/openclaw-handoff.log",
+      command: "carapace update --yes --channel beta --timeout 2700",
+      logPath: "/tmp/carapace-handoff.log",
       handoffId: "auto-handoff-id",
-      installRoot: "/opt/openclaw",
+      installRoot: "/opt/carapace",
     });
     resetUpdateAvailableStateForTest();
     createTestUpdateCheck({ cfg: {}, log: { info: vi.fn() }, isNixMode: false });
@@ -316,7 +316,7 @@ describe("update-startup", () => {
     updateChecks.clear();
     resetUpdateAvailableStateForTest();
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     await testState.cleanup();
   });
 
@@ -329,7 +329,7 @@ describe("update-startup", () => {
   });
 
   it("retries install identity initialization after a failed probe", async () => {
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue("/opt/carapace");
     vi.mocked(checkUpdateStatus).mockRejectedValueOnce(new Error("probe failed"));
 
     await expect(getUpdateEffectiveChannel()).rejects.toThrow("probe failed");
@@ -341,7 +341,7 @@ describe("update-startup", () => {
 
   it("coalesces configless Git identity before the schedule cache is ready", async () => {
     let releaseStatus: ((status: UpdateCheckResult) => void) | undefined;
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue("/opt/carapace");
     vi.mocked(checkUpdateStatus).mockImplementationOnce(
       () =>
         new Promise<UpdateCheckResult>((resolve) => {
@@ -354,11 +354,11 @@ describe("update-startup", () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(checkUpdateStatus).toHaveBeenCalledTimes(1);
     releaseStatus?.({
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       installKind: "git",
       packageManager: "pnpm",
       git: {
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         sha: "current-sha",
         tag: null,
         branch: "main",
@@ -383,8 +383,8 @@ describe("update-startup", () => {
     mockNpmChannelTag(tag, version);
   }
 
-  function mockPackageInstallStatus(root = "/opt/openclaw") {
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue(root);
+  function mockPackageInstallStatus(root = "/opt/carapace") {
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue(root);
     vi.mocked(checkUpdateStatus).mockResolvedValue({
       root,
       installKind: "package",
@@ -412,13 +412,13 @@ describe("update-startup", () => {
     fetchOk?: boolean;
   }) {
     const upstream = params?.upstream === undefined ? "origin/main" : params.upstream;
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue("/opt/carapace");
     const status = {
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       installKind: "git",
       packageManager: "pnpm",
       git: {
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         sha: params?.currentSha ?? "current-sha",
         tag: null,
         branch: params?.branch === undefined ? "main" : params.branch,
@@ -617,7 +617,7 @@ describe("update-startup", () => {
       { surface: "gateway" },
     );
     expect(log.info).toHaveBeenCalledWith(
-      `update available (latest): v2.0.0 (current v1.0.0). Run: ${formatCliCommand("openclaw update")}`,
+      `update available (latest): v2.0.0 (current v1.0.0). Run: ${formatCliCommand("carapace update")}`,
     );
     expect(parsed?.lastNotifiedVersion).toBe("2.0.0");
     expect(parsed?.lastAvailableVersion).toBe("2.0.0");
@@ -656,7 +656,7 @@ describe("update-startup", () => {
       mockPackageUpdateStatus(channel, version);
       checkTelemetryUpdateMock.mockResolvedValue({ version: "3.0.0" });
       if (external) {
-        process.env.OPENCLAW_SUPERVISOR_MODE = "external";
+        process.env.CARAPACE_SUPERVISOR_MODE = "external";
       }
 
       await runGatewayUpdateCheck({
@@ -1019,7 +1019,7 @@ describe("update-startup", () => {
     expect(checkTelemetryUpdateMock).toHaveBeenCalledTimes(2);
     expect(log.info).toHaveBeenCalledTimes(1);
     expect(log.info).toHaveBeenCalledWith(
-      `update available (extended-stable): v2.0.0 (current v1.0.0). Run: ${formatCliCommand("openclaw update")}`,
+      `update available (extended-stable): v2.0.0 (current v1.0.0). Run: ${formatCliCommand("carapace update")}`,
     );
     expect(onUpdateAvailableChange).toHaveBeenCalledTimes(1);
     expect(onUpdateAvailableChange).toHaveBeenCalledWith({
@@ -1046,7 +1046,7 @@ describe("update-startup", () => {
 
   it("does no extended-stable hint or auto work when checkOnStart is false", async () => {
     await seedExtendedStableAvailability();
-    vi.mocked(resolveOpenClawPackageRoot).mockClear();
+    vi.mocked(resolveCarapacePackageRoot).mockClear();
     vi.mocked(checkUpdateStatus).mockClear();
     vi.mocked(resolveNpmChannelTag).mockClear();
     const onUpdateAvailableChange = vi.fn();
@@ -1058,7 +1058,7 @@ describe("update-startup", () => {
       runAutoUpdate,
     });
 
-    expect(resolveOpenClawPackageRoot).not.toHaveBeenCalled();
+    expect(resolveCarapacePackageRoot).not.toHaveBeenCalled();
     expect(checkUpdateStatus).not.toHaveBeenCalled();
     expect(resolveNpmChannelTag).not.toHaveBeenCalled();
     expect(runAutoUpdate).not.toHaveBeenCalled();
@@ -1146,12 +1146,12 @@ describe("update-startup", () => {
     await seedExtendedStableAvailability();
     seedStableAutoRolloutState();
     resetUpdateAvailableStateForTest();
-    vi.mocked(resolveOpenClawPackageRoot).mockClear();
+    vi.mocked(resolveCarapacePackageRoot).mockClear();
     vi.mocked(checkUpdateStatus).mockClear();
     vi.mocked(resolveNpmChannelTag).mockClear();
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue("/opt/carapace");
     vi.mocked(checkUpdateStatus).mockResolvedValue({
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       installKind: "git",
       packageManager: "unknown",
     } satisfies UpdateCheckResult);
@@ -1210,7 +1210,7 @@ describe("update-startup", () => {
 
     await runExtendedStableUpdateCheck({ isNixMode: true, runAutoUpdate });
 
-    expect(resolveOpenClawPackageRoot).not.toHaveBeenCalled();
+    expect(resolveCarapacePackageRoot).not.toHaveBeenCalled();
     expect(checkUpdateStatus).not.toHaveBeenCalled();
     expect(resolveNpmChannelTag).not.toHaveBeenCalled();
     expect(runAutoUpdate).not.toHaveBeenCalled();
@@ -1251,7 +1251,7 @@ describe("update-startup", () => {
     });
 
     expect(checkUpdateStatus).toHaveBeenCalledWith({
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       signal: expect.any(AbortSignal),
       fetchGit: true,
       includeRegistry: false,
@@ -1282,7 +1282,7 @@ describe("update-startup", () => {
         "-c",
         "gc.autoDetach=false",
         "-C",
-        "/opt/openclaw",
+        "/opt/carapace",
         "log",
         "--format=%h%x09%s",
         "--max-count=5",
@@ -1317,7 +1317,7 @@ describe("update-startup", () => {
       mode: "git",
       timeoutMs: 45 * 60 * 1000,
       restartDrainTimeoutMs: 300_000,
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       devTarget: {
         mode: "tracked",
         upstreamRef: "origin/main",
@@ -1356,7 +1356,7 @@ describe("update-startup", () => {
       upstreamSha: "frozen-upstream-sha",
     });
     expect(runGatewayUpdatePreflightMock).toHaveBeenCalledWith(
-      "/opt/openclaw",
+      "/opt/carapace",
       45 * 60 * 1000,
       handoffParams?.devTarget,
       expect.any(AbortSignal),
@@ -1472,7 +1472,7 @@ describe("update-startup", () => {
       reason: "managed-service-handoff-failed",
     },
   ] as const)("continues automatic dev campaigns from a $name receipt", async (testCase) => {
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       writeUpdateInstallReceiptRowSync(db, {
         kind: "update",
         status: testCase.status,
@@ -1480,7 +1480,7 @@ describe("update-startup", () => {
         stats: {
           mode: "git",
           ...(testCase.reason ? { reason: testCase.reason } : {}),
-          root: "/opt/openclaw",
+          root: "/opt/carapace",
           after: {
             sha: "current-sha",
             version: "1.0.0",
@@ -1502,7 +1502,7 @@ describe("update-startup", () => {
     });
 
     expect(checkUpdateStatus).toHaveBeenCalledWith({
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       signal: expect.any(AbortSignal),
       fetchGit: true,
       includeRegistry: false,
@@ -1569,14 +1569,14 @@ describe("update-startup", () => {
   it("reports commit and verified installation times for the current checkout", async () => {
     const installedAtMs = Date.now() - 60 * 60 * 1000;
     const commitAtMs = installedAtMs - 24 * 60 * 60 * 1000;
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       writeUpdateInstallReceiptRowSync(db, {
         kind: "update",
         status: "ok",
         ts: installedAtMs,
         stats: {
           mode: "git",
-          root: "/opt/openclaw",
+          root: "/opt/carapace",
           after: { sha: "current-sha", version: "1.0.0", upstreamRef: "origin/main" },
         },
       });
@@ -1600,14 +1600,14 @@ describe("update-startup", () => {
 
   it("does not inherit install time from a same-SHA receipt for another checkout", async () => {
     const installedAtMs = Date.now() - 60 * 60 * 1000;
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runCarapaceStateWriteTransaction(({ db }) => {
       writeUpdateInstallReceiptRowSync(db, {
         kind: "update",
         status: "ok",
         ts: installedAtMs,
         stats: {
           mode: "git",
-          root: "/opt/other-openclaw",
+          root: "/opt/other-carapace",
           after: { sha: "current-sha", version: "1.0.0" },
         },
       });
@@ -1978,7 +1978,7 @@ describe("update-startup", () => {
   it("uses current config for scheduled update and catalog checks", async () => {
     mockPackageUpdateStatus("beta", "2.0.0-beta.1");
     process.env.NODE_ENV = "production";
-    let cfg: OpenClawConfig = { update: { channel: "beta" } };
+    let cfg: CarapaceConfig = { update: { channel: "beta" } };
     const params = { getConfig: () => cfg, log: { info: vi.fn() }, isNixMode: false };
     const check = createGatewayUpdateCheck(params);
     updateChecks.add(check);
@@ -2005,7 +2005,7 @@ describe("update-startup", () => {
     mockPackageInstallStatus();
     const discovery = createDeferred<UpdateCheckResult>();
     vi.mocked(checkUpdateStatus).mockReturnValueOnce(discovery.promise);
-    let cfg: OpenClawConfig = { telemetry: { enabled: true } };
+    let cfg: CarapaceConfig = { telemetry: { enabled: true } };
     const params = {
       getConfig: () => cfg,
       log: { info: vi.fn() },
@@ -2015,7 +2015,7 @@ describe("update-startup", () => {
     const checking = runGatewayUpdateCheckOwner(params);
     await vi.advanceTimersByTimeAsync(0);
     cfg = { telemetry: { enabled: false } };
-    discovery.resolve({ root: "/opt/openclaw", installKind: "package", packageManager: "npm" });
+    discovery.resolve({ root: "/opt/carapace", installKind: "package", packageManager: "npm" });
     await checking;
 
     expect(checkTelemetryUpdateMock).toHaveBeenCalledExactlyOnceWith(cfg, { surface: "gateway" });
@@ -2036,7 +2036,7 @@ describe("update-startup", () => {
       } else {
         mockPackageUpdateStatus("beta", "2.0.0-beta.1");
       }
-      let cfg: OpenClawConfig = { update: { channel, auto: { enabled: true } } };
+      let cfg: CarapaceConfig = { update: { channel, auto: { enabled: true } } };
       const runAutoUpdate = createAutoUpdateSuccessMock();
       const params = {
         getConfig: () => cfg,
@@ -2068,7 +2068,7 @@ describe("update-startup", () => {
     mockPackageUpdateStatus("beta", "2.0.0-beta.1");
     const applying = createDeferred<{ status: "handoff" }>();
     const runAutoUpdate = vi.fn(() => applying.promise);
-    let cfg: OpenClawConfig = createBetaAutoUpdateConfig();
+    let cfg: CarapaceConfig = createBetaAutoUpdateConfig();
     const params = {
       getConfig: () => cfg,
       log: { info: vi.fn() },
@@ -2093,17 +2093,17 @@ describe("update-startup", () => {
 
   it("returns cleanup before slow dev git discovery schedules a campaign", async () => {
     const remoteFetchDelayMs = 65_653;
-    vi.mocked(resolveOpenClawPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveCarapacePackageRoot).mockResolvedValue("/opt/carapace");
     vi.mocked(checkUpdateStatus).mockImplementation(({ fetchGit, timeoutMs }) => {
       const isRemoteFetch = fetchGit === true;
       const effectiveTimeoutMs = timeoutMs ?? (isRemoteFetch ? 120_000 : 6000);
       const remoteFetchFinished = isRemoteFetch && effectiveTimeoutMs >= remoteFetchDelayMs;
       const status = {
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         installKind: "git" as const,
         packageManager: "pnpm" as const,
         git: {
-          root: "/opt/openclaw",
+          root: "/opt/carapace",
           sha: "current-sha",
           tag: null,
           branch: "main",
@@ -2140,14 +2140,14 @@ describe("update-startup", () => {
       await vi.advanceTimersByTimeAsync(0);
       expect(checkUpdateStatus).toHaveBeenCalledTimes(2);
       expect(checkUpdateStatus).toHaveBeenNthCalledWith(1, {
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         signal: expect.any(AbortSignal),
         timeoutMs: 2500,
         fetchGit: false,
         includeRegistry: false,
       });
       expect(checkUpdateStatus).toHaveBeenNthCalledWith(2, {
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         signal: expect.any(AbortSignal),
         fetchGit: true,
         includeRegistry: false,
@@ -2229,7 +2229,7 @@ describe("update-startup", () => {
     await refreshGatewayUpdateStatus({});
 
     expect(checkUpdateStatus).toHaveBeenCalledWith({
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       signal: expect.any(AbortSignal),
       fetchGit: true,
       includeRegistry: false,
@@ -2327,10 +2327,10 @@ describe("update-startup", () => {
             releaseHandoff = () => {
               const handoff = {
                 pid: 12345,
-                command: "openclaw update --yes --channel beta",
+                command: "carapace update --yes --channel beta",
                 logPath: "/tmp/late-handoff.log",
                 handoffId: "late-handoff",
-                installRoot: "/opt/openclaw",
+                installRoot: "/opt/carapace",
               };
               resolve(
                 joined ? { ...handoff, status: "joined" } : { ...handoff, status: "started" },
@@ -2364,7 +2364,7 @@ describe("update-startup", () => {
           expect(cancelManagedServiceUpdateHandoffMock).toHaveBeenCalledWith({
             kind: "managed-update-handoff",
             handoffId: "late-handoff",
-            installRoot: "/opt/openclaw",
+            installRoot: "/opt/carapace",
           });
           if (cancelled !== "restored-in-process") {
             expect(log.info).toHaveBeenCalledWith(
@@ -2454,7 +2454,7 @@ describe("update-startup", () => {
       expect(cancelManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
         kind: "managed-update-handoff",
         handoffId: "auto-handoff-id",
-        installRoot: "/opt/openclaw",
+        installRoot: "/opt/carapace",
       });
       expect(await readRestartSentinel()).toBeNull();
       expect(runUpdateFailureTriageMock).not.toHaveBeenCalled();
@@ -2508,7 +2508,7 @@ describe("update-startup", () => {
       mode: "npm",
       timeoutMs: 45 * 60 * 1000,
       restartDrainTimeoutMs: 300_000,
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       packageTargetVersion: "2.0.0",
     });
   });
@@ -2529,7 +2529,7 @@ describe("update-startup", () => {
       mode: "npm",
       timeoutMs: 45 * 60 * 1000,
       restartDrainTimeoutMs: 300_000,
-      root: "/opt/openclaw",
+      root: "/opt/carapace",
       packageTargetVersion: "2.0.0-beta.1",
     });
   });
@@ -2590,9 +2590,9 @@ describe("update-startup", () => {
     expect(getUpdateSchedule()).toMatchObject({ channel: "beta", autoEnabled: false });
   });
 
-  it("disables update notices, telemetry, and auto-update with OPENCLAW_NO_AUTO_UPDATE", async () => {
+  it("disables update notices, telemetry, and auto-update with CARAPACE_NO_AUTO_UPDATE", async () => {
     mockPackageUpdateStatus("beta", "2.0.0-beta.1");
-    process.env.OPENCLAW_NO_AUTO_UPDATE = "1";
+    process.env.CARAPACE_NO_AUTO_UPDATE = "1";
     const log = { info: vi.fn() };
     const runAutoUpdate = createAutoUpdateSuccessMock();
 
@@ -2613,8 +2613,8 @@ describe("update-startup", () => {
 
   it("keeps external auto-update supervision authoritative over native systemd markers", async () => {
     mockPackageUpdateStatus("beta", "2.0.0-beta.1");
-    process.env.OPENCLAW_SUPERVISOR_MODE = "external";
-    process.env.OPENCLAW_SYSTEMD_UNIT = "openclaw-gateway.service";
+    process.env.CARAPACE_SUPERVISOR_MODE = "external";
+    process.env.CARAPACE_SYSTEMD_UNIT = "carapace-gateway.service";
     detectRespawnSupervisorMock.mockReturnValue("systemd");
     const log = { info: vi.fn() };
     const runAutoUpdate = createAutoUpdateSuccessMock();
@@ -2636,7 +2636,7 @@ describe("update-startup", () => {
   });
 
   it("keeps a foreground Gateway serving when automatic update has no restart owner", async () => {
-    process.env.OPENCLAW_PROFILE = "work";
+    process.env.CARAPACE_PROFILE = "work";
     mockPackageInstallStatus();
     mockNpmChannelTag("beta", "2.0.0-beta.1");
     await runAutoUpdateCheckWithDefaults({ cfg: createBetaAutoUpdateConfig() });
@@ -2650,7 +2650,7 @@ describe("update-startup", () => {
       kind: "update",
       status: "skipped",
       message: expect.stringMatching(
-        /Stop the foreground Gateway.*`openclaw --profile work update --yes --channel beta --tag 2\.0\.0-beta\.1 --timeout 2700`.*then launch the Gateway again/s,
+        /Stop the foreground Gateway.*`carapace --profile work update --yes --channel beta --tag 2\.0\.0-beta\.1 --timeout 2700`.*then launch the Gateway again/s,
       ),
       stats: { reason: "managed-service-handoff-unavailable" },
     });
@@ -2667,8 +2667,8 @@ describe("update-startup", () => {
     startManagedServiceUpdateHandoffMock.mockResolvedValueOnce({
       status: "started",
       pid: 12345,
-      command: "openclaw update --yes --channel beta --tag 2.0.0-beta.1 --timeout 2700",
-      logPath: "/tmp/openclaw-handoff.log",
+      command: "carapace update --yes --channel beta --tag 2.0.0-beta.1 --timeout 2700",
+      logPath: "/tmp/carapace-handoff.log",
       handoffId: "started-auto-handoff-id",
       installRoot: await fs.realpath(installRoot),
     });
@@ -2722,8 +2722,8 @@ describe("update-startup", () => {
       version: "2.0.0-beta.1",
       tag: "beta",
       forced: false,
-      command: "openclaw update --yes --channel beta --tag 2.0.0-beta.1 --timeout 2700",
-      logPath: "/tmp/openclaw-handoff.log",
+      command: "carapace update --yes --channel beta --tag 2.0.0-beta.1 --timeout 2700",
+      logPath: "/tmp/carapace-handoff.log",
     });
     expect(getUpdateSchedule()?.campaign?.state).toBe("applying");
     expect(runUpdateFailureTriageMock).not.toHaveBeenCalled();
@@ -2744,7 +2744,7 @@ describe("update-startup", () => {
       if (triageFails) {
         runUpdateFailureTriageMock.mockResolvedValueOnce({
           status: "failed",
-          hint: "Triage could not complete: collector failed. Run openclaw triage.",
+          hint: "Triage could not complete: collector failed. Run carapace triage.",
         });
       }
       const log = { info: vi.fn() };
@@ -2772,7 +2772,7 @@ describe("update-startup", () => {
         forced: false,
         reason: "managed-service-handoff-failed",
         message: expect.stringContaining("ENOENT"),
-        triage: expect.stringContaining(triageFails ? "openclaw triage" : triageResult.hint),
+        triage: expect.stringContaining(triageFails ? "carapace triage" : triageResult.hint),
       });
       expect(log.info).toHaveBeenCalledWith(
         "update campaign ended",
@@ -2785,7 +2785,7 @@ describe("update-startup", () => {
       expect((await terminalSentinels.at(-1))?.payload).toMatchObject({
         kind: "update",
         status: "error",
-        doctorHint: expect.stringContaining(triageFails ? "openclaw triage" : triageResult.hint),
+        doctorHint: expect.stringContaining(triageFails ? "carapace triage" : triageResult.hint),
         stats: { reason: "managed-service-handoff-failed" },
       });
       expect(runUpdateFailureTriageMock).toHaveBeenCalledOnce();
@@ -2806,8 +2806,8 @@ describe("update-startup", () => {
     startManagedServiceUpdateHandoffMock.mockResolvedValueOnce({
       status: "joined",
       pid: 12345,
-      command: "openclaw update --yes --channel beta --timeout 2700",
-      logPath: "/tmp/openclaw-handoff.log",
+      command: "carapace update --yes --channel beta --timeout 2700",
+      logPath: "/tmp/carapace-handoff.log",
       handoffId: "handoff-existing",
     });
 
@@ -2844,7 +2844,7 @@ describe("update-startup", () => {
       expect(cancelManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
         kind: "managed-update-handoff",
         handoffId: "auto-handoff-id",
-        installRoot: "/opt/openclaw",
+        installRoot: "/opt/carapace",
       });
       expect(scheduleGatewaySigusr1RestartMock).not.toHaveBeenCalled();
       expect(listUpdateRuns()).toEqual([
@@ -2872,11 +2872,11 @@ describe("update-startup", () => {
 
     expect(runCommandWithTimeout).not.toHaveBeenCalled();
     expect(detectRespawnSupervisorMock).toHaveBeenCalledWith(process.env, process.platform, {
-      includeLinuxOpenClawGatewayServiceMarker: true,
+      includeLinuxCarapaceGatewayServiceMarker: true,
     });
     expect(startManagedServiceUpdateHandoffMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        root: "/opt/openclaw",
+        root: "/opt/carapace",
         timeoutMs: 45 * 60 * 1000,
         restartDrainTimeoutMs: 300_000,
         channel: "beta",
@@ -2887,7 +2887,7 @@ describe("update-startup", () => {
     expect(transferManagedServiceUpdateHandoffMock).toHaveBeenCalledExactlyOnceWith({
       kind: "managed-update-handoff",
       handoffId: "auto-handoff-id",
-      installRoot: "/opt/openclaw",
+      installRoot: "/opt/carapace",
     });
     expect(scheduleGatewaySigusr1RestartMock).not.toHaveBeenCalled();
   });
@@ -2928,7 +2928,7 @@ describe("update-startup", () => {
 
     await vi.advanceTimersByTimeAsync(48 * 60 * 60 * 1000);
 
-    expect(resolveOpenClawPackageRoot).not.toHaveBeenCalled();
+    expect(resolveCarapacePackageRoot).not.toHaveBeenCalled();
     expect(checkUpdateStatus).not.toHaveBeenCalled();
     expect(resolveNpmChannelTag).not.toHaveBeenCalled();
     await stop();

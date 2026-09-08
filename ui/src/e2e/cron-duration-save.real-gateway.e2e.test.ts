@@ -3,25 +3,25 @@ import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import type { Locator, Page } from "playwright";
 import { expect, it } from "vitest";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../test/helpers/openclaw-test-instance.ts";
+  createCarapaceTestInstance,
+  type CarapaceTestInstance,
+} from "../../../test/helpers/carapace-test-instance.ts";
 import { runQaGatewayFixture } from "../../../test/helpers/qa-gateway-cleanup.ts";
 import type { CronJob } from "../api/types.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
 import { createControlUiE2eSuite } from "./control-ui-e2e-suite.test-support.ts";
 
-let instance: OpenClawTestInstance | undefined;
+let instance: CarapaceTestInstance | undefined;
 const suite = createControlUiE2eSuite({
   name: "Control UI exact stagger with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({
+    const owner = await createCarapaceTestInstance({
       name: "control-ui-exact-stagger",
       config: {
         gateway: { controlUi: { enabled: true } },
@@ -53,9 +53,9 @@ const suite = createControlUiE2eSuite({
     }
   },
 });
-const captureEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 
-let catalogInstance: OpenClawTestInstance | undefined;
+let catalogInstance: CarapaceTestInstance | undefined;
 const catalogModels = (id: string) => [
   { id: "anchor", name: "Anchor" },
   { id, name: id },
@@ -64,9 +64,9 @@ const catalogSuite = createControlUiE2eSuite({
   name: "Automation catalog publication with a real Gateway",
   startServerBeforeBrowser: true,
   async startServer() {
-    const owner = await createOpenClawTestInstance({
+    const owner = await createCarapaceTestInstance({
       name: "automation-catalog-publication",
-      env: { OPENCLAW_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
+      env: { CARAPACE_TEST_MINIMAL_GATEWAY: undefined, VITEST: undefined },
       config: {
         gateway: { controlUi: { enabled: true } },
         cron: { enabled: false },

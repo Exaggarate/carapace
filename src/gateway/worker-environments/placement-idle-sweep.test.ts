@@ -3,9 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { createDeferredCore } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../../state/carapace-state-db.js";
 import { coordinateWorkerPlacementDispatch } from "./placement-dispatch-coordinator.js";
 import { REQUEST } from "./placement-dispatch-test-fixtures.js";
 import { createHarness } from "./placement-dispatch-test-harness.js";
@@ -20,12 +20,12 @@ describe("worker placement idle suspension", () => {
 
   beforeEach(() => {
     nowMs = 1_000;
-    const root = tempDirs.make("openclaw-worker-idle-sweep-");
-    const database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    const root = tempDirs.make("carapace-worker-idle-sweep-");
+    const database = openCarapaceStateDatabase({ env: { CARAPACE_STATE_DIR: root } });
     placements = createWorkerSessionPlacementStore({ database, now: () => nowMs });
   });
 
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeCarapaceStateDatabaseForTest());
 
   function createIdleFixture(
     options: {

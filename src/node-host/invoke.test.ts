@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FsListDirResult } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -11,12 +11,12 @@ import { saveExecApprovals, type ExecApprovalsSnapshot } from "../infra/exec-app
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandContext,
+  CarapacePluginNodeHostCommand,
+  CarapacePluginNodeHostCommandContext,
 } from "../plugins/types.node-host.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import type { SkillBinsProvider } from "./invoke-types.js";
 import { handleInvoke } from "./invoke.js";
 
@@ -213,9 +213,9 @@ describe("node host invoke", () => {
       sessionKey: "agent:main:managed",
     };
     let retainedAcquire:
-      | NonNullable<OpenClawPluginNodeHostCommandContext["acquireManagedWorkspace"]>
+      | NonNullable<CarapacePluginNodeHostCommandContext["acquireManagedWorkspace"]>
       | undefined;
-    const handle = vi.fn<OpenClawPluginNodeHostCommand["handle"]>(
+    const handle = vi.fn<CarapacePluginNodeHostCommand["handle"]>(
       async (paramsJSON, _io, context) => {
         expect(JSON.parse(paramsJSON ?? "{}")).toEqual({ sessionKey: "agent:main:other" });
         expect(context?.sessionKey).toBe(workspaceRequest.sessionKey);
@@ -372,7 +372,7 @@ describe("node host invoke", () => {
   it.each(["Projects", "Projects "])(
     "lists and reopens node-host directory %j",
     async (directory) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-node-fs-listdir-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-node-fs-listdir-"));
       fs.mkdirSync(path.join(root, "Projects"));
       fs.mkdirSync(path.join(root, directory, "child"), { recursive: true });
       fs.writeFileSync(path.join(root, "notes.txt"), "hidden from directory listing");
@@ -703,7 +703,7 @@ describe("node host invoke", () => {
   it.runIf(process.platform !== "win32")(
     "resolves node skill cwd locators before preparing system.run",
     async () => {
-      const stateDir = fs.realpathSync(tempDirs.make("openclaw-node-skill-cwd-"));
+      const stateDir = fs.realpathSync(tempDirs.make("carapace-node-skill-cwd-"));
       const skillDir = path.join(stateDir, "skills", "cwd-skill");
       fs.mkdirSync(skillDir, { recursive: true });
       fs.writeFileSync(
@@ -711,7 +711,7 @@ describe("node host invoke", () => {
         "---\nname: cwd-skill\ndescription: Cwd skill\n---\n",
       );
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, async () => {
         const request = vi.fn<GatewayClient["request"]>().mockResolvedValue(null);
         const skillBins: SkillBinsProvider = { current: async () => [] };
         await handleInvoke(
@@ -778,7 +778,7 @@ describe("node host invoke", () => {
     { env: { GIT_PAGER: "cat", PAGER: "cat" }, blocked: undefined },
     { env: { GIT_PAGER: "cat; id" }, blocked: "GIT_PAGER" },
   ])("validates forwarded env overrides in system.run.prepare: $env", async ({ env, blocked }) => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-prepare-env-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-prepare-env-"));
     const toolPath = path.join(tempDir, "tool");
     fs.writeFileSync(toolPath, "#!/bin/sh\nexit 0\n");
     fs.chmodSync(toolPath, 0o755);
@@ -891,10 +891,10 @@ describe("node host invoke", () => {
   });
 
   it("forwards suppressNotifyOnExit on completed system.run events", async () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-node-event-suppress-"));
-    const stateDir = path.join(tempHome, ".openclaw");
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-node-event-suppress-"));
+    const stateDir = path.join(tempHome, ".carapace");
     try {
-      await withEnvAsync({ OPENCLAW_HOME: tempHome, OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ CARAPACE_HOME: tempHome, CARAPACE_STATE_DIR: stateDir }, async () => {
         saveExecApprovals({
           version: 1,
           defaults: { security: "allowlist", ask: "on-miss", askFallback: "deny" },
@@ -955,7 +955,7 @@ describe("node host invoke", () => {
         });
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       fs.rmSync(tempHome, { recursive: true, force: true });
     }
   });
@@ -984,7 +984,7 @@ describe("node host invoke", () => {
   it.each(["system.run", "agent.cli.claude.run.v1"])(
     "executes %s with omitted exec config and full/off host approvals",
     async (command) => {
-      const state = await createOpenClawTestState({ label: "node-default-policy" });
+      const state = await createCarapaceTestState({ label: "node-default-policy" });
       try {
         await state.writeConfig({});
         saveExecApprovals({ version: 1, defaults: { security: "full", ask: "off" } });

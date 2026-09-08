@@ -8,7 +8,7 @@ import {
 } from "../gateway/server-cron-notifications.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { resetTaskRegistryForTests } from "../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { runCronCommandJob } from "./command-runner.js";
 import { resolveCronDeliveryPreviews } from "./delivery-preview.js";
 import { CronService } from "./service.js";
@@ -92,8 +92,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   it("delivers a command result through the guarded webhook boundary and persists it", async () => {
     const receiver = await createWebhookReceiver();
     try {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-cron-webhook-delivery-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-cron-webhook-delivery-" },
         async (state) => {
           resetTaskRegistryForTests({ persist: false });
           const storePath = state.path("cron", "jobs.json");
@@ -188,8 +188,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   it("applies threshold and cooldown once before transporting execution failure alerts", async () => {
     const receiver = await createWebhookReceiver();
     try {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-cron-failure-destination-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-cron-failure-destination-" },
         async (state) => {
           resetTaskRegistryForTests({ persist: false });
           const storePath = state.path("cron", "jobs.json");
@@ -315,8 +315,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   it("routes required completion-delivery failure immediately without changing execution streak", async () => {
     const receiver = await createWebhookReceiver();
     try {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-cron-completion-failure-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-cron-completion-failure-" },
         async (state) => {
           resetTaskRegistryForTests({ persist: false });
           const storePath = state.path("cron", "jobs.json");
@@ -441,8 +441,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   });
 
   it("falls back to the exact job owner when Gateway alert transport rejects", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-alert-fallback-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-alert-fallback-" },
       async (state) => {
         const enqueueSystemEvent = vi.fn();
         const requestHeartbeat = vi.fn();
@@ -521,8 +521,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   it("sends skipped-run alerts through the real webhook path and persists alert state", async () => {
     const receiver = await createWebhookReceiver();
     try {
-      await withOpenClawTestState(
-        { layout: "state-only", prefix: "openclaw-cron-skipped-alert-" },
+      await withCarapaceTestState(
+        { layout: "state-only", prefix: "carapace-cron-skipped-alert-" },
         async (state) => {
           resetTaskRegistryForTests({ persist: false });
           const storePath = state.path("cron", "jobs.json");
@@ -604,8 +604,8 @@ describe("cron delivery outcomes", { concurrent: false }, () => {
   });
 
   it("builds delivery previews from persisted webhook and opt-out jobs", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-delivery-preview-" },
+    await withCarapaceTestState(
+      { layout: "state-only", prefix: "carapace-cron-delivery-preview-" },
       async (state) => {
         resetTaskRegistryForTests({ persist: false });
         const cron = new CronService({

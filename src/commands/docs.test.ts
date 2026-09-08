@@ -1,5 +1,5 @@
 // Docs command tests cover docs lookup, fetch handling, and runtime output.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RuntimeEnv } from "../runtime.js";
 
@@ -61,7 +61,7 @@ describe("docsSearchCommand", () => {
     if (!(url instanceof URL)) {
       throw new Error("expected docs search to call fetch with a URL");
     }
-    expect(url.href).toBe("https://docs.openclaw.ai/api/search?q=plugin+allowlist");
+    expect(url.href).toBe("https://github.com/Exaggarate/carapace");
     expect(init).toMatchObject({ headers: { Accept: "application/json" } });
   });
 
@@ -72,7 +72,7 @@ describe("docsSearchCommand", () => {
           results: [
             {
               title: "CLI reference",
-              link: "https://docs.openclaw.ai/cli",
+              link: "https://github.com/Exaggarate/carapace",
               snippet: "Command-line usage",
             },
           ],
@@ -89,7 +89,7 @@ describe("docsSearchCommand", () => {
       results: [
         {
           title: "CLI reference",
-          link: "https://docs.openclaw.ai/cli",
+          link: "https://github.com/Exaggarate/carapace",
           snippet: "Command-line usage",
         },
       ],
@@ -102,19 +102,19 @@ describe("docsSearchCommand", () => {
         JSON.stringify({
           results: [
             { title: "Invalid result without a link" },
-            { title: "CLI reference", link: "https://docs.openclaw.ai/cli" },
-            { title: "Plugin guide", link: "https://docs.openclaw.ai/plugins" },
+            { title: "CLI reference", link: "https://github.com/Exaggarate/carapace" },
+            { title: "Plugin guide", link: "https://github.com/Exaggarate/carapace" },
           ],
         }),
       ),
     );
     const runtime = makeRuntime();
 
-    await docsSearchCommand(["openclaw"], runtime, { json: true, limit: 1 });
+    await docsSearchCommand(["carapace"], runtime, { json: true, limit: 1 });
 
     expect(JSON.parse(String(runtime.log.mock.calls[0]?.[0]))).toEqual({
-      query: "openclaw",
-      results: [{ title: "CLI reference", link: "https://docs.openclaw.ai/cli" }],
+      query: "carapace",
+      results: [{ title: "CLI reference", link: "https://github.com/Exaggarate/carapace" }],
     });
   });
 
@@ -126,7 +126,7 @@ describe("docsSearchCommand", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(JSON.parse(String(runtime.log.mock.calls[0]?.[0]))).toEqual({
       query: null,
-      url: "https://docs.openclaw.ai/",
+      url: "https://github.com/Exaggarate/carapace",
       results: [],
     });
   });
@@ -171,7 +171,7 @@ describe("docsSearchCommand", () => {
     const body = new Uint8Array([
       ...new TextEncoder().encode('{"results":[{"title":"Plugin allow'),
       0xff,
-      ...new TextEncoder().encode('list","link":"https://docs.openclaw.ai/plugins/allowlist"}]}'),
+      ...new TextEncoder().encode('list","link":"https://github.com/Exaggarate/carapace"}]}'),
     ]);
     fetchMock.mockResolvedValueOnce(
       new Response(body, { headers: { "Content-Type": "application/json" } }),
@@ -190,7 +190,7 @@ describe("docsSearchCommand", () => {
           results: [
             {
               title: "Plugin allowlist",
-              link: "https://docs.openclaw.ai/plugins/allowlist",
+              link: "https://github.com/Exaggarate/carapace",
               snippet: "How to configure the allowlist.",
             },
           ],

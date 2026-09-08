@@ -1,11 +1,11 @@
 // Doctor-only runtime policy repair for migrated cron Codex model refs.
-import { asOptionalRecord, isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord, isRecord } from "@carapace/normalization-core/record-coerce";
 import { tryResolveAmbientOwnerAgentId } from "../../../agents/agent-scope-config.js";
 import {
   inheritLegacyDefaultAgentId,
   tryGetLegacyDefaultAgentId,
 } from "../../../config/legacy.default-agent-owner.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import {
   isBlockedLegacyCodexModelRef,
@@ -31,7 +31,7 @@ function ensureRecord(container: MutableRecord, key: string): MutableRecord {
 }
 
 function resolvePolicyOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target: CronCodexRuntimePolicyTarget;
 }): { owner: MutableRecord; path: string; agentId: string } | undefined {
   const root = isRecord(params.cfg) ? params.cfg : {};
@@ -81,11 +81,11 @@ function resolvePolicyOwner(params: {
 
 /** Install model-scoped Codex runtime intent for canonical refs migrated out of cron payloads. */
 export function repairCronCodexRuntimePolicies(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targets: ReadonlyArray<CronCodexRuntimePolicyTarget>;
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
 }): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
   warnings: string[];
   blockedTargets: CronCodexRuntimePolicyTarget[];
@@ -176,7 +176,7 @@ export function repairCronCodexRuntimePolicies(params: {
 
 /** Restrict a post-config-write cron rewrite to runtime policies already on disk. */
 export function planCronCodexRefRewriteAgainstPersistedConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   targets: ReadonlyArray<CronCodexRuntimePolicyTarget>;
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
   resolveFinalModelRef?: (input: { modelRef: string; agentId: string }) => ModelRefRepair;

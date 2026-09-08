@@ -129,7 +129,7 @@ export function installSpawnAttachmentFixture(params: {
   entered: () => void;
   release: Promise<void>;
 }) {
-  const root = path.join(params.stateDir, ".openclaw", "attachments");
+  const root = path.join(params.stateDir, ".carapace", "attachments");
   const lateWrites: string[] = [];
   const attachmentDirs: string[] = [];
   const mkdir = fs.mkdir;
@@ -189,17 +189,17 @@ export function installSpawnAuthorityFixture() {
   const parentSessionKey = "agent:main:main";
   const parentRunId = "pending-spawn-parent";
   const groupId = "pending-spawn";
-  const env = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+  const env = captureEnv(["CARAPACE_STATE_DIR", "CARAPACE_CONFIG_PATH"]);
   let stateDir = "";
   let pluginSnapshot: ReturnType<typeof captureActivePluginRegistrySnapshot>;
 
   beforeEach(async () => {
     pluginSnapshot = captureActivePluginRegistrySnapshot();
-    stateDir = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-spawn-authority-")));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+    stateDir = await realpath(await mkdtemp(path.join(os.tmpdir(), "carapace-spawn-authority-")));
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
+    setTestEnvValue("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
     await writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "carapace.json"),
       JSON.stringify({
         logging: { audit: { enabled: false } },
         tools: {

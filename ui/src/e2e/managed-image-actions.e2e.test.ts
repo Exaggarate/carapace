@@ -29,7 +29,7 @@ suite.define(() => {
     const imageUrl = `/api/chat/media/outgoing/agent%3Amain%3Amain/${attachmentId}/full`;
     const ticketedUrl = `${imageUrl}?mediaTicket=ticket-e2e`;
     const imageBytes = await readFile(
-      path.join(process.cwd(), "docs/assets/openclaw-banner-dark.png"),
+      path.join(process.cwd(), "docs/assets/carapace-banner-dark.png"),
     );
     const requestedVariants: string[] = [];
     await page.route(`**${controlUiBasePath}/api/chat/media/outgoing/**`, async (route) => {
@@ -38,7 +38,7 @@ suite.define(() => {
       expect(url.pathname).toMatch(/^\/rosita\/api\/chat\/media\/outgoing\//u);
       expect(url.searchParams.get("mediaTicket")).toBe("ticket-e2e");
       expect(request.headers().authorization).toBeUndefined();
-      expect(request.headers()["x-openclaw-requester-session-key"]).toBeUndefined();
+      expect(request.headers()["x-carapace-requester-session-key"]).toBeUndefined();
       requestedVariants.push(url.pathname.split("/").at(-1) ?? "");
       await route.fulfill({ body: imageBytes, contentType: "image/png" });
     });

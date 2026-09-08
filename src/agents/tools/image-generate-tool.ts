@@ -1,9 +1,9 @@
 /** Runs image generation, persistence, and detached completion. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { Type } from "typebox";
 import { findCapabilityProviderById } from "../../../packages/media-generation-core/src/capability-model-ref.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { resolveImageGenerationMaxInputImages } from "../../image-generation/capabilities.js";
 import {
   generateImage,
@@ -515,7 +515,7 @@ const defaultScheduleImageGenerateBackgroundWork = createDefaultMediaGenerateBac
 });
 
 async function executeImageGenerationJob(params: {
-  effectiveCfg: OpenClawConfig;
+  effectiveCfg: CarapaceConfig;
   prompt: string;
   agentDir?: string;
   model?: string;
@@ -681,7 +681,7 @@ async function executeImageGenerationJob(params: {
 }
 
 export function createImageGenerateTool(options?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   authProfileStore?: AuthProfileStore;
   agentSessionKey?: string;

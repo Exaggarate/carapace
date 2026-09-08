@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 // Telegram tests cover targets plugin behavior.
 import { describe, expect, it } from "vitest";
 import {
@@ -217,7 +217,7 @@ describe("telegram group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     expect(
       resolveTelegramGroupRequireMention({ cfg: telegramCfg, groupId: "-1001:topic:77" }),
     ).toBe(false);
@@ -259,7 +259,7 @@ describe("telegram group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     expect(
       resolveTelegramGroupRequireMention({

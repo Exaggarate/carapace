@@ -13,7 +13,7 @@ import {
 import { tmpdir } from "node:os";
 import path, { join } from "node:path";
 import { runInNewContext } from "node:vm";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { createTempDirTracker } from "../helpers/temp-dir.js";
@@ -25,8 +25,8 @@ const INSTALL_E2E_RUNNER_PATH = "scripts/docker/install-sh-e2e/run.sh";
 const DOCKER_SETUP_PATH = "scripts/docker/setup.sh";
 const HOST_TIMEOUT_PATH = "scripts/lib/host-timeout.sh";
 const PODMAN_SETUP_PATH = "scripts/podman/setup.sh";
-const PODMAN_QUADLET_TEMPLATE_PATH = "scripts/podman/openclaw.container.in";
-const PODMAN_RUN_PATH = "scripts/run-openclaw-podman.sh";
+const PODMAN_QUADLET_TEMPLATE_PATH = "scripts/podman/carapace.container.in";
+const PODMAN_RUN_PATH = "scripts/run-carapace-podman.sh";
 const SMOKE_DOCKERFILE_PATH = "scripts/docker/install-sh-smoke/Dockerfile";
 const SMOKE_RUNNER_PATH = "scripts/docker/install-sh-smoke/run.sh";
 const NONROOT_DOCKERFILE_PATH = "scripts/docker/install-sh-nonroot/Dockerfile";
@@ -36,8 +36,8 @@ const BUN_GLOBAL_ASSERTIONS_PATH = "scripts/e2e/lib/bun-global-install/assertion
 const DOCKER_E2E_PACKAGE_HELPER_PATH = "scripts/lib/docker-e2e-package.sh";
 const INSTALL_SMOKE_WORKFLOW_PATH = ".github/workflows/install-smoke-reusable.yml";
 const INSTALL_SMOKE_WRAPPER_PATH = ".github/workflows/install-smoke.yml";
-const RELEASE_CHECKS_WORKFLOW_PATH = ".github/workflows/openclaw-release-checks.yml";
-const LIVE_E2E_WORKFLOW_PATH = ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+const RELEASE_CHECKS_WORKFLOW_PATH = ".github/workflows/carapace-release-checks.yml";
+const LIVE_E2E_WORKFLOW_PATH = ".github/workflows/carapace-live-and-e2e-checks-reusable.yml";
 const tempDirs = createTempDirTracker();
 
 afterEach(() => {
@@ -95,7 +95,7 @@ function extractDockerTimezoneValidator(): string {
 }
 
 function runDockerTimezoneValidator(timezone: string) {
-  const root = tempDirs.make("openclaw-docker-timezone-");
+  const root = tempDirs.make("carapace-docker-timezone-");
   const binDir = join(root, "bin");
   const dockerPath = join(binDir, "docker");
   mkdirSync(binDir, { recursive: true });
@@ -117,7 +117,7 @@ function runDockerTimezoneValidator(timezone: string) {
       "--noprofile",
       "--norc",
       "-c",
-      `${extractDockerTimezoneValidator()}\nIMAGE_NAME=openclaw:test\nis_valid_timezone_in_image "$TIMEZONE"`,
+      `${extractDockerTimezoneValidator()}\nIMAGE_NAME=carapace:test\nis_valid_timezone_in_image "$TIMEZONE"`,
     ],
     {
       encoding: "utf8",
@@ -136,7 +136,7 @@ function runInstallE2eInstallerFixture(params: {
   installTag: string;
   installerBody: string;
 }) {
-  const root = tempDirs.make("openclaw-install-e2e-download-");
+  const root = tempDirs.make("carapace-install-e2e-download-");
   const binDir = join(root, "bin");
   const curlPath = join(binDir, "curl");
   const curlArgsPath = join(root, "curl-args.txt");
@@ -176,8 +176,8 @@ function runInstallE2eInstallerFixture(params: {
     OUTPUT_PATH_CAPTURE: outputPathCapture,
     PATH: `${binDir}:${process.env.PATH ?? ""}`,
   };
-  delete env.OPENCLAW_BETA;
-  delete env.OPENCLAW_VERSION;
+  delete env.CARAPACE_BETA;
+  delete env.CARAPACE_VERSION;
 
   const result = spawnSync(
     "/bin/bash",
@@ -201,7 +201,7 @@ function runInstallE2eInstallerFixture(params: {
 }
 
 function runNonrootInstallerFixture(curlExitCode: number) {
-  const root = tempDirs.make("openclaw-install-nonroot-download-");
+  const root = tempDirs.make("carapace-install-nonroot-download-");
   const binDir = join(root, "bin");
   const curlArgsPath = join(root, "curl-args.txt");
   const markerPath = join(root, "installer-marker.txt");
@@ -345,7 +345,7 @@ function extractInstallE2eAgentJsonParser(): string {
 }
 
 function normalizeInstallE2eAgentOutput(output: string) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-install-e2e-agent-output-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-install-e2e-agent-output-"));
   const outputPath = join(root, "agent.json");
   writeFileSync(outputPath, output, "utf8");
   try {
@@ -375,7 +375,7 @@ function extractInstallSmokeUpdateJsonParser(): string {
 }
 
 function validateInstallSmokeUpdateJson(doctorStep?: Record<string, unknown>) {
-  const updateUrl = "http://candidate.invalid/openclaw.tgz";
+  const updateUrl = "http://candidate.invalid/carapace.tgz";
   const payload = {
     status: "ok",
     before: { version: "2026.7.0" },
@@ -419,7 +419,7 @@ function runInstallSmokeInstallerPipelineFixture(params: {
   curlExitCode?: number;
   installerArgs: string[];
 }) {
-  const root = tempDirs.make("openclaw-install-smoke-pipeline-");
+  const root = tempDirs.make("carapace-install-smoke-pipeline-");
   const binDir = join(root, "bin");
   const curlArgsPath = join(root, "curl-args.txt");
   const installerArgsPath = join(root, "installer-args.txt");
@@ -569,13 +569,13 @@ function extractInstallSmokePackHelper(name: string, nextName: string): string {
 }
 
 function runInstallSmokePackHelpers(packJson: unknown, budgetBytes?: number) {
-  const root = tempDirs.make("openclaw-install-pack-helper-");
+  const root = tempDirs.make("carapace-install-pack-helper-");
   const packJsonPath = join(root, "pack.json");
   writeFileSync(packJsonPath, JSON.stringify(packJson), "utf8");
   const env: NodeJS.ProcessEnv = { ...process.env, PACK_JSON_PATH: packJsonPath };
-  delete env.OPENCLAW_INSTALL_SMOKE_PACK_UNPACKED_BUDGET_BYTES;
+  delete env.CARAPACE_INSTALL_SMOKE_PACK_UNPACKED_BUDGET_BYTES;
   if (budgetBytes !== undefined) {
-    env.OPENCLAW_INSTALL_SMOKE_PACK_UNPACKED_BUDGET_BYTES = String(budgetBytes);
+    env.CARAPACE_INSTALL_SMOKE_PACK_UNPACKED_BUDGET_BYTES = String(budgetBytes);
   }
   const result = spawnSync(
     "bash",
@@ -637,8 +637,8 @@ type RestorePathEscape = "packages" | "ai";
 function runRestoreLocalDistFixture(
   options: { failAiSwap?: boolean; symlinkEscape?: RestorePathEscape } = {},
 ) {
-  const fixtureRoot = tempDirs.make("openclaw-install-restore-root-");
-  const imageRoot = tempDirs.make("openclaw-install-restore-image-");
+  const fixtureRoot = tempDirs.make("carapace-install-restore-root-");
+  const imageRoot = tempDirs.make("carapace-install-restore-image-");
   let externalSentinel = "";
   for (const [relativePath, contents] of [
     ["dist/root.txt", "old-root"],
@@ -651,7 +651,7 @@ function runRestoreLocalDistFixture(
   }
   for (const [relativePath, contents] of [
     ["app/dist/root.txt", "new-root"],
-    ["app/node_modules/@openclaw/ai/dist/ai.txt", "new-ai"],
+    ["app/node_modules/@carapace/ai/dist/ai.txt", "new-ai"],
   ] as const) {
     const target = join(imageRoot, relativePath);
     mkdirSync(path.dirname(target), { recursive: true });
@@ -659,7 +659,7 @@ function runRestoreLocalDistFixture(
   }
 
   if (options.symlinkEscape) {
-    const escapeRoot = tempDirs.make("openclaw-install-restore-escape-");
+    const escapeRoot = tempDirs.make("carapace-install-restore-escape-");
     const externalAiRoot =
       options.symlinkEscape === "packages" ? join(escapeRoot, "packages", "ai") : escapeRoot;
     externalSentinel = join(externalAiRoot, "dist", "ai.txt");
@@ -742,7 +742,7 @@ describe("test-install-sh-docker", () => {
     expect(runDefaultSmokePlatform({ GITHUB_ACTIONS: "true" }, "x86_64")).toBe("linux/amd64");
     expect(runDefaultSmokePlatform({}, "arm64")).toBe("linux/arm64");
     expect(
-      runDefaultSmokePlatform({ OPENCLAW_INSTALL_SMOKE_PLATFORM: "linux/s390x" }, "x86_64"),
+      runDefaultSmokePlatform({ CARAPACE_INSTALL_SMOKE_PLATFORM: "linux/s390x" }, "x86_64"),
     ).toBe("linux/s390x");
   });
 
@@ -750,7 +750,7 @@ describe("test-install-sh-docker", () => {
     const script = readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain(
-      'UPDATE_EXPECT_VERSION="${OPENCLAW_INSTALL_SMOKE_UPDATE_EXPECT_VERSION:-}"',
+      'UPDATE_EXPECT_VERSION="${CARAPACE_INSTALL_SMOKE_UPDATE_EXPECT_VERSION:-}"',
     );
     expect(script).toContain('if [[ -z "$UPDATE_EXPECT_VERSION" ]]; then');
     expect(script).toContain('UPDATE_EXPECT_VERSION="$packed_update_version"');
@@ -765,17 +765,17 @@ describe("test-install-sh-docker", () => {
     const workflow = readFileSync(INSTALL_SMOKE_WORKFLOW_PATH, "utf8");
 
     expect(script).toContain(
-      'UPDATE_BASELINE_VERSION="${OPENCLAW_INSTALL_SMOKE_UPDATE_BASELINE:-latest}"',
+      'UPDATE_BASELINE_VERSION="${CARAPACE_INSTALL_SMOKE_UPDATE_BASELINE:-latest}"',
     );
     expect(script).toContain('quiet_npm pack "${PACKAGE_NAME}@${UPDATE_BASELINE_VERSION}"');
     expect(script).toContain('UPDATE_BASELINE_VERSION="$(');
     expect(runner).toContain(
-      'UPDATE_BASELINE_VERSION="${OPENCLAW_INSTALL_UPDATE_BASELINE:-latest}"',
+      'UPDATE_BASELINE_VERSION="${CARAPACE_INSTALL_UPDATE_BASELINE:-latest}"',
     );
     expect(runner).toContain("resolve_update_baseline_version");
     expect(runner).toContain('quiet_npm view "${PACKAGE_NAME}@${UPDATE_BASELINE_VERSION}" version');
     expect(workflow).toContain(
-      "OPENCLAW_INSTALL_SMOKE_UPDATE_BASELINE: ${{ inputs.update_baseline_version || 'latest' }}",
+      "CARAPACE_INSTALL_SMOKE_UPDATE_BASELINE: ${{ inputs.update_baseline_version || 'latest' }}",
     );
   });
 
@@ -783,17 +783,17 @@ describe("test-install-sh-docker", () => {
     const e2eDockerfile = expectInstallDockerfileContract(
       INSTALL_E2E_DOCKERFILE_PATH,
       "install-sh-e2e/run.sh",
-      "/usr/local/bin/openclaw-install-e2e",
+      "/usr/local/bin/carapace-install-e2e",
     );
     const smokeDockerfile = expectInstallDockerfileContract(
       SMOKE_DOCKERFILE_PATH,
       "install-sh-smoke/run.sh",
-      "/usr/local/bin/openclaw-install-smoke",
+      "/usr/local/bin/carapace-install-smoke",
     );
     const nonrootDockerfile = expectInstallDockerfileContract(
       NONROOT_DOCKERFILE_PATH,
       "install-sh-nonroot/run.sh",
-      "/usr/local/bin/openclaw-install-nonroot",
+      "/usr/local/bin/carapace-install-nonroot",
     );
 
     expect(e2eDockerfile).toContain("USER appuser");
@@ -816,17 +816,17 @@ describe("test-install-sh-docker", () => {
   });
 
   it("keeps shared install helpers parsing and verifying installed CLI versions", () => {
-    const root = tempDirs.make("openclaw-install-helper-");
+    const root = tempDirs.make("carapace-install-helper-");
     const binDir = join(root, "bin");
     mkdirSync(binDir, { recursive: true });
     writeFileSync(
-      join(binDir, "openclaw"),
+      join(binDir, "carapace"),
       [
         "#!/usr/bin/env bash",
         "set -euo pipefail",
         'case "${1:-}" in',
         "  --version)",
-        "    printf 'OpenClaw v2026.6.21-beta.1\\r\\n'",
+        "    printf 'Carapace v2026.6.21-beta.1\\r\\n'",
         "    ;;",
         "  --help)",
         "    printf 'usage\\n'",
@@ -847,8 +847,8 @@ describe("test-install-sh-docker", () => {
         [
           "set -euo pipefail",
           "source scripts/docker/install-sh-common/cli-verify.sh",
-          "printf 'parsed=%s\\n' \"$(extract_openclaw_semver 'OpenClaw v2026.6.21-beta.1+build.7')\"",
-          "verify_installed_cli openclaw 2026.6.21-beta.1",
+          "printf 'parsed=%s\\n' \"$(extract_carapace_semver 'Carapace v2026.6.21-beta.1+build.7')\"",
+          "verify_installed_cli carapace 2026.6.21-beta.1",
         ].join("\n"),
       ],
       {
@@ -866,7 +866,7 @@ describe("test-install-sh-docker", () => {
     expect(result.stderr).toBe("");
     expect(result.stdout).toContain("parsed=2026.6.21-beta.1+build.7");
     expect(result.stdout).toContain(
-      "cli=openclaw installed=2026.6.21-beta.1 expected=2026.6.21-beta.1",
+      "cli=carapace installed=2026.6.21-beta.1 expected=2026.6.21-beta.1",
     );
     expect(result.stdout).toContain("==> Sanity: CLI runs");
   });
@@ -876,18 +876,18 @@ describe("test-install-sh-docker", () => {
     const packageHelper = readFileSync(DOCKER_E2E_PACKAGE_HELPER_PATH, "utf8");
     const dockerfile = readFileSync("Dockerfile", "utf8");
 
-    expect(script).toContain('ROOT_DIR="${OPENCLAW_INSTALL_SMOKE_SOURCE_DIR:-$HARNESS_ROOT}"');
-    expect(script).toContain('UPDATE_DIST_IMAGE="${OPENCLAW_INSTALL_SMOKE_UPDATE_DIST_IMAGE:-}"');
+    expect(script).toContain('ROOT_DIR="${CARAPACE_INSTALL_SMOKE_SOURCE_DIR:-$HARNESS_ROOT}"');
+    expect(script).toContain('UPDATE_DIST_IMAGE="${CARAPACE_INSTALL_SMOKE_UPDATE_DIST_IMAGE:-}"');
     expect(script).toContain("docker_e2e_restore_package_dist_from_image");
     expect(script).toContain('source "$HARNESS_ROOT/scripts/lib/docker-e2e-package.sh"');
     expect(script).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_INSTALL_SMOKE_DOCKER_COMMAND_TIMEOUT:-600s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_INSTALL_SMOKE_DOCKER_COMMAND_TIMEOUT:-600s}}"',
     );
     expect(packageHelper).toContain('container_id="$(docker_e2e_docker_cmd create "$image")"');
     expect(packageHelper).toContain(
       'docker_e2e_docker_cmd cp "${container_id}:/app/dist" "$temp_dir/dist"',
     );
-    expect(packageHelper).toContain('"${container_id}:/app/node_modules/@openclaw/ai/dist"');
+    expect(packageHelper).toContain('"${container_id}:/app/node_modules/@carapace/ai/dist"');
     expect(packageHelper).toContain('"$temp_dir/ai-dist"');
     expect(packageHelper).toContain('mv "$temp_dir/ai-dist" "$ai_dist_dir"');
     expect(packageHelper).toContain("cleanup_restore_package_dist() {");
@@ -982,7 +982,7 @@ printf 'status=%s\\n' "$status"
     const script = readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain(
-      'INSTALL_SMOKE_DOCKER_RUN_TIMEOUT="${OPENCLAW_INSTALL_SMOKE_DOCKER_RUN_TIMEOUT:-2700s}"',
+      'INSTALL_SMOKE_DOCKER_RUN_TIMEOUT="${CARAPACE_INSTALL_SMOKE_DOCKER_RUN_TIMEOUT:-2700s}"',
     );
     expect(script).toContain("run_install_smoke_container()");
     expect(script).toContain(
@@ -1025,12 +1025,12 @@ printf 'status=%s\\n' "$status"
     const dockerfile = readFileSync("Dockerfile", "utf8");
 
     expect(dockerfile).toContain(
-      'ARG OPENCLAW_DOCKER_BUILD_NODE_OPTIONS="--max-old-space-size=8192"',
+      'ARG CARAPACE_DOCKER_BUILD_NODE_OPTIONS="--max-old-space-size=8192"',
     );
-    expect(dockerfile).toContain('ARG OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=""');
-    expect(dockerfile).toContain("ARG OPENCLAW_DOCKER_BUILD_SKIP_DTS=1");
+    expect(dockerfile).toContain('ARG CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB=""');
+    expect(dockerfile).toContain("ARG CARAPACE_DOCKER_BUILD_SKIP_DTS=1");
     expect(dockerfile).toContain(
-      'OPENCLAW_RUN_NODE_SKIP_DTS_BUILD="$OPENCLAW_DOCKER_BUILD_SKIP_DTS" OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB="$OPENCLAW_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB" NODE_OPTIONS="$OPENCLAW_DOCKER_BUILD_NODE_OPTIONS" pnpm_config_verify_deps_before_run=false pnpm build:docker',
+      'CARAPACE_RUN_NODE_SKIP_DTS_BUILD="$CARAPACE_DOCKER_BUILD_SKIP_DTS" CARAPACE_TSDOWN_MAX_OLD_SPACE_MB="$CARAPACE_DOCKER_BUILD_TSDOWN_MAX_OLD_SPACE_MB" NODE_OPTIONS="$CARAPACE_DOCKER_BUILD_NODE_OPTIONS" pnpm_config_verify_deps_before_run=false pnpm build:docker',
     );
   });
 
@@ -1067,15 +1067,15 @@ printf 'status=%s\\n' "$status"
     expect(verifier).toContain(
       "node scripts/docker/verify-fs-safe-native.mjs --package-root /app --mode require",
     );
-    expect(verifier).toContain("if grep -qx 'matrix' /tmp/openclaw-selected-plugin-dirs; then");
+    expect(verifier).toContain("if grep -qx 'matrix' /tmp/carapace-selected-plugin-dirs; then");
   });
 
   it("passes the baked browser build arg through Docker setup", () => {
     const script = readFileSync(DOCKER_SETUP_PATH, "utf8");
 
-    expect(script).toContain('export OPENCLAW_INSTALL_BROWSER="${OPENCLAW_INSTALL_BROWSER:-}"');
-    expect(script).toContain("OPENCLAW_INSTALL_BROWSER \\");
-    expect(script).toContain('--build-arg "OPENCLAW_INSTALL_BROWSER=${OPENCLAW_INSTALL_BROWSER}"');
+    expect(script).toContain('export CARAPACE_INSTALL_BROWSER="${CARAPACE_INSTALL_BROWSER:-}"');
+    expect(script).toContain("CARAPACE_INSTALL_BROWSER \\");
+    expect(script).toContain('--build-arg "CARAPACE_INSTALL_BROWSER=${CARAPACE_INSTALL_BROWSER}"');
   });
 
   it("bounds Docker setup image pulls", () => {
@@ -1083,10 +1083,10 @@ printf 'status=%s\\n' "$status"
     const timeoutHelper = readFileSync(HOST_TIMEOUT_PATH, "utf8");
 
     expect(script).toContain('source "$ROOT_DIR/scripts/lib/host-timeout.sh"');
-    expect(script).toContain('DOCKER_PULL_TIMEOUT="${OPENCLAW_DOCKER_SETUP_PULL_TIMEOUT:-600s}"');
+    expect(script).toContain('DOCKER_PULL_TIMEOUT="${CARAPACE_DOCKER_SETUP_PULL_TIMEOUT:-600s}"');
     expect(script).toContain("run_docker_pull()");
     expect(script).toContain(
-      'openclaw_host_timeout_cmd "$DOCKER_PULL_TIMEOUT" docker pull "$image"',
+      'carapace_host_timeout_cmd "$DOCKER_PULL_TIMEOUT" docker pull "$image"',
     );
     expect(timeoutHelper).toContain("elif command -v gtimeout >/dev/null 2>&1; then");
     expect(timeoutHelper).toContain('"$timeout_bin" --kill-after=30s "$timeout_value" "$@"');
@@ -1109,7 +1109,7 @@ printf 'status=%s\\n' "$status"
     const script = readFileSync(DOCKER_SETUP_PATH, "utf8");
     expect(script).not.toContain("/usr/share/zoneinfo");
     expect(script).toContain(
-      'fail "OPENCLAW_TZ must be supported by $IMAGE_NAME (e.g. Asia/Shanghai)."',
+      'fail "CARAPACE_TZ must be supported by $IMAGE_NAME (e.g. Asia/Shanghai)."',
     );
   });
 
@@ -1117,35 +1117,35 @@ printf 'status=%s\\n' "$status"
     const script = readFileSync(PODMAN_SETUP_PATH, "utf8");
 
     expect(script).toContain('source "$REPO_PATH/scripts/lib/host-timeout.sh"');
-    expect(script).toContain('PODMAN_PULL_TIMEOUT="${OPENCLAW_PODMAN_SETUP_PULL_TIMEOUT:-600s}"');
+    expect(script).toContain('PODMAN_PULL_TIMEOUT="${CARAPACE_PODMAN_SETUP_PULL_TIMEOUT:-600s}"');
     expect(script).toContain("run_podman_pull()");
     expect(script).toContain(
-      'openclaw_host_timeout_cmd "$PODMAN_PULL_TIMEOUT" podman pull "$image"',
+      'carapace_host_timeout_cmd "$PODMAN_PULL_TIMEOUT" podman pull "$image"',
     );
-    expect(script).toContain('run_podman_pull "$OPENCLAW_IMAGE"');
-    expect(script).not.toContain('podman pull "$OPENCLAW_IMAGE"');
+    expect(script).toContain('run_podman_pull "$CARAPACE_IMAGE"');
+    expect(script).not.toContain('podman pull "$CARAPACE_IMAGE"');
   });
 
   it("bounds Podman setup image builds", () => {
     const script = readFileSync(PODMAN_SETUP_PATH, "utf8");
 
     expect(script).toContain(
-      'PODMAN_BUILD_TIMEOUT="${OPENCLAW_PODMAN_SETUP_BUILD_TIMEOUT:-1800s}"',
+      'PODMAN_BUILD_TIMEOUT="${CARAPACE_PODMAN_SETUP_BUILD_TIMEOUT:-1800s}"',
     );
     expect(script).toContain("run_podman_build()");
-    expect(script).toContain('openclaw_host_timeout_cmd "$PODMAN_BUILD_TIMEOUT" podman build "$@"');
-    expect(script).toContain('run_podman_build -t "$OPENCLAW_IMAGE"');
-    expect(script).not.toContain('podman build -t "$OPENCLAW_IMAGE"');
+    expect(script).toContain('carapace_host_timeout_cmd "$PODMAN_BUILD_TIMEOUT" podman build "$@"');
+    expect(script).toContain('run_podman_build -t "$CARAPACE_IMAGE"');
+    expect(script).not.toContain('podman build -t "$CARAPACE_IMAGE"');
   });
 
   it("bounds detached Podman launches without timing out onboarding", () => {
     const script = readFileSync(PODMAN_RUN_PATH, "utf8");
 
-    expect(script).toContain('PODMAN_RUN_TIMEOUT="${OPENCLAW_PODMAN_RUN_TIMEOUT:-600s}"');
-    expect(script).toContain("OPENCLAW_PODMAN_RUN_TIMEOUT|OPENCLAW_PODMAN_GATEWAY_HOST_PORT");
+    expect(script).toContain('PODMAN_RUN_TIMEOUT="${CARAPACE_PODMAN_RUN_TIMEOUT:-600s}"');
+    expect(script).toContain("CARAPACE_PODMAN_RUN_TIMEOUT|CARAPACE_PODMAN_GATEWAY_HOST_PORT");
     expect(script).toContain('source "$SCRIPT_DIR/lib/host-timeout.sh"');
     expect(script).toContain("run_podman_detached()");
-    expect(script).toContain('openclaw_host_timeout_cmd "$PODMAN_RUN_TIMEOUT" podman run "$@"');
+    expect(script).toContain('carapace_host_timeout_cmd "$PODMAN_RUN_TIMEOUT" podman run "$@"');
     expect(script).toContain('podman run --pull="$PODMAN_PULL" --rm -it \\');
     expect(script).toContain('run_podman_detached --pull="$PODMAN_PULL" -d --replace \\');
     expect(script).not.toContain('podman run --pull="$PODMAN_PULL" -d --replace \\');
@@ -1156,23 +1156,23 @@ printf 'status=%s\\n' "$status"
     const podmanSetup = readFileSync(PODMAN_SETUP_PATH, "utf8");
     const dockerfile = readFileSync("Dockerfile", "utf8");
 
-    expect(dockerfile).toContain("ARG OPENCLAW_IMAGE_PIP_PACKAGES");
+    expect(dockerfile).toContain("ARG CARAPACE_IMAGE_PIP_PACKAGES");
     expect(dockerfile).toContain(
-      "python3 -m pip install --no-cache-dir --break-system-packages $OPENCLAW_IMAGE_PIP_PACKAGES",
+      "python3 -m pip install --no-cache-dir --break-system-packages $CARAPACE_IMAGE_PIP_PACKAGES",
     );
     expect(dockerSetup).toContain(
-      'export OPENCLAW_IMAGE_PIP_PACKAGES="${OPENCLAW_IMAGE_PIP_PACKAGES:-}"',
+      'export CARAPACE_IMAGE_PIP_PACKAGES="${CARAPACE_IMAGE_PIP_PACKAGES:-}"',
     );
-    expect(dockerSetup).toContain("OPENCLAW_IMAGE_PIP_PACKAGES \\");
+    expect(dockerSetup).toContain("CARAPACE_IMAGE_PIP_PACKAGES \\");
     expect(dockerSetup).toContain(
-      '--build-arg "OPENCLAW_IMAGE_PIP_PACKAGES=${OPENCLAW_IMAGE_PIP_PACKAGES}"',
+      '--build-arg "CARAPACE_IMAGE_PIP_PACKAGES=${CARAPACE_IMAGE_PIP_PACKAGES}"',
     );
-    expect(dockerSetup).not.toContain("OPENCLAW_DOCKER_PIP_PACKAGES");
-    expect(podmanSetup).toContain('OPENCLAW_IMAGE_PIP_PACKAGES="${OPENCLAW_IMAGE_PIP_PACKAGES:-}"');
+    expect(dockerSetup).not.toContain("CARAPACE_DOCKER_PIP_PACKAGES");
+    expect(podmanSetup).toContain('CARAPACE_IMAGE_PIP_PACKAGES="${CARAPACE_IMAGE_PIP_PACKAGES:-}"');
     expect(podmanSetup).toContain(
-      'BUILD_ARGS+=(--build-arg "OPENCLAW_IMAGE_PIP_PACKAGES=${OPENCLAW_IMAGE_PIP_PACKAGES}")',
+      'BUILD_ARGS+=(--build-arg "CARAPACE_IMAGE_PIP_PACKAGES=${CARAPACE_IMAGE_PIP_PACKAGES}")',
     );
-    expect(podmanSetup).not.toContain("OPENCLAW_DOCKER_PIP_PACKAGES");
+    expect(podmanSetup).not.toContain("CARAPACE_DOCKER_PIP_PACKAGES");
   });
 
   it("passes one source identity into local Docker and Podman builds", () => {
@@ -1181,9 +1181,9 @@ printf 'status=%s\\n' "$status"
 
     for (const setupScript of [dockerSetup, podmanSetup]) {
       expect(setupScript).toContain("scripts/lib/build-metadata.sh");
-      expect(setupScript).toContain("openclaw_resolve_git_commit");
-      expect(setupScript).toContain("openclaw_resolve_build_timestamp");
-      expect(setupScript).toContain("OPENCLAW_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}");
+      expect(setupScript).toContain("carapace_resolve_git_commit");
+      expect(setupScript).toContain("carapace_resolve_build_timestamp");
+      expect(setupScript).toContain("CARAPACE_BUILD_TIMESTAMP=${BUILD_TIMESTAMP}");
       expect(setupScript).toContain("GIT_COMMIT=${BUILD_GIT_COMMIT}");
     }
   });
@@ -1193,11 +1193,11 @@ printf 'status=%s\\n' "$status"
     const template = readFileSync(PODMAN_QUADLET_TEMPLATE_PATH, "utf8");
 
     expect(setupScript).toContain(
-      'QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/openclaw.container.in"',
+      'QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/carapace.container.in"',
     );
     for (const placeholder of [
-      "OPENCLAW_CONFIG_DIR",
-      "OPENCLAW_WORKSPACE_DIR",
+      "CARAPACE_CONFIG_DIR",
+      "CARAPACE_WORKSPACE_DIR",
       "IMAGE_NAME",
       "CONTAINER_NAME",
     ]) {
@@ -1207,11 +1207,11 @@ printf 'status=%s\\n' "$status"
 
     expect(template).toContain("UserNS=keep-id");
     expect(template).toContain("User=%U:%G");
-    expect(template).toContain("Volume={{OPENCLAW_CONFIG_DIR}}:/home/node/.openclaw:Z");
+    expect(template).toContain("Volume={{CARAPACE_CONFIG_DIR}}:/home/node/.carapace:Z");
     expect(template).toContain(
-      "Volume={{OPENCLAW_WORKSPACE_DIR}}:/home/node/.openclaw/workspace:Z",
+      "Volume={{CARAPACE_WORKSPACE_DIR}}:/home/node/.carapace/workspace:Z",
     );
-    expect(template).toContain("EnvironmentFile={{OPENCLAW_CONFIG_DIR}}/.env");
+    expect(template).toContain("EnvironmentFile={{CARAPACE_CONFIG_DIR}}/.env");
     expect(template).toContain("PublishPort=127.0.0.1:18789:18789");
     expect(template).toContain("Exec=node dist/index.js gateway --bind lan --port 18789");
     expect(template).not.toContain("/home/admin");
@@ -1229,7 +1229,7 @@ printf 'status=%s\\n' "$status"
     expect(workflow).toContain(
       "git for-each-ref --format='%(refname:short)' --contains \"$selected_sha\" refs/remotes/origin",
     );
-    expect(workflow).toContain("reachable from an OpenClaw branch or release tag");
+    expect(workflow).toContain("reachable from an Carapace branch or release tag");
   });
 
   it("downloads the OpenShell installer completely before execution", () => {
@@ -1292,8 +1292,8 @@ printf 'status=%s\\n' "$status"
 
   it("normalizes npm 12 pack output and enforces the budget without tsx", () => {
     const withinBudget = runInstallSmokePackHelpers({
-      openclaw: {
-        filename: "openclaw-2026.8.1.tgz",
+      carapace: {
+        filename: "carapace-2026.8.1.tgz",
         unpackedSize: 100,
         version: "2026.8.1",
       },
@@ -1302,7 +1302,7 @@ printf 'status=%s\\n' "$status"
     expect(withinBudget.result.stderr).toBe("");
     expect(withinBudget.normalized).toEqual([
       {
-        filename: "openclaw-2026.8.1.tgz",
+        filename: "carapace-2026.8.1.tgz",
         unpackedSize: 100,
         version: "2026.8.1",
       },
@@ -1333,18 +1333,18 @@ printf 'status=%s\\n' "$status"
   });
 
   it("rejects path-like npm pack tarball filenames in update smoke metadata", () => {
-    expect(runReadPackTarballFilename("openclaw-2026.6.17.tgz")).toMatchObject({
+    expect(runReadPackTarballFilename("carapace-2026.6.17.tgz")).toMatchObject({
       status: 0,
-      stdout: "openclaw-2026.6.17.tgz",
+      stdout: "carapace-2026.6.17.tgz",
     });
 
     const unsafeFilenames = [
-      "../openclaw.tgz",
-      "nested/openclaw.tgz",
-      "nested\\openclaw.tgz",
-      "/tmp/openclaw.tgz",
-      "C:\\temp\\openclaw.tgz",
-      "openclaw.tar.gz",
+      "../carapace.tgz",
+      "nested/carapace.tgz",
+      "nested\\carapace.tgz",
+      "/tmp/carapace.tgz",
+      "C:\\temp\\carapace.tgz",
+      "carapace.tar.gz",
     ];
 
     for (const filename of unsafeFilenames) {
@@ -1358,11 +1358,11 @@ printf 'status=%s\\n' "$status"
   it("uses the package artifact helper for local update tarballs", () => {
     const script = readFileSync(SCRIPT_PATH, "utf8");
 
-    expect(script).toContain('node "$HARNESS_ROOT/scripts/package-openclaw-for-docker.mjs"');
+    expect(script).toContain('node "$HARNESS_ROOT/scripts/package-carapace-for-docker.mjs"');
     expect(script).toContain("--allow-unreleased-changelog");
-    expect(script).toContain("OPENCLAW_INSTALL_SMOKE_ALLOW_UNRELEASED_CHANGELOG");
+    expect(script).toContain("CARAPACE_INSTALL_SMOKE_ALLOW_UNRELEASED_CHANGELOG");
     expect(script).toContain(
-      'if [[ "${OPENCLAW_INSTALL_SMOKE_ALLOW_UNRELEASED_CHANGELOG:-true}" == "true" ]]',
+      'if [[ "${CARAPACE_INSTALL_SMOKE_ALLOW_UNRELEASED_CHANGELOG:-true}" == "true" ]]',
     );
     expect(script).toContain("package_args+=(--allow-unreleased-changelog)");
     expect(script).toContain('--source-dir "$ROOT_DIR"');
@@ -1370,7 +1370,7 @@ printf 'status=%s\\n' "$status"
     expect(script).toContain("--skip-build");
     expect(script).not.toContain("node --import tsx scripts/write-package-dist-inventory.ts");
     expect(script).not.toContain("quiet_npm pack --ignore-scripts --json");
-    expect(script).toContain('node "$HARNESS_ROOT/scripts/check-openclaw-package-tarball.mjs"');
+    expect(script).toContain('node "$HARNESS_ROOT/scripts/check-carapace-package-tarball.mjs"');
     expect(script).toContain("--require-bundled-workspace-deps");
   });
 
@@ -1387,7 +1387,7 @@ printf 'status=%s\\n' "$status"
     expect(frozenBranch).toContain('cp "$FROZEN_PAYLOAD_DIR/candidate.tgz"');
     expect(frozenBranch).toContain('cp "$FROZEN_PAYLOAD_DIR/candidate-pack.json"');
     expect(frozenBranch).not.toContain("pnpm build");
-    expect(frozenBranch).not.toContain("package-openclaw-for-docker");
+    expect(frozenBranch).not.toContain("package-carapace-for-docker");
     expect(frozenBranch).not.toContain("normalize_npm_pack_json_file");
     expect(script).not.toContain("node --import tsx");
     expect(script).toContain('if [[ -z "$FROZEN_PAYLOAD_DIR" ]]; then');
@@ -1403,9 +1403,9 @@ printf 'status=%s\\n' "$status"
     const wrapper = readFileSync(SCRIPT_PATH, "utf8");
     const runner = readFileSync(SMOKE_RUNNER_PATH, "utf8");
 
-    expect(wrapper).toContain('-v "$INSTALL_SCRIPT_PATH:/tmp/openclaw-install.sh:ro"');
+    expect(wrapper).toContain('-v "$INSTALL_SCRIPT_PATH:/tmp/carapace-install.sh:ro"');
     expect(wrapper).toContain(
-      'FROZEN_PAYLOAD_DIR="${OPENCLAW_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:-}"',
+      'FROZEN_PAYLOAD_DIR="${CARAPACE_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:-}"',
     );
     expect(runner).toContain("Run official installer one-liner for latest release tarball");
     expect(runner).toContain("run_installer_pipeline");
@@ -1423,7 +1423,7 @@ printf 'status=%s\\n' "$status"
     expect(runner).toContain('--version "$FRESH_TAG_URL"');
     expect(runner).toContain('--version "$FRESHNESS_VERSION"');
     expect(runner).toMatch(
-      /HOME="\$policy_home" \\\n\s*NPM_CONFIG_USERCONFIG="\$\{policy_home\}\/\.npmrc" \\\n\s*OPENCLAW_NO_ONBOARD=1 \\\n\s*OPENCLAW_NO_PROMPT=1 \\\n\s*run_installer_pipeline/u,
+      /HOME="\$policy_home" \\\n\s*NPM_CONFIG_USERCONFIG="\$\{policy_home\}\/\.npmrc" \\\n\s*CARAPACE_NO_ONBOARD=1 \\\n\s*CARAPACE_NO_PROMPT=1 \\\n\s*run_installer_pipeline/u,
     );
   });
 
@@ -1431,9 +1431,9 @@ printf 'status=%s\\n' "$status"
     const wrapper = readFileSync(SCRIPT_PATH, "utf8");
     const nonrootRunner = readFileSync(NONROOT_RUNNER_PATH, "utf8");
 
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_CLI_URL="$CLI_INSTALL_URL"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_CLI_URL="$CLI_INSTALL_URL"');
     expect(wrapper).toContain(
-      `'set -o pipefail; curl -fsSL --connect-timeout 30 --max-time 300 -- "$OPENCLAW_INSTALL_CLI_URL" | bash -s -- --set-npm-prefix --no-onboard'`,
+      `'set -o pipefail; curl -fsSL --connect-timeout 30 --max-time 300 -- "$CARAPACE_INSTALL_CLI_URL" | bash -s -- --set-npm-prefix --no-onboard'`,
     );
     expect(nonrootRunner).toContain(
       'curl -fsSL --connect-timeout 30 --max-time 300 -o "$installer" -- "$INSTALL_URL"',
@@ -1479,13 +1479,13 @@ printf 'status=%s\\n' "$status"
     );
     expect(wrapper).toContain('LATEST_VERSION="$public_latest_version"');
     expect(wrapper).toContain('LATEST_VERSION="$(quiet_npm view "$PACKAGE_NAME" version)"');
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_EXPECT_VERSION="$LATEST_VERSION"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_EXPECT_VERSION="$LATEST_VERSION"');
   });
 
   it("runs update and non-root installer groups independently while defaulting to all", () => {
     const wrapper = readFileSync(SCRIPT_PATH, "utf8");
 
-    expect(wrapper).toContain('INSTALL_SMOKE_GROUP="${OPENCLAW_INSTALL_SMOKE_GROUP:-all}"');
+    expect(wrapper).toContain('INSTALL_SMOKE_GROUP="${CARAPACE_INSTALL_SMOKE_GROUP:-all}"');
     expect(wrapper).toContain("RUN_UPDATE_GROUP=0");
     expect(wrapper).toContain("RUN_NONROOT_GROUP=0");
     expect(wrapper).toContain('case "$INSTALL_SMOKE_GROUP" in');
@@ -1502,12 +1502,12 @@ printf 'status=%s\\n' "$status"
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_INSTALL_SMOKE_GROUP: "invalid",
+        CARAPACE_INSTALL_SMOKE_GROUP: "invalid",
       },
     });
     expect(invalid.status).toBe(2);
     expect(invalid.stderr).toContain(
-      "OPENCLAW_INSTALL_SMOKE_GROUP must be all, update, or nonroot",
+      "CARAPACE_INSTALL_SMOKE_GROUP must be all, update, or nonroot",
     );
   });
 });
@@ -1538,7 +1538,7 @@ describe("install-sh E2E runner", () => {
       const fixture = runInstallE2eInstallerFixture({
         installTag,
         installerBody:
-          'printf "%s|%s" "${OPENCLAW_BETA-}" "${OPENCLAW_VERSION-}" >"$INSTALL_MARKER"\n',
+          'printf "%s|%s" "${CARAPACE_BETA-}" "${CARAPACE_VERSION-}" >"$INSTALL_MARKER"\n',
       });
 
       expect(fixture.result.status, fixture.result.stderr).toBe(0);
@@ -1551,57 +1551,57 @@ describe("install-sh E2E runner", () => {
     const wrapper = readFileSync(INSTALL_E2E_DOCKER_PATH, "utf8");
 
     expect(wrapper).toContain(
-      'AGENT_TURN_TIMEOUT_SECONDS="$(\n  docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300\n)"',
+      'AGENT_TURN_TIMEOUT_SECONDS="$(\n  docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300\n)"',
     );
     expect(wrapper).toContain(
-      'OPENAI_PROVIDER_TIMEOUT_SECONDS="$(\n  docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"\n)"',
+      'OPENAI_PROVIDER_TIMEOUT_SECONDS="$(\n  docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS"\n)"',
     );
     expect(wrapper).toContain(
-      'AGENT_TURNS_PARALLEL="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
+      'AGENT_TURNS_PARALLEL="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
     );
     expect(wrapper).toContain(
-      'AGENT_TOOL_SMOKE="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
+      'AGENT_TOOL_SMOKE="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
     );
     expect(wrapper).toContain(
-      'SESSION_SCAN_BYTES="$(\n  docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_SESSION_SCAN_BYTES 16777216\n)"',
+      'SESSION_SCAN_BYTES="$(\n  docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_SESSION_SCAN_BYTES 16777216\n)"',
     );
     expect(wrapper).toContain(
-      'SESSION_LINE_BYTES="$(\n  docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_SESSION_LINE_BYTES 1048576\n)"',
+      'SESSION_LINE_BYTES="$(\n  docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_SESSION_LINE_BYTES 1048576\n)"',
     );
     expect(wrapper).toContain(
-      'SESSION_SCAN_DEPTH="$(docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_SESSION_SCAN_DEPTH 64)"',
+      'SESSION_SCAN_DEPTH="$(docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_SESSION_SCAN_DEPTH 64)"',
     );
     expect(wrapper).toContain(
-      'SESSION_SCAN_NODES="$(docker_e2e_read_positive_int_env OPENCLAW_INSTALL_E2E_SESSION_SCAN_NODES 100000)"',
+      'SESSION_SCAN_NODES="$(docker_e2e_read_positive_int_env CARAPACE_INSTALL_E2E_SESSION_SCAN_NODES 100000)"',
     );
     expect(wrapper).toContain(
-      '-e OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS="$OPENAI_PROVIDER_TIMEOUT_SECONDS"',
+      '-e CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS="$OPENAI_PROVIDER_TIMEOUT_SECONDS"',
     );
     expect(wrapper).toContain(
-      '-e OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS="$AGENT_TURN_TIMEOUT_SECONDS"',
+      '-e CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS="$AGENT_TURN_TIMEOUT_SECONDS"',
     );
     expect(wrapper).toContain(
-      '-e OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL="$AGENT_TURNS_PARALLEL"',
+      '-e CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL="$AGENT_TURNS_PARALLEL"',
     );
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE="$AGENT_TOOL_SMOKE"');
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_E2E_SESSION_SCAN_BYTES="$SESSION_SCAN_BYTES"');
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_E2E_SESSION_LINE_BYTES="$SESSION_LINE_BYTES"');
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_E2E_SESSION_SCAN_DEPTH="$SESSION_SCAN_DEPTH"');
-    expect(wrapper).toContain('-e OPENCLAW_INSTALL_E2E_SESSION_SCAN_NODES="$SESSION_SCAN_NODES"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE="$AGENT_TOOL_SMOKE"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_E2E_SESSION_SCAN_BYTES="$SESSION_SCAN_BYTES"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_E2E_SESSION_LINE_BYTES="$SESSION_LINE_BYTES"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_E2E_SESSION_SCAN_DEPTH="$SESSION_SCAN_DEPTH"');
+    expect(wrapper).toContain('-e CARAPACE_INSTALL_E2E_SESSION_SCAN_NODES="$SESSION_SCAN_NODES"');
     expect(wrapper).not.toContain(
-      'OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS="${OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS:-}"',
+      'CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS="${CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS:-}"',
     );
   });
 
   it.each([
-    ["turn timeout", "OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS", "300s"],
-    ["provider timeout", "OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS", "1e3"],
-    ["parallel toggle", "OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL", "2"],
-    ["tool smoke toggle", "OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE", "false"],
-    ["session scan bytes", "OPENCLAW_INSTALL_E2E_SESSION_SCAN_BYTES", "16mb"],
-    ["session line bytes", "OPENCLAW_INSTALL_E2E_SESSION_LINE_BYTES", "1mb"],
-    ["session scan depth", "OPENCLAW_INSTALL_E2E_SESSION_SCAN_DEPTH", "0"],
-    ["session scan nodes", "OPENCLAW_INSTALL_E2E_SESSION_SCAN_NODES", "100k"],
+    ["turn timeout", "CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS", "300s"],
+    ["provider timeout", "CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS", "1e3"],
+    ["parallel toggle", "CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL", "2"],
+    ["tool smoke toggle", "CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE", "false"],
+    ["session scan bytes", "CARAPACE_INSTALL_E2E_SESSION_SCAN_BYTES", "16mb"],
+    ["session line bytes", "CARAPACE_INSTALL_E2E_SESSION_LINE_BYTES", "1mb"],
+    ["session scan depth", "CARAPACE_INSTALL_E2E_SESSION_SCAN_DEPTH", "0"],
+    ["session scan nodes", "CARAPACE_INSTALL_E2E_SESSION_SCAN_NODES", "100k"],
   ])("rejects invalid install E2E Docker %s before image build", (_label, envName, value) => {
     const result = spawnSync("bash", [INSTALL_E2E_DOCKER_PATH], {
       encoding: "utf8",
@@ -1620,20 +1620,20 @@ describe("install-sh E2E runner", () => {
     const script = readFileSync(INSTALL_E2E_RUNNER_PATH, "utf8");
 
     expect(script).toContain(
-      'AGENT_TURN_TIMEOUT_SECONDS="$(read_positive_int_env OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300)"',
+      'AGENT_TURN_TIMEOUT_SECONDS="$(read_positive_int_env CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS 300)"',
     );
     expect(script).toContain(
-      'AGENT_TURNS_PARALLEL="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
+      'AGENT_TURNS_PARALLEL="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL 1)"',
     );
     expect(script).toContain(
-      'AGENT_TOOL_SMOKE="$(read_boolean_env OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
+      'AGENT_TOOL_SMOKE="$(read_boolean_env CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE 1)"',
     );
     expect(script).toContain(
-      'OPENAI_PROVIDER_TIMEOUT_SECONDS="$(read_positive_int_env OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS")"',
+      'OPENAI_PROVIDER_TIMEOUT_SECONDS="$(read_positive_int_env CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS "$AGENT_TURN_TIMEOUT_SECONDS")"',
     );
     expect(script).toContain('timeout --kill-after=15s "${AGENT_TURN_TIMEOUT_SECONDS}s"');
     expect(script).toContain('\\"timeoutSeconds\\":${OPENAI_PROVIDER_TIMEOUT_SECONDS}');
-    expect(script).toContain('openclaw --profile "$profile" agent \\');
+    expect(script).toContain('carapace --profile "$profile" agent \\');
     expect(script).not.toContain("\n    --local \\\n");
   });
 
@@ -1654,10 +1654,10 @@ describe("install-sh E2E runner", () => {
   });
 
   it.each([
-    ["turn timeout", "OPENCLAW_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS", "300s"],
-    ["provider timeout", "OPENCLAW_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS", "1e3"],
-    ["parallel toggle", "OPENCLAW_INSTALL_E2E_AGENT_TURNS_PARALLEL", "2"],
-    ["tool smoke toggle", "OPENCLAW_INSTALL_E2E_AGENT_TOOL_SMOKE", "false"],
+    ["turn timeout", "CARAPACE_INSTALL_E2E_AGENT_TURN_TIMEOUT_SECONDS", "300s"],
+    ["provider timeout", "CARAPACE_INSTALL_E2E_OPENAI_PROVIDER_TIMEOUT_SECONDS", "1e3"],
+    ["parallel toggle", "CARAPACE_INSTALL_E2E_AGENT_TURNS_PARALLEL", "2"],
+    ["tool smoke toggle", "CARAPACE_INSTALL_E2E_AGENT_TOOL_SMOKE", "false"],
   ])("rejects invalid install E2E %s before credential preflight", (_label, envName, value) => {
     const result = spawnSync("bash", [INSTALL_E2E_RUNNER_PATH], {
       encoding: "utf8",
@@ -1669,7 +1669,7 @@ describe("install-sh E2E runner", () => {
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(`invalid ${envName}: ${value}`);
-    expect(result.stderr).not.toContain("OPENCLAW_E2E_MODELS=both requires");
+    expect(result.stderr).not.toContain("CARAPACE_E2E_MODELS=both requires");
   });
 });
 
@@ -1677,7 +1677,7 @@ describe("install-sh smoke runner", () => {
   it.runIf(process.platform !== "win32").each([0, 23])(
     "reaps the heartbeat timer and preserves command exit %i",
     (exitCode) => {
-      const root = tempDirs.make("openclaw-smoke-heartbeat-");
+      const root = tempDirs.make("carapace-smoke-heartbeat-");
       const bin = join(root, "bin");
       const pidFile = join(root, "timer.pid");
       mkdirSync(bin);
@@ -1750,15 +1750,15 @@ printf 'command-status=%s\\n' "$command_result"
   ])(
     "uses the baseline manual path only after offline proof and checks candidate defaults: $scenario",
     ({ scenario, exitCode, updateCount }) => {
-      const root = tempDirs.make("openclaw-update-smoke-");
+      const root = tempDirs.make("carapace-update-smoke-");
       const bin = join(root, "bin");
       const globalRoot = join(root, "node_modules");
       const versionFile = join(root, "version");
       const callsFile = join(root, "updates.jsonl");
       const preload = join(root, "native-inspection.cjs");
       mkdirSync(bin);
-      mkdirSync(join(globalRoot, "openclaw"), { recursive: true });
-      writeFileSync(join(globalRoot, "openclaw", "package.json"), '{"version":"2026.8.2"}');
+      mkdirSync(join(globalRoot, "carapace"), { recursive: true });
+      writeFileSync(join(globalRoot, "carapace", "package.json"), '{"version":"2026.8.2"}');
       writeFileSync(versionFile, "2026.8.2");
       writeFileSync(callsFile, "");
       symlinkSync(process.execPath, join(bin, "node"));
@@ -1769,12 +1769,12 @@ printf 'command-status=%s\\n' "$command_result"
       );
       writeFileSync(join(bin, "timeout"), '#!/bin/bash\nshift 2\nexec "$@"\n', { mode: 0o755 });
       writeFileSync(
-        join(bin, "openclaw"),
+        join(bin, "carapace"),
         `#!${process.execPath}
 const fs = require("node:fs");
 const args = process.argv.slice(2);
 if (args[0] === "--version") {
-  console.log("OpenClaw " + fs.readFileSync(process.env.FAKE_VERSION_FILE, "utf8"));
+  console.log("Carapace " + fs.readFileSync(process.env.FAKE_VERSION_FILE, "utf8"));
 } else if (args[0] === "update") {
   const before = fs.readFileSync(process.env.FAKE_VERSION_FILE, "utf8");
   fs.appendFileSync(process.env.FAKE_CALLS_FILE, JSON.stringify(args) + "\\n");
@@ -1787,7 +1787,7 @@ if (args[0] === "--version") {
     before: { version: before, buildId: "candidate-build" }, after: { version: "2026.9.1", buildId: "candidate-build" },
     steps: [
       { name: "global update", exitCode: 0, command: "npm install " + args[args.indexOf("--tag") + 1] },
-      ...(before === "2026.9.1" ? [] : [{ name: "openclaw doctor", exitCode: 0 }]),
+      ...(before === "2026.9.1" ? [] : [{ name: "carapace doctor", exitCode: 0 }]),
     ],
   }));
 }
@@ -1815,13 +1815,13 @@ fs.readdirSync = (file, ...args) => {
   if (file === "/proc") return ["1", String(process.pid), ...(process.env.FAKE_SCENARIO === "live process" ? ["42"] : [])];
   if (String(file).endsWith("/systemd")) {
     if (process.env.FAKE_SCENARIO === "inspection failure") throw Object.assign(new Error("inspection denied"), { code: "EACCES" });
-    return process.env.FAKE_SCENARIO === "service definition" ? [{ name: "openclaw-gateway.service", parentPath: file }] : [];
+    return process.env.FAKE_SCENARIO === "service definition" ? [{ name: "carapace-gateway.service", parentPath: file }] : [];
   }
   return realList(file, ...args);
 };
 fs.readFileSync = (file, ...args) => {
-  if (file === "/proc/1/cmdline") return "bash\\0/usr/local/bin/openclaw-install-smoke\\0";
-  if (file === "/proc/42/cmdline") return "openclaw-gateway\\0";
+  if (file === "/proc/1/cmdline") return "bash\\0/usr/local/bin/carapace-install-smoke\\0";
+  if (file === "/proc/42/cmdline") return "carapace-gateway\\0";
   return realRead(file, ...args);
 };
 `,
@@ -1836,12 +1836,12 @@ fs.readFileSync = (file, ...args) => {
           FAKE_GLOBAL_ROOT: globalRoot,
           FAKE_VERSION_FILE: versionFile,
           FAKE_CALLS_FILE: callsFile,
-          OPENCLAW_INSTALL_SMOKE_MODE: "update",
-          OPENCLAW_INSTALL_UPDATE_BASELINE: "2026.8.2",
-          OPENCLAW_INSTALL_UPDATE_BASELINE_TAG_URL: "http://baseline.invalid/openclaw.tgz",
-          OPENCLAW_INSTALL_UPDATE_EXPECT_VERSION: "2026.9.1",
-          OPENCLAW_INSTALL_UPDATE_TAG_URL: "http://candidate.invalid/openclaw.tgz",
-          OPENCLAW_INSTALL_SMOKE_HEARTBEAT_INTERVAL: "0",
+          CARAPACE_INSTALL_SMOKE_MODE: "update",
+          CARAPACE_INSTALL_UPDATE_BASELINE: "2026.8.2",
+          CARAPACE_INSTALL_UPDATE_BASELINE_TAG_URL: "http://baseline.invalid/carapace.tgz",
+          CARAPACE_INSTALL_UPDATE_EXPECT_VERSION: "2026.9.1",
+          CARAPACE_INSTALL_UPDATE_TAG_URL: "http://candidate.invalid/carapace.tgz",
+          CARAPACE_INSTALL_SMOKE_HEARTBEAT_INTERVAL: "0",
         },
       });
       const calls = readFileSync(callsFile, "utf8")
@@ -1869,7 +1869,7 @@ fs.readFileSync = (file, ...args) => {
       "--install-method",
       "npm",
       "--version",
-      "https://packages.example.test/openclaw.tgz?x=1&y=2",
+      "https://packages.example.test/carapace.tgz?x=1&y=2",
       "--no-prompt",
     ];
     const fixture = runInstallSmokeInstallerPipelineFixture({ installerArgs });
@@ -1952,7 +1952,7 @@ run_update_smoke
           encoding: "utf8",
           env: {
             ...process.env,
-            PACKAGE_NAME: "openclaw",
+            PACKAGE_NAME: "carapace",
             UPDATE_BASELINE_VERSION: baseline,
             UPDATE_EXPECT_VERSION: candidate,
             UPDATE_BASELINE_TAG_URL: "",
@@ -1979,10 +1979,10 @@ run_update_smoke
     const script = readFileSync(SMOKE_RUNNER_PATH, "utf8");
 
     expect(script).toContain(
-      'HEARTBEAT_INTERVAL="$(read_nonnegative_int_env OPENCLAW_INSTALL_SMOKE_HEARTBEAT_INTERVAL 60)"',
+      'HEARTBEAT_INTERVAL="$(read_nonnegative_int_env CARAPACE_INSTALL_SMOKE_HEARTBEAT_INTERVAL 60)"',
     );
     expect(script).toContain(
-      'INSTALL_COMMAND_TIMEOUT="$(read_positive_int_env OPENCLAW_INSTALL_SMOKE_COMMAND_TIMEOUT 900)"',
+      'INSTALL_COMMAND_TIMEOUT="$(read_positive_int_env CARAPACE_INSTALL_SMOKE_COMMAND_TIMEOUT 900)"',
     );
     expect(script).toContain('if [[ "$interval" == "0" ]]; then');
     expect(script).toContain("run_with_heartbeat");
@@ -1991,13 +1991,13 @@ run_update_smoke
     expect(script).toContain("==> Still running");
     expect(script).toContain("print_install_audit");
     expect(script).toContain('install -g "$@"');
-    expect(script).toContain("openclaw update --tag");
+    expect(script).toContain("carapace update --tag");
     expect(script).toContain("is_self_swapped_package_process_exit");
     expect(script).toContain("legacy updater process exited after self-swap");
     expect(script).toContain("parseFirstJsonObject");
     expect(script).toContain("unterminated update JSON object");
     expect(script).toContain("verify_candidate_ai_runtime");
-    expect(script).toContain("openclaw infer image providers --json");
+    expect(script).toContain("carapace infer image providers --json");
   });
 
   it.each([
@@ -2012,7 +2012,7 @@ run_update_smoke
           {
             name: "global update",
             exitCode: 0,
-            command: "npm install http://candidate.invalid/openclaw.tgz",
+            command: "npm install http://candidate.invalid/carapace.tgz",
           },
           { name: "global install swap", exitCode: 0 },
         ],
@@ -2022,7 +2022,7 @@ run_update_smoke
     ],
     ["skipped first upgrade", {}, "applied", 1],
   ])("validates explicit installer outcome: %s", (_label, overrides, outcome, expectedExit) => {
-    const url = "http://candidate.invalid/openclaw.tgz";
+    const url = "http://candidate.invalid/carapace.tgz";
     const payload = {
       status: "skipped",
       reason: "already-current",
@@ -2047,7 +2047,7 @@ run_update_smoke
   });
 
   it("accepts legacy same-version apply only with the frozen-target compatibility flag", () => {
-    const url = "http://candidate.invalid/openclaw.tgz";
+    const url = "http://candidate.invalid/carapace.tgz";
     const payload = {
       status: "ok",
       before: { version: "2026.7.33" },
@@ -2055,7 +2055,7 @@ run_update_smoke
       steps: [
         { name: "global update", exitCode: 0, command: `npm install ${url}` },
         { name: "global install swap", exitCode: 0 },
-        { name: "openclaw doctor", exitCode: 0 },
+        { name: "carapace doctor", exitCode: 0 },
       ],
     };
     const run = (allowLegacy: boolean) =>
@@ -2069,7 +2069,7 @@ run_update_smoke
           UPDATE_BASELINE_VERSION: "2026.7.33",
           UPDATE_TAG_URL: url,
           UPDATE_EXPECT_OUTCOME: "already-current",
-          ...(allowLegacy ? { OPENCLAW_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY: "1" } : {}),
+          ...(allowLegacy ? { CARAPACE_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY: "1" } : {}),
         },
       });
 
@@ -2078,11 +2078,11 @@ run_update_smoke
   });
 
   it.each([
-    ["successful", { name: "openclaw doctor", exitCode: 0 }],
+    ["successful", { name: "carapace doctor", exitCode: 0 }],
     [
       "recoverable advisory",
       {
-        name: "openclaw doctor",
+        name: "carapace doctor",
         exitCode: 86,
         advisory: { kind: "package-post-install-doctor", message: "repair deferred" },
       },
@@ -2094,22 +2094,22 @@ run_update_smoke
   });
 
   it.each([
-    ["missing", undefined, "missing openclaw doctor step"],
-    ["fatal", { name: "openclaw doctor", exitCode: 1 }, "openclaw doctor step failed"],
-    ["untyped advisory", { name: "openclaw doctor", exitCode: 86 }, "openclaw doctor step failed"],
+    ["missing", undefined, "missing carapace doctor step"],
+    ["fatal", { name: "carapace doctor", exitCode: 1 }, "carapace doctor step failed"],
+    ["untyped advisory", { name: "carapace doctor", exitCode: 86 }, "carapace doctor step failed"],
     [
       "wrong advisory kind",
-      { name: "openclaw doctor", exitCode: 86, advisory: { kind: "other" } },
-      "openclaw doctor step failed",
+      { name: "carapace doctor", exitCode: 86, advisory: { kind: "other" } },
+      "carapace doctor step failed",
     ],
     [
       "wrong advisory exit",
       {
-        name: "openclaw doctor",
+        name: "carapace doctor",
         exitCode: 1,
         advisory: { kind: "package-post-install-doctor" },
       },
-      "openclaw doctor step failed",
+      "carapace doctor step failed",
     ],
   ])("rejects a %s package post-install doctor result", (_label, doctorStep, error) => {
     const result = validateInstallSmokeUpdateJson(doctorStep);
@@ -2119,8 +2119,8 @@ run_update_smoke
   });
 
   it.each([
-    ["command timeout", "OPENCLAW_INSTALL_SMOKE_COMMAND_TIMEOUT", "900s"],
-    ["heartbeat interval", "OPENCLAW_INSTALL_SMOKE_HEARTBEAT_INTERVAL", "60s"],
+    ["command timeout", "CARAPACE_INSTALL_SMOKE_COMMAND_TIMEOUT", "900s"],
+    ["heartbeat interval", "CARAPACE_INSTALL_SMOKE_HEARTBEAT_INTERVAL", "60s"],
   ])("rejects invalid install smoke %s before running npm", (_label, envName, value) => {
     const result = spawnSync("bash", [SMOKE_RUNNER_PATH], {
       encoding: "utf8",
@@ -2132,15 +2132,15 @@ run_update_smoke
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(`invalid ${envName}: ${value}`);
-    expect(result.stderr).not.toContain("unsupported OPENCLAW_INSTALL_SMOKE_MODE");
+    expect(result.stderr).not.toContain("unsupported CARAPACE_INSTALL_SMOKE_MODE");
   });
 
   it("covers plain npm global installs and npm-driven updates", () => {
     const script = readFileSync(SCRIPT_PATH, "utf8");
     const runner = readFileSync(SMOKE_RUNNER_PATH, "utf8");
 
-    expect(script).toContain('SKIP_NPM_GLOBAL="${OPENCLAW_INSTALL_SMOKE_SKIP_NPM_GLOBAL:-0}"');
-    expect(script).toContain('NPM_CACHE_DIR="${OPENCLAW_INSTALL_SMOKE_NPM_CACHE_DIR:-}"');
+    expect(script).toContain('SKIP_NPM_GLOBAL="${CARAPACE_INSTALL_SMOKE_SKIP_NPM_GLOBAL:-0}"');
+    expect(script).toContain('NPM_CACHE_DIR="${CARAPACE_INSTALL_SMOKE_NPM_CACHE_DIR:-}"');
     expect(script).toContain("-e npm_config_cache=/npm-cache");
     expect(script).toContain('${NPM_CACHE_DOCKER_ARGS[@]+"${NPM_CACHE_DOCKER_ARGS[@]}"}');
     expect(script).toContain("remove_owned_npm_cache");
@@ -2152,7 +2152,7 @@ run_update_smoke
       /Run CLI installer non-root test[\s\S]*"\$\{NPM_CACHE_DOCKER_ARGS\[@\]\}"/,
     );
     expect(script).toContain("==> Run direct npm global smoke");
-    expect(script).toContain("OPENCLAW_INSTALL_SMOKE_MODE=npm-global");
+    expect(script).toContain("CARAPACE_INSTALL_SMOKE_MODE=npm-global");
     expect(runner).toContain("run_npm_global_smoke");
     expect(runner).toContain("==> Direct npm global install candidate");
     expect(runner).toContain("==> Direct npm global update candidate");
@@ -2163,13 +2163,13 @@ run_update_smoke
 
     expect(script).toContain("SMOKE_RUNNER_ENV_ARGS=()");
     for (const envName of [
-      "OPENCLAW_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY",
-      "OPENCLAW_INSTALL_ALLOW_LEGACY_UPDATE_WARNING",
-      "OPENCLAW_INSTALL_SELF_UPDATE_WARNING_FIXED_VERSION",
-      "OPENCLAW_INSTALL_SMOKE_COMMAND_TIMEOUT",
-      "OPENCLAW_INSTALL_SMOKE_HEARTBEAT_INTERVAL",
-      "OPENCLAW_INSTALL_SMOKE_PREVIOUS",
-      "OPENCLAW_INSTALL_SMOKE_SKIP_PREVIOUS",
+      "CARAPACE_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY",
+      "CARAPACE_INSTALL_ALLOW_LEGACY_UPDATE_WARNING",
+      "CARAPACE_INSTALL_SELF_UPDATE_WARNING_FIXED_VERSION",
+      "CARAPACE_INSTALL_SMOKE_COMMAND_TIMEOUT",
+      "CARAPACE_INSTALL_SMOKE_HEARTBEAT_INTERVAL",
+      "CARAPACE_INSTALL_SMOKE_PREVIOUS",
+      "CARAPACE_INSTALL_SMOKE_SKIP_PREVIOUS",
     ]) {
       expect(script).toContain(envName);
     }
@@ -2193,7 +2193,7 @@ describe("bun global install smoke", () => {
     first: "timer" | "drain",
     failure?: "permission" | "uncleared",
   ) => {
-    const tempDir = tempDirs.make("openclaw-bun-global-force-kill-");
+    const tempDir = tempDirs.make("carapace-bun-global-force-kill-");
     const preloadPath = path.join(tempDir, "lifecycle.mjs");
     // Drive both native-observed callback orders at the real CLI boundary.
     // Only the child and clock are simulated; the helper owns all cleanup logic.
@@ -2267,7 +2267,7 @@ syncBuiltinESMExports();
       ["--import", preloadPath, BUN_GLOBAL_ASSERTIONS_PATH, "run-with-timeout", "60000", "fixture"],
       {
         encoding: "utf8",
-        env: { ...process.env, OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "100" },
+        env: { ...process.env, CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "100" },
       },
     );
   };
@@ -2303,40 +2303,40 @@ syncBuiltinESMExports();
     const assertions = readFileSync(BUN_GLOBAL_ASSERTIONS_PATH, "utf8");
     const packageHelper = readFileSync(DOCKER_E2E_PACKAGE_HELPER_PATH, "utf8");
 
-    expect(script).toContain("node scripts/package-openclaw-for-docker.mjs");
+    expect(script).toContain("node scripts/package-carapace-for-docker.mjs");
     expect(script).toContain("--allow-unreleased-changelog");
-    expect(script).toContain("OPENCLAW_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG");
+    expect(script).toContain("CARAPACE_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG");
     expect(script).toContain(
-      'if [[ "${OPENCLAW_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG:-true}" == "true" ]]',
+      'if [[ "${CARAPACE_BUN_GLOBAL_SMOKE_ALLOW_UNRELEASED_CHANGELOG:-true}" == "true" ]]',
     );
     expect(script).toContain("package_args+=(--allow-unreleased-changelog)");
     expect(script).toContain("--skip-build");
-    expect(script).toContain("--output-name openclaw-current.tgz");
+    expect(script).toContain("--output-name carapace-current.tgz");
     expect(script).not.toContain("npm pack --ignore-scripts --json --pack-destination");
     expect(script).toContain('"$bun_path" install -g --trust "$PACKAGE_TGZ" --no-progress');
-    expect(script).toContain('"$openclaw_bin" --help');
-    expect(script).toContain("OPENCLAW_BUN_GLOBAL_SMOKE_PROOF_PATH");
+    expect(script).toContain('"$carapace_bin" --help');
+    expect(script).toContain("CARAPACE_BUN_GLOBAL_SMOKE_PROOF_PATH");
     expect(script).toContain("infer image providers --json");
     expect(script).toContain("assert-image-providers");
-    expect(script).toContain("assert-openclaw-trusted");
+    expect(script).toContain("assert-carapace-trusted");
     expect(script).toContain("agent --local");
     expect(script).toContain("gateway health");
-    expect(script).toContain("openclaw_e2e_wait_gateway_ready");
+    expect(script).toContain("carapace_e2e_wait_gateway_ready");
     expect(assertions).toContain("image providers output is missing bundled provider");
-    expect(script).toContain("OPENCLAW_BUN_GLOBAL_SMOKE_DIST_IMAGE");
+    expect(script).toContain("CARAPACE_BUN_GLOBAL_SMOKE_DIST_IMAGE");
     expect(script).toContain('source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"');
     expect(script).toContain("docker_e2e_restore_package_dist_from_image");
     expect(script).toContain(
-      'COMMAND_TIMEOUT_MS="$(read_positive_int_env OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_MS 180000)"',
+      'COMMAND_TIMEOUT_MS="$(read_positive_int_env CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_MS 180000)"',
     );
     expect(script).toContain(
-      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_BUN_GLOBAL_SMOKE_DOCKER_COMMAND_TIMEOUT:-600s}}"',
+      'DOCKER_COMMAND_TIMEOUT="${DOCKER_COMMAND_TIMEOUT:-${CARAPACE_BUN_GLOBAL_SMOKE_DOCKER_COMMAND_TIMEOUT:-600s}}"',
     );
     expect(packageHelper).toContain('container_id="$(docker_e2e_docker_cmd create "$image")"');
     expect(packageHelper).toContain(
       'docker_e2e_docker_cmd cp "${container_id}:/app/dist" "$temp_dir/dist"',
     );
-    expect(packageHelper).toContain('"${container_id}:/app/node_modules/@openclaw/ai/dist"');
+    expect(packageHelper).toContain('"${container_id}:/app/node_modules/@carapace/ai/dist"');
     expect(packageHelper).toContain('"$temp_dir/ai-dist"');
     expect(packageHelper).toContain('mv "$temp_dir/ai-dist" "$ai_dist_dir"');
     expect(packageHelper).toContain("cleanup_restore_package_dist() {");
@@ -2356,12 +2356,12 @@ syncBuiltinESMExports();
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_MS: "180000ms",
+        CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_MS: "180000ms",
       },
     });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("invalid OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_MS: 180000ms");
+    expect(result.stderr).toContain("invalid CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_MS: 180000ms");
     expect(result.stderr).not.toContain("Bun is required");
   });
 
@@ -2369,9 +2369,9 @@ syncBuiltinESMExports();
     const script = readFileSync(BUN_GLOBAL_SMOKE_PATH, "utf8");
 
     expect(script).toContain('PACK_DIR="$(mktemp -d');
-    expect(script).toContain("node scripts/package-openclaw-for-docker.mjs");
+    expect(script).toContain("node scripts/package-carapace-for-docker.mjs");
     expect(script).toContain('--output-dir "$PACK_DIR"');
-    expect(script).toContain("--output-name openclaw-current.tgz");
+    expect(script).toContain("--output-name carapace-current.tgz");
   });
 
   it("resolves the matching candidate AI package without changing the public registry", () => {
@@ -2379,27 +2379,27 @@ syncBuiltinESMExports();
 
     expect(script).toContain("assert-release-versions");
     expect(script).toContain('"$BUN_INSTALL/install/global/package.json"');
-    expect(script).toContain("package/node_modules/@openclaw/ai");
+    expect(script).toContain("package/node_modules/@carapace/ai");
     expect(script).toContain("--strip-components=4");
     expect(script).toContain('npm pack --ignore-scripts --silent --pack-destination "$PACK_DIR"');
-    expect(script).toContain('overrides: { "@openclaw/ai": `file:${aiPackageTarball}` }');
+    expect(script).toContain('overrides: { "@carapace/ai": `file:${aiPackageTarball}` }');
     expect(script).not.toContain("--registry");
-    expect(script).not.toContain("@openclaw:registry");
+    expect(script).not.toContain("@carapace:registry");
   });
 
   it("requires root and AI candidate versions to match", () => {
-    const tempDir = tempDirs.make("openclaw-bun-candidate-versions-");
-    const rootManifestPath = join(tempDir, "openclaw.json");
+    const tempDir = tempDirs.make("carapace-bun-candidate-versions-");
+    const rootManifestPath = join(tempDir, "carapace.json");
     const aiManifestPath = join(tempDir, "ai.json");
     writeFileSync(
       rootManifestPath,
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         version: "2026.6.17",
-        dependencies: { "@openclaw/ai": "2026.6.17" },
+        dependencies: { "@carapace/ai": "2026.6.17" },
       }),
     );
-    writeFileSync(aiManifestPath, JSON.stringify({ name: "@openclaw/ai", version: "2026.6.17" }));
+    writeFileSync(aiManifestPath, JSON.stringify({ name: "@carapace/ai", version: "2026.6.17" }));
 
     const matching = spawnSync(
       process.execPath,
@@ -2408,7 +2408,7 @@ syncBuiltinESMExports();
     );
     expect(matching).toMatchObject({ status: 0, stdout: "2026.6.17" });
 
-    writeFileSync(aiManifestPath, JSON.stringify({ name: "@openclaw/ai", version: "2026.6.18" }));
+    writeFileSync(aiManifestPath, JSON.stringify({ name: "@carapace/ai", version: "2026.6.18" }));
     const mismatched = spawnSync(
       process.execPath,
       [BUN_GLOBAL_ASSERTIONS_PATH, "assert-release-versions", rootManifestPath, aiManifestPath],
@@ -2416,7 +2416,7 @@ syncBuiltinESMExports();
     );
     expect(mismatched.status).not.toBe(0);
     expect(mismatched.stderr).toContain(
-      "candidate version mismatch: openclaw=2026.6.17, dependency=2026.6.17, @openclaw/ai=2026.6.18",
+      "candidate version mismatch: carapace=2026.6.17, dependency=2026.6.17, @carapace/ai=2026.6.18",
     );
   });
 
@@ -2437,20 +2437,20 @@ syncBuiltinESMExports();
     expect(unsupported.stderr).toContain("Bun 1.4 or newer is required; found 1.3.14");
   });
 
-  it("requires Bun to trust and execute OpenClaw lifecycle scripts", () => {
-    const tempDir = tempDirs.make("openclaw-bun-trusted-lifecycle-");
-    const packageRoot = join(tempDir, "node_modules", "openclaw");
+  it("requires Bun to trust and execute Carapace lifecycle scripts", () => {
+    const tempDir = tempDirs.make("carapace-bun-trusted-lifecycle-");
+    const packageRoot = join(tempDir, "node_modules", "carapace");
     const globalManifestPath = join(tempDir, "package.json");
     const untrustedOutputPath = join(tempDir, "untrusted.txt");
     mkdirSync(join(packageRoot, "dist"), { recursive: true });
-    writeFileSync(globalManifestPath, JSON.stringify({ trustedDependencies: ["openclaw"] }));
+    writeFileSync(globalManifestPath, JSON.stringify({ trustedDependencies: ["carapace"] }));
     writeFileSync(untrustedOutputPath, "./node_modules/koffi [install]\n");
 
     const trusted = spawnSync(
       process.execPath,
       [
         BUN_GLOBAL_ASSERTIONS_PATH,
-        "assert-openclaw-trusted",
+        "assert-carapace-trusted",
         packageRoot,
         globalManifestPath,
         untrustedOutputPath,
@@ -2459,12 +2459,12 @@ syncBuiltinESMExports();
     );
     expect(trusted.status, trusted.stderr).toBe(0);
 
-    writeFileSync(untrustedOutputPath, "./node_modules/openclaw [preinstall, postinstall]\n");
+    writeFileSync(untrustedOutputPath, "./node_modules/carapace [preinstall, postinstall]\n");
     const blocked = spawnSync(
       process.execPath,
       [
         BUN_GLOBAL_ASSERTIONS_PATH,
-        "assert-openclaw-trusted",
+        "assert-carapace-trusted",
         packageRoot,
         globalManifestPath,
         untrustedOutputPath,
@@ -2472,15 +2472,15 @@ syncBuiltinESMExports();
       { encoding: "utf8" },
     );
     expect(blocked.status).not.toBe(0);
-    expect(blocked.stderr).toContain("OpenClaw lifecycle scripts remain blocked by Bun");
+    expect(blocked.stderr).toContain("Carapace lifecycle scripts remain blocked by Bun");
 
     writeFileSync(untrustedOutputPath, "");
-    writeFileSync(join(packageRoot, ".openclaw-lifecycle-pending"), "pending\n");
+    writeFileSync(join(packageRoot, ".carapace-lifecycle-pending"), "pending\n");
     const skipped = spawnSync(
       process.execPath,
       [
         BUN_GLOBAL_ASSERTIONS_PATH,
-        "assert-openclaw-trusted",
+        "assert-carapace-trusted",
         packageRoot,
         globalManifestPath,
         untrustedOutputPath,
@@ -2488,7 +2488,7 @@ syncBuiltinESMExports();
       { encoding: "utf8" },
     );
     expect(skipped.status).not.toBe(0);
-    expect(skipped.stderr).toContain("OpenClaw package lifecycle did not complete");
+    expect(skipped.stderr).toContain("Carapace package lifecycle did not complete");
   });
 
   it.runIf(process.platform !== "win32").each([
@@ -2508,10 +2508,10 @@ syncBuiltinESMExports();
       statusExit: 23,
     },
   ])("$name", ({ bundledAi, statusExit }) => {
-    const tempDir = tempDirs.make("openclaw-bun-prebuilt-");
+    const tempDir = tempDirs.make("carapace-bun-prebuilt-");
     const packageDir = join(tempDir, "fixture", "package");
-    const aiDir = join(packageDir, "node_modules", "@openclaw", "ai");
-    const packageTgz = join(tempDir, "openclaw-prebuilt.tgz");
+    const aiDir = join(packageDir, "node_modules", "@carapace", "ai");
+    const packageTgz = join(tempDir, "carapace-prebuilt.tgz");
     const bunPath = join(tempDir, "bun");
     const statePath = join(tempDir, "state-path");
     const aiTarballPath = join(tempDir, "ai-tarball-path");
@@ -2519,12 +2519,12 @@ syncBuiltinESMExports();
     writeFileSync(
       join(packageDir, "package.json"),
       JSON.stringify({
-        name: "openclaw",
+        name: "carapace",
         version: "2026.6.17",
         ...(bundledAi
           ? {
-              dependencies: { "@openclaw/ai": "2026.6.17" },
-              bundleDependencies: ["@openclaw/ai"],
+              dependencies: { "@carapace/ai": "2026.6.17" },
+              bundleDependencies: ["@carapace/ai"],
             }
           : {}),
       }),
@@ -2533,7 +2533,7 @@ syncBuiltinESMExports();
       mkdirSync(aiDir, { recursive: true });
       writeFileSync(
         join(aiDir, "package.json"),
-        JSON.stringify({ name: "@openclaw/ai", version: "2026.6.17" }),
+        JSON.stringify({ name: "@carapace/ai", version: "2026.6.17" }),
       );
     }
     const packed = spawnSync(
@@ -2557,7 +2557,7 @@ if [ "\${1:-}" = "pm" ] && [ "\${2:-}" = "-g" ] && [ "\${3:-}" = "untrusted" ]; 
   exit 0
 fi
 if [ "\${1:-}" = "run" ] && [ "\${2:-}" = "--bun" ]; then
-  echo "OpenClaw 2026.6.17"
+  echo "Carapace 2026.6.17"
   exit 0
 fi
 if [[ "\${1:-}" == */verify-fs-safe-native.mjs ]]; then
@@ -2567,12 +2567,12 @@ if [[ "\${1:-}" == */verify-fs-safe-native.mjs ]]; then
   test "\${5:-}" = "require"
   exit 0
 fi
-if [[ "\${1:-}" == */openclaw.mjs ]]; then
+if [[ "\${1:-}" == */carapace.mjs ]]; then
   shift
   if [ "\${1:-}" = "--version" ]; then
-    echo "OpenClaw 2026.6.17"
+    echo "Carapace 2026.6.17"
   elif [ "\${1:-}" = "--help" ]; then
-    echo "Usage: openclaw"
+    echo "Usage: carapace"
   elif [ "\${1:-}" = "infer" ]; then
     printf '[{"id":"google"},{"id":"openai"},{"id":"xai"}]\n'
   elif [ "\${1:-}" = "status" ] && [ "$FAKE_STATUS_EXIT" != "0" ]; then
@@ -2596,7 +2596,7 @@ if [[ "\${1:-}" == */openclaw.mjs ]]; then
     done
     exec node -e 'const http=require("node:http"); const port=Number(process.argv[1]); http.createServer((req,res)=>{res.writeHead(200,{"content-type":"text/plain"});res.end("ok")}).listen(port,"127.0.0.1",()=>console.log("[gateway] ready at http://127.0.0.1:"+port))' "$port"
   else
-    echo "unsupported fake OpenClaw command: $*" >&2
+    echo "unsupported fake Carapace command: $*" >&2
     exit 1
   fi
   exit 0
@@ -2611,16 +2611,16 @@ if [ ! -f "$BUN_INSTALL/install/global/package.json" ]; then
   echo '{}' >"$BUN_INSTALL/install/global/package.json"
 fi
 if [ "$EXPECT_AI_OVERRIDE" = "1" ]; then
-override="$(node -e 'const p=require(process.argv[1]);process.stdout.write(p.overrides["@openclaw/ai"])' "$BUN_INSTALL/install/global/package.json")"
+override="$(node -e 'const p=require(process.argv[1]);process.stdout.write(p.overrides["@carapace/ai"])' "$BUN_INSTALL/install/global/package.json")"
 case "\${override#file:}" in
   *.tgz) ;;
   *) exit 1 ;;
 esac
 test -f "\${override#file:}"
 fi
-package_root="$BUN_INSTALL/install/global/node_modules/openclaw"
+package_root="$BUN_INSTALL/install/global/node_modules/carapace"
 mkdir -p "$BUN_INSTALL/bin" "$package_root/dist/plugin-sdk"
-printf '%s\\n' "$OPENCLAW_STATE_DIR" >"$FAKE_STATE_PATH"
+printf '%s\\n' "$CARAPACE_STATE_DIR" >"$FAKE_STATE_PATH"
 if [ "$EXPECT_AI_OVERRIDE" = "1" ]; then
   printf '%s\\n' "\${override#file:}" >"$FAKE_AI_TARBALL_PATH"
 else
@@ -2630,22 +2630,22 @@ fi
 cat >"$package_root/dist/plugin-sdk/logging-core.js" <<'REDACTOR'
 exports.redactSensitiveText = (text) => text;
 REDACTOR
-cat >"$package_root/openclaw.mjs" <<'OPENCLAW'
+cat >"$package_root/carapace.mjs" <<'CARAPACE'
 #!/usr/bin/env node
 const args = process.argv.slice(2);
 if (args[0] === "--version") {
-  console.log("OpenClaw 2026.6.17");
+  console.log("Carapace 2026.6.17");
 } else if (args[0] === "--help") {
-  console.log("Usage: openclaw");
+  console.log("Usage: carapace");
 } else if (args[0] === "infer") {
   console.log(JSON.stringify([{ id: "google" }, { id: "openai" }, { id: "xai" }]));
 } else {
   process.exit(1);
 }
-OPENCLAW
-chmod +x "$package_root/openclaw.mjs"
-ln -s "$package_root/openclaw.mjs" "$BUN_INSTALL/bin/openclaw"
-node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.parse(fs.readFileSync(p,"utf8"));value.trustedDependencies=["openclaw"];fs.writeFileSync(p,JSON.stringify(value))' "$BUN_INSTALL/install/global/package.json"
+CARAPACE
+chmod +x "$package_root/carapace.mjs"
+ln -s "$package_root/carapace.mjs" "$BUN_INSTALL/bin/carapace"
+node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.parse(fs.readFileSync(p,"utf8"));value.trustedDependencies=["carapace"];fs.writeFileSync(p,JSON.stringify(value))' "$BUN_INSTALL/install/global/package.json"
 `,
     );
     chmodSync(bunPath, 0o755);
@@ -2659,9 +2659,9 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
         FAKE_STATUS_EXIT: String(statusExit),
         FAKE_STATE_PATH: statePath,
         FAKE_AI_TARBALL_PATH: aiTarballPath,
-        OPENCLAW_BUN_GLOBAL_SMOKE_HOST_BUILD: "0",
-        OPENCLAW_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: packageTgz,
-        OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_MS: "10000",
+        CARAPACE_BUN_GLOBAL_SMOKE_HOST_BUILD: "0",
+        CARAPACE_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: packageTgz,
+        CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_MS: "10000",
       },
     });
 
@@ -2686,7 +2686,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
   it.runIf(process.platform !== "win32" && existsSync("/usr/bin/time"))(
     "preserves Bun global timeout kill grace after the leader exits",
     () => {
-      const tempDir = tempDirs.make("openclaw-bun-global-timeout-grace-");
+      const tempDir = tempDirs.make("carapace-bun-global-timeout-grace-");
       const readyPath = path.join(tempDir, "ready");
       const drainedPath = path.join(tempDir, "drained");
       const childScript = [
@@ -2718,7 +2718,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
           encoding: "utf8",
           env: {
             ...process.env,
-            OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "1000",
+            CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "1000",
           },
           timeout: 5_000,
         },
@@ -2734,7 +2734,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
   it.runIf(process.platform !== "win32")(
     "cleans Bun global smoke descendants on parent signal",
     async () => {
-      const tempDir = tempDirs.make("openclaw-bun-global-parent-signal-");
+      const tempDir = tempDirs.make("carapace-bun-global-parent-signal-");
       const readyPath = path.join(tempDir, "ready");
       const descendantPidPath = path.join(tempDir, "descendant.pid");
       let descendantPid = 0;
@@ -2765,7 +2765,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
         {
           env: {
             ...process.env,
-            OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "100",
+            CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "100",
           },
           stdio: ["ignore", "pipe", "pipe"],
         },
@@ -2849,9 +2849,9 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
     expect(workflow).toContain("bash scripts/e2e/bun-global-install-smoke.sh");
     expect(workflow).not.toContain("uses: ./.release-harness/.github/actions/setup-node-env");
     expect(workflow).toContain(
-      "OPENCLAW_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: ${{ runner.temp }}/install-smoke-candidate-payload/candidate.tgz",
+      "CARAPACE_BUN_GLOBAL_SMOKE_PACKAGE_TGZ: ${{ runner.temp }}/install-smoke-candidate-payload/candidate.tgz",
     );
-    expect(workflow).not.toContain("OPENCLAW_BUN_GLOBAL_SMOKE_DIST_IMAGE");
+    expect(workflow).not.toContain("CARAPACE_BUN_GLOBAL_SMOKE_DIST_IMAGE");
     expect(workflow).toContain("group: ${{ github.workflow }}-workflow-call-${{ github.run_id }}");
     expect(workflow).toContain("cancel-in-progress: false");
     expect(workflow).not.toContain(
@@ -2859,9 +2859,9 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
     );
     expect(workflow).not.toContain("github.event_name == 'pull_request'");
     expect(workflow).not.toContain("node scripts/ci-changed-scope.mjs");
-    expect(workflow).toContain("OPENCLAW_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE");
+    expect(workflow).toContain("CARAPACE_CI_WORKFLOW_BUN_GLOBAL_INSTALL_SMOKE");
     expect(workflow).toContain('run_bun_global_install_smoke="$workflow_bun_global_install_smoke"');
-    expect(workflow).not.toContain("OPENCLAW_CI_EVENT_NAME");
+    expect(workflow).not.toContain("CARAPACE_CI_EVENT_NAME");
     expect(workflow).not.toContain('if [ "$event_name"');
     expect(workflow).toContain('echo "run_bun_global_install_smoke=$run_bun_global_install_smoke"');
     expect(workflow).toContain("run_fast_install_smoke=true");
@@ -2879,14 +2879,14 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
     expect(workflow).not.toMatch(/(^|\n)\s+docker run --rm --entrypoint sh/u);
     expect(workflow).toContain("--progress=plain");
     expect(workflow).toContain("--load");
-    expect(workflow).toContain("OPENCLAW_INSTALL_URL: file:///tmp/openclaw-install.sh");
-    expect(workflow).toContain("OPENCLAW_INSTALL_CLI_URL: file:///tmp/openclaw-install-cli.sh");
-    expect(workflow).toContain('OPENCLAW_INSTALL_SMOKE_SKIP_CLI: "0"');
+    expect(workflow).toContain("CARAPACE_INSTALL_URL: file:///tmp/carapace-install.sh");
+    expect(workflow).toContain("CARAPACE_INSTALL_CLI_URL: file:///tmp/carapace-install-cli.sh");
+    expect(workflow).toContain('CARAPACE_INSTALL_SMOKE_SKIP_CLI: "0"');
     expect(workflow).toContain("Run Rocky Linux installer smoke");
     expect(workflow).toContain("Run Rocky Linux CLI installer smoke");
     expect(workflow).toContain("PAYLOAD_DIR: ${{ runner.temp }}/install-smoke-candidate-payload");
     expect(workflow).toContain("$PAYLOAD_DIR/install-cli.sh:/tmp/install-cli.sh:ro");
-    expect(workflow).toContain("bash /tmp/install-cli.sh --prefix /tmp/openclaw-cli");
+    expect(workflow).toContain("bash /tmp/install-cli.sh --prefix /tmp/carapace-cli");
     expect(workflow).toContain("rockylinux:9@sha256:");
     expect(workflow).toContain("pnpm-workspace.yaml");
     expect(workflow).toContain("workspace.patchedDependencies");
@@ -2896,7 +2896,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
     expect(workflow).not.toContain("--cache-from");
     expect(workflow).not.toContain("--cache-to");
     expect(workflow).not.toContain("type=gha");
-    expect(workflow).toContain('OPENCLAW_INSTALL_SMOKE_SKIP_NPM_GLOBAL: "1"');
+    expect(workflow).toContain('CARAPACE_INSTALL_SMOKE_SKIP_NPM_GLOBAL: "1"');
     expect(releaseChecks).toContain("install_smoke_release_checks:");
     expect(releaseChecks).toContain("uses: ./.github/workflows/install-smoke-reusable.yml");
     expect(releaseChecks).toContain("run_bun_global_install_smoke: true");
@@ -2935,7 +2935,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
       const producer = workflow.jobs[testCase.producerName];
       const consumer = workflow.jobs[testCase.consumerName];
       expect(workflowStep(producer, "Checkout trusted release harness").with).toMatchObject({
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         ref: "main",
         "fetch-depth": 1,
         "persist-credentials": false,
@@ -2945,7 +2945,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
       expect(buildStep.run).not.toContain("candidate/scripts/docker");
 
       expect(workflowStep(consumer, "Checkout trusted release harness").with).toMatchObject({
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         ref: "main",
         "fetch-depth": 1,
         "persist-credentials": false,
@@ -2966,13 +2966,13 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
       );
       const run = workflowStep(consumer, testCase.testName);
       expect(run.env).toMatchObject({
-        OPENCLAW_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:
+        CARAPACE_INSTALL_SMOKE_FROZEN_PAYLOAD_DIR:
           "${{ runner.temp }}/install-smoke-candidate-payload",
-        OPENCLAW_INSTALL_SMOKE_GROUP: testCase.group,
+        CARAPACE_INSTALL_SMOKE_GROUP: testCase.group,
       });
       if (testCase.consumerName === "installer_smoke_update") {
         expect(run.env).toMatchObject({
-          OPENCLAW_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY:
+          CARAPACE_INSTALL_ALLOW_LEGACY_SAME_VERSION_APPLY:
             "${{ inputs.allow_frozen_target_scenario_omissions && '1' || '0' }}",
         });
       }
@@ -3010,7 +3010,7 @@ node -e 'const fs=require("node:fs");const p=process.argv[1];const value=JSON.pa
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "50",
+          CARAPACE_BUN_GLOBAL_SMOKE_TIMEOUT_KILL_GRACE_MS: "50",
         },
         timeout: 5000,
       },

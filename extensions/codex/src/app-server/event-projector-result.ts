@@ -4,8 +4,8 @@ import {
   type HeartbeatToolResponse,
   type MessagingToolSend,
   type MessagingToolSourceReplyPayload,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveCodexTtsProvenanceTransfer } from "openclaw/plugin-sdk/codex-mcp-projection";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { resolveCodexTtsProvenanceTransfer } from "carapace/plugin-sdk/codex-mcp-projection";
 import { attemptTerminal, type EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import { CodexAssistantProjection } from "./event-projector-assistant.js";
 import { CodexAsyncDeliveryProjection } from "./event-projector-async-delivery.js";
@@ -234,7 +234,7 @@ export abstract class CodexTurnProjection {
     //   - Two distinct turns where the user repeats verbatim content →
     //     distinct turnIds → distinct identities → both kept.
     // Codex owns the canonical thread. These mirror records keep enough local
-    // context for OpenClaw history, search, and future harness switching.
+    // context for Carapace history, search, and future harness switching.
     const messagesSnapshot = buildCodexMessagesSnapshot({
       runParams,
       turnId,

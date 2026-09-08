@@ -1,6 +1,6 @@
 import { consume } from "@lit/context";
 import { initialState, Task } from "@lit/task";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@carapace/normalization-core/record-coerce";
 import { html, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -19,7 +19,7 @@ import { isGatewayMethodAdvertised } from "../../lib/gateway-methods.ts";
 import { normalizeAgentId } from "../../lib/sessions/session-key.ts";
 import { showToast, type ToastOptions } from "../../lib/toast.ts";
 import { GatewayPageController } from "../../lit/gateway-page-controller.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { UsageRefreshPolicy } from "../usage/refresh-policy.ts";
 import {
@@ -55,7 +55,7 @@ import type { ModelProvidersRouteData } from "./route.ts";
 import { ModelProviderSupplementalLoader } from "./supplemental-load.ts";
 import { renderModelProviders, type ModelProviderRowMessage } from "./view.ts";
 
-const MODEL_PROVIDERS_DOCS_URL = "https://docs.openclaw.ai/concepts/model-providers";
+const MODEL_PROVIDERS_DOCS_URL = "https://github.com/Exaggarate/carapace";
 
 type DefaultsDraft = DefaultModelSelection & ModelBehaviorConfig;
 
@@ -63,7 +63,7 @@ function showProfileToast(options: ToastOptions) {
   showToast({ placement: "bottom", ...options });
 }
 
-export class ModelProvidersPage extends OpenClawLightDomElement {
+export class ModelProvidersPage extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -747,6 +747,6 @@ export class ModelProvidersPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-model-providers-page")) {
-  customElements.define("openclaw-model-providers-page", ModelProvidersPage);
+if (!customElements.get("carapace-model-providers-page")) {
+  customElements.define("carapace-model-providers-page", ModelProvidersPage);
 }

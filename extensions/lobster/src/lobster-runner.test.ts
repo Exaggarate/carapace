@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 // Lobster tests cover lobster runner plugin behavior.
-import { toErrorObject as toLintErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { toErrorObject as toLintErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createEmbeddedLobsterRunner,
@@ -106,7 +106,7 @@ describe("createEmbeddedLobsterRunner", () => {
       const runner = createEmbeddedLobsterRunner({
         loadRuntime: vi.fn().mockResolvedValue(runtime),
       });
-      const tempDir = tempDirs.make("openclaw-lobster-limit-");
+      const tempDir = tempDirs.make("carapace-lobster-limit-");
       const workflowPath = path.join(tempDir, "workflow.lobster");
       await fs.writeFile(workflowPath, "steps: []\n", "utf8");
       const params: LobsterRunnerParams =
@@ -174,7 +174,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("detects workflow files and parses argsJson", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-lobster-runner-"));
     const workflowPath = path.join(tempDir, "workflow.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -217,7 +217,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("detects existing workflow file paths that contain spaces", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-lobster-runner-"));
     const workflowPath = path.join(tempDir, "daily inbox.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -261,7 +261,7 @@ describe("createEmbeddedLobsterRunner", () => {
     ["missing.lobster", "missing.lobster"],
     ["nested/missing.yaml", path.join("nested", "missing.yaml")],
   ])("surfaces missing workflow path errors for %s", async (pipeline, expectedRelativePath) => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-lobster-runner-"));
 
     try {
       const runtime = {
@@ -291,7 +291,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("returns a parse error when workflow args are invalid JSON", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-lobster-runner-"));
     const workflowPath = path.join(tempDir, "workflow.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -376,7 +376,7 @@ describe("createEmbeddedLobsterRunner", () => {
         timeoutMs: 2000,
         maxStdoutBytes: 4096,
       }),
-    ).rejects.toThrow("Lobster input requests are not supported by the OpenClaw Lobster tool yet");
+    ).rejects.toThrow("Lobster input requests are not supported by the Carapace Lobster tool yet");
   });
 
   it("routes resume through the embedded runtime", async () => {

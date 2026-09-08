@@ -1,5 +1,5 @@
 // Anthropic Vertex tests cover index plugin behavior.
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { registerSingleProviderPlugin } from "carapace/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { hasAnthropicVertexAvailableAuthMock } = vi.hoisted(() => ({

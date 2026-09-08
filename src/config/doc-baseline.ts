@@ -3,9 +3,9 @@ import { createHash } from "node:crypto";
 import fsSync from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
+import { resolveCarapacePackageRootSync } from "../infra/carapace-root.js";
 import { replaceFileAtomicSync } from "../infra/replace-file.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { resolveRepoBundledPluginEnv } from "./repo-bundled-plugin-env.js";
@@ -122,7 +122,7 @@ function compareBaselineStrings(left: string, right: string): number {
 }
 
 function resolveRepoRoot(): string {
-  const fromPackage = resolveOpenClawPackageRootSync({
+  const fromPackage = resolveCarapacePackageRootSync({
     cwd: path.dirname(fileURLToPath(import.meta.url)),
     moduleUrl: import.meta.url,
   });

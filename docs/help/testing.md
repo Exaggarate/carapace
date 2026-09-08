@@ -7,7 +7,7 @@ read_when:
 title: "Testing"
 ---
 
-OpenClaw has three Vitest suites (unit/integration, e2e, live) plus Docker
+Carapace has three Vitest suites (unit/integration, e2e, live) plus Docker
 runners. This page covers what each suite covers, which command to run for a
 given workflow, how live tests discover credentials, and how to add
 regressions for real-world provider/model bugs.
@@ -32,7 +32,7 @@ Most days:
 - Direct file targeting routes plugin/channel paths too: `pnpm test extensions/discord/src/monitor/message-handler.preflight.test.ts`
 - Prefer targeted runs first when iterating on a single failure.
 - Docker-backed QA site: `pnpm qa:lab:up`
-- Linux VM-backed QA lane: `pnpm openclaw qa suite --runner multipass --scenario channel-chat-baseline`
+- Linux VM-backed QA lane: `pnpm carapace qa suite --runner multipass --scenario channel-chat-baseline`
 
 When you touch tests or want extra confidence:
 
@@ -51,7 +51,7 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 it("uses a temp workspace", () => {
-  const workspace = tempDirs.make("openclaw-example-");
+  const workspace = tempDirs.make("carapace-example-");
   // use workspace
 });
 ```
@@ -65,7 +65,7 @@ behavior. When a bare temp dir is genuinely needed, add an auditable allow
 comment with a reason:
 
 ```ts
-// openclaw-temp-dir: allow verifies raw fs cleanup behavior
+// carapace-temp-dir: allow verifies raw fs cleanup behavior
 const workspace = fs.mkdtempSync(prefix);
 ```
 
@@ -82,11 +82,11 @@ When debugging real providers/models (requires real creds):
 
 - Live suite (models + gateway tool/image probes): `pnpm test:live`
 - Target one live file quietly: `pnpm test:live -- src/agents/models.profiles.live.test.ts`
-- Runtime performance reports: dispatch `OpenClaw Performance` with
+- Runtime performance reports: dispatch `Carapace Performance` with
   `live_openai_candidate=true` for a real `openai/gpt-5.6-luna` agent turn or
   `deep_profile=true` for Kova CPU/heap/trace artifacts. Daily scheduled runs
   publish mock-provider, deep-profile, and GPT-5.6 Luna lane reports to
-  `openclaw/clawgrit-reports` from a separate artifact-consuming publisher job;
+  `carapace/clawgrit-reports` from a separate artifact-consuming publisher job;
   missing or invalid publisher authentication fails scheduled and
   `profile=release` runs. Manual non-release dispatches keep the GitHub artifacts
   and treat report publication as advisory. The mock-provider report also
@@ -95,16 +95,16 @@ When debugging real providers/models (requires real creds):
 - Docker live model sweep: `pnpm test:docker:live-models`
   - Each selected model runs a text turn plus a small file-read-style probe.
     Models whose metadata advertises `image` input also run a tiny image turn.
-    Disable the extra probes with `OPENCLAW_LIVE_MODEL_FILE_PROBE=0` or
-    `OPENCLAW_LIVE_MODEL_IMAGE_PROBE=0` when isolating provider failures.
-  - CI coverage: daily `OpenClaw Scheduled Live And E2E Checks` and manual
-    `OpenClaw Release Checks` both call the reusable live/E2E workflow with
+    Disable the extra probes with `CARAPACE_LIVE_MODEL_FILE_PROBE=0` or
+    `CARAPACE_LIVE_MODEL_IMAGE_PROBE=0` when isolating provider failures.
+  - CI coverage: daily `Carapace Scheduled Live And E2E Checks` and manual
+    `Carapace Release Checks` both call the reusable live/E2E workflow with
     `include_live_suites: true`, which includes Docker live model matrix jobs
     sharded by provider.
-  - For focused CI reruns, dispatch `OpenClaw Live And E2E Checks (Reusable)`
+  - For focused CI reruns, dispatch `Carapace Live And E2E Checks (Reusable)`
     with `include_live_suites: true` and `live_models_only: true`.
   - Add new high-signal provider secrets to `scripts/ci-hydrate-live-auth.sh`
-    plus `.github/workflows/openclaw-live-and-e2e-checks-reusable.yml` and its
+    plus `.github/workflows/carapace-live-and-e2e-checks-reusable.yml` and its
     scheduled/release callers.
 - Native Codex bound-chat smoke: `pnpm test:docker:live-codex-bind`
   - Runs a Docker live lane against the Codex app-server path, binds a
@@ -115,18 +115,18 @@ When debugging real providers/models (requires real creds):
   - Runs gateway agent turns through the plugin-owned Codex app-server
     harness, verifies `/codex status` and `/codex models`, and by default
     exercises image, cron MCP, sub-agent, and Guardian probes. Disable the
-    sub-agent probe with `OPENCLAW_LIVE_CODEX_HARNESS_SUBAGENT_PROBE=0` when
+    sub-agent probe with `CARAPACE_LIVE_CODEX_HARNESS_SUBAGENT_PROBE=0` when
     isolating other failures. For a focused sub-agent check, disable the
     other probes:
-    `OPENCLAW_LIVE_CODEX_HARNESS_IMAGE_PROBE=0 OPENCLAW_LIVE_CODEX_HARNESS_MCP_PROBE=0 OPENCLAW_LIVE_CODEX_HARNESS_GUARDIAN_PROBE=0 OPENCLAW_LIVE_CODEX_HARNESS_SUBAGENT_PROBE=1 pnpm test:docker:live-codex-harness`.
+    `CARAPACE_LIVE_CODEX_HARNESS_IMAGE_PROBE=0 CARAPACE_LIVE_CODEX_HARNESS_MCP_PROBE=0 CARAPACE_LIVE_CODEX_HARNESS_GUARDIAN_PROBE=0 CARAPACE_LIVE_CODEX_HARNESS_SUBAGENT_PROBE=1 pnpm test:docker:live-codex-harness`.
     This exits after the sub-agent probe unless
-    `OPENCLAW_LIVE_CODEX_HARNESS_SUBAGENT_ONLY=0` is set.
+    `CARAPACE_LIVE_CODEX_HARNESS_SUBAGENT_ONLY=0` is set.
 - Codex on-demand install smoke: `pnpm test:docker:codex-on-demand`
-  - Installs the packaged OpenClaw tarball in Docker, runs OpenAI API-key
+  - Installs the packaged Carapace tarball in Docker, runs OpenAI API-key
     onboarding, and verifies the Codex plugin plus `@openai/codex` dependency
     were downloaded into the managed npm project root on demand.
 - Codex npm-plugin live package smoke: `pnpm test:docker:live-codex-npm-plugin`
-  - Installs the candidate OpenClaw package and exact Codex plugin into Docker,
+  - Installs the candidate Carapace package and exact Codex plugin into Docker,
     then uses a real OpenAI key for CLI preflight and same-session turns.
   - Its zero-retry medium-thinking follow-through turn must send progress, keep
     working through randomized workspace reads and an exact artifact write,
@@ -136,24 +136,24 @@ When debugging real providers/models (requires real creds):
     through `npm-pack:`, verifies the dependency under the managed npm
     project root, then asks a live OpenAI model to call the plugin tool and
     return the hidden slug.
-- OpenClaw rescue command smoke: `pnpm test:live:system-agent-rescue-channel`
+- Carapace rescue command smoke: `pnpm test:live:system-agent-rescue-channel`
   - Opt-in belt-and-suspenders check for the message-channel rescue command
-    surface. Exercises `/openclaw status`, queues a persistent model
-    change, replies `/openclaw yes`, and verifies the audit/config write
+    surface. Exercises `/carapace status`, queues a persistent model
+    change, replies `/carapace yes`, and verifies the audit/config write
     path.
-- OpenClaw first-run Docker smoke: `pnpm test:docker:system-agent-first-run`
-  - Starts from an empty OpenClaw state dir and first proves the packaged
-    `openclaw setup` CLI fails closed without inference. It then
+- Carapace first-run Docker smoke: `pnpm test:docker:system-agent-first-run`
+  - Starts from an empty Carapace state dir and first proves the packaged
+    `carapace setup` CLI fails closed without inference. It then
     tests and activates fake Claude through the packaged activation module.
     Only afterward does a fuzzy packaged CLI request reach the planner and
     resolve to typed setup, followed by one-shot model, agent, Discord config,
     and SecretRef operations. It validates config and audit entries. This is
     supporting gate/operation evidence, not an interactive onboarding or
-    OpenClaw agent/tool/approval proof. The same lane is exposed in QA Lab by
-    `pnpm openclaw qa suite --scenario system-agent-ring-zero-setup`.
+    Carapace agent/tool/approval proof. The same lane is exposed in QA Lab by
+    `pnpm carapace qa suite --scenario system-agent-ring-zero-setup`.
 - Moonshot/Kimi cost smoke: with `MOONSHOT_API_KEY` set, run
-  `openclaw models list --provider moonshot --json`, then run an isolated
-  `openclaw agent --local --session-id live-kimi-cost --message 'Reply exactly: KIMI_LIVE_OK' --thinking off --json`
+  `carapace models list --provider moonshot --json`, then run an isolated
+  `carapace agent --local --session-id live-kimi-cost --message 'Reply exactly: KIMI_LIVE_OK' --thinking off --json`
   against `moonshot/kimi-k2.6`. Verify the JSON reports Moonshot/K2.6 and the
   assistant transcript stores normalized `usage.cost`.
 
@@ -169,7 +169,7 @@ CI runs QA Lab in dedicated workflows. Agentic parity is nested under
 `QA-Lab - All Lanes` and release validation, not a standalone PR workflow.
 Broad validation should use `Full Release Validation` with
 `rerun_group=qa-parity` for parity or `rerun_group=qa-live` for live QA.
-The direct `OpenClaw Release Checks` child alone may use `rerun_group=qa` as a
+The direct `Carapace Release Checks` child alone may use `rerun_group=qa` as a
 manual aggregate of both groups. Stable/full, soak-enabled, and explicit
 `qa-live` release checks include the QA-live Matrix and Telegram lanes. Bounded
 beta-publish `all` without soak runs parity but defers those live lanes to
@@ -183,18 +183,18 @@ avoid normal provider-plugin startup. These live transport gateways disable
 memory search; memory behavior stays covered by the QA parity suites.
 
 Full release live media shards use
-`ghcr.io/openclaw/openclaw-live-media-runner:ubuntu-24.04`, which already has
+`ghcr.io/carapace/carapace-live-media-runner:ubuntu-24.04`, which already has
 `ffmpeg` and `ffprobe`. Docker live model/backend shards use the shared
-`ghcr.io/openclaw/openclaw-live-test:<sha>` image built once per selected
-commit, then pull it with `OPENCLAW_SKIP_DOCKER_BUILD=1` instead of rebuilding
+`ghcr.io/carapace/carapace-live-test:<sha>` image built once per selected
+commit, then pull it with `CARAPACE_SKIP_DOCKER_BUILD=1` instead of rebuilding
 inside every shard.
 
-- `pnpm openclaw qa suite`
+- `pnpm carapace qa suite`
   - Runs repo-backed QA scenarios directly on the host.
   - Writes top-level `qa-evidence.json`, `qa-suite-summary.json`, and
     `qa-suite-report.md` artifacts for the selected scenario set, including
     mixed flow, Vitest, and Playwright scenario selections.
-  - When dispatched by `pnpm openclaw qa run --qa-profile <profile>`, embeds
+  - When dispatched by `pnpm carapace qa run --qa-profile <profile>`, embeds
     the selected taxonomy profile scorecard in the same `qa-evidence.json`.
     `smoke-ci` writes slim evidence (`evidenceMode: "slim"`, no per-entry
     `execution`). `release` covers the curated release-readiness slice; `all`
@@ -210,7 +210,7 @@ inside every shard.
     `aimock` starts a local AIMock-backed provider server for experimental
     fixture and protocol-mock coverage without replacing the scenario-aware
     `mock-openai` lane.
-- `pnpm openclaw qa coverage --match <query>`
+- `pnpm carapace qa coverage --match <query>`
   - Searches scenario IDs, titles, surfaces, coverage IDs, docs refs, code
     refs, plugins, and provider requirements, then prints matching suite
     targets.
@@ -225,7 +225,7 @@ inside every shard.
     CPU/RSS evidence, runs a live OpenAI turn, and checks adversarial
     diagnostics. Requires live OpenAI auth such as `OPENAI_API_KEY`. In
     hydrated Testbox sessions it automatically sources the Testbox live-auth
-    profile when the `openclaw-testbox-env` helper is present.
+    profile when the `carapace-testbox-env` helper is present.
 - `pnpm test:gateway:cpu-scenarios`
   - Runs the gateway startup bench plus a small mock QA Lab scenario pack
     (`channel-chat-baseline`, `memory-failure-fallback`,
@@ -237,7 +237,7 @@ inside every shard.
     gateway peg regression.
   - Runs against built `dist` artifacts; run a build first when the checkout
     does not already have fresh runtime output.
-- `pnpm openclaw qa suite --runner multipass`
+- `pnpm carapace qa suite --runner multipass`
   - Runs the same QA suite inside a disposable Multipass Linux VM, keeping
     the same scenario-selection and provider/model flags as `qa suite`.
   - Live runs forward the QA auth inputs practical for the guest:
@@ -255,16 +255,16 @@ inside every shard.
     Telegram by default, verifies the packaged plugin runtime loads without
     startup dependency repair, runs doctor, and runs one local agent turn
     against a mocked OpenAI endpoint.
-  - Use `OPENCLAW_NPM_ONBOARD_CHANNEL=discord` to run the same packaged-install
+  - Use `CARAPACE_NPM_ONBOARD_CHANNEL=discord` to run the same packaged-install
     lane with Discord.
 - `pnpm test:docker:session-runtime-context`
   - Runs a deterministic built-app Docker smoke for embedded runtime context
-    transcripts. Verifies hidden OpenClaw runtime context persists as a
+    transcripts. Verifies hidden Carapace runtime context persists as a
     non-display custom message instead of leaking into the visible user
     turn, then seeds an affected broken session JSONL and verifies
-    `openclaw doctor --fix` rewrites it to the active branch with a backup.
+    `carapace doctor --fix` rewrites it to the active branch with a backup.
 - `pnpm test:docker:npm-telegram-live`
-  - Installs an OpenClaw package candidate in Docker, runs installed-package
+  - Installs an Carapace package candidate in Docker, runs installed-package
     onboarding, configures Telegram through the installed CLI, then reuses
     the live Telegram QA lane with that installed package as the SUT
     Gateway.
@@ -272,33 +272,33 @@ inside every shard.
     dependencies, and private SDK build. The installed package remains the
     absolute CLI, Gateway, and bundled-plugin runtime under test, and its CLI
     writes the package candidate's persisted auth state.
-  - Defaults to `OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC=openclaw@beta`; set
-    `OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ=/path/to/openclaw-current.tgz` or
-    `OPENCLAW_CURRENT_PACKAGE_TGZ` to test a resolved local tarball instead
+  - Defaults to `CARAPACE_NPM_TELEGRAM_PACKAGE_SPEC=carapace@beta`; set
+    `CARAPACE_NPM_TELEGRAM_PACKAGE_TGZ=/path/to/carapace-current.tgz` or
+    `CARAPACE_CURRENT_PACKAGE_TGZ` to test a resolved local tarball instead
     of installing from the registry.
   - Emits repeated RTT timing in `qa-evidence.json` by default with
-    `OPENCLAW_NPM_TELEGRAM_RTT_SAMPLES=20`. Override
-    `OPENCLAW_NPM_TELEGRAM_RTT_SAMPLES`,
-    `OPENCLAW_NPM_TELEGRAM_RTT_TIMEOUT_MS`, or
-    `OPENCLAW_NPM_TELEGRAM_RTT_MAX_FAILURES` to tune the run.
-    `OPENCLAW_NPM_TELEGRAM_RTT_CHECKS` accepts zero or exactly one canonical
+    `CARAPACE_NPM_TELEGRAM_RTT_SAMPLES=20`. Override
+    `CARAPACE_NPM_TELEGRAM_RTT_SAMPLES`,
+    `CARAPACE_NPM_TELEGRAM_RTT_TIMEOUT_MS`, or
+    `CARAPACE_NPM_TELEGRAM_RTT_MAX_FAILURES` to tune the run.
+    `CARAPACE_NPM_TELEGRAM_RTT_CHECKS` accepts zero or exactly one canonical
     Telegram QA scenario id. When omitted, the normal lane samples
     `channel-canary`; focused non-RTT scenario runs stay probe-free. An explicit
     RTT scenario is included in scenario selection automatically, so callers do
-    not need to repeat it in `OPENCLAW_NPM_TELEGRAM_SCENARIOS`. Multiple ids
+    not need to repeat it in `CARAPACE_NPM_TELEGRAM_SCENARIOS`. Multiple ids
     fail immediately, while unknown or inapplicable ids fail canonical scenario
     validation. The package runner promotes the selected RTT scenario once to
     the first position before the remaining taxonomy-backed fail-fast release
     scenarios.
   - Uses the same Convex-leased Test Server userbot credentials as
-    `pnpm openclaw qa telegram`. Set `OPENCLAW_QA_CONVEX_SITE_URL` and the
+    `pnpm carapace qa telegram`. Set `CARAPACE_QA_CONVEX_SITE_URL` and the
     secret for the selected role. The Docker wrapper selects Convex by default.
   - The wrapper validates Convex credential env on the host before Docker
     build/install work. Set
-    `OPENCLAW_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT=1` only when
+    `CARAPACE_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT=1` only when
     deliberately debugging pre-credential setup.
-  - `OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE=ci|maintainer` overrides the
-    shared `OPENCLAW_QA_CREDENTIAL_ROLE` for this lane only. With no role, the
+  - `CARAPACE_NPM_TELEGRAM_CREDENTIAL_ROLE=ci|maintainer` overrides the
+    shared `CARAPACE_QA_CREDENTIAL_ROLE` for this lane only. With no role, the
     wrapper uses `ci` in CI and `maintainer` outside CI.
   - GitHub Actions exposes this lane as the manual maintainer workflow
     `NPM Telegram Beta E2E`. It does not run on merge. The workflow uses the
@@ -311,7 +311,7 @@ inside every shard.
   against one candidate package. It accepts a Git ref, published npm spec,
   HTTPS tarball URL plus SHA-256, trusted-URL policy, or tarball artifact
   from another run (`source=ref|npm|url|trusted-url|artifact`), uploads the
-  normalized `openclaw-current.tgz` as `package-under-test`, then runs the
+  normalized `carapace-current.tgz` as `package-under-test`, then runs the
   existing Docker E2E scheduler with `smoke`, `package`, `product`, `full`,
   or `custom` lane profiles. Set `telegram_mode=mock-openai` or
   `live-frontier` to run the Telegram QA workflow against the same
@@ -321,7 +321,7 @@ inside every shard.
 ```bash
 gh workflow run package-acceptance.yml --ref main \
   -f source=npm \
-  -f package_spec=openclaw@beta \
+  -f package_spec=carapace@beta \
   -f suite_profile=product \
   -f telegram_mode=mock-openai
 ```
@@ -331,7 +331,7 @@ gh workflow run package-acceptance.yml --ref main \
 ```bash
 gh workflow run package-acceptance.yml --ref main \
   -f source=url \
-  -f package_url=https://registry.npmjs.org/openclaw/-/openclaw-VERSION.tgz \
+  -f package_url=https://registry.npmjs.org/carapace/-/carapace-VERSION.tgz \
   -f package_sha256=<sha256> \
   -f suite_profile=package
 ```
@@ -342,12 +342,12 @@ gh workflow run package-acceptance.yml --ref main \
 gh workflow run package-acceptance.yml --ref main \
   -f source=trusted-url \
   -f trusted_source_id=enterprise-artifactory \
-  -f package_url=https://packages.example.internal:8443/artifactory/openclaw/openclaw-VERSION.tgz \
+  -f package_url=https://packages.example.internal:8443/artifactory/carapace/carapace-VERSION.tgz \
   -f package_sha256=<sha256> \
   -f suite_profile=package
 ```
 
-`source=trusted-url` reads `.github/package-trusted-sources.json` from the trusted workflow ref and does not accept URL credentials or a workflow-input private-network bypass. If the named policy declares bearer auth, configure the fixed `OPENCLAW_TRUSTED_PACKAGE_TOKEN` secret.
+`source=trusted-url` reads `.github/package-trusted-sources.json` from the trusted workflow ref and does not accept URL credentials or a workflow-input private-network bypass. If the named policy declares bearer auth, configure the fixed `CARAPACE_TRUSTED_PACKAGE_TOKEN` secret.
 
 - Artifact proof downloads a tarball artifact from another Actions run:
 
@@ -360,7 +360,7 @@ gh workflow run package-acceptance.yml --ref main \
 ```
 
 - `pnpm test:docker:plugins`
-  - Packs and installs the current OpenClaw build in Docker, starts the
+  - Packs and installs the current Carapace build in Docker, starts the
     Gateway with OpenAI configured, then enables bundled channel/plugins via
     config edits.
   - Verifies setup discovery leaves unconfigured downloadable plugins
@@ -368,13 +368,13 @@ gh workflow run package-acceptance.yml --ref main \
     downloadable plugin explicitly, and a second restart does not run
     hidden dependency repair.
   - Also installs a known older npm baseline, enables Telegram before
-    running `openclaw update --tag <candidate>`, and verifies the
+    running `carapace update --tag <candidate>`, and verifies the
     candidate's post-update doctor cleans legacy plugin dependency debris
     without a harness-side postinstall repair.
 - `pnpm test:parallels:npm-update`
   - Runs the native packaged-install update smoke across Parallels guests.
     Each selected platform first installs the requested baseline package,
-    then runs the installed `openclaw update` command in the same guest and
+    then runs the installed `carapace update` command in the same guest and
     verifies the installed version, update status, gateway readiness, and
     one local agent turn.
   - Use `--platform macos`, `--platform windows`, or `--platform linux`
@@ -382,7 +382,7 @@ gh workflow run package-acceptance.yml --ref main \
     path and per-lane status.
   - The OpenAI lane uses `openai/gpt-5.6-luna` for the live agent-turn proof by
     default. Pass `--model <provider/model>` or set
-    `OPENCLAW_PARALLELS_OPENAI_MODEL` to validate another OpenAI model.
+    `CARAPACE_PARALLELS_OPENAI_MODEL` to validate another OpenAI model.
   - Wrap long local runs in a host timeout so Parallels transport stalls
     cannot consume the rest of the testing window:
 
@@ -392,7 +392,7 @@ gh workflow run package-acceptance.yml --ref main \
     ```
 
   - The script writes nested lane logs under
-    `/tmp/openclaw-parallels-npm-update.*`. Inspect `windows-update.log`,
+    `/tmp/carapace-parallels-npm-update.*`. Inspect `windows-update.log`,
     `macos-update.log`, or `linux-update.log` before assuming the outer
     wrapper is hung.
   - Windows update can spend 10 to 15 minutes in post-update doctor and
@@ -406,10 +406,10 @@ gh workflow run package-acceptance.yml --ref main \
     understanding load through bundled runtime APIs even when the agent
     turn itself only checks a simple text response.
 
-- `pnpm openclaw qa aimock`
+- `pnpm carapace qa aimock`
   - Starts only the local AIMock provider server for direct protocol smoke
     testing.
-- `pnpm openclaw qa buzz`
+- `pnpm carapace qa buzz`
   - Runs the Buzz live QA lane against a real relay room using dedicated driver
     and SUT identities.
   - Local runs use `--credential-file <path>` with `relayUrl`, `roomId`,
@@ -421,17 +421,17 @@ gh workflow run package-acceptance.yml --ref main \
   - Supports `--credential-source convex` with a pooled `kind: "buzz"` row.
     Both public keys must be relay/room members, and the SUT must have the
     **Bot** room role. Never use a human owner or admin private key.
-- `pnpm openclaw qa matrix`
+- `pnpm carapace qa matrix`
   - Runs the Matrix live QA lane against a disposable Docker-backed Tuwunel
     homeserver. Source-checkout only - packaged installs do not ship
     `qa-lab`.
   - Full CLI, profile/scenario catalog, env vars, and artifact layout:
     [Matrix smoke lanes](/concepts/qa-e2e-automation#matrix-live-lane).
-- `pnpm openclaw qa telegram`
+- `pnpm carapace qa telegram`
   - Runs the Telegram live QA lane on Telegram's Test Server with one
     Convex-leased SUT bot and one independent TDLib user session.
   - Uses `--credential-source convex` by default and rejects `env`. Provide
-    `OPENCLAW_QA_CONVEX_SITE_URL` and the secret for the selected
+    `CARAPACE_QA_CONVEX_SITE_URL` and the secret for the selected
     `--credential-role`.
   - Defaults cover canary, mention gating, command addressing, `/status`,
     bot-to-bot mentioned replies, and core native command replies.
@@ -453,7 +453,7 @@ drift; the per-lane coverage matrix lives in
 
 ### Shared Telegram credentials via Convex (v1)
 
-When `--credential-source convex` (or `OPENCLAW_QA_CREDENTIAL_SOURCE=convex`)
+When `--credential-source convex` (or `CARAPACE_QA_CREDENTIAL_SOURCE=convex`)
 is enabled for live transport QA, QA lab acquires an exclusive lease from a
 Convex-backed pool, heartbeats that lease while the lane is running, and
 releases the lease on shutdown. Telegram always uses this source. The section
@@ -464,36 +464,36 @@ Reference Convex project scaffold: `qa/convex-credential-broker/`
 
 Required env vars:
 
-- `OPENCLAW_QA_CONVEX_SITE_URL` (for example `https://your-deployment.convex.site`)
+- `CARAPACE_QA_CONVEX_SITE_URL` (for example `https://your-deployment.convex.site`)
 - One secret for the selected role:
-  - `OPENCLAW_QA_CONVEX_SECRET_MAINTAINER` for `maintainer`
-  - `OPENCLAW_QA_CONVEX_SECRET_CI` for `ci`
+  - `CARAPACE_QA_CONVEX_SECRET_MAINTAINER` for `maintainer`
+  - `CARAPACE_QA_CONVEX_SECRET_CI` for `ci`
 - Credential role selection:
   - CLI: `--credential-role maintainer|ci`
-  - Env default: `OPENCLAW_QA_CREDENTIAL_ROLE` (defaults to `ci` in CI, `maintainer` otherwise)
+  - Env default: `CARAPACE_QA_CREDENTIAL_ROLE` (defaults to `ci` in CI, `maintainer` otherwise)
 
 Optional env vars:
 
-- `OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS` (default `1200000`)
-- `OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS` (default `30000`)
-- `OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS` (default `90000`)
-- `OPENCLAW_QA_CREDENTIAL_HTTP_TIMEOUT_MS` (default `15000`)
-- `OPENCLAW_QA_CONVEX_ENDPOINT_PREFIX` (default `/qa-credentials/v1`)
-- `OPENCLAW_QA_CREDENTIAL_OWNER_ID` (optional trace id)
-- `OPENCLAW_QA_ALLOW_INSECURE_HTTP=1` allows loopback `http://` Convex URLs for local-only development.
+- `CARAPACE_QA_CREDENTIAL_LEASE_TTL_MS` (default `1200000`)
+- `CARAPACE_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS` (default `30000`)
+- `CARAPACE_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS` (default `90000`)
+- `CARAPACE_QA_CREDENTIAL_HTTP_TIMEOUT_MS` (default `15000`)
+- `CARAPACE_QA_CONVEX_ENDPOINT_PREFIX` (default `/qa-credentials/v1`)
+- `CARAPACE_QA_CREDENTIAL_OWNER_ID` (optional trace id)
+- `CARAPACE_QA_ALLOW_INSECURE_HTTP=1` allows loopback `http://` Convex URLs for local-only development.
 
-`OPENCLAW_QA_CONVEX_SITE_URL` should use `https://` in normal operation.
+`CARAPACE_QA_CONVEX_SITE_URL` should use `https://` in normal operation.
 
 Maintainer admin commands (pool add/remove/list) require
-`OPENCLAW_QA_CONVEX_SECRET_MAINTAINER` specifically.
+`CARAPACE_QA_CONVEX_SECRET_MAINTAINER` specifically.
 
 CLI helpers for maintainers:
 
 ```bash
-pnpm openclaw qa credentials doctor
-pnpm openclaw qa credentials add --kind telegram --payload-file qa/telegram-credential.json
-pnpm openclaw qa credentials list --kind telegram
-pnpm openclaw qa credentials remove --credential-id <credential-id>
+pnpm carapace qa credentials doctor
+pnpm carapace qa credentials add --kind telegram --payload-file qa/telegram-credential.json
+pnpm carapace qa credentials list --kind telegram
+pnpm carapace qa credentials remove --credential-id <credential-id>
 ```
 
 Use `doctor` before live runs to check the Convex site URL, broker secrets,
@@ -501,7 +501,7 @@ endpoint prefix, HTTP timeout, and admin/list reachability without printing
 secret values. Use `--json` for machine-readable output in scripts and CI
 utilities.
 
-Default endpoint contract (`OPENCLAW_QA_CONVEX_SITE_URL` + `/qa-credentials/v1`).
+Default endpoint contract (`CARAPACE_QA_CONVEX_SITE_URL` + `/qa-credentials/v1`).
 Requests authenticate with an `Authorization: Bearer <role secret>` header;
 bodies below omit that header:
 
@@ -552,7 +552,7 @@ The architecture and scenario-helper names for new channel adapters live in
 [QA overview - Adding a channel](/concepts/qa-e2e-automation#adding-a-channel).
 The minimum bar: implement the transport runner on the shared `qa-lab` host
 seam, add an `adapterFactory` for shared scenarios, declare `qaRunners` in the
-plugin manifest, mount as `openclaw qa <runner>`, and author scenarios under
+plugin manifest, mount as `carapace qa <runner>`, and author scenarios under
 `qa/scenarios/`.
 
 ## Test suites (what runs where)
@@ -588,7 +588,7 @@ Native dependency policy:
   `allowBuilds` so local tests and Testbox lanes do not compile the native
   addon.
 - Compare native opus performance in the `libopus-wasm` benchmark repo, not
-  in default OpenClaw install/test loops. Do not set `@discordjs/opus` to
+  in default Carapace install/test loops. Do not set `@discordjs/opus` to
   `true` in the default `allowBuilds`; that makes unrelated install/test
   loops compile native code.
 
@@ -598,10 +598,10 @@ Native dependency policy:
     - Untargeted `pnpm test` runs thirteen smaller shard configs (`core-unit-fast`, `core-unit-src`, `core-unit-security`, `core-unit-ui`, `core-unit-support`, `core-support-boundary`, `core-tooling`, `core-contracts`, `core-bundled`, `core-runtime`, `agentic`, `auto-reply`, `extensions`) instead of one giant native root-project process. This cuts peak RSS on loaded machines and avoids auto-reply/plugin work starving unrelated suites.
     - `pnpm test --watch` still uses the native root `vitest.config.ts` project graph, because a multi-shard watch loop is not practical.
     - `pnpm test`, `pnpm test:watch`, and `pnpm test:perf:imports` route explicit file/directory targets through scoped lanes first, so `pnpm test extensions/discord/src/monitor/message-handler.preflight.test.ts` avoids paying the full root project startup tax.
-    - `pnpm test:changed` expands changed git paths into cheap scoped lanes by default: direct test edits, sibling `*.test.ts` files, explicit source mappings, and local import-graph dependents. Config/setup/package edits do not broad-run tests unless you explicitly use `OPENCLAW_TEST_CHANGED_BROAD=1 pnpm test:changed`.
+    - `pnpm test:changed` expands changed git paths into cheap scoped lanes by default: direct test edits, sibling `*.test.ts` files, explicit source mappings, and local import-graph dependents. Config/setup/package edits do not broad-run tests unless you explicitly use `CARAPACE_TEST_CHANGED_BROAD=1 pnpm test:changed`.
     - `pnpm check:changed` is the normal smart local check gate for narrow work. It classifies the diff into core, core tests, extensions, extension tests, apps, docs, release metadata, live Docker tooling, and tooling, then runs the matching typecheck, lint, and guard commands. Selected paths also schedule targeted Vitest owner tests via `pnpm test:serial`; use `pnpm test:changed` or explicit `pnpm test <target>` for additional test proof matching the touched contract. Release metadata-only version bumps run targeted version/config/root-dependency checks, with a guard that rejects package changes outside the top-level version field.
     - Live Docker ACP harness edits run focused checks: shell syntax for the live Docker auth scripts and a live Docker scheduler dry-run. `package.json` changes are included only when the diff is limited to `scripts["test:docker:live-*"]`; dependency, export, version, and other package-surface edits still use the broader guards.
-    - Import-light unit tests from agents, commands, plugins, auto-reply helpers, `plugin-sdk`, and similar pure utility areas route through the `unit-fast` lane, which skips `test/setup-openclaw-runtime.ts`; stateful/runtime-heavy files stay on the existing lanes.
+    - Import-light unit tests from agents, commands, plugins, auto-reply helpers, `plugin-sdk`, and similar pure utility areas route through the `unit-fast` lane, which skips `test/setup-carapace-runtime.ts`; stateful/runtime-heavy files stay on the existing lanes.
     - Selected `plugin-sdk` and `commands` helper source files also map changed-mode runs to explicit sibling tests in those light lanes, so helper edits avoid rerunning the full heavy suite for that directory.
     - `auto-reply` has dedicated buckets for top-level core helpers, top-level `reply.*` integration tests, and the `src/auto-reply/reply/**` subtree. CI further splits the reply subtree into agent-runner, dispatch, and commands/state-routing shards so one import-heavy bucket does not own the full Node tail.
     - Normal PR/main CI intentionally skips the bundled plugin batch sweep and release-only `agentic-plugins` shard. Full Release Validation dispatches the separate `Plugin Prerelease` child workflow for those plugin-heavy suites on release candidates.
@@ -635,14 +635,14 @@ Native dependency policy:
       defaults from the shared Vitest config.
     - `scripts/run-vitest.mjs` adds `--no-maglev` for Vitest child Node
       processes by default to reduce V8 compile churn during big local runs.
-      Set `OPENCLAW_VITEST_ENABLE_MAGLEV=1` to compare against stock V8
+      Set `CARAPACE_VITEST_ENABLE_MAGLEV=1` to compare against stock V8
       behavior.
     - `scripts/run-vitest.mjs` terminates explicit non-watch Vitest runs
       after 5 minutes with no stdout or stderr output. Set
-      `OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS=0` to disable the watchdog for
+      `CARAPACE_VITEST_NO_OUTPUT_TIMEOUT_MS=0` to disable the watchdog for
       an intentionally silent investigation.
     - `scripts/run-tsgo.mjs` leaves tsgo unbounded by default, preserving the
-      behavior of existing local workflows. Set `OPENCLAW_TSGO_TIMEOUT_MS` to
+      behavior of existing local workflows. Set `CARAPACE_TSGO_TIMEOUT_MS` to
       a positive millisecond value to make a wedged compiler fail loudly
       instead of blocking its caller forever. On expiry the whole tsgo process
       tree is killed and the run fails. Values above Node's timer
@@ -660,12 +660,12 @@ Native dependency policy:
     - `pnpm changed:lanes` shows which architectural lanes a diff triggers.
     - The pre-commit hook formats and restages files. When private rules are
       configured, it also scans staged content before and after formatting.
-      See [Local commit hook setup](https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md#local-commit-hook).
+      See [Local commit hook setup](https://github.com/Exaggarate/carapace/blob/main/CONTRIBUTING.md#local-commit-hook).
       It does not run lint, typecheck, or tests.
     - Run `pnpm check:changed` explicitly before handoff or push when you
       need the smart local check gate.
     - `pnpm test:changed` routes through cheap scoped lanes by default. Use
-      `OPENCLAW_TEST_CHANGED_BROAD=1 pnpm test:changed` only when the agent
+      `CARAPACE_TEST_CHANGED_BROAD=1 pnpm test:changed` only when the agent
       decides a harness, config, package, or contract edit really needs
       broader Vitest coverage.
     - `pnpm test:max` and `pnpm test:changed:max` keep the same routing
@@ -676,8 +676,8 @@ Native dependency policy:
     - The base Vitest config marks the projects/config files as
       `forceRerunTriggers` so changed-mode reruns stay correct when test
       wiring changes.
-    - The config keeps `OPENCLAW_VITEST_FS_MODULE_CACHE` enabled on
-      supported hosts; set `OPENCLAW_VITEST_FS_MODULE_CACHE_PATH=/abs/path`
+    - The config keeps `CARAPACE_VITEST_FS_MODULE_CACHE` enabled on
+      supported hosts; set `CARAPACE_VITEST_FS_MODULE_CACHE_PATH=/abs/path`
       for one explicit cache location for direct profiling.
 
   </Accordion>
@@ -747,8 +747,8 @@ Native dependency policy:
   - Uses one worker by default to keep non-isolated gateway state deterministic.
   - Runs in silent mode by default to reduce console I/O overhead.
 - Useful overrides:
-  - `OPENCLAW_E2E_WORKERS=<n>` to opt into parallel workers (capped at 16).
-  - `OPENCLAW_E2E_VERBOSE=1` to re-enable verbose console output.
+  - `CARAPACE_E2E_WORKERS=<n>` to opt into parallel workers (capped at 16).
+  - `CARAPACE_E2E_VERBOSE=1` to re-enable verbose console output.
 - Scope:
   - Multi-instance gateway end-to-end behavior
   - WebSocket/HTTP surfaces, node pairing, and heavier networking
@@ -770,10 +770,10 @@ Native dependency policy:
   - Most suites replace the Gateway WebSocket with deterministic in-browser mocks; some start isolated real Gateways
 - Expectations:
   - Runs in CI as part of `pnpm test:e2e`; the resource groups add no CI jobs
-  - No provider keys required; `OPENCLAW_UI_E2E_SKIP_REAL_GATEWAY=1` excludes real-Gateway suites
+  - No provider keys required; `CARAPACE_UI_E2E_SKIP_REAL_GATEWAY=1` excludes real-Gateway suites
   - Browser dependency must be present (`pnpm --dir ui exec playwright install chromium`)
 
-The dedicated real-Gateway CI job uses `test/vitest/vitest.ui-e2e-prebuilt.config.ts` after `OPENCLAW_BUILD_PRIVATE_QA=1 pnpm build:ci-artifacts` completes in a clean checkout. Keep source and built outputs unchanged until all workers and children finish. MCP conformance runs serially first, then the other 13 files share at most two workers in the same invocation, with no extra jobs or shards. Readiness failures stop execution without rebuilding or falling back. The ordinary local config keeps real-Gateway files serial; frozen targets without the prebuilt config keep their original serial command. See [CI](/ci) for the resource policy and bounded timing evidence.
+The dedicated real-Gateway CI job uses `test/vitest/vitest.ui-e2e-prebuilt.config.ts` after `CARAPACE_BUILD_PRIVATE_QA=1 pnpm build:ci-artifacts` completes in a clean checkout. Keep source and built outputs unchanged until all workers and children finish. MCP conformance runs serially first, then the other 13 files share at most two workers in the same invocation, with no extra jobs or shards. Readiness failures stop execution without rebuilding or falling back. The ordinary local config keeps real-Gateway files serial; frozen targets without the prebuilt config keep their original serial command. See [CI](/ci) for the resource policy and bounded timing evidence.
 
 ### E2E: OpenShell backend smoke
 
@@ -793,17 +793,17 @@ The dedicated real-Gateway CI job uses `test/vitest/vitest.ui-e2e-prebuilt.confi
   - Uses isolated `HOME` / `XDG_CONFIG_HOME`, then waits for durable sandbox absence before deleting the test workspace
   - Reports cleanup failures, including failed inventory queries; it does not retry database errors
 - Useful overrides:
-  - `OPENCLAW_E2E_OPENSHELL=1` to enable the test when running the broader e2e suite manually
-  - `OPENCLAW_E2E_OPENSHELL_COMMAND=/path/to/openshell` to point at a non-default CLI binary or wrapper script
-  - `OPENCLAW_E2E_OPENSHELL_CONFIG_HOME=/path/to/config` to expose the registered gateway config to the isolated test
-  - `OPENCLAW_E2E_OPENSHELL_HOST_IP=172.18.0.1` to replace the host policy fixture's default ranges with one explicit Docker gateway address and its existing `/32` suffix
+  - `CARAPACE_E2E_OPENSHELL=1` to enable the test when running the broader e2e suite manually
+  - `CARAPACE_E2E_OPENSHELL_COMMAND=/path/to/openshell` to point at a non-default CLI binary or wrapper script
+  - `CARAPACE_E2E_OPENSHELL_CONFIG_HOME=/path/to/config` to expose the registered gateway config to the isolated test
+  - `CARAPACE_E2E_OPENSHELL_HOST_IP=172.18.0.1` to replace the host policy fixture's default ranges with one explicit Docker gateway address and its existing `/32` suffix
 
 ### Live (real providers + real models)
 
 - Command: `pnpm test:live`
 - Config: `test/vitest/vitest.live.config.ts`
 - Files: `src/**/*.live.test.ts`, `test/**/*.live.test.ts`, and bundled-plugin live tests under `extensions/`
-- Default: **enabled** by `pnpm test:live` (sets `OPENCLAW_LIVE_TEST=1`)
+- Default: **enabled** by `pnpm test:live` (sets `CARAPACE_LIVE_TEST=1`)
 - Scope:
   - "Does this provider/model actually work _today_ with real creds?"
   - Catch provider format changes, tool-calling quirks, auth issues, and rate limit behavior
@@ -812,15 +812,15 @@ The dedicated real-Gateway CI job uses `test/vitest/vitest.ui-e2e-prebuilt.confi
   - Costs money / uses rate limits
   - Prefer running narrowed subsets instead of "everything"
 - Live runs use already-exported API keys and staged auth profiles.
-- By default, live runs still isolate `HOME` and copy config/auth material into a temp test home so unit fixtures cannot mutate your real `~/.openclaw`.
-- Set `OPENCLAW_LIVE_USE_REAL_HOME=1` only when you intentionally need live tests to use your real home directory.
-- `pnpm test:live` defaults to a quieter mode: it keeps `[live] ...` progress output and mutes gateway bootstrap logs/Bonjour chatter. Set `OPENCLAW_LIVE_TEST_QUIET=0` if you want the full startup logs back.
-- API key rotation (provider-specific): set `*_API_KEYS` with comma/semicolon format or `*_API_KEY_1`, `*_API_KEY_2` (for example `OPENAI_API_KEYS`, `ANTHROPIC_API_KEYS`, `GEMINI_API_KEYS`) or per-live override via `OPENCLAW_LIVE_*_KEY`; tests retry on rate limit responses.
+- By default, live runs still isolate `HOME` and copy config/auth material into a temp test home so unit fixtures cannot mutate your real `~/.carapace`.
+- Set `CARAPACE_LIVE_USE_REAL_HOME=1` only when you intentionally need live tests to use your real home directory.
+- `pnpm test:live` defaults to a quieter mode: it keeps `[live] ...` progress output and mutes gateway bootstrap logs/Bonjour chatter. Set `CARAPACE_LIVE_TEST_QUIET=0` if you want the full startup logs back.
+- API key rotation (provider-specific): set `*_API_KEYS` with comma/semicolon format or `*_API_KEY_1`, `*_API_KEY_2` (for example `OPENAI_API_KEYS`, `ANTHROPIC_API_KEYS`, `GEMINI_API_KEYS`) or per-live override via `CARAPACE_LIVE_*_KEY`; tests retry on rate limit responses.
 - Progress/heartbeat output:
   - Live suites emit progress lines to stderr so long provider calls are visibly active even when Vitest console capture is quiet.
   - `test/vitest/vitest.live.config.ts` disables Vitest console interception so provider/gateway progress lines stream immediately during live runs.
-  - Tune direct-model heartbeats with `OPENCLAW_LIVE_HEARTBEAT_MS`.
-  - Tune gateway/probe heartbeats with `OPENCLAW_LIVE_GATEWAY_HEARTBEAT_MS`.
+  - Tune direct-model heartbeats with `CARAPACE_LIVE_HEARTBEAT_MS`.
+  - Tune gateway/probe heartbeats with `CARAPACE_LIVE_GATEWAY_HEARTBEAT_MS`.
 
 ## Which suite should I run?
 
@@ -847,17 +847,17 @@ These Docker runners split into two buckets:
 - Live-model runners: `test:docker:live-models` and `test:docker:live-gateway` run only their matching profile-key live file inside the repo Docker image (`src/agents/models.profiles.live.test.ts` and `src/gateway/gateway-models.profiles.live.test.ts`), mounting your local config dir, workspace, and optional profile env file. The matching local entrypoints are `test:live:models-profiles` and `test:live:gateway-profiles`.
 - Docker live runners keep their own practical caps where needed:
   `test:docker:live-models` defaults to the curated supported high-signal set, and
-  `test:docker:live-gateway` defaults to `OPENCLAW_LIVE_GATEWAY_SMOKE=1`,
-  `OPENCLAW_LIVE_GATEWAY_MAX_MODELS=8`,
-  `OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS=45000`, and
-  `OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS=90000`. Set `OPENCLAW_LIVE_MAX_MODELS`
+  `test:docker:live-gateway` defaults to `CARAPACE_LIVE_GATEWAY_SMOKE=1`,
+  `CARAPACE_LIVE_GATEWAY_MAX_MODELS=8`,
+  `CARAPACE_LIVE_GATEWAY_STEP_TIMEOUT_MS=45000`, and
+  `CARAPACE_LIVE_GATEWAY_MODEL_TIMEOUT_MS=90000`. Set `CARAPACE_LIVE_MAX_MODELS`
   or the gateway env vars when you explicitly want a smaller cap or larger scan.
-- `test:docker:all` builds the live Docker image once via `test:docker:live-build`, packs OpenClaw once as an npm tarball through `scripts/package-openclaw-for-docker.mjs`, then builds/reuses two `scripts/e2e/Dockerfile` images. The bare image is only the Node/Git runner for install/update/plugin-dependency lanes; those lanes mount the prebuilt tarball. The functional image installs the same tarball into `/app` for built-app functionality lanes. Docker lane definitions live in `scripts/lib/docker-e2e-scenarios.mts`; planner logic lives in `scripts/lib/docker-e2e-plan.mts`; `scripts/test-docker-all.mjs` executes the selected plan. The aggregate uses a weighted local scheduler: `OPENCLAW_DOCKER_ALL_PARALLELISM` controls process slots, while resource caps keep heavy live, npm-install, and multi-service lanes from all starting at once. If a single lane is heavier than the active caps, the scheduler can still start it when the pool is empty and then keeps it running alone until capacity is available again. Defaults are 10 slots, `OPENCLAW_DOCKER_ALL_LIVE_LIMIT=9`, `OPENCLAW_DOCKER_ALL_NPM_LIMIT=5`, and `OPENCLAW_DOCKER_ALL_SERVICE_LIMIT=7`; tune `OPENCLAW_DOCKER_ALL_WEIGHT_LIMIT` or `OPENCLAW_DOCKER_ALL_DOCKER_LIMIT` (and other `OPENCLAW_DOCKER_ALL_<RESOURCE>_LIMIT` overrides) only when the Docker host has more headroom. The runner performs a Docker preflight by default, removes stale OpenClaw E2E containers, prints status every 30 seconds, stores successful lane timings in `.artifacts/docker-tests/lane-timings.json`, and uses those timings to start longer lanes first on later runs. Use `OPENCLAW_DOCKER_ALL_DRY_RUN=1` to print the weighted lane manifest without building or running Docker, or `node scripts/test-docker-all.mjs --plan-json` to print the CI plan for selected lanes, package/image needs, and credentials.
+- `test:docker:all` builds the live Docker image once via `test:docker:live-build`, packs Carapace once as an npm tarball through `scripts/package-carapace-for-docker.mjs`, then builds/reuses two `scripts/e2e/Dockerfile` images. The bare image is only the Node/Git runner for install/update/plugin-dependency lanes; those lanes mount the prebuilt tarball. The functional image installs the same tarball into `/app` for built-app functionality lanes. Docker lane definitions live in `scripts/lib/docker-e2e-scenarios.mts`; planner logic lives in `scripts/lib/docker-e2e-plan.mts`; `scripts/test-docker-all.mjs` executes the selected plan. The aggregate uses a weighted local scheduler: `CARAPACE_DOCKER_ALL_PARALLELISM` controls process slots, while resource caps keep heavy live, npm-install, and multi-service lanes from all starting at once. If a single lane is heavier than the active caps, the scheduler can still start it when the pool is empty and then keeps it running alone until capacity is available again. Defaults are 10 slots, `CARAPACE_DOCKER_ALL_LIVE_LIMIT=9`, `CARAPACE_DOCKER_ALL_NPM_LIMIT=5`, and `CARAPACE_DOCKER_ALL_SERVICE_LIMIT=7`; tune `CARAPACE_DOCKER_ALL_WEIGHT_LIMIT` or `CARAPACE_DOCKER_ALL_DOCKER_LIMIT` (and other `CARAPACE_DOCKER_ALL_<RESOURCE>_LIMIT` overrides) only when the Docker host has more headroom. The runner performs a Docker preflight by default, removes stale Carapace E2E containers, prints status every 30 seconds, stores successful lane timings in `.artifacts/docker-tests/lane-timings.json`, and uses those timings to start longer lanes first on later runs. Use `CARAPACE_DOCKER_ALL_DRY_RUN=1` to print the weighted lane manifest without building or running Docker, or `node scripts/test-docker-all.mjs --plan-json` to print the CI plan for selected lanes, package/image needs, and credentials.
 - `Package Acceptance` is the GitHub-native package gate for "does this installable tarball work as a product?" It resolves one candidate package from `source=npm`, `source=ref`, `source=url`, `source=trusted-url`, or `source=artifact`, uploads it as `package-under-test`, then runs the reusable Docker E2E lanes against that exact tarball instead of repacking the selected ref. Profiles are ordered by breadth: `smoke`, `package`, `product`, and `full` (plus `custom` for an explicit lane list). See [Testing updates and plugins](/help/testing-updates-plugins) for the package/update/plugin contract, published-upgrade survivor matrix, release defaults, and failure triage.
 - Build and release checks run `scripts/check-cli-bootstrap-imports.mts` after tsdown. The guard walks the static built graph from `dist/entry.js` and `dist/cli/run-main.js` and fails if that pre-dispatch bootstrap graph statically imports any external package (Commander, prompt UI, undici, logging, and similar startup-heavy deps all count) before command dispatch; it also caps the bundled gateway run chunk at 70 KB and rejects static imports of known cold gateway paths (`control-ui-assets`, `diagnostic-stability-bundle`, `onboard-helpers`, `process-respawn`, `restart-sentinel`, `server-close`, `server-reload-handlers`) from that chunk. Current builds locate the gateway chunk through hash-checked metadata emitted by tsdown, so discovery does not scan unrelated JavaScript under `dist`. Missing or stale metadata requires rebuilding; trusted release tooling retains source scanning only for frozen targets that predate the locator. Standalone workers still receive independent JavaScript dependency checks. `scripts/release-check.ts` separately smoke-tests the packed CLI with `--help`, `onboard --help`, `doctor --help`, `status --json --timeout 1`, `config schema`, and `models list --provider openai`.
 - Package Acceptance legacy compatibility is capped at `2026.4.25` (`2026.4.25-beta.*` included). Through that cutoff, the harness tolerates only shipped-package metadata gaps: omitted private QA inventory entries, missing `gateway install --wrapper`, missing patch files in the tarball-derived git fixture, missing persisted `update.channel`, legacy plugin install-record locations, missing marketplace install-record persistence, and config metadata migration during `plugins update`. For packages after `2026.4.25`, those paths are strict failures.
 - Container smoke runners: `test:docker:openwebui`, `test:docker:onboard`, `test:docker:npm-onboard-channel-agent`, `test:docker:release-user-journey`, `test:docker:release-typed-onboarding`, `test:docker:release-media-memory`, `test:docker:release-upgrade-user-journey`, `test:docker:release-plugin-marketplace`, `test:docker:skill-install`, `test:docker:update-channel-switch`, `test:docker:upgrade-survivor`, `test:docker:published-upgrade-survivor`, `test:docker:session-runtime-context`, `test:docker:agents-delete-shared-workspace`, `test:docker:gateway-network`, `test:docker:browser-cdp-snapshot`, `test:docker:mcp-channels`, `test:docker:agent-bundle-mcp-tools`, `test:docker:cron-mcp-cleanup`, `test:docker:plugins`, `test:docker:plugin-update`, `test:docker:plugin-lifecycle-matrix`, and `test:docker:config-reload` boot one or more real containers and verify higher-level integration paths.
-- Docker/Bash E2E lanes that install the packed OpenClaw tarball through `scripts/lib/openclaw-e2e-instance.sh` cap `npm install` at `OPENCLAW_E2E_NPM_INSTALL_TIMEOUT` (default `600s`; set `0` to disable the wrapper for debugging).
+- Docker/Bash E2E lanes that install the packed Carapace tarball through `scripts/lib/carapace-e2e-instance.sh` cap `npm install` at `CARAPACE_E2E_NPM_INSTALL_TIMEOUT` (default `600s`; set `0` to disable the wrapper for debugging).
 
 The live-model Docker runners also bind-mount only the needed CLI auth homes
 (or all supported ones when the run is not narrowed), then copy them into the
@@ -872,61 +872,61 @@ without mutating the host auth store:
 - Observability smokes: `pnpm qa:otel:smoke`, `pnpm qa:prometheus:smoke`, and `pnpm qa:observability:smoke` are private QA source-checkout lanes. They are intentionally not part of package Docker release lanes because the npm tarball omits QA Lab.
 - Open WebUI live smoke: `pnpm test:docker:openwebui` (script: `scripts/e2e/openwebui-docker.sh`)
 - Onboarding wizard (TTY, full scaffolding): `pnpm test:docker:onboard` (script: `scripts/e2e/onboard-docker.sh`)
-- Npm tarball onboarding/channel/agent smoke: `pnpm test:docker:npm-onboard-channel-agent` installs the packed OpenClaw tarball globally in Docker, configures OpenAI via env-ref onboarding plus Telegram by default, runs doctor, and runs one mocked OpenAI agent turn. Reuse a prebuilt tarball with `OPENCLAW_CURRENT_PACKAGE_TGZ=/path/to/openclaw-*.tgz`, skip the host rebuild with `OPENCLAW_NPM_ONBOARD_HOST_BUILD=0`, or switch channel with `OPENCLAW_NPM_ONBOARD_CHANNEL=discord` or `OPENCLAW_NPM_ONBOARD_CHANNEL=slack`.
+- Npm tarball onboarding/channel/agent smoke: `pnpm test:docker:npm-onboard-channel-agent` installs the packed Carapace tarball globally in Docker, configures OpenAI via env-ref onboarding plus Telegram by default, runs doctor, and runs one mocked OpenAI agent turn. Reuse a prebuilt tarball with `CARAPACE_CURRENT_PACKAGE_TGZ=/path/to/carapace-*.tgz`, skip the host rebuild with `CARAPACE_NPM_ONBOARD_HOST_BUILD=0`, or switch channel with `CARAPACE_NPM_ONBOARD_CHANNEL=discord` or `CARAPACE_NPM_ONBOARD_CHANNEL=slack`.
 
-- Release user journey smoke: `pnpm test:docker:release-user-journey` installs the packed OpenClaw tarball globally in a clean Docker home, runs onboarding, configures a mocked OpenAI provider, runs an agent turn, installs/uninstalls external plugins, configures ClickClack against a local fixture, verifies outbound/inbound messaging, restarts Gateway, and runs doctor.
-- Release typed onboarding smoke: `pnpm test:docker:release-typed-onboarding` installs the packed tarball, drives `openclaw onboard` through a real TTY, configures OpenAI as an env-ref provider, verifies no raw key persistence, and runs a mocked agent turn.
+- Release user journey smoke: `pnpm test:docker:release-user-journey` installs the packed Carapace tarball globally in a clean Docker home, runs onboarding, configures a mocked OpenAI provider, runs an agent turn, installs/uninstalls external plugins, configures ClickClack against a local fixture, verifies outbound/inbound messaging, restarts Gateway, and runs doctor.
+- Release typed onboarding smoke: `pnpm test:docker:release-typed-onboarding` installs the packed tarball, drives `carapace onboard` through a real TTY, configures OpenAI as an env-ref provider, verifies no raw key persistence, and runs a mocked agent turn.
 - Release media/memory smoke: `pnpm test:docker:release-media-memory` installs the packed tarball, verifies image understanding from a PNG attachment, OpenAI-compatible image generation output, memory search recall, and recall survival across Gateway restart.
-- Release upgrade user journey smoke: `pnpm test:docker:release-upgrade-user-journey` installs the newest published stable baseline older than the candidate tarball by default, onboards and installs a CLI plugin on the published package, then replaces the package and runs the documented Doctor migration step. It verifies the existing plugin still works and configures candidate-compatible mock provider/ClickClack settings for the agent/channel journey. If no older stable baseline exists, it reuses the candidate version only when that version is published and stable; otherwise it fails and requires an explicit baseline. Override the baseline with `OPENCLAW_RELEASE_UPGRADE_BASELINE_SPEC=openclaw@<version>`.
+- Release upgrade user journey smoke: `pnpm test:docker:release-upgrade-user-journey` installs the newest published stable baseline older than the candidate tarball by default, onboards and installs a CLI plugin on the published package, then replaces the package and runs the documented Doctor migration step. It verifies the existing plugin still works and configures candidate-compatible mock provider/ClickClack settings for the agent/channel journey. If no older stable baseline exists, it reuses the candidate version only when that version is published and stable; otherwise it fails and requires an explicit baseline. Override the baseline with `CARAPACE_RELEASE_UPGRADE_BASELINE_SPEC=carapace@<version>`.
 - Release plugin marketplace smoke: `pnpm test:docker:release-plugin-marketplace` installs from a local fixture marketplace, updates the installed plugin, uninstalls it, and verifies the plugin CLI disappears with install metadata pruned.
-- Skill install smoke: `pnpm test:docker:skill-install` installs the packed OpenClaw tarball globally in Docker, disables uploaded archive installs in config, resolves the current live ClawHub skill slug from search, installs it with `openclaw skills install`, and verifies the installed skill plus `.clawhub` origin/lock metadata.
-- Update channel switch smoke: `pnpm test:docker:update-channel-switch` installs the packed OpenClaw tarball globally in Docker, switches from package `stable` to git `dev`, verifies the persisted channel and plugin post-update work, then switches back to package `stable` and checks update status.
-- Upgrade survivor smoke: `pnpm test:docker:upgrade-survivor` installs the packed OpenClaw tarball over a dirty old-user fixture with agents, channel config, plugin allowlists, stale plugin dependency state, and existing workspace/session files. It runs package update plus non-interactive doctor without live provider or channel keys, then starts a loopback Gateway and checks config/state preservation plus startup/status budgets.
-- Published upgrade survivor smoke: `pnpm test:docker:published-upgrade-survivor` installs `openclaw@latest` by default, seeds realistic existing-user files, configures that baseline with a baked command recipe, validates the resulting config, updates that published install to the candidate tarball, runs non-interactive doctor, writes `.artifacts/upgrade-survivor/summary.json`, then starts a loopback Gateway and checks configured intents, state preservation, startup, `/healthz`, `/readyz`, and RPC status budgets. Override one baseline with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC`, ask the aggregate scheduler to expand exact local baselines with `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS` such as `openclaw@2026.5.2 openclaw@2026.4.23 openclaw@2026.4.15`, and expand issue-shaped fixtures with `OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS` such as `reported-issues`; the reported-issues set includes `configured-plugin-installs` for automatic external OpenClaw plugin install repair. Package Acceptance exposes those as `published_upgrade_survivor_baseline`, `published_upgrade_survivor_baselines`, and `published_upgrade_survivor_scenarios`, resolves meta baseline tokens such as `last-stable-4` or `all-since-2026.4.23`, and Full Release Validation runs all `reported-issues` scenarios against the latest stable baseline, resolved once to an exact package before fanout. Historical matrices remain explicit manual overrides.
+- Skill install smoke: `pnpm test:docker:skill-install` installs the packed Carapace tarball globally in Docker, disables uploaded archive installs in config, resolves the current live ClawHub skill slug from search, installs it with `carapace skills install`, and verifies the installed skill plus `.clawhub` origin/lock metadata.
+- Update channel switch smoke: `pnpm test:docker:update-channel-switch` installs the packed Carapace tarball globally in Docker, switches from package `stable` to git `dev`, verifies the persisted channel and plugin post-update work, then switches back to package `stable` and checks update status.
+- Upgrade survivor smoke: `pnpm test:docker:upgrade-survivor` installs the packed Carapace tarball over a dirty old-user fixture with agents, channel config, plugin allowlists, stale plugin dependency state, and existing workspace/session files. It runs package update plus non-interactive doctor without live provider or channel keys, then starts a loopback Gateway and checks config/state preservation plus startup/status budgets.
+- Published upgrade survivor smoke: `pnpm test:docker:published-upgrade-survivor` installs `carapace@latest` by default, seeds realistic existing-user files, configures that baseline with a baked command recipe, validates the resulting config, updates that published install to the candidate tarball, runs non-interactive doctor, writes `.artifacts/upgrade-survivor/summary.json`, then starts a loopback Gateway and checks configured intents, state preservation, startup, `/healthz`, `/readyz`, and RPC status budgets. Override one baseline with `CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC`, ask the aggregate scheduler to expand exact local baselines with `CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPECS` such as `carapace@2026.5.2 carapace@2026.4.23 carapace@2026.4.15`, and expand issue-shaped fixtures with `CARAPACE_UPGRADE_SURVIVOR_SCENARIOS` such as `reported-issues`; the reported-issues set includes `configured-plugin-installs` for automatic external Carapace plugin install repair. Package Acceptance exposes those as `published_upgrade_survivor_baseline`, `published_upgrade_survivor_baselines`, and `published_upgrade_survivor_scenarios`, resolves meta baseline tokens such as `last-stable-4` or `all-since-2026.4.23`, and Full Release Validation runs all `reported-issues` scenarios against the latest stable baseline, resolved once to an exact package before fanout. Historical matrices remain explicit manual overrides.
 - Session runtime context smoke: `pnpm test:docker:session-runtime-context` verifies hidden runtime context transcript persistence plus doctor repair of affected duplicated prompt-rewrite branches.
-- Bun global install and runtime smoke: `bash scripts/e2e/bun-global-install-smoke.sh` packs the current tree, installs it with `bun install -g --trust` in an isolated home, verifies OpenClaw's lifecycle scripts ran, and executes the installed package with Bun 1.4 or newer. It checks representative CLI state, bundled image providers, a mocked local agent turn, Gateway readiness and health, and a mocked agent turn through the Bun-hosted Gateway. Reuse a prebuilt tarball with `OPENCLAW_BUN_GLOBAL_SMOKE_PACKAGE_TGZ=/path/to/openclaw-*.tgz`, skip the host build with `OPENCLAW_BUN_GLOBAL_SMOKE_HOST_BUILD=0`, or copy `dist/` from a built Docker image with `OPENCLAW_BUN_GLOBAL_SMOKE_DIST_IMAGE=openclaw-dockerfile-smoke:local`.
-- Installer Docker smoke: `bash scripts/test-install-sh-docker.sh` shares one npm cache across its root, update, and direct-npm containers. Update smoke defaults to npm `latest` as the stable baseline before upgrading to the candidate tarball. Override with `OPENCLAW_INSTALL_SMOKE_UPDATE_BASELINE=2026.4.22` locally, or with the Install Smoke workflow's `update_baseline_version` input on GitHub. Non-root installer checks keep an isolated npm cache so root-owned cache entries do not mask user-local install behavior. Set `OPENCLAW_INSTALL_SMOKE_NPM_CACHE_DIR=/path/to/cache` to reuse the root/update/direct-npm cache across local reruns.
-- Install Smoke CI skips the duplicate direct-npm global update with `OPENCLAW_INSTALL_SMOKE_SKIP_NPM_GLOBAL=1`; run the script locally without that env when direct `npm install -g` coverage is needed.
-- Agents delete shared workspace CLI smoke: `pnpm test:docker:agents-delete-shared-workspace` (script: `scripts/e2e/agents-delete-shared-workspace-docker.sh`) builds the root Dockerfile image by default, seeds two agents with one workspace in an isolated container home, runs `agents delete --json`, and verifies valid JSON plus retained workspace behavior. Reuse the install-smoke image with `OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE=openclaw-dockerfile-smoke:local OPENCLAW_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD=1`.
+- Bun global install and runtime smoke: `bash scripts/e2e/bun-global-install-smoke.sh` packs the current tree, installs it with `bun install -g --trust` in an isolated home, verifies Carapace's lifecycle scripts ran, and executes the installed package with Bun 1.4 or newer. It checks representative CLI state, bundled image providers, a mocked local agent turn, Gateway readiness and health, and a mocked agent turn through the Bun-hosted Gateway. Reuse a prebuilt tarball with `CARAPACE_BUN_GLOBAL_SMOKE_PACKAGE_TGZ=/path/to/carapace-*.tgz`, skip the host build with `CARAPACE_BUN_GLOBAL_SMOKE_HOST_BUILD=0`, or copy `dist/` from a built Docker image with `CARAPACE_BUN_GLOBAL_SMOKE_DIST_IMAGE=carapace-dockerfile-smoke:local`.
+- Installer Docker smoke: `bash scripts/test-install-sh-docker.sh` shares one npm cache across its root, update, and direct-npm containers. Update smoke defaults to npm `latest` as the stable baseline before upgrading to the candidate tarball. Override with `CARAPACE_INSTALL_SMOKE_UPDATE_BASELINE=2026.4.22` locally, or with the Install Smoke workflow's `update_baseline_version` input on GitHub. Non-root installer checks keep an isolated npm cache so root-owned cache entries do not mask user-local install behavior. Set `CARAPACE_INSTALL_SMOKE_NPM_CACHE_DIR=/path/to/cache` to reuse the root/update/direct-npm cache across local reruns.
+- Install Smoke CI skips the duplicate direct-npm global update with `CARAPACE_INSTALL_SMOKE_SKIP_NPM_GLOBAL=1`; run the script locally without that env when direct `npm install -g` coverage is needed.
+- Agents delete shared workspace CLI smoke: `pnpm test:docker:agents-delete-shared-workspace` (script: `scripts/e2e/agents-delete-shared-workspace-docker.sh`) builds the root Dockerfile image by default, seeds two agents with one workspace in an isolated container home, runs `agents delete --json`, and verifies valid JSON plus retained workspace behavior. Reuse the install-smoke image with `CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_IMAGE=carapace-dockerfile-smoke:local CARAPACE_AGENTS_DELETE_SHARED_WORKSPACE_E2E_SKIP_BUILD=1`.
 - Gateway networking and host lifecycle: `pnpm test:docker:gateway-network` (script: `scripts/e2e/gateway-network-docker.sh`) preserves the two-container LAN WebSocket auth/health smoke, then uses loopback Admin HTTP to prove prepare fencing, retained-control access, resume recovery, and a prepared same-container stop/start. The restart check must finish before the original lease expires, verifies that suspension state is process-local while persisted Gateway config and container identity survive, and emits machine-readable phase timing JSON.
 - Browser CDP snapshot smoke: `pnpm test:docker:browser-cdp-snapshot` (script: `scripts/e2e/browser-cdp-snapshot-docker.sh`) builds the source E2E image plus a Chromium layer, starts Chromium with raw CDP, runs `browser doctor --deep`, and verifies CDP role snapshots cover link URLs, cursor-promoted clickables, iframe refs, and frame metadata.
 - OpenAI Responses web_search minimal reasoning regression: `pnpm test:docker:openai-web-search-minimal` (script: `scripts/e2e/openai-web-search-minimal-docker.sh`) runs a mocked OpenAI server through Gateway, verifies `web_search` raises `reasoning.effort` from `minimal` to `low`, then forces the provider schema reject and checks the raw detail appears in Gateway logs.
 - MCP channel bridge (seeded Gateway + stdio bridge + raw Claude notification-frame smoke): `pnpm test:docker:mcp-channels` (script: `scripts/e2e/mcp-channels-docker.sh`)
-- OpenClaw bundle MCP tools (real stdio MCP server + embedded OpenClaw profile allow/deny smoke): `pnpm test:docker:agent-bundle-mcp-tools` (script: `scripts/e2e/agent-bundle-mcp-tools-docker.sh`)
+- Carapace bundle MCP tools (real stdio MCP server + embedded Carapace profile allow/deny smoke): `pnpm test:docker:agent-bundle-mcp-tools` (script: `scripts/e2e/agent-bundle-mcp-tools-docker.sh`)
 - Cron/subagent MCP cleanup (real Gateway + stdio MCP child teardown after isolated cron and one-shot subagent runs): `pnpm test:docker:cron-mcp-cleanup` (script: `scripts/e2e/cron-mcp-cleanup-docker.sh`)
 - Plugins (install/update smoke for local path, `file:`, npm registry with hoisted dependencies, malformed npm package metadata, git moving refs, ClawHub kitchen-sink, marketplace updates, and Claude-bundle enable/inspect): `pnpm test:docker:plugins` (script: `scripts/e2e/plugins-docker.sh`)
-  Set `OPENCLAW_PLUGINS_E2E_CLAWHUB=0` to skip the ClawHub block, or override the default kitchen-sink package/runtime pair with `OPENCLAW_PLUGINS_E2E_CLAWHUB_SPEC` and `OPENCLAW_PLUGINS_E2E_CLAWHUB_ID`. Without `OPENCLAW_CLAWHUB_URL`/`CLAWHUB_URL`, the test uses a hermetic local ClawHub fixture server.
+  Set `CARAPACE_PLUGINS_E2E_CLAWHUB=0` to skip the ClawHub block, or override the default kitchen-sink package/runtime pair with `CARAPACE_PLUGINS_E2E_CLAWHUB_SPEC` and `CARAPACE_PLUGINS_E2E_CLAWHUB_ID`. Without `CARAPACE_CLAWHUB_URL`/`CLAWHUB_URL`, the test uses a hermetic local ClawHub fixture server.
 - Plugin update unchanged smoke: `pnpm test:docker:plugin-update` (script: `scripts/e2e/plugin-update-unchanged-docker.sh`)
-- Plugin lifecycle matrix smoke: `pnpm test:docker:plugin-lifecycle-matrix` installs the packed OpenClaw tarball in a bare container, installs an npm plugin, toggles enable/disable, upgrades and downgrades it through a local npm registry, deletes the installed code, then verifies uninstall still removes stale state while logging RSS/CPU metrics for each lifecycle phase.
+- Plugin lifecycle matrix smoke: `pnpm test:docker:plugin-lifecycle-matrix` installs the packed Carapace tarball in a bare container, installs an npm plugin, toggles enable/disable, upgrades and downgrades it through a local npm registry, deletes the installed code, then verifies uninstall still removes stale state while logging RSS/CPU metrics for each lifecycle phase.
 - Config reload metadata smoke: `pnpm test:docker:config-reload` (script: `scripts/e2e/config-reload-source-docker.sh`)
 - Plugins: `pnpm test:docker:plugins` covers install/update smoke for local path, `file:`, npm registry with hoisted dependencies, git moving refs, ClawHub fixtures, marketplace updates, and Claude-bundle enable/inspect. `pnpm test:docker:plugin-update` covers unchanged update behavior for installed plugins. `pnpm test:docker:plugin-lifecycle-matrix` covers resource-tracked npm plugin install, enable, disable, upgrade, downgrade, and missing-code uninstall.
 
 To prebuild and reuse the shared functional image manually:
 
 ```bash
-OPENCLAW_DOCKER_E2E_IMAGE=openclaw-docker-e2e-functional:local pnpm test:docker:e2e-build
-OPENCLAW_DOCKER_E2E_IMAGE=openclaw-docker-e2e-functional:local OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:mcp-channels
+CARAPACE_DOCKER_E2E_IMAGE=carapace-docker-e2e-functional:local pnpm test:docker:e2e-build
+CARAPACE_DOCKER_E2E_IMAGE=carapace-docker-e2e-functional:local CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:mcp-channels
 ```
 
-Suite-specific image overrides such as `OPENCLAW_GATEWAY_NETWORK_E2E_IMAGE` still win when set. When `OPENCLAW_SKIP_DOCKER_BUILD=1` points at a remote shared image, the scripts pull it if it is not already local. The QR and installer Docker tests keep their own Dockerfiles because they validate package/install behavior rather than the shared built-app runtime.
+Suite-specific image overrides such as `CARAPACE_GATEWAY_NETWORK_E2E_IMAGE` still win when set. When `CARAPACE_SKIP_DOCKER_BUILD=1` points at a remote shared image, the scripts pull it if it is not already local. The QR and installer Docker tests keep their own Dockerfiles because they validate package/install behavior rather than the shared built-app runtime.
 
 The live-model Docker runners also bind-mount the current checkout read-only
 and stage it into a temporary workdir inside the container. This keeps the
 runtime image slim while still running Vitest against your exact local
 source/config. The staging step skips large local-only caches and app build
-outputs such as `.pnpm-store`, `.worktrees`, `__openclaw_vitest__`, and
+outputs such as `.pnpm-store`, `.worktrees`, `__carapace_vitest__`, and
 app-local `.build` or Gradle output directories so Docker live runs do not
 spend minutes copying machine-specific artifacts. They also set
-`OPENCLAW_SKIP_CHANNELS=1` so gateway live probes do not start real
+`CARAPACE_SKIP_CHANNELS=1` so gateway live probes do not start real
 Telegram/Discord/etc. channel workers inside the container.
 `test:docker:live-models` still runs `pnpm test:live`, so pass through
-`OPENCLAW_LIVE_GATEWAY_*` as well when you need to narrow or exclude gateway
+`CARAPACE_LIVE_GATEWAY_*` as well when you need to narrow or exclude gateway
 live coverage from that Docker lane.
 
 `test:docker:openwebui` is a higher-level compatibility smoke: it starts an
-OpenClaw gateway container with the OpenAI-compatible HTTP endpoints enabled,
+Carapace gateway container with the OpenAI-compatible HTTP endpoints enabled,
 starts a pinned Open WebUI container against that gateway, signs in through
-Open WebUI, verifies `/api/models` exposes `openclaw/default`, then sends a
+Open WebUI, verifies `/api/models` exposes `carapace/default`, then sends a
 real chat request through Open WebUI's `/api/chat/completions` proxy. Set
 `OPENWEBUI_SMOKE_MODE=models` for release-path CI checks that should stop
 after Open WebUI sign-in and model discovery, without waiting on a live model
@@ -934,12 +934,12 @@ completion. The first run can be noticeably slower because Docker may need to
 pull the Open WebUI image and Open WebUI may need to finish its own
 cold-start setup. This lane expects a usable live model key, provided through
 the process environment, staged auth profiles, or an explicit
-`OPENCLAW_PROFILE_FILE`. Successful runs print a small JSON payload like
-`{ "ok": true, "model": "openclaw/default", ... }`.
+`CARAPACE_PROFILE_FILE`. Successful runs print a small JSON payload like
+`{ "ok": true, "model": "carapace/default", ... }`.
 
 `test:docker:mcp-channels` is intentionally deterministic and does not need a
 real Telegram, Discord, or iMessage account. It boots a seeded Gateway
-container, starts a second container that spawns `openclaw mcp serve`, then
+container, starts a second container that spawns `carapace mcp serve`, then
 verifies routed conversation discovery, transcript reads, attachment
 metadata, live event queue behavior, outbound send routing, and Claude-style
 channel + permission notifications over the real stdio MCP bridge. The
@@ -950,7 +950,7 @@ happens to surface.
 `test:docker:agent-bundle-mcp-tools` is deterministic and does not need a
 live model key. It builds the repo Docker image, starts a real stdio MCP
 probe server inside the container, materializes that server through the
-embedded OpenClaw bundle MCP runtime, executes the tool, then verifies
+embedded Carapace bundle MCP runtime, executes the tool, then verifies
 `coding` and `messaging` keep `bundle-mcp` tools while `minimal` and
 `tools.deny: ["bundle-mcp"]` filter them.
 
@@ -966,22 +966,22 @@ Manual ACP plain-language thread smoke (not CI):
 
 Useful env vars:
 
-- `OPENCLAW_CONFIG_DIR=...` (default: `~/.openclaw`) mounted to `/home/node/.openclaw`
-- `OPENCLAW_WORKSPACE_DIR=...` (default: `~/.openclaw/workspace`) mounted to `/home/node/.openclaw/workspace`
-- `OPENCLAW_PROFILE_FILE=...` mounted and sourced before running tests
-- `OPENCLAW_DOCKER_PROFILE_ENV_ONLY=1` to verify only env vars sourced from `OPENCLAW_PROFILE_FILE`, using temporary config/workspace dirs and no external CLI auth mounts
-- `OPENCLAW_DOCKER_CLI_TOOLS_DIR=...` (default: `~/.cache/openclaw/docker-cli-tools`, unless the run already uses a CI/managed bind dir) mounted to `/home/node/.npm-global` for cached CLI installs inside Docker
+- `CARAPACE_CONFIG_DIR=...` (default: `~/.carapace`) mounted to `/home/node/.carapace`
+- `CARAPACE_WORKSPACE_DIR=...` (default: `~/.carapace/workspace`) mounted to `/home/node/.carapace/workspace`
+- `CARAPACE_PROFILE_FILE=...` mounted and sourced before running tests
+- `CARAPACE_DOCKER_PROFILE_ENV_ONLY=1` to verify only env vars sourced from `CARAPACE_PROFILE_FILE`, using temporary config/workspace dirs and no external CLI auth mounts
+- `CARAPACE_DOCKER_CLI_TOOLS_DIR=...` (default: `~/.cache/carapace/docker-cli-tools`, unless the run already uses a CI/managed bind dir) mounted to `/home/node/.npm-global` for cached CLI installs inside Docker
 - External CLI auth dirs/files under `$HOME` are mounted read-only under `/host-auth...`, then copied into `/home/node/...` before tests start
   - Default dirs (used when the run is not narrowed to specific providers): `.factory`, `.gemini`, `.minimax`
   - Default files: `~/.codex/auth.json`, `~/.codex/config.toml`, `.claude.json`, `~/.claude/.credentials.json`, `~/.claude/settings.json`, `~/.claude/settings.local.json`
-  - Narrowed provider runs mount only the needed dirs/files inferred from `OPENCLAW_LIVE_PROVIDERS` / `OPENCLAW_LIVE_GATEWAY_PROVIDERS`
-  - Override manually with `OPENCLAW_DOCKER_AUTH_DIRS=all`, `OPENCLAW_DOCKER_AUTH_DIRS=none`, or a comma list like `OPENCLAW_DOCKER_AUTH_DIRS=.claude,.codex`
-- `OPENCLAW_LIVE_GATEWAY_MODELS=...` / `OPENCLAW_LIVE_MODELS=...` to narrow the run
-- `OPENCLAW_LIVE_GATEWAY_PROVIDERS=...` / `OPENCLAW_LIVE_PROVIDERS=...` to filter providers in-container
-- `OPENCLAW_SKIP_DOCKER_BUILD=1` to reuse an existing `openclaw:local-live` image for reruns that do not need a rebuild
-- `OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS=1` to ensure creds come from the profile store (not env)
-- `OPENCLAW_OPENWEBUI_MODEL=...` to choose the model exposed by the gateway for the Open WebUI smoke
-- `OPENCLAW_OPENWEBUI_PROMPT=...` to override the nonce-check prompt used by the Open WebUI smoke
+  - Narrowed provider runs mount only the needed dirs/files inferred from `CARAPACE_LIVE_PROVIDERS` / `CARAPACE_LIVE_GATEWAY_PROVIDERS`
+  - Override manually with `CARAPACE_DOCKER_AUTH_DIRS=all`, `CARAPACE_DOCKER_AUTH_DIRS=none`, or a comma list like `CARAPACE_DOCKER_AUTH_DIRS=.claude,.codex`
+- `CARAPACE_LIVE_GATEWAY_MODELS=...` / `CARAPACE_LIVE_MODELS=...` to narrow the run
+- `CARAPACE_LIVE_GATEWAY_PROVIDERS=...` / `CARAPACE_LIVE_PROVIDERS=...` to filter providers in-container
+- `CARAPACE_SKIP_DOCKER_BUILD=1` to reuse an existing `carapace:local-live` image for reruns that do not need a rebuild
+- `CARAPACE_LIVE_REQUIRE_PROFILE_KEYS=1` to ensure creds come from the profile store (not env)
+- `CARAPACE_OPENWEBUI_MODEL=...` to choose the model exposed by the gateway for the Open WebUI smoke
+- `CARAPACE_OPENWEBUI_PROMPT=...` to override the nonce-check prompt used by the Open WebUI smoke
 - `OPENWEBUI_IMAGE=...` to override the pinned Open WebUI image tag
 
 ## Docs sanity

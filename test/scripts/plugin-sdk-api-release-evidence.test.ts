@@ -48,7 +48,7 @@ describe("Plugin SDK API release evidence", () => {
       "f4b495f34f8c1b72721841242b24d6f8351524c00e34db016af0fd3944f44992",
     );
     expect(JSON.stringify(receipt)).toBe(
-      `{"schema":"openclaw.plugin-sdk-api-release-evidence/v1","status":"checked","baseRef":"v2026.8.1","baseSha":"${baseSha}","headSha":"${headSha}","hasChanges":true,"digest":"f4b495f34f8c1b72721841242b24d6f8351524c00e34db016af0fd3944f44992","diff":{"entrypointsAdded":[],"entrypointsRemoved":[],"exports":[{"change":"added","exportName":"send"}],"digest":"f4b495f34f8c1b72721841242b24d6f8351524c00e34db016af0fd3944f44992"},"workflowSha":"${workflowSha}"}`,
+      `{"schema":"carapace.plugin-sdk-api-release-evidence/v1","status":"checked","baseRef":"v2026.8.1","baseSha":"${baseSha}","headSha":"${headSha}","hasChanges":true,"digest":"f4b495f34f8c1b72721841242b24d6f8351524c00e34db016af0fd3944f44992","diff":{"entrypointsAdded":[],"entrypointsRemoved":[],"exports":[{"change":"added","exportName":"send"}],"digest":"f4b495f34f8c1b72721841242b24d6f8351524c00e34db016af0fd3944f44992"},"workflowSha":"${workflowSha}"}`,
     );
     expect(
       validatePluginSdkApiReleaseEvidence({

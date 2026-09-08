@@ -3,23 +3,23 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import * as channelInbound from "openclaw/plugin-sdk/channel-inbound";
-import { createTestInboundDebounceFlush } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelPlugin } from "carapace/plugin-sdk/channel-core";
+import * as channelInbound from "carapace/plugin-sdk/channel-inbound";
+import { createTestInboundDebounceFlush } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   recordInboundSession,
   type ensureConfiguredBindingRouteReady,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "carapace/plugin-sdk/conversation-runtime";
 import {
   createTestRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { dispatchReplyWithBufferedBlockDispatcher } from "openclaw/plugin-sdk/reply-runtime";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
-import type { waitForTransportReady } from "openclaw/plugin-sdk/transport-ready-runtime";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import type { dispatchReplyWithBufferedBlockDispatcher } from "carapace/plugin-sdk/reply-runtime";
+import { getSessionEntry, resolveStorePath } from "carapace/plugin-sdk/session-store-runtime";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
+import type { waitForTransportReady } from "carapace/plugin-sdk/transport-ready-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { createIMessageRpcClient } from "./client.js";
 import {
@@ -62,7 +62,7 @@ type MonitorRunParams = {
   session?: Record<string, unknown>;
   messages?: Record<string, unknown>;
   agents?: Record<string, unknown>;
-  bindings?: OpenClawConfig["bindings"];
+  bindings?: CarapaceConfig["bindings"];
   runtime?: MonitorIMessageOpts["runtime"];
   allowlist?: boolean;
 };
@@ -218,12 +218,12 @@ const createChannelInboundDebouncerMock = vi.hoisted(() =>
   ),
 );
 
-vi.mock("openclaw/plugin-sdk/transport-ready-runtime", () => ({
+vi.mock("carapace/plugin-sdk/transport-ready-runtime", () => ({
   waitForTransportReady: waitForTransportReadyMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/conversation-runtime")>();
+vi.mock("carapace/plugin-sdk/conversation-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/conversation-runtime")>();
   return {
     ...actual,
     ensureConfiguredBindingRouteReady: ensureConfiguredBindingRouteReadyMock,
@@ -232,8 +232,8 @@ vi.mock("openclaw/plugin-sdk/conversation-runtime", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("carapace/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("carapace/plugin-sdk/channel-inbound")>();
   return {
     ...actual,
     createChannelInboundDebouncer: createChannelInboundDebouncerMock,
@@ -278,7 +278,7 @@ async function runChannelInboundEventForLastRouteTest(params: RunChannelInboundE
 
 describe("iMessage monitor last-route updates", () => {
   const tempDirs: string[] = [];
-  const openClawStates: OpenClawTestState[] = [];
+  const carapaceStates: CarapaceTestState[] = [];
 
   beforeEach(() => {
     vi.spyOn(channelInbound, "runChannelInboundEvent").mockImplementation(
@@ -299,7 +299,7 @@ describe("iMessage monitor last-route updates", () => {
     vi.restoreAllMocks();
     resetPluginRuntimeStateForTest();
     vi.useRealTimers();
-    await Promise.all(openClawStates.splice(0).map((state) => state.cleanup()));
+    await Promise.all(carapaceStates.splice(0).map((state) => state.cleanup()));
     vi.unstubAllEnvs();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { recursive: true, force: true });
@@ -394,7 +394,7 @@ describe("iMessage monitor last-route updates", () => {
     async ({ label, configuredService, chatGuid, expectedService }) => {
       setAvailablePrivateApiMethods(["watch.subscribe", "send", "typing", "read"]);
       const stateDir = createTestStateDir(
-        `openclaw-imsg-direct-route-${label.replaceAll(" ", "-")}-`,
+        `carapace-imsg-direct-route-${label.replaceAll(" ", "-")}-`,
       );
       const configuredStore = path.join(stateDir, "sessions.json");
       const storePath = resolveStorePath(configuredStore, { agentId: "main" });
@@ -769,7 +769,7 @@ describe("iMessage monitor last-route updates", () => {
       error: "ACP backend unavailable",
     });
     const runtime = { error: vi.fn(), exit: vi.fn(), log: vi.fn() };
-    const stateDir = createTestStateDir("openclaw-imsg-acp-readiness-effects-");
+    const stateDir = createTestStateDir("carapace-imsg-acp-readiness-effects-");
 
     const client = await runMessageCase({
       requests: {
@@ -900,7 +900,7 @@ describe("iMessage monitor last-route updates", () => {
       expect(onToolResult).toBeTypeOf("function");
       await onToolResult?.({
         text: "💨Fast: auto-off(75s>=60s)",
-        channelData: { openclawProgressKind: "fast-mode-auto" },
+        channelData: { carapaceProgressKind: "fast-mode-auto" },
       });
       typingController.markRunComplete();
       typingController.markDispatchIdle();
@@ -947,7 +947,7 @@ describe("iMessage monitor last-route updates", () => {
       expect(onToolResult).toBeTypeOf("function");
       await onToolResult?.({
         text: "💨Fast: auto-off(75s>=60s)",
-        channelData: { openclawProgressKind: "fast-mode-auto" },
+        channelData: { carapaceProgressKind: "fast-mode-auto" },
       });
       return EMPTY_DISPATCH_RESULT;
     });
@@ -1196,7 +1196,7 @@ describe("iMessage monitor last-route updates", () => {
   );
 
   it("keeps per-channel-peer direct-message last-route writes on the isolated session", async () => {
-    const stateDir = createTestStateDir("openclaw-imsg-last-route-");
+    const stateDir = createTestStateDir("carapace-imsg-last-route-");
     const configuredStore = path.join(stateDir, "sessions.json");
     const storePath = resolveStorePath(configuredStore, { agentId: "main" });
     const sessionKey = "agent:main:imessage:direct:+15550001111";
@@ -1258,7 +1258,7 @@ describe("iMessage monitor last-route updates", () => {
       ],
       monitor: {
         imessage: {
-          dbPath: path.join(os.tmpdir(), `openclaw-missing-chat-${Date.now()}.db`),
+          dbPath: path.join(os.tmpdir(), `carapace-missing-chat-${Date.now()}.db`),
         },
       },
     });
@@ -1270,7 +1270,7 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("passes the startup rowid watermark as since_rowid when chat.db is readable", async () => {
-    const dbPath = createRecoveryChatDb("openclaw-imsg-startup-rowid-", undefined, "watermark");
+    const dbPath = createRecoveryChatDb("carapace-imsg-startup-rowid-", undefined, "watermark");
     const client = await runMessageCase({ monitor: { imessage: { dbPath } } });
 
     expectWatchSubscription(client, 5000);
@@ -1294,7 +1294,7 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("routes legacy catchup through durable ingress and rejects a live GUID overlap", async () => {
-    const dbPath = createRecoveryChatDb("openclaw-imsg-catchup-window-");
+    const dbPath = createRecoveryChatDb("carapace-imsg-catchup-window-");
     const createdAt = new Date().toISOString();
     const historyMessage = createInboundMessage({
       id: 4995,
@@ -1326,7 +1326,7 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("recovers downtime messages: replays from the cursor and delivers replay rows older than the live fence", async () => {
-    const dbPath = createRecoveryChatDb("openclaw-imsg-recovery-", 4990);
+    const dbPath = createRecoveryChatDb("carapace-imsg-recovery-", 4990);
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     const client = await runMessageCase({
@@ -1354,7 +1354,7 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("does not treat startup-boundary rows as recovery replay without a prior cursor", async () => {
-    const dbPath = createRecoveryChatDb("openclaw-imsg-first-run-boundary-");
+    const dbPath = createRecoveryChatDb("carapace-imsg-first-run-boundary-");
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     const client = await runMessageCase({
@@ -1373,7 +1373,7 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("records a suppressed live row so a later replay of the same row is deduped, not delivered", async () => {
-    const dbPath = createRecoveryChatDb("openclaw-imsg-suppress-record-");
+    const dbPath = createRecoveryChatDb("carapace-imsg-suppress-record-");
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     await runMessageCase({
@@ -1399,7 +1399,7 @@ describe("iMessage monitor last-route updates", () => {
 
   it("advances the recovery cursor after durable enqueue before dispatch", async () => {
     debouncerControl.holdEntries = true;
-    const dbPath = createRecoveryChatDb("openclaw-imsg-recovery-failed-", 4990);
+    const dbPath = createRecoveryChatDb("carapace-imsg-recovery-failed-", 4990);
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     const client = await runMessageCase({
@@ -1423,7 +1423,7 @@ describe("iMessage monitor last-route updates", () => {
 
   it("keeps the durable recovery cursor independent of later dispatch order", async () => {
     debouncerControl.holdEntries = true;
-    const dbPath = createRecoveryChatDb("openclaw-imsg-recovery-ordered-", 4990);
+    const dbPath = createRecoveryChatDb("carapace-imsg-recovery-ordered-", 4990);
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     await runMessageCase({
@@ -1447,14 +1447,14 @@ describe("iMessage monitor last-route updates", () => {
   const replacedDatabaseCases = [
     {
       name: "tails a chat.db replaced at the same path instead of suppressing every row below the stale cursor",
-      prefix: "openclaw-imsg-db-replaced-",
+      prefix: "carapace-imsg-db-replaced-",
       seededRowid: 5,
       liveRowid: 6,
       expectedSinceRowid: 5,
     },
     {
       name: "tails a chat.db rebuilt empty at the same path instead of suppressing its first rows",
-      prefix: "openclaw-imsg-db-rebuilt-",
+      prefix: "carapace-imsg-db-rebuilt-",
       seededRowid: null,
       liveRowid: 1,
       expectedSinceRowid: -1,
@@ -1524,7 +1524,7 @@ describe("iMessage monitor last-route updates", () => {
   }
 
   it("does not self-fence past the first row inserted while an empty rebuilt chat.db starts", async () => {
-    const stateDir = createTestStateDir("openclaw-imsg-db-rebuilt-startup-race-");
+    const stateDir = createTestStateDir("carapace-imsg-db-rebuilt-startup-race-");
     const dbPath = path.join(stateDir, "chat.db");
     advanceIMessageRecoveryCursor(
       "default",
@@ -1582,10 +1582,10 @@ describe("iMessage monitor last-route updates", () => {
   });
 
   it("repairs anchorless group watch payloads before routing or cursor updates", async () => {
-    openClawStates.push(
-      await createOpenClawTestState({
+    carapaceStates.push(
+      await createCarapaceTestState({
         layout: "state-only",
-        prefix: "openclaw-imsg-anchor-repair-",
+        prefix: "carapace-imsg-anchor-repair-",
       }),
     );
 
@@ -1620,7 +1620,7 @@ describe("iMessage monitor last-route updates", () => {
         chat_id: 0,
         sender: "+15550001111",
         is_from_me: false,
-        text: "@openclaw check this https://example.com",
+        text: "@carapace check this https://example.com",
         is_group: false,
         chat_guid: "",
         chat_identifier: "",
@@ -1632,7 +1632,7 @@ describe("iMessage monitor last-route updates", () => {
 
     await runIMessageMonitor({
       imessage: { groupPolicy: "open", groups: { "*": { requireMention: true } } },
-      messages: { groupChat: { mentionPatterns: ["@openclaw"] } },
+      messages: { groupChat: { mentionPatterns: ["@carapace"] } },
       allowlist: false,
     });
 

@@ -4,7 +4,7 @@ import {
 } from "../../../packages/gateway-protocol/src/client-info.js";
 import { CHAT_SEND_SESSION_KEY_MAX_LENGTH } from "../../../packages/gateway-protocol/src/schema/primitives.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
 import { isPluginOwnedSessionBindingRecord } from "../../plugins/conversation-binding-metadata.js";
 import { scopeLegacySessionKeyToAgent } from "../../routing/session-key.js";
@@ -95,7 +95,7 @@ export function normalizeExplicitChatSendOrigin(
 }
 
 export function validateChatSelectedAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   requestedSessionKey: string;
   explicitAgentId?: string;
 }): { ok: true; agentId?: string } | { ok: false; error: string } {

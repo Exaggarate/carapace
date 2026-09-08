@@ -1,15 +1,15 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { telegramBotInfoForTest } from "./bot.create-telegram-bot.test-support.js";
 
 type ReportChannelRoomJoin =
-  typeof import("openclaw/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin;
+  typeof import("carapace/plugin-sdk/channel-join-intro-runtime").reportChannelRoomJoin;
 
 const { reportChannelRoomJoinMock } = vi.hoisted(() => ({
   reportChannelRoomJoinMock: vi.fn<ReportChannelRoomJoin>(async () => ({ kind: "posted" })),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-join-intro-runtime", () => ({
+vi.mock("carapace/plugin-sdk/channel-join-intro-runtime", () => ({
   reportChannelRoomJoin: reportChannelRoomJoinMock,
 }));
 
@@ -29,7 +29,7 @@ function createMembershipContext(params?: {
   const member = {
     id: params?.memberId ?? telegramBotInfoForTest.id,
     is_bot: true,
-    first_name: "OpenClaw",
+    first_name: "Carapace",
   };
   const membership = {
     chat: {
@@ -49,7 +49,7 @@ function createMembershipContext(params?: {
   };
 }
 
-function registerJoinHandler(config: OpenClawConfig) {
+function registerJoinHandler(config: CarapaceConfig) {
   getLoadConfigMock().mockReturnValue(config);
   createTelegramBotCore({
     token: "tok",
@@ -65,7 +65,7 @@ describe("Telegram group join introductions", () => {
   });
 
   it("reports the bot's native group join with metadata-only room context", async () => {
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       channels: {
         telegram: {
           groupPolicy: "open",

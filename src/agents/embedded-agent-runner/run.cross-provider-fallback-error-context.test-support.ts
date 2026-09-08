@@ -1,6 +1,6 @@
 // Full-entry coverage for current-attempt error context across model fallback.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import type { CarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { makeAssistantMessageFixture } from "../test-helpers/assistant-message-fixtures.js";
 import { createModelFallbackConfig } from "../test-helpers/model-fallback-config-fixture.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
@@ -22,7 +22,7 @@ import {
 import { loadSharedRunIntegrationHarness } from "./run.shared-integration-harness.test-support.js";
 import type { EmbeddedRunAttemptResult } from "./run/types.js";
 
-let state: OpenClawTestState;
+let state: CarapaceTestState;
 let runEmbeddedAgent: Awaited<ReturnType<typeof loadSharedRunIntegrationHarness>>;
 const DEEPSEEK_ERROR_MESSAGE = "429 insufficient quota";
 const COMPACTION_REMOVED_ERROR_MESSAGE = "current candidate model unavailable";
@@ -134,12 +134,12 @@ function setupCompactionRemovedFallbackAttempt() {
   );
 }
 
-function runCompactionRemovedFallbackAttempt(ownedState: OpenClawTestState) {
+function runCompactionRemovedFallbackAttempt(ownedState: CarapaceTestState) {
   return runEmbeddedAgent({
     ...createOverflowRunParams(ownedState),
     runId: "run-compaction-fallback-error-context",
     config: makeCrossProviderFallbackConfig(),
-    agentHarnessRuntimeOverride: "openclaw",
+    agentHarnessRuntimeOverride: "carapace",
     provider: "anthropic",
     model: "test-model",
     authProfileId: "anthropic:test",
@@ -161,11 +161,11 @@ async function expectDeepseekFallbackError(promise: Promise<unknown>) {
 describe("runEmbeddedAgent cross-provider fallback error handling", () => {
   beforeAll(async () => {
     runEmbeddedAgent = await loadSharedRunIntegrationHarness();
-    const { withOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    await withOpenClawTestState({ label: "cross-provider-warmup" }, async (warmupState) => {
+    const { withCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    await withCarapaceTestState({ label: "cross-provider-warmup" }, async (warmupState) => {
       await warmRunOverflowCompactionHarness(runEmbeddedAgent, warmupState, {
         config: makeCrossProviderFallbackConfig(),
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "carapace",
         provider: "deepseek",
         model: "deepseek-chat",
       });
@@ -176,8 +176,8 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
 
   beforeEach(async () => {
     resetSharedRunIntegrationHarnessMocks();
-    const { createOpenClawTestState } = await import("../../test-utils/openclaw-test-state.js");
-    state = await createOpenClawTestState({ label: "run.cross-provider-fallback-error-context" });
+    const { createCarapaceTestState } = await import("../../test-utils/carapace-test-state.js");
+    state = await createCarapaceTestState({ label: "run.cross-provider-fallback-error-context" });
     useCrossProviderAuthFixture();
     mockedGlobalHookRunner.hasHooks.mockImplementation(() => false);
   });
@@ -212,7 +212,7 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
       ...createOverflowRunParams(state),
       runId: "run-cross-provider-fallback-error-context",
       config: makeCrossProviderFallbackConfig(),
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       provider: "deepseek",
       model: "deepseek-chat",
       authProfileId: "deepseek:test",
@@ -261,7 +261,7 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
       ...createOverflowRunParams(state),
       runId: "run-stale-session-assistant-timeout",
       config: makeCrossProviderFallbackConfig(),
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       provider: "deepseek",
       model: "deepseek-chat",
       authProfileId: "deepseek:test",
@@ -299,7 +299,7 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
       ...createOverflowRunParams(state),
       runId: "run-stale-session-assistant-non-timeout",
       config: makeCrossProviderFallbackConfig(),
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       provider: "deepseek",
       model: "deepseek-chat",
       authProfileId: "deepseek:test",
@@ -335,7 +335,7 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
       ...createOverflowRunParams(state),
       runId: "run-successful-assistant-stale-error-timeout",
       config: makeCrossProviderFallbackConfig(),
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "carapace",
       provider: "deepseek",
       model: "deepseek-chat",
       authProfileId: "deepseek:test",
@@ -373,7 +373,7 @@ describe("runEmbeddedAgent cross-provider fallback error handling", () => {
         ...createOverflowRunParams(state),
         runId: "run-successful-assistant-stale-thinking",
         config: makeCrossProviderFallbackConfig(),
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "carapace",
         provider: "deepseek",
         model: "deepseek-chat",
         thinkLevel: "high",

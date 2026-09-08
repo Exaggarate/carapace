@@ -8,7 +8,7 @@ import {
   makeTempDir,
   resetPluginAutoEnableTestState,
 } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveProviderUsageSnapshotWithPlugin } from "./provider-runtime.js";
 import { createEmptyPluginRegistry } from "./registry-empty.js";
 import { withPluginRuntimeRegistryScope } from "./runtime/gateway-request-scope.js";
@@ -25,12 +25,12 @@ function makeCodexManifestEnv(): NodeJS.ProcessEnv {
   fs.writeFileSync(
     path.join(pluginDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/codex-test",
-      openclaw: { extensions: ["./index.cjs"] },
+      name: "@carapace/codex-test",
+      carapace: { extensions: ["./index.cjs"] },
     }),
   );
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "carapace.plugin.json"),
     JSON.stringify({
       id: "codex",
       activation: { onAgentHarnesses: ["codex"] },
@@ -56,7 +56,7 @@ function makeCodexManifestEnv(): NodeJS.ProcessEnv {
       },
     };\n`,
   );
-  return makeIsolatedEnv({ OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir });
+  return makeIsolatedEnv({ CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir });
 }
 
 describe("provider runtime harness usage", () => {
@@ -120,22 +120,22 @@ describe("provider runtime harness usage", () => {
   it.each([
     {
       name: "globally disabled plugins",
-      config: { plugins: { enabled: false } } satisfies OpenClawConfig,
+      config: { plugins: { enabled: false } } satisfies CarapaceConfig,
       expectedReason: "plugins disabled",
     },
     {
       name: "a restrictive allowlist",
-      config: { plugins: { allow: ["openai", "memory-core"] } } satisfies OpenClawConfig,
+      config: { plugins: { allow: ["openai", "memory-core"] } } satisfies CarapaceConfig,
       expectedReason: "not in allowlist",
     },
   ])("preserves $name in cold usage diagnostics", async ({ config, expectedReason }) => {
     const workspaceDir = makeTempDir();
     const env = makeCodexManifestEnv();
-    vi.stubEnv("OPENCLAW_STATE_DIR", env.OPENCLAW_STATE_DIR ?? "");
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", env.OPENCLAW_BUNDLED_PLUGINS_DIR ?? "");
+    vi.stubEnv("CARAPACE_STATE_DIR", env.CARAPACE_STATE_DIR ?? "");
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", env.CARAPACE_BUNDLED_PLUGINS_DIR ?? "");
     vi.stubEnv(
-      "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
-      env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR ?? "",
+      "CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+      env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR ?? "",
     );
 
     const error = await resolveProviderUsageSnapshotWithPlugin({

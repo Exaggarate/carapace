@@ -1,21 +1,21 @@
 // Googlechat plugin module implements monitor webhook behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { isRecord } from "openclaw/plugin-sdk/channel-secret-basic-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "carapace/plugin-sdk/channel-secret-basic-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import {
   canonicalizeWebhookRouteKey,
   resolveRequestClientIp,
   type FixedWindowRateLimiter,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 import {
   readJsonWebhookBodyOrReject,
   runDetachedWebhookWork,
   type WebhookInFlightLimiter,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";
 import {
   resolveWebhookTargetWithAuthOrReject,
   withResolvedWebhookRequestPipeline,
-} from "openclaw/plugin-sdk/webhook-targets";
+} from "carapace/plugin-sdk/webhook-targets";
 import { verifyGoogleChatRequest } from "./auth.js";
 import { parseGoogleChatInboundPayload as normalizeGoogleChatInboundPayload } from "./monitor-event.js";
 import type { WebhookTarget } from "./monitor-types.js";
@@ -36,7 +36,7 @@ function extractBearerToken(header: unknown): string {
 
 const ADD_ON_PREAUTH_MAX_BYTES = 16 * 1024;
 const ADD_ON_PREAUTH_TIMEOUT_MS = 3_000;
-const GOOGLECHAT_WEBHOOK_ACCEPTED_HEADER = "x-openclaw-delivery-accepted";
+const GOOGLECHAT_WEBHOOK_ACCEPTED_HEADER = "x-carapace-delivery-accepted";
 const GOOGLECHAT_WEBHOOK_ACCEPTED_VALUE = "durable";
 
 type ParsedGoogleChatInboundSuccess = {

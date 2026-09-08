@@ -84,7 +84,7 @@ function trustedUpgradeSurvivorCommand(
 ): string {
   const prefix = envPrefix ? `${envPrefix} ` : "";
   const prelude = shellPrelude ? `${shellPrelude}; ` : "";
-  return `OPENCLAW_DOCKER_E2E_REPO_ROOT="\${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" ${prefix}OPENCLAW_SKIP_DOCKER_BUILD=1 bash -c '${prelude}harness="\${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${harnessDir}}"; OPENCLAW_LIVE_DOCKER_REPO_ROOT="\${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/upgrade-survivor-docker.sh"'`;
+  return `CARAPACE_DOCKER_E2E_REPO_ROOT="\${CARAPACE_DOCKER_E2E_REPO_ROOT:-$PWD}" ${prefix}CARAPACE_SKIP_DOCKER_BUILD=1 bash -c '${prelude}harness="\${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${harnessDir}}"; CARAPACE_LIVE_DOCKER_REPO_ROOT="\${CARAPACE_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/upgrade-survivor-docker.sh"'`;
 }
 
 function publishedUpgradeSurvivorLane(
@@ -93,11 +93,11 @@ function publishedUpgradeSurvivorLane(
   scenario?: string,
 ): ReturnType<typeof summarizeLane> {
   return {
-    command: `OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}" OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC='${baselineSpec}' ${
-      scenario ? `OPENCLAW_UPGRADE_SURVIVOR_SCENARIO='${scenario}' ` : ""
+    command: `CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}" CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC='${baselineSpec}' ${
+      scenario ? `CARAPACE_UPGRADE_SURVIVOR_SCENARIO='${scenario}' ` : ""
     }${trustedUpgradeSurvivorCommand(
-      "OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
-      'export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:-openclaw@latest}"; export OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
+      "CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
+      'export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC:-carapace@latest}"; export CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
     )}`,
     imageKind: "bare",
     live: false,
@@ -111,9 +111,9 @@ function publishedUpgradeSurvivorLane(
 
 function updateMigrationLane(name: string, baselineSpec: string): ReturnType<typeof summarizeLane> {
   return {
-    command: `OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}" OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC='${baselineSpec}' OPENCLAW_UPGRADE_SURVIVOR_SCENARIO='plugin-deps-cleanup' ${trustedUpgradeSurvivorCommand(
-      "OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
-      'export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:-openclaw@latest}"; export OPENCLAW_UPGRADE_SURVIVOR_SCENARIO="${OPENCLAW_UPGRADE_SURVIVOR_SCENARIO:-plugin-deps-cleanup}"',
+    command: `CARAPACE_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}" CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC='${baselineSpec}' CARAPACE_UPGRADE_SURVIVOR_SCENARIO='plugin-deps-cleanup' ${trustedUpgradeSurvivorCommand(
+      "CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
+      'export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC:-carapace@latest}"; export CARAPACE_UPGRADE_SURVIVOR_SCENARIO="${CARAPACE_UPGRADE_SURVIVOR_SCENARIO:-plugin-deps-cleanup}"',
     )}`,
     imageKind: "bare",
     live: false,
@@ -127,7 +127,7 @@ function updateMigrationLane(name: string, baselineSpec: string): ReturnType<typ
 
 function bundledPluginSweepLane(index: number): ReturnType<typeof summarizeLane> {
   return {
-    command: `OPENCLAW_BUNDLED_PLUGIN_SWEEP_TOTAL=24 OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX=${index} OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:bundled-plugin-install-uninstall`,
+    command: `CARAPACE_BUNDLED_PLUGIN_SWEEP_TOTAL=24 CARAPACE_BUNDLED_PLUGIN_SWEEP_INDEX=${index} CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:bundled-plugin-install-uninstall`,
     imageKind: "functional",
     live: false,
     name: `bundled-plugin-install-uninstall-${index}`,
@@ -162,7 +162,7 @@ describe("scripts/lib/docker-e2e-plan", () => {
   it.each(["literal", "mapped"])(
     "retains first-hop coverage for supported %s postbuild output declarations without executing target code",
     (shape) => {
-      const targetRoot = tempDirs.make("openclaw-first-hop-target-");
+      const targetRoot = tempDirs.make("carapace-first-hop-target-");
       mkdirSync(join(targetRoot, "scripts"));
       const source =
         shape === "literal"
@@ -191,7 +191,7 @@ describe("scripts/lib/docker-e2e-plan", () => {
   ])(
     "does not infer first-hop support from %s with missing or unrelated outputs %s",
     (shape, missing) => {
-      const targetRoot = tempDirs.make("openclaw-missing-first-hop-target-");
+      const targetRoot = tempDirs.make("carapace-missing-first-hop-target-");
       mkdirSync(join(targetRoot, "scripts"));
       if (shape !== "absent") {
         const source =
@@ -220,14 +220,14 @@ describe("scripts/lib/docker-e2e-plan", () => {
     [
       "package-only reused image",
       "docker-package-install",
-      { command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:package-install" },
+      { command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:package-install" },
       1,
       "must force a local image build",
     ],
     [
       "source reused image",
       "docker-selected-plugins",
-      { command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:selected-plugins" },
+      { command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:selected-plugins" },
       1,
       "must force a local image build",
     ],
@@ -237,7 +237,7 @@ describe("scripts/lib/docker-e2e-plan", () => {
       "docker-package-install",
       {
         e2eImageKind: "bare",
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:package-install",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:package-install",
       },
       0,
       "",
@@ -263,15 +263,15 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it.each([
-    ["codex-media-path", ["@openclaw/codex"]],
-    ["live-mcp-code-mode-gateway", ["@openclaw/codex"]],
-    ["release-typed-onboarding", ["@openclaw/codex"]],
-    ["npm-onboard-channel-agent", ["@openclaw/codex"]],
-    ["npm-onboard-discord-channel-agent", ["@openclaw/codex"]],
-    ["npm-onboard-slack-channel-agent", ["@openclaw/codex"]],
-    ["npm-onboard-discord-candidate-channel-agent", ["@openclaw/codex", "@openclaw/discord"]],
-    ["npm-onboard-slack-candidate-channel-agent", ["@openclaw/codex", "@openclaw/slack"]],
-    ["mcp-code-mode-gateway", ["@openclaw/codex"]],
+    ["codex-media-path", ["@carapace/codex"]],
+    ["live-mcp-code-mode-gateway", ["@carapace/codex"]],
+    ["release-typed-onboarding", ["@carapace/codex"]],
+    ["npm-onboard-channel-agent", ["@carapace/codex"]],
+    ["npm-onboard-discord-channel-agent", ["@carapace/codex"]],
+    ["npm-onboard-slack-channel-agent", ["@carapace/codex"]],
+    ["npm-onboard-discord-candidate-channel-agent", ["@carapace/codex", "@carapace/discord"]],
+    ["npm-onboard-slack-candidate-channel-agent", ["@carapace/codex", "@carapace/slack"]],
+    ["mcp-code-mode-gateway", ["@carapace/codex"]],
   ] as const)("requests only the matching companions for %s", (name, packages) => {
     const plan = planFor({ selectedLaneNames: [name] });
     expect(plan.lanes.map((lane) => lane.name)).toEqual([name]);
@@ -302,7 +302,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
     expect(plan.lanes.map(summarizeLane)).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:sandbox-browser-sidecar",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:sandbox-browser-sidecar",
         imageKind: "functional",
         live: false,
         name: "sandbox-browser-sidecar",
@@ -330,7 +330,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
           .map((candidate) => [candidate.name, candidate]),
       ).values(),
     ];
-    const tempRoot = tempDirs.make("openclaw-release-harness-");
+    const tempRoot = tempDirs.make("carapace-release-harness-");
     const nestedModule = join(
       tempRoot,
       ".release-harness",
@@ -342,7 +342,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(sourceLanes).toHaveLength(trustedScripts.size);
     for (const sourceLane of sourceLanes) {
       expect(sourceLane.command).toContain(
-        'harness="${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"',
+        'harness="${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"',
       );
     }
 
@@ -376,7 +376,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_E2E_REPO_ROOT: tempRoot,
+          CARAPACE_DOCKER_E2E_REPO_ROOT: tempRoot,
         },
       },
     );
@@ -385,7 +385,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(lanes).toHaveLength(trustedScripts.size);
     for (const lane of lanes) {
       expect(lane.command).toContain(
-        'harness="${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.release-harness}"',
+        'harness="${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.release-harness}"',
       );
       expect(lane.command).toContain(`bash "$harness/scripts/${trustedScripts.get(lane.name)}"`);
       expect(lane.command).not.toContain(`pnpm test:docker:${lane.name}`);
@@ -400,7 +400,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   ])(
     "passes the $name baseline through the trusted harness wrapper ($baseline)",
     ({ name, baseline, scenario }) => {
-      const root = tempDirs.make("openclaw-survivor-wrapper-");
+      const root = tempDirs.make("carapace-survivor-wrapper-");
       const harnessRoot = join(root, ".release-harness");
       const script = join(harnessRoot, "scripts/e2e/upgrade-survivor-docker.sh");
       const output = join(root, "survivor-env.txt");
@@ -409,7 +409,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         script,
         [
           "#!/usr/bin/env bash",
-          'printf "%s|%s\\n" "$OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC" "$OPENCLAW_UPGRADE_SURVIVOR_SCENARIO" > "$OPENCLAW_TEST_OUTPUT"',
+          'printf "%s|%s\\n" "$CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC" "$CARAPACE_UPGRADE_SURVIVOR_SCENARIO" > "$CARAPACE_TEST_OUTPUT"',
         ].join("\n"),
       );
       chmodSync(script, 0o755);
@@ -425,15 +425,15 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         cwd: root,
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_E2E_REPO_ROOT: root,
-          OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR: harnessRoot,
-          OPENCLAW_TEST_OUTPUT: output,
-          OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIO: scenario,
+          CARAPACE_DOCKER_E2E_REPO_ROOT: root,
+          CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR: harnessRoot,
+          CARAPACE_TEST_OUTPUT: output,
+          CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC: "",
+          CARAPACE_UPGRADE_SURVIVOR_SCENARIO: scenario,
         },
       });
 
-      expect(readFileSync(output, "utf8")).toBe(`openclaw@${baseline ?? "latest"}|${scenario}\n`);
+      expect(readFileSync(output, "utf8")).toBe(`carapace@${baseline ?? "latest"}|${scenario}\n`);
     },
   );
 
@@ -444,7 +444,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
     expect(plan.lanes.map(summarizeLane)).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:cli-installer-distribution",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:cli-installer-distribution",
         imageKind: "bare",
         live: false,
         name: "cli-installer-distribution",
@@ -454,7 +454,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:compose-setup",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:compose-setup",
         imageKind: "functional",
         live: false,
         name: "compose-setup",
@@ -464,7 +464,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=0 pnpm test:docker:package-install",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=0 pnpm test:docker:package-install",
         imageKind: undefined,
         live: false,
         name: "docker-package-install",
@@ -535,7 +535,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.selectedLanes).toEqual([]);
     expect(codeModeLanes.map(summarizeLane)).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:mcp-code-mode-gateway",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:mcp-code-mode-gateway",
         imageKind: "functional",
         live: false,
         name: "mcp-code-mode-gateway",
@@ -554,7 +554,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(targeted.lanes.map(summarizeLane)).toEqual([
       {
         command:
-          'OPENCLAW_SKIP_DOCKER_BUILD=1 bash -c \'harness="${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; OPENCLAW_LIVE_DOCKER_REPO_ROOT="${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/gateway-concurrency-docker.sh"\'',
+          'CARAPACE_SKIP_DOCKER_BUILD=1 bash -c \'harness="${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; CARAPACE_LIVE_DOCKER_REPO_ROOT="${CARAPACE_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/gateway-concurrency-docker.sh"\'',
         imageKind: "functional",
         live: false,
         name: "gateway-concurrency",
@@ -720,7 +720,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         .map(summarizeLane),
     ).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:release-typed-onboarding",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:release-typed-onboarding",
         imageKind: "bare",
         live: false,
         name: "release-typed-onboarding",
@@ -733,8 +733,8 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(packageInstallOpenAi.lanes.slice(-2).map(summarizeLane)).toEqual([
       {
         command: trustedUpgradeSurvivorCommand(
-          "OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1 OPENCLAW_UPGRADE_SURVIVOR_ROOT_MANAGED_VPS=1",
-          'export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:-openclaw@latest}"; export OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
+          "CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1 CARAPACE_UPGRADE_SURVIVOR_ROOT_MANAGED_VPS=1",
+          'export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC:-carapace@latest}"; export CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
         ),
         imageKind: "bare",
         live: false,
@@ -746,8 +746,8 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command: trustedUpgradeSurvivorCommand(
-          "OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1 OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth",
-          'export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:-openclaw@latest}"; export OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
+          "CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1 CARAPACE_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE=auto-auth",
+          'export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC:-carapace@latest}"; export CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
         ),
         imageKind: "bare",
         live: false,
@@ -760,7 +760,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     ]);
     expect(packageUpdateCore.lanes.map(summarizeLane)).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
         imageKind: "bare",
         live: false,
         name: "npm-onboard-channel-agent",
@@ -770,7 +770,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command:
-          "OPENCLAW_NPM_ONBOARD_CHANNEL=discord OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
+          "CARAPACE_NPM_ONBOARD_CHANNEL=discord CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
         imageKind: "bare",
         live: false,
         name: "npm-onboard-discord-channel-agent",
@@ -780,7 +780,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command:
-          "OPENCLAW_NPM_ONBOARD_CHANNEL=slack OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
+          "CARAPACE_NPM_ONBOARD_CHANNEL=slack CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-onboard-channel-agent",
         imageKind: "bare",
         live: false,
         name: "npm-onboard-slack-channel-agent",
@@ -789,7 +789,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:doctor-switch",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:doctor-switch",
         imageKind: "bare",
         live: false,
         name: "doctor-switch",
@@ -798,7 +798,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:skill-install",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:skill-install",
         imageKind: "bare",
         live: false,
         name: "skill-install",
@@ -808,7 +808,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 2,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-channel-switch",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-channel-switch",
         imageKind: "bare",
         live: false,
         name: "update-channel-switch",
@@ -819,8 +819,8 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command: trustedUpgradeSurvivorCommand(
-          "OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
-          'export OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC="${OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:-openclaw@latest}"; export OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
+          "CARAPACE_UPGRADE_SURVIVOR_PUBLISHED_BASELINE=1",
+          'export CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC="${CARAPACE_UPGRADE_SURVIVOR_BASELINE_SPEC:-carapace@latest}"; export CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT="${CARAPACE_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:-1500s}"',
         ),
         imageKind: "bare",
         live: false,
@@ -842,7 +842,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command:
-          "OPENCLAW_QA_ALLOW_UPDATE_FIRST_HOP=1 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-first-hop-compat",
+          "CARAPACE_QA_ALLOW_UPDATE_FIRST_HOP=1 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-first-hop-compat",
         imageKind: "bare",
         live: false,
         name: "update-first-hop-compat",
@@ -853,7 +853,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command:
-          "OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-run-package-self-upgrade",
+          "CARAPACE_QA_ALLOW_UPDATE_RUN_SELF=1 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:update-run-package-self-upgrade",
         imageKind: "bare",
         live: false,
         name: "update-run-package-self-upgrade",
@@ -866,7 +866,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(pluginsRuntimePlugins.lanes.map((lane) => lane.name)).toEqual(["plugins"]);
     expect(pluginsRuntimeServices.lanes.map(summarizeLane)).toEqual([
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:cron-mcp-cleanup",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:cron-mcp-cleanup",
         imageKind: "functional",
         live: false,
         name: "cron-mcp-cleanup",
@@ -875,7 +875,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:kitchen-sink-rpc",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:kitchen-sink-rpc",
         imageKind: "functional",
         live: false,
         name: "kitchen-sink-rpc",
@@ -885,7 +885,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:openai-web-search-minimal",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:openai-web-search-minimal",
         imageKind: "functional",
         live: false,
         name: "openai-web-search-minimal",
@@ -896,7 +896,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       },
       {
         command:
-          "OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS=300 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:live-plugin-tool",
+          "CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS=300 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:live-plugin-tool",
         imageKind: "bare",
         live: true,
         name: "live-plugin-tool",
@@ -909,7 +909,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(openWebUI.lanes.map(summarizeLane)).toEqual([
       {
         command:
-          "OPENCLAW_OPENWEBUI_MODEL=openai/gpt-5.4-mini OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui",
+          "CARAPACE_OPENWEBUI_MODEL=openai/gpt-5.4-mini CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui",
         imageKind: "functional",
         live: true,
         name: "openwebui",
@@ -1095,15 +1095,15 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     const plan = planFor({
       selectedLaneNames: ["published-upgrade-survivor"],
       upgradeSurvivorBaselines:
-        "openclaw@2026.4.29 2026.4.23 openclaw@2026.4.23 openclaw@2026.3.13-1",
+        "carapace@2026.4.29 2026.4.23 carapace@2026.4.23 carapace@2026.3.13-1",
     });
 
     expect(plan.lanes.map(summarizeLane)).toEqual([
-      publishedUpgradeSurvivorLane("published-upgrade-survivor-2026.4.29", "openclaw@2026.4.29"),
-      publishedUpgradeSurvivorLane("published-upgrade-survivor-2026.4.23", "openclaw@2026.4.23"),
+      publishedUpgradeSurvivorLane("published-upgrade-survivor-2026.4.29", "carapace@2026.4.29"),
+      publishedUpgradeSurvivorLane("published-upgrade-survivor-2026.4.23", "carapace@2026.4.23"),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.3.13-1",
-        "openclaw@2026.3.13-1",
+        "carapace@2026.3.13-1",
       ),
     ]);
   });
@@ -1118,42 +1118,42 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes.map(summarizeLane)).toEqual([
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.29",
-        "openclaw@2026.4.29",
+        "carapace@2026.4.29",
         "base",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.29-feishu-channel",
-        "openclaw@2026.4.29",
+        "carapace@2026.4.29",
         "feishu-channel",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.29-tilde-log-path",
-        "openclaw@2026.4.29",
+        "carapace@2026.4.29",
         "tilde-log-path",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.29-sqlite-volume",
-        "openclaw@2026.4.29",
+        "carapace@2026.4.29",
         "sqlite-volume",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.23",
-        "openclaw@2026.4.23",
+        "carapace@2026.4.23",
         "base",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.23-feishu-channel",
-        "openclaw@2026.4.23",
+        "carapace@2026.4.23",
         "feishu-channel",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.23-tilde-log-path",
-        "openclaw@2026.4.23",
+        "carapace@2026.4.23",
         "tilde-log-path",
       ),
       publishedUpgradeSurvivorLane(
         "published-upgrade-survivor-2026.4.23-sqlite-volume",
-        "openclaw@2026.4.23",
+        "carapace@2026.4.23",
         "sqlite-volume",
       ),
     ]);
@@ -1175,16 +1175,16 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     });
 
     expect(explicitPlan.lanes.map(summarizeLane)).toEqual([
-      publishedUpgradeSurvivorLane(laneName, `openclaw@${baseline}`, scenario),
+      publishedUpgradeSurvivorLane(laneName, `carapace@${baseline}`, scenario),
     ]);
     if (scenario === "abandoned-update") {
       expect(explicitPlan.requiredPrepublishPluginPackages).toEqual([]);
     }
     if (scenario === "recovery-cleanup") {
       expect(explicitPlan.requiredPrepublishPluginPackages).toEqual([
-        "@openclaw/codex",
-        "@openclaw/discord",
-        "@openclaw/whatsapp",
+        "@carapace/codex",
+        "@carapace/discord",
+        "@carapace/whatsapp",
       ]);
     }
 
@@ -1208,7 +1208,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
     expect(plan.lanes.map((lane) => lane.name)).toEqual([
       "published-upgrade-survivor-2026.4.29",
-      "published-upgrade-survivor-2026.4.29-acpx-openclaw-tools-bridge",
+      "published-upgrade-survivor-2026.4.29-acpx-carapace-tools-bridge",
       "published-upgrade-survivor-2026.4.29-feishu-channel",
       "published-upgrade-survivor-2026.4.29-bootstrap-persona",
       "published-upgrade-survivor-2026.4.29-channel-post-core-restore",
@@ -1233,8 +1233,8 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       "published-upgrade-survivor-2026.9.1-legacy-operator-state",
     ]);
     expect(plan.requiredPrepublishPluginPackages).toEqual([
-      "@openclaw/discord",
-      "@openclaw/duckduckgo-plugin",
+      "@carapace/discord",
+      "@carapace/duckduckgo-plugin",
     ]);
     expect(plan.lanes.every((lane) => lane.weight === 3)).toBe(true);
     for (const alias of ["reported-issues", "far-reaching"]) {
@@ -1321,7 +1321,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits trusted-current scenarios unsupported by a frozen target harness", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-upgrade-harness-");
     writeFrozenScenarioContract(targetRoot, [
       "base",
       "feishu-channel",
@@ -1352,14 +1352,14 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       "published-upgrade-survivor-2026.6.11-versioned-runtime-deps",
     ]);
     expect(plan.omittedUnsupportedLanes).toEqual([
-      "published-upgrade-survivor-2026.6.11-acpx-openclaw-tools-bridge",
+      "published-upgrade-survivor-2026.6.11-acpx-carapace-tools-bridge",
       "published-upgrade-survivor-2026.6.11-meeting-transcripts-sqlite",
       "published-upgrade-survivor-2026.6.11-cron-scheduled-authority",
     ]);
   });
 
   it("reads content-addressed scenario catalogs from pre-command frozen targets", () => {
-    const targetRoot = tempDirs.make("openclaw-legacy-frozen-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-legacy-frozen-upgrade-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     const legacyScenarios = [
       "base",
@@ -1391,19 +1391,19 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     });
 
     expect(plan.omittedUnsupportedLanes).toEqual([
-      "published-upgrade-survivor-2026.6.11-acpx-openclaw-tools-bridge",
+      "published-upgrade-survivor-2026.6.11-acpx-carapace-tools-bridge",
       "published-upgrade-survivor-2026.6.11-meeting-transcripts-sqlite",
       "published-upgrade-survivor-2026.6.11-cron-scheduled-authority",
     ]);
   });
 
   it("recognizes the frozen combined mobile and watch scenario catalog", () => {
-    const targetRoot = tempDirs.make("openclaw-platform-survivors-frozen-harness-");
+    const targetRoot = tempDirs.make("carapace-platform-survivors-frozen-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     const scenarios = [
       "base",
       "mobile-pairing-reconnect",
-      "acpx-openclaw-tools-bridge",
+      "acpx-carapace-tools-bridge",
       "feishu-channel",
       "bootstrap-persona",
       "channel-post-core-restore",
@@ -1449,7 +1449,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("keeps mobile pairing when an unapproved target lacks a source-qualified omission", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-mobile-package-target-");
+    const targetRoot = tempDirs.make("carapace-frozen-mobile-package-target-");
     writeFrozenScenarioContract(targetRoot, ["base"]);
 
     const plan = planFor({
@@ -1467,7 +1467,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("keeps mobile pairing when the selected Gateway admits iPhone watch relay", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-mobile-watch-relay-");
+    const targetRoot = tempDirs.make("carapace-frozen-mobile-watch-relay-");
     writeFrozenScenarioContract(targetRoot, ["base"]);
     const policy = join(targetRoot, "src/gateway/node-command-policy.ts");
     mkdirSync(dirname(policy), { recursive: true });
@@ -1489,7 +1489,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits mobile pairing when the selected Gateway does not admit its declared relay commands", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-mobile-watch-relay-unadmitted-");
+    const targetRoot = tempDirs.make("carapace-frozen-mobile-watch-relay-unadmitted-");
     writeFrozenScenarioContract(targetRoot, ["base"]);
     const policy = join(targetRoot, "src/gateway/node-command-policy.ts");
     mkdirSync(dirname(policy), { recursive: true });
@@ -1512,7 +1512,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits survivor lanes when the target exposes none of the requested scenarios", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-empty-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-empty-upgrade-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
@@ -1531,7 +1531,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits baseline-only survivor lanes when the target lacks the implicit base scenario", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-no-base-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-no-base-upgrade-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
@@ -1545,7 +1545,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits an unconfigured survivor lane when the target lacks the implicit base scenario", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-default-base-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-default-base-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
@@ -1558,7 +1558,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("reports an unsupported survivor lane beside runnable selected lanes", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-mixed-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-mixed-upgrade-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
@@ -1576,7 +1576,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("reports an explicitly selected expanded survivor lane as unsupported", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-expanded-upgrade-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-expanded-upgrade-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const selectedLane = "published-upgrade-survivor-2026.6.11";
@@ -1591,7 +1591,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("omits unsupported scenario-only survivor lanes without explicit baselines", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-scenario-only-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-scenario-only-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
@@ -1604,13 +1604,13 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("does not fall back to base when an unsupported scenario is baseline-incompatible", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-incompatible-scenario-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-incompatible-scenario-harness-");
     writeFrozenScenarioContract(targetRoot, ["unrelated"]);
 
     const plan = planFor({
       selectedLaneNames: ["published-upgrade-survivor"],
       upgradeSurvivorBaselines: "2026.4.21",
-      upgradeSurvivorScenarios: "acpx-openclaw-tools-bridge",
+      upgradeSurvivorScenarios: "acpx-carapace-tools-bridge",
       upgradeSurvivorTargetRoot: targetRoot,
     });
 
@@ -1619,7 +1619,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("fails closed when an unknown legacy scenario catalog lacks the command", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-failed-scenario-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-failed-scenario-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     mkdirSync(dirname(assertionsFile), { recursive: true });
     writeFileSync(
@@ -1640,7 +1640,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("fails closed when a frozen target scenario command returns non-JSON output", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-non-json-scenario-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-non-json-scenario-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     mkdirSync(dirname(assertionsFile), { recursive: true });
     writeFileSync(assertionsFile, 'process.stdout.write("base");\n');
@@ -1655,7 +1655,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("fails closed when a frozen target scenario command returns an invalid catalog", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-invalid-scenario-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-invalid-scenario-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     mkdirSync(dirname(assertionsFile), { recursive: true });
     writeFileSync(assertionsFile, 'process.stdout.write("[\\"base\\",\\"base\\"]");\n');
@@ -1670,7 +1670,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("does not inspect a frozen survivor contract for unrelated selected lanes", () => {
-    const targetRoot = tempDirs.make("openclaw-frozen-unrelated-lane-harness-");
+    const targetRoot = tempDirs.make("carapace-frozen-unrelated-lane-harness-");
     const assertionsFile = join(targetRoot, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
     mkdirSync(dirname(assertionsFile), { recursive: true });
     writeFileSync(assertionsFile, 'throw new Error("must not run");\n');
@@ -1694,7 +1694,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
     expect(plan.lanes.map((lane) => lane.name)).toEqual([
       "published-upgrade-survivor-2026.4.29",
-      "published-upgrade-survivor-2026.4.29-acpx-openclaw-tools-bridge",
+      "published-upgrade-survivor-2026.4.29-acpx-carapace-tools-bridge",
       "published-upgrade-survivor-2026.4.29-feishu-channel",
       "published-upgrade-survivor-2026.4.29-bootstrap-persona",
       "published-upgrade-survivor-2026.4.29-channel-post-core-restore",
@@ -1706,7 +1706,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       "published-upgrade-survivor-2026.4.29-versioned-runtime-deps",
       "published-upgrade-survivor-2026.4.29-cron-scheduled-authority",
       "published-upgrade-survivor-2026.4.22",
-      "published-upgrade-survivor-2026.4.22-acpx-openclaw-tools-bridge",
+      "published-upgrade-survivor-2026.4.22-acpx-carapace-tools-bridge",
       "published-upgrade-survivor-2026.4.22-feishu-channel",
       "published-upgrade-survivor-2026.4.22-bootstrap-persona",
       "published-upgrade-survivor-2026.4.22-channel-post-core-restore",
@@ -1747,8 +1747,8 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     });
 
     expect(plan.lanes.map(summarizeLane)).toEqual([
-      updateMigrationLane("update-migration-2026.4.29-plugin-deps-cleanup", "openclaw@2026.4.29"),
-      updateMigrationLane("update-migration-2026.4.23-plugin-deps-cleanup", "openclaw@2026.4.23"),
+      updateMigrationLane("update-migration-2026.4.29-plugin-deps-cleanup", "carapace@2026.4.29"),
+      updateMigrationLane("update-migration-2026.4.23-plugin-deps-cleanup", "carapace@2026.4.23"),
     ]);
   });
 
@@ -1768,26 +1768,26 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   });
 
   it("runs the gateway lane with the scheduler's shared live image and plugins", () => {
-    const root = tempDirs.make("openclaw-live-gateway-image-");
+    const root = tempDirs.make("carapace-live-gateway-image-");
     const script = join(root, "scripts/test-live-gateway-models-docker.sh");
     mkdirSync(dirname(script), { recursive: true });
     writeFileSync(
       script,
-      'printf "%s|%s|%s\\n" "$OPENCLAW_IMAGE" "$OPENCLAW_DOCKER_BUILD_EXTENSIONS" "$OPENCLAW_SKIP_DOCKER_BUILD"',
+      'printf "%s|%s|%s\\n" "$CARAPACE_IMAGE" "$CARAPACE_DOCKER_BUILD_EXTENSIONS" "$CARAPACE_SKIP_DOCKER_BUILD"',
     );
     const lane = requireFirstLane(planFor({ selectedLaneNames: ["live-gateway"] }));
     const output = execFileSync("/bin/bash", ["-c", lane.command], {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR: root,
-        OPENCLAW_IMAGE: "openclaw:prepared-candidate",
-        OPENCLAW_DOCKER_BUILD_EXTENSIONS: "matrix acpx codex",
-        OPENCLAW_SKIP_DOCKER_BUILD: "1",
+        CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR: root,
+        CARAPACE_IMAGE: "carapace:prepared-candidate",
+        CARAPACE_DOCKER_BUILD_EXTENSIONS: "matrix acpx codex",
+        CARAPACE_SKIP_DOCKER_BUILD: "1",
       },
     });
 
-    expect(output.trim()).toBe("openclaw:prepared-candidate|matrix acpx codex|1");
+    expect(output.trim()).toBe("carapace:prepared-candidate|matrix acpx codex|1");
   });
 
   it("derives live Docker credentials from lane resources", () => {
@@ -1818,10 +1818,10 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     const plan = planFor({ selectedLaneNames: ["live-cli-backend-gemini"] });
     const lane = requireFirstLane(plan);
 
-    expect(lane.command).toContain("OPENCLAW_LIVE_CLI_BACKEND_ADVISORY=1");
-    expect(lane.command).toContain("OPENCLAW_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP=1");
+    expect(lane.command).toContain("CARAPACE_LIVE_CLI_BACKEND_ADVISORY=1");
+    expect(lane.command).toContain("CARAPACE_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP=1");
     expect(lane.command).toContain(
-      "OPENCLAW_LIVE_CLI_BACKEND_MODEL=google-gemini-cli/gemini-3-flash-preview",
+      "CARAPACE_LIVE_CLI_BACKEND_MODEL=google-gemini-cli/gemini-3-flash-preview",
     );
   });
 
@@ -1831,7 +1831,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       const lane = requireFirstLane(plan);
 
       expect(plan.credentials, name).toEqual(["openai"]);
-      expect(lane.command, name).toContain("OPENCLAW_LIVE_CODEX_HARNESS_AUTH=api-key");
+      expect(lane.command, name).toContain("CARAPACE_LIVE_CODEX_HARNESS_AUTH=api-key");
       expect(lane.resources, name).toContain("live:openai");
       expect(lane.resources, name).not.toContain("live:codex");
     }
@@ -1844,7 +1844,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes.map(summarizeLane)).toEqual([
       {
         command:
-          'OPENCLAW_SKIP_DOCKER_BUILD=1 bash -c \'harness="${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; OPENCLAW_LIVE_DOCKER_REPO_ROOT="${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/codex-npm-plugin-live-docker.sh"\'',
+          'CARAPACE_SKIP_DOCKER_BUILD=1 bash -c \'harness="${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; CARAPACE_LIVE_DOCKER_REPO_ROOT="${CARAPACE_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/e2e/codex-npm-plugin-live-docker.sh"\'',
         imageKind: "bare",
         live: true,
         name: "live-codex-npm-plugin",
@@ -1869,7 +1869,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
     expect(plan.lanes).toHaveLength(1);
     const lane = requireFirstLane(plan);
-    expect(lane.command).toBe("OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:codex-on-demand");
+    expect(lane.command).toBe("CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:codex-on-demand");
     expect(lane.imageKind).toBe("bare");
     expect(lane.live).toBe(false);
     expect(lane.name).toBe("codex-on-demand");
@@ -1878,7 +1878,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(lane.timeoutMs).toBe(1_800_000);
     expect(plan.needs.bareImage).toBe(true);
     expect(plan.needs.package).toBe(true);
-    expect(plan.requiredPrepublishPluginPackages).toEqual(["@openclaw/codex"]);
+    expect(plan.requiredPrepublishPluginPackages).toEqual(["@carapace/codex"]);
     expect(plan.needs.prepublishPluginRegistry).toBe(true);
   });
 
@@ -1888,7 +1888,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes).toHaveLength(1);
     const lane = requireFirstLane(plan);
     expect(lane.command).toBe(
-      "OPENCLAW_SKIP_DOCKER_BUILD=0 pnpm test:docker:plugin-binding-command-escape",
+      "CARAPACE_SKIP_DOCKER_BUILD=0 pnpm test:docker:plugin-binding-command-escape",
     );
     expect(lane.imageKind).toBeUndefined();
     expect(lane.live).toBe(false);
@@ -1906,7 +1906,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes).toHaveLength(1);
     const lane = requireFirstLane(plan);
     expect(lane.command).toBe(
-      "OPENCLAW_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS=300 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:live-plugin-tool",
+      "CARAPACE_LIVE_PLUGIN_TOOL_TIMEOUT_SECONDS=300 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:live-plugin-tool",
     );
     expect(lane.imageKind).toBe("bare");
     expect(lane.live).toBe(true);
@@ -1942,7 +1942,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes).toHaveLength(1);
     const lane = requireFirstLane(plan);
     expect(lane.command).toBe(
-      'OPENCLAW_LIVE_ACP_BIND_AGENT=droid OPENCLAW_LIVE_ACP_BIND_REQUIRE_TRANSCRIPT=1 OPENCLAW_SKIP_DOCKER_BUILD=1 bash -c \'harness="${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; OPENCLAW_LIVE_DOCKER_REPO_ROOT="${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/test-live-acp-bind-docker.sh"\'',
+      'CARAPACE_LIVE_ACP_BIND_AGENT=droid CARAPACE_LIVE_ACP_BIND_REQUIRE_TRANSCRIPT=1 CARAPACE_SKIP_DOCKER_BUILD=1 bash -c \'harness="${CARAPACE_DOCKER_E2E_TRUSTED_HARNESS_DIR:-.}"; CARAPACE_LIVE_DOCKER_REPO_ROOT="${CARAPACE_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/test-live-acp-bind-docker.sh"\'',
     );
     expect(lane.imageKind).toBeUndefined();
     expect(lane.live).toBe(true);
@@ -1970,7 +1970,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:multi-node-update",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:multi-node-update",
         imageKind: "bare",
         live: false,
         name: "multi-node-update",
@@ -1980,7 +1980,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
         weight: 3,
       },
       {
-        command: "OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-telegram-live",
+        command: "CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:npm-telegram-live",
         imageKind: "bare",
         live: true,
         name: "npm-telegram-live",
@@ -2009,7 +2009,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     expect(plan.lanes.map(summarizeLane)).toEqual([
       {
         command:
-          "OPENCLAW_OPENWEBUI_MODEL=openai/gpt-5.4-mini OPENCLAW_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 OPENCLAW_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui",
+          "CARAPACE_OPENWEBUI_MODEL=openai/gpt-5.4-mini CARAPACE_OPENWEBUI_PROVIDER_TIMEOUT_SECONDS=300 CARAPACE_SKIP_DOCKER_BUILD=1 pnpm test:docker:openwebui",
         imageKind: "functional",
         live: true,
         name: "openwebui",
@@ -2102,9 +2102,9 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
     ]) {
       const plan = planFor({ selectedLaneNames: [laneName] });
       expect(plan.requiredPrepublishPluginPackages).toEqual([
-        "@openclaw/codex",
-        "@openclaw/discord",
-        "@openclaw/whatsapp",
+        "@carapace/codex",
+        "@carapace/discord",
+        "@carapace/whatsapp",
       ]);
       expect(plan.needs.prepublishPluginRegistry).toBe(true);
     }
@@ -2115,10 +2115,10 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       upgradeSurvivorScenarios: "base feishu-channel",
     });
     expect(feishuPlan.requiredPrepublishPluginPackages).toEqual([
-      "@openclaw/codex",
-      "@openclaw/discord",
-      "@openclaw/feishu",
-      "@openclaw/whatsapp",
+      "@carapace/codex",
+      "@carapace/discord",
+      "@carapace/feishu",
+      "@carapace/whatsapp",
     ]);
     const legacyFeishuPlan = planFor({
       selectedLaneNames: ["published-upgrade-survivor"],
@@ -2126,9 +2126,9 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       upgradeSurvivorScenarios: "feishu-channel",
     });
     expect(legacyFeishuPlan.requiredPrepublishPluginPackages).toEqual([
-      "@openclaw/codex",
-      "@openclaw/discord",
-      "@openclaw/whatsapp",
+      "@carapace/codex",
+      "@carapace/discord",
+      "@carapace/whatsapp",
     ]);
     const selfUpgradeLane = findLaneByName("update-run-package-self-upgrade");
     expect(selfUpgradeLane).toBeDefined();
@@ -2138,7 +2138,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
   it.each([
     {
       baseline: "2026.4.23",
-      packages: ["@openclaw/acpx", "@openclaw/codex", "@openclaw/discord", "@openclaw/whatsapp"],
+      packages: ["@carapace/acpx", "@carapace/codex", "@carapace/discord", "@carapace/whatsapp"],
     },
     { baseline: "2026.4.15", packages: [] },
   ])(
@@ -2147,7 +2147,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
       const plan = planFor({
         selectedLaneNames: ["published-upgrade-survivor"],
         upgradeSurvivorBaselines: baseline,
-        upgradeSurvivorScenarios: "acpx-openclaw-tools-bridge",
+        upgradeSurvivorScenarios: "acpx-carapace-tools-bridge",
       });
       expect(plan.requiredPrepublishPluginPackages).toEqual(packages);
     },
@@ -2223,7 +2223,7 @@ await import('./scripts/check-docker-e2e-boundaries.mts');`,
 
   it("rejects unknown selected lanes with the available lane names", () => {
     expect(() => planFor({ selectedLaneNames: ["missing-lane"] })).toThrow(
-      /OPENCLAW_DOCKER_ALL_LANES unknown lane\(s\): missing-lane/u,
+      /CARAPACE_DOCKER_ALL_LANES unknown lane\(s\): missing-lane/u,
     );
   });
 });

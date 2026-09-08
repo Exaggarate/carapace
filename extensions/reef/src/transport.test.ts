@@ -196,7 +196,7 @@ describe("ReefTransportClient device authentication", () => {
       code: "invalid_request",
       upgradeRequired: "reef-relay",
       message:
-        "The Reef relay is likely incompatible or outdated. Update OpenClaw and the Reef relay together, then approve the fresh pairing challenge again.",
+        "The Reef relay is likely incompatible or outdated. Update Carapace and the Reef relay together, then approve the fresh pairing challenge again.",
     });
     expect(calls).toHaveLength(1);
     expect(JSON.parse(new TextDecoder().decode(calls[0]?.body as Uint8Array))).toEqual({
@@ -208,7 +208,7 @@ describe("ReefTransportClient device authentication", () => {
     });
   });
 
-  it("diagnoses an outdated OpenClaw client from the current relay response", async () => {
+  it("diagnoses an outdated Carapace client from the current relay response", async () => {
     const client = createClient(async () =>
       Response.json({ error: "client_upgrade_required" }, { status: 409 }),
     );
@@ -222,9 +222,9 @@ describe("ReefTransportClient device authentication", () => {
     expect(error).toMatchObject({
       status: 409,
       code: "client_upgrade_required",
-      upgradeRequired: "openclaw-client",
+      upgradeRequired: "carapace-client",
       message:
-        "OpenClaw is outdated for this Reef relay. Update OpenClaw, then approve the fresh pairing challenge again.",
+        "Carapace is outdated for this Reef relay. Update Carapace, then approve the fresh pairing challenge again.",
     });
   });
 

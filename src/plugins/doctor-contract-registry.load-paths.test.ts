@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { findLegacyConfigIssues } from "../config/legacy.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { runPostSessionPluginDoctorStateRepairs } from "../infra/state-migrations.plugin-doctor.js";
 import {
   applyPluginDoctorCompatibilityMigrations,
@@ -20,17 +20,17 @@ function makeHermeticDoctorEnv(stateDir: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
     HOME: stateDir,
-    OPENCLAW_HOME: stateDir,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    CARAPACE_HOME: stateDir,
+    CARAPACE_STATE_DIR: stateDir,
+    CARAPACE_CONFIG_PATH: path.join(stateDir, "carapace.json"),
+    CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
   };
 }
 
 function writeDoctorPlugin(pluginRoot: string, pluginId: string): void {
   fs.mkdirSync(pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: pluginId,
@@ -92,7 +92,7 @@ module.exports = {
 function writeDistDoctorPlugin(pluginRoot: string, pluginId: string): void {
   fs.mkdirSync(path.join(pluginRoot, "dist"), { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: pluginId,
@@ -109,10 +109,10 @@ function writeDistDoctorPlugin(pluginRoot: string, pluginId: string): void {
     path.join(pluginRoot, "package.json"),
     JSON.stringify(
       {
-        name: `@openclaw/${pluginId}`,
+        name: `@carapace/${pluginId}`,
         version: "0.0.0-test",
         type: "module",
-        openclaw: {
+        carapace: {
           extensions: ["./dist/index.js"],
         },
       },
@@ -145,7 +145,7 @@ function writeLegacyRuntimeDoctorPlugin(params: {
 }): void {
   fs.mkdirSync(path.join(params.pluginRoot, "dist"), { recursive: true });
   fs.writeFileSync(
-    path.join(params.pluginRoot, "openclaw.plugin.json"),
+    path.join(params.pluginRoot, "carapace.plugin.json"),
     JSON.stringify({
       id: params.pluginId,
       doctorContract: { configRepair: true },
@@ -156,17 +156,17 @@ function writeLegacyRuntimeDoctorPlugin(params: {
   fs.writeFileSync(
     path.join(params.pluginRoot, "package.json"),
     JSON.stringify({
-      name: `@openclaw/${params.pluginId}`,
+      name: `@carapace/${params.pluginId}`,
       version: "2026.7.2-beta.7",
       type: "module",
-      openclaw: { extensions: ["./dist/index.js"] },
+      carapace: { extensions: ["./dist/index.js"] },
     }),
     "utf8",
   );
   fs.writeFileSync(path.join(params.pluginRoot, "dist", "index.js"), "export {};\n", "utf8");
   fs.writeFileSync(
     path.join(params.pluginRoot, "dist", "doctor-contract-api.js"),
-    `import { ${params.importedSymbols.join(", ")} } from "openclaw/plugin-sdk/runtime-doctor";
+    `import { ${params.importedSymbols.join(", ")} } from "carapace/plugin-sdk/runtime-doctor";
 const importedHelpers = [${params.importedSymbols.join(", ")}];
 if (importedHelpers.some((helper) => typeof helper !== "function")) {
   throw new Error("legacy runtime-doctor helper missing");
@@ -190,17 +190,17 @@ function writeLegacyChannelMigrationPlugin(params: {
 }): void {
   fs.mkdirSync(params.pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(params.pluginRoot, "openclaw.plugin.json"),
+    path.join(params.pluginRoot, "carapace.plugin.json"),
     JSON.stringify({ id: params.pluginId, channels: [params.pluginId], configSchema: {} }),
     "utf8",
   );
   fs.writeFileSync(
     path.join(params.pluginRoot, "package.json"),
     JSON.stringify({
-      name: `@openclaw/${params.pluginId}`,
+      name: `@carapace/${params.pluginId}`,
       version: "2026.7.1",
       type: "commonjs",
-      openclaw: {
+      carapace: {
         extensions: ["./index.cjs"],
         setupEntry: "./setup-entry.cjs",
         setupFeatures: { legacyStateMigrations: true },
@@ -262,7 +262,7 @@ function writeModernBundledChannelMigrationPlugin(params: {
 }): void {
   fs.mkdirSync(params.pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(params.pluginRoot, "openclaw.plugin.json"),
+    path.join(params.pluginRoot, "carapace.plugin.json"),
     JSON.stringify({
       id: params.pluginId,
       channels: [params.pluginId],
@@ -274,10 +274,10 @@ function writeModernBundledChannelMigrationPlugin(params: {
   fs.writeFileSync(
     path.join(params.pluginRoot, "package.json"),
     JSON.stringify({
-      name: `@openclaw/${params.pluginId}`,
+      name: `@carapace/${params.pluginId}`,
       version: "2026.7.1",
       type: "commonjs",
-      openclaw: {
+      carapace: {
         extensions: ["./index.cjs"],
         setupEntry: "./setup-entry.cjs",
       },
@@ -312,7 +312,7 @@ function writeModernBundledChannelMigrationPlugin(params: {
 function writeDoctorSessionOwnerPlugin(pluginRoot: string, pluginId: string): void {
   fs.mkdirSync(pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify(
       {
         id: pluginId,
@@ -341,7 +341,7 @@ function writeDoctorSessionOwnerPlugin(pluginRoot: string, pluginId: string): vo
 function writeLegacyDoctorSessionOwnerPlugin(pluginRoot: string, pluginId: string): void {
   fs.mkdirSync(pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify({ id: pluginId, configSchema: {} }),
     "utf8",
   );
@@ -363,7 +363,7 @@ function writeLegacyDoctorSessionOwnerPlugin(pluginRoot: string, pluginId: strin
 function writeLegacyPostSessionMigrationPlugin(pluginRoot: string, pluginId: string): void {
   fs.mkdirSync(pluginRoot, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify({
       id: pluginId,
       configSchema: {},
@@ -393,7 +393,7 @@ function writeLegacyPostSessionMigrationPlugin(pluginRoot: string, pluginId: str
   );
 }
 
-function createDoctorPluginConfig(pluginRoot: string, pluginId: string): OpenClawConfig {
+function createDoctorPluginConfig(pluginRoot: string, pluginId: string): CarapaceConfig {
   return {
     plugins: {
       load: { paths: [pluginRoot] },
@@ -409,7 +409,7 @@ function createDoctorPluginConfig(pluginRoot: string, pluginId: string): OpenCla
   };
 }
 
-function readPluginLlmPolicy(config: OpenClawConfig, pluginId: string): Record<string, unknown> {
+function readPluginLlmPolicy(config: CarapaceConfig, pluginId: string): Record<string, unknown> {
   const entry = config.plugins?.entries?.[pluginId] as { llm?: unknown } | undefined;
   return entry?.llm && typeof entry.llm === "object" && !Array.isArray(entry.llm)
     ? (entry.llm as Record<string, unknown>)
@@ -449,8 +449,8 @@ describe("doctor contract registry load-path plugins", () => {
   ])(
     "migrates real $pluginId state through a released external setup-entry contract",
     async ({ pluginId, namespace, sourceFile, stateKey, state }) => {
-      const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-      const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+      const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+      const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
       writeLegacyChannelMigrationPlugin({ pluginRoot, pluginId, namespace, sourceFile, stateKey });
       const bundledPluginsDir = path.join(stateDir, "bundled");
       const shadowedBundledRoot = path.join(bundledPluginsDir, pluginId);
@@ -461,9 +461,9 @@ describe("doctor contract registry load-path plugins", () => {
       const config = createDoctorPluginConfig(pluginRoot, pluginId);
       const env = {
         ...makeHermeticDoctorEnv(stateDir),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "0",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "0",
+        CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+        CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
       };
       const sourcePath = path.join(stateDir, pluginId, sourceFile);
       fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
@@ -508,8 +508,8 @@ describe("doctor contract registry load-path plugins", () => {
   );
 
   it("reloads a selected legacy setup entry after the plugin metadata lifecycle clears", async () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "legacy-refresh";
     const sourceFile = "refresh.json";
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -562,8 +562,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("discovers doctor warning rules from plugins.load.paths", () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "load-path-doctor";
     writeDoctorPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -588,8 +588,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("discovers doctor warning rules from package dist contracts", () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "dist-doctor";
     writeDistDoctorPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -630,8 +630,8 @@ describe("doctor contract registry load-path plugins", () => {
       ],
     },
   ])("loads the preserved $pluginId package contract", ({ pluginId, importedSymbols }) => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-legacy-package-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-legacy-package-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-legacy-package-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-legacy-package-");
     writeLegacyRuntimeDoctorPlugin({ pluginRoot, pluginId, importedSymbols });
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
 
@@ -650,8 +650,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("applies compatibility normalizers from plugins.load.paths", () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "load-path-doctor";
     writeDoctorPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -671,8 +671,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("discovers session route-state owners from plugins.load.paths", () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "load-path-session-owner";
     writeDoctorSessionOwnerPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -695,8 +695,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("keeps the deprecated module owner route for external load-path plugins", () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-load-paths-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-load-paths-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-load-paths-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-load-paths-");
     const pluginId = "legacy-load-path-owner";
     writeLegacyDoctorSessionOwnerPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);
@@ -719,8 +719,8 @@ describe("doctor contract registry load-path plugins", () => {
   });
 
   it("validates frozen live post-session actions without applying candidate-only refusal", async () => {
-    const stateDir = tempDirs.make("openclaw-doctor-contract-post-session-");
-    const pluginRoot = tempDirs.make("openclaw-doctor-contract-post-session-");
+    const stateDir = tempDirs.make("carapace-doctor-contract-post-session-");
+    const pluginRoot = tempDirs.make("carapace-doctor-contract-post-session-");
     const pluginId = "legacy-post-session-owner";
     writeLegacyPostSessionMigrationPlugin(pluginRoot, pluginId);
     const config = createDoctorPluginConfig(pluginRoot, pluginId);

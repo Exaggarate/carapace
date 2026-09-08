@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { resolveAgentMainSessionKey } from "../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { HeartbeatRunOptions } from "../infra/heartbeat-runner-execution.js";
 import {
   resolveHeartbeatPreflight,
@@ -18,7 +18,7 @@ import { CronService } from "./service.js";
 import { setupCronServiceSuite } from "./service.test-harness.js";
 
 const { logger, makeStorePath } = setupCronServiceSuite({
-  prefix: "openclaw-cron-failure-notification-",
+  prefix: "carapace-cron-failure-notification-",
   baseTimeIso: "2026-01-01T00:00:00.000Z",
 });
 
@@ -72,7 +72,7 @@ describe("CronService failure notification delivery", () => {
       wakesNow: false,
     },
   ])("routes a rejected failure alert to $name with cadence disabled", async (testCase) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { heartbeat: { every: "0m" } },
         list: [{ id: "main" }, { id: "ops" }],

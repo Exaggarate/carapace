@@ -3,7 +3,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelDirectoryEntry } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { createChannelTestPluginBase } from "../../test-utils/channel-plugins.js";
 type TargetResolverModule = typeof import("./target-resolver.js");
 
@@ -88,7 +88,7 @@ function firstMockArg(
 }
 
 describe("resolveMessagingTarget (directory fallback)", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
 
   beforeEach(() => {
     resetDirectoryCache();
@@ -506,7 +506,7 @@ describe("resolveMessagingTarget (directory fallback)", () => {
   it("defaults bare id-like targets to user for direct-only channel plugins", async () => {
     const directOnlyPlugin = {
       ...createChannelTestPluginBase({
-        id: "openclaw-weixin",
+        id: "carapace-weixin",
         capabilities: { chatTypes: ["direct"] },
       }),
       messaging: {
@@ -518,7 +518,7 @@ describe("resolveMessagingTarget (directory fallback)", () => {
 
     const result = await expectOkResolution({
       cfg,
-      channel: "openclaw-weixin",
+      channel: "carapace-weixin",
       input: "wxid_abc123@im.wechat",
       plugin: directOnlyPlugin,
     });
@@ -690,7 +690,7 @@ describe("resolveMessagingTarget (directory fallback)", () => {
 });
 
 describe("resolveMessagingTarget (registry-scoped channel plugins)", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as CarapaceConfig;
   const scopedPlugin = {
     id: "zephyrchat",
     meta: { label: "ZephyrChat" },

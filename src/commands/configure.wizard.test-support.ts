@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 
 const wizardTestMocks = vi.hoisted(() => {
@@ -42,14 +42,14 @@ const wizardTestMocks = vi.hoisted(() => {
     maybeInstallDaemon: vi.fn<typeof import("./configure.daemon.js").maybeInstallDaemon>(),
     promptAuthConfig: vi.fn(),
     promptGatewayConfig: vi.fn(),
-    promptRemoteGatewayConfig: vi.fn(async (cfg: OpenClawConfig): Promise<OpenClawConfig> => ({
+    promptRemoteGatewayConfig: vi.fn(async (cfg: CarapaceConfig): Promise<CarapaceConfig> => ({
       ...cfg,
       gateway: { mode: "remote", remote: { url: "wss://gateway.example.test" } },
     })),
-    isCodexNativeWebSearchRelevant: vi.fn(({ config }: { config: OpenClawConfig }) =>
+    isCodexNativeWebSearchRelevant: vi.fn(({ config }: { config: CarapaceConfig }) =>
       Boolean(config.auth?.profiles?.["openai:default"]),
     ),
-    setupChannels: vi.fn(async (cfg: OpenClawConfig) => cfg),
+    setupChannels: vi.fn(async (cfg: CarapaceConfig) => cfg),
     guardCancel: vi.fn((value: unknown, _runtime: RuntimeEnv, _exitCode?: number) => value),
   };
 });
@@ -64,14 +64,14 @@ vi.mock("@clack/prompts", () => ({
 }));
 
 vi.mock("../config/config.js", () => ({
-  CONFIG_PATH: "~/.openclaw/openclaw.json",
+  CONFIG_PATH: "~/.carapace/carapace.json",
   createConfigIO: () => ({
     readConfigFileSnapshotForWrite: async () => ({
       snapshot: await wizardTestMocks.readConfigFileSnapshot(),
       writeOptions: {
         assertConfigPathForWrite: wizardTestMocks.assertConfigPathForWrite,
-        expectedConfigPath: "/tmp/openclaw.json",
-        ownedConfigPathForWrite: "/tmp/openclaw.json",
+        expectedConfigPath: "/tmp/carapace.json",
+        ownedConfigPathForWrite: "/tmp/carapace.json",
       },
     }),
   }),
@@ -81,9 +81,9 @@ vi.mock("../config/config.js", () => ({
     writeOptions: {
       assertConfigPathForWrite: wizardTestMocks.assertConfigPathForWrite,
       envSnapshotForRestore: { SECRET: "resolved-secret" },
-      expectedConfigPath: "/tmp/openclaw.json",
+      expectedConfigPath: "/tmp/carapace.json",
       includeFileHashesForWrite: { "/tmp/plugins.json5": "stale-hash" },
-      ownedConfigPathForWrite: "/tmp/openclaw.json",
+      ownedConfigPathForWrite: "/tmp/carapace.json",
     },
   }),
   resolveConfigWriteAfterWrite: (afterWrite?: { mode: string }) => afterWrite ?? { mode: "auto" },
@@ -130,7 +130,7 @@ vi.mock("../infra/windows-gateway-firewall-diagnostics.js", () => ({
   formatWindowsGatewayFirewallGuidance: (params: { bind?: string }) =>
     params.bind === "lan"
       ? [
-          "Windows firewall: if another device cannot connect to the LAN URL, run `openclaw gateway status --deep` from this Windows host.",
+          "Windows firewall: if another device cannot connect to the LAN URL, run `carapace gateway status --deep` from this Windows host.",
         ]
       : [],
 }));
@@ -144,8 +144,8 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({
 }));
 
 vi.mock("./onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "~/.openclaw/workspace",
-  applyWizardMetadata: (cfg: OpenClawConfig) => cfg,
+  DEFAULT_WORKSPACE: "~/.carapace/workspace",
+  applyWizardMetadata: (cfg: CarapaceConfig) => cfg,
   ensureWorkspaceAndSessions: vi.fn(),
   guardCancel: wizardTestMocks.guardCancel,
   printWizardHeader: wizardTestMocks.printWizardHeader,
@@ -225,12 +225,12 @@ export function setupWizardTestDefaults() {
       credentialPath: "plugins.entries.firecrawl.config.webSearch.apiKey",
     },
   ]);
-  wizardTestMocks.setupSearch.mockImplementation(async (cfg: OpenClawConfig) => ({
+  wizardTestMocks.setupSearch.mockImplementation(async (cfg: CarapaceConfig) => ({
     outcome: "completed",
     config: cfg,
   }));
-  wizardTestMocks.promptAuthConfig.mockImplementation(async (cfg: OpenClawConfig) => cfg);
-  wizardTestMocks.promptGatewayConfig.mockImplementation(async (cfg: OpenClawConfig) => ({
+  wizardTestMocks.promptAuthConfig.mockImplementation(async (cfg: CarapaceConfig) => cfg);
+  wizardTestMocks.promptGatewayConfig.mockImplementation(async (cfg: CarapaceConfig) => ({
     config: cfg,
     port: 18789,
   }));
@@ -252,7 +252,7 @@ export function createWizardTestRuntime() {
   };
 }
 
-export function setupBaseWizardTestState(config: OpenClawConfig = {}) {
+export function setupBaseWizardTestState(config: CarapaceConfig = {}) {
   wizardTestMocks.readConfigFileSnapshot.mockResolvedValue({ ...EMPTY_CONFIG_SNAPSHOT, config });
   wizardTestMocks.resolveGatewayPort.mockReturnValue(18789);
   wizardTestMocks.probeGatewayReachable.mockResolvedValue({ ok: false });
@@ -303,7 +303,7 @@ export function createEnabledWebSearchConfig(
   provider: string,
   pluginEntry: Record<string, unknown>,
 ) {
-  return (cfg: OpenClawConfig) => ({
+  return (cfg: CarapaceConfig) => ({
     ...cfg,
     tools: {
       ...cfg.tools,

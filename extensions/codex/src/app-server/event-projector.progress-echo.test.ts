@@ -106,7 +106,7 @@ describe("CodexAppServerEventProjector tool progress echo filtering", () => {
       }
     ).text;
     expect(emittedProgressText).toHaveLength(10_000);
-    expect(emittedProgressText).toContain("OpenClaw truncated Codex native tool output");
+    expect(emittedProgressText).toContain("Carapace truncated Codex native tool output");
 
     await projector.handleNotification(
       forCurrentTurn("rawResponseItem/completed", {

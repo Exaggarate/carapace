@@ -3,8 +3,8 @@ import {
   createAzureOpenAIResponsesTransportStreamFn,
   createOpenAICompletionsTransportStreamFn,
   createOpenAIResponsesTransportStreamFn,
-} from "@openclaw/ai/transports";
-import type { Model } from "openclaw/plugin-sdk/llm";
+} from "@carapace/ai/transports";
+import type { Model } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   classifyAssistantFailoverReason,

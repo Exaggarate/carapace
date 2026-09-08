@@ -1,9 +1,9 @@
 // Fal setup module handles plugin onboarding behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-onboard";
+import type { CarapaceConfig } from "carapace/plugin-sdk/provider-onboard";
 
 const FAL_DEFAULT_IMAGE_MODEL_REF = "fal/fal-ai/flux/dev";
 
-export function applyFalConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyFalConfig(cfg: CarapaceConfig): CarapaceConfig {
   if (cfg.agents?.defaults?.mediaModels?.image) {
     return cfg;
   }

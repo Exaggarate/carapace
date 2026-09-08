@@ -5,7 +5,7 @@ import {
 } from "../../../packages/gateway-protocol/src/client-info.js";
 import type { EnvironmentSummary } from "../../../packages/gateway-protocol/src/index.js";
 import type { DevicePlacementRequirement } from "../../agents/harness/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   NODE_RUNNER_UPDATE_REQUIRED_ISSUE,
   NODE_WORKER_SUPERVISOR_PROTOCOL_FEATURE,
@@ -22,7 +22,7 @@ const REMOTE_REQUIREMENT: DevicePlacementRequirement = {
   requiredNodeCommands: ["runtime.exec"],
   consumesWorkerSlot: false,
 };
-const CONFIG: OpenClawConfig = {
+const CONFIG: CarapaceConfig = {
   gateway: { nodes: { commands: { allow: ["runtime.exec"] } } },
 };
 
@@ -235,7 +235,7 @@ describe("paired-device automatic placement selection", () => {
           issues: [NODE_RUNNER_UPDATE_REQUIRED_ISSUE],
         }),
       ],
-      message: "run openclaw update, then reconnect",
+      message: "run carapace update, then reconnect",
     },
   ])("explains $name with an operator recovery action", async ({ environments, message }) => {
     const result = await selectNodes(environments);

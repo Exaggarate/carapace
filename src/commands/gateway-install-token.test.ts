@@ -1,7 +1,7 @@
 // Gateway install auth tests cover validation and guarded token generation.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
-import type { ConfigFileSnapshot } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.js";
+import type { ConfigFileSnapshot } from "../config/types.carapace.js";
 import { resolveGatewayInstallToken } from "./gateway-install-token.js";
 
 const replaceConfigFileMock = vi.hoisted(() => vi.fn());
@@ -15,7 +15,7 @@ const resolveGatewayAuthMock = vi.hoisted(() =>
 );
 const shouldRequireGatewayTokenForInstallMock = vi.hoisted(() => vi.fn(() => true));
 const resolveSecretRefValuesMock = vi.hoisted(() => vi.fn());
-const secretRefKeyMock = vi.hoisted(() => vi.fn(() => "env:default:OPENCLAW_GATEWAY_TOKEN"));
+const secretRefKeyMock = vi.hoisted(() => vi.fn(() => "env:default:CARAPACE_GATEWAY_TOKEN"));
 const randomTokenMock = vi.hoisted(() => vi.fn(() => "generated-token"));
 
 vi.mock("../config/mutate.js", () => ({
@@ -51,9 +51,9 @@ function firstReplaceConfigRequest(): unknown {
   return call[0];
 }
 
-function createGeneration(config: OpenClawConfig = {}) {
+function createGeneration(config: CarapaceConfig = {}) {
   const snapshot: ConfigFileSnapshot = {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/carapace.json",
     exists: true,
     valid: true,
     raw: JSON.stringify(config),
@@ -88,7 +88,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { token: "config-token" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
       generateIfMissing: createGeneration(),
     });
@@ -102,16 +102,16 @@ describe("resolveGatewayInstallToken", () => {
   });
 
   it("validates SecretRef token but does not persist resolved plaintext", async () => {
-    const tokenRef = { source: "env", provider: "default", id: "OPENCLAW_GATEWAY_TOKEN" };
+    const tokenRef = { source: "env", provider: "default", id: "CARAPACE_GATEWAY_TOKEN" };
     resolveSecretRefValuesMock.mockResolvedValue(
-      new Map([["env:default:OPENCLAW_GATEWAY_TOKEN", "resolved-token"]]),
+      new Map([["env:default:CARAPACE_GATEWAY_TOKEN", "resolved-token"]]),
     );
 
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: tokenRef } },
-      } as OpenClawConfig,
-      env: { OPENCLAW_GATEWAY_TOKEN: "resolved-token" } as NodeJS.ProcessEnv,
+      } as CarapaceConfig,
+      env: { CARAPACE_GATEWAY_TOKEN: "resolved-token" } as NodeJS.ProcessEnv,
       generateIfMissing: createGeneration(),
     });
 
@@ -127,7 +127,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: "${MISSING_GATEWAY_TOKEN}" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -145,14 +145,14 @@ describe("resolveGatewayInstallToken", () => {
             password: "password-value", // pragma: allowlist secret
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
       generateIfMissing: createGeneration(),
     });
 
     expect(result.unavailableReason).toContain("gateway.auth.mode is unset");
-    expect(result.unavailableReason).toContain("openclaw config set gateway.auth.mode token");
-    expect(result.unavailableReason).toContain("openclaw config set gateway.auth.mode password");
+    expect(result.unavailableReason).toContain("carapace config set gateway.auth.mode token");
+    expect(result.unavailableReason).toContain("carapace config set gateway.auth.mode password");
     expect(replaceConfigFileMock).not.toHaveBeenCalled();
     expect(resolveSecretRefValuesMock).not.toHaveBeenCalled();
   });
@@ -161,7 +161,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -182,7 +182,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
       generateIfMissing: { ...generation, writeOptions },
     });
@@ -212,10 +212,10 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
       generateIfMissing: createGeneration({
-        gateway: { auth: { token: "${OPENCLAW_GATEWAY_TOKEN}" } },
+        gateway: { auth: { token: "${CARAPACE_GATEWAY_TOKEN}" } },
       }),
     });
 
@@ -255,7 +255,7 @@ describe("resolveGatewayInstallToken", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
       generateIfMissing: createGeneration(),
     });
@@ -267,7 +267,7 @@ describe("resolveGatewayInstallToken", () => {
 
   it("passes the install env through to gateway auth resolution", async () => {
     const env = {
-      OPENCLAW_GATEWAY_PASSWORD: "dotenv-password", // pragma: allowlist secret
+      CARAPACE_GATEWAY_PASSWORD: "dotenv-password", // pragma: allowlist secret
     } as NodeJS.ProcessEnv;
     shouldRequireGatewayTokenForInstallMock.mockReturnValue(false);
     resolveGatewayAuthMock.mockReturnValue({
@@ -280,7 +280,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: {} },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env,
       generateIfMissing: createGeneration(),
     });
@@ -296,7 +296,7 @@ describe("resolveGatewayInstallToken", () => {
   });
 
   it("skips token SecretRef resolution when token auth is not required", async () => {
-    const tokenRef = { source: "env", provider: "default", id: "OPENCLAW_GATEWAY_TOKEN" };
+    const tokenRef = { source: "env", provider: "default", id: "CARAPACE_GATEWAY_TOKEN" };
     shouldRequireGatewayTokenForInstallMock.mockReturnValue(false);
 
     const result = await resolveGatewayInstallToken({
@@ -307,7 +307,7 @@ describe("resolveGatewayInstallToken", () => {
             token: tokenRef,
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 

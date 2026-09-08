@@ -15,7 +15,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not installed or cannot start at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -110,7 +110,7 @@ async function tableBodyContrast(page: Page): Promise<number> {
 
 async function activeGatewayIdentity(page: Page) {
   return await page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("carapace-app") as HTMLElement & {
       runtime?: {
         context: {
           gateway: {
@@ -157,14 +157,14 @@ suite.define(() => {
       const existingSecretRow = page.getByRole("row", { name: /SERVICE_API_KEY/u });
       await existingSecretRow.getByRole("button", { name: "Actions: SERVICE_API_KEY" }).click();
       await existingSecretRow.locator('wa-dropdown-item[value="edit"]').click();
-      const editSecretDialog = page.locator('openclaw-modal-dialog[label="Edit"]');
+      const editSecretDialog = page.locator('carapace-modal-dialog[label="Edit"]');
       await editSecretDialog.getByRole("button", { name: "Save", exact: true }).click();
       await editSecretDialog.getByRole("alert").getByText("Enter a value.").waitFor();
       expect(await gateway.getRequests("secrets.store.set")).toHaveLength(0);
       await editSecretDialog.getByRole("button", { name: "Cancel", exact: true }).click();
 
       await page.getByRole("button", { name: "Add", exact: true }).click();
-      const addSecretDialog = page.locator('openclaw-modal-dialog[label="Add"]');
+      const addSecretDialog = page.locator('carapace-modal-dialog[label="Add"]');
       await addSecretDialog.getByLabel("Name", { exact: true }).fill("EMPTY_API_KEY");
       expect(
         await addSecretDialog.getByRole("radio", { name: /Protected secret/u }).isChecked(),
@@ -176,7 +176,7 @@ suite.define(() => {
       await addSecretDialog.getByRole("button", { name: "Cancel", exact: true }).click();
 
       await page.getByRole("button", { name: "Bulk Add", exact: true }).click();
-      const protectedBulkDialog = page.locator('openclaw-modal-dialog[label="Bulk Add"]');
+      const protectedBulkDialog = page.locator('carapace-modal-dialog[label="Bulk Add"]');
       await protectedBulkDialog
         .getByRole("textbox", { name: "Value", exact: true })
         .fill("EMPTY_API_KEY=\nEMPTY_ENV=");
@@ -191,7 +191,7 @@ suite.define(() => {
       await protectedBulkDialog.getByRole("button", { name: "Cancel", exact: true }).click();
 
       await page.getByRole("button", { name: "Add", exact: true }).click();
-      const addEnvDialog = page.locator('openclaw-modal-dialog[label="Add"]');
+      const addEnvDialog = page.locator('carapace-modal-dialog[label="Add"]');
       await addEnvDialog.getByLabel("Name", { exact: true }).fill("EMPTY_ENV");
       expect(
         await addEnvDialog.getByRole("radio", { name: /Agent-readable environment/u }).isChecked(),
@@ -203,7 +203,7 @@ suite.define(() => {
         .waitFor();
 
       await page.getByRole("button", { name: "Bulk Add", exact: true }).click();
-      const envBulkDialog = page.locator('openclaw-modal-dialog[label="Bulk Add"]');
+      const envBulkDialog = page.locator('carapace-modal-dialog[label="Bulk Add"]');
       await envBulkDialog
         .getByRole("textbox", { name: "Value", exact: true })
         .fill("EMPTY_BULK_ENV=");
@@ -269,7 +269,7 @@ suite.define(() => {
         await page.getByRole("heading", { name: "Secrets" }).waitFor();
 
         await page.getByRole("button", { name: "Add", exact: true }).click();
-        const addDialog = page.locator('openclaw-modal-dialog[label="Add"]');
+        const addDialog = page.locator('carapace-modal-dialog[label="Add"]');
         await addDialog.getByText("Agent-readable environment", { exact: true }).waitFor();
         expect(
           await addDialog.getByRole("radio", { name: /Agent-readable environment/u }).isChecked(),
@@ -289,7 +289,7 @@ suite.define(() => {
           .waitFor();
 
         await page.getByRole("button", { name: "Add", exact: true }).click();
-        const secretDialog = page.locator('openclaw-modal-dialog[label="Add"]');
+        const secretDialog = page.locator('carapace-modal-dialog[label="Add"]');
         await secretDialog.getByLabel("Name", { exact: true }).fill("SERVICE_API_KEY");
         expect(
           await secretDialog.getByRole("radio", { name: /Protected secret/u }).isChecked(),
@@ -319,7 +319,7 @@ suite.define(() => {
         );
 
         await page.getByRole("button", { name: "Bulk Add", exact: true }).click();
-        const bulkDialog = page.locator('openclaw-modal-dialog[label="Bulk Add"]');
+        const bulkDialog = page.locator('carapace-modal-dialog[label="Bulk Add"]');
         await bulkDialog
           .getByRole("textbox", { name: "Value", exact: true })
           .fill('BULK_PRIVATE_KEY="line one\nline two"\nBULK_URL=https://bulk.test');
@@ -338,7 +338,7 @@ suite.define(() => {
         const bulkRow = page.getByRole("row", { name: /BULK_URL/u });
         await bulkRow.getByRole("button", { name: "Actions: BULK_URL" }).click();
         await bulkRow.locator('wa-dropdown-item[value="delete"]').click();
-        const confirm = page.locator('openclaw-modal-dialog[label="Delete"]');
+        const confirm = page.locator('carapace-modal-dialog[label="Delete"]');
         await confirm.getByRole("button", { name: "Delete", exact: true }).click();
         await page.getByRole("status").getByText("Deleted BULK_URL.").waitFor();
         expect(await page.getByRole("row", { name: /BULK_URL/u }).count()).toBe(0);
@@ -372,13 +372,13 @@ suite.define(() => {
       const entryRow = page.getByRole("row", { name: /SERVICE_URL/u });
       await entryRow.getByRole("button", { name: "Actions: SERVICE_URL" }).click();
       await entryRow.locator('wa-dropdown-item[value="delete"]').click();
-      const confirmation = page.locator('openclaw-modal-dialog[label="Delete"]');
+      const confirmation = page.locator('carapace-modal-dialog[label="Delete"]');
       await confirmation.getByText("Delete SERVICE_URL?", { exact: true }).waitFor();
 
       const socketCount = await gateway.getSocketCount();
       const listCount = (await gateway.getRequests("secrets.store.list")).length;
       const originalGateway = await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               gateway: {
@@ -451,7 +451,7 @@ suite.define(() => {
       const entryRow = page.getByRole("row", { name: /SERVICE_URL/u });
       await entryRow.getByRole("button", { name: "Actions: SERVICE_URL" }).click();
       await entryRow.locator('wa-dropdown-item[value="delete"]').click();
-      const confirmation = page.locator('openclaw-modal-dialog[label="Delete"]');
+      const confirmation = page.locator('carapace-modal-dialog[label="Delete"]');
       await confirmation.getByText("Delete SERVICE_URL?", { exact: true }).waitFor();
 
       const originalGateway = await activeGatewayIdentity(page);

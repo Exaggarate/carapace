@@ -25,13 +25,13 @@ const {
   waitProviderOperationPollIntervalMock: vi.fn(async () => {}),
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-http")>(
-    "openclaw/plugin-sdk/provider-http",
+vi.mock("carapace/plugin-sdk/provider-http", async () => {
+  const actual = await vi.importActual<typeof import("carapace/plugin-sdk/provider-http")>(
+    "carapace/plugin-sdk/provider-http",
   );
   return {
     ...actual,

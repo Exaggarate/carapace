@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { describe, expect, it } from "vitest";
 import {
   prepareSystemAgentRunAdmission,
@@ -17,7 +17,7 @@ import {
   loadTranscriptEvents,
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   buildRestartSafeChatTranscriptState,
   createRestartSafeChatRequest,
@@ -26,7 +26,7 @@ import {
 import { clearMemoryPluginState, registerMemoryCapability } from "../../plugins/memory-state.js";
 import { createUserTurnTranscriptRecorder } from "../../sessions/user-turn-transcript.js";
 import { extractTextFromChatContent } from "../../shared/chat-content.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { runReplyAgent } from "./agent-runner.js";
 import {
   createTestFollowupRun,
@@ -45,7 +45,7 @@ describe("required maintenance with restart-safe admitted input", () => {
   it.each(["one archive", "two archives"] as const)(
     "keeps the approved user current through preflight maintenance (%s)",
     async (history) => {
-      await withOpenClawTestState({ label: "required-maintenance-pending" }, async (state) => {
+      await withCarapaceTestState({ label: "required-maintenance-pending" }, async (state) => {
         const requests: ModelRequest[] = [];
         const approved =
           "Approved current request: preserve ünicode 🦞 and exact newlines.\n" +
@@ -173,7 +173,7 @@ describe("required maintenance with restart-safe admitted input", () => {
         const runId = "approved-foreground";
         const storePath = path.join(state.sessionsDir(), "sessions.json");
         const scope = { agentId: "main", sessionKey, sessionId, storePath };
-        const cfg: OpenClawConfig = {
+        const cfg: CarapaceConfig = {
           agents: {
             list: [{ id: "main", default: true, workspace: state.workspaceDir }],
             defaults: {

@@ -6,11 +6,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/frozen-target-compat.sh"
-openclaw_resolve_frozen_core_harness_capabilities "${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}"
+carapace_resolve_frozen_core_harness_capabilities "${CARAPACE_DOCKER_E2E_REPO_ROOT:-$ROOT_DIR}"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-session-runtime-context-e2e" OPENCLAW_SESSION_RUNTIME_CONTEXT_E2E_IMAGE)"
-CONTAINER_NAME="openclaw-session-runtime-context-e2e-$$"
-RUN_LOG="$(mktemp -t openclaw-session-runtime-context-log.XXXXXX)"
+IMAGE_NAME="$(docker_e2e_resolve_image "carapace-session-runtime-context-e2e" CARAPACE_SESSION_RUNTIME_CONTEXT_E2E_IMAGE)"
+CONTAINER_NAME="carapace-session-runtime-context-e2e-$$"
+RUN_LOG="$(mktemp -t carapace-session-runtime-context-log.XXXXXX)"
 
 cleanup() {
   docker_e2e_docker_cmd rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
@@ -26,8 +26,8 @@ set +e
 docker_e2e_run_with_harness \
   --name "$CONTAINER_NAME" \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e "OPENCLAW_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE=$OPENCLAW_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE" \
-  -e "OPENCLAW_FROZEN_TARGET_SESSION_REPAIR_MODE=$OPENCLAW_FROZEN_TARGET_SESSION_REPAIR_MODE" \
+  -e "CARAPACE_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE=$CARAPACE_FROZEN_TARGET_RUNTIME_CONTEXT_INPUT_MODE" \
+  -e "CARAPACE_FROZEN_TARGET_SESSION_REPAIR_MODE=$CARAPACE_FROZEN_TARGET_SESSION_REPAIR_MODE" \
   "$IMAGE_NAME" \
   bash -lc 'set -euo pipefail; tsx scripts/e2e/session-runtime-context-docker-client.ts' \
   >"$RUN_LOG" 2>&1

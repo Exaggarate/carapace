@@ -9,7 +9,7 @@ import {
 import { persistDevicePairingStoreState } from "../../../infra/device-pairing-store.js";
 import type { PairedDevice } from "../../../infra/device-pairing.types.js";
 import { PAIRING_SETUP_BOOTSTRAP_PROFILE } from "../../../shared/device-bootstrap-profile.js";
-import { withOpenClawTestState } from "../../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../../test-utils/carapace-test-state.js";
 
 vi.mock("../health-state.js", () => ({
   buildGatewaySnapshot: vi.fn(() => ({
@@ -52,7 +52,7 @@ describe("sendGatewayHello setup completion ordering", () => {
   it.each([false, true])(
     "persists setup status before presence publication (failure=%s)",
     async (presenceFails) => {
-      await withOpenClawTestState(
+      await withCarapaceTestState(
         { label: "ws-setup-completion-order", layout: "state-only" },
         async () => {
           const paired: PairedDevice = {
@@ -110,7 +110,7 @@ describe("sendGatewayHello setup completion ordering", () => {
             frame: { id: "hello-setup-order" },
             connectParams: {
               client: {
-                id: "openclaw-ios",
+                id: "carapace-ios",
                 version: "dev",
                 platform: "test",
                 mode: "backend",
@@ -181,7 +181,7 @@ describe("sendGatewayHello setup completion ordering", () => {
   );
 
   it("keeps correlated setup completion uncertain when hello delivery fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "ws-setup-completion-send-failure", layout: "state-only" },
       async () => {
         const paired: PairedDevice = {
@@ -226,7 +226,7 @@ describe("sendGatewayHello setup completion ordering", () => {
           },
           frame: { id: "hello-setup-send-failure" },
           connectParams: {
-            client: { id: "openclaw-ios", version: "dev", platform: "test", mode: "backend" },
+            client: { id: "carapace-ios", version: "dev", platform: "test", mode: "backend" },
             role: "operator",
             scopes: PAIRING_SETUP_BOOTSTRAP_PROFILE.scopes,
           },
@@ -281,7 +281,7 @@ describe("sendGatewayHello setup completion ordering", () => {
   });
 
   it("does not consume a setup bearer after the paired public key is replaced", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "ws-setup-completion-replaced-key", layout: "state-only" },
       async () => {
         const paired: PairedDevice = {
@@ -334,7 +334,7 @@ describe("sendGatewayHello setup completion ordering", () => {
           },
           frame: { id: "hello-setup-replaced" },
           connectParams: {
-            client: { id: "openclaw-ios", version: "dev", platform: "test", mode: "backend" },
+            client: { id: "carapace-ios", version: "dev", platform: "test", mode: "backend" },
             role: "operator",
             scopes: PAIRING_SETUP_BOOTSTRAP_PROFILE.scopes,
           },
@@ -381,7 +381,7 @@ describe("sendGatewayHello setup completion ordering", () => {
   });
 
   it("restores an uncorrelated bootstrap token when hello delivery fails", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { label: "ws-generic-bootstrap-send-failure", layout: "state-only" },
       async () => {
         const paired: PairedDevice = {
@@ -424,7 +424,7 @@ describe("sendGatewayHello setup completion ordering", () => {
           },
           frame: { id: "hello-generic-send-failure" },
           connectParams: {
-            client: { id: "openclaw-ios", version: "dev", platform: "test", mode: "backend" },
+            client: { id: "carapace-ios", version: "dev", platform: "test", mode: "backend" },
             role: "operator",
             scopes: PAIRING_SETUP_BOOTSTRAP_PROFILE.scopes,
           },

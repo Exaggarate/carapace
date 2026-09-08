@@ -4,7 +4,7 @@
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AssistantMessage, UserMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage, UserMessage } from "carapace/plugin-sdk/llm";
 import { beforeEach, expect, vi } from "vitest";
 import type { InternalSessionEntry as SessionEntry } from "../../config/sessions.js";
 import type { InternalHookEvent } from "../../hooks/internal-hooks.js";
@@ -441,9 +441,9 @@ function createGatewaySessionsTestHarness(startServer: boolean, setup?: GatewayS
       });
     }
 
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.CARAPACE_CONFIG_PATH;
     if (!configPath) {
-      throw new Error("OPENCLAW_CONFIG_PATH is required");
+      throw new Error("CARAPACE_CONFIG_PATH is required");
     }
     await fs.writeFile(
       configPath,

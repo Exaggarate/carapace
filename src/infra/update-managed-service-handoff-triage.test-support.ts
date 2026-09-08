@@ -92,7 +92,7 @@ export function registerManagedUpdateHandoffTriageTests(
       }
       expect(sensitiveFilesRemoved).toBe(true);
       expect(savedFailure).toMatchObject({
-        path: expect.stringContaining("/logs/support/openclaw-update-failure-"),
+        path: expect.stringContaining("/logs/support/carapace-update-failure-"),
         mode: 0o600,
         contents: {
           result: {
@@ -107,11 +107,11 @@ export function registerManagedUpdateHandoffTriageTests(
       expect(JSON.stringify(savedFailure)).not.toContain(secret);
       expect(helperLog).toContain(`Saved update failure: ${savedFailure?.path}`);
       expect(helperLog).toContain(`--update-result ${savedFailure?.path}`);
-      expect(helperLog).toContain("OPENCLAW_STATE_DIR=");
+      expect(helperLog).toContain("CARAPACE_STATE_DIR=");
       expect(sentinel).toMatchObject({
         payload: {
           status: "error",
-          doctorHint: expect.stringContaining("openclaw triage"),
+          doctorHint: expect.stringContaining("carapace triage"),
           stats: {
             reason: "global-install-failed",
             steps: [expect.objectContaining({ name: "service-restore", log: { exitCode: 0 } })],
@@ -121,7 +121,7 @@ export function registerManagedUpdateHandoffTriageTests(
       expect(sentinel).toHaveProperty(
         "payload.doctorHint",
         expect.not.stringMatching(
-          /handoff\.log|OPENCLAW_(?:STATE_DIR|CONFIG_PATH|WORKSPACE_DIR)=/u,
+          /handoff\.log|CARAPACE_(?:STATE_DIR|CONFIG_PATH|WORKSPACE_DIR)=/u,
         ),
       );
       expect(helperLog).toContain("update triage could not complete");

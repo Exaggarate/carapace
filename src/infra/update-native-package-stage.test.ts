@@ -24,7 +24,7 @@ async function writeStoredRuntime(packageRoot: string, store: string, generation
   await fs.rm(path.join(modules, "aged-runtime"), { force: true });
   await fs.symlink(path.relative(modules, payload), path.join(modules, "aged-runtime"));
   await fs.writeFile(
-    path.join(packageRoot, "openclaw.mjs"),
+    path.join(packageRoot, "carapace.mjs"),
     '#!/usr/bin/env node\nimport value from "./node_modules/aged-runtime/index.cjs";\nconsole.log(value);\n',
     { mode: 0o755 },
   );
@@ -43,7 +43,7 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
         const packageRoot = path.join(
           globalRoot,
           ...(layout === "pnpm11" ? ["group", "node_modules"] : []),
-          "openclaw",
+          "carapace",
         );
         const liveBinDir = path.join(base, "bin");
         const external = path.join(base, "shared-store");
@@ -83,8 +83,8 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
         };
         const stage = await prepareNativePackageStage({
           installTarget,
-          packageName: "openclaw",
-          installSpec: "openclaw@2.0.0",
+          packageName: "carapace",
+          installSpec: "carapace@2.0.0",
           globalBinDir: liveBinDir,
           env: {},
         });
@@ -93,7 +93,7 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
           throw new Error("missing native stage");
         }
         const candidateRoot = path.join(stage.projectRoot, path.relative(project, packageRoot));
-        const candidateEntry = path.join(candidateRoot, "openclaw.mjs");
+        const candidateEntry = path.join(candidateRoot, "carapace.mjs");
         const candidateStore = path.join(
           stage.projectRoot,
           path.relative(project, virtualStoreDir),
@@ -107,7 +107,7 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
         await fs.rm(path.join(candidateStore, "old"), { recursive: true });
         expect(
           (
-            await runFile(process.execPath, [path.join(packageRoot, "openclaw.mjs")], {
+            await runFile(process.execPath, [path.join(packageRoot, "carapace.mjs")], {
               timeout: 5000,
             })
           ).stdout.trim(),
@@ -138,7 +138,7 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
         expect((await runFile(externalLauncher, [], { timeout: 5000 })).stdout.trim()).toBe(
           "external",
         );
-        const launcher = path.join(stage.binDir, "openclaw");
+        const launcher = path.join(stage.binDir, "carapace");
         if (layout === "bun") {
           await fs.symlink(path.relative(stage.binDir, candidateEntry), launcher);
         } else {
@@ -156,10 +156,10 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
           );
         }
         expect((await runFile(launcher, [], { timeout: 5000 })).stdout.trim()).toBe("candidate");
-        await finalizeNativePackageStage(stage, "openclaw");
+        await finalizeNativePackageStage(stage, "carapace");
         expect(
           (
-            await runFile(process.execPath, [path.join(packageRoot, "openclaw.mjs")], {
+            await runFile(process.execPath, [path.join(packageRoot, "carapace.mjs")], {
               timeout: 5000,
             })
           ).stdout.trim(),
@@ -170,11 +170,11 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
         });
         await fs.rename(project, `${project}.previous`);
         await fs.rename(stage.projectRoot, project);
-        await fs.cp(launcher, path.join(liveBinDir, "openclaw"), { verbatimSymlinks: true });
+        await fs.cp(launcher, path.join(liveBinDir, "carapace"), { verbatimSymlinks: true });
         await fs.copyFile(externalLauncher, path.join(liveBinDir, "shared"));
         await fs.rm(stage.binDir, { recursive: true });
         expect(
-          (await runFile(path.join(liveBinDir, "openclaw"), [], { timeout: 5000 })).stdout.trim(),
+          (await runFile(path.join(liveBinDir, "carapace"), [], { timeout: 5000 })).stdout.trim(),
         ).toBe(layout === "bun" ? "candidate" : "bin-runtime\ncandidate");
         expect(
           (await runFile(path.join(liveBinDir, "shared"), [], { timeout: 5000 })).stdout.trim(),
@@ -195,23 +195,23 @@ describe.skipIf(process.platform === "win32")("native package stage", () => {
     await withTestDir({ prefix: "native-package-stage-race-" }, async (base) => {
       const project = path.join(base, "install", "global");
       const globalRoot = path.join(project, "node_modules");
-      const packageRoot = path.join(globalRoot, "openclaw");
+      const packageRoot = path.join(globalRoot, "carapace");
       await fs.mkdir(packageRoot, { recursive: true });
       const manifest = path.join(project, "package.json");
-      await fs.writeFile(manifest, '{"dependencies":{"openclaw":"1.0.0"}}');
+      await fs.writeFile(manifest, '{"dependencies":{"carapace":"1.0.0"}}');
       const stage = await prepareNativePackageStage({
         installTarget: { manager: "bun", command: "bun", globalRoot, packageRoot },
-        packageName: "openclaw",
-        installSpec: "openclaw@2.0.0",
+        packageName: "carapace",
+        installSpec: "carapace@2.0.0",
         globalBinDir: path.join(base, "bin"),
         env: {},
       });
       if (!stage) {
         throw new Error("missing native stage");
       }
-      const concurrentManifest = '{"dependencies":{"openclaw":"1.0.0","sibling":"2.0.0"}}';
+      const concurrentManifest = '{"dependencies":{"carapace":"1.0.0","sibling":"2.0.0"}}';
       await fs.writeFile(manifest, concurrentManifest);
-      await expect(finalizeNativePackageStage(stage, "openclaw")).rejects.toThrow(
+      await expect(finalizeNativePackageStage(stage, "carapace")).rejects.toThrow(
         "changed before activation",
       );
       expect(await fs.readFile(manifest, "utf8")).toBe(concurrentManifest);

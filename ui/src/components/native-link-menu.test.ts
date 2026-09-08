@@ -7,7 +7,7 @@ import { de } from "../i18n/locales/de.ts";
 import { NativeLinkMenu, type NativeLinkMenuAction } from "./native-link-menu.runtime.ts";
 import "./tooltip.ts";
 
-const NATIVE_LINK_MENU_ELEMENT_NAME = `test-openclaw-native-link-menu-${crypto.randomUUID()}`;
+const NATIVE_LINK_MENU_ELEMENT_NAME = `test-carapace-native-link-menu-${crypto.randomUUID()}`;
 const containers: HTMLElement[] = [];
 type DropdownElement = HTMLElement & { readonly updateComplete: Promise<unknown> };
 
@@ -134,7 +134,7 @@ describe("native link menu", () => {
     const menu = await mountMenu({ trigger, onClose });
     const escaped = vi.fn();
     menu.addEventListener("keydown", escaped);
-    const tooltip = document.createElement("openclaw-tooltip");
+    const tooltip = document.createElement("carapace-tooltip");
     tooltip.content = "Link action details";
     tooltip.anchor = menuItems(menu)[0]!;
     menu.append(tooltip);

@@ -10,12 +10,12 @@ import {
 } from "./extension-install-layout.js";
 
 export const FOUNDATION_CHROME_WEB_STORE_EXTENSION_ID = "kcdjddhmeafeomebliikmbpblkmkfoig";
-export const FOUNDATION_CHROME_WEB_STORE_URL = `https://chromewebstore.google.com/detail/openclaw/${FOUNDATION_CHROME_WEB_STORE_EXTENSION_ID}`;
+export const FOUNDATION_CHROME_WEB_STORE_URL = `https://chromewebstore.google.com/detail/carapace/${FOUNDATION_CHROME_WEB_STORE_EXTENSION_ID}`;
 const STORE_UPDATE_URL = "https://clients2.google.com/service/update2/crx";
 // Chromium ignores unknown fields in each external-extension dictionary.
 const OWNED_REQUEST = {
   external_update_url: STORE_UPDATE_URL,
-  openclawOwnership: "browser-store-install-v1",
+  carapaceOwnership: "browser-store-install-v1",
 };
 
 export type ChromeStoreInstallRequest = {
@@ -55,13 +55,13 @@ async function inspectRequest(root: ChromeProductRoot): Promise<ChromeStoreInsta
       Object.keys(value).length !== 2 ||
       !("external_update_url" in value) ||
       value.external_update_url !== OWNED_REQUEST.external_update_url ||
-      !("openclawOwnership" in value) ||
-      value.openclawOwnership !== OWNED_REQUEST.openclawOwnership
+      !("carapaceOwnership" in value) ||
+      value.carapaceOwnership !== OWNED_REQUEST.carapaceOwnership
     ) {
       return {
         ...result,
         state: "foreign",
-        issue: "Store install registration is not OpenClaw-owned",
+        issue: "Store install registration is not Carapace-owned",
       };
     }
     return { ...result, state: "requested" };

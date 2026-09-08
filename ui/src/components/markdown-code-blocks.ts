@@ -18,7 +18,7 @@ import { copyToClipboard } from "../lib/clipboard.ts";
 import type { MarkdownRenderEnv } from "./markdown-render-options.ts";
 import { escapeMarkdownHtml, isMarkdownBlockArtText } from "./markdown-text.ts";
 
-const blockArtCopyPayloadPrefix = "openclaw:block-art-code:";
+const blockArtCopyPayloadPrefix = "carapace:block-art-code:";
 const blockArtCodeBlockCopyPayloadEncoding = "block-art-json";
 const CODE_PREVIEW_LINE_COUNT = 7;
 const codeBlockCopyAttempts = new WeakMap<HTMLElement, number>();

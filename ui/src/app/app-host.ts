@@ -32,12 +32,12 @@ import {
   resolveUiKnownSelectedGlobalAgentId,
 } from "../lib/sessions/session-key.ts";
 import { showToast } from "../lib/toast.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import type { ChatPage } from "../pages/chat/chat-page.ts";
 import type { NewSessionTarget } from "../pages/new-session/location.ts";
 import { selectShellRouteState, type ShellRouteState } from "./app-host-route-state.ts";
-import { OpenClawApp } from "./app-root.ts";
+import { CarapaceApp } from "./app-root.ts";
 import { ShellChromeOwner, type ShellChromeHost } from "./app-shell-chrome.ts";
 import {
   ShellGatewayOwner,
@@ -76,7 +76,7 @@ import {
   scheduleStaleChunkReload,
 } from "./stale-chunk-reload.ts";
 
-const APP_SIDEBAR_TAG = "openclaw-app-sidebar";
+const APP_SIDEBAR_TAG = "carapace-app-sidebar";
 const APP_SIDEBAR_ELEMENT = {
   tagName: APP_SIDEBAR_TAG,
   label: APP_SIDEBAR_TAG,
@@ -107,8 +107,8 @@ function equalShellRouteState(previous: ShellRouteState, next: ShellRouteState):
   );
 }
 
-class OpenClawShell
-  extends OpenClawLightDomElement
+class CarapaceShell
+  extends CarapaceLightDomElement
   implements ShellChromeHost, ShellGatewayHost, ShellNavigationHost, ShellViewHost
 {
   @property({ attribute: false }) runtime: ApplicationRuntime | undefined;
@@ -127,7 +127,7 @@ class OpenClawShell
   readonly assistantPanelElement = ASSISTANT_PANEL_ELEMENT;
   readonly execApprovalElement = EXEC_APPROVAL_ELEMENT;
   readonly onboardingMemoryImportElement = {
-    tagName: "openclaw-onboarding-memory-import",
+    tagName: "carapace-onboarding-memory-import",
     label: t("onboarding.memoryImport.title"),
     loadModule: () => import("../components/onboarding-memory-import.ts"),
   } satisfies OptionalCustomElement;
@@ -140,8 +140,8 @@ class OpenClawShell
   // still splash-gated, replaying would loop through the open handlers forever.
   readonly queryRenderedElement = (tagName: string): Element | null =>
     this.renderRoot?.querySelector(tagName) ?? null;
-  @query("openclaw-command-palette") commandPalette: CommandPaletteElement | undefined;
-  @query("openclaw-exec-approval")
+  @query("carapace-command-palette") commandPalette: CommandPaletteElement | undefined;
+  @query("carapace-exec-approval")
   approvalOverlay: (HTMLElement & { show(): void; dialogOpen?: boolean }) | undefined;
   commandPaletteTarget: CommandPaletteTargetDetail | undefined;
   navDrawerTrigger: HTMLElement | null = null;
@@ -613,7 +613,7 @@ class OpenClawShell
       return;
     }
     const outboxScopeHost = this.storedOutboxScopeHost(context);
-    let primaryContext = routeId === "custodian" ? t("nav.askOpenClaw") : titleForRoute(routeId);
+    let primaryContext = routeId === "custodian" ? t("nav.askCarapace") : titleForRoute(routeId);
     if (isSessionRouteId(routeId) && this.activeSessionKey) {
       primaryContext = this.chatTitleContext(context, outboxScopeHost) || primaryContext;
     }
@@ -646,12 +646,12 @@ class OpenClawShell
     // renders their element, independent of further context updates.
     this.restorePendingLazyAction();
     if (
-      !customElements.get("openclaw-sidebar-update-card") &&
-      this.querySelector("openclaw-sidebar-update-card")
+      !customElements.get("carapace-sidebar-update-card") &&
+      this.querySelector("carapace-sidebar-update-card")
     ) {
       this.loadSidebarUpdateCard();
     }
-    const chatPage = this.querySelector<ChatPage>("openclaw-chat-page");
+    const chatPage = this.querySelector<ChatPage>("carapace-chat-page");
     if (chatPage) {
       chatPage.navDrawerOpen = this.navDrawerOpen && !this.onboardingMode;
     }
@@ -728,9 +728,9 @@ class OpenClawShell
     return renderApplicationShell(this);
   }
 }
-if (!customElements.get("openclaw-app")) {
-  customElements.define("openclaw-app", OpenClawApp);
+if (!customElements.get("carapace-app")) {
+  customElements.define("carapace-app", CarapaceApp);
 }
-if (!customElements.get("openclaw-app-shell")) {
-  customElements.define("openclaw-app-shell", OpenClawShell);
+if (!customElements.get("carapace-app-shell")) {
+  customElements.define("carapace-app-shell", CarapaceShell);
 }

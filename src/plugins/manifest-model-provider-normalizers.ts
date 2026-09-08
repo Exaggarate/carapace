@@ -1,5 +1,5 @@
-import { normalizeModelPricingProvider } from "@openclaw/model-catalog-core/model-catalog-pricing";
-import { normalizeModelCatalogProviderId } from "@openclaw/model-catalog-core/model-catalog-refs";
+import { normalizeModelPricingProvider } from "@carapace/model-catalog-core/model-catalog-pricing";
+import { normalizeModelCatalogProviderId } from "@carapace/model-catalog-core/model-catalog-refs";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { normalizeTrimmedStringList } from "../../packages/normalization-core/src/string-normalization.js";
 import { ENV_SECRET_REF_ID_RE } from "../config/types.secrets.js";

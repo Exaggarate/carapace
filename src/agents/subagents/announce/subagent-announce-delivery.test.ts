@@ -10,7 +10,7 @@ import {
   loadTranscriptEvents,
   replaceSessionEntry,
 } from "../../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { InternalAgentTurnDispatchOptions } from "../../../gateway/agent-turn/internal-facade.types.js";
 import type { callGateway as runtimeCallGateway } from "../../../gateway/call.js";
 import { authorizeGatewaySessionCreation } from "../../../gateway/operator-role-policy.js";
@@ -245,7 +245,7 @@ function createRoleRestrictedInProcessGatewayMock(response: Record<string, unkno
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies CarapaceConfig;
   const dispatchGatewayMethodInProcess = vi.fn(
     async (
       _method: string,
@@ -343,7 +343,7 @@ function createQueueOutcomeSequenceMock(
 }
 
 async function createRequesterTranscriptFixture(sessionId: string) {
-  const dir = tempDirs.make("openclaw-subagent-announce-transcript-");
+  const dir = tempDirs.make("carapace-subagent-announce-transcript-");
   const sessionKey = "agent:main:slack:channel:C123:thread:171.222";
   const storePath = path.join(dir, "agents", "main", "sessions", "sessions.json");
   fs.mkdirSync(path.dirname(storePath), { recursive: true });
@@ -380,7 +380,7 @@ async function readRequesterTranscriptMessages(fixture: {
 const longChildCompletionOutput = [
   "34/34 tests pass, clean build. Now docker repro:",
   "Root cause: the requester's announce delivery accepted a prefix-only assistant payload as delivered.",
-  "PR: https://github.com/openclaw/openclaw/pull/12345",
+  "PR: https://github.com/Exaggarate/carapace/pull/12345",
   "Verification: pnpm test src/agents/subagents/announce/subagent-announce-delivery.test.ts passed with the regression enabled.",
 ].join("\n");
 
@@ -1352,8 +1352,8 @@ describe("deliverSubagentAnnouncement active requester steering", () => {
       retryWindowMs: 500,
     },
   ] as const)("$name", async ({ outcomes, announceTimeoutMs, retryWindowMs }) => {
-    const previousTestFast = process.env.OPENCLAW_TEST_FAST;
-    process.env.OPENCLAW_TEST_FAST = "1";
+    const previousTestFast = process.env.CARAPACE_TEST_FAST;
+    process.env.CARAPACE_TEST_FAST = "1";
     try {
       // Compaction remains retryable beyond the backoff schedule, but each
       // attempt must receive only the remaining delivery-timeout window.
@@ -1378,9 +1378,9 @@ describe("deliverSubagentAnnouncement active requester steering", () => {
       }
     } finally {
       if (previousTestFast === undefined) {
-        delete process.env.OPENCLAW_TEST_FAST;
+        delete process.env.CARAPACE_TEST_FAST;
       } else {
-        process.env.OPENCLAW_TEST_FAST = previousTestFast;
+        process.env.CARAPACE_TEST_FAST = previousTestFast;
       }
     }
   });
@@ -1613,7 +1613,7 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
           source: { type: "url" as const, url: "/api/chat/media/outgoing/generated.png" },
         },
       ],
-      __openclaw: { seq: 2 },
+      __carapace: { seq: 2 },
     };
     expect(
       buildSessionHistorySnapshot({ rawMessages: [...rawMessages, assistantReply] }).history
@@ -1622,8 +1622,8 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
   });
 
   it("waits through compaction on the completion handoff wake (86566)", async () => {
-    const previousTestFast = process.env.OPENCLAW_TEST_FAST;
-    process.env.OPENCLAW_TEST_FAST = "1";
+    const previousTestFast = process.env.CARAPACE_TEST_FAST;
+    process.env.CARAPACE_TEST_FAST = "1";
     try {
       // The generated-completion active wake (expectsCompletionMessage) must also
       // wait through a compacting run and re-steer the same wake instead of
@@ -1646,9 +1646,9 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
       expect(callGateway).not.toHaveBeenCalled();
     } finally {
       if (previousTestFast === undefined) {
-        delete process.env.OPENCLAW_TEST_FAST;
+        delete process.env.CARAPACE_TEST_FAST;
       } else {
-        process.env.OPENCLAW_TEST_FAST = previousTestFast;
+        process.env.CARAPACE_TEST_FAST = previousTestFast;
       }
     }
   });
@@ -3051,8 +3051,8 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
   });
 
   it("persists fallback-steered completion provenance after the requester session rotates", async () => {
-    const previousTestFast = process.env.OPENCLAW_TEST_FAST;
-    process.env.OPENCLAW_TEST_FAST = "1";
+    const previousTestFast = process.env.CARAPACE_TEST_FAST;
+    process.env.CARAPACE_TEST_FAST = "1";
     try {
       const transcriptA = await createRequesterTranscriptFixture("requester-session-direct");
       const transcriptB = await createRequesterTranscriptFixture("requester-session-fallback");
@@ -3141,7 +3141,7 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
       const assistantReply = {
         role: "assistant" as const,
         content: [{ type: "text" as const, text: "visible final reply" }],
-        __openclaw: { seq: 2 },
+        __carapace: { seq: 2 },
       };
       const history = buildSessionHistorySnapshot({
         rawMessages: [...rawMessages, assistantReply],
@@ -3150,9 +3150,9 @@ describe("deliverSubagentAnnouncement completion delivery", () => {
       expect(JSON.stringify(history)).not.toContain("child done");
     } finally {
       if (previousTestFast === undefined) {
-        delete process.env.OPENCLAW_TEST_FAST;
+        delete process.env.CARAPACE_TEST_FAST;
       } else {
-        process.env.OPENCLAW_TEST_FAST = previousTestFast;
+        process.env.CARAPACE_TEST_FAST = previousTestFast;
       }
     }
   });

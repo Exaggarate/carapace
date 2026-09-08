@@ -1,6 +1,6 @@
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime";
-import type { OpenClawPluginApi } from "./api.js";
+import { parseStrictPositiveInteger } from "carapace/plugin-sdk/number-runtime";
+import { defaultRuntime } from "carapace/plugin-sdk/runtime";
+import type { CarapacePluginApi } from "./api.js";
 import { isMemoryMachineOutput } from "./cli-output-mode.js";
 import type { MemoryConfig } from "./config.js";
 import type { Embeddings } from "./embeddings.js";
@@ -105,7 +105,7 @@ export function parseMemoryCliFilter(rawValue: unknown): MemoryQueryFilter | und
 }
 
 export function registerMemoryCli(
-  api: OpenClawPluginApi,
+  api: CarapacePluginApi,
   db: MemoryDB,
   embeddings: Embeddings,
   resolveCliAgentId: (rawAgentId: unknown) => string,

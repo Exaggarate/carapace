@@ -1,6 +1,6 @@
 // Tool warning tests ensure failed actions remain visible without exposing
 // verbose execution details unless the operator explicitly requests them.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { makeAssistantMessageFixture } from "../../test-helpers/assistant-message-fixtures.js";
 import {
@@ -137,7 +137,7 @@ describe("buildEmbeddedRunPayloads tool warnings", () => {
             type: "toolCall",
             id: "toolu_01",
             name: "browser",
-            arguments: { action: "search", query: "openclaw docs" },
+            arguments: { action: "search", query: "carapace docs" },
           },
         ],
       }),

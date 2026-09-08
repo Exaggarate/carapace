@@ -7,8 +7,8 @@
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import express from "express";
-import { isLoopbackHost } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isLoopbackHost } from "carapace/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { deleteBridgeAuthForPort, setBridgeAuthForPort } from "./bridge-auth-registry.js";
 import type { ResolvedBrowserConfig } from "./config.js";
 import { listenBrowserHttpServer } from "./http-listen.js";
@@ -68,7 +68,7 @@ function buildNoVncBootstrapHtml(params: ResolvedNoVncObserver): string {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="referrer" content="no-referrer" />
-  <title>OpenClaw noVNC Observer</title>
+  <title>Carapace noVNC Observer</title>
 </head>
 <body>
   <p>Opening sandbox observer...</p>

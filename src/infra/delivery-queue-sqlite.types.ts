@@ -1,5 +1,5 @@
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asPositiveSafeInteger } from "@carapace/normalization-core/number-coercion";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 
 export type DeliveryQueueCompletionRetention =
   | "permanent"

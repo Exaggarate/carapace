@@ -1,5 +1,5 @@
 // Resolves provider thinking-level policy from active plugins or plugin metadata.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "../agents/model-catalog.types.js";
 import { getCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { getPluginMetadataSnapshotCache, withPluginCache } from "./plugin-cache.js";

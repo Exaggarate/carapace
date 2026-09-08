@@ -1,7 +1,7 @@
 // Gateway config snapshot test helpers.
 // Builds config snapshots for mocked config module state.
 import { hashConfigRaw } from "../config/io.read-helpers.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.js";
 
 /** Builds a fully-populated config snapshot for config-module mocks. */
 export function buildTestConfigSnapshot(params: {
@@ -10,7 +10,7 @@ export function buildTestConfigSnapshot(params: {
   raw: string | null;
   parsed: unknown;
   valid: boolean;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   issues: ConfigFileSnapshot["issues"];
   warnings?: ConfigFileSnapshot["warnings"];
   legacyIssues: ConfigFileSnapshot["legacyIssues"];

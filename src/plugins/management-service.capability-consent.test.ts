@@ -177,7 +177,7 @@ describe("managed plugin capability consent", () => {
     createColdPluginFixture({
       rootDir,
       pluginId: "diffs",
-      packageName: "@openclaw/diffs",
+      packageName: "@carapace/diffs",
       manifest: { providers: [], channels: [], channelConfigs: {}, providerAuthChoices: [] },
     });
     return rootDir;
@@ -186,15 +186,15 @@ describe("managed plugin capability consent", () => {
   const officialSources: PluginInstallRecord[] = [
     {
       source: "npm",
-      spec: "@openclaw/diffs@1.0.0",
-      resolvedName: "@openclaw/diffs",
-      resolvedSpec: "@openclaw/diffs@1.0.0",
+      spec: "@carapace/diffs@1.0.0",
+      resolvedName: "@carapace/diffs",
+      resolvedSpec: "@carapace/diffs@1.0.0",
       integrity: "sha512-official-artifact",
     },
     {
       source: "clawhub",
-      spec: "clawhub:@openclaw/diffs@1.0.0",
-      clawhubPackage: "@openclaw/diffs",
+      spec: "clawhub:@carapace/diffs@1.0.0",
+      clawhubPackage: "@carapace/diffs",
       clawhubUrl: "https://clawhub.ai",
       clawhubChannel: "official",
       integrity: "sha256-official-artifact",
@@ -311,7 +311,7 @@ describe("managed plugin capability consent", () => {
     const handler = createManagedPluginArtifactConsentHandler({
       config: {},
       source: sourceRecord?.source ?? "npm",
-      spec: sourceRecord?.spec ?? "@openclaw/diffs",
+      spec: sourceRecord?.spec ?? "@carapace/diffs",
     });
     await expect(
       handler.onBeforePluginArtifactCommit({
@@ -365,9 +365,9 @@ describe("managed plugin capability consent", () => {
     };
     const env = {
       HOME: rootDir,
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
     };
     const { index, manifestRegistry } = loadInstalledPluginIndexWithDiscovery({
       config,
@@ -472,7 +472,7 @@ describe("managed plugin capability consent", () => {
       path.join(rootDir, "package.json"),
       JSON.stringify({
         name: "community-plugin",
-        openclaw: { extensions: ["./a/first.cjs", "./b/second.cjs"] },
+        carapace: { extensions: ["./a/first.cjs", "./b/second.cjs"] },
       }),
     );
     const config = {
@@ -486,9 +486,9 @@ describe("managed plugin capability consent", () => {
     };
     const env = {
       HOME: rootDir,
-      OPENCLAW_STATE_DIR: path.join(rootDir, "state"),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+      CARAPACE_STATE_DIR: path.join(rootDir, "state"),
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
     };
     mocks.records = { "community-plugin": record };
     const { index, manifestRegistry } = loadInstalledPluginIndexWithDiscovery({

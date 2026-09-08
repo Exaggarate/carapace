@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginServiceContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+  CarapacePluginApi,
+  CarapacePluginServiceContext,
+} from "carapace/plugin-sdk/plugin-entry";
 import type { TeamReportsConfig } from "./config.js";
 import { DAY_MS, describePeriod } from "./periods.js";
 import {
@@ -77,8 +77,8 @@ export class TeamReportsScheduler {
       config: TeamReportsConfig;
       resolved: ResolvedTeamReportsConfig;
       store: TeamReportsStore;
-      llm: OpenClawPluginApi["runtime"]["llm"];
-      context: Pick<OpenClawPluginServiceContext, "logger" | "serviceHealth">;
+      llm: CarapacePluginApi["runtime"]["llm"];
+      context: Pick<CarapacePluginServiceContext, "logger" | "serviceHealth">;
       sources?: ReportSourceFactory;
     },
   ) {

@@ -158,7 +158,7 @@ describe("upgrade survivor mobile pairing client", () => {
     expect(
       buildDeviceAuthCompatibilityPayloadV2({
         deviceId: "dev-1",
-        clientId: "openclaw-ios",
+        clientId: "carapace-ios",
         clientMode: "ui",
         role: "operator",
         scopes: ["operator.read", "operator.write"],
@@ -167,7 +167,7 @@ describe("upgrade survivor mobile pairing client", () => {
         nonce: "nonce-1",
       }),
     ).toBe(
-      "v2|dev-1|openclaw-ios|ui|operator|operator.read,operator.write|1700000000001|operator-token|nonce-1",
+      "v2|dev-1|carapace-ios|ui|operator|operator.read,operator.write|1700000000001|operator-token|nonce-1",
     );
   });
 
@@ -600,11 +600,11 @@ describe("upgrade survivor mobile pairing client", () => {
         CLIENT_PATH,
         "unknown",
         "--package-root",
-        "/tmp/openclaw-package",
+        "/tmp/carapace-package",
         "--credentials",
-        "/tmp/openclaw-credentials.json",
+        "/tmp/carapace-credentials.json",
         "--evidence",
-        "/tmp/openclaw-evidence.json",
+        "/tmp/carapace-evidence.json",
       ],
       {
         cwd: process.cwd(),
@@ -657,14 +657,14 @@ describe("upgrade survivor mobile pairing client", () => {
       'HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA="ea806575e6450e4d1efdfc72c19f04be982a1b9b"',
     );
     expect(source).toContain(
-      '[ "${OPENCLAW_DOCKER_E2E_SELECTED_SHA:-}" = "$HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA" ]',
+      '[ "${CARAPACE_DOCKER_E2E_SELECTED_SHA:-}" = "$HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA" ]',
     );
     expect(source).toContain('candidate_install_mode="historical-package-replacement"');
     expect(source).toContain(
       'npm install -g --prefix "$npm_prefix" "$update_spec" --no-fund --no-audit',
     );
     expect(source).toContain('npm_prefix="$(dirname "$(dirname "$(dirname "$live_package")")")"');
-    expect(source).not.toContain(".openclaw-mobile-stage");
+    expect(source).not.toContain(".carapace-mobile-stage");
     expect(source).not.toContain("mobile-backup");
   });
 
@@ -707,7 +707,7 @@ done
   it("passes candidate source provenance into the isolated package runner", () => {
     const source = readFileSync("scripts/e2e/upgrade-survivor-docker.sh", "utf8");
     expect(source).toContain(
-      '-e OPENCLAW_DOCKER_E2E_SELECTED_SHA="${OPENCLAW_DOCKER_E2E_SELECTED_SHA:-}"',
+      '-e CARAPACE_DOCKER_E2E_SELECTED_SHA="${CARAPACE_DOCKER_E2E_SELECTED_SHA:-}"',
     );
   });
 
@@ -803,14 +803,14 @@ run_plugin_fixture_phase fixture-phase true
           "-c",
           `set -eu
 SCENARIO="$1"
-OPENCLAW_CLAWHUB_URL=synthetic
+CARAPACE_CLAWHUB_URL=synthetic
 CLAWHUB_URL=synthetic
 ${helpers}
 phase() { printf '%s\\n' "$1"; }
 repair_update_restart_auth() { printf 'recovery-update-restart\\n'; }
 ${fixtureSetup}
 ${fixtureRecovery}
-printf 'clawhub=%s/%s\\n' "\${OPENCLAW_CLAWHUB_URL-}" "\${CLAWHUB_URL-}"
+printf 'clawhub=%s/%s\\n' "\${CARAPACE_CLAWHUB_URL-}" "\${CLAWHUB_URL-}"
 `,
           "survivor-companion-routing",
           scenario,
@@ -896,7 +896,7 @@ HISTORICAL_MOBILE_PAIRING_CANDIDATE_SHA=ea806575e6450e4d1efdfc72c19f04be982a1b9b
 SCENARIO=mobile-pairing-reconnect
 baseline_version=2026.7.1
 candidate_version=2026.8.1
-OPENCLAW_DOCKER_E2E_SELECTED_SHA="$1"
+CARAPACE_DOCKER_E2E_SELECTED_SHA="$1"
 ${functions}
 resolve_candidate_install_mode
 printf '%s\\n' "$candidate_install_mode"
@@ -914,10 +914,10 @@ printf '%s\\n' "$candidate_install_mode"
   });
 
   it("installs the historical candidate into the live npm prefix with dependency siblings", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-mobile-package-replacement-"));
+    const root = mkdtempSync(join(tmpdir(), "carapace-mobile-package-replacement-"));
     try {
       const prefix = join(root, "prefix");
-      const packageRoot = join(prefix, "lib", "node_modules", "openclaw");
+      const packageRoot = join(prefix, "lib", "node_modules", "carapace");
       const bin = join(root, "bin");
       const artifacts = join(root, "artifacts");
       mkdirSync(packageRoot, { recursive: true });
@@ -925,7 +925,7 @@ printf '%s\\n' "$candidate_install_mode"
       mkdirSync(artifacts, { recursive: true });
       writeFileSync(
         join(packageRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", version: "2026.7.1" }),
+        JSON.stringify({ name: "carapace", version: "2026.7.1" }),
       );
       const npm = join(bin, "npm");
       writeFileSync(
@@ -937,9 +937,9 @@ const args = process.argv.slice(2);
 fs.writeFileSync(process.env.NPM_ARGS_FILE, JSON.stringify(args));
 const prefix = args[args.indexOf("--prefix") + 1];
 const modules = path.join(prefix, "lib", "node_modules");
-fs.mkdirSync(path.join(modules, "openclaw"), { recursive: true });
+fs.mkdirSync(path.join(modules, "carapace"), { recursive: true });
 fs.mkdirSync(path.join(modules, "candidate-dependency"), { recursive: true });
-fs.writeFileSync(path.join(modules, "openclaw", "package.json"), JSON.stringify({name:"openclaw",version:"2026.8.1"}));
+fs.writeFileSync(path.join(modules, "carapace", "package.json"), JSON.stringify({name:"carapace",version:"2026.8.1"}));
 fs.writeFileSync(path.join(modules, "candidate-dependency", "package.json"), JSON.stringify({name:"candidate-dependency",version:"1.0.0"}));
 `,
       );
@@ -954,14 +954,14 @@ fs.writeFileSync(path.join(modules, "candidate-dependency", "package.json"), JSO
         [
           "-c",
           `set -eu
-openclaw_e2e_maybe_timeout() { shift; "$@"; }
-openclaw_e2e_print_log() { :; }
+carapace_e2e_maybe_timeout() { shift; "$@"; }
+carapace_e2e_print_log() { :; }
 package_root() { printf '%s\\n' "$TEST_PACKAGE_ROOT"; }
 candidate_update_spec() { printf '%s\\n' "$TEST_CANDIDATE_SPEC"; }
 read_installed_version() {
   node -e 'process.stdout.write(require(process.argv[1]).version)' "$TEST_PACKAGE_ROOT/package.json"
 }
-baseline_spec=openclaw@2026.7.1
+baseline_spec=carapace@2026.7.1
 baseline_version=2026.7.1
 candidate_version=2026.8.1
 CANDIDATE_KIND=tarball

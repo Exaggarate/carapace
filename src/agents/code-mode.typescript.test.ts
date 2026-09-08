@@ -4,7 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { observeWorkerActivity } from "../../test/helpers/worker-activity.js";
@@ -65,19 +65,19 @@ describe("Code Mode TypeScript execution", () => {
     {
       name: "runtime error after erased declarations",
       code: "type Ignored = string;\ninterface IgnoredToo {\n  value: number;\n}\nconst value: number = 1;\n(value as unknown as () => void)();",
-      location: /openclaw-code-mode:user\.ts:6:2/,
+      location: /carapace-code-mode:user\.ts:6:2/,
       cause: "TypeError",
     },
     {
       name: "runtime error after Unicode and erased types",
       code: 'type Ignored = string;\nconst emoji: string = "😀"; (42 as unknown as () => void)();',
-      location: /openclaw-code-mode:user\.ts:2:30/,
+      location: /carapace-code-mode:user\.ts:2:30/,
       cause: "TypeError",
     },
     {
       name: "compiler syntax error",
       code: "type Ignored = string;\nconst value: number = ;",
-      location: /openclaw-code-mode:user\.ts:2:\d+/,
+      location: /carapace-code-mode:user\.ts:2:\d+/,
       cause: "Expression expected",
     },
   ])("identifies the source of a $name", async ({ code, location, cause }) => {
@@ -91,7 +91,7 @@ describe("Code Mode TypeScript execution", () => {
     });
     expect(result).toMatchObject({ status: "failed", error: expect.stringContaining(cause) });
     expect(String(result.error)).toMatch(location);
-    expect(String(result.error)).not.toContain("openclaw-code-mode:user.js");
+    expect(String(result.error)).not.toContain("carapace-code-mode:user.js");
     expect(String(result.error)).not.toContain("controller.js");
   });
 
@@ -113,7 +113,7 @@ describe("Code Mode TypeScript execution", () => {
       value: {
         code: "tool_error",
         effectStatus: "unknown",
-        location: expect.stringMatching(/openclaw-code-mode:user\.ts:4:/),
+        location: expect.stringMatching(/carapace-code-mode:user\.ts:4:/),
       },
     });
     expect(target.execute).toHaveBeenCalledOnce();

@@ -69,7 +69,7 @@ type PendingAgentSecretInput = {
 type PendingAgentQuestion = PendingAgentGatewayQuestion | PendingAgentSecretInput;
 
 const pendingAgentQuestions = resolveGlobalMap<string, PendingAgentQuestion>(
-  Symbol.for("openclaw.pendingAgentQuestions"),
+  Symbol.for("carapace.pendingAgentQuestions"),
   (questions) => {
     const error = new Error("gateway lifecycle ended before question registration completed");
     for (const state of questions.values()) {

@@ -2,7 +2,7 @@
  * Settles prompt dispatch, stream cleanup, and result projection.
  * It may assume stream runtime preparation and session state are ready.
  */
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   mergeAgentRunAttemptTerminal,
   projectAgentRunAttemptTerminal,
@@ -38,7 +38,7 @@ import type { EmbeddedAttemptExecutionState, EmbeddedRunAttemptParams } from "./
 
 /** Runs prompt dispatch, stream settlement, cleanup, and result projection. */
 
-const FAILED_PROMPT_MEDIA_NOTE_TYPE = "openclaw.system-note";
+const FAILED_PROMPT_MEDIA_NOTE_TYPE = "carapace.system-note";
 const FAILED_PROMPT_MEDIA_NOTE_SOURCE = "prompt-image-hydration";
 
 type StreamCleanupInput = {

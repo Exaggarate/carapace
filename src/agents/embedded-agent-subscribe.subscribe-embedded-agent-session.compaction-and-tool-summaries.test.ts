@@ -1,5 +1,5 @@
 // Compaction retry state, fenced retry output, and tool summaries.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { onAgentEvent } from "../infra/agent-events.js";
@@ -173,10 +173,10 @@ describe("synchronous context accounting", () => {
       } satisfies AgentSessionEvent);
       emit({ type: "message_end", message: after });
       for (const model of ["delivery-mirror", "gateway-injected"]) {
-        const synthetic = { ...accountingAssistant(99_000), provider: "openclaw", model };
+        const synthetic = { ...accountingAssistant(99_000), provider: "carapace", model };
         emit({ type: "message_start", message: synthetic });
         emit({ type: "message_end", message: synthetic });
-        const withoutUsage = { role: "assistant", provider: "openclaw", model };
+        const withoutUsage = { role: "assistant", provider: "carapace", model };
         emit({ type: "message_end", message: withoutUsage });
         expect(withoutUsage).not.toHaveProperty("usage");
       }
@@ -381,7 +381,7 @@ describe("canvas presenter summaries", () => {
       toolCallId: "tool-canvas-1",
       args: {
         action: "present",
-        target: "/__openclaw__/canvas/documents/widget/index.html",
+        target: "/__carapace__/canvas/documents/widget/index.html",
       },
     });
 
@@ -392,7 +392,7 @@ describe("canvas presenter summaries", () => {
     const payload = onToolResult.mock.calls.at(0)?.[0];
     expect(payload.text).toContain("🖼️");
     expect(payload.text).toContain("Canvas");
-    expect(payload.text).toContain("/__openclaw__/canvas/documents/widget/index.html");
+    expect(payload.text).toContain("/__carapace__/canvas/documents/widget/index.html");
   });
   it("skips tool summaries when shouldEmitToolResult is false", () => {
     const onToolResult = vi.fn();

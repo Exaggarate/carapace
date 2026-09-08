@@ -22,9 +22,9 @@ describe("Control UI focus locations", () => {
     ],
     [
       "base-path dashboard",
-      "/openclaw/focus/dashboard/roboclaw/the-daily-claw-6d7c9ccb/",
-      "/openclaw",
-      "/openclaw/dashboard/roboclaw/the-daily-claw-6d7c9ccb",
+      "/carapace/focus/dashboard/roboclaw/the-daily-claw-6d7c9ccb/",
+      "/carapace",
+      "/carapace/dashboard/roboclaw/the-daily-claw-6d7c9ccb",
     ],
   ])("parses %s through the underlying dashboard route", (_name, pathname, basePath, routePath) => {
     expect(parseControlUiFocusLocation(pathname, basePath)).toEqual({
@@ -117,10 +117,10 @@ describe("Control UI focus locations", () => {
 
   it("infers focus-aware base paths without overriding an explicit base", () => {
     expect(inferControlUiFocusBasePath("/focus/terminal")).toBe("");
-    expect(inferControlUiFocusBasePath("/openclaw/focus/desktop")).toBe("/openclaw");
+    expect(inferControlUiFocusBasePath("/carapace/focus/desktop")).toBe("/carapace");
     expect(inferControlUiFocusBasePath("/company/focus/focus/terminal")).toBe("/company/focus");
     expect(inferControlUiFocusBasePath("/focused/terminal")).toBeNull();
-    expect(parseControlUiFocusLocation("/openclaw/focus/terminal", "/other")).toBeNull();
+    expect(parseControlUiFocusLocation("/carapace/focus/terminal", "/other")).toBeNull();
   });
 
   it("passes dashboard search and hash through to the canonical route loader", () => {
@@ -155,11 +155,11 @@ describe("buildControlUiFocusPath", () => {
     ],
     [
       "base-path dashboard with suffix",
-      { kind: "dashboard", path: "/openclaw/dashboard/roboclaw/main?catalog=beam#pane" },
-      "/openclaw/",
-      "/openclaw/focus/dashboard/roboclaw/main?catalog=beam#pane",
+      { kind: "dashboard", path: "/carapace/dashboard/roboclaw/main?catalog=beam#pane" },
+      "/carapace/",
+      "/carapace/focus/dashboard/roboclaw/main?catalog=beam#pane",
     ],
-    ["terminal", { kind: "terminal" }, "/openclaw", "/openclaw/focus/terminal"],
+    ["terminal", { kind: "terminal" }, "/carapace", "/carapace/focus/terminal"],
     ["desktop", { kind: "desktop" }, "", "/focus/desktop"],
     [
       "desktop source",
@@ -193,8 +193,8 @@ describe("buildControlUiFocusPath", () => {
     [
       "empty values",
       { kind: "desktop", source: " ", session: "" },
-      "/openclaw",
-      "/openclaw/focus/desktop",
+      "/carapace",
+      "/carapace/focus/desktop",
     ],
   ] as const)("builds %s", (_name, target, basePath, expected) => {
     expect(buildControlUiFocusPath(target, basePath)).toBe(expected);
@@ -202,7 +202,7 @@ describe("buildControlUiFocusPath", () => {
 
   it("rejects a dashboard route outside the configured base path", () => {
     expect(
-      buildControlUiFocusPath({ kind: "dashboard", path: "/dashboard/roboclaw/main" }, "/openclaw"),
+      buildControlUiFocusPath({ kind: "dashboard", path: "/dashboard/roboclaw/main" }, "/carapace"),
     ).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 // Lmstudio provider module implements model/runtime integration.
-import { createAsyncLock } from "openclaw/plugin-sdk/async-lock-runtime";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/logging-core";
+import { createAsyncLock } from "carapace/plugin-sdk/async-lock-runtime";
+import { toErrorObject } from "carapace/plugin-sdk/error-runtime";
+import { createSubsystemLogger } from "carapace/plugin-sdk/logging-core";
 import {
   buildRemoteBaseUrlPolicy,
   createRemoteEmbeddingProvider,
@@ -9,10 +9,10 @@ import {
   normalizeEmbeddingModelWithPrefixes,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderCreateOptions,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { resolveMemorySecretInputString } from "openclaw/plugin-sdk/memory-core-host-secret";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { formatErrorMessage, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
+import { resolveMemorySecretInputString } from "carapace/plugin-sdk/memory-core-host-secret";
+import { normalizeProviderId } from "carapace/plugin-sdk/provider-model-shared";
+import { formatErrorMessage, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import { LMSTUDIO_DEFAULT_EMBEDDING_MODEL, LMSTUDIO_PROVIDER_ID } from "./defaults.js";
 import {
   fetchLmstudioModels,

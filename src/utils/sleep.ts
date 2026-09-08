@@ -1,5 +1,5 @@
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { sleepWithAbort } from "@openclaw/retry";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
+import { sleepWithAbort } from "@carapace/retry";
 import { createAbortError } from "../infra/abort-signal.js";
 
 /** Promise-based sleep that clamps timer inputs through the shared timeout resolver. */

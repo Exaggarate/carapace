@@ -3,21 +3,21 @@ import { cancelResponseReaderSoon } from "../../../lib/bounded-response.mjs";
 import { readPositiveIntEnv, readTcpPortEnv } from "../env-limits.mjs";
 
 const portText = process.env.PORT;
-const token = process.env.OPENCLAW_GATEWAY_TOKEN;
+const token = process.env.CARAPACE_GATEWAY_TOKEN;
 const backendModel = process.env.MODEL_REF || "openai/gpt-5.4-mini";
 
-const timeoutSeconds = readPositiveIntEnv("OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", 180);
-const maxBodyBytes = readPositiveIntEnv("OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", 1048576);
+const timeoutSeconds = readPositiveIntEnv("CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS", 180);
+const maxBodyBytes = readPositiveIntEnv("CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES", 1048576);
 
 if (!portText || !token) {
-  throw new Error("missing PORT/OPENCLAW_GATEWAY_TOKEN");
+  throw new Error("missing PORT/CARAPACE_GATEWAY_TOKEN");
 }
 const port = readTcpPortEnv("PORT", portText);
 if (!Number.isFinite(timeoutSeconds) || timeoutSeconds <= 0) {
-  throw new Error(`invalid OPENCLAW_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: ${timeoutSeconds}`);
+  throw new Error(`invalid CARAPACE_OPENAI_CHAT_TOOLS_TIMEOUT_SECONDS: ${timeoutSeconds}`);
 }
 if (!Number.isFinite(maxBodyBytes) || maxBodyBytes <= 0) {
-  throw new Error(`invalid OPENCLAW_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: ${maxBodyBytes}`);
+  throw new Error(`invalid CARAPACE_OPENAI_CHAT_TOOLS_MAX_BODY_BYTES: ${maxBodyBytes}`);
 }
 
 async function readResponseChunk(reader, timeoutPromise, markCanceled) {
@@ -103,10 +103,10 @@ try {
       headers: {
         authorization: `Bearer ${token}`,
         "content-type": "application/json",
-        "x-openclaw-model": backendModel,
+        "x-carapace-model": backendModel,
       },
       body: JSON.stringify({
-        model: "openclaw",
+        model: "carapace",
         stream: false,
         messages: [
           {

@@ -2,13 +2,13 @@ import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
   requireFirstPostJsonRecordRequest as requireFirstRecordArg,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
+} from "carapace/plugin-sdk/provider-http-test-mocks";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 const transcodeAudioBufferToOpusMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
-  const { canonicalizeBase64 } = await import("@openclaw/media-core/base64");
+vi.mock("carapace/plugin-sdk/media-runtime", async () => {
+  const { canonicalizeBase64 } = await import("@carapace/media-core/base64");
   return {
     canonicalizeBase64,
     transcodeAudioBufferToOpus: transcodeAudioBufferToOpusMock,
@@ -100,7 +100,7 @@ describe("Google speech provider", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/media-runtime");
+    vi.doUnmock("carapace/plugin-sdk/media-runtime");
     vi.resetModules();
   });
 
@@ -269,7 +269,7 @@ describe("Google speech provider", () => {
     );
   });
 
-  it("does not wrap an OpenClaw audio-profile-v1 prompt twice", async () => {
+  it("does not wrap an Carapace audio-profile-v1 prompt twice", async () => {
     const provider = buildGoogleSpeechProvider();
     const text = [
       "Synthesize speech from the TRANSCRIPT section only. Use the other sections only",
@@ -512,7 +512,7 @@ describe("Google speech provider", () => {
       const request = expectRecordFields(requireFirstRecordArg(requestMock, "Google TTS request"), {
         url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent",
       }) as { headers?: HeadersInit };
-      expect(new Headers(request.headers).get("x-goog-api-client")).toMatch(/^openclaw\//u);
+      expect(new Headers(request.headers).get("x-goog-api-client")).toMatch(/^carapace\//u);
     },
   );
 

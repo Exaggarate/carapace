@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { estimateStringChars } from "@openclaw/normalization-core/cjk-chars";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { estimateStringChars } from "@carapace/normalization-core/cjk-chars";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { z } from "zod";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import type { AgentContextPruningConfig } from "../../config/types.agent-defaults.js";
@@ -923,7 +923,7 @@ export function restoreCacheTtlToolResultProjections(
     if (entry?.type === "reset") {
       return;
     }
-    if (entry?.type !== "custom" || entry.customType !== "openclaw.cache-ttl") {
+    if (entry?.type !== "custom" || entry.customType !== "carapace.cache-ttl") {
       continue;
     }
     const parsed = cacheTtlProjectionSnapshotSchema.safeParse(entry.data);

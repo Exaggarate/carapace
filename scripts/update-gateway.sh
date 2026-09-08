@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Updates a self-hosted OpenClaw gateway that runs from this source checkout.
+# Updates a self-hosted Carapace gateway that runs from this source checkout.
 #
 # Reference workflow for team-operated servers (see docs/install/updating.md).
-# Simple installs should prefer `openclaw update` / `openclaw update --channel
+# Simple installs should prefer `carapace update` / `carapace update --channel
 # dev`; this script exists for checkouts that additionally need to:
 #   - preserve a local branch by rebasing it onto origin/main,
 #   - refuse all tracked local changes, including build outputs,
@@ -10,9 +10,9 @@
 #   - restart a custom service unit.
 #
 # Environment:
-#   OPENCLAW_UPDATE_RESTART_CMD  restart command (default: openclaw gateway restart)
+#   CARAPACE_UPDATE_RESTART_CMD  restart command (default: carapace gateway restart)
 #                                set to "" to skip the restart step
-#   OPENCLAW_UPDATE_REMOTE       git remote to update from (default: origin)
+#   CARAPACE_UPDATE_REMOTE       git remote to update from (default: origin)
 set -euo pipefail
 
 pnpm_dir=""
@@ -35,7 +35,7 @@ if ! command -v corepack >/dev/null 2>&1; then
   log "Corepack is required. Install a Corepack version compatible with the target pnpm pin, then retry."
   exit 1
 fi
-pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-pnpm.XXXXXX")"
+pnpm_dir="$(mktemp -d "${TMPDIR:-/tmp}/carapace-pnpm.XXXXXX")"
 if ! corepack enable --install-directory "$pnpm_dir" pnpm || [ ! -x "$pnpm_dir/pnpm" ]; then
   log "Corepack could not create scoped pnpm shims. Repair Corepack before retrying; no Git update was attempted."
   exit 1
@@ -49,7 +49,7 @@ run_pnpm() (
   "$pnpm_dir/pnpm" "$@"
 )
 
-remote="${OPENCLAW_UPDATE_REMOTE:-origin}"
+remote="${CARAPACE_UPDATE_REMOTE:-origin}"
 
 # Never update over an in-progress git operation: aborting or rebasing on top
 # of an operator's paused rebase/merge would discard their progress.
@@ -139,14 +139,14 @@ done
 # The build owns cleanup under its checkout-local artifact lock. Deleting here
 # would race declaration writers and readers before that ownership is acquired.
 # Match CLI updates: build runtime artifacts unless declarations were explicitly requested.
-OPENCLAW_UPDATE_IN_PROGRESS=1 run_pnpm build
+CARAPACE_UPDATE_IN_PROGRESS=1 run_pnpm build
 
-restart_cmd="${OPENCLAW_UPDATE_RESTART_CMD-openclaw gateway restart}"
+restart_cmd="${CARAPACE_UPDATE_RESTART_CMD-carapace gateway restart}"
 if [ -n "$restart_cmd" ]; then
   log "restarting gateway: $restart_cmd"
   bash -c "$restart_cmd"
 else
-  log "restart skipped (OPENCLAW_UPDATE_RESTART_CMD is empty)"
+  log "restart skipped (CARAPACE_UPDATE_RESTART_CMD is empty)"
 fi
 
 log "OK $(git rev-parse --short HEAD) ($branch)"

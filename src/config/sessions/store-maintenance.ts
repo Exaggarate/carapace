@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { parseByteSize } from "../../cli/parse-bytes.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -181,7 +181,7 @@ function resolveHighWaterBytes(
 }
 
 /**
- * Resolve maintenance settings from openclaw.json (`session.maintenance`).
+ * Resolve maintenance settings from carapace.json (`session.maintenance`).
  * Falls back to built-in defaults when config is missing or unset.
  */
 export function resolveMaintenanceConfigFromInput(

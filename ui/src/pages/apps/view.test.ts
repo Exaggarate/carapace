@@ -7,23 +7,23 @@ import { buildMacGatewayLaunchUrl } from "./gateway-launch.ts";
 import { renderApps } from "./view.ts";
 
 const EXPECTED_EXTERNAL_HREFS = [
-  "https://apps.apple.com/app/openclaw-ai-that-does-things/id6780396132",
-  "https://docs.openclaw.ai/platforms/ios",
-  "https://play.google.com/store/apps/details?id=ai.openclaw.app",
-  "https://docs.openclaw.ai/platforms/android",
-  "https://docs.openclaw.ai/platforms/ios",
-  "https://docs.openclaw.ai/platforms/android",
-  "https://github.com/openclaw/openclaw/releases",
-  "https://docs.openclaw.ai/platforms/macos",
-  "https://github.com/openclaw/openclaw-windows-node/releases/latest",
-  "https://docs.openclaw.ai/platforms/windows",
-  "https://github.com/openclaw/openclaw/releases",
-  "https://docs.openclaw.ai/platforms/linux",
-  "https://chromewebstore.google.com/detail/openclaw/kcdjddhmeafeomebliikmbpblkmkfoig",
-  "https://docs.openclaw.ai/tools/chrome-extension",
+  "https://apps.apple.com/app/carapace-ai-that-does-things/id6780396132",
+  "https://github.com/Exaggarate/carapace",
+  "https://play.google.com/store/apps/details?id=ai.carapace.app",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace/releases",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace/carapace-windows-node/releases/latest",
+  "https://github.com/Exaggarate/carapace",
+  "https://github.com/Exaggarate/carapace/releases",
+  "https://github.com/Exaggarate/carapace",
+  "https://chromewebstore.google.com/detail/carapace/kcdjddhmeafeomebliikmbpblkmkfoig",
+  "https://github.com/Exaggarate/carapace",
   "https://clawhub.ai",
   "https://discord.gg/clawd",
-  "https://docs.openclaw.ai",
+  "https://github.com/Exaggarate/carapace",
 ];
 
 describe("renderApps", () => {
@@ -41,7 +41,7 @@ describe("renderApps", () => {
   it("renders the hero and one heading per section", () => {
     const container = renderIntoContainer();
     expect(container.querySelector(".apps-hero__title")?.textContent).toBe(
-      "Take OpenClaw everywhere",
+      "Take Carapace everywhere",
     );
     expect(container.querySelector(".apps-hero__tagline")?.textContent).toContain(
       "Companion apps for your phone",
@@ -90,7 +90,7 @@ describe("renderApps", () => {
       }),
       container,
     );
-    const launch = container.querySelector<HTMLAnchorElement>("a[href^='openclaw:']");
+    const launch = container.querySelector<HTMLAnchorElement>("a[href^='carapace:']");
     expect(launch?.textContent?.trim()).toBe("Open in Mac app");
     const url = new URL(launch!.href);
     expect(url.host).toBe("gateway");
@@ -100,7 +100,7 @@ describe("renderApps", () => {
     const card = launch?.closest(".apps-card");
     expect(card?.querySelector("h3")?.textContent).toBe("macOS");
     expect(
-      card?.querySelector("a[href='https://github.com/openclaw/openclaw/releases']")?.textContent?.trim(),
+      card?.querySelector("a[href='https://github.com/Exaggarate/carapace/releases']")?.textContent?.trim(),
     ).toBe("Download");
   });
 

@@ -1,13 +1,13 @@
 // Gateway startup auth preparation.
 // Merges auth overrides, resolves secret refs, validates weak secrets, and generates fallbacks.
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   copyConfigResolutionFactsExcept,
   getConfigResolutionFacts,
 } from "../config/resolution-facts.js";
 import type { GatewayAuthConfig, GatewayTailscaleConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   resolveGatewayPasswordSecretRefValue,
   resolveGatewayTokenSecretRefValue,
@@ -19,7 +19,7 @@ import { trimToUndefined } from "./credentials.js";
 import { assertGatewayAuthNotKnownWeak } from "./known-weak-gateway-secrets.js";
 
 const HOOKS_GATEWAY_AUTH_REUSE_WARNING =
-  "Security warning: hooks.token matches active Gateway shared-secret auth. Startup continues for compatibility; rotate hooks.token or Gateway auth. Run openclaw security audit for a full report, and run openclaw doctor --fix when the reused hooks.token is persisted in config.";
+  "Security warning: hooks.token matches active Gateway shared-secret auth. Startup continues for compatibility; rotate hooks.token or Gateway auth. Run carapace security audit for a full report, and run carapace doctor --fix when the reused hooks.token is persisted in config.";
 
 /** Merge sparse runtime auth overrides into persisted Gateway auth config. */
 export function mergeGatewayAuthConfig(
@@ -70,7 +70,7 @@ export function mergeGatewayTailscaleConfig(
 }
 
 function resolveGatewayAuthFromConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
@@ -98,7 +98,7 @@ function findActiveGatewaySharedSecret(auth: ResolvedGatewayAuth): string {
 }
 
 function warnHooksTokenReuseGatewayAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   auth: ResolvedGatewayAuth;
   warn?: (message: string) => void;
 }): void {
@@ -114,11 +114,11 @@ function warnHooksTokenReuseGatewayAuth(params: {
 
 /** Check every source that can satisfy token auth before startup generates one. */
 function hasGatewayTokenCandidate(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
 }): boolean {
-  const envToken = trimToUndefined(params.env.OPENCLAW_GATEWAY_TOKEN);
+  const envToken = trimToUndefined(params.env.CARAPACE_GATEWAY_TOKEN);
   if (envToken) {
     return true;
   }
@@ -152,7 +152,7 @@ function hasGatewayPasswordOverrideCandidate(params: {
 
 /** Ensure startup has effective Gateway auth, generating only an ephemeral token if needed. */
 export async function ensureGatewayStartupAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
@@ -164,7 +164,7 @@ export async function ensureGatewayStartupAuth(params: {
   persist?: boolean;
   baseHash?: string;
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   auth: ResolvedGatewayAuth;
   generatedToken?: string;
   persistedGeneratedToken: boolean;
@@ -191,7 +191,7 @@ export async function ensureGatewayStartupAuth(params: {
       hasPasswordOverride:
         hasGatewayPasswordOverrideCandidate({ authOverride: params.authOverride }) ||
         passwordAlreadySubstituted,
-      hasTokenFallback: Boolean(trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN)),
+      hasTokenFallback: Boolean(trimToUndefined(env.CARAPACE_GATEWAY_TOKEN)),
       hasPasswordFallback: Boolean(
         credentialPlan.envPassword ||
         credentialPlan.localPassword.value ||
@@ -208,7 +208,7 @@ export async function ensureGatewayStartupAuth(params: {
       hasTokenOverride:
         hasGatewayTokenOverrideCandidate({ authOverride: params.authOverride }) ||
         tokenAlreadySubstituted,
-      hasPasswordFallback: Boolean(trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD)),
+      hasPasswordFallback: Boolean(trimToUndefined(env.CARAPACE_GATEWAY_PASSWORD)),
       hasTokenFallback: hasGatewayTokenCandidate({
         cfg: params.cfg,
         env,
@@ -258,7 +258,7 @@ export async function ensureGatewayStartupAuth(params: {
   }
 
   const generatedToken = crypto.randomBytes(24).toString("hex");
-  const nextCfg: OpenClawConfig = {
+  const nextCfg: CarapaceConfig = {
     ...params.cfg,
     gateway: {
       ...params.cfg.gateway,

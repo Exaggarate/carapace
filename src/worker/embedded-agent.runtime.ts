@@ -28,7 +28,7 @@ import { SettingsManager } from "../agents/sessions/settings-manager.js";
 import { resolveToolLoopDetectionConfig } from "../agents/tool-loop-detection-config.js";
 import { wrapToolWithGatewayCallerIdentity } from "../agents/tools/gateway-caller-context.js";
 import { DEFAULT_AGENTS_FILENAME, loadWorkspaceBootstrapFiles } from "../agents/workspace.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { AssistantMessage, AssistantMessageEventStreamLike } from "../llm/types.js";
 import { materializeSkillResources } from "../skills/runtime/resources.js";
 import { createWorkerBrowserToolRuntime, type WorkerBrowserRuntime } from "./browser-runtime.js";
@@ -107,7 +107,7 @@ type RunWorkerEmbeddedTurnParams = {
   signal?: AbortSignal;
 };
 
-const WORKER_TOOL_CONFIG = { plugins: { enabled: false } } satisfies OpenClawConfig;
+const WORKER_TOOL_CONFIG = { plugins: { enabled: false } } satisfies CarapaceConfig;
 
 export async function runWorkerEmbeddedTurn(params: RunWorkerEmbeddedTurnParams): Promise<void> {
   const resources = params.skillResources

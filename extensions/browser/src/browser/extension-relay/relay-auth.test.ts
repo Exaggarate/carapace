@@ -10,9 +10,9 @@ let secretPath = "";
 let env: NodeJS.ProcessEnv;
 
 beforeEach(() => {
-  stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-relay-auth-")));
+  stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "carapace-relay-auth-")));
   secretPath = path.join(stateDir, "credentials", "browser-extension-relay.secret");
-  env = { OPENCLAW_STATE_DIR: stateDir };
+  env = { CARAPACE_STATE_DIR: stateDir };
 });
 afterEach(() => {
   vi.restoreAllMocks();
@@ -129,10 +129,10 @@ describe("extension relay host-local secret", () => {
   it("gives different hosts (state dirs) different secrets", async () => {
     const a = await ensureExtensionRelayToken(env);
     const otherDir = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-relay-auth-2-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "carapace-relay-auth-2-")),
     );
     try {
-      const b = await ensureExtensionRelayToken({ OPENCLAW_STATE_DIR: otherDir });
+      const b = await ensureExtensionRelayToken({ CARAPACE_STATE_DIR: otherDir });
       expect(b).not.toBe(a);
     } finally {
       fs.rmSync(otherDir, { recursive: true, force: true });

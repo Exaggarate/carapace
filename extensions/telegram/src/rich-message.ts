@@ -1,6 +1,6 @@
 import type { Bot } from "grammy";
 import type { InputRichMessage, ReplyParameters } from "grammy/types";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
+import type { MarkdownTableMode } from "carapace/plugin-sdk/config-contracts";
 import {
   inputRichBlocksToPlainText,
   type InputRichBlock,

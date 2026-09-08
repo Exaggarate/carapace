@@ -5,15 +5,15 @@ import path from "node:path";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "carapace/plugin-sdk/agent-runtime";
+import { createCapturedPluginRegistration } from "carapace/plugin-sdk/plugin-test-runtime";
 import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
-import { expectExplicitVideoGenerationCapabilities } from "openclaw/plugin-sdk/provider-test-contracts";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/provider-http-test-mocks";
+import { expectExplicitVideoGenerationCapabilities } from "carapace/plugin-sdk/provider-test-contracts";
+import { closeCarapaceAgentDatabasesForTest } from "carapace/plugin-sdk/sqlite-runtime-testing";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 const {
@@ -148,7 +148,7 @@ describe("openai video generation provider", () => {
   });
 
   it("does not advertise video generation for OAuth-only OpenAI profiles", () => {
-    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-openai-video-auth-"));
+    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-openai-video-auth-"));
     const previousOpenAIKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;
     try {
@@ -182,7 +182,7 @@ describe("openai video generation provider", () => {
       // Saving the profile store opens the per-agent database under the temporary agent
       // dir, and clearing the snapshots does not release it, so Windows fails the removal
       // with EBUSY unless the cached handles are closed first.
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
       fs.rmSync(agentDir, { recursive: true, force: true });
     }
   });

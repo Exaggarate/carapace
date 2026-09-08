@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => {
     startOptions: vi.fn(async (startOptions) => startOptions),
   };
   const providerAuth = {
-    agentDir: vi.fn(() => "/tmp/openclaw-agent"),
+    agentDir: vi.fn(() => "/tmp/carapace-agent"),
   };
   return { authBridge, managedBinary, providerAuth };
 });
@@ -43,8 +43,8 @@ vi.mock("./managed-binary.js", async (importOriginal) => ({
   resolveManagedCodexNativeCommand: mocks.managedBinary.nativeCommand,
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-registration")>()),
+vi.mock("carapace/plugin-sdk/agent-harness-registration", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-registration")>()),
   resolveDefaultAgentDir: mocks.providerAuth.agentDir,
 }));
 
@@ -180,7 +180,7 @@ describe("listCodexAppServerModels", () => {
     const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
     harness.send({
       id: initialize.id,
-      result: { userAgent: "openclaw/0.149.0 (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0 (macOS; test)" },
     });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThanOrEqual(3));
     const list = JSON.parse(harness.writes[2] ?? "{}") as { id?: number; method?: string };
@@ -201,7 +201,7 @@ describe("listCodexAppServerModels", () => {
     const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
     harness.send({
       id: initialize.id,
-      result: { userAgent: "openclaw/0.149.0 (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0 (macOS; test)" },
     });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThanOrEqual(3));
     const list = JSON.parse(harness.writes[2] ?? "{}") as { id?: number; method?: string };
@@ -270,7 +270,7 @@ describe("listCodexAppServerModels", () => {
         onWrite(line, send) {
           const request = JSON.parse(line) as { id: number; method: string };
           if (request.method === "initialize") {
-            send({ id: request.id, result: { userAgent: "openclaw/0.149.0 (macOS; test)" } });
+            send({ id: request.id, result: { userAgent: "carapace/0.149.0 (macOS; test)" } });
           } else if (request.method === "model/list") {
             send({
               id: request.id,
@@ -321,7 +321,7 @@ describe("listCodexAppServerModels", () => {
     const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
     harness.send({
       id: initialize.id,
-      result: { userAgent: "openclaw/0.149.0 (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0 (macOS; test)" },
     });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThanOrEqual(3));
     const firstList = JSON.parse(harness.writes[2] ?? "{}") as {
@@ -401,7 +401,7 @@ describe("listCodexAppServerModels", () => {
     const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
     harness.send({
       id: initialize.id,
-      result: { userAgent: "openclaw/0.149.0 (macOS; test)" },
+      result: { userAgent: "carapace/0.149.0 (macOS; test)" },
     });
     await vi.waitFor(() => expect(harness.writes.length).toBeGreaterThanOrEqual(3));
     const firstList = JSON.parse(harness.writes[2] ?? "{}") as { id?: number };

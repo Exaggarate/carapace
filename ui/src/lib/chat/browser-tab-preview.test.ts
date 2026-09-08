@@ -84,7 +84,7 @@ describe("browser tab previews", () => {
     const failed = { ...browserResult("failed"), isError: true };
     const running = {
       role: "assistant",
-      __openclawToolStreamLive: true,
+      __carapaceToolStreamLive: true,
       content: [
         { type: "toolcall", id: "running", name: "browser", arguments: {} },
         { type: "toolresult", id: "running", name: "browser", details: older.details },
@@ -142,8 +142,8 @@ describe("browser tab previews", () => {
       ],
     ]);
     expect(params.fetchMock.mock.calls.map(([url]) => url)).toEqual([
-      "/gateway/__openclaw__/assistant-media?source=%2Ftmp%2Ffirst.png",
-      "/gateway/__openclaw__/assistant-media?source=%2Ftmp%2Fshot.png",
+      "/gateway/__carapace__/assistant-media?source=%2Ftmp%2Ffirst.png",
+      "/gateway/__carapace__/assistant-media?source=%2Ftmp%2Fshot.png",
     ]);
   });
 

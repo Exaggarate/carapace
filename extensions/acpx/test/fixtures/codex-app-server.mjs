@@ -4,7 +4,7 @@ import readline from "node:readline";
 
 let nextRequestId = 1;
 const pending = new Map();
-const tracePath = process.env.OPENCLAW_ACPX_PROCESS_FIXTURE_TRACE;
+const tracePath = process.env.CARAPACE_ACPX_PROCESS_FIXTURE_TRACE;
 
 function trace(method) {
   if (tracePath) {
@@ -43,7 +43,7 @@ const model = {
 async function handle(method, params) {
   trace(method);
   if (method === "initialize") {
-    return { userAgent: "openclaw-acpx-process-fixture", codexHome: process.cwd() };
+    return { userAgent: "carapace-acpx-process-fixture", codexHome: process.cwd() };
   }
   if (method === "account/read") {
     return { requiresOpenaiAuth: false, account: null };

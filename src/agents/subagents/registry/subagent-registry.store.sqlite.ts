@@ -2,23 +2,23 @@
  * Persists subagent run records in the shared sqlite state database, with
  * query-bearing identity columns indexing canonical normalized payload JSON.
  */
-import { safeParseJson } from "@openclaw/normalization-core";
-import { asFiniteNumber as normalizeFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { safeParseJson } from "@carapace/normalization-core";
+import { asFiniteNumber as normalizeFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { sql, type Insertable, type Selectable, type Updateable } from "kysely";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../../state/openclaw-state-db.generated.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../../state/carapace-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabase,
+} from "../../../state/carapace-state-db.js";
 import { normalizeDeliveryContext } from "../../../utils/delivery-context.shared.js";
 import { normalizeSubagentRunState } from "./subagent-delivery-state.js";
 import type { SubagentRunReadRecord, SubagentRunRecord } from "./subagent-registry.types.js";
 
-type SubagentRunsTable = OpenClawStateKyselyDatabase["subagent_runs"];
-type SubagentRegistryDatabase = Pick<OpenClawStateKyselyDatabase, "subagent_runs">;
+type SubagentRunsTable = CarapaceStateKyselyDatabase["subagent_runs"];
+type SubagentRegistryDatabase = Pick<CarapaceStateKyselyDatabase, "subagent_runs">;
 type SubagentRunSqliteRow = Selectable<SubagentRunsTable>;
 type BoundSubagentRunRecord = Insertable<SubagentRunsTable>;
 type SubagentRunSqliteInsert = BoundSubagentRunRecord;
@@ -124,7 +124,7 @@ export function bindSubagentRunRecord(entry: SubagentRunRecord): BoundSubagentRu
 
 /** Upserts a prebound run on the exact supplied shared-state handle. */
 export function upsertSubagentRunRowInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   row: BoundSubagentRunRecord,
 ): void {
   const stateDb = getNodeSqliteKysely<SubagentRegistryDatabase>(database.db);
@@ -141,7 +141,7 @@ export function upsertSubagentRunRowInDatabase(
 
 /** Deletes one run on the exact supplied shared-state handle. */
 export function deleteSubagentRunRowInDatabase(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   runId: string,
 ): void {
   executeSqliteQuerySync(
@@ -153,7 +153,7 @@ export function deleteSubagentRunRowInDatabase(
 }
 
 export function readSubagentRun(
-  database: OpenClawStateDatabase,
+  database: CarapaceStateDatabase,
   runId: string,
 ): SubagentRunRecord | null {
   const row = executeSqliteQuerySync(
@@ -179,7 +179,7 @@ function writeSubagentRunValues(
   if (values.length === 0 && deleteRunIds?.length === 0 && retainedRunIds === undefined) {
     return;
   }
-  runOpenClawStateWriteTransaction((database) => {
+  runCarapaceStateWriteTransaction((database) => {
     const { db } = database;
     const stateDb = getNodeSqliteKysely<SubagentRegistryDatabase>(db);
     for (const row of values) {
@@ -207,7 +207,7 @@ type SubagentRegistryReadScope =
   | { kind: "child"; sessionKey: string };
 
 function readSubagentRegistryRows(scope?: SubagentRegistryReadScope): SubagentRunSqliteRow[] {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<SubagentRegistryDatabase>(db);
   let query = stateDb.selectFrom("subagent_runs").selectAll();
   if (scope?.kind === "child") {
@@ -256,7 +256,7 @@ function canonicalSubagentPayloadFilter() {
 }
 
 function readSubagentSessionListRows(): SubagentRunReadSqliteRow[] {
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openCarapaceStateDatabase();
   const stateDb = getNodeSqliteKysely<SubagentRegistryDatabase>(db);
   return executeSqliteQuerySync(
     db,

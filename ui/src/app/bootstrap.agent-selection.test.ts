@@ -1,5 +1,5 @@
-import { gatewayOriginScope } from "@openclaw/gateway-client/browser";
-import { buildControlUiSessionPath } from "@openclaw/session-url-contract";
+import { gatewayOriginScope } from "@carapace/gateway-client/browser";
+import { buildControlUiSessionPath } from "@carapace/session-url-contract";
 import type { RouteLocation } from "@openclaw/uirouter";
 import { expect, it, vi } from "vitest";
 import type { AgentsListResult } from "../api/types.ts";
@@ -13,8 +13,8 @@ import { loadGatewaySessionSelection, loadSettings, saveSettings } from "./setti
 it.each([
   { agentId: "main", savedAgentId: "work", basePath: "", suffix: "" },
   { agentId: "work", savedAgentId: "main", basePath: "", suffix: "" },
-  { agentId: "main", savedAgentId: "work", basePath: "/openclaw", suffix: "/" },
-  { agentId: "work", savedAgentId: "main", basePath: "/openclaw", suffix: "/" },
+  { agentId: "main", savedAgentId: "work", basePath: "/carapace", suffix: "/" },
+  { agentId: "work", savedAgentId: "main", basePath: "/carapace", suffix: "/" },
 ])(
   "keeps cold explicit $agentId over saved $savedAgentId at $basePath (suffix '$suffix')",
   async ({ agentId, savedAgentId, basePath, suffix }) => {
@@ -65,7 +65,7 @@ it("routes a canonical global session through its persisted agent owner", async 
       location: { pathname: "/chat", search: "", hash: "" },
       basePath: "",
       sessionKey: "global",
-      selectedAgentId: "openclaw",
+      selectedAgentId: "carapace",
       gateway: {
         snapshot: {
           phase: "connected",
@@ -90,12 +90,12 @@ it("routes a canonical global session through its persisted agent owner", async 
         scope: "global",
         agents: [
           { id: "dummy", kind: "agent" },
-          { id: "openclaw", kind: "agent" },
+          { id: "carapace", kind: "agent" },
         ],
       }),
       signal: new AbortController().signal,
     }),
-  ).resolves.toEqual({ pathname: "/chat/openclaw", search: "", hash: "" });
+  ).resolves.toEqual({ pathname: "/chat/carapace", search: "", hash: "" });
   expect(subscribe).not.toHaveBeenCalled();
 });
 
@@ -345,7 +345,7 @@ it.each([
   const previousSettings = loadSettings();
   const previousUrl = window.location.href;
   const targetGatewayUrl = `wss://native-${selectedAgentId ?? "unset"}.example`;
-  const targetSettingsKey = `openclaw.control.settings.v1:${gatewayOriginScope(targetGatewayUrl)}`;
+  const targetSettingsKey = `carapace.control.settings.v1:${gatewayOriginScope(targetGatewayUrl)}`;
   let runtime: ReturnType<typeof bootstrapApplication> | undefined;
 
   try {
@@ -362,7 +362,7 @@ it.each([
       lastActiveSessionKey: "agent:dummy:main",
       selectedAgentId: "dummy",
     });
-    window["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+    window["__CARAPACE_NATIVE_CONTROL_AUTH__"] = {
       gatewayUrl: targetGatewayUrl,
       token: "native-token",
     };
@@ -379,7 +379,7 @@ it.each([
     });
   } finally {
     runtime?.stop();
-    delete window["__OPENCLAW_NATIVE_CONTROL_AUTH__"];
+    delete window["__CARAPACE_NATIVE_CONTROL_AUTH__"];
     localStorage.removeItem(targetSettingsKey);
     window.history.replaceState({}, "", previousUrl);
     saveSettings(previousSettings);

@@ -1,8 +1,8 @@
 import { once } from "node:events";
 import { runInNewContext } from "node:vm";
 // Qa Lab tests cover server plugin behavior.
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { createRequireRecord } from "openclaw/plugin-sdk/test-fixtures";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { createRequireRecord } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { readQaMockRequestCursor } from "../shared/debug-request-cursor.js";
@@ -71,7 +71,7 @@ const QA_COMPACTION_RETRY_CODE_MODE_WRITE_RESULT = {
   replaySafe: false,
   telemetry: {
     catalogSize: 32,
-    sources: { openclaw: 32, mcp: 0, client: 0 },
+    sources: { carapace: 32, mcp: 0, client: 0 },
     counterScope: "qaFixtureScope01",
     searchCount: 0,
     describeCount: 0,
@@ -361,7 +361,7 @@ function makeWhatsAppStructuredUserInput(text: string, mediaKind?: "sticker") {
     return makeUserInput(text);
   }
   const mediaContext = [
-    "WhatsApp media: ⟦openclaw:ctx⟧",
+    "WhatsApp media: ⟦carapace:ctx⟧",
     "```json",
     JSON.stringify({ source: "whatsapp", type: "media", payload: { kind: mediaKind } }),
     "```",
@@ -385,12 +385,12 @@ const WHATSAPP_STRUCTURED_CASES = [
 ];
 
 const TEST_RUNTIME_CONTEXT_CARRIER = [
-  "OpenClaw runtime context for the immediately preceding user message.",
+  "Carapace runtime context for the immediately preceding user message.",
   "This context is runtime-generated, not user-authored. Keep internal details private.",
   "",
-  "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+  "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
   "runtime metadata",
-  "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+  "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
 ].join("\n");
 
 function makeDeveloperInput(text: string) {
@@ -415,12 +415,12 @@ const SESSIONS_SPAWN_TOOL = { type: "function", name: "sessions_spawn" } as cons
 const SESSIONS_YIELD_TOOL = { type: "function", name: "sessions_yield" } as const;
 const CODEX_DIRECT_YIELD_NAMESPACE = {
   type: "namespace",
-  name: "openclaw_direct",
+  name: "carapace_direct",
   tools: [SESSIONS_YIELD_TOOL],
 } as const;
 const CODEX_SUBAGENT_TOOL_NAMESPACE = {
   type: "namespace",
-  name: "openclaw",
+  name: "carapace",
   tools: [SESSIONS_SPAWN_TOOL, SESSIONS_YIELD_TOOL],
 } as const;
 const CODEX_CUSTOM_PATCH_TOOL = {
@@ -430,7 +430,7 @@ const CODEX_CUSTOM_PATCH_TOOL = {
 } as const;
 const CODEX_CUSTOM_PATCH_NAMESPACE = {
   type: "namespace",
-  name: "openclaw_direct",
+  name: "carapace_direct",
   tools: [CODEX_CUSTOM_PATCH_TOOL],
 } as const;
 const ANTHROPIC_GUEST_CODE_MODE_TOOLS = [
@@ -486,26 +486,26 @@ const MESSAGE_DECISION_SUPPRESSION_TEXT =
 const WHATSAPP_AGENT_REACT_PROMPT =
   "React to this WhatsApp message with thumbs up for QA action check WHATSAPP_QA_AGENT_REACT_TEST.";
 const WHATSAPP_GROUP_AGENT_REACT_PROMPT =
-  "openclawqa react to this WhatsApp group message with thumbs up for QA action check WHATSAPP_QA_GROUP_AGENT_REACT_TEST.";
+  "carapaceqa react to this WhatsApp group message with thumbs up for QA action check WHATSAPP_QA_GROUP_AGENT_REACT_TEST.";
 const WHATSAPP_AGENT_UPLOAD_TOKEN = "WHATSAPP_QA_AGENT_UPLOAD_TEST";
 const WHATSAPP_GROUP_AGENT_UPLOAD_TOKEN = "WHATSAPP_QA_GROUP_AGENT_UPLOAD_TEST";
 const WHATSAPP_AGENT_UPLOAD_PROMPT =
   `Use the WhatsApp message tool upload-file action to send a PNG with caption ${WHATSAPP_AGENT_UPLOAD_TOKEN}. ` +
   "Do not send any visible text reply after the upload.";
 const WHATSAPP_GROUP_AGENT_UPLOAD_PROMPT =
-  `openclawqa use the WhatsApp message tool upload-file action to send a PNG with caption ${WHATSAPP_GROUP_AGENT_UPLOAD_TOKEN}. ` +
+  `carapaceqa use the WhatsApp message tool upload-file action to send a PNG with caption ${WHATSAPP_GROUP_AGENT_UPLOAD_TOKEN}. ` +
   "Do not send any visible text reply after the upload.";
 const WHATSAPP_PENDING_HISTORY_QUIET_MARKER = "WHATSAPP_QA_PENDING_HISTORY_QUIET_TEST";
 const WHATSAPP_PENDING_HISTORY_CONTEXT_SENTINEL = "WHATSAPP_QA_PENDING_HISTORY_CONTEXT_ONLY_TEST";
 const WHATSAPP_PENDING_HISTORY_TRIGGER_MARKER = "WHATSAPP_QA_PENDING_HISTORY_TRIGGER_TEST";
 const WHATSAPP_PENDING_HISTORY_OK_MARKER = "WHATSAPP_QA_PENDING_HISTORY_OK_TEST";
 const WHATSAPP_PENDING_HISTORY_TRIGGER_PROMPT = [
-  "openclawqa pending history context check",
+  "carapaceqa pending history context check",
   WHATSAPP_PENDING_HISTORY_TRIGGER_MARKER,
   `Return ${WHATSAPP_PENDING_HISTORY_OK_MARKER} only if prior group context contains ${WHATSAPP_PENDING_HISTORY_CONTEXT_SENTINEL}.`,
 ].join(" ");
 const WHATSAPP_BROADCAST_TOKEN = "WHATSAPP_QA_BROADCAST_TOKEN_TEST";
-const WHATSAPP_BROADCAST_PROMPT = `openclawqa broadcast fanout check ${WHATSAPP_BROADCAST_TOKEN}`;
+const WHATSAPP_BROADCAST_PROMPT = `carapaceqa broadcast fanout check ${WHATSAPP_BROADCAST_TOKEN}`;
 const WHATSAPP_ACTIVATION_ALWAYS_MARKER = "WHATSAPP_QA_ACTIVATION_ALWAYS_TEST";
 const WHATSAPP_ACTIVATION_ALWAYS_PROMPT = `Group activation visible behavior marker ${WHATSAPP_ACTIVATION_ALWAYS_MARKER}`;
 const WHATSAPP_REPLY_TO_BOT_SEED_MARKER = "WHATSAPP_QA_REPLY_TO_BOT_SEED_TEST";
@@ -820,7 +820,7 @@ describe("qa mock openai server", () => {
     expect(outputItems(body).some((item) => item.type === "function_call")).toBe(false);
   });
 
-  it.each(["", "@openclaw ", "@sut_bot "])(
+  it.each(["", "@carapace ", "@sut_bot "])(
     "keeps final-only marker preview deltas separate from the final answer with prefix %j",
     async (prefix) => {
       const server = await startMockServer({ finalOnlyMarkerPauseMs: 1 });
@@ -1270,7 +1270,7 @@ describe("qa mock openai server", () => {
         makeUserInput(prompt),
         makeToolOutputWithCallId(
           "call_mock_read_1",
-          JSON.stringify({ text: "QA mission: understand this OpenClaw repo." }),
+          JSON.stringify({ text: "QA mission: understand this Carapace repo." }),
         ),
       ],
     });
@@ -1289,7 +1289,7 @@ describe("qa mock openai server", () => {
         makeUserInput("Read QA_KICKOFF_TASK.md, then summarize what you found."),
         makeToolOutputWithCallId(
           "call_mock_read_1",
-          JSON.stringify({ text: "QA mission: understand this OpenClaw repo." }),
+          JSON.stringify({ text: "QA mission: understand this Carapace repo." }),
         ),
       ],
     });
@@ -1405,28 +1405,28 @@ describe("qa mock openai server", () => {
     {
       name: "preview",
       prompt:
-        "@openclaw:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. After that read completes, reply exactly `CURRENT_PREVIEW_OK`.",
+        "@carapace:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. After that read completes, reply exactly `CURRENT_PREVIEW_OK`.",
       toolName: "read",
       expectedArgs: { path: "QA_KICKOFF_TASK.md" },
     },
     {
       name: "command preview",
       prompt:
-        "@openclaw:matrix-qa.test Tool progress QA check: call the exec tool exactly once with this exact command before answering: `printf 'matrix-command-progress-start\\n'; sleep 2`. After that exec command completes or fails, reply exactly `CURRENT_COMMAND_OK`.",
+        "@carapace:matrix-qa.test Tool progress QA check: call the exec tool exactly once with this exact command before answering: `printf 'matrix-command-progress-start\\n'; sleep 2`. After that exec command completes or fails, reply exactly `CURRENT_COMMAND_OK`.",
       toolName: "exec",
       expectedArgs: { command: "printf 'matrix-command-progress-start\\n'; sleep 2" },
     },
     {
       name: "error",
       prompt:
-        "@openclaw:matrix-qa.test Tool progress error QA check: read `missing-matrix-tool-progress-target.txt` before answering. After the read fails, reply exactly `CURRENT_ERROR_OK`.",
+        "@carapace:matrix-qa.test Tool progress error QA check: read `missing-matrix-tool-progress-target.txt` before answering. After the read fails, reply exactly `CURRENT_ERROR_OK`.",
       toolName: "read",
       expectedArgs: { path: "missing-matrix-tool-progress-target.txt" },
     },
     {
       name: "mention safety",
       prompt:
-        "@openclaw:matrix-qa.test Tool progress QA check: read the missing workspace file `matrix-progress-@room-@alice:matrix-qa.test-!room:matrix-qa.test.txt` before answering. After that read fails, reply exactly `CURRENT_MENTION_OK`.",
+        "@carapace:matrix-qa.test Tool progress QA check: read the missing workspace file `matrix-progress-@room-@alice:matrix-qa.test-!room:matrix-qa.test.txt` before answering. After that read fails, reply exactly `CURRENT_MENTION_OK`.",
       toolName: "read",
       expectedArgs: {
         path: "matrix-progress-@room-@alice:matrix-qa.test-!room:matrix-qa.test.txt",
@@ -1437,7 +1437,7 @@ describe("qa mock openai server", () => {
     const payload = await expectNonStreamingResponsesJson(server, {
       input: [
         makeUserInput(
-          "@openclaw:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
+          "@carapace:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
         ),
         makeUserInput(fixture.prompt),
         makeUserInput("Continue with the current Matrix QA scenario."),
@@ -1454,11 +1454,11 @@ describe("qa mock openai server", () => {
     const payload = await expectNonStreamingResponsesJson(server, {
       input: [
         makeUserInput(
-          "@openclaw:matrix-qa.test Tool progress QA check: read `stale-progress-target.txt` before answering. Reply exactly `STALE_PROGRESS_OK`.",
+          "@carapace:matrix-qa.test Tool progress QA check: read `stale-progress-target.txt` before answering. Reply exactly `STALE_PROGRESS_OK`.",
         ),
         makeToolOutputWithCallId("call_mock_read_stale_progress", "STALE_PROGRESS_OK"),
         makeUserInput(
-          "@openclaw:matrix-qa.test Tool progress QA check: read `current-progress-target.txt` before answering. Reply exactly `CURRENT_PROGRESS_OK`.",
+          "@carapace:matrix-qa.test Tool progress QA check: read `current-progress-target.txt` before answering. Reply exactly `CURRENT_PROGRESS_OK`.",
         ),
       ],
     });
@@ -1472,12 +1472,12 @@ describe("qa mock openai server", () => {
     {
       name: "quiet streaming",
       stalePrompt:
-        "@openclaw:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_QUIET_OK`.",
+        "@carapace:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_QUIET_OK`.",
     },
     {
       name: "tool progress",
       stalePrompt:
-        "@openclaw:matrix-qa.test Tool progress QA check: read `stale-progress-target.txt` before answering. Reply exactly `STALE_PROGRESS_OK`.",
+        "@carapace:matrix-qa.test Tool progress QA check: read `stale-progress-target.txt` before answering. Reply exactly `STALE_PROGRESS_OK`.",
     },
   ])("does not resurrect stale Matrix $name across an ordinary turn", async (fixture) => {
     const server = await startMockServer();
@@ -1497,7 +1497,7 @@ describe("qa mock openai server", () => {
     const payload = await expectNonStreamingResponsesJson(server, {
       input: [
         makeUserInput(
-          "@openclaw:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
+          "@carapace:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
         ),
         makeUserInput(
           "Please retry the new database operation, then reply exactly `CURRENT_RETRY_OK`.",
@@ -1512,11 +1512,11 @@ describe("qa mock openai server", () => {
   it("uses the current tool result marker after stale streaming history", async () => {
     const server = await startMockServer();
     const currentPrompt =
-      "@openclaw:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. The only valid final marker is inside that file.";
+      "@carapace:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. The only valid final marker is inside that file.";
     const payload = await expectNonStreamingResponsesJson(server, {
       input: [
         makeUserInput(
-          "@openclaw:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
+          "@carapace:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_STREAMING_OK`.",
         ),
         makeUserInput(currentPrompt),
         makeToolOutputWithCallId(
@@ -1532,9 +1532,9 @@ describe("qa mock openai server", () => {
   it("selects tool progress after quiet streaming in one user envelope", async () => {
     const server = await startMockServer();
     const currentPrompt =
-      "@openclaw:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. The only valid final marker is inside that file.";
+      "@carapace:matrix-qa.test Tool progress QA check: call the read tool exactly once on `QA_KICKOFF_TASK.md` before answering. The only valid final marker is inside that file.";
     const envelope = [
-      "@openclaw:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_ENVELOPE_OK`.",
+      "@carapace:matrix-qa.test Quiet streaming QA check: reply exactly `STALE_ENVELOPE_OK`.",
       currentPrompt,
     ].join("\n");
     const plan = await expectNonStreamingResponsesJson(server, {
@@ -1769,7 +1769,7 @@ describe("qa mock openai server", () => {
             `[Slack Driver (user) Fri 2026-07-31 10:00 UTC] ${seedPrompt}`,
             "[slack message id: 1.000000 channel: C123]",
             "",
-            `[Slack OpenClaw (this assistant) (assistant) Fri 2026-07-31 10:01 UTC] ${botReplyMarker}`,
+            `[Slack Carapace (this assistant) (assistant) Fri 2026-07-31 10:01 UTC] ${botReplyMarker}`,
             "[slack message id: 1.500000 channel: C123]",
             "",
             `[Slack Driver (user) Fri 2026-07-31 10:02 UTC] ${recallPrompt}`,
@@ -2124,7 +2124,7 @@ describe("qa mock openai server", () => {
   it("answers WhatsApp pending-history prompts only with injected prior group context", async () => {
     const server = await startMockServer();
     const currentTriggerPrompt = [
-      "openclawqa pending history context check",
+      "carapaceqa pending history context check",
       WHATSAPP_PENDING_HISTORY_TRIGGER_MARKER,
       `Return ${WHATSAPP_PENDING_HISTORY_OK_MARKER} only if prior group context contains the context-only sentinel.`,
     ].join(" ");
@@ -2187,7 +2187,7 @@ describe("qa mock openai server", () => {
     const contextWithoutCurrentTrigger = await expectOpenAiNonStreamingResponsesJson(server, {
       input: [
         makeUserInput(
-          [historyContext, "openclawqa pending history context check without current trigger"].join(
+          [historyContext, "carapaceqa pending history context check without current trigger"].join(
             "\n",
           ),
         ),
@@ -2255,7 +2255,7 @@ describe("qa mock openai server", () => {
       input: [makeUserInput("Quoted implicit reply trigger marker WHATSAPP_QA_UNRELATED_TEST")],
     });
 
-    expect(WHATSAPP_REPLY_TO_BOT_TRIGGER_PROMPT).not.toMatch(/\bopenclawqa\b/iu);
+    expect(WHATSAPP_REPLY_TO_BOT_TRIGGER_PROMPT).not.toMatch(/\bcarapaceqa\b/iu);
     expect(outputText(seedPayload)).toBe(WHATSAPP_REPLY_TO_BOT_SEED_MARKER);
     expect(outputText(triggerPayload)).toBe(WHATSAPP_REPLY_TO_BOT_TRIGGER_MARKER);
     expect(outputText(unrelatedPayload)).not.toBe(WHATSAPP_REPLY_TO_BOT_TRIGGER_MARKER);
@@ -2342,7 +2342,7 @@ describe("qa mock openai server", () => {
           "# Personal task ledger\n\nRequired status contract:\n1. Read PERSONAL_TASK_LEDGER.md.\n2. Read FOLLOWTHROUGH_NOTE.md.\n3. Write ./personal-task-status.txt.\n",
         ),
         makeUserInput(
-          "Task: prepare a local OpenClaw PR readiness note.\nPending: wait for maintainer feedback before publishing.\nBlocked: publishing needs explicit user approval.\nDone: local evidence captured in personal-task-status.txt.\n",
+          "Task: prepare a local Carapace PR readiness note.\nPending: wait for maintainer feedback before publishing.\nBlocked: publishing needs explicit user approval.\nDone: local evidence captured in personal-task-status.txt.\n",
         ),
       ],
     });
@@ -2938,9 +2938,9 @@ Update and merge these partial structured summaries.`,
     ).toBe(true);
   });
 
-  it("plans the write from an OpenClaw compacted retry payload", async () => {
+  it("plans the write from an Carapace compacted retry payload", async () => {
     const server = await startMockServer();
-    const runtimeSessionId = "compaction-openclaw-retry";
+    const runtimeSessionId = "compaction-carapace-retry";
     const initial = await postNonStreamingResponses(server, {
       model: "gpt-5.6-luna",
       instructions: `Runtime: embedded | sessionId=${runtimeSessionId}`,
@@ -3267,7 +3267,7 @@ Update and merge these partial structured summaries.`,
     {
       name: "Codex direct-only tools",
       tools: [SESSIONS_SPAWN_TOOL, CODEX_DIRECT_YIELD_NAMESPACE],
-      namespace: "openclaw_direct",
+      namespace: "carapace_direct",
     },
   ])("drives yielded-parent subagent fallback through $name", async ({ tools, namespace }) => {
     const server = await startMockServer();
@@ -3406,18 +3406,18 @@ Update and merge these partial structured summaries.`,
     [
       "empty",
       [
-        "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
         "QA-SUBAGENT-TERMINAL-INTERNAL-MUST-NOT-LEAK",
-        "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       ].join("\n"),
     ],
     [
       "fallback",
       [
         "QA-SUBAGENT-TERMINAL-FALLBACK-OK",
-        "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
         "QA-SUBAGENT-TERMINAL-INTERNAL-MUST-NOT-LEAK",
-        "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+        "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
       ].join("\n"),
     ],
   ])("returns the terminal-reply matrix worker result for %s", async (terminalCase, expected) => {
@@ -3977,7 +3977,7 @@ Update and merge these partial structured summaries.`,
   it("requires memory_get before answering thread recall in Code Mode", async () => {
     const server = await startMockServer();
     const prompt =
-      "@openclaw Thread memory check: what is the hidden thread codename stored only in memory? Use memory tools first and reply only in this thread.";
+      "@carapace Thread memory check: what is the hidden thread codename stored only in memory? Use memory tools first and reply only in this thread.";
     const codeModeTools = [
       {
         type: "function",
@@ -4088,7 +4088,7 @@ Update and merge these partial structured summaries.`,
     const rankingPrompt =
       "Session memory ranking check: what is the current Project Nebula codename? Use memory tools first.";
     const threadPrompt =
-      "@openclaw Thread memory check: what is the hidden thread codename stored only in memory? Use memory tools first and reply only in this thread.";
+      "@carapace Thread memory check: what is the hidden thread codename stored only in memory? Use memory tools first and reply only in this thread.";
     const acknowledgement = makeUserInput(
       "Protocol note: acknowledged. Continue with the QA scenario plan.",
     );
@@ -4387,7 +4387,7 @@ Update and merge these partial structured summaries.`,
       ];
       const usesCodexDelivery = instructionSource.startsWith("Codex");
       const instructions = usesCodexDelivery
-        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; OpenClaw stops after confirming delivery."
+        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; Carapace stops after confirming delivery."
         : "Current source visible reply MUST use `message(action=send)`; final text is private. Skip tool = user gets nothing.";
       const withDeliveryInstructions = (input: unknown[]) =>
         instructionSource === "body instructions"
@@ -4436,7 +4436,7 @@ Update and merge these partial structured summaries.`,
         "Subagent fanout synthesis check: delegate two bounded subagents sequentially, then report both results together.";
       const usesCodexDelivery = instructionSource.startsWith("Codex");
       const instructions = usesCodexDelivery
-        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; OpenClaw stops after confirming delivery."
+        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; Carapace stops after confirming delivery."
         : "Current source visible reply MUST use `message(action=send)`; final text is private. Skip tool = user gets nothing.";
 
       const firstSpawn = await expectNonStreamingResponsesJson(server, {
@@ -4494,7 +4494,7 @@ Update and merge these partial structured summaries.`,
         "Subagent fanout synthesis check: delegate two bounded subagents sequentially, then report both results together.";
       const usesCodexDelivery = instructionSource.startsWith("Codex");
       const instructions = usesCodexDelivery
-        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; OpenClaw stops after confirming delivery."
+        ? "Visible source replies are not automatically delivered for this run. Use `message(action=send)` for user-visible source-channel output. For progress, set `final=false`. When the message is the completed reply to the current source conversation, set `final=true`; Carapace stops after confirming delivery."
         : "Current source visible reply MUST use `message(action=send)`; final text is private. Skip tool = user gets nothing.";
 
       const firstSpawn = await expectNonStreamingResponsesJson(server, {
@@ -5107,7 +5107,7 @@ Update and merge these partial structured summaries.`,
     );
 
     const contextPrefix = [
-      "Conversation info: ⟦openclaw:ctx⟧",
+      "Conversation info: ⟦carapace:ctx⟧",
       "```json",
       '{"inbound_event_kind":"user_request"}',
       "```",
@@ -5122,7 +5122,7 @@ Update and merge these partial structured summaries.`,
       setupInput,
       previousExactMarkerInput,
       makeUserInput(
-        ["Sender: ⟦openclaw:ctx⟧", "```json", '{"name":"QA"}', "```", "", "<contact>"].join("\n"),
+        ["Sender: ⟦carapace:ctx⟧", "```json", '{"name":"QA"}', "```", "", "<contact>"].join("\n"),
       ),
     ]);
     const stickerResponse = await readMockResponse(server, [
@@ -5228,7 +5228,7 @@ Update and merge these partial structured summaries.`,
         "Sticker note: <media:sticker>",
       ].join("\n"),
       [
-        "WhatsApp media: ⟦openclaw:ctx⟧",
+        "WhatsApp media: ⟦carapace:ctx⟧",
         "```json",
         '{"source":"whatsapp","type":"media","payload":{"kind":"image"}}',
         "```",
@@ -5339,8 +5339,8 @@ Update and merge these partial structured summaries.`,
     const imageCall = outputToolCall(imagePlan, "image_generate");
     const callId = outputToolCallId(imageCall, "call_mock_image_generate_unavailable");
     const completionEvent = [
-      "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
-      "OpenClaw runtime context (internal):",
+      "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>",
+      "Carapace runtime context (internal):",
       "",
       "[Internal task completion event]",
       "source: image_generation",
@@ -5348,7 +5348,7 @@ Update and merge these partial structured summaries.`,
       "status: completed successfully",
       "Generated media:",
       "MEDIA:/tmp/qa-lighthouse.png",
-      "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+      "<<<END_CARAPACE_INTERNAL_CONTEXT>>>",
     ].join("\n");
     const completion = await expectNonStreamingResponsesJson<unknown>(server, {
       tools: [MESSAGE_TOOL],
@@ -5409,7 +5409,7 @@ Update and merge these partial structured summaries.`,
     const server = await startMockServer();
 
     const response = await expectNonStreamingResponses(server, {
-      instructions: "Codex dynamic OpenClaw tools available in this turn: web_search.",
+      instructions: "Codex dynamic Carapace tools available in this turn: web_search.",
       input: [
         makeUserInput(
           "tool search qa check target=web_search. Call exactly that tool once and then summarize.",
@@ -5420,7 +5420,7 @@ Update and merge these partial structured summaries.`,
     const toolPlanOutput = outputItem(await response.json());
     expect(toolPlanOutput.type).toBe("function_call");
     expect(toolPlanOutput.name).toBe("web_search");
-    expect(String(toolPlanOutput.arguments)).toContain("OpenClaw runtime parity fixed query");
+    expect(String(toolPlanOutput.arguments)).toContain("Carapace runtime parity fixed query");
   });
 
   it("plans QA tool-search calls from explicit fixture targets even without Responses tools", async () => {
@@ -5618,8 +5618,8 @@ Update and merge these partial structured summaries.`,
             ok: true,
             value: {
               tool: {
-                id: `openclaw:tool-search-e2e-fixture:${targetTool}`,
-                source: "openclaw",
+                id: `carapace:tool-search-e2e-fixture:${targetTool}`,
+                source: "carapace",
                 sourceName: "tool-search-e2e-fixture",
                 name: targetTool,
                 description: "x".repeat(260),
@@ -5755,7 +5755,7 @@ Update and merge these partial structured summaries.`,
     const toolPlanOutput = outputItem(await response.json());
     expect(toolPlanOutput.type).toBe("function_call");
     expect(toolPlanOutput.name).toBe("web_search");
-    expect(String(toolPlanOutput.arguments)).toContain("OPENCLAW_QA_WEB_SEARCH_DENIED_INPUT");
+    expect(String(toolPlanOutput.arguments)).toContain("CARAPACE_QA_WEB_SEARCH_DENIED_INPUT");
   });
 
   it.each([
@@ -5880,7 +5880,7 @@ Update and merge these partial structured summaries.`,
     expect(outputItem(await response.json())).toMatchObject({
       type: "custom_tool_call",
       name: "apply_patch",
-      namespace: "openclaw_direct",
+      namespace: "carapace_direct",
     });
   });
 
@@ -5889,7 +5889,7 @@ Update and merge these partial structured summaries.`,
     {
       label: "namespaced",
       tools: [CODEX_CUSTOM_PATCH_NAMESPACE],
-      namespace: "openclaw_direct",
+      namespace: "carapace_direct",
     },
   ])("streams $label native Codex patch input as custom-tool SSE", async ({ tools, namespace }) => {
     const server = await startMockServer();
@@ -6003,7 +6003,7 @@ Update and merge these partial structured summaries.`,
       expect(item).toMatchObject({
         type: "custom_tool_call",
         name: "apply_patch",
-        namespace: "openclaw_direct",
+        namespace: "carapace_direct",
       });
     }
   });
@@ -6155,7 +6155,7 @@ Update and merge these partial structured summaries.`,
     const toolPlanOutput = outputItem(await response.json());
     expect(toolPlanOutput.type).toBe("function_call");
     expect(toolPlanOutput.name).toBe("sessions_spawn");
-    expect(toolPlanOutput.namespace).toBe("openclaw");
+    expect(toolPlanOutput.namespace).toBe("carapace");
   });
 
   it("records image inputs and describes attached images", async () => {
@@ -6367,7 +6367,7 @@ Update and merge these partial structured summaries.`,
           "Switch models now. Tool continuity check: reread QA_KICKOFF_TASK.md and mention the handoff in one short sentence.",
         ),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -6396,7 +6396,7 @@ Update and merge these partial structured summaries.`,
     const response = await expectNonStreamingResponses(server, {
       input: [
         makeUserInput(
-          'Conversation info: ⟦openclaw:ctx⟧\n{"is_group_chat": true}\n\nhello team, no bot ping here',
+          'Conversation info: ⟦carapace:ctx⟧\n{"is_group_chat": true}\n\nhello team, no bot ping here',
         ),
       ],
     });
@@ -6495,7 +6495,7 @@ Update and merge these partial structured summaries.`,
       },
       body:
         '--qa\r\ncontent-disposition: form-data; name="file"; filename="upload.ogg"\r\n\r\n' +
-        "OPENCLAW_QA_GROUP_AUDIO_TRIGGER\r\n--qa--\r\n",
+        "CARAPACE_QA_GROUP_AUDIO_TRIGGER\r\n--qa--\r\n",
     });
     const quiet = await fetchOk(`${server.baseUrl}/v1/audio/transcriptions`, {
       method: "POST",
@@ -6506,7 +6506,7 @@ Update and merge these partial structured summaries.`,
     });
 
     await expect(triggered.json()).resolves.toEqual({
-      text: "openclawqa reply with only this exact marker after group audio preflight: WHATSAPP_QA_GROUP_AUDIO_TRANSCRIPT_OK",
+      text: "carapaceqa reply with only this exact marker after group audio preflight: WHATSAPP_QA_GROUP_AUDIO_TRANSCRIPT_OK",
     });
     await expect(quiet.json()).resolves.toEqual({
       text: "Reply with only this exact marker: WHATSAPP_QA_AUDIO_TRANSCRIPT_OK",
@@ -8039,7 +8039,7 @@ Update and merge these partial structured summaries.`,
       input: [
         makeUserInput(QA_REASONING_ONLY_RECOVERY_PROMPT),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -8058,7 +8058,7 @@ Update and merge these partial structured summaries.`,
         makeUserInput(QA_REASONING_ONLY_RECOVERY_PROMPT),
         makeUserInput(QA_REASONING_ONLY_RETRY_INSTRUCTION),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -8190,7 +8190,7 @@ Update and merge these partial structured summaries.`,
       input: [
         makeUserInput(QA_EMPTY_RESPONSE_RECOVERY_PROMPT),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -8205,7 +8205,7 @@ Update and merge these partial structured summaries.`,
         makeUserInput(QA_EMPTY_RESPONSE_RECOVERY_PROMPT),
         makeUserInput(QA_SETTLED_TOOL_TERMINAL_CONTINUATION_INSTRUCTION),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -8225,7 +8225,7 @@ Update and merge these partial structured summaries.`,
       input: [
         makeUserInput(QA_EMPTY_RESPONSE_EXHAUSTION_PROMPT),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });
@@ -8238,7 +8238,7 @@ Update and merge these partial structured summaries.`,
         makeUserInput(QA_EMPTY_RESPONSE_EXHAUSTION_PROMPT),
         makeUserInput(QA_EMPTY_RESPONSE_RETRY_INSTRUCTION),
         makeToolOutput(
-          "QA mission: Understand this OpenClaw repo from source + docs before acting.",
+          "QA mission: Understand this Carapace repo from source + docs before acting.",
         ),
       ],
     });

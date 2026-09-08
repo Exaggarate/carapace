@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { Value } from "typebox/value";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -13,8 +13,8 @@ import {
 import { projectPublicSessionEntry } from "../../config/sessions/session-entry-projection.js";
 import { isSecretValueRegisteredForRedaction } from "../../logging/secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "../../logging/secret-redaction-registry.test-support.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { resolvePublicSessionShareToken } from "../control-ui-public-session-token.js";
 import { sessionSharingHandlers } from "./sessions-sharing.js";
 import { identifiedClient, sessionSharingTestContext } from "./sessions-sharing.test-support.js";
@@ -22,7 +22,7 @@ import type { GatewayClient, RespondFn } from "./types.js";
 
 afterEach(() => {
   resetSecretRedactionRegistryForTest();
-  closeOpenClawAgentDatabasesForTest();
+  closeCarapaceAgentDatabasesForTest();
 });
 
 const scope = { agentId: "main", sessionKey: "agent:main:public-example" };
@@ -60,7 +60,7 @@ async function setPublic(enabled: boolean, client?: GatewayClient, expectedSessi
 
 describe("world-readable session publication management", () => {
   it("lets the owner publish, reuse, revoke and rotate a public link independently of team visibility", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await createSession();
       const published = await setPublic(true);
       expect(published?.[0]).toBe(true);
@@ -118,7 +118,7 @@ describe("world-readable session publication management", () => {
   });
 
   it("rejects non-managers and stale generation confirmations without changing publication", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await createSession();
       expect((await setPublic(true, identifiedClient("outsider")))?.[0]).toBe(false);
       expect((await setPublic(true, undefined, "previous-generation"))?.[0]).toBe(false);
@@ -133,7 +133,7 @@ describe("world-readable session publication management", () => {
   });
 
   it("rejects publication when runtime config remaps the exact store before commit", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
       const sessionKey = "global";
       const firstStorePath = state.path("public-share-first.sqlite");
       const secondStorePath = state.path("public-share-second.sqlite");
@@ -190,7 +190,7 @@ describe("world-readable session publication management", () => {
   });
 
   it("rejects an unencodable locator before persisting its publication grant", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const oversizedScope = {
         agentId: "main",
         sessionKey: `agent:main:${"🙂".repeat(2_000)}`,
@@ -213,7 +213,7 @@ describe("world-readable session publication management", () => {
   });
 
   it("drops publication at the canonical writer when resetting or copying into a fork", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       await createSession();
       await setPublic(true);
       const original = loadSessionEntry(scope)!;

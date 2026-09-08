@@ -4,7 +4,7 @@ import type { LogRecord } from "@opentelemetry/api-logs";
 import type {
   DiagnosticEventPayload,
   DiagnosticTraceContext,
-  OpenClawPluginServiceContext,
+  CarapacePluginServiceContext,
 } from "../api.js";
 
 export type OtelLogsExporter = "otlp" | "stdout" | "both";
@@ -14,7 +14,7 @@ export type OtelSignalIdentifier = "TRACES" | "METRICS" | "LOGS";
 export type OtelHttpAgentOptions = HttpsAgentOptions & {
   keepAlive: true;
 };
-export type OtelLogger = OpenClawPluginServiceContext["logger"];
+export type OtelLogger = CarapacePluginServiceContext["logger"];
 
 export type BuiltOtelLogRecord = {
   logRecord: LogRecord;

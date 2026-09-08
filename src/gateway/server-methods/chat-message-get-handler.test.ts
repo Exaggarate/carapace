@@ -1,17 +1,17 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   appendTranscriptMessage,
   loadTranscriptEvents,
   upsertSessionEntryCore,
 } from "../../config/sessions/session-accessor.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { createDirectChatContext } from "../server-chat.agent-events.test-helpers.js";
 import { chatMessageGetHandlers } from "./chat-message-get-handler.js";
 
 describe("chat.message.get recovery visibility", () => {
   it("hides recovered empty failures while retaining unresolved, partial, and successful replies", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withCarapaceTestState({ scenario: "minimal" }, async () => {
       const scope = {
         agentId: "main",
         sessionKey: "agent:main:message-recovery",
@@ -29,7 +29,7 @@ describe("chat.message.get recovery visibility", () => {
         content: [],
         stopReason: "error",
         errorMessage: "model unavailable",
-        __openclaw: { runId: "run-recovery" },
+        __carapace: { runId: "run-recovery" },
       };
       await appendTranscriptMessage(scope, { eventId: "failed", message: failure });
       const respond = vi.fn();

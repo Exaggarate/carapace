@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 // Classifies a Gateway connect failure into what the login gate should say and where the fix lives.
 import { ConnectErrorDetailCodes } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import { t } from "../i18n/index.ts";
@@ -93,7 +93,7 @@ function buildFeedback(params: {
   stepParams?: Record<string, string>;
   refreshAction?: { label: string };
 }): LoginFailureFeedback {
-  const docsHref = params.docsHref ?? "https://docs.openclaw.ai/web/dashboard";
+  const docsHref = params.docsHref ?? "https://github.com/Exaggarate/carapace";
   const rawError = redactLoginFailureError(params.rawError);
   return {
     kind: params.kind,
@@ -136,7 +136,7 @@ export function resolveLoginFailureFeedback(
         "login.failure.profileUnavailable.stepRetry",
         "login.failure.profileUnavailable.stepAdmin",
       ],
-      docsHref: "https://docs.openclaw.ai/concepts/user-model#gateway-profile-and-github-credit",
+      docsHref: "https://github.com/Exaggarate/carapace#gateway-profile-and-github-credit",
     });
   }
 
@@ -150,7 +150,7 @@ export function resolveLoginFailureFeedback(
         "login.failure.verifiedUserRequired.stepIdentity",
         "login.failure.verifiedUserRequired.stepSharedSecret",
       ],
-      docsHref: "https://docs.openclaw.ai/gateway/operator-scopes",
+      docsHref: "https://github.com/Exaggarate/carapace",
     });
   }
 
@@ -163,7 +163,7 @@ export function resolveLoginFailureFeedback(
       summaryKey: "chat.sidebar.serverUpdatedRefresh",
       refreshAction: { label: t("login.failure.protocol.refresh") },
       stepKeys: [],
-      docsHref: "https://docs.openclaw.ai/web/control-ui",
+      docsHref: "https://github.com/Exaggarate/carapace",
     });
   }
 
@@ -173,7 +173,7 @@ export function resolveLoginFailureFeedback(
       kind: "pairing-required",
       tone: "pending",
       rawError,
-      docsHref: "https://docs.openclaw.ai/web/control-ui#device-pairing-first-connection",
+      docsHref: "https://github.com/Exaggarate/carapace#device-pairing-first-connection",
       titleKey:
         pairing.kind === "scope-upgrade-pending"
           ? "login.failure.pairing.scopeTitle"
@@ -189,11 +189,11 @@ export function resolveLoginFailureFeedback(
       // `approve --latest` only previews the newest pending request and prints the
       // exact approve command; without a request id the steps say to run that too.
       primaryCommand: pairing.requestId
-        ? `openclaw devices approve ${pairing.requestId}`
-        : "openclaw devices approve --latest",
+        ? `carapace devices approve ${pairing.requestId}`
+        : "carapace devices approve --latest",
       stepKeys: [
         ...(pairing.requestId ? [] : ["login.failure.pairing.stepLatest"]),
-        { key: "login.failure.pairing.stepDashboard", commands: ["openclaw dashboard"] },
+        { key: "login.failure.pairing.stepDashboard", commands: ["carapace dashboard"] },
         ...(params.reconnectPending ? [] : ["login.failure.pairing.stepReconnect"]),
       ],
       stepParams: { host },
@@ -223,7 +223,7 @@ export function resolveLoginFailureFeedback(
     return buildFeedback({
       kind: "insecure-context",
       rawError,
-      docsHref: "https://docs.openclaw.ai/web/control-ui#insecure-http",
+      docsHref: "https://github.com/Exaggarate/carapace#insecure-http",
       titleKey: "login.failure.insecure.title",
       summaryKey: "login.failure.insecure.summary",
       stepKeys: ["login.failure.insecure.stepHttps", "login.failure.insecure.stepAvoidDisable"],
@@ -238,7 +238,7 @@ export function resolveLoginFailureFeedback(
       kind: "origin-not-allowed",
       rawError,
       docsHref:
-        "https://docs.openclaw.ai/web/control-ui#debuggingtesting-dev-server--remote-gateway",
+        "https://github.com/Exaggarate/carapace#debuggingtesting-dev-server--remote-gateway",
       titleKey: "login.failure.origin.title",
       summaryKey: "login.failure.origin.summary",
       stepKeys: [
@@ -254,12 +254,12 @@ export function resolveLoginFailureFeedback(
       kind: "protocol-mismatch",
       rawError,
       docsHref:
-        "https://docs.openclaw.ai/web/control-ui#debuggingtesting-dev-server--remote-gateway",
+        "https://github.com/Exaggarate/carapace#debuggingtesting-dev-server--remote-gateway",
       titleKey: "login.failure.protocol.title",
       summaryKey: "login.failure.protocol.summary",
       refreshAction: { label: t("login.failure.protocol.refresh") },
       stepKeys: [
-        { key: "login.failure.protocol.stepDashboard", commands: ["openclaw dashboard"] },
+        { key: "login.failure.protocol.stepDashboard", commands: ["carapace dashboard"] },
         { key: "login.failure.protocol.stepDevUi", commands: ["pnpm ui:dev"] },
         "login.failure.protocol.stepRestart",
       ],
@@ -279,7 +279,7 @@ export function resolveLoginFailureFeedback(
         "login.failure.trustedProxy.stepHeaders",
         "login.failure.trustedProxy.stepNoToken",
       ],
-      docsHref: "https://docs.openclaw.ai/gateway/trusted-proxy-auth",
+      docsHref: "https://github.com/Exaggarate/carapace",
     });
   }
   if (authHintKind === "required") {
@@ -298,11 +298,11 @@ export function resolveLoginFailureFeedback(
         : [
             {
               key: "login.failure.authRequired.stepPaste",
-              commands: ["openclaw gateway auth-token --show"],
+              commands: ["carapace gateway auth-token --show"],
             },
             {
               key: "login.failure.authRequired.stepGenerate",
-              commands: ["openclaw doctor --generate-gateway-token"],
+              commands: ["carapace doctor --generate-gateway-token"],
             },
             "login.failure.authRequired.stepConnect",
           ],
@@ -331,7 +331,7 @@ export function resolveLoginFailureFeedback(
         : [
             {
               key: "login.failure.authFailed.stepDashboard",
-              commands: ["openclaw dashboard --no-open", "openclaw gateway auth-token --show"],
+              commands: ["carapace dashboard --no-open", "carapace gateway auth-token --show"],
             },
             "login.failure.authFailed.stepReplace",
           ],
@@ -350,12 +350,12 @@ export function resolveLoginFailureFeedback(
     stepKeys: [
       {
         key: "login.failure.network.stepGateway",
-        commands: ["openclaw status", "openclaw gateway run"],
+        commands: ["carapace status", "carapace gateway run"],
       },
       "login.failure.network.stepUrl",
       {
         key: "login.failure.network.stepDashboard",
-        commands: ["openclaw dashboard --no-open"],
+        commands: ["carapace dashboard --no-open"],
       },
     ],
     stepParams: { host },

@@ -21,8 +21,8 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
-      ".openclaw",
+      "Carapace",
+      ".carapace",
     );
 
     const result = detectMacCloudSyncedStateDir(stateDir, {
@@ -37,7 +37,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects state dir under Library/CloudStorage", () => {
-    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "OpenClaw", ".openclaw");
+    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "Carapace", ".carapace");
 
     const result = detectMacCloudSyncedStateDir(stateDir, {
       platform: "darwin",
@@ -51,14 +51,14 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects cloud-synced target when state dir resolves via symlink", () => {
-    const symlinkPath = "/tmp/openclaw-state";
+    const symlinkPath = "/tmp/carapace-state";
     const resolvedCloudPath = path.join(
       home,
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
-      ".openclaw",
+      "Carapace",
+      ".carapace",
     );
 
     const result = detectMacCloudSyncedStateDir(symlinkPath, {
@@ -79,10 +79,10 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
-      ".openclaw",
+      "Carapace",
+      ".carapace",
     );
-    const resolvedLocalPath = path.join(home, ".openclaw");
+    const resolvedLocalPath = path.join(home, ".carapace");
 
     const result = detectMacCloudSyncedStateDir(symlinkPath, {
       platform: "darwin",
@@ -94,16 +94,16 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("follows a real symlink out of the sync root when the state dir leaf is absent", () => {
-    const sandbox = fs.realpathSync(tempDirs.make("openclaw-cloud-storage-symlink-"));
+    const sandbox = fs.realpathSync(tempDirs.make("carapace-cloud-storage-symlink-"));
     const realHome = path.join(sandbox, "home");
     const cloudStorage = path.join(realHome, "Library", "CloudStorage");
-    const localTarget = path.join(sandbox, "local-openclaw");
+    const localTarget = path.join(sandbox, "local-carapace");
     fs.mkdirSync(cloudStorage, { recursive: true });
     fs.mkdirSync(localTarget, { recursive: true });
     const syncedLink = path.join(cloudStorage, "OneDrive-Personal");
     fs.symlinkSync(localTarget, syncedLink, process.platform === "win32" ? "junction" : "dir");
 
-    const stateDir = path.join(syncedLink, "OpenClaw", ".openclaw");
+    const stateDir = path.join(syncedLink, "Carapace", ".carapace");
     expect(fs.existsSync(stateDir)).toBe(false);
 
     expect(
@@ -115,18 +115,18 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("still warns for a real absent leaf that stays inside the sync root", () => {
-    const sandbox = fs.realpathSync(tempDirs.make("openclaw-cloud-storage-real-"));
+    const sandbox = fs.realpathSync(tempDirs.make("carapace-cloud-storage-real-"));
     const realHome = path.join(sandbox, "home");
     const syncedDir = path.join(
       realHome,
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
+      "Carapace",
     );
     fs.mkdirSync(syncedDir, { recursive: true });
 
-    const stateDir = path.join(syncedDir, ".openclaw");
+    const stateDir = path.join(syncedDir, ".carapace");
     expect(fs.existsSync(stateDir)).toBe(false);
 
     expect(
@@ -140,10 +140,10 @@ describe("detectMacCloudSyncedStateDir", () => {
     });
   });
 
-  it("anchors cloud detection to OS homedir when OPENCLAW_HOME is overridden", () => {
-    const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".openclaw");
-    const originalOpenClawHome = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = "/tmp/openclaw-home-override";
+  it("anchors cloud detection to OS homedir when CARAPACE_HOME is overridden", () => {
+    const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".carapace");
+    const originalCarapaceHome = process.env.CARAPACE_HOME;
+    process.env.CARAPACE_HOME = "/tmp/carapace-home-override";
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(home);
     try {
       const result = detectMacCloudSyncedStateDir(stateDir, {
@@ -156,10 +156,10 @@ describe("detectMacCloudSyncedStateDir", () => {
       });
     } finally {
       homedirSpy.mockRestore();
-      if (originalOpenClawHome === undefined) {
-        delete process.env.OPENCLAW_HOME;
+      if (originalCarapaceHome === undefined) {
+        delete process.env.CARAPACE_HOME;
       } else {
-        process.env.OPENCLAW_HOME = originalOpenClawHome;
+        process.env.CARAPACE_HOME = originalCarapaceHome;
       }
     }
   });
@@ -170,8 +170,8 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
-      ".openclaw",
+      "Carapace",
+      ".carapace",
     );
 
     const result = detectMacCloudSyncedStateDir(stateDir, {

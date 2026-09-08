@@ -1,9 +1,9 @@
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "carapace/plugin-sdk/agent-harness-runtime";
 import {
   createStageTimingTracker,
   formatStageTimings,
   type StageTiming,
-} from "openclaw/plugin-sdk/time-runtime";
+} from "carapace/plugin-sdk/time-runtime";
 
 type CodexThreadLifecycleTimingSummary = {
   totalMs: number;

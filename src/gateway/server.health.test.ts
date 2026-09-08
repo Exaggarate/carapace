@@ -3,7 +3,7 @@
  */
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, test, vi } from "vitest";
 import { writeConfigFile } from "../config/config.js";
 import { emitAgentEvent } from "../infra/agent-events.js";
@@ -36,7 +36,7 @@ installGatewayTestHooks({
       agents: {
         defaults: {
           workspace: path.join(
-            expectDefined(process.env.OPENCLAW_STATE_DIR, "gateway fixture state directory"),
+            expectDefined(process.env.CARAPACE_STATE_DIR, "gateway fixture state directory"),
             "workspace",
           ),
         },

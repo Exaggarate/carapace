@@ -1,6 +1,6 @@
 export type ReleaseValidationCampaignArtifact =
   | {
-      schema: "openclaw.release-validation-campaign/v1";
+      schema: "carapace.release-validation-campaign/v1";
       operation: "upsert";
       tag: string;
       stableTrain: string;
@@ -11,7 +11,7 @@ export type ReleaseValidationCampaignArtifact =
       body: string;
     }
   | {
-      schema: "openclaw.release-validation-campaign/v1";
+      schema: "carapace.release-validation-campaign/v1";
       operation: "close";
       tag: string;
       stableTrain: string;

@@ -4,7 +4,7 @@
  * Prepares workspace layout, backend handle, filesystem bridge, browser bridge, and registry state for one run.
  */
 import fs from "node:fs/promises";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
   ensureBrowserControlAuth,
@@ -42,7 +42,7 @@ const loadSyncWorkspaceSkills = createLazyRuntimeNamedExport(
 async function syncSandboxSkillsToWorkspace(params: {
   sourceWorkspaceDir: string;
   targetWorkspaceDir: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId: string;
   rawSessionKey: string;
   execOverrides?: ExecPolicyOverrides;
@@ -91,7 +91,7 @@ async function ensureSandboxWorkspaceLayout(params: {
   agentId: string;
   rawSessionKey: string;
   isolationSubject?: SandboxIsolationSubject;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   execOverrides?: ExecPolicyOverrides;
   skillsSnapshot?: SkillSnapshot;
   workspaceDir?: string;
@@ -157,7 +157,7 @@ async function ensureSandboxWorkspaceLayout(params: {
 
 function resolveSandboxSession(params: {
   skillsSnapshot?: SkillSnapshot;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
 }) {
@@ -225,7 +225,7 @@ function resolveSandboxWorkspaceInfoWorkdir(params: {
 }
 
 type ResolveSandboxContextParams = {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   execOverrides?: ExecPolicyOverrides;
   requireCurrentConfig?: boolean;
@@ -237,7 +237,7 @@ type ResolveSandboxContextParams = {
 type ResolvedSandboxSession = NonNullable<ReturnType<typeof resolveSandboxSession>>;
 
 function assertSandboxSessionSecretOwnerAvailable(
-  config: OpenClawConfig | undefined,
+  config: CarapaceConfig | undefined,
   resolved: ResolvedSandboxSession,
 ): void {
   if (resolved.cfg.backend !== "ssh") {
@@ -385,7 +385,7 @@ async function resolveProvisionedSandboxContext(
 }
 
 export async function resolveSandboxContext(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   execOverrides?: ExecPolicyOverrides;
   requireCurrentConfig?: boolean;
@@ -410,7 +410,7 @@ export async function resolveSandboxContext(params: {
 
 export async function ensureSandboxWorkspaceForSession(params: {
   skillsSnapshot?: SkillSnapshot;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentId?: string;
   sessionKey?: string;
   workspaceDir?: string;

@@ -23,17 +23,17 @@ describe("json output mode", () => {
   });
 
   it("detects json output flags before argv terminators", () => {
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "list", "--json"])).toBe(true);
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "list", "--json=true"])).toBe(true);
-    expect(hasJsonOutputFlag(["node", "openclaw", "models", "--status-json"])).toBe(false);
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "--", "--json"])).toBe(false);
+    expect(hasJsonOutputFlag(["node", "carapace", "nodes", "list", "--json"])).toBe(true);
+    expect(hasJsonOutputFlag(["node", "carapace", "nodes", "list", "--json=true"])).toBe(true);
+    expect(hasJsonOutputFlag(["node", "carapace", "models", "--status-json"])).toBe(false);
+    expect(hasJsonOutputFlag(["node", "carapace", "nodes", "--", "--json"])).toBe(false);
   });
 
   it("temporarily routes console logs to stderr while json output is being prepared", async () => {
     const snapshots: boolean[] = [];
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "nodes", "list", "--json"],
+      ["node", "carapace", "nodes", "list", "--json"],
       async () => {
         snapshots.push(loggingState.forceConsoleToStderr);
       },
@@ -47,7 +47,7 @@ describe("json output mode", () => {
     loggingState.forceConsoleToStderr = true;
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "nodes", "list", "--json"],
+      ["node", "carapace", "nodes", "list", "--json"],
       async () => {
         expect(loggingState.forceConsoleToStderr).toBe(true);
       },
@@ -58,20 +58,20 @@ describe("json output mode", () => {
 
   it("restores stdout routing when command metadata marks --json as parse-only", async () => {
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "config", "set", "gateway.port", "18789", "--json"],
+      ["node", "carapace", "config", "set", "gateway.port", "18789", "--json"],
       async () => {
         expect(loggingState.forceConsoleToStderr).toBe(true);
         applyResolvedCommandOutputMode(false);
         expect(loggingState.forceConsoleToStderr).toBe(false);
         expect(
-          isJsonOutputModeActive(["node", "openclaw", "config", "set", "x", "1", "--json"]),
+          isJsonOutputModeActive(["node", "carapace", "config", "set", "x", "1", "--json"]),
         ).toBe(false);
       },
     );
   });
 
   it("does not treat config set's parser alias as JSON output before Commander resolves it", () => {
-    expect(isJsonOutputModeActive(["node", "openclaw", "config", "set", "x", "1", "--json"])).toBe(
+    expect(isJsonOutputModeActive(["node", "carapace", "config", "set", "x", "1", "--json"])).toBe(
       false,
     );
   });
@@ -80,7 +80,7 @@ describe("json output mode", () => {
     loggingState.forceConsoleToStderr = true;
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "config", "set", "gateway.port", "18789", "--json"],
+      ["node", "carapace", "config", "set", "gateway.port", "18789", "--json"],
       async () => {
         applyResolvedCommandOutputMode(false);
         expect(loggingState.forceConsoleToStderr).toBe(true);
@@ -90,13 +90,13 @@ describe("json output mode", () => {
 
   it("retains stderr routing through preaction for plain machine output", async () => {
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "models", "aliases", "list", "--plain"],
+      ["node", "carapace", "models", "aliases", "list", "--plain"],
       async () => {
         expect(loggingState.forceConsoleToStderr).toBe(true);
         applyResolvedCommandOutputMode(false, true);
         expect(loggingState.forceConsoleToStderr).toBe(true);
         expect(
-          isJsonOutputModeActive(["node", "openclaw", "models", "aliases", "list", "--plain"]),
+          isJsonOutputModeActive(["node", "carapace", "models", "aliases", "list", "--plain"]),
         ).toBe(false);
       },
       { machineOutput: true },
@@ -105,7 +105,7 @@ describe("json output mode", () => {
 
   it("still restores stdout when preaction resolves neither JSON nor plain machine output", async () => {
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "models", "aliases", "list", "--plain"],
+      ["node", "carapace", "models", "aliases", "list", "--plain"],
       async () => {
         applyResolvedCommandOutputMode(false);
         expect(loggingState.forceConsoleToStderr).toBe(false);

@@ -1,5 +1,5 @@
 // Matrix plugin module implements summary behavior.
-import { asNullableObjectRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asNullableObjectRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { isMatrixNotFoundError } from "../errors.js";
 import { resolveMatrixReplacementContent, resolveMatrixMessageAttachment } from "../media-text.js";
 import { fetchMatrixPollMessageSummary } from "../poll-summary.js";

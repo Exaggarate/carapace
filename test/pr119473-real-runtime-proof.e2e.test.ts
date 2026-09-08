@@ -14,17 +14,17 @@ import { captureEnv, setTestEnvValue } from "../src/test-utils/env.js";
 
 const envKeys = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+  "CARAPACE_STATE_DIR",
+  "CARAPACE_CONFIG_PATH",
+  "CARAPACE_GATEWAY_TOKEN",
+  "CARAPACE_SKIP_CHANNELS",
+  "CARAPACE_SKIP_GMAIL_WATCHER",
+  "CARAPACE_SKIP_CRON",
+  "CARAPACE_SKIP_CANVAS_HOST",
+  "CARAPACE_SKIP_BROWSER_CONTROL_SERVER",
+  "CARAPACE_SKIP_PROVIDERS",
+  "CARAPACE_BUNDLED_PLUGINS_DIR",
+  "CARAPACE_DISABLE_BUNDLED_PLUGINS",
 ] as const;
 
 describe("PR #119473 real gateway proof", () => {
@@ -47,10 +47,10 @@ describe("PR #119473 real gateway proof", () => {
       let second: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
 
       try {
-        tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pr119473-proof-"));
-        const stateDir = path.join(tempHome, ".openclaw");
+        tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-pr119473-proof-"));
+        const stateDir = path.join(tempHome, ".carapace");
         const workspaceDir = path.join(tempHome, "workspace");
-        const configPath = path.join(stateDir, "openclaw.json");
+        const configPath = path.join(stateDir, "carapace.json");
         const bundledPluginsDir = path.join(tempHome, "bundled-plugins");
         await Promise.all([
           fs.mkdir(workspaceDir, { recursive: true }),
@@ -59,17 +59,17 @@ describe("PR #119473 real gateway proof", () => {
         ]);
         for (const [key, value] of Object.entries({
           HOME: tempHome,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_GATEWAY_TOKEN: "pr119473-proof-token",
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-          OPENCLAW_SKIP_CRON: "1",
-          OPENCLAW_SKIP_CANVAS_HOST: "1",
-          OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-          OPENCLAW_SKIP_PROVIDERS: "1",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_GATEWAY_TOKEN: "pr119473-proof-token",
+          CARAPACE_SKIP_CHANNELS: "1",
+          CARAPACE_SKIP_GMAIL_WATCHER: "1",
+          CARAPACE_SKIP_CRON: "1",
+          CARAPACE_SKIP_CANVAS_HOST: "1",
+          CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+          CARAPACE_SKIP_PROVIDERS: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
         })) {
           setTestEnvValue(key, value);
         }

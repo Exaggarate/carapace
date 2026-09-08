@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
 import { resolveControlUiAssetHealth } from "./control-ui-assets.js";
 import { readPackageVersion } from "./package-json.js";
 import { resolveStableNodePath } from "./stable-node-path.js";
@@ -614,14 +614,14 @@ export async function updateGitCheckout(params: {
 
     // Source conversion migrates only after its prepared global exposure is swapped.
     if (!opts.prepareGitExposure) {
-      const doctorEntry = path.join(gitRoot, "openclaw.mjs");
+      const doctorEntry = path.join(gitRoot, "carapace.mjs");
       const doctorEntryExists = await fs.stat(doctorEntry).then(
         () => true,
         () => false,
       );
       if (!doctorEntryExists) {
         steps.push({
-          name: "openclaw doctor entry",
+          name: "carapace doctor entry",
           command: `verify ${doctorEntry}`,
           cwd: gitRoot,
           durationMs: 0,
@@ -640,7 +640,7 @@ export async function updateGitCheckout(params: {
       recovery = { serviceRestartSafe: false, reason: "state-migration-started" };
       const doctorStep = await runStep(
         step(
-          "openclaw doctor",
+          "carapace doctor",
           [
             doctorNodePath,
             doctorEntry,

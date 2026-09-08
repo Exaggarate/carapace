@@ -6,9 +6,9 @@ import { expect, it } from "vitest";
 import type { GatewayServer } from "../../../src/gateway/server-public.ts";
 import { resetLogger, setLoggerOverride } from "../../../src/logging.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../src/test-utils/openclaw-test-state.ts";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../../src/test-utils/carapace-test-state.ts";
 import { getFreePort } from "../../../src/test-utils/ports.ts";
 import { waitForControlUiGatewayReady } from "../test-helpers/control-ui-e2e-readiness.ts";
 import { takeControlUiViewportScreenshot } from "../test-helpers/control-ui-e2e-screenshot.ts";
@@ -21,7 +21,7 @@ const suite = createControlUiE2eSuite({
     `Playwright Chromium is not available at ${executablePath}`,
 });
 
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 const viewport = { height: 900, width: 1_440 };
 
 function logLine(message: string, level: "error" | "info" | "warn", second: number) {
@@ -52,7 +52,7 @@ async function visibleMessages(page: Page) {
 
 suite.define(() => {
   it("replaces a changed log source and preserves visible recovery through reconnect", async (context) => {
-    let fixture: OpenClawTestState | undefined;
+    let fixture: CarapaceTestState | undefined;
     let gateway: Promise<GatewayServer> | undefined;
     let loggerConfigured = false;
     await suite.runScenario(context, {
@@ -70,17 +70,17 @@ suite.define(() => {
       run: async (signal) => {
         const port = await getFreePort();
         signal.throwIfAborted();
-        const state = await createOpenClawTestState({
+        const state = await createCarapaceTestState({
           label: "control-ui-logs-lifecycle",
           layout: "home",
           env: {
-            OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-            OPENCLAW_SKIP_CANVAS_HOST: "1",
-            OPENCLAW_SKIP_CHANNELS: "1",
-            OPENCLAW_SKIP_CRON: "1",
-            OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-            OPENCLAW_SKIP_PROVIDERS: "1",
-            OPENCLAW_TEST_MINIMAL_GATEWAY: "1",
+            CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+            CARAPACE_SKIP_CANVAS_HOST: "1",
+            CARAPACE_SKIP_CHANNELS: "1",
+            CARAPACE_SKIP_CRON: "1",
+            CARAPACE_SKIP_GMAIL_WATCHER: "1",
+            CARAPACE_SKIP_PROVIDERS: "1",
+            CARAPACE_TEST_MINIMAL_GATEWAY: "1",
             VITEST: "1",
           },
         });
@@ -143,7 +143,7 @@ suite.define(() => {
             const url = new URL("logs", suite.server.baseUrl);
             url.searchParams.set("gatewayUrl", `ws://127.0.0.1:${port}`);
             await page.goto(url.toString());
-            const confirmation = page.locator("openclaw-gateway-url-confirmation");
+            const confirmation = page.locator("carapace-gateway-url-confirmation");
             await confirmation.waitFor();
             await confirmation
               .getByRole("button", { name: `Switch to 127.0.0.1:${port}`, exact: true })
@@ -166,7 +166,7 @@ suite.define(() => {
             const downloadPromise = page.waitForEvent("download");
             await page.getByRole("button", { name: "Export filtered" }).click();
             const download = await downloadPromise;
-            expect(download.suggestedFilename()).toMatch(/^openclaw-logs-filtered-.*\.log$/);
+            expect(download.suggestedFilename()).toMatch(/^carapace-logs-filtered-.*\.log$/);
             const downloadStream = await download.createReadStream();
             if (!downloadStream) {
               throw new Error("filtered log export did not provide a readable download");
@@ -200,7 +200,7 @@ suite.define(() => {
             gateway = undefined;
             signal.throwIfAborted();
             await page.waitForFunction(() => {
-              const app = document.querySelector("openclaw-app") as
+              const app = document.querySelector("carapace-app") as
                 | (HTMLElement & {
                     runtime?: { context?: { gateway?: { snapshot?: { phase?: string } } } };
                   })

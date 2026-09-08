@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WebSocket } from "ws";
 import { createDeferred } from "../../../test/helpers/promise.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { NodeRegistry } from "../node-registry.js";
@@ -41,14 +41,14 @@ describe.each([
           },
         },
         connect: {
-          client: { id: "openclaw-node-host", mode: "node" },
+          client: { id: "carapace-node-host", mode: "node" },
           device: { id: "node-1" },
           commands: [command],
         },
       } as never,
       { pairingIdentity: "identity-a", pairingGeneration: "generation-a" },
     );
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       agents: { entries: { main: {} } },
       gateway: {
         terminal: { enabled: true },

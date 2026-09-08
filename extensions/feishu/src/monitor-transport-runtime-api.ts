@@ -1,11 +1,11 @@
 // Feishu API module exposes the plugin public contract.
 export type { RuntimeEnv } from "../runtime-api.js";
-export { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+export { safeEqualSecret } from "carapace/plugin-sdk/security-runtime";
 export {
   applyBasicWebhookRequestGuards,
   resolveRequestClientIp,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "carapace/plugin-sdk/webhook-ingress";
 export {
   installRequestBodyLimitGuard,
   readWebhookBodyOrReject,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "carapace/plugin-sdk/webhook-request-guards";

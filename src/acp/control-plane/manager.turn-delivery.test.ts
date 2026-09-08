@@ -1,4 +1,4 @@
-import type { AcpRuntimeEvent, AcpRuntimeTurnResult } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntimeEvent, AcpRuntimeTurnResult } from "@carapace/acp-core/runtime/types";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import {

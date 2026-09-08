@@ -8,20 +8,20 @@ import {
 } from "../../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../../infra/sqlite-number.js";
 import { registerSecretValueForRedaction } from "../../logging/secret-redaction-registry.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import { ensureSecretStoreSchema } from "../../state/openclaw-state-db-schema-additive.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import { ensureSecretStoreSchema } from "../../state/carapace-state-db-schema-additive.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
+  runCarapaceStateWriteTransaction,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
 import {
   SECRET_STORE_VALUE_MAX_BYTES,
   SecretStoreValidationError,
 } from "./secret-store-validation-error.js";
 
-type HiddenGitHubStoreDatabase = Pick<OpenClawStateKyselyDatabase, "secret_store_entries">;
-type HiddenGitHubStoreRow = Selectable<OpenClawStateKyselyDatabase["secret_store_entries"]>;
+type HiddenGitHubStoreDatabase = Pick<CarapaceStateKyselyDatabase, "secret_store_entries">;
+type HiddenGitHubStoreRow = Selectable<CarapaceStateKyselyDatabase["secret_store_entries"]>;
 type HiddenGitHubStoreKind = "device" | "oauth";
 type HiddenGitHubStoreNameKind = "setup" | HiddenGitHubStoreKind;
 type HiddenGitHubStorePrefix = "github-device" | "github-oauth";
@@ -204,12 +204,12 @@ export function writeHiddenGitHubSecretRecord(params: {
   name: string;
   value: string;
   updatedBy?: string | null;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): void {
   assertHiddenGitHubSecretRecordName(params.name);
   validateHiddenGitHubSecretValue(params.value);
   const now = Date.now();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db: sqlite }) => {
       ensureSecretStoreSchema(sqlite);
       upsertHiddenGitHubSecret(
@@ -233,11 +233,11 @@ export function writeHiddenGitHubSecretRecord(params: {
 /** Reads one exact live hidden GitHub authorization record. */
 export function readHiddenGitHubSecretRecord(params: {
   name: string;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): string | undefined {
   const kind = assertHiddenGitHubSecretRecordName(params.name);
   try {
-    const row = withExistingOpenClawStateDatabaseReadOnly(({ db: sqlite }) => {
+    const row = withExistingCarapaceStateDatabaseReadOnly(({ db: sqlite }) => {
       const db = getNodeSqliteKysely<HiddenGitHubStoreDatabase>(sqlite);
       return executeSqliteQueryTakeFirstSync(
         sqlite,
@@ -268,13 +268,13 @@ export function readHiddenGitHubSecretRecord(params: {
 /** Lists live hidden GitHub authorization records of one exact class. */
 export function listHiddenGitHubSecretRecordNames(params: {
   prefix: HiddenGitHubStorePrefix;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): string[] {
   try {
     const now = Date.now();
     const kind = hiddenGitHubStoreKindFromPrefix(params.prefix);
     return (
-      withExistingOpenClawStateDatabaseReadOnly(({ db: sqlite }) => {
+      withExistingCarapaceStateDatabaseReadOnly(({ db: sqlite }) => {
         const db = getNodeSqliteKysely<HiddenGitHubStoreDatabase>(sqlite);
         const rows = executeSqliteQuerySync(
           sqlite,
@@ -311,11 +311,11 @@ export function listHiddenGitHubSecretRecordNames(params: {
 /** Hard-deletes one exact hidden GitHub authorization record. */
 export function deleteHiddenGitHubSecretRecord(params: {
   name: string;
-  database?: OpenClawStateDatabaseOptions;
+  database?: CarapaceStateDatabaseOptions;
 }): void {
   assertHiddenGitHubSecretRecordName(params.name);
   try {
-    runOpenClawStateWriteTransaction(
+    runCarapaceStateWriteTransaction(
       ({ db: sqlite }) => {
         const db = getNodeSqliteKysely<HiddenGitHubStoreDatabase>(sqlite);
         executeSqliteQuerySync(

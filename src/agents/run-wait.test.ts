@@ -6,7 +6,7 @@ import {
   addTimerTimeoutGraceMs,
   MAX_DATE_TIMESTAMP_MS,
   MAX_TIMER_TIMEOUT_MS,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/number-coercion";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const callGatewayMock = vi.fn();
@@ -111,7 +111,7 @@ describe("readLatestAssistantReply", () => {
     expect(result).toBe("older output");
   });
 
-  it("skips trailing transcript-only OpenClaw assistant mirrors for normal latest-reply reads", async () => {
+  it("skips trailing transcript-only Carapace assistant mirrors for normal latest-reply reads", async () => {
     callGatewayMock.mockResolvedValue({
       messages: [
         {
@@ -122,7 +122,7 @@ describe("readLatestAssistantReply", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "already delivered through message tool" }],
-          openclawMessageToolMirror: {
+          carapaceMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-send",
           },
@@ -130,7 +130,7 @@ describe("readLatestAssistantReply", () => {
         },
         {
           role: "assistant",
-          provider: "openclaw",
+          provider: "carapace",
           model: "gateway-injected",
           content: [{ type: "text", text: "gateway notice" }],
           timestamp: 12,

@@ -8,8 +8,8 @@ import {
   getGatewayContextResolver,
 } from "../../../plugins/runtime/gateway-request-scope.js";
 import { createDeferredCore } from "../../../shared/deferred.js";
-import { listOpenClawAgentDatabasesForTest as listSeedAgentDatabases } from "../../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest as closeSeedStateDatabase } from "../../../state/openclaw-state-db.js";
+import { listCarapaceAgentDatabasesForTest as listSeedAgentDatabases } from "../../../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest as closeSeedStateDatabase } from "../../../state/carapace-state-db.js";
 import "./subagent-registry.mocks.shared.js";
 import { createSubagentRunRecord } from "../../subagent-test-fixtures.test-helpers.js";
 import {
@@ -47,8 +47,8 @@ let callGatewayModule: typeof import("../../../gateway/call.js");
 let agentEventsModule: typeof import("../../../infra/agent-events.js");
 let registryDepsModule: typeof import("./subagent-registry-deps.js");
 let registrySessionCleanupModule: typeof import("../../../test-utils/session-state-cleanup.js");
-let registryAgentDbModule: typeof import("../../../state/openclaw-agent-db.js");
-let registryStateDbModule: typeof import("../../../state/openclaw-state-db.js");
+let registryAgentDbModule: typeof import("../../../state/carapace-agent-db.js");
+let registryStateDbModule: typeof import("../../../state/carapace-state-db.js");
 
 function listFixtureAgentDatabases(listDatabases: typeof listSeedAgentDatabases, stateDir: string) {
   return listDatabases().filter((database) => isPathInside(stateDir, database.path));
@@ -84,9 +84,9 @@ describe("subagent registry persistence resume", () => {
     mod = await import("./subagent-registry.test-helpers.js");
     callGatewayModule = await import("../../../gateway/call.js");
     agentEventsModule = await import("../../../infra/agent-events.js");
-    registryStateDbModule = await import("../../../state/openclaw-state-db.js");
+    registryStateDbModule = await import("../../../state/carapace-state-db.js");
     registryDepsModule = await import("./subagent-registry-deps.js");
-    registryAgentDbModule = await import("../../../state/openclaw-agent-db.js");
+    registryAgentDbModule = await import("../../../state/carapace-agent-db.js");
     registrySessionCleanupModule = await import("../../../test-utils/session-state-cleanup.js");
   });
 
@@ -105,7 +105,7 @@ describe("subagent registry persistence resume", () => {
   });
 
   const withRegistryState = <T>(run: (stateDir: string) => Promise<T>) => {
-    const stateDir = tempDirs.make("openclaw-subagent-");
+    const stateDir = tempDirs.make("carapace-subagent-");
     return withSubagentRegistryPersistenceState(
       {
         stateDir,
@@ -117,7 +117,7 @@ describe("subagent registry persistence resume", () => {
           await registrySessionCleanupModule.cleanupSessionStateForTest({ stateDir });
           for (const [label, listDatabases] of [
             ["seed", listSeedAgentDatabases],
-            ["post-reset", registryAgentDbModule.listOpenClawAgentDatabasesForTest],
+            ["post-reset", registryAgentDbModule.listCarapaceAgentDatabasesForTest],
           ] as const) {
             expect(
               listFixtureAgentDatabases(listDatabases, stateDir),
@@ -125,7 +125,7 @@ describe("subagent registry persistence resume", () => {
             ).toEqual([]);
           }
           closeSeedStateDatabase();
-          registryStateDbModule.closeOpenClawStateDatabaseForTest();
+          registryStateDbModule.closeCarapaceStateDatabaseForTest();
         },
       },
       () => run(stateDir),
@@ -162,7 +162,7 @@ describe("subagent registry persistence resume", () => {
       const registered = mod.getSubagentRunByChildSessionKey(childSessionKey);
       expect(registered).toMatchObject(expected);
       expect(registered?.expectsCompletionMessage).toBe(registration.expectsCompletionMessage);
-      registryStateDbModule.closeOpenClawStateDatabaseForTest();
+      registryStateDbModule.closeCarapaceStateDatabaseForTest();
       const restored = readPersistedRun("child-parent-association");
       expect(restored).toMatchObject(expected);
       expect(restored?.expectsCompletionMessage).toBe(registration.expectsCompletionMessage);
@@ -213,7 +213,7 @@ describe("subagent registry persistence resume", () => {
       ).toHaveLength(1);
       expect(
         listFixtureAgentDatabases(
-          registryAgentDbModule.listOpenClawAgentDatabasesForTest,
+          registryAgentDbModule.listCarapaceAgentDatabasesForTest,
           stateDir,
         ),
         "resumed completion timing acquired a post-reset agent handle",
@@ -413,7 +413,7 @@ describe("subagent registry persistence resume", () => {
           expect(mod.getSubagentRunByRunId(run.runId)?.requesterSettleWake).toEqual(
             run.requesterSettleWake,
           );
-          registryStateDbModule.closeOpenClawStateDatabaseForTest();
+          registryStateDbModule.closeCarapaceStateDatabaseForTest();
           closeSeedStateDatabase();
           const persisted = readPersistedRun(run.runId);
           expect(persisted?.requesterSettleWake).toEqual(run.requesterSettleWake);

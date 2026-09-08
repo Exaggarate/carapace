@@ -1,18 +1,18 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-scope-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-scope-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import {
   isProviderApiKeyConfigured,
   isProviderAuthProfileConfigured,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { createRealtimeTranscriptionWebSocketSession } from "openclaw/plugin-sdk/realtime-transcription-session";
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import { createRealtimeTranscriptionWebSocketSession } from "carapace/plugin-sdk/realtime-transcription-session";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceBridgeCreateRequest,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-voice";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => {
+vi.mock("carapace/plugin-sdk/agent-runtime", () => {
   throw new Error("Lazy capability metadata must not load the broad agent runtime");
 });
 

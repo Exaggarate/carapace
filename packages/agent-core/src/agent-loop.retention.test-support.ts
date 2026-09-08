@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { setImmediate } from "node:timers/promises";
-import { createAssistantMessageEventStream } from "@openclaw/ai/event-stream";
-import type { AssistantMessage, Model } from "@openclaw/llm-core";
+import { createAssistantMessageEventStream } from "@carapace/ai/event-stream";
+import type { AssistantMessage, Model } from "@carapace/llm-core";
 import { createDeferred } from "../../../test/helpers/promise.js";
 import { Agent } from "./agent.js";
 import type { AgentMessage } from "./types.js";

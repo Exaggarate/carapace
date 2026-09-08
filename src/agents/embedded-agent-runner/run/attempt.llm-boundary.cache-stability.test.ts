@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { streamOpenAICompletions, streamOpenAIResponses } from "@openclaw/ai/internal/openai";
+import { streamOpenAICompletions, streamOpenAIResponses } from "@carapace/ai/internal/openai";
 /**
  * Cache-stability gate for the prompt-cache bust fix (issue #3658).
  *
@@ -38,7 +38,7 @@ import { persistUserTurnTranscript } from "../../../sessions/user-turn-transcrip
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+  CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
   relocateCurrentRuntimeContextCarrierToTail,
 } from "../../internal-runtime-context.js";
 import { convertToLlm } from "../../sessions/messages.js";
@@ -189,8 +189,8 @@ describe("prompt-cache byte-identity (issue #3658)", () => {
     );
   });
   it.each([
-    [INTERNAL_RUNTIME_CONTEXT_BEGIN, "[[OPENCLAW_INTERNAL_CONTEXT_BEGIN]]"],
-    [INTERNAL_RUNTIME_CONTEXT_END, "[[OPENCLAW_INTERNAL_CONTEXT_END]]"],
+    [INTERNAL_RUNTIME_CONTEXT_BEGIN, "[[CARAPACE_INTERNAL_CONTEXT_BEGIN]]"],
+    [INTERNAL_RUNTIME_CONTEXT_END, "[[CARAPACE_INTERNAL_CONTEXT_END]]"],
   ])(
     "projects literal marker mentions consistently without rewriting transcripts: %s",
     (marker, escaped) => {
@@ -415,7 +415,7 @@ describe("prompt-cache byte-identity (issue #3658)", () => {
 
 describe("append-only late media (issue #99495)", () => {
   it("keeps every sent fingerprint stable and appends one late-media turn", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-99495-boundary-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-99495-boundary-"));
     const target = {
       agentId: "main",
       cwd: dir,
@@ -470,7 +470,7 @@ describe("append-only late media (issue #99495)", () => {
       const next = normalizeMessagesForLlmBoundary(persisted, { timezone: TZ });
       const persistedOutput = persisted as unknown as Array<{
         content?: unknown;
-        __openclaw?: { lateMedia?: unknown };
+        __carapace?: { lateMedia?: unknown };
       }>;
       const providerOutput = next as unknown as Array<{ content?: unknown }>;
       const latePersisted = persistedOutput.at(-1);
@@ -478,7 +478,7 @@ describe("append-only late media (issue #99495)", () => {
       expect(next).toHaveLength(sent.length + 1);
       expect(next.slice(0, sent.length)).toEqual(sent);
       expect(latePersisted?.content).toBe("");
-      expect(latePersisted?.["__openclaw"]?.lateMedia).toBe(true);
+      expect(latePersisted?.["__carapace"]?.lateMedia).toBe(true);
       expect(lateProvider?.content).toBe(
         `${EXPECTED_PREFIX_TURN1}[media attached: ${path.join(dir, "image.png")}]`,
       );
@@ -509,7 +509,7 @@ describe("append-only late media (issue #99495)", () => {
         sessionEntry: undefined,
         sessionId: "unused-session",
         sessionKey: "agent:main:unused",
-        storePath: "/tmp/openclaw-unused-sessions.json",
+        storePath: "/tmp/carapace-unused-sessions.json",
       },
     });
     const resolved = await prepared.resolveMessage();
@@ -522,7 +522,7 @@ describe("append-only late media (issue #99495)", () => {
 
     expect(normalized).toHaveLength(1);
     expect(merged).toMatchObject({
-      __openclaw: {
+      __carapace: {
         media: [expect.objectContaining({ path: "media://inbound/image.jpg" })],
       },
     });
@@ -532,10 +532,10 @@ describe("append-only late media (issue #99495)", () => {
 function runtimeCarrier(content: string, timestamp: number): AgentMsg {
   return {
     role: "custom",
-    customType: OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+    customType: CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
     content,
     display: false,
-    details: { source: "openclaw-runtime-context", runtimeContextCarrier: true },
+    details: { source: "carapace-runtime-context", runtimeContextCarrier: true },
     timestamp,
   } as unknown as AgentMsg;
 }
@@ -544,7 +544,7 @@ function isCarrier(message: unknown): boolean {
   return Boolean(
     message &&
     typeof message === "object" &&
-    (message as { customType?: unknown }).customType === OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+    (message as { customType?: unknown }).customType === CARAPACE_RUNTIME_CONTEXT_CUSTOM_TYPE,
   );
 }
 
@@ -744,7 +744,7 @@ describe("prompt-cache tail carrier for current-turn metadata (issue #100271)", 
     // (Conversation info / Reply target / …), which room events never carry. So
     // the inline form is byte-identical active vs historical.
     const roomText = [
-      "[OpenClaw room event]",
+      "[Carapace room event]",
       "inbound_event_kind: room_event",
       "Room context:\n#1 Alice: hi",
     ].join("\n\n");
@@ -770,7 +770,7 @@ describe("prompt-cache tail carrier for current-turn metadata (issue #100271)", 
     const activeGroupTurn = currentUserMsg("The launch is Friday", TS_TURN1);
     const persistedGroupTurn = {
       ...storedUserMsg("The launch is Friday", TS_TURN1),
-      __openclaw: {
+      __carapace: {
         senderId: "alice-id",
         senderName: "Alice",
         senderUsername: "alice",

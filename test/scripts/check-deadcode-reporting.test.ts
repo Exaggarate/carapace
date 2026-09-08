@@ -19,7 +19,7 @@ describe("deadcode command reporting", () => {
     { wrapper: "exports", outcomes: ["success", "success", "success"] },
     { wrapper: "unused-files", outcomes: ["success", "success"] },
   ])("reports every $wrapper outcome: $outcomes", ({ wrapper, outcomes }) => {
-    const root = mkdtempSync(path.join(os.tmpdir(), "openclaw-deadcode-reporting-"));
+    const root = mkdtempSync(path.join(os.tmpdir(), "carapace-deadcode-reporting-"));
     const pnpm = path.join(root, "pnpm.cjs");
     const scopes = ["production", "full-tree", "script"].slice(0, outcomes.length);
     const configs = [

@@ -8,11 +8,11 @@ import { managedWorktrees } from "../agents/worktrees/service.js";
 import { loadSessionEntry, upsertSessionEntryCore } from "../config/sessions/session-accessor.js";
 import { registerClonedProjectRegistry } from "../projects/project-registry.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "../state/carapace-state-db.js";
 import { getSessionRepositoryWorkspaceStore } from "../state/session-repository-workspaces.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { executeGitHubPublication } from "./github-publication-executor.js";
 import {
   ensureGitHubPublicationStore,
@@ -56,7 +56,7 @@ it.each([
 ] as const)(
   "continues publication through the actual Gateway handoff: %s",
   async (scenario) => {
-    await withOpenClawTestState({ label: "publication-handoff" }, async (state) => {
+    await withCarapaceTestState({ label: "publication-handoff" }, async (state) => {
       const actual =
         await vi.importActual<typeof import("../process/exec.js")>("../process/exec.js");
       mocked.run.mockImplementation(actual.runCommandBuffered);
@@ -129,7 +129,7 @@ it.each([
         await fs.writeFile(path.join(cloud, "published-only.ignored"), "cloud publication only\n");
         git(cloud, "add", "-f", "published-only.ignored");
       }
-      git(cloud, "commit", "-qam", "Cloud\n\nOpenClaw-Publication: prior-cloud-publication");
+      git(cloud, "commit", "-qam", "Cloud\n\nCarapace-Publication: prior-cloud-publication");
       const publishedHead = git(cloud, "rev-parse", "HEAD");
       git(cloud, "push", "origin", repository.branch);
       const priorCurrent = await readActualWorkspaceManifest({ root: cloud, baseCommit });
@@ -378,7 +378,7 @@ it.each([
       };
       ensureGitHubPublicationStore();
       const requestId = "local-publication";
-      runOpenClawStateWriteTransaction(({ db }) =>
+      runCarapaceStateWriteTransaction(({ db }) =>
         insertGitHubPublicationRequest(db, {
           request: { ...scope, idempotencyKey: "local", title: "Continue" },
           requestId,
@@ -437,13 +437,13 @@ it.each([
   120000,
 );
 it("can hold publisher exclusion during an existing reclaim claim without taking repository admission", async () => {
-  await withOpenClawTestState({ label: "handoff-exclusion" }, async () => {
+  await withCarapaceTestState({ label: "handoff-exclusion" }, async () => {
     const { createWorkerSessionPlacementStore } =
       await import("./worker-environments/placement-store.js");
     const { seedActivePlacement, REQUEST } =
       await import("./worker-environments/placement-dispatch-test-fixtures.js");
     const { placementTurnOwner } = await import("./worker-environments/placement-record.js");
-    const placements = createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() });
+    const placements = createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() });
     const active = seedActivePlacement(placements, {
       environmentId: "handoff-worker",
       ownerEpoch: 1,

@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { resolveAgentDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
@@ -8,13 +8,13 @@ import {
   saveAuthProfileStore,
   type AuthProfileStore,
 } from "../../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { UsageSummary } from "../../infra/provider-usage.types.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import { AsyncWorkScope } from "../../shared/async-work-scope.js";
 import { createDeferredCore } from "../../shared/deferred.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../../state/carapace-agent-db.js";
 
 const mocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(),
@@ -57,7 +57,7 @@ import { usageHandlers } from "./usage.js";
 
 const config = {
   agents: { list: [{ id: "main", default: true }] },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const refreshingCapableClient = { connect: { caps: ["usage-refreshing"] } };
 
@@ -78,7 +78,7 @@ function createStore(access = "access-one"): AuthProfileStore {
   };
 }
 
-async function runUsageStatus(params: { runtimeConfig?: OpenClawConfig; client?: unknown } = {}) {
+async function runUsageStatus(params: { runtimeConfig?: CarapaceConfig; client?: unknown } = {}) {
   const runtimeConfig = params.runtimeConfig ?? config;
   const respond = vi.fn();
   await expectDefined(
@@ -362,7 +362,7 @@ describe("usage.status provider usage cache", () => {
   });
 
   it("rebuilds prepared usage facts once after an auth-store write", async () => {
-    const writtenAgentDir = tempDirs.make("openclaw-usage-auth-");
+    const writtenAgentDir = tempDirs.make("carapace-usage-auth-");
     try {
       replaceRuntimeAuthProfileStoreSnapshots([{ agentDir: writtenAgentDir, store }]);
 
@@ -377,7 +377,7 @@ describe("usage.status provider usage cache", () => {
       expect(mocks.listProviderUsagePluginDescriptors).toHaveBeenCalledTimes(2);
       expect(mocks.ensureAuthProfileStore).toHaveBeenCalledTimes(2);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeCarapaceAgentDatabasesForTest();
     }
   });
 
@@ -410,7 +410,7 @@ describe("usage.status provider usage cache", () => {
 
   it("invalidates cached usage when the runtime config changes", async () => {
     const configFor = (baseUrl: string) =>
-      ({ ...config, models: { providers: { openai: { baseUrl, models: [] } } } }) as OpenClawConfig;
+      ({ ...config, models: { providers: { openai: { baseUrl, models: [] } } } }) as CarapaceConfig;
     const first = configFor("https://one.example/v1");
     await expect(runCapableUsageStatus(first)).resolves.toMatchObject({ refreshing: true });
     await vi.waitFor(async () => {

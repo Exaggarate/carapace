@@ -1,5 +1,5 @@
 // Coverage for waiting on completion-required async tool tasks.
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   completeTaskRunByRunId,

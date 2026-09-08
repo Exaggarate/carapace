@@ -4,12 +4,12 @@ import { note } from "../../packages/terminal-core/src/note.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  listOpenClawRegisteredAgentDatabases,
-  migrateOpenClawAgentDatabaseForMaintenance,
+  closeCarapaceAgentDatabaseByPath,
+  listCarapaceRegisteredAgentDatabases,
+  migrateCarapaceAgentDatabaseForMaintenance,
   withAgentDatabaseMaintenanceLease,
-} from "../state/openclaw-agent-db.js";
-import type { OpenClawStateLeaseContext } from "../state/openclaw-state-lease.js";
+} from "../state/carapace-agent-db.js";
+import type { CarapaceStateLeaseContext } from "../state/carapace-state-lease.js";
 import { shortenHomePath } from "../utils.js";
 import {
   DoctorSqliteMaintenanceLockUnavailableError,
@@ -71,7 +71,7 @@ function inspectAgentMemoryRecallMetadataMigration(
 ): MemoryRecallMetadataMigrationState | null {
   const stat = fs.lstatSync(pathname);
   if (!stat.isFile()) {
-    throw new Error(`OpenClaw agent database is not a regular file: ${pathname}`);
+    throw new Error(`Carapace agent database is not a regular file: ${pathname}`);
   }
   const database = openNodeSqliteDatabase(pathname, { readOnly: true });
   try {
@@ -84,14 +84,14 @@ function inspectAgentMemoryRecallMetadataMigration(
 /** Move the unreleased inline metadata shape into rollback-safe additive tables. */
 async function repairDoctorAgentMemorySchemas(
   options: { env?: NodeJS.ProcessEnv },
-  maintenance: OpenClawStateLeaseContext,
+  maintenance: CarapaceStateLeaseContext,
 ): Promise<DoctorAgentMemorySchemaReport> {
   const env = options.env ?? process.env;
   const repaired: DoctorAgentMemorySchemaRepair[] = [];
   const warnings: string[] = [];
-  let registered: ReturnType<typeof listOpenClawRegisteredAgentDatabases>;
+  let registered: ReturnType<typeof listCarapaceRegisteredAgentDatabases>;
   try {
-    registered = listOpenClawRegisteredAgentDatabases({
+    registered = listCarapaceRegisteredAgentDatabases({
       env,
       includeIncompatibleSchemaVersions: true,
     });
@@ -112,8 +112,8 @@ async function repairDoctorAgentMemorySchemas(
       }
       // Doctor owns offline maintenance. Close any handle opened by an earlier
       // doctor contribution before the feature owner migrates the shared table.
-      closeOpenClawAgentDatabaseByPath(entry.path);
-      await migrateOpenClawAgentDatabaseForMaintenance(
+      closeCarapaceAgentDatabaseByPath(entry.path);
+      await migrateCarapaceAgentDatabaseForMaintenance(
         { agentId: entry.agentId, pathname: entry.path },
         maintenance,
       );

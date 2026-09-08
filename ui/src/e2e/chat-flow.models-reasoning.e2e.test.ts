@@ -19,7 +19,7 @@ const suite = createChatFlowE2eSuite();
 const rosterMatch = { includeGlobal: true };
 
 async function createReasoningProofPage(scope: string) {
-  const parent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+  const parent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
   const artifactDir = parent ? createControlUiE2eArtifactDir(scope, parent) : undefined;
   const viewport = { height: 900, width: 1280 };
   const context = await suite.newBrowserContext({
@@ -79,7 +79,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const picker = pane.locator(".chat-controls__model-picker");
       await picker.locator('[data-chat-model-select="true"]').click();
       const toggle = picker.locator("[data-chat-context-window-toggle]");
@@ -118,7 +118,7 @@ suite.define(() => {
       label: "Session A",
       permissionMode: "guarded",
       sessionId: "session-a-original",
-      sessionRoot: "/workspace/projects/openclaw",
+      sessionRoot: "/workspace/projects/carapace",
       updatedAt: 2,
     };
     const gateway = await installMockGateway(page, {
@@ -130,7 +130,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, session.key));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const trigger = pane.locator('[data-chat-permission-select="true"]');
       await trigger.waitFor({ state: "visible", timeout: 10_000 });
       expect(await trigger.getAttribute("data-chat-select-value")).toBe("guarded");
@@ -489,7 +489,7 @@ suite.define(() => {
         },
       ]);
 
-      const artifactDirParent = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDirParent = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactDirParent
         ? createControlUiE2eArtifactDir("chat-flow.models-reasoning", artifactDirParent)
         : undefined;
@@ -522,7 +522,7 @@ suite.define(() => {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:session-a"));
 
       const main = page.getByRole("main");
-      const activePane = main.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const activePane = main.locator('carapace-chat-pane[aria-hidden="false"]');
       const modelSelect = activePane.locator('[data-chat-model-select="true"]');
       const selectModel = async (value: string) => {
         await activePane.locator('[data-chat-model-select="true"]').click();
@@ -753,7 +753,7 @@ suite.define(() => {
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, "agent:main:session-default"));
       const main = page.getByRole("main");
-      const activePane = main.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const activePane = main.locator('carapace-chat-pane[aria-hidden="false"]');
       const modelSelect = activePane.locator('[data-chat-model-select="true"]');
       const modelPopup = activePane.locator('.chat-controls__model-picker wa-popup [part="popup"]');
       const modelOption = activePane.locator('[data-chat-model-option="openai/gpt-5.6-sol"]');
@@ -815,7 +815,7 @@ suite.define(() => {
           name: "GPT-5.6 Luna",
           provider: "openai",
           reasoning: true,
-          agentRuntime: { id: "openclaw", source: "model" },
+          agentRuntime: { id: "carapace", source: "model" },
           thinkingLevels: ["max", "ultra"].map((id) => ({ id, label: id })),
           thinkingDefault: "ultra",
         },
@@ -836,7 +836,7 @@ suite.define(() => {
 
     try {
       await page.goto(controlUiSessionUrl(suite.server.baseUrl, sessionKey));
-      const pane = page.locator('openclaw-chat-pane[aria-hidden="false"]');
+      const pane = page.locator('carapace-chat-pane[aria-hidden="false"]');
       const effortSelect = pane.locator('[data-chat-thinking-select="true"]');
       await effortSelect.click();
       const thinkingSlider = pane.locator('[data-chat-thinking-slider="true"]');

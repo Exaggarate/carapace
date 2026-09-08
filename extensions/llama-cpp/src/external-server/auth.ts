@@ -3,12 +3,12 @@ import {
   hasConfiguredSecretInput,
   isNonSecretApiKeyMarker,
   normalizeOptionalSecretInput,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { resolveConfiguredSecretInputString } from "openclaw/plugin-sdk/secret-input-runtime";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+  type CarapaceConfig,
+} from "carapace/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "carapace/plugin-sdk/provider-auth-runtime";
+import type { ModelProviderConfig } from "carapace/plugin-sdk/provider-model-shared";
+import { resolveConfiguredSecretInputString } from "carapace/plugin-sdk/secret-input-runtime";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import { LLAMA_CPP_PROVIDER_ID, resolveLlamaCppSyntheticApiKey } from "../defaults.js";
 
 export function hasLlamaServerAuthorizationHeader(headers: unknown): boolean {
@@ -34,7 +34,7 @@ export function shouldUseLlamaServerSyntheticAuth(
 }
 
 export async function resolveLlamaServerProviderHeaders(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   headers?: unknown;
 }): Promise<Record<string, string> | undefined> {
@@ -69,7 +69,7 @@ export async function resolveLlamaServerProviderHeaders(params: {
 }
 
 export async function resolveLlamaServerRuntimeApiKey(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   profileId?: string;
 }): Promise<string | undefined> {

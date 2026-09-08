@@ -4,9 +4,9 @@ import { TextDecoder } from "node:util";
 import {
   parseStrictNonNegativeInteger,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/number-coercion";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { GatewayProtocolRequestError } from "../../packages/gateway-client/src/protocol-request.js";
 import {
   GATEWAY_CLIENT_MODES,
@@ -40,7 +40,7 @@ import {
 } from "../config/legacy.default-agent-owner.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   callGateway,
   isGatewayCredentialsRequiredError,
@@ -130,7 +130,7 @@ type RemoteGatewayRoster = {
 };
 type AgentDispatchOpts = Omit<AgentCliOpts, "messageFile"> & {
   message: string;
-  gatewayDispatchConfig?: OpenClawConfig;
+  gatewayDispatchConfig?: CarapaceConfig;
   remoteGatewayRoster?: RemoteGatewayRoster;
   localGatewayCompatibilityAgentId?: string;
 };
@@ -157,10 +157,10 @@ function usesImplicitRemoteCompatibilityDefault(roster: RemoteGatewayRoster): bo
   );
 }
 
-function resolveImplicitCliAgentId(cfg: OpenClawConfig, remote?: RemoteGatewayRoster): string {
+function resolveImplicitCliAgentId(cfg: CarapaceConfig, remote?: RemoteGatewayRoster): string {
   const migratedConfig = remote
     ? cfg
-    : (migratePersistedImplicitMainRoster(cfg).config as OpenClawConfig);
+    : (migratePersistedImplicitMainRoster(cfg).config as CarapaceConfig);
   const selectionCfg = remote
     ? cfg
     : inheritLegacyDefaultAgentId(
@@ -211,7 +211,7 @@ const embeddedStateLockModuleLoader = createLazyPromiseLoader(
   { cacheRejections: true },
 );
 const replyPayloadModuleLoader = createLazyPromiseLoader(
-  () => import("openclaw/plugin-sdk/reply-payload"),
+  () => import("carapace/plugin-sdk/reply-payload"),
   { cacheRejections: true },
 );
 let gatewayAbortRetryDelaysMsForTests: readonly number[] | undefined;
@@ -232,7 +232,7 @@ type EmbeddedRunDiagnosticsOptions = {
 async function startEmbeddedRunDiagnosticsExporters(
   runtime: RuntimeEnv,
   options: EmbeddedRunDiagnosticsOptions,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
 ): Promise<OneShotDiagnosticsHandle | null> {
   try {
     return await startOneShotDiagnosticsExporters({
@@ -282,18 +282,18 @@ async function runEmbeddedAgentCommand(
   }
 }
 
-async function loadRuntimeConfig(): Promise<OpenClawConfig> {
+async function loadRuntimeConfig(): Promise<CarapaceConfig> {
   const { getRuntimeConfig } = await runtimeConfigModuleLoader.load();
   return getRuntimeConfig();
 }
 
-function usesRemoteGateway(cfg: OpenClawConfig): boolean {
+function usesRemoteGateway(cfg: CarapaceConfig): boolean {
   return Boolean(
-    cfg.gateway?.mode === "remote" || normalizeOptionalString(process.env.OPENCLAW_GATEWAY_URL),
+    cfg.gateway?.mode === "remote" || normalizeOptionalString(process.env.CARAPACE_GATEWAY_URL),
   );
 }
 
-async function loadRemoteGatewayRoster(cfg: OpenClawConfig): Promise<RemoteGatewayRoster> {
+async function loadRemoteGatewayRoster(cfg: CarapaceConfig): Promise<RemoteGatewayRoster> {
   const result = await callGateway<AgentsListResult>({
     method: "agents.list",
     params: {},
@@ -316,8 +316,8 @@ async function loadRemoteGatewayRoster(cfg: OpenClawConfig): Promise<RemoteGatew
 }
 
 async function loadRemoteGatewayRosterWithShellEnvFallback(
-  cfg: OpenClawConfig,
-): Promise<{ config: OpenClawConfig; roster: RemoteGatewayRoster }> {
+  cfg: CarapaceConfig,
+): Promise<{ config: CarapaceConfig; roster: RemoteGatewayRoster }> {
   try {
     return { config: cfg, roster: await loadRemoteGatewayRoster(cfg) };
   } catch (error) {
@@ -333,7 +333,7 @@ async function loadRemoteGatewayRosterWithShellEnvFallback(
 }
 
 function formatActiveGatewayLocalRefusal(identity: GatewayLockIdentity): string {
-  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Run without --local to use it, or stop the Gateway first (${formatCliCommand("openclaw gateway stop")}).`;
+  return `A Gateway is running for this state directory (pid ${identity.pid}, port ${identity.port}). Run without --local to use it, or stop the Gateway first (${formatCliCommand("carapace gateway stop")}).`;
 }
 
 async function acquireEmbeddedAgentStateLock(
@@ -378,7 +378,7 @@ function protectJsonStdout(opts: Pick<AgentCliOpts, "json">): void {
 
 function missingAgentMessageError(): Error {
   return new Error(
-    `Missing message. Use ${formatCliCommand('openclaw agent --message "..." --agent <id>')} or ${formatCliCommand("openclaw agent --message-file <path> --agent <id>")}.`,
+    `Missing message. Use ${formatCliCommand('carapace agent --message "..." --agent <id>')} or ${formatCliCommand("carapace agent --message-file <path> --agent <id>")}.`,
   );
 }
 
@@ -458,7 +458,7 @@ async function resolveAgentMessageOpts(opts: AgentCliOpts): Promise<AgentDispatc
   return { ...rest, message };
 }
 
-function parseTimeoutSeconds(opts: { cfg: OpenClawConfig; timeout?: string }) {
+function parseTimeoutSeconds(opts: { cfg: CarapaceConfig; timeout?: string }) {
   const raw =
     opts.timeout !== undefined
       ? parseStrictNonNegativeInteger(opts.timeout)
@@ -578,7 +578,7 @@ async function normalizeSessionKeyOptsForDispatch(
   const hasExplicitSessionTarget =
     Boolean(opts.sessionId?.trim()) ||
     [rawSessionKey, rawTo].some((value) => classifySessionKeyShape(value) === "agent");
-  let selectionCfg: OpenClawConfig | undefined;
+  let selectionCfg: CarapaceConfig | undefined;
   let remoteGatewayRoster: RemoteGatewayRoster | undefined;
   if (opts.local !== true) {
     const cfg = readGatewayDispatchConfig();
@@ -829,7 +829,7 @@ async function abortAcceptedGatewayAgentRunWithGatewayCall(params: {
   signal: AgentCliSignal | undefined;
   runtime: RuntimeEnv;
   gatewayIdentity: AgentGatewayCallIdentity;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<void> {
   const request: GatewayRequestFunction = async <T = Record<string, unknown>>(
     method: string,
@@ -960,7 +960,7 @@ async function agentViaGatewayCommand(
 ) {
   const body = opts.message;
   const explicitSessionKey = opts.sessionKey?.trim();
-  let cfg: OpenClawConfig = opts.gatewayDispatchConfig ?? readGatewayDispatchConfig();
+  let cfg: CarapaceConfig = opts.gatewayDispatchConfig ?? readGatewayDispatchConfig();
   const remoteGateway = usesRemoteGateway(cfg);
   const remoteRosterIsSole =
     opts.remoteGatewayRoster?.ownership === "sole" ||
@@ -984,7 +984,7 @@ async function agentViaGatewayCommand(
     !hasImplicitGlobalTarget
   ) {
     throw new Error(
-      `No target session selected. Use --agent <id>, --session-key <key>, --session-id <id>, or --to <E.164>. Run ${formatCliCommand("openclaw agents list")} to see agents.`,
+      `No target session selected. Use --agent <id>, --session-key <key>, --session-id <id>, or --to <E.164>. Run ${formatCliCommand("carapace agents list")} to see agents.`,
     );
   }
 
@@ -997,7 +997,7 @@ async function agentViaGatewayCommand(
       opts.remoteGatewayRoster?.agentIds ?? (remoteGateway ? undefined : listAgentIds(cfg));
     if (knownAgents && !knownAgents.includes(agentId)) {
       throw new Error(
-        `Unknown agent id "${agentIdRaw}". Use "${formatCliCommand("openclaw agents list")}" to see configured agents.`,
+        `Unknown agent id "${agentIdRaw}". Use "${formatCliCommand("carapace agents list")}" to see configured agents.`,
       );
     }
   }
@@ -1068,7 +1068,7 @@ async function agentViaGatewayCommand(
   let activeConnectionAbortAttempted = false;
   let activeConnectionAbortSucceeded = false;
   let response: GatewayAgentResponse | undefined;
-  const dispatchGatewayAgentCall = async (activeCfg: OpenClawConfig) =>
+  const dispatchGatewayAgentCall = async (activeCfg: CarapaceConfig) =>
     await withProgress(
       {
         label: "Waiting for agent reply…",
@@ -1250,7 +1250,7 @@ export async function agentCliCommand(
   // Fail loudly and point at the first-class command instead of no-opping.
   if (isCompactControlCommand(messageOpts.message)) {
     runtime.error?.(
-      "Slash commands cannot be executed via --message from the CLI. Use: openclaw sessions compact <key>",
+      "Slash commands cannot be executed via --message from the CLI. Use: carapace sessions compact <key>",
     );
     runtime.exit(1);
     return undefined;
@@ -1311,7 +1311,7 @@ export async function agentCliCommand(
         // finish this turn. Recommending a blind retry or --local here could
         // double-execute the message, so point at verification first.
         runtime.error?.(
-          `Gateway agent call ${failureHint}; the Gateway may still be running this turn. Check \`openclaw gateway status\` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.`,
+          `Gateway agent call ${failureHint}; the Gateway may still be running this turn. Check \`carapace gateway status\` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.`,
         );
       }
       throw err;

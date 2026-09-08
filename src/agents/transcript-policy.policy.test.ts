@@ -3,7 +3,7 @@
  * Verifies plugin policy hooks override generic transport fallback choices.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { resolveTranscriptPolicy } from "./transcript-policy.js";
 
 vi.mock("../plugins/provider-hook-runtime.js", () => ({
@@ -33,7 +33,7 @@ const MISTRAL_PLUGIN_CONFIG = {
       mistral: { enabled: true },
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 const MOONSHOT_PLUGIN_CONFIG = {
   plugins: {
@@ -41,19 +41,19 @@ const MOONSHOT_PLUGIN_CONFIG = {
       moonshot: { enabled: true },
     },
   },
-} as OpenClawConfig;
+} as CarapaceConfig;
 
 function createProviderRuntimeSmokeContext(): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir: string;
 } {
   const env = { ...process.env };
-  delete env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  delete env.OPENCLAW_SKIP_PROVIDERS;
-  delete env.OPENCLAW_SKIP_CHANNELS;
-  delete env.OPENCLAW_SKIP_CRON;
-  delete env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+  delete env.CARAPACE_BUNDLED_PLUGINS_DIR;
+  delete env.CARAPACE_SKIP_PROVIDERS;
+  delete env.CARAPACE_SKIP_CHANNELS;
+  delete env.CARAPACE_SKIP_CRON;
+  delete env.CARAPACE_TEST_MINIMAL_GATEWAY;
   return {
     config: {},
     env,

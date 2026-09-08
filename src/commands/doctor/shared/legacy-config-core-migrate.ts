@@ -1,8 +1,8 @@
 // Core doctor compatibility migration pipeline for current config objects.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { readAgentRosterProperty } from "../../../agents/agent-scope-config.js";
 import { migrateLegacyContextBudgetConfig } from "../../../config/legacy.context-budget.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { HeartbeatSchema } from "../../../config/zod-schema.agent-runtime.js";
 import { runPluginSetupConfigMigrations } from "../../../plugins/setup-registry.js";
 import { migrateLegacySecretRefEnvMarkers } from "../../../secrets/legacy-secretref-env-marker.js";
@@ -16,9 +16,9 @@ import { stripRetiredTuningKnobs } from "./legacy-config-migrations.runtime.reti
 import { migrateReservedMcpServerNames } from "./reserved-mcp-server-name-migrate.js";
 
 function repairAgentRoster(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   repair: (agent: Record<string, unknown>, path: string) => Record<string, unknown>,
-): OpenClawConfig {
+): CarapaceConfig {
   // Snapshot/legacy migration normally converts lists first; blocked include migrations
   // can still leave a legacy list in doctor's best-effort candidate.
   const roster = readAgentRosterProperty(cfg);
@@ -50,7 +50,7 @@ function repairAgentRoster(
     : cfg;
 }
 
-function repairInvalidHeartbeatActiveHours(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function repairInvalidHeartbeatActiveHours(cfg: CarapaceConfig, changes: string[]): CarapaceConfig {
   const repairHeartbeat = (heartbeat: unknown, path: string): unknown => {
     if (!isRecord(heartbeat) || !Object.hasOwn(heartbeat, "activeHours")) {
       return heartbeat;
@@ -85,10 +85,10 @@ function repairInvalidHeartbeatActiveHours(cfg: OpenClawConfig, changes: string[
       ...next.agents,
       defaults: { ...next.agents?.defaults, heartbeat: defaultsHeartbeat },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function repairNullAgentWorkspaces(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function repairNullAgentWorkspaces(cfg: CarapaceConfig, changes: string[]): CarapaceConfig {
   let repaired = 0;
   const next = repairAgentRoster(cfg, (agent) => {
     if (agent.workspace === null) {
@@ -113,14 +113,14 @@ function repairNullAgentWorkspaces(cfg: OpenClawConfig, changes: string[]): Open
 
 /** Normalize current config through core, plugin setup, channel, and secret-ref migrations. */
 export function normalizeCompatibilityConfigValues(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   options: {
     blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
     sourceRaw?: unknown;
     sourceConfigBeforeMigrations?: unknown;
   } = {},
 ): {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   changes: string[];
   warnings?: string[];
 } {

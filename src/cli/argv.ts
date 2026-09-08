@@ -1,4 +1,4 @@
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 // Low-level CLI argv helpers for root options, help/version detection, and command paths.
 import { isExperimentalClawsEnabled } from "../claws/experimental.js";
 import { isBunRuntime, isNodeRuntime } from "../daemon/runtime-binary.js";
@@ -461,11 +461,11 @@ export function getPrimaryCommand(argv: string[]): string | null {
 
 export { getCommandPositionalsWithRootOptions } from "../infra/cli-root-options.js";
 
-export function buildParseArgv(rawArgs: string[], programName = "openclaw"): string[] {
+export function buildParseArgv(rawArgs: string[], programName = "carapace"): string[] {
   const normalizedArgv =
     rawArgs[0] === programName
       ? rawArgs.slice(1)
-      : rawArgs[0]?.endsWith("openclaw")
+      : rawArgs[0]?.endsWith("carapace")
         ? rawArgs.slice(1)
         : rawArgs;
   const looksLikeNode =

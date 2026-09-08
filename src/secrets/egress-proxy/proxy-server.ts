@@ -34,8 +34,8 @@ import {
   type SecretEgressRefusalReason,
 } from "./stream-substitution.js";
 
-const PROXY_AUTH_USERNAME = "openclaw";
-const PROXY_AUTH_REALM = "OpenClaw secret egress";
+const PROXY_AUTH_USERNAME = "carapace";
+const PROXY_AUTH_REALM = "Carapace secret egress";
 const REFUSAL_BODY = "Secret egress proxy refused the request.\n";
 const UPSTREAM_ERROR_BODY = "Secret egress proxy could not reach the upstream host.\n";
 
@@ -313,7 +313,7 @@ export async function startSecretEgressProxyServer(params: {
     return false;
   };
   const hostNotAllowedBody = (host: string): string =>
-    `Host "${host}" is not in the secret egress proxy traffic allowlist. Add it to secrets.egressProxy.allowedHosts or bind a store secret to it with: openclaw secrets store set <NAME> --allow-host ${host}, then restart the Gateway.\n`;
+    `Host "${host}" is not in the secret egress proxy traffic allowlist. Add it to secrets.egressProxy.allowedHosts or bind a store secret to it with: carapace secrets store set <NAME> --allow-host ${host}, then restart the Gateway.\n`;
   const authorize = (
     headers: IncomingHttpHeaders,
   ): RegisteredRun | Exclude<SecretEgressRefusalReason, "destination-not-allowed"> => {

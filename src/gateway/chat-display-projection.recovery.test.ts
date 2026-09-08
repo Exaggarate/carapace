@@ -3,7 +3,7 @@ import { STREAM_ERROR_FALLBACK_TEXT } from "../agents/stream-message-shared.js";
 import { projectChatDisplayMessages } from "./chat-display-projection.js";
 import { buildSessionHistorySnapshot, SessionHistorySseState } from "./session-history-state.js";
 
-const user = { role: "user", content: "hello", __openclaw: { seq: 1 } };
+const user = { role: "user", content: "hello", __carapace: { seq: 1 } };
 const failed = {
   role: "assistant",
   provider: "openai",
@@ -11,7 +11,7 @@ const failed = {
   content: [],
   stopReason: "error",
   errorMessage: "model unavailable",
-  __openclaw: { id: "failed", seq: 2, runId: "run-a" },
+  __carapace: { id: "failed", seq: 2, runId: "run-a" },
 };
 const answer = {
   role: "assistant",
@@ -19,11 +19,11 @@ const answer = {
   model: "backup",
   content: [{ type: "text", text: "Recovered answer" }],
   stopReason: "stop",
-  __openclaw: { id: "answer", seq: 3, runId: "run-a" },
+  __carapace: { id: "answer", seq: 3, runId: "run-a" },
 };
 
 function projectedIds(messages: unknown[]) {
-  return projectChatDisplayMessages(messages).map((message) => message["__openclaw"]);
+  return projectChatDisplayMessages(messages).map((message) => message["__carapace"]);
 }
 
 describe("recovered assistant errors", () => {
@@ -41,12 +41,12 @@ describe("recovered assistant errors", () => {
     const failures = Array.from({ length: 4 }, (_, attempt) => ({
       ...failed,
       content,
-      __openclaw: { ...failed["__openclaw"], id: `attempt-${attempt}`, seq: attempt + 2 },
+      __carapace: { ...failed["__carapace"], id: `attempt-${attempt}`, seq: attempt + 2 },
     }));
-    const final = { ...answer, __openclaw: { ...answer["__openclaw"], seq: 6 } };
+    const final = { ...answer, __carapace: { ...answer["__carapace"], seq: 6 } };
     const raw = [user, ...failures, final];
     const original = structuredClone(raw);
-    expect(projectedIds(raw)).toEqual([user["__openclaw"], final["__openclaw"]]);
+    expect(projectedIds(raw)).toEqual([user["__carapace"], final["__carapace"]]);
     expect(buildSessionHistorySnapshot({ rawMessages: raw }).history.messages).toEqual([
       user,
       final,
@@ -55,24 +55,24 @@ describe("recovered assistant errors", () => {
   });
 
   it.each([
-    { ...answer, __openclaw: { ...answer["__openclaw"], runId: "run-b" } },
-    { ...answer, __openclaw: { id: "answer", seq: 3 } },
-    { ...answer, provider: "openclaw", model: "gateway-injected" },
+    { ...answer, __carapace: { ...answer["__carapace"], runId: "run-b" } },
+    { ...answer, __carapace: { id: "answer", seq: 3 } },
+    { ...answer, provider: "carapace", model: "gateway-injected" },
     { ...answer, stopReason: "toolUse" },
     { ...answer, stopReason: "error" },
     { ...answer, stopReason: "aborted" },
     { ...answer, display: false },
   ])("keeps the failure without a successful runtime answer from its own run: %j", (later) => {
-    expect(projectedIds([user, failed, later])).toContainEqual(failed["__openclaw"]);
+    expect(projectedIds([user, failed, later])).toContainEqual(failed["__carapace"]);
   });
 
   it("keeps an unattributed failure and failures separated by a new user turn", () => {
-    const unattributed = { ...failed, __openclaw: { id: "failed", seq: 2 } };
-    expect(projectedIds([user, unattributed, answer])).toContainEqual(unattributed["__openclaw"]);
+    const unattributed = { ...failed, __carapace: { id: "failed", seq: 2 } };
+    expect(projectedIds([user, unattributed, answer])).toContainEqual(unattributed["__carapace"]);
     expect(projectedIds([user, failed, { ...user, content: "next turn" }, answer])).toContainEqual(
-      failed["__openclaw"],
+      failed["__carapace"],
     );
-    expect(projectedIds([user, failed])).toContainEqual(failed["__openclaw"]);
+    expect(projectedIds([user, failed])).toContainEqual(failed["__carapace"]);
   });
 
   it.each([
@@ -81,7 +81,7 @@ describe("recovered assistant errors", () => {
     { content: [{ type: "attachment", attachment: { kind: "document", label: "report.txt" } }] },
   ])("preserves failed attempts that already produced visible content: %j", ({ content }) => {
     expect(projectedIds([user, { ...failed, content }, answer])).toContainEqual(
-      failed["__openclaw"],
+      failed["__carapace"],
     );
   });
 
@@ -93,18 +93,18 @@ describe("recovered assistant errors", () => {
   });
 
   it("repairs only matching attempts when run identities interleave", () => {
-    const other = { ...failed, __openclaw: { id: "other", seq: 3, runId: "run-b" } };
+    const other = { ...failed, __carapace: { id: "other", seq: 3, runId: "run-b" } };
     expect(projectedIds([user, failed, other, answer])).toEqual([
-      user["__openclaw"],
-      other["__openclaw"],
-      answer["__openclaw"],
+      user["__carapace"],
+      other["__carapace"],
+      answer["__carapace"],
     ]);
   });
 
   it("retires the empty failure when its fallback answer reaches the output limit", () => {
     expect(projectedIds([user, failed, { ...answer, stopReason: "length" }])).toEqual([
-      user["__openclaw"],
-      answer["__openclaw"],
+      user["__carapace"],
+      answer["__carapace"],
     ]);
   });
 

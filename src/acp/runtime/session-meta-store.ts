@@ -8,7 +8,7 @@ import { loadSessionEntryReadOnly } from "../../config/sessions/session-accessor
 import { resolvePersistedSessionStoreOwnerForKey } from "../../config/sessions/session-store-owner.js";
 import { normalizeStoreSessionKey } from "../../config/sessions/store-entry.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 
 /** Join the logical ACP key to its canonical SQLite entry without renaming ACP metadata. */
@@ -32,9 +32,9 @@ export function resolveStoreEntryForSessionKey(params: {
 export function resolveSessionStorePathForAcp(params: {
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
-}): { cfg: OpenClawConfig; agentId: string; storePath: string; storeSessionKey: string } {
+}): { cfg: CarapaceConfig; agentId: string; storePath: string; storeSessionKey: string } {
   const cfg = params.cfg ?? getRuntimeConfig();
   const parsed = parseAgentSessionKey(params.sessionKey);
   const requestedAgentId = params.agentId?.trim() ? normalizeAgentId(params.agentId) : undefined;
@@ -103,11 +103,11 @@ export function resolveSessionStorePathForAcp(params: {
 export function readSessionEntryFromStore(params: {
   sessionKey: string;
   agentId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   clone?: boolean;
 }): {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId?: string;
   storePath?: string;
   storeSessionKey: string;

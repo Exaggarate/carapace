@@ -10,9 +10,9 @@ import * as secretRegistry from "../logging/secret-redaction-registry.js";
 import { resetSecretRedactionRegistryForTest } from "../logging/secret-redaction-registry.test-support.js";
 import * as processTree from "../process/kill-tree.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { NodeWorkerLaunchStore } from "./node-worker-launch-store.js";
 import {
@@ -42,7 +42,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 afterEach(() => {
   vi.restoreAllMocks();
   resetSecretRedactionRegistryForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 function fixture(options: Parameters<typeof createNodeWorkerSupervisor>[0] = {}) {
@@ -130,7 +130,7 @@ describe("node worker supervisor", () => {
 
   it("keeps the additive table absent until the first stateful operation", async () => {
     const { bundleRoot, env, supervisor } = fixture();
-    const database = openOpenClawStateDatabase({ env });
+    const database = openCarapaceStateDatabase({ env });
     const findTable = () =>
       database.db
         .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")
@@ -190,9 +190,9 @@ describe("node worker supervisor", () => {
     ]);
     await supervisor.close();
     await sameHandle.close();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
-    openOpenClawStateDatabase({ env });
+    openCarapaceStateDatabase({ env });
     const recovered = createNodeWorkerSupervisor({ bundleRoot, env });
     expect(await recovered.status("pending-launch")).toMatchObject({
       state: "pending",
@@ -285,7 +285,7 @@ describe("node worker supervisor", () => {
       ),
     ).rejects.toThrow("replayed with a different plan");
 
-    const row = openOpenClawStateDatabase({ env })
+    const row = openCarapaceStateDatabase({ env })
       .db.prepare("SELECT * FROM node_worker_launches WHERE launch_id = ?")
       .get(input.launchId);
     expect(JSON.stringify(row)).not.toContain(TEST_WORKER_CREDENTIAL);
@@ -470,10 +470,10 @@ describe("node worker supervisor", () => {
       NODE_DISABLE_COMPILE_CACHE: "1",
       NODE_EXTRA_CA_CERTS: path.join(root, "private-ca.pem"),
       NODE_USE_SYSTEM_CA: "1",
-      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
-      OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.node",
-      OPENCLAW_SERVICE_KIND: "node",
-      OPENCLAW_SUPPLIED_SECRET: "supplied-openclaw-secret",
+      CARAPACE_ALLOW_INSECURE_PRIVATE_WS: "1",
+      CARAPACE_LAUNCHD_LABEL: "ai.carapace.node",
+      CARAPACE_SERVICE_KIND: "node",
+      CARAPACE_SUPPLIED_SECRET: "supplied-carapace-secret",
       NODE_OPTIONS: "--title=forbidden-worker-title",
       BASH_ENV: path.join(root, "forbidden-shell-init"),
       DYLD_INSERT_LIBRARIES: path.join(root, "forbidden-runtime-injection"),
@@ -484,7 +484,7 @@ describe("node worker supervisor", () => {
     await withEnvAsync(
       {
         AMBIENT_SECRET: "ambient-secret",
-        OPENCLAW_AMBIENT_SECRET: "ambient-openclaw-secret",
+        CARAPACE_AMBIENT_SECRET: "ambient-carapace-secret",
         HTTP_PROXY: "http://ambient-proxy.invalid",
         NODE_OPTIONS: undefined,
       },
@@ -496,8 +496,8 @@ describe("node worker supervisor", () => {
           NODE_EXTRA_CA_CERTS: suppliedEnv.NODE_EXTRA_CA_CERTS,
           NODE_USE_SYSTEM_CA: suppliedEnv.NODE_USE_SYSTEM_CA,
           NODE_COMPILE_CACHE: expect.stringContaining("node-worker-compile-cache"),
-          OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: suppliedEnv.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS,
-          OPENCLAW_NO_RESPAWN: "1",
+          CARAPACE_ALLOW_INSECURE_PRIVATE_WS: suppliedEnv.CARAPACE_ALLOW_INSECURE_PRIVATE_WS,
+          CARAPACE_NO_RESPAWN: "1",
           [suppliedPathKey]: suppliedEnv[suppliedPathKey],
         };
         const supervisor = createNodeWorkerSupervisor({ bundleRoot, env: suppliedEnv });
@@ -512,11 +512,11 @@ describe("node worker supervisor", () => {
 
         expect(workerEnv).toMatchObject(expectedWorkerEnv);
         expect(workerEnv).not.toHaveProperty("AMBIENT_SECRET");
-        expect(workerEnv).not.toHaveProperty("OPENCLAW_AMBIENT_SECRET");
-        expect(workerEnv).not.toHaveProperty("OPENCLAW_LAUNCHD_LABEL");
-        expect(workerEnv).not.toHaveProperty("OPENCLAW_SERVICE_KIND");
-        expect(workerEnv).not.toHaveProperty("OPENCLAW_STATE_DIR");
-        expect(workerEnv).not.toHaveProperty("OPENCLAW_SUPPLIED_SECRET");
+        expect(workerEnv).not.toHaveProperty("CARAPACE_AMBIENT_SECRET");
+        expect(workerEnv).not.toHaveProperty("CARAPACE_LAUNCHD_LABEL");
+        expect(workerEnv).not.toHaveProperty("CARAPACE_SERVICE_KIND");
+        expect(workerEnv).not.toHaveProperty("CARAPACE_STATE_DIR");
+        expect(workerEnv).not.toHaveProperty("CARAPACE_SUPPLIED_SECRET");
         expect(workerEnv).not.toHaveProperty("NODE_DISABLE_COMPILE_CACHE");
         expect(workerEnv).not.toHaveProperty("NODE_OPTIONS");
         expect(workerEnv).not.toHaveProperty("BASH_ENV");
@@ -822,7 +822,7 @@ describe("node worker supervisor", () => {
       const input = launchInput(workspaceDir, "connection-failure-launch", prompt);
       await supervisor.launch(input, {
         kind: "websocket",
-        url: "wss://gateway.example:18789/__openclaw__/worker",
+        url: "wss://gateway.example:18789/__carapace__/worker",
       });
       if (state === "cancelled") {
         await vi.waitFor(() =>

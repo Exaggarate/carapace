@@ -38,7 +38,7 @@ const directoryLimit = 64;
 async function createRetainedUploads(root: string, sizes: number[]): Promise<string[]> {
   return Promise.all(
     sizes.map(async (size, index) => {
-      const directory = path.join(root, `openclaw-terminal-upload-retained-${index}`);
+      const directory = path.join(root, `carapace-terminal-upload-retained-${index}`);
       const file = path.join(directory, "retained.bin");
       await mkdir(directory, { mode: 0o700 });
       await writeFile(file, "");
@@ -53,13 +53,13 @@ async function createRetainedUploads(root: string, sizes: number[]): Promise<str
 async function retainedDirectories(root: string): Promise<string[]> {
   const entries = await readdir(root, { withFileTypes: true });
   return entries
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith("openclaw-terminal-upload-"))
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("carapace-terminal-upload-"))
     .map((entry) => entry.name);
 }
 
 describe("terminal file upload", () => {
   it("stages arbitrary bytes under a private temporary directory", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-test-");
+    const root = tempDirs.make("carapace-terminal-upload-test-");
     const content = Buffer.from([0, 1, 2, 255]);
 
     const result = await stageTerminalUpload(
@@ -78,15 +78,15 @@ describe("terminal file upload", () => {
   });
 
   it("uses the user-profile ACL boundary instead of a configurable Windows temp directory", async () => {
-    const homeDir = tempDirs.make("openclaw-terminal-upload-windows-home-");
-    const sharedTemp = tempDirs.make("openclaw-terminal-upload-windows-shared-");
+    const homeDir = tempDirs.make("carapace-terminal-upload-windows-home-");
+    const sharedTemp = tempDirs.make("carapace-terminal-upload-windows-shared-");
 
     const result = await stageTerminalUpload(
       { name: "report.pdf", contentBase64: "" },
       { platform: "win32", homeDir, tempDir: sharedTemp },
     );
 
-    expect(result.path.startsWith(path.join(homeDir, ".openclaw", "tmp"))).toBe(true);
+    expect(result.path.startsWith(path.join(homeDir, ".carapace", "tmp"))).toBe(true);
     expect(result.path.startsWith(sharedTemp)).toBe(false);
   });
 
@@ -95,7 +95,7 @@ describe("terminal file upload", () => {
     { name: "a partial lock", payload: '{"pid":' },
     { name: "an orphaned reclaim guard", payload: null },
   ])("protects shared-root locks and recovers safely from $name", async ({ payload }) => {
-    const root = tempDirs.make("openclaw-terminal-upload-private-lock-test-");
+    const root = tempDirs.make("carapace-terminal-upload-private-lock-test-");
     if (process.platform !== "win32") {
       await chmod(root, 0o1777);
     }
@@ -156,7 +156,7 @@ describe("terminal file upload", () => {
   });
 
   it("normalizes hostile and oversized names", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-name-test-");
+    const root = tempDirs.make("carapace-terminal-upload-name-test-");
     const stagedName = async (name: string) =>
       path.basename(
         (
@@ -177,8 +177,8 @@ describe("terminal file upload", () => {
   });
 
   it("recovers expired upload directories after restart", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-recovery-test-");
-    const directory = path.join(root, "openclaw-terminal-upload-stale");
+    const root = tempDirs.make("carapace-terminal-upload-recovery-test-");
+    const directory = path.join(root, "carapace-terminal-upload-stale");
     await mkdir(directory, { mode: 0o700 });
     await writeFile(path.join(directory, "report.pdf"), "stale");
     await utimes(directory, new Date(0), new Date(0));
@@ -192,7 +192,7 @@ describe("terminal file upload", () => {
     "keeps the original recovered expiry after renames in %i upload directories",
     async (count) => {
       vi.useFakeTimers({ now: Date.now() + 60_000 });
-      const root = tempDirs.make("openclaw-terminal-upload-rename-recovery-test-");
+      const root = tempDirs.make("carapace-terminal-upload-rename-recovery-test-");
       const remainingMs = 2 * 60 * 60 * 1000;
       try {
         const files = await createRetainedUploads(
@@ -230,8 +230,8 @@ describe("terminal file upload", () => {
     "gives a replacement directory its own expiry with $identity file identifiers",
     async ({ largeFileIds }) => {
       vi.useFakeTimers({ now: Date.now() + 60_000 });
-      const root = tempDirs.make("openclaw-terminal-upload-replacement-recovery-test-");
-      const directory = path.join(root, "openclaw-terminal-upload-replaced");
+      const root = tempDirs.make("carapace-terminal-upload-replacement-recovery-test-");
+      const directory = path.join(root, "carapace-terminal-upload-replaced");
       const movedDirectory = path.join(root, "operator-kept");
       const retentionMs = 24 * 60 * 60 * 1000;
       const remainingMs = 2 * 60 * 60 * 1000;
@@ -283,8 +283,8 @@ describe("terminal file upload", () => {
     const nowMs = Date.UTC(2026, 8, 7, 12);
     const retentionMs = 1_000;
     vi.useFakeTimers({ now: nowMs });
-    const root = tempDirs.make("openclaw-terminal-upload-future-recovery-test-");
-    const directory = path.join(root, "openclaw-terminal-upload-future");
+    const root = tempDirs.make("carapace-terminal-upload-future-recovery-test-");
+    const directory = path.join(root, "carapace-terminal-upload-future");
     try {
       await mkdir(directory, { mode: 0o700 });
       await writeFile(path.join(directory, "retained.bin"), "keep until expiry");
@@ -316,7 +316,7 @@ describe("terminal file upload", () => {
   });
 
   it("admits only the last available directory across simultaneous uploads after restart", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-count-test-");
+    const root = tempDirs.make("carapace-terminal-upload-count-test-");
     await createRetainedUploads(
       root,
       Array.from({ length: directoryLimit - 1 }, () => 0),
@@ -337,7 +337,7 @@ describe("terminal file upload", () => {
   });
 
   it("enforces the retained byte budget independently of the directory budget", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-bytes-test-");
+    const root = tempDirs.make("carapace-terminal-upload-bytes-test-");
     const sizes = Array.from(
       { length: storageLimitBytes / MAX_TERMINAL_UPLOAD_BYTES },
       (_, index) => (index === 0 ? MAX_TERMINAL_UPLOAD_BYTES - 1 : MAX_TERMINAL_UPLOAD_BYTES),
@@ -363,7 +363,7 @@ describe("terminal file upload", () => {
 
   it("keeps partially removed expired uploads charged and retries at the original deadline", async () => {
     vi.useFakeTimers({ now: Date.now() + 60_000 });
-    const root = tempDirs.make("openclaw-terminal-upload-cleanup-budget-test-");
+    const root = tempDirs.make("carapace-terminal-upload-cleanup-budget-test-");
     const files = await createRetainedUploads(
       root,
       Array.from({ length: directoryLimit }, () => storageLimitBytes / directoryLimit),
@@ -411,7 +411,7 @@ describe("terminal file upload", () => {
   });
 
   it("does not treat an uninspectable retained file as free capacity", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-inspection-test-");
+    const root = tempDirs.make("carapace-terminal-upload-inspection-test-");
     const files = await createRetainedUploads(
       root,
       Array.from(
@@ -445,7 +445,7 @@ describe("terminal file upload", () => {
 
   it("bounds cleanup timers for over-budget recovery and repeated external deletion", async () => {
     vi.useFakeTimers();
-    const root = tempDirs.make("openclaw-terminal-upload-timer-budget-test-");
+    const root = tempDirs.make("carapace-terminal-upload-timer-budget-test-");
     try {
       const files = await createRetainedUploads(
         root,
@@ -478,9 +478,9 @@ describe("terminal file upload", () => {
 
   it("retries a recovery scan after a transient root failure", async () => {
     vi.useFakeTimers();
-    const parent = tempDirs.make("openclaw-terminal-upload-retry-test-");
+    const parent = tempDirs.make("carapace-terminal-upload-retry-test-");
     const root = path.join(parent, "root");
-    const directory = path.join(root, "openclaw-terminal-upload-stale");
+    const directory = path.join(root, "carapace-terminal-upload-stale");
     try {
       await writeFile(root, "temporarily not a directory");
       await ensureTerminalUploadCleanup({ tempRoot: root, retentionMs: 1 });
@@ -501,7 +501,7 @@ describe("terminal file upload", () => {
 
   it("retries partial upload cleanup without replacing the write error", async () => {
     vi.useFakeTimers();
-    const root = tempDirs.make("openclaw-terminal-upload-write-failure-test-");
+    const root = tempDirs.make("carapace-terminal-upload-write-failure-test-");
     const writeError = new Error("write failed");
     const writeMock = vi.mocked(writeFile);
     const rmMock = vi.mocked(rm);
@@ -541,7 +541,7 @@ describe("terminal file upload", () => {
   });
 
   it("rejects malformed and oversized payloads", async () => {
-    const root = tempDirs.make("openclaw-terminal-upload-test-");
+    const root = tempDirs.make("carapace-terminal-upload-test-");
     expect(isCanonicalTerminalUploadBase64("AB==")).toBe(false);
     expect(isCanonicalTerminalUploadBase64("AAB=")).toBe(false);
     expect(isCanonicalTerminalUploadBase64("AA==")).toBe(true);

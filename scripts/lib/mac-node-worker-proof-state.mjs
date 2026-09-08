@@ -8,7 +8,7 @@ import { DatabaseSync } from "node:sqlite";
 export function seedMacNodeWorkerProofState(databasePath) {
   const source = fs.readFileSync(
     new URL(
-      "../../apps/shared/OpenClawKit/Sources/OpenClawNativeState/OpenClawNativeStateSQLite.swift",
+      "../../apps/shared/CarapaceKit/Sources/CarapaceNativeState/CarapaceNativeStateSQLite.swift",
       import.meta.url,
     ),
     "utf8",

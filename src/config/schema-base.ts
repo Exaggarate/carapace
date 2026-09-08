@@ -11,7 +11,7 @@ import {
 } from "./schema.shared.js";
 import { applyDerivedTags } from "./schema.tags.js";
 import { applyResolvedConfigTierHints } from "./schema.tiers.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { CarapaceSchema } from "./zod-schema.js";
 
 type ConfigSchema = Record<string, unknown>;
 
@@ -116,17 +116,17 @@ function computeBaseConfigSchemaStablePayload(): BaseConfigSchemaStablePayload {
   if (baseConfigSchemaStablePayload) {
     return baseConfigSchemaStablePayload;
   }
-  const schema = OpenClawSchema.toJSONSchema({
+  const schema = CarapaceSchema.toJSONSchema({
     io: "input",
     target: "draft-07",
     unrepresentable: "any",
   });
-  schema.title = "OpenClawConfig";
+  schema.title = "CarapaceConfig";
   const schemaRoot = asSchemaObject(schema);
   if (schemaRoot) {
     applyFieldDocumentation(schemaRoot);
   }
-  const baseHints = mapSensitivePaths(OpenClawSchema, "", buildBaseHints());
+  const baseHints = mapSensitivePaths(CarapaceSchema, "", buildBaseHints());
   const publicSchema = preparePublicSchema(schema);
   const stablePayload = {
     schema: publicSchema,

@@ -2,19 +2,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
-  startOpenClawCrablineAdapter,
-  type OpenClawCrablineChannelDriverSelection,
-  type OpenClawCrablineInbound,
-  type StartedOpenClawCrablineAdapter,
-  type StartedOpenClawCrablineCorrelatedAdapter,
+  startCarapaceCrablineAdapter,
+  type CarapaceCrablineChannelDriverSelection,
+  type CarapaceCrablineInbound,
+  type StartedCarapaceCrablineAdapter,
+  type StartedCarapaceCrablineCorrelatedAdapter,
 } from "@openclaw/crabline";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { fetchWithSsrFGuard } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   isRecord,
   normalizeStringifiedOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { createQaBusState, type QaBusState } from "./bus-state.js";
 import {
   createCrablineProviderDelivery,
@@ -51,7 +51,7 @@ type QaCrablineTransportState = QaTransportState & {
   rememberProviderTarget: (providerTargetKey: string, qaTarget: string) => void;
 };
 
-function normalizeCrablineSignalGatewayConfig(config: OpenClawConfig): OpenClawConfig {
+function normalizeCrablineSignalGatewayConfig(config: CarapaceConfig): CarapaceConfig {
   const signal = config.channels?.signal as unknown;
   if (!isRecord(signal)) {
     return config;
@@ -79,7 +79,7 @@ function normalizeCrablineSignalGatewayConfig(config: OpenClawConfig): OpenClawC
         },
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function resolveLogicalQaTarget(
@@ -144,8 +144,8 @@ function readTelegramLifecycleEvent(params: {
       id: chatId,
       kind: chatId.startsWith("-") ? "group" : "direct",
     },
-    senderId: "openclaw",
-    senderName: "OpenClaw QA",
+    senderId: "carapace",
+    senderName: "Carapace QA",
     text,
     timestamp: Date.now(),
     ...(threadId ? { threadId } : {}),
@@ -168,8 +168,8 @@ function readTelegramLifecycleEvent(params: {
 }
 
 async function postCrablineInbound(params: {
-  adapter: StartedOpenClawCrablineAdapter;
-  providerInbound: OpenClawCrablineInbound;
+  adapter: StartedCarapaceCrablineAdapter;
+  providerInbound: CarapaceCrablineInbound;
 }) {
   const { response, release } = await fetchWithSsrFGuard({
     url: params.adapter.manifest.endpoints.adminInboundUrl,
@@ -204,7 +204,7 @@ async function postCrablineInbound(params: {
 }
 
 function createCrablineState(params: {
-  adapter: StartedOpenClawCrablineAdapter;
+  adapter: StartedCarapaceCrablineAdapter;
   state: QaBusState;
 }): QaCrablineTransportState {
   const baseState = params.state;
@@ -303,8 +303,8 @@ function createCrablineState(params: {
 }
 
 class QaCrablineTransport extends QaStateBackedTransportAdapter {
-  readonly #adapter: StartedOpenClawCrablineCorrelatedAdapter;
-  readonly #selection: OpenClawCrablineChannelDriverSelection;
+  readonly #adapter: StartedCarapaceCrablineCorrelatedAdapter;
+  readonly #selection: CarapaceCrablineChannelDriverSelection;
   readonly #transportPolicy?: QaTransportPolicy;
   readonly #state: QaCrablineTransportState;
   readonly sendNativeCommand?: (input: QaTransportNativeCommandInput) => Promise<void>;
@@ -314,9 +314,9 @@ class QaCrablineTransport extends QaStateBackedTransportAdapter {
   }>;
 
   constructor(params: {
-    adapter: StartedOpenClawCrablineCorrelatedAdapter;
+    adapter: StartedCarapaceCrablineCorrelatedAdapter;
     transportPolicy?: QaTransportPolicy;
-    selection: OpenClawCrablineChannelDriverSelection;
+    selection: CarapaceCrablineChannelDriverSelection;
     state: QaCrablineTransportState;
   }) {
     super({
@@ -349,7 +349,7 @@ class QaCrablineTransport extends QaStateBackedTransportAdapter {
   }
 
   createGatewayConfig = (params: { baseUrl: string }): QaTransportGatewayConfig => {
-    const rawConfig = this.#adapter.createGatewayConfig(params) as OpenClawConfig;
+    const rawConfig = this.#adapter.createGatewayConfig(params) as CarapaceConfig;
     const config =
       this.#selection.channel === "signal"
         ? normalizeCrablineSignalGatewayConfig(rawConfig)
@@ -404,14 +404,14 @@ class QaCrablineTransport extends QaStateBackedTransportAdapter {
   handleAction = async (_params: {
     action: QaTransportActionName;
     args: Record<string, unknown>;
-    cfg: OpenClawConfig;
+    cfg: CarapaceConfig;
     accountId?: string | null;
   }) => {
     throw new Error(`Crabline channel-driver transport does not support ${_params.action} yet.`);
   };
 
   createReportNotes = (_params: QaTransportReportParams) => [
-    `Runs OpenClaw's ${this.#selection.channel} channel plugin against a Crabline local provider server.`,
+    `Runs Carapace's ${this.#selection.channel} channel plugin against a Crabline local provider server.`,
     "No live channel service or external credential lease is required.",
   ];
 
@@ -423,7 +423,7 @@ class QaCrablineTransport extends QaStateBackedTransportAdapter {
 export async function createQaCrablineTransportAdapter(params: {
   outputDir: string;
   transportPolicy?: QaTransportPolicy;
-  selection: OpenClawCrablineChannelDriverSelection;
+  selection: CarapaceCrablineChannelDriverSelection;
   state?: QaBusState;
 }) {
   const requiresTelegramPolicy =
@@ -442,10 +442,10 @@ export async function createQaCrablineTransportAdapter(params: {
   );
   await fs.mkdir(path.dirname(recorderPath), { recursive: true });
   let observeEvent = (_event: unknown) => {};
-  const adapter = await startOpenClawCrablineAdapter({
+  const adapter = await startCarapaceCrablineAdapter({
     channel: params.selection.channel,
     onEvent: (event) => observeEvent(event),
-    openclawConfig: {},
+    carapaceConfig: {},
     recorderPath,
   });
 

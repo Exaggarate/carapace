@@ -1,6 +1,6 @@
 // Classic setup tests keep every workspace-owned effect on the configured default agent.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "./prompts.js";
 
@@ -28,7 +28,7 @@ vi.mock("./setup.shared.js", async (importOriginal) => {
     ...actual,
     readSetupConfigFileSnapshot: mocks.readSnapshot,
     readValidSetupConfigFile: vi.fn(),
-    requireRiskAcknowledgement: async ({ config }: { config: OpenClawConfig }) => config,
+    requireRiskAcknowledgement: async ({ config }: { config: CarapaceConfig }) => config,
     resolveQuickstartGatewayDefaults: () => ({
       hasExisting: false,
       port: 18789,
@@ -47,7 +47,7 @@ vi.mock("./setup.migration-import.js", () => ({
 }));
 
 vi.mock("./setup.model-auth.js", () => ({
-  runSetupModelAuthStep: async ({ config }: { config: OpenClawConfig }) => ({
+  runSetupModelAuthStep: async ({ config }: { config: CarapaceConfig }) => ({
     config,
     authProfiles: [],
     persistAuthProfiles: async () => {},
@@ -66,7 +66,7 @@ vi.mock("./setup.secret-input.js", () => ({
 }));
 
 vi.mock("./setup.gateway-config.js", () => ({
-  configureGatewayForSetup: async ({ nextConfig }: { nextConfig: OpenClawConfig }) => ({
+  configureGatewayForSetup: async ({ nextConfig }: { nextConfig: CarapaceConfig }) => ({
     nextConfig,
     settings: {
       port: 18789,
@@ -100,7 +100,7 @@ vi.mock("./setup.finalize.js", () => ({
 
 vi.mock("../commands/onboard-helpers.js", () => ({
   DEFAULT_WORKSPACE: "/tmp/default-workspace",
-  applyWizardMetadata: (config: OpenClawConfig) => config,
+  applyWizardMetadata: (config: CarapaceConfig) => config,
   ensureWorkspaceAndSessions: mocks.ensureWorkspaceAndSessions,
   printWizardHeader: vi.fn(),
   probeGatewayReachable: vi.fn(async () => ({ ok: false })),
@@ -152,7 +152,7 @@ describe("runSetupWizard default-agent ownership", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     mocks.readSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
@@ -161,16 +161,16 @@ describe("runSetupWizard default-agent ownership", () => {
       sourceConfigBeforeMigrations: config,
       issues: [],
     });
-    mocks.writeConfig.mockImplementation(async (nextConfig: OpenClawConfig) => nextConfig);
-    mocks.setupSkills.mockImplementation(async (nextConfig: OpenClawConfig) => nextConfig);
+    mocks.writeConfig.mockImplementation(async (nextConfig: CarapaceConfig) => nextConfig);
+    mocks.setupSkills.mockImplementation(async (nextConfig: CarapaceConfig) => nextConfig);
     mocks.setupOfficialPlugins.mockImplementation(
-      async ({ config: nextConfig }: { config: OpenClawConfig }) => nextConfig,
+      async ({ config: nextConfig }: { config: CarapaceConfig }) => nextConfig,
     );
     mocks.setupRecommendations.mockImplementation(
-      async ({ config: nextConfig }: { config: OpenClawConfig }) => ({ config: nextConfig }),
+      async ({ config: nextConfig }: { config: CarapaceConfig }) => ({ config: nextConfig }),
     );
     mocks.setupPluginConfig.mockImplementation(
-      async ({ config: nextConfig }: { config: OpenClawConfig }) => nextConfig,
+      async ({ config: nextConfig }: { config: CarapaceConfig }) => nextConfig,
     );
     mocks.finalizeSetup.mockResolvedValue({ launchedTui: false });
   });
@@ -181,7 +181,7 @@ describe("runSetupWizard default-agent ownership", () => {
       const config = {
         gateway: { mode: "local", port: 18789 },
         agents: { entries: { main: {} } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       mocks.readSnapshot.mockResolvedValue({
         exists: true,
         valid: true,
@@ -191,8 +191,8 @@ describe("runSetupWizard default-agent ownership", () => {
         issues: [],
       });
       vi.mocked(prompter.select).mockResolvedValue(enabled);
-      let persisted: OpenClawConfig | undefined;
-      mocks.writeConfig.mockImplementation(async (nextConfig: OpenClawConfig) => {
+      let persisted: CarapaceConfig | undefined;
+      mocks.writeConfig.mockImplementation(async (nextConfig: CarapaceConfig) => {
         persisted = nextConfig;
         return nextConfig;
       });
@@ -224,7 +224,7 @@ describe("runSetupWizard default-agent ownership", () => {
     const config = {
       gateway: { mode: "local", port: 18789 },
       agents: { entries: { main: {} } },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
     const current = { ...config, gateway: { ...config.gateway, port: 24444 } };
     mocks.readSnapshot
       .mockResolvedValueOnce({
@@ -244,8 +244,8 @@ describe("runSetupWizard default-agent ownership", () => {
         issues: [],
       });
     vi.mocked(prompter.select).mockResolvedValue(false);
-    let persisted: OpenClawConfig | undefined;
-    mocks.writeConfig.mockImplementation(async (nextConfig: OpenClawConfig) => {
+    let persisted: CarapaceConfig | undefined;
+    mocks.writeConfig.mockImplementation(async (nextConfig: CarapaceConfig) => {
       persisted = nextConfig;
       return nextConfig;
     });

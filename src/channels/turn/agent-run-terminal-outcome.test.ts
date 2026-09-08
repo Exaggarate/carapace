@@ -18,7 +18,7 @@ describe("agent run terminal outcome carrier", () => {
     expect(readAgentRunTerminalOutcome(result)).toBe("failed");
     expect(readAgentRunTerminalError(result)).toBe("Provider rejected the request.");
     expect(
-      Object.getOwnPropertyDescriptor(result, Symbol.for("openclaw.agentRunTerminalOutcome")),
+      Object.getOwnPropertyDescriptor(result, Symbol.for("carapace.agentRunTerminalOutcome")),
     ).toMatchObject({ enumerable: true, value: "failed" });
     expect(readAgentRunTerminalOutcome({ ...result })).toBe("failed");
     expect(readAgentRunTerminalError({ ...result })).toBe("Provider rejected the request.");
@@ -37,7 +37,7 @@ describe("agent run terminal outcome carrier", () => {
     ["plain custom dispatch result", { agentRunTerminalOutcome: "failed" }],
     [
       "invalid private carrier value",
-      { [Symbol.for("openclaw.agentRunTerminalOutcome")]: "cancelled" },
+      { [Symbol.for("carapace.agentRunTerminalOutcome")]: "cancelled" },
     ],
   ])("rejects %s", (_label, value) => {
     expect(readAgentRunTerminalOutcome(value)).toBeUndefined();

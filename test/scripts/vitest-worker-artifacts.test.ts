@@ -122,7 +122,7 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
               TMPDIR: relocated,
               TMP: relocated,
               TEMP: relocated,
-              OPENCLAW_FS_SAFE_NATIVE_MODE: mode,
+              CARAPACE_FS_SAFE_NATIVE_MODE: mode,
             },
           );
           expect(result.code, result.stderr + result.stdout).toBe(0);
@@ -549,8 +549,8 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
         const pluginRoot = path.join(bundled, "anthropic");
         writeFixture(
           pluginRoot,
-          "openclaw.plugin.json",
-          fs.readFileSync(path.join(root, "extensions/anthropic/openclaw.plugin.json"), "utf8"),
+          "carapace.plugin.json",
+          fs.readFileSync(path.join(root, "extensions/anthropic/carapace.plugin.json"), "utf8"),
         );
         writeFixture(
           pluginRoot,
@@ -562,8 +562,8 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
           root,
           {
             ...process.env,
-            OPENCLAW_BUNDLED_PLUGINS_DIR: bundled,
-            OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+            CARAPACE_BUNDLED_PLUGINS_DIR: bundled,
+            CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
           },
         );
         console.log(JSON.stringify({ preparationMs: manifest.durationMs }));
@@ -596,7 +596,7 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
             const pluginRoot = path.join(bundled, "fixture-hook");
             writeFixture(
               pluginRoot,
-              "openclaw.plugin.json",
+              "carapace.plugin.json",
               JSON.stringify({
                 id: "fixture-hook",
                 providers: ["fixture-provider"],
@@ -658,9 +658,9 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
             assert.deepEqual(observed(),[], 'error formatting must not materialize the provider');
             let scopedPreparationRecordCount = 0;
             if (${scope === "scoped"}) {
-              const {loadOpenClawPlugins} = await import(${JSON.stringify(pathToFileURL(path.join(root, "src/plugins/loader.ts")).href)});
+              const {loadCarapacePlugins} = await import(${JSON.stringify(pathToFileURL(path.join(root, "src/plugins/loader.ts")).href)});
               const scopedHook = registry.providers[0].provider.classifyFailoverReason;
-              registry = loadOpenClawPlugins({config:{plugins:{allow:['fixture-hook'],entries:{'fixture-hook':{enabled:true}}}},onlyPluginIds:['fixture-hook'],activate:false});
+              registry = loadCarapacePlugins({config:{plugins:{allow:['fixture-hook'],entries:{'fixture-hook':{enabled:true}}}},onlyPluginIds:['fixture-hook'],activate:false});
               const loadedOwner = registry.providers.find(entry=>entry.pluginId==='fixture-hook');
               assert(loadedOwner, 'the real loader must establish the scoped provider owner');
               loadedOwner.provider.classifyFailoverReason = scopedHook;
@@ -749,8 +749,8 @@ describe.concurrent("fresh compiled subprocess invocation", () => {
               root,
               {
                 ...process.env,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: bundled,
-                OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+                CARAPACE_BUNDLED_PLUGINS_DIR: bundled,
+                CARAPACE_DISABLE_BUNDLED_PLUGINS: undefined,
               },
             );
             console.log(result.stdout);
@@ -814,7 +814,7 @@ if (process.argv[1]?.endsWith("vitest-worker-compiler.mts")) {
               root,
               {
                 ...process.env,
-                OPENCLAW_VITEST_MAX_WORKERS: "2",
+                CARAPACE_VITEST_MAX_WORKERS: "2",
                 RAYON_NUM_THREADS: "",
                 TOKIO_WORKER_THREADS: "",
                 NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ""} --import ${pathToFileURL(preload).href}`,
@@ -1333,7 +1333,7 @@ export default class {
         const database = new DatabaseSync(databasePath);
         database.exec("CREATE TABLE probe(value TEXT); INSERT INTO probe VALUES ('native work');");
         database.close();
-        const childArgs = ["--openclaw-sqlite-readonly-child", "async", databasePath];
+        const childArgs = ["--carapace-sqlite-readonly-child", "async", databasePath];
         const stale = await node([
           path.join(fixture, "dist/infra/sqlite-readonly-location.worker.js"),
           ...childArgs,
@@ -1347,7 +1347,7 @@ export default class {
           fixture,
           `${privatePackage}/package.json`,
           JSON.stringify({
-            name: "@openclaw/private-worker-fixture",
+            name: "@carapace/private-worker-fixture",
             private: true,
             type: "module",
             dependencies: { "worker-private-version": "1.0.0" },

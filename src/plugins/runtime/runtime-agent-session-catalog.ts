@@ -4,11 +4,11 @@ import {
   resolveDefaultModelForAgent,
 } from "../../agents/model-selection.js";
 import { resolveEffectiveAgentRuntime } from "../../agents/thinking-runtime.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SessionCatalogCreateTarget } from "../session-catalog.js";
 
 type RuntimeSessionCatalogCreateTargetParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   requestedAgentId?: string;
   provider: string;
   modelIds: readonly string[];

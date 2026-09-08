@@ -4,9 +4,9 @@ set -euo pipefail
 # Build the mac app bundle, then create a zip (Sparkle) + styled DMG (humans).
 #
 # Output:
-# - dist/OpenClaw.app
-# - dist/OpenClaw-<version>.zip
-# - dist/OpenClaw-<version>.dmg
+# - dist/Carapace.app
+# - dist/Carapace-<version>.zip
+# - dist/Carapace-<version>.dmg
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/scripts/lib/plistbuddy.sh"
@@ -46,14 +46,14 @@ if [[ "$RESUME_NOTARIZATION" == "0" && -e "$RECOVERY_DIR" ]]; then
 fi
 
 BUILD_ROOT="$ROOT_DIR/apps/macos/.build"
-PRODUCT="OpenClaw"
+PRODUCT="Carapace"
 BUILD_CONFIG="${BUILD_CONFIG:-release}"
 APP_VERSION_INPUT="${APP_VERSION:-}"
 
 # Default to universal binary for distribution builds (supports both Apple Silicon and Intel Macs)
 export BUILD_ARCHS="${BUILD_ARCHS:-all}"
 export BUILD_CONFIG
-export OPENCLAW_CONTROL_UI_RELEASE_BUILD=1
+export CARAPACE_CONTROL_UI_RELEASE_BUILD=1
 DSYM_ARCHS_VALUE="$BUILD_ARCHS"
 if [[ "$DSYM_ARCHS_VALUE" == "all" ]]; then
   DSYM_ARCHS_VALUE="arm64 x86_64"
@@ -62,7 +62,7 @@ IFS=' ' read -r -a DSYM_ARCHS <<< "$DSYM_ARCHS_VALUE"
 
 # Use release bundle ID (not .debug) so Sparkle auto-update works.
 # The .debug suffix in package-mac-app.sh blanks SUFeedURL intentionally for dev builds.
-export BUNDLE_ID="${BUNDLE_ID:-ai.openclaw.mac}"
+export BUNDLE_ID="${BUNDLE_ID:-ai.carapace.mac}"
 
 DIST_PNPM_CMD=()
 SPARKLE_BUILD_DEPS_RETRIED=0
@@ -103,7 +103,7 @@ canonical_sparkle_build() {
   local output
   local stderr_file
 
-  stderr_file="$(mktemp "${TMPDIR:-/tmp}/openclaw-sparkle-build.XXXXXX")" || {
+  stderr_file="$(mktemp "${TMPDIR:-/tmp}/carapace-sparkle-build.XXXXXX")" || {
     echo "ERROR: failed to create temporary stderr capture for Sparkle build metadata." >&2
     return 1
   }
@@ -177,7 +177,7 @@ if [[ "$RESUME_NOTARIZATION" == "0" && -z "${APP_BUILD:-}" && "$BUILD_CONFIG" ==
   export APP_BUILD="${APP_BUILD:-$CANONICAL_APP_BUILD}"
 fi
 
-APP="$ROOT_DIR/dist/OpenClaw.app"
+APP="$ROOT_DIR/dist/Carapace.app"
 if [[ "$RESUME_NOTARIZATION" == "1" ]]; then
   python3 "$RECOVERY_HELPER" verify "$RECOVERY_DIR" "$(git -C "$ROOT_DIR" rev-parse HEAD)" "$APP_VERSION_INPUT" >/dev/null
   APP_BUILD="$(jq -r '.build' "$RECOVERY_DIR/manifest.json")"
@@ -185,7 +185,7 @@ if [[ "$RESUME_NOTARIZATION" == "1" ]]; then
   SKIP_DSYM="$(jq -r 'if .skipDsym then "1" else "0" end' "$RECOVERY_DIR/manifest.json")"
   RESTORED_APP_DIR="$(mktemp -d "$ROOT_DIR/dist/.notary-resume.XXXXXX")"
   ditto -x -k "$RECOVERY_DIR/app.zip" "$RESTORED_APP_DIR"
-  APP="$RESTORED_APP_DIR/OpenClaw.app"
+  APP="$RESTORED_APP_DIR/Carapace.app"
   /usr/bin/codesign --verify --deep --strict "$APP"
   if [[ -n "${EXPECTED_DEVELOPER_TEAM_ID:-}" ]]; then
     /usr/bin/codesign --verify --strict -R="anchor apple generic and certificate leaf[subject.OU] = \"${EXPECTED_DEVELOPER_TEAM_ID}\"" "$APP"
@@ -202,10 +202,10 @@ VERSION="$(plist_print_required "$APP/Contents/Info.plist" CFBundleShortVersionS
 BUNDLE_VERSION="$(plist_print_required "$APP/Contents/Info.plist" CFBundleVersion)"
 ACTUAL_BUNDLE_ID="$(plist_print_required "$APP/Contents/Info.plist" CFBundleIdentifier)"
 ACTUAL_FEED_URL="$(plist_print_required "$APP/Contents/Info.plist" SUFeedURL)"
-ZIP="$ROOT_DIR/dist/OpenClaw-$VERSION.zip"
-DMG="$ROOT_DIR/dist/OpenClaw-$VERSION.dmg"
+ZIP="$ROOT_DIR/dist/Carapace-$VERSION.zip"
+DMG="$ROOT_DIR/dist/Carapace-$VERSION.dmg"
 NOTARY_ZIP="$RECOVERY_DIR/app.zip"
-DSYM_ZIP="$ROOT_DIR/dist/OpenClaw-$VERSION.dSYM.zip"
+DSYM_ZIP="$ROOT_DIR/dist/Carapace-$VERSION.dSYM.zip"
 SKIP_NOTARIZE="${SKIP_NOTARIZE:-0}"
 NOTARIZE=1
 SKIP_DSYM="${SKIP_DSYM:-0}"
@@ -369,8 +369,8 @@ else
 fi
 
 if [[ -n "$RESTORED_APP_DIR" ]]; then
-  rm -rf "$ROOT_DIR/dist/OpenClaw.app"
-  mv "$APP" "$ROOT_DIR/dist/OpenClaw.app"
+  rm -rf "$ROOT_DIR/dist/Carapace.app"
+  mv "$APP" "$ROOT_DIR/dist/Carapace.app"
 fi
 
 if [[ "$RECOVERY_READY" == "1" ]]; then

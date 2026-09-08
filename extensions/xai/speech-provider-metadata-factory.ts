@@ -1,18 +1,18 @@
-import type { PluginCapabilityCatalogContext } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import type { PluginCapabilityCatalogContext } from "carapace/plugin-sdk/plugin-entry";
+import { normalizeResolvedSecretInputString } from "carapace/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
   SpeechSynthesisTarget,
-} from "openclaw/plugin-sdk/speech";
+} from "carapace/plugin-sdk/speech";
 import {
   asFiniteNumberInRange,
   asOptionalObjectRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 import { XAI_BASE_URL } from "./model-definitions.js";
 
 const XAI_SPEECH_RESPONSE_FORMATS = ["mp3", "wav", "pcm", "mulaw", "alaw"] as const;

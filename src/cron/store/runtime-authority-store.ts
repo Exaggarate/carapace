@@ -1,15 +1,15 @@
 /** Downgrade-stable persistence for runtime-private cron authority. */
 import { createHash } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core";
+import { safeParseJson } from "@carapace/normalization-core";
 import type { Selectable } from "kysely";
 import {
   executeSqliteQuerySync,
   getNodeSqliteKysely,
   sqliteStringSet,
 } from "../../infra/kysely-sync.js";
-import { tableExists } from "../../state/openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import { tableExists } from "../../state/carapace-state-db-schema-helpers.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
 import { normalizeCronRuntimeAuthority } from "../runtime-authority.js";
 import { normalizeCronScheduledToolPolicy } from "../scheduled-tool-policy.js";
 import { cronJobUsesToolRuntime } from "../tools-allow.js";
@@ -38,11 +38,11 @@ CREATE TABLE IF NOT EXISTS cron_job_runtime_authorities (
 `;
 
 type CronAuthorityDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  CarapaceStateKyselyDatabase,
   "cron_job_runtime_authorities" | "cron_jobs"
 >;
 type CronRuntimeAuthorityRow = Selectable<
-  OpenClawStateKyselyDatabase["cron_job_runtime_authorities"]
+  CarapaceStateKyselyDatabase["cron_job_runtime_authorities"]
 >;
 
 type CronRuntimeAuthorityLoadResult = {

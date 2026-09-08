@@ -1,13 +1,13 @@
 // Xiaomi tests cover speech provider plugin behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const transcodeAudioBufferToOpusMock = vi.hoisted(() => vi.fn());
 
 const PROVIDER_RESPONSE_MAX_BYTES = 16 * 1024 * 1024;
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/media-runtime")>()),
+vi.mock("carapace/plugin-sdk/media-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/media-runtime")>()),
   transcodeAudioBufferToOpus: transcodeAudioBufferToOpusMock,
 }));
 
@@ -185,7 +185,7 @@ describe("buildXiaomiSpeechProvider", () => {
       );
 
       const result = await provider.synthesize({
-        text: "Hello from OpenClaw.",
+        text: "Hello from Carapace.",
         cfg: {} as never,
         providerConfig: {
           apiKey: "sk-test",
@@ -213,7 +213,7 @@ describe("buildXiaomiSpeechProvider", () => {
       expect(body.model).toBe("mimo-v2.5-tts");
       expect(body.messages).toEqual([
         { role: "user", content: "Bright." },
-        { role: "assistant", content: "Hello from OpenClaw." },
+        { role: "assistant", content: "Hello from Carapace." },
       ]);
       expect(body.audio).toEqual({ format: "mp3", voice: "default_en" });
       expect(transcodeAudioBufferToOpusMock).not.toHaveBeenCalled();
@@ -229,7 +229,7 @@ describe("buildXiaomiSpeechProvider", () => {
 
       await expect(
         provider.synthesize({
-          text: "Hello from OpenClaw.",
+          text: "Hello from Carapace.",
           cfg: {} as never,
           providerConfig: { apiKey: "sk-test" },
           target: "audio-file",
@@ -249,7 +249,7 @@ describe("buildXiaomiSpeechProvider", () => {
       );
 
       const result = await provider.synthesize({
-        text: "Hello from OpenClaw.",
+        text: "Hello from Carapace.",
         cfg: {} as never,
         providerConfig: {
           apiKey: "sk-test",
@@ -273,7 +273,7 @@ describe("buildXiaomiSpeechProvider", () => {
       expect(body.model).toBe("mimo-v2.5-tts-voicedesign");
       expect(body.messages).toEqual([
         { role: "user", content: "Warm, bright, natural voice." },
-        { role: "assistant", content: "Hello from OpenClaw." },
+        { role: "assistant", content: "Hello from Carapace." },
       ]);
       expect(body.audio).toEqual({ format: "wav" });
     });
@@ -289,7 +289,7 @@ describe("buildXiaomiSpeechProvider", () => {
       );
 
       await provider.synthesize({
-        text: "Hello from OpenClaw.",
+        text: "Hello from Carapace.",
         cfg: {} as never,
         providerConfig: {
           apiKey: "sk-test",
@@ -307,7 +307,7 @@ describe("buildXiaomiSpeechProvider", () => {
       expect(body.messages[0]?.content).toContain("natural");
       expect(body.messages[1]).toEqual({
         role: "assistant",
-        content: "Hello from OpenClaw.",
+        content: "Hello from Carapace.",
       });
       expect(body.audio).toEqual({ format: "mp3" });
     });
@@ -323,7 +323,7 @@ describe("buildXiaomiSpeechProvider", () => {
       transcodeAudioBufferToOpusMock.mockResolvedValueOnce(Buffer.from("fake-opus-audio"));
 
       const result = await provider.synthesize({
-        text: "Hello from OpenClaw.",
+        text: "Hello from Carapace.",
         cfg: {} as never,
         providerConfig: { apiKey: "sk-test" },
         target: "voice-note",
@@ -353,7 +353,7 @@ describe("buildXiaomiSpeechProvider", () => {
       transcodeAudioBufferToOpusMock.mockResolvedValueOnce(Buffer.from("fake-opus-audio"));
 
       const result = await provider.synthesize({
-        text: "Hello from OpenClaw.",
+        text: "Hello from Carapace.",
         cfg: {} as never,
         providerConfig: {
           apiKey: "sk-test",
@@ -391,7 +391,7 @@ describe("buildXiaomiSpeechProvider", () => {
 
       try {
         await provider.synthesize({
-          text: "Hello from OpenClaw.",
+          text: "Hello from Carapace.",
           cfg: {} as never,
           providerConfig: { apiKey: "sk-test" },
           target: "audio-file",

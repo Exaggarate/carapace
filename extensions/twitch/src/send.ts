@@ -1,8 +1,8 @@
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceipt,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "carapace/plugin-sdk/channel-outbound";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import type { TwitchClientManager } from "./twitch-client.js";
 import type { TwitchAccountConfig } from "./types.js";
 import { stripMarkdownForTwitch } from "./utils/markdown.js";
@@ -29,7 +29,7 @@ function createTwitchSendReceipt(messageId?: string, channel?: string): MessageR
 export async function sendMessageTwitchInternal(params: {
   channel: string;
   text: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   account: TwitchAccountConfig;
   accountId: string;
   clientManager: TwitchClientManager | undefined;

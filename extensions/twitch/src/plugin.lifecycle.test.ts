@@ -5,9 +5,9 @@ import {
   expectStopPendingUntilAbort,
   startAccountAndTrackLifecycle,
   waitForStartedMocks,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/status-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/plugin-test-runtime";
+import type { ChannelAccountSnapshot } from "carapace/plugin-sdk/status-helpers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { TwitchAccountConfig } from "./types.js";
 

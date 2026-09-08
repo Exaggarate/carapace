@@ -12,14 +12,14 @@ import {
   getNodeSqliteKysely,
   iterateSqliteQuerySync,
 } from "../../infra/kysely-sync.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
 import {
-  settleOpenClawAgentDatabaseWorkerClose,
-  withOpenClawAgentDatabaseAdmission,
-  type OpenClawAgentDatabaseWorkerCloseResult,
-  type OpenClawAgentDatabaseWriteAdmission,
-} from "../../state/openclaw-agent-db.js";
+  settleCarapaceAgentDatabaseWorkerClose,
+  withCarapaceAgentDatabaseAdmission,
+  type CarapaceAgentDatabaseWorkerCloseResult,
+  type CarapaceAgentDatabaseWriteAdmission,
+} from "../../state/carapace-agent-db.js";
 import {
   hashSessionArchiveBytes,
   MAX_MATERIALIZED_ARCHIVE_BATCH_BYTES,
@@ -48,7 +48,7 @@ import {
 } from "./session-accessor.sqlite-reclamation.js";
 
 type TranscriptArchiveDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  CarapaceAgentKyselyDatabase,
   "session_transcript_archives" | "transcript_events"
 >;
 
@@ -58,9 +58,9 @@ async function settleReclamationDatabase(
   pathname: string,
 ): Promise<{ cleanupWarnings: string[]; settled: boolean }> {
   const warnings = new Set<string>();
-  let outcome: OpenClawAgentDatabaseWorkerCloseResult = { errors: [], settled: false };
+  let outcome: CarapaceAgentDatabaseWorkerCloseResult = { errors: [], settled: false };
   for (let attempt = 0; attempt < WORKER_CLOSE_MAX_ATTEMPTS; attempt += 1) {
-    outcome = settleOpenClawAgentDatabaseWorkerClose(pathname);
+    outcome = settleCarapaceAgentDatabaseWorkerClose(pathname);
     outcome.errors.forEach((error) => warnings.add(error.message));
     if (outcome.settled) {
       break;
@@ -298,7 +298,7 @@ export async function materializeTranscriptArchiveInWorker(
     sessionId: plan.sessionId,
   })}.${randomUUID()}.jsonl-stage`;
   try {
-    const opened = withOpenClawAgentDatabaseReadOnly(
+    const opened = withCarapaceAgentDatabaseReadOnly(
       (database) => {
         let transactionOpen = false;
         try {
@@ -355,7 +355,7 @@ export function publishTranscriptArchiveInWorker(
   plan: TranscriptArchivePublishPlan,
 ): TranscriptArchivePublishResult {
   try {
-    const opened = withOpenClawAgentDatabaseReadOnly(
+    const opened = withCarapaceAgentDatabaseReadOnly(
       (database) => {
         const db = getNodeSqliteKysely<TranscriptArchiveDatabase>(database.db);
         return executeSqliteQuerySync(
@@ -429,7 +429,7 @@ async function runReclamationWorkerPort(
   const commitGate = data.commitGate;
   let admissionId = 0;
   let finalAdmission = false;
-  const withAdmission: OpenClawAgentDatabaseWriteAdmission = async (run) => {
+  const withAdmission: CarapaceAgentDatabaseWriteAdmission = async (run) => {
     const requestedId = ++admissionId;
     const allowed = await new Promise<boolean>((resolve, reject) => {
       const receive = (message: { type: string; admissionId: number; allowed: boolean }) => {
@@ -463,7 +463,7 @@ async function runReclamationWorkerPort(
     return value;
   };
   try {
-    result = await withOpenClawAgentDatabaseAdmission(
+    result = await withCarapaceAgentDatabaseAdmission(
       data.plan.databaseOptions,
       withAdmission,
       () => {
@@ -497,7 +497,7 @@ async function runReclamationWorkerPort(
     } else {
       throw new AggregateError(
         [error, ...cleanup.cleanupWarnings.map((warning) => new Error(warning))],
-        "SQLite session reclamation failed and Worker cleanup is incomplete; restart OpenClaw before deleting the owning agent",
+        "SQLite session reclamation failed and Worker cleanup is incomplete; restart Carapace before deleting the owning agent",
         { cause: error },
       );
     }

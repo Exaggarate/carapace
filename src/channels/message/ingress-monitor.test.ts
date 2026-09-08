@@ -8,7 +8,7 @@ import {
   runWithGatewayIndependentRootWorkAdmission,
   runWithGatewayIndependentRootWorkContinuation,
 } from "../../process/gateway-work-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import { createChannelIngressError } from "./ingress-errors.js";
 import {
   CHANNEL_INGRESS_RETENTION_DEFAULTS,
@@ -31,13 +31,13 @@ class PermanentIngressError extends Error {}
 async function withQueue<T>(
   run: (queue: ChannelIngressQueue<StoredEvent>) => Promise<T>,
 ): Promise<T> {
-  const stateDir = tempDirs.make("openclaw-ingress-monitor-");
+  const stateDir = tempDirs.make("carapace-ingress-monitor-");
   try {
     return await run(
       createChannelIngressQueue<StoredEvent>({ channelId: "test", accountId: "a", stateDir }),
     );
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
   }
 }
 
@@ -98,7 +98,7 @@ async function waitForAbort(signal: AbortSignal): Promise<void> {
 
 afterEach(() => {
   resetGatewayWorkAdmission();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

@@ -9,20 +9,20 @@ import { resolveAllowedModelRefCore } from "../../agents/model-selection-resolve
 import { resolveConfiguredThinkingDefault } from "../../agents/model-thinking-default.js";
 import type { ResolvedPublishedModelCatalogOwner } from "../../agents/prepared-model-catalog.types.js";
 import type { AgentModelEntryConfig } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { createPluginMetadataSnapshotFixture } from "../../plugins/plugin-metadata.test-support.js";
 import { withPluginRuntimeGenerationScope } from "../../plugins/runtime/generation-scope.js";
 import { resolveCronModelSelection } from "./model-selection.js";
 import { resolveCronAgentConfig } from "./run-config.js";
 
-function buildCronConfig(cfg: OpenClawConfig, agentId: string): OpenClawConfig {
+function buildCronConfig(cfg: CarapaceConfig, agentId: string): CarapaceConfig {
   return resolveCronAgentConfig({
     config: cfg,
     agentConfigOverride: resolveAgentConfig(cfg, agentId),
   }).cfgWithAgentDefaults;
 }
 
-function resolveCronPayloadModel(cfg: OpenClawConfig, raw: string) {
+function resolveCronPayloadModel(cfg: CarapaceConfig, raw: string) {
   return resolveAllowedModelRefCore({
     cfg,
     catalog: [
@@ -38,8 +38,8 @@ function resolveCronPayloadModel(cfg: OpenClawConfig, raw: string) {
 
 describe("resolveCronAgentConfig model policy preservation", () => {
   it.each<{ models: Record<string, AgentModelEntryConfig>; expectedRuntime: string }>([
-    { models: {}, expectedRuntime: "openclaw" },
-    { models: { "openai/other": { alias: "other" } }, expectedRuntime: "openclaw" },
+    { models: {}, expectedRuntime: "carapace" },
+    { models: { "openai/other": { alias: "other" } }, expectedRuntime: "carapace" },
     {
       models: { "openai/test-model": { agentRuntime: { id: "test-runtime" } } },
       expectedRuntime: "test-runtime",
@@ -47,13 +47,13 @@ describe("resolveCronAgentConfig model policy preservation", () => {
   ])(
     "preserves inherited model policy with agent catalog $models",
     ({ models, expectedRuntime }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             model: "openai/test-model",
             models: {
               "openai/test-model": {
-                agentRuntime: { id: "openclaw" },
+                agentRuntime: { id: "carapace" },
                 params: { temperature: 0.4, topP: 0.6 },
               },
             },
@@ -87,13 +87,13 @@ describe("resolveCronAgentConfig model policy preservation", () => {
   );
 
   it("keeps per-agent model parameters and controls without flattening their catalog", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           model: "openai/test-model",
           models: {
             "openai/test-model": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "carapace" },
               params: {
                 maxTokens: 2048,
                 topP: 0.6,
@@ -156,7 +156,7 @@ describe("resolveCronAgentConfig model policy preservation", () => {
   });
 
   it("keeps the inherited default restriction when the per-agent policy is empty", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { modelPolicy: { allow: ["openai/gpt-5.5"] } },
         list: [{ id: "worker", modelPolicy: {} }],
@@ -172,7 +172,7 @@ describe("resolveCronAgentConfig model policy preservation", () => {
   });
 
   it("applies an explicit per-agent allowlist to cron model resolution", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: { modelPolicy: { allow: ["openai/gpt-5.5"] } },
         list: [{ id: "worker", modelPolicy: { allow: ["openai/gpt-5.6-sol"] } }],
@@ -211,7 +211,7 @@ describe("resolveCronAgentConfig model policy preservation", () => {
       });
       const metadataSnapshot = snapshot("/tmp/cron-owner", "selected");
       const otherWorkspace = snapshot("/tmp/other-owner", "other");
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             model: { primary: source === "default" ? "custom/legacy" : "custom/baseline" },

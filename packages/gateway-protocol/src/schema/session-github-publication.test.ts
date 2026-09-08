@@ -142,7 +142,7 @@ describe("session GitHub publication protocol", () => {
 
   it.each([
     ["token", "secret"],
-    ["repository", "openclaw/openclaw"],
+    ["repository", "carapace/carapace"],
     ["branch", "main"],
   ])("rejects caller-owned %s authority independently", (field, value) => {
     expect(
@@ -174,9 +174,9 @@ describe("session GitHub publication protocol", () => {
     {
       requestId: "request-1",
       status: "published",
-      url: "https://github.com/openclaw/openclaw/pull/1",
-      repository: "openclaw/openclaw",
-      branch: "openclaw/task",
+      url: "https://github.com/Exaggarate/carapace/pull/1",
+      repository: "carapace/carapace",
+      branch: "carapace/task",
       headCommit: "a".repeat(40),
     },
     {

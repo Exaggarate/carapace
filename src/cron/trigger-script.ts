@@ -18,7 +18,7 @@ import {
   type HookContext,
 } from "../agents/agent-tools.before-tool-call.js";
 import {
-  createOpenClawCodingTools,
+  createCarapaceCodingTools,
   resolveToolLoopDetectionConfig,
 } from "../agents/agent-tools.js";
 import { createHeadlessDeadlineScope } from "../agents/code-mode-headless.js";
@@ -56,7 +56,7 @@ import {
   withGatewayToolCallerIdentity,
 } from "../agents/tools/gateway-caller-context.js";
 import { ensureAgentWorkspace } from "../agents/workspace.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { GatewayContextResolver } from "../gateway/server-methods/types.js";
 import { formatErrorMessageWithCode } from "../infra/errors.js";
 import { pruneMapToMaxSize } from "../infra/map-size.js";
@@ -111,14 +111,14 @@ void assertTriggerCodesCoverHeadless;
 
 type PreparedTriggerRuntime = {
   tools: AnyAgentTool[];
-  context: HookContext & { config: OpenClawConfig; agentId: string; sessionKey: string };
+  context: HookContext & { config: CarapaceConfig; agentId: string; sessionKey: string };
   pluginRegistry?: PluginRegistry;
 };
 
 type CronScriptInvocation = Parameters<NonNullable<CronServiceDeps["evaluateCronTrigger"]>>[0];
 
 type PrepareTriggerRuntime = (params: {
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: CarapaceConfig;
   jobId: string;
   agentId?: string;
   toolsAllow?: string[];
@@ -128,7 +128,7 @@ type PrepareTriggerRuntime = (params: {
 }) => Promise<PreparedTriggerRuntime>;
 
 type CronTriggerEvaluatorDeps = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   runHeadless?: typeof runCodeModeScriptHeadless;
   prepareRuntime?: PrepareTriggerRuntime;
   loadPluginRegistry?: typeof loadPreparedInboundPluginRegistry;
@@ -137,12 +137,12 @@ type CronTriggerEvaluatorDeps = {
 
 type TriggerRuntimeCacheEntry = {
   promise: Promise<PreparedTriggerRuntime>;
-  configEpoch: OpenClawConfig;
+  configEpoch: CarapaceConfig;
   agentId: string;
   toolsAllowKey: string;
 };
 
-function resolveTriggerAgentId(config: OpenClawConfig, agentId?: string): string {
+function resolveTriggerAgentId(config: CarapaceConfig, agentId?: string): string {
   return agentId?.trim() ? normalizeAgentId(agentId) : resolveDefaultAgentId(config);
 }
 
@@ -204,7 +204,7 @@ async function prepareTriggerRuntime(
     // Bundle MCP tools are source:"mcp", which the headless bridge excludes.
     // LSP runtimes are session-scoped and intentionally outside trigger v1.
     const allTools = toolPlan.constructTools
-      ? createOpenClawCodingTools({
+      ? createCarapaceCodingTools({
           agentId,
           exec: { config },
           sandbox,

@@ -11,7 +11,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
@@ -61,7 +61,7 @@ suite.define(() => {
           candidates: [],
           manualProviders: [],
           prepareOptions,
-          workspace: "/tmp/openclaw-e2e",
+          workspace: "/tmp/carapace-e2e",
           setupComplete: false,
         };
         const modelRef = "llama-cpp/qwen3.5-9b-q4_k_m";
@@ -69,19 +69,19 @@ suite.define(() => {
           featureMethods: [
             "chat.metadata",
             "chat.startup",
-            "openclaw.setup.detect",
-            "openclaw.setup.activate.start",
-            "openclaw.setup.prepare.start",
+            "carapace.setup.detect",
+            "carapace.setup.activate.start",
+            "carapace.setup.prepare.start",
             "wizard.next",
           ],
           methodResponses: {
-            "openclaw.setup.detect": initialDetection,
-            "openclaw.setup.prepare.start": {
+            "carapace.setup.detect": initialDetection,
+            "carapace.setup.prepare.start": {
               sessionId: "llama-cpp-prepare-session",
               done: false,
               status: "running",
             },
-            "openclaw.setup.activate.start": {
+            "carapace.setup.activate.start": {
               sessionId: "activation-session",
               done: false,
               status: "running",
@@ -95,7 +95,7 @@ suite.define(() => {
                     id: "llama-cpp-consent",
                     type: "confirm",
                     message:
-                      "Runs on Gateway host gateway-host (darwin/arm64), using Apple Metal.\n16 GiB RAM; 100 GiB free disk.\nQwen3.5 9B (Q4_K_M) fits the 12 GiB Metal unified memory budget with a 64K context. Runtime verification checks the actual model before activation.\nOpenClaw will check a real tool call before making this your default model.\n\nDownload Qwen3.5 9B (Q4_K_M) (5.7 GB), the local embedding model (about 0.3 GB), and the verified METAL runtime, then use this model?",
+                      "Runs on Gateway host gateway-host (darwin/arm64), using Apple Metal.\n16 GiB RAM; 100 GiB free disk.\nQwen3.5 9B (Q4_K_M) fits the 12 GiB Metal unified memory budget with a 64K context. Runtime verification checks the actual model before activation.\nCarapace will check a real tool call before making this your default model.\n\nDownload Qwen3.5 9B (Q4_K_M) (5.7 GB), the local embedding model (about 0.3 GB), and the verified METAL runtime, then use this model?",
                     initialValue: false,
                   },
                 },
@@ -156,7 +156,7 @@ suite.define(() => {
         }
 
         await llamaCppRow.getByRole("button", { name: "Set up model" }).click();
-        const start = await gateway.waitForRequest("openclaw.setup.prepare.start");
+        const start = await gateway.waitForRequest("carapace.setup.prepare.start");
         expect(start.params).toMatchObject({ authChoice: "llama-cpp" });
         await page.getByRole("heading", { name: "Set up a local model" }).waitFor();
         await page.getByText("Runs on Gateway host gateway-host", { exact: false }).waitFor();
@@ -165,7 +165,7 @@ suite.define(() => {
             page.getByText("Runs on Gateway host gateway-host", { exact: false }).textContent(),
           )
           .toContain("using Apple Metal");
-        await page.locator("openclaw-modal-dialog wa-dialog").evaluate(async (dialog) => {
+        await page.locator("carapace-modal-dialog wa-dialog").evaluate(async (dialog) => {
           // Visible slotted text can precede the native dialog's opening animation.
           if (dialog.shadowRoot?.querySelector("dialog")?.classList.contains("show")) {
             await new Promise<void>((resolve) => {
@@ -175,7 +175,7 @@ suite.define(() => {
         });
         await expect
           .poll(() =>
-            page.locator("openclaw-modal-dialog wa-dialog dialog[open]").evaluate((dialog) => ({
+            page.locator("carapace-modal-dialog wa-dialog dialog[open]").evaluate((dialog) => ({
               opening: dialog.classList.contains("show"),
               opacity: getComputedStyle(dialog).opacity,
               visibility: getComputedStyle(dialog).visibility,
@@ -190,7 +190,7 @@ suite.define(() => {
           });
         }
 
-        await gateway.setMethodResponse("openclaw.setup.detect", {
+        await gateway.setMethodResponse("carapace.setup.detect", {
           ...initialDetection,
           candidates: [
             {
@@ -216,7 +216,7 @@ suite.define(() => {
           .poll(() => page.locator('.model-setup-success [data-provider-icon="llamacpp"]').count())
           .toBe(1);
 
-        const activate = await gateway.waitForRequest("openclaw.setup.activate.start");
+        const activate = await gateway.waitForRequest("carapace.setup.activate.start");
         expect(activate.params).toEqual({
           sessionId: expect.any(String),
           kind: "provider-auto:llama-cpp",
@@ -238,7 +238,7 @@ suite.define(() => {
           });
         }
 
-        await gateway.setMethodResponse("openclaw.setup.detect", {
+        await gateway.setMethodResponse("carapace.setup.detect", {
           ...initialDetection,
           candidates: [],
           configuredModel: modelRef,

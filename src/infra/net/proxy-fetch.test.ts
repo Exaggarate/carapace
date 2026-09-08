@@ -359,8 +359,8 @@ describe("resolveProxyFetchFromEnv", () => {
     const env = {
       HTTP_PROXY: "socks5://proxy.test:1080",
       HTTPS_PROXY: "https://proxy.test:8443",
-      OPENCLAW_PROXY_ACTIVE: "1",
-      OPENCLAW_PROXY_CA_FILE: "/supplied/proxy-ca.pem",
+      CARAPACE_PROXY_ACTIVE: "1",
+      CARAPACE_PROXY_CA_FILE: "/supplied/proxy-ca.pem",
     };
     expect(requireProxyFetch(resolveProxyFetchFromEnv(env))).toBeTypeOf("function");
     expect(createHttp1EnvHttpProxyAgent).toHaveBeenCalledWith(

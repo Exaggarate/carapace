@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import { extractFrontmatterBlock } from "../../../packages/markdown-core/src/frontmatter.js";
 import { resolveWorkspaceTemplateSearchDirs } from "../../agents/workspace-templates.js";
 import { publishBootstrapFile, resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
@@ -41,7 +41,7 @@ async function loadDevTemplate(name: string, fallback: string): Promise<string> 
 
 const resolveDevWorkspaceDir = (env: NodeJS.ProcessEnv = process.env): string => {
   const baseDir = resolveDefaultAgentWorkspaceDir(env, os.homedir);
-  const profile = normalizeOptionalLowercaseString(env.OPENCLAW_PROFILE);
+  const profile = normalizeOptionalLowercaseString(env.CARAPACE_PROFILE);
   if (profile === "dev") {
     return baseDir;
   }
@@ -55,7 +55,7 @@ async function ensureDevWorkspace(dir: string) {
   const [agents, soul, identity, user] = await Promise.all([
     loadDevTemplate(
       "AGENTS.dev.md",
-      `# AGENTS.md - OpenClaw Dev Workspace\n\nDefault dev workspace for openclaw gateway --dev.\n`,
+      `# AGENTS.md - Carapace Dev Workspace\n\nDefault dev workspace for carapace gateway --dev.\n`,
     ),
     loadDevTemplate(
       "SOUL.dev.md",

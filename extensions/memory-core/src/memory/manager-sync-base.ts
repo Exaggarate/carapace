@@ -1,14 +1,14 @@
 // Memory Core plugin module owns shared manager synchronization state.
 import type { DatabaseSync } from "node:sqlite";
 import type { FSWatcher } from "chokidar";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
 import {
   createSubsystemLogger,
   resolveAgentDir,
   resolveUserPath,
-  type OpenClawConfig,
+  type CarapaceConfig,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "carapace/plugin-sdk/memory-core-host-engine-foundation";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
@@ -19,8 +19,8 @@ import {
   type MemorySource,
   type MemorySyncParams,
   type MemorySyncProgressUpdate,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { runSqliteImmediateTransactionSync } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "carapace/plugin-sdk/memory-core-host-engine-storage";
+import { runSqliteImmediateTransactionSync } from "carapace/plugin-sdk/sqlite-runtime";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 import {
   resolveEmbeddingProviderIndexIdentity,
@@ -109,7 +109,7 @@ const log = createSubsystemLogger("memory");
 
 export abstract class MemoryManagerSyncBase extends MemoryManagerDatabaseContext {
   protected readonly acquireLocalService?: MemoryCoreAcquireLocalService;
-  protected abstract readonly cfg: OpenClawConfig;
+  protected abstract readonly cfg: CarapaceConfig;
   protected abstract readonly agentId: string;
   protected abstract readonly workspaceDir: string;
   protected abstract readonly settings: ResolvedMemorySearchConfig;

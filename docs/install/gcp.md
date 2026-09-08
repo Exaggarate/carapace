@@ -1,14 +1,14 @@
 ---
-summary: "Run OpenClaw Gateway 24/7 on a GCP Compute Engine VM with Docker"
+summary: "Run Carapace Gateway 24/7 on a GCP Compute Engine VM with Docker"
 doc-schema-version: 1
 read_when:
-  - You want OpenClaw running 24/7 on GCP
+  - You want Carapace running 24/7 on GCP
   - You want a persistent Gateway on a Compute Engine VM
   - You need GCP provisioning, firewall, or SSH tunnel guidance
 title: "GCP"
 ---
 
-Run a persistent OpenClaw Gateway on a Debian Compute Engine VM. This page
+Run a persistent Carapace Gateway on a Debian Compute Engine VM. This page
 covers GCP provisioning, network access, and machine operations; the shared
 [Docker VM runtime](/install/docker-vm-runtime) page owns container setup,
 persistence, custom binaries, verification, and updates.
@@ -44,8 +44,8 @@ in [Docker VM runtime](/install/docker-vm-runtime).
 
   <Step title="Create the project">
     ```bash
-    gcloud projects create my-openclaw-project --name="OpenClaw Gateway"
-    gcloud config set project my-openclaw-project
+    gcloud projects create my-carapace-project --name="Carapace Gateway"
+    gcloud config set project my-carapace-project
     gcloud services enable compute.googleapis.com
     ```
 
@@ -65,7 +65,7 @@ in [Docker VM runtime](/install/docker-vm-runtime).
     Create a Debian 12 VM:
 
     ```bash
-    gcloud compute instances create openclaw-gateway \
+    gcloud compute instances create carapace-gateway \
       --zone=us-central1-a \
       --machine-type=e2-standard-2 \
       --boot-disk-size=20GB \
@@ -93,7 +93,7 @@ in [Docker VM runtime](/install/docker-vm-runtime).
 
   <Step title="Connect over SSH">
     ```bash
-    gcloud compute ssh openclaw-gateway --zone=us-central1-a
+    gcloud compute ssh carapace-gateway --zone=us-central1-a
     ```
 
     SSH key propagation can take a minute or two after VM creation. Wait and
@@ -115,7 +115,7 @@ in [Docker VM runtime](/install/docker-vm-runtime).
     Reconnect so the group change takes effect, then verify the installation:
 
     ```bash
-    gcloud compute ssh openclaw-gateway --zone=us-central1-a
+    gcloud compute ssh carapace-gateway --zone=us-central1-a
     docker --version
     docker compose version
     ```
@@ -130,9 +130,9 @@ On the VM, follow [Docker VM runtime](/install/docker-vm-runtime) from
 maintained setup script uses these GCP host paths by default:
 
 ```bash
-export OPENCLAW_CONFIG_DIR="$HOME/.openclaw"
-export OPENCLAW_WORKSPACE_DIR="$HOME/.openclaw/workspace"
-export OPENCLAW_AUTH_PROFILE_SECRET_DIR="$HOME/.openclaw-auth-profile-secrets"
+export CARAPACE_CONFIG_DIR="$HOME/.carapace"
+export CARAPACE_WORKSPACE_DIR="$HOME/.carapace/workspace"
+export CARAPACE_AUTH_PROFILE_SECRET_DIR="$HOME/.carapace-auth-profile-secrets"
 ```
 
 If a source build ends with `Killed`, `ResourceExhausted`, or exit code 137,
@@ -143,7 +143,7 @@ resize the VM before retrying.
 From your laptop, open an SSH tunnel and leave it running:
 
 ```bash
-gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
+gcloud compute ssh carapace-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
 ```
 
 Open `http://127.0.0.1:18789/`. Paste the Gateway token from the VM's `.env`
@@ -151,10 +151,10 @@ when prompted. To reprint the dashboard URL or approve a browser device, run on
 the VM:
 
 ```bash
-cd openclaw
-docker compose run --rm openclaw-cli dashboard --no-open
-docker compose run --rm openclaw-cli devices list
-docker compose run --rm openclaw-cli devices approve <requestId>
+cd carapace
+docker compose run --rm carapace-cli dashboard --no-open
+docker compose run --rm carapace-cli devices list
+docker compose run --rm carapace-cli devices approve <requestId>
 ```
 
 ## Troubleshooting
@@ -176,11 +176,11 @@ Ensure your account has Compute OS Login or Compute OS Admin Login permission.
 ### Resize after an out-of-memory build
 
 ```bash
-gcloud compute instances stop openclaw-gateway --zone=us-central1-a
-gcloud compute instances set-machine-type openclaw-gateway \
+gcloud compute instances stop carapace-gateway --zone=us-central1-a
+gcloud compute instances set-machine-type carapace-gateway \
   --zone=us-central1-a \
   --machine-type=e2-medium
-gcloud compute instances start openclaw-gateway --zone=us-central1-a
+gcloud compute instances start carapace-gateway --zone=us-central1-a
 ```
 
 ## Use a deployment service account
@@ -189,11 +189,11 @@ For personal setup, your user account is enough. Automation should use a
 dedicated service account with the narrowest role that works:
 
 ```bash
-gcloud iam service-accounts create openclaw-deploy \
-  --display-name="OpenClaw Deployment"
+gcloud iam service-accounts create carapace-deploy \
+  --display-name="Carapace Deployment"
 
-gcloud projects add-iam-policy-binding my-openclaw-project \
-  --member="serviceAccount:openclaw-deploy@my-openclaw-project.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding my-carapace-project \
+  --member="serviceAccount:carapace-deploy@my-carapace-project.iam.gserviceaccount.com" \
   --role="roles/compute.instanceAdmin.v1"
 ```
 
@@ -205,7 +205,7 @@ Avoid the Owner role. See
 - [Channels](/channels)
 - [Nodes](/nodes)
 - [Gateway configuration](/gateway/configuration)
-- [Docker VM Runtime](/install/docker-vm-runtime#update-openclaw)
+- [Docker VM Runtime](/install/docker-vm-runtime#update-carapace)
 
 ## Related
 

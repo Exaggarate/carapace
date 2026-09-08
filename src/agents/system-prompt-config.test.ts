@@ -1,7 +1,7 @@
 // System prompt config tests cover config-to-prompt parameter resolution through
 // the canonical agent prompt facade.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildConfiguredAgentSystemPrompt } from "./system-prompt-config.js";
 import * as systemPrompt from "./system-prompt.js";
 
@@ -11,11 +11,11 @@ vi.mock("../tts/tts-settings.js", () => ({
   setTtsMachinePrefsPathResolver: vi.fn(),
 }));
 
-function buildPrompt(config: OpenClawConfig, agentId = "main", sessionKey?: string): string {
+function buildPrompt(config: CarapaceConfig, agentId = "main", sessionKey?: string): string {
   return buildConfiguredAgentSystemPrompt({
     config,
     agentId,
-    workspaceDir: "/tmp/openclaw",
+    workspaceDir: "/tmp/carapace",
     toolNames: ["sessions_spawn", "subagents"],
     runtimeInfo: { sessionKey },
   });
@@ -29,20 +29,20 @@ describe("buildConfiguredAgentSystemPrompt", () => {
       name: "retired hash",
       config: {
         commands: { ownerDisplay: "hash", ownerDisplaySecret: "retired-secret" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     },
     {
       name: "retired raw",
       config: {
         commands: { ownerDisplay: "raw", ownerDisplaySecret: "retired-secret" },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
     },
   ])("preserves owner display semantics with $name config", ({ config }) => {
     const render = vi.spyOn(systemPrompt, "buildAgentSystemPrompt");
     try {
       const prompt = buildConfiguredAgentSystemPrompt({
         config,
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/carapace",
         ownerNumbers: ["owner-a"],
         ownerDisplay: "hash",
         ownerDisplaySecret: "caller-secret", // pragma: allowlist secret
@@ -67,31 +67,31 @@ describe("buildConfiguredAgentSystemPrompt", () => {
   it.each([
     {
       name: "prefers delegation in the canonical main session",
-      config: {} satisfies OpenClawConfig,
+      config: {} satisfies CarapaceConfig,
       sessionKey: "agent:main:main",
       expected: true,
     },
     {
       name: "suggests delegation outside the canonical main session",
-      config: {} satisfies OpenClawConfig,
+      config: {} satisfies CarapaceConfig,
       sessionKey: "agent:main:slack:channel:C01234567",
       expected: false,
     },
     {
       name: "recognizes a custom canonical main key",
-      config: { session: { mainKey: "inbox" } } satisfies OpenClawConfig,
+      config: { session: { mainKey: "inbox" } } satisfies CarapaceConfig,
       sessionKey: "agent:main:inbox",
       expected: true,
     },
     {
       name: "recognizes the global-scope canonical main key",
-      config: { session: { scope: "global" } } satisfies OpenClawConfig,
+      config: { session: { scope: "global" } } satisfies CarapaceConfig,
       sessionKey: "global",
       expected: true,
     },
     {
       name: "suggests delegation without a render session key",
-      config: {} satisfies OpenClawConfig,
+      config: {} satisfies CarapaceConfig,
       sessionKey: undefined,
       expected: false,
     },
@@ -99,7 +99,7 @@ describe("buildConfiguredAgentSystemPrompt", () => {
       name: "honors explicit prefer outside the canonical main session",
       config: {
         agents: { defaults: { subagents: { delegationMode: "prefer" } } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionKey: "agent:main:dashboard:project",
       expected: true,
     },
@@ -107,7 +107,7 @@ describe("buildConfiguredAgentSystemPrompt", () => {
       name: "honors explicit suggest in the canonical main session",
       config: {
         agents: { defaults: { subagents: { delegationMode: "suggest" } } },
-      } satisfies OpenClawConfig,
+      } satisfies CarapaceConfig,
       sessionKey: "agent:main:main",
       expected: false,
     },
@@ -126,7 +126,7 @@ describe("buildConfiguredAgentSystemPrompt", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(buildPrompt(config)).toContain("## Delegation");
   });
@@ -148,7 +148,7 @@ describe("buildConfiguredAgentSystemPrompt", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     expect(buildPrompt(config, "coordinator")).toContain("## Delegation");
   });
@@ -165,7 +165,7 @@ describe("buildConfiguredAgentSystemPrompt", () => {
         },
       },
       agentId: "main",
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/carapace",
       toolNames: ["sessions_spawn", "subagents"],
     });
 

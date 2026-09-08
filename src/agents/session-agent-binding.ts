@@ -6,9 +6,9 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolvePersistedSessionStoreOwnerForKey } from "../config/sessions/session-store-owner.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeMainKey, parseAgentSessionKey } from "../routing/session-key.js";
 import { resolveSessionAgentId } from "./agent-scope.js";
 
@@ -16,7 +16,7 @@ import { resolveSessionAgentId } from "./agent-scope.js";
  * Resolve the trusted active agent bound to a host-owned session reference.
  */
 export function resolveBoundAgentIdForSession(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   sessionKey?: string;
   agentId?: string;
 }): string | undefined {

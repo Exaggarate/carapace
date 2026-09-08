@@ -1,8 +1,8 @@
 /**
  * Browser tab selection operations for default tab choice, focus, and close.
  */
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { sleepWithAbort } from "carapace/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import { assertChromeMcpCdpTransportAllowed } from "./cdp-reachability-policy.js";

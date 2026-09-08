@@ -1,4 +1,4 @@
-// OpenClaw gateway methods host the setup/repair conversation for clients.
+// Carapace gateway methods host the setup/repair conversation for clients.
 import {
   buildSystemAgentInferenceUnavailableErrorDetails,
   buildSystemAgentSessionInvalidatedErrorDetails,
@@ -69,8 +69,8 @@ import { assertValidParams } from "./validation.js";
 export type { SystemAgentChatSession };
 
 /**
- * `openclaw.chat` lets clients (macOS app onboarding, future UIs) run the
- * same conversational setup as `openclaw setup`. Structured setup owns
+ * `carapace.chat` lets clients (macOS app onboarding, future UIs) run the
+ * same conversational setup as `carapace setup`. Structured setup owns
  * the pre-inference phase; a new chat session starts only after a live model
  * turn succeeds.
  *
@@ -119,7 +119,7 @@ async function evictOldestSession(
 }
 
 export const systemAgentHandlers: GatewayRequestHandlers = {
-  "openclaw.approval.list": async ({ respond, client, context }) => {
+  "carapace.approval.list": async ({ respond, client, context }) => {
     const manager = context.systemAgentApprovalManager;
     respond(
       true,
@@ -133,12 +133,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
       undefined,
     );
   },
-  "openclaw.chat.history": ({ params, respond }) => {
+  "carapace.chat.history": ({ params, respond }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentChatHistoryParams,
-        "openclaw.chat.history",
+        "carapace.chat.history",
         respond,
       )
     ) {
@@ -151,12 +151,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
     );
   },
   /** Structured onboarding: list reusable AI access on this host. */
-  "openclaw.setup.detect": async ({ params, respond }) => {
+  "carapace.setup.detect": async ({ params, respond }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupDetectParams,
-        "openclaw.setup.detect",
+        "carapace.setup.detect",
         respond,
       )
     ) {
@@ -169,12 +169,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
     respond(true, await detectSetupInferenceIsolated(params), undefined);
   },
   /** Re-run the exact current default-agent inference route without mutating setup. */
-  "openclaw.setup.verify": async ({ params, respond, context }) => {
+  "carapace.setup.verify": async ({ params, respond, context }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupVerifyParams,
-        "openclaw.setup.verify",
+        "carapace.setup.verify",
         respond,
       )
     ) {
@@ -190,12 +190,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
     });
   },
   /** Start one provider-owned OAuth/device-code login over the shared wizard transport. */
-  "openclaw.setup.auth.start": async ({ params, respond, context, client }) => {
+  "carapace.setup.auth.start": async ({ params, respond, context, client }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupAuthStartParams,
-        "openclaw.setup.auth.start",
+        "carapace.setup.auth.start",
         respond,
       )
     ) {
@@ -212,12 +212,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
     });
   },
   /** Activate a detected or manual route with server-owned capability review. */
-  "openclaw.setup.activate.start": async ({ params, respond, context }) => {
+  "carapace.setup.activate.start": async ({ params, respond, context }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupActivateStartParams,
-        "openclaw.setup.activate.start",
+        "carapace.setup.activate.start",
         respond,
       )
     ) {
@@ -233,12 +233,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
     });
   },
   /** Run one provider-owned prepare flow over the shared wizard transport. */
-  "openclaw.setup.prepare.start": async ({ params, respond, context }) => {
+  "carapace.setup.prepare.start": async ({ params, respond, context }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupAuthStartParams,
-        "openclaw.setup.prepare.start",
+        "carapace.setup.prepare.start",
         respond,
       )
     ) {
@@ -260,11 +260,11 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
               const snapshot = await setupShared.readSetupConfigFileSnapshot();
               if (!snapshot.valid) {
                 throw new Error(
-                  "Config is invalid. Run `openclaw doctor` before preparing a model.",
+                  "Config is invalid. Run `carapace doctor` before preparing a model.",
                 );
               }
               // Match the classic wizard: mutate the authored shape, not runtimeConfig,
-              // so setup never writes resolved runtime defaults into openclaw.json.
+              // so setup never writes resolved runtime defaults into carapace.json.
               const baseConfig = snapshot.exists ? snapshot.sourceConfig : {};
               const workspaceDir = params.workspace?.trim()
                 ? resolveUserPath(params.workspace.trim())
@@ -292,7 +292,7 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
               });
               if (!prepared || prepared.retrySelection) {
                 throw new Error(
-                  `Provider setup resolution failed for "${params.authChoice}". Run \`openclaw doctor --fix\`, restart the Gateway, and try again.`,
+                  `Provider setup resolution failed for "${params.authChoice}". Run \`carapace doctor --fix\`, restart the Gateway, and try again.`,
                 );
               }
               signal.throwIfAborted();
@@ -325,12 +325,12 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
    * queueing work that could outlive their RPC timeout. Verification failures never
    * commit a broken model; post-commit application failures explain the saved state.
    */
-  "openclaw.setup.activate": async ({ params, respond }) => {
+  "carapace.setup.activate": async ({ params, respond }) => {
     if (
       !assertValidParams(
         params,
         validateSystemAgentSetupActivateParams,
-        "openclaw.setup.activate",
+        "carapace.setup.activate",
         respond,
       )
     ) {
@@ -368,9 +368,9 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
       respondSetupAdmissionBusy(respond);
     }
   },
-  "openclaw.chat": async ({ params: rawParams, respond, client, context }) => {
+  "carapace.chat": async ({ params: rawParams, respond, client, context }) => {
     const params = sanitizeSystemAgentChatParams(rawParams);
-    if (!assertValidParams(params, validateSystemAgentChatParams, "openclaw.chat", respond)) {
+    if (!assertValidParams(params, validateSystemAgentChatParams, "carapace.chat", respond)) {
       return;
     }
     const inputError = getSystemAgentChatInputError(params);
@@ -394,7 +394,7 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
         respond(
           false,
           undefined,
-          errorShape(ErrorCodes.INVALID_REQUEST, "OpenClaw caller identity unavailable."),
+          errorShape(ErrorCodes.INVALID_REQUEST, "Carapace caller identity unavailable."),
         );
         return undefined;
       }
@@ -405,7 +405,7 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
         respond(
           false,
           undefined,
-          errorShape(ErrorCodes.INVALID_REQUEST, "OpenClaw session belongs to another caller.", {
+          errorShape(ErrorCodes.INVALID_REQUEST, "Carapace session belongs to another caller.", {
             details: buildSystemAgentSessionInvalidatedErrorDetails(),
           }),
         );
@@ -429,8 +429,8 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
           errorShape(
             ErrorCodes.INVALID_REQUEST,
             params.wizardCancel !== undefined
-              ? "No active OpenClaw chat session is awaiting that wizard cancel."
-              : "No active OpenClaw chat session is awaiting that wizard answer.",
+              ? "No active Carapace chat session is awaiting that wizard cancel."
+              : "No active Carapace chat session is awaiting that wizard answer.",
             { details: buildSystemAgentSessionInvalidatedErrorDetails() },
           ),
         );
@@ -454,7 +454,7 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
             undefined,
             errorShape(
               ErrorCodes.UNAVAILABLE,
-              `OpenClaw requires working inference: ${inference.error}`,
+              `Carapace requires working inference: ${inference.error}`,
               {
                 details: buildSystemAgentInferenceUnavailableErrorDetails(),
               },
@@ -588,7 +588,7 @@ export const systemAgentHandlers: GatewayRequestHandlers = {
           respond(
             false,
             undefined,
-            errorShape(ErrorCodes.INVALID_REQUEST, "OpenClaw chat input is missing."),
+            errorShape(ErrorCodes.INVALID_REQUEST, "Carapace chat input is missing."),
           );
           return undefined;
         }

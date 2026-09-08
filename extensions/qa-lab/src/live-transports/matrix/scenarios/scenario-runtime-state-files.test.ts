@@ -3,11 +3,11 @@ import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createClaimableDedupe } from "openclaw/plugin-sdk/persistent-dedupe";
+import { createClaimableDedupe } from "carapace/plugin-sdk/persistent-dedupe";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { createMatrixQaE2eeTestContext } from "./scenario-runtime-e2ee.test-helpers.js";
 import {
@@ -28,7 +28,7 @@ describe("Matrix QA persisted state probes", () => {
     return createPluginStateSyncKeyedStoreForTests<unknown>("matrix", {
       namespace,
       maxEntries: 20,
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
     });
   }
 
@@ -105,7 +105,7 @@ describe("Matrix QA persisted state probes", () => {
         timeoutMs: 1_000,
       });
       expect(selected).toMatchObject({
-        pathname: path.join(target, "state", "openclaw.sqlite"),
+        pathname: path.join(target, "state", "carapace.sqlite"),
         cursor: "target-cursor",
         source: "sqlite",
       });
@@ -188,7 +188,7 @@ describe("Matrix QA persisted state probes", () => {
       ttlMs: 30 * 24 * 60 * 60 * 1000,
       memoryMaxSize: 100,
       stateMaxEntries: 100,
-      env: { ...process.env, OPENCLAW_STATE_DIR: accountRoot },
+      env: { ...process.env, CARAPACE_STATE_DIR: accountRoot },
     });
     const key = `runtime-default\0${roomId}\0${eventId}`;
     await guard.claim(key);
@@ -202,6 +202,6 @@ describe("Matrix QA persisted state probes", () => {
         stateDir,
         timeoutMs: 1_000,
       }),
-    ).resolves.toBe(path.join(accountRoot, "state", "openclaw.sqlite"));
+    ).resolves.toBe(path.join(accountRoot, "state", "carapace.sqlite"));
   });
 });

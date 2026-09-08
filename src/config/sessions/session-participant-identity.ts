@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { Compile, type Validator } from "typebox/compile";
 import {
   SessionParticipantIdentitySchema,
@@ -47,7 +47,7 @@ export function readParticipantIdentity(namespace: string, id: string): SessionP
       return identity;
     }
   }
-  throw new Error("Session participant identity is invalid; run openclaw doctor --fix.");
+  throw new Error("Session participant identity is invalid; run carapace doctor --fix.");
 }
 
 type ParticipantAggregate = {

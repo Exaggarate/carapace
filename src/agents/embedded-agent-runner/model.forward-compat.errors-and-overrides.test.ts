@@ -1,6 +1,6 @@
 // Coverage for forward-compatible model fallback errors and provider overrides.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ModelProviderConfig, OpenClawConfig } from "../../config/config.js";
+import type { ModelProviderConfig, CarapaceConfig } from "../../config/config.js";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
@@ -70,7 +70,7 @@ vi.mock("../model-suppression.js", () => {
     ) {
       return undefined;
     }
-    return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`openclaw models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
+    return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`carapace models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
   }
   return {
     shouldSuppressBuiltInModelCore: (input: Parameters<typeof suppressionError>[0]) =>
@@ -86,7 +86,7 @@ vi.mock("../prepared-model-runtime.js", async () => {
     await import("../../config/plugin-auto-enable.test-helpers.js");
   const createSnapshot = (input: {
     agentDir: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir?: string;
   }) => {
     const config = input.config ?? {};
@@ -163,7 +163,7 @@ async function resolveModelForTest(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: OpenClawConfig,
+  cfg?: CarapaceConfig,
 ) {
   return await resolveModelAsync(provider, modelId, agentDir, cfg, {
     runtimeHooks: createRuntimeHooks(),
@@ -200,7 +200,7 @@ async function resolveAnthropicModelWithProviderOverrides(overrides: Partial<Mod
         anthropic: overrides,
       },
     },
-  } as unknown as OpenClawConfig);
+  } as unknown as CarapaceConfig);
 }
 
 describe("resolveModel forward-compat errors and overrides", () => {
@@ -262,7 +262,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
         cost: { ...staleCost, ...cost },
       };
       const providerConfig = { baseUrl: "https://models.example/v1", models: [model] };
-      const runtime: OpenClawConfig = { models: { providers: { [provider]: providerConfig } } };
+      const runtime: CarapaceConfig = { models: { providers: { [provider]: providerConfig } } };
       const source = {
         models: {
           providers: {
@@ -280,7 +280,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as CarapaceConfig;
       const catalogModel = {
         ...model,
         provider,
@@ -353,7 +353,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -368,13 +368,13 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -390,7 +390,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
     expect(result.error).toBeUndefined();
@@ -402,7 +402,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
   it("resolves suppressed openai gpt-5.3-codex-spark through model-scoped Codex runtime", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           models: {
@@ -424,7 +424,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
   it("keeps model-scoped Codex runtime blocked for explicit OpenAI API-key provider config", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       agents: {
         defaults: {
           models: {
@@ -502,7 +502,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
@@ -532,7 +532,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
@@ -556,7 +556,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
@@ -589,7 +589,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.3-codex-spark", "/tmp/agent", cfg);
 
@@ -634,7 +634,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -649,7 +649,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -660,7 +660,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -675,7 +675,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -686,7 +686,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -701,7 +701,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -729,7 +729,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -758,7 +758,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     const result = await resolveModelForTest(
       "azure-openai-responses",
@@ -769,12 +769,12 @@ describe("resolveModel forward-compat errors and overrides", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `carapace models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
   it("uses codex fallback even when openai provider is configured", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -783,7 +783,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expectResolvedForwardCompatFallbackResult({
       result: await resolveModelForTest("openai", "gpt-5.4", "/tmp/agent", cfg),
@@ -798,7 +798,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
   it("uses codex fallback when inline model omits api (#39682)", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -808,7 +808,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("openai", "gpt-5.4", "/tmp/agent", cfg);
     expect(result.error).toBeUndefined();
@@ -824,7 +824,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
   it("keeps openai gpt-5.4 responses overrides on the OpenAI API transport", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -833,7 +833,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expectResolvedForwardCompatFallbackResult({
       result: await resolveModelForTest("openai", "gpt-5.4", "/tmp/agent", cfg),
@@ -849,7 +849,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
   it("normalizes openai gpt-5.4 completions overrides to the OpenAI API transport", async () => {
     mockOpenAICodexTemplateModel(discoverModels);
 
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: {
         providers: {
           openai: {
@@ -858,7 +858,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     expectResolvedForwardCompatFallbackResult({
       result: await resolveModelForTest("openai", "gpt-5.4", "/tmp/agent", cfg),
@@ -877,7 +877,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
     expect(result.model).toBeUndefined();
     expect(result.error).toContain("Unknown model: ollama/gemma3:4b");
     expect(result.error).toContain("OLLAMA_API_KEY");
-    expect(result.error).toContain("docs.openclaw.ai/providers/ollama");
+    expect(result.error).toContain("github.com/Exaggarate/carapace");
   });
 
   it("includes auth hint for unknown vllm models", async () => {
@@ -943,7 +943,7 @@ describe("resolveModel forward-compat errors and overrides", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const result = await resolveModelForTest("kimi", "kimi-code", "/tmp/agent", cfg);
     expect(result.error).toBeUndefined();

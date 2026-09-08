@@ -1,7 +1,7 @@
 import EventKit
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 struct RemindersServiceTests {
     @Test func `due date uses Gregorian components and an absolute alarm`() throws {

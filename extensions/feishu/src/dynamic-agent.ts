@@ -3,15 +3,15 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { resolveChannelConfigWrites } from "openclaw/plugin-sdk/channel-config-writes";
-import { normalizeAccountId, resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import type { OpenClawConfig, PluginRuntime } from "../runtime-api.js";
+import { resolveChannelConfigWrites } from "carapace/plugin-sdk/channel-config-writes";
+import { normalizeAccountId, resolveAgentRoute } from "carapace/plugin-sdk/routing";
+import type { CarapaceConfig, PluginRuntime } from "../runtime-api.js";
 import { resolveFeishuAccount } from "./accounts.js";
 import type { DynamicAgentCreationConfig } from "./types.js";
 
 type MaybeCreateDynamicAgentResult = {
   created: boolean;
-  updatedCfg: OpenClawConfig;
+  updatedCfg: CarapaceConfig;
   agentId?: string;
 };
 
@@ -21,13 +21,13 @@ type DynamicAgentMutationResult = {
 };
 
 class DynamicAgentMutationSkipped extends Error {
-  constructor(readonly cfg: OpenClawConfig) {
+  constructor(readonly cfg: CarapaceConfig) {
     super("dynamic agent mutation skipped");
   }
 }
 
 function hasDefaultDirectRoute(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
   senderOpenId: string,
 ): boolean {
@@ -42,7 +42,7 @@ function hasDefaultDirectRoute(
 }
 
 function resolveDynamicAgentConfig(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   accountId: string,
 ): DynamicAgentCreationConfig | undefined {
   return resolveFeishuAccount({ cfg, accountId }).config.dynamicAgentCreation as
@@ -51,7 +51,7 @@ function resolveDynamicAgentConfig(
 }
 
 function isAtDynamicAgentLimit(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   dynamicCfg: DynamicAgentCreationConfig,
 ): boolean {
   if (dynamicCfg.maxAgents === undefined) {
@@ -81,11 +81,11 @@ function resolveDynamicAgentId(accountId: string, senderOpenId: string): string 
  * account policy permits config writes.
  */
 export async function maybeCreateDynamicAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runtime: PluginRuntime;
   accountId: string;
   senderOpenId: string;
-  canCreateForConfig: (cfg: OpenClawConfig) => Promise<boolean>;
+  canCreateForConfig: (cfg: CarapaceConfig) => Promise<boolean>;
   log: (msg: string) => void;
 }): Promise<MaybeCreateDynamicAgentResult> {
   const { cfg, runtime, senderOpenId, canCreateForConfig, log } = params;
@@ -95,7 +95,7 @@ export async function maybeCreateDynamicAgent(params: {
     return { created: false, updatedCfg: cfg };
   }
 
-  const currentCfg = runtime.config.current() as OpenClawConfig;
+  const currentCfg = runtime.config.current() as CarapaceConfig;
   if (!hasDefaultDirectRoute(currentCfg, accountId, senderOpenId)) {
     return { created: false, updatedCfg: currentCfg };
   }
@@ -124,7 +124,7 @@ export async function maybeCreateDynamicAgent(params: {
 
   // The config mutation lock owns the final duplicate/limit checks. This keeps
   // simultaneous DM creations and policy updates from producing stale writes.
-  let skippedCfg: OpenClawConfig | undefined;
+  let skippedCfg: CarapaceConfig | undefined;
   const committed = await runtime.config
     .mutateConfigFile<DynamicAgentMutationResult>({
       base: "runtime",
@@ -154,9 +154,9 @@ export async function maybeCreateDynamicAgent(params: {
 
         if (!agentExists) {
           const workspaceTemplate =
-            dynamicCfg.workspaceTemplate ?? "~/.openclaw/workspace-{agentId}";
+            dynamicCfg.workspaceTemplate ?? "~/.carapace/workspace-{agentId}";
           const agentDirTemplate =
-            dynamicCfg.agentDirTemplate ?? "~/.openclaw/agents/{agentId}/agent";
+            dynamicCfg.agentDirTemplate ?? "~/.carapace/agents/{agentId}/agent";
           const workspace = resolveUserPath(
             workspaceTemplate.replace("{userId}", senderOpenId).replace("{agentId}", agentId),
           );
@@ -203,7 +203,7 @@ export async function maybeCreateDynamicAgent(params: {
 
   return {
     created: committed.result?.created ?? false,
-    updatedCfg: runtime.config.current() as OpenClawConfig,
+    updatedCfg: runtime.config.current() as CarapaceConfig,
     agentId: committed.result?.agentId,
   };
 }

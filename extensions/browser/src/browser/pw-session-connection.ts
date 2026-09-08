@@ -1,5 +1,5 @@
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { Browser, BrowserContext, Page } from "playwright-core";
 import { formatErrorMessage, toErrorObject } from "../infra/errors.js";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
@@ -441,7 +441,7 @@ export async function connectBrowser(
         if (!relay && !resolvedEndpoint && !configuredIsWebSocket) {
           if (hasUrlCredentials) {
             // Playwright preserves explicit headers across HTTP discovery redirects.
-            // Keep credentialed discovery in OpenClaw's guarded fetch path instead.
+            // Keep credentialed discovery in Carapace's guarded fetch path instead.
             throw new Error(
               "Authenticated CDP HTTP endpoint did not expose a usable WebSocket URL.",
             );

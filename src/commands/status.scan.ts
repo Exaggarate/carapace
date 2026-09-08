@@ -23,7 +23,7 @@ export async function scanStatus(opts: {
         env: process.env,
         commandName: "status",
         opts,
-        showSecrets: process.env.OPENCLAW_SHOW_SECRETS?.trim() !== "0",
+        showSecrets: process.env.CARAPACE_SHOW_SECRETS?.trim() !== "0",
         includeLiveChannelStatus: isDetailedScan,
         includeChannelSetupRuntimeFallback: isDetailedScan,
         fetchGitUpdate: isDetailedScan,

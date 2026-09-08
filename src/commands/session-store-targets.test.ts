@@ -60,7 +60,7 @@ describe("resolveCommandSessionStoreTargets", () => {
   it.each(["missing", "suffixless", "directory", "non-database", "foreign-database"] as const)(
     "rejects a %s explicit store through the CLI failure owner",
     (storeKind) => {
-      const dir = tempDirs.make("openclaw-explicit-session-store-");
+      const dir = tempDirs.make("carapace-explicit-session-store-");
       const storePath = path.join(
         dir,
         storeKind === "suffixless" ? "requested-store" : `${storeKind}.sqlite`,
@@ -92,10 +92,10 @@ describe("resolveCommandSessionStoreTargets", () => {
   );
 
   it.each([
-    ["legacy JSON locator", "sessions.json", "openclaw-agent.sqlite"],
+    ["legacy JSON locator", "sessions.json", "carapace-agent.sqlite"],
     ["suffixless locator", "offline-store", "offline-store.sqlite"],
   ])("accepts an existing SQLite target resolved from a %s", (_name, locator, target) => {
-    const dir = tempDirs.make("openclaw-explicit-session-store-");
+    const dir = tempDirs.make("carapace-explicit-session-store-");
     const storePath = path.join(dir, locator);
     createRepairableSessionDatabase(path.join(dir, target));
     resolveSessionStoreTargetsMock.mockReturnValue([{ agentId: "main", storePath }]);

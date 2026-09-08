@@ -1,8 +1,8 @@
 import Foundation
 import Network
 import Observation
-import OpenClawChatUI
-import OpenClawKit
+import CarapaceChatUI
+import CarapaceKit
 import SwiftUI
 
 typealias GatewayTCPReachabilityProbe = @Sendable (String, Int, Double, String) async -> Bool
@@ -161,7 +161,7 @@ final class GatewayConnectionController {
                 endpoint.host,
                 endpoint.port,
                 GatewaySetupRouteProbeBudget.tcpConnectTimeoutSeconds,
-                "ai.openclaw.gateway.setup-route-\(index)")
+                "ai.carapace.gateway.setup-route-\(index)")
             if reachable {
                 return link.selectingEndpoint(endpoint)
             }

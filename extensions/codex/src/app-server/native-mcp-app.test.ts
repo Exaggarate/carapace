@@ -1,14 +1,14 @@
 import {
   prepareHarnessNativeMcpAppPreview,
   type EmbeddedRunAttemptParamsV2 as EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { CodexAppServerClient } from "./client.js";
 import { createCodexNativeMcpAppResultDetailsPreparer } from "./native-mcp-app.js";
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
   const original =
-    await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/agent-harness-runtime")>();
   return {
     ...original,
     prepareHarnessNativeMcpAppPreview: vi.fn(original.prepareHarnessNativeMcpAppPreview),

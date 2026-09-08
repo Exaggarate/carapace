@@ -1,7 +1,7 @@
-import type { ModelCatalogSuppression } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { ModelCatalogSuppression } from "@carapace/model-catalog-core/model-catalog-types";
 import { vi } from "vitest";
 import { createPluginMetadataSnapshot } from "../../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { setCurrentPluginMetadataSnapshot } from "../../plugins/current-plugin-metadata.test-support.js";
 import type { PluginManifestRecord } from "../../plugins/manifest-registry.js";
 import { clearPluginMetadataLifecycleCaches } from "../../plugins/plugin-metadata-lifecycle.js";
@@ -19,7 +19,7 @@ type ImagePolicy = NonNullable<NonNullable<ProviderRuntimeModel["mediaInput"]>["
 export function createModelGenerationFixture(params: {
   agentDir: string;
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   createStores?: PreparedModelRuntimeSnapshot["createStores"];
   label: string;
   modelId?: string;
@@ -51,7 +51,7 @@ export function createModelGenerationFixture(params: {
     origin: "bundled",
     rootDir: `/tmp/generation-plugin-${params.label}`,
     source: `/tmp/generation-plugin-${params.label}/index.js`,
-    manifestPath: `/tmp/generation-plugin-${params.label}/openclaw.plugin.json`,
+    manifestPath: `/tmp/generation-plugin-${params.label}/carapace.plugin.json`,
     modelCatalog: {
       ...(requestProvider === provider ? {} : { aliases: { [requestProvider]: { provider } } }),
       ...(params.runtimeAugment === undefined ? {} : { runtimeAugment: params.runtimeAugment }),

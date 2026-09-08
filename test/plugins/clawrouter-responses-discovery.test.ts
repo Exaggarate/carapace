@@ -1,5 +1,5 @@
-import { createOpenAIResponsesTransportStreamFn } from "@openclaw/ai/transports";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { createOpenAIResponsesTransportStreamFn } from "@carapace/ai/transports";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import clawrouter from "../../extensions/clawrouter/index.js";
 import {
@@ -7,21 +7,21 @@ import {
   resolveModelAsync,
 } from "../../src/agents/embedded-agent-runner/model.js";
 import type { ProviderRuntimeHooks } from "../../src/agents/embedded-agent-runner/model.provider-hooks.js";
-import type { OpenClawConfig } from "../../src/config/types.openclaw.js";
+import type { CarapaceConfig } from "../../src/config/types.carapace.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../src/test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../src/test-utils/carapace-test-state.js";
 import { registerSingleProviderPlugin } from "../../src/test-utils/plugin-registration.js";
 
 const auth = vi.hoisted(() => ({ resolveApiKeyForProvider: vi.fn() }));
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => auth);
+vi.mock("carapace/plugin-sdk/provider-auth-runtime", () => auth);
 
 describe("ClawRouter Responses discovery to dispatch", () => {
-  let state: OpenClawTestState;
+  let state: CarapaceTestState;
 
   beforeEach(async () => {
-    state = await createOpenClawTestState({ label: "clawrouter-responses" });
+    state = await createCarapaceTestState({ label: "clawrouter-responses" });
     clearLiveCatalogCacheForTests();
     auth.resolveApiKeyForProvider.mockReset();
     auth.resolveApiKeyForProvider.mockResolvedValue({ apiKey: "synthetic-catalog-key" });
@@ -40,9 +40,9 @@ describe("ClawRouter Responses discovery to dispatch", () => {
     "uses $role for a discovered reasoning=$reasoning model",
     async ({ efforts, reasoning, role }) => {
       const baseUrl = "https://broker.example.test/private";
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         models: {
-          providers: { clawrouter: { baseUrl, agentRuntime: { id: "openclaw" }, models: [] } },
+          providers: { clawrouter: { baseUrl, agentRuntime: { id: "carapace" }, models: [] } },
         },
       };
       const requests: Array<{ url: string; body: Record<string, unknown> }> = [];

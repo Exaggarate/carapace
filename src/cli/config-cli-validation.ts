@@ -1,5 +1,5 @@
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { isRecord as isPlainRecord } from "@carapace/normalization-core/record-coerce";
+import { uniqueValues } from "@carapace/normalization-core/string-normalization";
 import type { ConfigFileSnapshot } from "../config/config.js";
 import { readConfigFileSnapshotForWrite } from "../config/config.js";
 import { visitConfigValueTree } from "../config/io.read-helpers.js";
@@ -7,7 +7,7 @@ import { formatConfigIssueLines, normalizeConfigIssues } from "../config/issue-f
 import { renderConfigValidationIssueLines } from "../config/issue-location.js";
 import { isPluginPackagingRuntimeOutputInvalidConfigSnapshot } from "../config/recovery-policy.js";
 import type { ConfigValidationIssue } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   coerceSecretRef,
   isSecretRef,
@@ -50,7 +50,7 @@ function formatInvalidConfigRepairHint(
 ): string {
   return isPluginPackagingRuntimeOutputInvalidConfigSnapshot(snapshot)
     ? formatPluginPackagingRuntimeOutputRecoveryHint()
-    : `Run \`${formatCliCommand("openclaw doctor --fix")}\` ${doctorMessage}`;
+    : `Run \`${formatCliCommand("carapace doctor --fix")}\` ${doctorMessage}`;
 }
 
 export function ensureValidConfigSnapshotForCli(
@@ -63,12 +63,12 @@ export function ensureValidConfigSnapshotForCli(
   }
   if (options.json) {
     writeRuntimeJson(runtime, {
-      ...formatCliJsonFailure(`OpenClaw config is invalid: ${shortenHomePath(snapshot.path)}`),
+      ...formatCliJsonFailure(`Carapace config is invalid: ${shortenHomePath(snapshot.path)}`),
       issues: normalizeConfigIssues(snapshot.issues),
     });
     exitCliAfterOutput(runtime, 1);
   }
-  runtime.error(`OpenClaw config is invalid: ${shortenHomePath(snapshot.path)}`);
+  runtime.error(`Carapace config is invalid: ${shortenHomePath(snapshot.path)}`);
   for (const line of renderConfigValidationIssueLines(snapshot)) {
     runtime.error(line);
   }
@@ -112,7 +112,7 @@ function pathContains(parent: readonly string[], child: readonly string[]): bool
 }
 
 function selectConfigMutationSecrets(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   operations: ConfigSetOperation[],
 ): ConfigMutationSecretSelection {
   const paths = operations.map(({ setPath }) => setPath);
@@ -200,7 +200,7 @@ function selectConfigMutationSecrets(
 
 async function collectDryRunResolvabilityErrors(params: {
   refs: SecretRef[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): Promise<ConfigSetDryRunError[]> {
   const failures: ConfigSetDryRunError[] = [];
   for (const ref of params.refs) {
@@ -219,7 +219,7 @@ async function collectDryRunResolvabilityErrors(params: {
 
 function collectDryRunStaticErrorsForSkippedExecRefs(params: {
   refs: SecretRef[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
 }): ConfigSetDryRunError[] {
   const failures: ConfigSetDryRunError[] = [];
   for (const ref of params.refs) {
@@ -276,7 +276,7 @@ function selectDryRunRefsForResolution(params: { refs: SecretRef[]; allowExecInD
 }
 
 function collectStrictConfigErrors(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "manifestRegistry">,
 ): ConfigSetDryRunError[] {
   const validated = validateConfigObjectRawWithPlugins(config, {
@@ -293,7 +293,7 @@ function collectStrictConfigErrors(
 }
 
 export function assertStrictConfigForMutation(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "manifestRegistry">,
 ): void {
   const errors = collectStrictConfigErrors(config, pluginMetadataSnapshot);
@@ -306,7 +306,7 @@ export function assertStrictConfigForMutation(
 }
 
 async function collectConfigSecretProviderErrors(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   selection?: ConfigMutationSecretSelection;
 }): Promise<ConfigValidationIssue[]> {
   const providers = params.config.secrets?.providers ?? {};
@@ -370,8 +370,8 @@ function dedupeDryRunErrors(errors: ConfigSetDryRunError[]): ConfigSetDryRunErro
 
 /** Validates one final candidate and decides whether the runner may preview, skip, or write it. */
 export async function validateConfigMutation(params: {
-  config: OpenClawConfig;
-  previousConfig: OpenClawConfig;
+  config: CarapaceConfig;
+  previousConfig: CarapaceConfig;
   operations: ConfigSetOperation[];
   options: ConfigMutationOptions;
   configPath: string;

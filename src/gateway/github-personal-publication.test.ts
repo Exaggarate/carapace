@@ -7,15 +7,15 @@ import {
   deleteSessionEntryLifecycle,
   patchSessionEntryCore,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createDeferredCore } from "../shared/deferred.js";
 import { readGitHubPublicationSessionLifecycle } from "../state/github-publication-session-lifecycles.js";
-import { ensurePersonalGitHubPublicationSchema } from "../state/openclaw-state-db-schema-additive.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { ensurePersonalGitHubPublicationSchema } from "../state/carapace-state-db-schema-additive.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
 import {
   disconnectUserGitHubConnection,
   readUserGitHubConnection,
@@ -80,7 +80,7 @@ describe("personal publication authority and recovery", () => {
   let otherOwner: string;
   let action: ReturnType<typeof preparePersonalGitHubSessionAction>;
   let client: GatewayClient;
-  let config: OpenClawConfig;
+  let config: CarapaceConfig;
   let context: GatewayRequestContext;
   let runtime: Awaited<ReturnType<typeof createPersonalPublicationFixture>>["runtime"];
   let generation: string;
@@ -219,7 +219,7 @@ describe("personal publication authority and recovery", () => {
           publisher: { source: "personal", ...account },
         });
       } else {
-        expect(tableExists(openOpenClawStateDatabase().db, table)).toBe(false);
+        expect(tableExists(openCarapaceStateDatabase().db, table)).toBe(false);
         expect(commands).toEqual([]);
       }
     },
@@ -255,7 +255,7 @@ describe("personal publication authority and recovery", () => {
             : null,
         pendingPersonal: null,
       });
-      expect(tableExists(openOpenClawStateDatabase().db, table)).toBe(false);
+      expect(tableExists(openCarapaceStateDatabase().db, table)).toBe(false);
     },
   );
 
@@ -288,7 +288,7 @@ describe("personal publication authority and recovery", () => {
         return { source: "system-configured", account: { accountId: 42, login: "roboclaw-bot" } };
       });
       expect((await rpc("sessions.github.options"))[0]).toBe(false);
-      expect(tableExists(openOpenClawStateDatabase().db, table)).toBe(false);
+      expect(tableExists(openCarapaceStateDatabase().db, table)).toBe(false);
     },
   );
 
@@ -338,7 +338,7 @@ describe("personal publication authority and recovery", () => {
     await expect(coordinator.requestPersonalForSession(request(), action)).rejects.toThrow(
       "identity changed",
     );
-    const row = openOpenClawStateDatabase()
+    const row = openCarapaceStateDatabase()
       .db.prepare(`SELECT request_id, status, execution_id FROM ${table}`)
       .get() as { request_id: string; status: string; execution_id: null };
     expect(row).toMatchObject({ status: "requested", execution_id: null });
@@ -354,7 +354,7 @@ describe("personal publication authority and recovery", () => {
 
   it("exposes a stopped pre-claim admission for explicit confirmation and reports only a live execution as publishing", async () => {
     const controller = new AbortController();
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     ensurePersonalGitHubPublicationSchema(db);
     db.function("stop_personal_admission", () => {
       controller.abort();
@@ -409,7 +409,7 @@ describe("personal publication authority and recovery", () => {
   });
 
   it("creates its private table only on admission, publishes the exact account and snapshot, and replays only for its owner", async () => {
-    const db = openOpenClawStateDatabase().db;
+    const db = openCarapaceStateDatabase().db;
     expect(tableExists(db, table)).toBe(false);
     expect(() => status(randomUUID())).toThrow("not found");
     expect(tableExists(db, table)).toBe(false);
@@ -427,8 +427,8 @@ describe("personal publication authority and recovery", () => {
       source_head_commit: OLD_HEAD,
       source_index_tree: WORKSPACE_TREE,
       workspace_tree: WORKSPACE_TREE,
-      push_repository: "openclaw/openclaw",
-      repository: "openclaw/openclaw",
+      push_repository: "carapace/carapace",
+      repository: "carapace/carapace",
       branch: BRANCH,
     });
     expect(JSON.stringify(receipt)).not.toMatch(/synthetic|GH_CONFIG_DIR|claim_id|run_id/);
@@ -443,13 +443,13 @@ describe("personal publication authority and recovery", () => {
       ),
     ).toThrow("not found");
     const count = commands.length;
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     coordinator = createTestGitHubPublicationCoordinator({
-      placements: createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() }),
+      placements: createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() }),
     });
     await expect(coordinator.requestPersonalForSession(request(), action)).resolves.toEqual(result);
     expect(commands).toHaveLength(count);
-    expect(openOpenClawStateDatabase().db.prepare("PRAGMA integrity_check").get()).toEqual({
+    expect(openCarapaceStateDatabase().db.prepare("PRAGMA integrity_check").get()).toEqual({
       integrity_check: "ok",
     });
   });
@@ -468,7 +468,7 @@ describe("personal publication authority and recovery", () => {
     await expect(coordinator.requestPersonalForSession(request(), action)).rejects.toThrow(
       "My GitHub credentials are unavailable; reconnect My GitHub before publishing.",
     );
-    expect(tableExists(openOpenClawStateDatabase().db, table)).toBe(false);
+    expect(tableExists(openCarapaceStateDatabase().db, table)).toBe(false);
   });
 
   it.each(["turn", "remote", "reconciliation"] as const)(
@@ -499,7 +499,7 @@ describe("personal publication authority and recovery", () => {
       await expect(
         coordinator.requestPersonalForSession(request(), selectedAction),
       ).rejects.toThrow(/idle local|reconciling/);
-      expect(tableExists(openOpenClawStateDatabase().db, table)).toBe(false);
+      expect(tableExists(openCarapaceStateDatabase().db, table)).toBe(false);
       expect(commands).toEqual([]);
     },
   );
@@ -593,7 +593,7 @@ describe("personal publication authority and recovery", () => {
         await expect(pending).rejects.toThrow();
       }
       expect(commands.some((argv) => argv.includes("push") || argv.includes("POST"))).toBe(false);
-      expect(openOpenClawStateDatabase().db.prepare(`SELECT status FROM ${table}`).get()).toEqual({
+      expect(openCarapaceStateDatabase().db.prepare(`SELECT status FROM ${table}`).get()).toEqual({
         status: race === "session" ? "failed" : "needs_confirmation",
       });
     },
@@ -611,7 +611,7 @@ describe("personal publication authority and recovery", () => {
     await expect(coordinator.requestPersonalForSession(request(), action)).rejects.toThrow(
       "identity changed",
     );
-    const row = openOpenClawStateDatabase().db.prepare(`SELECT request_id FROM ${table}`).get() as {
+    const row = openCarapaceStateDatabase().db.prepare(`SELECT request_id FROM ${table}`).get() as {
       request_id: string;
     };
     expect(status(row.request_id).result).toMatchObject({
@@ -653,16 +653,16 @@ describe("personal publication authority and recovery", () => {
         return commandResult(NEW_HEAD);
       }
       if (recovering && command === "git show -s --format=%B HEAD") {
-        const row = openOpenClawStateDatabase()
+        const row = openCarapaceStateDatabase()
           .db.prepare(`SELECT request_id FROM ${table}`)
           .get() as { request_id: string };
-        return commandResult(`OpenClaw-Publication: ${row.request_id}`);
+        return commandResult(`Carapace-Publication: ${row.request_id}`);
       }
       if (recovering && argv.includes("state=all")) {
         return commandResult(
           JSON.stringify([
             {
-              url: "https://github.com/openclaw/openclaw/pull/125200",
+              url: "https://github.com/Exaggarate/carapace/pull/125200",
               userId: account.accountId,
               state: "open",
               body,
@@ -683,8 +683,8 @@ describe("personal publication authority and recovery", () => {
       publisher: { source: "personal", ...account },
     });
     const count = commands.length;
-    closeOpenClawStateDatabaseForTest();
-    placements = createWorkerSessionPlacementStore({ database: openOpenClawStateDatabase() });
+    closeCarapaceStateDatabaseForTest();
+    placements = createWorkerSessionPlacementStore({ database: openCarapaceStateDatabase() });
     coordinator = createTestGitHubPublicationCoordinator({ placements });
     requirePersonalGitHubPublicationConfirmation(placements.workspaceResultInstanceId());
     await coordinator.resumeSessionRequests();
@@ -698,7 +698,7 @@ describe("personal publication authority and recovery", () => {
       confirmation: {
         account,
         generation,
-        repository: "openclaw/openclaw",
+        repository: "carapace/carapace",
         workspaceTree: WORKSPACE_TREE,
       },
     });
@@ -974,7 +974,7 @@ describe("personal publication authority and recovery", () => {
 
   it("fails closed on corrupt owner binding rather than replaying the other user's result", async () => {
     const result = await coordinator.requestPersonalForSession(request(), action);
-    openOpenClawStateDatabase()
+    openCarapaceStateDatabase()
       .db.prepare(`UPDATE ${table} SET owner_profile_id = ? WHERE request_id = ?`)
       .run(otherOwner, result.requestId);
     expect(readPersonalGitHubPublication(owner, { requestId: result.requestId })).toBeUndefined();

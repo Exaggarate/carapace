@@ -2,11 +2,11 @@ import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+  closeCarapaceStateDatabaseByPath,
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "../../state/carapace-state-db.js";
+import { resolveCarapaceStateSqlitePath } from "../../state/carapace-state-db.paths.js";
 import type { AgentRuntimeIdentity } from "../agent-runtime-identity-token.js";
 import { ExecApprovalManager } from "../exec-approval-manager.js";
 import { createTestApprovalManager } from "../exec-approval-manager.test-support.js";
@@ -21,15 +21,15 @@ vi.mock("../../infra/command-analysis/explain.js", () => ({
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) =>
   afterEach(() => {
     for (const dir of tempDirs.dirs) {
-      closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath({ OPENCLAW_STATE_DIR: dir }));
+      closeCarapaceStateDatabaseByPath(resolveCarapaceStateSqlitePath({ CARAPACE_STATE_DIR: dir }));
     }
     cleanup();
   }),
 );
 
-function databaseOptions(): OpenClawStateDatabaseOptions {
+function databaseOptions(): CarapaceStateDatabaseOptions {
   const stateDir = fs.realpathSync(tempDirs.make("exec-approval-id-"));
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
 }
 
 function identity(enabled: boolean): AgentRuntimeIdentity {
@@ -189,7 +189,7 @@ describe("exec approval signed agent runtime", () => {
       turnSourceAccountId: "default",
       turnSourceThreadId: "thread-1",
     });
-    const db = openOpenClawStateDatabase(options).db;
+    const db = openCarapaceStateDatabase(options).db;
     if (enabled) {
       expect(
         db

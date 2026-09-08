@@ -8,8 +8,8 @@ import {
 } from "./crabbox-gate-contract.mjs";
 
 const CHECK_APP_ID = 15368;
-const CRABBOX_CHECK_NAME = "openclaw/crabbox-gate";
-const CI_CHECK_NAME = "openclaw/ci-gate";
+const CRABBOX_CHECK_NAME = "carapace/crabbox-gate";
+const CI_CHECK_NAME = "carapace/ci-gate";
 const BYPASSABLE_JOB_CONCLUSIONS = new Set(["failure", "timed_out"]);
 
 function record(value, label) {
@@ -61,11 +61,11 @@ function validateCheckIdentity(check, { conclusion, headSha, name }) {
 }
 
 function parseCiDetailsUrl(value) {
-  const match = requiredString(value, "openclaw/ci-gate details URL").match(
-    /^https:\/\/github\.com\/openclaw\/openclaw\/actions\/runs\/(\d+)\/job\/(\d+)$/u,
+  const match = requiredString(value, "carapace/ci-gate details URL").match(
+    /^https:\/\/github\.com\/carapace\/carapace\/actions\/runs\/(\d+)\/job\/(\d+)$/u,
   );
   if (!match) {
-    throw new Error("openclaw/ci-gate details URL is not an exact Actions run/job URL");
+    throw new Error("carapace/ci-gate details URL is not an exact Actions run/job URL");
   }
   return {
     jobId: Number(match[2]),
@@ -74,11 +74,11 @@ function parseCiDetailsUrl(value) {
 }
 
 function parsePublisherDetailsUrl(value) {
-  const match = requiredString(value, "openclaw/crabbox-gate details URL").match(
-    /^https:\/\/github\.com\/openclaw\/openclaw\/actions\/runs\/(\d+)$/u,
+  const match = requiredString(value, "carapace/crabbox-gate details URL").match(
+    /^https:\/\/github\.com\/carapace\/carapace\/actions\/runs\/(\d+)$/u,
   );
   if (!match) {
-    throw new Error("openclaw/crabbox-gate details URL is not an exact Actions run URL");
+    throw new Error("carapace/crabbox-gate details URL is not an exact Actions run URL");
   }
   return Number(match[1]);
 }
@@ -153,7 +153,7 @@ export function validateCrabboxMergeBypass({
     membershipRecord.role !== "admin" ||
     record(membershipRecord.user, "organization membership user").login !== actorLogin
   ) {
-    throw new Error(`${actorLogin} is not an active openclaw organization admin`);
+    throw new Error(`${actorLogin} is not an active carapace organization admin`);
   }
   validateRequiredChecks(requiredChecks);
 
@@ -168,7 +168,7 @@ export function validateCrabboxMergeBypass({
     name: CRABBOX_CHECK_NAME,
   });
   const binding = parseCrabboxGateCheckSummary(
-    record(crabboxCheck.output, "openclaw/crabbox-gate output").summary,
+    record(crabboxCheck.output, "carapace/crabbox-gate output").summary,
   );
   const pull = record(pullRequest, "pull request");
   if (
@@ -180,13 +180,13 @@ export function validateCrabboxMergeBypass({
     pull.draft !== false ||
     record(pull.head, "pull request head").sha !== headSha ||
     record(record(pull.head, "pull request head").repo, "pull request head repo").full_name !==
-      "openclaw/openclaw" ||
+      "carapace/carapace" ||
     record(pull.base, "pull request base").sha !== binding.baseSha ||
     record(record(pull.base, "pull request base").repo, "pull request base repo").full_name !==
-      "openclaw/openclaw" ||
+      "carapace/carapace" ||
     record(pull.base, "pull request base").ref !== "main"
   ) {
-    throw new Error("openclaw/crabbox-gate does not bind the expected broker proof");
+    throw new Error("carapace/crabbox-gate does not bind the expected broker proof");
   }
   const publisherRunId = parsePublisherDetailsUrl(crabboxCheck.details_url);
   const publisher = record(publisherRun, "Crabbox publisher workflow run");
@@ -307,11 +307,11 @@ export function validateCrabboxMergeBypass({
 
   return {
     actor: actorLogin,
-    crabboxCheckId: requiredPositiveInteger(crabboxCheck.id, "openclaw/crabbox-gate check id"),
-    crabboxCheckUrl: requiredString(crabboxCheck.details_url, "openclaw/crabbox-gate URL"),
+    crabboxCheckId: requiredPositiveInteger(crabboxCheck.id, "carapace/crabbox-gate check id"),
+    crabboxCheckUrl: requiredString(crabboxCheck.details_url, "carapace/crabbox-gate URL"),
     crabboxPublisherRunId: publisherRunId,
-    ciGateCheckId: requiredPositiveInteger(ciCheck.id, "openclaw/ci-gate check id"),
-    ciGateUrl: requiredString(ciCheck.details_url, "openclaw/ci-gate URL"),
+    ciGateCheckId: requiredPositiveInteger(ciCheck.id, "carapace/ci-gate check id"),
+    ciGateUrl: requiredString(ciCheck.details_url, "carapace/ci-gate URL"),
     ciRunId,
     infrastructureJobs,
     mainSha,

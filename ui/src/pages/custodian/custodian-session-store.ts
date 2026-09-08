@@ -1,4 +1,4 @@
-import type { SystemAgentChatParams, SystemAgentChatResult } from "@openclaw/gateway-protocol";
+import type { SystemAgentChatParams, SystemAgentChatResult } from "@carapace/gateway-protocol";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import type { ApplicationContext } from "../../app/context.ts";
 import type { CustodianTurnAdmission } from "../../components/custodian-alert-contract.ts";
@@ -476,8 +476,8 @@ export class CustodianSessionStore {
     const snapshot = context.gateway.snapshot;
     const client = snapshot.phase === "connected" ? snapshot.client : null;
     const chatSupported =
-      client !== null && canCallGatewayMethod(snapshot, "openclaw.chat", "operator.admin");
-    const chatUnsupported = isGatewayMethodAdvertised(snapshot, "openclaw.chat") === false;
+      client !== null && canCallGatewayMethod(snapshot, "carapace.chat", "operator.admin");
+    const chatUnsupported = isGatewayMethodAdvertised(snapshot, "carapace.chat") === false;
     const configuredInferenceState = resolveCustodianConfiguredInferenceState(this.context);
     const inferenceStateChanged = configuredInferenceState !== this.configuredInferenceState;
     this.configuredInferenceState = configuredInferenceState;
@@ -613,7 +613,7 @@ export class CustodianSessionStore {
     const context = this.context;
     if (
       !context ||
-      isGatewayMethodAdvertised(context.gateway.snapshot, "openclaw.chat.history") !== true
+      isGatewayMethodAdvertised(context.gateway.snapshot, "carapace.chat.history") !== true
     ) {
       return false;
     }
@@ -659,7 +659,7 @@ export class CustodianSessionStore {
     const canRequest = () =>
       client === this.activeClient &&
       context.gateway.snapshot.client === client &&
-      canCallGatewayMethod(context.gateway.snapshot, "openclaw.chat", "operator.admin");
+      canCallGatewayMethod(context.gateway.snapshot, "carapace.chat", "operator.admin");
     if (!canRequest()) {
       return "rejected";
     }
@@ -681,7 +681,7 @@ export class CustodianSessionStore {
         return "rejected";
       }
       // Admission publishes the turn; dispatch before observers can rotate its owner.
-      const pending = client.request<SystemAgentChatResult>("openclaw.chat", params, {
+      const pending = client.request<SystemAgentChatResult>("carapace.chat", params, {
         timeoutMs: SYSTEM_AGENT_CHAT_TIMEOUT_MS,
         onSent: () => {
           delivery = "sent";

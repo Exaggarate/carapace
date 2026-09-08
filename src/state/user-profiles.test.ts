@@ -3,13 +3,13 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GIT_COAUTHOR_PREFERENCE_KEY } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "./openclaw-state-db-contract.js";
-import { tableExists, tableHasColumn } from "./openclaw-state-db-schema-helpers.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "./carapace-state-db-contract.js";
+import { tableExists, tableHasColumn } from "./carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "./openclaw-state-db.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  runCarapaceStateWriteTransaction,
+} from "./carapace-state-db.js";
 import { getUserPreferences, setUserPreferences } from "./user-preferences.js";
 import { onUserProfilesChanged, readUserProfileVersion } from "./user-profile-events.js";
 import { migrateLegacyTailscaleProfileIdentities } from "./user-profiles-tailscale-migration.js";
@@ -33,7 +33,7 @@ import {
 const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     cleanup();
   });
 });
@@ -46,7 +46,7 @@ it("publishes profile changes only after the owning transaction commits", () => 
   const before = readUserProfileVersion();
   try {
     expect(() =>
-      runOpenClawStateWriteTransaction(() => {
+      runCarapaceStateWriteTransaction(() => {
         setDisplayName(profile.id, "Rolled back", options);
         expect(changed).not.toHaveBeenCalled();
         throw new Error("rollback");
@@ -54,7 +54,7 @@ it("publishes profile changes only after the owning transaction commits", () => 
     ).toThrow("rollback");
     expect(readUserProfileVersion()).toBe(before);
     expect(getUserProfileDisplay(profile.id, options).displayName).not.toBe("Rolled back");
-    runOpenClawStateWriteTransaction(() => {
+    runCarapaceStateWriteTransaction(() => {
       setDisplayName(profile.id, "Committed", options);
       expect(changed).not.toHaveBeenCalled();
     }, options);
@@ -66,8 +66,8 @@ it("publishes profile changes only after the owning transaction commits", () => 
 });
 
 function stateOptions() {
-  const directory = tempDirs.make("openclaw-user-profiles-");
-  return { path: join(directory, "openclaw.sqlite") };
+  const directory = tempDirs.make("carapace-user-profiles-");
+  return { path: join(directory, "carapace.sqlite") };
 }
 
 function fixtureImage(path: string): Buffer {
@@ -132,7 +132,7 @@ describe("user profiles", () => {
     "display lookup leaves absent profile storage absent (database exists: %s)",
     (databaseExists) => {
       const options = stateOptions();
-      const database = databaseExists ? openOpenClawStateDatabase(options).db : undefined;
+      const database = databaseExists ? openCarapaceStateDatabase(options).db : undefined;
       expect(() => getUserProfileDisplay("missing-profile", options)).toThrow(
         "user profile not found",
       );
@@ -146,7 +146,7 @@ describe("user profiles", () => {
 
   it("lazily ensures and resolves lowercased email aliases idempotently", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     const versionBefore = database.prepare("PRAGMA user_version").get()?.user_version;
     expect(tableExists(database, "user_profiles")).toBe(false);
     expect(tableExists(database, "user_profile_identities")).toBe(false);
@@ -156,14 +156,14 @@ describe("user profiles", () => {
     expect(readUserProfileVersion()).toBe(profileVersion + 1);
     const second = ensureProfileForEmail("ada@example.com", options);
 
-    expect(tableExists(openOpenClawStateDatabase(options).db, "user_profiles")).toBe(true);
-    expect(tableExists(openOpenClawStateDatabase(options).db, "user_profile_identities")).toBe(
+    expect(tableExists(openCarapaceStateDatabase(options).db, "user_profiles")).toBe(true);
+    expect(tableExists(openCarapaceStateDatabase(options).db, "user_profile_identities")).toBe(
       true,
     );
     expect(
-      openOpenClawStateDatabase(options).db.prepare("PRAGMA user_version").get()?.user_version,
+      openCarapaceStateDatabase(options).db.prepare("PRAGMA user_version").get()?.user_version,
     ).toBe(versionBefore);
-    expect(versionBefore).toBe(OPENCLAW_STATE_SCHEMA_VERSION);
+    expect(versionBefore).toBe(CARAPACE_STATE_SCHEMA_VERSION);
     expect(second).toEqual(first);
     expect(ensureProfileForEmail("ADA@example.com", options)).toEqual(first);
     expect(readUserProfileVersion()).toBe(profileVersion + 1);
@@ -192,7 +192,7 @@ describe("user profiles", () => {
       expect.objectContaining({ id: first.id, emails: [], displayName: "Ada Lovelace" }),
     ]);
     expect(
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "SELECT provider, subject, profile_id FROM user_profile_identities ORDER BY provider, subject",
         )
@@ -204,7 +204,7 @@ describe("user profiles", () => {
     const options = stateOptions();
     const identity = { login: "ada@github" };
     const profile = ensureProfileForTailscaleIdentity(identity, options);
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     database
       .prepare("UPDATE user_profile_identities SET subject = ? WHERE provider = ?")
       .run("ada", "github");
@@ -221,7 +221,7 @@ describe("user profiles", () => {
 
   it("lazily adds canonical GitHub login storage without changing the schema version", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     database.exec(`
       CREATE TABLE user_profile_identities (
         provider TEXT NOT NULL,
@@ -241,7 +241,7 @@ describe("user profiles", () => {
 
   it("lazily adds a downgrade-safe nullable role without changing the schema version", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     database.exec(`
       CREATE TABLE user_profiles (
         id TEXT NOT NULL PRIMARY KEY,
@@ -284,7 +284,7 @@ describe("user profiles", () => {
     database
       .prepare("INSERT INTO user_profiles (id, created_at, updated_at) VALUES (?, ?, ?)")
       .run("older-profile", 1, 1);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     expect(getUserProfileRole(profile.id, options)).toBe("maintainer");
     expect(getUserProfileRole("older-profile", options)).toBeNull();
@@ -363,7 +363,7 @@ describe("user profiles", () => {
     ).toMatchObject({ login: "Octo-Renamed" });
     expect(readUserProfileVersion()).toBe(version + 1);
     expect(
-      openOpenClawStateDatabase(options)
+      openCarapaceStateDatabase(options)
         .db.prepare(
           "SELECT provider, subject, canonical_login, profile_id FROM user_profile_identities ORDER BY subject",
         )
@@ -543,7 +543,7 @@ describe("user profiles", () => {
         displayName: expected,
         githubIdentity: { login: "Ada" },
       });
-      closeOpenClawStateDatabaseForTest();
+      closeCarapaceStateDatabaseForTest();
       expect(getUserProfileDisplay(profile.id, options).displayName).toBe(expected);
     },
   );
@@ -657,7 +657,7 @@ describe("user profiles", () => {
     const options = stateOptions();
     const matching = ensureProfileForTailscaleIdentity({ login: "ada@github" }, options);
     const mismatched = ensureProfileForTailscaleIdentity({ login: "grace@github" }, options);
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     const insertLegacy = database.prepare(
       "INSERT INTO user_profile_identities (provider, subject, profile_id, canonical_login, created_at) VALUES ('github-attribution', ?, ?, ?, 1)",
     );
@@ -833,7 +833,7 @@ describe("user profiles", () => {
 
   it.each([
     ["image/png", "ui/public/favicon-32.png"],
-    ["image/jpeg", "docs/whatsapp-openclaw.jpg"],
+    ["image/jpeg", "docs/whatsapp-carapace.jpg"],
     ["image/webp", "ui/public/app-art/android.webp"],
   ])("adopts a bounded %s Tailscale avatar", async (mime, path) => {
     const options = stateOptions();
@@ -983,7 +983,7 @@ describe("user profiles", () => {
     });
     expect(migrateLegacyTailscaleProfileIdentities(options)).toEqual({ changes: [], warnings: [] });
 
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
     expect(
       database.prepare("SELECT provider, subject, profile_id FROM user_profile_identities").all(),
     ).toEqual([{ provider: "github", subject: "login:user", profile_id: provider.id }]);
@@ -1006,7 +1006,7 @@ describe("user profiles", () => {
 
   it("does not activate user-profile tables when Doctor has no legacy aliases", () => {
     const options = stateOptions();
-    const database = openOpenClawStateDatabase(options).db;
+    const database = openCarapaceStateDatabase(options).db;
 
     expect(migrateLegacyTailscaleProfileIdentities(options)).toEqual({ changes: [], warnings: [] });
     expect(tableExists(database, "user_profiles")).toBe(false);

@@ -13,7 +13,7 @@ import {
 } from "./update-managed-service-handoff.test-support.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const resolvePreferredOpenClawTmpDirMock = vi.hoisted(() => vi.fn());
+const resolvePreferredCarapaceTmpDirMock = vi.hoisted(() => vi.fn());
 const forceKillChildProcessTreeMock = vi.hoisted(() => vi.fn());
 const findInstalledSystemdGatewayScopeMock = vi.hoisted(() =>
   vi.fn(
@@ -28,7 +28,7 @@ const findInstalledSystemdGatewayScopeMock = vi.hoisted(() =>
 // The coordinator must outlive mocked lease cleanup in afterEach.
 const tempRoots = createTempDirTracker();
 const mockedHandoffLeaseCleanups = new Set<() => void>();
-const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `openclaw-handoff-single-flight-${process.pid}`);
+const MOCK_INSTALL_ROOT = path.join(os.tmpdir(), `carapace-handoff-single-flight-${process.pid}`);
 
 function createReadyChild(
   pid: number,
@@ -73,15 +73,15 @@ vi.mock("../process/child-process-tree.js", async (importOriginal) => ({
   forceKillChildProcessTree: forceKillChildProcessTreeMock,
 }));
 
-vi.mock("./tmp-openclaw-dir.js", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./tmp-openclaw-dir.js")>()),
-  resolvePreferredOpenClawTmpDir: resolvePreferredOpenClawTmpDirMock,
+vi.mock("./tmp-carapace-dir.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./tmp-carapace-dir.js")>()),
+  resolvePreferredCarapaceTmpDir: resolvePreferredCarapaceTmpDirMock,
 }));
 
 beforeEach(async () => {
   // Competing helpers share this fixture's coordinator, never the operator's database.
-  resolvePreferredOpenClawTmpDirMock.mockReturnValue(
-    tempRoots.make("openclaw-handoff-coordinator-"),
+  resolvePreferredCarapaceTmpDirMock.mockReturnValue(
+    tempRoots.make("carapace-handoff-coordinator-"),
   );
   let pid = 24680;
   const liveChildren = new Set<number>();
@@ -127,7 +127,7 @@ const baseParams = {
   restartDrainTimeoutMs: 300_000,
   parentPid: process.pid,
   execPath: "/usr/local/bin/node",
-  argv1: "/opt/openclaw/openclaw.mjs",
+  argv1: "/opt/carapace/carapace.mjs",
 };
 
 describe("managed service update handoff single-flight", () => {
@@ -208,8 +208,8 @@ describe("managed service update handoff single-flight", () => {
   it("rejects system-scope systemd before spawning or reserving handoff ownership", async () => {
     findInstalledSystemdGatewayScopeMock.mockResolvedValueOnce({
       scope: "system",
-      unitName: "openclaw-gateway.service",
-      unitPath: "/etc/systemd/system/openclaw-gateway.service",
+      unitName: "carapace-gateway.service",
+      unitPath: "/etc/systemd/system/carapace-gateway.service",
     });
     const { claimManagedServiceUpdateHandoff, startManagedServiceUpdateHandoff } =
       await import("./update-managed-service-handoff.js");
@@ -221,7 +221,7 @@ describe("managed service update handoff single-flight", () => {
         root,
         handoffId: "system-handoff",
         supervisor: "systemd",
-        env: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service" },
+        env: { CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service" },
         meta: {},
       }),
     ).rejects.toThrow(/user-scope systemd unit.*manual system-service update/);
@@ -294,7 +294,7 @@ describe("managed service update handoff single-flight", () => {
       await vi.importActual<typeof import("node:child_process")>("node:child_process");
     spawnMock.mockImplementation(spawn);
     const processIdentity = await import("../shared/pid-alive.js");
-    const root = await fs.realpath(tempRoots.make("openclaw-helper-process-identity-"));
+    const root = await fs.realpath(tempRoots.make("carapace-helper-process-identity-"));
     const parent = spawn(process.execPath, ["-e", "process.stdin.resume()"], {
       stdio: ["pipe", "ignore", "ignore"],
     });
@@ -311,7 +311,7 @@ describe("managed service update handoff single-flight", () => {
         parentPid: parent.pid,
         execPath: process.execPath,
         argv1: process.argv[1],
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
         meta: {},
       });
       if (started.status !== "started" || !started.pid) {
@@ -378,7 +378,7 @@ describe("managed service update handoff single-flight", () => {
     const processIdentity = await import("../shared/pid-alive.js");
     const { getFileLockProcessStartTime } = processIdentity;
     spawnMock.mockImplementation(spawn);
-    const root = await fs.realpath(tempRoots.make("openclaw-dead-handoff-owner-"));
+    const root = await fs.realpath(tempRoots.make("carapace-dead-handoff-owner-"));
     const markerPath = path.join(root, "updater-ran");
     const updaterPath = path.join(root, "updater.cjs");
     await fs.writeFile(
@@ -401,7 +401,7 @@ describe("managed service update handoff single-flight", () => {
           parentPid: parent.pid,
           execPath: process.execPath,
           argv1: updaterPath,
-          env: { ...process.env, OPENCLAW_STATE_DIR: root },
+          env: { ...process.env, CARAPACE_STATE_DIR: root },
           meta: {},
         });
       const started = await start();
@@ -575,7 +575,7 @@ describe("managed service update handoff single-flight", () => {
     const { spawn } =
       await vi.importActual<typeof import("node:child_process")>("node:child_process");
     spawnMock.mockImplementation(spawn);
-    const root = await fs.realpath(tempRoots.make("openclaw-handoff-noop-"));
+    const root = await fs.realpath(tempRoots.make("carapace-handoff-noop-"));
     const updaterPath = path.join(root, "updater.cjs");
     await fs.writeFile(
       updaterPath,
@@ -594,7 +594,7 @@ describe("managed service update handoff single-flight", () => {
           parentPid: parent.pid,
           execPath: process.execPath,
           argv1: updaterPath,
-          env: { ...process.env, OPENCLAW_STATE_DIR: root },
+          env: { ...process.env, CARAPACE_STATE_DIR: root },
           meta: {},
         });
         expect(started.status).toBe("started");
@@ -625,7 +625,7 @@ describe("managed service update handoff single-flight", () => {
       await vi.importActual<typeof import("node:child_process")>("node:child_process");
     const { DatabaseSync } = await import("node:sqlite");
     spawnMock.mockImplementation(spawn);
-    const root = await fs.realpath(tempRoots.make("openclaw-handoff-control-epipe-"));
+    const root = await fs.realpath(tempRoots.make("carapace-handoff-control-epipe-"));
     const parent = spawn(process.execPath, ["-e", "process.stdin.resume()"], {
       stdio: ["pipe", "ignore", "ignore"],
     });
@@ -640,7 +640,7 @@ describe("managed service update handoff single-flight", () => {
       parentPid: parent.pid,
       execPath: process.execPath,
       argv1: process.argv[1],
-      env: { ...process.env, OPENCLAW_STATE_DIR: root },
+      env: { ...process.env, CARAPACE_STATE_DIR: root },
       meta: {},
     });
     if (started.status !== "started") {
@@ -712,7 +712,7 @@ describe("managed service update handoff single-flight", () => {
   });
 
   it("joins canonical aliases while distinct install roots remain independent", async () => {
-    const tempDir = tempRoots.make("openclaw-handoff-root-");
+    const tempDir = tempRoots.make("carapace-handoff-root-");
     const root = path.join(tempDir, "install");
     const alias = path.join(tempDir, "install-alias");
     const otherRoot = path.join(tempDir, "other");
@@ -767,7 +767,7 @@ describe("managed service update handoff single-flight", () => {
       throw new Error("expected the replacement owner to have a stable process identity");
     }
     spawnMock.mockImplementation(spawn);
-    const root = await fs.realpath(tempRoots.make("openclaw-cancel-owner-"));
+    const root = await fs.realpath(tempRoots.make("carapace-cancel-owner-"));
     const markerPath = path.join(root, "updater-ran");
     const updaterPath = path.join(root, "updater.cjs");
     await fs.writeFile(
@@ -789,7 +789,7 @@ describe("managed service update handoff single-flight", () => {
         parentPid: parent.pid,
         execPath: process.execPath,
         argv1: updaterPath,
-        env: { ...process.env, OPENCLAW_STATE_DIR: root },
+        env: { ...process.env, CARAPACE_STATE_DIR: root },
         meta: {},
       });
     const started = await start();

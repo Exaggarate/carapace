@@ -10,7 +10,7 @@ const RECENT_QUEUE_MESSAGE_ID_MAX_SIZE = 10_000;
  * are rejected no matter which chunk receives the enqueue call.
  */
 const RECENT_QUEUE_MESSAGE_IDS = resolveGlobalDedupeCache(
-  Symbol.for("openclaw.recentQueueMessageIdOwners"),
+  Symbol.for("carapace.recentQueueMessageIdOwners"),
   {
     ttlMs: RECENT_QUEUE_MESSAGE_ID_TTL_MS,
     maxSize: RECENT_QUEUE_MESSAGE_ID_MAX_SIZE,

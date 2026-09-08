@@ -2,7 +2,7 @@
  * Gateway sessions.list changed-state tests.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, test, vi } from "vitest";
 import { createDeferred } from "../../test/helpers/promise.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
@@ -310,7 +310,7 @@ test("sessions.list keeps bulk rows lightweight and uses selected model fields",
       },
       {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       },
@@ -931,7 +931,7 @@ test("sessions.changed mutation events include live usage metadata", async () =>
         modelOverride: "gpt-5.3-codex-spark",
         modelProvider: "openai",
         model: "gpt-5.3-codex-spark",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "carapace",
         contextTokens: 123_456,
         contextTokensSource: "runtime",
         totalTokens: 0,

@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
@@ -48,7 +48,7 @@ function scan(
     path.join(bin, "gh"),
     `#!/usr/bin/env bash
 set -euo pipefail
-[[ "$1" == api && "$2" == --paginate && "$3" == repos/openclaw/openclaw/pulls/123/files ]]
+[[ "$1" == api && "$2" == --paginate && "$3" == repos/carapace/carapace/pulls/123/files ]]
 call=$(( $(cat calls) + 1 ))
 echo "$call" > calls
 if [[ "$call" == "$FAIL_CALL" ]]; then
@@ -67,7 +67,7 @@ fi
   const result = runStep(step, root, {
     PATH: `${bin}${path.delimiter}${process.env.PATH}`,
     PR_NUMBER: "123",
-    REPOSITORY: "openclaw/openclaw",
+    REPOSITORY: "carapace/carapace",
     GITHUB_OUTPUT: output,
     FAIL_CALL: String(failCall),
     EVENT_NAME: "pull_request",
@@ -86,7 +86,7 @@ describe("network CodeQL PR routing", () => {
     ["tests/network-runtime-extra/example.qlref", false],
   ])("selects the network shard only for its own semantic fixtures: %s", (file, selected) => {
     const { result, output } = scan(
-      [{ filename: `.github/codeql/openclaw-boundary/${file}` }],
+      [{ filename: `.github/codeql/carapace-boundary/${file}` }],
       0,
       undefined,
       "detect",
@@ -118,13 +118,13 @@ describe("network CodeQL PR routing", () => {
     ],
     [
       "unrelated query",
-      ".github/codeql/openclaw-boundary/queries/example.ql",
+      ".github/codeql/carapace-boundary/queries/example.ql",
       "+select example",
       false,
     ],
     [
       "similar query name",
-      ".github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql.bak",
+      ".github/codeql/carapace-boundary/queries/raw-socket-callsite-classification.ql.bak",
       "+select example",
       false,
     ],
@@ -165,7 +165,7 @@ describe("network CodeQL PR routing", () => {
     "HTTPS_PROXY",
     "NO_PROXY",
     "GLOBAL_AGENT_HTTP_PROXY",
-    "OPENCLAW_PROXY_ACTIVE",
+    "CARAPACE_PROXY_ACTIVE",
   ])("escalates added %s references", (key) => {
     const { result, output } = scan([
       { filename: "src/infra/net/proxy/proxy-lifecycle.ts", patch: `+process.env.${key} = value;` },
@@ -176,9 +176,9 @@ describe("network CodeQL PR routing", () => {
 
   it.each([
     ".github/codeql/codeql-network-runtime-boundary-critical-quality.yml",
-    ".github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql",
-    ".github/codeql/openclaw-boundary/queries/managed-proxy-runtime-mutation.ql",
-    ".github/codeql/openclaw-boundary/tests/network-runtime/raw-socket-callsite-classification.qlref",
+    ".github/codeql/carapace-boundary/queries/raw-socket-callsite-classification.ql",
+    ".github/codeql/carapace-boundary/queries/managed-proxy-runtime-mutation.ql",
+    ".github/codeql/carapace-boundary/tests/network-runtime/raw-socket-callsite-classification.qlref",
     codexTransport,
   ])("always escalates contract owner %s", (filename) => {
     const { result, output } = scan([{ filename }]);

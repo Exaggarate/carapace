@@ -77,7 +77,7 @@ export const legacyBillingBCases = legacyFailoverCorpusRows("legacy-billing-b", 
   [
     26,
     "classifyFailoverReason",
-    'No API key found for provider "openai". Auth store: /tmp/openclaw-agent-abc/auth-profiles.json (agentDir: /tmp/openclaw-agent-abc).',
+    'No API key found for provider "openai". Auth store: /tmp/carapace-agent-abc/auth-profiles.json (agentDir: /tmp/carapace-agent-abc).',
     "auth",
   ],
   [27, "classifyFailoverReason", "no credentials found", "auth"],

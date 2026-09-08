@@ -31,7 +31,7 @@ import type {
   PluginManifestToolMetadata,
 } from "./manifest-types.js";
 import type {
-  OpenClawPackageManifest,
+  CarapacePackageManifest,
   PluginPackageChannel,
   PluginPackageInstall,
 } from "./package-manifest.types.js";
@@ -106,7 +106,7 @@ export type PluginManifestRecord = {
   doctorContract?: PluginManifestDoctorContract;
   doctorHealthChecks?: boolean;
   sessionRouteStateOwners?: DoctorSessionRouteStateOwner[];
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   packageDependencies?: PluginDependencySpecMap;
   packageOptionalDependencies?: PluginDependencySpecMap;
   packageChannel?: PluginPackageChannel;
@@ -158,5 +158,5 @@ export type PluginManifestRegistry = {
 export type BundledChannelConfigCollector = (params: {
   pluginDir: string;
   manifest: PluginManifest;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 }) => Record<string, PluginManifestChannelConfig> | undefined;

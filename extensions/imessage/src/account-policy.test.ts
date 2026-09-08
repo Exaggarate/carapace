@@ -1,7 +1,7 @@
 import {
   createAccountPolicyInheritanceCases,
   validateTestChannelConfig,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "carapace/plugin-sdk/channel-test-helpers";
 import { describe, expect, it } from "vitest";
 import { resolveIMessageAccount } from "./accounts.js";
 import { IMessageConfigSchema } from "./config-schema.js";

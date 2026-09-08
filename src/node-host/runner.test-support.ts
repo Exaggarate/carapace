@@ -110,7 +110,7 @@ vi.mock("../infra/executable-path.js", () => ({
 }));
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureOpenClawCliOnPath: vi.fn(() => {
+  ensureCarapaceCliOnPath: vi.fn(() => {
     mocks.runtimeSteps.push("path");
     if (mocks.normalizedPath) {
       process.env.PATH = mocks.normalizedPath;

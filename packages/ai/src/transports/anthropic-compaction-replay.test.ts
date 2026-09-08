@@ -1,4 +1,4 @@
-import type { AssistantMessage, Context, Model } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model } from "@carapace/llm-core";
 import { describe, expect, it } from "vitest";
 import { createZeroUsage } from "../usage.test-support.js";
 import {

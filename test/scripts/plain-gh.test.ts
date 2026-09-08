@@ -60,7 +60,7 @@ const fs = require("node:fs");
 const env = process.env;
 const argv = process.argv.slice(2);
 const route = ${JSON.stringify(route)};
-fs.appendFileSync(env.FAKE_GH_CALLS, JSON.stringify({ route, argv, override: env.OPENCLAW_GH_BIN ?? null }) + "\\n");
+fs.appendFileSync(env.FAKE_GH_CALLS, JSON.stringify({ route, argv, override: env.CARAPACE_GH_BIN ?? null }) + "\\n");
 if (argv[0] === "auth" && argv[1] === "token") {
   process.stdout.write("fixture-token\\n");
 } else if (env.FAKE_GH_REJECT && route === "protected") {
@@ -72,7 +72,7 @@ if (argv[0] === "auth" && argv[1] === "token") {
 } else {
   const colors = Object.fromEntries(["NO_COLOR", "FORCE_COLOR", "CLICOLOR", "CLICOLOR_FORCE", "COLORTERM", "GH_FORCE_TTY"].map(key => [key, env[key] ?? null]));
   const tokens = Object.fromEntries(${JSON.stringify(tokenNames)}.filter(key => env[key]).map(key => [key, env[key]]));
-  const result = JSON.stringify({ route, argv, colors, tokens, override: env.OPENCLAW_GH_BIN ?? null, cwd: process.cwd() });
+  const result = JSON.stringify({ route, argv, colors, tokens, override: env.CARAPACE_GH_BIN ?? null, cwd: process.cwd() });
   const colored = env.NO_COLOR !== "1" || env.FORCE_COLOR !== "0" || env.CLICOLOR !== "0" || env.CLICOLOR_FORCE !== "0" || env.COLORTERM || env.GH_FORCE_TTY;
   process.stdout.write(colored ? "\\x1b[31m" + result + "\\x1b[0m" : result);
 }
@@ -133,7 +133,7 @@ describe.each(engines)("%s plain gh execution", (engine) => {
     "keeps HOME/bin first on PATH with override %j and does not extract credentials",
     (override) => {
       const fixture = makeFixture();
-      fixture.env.OPENCLAW_GH_BIN = override;
+      fixture.env.CARAPACE_GH_BIN = override;
       const before = { ...fixture.env };
       const result = JSON.parse(runGh(engine, fixture.env));
       expect(result).toMatchObject({
@@ -176,8 +176,8 @@ describe.each(engines)("%s plain gh execution", (engine) => {
       if (failure === "missing PATH command") {
         fixture.env.PATH = fixture.toolsBin;
       } else {
-        fixture.env.OPENCLAW_GH_BIN = path.join(fixture.root, "not-executable");
-        writeFileSync(fixture.env.OPENCLAW_GH_BIN, "not executable");
+        fixture.env.CARAPACE_GH_BIN = path.join(fixture.root, "not-executable");
+        writeFileSync(fixture.env.CARAPACE_GH_BIN, "not executable");
         // Existing ambient credentials isolate executable validation from split-auth probing.
         fixture.env.GH_TOKEN = "fixture-ambient";
       }
@@ -190,7 +190,7 @@ describe.each(engines)("%s plain gh execution", (engine) => {
     const fixture = makeFixture();
     fixture.env[tokenName] = "fixture-ambient";
     for (const explicit of [false, true]) {
-      fixture.env.OPENCLAW_GH_BIN = explicit ? fixture.override : undefined;
+      fixture.env.CARAPACE_GH_BIN = explicit ? fixture.override : undefined;
       const before = { ...fixture.env };
       const result = JSON.parse(runGh(engine, fixture.env));
       expect(result).toMatchObject({
@@ -222,7 +222,7 @@ describe.each(engines)("%s plain gh execution", (engine) => {
     "forwards explicit override credentials for host $host only to the child",
     ({ host, tokenName, args }) => {
       const fixture = makeFixture();
-      Object.assign(fixture.env, { GH_HOST: host, OPENCLAW_GH_BIN: fixture.override });
+      Object.assign(fixture.env, { GH_HOST: host, CARAPACE_GH_BIN: fixture.override });
       const before = { ...fixture.env };
       const output =
         engine === "Node"
@@ -301,7 +301,7 @@ describe("plain gh subprocess contracts", () => {
 
   it("keeps explicit reads override-independent and parses normalized JSON", async () => {
     const fixture = makeFixture();
-    fixture.env.OPENCLAW_GH_BIN = "/invalid-explicit-override";
+    fixture.env.CARAPACE_GH_BIN = "/invalid-explicit-override";
     const options = { encoding: "utf8" as const, env: fixture.env };
     expect(JSON.parse(execGhApiRead("repos/example/repo", options))).toMatchObject({
       route: "protected",
@@ -318,12 +318,12 @@ describe("plain gh subprocess contracts", () => {
       colors: { NO_COLOR: "1", FORCE_COLOR: "0", CLICOLOR: "0", CLICOLOR_FORCE: "0" },
     });
     expect(fixture.calls()).toHaveLength(3);
-    expect(fixture.env.OPENCLAW_GH_BIN).toBe("/invalid-explicit-override");
+    expect(fixture.env.CARAPACE_GH_BIN).toBe("/invalid-explicit-override");
   });
 
   it("preserves asynchronous read refusals and buffer limits without another route", async () => {
     const fixture = makeFixture();
-    fixture.env.OPENCLAW_GH_BIN = fixture.override;
+    fixture.env.CARAPACE_GH_BIN = fixture.override;
     fixture.env.FAKE_GH_REJECT = "1";
     const options = { env: fixture.env, timeout: 10_000, killSignal: "SIGKILL" as const };
     await expect(execGhReadAsync(["--version"], options)).rejects.toMatchObject({
@@ -349,7 +349,7 @@ describe("plain gh subprocess contracts", () => {
     (execute) => {
       const fixture = makeFixture();
       // Explicit selection also keeps this payload proof harmless on the pre-fix resolver.
-      fixture.env.OPENCLAW_GH_BIN = fixture.override;
+      fixture.env.CARAPACE_GH_BIN = fixture.override;
       fixture.env.GH_TOKEN = "fixture-ambient";
       fixture.env.FAKE_GH_BYTES = String(2 * 1024 * 1024);
       const options = {

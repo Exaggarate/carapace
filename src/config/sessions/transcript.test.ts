@@ -10,10 +10,10 @@ import * as transcriptEvents from "../../sessions/transcript-events.js";
 import type { InternalSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
 import {
   CRON_DIRECT_DELIVERY_CONTEXT_KIND,
-  OPENCLAW_DELIVERY_MIRROR_MODEL,
-  OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-  OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
-} from "../../shared/transcript-only-openclaw-assistant.js";
+  CARAPACE_DELIVERY_MIRROR_MODEL,
+  CARAPACE_TRANSCRIPT_ARTIFACT_API,
+  CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
+} from "../../shared/transcript-only-carapace-assistant.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import { resolveSessionTranscriptPathInDir } from "./paths.js";
 import {
@@ -171,9 +171,9 @@ describe("appendAssistantMessageToSessionTranscript", () => {
 
   it("uses configured session.store when storePath is omitted", async () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "transcript-config-store-"));
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempDir, "default-state"));
+      setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempDir, "default-state"));
       const sessionsDir = path.join(tempDir, "configured", "sessions");
       fs.mkdirSync(sessionsDir, { recursive: true });
       const storePath = path.join(sessionsDir, "sessions.json");
@@ -221,9 +221,9 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       );
     } finally {
       if (previousStateDir === undefined) {
-        deleteTestEnvValue("OPENCLAW_STATE_DIR");
+        deleteTestEnvValue("CARAPACE_STATE_DIR");
       } else {
-        setTestEnvValue("OPENCLAW_STATE_DIR", previousStateDir);
+        setTestEnvValue("CARAPACE_STATE_DIR", previousStateDir);
       }
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -231,10 +231,10 @@ describe("appendAssistantMessageToSessionTranscript", () => {
 
   it("uses the session key agent for configured session.store templates", async () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "transcript-agent-store-"));
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.CARAPACE_STATE_DIR;
     const emitSpy = vi.spyOn(transcriptEvents, "emitSessionTranscriptUpdate");
     try {
-      setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempDir, "default-state"));
+      setTestEnvValue("CARAPACE_STATE_DIR", path.join(tempDir, "default-state"));
       const storeTemplate = path.join(tempDir, "agents", "{agentId}", "sessions", "sessions.json");
       const sessionsDir = path.join(tempDir, "agents", "worker", "sessions");
       fs.mkdirSync(sessionsDir, { recursive: true });
@@ -294,9 +294,9 @@ describe("appendAssistantMessageToSessionTranscript", () => {
     } finally {
       emitSpy.mockRestore();
       if (previousStateDir === undefined) {
-        deleteTestEnvValue("OPENCLAW_STATE_DIR");
+        deleteTestEnvValue("CARAPACE_STATE_DIR");
       } else {
-        setTestEnvValue("OPENCLAW_STATE_DIR", previousStateDir);
+        setTestEnvValue("CARAPACE_STATE_DIR", previousStateDir);
       }
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -630,8 +630,8 @@ describe("appendAssistantMessageToSessionTranscript", () => {
     expect(event?.sessionKey).toBe(sessionKey);
     expect(event?.messageId).toBeTypeOf("string");
     expect(message?.role).toBe("assistant");
-    expect(message?.api).toBe(OPENCLAW_TRANSCRIPT_ARTIFACT_API);
-    expect(message?.provider).toBe("openclaw");
+    expect(message?.api).toBe(CARAPACE_TRANSCRIPT_ARTIFACT_API);
+    expect(message?.provider).toBe("carapace");
     expect(message?.model).toBe("delivery-mirror");
     expect(message?.content).toEqual([{ type: "text", text: "Hello from delivery mirror!" }]);
     emitSpy.mockRestore();
@@ -834,9 +834,9 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       expect(nextTurn.messageId).not.toBe(first.messageId);
       const messages = (await loadFixtureMessages()).flatMap((entry) =>
         entry.message ? [entry.message] : [],
-      ) as Array<{ openclawDeliveryMirror?: unknown }>;
+      ) as Array<{ carapaceDeliveryMirror?: unknown }>;
       expect(messages).toHaveLength(2);
-      expect(messages[0]?.openclawDeliveryMirror).toEqual({
+      expect(messages[0]?.carapaceDeliveryMirror).toEqual({
         kind: "channel-final",
         sourceMessageId: "message-1",
       });
@@ -921,20 +921,20 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       const mirrors = events
         .map((event) => (event as { message?: Record<string, unknown> }).message)
         .filter((message): message is Record<string, unknown> =>
-          Boolean(message?.openclawDeliveryMirror),
+          Boolean(message?.carapaceDeliveryMirror),
         );
       expect(mirrors).toHaveLength(2);
       expect(mirrors[0]).toMatchObject({
-        api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-        provider: OPENCLAW_TRANSCRIPT_ARTIFACT_PROVIDER,
-        model: OPENCLAW_DELIVERY_MIRROR_MODEL,
-        openclawDeliveryMirror: {
+        api: CARAPACE_TRANSCRIPT_ARTIFACT_API,
+        provider: CARAPACE_TRANSCRIPT_ARTIFACT_PROVIDER,
+        model: CARAPACE_DELIVERY_MIRROR_MODEL,
+        carapaceDeliveryMirror: {
           kind: "channel-final-suppressed",
           reason: "stale-foreground",
           sourceMessageId: "message-1",
         },
       });
-      expect(mirrors[1]?.openclawDeliveryMirror).toEqual({
+      expect(mirrors[1]?.carapaceDeliveryMirror).toEqual({
         kind: "channel-final-suppressed",
         reason: "stale-foreground",
         sourceMessageId: "message-2",
@@ -1297,7 +1297,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
     }
   });
 
-  it("skips transcript-only OpenClaw assistant entries when reading latest assistant text", async () => {
+  it("skips transcript-only Carapace assistant entries when reading latest assistant text", async () => {
     await writeTranscriptStore();
 
     const finalResult = await appendExactAssistantMessageToSessionTranscript({
@@ -1320,7 +1320,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       storePath: fixture.storePath(),
       message: createExactAssistantMessage({
         text: "Injected transcript text",
-        provider: "openclaw",
+        provider: "carapace",
         model: "gateway-injected",
       }),
     });
@@ -1335,7 +1335,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
     expect(latestAssistantText?.text).toBe("Complete final answer");
   });
 
-  it("does not report transcript-only OpenClaw assistant entries as latest assistant text", async () => {
+  it("does not report transcript-only Carapace assistant entries as latest assistant text", async () => {
     await writeTranscriptStore();
 
     const mirrorResult = await appendAssistantMessageToSessionTranscript({
@@ -1440,8 +1440,8 @@ describe("appendAssistantMessageToSessionTranscript", () => {
         content?: Array<{ text?: string }>;
       }>;
       expect(messages).toHaveLength(3);
-      expect(messages[2]?.api).toBe(OPENCLAW_TRANSCRIPT_ARTIFACT_API);
-      expect(messages[2]?.provider).toBe("openclaw");
+      expect(messages[2]?.api).toBe(CARAPACE_TRANSCRIPT_ARTIFACT_API);
+      expect(messages[2]?.provider).toBe("carapace");
       expect(messages[2]?.model).toBe("delivery-mirror");
       expect(messages[2]?.content?.[0]?.text).toBe("Repeated answer");
     }
@@ -1488,7 +1488,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       entry.message ? [entry.message] : [],
     ) as Array<{ api?: string; model?: string }>;
     expect(messagesAfterMirror).toHaveLength(2);
-    expect(messagesAfterMirror[1]?.api).toBe(OPENCLAW_TRANSCRIPT_ARTIFACT_API);
+    expect(messagesAfterMirror[1]?.api).toBe(CARAPACE_TRANSCRIPT_ARTIFACT_API);
     expect(messagesAfterMirror[1]?.model).toBe("delivery-mirror");
 
     await persistSessionTranscriptTurn(createFixtureTranscriptScope(), {
@@ -1625,7 +1625,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
             textSignature: JSON.stringify({ v: 1, id: "item_final", phase: "final_answer" }),
           },
         ],
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
       }),
     });
@@ -1972,7 +1972,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
           updateMode: "none",
           message: createExactAssistantMessage({
             text: "Mirrored reply",
-            provider: "openclaw",
+            provider: "carapace",
             model: "delivery-mirror",
           }),
         }),
@@ -2004,7 +2004,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       updateMode: "file-only",
       message: createExactAssistantMessage({
         text: "Done.",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
       }),
     });
@@ -2468,7 +2468,7 @@ describe("appendAssistantMessageToSessionTranscript", () => {
       transcriptPath: sessionFile,
       message: {
         role: "assistant",
-        provider: "openclaw",
+        provider: "carapace",
         model: "delivery-mirror",
         content: "second side delivery",
       },

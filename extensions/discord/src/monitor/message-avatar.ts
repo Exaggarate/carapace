@@ -1,6 +1,6 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { logDebug } from "openclaw/plugin-sdk/logging-core";
-import { saveRemoteMedia } from "openclaw/plugin-sdk/media-runtime";
+import { formatErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { logDebug } from "carapace/plugin-sdk/logging-core";
+import { saveRemoteMedia } from "carapace/plugin-sdk/media-runtime";
 import type { Client, User } from "../internal/discord.js";
 import { resolveDiscordCdnPolicy } from "./media-ssrf-policy.js";
 

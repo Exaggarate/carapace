@@ -15,7 +15,7 @@ function worktreeRecord(repoRoot: string): ManagedWorktreeRecord {
     repoFingerprint: "0123456789abcdef",
     repoRoot,
     path: "/state/worktrees/0123456789abcdef/task-one",
-    branch: "openclaw/task-one",
+    branch: "carapace/task-one",
     baseRef: "HEAD",
     ownerKind: "manual",
     createdAt: 1,
@@ -62,7 +62,7 @@ async function dispatchCreate(params: { repoRoot: string; scopes: string[]; work
 
 describe("worktrees.create authorization", () => {
   it("allows write-scoped creation inside an agent workspace", async () => {
-    const workspace = await fs.realpath(tempDirs.make("openclaw-worktree-create-auth-"));
+    const workspace = await fs.realpath(tempDirs.make("carapace-worktree-create-auth-"));
     const repoRoot = path.join(workspace, "project");
     await fs.mkdir(repoRoot);
 
@@ -83,7 +83,7 @@ describe("worktrees.create authorization", () => {
   });
 
   it("keeps arbitrary host paths admin-only", async () => {
-    const root = await fs.realpath(tempDirs.make("openclaw-worktree-create-host-auth-"));
+    const root = await fs.realpath(tempDirs.make("carapace-worktree-create-host-auth-"));
     const workspace = path.join(root, "workspace");
     const outside = path.join(root, "outside");
     await Promise.all([fs.mkdir(workspace), fs.mkdir(outside)]);

@@ -2,9 +2,9 @@
 import type { AgentToolResult } from "../agents/runtime/index.js";
 import type { PluginToolMatcher } from "./hook-types.js";
 
-export type OpenClawAgentToolResult<TResult = unknown> = AgentToolResult<TResult>;
+export type CarapaceAgentToolResult<TResult = unknown> = AgentToolResult<TResult>;
 
-export type AgentToolResultMiddlewareRuntime = "openclaw" | "codex";
+export type AgentToolResultMiddlewareRuntime = "carapace" | "codex";
 
 export type AgentToolResultMiddlewareEvent = {
   threadId?: string;
@@ -14,7 +14,7 @@ export type AgentToolResultMiddlewareEvent = {
   args: Record<string, unknown>;
   cwd?: string;
   isError?: boolean;
-  result: OpenClawAgentToolResult;
+  result: CarapaceAgentToolResult;
 };
 
 export type AgentToolResultMiddlewareContext = {
@@ -26,7 +26,7 @@ export type AgentToolResultMiddlewareContext = {
 };
 
 export type AgentToolResultMiddlewareResult = {
-  result: OpenClawAgentToolResult;
+  result: CarapaceAgentToolResult;
 };
 
 export type AgentToolResultMiddleware = (

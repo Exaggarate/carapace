@@ -25,13 +25,13 @@ describe("worktree Git size estimates", () => {
   });
 
   async function partialClone() {
-    const root = tempDirs.make("openclaw-partial-worktree-");
+    const root = tempDirs.make("carapace-partial-worktree-");
     const source = path.join(root, "source");
     const origin = path.join(root, "origin.git");
     const clone = path.join(root, "clone");
     await git(root, "init", "--template=", "-b", "main", source);
-    await git(source, "config", "user.name", "OpenClaw Test");
-    await git(source, "config", "user.email", "openclaw-test@example.invalid");
+    await git(source, "config", "user.name", "Carapace Test");
+    await git(source, "config", "user.email", "carapace-test@example.invalid");
     await git(source, "config", "commit.gpgSign", "false");
     await fs.writeFile(path.join(source, "base.txt"), "base\n");
     await git(source, "add", ".");

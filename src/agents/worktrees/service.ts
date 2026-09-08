@@ -2,8 +2,8 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import { getRuntimeConfig, type OpenClawConfig } from "../../config/config.js";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
+import { getRuntimeConfig, type CarapaceConfig } from "../../config/config.js";
 import { resolveStateDir } from "../../config/paths.js";
 import { isMissingPathError, formatErrorMessage } from "../../infra/errors.js";
 import { root as fsRoot } from "../../infra/fs-safe.js";
@@ -16,7 +16,7 @@ import {
 } from "../../media/staged-inputs.js";
 import { createCommandError } from "../../process/command-error.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
-import { withOpenClawStateLease } from "../../state/openclaw-state-lease.js";
+import { withCarapaceStateLease } from "../../state/carapace-state-lease.js";
 import { createCrustaceanSlug } from "../session-slug.js";
 import { resolveWorktreeBase } from "./base-ref.js";
 import {
@@ -126,13 +126,13 @@ export function classifyWorktreeRemovalError(error: unknown): WorktreeRemovalFai
 }
 
 export class WorktreeRepositoryError extends Error {}
-const SNAPSHOT_REF_PREFIX = "refs/openclaw/snapshots";
+const SNAPSHOT_REF_PREFIX = "refs/carapace/snapshots";
 const log = createSubsystemLogger("agents/worktrees");
 
 type ServiceOptions = {
   env?: NodeJS.ProcessEnv;
   now?: () => number;
-  getConfig?: () => Pick<OpenClawConfig, "worktreeRoot">;
+  getConfig?: () => Pick<CarapaceConfig, "worktreeRoot">;
 };
 
 export type WorktreeCleanupLimits = {
@@ -199,7 +199,7 @@ async function nameIsUnavailable(
   if (registered || (await worktreePathExists(worktreePath))) {
     return true;
   }
-  const branch = `openclaw/${name}`;
+  const branch = `carapace/${name}`;
   const branchExists = await runGit(repoRoot, [
     "show-ref",
     "--quiet",
@@ -389,7 +389,7 @@ async function runSetupScript(
   worktreePath: string,
   params: CreateManagedWorktreeParams,
 ): Promise<void> {
-  const setupScript = path.join(repoRoot, ".openclaw", "worktree-setup.sh");
+  const setupScript = path.join(repoRoot, ".carapace", "worktree-setup.sh");
   const stat = await fs.stat(setupScript).catch(() => undefined);
   if (!stat?.isFile() || (stat.mode & 0o111) === 0) {
     return;
@@ -406,8 +406,8 @@ async function runSetupScript(
     signal: params.signal,
     killProcessTree: true,
     env: {
-      OPENCLAW_SOURCE_TREE_PATH: repoRoot,
-      OPENCLAW_WORKTREE_PATH: worktreePath,
+      CARAPACE_SOURCE_TREE_PATH: repoRoot,
+      CARAPACE_WORKTREE_PATH: worktreePath,
     },
   });
   params.signal?.throwIfAborted();
@@ -511,16 +511,16 @@ async function snapshotWorktree(
   if (!provisionedPaths) {
     throw new Error("provisioned path ledger is unavailable");
   }
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worktree-index-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worktree-index-"));
   const indexPath = path.join(tempDir, "index");
   const snapshotRef = `${SNAPSHOT_REF_PREFIX}/${record.id}`;
   const filemodeArgs = process.platform === "win32" ? [] : ["-c", "core.filemode=true"];
   const env: NodeJS.ProcessEnv = {
     GIT_INDEX_FILE: indexPath,
-    GIT_AUTHOR_NAME: "OpenClaw",
-    GIT_AUTHOR_EMAIL: "openclaw@localhost",
-    GIT_COMMITTER_NAME: "OpenClaw",
-    GIT_COMMITTER_EMAIL: "openclaw@localhost",
+    GIT_AUTHOR_NAME: "Carapace",
+    GIT_AUTHOR_EMAIL: "carapace@localhost",
+    GIT_COMMITTER_NAME: "Carapace",
+    GIT_COMMITTER_EMAIL: "carapace@localhost",
   };
   try {
     const provisioned = new Set(provisionedPaths.map((entry) => gitPathKey(Buffer.from(entry))));
@@ -653,7 +653,7 @@ async function snapshotWorktree(
         "-p",
         parent,
         "-m",
-        `OpenClaw worktree snapshot: ${reason}`,
+        `Carapace worktree snapshot: ${reason}`,
       ],
       { env },
     );
@@ -803,7 +803,7 @@ export class ManagedWorktreeService {
   ): Promise<T> {
     // Disk headroom is shared across repositories. Hold one renewable lease
     // through checkout, setup, snapshots, and publication, including CLI processes.
-    return await withOpenClawStateLease(
+    return await withCarapaceStateLease(
       {
         scope: WORKTREE_CREATE_LEASE_SCOPE,
         key: "capacity",
@@ -888,7 +888,7 @@ export class ManagedWorktreeService {
         params.suggestedName ?? inferredName,
       ));
     const worktreePath = path.join(root, name);
-    const branch = `openclaw/${name}`;
+    const branch = `carapace/${name}`;
     const branchExists = await runGit(repository.repoRoot, [
       "show-ref",
       "--quiet",
@@ -925,7 +925,7 @@ export class ManagedWorktreeService {
       params.runSetupScript === false
         ? undefined
         : await fs
-            .stat(path.join(repository.sourceRoot, ".openclaw", "worktree-setup.sh"))
+            .stat(path.join(repository.sourceRoot, ".carapace", "worktree-setup.sh"))
             .catch(() => undefined);
     const runRepositorySetup = setupStat?.isFile() === true && (setupStat.mode & 0o111) !== 0;
     const setupBytes = runRepositorySetup
@@ -1213,7 +1213,7 @@ export class ManagedWorktreeService {
         throw new WorktreeRemovalLockError(
           state.kind === "live" ? "busy" : "foreign-lock",
           state.kind === "live"
-            ? `worktree is locked by live OpenClaw pid ${state.pid}`
+            ? `worktree is locked by live Carapace pid ${state.pid}`
             : `worktree has a foreign lock${state.reason ? `: ${state.reason}` : ""}`,
         );
       }

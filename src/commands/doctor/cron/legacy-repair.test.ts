@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   loadCronQuarantinedJobs,
   loadCronStore,
@@ -12,7 +12,7 @@ import {
 } from "../../../cron/store.js";
 import { cronStoreKey } from "../../../cron/store/key.js";
 import type { CronJob } from "../../../cron/types.js";
-import { openOpenClawStateDatabase } from "../../../state/openclaw-state-db.js";
+import { openCarapaceStateDatabase } from "../../../state/carapace-state-db.js";
 import {
   applyLegacyCronStoreRepair,
   loadLegacyCronRepairState,
@@ -31,7 +31,7 @@ afterEach(async () => {
 
 it.each<{
   name: string;
-  agents: NonNullable<OpenClawConfig["agents"]>;
+  agents: NonNullable<CarapaceConfig["agents"]>;
   agentId?: string;
   expectedOwner: { kind: "runtime-default" | "explicit"; agentId: string };
 }>([
@@ -62,7 +62,7 @@ it.each<{
 ])(
   "projects the $name without changing the stored owner",
   async ({ agents, agentId, expectedOwner }) => {
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-owner-projection-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-owner-projection-"));
     const storePath = path.join(tempRoot, "cron", "jobs.json");
     await saveCronStore(storePath, {
       version: 1,
@@ -86,7 +86,7 @@ it.each<{
     const cfg = {
       cron: { store: storePath },
       agents,
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const state = await loadLegacyCronRepairState({ cfg, storePath, readOnly: true });
 
     expect(state?.rawJobs[0]?.agentId).toBe(agentId);
@@ -110,7 +110,7 @@ function job(id: string): CronJob {
 }
 
 async function loadRepairStateForStore(storePath: string) {
-  const cfg = { cron: { store: storePath } } as OpenClawConfig;
+  const cfg = { cron: { store: storePath } } as CarapaceConfig;
   const state = expectDefined(
     await loadLegacyCronRepairState({ cfg, storePath }),
     `repair state for ${storePath}`,
@@ -119,14 +119,14 @@ async function loadRepairStateForStore(storePath: string) {
 }
 
 it("refuses to rewrite a row a writer outside this branch's code committed after the snapshot", async () => {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-repair-mixed-version-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-repair-mixed-version-"));
   const storePath = path.join(tempRoot, "cron", "jobs.json");
   await saveCronStore(storePath, {
     version: 1,
     jobs: [{ ...job("job-a"), notify: true } as CronJob],
   });
   const { cfg, state } = await loadRepairStateForStore(storePath);
-  openOpenClawStateDatabase()
+  openCarapaceStateDatabase()
     .db.prepare(
       `INSERT INTO cron_jobs (store_key, job_id, name, enabled, payload_kind, job_json, state_json, sort_order, updated_at)
        VALUES (?, ?, ?, 1, 'agentTurn', ?, '{}', 1, 1)`,
@@ -143,7 +143,7 @@ it("refuses to rewrite a row a writer outside this branch's code committed after
 });
 
 it("refuses a legacy JSON import when rows were committed after the repair snapshot", async () => {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-repair-legacy-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-repair-legacy-"));
   const storePath = path.join(tempRoot, "cron", "jobs.json");
   await fs.mkdir(path.dirname(storePath), { recursive: true });
   await fs.writeFile(storePath, JSON.stringify({ version: 1, jobs: [job("job-legacy")] }));
@@ -157,9 +157,9 @@ it("refuses a legacy JSON import when rows were committed after the repair snaps
 });
 
 it("does not reactivate quarantined automations during startup repair", async () => {
-  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-startup-quarantine-"));
+  tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-cron-startup-quarantine-"));
   const storePath = path.join(tempRoot, "cron", "jobs.json");
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempRoot);
+  vi.stubEnv("CARAPACE_STATE_DIR", tempRoot);
   await saveCronStore(storePath, { version: 1, jobs: [] });
   saveCronQuarantinedJobs({
     storePath,
@@ -183,7 +183,7 @@ it("does not reactivate quarantined automations during startup repair", async ()
       },
     ],
   });
-  const cfg = { cron: { store: storePath } } as OpenClawConfig;
+  const cfg = { cron: { store: storePath } } as CarapaceConfig;
 
   const result = await repairLegacyCronStoreWithoutPrompt({ cfg });
 

@@ -4,9 +4,9 @@ import {
   type APIMessage,
   type GatewayGuildCreateDispatchData,
 } from "discord-api-types/v10";
-import { reportChannelRoomJoin } from "openclaw/plugin-sdk/channel-join-intro-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { reportChannelRoomJoin } from "carapace/plugin-sdk/channel-join-intro-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Client } from "../internal/discord.js";
 import { DiscordGuildJoinIntroductionListener } from "./listeners.guild-join.js";
@@ -23,13 +23,13 @@ const mocks = vi.hoisted(() => ({
   readMessagesDiscord: vi.fn(async (): Promise<APIMessage[]> => []),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-join-intro-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/channel-join-intro-runtime")>()),
+vi.mock("carapace/plugin-sdk/channel-join-intro-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/channel-join-intro-runtime")>()),
   reportChannelRoomJoin: mocks.reportChannelRoomJoin,
 }));
 
-vi.mock("openclaw/plugin-sdk/routing", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/routing")>()),
+vi.mock("carapace/plugin-sdk/routing", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/routing")>()),
   resolveAgentRoute: mocks.resolveAgentRoute,
 }));
 
@@ -49,7 +49,7 @@ function guildCreateEvent(
 ): GatewayGuildCreateDispatchData {
   return {
     id: "guild-1",
-    name: "OpenClaw Guild",
+    name: "Carapace Guild",
     joined_at: new Date().toISOString(),
     system_channel_id: "system-channel",
     channels: [
@@ -149,7 +149,7 @@ describe("Discord guild join introductions", () => {
 
   it("rejects a guild introduction whose policy changes during permission lookup", async () => {
     const guilds = { "guild-1": { channels: { "system-channel": { enabled: true } } } };
-    let cfg: OpenClawConfig = { channels: { discord: { groupPolicy: "allowlist", guilds } } };
+    let cfg: CarapaceConfig = { channels: { discord: { groupPolicy: "allowlist", guilds } } };
     const readPolicy = createDiscordLivePolicyReader({
       cfg,
       accountId: "work",

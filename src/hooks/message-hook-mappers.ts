@@ -2,10 +2,10 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   readNonBlankString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import type { FinalizedMsgContext } from "../auto-reply/templating.js";
 import { getChannelPlugin, normalizeChannelId } from "../channels/plugins/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   freezeDiagnosticTraceContext,
   type DiagnosticTraceContext,
@@ -58,7 +58,7 @@ type CanonicalInboundMessageHookContext = {
   threadParentId?: string | number;
   media?: MessageHookMediaFact[];
   originalMedia?: MessageHookMediaFact[];
-  // `mediaPath(s)` are files OpenClaw has already staged locally. `mediaUrl(s)`
+  // `mediaPath(s)` are files Carapace has already staged locally. `mediaUrl(s)`
   // are provider/media-server references that may not exist on this host.
   mediaPath?: string;
   mediaUrl?: string;
@@ -650,8 +650,8 @@ export function toInternalMessageReceivedContext(
 
 export function toInternalMessageTranscribedContext(
   canonical: CanonicalInboundMessageHookContext,
-  cfg: OpenClawConfig,
-): MessageTranscribedHookContext & { cfg: OpenClawConfig } {
+  cfg: CarapaceConfig,
+): MessageTranscribedHookContext & { cfg: CarapaceConfig } {
   const shared = toInternalInboundMessageHookContextBase(canonical);
   return {
     ...shared,
@@ -662,8 +662,8 @@ export function toInternalMessageTranscribedContext(
 
 export function toInternalMessagePreprocessedContext(
   canonical: CanonicalInboundMessageHookContext,
-  cfg: OpenClawConfig,
-): MessagePreprocessedHookContext & { cfg: OpenClawConfig } {
+  cfg: CarapaceConfig,
+): MessagePreprocessedHookContext & { cfg: CarapaceConfig } {
   const shared = toInternalInboundMessageHookContextBase(canonical);
   return {
     ...shared,

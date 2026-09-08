@@ -5,18 +5,18 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createUpdateRun, finishUpdateRun } from "../infra/update-run-ledger.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-} from "../state/openclaw-agent-db.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+  closeCarapaceAgentDatabasesForTest,
+  openCarapaceAgentDatabase,
+  CARAPACE_AGENT_SCHEMA_VERSION,
+} from "../state/carapace-agent-db.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  repairOpenClawStateDatabaseSchema,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+  repairCarapaceStateDatabaseSchema,
+} from "../state/carapace-state-db.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { VERSION } from "../version.js";
 import { runDoctorHealthFlow } from "./doctor-health.js";
 
@@ -60,7 +60,7 @@ describe("Doctor schema bumps under an updating parent", () => {
     mocks.packageRoot.mockReturnValue(undefined);
     mocks.runContributions.mockReset();
     mocks.outro.mockClear();
-    vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", "1");
+    vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", "1");
   });
 
   it.each([
@@ -70,15 +70,15 @@ describe("Doctor schema bumps under an updating parent", () => {
   ])(
     "refuses a $kind bump driven by $updaterVersion before changing database bytes, ledger, or config",
     async ({ kind, updaterVersion, missingMetadata }) => {
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const shared = openOpenClawStateDatabase({ env: state.env }).path;
-        const agent = openOpenClawAgentDatabase({ agentId: "main", env: state.env }).path;
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const shared = openCarapaceStateDatabase({ env: state.env }).path;
+        const agent = openCarapaceAgentDatabase({ agentId: "main", env: state.env }).path;
         createUpdateRun({ trigger: "cli", before: { version: updaterVersion } });
-        closeOpenClawAgentDatabasesForTest();
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceAgentDatabasesForTest();
+        closeCarapaceStateDatabaseForTest();
         const target = kind === "state" ? shared : agent;
         const supported =
-          kind === "state" ? OPENCLAW_STATE_SCHEMA_VERSION : OPENCLAW_AGENT_SCHEMA_VERSION;
+          kind === "state" ? CARAPACE_STATE_SCHEMA_VERSION : CARAPACE_AGENT_SCHEMA_VERSION;
         setSchemaVersion(target, supported - 1);
         if (missingMetadata) {
           const db = new DatabaseSync(shared);
@@ -86,7 +86,7 @@ describe("Doctor schema bumps under an updating parent", () => {
           db.close();
         }
         const before = readDatabase(shared);
-        const quarantine = state.statePath("state", "openclaw-quarantine.sqlite");
+        const quarantine = state.statePath("state", "carapace-quarantine.sqlite");
         fs.writeFileSync(quarantine, "unreadable quarantine fixture");
         const files = [shared, agent, state.configPath, quarantine];
         const bytes = files.map((file) => fs.readFileSync(file));
@@ -103,10 +103,10 @@ describe("Doctor schema bumps under an updating parent", () => {
             { kind, path: target, foundVersion: supported - 1, supportedVersion: supported },
           ],
           commands: [
-            "openclaw gateway stop",
-            `npm install -g openclaw@${VERSION} --allow-scripts=openclaw`,
-            "openclaw doctor --fix",
-            "openclaw gateway start",
+            "carapace gateway stop",
+            `npm install -g carapace@${VERSION} --allow-scripts=carapace`,
+            "carapace doctor --fix",
+            "carapace gateway start",
           ],
         });
         expect(files.map((file) => fs.readFileSync(file))).toEqual(bytes);
@@ -131,14 +131,14 @@ describe("Doctor schema bumps under an updating parent", () => {
   ])(
     "completes real migration when permitted: %j",
     async ({ ledger, update, driver, bump, deferred }) => {
-      vi.stubEnv("OPENCLAW_UPDATE_IN_PROGRESS", update);
-      await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-        const shared = openOpenClawStateDatabase({ env: state.env }).path;
+      vi.stubEnv("CARAPACE_UPDATE_IN_PROGRESS", update);
+      await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+        const shared = openCarapaceStateDatabase({ env: state.env }).path;
         const run = createUpdateRun({ trigger: "cli", before: { version: driver } });
         if (ledger === "finished") {
           finishUpdateRun(run.runId, { status: "succeeded" });
         }
-        closeOpenClawStateDatabaseForTest();
+        closeCarapaceStateDatabaseForTest();
         if (ledger === "missing") {
           const db = new DatabaseSync(shared);
           try {
@@ -148,10 +148,10 @@ describe("Doctor schema bumps under an updating parent", () => {
           }
         }
         if (bump) {
-          setSchemaVersion(shared, OPENCLAW_STATE_SCHEMA_VERSION - 1);
+          setSchemaVersion(shared, CARAPACE_STATE_SCHEMA_VERSION - 1);
         }
         mocks.runContributions.mockImplementation(async () => {
-          const result = repairOpenClawStateDatabaseSchema({ env: state.env });
+          const result = repairCarapaceStateDatabaseSchema({ env: state.env });
           expect(result.warnings).toEqual([]);
         });
         const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
@@ -160,10 +160,10 @@ describe("Doctor schema bumps under an updating parent", () => {
           nonInteractive: true,
         });
         expect(readDatabase(shared).version).toBe(
-          OPENCLAW_STATE_SCHEMA_VERSION - (deferred ? 1 : 0),
+          CARAPACE_STATE_SCHEMA_VERSION - (deferred ? 1 : 0),
         );
         if (deferred) {
-          expect(readDatabase(shared).contentVersion).toBe(String(OPENCLAW_STATE_SCHEMA_VERSION));
+          expect(readDatabase(shared).contentVersion).toBe(String(CARAPACE_STATE_SCHEMA_VERSION));
           expect(runtime.log).toHaveBeenCalledWith(
             expect.stringContaining(
               `Schema content applied; version publication deferred until update run ${run.runId} finishes`,
@@ -176,11 +176,11 @@ describe("Doctor schema bumps under an updating parent", () => {
   );
 
   it("emits a structured refusal with a failure exit for the affected ledger writer", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async (state) => {
-      const shared = openOpenClawStateDatabase({ env: state.env }).path;
+    await withCarapaceTestState({ scenario: "minimal" }, async (state) => {
+      const shared = openCarapaceStateDatabase({ env: state.env }).path;
       createUpdateRun({ trigger: "cli", before: { version: "2026.9.2" } });
-      closeOpenClawStateDatabaseForTest();
-      setSchemaVersion(shared, OPENCLAW_STATE_SCHEMA_VERSION - 1);
+      closeCarapaceStateDatabaseForTest();
+      setSchemaVersion(shared, CARAPACE_STATE_SCHEMA_VERSION - 1);
       const database = new DatabaseSync(shared);
       database.exec("DROP TABLE config_machine_state");
       database.close();
@@ -205,7 +205,7 @@ describe("Doctor schema bumps under an updating parent", () => {
             databases: [
               expect.objectContaining({
                 kind: "state",
-                foundVersion: OPENCLAW_STATE_SCHEMA_VERSION - 1,
+                foundVersion: CARAPACE_STATE_SCHEMA_VERSION - 1,
               }),
             ],
           }),

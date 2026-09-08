@@ -4,7 +4,7 @@ import type { NativeGateway, NativeGatewaysSnapshot } from "../app/native-gatewa
 
 export function setNativeGatewayTestState(kind: NativeGateway["kind"] | null): void {
   if (!kind) {
-    Reflect.deleteProperty(window, "__OPENCLAW_NATIVE_GATEWAYS__");
+    Reflect.deleteProperty(window, "__CARAPACE_NATIVE_GATEWAYS__");
     Reflect.deleteProperty(window, "webkit");
     vi.spyOn(nativeGateways, "nativeGatewaysCapability").mockReturnValue(null);
     return;
@@ -31,13 +31,13 @@ export function setNativeGatewayTestState(kind: NativeGateway["kind"] | null): v
     currentId: kind,
   };
   Object.assign(window, {
-    __OPENCLAW_NATIVE_GATEWAYS__: snapshot,
-    webkit: { messageHandlers: { openclawGateways: { postMessage: vi.fn() } } },
+    __CARAPACE_NATIVE_GATEWAYS__: snapshot,
+    webkit: { messageHandlers: { carapaceGateways: { postMessage: vi.fn() } } },
   });
-  window.dispatchEvent(new CustomEvent("openclaw:native-gateways-changed", { detail: snapshot }));
+  window.dispatchEvent(new CustomEvent("carapace:native-gateways-changed", { detail: snapshot }));
 }
 
 export function clearNativeGatewayTestState(): void {
-  Reflect.deleteProperty(window, "__OPENCLAW_NATIVE_GATEWAYS__");
+  Reflect.deleteProperty(window, "__CARAPACE_NATIVE_GATEWAYS__");
   Reflect.deleteProperty(window, "webkit");
 }

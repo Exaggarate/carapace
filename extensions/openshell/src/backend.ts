@@ -7,29 +7,29 @@ import {
   movePathWithCopyFallback,
   type MovePathPublicationReceipt,
 } from "@openclaw/fs-safe/atomic";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
 import type {
   CreateSandboxBackendParams,
-  OpenClawConfig,
+  CarapaceConfig,
   SandboxBackendCommandParams,
   SandboxBackendCommandResult,
   SandboxBackendFactory,
   SandboxBackendManager,
   SandboxFsBridge,
-} from "openclaw/plugin-sdk/sandbox";
+} from "carapace/plugin-sdk/sandbox";
 import {
   createRemoteShellSandboxFsBridge,
   disposeSshSandboxSession,
   prepareSshSandboxExec,
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredCarapaceTmpDir,
   runSshSandboxCommand,
   sanitizeEnvVars,
   shellEscape,
   withTempWorkspace,
-} from "openclaw/plugin-sdk/sandbox";
-import { canonicalPathFromExistingAncestor } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/sandbox";
+import { canonicalPathFromExistingAncestor } from "carapace/plugin-sdk/security-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { OpenShellFsBridgeContext, OpenShellSandboxBackend } from "./backend.types.js";
 import {
   buildValidatedExecRemoteCommand,
@@ -69,7 +69,7 @@ type OpenShellWorkspaceLease = {
 // Mirror commands own their snapshot until publication; remote runtimes only serialize initialization.
 const openShellWorkspaceOperations = new KeyedAsyncQueue();
 let openShellDetachedCreateSupport: { key: string; promise: Promise<boolean> } | undefined;
-const MATERIALIZED_SKILLS_REMOTE_PARTS = [".openclaw", "sandbox-skills"] as const;
+const MATERIALIZED_SKILLS_REMOTE_PARTS = [".carapace", "sandbox-skills"] as const;
 function buildOpenShellDirectoryUploadArgs(params: {
   sandboxName: string;
   localPath: string;
@@ -700,7 +700,7 @@ class OpenShellSandboxBackendImpl {
           "/bin/sh",
           "-c",
           params.script,
-          "openclaw-openshell-fs",
+          "carapace-openshell-fs",
           ...(params.args ?? []),
         ]),
         stdin: params.stdin,
@@ -980,12 +980,12 @@ class OpenShellSandboxBackendImpl {
   }
 
   private buildLegacyRuntimeUnavailableError(detail: string): Error {
-    const recreateCommand = `openclaw sandbox recreate --session ${shellEscape(this.params.createParams.scopeKey)}`;
+    const recreateCommand = `carapace sandbox recreate --session ${shellEscape(this.params.createParams.scopeKey)}`;
     return new Error(
       [
         `Registered legacy OpenShell sandbox "${this.params.execContext.sandboxName}" is not usable.`,
         detail,
-        `OpenClaw will not recreate this retired runtime name. Run \`${recreateCommand}\` to migrate this scope to the current naming format.`,
+        `Carapace will not recreate this retired runtime name. Run \`${recreateCommand}\` to migrate this scope to the current naming format.`,
       ]
         .filter(Boolean)
         .join(" "),
@@ -1070,7 +1070,7 @@ class OpenShellSandboxBackendImpl {
         continue;
       }
       await withTempWorkspace(
-        { rootDir: resolveOpenShellTmpRoot(), prefix: "openclaw-openshell-sync-" },
+        { rootDir: resolveOpenShellTmpRoot(), prefix: "carapace-openshell-sync-" },
         async ({ dir: tmpDir }) => {
           const result = await runOpenShellCli({
             context: this.params.execContext,
@@ -1167,7 +1167,7 @@ class OpenShellSandboxBackendImpl {
 
   private async uploadPathToRemote(localPath: string, remotePath: string): Promise<void> {
     await withTempWorkspace(
-      { rootDir: resolveOpenShellTmpRoot(), prefix: "openclaw-openshell-upload-" },
+      { rootDir: resolveOpenShellTmpRoot(), prefix: "carapace-openshell-upload-" },
       async ({ dir: tmpDir }) => {
         // Stage a symlink-free snapshot so upload never dereferences host paths
         // outside the mirrored workspace tree.
@@ -1222,7 +1222,7 @@ class OpenShellSandboxBackendImpl {
 }
 
 function resolveOpenShellPluginConfigFromConfig(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   fallback: ResolvedOpenShellPluginConfig,
 ): ResolvedOpenShellPluginConfig {
   const pluginConfig = config.plugins?.entries?.openshell?.config;
@@ -1259,7 +1259,7 @@ function buildLegacyOpenShellSandboxName(scopeKey: string): string {
     (acc, char) => ((acc * 33) ^ char.charCodeAt(0)) >>> 0,
     5381,
   );
-  return `openclaw-${safe || "session"}-${hash.toString(16).slice(0, 8)}`;
+  return `carapace-${safe || "session"}-${hash.toString(16).slice(0, 8)}`;
 }
 
 function resolveOpenShellSandboxName(params: {
@@ -1369,7 +1369,7 @@ async function moveLocalShadowAside(params: {
     return;
   }
   const preserveRoot = await fs.mkdtemp(
-    path.join(path.dirname(params.tmpDir), "openclaw-openshell-preserve-"),
+    path.join(path.dirname(params.tmpDir), "carapace-openshell-preserve-"),
   );
   let preserved: PreservedLocalShadow | undefined;
   await movePathWithCopyFallback({
@@ -1430,7 +1430,7 @@ async function restoreLocalShadow(preserved: PreservedLocalShadow): Promise<Erro
 }
 
 function resolveOpenShellTmpRoot(): string {
-  return path.resolve(resolvePreferredOpenClawTmpDir());
+  return path.resolve(resolvePreferredCarapaceTmpDir());
 }
 
 function normalizeRemotePath(remotePath: string): string {

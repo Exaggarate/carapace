@@ -1,8 +1,8 @@
 // Slack type declarations define plugin contracts.
 import type { MessageMetadata } from "@slack/types";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { FinalizedMsgContext, GetReplyOptions } from "openclaw/plugin-sdk/reply-runtime";
-import type { ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
+import type { HistoryEntry } from "carapace/plugin-sdk/reply-history";
+import type { FinalizedMsgContext, GetReplyOptions } from "carapace/plugin-sdk/reply-runtime";
+import type { ResolvedAgentRoute } from "carapace/plugin-sdk/routing";
 import type { ResolvedSlackAccount } from "../../accounts.js";
 import type { SlackSendIdentity } from "../../send.js";
 import type { SlackMessageEvent } from "../../types.js";

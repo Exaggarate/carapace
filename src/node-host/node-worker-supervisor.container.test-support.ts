@@ -76,10 +76,10 @@ const killWorker = (container) => {
   }
 };
 const launchIdFor = (container) =>
-  Buffer.from(container.labels["openclaw.node-worker.launch"], "base64url").toString("utf8");
+  Buffer.from(container.labels["carapace.node-worker.launch"], "base64url").toString("utf8");
 const journalState = (launchId) => {
   try {
-    const database = new DatabaseSync(path.join(stateRoot, "state", "openclaw.sqlite"), { readOnly: true });
+    const database = new DatabaseSync(path.join(stateRoot, "state", "carapace.sqlite"), { readOnly: true });
     const row = database.prepare("SELECT state FROM node_worker_launches WHERE launch_id = ?").get(launchId);
     const hasContainerTable = database.prepare(
       "SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'node_worker_launch_containers'",
@@ -228,11 +228,11 @@ if (command === "version") {
   // while it was still created: the launch only proceeds after that observation.
   const startHold = path.join(engineRoot, "hold-start");
   if (fs.existsSync(startHold)) fs.unlinkSync(startHold);
-  if (format.includes("openclaw.node-worker.host")) {
+  if (format.includes("carapace.node-worker.host")) {
     columns.push(
-      container.labels["openclaw.node-worker.host"] ?? "",
-      container.labels["openclaw.node-worker.gateway"] ?? "",
-      container.labels["openclaw.node-worker.launch"] ?? "",
+      container.labels["carapace.node-worker.host"] ?? "",
+      container.labels["carapace.node-worker.gateway"] ?? "",
+      container.labels["carapace.node-worker.launch"] ?? "",
     );
   }
   process.stdout.write(columns.join("\t") + "\n");
@@ -266,17 +266,17 @@ if (command === "version") {
   }));
 } else if (command === "ps") {
   record({ argv: args });
-  const ownerFilter = args.find((arg) => arg.startsWith("label=openclaw.node-worker.host="));
-  const owner = ownerFilter?.slice("label=openclaw.node-worker.host=".length);
+  const ownerFilter = args.find((arg) => arg.startsWith("label=carapace.node-worker.host="));
+  const owner = ownerFilter?.slice("label=carapace.node-worker.host=".length);
   for (const file of fs.readdirSync(engineRoot).sort()) {
     if (!file.endsWith(".container.json")) continue;
     const id = file.slice(0, -".container.json".length);
     const container = withContainerLock(id, () => fs.existsSync(statePath(id)) ? load(id) : undefined);
-    if (!container || container.labels["openclaw.node-worker.host"] !== owner) continue;
+    if (!container || container.labels["carapace.node-worker.host"] !== owner) continue;
     process.stdout.write([
       container.id,
-      container.labels["openclaw.node-worker.gateway"],
-      container.labels["openclaw.node-worker.launch"],
+      container.labels["carapace.node-worker.gateway"],
+      container.labels["carapace.node-worker.launch"],
     ].join("\t") + "\n");
   }
 } else {

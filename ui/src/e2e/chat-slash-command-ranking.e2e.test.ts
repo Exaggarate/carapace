@@ -16,7 +16,7 @@ suite.define(() => {
   it.each(["/export-session", "/export"])(
     "shows an empty export result and retains staged attachments for %s",
     async (command) => {
-      const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
       const artifactDir = artifactRoot
         ? createControlUiE2eArtifactDir("chat-slash-command-ranking", artifactRoot)
         : undefined;
@@ -89,16 +89,16 @@ suite.define(() => {
       await page.getByRole("button", { name: "Send message" }).click();
       const download = await downloadPromise;
 
-      expect(download.suggestedFilename()).toMatch(/^chat-OpenClaw-.+\.md$/);
+      expect(download.suggestedFilename()).toMatch(/^chat-Carapace-.+\.md$/);
       const stream = await download.createReadStream();
       if (!stream) {
         throw new Error("chat export did not provide a readable download");
       }
       const markdown = await text(stream);
-      expect(markdown).toContain("# Chat with OpenClaw");
+      expect(markdown).toContain("# Chat with Carapace");
       expect(markdown).toContain("## You");
       expect(markdown).toContain(question);
-      expect(markdown).toContain("## OpenClaw");
+      expect(markdown).toContain("## Carapace");
       expect(markdown).toContain(answer);
       expect(await gateway.getRequests("chat.send")).toHaveLength(0);
     });
@@ -126,7 +126,7 @@ suite.define(() => {
           methodResponses: {
             "chat.startup": {
               agentsList: {
-                agents: [{ id: "main", name: "OpenClaw" }],
+                agents: [{ id: "main", name: "Carapace" }],
                 defaultId: "main",
                 mainKey: "main",
                 scope: "agent",
@@ -215,7 +215,7 @@ suite.define(() => {
   );
 
   it("keeps visible search results and keyboard selection in relevance order", async () => {
-    const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
     const artifactDir = artifactRoot
       ? createControlUiE2eArtifactDir("chat-slash-command-ranking", artifactRoot)
       : undefined;
@@ -251,7 +251,7 @@ suite.define(() => {
           methodResponses: {
             "chat.startup": {
               agentsList: {
-                agents: [{ id: "main", name: "OpenClaw" }],
+                agents: [{ id: "main", name: "Carapace" }],
                 defaultId: "main",
                 mainKey: "main",
                 scope: "agent",
@@ -282,7 +282,7 @@ suite.define(() => {
                 .locator(".slash-menu-name")
                 .evaluateAll((names) => names.slice(0, 3).map((name) => name.textContent?.trim())),
           )
-          .toEqual(["/pair", "/pair-device", "/openclaw"]);
+          .toEqual(["/pair", "/pair-device", "/carapace"]);
 
         await composer.press("ArrowDown");
         await expect.poll(() => options.nth(1).getAttribute("aria-selected")).toBe("true");

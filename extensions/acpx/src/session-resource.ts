@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
-import { normalizeAgentId, parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import { normalizeAgentId, parseAgentSessionKey } from "carapace/plugin-sdk/routing";
 import { AcpRuntimeError } from "../runtime-api.js";
 
-/** Logical OpenClaw keys stay intact; only bare backend resource names need a namespace. */
+/** Logical Carapace keys stay intact; only bare backend resource names need a namespace. */
 export function resolveAcpxSessionResource(target: {
   sessionKey: string;
   agentId?: string;
@@ -13,7 +13,7 @@ export function resolveAcpxSessionResource(target: {
   if (!sessionKey || (encodedOwner && agentId !== encodedOwner) || (!encodedOwner && !agentId)) {
     throw new AcpRuntimeError(
       "ACP_SESSION_INIT_FAILED",
-      "ACP session owner is missing or disagrees with its logical key. Pass the OpenClaw agentId that owns this session.",
+      "ACP session owner is missing or disagrees with its logical key. Pass the Carapace agentId that owns this session.",
       { detailCode: "SESSION_OWNER_UNSUPPORTED" },
     );
   }
@@ -23,5 +23,5 @@ export function resolveAcpxSessionResource(target: {
   const digest = createHash("sha256")
     .update(JSON.stringify([agentId, sessionKey]))
     .digest("hex");
-  return `openclaw-owner-v1-${digest}`;
+  return `carapace-owner-v1-${digest}`;
 }

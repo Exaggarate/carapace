@@ -25,7 +25,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
   beforeEach(async () => {
     vi.stubGlobal("localStorage", createStorageMock());
     localStorage.setItem(
-      "openclaw-device-identity-v1",
+      "carapace-device-identity-v1",
       JSON.stringify({ version: 1, privateKey: "test-device-key" }),
     );
     await i18n.setLocale("en");
@@ -40,7 +40,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
     async (configured) => {
       const { context, client, request } = createFirstRunContext();
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         if (method === "wizard.next") {
@@ -50,7 +50,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
             details: { code: "WIZARD_NOT_FOUND" },
           });
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return {
             ...detection,
             authOptions: [
@@ -59,7 +59,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
             ...(configured ? { configuredModel: "provider/selected", setupComplete: true } : {}),
           };
         }
-        if (method === "openclaw.setup.verify") {
+        if (method === "carapace.setup.verify") {
           return { ok: true, modelRef: "provider/selected", latencyMs: 12 };
         }
         throw new Error(`Unexpected setup request: ${method}`);
@@ -81,9 +81,9 @@ describe("ModelSetupPage first-run activation ownership", () => {
       await waitForFast(() =>
         expect(page.textContent).toContain("Gateway no longer has this setup session"),
       );
-      const receipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+      const receipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
       expect(receipt).not.toBeNull();
-      [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")]
+      [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")]
         .find((button) => button.textContent?.trim() === "Close")!
         .click();
       await page.updateComplete;
@@ -94,13 +94,13 @@ describe("ModelSetupPage first-run activation ownership", () => {
       checkAgain().click();
       await waitForFast(() =>
         expect(request.mock.calls.map(([method]) => method)).toEqual([
-          "openclaw.setup.auth.start",
+          "carapace.setup.auth.start",
           "wizard.next",
-          "openclaw.setup.detect",
+          "carapace.setup.detect",
         ]),
       );
       await waitForFast(() => expect(page.querySelector(".model-setup__loading")).toBeNull());
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(receipt);
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(receipt);
       expect(context.navigate).not.toHaveBeenCalled();
       if (configured) {
         page.querySelector<HTMLButtonElement>(".model-setup__recovery .btn.primary")!.click();
@@ -108,10 +108,10 @@ describe("ModelSetupPage first-run activation ownership", () => {
           expect(context.navigate).toHaveBeenCalledWith("custodian", { search: "?onboarding=1" }),
         );
         expect(request.mock.calls.map(([method]) => method)).toEqual([
-          "openclaw.setup.auth.start",
+          "carapace.setup.auth.start",
           "wizard.next",
-          "openclaw.setup.detect",
-          "openclaw.setup.verify",
+          "carapace.setup.detect",
+          "carapace.setup.verify",
         ]);
       } else {
         expect(
@@ -128,9 +128,9 @@ describe("ModelSetupPage first-run activation ownership", () => {
           ).toBe(false),
         );
         expect(
-          request.mock.calls.filter(([method]) => method === "openclaw.setup.auth.start"),
+          request.mock.calls.filter(([method]) => method === "carapace.setup.auth.start"),
         ).toHaveLength(1);
-        expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+        expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
       }
     },
   );
@@ -139,10 +139,10 @@ describe("ModelSetupPage first-run activation ownership", () => {
     const { context, client, request } = createFirstRunContext();
     const response = createDeferred<unknown>();
     request.mockImplementation(async (method) => {
-      if (method === "openclaw.setup.detect") {
+      if (method === "carapace.setup.detect") {
         return detection;
       }
-      if (method === "openclaw.setup.activate.start") {
+      if (method === "carapace.setup.activate.start") {
         return response.promise;
       }
       throw new Error(`Unexpected method ${method}`);
@@ -167,11 +167,11 @@ describe("ModelSetupPage first-run activation ownership", () => {
     };
     try {
       await waitForFast(() => expect(request).toHaveBeenCalledOnce());
-      const receipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+      const receipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
       page.routeData = { firstRun: true };
       await page.updateComplete;
       expect(request).toHaveBeenCalledOnce();
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(receipt);
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(receipt);
       response.resolve(success);
       await waitForFast(() =>
         expect(context.navigate).toHaveBeenCalledWith("custodian", { search: "?onboarding=1" }),
@@ -189,9 +189,9 @@ describe("ModelSetupPage first-run activation ownership", () => {
         createFirstRunContext();
       let releaseActivation: ((value: unknown) => void) | undefined;
       const activatedMethod =
-        entry === "manual key" ? "openclaw.setup.activate.start" : "wizard.next";
+        entry === "manual key" ? "carapace.setup.activate.start" : "wizard.next";
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { sessionId: "auth", done: false, status: "running" };
         }
         if (method === activatedMethod) {
@@ -206,10 +206,10 @@ describe("ModelSetupPage first-run activation ownership", () => {
             releaseActivation = resolve;
           });
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return { ...detection, configuredModel: "provider/current", setupComplete: true };
         }
-        if (method === "openclaw.setup.verify") {
+        if (method === "carapace.setup.verify") {
           return { ok: true, modelRef: "provider/current", latencyMs: 31 };
         }
         if (method === "wizard.cancel") {
@@ -245,7 +245,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
           .click();
       }
       await waitForFast(() => expect(releaseActivation).toBeTypeOf("function"));
-      const receipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")!;
+      const receipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1")!;
       expect(JSON.parse(receipt).modelRef).toBeNull();
       expect(receipt).not.toContain("test-only-provider-key");
       expect(receipt).not.toContain("provider-login");
@@ -256,7 +256,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
         await waitForFast(() =>
           expect(page.textContent).toContain("Gateway no longer has this setup session"),
         );
-        [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")]
+        [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")]
           .find((button) => button.textContent?.trim() === "Close")!
           .click();
         await page.updateComplete;
@@ -266,7 +266,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       }
       await waitForFast(() => expect(page.textContent).toContain("Verify & use selected model"));
       expect(
-        request.mock.calls.filter(([method]) => method === "openclaw.setup.verify"),
+        request.mock.calls.filter(([method]) => method === "carapace.setup.verify"),
       ).toHaveLength(0);
       expect(context.navigate).not.toHaveBeenCalled();
       page.querySelector<HTMLButtonElement>(".model-setup__recovery .btn.primary")!.click();
@@ -284,7 +284,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       );
       expect(request.mock.calls.filter(([method]) => method.endsWith(".start"))).toHaveLength(1);
       expect(context.navigate).toHaveBeenCalledOnce();
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
     },
   );
 
@@ -303,7 +303,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
     ["auth", "validation error"],
   ])("allows retry only after definitive %s %s", async (mode, outcome) => {
     const { context, client, request } = createFirstRunContext();
-    const startMethod = `openclaw.setup.${mode}.start`;
+    const startMethod = `carapace.setup.${mode}.start`;
     const selector = `[data-${mode === "auth" ? "auth" : "prepare"}-choice="provider-login"] button`;
     const failure = "Provider could not finish this sign-in";
     let nextCount = 0;
@@ -389,7 +389,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
     const signIn = () => page.querySelector<HTMLButtonElement>(selector)!;
     signIn().click();
     await waitForFast(() => expect(page.textContent).toContain(failure));
-    [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")]
+    [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")]
       .find(
         (button) =>
           button.textContent?.trim() === (outcome === "validation error" ? "Cancel" : "Close"),
@@ -400,9 +400,9 @@ describe("ModelSetupPage first-run activation ownership", () => {
       await waitForFast(() =>
         expect(page.textContent).toContain("Setup is finishing the current step"),
       );
-      expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).not.toBeNull();
     } else {
-      expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).toBeNull();
     }
     const terminal =
       (mode === "prepare" && outcome === "terminal error") ||
@@ -412,7 +412,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       expect(request.mock.calls.map(([method]) => method)).toEqual([startMethod]);
     }
     expect(signIn().disabled).toBe(!terminal);
-    expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1") === null).toBe(
+    expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1") === null).toBe(
       terminal,
     );
     signIn().click();
@@ -422,7 +422,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
     expect(request.mock.calls.filter(([method]) => method === startMethod)).toHaveLength(
       terminal ? 2 : 1,
     );
-    expect(request.mock.calls.some(([method]) => method === "openclaw.setup.verify")).toBe(false);
+    expect(request.mock.calls.some(([method]) => method === "carapace.setup.verify")).toBe(false);
     expect(page.textContent).not.toContain("Connection verified");
     expect(context.navigate).not.toHaveBeenCalled();
   });
@@ -444,7 +444,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       };
       let startCount = 0;
       const respond = async (method: string) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           if (terminal === "busy" && startCount++ === 0) {
             return await cancelled.promise;
           }
@@ -463,7 +463,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
           }
           return await cancelled.promise;
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return result;
         }
         throw new Error(`Unexpected method ${method}`);
@@ -479,12 +479,12 @@ describe("ModelSetupPage first-run activation ownership", () => {
       signIn().click();
       await waitForFast(() =>
         expect(original.request).toHaveBeenCalledWith(
-          "openclaw.setup.auth.start",
+          "carapace.setup.auth.start",
           { sessionId: expect.any(String), agentId: "main", authChoice: "provider-login" },
           { timeoutMs: null },
         ),
       );
-      [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")]
+      [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")]
         .find((button) => button.textContent?.trim() === "Cancel")!
         .click();
       await waitForFast(() =>
@@ -498,7 +498,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       // a distinct attempt; the old cancellation acknowledgement is still pending.
       page.routeData = { ...page.routeData!, firstRun: false };
       await page.updateComplete;
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
       const next = replacement === "new authenticated context" ? createFirstRunContext() : original;
       if (next !== original) {
         next.context.gateway.connection.token = "replacement-test-auth";
@@ -518,7 +518,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       await waitForFast(() => expect(signIn()).not.toBeNull());
       signIn().click();
       await waitForFast(() => expect(page.textContent).toContain("Complete login"));
-      const receipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+      const receipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
       expect(receipt).not.toBeNull();
       if (terminal === "busy") {
         cancelled.reject(
@@ -537,7 +537,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
         ).toBe(true),
       );
       await page.updateComplete;
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(receipt);
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(receipt);
       expect(page.textContent).toContain("Complete login");
       expect(original.context.navigate).not.toHaveBeenCalled();
       expect(next.context.navigate).not.toHaveBeenCalled();
@@ -583,7 +583,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       expect(setup.ownsActivation(activation)).toBe(false);
       setup.finishActivation({ ok: true, modelRef: "synthetic/model" }, "provider-auth", null);
       expect(context.navigate).not.toHaveBeenCalled();
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBeNull();
     } finally {
       unsubscribe();
       setup.dispose();
@@ -618,15 +618,15 @@ describe("ModelSetupPage first-run activation ownership", () => {
         await refresh.promise;
       });
       const activatedMethod =
-        entry === "manual key" ? "openclaw.setup.activate.start" : "wizard.next";
+        entry === "manual key" ? "carapace.setup.activate.start" : "wizard.next";
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           return { done: false, status: "running" };
         }
         if (method === activatedMethod) {
           return await reply.promise;
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return detection;
         }
         if (method === "wizard.cancel") {
@@ -722,10 +722,10 @@ describe("ModelSetupPage first-run activation ownership", () => {
       await page.updateComplete;
       expect(page.textContent).not.toContain("Connection verified");
       expect(page.textContent).not.toContain("Cannot read properties");
-      expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).toBeNull();
       expect(context.navigate).not.toHaveBeenCalled();
       if (replacement) {
-        expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(
+        expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(
           JSON.stringify(replacement),
         );
       }
@@ -778,7 +778,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
         await clickCandidate(page, "openai-api-key");
       }
       await waitForFast(() => expect(request).toHaveBeenCalledOnce());
-      const originalReceipt = localStorage.getItem("openclaw.modelSetup.pendingActivation.v1");
+      const originalReceipt = localStorage.getItem("carapace.modelSetup.pendingActivation.v1");
       const replacement =
         ownership === "replacement"
           ? persistFirstRunActivationReceipt(
@@ -823,7 +823,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       }
       expect(page.textContent).not.toContain("Cannot read properties");
       expect(page.textContent).not.toContain("Connection verified");
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).toBe(
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).toBe(
         replacement
           ? JSON.stringify(replacement)
           : rejection === "uncertain"
@@ -832,7 +832,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       );
       expect(context.navigate).not.toHaveBeenCalled();
       if (ownership === "active" && entry === "manual" && rejection !== "uncertain") {
-        [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")]
+        [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")]
           .find((button) => button.textContent?.trim() === "Close")!
           .click();
         await page.updateComplete;
@@ -875,7 +875,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
         ],
       };
       request.mockImplementation(async (method) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "carapace.setup.auth.start") {
           if (cancelStatus === "busy") {
             return await cancelled.promise;
           }
@@ -906,7 +906,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
           }
           return await cancelled.promise;
         }
-        if (method === "openclaw.setup.detect") {
+        if (method === "carapace.setup.detect") {
           return result;
         }
         throw new Error(`Unexpected method ${method}`);
@@ -919,13 +919,13 @@ describe("ModelSetupPage first-run activation ownership", () => {
       page.querySelector<HTMLButtonElement>('[data-auth-choice="provider-login"] button')!.click();
       await waitForFast(() =>
         expect(request).toHaveBeenCalledWith(
-          "openclaw.setup.auth.start",
+          "carapace.setup.auth.start",
           { sessionId: expect.any(String), agentId: "main", authChoice: "provider-login" },
           { timeoutMs: null },
         ),
       );
       const cancel = [
-        ...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button"),
+        ...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button"),
       ].find((button) => button.textContent?.trim() === "Cancel")!;
       cancel.click();
       await waitForFast(() =>
@@ -936,8 +936,8 @@ describe("ModelSetupPage first-run activation ownership", () => {
         ),
       );
       await page.updateComplete;
-      expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1")).not.toBeNull();
+      expect(page.querySelector("carapace-modal-dialog")).not.toBeNull();
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1")).not.toBeNull();
       if (lifecycle === "route refresh") {
         page.routeData = { ...page.routeData! };
       } else if (lifecycle === "reconnect") {
@@ -970,7 +970,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
       await waitForFast(() => {
         const cancelIndex = request.mock.calls.findIndex(
           ([method]) =>
-            method === (cancelStatus === "busy" ? "openclaw.setup.auth.start" : "wizard.cancel"),
+            method === (cancelStatus === "busy" ? "carapace.setup.auth.start" : "wizard.cancel"),
         );
         expect(request.mock.settledResults[cancelIndex]?.type).toBe(
           cancelStatus === "absent" || cancelStatus === "busy" ? "rejected" : "fulfilled",
@@ -978,19 +978,19 @@ describe("ModelSetupPage first-run activation ownership", () => {
       });
       if (lifecycle !== "unmount" && ["cancelled", "error", "busy"].includes(cancelStatus)) {
         const terminalClose = () =>
-          [...page.querySelectorAll<HTMLButtonElement>("openclaw-modal-dialog button")].find(
+          [...page.querySelectorAll<HTMLButtonElement>("carapace-modal-dialog button")].find(
             (button) => button.textContent?.trim() === "Close",
           );
         await waitForFast(() =>
           expect(
-            page.querySelector("openclaw-modal-dialog") === null || terminalClose() !== undefined,
+            page.querySelector("carapace-modal-dialog") === null || terminalClose() !== undefined,
           ).toBe(true),
         );
         terminalClose()?.click();
         await page.updateComplete;
-        expect(page.querySelector("openclaw-modal-dialog")).toBeNull();
+        expect(page.querySelector("carapace-modal-dialog")).toBeNull();
       } else if (lifecycle === "in place" && cancelStatus === "running") {
-        expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
+        expect(page.querySelector("carapace-modal-dialog")).not.toBeNull();
       }
       if (lifecycle === "unmount") {
         ({ page } = await mountPage(context, {
@@ -1006,7 +1006,7 @@ describe("ModelSetupPage first-run activation ownership", () => {
         expect(button).not.toBeNull();
         expect(button!.disabled).toBe(!["cancelled", "busy"].includes(cancelStatus));
       });
-      expect(localStorage.getItem("openclaw.modelSetup.pendingActivation.v1") === null).toBe(
+      expect(localStorage.getItem("carapace.modelSetup.pendingActivation.v1") === null).toBe(
         ["cancelled", "busy"].includes(cancelStatus),
       );
       expect(context.navigate).not.toHaveBeenCalled();

@@ -21,7 +21,7 @@ export type PanelTabStripTab = {
 
 const reconciledTabLayouts = new WeakMap<Element, string>();
 const keyboardCloseActivations = new WeakSet<Element>();
-const PANEL_TAB_DRAG_TYPE = "application/x-openclaw-panel-tab";
+const PANEL_TAB_DRAG_TYPE = "application/x-carapace-panel-tab";
 
 function clearPanelTabDropTargets(element: Element): void {
   const group = element.closest<HTMLElement>("wa-tab-group");
@@ -369,12 +369,12 @@ export function renderPanelTabStrip(params: {
             >
               ${
                 tab.labelTooltip
-                  ? html`<openclaw-tooltip
+                  ? html`<carapace-tooltip
                       class="tabstrip-tab__label-tooltip"
                       .content=${tab.labelTooltip}
                     >
                       <span class="tabstrip-tab__tooltip-trigger">${tabContent}</span>
-                    </openclaw-tooltip>`
+                    </carapace-tooltip>`
                   : tabContent
               }
             </wa-tab>

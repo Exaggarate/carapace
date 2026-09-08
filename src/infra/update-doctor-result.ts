@@ -2,14 +2,14 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "./tmp-carapace-dir.js";
 
 // IPC contract between package update parents and the post-install doctor child.
 export const UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH_ENV =
-  "OPENCLAW_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH";
+  "CARAPACE_UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH";
 export const UPDATE_POST_INSTALL_DOCTOR_ADVISORY_EXIT_CODE = 86;
 const UPDATE_POST_INSTALL_DOCTOR_RESULT_FILENAME_RE =
-  /^openclaw-update-doctor-\d+-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.json$/iu;
+  /^carapace-update-doctor-\d+-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.json$/iu;
 
 export type PackageUpdateStepAdvisory = {
   kind: "package-post-install-doctor";
@@ -64,13 +64,13 @@ export function recordUpdateDoctorConfigWrite(
 
 export function createUpdatePostInstallDoctorResultPath(): string {
   return path.join(
-    resolvePreferredOpenClawTmpDir(),
-    `openclaw-update-doctor-${process.pid}-${randomUUID()}.json`,
+    resolvePreferredCarapaceTmpDir(),
+    `carapace-update-doctor-${process.pid}-${randomUUID()}.json`,
   );
 }
 
 function resolveSafeUpdatePostInstallDoctorResultPath(resultPath: string): string {
-  const tempRoot = path.resolve(resolvePreferredOpenClawTmpDir());
+  const tempRoot = path.resolve(resolvePreferredCarapaceTmpDir());
   const resolvedPath = path.resolve(resultPath);
   if (
     path.dirname(resolvedPath) !== tempRoot ||

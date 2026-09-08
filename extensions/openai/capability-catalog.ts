@@ -1,4 +1,4 @@
-import type { PluginCapabilityCatalogEntry } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCapabilityCatalogEntry } from "carapace/plugin-sdk/plugin-entry";
 import { buildOpenAIRealtimeTranscriptionProvider } from "./realtime-transcription-provider-factory.js";
 import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider-factory.js";
 import { buildOpenAISpeechProvider } from "./speech-provider.js";

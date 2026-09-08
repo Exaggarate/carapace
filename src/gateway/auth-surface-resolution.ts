@@ -1,6 +1,6 @@
 // Gateway auth surface resolver.
 // Centralizes credential precedence for probes and interactive clients.
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import { createGatewayCredentialPlan } from "./credential-planner.js";
 import { trimToUndefined, type ExplicitGatewayAuth } from "./credentials.js";
 import { resolveConfiguredSecretInputWithFallback } from "./resolve-configured-secret-input-string.js";
@@ -21,7 +21,7 @@ type ResolvedGatewayCredential = {
 };
 
 async function resolveGatewayCredential(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   diagnostics: string[];
   path: GatewayCredentialPath;
@@ -49,7 +49,7 @@ function withDiagnostics<T extends object>(
 
 /** Resolves best-effort credentials for non-mutating local/remote gateway probes. */
 export async function resolveGatewayProbeSurfaceAuth(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   surface: "local" | "remote";
 }): Promise<{
@@ -79,8 +79,8 @@ export async function resolveGatewayProbeSurfaceAuth(params: {
           path: "gateway.remote.password",
           value: params.config.gateway?.remote?.password,
         });
-    const envToken = trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN);
-    const envPassword = trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD);
+    const envToken = trimToUndefined(env.CARAPACE_GATEWAY_TOKEN);
+    const envPassword = trimToUndefined(env.CARAPACE_GATEWAY_PASSWORD);
     const hasConfiguredAuth = Boolean(remoteToken.value || remotePassword.value);
     // A failed remote ref may retain a healthy configured sibling, never an
     // ambient credential that would hide the operator's selected secret owner.
@@ -98,8 +98,8 @@ export async function resolveGatewayProbeSurfaceAuth(params: {
     return {};
   }
 
-  const envToken = trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN);
-  const envPassword = trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD);
+  const envToken = trimToUndefined(env.CARAPACE_GATEWAY_TOKEN);
+  const envPassword = trimToUndefined(env.CARAPACE_GATEWAY_PASSWORD);
 
   if (authMode === "token" || authMode === "password") {
     const credential = await resolveGatewayCredential({
@@ -164,7 +164,7 @@ export async function resolveGatewayProbeSurfaceAuth(params: {
 
 /** Resolves credentials for client paths that must either authenticate or explain the failure. */
 export async function resolveGatewayInteractiveSurfaceAuth(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
   suppressEnvAuthFallback?: boolean;
@@ -191,10 +191,10 @@ export async function resolveGatewayInteractiveSurfaceAuth(params: {
   }
   const envToken = params.suppressEnvAuthFallback
     ? undefined
-    : trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN);
+    : trimToUndefined(env.CARAPACE_GATEWAY_TOKEN);
   const envPassword = params.suppressEnvAuthFallback
     ? undefined
-    : trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD);
+    : trimToUndefined(env.CARAPACE_GATEWAY_PASSWORD);
 
   if (params.surface === "remote") {
     const remoteToken = explicitToken

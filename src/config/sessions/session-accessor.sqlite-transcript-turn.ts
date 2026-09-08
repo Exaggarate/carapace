@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import { ensureSessionGoalOperationsSchema } from "../../state/openclaw-agent-goal-operations-schema.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import { openCarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
+import { ensureSessionGoalOperationsSchema } from "../../state/carapace-agent-goal-operations-schema.js";
 import {
   applySessionGoalOperation,
   readSessionGoalOperationReceipt,
@@ -16,7 +16,7 @@ import type {
   SessionTranscriptWriteScope,
   TranscriptMessageAppendResult,
 } from "./session-accessor.sqlite-contract.js";
-import { runSqliteSessionDeletionTransaction as runOpenClawAgentWriteTransaction } from "./session-accessor.sqlite-deletion.js";
+import { runSqliteSessionDeletionTransaction as runCarapaceAgentWriteTransaction } from "./session-accessor.sqlite-deletion.js";
 import {
   collectSessionEntryLookupKeys,
   readSessionEntryRow,
@@ -61,7 +61,7 @@ export async function appendExpectedSessionTranscriptTurn(
   scope: SessionTranscriptWriteScope,
   options: {
     atomicGroup?: boolean;
-    config?: import("../types.openclaw.js").OpenClawConfig;
+    config?: import("../types.carapace.js").CarapaceConfig;
     cwd?: string;
     expectedLifecycleRevision?: SessionLifecycleRevisionExpectation;
     expectedWriterRunId?: SessionTranscriptTurnExpectedState["expectedWriterRunId"];
@@ -103,11 +103,11 @@ export async function appendExpectedSessionTranscriptTurn(
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     const mutation = options.sessionTurnMutation;
     mutation?.assertCurrent?.();
-    const preparedDatabase = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const preparedDatabase = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     if (mutation) {
       ensureSessionGoalOperationsSchema(preparedDatabase.db);
     }
-    // openclaw-agent-db.ts cache rule: LRU can close idle handles during shouldAppend awaits.
+    // carapace-agent-db.ts cache rule: LRU can close idle handles during shouldAppend awaits.
     const preparedEntry = readSessionEntryRow(preparedDatabase, resolved.sessionKey);
     const preparedReplay = mutation
       ? readSessionGoalOperationReceipt(
@@ -144,7 +144,7 @@ export async function appendExpectedSessionTranscriptTurn(
       preparedEntry,
       options.sessionFile,
     );
-    const publish = runOpenClawAgentWriteTransaction((transactionDb) => {
+    const publish = runCarapaceAgentWriteTransaction((transactionDb) => {
       mutation?.assertCurrent?.();
       const fresh = readSessionEntryRow(transactionDb, resolved.sessionKey);
       const replay = mutation
@@ -196,8 +196,8 @@ export async function appendExpectedSessionTranscriptTurn(
         if (mutation && goal && isRecord(message) && message.role === "user") {
           message = {
             ...message,
-            __openclaw: {
-              ...(isRecord(message["__openclaw"]) ? message["__openclaw"] : {}),
+            __carapace: {
+              ...(isRecord(message["__carapace"]) ? message["__carapace"] : {}),
               intent: {
                 kind:
                   mutation.operation.action === "start"

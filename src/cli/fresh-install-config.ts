@@ -1,4 +1,4 @@
-import type { ConfigFileSnapshot } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../config/types.carapace.js";
 
 const UNCONFIGURED_CONFIG_IGNORED_KEYS = new Set(["$schema", "meta"]);
 

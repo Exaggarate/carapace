@@ -121,7 +121,7 @@ export function resetSlackSlashMocks() {
   mocks.finalizeInboundContextMock.mockReset().mockImplementation((ctx: unknown) => ctx);
   mocks.resolveConversationLabelMock.mockReset().mockReturnValue(undefined);
   mocks.recordSessionMetaFromInboundMock.mockReset().mockResolvedValue(undefined);
-  mocks.resolveStorePathMock.mockReset().mockReturnValue("/tmp/openclaw-sessions.json");
+  mocks.resolveStorePathMock.mockReset().mockReturnValue("/tmp/carapace-sessions.json");
   mocks.deliverSlackSlashRepliesMock.mockReset().mockImplementation(async (params: unknown) => {
     const delivery = params as {
       replies?: unknown[];

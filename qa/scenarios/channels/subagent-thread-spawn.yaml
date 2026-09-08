@@ -63,7 +63,7 @@ flow:
             senderId: "@driver:matrix.test"
             senderName: QA Driver
             text:
-              expr: "`@openclaw ${config.prompt}`"
+              expr: "`@carapace ${config.prompt}`"
         - waitForOutbound:
             conversation:
               id:
@@ -111,7 +111,7 @@ flow:
             senderId: "@driver:matrix.test"
             senderName: QA Driver
             text:
-              expr: "`@openclaw Reply exactly: ${config.boundMarker}`"
+              expr: "`@carapace Reply exactly: ${config.boundMarker}`"
             threadId:
               ref: intro.id
         - waitForOutbound:
@@ -155,7 +155,7 @@ flow:
             senderId: "@driver:matrix.test"
             senderName: QA Driver
             text:
-              expr: "`@openclaw Reply exactly: ${config.unboundMarker}`"
+              expr: "`@carapace Reply exactly: ${config.unboundMarker}`"
             threadId:
               ref: intro.id
         - waitForOutbound:

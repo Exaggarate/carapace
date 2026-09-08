@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveActivatedPluginBackupInventory } from "./manifest-backup-resources.js";
 import { loadPluginManifest } from "./manifest.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
@@ -23,13 +23,13 @@ function createPluginFixture(params: {
   const id = params.id ?? "backup-owner";
   const workspaceDir = path.join(root, "workspace");
   const pluginRoot = params.workspace
-    ? path.join(workspaceDir, ".openclaw", "extensions", id)
+    ? path.join(workspaceDir, ".carapace", "extensions", id)
     : path.join(root, id);
   const stateDir = path.join(root, "state");
   fs.mkdirSync(pluginRoot, { recursive: true });
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "carapace.plugin.json"),
     JSON.stringify({
       id,
       configSchema: { type: "object", additionalProperties: false },
@@ -47,9 +47,9 @@ function createPluginFixture(params: {
     workspaceDir,
     env: {
       HOME: root,
-      OPENCLAW_HOME: root,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "no-bundled-plugins"),
+      CARAPACE_HOME: root,
+      CARAPACE_STATE_DIR: stateDir,
+      CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "no-bundled-plugins"),
     },
   };
 }
@@ -141,7 +141,7 @@ describe("plugin manifest backup resources", () => {
       id: "disabled-owner",
       backupResources: [{ ...regenerable, relativePath: "disabled-owner/cache" }],
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         allow: [enabled.id, disabled.id],
         load: { paths: [enabled.pluginRoot, disabled.pluginRoot] },
@@ -172,7 +172,7 @@ describe("plugin manifest backup resources", () => {
     const fixture = createPluginFixture({
       backupResources: [{ disposition: "include", scope: "state", relativePath: "../outside" }],
     });
-    const config: OpenClawConfig = {
+    const config: CarapaceConfig = {
       plugins: {
         load: { paths: [fixture.pluginRoot] },
         entries: { [fixture.id]: { enabled: true } },
@@ -198,7 +198,7 @@ describe("plugin manifest backup resources", () => {
         workspace: true,
         backupResources: [{ disposition: "include", scope: "state", relativePath: "../outside" }],
       });
-      const config: OpenClawConfig = {
+      const config: CarapaceConfig = {
         plugins: {
           allow: [fixture.id],
           entries: { [fixture.id]: { enabled: activated } },

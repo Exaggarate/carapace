@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { markInboundContextLabel } from "../auto-reply/reply/inbound-context-marker.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { CarapaceConfig } from "../config/config.js";
 import { encodeSessionArchiveContent } from "../config/sessions/archive-compression.js";
 import {
   appendTranscriptMessage,
@@ -85,9 +85,9 @@ async function refreshSessionCostUsageForTest(sessionFile: string): Promise<void
 }
 
 describe("session cost usage", () => {
-  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-session-cost-" });
+  const suiteRootTracker = createSuiteTempRootTracker({ prefix: "carapace-session-cost-" });
   const withStateDir = async <T>(stateDir: string, fn: () => Promise<T>): Promise<T> =>
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, fn);
+    await withEnvAsync({ CARAPACE_STATE_DIR: stateDir }, fn);
   const makeSessionCostRoot = async (prefix: string): Promise<string> =>
     await suiteRootTracker.make(prefix);
   const transcriptText = (sessionId: string, entry: unknown): string =>
@@ -371,7 +371,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await withStateDir(root, async () => {
       const summary = await loadCostUsageSummary({ config });
@@ -450,7 +450,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await withStateDir(root, async () => {
       const alpha = await loadCostUsageSummary({ agentId: "alpha", config });
@@ -567,7 +567,7 @@ describe("session cost usage", () => {
       );
       expect(sqliteRows).toHaveLength(1);
       expect(sqliteRows[0]?.key).toContain(
-        path.join("agents", "main", "agent", "openclaw-agent.sqlite"),
+        path.join("agents", "main", "agent", "carapace-agent.sqlite"),
       );
     });
   });
@@ -648,7 +648,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     const costSpy = vi.spyOn(usageFormat, "resolveModelCostConfig");
     try {
@@ -703,7 +703,7 @@ describe("session cost usage", () => {
       bundledGeneratedAt: () => 100,
       readStoredCatalog: () => ({
         id: 1,
-        source_url: "https://catalog.openclaw.ai/models/v1/catalog.json",
+        source_url: "https://github.com/Exaggarate/carapace",
         bundle_json: bundleJson,
         generated_at: 200,
         min_version: "2026.7.0",
@@ -721,7 +721,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     try {
       await withStateDir(root, async () => {
@@ -836,7 +836,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
 
     await withStateDir(root, async () => {
       const summary = await loadCostUsageSummary({ config });
@@ -932,7 +932,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const expectedCost = 0.0028;
 
     await withStateDir(root, async () => {

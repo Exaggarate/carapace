@@ -15,7 +15,7 @@ afterEach(() => {
 function nativeBackgroundFixture(options: Parameters<typeof createDraftFixture>[0] = {}) {
   const postMessage = vi.fn();
   vi.stubGlobal("webkit", {
-    messageHandlers: { openclawNotifications: { postMessage } },
+    messageHandlers: { carapaceNotifications: { postMessage } },
   });
   const nativeNotifications = createNativeNotificationsCapability();
   const fixture = createDraftFixture(options);

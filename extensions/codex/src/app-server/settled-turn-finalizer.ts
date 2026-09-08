@@ -1,8 +1,8 @@
 import type {
   AgentHarnessV2,
   AgentHarnessSettledTurnFinalizationResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isSilentReplyText } from "openclaw/plugin-sdk/reply-runtime";
+} from "carapace/plugin-sdk/agent-harness-runtime";
+import { isSilentReplyText } from "carapace/plugin-sdk/reply-runtime";
 import { resolveCodexAppServerPreparedAuthHandoff } from "./auth-bridge.js";
 import { runBoundedCodexAppServerTurn, type CodexBoundedTurnOptions } from "./bounded-turn.js";
 import { createAttributedCodexAssistantMessage } from "./event-projector-assistant-message.js";

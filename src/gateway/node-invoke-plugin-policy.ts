@@ -1,16 +1,16 @@
 // Plugin-provided node.invoke policy adapter.
 // Lets plugin policies gate dangerous node commands before transport dispatch.
 import { randomUUID } from "node:crypto";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { recordRuntimeActionDecision } from "../audit/runtime-action-decision.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import { getActivePluginGatewayNodePolicyRegistry } from "../plugins/runtime-state.js";
 import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
 import type {
-  OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult,
-  OpenClawPluginNodeInvokeTransportResult,
+  CarapacePluginNodeInvokePolicyContext,
+  CarapacePluginNodeInvokePolicyResult,
+  CarapacePluginNodeInvokeTransportResult,
 } from "../plugins/types.js";
 import type { AgentRuntimeIdentity } from "./agent-runtime-identity-token.js";
 import { ApprovalObserverClosedError } from "./exec-approval-lifecycle.js";
@@ -60,8 +60,8 @@ function findDangerousPluginNodeCommand(registry: PluginRegistry | null, command
 }
 
 function validateRiskClassification(
-  value: NonNullable<OpenClawPluginNodeInvokePolicyContext["risk"]>,
-): NonNullable<OpenClawPluginNodeInvokePolicyContext["risk"]> | null {
+  value: NonNullable<CarapacePluginNodeInvokePolicyContext["risk"]>,
+): NonNullable<CarapacePluginNodeInvokePolicyContext["risk"]> | null {
   const family = normalizeOptionalString(value?.family);
   if (
     (value?.level !== "ordinary" && value?.level !== "high") ||
@@ -120,7 +120,7 @@ export async function applyPluginNodeInvokePolicy(params: {
   privateTransport?: PluginNodeInvokePrivateTransport;
   /** Internal callers carry an admitted run without inventing a client connection. */
   agentRuntimeIdentity?: AgentRuntimeIdentity;
-}): Promise<OpenClawPluginNodeInvokePolicyResult | null> {
+}): Promise<CarapacePluginNodeInvokePolicyResult | null> {
   const registry = getActivePluginGatewayNodePolicyRegistry();
   const callerIdentity =
     params.agentRuntimeIdentity ?? params.client?.internal?.agentRuntimeIdentity;
@@ -187,7 +187,7 @@ export async function applyPluginNodeInvokePolicy(params: {
     return null;
   }
 
-  let risk: OpenClawPluginNodeInvokePolicyContext["risk"];
+  let risk: CarapacePluginNodeInvokePolicyContext["risk"];
   if (entry.policy.classifyRisk) {
     try {
       risk =
@@ -231,13 +231,13 @@ export async function applyPluginNodeInvokePolicy(params: {
         pluginRecord.enabled &&
         pluginRecord.status === "loaded"));
   const dispatchNode = async (
-    override: Parameters<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>[0] = {},
+    override: Parameters<CarapacePluginNodeInvokePolicyContext["invokeNode"]>[0] = {},
     sessionAuthority?: { assertCurrent: () => void; signal: AbortSignal },
-  ): Promise<OpenClawPluginNodeInvokeTransportResult> => {
+  ): Promise<CarapacePluginNodeInvokeTransportResult> => {
     const deny = (
       reasonCode: string,
-      result: OpenClawPluginNodeInvokeTransportResult,
-    ): OpenClawPluginNodeInvokeTransportResult => {
+      result: CarapacePluginNodeInvokeTransportResult,
+    ): CarapacePluginNodeInvokeTransportResult => {
       nodeGateDecisionRecorded = true;
       recordNodeDecision({
         pluginId: entry.pluginId,
@@ -479,7 +479,7 @@ export async function applyPluginNodeInvokePolicy(params: {
       : undefined;
   const invokeOwned = (
     source: "human-approved" | "session-full",
-    override: NonNullable<Parameters<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>[0]>,
+    override: NonNullable<Parameters<CarapacePluginNodeInvokePolicyContext["invokeNode"]>[0]>,
     createParams?: () => unknown,
   ) =>
     ownedInvocation && override.workspace
@@ -502,7 +502,7 @@ export async function applyPluginNodeInvokePolicy(params: {
           },
         )
       : undefined;
-  const invokeNode: OpenClawPluginNodeInvokePolicyContext["invokeNode"] = async (override = {}) => {
+  const invokeNode: CarapacePluginNodeInvokePolicyContext["invokeNode"] = async (override = {}) => {
     if (!ownedInvocation || !override.workspace) {
       return await dispatchNode(override);
     }
@@ -513,7 +513,7 @@ export async function applyPluginNodeInvokePolicy(params: {
     return result;
   };
 
-  let result: OpenClawPluginNodeInvokePolicyResult;
+  let result: CarapacePluginNodeInvokePolicyResult;
   try {
     result = await entry.policy.handle({
       nodeId: params.nodeSession.nodeId,
@@ -587,14 +587,14 @@ export async function applyPluginNodeInvokePolicy(params: {
       coverageState: result.ok ? "unknown" : "enforced",
       reasonCode: result.ok ? "node_action_callback_missing" : "node_plugin_policy_denied",
       summary: result.ok
-        ? "The plugin policy returned without invoking the expected OpenClaw node callback."
+        ? "The plugin policy returned without invoking the expected Carapace node callback."
         : "The registered plugin policy denied node transport dispatch.",
       missingEvidence: result.ok ? ["node.action_callback"] : [],
       remediation: result.ok
         ? [
             {
               code: "add_node_action_callback",
-              text: "Route the native action through the provided OpenClaw node callback.",
+              text: "Route the native action through the provided Carapace node callback.",
             },
           ]
         : [],

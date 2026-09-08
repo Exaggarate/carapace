@@ -320,7 +320,7 @@ describe("recent session prefetch", () => {
         _name: string,
         _options: LockOptions,
         callback: (lock: Lock | null) => Promise<void>,
-      ) => await callback({ name: "openclaw-chat-prefetch", mode: "exclusive" } as Lock),
+      ) => await callback({ name: "carapace-chat-prefetch", mode: "exclusive" } as Lock),
     );
     Object.defineProperty(navigator, "locks", {
       configurable: true,
@@ -353,7 +353,7 @@ describe("recent session prefetch", () => {
       expect(params).toMatchObject({ limit: 20, maxBytes: 64 * 1024 });
     }
     expect(locksRequest).toHaveBeenCalledWith(
-      "openclaw-chat-prefetch",
+      "carapace-chat-prefetch",
       { ifAvailable: true },
       expect.any(Function),
     );
@@ -396,7 +396,7 @@ describe("recent session prefetch", () => {
 
     updatePrefetch({ ...state, loadingSessionKeys: [] });
     host.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(300);
     await settlePromises();
@@ -437,7 +437,7 @@ describe("recent session prefetch", () => {
 
     updatePrefetch({ ...state, loadingSessionKeys: [] });
     host.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(300);
     await settlePromises();
@@ -463,7 +463,7 @@ describe("recent session prefetch", () => {
     const pane = host.firstElementChild as HTMLElement & { transcriptLoading: boolean };
     pane.transcriptLoading = true;
     pane.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(2_000);
     await settlePromises();
@@ -471,7 +471,7 @@ describe("recent session prefetch", () => {
 
     pane.transcriptLoading = false;
     pane.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(300);
     await settlePromises();
@@ -505,7 +505,7 @@ describe("recent session prefetch", () => {
     const pane = host.firstElementChild as HTMLElement & { transcriptLoading: boolean };
     pane.transcriptLoading = true;
     pane.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     read.resolve(stored);
     await settlePromises();
@@ -513,7 +513,7 @@ describe("recent session prefetch", () => {
 
     pane.transcriptLoading = false;
     pane.dispatchEvent(
-      new CustomEvent("openclaw-chat-transcript-loading-changed", { bubbles: true }),
+      new CustomEvent("carapace-chat-transcript-loading-changed", { bubbles: true }),
     );
     await vi.advanceTimersByTimeAsync(300);
     await settlePromises();
@@ -612,7 +612,7 @@ describe("recent session prefetch", () => {
     const priorMessages = Array.from({ length: 5 }, (_, index) => ({
       role: index % 2 === 0 ? "user" : "assistant",
       content: `prior-${index + 1}`,
-      __openclaw: { id: `prior-${index + 1}`, seq: index + 1 },
+      __carapace: { id: `prior-${index + 1}`, seq: index + 1 },
     }));
     cacheChatSessionSnapshot(
       cache,
@@ -631,7 +631,7 @@ describe("recent session prefetch", () => {
     const liveMessage = {
       role: "user",
       content: "live broadcast",
-      __openclaw: { id: "live-user", seq: 6 },
+      __carapace: { id: "live-user", seq: 6 },
     };
     const liveEvent = {
       sessionKey,
@@ -643,7 +643,7 @@ describe("recent session prefetch", () => {
     const deltaMessage = {
       role: "assistant",
       content: "delta reply",
-      __openclaw: { id: "delta-assistant", seq: 7 },
+      __carapace: { id: "delta-assistant", seq: 7 },
     };
     const request = vi.fn(async () => ({
       kind: "delta",

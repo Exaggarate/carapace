@@ -2,14 +2,14 @@
 import type {
   ChannelAccountSnapshot,
   ChannelStatusIssue,
-} from "openclaw/plugin-sdk/channel-contract";
-import { formatCliCommand } from "openclaw/plugin-sdk/cli-runtime";
+} from "carapace/plugin-sdk/channel-contract";
+import { formatCliCommand } from "carapace/plugin-sdk/cli-runtime";
 import {
   collectIssuesForEnabledAccounts,
   isRecord,
   readAccountStatusSnapshot,
-} from "openclaw/plugin-sdk/status-helpers";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/status-helpers";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 
 const WHATSAPP_ACCOUNT_STATUS_FIELDS = [
   "statusState",
@@ -80,7 +80,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "auth",
           message: `Session logged out${lastError ? `: ${lastError}` : "."}`,
-          fix: `Run: ${formatCliCommand("openclaw channels login")} (scan QR on the gateway host).`,
+          fix: `Run: ${formatCliCommand("carapace channels login")} (scan QR on the gateway host).`,
         });
         return;
       }
@@ -91,7 +91,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "auth",
           message: "Not linked (no WhatsApp Web session).",
-          fix: `Run: ${formatCliCommand("openclaw channels login")} (scan QR on the gateway host).`,
+          fix: `Run: ${formatCliCommand("carapace channels login")} (scan QR on the gateway host).`,
         });
         return;
       }
@@ -106,7 +106,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "runtime",
           message: `Linked but stale${staleSuffix}${lastError ? `: ${lastError}` : "."}`,
-          fix: `Run: ${formatCliCommand("openclaw doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
+          fix: `Run: ${formatCliCommand("carapace doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
         });
         return;
       }
@@ -127,7 +127,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "runtime",
           message: `Linked but ${stateLabel}${reconnectAttempts != null ? ` (reconnectAttempts=${reconnectAttempts})` : ""}${lastError ? `: ${lastError}` : "."}`,
-          fix: `Run: ${formatCliCommand("openclaw doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
+          fix: `Run: ${formatCliCommand("carapace doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
         });
         return;
       }
@@ -145,7 +145,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "runtime",
           message: `Linked but recently reconnected (reconnectAttempts=${reconnectAttempts})${lastError ? `: ${lastError}` : "."}`,
-          fix: `Watch: ${formatCliCommand("openclaw logs --follow")} and run ${formatCliCommand("openclaw channels status --probe")} if disconnects continue. If it keeps flapping, restart the gateway or relink via channels login.`,
+          fix: `Watch: ${formatCliCommand("carapace logs --follow")} and run ${formatCliCommand("carapace channels status --probe")} if disconnects continue. If it keeps flapping, restart the gateway or relink via channels login.`,
         });
         return;
       }
@@ -156,7 +156,7 @@ export function collectWhatsAppStatusIssues(
           accountId,
           kind: "runtime",
           message: `Linked but disconnected${reconnectAttempts != null ? ` (reconnectAttempts=${reconnectAttempts})` : ""}${lastError ? `: ${lastError}` : "."}`,
-          fix: `Run: ${formatCliCommand("openclaw doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
+          fix: `Run: ${formatCliCommand("carapace doctor")} (or restart the gateway). If it persists, relink via channels login and check logs.`,
         });
       }
     },

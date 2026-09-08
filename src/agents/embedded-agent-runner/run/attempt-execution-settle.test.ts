@@ -195,7 +195,7 @@ function createFixture() {
       role: "user",
       content: "hello",
       timestamp: 100,
-      __openclaw: { senderName: "Alice" },
+      __carapace: { senderName: "Alice" },
     },
     sessionManager,
     sessionPromptState,
@@ -390,7 +390,7 @@ describe("runEmbeddedAttemptSettledPhase", () => {
 
     expect(fixture.sessionManager.appendMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        customType: "openclaw.system-note",
+        customType: "carapace.system-note",
         display: true,
         content: expect.stringMatching(/1.*image contents.*unavailable.*resend.*not claim/is),
       }),
@@ -403,7 +403,7 @@ describe("runEmbeddedAttemptSettledPhase", () => {
       expect.any(Object),
       expect.objectContaining({
         messagesSnapshot: expect.arrayContaining([
-          expect.objectContaining({ customType: "openclaw.system-note", display: true }),
+          expect.objectContaining({ customType: "carapace.system-note", display: true }),
         ]),
       }),
     );

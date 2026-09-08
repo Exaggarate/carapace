@@ -1,5 +1,5 @@
 // Chutes tests cover models plugin behavior.
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+import { clearLiveCatalogCacheForTests } from "carapace/plugin-sdk/provider-catalog-live-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { buildChutesProvider, CHUTES_DEFAULT_MODEL_ID } from "./api.js";
 import { CHUTES_MODEL_CATALOG, discoverChutesModels } from "./models.js";
@@ -8,7 +8,7 @@ import {
   applyChutesProviderConfig,
   CHUTES_DEFAULT_MODEL_REF,
 } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./carapace.plugin.json" with { type: "json" };
 
 const EXPECTED_STATIC_MODEL_IDS = [
   "deepseek-ai/DeepSeek-V3.2-TEE",

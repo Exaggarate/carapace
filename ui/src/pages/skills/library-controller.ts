@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import type { ReactiveControllerHost } from "lit";
 import type {
   SkillsProposalInspectResult,

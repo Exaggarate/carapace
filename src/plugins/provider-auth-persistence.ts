@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { persistAuthProfileBatch } from "../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isValidEnvSecretRefId, type SecretRef } from "../config/types.secrets.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
 import { resolveDefaultSecretProviderAlias } from "../secrets/ref-contract.js";
@@ -29,7 +29,7 @@ type PersistProviderAuthProfileBatchParams = Omit<
   "profiles"
 > & {
   profiles: readonly ProviderAuthProfile[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -98,7 +98,7 @@ function rollbackStoreWrites(
   if (errors.length > 0) {
     throw new AggregateError(
       errors,
-      "Could not confirm rollback of protected provider credentials; run openclaw doctor --fix before retrying.",
+      "Could not confirm rollback of protected provider credentials; run carapace doctor --fix before retrying.",
     );
   }
 }
@@ -106,7 +106,7 @@ function rollbackStoreWrites(
 /** Materializes provider-minted static credentials only when their final persistence begins. */
 export function prepareProviderAuthProfilesForPersistence(params: {
   profiles: readonly ProviderAuthProfile[];
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): PreparedProviderAuthProfiles {
   const database = params.env ? { env: params.env } : undefined;
@@ -129,7 +129,7 @@ export function prepareProviderAuthProfilesForPersistence(params: {
       const existing = readSecretStoreValue({ scope: STORE_SCOPE, name, database });
       if (!existing.ok && existing.error.code !== "SECRET_STORE_NOT_FOUND") {
         throw new Error(
-          "The protected secret store is unavailable. Check the OpenClaw state-directory permissions and retry; the auth profile was not changed.",
+          "The protected secret store is unavailable. Check the Carapace state-directory permissions and retry; the auth profile was not changed.",
           { cause: existing.error },
         );
       }
@@ -157,7 +157,7 @@ export function prepareProviderAuthProfilesForPersistence(params: {
         });
       } catch (error) {
         throw new Error(
-          "Could not write the protected secret store. Check the OpenClaw state-directory permissions and retry; the auth profile was not changed.",
+          "Could not write the protected secret store. Check the Carapace state-directory permissions and retry; the auth profile was not changed.",
           { cause: error },
         );
       }
@@ -195,7 +195,7 @@ export async function persistProviderAuthProfileBatch(
   params: PersistProviderAuthProfileBatchParams,
 ): Promise<{ profiles: ProviderAuthProfile[]; rollback: () => void }> {
   const env = params.stateDir
-    ? { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir }
+    ? { ...(params.env ?? process.env), CARAPACE_STATE_DIR: params.stateDir }
     : params.env;
   const prepared = prepareProviderAuthProfilesForPersistence({
     profiles: params.profiles,

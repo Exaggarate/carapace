@@ -1,6 +1,6 @@
 import type { ReactiveController, ReactiveControllerHost } from "lit";
 import type { PresenceEntry } from "../../api/types.ts";
-import type { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import type { CarapaceLightDomElement } from "../../lit/carapace-element.ts";
 
 const PLACE_TOPOLOGY_EVENTS = new Set([
   "config.changed",
@@ -27,7 +27,7 @@ export function presenceStateSignature(entries: PresenceEntry[]): string {
   return JSON.stringify([...states].toSorted(([left], [right]) => left.localeCompare(right)));
 }
 
-export function createControllerHost(element: OpenClawLightDomElement): ReactiveControllerHost {
+export function createControllerHost(element: CarapaceLightDomElement): ReactiveControllerHost {
   return {
     addController: (controller: ReactiveController) => element.addController(controller),
     removeController: (controller: ReactiveController) => element.removeController(controller),

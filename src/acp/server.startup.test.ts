@@ -44,7 +44,7 @@ const mockState = vi.hoisted(() => ({
   routeLogsToStderr: vi.fn(),
   startProxy: vi.fn(async (_configForTest: unknown) => null as unknown),
   stopProxy: vi.fn(async (_handle: unknown) => {}),
-  closeOpenClawStateDatabase: vi.fn(),
+  closeCarapaceStateDatabase: vi.fn(),
   gatewayStopDeferred: null as {
     resolve: () => void;
     promise: Promise<void>;
@@ -209,8 +209,8 @@ vi.mock("../logging/console.js", async (importOriginal) => {
   };
 });
 
-vi.mock("../state/openclaw-state-db.js", () => ({
-  closeOpenClawStateDatabase: () => mockState.closeOpenClawStateDatabase(),
+vi.mock("../state/carapace-state-db.js", () => ({
+  closeCarapaceStateDatabase: () => mockState.closeCarapaceStateDatabase(),
 }));
 
 vi.mock("./event-ledger.js", () => ({
@@ -389,7 +389,7 @@ describe("serveAcpGateway startup", () => {
     mockState.routeLogsToStderr.mockReset();
     mockState.startProxy.mockReset();
     mockState.stopProxy.mockReset();
-    mockState.closeOpenClawStateDatabase.mockReset();
+    mockState.closeCarapaceStateDatabase.mockReset();
     mockState.gatewayStopDeferred = null;
     mockState.startProxy.mockResolvedValue(null);
     mockState.stopProxy.mockResolvedValue(undefined);
@@ -498,14 +498,14 @@ describe("serveAcpGateway startup", () => {
     {
       name: "default logging",
       opts: {},
-      expected: ["openclaw acp: gateway event chat failed\n"],
+      expected: ["carapace acp: gateway event chat failed\n"],
     },
     {
       name: "verbose logging",
       opts: { verbose: true },
       expected: [
-        "openclaw acp: gateway event chat failed\n",
-        "openclaw acp: gateway event chat error: handler boom\n",
+        "carapace acp: gateway event chat failed\n",
+        "carapace acp: gateway event chat error: handler boom\n",
       ],
     },
   ])("contains rejected gateway event handling with $name", async ({ opts, expected }) => {
@@ -586,7 +586,7 @@ describe("serveAcpGateway startup", () => {
     try {
       await serveAcpGateway({});
       expect(mockState.agentSideConnectionCtor).not.toHaveBeenCalled();
-      expect(mockState.closeOpenClawStateDatabase).toHaveBeenCalledOnce();
+      expect(mockState.closeCarapaceStateDatabase).toHaveBeenCalledOnce();
     } finally {
       onceSpy.mockRestore();
     }
@@ -697,14 +697,14 @@ describe("serveAcpGateway startup", () => {
 
   it("closes the shared state database on shutdown", async () => {
     const { signalHandlers, onceSpy } = captureProcessSignalHandlers();
-    expect(mockState.closeOpenClawStateDatabase).not.toHaveBeenCalled();
+    expect(mockState.closeCarapaceStateDatabase).not.toHaveBeenCalled();
 
     try {
       const servePromise = serveAcpGateway({});
       await emitHelloAndWaitForAgentSideConnection();
       await stopServeWithSigint(signalHandlers, servePromise);
       expect(mockState.agentShutdown).toHaveBeenCalledOnce();
-      expect(mockState.closeOpenClawStateDatabase).toHaveBeenCalledOnce();
+      expect(mockState.closeCarapaceStateDatabase).toHaveBeenCalledOnce();
     } finally {
       onceSpy.mockRestore();
     }
@@ -725,7 +725,7 @@ describe("serveAcpGateway startup", () => {
       await servePromise;
 
       expect(mockState.agentShutdown).toHaveBeenCalledOnce();
-      expect(mockState.closeOpenClawStateDatabase).toHaveBeenCalledOnce();
+      expect(mockState.closeCarapaceStateDatabase).toHaveBeenCalledOnce();
     } finally {
       onceSpy.mockRestore();
     }
@@ -746,11 +746,11 @@ describe("serveAcpGateway startup", () => {
       await vi.waitFor(() => {
         expect(mockState.agentShutdown).toHaveBeenCalledOnce();
       });
-      expect(mockState.closeOpenClawStateDatabase).not.toHaveBeenCalled();
+      expect(mockState.closeCarapaceStateDatabase).not.toHaveBeenCalled();
 
       resolveStop();
       await servePromise;
-      expect(mockState.closeOpenClawStateDatabase).toHaveBeenCalledOnce();
+      expect(mockState.closeCarapaceStateDatabase).toHaveBeenCalledOnce();
     } finally {
       onceSpy.mockRestore();
     }
@@ -759,19 +759,19 @@ describe("serveAcpGateway startup", () => {
   it("closes a real node:sqlite DatabaseSync handle through serveAcpGateway shutdown", async () => {
     // Use the real state-db module to open and verify a DatabaseSync handle —
     // this proves the full serveAcpGateway → shutdown → close path, not just
-    // the closeOpenClawStateDatabase helper in isolation.
-    const actualStateDb = await vi.importActual<typeof import("../state/openclaw-state-db.js")>(
-      "../state/openclaw-state-db.js",
+    // the closeCarapaceStateDatabase helper in isolation.
+    const actualStateDb = await vi.importActual<typeof import("../state/carapace-state-db.js")>(
+      "../state/carapace-state-db.js",
     );
 
-    const realDb = actualStateDb.openOpenClawStateDatabase();
+    const realDb = actualStateDb.openCarapaceStateDatabase();
     expect(realDb.db.isOpen).toBe(true);
-    expect(actualStateDb.isOpenClawStateDatabaseOpen()).toBe(true);
+    expect(actualStateDb.isCarapaceStateDatabaseOpen()).toBe(true);
 
     // Wire the test mock so serveAcpGateway's shutdown handler calls the
-    // real closeOpenClawStateDatabase, which closes the handle we opened above.
-    mockState.closeOpenClawStateDatabase.mockImplementation(() => {
-      actualStateDb.closeOpenClawStateDatabase();
+    // real closeCarapaceStateDatabase, which closes the handle we opened above.
+    mockState.closeCarapaceStateDatabase.mockImplementation(() => {
+      actualStateDb.closeCarapaceStateDatabase();
     });
 
     const { signalHandlers, onceSpy } = captureProcessSignalHandlers();
@@ -784,9 +784,9 @@ describe("serveAcpGateway startup", () => {
       // handle must be closed — proving the ACP shutdown fix works
       // end-to-end, not just in the helper function.
       expect(realDb.db.isOpen).toBe(false);
-      expect(actualStateDb.isOpenClawStateDatabaseOpen()).toBe(false);
+      expect(actualStateDb.isCarapaceStateDatabaseOpen()).toBe(false);
     } finally {
-      actualStateDb.closeOpenClawStateDatabase();
+      actualStateDb.closeCarapaceStateDatabase();
       onceSpy.mockRestore();
     }
   });
@@ -872,7 +872,7 @@ describe("serveAcpGateway startup", () => {
       method: "session/new",
       params: {
         protocolVersion: "2025-11-25",
-        cwd: "/tmp/openclaw",
+        cwd: "/tmp/carapace",
       },
     };
 

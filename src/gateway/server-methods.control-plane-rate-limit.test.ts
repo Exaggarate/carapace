@@ -46,7 +46,7 @@ describe("gateway control-plane write rate limit", () => {
       role: "operator",
       scopes: ["operator.admin"],
       client: {
-        id: "openclaw-control-ui",
+        id: "carapace-control-ui",
         version: "1.0.0",
         platform: "macos",
         mode: "ui",
@@ -128,7 +128,7 @@ describe("gateway control-plane write rate limit", () => {
     },
   );
 
-  it("allows the OpenClaw inference ladder to probe more than 3 candidates", async () => {
+  it("allows the Carapace inference ladder to probe more than 3 candidates", async () => {
     const handlerCalls = vi.fn();
     const handler: GatewayRequestHandler = (opts) => {
       handlerCalls(opts);
@@ -141,7 +141,7 @@ describe("gateway control-plane write rate limit", () => {
     for (let attempt = 0; attempt < 4; attempt += 1) {
       responses.push(
         await runRequest({
-          method: "openclaw.setup.activate",
+          method: "carapace.setup.activate",
           context,
           client,
           handler,

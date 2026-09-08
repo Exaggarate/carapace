@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import type { GatewayRequestContext } from "./server-methods/types.js";
 import type { GatewayPostReadySidecarHandle } from "./server-startup-post-attach.js";
@@ -17,7 +17,7 @@ export function broadcastChatMetadataChanged(
 }
 
 export async function createGatewayChatMetadataLifecycle(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => CarapaceConfig;
   minimalTestGateway: boolean;
   log: GatewayLogger;
 }) {

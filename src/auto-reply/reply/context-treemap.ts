@@ -2,10 +2,10 @@
 import crypto from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { estimateTokensFromChars } from "@openclaw/normalization-core/cjk-chars";
+import { expectDefined } from "@carapace/normalization-core";
+import { estimateTokensFromChars } from "@carapace/normalization-core/cjk-chars";
 import type { SessionSystemPromptReport } from "../../config/sessions/types.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredCarapaceTmpDir } from "../../infra/tmp-carapace-dir.js";
 import { encodePngRgba } from "../../media/png-encode.js";
 
 /** PNG treemap renderer for visualizing prompt context size by section. */
@@ -457,8 +457,8 @@ export async function renderContextTreemapPng(params: {
     1,
   );
   const outPath = path.join(
-    resolvePreferredOpenClawTmpDir(),
-    `openclaw-context-map-${crypto.randomUUID()}.png`,
+    resolvePreferredCarapaceTmpDir(),
+    `carapace-context-map-${crypto.randomUUID()}.png`,
   );
   await writeFile(outPath, encodePngRgba(canvas.data, WIDTH, HEIGHT));
   const caption = [

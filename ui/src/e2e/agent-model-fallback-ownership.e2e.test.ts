@@ -17,7 +17,7 @@ const suite = createControlUiE2eSuite({
 const primaryModel = "openai/gpt-5.4";
 const inheritedFallback = "anthropic/claude-sonnet-4-6";
 const writerWorkspace = "/tmp/agents/writer";
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProof) {
@@ -103,7 +103,7 @@ suite.define(() => {
       expect(response?.status()).toBe(200);
       await gateway.waitForRequest("agents.list");
       await gateway.waitForRequest("config.get");
-      const agentPicker = page.locator("openclaw-agents-page openclaw-agent-select");
+      const agentPicker = page.locator("carapace-agents-page carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       // Switching agents is the user action under test; the Tools panel must survive it.
       await agentPicker
@@ -127,7 +127,7 @@ suite.define(() => {
           fullPage: true,
           path: path.join(
             proofDir,
-            `${process.env.OPENCLAW_UI_PROOF_LABEL ?? "agent-context"}.png`,
+            `${process.env.CARAPACE_UI_PROOF_LABEL ?? "agent-context"}.png`,
           ),
         });
       }
@@ -144,7 +144,7 @@ suite.define(() => {
         : primaryModel;
       await expect.poll(() => modelDescription.textContent()).toContain(displayedModel);
 
-      const fallbacks = page.locator("openclaw-multi-select.agent-fallbacks");
+      const fallbacks = page.locator("carapace-multi-select.agent-fallbacks");
       await fallbacks.waitFor({ timeout: 10_000 });
       await expect
         .poll(() =>

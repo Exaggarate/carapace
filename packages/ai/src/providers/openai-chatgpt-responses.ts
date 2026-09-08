@@ -4,8 +4,8 @@ import type * as NodeZlib from "node:zlib";
 import {
   extractErrorCodeOrErrno,
   toErrorObject,
-} from "@openclaw/normalization-core/error-coercion";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+} from "@carapace/normalization-core/error-coercion";
+import { resolveTimerTimeoutMs } from "@carapace/normalization-core/number-coercion";
 import type {
   Tool as OpenAITool,
   ResponseCreateParamsStreaming,
@@ -1707,10 +1707,10 @@ function buildBaseCodexHeaders(
   }
   headers.set("Authorization", `Bearer ${token}`);
   headers.set("chatgpt-account-id", accountId);
-  headers.set("originator", "openclaw");
+  headers.set("originator", "carapace");
   const userAgent = os
-    ? `openclaw (${os.platform()} ${os.release()}; ${os.arch()})`
-    : "openclaw (browser)";
+    ? `carapace (${os.platform()} ${os.release()}; ${os.arch()})`
+    : "carapace (browser)";
   headers.set("User-Agent", userAgent);
   return headers;
 }

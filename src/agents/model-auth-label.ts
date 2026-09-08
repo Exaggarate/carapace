@@ -1,10 +1,10 @@
 /**
  * Formats user-facing auth labels for resolved provider/model credentials.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { isUserModelAuthProfileId } from "../state/user-model-account-id.js";
 import {
   externalCliDiscoveryForProviderAuth,
@@ -27,7 +27,7 @@ import {
 /** Resolve the display label that describes how a provider is authenticated. */
 export function resolveModelAuthLabel(params: {
   provider?: string;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   sessionEntry?: Partial<Pick<SessionEntry, "authProfileOverride">>;
   agentDir?: string;
   workspaceDir?: string;

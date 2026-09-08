@@ -18,11 +18,11 @@ describe("resolveInstalledPluginIndexPolicyHash", () => {
   // from the unit-fast lane and leak across isolate=false workers.
   const makeStateRoot = async (mode?: "compat" | "allowlist"): Promise<string> => {
     const stateDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-index-policy-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "carapace-index-policy-")),
     );
     if (mode) {
-      const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+      setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
       try {
         writeConfigMachineState("plugins.bundledDiscovery", mode);
       } finally {
@@ -34,12 +34,12 @@ describe("resolveInstalledPluginIndexPolicyHash", () => {
 
   const envForRoot = (stateDir: string): NodeJS.ProcessEnv => ({
     ...process.env,
-    OPENCLAW_STATE_DIR: stateDir,
+    CARAPACE_STATE_DIR: stateDir,
   });
 
   it("changes when the machine-state bundled discovery mode changes", async () => {
     // Regression for #123297's upgrade path: doctor migrates the mode into
-    // machine state without touching openclaw.json, so the mode must be a
+    // machine state without touching carapace.json, so the mode must be a
     // policy-hash input or persisted enabled values stay stale after --fix.
     const config = { plugins: { allow: ["rollover"] } };
     const unsetRoot = await makeStateRoot();
@@ -65,8 +65,8 @@ describe("resolveInstalledPluginIndexPolicyHash", () => {
     // that env's mode or persisted indexes leak decisions across roots.
     const compatRoot = await makeStateRoot("compat");
     const plainRoot = await makeStateRoot();
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", plainRoot);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", plainRoot);
     try {
       clearBundledDiscoveryModeMemo();
       const config = { plugins: { allow: ["rollover"] } };

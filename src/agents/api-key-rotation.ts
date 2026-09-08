@@ -3,8 +3,8 @@
  * Runs provider calls across configured keys on rate-limit failures and keeps
  * same-key transient retries separate from key rotation.
  */
-import { toErrorObject as toLintErrorObject } from "@openclaw/normalization-core/error-coercion";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { toErrorObject as toLintErrorObject } from "@carapace/normalization-core/error-coercion";
+import { normalizeUniqueStringEntries } from "@carapace/normalization-core/string-normalization";
 import { sleepWithAbort } from "../infra/backoff.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {

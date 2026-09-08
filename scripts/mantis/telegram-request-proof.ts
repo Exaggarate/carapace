@@ -9,7 +9,7 @@ export const telegramProofIdentitySchema = z
   .strictObject({
     request_id: digest,
     plan_sha256: digest,
-    repository: z.strictObject({ id: messageId, full_name: z.literal("openclaw/openclaw") }),
+    repository: z.strictObject({ id: messageId, full_name: z.literal("carapace/carapace") }),
     pull_request: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
     candidate_sha: sha,
     scenario: z.literal("telegram-bot-e2e-proof"),

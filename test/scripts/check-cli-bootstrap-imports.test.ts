@@ -22,7 +22,7 @@ import {
 const tempRoots: string[] = [];
 
 function makeTempRoot(): string {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-cli-bootstrap-imports-"));
+  const root = mkdtempSync(join(tmpdir(), "carapace-cli-bootstrap-imports-"));
   tempRoots.push(root);
   mkdirSync(join(root, "dist", "cli"), { recursive: true });
   return root;

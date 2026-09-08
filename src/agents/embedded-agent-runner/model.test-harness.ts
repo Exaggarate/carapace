@@ -1,6 +1,6 @@
 // Shared model fixtures for embedded runner model resolution tests.
 import { vi } from "vitest";
-import type { OpenClawConfig, OpenClawConfigInput } from "../../config/config.js";
+import type { CarapaceConfig, CarapaceConfigInput } from "../../config/config.js";
 import type { ModelDefinitionConfig } from "../../config/types.js";
 
 type DiscoverModelsMock = typeof import("../agent-model-discovery.js").discoverModels;
@@ -17,8 +17,8 @@ export const makeModel = (id: string): ModelDefinitionConfig => ({
   maxTokens: 1,
 });
 
-export function makeOpenClawConfigFixture(input: OpenClawConfigInput = {}): OpenClawConfig {
-  return input as OpenClawConfig;
+export function makeCarapaceConfigFixture(input: CarapaceConfigInput = {}): CarapaceConfig {
+  return input as CarapaceConfig;
 }
 
 export const OPENAI_CODEX_TEMPLATE_MODEL = {

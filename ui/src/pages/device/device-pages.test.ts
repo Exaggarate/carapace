@@ -57,7 +57,7 @@ function createCapability(
 }
 
 async function mount(
-  tag: "openclaw-device-page" | "openclaw-device-permissions-page",
+  tag: "carapace-device-page" | "carapace-device-permissions-page",
   nativeDeviceSettings: NativeDeviceSettingsCapability | null,
 ) {
   const provider = createApplicationContextProvider({ nativeDeviceSettings } as ApplicationContext);
@@ -101,7 +101,7 @@ describe("native device settings pages", () => {
       installRequested: true,
       discoveredProfiles: 0,
     });
-    const page = await mount("openclaw-device-page", capability);
+    const page = await mount("carapace-device-page", capability);
     expect(capability.installChromeExtension).not.toHaveBeenCalled();
     row(page, "Set up Chrome on this Mac").querySelector<HTMLButtonElement>("button")!.click();
     await vi.waitFor(() => expect(page.textContent).toContain("installation requested"));
@@ -110,11 +110,11 @@ describe("native device settings pages", () => {
     row(page, "Set up Chrome on this Mac").querySelector<HTMLButtonElement>("button")!.click();
     await vi.waitFor(() => expect(page.textContent).toContain("Setup could not finish"));
   });
-  it.each(["openclaw-device-page", "openclaw-device-permissions-page"] as const)(
+  it.each(["carapace-device-page", "carapace-device-permissions-page"] as const)(
     "shows an app-only state without a bridge and waits for the initial snapshot on %s",
     async (tag) => {
       const browserPage = await mount(tag, null);
-      expect(browserPage.textContent).toContain("only available inside the OpenClaw app");
+      expect(browserPage.textContent).toContain("only available inside the Carapace app");
       expect(browserPage.querySelector("wa-switch")).toBeNull();
       const { capability } = createCapability(null);
       const waitingPage = await mount(tag, capability);
@@ -129,10 +129,10 @@ describe("native device settings pages", () => {
     snapshot.app.quickChatShortcut = null;
     snapshot.app.launchAtLoginAvailable = false;
     const { capability } = createCapability(snapshot);
-    const page = await mount("openclaw-device-page", capability);
+    const page = await mount("carapace-device-page", capability);
     expect(page.querySelector(".page-title")?.textContent).toContain("This Mac");
     expect(page.querySelector<HTMLAnchorElement>(".page-subtitle a")?.href).toBe(
-      "https://docs.openclaw.ai/platforms/macos",
+      "https://github.com/Exaggarate/carapace",
     );
     expect(row(page, "Quick Chat shortcut").textContent).toContain("Not set");
     const iconStyles = row(page, "Dock icon").querySelector<HTMLSelectElement>("select")!;
@@ -175,7 +175,7 @@ describe("native device settings pages", () => {
 
   it("renders new native snapshots and removes controls whose native capabilities became unavailable", async () => {
     const native = createCapability();
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     const next = createNativeDeviceSettingsSnapshot();
     next.app.iconStyle = {
       selectedId: "origami",
@@ -211,7 +211,7 @@ describe("native device settings pages", () => {
 
   it("renders only published iOS settings and delegates app preferences and device panels", async () => {
     const { capability } = createCapability(createIosNativeDeviceSettingsSnapshot());
-    const page = await mount("openclaw-device-page", capability);
+    const page = await mount("carapace-device-page", capability);
     expect(page.querySelector(".page-title")?.textContent).toContain("This iPhone");
     expect(
       [...page.querySelectorAll(".settings-row__title")].map((element) =>
@@ -259,7 +259,7 @@ describe("native device settings pages", () => {
 
   it("removes absent device families and fields and hides unavailable health summaries", async () => {
     const native = createCapability(createIosNativeDeviceSettingsSnapshot());
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     const next: NativeDeviceSettingsSnapshot = {
       ...createIosNativeDeviceSettingsSnapshot(),
       app: { notificationsEnabled: false },
@@ -283,7 +283,7 @@ describe("native device settings pages", () => {
 
   it("normalizes and deduplicates added cookie hostnames and removes a selected hostname", async () => {
     const { capability } = createCapability();
-    const page = await mount("openclaw-device-page", capability);
+    const page = await mount("carapace-device-page", capability);
     const input = row(page, "Domains").querySelector<HTMLInputElement>("input")!;
     const form = row(page, "Domains").querySelector<HTMLFormElement>("form")!;
     for (const hostname of ["  EXAMPLE.COM ", "  ACCOUNTS.EXAMPLE.ORG  "]) {
@@ -308,7 +308,7 @@ describe("native device settings pages", () => {
 
   it("preserves newer domain edits across an older native acknowledgement", async () => {
     const native = createCapability();
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     for (const hostname of ["a.example.com", "b.example.com"]) {
       const input = row(page, "Domains").querySelector<HTMLInputElement>("input")!;
       input.value = hostname;
@@ -346,7 +346,7 @@ describe("native device settings pages", () => {
   it("debounces profile typing and flushes the latest edit once when leaving the page", async () => {
     vi.useFakeTimers();
     const { capability } = createCapability();
-    const page = await mount("openclaw-device-page", capability);
+    const page = await mount("carapace-device-page", capability);
     const input = row(page, "Target profile").querySelector<HTMLInputElement>("input")!;
     for (const value of ["work", "work-browser"]) {
       input.value = value;
@@ -375,7 +375,7 @@ describe("native device settings pages", () => {
   it("preserves the latest sent profile across an older native acknowledgement", async () => {
     vi.useFakeTimers();
     const native = createCapability();
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     const input = row(page, "Target profile").querySelector<HTMLInputElement>("input")!;
     for (const value of ["first-profile", "second-profile"]) {
       input.value = value;
@@ -410,7 +410,7 @@ describe("native device settings pages", () => {
   it("preserves pending cookie sync edits across page navigation", async () => {
     vi.useFakeTimers();
     const native = createCapability();
-    const first = await mount("openclaw-device-page", native.capability);
+    const first = await mount("carapace-device-page", native.capability);
     const firstDomain = row(first, "Domains").querySelector<HTMLInputElement>("input")!;
     firstDomain.value = "b.example.com";
     firstDomain.dispatchEvent(new Event("input", { bubbles: true }));
@@ -423,7 +423,7 @@ describe("native device settings pages", () => {
     firstProfile.dispatchEvent(new Event("input", { bubbles: true }));
     first.remove();
 
-    const second = await mount("openclaw-device-page", native.capability);
+    const second = await mount("carapace-device-page", native.capability);
     const secondDomain = row(second, "Domains").querySelector<HTMLInputElement>("input")!;
     secondDomain.value = "c.example.com";
     secondDomain.dispatchEvent(new Event("input", { bubbles: true }));
@@ -455,7 +455,7 @@ describe("native device settings pages", () => {
     external.browser.cookieSync.domains = ["external.example.com"];
     external.browser.cookieSync.targetProfile = "external-profile";
     native.publish(external);
-    const third = await mount("openclaw-device-page", native.capability);
+    const third = await mount("carapace-device-page", native.capability);
     expect(row(third, "Domains").textContent).toContain("external.example.com");
     expect(row(third, "Domains").textContent).not.toContain("b.example.com");
     expect(row(third, "Target profile").querySelector<HTMLInputElement>("input")!.value).toBe(
@@ -466,7 +466,7 @@ describe("native device settings pages", () => {
   it("settles cancelled cookie edits after navigation without reusing rejected values", async () => {
     vi.useFakeTimers();
     const native = createCapability();
-    const first = await mount("openclaw-device-page", native.capability);
+    const first = await mount("carapace-device-page", native.capability);
     const domain = row(first, "Domains").querySelector<HTMLInputElement>("input")!;
     domain.value = "rejected.example.com";
     domain.dispatchEvent(new Event("input", { bubbles: true }));
@@ -478,7 +478,7 @@ describe("native device settings pages", () => {
     profile.value = "rejected-profile";
     profile.dispatchEvent(new Event("input", { bubbles: true }));
     first.remove();
-    const second = await mount("openclaw-device-page", native.capability);
+    const second = await mount("carapace-device-page", native.capability);
     native.settle(0);
     native.settle(1);
     await second.updateComplete;
@@ -496,7 +496,7 @@ describe("native device settings pages", () => {
   it("settles native profile normalization without losing a newer unsent edit", async () => {
     vi.useFakeTimers();
     const native = createCapability();
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     const input = row(page, "Target profile").querySelector<HTMLInputElement>("input")!;
     input.value = " work ";
     input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -523,7 +523,7 @@ describe("native device settings pages", () => {
   it("keeps a newer equal-valued profile pending when the first request settles", async () => {
     vi.useFakeTimers();
     const native = createCapability();
-    const page = await mount("openclaw-device-page", native.capability);
+    const page = await mount("carapace-device-page", native.capability);
     const input = row(page, "Target profile").querySelector<HTMLInputElement>("input")!;
     for (const value of ["first", "middle", "first"]) {
       input.value = value;
@@ -543,7 +543,7 @@ describe("native device settings pages", () => {
 
   it("keeps permission order and maps each native status to the correct action", async () => {
     const { capability } = createCapability();
-    const page = await mount("openclaw-device-permissions-page", capability);
+    const page = await mount("carapace-device-permissions-page", capability);
     const permissions = page.querySelector(".settings-group");
     expect(
       [...permissions!.querySelectorAll(".settings-row__title")].map((element) =>
@@ -587,7 +587,7 @@ describe("native device settings pages", () => {
       ];
       snapshot.permissions.location.precise = false;
       const native = createCapability(snapshot);
-      const page = await mount("openclaw-device-permissions-page", native.capability);
+      const page = await mount("carapace-device-permissions-page", native.capability);
       expect(
         [...page.querySelector(".settings-group")!.querySelectorAll(".settings-row__title")].map(
           (element) => element.textContent?.trim(),
@@ -627,7 +627,7 @@ describe("native device settings pages", () => {
 
   it("enables precision with location access and changes local location and activity preferences", async () => {
     const native = createCapability();
-    const page = await mount("openclaw-device-permissions-page", native.capability);
+    const page = await mount("carapace-device-permissions-page", native.capability);
     expect(row(page, "Precise location").querySelector<ToggleElement>("wa-switch")!.disabled).toBe(
       true,
     );

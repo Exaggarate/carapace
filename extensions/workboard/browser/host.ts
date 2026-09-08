@@ -1,4 +1,4 @@
-import type { ControlUiHost } from "openclaw/plugin-sdk/control-ui";
+import type { ControlUiHost } from "carapace/plugin-sdk/control-ui";
 
 let activeHost: ControlUiHost | undefined;
 let redact: (text: string) => string = () => "Workboard is not active.";

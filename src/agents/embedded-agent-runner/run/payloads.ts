@@ -1,7 +1,7 @@
 /**
  * Builds embedded-agent payload objects from attempt inputs and outcomes.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { buildCodexLoginRecovery } from "../../../auto-reply/codex-login-recovery.js";
 import type { SourceReplyDeliveryMode } from "../../../auto-reply/get-reply-options.types.js";
 import {
@@ -23,7 +23,7 @@ import {
   isSilentReplyPayloadText,
   SILENT_REPLY_TOKEN,
 } from "../../../auto-reply/tokens.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import { hasReplyPayloadContent } from "../../../interactive/payload.js";
 import type { AssistantMessage } from "../../../llm/types.js";
 import {
@@ -130,7 +130,7 @@ export function buildEmbeddedRunPayloads(params: {
   lastAssistant: AssistantMessage | undefined;
   currentAssistant?: AssistantMessage | null;
   lastToolError?: ToolErrorSummary;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   isCronTrigger?: boolean;
   isHeartbeatTrigger?: boolean;
   sessionKey: string;
@@ -204,7 +204,7 @@ export function buildEmbeddedRunPayloads(params: {
     currentAssistant ?? (nonEmptyAssistantTexts.length === 1 ? undefined : params.lastAssistant);
   // Pre-upgrade recovered messages have no stored facts, and recovery intentionally does not
   // reparse text; one in-flight reply can lose delivery or speech intent across this boundary.
-  const storedDelivery = assistantForPayload?.openclawDelivery;
+  const storedDelivery = assistantForPayload?.carapaceDelivery;
   const lastAssistantStopReason = assistantForPayload?.stopReason;
   const lastAssistantErrored = lastAssistantStopReason === "error";
   const lastAssistantAborted = lastAssistantStopReason === "aborted";

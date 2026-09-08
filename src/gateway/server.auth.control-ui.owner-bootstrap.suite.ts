@@ -28,9 +28,9 @@ export function registerControlUiOwnerBootstrapSuite(): void {
       await import("./server/ws-shared-generation.js");
     const { prepareSessionWorkspaceIcon } = await import("./workspace-icon-http.js");
     const { mutateConfigFile } = await import("../config/config.js");
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.CARAPACE_STATE_DIR;
     if (!stateDir) {
-      throw new Error("OPENCLAW_STATE_DIR must be set by the gateway test hooks");
+      throw new Error("CARAPACE_STATE_DIR must be set by the gateway test hooks");
     }
     const workspace = path.join(stateDir, "owner-icon-workspace");
     await fs.mkdir(workspace, { recursive: true });
@@ -58,7 +58,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     const { server, port, prevToken } = await startProxiedControlUiServer("secret");
 
     const { identityPath, identity } = await createOperatorIdentityFixture(
-      "openclaw-bootstrap-control-ui-",
+      "carapace-bootstrap-control-ui-",
     );
 
     try {
@@ -103,7 +103,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
 
       await prepareSessionWorkspaceIcon({ sessionKey });
       const iconResponse = await fetch(
-        `http://127.0.0.1:${port}/__openclaw__/workspace-icon/${encodeURIComponent(sessionKey)}`,
+        `http://127.0.0.1:${port}/__carapace__/workspace-icon/${encodeURIComponent(sessionKey)}`,
         { headers: { Authorization: `Bearer ${deviceToken}` } },
       );
       expect(iconResponse.status).toBe(200);
@@ -180,7 +180,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     testState.gatewayControlUi = { allowedOrigins: ["https://localhost"] };
     const { server, port, prevToken } = await startProxiedControlUiServer("secret");
     const { identityPath, identity } = await createOperatorIdentityFixture(
-      "openclaw-bootstrap-control-ui-bounded-",
+      "carapace-bootstrap-control-ui-bounded-",
     );
 
     try {
@@ -239,7 +239,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     const { CONTROL_UI_OWNER_BOOTSTRAP_OPERATOR_SCOPES, CONTROL_UI_OWNER_BOOTSTRAP_PROFILE } =
       await import("../shared/device-bootstrap-profile.js");
     const { identity, identityPath } = await seedApprovedOperatorReadPairing({
-      identityPrefix: "openclaw-control-ui-owner-upgrade-",
+      identityPrefix: "carapace-control-ui-owner-upgrade-",
       clientId: CONTROL_UI_CLIENT.id,
       clientMode: CONTROL_UI_CLIENT.mode,
       displayName: "control-ui-owner-upgrade",
@@ -254,7 +254,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     testState.gatewayControlUi = { allowedOrigins: ["https://localhost"] };
     const { server, port, prevToken } = await startProxiedControlUiServer("secret");
     const { identityPath: secondIdentityPath } = await createOperatorIdentityFixture(
-      "openclaw-control-ui-owner-upgrade-second-browser-",
+      "carapace-control-ui-owner-upgrade-second-browser-",
     );
 
     try {
@@ -347,7 +347,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     const { server, port, prevToken } = await startProxiedControlUiServer("secret");
 
     const { identityPath, identity } = await createOperatorIdentityFixture(
-      "openclaw-bootstrap-control-ui-missing-purpose-",
+      "carapace-bootstrap-control-ui-missing-purpose-",
     );
 
     try {
@@ -392,7 +392,7 @@ export function registerControlUiOwnerBootstrapSuite(): void {
     const { server, port, prevToken } = await startProxiedControlUiServer("secret");
 
     const { identityPath, identity } = await createOperatorIdentityFixture(
-      "openclaw-bootstrap-control-ui-node-profile-",
+      "carapace-bootstrap-control-ui-node-profile-",
     );
 
     try {

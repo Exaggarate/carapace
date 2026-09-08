@@ -8,7 +8,7 @@ import type { MentionsCapability } from "../app/mentions.ts";
 import type { UpdateProgress } from "../app/update-confirmation.ts";
 import { t } from "../i18n/index.ts";
 import { canCallGatewayMethod } from "../lib/gateway-methods.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { CarapaceLightDomElement } from "../lit/carapace-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import "../styles/sidebar-attention-floating.css";
 import { icons } from "./icons.ts";
@@ -31,7 +31,7 @@ type UpdateProgressWatcher = (listener: (progress: UpdateProgress) => void) => (
 // Display is stylesheet-owned (layout.css `display: contents` in the footer,
 // flex when floating): the LightDomContents base's inline display would defeat
 // the floating override, re-piling the collapsed-nav cluster at the origin.
-class SidebarAttention extends OpenClawLightDomElement {
+class SidebarAttention extends CarapaceLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
@@ -210,7 +210,7 @@ class SidebarAttention extends OpenClawLightDomElement {
     const { custodianAlertStore } = await import("../pages/custodian/custodian-alert-store.ts");
     custodianAlertStore.present(item.action.alert);
     const snapshot = this.context?.gateway.snapshot;
-    if (canCallGatewayMethod(snapshot, "openclaw.chat", "operator.admin")) {
+    if (canCallGatewayMethod(snapshot, "carapace.chat", "operator.admin")) {
       window.dispatchEvent(
         new CustomEvent(CUSTODIAN_PANEL_TOGGLE_EVENT, { detail: { open: true } }),
       );
@@ -349,6 +349,6 @@ class SidebarAttention extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-sidebar-attention")) {
-  customElements.define("openclaw-sidebar-attention", SidebarAttention);
+if (!customElements.get("carapace-sidebar-attention")) {
+  customElements.define("carapace-sidebar-attention", SidebarAttention);
 }

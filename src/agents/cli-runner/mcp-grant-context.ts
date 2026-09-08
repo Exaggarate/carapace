@@ -1,6 +1,6 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@carapace/normalization-core/string-normalization";
 import { canonicalizeMainSessionAlias } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { McpLoopbackRequestContext } from "../../gateway/mcp-grant-store.js";
 import { resolveGatewayMessageChannel } from "../../utils/message-channel.js";
 import type { DelegationCapability } from "../delegation-capability.js";
@@ -96,7 +96,7 @@ function buildCliMcpChannelContext(
 
 function resolveCliMcpSessionKey(
   run: Pick<RunCliAgentParams, "sessionKey">,
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   agentId: string,
 ): string {
   return canonicalizeMainSessionAlias({
@@ -108,7 +108,7 @@ function resolveCliMcpSessionKey(
 
 export function buildCliMcpGrantContext(params: {
   run: RunCliAgentParams;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   requireExplicitMessageTarget: boolean;
   agentId: string;
   runtimePolicyAgentId?: string;
@@ -138,7 +138,7 @@ export function buildCliMcpGrantContext(params: {
     params.run.messageChannel ?? params.run.messageProvider,
   );
   const currentChannelId = normalizeOptionalMcpContextValue(params.run.currentChannelId);
-  const grantedToolsAllow = params.run.cliToolAvailability?.openClaw ?? params.toolsAllow;
+  const grantedToolsAllow = params.run.cliToolAvailability?.carapace ?? params.toolsAllow;
   const delegationCapability = readCliMcpDelegationCapability(params.run);
   // Trusted message-only completions stay restricted even when source routing
   // is missing; the message tool must fail closed instead of widening authority.

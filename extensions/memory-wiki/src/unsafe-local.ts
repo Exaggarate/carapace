@@ -2,9 +2,9 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { isPathInside } from "openclaw/plugin-sdk/file-access-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { runTasksWithConcurrency } from "carapace/plugin-sdk/concurrency-runtime";
+import { isPathInside } from "carapace/plugin-sdk/file-access-runtime";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import { walkMemoryWikiDirectory } from "./bounded-walk.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import {
@@ -211,8 +211,8 @@ async function writeUnsafeLocalSourcePage(params: {
           renderMarkdownFence(raw, detectFenceLanguage(params.artifact.absolutePath)),
           "",
           "## Notes",
-          "<!-- openclaw:human:start -->",
-          "<!-- openclaw:human:end -->",
+          "<!-- carapace:human:start -->",
+          "<!-- carapace:human:end -->",
           "",
         ].join("\n"),
       }),

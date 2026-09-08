@@ -1,13 +1,13 @@
 // Doctor cron storage repair mechanics for legacy stores, run logs, payloads, and Codex refs.
 import type { DatabaseSync } from "node:sqlite";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
 } from "../../../../packages/normalization-core/src/string-coerce.js";
 import { tryResolveAmbientOwnerAgentId } from "../../../agents/agent-scope-config.js";
 import { formatCliCommand } from "../../../cli/command-format.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import {
   assertCronJobsStoreUnchanged,
   CronJobsStoreChangedError,
@@ -104,8 +104,8 @@ function formatRunLogMigrationNote(importedFiles: number): string {
     : "";
 }
 
-function readLegacyCronStorePath(cfg: OpenClawConfig): string | undefined {
-  return (cfg.cron as (NonNullable<OpenClawConfig["cron"]> & { store?: string }) | undefined)
+function readLegacyCronStorePath(cfg: CarapaceConfig): string | undefined {
+  return (cfg.cron as (NonNullable<CarapaceConfig["cron"]> & { store?: string }) | undefined)
     ?.store;
 }
 
@@ -125,7 +125,7 @@ function projectCronOwner(
 }
 
 export async function loadLegacyCronRepairState(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   storePath?: string;
   env?: NodeJS.ProcessEnv;
   onlyIfLegacyDetected?: boolean;
@@ -210,8 +210,8 @@ export async function loadLegacyCronRepairState(params: {
 }
 
 export async function applyLegacyCronStoreRepair(params: {
-  cfg: OpenClawConfig;
-  retiredModelRefConfig?: Pick<OpenClawConfig, "agents" | "models">;
+  cfg: CarapaceConfig;
+  retiredModelRefConfig?: Pick<CarapaceConfig, "agents" | "models">;
   state: LegacyCronRepairState;
   normalized?: ReturnType<typeof normalizeStoredCronJobs>;
   migrateCodexModelRefs?: boolean;
@@ -303,7 +303,7 @@ export async function applyLegacyCronStoreRepair(params: {
           : tryResolveAmbientOwnerAgentId(params.cfg));
       if (!agentId) {
         warnings.push(
-          `Skipped retired model repair for cron job "${jobId}": select its owning agent, then rerun openclaw doctor --fix.`,
+          `Skipped retired model repair for cron job "${jobId}": select its owning agent, then rerun carapace doctor --fix.`,
         );
         continue;
       }
@@ -318,7 +318,7 @@ export async function applyLegacyCronStoreRepair(params: {
       if (retirementChanges.length > beforeChanges && asOptionalRecord(job.state)?.autoDisabled) {
         const jobName = normalizeOptionalString(job.name) ?? jobId;
         retirementChanges.push(
-          `Automation "${jobName}" remains auto-disabled. Run openclaw automations enable ${jobId} to resume it after this repair.`,
+          `Automation "${jobName}" remains auto-disabled. Run carapace automations enable ${jobId} to resume it after this repair.`,
         );
       }
     }
@@ -403,7 +403,7 @@ export async function applyLegacyCronStoreRepair(params: {
       rethrowSqliteSchemaVersionError(err);
       const failure =
         err instanceof CronJobsStoreChangedError
-          ? `Cron store at ${shortenHomePath(state.storePath)} changed while doctor was waiting, so no rows were rewritten; re-run ${formatCliCommand("openclaw doctor --fix")} to repair from a fresh snapshot.`
+          ? `Cron store at ${shortenHomePath(state.storePath)} changed while doctor was waiting, so no rows were rewritten; re-run ${formatCliCommand("carapace doctor --fix")} to repair from a fresh snapshot.`
           : `Failed writing migrated cron store at ${shortenHomePath(state.storePath)}: ${errorMessage(err)}`;
       return { changes, warnings: [...warnings, failure] };
     }
@@ -424,7 +424,7 @@ export async function applyLegacyCronStoreRepair(params: {
       );
     } else {
       warnings.push(
-        `Migrated quarantined automations to SQLite but could not archive the legacy cron file at ${shortenHomePath(state.legacyQuarantine.path)}: ${archiveResult.reason}. Remove it manually or rerun ${formatCliCommand("openclaw doctor --fix")} to retry.`,
+        `Migrated quarantined automations to SQLite but could not archive the legacy cron file at ${shortenHomePath(state.legacyQuarantine.path)}: ${archiveResult.reason}. Remove it manually or rerun ${formatCliCommand("carapace doctor --fix")} to retry.`,
       );
     }
   }
@@ -466,7 +466,7 @@ export async function applyLegacyCronStoreRepair(params: {
       // claiming a finished migration; doctor re-detects the leftover and retries.
       for (const failure of archiveResult.failures) {
         warnings.push(
-          `Migrated automations to SQLite but could not archive the legacy cron file at ${shortenHomePath(failure.path)}: ${failure.reason}. Remove it manually or rerun ${formatCliCommand("openclaw doctor --fix")} to retry.`,
+          `Migrated automations to SQLite but could not archive the legacy cron file at ${shortenHomePath(failure.path)}: ${failure.reason}. Remove it manually or rerun ${formatCliCommand("carapace doctor --fix")} to retry.`,
         );
       }
     }
@@ -496,7 +496,7 @@ export async function applyLegacyCronStoreRepair(params: {
 }
 
 export async function repairLegacyCronStoreWithoutPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   migrateCodexModelRefs?: boolean;
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
 }): Promise<LegacyCronRepairResult> {
@@ -526,7 +526,7 @@ export async function repairLegacyCronStoreWithoutPrompt(params: {
 
 /** Read legacy Codex cron targets without changing either cron storage or config. */
 export async function collectCronCodexRuntimePolicyTargetsReadOnly(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
 }): Promise<{ targets: CronCodexRuntimePolicyTarget[]; warnings: string[] }> {
   const storePath = resolveCronJobsStorePath(
     normalizeOptionalString(readLegacyCronStorePath(params.cfg)),
@@ -550,8 +550,8 @@ export async function collectCronCodexRuntimePolicyTargetsReadOnly(params: {
 
 /** Commit Codex cron refs only after their model-scoped config policy is durable. */
 export async function repairCronCodexModelRefsAfterConfigWrite(params: {
-  cfg: OpenClawConfig;
-  retiredModelRefConfig?: Pick<OpenClawConfig, "agents" | "models">;
+  cfg: CarapaceConfig;
+  retiredModelRefConfig?: Pick<CarapaceConfig, "agents" | "models">;
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
   repairRetiredModelRefs?: boolean;
 }): Promise<LegacyCronRepairResult> {

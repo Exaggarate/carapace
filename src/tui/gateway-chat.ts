@@ -1,6 +1,6 @@
 // Bridges TUI chat requests to gateway session APIs.
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { gatewayOriginScope } from "../../packages/gateway-client/src/gateway-origin-scope.js";
 import {
   GATEWAY_CLIENT_CAPS,
@@ -28,7 +28,7 @@ import {
 } from "../../packages/gateway-protocol/src/index.js";
 import { isRetryableGatewayStartupUnavailableError } from "../../packages/gateway-protocol/src/startup-unavailable.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
 import {
@@ -93,7 +93,7 @@ function throwGatewayAuthResolutionError(reason: string): never {
   throw new Error(
     [
       reason,
-      "Fix: set OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD, pass --token/--password,",
+      "Fix: set CARAPACE_GATEWAY_TOKEN/CARAPACE_GATEWAY_PASSWORD, pass --token/--password,",
       "or resolve the configured secret provider for this credential.",
     ].join("\n"),
   );
@@ -193,7 +193,7 @@ export class GatewayChatClient implements TuiBackend {
       tlsFingerprint: connection.tlsFingerprint,
       preauthHandshakeTimeoutMs: connection.preauthHandshakeTimeoutMs,
       clientName: GATEWAY_CLIENT_NAMES.TUI,
-      clientDisplayName: "openclaw-tui",
+      clientDisplayName: "carapace-tui",
       clientVersion: VERSION,
       mode: GATEWAY_CLIENT_MODES.UI,
       scopes: ["operator.admin", "operator.read", "operator.write", "operator.approvals"],
@@ -249,7 +249,7 @@ export class GatewayChatClient implements TuiBackend {
 
   /** Connect to a target already selected and authenticated by a preceding Gateway probe. */
   static async connectBound(
-    opts: GatewayConnectionOptions & { config: OpenClawConfig; url: string },
+    opts: GatewayConnectionOptions & { config: CarapaceConfig; url: string },
   ): Promise<GatewayChatClient> {
     return new GatewayChatClient(await resolveBoundGatewayConnection(opts));
   }
@@ -283,7 +283,7 @@ export class GatewayChatClient implements TuiBackend {
     ) {
       error.message = [
         error.message,
-        "Pairing request sent. Approve it in that gateway's Control UI (Settings -> Devices), or run `openclaw devices approve --latest` on the gateway host, then retry.",
+        "Pairing request sent. Approve it in that gateway's Control UI (Settings -> Devices), or run `carapace devices approve --latest` on the gateway host, then retry.",
       ].join("\n");
     }
     this.pendingConnectError = error;
@@ -515,7 +515,7 @@ export class GatewayChatClient implements TuiBackend {
  * credentials, while still applying the normal remote URL safety policy.
  */
 async function resolveBoundGatewayConnection(
-  opts: GatewayConnectionOptions & { config: OpenClawConfig; url: string },
+  opts: GatewayConnectionOptions & { config: CarapaceConfig; url: string },
 ): Promise<ResolvedGatewayConnection> {
   const url = buildGatewayConnectionDetails({
     config: opts.config,
@@ -553,13 +553,13 @@ async function resolveGatewayConnection(
   const urlOverride = resolveGatewayUrlOverride({ gatewayUrl: opts.url, env });
   const explicitAuth = resolveExplicitGatewayAuth({ token: opts.token, password: opts.password });
   const hasExplicitGatewayTarget = Boolean(
-    urlOverride.url || env.OPENCLAW_GATEWAY_PORT?.trim() || isRemoteMode,
+    urlOverride.url || env.CARAPACE_GATEWAY_PORT?.trim() || isRemoteMode,
   );
   const resumeMayMatchLocalTarget =
     opts.allowConfiguredAuthForExactTarget === true &&
     urlOverride.source === "cli" &&
     !isRemoteMode &&
-    !env.OPENCLAW_GATEWAY_PORT?.trim();
+    !env.CARAPACE_GATEWAY_PORT?.trim();
   const activeLocalGatewayPort =
     !hasExplicitGatewayTarget || resumeMayMatchLocalTarget
       ? await readActiveGatewayLockPort()
@@ -588,7 +588,7 @@ async function resolveGatewayConnection(
     explicitTlsFingerprint: opts.tlsFingerprint,
     allowStoredOriginAuth: hasStoredOriginDeviceAuth,
     overrideAuthErrorHint:
-      "Fix: pass --token or --password once to request pairing, approve it in that gateway's Control UI (Settings -> Devices), then retry with the same credential so OpenClaw can store the device token.",
+      "Fix: pass --token or --password once to request pairing, approve it in that gateway's Control UI (Settings -> Devices), then retry with the same credential so Carapace can store the device token.",
     buildConnectionDetails: buildGatewayConnectionDetails,
   });
   const hasStoredOriginAuth = Boolean(

@@ -1,7 +1,7 @@
 // Media-understanding resolve tests cover timeout clamping and capability filtering.
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@carapace/normalization-core/number-coercion";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { CarapaceConfig } from "../config/types.js";
 import type { MediaUnderstandingModelConfig } from "../config/types.tools.js";
 import { resolveMediaRuntimeTimeoutMs, resolveModelEntries, resolveTimeoutMs } from "./resolve.js";
 import type { MediaUnderstandingCapability } from "./types.js";
@@ -45,7 +45,7 @@ describe("resolveModelEntries", () => {
       expected: [],
     },
   ])("preserves $name with a complete provider catalog", ({ models, expected }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: { media: { models } },
     };
     const completeRegistry = new Map<string, { capabilities: MediaUnderstandingCapability[] }>([
@@ -62,7 +62,7 @@ describe("resolveModelEntries", () => {
   });
 
   it("uses provider capabilities for shared entries without explicit caps", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         media: {
           models: [{ provider: "openai", model: "gpt-5.4" }],
@@ -90,7 +90,7 @@ describe("resolveModelEntries", () => {
   });
 
   it("orders capability-tagged shared entries by the per-capability preference", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         media: {
           models: [
@@ -121,7 +121,7 @@ describe("resolveModelEntries", () => {
   });
 
   it("ranks an exact provider-qualified preference above a matching bare model id", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         media: {
           models: [
@@ -143,7 +143,7 @@ describe("resolveModelEntries", () => {
   });
 
   it("prefers a provider-default entry without requiring a model id", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         media: {
           models: [
@@ -165,7 +165,7 @@ describe("resolveModelEntries", () => {
   });
 
   it("skips shared CLI entries without capabilities", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       tools: {
         media: {
           models: [{ type: "cli", command: "gemini", args: ["--file", "{{MediaPath}}"] }],

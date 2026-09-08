@@ -3,8 +3,8 @@ import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { DB as CarapaceAgentKyselyDatabase } from "../../state/carapace-agent-db.generated.js";
+import type { CarapaceAgentDatabase } from "../../state/carapace-agent-db.js";
 import type { SqliteSessionOwnerRow } from "./session-accessor.sqlite-owner-projection.js";
 import { projectSqliteSessionParticipants } from "./session-accessor.sqlite-participant-projection.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
@@ -22,8 +22,8 @@ import {
 } from "./store-entry.js";
 import type { InternalSessionEntry as SessionEntry } from "./types.js";
 
-type OpenClawAgentDatabaseReader = Pick<OpenClawAgentDatabase, "agentId" | "db">;
-type SessionEntryRow = Selectable<OpenClawAgentKyselyDatabase["session_nodes"]>;
+type CarapaceAgentDatabaseReader = Pick<CarapaceAgentDatabase, "agentId" | "db">;
+type SessionEntryRow = Selectable<CarapaceAgentKyselyDatabase["session_nodes"]>;
 export type ResolvedSessionEntryRow = {
   entry: SessionEntry;
   row: Pick<SessionEntryRow, "current_session_id" | "entry_json" | "session_key" | "updated_at"> &
@@ -32,7 +32,7 @@ export type ResolvedSessionEntryRow = {
 
 /** Decodes a fresh owned entry, including its nested JSON, owner and participant values. */
 export function parseReadableSqliteSessionEntryRow(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   row: ResolvedSessionEntryRow["row"],
   projection: "full" | "list" = "full",
 ): SessionEntry | null {
@@ -66,7 +66,7 @@ export function parseReadableSqliteSessionEntryRow(
 }
 
 export function readSessionEntryRow(
-  database: OpenClawAgentDatabaseReader,
+  database: CarapaceAgentDatabaseReader,
   sessionKey: string,
 ): ResolvedSessionEntryRow | undefined {
   assertCanonicalSqliteSessionKeysCurrent(database);
@@ -74,7 +74,7 @@ export function readSessionEntryRow(
 }
 
 function readSessionEntryRowUnchecked(
-  database: OpenClawAgentDatabaseReader,
+  database: CarapaceAgentDatabaseReader,
   sessionKey: string,
 ): ResolvedSessionEntryRow | undefined {
   const db = getSessionKysely(database.db);
@@ -102,7 +102,7 @@ function readSessionEntryRowUnchecked(
 }
 
 export function readExactSessionEntryRow(
-  database: OpenClawAgentDatabaseReader,
+  database: CarapaceAgentDatabaseReader,
   sessionKey: string,
   projection: "full" | "list" = "full",
 ): ResolvedSessionEntryRow | undefined {
@@ -123,7 +123,7 @@ export function readExactSessionEntryRow(
 }
 
 export function readExactSessionEntryJson(
-  database: Pick<OpenClawAgentDatabase, "db">,
+  database: Pick<CarapaceAgentDatabase, "db">,
   sessionKey: string,
 ): string | undefined {
   const db = getSessionKysely(database.db);
@@ -134,7 +134,7 @@ export function readExactSessionEntryJson(
 }
 
 export function readExactSessionEntryRowValidated(
-  database: OpenClawAgentDatabaseReader,
+  database: CarapaceAgentDatabaseReader,
   sessionKey: string,
   projection: "full" | "list" = "full",
 ): ResolvedSessionEntryRow | undefined {

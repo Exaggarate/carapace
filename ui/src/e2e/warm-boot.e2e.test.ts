@@ -1,5 +1,5 @@
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import type { Page } from "playwright";
 import { expect, it } from "vitest";
 import type { ApplicationRuntime } from "../app/bootstrap.ts";
@@ -21,7 +21,7 @@ async function waitForPersistedWarmState(page: Page, eligible = true): Promise<v
     .poll(() =>
       page.evaluate(async () => {
         const hasBootRecord = Object.keys(localStorage).some((key) =>
-          key.startsWith("openclaw.control.bootRecord.v1:"),
+          key.startsWith("carapace.control.bootRecord.v1:"),
         );
         const databases = await indexedDB.databases();
         async function readRecords(databaseName: string, storeName: string): Promise<unknown[]> {
@@ -48,8 +48,8 @@ async function waitForPersistedWarmState(page: Page, eligible = true): Promise<v
           });
         }
         const [rosters, snapshots] = await Promise.all([
-          readRecords("openclaw-session-roster", "rosters"),
-          readRecords("openclaw-chat-snapshots", "snapshots"),
+          readRecords("carapace-session-roster", "rosters"),
+          readRecords("carapace-chat-snapshots", "snapshots"),
         ]);
         return {
           bootRecord: hasBootRecord,
@@ -125,7 +125,7 @@ suite.define(() => {
                 {
                   role: "assistant",
                   content: transcriptText,
-                  __openclaw: { id: "cached-message", seq: 1 },
+                  __carapace: { id: "cached-message", seq: 1 },
                 },
               ],
               deltaCursor: "warm-reload-cursor",
@@ -142,14 +142,14 @@ suite.define(() => {
         await page.locator(".connect-splash").waitFor();
         await page.screenshot({ path: path.join(suite.artifactDir, "cold-connecting.png") });
         await gateway.resolveDeferred("connect");
-        const sidebar = page.locator("openclaw-app-sidebar");
+        const sidebar = page.locator("carapace-app-sidebar");
         const transcript = page.locator(".chat-thread-inner");
         await sidebar.getByText("Cached only session", { exact: true }).waitFor();
         await transcript.getByText(transcriptText, { exact: true }).waitFor();
         await waitForPersistedWarmState(page, profile !== "trusted-proxy");
         const hello = await page.evaluate(() => {
           const app = document.querySelector<HTMLElement & { runtime?: ApplicationRuntime }>(
-            "openclaw-app",
+            "carapace-app",
           );
           const snapshot = app?.runtime?.context.gateway.snapshot;
           if (snapshot?.selfUser?.id !== "profile-a" || !snapshot.hello) {
@@ -162,7 +162,7 @@ suite.define(() => {
         const connect = await gateway.waitForRequest("connect");
         if (profile === "trusted-proxy") {
           await page.locator(".connect-splash").waitFor();
-          expect(await page.locator("openclaw-app-shell").count()).toBe(0);
+          expect(await page.locator("carapace-app-shell").count()).toBe(0);
           expect(await sidebar.getByText("Cached only session", { exact: true }).count()).toBe(0);
           expect(await transcript.getByText(transcriptText, { exact: true }).count()).toBe(0);
           expect(await gateway.getRequests("sessions.list")).toEqual([]);

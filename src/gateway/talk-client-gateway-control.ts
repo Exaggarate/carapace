@@ -178,7 +178,7 @@ export function createTalkRealtimeRunControlOwner(params: {
       )
     ) {
       reply(
-        "OpenClaw's voice control queue is full. Please try again after the pending controls finish.",
+        "Carapace's voice control queue is full. Please try again after the pending controls finish.",
       );
     }
     return "control";

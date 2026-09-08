@@ -2,16 +2,16 @@ import {
   resolveOAuthTokenExpiresAt,
   resolveOAuthTokenLifetimeMs,
   throwIfOAuthLoginAborted,
-} from "openclaw/plugin-sdk/provider-oauth-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/provider-oauth-runtime";
+import { readResponseWithLimit } from "carapace/plugin-sdk/response-limit-runtime";
+import { redactSensitiveText } from "carapace/plugin-sdk/security-runtime";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   asOptionalRecord,
   isRecord,
   normalizeBoundedOptionalString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/string-coerce-runtime";
 
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
 const TOKEN_URL = "https://auth.openai.com/oauth/token";

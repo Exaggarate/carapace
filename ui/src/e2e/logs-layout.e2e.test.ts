@@ -15,14 +15,14 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const artifactRoot = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactRoot = process.env.CARAPACE_UI_E2E_ARTIFACT_DIR?.trim();
 let artifactDir: string | undefined;
 beforeEach(() => {
   artifactDir = artifactRoot
     ? createControlUiE2eArtifactDir("logs-layout", artifactRoot)
     : undefined;
 });
-const proofLabel = process.env.OPENCLAW_UI_E2E_PROOF_LABEL?.trim() || "logs-layout";
+const proofLabel = process.env.CARAPACE_UI_E2E_PROOF_LABEL?.trim() || "logs-layout";
 const viewport = { height: 584, width: 863 };
 
 const logLines = Array.from({ length: 40 }, (_value, index) =>
@@ -52,18 +52,18 @@ suite.define(() => {
         await page.addInitScript((settingsKey) => {
           localStorage.setItem(settingsKey, JSON.stringify({ textScale: 125, themeMode: "dark" }));
           const nativeWindow = window as Window & {
-            __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-            __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+            __CARAPACE_NATIVE_WEB_CHROME__?: boolean;
+            __CARAPACE_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
           };
-          nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-          nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+          nativeWindow["__CARAPACE_NATIVE_WEB_CHROME__"] = true;
+          nativeWindow["__CARAPACE_NATIVE_HISTORY__"] = {
             canGoBack: false,
             canGoForward: false,
           };
           const stamp = () =>
             document.documentElement.classList.add(
-              "openclaw-native-macos",
-              "openclaw-native-web-chrome",
+              "carapace-native-macos",
+              "carapace-native-web-chrome",
             );
           if (document.documentElement) {
             stamp();
@@ -75,7 +75,7 @@ suite.define(() => {
           methodResponses: {
             "logs.tail": {
               cursor: logLines.length,
-              file: "/tmp/openclaw/openclaw-2026-07-21.log",
+              file: "/tmp/carapace/carapace-2026-07-21.log",
               lines: logLines,
               reset: true,
             },

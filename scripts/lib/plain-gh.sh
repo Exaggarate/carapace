@@ -14,12 +14,12 @@ plain_gh_env() {
 }
 
 resolve_plain_gh_bin() {
-  if [ -n "${OPENCLAW_GH_BIN:-}" ]; then
-    if [ -x "$OPENCLAW_GH_BIN" ]; then
-      printf '%s\n' "$OPENCLAW_GH_BIN"
+  if [ -n "${CARAPACE_GH_BIN:-}" ]; then
+    if [ -x "$CARAPACE_GH_BIN" ]; then
+      printf '%s\n' "$CARAPACE_GH_BIN"
       return 0
     fi
-    printf 'OPENCLAW_GH_BIN is not executable: %s\n' "$OPENCLAW_GH_BIN" >&2
+    printf 'CARAPACE_GH_BIN is not executable: %s\n' "$CARAPACE_GH_BIN" >&2
     return 1
   fi
 
@@ -28,7 +28,7 @@ resolve_plain_gh_bin() {
 }
 
 plain_gh_auth_token() {
-  if [ -z "${OPENCLAW_GH_BIN:-}" ] ||
+  if [ -z "${CARAPACE_GH_BIN:-}" ] ||
     [ -n "${GH_TOKEN:-}" ] ||
     [ -n "${GITHUB_TOKEN:-}" ] ||
     [ -n "${GH_ENTERPRISE_TOKEN:-}" ] ||
@@ -42,7 +42,7 @@ plain_gh_auth_token() {
   if [ -n "${GH_HOST:-}" ]; then
     args+=(--hostname "$GH_HOST")
   fi
-  OPENCLAW_GH_BIN= plain_gh_env "$path_gh" "${args[@]}"
+  CARAPACE_GH_BIN= plain_gh_env "$path_gh" "${args[@]}"
 }
 
 gh_plain() {

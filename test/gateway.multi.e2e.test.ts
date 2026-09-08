@@ -12,7 +12,7 @@ import {
   stopGatewayInstance,
   waitForNodeStatus,
 } from "./helpers/gateway-e2e-harness.js";
-import { createOpenClawTestInstance } from "./helpers/openclaw-test-instance.js";
+import { createCarapaceTestInstance } from "./helpers/carapace-test-instance.js";
 import { runQaGatewayFixture } from "./helpers/qa-gateway-cleanup.js";
 
 const E2E_TIMEOUT_MS = 120_000;
@@ -79,7 +79,7 @@ describe("gateway multi-instance e2e", () => {
             text: "wake a",
             mode: "now",
           },
-          { "x-openclaw-token": gwA.hookToken },
+          { "x-carapace-token": gwA.hookToken },
         ),
         postJson(
           `http://127.0.0.1:${gwB.port}/hooks/wake`,
@@ -87,7 +87,7 @@ describe("gateway multi-instance e2e", () => {
             text: "wake b",
             mode: "now",
           },
-          { "x-openclaw-token": gwB.hookToken },
+          { "x-carapace-token": gwB.hookToken },
         ),
       ]);
       expect(hookResA.status).toBe(200);
@@ -118,10 +118,10 @@ describe("gateway multi-instance e2e", () => {
     "preserves scheduler runtime across a scheduler-disabled Gateway edit",
     { timeout: E2E_TIMEOUT_MS },
     async () => {
-      const manager = await createOpenClawTestInstance({
+      const manager = await createCarapaceTestInstance({
         name: "cron-passive-manager",
         config: { cron: { enabled: false }, plugins: { enabled: false } },
-        env: { OPENCLAW_SKIP_CRON: "0" },
+        env: { CARAPACE_SKIP_CRON: "0" },
       });
       let managerClient: GatewayClient | undefined;
       await runQaGatewayFixture(

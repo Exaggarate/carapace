@@ -63,7 +63,7 @@ function createPage(
     basePath: "",
     gateway,
   } as unknown as ApplicationContext);
-  const page = document.createElement("openclaw-approvals-page") as TestApprovalsPage;
+  const page = document.createElement("carapace-approvals-page") as TestApprovalsPage;
   provider.append(page);
   document.body.append(provider);
   return {
@@ -123,7 +123,7 @@ describe("ApprovalsPage", () => {
     const docsLink = page.querySelector<HTMLAnchorElement>(".page-subtitle a");
     expect(docsLink?.textContent?.trim()).toBe("Learn more");
     expect(page.querySelector(".settings-page__intro")).toBeNull();
-    expect(docsLink?.href).toBe("https://docs.openclaw.ai/tools/exec-approvals");
+    expect(docsLink?.href).toBe("https://github.com/Exaggarate/carapace");
     expect(page.querySelectorAll(".approval-history-table tbody tr")).toHaveLength(1);
     expect(page.querySelector(".approval-history-table")?.textContent).toContain("agent:main:test");
     expect(page.querySelector(".approval-history-table")?.textContent).toContain("echo first");
@@ -165,7 +165,7 @@ describe("ApprovalsPage", () => {
   it.each([
     { kind: "exec", event: "exec.approval.resolved" },
     { kind: "plugin", event: "plugin.approval.resolved" },
-    { kind: "system-agent", event: "openclaw.approval.resolved" },
+    { kind: "system-agent", event: "carapace.approval.resolved" },
   ])("shows a newly resolved $kind approval without leaving the page", async ({ event }) => {
     const request = vi
       .fn()

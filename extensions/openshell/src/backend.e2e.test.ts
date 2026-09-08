@@ -7,7 +7,7 @@ import {
   createSandboxBrowserConfig,
   createSandboxPruneConfig,
   createSandboxSshConfig,
-} from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import {
   buildOpenShellPolicyYaml,
@@ -24,13 +24,13 @@ import {
 } from "./backend.js";
 import { resolveOpenShellPluginConfig } from "./config.js";
 
-const OPENCLAW_OPENSHELL_E2E = process.env.OPENCLAW_E2E_OPENSHELL === "1";
-const OPENCLAW_OPENSHELL_E2E_TIMEOUT_MS = 12 * 60_000;
-const OPENCLAW_OPENSHELL_COMMAND =
-  process.env.OPENCLAW_E2E_OPENSHELL_COMMAND?.trim() || "openshell";
-const OPENCLAW_OPENSHELL_CONFIG_HOME =
-  process.env.OPENCLAW_E2E_OPENSHELL_CONFIG_HOME?.trim() || null;
-const OPENCLAW_OPENSHELL_HOST_IP = process.env.OPENCLAW_E2E_OPENSHELL_HOST_IP;
+const CARAPACE_OPENSHELL_E2E = process.env.CARAPACE_E2E_OPENSHELL === "1";
+const CARAPACE_OPENSHELL_E2E_TIMEOUT_MS = 12 * 60_000;
+const CARAPACE_OPENSHELL_COMMAND =
+  process.env.CARAPACE_E2E_OPENSHELL_COMMAND?.trim() || "openshell";
+const CARAPACE_OPENSHELL_CONFIG_HOME =
+  process.env.CARAPACE_E2E_OPENSHELL_CONFIG_HOME?.trim() || null;
+const CARAPACE_OPENSHELL_HOST_IP = process.env.CARAPACE_E2E_OPENSHELL_HOST_IP;
 
 const CUSTOM_IMAGE_DOCKERFILE = `FROM python:3.13-slim
 
@@ -42,7 +42,7 @@ RUN groupadd -g 1000660000 sandbox && \\
     useradd -m -u 1000660000 -g sandbox sandbox && \\
     install -d -o sandbox -g sandbox /sandbox
 
-RUN echo "openclaw-openshell-e2e" > /opt/openshell-e2e-marker.txt
+RUN echo "carapace-openshell-e2e" > /opt/openshell-e2e-marker.txt
 
 USER sandbox
 WORKDIR /sandbox
@@ -313,24 +313,24 @@ describe("OpenShell gateway discovery", () => {
 
 describe("openshell sandbox backend e2e", () => {
   it
-    .runIf(process.platform !== "win32" && OPENCLAW_OPENSHELL_E2E)
+    .runIf(process.platform !== "win32" && CARAPACE_OPENSHELL_E2E)
     .each(["mirror", "remote"] as const)(
     "runs remote and mirrored sandboxes in a non-default OpenShell workspace with %s stress",
-    { timeout: OPENCLAW_OPENSHELL_E2E_TIMEOUT_MS },
+    { timeout: CARAPACE_OPENSHELL_E2E_TIMEOUT_MS },
     async (stressMode) => {
       if (!(await dockerReady())) {
         throw new Error("OpenShell E2E requires a working Docker daemon");
       }
-      if (!(await commandAvailable(OPENCLAW_OPENSHELL_COMMAND))) {
-        throw new Error(`OpenShell CLI is unavailable: ${OPENCLAW_OPENSHELL_COMMAND}`);
+      if (!(await commandAvailable(CARAPACE_OPENSHELL_COMMAND))) {
+        throw new Error(`OpenShell CLI is unavailable: ${CARAPACE_OPENSHELL_COMMAND}`);
       }
-      if (!OPENCLAW_OPENSHELL_CONFIG_HOME) {
+      if (!CARAPACE_OPENSHELL_CONFIG_HOME) {
         throw new Error(
-          "OpenShell E2E requires OPENCLAW_E2E_OPENSHELL_CONFIG_HOME because tests isolate HOME and XDG_CONFIG_HOME",
+          "OpenShell E2E requires CARAPACE_E2E_OPENSHELL_CONFIG_HOME because tests isolate HOME and XDG_CONFIG_HOME",
         );
       }
-      const openshellConfigHome = OPENCLAW_OPENSHELL_CONFIG_HOME;
-      const gatewayName = await activeOpenShellGateway(OPENCLAW_OPENSHELL_COMMAND, {
+      const openshellConfigHome = CARAPACE_OPENSHELL_CONFIG_HOME;
+      const gatewayName = await activeOpenShellGateway(CARAPACE_OPENSHELL_COMMAND, {
         ...process.env,
         XDG_CONFIG_HOME: openshellConfigHome,
       });
@@ -368,8 +368,8 @@ describe("openshell sandbox backend e2e", () => {
         workspaceRoot: path.join(rootDir, "sandboxes"),
         dockerTmpfsSource: "configured" as const,
         docker: {
-          image: "openclaw-sandbox:bookworm-slim",
-          containerPrefix: "openclaw-sbx-",
+          image: "carapace-sandbox:bookworm-slim",
+          containerPrefix: "carapace-sbx-",
           workdir: "/workspace",
           readOnlyRoot: true,
           tmpfs: ["/tmp"],
@@ -377,14 +377,14 @@ describe("openshell sandbox backend e2e", () => {
           capDrop: ["ALL"],
           env: {},
         },
-        ssh: createSandboxSshConfig("/tmp/openclaw-sandboxes"),
+        ssh: createSandboxSshConfig("/tmp/carapace-sandboxes"),
         browser: createSandboxBrowserConfig(),
         tools: { allow: [], deny: [] },
         prune: createSandboxPruneConfig(),
       };
 
       const pluginConfig = resolveOpenShellPluginConfig({
-        command: OPENCLAW_OPENSHELL_COMMAND,
+        command: CARAPACE_OPENSHELL_COMMAND,
         gateway: gatewayName,
         workspace: openShellWorkspace,
         from: dockerfilePath,
@@ -401,7 +401,7 @@ describe("openshell sandbox backend e2e", () => {
         cfg: sandboxCfg,
       });
       const mirrorPluginConfig = resolveOpenShellPluginConfig({
-        command: OPENCLAW_OPENSHELL_COMMAND,
+        command: CARAPACE_OPENSHELL_COMMAND,
         gateway: gatewayName,
         workspace: openShellWorkspace,
         from: dockerfilePath,
@@ -421,7 +421,7 @@ describe("openshell sandbox backend e2e", () => {
       });
       const overlapBackend = await createOpenShellSandboxBackendFactory({
         pluginConfig: resolveOpenShellPluginConfig({
-          command: OPENCLAW_OPENSHELL_COMMAND,
+          command: CARAPACE_OPENSHELL_COMMAND,
           gateway: gatewayName,
           workspace: openShellWorkspace,
           from: dockerfilePath,
@@ -472,7 +472,7 @@ describe("openshell sandbox backend e2e", () => {
           { recursive: true },
         );
         await runCommand({
-          command: OPENCLAW_OPENSHELL_COMMAND,
+          command: CARAPACE_OPENSHELL_COMMAND,
           args: ["workspace", "create", "--name", openShellWorkspace],
           env,
           timeoutMs: 30_000,
@@ -532,7 +532,7 @@ describe("openshell sandbox backend e2e", () => {
           buildOpenShellPolicyYaml({
             port: hostPolicyServer.port,
             binaryPath: "/usr/bin/false",
-            hostIp: OPENCLAW_OPENSHELL_HOST_IP,
+            hostIp: CARAPACE_OPENSHELL_HOST_IP,
           }),
           "utf8",
         );
@@ -541,7 +541,7 @@ describe("openshell sandbox backend e2e", () => {
           buildOpenShellPolicyYaml({
             port: hostPolicyServer.port,
             binaryPath: "/usr/bin/curl",
-            hostIp: OPENCLAW_OPENSHELL_HOST_IP,
+            hostIp: CARAPACE_OPENSHELL_HOST_IP,
           }),
           "utf8",
         );
@@ -554,7 +554,7 @@ describe("openshell sandbox backend e2e", () => {
         expect(execResult.code).toBe(0);
         const stdout = execResult.stdout.trim();
         expect(stdout).toContain("/sandbox");
-        expect(stdout).toContain("openclaw-openshell-e2e");
+        expect(stdout).toContain("carapace-openshell-e2e");
         expect(stdout).toContain("seed-from-local");
 
         const manager = createOpenShellSandboxBackendManager({ pluginConfig });
@@ -606,7 +606,7 @@ describe("openshell sandbox backend e2e", () => {
         );
 
         const verifyResult = await runCommand({
-          command: OPENCLAW_OPENSHELL_COMMAND,
+          command: CARAPACE_OPENSHELL_COMMAND,
           args: ["--workspace", openShellWorkspace, "sandbox", "ssh-config", backend.runtimeId],
           env,
           timeoutMs: 60_000,
@@ -818,7 +818,7 @@ describe("openshell sandbox backend e2e", () => {
             runBackendExec({
               backend: candidate,
               command:
-                "test -z \"$(find /tmp -maxdepth 1 -name 'openclaw-sandbox-exec-*' -print)\" && printf recovered",
+                "test -z \"$(find /tmp -maxdepth 1 -name 'carapace-sandbox-exec-*' -print)\" && printf recovered",
             }),
           ).resolves.toMatchObject({ code: 0, stdout: "recovered" });
         }
@@ -842,7 +842,7 @@ describe("openshell sandbox backend e2e", () => {
         try {
           if (workspaceCreated) {
             await cleanupOpenShellWorkspace({
-              command: OPENCLAW_OPENSHELL_COMMAND,
+              command: CARAPACE_OPENSHELL_COMMAND,
               env,
               workspace: openShellWorkspace,
               sandboxNames: [

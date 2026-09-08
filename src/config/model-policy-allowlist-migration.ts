@@ -1,7 +1,7 @@
 // Shared legacy model allowlist detection for runtime, doctor, and config writes.
 import { isRecord } from "../utils.js";
 import { createModelPolicyRefValidator } from "./model-policy-ref.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { CarapaceConfig } from "./types.carapace.js";
 
 export function hasModelPolicyAllowlistMigrationMarker(value: unknown): boolean {
   if (
@@ -51,9 +51,9 @@ function collectLegacyDefaultModelAllowRefs(defaults: unknown): string[] | null 
 
 /** Materialize a whole legacy restriction, or retain its shipped dynamic-map semantics. */
 export function materializeModelPolicyAllowlist(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   previousConfig: unknown = cfg,
-): { kind: "complete" | "deferred"; config: OpenClawConfig } {
+): { kind: "complete" | "deferred"; config: CarapaceConfig } {
   const previousAgents = isRecord(previousConfig) ? previousConfig.agents : undefined;
   const allow = isRecord(cfg.agents?.defaults?.modelPolicy)
     ? null

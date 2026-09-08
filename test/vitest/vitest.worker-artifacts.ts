@@ -16,15 +16,15 @@ import { getVitestWorkerDescriptor } from "../../scripts/lib/vitest-worker-boots
 const declarationNames = new Set(
   Object.values(vitestWorkerDeclarationEntries).map((source) => path.basename(source, ".ts")),
 );
-const ownerKey = Symbol.for("openclaw.vitest.compiled-subprocess-owner");
-const declarationPrefix = "\0openclaw:compiled-subprocess:";
+const ownerKey = Symbol.for("carapace.vitest.compiled-subprocess-owner");
+const declarationPrefix = "\0carapace:compiled-subprocess:";
 type WorkerOwner = { acquire: () => Promise<string> };
 type WorkerVitest = Vitest & { [ownerKey]?: WorkerOwner };
 
 export function compiledSubprocessesPlugin(): Plugin {
   let owner: WorkerOwner | undefined;
   return {
-    name: "openclaw:compiled-subprocesses",
+    name: "carapace:compiled-subprocesses",
     enforce: "pre",
     configureVitest({ vitest, defineCacheKeyGenerator }) {
       const supplied = getVitestWorkerDescriptor();
@@ -41,7 +41,7 @@ export function compiledSubprocessesPlugin(): Plugin {
       if (!instance[ownerKey]) {
         // Source and compiled imports differ, but generations within this mode
         // share parent transforms. Keep Vitest's source/config hashing intact.
-        defineCacheKeyGenerator(() => "openclaw:compiled-subprocesses");
+        defineCacheKeyGenerator(() => "carapace:compiled-subprocesses");
         const directory = supplied.directory;
         let preparation: Promise<string> | undefined;
         let failure: unknown;
@@ -105,7 +105,7 @@ export function compiledSubprocessesPlugin(): Plugin {
         importer.endsWith("/scripts/lib/runtime-process-core-build-entries.mts") ||
         importer.endsWith("/scripts/lib/vitest-worker-build-entries.mts")
       ) {
-        return `${resolved.id}?openclaw-build-source`;
+        return `${resolved.id}?carapace-build-source`;
       }
       return declarationPrefix + resolved.id;
     },

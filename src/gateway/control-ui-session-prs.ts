@@ -2,12 +2,12 @@
 // UI chat view can pin PR status chips above the composer.
 import fs from "node:fs/promises";
 import nodePath from "node:path";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { asFiniteNumber } from "@carapace/normalization-core/number-coercion";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import {
   normalizeOptionalString,
   readNonBlankString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@carapace/normalization-core/string-coerce";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { runGit } from "../agents/worktrees/git.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";

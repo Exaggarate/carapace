@@ -3,8 +3,8 @@
 import {
   DEFAULT_GATEWAY_REQUEST_TIMEOUT_MS,
   type GatewayProtocolRequestOptions,
-} from "@openclaw/gateway-client/browser";
-import type { Question, QuestionRecord, QuestionResolveResult } from "@openclaw/gateway-protocol";
+} from "@carapace/gateway-client/browser";
+import type { Question, QuestionRecord, QuestionResolveResult } from "@carapace/gateway-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../api/gateway.ts";
 import { waitForFast } from "../test-helpers/wait-for.ts";

@@ -2,9 +2,9 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { requireDirectorySync, syncDirectory } from "../infra/directory-durability.js";
-import { assertOpenClawStateWriteAllowedAtPath } from "../state/openclaw-state-ownership.js";
+import { assertCarapaceStateWriteAllowedAtPath } from "../state/carapace-state-ownership.js";
 import {
   isPendingMigrationArtifactClaim,
   moveMigrationArtifact,
@@ -60,11 +60,11 @@ function assertRecoveryOriginal(archivePath: string, artifact: MigrationArtifact
 export async function retireSessionSqliteRecovery(params: {
   env: NodeJS.ProcessEnv;
   preview: RecoveryCleanupReport;
-  readConfig(): Promise<OpenClawConfig>;
+  readConfig(): Promise<CarapaceConfig>;
   confirm(report: RecoveryCleanupReport): Promise<boolean>;
 }): Promise<RecoveryCleanupReport> {
-  await assertOpenClawStateWriteAllowedAtPath({
-    databasePath: path.join(params.preview.stateDir, "state", "openclaw.sqlite"),
+  await assertCarapaceStateWriteAllowedAtPath({
+    databasePath: path.join(params.preview.stateDir, "state", "carapace.sqlite"),
     env: params.env,
     recoverOrphanedSidecars: false,
   });
@@ -83,8 +83,8 @@ export async function retireSessionSqliteRecovery(params: {
       ) {
         throw new Error("Recovery selection changed; preview cleanup again.");
       }
-      await assertOpenClawStateWriteAllowedAtPath({
-        databasePath: path.join(report.stateDir, "state", "openclaw.sqlite"),
+      await assertCarapaceStateWriteAllowedAtPath({
+        databasePath: path.join(report.stateDir, "state", "carapace.sqlite"),
         env: params.env,
         recoverOrphanedSidecars: false,
       });
@@ -181,8 +181,8 @@ export async function retireSessionSqliteRecovery(params: {
           }
         }
       }
-      await assertOpenClawStateWriteAllowedAtPath({
-        databasePath: path.join(report.stateDir, "state", "openclaw.sqlite"),
+      await assertCarapaceStateWriteAllowedAtPath({
+        databasePath: path.join(report.stateDir, "state", "carapace.sqlite"),
         env: params.env,
         recoverOrphanedSidecars: false,
       });

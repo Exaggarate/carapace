@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createConfiguredAcpTopicBinding,
@@ -53,14 +53,14 @@ describe("Telegram native command dispatch routing", () => {
         handler: shadowHandler,
       },
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: CarapaceConfig = {};
     const { handler } = registerAndResolveStatusHandler({ cfg });
     await handler(createTelegramPrivateCommandContext());
 
     expect(sessionMocks.recordSessionMetaFromInbound).toHaveBeenCalledTimes(1);
     expect(shadowHandler).not.toHaveBeenCalled();
     const turnPlan = dispatchChannelInboundTurnMock.mock.calls[0]?.[0];
-    expect(turnPlan?.replyOptions?.[Symbol.for("openclaw.pluginCommandDispatch") as never]).toEqual(
+    expect(turnPlan?.replyOptions?.[Symbol.for("carapace.pluginCommandDispatch") as never]).toEqual(
       { kind: "non-plugin" },
     );
     const call = (
@@ -108,8 +108,8 @@ describe("Telegram native command dispatch routing", () => {
   });
 
   it("keeps one live config snapshot through native command execution", async () => {
-    const startupCfg: OpenClawConfig = { session: { store: "/tmp/startup-sessions.json" } };
-    const runtimeCfg: OpenClawConfig = { session: { store: "/tmp/runtime-sessions.json" } };
+    const startupCfg: CarapaceConfig = { session: { store: "/tmp/startup-sessions.json" } };
+    const runtimeCfg: CarapaceConfig = { session: { store: "/tmp/runtime-sessions.json" } };
     const { handler } = registerAndResolveStatusHandler({ cfg: startupCfg, runtimeCfg });
 
     await handler(createTelegramPrivateCommandContext());
@@ -136,7 +136,7 @@ describe("Telegram native command dispatch routing", () => {
             streaming: { block: { enabled: blockStreamingEnabled } },
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       const { handler } = registerAndResolveStatusHandler({ cfg });
 
       await handler(createTelegramPrivateCommandContext());

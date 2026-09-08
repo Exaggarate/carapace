@@ -4,9 +4,9 @@ import path from "node:path";
 import {
   canonicalPathFromExistingAncestor,
   isPathInside,
-} from "openclaw/plugin-sdk/file-access-runtime";
-import { createMigrationItem, MIGRATION_REASON_TARGET_EXISTS } from "openclaw/plugin-sdk/migration";
-import type { MigrationItem } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/file-access-runtime";
+import { createMigrationItem, MIGRATION_REASON_TARGET_EXISTS } from "carapace/plugin-sdk/migration";
+import type { MigrationItem } from "carapace/plugin-sdk/plugin-entry";
 import {
   CLAUDE_AUTO_MEMORY_MAX_FILES,
   CLAUDE_AUTO_MEMORY_MAX_SCAN_ENTRIES,
@@ -135,7 +135,7 @@ async function assertSafeMemoryDestination(
     isPathInside(canonicalTarget, boundary.source)
   ) {
     throw new Error(
-      "Claude Code auto-memory source and OpenClaw import destination must be separate directories.",
+      "Claude Code auto-memory source and Carapace import destination must be separate directories.",
     );
   }
 }
@@ -194,7 +194,7 @@ async function buildAutoMemoryItems(params: {
             : targetConflict
               ? MIGRATION_REASON_TARGET_EXISTS
               : undefined,
-          message: "Copy Claude Code auto-memory Markdown into the OpenClaw memory index.",
+          message: "Copy Claude Code auto-memory Markdown into the Carapace memory index.",
           details: {
             sourceType: "claude-auto-memory",
             sourceLabel: "Claude Code auto-memory",

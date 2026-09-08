@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { afterEach, expect, it, vi } from "vitest";
 import { attemptMemoryCorpus, runMemoryCorpusDeadline } from "./memory-corpus.js";
 

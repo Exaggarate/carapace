@@ -1,9 +1,9 @@
 /** Onboarding defaults for workspace hooks. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 
 const DEFAULT_ONBOARDING_INTERNAL_HOOKS = ["session-memory"] as const;
 
-export function enableDefaultOnboardingInternalHooks(cfg: OpenClawConfig): OpenClawConfig {
+export function enableDefaultOnboardingInternalHooks(cfg: CarapaceConfig): CarapaceConfig {
   const existingInternal = cfg.hooks?.internal;
   if (existingInternal?.enabled === false) {
     return cfg;

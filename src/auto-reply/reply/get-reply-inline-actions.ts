@@ -1,12 +1,12 @@
 /** Handles inline slash commands, skill invocations, and abort actions before model runs. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@carapace/normalization-core/string-coerce";
 import type { QueueMode } from "../../../packages/gateway-protocol/src/schema/logs-chat.js";
 import { collectTextContentBlocks } from "../../agents/content-blocks.js";
 import type { BlockReplyChunking } from "../../agents/embedded-agent-block-chunker.js";
 import type { ExecPolicyOverrides } from "../../agents/exec-defaults.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { logVerbose } from "../../globals.js";
 import type { SessionMemoryTranscript } from "../../hooks/bundled/session-memory/capture.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -156,7 +156,7 @@ function extractBlockedToolReason(result: unknown): string | null {
 export async function handleInlineActions(params: {
   ctx: MsgContext;
   sessionCtx: TemplateContext;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   agentDir?: string;
   sessionEntry?: SessionEntry;
@@ -373,7 +373,7 @@ export async function handleInlineActions(params: {
       const rawArgs = (skillInvocation.args ?? "").trim();
       const { resolveSkillDispatchTools } = await skillToolDispatchRuntimeLoader.load();
       const dependencies =
-        params.skillToolDispatchDependencies ?? (await import("../../agents/openclaw-tools.js"));
+        params.skillToolDispatchDependencies ?? (await import("../../agents/carapace-tools.js"));
       const authorizedTools = resolveSkillDispatchTools(
         {
           message: {

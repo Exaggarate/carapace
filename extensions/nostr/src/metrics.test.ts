@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { describe, expect, it } from "vitest";
 import { createMetrics, createNoopMetrics, type MetricEvent } from "./metrics.js";
 import { TEST_RELAY_URL } from "./test-fixtures.js";

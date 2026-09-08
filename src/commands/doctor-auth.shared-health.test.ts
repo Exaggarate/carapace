@@ -11,9 +11,9 @@ import {
   loadAuthProfileStoreWithoutExternalProfiles,
 } from "../agents/auth-profiles/store-runtime.js";
 import { resolvePersistedAuthProfileOwnerAgentDir } from "../agents/auth-profiles/store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { writeConfigMachineState } from "../state/config-machine-state-write.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { collectAuthProfileHealthFindings, noteAuthProfileHealth } from "./doctor-auth.js";
 import { createDoctorPrompter } from "./doctor-prompter.js";
 
@@ -36,8 +36,8 @@ afterEach(() => {
 
 describe("Doctor shared auth health", () => {
   it("reports shared OAuth expiry for an explicit fleet without local profiles", async () => {
-    await withOpenClawTestState({ prefix: "openclaw-doctor-shared-health-" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ prefix: "carapace-doctor-shared-health-" }, async (state) => {
+      const cfg: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { alpha: {}, beta: {} } },
         plugins: { enabled: false },
       };
@@ -81,8 +81,8 @@ describe("Doctor shared auth health", () => {
   });
 
   it("keeps inherited-profile recovery guidance local without duplicating shared expiry", async () => {
-    await withOpenClawTestState({ prefix: "openclaw-doctor-auth-owners-" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ prefix: "carapace-doctor-auth-owners-" }, async (state) => {
+      const cfg: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { alpha: {}, beta: {} } },
         plugins: { enabled: false },
       };
@@ -125,7 +125,7 @@ describe("Doctor shared auth health", () => {
           path: resolveAuthProfileDatabasePath(agentDir),
           message: expect.stringContaining("cooldown:session_expired"),
           fixHint:
-            "Re-authenticate with `openclaw models auth login --provider diagnostic-provider --profile-id 'diagnostic-provider:shared'`.",
+            "Re-authenticate with `carapace models auth login --provider diagnostic-provider --profile-id 'diagnostic-provider:shared'`.",
         }),
       ]);
       await noteAuthProfileHealth({
@@ -138,7 +138,7 @@ describe("Doctor shared auth health", () => {
       });
       expect(vi.mocked(note)).toHaveBeenCalledWith(
         expect.stringContaining(
-          "Re-authenticate with `openclaw models auth login --provider diagnostic-provider --profile-id 'diagnostic-provider:shared'`.",
+          "Re-authenticate with `carapace models auth login --provider diagnostic-provider --profile-id 'diagnostic-provider:shared'`.",
         ),
         "Auth profile cooldowns (Agent alpha)",
       );
@@ -146,8 +146,8 @@ describe("Doctor shared auth health", () => {
   });
 
   it("preserves external CLI overlays when checking an agent-local auth store", async () => {
-    await withOpenClawTestState({ prefix: "openclaw-doctor-cli-auth-" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ prefix: "carapace-doctor-cli-auth-" }, async (state) => {
+      const cfg: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { alpha: {}, beta: {} } },
         plugins: { enabled: false },
       };
@@ -180,8 +180,8 @@ describe("Doctor shared auth health", () => {
     { name: "expired shared", sharedExpired: true, sameAccount: true, owner: "shared" },
     { name: "distinct local account", sharedExpired: false, sameAccount: false, owner: "local" },
   ])("respects canonical OAuth ownership for $name credentials", async (scenario) => {
-    await withOpenClawTestState({ prefix: "openclaw-doctor-oauth-owner-" }, async (state) => {
-      const cfg: OpenClawConfig = {
+    await withCarapaceTestState({ prefix: "carapace-doctor-oauth-owner-" }, async (state) => {
+      const cfg: CarapaceConfig = {
         agents: { ownership: "explicit", entries: { alpha: {}, beta: {} } },
         plugins: { enabled: false },
       };

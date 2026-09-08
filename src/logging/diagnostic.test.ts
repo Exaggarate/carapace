@@ -1,6 +1,6 @@
 // Diagnostic logger tests cover event emission, metrics, and support output.
 import fs from "node:fs";
-import { createRequireRecord, importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { createRequireRecord, importFreshModule } from "carapace/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   appendTranscriptMessageSync,
@@ -16,7 +16,7 @@ import {
 import { emitCoreModelRequestStartedDiagnosticEvent } from "../infra/diagnostic-model-request.js";
 import { emitCoreSemanticRunProgressDiagnosticEvent } from "../infra/diagnostic-semantic-run-progress.js";
 import { DEFAULT_UNDICI_STREAM_TIMEOUT_MS } from "../infra/net/undici-global-dispatcher.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { withDiagnosticPhase } from "./diagnostic-phase.js";
 import {
   beginDiagnosticBackendActivity,
@@ -421,9 +421,9 @@ describe("stuck session diagnostics threshold", () => {
   });
 
   it("includes the current app-agent SQLite assistant reply in heartbeat diagnostics", async () => {
-    const openClawState = await createOpenClawTestState({
+    const carapaceState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-heartbeat-app-agent-",
+      prefix: "carapace-heartbeat-app-agent-",
     });
     const sessionKey = "agent:oauth-agent:main";
     const sessionId = "oauth-session";
@@ -445,14 +445,14 @@ describe("stuck session diagnostics threshold", () => {
 
       expectLoggerMessageContaining(warnSpy, 'lastAssistant="the reimbursement was approved"');
     } finally {
-      await openClawState.cleanup();
+      await carapaceState.cleanup();
     }
   });
 
   it("never copies an incognito assistant reply into durable heartbeat diagnostics", async () => {
-    const openClawState = await createOpenClawTestState({
+    const carapaceState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-heartbeat-incognito-",
+      prefix: "carapace-heartbeat-incognito-",
     });
     const sessionKey = "agent:main:dashboard:incognito-private";
     const sessionId = "incognito-private-session";
@@ -477,13 +477,13 @@ describe("stuck session diagnostics threshold", () => {
       expectNoLoggerMessageContaining(warnSpy, privateReply);
       expectNoLoggerMessageContaining(warnSpy, "lastAssistant=");
     } finally {
-      await openClawState.cleanup();
+      await carapaceState.cleanup();
     }
   });
 
   it("threads session files from heartbeat state into stuck-session recovery", () => {
     const recoverStuckSession = vi.fn();
-    const sessionFile = "/tmp/openclaw-heartbeat-session.jsonl";
+    const sessionFile = "/tmp/carapace-heartbeat-session.jsonl";
 
     startEnabledDiagnosticHeartbeat({ recoverStuckSession });
     logSessionStateChange({
@@ -1570,7 +1570,7 @@ describe("stuck session diagnostics threshold", () => {
     logSessionStateChange({
       sessionId: "s1",
       sessionKey: "main",
-      sessionFile: "/tmp/openclaw-active-abort-session.jsonl",
+      sessionFile: "/tmp/carapace-active-abort-session.jsonl",
       state: "processing",
     });
     markDiagnosticEmbeddedRunStarted({ sessionId: "s1", sessionKey: "main" });
@@ -1582,7 +1582,7 @@ describe("stuck session diagnostics threshold", () => {
       {
         sessionId: "s1",
         sessionKey: "main",
-        sessionFile: "/tmp/openclaw-active-abort-session.jsonl",
+        sessionFile: "/tmp/carapace-active-abort-session.jsonl",
         queueDepth: 0,
         allowActiveAbort: true,
       },

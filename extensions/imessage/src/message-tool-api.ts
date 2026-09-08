@@ -1,9 +1,9 @@
 // Imessage API module exposes the plugin public contract.
-import { createActionGate } from "openclaw/plugin-sdk/channel-actions";
+import { createActionGate } from "carapace/plugin-sdk/channel-actions";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "carapace/plugin-sdk/channel-contract";
 import { Type } from "typebox";
 import { resolveIMessageAccount } from "./accounts.js";
 import { IMESSAGE_ACTION_NAMES, IMESSAGE_ACTIONS } from "./actions-contract.js";

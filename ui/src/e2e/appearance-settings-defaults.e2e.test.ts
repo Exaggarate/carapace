@@ -20,10 +20,10 @@ const suite = createControlUiE2eSuite({
   name: "Control UI Appearance defaults mocked Gateway E2E",
   startServerBeforeBrowser: true,
   unavailableMessage: (executablePath) =>
-    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+    `Playwright Chromium is not available at ${executablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let uiProofArtifactDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -234,7 +234,7 @@ suite.define(() => {
     });
     await context.addInitScript(
       ({ gatewayUrl, key }) => {
-        const seedKey = "openclaw.control-ui-e2e.appearance-defaults-seeded";
+        const seedKey = "carapace.control-ui-e2e.appearance-defaults-seeded";
         if (sessionStorage.getItem(seedKey) === "1") {
           return;
         }
@@ -745,7 +745,7 @@ suite.define(() => {
       await reasoning.click();
       await expect.poll(() => reasoning.getAttribute("aria-checked")).toBe("false");
 
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       await sidebar
         .locator("wa-dropdown.sidebar-more-menu")
@@ -1051,7 +1051,7 @@ suite.define(() => {
       );
       await gateway.emitGatewayEvent("config.changed", {
         hash: "custom-theme-server-race-2",
-        path: "/tmp/openclaw.json",
+        path: "/tmp/carapace.json",
         ts: Date.now(),
       });
       await waitForRequestCount(gateway, "config.get", configGetCount + 1);

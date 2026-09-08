@@ -42,7 +42,7 @@ function connectTunnel(env = proxyEnv): Promise<{ status: number; socket?: Socke
       method: "CONNECT",
       path: `localhost:${originPort}`,
       headers: {
-        "Proxy-Authorization": `Basic ${Buffer.from(`openclaw:${url.password}`).toString("base64")}`,
+        "Proxy-Authorization": `Basic ${Buffer.from(`carapace:${url.password}`).toString("base64")}`,
       },
     });
     request.once("socket", trackSocket);
@@ -90,9 +90,9 @@ function register(targetRun = run): Record<string, string> {
 }
 
 beforeEach(async () => {
-  vi.stubEnv("OPENCLAW_SECRET_SENTINELS", undefined);
+  vi.stubEnv("CARAPACE_SECRET_SENTINELS", undefined);
   observed = [];
-  caDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-egress-lifecycle-"));
+  caDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-egress-lifecycle-"));
   proxy = await startSecretEgressProxyServer({ caDir, onAudit: () => {} });
   const leaf = await proxyCa.generateLocalProxyLeaf({
     certDir: caDir,

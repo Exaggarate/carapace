@@ -38,7 +38,7 @@ import {
   getSessionWorkAdmissionOwnerRelease,
   type SessionWorkAdmissionLease,
 } from "../../sessions/session-lifecycle-admission.js";
-import type { OpenClawAgentDatabaseClaim } from "../../state/openclaw-agent-db-identity.js";
+import type { CarapaceAgentDatabaseClaim } from "../../state/carapace-agent-db-identity.js";
 import {
   createReplyOperation,
   expireStaleReplyOperation,
@@ -72,7 +72,7 @@ type ReplyTurnAdmission =
       status: "owned";
       operation: ReplyOperation;
       sessionEntry?: SessionEntry;
-      databaseClaim?: OpenClawAgentDatabaseClaim;
+      databaseClaim?: CarapaceAgentDatabaseClaim;
     }
   | {
       status: "skipped";
@@ -250,9 +250,9 @@ export async function admitReplyTurn(
   const waitTimeoutMs =
     params.waitTimeoutMs ??
     (params.kind === "queued_followup" ? REPLY_RUN_IDLE_SETTLE_TIMEOUT_MS : undefined);
-  let admittedDatabaseClaim: OpenClawAgentDatabaseClaim | undefined;
+  let admittedDatabaseClaim: CarapaceAgentDatabaseClaim | undefined;
   let owned = false;
-  const assertDatabaseOwnerCurrent = (nextClaim?: OpenClawAgentDatabaseClaim) => {
+  const assertDatabaseOwnerCurrent = (nextClaim?: CarapaceAgentDatabaseClaim) => {
     if (
       admittedDatabaseClaim &&
       (!admittedDatabaseClaim.isCurrent() ||

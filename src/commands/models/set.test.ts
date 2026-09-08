@@ -1,7 +1,7 @@
 // Model set tests cover persisting default model/provider selections.
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, TransformConfigFileParams } from "../../config/config.js";
+import type { CarapaceConfig, TransformConfigFileParams } from "../../config/config.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
 const mocks = vi.hoisted(() => ({
@@ -17,7 +17,7 @@ vi.mock("../../config/config.js", () => ({
   transformConfigFile: async ({ transform }: TransformConfigFileParams<unknown>) => {
     const loaded = await mocks.readConfigFileSnapshot();
     const snapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       parsed: loaded.sourceConfig ?? loaded.config,
       runtimeConfig: loaded.config,
       ...loaded,
@@ -82,7 +82,7 @@ describe("modelsSetCommand", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const runtimeConfig = {
       agents: {
         defaults: {
@@ -91,7 +91,7 @@ describe("modelsSetCommand", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       hash: "config-hash",
@@ -134,7 +134,7 @@ describe("modelsSetCommand", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     const runtimeConfig = {
       agents: {
         defaults: {
@@ -144,7 +144,7 @@ describe("modelsSetCommand", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       hash: "config-hash",
@@ -176,7 +176,7 @@ describe("modelsSetCommand", () => {
   });
 
   it("persists manifest-owned provider aliases with the canonical provider id", async () => {
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.resolve("extensions"));
+    vi.stubEnv("CARAPACE_BUNDLED_PLUGINS_DIR", path.resolve("extensions"));
 
     const sourceConfig = {
       agents: {
@@ -184,7 +184,7 @@ describe("modelsSetCommand", () => {
           models: {},
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as CarapaceConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       valid: true,
       hash: "config-hash",

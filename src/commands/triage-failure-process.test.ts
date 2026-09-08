@@ -36,7 +36,7 @@ it("retains original JSON and closes the shared lease after preloaded owner file
       /from "([^"]+)"/g,
       (_match, specifier: string) => {
         const resolved =
-          specifier === "@openclaw/normalization-core/record-coerce"
+          specifier === "@carapace/normalization-core/record-coerce"
             ? path.resolve("packages/normalization-core/src/record-coerce.ts")
             : specifier.startsWith(".")
               ? path.resolve(path.dirname(original), specifier).replace(/\.js$/, ".ts")
@@ -65,7 +65,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 const admission=await acceptTriageContinuation();
 if (!admission) throw new Error('candidate was not admitted');
-const descendant=JSON.parse(execFileSync(process.execPath,['-e','console.log(JSON.stringify({updateRunId:process.env[${JSON.stringify(UPDATE_RUN_ID_ENV)}] ?? null,handoff:process.env.OPENCLAW_UPDATE_RUN_HANDOFF ?? null,sentinel:process.env.OPENCLAW_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null,inProgress:process.env.OPENCLAW_UPDATE_IN_PROGRESS ?? null,shell:process.env.OPENCLAW_SHELL,compileCache:process.env.NODE_DISABLE_COMPILE_CACHE}))'],{encoding:'utf8'}));
+const descendant=JSON.parse(execFileSync(process.execPath,['-e','console.log(JSON.stringify({updateRunId:process.env[${JSON.stringify(UPDATE_RUN_ID_ENV)}] ?? null,handoff:process.env.CARAPACE_UPDATE_RUN_HANDOFF ?? null,sentinel:process.env.CARAPACE_CONTROL_PLANE_UPDATE_SENTINEL_META ?? null,inProgress:process.env.CARAPACE_UPDATE_IN_PROGRESS ?? null,shell:process.env.CARAPACE_SHELL,compileCache:process.env.NODE_DISABLE_COMPILE_CACHE}))'],{encoding:'utf8'}));
 fs.writeFileSync(${JSON.stringify(receipt)},JSON.stringify({message:admission,descendant,args:process.argv.slice(2)}));
 await admission.finish("closed");
 `,
@@ -81,7 +81,7 @@ process.stdout.write('{"status":"error","reason":"original failure"}\\n');
 await triageAfterFailure({log:console.log,error:console.error,exit:()=>{throw new Error('failure owner exit overwritten');}}, {
   kind:'update',phase:'synthetic-replacement',error:'original failure',gateway:'preserve',installationRoot:${JSON.stringify(installed)}
 });
-if(process.env.OPENCLAW_UPDATE_IN_PROGRESS!=='1') throw new Error('updater role was changed');
+if(process.env.CARAPACE_UPDATE_IN_PROGRESS!=='1') throw new Error('updater role was changed');
 process.exitCode=7;
 `,
   );
@@ -92,14 +92,14 @@ process.exitCode=7;
       cwd: root,
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: root,
-        OPENCLAW_CONFIG_PATH: path.join(root, "openclaw.json"),
-        OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
-        OPENCLAW_SHELL: "",
+        CARAPACE_STATE_DIR: root,
+        CARAPACE_CONFIG_PATH: path.join(root, "carapace.json"),
+        CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
+        CARAPACE_SHELL: "",
         CODEX_THREAD_ID: "",
-        OPENCLAW_SUPERVISOR_MODE: "",
-        OPENCLAW_UPDATE_RUN_HANDOFF: "",
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        CARAPACE_SUPERVISOR_MODE: "",
+        CARAPACE_UPDATE_RUN_HANDOFF: "",
+        CARAPACE_UPDATE_IN_PROGRESS: "1",
         [UPDATE_RUN_ID_ENV]: "completed-update-run",
         TSX_TSCONFIG_PATH: path.resolve("tsconfig.json"),
         NODE_OPTIONS: `--import ${path.resolve("scripts/tsx.mjs")}`,

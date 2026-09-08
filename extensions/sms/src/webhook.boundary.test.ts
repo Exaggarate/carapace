@@ -11,8 +11,8 @@ import {
   getActivePluginRegistry,
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-test-runtime";
+import { withServer } from "carapace/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { startSmsGatewayAccount } from "./gateway.js";
 import type { SmsChannelRuntime } from "./inbound.js";
@@ -255,7 +255,7 @@ describe("SMS webhook real route boundary", () => {
           });
 
           expect(admitted.statusCode).toBe(200);
-          expect(admitted.headers["x-openclaw-delivery-accepted"]).toBe("durable");
+          expect(admitted.headers["x-carapace-delivery-accepted"]).toBe("durable");
           expect(enqueueSmsIngress).toHaveBeenCalledOnce();
           expect(enqueueSmsIngress).toHaveBeenCalledWith(form);
         } finally {

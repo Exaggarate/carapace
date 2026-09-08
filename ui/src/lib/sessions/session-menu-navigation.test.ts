@@ -51,7 +51,7 @@ function page(messages: unknown[], extra: Partial<ChatHistoryResult> = {}): Chat
 }
 
 function message(seq: number, content: string) {
-  return { role: "assistant", content, __openclaw: { seq } };
+  return { role: "assistant", content, __carapace: { seq } };
 }
 
 afterEach(() => {
@@ -209,7 +209,7 @@ describe("session menu navigation actions", () => {
         {
           role: "toolResult",
           content:
-            "[openclaw] missing tool result in session history; inserted synthetic error result for transcript repair.",
+            "[carapace] missing tool result in session history; inserted synthetic error result for transcript repair.",
         },
       ]),
     );
@@ -284,7 +284,7 @@ describe("session menu navigation actions", () => {
   it("uses the mounted chat owner's split capability and requires its handling receipt", async () => {
     const params = fixture().params;
     expect(canSplitSessionView()).toBe(false);
-    const chatPage = document.createElement("openclaw-chat-page");
+    const chatPage = document.createElement("carapace-chat-page");
     Object.assign(chatPage, { sessionSplitAvailable: true });
     document.body.append(chatPage);
     expect(canSplitSessionView()).toBe(true);

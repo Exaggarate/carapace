@@ -18,7 +18,7 @@ export function registerTestWidgetContentKind(
   createPluginBoardWidgetContentKindRegistrar(registry)(record, {
     kind,
     label: "Diagram",
-    resources: { surface: "diagram", paths: ["/__openclaw__/diagram/app.js"] },
+    resources: { surface: "diagram", paths: ["/__carapace__/diagram/app.js"] },
     validateSource(source) {
       if (!source.startsWith("diagram:")) {
         throw new Error("diagram prefix required");

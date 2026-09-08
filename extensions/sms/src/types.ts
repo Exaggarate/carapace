@@ -1,5 +1,5 @@
 // Sms type declarations define plugin contracts.
-import type { SecretInput } from "openclaw/plugin-sdk/secret-input";
+import type { SecretInput } from "carapace/plugin-sdk/secret-input";
 
 type SmsChannelConfigFields = {
   /** Megabyte cap for media this channel accepts and delivers. */

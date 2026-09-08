@@ -1,8 +1,8 @@
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import { parseModelCatalogRef } from "@carapace/model-catalog-core/model-catalog-refs";
 import {
   normalizeBuiltInProviderModelId,
   stripSelfProviderModelPrefix,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
+} from "@carapace/model-catalog-core/provider-model-id-normalization";
 
 export type CompiledModelAllowlist = {
   configured: boolean;

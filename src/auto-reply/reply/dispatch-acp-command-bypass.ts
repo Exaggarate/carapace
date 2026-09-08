@@ -1,5 +1,5 @@
 // Detects ACP commands that should bypass normal agent dispatch.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { hasControlCommand } from "../command-detection.js";
 import { isCommandEnabled } from "../commands-registry-list.js";
 import { shouldHandleTextCommands } from "../commands-text-routing.js";
@@ -16,7 +16,7 @@ function isAcpCommandCandidate(text: string): boolean {
 
 export function shouldBypassAcpDispatchForCommand(
   ctx: FinalizedRuntimeMsgContext,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): boolean {
   const candidate = resolveCommandContextText(ctx);
   if (!candidate) {

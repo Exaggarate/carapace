@@ -12,7 +12,7 @@ import {
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
 import { trackAsyncWork } from "../shared/async-work-scope.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { captureAgentTurnPrincipal } from "./agent-turn/principal.js";
 import { APPROVALS_SCOPE, WRITE_SCOPE } from "./method-scopes.js";
 import { createGatewayMethodRegistry } from "./methods/registry.js";
@@ -158,7 +158,7 @@ describe("createGatewayInstanceRuntime", () => {
   });
 
   it("sends recovery notices through normal outbound without invoking plugin actions", async () => {
-    await withOpenClawTestState({ layout: "state-only", prefix: "recovery-notice-" }, async () => {
+    await withCarapaceTestState({ layout: "state-only", prefix: "recovery-notice-" }, async () => {
       let releasePlatformDispatch: (() => void) | undefined;
       let platformDispatchHold: Promise<void> | undefined;
       const visibleSend = vi.fn();

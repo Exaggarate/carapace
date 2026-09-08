@@ -13,7 +13,7 @@ vi.mock("../../process/exec.js", async (importOriginal) => ({
 
 const COMMIT = "a".repeat(40);
 const ADVERTISED_TIP = "b".repeat(40);
-const ORIGIN = "https://example.invalid/openclaw.git";
+const ORIGIN = "https://example.invalid/carapace.git";
 const SEED_KEY = "f768fa4834ce38c2cc9d0050df323298de898870b2cf372c95da0a7965dad806";
 const MANIFEST_REF = `sha256:${"c".repeat(64)}`;
 const REMOTE_WORKSPACE = "/node/workspace";
@@ -80,16 +80,16 @@ describe("node worker workspace origin fallback", () => {
     });
 
     expect(exec.mock.calls.map(([command]) => command.argv)).toEqual([
-      ["openclaw-internal-workspace-seed"],
+      ["carapace-internal-workspace-seed"],
       expect.arrayContaining(["clone", "--filter=blob:none", ORIGIN]),
       expect.arrayContaining(["fetch", "origin", COMMIT]),
       expect.arrayContaining(["rev-parse", "FETCH_HEAD^{commit}"]),
       expect.arrayContaining(["checkout", COMMIT]),
       expect.arrayContaining(["node", REMOTE_WORKSPACE, COMMIT]),
-      ["openclaw-internal-workspace-seed"],
+      ["carapace-internal-workspace-seed"],
     ]);
     expect(exec.mock.calls.at(-1)?.[0]).toEqual({
-      argv: ["openclaw-internal-workspace-seed"],
+      argv: ["carapace-internal-workspace-seed"],
       seed: { action: "store", key: SEED_KEY, maxAgeMs: 6 * 60 * 60 * 1000 },
       timeoutMs: 180_000,
       transportRetry: "never",
@@ -164,7 +164,7 @@ describe("node worker workspace origin fallback", () => {
         result: { mode: "git", remoteWorkspaceDir: REMOTE_WORKSPACE, manifestRef: MANIFEST_REF },
       });
       expect(exec.mock.calls[0]?.[0]).toEqual({
-        argv: ["openclaw-internal-workspace-seed"],
+        argv: ["carapace-internal-workspace-seed"],
         seed: { action: "apply", key: SEED_KEY },
         timeoutMs: 60_000,
         transportRetry: "never",
@@ -190,7 +190,7 @@ describe("node worker workspace origin fallback", () => {
       }
       expect(commands.filter((command) => command.seed?.action === "store")).toEqual([
         {
-          argv: ["openclaw-internal-workspace-seed"],
+          argv: ["carapace-internal-workspace-seed"],
           seed: { action: "store", key: SEED_KEY, maxAgeMs: 6 * 60 * 60 * 1000 },
           timeoutMs: 180_000,
           transportRetry: "never",

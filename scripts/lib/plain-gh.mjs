@@ -40,7 +40,7 @@ function isExecutable(filePath) {
 export function plainGhAuthenticatedEnv(env) {
   const next = plainGhEnv(env);
   if (
-    !next.OPENCLAW_GH_BIN ||
+    !next.CARAPACE_GH_BIN ||
     next.GH_TOKEN ||
     next.GITHUB_TOKEN ||
     next.GH_ENTERPRISE_TOKEN ||
@@ -50,7 +50,7 @@ export function plainGhAuthenticatedEnv(env) {
   }
 
   const tokenEnv = { ...next };
-  delete tokenEnv.OPENCLAW_GH_BIN;
+  delete tokenEnv.CARAPACE_GH_BIN;
   const args = ["auth", "token"];
   if (tokenEnv.GH_HOST) {
     args.push("--hostname", tokenEnv.GH_HOST);
@@ -97,11 +97,11 @@ export function plainGhEnv(env = process.env) {
  * @returns {string}
  */
 export function resolvePlainGhBin(env = process.env) {
-  if (env.OPENCLAW_GH_BIN) {
-    if (isExecutable(env.OPENCLAW_GH_BIN)) {
-      return env.OPENCLAW_GH_BIN;
+  if (env.CARAPACE_GH_BIN) {
+    if (isExecutable(env.CARAPACE_GH_BIN)) {
+      return env.CARAPACE_GH_BIN;
     }
-    throw new Error(`OPENCLAW_GH_BIN is not executable: ${env.OPENCLAW_GH_BIN}`);
+    throw new Error(`CARAPACE_GH_BIN is not executable: ${env.CARAPACE_GH_BIN}`);
   }
 
   // child_process resolves PATH in the child cwd, including relative and empty entries.
@@ -181,7 +181,7 @@ export function execGhRead(args, options = {}, params = {}) {
 function ghReadEnv(env) {
   const next = plainGhEnv(env);
   // Cache-aware reads stay on PATH even when another caller selects an explicit binary.
-  delete next.OPENCLAW_GH_BIN;
+  delete next.CARAPACE_GH_BIN;
   return next;
 }
 

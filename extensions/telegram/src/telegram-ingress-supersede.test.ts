@@ -1,18 +1,18 @@
 // Telegram supersede policy for durable ingress (authorization-gated).
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import {
   addChannelAllowFromStoreEntry,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+  closeCarapaceStateDatabaseForTest,
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { createCarapaceTestState, type CarapaceTestState } from "carapace/plugin-sdk/test-state";
 import { afterEach, describe, expect, it } from "vitest";
 
-let openClawState: OpenClawTestState | undefined;
+let carapaceState: CarapaceTestState | undefined;
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
-  await openClawState?.cleanup();
-  openClawState = undefined;
+  closeCarapaceStateDatabaseForTest();
+  await carapaceState?.cleanup();
+  carapaceState = undefined;
 });
 import type { TelegramSpooledUpdatePayload } from "./telegram-ingress-spool.payload.js";
 import {
@@ -24,7 +24,7 @@ import { createShouldSupersedeTelegramSpooledPending } from "./telegram-ingress-
 const OWNER_ID = "111";
 const STRANGER_ID = "999";
 
-function cfgWithOwner(ownerId = OWNER_ID): OpenClawConfig {
+function cfgWithOwner(ownerId = OWNER_ID): CarapaceConfig {
   return {
     channels: {
       telegram: {
@@ -32,7 +32,7 @@ function cfgWithOwner(ownerId = OWNER_ID): OpenClawConfig {
         dmPolicy: "allowlist",
       },
     },
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
 function messageUpdate(params: {
@@ -174,7 +174,7 @@ describe("telegram ingress supersede policy", () => {
   });
 
   it("gates command supersede on authorized sender", async () => {
-    // /new is a recognized text alias in OpenClaw command set.
+    // /new is a recognized text alias in Carapace command set.
     const authorized = await shouldSupersede(
       record("2", messageUpdate({ updateId: 2, text: "/new", senderId: OWNER_ID })),
       claim("1", messageUpdate({ updateId: 1, text: "prior", senderId: OWNER_ID })),
@@ -356,7 +356,7 @@ describe("telegram ingress supersede policy", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
     };
     const shouldSupersedeTopic = createShouldSupersedeTelegramSpooledPending(topicRestrictedAuth);
@@ -430,7 +430,7 @@ describe("telegram ingress supersede policy", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
     };
     const update = messageUpdate({
@@ -475,9 +475,9 @@ describe("telegram ingress supersede policy", () => {
 
   it("authorizes paired DM senders via the pairing store under dmPolicy pairing", async () => {
     const pairedId = "424242";
-    openClawState = await createOpenClawTestState({
+    carapaceState = await createCarapaceTestState({
       layout: "state-only",
-      prefix: "openclaw-supersede-store-",
+      prefix: "carapace-supersede-store-",
     });
     await addChannelAllowFromStoreEntry({
       channel: "telegram",
@@ -491,7 +491,7 @@ describe("telegram ingress supersede policy", () => {
             dmPolicy: "pairing",
           },
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
     };
     const shouldSupersedePaired = createShouldSupersedeTelegramSpooledPending(pairingAuth);
@@ -530,7 +530,7 @@ describe("telegram ingress supersede policy", () => {
         commands: {
           ownerAllowFrom: [ownerId],
         },
-      } as OpenClawConfig,
+      } as CarapaceConfig,
       accountId: "default",
     };
     const shouldSupersedeOwner = createShouldSupersedeTelegramSpooledPending(ownerAuth);

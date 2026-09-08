@@ -14,8 +14,8 @@ const DOCTOR_CONTRACT_SURFACES = [
 
 const sourceManifestEnv: NodeJS.ProcessEnv = {
   ...process.env,
-  OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-  OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+  CARAPACE_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+  CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
 };
 
 describe("bundled plugin doctor contract declarations", () => {

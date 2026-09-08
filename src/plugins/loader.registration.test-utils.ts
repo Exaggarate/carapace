@@ -28,7 +28,7 @@ import {
   claimPluginInteractiveCallbackDedupe,
   commitPluginInteractiveCallbackDedupe,
 } from "./interactive-state.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadCarapacePlugins } from "./loader.js";
 import {
   makePluginLoaderTempDir,
   mkdirSafe,
@@ -79,7 +79,7 @@ import {
 afterEach(globalAfterEach0);
 afterAll(globalAfterAll1);
 
-describe("loadOpenClawPlugins", () => {
+describe("loadCarapacePlugins", () => {
   it("rejects a repeated named legacy hook before adding another executable handler", () => {
     useNoBundledPlugins();
     const plugin = writePlugin({
@@ -222,7 +222,7 @@ describe("loadOpenClawPlugins", () => {
     });
     for (const plugin of [first, second]) {
       fs.writeFileSync(
-        path.join(plugin.dir, "openclaw.plugin.json"),
+        path.join(plugin.dir, "carapace.plugin.json"),
         JSON.stringify(
           {
             id: plugin.id,
@@ -237,7 +237,7 @@ describe("loadOpenClawPlugins", () => {
 
     clearInternalHooks();
 
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       cache: false,
       workspaceDir: first.dir,
       onlyPluginIds: ["hook-context-first", "hook-context-second"],
@@ -430,7 +430,7 @@ describe("loadOpenClawPlugins", () => {
         },
       },
       onlyPluginIds: ["activation-replacement"],
-    } satisfies Parameters<typeof loadOpenClawPlugins>[0];
+    } satisfies Parameters<typeof loadCarapacePlugins>[0];
     const hookInit = vi
       .spyOn(hookRunnerGlobal, "initializeGlobalHookRunner")
       .mockImplementationOnce(() => {
@@ -438,7 +438,7 @@ describe("loadOpenClawPlugins", () => {
       });
 
     try {
-      expect(() => loadOpenClawPlugins(replacementOptions)).toThrow("hook activation failed");
+      expect(() => loadCarapacePlugins(replacementOptions)).toThrow("hook activation failed");
     } finally {
       hookInit.mockRestore();
     }
@@ -452,7 +452,7 @@ describe("loadOpenClawPlugins", () => {
     expect(getPluginCommandSpecs().map((command) => command.name)).toEqual(["prior"]);
     expect(isPluginRecordLifecycleEpochActive(priorRegistry, priorRecord!, priorEpoch!)).toBe(true);
 
-    const activated = loadOpenClawPlugins(replacementOptions);
+    const activated = loadCarapacePlugins(replacementOptions);
     expect(activated.commands.map((entry) => entry.command.name)).toEqual(["replacement"]);
     expect(getPluginCommandSpecs().map((command) => command.name)).toEqual(["replacement"]);
     expect(isPluginRecordLifecycleEpochActive(priorRegistry, priorRecord!, priorEpoch!)).toBe(
@@ -538,8 +538,8 @@ describe("loadOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(scopedDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/scoped-provider",
-        openclaw: { extensions: ["./index.cjs"] },
+        name: "@carapace/scoped-provider",
+        carapace: { extensions: ["./index.cjs"] },
       }),
       "utf-8",
     );
@@ -565,8 +565,8 @@ describe("loadOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(unscopedDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/unscoped-provider",
-        openclaw: { extensions: ["./index.cjs"] },
+        name: "@carapace/unscoped-provider",
+        carapace: { extensions: ["./index.cjs"] },
       }),
       "utf-8",
     );
@@ -585,10 +585,10 @@ describe("loadOpenClawPlugins", () => {
       enabledByDefault: true,
       providers: ["unscoped-provider"],
     });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledDir;
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledDir;
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
 
-    const scoped = loadOpenClawPlugins({
+    const scoped = loadCarapacePlugins({
       cache: false,
       activate: false,
       config: {
@@ -612,8 +612,8 @@ describe("loadOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(bundledPluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/notify-host",
-        openclaw: { extensions: ["./index.cjs"] },
+        name: "@carapace/notify-host",
+        carapace: { extensions: ["./index.cjs"] },
       }),
       "utf-8",
     );
@@ -632,10 +632,10 @@ describe("loadOpenClawPlugins", () => {
         };`,
     });
     updatePluginManifest(bundled, { enabledByDefault: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledDir;
-    delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = bundledDir;
+    delete process.env.CARAPACE_DISABLE_BUNDLED_PLUGINS;
 
-    const bundledRegistry = loadOpenClawPlugins({
+    const bundledRegistry = loadCarapacePlugins({
       cache: false,
       config: { plugins: { allow: ["notify-host"] } },
       onlyPluginIds: ["notify-host"],
@@ -658,7 +658,7 @@ describe("loadOpenClawPlugins", () => {
           },
         };`,
     });
-    const externalRegistry = loadOpenClawPlugins({
+    const externalRegistry = loadCarapacePlugins({
       cache: false,
       workspaceDir: external.dir,
       config: {
@@ -1030,7 +1030,7 @@ describe("loadOpenClawPlugins", () => {
         } };`,
       }),
     );
-    const registry = loadOpenClawPlugins({
+    const registry = loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1120,9 +1120,9 @@ describe("loadOpenClawPlugins", () => {
         },
       },
       onlyPluginIds: ["cached-detached-runtime"],
-    } satisfies Parameters<typeof loadOpenClawPlugins>[0];
+    } satisfies Parameters<typeof loadCarapacePlugins>[0];
 
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
     expect(requireActivePluginRegistry().detachedTaskRuntimes[0]?.pluginId).toBe(
       "cached-detached-runtime",
     );
@@ -1130,7 +1130,7 @@ describe("loadOpenClawPlugins", () => {
     setActivePluginRegistry(createEmptyPluginRegistry());
     expect(requireActivePluginRegistry().detachedTaskRuntimes[0]).toBeUndefined();
 
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
 
     expect(requireActivePluginRegistry().detachedTaskRuntimes[0]?.pluginId).toBe(
       "cached-detached-runtime",
@@ -1165,15 +1165,15 @@ describe("loadOpenClawPlugins", () => {
         },
       },
       onlyPluginIds: ["cached-legacy-hook"],
-    } satisfies Parameters<typeof loadOpenClawPlugins>[0];
+    } satisfies Parameters<typeof loadCarapacePlugins>[0];
 
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
     const firstEvent = createInternalHookEvent("gateway", "startup", "gateway:startup");
     await triggerInternalHook(firstEvent);
     expect(firstEvent.messages).toEqual(["cached-hook-fired"]);
 
     setActivePluginRegistry(createEmptyPluginRegistry());
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
 
     const cachedEvent = createInternalHookEvent("gateway", "startup", "gateway:startup");
     await triggerInternalHook(cachedEvent);
@@ -1211,9 +1211,9 @@ describe("loadOpenClawPlugins", () => {
         },
       },
       onlyPluginIds: ["cached-command-interactive"],
-    } satisfies Parameters<typeof loadOpenClawPlugins>[0];
+    } satisfies Parameters<typeof loadCarapacePlugins>[0];
 
-    const registry = loadOpenClawPlugins(loadOptions);
+    const registry = loadCarapacePlugins(loadOptions);
     expect(getPluginCommandSpecs()).toEqual([
       { name: "hue", description: "Control Hue lights", acceptsArgs: false },
     ]);
@@ -1237,7 +1237,7 @@ describe("loadOpenClawPlugins", () => {
     commitPluginInteractiveCallbackDedupe(dedupeKey, 1_000);
     expect(claimPluginInteractiveCallbackDedupe(dedupeKey, 1_001)).toBe(false);
 
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
     expect(claimPluginInteractiveCallbackDedupe(dedupeKey, 1_002)).toBe(false);
 
     setActivePluginRegistry(createEmptyPluginRegistry());
@@ -1250,7 +1250,7 @@ describe("loadOpenClawPlugins", () => {
       ),
     ).toBeNull();
 
-    loadOpenClawPlugins(loadOptions);
+    loadCarapacePlugins(loadOptions);
 
     expect(getPluginCommandSpecs()).toEqual([
       { name: "hue", description: "Control Hue lights", acceptsArgs: false },
@@ -1270,7 +1270,7 @@ describe("loadOpenClawPlugins", () => {
     useNoBundledPlugins();
     setDetachedTaskLifecycleRuntime(createDetachedTaskRuntimeStub("stale"), "stale-runtime");
 
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       cache: false,
       config: {
         plugins: {
@@ -1336,17 +1336,17 @@ describe("loadOpenClawPlugins", () => {
       },
     ];
 
-    const first = loadOpenClawPlugins(options);
+    const first = loadCarapacePlugins(options);
     await expect(listActiveMemoryPublicArtifacts({ cfg: {} as never })).resolves.toEqual(
       expectedArtifacts,
     );
 
     setActivePluginRegistry(createEmptyPluginRegistry());
 
-    const second = loadOpenClawPlugins(options);
+    const second = loadCarapacePlugins(options);
     // Scalar comparisons avoid materializing the registry's lazy runtime in failure output.
     expect(second === first).toBe(false);
-    expect(loadOpenClawPlugins(options) === second).toBe(true);
+    expect(loadCarapacePlugins(options) === second).toBe(true);
     await expect(listActiveMemoryPublicArtifacts({ cfg: {} as never })).resolves.toEqual(
       expectedArtifacts,
     );
@@ -1397,7 +1397,7 @@ describe("loadOpenClawPlugins", () => {
         slots: { memory: "capability-survives-memory" },
       },
     };
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       cache: false,
       workspaceDir: memoryPlugin.dir,
       config: activateConfig,
@@ -1421,7 +1421,7 @@ describe("loadOpenClawPlugins", () => {
     // Simulate what resolvePluginWebSearchProviders and similar read-only paths do:
     // load plugins again with activate:false. Each per-plugin snapshot/rollback must
     // preserve the previously registered memory capability.
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       cache: false,
       activate: false,
       workspaceDir: memoryPlugin.dir,
@@ -1435,7 +1435,7 @@ describe("loadOpenClawPlugins", () => {
 
   it("uses discovery registration mode for non-activating loads", () => {
     useNoBundledPlugins();
-    const marker = "__openclawDiscoveryModeTest";
+    const marker = "__carapaceDiscoveryModeTest";
     const plugin = writePlugin({
       id: "discovery-mode-test",
       filename: "discovery-mode-test.cjs",
@@ -1462,7 +1462,7 @@ describe("loadOpenClawPlugins", () => {
       },
     };
 
-    const snapshot = loadOpenClawPlugins({
+    const snapshot = loadCarapacePlugins({
       activate: false,
       cache: false,
       workspaceDir: plugin.dir,
@@ -1472,7 +1472,7 @@ describe("loadOpenClawPlugins", () => {
     expect(snapshot.providers.map((entry) => entry.provider.id)).toEqual(["discovery-provider"]);
     expect(snapshot.tools.flatMap((entry) => entry.names)).toContain("discovery_tool");
 
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       cache: false,
       workspaceDir: plugin.dir,
       config,
@@ -1602,7 +1602,7 @@ describe("loadOpenClawPlugins", () => {
   it("caches non-activating snapshots without restoring global side effects", () => {
     useNoBundledPlugins();
     clearPluginCommands();
-    const marker = "__openclawSnapshotCacheRegisterCount";
+    const marker = "__carapaceSnapshotCacheRegisterCount";
     const plugin = writePlugin({
       id: "snapshot-cache",
       filename: "snapshot-cache.cjs",
@@ -1630,15 +1630,15 @@ describe("loadOpenClawPlugins", () => {
       onlyPluginIds: ["snapshot-cache"],
     };
 
-    const first = loadOpenClawPlugins(options);
-    const second = loadOpenClawPlugins(options);
+    const first = loadCarapacePlugins(options);
+    const second = loadCarapacePlugins(options);
 
     expect(second).toBe(first);
     expect((globalThis as Record<string, unknown>)[marker]).toBe(1);
     expect(first.commands.map((entry) => entry.command.name)).toEqual(["snapshot-command"]);
     expect(getPluginCommandSpecs()).toStrictEqual([]);
 
-    const active = loadOpenClawPlugins({
+    const active = loadCarapacePlugins({
       workspaceDir: plugin.dir,
       config: options.config,
       onlyPluginIds: ["snapshot-cache"],
@@ -1673,13 +1673,13 @@ describe("loadOpenClawPlugins", () => {
       },
     };
 
-    const first = loadOpenClawPlugins(options);
+    const first = loadCarapacePlugins(options);
     expectGlobalHookRunner(getGlobalHookRunner());
 
     resetGlobalHookRunner();
     expect(getGlobalHookRunner()).toBeNull();
 
-    const second = loadOpenClawPlugins(options);
+    const second = loadCarapacePlugins(options);
     expect(second).toBe(first);
     expectGlobalHookRunner(getGlobalHookRunner());
 
@@ -1703,7 +1703,7 @@ describe("loadOpenClawPlugins", () => {
         } };`,
     });
 
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       workspaceDir: firstPlugin.dir,
       config: {
         plugins: {
@@ -1717,7 +1717,7 @@ describe("loadOpenClawPlugins", () => {
 
     // A second activation retires the unpinned first registry entirely; its
     // hooks must drop instead of dispatching stale config closures.
-    loadOpenClawPlugins({
+    loadCarapacePlugins({
       workspaceDir: secondPlugin.dir,
       config: {
         plugins: {
@@ -1767,19 +1767,19 @@ describe("loadOpenClawPlugins", () => {
           expectedFirstSource: pluginA.file,
           expectedSecondSource: pluginB.file,
           loadFirst: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: bundledA,
+                CARAPACE_BUNDLED_PLUGINS_DIR: bundledA,
               },
             }),
           loadSecond: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: bundledB,
+                CARAPACE_BUNDLED_PLUGINS_DIR: bundledB,
               },
             }),
         };
@@ -1824,25 +1824,25 @@ describe("loadOpenClawPlugins", () => {
           expectedFirstSource: pluginA.file,
           expectedSecondSource: pluginB.file,
           loadFirst: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
                 HOME: homeA,
-                OPENCLAW_HOME: undefined,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+                CARAPACE_HOME: undefined,
+                CARAPACE_STATE_DIR: stateDir,
+                CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
               },
             }),
           loadSecond: () =>
-            loadOpenClawPlugins({
+            loadCarapacePlugins({
               ...options,
               env: {
                 ...process.env,
                 HOME: homeB,
-                OPENCLAW_HOME: undefined,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+                CARAPACE_HOME: undefined,
+                CARAPACE_STATE_DIR: stateDir,
+                CARAPACE_BUNDLED_PLUGINS_DIR: bundledDir,
               },
             }),
         };

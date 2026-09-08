@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createCarapaceTestState,
+  type CarapaceTestState,
+} from "../../test-utils/carapace-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 
 const revisionFault = vi.hoisted(() => ({
@@ -126,7 +126,7 @@ vi.mock("./store-sqlite-transition.js", async (importOriginal) => {
   };
 });
 
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   evaluateSkillProposal as evaluateSkillProposalImpl,
   inspectSkillProposal as inspectSkillProposalImpl,
@@ -137,9 +137,9 @@ import {
 import type { SkillProposalReadResult } from "./types.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
-const workshopConfig: OpenClawConfig = {};
-type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: OpenClawConfig };
+let testState: CarapaceTestState;
+const workshopConfig: CarapaceConfig = {};
+type OptionalWorkshopConfig<T> = Omit<T, "config"> & { config?: CarapaceConfig };
 const evaluateSkillProposal = (
   input: OptionalWorkshopConfig<Parameters<typeof evaluateSkillProposalImpl>[0]>,
 ) => evaluateSkillProposalImpl({ config: workshopConfig, ...input });
@@ -158,9 +158,9 @@ const reviseSkillProposal = (
 ) => reviseSkillProposalImpl({ config: workshopConfig, ...input });
 
 beforeAll(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createCarapaceTestState({
     layout: "state-only",
-    prefix: "openclaw-workshop-revision-atomicity-",
+    prefix: "carapace-workshop-revision-atomicity-",
   });
 });
 
@@ -176,7 +176,7 @@ afterAll(async () => {
 
 describe("Skill Workshop revision generation atomicity", () => {
   async function createProposal() {
-    const workspaceDir = await tempDirs.make("openclaw-workshop-revision-workspace-");
+    const workspaceDir = await tempDirs.make("carapace-workshop-revision-workspace-");
     const proposal = await proposeCreateSkill({
       workspaceDir,
       env: testState.env,

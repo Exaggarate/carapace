@@ -22,7 +22,7 @@ const suite = createControlUiE2eSuite({
   startServerBeforeBrowser: true,
 });
 const sessionKey = "agent:main:dashboard:owner-outcome";
-const proofPhase = process.env.OPENCLAW_OWNER_ASSIGNMENT_PROOF_PHASE;
+const proofPhase = process.env.CARAPACE_OWNER_ASSIGNMENT_PROOF_PHASE;
 let proofDir: string;
 beforeEach(() => {
   if (proofPhase) {
@@ -163,7 +163,7 @@ suite.define(() => {
       await expectBrowser(checked.locator(":scope > .session-menu__text")).toHaveText("Me");
       await expectBrowser(
         assignTo.locator(':scope > wa-dropdown-item[slot="submenu"] > .session-menu__text'),
-      ).toHaveText(["Me", "OpenClaw", "Bob", "Carol"]);
+      ).toHaveText(["Me", "Carapace", "Bob", "Carol"]);
     });
   });
 
@@ -178,7 +178,7 @@ suite.define(() => {
       });
       await trigger.click();
 
-      const menu = page.locator("openclaw-session-menu");
+      const menu = page.locator("carapace-session-menu");
       const rootAssignmentLabels = await menu
         .locator(":scope > wa-dropdown > wa-dropdown-item > .session-menu__text")
         .allTextContents();
@@ -194,10 +194,10 @@ suite.define(() => {
         ':scope > wa-dropdown-item[slot="submenu"] > .session-menu__text',
       );
       await captureProof(page, "assignment-submenu");
-      await expectBrowser(ownerItems).toHaveText(["Me", "OpenClaw", "Bob", "Carol"]);
+      await expectBrowser(ownerItems).toHaveText(["Me", "Carapace", "Bob", "Carol"]);
       const selfAvatar = assignTo
         .getByRole("menuitemradio", { name: "Me", exact: true })
-        .locator("openclaw-viewer-avatar img");
+        .locator("carapace-viewer-avatar img");
       await expectBrowser(selfAvatar).toHaveCount(1);
       await expect
         .poll(() => selfAvatar.evaluate((image) => (image as HTMLImageElement).naturalWidth))
@@ -277,7 +277,7 @@ suite.define(() => {
                 )
               : [];
           const gateway = await installOwnerGateway(page, true, extraNames);
-          const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+          const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
           await expectBrowser(activePane.locator(".agent-chat__disabled-banner")).toContainText(
             "This session is archived.",
           );
@@ -300,7 +300,7 @@ suite.define(() => {
           await captureProof(page, `archived-${surface.replaceAll(" ", "-")}`);
           await expectBrowser(
             page.getByRole("menuitemradio").locator(":scope > .session-menu__text"),
-          ).toHaveText(["Me", "OpenClaw", "Bob", "Carol", ...extraNames]);
+          ).toHaveText(["Me", "Carapace", "Bob", "Carol", ...extraNames]);
           const target = extraNames.at(-1) ?? "Carol";
           const owner = page.getByRole("menuitemradio", { name: target, exact: true });
           await owner.scrollIntoViewIfNeeded();
@@ -328,7 +328,7 @@ suite.define(() => {
         await page.addInitScript(
           ({ gatewayUrl }) => {
             localStorage.setItem(
-              `openclaw.control.settings.v1:${gatewayUrl}`,
+              `carapace.control.settings.v1:${gatewayUrl}`,
               JSON.stringify({ gatewayUrl, theme: "dash", themeMode: "dark" }),
             );
           },
@@ -363,7 +363,7 @@ suite.define(() => {
       },
       async ({ page }) => {
         const gateway = await installOwnerGateway(page);
-        const activePane = page.locator("openclaw-chat-pane.chat-pane-cache__pane--active");
+        const activePane = page.locator("carapace-chat-pane.chat-pane-cache__pane--active");
         const menuTrigger = activePane.getByRole("button", { name: "Actions for Owner outcome" });
         await gateway.deferNext("users.list");
         await menuTrigger.press("Enter");

@@ -13,15 +13,15 @@ For the full key index and the other top-level config domains, see [Configuratio
 
 ## `worktreeRoot`
 
-Optional global root directory for [managed worktree](/concepts/managed-worktrees) checkouts. Defaults to `<openclaw-state-dir>/worktrees`.
+Optional global root directory for [managed worktree](/concepts/managed-worktrees) checkouts. Defaults to `<carapace-state-dir>/worktrees`.
 
 ```json5
 {
-  worktreeRoot: "/mnt/workspaces/openclaw-worktrees",
+  worktreeRoot: "/mnt/workspaces/carapace-worktrees",
 }
 ```
 
-Use an absolute Gateway-host path, `~` for the Gateway user's home directory, or `~/` followed by a folder inside it; relative paths are rejected. OpenClaw creates checkouts at `<worktreeRoot>/<repo-fingerprint>/<name>`. This setting applies to all agents and all managed-worktree owners, with no per-agent override. The shared state database and allocation limits remain under the existing state directory.
+Use an absolute Gateway-host path, `~` for the Gateway user's home directory, or `~/` followed by a folder inside it; relative paths are rejected. Carapace creates checkouts at `<worktreeRoot>/<repo-fingerprint>/<name>`. This setting applies to all agents and all managed-worktree owners, with no per-agent override. The shared state database and allocation limits remain under the existing state directory.
 
 Changes affect new allocations only. Registered worktrees retain their original paths for reuse, cleanup, and snapshot restore; existing checkouts are not moved automatically. Keep their original storage available while those records are still needed.
 
@@ -37,7 +37,7 @@ The `models` root also owns global model-catalog behavior.
     // Optional. Hosted catalog updates default on.
     catalogRefresh: {
       enabled: true,
-      // url: "https://catalog.example.com/openclaw/catalog.json",
+      // url: "https://catalog.example.com/carapace/catalog.json",
     },
   },
 }
@@ -46,7 +46,7 @@ The `models` root also owns global model-catalog behavior.
 - `models.mode`: provider catalog behavior (`merge` or `replace`).
 - `models.providers`: custom provider map keyed by provider id.
 - `models.providers.*.localService`: optional on-demand process manager for
-  local model servers. OpenClaw probes the configured health endpoint, starts
+  local model servers. Carapace probes the configured health endpoint, starts
   the absolute `command` when needed, waits for readiness, then sends the model
   request. See [Local model services](/gateway/local-model-services).
 - `models.catalogRefresh.enabled`: controls the hosted model catalog refresh
@@ -60,8 +60,8 @@ The `models` root also owns global model-catalog behavior.
   always wins.
 
 Pricing updates ship in the same hosted catalog file as model metadata. The
-retired `models.pricing` toggle is removed automatically by `openclaw doctor
---fix`; use `models.catalogRefresh.enabled: false` when OpenClaw must avoid all
+retired `models.pricing` toggle is removed automatically by `carapace doctor
+--fix`; use `models.catalogRefresh.enabled: false` when Carapace must avoid all
 hosted catalog traffic.
 
 ## Discovery
@@ -82,22 +82,22 @@ hosted catalog traffic.
 - `full`: include `cliPath` + `sshPort`; LAN multicast advertising still requires the bundled `bonjour` plugin to be enabled.
 - `off`: suppress LAN multicast advertising without changing plugin enablement.
 - The bundled `bonjour` plugin auto-starts on macOS hosts and is opt-in on Linux, Windows, and containerized Gateway deployments.
-- Hostname defaults to the system hostname when it is a valid DNS label, falling back to `openclaw`. Override with `OPENCLAW_MDNS_HOSTNAME`.
-- `OPENCLAW_DISABLE_BONJOUR=1` disables mDNS advertising outright, overriding `discovery.mdns.mode`.
+- Hostname defaults to the system hostname when it is a valid DNS label, falling back to `carapace`. Override with `CARAPACE_MDNS_HOSTNAME`.
+- `CARAPACE_DISABLE_BONJOUR=1` disables mDNS advertising outright, overriding `discovery.mdns.mode`.
 
 ### Wide-area (DNS-SD)
 
 ```json5
 {
   discovery: {
-    wideArea: { domain: "openclaw.internal" },
+    wideArea: { domain: "carapace.internal" },
   },
 }
 ```
 
-Setting `discovery.wideArea.domain` enables wide-area discovery and writes a unicast DNS-SD zone under `~/.openclaw/dns/`. For cross-network discovery, pair with a DNS server (CoreDNS recommended) + Tailscale split DNS.
+Setting `discovery.wideArea.domain` enables wide-area discovery and writes a unicast DNS-SD zone under `~/.carapace/dns/`. For cross-network discovery, pair with a DNS server (CoreDNS recommended) + Tailscale split DNS.
 
-Setup: `openclaw dns setup --apply`.
+Setup: `carapace dns setup --apply`.
 
 ---
 
@@ -117,7 +117,7 @@ Setup: `openclaw dns setup --apply`.
 ```
 
 - `channel`: release channel - `"stable"`, `"extended-stable"`, `"beta"`, or `"dev"`. Extended-stable is package-only: foreground commands own installation, while the Gateway may emit read-only update hints.
-- `checkOnStart`: check for updates through `https://telemetry.openclaw.ai/api/latest-version` when the Gateway starts and at most once every 24 hours afterward (default: `true`). The default request shares only the OpenClaw version and platform information in its `User-Agent`; anonymous feature statistics are included only when `telemetry.enabled` is `true`. Setting this to `false`, or setting `OPENCLAW_NO_AUTO_UPDATE=1`, prevents all automatic update requests, feature statistics, and update notices, even when `auto.enabled` is `true`. Stored extended-stable selections use the same read-only hint and 24-hour hint schedule.
+- `checkOnStart`: check for updates through `https://github.com/Exaggarate/carapace` when the Gateway starts and at most once every 24 hours afterward (default: `true`). The default request shares only the Carapace version and platform information in its `User-Agent`; anonymous feature statistics are included only when `telemetry.enabled` is `true`. Setting this to `false`, or setting `CARAPACE_NO_AUTO_UPDATE=1`, prevents all automatic update requests, feature statistics, and update notices, even when `auto.enabled` is `true`. Stored extended-stable selections use the same read-only hint and 24-hour hint schedule.
 - `auto.enabled`: enable background auto-update campaigns for stable and beta package installs and dev git installs when `checkOnStart` is also enabled (default: `false`). Extended-stable never applies automatically.
 
 ---
@@ -182,7 +182,7 @@ Behavior and metadata for CLI guided setup flows (`onboard`, `configure`, `docto
 
 ## Bridge (legacy, removed)
 
-Current builds no longer include the TCP bridge. Nodes connect over the Gateway WebSocket. `bridge.*` keys are no longer part of the config schema (validation fails until removed; `openclaw doctor --fix` can strip unknown keys).
+Current builds no longer include the TCP bridge. Nodes connect over the Gateway WebSocket. `bridge.*` keys are no longer part of the config schema (validation fails until removed; `carapace doctor --fix` can strip unknown keys).
 
 <Accordion title="Legacy bridge config (historical reference)">
 

@@ -2,4 +2,4 @@
 export {
   collectNestedErrorCandidates,
   extractErrorCodeOrErrno,
-} from "@openclaw/normalization-core/error-coercion";
+} from "@carapace/normalization-core/error-coercion";

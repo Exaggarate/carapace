@@ -128,10 +128,10 @@ function writePublishablePluginPackage(repoDir: string): string {
   const packageDir = join(repoDir, "extensions", "diffs");
   mkdirSync(packageDir, { recursive: true });
   writeJsonFile(join(packageDir, "package.json"), {
-    name: "@openclaw/diffs",
+    name: "@carapace/diffs",
     version: "2026.5.3",
     type: "module",
-    openclaw: {
+    carapace: {
       extensions: ["./index.ts"],
       setupEntry: "./setup-entry.ts",
       compat: {
@@ -142,7 +142,7 @@ function writePublishablePluginPackage(repoDir: string): string {
       },
     },
   });
-  writeJsonFile(join(packageDir, "openclaw.plugin.json"), { id: "diffs" });
+  writeJsonFile(join(packageDir, "carapace.plugin.json"), { id: "diffs" });
   writeFileText(join(packageDir, "README.md"), "# Diffs\n");
   writeFileText(join(packageDir, "SKILL.md"), "# Diffs Skill\n");
   writeFileText(join(packageDir, "skills", "diffs", "SKILL.md"), "# Diffs Skill\n");
@@ -185,7 +185,7 @@ function writeOptionalPlatformDependencyPackage(packageDir: string): string {
 
 function writePatchedRuntimeFixture(bundling = "default") {
   const optionalDirect = bundling === "optional-direct" || bundling === "skipped-optional";
-  const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-patched-artifact-");
+  const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-patched-artifact-");
   const packageDir = writePublishablePluginPackage(repoDir);
   writeLocalDependencyPackage(packageDir);
   const packRegistryDependency = (name: string) => {
@@ -405,9 +405,9 @@ describe("plugin npm package manifest staging", () => {
   it("keeps msteams runtime dependencies registry-installed", () => {
     const packageJson = JSON.parse(
       readFileSync(join(process.cwd(), "extensions", "msteams", "package.json"), "utf8"),
-    ) as { openclaw?: { release?: { bundleRuntimeDependencies?: boolean } } };
+    ) as { carapace?: { release?: { bundleRuntimeDependencies?: boolean } } };
 
-    expect(packageJson.openclaw?.release?.bundleRuntimeDependencies).toBe(false);
+    expect(packageJson.carapace?.release?.bundleRuntimeDependencies).toBe(false);
   });
 
   it("wraps Windows npm.cmd staging through cmd.exe without shell mode", () => {
@@ -442,7 +442,7 @@ describe("plugin npm package manifest staging", () => {
         existsSync: () => false,
         platform: "win32",
       }),
-    ).toThrow("OpenClaw refuses to shell out to bare npm on Windows");
+    ).toThrow("Carapace refuses to shell out to bare npm on Windows");
   });
 
   it("retries timed-out bundled dependency installs after cleaning partial output", () => {
@@ -499,7 +499,7 @@ describe("plugin npm package manifest staging", () => {
   });
 
   it("cleans an exhausted timeout before reusing the same package directory", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-timeout-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-timeout-");
     const packageDir = join(repoDir, "extensions", "whatsapp");
     const nodeModulesPath = join(packageDir, "node_modules");
     const timeoutError = Object.assign(new Error("timed out"), { code: "ETIMEDOUT" });
@@ -562,7 +562,7 @@ describe("plugin npm package manifest staging", () => {
     expect(lock).toBe('{"lockfileVersion":3}\n');
     expect(generateOptions).toHaveLength(2);
     expect(generateOptions[0]).toMatchObject({
-      env: { OPENCLAW_NPM_LOCK_COMMAND_TIMEOUT_MS: "180000" },
+      env: { CARAPACE_NPM_LOCK_COMMAND_TIMEOUT_MS: "180000" },
       installStrategy: "shallow",
     });
     expect(generateOptions[1]).toEqual(generateOptions[0]);
@@ -586,7 +586,7 @@ describe("plugin npm package manifest staging", () => {
   });
 
   it("overlays generated channel configs while packing and restores source manifest", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-manifest-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-manifest-");
     const packageDir = join(repoDir, "extensions", "twitch");
     mkdirSync(packageDir, { recursive: true });
     const sourceManifest = {
@@ -598,7 +598,7 @@ describe("plugin npm package manifest staging", () => {
         properties: {},
       },
     };
-    writeJsonFile(join(packageDir, "openclaw.plugin.json"), sourceManifest);
+    writeJsonFile(join(packageDir, "carapace.plugin.json"), sourceManifest);
     writeGeneratedChannelMetadata(repoDir);
 
     const resolved = resolveAugmentedPluginNpmManifest({
@@ -629,21 +629,21 @@ describe("plugin npm package manifest staging", () => {
       },
     });
 
-    const originalText = readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8");
+    const originalText = readFileSync(join(packageDir, "carapace.plugin.json"), "utf8");
     withAugmentedPluginNpmManifestForPackage({ repoRoot: repoDir, packageDir }, () => {
       const stagedManifest = JSON.parse(
-        readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8"),
+        readFileSync(join(packageDir, "carapace.plugin.json"), "utf8"),
       );
       expect(stagedManifest.channelConfigs.twitch.description).toBe("Twitch chat integration");
     });
-    expect(readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8")).toBe(originalText);
+    expect(readFileSync(join(packageDir, "carapace.plugin.json"), "utf8")).toBe(originalText);
   });
 
   it("overlays package-local runtime metadata while packing and restores source package json", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-runtime-");
     const packageDir = writePublishablePluginPackage(repoDir);
     const sourcePackageJson = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
-    sourcePackageJson.openclaw.channel = {
+    sourcePackageJson.carapace.channel = {
       id: "diffs",
       configuredState: {
         specifier: "./configured-state",
@@ -669,20 +669,20 @@ describe("plugin npm package manifest staging", () => {
     });
     expect(resolved.changed).toBe(true);
     expect(resolved.packageJson).toEqual({
-      name: "@openclaw/diffs",
+      name: "@carapace/diffs",
       version: "2026.5.3",
       type: "module",
       bundledDependencies: [],
-      files: ["dist/**", "openclaw.plugin.json", "README.md", "SKILL.md", "skills/**"],
+      files: ["dist/**", "carapace.plugin.json", "README.md", "SKILL.md", "skills/**"],
       peerDependencies: {
-        openclaw: ">=2026.4.30",
+        carapace: ">=2026.4.30",
       },
       peerDependenciesMeta: {
-        openclaw: {
+        carapace: {
           optional: true,
         },
       },
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         setupEntry: "./dist/setup-entry.js",
         channel: {
@@ -710,11 +710,11 @@ describe("plugin npm package manifest staging", () => {
         const stagedPackageJson = JSON.parse(
           readFileSync(join(packageDir, "package.json"), "utf8"),
         );
-        expect(stagedPackageJson.openclaw.extensions).toEqual(["./index.ts"]);
-        expect(stagedPackageJson.openclaw.runtimeExtensions).toEqual(["./dist/index.js"]);
-        expect(stagedPackageJson.openclaw.setupEntry).toBe("./dist/setup-entry.js");
-        expect(stagedPackageJson.openclaw.runtimeSetupEntry).toBe("./dist/setup-entry.js");
-        expect(stagedPackageJson.openclaw.channel.configuredState.specifier).toBe(
+        expect(stagedPackageJson.carapace.extensions).toEqual(["./index.ts"]);
+        expect(stagedPackageJson.carapace.runtimeExtensions).toEqual(["./dist/index.js"]);
+        expect(stagedPackageJson.carapace.setupEntry).toBe("./dist/setup-entry.js");
+        expect(stagedPackageJson.carapace.runtimeSetupEntry).toBe("./dist/setup-entry.js");
+        expect(stagedPackageJson.carapace.channel.configuredState.specifier).toBe(
           "./dist/configured-state.js",
         );
         expect(stagedPackageJson.bundledDependencies).toEqual([]);
@@ -722,8 +722,8 @@ describe("plugin npm package manifest staging", () => {
         expect(stagedPackageJson.files).toContain("dist/**");
         expect(stagedPackageJson.files).not.toContain("package-lock.json");
         expect(stagedPackageJson.files).toContain("skills/**");
-        expect(stagedPackageJson.peerDependencies.openclaw).toBe(">=2026.4.30");
-        expect(stagedPackageJson.peerDependenciesMeta.openclaw.optional).toBe(true);
+        expect(stagedPackageJson.peerDependencies.carapace).toBe(">=2026.4.30");
+        expect(stagedPackageJson.peerDependenciesMeta.carapace.optional).toBe(true);
       },
     );
     expect(readFileSync(join(packageDir, "package.json"), "utf8")).toBe(originalText);
@@ -739,11 +739,11 @@ describe("plugin npm package manifest staging", () => {
   ])(
     "packs and loads both channel-state probes from one package artifact ($name)",
     ({ partial }) => {
-      const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-state-runtime-");
+      const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-state-runtime-");
       const packageDir = writePublishablePluginPackage(repoDir);
       const sourcePackageJson = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
-      sourcePackageJson.openclaw.build = { runtimeFormat: "cjs" };
-      sourcePackageJson.openclaw.channel = {
+      sourcePackageJson.carapace.build = { runtimeFormat: "cjs" };
+      sourcePackageJson.carapace.channel = {
         id: "diffs",
         configuredState: {
           specifier: "./configured-state",
@@ -756,7 +756,7 @@ describe("plugin npm package manifest staging", () => {
       };
       if (partial) {
         for (const metadataKey of ["configuredState", "persistedAuthState"] as const) {
-          sourcePackageJson.openclaw.channel[metadataKey] = {
+          sourcePackageJson.carapace.channel[metadataKey] = {
             ...partial,
             env: { anyOf: ["SYNTHETIC_PLUGIN_TOKEN"] },
           };
@@ -787,17 +787,17 @@ describe("plugin npm package manifest staging", () => {
         const stagedPackageJson = JSON.parse(
           readFileSync(join(packageDir, "package.json"), "utf8"),
         );
-        expect(stagedPackageJson.openclaw.channel.configuredState).toEqual(
+        expect(stagedPackageJson.carapace.channel.configuredState).toEqual(
           partial
-            ? sourcePackageJson.openclaw.channel.configuredState
+            ? sourcePackageJson.carapace.channel.configuredState
             : {
                 specifier: "./dist/configured-state.cjs",
                 exportName: "hasConfiguredChannelState",
               },
         );
-        expect(stagedPackageJson.openclaw.channel.persistedAuthState).toEqual(
+        expect(stagedPackageJson.carapace.channel.persistedAuthState).toEqual(
           partial
-            ? sourcePackageJson.openclaw.channel.persistedAuthState
+            ? sourcePackageJson.carapace.channel.persistedAuthState
             : {
                 specifier: "./dist/auth-presence.cjs",
                 exportName: "hasPersistedChannelAuth",
@@ -846,8 +846,8 @@ describe("plugin npm package manifest staging", () => {
         const packageRoot = join(consumerDir, "package");
         if (partial) {
           const channel = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"))
-            .openclaw.channel;
-          expect(channel).toEqual(sourcePackageJson.openclaw.channel);
+            .carapace.channel;
+          expect(channel).toEqual(sourcePackageJson.carapace.channel);
           for (const metadataKey of ["configuredState", "persistedAuthState"] as const) {
             const probe = {
               entry: {
@@ -880,7 +880,7 @@ import { pathToFileURL } from "node:url";
 const root = ${JSON.stringify(packageRoot)};
 const pkg = JSON.parse(fs.readFileSync(root + "/package.json", "utf8"));
 for (const key of ["configuredState", "persistedAuthState"]) {
-  const state = pkg.openclaw.channel[key];
+  const state = pkg.carapace.channel[key];
   const loaded = await import(new URL(state.specifier, pathToFileURL(root + "/")));
   if (loaded[state.exportName]?.() !== true) throw new Error("packed state checker failed: " + key);
 }
@@ -900,8 +900,8 @@ process.stdout.write("PACKED_PLUGIN_CHANNEL_STATE_OK\\n");
       for (const metadataKey of ["configuredState", "persistedAuthState"] as const) {
         writeJsonFile(join(packageDir, "package.json"), {
           ...sourcePackageJson,
-          openclaw: {
-            ...sourcePackageJson.openclaw,
+          carapace: {
+            ...sourcePackageJson.carapace,
             channel: {
               id: "diffs",
               [metadataKey]: {
@@ -926,7 +926,7 @@ process.stdout.write("PACKED_PLUGIN_CHANNEL_STATE_OK\\n");
   it.each(["default destination", "relative destination", "split destination", "failed command"])(
     "preserves source dependencies while staging npm bundles with %s",
     (scenario) => {
-      const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-portable-optional-");
+      const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-portable-optional-");
       const packageDir = writePublishablePluginPackage(repoDir);
       writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
       writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
@@ -935,12 +935,12 @@ process.stdout.write("PACKED_PLUGIN_CHANNEL_STATE_OK\\n");
         optionalDependencySpec: "file:../../deps/optional-platform-dep",
       });
       writeJsonFile(join(packageDir, "package.json"), {
-        name: "@openclaw/diffs",
+        name: "@carapace/diffs",
         version: "2026.5.3",
         type: "module",
         dependencies: { "local-runtime-dep": "file:./deps/local-runtime-dep" },
-        devDependencies: { "@openclaw/plugin-sdk": "workspace:*" },
-        openclaw: {
+        devDependencies: { "@carapace/plugin-sdk": "workspace:*" },
+        carapace: {
           extensions: ["./index.ts"],
           setupEntry: "./setup-entry.ts",
           compat: { pluginApi: ">=2026.4.30" },
@@ -991,7 +991,7 @@ process.stdout.write("PACKED_PLUGIN_CHANNEL_STATE_OK\\n");
         {
           cwd: repoDir,
           encoding: "utf8",
-          env: { ...process.env, OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1" },
+          env: { ...process.env, CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES: "1" },
         },
       );
       expect(result.status, result.stderr).toBe(scenario === "failed command" ? 7 : 0);
@@ -1048,7 +1048,7 @@ process.stdout.write("PACKED_PLUGIN_CHANNEL_STATE_OK\\n");
     const { repoDir, packageDir, sourceManifest, installedDir, installedSource, registryVersions } =
       writePatchedRuntimeFixture(bundling);
     if (bundling === "unchanged") {
-      delete sourceManifest.openclaw.setupEntry;
+      delete sourceManifest.carapace.setupEntry;
       writeJsonFile(join(packageDir, "package.json"), sourceManifest);
       Object.assign(
         sourceManifest,
@@ -1133,11 +1133,11 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
           ...registryEnv,
           SOURCE_COMMIT: "1".repeat(40),
           SOURCE_REF: "fixture",
-          OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD: "0",
-          OPENCLAW_CLAWHUB_CLI: cli,
-          OPENCLAW_CLAWHUB_PACK_OUTPUT_DIR: consumerDir,
+          CARAPACE_PLUGIN_NPM_RUNTIME_BUILD: "0",
+          CARAPACE_CLAWHUB_CLI: cli,
+          CARAPACE_CLAWHUB_PACK_OUTPUT_DIR: consumerDir,
         };
-        delete env.OPENCLAW_NPM_PACKAGE_LOCK_REPO_ROOT;
+        delete env.CARAPACE_NPM_PACKAGE_LOCK_REPO_ROOT;
         await execFileAsync(
           "bash",
           [
@@ -1174,8 +1174,8 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
             encoding: "utf8",
             env: {
               ...registryEnv,
-              OPENCLAW_NPM_PACKAGE_LOCK_REPO_ROOT: repoDir,
-              OPENCLAW_PLUGIN_NPM_BUNDLE_DEPENDENCIES:
+              CARAPACE_NPM_PACKAGE_LOCK_REPO_ROOT: repoDir,
+              CARAPACE_PLUGIN_NPM_BUNDLE_DEPENDENCIES:
                 bundling === "all" || bundling.startsWith("nested-") ? "1" : "0",
             },
           },
@@ -1271,7 +1271,7 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
       const { repoDir, packageDir, sourceManifest, installedDir, lock } =
         writePatchedRuntimeFixture(layout);
       if (scenario === "bundle opt-out") {
-        sourceManifest.openclaw.release.bundleRuntimeDependencies = false;
+        sourceManifest.carapace.release.bundleRuntimeDependencies = false;
         writeJsonFile(join(packageDir, "package.json"), sourceManifest);
       } else if (scenario === "stale install") {
         writeJsonFile(join(repoDir, "node_modules", ".pnpm", "lock.yaml"), {
@@ -1338,7 +1338,7 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
   );
 
   it("does not require a patch registered for a different resolved dependency version", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-unpatched-version-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-unpatched-version-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
@@ -1365,19 +1365,19 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
   });
 
   it("honors plugin package opt-out for bundled runtime dependencies", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-bundle-opt-out-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-bundle-opt-out-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
     writeLocalDependencyPackage(packageDir);
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@carapace/diffs",
       version: "2026.5.3",
       type: "module",
       dependencies: {
         "local-runtime-dep": "file:./deps/local-runtime-dep",
       },
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {
@@ -1413,7 +1413,7 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
   });
 
   it("refuses to pack publishable plugins before package-local runtime files exist", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-missing-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-runtime-missing-");
     const packageDir = writePublishablePluginPackage(repoDir);
 
     expect(() =>
@@ -1427,16 +1427,16 @@ console.log(JSON.stringify({ path: path.join(destination, packed.filename) }));
   });
 
   it("refuses package file rules that omit advertised package-local runtime files", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-excluded-");
+    const repoDir = makeTempRepoRoot(tempDirs, "carapace-plugin-npm-package-runtime-excluded-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@carapace/diffs",
       version: "2026.5.3",
       type: "module",
       files: ["dist/**", "!dist/setup-entry.js"],
-      openclaw: {
+      carapace: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {

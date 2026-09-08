@@ -1,9 +1,9 @@
 ---
-summary: "Browse non-archived native Codex sessions and paginated transcripts across OpenClaw nodes"
+summary: "Browse non-archived native Codex sessions and paginated transcripts across Carapace nodes"
 title: "Supervise Codex sessions"
 sidebarTitle: "Codex supervision"
 read_when:
-  - You want Codex Desktop or CLI sessions to appear in OpenClaw
+  - You want Codex Desktop or CLI sessions to appear in Carapace
   - You need to continue a stored or idle Codex session or archive a local one
   - You are exposing Codex sessions and transcript history from paired nodes
 ---
@@ -15,12 +15,12 @@ sidebar and Chat pane.
 
 Supported actions depend on the source host and its capabilities:
 
-- A stored or idle local session can create a model-locked OpenClaw Chat from
+- A stored or idle local session can create a model-locked Carapace Chat from
   its bounded persisted user and assistant history. The first message starts a
   native snapshot fork, then starts the full Codex harness thread with exactly
   the model and provider that Codex App Server selected for that fork. Later
   turns restore the canonical native thread's persisted pair while the
-  supervised binding prevents OpenClaw from substituting another runtime,
+  supervised binding prevents Carapace from substituting another runtime,
   model, or fallback. A separate native Codex control can still change that
   persisted pair. An already-created branch opens its existing Chat.
 - A stored local session discovered from another Codex process has unknown live
@@ -41,19 +41,19 @@ Supported actions depend on the source host and its capabilities:
 
 ## Before you begin
 
-- Install the official `@openclaw/codex` plugin on the Gateway. The OpenClaw
+- Install the official `@carapace/codex` plugin on the Gateway. The Carapace
   macOS app can install it when you enable Codex features; CLI installations can
-  run `openclaw plugins install @openclaw/codex`.
+  run `carapace plugins install @carapace/codex`.
 - Install and sign in to Codex Desktop or the Codex CLI on each computer whose
   sessions you want to list.
-- Pair remote computers as OpenClaw nodes. Each computer must opt in locally;
+- Pair remote computers as Carapace nodes. Each computer must opt in locally;
   enabling supervision only on the Gateway does not authorize another node.
 - Use an owner-controlled Gateway. Session titles, working directories, and Git
   branches can reveal sensitive project information.
 
 ## Enable supervision
 
-Guided `openclaw onboard` and macOS first-run setup attempt to install and
+Guided `carapace onboard` and macOS first-run setup attempt to install and
 enable Codex supervision after detecting a native Codex installation and
 successfully activating the selected inference backend. Codex does not need to
 be the primary backend. Supervision becomes available when that opportunistic
@@ -67,7 +67,7 @@ Codex provider, harness, and agent-facing supervision policy unchanged while
 also removing the paired-node catalog list/read commands from this host.
 Existing installations can enable the same capability manually:
 
-Enable the `codex` plugin and its supervision capability in `openclaw.json`:
+Enable the `codex` plugin and its supervision capability in `carapace.json`:
 
 ```json5
 {
@@ -92,10 +92,10 @@ changing plugin activation.
 With no explicit `appServer` connection settings, supervision uses managed
 stdio connections for the available local Codex stores. The catalog combines
 the process user's `CODEX_HOME` with existing `codex-home` stores under configured
-OpenClaw agent directories, deduplicates canonical paths, and assigns each store
+Carapace agent directories, deduplicates canonical paths, and assigns each store
 an opaque local host id. Each store gets its own App Server connection; its path
 is never exposed in the catalog. List, read, continue, archive, adoption, and
-terminal resume keep the selected source while retaining the explicit OpenClaw
+terminal resume keep the selected source while retaining the explicit Carapace
 route agent as owner. The ordinary Codex harness remains agent-scoped by default.
 Set `appServer.homeScope: "user"` explicitly if the harness should share native
 Codex state too. Supervision honors explicit `appServer` connection settings
@@ -109,13 +109,13 @@ and provider configuration without changing the default for other sessions.
 Watched adopted Chats also participate in [session state awareness](/concepts/session-state).
 
 For the default local supervision connection, the store is shared with native
-Codex clients. OpenClaw does not assume that another client shares the same live
+Codex clients. Carapace does not assume that another client shares the same live
 App Server process, and native status ownership is process-local. It therefore
 treats a thread that its supervision App Server reports as `notLoaded` as
 **Stored / activity unknown**, not as idle.
 
 Apply the same opt-in on every headless node host whose sessions should appear.
-The native OpenClaw macOS app reads the same local setting when it advertises
+The native Carapace macOS app reads the same local setting when it advertises
 its Codex catalog to the paired Gateway. That paired native Mac catalog supports
 only the default or explicit `appServer.transport: "stdio"` with an unset or
 explicit `appServer.homeScope: "user"`. `command`, `args`, and `clearEnv` are
@@ -125,7 +125,7 @@ capability or command, and a stale direct invocation fails instead of exposing
 the user Codex home or spawning a different local stdio App Server.
 
 The optional `agentId` in native Mac catalog list/read requests identifies the
-Gateway's OpenClaw route owner. It cannot select an agent-specific Codex home;
+Gateway's Carapace route owner. It cannot select an agent-specific Codex home;
 the native catalog remains user-home stdio only. Headless node catalog requests
 still resolve `agentId` against that node's configured agents and use the selected
 agent's configured catalog source. This does not map agent IDs between computers.
@@ -134,8 +134,8 @@ A newly advertised node command changes the node's approved command surface.
 Approve the update from the Gateway host:
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
+carapace nodes pending
+carapace nodes approve <requestId>
 ```
 
 Non-archived Codex sessions also appear in the main Control UI sidebar, grouped
@@ -176,7 +176,7 @@ hide results from healthy hosts.
 The sidebar warning includes the catalog error code and the safe underlying
 Gateway error. Open **Settings > Automation > Plugins > Codex > Native Session
 Discovery** to disable discovery without disabling Codex. For
-`NODE_LIST_FAILED`, compare `openclaw nodes list` and **Settings > Devices**;
+`NODE_LIST_FAILED`, compare `carapace nodes list` and **Settings > Devices**;
 the detailed cause identifies the pairing-store, node-registry, permission, or
 Gateway lifecycle failure that needs repair.
 
@@ -184,7 +184,7 @@ Gateway lifecycle failure that needs repair.
 
 Select **+** beside **Codex**, choose a native host and folder, then press
 **Start in terminal** or Enter. This launches a new interactive Codex CLI, not
-a model-locked OpenClaw Chat or an adopted native thread. Codex owns its native
+a model-locked Carapace Chat or an adopted native thread. Codex owns its native
 account, model, configuration, and session identity. The optional prompt is
 passed as text, never as CLI options. Local catalog sources preserve their
 selected Codex home, including opaque secondary local host IDs.
@@ -192,12 +192,12 @@ selected Codex home, including opaque secondary local host IDs.
 Terminal creation requires `operator.admin`, `gateway.cliAgents.enabled`, the
 installed CLI, and the active catalog plugin. Terminals are enabled by default;
 `gateway.terminal.enabled: false` blocks creation.
-It does not require an eligible OpenClaw model. A paired headless node must
+It does not require an eligible Carapace model. A paired headless node must
 advertise and permit **`codex.terminal.start.v1`**; the existing
 `codex.terminal.resume.v1` alone does not support fresh starts. The node chooses
 its own installed Codex executable and native account/configuration. The Gateway
 agent remains the authorization context; it need not exist in the node's
-OpenClaw configuration.
+Carapace configuration.
 
 Local starts support the Gateway folder/worktree chooser. Node starts require
 an existing absolute directory on that node and never substitute the node's
@@ -215,14 +215,14 @@ The terminal CLI exposes the same non-archived catalog and Gateway-local branch
 and archive actions:
 
 ```bash
-openclaw codex sessions [--agent <id>] [--search <text>] [--host <id>] [--limit <count>] [--cursor <cursor>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
-openclaw codex continue <thread-id> [--agent <id>] [--host <id>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
-openclaw codex archive <thread-id> --confirm-no-other-runner [--agent <id>] [--host <id>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+carapace codex sessions [--agent <id>] [--search <text>] [--host <id>] [--limit <count>] [--cursor <cursor>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+carapace codex continue <thread-id> [--agent <id>] [--host <id>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+carapace codex archive <thread-id> --confirm-no-other-runner [--agent <id>] [--host <id>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
 ```
 
-`openclaw codex sessions` options:
+`carapace codex sessions` options:
 
-- `--agent <id>` selects the OpenClaw owner in a multi-agent Gateway.
+- `--agent <id>` selects the Carapace owner in a multi-agent Gateway.
 - `--search <text>` searches session titles case-insensitively.
 - `--host <id>` limits the response to one stable catalog host, such as
   `gateway:local`, an opaque `gateway:local:<source-id>`, or `node:<node-id>`.
@@ -258,7 +258,7 @@ command.
 ## Branch from a local session
 
 Choose **Continue as branch** on a stored or idle row from the Gateway computer.
-OpenClaw creates a normal Chat entry, mirrors bounded user and assistant history
+Carapace creates a normal Chat entry, mirrors bounded user and assistant history
 through the source's last terminal persisted turn (completed, interrupted, or
 failed), records a pending harness branch, and opens the Chat. The generic model
 picker is locked, but no concrete model or provider has been selected yet. The
@@ -276,25 +276,25 @@ Send the first normal Chat message to begin work. The Codex harness installs the
 real approval, elicitation, event, and delivery handlers. It uses an ephemeral
 native fork on the supervision connection to pin the source snapshot without
 supplying a model or provider override. Codex App Server selects both from its
-current native configuration and returns the actual selection. OpenClaw confirms
+current native configuration and returns the actual selection. Carapace confirms
 the probe's subscription is released before creating the canonical branch; the
 probe never becomes stored history or an archive artifact. On that same
-connection, OpenClaw starts the canonical `appServer`-source full harness thread
+connection, Carapace starts the canonical `appServer`-source full harness thread
 under its cwd and runtime policy with exactly that returned pair, injects the
 bounded visible history, and commits the branch binding. The canonical thread
-has the full OpenClaw harness tool surface. This is a visible-history branch, not
+has the full Carapace harness tool surface. This is a visible-history branch, not
 a full native rollout clone: source reasoning, tool calls, and tool results are
 omitted. This and every later turn stays on the supervised Codex connection
-rather than another OpenClaw model runtime or the ordinary agent-home harness.
+rather than another Carapace model runtime or the ordinary agent-home harness.
 
 The returned selection is not proof of the source's historical model. If the
 current native configuration differs from the model recorded for the source's
-last turn, Codex emits its normal model-difference warning. OpenClaw uses the
+last turn, Codex emits its normal model-difference warning. Carapace uses the
 returned pair for the canonical thread start. Codex persists that canonical
 thread's native model and provider, and later resumes preserve them because
-OpenClaw omits model and provider overrides. If the canonical thread is changed
-through a separate native Codex control, OpenClaw accepts Codex's persisted
-selection. OpenClaw never substitutes its outer model or fallback chain.
+Carapace omits model and provider overrides. If the canonical thread is changed
+through a separate native Codex control, Carapace accepts Codex's persisted
+selection. Carapace never substitutes its outer model or fallback chain.
 
 The supervised model-locked Chat cannot be deleted, switch models, use `/new`
 or `/reset`, invoke the Gateway session-reset action, or use the generic
@@ -316,7 +316,7 @@ closed instead of moving to an ordinary agent-home session.
 
 A new adoption snapshots the native title as a trimmed display name, capped at
 500 UTF-16 code units without splitting surrogate pairs. Native titles can be
-duplicated or blank; they do not claim unique OpenClaw labels. An explicit local
+duplicated or blank; they do not claim unique Carapace labels. An explicit local
 label takes priority over the stored display name. Reopening or recovering a Chat
 preserves its existing label and title snapshot, including older automatically
 assigned labels; renaming the native source does not resync either field.
@@ -338,18 +338,18 @@ still provide bounded title-only search. Rename, unarchive, detached fork, and
 archive of an unrelated unowned thread require
 `allowWriteControls`. Neither option bypasses the locked binding.
 
-OpenClaw does not subscribe to or answer approval requests while merely listing
+Carapace does not subscribe to or answer approval requests while merely listing
 the source thread or displaying the pending Chat. Starting a distinct canonical
 harness thread on the first turn lets another Codex process keep owning the
 source without creating competing rollout writers.
 
 The original CLI, VS Code, Atlas, or ChatGPT source remains visible to native
-clients and the OpenClaw catalog. The canonical branch is stored as a native
+clients and the Carapace catalog. The canonical branch is stored as a native
 Codex thread, but its source kind is `appServer`; Codex Desktop or another
 native client may filter that source kind, so the branch itself is not guaranteed
 to appear in every native history view.
 
-An active row reported by OpenClaw's App Server cannot start a new branch. Wait
+An active row reported by Carapace's App Server cannot start a new branch. Wait
 for the current turn to finish and refresh the catalog. Codex App Server
 serializes mutations within one process, but it does not provide an exclusive
 cross-process runner or approval-owner lease.
@@ -365,7 +365,7 @@ Forking an original imported user message keeps the original-source flow: the
 source must still be readable, and the child's first turn materializes its
 bounded imported history.
 
-Forking a user message created in the canonical OpenClaw conversation instead
+Forking a user message created in the canonical Carapace conversation instead
 creates a native child immediately, cut before that native turn. Codex retains
 its raw history, including the originally injected prefix, without another
 history import. The local Chat copies only the verified display prefix before
@@ -381,12 +381,12 @@ provenance remain unverifiable: matching text or an adjacent assistant reply
 cannot establish the missing native boundary. A later verified turn does not
 repair an earlier unverifiable prefix. Start a fresh Chat from the original
 source, or fork an original imported message while that source remains
-available, then create new canonical turns. OpenClaw does not backfill old rows.
+available, then create new canonical turns. Carapace does not backfill old rows.
 
 Canonical message forks use the shipping Codex App Server's developer-message
-API. OpenClaw keeps the complete current generic instructions in native thread
+API. Carapace keeps the complete current generic instructions in native thread
 configuration and appends one developer message that replaces earlier
-OpenClaw-supplied generic policy, including removed sections or an explicit
+Carapace-supplied generic policy, including removed sections or an explicit
 empty policy. Independent native managed, guardian, security, collaboration,
 and project instructions retain their authority. This is textual supersession;
 it does not delete earlier history or change native permission enforcement.
@@ -402,7 +402,7 @@ They use the source thread's current model selection when loaded in the selected
 App Server, or its latest persisted selection when unloaded. If Codex cannot
 report that selection, update Codex or fork an original imported message instead.
 
-Before publishing the child, OpenClaw verifies the native cut, selected model
+Before publishing the child, Carapace verifies the native cut, selected model
 and provider, immutable tool catalog, local display prefix, and exact creation
 owner. It rejects changes to the source rollout or selected model during
 initialization. Its automatic native subscription is released before readiness.
@@ -424,7 +424,7 @@ not satisfy that isolation requirement.
 
 Later turns require native unload evidence before applying current harness
 configuration. An unsubscribe acknowledgement alone does not establish that
-the thread unloaded. Once configuration is proven, OpenClaw refreshes the
+the thread unloaded. Once configuration is proven, Carapace refreshes the
 complete generic policy before starting the turn. Stop competing native work
 and reconnect if configuration application cannot be verified; the bound
 conversation is preserved. An uncertain refresh also preserves the conversation
@@ -440,8 +440,8 @@ next admitted supervised run supplies current configuration and refreshes it.
 ## Archive a local session
 
 Choose **Archive** on a stored or idle Gateway-local row, then confirm that no
-other Codex client or OpenClaw runner is using that thread or its spawned
-descendants. OpenClaw freshly reads the process-local status, proceeds only for
+other Codex client or Carapace runner is using that thread or its spawned
+descendants. Carapace freshly reads the process-local status, proceeds only for
 `idle` or `notLoaded`, calls the native Codex archive operation, and removes the
 session from the non-archived list. Native Codex also attempts to archive the
 thread's spawned descendants.
@@ -450,8 +450,8 @@ Archive is unavailable when the fresh read reports the session active or in an
 error state, when it belongs to a paired node, or while a newly created
 supervised Chat still has a pending branch from that source. Send the Chat's
 first message to materialize its canonical branch before archiving the source.
-Archive is also blocked when OpenClaw knows that an active binding owns the
-exact target thread or any non-archived spawned descendant. OpenClaw follows the
+Archive is also blocked when Carapace knows that an active binding owns the
+exact target thread or any non-archived spawned descendant. Carapace follows the
 experimental Codex descendant query through every page; an invalid response,
 request failure, repeated cursor or thread, or safety-limit exhaustion rejects
 archive.
@@ -506,10 +506,10 @@ Chat. That message and later turns run `codex exec resume` on the node with its
 native CLI configuration and return its final text. This text-prompt path does
 not create the Gateway-local branch or forward the full App Server harness
 events, approvals, tool calls, or structured attachments. Bound turns still
-require owner/admin authority and are blocked while OpenClaw sandboxing is active.
+require owner/admin authority and are blocked while Carapace sandboxing is active.
 
 Avoid running the same thread in another Codex client while using this Chat.
-The node prevents overlapping OpenClaw resume turns within its own process, but
+The node prevents overlapping Carapace resume turns within its own process, but
 `notLoaded` does not prove that another native client is idle and there is no
 cross-process runner lease. Paired-node **Archive** remains unavailable,
 regardless of continuation or terminal capabilities.
@@ -568,7 +568,7 @@ Sessions**, where the full harness installs approval and tool handlers before
 continuation. Interrupt likewise requires an active readable turn. These tools
 do not resume or start an idle source thread.
 
-`openclaw doctor --fix` moves a retired `codex-supervisor` entry, its endpoint
+`carapace doctor --fix` moves a retired `codex-supervisor` entry, its endpoint
 and permission fields, and plugin allow/deny policy references into the official
 `codex` plugin without overwriting explicit canonical settings. The standalone
 compatibility MCP adapter continues to load the same five tools from that
@@ -580,7 +580,7 @@ For every supervision config field, see
 
 ## Troubleshooting
 
-**No sessions appear:** verify that `@openclaw/codex` is installed, both the
+**No sessions appear:** verify that `@carapace/codex` is installed, both the
 plugin and `supervision.enabled` are true, the current plugin allowlist permits
 `codex`, and the sessions are not archived. Restart the Gateway or node after
 changing activation.
@@ -598,7 +598,7 @@ sources, transcript, Continue, Archive, and terminal actions verify the selected
 thread directly, check non-archived native index membership, and validate its
 rollout metadata in the selected Codex home. These checks share one request
 budget and do not scan the full catalog. Missing, unreadable, inconsistent, or
-OpenClaw-managed metadata is not accepted. Refresh the catalog, verify the session
+Carapace-managed metadata is not accepted. Refresh the catalog, verify the session
 in its native Codex home, and retry. This error does not prove that the thread
 does not exist. Ordinary discovery keeps its existing behavior; remote sources
 continue to use native catalog verification.
@@ -612,7 +612,7 @@ read-only for archive.
 no archived view. Run `codex unarchive <thread-id>` or use Codex Desktop to show
 it again.
 
-**Old `codex-supervisor` config remains:** run `openclaw doctor --fix`. Doctor
+**Old `codex-supervisor` config remains:** run `carapace doctor --fix`. Doctor
 moves the retired plugin entry and related plugin-policy references into
 `plugins.entries.codex.config.supervision` without overwriting explicit Codex
 settings.

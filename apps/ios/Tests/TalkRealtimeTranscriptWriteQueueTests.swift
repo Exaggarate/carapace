@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import CarapaceKit
 import Testing
-@testable import OpenClaw
+@testable import Carapace
 
 @MainActor
 struct TalkRealtimeTranscriptWriteQueueTests {

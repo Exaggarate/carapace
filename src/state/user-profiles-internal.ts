@@ -2,9 +2,9 @@ import type { DatabaseSync } from "node:sqlite";
 import { expressionBuilder, type SelectQueryBuilder } from "kysely";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openCarapaceStateDatabase,
+  type CarapaceStateDatabaseOptions,
+} from "./carapace-state-db.js";
 import {
   ensureUserProfilesSchema,
   type UserProfilesDatabase,
@@ -82,10 +82,10 @@ export function formatUserProfileAvatarEtag(sha256: string, mime: UserProfileAva
 
 export function getProfileAvatar(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: CarapaceStateDatabaseOptions = {},
 ): UserProfileAvatar | undefined {
   ensureUserProfilesSchema(options);
-  const profile = selectResolvedUserProfileById(openOpenClawStateDatabase(options).db, profileId);
+  const profile = selectResolvedUserProfileById(openCarapaceStateDatabase(options).db, profileId);
   const mime = normalizeUserProfileAvatarMime(profile?.avatar_mime ?? null);
   return profile?.avatar && mime && profile.avatar_sha256
     ? { bytes: profile.avatar, mime, sha256: profile.avatar_sha256, updatedAt: profile.updated_at }

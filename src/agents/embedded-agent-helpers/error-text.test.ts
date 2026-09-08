@@ -1,7 +1,7 @@
 // Covers assistant error formatting for streaming, sandbox, and context errors.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "carapace/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import { MALFORMED_STREAMING_FRAGMENT_ERROR_MESSAGE } from "../../shared/assistant-error-format.js";
 import { makeAssistantMessageFixture } from "../test-helpers/assistant-message-fixtures.js";
 import { formatAssistantErrorText, formatUserFacingAssistantErrorText } from "./error-text.js";
@@ -74,7 +74,7 @@ describe("formatAssistantErrorText streaming JSON parse classification", () => {
     ({ sessionKey, agentId, mode }) => {
       // Formatting may be called multiple times for the same error; audit logs
       // should stay deduplicated per blocked assistant error.
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           defaults: {
             sandbox: { mode, scope: "agent" },

@@ -3,7 +3,7 @@
  *
  * Reads lightweight thread placement and inbound conversation hooks without full plugin loading.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { loadOptionalBundledChannelPublicArtifact } from "./optional-public-artifact.js";
 
 type ThreadBindingPlacement = "current" | "child";

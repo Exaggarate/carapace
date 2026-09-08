@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
   buildGroupedTestComparison,
@@ -159,7 +159,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("fails missing report inputs instead of writing an empty green report", () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const missingReport = path.join(tempDir, "missing.json");
     const output = path.join(tempDir, "group-report.json");
     try {
@@ -192,7 +192,7 @@ describe("scripts/test-group-report aggregation", () => {
     ["missing testResults array", {}],
     ["empty testResults array", { testResults: [] }],
   ])("fails malformed report inputs with %s", (reason, payload) => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const reportPath = path.join(tempDir, "malformed.json");
     const output = path.join(tempDir, "group-report.json");
     fs.writeFileSync(reportPath, `${JSON.stringify(payload)}\n`, "utf8");
@@ -224,7 +224,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("fails when every allow-failures run produces no JSON report", () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const missingConfig = path.join(tempDir, "missing-vitest.config.ts");
     const output = path.join(tempDir, "group-report.json");
     try {
@@ -258,7 +258,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("continues allow-failures profiling after a config exits without JSON", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const reportDir = path.join(tempDir, "reports");
     const calls: string[] = [];
     try {
@@ -318,7 +318,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("continues allow-failures profiling after a config writes an empty JSON report", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     try {
       const result = await runReportPlans({
         args: parseTestGroupReportArgs([
@@ -374,7 +374,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("stops admitting report plans after a parallel failure", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const labels = ["first", "second", "third"];
     const started: string[] = [];
     const resolvers = new Map<string, (status: number) => void>();
@@ -435,7 +435,7 @@ describe("scripts/test-group-report aggregation", () => {
   });
 
   it("prints slow tests as soon as each config report completes", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {
       await runReportPlans({
@@ -636,7 +636,7 @@ describe("scripts/test-group-report comparison", () => {
   });
 
   it("fails compare mode for malformed grouped reports", () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const beforePath = path.join(tempDir, "before.json");
     const afterPath = path.join(tempDir, "after.json");
     const output = path.join(tempDir, "compare.json");
@@ -671,7 +671,7 @@ describe("scripts/test-group-report comparison", () => {
   });
 
   it("fails compare mode for empty grouped report evidence", () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const beforePath = path.join(tempDir, "before.json");
     const afterPath = path.join(tempDir, "after.json");
     const output = path.join(tempDir, "compare.json");
@@ -996,7 +996,7 @@ describe("scripts/test-group-report child process guard", () => {
       return;
     }
 
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-test-group-report-"));
     const markerPath = path.join(tempDir, "marker.txt");
     try {
       const result = await spawnText(
@@ -1042,7 +1042,7 @@ describe("scripts/test-group-report child process guard", () => {
       return;
     }
 
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const childPidPath = path.join(tempDir, "child.pid");
     const reportModuleUrl = pathToFileURL(path.resolve("scripts/test-group-report.mts")).href;
     let childPid: number | undefined;
@@ -1095,7 +1095,7 @@ describe("scripts/test-group-report child process guard", () => {
       return;
     }
 
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const childPidPath = path.join(tempDir, "child.pid");
     const readyPath = path.join(tempDir, "child.ready");
     const reportModuleUrl = pathToFileURL(path.resolve("scripts/test-group-report.mts")).href;
@@ -1164,7 +1164,7 @@ describe("scripts/test-group-report child process guard", () => {
       return;
     }
 
-    const tempDir = makeTempDir(tempDirs, "openclaw-test-group-report-");
+    const tempDir = makeTempDir(tempDirs, "carapace-test-group-report-");
     const childPidPath = path.join(tempDir, "child.pid");
     const cleanupPath = path.join(tempDir, "child.cleanup");
     const childScript = [
@@ -1219,7 +1219,7 @@ describe("scripts/test-group-report child process guard", () => {
   });
 
   it.concurrent("streams large child output to a log path without retaining it", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-log-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-test-group-report-log-"));
     const logPath = path.join(tempDir, "child.log");
     try {
       const result = await spawnText(
@@ -1279,7 +1279,7 @@ describe("scripts/test-group-report child process guard", () => {
   });
 
   it.concurrent("stops streamed child output after the configured log cap", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-log-cap-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-test-group-report-log-cap-"));
     const logPath = path.join(tempDir, "child.log");
     try {
       const result = await spawnText(
@@ -1321,14 +1321,14 @@ describe("scripts/test-group-report run plans", () => {
   beforeAll(() => {
     withEnv(
       {
-        OPENCLAW_TEST_PROJECTS_PARALLEL: undefined,
-        OPENCLAW_TEST_PROJECTS_LEAF_SHARDS: undefined,
+        CARAPACE_TEST_PROJECTS_PARALLEL: undefined,
+        CARAPACE_TEST_PROJECTS_LEAF_SHARDS: undefined,
       },
       () => {
         serialFullSuitePlans = resolveRunPlans(parseTestGroupReportArgs(["--full-suite"]));
       },
     );
-    withEnv({ OPENCLAW_TEST_PROJECTS_PARALLEL: "6" }, () => {
+    withEnv({ CARAPACE_TEST_PROJECTS_PARALLEL: "6" }, () => {
       parallelFullSuitePlans = resolveRunPlans(parseTestGroupReportArgs(["--full-suite"]));
     });
   });
@@ -1354,7 +1354,7 @@ describe("scripts/test-group-report run plans", () => {
 
   it("caps Vitest workers for full-suite profiling by default", () => {
     expect(resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {})).toEqual({
-      OPENCLAW_VITEST_MAX_WORKERS: "2",
+      CARAPACE_VITEST_MAX_WORKERS: "2",
     });
   });
 
@@ -1362,19 +1362,19 @@ describe("scripts/test-group-report run plans", () => {
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {}, "commands"),
     ).toEqual({
-      OPENCLAW_VITEST_MAX_WORKERS: "1",
+      CARAPACE_VITEST_MAX_WORKERS: "1",
     });
   });
 
   it("preserves explicit Vitest worker budgets for full-suite profiling", () => {
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {
-        OPENCLAW_VITEST_MAX_WORKERS: "2",
+        CARAPACE_VITEST_MAX_WORKERS: "2",
       }),
     ).toEqual({});
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {
-        OPENCLAW_TEST_WORKERS: "2",
+        CARAPACE_TEST_WORKERS: "2",
       }),
     ).toEqual({});
   });
@@ -1404,7 +1404,7 @@ describe("scripts/test-group-report run plans", () => {
       { cwd: "/repo", env: {} },
     );
 
-    expect(specs.map((spec) => spec.env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH)).toEqual([
+    expect(specs.map((spec) => spec.env.CARAPACE_VITEST_FS_MODULE_CACHE_PATH)).toEqual([
       path.join("/repo", ".cache", "vitest", "0-a.ts"),
       path.join("/repo", ".cache", "vitest", "1-b.ts"),
     ]);

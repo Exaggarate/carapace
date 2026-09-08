@@ -1,5 +1,5 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { createPluginRuntimeMock } from "carapace/plugin-sdk/channel-test-helpers";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
 import { expect, it, vi } from "vitest";
 import { setQaChannelRuntime } from "../api.js";
 import { handleQaInbound } from "./inbound.js";
@@ -22,7 +22,7 @@ it("admits symbolic group members from each supplied config snapshot", async () 
       accessGroups: {
         reviewers: { type: "message.senders", members: { "qa-channel": members } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await handleQaInbound({ ...params, config });
 

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { expect, it, vi } from "vitest";
 import { SessionManager } from "../../agents/sessions/session-manager.js";
 import { getRuntimeConfig } from "../../config/config.js";
@@ -14,13 +14,13 @@ import {
 import { discoverAllSessions, loadSessionCostSummary } from "../../infra/session-cost-usage.js";
 import type { AssistantMessage } from "../../llm/types.js";
 import type { SessionsUsageResult } from "../../shared/usage-types.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { usageHandlers } from "./usage.js";
 
 it.each([undefined, "agent:opus:slack:dm", "global"])(
   "keeps independent same-id transcripts with opus store key %s through the real usage handler",
   async (opusKey) => {
-    const state = await createOpenClawTestState({ label: "usage-owner-integration" });
+    const state = await createCarapaceTestState({ label: "usage-owner-integration" });
     try {
       await state.writeConfig({
         agents: { ownership: "explicit", entries: { main: {}, opus: {} } },
@@ -116,7 +116,7 @@ it.each([
 ])(
   "keeps family usage with $name before the current SQLite transcript exists",
   async ({ artifact, directOwner, currentArtifact }) => {
-    const state = await createOpenClawTestState({ label: "usage-empty-current-family" });
+    const state = await createCarapaceTestState({ label: "usage-empty-current-family" });
     try {
       await state.writeConfig({
         agents: { ownership: "explicit", entries: { main: {}, opus: {} } },

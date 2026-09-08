@@ -5,16 +5,16 @@ import { afterEach, describe, expect, it } from "vitest";
 import gitPrerequisites from "../../.github/actions/git-owner/test-prerequisites.json" with { type: "json" };
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db-contract.js";
-import { tableExists } from "../state/openclaw-state-db-schema-helpers.js";
+import { CARAPACE_STATE_SCHEMA_VERSION } from "../state/carapace-state-db-contract.js";
+import { tableExists } from "../state/carapace-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { STATE_SCHEMA_10_TO_9_DOWNGRADE_SQL } from "../state/openclaw-state-schema-v10-retirement.test-support.js";
-import { STATE_SCHEMA_11_TO_10_TABLES_SQL } from "../state/openclaw-state-schema-v11-retirement.test-support.js";
-import { STATE_SCHEMA_12_TO_11_DOWNGRADE_SQL } from "../state/openclaw-state-schema-v12-foldin.test-support.js";
-import { STATE_SCHEMA_13_TO_12_DOWNGRADE_SQL } from "../state/openclaw-state-schema-v13-widerow.test-support.js";
+  closeCarapaceStateDatabaseForTest,
+  openCarapaceStateDatabase,
+} from "../state/carapace-state-db.js";
+import { STATE_SCHEMA_10_TO_9_DOWNGRADE_SQL } from "../state/carapace-state-schema-v10-retirement.test-support.js";
+import { STATE_SCHEMA_11_TO_10_TABLES_SQL } from "../state/carapace-state-schema-v11-retirement.test-support.js";
+import { STATE_SCHEMA_12_TO_11_DOWNGRADE_SQL } from "../state/carapace-state-schema-v12-foldin.test-support.js";
+import { STATE_SCHEMA_13_TO_12_DOWNGRADE_SQL } from "../state/carapace-state-schema-v13-widerow.test-support.js";
 import { recordAuditEvent } from "./audit-event-store.js";
 import type { OutboundMessageProgressInput } from "./audit-event-types.js";
 import {
@@ -51,7 +51,7 @@ function ensurePinnedReaderCommit(repositoryRoot: string): void {
 }
 
 function databaseOptions() {
-  return { env: { OPENCLAW_STATE_DIR: tempDirs.make("message-progress-") } };
+  return { env: { CARAPACE_STATE_DIR: tempDirs.make("message-progress-") } };
 }
 
 function progressInput(
@@ -118,15 +118,15 @@ function terminalInput(
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceStateDatabaseForTest();
 });
 
 describe("outbound message progress companion", () => {
   it("upgrades the predecessor progress table before a run-only insert", () => {
     const database = databaseOptions();
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     const schema = fs
-      .readFileSync(new URL("../state/openclaw-state-schema.sql", import.meta.url), "utf8")
+      .readFileSync(new URL("../state/carapace-state-schema.sql", import.meta.url), "utf8")
       .replace("  context_id TEXT,\n  execution_id TEXT,\n", "");
     const start = schema.indexOf("CREATE TABLE IF NOT EXISTS outbound_message_progress (");
     const end = schema.indexOf(") STRICT;", start);
@@ -145,9 +145,9 @@ describe("outbound message progress companion", () => {
 
   it("stays absent through startup, reads, and terminal-only writes at the current schema", () => {
     const database = databaseOptions();
-    const opened = openOpenClawStateDatabase(database);
+    const opened = openCarapaceStateDatabase(database);
     expect(opened.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(tableExists(opened.db, "outbound_message_progress")).toBe(false);
     expect(tableExists(opened.db, "outbound_message_execution_bindings")).toBe(false);
@@ -171,13 +171,13 @@ describe("outbound message progress companion", () => {
     const database = databaseOptions();
     const queued = progressInput("message.outbound.queued");
     const first = recordOutboundMessageProgress(queued, database);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     const recoveredReplay = recordOutboundMessageProgress(queued, database);
     recordOutboundMessageProgress(progressInput("message.outbound.platform-started"), database);
 
     expect(first).toMatchObject({ action: "message.outbound.queued", outcome: "queued" });
     expect(recoveredReplay).toBeUndefined();
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     expect(tableExists(db, "outbound_message_progress")).toBe(true);
     expect(
       (
@@ -228,7 +228,7 @@ describe("outbound message progress companion", () => {
     });
     expect(first.entries).toHaveLength(1);
     expect(first.nextCursor).toBeDefined();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const second = pageOutboundMessageAuditEventsForRun({
       runId: "run-progress",
@@ -273,13 +273,13 @@ describe("outbound message progress companion", () => {
       }),
       database,
     );
-    openOpenClawStateDatabase(database);
+    openCarapaceStateDatabase(database);
     expect(
-      tableExists(openOpenClawStateDatabase(database).db, "outbound_message_execution_bindings"),
+      tableExists(openCarapaceStateDatabase(database).db, "outbound_message_execution_bindings"),
     ).toBe(true);
     const repositoryRoot = process.cwd();
     ensurePinnedReaderCommit(repositoryRoot);
-    const projectedDatabase = openOpenClawStateDatabase(database).db;
+    const projectedDatabase = openCarapaceStateDatabase(database).db;
     // Only audit rows belong to this proof. Restore the empty binding and Workshop
     // proposal tables from the immutable reader's schema without inventing a
     // production downgrade.
@@ -293,7 +293,7 @@ describe("outbound message progress companion", () => {
       pinnedSchemaDatabase.exec(
         execFileSync(
           "git",
-          ["show", `${PINNED_PRE_C04_READER_SHA}:src/state/openclaw-state-schema.sql`],
+          ["show", `${PINNED_PRE_C04_READER_SHA}:src/state/carapace-state-schema.sql`],
           { cwd: repositoryRoot, encoding: "utf8" },
         ),
       );
@@ -318,7 +318,7 @@ describe("outbound message progress companion", () => {
     projectedDatabase.exec(STATE_SCHEMA_12_TO_11_DOWNGRADE_SQL);
     projectedDatabase.exec(STATE_SCHEMA_11_TO_10_TABLES_SQL);
     projectedDatabase.exec(STATE_SCHEMA_10_TO_9_DOWNGRADE_SQL);
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
 
     const checkoutParent = tempDirs.make("message-progress-pinned-reader-");
     const pinnedCheckout = path.join(checkoutParent, "checkout");
@@ -341,14 +341,14 @@ describe("outbound message progress companion", () => {
           "--input-type=module",
           "--eval",
           `
-            const stateDir = process.env.OPENCLAW_C04_PINNED_READER_STATE_DIR;
+            const stateDir = process.env.CARAPACE_C04_PINNED_READER_STATE_DIR;
             const { listAuditEvents } = await import("./src/audit/audit-event-store.ts");
             const {
-              closeOpenClawStateDatabaseForTest,
-              openOpenClawStateDatabase,
-            } = await import("./src/state/openclaw-state-db.ts");
-            const database = { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
-            const opened = openOpenClawStateDatabase(database);
+              closeCarapaceStateDatabaseForTest,
+              openCarapaceStateDatabase,
+            } = await import("./src/state/carapace-state-db.ts");
+            const database = { env: { ...process.env, CARAPACE_STATE_DIR: stateDir } };
+            const opened = openCarapaceStateDatabase(database);
             const schemaVersion = opened.db.prepare("PRAGMA user_version").get().user_version;
             const quickCheck = opened.db.prepare("PRAGMA quick_check").get().quick_check;
             const events = listAuditEvents({
@@ -356,7 +356,7 @@ describe("outbound message progress companion", () => {
               limit: 10,
               database,
             }).events;
-            closeOpenClawStateDatabaseForTest();
+            closeCarapaceStateDatabaseForTest();
             console.log("C04_PINNED_READER_RESULT=" + JSON.stringify({
               schemaVersion,
               quickCheck,
@@ -369,7 +369,7 @@ describe("outbound message progress companion", () => {
           cwd: pinnedCheckout,
           env: {
             ...process.env,
-            OPENCLAW_C04_PINNED_READER_STATE_DIR: database.env.OPENCLAW_STATE_DIR,
+            CARAPACE_C04_PINNED_READER_STATE_DIR: database.env.CARAPACE_STATE_DIR,
           },
           encoding: "utf8",
           stdio: ["ignore", "pipe", "pipe"],
@@ -392,9 +392,9 @@ describe("outbound message progress companion", () => {
       });
     }
 
-    const reopened = openOpenClawStateDatabase(database).db;
+    const reopened = openCarapaceStateDatabase(database).db;
     expect(reopened.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_STATE_SCHEMA_VERSION,
+      user_version: CARAPACE_STATE_SCHEMA_VERSION,
     });
     expect(reopened.prepare("PRAGMA quick_check").get()).toEqual({ quick_check: "ok" });
     expect(
@@ -416,7 +416,7 @@ describe("outbound message progress companion", () => {
       progressInput("message.outbound.queued", { occurredAt }),
       database,
     );
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     db.prepare("DELETE FROM outbound_message_progress").run();
     const insert = db.prepare(`
       INSERT INTO outbound_message_progress (
@@ -494,7 +494,7 @@ describe("outbound message progress companion", () => {
       occurredAt,
       rowId: progress?.rowId ?? 0,
     };
-    openOpenClawStateDatabase(database).db.prepare("DELETE FROM outbound_message_progress").run();
+    openCarapaceStateDatabase(database).db.prepare("DELETE FROM outbound_message_progress").run();
 
     expect(() =>
       pageOutboundMessageAuditEventsForRun({
@@ -525,7 +525,7 @@ describe("outbound message progress companion", () => {
     recordAuditEvent(terminalInput({ occurredAt: Date.now() }), database);
 
     pruneExpiredOutboundMessageProgress({ database, now: Date.now() });
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     expect(
       (
         db.prepare("SELECT COUNT(*) AS count FROM outbound_message_progress").get() as {
@@ -541,7 +541,7 @@ describe("outbound message progress companion", () => {
   it("bounds each expired progress maintenance transaction", () => {
     const database = databaseOptions();
     recordOutboundMessageProgress(progressInput("message.outbound.queued"), database);
-    const { db } = openOpenClawStateDatabase(database);
+    const { db } = openCarapaceStateDatabase(database);
     db.exec("DELETE FROM outbound_message_progress");
     const now = Date.now();
     const expiredAt = now - 31 * 24 * 60 * 60_000;

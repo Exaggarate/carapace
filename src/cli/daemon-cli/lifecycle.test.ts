@@ -152,7 +152,7 @@ vi.mock("./start-repair.js", () => ({
 vi.mock("../terminal-interactivity.js", () => ({
   isTerminalInteractive: () => isTerminalInteractive(),
   NON_INTERACTIVE_GATEWAY_STOP_MESSAGE:
-    "This stops the operator's running gateway service. Use an isolated dev gateway (openclaw gateway run --dev, or --profile <name> with a free port) for testing, or re-run with --force if you really mean it.",
+    "This stops the operator's running gateway service. Use an isolated dev gateway (carapace gateway run --dev, or --profile <name> with a free port) for testing, or re-run with --force if you really mean it.",
 }));
 
 vi.mock("./lifecycle-audit.js", () => ({
@@ -236,12 +236,12 @@ describe("runDaemonRestart health checks", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "OPENCLAW_CONTAINER_HINT",
-      "OPENCLAW_PROFILE",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_SYSTEMD_UNIT",
+      "CARAPACE_CONTAINER_HINT",
+      "CARAPACE_PROFILE",
+      "CARAPACE_STATE_DIR",
+      "CARAPACE_SYSTEMD_UNIT",
     ]);
-    delete process.env.OPENCLAW_CONTAINER_HINT;
+    delete process.env.CARAPACE_CONTAINER_HINT;
     service.readCommand.mockReset();
     service.readRuntime.mockReset().mockResolvedValue({ status: "stopped" });
     service.restart.mockReset().mockResolvedValue({ outcome: "completed" });
@@ -279,7 +279,7 @@ describe("runDaemonRestart health checks", () => {
     mockSystemAccountHome();
 
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
+      programArguments: ["carapace", "gateway", "--port", "18789"],
       environment: {},
     });
     readActiveGatewayLockIdentity.mockResolvedValue({
@@ -377,20 +377,20 @@ describe("runDaemonRestart health checks", () => {
     await runDaemonRestart({ json: true });
 
     const restartParams = requireMockCallArg(runServiceRestart, "runServiceRestart");
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-non-default-service-state";
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-non-default-service-state";
     expect(() => (restartParams.beforeServiceMutation as () => void)()).toThrow(
       /non-default state dir/,
     );
   });
 
   it("uses the installed service environment for managed restart health", async () => {
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-caller-state";
-    process.env.OPENCLAW_SYSTEMD_UNIT = "openclaw-gateway-maintenance.service";
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-caller-state";
+    process.env.CARAPACE_SYSTEMD_UNIT = "carapace-gateway-maintenance.service";
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
+      programArguments: ["carapace", "gateway", "--port", "18789"],
       environment: {
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-service-state",
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+        CARAPACE_STATE_DIR: "/tmp/carapace-service-state",
+        CARAPACE_SYSTEMD_UNIT: "carapace-gateway.service",
       },
     });
 
@@ -400,8 +400,8 @@ describe("runDaemonRestart health checks", () => {
       waitForGatewayHealthyRestart,
       "waitForGatewayHealthyRestart",
     ) as { env?: NodeJS.ProcessEnv };
-    expect(waitParams.env?.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-service-state");
-    expect(waitParams.env?.OPENCLAW_SYSTEMD_UNIT).toBe("openclaw-gateway-maintenance.service");
+    expect(waitParams.env?.CARAPACE_STATE_DIR).toBe("/tmp/carapace-service-state");
+    expect(waitParams.env?.CARAPACE_SYSTEMD_UNIT).toBe("carapace-gateway-maintenance.service");
   });
 
   it("carries launchd KeepAlive supervision into managed restart health", async () => {
@@ -417,12 +417,12 @@ describe("runDaemonRestart health checks", () => {
   it("re-reads the installed service environment after restart repair", async () => {
     service.readCommand
       .mockResolvedValueOnce({
-        programArguments: ["openclaw", "gateway", "--port", "18789"],
-        environment: { OPENCLAW_STATE_DIR: "/tmp/openclaw-stale-state" },
+        programArguments: ["carapace", "gateway", "--port", "18789"],
+        environment: { CARAPACE_STATE_DIR: "/tmp/carapace-stale-state" },
       })
       .mockResolvedValue({
-        programArguments: ["openclaw", "gateway", "--port", "19001"],
-        environment: { OPENCLAW_STATE_DIR: "/tmp/openclaw-repaired-state" },
+        programArguments: ["carapace", "gateway", "--port", "19001"],
+        environment: { CARAPACE_STATE_DIR: "/tmp/carapace-repaired-state" },
       });
     repairLoadedGatewayServiceForStart.mockResolvedValue({
       result: "restarted",
@@ -452,7 +452,7 @@ describe("runDaemonRestart health checks", () => {
       expect.objectContaining({
         port: 19_001,
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-repaired-state",
+          CARAPACE_STATE_DIR: "/tmp/carapace-repaired-state",
         }),
       }),
     );
@@ -530,7 +530,7 @@ describe("runDaemonRestart health checks", () => {
         await params.repairLoadedService?.({
           json: true,
           stdout: process.stdout,
-          state: { command: { environment: { OPENCLAW_GATEWAY_PORT: "18789" } } },
+          state: { command: { environment: { CARAPACE_GATEWAY_PORT: "18789" } } },
           issues: [{ code: "port-mismatch", message: "service port is stale" }],
         });
       },
@@ -550,7 +550,7 @@ describe("runDaemonRestart health checks", () => {
     expect(repairParams.service).toBe(service);
     expect(repairParams.json).toBe(true);
     expect(repairParams.state?.command?.environment).toEqual({
-      OPENCLAW_GATEWAY_PORT: "18789",
+      CARAPACE_GATEWAY_PORT: "18789",
     });
     expect(repairParams.issues).toHaveLength(1);
     expect(repairParams.issues?.[0]?.code).toBe("port-mismatch");
@@ -614,8 +614,8 @@ describe("runDaemonRestart health checks", () => {
     const error = await expectRestartError(runDaemonRestart({ json: true }));
     expect(error.message).toBe("Gateway restart timed out after 60s waiting for health checks.");
     expect(error.hints).toEqual([
-      formatCliCommand("openclaw gateway status --deep"),
-      formatCliCommand("openclaw doctor"),
+      formatCliCommand("carapace gateway status --deep"),
+      formatCliCommand("carapace doctor"),
     ]);
     expect(terminateStaleGatewayPids).not.toHaveBeenCalled();
     expect(renderRestartDiagnostics).toHaveBeenCalledTimes(1);
@@ -678,8 +678,8 @@ describe("runDaemonRestart health checks", () => {
       "Gateway restart failed after 13s: service stayed stopped and health checks never came up.",
     );
     expect(error.hints).toEqual([
-      formatCliCommand("openclaw gateway status --deep"),
-      formatCliCommand("openclaw doctor"),
+      formatCliCommand("carapace gateway status --deep"),
+      formatCliCommand("carapace doctor"),
     ]);
     expect(terminateStaleGatewayPids).not.toHaveBeenCalled();
     expect(renderRestartDiagnostics).toHaveBeenCalledTimes(1);
@@ -715,7 +715,7 @@ describe("runDaemonRestart health checks", () => {
     expect(writeJson).toHaveBeenCalledWith(
       expect.objectContaining({
         ok: false,
-        error: expect.stringContaining("openclaw gateway run --dev"),
+        error: expect.stringContaining("carapace gateway run --dev"),
       }),
     );
     expect(runServiceStop).not.toHaveBeenCalled();
@@ -806,7 +806,7 @@ describe("runDaemonRestart health checks", () => {
 
   it("signals a single unmanaged gateway process on restart", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("linux");
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-non-default-service-state";
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-non-default-service-state";
     findVerifiedGatewayListenerPidsOnPortSync.mockReturnValue([4200]);
     mockUnmanagedRestart({ runPostRestartCheck: true });
 
@@ -830,7 +830,7 @@ describe("runDaemonRestart health checks", () => {
 
   it("rejects denied Darwin recovery when no unmanaged listener exists", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-non-default-service-state";
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-non-default-service-state";
     mockUnmanagedRestart();
 
     await expect(runDaemonRestart({ json: true })).rejects.toThrow(/non-default state dir/);
@@ -961,7 +961,7 @@ describe("runDaemonRestart health checks", () => {
   it("does not fall back to unmanaged restart when launchd repair reports headless GUI bootstrap failure", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("darwin");
     recoverInstalledLaunchAgent.mockRejectedValue(
-      new Error("LaunchAgent openclaw gateway restart requires a logged-in macOS GUI session"),
+      new Error("LaunchAgent carapace gateway restart requires a logged-in macOS GUI session"),
     );
     findVerifiedGatewayListenerPidsOnPortSync.mockReturnValue([4200]);
     mockUnmanagedRestart();
@@ -1004,7 +1004,7 @@ describe("runDaemonRestart health checks", () => {
   });
 
   it("fails unmanaged restart when multiple gateway listeners are present", async () => {
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-non-default-service-state";
+    process.env.CARAPACE_STATE_DIR = "/tmp/carapace-non-default-service-state";
     findVerifiedGatewayListenerPidsOnPortSync.mockReturnValue([4200, 4300]);
     mockUnmanagedRestart();
 
@@ -1037,8 +1037,8 @@ describe("runDaemonRestart health checks", () => {
     findVerifiedGatewayListenerPidsOnPortSync.mockReturnValue([4200]);
   }
 
-  it("delegates system-scope restart to systemctl without unmanaged signaling when root (openclaw#87577)", async () => {
-    mockSystemdScope("openclaw.service");
+  it("delegates system-scope restart to systemctl without unmanaged signaling when root (carapace#87577)", async () => {
+    mockSystemdScope("carapace.service");
     restartSystemdService.mockResolvedValue({ outcome: "completed" });
     mockUnmanagedRestart();
 
@@ -1049,25 +1049,25 @@ describe("runDaemonRestart health checks", () => {
     expect(probeGateway).not.toHaveBeenCalled();
   });
 
-  it("surfaces systemd sudo guidance and never signals when restarting a system-scope unit as non-root (openclaw#87577)", async () => {
-    mockSystemdScope("openclaw.service");
+  it("surfaces systemd sudo guidance and never signals when restarting a system-scope unit as non-root (carapace#87577)", async () => {
+    mockSystemdScope("carapace.service");
     restartSystemdService.mockRejectedValue(
       new Error(
-        "openclaw.service is a system-scope unit (/etc/systemd/system/openclaw.service); run `sudo systemctl restart openclaw.service` to restart it",
+        "carapace.service is a system-scope unit (/etc/systemd/system/carapace.service); run `sudo systemctl restart carapace.service` to restart it",
       ),
     );
     mockUnmanagedRestart();
 
     await expect(runDaemonRestart({ json: true })).rejects.toThrow(
-      /sudo systemctl restart openclaw\.service/,
+      /sudo systemctl restart carapace\.service/,
     );
 
     expect(signalVerifiedGatewayPidSync).not.toHaveBeenCalled();
     expect(probeGateway).not.toHaveBeenCalled();
   });
 
-  it("delegates system-scope stop to systemctl without unmanaged signaling when root (openclaw#87577)", async () => {
-    mockSystemdScope("openclaw-gateway.service");
+  it("delegates system-scope stop to systemctl without unmanaged signaling when root (carapace#87577)", async () => {
+    mockSystemdScope("carapace-gateway.service");
     stopSystemdService.mockResolvedValue(undefined);
     await expect(runUnmanagedStop()).resolves.toEqual(
       expect.objectContaining({ result: "stopped" }),
@@ -1076,15 +1076,15 @@ describe("runDaemonRestart health checks", () => {
     expect(signalVerifiedGatewayPidSync).not.toHaveBeenCalled();
   });
 
-  it("surfaces systemd sudo guidance and never signals when stopping a system-scope unit as non-root (openclaw#87577)", async () => {
-    mockSystemdScope("openclaw-gateway.service");
+  it("surfaces systemd sudo guidance and never signals when stopping a system-scope unit as non-root (carapace#87577)", async () => {
+    mockSystemdScope("carapace-gateway.service");
     stopSystemdService.mockRejectedValue(
       new Error(
-        "openclaw-gateway.service is a system-scope unit (/etc/systemd/system/openclaw-gateway.service); run `sudo systemctl stop openclaw-gateway.service` to stop it",
+        "carapace-gateway.service is a system-scope unit (/etc/systemd/system/carapace-gateway.service); run `sudo systemctl stop carapace-gateway.service` to stop it",
       ),
     );
     await expect(runUnmanagedStop()).rejects.toThrow(
-      /sudo systemctl stop openclaw-gateway\.service/,
+      /sudo systemctl stop carapace-gateway\.service/,
     );
     expect(stopSystemdService).toHaveBeenCalled();
     expect(signalVerifiedGatewayPidSync).not.toHaveBeenCalled();
@@ -1112,14 +1112,14 @@ describe("runDaemonRestart health checks", () => {
 
   it("resolves port and probe hosts from selected service config/env (no --port arg)", async () => {
     const serviceCommand = {
-      programArguments: ["openclaw", "gateway"],
-      environment: { OPENCLAW_STATE_DIR: "/tmp/service-state" },
+      programArguments: ["carapace", "gateway"],
+      environment: { CARAPACE_STATE_DIR: "/tmp/service-state" },
     };
     service.readCommand.mockResolvedValue(serviceCommand);
     loadConfig.mockReturnValue({ gateway: { port: 18789 } });
     createConfigIO.mockImplementation((opts) => ({
       readBestEffortConfig: async () => ({
-        gateway: { port: opts?.env?.OPENCLAW_STATE_DIR === "/tmp/service-state" ? 19000 : 18789 },
+        gateway: { port: opts?.env?.CARAPACE_STATE_DIR === "/tmp/service-state" ? 19000 : 18789 },
       }),
     }));
     resolveGatewayPort.mockImplementation((cfg) => {

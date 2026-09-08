@@ -61,7 +61,7 @@ describe("createPluginStateErrorReporter", () => {
 describe("published plugin state SQLite runtime", () => {
   it("keeps the WAL retry budget stable across wall-clock jumps", () => {
     vi.useFakeTimers();
-    const databasePath = path.join(tempDirs.make("openclaw-plugin-state-wal-"), "state.sqlite");
+    const databasePath = path.join(tempDirs.make("carapace-plugin-state-wal-"), "state.sqlite");
     const database = new DatabaseSync(databasePath);
     let journalModeAttempts = 0;
     const instrumentedDatabase = new Proxy(database, {

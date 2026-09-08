@@ -35,12 +35,12 @@ vi.mock("../plugins/official-external-plugin-bundled-catalogs.js", () => ({
 }));
 
 // The channel-catalog.json fallback still walks package roots via
-// resolveOpenClawPackageRootSync. Isolate from the real repo by mocking
+// resolveCarapacePackageRootSync. Isolate from the real repo by mocking
 // moduleUrl/argv1 resolution to null and deriving only from the tmp cwd.
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRootSync: (opts: { cwd?: string; argv1?: string; moduleUrl?: string }) =>
+vi.mock("../infra/carapace-root.js", () => ({
+  resolveCarapacePackageRootSync: (opts: { cwd?: string; argv1?: string; moduleUrl?: string }) =>
     opts.cwd ?? null,
-  resolveOpenClawPackageRoot: async (opts: { cwd?: string; argv1?: string; moduleUrl?: string }) =>
+  resolveCarapacePackageRoot: async (opts: { cwd?: string; argv1?: string; moduleUrl?: string }) =>
     opts.cwd ?? null,
 }));
 
@@ -53,19 +53,19 @@ import {
 import { listBundledChannelIds } from "./plugins/bundled-ids.js";
 
 const tempDirs: string[] = [];
-const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const originalTrustBundledPluginsDir = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+const originalBundledPluginsDir = process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
+const originalTrustBundledPluginsDir = process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
 afterEach(() => {
   if (originalBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
   }
   if (originalTrustBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = originalTrustBundledPluginsDir;
   }
   cleanupTempDirs(tempDirs);
   bundledOfficialExternalCatalogEntriesMock.length = 0;
@@ -79,17 +79,17 @@ afterEach(() => {
 
 function useBundledPluginsDir(extensionsRoot: string | undefined): void {
   if (extensionsRoot) {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = extensionsRoot;
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
+    process.env.CARAPACE_BUNDLED_PLUGINS_DIR = extensionsRoot;
+    process.env.CARAPACE_TEST_TRUST_BUNDLED_PLUGINS_DIR = "1";
   } else {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.CARAPACE_BUNDLED_PLUGINS_DIR;
   }
   vi.mocked(resolveBundledPluginsDir).mockReturnValue(extensionsRoot);
 }
 
 function seedRoot(prefix: string): string {
   const root = makeTempRepoRoot(tempDirs, prefix);
-  writeJsonFile(path.join(root, "package.json"), { name: "openclaw" });
+  writeJsonFile(path.join(root, "package.json"), { name: "carapace" });
   vi.spyOn(process, "cwd").mockReturnValue(root);
   return root;
 }
@@ -109,8 +109,8 @@ function seedChannelPkg(
   const pluginDir = path.dirname(pkgJsonPath);
   const pluginId = opts.pluginId ?? opts.id;
   writeJsonFile(pkgJsonPath, {
-    name: `@openclaw/${pluginId}`,
-    openclaw: {
+    name: `@carapace/${pluginId}`,
+    carapace: {
       channel: {
         id: opts.id,
         label: opts.label ?? opts.id,
@@ -121,7 +121,7 @@ function seedChannelPkg(
       },
     },
   });
-  writeJsonFile(path.join(pluginDir, "openclaw.plugin.json"), {
+  writeJsonFile(path.join(pluginDir, "carapace.plugin.json"), {
     id: pluginId,
     configSchema: { type: "object" },
     channels: [opts.id],
@@ -147,7 +147,7 @@ function seedGeneratedChannelCatalog(
 ): void {
   const { packageName, ...channel } = params;
   writeJsonFile(path.join(root, "dist", "channel-catalog.json"), {
-    entries: [{ name: packageName, openclaw: { channel } }],
+    entries: [{ name: packageName, carapace: { channel } }],
   });
 }
 
@@ -225,7 +225,7 @@ describe("listBundledChannelCatalogEntries", () => {
       label: "Telegram",
     });
     seedGeneratedChannelCatalog(root, {
-      packageName: "@tencent-connect/openclaw-qqbot",
+      packageName: "@tencent-connect/carapace-qqbot",
       id: "qqbot",
       label: "QQ Bot",
       docsPath: "/channels/qqbot",
@@ -242,8 +242,8 @@ describe("listBundledChannelCatalogEntries", () => {
   it("uses bundled external channel metadata before a dist catalog exists", () => {
     seedRoot("bcr-bundled-external-");
     bundledOfficialExternalCatalogEntriesMock.push({
-      name: "@tencent-connect/openclaw-qqbot",
-      openclaw: {
+      name: "@tencent-connect/carapace-qqbot",
+      carapace: {
         channel: {
           id: "qqbot",
           label: "QQ Bot",
@@ -265,7 +265,7 @@ describe("listBundledChannelCatalogEntries", () => {
     const root = seedRoot("bcr-generated-doctor-");
     useBundledPluginsDir(undefined);
     seedGeneratedChannelCatalog(root, {
-      packageName: "@openclaw/discord",
+      packageName: "@carapace/discord",
       id: "discord",
       label: "Discord",
       docsPath: "/channels/discord",
@@ -296,7 +296,7 @@ describe("listBundledChannelCatalogEntries", () => {
       markdownCapable: true,
     });
     seedGeneratedChannelCatalog(root, {
-      packageName: "@openclaw/matrix",
+      packageName: "@carapace/matrix",
       id: "matrix",
       label: "Matrix",
       docsPath: "/channels/matrix",
@@ -309,13 +309,13 @@ describe("listBundledChannelCatalogEntries", () => {
   });
 
   it("falls back to dist/channel-catalog.json when the resolver returns undefined", () => {
-    // OPENCLAW_DISABLE_BUNDLED_PLUGINS, missing bundled tree, or an unresolvable
+    // CARAPACE_DISABLE_BUNDLED_PLUGINS, missing bundled tree, or an unresolvable
     // package root all surface as undefined from resolveBundledPluginsDir. In
     // that case the loader should consult the shipped channel-catalog.json
     // rather than report zero bundled channels.
     const root = seedRoot("bcr-fallback-undefined-");
     seedGeneratedChannelCatalog(root, {
-      packageName: "@openclaw/fallback",
+      packageName: "@carapace/fallback",
       id: "fallback-channel",
       label: "Fallback",
       docsPath: "/channels/fallback",
@@ -328,7 +328,7 @@ describe("listBundledChannelCatalogEntries", () => {
   });
 
   it("falls back to dist/channel-catalog.json when the resolved dir has no plugin package.jsons", () => {
-    // A stale staged dir or an OPENCLAW_BUNDLED_PLUGINS_DIR override pointing at
+    // A stale staged dir or an CARAPACE_BUNDLED_PLUGINS_DIR override pointing at
     // an empty tree should not hide the shipped catalog entries. The loader's
     // own readdir returns nothing, bundledEntries is empty, and control falls
     // through to readOfficialCatalogFileSync.
@@ -336,7 +336,7 @@ describe("listBundledChannelCatalogEntries", () => {
     const extensionsRoot = path.join(root, "dist", "extensions");
     fs.mkdirSync(extensionsRoot, { recursive: true });
     seedGeneratedChannelCatalog(root, {
-      packageName: "@openclaw/fallback",
+      packageName: "@carapace/fallback",
       id: "fallback-channel",
       label: "Fallback",
       docsPath: "/channels/fallback",
@@ -374,7 +374,7 @@ describe("listBundledChannelCatalogEntries", () => {
       listBundledChannelCatalogEntries().find((entry) => entry.id === "generated"),
     ).toBeUndefined();
     seedGeneratedChannelCatalog(root, {
-      packageName: "@openclaw/generated",
+      packageName: "@carapace/generated",
       id: "generated",
       label: "Generated after reset",
       docsPath: "/channels/generated",

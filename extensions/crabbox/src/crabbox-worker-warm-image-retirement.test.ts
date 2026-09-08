@@ -1,5 +1,5 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { resetPluginStateStoreForTests } from "carapace/plugin-sdk/plugin-state-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { operationLeaseId } from "./crabbox-worker-profile.js";
 import { listCrabboxWarmImages } from "./crabbox-worker-warm-image-store.js";
@@ -333,7 +333,7 @@ describe("Crabbox checkpoint retirement", () => {
       });
       expect(warn).toHaveBeenCalledWith(
         expect.stringMatching(
-          /checkpoint retirement.*chk_profile_warm.*retained.*retry.*openclaw crabbox warm-images/iu,
+          /checkpoint retirement.*chk_profile_warm.*retained.*retry.*carapace crabbox warm-images/iu,
         ),
       );
       expect(warn).not.toHaveBeenCalledWith(expect.stringContaining("warm image capture failed"));

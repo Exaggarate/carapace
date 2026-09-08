@@ -1,22 +1,22 @@
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/account-helpers";
-import { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
+import { resolveChannelMediaMaxBytes } from "carapace/plugin-sdk/account-helpers";
+import { createChannelPartialDeliveryError } from "carapace/plugin-sdk/channel-inbound";
 // Mattermost plugin module implements send behavior.
 import {
   createMessageReceiptFromOutboundResults,
   listMessageReceiptPlatformIds,
   type MessageReceipt,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "carapace/plugin-sdk/channel-outbound";
+import { pruneMapToMaxSize } from "carapace/plugin-sdk/collection-runtime";
+import { resolveMarkdownTableMode } from "carapace/plugin-sdk/markdown-table-runtime";
+import { extensionForMime } from "carapace/plugin-sdk/media-mime";
+import { requireRuntimeConfig } from "carapace/plugin-sdk/plugin-config-runtime";
+import { isPrivateNetworkOptInEnabled } from "carapace/plugin-sdk/ssrf-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { convertMarkdownTables, FormatCapabilityProfile } from "openclaw/plugin-sdk/text-chunking";
+} from "carapace/plugin-sdk/string-coerce-runtime";
+import { convertMarkdownTables, FormatCapabilityProfile } from "carapace/plugin-sdk/text-chunking";
 import { getMattermostRuntime } from "../runtime.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import {
@@ -39,7 +39,7 @@ import {
   resolveInteractionCallbackUrl,
   setInteractionSecret,
 } from "./interactions.js";
-import { loadOutboundMediaFromUrl, type OpenClawConfig } from "./runtime-api.js";
+import { loadOutboundMediaFromUrl, type CarapaceConfig } from "./runtime-api.js";
 import {
   parseMattermostTarget,
   resolveMattermostOpaqueTarget,
@@ -47,7 +47,7 @@ import {
 } from "./target-resolution.js";
 
 type MattermostSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   botToken?: string;
   baseUrl?: string;
   accountId?: string;
@@ -302,7 +302,7 @@ async function resolveTargetChannelId(params: ResolveTargetChannelIdParams): Pro
 }
 
 type MattermostSendContext = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   accountId: string;
   client: MattermostClient;
   channelId: string;

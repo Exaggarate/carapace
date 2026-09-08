@@ -16,7 +16,7 @@ afterEach(() => {
 it.each(["native", "native with a companion bundle"])(
   "installs runnable archive dependencies for %s plugins",
   async (format) => {
-    const rootDir = tempDirs.make("openclaw-archive-dependencies-");
+    const rootDir = tempDirs.make("carapace-archive-dependencies-");
     const packageDir = path.join(rootDir, "package");
     const stateDir = path.join(rootDir, "state");
     const npmConfig = { userconfig: "user.npmrc", globalconfig: "global.npmrc" };
@@ -33,8 +33,8 @@ it.each(["native", "native with a companion bundle"])(
       vi.stubEnv(`npm_config_${key}`, value);
       vi.stubEnv(`NPM_CONFIG_${key.toUpperCase()}`, value);
     }
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_CONFIG_PATH", path.join(stateDir, "carapace.json"));
     await fs.mkdir(path.join(packageDir, "dist"), { recursive: true });
     await fs.mkdir(path.join(packageDir, "dependency"));
     await fs.writeFile(
@@ -50,12 +50,12 @@ it.each(["native", "native with a companion bundle"])(
       JSON.stringify({
         name: "native-archive",
         version: "1.0.0",
-        openclaw: { extensions: ["./dist/index.cjs"] },
+        carapace: { extensions: ["./dist/index.cjs"] },
         dependencies: { "archive-dependency": "file:./dependency" },
       }),
     );
     await fs.writeFile(
-      path.join(packageDir, "openclaw.plugin.json"),
+      path.join(packageDir, "carapace.plugin.json"),
       JSON.stringify({ id: "native-archive", configSchema: { type: "object", properties: {} } }),
     );
     await fs.writeFile(
@@ -86,7 +86,7 @@ it.each(["native", "native with a companion bundle"])(
       return;
     }
     expect(result.pluginId).toBe("native-archive");
-    expect(result.artifactInspection?.format).toBe("openclaw");
+    expect(result.artifactInspection?.format).toBe("carapace");
     const entryPath = path.join(result.targetDir, "dist/index.cjs");
     const require = createRequire(entryPath);
     try {

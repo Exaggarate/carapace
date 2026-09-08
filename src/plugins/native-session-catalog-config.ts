@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import catalogs from "../../scripts/lib/native-session-catalogs.json" with { type: "json" };
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { PluginManifestNativeSessionCatalogSetup } from "./manifest-types.js";
 
 export const shippedNativeSessionCatalogs: readonly (PluginManifestNativeSessionCatalogSetup & {
@@ -41,11 +41,11 @@ export function isNativeSessionCatalogOptOutOnly(pluginId: string, entry: unknow
 }
 
 export function applyNativeSessionCatalogPreference(
-  config: OpenClawConfig,
+  config: CarapaceConfig,
   pluginIds: readonly string[],
   enabled: boolean,
   onlyUnset = false,
-): OpenClawConfig {
+): CarapaceConfig {
   const entries = { ...config.plugins?.entries };
   let changed = false;
   for (const pluginId of pluginIds) {
@@ -68,7 +68,7 @@ export function applyNativeSessionCatalogPreference(
 }
 
 /** Called only by the config writer after its snapshot proves the file is absent. */
-export function initializeNativeSessionCatalogPreferences(config: OpenClawConfig): OpenClawConfig {
+export function initializeNativeSessionCatalogPreferences(config: CarapaceConfig): CarapaceConfig {
   return applyNativeSessionCatalogPreference(
     config,
     shippedNativeSessionCatalogs.map(({ pluginId }) => pluginId),

@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@carapace/normalization-core/error-coercion";
 import { describe, expect, it, vi } from "vitest";
 import {
   createManagedCommandSpawnSpec,
@@ -115,7 +115,7 @@ describe("managed-child-process", () => {
   it.runIf(process.platform === "linux")(
     "accepts exited tooling descendants still awaiting reaping",
     async () => {
-      const dir = createTempDir("openclaw-managed-zombie-");
+      const dir = createTempDir("carapace-managed-zombie-");
       const childPath = path.join(dir, "child.mts");
       const runnerPath = path.join(dir, "runner.mjs");
       fs.writeFileSync(childPath, 'const value: number = 7; console.log("typed-child", value);');
@@ -185,7 +185,7 @@ sys.exit(result.returncode)
     },
     ...cleanups: Array<() => unknown>
   ) {
-    const dir = fs.realpathSync(createTempDir("openclaw-nested-timeout-"));
+    const dir = fs.realpathSync(createTempDir("carapace-nested-timeout-"));
     const moduleUrl = (file: string) => pathToFileURL(path.resolve(file)).href;
     const pidPaths = ["wrapper", "implementation", "leaf"].map((role) =>
       path.join(dir, `${role}.pid`),
@@ -309,7 +309,7 @@ ${publish(2)}
   posixIt.each(["managed", "preparation"] as const)(
     "retains pre-PID $0 launch failure while completing nested cleanup",
     async (runner) => {
-      const bin = path.join(createTempDir("openclaw-nested-startup-"), "missing-node");
+      const bin = path.join(createTempDir("carapace-nested-startup-"), "missing-node");
       const lastCleanup = vi.fn();
       const failure = await runNestedCleanupFixture(
         { runner, resistant: false, abort: false, bin },
@@ -350,7 +350,7 @@ ${publish(2)}
   posixIt(
     "keeps the bounded launcher alive until nested signal cleanup finishes",
     async () => {
-      const dir = createTempDir("openclaw-bounded-launcher-cleanup-");
+      const dir = createTempDir("carapace-bounded-launcher-cleanup-");
       const leafPath = path.join(dir, "leaf.mjs");
       const leafPidPath = path.join(dir, "leaf.pid");
       fs.writeFileSync(
@@ -917,7 +917,7 @@ setInterval(() => {}, 1_000);
 
   it.each([
     { bin: "invalid\0command", code: "ERR_INVALID_ARG_VALUE" },
-    { bin: "/missing/openclaw-test-command", code: "ENOENT" },
+    { bin: "/missing/carapace-test-command", code: "ENOENT" },
   ])("restores signal listeners after a $code spawn failure", async ({ bin, code }) => {
     const signals = ["SIGHUP", "SIGINT", "SIGTERM"] as const;
     const baseline = signals.map((signal) => process.listenerCount(signal));
@@ -926,7 +926,7 @@ setInterval(() => {}, 1_000);
   });
 
   it("times out and kills managed command descendants", async () => {
-    const dir = createTempDir("openclaw-managed-timeout-");
+    const dir = createTempDir("carapace-managed-timeout-");
     const childPath = path.join(dir, "child.mjs");
     const childPidPath = path.join(dir, "child.pid");
     const descendantPidPath = path.join(dir, "descendant.pid");
@@ -1002,7 +1002,7 @@ ${publishReadyPidScript(2)}
   });
 
   posixIt("lets a timed-out command handle SIGTERM before forced cleanup", async () => {
-    const dir = createTempDir("openclaw-managed-timeout-grace-");
+    const dir = createTempDir("carapace-managed-timeout-grace-");
     const childPath = path.join(dir, "child.mjs");
     const signalPath = path.join(dir, "signal.txt");
     fs.writeFileSync(
@@ -1032,7 +1032,7 @@ setInterval(() => {}, 1_000);
   });
 
   posixIt("force-kills descendants after the timed-out leader exits during grace", async () => {
-    const dir = createTempDir("openclaw-managed-timeout-leader-exit-");
+    const dir = createTempDir("carapace-managed-timeout-leader-exit-");
     const childPath = path.join(dir, "child.mjs");
     const descendantPidPath = path.join(dir, "descendant.pid");
     const signalPath = path.join(dir, "signal.txt");
@@ -1195,7 +1195,7 @@ setInterval(() => {}, 1_000);
   posixIt.each(["before", "after"])(
     "applies the strict wall deadline only before output closure (deadline %s close)",
     async (deadline) => {
-      const dir = fs.realpathSync(createTempDir("openclaw-managed-deadline-"));
+      const dir = fs.realpathSync(createTempDir("carapace-managed-deadline-"));
       const controllerPath = path.join(dir, "controller.mjs");
       const helperUrl = pathToFileURL(path.resolve("scripts/lib/managed-child-process.mts")).href;
       // Only this controller mocks time; child I/O and concurrent tests keep real clocks.
@@ -1296,7 +1296,7 @@ if (role === "leaf") {
     {
       bin = process.execPath,
       dir = fs.mkdtempSync(
-        path.join(fs.realpathSync(os.tmpdir()), "openclaw-managed-held-output-"),
+        path.join(fs.realpathSync(os.tmpdir()), "carapace-managed-held-output-"),
       ),
     }: { bin?: string; dir?: string } = {},
   ) {
@@ -1505,7 +1505,7 @@ child.once('message', () => { ${normalExit ? "process.exit(0);" : ""} });
     { timeout: 25_000 },
     async (mode, { expect: expectCase }) => {
       const dir = fs.mkdtempSync(
-        path.join(fs.realpathSync(os.tmpdir()), "openclaw-escaped-launch-failure-"),
+        path.join(fs.realpathSync(os.tmpdir()), "carapace-escaped-launch-failure-"),
       );
       const bin = path.join(dir, "missing-node");
       const signals = ["SIGHUP", "SIGINT", "SIGTERM"] as const;
@@ -1670,7 +1670,7 @@ child.once('message', () => { ${normalExit ? "process.exit(0);" : ""} });
   ])(
     "joins reentrant $first cancellation (setup failure: $setupFails, cleanup failure: $cleanupFails)",
     async ({ first, setupFails, cleanupFails }) => {
-      const dir = createTempDir("openclaw-managed-reentrant-");
+      const dir = createTempDir("carapace-managed-reentrant-");
       // Deliberate failed finalization owns a separate namespace; the controller
       // joins its real child before this fixture is removed.
       createVitestResourceOwner(dir);
@@ -1756,7 +1756,7 @@ if (cleanupFails) {
   ] as const)(
     "joins descendants after $runner leader exits $exit ($output output)",
     async ({ runner, output, exit }) => {
-      const dir = createTempDir("openclaw-managed-lingering-");
+      const dir = createTempDir("carapace-managed-lingering-");
       const owner = createVitestResourceOwner(dir);
       const env = { ...process.env, TMPDIR: dir, TMP: dir, TEMP: dir };
       const descendantPidPath = path.join(dir, "descendant.pid");
@@ -1850,7 +1850,7 @@ child.once("message", () => ${typeof exit === "string" ? `process.kill(process.p
   );
 
   posixIt("releases non-strict command claims after a child signal exit", async () => {
-    const dir = createTempDir("openclaw-managed-signal-");
+    const dir = createTempDir("carapace-managed-signal-");
     const owner = createVitestResourceOwner(dir);
     const onSignal = vi.fn();
     let child: ReturnType<typeof spawn> | undefined;
@@ -1883,7 +1883,7 @@ child.once("message", () => ${typeof exit === "string" ? `process.kill(process.p
   posixIt(
     "kills managed child process group descendants when the runner is terminated",
     async () => {
-      const dir = createTempDir("openclaw-managed-child-");
+      const dir = createTempDir("carapace-managed-child-");
       const childPath = path.join(dir, "child.mjs");
       const runnerPath = path.join(dir, "runner.mjs");
       const childPidPath = path.join(dir, "child.pid");

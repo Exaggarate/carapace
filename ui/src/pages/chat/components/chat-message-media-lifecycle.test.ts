@@ -105,7 +105,7 @@ function createAvailabilityPane(source: string, authToken: string) {
   let latest: ReturnType<typeof resolveAssistantAttachmentAvailability> | undefined;
   const rerender = observeSubscriber(() => {
     latest = resolveAssistantAttachmentAvailability(source, {
-      resourceBasePath: "/openclaw",
+      resourceBasePath: "/carapace",
       authToken,
       onRequestUpdate: rerender,
     });
@@ -568,7 +568,7 @@ describe("chat media resource lifecycle", () => {
   });
 
   it("shares assistant attachment completion and ticket refresh across split panes", async () => {
-    const source = `/tmp/openclaw/${crypto.randomUUID()}.png`;
+    const source = `/tmp/carapace/${crypto.randomUUID()}.png`;
     const fetchMock = vi
       .fn()
       .mockImplementationOnce(async () => ticketResponse("ticket-before-refresh", 31_000))
@@ -602,7 +602,7 @@ describe("chat media resource lifecycle", () => {
   });
 
   it("stops polling after a definitive ticket refresh rejection and one unavailable retry", async () => {
-    const source = `/tmp/openclaw/${crypto.randomUUID()}.mp3`;
+    const source = `/tmp/carapace/${crypto.randomUUID()}.mp3`;
     const fetchMock = vi
       .fn()
       .mockImplementationOnce(async () =>
@@ -630,7 +630,7 @@ describe("chat media resource lifecycle", () => {
   });
 
   it("bounds transient ticket refresh failures before using the unavailable retry", async () => {
-    const source = `/tmp/openclaw/${crypto.randomUUID()}.mp3`;
+    const source = `/tmp/carapace/${crypto.randomUUID()}.mp3`;
     const fetchMock = vi
       .fn()
       .mockImplementationOnce(async () =>
@@ -665,7 +665,7 @@ describe("chat media resource lifecycle", () => {
   });
 
   it("transitions an expired ticket to unavailable instead of retrying it", async () => {
-    const source = `/tmp/openclaw/${crypto.randomUUID()}.mp3`;
+    const source = `/tmp/carapace/${crypto.randomUUID()}.mp3`;
     const expiredAt = new Date(Date.now() + 31_000);
     const fetchMock = vi
       .fn()
@@ -687,7 +687,7 @@ describe("chat media resource lifecycle", () => {
   });
 
   it("shares the one bounded assistant attachment retry across split panes", async () => {
-    const source = `/tmp/openclaw/${crypto.randomUUID()}.png`;
+    const source = `/tmp/carapace/${crypto.randomUUID()}.png`;
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({
@@ -838,7 +838,7 @@ describe("chat media resource lifecycle", () => {
       expect(requestUrl).toBe(ticketedUrl.replace(/\/full(?=\?)/u, "/thumbnail"));
       const headers = new Headers(init.headers);
       expect(headers.get("Authorization")).toBeNull();
-      expect(headers.get("x-openclaw-requester-session-key")).toBeNull();
+      expect(headers.get("x-carapace-requester-session-key")).toBeNull();
     }
     expect(
       container.querySelector<HTMLImageElement>(".chat-message-image")?.getAttribute("src"),

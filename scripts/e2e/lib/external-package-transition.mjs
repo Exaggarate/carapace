@@ -6,9 +6,9 @@ import { DatabaseSync } from "node:sqlite";
 const [command, ...args] = process.argv.slice(2);
 let result;
 if (command === "schema") {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.CARAPACE_STATE_DIR;
   assert(stateDir, "explicit isolated state directory required");
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "carapace.sqlite");
   const database = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const publishedVersion = Number(database.prepare("PRAGMA user_version").get().user_version);

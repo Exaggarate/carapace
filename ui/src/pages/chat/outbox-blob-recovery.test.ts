@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../../../test/helpers/promise.js";
 import type { ChatQueueItem } from "../../lib/chat/chat-types.ts";
@@ -71,7 +71,7 @@ async function prepare(host: ReturnType<typeof hostFor>, id: string, sessionKey 
   };
 }
 function seed(items: ChatQueueItem[], sessionKey = "global", version = 3) {
-  const key = `openclaw.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
+  const key = `carapace.control.chatComposer.v${version}:${encodeURIComponent(gatewayUrl)}`;
   const raw = JSON.stringify({
     version,
     gatewayOwner: gatewayUrl,
@@ -128,7 +128,7 @@ describe("Blob-preserving metadata migration", () => {
     const item = await prepare(host, "insecure-http");
 
     await expectBytes(host, item);
-    expect(sessionStorage.getItem("openclaw.control.outboxTab.v1")).toBe(
+    expect(sessionStorage.getItem("carapace.control.outboxTab.v1")).toBe(
       "07070707-0707-4707-8707-070707070707",
     );
   });

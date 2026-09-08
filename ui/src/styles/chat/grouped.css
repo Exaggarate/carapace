@@ -1083,7 +1083,7 @@ img.chat-avatar.chat-avatar--logo {
 
 /* ── Message metadata (tokens, cost, model, context %) ── */
 .msg-meta {
-  --openclaw-tooltip-max-width: min(36rem, calc(100vw - 32px));
+  --carapace-tooltip-max-width: min(36rem, calc(100vw - 32px));
 }
 
 .msg-meta__summary {

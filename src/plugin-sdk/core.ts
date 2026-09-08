@@ -27,12 +27,12 @@ import type {
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelMeta } from "../channels/plugins/types.public.js";
 import type { ReplyToMode } from "../config/types.base.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { buildOutboundBaseSessionKey } from "../infra/outbound/base-session-key.js";
 import type { OutboundDeliveryResult } from "../infra/outbound/deliver.js";
 import { normalizeOutboundThreadId } from "../infra/outbound/thread-id.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
-import type { OpenClawPluginApi } from "../plugins/types.js";
+import type { CarapacePluginApi } from "../plugins/types.js";
 import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import {
   normalizeSessionKeyPreservingOpaquePeerIds,
@@ -46,12 +46,12 @@ export type {
   AgentHarness,
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  CarapacePluginApi,
+  CarapacePluginCommandDefinition,
+  CarapacePluginConfigSchema,
+  CarapacePluginDefinition,
+  CarapacePluginService,
+  CarapacePluginServiceContext,
   PluginCommandContext,
   PluginCommandResult,
   PluginAgentEventEmitParams,
@@ -138,17 +138,17 @@ export type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogKind,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
+} from "@carapace/model-catalog-core/model-catalog-types";
 export type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.types.js";
 export type {
-  OpenClawPluginActiveModelContext,
-  OpenClawPluginToolContext,
-  OpenClawPluginToolFactory,
+  CarapacePluginActiveModelContext,
+  CarapacePluginToolContext,
+  CarapacePluginToolFactory,
 } from "../plugins/types.js";
 export type {
-  OpenClawPluginGatewayEventScope,
-  OpenClawPluginGatewayEvents,
-  OpenClawPluginSessionsChangedEvent,
+  CarapacePluginGatewayEventScope,
+  CarapacePluginGatewayEvents,
+  CarapacePluginSessionsChangedEvent,
 } from "../plugins/gateway-events.js";
 export type {
   MemoryPluginCapability,
@@ -164,7 +164,7 @@ export type {
   PluginHookReplyDispatchEvent,
   PluginHookReplyDispatchResult,
 } from "../plugins/types.js";
-export type { OpenClawConfig } from "../config/config.js";
+export type { CarapaceConfig } from "../config/config.js";
 export type { OutboundIdentity } from "../infra/outbound/identity.js";
 export type { HistoryEntry } from "../auto-reply/reply/history.types.js";
 export type { ReplyPayload } from "./reply-payload.js";
@@ -283,14 +283,14 @@ export {
   readStringArrayParam,
   readToolStringParam as readStringParam,
 } from "../agents/tools/common.js";
-export { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+export { parseStrictPositiveInteger } from "@carapace/normalization-core/number-coercion";
 export { isTrustedProxyAddress, resolveClientIp } from "../gateway/net.js";
 export { formatZonedTimestamp } from "../infra/format-time/format-datetime.js";
 export { resolveConfiguredAcpBindingRecord } from "../acp/persistent-bindings.resolve.js";
 
 /** Ensure a configured ACP binding has live runtime state before channel delivery uses it. */
 export async function ensureConfiguredAcpBindingReady(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   configuredBinding: ResolvedConfiguredAcpBinding | null;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const runtime = await import("../acp/persistent-bindings.lifecycle.js");
@@ -345,7 +345,7 @@ export function stripTargetKindPrefix(raw: string): string {
  * message adapters.
  */
 export function buildChannelOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;
@@ -484,9 +484,9 @@ type DefineChannelPluginEntryOptions<TPlugin = ChannelPlugin> = {
   plugin: TPlugin;
   configSchema?: ChannelEntryConfigSchema<TPlugin> | (() => ChannelEntryConfigSchema<TPlugin>);
   setRuntime?: (runtime: PluginRuntime) => void;
-  registerCliMetadata?: (api: OpenClawPluginApi) => void;
-  registerFull?: (api: OpenClawPluginApi) => void;
-  registerCapabilities?: (api: OpenClawPluginApi) => void;
+  registerCliMetadata?: (api: CarapacePluginApi) => void;
+  registerFull?: (api: CarapacePluginApi) => void;
+  registerCapabilities?: (api: CarapacePluginApi) => void;
 };
 
 type DefinedChannelPluginEntry<TPlugin> = {
@@ -494,7 +494,7 @@ type DefinedChannelPluginEntry<TPlugin> = {
   name: string;
   description: string;
   configSchema: ChannelConfigSchema;
-  register: (api: OpenClawPluginApi) => void;
+  register: (api: CarapacePluginApi) => void;
   channelPlugin: TPlugin;
   setChannelRuntime?: (runtime: PluginRuntime) => void;
 };
@@ -569,7 +569,7 @@ export function defineChannelPluginEntry<TPlugin>({
     get configSchema() {
       return getConfigSchema();
     },
-    register(api: OpenClawPluginApi) {
+    register(api: CarapacePluginApi) {
       if (api.registrationMode === "cli-metadata") {
         registerCliMetadata?.(api);
         return;
@@ -656,7 +656,7 @@ type ChatChannelThreadingReplyModeOptions<TResolvedAccount> =
   | { topLevelReplyToMode: string }
   | {
       scopedAccountReplyToMode: {
-        resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) => TResolvedAccount;
+        resolveAccount: (cfg: CarapaceConfig, accountId?: string | null) => TResolvedAccount;
         resolveReplyToMode: (
           account: TResolvedAccount,
           chatType?: string | null,

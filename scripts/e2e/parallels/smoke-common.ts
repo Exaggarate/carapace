@@ -1,11 +1,11 @@
-// Smoke Common helper supports OpenClaw script workflows.
+// Smoke Common helper supports Carapace script workflows.
 import { readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { PROCESS_NODE_VERSION_CHECK } from "../../../node-version.mjs";
 import { stripLeadingPackageManagerSeparator } from "../../lib/arg-utils.mts";
 import { resolveProviderConfig } from "../../lib/cross-os-release-checks/config.ts";
 import { parseTcpPort } from "./env-limits.ts";
-import { extractLastOpenClawVersionFromLog } from "./filesystem.ts";
+import { extractLastCarapaceVersionFromLog } from "./filesystem.ts";
 import { run, say, die, shellQuote } from "./host-command.ts";
 import {
   resolveHostIp,
@@ -17,7 +17,7 @@ import { runSmokeLane, type SmokeLane, type SmokeLaneStatus } from "./lane-runne
 import {
   packageBuildCommitFromTgz,
   packageVersionFromTgz,
-  packOpenClaw,
+  packCarapace,
 } from "./package-artifact.ts";
 import { ensureValue, parseMode, parseProvider } from "./provider-auth.ts";
 import type { HostServer, Mode, PackageArtifact, Provider, SnapshotInfo } from "./types.ts";
@@ -269,10 +269,10 @@ if ${managedCommand} gateway stop --help | grep -Eq '^[[:space:]]+--force([[:spa
   gateway_stop_args+=(--force)
 fi
 ${managedCommand} "\${gateway_stop_args[@]}"`
-    : "pkill -f '^openclaw-gateway([[:space:]]|$)' || [ \"$?\" -eq 1 ]";
+    : "pkill -f '^carapace-gateway([[:space:]]|$)' || [ \"$?\" -eq 1 ]";
   return `${stop}
 gateway_stop_deadline=$((SECONDS + 30))
-while pgrep -f '^openclaw-gateway([[:space:]]|$)' >/dev/null; do
+while pgrep -f '^carapace-gateway([[:space:]]|$)' >/dev/null; do
   if [ "$SECONDS" -ge "$gateway_stop_deadline" ]; then
     echo "gateway did not release state ownership before the local agent turn" >&2
     exit 1
@@ -302,7 +302,7 @@ export async function startSmokeArtifactServer(input: {
       hostIp: input.hostIp,
       packages: [
         {
-          name: "openclaw",
+          name: "carapace",
           version: await expectedPackageTargetVersion(input.artifact),
           tarballPath: input.artifact.path,
         },
@@ -339,7 +339,7 @@ export async function packAndServeSmokeArtifact(
   if (!providerConfig) {
     die(`missing release smoke configuration for provider: ${provider}`);
   }
-  const artifact = await packOpenClaw({
+  const artifact = await packCarapace({
     destination: tgzDir,
     packageSpec,
     requireControlUi,
@@ -394,9 +394,9 @@ export async function installSmokeRuntimeCompanions(input: {
   }
   const version = input
     .readCli(["--version"])
-    .match(/^OpenClaw\s+(\d{4}\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?)(?:\s|$)/mu)?.[1];
+    .match(/^Carapace\s+(\d{4}\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?)(?:\s|$)/mu)?.[1];
   if (!version) {
-    throw new Error("could not resolve installed OpenClaw version for runtime companions");
+    throw new Error("could not resolve installed Carapace version for runtime companions");
   }
   // Candidate registries bind reviewed companion artifacts to the core version.
   // Only the selected provider's required packages receive explicit consent.
@@ -505,12 +505,12 @@ export async function expectedPackageBuildCommit(artifact: PackageArtifact): Pro
   return artifact.buildCommitShort || (await packageBuildCommitFromTgz(artifact.path)).slice(0, 7);
 }
 
-export async function extractLastOpenClawVersion(
+export async function extractLastCarapaceVersion(
   runDir: string,
   phaseName: string,
   pattern: RegExp,
 ): Promise<string> {
-  return await extractLastOpenClawVersionFromLog(path.join(runDir, `${phaseName}.log`), pattern);
+  return await extractLastCarapaceVersionFromLog(path.join(runDir, `${phaseName}.log`), pattern);
 }
 
 export function buildCommonSmokeSummary(input: {

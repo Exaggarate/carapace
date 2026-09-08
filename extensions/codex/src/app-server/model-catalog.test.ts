@@ -1,4 +1,4 @@
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createCodexAppServerModelCatalog } from "./model-catalog.js";
 import { listAllCodexAppServerModels } from "./models.js";

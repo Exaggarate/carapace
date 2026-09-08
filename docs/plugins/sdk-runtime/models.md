@@ -15,7 +15,7 @@ Call a model, resolve model-selection policy, and resolve provider auth without 
 <AccordionGroup>
   <Accordion title="api.runtime.llm">
     Run a host-owned text completion without importing provider internals or
-    duplicating OpenClaw model/auth/base URL preparation.
+    duplicating Carapace model/auth/base URL preparation.
 
     ```typescript
     const result = await api.runtime.llm.complete({
@@ -91,7 +91,7 @@ Call a model, resolve model-selection policy, and resolve provider auth without 
     Studio adapters. The host owns startup serialization, readiness probes,
     request leases, abort handling, and idle shutdown.
 
-    The helper uses the same simple-completion preparation path as OpenClaw's
+    The helper uses the same simple-completion preparation path as Carapace's
     built-in runtime and the host-owned runtime config snapshot. Context engines
     receive a session-bound `llm.complete` capability, so model calls use the
     active session's agent and do not silently fall back to the default agent. The

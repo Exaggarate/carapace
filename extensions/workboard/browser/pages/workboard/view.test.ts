@@ -1,9 +1,9 @@
 import "../../test/dom.setup.ts";
-import { GatewayProtocolRequestError } from "@openclaw/gateway-client/browser";
+import { GatewayProtocolRequestError } from "@carapace/gateway-client/browser";
 // Control UI tests cover workboard behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { render } from "lit";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
 import { describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { nextWorkboardCardPosition } from "../../lib/workboard/card-state.ts";

@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw memory` (status/index/reset/search/forget/promote/promote-explain/rem-harness/rem-backfill/session-backfill)"
+summary: "CLI reference for `carapace memory` (status/index/reset/search/forget/promote/promote-explain/rem-harness/rem-backfill/session-backfill)"
 read_when:
   - You want to index or search semantic memory
   - You're debugging memory availability or indexing
@@ -9,7 +9,7 @@ title: "Memory"
 doc-schema-version: 1
 ---
 
-# `openclaw memory`
+# `carapace memory`
 
 Manage semantic memory indexing, search, promotion into `MEMORY.md`, and
 provenance-based deletion.
@@ -38,7 +38,7 @@ disabled; acquisition failures still set a nonzero exit code.
 ## `memory status`
 
 ```bash
-openclaw memory status [--agent <id>] [--deep] [--index] [--fix] [--json] [--verbose]
+carapace memory status [--agent <id>] [--deep] [--index] [--fix] [--json] [--verbose]
 ```
 
 Without `--agent`, runs for every agent in `agents.entries`; if no agent list is
@@ -76,7 +76,7 @@ the provider and verify the model and provider settings against the existing ind
 ## `memory index`
 
 ```bash
-openclaw memory index [--agent <id>] [--force] [--verbose]
+carapace memory index [--agent <id>] [--force] [--verbose]
 ```
 
 Same per-agent scoping as `status`. `--force` runs a full reindex instead of
@@ -97,17 +97,17 @@ If status reports an index identity warning after changing embedding settings,
 check the affected agent's provider, model, sources, and extra paths, then rebuild:
 
 ```bash
-openclaw memory status --deep --agent <id>
-openclaw memory index --force --agent <id>
-openclaw memory status --agent <id>
+carapace memory status --deep --agent <id>
+carapace memory index --force --agent <id>
+carapace memory status --agent <id>
 ```
 
-`openclaw memory status --index --agent <id>` also rebuilds an incompatible index.
+`carapace memory status --index --agent <id>` also rebuilds an incompatible index.
 Both repair commands replace the derived memory index while preserving other agent
 state. Use `--agent` to limit the repair to the affected agent.
 
 <Warning>
-The default `openclaw-agent.sqlite` database also contains canonical sessions,
+The default `carapace-agent.sqlite` database also contains canonical sessions,
 transcripts, and other durable agent state. Never delete it or its `-wal`,
 `-shm`, or `-journal` sidecars to reset a memory index. Use `memory index --force`
 to rebuild, or [`memory reset`](/cli/memory#memory-reset) to clear the derived index and
@@ -121,7 +121,7 @@ Clear the builtin memory index and embedding cache without deleting sessions,
 transcripts, or memory files.
 
 ```bash
-openclaw memory reset [--agent <id>] [--yes]
+carapace memory reset [--agent <id>] [--yes]
 ```
 
 Same per-agent scoping as `status` and `index`: without `--agent`, reset runs for
@@ -130,7 +130,7 @@ configured. The command asks for confirmation. `--yes` skips the prompt and is
 required in a non-interactive terminal.
 
 Reset atomically drops and recreates only memory-owned derived tables in
-`agents/<agentId>/agent/openclaw-agent.sqlite`, clearing indexed content and
+`agents/<agentId>/agent/carapace-agent.sqlite`, clearing indexed content and
 cached embeddings while retaining required revision bookkeeping. Non-memory
 database tables and memory source files remain untouched. An agent with no index
 is a successful no-op. Reset coordinates with existing memory maintenance and
@@ -140,8 +140,8 @@ afterward. If indexing is busy, let it finish and retry reset.
 Rebuild from retained sources afterward:
 
 ```bash
-openclaw memory reset --agent main --yes
-openclaw memory index --agent main
+carapace memory reset --agent main --yes
+carapace memory index --agent main
 ```
 
 Reset does not shrink the database file or restore data already lost by deleting
@@ -152,7 +152,7 @@ tracked memory derived from selected sessions and prevent re-ingestion.
 ## `memory search`
 
 ```bash
-openclaw memory search [query] [--query <text>] [--agent <id>] [--max-results <n>] [--min-score <n>] [--json]
+carapace memory search [query] [--query <text>] [--agent <id>] [--max-results <n>] [--min-score <n>] [--json]
 ```
 
 - Query: positional `[query]` or `--query <text>`. If both are set, `--query`
@@ -185,9 +185,9 @@ confirmation prompt or `--apply` flag. Source session transcripts are retained.
 Start with a preview:
 
 ```bash
-openclaw memory forget --agent <agent-id> --session <id-or-key> --dry-run --json
-openclaw memory forget --agent <agent-id> --hook-source gmail --dry-run --json
-openclaw memory forget --agent <agent-id> --participant <actor-id> --dry-run --json
+carapace memory forget --agent <agent-id> --session <id-or-key> --dry-run --json
+carapace memory forget --agent <agent-id> --hook-source gmail --dry-run --json
+carapace memory forget --agent <agent-id> --participant <actor-id> --dry-run --json
 ```
 
 After checking the report, repeat the intended command without `--dry-run`.
@@ -352,7 +352,7 @@ Rank short-term candidates from `memory/YYYY-MM-DD.md` and optionally append
 top entries to `MEMORY.md`.
 
 ```bash
-openclaw memory promote [--agent <id>] [--limit <n>] [--min-score <n>] \
+carapace memory promote [--agent <id>] [--limit <n>] [--min-score <n>] \
   [--min-recall-count <n>] [--min-unique-queries <n>] [--apply] [--include-promoted] [--json]
 ```
 
@@ -385,7 +385,7 @@ since ranking are respected instead of promoting from a stale snapshot.
 Explain one promotion candidate's score breakdown.
 
 ```bash
-openclaw memory promote-explain <selector> [--agent <id>] [--include-promoted] [--json]
+carapace memory promote-explain <selector> [--agent <id>] [--include-promoted] [--json]
 ```
 
 `<selector>` matches a candidate's key (exact or substring), path, or snippet
@@ -397,7 +397,7 @@ Preview REM reflections, candidate truths, and deep-phase promotion output
 without writing anything.
 
 ```bash
-openclaw memory rem-harness [--agent <id>] [--path <file-or-dir>] [--grounded] [--include-promoted] [--json]
+carapace memory rem-harness [--agent <id>] [--path <file-or-dir>] [--grounded] [--include-promoted] [--json]
 ```
 
 - `--path <file-or-dir>`: seed the harness from historical `YYYY-MM-DD.md`
@@ -411,8 +411,8 @@ Write grounded historical REM summaries into `DREAMS.md` for UI review.
 Reversible.
 
 ```bash
-openclaw memory rem-backfill --path <file-or-dir> [--agent <id>] [--stage-short-term] [--json]
-openclaw memory rem-backfill --rollback [--rollback-short-term] [--json]
+carapace memory rem-backfill --path <file-or-dir> [--agent <id>] [--stage-short-term] [--json]
+carapace memory rem-backfill --rollback [--rollback-short-term] [--json]
 ```
 
 - `--path <file-or-dir>`: required unless `--rollback`/`--rollback-short-term`
@@ -435,9 +435,9 @@ The default is a read-only preview, ordered
 from the oldest unprocessed day to the newest.
 
 ```bash
-openclaw memory session-backfill --agent <id> [--from YYYY-MM-DD] [--to YYYY-MM-DD] \
+carapace memory session-backfill --agent <id> [--from YYYY-MM-DD] [--to YYYY-MM-DD] \
   [--limit-days <n>] [--archive-files <path...>] [--rem | --apply] [--json]
-openclaw memory session-backfill --agent <id> --rollback [--json]
+carapace memory session-backfill --agent <id> --rollback [--json]
 ```
 
 | Flag                        | Default      | Effect                                                                                                        |
@@ -494,7 +494,7 @@ facts into `MEMORY.md`). Only deep writes to `MEMORY.md`.
 
 - Enable with `plugins.entries.memory-core.config.dreaming.enabled: true`
   (default `true`); `memory-core` auto-manages the sweep cron job, no manual
-  `openclaw cron add` required.
+  `carapace cron add` required.
 - Toggle from chat with `/dreaming on|off`; inspect with `/dreaming status`
   (or `/dreaming`/`/dreaming help`). `on`/`off` requires channel owner status
   or gateway `operator.admin`; `status` and help stay available to anyone who

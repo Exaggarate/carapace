@@ -1,5 +1,5 @@
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { PluginDoctorStateMigration } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { asOptionalRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { WarmImageRecord, WarmProfileRecord } from "./src/crabbox-worker-warm-image-store.js";
 
 type LegacyWarmImageRecord = WarmImageRecord & {
@@ -94,7 +94,7 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
                 : []),
               ...leases.map(
                 (lease) =>
-                  `- Legacy Crabbox lease ${lease.leaseId} requires provider cleanup acknowledgement: openclaw crabbox warm-images --recover ${lease.selector} --acknowledge-provider-cleanup`,
+                  `- Legacy Crabbox lease ${lease.leaseId} requires provider cleanup acknowledgement: carapace crabbox warm-images --recover ${lease.selector} --acknowledge-provider-cleanup`,
               ),
             ],
           }
@@ -169,7 +169,7 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
         );
         for (const lease of leases) {
           warnings.push(
-            `Resolve lease ${lease.leaseId} through its original Gateway or provider, stop the original Gateway/capture processes, and confirm provider cleanup before running: openclaw crabbox warm-images --recover ${lease.selector} --acknowledge-provider-cleanup. Then rerun openclaw doctor --fix. The row was not changed.`,
+            `Resolve lease ${lease.leaseId} through its original Gateway or provider, stop the original Gateway/capture processes, and confirm provider cleanup before running: carapace crabbox warm-images --recover ${lease.selector} --acknowledge-provider-cleanup. Then rerun carapace doctor --fix. The row was not changed.`,
           );
         }
       }

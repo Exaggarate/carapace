@@ -1,9 +1,9 @@
-// Provider-neutral live inference ladder for OpenClaw sessions.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+// Provider-neutral live inference ladder for Carapace sessions.
+import { normalizeProviderId } from "@carapace/model-catalog-core/provider-id";
 import { resolveAmbientOwnerAgentId } from "../agents/agent-scope-config.js";
 import { listAgentIds } from "../agents/agent-scope.js";
 import { hasAvailableAuthForProvider } from "../agents/model-auth.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, CarapaceConfig } from "../config/types.carapace.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
@@ -31,9 +31,9 @@ const RETRYABLE_INFERENCE_STATUSES = new Set([
 const PROVIDER_WIDE_FAILURE_STATUSES = new Set(["timeout", "unavailable"]);
 
 type InferenceFallbackDeps = {
-  readConfig?: () => Promise<OpenClawConfig>;
+  readConfig?: () => Promise<CarapaceConfig>;
   resolveRoute?: (
-    config: OpenClawConfig,
+    config: CarapaceConfig,
     agentId: string,
   ) => Promise<SystemAgentConfiguredRoute | null>;
   hasAuth?: typeof hasAvailableAuthForProvider;
@@ -91,7 +91,7 @@ export async function verifySystemAgentInferenceWithFallback(
   ]);
   const resolveRoute =
     deps.resolveRoute ??
-    ((candidateConfig: OpenClawConfig, agentId: string) =>
+    ((candidateConfig: CarapaceConfig, agentId: string) =>
       resolveSystemAgentConfiguredRouteFromConfig(candidateConfig, agentId, {}, snapshot));
   const routes: Array<{ agentId: string; provider: string; route: SystemAgentConfiguredRoute }> =
     [];
@@ -197,7 +197,7 @@ export async function verifySystemAgentInferenceWithFallback(
     lastFailure ?? {
       ok: false,
       status: "unknown",
-      error: "OpenClaw could not verify a usable inference route. Check model setup and try again.",
+      error: "Carapace could not verify a usable inference route. Check model setup and try again.",
     }
   );
 }

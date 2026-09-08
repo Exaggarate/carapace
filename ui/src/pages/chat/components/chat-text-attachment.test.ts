@@ -7,7 +7,7 @@ import "./chat-sidebar.ts";
 async function mountAttachment(
   overrides: Partial<Extract<SidebarContent, { kind: "attachment" }>> = {},
 ) {
-  const panel = document.createElement("openclaw-chat-detail-panel") as HTMLElement & {
+  const panel = document.createElement("carapace-chat-detail-panel") as HTMLElement & {
     content: SidebarContent;
     updateComplete: Promise<unknown>;
   };
@@ -15,7 +15,7 @@ async function mountAttachment(
     kind: "attachment",
     attachmentKind: "document",
     title: "notes.txt",
-    src: "/__openclaw__/assistant-media?mediaTicket=text-preview",
+    src: "/__carapace__/assistant-media?mediaTicket=text-preview",
     mimeType: "text/plain",
     ...overrides,
   };
@@ -39,7 +39,7 @@ it("reads a text attachment in Files without downloading or interpreting its con
   await vi.waitFor(() => expect(panel.querySelector("pre")?.textContent).toBe(text));
   expect(panel.querySelector("script, iframe, textarea")).toBeNull();
   expect(panel.querySelector<HTMLAnchorElement>("a[download]")?.getAttribute("href")).toBe(
-    "/__openclaw__/assistant-media?mediaTicket=text-preview",
+    "/__carapace__/assistant-media?mediaTicket=text-preview",
   );
   expect(fetchMock).toHaveBeenCalledOnce();
   expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).has("Authorization")).toBe(false);
@@ -152,7 +152,7 @@ it("aborts a superseded read and never displays its late contents", async () => 
   expect(signal?.aborted).toBe(true);
   resolveOld(new Response("Old file"));
   await vi.waitFor(() => expect(fetchMock.mock.settledResults[0]?.type).toBe("fulfilled"));
-  await panel.querySelector("openclaw-chat-text-attachment")?.updateComplete;
+  await panel.querySelector("carapace-chat-text-attachment")?.updateComplete;
   expect(panel.querySelector("pre")?.textContent).toBe("Current file");
 });
 

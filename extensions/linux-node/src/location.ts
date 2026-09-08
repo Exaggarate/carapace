@@ -1,4 +1,4 @@
-import type { OpenClawPluginNodeHostCommand } from "openclaw/plugin-sdk/plugin-entry";
+import type { CarapacePluginNodeHostCommand } from "carapace/plugin-sdk/plugin-entry";
 import {
   clamp,
   formatToolError,
@@ -96,7 +96,7 @@ function parseLocationOutput(
 
 export function createLinuxLocationCommand(
   deps: LocationCommandDeps,
-): OpenClawPluginNodeHostCommand {
+): CarapacePluginNodeHostCommand {
   const findWhereAmI = (env = deps.env) =>
     deps.resolveExecutable("where-am-i", env, GEOCLUE_DEMO_PATHS);
   return {

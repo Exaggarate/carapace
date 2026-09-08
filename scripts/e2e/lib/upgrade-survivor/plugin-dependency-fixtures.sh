@@ -9,7 +9,7 @@ plugin_deps_cleanup_enabled() {
 }
 
 plugin_deps_cleanup_plugins() {
-  printf '%s\n' "${OPENCLAW_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS:-discord telegram}"
+  printf '%s\n' "${CARAPACE_UPGRADE_SURVIVOR_PLUGIN_DEPS_CLEANUP_PLUGINS:-discord telegram}"
 }
 
 plugin_deps_cleanup_plugin_dirs() {
@@ -25,11 +25,11 @@ legacy_plugin_dependency_probe_paths() {
   while IFS= read -r plugin_dir; do
     printf '%s\n' \
       "$plugin_dir/node_modules" \
-      "$plugin_dir/.openclaw-runtime-deps.json" \
-      "$plugin_dir/.openclaw-runtime-deps-stamp.json" \
-      "$plugin_dir/.openclaw-runtime-deps-copy-upgrade-survivor" \
-      "$plugin_dir/.openclaw-install-stage-upgrade-survivor" \
-      "$plugin_dir/.openclaw-pnpm-store"
+      "$plugin_dir/.carapace-runtime-deps.json" \
+      "$plugin_dir/.carapace-runtime-deps-stamp.json" \
+      "$plugin_dir/.carapace-runtime-deps-copy-upgrade-survivor" \
+      "$plugin_dir/.carapace-install-stage-upgrade-survivor" \
+      "$plugin_dir/.carapace-pnpm-store"
   done < <(plugin_deps_cleanup_plugin_dirs "$plugin")
   printf '%s\n' "$(package_root)/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor"
 }
@@ -56,27 +56,27 @@ seed_legacy_plugin_dependency_debris() {
     done < <(plugin_deps_cleanup_plugin_dirs "$plugin")
     [ -n "$plugin_dir" ] || continue
     mkdir -p \
-      "$plugin_dir/node_modules/openclaw-upgrade-survivor-dep" \
-      "$plugin_dir/.openclaw-runtime-deps-copy-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep" \
-      "$plugin_dir/.openclaw-install-stage-upgrade-survivor" \
-      "$plugin_dir/.openclaw-pnpm-store" \
-      "$(package_root)/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep" \
-      "$OPENCLAW_STATE_DIR/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep" \
-      "$OPENCLAW_STATE_DIR/plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep"
-    printf '{"name":"openclaw-upgrade-survivor-dep","version":"0.0.0"}\n' \
-      >"$plugin_dir/node_modules/openclaw-upgrade-survivor-dep/package.json"
+      "$plugin_dir/node_modules/carapace-upgrade-survivor-dep" \
+      "$plugin_dir/.carapace-runtime-deps-copy-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep" \
+      "$plugin_dir/.carapace-install-stage-upgrade-survivor" \
+      "$plugin_dir/.carapace-pnpm-store" \
+      "$(package_root)/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep" \
+      "$CARAPACE_STATE_DIR/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep" \
+      "$CARAPACE_STATE_DIR/plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep"
+    printf '{"name":"carapace-upgrade-survivor-dep","version":"0.0.0"}\n' \
+      >"$plugin_dir/node_modules/carapace-upgrade-survivor-dep/package.json"
     printf '{"plugin":"%s","scenario":"plugin-deps-cleanup"}\n' "$plugin" \
-      >"$plugin_dir/.openclaw-runtime-deps.json"
+      >"$plugin_dir/.carapace-runtime-deps.json"
     printf '{"plugin":"%s","scenario":"plugin-deps-cleanup","stale":true}\n' "$plugin" \
-      >"$plugin_dir/.openclaw-runtime-deps-stamp.json"
-    printf '{"name":"openclaw-upgrade-survivor-dep","version":"0.0.0"}\n' \
-      >"$plugin_dir/.openclaw-runtime-deps-copy-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
-    printf '{"name":"openclaw-upgrade-survivor-dep","version":"0.0.0"}\n' \
-      >"$(package_root)/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
-    printf '{"name":"openclaw-upgrade-survivor-dep","version":"0.0.0"}\n' \
-      >"$OPENCLAW_STATE_DIR/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
-    printf '{"name":"openclaw-upgrade-survivor-dep","version":"0.0.0"}\n' \
-      >"$OPENCLAW_STATE_DIR/plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
+      >"$plugin_dir/.carapace-runtime-deps-stamp.json"
+    printf '{"name":"carapace-upgrade-survivor-dep","version":"0.0.0"}\n' \
+      >"$plugin_dir/.carapace-runtime-deps-copy-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
+    printf '{"name":"carapace-upgrade-survivor-dep","version":"0.0.0"}\n' \
+      >"$(package_root)/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
+    printf '{"name":"carapace-upgrade-survivor-dep","version":"0.0.0"}\n' \
+      >"$CARAPACE_STATE_DIR/.local/bundled-plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
+    printf '{"name":"carapace-upgrade-survivor-dep","version":"0.0.0"}\n' \
+      >"$CARAPACE_STATE_DIR/plugin-runtime-deps/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
     seeded_plugin_dependency_ids+=("$plugin")
     echo "Seeded legacy plugin dependency debris for configured plugin: $plugin"
   done
@@ -128,8 +128,8 @@ assert_legacy_plugin_dependency_debris_cleaned() {
       fi
     done < <(legacy_plugin_dependency_probe_paths "$plugin")
     local shared_root
-    for shared_root in "$OPENCLAW_STATE_DIR/.local/bundled-plugin-runtime-deps" "$OPENCLAW_STATE_DIR/plugin-runtime-deps"; do
-      local sentinel="$shared_root/$plugin-upgrade-survivor/node_modules/openclaw-upgrade-survivor-dep/package.json"
+    for shared_root in "$CARAPACE_STATE_DIR/.local/bundled-plugin-runtime-deps" "$CARAPACE_STATE_DIR/plugin-runtime-deps"; do
+      local sentinel="$shared_root/$plugin-upgrade-survivor/node_modules/carapace-upgrade-survivor-dep/package.json"
       if [ ! -f "$sentinel" ]; then
         echo "shared plugin dependency state was removed during update/doctor: $sentinel" >&2
         remaining=1

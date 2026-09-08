@@ -1,6 +1,6 @@
 // Model picker flow lets users select provider models for config defaults.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
+import { sortUniqueStrings } from "@carapace/normalization-core/string-normalization";
 import {
   resolveAgentConfig,
   resolveAgentEffectiveModelPrimary,
@@ -43,7 +43,7 @@ import {
   toAgentModelListLike,
 } from "../config/model-input.js";
 import { computeModelPolicyAllowlist } from "../config/model-policy-allowlist-migration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveOwningPluginIdsForProviderRef } from "../plugins/providers.js";
 import type { ProviderPlugin } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -64,7 +64,7 @@ type ModelRouteRuntimeResolver = (params: {
   modelId: string;
   api?: string | null;
   baseUrl?: unknown;
-}) => "codex" | "openclaw" | undefined;
+}) => "codex" | "carapace" | undefined;
 
 // Internal router models are valid defaults during auth/setup but not manual API targets.
 const HIDDEN_ROUTER_MODELS = new Set(["openrouter/auto"]);
@@ -95,7 +95,7 @@ function formatModelRefLabel(params: {
 }
 
 function resolvePickerAgentDir(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   env?: NodeJS.ProcessEnv;
 }): string {
@@ -103,7 +103,7 @@ function resolvePickerAgentDir(params: {
 }
 
 type PromptDefaultModelParams = {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   prompter: WizardPrompter;
   allowKeep?: boolean;
   includeManual?: boolean;
@@ -120,7 +120,7 @@ type PromptDefaultModelParams = {
   message?: string;
 };
 
-type PromptDefaultModelResult = { model?: string; config?: OpenClawConfig };
+type PromptDefaultModelResult = { model?: string; config?: CarapaceConfig };
 type PromptModelAllowlistResult = { models?: string[]; scopeKeys?: string[] };
 
 async function loadModelPickerRuntime() {
@@ -132,18 +132,18 @@ const loadResolvedModelPickerRuntime = createLazyRuntimeSurface(
   ({ modelPickerRuntime }) => modelPickerRuntime,
 );
 
-function resolveConfiguredModelRaw(cfg: OpenClawConfig): string {
+function resolveConfiguredModelRaw(cfg: CarapaceConfig): string {
   return resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model) ?? "";
 }
 
-function resolveConfiguredModelKeys(cfg: OpenClawConfig): string[] {
+function resolveConfiguredModelKeys(cfg: CarapaceConfig): string[] {
   const models = cfg.agents?.defaults?.models ?? {};
   return Object.keys(models)
     .map((key) => key.trim())
     .filter((key) => key.length > 0);
 }
 
-function resolveModelPickerConfig(cfg: OpenClawConfig, agentId?: string): OpenClawConfig {
+function resolveModelPickerConfig(cfg: CarapaceConfig, agentId?: string): CarapaceConfig {
   if (!agentId) {
     return cfg;
   }
@@ -189,7 +189,7 @@ function toPickerCatalogEntry(
 }
 
 function loadPickerModelCatalog(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   opts: {
     preferredProvider?: string;
     preferLiveProviderCatalog?: boolean;
@@ -254,7 +254,7 @@ function loadPickerModelCatalog(
 }
 
 async function resolvePickerLogicalCatalog(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   catalog: ModelCatalogEntry[];
   routeVariants: readonly ModelCatalogEntry[];
   defaultProvider: string;
@@ -326,7 +326,7 @@ function normalizeModelKeys(values: string[]): string[] {
 }
 
 function resolveFallbackModelKey(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   raw: string;
   defaultProvider: string;
   aliasIndex: ModelAliasIndex;
@@ -348,7 +348,7 @@ function resolveFallbackModelKey(params: {
 }
 
 function resolveFallbackModelKeys(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   rawFallbacks: string[];
   defaultProvider: string;
   aliasIndex: ModelAliasIndex;
@@ -368,10 +368,10 @@ function resolveFallbackModelKeys(params: {
 }
 
 function createModelRouteRuntimeResolver(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
 }): ModelRouteRuntimeResolver {
-  const cache = new Map<string, "codex" | "openclaw" | undefined>();
+  const cache = new Map<string, "codex" | "carapace" | undefined>();
   return (route) => {
     const baseUrlKey =
       typeof route.baseUrl === "string"
@@ -392,7 +392,7 @@ function createModelRouteRuntimeResolver(params: {
       env: params.env,
     });
     const runtime =
-      policy.runtime === "codex" ? "codex" : policy.runtime === "openclaw" ? "openclaw" : undefined;
+      policy.runtime === "codex" ? "codex" : policy.runtime === "carapace" ? "carapace" : undefined;
     cache.set(key, runtime);
     return runtime;
   };
@@ -416,13 +416,13 @@ function resolveModelRouteHint(params: {
   });
   return runtime === "codex"
     ? "Codex runtime route"
-    : runtime === "openclaw"
-      ? "OpenClaw runtime route"
+    : runtime === "carapace"
+      ? "Carapace runtime route"
       : undefined;
 }
 
 async function resolveLiteralPrefixProviderIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   providerRefs?: readonly string[];
@@ -582,7 +582,7 @@ async function addModelKeySelectOption(params: {
 
 function createPreferredProviderMatcher(params: {
   preferredProvider: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): (entryProvider: string) => boolean {
@@ -668,7 +668,7 @@ async function maybeFilterModelsByProvider(params: {
   }>;
   preferredProvider?: string;
   prompter: WizardPrompter;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   isVisibleProvider: (provider: string) => boolean;
@@ -709,7 +709,7 @@ async function maybeFilterModelsByProvider(params: {
 }
 
 async function resolveProviderPluginSetupOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<WizardSelectOption[]> {
@@ -739,7 +739,7 @@ async function resolveProviderPluginSetupOptions(params: {
 
 async function maybeHandleProviderPluginSelection(params: {
   selection: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   prompter: WizardPrompter;
   agentDir?: string;
   workspaceDir?: string;
@@ -1175,7 +1175,7 @@ export async function promptDefaultModel(
 }
 
 export async function promptModelAllowlist(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   prompter: WizardPrompter;
   message?: string;
   agentId?: string;
@@ -1531,10 +1531,10 @@ export async function promptModelAllowlist(params: {
 }
 
 export function applyModelAllowlist(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   models: string[],
   opts: { scopeKeys?: string[] } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const defaults = cfg.agents?.defaults;
   const normalized = normalizeModelKeys(models);
   const scopeKeys = opts.scopeKeys ? normalizeModelKeys(opts.scopeKeys) : [];
@@ -1650,10 +1650,10 @@ export function applyModelAllowlist(
 }
 
 export function applyModelFallbacksFromSelection(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   selection: string[],
   opts: { scopeKeys?: string[] } = {},
-): OpenClawConfig {
+): CarapaceConfig {
   const normalized = normalizeModelKeys(selection);
   const scopeKeys = opts.scopeKeys ? normalizeModelKeys(opts.scopeKeys) : [];
   const scopeKeySet = scopeKeys.length > 0 ? new Set(scopeKeys) : null;

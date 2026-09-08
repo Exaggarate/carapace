@@ -1,5 +1,5 @@
 // Matrix plugin module implements room behavior.
-import { filterStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { filterStringEntries } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixRoomId } from "../send.js";
 import { withResolvedActionClient, withResolvedRoomAction } from "./client.js";
 import { EventType, type MatrixActionClientOpts } from "./types.js";

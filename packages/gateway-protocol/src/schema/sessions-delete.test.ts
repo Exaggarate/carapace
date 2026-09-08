@@ -6,7 +6,7 @@ describe("SessionsDeleteResultSchema", () => {
   it("rejects unknown and missing worktree preservation reasons", () => {
     const preserved = {
       id: "wt-1",
-      branch: "openclaw/task-one",
+      branch: "carapace/task-one",
       path: "/worktree/task-one",
     };
     expect(

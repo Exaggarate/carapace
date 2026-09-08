@@ -1,14 +1,14 @@
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
+import { resolveGlobalSingleton } from "carapace/plugin-sdk/global-singleton";
+import { KeyedAsyncQueue } from "carapace/plugin-sdk/keyed-async-queue";
 
 // Dist and source copies share physical clients, so their lifecycle queues must
 // share ownership too. Settled entries drain naturally; never clear active tails.
 const nativeThreadOwners = resolveGlobalSingleton(
-  Symbol.for("openclaw.codexNativeThreadOwners"),
+  Symbol.for("carapace.codexNativeThreadOwners"),
   () => new KeyedAsyncQueue(),
 );
 
-/** Serialize OpenClaw-owned lifecycle changes, not native-internal thread controllers. */
+/** Serialize Carapace-owned lifecycle changes, not native-internal thread controllers. */
 export async function withCodexAppServerThreadMutation<T>(
   threadId: string,
   run: () => Promise<T>,

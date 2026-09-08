@@ -6,11 +6,11 @@ const mocks = vi.hoisted(() => ({
   logDebug: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", () => ({
+vi.mock("carapace/plugin-sdk/media-runtime", () => ({
   saveRemoteMedia: mocks.saveRemoteMedia,
 }));
 
-vi.mock("openclaw/plugin-sdk/logging-core", () => ({
+vi.mock("carapace/plugin-sdk/logging-core", () => ({
   logDebug: mocks.logDebug,
 }));
 

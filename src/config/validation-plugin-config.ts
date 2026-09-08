@@ -23,7 +23,7 @@ import { validatePluginSchemaValue } from "../plugins/schema-validator.js";
 import { hasKind } from "../plugins/slots.js";
 import { isRecord, resolveUserPath } from "../utils.js";
 import { shouldSuppressMissingCodexPluginDiagnostics } from "./codex-plugin-diagnostics.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, CarapaceConfig } from "./types.js";
 
 const BLOCKED_PLUGIN_CANDIDATE_PREFIX = "blocked plugin candidate:";
 
@@ -107,7 +107,7 @@ export function resolveExplicitPluginReferencePath(
 
 function formatRemovedPluginConfigWarning(pluginId: string): string {
   if (pluginId === "skill-workshop") {
-    return "plugin removed: skill-workshop (stale plugin config ignored; Skill Workshop is built into OpenClaw skills now. Use skills.workshop settings and openclaw skills workshop commands, then remove this plugins config entry)";
+    return "plugin removed: skill-workshop (stale plugin config ignored; Skill Workshop is built into Carapace skills now. Use skills.workshop settings and carapace skills workshop commands, then remove this plugins config entry)";
   }
   return `plugin removed: ${pluginId} (stale config entry ignored; remove it from plugins config)`;
 }
@@ -125,14 +125,14 @@ function formatMissingOfficialExternalPluginWarning(
     return null;
   }
   if (pluginId === "memory-lancedb" && opts?.selectedMissingMemorySlot) {
-    return `plugin not installed: ${pluginId} — gateway will run without persistent memory until installed; install the official external plugin with: openclaw plugins install ${installSpec}`;
+    return `plugin not installed: ${pluginId} — gateway will run without persistent memory until installed; install the official external plugin with: carapace plugins install ${installSpec}`;
   }
-  return `plugin not installed: ${pluginId} — install the official external plugin with: openclaw plugins install ${installSpec}`;
+  return `plugin not installed: ${pluginId} — install the official external plugin with: carapace plugins install ${installSpec}`;
 }
 
 export function validateExplicitPluginConfig(params: {
   raw: unknown;
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   applyDefaults: boolean;
   registry: PluginManifestRegistry;
@@ -261,7 +261,7 @@ export function validateExplicitPluginConfig(params: {
       shouldSuppressMissingCodexPluginDiagnostics(
         config,
         env ?? process.env,
-        isRecord(raw) ? (raw as OpenClawConfig) : undefined,
+        isRecord(raw) ? (raw as CarapaceConfig) : undefined,
       )
     ) {
       return;
@@ -434,7 +434,7 @@ export function validateExplicitPluginConfig(params: {
           params.replacePluginEntryConfig(pluginId, nextValue);
         }
       } else if (record.format === "bundle") {
-        // Compatible bundles currently expose no native OpenClaw config schema.
+        // Compatible bundles currently expose no native Carapace config schema.
         // Treat them as schema-less capability packs rather than failing validation.
       } else {
         issues.push({

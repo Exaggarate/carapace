@@ -97,7 +97,7 @@ describe("plugin harness prompt media", () => {
       expectedImages: 1,
     },
   ])("applies canonical $name rules at the actual plugin-harness boundary", async (testCase) => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-harness-canonical-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-harness-canonical-"));
     const workspaceDir = path.join(stateDir, "workspace");
     const inboundDir = path.join(stateDir, "media", "inbound");
     const imagePath = path.join(inboundDir, testCase.fileName);
@@ -105,8 +105,8 @@ describe("plugin harness prompt media", () => {
     await fs.mkdir(inboundDir, { recursive: true });
     await fs.writeFile(imagePath, testCase.bytes);
     const media = [{ path: imagePath, contentType: testCase.contentType, kind: testCase.kind }];
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
 
     try {
       const result = await preparePluginHarnessPromptImages({
@@ -116,7 +116,7 @@ describe("plugin harness prompt media", () => {
           media,
           sessionId: "session-canonical-media",
           userTurnTranscriptRecorder: {
-            message: { role: "user", content: "inspect", __openclaw: { media } },
+            message: { role: "user", content: "inspect", __carapace: { media } },
             async resolveMessage() {
               return this.message;
             },
@@ -142,7 +142,7 @@ describe("plugin harness prompt media", () => {
   });
 
   it("hydrates plugin images and preserves serialized replay order with non-image facts", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-harness-media-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-harness-media-"));
     const workspaceDir = path.join(stateDir, "workspace");
     const inboundDir = path.join(stateDir, "media", "inbound");
     const mediaId = "photo.png";
@@ -150,8 +150,8 @@ describe("plugin harness prompt media", () => {
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.mkdir(inboundDir, { recursive: true });
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const documentFact = {
       path: path.join(workspaceDir, "misleading.png"),
       contentType: "application/pdf",
@@ -168,13 +168,13 @@ describe("plugin harness prompt media", () => {
           message: {
             role: "user",
             content: "stale initial facts",
-            __openclaw: { media: [documentFact] },
+            __carapace: { media: [documentFact] },
           },
           async resolveMessage() {
             return {
               role: "user",
               content: "inspect",
-              __openclaw: {
+              __carapace: {
                 media: [{ path: imagePath, contentType: "image/png" }, documentFact],
                 mediaImageLayout: { slots: [{ kind: "offloaded", factIndex: 0 }] },
               },
@@ -208,7 +208,7 @@ describe("plugin harness prompt media", () => {
   });
 
   it("hydrates named-agent workspace images without opening sibling workspaces", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-harness-agent-media-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-harness-agent-media-"));
     const workspaceDir = path.join(stateDir, "workspace-arthur");
     const siblingWorkspaceDir = path.join(stateDir, "workspace-merlin");
     const imagePath = path.join(workspaceDir, "media", "inbound", "photo.png");
@@ -218,8 +218,8 @@ describe("plugin harness prompt media", () => {
     await fs.mkdir(path.dirname(siblingImagePath), { recursive: true });
     await fs.writeFile(imagePath, image);
     await fs.writeFile(siblingImagePath, image);
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
     const config = {
       agents: {
         entries: {
@@ -262,7 +262,7 @@ describe("plugin harness prompt media", () => {
   });
 
   it("hydrates named-agent workspace images on the embedded prompt path", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-embedded-agent-media-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-embedded-agent-media-"));
     const workspaceDir = path.join(stateDir, "workspace-arthur");
     const siblingWorkspaceDir = path.join(stateDir, "workspace-merlin");
     const imagePath = path.join(workspaceDir, "media", "inbound", "photo.png");
@@ -272,8 +272,8 @@ describe("plugin harness prompt media", () => {
     await fs.mkdir(path.dirname(siblingImagePath), { recursive: true });
     await fs.writeFile(imagePath, image);
     await fs.writeFile(siblingImagePath, image);
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["CARAPACE_STATE_DIR"]);
+    setTestEnvValue("CARAPACE_STATE_DIR", stateDir);
 
     try {
       const hydrate = (mediaPath: string, sessionId: string) =>
@@ -318,7 +318,7 @@ describe("plugin harness prompt media", () => {
   });
 
   it("surfaces a failed image hydration before plugin dispatch", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-harness-failed-media-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-harness-failed-media-"));
     try {
       await expect(
         preparePluginHarnessPromptImages({
@@ -343,7 +343,7 @@ describe("plugin harness prompt media", () => {
   });
 
   it("delivers readable images when an unresolved attachment is hydration-suppressed", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-harness-mixed-media-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-harness-mixed-media-"));
     const imagePath = path.join(workspaceDir, "present.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     try {
@@ -500,7 +500,7 @@ describe("plugin harness prompt media", () => {
           message: {
             role: "user",
             content: "compare",
-            __openclaw: {
+            __carapace: {
               media: [
                 { path: "/tmp/described.png", contentType: "image/png" },
                 { path: "/tmp/inline.png", contentType: "image/png" },

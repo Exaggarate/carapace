@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-status-corrupt-plugin-deps.XXXXXX")"
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/carapace-status-corrupt-plugin-deps.XXXXXX")"
 cleanup() {
   rm -rf "$TMP_DIR"
 }
@@ -12,17 +12,17 @@ trap cleanup EXIT
 
 HOME_DIR="$TMP_DIR/home"
 STATE_DIR="$TMP_DIR/state"
-CONFIG_PATH="$TMP_DIR/openclaw.json"
+CONFIG_PATH="$TMP_DIR/carapace.json"
 PLUGIN_DIR="$TMP_DIR/plugin"
 STAGE_DIR="$TMP_DIR/stage"
 mkdir -p "$HOME_DIR" "$STATE_DIR" "$PLUGIN_DIR" "$STAGE_DIR/node_modules/ansi-escapes"
-printf "corrupt rename residue\n" > "$STAGE_DIR/node_modules/ansi-escapes/.openclaw-rename-tmp"
+printf "corrupt rename residue\n" > "$STAGE_DIR/node_modules/ansi-escapes/.carapace-rename-tmp"
 
 cat > "$PLUGIN_DIR/package.json" <<'JSON'
 {
-  "name": "@example/openclaw-e2e-corrupt-chat",
+  "name": "@example/carapace-e2e-corrupt-chat",
   "version": "1.0.0",
-  "openclaw": {
+  "carapace": {
     "extensions": ["./index.cjs"],
     "setupEntry": "./setup-entry.cjs",
     "channel": {
@@ -33,7 +33,7 @@ cat > "$PLUGIN_DIR/package.json" <<'JSON'
 }
 JSON
 
-cat > "$PLUGIN_DIR/openclaw.plugin.json" <<'JSON'
+cat > "$PLUGIN_DIR/carapace.plugin.json" <<'JSON'
 {
   "id": "e2e-corrupt-chat",
   "configSchema": {
@@ -70,8 +70,8 @@ cat > "$PLUGIN_DIR/setup-entry.cjs" <<'JS'
 const fs = require("node:fs");
 const path = require("node:path");
 
-const stageDir = process.env.OPENCLAW_PLUGIN_STAGE_DIR || "";
-const renameResidue = path.join(stageDir, "node_modules", "ansi-escapes", ".openclaw-rename-tmp");
+const stageDir = process.env.CARAPACE_PLUGIN_STAGE_DIR || "";
+const renameResidue = path.join(stageDir, "node_modules", "ansi-escapes", ".carapace-rename-tmp");
 if (fs.existsSync(renameResidue)) {
   const err = new Error("ENOTEMPTY: directory not empty, rename 'ansi-escapes'");
   err.code = "ENOTEMPTY";
@@ -115,17 +115,17 @@ cat > "$CONFIG_PATH" <<JSON
 }
 JSON
 
-run_openclaw() {
+run_carapace() {
   HOME="$HOME_DIR" \
-  OPENCLAW_HOME="$STATE_DIR" \
-  OPENCLAW_STATE_DIR="$STATE_DIR" \
-  OPENCLAW_CONFIG_PATH="$CONFIG_PATH" \
-  OPENCLAW_PLUGIN_STAGE_DIR="$STAGE_DIR" \
-  OPENCLAW_DISABLE_BUNDLED_PLUGINS=1 \
-  OPENCLAW_NO_ONBOARD=1 \
-  OPENCLAW_NO_PROMPT=1 \
-  OPENCLAW_SKIP_CHANNELS=1 \
-  OPENCLAW_SKIP_PROVIDERS=1 \
+  CARAPACE_HOME="$STATE_DIR" \
+  CARAPACE_STATE_DIR="$STATE_DIR" \
+  CARAPACE_CONFIG_PATH="$CONFIG_PATH" \
+  CARAPACE_PLUGIN_STAGE_DIR="$STAGE_DIR" \
+  CARAPACE_DISABLE_BUNDLED_PLUGINS=1 \
+  CARAPACE_NO_ONBOARD=1 \
+  CARAPACE_NO_PROMPT=1 \
+  CARAPACE_SKIP_CHANNELS=1 \
+  CARAPACE_SKIP_PROVIDERS=1 \
   COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
   NO_COLOR=1 \
     node "$ROOT_DIR/scripts/run-node.mjs" "$@"
@@ -135,17 +135,17 @@ BEFORE="$TMP_DIR/status-before.txt"
 DOCTOR="$TMP_DIR/doctor.txt"
 AFTER="$TMP_DIR/status-after.txt"
 
-run_openclaw status --all --timeout 1 > "$BEFORE"
+run_carapace status --all --timeout 1 > "$BEFORE"
 grep -F "e2e-corrupt-chat" "$BEFORE" >/dev/null
-grep -F "plugin load failed: dependency tree corrupted; run openclaw doctor --fix" "$BEFORE" >/dev/null
+grep -F "plugin load failed: dependency tree corrupted; run carapace doctor --fix" "$BEFORE" >/dev/null
 
-run_openclaw doctor --fix --non-interactive --yes > "$DOCTOR"
+run_carapace doctor --fix --non-interactive --yes > "$DOCTOR"
 if [[ -e "$STAGE_DIR" ]]; then
   echo "doctor --fix did not remove corrupt plugin stage dir: $STAGE_DIR" >&2
   exit 1
 fi
 
-run_openclaw status --all --timeout 1 > "$AFTER"
+run_carapace status --all --timeout 1 > "$AFTER"
 grep -F "E2E Corrupt Chat" "$AFTER" >/dev/null
 if grep -F "plugin load failed: dependency tree corrupted" "$AFTER" >/dev/null; then
   echo "status still reports corrupt plugin dependency tree after doctor --fix" >&2

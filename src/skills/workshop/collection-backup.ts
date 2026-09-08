@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { pathExists } from "../../infra/fs-safe.js";
 import { isPathStrictlyInside } from "../../infra/path-guards.js";
 import { readSkillProposalTargetTreeSha256 } from "./proposal-bundle.js";
 
-const BACKUP_SCHEMA = "openclaw.skill-collection-backup.v2";
+const BACKUP_SCHEMA = "carapace.skill-collection-backup.v2";
 
 export type CollectionBackupManifest = {
   schema: typeof BACKUP_SCHEMA;

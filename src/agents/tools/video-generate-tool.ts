@@ -1,7 +1,7 @@
 /** Runs capability-aware video generation and persistence. */
 import { Type, type TSchema } from "typebox";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { SsrFPolicy } from "../../infra/net/ssrf.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { parseVideoGenerationModelRef } from "../../media-generation/model-ref.js";
@@ -209,7 +209,7 @@ function createVideoGenerateToolSchema(params: { includeAudioReferences: boolean
 }
 
 function collectVideoGenerationModelProviderIds(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   modelConfig: ToolModelConfig;
   workspaceDir?: string;
 }): Set<string> {
@@ -230,7 +230,7 @@ function collectVideoGenerationModelProviderIds(params: {
 
 function isVideoGenerationProviderConfigured(params: {
   snapshot: Pick<PluginMetadataSnapshot, "index" | "plugins">;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -256,7 +256,7 @@ function isVideoGenerationProviderConfigured(params: {
 }
 
 function shouldExposeVideoReferenceAudioParams(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   workspaceDir?: string;
@@ -389,7 +389,7 @@ function normalizeReferenceInputs(params: {
 }
 
 function resolveSelectedVideoGenerationProvider(params: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   providers?: VideoGenerationProvider[];
   videoGenerationModelConfig: ToolModelConfig;
   modelOverride?: string;
@@ -466,7 +466,7 @@ type ExecutedVideoGeneration = {
 };
 
 async function executeVideoGenerationJob(params: {
-  effectiveCfg: OpenClawConfig;
+  effectiveCfg: CarapaceConfig;
   prompt: string;
   agentDir?: string;
   model?: string;
@@ -757,7 +757,7 @@ async function executeVideoGenerationJob(params: {
 }
 
 export function createVideoGenerateTool(options?: {
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   agentDir?: string;
   authProfileStore?: AuthProfileStore;
   agentSessionKey?: string;
@@ -770,7 +770,7 @@ export function createVideoGenerateTool(options?: {
   scheduleBackgroundWork?: MediaGenerateBackgroundScheduler;
   onAsyncTaskStarted?: MediaGenerateAsyncStartCallback;
 }): AnyAgentTool | null {
-  const cfg: OpenClawConfig = options?.config ?? getRuntimeConfig();
+  const cfg: CarapaceConfig = options?.config ?? getRuntimeConfig();
   const preparedProviders = options?.preparedModelRuntime?.mediaCapabilityProviders
     ?.videoGenerationProviders
     ? [...options.preparedModelRuntime.mediaCapabilityProviders.videoGenerationProviders]

@@ -1,15 +1,15 @@
 // Voice Call tests cover media stream plugin behavior.
 import type { IncomingMessage } from "node:http";
 import net from "node:net";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { expectDefined } from "carapace/plugin-sdk/expect-runtime";
+import { createDeferred } from "carapace/plugin-sdk/extension-shared";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import type {
   RealtimeTranscriptionProviderPlugin,
   RealtimeTranscriptionSession,
   RealtimeTranscriptionSessionCreateRequest,
-} from "openclaw/plugin-sdk/realtime-transcription";
-import { createTalkSessionController, type TalkEvent } from "openclaw/plugin-sdk/realtime-voice";
+} from "carapace/plugin-sdk/realtime-transcription";
+import { createTalkSessionController, type TalkEvent } from "carapace/plugin-sdk/realtime-voice";
 import { describe, expect, it, vi } from "vitest";
 import { MediaStreamHandler } from "./media-stream.js";
 import {

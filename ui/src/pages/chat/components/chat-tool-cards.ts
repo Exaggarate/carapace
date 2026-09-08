@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@carapace/normalization-core/record-coerce";
 import { html, nothing } from "lit";
 import { stripShellPreamble } from "../../../../../src/agents/tool-display-exec-shell.js";
 import {

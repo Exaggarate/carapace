@@ -2,7 +2,7 @@
 import {
   hasOutboundReplyContent,
   isReasoningReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "carapace/plugin-sdk/reply-payload";
 import { getReplyPayloadMetadata } from "./reply-payload.js";
 import type { ReplyPayload } from "./types.js";
 

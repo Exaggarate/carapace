@@ -59,7 +59,7 @@ suite.define(() => {
         methodResponses: { "sessions.catalog.list": catalog("Retained sample session") },
       });
       await page.goto(`${suite.server.baseUrl}new`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("carapace-app-sidebar");
       await sidebar.getByText("Retained sample session", { exact: true }).waitFor();
       await gateway.setMethodResponse("sessions.catalog.list", { __mockError: suspensionError });
       await gateway.emitGatewayEvent("gateway.suspension", { phase: "draining" });

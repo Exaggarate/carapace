@@ -1,14 +1,14 @@
 // Tts Local Cli live tests cover the real process and ffmpeg integration.
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveFfmpegBin, runFfmpeg } from "openclaw/plugin-sdk/media-runtime";
-import type { SpeechProviderConfig, SpeechSynthesisRequest } from "openclaw/plugin-sdk/speech-core";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { resolveFfmpegBin, runFfmpeg } from "carapace/plugin-sdk/media-runtime";
+import type { SpeechProviderConfig, SpeechSynthesisRequest } from "carapace/plugin-sdk/speech-core";
+import { withTempDir } from "carapace/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import { buildCliSpeechProvider } from "./speech-provider.js";
 
-const describeLive = process.env.OPENCLAW_LIVE_TEST === "1" ? describe : describe.skip;
+const describeLive = process.env.CARAPACE_LIVE_TEST === "1" ? describe : describe.skip;
 
 function firstOggPacketPrefix(buffer: Buffer, length: number): string {
   const segmentCount = buffer[26] ?? 0;
@@ -17,7 +17,7 @@ function firstOggPacketPrefix(buffer: Buffer, length: number): string {
 
 describeLive("buildCliSpeechProvider live", () => {
   it("synthesizes through a real local CLI fixture and ffmpeg", async () => {
-    await withTempDir("openclaw-cli-tts-live-", async (dir) => {
+    await withTempDir("carapace-cli-tts-live-", async (dir) => {
       const script = path.join(dir, "copy-audio.mjs");
       const wavPath = path.join(dir, "source.wav");
       await runFfmpeg([
@@ -48,7 +48,7 @@ copyFileSync(${JSON.stringify(wavPath)}, process.argv[outIndex + 1]);
       const provider = buildCliSpeechProvider();
       const request: SpeechSynthesisRequest = {
         text: "hello world",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as CarapaceConfig,
         providerConfig,
         providerOverrides: {},
         timeoutMs: 30_000,
@@ -92,7 +92,7 @@ copyFileSync(${JSON.stringify(wavPath)}, process.argv[outIndex + 1]);
 
     const result = await buildCliSpeechProvider().synthesize({
       text: "hello world",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       providerConfig,
       providerOverrides: {},
       timeoutMs: 30_000,
@@ -134,7 +134,7 @@ copyFileSync(${JSON.stringify(wavPath)}, process.argv[outIndex + 1]);
 
     const result = await buildCliSpeechProvider().synthesize({
       text: "hello world",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as CarapaceConfig,
       providerConfig,
       providerOverrides: {},
       timeoutMs: 30_000,

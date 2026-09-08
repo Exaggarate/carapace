@@ -19,4 +19,4 @@ export type {
   QaBusThread,
   QaBusToolCall,
   QaBusWaitForInput,
-} from "openclaw/plugin-sdk/qa-channel-protocol";
+} from "carapace/plugin-sdk/qa-channel-protocol";

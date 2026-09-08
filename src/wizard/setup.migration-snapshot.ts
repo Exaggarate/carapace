@@ -4,7 +4,7 @@ import crypto from "node:crypto";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { FILE_LOCK_TIMEOUT_ERROR_CODE, withFileLock } from "../infra/file-lock.js";
 import { readJsonFile } from "../infra/json-files.js";
 import { isNotFoundPathError } from "../infra/path-guards.js";
@@ -74,7 +74,7 @@ function hasMeaningfulWizardConfig(value: unknown): boolean {
   );
 }
 
-function hasMeaningfulConfig(config: OpenClawConfig): boolean {
+function hasMeaningfulConfig(config: CarapaceConfig): boolean {
   return Object.entries(config as Record<string, unknown>).some(([key, value]) => {
     if (MEANINGFUL_CONFIG_IGNORED_KEYS.has(key)) {
       return false;
@@ -83,7 +83,7 @@ function hasMeaningfulConfig(config: OpenClawConfig): boolean {
   });
 }
 
-function buildSetupMigrationSnapshotConfig(config: OpenClawConfig): Record<string, unknown> {
+function buildSetupMigrationSnapshotConfig(config: CarapaceConfig): Record<string, unknown> {
   const snapshot: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(config as Record<string, unknown>)) {
     if (MEANINGFUL_CONFIG_IGNORED_KEYS.has(key)) {
@@ -107,7 +107,7 @@ function buildSetupMigrationSnapshotConfig(config: OpenClawConfig): Record<strin
 }
 
 export async function inspectSetupMigrationFreshness(params: {
-  baseConfig: OpenClawConfig;
+  baseConfig: CarapaceConfig;
   stateDir: string;
   workspaceDir: string;
 }): Promise<{ fresh: boolean; reasons: string[] }> {
@@ -136,9 +136,9 @@ export async function inspectSetupMigrationFreshness(params: {
 
 /** Preserve interactive consent decisions made before the import lock rereads config. */
 export function preserveSetupMigrationOnboardingConsents(
-  config: OpenClawConfig,
-  inMemoryConfig: OpenClawConfig,
-): OpenClawConfig {
+  config: CarapaceConfig,
+  inMemoryConfig: CarapaceConfig,
+): CarapaceConfig {
   const securityAcknowledgedAt = inMemoryConfig.wizard?.securityAcknowledgedAt;
   const preserveSecurity = securityAcknowledgedAt && !config.wizard?.securityAcknowledgedAt;
   const preserveTelemetry = inMemoryConfig.telemetry?.consentedAt && !config.telemetry?.consentedAt;
@@ -248,7 +248,7 @@ async function hashSourcePath(
 
 /** Hashes migration-owned target state without persisting raw paths or values. */
 export async function buildSetupMigrationTargetSnapshot(params: {
-  config: OpenClawConfig;
+  config: CarapaceConfig;
   stateDir: string;
   workspaceDir: string;
 }): Promise<string> {
@@ -290,8 +290,8 @@ export async function buildSetupMigrationPlanSourceSnapshot(plan: MigrationPlan)
 
 /** Verifies planning inputs and builds the exact provider-side-effect retry boundary. */
 export async function prepareSetupMigrationAttemptBoundary(params: {
-  currentConfig: OpenClawConfig;
-  targetConfig: OpenClawConfig;
+  currentConfig: CarapaceConfig;
+  targetConfig: CarapaceConfig;
   stateDir: string;
   workspaceDir: string;
   plan: MigrationPlan;
@@ -327,7 +327,7 @@ export async function prepareSetupMigrationAttemptBoundary(params: {
   };
 }
 
-/** Serializes onboarding writes that share one OpenClaw state target. */
+/** Serializes onboarding writes that share one Carapace state target. */
 export async function withSetupMigrationTargetLock<T>(
   stateDir: string,
   fn: () => Promise<T>,
@@ -336,7 +336,7 @@ export async function withSetupMigrationTargetLock<T>(
   const activeStateDir = activeSetupMigrationTargetLock.getStore();
   if (activeStateDir) {
     if (activeStateDir !== resolvedStateDir) {
-      throw new Error("nested onboarding target lock cannot switch the OpenClaw state directory");
+      throw new Error("nested onboarding target lock cannot switch the Carapace state directory");
     }
     return await fn();
   }
@@ -359,7 +359,7 @@ export async function withSetupMigrationTargetLock<T>(
     const pid = payload?.pid;
     const holderPid =
       typeof pid === "number" && Number.isSafeInteger(pid) && pid > 0 ? pid : undefined;
-    throw new SetupTargetLockedError(holderPid, process.env.OPENCLAW_PROFILE?.trim(), error);
+    throw new SetupTargetLockedError(holderPid, process.env.CARAPACE_PROFILE?.trim(), error);
   }
 }
 
@@ -372,7 +372,7 @@ export function assertFreshSetupMigrationTarget(freshness: {
   }
   throw new SetupMigrationFreshnessError(
     [
-      "Migration import during onboarding requires a fresh OpenClaw setup.",
+      "Migration import during onboarding requires a fresh Carapace setup.",
       "Create a fresh setup or reset config, credentials, sessions, and workspace before importing.",
       "Backup plus overwrite/merge imports are feature-gated for now.",
       "Existing setup:",

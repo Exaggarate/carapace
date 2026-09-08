@@ -1,11 +1,11 @@
-import { resolveAgentDir, resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getMemoryCapabilityRegistration } from "openclaw/plugin-sdk/memory-host-core";
+import { resolveAgentDir, resolveAgentWorkspaceDir } from "carapace/plugin-sdk/agent-runtime";
+import type { CarapaceConfig } from "carapace/plugin-sdk/config-contracts";
+import { getMemoryCapabilityRegistration } from "carapace/plugin-sdk/memory-host-core";
 import {
   normalizePluginsConfig,
   resolveLivePluginConfigObject,
-} from "openclaw/plugin-sdk/plugin-config-runtime";
-import { definePluginEntry, type OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "carapace/plugin-sdk/plugin-config-runtime";
+import { definePluginEntry, type CarapacePluginApi } from "carapace/plugin-sdk/plugin-entry";
 import {
   applyCliRuntimeRecallTimeoutDefault,
   hasDeprecatedModelFallbackPolicy,
@@ -80,7 +80,7 @@ export default definePluginEntry({
   id: "active-memory",
   name: "Active Memory",
   description: "Proactively surfaces relevant memory before eligible conversational replies.",
-  register(api: OpenClawPluginApi) {
+  register(api: CarapacePluginApi) {
     const readCurrentConfig = () => readActiveMemoryConfig(api);
     let config = normalizePluginConfig(api.pluginConfig, readCurrentConfig());
     const warnDeprecatedModelFallbackPolicy = (pluginConfig: unknown) => {
@@ -98,7 +98,7 @@ export default definePluginEntry({
     const refreshLiveConfigFromRuntime = () => {
       const livePluginConfig = resolveLivePluginConfigObject(
         api.runtime.config?.current
-          ? () => api.runtime.config.current() as OpenClawConfig
+          ? () => api.runtime.config.current() as CarapaceConfig
           : undefined,
         "active-memory",
         api.pluginConfig as Record<string, unknown>,
@@ -131,7 +131,7 @@ export default definePluginEntry({
             : undefined;
         refreshLiveConfigFromRuntime();
         if (isGlobal) {
-          const currentConfig = api.runtime.config.current() as OpenClawConfig;
+          const currentConfig = api.runtime.config.current() as CarapaceConfig;
           if (action === "status") {
             return {
               text: `Active Memory: ${isActiveMemoryGloballyEnabled(currentConfig) ? "on" : "off"} globally.`,

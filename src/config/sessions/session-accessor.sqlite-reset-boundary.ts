@@ -1,9 +1,9 @@
 import { clearSessionProgressCardForReset } from "../../session-cards/progress-card-store.js";
 import { emitSessionLifecycleEvent } from "../../sessions/session-lifecycle-events.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { SessionResetBoundaryWrite } from "./session-accessor.lifecycle-types.js";
 import { loadTranscriptEventsFromDatabase } from "./session-accessor.sqlite-read.js";
 import type { ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
@@ -17,7 +17,7 @@ import type { InternalSessionEntry } from "./types.js";
 
 /** Transcript reset and prior-task retirement share the owning guarded transaction. */
 export function appendSessionResetBoundary(
-  database: OpenClawAgentDatabase,
+  database: CarapaceAgentDatabase,
   scope: ResolvedTranscriptScope,
   previousEntry: InternalSessionEntry,
   boundary: SessionResetBoundaryWrite,
@@ -42,7 +42,7 @@ export function appendSessionResetBoundary(
     clearSessionProgressCardForReset(database.db, scope.sessionKey)
   ) {
     const { agentId, sessionKey } = scope;
-    deferOpenClawAgentPostCommitPublication(database, () => {
+    deferCarapaceAgentPostCommitPublication(database, () => {
       emitSessionLifecycleEvent({ agentId, sessionKey, reason: "progress-card-reset" });
     });
   }

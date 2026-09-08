@@ -1,4 +1,4 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@carapace/normalization-core/result";
 import { getRuntimeConfig } from "../config/config.js";
 import {
   appendSessionTranscriptReport,
@@ -91,7 +91,7 @@ export function createWorkerWorkspaceConflictTranscriptHandlers(
         (details.totalCount === undefined ||
           (Number.isSafeInteger(details.totalCount) &&
             (details.totalCount as number) >= details.paths.length)) &&
-        /^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef)
+        /^refs\/carapace\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef)
       ) {
         return {
           kind: "conflict",
@@ -175,7 +175,7 @@ export function createWorkerWorkspaceConflictTranscriptHandlers(
             customTypes: [WORKSPACE_RECOVERY_FAILURE_TRANSCRIPT_TYPE],
             selectReport: (latestRecovery) => {
               const error = boundedWorkerError(recovery.error, 768);
-              const content = `Cloud workspace recovery attempt failed: ${error}. OpenClaw preserved the result and will retry.`;
+              const content = `Cloud workspace recovery attempt failed: ${error}. Carapace preserved the result and will retry.`;
               if (latestRecovery?.content !== content) {
                 return {
                   customType: WORKSPACE_RECOVERY_FAILURE_TRANSCRIPT_TYPE,

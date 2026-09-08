@@ -3,14 +3,14 @@ import { afterEach, beforeEach, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { createTranscriptsTool } from "../agents/tools/transcripts-tool.js";
 import { resetConfigRuntimeState } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import {
   captureActivePluginRegistrySnapshot,
   restoreActivePluginRegistrySnapshot,
   setActivePluginRegistry,
 } from "../plugins/runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { activeSessions, startTranscripts } from "./capture.js";
 import * as providerRegistry from "./provider-registry.js";
 import type { TranscriptSourceProvider } from "./provider-types.js";
@@ -33,18 +33,18 @@ export function useTranscriptStatusFixture() {
   afterEach(() => {
     activeSessions.clear();
     resetConfigRuntimeState();
-    closeOpenClawStateDatabaseForTest();
+    closeCarapaceStateDatabaseForTest();
     restoreActivePluginRegistrySnapshot(previousRegistry);
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
   return function fixture(
-    config: OpenClawConfig = { transcripts: { autoStart: [transcriptStatusRoom] } },
+    config: CarapaceConfig = { transcripts: { autoStart: [transcriptStatusRoom] } },
   ) {
     const stateDir = tempDirs.make("transcript-status-producer-");
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, CARAPACE_STATE_DIR: stateDir },
     });
     const provider: TranscriptSourceProvider = {
       id: transcriptStatusRoom.providerId,

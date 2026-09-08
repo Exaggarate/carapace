@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";
 import type {
   CompactionAccountingFact,
@@ -101,8 +101,8 @@ export async function runEmbeddedFallbackCandidate(
   });
   const embeddedRunHarnessOverride =
     params.sessionRuntimeOverride ??
-    (agentHarnessPolicy.runtime === "openclaw" && embeddedRunProvider !== params.provider
-      ? "openclaw"
+    (agentHarnessPolicy.runtime === "carapace" && embeddedRunProvider !== params.provider
+      ? "carapace"
       : undefined);
   const messageActionCapabilitySessionKey =
     turn.runtimePolicySessionKey ?? embeddedContext.sessionKey;

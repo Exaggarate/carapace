@@ -1,4 +1,4 @@
-import { stableStringify } from "@openclaw/normalization-core";
+import { stableStringify } from "@carapace/normalization-core";
 import { clawProfileExtensionPackages } from "./application-plan.js";
 import type { ClawPackageStatus } from "./lifecycle-status.js";
 import type { PersistedClawPackageRef } from "./provenance.js";
@@ -6,7 +6,7 @@ import type {
   ClawAddPlanAction,
   ClawDiagnostic,
   ClawManifest,
-  ClawOpenClawProfile,
+  ClawCarapaceProfile,
   ClawPackage,
   ClawPackagePreflight,
   ClawPackagePreflightResult,
@@ -57,7 +57,7 @@ export function recordingClawPackagePreflight(
 
 export function clawTargetPackages(
   manifest: ClawManifest,
-  profile: ClawOpenClawProfile | undefined,
+  profile: ClawCarapaceProfile | undefined,
 ) {
   return new Map(
     [...manifest.packages, ...clawProfileExtensionPackages(profile)].map(

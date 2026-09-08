@@ -58,7 +58,7 @@ describe("maybeRestartService", () => {
       portUsage: {
         port: 18789,
         status: "busy",
-        listeners: [{ pid: 8000, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 8000, commandLine: "carapace-gateway" }],
         hints: [],
       },
       healthy: true,
@@ -73,7 +73,7 @@ describe("maybeRestartService", () => {
       const result = {
         status: "ok",
         mode: "git",
-        root: "/tmp/openclaw-configured-ui-update",
+        root: "/tmp/carapace-configured-ui-update",
         after: { version: "2026.9.1", buildId },
         steps: [],
         durationMs: 0,
@@ -88,13 +88,13 @@ describe("maybeRestartService", () => {
           serviceEnv: { HOME: "/home/operator" },
           serviceInstallEnv: {},
           gatewayPort: 18789,
-          restartScriptPath: "/tmp/openclaw-configured-ui-restart.sh",
+          restartScriptPath: "/tmp/carapace-configured-ui-restart.sh",
           timeoutMs: 1_000,
         }),
       ).resolves.toBe("ok");
 
       expect(mocks.runRestartScript).toHaveBeenCalledWith(
-        "/tmp/openclaw-configured-ui-restart.sh",
+        "/tmp/carapace-configured-ui-restart.sh",
         1_000,
       );
       expect(mocks.waitForGatewayHealthyRestart.mock.lastCall?.[0].expectedBuildId).toBe(buildId);
@@ -123,7 +123,7 @@ describe("maybeRestartService", () => {
         result: {
           status: "ok",
           mode: "git",
-          root: "/tmp/openclaw-configured-ui-update",
+          root: "/tmp/carapace-configured-ui-update",
           after: { version: "2026.9.1", buildId: "new-build" },
           steps: [],
           durationMs: 0,
@@ -133,7 +133,7 @@ describe("maybeRestartService", () => {
         serviceEnv: { HOME: "/home/operator" },
         serviceInstallEnv: {},
         gatewayPort: 18789,
-        restartScriptPath: "/tmp/openclaw-configured-ui-restart.sh",
+        restartScriptPath: "/tmp/carapace-configured-ui-restart.sh",
         timeoutMs: 1_000,
       }),
     ).resolves.toBe("failed");
@@ -164,7 +164,7 @@ describe("maybeRestartService", () => {
         refreshServiceEnv,
         serviceEnv: { HOME: "/home/operator" },
         gatewayPort: 18789,
-        restartScriptPath: "/tmp/openclaw-verification.sh",
+        restartScriptPath: "/tmp/carapace-verification.sh",
         timeoutMs: 1_000,
         onVerified,
         onVerificationFailure,
@@ -205,7 +205,7 @@ describe("maybeRestartService", () => {
         refreshServiceEnv: false,
         serviceEnv: { HOME: "/home/operator" },
         gatewayPort: 18789,
-        restartScriptPath: "/tmp/openclaw-verification.sh",
+        restartScriptPath: "/tmp/carapace-verification.sh",
         timeoutMs: 1_000,
         onVerificationFailure,
       }),

@@ -2,8 +2,8 @@ import { isDeepStrictEqual } from "node:util";
 import {
   readVisibleSessionTranscriptMessageEntries,
   type SessionTranscriptMessageEntry,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/session-transcript-runtime";
+import { isRecord } from "carapace/plugin-sdk/string-coerce-runtime";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
 import { assertCodexThreadAcceptsDirectInput } from "./protocol-validators.js";
 import type { CodexThread, CodexTurn } from "./protocol.js";
@@ -93,7 +93,7 @@ function resolveCodexUpstreamForkBoundaryFromTurns(params: {
       if (nativeText === undefined) {
         return failure(
           "drift-mismatch",
-          "A message before the fork point contains images or attachments that cannot be verified across OpenClaw and Codex. Fork from a text-only span instead.",
+          "A message before the fork point contains images or attachments that cannot be verified across Carapace and Codex. Fork from a text-only span instead.",
         );
       }
       const local = params.localPrefix[localIndex];
@@ -260,7 +260,7 @@ export async function resolveCodexUpstreamForkBoundary(params: {
       if (isOriginal(entry)) {
         return false;
       }
-      const meta = "__openclaw" in entry.message ? entry.message["__openclaw"] : undefined;
+      const meta = "__carapace" in entry.message ? entry.message["__carapace"] : undefined;
       const blocked = isRecord(meta) ? meta.beforeAgentRunBlocked : undefined;
       return !(
         entry !== target &&

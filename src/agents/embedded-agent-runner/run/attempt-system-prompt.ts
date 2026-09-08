@@ -4,15 +4,15 @@
 import {
   splitSystemPromptCacheBoundary,
   SYSTEM_PROMPT_CACHE_BOUNDARY,
-} from "@openclaw/ai/internal/shared";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+} from "@carapace/ai/internal/shared";
+import type { CarapaceConfig } from "../../../config/types.carapace.js";
 import type { ProviderTransformSystemPromptContext } from "../../../plugins/types.js";
 import { buildEmbeddedSystemPrompt } from "../system-prompt.js";
 
 type EmbeddedSystemPromptParams = Parameters<typeof buildEmbeddedSystemPrompt>[0];
 type ProviderSystemPromptTransform = (params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: CarapaceConfig;
   workspaceDir: string;
   context: ProviderTransformSystemPromptContext;
 }) => string;
@@ -23,7 +23,7 @@ type BuildAttemptSystemPromptParams = {
   transformProviderSystemPrompt: ProviderSystemPromptTransform;
   providerTransform: {
     provider: string;
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     workspaceDir: string;
     context: Omit<ProviderTransformSystemPromptContext, "systemPrompt">;
   };
@@ -37,10 +37,10 @@ type AttemptSystemPrompt = {
 };
 
 const ATTEMPT_PROMPT_SECTION =
-  /<!-- openclaw:attempt:(STABLE|DYNAMIC|PERMISSION) -->[\s\S]*?<!-- \/openclaw:attempt:\1 -->/g;
+  /<!-- carapace:attempt:(STABLE|DYNAMIC|PERMISSION) -->[\s\S]*?<!-- \/carapace:attempt:\1 -->/g;
 
 function renderAttemptPromptSection(section: "STABLE" | "DYNAMIC" | "PERMISSION", text: string) {
-  return `<!-- openclaw:attempt:${section} -->\n${text}\n<!-- /openclaw:attempt:${section} -->`;
+  return `<!-- carapace:attempt:${section} -->\n${text}\n<!-- /carapace:attempt:${section} -->`;
 }
 
 /**
@@ -76,7 +76,7 @@ export function buildAttemptSystemPrompt(
   const systemPrompt = params.isRawModelRun
     ? ""
     : splitPrompt
-      ? `${stablePrompt}${SYSTEM_PROMPT_CACHE_BOUNDARY}${dynamicPrompt}` // nosemgrep: security.opengrep.ghsa-2qj5-gwg2-xwc4.openclaw.prompt-unsanitized-literal-interpolation -- These are complete prompts from trusted builders/transforms; path literals are sanitized at their producers, not by flattening prompt newlines here.
+      ? `${stablePrompt}${SYSTEM_PROMPT_CACHE_BOUNDARY}${dynamicPrompt}` // nosemgrep: security.opengrep.ghsa-2qj5-gwg2-xwc4.carapace.prompt-unsanitized-literal-interpolation -- These are complete prompts from trusted builders/transforms; path literals are sanitized at their producers, not by flattening prompt newlines here.
       : stablePrompt;
 
   return {

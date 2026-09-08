@@ -13,7 +13,7 @@ export function createIndex(rootDir: string): InstalledPluginIndex {
     plugins: [
       {
         pluginId: "installed",
-        manifestPath: path.join(rootDir, "openclaw.plugin.json"),
+        manifestPath: path.join(rootDir, "carapace.plugin.json"),
         manifestHash: "manifest-hash",
         source: path.join(rootDir, "index.ts"),
         rootDir,

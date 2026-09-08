@@ -39,7 +39,7 @@ describe("status-overview-rows", () => {
         : buildStatusAllOverviewRows({
             ...params,
             surface,
-            configPath: "/tmp/openclaw.json",
+            configPath: "/tmp/carapace.json",
             secretDiagnosticsCount: 0,
           });
 
@@ -100,7 +100,7 @@ describe("status-overview-rows", () => {
       expected: "muted(disabled · update checks off)",
     },
     {
-      label: "update checks disabled by OPENCLAW_NO_AUTO_UPDATE=yes",
+      label: "update checks disabled by CARAPACE_NO_AUTO_UPDATE=yes",
       telemetry: { enabled: true },
       doNotTrack: undefined,
       noAutoUpdate: "yes",
@@ -108,7 +108,7 @@ describe("status-overview-rows", () => {
       expected: "muted(disabled · update checks off)",
     },
     {
-      label: "update checks disabled by a trimmed OPENCLAW_NO_AUTO_UPDATE=on",
+      label: "update checks disabled by a trimmed CARAPACE_NO_AUTO_UPDATE=on",
       telemetry: { enabled: true },
       doNotTrack: undefined,
       noAutoUpdate: " on ",
@@ -124,7 +124,7 @@ describe("status-overview-rows", () => {
         env: {
           ...params.env,
           DO_NOT_TRACK: doNotTrack,
-          OPENCLAW_NO_AUTO_UPDATE: noAutoUpdate,
+          CARAPACE_NO_AUTO_UPDATE: noAutoUpdate,
         },
         surface: {
           ...params.surface,
@@ -140,7 +140,7 @@ describe("status-overview-rows", () => {
     const params = createStatusCommandOverviewRowsParams();
     const rows = buildStatusCommandOverviewRows({
       ...params,
-      env: { ...params.env, OPENCLAW_NIX_MODE: "1" },
+      env: { ...params.env, CARAPACE_NIX_MODE: "1" },
       surface: {
         ...params.surface,
         cfg: { ...params.surface.cfg, telemetry: { enabled: true } },
@@ -220,13 +220,13 @@ describe("status-overview-rows", () => {
 
   it.each(["default", "all"])("surfaces startup migration warnings in %s output", (mode) => {
     const params = createStatusCommandOverviewRowsParams();
-    params.summary.startupMigrationWarning = "Retained legacy state. Run openclaw doctor --fix.";
+    params.summary.startupMigrationWarning = "Retained legacy state. Run carapace doctor --fix.";
     const rows =
       mode === "default"
         ? buildStatusCommandOverviewRows(params)
         : buildStatusAllOverviewRows({
             ...params,
-            configPath: "/tmp/openclaw.json",
+            configPath: "/tmp/carapace.json",
             secretDiagnosticsCount: 0,
           });
     expect(findRowValue(rows, "Startup migrations")).toContain(
@@ -273,7 +273,7 @@ describe("status-overview-rows", () => {
         ],
       },
       osLabel: "macOS",
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/carapace.json",
       secretDiagnosticsCount: 2,
       updateRows: [{ Item: "Update restart", Value: "restart pending health verification" }],
       agentStatus: {
@@ -286,10 +286,10 @@ describe("status-overview-rows", () => {
 
     expect(findRowValue(rows, "Version")).toBe(VERSION);
     expect(findRowValue(rows, "OS")).toBe("macOS");
-    expect(findRowValue(rows, "Config")).toBe("/tmp/openclaw.json");
+    expect(findRowValue(rows, "Config")).toBe("/tmp/carapace.json");
     expect(findRowValue(rows, "Update")).toContain("behind 2");
     expect(findRowValue(rows, "Update restart")).toBe("restart pending health verification");
-    expect(findRowValue(rows, "Security")).toBe("Run: openclaw security audit --deep");
+    expect(findRowValue(rows, "Security")).toBe("Run: carapace security audit --deep");
     expect(findRowValue(rows, "Secret egress proxy")).toBe(
       "Check OpenSSL, then retry the request.",
     );

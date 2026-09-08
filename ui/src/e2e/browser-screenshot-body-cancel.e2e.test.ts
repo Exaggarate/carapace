@@ -15,7 +15,7 @@ const suite = createControlUiE2eSuite({
   unavailableMessage: (executablePath) => `Playwright Chromium is unavailable at ${executablePath}`,
 });
 
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.CARAPACE_CAPTURE_UI_PROOF === "1";
 let proofDir: string;
 beforeEach(() => {
   if (captureUiProofEnabled) {
@@ -27,13 +27,13 @@ suite.define(() => {
   it("keeps the status error visible and cancels the unread media body", async () => {
     await suite.withPage(createControlUiE2eContextOptions(), async ({ page }) => {
       await page.addInitScript(() => {
-        localStorage.removeItem("openclaw.browser.panel.v1");
+        localStorage.removeItem("carapace.browser.panel.v1");
         const originalFetch = window.fetch.bind(window);
         window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
           const response = await originalFetch(input, init);
           const url =
             typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-          if (!url.includes("/__openclaw__/assistant-media")) {
+          if (!url.includes("/__carapace__/assistant-media")) {
             return response;
           }
           const source = response.body;
@@ -46,8 +46,8 @@ suite.define(() => {
             fetchCount: number;
             statuses: number[];
           };
-          const proofWindow = window as Window & { openclawScreenshotProof?: ScreenshotProof };
-          const proof = (proofWindow.openclawScreenshotProof ??= {
+          const proofWindow = window as Window & { carapaceScreenshotProof?: ScreenshotProof };
+          const proof = (proofWindow.carapaceScreenshotProof ??= {
             cancelCount: 0,
             cancelResolvedCount: 0,
             fetchCount: 0,
@@ -65,7 +65,7 @@ suite.define(() => {
         };
       });
       let mediaRequest: { authorization: string; source: string | null } | null = null;
-      await page.route("**/__openclaw__/assistant-media**", (route) => {
+      await page.route("**/__carapace__/assistant-media**", (route) => {
         const request = route.request();
         mediaRequest = {
           authorization: request.headers().authorization ?? "",
@@ -136,14 +136,14 @@ suite.define(() => {
             () =>
               (
                 window as Window & {
-                  openclawScreenshotProof?: {
+                  carapaceScreenshotProof?: {
                     cancelCount?: number;
                     cancelResolvedCount?: number;
                     fetchCount?: number;
                     statuses?: number[];
                   };
                 }
-              ).openclawScreenshotProof,
+              ).carapaceScreenshotProof,
           ),
         )
         .toEqual({
@@ -178,7 +178,7 @@ suite.define(() => {
           path: path.join(proofDir, "failed-screenshot.png"),
         });
         const stream = await page.evaluate(
-          () => (window as Window & { openclawScreenshotProof?: unknown }).openclawScreenshotProof,
+          () => (window as Window & { carapaceScreenshotProof?: unknown }).carapaceScreenshotProof,
         );
         await writeFile(
           path.join(proofDir, "proof.json"),

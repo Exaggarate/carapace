@@ -1,7 +1,7 @@
 /** Selects built plugin artifacts without importing active runtime state. */
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
+import type { CarapacePackageManifest } from "./manifest.js";
 import {
   isTypeScriptPackageEntry,
   listBuiltRuntimeEntryCandidates,
@@ -24,10 +24,10 @@ export type PluginRuntimeArtifactSelectionParams = PluginRuntimeArtifact & {
   origin: PluginOrigin;
   preferBuiltPluginArtifacts: boolean;
   sourcePreferred?: boolean;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 };
 
-const RUNTIME_ARTIFACT_SELECTION = Symbol.for("openclaw.pluginRuntimeArtifactSelection");
+const RUNTIME_ARTIFACT_SELECTION = Symbol.for("carapace.pluginRuntimeArtifactSelection");
 type RuntimeArtifactSelection = {
   sourcePreferred: boolean;
   sourceExternal: boolean;
@@ -43,7 +43,7 @@ type ArtifactBoundRecord = PluginRecord & {
 type RuntimeArtifactSelectionInput = {
   sourcePreferred?: boolean;
   setupSource?: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
   preferBuiltPluginArtifacts?: boolean;
 };
 
@@ -263,7 +263,7 @@ function resolvePackageLocalDistRuntimeArtifact(params: {
 function resolvePreferredBundledRootArtifactFromCanonicalPaths(params: {
   source: string;
   rootDir: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 }): { source: string; rootDir: string } {
   const { rootDir, source } = params;
   const sourceExternal = params.packageManifest?.build?.bundledDist === false;
@@ -307,7 +307,7 @@ function resolvePreferredBundledRootArtifactFromCanonicalPaths(params: {
 export function resolvePreferredBundledRootArtifact(params: {
   source: string;
   rootDir: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 }): { source: string; rootDir: string } {
   const artifacts = getPluginCacheRoot(params.rootDir).runtimeArtifacts;
   const key = JSON.stringify([
@@ -335,7 +335,7 @@ function resolvePreferredBuiltRuntimeArtifact(params: {
   origin: PluginOrigin;
   preferBuiltPluginArtifacts: boolean;
   sourcePreferred?: boolean;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: CarapacePackageManifest;
 }): { source: string; rootDir: string } {
   // The stateful resolver canonicalizes both paths before memo-key construction.
   const { rootDir, source } = params;

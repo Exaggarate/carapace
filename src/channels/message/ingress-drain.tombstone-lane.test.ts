@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../../state/carapace-state-db.js";
 import type { ChannelIngressDispatchLifecycle } from "./ingress-drain-lifecycle.js";
 import { createChannelIngressDrain } from "./ingress-drain.js";
 import {
@@ -10,7 +10,7 @@ import {
 } from "./ingress-drain.test-helpers.js";
 
 describe("channel ingress drain restart-recovery tombstone", () => {
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeCarapaceStateDatabaseForTest());
 
   it.each([
     { reclaimed: false, terminal: false },
@@ -128,7 +128,7 @@ describe("channel ingress drain restart-recovery tombstone", () => {
           expect(await queue.listPending({ limit: "all" })).toEqual([]);
           expect(await queue.listClaims()).toEqual([]);
           drain.dispose();
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
 
           const reopened = createTestIngressQueue(stateDir, { now: () => 20_000 });
           const dispatchAfterRestart = vi.fn(async () => {});

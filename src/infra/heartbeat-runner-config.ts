@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { resolveAgentConfig } from "../agents/agent-scope.js";
 import { resolveModelRefFromString, type ModelRef } from "../agents/model-selection.js";
 import { resolveEffectiveAgentRuntime } from "../agents/thinking-runtime.js";
@@ -11,7 +11,7 @@ import { normalizeChatType, type ChatType } from "../channels/chat-type.js";
 import { getChannelPlugin } from "../channels/plugins/index.js";
 import type { ChannelId, ChannelPlugin } from "../channels/plugins/types.public.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getActivePluginChannelRegistry } from "../plugins/runtime.js";
 import {
@@ -41,7 +41,7 @@ export function resolveHeartbeatChannelPlugin(channel: string): ChannelPlugin | 
 }
 
 export function resolveHeartbeatTimeoutOverrideSeconds(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   heartbeat?: HeartbeatConfig,
 ) {
   if (typeof heartbeat?.timeoutSeconds === "number") {
@@ -77,7 +77,7 @@ function omitExplicitHeartbeatDestination(heartbeat: HeartbeatConfig | undefined
 }
 
 export function resolveHeartbeatForWake(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   configuredHeartbeat?: HeartbeatConfig;
   requestedHeartbeat?: HeartbeatConfig;
@@ -93,23 +93,23 @@ export function resolveHeartbeatForWake(params: {
     : heartbeat;
 }
 
-function resolveHeartbeatPromptRaw(cfg: OpenClawConfig, heartbeat?: HeartbeatConfig) {
+function resolveHeartbeatPromptRaw(cfg: CarapaceConfig, heartbeat?: HeartbeatConfig) {
   return heartbeat?.prompt ?? cfg.agents?.defaults?.heartbeat?.prompt;
 }
 
-export function resolveConfiguredHeartbeatPrompt(cfg: OpenClawConfig, heartbeat?: HeartbeatConfig) {
+export function resolveConfiguredHeartbeatPrompt(cfg: CarapaceConfig, heartbeat?: HeartbeatConfig) {
   return resolveHeartbeatPromptText(resolveHeartbeatPromptRaw(cfg, heartbeat));
 }
 
 export function resolveHeartbeatResponseToolPrompt(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   heartbeat?: HeartbeatConfig,
 ) {
   return resolveHeartbeatPromptForResponseTool(resolveHeartbeatPromptRaw(cfg, heartbeat));
 }
 
 function resolveHeartbeatModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   heartbeat?: HeartbeatConfig;
   entry?: SessionEntry;
@@ -145,7 +145,7 @@ function resolveHeartbeatModelRef(params: {
 }
 
 function usesCodexHarness(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   heartbeat?: HeartbeatConfig;
   entry?: SessionEntry;
@@ -165,7 +165,7 @@ function usesCodexHarness(params: {
 }
 
 export function shouldUseHeartbeatResponseToolPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   heartbeat?: HeartbeatConfig;
   entry?: SessionEntry;
@@ -187,7 +187,7 @@ export function shouldUseHeartbeatResponseToolPrompt(params: {
 }
 
 export function isHeartbeatTypingEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
   hasChatDelivery: boolean;
 }) {
@@ -200,7 +200,7 @@ export function isHeartbeatTypingEnabled(params: {
   return typingMode !== "never";
 }
 
-export function resolveHeartbeatTypingIntervalSeconds(cfg: OpenClawConfig) {
+export function resolveHeartbeatTypingIntervalSeconds(cfg: CarapaceConfig) {
   const configured = cfg.agents?.defaults?.typingIntervalSeconds;
   return typeof configured === "number" && configured > 0 ? configured : undefined;
 }

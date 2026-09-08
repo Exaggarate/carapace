@@ -1,4 +1,4 @@
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ModelDefinitionConfig } from "carapace/plugin-sdk/provider-model-shared";
 import {
   DEFAULT_LLAMA_CPP_CONTEXT_SIZE,
   DEFAULT_LLAMA_CPP_EMBEDDING_MODEL_SIZE_BYTES,

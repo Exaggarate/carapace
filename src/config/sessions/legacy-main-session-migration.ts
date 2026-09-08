@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@carapace/normalization-core/record-coerce";
 import { listAgentIds, tryResolveSoleAgentId } from "../../agents/agent-scope-config.js";
 import {
   executeSqliteQuerySync,
@@ -9,12 +9,12 @@ import {
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
 import { normalizeAgentId, normalizeMainKey } from "../../routing/session-key.js";
-import { isSameOpenClawAgentDatabasePath } from "../../state/openclaw-agent-db-registry.js";
-import { withExistingOpenClawStateDatabaseReadOnly } from "../../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../../state/openclaw-state-db.js";
+import { isSameCarapaceAgentDatabasePath } from "../../state/carapace-agent-db-registry.js";
+import { withExistingCarapaceStateDatabaseReadOnly } from "../../state/carapace-state-db-readonly.js";
+import type { DB as CarapaceStateKyselyDatabase } from "../../state/carapace-state-db.generated.js";
+import { runCarapaceStateWriteTransaction } from "../../state/carapace-state-db.js";
 import { resolveStateDir } from "../paths.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import {
   readClaimsFromStore,
   storeHasLegacyAgentSessionKey,
@@ -45,7 +45,7 @@ const SOURCE_KEY = "legacy-main-session-keys";
 const MIGRATION_KIND = "legacy-main-session-keys-v1";
 const REPORT_VERSION = 1;
 
-type LedgerDatabase = Pick<OpenClawStateKyselyDatabase, "migration_runs" | "migration_sources">;
+type LedgerDatabase = Pick<CarapaceStateKyselyDatabase, "migration_runs" | "migration_sources">;
 
 type ArmingDecision =
   | { armed: false; reason: "legacy-agent-present" | "owner-unresolved" }
@@ -61,7 +61,7 @@ type LedgerReport = {
   status: "complete";
 };
 
-function resolveArmingDecision(cfg: OpenClawConfig, legacyAgentId: string): ArmingDecision {
+function resolveArmingDecision(cfg: CarapaceConfig, legacyAgentId: string): ArmingDecision {
   const roster = new Set(listAgentIds(cfg).map(normalizeAgentId));
   if (roster.has(legacyAgentId)) {
     return { armed: false, reason: "legacy-agent-present" };
@@ -145,7 +145,7 @@ type ResolvedPhysicalStores = {
 };
 
 function resolvePhysicalStores(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env: NodeJS.ProcessEnv;
   legacyAgentId: string;
   mode: LegacyMainSessionMigrationMode;
@@ -224,7 +224,7 @@ function resolveSourceLayout(resolved: ResolvedPhysicalStores): string[] {
 
 function readLedger(env: NodeJS.ProcessEnv): { report: LedgerReport; status: string } | undefined {
   return (
-    withExistingOpenClawStateDatabaseReadOnly(
+    withExistingCarapaceStateDatabaseReadOnly(
       ({ db }) => {
         const row = executeSqliteQueryTakeFirstSync(
           db,
@@ -295,7 +295,7 @@ function writeLedger(params: {
   const identityHash = createHash("sha256").update(JSON.stringify(params.identity)).digest("hex");
   const runId = `${SOURCE_KEY}:${identityHash.slice(0, 24)}`;
   params.beforePersistentApply?.();
-  runOpenClawStateWriteTransaction(
+  runCarapaceStateWriteTransaction(
     ({ db }) => {
       const kysely = getNodeSqliteKysely<LedgerDatabase>(db);
       executeSqliteQuerySync(
@@ -410,7 +410,7 @@ async function migrateLegacyMainSessionKeysInternal(
       outcomes: [{ kind: "not-armed", detail: arming.reason }],
       warnings: unresolved
         ? [
-            `session: legacy ${legacyAgentId} rows have no unambiguous configured owner; preserve them and run openclaw doctor after assigning agents.defaults.sessionStore.agentId`,
+            `session: legacy ${legacyAgentId} rows have no unambiguous configured owner; preserve them and run carapace doctor after assigning agents.defaults.sessionStore.agentId`,
           ]
         : [],
     };
@@ -439,7 +439,7 @@ async function migrateLegacyMainSessionKeysInternal(
   }
   for (const pathname of resolved.jsonPaths) {
     warnings.push(
-      `session: deferred legacy-main session migration for JSON store ${pathname}; run openclaw doctor --fix`,
+      `session: deferred legacy-main session migration for JSON store ${pathname}; run carapace doctor --fix`,
     );
   }
   const identityBase = { legacyAgentId, mainKey, ownerAgentId };
@@ -509,7 +509,7 @@ async function migrateLegacyMainSessionKeysInternal(
     env,
   });
   const destination: PhysicalStore = resolved.stores.find((store) =>
-    isSameOpenClawAgentDatabasePath(store.path, destinationResolved.path),
+    isSameCarapaceAgentDatabasePath(store.path, destinationResolved.path),
   ) ?? {
     databaseAgentId: normalizeAgentId(destinationResolved.agentId ?? ownerAgentId),
     ownerStorePath: destinationLogical,
@@ -661,7 +661,7 @@ async function migrateLegacyMainSessionKeysInternal(
 
 export async function migrateLegacyMainSessionKeys(params: {
   beforePersistentApply?: () => void;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   /** Bypass the startup ledger shortcut and verify the physical legacy stores. */
   forceScan?: boolean;

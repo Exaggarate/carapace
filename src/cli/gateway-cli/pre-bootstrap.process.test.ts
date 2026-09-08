@@ -35,11 +35,11 @@ describe("Gateway config selection before migration admission", () => {
   ])(
     "prepares recovery safely for $name",
     async ({ name, code }) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-recovery-selection-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-recovery-selection-"));
       const runtimeRoot = createSourceRuntime(root);
       const stateDir = path.join(root, "state");
       fs.mkdirSync(stateDir);
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const healthy = {
         gateway: { mode: "local" },
         plugins: { enabled: false },
@@ -53,16 +53,16 @@ describe("Gateway config selection before migration admission", () => {
         current = future;
         backup = healthy;
       } else if (name === "future service-mode backup") {
-        backup = { ...future, env: { vars: { OPENCLAW_SERVICE_MARKER: "openclaw" } } };
+        backup = { ...future, env: { vars: { CARAPACE_SERVICE_MARKER: "carapace" } } };
       } else if (name === "future backup after config selection changes") {
         const selectedPath = path.join(stateDir, "selected.json");
-        backup = { ...healthy, env: { vars: { OPENCLAW_CONFIG_PATH: selectedPath } } };
+        backup = { ...healthy, env: { vars: { CARAPACE_CONFIG_PATH: selectedPath } } };
         fs.writeFileSync(selectedPath, JSON.stringify(clobbered));
         fs.writeFileSync(`${selectedPath}.bak`, JSON.stringify(future));
       } else if (name === "discarded clobbered environment") {
         current = {
           gateway: { mode: "local" },
-          env: { vars: { OPENCLAW_GATEWAY_TOKEN: "discarded-test-token" } },
+          env: { vars: { CARAPACE_GATEWAY_TOKEN: "discarded-test-token" } },
         };
         backup = healthy;
       }
@@ -74,16 +74,16 @@ describe("Gateway config selection before migration admission", () => {
           ...process.env,
           HOME: root,
           USERPROFILE: root,
-          OPENCLAW_HOME: root,
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
-          OPENCLAW_SERVICE_MARKER: undefined,
-          OPENCLAW_GATEWAY_TOKEN: undefined,
-          OPENCLAW_PROXY_ACTIVE: "1",
-          OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS:
+          CARAPACE_HOME: root,
+          CARAPACE_STATE_DIR: stateDir,
+          CARAPACE_CONFIG_PATH: undefined,
+          CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
+          CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+          CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+          CARAPACE_SERVICE_MARKER: undefined,
+          CARAPACE_GATEWAY_TOKEN: undefined,
+          CARAPACE_PROXY_ACTIVE: "1",
+          CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS:
             name === "future service-mode backup" ? "1" : undefined,
         },
         `
@@ -100,8 +100,8 @@ describe("Gateway config selection before migration admission", () => {
           code = error.code;
         }
         process.stdout.write("__RESULT__" + JSON.stringify({ code,
-          tokenPresent: Boolean(process.env.OPENCLAW_GATEWAY_TOKEN),
-          proxyRetained: process.env.OPENCLAW_PROXY_ACTIVE === "1",
+          tokenPresent: Boolean(process.env.CARAPACE_GATEWAY_TOKEN),
+          proxyRetained: process.env.CARAPACE_PROXY_ACTIVE === "1",
         }) + "\\n");
       `,
         { runtimeRoot, timeoutMs: 60_000 },
@@ -122,11 +122,11 @@ describe("Gateway config selection before migration admission", () => {
   it.each([false, true])(
     "preserves every state artifact with backup=%s",
     async (withBackup) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-readonly-bootstrap-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-readonly-bootstrap-"));
       const runtimeRoot = createSourceRuntime(root);
       const stateDir = path.join(root, "state");
       fs.mkdirSync(stateDir);
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       fs.writeFileSync(
         configPath,
         JSON.stringify({ gateway: { mode: "local" }, plugins: { enabled: false } }),
@@ -147,13 +147,13 @@ describe("Gateway config selection before migration admission", () => {
         ...process.env,
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
-        OPENCLAW_TEST_FAST: "1",
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+        CARAPACE_TEST_FAST: "1",
       };
       const result = await runIsolatedModuleScript(
         env,
@@ -192,23 +192,23 @@ describe("Gateway config selection before migration admission", () => {
   ])(
     "passes $flag through $dispatch startup admission without config",
     async ({ flag, suffix, dev, allowUnconfigured }) => {
-      const root = fs.realpathSync(tempDirs.make("openclaw-startup-allowance-"));
+      const root = fs.realpathSync(tempDirs.make("carapace-startup-allowance-"));
       const runtimeRoot = createSourceRuntime(root);
       const stateDir = path.join(root, "state");
       fs.mkdirSync(stateDir);
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "carapace.json");
       const env = {
         PATH: process.env.PATH,
         HOME: root,
         USERPROFILE: root,
-        OPENCLAW_HOME: root,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_CONFIG_PATH: configPath,
-        OPENCLAW_WORKSPACE_DIR: path.join(root, "workspace"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
-        OPENCLAW_HIDE_BANNER: "1",
-        OPENCLAW_GATEWAY_TOKEN: "synthetic-startup-allowance-token",
+        CARAPACE_HOME: root,
+        CARAPACE_STATE_DIR: stateDir,
+        CARAPACE_CONFIG_PATH: configPath,
+        CARAPACE_WORKSPACE_DIR: path.join(root, "workspace"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_BUNDLED_PLUGINS_DIR: path.join(root, "bundled"),
+        CARAPACE_HIDE_BANNER: "1",
+        CARAPACE_GATEWAY_TOKEN: "synthetic-startup-allowance-token",
         XDG_CONFIG_HOME: path.join(root, "xdg-config"),
         XDG_DATA_HOME: path.join(root, "xdg-data"),
         XDG_STATE_HOME: path.join(root, "xdg-state"),
@@ -223,7 +223,7 @@ describe("Gateway config selection before migration admission", () => {
         env,
         `
       import { registerHooks } from "node:module";
-      const calls = globalThis[Symbol.for("openclaw.test.startupAllowanceCalls")] = [];
+      const calls = globalThis[Symbol.for("carapace.test.startupAllowanceCalls")] = [];
       registerHooks({
         resolve(specifier, context, nextResolve) {
           const parent = context.parentURL ?? "";
@@ -233,7 +233,7 @@ describe("Gateway config selection before migration admission", () => {
               shortCircuit: true,
               url: "data:text/javascript," + encodeURIComponent(
                 'export async function runGatewayCommand(opts) {' +
-                'globalThis[Symbol.for("openclaw.test.startupAllowanceCalls")].push({' +
+                'globalThis[Symbol.for("carapace.test.startupAllowanceCalls")].push({' +
                 'dev: opts.dev === true, allowUnconfigured: opts.allowUnconfigured === true }); }'
               ),
             };
@@ -242,7 +242,7 @@ describe("Gateway config selection before migration admission", () => {
         },
       });
       const { runCli } = await import("./src/cli/run-main.ts");
-      process.argv = [process.execPath, "openclaw", "gateway", "run", "--port", "18736", ${JSON.stringify(flag)}, ...${JSON.stringify(suffix)}];
+      process.argv = [process.execPath, "carapace", "gateway", "run", "--port", "18736", ${JSON.stringify(flag)}, ...${JSON.stringify(suffix)}];
       await runCli(process.argv);
       process.stdout.write("__RESULT__" + JSON.stringify(calls) + "\\n");
     `,

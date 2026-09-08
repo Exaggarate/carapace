@@ -65,7 +65,7 @@ describe("worker launch capabilities", () => {
       const github: WorkerGitHubLaunchBinding = {
         token: "synthetic-turn-bound-github-token",
         login: "shared-bot",
-        branch: "openclaw/session-branch",
+        branch: "carapace/session-branch",
         remoteUrl: "https://github.com/owner/repo.git",
         gitAuthor: { name: "Shared Bot", email: "shared@example.test" },
       };
@@ -590,7 +590,7 @@ describe("worker launch capabilities", () => {
                 workspaceDir: root,
                 sessionKey: SESSION_KEY,
                 preparation: { kind: "direct" },
-                resolveRuntimeOverride: () => "openclaw",
+                resolveRuntimeOverride: () => "carapace",
               },
               behavior: { kind: "command-rpc", hasCommittedSideEffect: () => false },
               sessionOverride: { kind: "preserve" },

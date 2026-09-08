@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 function createArtifactFixture(files: Record<string, object | string>): string {
-  const rootDir = makeTrackedTempDir("openclaw-plugin-capability-consent", tempDirs);
+  const rootDir = makeTrackedTempDir("carapace-plugin-capability-consent", tempDirs);
   for (const [relativePath, contents] of Object.entries(files)) {
     const filePath = path.join(rootDir, relativePath);
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -107,29 +107,29 @@ describe("plugin capability consent", () => {
       const rootDir = createArtifactFixture({
         "package.json": {
           name: "multi-plugin-package",
-          openclaw: { extensions: ["./index.js", "./plugins/child/child.js"] },
+          carapace: { extensions: ["./index.js", "./plugins/child/child.js"] },
         },
-        "openclaw.plugin.json": {
+        "carapace.plugin.json": {
           id: "root",
           channels: ["chat"],
           contracts: { tools: ["read"] },
           configSchema: { type: "object" },
         },
         "index.js": "export {};",
-        "plugins/child/openclaw.plugin.json": {
+        "plugins/child/carapace.plugin.json": {
           id: "child",
           contracts: { tools: ["write", "read"] },
           skills: ["child-skill"],
           configSchema: { type: "object" },
         },
         "plugins/child/child.js": "export {};",
-        "plugins/openclaw.plugin.json": {
+        "plugins/carapace.plugin.json": {
           id: "ignored-ancestor",
           contracts: { tools: ["unreachable-tool"] },
           configSchema: { type: "object" },
         },
         "extra/extra.js": "export {};",
-        "extra/openclaw.plugin.json": {
+        "extra/carapace.plugin.json": {
           id: "unmanaged-extra",
           contracts: { tools: ["unmanaged-tool"] },
           configSchema: { type: "object" },
@@ -139,7 +139,7 @@ describe("plugin capability consent", () => {
       if (staged) {
         fs.cpSync(rootDir, artifactDir, { recursive: true });
         fs.writeFileSync(
-          path.join(artifactDir, "plugins/child/openclaw.plugin.json"),
+          path.join(artifactDir, "plugins/child/carapace.plugin.json"),
           JSON.stringify({
             id: "child",
             contracts: { tools: ["staged-write", "read"] },
@@ -169,9 +169,9 @@ describe("plugin capability consent", () => {
       const runtimePaths = explicitPath ? [path.join(artifactDir, configuredEntry)] : [];
       const env = {
         HOME: artifactDir,
-        OPENCLAW_STATE_DIR: path.join(artifactDir, "state"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
+        CARAPACE_STATE_DIR: path.join(artifactDir, "state"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_DISABLE_BUNDLED_SOURCE_OVERLAYS: "1",
       };
       const runtime = loadInstalledPluginIndexWithDiscovery({
         config: { plugins: { load: { paths: runtimePaths } } },
@@ -225,9 +225,9 @@ describe("plugin capability consent", () => {
 
   it("reviews native package extensions before a competing bundle manifest, like runtime discovery", () => {
     const rootDir = createArtifactFixture({
-      "package.json": { openclaw: { extensions: ["./index.js"] } },
+      "package.json": { carapace: { extensions: ["./index.js"] } },
       "index.js": "export {};",
-      "openclaw.plugin.json": {
+      "carapace.plugin.json": {
         id: "native",
         contracts: { gatewayMethodDispatch: ["dangerous.gateway"] },
         configSchema: { type: "object" },
@@ -242,7 +242,7 @@ describe("plugin capability consent", () => {
 
   it("reviews a competing bundle before native fallback when the package declares no extensions", () => {
     const rootDir = createArtifactFixture({
-      "openclaw.plugin.json": {
+      "carapace.plugin.json": {
         id: "native",
         contracts: { gatewayMethodDispatch: ["native.gateway"] },
         configSchema: { type: "object" },
@@ -257,8 +257,8 @@ describe("plugin capability consent", () => {
 
   it("rejects package extension entries that escape the installed artifact", () => {
     const rootDir = createArtifactFixture({
-      "package.json": { openclaw: { extensions: ["../outside/index.js"] } },
-      "openclaw.plugin.json": { id: "root", configSchema: { type: "object" } },
+      "package.json": { carapace: { extensions: ["../outside/index.js"] } },
+      "carapace.plugin.json": { id: "root", configSchema: { type: "object" } },
     });
 
     expect(() => resolvePluginArtifactDeclaredSurface(rootDir)).toThrow();
@@ -413,7 +413,7 @@ describe("plugin capability consent", () => {
       mode: "install",
       stagedArtifactDir: createArtifactFixture({
         "index.js": "export {};",
-        "openclaw.plugin.json": { id: "plugin", configSchema: { type: "object" } },
+        "carapace.plugin.json": { id: "plugin", configSchema: { type: "object" } },
       }),
     });
 
@@ -451,9 +451,9 @@ describe("plugin capability consent", () => {
     "requires fresh review to repair a %s previous artifact",
     async (condition) => {
       const files = {
-        "package.json": { openclaw: { extensions: ["./index.js"] } },
+        "package.json": { carapace: { extensions: ["./index.js"] } },
         "index.js": "export {};",
-        "openclaw.plugin.json": {
+        "carapace.plugin.json": {
           id: "plugin",
           contracts: { tools: ["repair-tool"] },
           configSchema: { type: "object" },
@@ -473,7 +473,7 @@ describe("plugin capability consent", () => {
       if (condition === "missing") {
         fs.rmSync(previousDir, { recursive: true });
       } else {
-        fs.writeFileSync(path.join(previousDir, "openclaw.plugin.json"), "{");
+        fs.writeFileSync(path.join(previousDir, "carapace.plugin.json"), "{");
       }
       const params = {
         config: {},
@@ -507,9 +507,9 @@ describe("plugin capability consent", () => {
 
   it("rejects reinstall without capability consent even when the plugin is disabled", async () => {
     const rootDir = createArtifactFixture({
-      "package.json": { openclaw: { extensions: ["./index.js"] } },
+      "package.json": { carapace: { extensions: ["./index.js"] } },
       "index.js": "export {};",
-      "openclaw.plugin.json": { id: "plugin", configSchema: { type: "object" } },
+      "carapace.plugin.json": { id: "plugin", configSchema: { type: "object" } },
     });
     const consent = createManagedPluginArtifactConsentHandler({
       config: { plugins: { entries: { plugin: { enabled: false } } } },

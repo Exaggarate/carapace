@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 // Voice Call tests cover cli plugin behavior.
 import { Command } from "commander";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "carapace/plugin-sdk/number-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 const callGatewayFromCliMock = vi.hoisted(() => vi.fn());
 const findCallInStoreMock = vi.hoisted(() => vi.fn());
@@ -22,8 +22,8 @@ const sleepMock = vi.hoisted(() =>
   ),
 );
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/gateway-runtime")>()),
+vi.mock("carapace/plugin-sdk/gateway-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("carapace/plugin-sdk/gateway-runtime")>()),
   callGatewayFromCli: callGatewayFromCliMock,
 }));
 vi.mock("../api.js", async (importOriginal) => ({
@@ -78,7 +78,7 @@ function gatewayCredentialsError(message: string): Error {
   return Object.assign(new Error(message), {
     name: "GatewayCredentialsRequiredError",
     method: "voicecall.status",
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/carapace.json",
   });
 }
 
@@ -419,8 +419,8 @@ describe("voice-call CLI status fallback", () => {
     initial: string | Buffer = "initial\n",
     copyTruncated?: string | Buffer,
   ): Promise<{ output: string; shortened: boolean }> {
-    // openclaw-temp-dir: allow extension tests cannot import repo-only test helpers
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-voice-call-tail-"));
+    // carapace-temp-dir: allow extension tests cannot import repo-only test helpers
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-voice-call-tail-"));
     const logFile = path.join(tempDir, "custom.log");
     fs.writeFileSync(logFile, initial);
     const initialByteLength = Buffer.isBuffer(initial)

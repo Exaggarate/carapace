@@ -20,7 +20,7 @@ import {
 } from "./update-runner.js";
 
 const { runCommandWithTimeout } = processExec;
-const execFileSyncMock = vi.hoisted(() => vi.fn(() => "/tmp/openclaw-test-global-npmrc\n"));
+const execFileSyncMock = vi.hoisted(() => vi.fn(() => "/tmp/carapace-test-global-npmrc\n"));
 
 vi.mock("node:child_process", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:child_process")>();
@@ -34,7 +34,7 @@ type CommandResponse = { stdout?: string; stderr?: string; code?: number | null 
 type CommandResult = { stdout: string; stderr: string; code: number | null };
 const PNPM_VERSION = "12.0.0";
 const PNPM_PACKAGE_MANAGER = `pnpm@${PNPM_VERSION}`;
-const fixtureRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-update-" });
+const fixtureRootTracker = createSuiteTempRootTracker({ prefix: "carapace-update-" });
 
 function toCommandResult(response?: CommandResponse): CommandResult {
   return {
@@ -110,12 +110,12 @@ describe("resolveUpdateDoctorExecutionPolicy", () => {
         targetVersion,
         allowGatewayServiceRepair,
       });
-      const result = await withEnvAsync({ OPENCLAW_SERVICE_REPAIR_POLICY: "external" }, () =>
+      const result = await withEnvAsync({ CARAPACE_SERVICE_REPAIR_POLICY: "external" }, () =>
         runCommandWithTimeout(
           [
             process.execPath,
             "-e",
-            "process.stdout.write(JSON.stringify(process.env.OPENCLAW_SERVICE_REPAIR_POLICY ?? null))",
+            "process.stdout.write(JSON.stringify(process.env.CARAPACE_SERVICE_REPAIR_POLICY ?? null))",
           ],
           {
             timeoutMs: 5000,
@@ -135,7 +135,7 @@ describe("resolveUpdateDoctorExecutionPolicy", () => {
 });
 
 describe("runGatewayUpdate", () => {
-  const preflightPrefixPattern = /(?:openclaw-update-preflight-|ocu-pf-)/;
+  const preflightPrefixPattern = /(?:carapace-update-preflight-|ocu-pf-)/;
 
   let tempDir: string;
 
@@ -150,7 +150,7 @@ describe("runGatewayUpdate", () => {
   beforeEach(async () => {
     execFileSyncMock.mockClear();
     tempDir = await fixtureRootTracker.make("case");
-    await fs.writeFile(path.join(tempDir, "openclaw.mjs"), "export {};\n", "utf-8");
+    await fs.writeFile(path.join(tempDir, "carapace.mjs"), "export {};\n", "utf-8");
   });
 
   async function createStableTagRunner(params: {
@@ -162,7 +162,7 @@ describe("runGatewayUpdate", () => {
     const calls: string[] = [];
     let uiBuildCount = 0;
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorKey = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+    const doctorKey = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
 
     const runCommand = async (argv: string[], options?: TestCommandOptions) => {
       const key = argv.join(" ");
@@ -212,7 +212,7 @@ describe("runGatewayUpdate", () => {
 
   async function setupGitCheckout(options?: { packageManager?: string }) {
     await fs.mkdir(path.join(tempDir, ".git"));
-    const pkg: Record<string, string> = { name: "openclaw", version: "1.0.0" };
+    const pkg: Record<string, string> = { name: "carapace", version: "1.0.0" };
     if (options?.packageManager) {
       pkg.packageManager = options.packageManager;
     }
@@ -230,7 +230,7 @@ describe("runGatewayUpdate", () => {
     vi.resetModules();
     vi.doMock("../process/exec.js", () => ({ runCommandWithTimeout: runCommandWithTimeoutMock }));
     vi.doMock("./update-global.js", () => ({
-      createGlobalInstallEnv: async () => ({ OPENCLAW_UPDATE_TEST_ENV: "1" }),
+      createGlobalInstallEnv: async () => ({ CARAPACE_UPDATE_TEST_ENV: "1" }),
     }));
 
     try {
@@ -241,7 +241,7 @@ describe("runGatewayUpdate", () => {
 
       expect(runCommandWithTimeoutMock).toHaveBeenCalledWith(["pnpm", "install"], {
         cwd: tempDir,
-        env: { OPENCLAW_UPDATE_TEST_ENV: "1" },
+        env: { CARAPACE_UPDATE_TEST_ENV: "1" },
         killProcessTree: true,
         timeoutMs: 500,
       });
@@ -257,25 +257,25 @@ describe("runGatewayUpdate", () => {
     async () => {
       const globalRoot = path.join(tempDir, "pnpm-home", "global", "v11");
       const installDir = path.join(globalRoot, "install-a");
-      const packageRoot = path.join(installDir, "node_modules", "openclaw");
-      const storeRoot = path.join(tempDir, "pnpm-home", "store", "v11", "links", "openclaw");
+      const packageRoot = path.join(installDir, "node_modules", "carapace");
+      const storeRoot = path.join(tempDir, "pnpm-home", "store", "v11", "links", "carapace");
       await fs.mkdir(path.dirname(packageRoot), { recursive: true });
       await fs.mkdir(storeRoot, { recursive: true });
       await Promise.all([
         fs.writeFile(
           path.join(installDir, "package.json"),
-          JSON.stringify({ private: true, dependencies: { openclaw: "1.0.0" } }),
+          JSON.stringify({ private: true, dependencies: { carapace: "1.0.0" } }),
           "utf8",
         ),
         fs.writeFile(
           path.join(storeRoot, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "1.0.0" }),
+          JSON.stringify({ name: "carapace", version: "1.0.0" }),
           "utf8",
         ),
       ]);
       await Promise.all([
         fs.symlink(storeRoot, packageRoot, "dir"),
-        fs.symlink(installDir, path.join(globalRoot, "hash-openclaw"), "dir"),
+        fs.symlink(installDir, path.join(globalRoot, "hash-carapace"), "dir"),
       ]);
 
       const runCommand = async (argv: string[]) => {
@@ -360,7 +360,7 @@ describe("runGatewayUpdate", () => {
     await fs.mkdir(root, { recursive: true });
     await fs.writeFile(
       path.join(root, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "1.0.0", packageManager }),
+      JSON.stringify({ name: "carapace", version: "1.0.0", packageManager }),
       "utf-8",
     );
   }
@@ -537,24 +537,24 @@ describe("runGatewayUpdate", () => {
     const sourceRoot = await fixtureRootTracker.make("tracked-source");
     const localRoot = await fixtureRootTracker.make("tracked-local");
     await runRealGit(sourceRoot, "init", "--initial-branch=main");
-    await runRealGit(sourceRoot, "config", "user.name", "OpenClaw Test");
-    await runRealGit(sourceRoot, "config", "user.email", "openclaw@example.com");
+    await runRealGit(sourceRoot, "config", "user.name", "Carapace Test");
+    await runRealGit(sourceRoot, "config", "user.email", "carapace@example.com");
     await fs.writeFile(
       path.join(sourceRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "1.0.0", packageManager: PNPM_PACKAGE_MANAGER }),
+      JSON.stringify({ name: "carapace", version: "1.0.0", packageManager: PNPM_PACKAGE_MANAGER }),
     );
-    await fs.writeFile(path.join(sourceRoot, "openclaw.mjs"), "export {};\n");
+    await fs.writeFile(path.join(sourceRoot, "carapace.mjs"), "export {};\n");
     await fs.writeFile(path.join(sourceRoot, "README.md"), "base\n");
     await fs.writeFile(
       path.join(sourceRoot, ".gitignore"),
       "dist/\nnode_modules/\n.artifacts/\n*.tmp\n",
     );
-    await runRealGit(sourceRoot, "add", ".gitignore", "package.json", "openclaw.mjs", "README.md");
+    await runRealGit(sourceRoot, "add", ".gitignore", "package.json", "carapace.mjs", "README.md");
     await runRealGit(sourceRoot, "commit", "-m", "base");
     const baseSha = await runRealGit(sourceRoot, "rev-parse", "HEAD");
     await runRealGit(path.dirname(localRoot), "clone", "--quiet", sourceRoot, localRoot);
-    await runRealGit(localRoot, "config", "user.name", "OpenClaw Test");
-    await runRealGit(localRoot, "config", "user.email", "openclaw@example.com");
+    await runRealGit(localRoot, "config", "user.name", "Carapace Test");
+    await runRealGit(localRoot, "config", "user.email", "carapace@example.com");
     if (detached) {
       await runRealGit(localRoot, "checkout", "--detach", baseSha);
     }
@@ -717,7 +717,7 @@ describe("runGatewayUpdate", () => {
           worktrees.add(candidate);
           heads.set(candidate, revision);
           await fs.mkdir(candidate, { recursive: true });
-          for (const file of ["package.json", "openclaw.mjs"]) {
+          for (const file of ["package.json", "carapace.mjs"]) {
             const destination = path.join(candidate, file);
             if (!(await pathExists(destination)) && (await pathExists(path.join(tempDir, file)))) {
               await fs.copyFile(path.join(tempDir, file), destination);
@@ -966,7 +966,7 @@ describe("runGatewayUpdate", () => {
     await setupGitPackageManagerFixture();
     const upstreamSha = "upstream123";
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
     const beforeGitMutation = vi.fn(async () => {
       calls.push("beforeGitMutation");
     });
@@ -982,7 +982,7 @@ describe("runGatewayUpdate", () => {
       },
       [`git -C ${tempDir} show ${upstreamSha}:package.json`]: {
         stdout: JSON.stringify({
-          openclaw: { schemaVersions: { state: 3, agent: 11 } },
+          carapace: { schemaVersions: { state: 3, agent: 11 } },
         }),
       },
       [`git -C ${tempDir} rebase ${upstreamSha}`]: { stdout: "" },
@@ -1097,7 +1097,7 @@ describe("runGatewayUpdate", () => {
         if (
           options?.cwd &&
           preflightPrefixPattern.test(options.cwd) &&
-          key === "pnpm openclaw config validate --json"
+          key === "pnpm carapace config validate --json"
         ) {
           return { code: 1, stderr: invalidConfig };
         }
@@ -1348,7 +1348,7 @@ describe("runGatewayUpdate", () => {
     await setupGitPackageManagerFixture();
     const targetSha = "2222222222222222222222222222222222222222";
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
     const { runner, calls } = createRunner({
       ...buildGitWorktreeProbeResponses(),
       [`git -C ${tempDir} fetch --all --prune --no-tags --no-prune-tags`]: { stdout: "" },
@@ -1504,7 +1504,7 @@ describe("runGatewayUpdate", () => {
       installCommand: "pnpm install",
       buildCommand: "pnpm build",
       uiBuildCommand: "pnpm ui:build",
-      doctorCommand: `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`,
+      doctorCommand: `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`,
       onCommand: (key, options) => {
         if (key === "pnpm install") {
           installEnvs.push(options?.env ?? {});
@@ -1542,7 +1542,7 @@ describe("runGatewayUpdate", () => {
         installCommand: "pnpm install",
         buildCommand: "pnpm build",
         uiBuildCommand: "pnpm ui:build",
-        doctorCommand: `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`,
+        doctorCommand: `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`,
         onCommand: (key, options) => {
           if (key === "pnpm install") {
             installEnvs.push(options?.env ?? {});
@@ -1581,7 +1581,7 @@ describe("runGatewayUpdate", () => {
         installCommand: "pnpm install",
         buildCommand: "pnpm build",
         uiBuildCommand: "pnpm ui:build",
-        doctorCommand: `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`,
+        doctorCommand: `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`,
         onCommand: (key, options) => {
           if (key === "pnpm config get prefer-offline") {
             return configResponse;
@@ -1608,7 +1608,7 @@ describe("runGatewayUpdate", () => {
     const stableTag = "v1.0.1-1";
     let doctorEnv: NodeJS.ProcessEnv | undefined;
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
     const { runCommand } = createGitInstallRunner({
       stableTag,
       installCommand: "pnpm install",
@@ -1631,12 +1631,12 @@ describe("runGatewayUpdate", () => {
     });
 
     expect(result.status).toBe("ok");
-    expect(doctorEnv?.OPENCLAW_UPDATE_IN_PROGRESS).toBe("1");
-    expect(doctorEnv?.OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBe("1");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBe("1");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART).toBe("1");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR).toBe("1");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_IN_PROGRESS).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR).toBe("1");
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe("1");
   });
 
   it("uses the pre-mutation activation decision for the git update doctor pass", async () => {
@@ -1645,7 +1645,7 @@ describe("runGatewayUpdate", () => {
     const stableTag = "v1.0.1-1";
     let doctorEnv: NodeJS.ProcessEnv | undefined;
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive`;
+    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive`;
     const { runCommand } = createGitInstallRunner({
       stableTag,
       installCommand: "pnpm install",
@@ -1671,9 +1671,9 @@ describe("runGatewayUpdate", () => {
     });
 
     expect(result.status).toBe("ok");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR).toBe("0");
-    expect(doctorEnv?.OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe("0");
-    expect(doctorEnv?.OPENCLAW_SERVICE_REPAIR_POLICY).toBeUndefined();
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR).toBe("0");
+    expect(doctorEnv?.CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION).toBe("0");
+    expect(doctorEnv?.CARAPACE_SERVICE_REPAIR_POLICY).toBeUndefined();
   });
 
   it("uses pnpm highest resolution mode for dev preflight installs", async () => {
@@ -1872,10 +1872,10 @@ describe("runGatewayUpdate", () => {
         ? path.join(tempDir, "external-artifacts")
         : path.join(checkout, ".artifacts");
       await writePreflightPackageManagerFixture(checkout);
-      await fs.copyFile(path.join(tempDir, "openclaw.mjs"), path.join(checkout, "openclaw.mjs"));
+      await fs.copyFile(path.join(tempDir, "carapace.mjs"), path.join(checkout, "carapace.mjs"));
       await runRealGit(checkout, "init", "--initial-branch=main");
-      await runRealGit(checkout, "config", "user.name", "OpenClaw Test");
-      await runRealGit(checkout, "config", "user.email", "openclaw@example.com");
+      await runRealGit(checkout, "config", "user.name", "Carapace Test");
+      await runRealGit(checkout, "config", "user.email", "carapace@example.com");
       await fs.symlink(checkout, alias, "dir");
       await fs.mkdir(artifacts);
       await fs.copyFile(
@@ -1888,7 +1888,7 @@ describe("runGatewayUpdate", () => {
         // so this fixture starts clean without altering the repository ignore rules.
         await runRealGit(checkout, "add", ".artifacts");
       }
-      await runRealGit(checkout, "add", ".gitignore", "package.json", "openclaw.mjs");
+      await runRealGit(checkout, "add", ".gitignore", "package.json", "carapace.mjs");
       await runRealGit(checkout, "commit", "-m", "artifact storage");
       const targetSha = await runRealGit(checkout, "rev-parse", "HEAD");
       await fs.writeFile(path.join(artifacts, "keep.txt"), "existing artifact\n");
@@ -2156,7 +2156,7 @@ describe("runGatewayUpdate", () => {
     const calls: string[] = [];
     let managerVersionProbeCount = 0;
     const doctorNodePath = await resolveStableNodePath(process.execPath);
-    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+    const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
 
     const writeCandidatePackageManager = async (key: string, packageManager: string) => {
       const match = /^git -C (?<root>\S+) checkout --detach /u.exec(key);
@@ -2350,7 +2350,7 @@ describe("runGatewayUpdate", () => {
       "pnpm install": { stdout: "" },
       "pnpm build": { stdout: "" },
       "pnpm ui:build": { stdout: "" },
-      [`${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`]: {
+      [`${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`]: {
         stdout: "",
       },
     });
@@ -2387,7 +2387,7 @@ describe("runGatewayUpdate", () => {
       "pnpm install": { stdout: "" },
       "pnpm build": { stdout: "" },
       "pnpm ui:build": { stdout: "" },
-      [`${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`]: {
+      [`${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`]: {
         stdout: "",
       },
     });
@@ -2412,7 +2412,7 @@ describe("runGatewayUpdate", () => {
       "pnpm install": { stdout: "" },
       "pnpm build": { stdout: "" },
       "pnpm ui:build": { stdout: "" },
-      [`${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`]: {
+      [`${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`]: {
         stdout: "",
       },
     });
@@ -2432,11 +2432,11 @@ describe("runGatewayUpdate", () => {
       installCommand: "pnpm install",
       buildCommand: "pnpm build",
       uiBuildCommand: "pnpm ui:build",
-      doctorCommand: `${process.execPath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive`,
+      doctorCommand: `${process.execPath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive`,
       onCommand: (key, options) => {
         if (key === "pnpm --version") {
           const envPath = options?.env?.PATH ?? options?.env?.Path ?? "";
-          if (envPath.includes("openclaw-update-pnpm-")) {
+          if (envPath.includes("carapace-update-pnpm-")) {
             return { stdout: PNPM_VERSION };
           }
           throw new Error("spawn pnpm ENOENT");
@@ -2474,7 +2474,7 @@ describe("runGatewayUpdate", () => {
       installCommand: "pnpm install",
       buildCommand: "pnpm build",
       uiBuildCommand: "pnpm ui:build",
-      doctorCommand: `${process.execPath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive`,
+      doctorCommand: `${process.execPath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive`,
       onCommand: (key) => {
         if (key === "pnpm --version") {
           pnpmVersionChecks += 1;
@@ -2513,7 +2513,7 @@ describe("runGatewayUpdate", () => {
       onCommand: (key, options) => {
         if (key === "pnpm --version") {
           const envPath = options?.env?.PATH ?? options?.env?.Path ?? "";
-          if (envPath.includes("openclaw-update-pnpm-")) {
+          if (envPath.includes("carapace-update-pnpm-")) {
             pnpmEnvPaths.push(envPath);
             return { stdout: PNPM_VERSION };
           }
@@ -2548,7 +2548,7 @@ describe("runGatewayUpdate", () => {
     expect(calls).toContain("pnpm build");
     expect(calls).not.toContain("pnpm lint");
     expect(calls).not.toContain("pnpm ui:build");
-    expect(pnpmEnvPaths.filter((envPath) => envPath.includes("openclaw-update-pnpm-"))).not.toEqual(
+    expect(pnpmEnvPaths.filter((envPath) => envPath.includes("carapace-update-pnpm-"))).not.toEqual(
       [],
     );
   });
@@ -2565,15 +2565,15 @@ describe("runGatewayUpdate", () => {
       },
     });
 
-    const result = await withEnvAsync({ OPENCLAW_UPDATE_PREFLIGHT_LINT: "1" }, async () =>
+    const result = await withEnvAsync({ CARAPACE_UPDATE_PREFLIGHT_LINT: "1" }, async () =>
       runWithCommand(runCommand, { channel: "dev" }),
     );
 
     expect(result.status).toBe("ok");
     expect(calls).toContain("pnpm lint");
     expect(lintEnv).toHaveLength(1);
-    expect(lintEnv[0]?.OPENCLAW_LOCAL_CHECK).toBe("1");
-    expect(lintEnv[0]?.OPENCLAW_LOCAL_CHECK_MODE).toBe("throttled");
+    expect(lintEnv[0]?.CARAPACE_LOCAL_CHECK).toBe("1");
+    expect(lintEnv[0]?.CARAPACE_LOCAL_CHECK_MODE).toBe("throttled");
   });
 
   it("installs Windows candidate dependencies with scripts disabled before activation", async () => {
@@ -2760,8 +2760,8 @@ describe("runGatewayUpdate", () => {
         {
           NODE_OPTIONS: nodeOptions,
           COREPACK_ENABLE_DOWNLOAD_PROMPT: undefined,
-          OPENCLAW_UPDATE_IN_PROGRESS: undefined,
-          OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: skipDts,
+          CARAPACE_UPDATE_IN_PROGRESS: undefined,
+          CARAPACE_RUN_NODE_SKIP_DTS_BUILD: skipDts,
         },
         async () => {
           const result = await runWithCommand(runCommand, { channel: "dev" });
@@ -2769,17 +2769,17 @@ describe("runGatewayUpdate", () => {
           expect(buildEnvs).toHaveLength(1);
           for (const env of buildEnvs) {
             expect(env).toMatchObject({
-              OPENCLAW_UPDATE_IN_PROGRESS: "1",
+              CARAPACE_UPDATE_IN_PROGRESS: "1",
               COREPACK_ENABLE_DOWNLOAD_PROMPT: "0",
               NODE_OPTIONS: expectedNodeOptions,
               BUILD_ALL_CACHE_ROOT: path.join(tempDir, ".artifacts", "build-all-cache"),
               PATH: process.env.PATH,
             });
-            expect(env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
+            expect(env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
           }
-          expect(process.env.OPENCLAW_UPDATE_IN_PROGRESS).toBeUndefined();
+          expect(process.env.CARAPACE_UPDATE_IN_PROGRESS).toBeUndefined();
           expect(process.env.NODE_OPTIONS).toBe(nodeOptions);
-          expect(process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
+          expect(process.env.CARAPACE_RUN_NODE_SKIP_DTS_BUILD).toBe(skipDts);
         },
       );
       expect(calls.filter((call) => call === "pnpm build")).toHaveLength(1);
@@ -3018,7 +3018,7 @@ describe("runGatewayUpdate", () => {
   it("skips update when no git root", async () => {
     await fs.writeFile(
       path.join(tempDir, "package.json"),
-      JSON.stringify({ name: "openclaw", packageManager: PNPM_PACKAGE_MANAGER }),
+      JSON.stringify({ name: "carapace", packageManager: PNPM_PACKAGE_MANAGER }),
       "utf-8",
     );
     await fs.writeFile(path.join(tempDir, "pnpm-lock.yaml"), "", "utf-8");
@@ -3040,11 +3040,11 @@ describe("runGatewayUpdate", () => {
 
   it("leaves package-manager updates to the CLI transaction owner", async () => {
     const nodeModules = path.join(tempDir, "node_modules");
-    const pkgRoot = path.join(nodeModules, "openclaw");
+    const pkgRoot = path.join(nodeModules, "carapace");
     await fs.mkdir(pkgRoot, { recursive: true });
     await fs.writeFile(
       path.join(pkgRoot, "package.json"),
-      JSON.stringify({ name: "openclaw", version: "1.0.0" }),
+      JSON.stringify({ name: "carapace", version: "1.0.0" }),
     );
     const { runner, calls } = createRunner({
       [`git -C ${pkgRoot} rev-parse --show-toplevel`]: { code: 128 },
@@ -3065,7 +3065,7 @@ describe("runGatewayUpdate", () => {
     expect(calls.some((call) => /^npm (?:i|install|pack) /u.test(call))).toBe(false);
   });
 
-  it("rejects git roots that are not a openclaw checkout", async () => {
+  it("rejects git roots that are not a carapace checkout", async () => {
     await fs.mkdir(path.join(tempDir, ".git"));
     const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(tempDir);
     const { runner, calls } = createRunner({
@@ -3077,13 +3077,13 @@ describe("runGatewayUpdate", () => {
     cwdSpy.mockRestore();
 
     expect(result.status).toBe("error");
-    expect(result.reason).toBe("not-openclaw-root");
+    expect(result.reason).toBe("not-carapace-root");
     expect(calls.filter((call) => call.includes("status --porcelain"))).toEqual([]);
   });
 
-  it("fails with a clear reason when openclaw.mjs is missing", async () => {
+  it("fails with a clear reason when carapace.mjs is missing", async () => {
     await setupGitCheckout({ packageManager: PNPM_PACKAGE_MANAGER });
-    await fs.rm(path.join(tempDir, "openclaw.mjs"), { force: true });
+    await fs.rm(path.join(tempDir, "carapace.mjs"), { force: true });
 
     const stableTag = "v1.0.1-1";
     const { runner } = createRunner({
@@ -3097,7 +3097,7 @@ describe("runGatewayUpdate", () => {
 
     expect(result.status).toBe("error");
     expect(result.reason).toBe("doctor-entry-missing");
-    expect(result.steps.some((step) => step.name === "openclaw doctor entry")).toBe(true);
+    expect(result.steps.some((step) => step.name === "carapace doctor entry")).toBe(true);
     expect(result.steps.at(-1)?.name).toMatch(/^git rollback/);
   });
 
@@ -3110,7 +3110,7 @@ describe("runGatewayUpdate", () => {
       let doctorRan = false;
       const stableTag = "v1.0.1";
       const doctorNodePath = await resolveStableNodePath(process.execPath);
-      const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "openclaw.mjs")} doctor --non-interactive --fix`;
+      const doctorCommand = `${doctorNodePath} ${path.join(tempDir, "carapace.mjs")} doctor --non-interactive --fix`;
       const { runCommand, calls } = createGitInstallRunner({
         stableTag,
         installCommand: "pnpm install",

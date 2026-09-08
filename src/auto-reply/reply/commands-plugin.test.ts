@@ -2,9 +2,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import { parseSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
 import {
   deleteSessionEntryLifecycle,
@@ -12,7 +12,7 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import { registerPluginCommandInRegistry } from "../../plugins/command-registration.js";
-import { loadOpenClawPlugins } from "../../plugins/loader.js";
+import { loadCarapacePlugins } from "../../plugins/loader.js";
 import {
   PLUGIN_COMMAND_DISPATCH,
   type PluginCommandExecutionReplyOptions,
@@ -21,7 +21,7 @@ import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import type { PluginRegistry } from "../../plugins/registry-types.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import type { PluginCommandContext, PluginCommandResult } from "../../plugins/types.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../../state/openclaw-agent-db.js";
+import { resolveIncognitoCarapaceAgentSqlitePath } from "../../state/carapace-agent-db.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { buildCommandContext } from "./commands-context.js";
 import { handlePluginCommand } from "./commands-plugin.js";
@@ -61,7 +61,7 @@ function firstCommandContext(handler: ReturnType<typeof registerTestCommand>) {
 
 function buildPluginParams(
   commandBodyNormalized: string,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): HandleCommandsParams {
   return {
     cfg,
@@ -89,7 +89,7 @@ function buildPluginParams(
     },
     provider: "openai",
     model: "gpt-5.4",
-    workspaceDir: "/tmp/openclaw-plugin-command",
+    workspaceDir: "/tmp/carapace-plugin-command",
     contextTokens: 10_000,
     isGroup: false,
     resolveDefaultThinkingLevel: async () => "medium",
@@ -98,15 +98,15 @@ function buildPluginParams(
 
 async function withDeclaredCommandPlugin(
   options: { enabled?: boolean; fails?: boolean; alias?: string },
-  run: (cfg: OpenClawConfig) => Promise<void>,
+  run: (cfg: CarapaceConfig) => Promise<void>,
 ) {
   const tempDir = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-command-availability-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-command-availability-")),
   );
   const pluginId = "recovery-controls";
   const alias = options.alias ?? "recover";
   const pluginFile = path.join(tempDir, "index.cjs");
-  const cfg: OpenClawConfig = {
+  const cfg: CarapaceConfig = {
     agents: { defaults: { workspace: tempDir } },
     commands: { text: true },
     plugins: {
@@ -117,7 +117,7 @@ async function withDeclaredCommandPlugin(
   };
   try {
     await fs.writeFile(
-      path.join(tempDir, "openclaw.plugin.json"),
+      path.join(tempDir, "carapace.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -140,12 +140,12 @@ async function withDeclaredCommandPlugin(
     );
     await withEnvAsync(
       {
-        OPENCLAW_STATE_DIR: path.join(tempDir, "state"),
-        OPENCLAW_CONFIG_PATH: path.join(tempDir, "openclaw.json"),
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+        CARAPACE_STATE_DIR: path.join(tempDir, "state"),
+        CARAPACE_CONFIG_PATH: path.join(tempDir, "carapace.json"),
+        CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
       },
       async () => {
-        registry = loadOpenClawPlugins({
+        registry = loadCarapacePlugins({
           config: cfg,
           workspaceDir: tempDir,
           cache: false,
@@ -187,7 +187,7 @@ describe("handlePluginCommand", () => {
       expect(result?.shouldContinue).toBe(false);
       expect(result?.reply?.text).toContain('Plugin "recovery-controls" failed to load');
       expect(result?.reply?.text).toContain("fixture registration failed");
-      expect(result?.reply?.text).toContain("openclaw doctor");
+      expect(result?.reply?.text).toContain("carapace doctor");
       expect(result?.reply?.text).not.toContain("private loader frame");
     });
   });
@@ -257,7 +257,7 @@ describe("handlePluginCommand", () => {
       buildPluginParams("/card", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       true,
     );
 
@@ -272,7 +272,7 @@ describe("handlePluginCommand", () => {
   });
 
   it("compacts the bound session through the host runtime and records fresh tokens", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-compact-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-compact-"));
     const sessionKey = "agent:main:whatsapp:direct:test-user";
     const storePath = path.join(tempDir, "sessions.json");
     const handler = vi.fn(async (ctx: PluginCommandContext) => ({
@@ -294,7 +294,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: storePath },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = storePath;
     const entry = { sessionId: "session-plugin-command", updatedAt: Date.now() };
     params.sessionStore = { [sessionKey]: entry };
@@ -324,7 +324,7 @@ describe("handlePluginCommand", () => {
 
   it("omits session compaction when no bound session exists", async () => {
     const handler = registerTestCommand();
-    const params = buildPluginParams("/card", { commands: { text: true } } as OpenClawConfig);
+    const params = buildPluginParams("/card", { commands: { text: true } } as CarapaceConfig);
     params.sessionEntry = undefined;
 
     await handlePluginCommand(params, true);
@@ -340,7 +340,7 @@ describe("handlePluginCommand", () => {
       requireAuth: false,
       handler,
     });
-    const params = buildPluginParams("/card", { commands: { text: true } } as OpenClawConfig);
+    const params = buildPluginParams("/card", { commands: { text: true } } as CarapaceConfig);
     params.command = { ...params.command, isAuthorizedSender: false };
 
     const result = await handlePluginCommand(params, true);
@@ -365,7 +365,7 @@ describe("handlePluginCommand", () => {
     });
 
     await handlePluginCommand(
-      buildPluginParams("/card", { commands: { text: true } } as OpenClawConfig),
+      buildPluginParams("/card", { commands: { text: true } } as CarapaceConfig),
       true,
     );
 
@@ -377,7 +377,7 @@ describe("handlePluginCommand", () => {
   });
 
   it("closes unawaited session compaction when the command handler settles", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-compact-detached-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-compact-detached-"));
     const sessionKey = "agent:main:whatsapp:direct:test-user";
     const storePath = path.join(tempDir, "sessions.json");
     const entry = { sessionId: "session-plugin-command", updatedAt: Date.now() };
@@ -401,7 +401,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: storePath },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = storePath;
     params.sessionStore = { [sessionKey]: entry };
     params.resolveDefaultThinkingLevel = async () => {
@@ -424,7 +424,7 @@ describe("handlePluginCommand", () => {
   });
 
   it("rejects session compaction when the bound session disappeared", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-compact-gone-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-compact-gone-"));
     const sessionKey = "agent:main:whatsapp:direct:test-user";
     const storePath = path.join(tempDir, "sessions.json");
     const entry = { sessionId: "session-plugin-command", updatedAt: Date.now() };
@@ -442,7 +442,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: storePath },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = storePath;
     params.sessionStore = { [sessionKey]: entry };
 
@@ -458,7 +458,7 @@ describe("handlePluginCommand", () => {
   });
 
   it("rejects session compaction when its lifecycle changes during admission", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-compact-race-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-compact-race-"));
     const sessionKey = "agent:main:whatsapp:direct:test-user";
     const storePath = path.join(tempDir, "sessions.json");
     const entry = {
@@ -475,7 +475,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: storePath },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = storePath;
     params.sessionStore = { [sessionKey]: entry };
     params.resolveDefaultThinkingLevel = async () => {
@@ -498,7 +498,7 @@ describe("handlePluginCommand", () => {
   });
 
   it("rejects session replacement before the compact capability is invoked", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-compact-rebound-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-plugin-compact-rebound-"));
     const sessionKey = "agent:main:whatsapp:direct:test-user";
     const storePath = path.join(tempDir, "sessions.json");
     const entry = {
@@ -515,7 +515,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: storePath },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.storePath = storePath;
     params.sessionStore = { [sessionKey]: entry };
     registerTestCommand(undefined, {
@@ -550,7 +550,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.agentId = "target";
     params.sessionKey = "agent:target:whatsapp:direct:test-user";
     params.sessionEntry = {
@@ -590,7 +590,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: "/tmp/durable/{agentId}/sessions.json" },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.agentId = "main";
     params.sessionKey = "agent:main:dashboard:incognito-plugin-command";
     params.storePath = "/tmp/durable/main/sessions.json";
@@ -605,7 +605,7 @@ describe("handlePluginCommand", () => {
     await handlePluginCommand(params, true);
 
     const commandParams = firstCommandContext(handler);
-    const expectedStorePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
+    const expectedStorePath = resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" });
     expect(commandParams.sessionTarget?.storePath).toBe(expectedStorePath);
     expect(parseSqliteSessionFileMarker(commandParams.sessionFile)?.storePath).toBe(
       expectedStorePath,
@@ -618,7 +618,7 @@ describe("handlePluginCommand", () => {
     const params = buildPluginParams("/card", {
       commands: { text: true },
       session: { store: "/tmp/durable/{agentId}/sessions.json" },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     params.agentId = "other";
     params.sessionKey = "global";
 
@@ -641,7 +641,7 @@ describe("handlePluginCommand", () => {
       buildPluginParams("/card", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       true,
     );
 
@@ -669,7 +669,7 @@ describe("handlePluginCommand", () => {
       buildPluginParams("/approve-deploy", {
         commands: { text: true },
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig),
+      } as CarapaceConfig),
       true,
     );
 
@@ -682,7 +682,7 @@ describe("handlePluginCommand", () => {
     const allowedParams = buildPluginParams("/approve-deploy", {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as CarapaceConfig);
     allowedParams.ctx.GatewayClientScopes = ["operator.approvals"];
 
     const allowed = await handlePluginCommand(allowedParams, true);
@@ -712,7 +712,7 @@ describe("handlePluginCommand", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
     const commandBody = "/card";
     const ctx = finalizeInboundContext({
       Provider: route.Provider,
@@ -759,7 +759,7 @@ describe("handlePluginCommand", () => {
     const originalHandler = registerTestCommand();
     const replyOptions: NonNullable<HandleCommandsParams["opts"]> &
       PluginCommandExecutionReplyOptions = {};
-    const cfg = { commands: { text: true } } as OpenClawConfig;
+    const cfg = { commands: { text: true } } as CarapaceConfig;
     expect(
       shouldBypassPluginOwnedBindingForCommand(
         {
@@ -797,7 +797,7 @@ describe("handlePluginCommand", () => {
 
   it("treats an explicit non-plugin catalog winner as terminal for plugin matching", async () => {
     const handler = registerTestCommand();
-    const params = buildPluginParams("/card", { commands: { text: true } } as OpenClawConfig);
+    const params = buildPluginParams("/card", { commands: { text: true } } as CarapaceConfig);
     params.opts = {
       [PLUGIN_COMMAND_DISPATCH]: { kind: "non-plugin" },
     } as NonNullable<HandleCommandsParams["opts"]> & PluginCommandExecutionReplyOptions;

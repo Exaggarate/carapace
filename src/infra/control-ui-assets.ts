@@ -1,14 +1,14 @@
 // Resolves and checks packaged Control UI assets.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeStringEntries } from "@carapace/normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@carapace/normalization-core/utf16-slice";
 import { quoteCliArg, quotePowerShellArg } from "../cli/quote-cli-arg.js";
 import { CONTROL_UI_BUILD_ID_ATTRIBUTE } from "../gateway/control-ui-root-assets.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
 import * as controlUiFsRuntime from "./control-ui-assets.fs.runtime.js";
-import { resolveOpenClawPackageRoot, resolveOpenClawPackageRootSync } from "./openclaw-root.js";
+import { resolveCarapacePackageRoot, resolveCarapacePackageRootSync } from "./carapace-root.js";
 
 export function formatControlUiSourceCommand(root: string, action: "build" | "dev"): string {
   const directory = process.platform === "win32" ? quotePowerShellArg(root) : quoteCliArg(root);
@@ -52,12 +52,12 @@ function resolveControlUiRepoRoot(opts: {
   const roots = opts.root
     ? [path.resolve(opts.root)]
     : [
-        resolveOpenClawPackageRootSync({
+        resolveCarapacePackageRootSync({
           argv1: opts.argv1 ?? process.argv[1],
           moduleUrl: opts.moduleUrl ?? import.meta.url,
           cwd,
         }),
-        resolveOpenClawPackageRootSync({ cwd }),
+        resolveCarapacePackageRootSync({ cwd }),
       ];
   return (
     roots.find(
@@ -96,12 +96,12 @@ async function resolveControlUiDistIndexPath(
     }
   }
 
-  const packageRoot = await resolveOpenClawPackageRoot({ argv1: normalized, moduleUrl });
+  const packageRoot = await resolveCarapacePackageRoot({ argv1: normalized, moduleUrl });
   if (packageRoot) {
     return path.join(packageRoot, "dist", "control-ui", "index.html");
   }
 
-  // Fallback: traverse up and find package.json with name "openclaw" + dist/control-ui/index.html
+  // Fallback: traverse up and find package.json with name "carapace" + dist/control-ui/index.html
   // This handles global installs where path-based resolution might fail.
   const fallbackStartDirs = new Set(
     entrypointCandidates.map((candidate) => path.dirname(candidate)),
@@ -115,7 +115,7 @@ async function resolveControlUiDistIndexPath(
         try {
           const raw = controlUiFsRuntime.readFileSync(pkgJsonPath, "utf-8");
           const parsed = JSON.parse(raw) as { name?: unknown };
-          if (parsed.name === "openclaw") {
+          if (parsed.name === "carapace") {
             return controlUiFsRuntime.existsSync(indexPath) ? indexPath : null;
           }
           // Stop at the first package boundary to avoid resolving through unrelated ancestors.
@@ -207,7 +207,7 @@ export function resolveControlUiRootSync(opts: ControlUiRootResolveOptions = {})
       return null;
     }
   })();
-  const packageRoot = resolveOpenClawPackageRootSync({
+  const packageRoot = resolveCarapacePackageRootSync({
     argv1,
     moduleUrl: opts.moduleUrl,
     cwd,
@@ -225,12 +225,12 @@ export function resolveControlUiRootSync(opts: ControlUiRootResolveOptions = {})
     addCandidate(candidates, path.join(moduleDir, "../../dist/control-ui"));
   }
   if (argv1Dir) {
-    // openclaw.mjs or dist/<bundle>.js
+    // carapace.mjs or dist/<bundle>.js
     addCandidate(candidates, path.join(argv1Dir, "dist", "control-ui"));
     addCandidate(candidates, path.join(argv1Dir, "control-ui"));
   }
   if (argv1RealpathDir && argv1RealpathDir !== argv1Dir) {
-    // Symlinked wrappers (e.g. ~/.bun/bin/openclaw -> .../dist/index.js)
+    // Symlinked wrappers (e.g. ~/.bun/bin/carapace -> .../dist/index.js)
     addCandidate(candidates, path.join(argv1RealpathDir, "dist", "control-ui"));
     addCandidate(candidates, path.join(argv1RealpathDir, "control-ui"));
   }
@@ -254,7 +254,7 @@ export function isPackageProvenControlUiRootSync(
 ): boolean {
   const argv1 = opts.argv1 ?? process.argv[1];
   const cwd = opts.cwd ?? process.cwd();
-  const packageRoot = resolveOpenClawPackageRootSync({
+  const packageRoot = resolveCarapacePackageRootSync({
     argv1,
     moduleUrl: opts.moduleUrl,
     cwd,
@@ -390,7 +390,7 @@ export async function ensureControlUiAssetsBuilt(
           ? `Incomplete Control UI assets${location} (missing ${health.missingAsset})`
           : `Missing Control UI assets${location}`;
     return controlUiAssetsFailure(
-      `${hint}. Reinstall OpenClaw to restore bundled Control UI assets.`,
+      `${hint}. Reinstall Carapace to restore bundled Control UI assets.`,
     );
   }
 

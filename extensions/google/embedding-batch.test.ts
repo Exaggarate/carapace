@@ -1,6 +1,6 @@
 // Google tests cover embedding batch bounded JSON response reads.
 import { createServer } from "node:http";
-import * as embeddingSdk from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+import * as embeddingSdk from "carapace/plugin-sdk/memory-core-host-engine-embeddings";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { runGeminiEmbeddingBatches } from "./embedding-batch.js";
 import type { GeminiEmbeddingClient } from "./embedding-provider.js";
@@ -8,9 +8,9 @@ import { geminiMemoryEmbeddingProviderAdapter } from "./memory-embedding-adapter
 
 // Pass-through so onResponse receives real Response objects (required by
 // readProviderJsonResponse which needs a real .body ReadableStream).
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
+vi.mock("carapace/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/memory-core-host-engine-embeddings")>();
+    await importOriginal<typeof import("carapace/plugin-sdk/memory-core-host-engine-embeddings")>();
   return {
     ...actual,
     withRemoteHttpResponse: async <T>(params: {
@@ -378,7 +378,7 @@ describe("Google embedding-batch bounded JSON reads", () => {
       const authHeaders: Array<string | undefined> = [];
       const tenantHeaders: Array<string | undefined> = [];
       const realSdk = await vi.importActual<typeof embeddingSdk>(
-        "openclaw/plugin-sdk/memory-core-host-engine-embeddings",
+        "carapace/plugin-sdk/memory-core-host-engine-embeddings",
       );
       const remoteHttp = vi
         .spyOn(embeddingSdk, "withRemoteHttpResponse")

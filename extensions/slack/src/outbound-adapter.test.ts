@@ -1,5 +1,5 @@
 // Slack tests cover outbound adapter plugin behavior.
-import { presentationToInteractiveControlsReply } from "openclaw/plugin-sdk/interactive-runtime";
+import { presentationToInteractiveControlsReply } from "carapace/plugin-sdk/interactive-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageSlackMock = vi.hoisted(() => vi.fn());
@@ -69,8 +69,8 @@ describe("slackOutbound", () => {
     expect(sendMessageSlackMock.mock.calls[0]?.[2]?.blocks).toHaveLength(50);
     expect(sendMessageSlackMock.mock.calls[0]?.[2]?.blocks.at(-1)).toMatchObject({
       elements: [
-        { action_id: "openclaw:question_button:1:1", value: `slq1:${questionId}:1` },
-        { action_id: "openclaw:question_button:1:2", value: `slq1:${questionId}:0` },
+        { action_id: "carapace:question_button:1:1", value: `slq1:${questionId}:1` },
+        { action_id: "carapace:question_button:1:2", value: `slq1:${questionId}:0` },
       ],
     });
   });

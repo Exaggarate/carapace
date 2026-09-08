@@ -131,7 +131,7 @@ describe("queued cancellation during adapter preparation", () => {
     async (mode) => {
       vi.useFakeTimers();
       const stateDir = fixtures.tmpDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       const adapter = installHeldAdapter();
       const controller = new AbortController();
       const audit: string[] = [];
@@ -227,7 +227,7 @@ describe("queued cancellation during adapter preparation", () => {
 
   it("does not retire a replacement producer while old preparation is held", async () => {
     const stateDir = fixtures.tmpDir();
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const adapter = installHeldAdapter();
     const controller = new AbortController();
     const queueIdReady = createDeferred<string>();
@@ -270,7 +270,7 @@ describe("queued cancellation during adapter preparation", () => {
     async (state) => {
       const { retireUnsentDelivery } = await import("./delivery-queue-ack.js");
       const stateDir = fixtures.tmpDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       const initialProducerClaim = createInitialDeliveryProducerClaim();
       const id = await enqueueDelivery({
         channel: "matrix",
@@ -295,7 +295,7 @@ describe("queued cancellation during adapter preparation", () => {
       throw new Error("state database write failed");
     });
     const stateDir = fixtures.tmpDir();
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
     const adapter = installHeldAdapter();
     const controller = new AbortController();
     const audit: string[] = [];
@@ -337,7 +337,7 @@ describe("queued cancellation during adapter preparation", () => {
     async (result) => {
       vi.useFakeTimers();
       const stateDir = fixtures.tmpDir();
-      vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+      vi.stubEnv("CARAPACE_STATE_DIR", stateDir);
       const adapter = installHeldAdapter();
       const controller = new AbortController();
       const queueIdReady = createDeferred<string>();

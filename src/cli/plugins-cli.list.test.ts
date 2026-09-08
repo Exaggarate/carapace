@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type {
   ConfigFileSnapshot,
   ConfigValidationIssue,
-  OpenClawConfig,
-} from "../config/types.openclaw.js";
+  CarapaceConfig,
+} from "../config/types.carapace.js";
 import { createCompatibilityNotice, createPluginRecord } from "../plugins/status.test-fixtures.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -24,11 +24,11 @@ import {
 
 const cleanDoctorMessage =
   "Plugin discovery, module loading, compatibility, and configuration checks passed. " +
-  'Run "openclaw health" to check the running Gateway, including runtime quarantines and fallbacks.';
+  'Run "carapace health" to check the running Gateway, including runtime quarantines and fallbacks.';
 const originalExitCode = process.exitCode;
 
 async function mockPluginDoctorValidationWarnings(warnings: ConfigValidationIssue[]) {
-  const config: OpenClawConfig = {
+  const config: CarapaceConfig = {
     plugins: {
       allow: ["imessage", "memory-core"],
       entries: { google: { config: { apiKey: "test-google-key" } } },
@@ -48,7 +48,7 @@ async function mockPluginDoctorValidationWarnings(warnings: ConfigValidationIssu
       origin: "bundled",
       rootDir: `/plugins/${id}`,
       source: `/plugins/${id}`,
-      manifestPath: `/plugins/${id}/openclaw.plugin.json`,
+      manifestPath: `/plugins/${id}/carapace.plugin.json`,
     })),
     diagnostics: [],
   });
@@ -117,7 +117,7 @@ describe("plugins cli list", () => {
     "surfaces plugin discovery and stale-registry diagnostics in the $label list",
     async ({ args, visibleError }) => {
       const refreshMessage =
-        "Persisted plugin registry is stale. Run `openclaw plugins registry --refresh`.";
+        "Persisted plugin registry is stale. Run `carapace plugins registry --refresh`.";
       const dependencyError = "Plugin dependency example-package could not be resolved.";
       buildPluginRegistrySnapshotReportMock.mockReturnValue({
         workspaceDir: "/workspace",
@@ -414,7 +414,7 @@ describe("plugins cli list", () => {
   });
 
   it("emits one sanitized JSON doctor report without human decoration", async () => {
-    const homeDir = "/tmp/openclaw-plugin-doctor-home";
+    const homeDir = "/tmp/carapace-plugin-doctor-home";
     buildPluginDiagnosticsReportMock.mockReturnValue({
       plugins: [
         createPluginRecord({
@@ -441,7 +441,7 @@ describe("plugins cli list", () => {
       ],
     });
 
-    await withEnvAsync({ OPENCLAW_HOME: homeDir }, async () => {
+    await withEnvAsync({ CARAPACE_HOME: homeDir }, async () => {
       await runPluginsCommand(["plugins", "doctor", "--json"]);
     });
 
@@ -455,14 +455,14 @@ describe("plugins cli list", () => {
       pluginErrors: [
         {
           id: "broken",
-          error: "failed to load $OPENCLAW_HOME/plugins/broken/runtime.ts",
-          source: "$OPENCLAW_HOME/plugins/broken/index.ts",
+          error: "failed to load $CARAPACE_HOME/plugins/broken/runtime.ts",
+          source: "$CARAPACE_HOME/plugins/broken/index.ts",
         },
       ],
       diagnostics: [
         {
           level: "warn",
-          message: "failed to inspect $OPENCLAW_HOME/plugins/unreadable",
+          message: "failed to inspect $CARAPACE_HOME/plugins/unreadable",
         },
       ],
       sourceShadowing: [
@@ -470,19 +470,19 @@ describe("plugins cli list", () => {
           pluginId: "broken",
           message:
             "duplicate plugin id resolved by explicit config-selected plugin; " +
-            "global plugin will be overridden by config plugin ($OPENCLAW_HOME/plugins/broken/index.ts)",
+            "global plugin will be overridden by config plugin ($CARAPACE_HOME/plugins/broken/index.ts)",
           active: {
-            source: "$OPENCLAW_HOME/plugins/broken/index.ts",
+            source: "$CARAPACE_HOME/plugins/broken/index.ts",
             origin: "config",
             status: "error",
-            error: "failed to load $OPENCLAW_HOME/plugins/broken/runtime.ts",
+            error: "failed to load $CARAPACE_HOME/plugins/broken/runtime.ts",
           },
-          shadowedSource: "$OPENCLAW_HOME/plugins/shadowed/index.ts",
+          shadowedSource: "$CARAPACE_HOME/plugins/shadowed/index.ts",
           repair: [
-            "openclaw plugins inspect broken",
+            "carapace plugins inspect broken",
             "edit or remove the config-selected plugin source",
-            "openclaw plugins registry --refresh",
-            "openclaw gateway restart --force",
+            "carapace plugins registry --refresh",
+            "carapace gateway restart --force",
           ],
         },
       ],
@@ -554,7 +554,7 @@ describe("plugins cli list", () => {
     };
     pluginCliConfigMock.mockReturnValue({});
     readConfigFileSnapshotMock.mockResolvedValueOnce({
-      path: "/tmp/openclaw-config.json5",
+      path: "/tmp/carapace-config.json5",
       exists: true,
       raw: "{}",
       parsed: sourceConfig,
@@ -584,7 +584,7 @@ describe("plugins cli list", () => {
       'plugins.slots.contextEngine: slot references missing plugin "lossless-claw".',
     );
     expect(output).toContain(
-      'Run "openclaw doctor --fix" to remove stale plugin ids and dangling channel references.',
+      'Run "carapace doctor --fix" to remove stale plugin ids and dangling channel references.',
     );
     expect(output).toContain(
       "No plugin install-tree issues detected; configuration warnings remain.",
@@ -606,7 +606,7 @@ describe("plugins cli list", () => {
     };
     pluginCliConfigMock.mockReturnValue(sourceConfig);
     readConfigFileSnapshotMock.mockResolvedValueOnce({
-      path: "/tmp/openclaw-config.json5",
+      path: "/tmp/carapace-config.json5",
       exists: true,
       raw: "{}",
       parsed: sourceConfig,
@@ -630,8 +630,8 @@ describe("plugins cli list", () => {
     const output = pluginsCliRuntimeLogs.join("\n");
     expect(output).toContain("Plugin configuration:");
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
-    expect(output).toContain("openclaw doctor --fix");
-    expect(output).toContain("openclaw plugins install @openclaw/codex");
+    expect(output).toContain("carapace doctor --fix");
+    expect(output).toContain("carapace plugins install @carapace/codex");
     expect(output).toContain(
       "No plugin install-tree issues detected; configuration warnings remain.",
     );
@@ -655,8 +655,8 @@ describe("plugins cli list", () => {
     const output = pluginsCliRuntimeLogs.join("\n");
     expect(output).toContain("Plugin configuration:");
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
-    expect(output).toContain("openclaw doctor --fix");
-    expect(output).toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).toContain("carapace doctor --fix");
+    expect(output).toContain("carapace plugins install @carapace/acpx");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -683,8 +683,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
     expect(output).toContain("Set plugins.entries.acpx.enabled=true");
     expect(output).toContain("disable ACP/acpx in acp config");
-    expect(output).not.toContain('runtime policy to "openclaw"');
-    expect(output).not.toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).not.toContain('runtime policy to "carapace"');
+    expect(output).not.toContain("carapace plugins install @carapace/acpx");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -706,8 +706,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
     expect(output).toContain('Enable the "acpx" plugin');
     expect(output).toContain("disable ACP/acpx in acp config");
-    expect(output).not.toContain('runtime policy to "openclaw"');
-    expect(output).not.toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).not.toContain('runtime policy to "carapace"');
+    expect(output).not.toContain("carapace plugins install @carapace/acpx");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -779,7 +779,7 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is disabled');
     expect(output).toContain('Enable the "codex" plugin');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain("carapace plugins install @carapace/codex");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -810,8 +810,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is blocked by plugin configuration');
     expect(output).toContain('Remove "codex" from plugins.deny');
-    expect(output).not.toContain('Run "openclaw doctor --fix" to install');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain('Run "carapace doctor --fix" to install');
+    expect(output).not.toContain("carapace plugins install @carapace/codex");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -844,8 +844,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is blocked by plugin configuration');
     expect(output).toContain("Set plugins.entries.codex.enabled=true");
-    expect(output).not.toContain('Run "openclaw doctor --fix" to install');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain('Run "carapace doctor --fix" to install');
+    expect(output).not.toContain("carapace plugins install @carapace/codex");
     expect(output).not.toContain(cleanDoctorMessage);
   });
 
@@ -855,7 +855,7 @@ describe("plugins cli list", () => {
         createPluginRecord({
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw-upstream/extensions/discord/index.ts",
+          source: "/tmp/carapace-upstream/extensions/discord/index.ts",
           status: "error",
           error: "Cannot find module 'chalk'",
         }),
@@ -864,9 +864,9 @@ describe("plugins cli list", () => {
         {
           level: "warn",
           pluginId: "discord",
-          source: "/tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+          source: "/tmp/carapace/npm/node_modules/@carapace/discord/index.ts",
           message:
-            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/openclaw-upstream/extensions/discord/index.ts)",
+            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/carapace-upstream/extensions/discord/index.ts)",
         },
       ],
     });
@@ -878,9 +878,9 @@ describe("plugins cli list", () => {
     expect(output).toContain(
       "discord: duplicate plugin id resolved by explicit config-selected plugin",
     );
-    expect(output).toContain("active: /tmp/openclaw-upstream/extensions/discord/index.ts");
-    expect(output).toContain("shadowed: /tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts");
-    expect(output).toContain("openclaw plugins registry --refresh");
+    expect(output).toContain("active: /tmp/carapace-upstream/extensions/discord/index.ts");
+    expect(output).toContain("shadowed: /tmp/carapace/npm/node_modules/@carapace/discord/index.ts");
+    expect(output).toContain("carapace plugins registry --refresh");
   });
 
   it("does not report healthy config-selected plugin source shadowing as doctor issue", async () => {
@@ -889,7 +889,7 @@ describe("plugins cli list", () => {
         createPluginRecord({
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw-upstream/extensions/discord/index.ts",
+          source: "/tmp/carapace-upstream/extensions/discord/index.ts",
           status: "loaded",
         }),
       ],
@@ -897,9 +897,9 @@ describe("plugins cli list", () => {
         {
           level: "warn",
           pluginId: "discord",
-          source: "/tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+          source: "/tmp/carapace/npm/node_modules/@carapace/discord/index.ts",
           message:
-            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/openclaw-upstream/extensions/discord/index.ts)",
+            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/carapace-upstream/extensions/discord/index.ts)",
         },
       ],
     });
@@ -941,7 +941,7 @@ describe("plugins cli list", () => {
     expect(pluginsCliRuntimeLogs.join("\n")).toContain(
       "demo: persisted /plugins/demo/index.js; derived /plugins/demo/dist/index.js",
     );
-    expect(pluginsCliRuntimeLogs.join("\n")).toContain("openclaw plugins registry --refresh");
+    expect(pluginsCliRuntimeLogs.join("\n")).toContain("carapace plugins registry --refresh");
   });
 
   it("refreshes the persisted plugin registry on request", async () => {
@@ -986,7 +986,7 @@ describe("plugins cli list", () => {
     });
 
     await expect(runPluginsCommand(["plugins", "registry", "--refresh"])).rejects.toThrow(
-      /demo: persisted \/plugins\/demo\/index\.js; derived \/plugins\/demo\/dist\/index\.js.*openclaw plugins registry --refresh/su,
+      /demo: persisted \/plugins\/demo\/index\.js; derived \/plugins\/demo\/dist\/index\.js.*carapace plugins registry --refresh/su,
     );
   });
 

@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import {
   clearUserProfileAuthLink,
   connectUserModelAccount,
 } from "../../state/user-model-accounts.js";
 import { ensureProfileForEmail, linkEmail } from "../../state/user-profiles.js";
 import { withEnvAsync } from "../../test-utils/env.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import {
   catalogEntry,
   createModelsListTestContext,
@@ -24,7 +24,7 @@ describe("models.list configured static entries", () => {
   });
 
   it("projects personal-only models for the authenticated requester without publishing shared auth", async () => {
-    await withOpenClawTestState(
+    await withCarapaceTestState(
       { layout: "state-only", prefix: "personal-model-catalog-", env: WITHOUT_OPENAI_ENV_AUTH },
       async (state) => {
         const alice = ensureProfileForEmail("alice@example.test");
@@ -97,7 +97,7 @@ describe("models.list configured static entries", () => {
           models: { "openai/gpt-5.6-luna": {}, "openai/gpt-5.6-sol": {} },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = listModels({
       catalog,
@@ -136,7 +136,7 @@ describe("models.list configured static entries", () => {
           models: { "openai/gpt-5.6-luna": {}, "openai/gpt-5.6-sol": {} },
         },
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     const result = listModels({
       catalog: [],
@@ -166,7 +166,7 @@ describe("models.list configured static entries", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as CarapaceConfig;
 
     await expect(
       listModels({
@@ -218,7 +218,7 @@ describe("models.list configured static entries", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as CarapaceConfig;
 
       const result = await listModels({
         agentId: "worker",

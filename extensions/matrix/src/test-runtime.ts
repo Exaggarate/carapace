@@ -4,24 +4,24 @@ import path from "node:path";
 import {
   implicitMentionKindWhen,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-mention-gating";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "carapace/plugin-sdk/channel-mention-gating";
+import type { PluginRuntime } from "carapace/plugin-sdk/plugin-runtime";
 import type {
   OpenBlobStoreOptions,
   OpenKeyedStoreOptions,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "carapace/plugin-sdk/plugin-state-runtime";
 import {
   createPluginBlobStoreForTests,
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import { resolvePreferredCarapaceTmpDir } from "carapace/plugin-sdk/temp-path";
 import { afterAll, vi } from "vitest";
 import { setMatrixRuntime } from "./runtime.js";
 
 const defaultStateDir = fs.realpathSync(
-  fs.mkdtempSync(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-matrix-test-state-")),
+  fs.mkdtempSync(path.join(resolvePreferredCarapaceTmpDir(), "carapace-matrix-test-state-")),
 );
 
 afterAll(() => {
@@ -84,8 +84,8 @@ export function installMatrixTestRuntime(options: MatrixTestRuntimeOptions = {})
   ) => stateDir;
   const resolvePluginStateEnv = (storeOptions: OpenKeyedStoreOptions): NodeJS.ProcessEnv => ({
     ...(storeOptions.env ?? process.env),
-    OPENCLAW_STATE_DIR:
-      storeOptions.env?.OPENCLAW_STATE_DIR?.trim() || defaultStateDirResolver(storeOptions.env),
+    CARAPACE_STATE_DIR:
+      storeOptions.env?.CARAPACE_STATE_DIR?.trim() || defaultStateDirResolver(storeOptions.env),
   });
   const getRuntimeConfig = () => options.cfg ?? {};
   const logging: PluginRuntime["logging"] | undefined = options.logging
@@ -113,7 +113,7 @@ export function installMatrixTestRuntime(options: MatrixTestRuntimeOptions = {})
       openBlobStore: (<T>(storeOptions: OpenBlobStoreOptions) =>
         createPluginBlobStoreForTests<T>("matrix", storeOptions, {
           ...process.env,
-          OPENCLAW_STATE_DIR: defaultStateDirResolver(process.env),
+          CARAPACE_STATE_DIR: defaultStateDirResolver(process.env),
         })) as PluginRuntime["state"]["openBlobStore"],
       openKeyedStore: (<T>(storeOptions: OpenKeyedStoreOptions) =>
         createPluginStateKeyedStoreForTests<T>("matrix", {

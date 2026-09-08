@@ -6,7 +6,7 @@ import {
 import { GATEWAY_OWNER_PROFILE_ID } from "../../packages/gateway-protocol/src/schema/users.js";
 import type { SessionCreatedActor } from "../config/sessions/session-entry-provenance.js";
 import type { GatewayOperatorRoleDefinition } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getUserProfileRole } from "../state/user-profiles.js";
 import { bumpGatewayAccessRevision } from "./gateway-access-revision.js";
@@ -28,7 +28,7 @@ const deniedOperatorRole: GatewayOperatorRoleDefinition = {
 };
 
 type GatewaySessionAgentAuthorization = {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   agentId: string;
 } & (
   | { actor: GatewayOperatorRoleActor; profileId?: never; client?: never }
@@ -70,7 +70,7 @@ export function invalidateOperatorRolePolicy(profileId: string): void {
 /** An enabled role boundary denies missing identity and unresolvable assignments. */
 export function resolveOperatorRolePolicyForProfile(
   profileId: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): GatewayOperatorRoleDefinition | undefined {
   // The owner attributes the shared-secret system actor; roles govern identified people only.
   if (!cfg.gateway?.roles || profileId === GATEWAY_OWNER_PROFILE_ID) {
@@ -87,7 +87,7 @@ export function resolveOperatorRolePolicyForProfile(
 export function resolveOperatorRolePolicyForAssignment(
   profileId: string | undefined,
   assignedRole: string | null,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): GatewayOperatorRoleDefinition | undefined {
   const roles = cfg.gateway?.roles;
   if (!roles || profileId === GATEWAY_OWNER_PROFILE_ID) {
@@ -115,7 +115,7 @@ export function resolveOperatorRolePolicyForAssignment(
 
 /** Preserve human-derived restrictions, including ambiguous historical actors; this is not identity proof. */
 export function resolveCreatorSandbox(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   creation: { actor?: SessionCreatedActor } | undefined,
 ): "required" | undefined {
   const actor = creation?.actor;
@@ -143,7 +143,7 @@ export function resolveGatewayOperatorRoleActor(
 /** Resolves the current named policy from an authoritative operator or system actor. */
 export function resolveOperatorRolePolicy(
   client: GatewayClient | null,
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): GatewayOperatorRoleDefinition | undefined {
   const actor = resolveGatewayOperatorRoleActor(client);
   if (actor?.kind === "system") {
@@ -152,11 +152,11 @@ export function resolveOperatorRolePolicy(
   return resolveOperatorRolePolicyForProfile(actor?.profileId, cfg);
 }
 
-export function operatorSessionCap(client: GatewayClient | null, cfg: OpenClawConfig) {
+export function operatorSessionCap(client: GatewayClient | null, cfg: CarapaceConfig) {
   return resolveOperatorRolePolicy(client, cfg)?.sessions.others;
 }
 
-export function hasOperatorBoundary(client: GatewayClient | null, cfg: OpenClawConfig): boolean {
+export function hasOperatorBoundary(client: GatewayClient | null, cfg: CarapaceConfig): boolean {
   return operatorSessionCap(client, cfg) !== undefined;
 }
 
@@ -184,7 +184,7 @@ export function authorizeGatewaySessionCreation(
 /** Leave ordinary creation attribution unchanged unless the authenticated person requires isolation. */
 export function resolveSandboxedSessionCreation(
   client: Parameters<typeof resolveOperatorSessionCreation>[0],
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
 ): TrustedSessionCreation | undefined {
   const creation = resolveOperatorSessionCreation(client);
   return resolveCreatorSandbox(cfg, creation) === "required"

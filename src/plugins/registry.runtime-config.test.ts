@@ -2,7 +2,7 @@
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import { resolveUserPath } from "../utils.js";
 import { createLazyPluginRuntime } from "./loader-module-runtime.js";
 import { createPluginRecord } from "./loader-records.js";
@@ -34,10 +34,10 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
     api.registerAgentHarness({
-      id: "openclaw",
+      id: "carapace",
       label: "Forged built-in",
       supports: () => ({ supported: true }),
       runAttempt: async () => {
@@ -51,7 +51,7 @@ describe("plugin registry runtime config scope", () => {
       expect.objectContaining({
         level: "error",
         pluginId: "untrusted-plugin",
-        message: 'agent harness id "openclaw" is reserved for the built-in runtime',
+        message: 'agent harness id "carapace" is reserved for the built-in runtime',
       }),
     );
   });
@@ -65,9 +65,9 @@ describe("plugin registry runtime config scope", () => {
     },
     {
       label: "official global",
-      source: "/plugins/node_modules/@openclaw/codex/index.js",
+      source: "/plugins/node_modules/@carapace/codex/index.js",
       origin: "global",
-      packageName: "@openclaw/codex",
+      packageName: "@carapace/codex",
     },
   ] as const)("binds native compaction to the $label Codex harness", (fixture) => {
     const pluginRegistry = createTestRegistry(createPluginRuntime());
@@ -79,7 +79,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
     const nativeCompaction = vi.fn(async () => ({ ok: true, compacted: true }));
 
     api.registerAgentHarness(
@@ -110,7 +110,7 @@ describe("plugin registry runtime config scope", () => {
         enabled: true,
         configSchema: false,
       });
-      const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+      const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
       api.registerAgentHarness(
         {
@@ -145,7 +145,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
     api.registerAgentHarness(
       {
@@ -171,7 +171,7 @@ describe("plugin registry runtime config scope", () => {
   });
 
   it("resolves plugin API paths against the plugin root", () => {
-    const pluginRoot = path.join(os.tmpdir(), "openclaw-plugins", "demo");
+    const pluginRoot = path.join(os.tmpdir(), "carapace-plugins", "demo");
     const pluginRegistry = createTestRegistry(createPluginRuntime());
     const record = createPluginRecord({
       id: "path-plugin",
@@ -182,19 +182,19 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
     const absolute = path.resolve(pluginRoot, "..", "outside.txt");
 
     expect(api.resolvePath("data/cache.json")).toBe(path.join(pluginRoot, "data", "cache.json"));
     expect(api.resolvePath("./data/cache.json")).toBe(path.join(pluginRoot, "data", "cache.json"));
     expect(api.resolvePath(absolute)).toBe(absolute);
-    expect(api.resolvePath("~/openclaw/plugin.txt")).toBe(resolveUserPath("~/openclaw/plugin.txt"));
+    expect(api.resolvePath("~/carapace/plugin.txt")).toBe(resolveUserPath("~/carapace/plugin.txt"));
   });
 
   it("adds plugin context to lazy runtime resolution failures", () => {
     const runtime = new Proxy({} as PluginRuntime, {
       get() {
-        throw new Error("Unable to resolve plugin runtime module; loader=/tmp/openclaw-loader.js");
+        throw new Error("Unable to resolve plugin runtime module; loader=/tmp/carapace-loader.js");
       },
     });
     const pluginRegistry = createTestRegistry(runtime);
@@ -206,7 +206,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
     let thrown: unknown;
     try {
@@ -227,12 +227,12 @@ describe("plugin registry runtime config scope", () => {
     let currentScope = getPluginRuntimeGatewayRequestScope();
     let mutateScope = getPluginRuntimeGatewayRequestScope();
     let replaceScope = getPluginRuntimeGatewayRequestScope();
-    const config = {} as OpenClawConfig;
+    const config = {} as CarapaceConfig;
     const replaceResult = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/carapace.json",
       previousHash: null,
       persistedHash: "persisted-hash",
-      snapshot: { path: "/tmp/openclaw.json" },
+      snapshot: { path: "/tmp/carapace.json" },
       nextConfig: config,
       afterWrite: { mode: "auto" },
       followUp: { mode: "auto", requiresRestart: false },
@@ -310,7 +310,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
     await api.runtime.llm.acquireLocalService({
       providerId: "gpu-host",
@@ -361,7 +361,7 @@ describe("plugin registry runtime config scope", () => {
         enabled: true,
         configSchema: false,
       });
-      const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+      const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
       await api.runtime.nodes.list({ connected: true });
       await api.runtime.nodes.invoke({
@@ -407,7 +407,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
 
     await api.runtime.gateway.request("voicecall.start", { to: "+15550001234" });
 
@@ -453,8 +453,8 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as OpenClawConfig });
-    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as OpenClawConfig });
+    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as CarapaceConfig });
+    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as CarapaceConfig });
     ownerApi.registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -515,7 +515,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
     api.registerCliBackend({ id: "claude-cli", config: { command: "claude" } });
     api.registerAgentHarness({
       id: "anthropic-harness",
@@ -580,7 +580,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as CarapaceConfig });
     const initialEntry = {
       acpBackendId: "acpx",
       acpSessionBinding: {

@@ -5,7 +5,7 @@ import { resolveConfiguredLiveQuicksilverModel } from "./realtime-quicksilver-li
 import { buildOpenAISpeechProvider } from "./speech-provider.js";
 
 const LIVE_ENABLED =
-  process.env.OPENCLAW_LIVE_TEST === "1" && process.env.OPENCLAW_LIVE_GPT_LIVE === "1";
+  process.env.CARAPACE_LIVE_TEST === "1" && process.env.CARAPACE_LIVE_GPT_LIVE === "1";
 const describeLive = LIVE_ENABLED ? describe : describe.skip;
 const LIVE_TIMEOUT_MS = 60_000;
 const MAX_PENDING_AUDIO_BYTES = 240_000;

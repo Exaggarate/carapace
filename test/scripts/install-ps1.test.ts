@@ -4,7 +4,7 @@ import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { isSupportedOpenClawNodeVersion } from "../../node-version.mjs";
+import { isSupportedCarapaceNodeVersion } from "../../node-version.mjs";
 import { NODE_RELEASE_VERSION_CASES } from "../helpers/node-version-cases.js";
 import { createScriptTestHarness } from "./test-helpers.js";
 
@@ -78,10 +78,10 @@ function createDeferredPathSuccessFixture(source: string): string {
     "function Write-Banner { }",
     "function Ensure-ExecutionPolicy { return $true }",
     "function Check-Node { return $true }",
-    "function Check-ExistingOpenClaw { return $false }",
+    "function Check-ExistingCarapace { return $false }",
     "function Add-ToPath { param([string]$Path) }",
-    "function Install-OpenClaw { return $true }",
-    "function Ensure-OpenClawOnPath { return $false }",
+    "function Install-Carapace { return $true }",
+    "function Ensure-CarapaceOnPath { return $false }",
     "$NoOnboard = $true",
     "",
     ...entrypointLines,
@@ -157,7 +157,7 @@ describe("install.ps1 failure handling", () => {
           String.raw`
 $ErrorActionPreference = 'Stop'
 $beforeLocation = (Get-Location).Path
-$root = Join-Path ([IO.Path]::GetTempPath()) ('openclaw-native-stderr-' + [Guid]::NewGuid().ToString('N'))
+$root = Join-Path ([IO.Path]::GetTempPath()) ('carapace-native-stderr-' + [Guid]::NewGuid().ToString('N'))
 [void](New-Item -ItemType Directory -Path $root)
 $child = Join-Path $root 'child.cjs'
 [IO.File]::WriteAllText($child, 'if (process.argv[2] === "marker") { require("node:fs").writeFileSync(process.argv[3], "spawned"); process.exit(0); } if (process.argv[2] === "warning") process.stderr.write("npm warn proof\n"); process.stdout.write("native-complete\n"); process.exit(Number(process.argv[3]));')
@@ -189,14 +189,14 @@ try {
         ].join("\n"),
       },
       {
-        name: "openclaw-native-command-exit",
+        name: "carapace-native-command-exit",
         source: [
           scriptWithoutEntryPoint,
           "",
-          "function Get-OpenClawCommandPath { return (Get-Process -Id $PID).Path }",
+          "function Get-CarapaceCommandPath { return (Get-Process -Id $PID).Path }",
           "$caught = $false",
           "try {",
-          "  Invoke-OpenClawCommand -NoLogo -NoProfile -Command 'exit 17'",
+          "  Invoke-CarapaceCommand -NoLogo -NoProfile -Command 'exit 17'",
           "} catch {",
           "  if ($_.Exception.Message -notmatch 'failed with exit code 17') { throw }",
           "  $caught = $true",
@@ -210,7 +210,7 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          "function Invoke-OpenClawCommand { throw 'doctor failed' }",
+          "function Invoke-CarapaceCommand { throw 'doctor failed' }",
           "$output = @(Run-Doctor *>&1 | ForEach-Object { $_.ToString() })",
           '$text = $output -join "`n"',
           "if ($text -match 'Migration complete') { throw 'doctor failure reported success' }",
@@ -230,22 +230,22 @@ try {
           "  if ($Arguments[0] -eq '--version') { Write-Output $script:NpmVersion; $global:LASTEXITCODE = 0; return }",
           "  throw 'unexpected npm mutation'",
           "}",
-          "$cases = @{ '11.15.0' = $null; '11.16.0' = '--allow-scripts=openclaw'; '12.0.0' = '--allow-scripts=openclaw' }",
+          "$cases = @{ '11.15.0' = $null; '11.16.0' = '--allow-scripts=carapace'; '12.0.0' = '--allow-scripts=carapace' }",
           "foreach ($entry in $cases.GetEnumerator()) {",
           "  $script:NpmVersion = $entry.Key",
-          "  $actual = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'openclaw@latest'",
+          "  $actual = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'carapace@latest'",
           '  if ($actual -ne $entry.Value) { throw "version=$($entry.Key) actual=$actual" }',
           "}",
           "$script:NpmVersion = '12.0.0'",
           "$tool = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'pnpm@12.0.0' -ExactIdentity 'pnpm@12.0.0'",
           'if ($tool -ne "--allow-scripts=pnpm@12.0.0") { throw "tool=$tool" }',
-          "$alias = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'openclaw@npm:@scope/candidate@1.0.0'",
+          "$alias = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'carapace@npm:@scope/candidate@1.0.0'",
           "if ($alias -ne '--allow-scripts=@scope/candidate') { throw \"alias=$alias\" }",
-          "$archiveAlias = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'openclaw@npm:@scope/candidate.tgz@1.0.0'",
+          "$archiveAlias = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'carapace@npm:@scope/candidate.tgz@1.0.0'",
           "if ($archiveAlias -ne '--allow-scripts=@scope/candidate.tgz') { throw \"alias=$archiveAlias\" }",
-          "$tarball = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'https://example.invalid/openclaw.tgz'",
-          "if ($tarball -ne '--allow-scripts=https://example.invalid/openclaw.tgz') { throw \"tarball=$tarball\" }",
-          '$archiveRoot = Join-Path ([System.IO.Path]::GetTempPath()) "openclaw-archive-identity"',
+          "$tarball = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'https://example.invalid/carapace.tgz'",
+          "if ($tarball -ne '--allow-scripts=https://example.invalid/carapace.tgz') { throw \"tarball=$tarball\" }",
+          '$archiveRoot = Join-Path ([System.IO.Path]::GetTempPath()) "carapace-archive-identity"',
           '$safeCwd = Join-Path $archiveRoot "work"',
           '$candidate = Join-Path $archiveRoot "candidate.tgz"',
           '$archiveUrl = "file:///" + $candidate.Replace("\\", "/").TrimStart("/")',
@@ -254,7 +254,7 @@ try {
           "  $actual = Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec $spec -NpmCwd $safeCwd",
           '  if ($actual -ne "--allow-scripts=$protocol$candidate") { throw "archive=$actual" }',
           "}",
-          '$commaRoot = Join-Path ([System.IO.Path]::GetTempPath()) "openclaw,identity"',
+          '$commaRoot = Join-Path ([System.IO.Path]::GetTempPath()) "carapace,identity"',
           "$caught = $false",
           "try { Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec (Join-Path $commaRoot 'candidate.tgz') -NpmCwd $commaRoot } catch {",
           "  if ($_.Exception.Message -notmatch 'without commas') { throw }",
@@ -272,7 +272,7 @@ try {
           "foreach ($invalidVersion in @('invalid', 'npm 12.0.0 warning')) {",
           "  $script:NpmVersion = $invalidVersion",
           "  $caught = $false",
-          "  try { Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'openclaw@latest' } catch { $caught = $true }",
+          "  try { Get-NpmLifecycleAllowArgument -NpmCommand 'npm.cmd' -InstallSpec 'carapace@latest' } catch { $caught = $true }",
           '  if (-not $caught) { throw "invalid npm version was accepted: $invalidVersion" }',
           "}",
           "",
@@ -283,7 +283,7 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-pnpm-policy-" + [guid]::NewGuid().ToString("N"))',
+          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-pnpm-policy-" + [guid]::NewGuid().ToString("N"))',
           '$project = Join-Path $root "project"',
           "$previousUpper = $env:PNPM_CONFIG_PREFER_OFFLINE",
           "$previousLower = $env:pnpm_config_prefer_offline",
@@ -325,15 +325,15 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-missing-candidate-" + [guid]::NewGuid().ToString("N"))',
+          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-missing-candidate-" + [guid]::NewGuid().ToString("N"))',
           "New-Item -ItemType Directory -Path $root | Out-Null",
-          "function Check-ExistingOpenClaw { return $true }",
+          "function Check-ExistingCarapace { return $true }",
           "function Check-Node { return $true }",
           "function Ensure-Git { return $true }",
           "function Test-PreviousGitWrapper { return $false }",
           "function Get-NpmCommandPath { return 'npm.cmd' }",
           "function Get-WindowsCommandSafeDirectory { return $root }",
-          "function Resolve-NpmOpenClawInstallSpec { return 'openclaw@latest' }",
+          "function Resolve-NpmCarapaceInstallSpec { return 'carapace@latest' }",
           "function Test-NpmConfigRawKey { return $true }",
           "function Get-NpmDebugLogRootCandidates { return @() }",
           "function Invoke-NpmCommand {",
@@ -345,7 +345,7 @@ try {
           "  if ($Arguments[0] -eq 'install') { return }",
           "  throw \"unexpected npm command: $($Arguments -join ' ')\"",
           "}",
-          "function Ensure-OpenClawOnPath { throw 'old PATH command was accepted after missing candidate' }",
+          "function Ensure-CarapaceOnPath { throw 'old PATH command was accepted after missing candidate' }",
           "$InstallMethod = 'npm'",
           "$NoOnboard = $true",
           "$Tag = 'latest'",
@@ -364,7 +364,7 @@ try {
           scriptWithoutEntryPoint,
           "",
           "$script:OldOwnerRemoved = $false",
-          "function Check-ExistingOpenClaw { return $true }",
+          "function Check-ExistingCarapace { return $true }",
           "function Check-Node { return $true }",
           "function Get-NpmCommandPath { return 'npm.cmd' }",
           "function Invoke-NpmCommand {",
@@ -373,7 +373,7 @@ try {
           "  if ($Arguments[0] -eq 'uninstall') { $script:OldOwnerRemoved = $true; $global:LASTEXITCODE = 0; return }",
           "  throw 'unexpected npm command'",
           "}",
-          "function Install-OpenClawFromGit { return $false }",
+          "function Install-CarapaceFromGit { return $false }",
           "$InstallMethod = 'git'",
           "$NoOnboard = $true",
           "$null = Main",
@@ -389,7 +389,7 @@ try {
           "$cases = @{",
           ...NODE_RELEASE_VERSION_CASES.map(
             (version) =>
-              `  ${toPowerShellSingleQuotedLiteral(version)} = $${isSupportedOpenClawNodeVersion(version)}`,
+              `  ${toPowerShellSingleQuotedLiteral(version)} = $${isSupportedCarapaceNodeVersion(version)}`,
           ),
           "}",
           "foreach ($entry in $cases.GetEnumerator()) {",
@@ -404,13 +404,13 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-shim-transaction-" + [guid]::NewGuid().ToString("N"))',
-          '$target = Join-Path $root "openclaw.cmd"',
+          '$root = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-shim-transaction-" + [guid]::NewGuid().ToString("N"))',
+          '$target = Join-Path $root "carapace.cmd"',
           "try {",
           "  New-Item -ItemType Directory -Force -Path $root | Out-Null",
           '  $old = "@echo off`r`nnode `"C:\\old\\dist\\entry.js`" %*`r`n"',
-          '  $launcher = Join-Path $root "node_modules\\openclaw\\openclaw.mjs"',
-          '  $candidate = "@ECHO off`r`nGOTO start`r`n:find_dp0`r`nSET dp0=%~dp0`r`nEXIT /b`r`n:start`r`nSETLOCAL`r`nCALL :find_dp0`r`nnode `"%dp0%\\node_modules\\openclaw\\openclaw.mjs`" %*`r`n"',
+          '  $launcher = Join-Path $root "node_modules\\carapace\\carapace.mjs"',
+          '  $candidate = "@ECHO off`r`nGOTO start`r`n:find_dp0`r`nSET dp0=%~dp0`r`nEXIT /b`r`n:start`r`nSETLOCAL`r`nCALL :find_dp0`r`nnode `"%dp0%\\node_modules\\carapace\\carapace.mjs`" %*`r`n"',
           "  [System.IO.File]::WriteAllText($target, $old)",
           "  $backup = Start-NpmShimBackup -Path $target -ExpectedLauncher $launcher",
           "  [System.IO.File]::WriteAllText($target, $candidate)",
@@ -439,7 +439,7 @@ try {
           "",
           "$originalTemp = $env:TEMP",
           "$originalTmp = $env:TMP",
-          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-install-temp-test-" + [guid]::NewGuid().ToString("N"))',
+          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-install-temp-test-" + [guid]::NewGuid().ToString("N"))',
           '$longTemp = Join-Path $sandbox "Long Temp"',
           "try {",
           "  New-Item -ItemType Directory -Force -Path $longTemp | Out-Null",
@@ -481,7 +481,7 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-portable-git-test-" + [guid]::NewGuid().ToString("N"))',
+          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-portable-git-test-" + [guid]::NewGuid().ToString("N"))',
           '$portableRoot = Join-Path $sandbox "portable-git"',
           "try {",
           "  New-Item -ItemType Directory -Force -Path $sandbox | Out-Null",
@@ -507,7 +507,7 @@ try {
           "  if (-not $script:usedBasicParsing) { throw 'MinGit download must use basic parsing' }",
           "  if (-not (Test-Path -LiteralPath (Join-Path $portableRoot 'cmd/git.exe'))) { throw 'missing cmd/git.exe' }",
           "  if (-not (Test-Path -LiteralPath (Join-Path $portableRoot 'etc/gitconfig'))) { throw 'missing etc/gitconfig' }",
-          "  if (@(Get-ChildItem -LiteralPath $sandbox -Filter 'openclaw-portable-git-*').Count -ne 0) { throw 'temporary Git files remain' }",
+          "  if (@(Get-ChildItem -LiteralPath $sandbox -Filter 'carapace-portable-git-*').Count -ne 0) { throw 'temporary Git files remain' }",
           "} finally {",
           "  if (Test-Path -LiteralPath $sandbox) { Remove-Item -LiteralPath $sandbox -Recurse -Force }",
           "}",
@@ -744,7 +744,7 @@ try {
           "try {",
           ...entrypointLines.map((line) => `  ${line}`),
           "} catch {",
-          "  if ($_.Exception.Message -ne 'OpenClaw installation failed with exit code 1.') { throw }",
+          "  if ($_.Exception.Message -ne 'Carapace installation failed with exit code 1.') { throw }",
           "  $caught = $true",
           "}",
           "if (-not $caught) { throw 'Install failure did not reach the caller' }",
@@ -763,15 +763,15 @@ try {
           "function Write-Banner { }",
           "function Ensure-ExecutionPolicy { return $true }",
           "function Check-Node { return $true }",
-          "function Check-ExistingOpenClaw { return $false }",
+          "function Check-ExistingCarapace { return $false }",
           "function Get-NpmCommandPath { return $null }",
-          "function Install-OpenClawFromGit {",
+          "function Install-CarapaceFromGit {",
           "  Write-Output 'pnpm stdout before failure'",
           "  return $false",
           "}",
-          "function Ensure-OpenClawOnPath { throw 'should not continue after failed git install' }",
+          "function Ensure-CarapaceOnPath { throw 'should not continue after failed git install' }",
           "$InstallMethod = 'git'",
-          "$GitDir = 'C:\\\\openclaw-test'",
+          "$GitDir = 'C:\\\\carapace-test'",
           "$NoOnboard = $true",
           "$null = Main",
           'if ($script:InstallExitCode -ne 1) { throw "InstallExitCode=$script:InstallExitCode" }',
@@ -786,12 +786,12 @@ try {
           "function Write-Banner { }",
           "function Ensure-ExecutionPolicy { return $true }",
           "function Check-Node { return $true }",
-          "function Check-ExistingOpenClaw { return $false }",
+          "function Check-ExistingCarapace { return $false }",
           "function Add-ToPath { param([string]$Path) }",
-          "function Install-OpenClaw { Write-Output 'npm stdout'; return $true }",
-          "function Ensure-OpenClawOnPath { return $true }",
+          "function Install-Carapace { Write-Output 'npm stdout'; return $true }",
+          "function Ensure-CarapaceOnPath { return $true }",
           "function Refresh-GatewayServiceIfLoaded { }",
-          "function Invoke-OpenClawCommand { return 'OpenClaw test-version' }",
+          "function Invoke-CarapaceCommand { return 'Carapace test-version' }",
           "$NoOnboard = $true",
           "$result = Main",
           "if ($result -is [array]) { throw 'Main returned an array' }",
@@ -807,15 +807,15 @@ try {
           "function Write-Banner { }",
           "function Ensure-ExecutionPolicy { return $true }",
           "function Check-Node { return $true }",
-          "function Check-ExistingOpenClaw { return $false }",
+          "function Check-ExistingCarapace { return $false }",
           "function Add-ToPath { param([string]$Path) }",
-          "function Install-OpenClaw {",
+          "function Install-Carapace {",
           "  Write-Output 'native chatter'",
           "  return $true",
           "}",
-          "function Ensure-OpenClawOnPath { return $true }",
+          "function Ensure-CarapaceOnPath { return $true }",
           "function Refresh-GatewayServiceIfLoaded { }",
-          "function Invoke-OpenClawCommand { return 'OpenClaw test-version' }",
+          "function Invoke-CarapaceCommand { return 'Carapace test-version' }",
           "$NoOnboard = $true",
           ...entrypointLines,
           "",
@@ -826,7 +826,7 @@ try {
         source: [
           scriptWithoutEntryPoint,
           "",
-          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-transactional-clone-" + [guid]::NewGuid().ToString("N"))',
+          '$sandbox = Join-Path ([System.IO.Path]::GetTempPath()) ("carapace-transactional-clone-" + [guid]::NewGuid().ToString("N"))',
           "New-Item -ItemType Directory -Path $sandbox | Out-Null",
           "$script:CloneMode = 'success'",
           "$script:GitFilterSupport = $true",
@@ -858,14 +858,14 @@ try {
           "}",
           "try {",
           "  $successRepo = Join-Path $sandbox 'success'",
-          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/openclaw.git' -RepoDir $successRepo",
+          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/carapace.git' -RepoDir $successRepo",
           "  if (-not (Test-Path -LiteralPath (Join-Path $successRepo 'checkout.marker'))) { throw 'complete checkout was not published' }",
           "  if ($script:LastCloneArgs -notcontains '--filter=blob:none') { throw 'supported Git did not use a filtered clone' }",
           "",
           "  $emptyRepo = Join-Path $sandbox 'empty'",
           "  New-Item -ItemType Directory -Path $emptyRepo | Out-Null",
           "  $script:GitFilterSupport = $false",
-          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/openclaw.git' -RepoDir $emptyRepo",
+          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/carapace.git' -RepoDir $emptyRepo",
           "  if (-not (Test-Path -LiteralPath (Join-Path $emptyRepo 'checkout.marker'))) { throw 'empty destination was not populated' }",
           "  if ($script:LastCloneArgs -contains '--filter=blob:none') { throw 'unsupported Git used a filtered clone' }",
           "",
@@ -877,25 +877,25 @@ try {
           "  $linkType = if ($IsWindows -or $env:OS -eq 'Windows_NT') { 'Junction' } else { 'SymbolicLink' }",
           "  New-Item -ItemType $linkType -Path $script:AliasPath -Target $aliasTarget | Out-Null",
           "  $script:CloneMode = 'retarget-alias'",
-          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/openclaw.git' -RepoDir $script:AliasPath",
+          "  New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/carapace.git' -RepoDir $script:AliasPath",
           "  if (-not (Test-Path -LiteralPath (Join-Path $aliasTarget 'checkout.marker'))) { throw 'original alias target was not populated' }",
           "  if (@(Get-ChildItem -LiteralPath $script:AliasReplacement -Force).Count -ne 0) { throw 'replacement alias target was modified' }",
           "",
           "  $script:CloneMode = 'failure'",
           "  $failedRepo = Join-Path $sandbox 'failure'",
           "  $cloneFailed = $false",
-          "  try { New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/openclaw.git' -RepoDir $failedRepo } catch { $cloneFailed = $true }",
+          "  try { New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/carapace.git' -RepoDir $failedRepo } catch { $cloneFailed = $true }",
           "  if (-not $cloneFailed) { throw 'failed clone was accepted' }",
           "  if (Test-Path -LiteralPath $failedRepo) { throw 'failed clone published its destination' }",
           "",
           "  $script:CloneMode = 'concurrent'",
           "  $script:ConcurrentRepo = Join-Path $sandbox 'concurrent'",
           "  $publicationFailed = $false",
-          "  try { New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/openclaw.git' -RepoDir $script:ConcurrentRepo } catch { $publicationFailed = $true }",
+          "  try { New-TransactionalGitCheckout -RepoUrl 'https://example.invalid/carapace.git' -RepoDir $script:ConcurrentRepo } catch { $publicationFailed = $true }",
           "  if (-not $publicationFailed) { throw 'concurrent destination was replaced' }",
           "  if ((Get-Content -LiteralPath (Join-Path $script:ConcurrentRepo 'user.marker') -Raw).Trim() -ne 'keep') { throw 'concurrent destination changed' }",
           "  if (Test-Path -LiteralPath (Join-Path $script:ConcurrentRepo 'checkout.marker')) { throw 'clone leaked into concurrent destination' }",
-          "  if (@(Get-ChildItem -LiteralPath $sandbox -Filter '.openclaw-clone-*' -Force).Count -ne 0) { throw 'staging directories remain' }",
+          "  if (@(Get-ChildItem -LiteralPath $sandbox -Filter '.carapace-clone-*' -Force).Count -ne 0) { throw 'staging directories remain' }",
           "} finally {",
           "  Remove-Item -LiteralPath $sandbox -Recurse -Force -ErrorAction SilentlyContinue",
           "}",
@@ -910,10 +910,10 @@ try {
           scriptWithoutEntryPoint,
           `$nodeExe = ${toPowerShellSingleQuotedLiteral(process.execPath)}`,
           String.raw`
-$root = Join-Path $script:InstallerTempDirectory ("openclaw pnpm boundary " + [guid]::NewGuid().ToString("N"))
+$root = Join-Path $script:InstallerTempDirectory ("carapace pnpm boundary " + [guid]::NewGuid().ToString("N"))
 $contextNames = @('COREPACK_ENABLE_DOWNLOAD_PROMPT', 'NPM_CONFIG_WORKSPACE_DIR', 'PNPM_CONFIG_LOCKFILE_DIR', 'PNPM_CONFIG_CHILD_CONCURRENCY', 'PNPM_CONFIG_NETWORK_CONCURRENCY', 'PNPM_CONFIG_WORKSPACE_CONCURRENCY', 'PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN', 'PNPM_CONFIG_SIDE_EFFECTS_CACHE', 'NODE_OPTIONS')
 $saved = @{}
-foreach ($name in (@('PATH', 'PATHEXT', 'USERPROFILE', 'OPENCLAW_TEST_BOOTSTRAP_ROOT', 'PNPM_CONFIG_PREFER_OFFLINE') + $contextNames)) {
+foreach ($name in (@('PATH', 'PATHEXT', 'USERPROFILE', 'CARAPACE_TEST_BOOTSTRAP_ROOT', 'PNPM_CONFIG_PREFER_OFFLINE') + $contextNames)) {
     $saved[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
 }
 $previousTemp = $script:InstallerTempDirectory
@@ -926,10 +926,10 @@ function New-TransactionalGitCheckout { throw 'unexpected clone' }
 function Main { throw 'unexpected installer entrypoint' }
 function Run-Doctor { throw 'unexpected doctor' }
 function Refresh-GatewayServiceIfLoaded { throw 'unexpected gateway refresh' }
-function Invoke-OpenClawCommand { throw 'unexpected live CLI' }
+function Invoke-CarapaceCommand { throw 'unexpected live CLI' }
 function Publish-TextFileAtomically {
     param([string]$Path, [string]$Contents)
-    $expectedPath = Join-Path $env:USERPROFILE '.local\bin\openclaw.cmd'
+    $expectedPath = Join-Path $env:USERPROFILE '.local\bin\carapace.cmd'
     # Duplicate separators can name the same Windows wrapper; require the exact normalized path.
     if ([IO.Path]::GetFullPath($Path) -ne [IO.Path]::GetFullPath($expectedPath)) { throw 'publication escaped fixture' }
     $script:Published += 1
@@ -940,7 +940,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const root = process.env.OPENCLAW_TEST_BOOTSTRAP_ROOT;
+const root = process.env.CARAPACE_TEST_BOOTSTRAP_ROOT;
 const spec = JSON.parse(fs.readFileSync(path.join(root, 'case.json'), 'utf8'));
 const target = path.join(root, 'target');
 const log = path.join(root, 'calls.jsonl');
@@ -1056,7 +1056,7 @@ try {
         foreach ($dir in @($bin, $target, $foreign, $script:InstallerTempDirectory)) {
             New-Item -ItemType Directory -Force -Path $dir | Out-Null
         }
-        $env:OPENCLAW_TEST_BOOTSTRAP_ROOT = $caseRoot
+        $env:CARAPACE_TEST_BOOTSTRAP_ROOT = $caseRoot
         $env:USERPROFILE = $caseRoot
         $env:PATH = $bin
         $env:PATHEXT = '.COM;.EXE;.BAT;.CMD'
@@ -1084,7 +1084,7 @@ try {
         $script:Published = 0
         $script:PathPublished = 0
         $outsideRejected = try {
-            Publish-TextFileAtomically -Path (Join-Path $caseRoot '..\openclaw.cmd') -Contents ''
+            Publish-TextFileAtomically -Path (Join-Path $caseRoot '..\carapace.cmd') -Contents ''
             $false
         } catch {
             if ($_.Exception.Message -ne 'publication escaped fixture') { throw }
@@ -1093,7 +1093,7 @@ try {
         if (-not $outsideRejected -or $script:Published -ne 0) { throw 'outside publication was accepted' }
         $caught = $null
         $ownerOutput = @()
-        try { $ownerOutput = @(Install-OpenClawFromGit -RepoDir $target -SkipUpdate) } catch { $caught = $_ }
+        try { $ownerOutput = @(Install-CarapaceFromGit -RepoDir $target -SkipUpdate) } catch { $caught = $_ }
         $success = Test-BooleanSuccessResult -Results $ownerOutput
         if ($scenario.Failure -in @('bootstrap', 'version')) {
             if (-not $caught -or $caught.Exception.Message -notmatch 'Could not (install|provision)') { throw "missing bootstrap failure: $caught" }
@@ -1127,7 +1127,7 @@ try {
         source: [
           scriptWithoutEntryPoint,
           String.raw`
-$root = Join-Path $script:InstallerTempDirectory ("openclaw portable node " + [guid]::NewGuid().ToString("N"))
+$root = Join-Path $script:InstallerTempDirectory ("carapace portable node " + [guid]::NewGuid().ToString("N"))
 $bin = Join-Path $root "bin"
 $archiveRoot = Join-Path $root "archive"
 $nodeRoot = Join-Path $archiveRoot "node-fixture"
@@ -1174,7 +1174,7 @@ try {
         ].join("\n"),
       });
     }
-    const tempDir = harness.createTempDir("openclaw-install-ps1-batch-");
+    const tempDir = harness.createTempDir("carapace-install-ps1-batch-");
     const fixtures = cases.map((testCase, index) => {
       const scriptPath = join(tempDir, `case-${index}.ps1`);
       writeFileSync(scriptPath, testCase.source);
@@ -1256,8 +1256,8 @@ try {
 
     for (const args of cases) {
       const result = runInstallerFile(args, {
-        OPENCLAW_DRY_RUN: "1",
-        OPENCLAW_NO_ONBOARD: "1",
+        CARAPACE_DRY_RUN: "1",
+        CARAPACE_NO_ONBOARD: "1",
       });
       expect(result.status, args.join(" ")).not.toBe(0);
       expect(`${result.stdout}\n${result.stderr}`).not.toContain("[OK] Windows detected");
@@ -1266,8 +1266,8 @@ try {
 
   runIfPowerShell("validates environment options before starting the installer", () => {
     const result = runInstallerFile(["-NoOnboard"], {
-      OPENCLAW_DRY_RUN: "1",
-      OPENCLAW_INSTALL_METHOD: "bogus",
+      CARAPACE_DRY_RUN: "1",
+      CARAPACE_INSTALL_METHOD: "bogus",
     });
 
     expect(result.status).not.toBe(0);
@@ -1321,7 +1321,7 @@ try {
     const completeInstallBody = extractFunctionBody(source, "Complete-Install");
     expect(completeInstallBody).toMatch(/\$PSCommandPath/);
     expect(completeInstallBody).toMatch(/\bexit \$script:InstallExitCode\b/);
-    expect(completeInstallBody).toMatch(/\bthrow "OpenClaw installation failed with exit code/);
+    expect(completeInstallBody).toMatch(/\bthrow "Carapace installation failed with exit code/);
     expect(completeInstallBody).toContain("$script:InstallExitCode -eq 0");
     expect(source).toContain("$null = Main");
     expect(source).toMatch(/\$null = Main\s+Complete-Install\s*$/);
@@ -1445,7 +1445,7 @@ try {
   });
 
   it("runs npm install through the resolved command with quiet CI defaults", () => {
-    const npmInstallBody = extractFunctionBody(source, "Install-OpenClaw");
+    const npmInstallBody = extractFunctionBody(source, "Install-Carapace");
     expect(npmInstallBody).toContain(
       "$npmOutput = Invoke-NpmCommand -CommandPath $npmCommand -WorkingDirectory $npmCwd -Arguments",
     );
@@ -1476,8 +1476,8 @@ try {
 
   it("does not force npm or pnpm lifecycle scripts through cmd.exe", () => {
     const ensurePnpmBody = extractFunctionBody(source, "Ensure-Pnpm");
-    const npmInstallBody = extractFunctionBody(source, "Install-OpenClaw");
-    const gitInstallBody = extractFunctionBody(source, "Install-OpenClawFromGit");
+    const npmInstallBody = extractFunctionBody(source, "Install-Carapace");
+    const gitInstallBody = extractFunctionBody(source, "Install-CarapaceFromGit");
 
     expect(ensurePnpmBody).not.toContain("NPM_CONFIG_SCRIPT_SHELL");
     expect(npmInstallBody).not.toContain("NPM_CONFIG_SCRIPT_SHELL");
@@ -1486,7 +1486,7 @@ try {
 
   it("rejects a git checkout without a commit before updating it", () => {
     const guardBody = extractFunctionBody(source, "Assert-GitCheckoutHasCommit");
-    const gitInstallBody = extractFunctionBody(source, "Install-OpenClawFromGit");
+    const gitInstallBody = extractFunctionBody(source, "Install-CarapaceFromGit");
 
     expect(guardBody).toContain('"--git-dir=$gitDir"');
     expect(guardBody).toContain('"--work-tree=$RepoDir"');
@@ -1504,7 +1504,7 @@ try {
   it("runs Windows command shims from a Windows-local cwd", () => {
     const commandSafeBody = extractFunctionBody(source, "Invoke-CommandFromWindowsSafeDirectory");
     const npmCommandBody = extractFunctionBody(source, "Invoke-NpmCommand");
-    const openClawPathBody = extractFunctionBody(source, "Ensure-OpenClawOnPath");
+    const carapacePathBody = extractFunctionBody(source, "Ensure-CarapaceOnPath");
     const ensurePnpmBody = extractFunctionBody(source, "Ensure-Pnpm");
     const mainBody = extractFunctionBody(source, "Main");
 
@@ -1514,7 +1514,7 @@ try {
     expect(commandSafeBody).toContain("& $CommandPath @Arguments");
     expect(commandSafeBody).toContain("Pop-Location");
     expect(npmCommandBody).toContain("Invoke-CommandFromWindowsSafeDirectory");
-    expect(openClawPathBody).toContain('Invoke-NpmCommand -Arguments @("config", "get", "prefix")');
+    expect(carapacePathBody).toContain('Invoke-NpmCommand -Arguments @("config", "get", "prefix")');
     expect(ensurePnpmBody).toContain(
       '@("enable", "--install-directory", $InstallDirectory, "pnpm")',
     );
@@ -1555,13 +1555,13 @@ try {
     expect(source).not.toContain("Get-InstallerTempDirectory");
   });
 
-  it("rejects OpenClaw GitHub source targets for npm installs", () => {
-    const npmInstallBody = extractFunctionBody(source, "Install-OpenClaw");
-    const sourceTargetBody = extractFunctionBody(source, "Test-OpenClawSourcePackageInstallSpec");
+  it("rejects Carapace GitHub source targets for npm installs", () => {
+    const npmInstallBody = extractFunctionBody(source, "Install-Carapace");
+    const sourceTargetBody = extractFunctionBody(source, "Test-CarapaceSourcePackageInstallSpec");
     expect(sourceTargetBody).toContain('$normalizedTag -eq "main"');
-    expect(sourceTargetBody).toContain("^github:openclaw/openclaw");
-    expect(npmInstallBody).toContain("Test-OpenClawSourcePackageInstallSpec -RequestedTag $Tag");
-    expect(npmInstallBody).toContain("npm installs do not support OpenClaw GitHub source targets");
+    expect(sourceTargetBody).toContain("^github:carapace/carapace");
+    expect(npmInstallBody).toContain("Test-CarapaceSourcePackageInstallSpec -RequestedTag $Tag");
+    expect(npmInstallBody).toContain("npm installs do not support Carapace GitHub source targets");
     expect(npmInstallBody).toContain("-InstallMethod git -Tag main");
   });
 
@@ -1572,7 +1572,7 @@ try {
   });
 
   it("preserves the min-release-age probe status before raw npmrc detection", () => {
-    const npmInstallBody = extractFunctionBody(source, "Install-OpenClaw");
+    const npmInstallBody = extractFunctionBody(source, "Install-Carapace");
     const probeStatusCapture = npmInstallBody.indexOf("$minReleaseAgeStatus = $LASTEXITCODE");
     const rawKeyProbe = npmInstallBody.indexOf("Test-NpmConfigRawKey -Key");
     expect(probeStatusCapture).toBeGreaterThan(-1);
@@ -1590,7 +1590,7 @@ try {
   });
 
   it("preserves caller-relative local tarball install specs before safe-cwd npm calls", () => {
-    const resolveSpecBody = extractFunctionBody(source, "Resolve-NpmOpenClawInstallSpec");
+    const resolveSpecBody = extractFunctionBody(source, "Resolve-NpmCarapaceInstallSpec");
     const localSpecBody = extractFunctionBody(source, "Resolve-LocalNpmPackageInstallSpec");
     const localPathBody = extractFunctionBody(source, "Resolve-LocalNpmPackagePath");
 
@@ -1612,7 +1612,7 @@ try {
     const portableNodeRootBody = extractFunctionBody(source, "Get-PortableNodeRoot");
     const portableNodePathBody = extractFunctionBody(source, "Ensure-PortableNodeOnUserPath");
     const userPathBody = extractFunctionBody(source, "Add-ToUserPath");
-    const depsRootBody = extractFunctionBody(source, "Get-OpenClawDepsRoot");
+    const depsRootBody = extractFunctionBody(source, "Get-CarapaceDepsRoot");
     const resolveNodeBody = extractFunctionBody(source, "Resolve-PortableNodeDownload");
     const expandNodeBody = extractFunctionBody(source, "Expand-PortableNodeArchive");
     const timeoutParametersBody = extractFunctionBody(source, "Get-WebRequestTimeoutParameters");
@@ -1620,7 +1620,7 @@ try {
     expect(installNodeBody).toContain("Install-PortableNode");
     expect(installNodeBody).toContain("Portable Node.js bootstrap failed");
     expect(installNodeBody).toContain("Error: Could not install Node.js automatically.");
-    expect(depsRootBody).toContain("OpenClaw\\deps");
+    expect(depsRootBody).toContain("Carapace\\deps");
     expect(portableNodeRootBody).toContain("portable-node");
     expect(portableNodeBody).toContain("Ensure-PortableNodeOnUserPath");
     expect(portableNodeBody).toContain(
@@ -1667,7 +1667,7 @@ try {
     const usePortableGitBody = extractFunctionBody(source, "Use-PortableGitIfPresent");
     const ensureGitBody = extractFunctionBody(source, "Ensure-Git");
 
-    expect(portableGitRootBody).toContain("Get-OpenClawDepsRoot");
+    expect(portableGitRootBody).toContain("Get-CarapaceDepsRoot");
     expect(portableGitPathEntriesBody).toContain("mingw64\\bin");
     expect(portableGitPathEntriesBody).toContain("usr\\bin");
     expect(portableGitPathEntriesBody).toContain("Split-Path -Parent $gitExe");
@@ -1693,7 +1693,7 @@ try {
     expect(portableGitDownloadBody).toContain("'^MinGit-.*-arm64\\.zip$'");
     expect(portableGitDownloadBody).toContain("'^MinGit-.*-64-bit\\.zip$'");
     expect(portableGitBody).toContain(
-      '$tempName = "openclaw-portable-git-" + [guid]::NewGuid().ToString("N")',
+      '$tempName = "carapace-portable-git-" + [guid]::NewGuid().ToString("N")',
     );
     expect(portableGitBody).toContain(
       'Join-Path $script:InstallerTempDirectory ($tempName + ".zip")',
@@ -1718,7 +1718,7 @@ try {
     const ensurePnpmBody = extractFunctionBody(source, "Ensure-Pnpm");
     const gitFilterSupportBody = extractFunctionBody(source, "Test-GitFilterSupport");
     const transactionalCloneBody = extractFunctionBody(source, "New-TransactionalGitCheckout");
-    const gitInstallBody = extractFunctionBody(source, "Install-OpenClawFromGit");
+    const gitInstallBody = extractFunctionBody(source, "Install-CarapaceFromGit");
     const nodeOptionsBody = extractFunctionBody(source, "Resolve-NodeOptionsWithMinOldSpace");
     const mainBody = extractFunctionBody(source, "Main");
 
@@ -1751,9 +1751,9 @@ try {
     expect(gitInstallBody.indexOf("git -C $RepoDir pull --rebase")).toBeLessThan(
       gitInstallBody.indexOf("Ensure-Pnpm -RepoDir $RepoDir"),
     );
-    expect(mainBody).toContain("$gitInstallResults = @(Install-OpenClawFromGit");
+    expect(mainBody).toContain("$gitInstallResults = @(Install-CarapaceFromGit");
     expect(mainBody).toContain("Test-BooleanSuccessResult -Results $gitInstallResults");
-    expect(mainBody).toContain("$npmInstallResults = @(Install-OpenClaw)");
+    expect(mainBody).toContain("$npmInstallResults = @(Install-Carapace)");
     expect(mainBody).toContain("Test-BooleanSuccessResult -Results $npmInstallResults");
     expect(gitInstallBody).toContain("Push-Location -LiteralPath $RepoDir");
     expect(gitInstallBody).toContain('$sourceInstallArgs = @("install")');
@@ -1805,21 +1805,21 @@ try {
     expect(gitInstallBody).toContain('Write-Host "[!] pnpm build failed for the Git checkout"');
     expect(gitInstallBody).toContain('$entryPath = Join-Path $RepoDir "dist\\\\entry.js"');
     expect(gitInstallBody).toContain("Test-Path $entryPath");
-    expect(gitInstallBody).toContain('Write-Host "[!] OpenClaw build did not produce $entryPath"');
+    expect(gitInstallBody).toContain('Write-Host "[!] Carapace build did not produce $entryPath"');
     expect(gitInstallBody).toContain("node $entryPath --version");
-    expect(gitInstallBody).toContain("Format-OpenClawGitWrapper -EntryPath $entryPath");
+    expect(gitInstallBody).toContain("Format-CarapaceGitWrapper -EntryPath $entryPath");
     expect(gitInstallBody).not.toContain("& $pnpmCommand -C $RepoDir install");
   });
 
   it("cleans legacy git submodules only from the selected git checkout", () => {
-    const gitInstallBody = extractFunctionBody(source, "Install-OpenClawFromGit");
+    const gitInstallBody = extractFunctionBody(source, "Install-CarapaceFromGit");
     const mainBody = extractFunctionBody(source, "Main");
     expect(gitInstallBody).toContain("Remove-LegacySubmodule -RepoDir $RepoDir");
     expect(mainBody).not.toContain("Remove-LegacySubmodule");
   });
 
   it("launches interactive onboarding outside Main's captured output", () => {
-    const interactiveCommandBody = extractFunctionBody(source, "Invoke-InteractiveOpenClawCommand");
+    const interactiveCommandBody = extractFunctionBody(source, "Invoke-InteractiveCarapaceCommand");
     const mainBody = extractFunctionBody(source, "Main");
     expect(interactiveCommandBody).toContain("Start-Process");
     expect(interactiveCommandBody).toContain("-NoNewWindow");
@@ -1828,13 +1828,13 @@ try {
     expect(interactiveCommandBody).toContain("$process.ExitCode -ne 0");
     expect(interactiveCommandBody).toContain("failed with exit code");
     expect(mainBody).toContain('Write-Host "Starting setup..." -ForegroundColor Cyan');
-    expect(mainBody).toContain("Invoke-InteractiveOpenClawCommand onboard");
+    expect(mainBody).toContain("Invoke-InteractiveCarapaceCommand onboard");
   });
 
   runConcurrentIfPowerShell(
     "fails install when interactive onboarding exits non-zero",
     async () => {
-      const tempDir = mkdtempSync(join(tmpdir(), "openclaw-install-ps1-"));
+      const tempDir = mkdtempSync(join(tmpdir(), "carapace-install-ps1-"));
       const scriptPath = join(tempDir, "install.ps1");
       try {
         const scriptWithoutEntryPoint = source.replace(ENTRYPOINT_RE, "");
@@ -1846,17 +1846,17 @@ try {
             "function Write-Banner { }",
             "function Ensure-ExecutionPolicy { return $true }",
             "function Check-Node { return $true }",
-            "function Check-ExistingOpenClaw { return $false }",
+            "function Check-ExistingCarapace { return $false }",
             "function Get-NpmCommandPath { return 'npm.cmd' }",
             "function Invoke-NpmCommand {",
             "  param([string[]]$Arguments = @(), [string]$CommandPath, [string]$WorkingDirectory)",
             "  if ($Arguments[0] -eq 'config' -and $Arguments[2] -eq 'prefix') { Write-Output $env:USERPROFILE; $global:LASTEXITCODE = 0; return }",
             "  throw 'unexpected npm command'",
             "}",
-            "function Install-OpenClaw { return $true }",
-            "function Ensure-OpenClawOnPath { return $true }",
+            "function Install-Carapace { return $true }",
+            "function Ensure-CarapaceOnPath { return $true }",
             "function Add-ToUserPath { param([string]$Path) }",
-            "function Get-OpenClawCommandPath { return 'cmd.exe' }",
+            "function Get-CarapaceCommandPath { return 'cmd.exe' }",
             "function Start-Process {",
             "  param([string]$FilePath, [string[]]$ArgumentList, [switch]$NoNewWindow, [switch]$Wait, [switch]$PassThru)",
             "  [pscustomobject]@{ ExitCode = 17 }",
@@ -1881,7 +1881,7 @@ try {
 
         expect(result.status).toBe(1);
         expect(`${result.stdout}\n${result.stderr}`).toContain(
-          "openclaw onboard failed with exit code 17",
+          "carapace onboard failed with exit code 17",
         );
       } finally {
         rmSync(tempDir, { force: true, recursive: true });
@@ -1890,7 +1890,7 @@ try {
   );
 
   runConcurrentIfPowerShell("exits non-zero when run as a script file", async () => {
-    const tempDir = mkdtempSync(join(tmpdir(), "openclaw-install-ps1-"));
+    const tempDir = mkdtempSync(join(tmpdir(), "carapace-install-ps1-"));
     const scriptPath = join(tempDir, "install.ps1");
     try {
       writeFileSync(scriptPath, createFailingNodeFixture(source));
@@ -1914,7 +1914,7 @@ try {
   runConcurrentIfPowerShell(
     "exits zero after install succeeds with deferred PATH discovery",
     async () => {
-      const tempDir = mkdtempSync(join(tmpdir(), "openclaw-install-ps1-"));
+      const tempDir = mkdtempSync(join(tmpdir(), "carapace-install-ps1-"));
       const scriptPath = join(tempDir, "install.ps1");
       try {
         writeFileSync(scriptPath, createDeferredPathSuccessFixture(source));

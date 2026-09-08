@@ -13,7 +13,7 @@ import {
 } from "./tunnel.test-support.js";
 
 it("materializes a large dirty git workspace as a credential-free commit-capable clone", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-git-sync-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "carapace-worker-git-sync-"));
   const localPath = path.join(root, "local");
   const remoteHome = path.join(root, "remote-home");
   await Promise.all([
@@ -26,7 +26,7 @@ it("materializes a large dirty git workspace as a credential-free commit-capable
   await Promise.all([
     fs.writeFile(
       path.join(localPath, ".gitignore"),
-      "cache/**\nprivate/**\nmedia/inbound/openclaw-staged-*/\n",
+      "cache/**\nprivate/**\nmedia/inbound/carapace-staged-*/\n",
     ),
     fs.writeFile(path.join(localPath, ".worktreeinclude"), "cache/*.txt\n"),
     fs.writeFile(path.join(localPath, "gone.txt"), "delete me\n"),
@@ -215,7 +215,7 @@ it("materializes a large dirty git workspace as a credential-free commit-capable
 
     const manifestPath = path.join(
       remoteHome,
-      ".openclaw-worker/manifests",
+      ".carapace-worker/manifests",
       `${result.manifestRef.slice("sha256:".length)}.json`,
     );
     const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8")) as {

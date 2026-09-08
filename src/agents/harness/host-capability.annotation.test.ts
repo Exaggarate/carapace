@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@carapace/normalization-core";
+import { asOptionalRecord } from "@carapace/normalization-core/record-coerce";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { convertMessages } from "../../../packages/ai/src/openai-completions-messages.js";
 import { resolveOpenAICompletionsCompat } from "../../../packages/ai/src/transports/openai-completions-compat.js";
@@ -24,7 +24,7 @@ import {
   runExclusiveSqliteSessionWrite,
 } from "../../config/sessions/session-accessor.sqlite-scope.js";
 import { markSessionTranscriptIndexDirtyInTransaction } from "../../config/sessions/session-transcript-index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import { createWorkerSessionPlacementStore } from "../../gateway/worker-environments/placement-store.js";
 import { readCodexSessionTranscriptEventsBeforeAdmission } from "../../plugin-sdk/codex-session-transcript-runtime.js";
@@ -39,10 +39,10 @@ import type {
   UserTurnTranscriptAnnotation,
 } from "../../sessions/user-turn-transcript.types.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+  openCarapaceAgentDatabase,
+  runCarapaceAgentWriteTransaction,
+} from "../../state/carapace-agent-db.js";
+import { withCarapaceTestState } from "../../test-utils/carapace-test-state.js";
 import { normalizeMessagesForLlmBoundary } from "../embedded-agent-runner/run/attempt-llm-boundary.js";
 import { convertToLlm } from "../sessions/messages.js";
 import { withGatewayToolCallerIdentity } from "../tools/gateway-caller-context.js";
@@ -81,12 +81,12 @@ async function withAdmission(
       "input" | "message" | "resolveInput" | "beforeMessageWrite"
     >
   > & {
-    config?: OpenClawConfig;
+    config?: CarapaceConfig;
     persist?: boolean;
     suppress?: boolean;
   } = {},
 ) {
-  await withOpenClawTestState({ label: "admission-annotation" }, async (state) => {
+  await withCarapaceTestState({ label: "admission-annotation" }, async (state) => {
     const fixture = await prepareAdmission(
       path.join(state.sessionsDir(), "sessions.json"),
       options,
@@ -117,7 +117,7 @@ async function prepareAdmission(
     lifecycleRevision: "initial",
   });
   const patchSession = (patch: Record<string, unknown>) =>
-    runOpenClawAgentWriteTransaction(
+    runCarapaceAgentWriteTransaction(
       (database) => {
         writeSessionEntry(database, target.sessionKey, {
           ...expectDefined(loadSessionEntry(target), "session"),
@@ -192,7 +192,7 @@ describe("host-owned current admission annotation", () => {
           expect(f.recorder.getPersistedMessage?.()).toMatchObject({
             content: "prompt",
             ...(provenance ? { provenance } : {}),
-            __openclaw: { mirrorIdentity: "native-turn:prompt" },
+            __carapace: { mirrorIdentity: "native-turn:prompt" },
           });
         },
         {
@@ -387,7 +387,7 @@ describe("host-owned current admission annotation", () => {
       const updates = vi.fn();
       const unsubscribe = onInternalSessionTranscriptUpdate(updates);
       try {
-        const { db } = openOpenClawAgentDatabase({ agentId: "main" });
+        const { db } = openCarapaceAgentDatabase({ agentId: "main" });
         const searchRows = () =>
           db
             .prepare("SELECT * FROM session_transcript_fts WHERE session_id = ?")
@@ -507,7 +507,7 @@ describe("host-owned current admission annotation", () => {
         content: "",
         timestamp: 456,
         idempotencyKey: `${f.attempt.runId}:user:late-media`,
-        __openclaw: {
+        __carapace: {
           lateMedia: true,
           media: [{ kind: "image", path: "/tmp/fixture-image.png", contentType: "image/png" }],
         },
@@ -526,7 +526,7 @@ describe("host-owned current admission annotation", () => {
 
   it("preserves existing media and hook metadata without replaying the hook", async () => {
     const hook = vi.fn<NonNullable<CreateUserTurnTranscriptRecorderParams["beforeMessageWrite"]>>(
-      ({ message }) => ({ ...message, __openclaw: { ...message["__openclaw"], hookOwned: true } }),
+      ({ message }) => ({ ...message, __carapace: { ...message["__carapace"], hookOwned: true } }),
     );
     await withAdmission(
       async (f) => {
@@ -536,10 +536,10 @@ describe("host-owned current admission annotation", () => {
         expect(before).toStrictEqual(stored);
         expect(f.recorder.getPersistedMessage?.()).toEqual({
           ...before,
-          __openclaw: { ...before?.["__openclaw"], ...nativeAnnotation(), runId: f.attempt.runId },
+          __carapace: { ...before?.["__carapace"], ...nativeAnnotation(), runId: f.attempt.runId },
         });
         expect(hook).toHaveBeenCalledOnce();
-        expect(f.recorder.getPersistedMessage?.()?.["__openclaw"]?.runTerminal).toBeUndefined();
+        expect(f.recorder.getPersistedMessage?.()?.["__carapace"]?.runTerminal).toBeUndefined();
       },
       {
         input: {
@@ -557,7 +557,7 @@ describe("host-owned current admission annotation", () => {
   it("retains the existing empty-upstream-text fingerprint contract", async () => {
     await withAdmission(async (f) => {
       await f.annotate(nativeAnnotation("prompt", ""));
-      expect(f.recorder.getPersistedMessage?.()?.["__openclaw"]?.upstreamUserText).toBe("");
+      expect(f.recorder.getPersistedMessage?.()?.["__carapace"]?.upstreamUserText).toBe("");
     });
   });
 
@@ -766,7 +766,7 @@ describe("host-owned current admission annotation", () => {
   it("refuses a stale active projection even when the old anchor still matches", async () => {
     await withAdmission(async (f) => {
       const before = await loadTranscriptEvents(f.target);
-      runOpenClawAgentWriteTransaction(
+      runCarapaceAgentWriteTransaction(
         (database) => markSessionTranscriptIndexDirtyInTransaction(database.db, f.target.sessionId),
         { agentId: "main" },
       );

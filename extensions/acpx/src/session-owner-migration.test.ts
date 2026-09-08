@@ -10,9 +10,9 @@ import {
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor-migrations";
-import { useAutoCleanupTempDirTracker } from "openclaw/plugin-sdk/test-env";
+} from "carapace/plugin-sdk/plugin-state-test-runtime";
+import type { PluginDoctorStateMigrationContext } from "carapace/plugin-sdk/runtime-doctor-migrations";
+import { useAutoCleanupTempDirTracker } from "carapace/plugin-sdk/test-env";
 import { afterEach, expect, it } from "vitest";
 import { AcpxRuntime } from "./runtime.js";
 import { acpxSessionOwnerMigration } from "./session-owner-migration.js";
@@ -68,7 +68,7 @@ async function fixture(mode: "persistent" | "oneshot" = "persistent", sessionKey
     {
       agentId: "work",
       sessionKey: "global",
-      binding: { sessionId: "openclaw-session", lifecycleRevision: "revision" },
+      binding: { sessionId: "carapace-session", lifecycleRevision: "revision" },
       meta: {
         backend: "acpx",
         agent: "fixture",
@@ -93,7 +93,7 @@ async function fixture(mode: "persistent" | "oneshot" = "persistent", sessionKey
     openPluginStateKeyedStore: (options) =>
       createPluginStateKeyedStoreForTests("acpx", {
         ...options,
-        env: { ...process.env, OPENCLAW_STATE_DIR: directory },
+        env: { ...process.env, CARAPACE_STATE_DIR: directory },
       }),
     inspectAcpSessionClaims: async () => ({
       claims: structuredClone(claims),
@@ -111,7 +111,7 @@ async function fixture(mode: "persistent" | "oneshot" = "persistent", sessionKey
   };
   const input = {
     config: {},
-    env: { ...process.env, OPENCLAW_STATE_DIR: directory },
+    env: { ...process.env, CARAPACE_STATE_DIR: directory },
     stateDir: directory,
     oauthDir: path.join(directory, "oauth"),
     serviceWorkspaceDir: directory,
@@ -253,7 +253,7 @@ it.each(["runtime", "doctor"])(
     } else {
       const runtime = new AcpxRuntime({
         ...f.runtimeOptions,
-        openclawLegacyBareSessionKeys: new Set([resource]),
+        carapaceLegacyBareSessionKeys: new Set([resource]),
       });
       let adopted: Awaited<ReturnType<AcpxRuntime["ensureSession"]>> | undefined;
       try {

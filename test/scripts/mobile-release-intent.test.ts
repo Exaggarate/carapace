@@ -26,8 +26,8 @@ function iosIntent() {
     buildNumber: "8",
     gatewayVersion: "2026.9.2",
     internalGroupId: "group-123",
-    internalGroupName: "OpenClaw Internal",
-    kind: "openclaw-mobile-release-ref-intent",
+    internalGroupName: "Carapace Internal",
+    kind: "carapace-mobile-release-ref-intent",
     platform: "ios",
     schemaVersion: 2,
     targetRef: "release/2026.9.2-mobile",
@@ -39,7 +39,7 @@ function androidIntent() {
   return signIntent({
     authorityReceiptDigest: RECEIPT_DIGEST,
     gatewayVersion: "2026.9.2",
-    kind: "openclaw-mobile-release-ref-intent",
+    kind: "carapace-mobile-release-ref-intent",
     phoneTrack: "internal",
     phoneVersionCode: "2026090201",
     playEditState: "committed",
@@ -56,7 +56,7 @@ function androidIntent() {
 
 describe("mobile release intent", () => {
   it("round-trips separate gateway and accepted store identities into derived refs", () => {
-    const root = tempRoots.make("openclaw-mobile-release-intent-");
+    const root = tempRoots.make("carapace-mobile-release-intent-");
     const iosPath = path.join(root, "ios.json");
     const androidPath = path.join(root, "android.json");
 
@@ -74,10 +74,10 @@ describe("mobile release intent", () => {
       schemaVersion: 2,
     });
     expect(mobileReleaseRefForIntent(readIos)).toBe(
-      "refs/openclaw/mobile-releases/ios/2026.9.20-8",
+      "refs/carapace/mobile-releases/ios/2026.9.20-8",
     );
     expect(mobileReleaseRefForIntent(readAndroid)).toBe(
-      "refs/openclaw/mobile-releases/android/2026.9.2-2026090201",
+      "refs/carapace/mobile-releases/android/2026.9.2-2026090201",
     );
     expect(readAndroid).toMatchObject({
       phoneTrack: "internal",
@@ -104,7 +104,7 @@ describe("mobile release intent", () => {
       }),
     ).toThrow("target ref");
 
-    const root = tempRoots.make("openclaw-mobile-release-intent-noncanonical-");
+    const root = tempRoots.make("carapace-mobile-release-intent-noncanonical-");
     const file = path.join(root, "intent.json");
     fs.writeFileSync(file, JSON.stringify(iosIntent(), null, 2));
     expect(() => readMobileReleaseIntent(file)).toThrow("canonical closed-schema form");
@@ -151,11 +151,11 @@ describe("mobile release intent", () => {
     expect(() =>
       validateMobileReleaseIntent({
         ...iosIntent(),
-        internalGroupName: "OpenClaw\nInternal",
+        internalGroupName: "Carapace\nInternal",
       }),
     ).toThrow("bounded printable string");
 
-    const root = tempRoots.make("openclaw-mobile-release-intent-large-");
+    const root = tempRoots.make("carapace-mobile-release-intent-large-");
     const file = path.join(root, "intent.json");
     fs.writeFileSync(file, "x".repeat(MOBILE_RELEASE_INTENT_MAX_BYTES + 1));
     expect(() => readMobileReleaseIntent(file)).toThrow("no larger than 4 KiB");

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import {
   normalizeModelCatalog,
   normalizeModelCatalogProviderRows,
-} from "@openclaw/model-catalog-core/model-catalog-normalize";
+} from "@carapace/model-catalog-core/model-catalog-normalize";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -244,7 +244,7 @@ describe("manifest model suppression", () => {
         suppress: true,
         retirement: replacedBy ? { replacedBy } : {},
       });
-      expect(retired?.errorMessage).toContain("openclaw doctor --fix");
+      expect(retired?.errorMessage).toContain("carapace doctor --fix");
       expect(resolver({ provider: "fixture", id: "old-model" })).toBeUndefined();
       expect(
         resolver({ provider: "fixture", id: "old-model", baseUrl: "https://api.example/v1" }),
@@ -285,7 +285,7 @@ describe("manifest model suppression", () => {
   it("keeps the OpenAI API route available while retiring the ChatGPT route", () => {
     const manifest = JSON.parse(
       fs.readFileSync(
-        new URL("../../extensions/openai/openclaw.plugin.json", import.meta.url),
+        new URL("../../extensions/openai/carapace.plugin.json", import.meta.url),
         "utf8",
       ),
     );
@@ -470,7 +470,7 @@ describe("manifest model suppression", () => {
         // Public metadata is fixture data; core's type graph must not compile plugin files.
         const qwenManifest: Record<string, unknown> = JSON.parse(
           fs.readFileSync(
-            new URL("../../extensions/qwen/openclaw.plugin.json", import.meta.url),
+            new URL("../../extensions/qwen/carapace.plugin.json", import.meta.url),
             "utf8",
           ),
         );

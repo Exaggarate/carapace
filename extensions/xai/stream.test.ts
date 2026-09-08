@@ -1,5 +1,5 @@
 // Xai tests cover stream plugin behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "carapace/plugin-sdk/agent-core";
 import {
   streamSimple,
   type Api,
@@ -7,8 +7,8 @@ import {
   type Context,
   type Model,
   type ModelThinkingLevel,
-} from "openclaw/plugin-sdk/llm";
-import { createZeroUsageFixture } from "openclaw/plugin-sdk/test-fixtures";
+} from "carapace/plugin-sdk/llm";
+import { createZeroUsageFixture } from "carapace/plugin-sdk/test-fixtures";
 import { describe, expect, it } from "vitest";
 import { XAI_BASE_URL } from "./model-definitions.js";
 import { applyXaiRuntimeModelCompat } from "./runtime-model-compat.js";

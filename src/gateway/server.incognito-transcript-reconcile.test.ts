@@ -6,30 +6,30 @@ import {
   isSessionTranscriptIndexReconcileRunning,
   waitForSessionTranscriptIndexReconcile,
 } from "../config/sessions/session-transcript-reconcile.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../state/carapace-agent-db-readonly.js";
 import {
-  getOpenClawAgentDatabaseIfOpen,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+  getCarapaceAgentDatabaseIfOpen,
+  resolveIncognitoCarapaceAgentSqlitePath,
+} from "../state/carapace-agent-db.js";
+import { createCarapaceTestState } from "../test-utils/carapace-test-state.js";
 import { cleanupSessionStateForTest } from "../test-utils/session-state-cleanup.js";
 import { disconnectGatewayClient, startGatewayWithClient } from "./test-helpers.e2e.js";
 
 it("serves the reconciled incognito branch through authenticated Gateway history", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createCarapaceTestState({
     label: "incognito-reconcile-gateway",
     env: {
-      OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
-      OPENCLAW_SKIP_CHANNELS: "1",
-      OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-      OPENCLAW_SKIP_CRON: "1",
-      OPENCLAW_SKIP_CANVAS_HOST: "1",
-      OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-      OPENCLAW_SKIP_PROVIDERS: "1",
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_GATEWAY_PASSWORD: undefined,
+      CARAPACE_TEST_MINIMAL_GATEWAY: undefined,
+      CARAPACE_SKIP_CHANNELS: "1",
+      CARAPACE_SKIP_GMAIL_WATCHER: "1",
+      CARAPACE_SKIP_CRON: "1",
+      CARAPACE_SKIP_CANVAS_HOST: "1",
+      CARAPACE_SKIP_BROWSER_CONTROL_SERVER: "1",
+      CARAPACE_SKIP_PROVIDERS: "1",
+      CARAPACE_DISABLE_BUNDLED_PLUGINS: "1",
+      CARAPACE_GATEWAY_TOKEN: undefined,
+      CARAPACE_GATEWAY_PASSWORD: undefined,
     },
   });
   let gateway: Awaited<ReturnType<typeof startGatewayWithClient>> | undefined;
@@ -46,7 +46,7 @@ it("serves the reconciled incognito branch through authenticated Gateway history
         plugins: { slots: { memory: "none" } },
         tools: { profile: "minimal" },
         gateway: { auth: { mode: "token", token: "incognito-reconcile-test" } },
-      } satisfies OpenClawConfig;
+      } satisfies CarapaceConfig;
       gateway = await startGatewayWithClient({
         cfg,
         configPath: state.configPath,
@@ -64,9 +64,9 @@ it("serves the reconciled incognito branch through authenticated Gateway history
       expect(created.runStarted).toBe(false);
       const options = {
         agentId: "main",
-        path: resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" }),
+        path: resolveIncognitoCarapaceAgentSqlitePath({ agentId: "main" }),
       };
-      const database = getOpenClawAgentDatabaseIfOpen(options)!;
+      const database = getCarapaceAgentDatabaseIfOpen(options)!;
       const projection = () =>
         database.db
           .prepare("SELECT needs_rebuild FROM session_transcript_index_state WHERE session_id = ?")
@@ -112,7 +112,7 @@ it("serves the reconciled incognito branch through authenticated Gateway history
         { role: "assistant", content: "active" },
       ]);
       expect(fs.existsSync(options.path)).toBe(false);
-      const durable = withOpenClawAgentDatabaseReadOnly(
+      const durable = withCarapaceAgentDatabaseReadOnly(
         ({ db }) => ({
           events: db
             .prepare("SELECT count(*) AS count FROM transcript_events WHERE session_id = ?")

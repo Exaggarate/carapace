@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import { testing as approvalsTesting } from "../infra/exec-approvals-store.test-support.js";
 import { saveExecApprovals } from "../infra/exec-approvals.js";
 import { requestExecHostViaSocket, type ExecHostRequest } from "../infra/exec-host.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { withTestDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { handleSystemRunInvoke } from "./invoke-system-run.js";
@@ -18,9 +18,9 @@ describe.runIf(process.platform !== "win32")("enforced exec host transport bound
   it("does not replay locally when a completed execution loses its socket response", async () => {
     await withTestDir({ prefix: "oc-run-", parentDir: "/tmp" }, async (dir) => {
       await withEnvAsync(
-        { OPENCLAW_HOME: dir, OPENCLAW_STATE_DIR: path.join(dir, "state") },
+        { CARAPACE_HOME: dir, CARAPACE_STATE_DIR: path.join(dir, "state") },
         async () => {
-          closeOpenClawStateDatabaseForTest();
+          closeCarapaceStateDatabaseForTest();
           approvalsTesting.reset();
           const socketPath = path.join(dir, "host.sock");
           const token = "enforced-exec-host-test-token";
@@ -155,7 +155,7 @@ describe.runIf(process.platform !== "win32")("enforced exec host transport bound
               server.close((error) => (error ? reject(error) : resolve()));
             });
             approvalsTesting.reset();
-            closeOpenClawStateDatabaseForTest();
+            closeCarapaceStateDatabaseForTest();
           }
         },
       );

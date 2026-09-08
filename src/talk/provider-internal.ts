@@ -5,7 +5,7 @@
  * public Plugin SDK. External providers continue to implement only the stable
  * RealtimeVoiceProviderPlugin contract.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type {
   RealtimeVoicePublicClientHints,
   RealtimeVoicePublicProjection,
@@ -19,7 +19,7 @@ import type {
   RealtimeVoiceProviderConfig,
 } from "./provider-types.js";
 
-const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("openclaw.internal.realtime-voice-provider.v1");
+const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("carapace.internal.realtime-voice-provider.v1");
 
 export type InternalRealtimeVoiceProviderCapabilities = RealtimeVoiceProviderCapabilities & {
   /** Dynamic voice choices for the effective route without exposing its model identifier. */
@@ -47,12 +47,12 @@ export type InternalRealtimeVoiceBrowserSessionCreateRequest =
 
 type InternalRealtimeVoiceProviderApi = {
   isBrowserSessionConfigured: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerConfig: RealtimeVoiceProviderConfig;
     agentId?: string;
   }) => boolean;
   resolveBrowserSessionCapabilities?: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerConfig: RealtimeVoiceProviderConfig;
     agentId?: string;
     /** Effective per-session model after request overrides. */
@@ -60,12 +60,12 @@ type InternalRealtimeVoiceProviderApi = {
     clientControl?: RealtimeVoiceBrowserSessionCreateRequest["clientControl"];
   }) => InternalRealtimeVoiceProviderCapabilities;
   isGatewayRelayConfigured?: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerConfig: RealtimeVoiceProviderConfig;
     agentId?: string;
   }) => boolean | undefined;
   resolveGatewayRelayCapabilities?: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerConfig: RealtimeVoiceProviderConfig;
     model?: string;
   }) => InternalRealtimeVoiceProviderCapabilities;
@@ -74,7 +74,7 @@ type InternalRealtimeVoiceProviderApi = {
     config: RealtimeVoiceProviderConfig;
   }) => RealtimeVoicePublicProjection;
   validateGatewayRelayLaunch?: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: CarapaceConfig;
     providerConfig: RealtimeVoiceProviderConfig;
     model?: string;
     autoRespondToAudio?: boolean;
@@ -100,7 +100,7 @@ function readInternalRealtimeVoiceProviderApi(
 
 export function isInternalRealtimeVoiceBrowserSessionConfigured(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   agentId?: string;
 }): boolean | undefined {
@@ -113,7 +113,7 @@ export function isInternalRealtimeVoiceBrowserSessionConfigured(params: {
 
 export function resolveInternalRealtimeVoiceBrowserSessionCapabilities(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   agentId?: string;
   model?: string;
@@ -132,7 +132,7 @@ export function resolveInternalRealtimeVoiceBrowserSessionCapabilities(params: {
 
 export function isInternalRealtimeVoiceGatewayRelayConfigured(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   agentId?: string;
 }): boolean | undefined {
@@ -145,7 +145,7 @@ export function isInternalRealtimeVoiceGatewayRelayConfigured(params: {
 
 export function resolveInternalRealtimeVoiceGatewayRelayCapabilities(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   model?: string;
 }): InternalRealtimeVoiceProviderCapabilities | undefined {
@@ -195,7 +195,7 @@ export function projectInternalRealtimeVoicePublicProjection<
 
 export function resolveInternalRealtimeVoiceGatewayRelayLaunchError(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: CarapaceConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   model?: string;
   autoRespondToAudio?: boolean;

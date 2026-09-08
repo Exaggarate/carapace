@@ -1,7 +1,7 @@
-name: OpenClaw
+name: Carapace
 options:
   preGenCommand: node ../../scripts/prepare-apple-mermaid.mjs
-  bundleIdPrefix: ai.openclawfoundation
+  bundleIdPrefix: ai.carapacefoundation
   deploymentTarget:
     iOS: "18.0"
   xcodeVersion: "26.0"
@@ -12,8 +12,8 @@ settings:
     ENABLE_APP_INTENTS_METADATA_GENERATION: NO
 
 packages:
-  OpenClawKit:
-    path: ../shared/OpenClawKit
+  CarapaceKit:
+    path: ../shared/CarapaceKit
   Swabble:
     path: ../swabble
   WebRTC:
@@ -21,42 +21,42 @@ packages:
     exactVersion: 152.0.0
 
 schemes:
-  OpenClaw:
+  Carapace:
     shared: true
     build:
       targets:
-        OpenClaw: all
+        Carapace: all
     test:
       targets:
-        - OpenClawTests
-        - OpenClawLogicTests
-  OpenClawLogicTests:
+        - CarapaceTests
+        - CarapaceLogicTests
+  CarapaceLogicTests:
     shared: true
     build:
       targets:
-        OpenClawLogicTests: all
+        CarapaceLogicTests: all
     test:
       targets:
-        - OpenClawLogicTests
-  OpenClawUITests:
+        - CarapaceLogicTests
+  CarapaceUITests:
     shared: true
     build:
       targets:
-        OpenClawUITests: all
+        CarapaceUITests: all
     test:
       targets:
-        - OpenClawUITests
-  OpenClawWatchApp:
+        - CarapaceUITests
+  CarapaceWatchApp:
     shared: true
     build:
       targets:
-        OpenClawWatchApp: all
+        CarapaceWatchApp: all
     test:
       targets:
-        - OpenClawWatchTests
+        - CarapaceWatchTests
 
 targets:
-  OpenClaw:
+  Carapace:
     type: application
     platform: iOS
     configFiles:
@@ -72,18 +72,18 @@ targets:
       - path: Resources/Localizable.xcstrings
         buildPhase: resources
     dependencies:
-      - target: OpenClawShareExtension
+      - target: CarapaceShareExtension
         embed: true
-      - target: OpenClawActivityWidget
+      - target: CarapaceActivityWidget
         embed: true
       # A companion watch application belongs in the standard Watch bundle location.
       # PlugIns is for extension products and breaks paired watch installation.
-      - target: OpenClawWatchApp
-      - package: OpenClawKit
-      - package: OpenClawKit
-        product: OpenClawChatUI
-      - package: OpenClawKit
-        product: OpenClawProtocol
+      - target: CarapaceWatchApp
+      - package: CarapaceKit
+      - package: CarapaceKit
+        product: CarapaceChatUI
+      - package: CarapaceKit
+        product: CarapaceProtocol
       - package: Swabble
         product: SwabbleKit
       - package: WebRTC
@@ -99,7 +99,7 @@ targets:
           export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
           "$SRCROOT/../../scripts/check-swift-tools.sh" swiftformat
           swiftformat --lint --config "$SRCROOT/../../config/swiftformat" \
-            --unexclude "$SRCROOT/Sources,$SRCROOT/ShareExtension,$SRCROOT/ActivityWidget,$SRCROOT/WatchApp,$SRCROOT/../shared/OpenClawKit/Sources/OpenClawChatUI,$SRCROOT/../shared/OpenClawKit/Sources/OpenClawKit,$SRCROOT/../shared/OpenClawKit/Sources/OpenClawNativeState,$SRCROOT/../shared/OpenClawKit/Sources/OpenClawProtocol,$SRCROOT/../swabble/Sources/SwabbleKit" \
+            --unexclude "$SRCROOT/Sources,$SRCROOT/ShareExtension,$SRCROOT/ActivityWidget,$SRCROOT/WatchApp,$SRCROOT/../shared/CarapaceKit/Sources/CarapaceChatUI,$SRCROOT/../shared/CarapaceKit/Sources/CarapaceKit,$SRCROOT/../shared/CarapaceKit/Sources/CarapaceNativeState,$SRCROOT/../shared/CarapaceKit/Sources/CarapaceProtocol,$SRCROOT/../swabble/Sources/SwabbleKit" \
             --filelist "$SRCROOT/SwiftSources.input.xcfilelist"
       - name: SwiftLint
         basedOnDependencyAnalysis: false
@@ -113,14 +113,14 @@ targets:
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_ENTITLEMENTS: "$(OPENCLAW_CODE_SIGN_ENTITLEMENTS)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        OPENCLAW_ACTIVE_APP_GROUP_ID: "$(OPENCLAW_APP_GROUP_ID)"
-        OPENCLAW_URL_SCHEME: openclaw
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_APP_BUNDLE_ID)"
-        PROVISIONING_PROFILE_SPECIFIER: "$(OPENCLAW_APP_PROFILE)"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_ENTITLEMENTS: "$(CARAPACE_CODE_SIGN_ENTITLEMENTS)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        CARAPACE_ACTIVE_APP_GROUP_ID: "$(CARAPACE_APP_GROUP_ID)"
+        CARAPACE_URL_SCHEME: carapace
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_APP_BUNDLE_ID)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(CARAPACE_APP_PROFILE)"
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
@@ -131,34 +131,34 @@ targets:
         Debug:
           ASSETCATALOG_COMPILER_APPICON_NAME: AppIconDebug
           CODE_SIGN_STYLE: Automatic
-          OPENCLAW_ACTIVE_APP_GROUP_ID: "$(OPENCLAW_DEBUG_APP_GROUP_ID)"
-          OPENCLAW_CODE_SIGN_ENTITLEMENTS: Sources/OpenClaw.entitlements
-          OPENCLAW_APNS_ENTITLEMENT_ENVIRONMENT: development
-          OPENCLAW_URL_SCHEME: openclaw-debug
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_APP_BUNDLE_ID)"
+          CARAPACE_ACTIVE_APP_GROUP_ID: "$(CARAPACE_DEBUG_APP_GROUP_ID)"
+          CARAPACE_CODE_SIGN_ENTITLEMENTS: Sources/Carapace.entitlements
+          CARAPACE_APNS_ENTITLEMENT_ENVIRONMENT: development
+          CARAPACE_URL_SCHEME: carapace-debug
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_APP_BUNDLE_ID)"
           PROVISIONING_PROFILE_SPECIFIER: ""
-          OPENCLAW_PUSH_MODE: localSandbox
-          OPENCLAW_PUSH_RELAY_BASE_URL: ""
+          CARAPACE_PUSH_MODE: localSandbox
+          CARAPACE_PUSH_RELAY_BASE_URL: ""
         Release:
-          OPENCLAW_CODE_SIGN_ENTITLEMENTS: Sources/OpenClaw.entitlements
-          OPENCLAW_APNS_ENTITLEMENT_ENVIRONMENT: production
-          OPENCLAW_PUSH_MODE: localProduction
-          OPENCLAW_PUSH_RELAY_BASE_URL: ""
+          CARAPACE_CODE_SIGN_ENTITLEMENTS: Sources/Carapace.entitlements
+          CARAPACE_APNS_ENTITLEMENT_ENVIRONMENT: production
+          CARAPACE_PUSH_MODE: localProduction
+          CARAPACE_PUSH_RELAY_BASE_URL: ""
     info:
       path: Sources/Info.plist
       properties:
-        CFBundleDisplayName: OpenClaw
+        CFBundleDisplayName: Carapace
         CFBundleIconName: "$(ASSETCATALOG_COMPILER_APPICON_NAME)"
         CFBundleURLTypes:
-          - CFBundleURLName: ai.openclawfoundation.app
+          - CFBundleURLName: ai.carapacefoundation.app
             CFBundleURLSchemes:
-              - "$(OPENCLAW_URL_SCHEME)"
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        OpenClawCanonicalVersion: "$(OPENCLAW_IOS_VERSION)"
-        OpenClawGitCommit: "$(OPENCLAW_GIT_COMMIT)"
-        OpenClawBuildTimestamp: "$(OPENCLAW_BUILD_TIMESTAMP)"
-        OpenClawAppGroupIdentifier: "$(OPENCLAW_ACTIVE_APP_GROUP_ID)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+              - "$(CARAPACE_URL_SCHEME)"
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CarapaceCanonicalVersion: "$(CARAPACE_IOS_VERSION)"
+        CarapaceGitCommit: "$(CARAPACE_GIT_COMMIT)"
+        CarapaceBuildTimestamp: "$(CARAPACE_BUILD_TIMESTAMP)"
+        CarapaceAppGroupIdentifier: "$(CARAPACE_ACTIVE_APP_GROUP_ID)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -169,27 +169,27 @@ targets:
           - remote-notification
         BGTaskSchedulerPermittedIdentifiers:
           - "$(PRODUCT_BUNDLE_IDENTIFIER).bgrefresh"
-        NSLocalNetworkUsageDescription: OpenClaw discovers and connects to your OpenClaw gateway on the local network.
+        NSLocalNetworkUsageDescription: Carapace discovers and connects to your Carapace gateway on the local network.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoadsInWebContent: true
           NSAllowsLocalNetworking: true
         NSBonjourServices:
-          - _openclaw-gw._tcp
-        NSCameraUsageDescription: OpenClaw uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.
-        NSCalendarsUsageDescription: OpenClaw uses your calendars to show events and scheduling context when you enable calendar access.
-        NSCalendarsFullAccessUsageDescription: OpenClaw uses your calendars to show events and scheduling context when you enable calendar access.
-        NSCalendarsWriteOnlyAccessUsageDescription: OpenClaw uses your calendars to add events when you enable calendar access.
-        NSContactsUsageDescription: OpenClaw uses your contacts so you can search and reference people while using the assistant.
-        NSLocationWhenInUseUsageDescription: OpenClaw uses your location when you allow location sharing.
-        NSLocationAlwaysAndWhenInUseUsageDescription: OpenClaw can share your location in the background when you enable Always.
-        NSMicrophoneUsageDescription: OpenClaw uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.
-        NSMotionUsageDescription: OpenClaw may use motion data to support device-aware interactions and automations.
-        NSHealthShareUsageDescription: OpenClaw reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.
-        NSHealthUpdateUsageDescription: OpenClaw does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.
-        NSPhotoLibraryUsageDescription: OpenClaw lets your assistant read photos you allow and lets you choose photos to share.
+          - _carapace-gw._tcp
+        NSCameraUsageDescription: Carapace uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.
+        NSCalendarsUsageDescription: Carapace uses your calendars to show events and scheduling context when you enable calendar access.
+        NSCalendarsFullAccessUsageDescription: Carapace uses your calendars to show events and scheduling context when you enable calendar access.
+        NSCalendarsWriteOnlyAccessUsageDescription: Carapace uses your calendars to add events when you enable calendar access.
+        NSContactsUsageDescription: Carapace uses your contacts so you can search and reference people while using the assistant.
+        NSLocationWhenInUseUsageDescription: Carapace uses your location when you allow location sharing.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Carapace can share your location in the background when you enable Always.
+        NSMicrophoneUsageDescription: Carapace uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.
+        NSMotionUsageDescription: Carapace may use motion data to support device-aware interactions and automations.
+        NSHealthShareUsageDescription: Carapace reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.
+        NSHealthUpdateUsageDescription: Carapace does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.
+        NSPhotoLibraryUsageDescription: Carapace lets your assistant read photos you allow and lets you choose photos to share.
         PHPhotoLibraryPreventAutomaticLimitedAccessAlert: true
-        NSRemindersFullAccessUsageDescription: OpenClaw uses your reminders to list, add, and complete tasks when you enable reminders access.
-        NSSpeechRecognitionUsageDescription: OpenClaw uses on-device speech recognition for talk mode and voice wake.
+        NSRemindersFullAccessUsageDescription: Carapace uses your reminders to list, add, and complete tasks when you enable reminders access.
+        NSSpeechRecognitionUsageDescription: Carapace uses on-device speech recognition for talk mode and voice wake.
         NSSupportsLiveActivities: true
         ITSAppUsesNonExemptEncryption: false
         UIAppFonts:
@@ -199,14 +199,14 @@ targets:
           - JetBrainsMono-Regular.ttf
           - JetBrainsMono-Medium.ttf
           - JetBrainsMono-SemiBold.ttf
-        OpenClawPushMode: "$(OPENCLAW_PUSH_MODE)"
-        OpenClawPushRelayBaseURL: "$(OPENCLAW_PUSH_RELAY_BASE_URL)"
+        CarapacePushMode: "$(CARAPACE_PUSH_MODE)"
+        CarapacePushRelayBaseURL: "$(CARAPACE_PUSH_RELAY_BASE_URL)"
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-  OpenClawShareExtension:
+  CarapaceShareExtension:
     type: app-extension
     platform: iOS
     configFiles:
@@ -217,35 +217,35 @@ targets:
       - path: Resources/Localizable.xcstrings
         buildPhase: resources
     dependencies:
-      - package: OpenClawKit
+      - package: CarapaceKit
       - sdk: AppIntents.framework
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_ENTITLEMENTS: ShareExtension/OpenClawShareExtension.entitlements
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/CarapaceShareExtension.entitlements
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
         ENABLE_APPINTENTS_METADATA: NO
         ENABLE_APP_INTENTS_METADATA_GENERATION: NO
-        OPENCLAW_ACTIVE_APP_GROUP_ID: "$(OPENCLAW_APP_GROUP_ID)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_SHARE_BUNDLE_ID)"
-        PROVISIONING_PROFILE_SPECIFIER: "$(OPENCLAW_SHARE_PROFILE)"
+        CARAPACE_ACTIVE_APP_GROUP_ID: "$(CARAPACE_APP_GROUP_ID)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_SHARE_BUNDLE_ID)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(CARAPACE_SHARE_PROFILE)"
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
       configs:
         Debug:
           CODE_SIGN_STYLE: Automatic
-          OPENCLAW_ACTIVE_APP_GROUP_ID: "$(OPENCLAW_DEBUG_APP_GROUP_ID)"
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_SHARE_BUNDLE_ID)"
+          CARAPACE_ACTIVE_APP_GROUP_ID: "$(CARAPACE_DEBUG_APP_GROUP_ID)"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_SHARE_BUNDLE_ID)"
           PROVISIONING_PROFILE_SPECIFIER: ""
     info:
       path: ShareExtension/Info.plist
       properties:
-        CFBundleDisplayName: OpenClaw Share
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        OpenClawAppGroupIdentifier: "$(OPENCLAW_ACTIVE_APP_GROUP_ID)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleDisplayName: Carapace Share
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CarapaceAppGroupIdentifier: "$(CARAPACE_ACTIVE_APP_GROUP_ID)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShareViewController"
@@ -256,7 +256,7 @@ targets:
               NSExtensionActivationSupportsImageWithMaxCount: 10
               NSExtensionActivationSupportsMovieWithMaxCount: 1
 
-  OpenClawActivityWidget:
+  CarapaceActivityWidget:
     type: app-extension
     platform: iOS
     configFiles:
@@ -264,9 +264,9 @@ targets:
       Release: Signing.xcconfig
     sources:
       - path: ActivityWidget
-      - path: Sources/LiveActivity/OpenClawActivityAttributes.swift
+      - path: Sources/LiveActivity/CarapaceActivityAttributes.swift
       # Shared continuous avatar waveform; dependency-free for widget isolation.
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/TalkWaveformView.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/TalkWaveformView.swift
         group: Shared
       - path: Sources/Fonts
         buildPhase: resources
@@ -277,11 +277,11 @@ targets:
       - sdk: ActivityKit.framework
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_ACTIVITY_WIDGET_BUNDLE_ID)"
-        PROVISIONING_PROFILE_SPECIFIER: "$(OPENCLAW_ACTIVITY_WIDGET_PROFILE)"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_ACTIVITY_WIDGET_BUNDLE_ID)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(CARAPACE_ACTIVITY_WIDGET_PROFILE)"
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
@@ -289,14 +289,14 @@ targets:
       configs:
         Debug:
           CODE_SIGN_STYLE: Automatic
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_ACTIVITY_WIDGET_BUNDLE_ID)"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_ACTIVITY_WIDGET_BUNDLE_ID)"
           PROVISIONING_PROFILE_SPECIFIER: ""
     info:
       path: ActivityWidget/Info.plist
       properties:
-        CFBundleDisplayName: OpenClaw Activity
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleDisplayName: Carapace Activity
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
         NSSupportsLiveActivities: true
         UIAppFonts:
           - RedHatDisplay[wght].ttf
@@ -308,7 +308,7 @@ targets:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
 
-  OpenClawWatchApp:
+  CarapaceWatchApp:
     type: application
     platform: watchOS
     deploymentTarget: "11.0"
@@ -327,24 +327,24 @@ targets:
       - path: Resources/Licenses/str0m.txt
         buildPhase: resources
       # Universal talk waveform, compiled directly to keep the watch styling local.
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/TalkWaveformView.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/TalkWaveformView.swift
         group: Shared
       # Universal mascot, compiled directly to keep the watch styling local.
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotView.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotView.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotAnimator.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotAnimator.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotCanvas+Accessories.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotCanvas+Accessories.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/ChatTypography.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/ChatTypography.swift
         group: Shared
       - path: Sources/Fonts
         buildPhase: resources
       - path: Resources/Localizable.xcstrings
         buildPhase: resources
     dependencies:
-      - package: OpenClawKit
-        product: OpenClawKit
+      - package: CarapaceKit
+        product: CarapaceKit
       - sdk: AppIntents.framework
       - sdk: AVFAudio.framework
       - sdk: Network.framework
@@ -357,49 +357,49 @@ targets:
         script: |
           set -euo pipefail
           export PATH="$PATH:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin"
-          "$SRCROOT/../shared/OpenClawWatchRTC/build.sh" \
+          "$SRCROOT/../shared/CarapaceWatchRTC/build.sh" \
             "$PLATFORM_NAME" "$DERIVED_FILE_DIR/WatchRTC" $ARCHS
     configFiles:
       Debug: Config/Signing.xcconfig
       Release: Config/Signing.xcconfig
     attributes:
-      DevelopmentTeam: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-      ProvisioningStyle: "$(OPENCLAW_CODE_SIGN_STYLE)"
+      DevelopmentTeam: "$(CARAPACE_DEVELOPMENT_TEAM)"
+      ProvisioningStyle: "$(CARAPACE_CODE_SIGN_STYLE)"
     settings:
       base:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
         ENABLE_APPINTENTS_METADATA: NO
         ENABLE_APP_INTENTS_METADATA_GENERATION: NO
-        OPENCLAW_COMPANION_APP_BUNDLE_ID: "$(OPENCLAW_APP_BUNDLE_ID)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_WATCH_APP_BUNDLE_ID)"
-        PROVISIONING_PROFILE_SPECIFIER: "$(OPENCLAW_WATCH_APP_PROFILE)"
+        CARAPACE_COMPANION_APP_BUNDLE_ID: "$(CARAPACE_APP_BUNDLE_ID)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_WATCH_APP_BUNDLE_ID)"
+        PROVISIONING_PROFILE_SPECIFIER: "$(CARAPACE_WATCH_APP_PROFILE)"
         SWIFT_STRICT_CONCURRENCY: complete
         SWIFT_VERSION: "6.0"
-        SWIFT_INCLUDE_PATHS: "$(inherited) $(SRCROOT)/../shared/OpenClawWatchRTC/include"
-        HEADER_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../shared/OpenClawWatchRTC/include"
+        SWIFT_INCLUDE_PATHS: "$(inherited) $(SRCROOT)/../shared/CarapaceWatchRTC/include"
+        HEADER_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../shared/CarapaceWatchRTC/include"
         LIBRARY_SEARCH_PATHS: "$(inherited) $(DERIVED_FILE_DIR)/WatchRTC"
-        OTHER_LDFLAGS: "$(inherited) -lopenclaw_watch_rtc"
+        OTHER_LDFLAGS: "$(inherited) -lcarapace_watch_rtc"
       configs:
         Debug:
           ASSETCATALOG_COMPILER_APPICON_NAME: AppIconDebug
           CODE_SIGN_STYLE: Automatic
-          OPENCLAW_COMPANION_APP_BUNDLE_ID: "$(OPENCLAW_DEBUG_APP_BUNDLE_ID)"
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_WATCH_APP_BUNDLE_ID)"
+          CARAPACE_COMPANION_APP_BUNDLE_ID: "$(CARAPACE_DEBUG_APP_BUNDLE_ID)"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_WATCH_APP_BUNDLE_ID)"
           PROVISIONING_PROFILE_SPECIFIER: ""
     info:
       path: WatchApp/Info.plist
       properties:
-        CFBundleDisplayName: OpenClaw
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
-        WKCompanionAppBundleIdentifier: "$(OPENCLAW_COMPANION_APP_BUNDLE_ID)"
+        CFBundleDisplayName: Carapace
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
+        WKCompanionAppBundleIdentifier: "$(CARAPACE_COMPANION_APP_BUNDLE_ID)"
         WKApplication: true
         WKPrefersNetworkUponForeground: true
-        NSLocalNetworkUsageDescription: OpenClaw connects this Apple Watch directly to your Gateway on trusted local networks.
-        NSMicrophoneUsageDescription: OpenClaw uses the microphone for voice conversations you start on Apple Watch.
+        NSLocalNetworkUsageDescription: Carapace connects this Apple Watch directly to your Gateway on trusted local networks.
+        NSMicrophoneUsageDescription: Carapace uses the microphone for voice conversations you start on Apple Watch.
         UIBackgroundModes:
           - audio
         UIAppFonts:
@@ -410,7 +410,7 @@ targets:
           - JetBrainsMono-Medium.ttf
           - JetBrainsMono-SemiBold.ttf
 
-  OpenClawTests:
+  CarapaceTests:
     type: bundle.unit-test
     platform: iOS
     configFiles:
@@ -420,45 +420,45 @@ targets:
       - path: Tests
         excludes:
           - Logic
-      - path: ../macos/Tests/OpenClawIPCTests/GatewayWebSocketTestSupport.swift
+      - path: ../macos/Tests/CarapaceIPCTests/GatewayWebSocketTestSupport.swift
         group: Tests
-      - path: ../shared/OpenClawKit/Tests/OpenClawKitTests/NativeGatewayWebSocketFixture.swift
+      - path: ../shared/CarapaceKit/Tests/CarapaceKitTests/NativeGatewayWebSocketFixture.swift
         group: Tests
-      - path: ../shared/OpenClawKit/Tests/OpenClawKitTests/ChatMermaidRenderModelTests.swift
+      - path: ../shared/CarapaceKit/Tests/CarapaceKitTests/ChatMermaidRenderModelTests.swift
         group: Tests
-      - path: ../shared/OpenClawKit/Tests/OpenClawKitTests/ChatSelectableTextViewTests.swift
+      - path: ../shared/CarapaceKit/Tests/CarapaceKitTests/ChatSelectableTextViewTests.swift
         group: Tests
-      - path: ../shared/OpenClawKit/Tests/OpenClawKitTests/ChatPasteboardTests.swift
+      - path: ../shared/CarapaceKit/Tests/CarapaceKitTests/ChatPasteboardTests.swift
         group: Tests
       - path: WatchApp/Sources/WatchDeferredPayloadOrdering.swift
         group: WatchApp/Sources
     dependencies:
-      - target: OpenClaw
+      - target: Carapace
       - package: Swabble
         product: SwabbleKit
       - sdk: AppIntents.framework
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_APP_BUNDLE_ID).tests"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_APP_BUNDLE_ID).tests"
         ENABLE_APP_INTENTS_METADATA_GENERATION: NO
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/OpenClaw.app/OpenClaw"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Carapace.app/Carapace"
         BUNDLE_LOADER: "$(TEST_HOST)"
       configs:
         Debug:
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_APP_BUNDLE_ID).tests"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_APP_BUNDLE_ID).tests"
     info:
       path: Tests/Info.plist
       properties:
         CFBundleDisplayName: "$(PRODUCT_NAME)"
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
 
-  OpenClawLogicTests:
+  CarapaceLogicTests:
     type: bundle.unit-test
     platform: iOS
     configFiles:
@@ -480,39 +480,39 @@ targets:
         group: WatchApp/Sources
       - path: WatchApp/Sources/WatchMascot.swift
         group: WatchApp/Sources
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotView.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotView.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotAnimator.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotAnimator.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/OpenClawMascotCanvas+Accessories.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/CarapaceMascotCanvas+Accessories.swift
         group: Shared
-      - path: ../shared/OpenClawKit/Sources/OpenClawChatUI/ChatTypography.swift
+      - path: ../shared/CarapaceKit/Sources/CarapaceChatUI/ChatTypography.swift
         group: Shared
       - path: Sources/Services/ExactOpaqueIdentifier.swift
         group: Sources/Services
     dependencies:
-      - package: OpenClawKit
+      - package: CarapaceKit
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_APP_BUNDLE_ID).logic-tests"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_APP_BUNDLE_ID).logic-tests"
         ENABLE_APP_INTENTS_METADATA_GENERATION: NO
         SWIFT_EMIT_CONST_VALUE_PROTOCOLS: ""
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
       configs:
         Debug:
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_APP_BUNDLE_ID).logic-tests"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_APP_BUNDLE_ID).logic-tests"
     info:
       path: Tests/Info.plist
       properties:
         CFBundleDisplayName: "$(PRODUCT_NAME)"
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
 
-  OpenClawUITests:
+  CarapaceUITests:
     type: bundle.ui-testing
     platform: iOS
     configFiles:
@@ -521,30 +521,30 @@ targets:
     sources:
       - path: UITests
     dependencies:
-      - target: OpenClaw
+      - target: Carapace
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_APP_BUNDLE_ID).ui-tests"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_APP_BUNDLE_ID).ui-tests"
         SDKROOT: iphoneos
         SUPPORTED_PLATFORMS: "iphonesimulator iphoneos"
         SUPPORTS_MACCATALYST: NO
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
-        TEST_TARGET_NAME: OpenClaw
+        TEST_TARGET_NAME: Carapace
         SWIFT_VERSION: "5.0"
       configs:
         Debug:
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_APP_BUNDLE_ID).ui-tests"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_APP_BUNDLE_ID).ui-tests"
     info:
       path: UITests/Info.plist
       properties:
-        CFBundleDisplayName: OpenClawUITests
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleDisplayName: CarapaceUITests
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"
 
-  OpenClawWatchTests:
+  CarapaceWatchTests:
     type: bundle.unit-test
     platform: watchOS
     deploymentTarget: "11.0"
@@ -554,27 +554,27 @@ targets:
     sources:
       - path: WatchTests
     dependencies:
-      - target: OpenClawWatchApp
+      - target: CarapaceWatchApp
     settings:
       base:
-        CODE_SIGN_IDENTITY: "$(OPENCLAW_CODE_SIGN_IDENTITY)"
-        CODE_SIGN_STYLE: "$(OPENCLAW_CODE_SIGN_STYLE)"
-        DEVELOPMENT_TEAM: "$(OPENCLAW_DEVELOPMENT_TEAM)"
-        PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_WATCH_APP_BUNDLE_ID).tests"
+        CODE_SIGN_IDENTITY: "$(CARAPACE_CODE_SIGN_IDENTITY)"
+        CODE_SIGN_STYLE: "$(CARAPACE_CODE_SIGN_STYLE)"
+        DEVELOPMENT_TEAM: "$(CARAPACE_DEVELOPMENT_TEAM)"
+        PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_WATCH_APP_BUNDLE_ID).tests"
         ENABLE_APP_INTENTS_METADATA_GENERATION: NO
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/OpenClawWatchApp.app/OpenClawWatchApp"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/CarapaceWatchApp.app/CarapaceWatchApp"
         BUNDLE_LOADER: "$(TEST_HOST)"
-        SWIFT_INCLUDE_PATHS: "$(inherited) $(SRCROOT)/../shared/OpenClawWatchRTC/include"
-        HEADER_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../shared/OpenClawWatchRTC/include"
+        SWIFT_INCLUDE_PATHS: "$(inherited) $(SRCROOT)/../shared/CarapaceWatchRTC/include"
+        HEADER_SEARCH_PATHS: "$(inherited) $(SRCROOT)/../shared/CarapaceWatchRTC/include"
       configs:
         Debug:
           CODE_SIGN_STYLE: Automatic
-          PRODUCT_BUNDLE_IDENTIFIER: "$(OPENCLAW_DEBUG_WATCH_APP_BUNDLE_ID).tests"
+          PRODUCT_BUNDLE_IDENTIFIER: "$(CARAPACE_DEBUG_WATCH_APP_BUNDLE_ID).tests"
     info:
       path: Tests/Info.plist
       properties:
         CFBundleDisplayName: "$(PRODUCT_NAME)"
-        CFBundleShortVersionString: "$(OPENCLAW_MARKETING_VERSION)"
-        CFBundleVersion: "$(OPENCLAW_BUILD_VERSION)"
+        CFBundleShortVersionString: "$(CARAPACE_MARKETING_VERSION)"
+        CFBundleVersion: "$(CARAPACE_BUILD_VERSION)"

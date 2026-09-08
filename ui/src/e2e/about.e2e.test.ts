@@ -23,8 +23,8 @@ suite.define(() => {
         configurable: true,
         value: {
           writeText: async (text: string) => {
-            (globalThis as typeof globalThis & { __openclawCopiedCommit?: string })[
-              "__openclawCopiedCommit"
+            (globalThis as typeof globalThis & { __carapaceCopiedCommit?: string })[
+              "__carapaceCopiedCommit"
             ] = text;
           },
         },
@@ -75,7 +75,7 @@ suite.define(() => {
         .toContain("separate from this Control UI build");
 
       const hero = page.locator(".about-hero");
-      await expect.poll(() => hero.locator(".about-hero__name").textContent()).toBe("OpenClaw");
+      await expect.poll(() => hero.locator(".about-hero__name").textContent()).toBe("Carapace");
       await expect
         .poll(() => hero.locator(".about-hero__version").textContent())
         .toBe("v2026.7.10");
@@ -83,19 +83,19 @@ suite.define(() => {
       const githubLink = hero.getByRole("link", { name: "GitHub", exact: true });
       await expect
         .poll(() => githubLink.getAttribute("href"))
-        .toBe("https://github.com/openclaw/openclaw");
+        .toBe("https://github.com/Exaggarate/carapace");
       await expect.poll(() => githubLink.getAttribute("target")).toBe("_blank");
       await expect.poll(() => githubLink.getAttribute("rel")).toContain("noopener");
       const discordLink = hero.getByRole("link", { name: "Discord", exact: true });
       await expect.poll(() => discordLink.getAttribute("href")).toBe("https://discord.gg/clawd");
       const xLink = hero.getByRole("link", { name: "X (Twitter)", exact: true });
-      await expect.poll(() => xLink.getAttribute("href")).toBe("https://x.com/openclaw");
+      await expect.poll(() => xLink.getAttribute("href")).toBe("https://x.com/carapace");
 
       const clawd = page.getByRole("button", { name: "Wave hello to Clawd" });
       // CLAWD_WAVE_MS clears the class after 1400ms, so click and read it in one browser step.
       const clawdWaving = await clawd.evaluate(async (element) => {
         const button = element as HTMLButtonElement;
-        const owner = element.closest("openclaw-about-page") as
+        const owner = element.closest("carapace-about-page") as
           | (HTMLElement & {
               updateComplete: Promise<unknown>;
             })
@@ -117,7 +117,7 @@ suite.define(() => {
       // initial copying render and the async clipboard continuation before reading it.
       const copiedLabel = await copyButton.evaluate(async (element) => {
         const button = element as HTMLButtonElement;
-        const owner = element.closest("openclaw-about-page") as
+        const owner = element.closest("carapace-about-page") as
           | (HTMLElement & {
               updateComplete: Promise<unknown>;
             })
@@ -152,8 +152,8 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(
             () =>
-              (globalThis as typeof globalThis & { __openclawCopiedCommit?: string })[
-                "__openclawCopiedCommit"
+              (globalThis as typeof globalThis & { __carapaceCopiedCommit?: string })[
+                "__carapaceCopiedCommit"
               ],
           ),
         )

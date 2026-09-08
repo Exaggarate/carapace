@@ -5,7 +5,7 @@ import type {
   ChannelDirectoryEntry,
   ChannelOutboundAdapter,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { CarapaceConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import {
   forumMessagingForTest,
@@ -191,7 +191,7 @@ beforeEach(() => {
           config: {
             listAccountIds: () => [],
             resolveAccount: () => ({}),
-            resolveAllowFrom: ({ cfg }: { cfg: OpenClawConfig }) =>
+            resolveAllowFrom: ({ cfg }: { cfg: CarapaceConfig }) =>
               (cfg.channels?.alpha as { allowFrom?: string[] } | undefined)?.allowFrom,
           },
         },
@@ -205,15 +205,15 @@ afterEach(() => {
   resetPluginRuntimeStateForTest();
 });
 
-function makeCfg(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+function makeCfg(overrides?: Partial<CarapaceConfig>): CarapaceConfig {
   return {
     bindings: [],
     channels: {},
     ...overrides,
-  } as OpenClawConfig;
+  } as CarapaceConfig;
 }
 
-function makeForumBoundCfg(accountId = "account-b"): OpenClawConfig {
+function makeForumBoundCfg(accountId = "account-b"): CarapaceConfig {
   return makeCfg({
     bindings: [
       {
@@ -294,7 +294,7 @@ function setLastSessionEntry(params: {
 }
 
 async function resolveForAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   target?: { channel?: "last" | "forum" | "alpha"; to?: string };
 }) {
   const channel = params.target ? params.target.channel : DEFAULT_TARGET.channel;
@@ -305,7 +305,7 @@ async function resolveForAgent(params: {
   });
 }
 
-async function resolveLastTarget(cfg: OpenClawConfig) {
+async function resolveLastTarget(cfg: CarapaceConfig) {
   return resolveForAgent({
     cfg,
     target: { channel: "last", to: undefined },

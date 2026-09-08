@@ -3,13 +3,13 @@ import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { resolveModelRefFromString } from "openclaw/plugin-sdk/agent-runtime";
-import { formatErrorMessage as formatQaErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { formatMemoryDreamingDay } from "openclaw/plugin-sdk/memory-core-host-status";
-import { resolveSessionTranscriptsDirForAgent } from "openclaw/plugin-sdk/memory-host-core";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-store-runtime";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveModelRefFromString } from "carapace/plugin-sdk/agent-runtime";
+import { formatErrorMessage as formatQaErrorMessage } from "carapace/plugin-sdk/error-runtime";
+import { formatMemoryDreamingDay } from "carapace/plugin-sdk/memory-core-host-status";
+import { resolveSessionTranscriptsDirForAgent } from "carapace/plugin-sdk/memory-host-core";
+import { createPluginStateSyncKeyedStore } from "carapace/plugin-sdk/plugin-state-store-runtime";
+import { buildAgentSessionKey } from "carapace/plugin-sdk/routing";
+import { normalizeLowercaseStringOrEmpty } from "carapace/plugin-sdk/string-coerce-runtime";
 import * as browserRuntime from "./browser-runtime.js";
 import * as cronRunWait from "./cron-run-wait.js";
 import * as discoveryEval from "./discovery-eval.js";
@@ -58,7 +58,7 @@ function setActiveMemorySessionDisabled(
     maxEntries: 10_000,
     env: {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
+      CARAPACE_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
     },
   });
   const key = activeMemoryToggleKey(sessionKey);
@@ -104,7 +104,7 @@ export async function runQaSuiteScenarioSteps(
   let rttMeasurement: QaSuiteScenarioResult["rttMeasurement"];
   for (const step of steps) {
     try {
-      if (process.env.OPENCLAW_QA_DEBUG === "1") {
+      if (process.env.CARAPACE_QA_DEBUG === "1") {
         console.error(`[qa-suite] start scenario="${name}" step="${step.name}"`);
       }
       const outcome = await step.run();
@@ -120,7 +120,7 @@ export async function runQaSuiteScenarioSteps(
         timing ??= {};
         timing.rttMs = rttMeasurement.finalMatchedReplyRttMs;
       }
-      if (process.env.OPENCLAW_QA_DEBUG === "1") {
+      if (process.env.CARAPACE_QA_DEBUG === "1") {
         console.error(`[qa-suite] pass scenario="${name}" step="${step.name}"`);
       }
       stepResults.push({
@@ -141,7 +141,7 @@ export async function runQaSuiteScenarioSteps(
           ...(rttMeasurement ? { rttMeasurement } : {}),
         };
       }
-      if (process.env.OPENCLAW_QA_DEBUG === "1") {
+      if (process.env.CARAPACE_QA_DEBUG === "1") {
         console.error(`[qa-suite] fail scenario="${name}" step="${step.name}" details=${details}`);
       }
       stepResults.push({ name: step.name, status: "fail", details });

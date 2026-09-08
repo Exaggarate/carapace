@@ -1,7 +1,7 @@
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
-import type { PluginCommandContext, PluginCommandResult } from "openclaw/plugin-sdk/plugin-entry";
-import { parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveAgentDir } from "carapace/plugin-sdk/agent-runtime";
+import type { PluginCommandContext, PluginCommandResult } from "carapace/plugin-sdk/plugin-entry";
+import { parseAgentSessionKey } from "carapace/plugin-sdk/routing";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveCodexAppServerAuthProfileIdForAgent } from "./app-server/auth-profile.js";
 import { resolveCodexBindingAppServerConnection } from "./app-server/binding-connection.js";
 import { isJsonObject } from "./app-server/protocol.js";
@@ -91,7 +91,7 @@ async function requestCodexDiagnosticsFeedbackApproval(
   if (targets.length === 0) {
     return {
       text: [
-        "No Codex thread is attached to this OpenClaw session yet.",
+        "No Codex thread is attached to this Carapace session yet.",
         "Use /codex threads to find a thread, then /codex resume <thread-id> before sending diagnostics.",
       ].join("\n"),
     };
@@ -168,7 +168,7 @@ async function previewCodexDiagnosticsFeedbackApproval(
   const targets = await resolveCodexDiagnosticsTargets(deps, ctx);
   if (targets.length === 0) {
     return [
-      "No Codex thread is attached to this OpenClaw session yet.",
+      "No Codex thread is attached to this Carapace session yet.",
       "Use /codex threads to find a thread, then /codex resume <thread-id> before sending diagnostics.",
     ].join("\n");
   }
@@ -183,7 +183,7 @@ async function previewCodexDiagnosticsFeedbackApproval(
   return [
     targets.length === 1 ? "Codex runtime thread detected." : "Codex runtime threads detected.",
     `Approving diagnostics will also send ${targets.length === 1 ? "this thread's feedback bundle" : "these threads' feedback bundles"} to OpenAI servers.`,
-    "The completed diagnostics reply will list the OpenClaw session ids and Codex thread ids that were sent.",
+    "The completed diagnostics reply will list the Carapace session ids and Codex thread ids that were sent.",
     ...(displayReason ? [`Note: ${displayReason}`] : []),
     "Included: Codex logs and spawned Codex subthreads when available.",
   ].join("\n");
@@ -270,7 +270,7 @@ async function sendCodexDiagnosticsFeedbackForContext(
   const targets = await resolveCodexDiagnosticsTargets(deps, ctx);
   if (targets.length === 0) {
     return [
-      "No Codex thread is attached to this OpenClaw session yet.",
+      "No Codex thread is attached to this Carapace session yet.",
       "Use /codex threads to find a thread, then /codex resume <thread-id> before sending diagnostics.",
     ].join("\n");
   }
@@ -287,7 +287,7 @@ async function sendCodexDiagnosticsFeedbackForTargets(
 ): Promise<string> {
   if (targets.length === 0) {
     return [
-      "No Codex thread is attached to this OpenClaw session yet.",
+      "No Codex thread is attached to this Carapace session yet.",
       "Use /codex threads to find a thread, then /codex resume <thread-id> before sending diagnostics.",
     ].join("\n");
   }

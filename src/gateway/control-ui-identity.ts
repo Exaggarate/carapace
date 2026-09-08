@@ -1,12 +1,12 @@
 import { resolveGatewayPublicOrigin } from "../config/gateway-public-origin.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { ResolvedGatewayAuth } from "./auth-resolve.js";
 import { normalizeControlUiBasePath } from "./control-ui-shared.js";
 import { getTailscalePublishedOrigin } from "./tailscale-published-origin.js";
 
 /** Advertise browser identity at the ingress that actually authenticates people. */
 export function resolveControlUiIdentity(
-  cfg: OpenClawConfig,
+  cfg: CarapaceConfig,
   auth: ResolvedGatewayAuth,
 ): { url: string; signal?: AbortSignal } | undefined {
   if (cfg.gateway?.controlUi?.enabled === false) {

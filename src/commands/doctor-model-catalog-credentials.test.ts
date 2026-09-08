@@ -19,10 +19,10 @@ import {
   PLUGIN_MODEL_CATALOG_GENERATED_BY,
   replacePersistedPluginModelCatalogs,
 } from "../agents/plugin-model-catalog.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeCarapaceAgentDatabasesForTest } from "../state/carapace-agent-db.js";
+import { closeCarapaceStateDatabaseForTest } from "../state/carapace-state-db.js";
 import { maybeMigrateModelCatalogCredentials } from "./doctor-model-catalog-credentials.js";
 import { createDoctorPrompter, type DoctorPrompter } from "./doctor-prompter.js";
 
@@ -32,14 +32,14 @@ vi.mock("../../packages/terminal-core/src/note.js", () => ({ note }));
 const tempDirs: string[] = [];
 
 function createState(): { agentDir: string; env: NodeJS.ProcessEnv; stateDir: string } {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-catalog-credentials-"));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "carapace-doctor-catalog-credentials-"));
   tempDirs.push(stateDir);
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   fs.mkdirSync(agentDir, { recursive: true });
   return {
     agentDir,
     stateDir,
-    env: { ...process.env, HOME: stateDir, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, HOME: stateDir, CARAPACE_STATE_DIR: stateDir },
   };
 }
 
@@ -62,7 +62,7 @@ function provider(apiKey: string) {
   };
 }
 
-function migrationParams(state: ReturnType<typeof createState>, cfg: OpenClawConfig) {
+function migrationParams(state: ReturnType<typeof createState>, cfg: CarapaceConfig) {
   return {
     cfg,
     env: state.env,
@@ -72,8 +72,8 @@ function migrationParams(state: ReturnType<typeof createState>, cfg: OpenClawCon
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeCarapaceAgentDatabasesForTest();
+  closeCarapaceStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -83,7 +83,7 @@ describe("doctor model catalog credential migration", () => {
   it("copies config, root, and plugin catalog keys before runtime retires plaintext", async () => {
     const state = createState();
     const { agentDir } = state;
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: { providers: { configured: provider("configured-secret") } },
     };
     const rootContents = `{
@@ -132,7 +132,7 @@ describe("doctor model catalog credential migration", () => {
 
   it("preserves custom provider env references and removes profiles containing their markers", async () => {
     const state = createState();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: { providers: { custom: provider("${CUSTOM_PROVIDER_KEY}") } },
     };
     fs.writeFileSync(
@@ -178,7 +178,7 @@ describe("doctor model catalog credential migration", () => {
       const state = createState();
       const agentDir = path.join(state.stateDir, "agents", agentId, "agent");
       fs.mkdirSync(agentDir, { recursive: true });
-      const cfg: OpenClawConfig = {
+      const cfg: CarapaceConfig = {
         agents: {
           ownership: "explicit",
           defaults: { systemAgent: { agentId: "main" } },
@@ -230,7 +230,7 @@ describe("doctor model catalog credential migration", () => {
 
   it("does not copy a stale generated credential over an explicit provider SecretRef", async () => {
     const state = createState();
-    const cfg: OpenClawConfig = {
+    const cfg: CarapaceConfig = {
       models: { providers: { custom: provider("${CUSTOM_PROVIDER_KEY}") } },
     };
     fs.writeFileSync(
@@ -334,7 +334,7 @@ describe("doctor model catalog credential migration", () => {
           third: { agentDir: thirdAgentDir },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies CarapaceConfig;
 
     await expect(maybeMigrateModelCatalogCredentials(migrationParams(state, cfg))).resolves.toEqual(
       { detected: 1, migrated: 1, removed: 0, warnings: [] },

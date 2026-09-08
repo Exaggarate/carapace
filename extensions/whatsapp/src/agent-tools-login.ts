@@ -2,10 +2,10 @@
 import {
   optionalPositiveIntegerSchema,
   readPositiveIntegerParam,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelAgentTool } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawPluginApi, OpenClawPluginToolContext } from "openclaw/plugin-sdk/core";
-import { hasNonEmptyString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/channel-actions";
+import type { ChannelAgentTool } from "carapace/plugin-sdk/channel-contract";
+import type { CarapacePluginApi, CarapacePluginToolContext } from "carapace/plugin-sdk/core";
+import { hasNonEmptyString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import { startWebLoginWithQr, waitForWebLogin } from "../login-qr-api.js";
 
@@ -16,7 +16,7 @@ function readLoginStringPreservingWhitespace(value: unknown): string | undefined
 }
 
 export function createWhatsAppLoginTool(
-  context: OpenClawPluginToolContext,
+  context: CarapacePluginToolContext,
 ): ChannelAgentTool | null {
   if (context.senderIsOwner !== true) {
     return null;
@@ -124,6 +124,6 @@ export function createWhatsAppLoginTool(
   };
 }
 
-export function registerWhatsAppLoginTool(api: OpenClawPluginApi): void {
+export function registerWhatsAppLoginTool(api: CarapacePluginApi): void {
   api.registerTool((context) => createWhatsAppLoginTool(context), { name: "whatsapp_login" });
 }

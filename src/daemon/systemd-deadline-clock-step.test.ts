@@ -65,15 +65,15 @@ describe.skipIf(process.platform === "win32")("systemd budgets across a wall-clo
     assertNoSystemOwnership.mockReset().mockResolvedValue(undefined);
     reloadUserManager.mockReset().mockResolvedValue(undefined);
     busctl.mockReset();
-    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-clock-step-")));
+    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "carapace-clock-step-")));
     env = {
       HOME: path.join(root, "home"),
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-owned",
+      CARAPACE_STATE_DIR: path.join(root, "state"),
+      CARAPACE_SYSTEMD_UNIT: "carapace-owned",
     };
-    unitPath = path.join(env.HOME!, ".config/systemd/user/openclaw-owned.service");
+    unitPath = path.join(env.HOME!, ".config/systemd/user/carapace-owned.service");
     await fs.mkdir(path.dirname(unitPath), { recursive: true });
-    await fs.mkdir(env.OPENCLAW_STATE_DIR!);
+    await fs.mkdir(env.CARAPACE_STATE_DIR!);
   });
 
   afterEach(async () => {
@@ -86,7 +86,7 @@ describe.skipIf(process.platform === "win32")("systemd budgets across a wall-clo
     async (stepMs) => {
       busctl.mockImplementation(async (serviceEnv) => {
         offset = stepMs;
-        return unitNotFound(serviceEnv.OPENCLAW_SYSTEMD_UNIT ?? "openclaw-owned");
+        return unitNotFound(serviceEnv.CARAPACE_SYSTEMD_UNIT ?? "carapace-owned");
       });
 
       await withSystemdDefinitionMutation(env, env, async () => undefined, {
@@ -105,15 +105,15 @@ describe.skipIf(process.platform === "win32")("systemd budgets across a wall-clo
     "effective-manager queries for a loaded unit keep their budget through a %s ms step",
     async (stepMs) => {
       const snapshot = {
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
-        fragmentPath: "/etc/systemd/user/openclaw-owned.service",
+        programArguments: ["/usr/bin/carapace", "gateway", "run"],
+        fragmentPath: "/etc/systemd/user/carapace-owned.service",
       };
       busctl.mockImplementation(async (_serviceEnv, args) => {
         offset = stepMs;
         const stdout = args.includes("LoadUnit")
           ? JSON.stringify({
               type: "o",
-              data: ["/org/freedesktop/systemd1/unit/openclaw_2downed_2eservice"],
+              data: ["/org/freedesktop/systemd1/unit/carapace_2downed_2eservice"],
             })
           : args.includes("org.freedesktop.systemd1.Unit")
             ? buildSystemdUnitPropertyOutput(snapshot)
@@ -140,20 +140,20 @@ describe.skipIf(process.platform === "win32")("systemd budgets across a wall-clo
         unitPath,
         [
           "[Unit]",
-          "Description=OpenClaw Gateway (v2026.7.1-2)",
+          "Description=Carapace Gateway (v2026.7.1-2)",
           "",
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          "Environment=OPENCLAW_SERVICE_MARKER=openclaw",
-          "Environment=OPENCLAW_SERVICE_KIND=gateway",
-          'Environment=OPENCLAW_SERVICE_VERSION=2026.7.1-2 "OTHER_SETTING=kept value"',
-          "Environment=OPENCLAW_GATEWAY_PORT=18789",
+          "ExecStart=/usr/bin/carapace gateway run",
+          "Environment=CARAPACE_SERVICE_MARKER=carapace",
+          "Environment=CARAPACE_SERVICE_KIND=gateway",
+          'Environment=CARAPACE_SERVICE_VERSION=2026.7.1-2 "OTHER_SETTING=kept value"',
+          "Environment=CARAPACE_GATEWAY_PORT=18789",
           "",
         ].join("\n"),
         "utf8",
       );
       busctl.mockImplementation(async (serviceEnv) =>
-        unitNotFound(serviceEnv.OPENCLAW_SYSTEMD_UNIT ?? "openclaw-owned"),
+        unitNotFound(serviceEnv.CARAPACE_SYSTEMD_UNIT ?? "carapace-owned"),
       );
       assertNoSystemOwnership.mockImplementation(async () => {
         offset = stepMs;

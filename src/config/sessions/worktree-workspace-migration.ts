@@ -5,8 +5,8 @@ import { listRegistryWorktreesForMigration } from "../../agents/worktrees/regist
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { resolveProjectRegistry } from "../../projects/project-registry.js";
 import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
+import type { CarapaceConfig } from "../types.carapace.js";
 import { patchSessionEntryCore } from "./session-accessor.js";
 import { parseReadableSqliteSessionEntryRow } from "./session-accessor.sqlite-entry-store.js";
 import {
@@ -23,7 +23,7 @@ function isInside(root: string, target: string): boolean {
 
 function resolveLegacyCanonicalWorkspace(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   entry: SessionEntry;
   env: NodeJS.ProcessEnv;
   sessionKey: string;
@@ -64,7 +64,7 @@ function listLegacyWorktreeSessionEntries(params: {
   storePath: string;
 }): Array<{ databasePath: string; entry: SessionEntry; sessionKey: string }> {
   const resolved = resolveSqliteScope({ ...params, sessionKey: "" });
-  const result = withOpenClawAgentDatabaseReadOnly((database) => {
+  const result = withCarapaceAgentDatabaseReadOnly((database) => {
     const db = getSessionKysely(database.db);
     const rows = executeSqliteQuerySync(
       database.db,
@@ -94,7 +94,7 @@ function listLegacyWorktreeSessionEntries(params: {
 
 export async function migrateManagedWorktreeCanonicalWorkspaces(params: {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   env?: NodeJS.ProcessEnv;
   storePath: string;
 }): Promise<number> {

@@ -13,11 +13,11 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.CARAPACE_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 const NOW = Date.now();
-const recordVisuals = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+const recordVisuals = process.env.CARAPACE_UI_E2E_RECORD === "1";
 let utilityHelpArtifactDir: string;
 beforeEach(() => {
   if (recordVisuals) {
@@ -104,11 +104,11 @@ describeControlUiE2e("Control UI Models help mocked Gateway E2E", () => {
         expect(await utilityLabel.evaluate((node) => getComputedStyle(node).columnGap)).toBe("8px");
         await expect
           .poll(() => modelPickerValue(utilityField.locator("wa-select")))
-          .toBe("__openclaw_automatic_utility__");
+          .toBe("__carapace_automatic_utility__");
         await expect
           .poll(() =>
             utilityField
-              .locator('wa-option[value="__openclaw_automatic_utility__"]')
+              .locator('wa-option[value="__carapace_automatic_utility__"]')
               .textContent()
               .then((value) => value?.trim()),
           )

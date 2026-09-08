@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import {
   isAgentHarnessSessionKey,
@@ -8,12 +8,12 @@ import {
 } from "../../sessions/agent-harness-session-key.js";
 import { emitSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
 import { deletePersonalGitHubSessionReceipts } from "../../state/github-personal-publication-lifecycle.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../../state/openclaw-agent-db-readonly.js";
+import { withCarapaceAgentDatabaseReadOnly } from "../../state/carapace-agent-db-readonly.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferCarapaceAgentPostCommitPublication,
+  openCarapaceAgentDatabase,
+  type CarapaceAgentDatabase,
+} from "../../state/carapace-agent-db.js";
 import type { ResetSessionEntryLifecycleMutation } from "./session-accessor.lifecycle-types.js";
 import { publishSessionStateArchives } from "./session-accessor.sqlite-archive-store.js";
 import { materializeSessionStateDeletePlans } from "./session-accessor.sqlite-archive.js";
@@ -29,7 +29,7 @@ import type {
 } from "./session-accessor.sqlite-contract.js";
 import {
   hasPreparedNativeSessionDeletion,
-  runSqliteSessionDeletionTransaction as runOpenClawAgentWriteTransaction,
+  runSqliteSessionDeletionTransaction as runCarapaceAgentWriteTransaction,
   withSqliteSessionDeletions,
 } from "./session-accessor.sqlite-deletion.js";
 import {
@@ -80,7 +80,7 @@ import type { InternalSessionEntry as SessionEntry } from "./types.js";
 async function withCommittedHistoryMaintenance<T>(
   { agentId, storePath }: { agentId?: string; storePath: string },
   run: (
-    recordCommit: (database: OpenClawAgentDatabase) => void,
+    recordCommit: (database: CarapaceAgentDatabase) => void,
     markCommitted: () => void,
   ) => Promise<T>,
   options: { scheduleNext?: boolean } = {},
@@ -89,7 +89,7 @@ async function withCommittedHistoryMaintenance<T>(
   try {
     return await run(
       (database) => {
-        deferOpenClawAgentPostCommitPublication(database, () => {
+        deferCarapaceAgentPostCommitPublication(database, () => {
           committed = true;
         });
       },
@@ -122,11 +122,11 @@ export async function cleanupSessionLifecycleArtifactsCore(
   });
   const databaseOptions = toDatabaseOptions(resolved);
   // Maintenance must not turn a read-only startup probe into a newly materialized agent store.
-  if (!withOpenClawAgentDatabaseReadOnly(() => true, databaseOptions).found) {
+  if (!withCarapaceAgentDatabaseReadOnly(() => true, databaseOptions).found) {
     return { removedEntries: 0, archivedTranscriptArtifacts: 0 };
   }
   const cleanupPlan = await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openCarapaceAgentDatabase(databaseOptions);
     return planSessionLifecycleArtifactCleanup(database, {
       ...(params.agentId !== undefined ? { agentId: resolved.agentId } : {}),
       archiveRemovedEntryTranscripts: params.archiveRemovedEntryTranscripts !== false,
@@ -200,7 +200,7 @@ export async function resetSessionEntryLifecycle(
     async (recordCommit) =>
       runExclusiveSqliteSessionWrite(resolved, async () => {
         params.commitGuard?.();
-        const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+        const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
         const targetSnapshot = readLifecycleTargetSnapshot(database, params.target);
         const current = targetSnapshot[0];
         const nextEntry = await params.buildNextEntry({
@@ -216,7 +216,7 @@ export async function resetSessionEntryLifecycle(
           ...(current ? { previousEntry: cloneSessionEntry(current.entry) } : {}),
           ...(current?.entry.sessionId ? { previousSessionId: current.entry.sessionId } : {}),
         };
-        runOpenClawAgentWriteTransaction((transactionDb) => {
+        runCarapaceAgentWriteTransaction((transactionDb) => {
           params.commitGuard?.();
           assertLifecycleTargetUnchanged(transactionDb, params.target, current?.entry, "reset");
           if (shouldAppendResetBoundary && current?.entry.sessionId && params.resetBoundary) {
@@ -298,13 +298,13 @@ async function deleteSqliteSessionEntryLifecycleLocked(
   params: DeleteSessionEntryLifecycleParams,
   allowLockedEntryRemoval: boolean,
   expectedPluginOwnerId: string | undefined,
-  recordCommit: (database: OpenClawAgentDatabase) => void,
+  recordCommit: (database: CarapaceAgentDatabase) => void,
   markCommitted: () => void,
 ): Promise<DeleteSessionEntryLifecycleResult> {
   const prepared = await runExclusiveSqliteSessionWrite(resolved, async () => {
     // Opening a store can register durable ownership, even before the deletion transaction.
     params.commitGuard?.();
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
     const targetSnapshot = readLifecycleTargetSnapshot(database, params.target);
     const current = targetSnapshot[0];
     if (!current) {
@@ -397,7 +397,7 @@ async function deleteSqliteSessionEntryLifecycleLocked(
       for (const sessionId of prepared.historicalGenerationIds) {
         const plan = await runExclusiveSqliteSessionWrite(resolved, async () => {
           params.commitGuard?.();
-          const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+          const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
           const targetSnapshot = readLifecycleTargetSnapshot(database, params.target);
           if (
             !sqliteLifecycleTargetSnapshotsEqual(prepared.targetSnapshot, targetSnapshot) ||
@@ -444,7 +444,7 @@ async function deleteSqliteSessionEntryLifecycleLocked(
             async () => {
               params.commitGuard?.();
               assertCurrent();
-              const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+              const database = openCarapaceAgentDatabase(toDatabaseOptions(resolved));
               const targetSnapshot = readLifecycleTargetSnapshot(database, params.target);
               if (
                 !sqliteLifecycleTargetSnapshotsEqual(prepared.targetSnapshot, targetSnapshot) ||

@@ -18,9 +18,9 @@ export { collectRootPackageExcludedExtensionDirs };
 const TOP_LEVEL_PUBLIC_SURFACE_EXTENSIONS = new Set([".ts", ".js", ".mts", ".cts", ".mjs", ".cjs"]);
 /** Bundled plugin directories built with core but not packaged as standalone npm plugins. */
 export const NON_PACKAGED_BUNDLED_PLUGIN_DIRS = new Set(["qa-channel", "qa-lab"]);
-const BUNDLED_PLUGIN_BUILD_IDS_ENV = "OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS";
+const BUNDLED_PLUGIN_BUILD_IDS_ENV = "CARAPACE_BUNDLED_PLUGIN_BUILD_IDS";
 /** @internal Shared repository-script contract. */
-export const DOCKER_SELECTED_PLUGIN_BUILD_IDS_ENV = "OPENCLAW_INTERNAL_DOCKER_BUILD_PLUGIN_IDS";
+export const DOCKER_SELECTED_PLUGIN_BUILD_IDS_ENV = "CARAPACE_INTERNAL_DOCKER_BUILD_PLUGIN_IDS";
 // Declaration caches must distinguish every selector that changes this entry graph.
 export const BUNDLED_PLUGIN_BUILD_ENV_NAMES = [
   BUNDLED_PLUGIN_BUILD_IDS_ENV,
@@ -79,18 +79,18 @@ function readBundledPluginPackageJson(packageJsonPath, options = {}) {
 }
 
 function isManifestlessBundledRuntimeSupportPackage(params) {
-  if (params.packageJson?.openclaw?.release?.publishToNpm === true) {
+  if (params.packageJson?.carapace?.release?.publishToNpm === true) {
     return false;
   }
   const packageName = typeof params.packageJson?.name === "string" ? params.packageJson.name : "";
-  if (packageName !== `@openclaw/${params.dirName}`) {
+  if (packageName !== `@carapace/${params.dirName}`) {
     return false;
   }
   return params.topLevelPublicSurfaceEntries.length > 0;
 }
 
 function shouldBuildBundledDistEntry(packageJson) {
-  return packageJson?.openclaw?.build?.bundledDist !== false;
+  return packageJson?.carapace?.build?.bundledDist !== false;
 }
 
 /**
@@ -98,7 +98,7 @@ function shouldBuildBundledDistEntry(packageJson) {
  * @returns {"cjs" | "esm"}
  */
 export function resolvePluginRuntimeFormat(packageJson) {
-  return packageJson?.openclaw?.build?.runtimeFormat === "cjs" ? "cjs" : "esm";
+  return packageJson?.carapace?.build?.runtimeFormat === "cjs" ? "cjs" : "esm";
 }
 
 export function pluginRuntimeExtension(runtimeFormat) {
@@ -131,15 +131,15 @@ export function mapPluginCatalogEntries(manifest, mapEntry) {
 
 /** Collect plugin source entry files declared by package and manifest metadata. */
 export function collectPluginSourceEntries(packageJson, manifest = {}) {
-  let packageEntries = Array.isArray(packageJson?.openclaw?.extensions)
-    ? packageJson.openclaw.extensions.filter(
+  let packageEntries = Array.isArray(packageJson?.carapace?.extensions)
+    ? packageJson.carapace.extensions.filter(
         (entry) => typeof entry === "string" && entry.trim().length > 0,
       )
     : [];
   const setupEntry =
-    typeof packageJson?.openclaw?.setupEntry === "string" &&
-    packageJson.openclaw.setupEntry.trim().length > 0
-      ? packageJson.openclaw.setupEntry
+    typeof packageJson?.carapace?.setupEntry === "string" &&
+    packageJson.carapace.setupEntry.trim().length > 0
+      ? packageJson.carapace.setupEntry
       : undefined;
   if (setupEntry) {
     packageEntries = Array.from(new Set([...packageEntries, setupEntry]));
@@ -288,9 +288,9 @@ export function collectBundledPluginBuildEntries(params = {}) {
 
   for (const candidate of candidates) {
     const { dirName, pluginDir, relativeFiles, topLevelPublicSurfaceEntries } = candidate;
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     const hasManifest =
-      relativeFiles?.includes("openclaw.plugin.json") ?? fs.existsSync(manifestPath);
+      relativeFiles?.includes("carapace.plugin.json") ?? fs.existsSync(manifestPath);
     const packageJsonPath = path.join(pluginDir, "package.json");
     const packageJson = readBundledPluginPackageJson(packageJsonPath, {
       hasPackageJson: relativeFiles?.includes("package.json"),
@@ -310,8 +310,8 @@ export function collectBundledPluginBuildEntries(params = {}) {
     }
     const externalSourceEntry =
       params.includeExternalSourceEntries === true &&
-      (packageJson?.openclaw?.release?.publishToNpm === true ||
-        packageJson?.openclaw?.release?.publishToClawHub === true);
+      (packageJson?.carapace?.release?.publishToNpm === true ||
+        packageJson?.carapace?.release?.publishToClawHub === true);
     if (
       !shouldBuildBundledDistEntry(packageJson) &&
       !dockerSelectedBuildIds?.has(dirName) &&
@@ -378,7 +378,7 @@ export function collectSourceCheckoutPluginBuildEntries(params = {}) {
   })
     .filter(({ id }) =>
       NON_PACKAGED_BUNDLED_PLUGIN_DIRS.has(id)
-        ? env.OPENCLAW_BUILD_PRIVATE_QA === "1"
+        ? env.CARAPACE_BUILD_PRIVATE_QA === "1"
         : !dockerSelected || !excluded.has(id) || dockerSelected.has(id),
     )
     .map((entry) => {
@@ -404,7 +404,7 @@ export function collectChannelConfigDoctorBuildEntries(params = {}) {
     cwd,
     path.join(cwd, BUNDLED_PLUGIN_ROOT_DIR),
   )) {
-    const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+    const manifestPath = path.join(pluginDir, "carapace.plugin.json");
     if (!fs.existsSync(manifestPath)) {
       continue;
     }
@@ -458,7 +458,7 @@ export function listBundledPluginPackArtifacts(params = {}) {
 
   for (const { id, hasManifest, hasPackageJson, sourceEntries } of entries) {
     if (hasManifest) {
-      artifacts.add(bundledDistPluginFile(id, "openclaw.plugin.json"));
+      artifacts.add(bundledDistPluginFile(id, "carapace.plugin.json"));
     }
     if (hasPackageJson) {
       artifacts.add(bundledDistPluginFile(id, "package.json"));

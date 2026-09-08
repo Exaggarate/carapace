@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@carapace/normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -6,7 +6,7 @@ import {
 import { readAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import { getLatestLiveSubagentRunByChildSessionKey } from "../../agents/subagents/registry/subagent-registry-read.js";
 import { resolveAgentIdFromSessionKey, resolveAgentMainSessionKey } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { CarapaceConfig } from "../../config/types.carapace.js";
 import type { PluginSubagentRequesterContext } from "../../plugins/runtime/subagent-requester-context.js";
 import { isAcpSessionKey } from "../../routing/session-key.js";
 import type { InputProvenance } from "../../sessions/input-provenance.js";
@@ -186,7 +186,7 @@ export function isConfirmedAcpManualSpawnTaskOwner(params: {
 }
 
 export async function registerPluginSubagentRunFromGateway(params: {
-  cfg: OpenClawConfig;
+  cfg: CarapaceConfig;
   runId: string;
   childSessionKey: string;
   task: string;

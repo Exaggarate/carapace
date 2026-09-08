@@ -1,6 +1,6 @@
 // Whatsapp plugin module exposes live connection controllers through the channel runtime.
 import type { WASocket } from "baileys";
-import { getChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
+import { getChannelRuntimeContext } from "carapace/plugin-sdk/channel-runtime-context";
 import type { WhatsAppSelfIdentity } from "./identity.js";
 import type { ActiveWebListener } from "./inbound/types.js";
 import { getOptionalWhatsAppChannelRuntime } from "./runtime.js";

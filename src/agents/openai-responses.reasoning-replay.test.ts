@@ -1,7 +1,7 @@
-import { resolveReplayableResponsesMessageId } from "@openclaw/ai/transports";
+import { resolveReplayableResponsesMessageId } from "@carapace/ai/transports";
 // Verifies OpenAI Responses replay preserves reasoning and response item ids.
-import type { AssistantMessage, Model, ToolResultMessage } from "openclaw/plugin-sdk/llm";
-import { stream } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage, Model, ToolResultMessage } from "carapace/plugin-sdk/llm";
+import { stream } from "carapace/plugin-sdk/llm";
 import { Type } from "typebox";
 import { describe, expect, it } from "vitest";
 import { createZeroUsageFixture } from "./test-helpers/usage-fixtures.js";

@@ -1,5 +1,5 @@
 // Line plugin module implements setup surface behavior.
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
+import { createChannelDmPolicy } from "carapace/plugin-sdk/channel-dm-policy";
 import {
   createAllowFromSection,
   createPromptParsedAllowFromForAccount,
@@ -7,8 +7,8 @@ import {
   createSetupTranslator,
   defineTokenCredential,
   parseSetupEntriesWithParser,
-} from "openclaw/plugin-sdk/setup";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "carapace/plugin-sdk/setup";
+import { normalizeOptionalString } from "carapace/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultLineAccountId } from "./accounts.js";
 import {
   isLineConfigured,

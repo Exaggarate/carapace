@@ -90,7 +90,7 @@ suite.define(() => {
         .toBe(true);
       await page.keyboard.press("Escape");
 
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent carapace-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")
@@ -181,8 +181,8 @@ suite.define(() => {
         const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
         Storage.prototype.setItem = function (key: string, value: string) {
           if (
-            key.startsWith("openclaw.new-session.session-placement-recovery.v1:") ||
-            key.startsWith("openclaw.control-ui-e2e.")
+            key.startsWith("carapace.new-session.session-placement-recovery.v1:") ||
+            key.startsWith("carapace.control-ui-e2e.")
           ) {
             originalSetItem(key, value);
             return;
@@ -207,7 +207,7 @@ suite.define(() => {
       const startupError = await page.evaluate(
         (key) =>
           new Promise<string>((resolve, reject) => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: {
                 context: {
                   placementStartup: {
@@ -254,7 +254,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -298,7 +298,7 @@ suite.define(() => {
               source: { type: "base64", media_type: "image/png", data: ONE_PIXEL_PNG_B64 },
             },
           ],
-          __openclaw: { idempotencyKey: `${messageId}:user` },
+          __carapace: { idempotencyKey: `${messageId}:user` },
         },
       ]);
       await checkDelivery.click();
@@ -348,7 +348,7 @@ suite.define(() => {
             {
               role: "user",
               content: [{ type: "text", text: "restore after reconnect" }],
-              __openclaw: { idempotencyKey: "message-offline-recovery:user" },
+              __carapace: { idempotencyKey: "message-offline-recovery:user" },
             },
           ],
           sessionId: "session-offline-recovery",
@@ -360,7 +360,7 @@ suite.define(() => {
       await page.goto(`${suite.server.baseUrl}new`);
       await gateway.waitForRequest("environments.list");
       const recoveryIdentity = await page.evaluate(async () => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("carapace-app") as HTMLElement & {
           runtime?: {
             context: {
               gateway: {
@@ -384,7 +384,7 @@ suite.define(() => {
         const sessionKey = "agent:cloud:offline-recovery";
         const frame = (value: string) => `${value.length}:${value}`;
         const storageKey =
-          `openclaw.new-session.session-placement-recovery.v1:${frame(gatewayUrl)}:` +
+          `carapace.new-session.session-placement-recovery.v1:${frame(gatewayUrl)}:` +
           `${frame(legacyScope)}:${frame(sessionKey)}`;
         return { gatewayUrl, legacyScope, storageKey };
       });
@@ -393,7 +393,7 @@ suite.define(() => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("carapace-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase === "connected";
@@ -424,7 +424,7 @@ suite.define(() => {
         .poll(() =>
           page.evaluate(() =>
             Object.keys(sessionStorage).filter((key) =>
-              key.startsWith("openclaw.new-session.session-placement-recovery.v1:"),
+              key.startsWith("carapace.new-session.session-placement-recovery.v1:"),
             ),
           ),
         )

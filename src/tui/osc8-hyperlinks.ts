@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@carapace/normalization-core";
 import { iterateAnsiSegments } from "../../packages/terminal-core/src/ansi-sequences.js";
 import { stripAnsi } from "../../packages/terminal-core/src/ansi.js";
 

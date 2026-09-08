@@ -5,44 +5,44 @@ import { globalInstallArgs, globalInstallFallbackArgs } from "./update-global.js
 
 vi.mock("node:child_process", async (importOriginal) => ({
   ...(await importOriginal<typeof import("node:child_process")>()),
-  execFileSync: vi.fn(() => "/tmp/openclaw-test-global-npmrc\n"),
+  execFileSync: vi.fn(() => "/tmp/carapace-test-global-npmrc\n"),
 }));
 
 describe("npm global install lifecycle policy", () => {
   it("applies an unflagged npm policy to primary and retry argv", () => {
     expect(
-      globalInstallArgs("npm", "openclaw@latest", null, null, null, "unflagged"),
-    ).not.toContain("--allow-scripts=openclaw");
+      globalInstallArgs("npm", "carapace@latest", null, null, null, "unflagged"),
+    ).not.toContain("--allow-scripts=carapace");
     expect(
-      globalInstallFallbackArgs("npm", "openclaw@latest", null, null, null, "unflagged"),
+      globalInstallFallbackArgs("npm", "carapace@latest", null, null, null, "unflagged"),
     ).toEqual(expect.arrayContaining(["--omit=optional"]));
     expect(
-      globalInstallFallbackArgs("npm", "openclaw@latest", null, null, null, "unflagged"),
-    ).not.toContain("--allow-scripts=openclaw");
+      globalInstallFallbackArgs("npm", "carapace@latest", null, null, null, "unflagged"),
+    ).not.toContain("--allow-scripts=carapace");
   });
 
   it("builds npm staged install argv with an explicit prefix", () => {
-    expect(globalInstallArgs("npm", "openclaw@latest", null, "/tmp/stage")).toEqual([
+    expect(globalInstallArgs("npm", "carapace@latest", null, "/tmp/stage")).toEqual([
       "npm",
       "i",
       "-g",
-      "--allow-scripts=openclaw",
+      "--allow-scripts=carapace",
       "--prefix",
       "/tmp/stage",
-      "openclaw@latest",
+      "carapace@latest",
       "--no-fund",
       "--no-audit",
       "--loglevel=error",
       "--min-release-age=0",
     ]);
-    expect(globalInstallFallbackArgs("npm", "openclaw@latest", null, "/tmp/stage")).toEqual([
+    expect(globalInstallFallbackArgs("npm", "carapace@latest", null, "/tmp/stage")).toEqual([
       "npm",
       "i",
       "-g",
-      "--allow-scripts=openclaw",
+      "--allow-scripts=carapace",
       "--prefix",
       "/tmp/stage",
-      "openclaw@latest",
+      "carapace@latest",
       "--omit=optional",
       "--no-fund",
       "--no-audit",
@@ -53,24 +53,24 @@ describe("npm global install lifecycle policy", () => {
 
   it("omits npm's lifecycle allowlist before npm 11.16", () => {
     expect(
-      globalInstallArgs("npm", "openclaw@latest", null, null, null, "unflagged"),
-    ).not.toContain("--allow-scripts=openclaw");
+      globalInstallArgs("npm", "carapace@latest", null, null, null, "unflagged"),
+    ).not.toContain("--allow-scripts=carapace");
   });
 
   it("allows only the resolved npm candidate lifecycle identity", () => {
-    const archive = path.resolve("/tmp/openclaw-2026.7.2.tgz");
+    const archive = path.resolve("/tmp/carapace-2026.7.2.tgz");
     expect(globalInstallArgs("npm", archive)).toContain(`--allow-scripts=${archive}`);
-    expect(globalInstallArgs("npm", "openclaw@npm:@vendor/openclaw@1.2.3")).toContain(
-      "--allow-scripts=@vendor/openclaw",
+    expect(globalInstallArgs("npm", "carapace@npm:@vendor/carapace@1.2.3")).toContain(
+      "--allow-scripts=@vendor/carapace",
     );
-    expect(globalInstallArgs("npm", "openclaw@npm:vendor-openclaw@1.2.3")).toContain(
-      "--allow-scripts=vendor-openclaw",
+    expect(globalInstallArgs("npm", "carapace@npm:vendor-carapace@1.2.3")).toContain(
+      "--allow-scripts=vendor-carapace",
     );
-    expect(globalInstallArgs("npm", "openclaw@npm:@vendor/client.tgz@1.2.3")).toContain(
+    expect(globalInstallArgs("npm", "carapace@npm:@vendor/client.tgz@1.2.3")).toContain(
       "--allow-scripts=@vendor/client.tgz",
     );
-    expect(globalInstallArgs("npm", "./openclaw-candidate")).toContain(
-      "--allow-scripts=./openclaw-candidate",
+    expect(globalInstallArgs("npm", "./carapace-candidate")).toContain(
+      "--allow-scripts=./carapace-candidate",
     );
     for (const spec of ["vendor/repo.tgz", "vendor/repo#release.tgz"]) {
       expect(globalInstallArgs("npm", spec)).toContain(`--allow-scripts=${spec}`);
@@ -81,18 +81,18 @@ describe("npm global install lifecycle policy", () => {
     expect(
       globalInstallArgs(
         "npm",
-        "/tmp/build,cache/openclaw-candidate",
+        "/tmp/build,cache/carapace-candidate",
         null,
         null,
         "/tmp/build,cache",
       ),
-    ).toContain("--allow-scripts=./openclaw-candidate");
+    ).toContain("--allow-scripts=./carapace-candidate");
   });
 
   it.each(["absolute", "relative", "file:absolute", "file:relative"])(
     "uses the absolute npm tarball identity for %s input",
     (form) => {
-      const cwd = path.resolve("/tmp/openclaw-update-identity/work");
+      const cwd = path.resolve("/tmp/carapace-update-identity/work");
       const candidate = path.resolve(cwd, "../candidate.tgz");
       const protocol = form.startsWith("file:") ? "file:" : "";
       const spec = `${protocol}${form.endsWith("relative") ? "../candidate.tgz" : candidate}`;
@@ -121,7 +121,7 @@ describe("npm global install lifecycle policy", () => {
     "file:///~/candidate.tgz",
     "file:./~/candidate.tgz",
   ])("preserves npm's local archive resolution for %s", (spec) => {
-    const cwd = path.resolve("/tmp/openclaw-update-identity/work");
+    const cwd = path.resolve("/tmp/carapace-update-identity/work");
     const expected = spec.includes("~")
       ? path.join(os.homedir(), "candidate.tgz")
       : path.resolve(cwd, "../candidate.tgz");
@@ -133,7 +133,7 @@ describe("npm global install lifecycle policy", () => {
   it.each(["tgz", "tar.gz", "tar"])(
     "normalizes file URLs while preserving literal archive characters for .%s",
     (extension) => {
-      const archive = path.resolve(`/tmp/openclaw/a%2C#b.${extension}`);
+      const archive = path.resolve(`/tmp/carapace/a%2C#b.${extension}`);
       const spec = `file:///${archive.replaceAll("\\", "/").replace(/^\/+/u, "")}`;
       expect(globalInstallArgs("npm", spec)).toContain(`--allow-scripts=file:${archive}`);
     },

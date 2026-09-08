@@ -48,8 +48,8 @@ type AimockRequestObservation =
 
 // Runtime-context delimiters are owned by src/agents/internal-runtime-context.ts.
 // This mock mirrors the wire shape so delimiter drift fails through QA timeouts.
-const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>";
-const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_CARAPACE_INTERNAL_CONTEXT>>>";
+const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_CARAPACE_INTERNAL_CONTEXT>>>";
 
 function requestMessages(body: ChatCompletionRequest | null | undefined) {
   return Array.isArray(body?.messages) ? body.messages : [];

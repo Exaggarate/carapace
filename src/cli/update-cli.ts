@@ -1,4 +1,4 @@
-// Commander wiring for `openclaw update`, its status/finalize subcommands, and help text.
+// Commander wiring for `carapace update`, its status/finalize subcommands, and help text.
 import type { Command } from "commander";
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
@@ -75,7 +75,7 @@ function createUpdateLeafAction(
     try {
       if (!options.supportsDryRun && inheritOptionFromParent<boolean>(command, "dryRun")) {
         throw new Error(
-          `--dry-run is not supported for \`openclaw update ${command.name()}\`. Run \`openclaw update --dry-run\` instead.`,
+          `--dry-run is not supported for \`carapace update ${command.name()}\`. Run \`carapace update --dry-run\` instead.`,
         );
       }
       await action(opts, command);
@@ -99,18 +99,18 @@ function registerUpdateFinalizationCommand(update: Command, name: string, hidden
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw update repair", "Reconcile abandoned runs or repair post-update state."],
+          ["carapace update repair", "Reconcile abandoned runs or repair post-update state."],
           [
-            "openclaw update repair --accept-capabilities",
+            "carapace update repair --accept-capabilities",
             "Accept reviewed plugin capability changes during repair.",
           ],
-          ["openclaw update repair --channel beta", "Repair against the beta update channel."],
-          ["openclaw update repair --json", "JSON output for automation."],
+          ["carapace update repair --channel beta", "Repair against the beta update channel."],
+          ["carapace update repair --json", "JSON output for automation."],
         ])}\n\n${theme.heading("Notes:")}\n${theme.muted(
           "- Reconciles abandoned runs when the Gateway is healthy; otherwise repairs post-update state",
         )}\n${theme.muted("- Runs doctor repair and plugin convergence, but never restarts the Gateway")}\n\n${theme.muted(
           "Docs:",
-        )} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/update")}`,
+        )} ${formatDocsLink("/cli/update", "github.com/Exaggarate/carapace")}`,
     )
     .action(
       createUpdateLeafAction(async (opts, actionCommand) => {
@@ -139,29 +139,29 @@ export function registerUpdateCli(program: Command) {
   program.enablePositionalOptions();
   const update = program
     .command("update")
-    .description("Update OpenClaw and inspect update channel status");
+    .description("Update Carapace and inspect update channel status");
   for (const [flags, description, defaultValue] of UPDATE_OPTION_SPECS) {
     update.option(flags, description, defaultValue);
   }
   update
     .addHelpText("after", () => {
       const examples = [
-        ["openclaw update", "Update a source checkout (git)"],
+        ["carapace update", "Update a source checkout (git)"],
         [
-          "openclaw update --channel extended-stable",
+          "carapace update --channel extended-stable",
           "Switch to the monthly supported npm channel",
         ],
-        ["openclaw update --channel beta", "Switch to beta channel (git + npm)"],
-        ["openclaw update --channel dev", "Switch to dev channel (git + npm)"],
-        ["openclaw update --tag beta", "One-off update to a dist-tag or version"],
-        ["openclaw update --dry-run", "Preview actions without changing anything"],
-        ["openclaw update --no-restart", "Update without restarting the service"],
-        ["openclaw update --json", "Output result as JSON"],
-        ["openclaw update --yes", "Non-interactive (accept downgrade prompts)"],
-        ["openclaw update --accept-capabilities", "Accept reviewed plugin capability changes"],
-        ["openclaw update repair", "Repair stranded post-update plugin state"],
-        ["openclaw update wizard", "Interactive update wizard"],
-        ["openclaw --update", "Shorthand for openclaw update"],
+        ["carapace update --channel beta", "Switch to beta channel (git + npm)"],
+        ["carapace update --channel dev", "Switch to dev channel (git + npm)"],
+        ["carapace update --tag beta", "One-off update to a dist-tag or version"],
+        ["carapace update --dry-run", "Preview actions without changing anything"],
+        ["carapace update --no-restart", "Update without restarting the service"],
+        ["carapace update --json", "Output result as JSON"],
+        ["carapace update --yes", "Non-interactive (accept downgrade prompts)"],
+        ["carapace update --accept-capabilities", "Accept reviewed plugin capability changes"],
+        ["carapace update repair", "Repair stranded post-update plugin state"],
+        ["carapace update wizard", "Interactive update wizard"],
+        ["carapace --update", "Shorthand for carapace update"],
       ] as const;
       const fmtExamples = examples
         .map(([cmd, desc]) => `  ${theme.command(cmd)} ${theme.muted(`# ${desc}`)}`)
@@ -173,7 +173,7 @@ ${theme.heading("What this does:")}
 
 ${theme.heading("Switch channels:")}
   - Use --channel stable|extended-stable|beta|dev to persist the update channel in config
-  - Run openclaw update status to see the active channel and source
+  - Run carapace update status to see the active channel and source
   - Use --tag <dist-tag|version|spec> for a one-off package update without persisting
   - Use --channel dev for the moving GitHub main checkout; package installs reject --tag main
 
@@ -192,7 +192,7 @@ ${theme.heading("Notes:")}
   - Downgrades require confirmation (can break configuration)
   - Skips update if the working directory has uncommitted changes
 
-${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/update")}`;
+${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "github.com/Exaggarate/carapace")}`;
     })
     .action(async (opts: CommanderUpdateOptions) => {
       try {
@@ -227,7 +227,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/up
               update.getOptionValueSource(key) !== "default"
             ) {
               throw new Error(
-                `--${key === "restart" ? "no-restart" : key === "acceptCapabilities" ? "accept-capabilities" : key} is not supported for openclaw update cleanup.`,
+                `--${key === "restart" ? "no-restart" : key === "acceptCapabilities" ? "accept-capabilities" : key} is not supported for carapace update cleanup.`,
               );
             }
           }
@@ -250,8 +250,8 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/up
     .command("migration-plan", { hidden: true })
     .description("Plan Doctor-owned state migrations against an isolated snapshot")
     .requiredOption("--snapshot-home <path>", "Copied environment home")
-    .requiredOption("--snapshot-config <path>", "Copied OpenClaw config")
-    .requiredOption("--snapshot-state <path>", "Copied OpenClaw state directory")
+    .requiredOption("--snapshot-config <path>", "Copied Carapace config")
+    .requiredOption("--snapshot-state <path>", "Copied Carapace state directory")
     .option("--dry-run", "Accepted for parity; migration planning is always read-only", true)
     .option("--json", "Output result as JSON", true)
     .action(
@@ -276,7 +276,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/up
     .option("--timeout <seconds>", "Timeout for each update step in seconds (default: 1800)")
     .addHelpText(
       "after",
-      `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/update")}\n`,
+      `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "github.com/Exaggarate/carapace")}\n`,
     )
     .action(
       createUpdateLeafAction(async (opts, command) => {
@@ -299,14 +299,14 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/up
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw update status", "Show channel + version status."],
-          ["openclaw update status --json", "JSON output."],
-          ["openclaw update status --timeout 10", "Custom timeout."],
+          ["carapace update status", "Show channel + version status."],
+          ["carapace update status --json", "JSON output."],
+          ["carapace update status --timeout 10", "Custom timeout."],
         ])}\n\n${theme.heading("Notes:")}\n${theme.muted(
           "- Shows current update channel (stable/extended-stable/beta/dev) and source",
         )}\n${theme.muted("- Includes git tag/branch/SHA for source checkouts")}\n\n${theme.muted(
           "Docs:",
-        )} ${formatDocsLink("/cli/update", "docs.openclaw.ai/cli/update")}`,
+        )} ${formatDocsLink("/cli/update", "github.com/Exaggarate/carapace")}`,
     )
     .action(
       createUpdateLeafAction(async (opts, command) => {

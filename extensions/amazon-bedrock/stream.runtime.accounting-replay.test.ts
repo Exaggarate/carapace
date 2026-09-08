@@ -6,8 +6,8 @@ import {
   ConverseStreamCommand,
   StopReason as BedrockStopReason,
 } from "@aws-sdk/client-bedrock-runtime";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@carapace/ai/internal/shared";
+import type { Context, Model } from "carapace/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BedrockOptions } from "./bedrock-options.js";
 import { streamSimpleBedrock } from "./stream.runtime.js";
@@ -306,7 +306,7 @@ describe("Bedrock reasoning replay", () => {
 
 describe("Bedrock prompt cache ownership", () => {
   it("keeps unset Nova payloads identical to disabled caching despite environment defaults", async () => {
-    vi.stubEnv("OPENCLAW_CACHE_RETENTION", "long");
+    vi.stubEnv("CARAPACE_CACHE_RETENTION", "long");
     vi.stubEnv("AWS_BEDROCK_FORCE_CACHE", "1");
     const model = bedrockModel({});
     const context: Context = {
@@ -478,7 +478,7 @@ describe("Bedrock prompt cache ownership", () => {
       }
       for (const [index, payload] of requests.entries()) {
         const suffix = index === 0 ? "Today: Monday" : "Today: Tuesday";
-        expect(JSON.stringify(payload)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+        expect(JSON.stringify(payload)).not.toContain("CARAPACE_CACHE_BOUNDARY");
         if (cacheRetention === "none") {
           expect(JSON.stringify(payload)).not.toContain("cachePoint");
           expect(payload.system).toEqual([{ text: `Stable workspace\n${suffix}` }]);

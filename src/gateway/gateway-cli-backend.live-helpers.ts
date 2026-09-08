@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@carapace/normalization-core/string-coerce";
 import type { EventFrame } from "../../packages/gateway-protocol/src/index.js";
 import {
   listCliRuntimeModelBackendBindings,
@@ -49,8 +49,8 @@ export type CliBackendLiveModelSelection = {
 
 export type CliBackendLiveEnvSnapshot = LiveEnvSnapshot;
 
-export const CLI_BACKEND_LIVE_PROVIDER_SKIP_ENV = "OPENCLAW_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP";
-export const CLI_BACKEND_LIVE_ADVISORY_ENV = "OPENCLAW_LIVE_CLI_BACKEND_ADVISORY";
+export const CLI_BACKEND_LIVE_PROVIDER_SKIP_ENV = "CARAPACE_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP";
+export const CLI_BACKEND_LIVE_ADVISORY_ENV = "CARAPACE_LIVE_CLI_BACKEND_ADVISORY";
 
 export type CliBackendLiveProviderSkipDecision = {
   action: "fail" | "skip";
@@ -88,13 +88,13 @@ export function resolveCliBackendLiveModelSelection(params: {
   const parsed = parseModelRef(params.rawModel, params.defaultProvider);
   if (!parsed) {
     throw new Error(
-      `OPENCLAW_LIVE_CLI_BACKEND_MODEL must resolve to a CLI backend model. Got: ${params.rawModel}`,
+      `CARAPACE_LIVE_CLI_BACKEND_MODEL must resolve to a CLI backend model. Got: ${params.rawModel}`,
     );
   }
 
   if (parsed.provider === "codex-cli") {
     throw new Error(
-      "OPENCLAW_LIVE_CLI_BACKEND_MODEL=codex-cli/... is no longer supported. Use a supported CLI backend such as claude-cli or google-gemini-cli.",
+      "CARAPACE_LIVE_CLI_BACKEND_MODEL=codex-cli/... is no longer supported. Use a supported CLI backend such as claude-cli or google-gemini-cli.",
     );
   }
   const cliBinding = listCliRuntimeModelBackendBindings({ includeSetupRegistry: true }).find(
@@ -116,7 +116,7 @@ export function resolveCliBackendLiveModelSelection(params: {
     cliModelKey: modelKey,
     configModelKey: modelKey,
     configModelSwitchTarget: params.modelSwitchTarget,
-    agentRuntime: { id: "openclaw" },
+    agentRuntime: { id: "carapace" },
   };
 }
 
@@ -140,11 +140,11 @@ export function parseImageMode(raw?: string): "list" | "repeat" | undefined {
   if (trimmed === "list" || trimmed === "repeat") {
     return trimmed;
   }
-  throw new Error("OPENCLAW_LIVE_CLI_BACKEND_IMAGE_MODE must be 'list' or 'repeat'.");
+  throw new Error("CARAPACE_LIVE_CLI_BACKEND_IMAGE_MODE must be 'list' or 'repeat'.");
 }
 
 export function shouldRunCliImageProbe(providerId: string): boolean {
-  const raw = process.env.OPENCLAW_LIVE_CLI_BACKEND_IMAGE_PROBE?.trim();
+  const raw = process.env.CARAPACE_LIVE_CLI_BACKEND_IMAGE_PROBE?.trim();
   if (raw) {
     return isTruthyEnvValue(raw);
   }
@@ -152,7 +152,7 @@ export function shouldRunCliImageProbe(providerId: string): boolean {
 }
 
 export function shouldRunCliMcpProbe(providerId: string): boolean {
-  const raw = process.env.OPENCLAW_LIVE_CLI_BACKEND_MCP_PROBE?.trim();
+  const raw = process.env.CARAPACE_LIVE_CLI_BACKEND_MCP_PROBE?.trim();
   if (raw) {
     return isTruthyEnvValue(raw);
   }
@@ -166,18 +166,18 @@ export function resolveCliBackendLiveArgs(params: {
 }): { args: string[]; resumeArgs?: string[] } {
   const args =
     parseJsonStringArray(
-      "OPENCLAW_LIVE_CLI_BACKEND_ARGS",
-      process.env.OPENCLAW_LIVE_CLI_BACKEND_ARGS,
+      "CARAPACE_LIVE_CLI_BACKEND_ARGS",
+      process.env.CARAPACE_LIVE_CLI_BACKEND_ARGS,
     ) ?? params.defaultArgs;
   if (!args || args.length === 0) {
     throw new Error(
-      `OPENCLAW_LIVE_CLI_BACKEND_ARGS is required for provider "${params.providerId}".`,
+      `CARAPACE_LIVE_CLI_BACKEND_ARGS is required for provider "${params.providerId}".`,
     );
   }
   const resumeArgs =
     parseJsonStringArray(
-      "OPENCLAW_LIVE_CLI_BACKEND_RESUME_ARGS",
-      process.env.OPENCLAW_LIVE_CLI_BACKEND_RESUME_ARGS,
+      "CARAPACE_LIVE_CLI_BACKEND_RESUME_ARGS",
+      process.env.CARAPACE_LIVE_CLI_BACKEND_RESUME_ARGS,
     ) ?? params.defaultResumeArgs;
   return { args, resumeArgs };
 }
@@ -198,7 +198,7 @@ export function resolveCliModelSwitchProbeTarget(
 }
 
 export function shouldRunCliModelSwitchProbe(providerId: string, modelRef: string): boolean {
-  const raw = process.env.OPENCLAW_LIVE_CLI_BACKEND_MODEL_SWITCH_PROBE?.trim();
+  const raw = process.env.CARAPACE_LIVE_CLI_BACKEND_MODEL_SWITCH_PROBE?.trim();
   if (raw) {
     return isTruthyEnvValue(raw);
   }
@@ -524,22 +524,22 @@ function isRetryableGatewayConnectError(error: Error): boolean {
 
 export function snapshotCliBackendLiveEnv(): CliBackendLiveEnvSnapshot {
   return snapshotLiveEnv([
-    "OPENCLAW_SKIP_PROVIDERS",
-    "OPENCLAW_BUNDLED_PLUGINS_DIR",
-    "OPENCLAW_TEST_MINIMAL_GATEWAY",
+    "CARAPACE_SKIP_PROVIDERS",
+    "CARAPACE_BUNDLED_PLUGINS_DIR",
+    "CARAPACE_TEST_MINIMAL_GATEWAY",
     "ANTHROPIC_API_KEY",
     "ANTHROPIC_API_KEY_OLD",
   ]);
 }
 
 export function applyCliBackendLiveEnv(preservedEnv: ReadonlySet<string>): void {
-  process.env.OPENCLAW_SKIP_CHANNELS = "1";
-  process.env.OPENCLAW_SKIP_PROVIDERS = "1";
-  process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-  process.env.OPENCLAW_SKIP_CRON = "1";
-  process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
-  process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = "1";
-  process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
+  process.env.CARAPACE_SKIP_CHANNELS = "1";
+  process.env.CARAPACE_SKIP_PROVIDERS = "1";
+  process.env.CARAPACE_SKIP_GMAIL_WATCHER = "1";
+  process.env.CARAPACE_SKIP_CRON = "1";
+  process.env.CARAPACE_SKIP_CANVAS_HOST = "1";
+  process.env.CARAPACE_SKIP_BROWSER_CONTROL_SERVER = "1";
+  process.env.CARAPACE_TEST_MINIMAL_GATEWAY = "0";
   if (!preservedEnv.has("ANTHROPIC_API_KEY")) {
     delete process.env.ANTHROPIC_API_KEY;
   }

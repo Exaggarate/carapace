@@ -9,7 +9,7 @@ import {
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { CarapaceConfig } from "../config/types.carapace.js";
 import {
   onSessionLifecycleEvent,
   type SessionLifecycleEvent,
@@ -160,7 +160,7 @@ describe("applySessionModelSelection", () => {
           provider: selected.provider,
           model: selected.id,
           isDefault: false,
-          runtime: { kind: "set", runtime: "openclaw" },
+          runtime: { kind: "set", runtime: "carapace" },
         },
       }),
     );
@@ -222,7 +222,7 @@ describe("applySessionModelSelection", () => {
     "persists an off-catalog selection under policy %j without credentials",
     async (modelPolicy) => {
       const sessionEntry = createEntry({ thinkingLevel: "high" });
-      const cfg: OpenClawConfig = { agents: { defaults: { modelPolicy } } };
+      const cfg: CarapaceConfig = { agents: { defaults: { modelPolicy } } };
       const result = await applySessionModelSelection(
         createParams({
           cfg,
@@ -253,7 +253,7 @@ describe("applySessionModelSelection", () => {
   );
 
   it("publishes a profile-only selection after the scoped session has persisted", async () => {
-    const tempRoot = tempDirs.make("openclaw-model-picker-profile-");
+    const tempRoot = tempDirs.make("carapace-model-picker-profile-");
     const storePath = path.join(tempRoot, "sessions.json");
     const sessionKey = "agent:main:dm:profile";
     const sessionEntry = createEntry({
@@ -544,7 +544,7 @@ describe("applySessionModelSelection", () => {
       },
     };
     effects.mutateConfigFileWithRetry.mockImplementationOnce(
-      async ({ mutate }: { mutate: (config: OpenClawConfig) => string }) => ({
+      async ({ mutate }: { mutate: (config: CarapaceConfig) => string }) => ({
         nextConfig: draft,
         result: mutate(draft),
       }),
@@ -593,22 +593,22 @@ describe("applySessionModelSelection", () => {
     {
       name: "set",
       initial: undefined,
-      runtime: { kind: "set", runtime: "openclaw" } as const,
-      expected: "openclaw",
-      runtimeChange: { kind: "set", runtime: "openclaw" },
-      agentRuntime: "openclaw",
+      runtime: { kind: "set", runtime: "carapace" } as const,
+      expected: "carapace",
+      runtimeChange: { kind: "set", runtime: "carapace" },
+      agentRuntime: "carapace",
     },
     {
       name: "set idempotently",
-      initial: "openclaw",
-      runtime: { kind: "set", runtime: "openclaw" } as const,
-      expected: "openclaw",
-      runtimeChange: { kind: "set", runtime: "openclaw" },
-      agentRuntime: "openclaw",
+      initial: "carapace",
+      runtime: { kind: "set", runtime: "carapace" } as const,
+      expected: "carapace",
+      runtimeChange: { kind: "set", runtime: "carapace" },
+      agentRuntime: "carapace",
     },
     {
       name: "clear",
-      initial: "openclaw",
+      initial: "carapace",
       runtime: { kind: "clear" } as const,
       expected: undefined,
       runtimeChange: { kind: "clear" },
@@ -624,11 +624,11 @@ describe("applySessionModelSelection", () => {
     },
     {
       name: "unchanged",
-      initial: "openclaw",
+      initial: "carapace",
       runtime: { kind: "unchanged" } as const,
-      expected: "openclaw",
+      expected: "carapace",
       runtimeChange: undefined,
-      agentRuntime: "openclaw",
+      agentRuntime: "carapace",
     },
   ])(
     "supports runtime $name",
@@ -741,7 +741,7 @@ describe("applySessionModelSelection", () => {
   );
 
   it("rejects when the authoritative persisted row became locked", async () => {
-    const tempRoot = tempDirs.make("openclaw-model-picker-lock-");
+    const tempRoot = tempDirs.make("carapace-model-picker-lock-");
     const storePath = path.join(tempRoot, "sessions.json");
     const sessionKey = "agent:main:dm:locked-disk";
     const sessionEntry = createEntry();
@@ -875,7 +875,7 @@ describe("applySessionModelSelection", () => {
       }),
     },
   ])("returns conflict without a hybrid row after concurrent $name", async ({ concurrent }) => {
-    const tempRoot = tempDirs.make("openclaw-model-picker-service-");
+    const tempRoot = tempDirs.make("carapace-model-picker-service-");
     const storePath = path.join(tempRoot, "sessions.json");
     const sessionEntry = createEntry({
       providerOverride: "anthropic",

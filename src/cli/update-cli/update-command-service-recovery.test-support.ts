@@ -19,25 +19,25 @@ import {
 
 export async function createServiceActivationFixture() {
   const root = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-activation-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "carapace-update-activation-")),
   );
   vi.spyOn(os, "userInfo").mockReturnValue({ ...os.userInfo(), homedir: root });
   const keys = [
     "HOME",
-    "OPENCLAW_HOME",
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_CONFIG_PATH",
-    "OPENCLAW_PROFILE",
-    "OPENCLAW_GATEWAY_PORT",
-    "OPENCLAW_SERVICE_MARKER",
-    "OPENCLAW_SERVICE_KIND",
-    "OPENCLAW_SUPERVISOR_MODE",
-    "OPENCLAW_SYSTEMD_UNIT",
-    "OPENCLAW_LAUNCHD_LABEL",
-    "OPENCLAW_UPDATE_IN_PROGRESS",
-    "OPENCLAW_UPDATE_RUN_HANDOFF",
-    "OPENCLAW_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
-    "OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS",
+    "CARAPACE_HOME",
+    "CARAPACE_STATE_DIR",
+    "CARAPACE_CONFIG_PATH",
+    "CARAPACE_PROFILE",
+    "CARAPACE_GATEWAY_PORT",
+    "CARAPACE_SERVICE_MARKER",
+    "CARAPACE_SERVICE_KIND",
+    "CARAPACE_SUPERVISOR_MODE",
+    "CARAPACE_SYSTEMD_UNIT",
+    "CARAPACE_LAUNCHD_LABEL",
+    "CARAPACE_UPDATE_IN_PROGRESS",
+    "CARAPACE_UPDATE_RUN_HANDOFF",
+    "CARAPACE_UPDATE_PARENT_ALLOWS_GATEWAY_SERVICE_REPAIR",
+    "CARAPACE_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS",
   ];
   const envSnapshot = captureEnv(keys);
   for (const key of keys) {
@@ -45,15 +45,15 @@ export async function createServiceActivationFixture() {
   }
   process.env.HOME = root;
   // This fixture models an installed service even though its manager calls are simulated.
-  const unitPath = path.join(root, ".config/systemd/user/openclaw-gateway.service");
+  const unitPath = path.join(root, ".config/systemd/user/carapace-gateway.service");
   await fs.mkdir(path.dirname(unitPath), { recursive: true });
-  await fs.writeFile(unitPath, "[Service]\nExecStart=/fixture/openclaw gateway\n");
-  const configPath = path.join(root, ".openclaw", "openclaw.json");
+  await fs.writeFile(unitPath, "[Service]\nExecStart=/fixture/carapace gateway\n");
+  const configPath = path.join(root, ".carapace", "carapace.json");
   await fs.mkdir(path.dirname(configPath));
   await fs.mkdir(path.join(root, "dist"));
   await fs.writeFile(
     path.join(root, "package.json"),
-    JSON.stringify({ name: "openclaw", version: VERSION, type: "module" }),
+    JSON.stringify({ name: "carapace", version: VERSION, type: "module" }),
   );
   await fs.writeFile(path.join(root, "dist", "index.js"), "export {};\n");
   const worker = "dist/infra/update-candidate-state.worker.js";
@@ -159,7 +159,7 @@ export function registerRecoveryTests(params: {
         return {
           port,
           status: ready ? "busy" : "free",
-          listeners: ready ? [{ pid: 4242, command: "openclaw-gateway" }] : [],
+          listeners: ready ? [{ pid: 4242, command: "carapace-gateway" }] : [],
           hints: [],
         };
       });
@@ -284,7 +284,7 @@ export function registerRecoveryTests(params: {
     });
     expect(before.stopped).toBe(true);
     await writeRecoveryConfig(configPath, "9999.1.1");
-    process.env.OPENCLAW_GATEWAY_PORT = "19999";
+    process.env.CARAPACE_GATEWAY_PORT = "19999";
     const command = await mocks.command(process.env);
     if (!command) {
       throw new Error("missing fixture command");
@@ -296,7 +296,7 @@ export function registerRecoveryTests(params: {
       await fs.mkdir(path.join(foreign, "dist"), { recursive: true });
       await fs.writeFile(
         path.join(foreign, "package.json"),
-        JSON.stringify({ name: "openclaw", version: VERSION }),
+        JSON.stringify({ name: "carapace", version: VERSION }),
       );
       await fs.writeFile(path.join(foreign, "dist", "index.js"), "export {};\n");
       const replacement = {
@@ -314,17 +314,17 @@ export function registerRecoveryTests(params: {
         ],
         environment: {
           HOME: root,
-          OPENCLAW_PROFILE: "default",
-          OPENCLAW_STATE_DIR: path.dirname(configPath),
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_SYSTEMD_UNIT:
-            change === "unit" ? "openclaw-other.service" : "openclaw-gateway.service",
+          CARAPACE_PROFILE: "default",
+          CARAPACE_STATE_DIR: path.dirname(configPath),
+          CARAPACE_CONFIG_PATH: configPath,
+          CARAPACE_SYSTEMD_UNIT:
+            change === "unit" ? "carapace-other.service" : "carapace-gateway.service",
           ...(change === "profile"
             ? {
-                OPENCLAW_PROFILE: "second",
-                OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-second.service",
-                OPENCLAW_STATE_DIR: path.join(root, ".openclaw-second"),
-                OPENCLAW_CONFIG_PATH: path.join(root, ".openclaw-second", "openclaw.json"),
+                CARAPACE_PROFILE: "second",
+                CARAPACE_SYSTEMD_UNIT: "carapace-gateway-second.service",
+                CARAPACE_STATE_DIR: path.join(root, ".carapace-second"),
+                CARAPACE_CONFIG_PATH: path.join(root, ".carapace-second", "carapace.json"),
               }
             : {}),
         },
@@ -352,7 +352,7 @@ export function registerRecoveryTests(params: {
       expect(mocks.child.mock.calls[0]?.[0]).toContain("--preserve-definition");
       expect(mocks.restart).not.toHaveBeenCalled();
       expect(mocks.child.mock.calls[0]?.[1]).toMatchObject({ baseEnv: {} });
-      expect(mocks.child.mock.calls[0]?.[1]).not.toHaveProperty("env.OPENCLAW_GATEWAY_PORT");
+      expect(mocks.child.mock.calls[0]?.[1]).not.toHaveProperty("env.CARAPACE_GATEWAY_PORT");
     } else if (change === "after readiness") {
       expect(recovered).toBe("failed");
       expect(mocks.child).toHaveBeenCalledOnce();
